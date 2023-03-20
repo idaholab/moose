@@ -15,6 +15,7 @@
 #include "SwapBackSentinel.h"
 #include "FEProblem.h"
 #include "MaterialBase.h"
+#include "ThreadedElementLoop.h"
 
 #include "libmesh/threads.h"
 
@@ -184,8 +185,8 @@ ComputeElemAuxVarsThread<AuxKernelType>::printBlockExecutionInformation()
       return;
     auto console = _fe_problem.console();
     std::vector<AuxKernelType *> kernels;
-    for (auto shared_ptr : _aux_kernels.getActiveBlockObjects(_subdomain, _tid))
-      kernels.push_back(shared_ptr.get());
+    // for (auto shared_ptr : _aux_kernels.getActiveBlockObjects(_subdomain, _tid))
+    //   kernels.push_back(shared_ptr.get());
 
     console << "[DBG] Ordering of AuxKernels on block " << _subdomain << std::endl;
     ThreadedElementLoop<ConstElemRange>::printExecutionOrdering<AuxKernelType>(kernels, false);

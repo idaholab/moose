@@ -416,7 +416,7 @@ insertNewline(std::stringstream & oss, std::streampos & begin, std::streampos & 
 std::string
 formatString(std::string message, const std::string & prefix)
 {
-  MooseUtils::indentMessage(prefix, message, COLOR_DEFAULT);
+  MooseUtils::indentMessage(prefix, message, COLOR_DEFAULT, true, " ");
   std::stringstream stream;
   std::streampos start = stream.tellp();
   stream << message;

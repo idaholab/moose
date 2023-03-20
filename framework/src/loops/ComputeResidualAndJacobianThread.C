@@ -162,7 +162,7 @@ ComputeResidualAndJacobianThread::printBlockExecutionInformation()
                           _fv_kernels[0]->name(),
                           [](const std::string & str_out, FVElementalKernel * kernel)
                           { return str_out + " " + kernel->name(); });
-      console << "[DBG] " << fvkernels << std::endl;
+      console << ConsoleUtils::formatString(fvkernels, "[DBG]") << std::endl;
     }
     if (_dg_kernels.hasActiveObjects())
     {

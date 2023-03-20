@@ -110,6 +110,7 @@
       input = 'show_execution_kernels_bcs.i'
       expect_out = '\[DBG\] bc_u_tb bc_ul bc_ur bc_ut bc_ub '
       detail = 'objects contributing to the residual and Jacobian, notably regular kernels and boundary conditions'
+      cli_args = '--color off'
     []
     [fv_kernels_bcs]
       type = RunApp
@@ -122,13 +123,14 @@
       input = 'show_execution_nodal_kernels_bcs.i'
       expect_out = '\[DBG\] source bc_all '
       detail = 'nodal objects contributing to the residual, notably nodal kernels and boundary conditions'
+      cli_args = '--color off'
     []
     # The three next tests make sure the targetting of a single execution flag works
     [user_objects_initial]
       type = RunApp
       input = 'show_execution_userobjects.i'
-      cli_args = 'Debug/show_execution_order=INITIAL Postprocessors/dofs/execute_on=INITIAL UserObjects/find_node/execute_on=INITIAL UserObjects/side_int/execute_on=INITIAL UserObjects/values/execute_on=INITIAL'
-      expect_out = '\[DBG\] values'
+      cli_args = 'Debug/show_execution_order=INITIAL Postprocessors/dofs/execute_on=INITIAL UserObjects/find_node/execute_on=INITIAL UserObjects/side_int/execute_on=INITIAL UserObjects/values/execute_on=INITIAL --color off'
+      expect_out = '\[DBG\] side_int'
       detail = 'user objects, including postprocessors, executed at the beginning of the simulation'
     []
     [user_objects_timestep_begin_end]
@@ -153,6 +155,7 @@
       input = 'show_execution_adaptivity.i'
       expect_out = '\[DBG\] indicator'
       detail = 'each step of the adaptive refinement process'
+      cli_args = '--color off'
     []
     # Initial conditions use dependency resolution at node/element scale to execute
     [initial_conditions]
@@ -160,14 +163,16 @@
       input = 'show_execution_ics.i'
       expect_out = '\[DBG\] a_ic u_ic v_ic b_ic ghost_ic test_var_ic power'
       detail = 'initial conditions of variables'
+      cli_args = '--color off'
     []
     # Auxiliary kernels could be misordered easily, it is one of the most important goals of this
     # debug log to make sure chains of auxkernels are in the right order
     [auxkernels]
       type = RunApp
       input = 'show_execution_auxkernels.i'
-      expect_out = '\[DBG\] b_saux c_saux '
+      expect_out = '\[DBG\] b_saux c_saux'
       detail = 'auxiliary kernels intermingled with initial conditions and user objects'
+      cli_args = '--color off'
     []
   []
 []

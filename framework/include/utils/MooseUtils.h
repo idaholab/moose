@@ -662,6 +662,7 @@ void MaterialPropertyStorageDump(
  * @param message The message that will be indented
  * @param color The color to apply to the prefix (default CYAN)
  * @param indent_first_line If true this will indent the first line too (default)
+ * @param post_prefix A string to append right after the prefix, defaults to a column and a space
  *
  * Takes a message like the following and indents it with another color code (see below)
  *
@@ -687,10 +688,11 @@ void MaterialPropertyStorageDump(
 void indentMessage(const std::string & prefix,
                    std::string & message,
                    const char * color = COLOR_CYAN,
-                   bool dont_indent_first_line = true);
+                   bool dont_indent_first_line = true,
+                   const std::string & post_prefix = ": ");
 
 /**
- * remove ANSI escape sequences for teminal color from msg
+ * remove ANSI escape sequences for terminal color from msg
  */
 std::string & removeColor(std::string & msg);
 

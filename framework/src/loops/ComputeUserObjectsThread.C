@@ -74,7 +74,7 @@ ComputeUserObjectsThread::subdomainChanged()
 
   objs.insert(objs.begin(), side_objs.begin(), side_objs.end());
 
-  // collect dependenciesand run subdomain setup
+  // collect dependencies and run subdomain setup
   _fe_problem.subdomainSetup(_subdomain, _tid);
 
   std::set<MooseVariableFEBase *> needed_moose_vars;
@@ -329,15 +329,6 @@ ComputeUserObjectsThread::printGeneralExecutionInformation() const
 {
   if (_fe_problem.shouldPrintExecution())
   {
-    // Gather all user objects that may execute
-    std::vector<ShapeSideUserObject *> shapers;
-    const_cast<ComputeUserObjectsThread *>(this)->queryBoundary(
-        Interfaces::ShapeSideUserObject, Moose::ANY_BOUNDARY_ID, shapers);
-
-    std::vector<UserObject *> side_uos;
-    const_cast<ComputeUserObjectsThread *>(this)->queryBoundary(
-        Interfaces::SideUserObject, Moose::ANY_BOUNDARY_ID, side_uos);
-
     auto console = _fe_problem.console();
     auto execute_on = _fe_problem.getCurrentExecuteOnFlag();
     console << "[DBG] Computing elemental user objects on " << execute_on << std::endl;
@@ -369,15 +360,18 @@ ComputeUserObjectsThread::printBlockExecutionInformation()
   if (_fe_problem.shouldPrintExecution())
   {
     // Gather all user objects that may execute
+    // TODO: restrict this gathering of boundary objects to boundaries that are present
+    // in the current block
     std::vector<ShapeSideUserObject *> shapers;
-    const_cast<ComputeUserObjectsThread *>(this)->queryBoundary(
-        Interfaces::ShapeSideUserObject, Moose::ANY_BOUNDARY_ID, shapers);
+    queryBoundary(Interfaces::ShapeSideUserObject, Moose::ANY_BOUNDARY_ID, shapers);
 
-    std::vector<UserObject *> side_uos;
-    const_cast<ComputeUserObjectsThread *>(this)->queryBoundary(
-        Interfaces::SideUserObject, Moose::ANY_BOUNDARY_ID, side_uos);
+    std::vector<SideUserObject *> side_uos;
+    queryBoundary(Interfaces::SideUserObject, Moose::ANY_BOUNDARY_ID, side_uos);
 
-    std::vector<const UserObject *> domain_interface_uos;
+    std::vector<InterfaceUserObject *> interface_objs;
+    queryBoundary(Interfaces::InterfaceUserObject, Moose::ANY_BOUNDARY_ID, interface_objs);
+
+    std::vector<const DomainUserObject *> domain_interface_uos;
     for (const auto * const domain_uo : _domain_objs)
       if (domain_uo->shouldExecuteOnInterface())
         domain_interface_uos.push_back(domain_uo);
@@ -385,7 +379,7 @@ ComputeUserObjectsThread::printBlockExecutionInformation()
     // Approximation of the number of user objects currently executing
     int num_objects = _element_objs.size() + _domain_objs.size() + _shape_element_objs.size() +
                       side_uos.size() + shapers.size() + _internal_side_objs.size() +
-                      _interface_user_objects.size() + domain_interface_uos.size();
+                      interface_objs.size() + domain_interface_uos.size();
 
     auto console = _fe_problem.console();
     auto execute_on = _fe_problem.getCurrentExecuteOnFlag();
@@ -401,7 +395,7 @@ ComputeUserObjectsThread::printBlockExecutionInformation()
       if (_fe_problem.currentlyComputingJacobian())
         printExecutionOrdering<ShapeElementUserObject>(
             _shape_element_objs, "element user objects contributing to the Jacobian");
-      printExecutionOrdering<UserObject>(side_uos, "side user objects");
+      printExecutionOrdering<SideUserObject>(side_uos, "side user objects");
       if (_fe_problem.currentlyComputingJacobian())
         printExecutionOrdering<ShapeSideUserObject>(
             shapers, "side user objects contributing to the Jacobian");
@@ -409,10 +403,13 @@ ComputeUserObjectsThread::printBlockExecutionInformation()
                                                      "internal side user objects");
       printExecutionOrdering<InterfaceUserObject>(interface_objs, "interface user objects");
       console << "[DBG] Only user objects active on local element/sides are executed" << std::endl;
-      _blocks_exec_printed.insert(_subdomain);
     }
     else if (_fe_problem.shouldPrintExecution() && num_objects == 0 &&
              _blocks_exec_printed.count(_subdomain) == 0)
-      console << "[DBG] No User Objects on block " << _subdomain << std::endl;
+      console << "[DBG] No User Objects on block " << _subdomain << " on " << execute_on.name()
+              << std::endl;
+
+    // Mark subdomain as having printed to avoid printing again
+    _blocks_exec_printed.insert(_subdomain);
   }
 }

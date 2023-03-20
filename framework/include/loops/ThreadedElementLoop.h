@@ -150,7 +150,9 @@ ThreadedElementLoop<RangeType>::printExecutionOrdering(const std::vector<T *> ob
     auto names = ConsoleUtils::mooseObjectVectorToString(moose_objs);
 
     // Print string with a DBG prefix and with sufficient line breaks
-    std::string message = print_header ? "Executing " + objects_type + " on " + +"\n" : "";
+    std::string message = print_header ? "Executing " + objects_type + " on " +
+                                             _fe_problem.getCurrentExecuteOnFlag().name() + "\n"
+                                       : "";
     message += "Order of execution:\n" + names;
     console << ConsoleUtils::formatString(message, line_prefix) << std::endl;
   }

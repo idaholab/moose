@@ -224,7 +224,7 @@ ComputeIndicatorThread::printBlockExecutionInformation()
       if (!active_indicators_string.empty())
       {
         console << "[DBG] Ordering of element indicators on block " << _subdomain << std::endl;
-        console << "[DBG] " << active_indicators_string << std::endl;
+        console << ConsoleUtils::formatString(active_indicators_string, "[DBG]") << std::endl;
       }
     }
     if (_internal_side_indicators.hasActiveBlockObjects(_subdomain, _tid))
@@ -239,7 +239,7 @@ ComputeIndicatorThread::printBlockExecutionInformation()
       {
         console << "[DBG] Ordering of element internal sides indicators on block " << _subdomain
                 << std::endl;
-        console << "[DBG] " << active_indicators_string << std::endl;
+        console << ConsoleUtils::formatString(active_indicators_string, "[DBG]") << std::endl;
       }
     }
     _blocks_exec_printed.insert(_subdomain);

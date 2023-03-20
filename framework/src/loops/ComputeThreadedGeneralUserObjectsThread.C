@@ -63,6 +63,6 @@ ComputeThreadedGeneralUserObjectsThread::printGeneralExecutionInformation(
     std::string threaded_uos = "";
     for (auto it = range.begin(); it != range.end(); ++it)
       threaded_uos += (*it)->name() + " ";
-    console << "[DBG] " << ConsoleUtils::formatString(threaded_uos, "[DBG] ") << std::endl;
+    console << ConsoleUtils::formatString(threaded_uos, "[DBG] ") << std::endl;
   }
 }
