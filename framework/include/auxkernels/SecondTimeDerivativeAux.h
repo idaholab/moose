@@ -24,7 +24,7 @@ public:
 protected:
   virtual Real computeValue() override;
 
-  /// Variable
+  /// Variable we're computing the second time derivative of
   const VariableValue & _v;
 
   /// Factor to multiply the second time derivative with

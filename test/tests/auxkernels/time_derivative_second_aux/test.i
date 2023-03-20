@@ -53,8 +53,6 @@
 
 [AuxKernels]
   # Time derivative of a nonlinear variable
-  # Time derivative of an aux variable is not currently supported
-  # in the Auxiliary system (only in nonlinear)
   [var_derivative]
     type = SecondTimeDerivativeAux
     variable = variable_derivative
