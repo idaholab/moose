@@ -138,6 +138,7 @@ public:
     CONVERGED_ACCEPTABLE_REL,
     CONVERGED_BOUNDS,
     EXACT_GUESS,
+    CONVERGED_XTOL,
     NOT_CONVERGED
   };
 
@@ -159,6 +160,9 @@ protected:
 
   /// number of nested iterations
   std::size_t _n_iterations;
+
+  // Threshold for minimum step size of linear iterations
+  Real _x_tol;
 
   /// Size a dynamic Jacobian matrix correctly
   void sizeItems(const NestedSolveTempl<is_ad>::DynamicVector & guess,
@@ -424,11 +428,23 @@ NestedSolveTempl<is_ad>::nonlinear(V & guess, T & compute)
 
     // solve and apply next increment
     linear(jacobian, delta, residual);
+
+    // Check if step size is smaller than the floating point tolerance
+    if (delta.cwiseAbs().maxCoeff() <= _x_tol)
+    {
+      _state = State::CONVERGED_XTOL;
+      return;
+    }
+
     guess -= delta;
     _n_iterations++;
 
     // compute residual and jacobian for the next iteration
-    compute(guess, residual, jacobian);
+    Real _alpha = compute(guess, residual, jacobian);
+
+    // Dampen output if requested
+    guess += (1 - _alpha) * delta;
+
     r_square = normSquare(residual);
   }
 
