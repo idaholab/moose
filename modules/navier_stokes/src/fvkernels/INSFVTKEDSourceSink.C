@@ -96,6 +96,7 @@ INSFVTKEDSourceSink::INSFVTKEDSourceSink(const InputParameters & params)
                "In three-dimensions, the w velocity must be supplied and it must be an "
                "INSFVVelocityVariable.");
 
+  _loc_dt = _dt;
   for (const auto & elem : _fe_problem.mesh().getMesh().element_ptr_range())
   {
     _symmetric_strain_tensor_norm_old[elem] = 0.0;
@@ -103,6 +104,8 @@ INSFVTKEDSourceSink::INSFVTKEDSourceSink(const InputParameters & params)
     _pevious_nl_sol[elem] = 0.0;
     _production_NL_old[elem] = 0.0;
     _destruction_NL_old[elem] = 0.0;
+    _pevious_production[elem] = 0.0;
+    _pevious_destruction[elem] = 0.0;
 
     auto wall_bounded = false;
     for (unsigned int i_side = 0; i_side < elem->n_sides(); ++i_side)
@@ -209,111 +212,76 @@ INSFVTKEDSourceSink::computeQpResidual()
   {
     // constexpr Real offset = 0.0; // prevents explosion of sqrt(x) derivative to infinity
 
-    // const auto & grad_u = _u_var->adGradSln(_current_elem);
-    // auto Sij_00 = grad_u(0) + grad_u(0);
-    // ADReal symmetric_strain_tensor_norm = 0.5 * Utility::pow<2>(Sij_00);
-    // if (_dim >= 2)
+    if (_loc_dt != _dt)
+    {
+
+      const auto & grad_u = _u_var->adGradSln(_current_elem);
+      auto Sij_00 = grad_u(0) + grad_u(0);
+      ADReal symmetric_strain_tensor_norm = 0.5 * Utility::pow<2>(Sij_00);
+      if (_dim >= 2)
+      {
+        const auto & grad_v = _v_var->adGradSln(_current_elem);
+        auto Sij_01 = grad_u(1) + grad_v(0);
+        auto Sij_11 = grad_v(1) + grad_u(1);
+        symmetric_strain_tensor_norm +=
+            0.5 * (2.0 * Utility::pow<2>(Sij_01) + Utility::pow<2>(Sij_11));
+        if (_dim >= 3)
+        {
+          const auto & grad_w = _w_var->adGradSln(_current_elem);
+          auto Sij_02 = grad_u(2) + grad_w(0);
+          auto Sij_12 = grad_v(2) + grad_w(1);
+          auto Sij_22 = grad_w(2) + grad_w(2);
+          symmetric_strain_tensor_norm +=
+              0.5 * (2.0 * Utility::pow<2>(Sij_02) + 2.0 * Utility::pow<2>(Sij_12) +
+                     Utility::pow<2>(Sij_22));
+        }
+      }
+
+      auto production_k = _mu_t(makeElemArg(_current_elem)) * symmetric_strain_tensor_norm.value();
+
+      auto time_scale = std::abs(_k(makeElemArg(_current_elem)) / _var(makeElemArg(_current_elem)));
+
+      production = _C1_eps(makeElemArg(_current_elem)) * production_k / time_scale;
+      destruction = _C2_eps(makeElemArg(_current_elem)) * _rho(makeElemArg(_current_elem)) *
+                    _var(makeElemArg(_current_elem)) / time_scale;
+
+      production = _rf * production + (1.0 - _rf) * _pevious_production[_current_elem];
+      destruction = _rf * destruction + (1.0 - _rf) * _pevious_destruction[_current_elem];
+
+      _pevious_production[_current_elem] = production.value();
+      _pevious_destruction[_current_elem] = destruction.value();
+      _loc_dt = _dt;
+    }
+
+    // Implicit relaxation
+
+    // if (_realizable_constraint)
     // {
-    //   const auto & grad_v = _v_var->adGradSln(_current_elem);
-    //   auto Sij_01 = grad_u(1) + grad_v(0);
-    //   auto Sij_11 = grad_v(1) + grad_u(1);
-    //   symmetric_strain_tensor_norm +=
-    //       0.5 * (2.0 * Utility::pow<2>(Sij_01) + Utility::pow<2>(Sij_11));
-    //   if (_dim >= 3)
-    //   {
-    //     const auto & grad_w = _w_var->adGradSln(_current_elem);
-    //     auto Sij_02 = grad_u(2) + grad_w(0);
-    //     auto Sij_12 = grad_v(2) + grad_w(1);
-    //     auto Sij_22 = grad_w(2) + grad_w(2);
-    //     symmetric_strain_tensor_norm +=
-    //         0.5 * (2.0 * Utility::pow<2>(Sij_02) + 2.0 * Utility::pow<2>(Sij_12) +
-    //                Utility::pow<2>(Sij_22));
-    //   }
+    //   // Realizable dissipation constraints
+    //   production = (production > 0) ? production : 0.0;
+    //   destruction = (destruction > 0) ? destruction : 0.0;
+    //   destruction = (destruction < production) ? destruction : production;
     // }
 
-    // const auto & grad_u_old = _u_var->adGradSln(_current_elem, 1);
-    // auto Sij_00_old = grad_u_old(0) + grad_u_old(0);
-    // ADReal symmetric_strain_tensor_norm_old_time = 0.5 * Utility::pow<2>(Sij_00_old);
-    // if (_dim >= 2)
-    // {
-    //   const auto & grad_v_old = _v_var->adGradSln(_current_elem, 1);
-    //   auto Sij_01_old = grad_u_old(1) + grad_v_old(0);
-    //   auto Sij_11_old = grad_v_old(1) + grad_u_old(1);
-    //   symmetric_strain_tensor_norm_old_time +=
-    //       0.5 * (2.0 * Utility::pow<2>(Sij_01_old) + Utility::pow<2>(Sij_11_old));
-    //   if (_dim >= 3)
-    //   {
-    //     const auto & grad_w_old = _w_var->adGradSln(_current_elem, 1);
-    //     auto Sij_02_old = grad_u_old(2) + grad_w_old(0);
-    //     auto Sij_12_old = grad_v_old(2) + grad_w_old(1);
-    //     auto Sij_22_old = grad_w_old(2) + grad_w_old(2);
-    //     symmetric_strain_tensor_norm_old_time +=
-    //         0.5 * (2.0 * Utility::pow<2>(Sij_02_old) + 2.0 * Utility::pow<2>(Sij_12_old) +
-    //                Utility::pow<2>(Sij_22_old));
-    //   }
-    // }
+    // Solver Relaxation
+    // Real diag = 0.0;
+    // if (_subproblem.isTransient())
+    //   diag += 1.0 / _dt;
+    // diag += _mu_t(makeElemArg(_current_elem)).value() *
+    // _var.adGradSln(_current_elem).norm().value() /
+    //         _var(makeElemArg(_current_elem)).value();
 
-    // auto production_k = _mu_t(makeElemArg(_current_elem)) * symmetric_strain_tensor_norm.value();
-    // auto production_k_old_time =
-    //     _mu_t(makeElemArg(_current_elem), 1) * symmetric_strain_tensor_norm_old_time.value();
+    // residual += 1.0 / _rf * diag * _var(makeElemArg(_current_elem)) -
+    //             (1.0 - _rf) / _rf * diag * _var(makeElemArg(_current_elem)).value();
 
-    // // constexpr Real protection_k = 0.0;
-    // if (_linearized_model)
-    // {
-    //   production = _C1_eps(makeElemArg(_current_elem)) * production_k *
-    //                _linear_variable(makeElemArg(_current_elem));
-
-    //   destruction = _C2_eps(makeElemArg(_current_elem)) * _rho(makeElemArg(_current_elem)) *
-    //                 _var(makeElemArg(_current_elem)) *
-    //                 _linear_variable(makeElemArg(_current_elem));
-    // }
-    // else
-    // {
-    //   auto time_scale = std::abs(_k(makeElemArg(_current_elem)).value() /
-    //                              _var(makeElemArg(_current_elem)).value());
-    //   auto time_scale_old_time =
-    //       std::abs(_k(makeElemArg(_current_elem), 1) / _var(makeElemArg(_current_elem), 1));
-
-    //   production = _C1_eps(makeElemArg(_current_elem)) * production_k / time_scale;
-    //   destruction = _C2_eps(makeElemArg(_current_elem)) * _rho(makeElemArg(_current_elem)) *
-    //                 _var(makeElemArg(_current_elem)) / time_scale;
-
-    //   production_old_time =
-    //       _C1_eps(makeElemArg(_current_elem), 1) * production_k_old_time / time_scale_old_time;
-    //   destruction_old_time = _C2_eps(makeElemArg(_current_elem), 1) *
-    //                          _rho(makeElemArg(_current_elem), 1) *
-    //                          _var(makeElemArg(_current_elem), 1) / time_scale_old_time;
-    // }
-
-    // // Implicit relaxation
-
-    // // if (_realizable_constraint)
-    // // {
-    // //   // Realizable dissipation constraints
-    // //   production = (production > 0) ? production : 0.0;
-    // //   destruction = (destruction > 0) ? destruction : 0.0;
-    // //   destruction = (destruction < production) ? destruction : production;
-    // // }
-
-    // // Solver Relaxation
-    // // Real diag = 0.0;
-    // // if (_subproblem.isTransient())
-    // //   diag += 1.0 / _dt;
-    // // diag += _mu_t(makeElemArg(_current_elem)).value() *
-    // // _var.adGradSln(_current_elem).norm().value() /
-    // //         _var(makeElemArg(_current_elem)).value();
-
-    // // residual += 1.0 / _rf * diag * _var(makeElemArg(_current_elem)) -
-    // //             (1.0 - _rf) / _rf * diag * _var(makeElemArg(_current_elem)).value();
-
-    // // Variable Relaxation
+    // Variable Relaxation
     // production = _rf * production + (1.0 - _rf) * production_old_time;
     // destruction = _rf * destruction + (1.0 - _rf) * destruction_old_time;
-    // // production = _rf * production + (1.0 - _rf) * _production_NL_old[_current_elem];
-    // // destruction = _rf * destruction + (1.0 - _rf) * _destruction_NL_old[_current_elem];
+    // production = _rf * production + (1.0 - _rf) * _production_NL_old[_current_elem];
+    // destruction = _rf * destruction + (1.0 - _rf) * _destruction_NL_old[_current_elem];
 
-    // // _console << "Production: " << production << std::endl;
-    // // _console << "Destruction: " << destruction << std::endl;
+    // _console << "Production: " << production << std::endl;
+    // _console << "Destruction: " << destruction << std::endl;
 
     // auto new_old_norm = 1.0;
     // if (_fe_problem.getNonlinearSystemBase().getCurrentNonlinearIterationNumber() >= 0)
@@ -326,21 +294,21 @@ INSFVTKEDSourceSink::computeQpResidual()
     //     std::exp(-1e2 / (1.0 + symmetric_strain_tensor_norm.value()) *
     //              Utility::pow<2>(_var(makeElemArg(_current_elem), 0).value()) / new_old_norm);
 
-    // // _console << "-----------------------" << std::endl;
-    // // _console << "new_old_norm: " << new_old_norm << std::endl;
-    // // _console << "scaling: " << scaling << std::endl;
-    // // auto scaling = 0.0;
+    // _console << "-----------------------" << std::endl;
+    // _console << "new_old_norm: " << new_old_norm << std::endl;
+    // _console << "scaling: " << scaling << std::endl;
+    // auto scaling = 0.0;
 
     // production += std::max(destruction - production, 0.0) * scaling;
 
-    // residual += destruction - production;
+    residual += _pevious_destruction[_current_elem] - _pevious_production[_current_elem];
 
     // residual *= (1.0 - scaling);
 
-    // // _console << "Production eps: " << production << " Destruction eps: " << destruction <<
-    // // std::endl;
+    // _console << "Production eps: " << production << " Destruction eps: " << destruction <<
+    // std::endl;
 
-    // // Updating olds
+    // Updating olds
     // _symmetric_strain_tensor_norm_old[_current_elem] =
     //     _rf * symmetric_strain_tensor_norm.value() +
     //     (1.0 - _rf) * _symmetric_strain_tensor_norm_old[_current_elem];
@@ -348,7 +316,7 @@ INSFVTKEDSourceSink::computeQpResidual()
     //     _rf * destruction.value() + (1.0 - _rf) * _old_destruction[_current_elem];
 
     // residual = -1.0;
-    residual = _var(makeElemArg(_current_elem)) - 1.0;
+    // residual = _var(makeElemArg(_current_elem)) - 1.0;
   }
 
   _pevious_nl_sol[_current_elem] =

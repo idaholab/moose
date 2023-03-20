@@ -72,19 +72,15 @@ protected:
   /// C_mu constant
   Real _C_mu;
 
-  /// Stored strain rate
-  std::map<const Elem *, Real> _symmetric_strain_tensor_norm_old;
-  std::map<const Elem *, Real> _old_destruction;
-
-  /// Map for the previous nonlienar iterate
-  std::map<const Elem *, Real> _pevious_nl_sol;
-
   /// Maps for wall treatement
   std::map<const Elem *, bool> _wall_bounded;
   std::map<const Elem *, std::vector<Real>> _dist;
   std::map<const Elem *, std::vector<Point>> _normal;
-  std::map<const Elem *, Real> _production_NL_old;
-  std::map<const Elem *, Real> _destruction_NL_old;
+
+  /// Storing current time
+  Real _loc_dt;
+  std::map<const Elem *, Real> _pevious_production;
+  std::map<const Elem *, Real> _pevious_destruction;
 
   /// -- Constants of the method
   static constexpr Real _von_karman{0.4187};

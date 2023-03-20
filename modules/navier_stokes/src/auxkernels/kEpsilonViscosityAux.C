@@ -190,13 +190,14 @@ kEpsilonViscosityAux::computeValue()
 
   auto time_scale = _k(current_argument) / _epsilon(current_argument);
 
-  auto min_constraint_time_scale =
-      0.6 * std::sqrt(_mu(current_argument) / _rho(current_argument) / _epsilon(current_argument));
+  // auto min_constraint_time_scale =
+  //     0.6 * std::sqrt(_mu(current_argument) / _rho(current_argument) /
+  //     _epsilon(current_argument));
 
-  auto constraint_time_scale = std::max(min_constraint_time_scale.value(), time_scale.value());
+  // auto constraint_time_scale = std::max(min_constraint_time_scale.value(), time_scale.value());
 
   Real mu_t = _rho(current_argument).value() * _C_mu(current_argument).value() *
-              _k(current_argument).value() * constraint_time_scale;
+              _k(current_argument).value() * time_scale.value();
 
   auto mu_t_old = _var(current_argument).value();
   mu_t = _rf * mu_t + (1.0 - _rf) * mu_t_old;
@@ -249,59 +250,8 @@ kEpsilonViscosityAux::computeValue()
                       (1.0 - blending_function) * _mu(current_argument).value();
       mu_t_wall = wall_val.value();
     }
-
-    // mu_t = std::max(mu_t_wall, mu_t);
-
-    // mu_t = mu_t_wall;
-
-    // _console << "y plus: " << y_plus << std::endl;
-    // _console << "rho: " << _rho(current_argument) << std::endl;
-    // _console << "mu: " << _mu(current_argument) << std::endl;
-    // _console << "y: " << min_wall_dist << std::endl;
-    // _console << "u: " << parallel_speed << std::endl;
-    // _console << "u_tau: " << u_tau << std::endl;
-    // _console << "mu_t: " << mu_t - _mu(current_argument).value() << std::endl;
-    // _console << "------------------------------ " << std::endl;
-
-    // Updating limiter if needed
-    // if (mu_t_wall > _max_viscosity_value)
-    //   _max_viscosity_value = std::max(mu_t_wall, 1e3);
+    mu_t = mu_t_wall;
   }
-  // else
-  // {
-  //  Return Bulk value
-  // constexpr Real protection_epsilon = 1e-15;
-
-  // auto k_value = std::max(_k(current_argument), 1e-10);
-  // auto epsilon_value = std::max(_epsilon(current_argument), 1e-10);
-
-  // ADReal local_mixing_length = (_rho(current_argument) * _C_mu(current_argument) *
-  //                               std::pow(k_value, 2) / (epsilon_value + protection_epsilon))
-  //                                  .value();
-
-  // bool mixing_length_cond = (_C_mu(current_argument) * std::pow(_k(current_argument), 1.5)) <
-  //                           (std::abs(_epsilon(current_argument)) * _max_mixing_length);
-  // local_mixing_length = (mixing_length_cond) ? local_mixing_length : _max_mixing_length;
-
-  // mu_t = (local_mixing_length * std::pow(k_value, 0.5)).value() +
-  // _mu(current_argument).value(); mu_t = std::max(std::min(mu_t, _mu(current_argument).value() *
-  // 1e6), 1e-10); mu_t = std::max(mu_t, _mu(current_argument).value());
-
-  //   mu_t = _rho(current_argument).value() * _C_mu(current_argument).value() *
-  //          std::pow(_k(current_argument).value(), 2) / _epsilon(current_argument).value();
-  // }
-
-  // mu_t = std::max(mu_t, mu_t_wall);
-
-  // if (elem == (*(*_mesh.activeLocalElementsBegin())))
-  // {
-  //   _n_kernel_iters += 1;
-  //   if (_n_kernel_iters == (_n_iters_activate + 10)) //+2 since we need to consider assembly
-  //   {
-  //     _console << "Activating k-epsilon model." << std::endl;
-  //     mu_t = 1.0;
-  //   }
-  // }
 
   return mu_t;
 }

@@ -92,6 +92,11 @@ protected:
   std::map<const Elem *, Real> _production_NL_old;
   std::map<const Elem *, Real> _destruction_NL_old;
 
+  /// Storing current time
+  Real _loc_dt;
+  std::map<const Elem *, Real> _pevious_production;
+  std::map<const Elem *, Real> _pevious_destruction;
+
   /// -- Constants of the method
   static constexpr Real _von_karman{0.4187};
 };
