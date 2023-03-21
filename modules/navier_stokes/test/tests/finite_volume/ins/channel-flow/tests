@@ -249,4 +249,12 @@
     abs_zero = 6e-9
     valgrind = HEAVY
   []
+  [average-pressure-constraint]
+    type = 'Exodiff'
+    input = '2d-rc-no-slip-average-outlet-pressure-constraint.i'
+    exodiff = '2d-rc-no-slip-average-outlet-pressure-constraint_out.e'
+    valgrind = HEAVY
+    method = '!dbg'
+    requirement = 'The system shall be able to constrain the pressure nullspace by imposing an average pressure value on a boundary.'
+  []
 []
