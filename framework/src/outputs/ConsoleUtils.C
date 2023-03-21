@@ -422,7 +422,11 @@ formatString(std::string message, const std::string & prefix)
   stream << message;
   std::streampos end = stream.tellp();
   insertNewline(stream, start, end);
-  return stream.str();
+  auto formatted_string = stream.str();
+  // no need to end with a line break
+  if (formatted_string.back() == '\n')
+    formatted_string.pop_back();
+  return formatted_string;
 }
 
 std::string

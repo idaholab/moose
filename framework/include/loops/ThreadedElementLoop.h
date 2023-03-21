@@ -153,7 +153,7 @@ ThreadedElementLoop<RangeType>::printExecutionOrdering(const std::vector<T *> ob
     std::string message = print_header ? "Executing " + objects_type + " on " +
                                              _fe_problem.getCurrentExecuteOnFlag().name() + "\n"
                                        : "";
-    message += "Order of execution:\n" + names;
+    message += (print_header ? "Order of execution:\n" : "") + names;
     console << ConsoleUtils::formatString(message, line_prefix) << std::endl;
   }
 }

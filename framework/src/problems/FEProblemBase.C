@@ -7954,7 +7954,7 @@ FEProblemBase::currentNlSysNum() const
 bool
 FEProblemBase::shouldPrintExecution(const THREAD_ID tid) const
 {
-  // For now, only support one thread
+  // For now, only support printing from thread 0
   if (tid != 0)
     return false;
 

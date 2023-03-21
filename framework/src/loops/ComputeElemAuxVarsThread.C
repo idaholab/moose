@@ -186,10 +186,11 @@ ComputeElemAuxVarsThread<AuxKernelType>::printBlockExecutionInformation()
       return;
     auto console = _fe_problem.console();
     std::vector<AuxKernelType *> kernels;
-    // for (auto shared_ptr : _aux_kernels.getActiveBlockObjects(_subdomain, _tid))
-    //   kernels.push_back(shared_ptr.get());
+    for (auto shared_ptr : _aux_kernels.getActiveBlockObjects(_subdomain, _tid))
+      kernels.push_back(shared_ptr.get());
 
-    console << "[DBG] Ordering of AuxKernels on block " << _subdomain << std::endl;
+    if (kernels.size())
+      console << "[DBG] Ordering of AuxKernels on block " << _subdomain << std::endl;
     ThreadedElementLoop<ConstElemRange>::printExecutionOrdering<AuxKernelType>(kernels, false);
     _blocks_exec_printed.insert(_subdomain);
   }
