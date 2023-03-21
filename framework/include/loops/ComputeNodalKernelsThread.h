@@ -41,7 +41,7 @@ protected:
 
   AuxiliarySystem & _aux_sys;
 
-  const std::set<TagID> & _tags;
+  const std::vector<VectorTag> _tags;
 
   MooseObjectTagWarehouse<NodalKernelBase> & _nodal_kernels;
 

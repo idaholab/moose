@@ -1318,9 +1318,9 @@ public:
   virtual void addResidualLower(THREAD_ID tid, const std::vector<VectorTag> & tags) override;
   virtual void addResidualScalar(THREAD_ID tid, const std::vector<VectorTag> & tags);
 
-  virtual void cacheResidual(THREAD_ID tid) override;
-  virtual void cacheResidualNeighbor(THREAD_ID tid) override;
-  virtual void addCachedResidual(THREAD_ID tid) override;
+  virtual void cacheResidual(THREAD_ID tid, const std::vector<VectorTag> & tags) override;
+  virtual void cacheResidualNeighbor(THREAD_ID tid, const std::vector<VectorTag> & tags) override;
+  virtual void addCachedResidual(THREAD_ID tid, const std::vector<VectorTag> & tags) override;
 
   /**
    * Allows for all the residual contributions that are currently cached to be added directly into

@@ -1190,10 +1190,13 @@ NonlinearSystemBase::setConstraintSecondaryValues(NumericVector<Number> & soluti
 }
 
 void
-NonlinearSystemBase::constraintResiduals(NumericVector<Number> & residual, bool displaced)
+NonlinearSystemBase::constraintResiduals(NumericVector<Number> & residual,
+                                         bool displaced,
+                                         const std::set<TagID> & tags)
 {
   // Make sure the residual is in a good state
   residual.close();
+  const auto vector_tag_data = _fe_problem.getVectorTags(tags);
 
   std::map<std::pair<unsigned int, unsigned int>, PenetrationLocator *> * penetration_locators =
       NULL;
@@ -1298,8 +1301,8 @@ NonlinearSystemBase::constraintResiduals(NumericVector<Number> & residual, bool 
                   residual_has_inserted_values = true;
                 }
                 else
-                  _fe_problem.cacheResidual(0);
-                _fe_problem.cacheResidualNeighbor(0);
+                  _fe_problem.cacheResidual(0, vector_tag_data);
+                _fe_problem.cacheResidualNeighbor(0, vector_tag_data);
               }
           }
         }
@@ -1403,10 +1406,10 @@ NonlinearSystemBase::constraintResiduals(NumericVector<Number> & residual, bool 
 
           ec->reinit(info);
           ec->computeResidual();
-          _fe_problem.cacheResidual(tid);
-          _fe_problem.cacheResidualNeighbor(tid);
+          _fe_problem.cacheResidual(tid, vector_tag_data);
+          _fe_problem.cacheResidualNeighbor(tid, vector_tag_data);
         }
-        _fe_problem.addCachedResidual(tid);
+        _fe_problem.addCachedResidual(tid, vector_tag_data);
       }
     }
   }
@@ -1461,11 +1464,11 @@ NonlinearSystemBase::constraintResiduals(NumericVector<Number> & residual, bool 
                   residual_has_inserted_values = true;
                 }
                 else
-                  _fe_problem.cacheResidual(0);
-                _fe_problem.cacheResidualNeighbor(0);
+                  _fe_problem.cacheResidual(0, vector_tag_data);
+                _fe_problem.cacheResidualNeighbor(0, vector_tag_data);
               }
             }
-            _fe_problem.addCachedResidual(0);
+            _fe_problem.addCachedResidual(0, vector_tag_data);
           }
         }
       }
@@ -1489,7 +1492,7 @@ NonlinearSystemBase::constraintResiduals(NumericVector<Number> & residual, bool 
   }
 
   // We may have additional tagged vectors that also need to be accumulated
-  _fe_problem.addCachedResidual(0);
+  _fe_problem.addCachedResidual(0, vector_tag_data);
 }
 
 void
@@ -1528,6 +1531,8 @@ NonlinearSystemBase::computeResidualInternal(const std::set<TagID> & tags)
   TIME_SECTION("computeResidualInternal", 3);
 
   residualSetup();
+
+  const auto vector_tag_data = _fe_problem.getVectorTags(tags);
 
   // Residual contributions from UOs - for now this is used for ray tracing
   // and ray kernels that contribute to the residual (think line sources)
@@ -1571,7 +1576,7 @@ NonlinearSystemBase::computeResidualInternal(const std::set<TagID> & tags)
     unsigned int n_threads = libMesh::n_threads();
     for (unsigned int i = 0; i < n_threads;
          i++) // Add any cached residuals that might be hanging around
-      _fe_problem.addCachedResidual(i);
+      _fe_problem.addCachedResidual(i, vector_tag_data);
   }
   PARALLEL_CATCH;
 
@@ -1641,7 +1646,7 @@ NonlinearSystemBase::computeResidualInternal(const std::set<TagID> & tags)
         unsigned int n_threads = libMesh::n_threads();
         for (unsigned int i = 0; i < n_threads;
              i++) // Add any cached residuals that might be hanging around
-          _fe_problem.addCachedResidual(i);
+          _fe_problem.addCachedResidual(i, vector_tag_data);
       }
     }
   }
@@ -1669,12 +1674,12 @@ NonlinearSystemBase::computeResidualInternal(const std::set<TagID> & tags)
       unsigned int n_threads = libMesh::n_threads();
       for (unsigned int i = 0; i < n_threads;
            i++) // Add any cached residuals that might be hanging around
-        _fe_problem.addCachedResidual(i);
+        _fe_problem.addCachedResidual(i, vector_tag_data);
     }
   }
   PARALLEL_CATCH;
 
-  mortarConstraints(Moose::ComputeType::Residual);
+  mortarConstraints(Moose::ComputeType::Residual, tags, {});
 
   if (_residual_copy.get())
   {
@@ -1705,11 +1710,11 @@ NonlinearSystemBase::computeResidualInternal(const std::set<TagID> & tags)
     PARALLEL_TRY
     {
       // Undisplaced Constraints
-      constraintResiduals(*_Re_non_time, false);
+      constraintResiduals(*_Re_non_time, false, tags);
 
       // Displaced Constraints
       if (_fe_problem.getDisplacedProblem())
-        constraintResiduals(*_Re_non_time, true);
+        constraintResiduals(*_Re_non_time, true, tags);
 
       if (_fe_problem.computingNonlinearResid())
         _constraints.residualEnd();
@@ -1790,13 +1795,14 @@ NonlinearSystemBase::computeResidualAndJacobianInternal(const std::set<TagID> & 
       Threads::parallel_reduce(faces, fvrj);
     }
 
-    mortarConstraints(Moose::ComputeType::ResidualAndJacobian);
+    mortarConstraints(Moose::ComputeType::ResidualAndJacobian, vector_tags, matrix_tags);
 
+    const auto vector_tag_data = _fe_problem.getVectorTags(vector_tags);
     unsigned int n_threads = libMesh::n_threads();
     for (unsigned int i = 0; i < n_threads;
          i++) // Add any cached residuals that might be hanging around
     {
-      _fe_problem.addCachedResidual(i);
+      _fe_problem.addCachedResidual(i, vector_tag_data);
       _fe_problem.addCachedJacobian(i);
     }
   }
@@ -2646,7 +2652,7 @@ NonlinearSystemBase::computeJacobianInternal(const std::set<TagID> & tags)
       Threads::parallel_reduce(faces, fvj);
     }
 
-    mortarConstraints(Moose::ComputeType::Jacobian);
+    mortarConstraints(Moose::ComputeType::Jacobian, {}, tags);
 
     // Get our element range for looping over
     ConstElemRange & elem_range = *_mesh.getActiveLocalElementRange();
@@ -3568,17 +3574,19 @@ NonlinearSystemBase::setPreviousNewtonSolution(const NumericVector<Number> & sol
 }
 
 void
-NonlinearSystemBase::mortarConstraints(const Moose::ComputeType compute_type)
+NonlinearSystemBase::mortarConstraints(const Moose::ComputeType compute_type,
+                                       const std::set<TagID> & vector_tags,
+                                       const std::set<TagID> & matrix_tags)
 {
   parallel_object_only();
 
   try
   {
     for (auto & map_pr : _undisplaced_mortar_functors)
-      map_pr.second(compute_type);
+      map_pr.second(compute_type, vector_tags, matrix_tags);
 
     for (auto & map_pr : _displaced_mortar_functors)
-      map_pr.second(compute_type);
+      map_pr.second(compute_type, vector_tags, matrix_tags);
   }
   catch (MetaPhysicL::LogicError &)
   {

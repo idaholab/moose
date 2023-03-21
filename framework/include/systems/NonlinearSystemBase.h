@@ -254,7 +254,9 @@ public:
    * computed
    * @param displaced Controls whether to do the displaced Constraints or non-displaced
    */
-  void constraintResiduals(NumericVector<Number> & residual, bool displaced);
+  void constraintResiduals(NumericVector<Number> & residual,
+                           bool displaced,
+                           const std::set<TagID> & tags);
 
   /**
    * Computes residual for a given tag
@@ -734,7 +736,9 @@ protected:
   /**
    * Do mortar constraint residual/jacobian computations
    */
-  void mortarConstraints(Moose::ComputeType compute_type);
+  void mortarConstraints(Moose::ComputeType compute_type,
+                         const std::set<TagID> & vector_tags,
+                         const std::set<TagID> & matrix_tags);
 
   /**
    * Compute a "Jacobian" for automatic scaling purposes

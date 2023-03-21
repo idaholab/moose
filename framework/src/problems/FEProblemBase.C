@@ -1611,28 +1611,28 @@ FEProblemBase::addResidualScalar(THREAD_ID tid, const std::vector<VectorTag> & t
 }
 
 void
-FEProblemBase::cacheResidual(THREAD_ID tid)
+FEProblemBase::cacheResidual(THREAD_ID tid, const std::vector<VectorTag> & tags)
 {
-  _assembly[tid][_current_nl_sys->number()]->cacheResidual();
+  _assembly[tid][_current_nl_sys->number()]->cacheResidual(tags);
   if (_displaced_problem)
-    _displaced_problem->cacheResidual(tid);
+    _displaced_problem->cacheResidual(tid, tags);
 }
 
 void
-FEProblemBase::cacheResidualNeighbor(THREAD_ID tid)
+FEProblemBase::cacheResidualNeighbor(THREAD_ID tid, const std::vector<VectorTag> & tags)
 {
-  _assembly[tid][_current_nl_sys->number()]->cacheResidualNeighbor();
+  _assembly[tid][_current_nl_sys->number()]->cacheResidualNeighbor(tags);
   if (_displaced_problem)
-    _displaced_problem->cacheResidualNeighbor(tid);
+    _displaced_problem->cacheResidualNeighbor(tid, tags);
 }
 
 void
-FEProblemBase::addCachedResidual(THREAD_ID tid)
+FEProblemBase::addCachedResidual(THREAD_ID tid, const std::vector<VectorTag> & tags)
 {
-  _assembly[tid][_current_nl_sys->number()]->addCachedResiduals();
+  _assembly[tid][_current_nl_sys->number()]->addCachedResiduals(tags);
 
   if (_displaced_problem)
-    _displaced_problem->addCachedResidual(tid);
+    _displaced_problem->addCachedResidual(tid, tags);
 }
 
 void

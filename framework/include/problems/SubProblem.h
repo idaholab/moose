@@ -332,9 +332,9 @@ public:
   virtual void addResidualNeighbor(THREAD_ID tid, const std::vector<VectorTag> & tags) = 0;
   virtual void addResidualLower(THREAD_ID tid, const std::vector<VectorTag> & tags) = 0;
 
-  virtual void cacheResidual(THREAD_ID tid) = 0;
-  virtual void cacheResidualNeighbor(THREAD_ID tid) = 0;
-  virtual void addCachedResidual(THREAD_ID tid) = 0;
+  virtual void cacheResidual(THREAD_ID tid, const std::vector<VectorTag> & tags) = 0;
+  virtual void cacheResidualNeighbor(THREAD_ID tid, const std::vector<VectorTag> & tags) = 0;
+  virtual void addCachedResidual(THREAD_ID tid, const std::vector<VectorTag> & tags) = 0;
 
   virtual void setResidual(NumericVector<Number> & residual, THREAD_ID tid) = 0;
   virtual void setResidualNeighbor(NumericVector<Number> & residual, THREAD_ID tid) = 0;

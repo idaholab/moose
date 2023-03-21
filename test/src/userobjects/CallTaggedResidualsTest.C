@@ -71,7 +71,7 @@ CallTaggedResidualsTest::execute()
          << _fe_problem.vectorTagName(_tags[i]) << ":\n";
       for (const auto & j : diff)
       {
-        ss << "\t" << _fe_problem.vectorTagName(_tags[i]) << "\n\tindex\tvalue\tsaved\tdiff\n";
+        ss << "\t" << _fe_problem.vectorTagName(_tags[j]) << "\n\tindex\tvalue\tsaved\tdiff\n";
 
         std::vector<Number> tag_local;
         _tag_vectors[j]->localize(tag_local);
