@@ -1,11 +1,11 @@
 # HPC Cluster
 
-The following instructions aims at setting up a baseline single-user environment for building MOOSE
-based applications in a job scheduling capable environment.
+The following instructions are for those operating on an HPC cluster.
 
-If you are interested in allowing MOOSE-based development to be made available to multiple users,
-please see our [Multi-User](getting_started/installation/cluster.md) setup instructions (requires
-administrative rights).
+!alert note
+It is entirely possible your cluster may have too old of libraries. If this ends up being the case
+after following the below instructions, please follow our regular [Linux](installation/conda.md)
+instructions instead.
 
 ## Pre-Reqs
 
@@ -18,31 +18,24 @@ Your cluster will most likely have these requirements available via some form of
 management software. If you are unfamiliar with how to manage your environment or unsure how to
 obtain the above requirements, please consult with your cluster administrators.
 
-## Create MOOSE Profile
+## Activate Environment
 
-Use an editor to add the following contents to `$HOME/.moose_profile`
+Activate your desired MPI environment (refer to your cluster administrators on how to do this).
+This *usually* involves `module load` commands. Please note again, that Intel compilers are not
+supported.
 
-!package! code max-height=400
-
-export CC=mpicc
-export CXX=mpicxx
-export F90=mpif90
-export F77=mpif77
-export FC=mpif90
-
-!package-end!
-
-## Source the MOOSE Profile
+Sometimes after loading up a proper MPI environment, it is still necessary to set some variables.
+Check to see if the following variables are set:
 
 ```bash
-source $HOME/.moose_profile
+echo $CC $CXX $FC $F90 $F77
 ```
 
-By sourcing the above file, you are now ready to begin MOOSE-based development.
+If nothing returns, or what does return does *not* include MPI naming conventions, you need to set
+them manually (each and every time you load said environment):
 
-!alert note title=+Remember to source the profile!+
-You will need to perform the above (`source $HOME/.moose_profile`) for every new terminal session
-for which you perform work with MOOSE. If you want this to be automatic, add the above to your
-`~/.bash_profile` (or `~/.bashrc` or, which ever profile you use on your system)
+```bash
+export CC=mpicc CXX=mpicxx FC=mpif90 F90=mpif90 F77=mpif77
+```
 
 !include getting_started/installation/install_moose.md

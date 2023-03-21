@@ -20,7 +20,7 @@ appropriately make use of that cluster's MPI wrapper. If, by chance you will hav
 you have some choices; [OpenMPI](https://www.open-mpi.org/),
 [MVAPICH](https://mvapich.cse.ohio-state.edu/), and [MPICH](https://www.mpich.org/), all work well.
 You will want to head on over to one of those product sites, and follow their instructions to build
-yourself an MPI wrapper (using the GCC or LLVM compiler you choose above).
+yourself an MPI wrapper.
 
 !alert note
 MVAPICH is regarded as the better wrapper for HPC clusters. However, it is also the most difficult

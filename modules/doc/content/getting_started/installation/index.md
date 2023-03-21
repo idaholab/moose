@@ -11,7 +11,7 @@ another method of choice:
 
   - [installation/install_libtorch.md]
 
-For those with greater demands on their machines, the following advanced instructions are available:
+When the above does not quite fit your needs, the following instructions are available:
 
 - [Offline (air-gapped)](installation/offline_installation.md)
 - [HPC Clusters](installation/hpc_install_moose.md)
