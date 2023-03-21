@@ -25,6 +25,7 @@ FVIntegralValueConstraint::validParams()
   InputParameters params = FVScalarLagrangeMultiplierConstraint::validParams();
   params.addClassDescription("This class is used to enforce integral of phi = volume * phi_0 "
                              "with a Lagrange multiplier approach.");
+  params.setDocString("phi0", "What we want the average value of the primal variable to be.");
   return params;
 }
 
