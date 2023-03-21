@@ -11,17 +11,18 @@
 
 #include "StochasticToolsApp.h"
 #include "MooseObject.h"
+#include "Restartable.h"
 
 #include "libmesh/petsc_vector.h"
 #include "libmesh/petsc_matrix.h"
 
-class MappingBase : public MooseObject
+class MappingBase : public MooseObject, public Restartable
 {
 public:
   static InputParameters validParams();
   MappingBase(const InputParameters & parameters);
 
-  virtual void buildMapping() = 0;
+  virtual void buildMapping(const VariableName & vname) = 0;
 
   virtual void map(const DenseVector<Real> & full_order_vector,
                    std::vector<Real> & reduced_order_vector) const = 0;

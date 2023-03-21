@@ -49,7 +49,7 @@
     from_multi_app = worker
     sampler = sample
     serialized_solution_reporter = solution_storage
-    variables = 'u'
+    variables = 'u v'
     serialize_on_root = true
   []
 []
@@ -63,7 +63,7 @@
     sampler = sample
     parallel_storage = parallel_storage
     mapping = pod_mapping
-    variables = "u"
+    variables = "u v"
     execute_on = FINAL
   []
 []

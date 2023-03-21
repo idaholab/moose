@@ -25,42 +25,19 @@ PODMapping::validParams()
   return params;
 }
 
-PODMapping::PODMapping(const InputParameters & parameters) : MappingBase(parameters)
+PODMapping::PODMapping(const InputParameters & parameters)
+  : MappingBase(parameters),
+    _basis_functions(declareRestartableData<
+                     std::map<VariableName, std::vector<std::unique_ptr<DenseVector<Real>>>>>(
+        "basis_functions")),
+    _eigen_values(declareRestartableData<std::map<VariableName, std::vector<Real>>>("eigen_values"))
+
 {
-  // UserObjectName parallel_storage_name = getParam<UserObjectName>("solution_storage");
-  // /// Reference to FEProblemBase instance
-  // FEProblemBase & feproblem = *parameters.get<FEProblemBase *>("_fe_problem_base");
-
-  // std::vector<UserObject *> reporters;
-  // feproblem.theWarehouse()
-  //     .query()
-  //     .condition<AttribSystem>("UserObject")
-  //     .condition<AttribName>(parallel_storage_name)
-  //     .queryInto(reporters);
-
-  // if (reporters.empty())
-  //   paramError(
-  //       "solution_storage", "Unable to find reporter with name '", parallel_storage_name, "'");
-  // else if (reporters.size() > 1)
-  //   paramError("solution_storage",
-  //              "We found more than one reporter with the name '",
-  //              parallel_storage_name,
-  //              "'");
-
-  // _parallel_storage = dynamic_cast<ParallelSolutionStorage *>(reporters[0]);
-
-  // if (!_parallel_storage)
-  //   paramError("solution_storage",
-  //              "The parallel storage reporter is not of type '",
-  //              parallel_storage_name,
-  //              "'");
 }
 
 void
-PODMapping::buildMapping()
+PODMapping::buildMapping(const VariableName & vname)
 {
-  mooseAssert(comm().verify(typeAndName()), "Not at same branch");
-
   UserObjectName parallel_storage_name = getParam<UserObjectName>("solution_storage");
   /// Reference to FEProblemBase instance
   FEProblemBase & feproblem = *_pars.get<FEProblemBase *>("_fe_problem_base");
@@ -90,7 +67,6 @@ PODMapping::buildMapping()
                parallel_storage_name,
                "'");
 
-
   Mat mat;
 
   unsigned int local_rows = 0;
@@ -98,25 +74,24 @@ PODMapping::buildMapping()
   unsigned int global_rows = 0;
   if (parallel_storage->getStorage().size())
   {
-    local_rows = parallel_storage->getStorage().begin()->second.size();
+    local_rows = parallel_storage->getStorage(vname).size();
     global_rows = local_rows;
-    snapshot_size = parallel_storage->getStorage().begin()->second.begin()->second[0]->size();
+    snapshot_size = parallel_storage->getStorage(vname).begin()->second[0]->size();
   }
 
   comm().sum(global_rows);
   comm().max(snapshot_size);
 
-  // PetscErrorCode ierr = MatCreateDense(_communicator.get(), local_rows, snapshot_size, global_rows, snapshot_size, NULL, &mat);
-  // LIBMESH_CHKERR(ierr);
-  // ierr = MatSetUp(mat);
-  // LIBMESH_CHKERR(ierr);
-
-  PetscErrorCode ierr = MatCreateAIJ(_communicator.get(), local_rows, snapshot_size, global_rows, snapshot_size,
-                                     processor_id() == 0 ? snapshot_size : 0, NULL,
-                                     processor_id() == 0 ? 0 : snapshot_size, NULL, &mat);
-
-  // MatSetOption(mat,MAT_NEW_NONZERO_LOCATIONS,PETSC_FALSE);
-
+  PetscErrorCode ierr = MatCreateAIJ(_communicator.get(),
+                                     local_rows,
+                                     snapshot_size,
+                                     global_rows,
+                                     snapshot_size,
+                                     processor_id() == 0 ? snapshot_size : 0,
+                                     NULL,
+                                     processor_id() == 0 ? 0 : snapshot_size,
+                                     NULL,
+                                     &mat);
   LIBMESH_CHKERR(ierr);
 
   dof_id_type local_beg;
@@ -124,13 +99,9 @@ PODMapping::buildMapping()
 
   MatGetOwnershipRange(mat, numeric_petsc_cast(&local_beg), numeric_petsc_cast(&local_end));
 
-  std::cerr << local_rows << " " << local_beg << " " << local_end << std::endl;
-  std::cerr << snapshot_size << std::endl;
-
   unsigned int counter = 0;
   if (local_rows)
-  {
-    for (const auto & row : parallel_storage->getStorage().begin()->second)
+    for (const auto & row : parallel_storage->getStorage(vname))
     {
       std::vector<PetscInt> rows(snapshot_size, (counter++) + local_beg);
       std::vector<PetscInt> columns = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10};
@@ -142,7 +113,6 @@ PODMapping::buildMapping()
                    row.second[0]->get_values().data(),
                    INSERT_VALUES);
     }
-  }
 
   MatAssemblyBegin(mat, MAT_FINAL_ASSEMBLY);
   MatAssemblyEnd(mat, MAT_FINAL_ASSEMBLY);
@@ -153,18 +123,45 @@ PODMapping::buildMapping()
   SVD svd;
   SVDCreate(_communicator.get(), &svd);
   SVDSetOperators(svd, mat, NULL);
-  SVDSetProblemType(svd, SVD_STANDARD);
+  // SVDSetProblemType(svd, SVD_STANDARD);
   SVDSetType(svd, SVDTRLANCZOS);
   ierr = PetscOptionsInsertString(NULL, "-svd_monitor_all");
   LIBMESH_CHKERR(ierr);
   SVDSetFromOptions(svd);
-  SVDSetDimensions(svd, 2, 4, 4);
+  SVDSetDimensions(svd, 1, 2, 2);
 
   ierr = SVDSolve(svd);
   LIBMESH_CHKERR(ierr);
-  // PetscInt nconv;
-  // // ierr = SVDGetConverged(svd, &nconv);
-  // // LIBMESH_CHKERR(ierr);
+
+  PetscInt nconv;
+  ierr = SVDGetConverged(svd, &nconv);
+  LIBMESH_CHKERR(ierr);
+
+  PetscVector<Real> u(_communicator);
+  PetscVector<Real> v(_communicator);
+  u.init(snapshot_size);
+
+  const numeric_index_type converted_asd = global_rows;
+  const numeric_index_type converted_local = local_rows;
+
+  // std::cerr << converted_asd << std::endl;
+  v.init(converted_asd, converted_local, false, PARALLEL);
+  PetscReal sigma;
+  // PetscReal error;
+
+  for (PetscInt j = 0; j < 1; j++)
+  {
+    SVDGetSingularTriplet(svd, j, &sigma, v.vec(), u.vec());
+
+    v.scale(sigma);
+    // SVDComputeError(svd, j, SVD_ERROR_RELATIVE, &error);
+    // ierr = VecView(u.vec(), PETSC_VIEWER_STDOUT_SELF);
+    // LIBMESH_CHKERR(ierr);
+    ierr = VecView(v.vec(), PETSC_VIEWER_STDOUT_WORLD);
+    LIBMESH_CHKERR(ierr);
+    // std::cerr << sigma << std::endl;
+    // std::cerr << error << std::endl;
+  }
 
   SVDDestroy(&svd);
   MatDestroy(&mat);

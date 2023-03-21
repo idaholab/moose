@@ -19,4 +19,7 @@ MappingBase::validParams()
   return params;
 }
 
-MappingBase::MappingBase(const InputParameters & parameters) : MooseObject(parameters) {}
+MappingBase::MappingBase(const InputParameters & parameters)
+  : MooseObject(parameters), Restartable(this, "Mappings")
+{
+}

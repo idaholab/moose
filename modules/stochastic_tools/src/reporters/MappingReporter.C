@@ -95,7 +95,8 @@ MappingReporter::initialSetup()
 void
 MappingReporter::execute()
 {
-  _mapping->buildMapping();
+  for (const auto & var : _variable_names)
+    _mapping->buildMapping(var);
 
   const auto rank_config = _sampler->getRankConfig(true);
 
