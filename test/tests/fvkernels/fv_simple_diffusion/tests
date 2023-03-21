@@ -95,4 +95,13 @@
     design = 'GradientJumpIndicator.md'
     requirement = 'The system shall be able to perform Laplacian-based adaptivity with finite volume variables.'
   []
+
+  [constrained]
+    type = 'Exodiff'
+    input = 'dirichlet-constrained-average-value.i'
+    exodiff = 'dirichlet-constrained-average-value_out.e'
+    design = 'FVBoundaryIntegralValueConstraint.md'
+    issues = '#23745'
+    requirement = 'The system shall be able to impose the constraint that the average value of a variable on a boundary be a prescribed value.'
+  []
 []
