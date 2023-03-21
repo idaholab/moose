@@ -9,6 +9,7 @@
     requirement = 'The system shall be able to compute the pressure drop in a straight channel with a finite element incompressible Navier Stokes model.'
     cli_args = "Mesh/inactive='diverging_mesh' Outputs/file_base='straight_insad'"
     ad_indexing_type = 'global'
+    method = 'opt'
   []
   [fe_diverging]
     requirement = 'The system shall be able to compute the pressure drop in a diverging channel with a finite element incompressible Navier Stokes model'
@@ -20,6 +21,7 @@
       detail = 'with a regular face pressure evaluation, and'
       cli_args = "Outputs/file_base='diverging_insad'"
       ad_indexing_type = 'global'
+      method = 'opt'
     []
     [weighted]
       type = CSVDiff
@@ -31,6 +33,7 @@
                   Postprocessors/pdrop_mid2/weighting_functor='velocity' Postprocessors/pdrop_mid3/weighting_functor='velocity'"
       detail = 'with a pressure drop face evaluation weighted by the local velocity.'
       ad_indexing_type = 'global'
+      method = 'opt'
     []
   []
 
@@ -122,6 +125,7 @@
                   Postprocessors/pdrop_total/weighting_functor=null"
       detail = 'the weighting functor integrates to 0, and'
       ad_indexing_type = 'global'
+      method = 'opt'
     []
     [face_interp_scheme_for_fe]
       type = RunException

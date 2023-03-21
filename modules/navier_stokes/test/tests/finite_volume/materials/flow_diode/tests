@@ -22,6 +22,8 @@
       detail = 'with a simple time-based turn-on criterion,'
       # see #21185
       allow_warnings = true
+      valgrind = 'none' # too slow
+      method = 'opt'
     []
     [pdrop]
       type = CSVDiff
@@ -32,6 +34,8 @@
       detail = 'with a simple pressure-based turn-on criterion, and'
       # see #21185
       allow_warnings = true
+      valgrind = 'none' # too slow
+      method = 'opt'
     []
     [flow]
       type = CSVDiff
@@ -42,6 +46,8 @@
       detail = 'with a simple flow-based turn-on criterion.'
       # see #21185
       allow_warnings = true
+      valgrind = 'none' # too slow
+      method = 'opt'
     []
   []
 []
