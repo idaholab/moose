@@ -201,7 +201,6 @@ PressureDrop::execute()
 Real
 PressureDrop::computeFaceInfoWeightedPressureIntegral(const FaceInfo * const fi) const
 {
-#ifdef MOOSE_GLOBAL_AD_INDEXING
   mooseAssert(fi, "We should have a face info in " + name());
 
   const bool correct_skewness =
@@ -222,29 +221,15 @@ PressureDrop::computeFaceInfoWeightedPressureIntegral(const FaceInfo * const fi)
   }
   else
   {
-    // External faces for the pressure
-    if (!fi->neighborPtr() || !_pressure.hasBlocks(fi->neighborPtr()->subdomain_id()))
-    {
-      const auto ssf = Moose::FaceArg(
-          {fi, limiterType(_weight_interp_method), true, correct_skewness, _current_elem});
-      return _pressure(ssf);
-    }
-    else
-    {
-      const auto ssf = Moose::FaceArg(
-          {fi, Moose::FV::limiterType(_weight_interp_method), true, correct_skewness, nullptr});
-      return _pressure(ssf);
-    }
+    const auto ssf = Moose::FaceArg(
+        {fi, Moose::FV::limiterType(_weight_interp_method), true, correct_skewness, nullptr});
+    return _pressure(ssf);
   }
-#else
-  mooseError("FaceInfo integration is not defined for local AD indexing");
-#endif
 }
 
 Real
-PressureDrop::computeFaceInfoWeightIntegral([[maybe_unused]] const FaceInfo * fi) const
+PressureDrop::computeFaceInfoWeightIntegral(const FaceInfo * fi) const
 {
-#ifdef MOOSE_GLOBAL_AD_INDEXING
   mooseAssert(fi, "We should have a face info in " + name());
   auto elem_arg = std::make_tuple(_current_elem, _qp, _qrule);
   mooseAssert(_qp == 0, "Only one quadrature point");
@@ -254,34 +239,16 @@ PressureDrop::computeFaceInfoWeightIntegral([[maybe_unused]] const FaceInfo * fi
 
   if (_weighting_functor)
   {
-    // External faces for the weighting functor
-    if (!fi->neighborPtr() || !_weighting_functor->hasBlocks(fi->neighborPtr()->subdomain_id()))
-    {
-      const auto ssf = Moose::FaceArg(
-          {fi,
-           limiterType(_weight_interp_method),
-           MetaPhysicL::raw_value((*_weighting_functor)(elem_arg)) * fi->normal() > 0,
-           correct_skewness,
-           _current_elem});
-      return fi->normal() * MetaPhysicL::raw_value((*_weighting_functor)(ssf));
-    }
-    else
-    {
-      const auto ssf = Moose::FaceArg(
-          {fi,
-           Moose::FV::limiterType(_weight_interp_method),
-           MetaPhysicL::raw_value((*_weighting_functor)(elem_arg)) * fi->normal() > 0,
-           correct_skewness,
-           nullptr});
-      return fi->normal() * MetaPhysicL::raw_value((*_weighting_functor)(ssf));
-    }
+    const auto ssf =
+        Moose::FaceArg({fi,
+                        Moose::FV::limiterType(_weight_interp_method),
+                        MetaPhysicL::raw_value((*_weighting_functor)(elem_arg)) * fi->normal() > 0,
+                        correct_skewness,
+                        nullptr});
+    return fi->normal() * MetaPhysicL::raw_value((*_weighting_functor)(ssf));
   }
   else
     return 1;
-
-#else
-  mooseError("FaceInfo integration is not defined for local AD indexing");
-#endif
 }
 
 Real

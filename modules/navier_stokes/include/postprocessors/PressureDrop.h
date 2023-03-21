@@ -32,10 +32,14 @@ public:
   virtual Real getValue() override;
 
 protected:
+  /// Computes the contribution on a face to the weighted pressure integral
   Real computeFaceInfoWeightedPressureIntegral(const FaceInfo * fi) const;
+  /// Computes the contribution on a face to the integral of the weight
   Real computeFaceInfoWeightIntegral(const FaceInfo * fi) const;
 
+  /// Computes the contribution on a Qp to the weighted pressure integral
   Real computeQpWeightedPressureIntegral() const;
+  /// Computes the contribution on a Qp to the integral of the weight
   Real computeQpWeightIntegral() const;
 
   /// The pressure functor
