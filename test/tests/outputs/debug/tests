@@ -109,20 +109,20 @@
       type = RunApp
       input = 'show_execution_kernels_bcs.i'
       expect_out = '\[DBG\] bc_u_tb bc_ul bc_ur bc_ut bc_ub '
-      detail = 'objects contributing to the residual and Jacobian, notably regular kernels and boundary conditions'
+      detail = 'objects contributing to the residual and Jacobian, notably regular kernels and boundary conditions,'
       cli_args = '--color off'
     []
     [fv_kernels_bcs]
       type = RunApp
       input = 'show_execution_fv_flux_objects.i'
       expect_out = '\[DBG\] 2_burger 1_burgers'
-      detail = 'finite volume flux objects contributing to the residual and Jacobian, notably finite volume flux kernels and flux boundary conditions'
+      detail = 'finite volume flux objects contributing to the residual and Jacobian, notably finite volume flux kernels and flux boundary conditions,'
     []
     [nodal_kernel_bcs]
       type = RunApp
       input = 'show_execution_nodal_kernels_bcs.i'
       expect_out = '\[DBG\] source bc_all '
-      detail = 'nodal objects contributing to the residual, notably nodal kernels and boundary conditions'
+      detail = 'nodal objects contributing to the residual, notably nodal kernels and boundary conditions,'
       cli_args = '--color off'
     []
     # The three next tests make sure the targetting of a single execution flag works
@@ -131,14 +131,14 @@
       input = 'show_execution_userobjects.i'
       cli_args = 'Debug/show_execution_order=INITIAL Postprocessors/dofs/execute_on=INITIAL UserObjects/find_node/execute_on=INITIAL UserObjects/side_int/execute_on=INITIAL UserObjects/values/execute_on=INITIAL --color off'
       expect_out = '\[DBG\] side_int'
-      detail = 'user objects, including postprocessors, executed at the beginning of the simulation'
+      detail = 'user objects, including postprocessors, executed at the beginning of the simulation,'
     []
     [user_objects_timestep_begin_end]
       type = RunApp
       input = 'show_execution_userobjects.i'
       cli_args = "Debug/show_execution_order='TIMESTEP_BEGIN TIMESTEP_END'"
       expect_out = 'h L2u H1error H1Semierror L2v_elem f_integral elem_sample'
-      detail = 'user objects, including postprocessors, executed at the beginning and end of each time step'
+      detail = 'user objects, including postprocessors, executed at the beginning and end of each time step,'
     []
     # This is one way to understand conservative transfers are only conservative if the conserved quantity linearly depends on the transferred quantity
     # The postprocessors are only executed once!
@@ -147,14 +147,14 @@
       input = 'show_execution_userobjects.i'
       cli_args = 'MultiApps/active=full_solve Transfers/active=conservative Debug/show_execution_order=TRANSFER'
       expect_out = '\[DBG\] Computing elemental user objects on TRANSFER'
-      detail = 'user objects, including postprocessors, executed on transfers between applications'
+      detail = 'user objects, including postprocessors, executed on transfers between applications,'
     []
     # This should be useful if an indicator is executed after a marker, by accident
     [adaptivity]
       type = RunApp
       input = 'show_execution_adaptivity.i'
       expect_out = '\[DBG\] indicator'
-      detail = 'each step of the adaptive refinement process'
+      detail = 'each step of the adaptive refinement process,'
       cli_args = '--color off'
     []
     # Initial conditions use dependency resolution at node/element scale to execute
@@ -162,7 +162,7 @@
       type = RunApp
       input = 'show_execution_ics.i'
       expect_out = '\[DBG\] a_ic u_ic v_ic b_ic ghost_ic test_var_ic power'
-      detail = 'initial conditions of variables'
+      detail = 'initial conditions of variables, and '
       cli_args = '--color off'
     []
     # Auxiliary kernels could be misordered easily, it is one of the most important goals of this
@@ -171,7 +171,7 @@
       type = RunApp
       input = 'show_execution_auxkernels.i'
       expect_out = '\[DBG\] b_saux c_saux'
-      detail = 'auxiliary kernels intermingled with initial conditions and user objects'
+      detail = 'auxiliary kernels intermingled with initial conditions and user objects.'
       cli_args = '--color off'
     []
   []
