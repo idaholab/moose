@@ -45,14 +45,14 @@ TestSaveInMesh::TestSaveInMesh(const InputParameters & parameters) : GeneralUser
       {
         auto mesh = mesh_generator_system.getSavedMesh(name);
 
-          ExodusII_IO exio(*mesh);
+        ExodusII_IO exio(*mesh);
 
-          if (mesh->mesh_dimension() == 1)
-            exio.write_as_dimension(3);
+        if (mesh->mesh_dimension() == 1)
+          exio.write_as_dimension(3);
 
-          exio.set_hdf5_writing(false);
+        exio.set_hdf5_writing(false);
 
-          exio.write(name + "_in.e");
+        exio.write(name + "_in.e");
       }
     }
 
