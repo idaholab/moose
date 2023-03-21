@@ -44,7 +44,6 @@ MooseObject::validParams()
   params.addPrivateParam<SubProblem *>("_subproblem", nullptr);
   params.addPrivateParam<SystemBase *>("_sys", nullptr);
   params.addPrivateParam<SystemBase *>("_nl_sys", nullptr);
-  params.addPrivateParam<AuxiliarySystem *>("_aux_sys", nullptr);
   params.addPrivateParam<Transient *>("_executioner", nullptr);
   params.addPrivateParam<THREAD_ID>("_tid");
   params.addPrivateParam<bool>("_residual_object", false);

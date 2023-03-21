@@ -309,8 +309,6 @@ AuxiliarySystem::addKernel(const std::string & kernel_name,
                            const std::string & name,
                            InputParameters & parameters)
 {
-  parameters.set<AuxiliarySystem *>("_aux_sys") = this;
-
   for (THREAD_ID tid = 0; tid < libMesh::n_threads(); tid++)
   {
     if (parameters.get<std::string>("_moose_base") == "AuxKernel")
