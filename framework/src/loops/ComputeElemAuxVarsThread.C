@@ -167,7 +167,7 @@ template <typename AuxKernelType>
 void
 ComputeElemAuxVarsThread<AuxKernelType>::printGeneralExecutionInformation() const
 {
-  if (_fe_problem.shouldPrintExecution() && _aux_kernels.hasActiveObjects())
+  if (_fe_problem.shouldPrintExecution(_tid) && _aux_kernels.hasActiveObjects())
   {
     auto console = _fe_problem.console();
     auto execute_on = _fe_problem.getCurrentExecuteOnFlag();
@@ -179,7 +179,8 @@ template <typename AuxKernelType>
 void
 ComputeElemAuxVarsThread<AuxKernelType>::printBlockExecutionInformation()
 {
-  if (_fe_problem.shouldPrintExecution() && _aux_kernels.hasActiveBlockObjects(_subdomain, _tid))
+  if (_fe_problem.shouldPrintExecution(_tid) &&
+      _aux_kernels.hasActiveBlockObjects(_subdomain, _tid))
   {
     if (_blocks_exec_printed.count(_subdomain))
       return;

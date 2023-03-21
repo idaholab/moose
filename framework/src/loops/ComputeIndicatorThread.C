@@ -193,7 +193,7 @@ ComputeIndicatorThread::join(const ComputeIndicatorThread & /*y*/)
 void
 ComputeIndicatorThread::printGeneralExecutionInformation() const
 {
-  if (_fe_problem.shouldPrintExecution())
+  if (_fe_problem.shouldPrintExecution(_tid))
   {
     auto console = _fe_problem.console();
     auto execute_on = _fe_problem.getCurrentExecuteOnFlag();
@@ -208,7 +208,7 @@ ComputeIndicatorThread::printGeneralExecutionInformation() const
 void
 ComputeIndicatorThread::printBlockExecutionInformation()
 {
-  if (_fe_problem.shouldPrintExecution())
+  if (_fe_problem.shouldPrintExecution(_tid))
   {
     if (_blocks_exec_printed.count(_subdomain))
       return;

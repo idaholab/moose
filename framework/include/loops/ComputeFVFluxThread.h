@@ -1024,7 +1024,7 @@ template <typename RangeType, typename AttributeTagType>
 void
 ComputeFVFluxThread<RangeType, AttributeTagType>::printGeneralExecutionInformation() const
 {
-  if (_fe_problem.shouldPrintExecution() && _fv_flux_kernels.size())
+  if (_fe_problem.shouldPrintExecution(_tid) && _fv_flux_kernels.size())
   {
     auto console = _fe_problem.console();
     auto execute_on = _fe_problem.getCurrentExecuteOnFlag();
@@ -1041,7 +1041,7 @@ template <typename RangeType, typename AttributeTagType>
 void
 ComputeFVFluxThread<RangeType, AttributeTagType>::printBlockExecutionInformation()
 {
-  if (_fe_problem.shouldPrintExecution() && _fv_flux_kernels.size())
+  if (_fe_problem.shouldPrintExecution(_tid) && _fv_flux_kernels.size())
   {
     const auto block_pair = std::make_pair(_subdomain, _neighbor_subdomain);
     if (_blocks_exec_printed.count(block_pair))
@@ -1065,7 +1065,7 @@ void
 ComputeFVFluxThread<RangeType, AttributeTagType>::printBoundaryExecutionInformation(
     const BoundaryID bnd_id)
 {
-  if (!_fe_problem.shouldPrintExecution())
+  if (!_fe_problem.shouldPrintExecution(_tid))
     return;
   if (_boundaries_exec_printed.count(bnd_id))
     return;

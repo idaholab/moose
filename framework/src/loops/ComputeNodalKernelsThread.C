@@ -102,7 +102,7 @@ ComputeNodalKernelsThread::join(const ComputeNodalKernelsThread & /*y*/)
 void
 ComputeNodalKernelsThread::printGeneralExecutionInformation() const
 {
-  if (_fe_problem.shouldPrintExecution())
+  if (_fe_problem.shouldPrintExecution(_tid))
   {
     auto console = _fe_problem.console();
     auto execute_on = _fe_problem.getCurrentExecuteOnFlag();

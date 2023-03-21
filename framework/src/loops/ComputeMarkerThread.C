@@ -112,7 +112,7 @@ ComputeMarkerThread::join(const ComputeMarkerThread & /*y*/)
 void
 ComputeMarkerThread::printGeneralExecutionInformation() const
 {
-  if (_fe_problem.shouldPrintExecution())
+  if (_fe_problem.shouldPrintExecution(_tid))
   {
     auto console = _fe_problem.console();
     auto execute_on = _fe_problem.getCurrentExecuteOnFlag();
@@ -123,7 +123,7 @@ ComputeMarkerThread::printGeneralExecutionInformation() const
 void
 ComputeMarkerThread::printBlockExecutionInformation()
 {
-  if (_fe_problem.shouldPrintExecution() && _marker_whs.hasActiveObjects())
+  if (_fe_problem.shouldPrintExecution(_tid) && _marker_whs.hasActiveObjects())
   {
     if (_blocks_exec_printed.count(_subdomain))
       return;

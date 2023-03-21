@@ -119,7 +119,7 @@ ComputeResidualAndJacobianThread::determineResidualObjects()
 void
 ComputeResidualAndJacobianThread::printGeneralExecutionInformation() const
 {
-  if (_fe_problem.shouldPrintExecution())
+  if (_fe_problem.shouldPrintExecution(_tid))
   {
     auto console = _fe_problem.console();
     auto execute_on = _fe_problem.getCurrentExecuteOnFlag();
@@ -143,7 +143,7 @@ ComputeResidualAndJacobianThread::printBlockExecutionInformation()
   int num_objects = _kernels.size() + _fv_kernels.size() + _integrated_bcs.size() +
                     _dg_kernels.size() + _interface_kernels.size();
   auto console = _fe_problem.console();
-  if (_fe_problem.shouldPrintExecution() && num_objects > 0)
+  if (_fe_problem.shouldPrintExecution(_tid) && num_objects > 0)
   {
     if (_blocks_exec_printed.count(_subdomain))
       return;
@@ -181,7 +181,7 @@ ComputeResidualAndJacobianThread::printBlockExecutionInformation()
     }
     _blocks_exec_printed.insert(_subdomain);
   }
-  else if (_fe_problem.shouldPrintExecution() && num_objects == 0 &&
+  else if (_fe_problem.shouldPrintExecution(_tid) && num_objects == 0 &&
            _blocks_exec_printed.count(_subdomain) == 0)
     console << "[DBG] No Active Residual & Jacobian Objects on block " << _subdomain << std::endl;
 }

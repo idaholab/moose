@@ -2052,7 +2052,7 @@ public:
   /**
    * Check whether the problem should output execution orders at this time
    */
-  bool shouldPrintExecution() const;
+  bool shouldPrintExecution(const THREAD_ID tid) const;
 
 protected:
   /// Create extra tagged vectors and matrices

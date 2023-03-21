@@ -157,7 +157,7 @@ template <typename AuxKernelType>
 void
 ComputeElemAuxBcsThread<AuxKernelType>::printGeneralExecutionInformation() const
 {
-  if (_fe_problem.shouldPrintExecution() && _storage.hasActiveObjects())
+  if (_fe_problem.shouldPrintExecution(_tid) && _storage.hasActiveObjects())
   {
     auto console = _fe_problem.console();
     auto execute_on = _fe_problem.getCurrentExecuteOnFlag();
@@ -171,7 +171,7 @@ void
 ComputeElemAuxBcsThread<AuxKernelType>::printBoundaryExecutionInformation(
     unsigned int boundary_id, std::vector<std::shared_ptr<AuxKernelType>> kernels) const
 {
-  if (_fe_problem.shouldPrintExecution() && _storage.hasActiveObjects())
+  if (_fe_problem.shouldPrintExecution(_tid) && _storage.hasActiveObjects())
   {
     auto console = _fe_problem.console();
     console << "[DBG] Ordering on boundary " << boundary_id << std::endl;

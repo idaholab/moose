@@ -113,7 +113,7 @@ ComputeNodalUserObjectsThread::join(const ComputeNodalUserObjectsThread & /*y*/)
 void
 ComputeNodalUserObjectsThread::printGeneralExecutionInformation() const
 {
-  if (_fe_problem.shouldPrintExecution())
+  if (_fe_problem.shouldPrintExecution(_tid))
   {
     // Get all nodal UOs
     std::vector<MooseObject *> nodal_uos;

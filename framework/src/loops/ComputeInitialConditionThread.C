@@ -112,7 +112,7 @@ void
 ComputeInitialConditionThread::printGeneralExecutionInformation() const
 {
   const InitialConditionWarehouse & ic_wh = _fe_problem.getInitialConditionWarehouse();
-  if (_fe_problem.shouldPrintExecution() && ic_wh.hasActiveObjects())
+  if (_fe_problem.shouldPrintExecution(_tid) && ic_wh.hasActiveObjects())
   {
     auto console = _fe_problem.console();
     auto execute_on = _fe_problem.getCurrentExecuteOnFlag();

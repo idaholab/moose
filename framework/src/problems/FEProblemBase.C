@@ -7952,8 +7952,12 @@ FEProblemBase::currentNlSysNum() const
 }
 
 bool
-FEProblemBase::shouldPrintExecution() const
+FEProblemBase::shouldPrintExecution(const THREAD_ID tid) const
 {
+  // For now, only support one thread
+  if (tid != 0)
+    return false;
+
   if (_print_execution_on.contains(_current_execute_on_flag) ||
       _print_execution_on.contains(EXEC_ALWAYS))
     return true;

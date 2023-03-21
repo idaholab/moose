@@ -150,7 +150,7 @@ template <typename AuxKernelType>
 void
 ComputeNodalAuxVarsThread<AuxKernelType>::printGeneralExecutionInformation() const
 {
-  if (_fe_problem.shouldPrintExecution() && _storage.hasActiveObjects())
+  if (_fe_problem.shouldPrintExecution(_tid) && _storage.hasActiveObjects())
   {
     auto console = _fe_problem.console();
     auto execute_on = _fe_problem.getCurrentExecuteOnFlag();

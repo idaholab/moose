@@ -142,7 +142,7 @@ ComputeNodalKernelJacobiansThread::join(const ComputeNodalKernelJacobiansThread 
 void
 ComputeNodalKernelJacobiansThread::printGeneralExecutionInformation() const
 {
-  if (_fe_problem.shouldPrintExecution() && _nkernel_warehouse->hasActiveObjects())
+  if (_fe_problem.shouldPrintExecution(_tid) && _nkernel_warehouse->hasActiveObjects())
   {
     auto console = _fe_problem.console();
     auto execute_on = _fe_problem.getCurrentExecuteOnFlag();

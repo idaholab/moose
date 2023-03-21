@@ -54,7 +54,7 @@ void
 ComputeThreadedGeneralUserObjectsThread::printGeneralExecutionInformation(
     const GeneralUserObjectRange & range) const
 {
-  if (_fe_problem.shouldPrintExecution() && range.size())
+  if (_fe_problem.shouldPrintExecution(0) && range.size())
   {
     auto console = _fe_problem.console();
     auto execute_on = _fe_problem.getCurrentExecuteOnFlag();

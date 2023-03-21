@@ -145,7 +145,7 @@ ComputeNodalKernelBCJacobiansThread::join(const ComputeNodalKernelBCJacobiansThr
 void
 ComputeNodalKernelBCJacobiansThread::printGeneralExecutionInformation() const
 {
-  if (_fe_problem.shouldPrintExecution() && _nkernel_warehouse->hasActiveBoundaryObjects())
+  if (_fe_problem.shouldPrintExecution(_tid) && _nkernel_warehouse->hasActiveBoundaryObjects())
   {
     auto console = _fe_problem.console();
     auto execute_on = _fe_problem.getCurrentExecuteOnFlag();

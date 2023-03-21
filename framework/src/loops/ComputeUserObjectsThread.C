@@ -327,7 +327,7 @@ ComputeUserObjectsThread::join(const ComputeUserObjectsThread & /*y*/)
 void
 ComputeUserObjectsThread::printGeneralExecutionInformation() const
 {
-  if (_fe_problem.shouldPrintExecution())
+  if (_fe_problem.shouldPrintExecution(_tid))
   {
     auto console = _fe_problem.console();
     auto execute_on = _fe_problem.getCurrentExecuteOnFlag();
@@ -357,7 +357,7 @@ ComputeUserObjectsThread::printGeneralExecutionInformation() const
 void
 ComputeUserObjectsThread::printBlockExecutionInformation()
 {
-  if (_fe_problem.shouldPrintExecution())
+  if (_fe_problem.shouldPrintExecution(_tid))
   {
     // Gather all user objects that may execute
     // TODO: restrict this gathering of boundary objects to boundaries that are present
@@ -404,7 +404,7 @@ ComputeUserObjectsThread::printBlockExecutionInformation()
       printExecutionOrdering<InterfaceUserObject>(interface_objs, "interface user objects");
       console << "[DBG] Only user objects active on local element/sides are executed" << std::endl;
     }
-    else if (_fe_problem.shouldPrintExecution() && num_objects == 0 &&
+    else if (_fe_problem.shouldPrintExecution(_tid) && num_objects == 0 &&
              _blocks_exec_printed.count(_subdomain) == 0)
       console << "[DBG] No User Objects on block " << _subdomain << " on " << execute_on.name()
               << std::endl;

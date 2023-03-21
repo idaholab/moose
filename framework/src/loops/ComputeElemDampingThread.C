@@ -79,7 +79,7 @@ void
 ComputeElemDampingThread::printGeneralExecutionInformation() const
 {
   const auto damper_wh = _nl.getElementDamperWarehouse();
-  if (_fe_problem.shouldPrintExecution() && damper_wh.hasActiveObjects())
+  if (_fe_problem.shouldPrintExecution(_tid) && damper_wh.hasActiveObjects())
   {
     auto console = _fe_problem.console();
     auto execute_on = _fe_problem.getCurrentExecuteOnFlag();
