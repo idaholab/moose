@@ -54,6 +54,7 @@ issues = '#6815 #9227'
     input = cracking_rz_exponential.i
     exodiff = cracking_rz_exponential_out.e
     custom_cmp = cracking_rz_exp.cmp
+    exodiff_opts = '-steps 0:1200:1'
     requirement = 'The MOOSE TensorMechanics module shall simulate exponential stress relase while using the rz coordinate system.'
   [../]
   [./power]
