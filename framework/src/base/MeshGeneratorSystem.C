@@ -323,7 +323,7 @@ MeshGeneratorSystem::executeMeshGenerators()
                                   &getMeshGeneratorOutput(generator->name()));
       }
 
-  // Grab the outputs from the final generator so MeshGeneratorMesh can pick them up
+  // Grab the outputs from the final generator so MeshGeneratorMesh can pick it up
   to_save_in_meshes.emplace(mainMeshGeneratorName(),
                             &getMeshGeneratorOutput(_final_generator_name));
 

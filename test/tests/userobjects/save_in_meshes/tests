@@ -43,5 +43,23 @@
 
       detail = 'trying to use the capability with the final mesh'
     []
+
+    [save_in_meshes_not_find]
+      type = 'RunException'
+      input = 'save_in_meshes_with_D.i'
+      cli_args ="UserObjects/test/find_mesh='right_block'"
+      expect_err = "Failed to find a saved mesh with the name 'right_block'"
+
+      detail = 'The requested save in mesh is not exist'
+    []
+
+    [save_in_meshes_retreived_twice]
+      type = 'RunException'
+      input = 'save_in_meshes_with_D.i'
+      cli_args ="UserObjects/test/mesh_unique='left_block'"
+      expect_err = "While getting the saved mesh generator 'left_block', said mesh has already been retreived"
+
+      detail = 'The requested save in mesh has already been retreived'
+    []
   []
 []

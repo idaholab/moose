@@ -21,9 +21,14 @@ InputParameters
 TestSaveInMesh::validParams()
 {
   InputParameters params = GeneralUserObject::validParams();
-  params.addParam<bool>(
-      "nemesis", false, "Whether or not to output the mesh file in distributed form");
-
+  params.addParam<std::string>(
+      "find_mesh",
+      std::string(),
+      "Test whether or not throw out an error when the saved mesh is not found");
+  params.addParam<std::string>(
+      "mesh_unique",
+      std::string(),
+      "Test whether or not throw out an error when the saved mesh mesh has already been retreived");
   return params;
 }
 
@@ -40,8 +45,6 @@ TestSaveInMesh::TestSaveInMesh(const InputParameters & parameters) : GeneralUser
       {
         auto mesh = mesh_generator_system.getSavedMesh(name);
 
-        if (!getParam<bool>("nemesis"))
-        {
           ExodusII_IO exio(*mesh);
 
           if (mesh->mesh_dimension() == 1)
@@ -50,8 +53,20 @@ TestSaveInMesh::TestSaveInMesh(const InputParameters & parameters) : GeneralUser
           exio.set_hdf5_writing(false);
 
           exio.write(name + "_in.e");
-        }
       }
+    }
+
+    auto find_mesh_name = getParam<std::string>("find_mesh");
+    if (!find_mesh_name.empty())
+    {
+      auto find_mesh = mesh_generator_system.getSavedMesh(find_mesh_name);
+    }
+
+    auto mesh_unique_test = getParam<std::string>("mesh_unique");
+    if (!mesh_unique_test.empty())
+    {
+      auto test_mesh1 = mesh_generator_system.getSavedMesh(mesh_unique_test);
+      auto test_mesh2 = mesh_generator_system.getSavedMesh(mesh_unique_test);
     }
   }
 }

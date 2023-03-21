@@ -232,12 +232,6 @@ public:
   std::shared_ptr<MooseMesh> & displacedMesh() { return _displaced_mesh; }
   const std::shared_ptr<MooseMesh> & getDisplacedMesh() const { return _displaced_mesh; }
 
-  std::map<std::string, std::shared_ptr<MooseMesh> *> savedMesh() { return _save_in_meshes; }
-  const std::map<std::string, std::shared_ptr<MooseMesh> *> & getSavedMesh() const
-  {
-    return _save_in_meshes;
-  }
-
   std::shared_ptr<FEProblemBase> & problemBase() { return _problem; }
   std::shared_ptr<FEProblem> problem();
   MooseApp & mooseApp() { return _app; }
@@ -309,9 +303,6 @@ protected:
 
   /// Possible mesh for displaced problem
   std::shared_ptr<MooseMesh> _displaced_mesh;
-
-  /// All meshes that saved in
-  std::map<std::string, std::shared_ptr<MooseMesh> *> _save_in_meshes;
 
   /// Problem class
   std::shared_ptr<FEProblemBase> _problem;
