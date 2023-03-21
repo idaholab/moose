@@ -51,8 +51,10 @@ GrainTrackerMerge::mergeGrainsBasedMisorientation()
 
       if (misor_angle < 0.8)
       {
-        _console << COLOR_YELLOW << "Grain #" << grain_i._id << " and Grain #" << grain_j._id
-                 << " was merged (misor: " << misor_angle << ").\n"
+        _console << COLOR_YELLOW << "Grain #" << grain_i._id << " (eta" 
+                 << grain_i._var_index << ", id" << grain_num_i << "), and Grain #" << grain_j._id 
+                 << " (eta" << grain_j._var_index << ", id" << grain_j_index
+                 << ") was merged (misor: " << misor_angle << ").\n"
                  << COLOR_DEFAULT;
 
         grain_j._id = grain_i._id;

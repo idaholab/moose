@@ -114,6 +114,7 @@ protected:
    */
   void remapGrains();
 
+  void remapGrainsMerge();
   // re-merge grains due to misorientation angle from euler angles calculation
   virtual void mergeGrainsBasedMisorientation();
 

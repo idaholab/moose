@@ -361,6 +361,8 @@ GrainTracker::finalize()
    */
   broadcastAndUpdateGrainData();
 
+  remapGrainsMerge();
+
   /**
    * Remap Grains
    */
@@ -810,7 +812,7 @@ GrainTracker::trackGrains()
         // Must be a nucleating grain (status is still not set)
         if (grain._status == Status::CLEAR)
         {
-          auto new_index = getNextUniqueID();
+          auto new_index = 0; //getNextUniqueID();
           grain._id = new_index;          // Set the ID
           grain._status = Status::MARKED; // Mark it
 
@@ -986,10 +988,10 @@ GrainTracker::remapGrains()
             grain1._var_index = grain2._var_index;
             grain1._status |= Status::DIRTY;
 
-            if (_merge_grains_based_misorientaion)
-              grain_id_to_new_var.emplace_hint(
-                  grain_id_to_new_var.end(),
-                  std::pair<unsigned int, std::size_t>(grain1._id, grain1._var_index));            
+            // if (_merge_grains_based_misorientaion)
+            //   grain_id_to_new_var.emplace_hint(
+            //       grain_id_to_new_var.end(),
+            //       std::pair<unsigned int, std::size_t>(grain1._id, grain1._var_index));            
           }
         }
       }
@@ -1094,6 +1096,180 @@ GrainTracker::remapGrains()
         mooseWarning(oss.str());
       else
         mooseError(oss.str());
+    }
+
+    // Verify that split grains are still intact
+    for (auto & split_pair : split_pairs)
+      if (_feature_sets[split_pair.first]._var_index != _feature_sets[split_pair.first]._var_index)
+        mooseError("Split grain remapped - This case is currently not handled");
+
+    /**
+     * The remapping loop is complete but only on the primary process.
+     * Now we need to build the remap map and communicate it to the
+     * remaining processors.
+     */
+    for (auto & grain : _feature_sets)
+    {
+      mooseAssert(grain_id_to_existing_var_index.find(grain._id) !=
+                      grain_id_to_existing_var_index.end(),
+                  "Missing unique ID");
+
+      auto old_var_index = grain_id_to_existing_var_index[grain._id];
+
+      if (old_var_index != grain._var_index)
+      {
+        mooseAssert(static_cast<bool>(grain._status & Status::DIRTY), "grain status is incorrect");
+
+        grain_id_to_new_var.emplace_hint(
+            grain_id_to_new_var.end(),
+            std::pair<unsigned int, std::size_t>(grain._id, grain._var_index));
+
+        /**
+         * Since the remapping algorithm only runs on the root process,
+         * the variable index on the primary's grains is inconsistent from
+         * the rest of the ranks. These are the grains with a status of
+         * DIRTY. As we build this map we will temporarily switch these
+         * variable indices back to the correct value so that all
+         * processors use the same algorithm to remap.
+         */
+        grain._var_index = old_var_index;
+        // Clear the DIRTY status as well for consistency
+        grain._status &= ~Status::DIRTY;
+      }
+    }
+
+    if (!grain_id_to_new_var.empty())
+    {
+      if (_verbosity_level > 1)
+      {
+        _console << "Final remapping tally:\n";
+        for (const auto & remap_pair : grain_id_to_new_var)
+          _console << "Grain #" << remap_pair.first << " var_index "
+                   << grain_id_to_existing_var_index[remap_pair.first] << " -> "
+                   << remap_pair.second << '\n';
+        _console << "Communicating swaps with remaining processors..." << std::endl;
+      }
+    }
+  } // root processor
+
+  // Communicate the std::map to all ranks
+  _communicator.broadcast(grain_id_to_new_var);
+
+  // Perform swaps if any occurred
+  if (!grain_id_to_new_var.empty())
+  {
+    // Cache for holding values during swaps
+    std::vector<std::map<Node *, CacheValues>> cache(_n_vars);
+
+    // Perform the actual swaps on all processors
+    for (auto & grain : _feature_sets)
+    {
+      // See if this grain was remapped
+      auto new_var_it = grain_id_to_new_var.find(grain._id);
+      if (new_var_it != grain_id_to_new_var.end())
+        swapSolutionValues(grain, new_var_it->second, cache, RemapCacheMode::FILL);
+    }
+
+    for (auto & grain : _feature_sets)
+    {
+      // See if this grain was remapped
+      auto new_var_it = grain_id_to_new_var.find(grain._id);
+      if (new_var_it != grain_id_to_new_var.end())
+        swapSolutionValues(grain, new_var_it->second, cache, RemapCacheMode::USE);
+    }
+
+    _nl.solution().close();
+    _nl.solutionOld().close();
+    _nl.solutionOlder().close();
+
+    _fe_problem.getNonlinearSystemBase().system().update();
+
+    if (_verbosity_level > 1)
+      _console << "Swaps complete" << std::endl;
+  }
+}
+
+void
+GrainTracker::remapGrainsMerge()
+{
+  // Don't remap grains if the current simulation step is before the specified tracking step
+  if (_t_step < _tracking_step)
+    return;
+
+  TIME_SECTION("remapGrains", 3, "Remapping Grains");
+
+  if (_verbosity_level > 1)
+    _console << "Running remap Grains\n" << std::endl;
+
+  /**
+   * Map used for communicating remap indices to all ranks
+   * This map isn't populated until after the remap loop.
+   * It's declared here before we enter the root scope
+   * since it's needed by all ranks during the broadcast.
+   */
+  std::map<unsigned int, std::size_t> grain_id_to_new_var;
+
+  // Items are added to this list when split grains are found
+  std::list<std::pair<std::size_t, std::size_t>> split_pairs;
+
+  /**
+   * The remapping algorithm is recursive. We will use the status variable in each FeatureData
+   * to track which grains are currently being remapped so we don't have runaway recursion.
+   * To begin we need to clear all of the active (MARKED) flags (CLEAR).
+   *
+   * Additionally we need to record each grain's variable index so that we can communicate
+   * changes to the non-root ranks later in a single batch.
+   */
+  if (_is_primary)
+  {
+    // Build the map to detect difference in _var_index mappings after the remap operation
+    std::map<unsigned int, std::size_t> grain_id_to_existing_var_index;
+    for (auto & grain : _feature_sets)
+    {
+      // Unmark the grain so it can be used in the remap loop
+      grain._status = Status::CLEAR;
+
+      grain_id_to_existing_var_index[grain._id] = grain._var_index;
+    }
+
+    // Make sure that all split pieces of any grain are on the same OP
+    for (const auto i : index_range(_feature_sets))
+    {
+      auto & grain1 = _feature_sets[i];
+
+      for (const auto j : index_range(_feature_sets))
+      {
+        auto & grain2 = _feature_sets[j];
+        if (i == j)
+          continue;
+
+        // The first condition below is there to prevent symmetric checks (duplicate values)
+        if (i < j && grain1._id == grain2._id)
+        {
+          split_pairs.push_front(std::make_pair(i, j));
+          if (grain1._var_index != grain2._var_index)
+          {
+            if (_verbosity_level > 0)
+              _console << COLOR_YELLOW << "Split Grain (#" << grain1._id << ", i " << i << ", j " << j
+                       << ") detected on unmatched OPs (" << grain1._var_index << ", "
+                       << grain2._var_index << ") attempting to remap to " << grain1._var_index
+                       << ".\n"
+                       << COLOR_DEFAULT;
+
+            /**
+             * We're not going to try very hard to look for a suitable remapping. Just set it to
+             * what we want and hope it all works out. Make the GrainTracker great again!
+             */
+            grain2._var_index = grain1._var_index;
+            grain2._status |= Status::DIRTY;
+
+            if (_merge_grains_based_misorientaion)
+              grain_id_to_new_var.emplace_hint(
+                  grain_id_to_new_var.end(),
+                  std::pair<unsigned int, std::size_t>(grain2._id, grain1._var_index));
+          }
+        }
+      }
     }
 
     // Verify that split grains are still intact
