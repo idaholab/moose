@@ -115,12 +115,15 @@ public:
     return _name_to_params_pointer;
   }
 
+  ///@{ Don't allow creation through copy consturction or assignment
+  AppFactory(AppFactory const &) = delete;
+  void operator=(AppFactory const &) = delete;
+  ///@}
+
 protected:
   std::map<std::string, appBuildPtr> _name_to_build_pointer;
 
   std::map<std::string, paramsPtr> _name_to_params_pointer;
-
-  static AppFactory _instance;
 
 private:
   // Private constructor for singleton pattern
