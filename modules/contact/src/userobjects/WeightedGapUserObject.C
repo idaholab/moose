@@ -48,11 +48,6 @@ WeightedGapUserObject::WeightedGapUserObject(const InputParameters & parameters)
     _primary_disp_z(_has_disp_z ? &_disp_z_var->adSlnNeighbor() : nullptr),
     _coord(_assembly.mortarCoordTransformation())
 {
-#ifndef MOOSE_GLOBAL_AD_INDEXING
-  mooseError("WeightedGapUserObject relies on use of the global indexing container "
-             "in order to make its implementation feasible");
-#endif
-
   if (!getParam<bool>("use_displaced_mesh"))
     paramError("use_displaced_mesh",
                "'use_displaced_mesh' must be true for the WeightedGapUserObject object");
@@ -69,7 +64,6 @@ WeightedGapUserObject::initialSetup()
 void
 WeightedGapUserObject::computeQpProperties()
 {
-#ifdef MOOSE_GLOBAL_AD_INDEXING
   // Trim interior node variable derivatives
   const auto & primary_ip_lowerd_map = amg().getPrimaryIpToLowerElementMap(
       *_lower_primary_elem, *_lower_primary_elem->interior_parent(), *_lower_secondary_elem);
@@ -112,7 +106,6 @@ WeightedGapUserObject::computeQpProperties()
 
   // To do normalization of constraint coefficient (c_n)
   _qp_factor = _JxW_msm[_qp] * _coord[_qp];
-#endif
 }
 
 void
@@ -141,7 +134,6 @@ WeightedGapUserObject::initialize()
 void
 WeightedGapUserObject::finalize()
 {
-#ifdef MOOSE_SPARSE_AD
   // If the constraint is performed by the owner, then we don't need any data sent back; the owner
   // will take care of it. But if the constraint is not performed by the owner and we might have to
   // do some of the constraining ourselves, then we need data sent back to us
@@ -152,7 +144,6 @@ WeightedGapUserObject::finalize()
                                           _normalize_c,
                                           _communicator,
                                           send_data_back);
-#endif
 }
 
 void

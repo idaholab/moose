@@ -47,11 +47,6 @@ WeightedVelocitiesUserObject::WeightedVelocitiesUserObject(const InputParameters
     _primary_z_dot(_has_disp_z ? &adCoupledNeighborValueDot("disp_z") : nullptr),
     _3d(_has_disp_z)
 {
-#ifndef MOOSE_GLOBAL_AD_INDEXING
-  mooseError("WeightedVelocitiesUserObject relies on use of the global indexing container "
-             "in order to make its implementation feasible");
-#endif
-
   if (!getParam<bool>("use_displaced_mesh"))
     paramError("use_displaced_mesh",
                "'use_displaced_mesh' must be true for the WeightedVelocitiesUserObject object");
@@ -66,7 +61,6 @@ WeightedVelocitiesUserObject::initialSetup()
 void
 WeightedVelocitiesUserObject::computeQpProperties()
 {
-#ifdef MOOSE_GLOBAL_AD_INDEXING
   // Compute the value of _qp_gap
   WeightedGapUserObject::computeQpProperties();
 
@@ -108,8 +102,6 @@ WeightedVelocitiesUserObject::computeQpProperties()
   // Geometry is averaged and used at the nodes for constraint enforcement.
   _qp_real_tangential_velocity_nodal = relative_velocity;
   _qp_tangential_velocity_nodal = relative_velocity * (_JxW_msm[_qp] * _coord[_qp]);
-
-#endif
 }
 
 void
@@ -152,7 +144,6 @@ WeightedVelocitiesUserObject::initialize()
 void
 WeightedVelocitiesUserObject::finalize()
 {
-#ifdef MOOSE_SPARSE_AD
   WeightedGapUserObject::finalize();
 
   // If the constraint is performed by the owner, then we don't need any data sent back; the owner
@@ -165,7 +156,6 @@ WeightedVelocitiesUserObject::finalize()
                                                 _nodal,
                                                 _communicator,
                                                 send_data_back);
-#endif
 }
 
 void
