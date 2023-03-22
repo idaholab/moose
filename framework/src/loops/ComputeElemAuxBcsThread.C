@@ -22,12 +22,10 @@ template <typename AuxKernelType>
 ComputeElemAuxBcsThread<AuxKernelType>::ComputeElemAuxBcsThread(
     FEProblemBase & fe_problem,
     const MooseObjectWarehouse<AuxKernelType> & storage,
-    const std::vector<std::vector<MooseVariableFEBase *>> & vars,
     bool need_materials)
   : _fe_problem(fe_problem),
     _aux_sys(fe_problem.getAuxiliarySystem()),
     _storage(storage),
-    _aux_vars(vars),
     _need_materials(need_materials)
 {
 }
@@ -39,7 +37,6 @@ ComputeElemAuxBcsThread<AuxKernelType>::ComputeElemAuxBcsThread(ComputeElemAuxBc
   : _fe_problem(x._fe_problem),
     _aux_sys(x._aux_sys),
     _storage(x._storage),
-    _aux_vars(x._aux_vars),
     _need_materials(x._need_materials)
 {
 }
@@ -68,10 +65,6 @@ ComputeElemAuxBcsThread<AuxKernelType>::operator()(const ConstBndElemRange & ran
 
     if (elem->processor_id() == _fe_problem.processor_id())
     {
-      // prepare variables
-      for (auto * var : _aux_vars[_tid])
-        var->prepareAux();
-
       // Locate the AuxKernel objects for the current BoundaryID
       const auto iter = boundary_kernels.find(boundary_id);
 
@@ -131,17 +124,13 @@ ComputeElemAuxBcsThread<AuxKernelType>::operator()(const ConstBndElemRange & ran
         }
 
         for (const auto & aux : iter->second)
+        {
           aux->compute();
+          aux->variable().insert(_aux_sys.solution());
+        }
 
         if (_need_materials)
           _fe_problem.clearActiveMaterialProperties(_tid);
-      }
-
-      // update the solution vector
-      {
-        Threads::spin_mutex::scoped_lock lock(Threads::spin_mtx);
-        for (auto * var : _aux_vars[_tid])
-          var->insert(_aux_sys.solution());
       }
     }
   }
