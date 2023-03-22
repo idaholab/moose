@@ -74,10 +74,10 @@ ComputeElemAuxBcsThread<AuxKernelType>::operator()(const ConstBndElemRange & ran
 
       // Locate the AuxKernel objects for the current BoundaryID
       const auto iter = boundary_kernels.find(boundary_id);
-      printBoundaryExecutionInformation(boundary_id, iter->second);
 
       if (iter != boundary_kernels.end() && !(iter->second.empty()))
       {
+        printBoundaryExecutionInformation(boundary_id, iter->second);
         auto did = elem->subdomain_id();
         if (did != last_did)
         {
@@ -175,12 +175,10 @@ ComputeElemAuxBcsThread<AuxKernelType>::printBoundaryExecutionInformation(
   {
     auto console = _fe_problem.console();
     console << "[DBG] Ordering on boundary " << boundary_id << std::endl;
-    std::string list_kernels =
-        std::accumulate(kernels.begin() + 1,
-                        kernels.end(),
-                        kernels[0]->name(),
-                        [](const std::string & str_out, std::shared_ptr<AuxKernelType> kernel)
-                        { return str_out + " " + kernel->name(); });
+    std::vector<MooseObject *> objs_ptrs;
+    for (auto kernel_ptr : kernels)
+      objs_ptrs.push_back(dynamic_cast<MooseObject *>(kernel_ptr.get()));
+    std::string list_kernels = ConsoleUtils::mooseObjectVectorToString(objs_ptrs);
     console << ConsoleUtils::formatString(list_kernels, "[DBG]") << std::endl;
   }
 }

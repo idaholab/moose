@@ -47,7 +47,7 @@ def findTestRoot(start=os.getcwd(), method=os.environ.get('METHOD', 'opt')):
     raise RuntimeError('test root directory not found in "{}"'.format(start))
 
 # This function finds a file in the herd trunk containing all the possible applications
-# thay may be built with an "up" target.  If passed the value ROOT it will simply
+# that may be built with an "up" target.  If passed the value ROOT it will simply
 # return the root directory
 def findDepApps(dep_names, use_current_only=False):
     dep_name = dep_names.split('~')[0]
@@ -431,7 +431,7 @@ class TestHarness:
             # Wait for all the tests to complete (blocking)
             self.scheduler.waitFinish()
 
-            # TODO: this DOES NOT WORK WITH MAX FAILES (max failes is considered a scheduler error at the moment)
+            # TODO: this DOES NOT WORK WITH MAX FAILS (max fails is considered a scheduler error at the moment)
             if not self.scheduler.schedulerError():
                 self.cleanup()
 
