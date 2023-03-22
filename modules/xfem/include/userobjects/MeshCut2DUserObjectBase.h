@@ -33,13 +33,44 @@ public:
                                      std::vector<Xfem::CutEdge> & cut_edges) const override;
   virtual bool cutFragmentByGeometry(std::vector<std::vector<Point>> & frag_faces,
                                      std::vector<Xfem::CutFace> & cut_faces) const override;
+  virtual const std::vector<Point>
+  getCrackFrontPoints(unsigned int num_crack_front_points) const override;
+  virtual const std::vector<RealVectorValue>
+  getCrackPlaneNormals(unsigned int num_crack_front_points) const override;
 
   MeshBase & getCutterMesh() const;
 
 protected:
+  /// The structural mesh
+  MooseMesh & _mesh;
+
   /// The cutter mesh
   std::unique_ptr<MeshBase> _cutter_mesh;
 
-  /// The structural mesh
-  MooseMesh & _mesh;
+  /// bool to specify if _cutter_mesh has been modified by crack growth
+  bool was_cutter_mesh_modified() const { return !_active_front_node_growth_vectors.empty(); }
+
+  /**
+   * Contains the original crack front node ids in pair.first and the
+   * assosciated current crack front node id in pair.second.  This vector is sorted on pair.first
+   * which makes the ordering of this vector the same as that used in the CrackFrontDefinition
+   */
+  std::vector<std::pair<dof_id_type, dof_id_type>> _original_and_current_front_node_ids;
+
+  /// contains the active nodeids and their growth vector
+  std::vector<std::pair<dof_id_type, Point>> _active_front_node_growth_vectors;
+
+  /**
+  Find growth direction at each active node
+  */
+  virtual void findActiveBoundaryGrowth() = 0;
+
+  /**
+    Find the original crack front nodes in the cutter mesh and fill pair.first in
+    _original_and_current_front_node_ids.
+   */
+  void findOriginalCrackFrontNodes();
+
+  /// grow the cutter mesh
+  void growFront();
 };

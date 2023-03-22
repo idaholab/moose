@@ -27,7 +27,6 @@
   [./cut_mesh]
     type = MeshCut2DFunctionUserObject
     mesh_file = 2D_edge_crack.e
-    growth_dir_method = FUNCTION
     function_x = growth_func_x
     function_y = growth_func_y
     function_v = growth_func_v

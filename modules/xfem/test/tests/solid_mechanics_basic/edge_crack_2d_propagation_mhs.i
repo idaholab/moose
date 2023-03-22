@@ -35,7 +35,7 @@
     type = MeshCut2DFractureUserObject
     mesh_file = make_edge_crack_in.e
     k_critical=80
-    growth_length_per_timestep = 0.1
+    growth_increment = 0.1
   []
 []
 
@@ -124,7 +124,7 @@
   start_time = 0.0
   dt = 1.0
   end_time = 5
-  max_xfem_update = 2
+  max_xfem_update = 10
 []
 
 [Outputs]
@@ -141,6 +141,3 @@
     output_nonlinear = false
   [../]
 []
-# [Debug]
-#   show_reporters=true
-# []
