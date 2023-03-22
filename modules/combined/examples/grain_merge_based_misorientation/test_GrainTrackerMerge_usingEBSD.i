@@ -37,6 +37,8 @@ my_filename = "case2_EBSD"
 
     merge_grains_based_misorientaion = true
     euler_angle_provider = ebsd_reader
+
+    remap_grains = true
   []
   [./term]
     type = Terminator
@@ -196,7 +198,7 @@ my_filename = "case2_EBSD"
   dtmin = 1.0e-4
 
   start_time = 0.0
-  num_steps = 5
+  num_steps = 6
 
   [TimeStepper]
     type = IterationAdaptiveDT
@@ -220,11 +222,9 @@ my_filename = "case2_EBSD"
     additional_execute_on = 'FINAL' # seems to be a necessary to avoid a Checkpoint bug
   [../]
   [my_exodus]
-    file_base = ./${my_filename}/out_${my_filename}
     type = Nemesis # Nemesis Exodus
   [../]
   [./csv]
-    file_base = ./${my_filename}/${my_filename}
     type = CSV
   [../]
   print_linear_residuals = false
