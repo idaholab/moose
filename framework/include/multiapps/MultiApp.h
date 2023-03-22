@@ -69,6 +69,8 @@ struct LocalRankConfig
   /// only transfer data to a given subapp once even though it may be running on
   /// multiple procs/ranks.
   bool is_first_local_rank;
+
+  processor_id_type my_first_rank;
 };
 
 /// Returns app partitioning information relevant to the given rank for a

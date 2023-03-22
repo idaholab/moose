@@ -111,6 +111,7 @@ MappingReporter::execute()
         const unsigned int global_i = sample_i + _sampler->getLocalRowBegin();
         for (const auto var_i : index_range(_variable_names))
         {
+          std::vector<Real> local_vector;
           if (_parallel_storage->hasGlobalSample(global_i, _variable_names[var_i]))
           {
             const auto & full_vector =
@@ -118,8 +119,11 @@ MappingReporter::execute()
             if (full_vector.size() != 1)
               mooseError("MappingReporter is only supported for simulations with one solution "
                          "field per run!");
-            _mapping->map(*(full_vector[0]), (*_vector_real_values[var_i])[sample_i]);
+            _mapping->map(_variable_names[var_i], global_i, local_vector);
           }
+          comm().gather(rank_config.my_first_rank, local_vector);
+          if (rank_config.is_first_local_rank)
+            (*_vector_real_values[var_i])[global_i] = local_vector;
         }
       }
     }

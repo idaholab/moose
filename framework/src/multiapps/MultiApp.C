@@ -1231,6 +1231,16 @@ rankConfig(dof_id_type rank,
   bool is_first_local_rank = rank == 0 || (slot_for_rank[rank - 1] != slot_for_rank[rank]);
   auto n_local_apps = apps_per_slot + 1 * (slot_num < leftover_apps);
 
+  processor_id_type my_first_rank = 0;
+  for (dof_id_type rankiter = rank; rankiter > 0; rankiter--)
+  {
+    if (slot_for_rank[rank] != slot_for_rank[rankiter])
+    {
+      my_first_rank = slot_for_rank[rankiter + 1];
+      break;
+    }
+  }
+
   dof_id_type app_index = 0;
   for (dof_id_type slot = 0; slot < slot_num; slot++)
   {
@@ -1240,7 +1250,7 @@ rankConfig(dof_id_type rank,
 
   if (batch_mode)
     return {n_local_apps, app_index, 1, slot_num, is_first_local_rank};
-  return {n_local_apps, app_index, n_local_apps, app_index, is_first_local_rank};
+  return {n_local_apps, app_index, n_local_apps, app_index, is_first_local_rank, my_first_rank};
 }
 
 void

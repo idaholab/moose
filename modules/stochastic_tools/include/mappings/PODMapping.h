@@ -11,12 +11,17 @@
 
 #include "MappingBase.h"
 #include "ParallelSolutionStorage.h"
+#include <slepcsvd.h>
+#include "libmesh/parallel_object.h"
+#include "libmesh/petsc_vector.h"
 
 class PODMapping : public MappingBase
 {
 public:
   static InputParameters validParams();
   PODMapping(const InputParameters & parameters);
+
+  ~PODMapping();
 
   virtual void buildMapping(const VariableName & vname) override;
 
@@ -26,10 +31,29 @@ public:
   void map(const NumericVector<Number> & full_order_vector,
            std::vector<Real> & reduced_order_vector) const override;
 
+  void map(const VariableName & vname,
+           const unsigned int global_sample_i,
+           std::vector<Real> & reduced_order_vector) const override;
+
   void inverse_map(const std::vector<Real> & reduced_order_vector,
                    std::vector<Real> & full_order_vector) const override;
 
 protected:
+  unsigned int determineNumberOfModes(const VariableName & vname,
+                                      const std::vector<Real> & converged_evs);
+
+  const std::vector<VariableName> _variable_names;
+  const std::vector<unsigned int> _num_modes;
+  const std::vector<Real> _energy_threshold;
+
   std::map<VariableName, std::vector<std::unique_ptr<DenseVector<Real>>>> & _basis_functions;
   std::map<VariableName, std::vector<Real>> & _eigen_values;
+
+  const std::string _extra_slepc_options;
+
+private:
+  ParallelSolutionStorage * _parallel_storage;
+
+  std::map<VariableName, SVD> _svds;
+  std::map<VariableName, bool> _computed_svd;
 };

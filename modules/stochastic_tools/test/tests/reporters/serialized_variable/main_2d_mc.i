@@ -7,15 +7,28 @@
     lower_bound = 2.5
     upper_bound = 7.5
   []
+  [D_dist]
+    type = Uniform
+    lower_bound = 2.5
+    upper_bound = 7.5
+  []
 []
 
 [Samplers]
   [sample]
     type = MonteCarlo
     num_rows = 8
-    distributions = 'S_dist'
+    distributions = 'S_dist D_dist'
     execute_on = initial
     min_procs_per_row = 2
+  []
+  [sample_test]
+    type = MonteCarlo
+    num_rows = 100
+    distributions = 'S_dist D_dist'
+    execute_on = initial
+    min_procs_per_row = 2
+    seed = 11
   []
 []
 
@@ -29,10 +42,32 @@
   []
 []
 
+[Trainers]
+  [polyreg]
+    type = PolynomialRegressionTrainer
+    sampler = sample
+    regression_type = ols
+    max_degree = 2
+    response = reduced_solutions/v_pod_mapping
+    response_type = vector_real
+    execute_on = FINAL
+  []
+[]
+
+[Surrogates]
+  [polyreg]
+    type = PolynomialRegressionSurrogate
+    trainer = polyreg
+  []
+[]
+
 [Mappings]
   [pod_mapping]
     type = PODMapping
     solution_storage = parallel_storage
+    variables = "u v"
+    num_modes = '4 4'
+    extra_slepc_options = "-svd_monitor_all"
   []
 []
 
@@ -41,7 +76,7 @@
     type = SamplerParameterTransfer
     to_multi_app = worker
     sampler = sample
-    parameters = 'Kernels/source_u/value'
+    parameters = 'Kernels/source_u/value BCs/right_v/value'
   []
   [solution_transfer]
     type = SerializedSolutionTransfer
@@ -64,18 +99,21 @@
     parallel_storage = parallel_storage
     mapping = pod_mapping
     variables = "u v"
+    execute_on = timestep_end
+  []
+  [eval]
+    type = EvaluateSurrogate
+    model = polyreg
+    response_type = vector_real
+    parallel_type = ROOT
     execute_on = FINAL
+    sampler = sample_test
   []
 []
 
-[Executioner]
-  type = Steady
-  petsc_options = '-svd_monitor'
+[Outputs]
+  [out]
+    type = JSON
+    execute_on = FINAL
+  []
 []
-
-# [Outputs]
-#   [out]
-#     type = CSV
-#     execute_on = FINAL
-#   []
-# []
