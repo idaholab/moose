@@ -212,11 +212,11 @@ diff = 10.0
     coeff = ${k}
     variable = T
   []
-  # [energy_diffusion_rans]
-  #   type = FVDiffusion
-  #   coeff = 'k_t'
-  #   variable = T
-  # []
+  [energy_diffusion_rans]
+    type = FVDiffusion
+    coeff = 'k_t'
+    variable = T
+  []
 []
 
 [AuxVariables]
@@ -325,24 +325,24 @@ diff = 10.0
     variable = vel_y
     value = 0
   []
-  [walls-T]
-    type = FVDirichletBC
-    boundary = 'top'
-    variable = T
-    value = 400
-  []
-  # [wall-funct-T]
-  #   type = INSFVTurbulentTemperatureWallFunction
+  # [walls-T]
+  #   type = FVDirichletBC
   #   boundary = 'top'
   #   variable = T
-  #   u = vel_x
-  #   v = vel_y
-  #   rho = ${rho}
-  #   mu = ${mu}
-  #   cp = ${cp}
-  #   kappa = ${k}
-  #   T_w = 400
+  #   value = 400
   # []
+  [wall-funct-T]
+    type = INSFVTurbulentTemperatureWallFunction
+    boundary = 'top'
+    variable = T
+    u = vel_x
+    v = vel_y
+    rho = ${rho}
+    mu = ${mu}
+    cp = ${cp}
+    kappa = ${k}
+    T_w = 400
+  []
   [outlet_p]
     type = INSFVOutletPressureBC
     boundary = 'right'
