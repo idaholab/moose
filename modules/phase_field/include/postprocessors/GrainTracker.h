@@ -104,19 +104,26 @@ protected:
   void trackGrains();
   
   /**
+   * This method is called when considering grain re-merging due to misorientation angle. 
+   */
+  virtual void mergeGrainsBasedMisorientation();
+
+  /**
    * This method is called when a new grain is detected. It can be overridden by a derived class to
    * handle setting new properties on the newly created grain.
    */
   virtual void newGrainCreated(unsigned int new_grain_id);
 
   /**
+   * This method is called after mergeGrainsBasedMisorientation to remap grains that have the same Grain ID.
+   */
+  virtual void remapGrainsMerge();
+
+  /**
    * This method is called after trackGrains to remap grains that are too close to each other.
    */
   void remapGrains();
-
-  void remapGrainsMerge();
-  // re-merge grains due to misorientation angle from euler angles calculation
-  virtual void mergeGrainsBasedMisorientation();
+  
 
   /**
    * Broadcast essential Grain information to all processors. This method is used to get certain
