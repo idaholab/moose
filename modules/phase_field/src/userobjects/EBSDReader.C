@@ -540,7 +540,7 @@ EBSDReader::getPointDataAccessFunctor(const MooseEnum & field_name) const
     {
       // check for custom columns
       for (const auto i : make_range(_custom_columns))
-        if (field_name == "CUSTOM" + Moose::stringify(i))
+        if (std::string(field_name) == std::string("CUSTOM" + Moose::stringify(i)))
         {
           ret_val = new EBSDPointDataCustom(i);
           break;
