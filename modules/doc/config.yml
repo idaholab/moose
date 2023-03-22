@@ -32,7 +32,6 @@ Content:
 Renderer:
     type: MooseDocs.base.MaterializeRenderer
     favicon: media/moose.ico
-    google_analytics: True
 
 Extensions:
     MooseDocs.extensions.navigation:
@@ -182,6 +181,8 @@ Extensions:
         requirement-groups:
             dgkernels: DGKernel Objects
             interfacekernels: InterfaceKernel Objects
-
     MooseDocs.extensions.algorithm:
         active: True
+    MooseDocs.extensions.analytics:
+        active: True
+        google_measurement_id: G-RH7BY5XXNW
