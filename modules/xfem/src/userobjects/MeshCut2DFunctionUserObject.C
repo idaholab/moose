@@ -72,12 +72,12 @@ MeshCut2DFunctionUserObject::findActiveBoundaryGrowth()
     dir(1) = _func_y->value(_t, this_point);
     dir = dir / dir.norm();
 
-      // compute growth amount/velocity
-      Point nodal_offset;
-      Real velo = _func_v->value(_t, Point(0, 0, 0));
-      nodal_offset = dir * velo * _dt;
+    // compute growth amount/velocity
+    Point nodal_offset;
+    Real velo = _func_v->value(_t, Point(0, 0, 0));
+    nodal_offset = dir * velo * _dt;
 
-      _active_front_node_growth_vectors.push_back(std::make_pair(_original_and_current_front_node_ids[i].second,
-                                                  nodal_offset));
+    _active_front_node_growth_vectors.push_back(
+        std::make_pair(_original_and_current_front_node_ids[i].second, nodal_offset));
   }
 }

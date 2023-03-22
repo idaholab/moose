@@ -48,7 +48,7 @@ protected:
   std::unique_ptr<MeshBase> _cutter_mesh;
 
   /// bool to specify if _cutter_mesh has been modified by crack growth
-  bool was_cutter_mesh_modified() const { return !_active_front_node_growth_vectors.empty(); }
+  bool wasCutterMeshModified() const { return !_active_front_node_growth_vectors.empty(); }
 
   /**
    * Contains the original crack front node ids in pair.first and the

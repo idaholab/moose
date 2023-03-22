@@ -50,7 +50,7 @@ MeshCut2DFractureUserObject::initialize()
 {
   findActiveBoundaryGrowth();
   growFront();
-  _crack_front_definition->isCutterModified(was_cutter_mesh_modified());
+  _crack_front_definition->isCutterModified(wasCutterMeshModified());
 }
 
 void

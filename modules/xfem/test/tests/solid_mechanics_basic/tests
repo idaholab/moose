@@ -107,7 +107,7 @@
   [./edge_crack_2d_propagation_mhs]
     type = Exodiff
     input = edge_crack_2d_propagation_mhs.i
-    exodiff = 'edge_crack_2d_propagation_mhs_xfemcutter.e-s0005'
+    exodiff = 'edge_crack_2d_propagation_mhs_xfemcutter.e edge_crack_2d_propagation_mhs_out.e'
     abs_zero = 1e-8
     map = false
     # XFEM requires --enable-unique-ids in libmesh

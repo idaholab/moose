@@ -123,8 +123,8 @@
 # time control
   start_time = 0.0
   dt = 1.0
-  end_time = 5
-  max_xfem_update = 10
+  end_time = 1
+  max_xfem_update = 100
 []
 
 [Outputs]
