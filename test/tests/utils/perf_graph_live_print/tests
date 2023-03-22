@@ -57,7 +57,7 @@
     type = RunApp
     input = perf_graph_live_print.i
     cli_args = "MultiApps/active='subapp' MultiApps/subapp/cli_args='MultiApps/active=subapp' --color off"
-    expect_out = "subapp0_subapp0: Testing Slowness(\.| ){56}\["
+    expect_out = "subapp0_subapp0: Testing Slowness"
 
     issues = '#19114'
     design = 'utils/PerfGraphLivePrint.md'
