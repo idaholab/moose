@@ -64,9 +64,7 @@ MortarArchardsLawAux::MortarArchardsLawAux(const InputParameters & parameters)
     _primary_z_dot(_has_disp_z ? &_displacements[2]->adUDotNeighbor() : nullptr),
     _worn_depth(0),
     _worn_out_depth_dt(0),
-    _qp_gap_velocity_nodal(0),
-    _i(0),
-    _qp(0)
+    _qp_gap_velocity_nodal(0)
 {
   if (!_displaced)
     paramError("use_displaced_mesh",
@@ -81,7 +79,7 @@ MortarArchardsLawAux::computeValue()
   for (_qp = 0; _qp < _qrule_msm->n_points(); _qp++)
   {
     computeQpProperties();
-    for (_i = 0; _i < _test.size(); ++_i)
+    for (_i = 0; _i < _test_lower.size(); ++_i)
       computeQpIProperties();
   }
 
@@ -105,14 +103,14 @@ MortarArchardsLawAux::computeQpProperties()
   const Real norm_tangential_vel = gap_velocity_vec.norm();
 
   _worn_out_depth_dt = norm_tangential_vel * _energy_wear_coefficient * _friction_coefficient *
-                       _normal_pressure[0] * _dt * _JxW_msm[_qp] * _coord[_qp];
+                       _normal_pressure[0] * _dt * _JxW_msm[_qp] * _coord_msm[_qp];
 
-  _msm_volume += _JxW_msm[_qp] * _coord[_qp];
+  _msm_volume += _JxW_msm[_qp] * _coord_msm[_qp];
 }
 
 void
 MortarArchardsLawAux::computeQpIProperties()
 {
   // Accumulate worn-out depth over time.
-  _worn_depth += _test[_i][_qp] * _worn_out_depth_dt;
+  _worn_depth += _test_lower[_i][_qp] * _worn_out_depth_dt;
 }

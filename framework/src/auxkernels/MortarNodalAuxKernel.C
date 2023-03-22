@@ -54,7 +54,9 @@ MortarNodalAuxKernelTempl<ComputeValueType>::MortarNodalAuxKernelTempl(
     _fe_problem(*this->template getCheckedPointerParam<FEProblemBase *>("_fe_problem_base")),
     _msm_volume(0),
     _incremental(this->template getParam<bool>("incremental")),
-    _u_old(uOld())
+    _u_old(uOld()),
+    _test_lower(_var.phiLower()),
+    _coord_msm(_assembly.mortarCoordTransformation())
 {
   if (!isNodal())
     paramError("variable",

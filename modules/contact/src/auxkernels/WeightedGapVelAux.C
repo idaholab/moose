@@ -48,10 +48,7 @@ WeightedGapVelAux::WeightedGapVelAux(const InputParameters & parameters)
     _primary_z_dot(_has_disp_z ? &_disp_z->adUDotNeighbor() : nullptr),
     _weighted_gap_velocity(0),
     _qp_gap_velocity(0),
-    _qp_gap_velocity_nodal(0),
-    _i(0),
-    _qp(0),
-    _test_lower(_var.phiLower())
+    _qp_gap_velocity_nodal(0)
 {
   if (!_displaced)
     paramWarning(
@@ -84,13 +81,13 @@ WeightedGapVelAux::computeQpProperties()
   if (_has_disp_z)
     gap_velocity_vec(2) = MetaPhysicL::raw_value((*_secondary_z_dot)[_qp] - (*_primary_z_dot)[_qp]);
 
-  _qp_gap_velocity_nodal = gap_velocity_vec * (_JxW_msm[_qp] * _coord[_qp]);
+  _qp_gap_velocity_nodal = gap_velocity_vec * (_JxW_msm[_qp] * _coord_msm[_qp]);
 
-  _msm_volume += _JxW_msm[_qp] * _coord[_qp];
+  _msm_volume += _JxW_msm[_qp] * _coord_msm[_qp];
 }
 
 void
 WeightedGapVelAux::computeQpIProperties()
 {
-  _weighted_gap_velocity += _test[_i][_qp] * _qp_gap_velocity_nodal * _normals[_i];
+  _weighted_gap_velocity += _test_lower[_i][_qp] * _qp_gap_velocity_nodal * _normals[_i];
 }
