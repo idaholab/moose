@@ -1,46 +1,28 @@
 von_karman_const = 0.41
 
 H = 1 #halfwidth of the channel
-L = 150
+L = 10
 
 Re = 13700
 
 rho = 1
-bulk_u = 0.1
+bulk_u = 1
 mu = '${fparse rho * bulk_u * 2 * H / Re}'
+k = 0.1
+cp = 1000.0
 
 advected_interp_method = 'upwind'
-velocity_interp_method = 'average'
+velocity_interp_method = 'rc'
 
 [Mesh]
   [gen]
     type = CartesianMeshGenerator
     dim = 2
-    dx = '0.3 1.4'
-    dy = '0.1 0.1'
-    ix = '24 112'
-    iy = '8  8'
-    subdomain_id = '
-                    2 1
-                    1 1
-                  '
+    dx = '${L}'
+    dy = '1.0'
+    ix = '50'
+    iy = '10'
   []
-  [corner_walls]
-    type = SideSetsBetweenSubdomainsGenerator
-    input = gen
-    primary_block = '1'
-    paired_block = '2'
-    new_boundary = 'wall-side'
-  []
-  [delete_bottom]
-    type = BlockDeletionGenerator
-    input = corner_walls
-    block = '2'
-  []
-  # [fmg]
-  #   type = FileMeshGenerator
-  #   file = backward_facing_step_in.e
-  # []
 []
 
 # Crafted wall function
@@ -106,6 +88,10 @@ diff = 10.0
     #initial_condition = ${eps_bulk}
     #scaling = '${fparse 1/eps_bulk}'
   []
+  [T]
+    type = INSFVEnergyVariable
+    initial_condition = 300.0
+  []
 []
 
 [FVKernels]
@@ -164,14 +150,14 @@ diff = 10.0
     type = INSFVTurbulentAdvection
     variable = TKE
     rho = ${rho}
-    walls = 'top bottom wall-side'
+    walls = 'top'
   []
   [TKE_diffusion]
     type = INSFVTurbulentDiffusion
     variable = TKE
     coeff = 'mu_t'
     scaling_coef = ${sigma_k}
-    walls = 'top bottom wall-side'
+    walls = 'top'
   []
   [TKE_source_sink]
     type = INSFVTKESourceSink
@@ -184,7 +170,7 @@ diff = 10.0
     mu_t = 'mu_t'
     linearized_model = true
     rf = 1.0
-    walls = 'top bottom wall-side'
+    walls = 'top'
     non_equilibrium_treatement = false
   []
 
@@ -192,14 +178,14 @@ diff = 10.0
     type = INSFVTurbulentAdvection
     variable = TKED
     rho = ${rho}
-    walls = 'top bottom wall-side'
+    walls = 'top'
   []
   [TKED_diffusion]
     type = INSFVTurbulentDiffusion
     variable = TKED
     coeff = 'mu_t'
     scaling_coef = ${sigma_eps}
-    walls = 'top bottom wall-side'
+    walls = 'top'
   []
   [TKED_source_sink]
     type = INSFVTKEDSourceSink
@@ -213,9 +199,24 @@ diff = 10.0
     C1_eps = ${C1_eps}
     C2_eps = ${C2_eps}
     rf = 1.0
-    walls = 'top bottom wall-side'
+    walls = 'top'
     # non_equilibrium_treatement = false
   []
+
+  [energy_advection]
+    type = INSFVEnergyAdvection
+    variable = T
+  []
+  [energy_diffusion]
+    type = FVDiffusion
+    coeff = ${k}
+    variable = T
+  []
+  # [energy_diffusion_rans]
+  #   type = FVDiffusion
+  #   coeff = 'k_t'
+  #   variable = T
+  # []
 []
 
 [AuxVariables]
@@ -227,6 +228,10 @@ diff = 10.0
   [mu_t]
     type = MooseVariableFVReal
     initial_condition = '${fparse mu_bulk}'
+  []
+  [k_t]
+    type = MooseVariableFVReal
+    initial_condition = '${fparse mu_bulk*cp/0.9}'
   []
 []
 
@@ -248,10 +253,16 @@ diff = 10.0
     u = vel_x
     v = vel_y
     wall_treatement = false
-    walls = 'top bottom wall-side'
+    walls = 'top'
     non_equilibrium_treatement = false
-    rf = 0.8
+    rf = 1.0
     execute_on = 'TIMESTEP_END'
+  []
+  [compute_k_t]
+    type = TurbulentConductivityAux
+    variable = k_t
+    mu_t = mu_t
+    cp = ${cp}
   []
 []
 
@@ -275,6 +286,12 @@ diff = 10.0
     prop_names = 'mu_t_imposed'
     prop_values = 'viscous_jump'
   []
+  [ins_fv]
+    type = INSFVEnthalpyMaterial
+    rho = ${rho}
+    cp = ${cp}
+    temperature = 'T'
+  []
 []
 
 [FVBCs]
@@ -290,18 +307,42 @@ diff = 10.0
     variable = vel_y
     function = 0
   []
+  [inlet-T]
+    type = FVDirichletBC
+    boundary = 'left'
+    variable = T
+    value = 300.0
+  []
   [walls-u]
     type = FVDirichletBC
-    boundary = 'top bottom wall-side'
+    boundary = 'top'
     variable = vel_x
     value = 0
   []
   [walls-v]
     type = FVDirichletBC
-    boundary = 'top bottom wall-side'
+    boundary = 'top'
     variable = vel_y
     value = 0
   []
+  [walls-T]
+    type = FVDirichletBC
+    boundary = 'top'
+    variable = T
+    value = 400
+  []
+  # [wall-funct-T]
+  #   type = INSFVTurbulentTemperatureWallFunction
+  #   boundary = 'top'
+  #   variable = T
+  #   u = vel_x
+  #   v = vel_y
+  #   rho = ${rho}
+  #   mu = ${mu}
+  #   cp = ${cp}
+  #   kappa = ${k}
+  #   T_w = 400
+  # []
   [outlet_p]
     type = INSFVOutletPressureBC
     boundary = 'right'
@@ -325,7 +366,7 @@ diff = 10.0
   []
   [walls_mu_t]
     type = INSFVTurbulentViscosityWallFunction
-    boundary = 'top bottom wall-side'
+    boundary = 'top'
     variable = mu_t
     u = vel_x
     v = vel_y
@@ -333,6 +374,39 @@ diff = 10.0
     mu = ${mu}
     mu_t = mu_t
     k = TKE
+  []
+  [sym-u]
+    type = INSFVSymmetryVelocityBC
+    boundary = 'bottom'
+    variable = vel_x
+    u = vel_x
+    v = vel_y
+    mu = 'mu_t'
+    momentum_component = x
+  []
+  [sym-v]
+    type = INSFVSymmetryVelocityBC
+    boundary = 'bottom'
+    variable = vel_y
+    u = vel_x
+    v = vel_y
+    mu = 'mu_t'
+    momentum_component = y
+  []
+  [symmetry_pressure]
+    type = INSFVSymmetryPressureBC
+    boundary = 'bottom'
+    variable = pressure
+  []
+  [symmetry_TKE]
+    type = INSFVSymmetryScalarBC
+    boundary = 'bottom'
+    variable = TKE
+  []
+  [symmetry_TKED]
+    type = INSFVSymmetryScalarBC
+    boundary = 'bottom'
+    variable = TKED
   []
 []
 
