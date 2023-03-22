@@ -26,6 +26,7 @@ public:
   virtual Real computeQpIntegral() override { mooseError("Not implemented"); };
 
   virtual void initialize() override;
+  virtual void meshChanged() override;
   virtual void execute() override;
   virtual void threadJoin(const UserObject & y) override;
   virtual void finalize() override;

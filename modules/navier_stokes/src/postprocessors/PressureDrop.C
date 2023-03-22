@@ -101,6 +101,15 @@ PressureDrop::initialize()
   _weighted_pressure_downstream = 0;
   _weight_upstream = 0;
   _weight_downstream = 0;
+
+  // Build the face infos in all cases, needed to detect upstream/downstream status
+  _mesh.faceInfo(nullptr, 0);
+}
+
+void
+PressureDrop::meshChanged()
+{
+  initialize();
 }
 
 void
