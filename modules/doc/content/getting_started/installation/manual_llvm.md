@@ -32,7 +32,7 @@ The above configuration assumes you are using a custom version of GCC (note the 
 gcc-[!package!gcc] paths)
 !alert-end!
 
-With configure complete (and error free), build and install LLVM Clang:
+With `configure` complete (and error free), build and install LLVM Clang:
 
 ```bash
 make -j 6

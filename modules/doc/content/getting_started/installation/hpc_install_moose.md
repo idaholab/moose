@@ -38,4 +38,8 @@ them manually (each and every time you load said environment):
 export CC=mpicc CXX=mpicxx FC=mpif90 F90=mpif90 F77=mpif77
 ```
 
-!include getting_started/installation/install_moose.md
+!template load file=installation/clone_moose.md.template PATH=~/projects
+
+!template load file=installation/build_petsc_and_libmesh.md.template PATH=~/projects
+
+!template load file=installation/test_moose.md.template PATH=~/projects

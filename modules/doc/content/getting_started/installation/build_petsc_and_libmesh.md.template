@@ -1,13 +1,13 @@
-## Compile libMesh
+## PETSc and libMesh
 
-MOOSE directly relies on the [libMesh] finite-element framework. Because
-of this strong tie MOOSE contains a particular version of libMesh that we have vetted for our
-users. To pull down and compile this version of libMesh you simply need to run a script in MOOSE:
+MOOSE requires several support libraries in order to build or run properly. Both of these libraries
+(PETSc and libMesh) can be built using our supplied scripts:
 
 ```bash
+cd {{PATH}}/moose/scripts
 export MOOSE_JOBS=6 METHODS=opt
-cd ~/projects/moose
-./scripts/update_and_rebuild_libmesh.sh
+./update_and_rebuild_petsc.sh
+./update_and_rebuild_libmesh.sh
 ```
 
 !alert! tip

@@ -32,7 +32,7 @@ cd gcc-build
 --with-pic
 !package-end!
 
-With configure complete (and error free), build and install GCC:
+With `configure` complete (and error free), build and install GCC:
 
 ```bash
 make -j 6

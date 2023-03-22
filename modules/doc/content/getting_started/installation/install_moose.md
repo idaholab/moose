@@ -1,11 +1,9 @@
 # Obtaining and Building MOOSE
 
-!include getting_started/installation/clone_moose.md
+!template load file=installation/clone_moose.md.template PATH=~/projects
 
-!include getting_started/installation/manual_petsc.md
+!template load file=installation/build_petsc_and_libmesh.md.template PATH=~/projects
 
-!include getting_started/installation/build_libmesh.md
-
-!include getting_started/installation/test_moose.md
+!template load file=installation/test_moose.md.template PATH=~/projects
 
 Head back over to the [getting_started/index.md] page to continue your tour of MOOSE.
