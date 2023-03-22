@@ -9,6 +9,7 @@
 
 from . import acronym
 from . import alert
+from . import analytics
 from . import appsyntax
 from . import autolink
 from . import bibtex
