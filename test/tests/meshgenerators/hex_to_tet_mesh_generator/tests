@@ -1,0 +1,9 @@
+[Tests]
+  [invalid_input_elem]
+    type = RunException
+    input = non_hex.i
+    cli_args = '--mesh-only'
+    expect_err = "This mesh generator can only be applied to meshes with HEX8 elements!"
+    requirement = "The system shall error if using a non-hex8 element type with the hex to tet converter"
+  []
+[]
