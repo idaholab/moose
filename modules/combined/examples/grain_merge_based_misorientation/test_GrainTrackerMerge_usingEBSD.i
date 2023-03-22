@@ -216,13 +216,13 @@ my_filename = "case2_EBSD"
 []
 
 [Outputs]
+  file_base = ./${my_filename}/out_${my_filename}
   [./my_checkpoint]
-    file_base = ./${my_filename}/out_${my_filename}
     type = Checkpoint
-    additional_execute_on = 'FINAL' # seems to be a necessary to avoid a Checkpoint bug
+    additional_execute_on = 'FINAL'
   [../]
   [my_exodus]
-    type = Nemesis # Nemesis Exodus
+    type = Nemesis
   [../]
   [./csv]
     type = CSV
