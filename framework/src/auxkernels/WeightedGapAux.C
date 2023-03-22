@@ -25,7 +25,13 @@ WeightedGapAux::validParams()
 }
 
 WeightedGapAux::WeightedGapAux(const InputParameters & parameters)
-  : MortarNodalAuxKernel(parameters), _weighted_gap(0), _qp_gap_nodal(0), _i(0), _qp(0)
+  : MortarNodalAuxKernel(parameters),
+    _weighted_gap(0),
+    _qp_gap_nodal(0),
+    _i(0),
+    _qp(0),
+    _test_lower(_var.phiLower())
+
 {
 }
 
@@ -36,7 +42,7 @@ WeightedGapAux::computeValue()
   for (_qp = 0; _qp < _qrule_msm->n_points(); _qp++)
   {
     computeQpProperties();
-    for (_i = 0; _i < _test.size(); ++_i)
+    for (_i = 0; _i < _test_lower.size(); ++_i)
       computeQpIProperties();
   }
 

@@ -57,7 +57,8 @@ MortarNodalAuxKernelTempl<ComputeValueType>::MortarNodalAuxKernelTempl(
     _u_old(uOld())
 {
   if (!isNodal())
-    paramError("variable", "MortarNodalAuxKernel derivatives populate nodal aux variables only.");
+    paramError("variable",
+               "MortarNodalAuxKernel derived classes populate nodal aux variables only.");
 }
 
 template <typename ComputeValueType>

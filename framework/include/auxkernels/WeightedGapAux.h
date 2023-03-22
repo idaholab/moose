@@ -44,4 +44,8 @@ protected:
 
   /// The current quadrature point index
   unsigned int _qp;
+
+  /// The shape functions for the variable associated with the lower-dimensional element, e.g. the
+  /// shape functions for the nodes connected to the lower-dimensional element
+  const VariableTestValue & _test_lower;
 };

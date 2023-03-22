@@ -58,9 +58,6 @@ WeightedGapVelAux::WeightedGapVelAux(const InputParameters & parameters)
         "use_displaced_mesh",
         "This auxiliary kernel typically requires the use of displaced meshes to compute the "
         "weighted gap velocity.");
-
-  if (!_var.isNodal())
-    paramError("variable", "This object only works with Lagrange variables");
 }
 
 Real
