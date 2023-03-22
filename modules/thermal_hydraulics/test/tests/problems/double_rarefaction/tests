@@ -7,6 +7,5 @@
     abs_zero = 1e-10
     rel_err = 1e-5
     max_parallel = 1
-    ad_indexing_type = 'global'
   []
 []

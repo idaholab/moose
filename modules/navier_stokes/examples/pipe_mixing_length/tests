@@ -5,7 +5,6 @@
     type = RunApp
     input = 'pipe_mixing_length.i'
     check_input = True
-    ad_indexing_type = 'global'
     mesh_mode = REPLICATED
     requirement = 'The system shall be able to simulate turbulence in a pipe with a simple mixing length model.'
   []

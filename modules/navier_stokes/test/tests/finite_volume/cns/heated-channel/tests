@@ -5,7 +5,6 @@
     type = Exodiff
     input = transient-porous-kt-primitive.i
     exodiff = transient-porous-kt-primitive_exo.e
-    ad_indexing_type = global
     requirement = 'The system shall be able to solve the steady Euler equations in a heated channel using Kurganov-Tadmor with linearly reconstructed data with Van-Leer limiting for the convection term and a primitive variable set and show a flat momentum profile'
     mumps = true
     recover = false # See https://github.com/idaholab/moose/issues/17906

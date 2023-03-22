@@ -34,7 +34,6 @@
     design = 'ConstantBoundsAux.md'
     issues = '#951 #14946'
     requirement = "The system shall be able to impose constant upper and lower bounds on a finite volume variable."
-    ad_indexing_type = 'global'
   []
 
   [exceptions]

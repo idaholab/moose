@@ -633,9 +633,7 @@ SHELL'
 ac_subst_files=''
 ac_user_opts='
 enable_option_checking
-with_derivative_type
 with_derivative_size
-with_ad_indexing_type
 with_libtorch
 '
       ac_precious_vars='build_alias
@@ -1249,12 +1247,8 @@ if test -n "$ac_init_help"; then
 Optional Packages:
   --with-PACKAGE[=ARG]    use PACKAGE [ARG=yes]
   --without-PACKAGE       do not use PACKAGE (same as --with-PACKAGE=no)
-  --with-derivative-type=sparse,nonsparse
-                          Specify the derivative type to use
   --with-derivative-size=<n>
                           Specify the size of the derivative backing array
-  --with-ad-indexing-type=local,global
-                          Specify the indexing scheme for AD derivatives
   --with-libtorch[=ARG]   Specify if libtorch support should be enabled
                           [ARG=yes or libtorch directory]
 
@@ -1722,21 +1716,6 @@ ac_config_commands="$ac_config_commands framework/include/base/MooseConfig.h"
 
 
 
-# Check whether --with-derivative-type was given.
-if test "${with_derivative_type+set}" = set; then :
-  withval=$with_derivative_type;
-              derivative_type="$withval"
-              user_set_derivative_type=yes
-
-else
-
-              derivative_type=sparse
-              user_det_derivative_type=no
-
-fi
-
-
-
 # Check whether --with-derivative-size was given.
 if test "${with_derivative_size+set}" = set; then :
   withval=$with_derivative_size; derivative_size="$withval"
@@ -1753,50 +1732,6 @@ _ACEOF
 
 { $as_echo "$as_me:${as_lineno-$LINENO}: result: configuring with derivative backing array size of $derivative_size" >&5
 $as_echo "configuring with derivative backing array size of $derivative_size" >&6; }
-
-
-# Check whether --with-ad-indexing-type was given.
-if test "${with_ad_indexing_type+set}" = set; then :
-  withval=$with_ad_indexing_type; ad_indexing_type="$withval"
-else
-  ad_indexing_type=global
-fi
-
-
-case "$ad_indexing_type" in #(
-  global) :
-
-          if test "$derivative_type" = nonsparse; then :
-
-                                      as_fn_error $? "cannot use global AD indexing with a nonsparse derivative container" "$LINENO" 5
-
-fi
-
-$as_echo "#define GLOBAL_AD_INDEXING 1" >>confdefs.h
-
-         ;; #(
-  local) :
-     ;; #(
-  *) :
-    as_fn_error $? "bad value \"$ad_indexing_type\" for --with-ad-indexing-type" "$LINENO" 5 ;;
-esac
-
-{ $as_echo "$as_me:${as_lineno-$LINENO}: result: configuring with AD indexing type $ad_indexing_type" >&5
-$as_echo "configuring with AD indexing type $ad_indexing_type" >&6; }
-
-case "$derivative_type" in #(
-  sparse) :
-
-$as_echo "#define SPARSE_AD 1" >>confdefs.h
- ;; #(
-  nonsparse) :
-     ;; #(
-  *) :
-    as_fn_error $? "bad value \"$derivative_type\" for --with-derivative-type" "$LINENO" 5 ;;
-esac
-
-{ $as_echo "$as_me:${as_lineno-$LINENO}: result: configuring with derivative type $derivative_type" >&5
-$as_echo "configuring with derivative type $derivative_type" >&6; }
 
 
 # Check whether --with-libtorch was given.

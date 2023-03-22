@@ -11,9 +11,4 @@
 
 #include "MooseConfig.h"
 #include "DualReal.h"
-
-#ifdef MOOSE_SPARSE_AD
 #include "SparseOps.h"
-#else
-#include "NumberArrayOps.h"
-#endif

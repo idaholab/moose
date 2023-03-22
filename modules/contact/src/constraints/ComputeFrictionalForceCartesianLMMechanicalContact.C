@@ -73,8 +73,6 @@ ComputeFrictionalForceCartesianLMMechanicalContact::
 void
 ComputeFrictionalForceCartesianLMMechanicalContact::computeQpProperties()
 {
-#ifdef MOOSE_GLOBAL_AD_INDEXING
-
   ComputeWeightedGapCartesianLMMechanicalContact::computeQpProperties();
 
   // Trim derivatives
@@ -113,8 +111,6 @@ ComputeFrictionalForceCartesianLMMechanicalContact::computeQpProperties()
     relative_velocity = {sec_x_dot - prim_x_dot, sec_y_dot - prim_y_dot, 0.0};
 
   _qp_tangential_velocity_nodal = relative_velocity * (_JxW_msm[_qp] * _coord[_qp]);
-
-#endif
 }
 
 void
@@ -147,12 +143,10 @@ ComputeFrictionalForceCartesianLMMechanicalContact::residualSetup()
 void
 ComputeFrictionalForceCartesianLMMechanicalContact::post()
 {
-#ifdef MOOSE_SPARSE_AD
   Moose::Mortar::Contact::communicateGaps(
       _dof_to_weighted_gap, this->processor_id(), _mesh, _nodal, _normalize_c, _communicator);
   Moose::Mortar::Contact::communicateVelocities(
       _dof_to_weighted_tangential_velocity, this->processor_id(), _mesh, _nodal, _communicator);
-#endif
 
   // Enforce frictional complementarity constraints
   for (const auto & pr : _dof_to_weighted_tangential_velocity)
@@ -178,12 +172,10 @@ void
 ComputeFrictionalForceCartesianLMMechanicalContact::incorrectEdgeDroppingPost(
     const std::unordered_set<const Node *> & inactive_lm_nodes)
 {
-#ifdef MOOSE_SPARSE_AD
   Moose::Mortar::Contact::communicateGaps(
       _dof_to_weighted_gap, this->processor_id(), _mesh, _nodal, _normalize_c, _communicator);
   Moose::Mortar::Contact::communicateVelocities(
       _dof_to_weighted_tangential_velocity, this->processor_id(), _mesh, _nodal, _communicator);
-#endif
 
   // Enforce frictional complementarity constraints
   for (const auto & pr : _dof_to_weighted_tangential_velocity)
@@ -340,7 +332,6 @@ ComputeFrictionalForceCartesianLMMechanicalContact::enforceConstraintOnDof(
 
   libmesh_ignore(component_normal);
 
-#ifdef MOOSE_GLOBAL_AD_INDEXING
   _assembly.processResidualAndJacobian(
       normal_dof_residual,
       component_normal == 0 ? dof_index_x : (component_normal == 1 ? dof_index_y : dof_index_z),
@@ -359,5 +350,4 @@ ComputeFrictionalForceCartesianLMMechanicalContact::enforceConstraintOnDof(
         (component_normal == 0 || component_normal == 1) ? dof_index_z : dof_index_x,
         _vector_tags,
         _matrix_tags);
-#endif
 }

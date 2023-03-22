@@ -10,7 +10,6 @@
       exodiff = 'InterfaceDiffusiveFluxIntegral_fe.e'
       cli_args = 'postprocessor_type=InterfaceDiffusiveFluxIntegral'
       detail = 'with finite element variables, '
-      ad_indexing_type = 'global'
     []
     [fv]
       type = 'Exodiff'
@@ -18,7 +17,6 @@
       exodiff = 'InterfaceDiffusiveFluxIntegral_fv.e'
       detail = 'and with finite volume variables.'
       cli_args = 'postprocessor_type=InterfaceDiffusiveFluxIntegral'
-      ad_indexing_type = 'global'
     []
     [fv-harmonic]
       type = 'CSVDiff'
@@ -31,7 +29,6 @@
                   Outputs/file_base='${raw ${postprocessor_type} _fv-harmonic}'
                   Outputs/exodus=false
                   Outputs/csv=true"
-      ad_indexing_type = 'global'
     []
   []
   [average]
@@ -42,7 +39,6 @@
       exodiff = 'InterfaceDiffusiveFluxAverage_fe.e'
       cli_args = 'postprocessor_type=InterfaceDiffusiveFluxAverage'
       detail = 'with finite element variables, '
-      ad_indexing_type = 'global'
     []
     [fv]
       type = 'Exodiff'
@@ -50,7 +46,6 @@
       exodiff = 'InterfaceDiffusiveFluxAverage_fv.e'
       cli_args = 'postprocessor_type=InterfaceDiffusiveFluxAverage'
       detail = 'and with finite volume variables.'
-      ad_indexing_type = 'global'
     []
   []
 []

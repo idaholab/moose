@@ -6,6 +6,5 @@
     input = 'natural_circulation_dogleg.i'
     exodiff = 'natural_circulation_dogleg_out.e'
     requirement = 'The system shall be able to use pressure inlet and outlet boundary conditions to compute open, chimney-type natural circulation problems.'
-    ad_indexing_type = 'global'
   []
 []

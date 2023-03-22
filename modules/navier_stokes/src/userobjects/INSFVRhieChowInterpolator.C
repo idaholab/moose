@@ -383,7 +383,6 @@ INSFVRhieChowInterpolator::execute()
 void
 INSFVRhieChowInterpolator::finalize()
 {
-#ifdef MOOSE_GLOBAL_AD_INDEXING
   if (_a_data_provided || this->n_processors() == 1 ||
       _velocity_interp_method == Moose::FV::InterpMethod::Average)
     return;
@@ -449,9 +448,6 @@ INSFVRhieChowInterpolator::finalize()
     TIMPI::pull_parallel_vector_data(
         _communicator, pull_requests, gather_functor, action_functor, &example);
   }
-#else
-  mooseError("INSFVRhieChowInterpolator only supported for global AD indexing.");
-#endif
 }
 
 void

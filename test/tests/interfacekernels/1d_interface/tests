@@ -25,7 +25,6 @@
       input = 'ad-coupled-value-coupled-flux.i'
       exodiff = 'ad-coupled-value-coupled-flux_out.e'
       detail = 'using a Jacobian computed via automatic differentiation'
-      ad_indexing_type = 'global'
     []
   []
   [interface_diffusion_penalty_with_jump_material]

@@ -24,7 +24,6 @@
     exodiff = 'fv_material_quadrature_out.e'
     issues = '#15194'
     requirement = 'The system shall provide location dependent boundary material property evaluations with finite volume variables.'
-    ad_indexing_type = 'global'
   []
 
   [ad_piecewise_linear]
@@ -32,7 +31,6 @@
     input = 'fv_material_quadrature.i'
     exodiff = 'ad_piecewise.e'
     cli_args = "Materials/active='k1_piecewise' Outputs/file_base=ad_piecewise"
-    ad_indexing_type = 'global'
     issues = '#20644'
     design = 'PiecewiseConstant.md'
     requirement = 'The system shall be able to use automatic differentiation instantiations of piecewise linear functions.'

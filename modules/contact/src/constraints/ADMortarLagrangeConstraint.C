@@ -185,11 +185,6 @@ ADMortarLagrangeConstraint::computeJacobian(Moose::MortarType mortar_type)
       // no adaptivity option is used (dofs are not checked).
       // Uncomment when https://github.com/libMesh/MetaPhysicL/pull/18 makes it to MOOSE
 
-      //#ifdef MOOSE_SPARSE_AD
-      //      if (_apply_derivative_threshold)
-      //        residuals_lower[index_lower].derivatives().sparsity_trim(_ad_derivative_threshold);
-      //#endif
-
       index_lower++;
     }
   }
@@ -270,10 +265,6 @@ ADMortarLagrangeConstraint::computeJacobian(Moose::MortarType mortar_type)
           for (_j = 0; _j < shape_space_sizes[type_index]; _j++)
           {
             _i = index;
-#ifndef MOOSE_SPARSE_AD
-            mooseAssert(ad_offsets[type_index] + _j < MOOSE_AD_MAX_DOFS_PER_ELEM,
-                        "Out of bounds access in derivative vector.");
-#endif
             _local_ke(_i, _j) +=
                 input_residuals[index_lower].derivatives()[ad_offsets[type_index] + _j];
           }

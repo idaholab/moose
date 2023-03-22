@@ -7,7 +7,6 @@
       type = Exodiff
       input = test.i
       exodiff = test_out.e
-      ad_indexing_type = 'global'
       detail = 'compute the correct results when the residual and Jacobian are computed separately'
     []
     [resid_together]
@@ -15,13 +14,11 @@
       input = test.i
       cli_args = 'Outputs/file_base=together Executioner/residual_and_jacobian_together=true'
       exodiff = together.e
-      ad_indexing_type = 'global'
       detail = 'compute the correct results when the residual and Jacobian are computed together'
     []
     [jac_separate]
       type = PetscJacobianTester
       input = test.i
-      ad_indexing_type = 'global'
       run_sim = True
       detail = 'compute the correct Jacobian when the residual and Jacobian are computed separately'
       ratio_tol = 5e-8
@@ -31,7 +28,6 @@
       input = test.i
       cli_args = 'Executioner/residual_and_jacobian_together=true'
       run_sim = True
-      ad_indexing_type = 'global'
       detail = 'compute the correct Jacobian when the residual and Jacobian are computed together'
       ratio_tol = 5e-8
     []

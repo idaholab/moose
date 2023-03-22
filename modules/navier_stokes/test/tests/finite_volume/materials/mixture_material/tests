@@ -6,6 +6,5 @@
     type = CSVDiff
     input = mixture.i
     csvdiff = "mixture_out_cp_0001.csv mixture_out_k_0001.csv"
-    ad_indexing_type = 'global'
   []
 []

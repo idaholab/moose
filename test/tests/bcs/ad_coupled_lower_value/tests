@@ -13,6 +13,5 @@
     exodiff = 'together_out.e'
     requirement = 'The system shall be able to compute the residual and Jacobian together when boundary conditions couple in variables defined on lower-dimensional blocks.'
     issues = '#19444'
-    ad_indexing_type = 'global'
   []
 []

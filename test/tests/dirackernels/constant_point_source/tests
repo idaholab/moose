@@ -34,7 +34,6 @@
       exodiff = '1d_fv_out.e'
 
       detail = 'with finite volume variables'
-      ad_indexing_type = 'global'
     []
     [vector2D]
       type = 'Exodiff'

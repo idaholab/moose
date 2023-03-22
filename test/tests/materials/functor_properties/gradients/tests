@@ -3,7 +3,6 @@
   issues = '#19943'
   [exo]
     type = Exodiff
-    ad_indexing_type = 'global'
     input = functor-gradients.i
     exodiff = functor-gradients_out.e
     requirement = 'The system shall be able to create functor material properties from the gradient of other functors.'

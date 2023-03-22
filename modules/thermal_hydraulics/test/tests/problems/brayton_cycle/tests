@@ -10,7 +10,6 @@
     abs_zero = 1e-10
     rel_err = 1e-5
     max_parallel = 1
-    ad_indexing_type = 'global'
     cli_args = 'motor_ramp_up_duration=1 motor_ramp_down_duration=1 post_motor_time=1'
   []
 
@@ -22,7 +21,6 @@
     abs_zero = 1e-10
     rel_err = 1e-5
     max_parallel = 1
-    ad_indexing_type = 'global'
     cli_args = 'motor_ramp_up_duration=1 motor_ramp_down_duration=1 post_motor_time=1'
   []
 
@@ -32,7 +30,6 @@
     check_input = true
     max_parallel = 1
     recover = false
-    ad_indexing_type = 'global'
     requirement = 'The system shall be able to model an open recuperated Brayton cycle'
   []
 []

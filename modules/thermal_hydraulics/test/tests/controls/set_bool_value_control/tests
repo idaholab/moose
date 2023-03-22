@@ -4,6 +4,5 @@
     input = 'test.i'
     csvdiff = 'test_out.csv'
     allow_test_objects = true
-    ad_indexing_type = 'global'
   []
 []

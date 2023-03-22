@@ -6,6 +6,5 @@
     allow_test_objects = true
     recover = false
     max_parallel = 1
-    ad_indexing_type = 'global'
   []
 []

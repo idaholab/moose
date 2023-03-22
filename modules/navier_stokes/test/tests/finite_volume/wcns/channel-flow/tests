@@ -8,7 +8,6 @@
     method = "!dbg"
     cli_args = "AuxVariables/inactive='mixing_length'"
     requirement = 'The system shall be able to solve for a transient 2D channel case with a weakly compressible formulation.'
-    ad_indexing_type = 'global'
     abs_zero = 1e-9
     recover = false # see #19126
     valgrind = HEAVY
@@ -19,7 +18,6 @@
     exodiff = 2d-transient-action_out.e
     method = "!dbg"
     requirement = 'The system shall be able to solve for a transient 2D channel case with a weakly compressible formulation using the NSFV action syntax.'
-    ad_indexing_type = 'global'
     abs_zero = 1e-9
     recover = false # see #19126
     valgrind = HEAVY
@@ -31,7 +29,6 @@
     cli_args = "FVKernels/inactive='' AuxKernels/inactive='' Outputs/file_base='2d-turbulent'"
     method = "!dbg"
     requirement = 'The system shall be able to solve for a transient 2D channel case with a weakly compressible formulation and a mixing length turbulence model.'
-    ad_indexing_type = 'global'
     mesh_mode = REPLICATED
     abs_zero = 1e-9
     recover = false # see #19126
@@ -54,7 +51,6 @@
     cli_args = "Modules/NavierStokesFV/turbulence_handling='mixing-length' Modules/NavierStokesFV/mixing_length_delta='0.5' Modules/NavierStokesFV/mixing_length_walls='top' Modules/NavierStokesFV/mixing_length_aux_execute_on='initial' Modules/NavierStokesFV/mixing_length_two_term_bc_expansion=true Outputs/file_base='2d-turbulent-action'"
     method = "!dbg"
     requirement = 'The system shall be able to solve for a transient 2D channel case with a weakly compressible formulation and a mixing length turbulence model using the NSFV action syntax.'
-    ad_indexing_type = 'global'
     mesh_mode = REPLICATED
     abs_zero = 1e-9
     recover = false # see #19126
@@ -75,7 +71,6 @@
     input = 2d-transient.i
     run_sim = True
     requirement = 'The system shall be able to solve for a transient 2D channel case with a weakly compressible formulation and show a perfect Jacobian.'
-    ad_indexing_type = 'global'
     difference_tol = 1e-7
     cli_args = 'Mesh/gen/nx=2 Mesh/gen/ny=2 Executioner/num_steps=1'
   []
@@ -83,7 +78,6 @@
     type = 'PetscJacobianTester'
     input = 2d-transient.i
     run_sim = True
-    ad_indexing_type = 'global'
     difference_tol = 1e-7
     cli_args = "Mesh/gen/nx=2 Mesh/gen/ny=2 Executioner/num_steps=1 FVKernels/inactive='' AuxKernels/inactive='' Outputs/file_base='2d-turbulent'"
     requirement = 'The system shall be able to solve for a transient 2D channel case with a weakly compressible formulation and a mixing length turbulence model and show a perfect Jacobian.'

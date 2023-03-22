@@ -554,40 +554,22 @@ ADComputeIncrementalShellStrain::computeSolnVector()
 
     for (unsigned int i = 0; i < _ndisp; ++i)
     {
-#ifndef MOOSE_GLOBAL_AD_INDEXING
-      std::size_t ad_offset = _disp_num[i] * _nonlinear_sys.getMaxVarNDofsPerElem();
-#endif
       _soln_disp_index[j][i] = _nodes[j]->dof_number(_nonlinear_sys.number(), _disp_num[i], 0);
       _soln_vector(j + i * _nodes.size()) =
           (*_sol)(_soln_disp_index[j][i]) - _sol_old(_soln_disp_index[j][i]);
       if (ADReal::do_derivatives)
-        Moose::derivInsert(_soln_vector(j + i * _nodes.size()).derivatives(),
-#ifdef MOOSE_GLOBAL_AD_INDEXING
-                           _soln_disp_index[j][i]
-#else
-                           ad_offset + j
-#endif
-                           ,
-                           1.);
+        Moose::derivInsert(
+            _soln_vector(j + i * _nodes.size()).derivatives(), _soln_disp_index[j][i], 1.);
     }
 
     for (unsigned int i = 0; i < _nrot; ++i)
     {
-#ifndef MOOSE_GLOBAL_AD_INDEXING
-      std::size_t ad_offset = _rot_num[i] * _nonlinear_sys.getMaxVarNDofsPerElem();
-#endif
       _soln_rot_index[j][i] = _nodes[j]->dof_number(_nonlinear_sys.number(), _rot_num[i], 0);
       _soln_vector(j + 12 + i * _nodes.size()) =
           (*_sol)(_soln_rot_index[j][i]) - _sol_old(_soln_rot_index[j][i]);
       if (ADReal::do_derivatives)
-        Moose::derivInsert(_soln_vector(j + 12 + i * _nodes.size()).derivatives(),
-#ifdef MOOSE_GLOBAL_AD_INDEXING
-                           _soln_rot_index[j][i]
-#else
-                           ad_offset + j
-#endif
-                           ,
-                           1.);
+        Moose::derivInsert(
+            _soln_vector(j + 12 + i * _nodes.size()).derivatives(), _soln_rot_index[j][i], 1.);
     }
   }
 }

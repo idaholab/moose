@@ -36,8 +36,6 @@ protected:
    */
   void computeJacobian(Moose::MortarType mortar_type) override;
 
-#ifdef MOOSE_GLOBAL_AD_INDEXING
-
   /**
    * Get rid of AD derivative entries by dof index
    */
@@ -52,7 +50,7 @@ protected:
                               const Variables & moose_var,
                               DualNumbers & ad_vars,
                               const bool is_secondary);
-#endif
+
   void computeResidualAndJacobian() override;
 
 private:
@@ -76,7 +74,6 @@ protected:
   const ADVariableGradient & _grad_u_primary;
 };
 
-#ifdef MOOSE_GLOBAL_AD_INDEXING
 template <typename Variables, typename DualNumbers>
 void
 ADMortarConstraint::trimInteriorNodeDerivatives(
@@ -110,4 +107,3 @@ ADMortarConstraint::trimInteriorNodeDerivatives(
       }
     }
 }
-#endif

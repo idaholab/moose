@@ -5,6 +5,5 @@
   [./horizontal_blocks_mortar_TM]
     type = 'RunApp'
     input = horizontal_blocks_mortar_TM.i
-    ad_indexing_type = 'global'
   [../]
 []

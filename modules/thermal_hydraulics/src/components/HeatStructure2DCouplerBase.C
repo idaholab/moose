@@ -118,8 +118,4 @@ HeatStructure2DCouplerBase::check() const
 
   if (constMesh().isDistributedMesh())
     logError("HeatStructure2DCouplerBase does not work with a distributed mesh.");
-
-#ifndef MOOSE_GLOBAL_AD_INDEXING
-  logError("HeatStructure2DCouplerBase only works with global AD indexing.");
-#endif
 }

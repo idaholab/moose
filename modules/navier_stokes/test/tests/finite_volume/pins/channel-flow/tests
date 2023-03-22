@@ -7,7 +7,6 @@
     exodiff = rc.e
     method = "!dbg"
     requirement = 'The system shall be able to model free-slip conditions in a porous media channel; specifically the tangential velocity shall have a uniform value of unity, the normal velocity shall have a uniform value of zero, and the pressure shall not change.'
-    ad_indexing_type = 'global'
     cli_args = "Outputs/file_base='rc'"
   []
   [free-slip-action]
@@ -17,7 +16,6 @@
     method = "!dbg"
     issues = "#19472"
     requirement = 'The system should be able to run a porous medium channel computation using the NSFV action.'
-    ad_indexing_type = 'global'
     cli_args = "Outputs/file_base='rc-action'"
   []
   [free-slip-rz]
@@ -26,7 +24,6 @@
     exodiff = rc-rz.e
     method = "!dbg"
     requirement = 'The system shall be able to model free-slip conditions in a porous media cylindrical channel; specifically the tangential velocity shall have a uniform value of unity, the normal velocity shall have a uniform value of zero, and the pressure shall not change.'
-    ad_indexing_type = 'global'
     cli_args = "Problem/coord_type='rz' Problem/rz_coord_axis='x' Outputs/file_base='rc-rz'"
   []
   [no-slip]
@@ -36,7 +33,6 @@
     method = "!dbg"
     requirement = 'The system shall be able to model no-slip conditions in a porous media channel; specifically, moving down the channel, the tangential velocity shall develop a parabolic profile.'
     abs_zero = 1e-9
-    ad_indexing_type = 'global'
     cli_args = "FVBCs/active='inlet-u inlet-v outlet-p no-slip-u no-slip-v' Outputs/file_base='rc-no-slip' -pc_type lu -pc_factor_shift_type NONZERO"
   []
   [no-slip-pressure-driven]
@@ -46,7 +42,6 @@
     method = "!dbg"
     requirement = 'The system shall be able to model no-slip conditions in a porous media channel with flow driven by a pressure differential; specifically, moving down the channel, the tangential velocity shall develop a parabolic profile.'
     abs_zero = 1e-9
-    ad_indexing_type = 'global'
     cli_args = "FVBCs/active='inlet-p outlet-p no-slip-u no-slip-v' Outputs/file_base='rc-no-slip-delta-pressure'"
   []
   [no-slip-pressure-driven-action]
@@ -57,7 +52,6 @@
     requirement = 'The system shall be able to model no-slip conditions in a porous media channel with flow driven by a pressure differential using the NSFVAction syntax.'
     abs_zero = 1e-9
     issues = "#19472"
-    ad_indexing_type = 'global'
     cli_args = "Modules/NavierStokesFV/inlet_boundaries='' Modules/NavierStokesFV/momentum_inlet_types='' Modules/NavierStokesFV/momentum_inlet_function='' Modules/NavierStokesFV/outlet_boundaries='left right' Modules/NavierStokesFV/momentum_outlet_types='fixed-pressure fixed-pressure' Modules/NavierStokesFV/momentum_wall_types='noslip noslip'  Modules/NavierStokesFV/pinned_pressure_value=0.01  Outputs/file_base='rc-no-slip-delta-pressure-action' Modules/NavierStokesFV/pressure_function='1 0'"
   []
   [no-slip-pressure-average]
@@ -67,7 +61,6 @@
     method = "!dbg"
     requirement = 'The system shall be able to model no-slip conditions in a porous media channel with a set mean pressure; specifically, moving down the channel, the tangential velocity shall develop a parabolic profile.'
     abs_zero = 1e-9
-    ad_indexing_type = 'global'
     cli_args = "Executioner/automatic_scaling=true Executioner/nl_rel_tol=1e-13 Variables/inactive='' FVKernels/inactive='' FVBCs/active='inlet-u inlet-v outlet-p-novalue outlet-u outlet-v no-slip-u no-slip-v' Outputs/file_base='rc-no-slip-mean-pressure'"
   []
   [no-slip-pressure-average-action]
@@ -78,7 +71,6 @@
     requirement = 'The system shall be able to model no-slip conditions in a porous media channel using the NSFV action and a set mean pressure.'
     abs_zero = 1e-9
     issues = "#19472"
-    ad_indexing_type = 'global'
     cli_args = "Modules/NavierStokesFV/momentum_wall_types='noslip noslip' Modules/NavierStokesFV/momentum_outlet_types='zero-gradient'  Modules/NavierStokesFV/pin_pressure=true  Modules/NavierStokesFV/pinned_pressure_type=average  Modules/NavierStokesFV/pinned_pressure_value=0.01  Outputs/file_base='rc-no-slip-mean-pressure-action' Modules/NavierStokesFV/pressure_function=''"
   []
   [no-slip-average]
@@ -88,7 +80,6 @@
     method = "!dbg"
     requirement = 'The system shall be able to model no-slip conditions in a porous media channel using an average interpolation for velocity; specifically, moving down the channel, the tangential velocity shall develop a parabolic profile.'
     abs_zero = 1e-9
-    ad_indexing_type = 'global'
     cli_args = "GlobalParams/velocity_interp_method='average' FVBCs/active='inlet-u inlet-v outlet-p no-slip-u no-slip-v' Outputs/file_base='rc-no-slip-average-velocity' -pc_type lu -pc_factor_shift_type NONZERO"
   []
   [no-slip-match]
@@ -98,7 +89,6 @@
     method = "!dbg"
     requirement = 'The system shall be able to model no-slip conditions in a porous media channel with a porosity of 1; specifically, it should match a regular INSFV simulation results.'
     abs_zero = 1e-9
-    ad_indexing_type = 'global'
     cli_args = "AuxVariables/porosity/initial_condition=1 FVBCs/active='inlet-u inlet-v outlet-p no-slip-u no-slip-v' Outputs/file_base='rc-no-slip-match-insfv' -pc_type lu -pc_factor_shift_type NONZERO"
   []
   [symmetry]
@@ -108,7 +98,6 @@
     method = "!dbg"
     requirement = 'The system shall be able to model no-slip conditions in a porous media channel with reflective boundary conditions on one side; specifically, moving down the channel, the tangential velocity shall develop a parabolic profile.'
     abs_zero = 1e-9
-    ad_indexing_type = 'global'
     cli_args = "FVBCs/no-slip-u/boundary='top' FVBCs/no-slip-v/boundary='top' FVBCs/active='inlet-u inlet-v outlet-p no-slip-u no-slip-v symmetry-u symmetry-v symmetry-p' Outputs/file_base='rc-no-slip-symmetry'"
   []
   [symmetry-action]
@@ -119,7 +108,6 @@
     requirement = 'The system shall be able to model no-slip conditions in a symmetric porous media channel using the NSFV action.'
     abs_zero = 1e-9
     issues = "#19472"
-    ad_indexing_type = 'global'
     cli_args = "Modules/NavierStokesFV/momentum_wall_types='noslip symmetry' Outputs/file_base='rc-no-slip-symmetry-action'"
   []
   [symmetry-rz]
@@ -129,7 +117,6 @@
     method = "!dbg"
     requirement = 'The system shall be able to model no-slip conditions in a cylindrical porous media channel with reflective boundary conditions on one side; specifically, moving down the channel, the tangential velocity shall develop a parabolic profile.'
     abs_zero = 1e-9
-    ad_indexing_type = 'global'
     cli_args = "Problem/coord_type='rz' Problem/rz_coord_axis='x' FVBCs/no-slip-u/boundary='top' FVBCs/no-slip-v/boundary='top' FVBCs/active='inlet-u inlet-v outlet-p no-slip-u no-slip-v symmetry-u symmetry-v symmetry-p' Outputs/file_base='rc-no-slip-rz-symmetry' -pc_type lu -pc_factor_shift_type NONZERO"
   []
   [friction]
@@ -139,7 +126,6 @@
     method = "!dbg"
     requirement = 'The system shall be able to model porous flow with volumetric friction, using the Darcy and Forchheimer friction models with no slip boundary conditions on the channel walls.'
     abs_zero = 1e-9
-    ad_indexing_type = 'global'
     cli_args = "Outputs/file_base='rc-friction' -pc_type lu -pc_factor_shift_type NONZERO"
   []
   [friction-action]
@@ -150,7 +136,6 @@
     requirement = 'The system shall be able to model porous flow with volumetric friction, using the Darcy and Forchheimer friction models and the NSFV action input syntax.'
     abs_zero = 1e-9
     issues = "#19472"
-    ad_indexing_type = 'global'
     cli_args = "Outputs/file_base='rc-friction-action' -pc_type lu -pc_factor_shift_type NONZERO"
   []
   [friction-free-slip]
@@ -160,7 +145,6 @@
     method = "!dbg"
     requirement = 'The system shall be able to model porous flow with volumetric friction, using the Darcy and Forchheimer friction models with free slip boundary conditions on the channel walls.'
     abs_zero = 1e-9
-    ad_indexing_type = 'global'
     cli_args = "FVBCs/inactive='no-slip-u no-slip-v' Outputs/file_base='rc-friction-free-slip' -pc_type lu -pc_factor_shift_type NONZERO"
     issues = '#16765'
   []
@@ -171,7 +155,6 @@
     method = "!dbg"
     requirement = 'The system shall be able to model porous flow with volumetric friction, using the Darcy and Forchheimer friction models with free slip boundary conditions using the NSFV action.'
     abs_zero = 1e-9
-    ad_indexing_type = 'global'
     cli_args = "Modules/NavierStokesFV/momentum_wall_types='slip symmetry' Outputs/file_base='rc-friction-free-slip-action' -pc_type lu -pc_factor_shift_type NONZERO"
     issues = '#19472'
   []
@@ -182,7 +165,6 @@
     method = "!dbg"
     requirement = 'The system shall be able to model porous flow with block-restricted volumetric friction.'
     abs_zero = 1e-9
-    ad_indexing_type = 'global'
     cli_args = "FVBCs/inactive='no-slip-u no-slip-v' FVKernels/u_friction/block=2  FVKernels/v_friction/block=2 Outputs/file_base='rc-friction-block' -pc_type lu -pc_factor_shift_type NONZERO"
     issues = '#16765'
   []
@@ -193,7 +175,6 @@
     method = "!dbg"
     requirement = 'The system shall be able to model porous flow with block-restricted volumetric friction using the NSFV action.'
     abs_zero = 1e-9
-    ad_indexing_type = 'global'
     cli_args = "Modules/NavierStokesFV/momentum_wall_types='slip symmetry' Modules/NavierStokesFV/friction_blocks='2' Outputs/file_base='rc-friction-block-action' -pc_type lu -pc_factor_shift_type NONZERO"
     issues = '#19472'
   []
@@ -204,7 +185,6 @@
     method = "!dbg"
     requirement = 'The system shall be able to solve the porous flow equations in RZ geometry using an integration by parts of the pressure term.'
     abs_zero = 1e-9
-    ad_indexing_type = 'global'
     issues = '#18478'
   []
 []

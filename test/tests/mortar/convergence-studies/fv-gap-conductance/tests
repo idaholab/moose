@@ -10,7 +10,6 @@
       detail = 'first order accuracy'
       required_python_packages = 'sympy pandas matplotlib'
       method = '!dbg'
-      ad_indexing_type = 'global'
     []
     [second_order]
       type = PythonUnitTest
@@ -19,7 +18,6 @@
       detail = 'second order accuracy'
       required_python_packages = 'sympy pandas matplotlib'
       method = '!dbg'
-      ad_indexing_type = 'global'
     []
   []
 []

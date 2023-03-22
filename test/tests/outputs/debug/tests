@@ -95,6 +95,5 @@
 
     requirement = 'The system shall be able to output debug information for functors and objects requesting functors'
     design = 'Debug/index.md'
-    ad_indexing_type = 'global'
   []
 []

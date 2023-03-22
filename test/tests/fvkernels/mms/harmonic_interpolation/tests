@@ -9,7 +9,6 @@
       test_case = TestAverageTriangles
       detail = 'when using a simple arithmetic average to determine the face values of discontinuous diffusion coefficients on a regular tri mesh.'
       method = '!dbg'
-      ad_indexing_type = 'global'
       required_python_packages = 'pandas matplotlib'
       valgrind = none
     []
@@ -19,7 +18,6 @@
       test_case = TestAverageQuads
       detail = 'when using a simple arithmetic average to determine the face values of discontinuous diffusion coefficients on a quad mesh.'
       method = '!dbg'
-      ad_indexing_type = 'global'
       required_python_packages = 'pandas matplotlib'
       valgrind = none
     []
@@ -32,7 +30,6 @@
       test_case = TestHarmonicTriangles
       detail = 'close to second order convergence, when using a simple harmonic average to determine the face values of discontinuous diffusion coefficients on a regular tri mesh.'
       method = '!dbg'
-      ad_indexing_type = 'global'
       required_python_packages = 'pandas matplotlib'
       valgrind = none
     []
@@ -42,7 +39,6 @@
       test_case = TestHarmonicQuads
       detail = 'second order convergence, when using a simple harmonic average to determine the face values of discontinuous diffusion coefficients on a quad mesh.'
       method = '!dbg'
-      ad_indexing_type = 'global'
       required_python_packages = 'pandas matplotlib'
       valgrind = none
     []

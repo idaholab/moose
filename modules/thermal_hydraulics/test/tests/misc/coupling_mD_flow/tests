@@ -4,6 +4,5 @@
     input = 'parent_non_overlapping.i'
     exodiff = 'parent_non_overlapping_out.e'
     recover = false
-    ad_indexing_type = 'global'
   []
 []

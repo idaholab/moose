@@ -208,6 +208,5 @@
     input = tag-fv.i
     exodiff = tag-fv_out.e
     requirement = 'The system shall be able to index solution vectors and residual vectors using the degree of freedom indices of a finite volume variable.'
-    ad_indexing_type = 'global'
   []
 []

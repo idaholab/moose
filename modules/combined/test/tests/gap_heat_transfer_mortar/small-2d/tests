@@ -11,7 +11,6 @@
       heavy = true
       detail = 'low conductivity in the gap and first order variables'
       cli_args = 'name=first_low_k'
-      ad_indexing_type = 'global'
     []
     [first_high_k]
       type = CSVDiff
@@ -20,7 +19,6 @@
       heavy = true
       detail = 'high conductivity in the gap and first order variables'
       cli_args = 'name=first_high_k Constraints/thermal_contact/k=100'
-      ad_indexing_type = 'global'
     []
     [second_low_k]
       type = CSVDiff
@@ -30,7 +28,6 @@
       detail = 'low conductivity in the gap and second order variables'
       cli_args = 'name=second_low_k Mesh/second_order=true order=SECOND'
       min_ad_size = '73'
-      ad_indexing_type = 'global'
     []
     [second_high_k]
       type = CSVDiff
@@ -40,7 +37,6 @@
       detail = 'high conductivity in the gap and second order variables'
       cli_args = 'name=second_high_k Mesh/second_order=true order=SECOND Constraints/thermal_contact/k=100'
       min_ad_size = '73'
-      ad_indexing_type = 'global'
     []
   []
 
@@ -55,14 +51,12 @@
       detail = 'to compute temperatures at the interface that converge to the analytical '
                'solution for a steady state heat transfer problem with a mechanical '
                'contact pressure of approximately unity.'
-      ad_indexing_type = 'global'
     []
     [open_gap_pressure_dependent]
       type = CSVDiff
       input = 'open_gap_pressure_dependent.i'
       csvdiff = 'open_gap_pressure_dependent_out.csv'
       detail = 'in an open gap geometry such that no heat transfer occurs between the two blocks.'
-      ad_indexing_type = 'global'
     []
     [multi_component_mortar_thermal_conduction]
       type = CSVDiff
@@ -72,7 +66,6 @@
                'dominates the heat flux when the blocks are in contact (and the '
                'contact pressure is nonzero) and the heat radition dominates when '
                'the blocks move out of contact.'
-      ad_indexing_type = 'global'
     []
   []
 []

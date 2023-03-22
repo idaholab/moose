@@ -731,20 +731,6 @@ FEProblemBase::initialSetup()
       if (displaced_problem)
         displaced_problem->nlSys(i).assignMaxVarNDofsPerNode(max_var_n_dofs_per_node);
     }
-
-    {
-      TIME_SECTION("settingRequireDerivativeSize", 5, "Setting Required Derivative Size");
-
-#ifndef MOOSE_SPARSE_AD
-      auto size_required = max_var_n_dofs_per_elem * nl.nVariables();
-      if (hasMortarCoupling())
-        size_required *= 3;
-      else if (hasNeighborCoupling())
-        size_required *= 2;
-
-      nl.setRequiredDerivativeSize(size_required);
-#endif
-    }
   }
 
   {
@@ -4140,6 +4126,8 @@ FEProblemBase::computeUserObjectsInternal(const ExecFlagType & type,
                                           const Moose::AuxGroup & group,
                                           TheWarehouse::Query & primary_query)
 {
+  TIME_SECTION("computeUserObjects", 1, "Computing User Objects");
+
   // Add group to query
   if (group == Moose::PRE_IC)
     primary_query.condition<AttribPreIC>(true);
@@ -4180,8 +4168,6 @@ FEProblemBase::computeUserObjectsInternal(const ExecFlagType & type,
 
     if (userobjs.empty() && genobjs.empty() && tgobjs.empty() && nodal.empty())
       continue;
-
-    TIME_SECTION("computeUserObjects", 1, "Computing User Objects");
 
     // Start the timer here since we have at least one active user object
     std::string compute_uo_tag = "computeUserObjects(" + Moose::stringify(type) + ")";
@@ -5896,14 +5882,12 @@ FEProblemBase::computeResidualAndJacobian(const NumericVector<Number> & soln,
       {
         auto & matrix = _current_nl_sys->getMatrix(tag);
         matrix.zero();
-#ifdef MOOSE_GLOBAL_AD_INDEXING
         if (haveADObjects())
           // PETSc algorithms require diagonal allocations regardless of whether there is non-zero
           // diagonal dependence. With global AD indexing we only add non-zero
           // dependence, so PETSc will scream at us unless we artificially add the diagonals.
           for (auto index : make_range(matrix.row_start(), matrix.row_stop()))
             matrix.add(index, index, 0);
-#endif
       }
 
     _aux->zeroVariablesForResidual();
@@ -6296,14 +6280,12 @@ FEProblemBase::computeJacobianTags(const std::set<TagID> & tags)
       {
         auto & matrix = _current_nl_sys->getMatrix(tag);
         matrix.zero();
-#ifdef MOOSE_GLOBAL_AD_INDEXING
         if (haveADObjects())
           // PETSc algorithms require diagonal allocations regardless of whether there is non-zero
           // diagonal dependence. With global AD indexing we only add non-zero
           // dependence, so PETSc will scream at us unless we artificially add the diagonals.
           for (auto index : make_range(matrix.row_start(), matrix.row_stop()))
             matrix.add(index, index, 0);
-#endif
       }
 
     _aux->zeroVariablesForJacobian();

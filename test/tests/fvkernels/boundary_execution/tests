@@ -6,7 +6,6 @@
     input = 2d.i
     exodiff = 2d_all.e
     requirement = 'The system shall be able to force execution of flux kernels on all external boundaries.'
-    ad_indexing_type = 'global'
     cli_args = 'Outputs/file_base=2d_all FVKernels/diff_all/force_boundary_execution=true FVKernels/diff_part/force_boundary_execution=true'
   []
   [force_external_boundary]
@@ -14,7 +13,6 @@
     input = 2d.i
     exodiff = 2d_bot.e
     requirement = 'The system shall be able to force execution of flux kernels on one (or several) external boundary(ies).'
-    ad_indexing_type = 'global'
     cli_args = 'Outputs/file_base=2d_bot FVKernels/diff_all/boundaries_to_force=bottom FVKernels/diff_part/boundaries_to_force=bottom'
   []
   [ignore_post_forcing]
@@ -22,7 +20,6 @@
     input = 2d.i
     exodiff = 2d_bot.e
     requirement = 'The system shall be able to force execution of flux kernels on all but one (or several) external boundary(ies).'
-    ad_indexing_type = 'global'
     cli_args = "Outputs/file_base=2d_bot FVKernels/diff_all/force_boundary_execution=true FVKernels/diff_all/boundaries_to_avoid='top' FVKernels/diff_part/force_boundary_execution=true"
     prereq = force_external_boundary
   []
@@ -31,7 +28,6 @@
     input = 2d.i
     exodiff = 2d_internal.e
     requirement = 'The system shall be able to avoid executing on one (or several) internal boundary(ies) or sidesets.'
-    ad_indexing_type = 'global'
     cli_args = "Outputs/file_base=2d_internal FVKernels/diff_all/boundaries_to_avoid='corner_inward'"
   []
 
@@ -40,7 +36,6 @@
     input = 2d.i
     expect_err = 'A boundary may not be specified in both boundaries_to_avoid and boundaries_to_force'
     requirement = 'The system shall error if conflictingly told to avoid and execute a flux kernel on the same boundary.'
-    ad_indexing_type = 'global'
     cli_args = "FVKernels/diff_all/boundaries_to_avoid='left' FVKernels/diff_all/boundaries_to_force='left'"
   []
 []

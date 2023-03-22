@@ -10,7 +10,6 @@
     cli_args = "Outputs/out/type=CSV Outputs/out/execute_on=final Outputs/out/show='mass_conservation energy_conservation'"
     abs_zero = 1e-5
     rel_err = 0
-    ad_indexing_type = 'global'
 
     requirement = 'The system shall conserve mass and energy when using ShaftConnectedCompressor1Phase.'
   []
@@ -22,7 +21,6 @@
     rel_err = 4e-3
     abs_zero = 1e-9
     cli_args = 'Outputs/exodus=true'
-    ad_indexing_type = 'global'
 
     requirement = 'The system shall be able to model a compressor with ShaftConnectedCompressor1Phase.'
   []
@@ -36,7 +34,6 @@
       GlobalParams/initial_vel_x=0
       Executioner/num_steps=1"
     recover = False
-    ad_indexing_type = 'global'
 
     requirement = 'The system shall allow ShaftConnectedCompressor1Phase to run with a zero shaft speed.'
     issues = '#19863 #20008 #20009'
@@ -52,7 +49,6 @@
     allow_test_objects = true
     max_threads = 1
     max_parallel = 1
-    ad_indexing_type = 'global'
 
     requirement = 'The system shall correctly compute Jacobians for ShaftConnectedCompressor1Phase.'
   []
@@ -62,7 +58,6 @@
     input = 'shaft_motor_compressor.i'
     cli_args = "Components/shaft/connected_components=''"
     expect_err = "This component must be connected to a shaft"
-    ad_indexing_type = 'global'
 
     requirement = 'The system shall throw an error if ShaftConnectedCompressor1Phase is not connected to a shaft component.'
     issues = '#19863 #19998'

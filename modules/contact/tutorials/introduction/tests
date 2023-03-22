@@ -8,7 +8,6 @@
     type = RunApp
     input = step02.i
     check_input = True
-    ad_indexing_type = 'global'
   []
   [plot02]
     type = RunApp

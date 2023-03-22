@@ -38,9 +38,6 @@ LMKernel::LMKernel(const InputParameters & parameters)
     _lm_test(_lm_var.phi()),
     _lm_sign(getParam<bool>("lm_sign_positive") ? 1. : -1)
 {
-#ifndef MOOSE_GLOBAL_AD_INDEXING
-  mooseError("LMKernel requires global AD indexing");
-#endif
 }
 
 void

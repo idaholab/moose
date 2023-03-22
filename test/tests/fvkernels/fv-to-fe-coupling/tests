@@ -7,7 +7,6 @@
     cli_args = "Materials/active='bad_mat'"
     requirement = 'The system shall be able to couple both finite element and finite volume variables, as functors, into functor material property calculations.'
     exodiff = '1d_out.e'
-    ad_indexing_type = 'global'
     issues = '#16809'
   []
   [coupled-gold]
@@ -15,7 +14,6 @@
     input = 1d.i
     requirement = 'The system shall support coupling of a finite volume variable into a finite element calculation.'
     exodiff = '1d_out.e'
-    ad_indexing_type = 'global'
     prereq = 'fe-and-fv-with-functors'
   []
   [jac]
@@ -25,7 +23,6 @@
     requirement = 'The system shall compute a perfect Jacobian when coupling a finite volume variable into a finite element calculation.'
     difference_tol = 1e-4
     ratio_tol = 1e-7
-    ad_indexing_type = 'global'
   []
   [dep-in-same-mat-as-coupled-fe]
     type = Exodiff
@@ -35,6 +32,5 @@
     requirement = 'The system shall allow a finite volume object to consume a material property that depends on another material property that is computed in a material that couples in a finite element variable.'
     prereq = coupled-gold
     issues = '#16809'
-    ad_indexing_type = 'global'
   []
 []

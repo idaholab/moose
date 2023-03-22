@@ -4,14 +4,12 @@
     type = 'Exodiff'
     input = 'phy.stagnation_p_T_steady_3eqn.i'
     exodiff = 'phy.stagnation_p_T_steady_3eqn_out.e'
-    ad_indexing_type = 'global'
   []
 
   [phy:stagnation_p_T_transient_3eqn]
     type = 'Exodiff'
     input = 'phy.stagnation_p_T_transient_3eqn.i'
     exodiff = 'phy.stagnation_p_T_transient_3eqn_out.e'
-    ad_indexing_type = 'global'
   []
 
   [phy:p0T0_3eqn]
@@ -20,20 +18,17 @@
     exodiff = 'phy.p0T0_3eqn.e'
     max_time = 500
     group = 'inlet_p0_T0 outlet pipe 1phase'
-    ad_indexing_type = 'global'
   []
 
   [clg:ctrl_p0_3eqn]
     type = 'CSVDiff'
     input = 'clg.ctrl_p0_3eqn.i'
     csvdiff = 'clg.ctrl_p0_3eqn_out.csv'
-    ad_indexing_type = 'global'
   []
 
   [clg:ctrl_T0_3eqn]
     type = 'CSVDiff'
     input = 'clg.ctrl_T0_3eqn.i'
     csvdiff = 'clg.ctrl_T0_3eqn_out.csv'
-    ad_indexing_type = 'global'
   []
 []

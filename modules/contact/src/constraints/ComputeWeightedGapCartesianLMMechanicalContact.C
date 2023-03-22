@@ -86,11 +86,6 @@ ComputeWeightedGapCartesianLMMechanicalContact::ComputeWeightedGapCartesianLMMec
     _disp_y_var(getVar("disp_y", 0)),
     _disp_z_var(_has_disp_z ? getVar("disp_z", 0) : nullptr)
 {
-#ifndef MOOSE_GLOBAL_AD_INDEXING
-  mooseError("ComputeWeightedGapLMMechanicalContact relies on use of the global indexing container "
-             "in order to make its implementation feasible");
-#endif
-
   if (_interpolate_normals)
     paramError("interpolate_normals",
                "This version of normal mechanical contact does not allow mortar interpolation of "
@@ -126,7 +121,6 @@ ADReal ComputeWeightedGapCartesianLMMechanicalContact::computeQpResidual(Moose::
 void
 ComputeWeightedGapCartesianLMMechanicalContact::computeQpProperties()
 {
-#ifdef MOOSE_GLOBAL_AD_INDEXING
   // Trim interior node variable derivatives
   const auto & primary_ip_lowerd_map = amg().getPrimaryIpToLowerElementMap(
       *_lower_primary_elem, *_lower_primary_elem->interior_parent(), *_lower_secondary_elem);
@@ -168,7 +162,6 @@ ComputeWeightedGapCartesianLMMechanicalContact::computeQpProperties()
 
   // To do normalization of constraint coefficient (c_n)
   _qp_factor = _JxW_msm[_qp] * _coord[_qp];
-#endif
 }
 
 void
@@ -260,10 +253,8 @@ ComputeWeightedGapCartesianLMMechanicalContact::computeJacobian(const Moose::Mor
 void
 ComputeWeightedGapCartesianLMMechanicalContact::post()
 {
-#ifdef MOOSE_SPARSE_AD
   Moose::Mortar::Contact::communicateGaps(
       _dof_to_weighted_gap, this->processor_id(), _mesh, _nodal, _normalize_c, _communicator);
-#endif
 
   for (const auto & pr : _dof_to_weighted_gap)
   {
@@ -281,10 +272,8 @@ void
 ComputeWeightedGapCartesianLMMechanicalContact::incorrectEdgeDroppingPost(
     const std::unordered_set<const Node *> & inactive_lm_nodes)
 {
-#ifdef MOOSE_SPARSE_AD
   Moose::Mortar::Contact::communicateGaps(
       _dof_to_weighted_gap, this->processor_id(), _mesh, _nodal, _normalize_c, _communicator);
-#endif
 
   for (const auto & pr : _dof_to_weighted_gap)
   {
@@ -366,8 +355,6 @@ ComputeWeightedGapCartesianLMMechanicalContact::enforceConstraintOnDof(const Dof
 
   libmesh_ignore(component_normal);
 
-#ifdef MOOSE_GLOBAL_AD_INDEXING
-
   _assembly.processResidualAndJacobian(
       normal_dof_residual,
       component_normal == 0 ? dof_index_x : (component_normal == 1 ? dof_index_y : dof_index_z),
@@ -386,5 +373,4 @@ ComputeWeightedGapCartesianLMMechanicalContact::enforceConstraintOnDof(const Dof
         (component_normal == 0 || component_normal == 1) ? dof_index_z : dof_index_x,
         _vector_tags,
         _matrix_tags);
-#endif
 }

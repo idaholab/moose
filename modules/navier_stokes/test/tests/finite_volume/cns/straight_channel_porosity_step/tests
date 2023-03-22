@@ -8,7 +8,6 @@
       input = implicit-euler-basic-kt-primitive.i
       exodiff = implicit-euler-basic-kt-primitive_out.e
       detail = 'the Kurganov-Tadmor scheme'
-      ad_indexing_type = 'global'
       recover = false # See https://github.com/idaholab/moose/issues/17906
       valgrind = HEAVY
     []
@@ -17,7 +16,6 @@
       input = hllc.i
       exodiff = hllc_out.e
       detail = 'the HLLC scheme'
-      ad_indexing_type = 'global'
     []
   []
   [twod_y_channel_upwind_frictional_porosity_function]
@@ -25,7 +23,6 @@
     input = rotated-2d-bkt-function-porosity.i
     exodiff = rotated-2d-bkt-function-porosity_out.e
     requirement = 'The system shall be able to solve a two-dimensional y-channel problem with frictional drag and a series of porosity jumps smoothed into a continuous porosity function, using the Kurganov-Tadmor scheme for computing intercell convective fluxes with upwind limiting interpolation (e.g. the + cell centroid value is used as the + side value at the face).'
-    ad_indexing_type = 'global'
     mumps = true
     recover = false # See https://github.com/idaholab/moose/issues/17906
     method = "!dbg"
@@ -37,7 +34,6 @@
     input = rotated-2d-bkt-function-porosity-mixed.i
     exodiff = rotated-2d-bkt-function-porosity-mixed_out.e
     requirement = 'The system shall be able to solve a two-dimensional y-channel problem using a mixed variable set with frictional drag and a series of porosity jumps smoothed into a continuous porosity function, using the Kurganov-Tadmor scheme for computing intercell convective fluxes with upwind limiting interpolation (e.g. the + cell centroid value is used as the + side value at the face).'
-    ad_indexing_type = 'global'
     mumps = true
     recover = false # See https://github.com/idaholab/moose/issues/17906
     method = "!dbg"
@@ -48,7 +44,6 @@
     type = Exodiff
     input = dc.i
     exodiff = dc_out.e
-    ad_indexing_type = 'global'
     requirement = 'The system shall support the deferred correction algorithm for transitioning from low-order to high-order representations of the convective flux during a transient simulation.'
     abs_zero = 1e-8
     valgrind = HEAVY

@@ -11,8 +11,6 @@
 
 #include "MooseConfig.h"
 
-#ifdef MOOSE_SPARSE_AD
-
 #include "FEProblemBase.h"
 #include "ADReal.h"
 #include "MooseMesh.h"
@@ -110,4 +108,3 @@ void communicateGaps(
 }
 }
 }
-#endif

@@ -16,39 +16,14 @@ namespace FV
 {
 template <typename T, typename T2>
 ADReal
-gradUDotNormal(const T &
-#ifndef MOOSE_GLOBAL_AD_INDEXING
-                   elem_value
-#endif
-               ,
-               const T2 &
-#ifndef MOOSE_GLOBAL_AD_INDEXING
-                   neighbor_value
-#endif
-               ,
+gradUDotNormal(const T &,
+               const T2 &,
                const FaceInfo & face_info,
-               const MooseVariableFV<Real> &
-#ifdef MOOSE_GLOBAL_AD_INDEXING
-                   fv_var
-#endif
-               ,
-               bool
-#ifdef MOOSE_GLOBAL_AD_INDEXING
-                   correct_skewness
-#endif
-)
+               const MooseVariableFV<Real> & fv_var,
+               bool correct_skewness)
 
 {
-#ifdef MOOSE_GLOBAL_AD_INDEXING
-
   return fv_var.adGradSln(face_info, correct_skewness) * face_info.normal();
-#else
-
-  // Orthogonal contribution
-  auto orthogonal = (neighbor_value - elem_value) / face_info.dCNMag();
-
-  return orthogonal; // TO-DO for local indexing: add non-orthogonal contribution
-#endif
 }
 
 bool

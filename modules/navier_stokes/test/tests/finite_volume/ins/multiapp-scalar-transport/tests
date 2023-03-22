@@ -5,7 +5,6 @@
     input = 'fluid-flow.i'
     exodiff = 'fluid-flow_out.e fluid-flow_out_scalar0.e'
     requirement = 'The system shall be able to transport passive scalar quantities in an application different from the fluid flow.'
-    ad_indexing_type = 'global'
     valgrind = HEAVY
     issues = '#16585'
   []
@@ -15,7 +14,6 @@
     exodiff = 'fluid-flow_out.e fluid-flow_out_scalar0.e'
     cli_args = 'MultiApps/scalar/input_files=scalar-transport_action.i'
     requirement = 'The system shall be able to transport passive scalar quantities in an application different from the fluid flow, using the NSFV simplified action syntax.'
-    ad_indexing_type = 'global'
     valgrind = HEAVY
     issues = '#16585'
   []
@@ -28,7 +26,6 @@
     expect_err = 'Rhie Chow coefficients may not be specified for average velocity interpolation'
     requirement = 'The system shall error out if both average and Rhie Chow velocity interpolation parameters are provided.'
     issues = '#20294'
-    ad_indexing_type = 'global'
   []
   [RC_yet_a_not_provided]
     type = RunException
@@ -37,7 +34,6 @@
     expect_err = 'No INSFVKernels detected for the velocity variables*'
     requirement = 'The system shall error out if Rhie Chow velocity interpolation is requested but the a coefficients are not provided and cannot be computed from the momemtum equation.'
     issues = '#20294'
-    ad_indexing_type = 'global'
   []
   [bad_a_components]
     requirement = 'The system shall error out if the Rhie Chow a coefficients are provided in a manner inconsistent with the dimension of the problem '
@@ -48,7 +44,6 @@
       cli_args = "UserObjects/active='rc_bad' GlobalParams/rhie_chow_user_object='rc_bad' UserObjects/rc_bad/a_v=ay"
       expect_err = 'If the a_v coefficients are provided, then a_u must be provided'
       detail = 'for example with the Y coefficient but not the X one'
-      ad_indexing_type = 'global'
     []
     [bad_a_components_wu]
       type = RunException
@@ -56,7 +51,6 @@
       cli_args = "UserObjects/active='rc_bad' GlobalParams/rhie_chow_user_object='rc_bad' UserObjects/rc_bad/a_w=ay"
       expect_err = 'If the a_w coefficients are provided, then a_u must be provided'
       detail = 'for example with the Z coefficient but not the X one'
-      ad_indexing_type = 'global'
     []
     [missing_ax_action]
       type = RunException
@@ -64,7 +58,6 @@
       cli_args = "AuxVariables/inactive=ax"
       expect_err = 'Rhie Chow coefficient ax must be provided for advection by auxiliary velocities'
       detail = 'for example if the x coefficient is missing in a >1D problem'
-      ad_indexing_type = 'global'
     []
     [missing_ay_action]
       type = RunException
@@ -72,7 +65,6 @@
       cli_args = "AuxVariables/inactive=ay"
       expect_err = 'Rhie Chow coefficient ay must be provided for advection by auxiliary velocities'
       detail = 'for example if the y coefficient is missing in a >2D problem'
-      ad_indexing_type = 'global'
     []
   []
 []

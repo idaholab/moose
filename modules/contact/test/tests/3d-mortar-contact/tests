@@ -19,7 +19,6 @@
                   'constraints where the primary suface is composed of a single element and the '
                   'secondary side is composed of first order faces with a required derivative '
                   'container size of less than 50'
-    ad_indexing_type = 'global'
   []
   [frictionless-mortar-3d-action]
     type = 'CSVDiff'

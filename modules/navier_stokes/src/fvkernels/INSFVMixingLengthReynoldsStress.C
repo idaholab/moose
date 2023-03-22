@@ -50,12 +50,6 @@ INSFVMixingLengthReynoldsStress::INSFVMixingLengthReynoldsStress(const InputPara
     _rho(getFunctor<ADReal>(NS::density)),
     _mixing_len(getFunctor<ADReal>("mixing_length"))
 {
-#ifndef MOOSE_GLOBAL_AD_INDEXING
-  mooseError("INSFV is not supported by local AD indexing. In order to use INSFV, please run the "
-             "configure script in the root MOOSE directory with the configure option "
-             "'--with-ad-indexing-type=global'");
-#endif
-
   if (_dim >= 2 && !_v)
     mooseError(
         "In two or more dimensions, the v velocity must be supplied using the 'v' parameter");
@@ -66,7 +60,6 @@ INSFVMixingLengthReynoldsStress::INSFVMixingLengthReynoldsStress(const InputPara
 ADReal
 INSFVMixingLengthReynoldsStress::computeStrongResidual()
 {
-#ifdef MOOSE_GLOBAL_AD_INDEXING
   constexpr Real offset = 1e-15; // prevents explosion of sqrt(x) derivative to infinity
 
   const auto face = makeCDFace(*_face_info);
@@ -130,11 +123,6 @@ INSFVMixingLengthReynoldsStress::computeStrongResidual()
 
   // Return the turbulent stress contribution to the momentum equation
   return -1 * rho * eddy_diff * norm_strain_rate;
-
-#else
-  return 0;
-
-#endif
 }
 
 void

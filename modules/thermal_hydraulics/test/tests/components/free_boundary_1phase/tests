@@ -7,7 +7,6 @@
     cli_args = 'Outputs/out_mass/type=CSV Outputs/out_mass/execute_postprocessors_on=final Outputs/out_mass/show=mass_conservation'
     abs_zero = 1e-10
     rel_err = 1e-15
-    ad_indexing_type = 'global'
   []
   [phy:momentum_1phase]
     type = 'CSVDiff'
@@ -17,7 +16,6 @@
     abs_zero = 1e-6
     rel_err = 1e-15
     prereq = 'phy:mass_1phase'
-    ad_indexing_type = 'global'
   []
   [phy:energy_1phase]
     type = 'CSVDiff'
@@ -27,6 +25,5 @@
     abs_zero = 1e-2
     rel_err = 1e-15
     prereq = 'phy:momentum_1phase'
-    ad_indexing_type = 'global'
   []
 []

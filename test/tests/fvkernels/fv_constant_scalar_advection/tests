@@ -6,6 +6,5 @@
     requirement = 'The system shall run a 2D linear advection problems using the finite volume method a regular mesh.'
     design = 'fv_design.md'
     issues = '#14549'
-    ad_indexing_type = 'global'
   []
 []

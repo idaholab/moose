@@ -51,7 +51,6 @@ FVOnlyAddDiffusionToOneSideOfInterface::computeResidualAndJacobian(const FaceInf
   computeJacobian(fi);
 }
 
-#ifdef MOOSE_GLOBAL_AD_INDEXING
 void
 FVOnlyAddDiffusionToOneSideOfInterface::computeJacobian(const FaceInfo & fi)
 {
@@ -70,12 +69,6 @@ FVOnlyAddDiffusionToOneSideOfInterface::computeJacobian(const FaceInfo & fi)
   else
     _assembly.processResidualAndJacobian(-r, neigh_dof_indices[0], _vector_tags, _matrix_tags);
 }
-#else
-void
-FVOnlyAddDiffusionToOneSideOfInterface::computeJacobian(const FaceInfo &)
-{
-}
-#endif
 
 ADReal
 FVOnlyAddDiffusionToOneSideOfInterface::computeQpResidual()

@@ -11,7 +11,6 @@
       input = 'small.i'
       csvdiff = 'small.csv'
       heavy = true
-      ad_indexing_type = 'global'
     []
     [finite]
       detail = 'using the finite strain formulation.'
@@ -19,7 +18,6 @@
       input = 'finite.i'
       csvdiff = 'finite.csv'
       heavy = true
-      ad_indexing_type = 'global'
     []
     [finite_scaling]
       detail = 'using the finite strain formulation with automatic scaling.'
@@ -29,7 +27,6 @@
                  'name=finite_scaling'
       csvdiff = 'finite_scaling.csv'
       heavy = true
-      ad_indexing_type = 'global'
     []
     [finite_rr]
       detail = 'using the finite strain formulation and reference residual.'
@@ -37,7 +34,6 @@
       input = 'finite_rr.i'
       csvdiff = 'finite_rr.csv'
       heavy = true
-      ad_indexing_type = 'global'
     []
   []
   [stiff]
@@ -51,7 +47,6 @@
       csvdiff = 'stiff_stiff.csv'
       cli_args = 'E_block=1e9 E_plank=1e9 name=stiff_stiff'
       heavy = true
-      ad_indexing_type = 'global'
     []
     [soft_stiff]
       detail = 'using with a soft block and a stiff plank.'
@@ -60,7 +55,6 @@
       csvdiff = 'soft_stiff.csv'
       cli_args = 'E_block=1e7 E_plank=1e9 name=soft_stiff'
       heavy = true
-     ad_indexing_type = 'global'
     []
   []
 []

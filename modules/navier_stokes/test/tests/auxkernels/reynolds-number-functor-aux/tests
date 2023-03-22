@@ -8,14 +8,12 @@
       input = fv.i
       exodiff = fv_out.e
       detail = 'finite volume discretizations'
-      ad_indexing_type = 'global'
     []
     [fe]
       type = Exodiff
       input = fe.i
       exodiff = fe_out.e
       detail = 'finite element discretizations'
-      ad_indexing_type = 'global'
     []
   []
 []

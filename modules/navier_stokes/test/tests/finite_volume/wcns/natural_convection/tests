@@ -6,7 +6,6 @@
     input = 'natural_circulation_pipe.i'
     exodiff = 'natural_circulation_pipe_out.e'
     requirement = 'The system shall be able to use pressure inlet and outlet boundary conditions to compute open, chimney-type natural circulation problems using weakly compressible navier-stokes equations.'
-    ad_indexing_type = 'global'
     abs_zero = 1e-9
   []
 []

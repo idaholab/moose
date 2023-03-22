@@ -46,7 +46,6 @@
                 'parent_fv_out_pp_sub0.e parent_fv_out_pp_sub1.e'
 
       detail = "from a finite volume constant monomial source variable."
-      ad_indexing_type = 'global'
     []
   []
 

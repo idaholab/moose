@@ -24,7 +24,6 @@
     abs_zero = 1e-8
     requirement = 'The system shall be able to compute flow rates and prove mass, momentum and energy conservation at internal and external boundaries of a frictionless heated straight channel with a finite volume incompressible Navier Stokes model.'
     cli_args = "Mesh/inactive='diverging_mesh' Outputs/file_base='straight_INSFV' -pc_type lu -pc_factor_shift_type NONZERO"
-    ad_indexing_type = 'global'
   []
   [insfv_diverging]
     requirement = 'The system shall be able to compute flow rates and prove mass, momentum and energy conservation at internal and external boundaries of a frictionless heated diverging channel with a finite volume incompressible Navier Stokes model,'
@@ -34,7 +33,6 @@
       csvdiff = diverging_INSFV_quad_xy.csv
       abs_zero = 1e-8
       detail = 'with a quadrilateral mesh in XY geometry, with mass flow measured using either a variable or material property,'
-      ad_indexing_type = 'global'
       cli_args = "Outputs/file_base='diverging_INSFV_quad_xy'"
     []
     [insfv_quad_rz]
@@ -44,7 +42,6 @@
       abs_zero = 1e-8
       detail = 'with a quadrilateral mesh in RZ geometry,'
       cli_args = "Problem/coord_type=RZ Outputs/file_base='diverging_INSFV_quad_rz'"
-      ad_indexing_type = 'global'
     []
     [insfv_tri_xy]
       type = CSVDiff
@@ -53,7 +50,6 @@
       abs_zero = 1e-8
       detail = 'with a triangular mesh in XY geometry,'
       cli_args = "Mesh/diverging_mesh/file='expansion_tri.e' Outputs/file_base='diverging_INSFV_tri_xy' GlobalParams/two_term_boundary_expansion=false"
-      ad_indexing_type = 'global'
     []
     [insfv_quad_xy_upwind]
       type = CSVDiff
@@ -62,7 +58,6 @@
       abs_zero = 1e-8
       detail = 'with upwind interpolation of advected quantities,'
       cli_args = "advected_interp_method='upwind' Outputs/file_base='diverging_INSFV_quad_xy_upwind' Postprocessors/inactive='inlet_momentum_x inlet_momentum_y'"
-      ad_indexing_type = 'global'
     []
     [insfv_quad_xy_noslip]
       type = CSVDiff
@@ -71,7 +66,6 @@
       abs_zero = 1e-8
       detail = 'with no-slip boundary conditions, for which momentum and energy will be dissipated at the wall.'
       cli_args = "FVBCs/inactive='free-slip-u free-slip-v' Outputs/file_base='diverging_INSFV_quad_xy_noslip'"
-      ad_indexing_type = 'global'
     []
     [insfv_quad_xy_noslip_refined]
       type = CSVDiff
@@ -80,7 +74,6 @@
       abs_zero = 1e-8
       detail = 'with uniform refinement near an internal interface.'
       cli_args = "-r 1 FVBCs/inactive='free-slip-u free-slip-v' Outputs/file_base='diverging_INSFV_quad_xy_noslip'"
-      ad_indexing_type = 'global'
     []
     [initial]
       type = CSVDiff
@@ -89,7 +82,6 @@
       abs_zero = 1e-8
       detail = 'at the very beginning of the simulation, with the initialized velocities'
       cli_args = "Variables/temperature/initial_condition=290 Postprocessors/inlet_mass_variable/execute_on=initial Postprocessors/inlet_mass_constant/execute_on=initial Postprocessors/inlet_mass_matprop/execute_on=initial Postprocessors/outlet_mass/execute_on=INITIAL Outputs/file_base=diverging_INSFV_initial"
-      ad_indexing_type = 'global'
     []
   []
   [pinsfv_straight]
@@ -99,7 +91,6 @@
     abs_zero = 1e-8
     requirement = 'The system shall be able to compute flow rates and prove mass, momentum and energy conservation at internal and external boundaries of a frictionless heated straight channel with a finite volume porous media incompressible Navier Stokes model.'
     cli_args = "Mesh/inactive='diverging_mesh' Outputs/file_base='straight_PINSFV'"
-    ad_indexing_type = 'global'
   []
   [pinsfv_diverging]
     requirement = 'The system shall be able to compute flow rates and prove mass, momentum and energy conservation at internal and external boundaries of a frictionless heated diverging channel with a finite volume porous media incompressible Navier Stokes model,'
@@ -109,7 +100,6 @@
       csvdiff = diverging_PINSFV_quad_xy.csv
       abs_zero = 1e-8
       detail = 'with a quadrilateral mesh in XY geometry, with mass flow measured using either a variable or material property,'
-      ad_indexing_type = 'global'
       cli_args = "Outputs/file_base='diverging_PINSFV_quad_xy'"
     []
     [pinsfv_quad_rz]
@@ -119,7 +109,6 @@
       abs_zero = 1e-8
       detail = 'with a quadrilateral mesh in RZ geometry,'
       cli_args = "Problem/coord_type=RZ Outputs/file_base='diverging_PINSFV_quad_rz'"
-      ad_indexing_type = 'global'
     []
     [pinsfv_quad_xy_upwind]
       type = CSVDiff
@@ -128,7 +117,6 @@
       abs_zero = 1e-8
       detail = 'with upwind interpolation of advected quantities,'
       cli_args = "advected_interp_method='upwind' Outputs/file_base='diverging_PINSFV_quad_xy_upwind' Postprocessors/inactive='inlet_momentum_x inlet_momentum_y'"
-      ad_indexing_type = 'global'
     []
     [pinsfv_quad_xy_noslip]
       type = CSVDiff
@@ -137,7 +125,6 @@
       abs_zero = 1e-8
       detail = 'and with no-slip boundary conditions, for which momentum and energy will be dissipated at the wall.'
       cli_args = "FVBCs/inactive='free-slip-u free-slip-v' Outputs/file_base='diverging_PINSFV_quad_xy_noslip'"
-      ad_indexing_type = 'global'
     []
   []
 
@@ -150,7 +137,6 @@
       expect_err = 'Volumetric flow rates cannot be computed on internal flow boundaries on INITIAL'
       cli_args = 'Postprocessors/mid1_mass/execute_on=initial'
       detail = 'a volumetric flow rate is requested at the initialization of the simulation on a boundary internal to the flow domain when using finite volume and Rhie Chow interpolation, as this is not supported'
-      ad_indexing_type = 'global'
     []
   []
 []

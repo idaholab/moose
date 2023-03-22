@@ -73,7 +73,6 @@ ComputeDynamicWeightedGapLMMechanicalContact::ComputeDynamicWeightedGapLMMechani
 void
 ComputeDynamicWeightedGapLMMechanicalContact::computeQpProperties()
 {
-#ifdef MOOSE_GLOBAL_AD_INDEXING
   // Trim interior node variable derivatives
   const auto & primary_ip_lowerd_map = amg().getPrimaryIpToLowerElementMap(
       *_lower_primary_elem, *_lower_primary_elem->interior_parent(), *_lower_secondary_elem);
@@ -144,7 +143,6 @@ ComputeDynamicWeightedGapLMMechanicalContact::computeQpProperties()
 
   // To do normalization of constraint coefficient (c_n)
   _qp_factor = _JxW_msm[_qp] * _coord[_qp];
-#endif
 }
 
 void
@@ -202,10 +200,8 @@ ComputeDynamicWeightedGapLMMechanicalContact::residualSetup()
 void
 ComputeDynamicWeightedGapLMMechanicalContact::post()
 {
-#ifdef MOOSE_SPARSE_AD
   Moose::Mortar::Contact::communicateGaps(
       _dof_to_weighted_gap, this->processor_id(), _mesh, _nodal, _normalize_c, _communicator);
-#endif
 
   if (_has_wear)
     communicateWear();
@@ -248,10 +244,8 @@ void
 ComputeDynamicWeightedGapLMMechanicalContact::incorrectEdgeDroppingPost(
     const std::unordered_set<const Node *> & inactive_lm_nodes)
 {
-#ifdef MOOSE_SPARSE_AD
   Moose::Mortar::Contact::communicateGaps(
       _dof_to_weighted_gap, this->processor_id(), _mesh, _nodal, _normalize_c, _communicator);
-#endif
 
   if (_has_wear)
     communicateWear();
@@ -295,7 +289,6 @@ ComputeDynamicWeightedGapLMMechanicalContact::incorrectEdgeDroppingPost(
 void
 ComputeDynamicWeightedGapLMMechanicalContact::communicateWear()
 {
-#ifdef MOOSE_SPARSE_AD
   // We may have wear depth information that should go to other processes that own the dofs
   using Datum = std::pair<dof_id_type, ADReal>;
   std::unordered_map<processor_id_type, std::vector<Datum>> push_data;
@@ -328,5 +321,4 @@ ComputeDynamicWeightedGapLMMechanicalContact::communicateWear()
   };
 
   TIMPI::push_parallel_vector_data(_communicator, push_data, action_functor);
-#endif
 }

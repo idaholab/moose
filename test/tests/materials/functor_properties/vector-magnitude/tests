@@ -6,13 +6,11 @@
     input = test.i
     exodiff = test_out.e
     requirement = 'The system shall be able to compute the vector norm in a functor material property of component scalars'
-    ad_indexing_type = 'global'
   []
   [vector-test]
     type = Exodiff
     input = vector-test.i
     exodiff = vector-test_out.e
-    ad_indexing_type = 'global'
     requirement = 'The system shall be able to supply a functor capable of computing the norm of a vector functor.'
   []
   [multiple_provided]
@@ -20,7 +18,6 @@
     [x_functor]
       type = RunException
       input = vector-test.i
-      ad_indexing_type = 'global'
       detail = 'x-component functor parameter'
       expect_err = "Either a 'x_functor' or 'vector_functor' parameter must be provided to 'functor'"
       cli_args = 'Materials/functor/x_functor=0'
@@ -28,7 +25,6 @@
     [y_functor]
       type = RunException
       input = vector-test.i
-      ad_indexing_type = 'global'
       detail = 'y-component functor parameter'
       expect_err = "Either a 'y_functor' or 'vector_functor' parameter must be provided to 'functor'"
       cli_args = 'Materials/functor/y_functor=0'

@@ -13,7 +13,6 @@
       rel_err = 1e-5
       max_parallel = 1
       group = '1phase rdg explicit pipe free_boundary'
-      ad_indexing_type = 'global'
 
       detail = 'using an explicit temporal discretization, and'
     []
@@ -33,7 +32,6 @@
       rel_err = 1e-5
       max_parallel = 1
       method = opt
-      ad_indexing_type = 'global'
 
       detail = 'using an implicit temporal discretization.'
     []

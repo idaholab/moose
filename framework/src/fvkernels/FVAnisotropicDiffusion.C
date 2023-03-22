@@ -31,14 +31,6 @@ FVAnisotropicDiffusion::validParams()
 FVAnisotropicDiffusion::FVAnisotropicDiffusion(const InputParameters & params)
   : FVFluxKernel(params), _coeff(getFunctor<ADRealVectorValue>("coeff"))
 {
-#ifndef MOOSE_GLOBAL_AD_INDEXING
-  mooseError("FVAnisotropicDiffusion is not supported by local AD indexing. In order to use this "
-             "object, please run "
-             "the configure script in the root MOOSE directory with the configure option "
-             "'--with-ad-indexing-type=global'. Note that global indexing is now the default "
-             "configuration for AD indexing type.");
-#endif
-
   const auto & interp_method = getParam<MooseEnum>("coeff_interp_method");
   if (interp_method == "average")
     _coeff_interp_method = Moose::FV::InterpMethod::Average;
