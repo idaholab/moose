@@ -76,6 +76,11 @@ MooseMesh::validParams()
                              "DISTRIBUTED: Always use libMesh::DistributedMesh");
 
   params.addParam<bool>(
+      "use_distributed_mesh",
+      true,
+      "If use_distributed_mesh=true, distributed mesh is adopted in calculation.");
+
+  params.addParam<bool>(
       "allow_renumbering",
       true,
       "If allow_renumbering=false, node and element numbers are kept fixed until deletion");
@@ -175,7 +180,7 @@ MooseMesh::MooseMesh(const InputParameters & parameters)
     Restartable(this, "Mesh"),
     PerfGraphInterface(this),
     _parallel_type(getParam<MooseEnum>("parallel_type").getEnum<MooseMesh::ParallelType>()),
-    _use_distributed_mesh(false),
+    _use_distributed_mesh(getParam<bool>("use_distributed_mesh")),
     _distribution_overridden(false),
     _parallel_type_overridden(false),
     _mesh(nullptr),

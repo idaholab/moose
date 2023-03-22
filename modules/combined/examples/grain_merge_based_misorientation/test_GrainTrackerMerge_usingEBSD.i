@@ -1,3 +1,7 @@
+# This test was used for grain grain with re-merging grains based on 
+# misorientation angle, and with the initial miscrostructure from
+# EBSD data. Distributed Mesh was adopted in FEM.
+
 my_filename = "case2_EBSD"
 
 [Mesh]
@@ -5,6 +9,7 @@ my_filename = "case2_EBSD"
     type = EBSDMeshGenerator
     filename = local_ebsd_Ti.inl
   []
+  use_distributed_mesh = true
 []
 
 [GlobalParams]
