@@ -8,7 +8,6 @@
     abs_zero = 1e-8
     requirement = 'The system shall be able to compute the pressure drop in a straight channel with a finite element incompressible Navier Stokes model.'
     cli_args = "Mesh/inactive='diverging_mesh' Outputs/file_base='straight_insad'"
-    ad_indexing_type = 'global'
   []
   [fe_diverging]
     requirement = 'The system shall be able to compute the pressure drop in a diverging channel with a finite element incompressible Navier Stokes model'
@@ -19,7 +18,6 @@
       abs_zero = 1e-8
       detail = 'with a regular face pressure evaluation, and'
       cli_args = "Outputs/file_base='diverging_insad'"
-      ad_indexing_type = 'global'
     []
     [weighted]
       type = CSVDiff
@@ -30,7 +28,6 @@
                   Postprocessors/pdrop_total/weighting_functor='velocity' Postprocessors/pdrop_mid1/weighting_functor='velocity'
                   Postprocessors/pdrop_mid2/weighting_functor='velocity' Postprocessors/pdrop_mid3/weighting_functor='velocity'"
       detail = 'with a pressure drop face evaluation weighted by the local velocity.'
-      ad_indexing_type = 'global'
     []
   []
 
@@ -43,7 +40,6 @@
       abs_zero = 1e-8
       cli_args = "Mesh/inactive='diverging_mesh' Outputs/file_base='straight_insfv' -pc_type lu -pc_factor_shift_type NONZERO"
       detail = 'with a regular face pressure evaluation, and'
-      ad_indexing_type = 'global'
     []
     [weighted]
       type = CSVDiff
@@ -55,7 +51,6 @@
                   Postprocessors/pdrop_total/weighting_functor='velocity' Postprocessors/pdrop_mid1/weighting_functor='velocity'
                   Postprocessors/pdrop_mid2/weighting_functor='velocity' Postprocessors/pdrop_mid3/weighting_functor='velocity'"
       detail = 'with a pressure drop face evaluation weighted by the local velocity'
-      ad_indexing_type = 'global'
     []
   []
 
@@ -67,7 +62,6 @@
       csvdiff = diverging_insfv_quad_xy.csv
       abs_zero = 1e-8
       detail = 'with a quadrilateral mesh in XY geometry, with mass flow measured using either a variable or material property, and'
-      ad_indexing_type = 'global'
       cli_args = "Outputs/file_base='diverging_insfv_quad_xy'"
     []
     [insfv_quad_rz]
@@ -77,7 +71,6 @@
       abs_zero = 1e-8
       detail = 'with a quadrilateral mesh in RZ geometry.'
       cli_args = "Mesh/coord_type=RZ Outputs/file_base='diverging_insfv_quad_rz'"
-      ad_indexing_type = 'global'
     []
   []
 
@@ -121,7 +114,6 @@
                   Materials/null/prop_values='0 0 0'
                   Postprocessors/pdrop_total/weighting_functor=null"
       detail = 'the weighting functor integrates to 0, and'
-      ad_indexing_type = 'global'
     []
     [face_interp_scheme_for_fe]
       type = RunException
