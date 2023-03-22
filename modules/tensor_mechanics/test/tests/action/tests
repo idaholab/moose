@@ -102,7 +102,7 @@
   [action_eigenstrain]
     type = RunApp
     input = "action_eigenstrain.i"
-    expect_out = "solid: eigenstrain1,eigenstrain2"
+    expect_out = "solid: eigenstrain1, eigenstrain2"
     match_literal = true
     design = "syntax/Modules/TensorMechanics/Master/index.md"
     requirement = "The TensorMechanics MasterAction shall extract eigenstrain names from material "

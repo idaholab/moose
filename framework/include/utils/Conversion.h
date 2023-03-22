@@ -136,7 +136,7 @@ stringify(const std::pair<T, U> & p, const std::string & delim = ":")
 template <template <typename...> class T, typename... U>
 std::string
 stringify(const T<U...> & c,
-          const std::string & delim = ",",
+          const std::string & delim = ", ",
           const std::string & elem_encl = "",
           bool enclose_list_in_curly_braces = false)
 {

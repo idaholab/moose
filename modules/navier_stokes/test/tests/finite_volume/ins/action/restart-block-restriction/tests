@@ -16,7 +16,7 @@
     cli_args = "Modules/NavierStokesFV/block='1 2'"
     expect_err = "The suppled variable \(vel_x\) does not have the same block-restriction as the "
                  "NSFVAction. The restriction of the variable is: \(ANY_BLOCK_ID\) while the "
-                 "restriction for the action is: \(1,2\)"
+                 "restriction for the action is: \(1, 2\)"
     prereq = restricted-data-save
     recover = false
   []
