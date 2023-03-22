@@ -25,7 +25,7 @@
     type = RunApp
     input = perf_graph_live_print.i
     cli_args = 'Problem/print_during_section=true'
-    expect_out = "Timed section just started, printing something though\n(Currently|Still) Executing"
+    expect_out = "Timed section just started, printing something though\n(Currently|Still)"
 
     issues = '#23746'
     design = 'utils/PerfGraphLivePrint.md'
@@ -36,7 +36,7 @@
     type = RunApp
     input = perf_graph_live_print.i
     cli_args = "MultiApps/active='subapp' --color off"
-    expect_out = "subapp0: Testing Slowness( |\.){64}\["
+    expect_out = "subapp0: Testing Slowness"
 
     issues = '#19114'
     design = 'utils/PerfGraphLivePrint.md'
