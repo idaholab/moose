@@ -12,9 +12,7 @@
 #        (0,0) *--------------*
 #                 bottom_pipe
 #
-# Heating and cooling occurs in the range z = (0.2 m, 0.8 m). Heat input is
-# provided with a constant, uniform function, and cooling occurs via convective
-# heat transfer with an ambient temperature.
+# Heating and cooling occurs in the range z = (0.2 m, 0.8 m) with uniform heat fluxes.
 
 n_elems = 50
 
@@ -30,6 +28,8 @@ htc = 25.0
 area = ${fparse 0.25 * pi * diam^2}
 S_heated = ${fparse pi * diam * heated_length}
 S_cooled = ${fparse pi * diam * heated_length}
+
+output_variables = 'rho p T vel rhouA'
 
 [GlobalParams]
   gravity_vector = '0 0 -9.81'
@@ -169,8 +169,39 @@ S_cooled = ${fparse pi * diam * heated_length}
   l_max_its = 10
 []
 
+[VectorPostprocessors]
+  [heated_pipe_vpp]
+    type = ElementValueSampler
+    block = 'heated_pipe'
+    variable = ${output_variables}
+    sort_by = z
+    execute_on = 'FINAL'
+  []
+  [top_pipe_vpp]
+    type = ElementValueSampler
+    block = 'top_pipe'
+    variable = ${output_variables}
+    sort_by = x
+    execute_on = 'FINAL'
+  []
+  [cooled_pipe_vpp]
+    type = ElementValueSampler
+    block = 'cooled_pipe'
+    variable = ${output_variables}
+    sort_by = z
+    execute_on = 'FINAL'
+  []
+  [bottom_pipe_vpp]
+    type = ElementValueSampler
+    block = 'bottom_pipe'
+    variable = ${output_variables}
+    sort_by = x
+    execute_on = 'FINAL'
+  []
+[]
+
 [Outputs]
-  exodus = true
+  xml = true
   velocity_as_vector = false
-  show = 'p T vel'
+  execute_on = 'FINAL'
 []

@@ -3,9 +3,9 @@
   issues = '#23790'
 
   [test]
-    type = Exodiff
+    type = XMLDiff
     input = 'natural_circulation.i'
-    exodiff = 'natural_circulation_out.e'
+    xmldiff = 'natural_circulation_out.xml'
     rel_err = 1e-4 # parallel/threading tests require this
     heavy = true
     recover = false # run to steady-state; recover does not know when half transient ends
