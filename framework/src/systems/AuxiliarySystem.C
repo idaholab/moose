@@ -768,6 +768,10 @@ AuxiliarySystem::computeMortarNodalVars(const ExecFlagType type)
           {
             _fe_problem.setException("We caught a libMesh::LogicError:" + std::string(e.what()));
           }
+          catch (MetaPhysicL::LogicError & e)
+          {
+            moose::translateMetaPhysicLError(e);
+          }
         }
         PARALLEL_CATCH;
 

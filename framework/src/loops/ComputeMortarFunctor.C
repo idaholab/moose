@@ -156,6 +156,10 @@ ComputeMortarFunctor::operator()(const Moose::ComputeType compute_type)
     {
       _fe_problem.setException(e.what());
     }
+    catch (MetaPhysicL::LogicError & e)
+    {
+      moose::translateMetaPhysicLError(e);
+    }
   }
   PARALLEL_CATCH;
 
