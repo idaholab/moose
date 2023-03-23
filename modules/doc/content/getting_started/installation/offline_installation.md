@@ -267,6 +267,7 @@ export CC=mpicc CXX=mpicxx FC=mpif90 F90=mpif90 F77=mpif77
 export MOOSE_DIR=$HOME/offline/moose
 ```
 
+!alert tip
 You will need to perform the above, each and every time you log into the target machine and wish to
 perform development on your application. To that end, creating a special profile you can source in
 one command is recommended.
