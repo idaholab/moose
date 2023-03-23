@@ -3429,13 +3429,24 @@ NonlinearSystemBase::checkKernelCoverage(const std::set<SubdomainID> & mesh_subd
 
     if (!difference.empty())
     {
+      std::vector<SubdomainID> difference_vec =
+          std::vector<SubdomainID>(difference.begin(), difference.end());
+      std::vector<SubdomainName> difference_names = _mesh.getSubdomainNames(difference_vec);
+      std::stringstream missing_block_names;
+      std::copy(difference_names.begin(),
+                difference_names.end(),
+                std::ostream_iterator<std::string>(missing_block_names, " "));
       std::stringstream missing_block_ids;
       std::copy(difference.begin(),
                 difference.end(),
                 std::ostream_iterator<unsigned int>(missing_block_ids, " "));
+
       mooseError("Each subdomain must contain at least one Kernel.\nThe following block(s) lack an "
                  "active kernel: " +
-                 missing_block_ids.str());
+                     missing_block_names.str(),
+                 " (ids: ",
+                 missing_block_ids.str(),
+                 ")");
     }
   }
 

@@ -31,6 +31,7 @@
 
   # Very small timestep size
   dt = 1e-13
+  dtmin = 1e-13
   solve_type = PJFNK
   petsc_options_iname = '-pc_type -pc_hypre_type'
   petsc_options_value = 'hypre boomeramg'

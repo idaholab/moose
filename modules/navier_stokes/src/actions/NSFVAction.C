@@ -283,7 +283,8 @@ NSFVAction::validParams()
                         "To indicate if the enthalpy material is set up outside of the action.");
 
   params.addParamNamesToGroup("ambient_convection_alpha ambient_convection_blocks "
-                              "ambient_temperature external_heat_source external_heat_source_coeff",
+                              "ambient_temperature external_heat_source external_heat_source_coeff "
+                              "use_external_enthalpy_material",
                               "Energy equation");
 
   /**
@@ -457,7 +458,8 @@ NSFVAction::validParams()
       "momentum_face_interpolation energy_face_interpolation passive_scalar_face_interpolation "
       "pressure_face_interpolation momentum_two_term_bc_expansion "
       "energy_two_term_bc_expansion passive_scalar_two_term_bc_expansion "
-      "mixing_length_two_term_bc_expansion pressure_two_term_bc_expansion",
+      "mixing_length_two_term_bc_expansion pressure_two_term_bc_expansion "
+      "velocity_interpolation",
       "Numerical scheme");
 
   params.addParamNamesToGroup("momentum_scaling energy_scaling mass_scaling passive_scalar_scaling",
