@@ -113,6 +113,7 @@ public:
   ///@{ default values
   static Real relativeToleranceDefault() { return 1e-8; }
   static Real absoluteToleranceDefault() { return 1e-13; }
+  static Real xToleranceDefault() { return 1e-15; }
   static unsigned int minIterationsDefault() { return 3; }
   static unsigned int maxIterationsDefault() { return 1000; }
   static Real acceptableMultiplierDefault() { return 10.0; }
@@ -124,6 +125,9 @@ public:
 
   Real _relative_tolerance_square;
   Real _absolute_tolerance_square;
+  // Threshold for minimum step size of linear iterations
+  Real _x_tolerance_square;
+
   unsigned int _min_iterations;
   unsigned int _max_iterations;
   Real _acceptable_multiplier;
@@ -160,9 +164,6 @@ protected:
 
   /// number of nested iterations
   std::size_t _n_iterations;
-
-  // Threshold for minimum step size of linear iterations
-  Real _x_tol;
 
   /// Size a dynamic Jacobian matrix correctly
   void sizeItems(const NestedSolveTempl<is_ad>::DynamicVector & guess,
@@ -430,7 +431,7 @@ NestedSolveTempl<is_ad>::nonlinear(V & guess, T & compute)
     linear(jacobian, delta, residual);
 
     // Check if step size is smaller than the floating point tolerance
-    if (delta.cwiseAbs().maxCoeff() <= _x_tol)
+    if (normSquare(delta) <= _x_tolerance_square)
     {
       _state = State::CONVERGED_XTOL;
       return;
@@ -440,10 +441,7 @@ NestedSolveTempl<is_ad>::nonlinear(V & guess, T & compute)
     _n_iterations++;
 
     // compute residual and jacobian for the next iteration
-    Real _alpha = compute(guess, residual, jacobian);
-
-    // Dampen output if requested
-    guess += (1 - _alpha) * delta;
+    compute(guess, residual, jacobian);
 
     r_square = normSquare(residual);
   }

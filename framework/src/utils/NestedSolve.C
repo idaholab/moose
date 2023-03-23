@@ -24,6 +24,8 @@ NestedSolveTempl<is_ad>::validParams()
   params.addParam<Real>("absolute_tolerance",
                         absoluteToleranceDefault(),
                         "Absolute convergence tolerance for Newton iteration");
+  params.addParam<Real>(
+      "x_tolerance", xToleranceDefault(), "Threshold for minimum step size of linear iterations");
   params.addParam<unsigned int>(
       "min_iterations",
       minIterationsDefault(),
@@ -42,6 +44,7 @@ template <bool is_ad>
 NestedSolveTempl<is_ad>::NestedSolveTempl()
   : _relative_tolerance_square(Utility::pow<2>(relativeToleranceDefault())),
     _absolute_tolerance_square(Utility::pow<2>(absoluteToleranceDefault())),
+    _x_tolerance_square(Utility::pow<2>(xToleranceDefault())),
     _min_iterations(minIterationsDefault()),
     _max_iterations(maxIterationsDefault()),
     _acceptable_multiplier(acceptableMultiplierDefault()),
@@ -54,6 +57,7 @@ template <bool is_ad>
 NestedSolveTempl<is_ad>::NestedSolveTempl(const InputParameters & params)
   : _relative_tolerance_square(Utility::pow<2>(params.get<Real>("relative_tolerance"))),
     _absolute_tolerance_square(Utility::pow<2>(params.get<Real>("absolute_tolerance"))),
+    _x_tolerance_square(Utility::pow<2>(params.get<Real>("x_tolerance"))),
     _min_iterations(params.get<unsigned int>("min_iterations")),
     _max_iterations(params.get<unsigned int>("max_iterations")),
     _acceptable_multiplier(params.get<Real>("acceptable_multiplier")),
