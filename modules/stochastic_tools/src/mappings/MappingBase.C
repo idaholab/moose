@@ -13,12 +13,10 @@ InputParameters
 MappingBase::validParams()
 {
   InputParameters params = MooseObject::validParams();
+  params += RestartableModelInterface::validParams();
   params.addClassDescription("Base class for mapping objects.");
   params.registerBase("MappingBase");
   params.registerSystemAttributeName("MappingBase");
-  params.addParam<std::string>(
-      "filename",
-      "Name of the restartable data file for cases when we would like to load the mapping.");
   return params;
 }
 

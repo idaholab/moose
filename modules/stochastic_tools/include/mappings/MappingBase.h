@@ -24,7 +24,8 @@ public:
 
   virtual void buildMapping(const VariableName & vname) = 0;
 
-  virtual void map(const DenseVector<Real> & full_order_vector,
+  virtual void map(const VariableName & vname,
+                   const DenseVector<Real> & full_order_vector,
                    std::vector<Real> & reduced_order_vector) const = 0;
 
   virtual void map(const NumericVector<Number> & full_order_vector,

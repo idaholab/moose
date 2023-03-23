@@ -22,7 +22,7 @@ PODMapping::validParams()
   InputParameters params = MappingBase::validParams();
   params.addParam<UserObjectName>(
       "solution_storage", "The name of the storage reporter where the snapshots are located.");
-  params.addRequiredParam<std::vector<VariableName>>(
+  params.addParam<std::vector<VariableName>>(
       "variables", "The names of the variables which need a reduced basis.");
   params.addParam<std::vector<unsigned int>>(
       "num_modes",
@@ -48,13 +48,11 @@ PODMapping::PODMapping(const InputParameters & parameters)
     _energy_threshold(isParamValid("energy_threshold")
                           ? getParam<std::vector<Real>>("energy_threshold")
                           : std::vector<Real>()),
-    _basis_functions(
-        isParamValid("filename")
-            ? setModelData<std::map<VariableName, std::vector<std::unique_ptr<DenseVector<Real>>>>>(
-                  "basis_functions")
-            : declareModelData<
-                  std::map<VariableName, std::vector<std::unique_ptr<DenseVector<Real>>>>>(
-                  "basis_functions")),
+    _basis_functions(isParamValid("filename")
+                         ? setModelData<std::map<VariableName, std::vector<DenseVector<Real>>>>(
+                               "basis_functions")
+                         : declareModelData<std::map<VariableName, std::vector<DenseVector<Real>>>>(
+                               "basis_functions")),
     _eigen_values(
         isParamValid("filename")
             ? setModelData<std::map<VariableName, std::vector<Real>>>("eigen_values")
@@ -88,7 +86,7 @@ PODMapping::PODMapping(const InputParameters & parameters)
     for (const auto & vname : _variable_names)
     {
       _eigen_values.emplace(vname, std::vector<Real>());
-      _basis_functions.emplace(vname, std::vector<std::unique_ptr<DenseVector<Real>>>());
+      _basis_functions.emplace(vname, std::vector<DenseVector<Real>>());
       _svds.try_emplace(vname);
       SVDCreate(_communicator.get(), &_svds[vname]);
       _computed_svd.emplace(vname, false);
@@ -299,11 +297,11 @@ PODMapping::buildMapping(const VariableName & vname)
   for (PetscInt j = 0; j < num_requested_modes; j++)
   {
     SVDGetSingularTriplet(_svds[vname], j, &sigma, NULL, u.vec());
-    std::unique_ptr<DenseVector<Real>> serialized_mode = std::make_unique<DenseVector<Real>>();
-    u.localize(serialized_mode->get_values());
+    DenseVector<Real> serialized_mode;
+    u.localize(serialized_mode.get_values());
     _basis_functions[vname].push_back(std::move(serialized_mode));
 
-    mystream << " Mode " << j << " " << Moose::stringify(_basis_functions[vname][j]->get_values())
+    mystream << " Mode " << j << " " << Moose::stringify(_basis_functions[vname][j].get_values())
              << std::endl;
   }
   _computed_svd[vname] = true;
@@ -328,14 +326,26 @@ PODMapping::map(const VariableName & vname,
   reduced_order_vector.clear();
   reduced_order_vector.resize(bases.size());
   for (auto base_i : index_range(bases))
-    reduced_order_vector[base_i] = bases[base_i]->dot(snapshot);
+    reduced_order_vector[base_i] = bases[base_i].dot(snapshot);
 }
 
 void
-PODMapping::map(const DenseVector<Real> & full_order_vector,
+PODMapping::map(const VariableName & vname,
+                const DenseVector<Real> & full_order_vector,
                 std::vector<Real> & reduced_order_vector) const
 {
-  std::cerr << "Something smart" << std::endl;
+  const auto & bases = _basis_functions[vname];
+
+  reduced_order_vector.clear();
+  reduced_order_vector.resize(bases.size());
+  for (auto base_i : index_range(bases))
+  {
+    std::ostringstream mystream;
+    mystream << "P " << processor_id() << " " << Moose::stringify(bases[base_i].get_values())
+             << std::endl;
+    std::cerr << mystream.str() << std::endl;
+    reduced_order_vector[base_i] = bases[base_i].dot(full_order_vector);
+  }
 }
 
 void

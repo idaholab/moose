@@ -38,5 +38,6 @@ protected:
   const std::vector<VariableName> _variable_names;
   MappingBase * _mapping;
 
-  std::vector<std::vector<std::vector<Real>> *> _vector_real_values;
+  std::vector<std::vector<std::vector<Real>> *> _vector_real_values_parallel_storage;
+  std::vector<std::vector<Real> *> _vector_real_values;
 };

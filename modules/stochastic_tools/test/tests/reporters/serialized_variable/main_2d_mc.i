@@ -116,8 +116,12 @@
     type = JSON
     execute_on = FINAL
   []
-  [rd]
+  [mapping]
     type = MappingOutput
     mappings = pod_mapping
+  []
+  [rom]
+    type = SurrogateTrainerOutput
+    trainers = polyreg
   []
 []

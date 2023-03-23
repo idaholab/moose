@@ -25,7 +25,8 @@ public:
 
   virtual void buildMapping(const VariableName & vname) override;
 
-  void map(const DenseVector<Real> & full_order_vector,
+  void map(const VariableName & vname,
+           const DenseVector<Real> & full_order_vector,
            std::vector<Real> & reduced_order_vector) const override;
 
   void map(const NumericVector<Number> & full_order_vector,
@@ -46,7 +47,7 @@ protected:
   const std::vector<unsigned int> _num_modes;
   const std::vector<Real> _energy_threshold;
 
-  std::map<VariableName, std::vector<std::unique_ptr<DenseVector<Real>>>> & _basis_functions;
+  std::map<VariableName, std::vector<DenseVector<Real>>> & _basis_functions;
   std::map<VariableName, std::vector<Real>> & _eigen_values;
 
   const std::string _extra_slepc_options;

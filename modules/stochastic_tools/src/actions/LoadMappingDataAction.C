@@ -7,40 +7,41 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "LoadSurrogateDataAction.h"
-#include "SurrogateModel.h"
+#include "LoadMappingDataAction.h"
+#include "MappingBase.h"
 #include "FEProblem.h"
 #include "RestartableDataIO.h"
 #include "StochasticToolsApp.h"
 
-registerMooseAction("StochasticToolsApp", LoadSurrogateDataAction, "load_surrogate_data");
+registerMooseAction("StochasticToolsApp", LoadMappingDataAction, "load_mapping_data");
 
 InputParameters
-LoadSurrogateDataAction::validParams()
+LoadMappingDataAction::validParams()
 {
   InputParameters params = Action::validParams();
-  params.addClassDescription("Calls load method on SurrogateModel objects contained within the "
-                             "`[Surrogates]` input block, if a filename is given.");
+  params.addClassDescription("Blabla.");
   return params;
 }
 
-LoadSurrogateDataAction::LoadSurrogateDataAction(const InputParameters & params) : Action(params) {}
+LoadMappingDataAction::LoadMappingDataAction(const InputParameters & params) : Action(params) {}
 
 void
-LoadSurrogateDataAction::act()
+LoadMappingDataAction::act()
 {
-  std::vector<SurrogateModel *> objects;
-  _app.theWarehouse().query().condition<AttribSystem>("SurrogateModel").queryInto(objects);
-  for (auto model_ptr : objects)
+  std::vector<MappingBase *> objects;
+  _app.theWarehouse().query().condition<AttribSystem>("MappingBase").queryInto(objects);
+  for (auto mapping_ptr : objects)
   {
-    if (model_ptr && model_ptr->isParamValid("filename"))
-      load(*model_ptr);
+    if (mapping_ptr && mapping_ptr->isParamValid("filename"))
+      load(*mapping_ptr);
   }
 }
 
 void
-LoadSurrogateDataAction::load(const SurrogateModel & model)
+LoadMappingDataAction::load(const MappingBase & model)
 {
+  std::cerr << model.isParamValid("filename") << std::endl;
+  std::cerr << model.getParam<FileName>("filename") << std::endl;
   // File to load
   const FileName & filename = model.getParam<FileName>("filename");
 
