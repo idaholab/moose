@@ -10,6 +10,7 @@
 #include "WeightedVelocitiesUserObject.h"
 #include "MooseVariableField.h"
 #include "SubProblem.h"
+#include "SystemBase.h"
 #include "MortarUtils.h"
 #include "MooseUtils.h"
 #include "MortarContactUtils.h"

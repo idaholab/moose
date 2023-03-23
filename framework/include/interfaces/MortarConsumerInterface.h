@@ -15,7 +15,6 @@
 
 class InputParameters;
 class MooseObject;
-class FEProblemBase;
 class MooseMesh;
 class MortarData;
 class AutomaticMortarGeneration;
@@ -170,10 +169,17 @@ private:
   const AutomaticMortarGeneration * _amg;
 
   friend class ComputeMortarFunctor;
+  friend class FEProblemBase;
+
   template <typename>
   friend class MortarNodalAuxKernelTempl;
   friend class MortarUserObjectThread;
-  friend void FEProblemBase::reinitMortarUserObjects(BoundaryID, BoundaryID, bool);
+
+  /**
+   * Calls the reinitialization of mortar user objects
+   * @see FEProblemBase::reinitMortarUserObjects
+   */
+  friend void reinitMortarUserObjects(BoundaryID, BoundaryID, bool);
 };
 
 inline const AutomaticMortarGeneration &
