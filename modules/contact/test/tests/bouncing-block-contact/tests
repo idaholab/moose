@@ -133,7 +133,6 @@
                'negative gap distance to form the contact force.'
       cli_args = "Mesh/file=long-bottom-block-1elem-blocks-coarse.e Executioner/end_time=50 "
                  "Postprocessors/active=''"
-      ad_indexing_type = 'global'
     []
   []
   [weighted_vel_pdass]
@@ -172,7 +171,6 @@
     type = 'Exodiff'
     input = 'variational-frictional-action.i'
     exodiff = 'variational-frictional-action_exodus.e'
-    ad_indexing_type = 'global'
     cli_args = 'Outputs/hide=procid'
     requirement = 'The system shall be able to solve a frictional, variationally consistent, mortar '
                   'mechanical contact problem in which the secondary side of the contact interface '
