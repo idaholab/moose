@@ -125,13 +125,13 @@ LowerDBlockFromSidesetGenerator::generate()
         push_node_data[pid] = connected_nodes;
       }
 
-    auto node_action_functor = [](processor_id_type, auto &)
+    auto node_action_functor = [](processor_id_type, const auto &)
     {
       // Node packing specialization already has unpacked node into mesh, so nothing to do
     };
     Parallel::push_parallel_packed_range(
         mesh->comm(), push_node_data, mesh.get(), node_action_functor);
-    auto elem_action_functor = [](processor_id_type, auto &)
+    auto elem_action_functor = [](processor_id_type, const auto &)
     {
       // Elem packing specialization already has unpacked elem into mesh, so nothing to do
     };
