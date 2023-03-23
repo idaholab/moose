@@ -915,19 +915,19 @@ DisplacedProblem::addResidualLower(THREAD_ID tid, const std::vector<VectorTag> &
 void
 DisplacedProblem::cacheResidual(THREAD_ID tid)
 {
-  _assembly[tid][currentNlSysNum()]->cacheResidual();
+  _assembly[tid][currentNlSysNum()]->cacheResidual(currentResidualVectorTags());
 }
 
 void
 DisplacedProblem::cacheResidualNeighbor(THREAD_ID tid)
 {
-  _assembly[tid][currentNlSysNum()]->cacheResidualNeighbor();
+  _assembly[tid][currentNlSysNum()]->cacheResidualNeighbor(currentResidualVectorTags());
 }
 
 void
 DisplacedProblem::addCachedResidual(THREAD_ID tid)
 {
-  _assembly[tid][currentNlSysNum()]->addCachedResiduals();
+  _assembly[tid][currentNlSysNum()]->addCachedResiduals(currentResidualVectorTags());
 }
 
 void
@@ -1293,4 +1293,10 @@ std::size_t
 DisplacedProblem::numNonlinearSystems() const
 {
   return _mproblem.numNonlinearSystems();
+}
+
+const std::vector<VectorTag> &
+DisplacedProblem::currentResidualVectorTags() const
+{
+  return _mproblem.currentResidualVectorTags();
 }

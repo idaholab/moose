@@ -2043,6 +2043,8 @@ public:
    */
   bool failNextNonlinearConvergenceCheck() const { return _fail_next_nonlinear_convergence_check; }
 
+  virtual const std::vector<VectorTag> & currentResidualVectorTags() const override;
+
 protected:
   /// Create extra tagged vectors and matrices
   void createTagVectors();
@@ -2379,6 +2381,16 @@ private:
 
   void joinAndFinalize(TheWarehouse::Query query, bool isgen = false);
 
+  /**
+   * Set the current residual vector tag data structure based on the passed in tag IDs
+   */
+  void setCurrentResidualVectorTags(const std::set<TagID> & vector_tags);
+
+  /**
+   * Clear the current residual vector tag data structure
+   */
+  void clearCurrentResidualVectorTags();
+
   bool _error_on_jacobian_nonzero_reallocation;
   bool _ignore_zeros_in_jacobian;
   const bool _force_restart;
@@ -2436,6 +2448,11 @@ private:
 
   /// Flag used to indicate whether we are doing the uo/aux state check in execute
   bool _checking_uo_aux_state = false;
+
+  /// A data member to store the residual vector tag(s) passed into \p computeResidualTag(s). This
+  /// data member will be used when APIs like \p cacheResidual, \p addCachedResiduals, etc. are
+  /// called
+  std::vector<VectorTag> _current_residual_vector_tags;
 };
 
 using FVProblemBase = FEProblemBase;
@@ -2579,4 +2596,22 @@ FEProblemBase::fvBCsIntegrityCheck(const bool fv_bcs_integrity_check)
     return;
 
   _fv_bcs_integrity_check = fv_bcs_integrity_check;
+}
+
+inline const std::vector<VectorTag> &
+FEProblemBase::currentResidualVectorTags() const
+{
+  return _current_residual_vector_tags;
+}
+
+inline void
+FEProblemBase::setCurrentResidualVectorTags(const std::set<TagID> & vector_tags)
+{
+  _current_residual_vector_tags = getVectorTags(vector_tags);
+}
+
+inline void
+FEProblemBase::clearCurrentResidualVectorTags()
+{
+  _current_residual_vector_tags.clear();
 }

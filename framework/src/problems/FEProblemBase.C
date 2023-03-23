@@ -1613,7 +1613,7 @@ FEProblemBase::addResidualScalar(THREAD_ID tid, const std::vector<VectorTag> & t
 void
 FEProblemBase::cacheResidual(THREAD_ID tid)
 {
-  _assembly[tid][_current_nl_sys->number()]->cacheResidual();
+  _assembly[tid][_current_nl_sys->number()]->cacheResidual(currentResidualVectorTags());
   if (_displaced_problem)
     _displaced_problem->cacheResidual(tid);
 }
@@ -1621,7 +1621,7 @@ FEProblemBase::cacheResidual(THREAD_ID tid)
 void
 FEProblemBase::cacheResidualNeighbor(THREAD_ID tid)
 {
-  _assembly[tid][_current_nl_sys->number()]->cacheResidualNeighbor();
+  _assembly[tid][_current_nl_sys->number()]->cacheResidualNeighbor(currentResidualVectorTags());
   if (_displaced_problem)
     _displaced_problem->cacheResidualNeighbor(tid);
 }
@@ -1629,7 +1629,7 @@ FEProblemBase::cacheResidualNeighbor(THREAD_ID tid)
 void
 FEProblemBase::addCachedResidual(THREAD_ID tid)
 {
-  _assembly[tid][_current_nl_sys->number()]->addCachedResiduals();
+  _assembly[tid][_current_nl_sys->number()]->addCachedResiduals(currentResidualVectorTags());
 
   if (_displaced_problem)
     _displaced_problem->addCachedResidual(tid);
@@ -5858,6 +5858,8 @@ FEProblemBase::computeResidualAndJacobian(const NumericVector<Number> & soln,
 
     for (const auto & residual_vector_tag : residual_vector_tags)
       _fe_vector_tags.insert(residual_vector_tag._id);
+
+    setCurrentResidualVectorTags(_fe_vector_tags);
   }
 
   // matrix tags
@@ -6007,6 +6009,8 @@ FEProblemBase::computeResidualAndJacobian(const NumericVector<Number> & soln,
       _displaced_problem->setCurrentlyComputingJacobian(false);
       _displaced_problem->setCurrentlyComputingResidualAndJacobian(false);
     }
+
+    clearCurrentResidualVectorTags();
   }
   catch (MooseException & e)
   {
@@ -6122,6 +6126,8 @@ FEProblemBase::computeResidualTags(const std::set<TagID> & tags)
 
   TIME_SECTION("computeResidualTags", 5, "Computing Residual");
 
+  setCurrentResidualVectorTags(tags);
+
   _aux->zeroVariablesForResidual();
 
   unsigned int n_threads = libMesh::n_threads();
@@ -6215,6 +6221,7 @@ FEProblemBase::computeResidualTags(const std::set<TagID> & tags)
   _current_nl_sys->computeResidualTags(tags);
 
   _safe_access_tagged_vectors = true;
+  clearCurrentResidualVectorTags();
 }
 
 void
