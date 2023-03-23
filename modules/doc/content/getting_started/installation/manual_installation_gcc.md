@@ -3,7 +3,7 @@
 The following instructions are for those who wish to build their own custom GCC compiler stack.
 
 Due to the general nature of the following document, the commands you see here are for reference and
-should not be blindly 'cut and pasted' into your terminal.
+should not blindly be 'cut and pasted' into your terminal.
 
 ## Prerequisites
 

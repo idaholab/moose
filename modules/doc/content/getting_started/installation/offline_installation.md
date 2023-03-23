@@ -4,40 +4,47 @@ If you are using a machine (or HPC cluster) with no access to the internet, the 
 instructions will help you create an environment suitable for MOOSE-based development.
 
 Please be certain, that the machine in which you intend to perform the actual work (which this
-document will refer to as the 'target' machine), meets our minimum requirements:
+document will refer to as the 'target' machine), meets the following requirements:
 
 !include sqa/minimum_requirements.md
 
-## Prereqs
+# Prerequisites
+
+#### Air-Gapped HPC Clusters
+
+If the target machine is an HPC cluster, it is likely your cluster already has an MPI wrapper (and
+thus a GCC or LLVM compiler). Please contact your system administrator and ask them how to
+appropriately make use of your cluster's MPI wrapper and compiler. Please note, Intel compilers are
+not supported.
+
+#### Personal Workstation
+
+If the target machine is your personal workstation, that machine must sufficiently achieve the
+following:
 
 !include installation/manual_prereqs.md
 
-## MPI Wrapper
+In addition, the target machine will need an MPI wrapper. We recommend one of the following:
 
-If the target machine is an HPC system, it is likely your system already has an MPI wrapper (and
-thus, a GCC or LLVM compiler). Please contact your system administrator, and ask them how to
-appropriately make use of that cluster's MPI wrapper. If, by chance you will have to build your own,
-you have some choices; [OpenMPI](https://www.open-mpi.org/),
-[MVAPICH](https://mvapich.cse.ohio-state.edu/), and [MPICH](https://www.mpich.org/), all work well.
-You will want to head on over to one of those product sites, and follow their instructions to build
-yourself an MPI wrapper.
+- [MPICH](https://www.mpich.org/)
 
-!alert note
-MVAPICH is regarded as the better wrapper for HPC clusters. However, it is also the most difficult
-to build properly for that clusters specific hardware. While you may be able to *build* it easily
-enough, you may not have built it *properly* to optimally make use of said cluster's hardware.
+- [OpenMPI](https://www.open-mpi.org/)
+
+!alert note title=Personal Air-Gapped Workstation
+Procuring the above on a personal air-gapped workstation will need to be your responsibility. We
+cannot instruct a means for bypassing such security.
 
 ## Prepare Directory
 
-These three libraries can all be obtained from one repository (the moose repository). First, create
-a top-level directory named 'offline', which will ultimately contain everything we need to transfer
-over to your target machine.
+PETSc, libMesh and MOOSE can all be obtained from one repository (the moose repository). First,
+create a top-level directory named 'offline', which will ultimately contain everything we need to
+transfer over to your target machine.
 
 ```bash
 mkdir -p ~/offline/downloads
 ```
 
-Next, enter the offline directory, and perform the cloning operation to obtain all three products:
+Next, enter the offline directory, and perform the cloning operation to obtain all three libraries:
 
 ```bash
 cd ~/offline
@@ -57,7 +64,7 @@ cd ~/offline/moose
 ./scripts/update_and_rebuild_petsc.sh  --with-packages-download-dir=~/offline/downloads
 ```
 
-As an example, the above command, should return something like this:
+As an example, the above command should return something like the following:
 
 ```pre
 ===============================================================================
@@ -122,7 +129,7 @@ tar -xf offline.tar.gz -C ~/
 With the `~/offline` directory available in your target machine's home directory, we can now build
 PETSc, libMesh, and MOOSE, using your MPI Wrapper/Compiler established in earlier steps.
 
-### PETSc
+#### PETSc
 
 Configure, build, and install PETSc to:`$HOME/libs/petsc`
 
@@ -171,7 +178,7 @@ In this case, you need to `unset PETSC_DIR PETSC_ARCH` during libmesh compile.
 
 !alert-end!
 
-### libMesh
+#### libMesh
 
 Configure, build, and install libMesh to: `$HOME/libs/libmesh`
 
@@ -218,7 +225,7 @@ document. Please submit a detailed log of the error, to the
 
 Proceed only if libMesh completed successfully.
 
-### MOOSE
+#### MOOSE
 
 First, we need to tell MOOSE  where libMesh is:
 
@@ -256,7 +263,6 @@ any MOOSE-based development. Here are those environment variables again (setting
 is harmless):
 
 ```bash
-export PATH=/some/path/to/MPI/bin:/some/path/to/GCC/bin:$PATH <--EXAMPLE, CHANGE ME
 export CC=mpicc CXX=mpicxx FC=mpif90 F90=mpif90 F77=mpif77
 export MOOSE_DIR=$HOME/offline/moose
 ```

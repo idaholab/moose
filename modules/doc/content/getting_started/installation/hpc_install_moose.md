@@ -24,7 +24,7 @@ Activate your desired MPI environment (refer to your cluster administrators on h
 This *usually* involves `module load` commands. Please note again, that Intel compilers are not
 supported.
 
-Sometimes after loading up a proper MPI environment, it is still necessary to set some variables.
+Sometimes after loading a proper MPI environment, it is still necessary to set some variables.
 Check to see if the following variables are set:
 
 ```bash

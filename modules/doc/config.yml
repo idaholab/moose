@@ -40,7 +40,7 @@ Extensions:
         google-cse: 000781241768298771085:pedtnlxdkx8
         menu:
             Getting Started:
-                Building MOOSE: getting_started/installation/index.md
+                Installing MOOSE: getting_started/installation/index.md
                 Creating an Application: getting_started/new_users.md
                 Examples and Tutorials: getting_started/examples_and_tutorials/index.md
                 NCRC Applications: help/inl/applications.md

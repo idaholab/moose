@@ -8,8 +8,11 @@ which mpicc mpicxx mpif90
 ```
 
 If the above command returns with paths to their respected binaries, you will want to work with your
-system package manager to remove or suppress it. -Having two completely different MPI wrappers
-being made available simultaneously is prone to failure.
+system package manager to remove or suppress it.
+
+!alert warning
+Having two completely different MPI wrappers being made available simultaneously is prone to
+failure.
 
 Download MPICH [!package!mpich]
 

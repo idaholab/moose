@@ -5,11 +5,12 @@ Building an LLVM (Clang) compiler is substantially more difficult than GCC
 !alert-end!
 
 Because we need MPICH to ultimately wrap to a Fortran compiler, it will be necessary to build GCC
-first, and then LLVM Clang. Therefor both compilers must be built *perfectly* (+you *really* need to
-pay attention to any warnings/errors you encounter+) to achieve a proper LLVM Clang compiler stack.
+first, and then LLVM Clang. Therefore both compilers must be built *perfectly* (+you *really* need
+to pay attention to any warnings/errors you encounter+) to achieve a proper LLVM Clang compiler
+stack.
 
 Due to the general nature of the following document, the commands you see here are for reference and
-should not be blindly 'cut and pasted' into your terminal.
+should not blindly be 'cut and pasted' into your terminal.
 
 ## Prerequisites
 

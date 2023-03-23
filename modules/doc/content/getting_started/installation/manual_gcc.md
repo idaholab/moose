@@ -14,7 +14,7 @@ tar -xf gcc-__GCC__.tar.gz -C .
 Obtain GCC pre-reqs:
 
 !package! code max-height=450
-cd gcc-10.4.0
+cd gcc-__GCC__
 ./contrib/download_prerequisites
 !package-end!
 
@@ -38,3 +38,5 @@ With `configure` complete (and error free), build and install GCC:
 make -j 6
 make install
 ```
+
+Follow the onscreen instructions on how to make use of your new compiler.

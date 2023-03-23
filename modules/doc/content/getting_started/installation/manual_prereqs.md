@@ -1,18 +1,19 @@
 
-- A sane, modern toolchain environment (make, Automake, Autoconf, CMake)
+- A sane, modern toolchain environment (make, Automake, Autoconf, CMake). Examples for several
+  popular operating systems:
 
-  - Mactinosh: (`xcode-select`) Xcode Command Line Tools
+  - +Macintosh+: Xcode (`xcode-select --install`)
 
-  - Windows: (`WSL`) Windows Subsystem for Linux
+  - +Windows+: Windows Subsystem for Linux (WSL)
 
-    - In addition to one the following Linux flavors below
+    - In addition, a chosen Linux flavor below
 
-  - Ubuntu: (`apt`) Build Essentials
+  - +Ubuntu+: (`apt install build-essential`)
 
-  - CentOS/Rocky: (`dnf`) Development Tools
+  - +CentOS/Rocky+: (`dnf groupinstall 'Development Tools'`)
 
-  - OpenSUSE: (`zypper`) pattern devel_basis
+  - +OpenSUSE+: (`zypper install --type pattern devel_basis`)
 
-Different operating systems leverage different means for obtaining a developers environment. We
-assume the reader is intricately familiar with their platform of choice, and has already obtained
-the above prerequisites.
+Different operating systems leverage different means of obtaining a developer's environment (these
+were just a few). We assume the reader is intricately familiar with their platform of choice, and
+has established an environment for development.

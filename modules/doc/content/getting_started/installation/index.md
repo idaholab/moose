@@ -1,12 +1,12 @@
-# Building MOOSE
+# Installing MOOSE
 
-To begin building with the MOOSE Framework, click a link corresponding to your operating system or
-another method of choice:
+To begin developing with MOOSE, click a link corresponding to your operating system or another
+method of choice:
 
 - [Linux and MacOS](installation/conda.md)
 - [Docker](installation/docker.md)
 - [Windows Subsystem for Linux](installation/windows.md)
-- [INL's HPC Pre-Build MOOSE](installation/inl_hpc_prebuilt_moose.md)
+- [INL's HPC Pre-Built MOOSE](installation/inl_hpc_prebuilt_moose.md)
 - Optional packages:
 
   - [installation/install_libtorch.md]
