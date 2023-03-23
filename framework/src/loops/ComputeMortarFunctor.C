@@ -148,6 +148,10 @@ ComputeMortarFunctor::operator()(const Moose::ComputeType compute_type)
                                             _secondary_boundary_mats,
                                             act_functor);
     }
+    catch (libMesh::LogicError & e)
+    {
+      _fe_problem.setException("We caught a libMesh::LogicError: " + std::string(e.what()));
+    }
     catch (MooseException & e)
     {
       _fe_problem.setException(e.what());
