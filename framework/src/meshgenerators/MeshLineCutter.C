@@ -1,0 +1,151 @@
+//* This file is part of the MOOSE framework
+//* https://www.mooseframework.org
+//*
+//* All rights reserved, see COPYRIGHT for full restrictions
+//* https://github.com/idaholab/moose/blob/master/COPYRIGHT
+//*
+//* Licensed under LGPL 2.1, please see LICENSE for details
+//* https://www.gnu.org/licenses/lgpl-2.1.html
+
+#include "MeshLineCutter.h"
+#include "MooseMeshCuttingUtils.h"
+
+// C++ includes
+#include <cmath>
+
+registerMooseObject("MooseApp", MeshLineCutter);
+
+InputParameters
+MeshLineCutter::validParams()
+{
+  InputParameters params = MeshGenerator::validParams();
+
+  MooseEnum cutting_type("CUT_ELEM MOV_NODE", "CUT_ELEM");
+  params.addParam<MooseEnum>(
+      "cutting_type",
+      cutting_type,
+      "Which method is to be used to cut the input mesh. 'CUT_ELEM' is the recommended method but "
+      "it may cause fine elements near the cutting line, while 'MOV_NODE' deforms subdomain "
+      "boundaries if they are not perpendicular to the cutting line.");
+
+  params.addRequiredParam<MeshGeneratorName>("input", "The input mesh that needs to be trimmed.");
+  params.addRequiredParam<std::vector<Real>>(
+      "cut_line_params",
+      "Cutting line parameters, which are a, b, and c in line equation a*x+b*y+c=0. Note that "
+      "a*x+b*y+c>0 part is being removed.");
+  params.addRequiredParam<boundary_id_type>(
+      "new_boundary_id", "Boundary id to be assigned to the boundary formed by the cutting.");
+  params.addParam<boundary_id_type>("input_mesh_external_boundary_id",
+                                    "Boundary id of the external boundary of the input mesh.");
+
+  params.addParam<SubdomainName>(
+      "tri_elem_subdomain_name_suffix",
+      "trimmer_tri",
+      "Suffix to the block name used for quad elements that are trimmed/converted into "
+      "triangular elements to avert degenerate quad elements");
+  params.addParam<subdomain_id_type>(
+      "tri_elem_subdomain_shift",
+      "Customized id shift to define subdomain ids of the converted triangular elements.");
+
+  params.addClassDescription(
+      "This MeshLineCutter object is designed to trim the input mesh by removing all the elements "
+      "on one side of a given straight line with special processing on the elements crossed by the "
+      "cutting line to ensure a smooth cross-section..");
+
+  return params;
+}
+
+MeshLineCutter::MeshLineCutter(const InputParameters & parameters)
+  : MeshGenerator(parameters),
+    _cutting_type(getParam<MooseEnum>("cutting_type").template getEnum<CutType>()),
+    _input_name(getParam<MeshGeneratorName>("input")),
+    _cut_line_params(getParam<std::vector<Real>>("cut_line_params")),
+    _new_boundary_id(getParam<boundary_id_type>("new_boundary_id")),
+    _input_mesh_external_boundary_id(
+        isParamValid("input_mesh_external_boundary_id")
+            ? getParam<boundary_id_type>("input_mesh_external_boundary_id")
+            : Moose::INVALID_BOUNDARY_ID),
+    _tri_elem_subdomain_name_suffix(getParam<SubdomainName>("tri_elem_subdomain_name_suffix")),
+    _tri_elem_subdomain_shift(isParamValid("tri_elem_subdomain_shift")
+                                  ? getParam<subdomain_id_type>("tri_elem_subdomain_shift")
+                                  : Moose::INVALID_BLOCK_ID),
+    _input(getMeshByName(_input_name))
+{
+  if (_cut_line_params.size() != 3)
+    paramError("cut_line_params", "this parameter must have three elements.");
+  if (_cut_line_params[0] < libMesh::TOLERANCE && _cut_line_params[1] < libMesh::TOLERANCE)
+    paramError("cut_line_params", "At lease one of the first two elements must be non-zero.");
+  if (_input_mesh_external_boundary_id == Moose::INVALID_BOUNDARY_ID &&
+      _cutting_type == CutType::MOV_NODE)
+    paramError(
+        "input_mesh_external_boundary_id",
+        "This parameter must be provided if 'MOV_NODE' method is selected as 'cutting_type'.");
+}
+
+std::unique_ptr<MeshBase>
+MeshLineCutter::generate()
+{
+  auto replicated_mesh_ptr = dynamic_cast<ReplicatedMesh *>(_input.get());
+  if (!replicated_mesh_ptr)
+    paramError("input", "Input is not a replicated mesh, which is required");
+  if (*(replicated_mesh_ptr->elem_dimensions().begin()) != 2 ||
+      *(replicated_mesh_ptr->elem_dimensions().rbegin()) != 2)
+    paramError("input", "Only 2D meshes are supported.");
+
+  ReplicatedMesh & mesh = *replicated_mesh_ptr;
+
+  std::set<subdomain_id_type> subdomain_ids_set;
+  mesh.subdomain_ids(subdomain_ids_set);
+  const subdomain_id_type max_subdomain_id = *subdomain_ids_set.rbegin() + 2;
+  const subdomain_id_type block_id_to_remove = max_subdomain_id - 1;
+  const subdomain_id_type tri_subdomain_id_shift =
+      _tri_elem_subdomain_shift == Moose::INVALID_BLOCK_ID ? max_subdomain_id
+                                                           : _tri_elem_subdomain_shift;
+
+  if (_cutting_type == CutType::CUT_ELEM)
+  {
+    try
+    {
+      MooseMeshCuttingUtils::lineRemoverCutElem(mesh,
+                                                _cut_line_params,
+                                                tri_subdomain_id_shift,
+                                                _tri_elem_subdomain_name_suffix,
+                                                block_id_to_remove,
+                                                _new_boundary_id);
+    }
+    catch (MooseException & e)
+    {
+      if (((std::string)e.what()).compare("The new subdomain name already exists in the mesh.") ==
+          0)
+        paramError("tri_elem_subdomain_name_suffix",
+                   "The new subdomain name already exists in the mesh.");
+    }
+  }
+  else
+  {
+    try
+    {
+      MooseMeshCuttingUtils::lineRemoverMoveNode(mesh,
+                                                 _cut_line_params,
+                                                 block_id_to_remove,
+                                                 subdomain_ids_set,
+                                                 _new_boundary_id,
+                                                 _input_mesh_external_boundary_id);
+    }
+    catch (MooseException & e)
+    {
+      if (((std::string)e.what())
+              .compare("The input mesh has degenerate quad element before trimming.") == 0)
+        paramError("input", "The input mesh has degenerate quad element before trimming.");
+      else if (((std::string)e.what())
+                   .compare("The new subdomain name already exists in the mesh.") == 0)
+        paramError("tri_elem_subdomain_name_suffix",
+                   "The new subdomain name already exists in the mesh.");
+    }
+    MooseMeshCuttingUtils::quasiTriElementsFixer(
+        mesh, subdomain_ids_set, tri_subdomain_id_shift, _tri_elem_subdomain_name_suffix);
+  }
+
+  mesh.prepare_for_use();
+  return std::move(_input);
+}
