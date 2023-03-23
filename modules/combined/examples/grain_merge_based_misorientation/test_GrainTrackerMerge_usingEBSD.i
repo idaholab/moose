@@ -9,7 +9,7 @@ my_filename = "case2_EBSD"
     type = EBSDMeshGenerator
     filename = local_ebsd_Ti.inl
   []
-  use_distributed_mesh = true
+  parallel_type = distributed
 []
 
 [GlobalParams]
