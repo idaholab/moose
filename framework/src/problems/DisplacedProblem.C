@@ -897,19 +897,19 @@ DisplacedProblem::clearDiracInfo()
 void
 DisplacedProblem::addResidual(THREAD_ID tid)
 {
-  _assembly[tid][currentNlSysNum()]->addResidual(getVectorTags(Moose::VECTOR_TAG_RESIDUAL));
+  _assembly[tid][currentNlSysNum()]->addResidual(currentResidualVectorTags());
 }
 
 void
 DisplacedProblem::addResidualNeighbor(THREAD_ID tid)
 {
-  _assembly[tid][currentNlSysNum()]->addResidualNeighbor(getVectorTags(Moose::VECTOR_TAG_RESIDUAL));
+  _assembly[tid][currentNlSysNum()]->addResidualNeighbor(currentResidualVectorTags());
 }
 
 void
 DisplacedProblem::addResidualLower(THREAD_ID tid)
 {
-  _assembly[tid][currentNlSysNum()]->addResidualLower(getVectorTags(Moose::VECTOR_TAG_RESIDUAL));
+  _assembly[tid][currentNlSysNum()]->addResidualLower(currentResidualVectorTags());
 }
 
 void
