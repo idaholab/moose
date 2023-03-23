@@ -6159,7 +6159,7 @@ FEProblemBase::computeResidualTags(const std::set<TagID> & tags)
       }
       catch (libMesh::LogicError & e)
       {
-        throw MooseException("We caught a libMesh error in FEProblemBase");
+        mooseException("We caught a libMesh error in FEProblemBase: ", e.what());
       }
     }
     catch (MooseException & e)
