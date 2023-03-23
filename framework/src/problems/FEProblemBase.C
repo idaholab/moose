@@ -5804,6 +5804,8 @@ FEProblemBase::computeResidualSys(NonlinearImplicitSystem & sys,
                                   const NumericVector<Number> & soln,
                                   NumericVector<Number> & residual)
 {
+  parallel_object_only();
+
   TIME_SECTION("computeResidualSys", 5);
 
   ADReal::do_derivatives = false;
@@ -6057,6 +6059,8 @@ FEProblemBase::computeResidualInternal(const NumericVector<Number> & soln,
                                        NumericVector<Number> & residual,
                                        const std::set<TagID> & tags)
 {
+  parallel_object_only();
+
   TIME_SECTION("computeResidualInternal", 1);
 
   try
@@ -6117,6 +6121,8 @@ FEProblemBase::computeResidualType(const NumericVector<Number> & soln,
 void
 FEProblemBase::computeResidualTags(const std::set<TagID> & tags)
 {
+  parallel_object_only();
+
   TIME_SECTION("computeResidualTags", 5, "Computing Residual");
 
   _aux->zeroVariablesForResidual();
@@ -7746,6 +7752,8 @@ FEProblemBase::systemBaseAuxiliary()
 void
 FEProblemBase::computingNonlinearResid(bool computing_nonlinear_residual)
 {
+  parallel_object_only();
+
   if (_displaced_problem)
     _displaced_problem->computingNonlinearResid(computing_nonlinear_residual);
   _computing_nonlinear_residual = computing_nonlinear_residual;

@@ -53,6 +53,8 @@ ComputeMortarFunctor::ComputeMortarFunctor(
 void
 ComputeMortarFunctor::operator()(const Moose::ComputeType compute_type)
 {
+  libmesh_parallel_only(_fe_problem.comm());
+
   unsigned int num_cached = 0;
 
   const auto & secondary_elems_to_mortar_segments = _amg.secondariesToMortarSegments();
