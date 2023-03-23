@@ -18,19 +18,20 @@ physics are tougher to solve, or because there are issues with the kernels for t
 
 MOOSE provides two convenient debug boolean options to examine the convergence of nonlinear residuals:
 
-- [!param](/Debug/show_var_residual_norms) shows the residual norms for each nonlinear variable (more like equation actually). The equation with the highest residual is the least converged. This is the norm after scaling if
-equation scaling, automatic or not, is used.
+- [!param](/Debug/show_var_residual_norms) shows the residual norms for each nonlinear variable
+  (more like equation actually). The equation with the highest residual is the least converged.
+  This is the norm after scaling if equation scaling, automatic or not, is used.
 
 - [!param](/Debug/show_top_residuals) shows the residual norms only for the least converged equation/variable.
 
 
-Helpful information on debugging numerical convergence issues is provided in the [numerical troubleshooting page](failed_solves.md).
+Helpful information on debugging numerical convergence issues is provided in the [numerical troubleshooting page](application_usage/failed_solves.md).
 
 ## Execution ordering output
 
 ### Ordering of the problem set-up
 
-MOOSE parses the input file and executes numerous [Actions](/syntax/Actions/index.md) which progressively
+MOOSE parses the input file and executes numerous [Actions](actions/Action.md) which progressively
 load/build the mesh, create the variables, kernels, boundary conditions, output objects etc.
 The ordering of this process may be shown using the [!param](/Debug/show_actions) parameter.
 
@@ -65,17 +66,18 @@ The `[Debug]` system is not the only system that provides useful debugging infor
 these other helpful resources below:
 
 - to debug [MultiApps](/syntax/MultiApps/index.md) and [Transfers](/syntax/Transfers/index.md)-related
-issues, the `FEProblem` parameter [!param](/Problem/FEProblem/verbose_multiapps) shows a helpful summary of
-transfers executed and important metadata about each `Transfer`.
+  issues, the `FEProblem` parameter [!param](/Problem/FEProblem/verbose_multiapps) shows a helpful summary of
+  transfers executed and important metadata about each `Transfer`.
 
 - to debug linear system convergence issues, numerous parameters may be passed to PETSc to make it more verbose.
-They are summarized on this [page about debugging numerical issues](failed_solves.md) and in the [PETSc manual](https://www.mcs.anl.gov/petsc/petsc-current/docs/manualpages/).
+  They are summarized on this [page about debugging numerical issues](application_usage/failed_solves.md) and in
+  the [PETSc manual](https://www.mcs.anl.gov/petsc/petsc-current/docs/manualpages/).
 
 
 !alert note
 There are currently no convenient debugging options or tools for `MultiApps`-based fixed point iteration problems.
-Use the [!param](/Executioner/fixed_point_min_its), [!param](/Executioner/fixed_point_max_its) and
-[!param](/Executioner/accept_on_max_fixed_point_iteration) to output at the desired fixed point iteration.
+Use the [!param](/Executioner/Transient/fixed_point_min_its), [!param](/Executioner/Transient/fixed_point_max_its) and
+[!param](/Executioner/Transient/accept_on_max_fixed_point_iteration) to output at the desired fixed point iteration.
 
 
 ## Parameters list
