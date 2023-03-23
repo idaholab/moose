@@ -57,13 +57,13 @@ ComputeResidualThread::accumulateNeighborLower()
 void
 ComputeResidualThread::accumulate()
 {
-  _fe_problem.cacheResidual(_tid, _tags);
+  _fe_problem.cacheResidual(_tid);
   _num_cached++;
 
   if (_num_cached % 20 == 0)
   {
     Threads::spin_mutex::scoped_lock lock(Threads::spin_mtx);
-    _fe_problem.addCachedResidual(_tid, _tags);
+    _fe_problem.addCachedResidual(_tid);
   }
 }
 

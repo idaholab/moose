@@ -72,14 +72,14 @@ ComputeResidualAndJacobianThread::accumulateNeighbor()
 void
 ComputeResidualAndJacobianThread::accumulate()
 {
-  _fe_problem.cacheResidual(_tid, _vector_tags);
+  _fe_problem.cacheResidual(_tid);
   _fe_problem.cacheJacobian(_tid);
   _num_cached++;
 
   if (_num_cached % 20 == 0)
   {
     Threads::spin_mutex::scoped_lock lock(Threads::spin_mtx);
-    _fe_problem.addCachedResidual(_tid, _vector_tags);
+    _fe_problem.addCachedResidual(_tid);
     _fe_problem.addCachedJacobian(_tid);
   }
 }

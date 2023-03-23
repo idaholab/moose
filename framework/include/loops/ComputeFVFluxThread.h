@@ -114,13 +114,7 @@ public:
 protected:
   FEProblemBase & _fe_problem;
   MooseMesh & _mesh;
-
-  /// Vector tag IDs
   const std::set<TagID> & _tags;
-
-  /// Detailed vector tag data
-  const std::vector<VectorTag> _tag_data;
-
   THREAD_ID _tid;
   const unsigned int _nl_system_num;
 
@@ -155,7 +149,6 @@ ThreadedFaceLoop<RangeType>::ThreadedFaceLoop(FEProblemBase & fe_problem,
   : _fe_problem(fe_problem),
     _mesh(fe_problem.mesh()),
     _tags(tags),
-    _tag_data(_fe_problem.getVectorTags(_tags)),
     _nl_system_num(nl_system_num),
     _zeroth_copy(true),
     _incoming_throw_on_error(Moose::_throw_on_error)
@@ -168,7 +161,6 @@ ThreadedFaceLoop<RangeType>::ThreadedFaceLoop(ThreadedFaceLoop & x, Threads::spl
   : _fe_problem(x._fe_problem),
     _mesh(x._mesh),
     _tags(x._tags),
-    _tag_data(x._tag_data),
     _nl_system_num(x._nl_system_num),
     _zeroth_copy(false),
     _incoming_throw_on_error(false)
@@ -338,7 +330,6 @@ protected:
   using ThreadedFaceLoop<RangeType>::_mesh;
   using ThreadedFaceLoop<RangeType>::_tid;
   using ThreadedFaceLoop<RangeType>::_tags;
-  using ThreadedFaceLoop<RangeType>::_tag_data;
   using ThreadedFaceLoop<RangeType>::_nl_system_num;
   using ThreadedFaceLoop<RangeType>::_subdomain;
   using ThreadedFaceLoop<RangeType>::_neighbor_subdomain;
@@ -834,12 +825,11 @@ protected:
   using ComputeFVFluxThread<RangeType, AttribVectorTags>::_tid;
   using ComputeFVFluxThread<RangeType, AttribVectorTags>::_nl_system_num;
   using ComputeFVFluxThread<RangeType, AttribVectorTags>::_num_cached;
-  using ComputeFVFluxThread<RangeType, AttribVectorTags>::_tag_data;
 
   void postFace(const FaceInfo & fi) override;
   void compute(FVFaceResidualObject & ro, const FaceInfo & fi) override { ro.computeResidual(fi); }
   void setup(SetupInterface & obj) override { obj.residualSetup(); }
-  void addCached() override { _fe_problem.addCachedResidual(_tid, _tag_data); }
+  void addCached() override { _fe_problem.addCachedResidual(_tid); }
 };
 
 template <typename RangeType>
@@ -862,10 +852,10 @@ ComputeFVFluxResidualThread<RangeType>::postFace(const FaceInfo & /*fi*/)
 {
   _num_cached++;
   // TODO: do we need both calls - or just the neighbor one? - confirm this
-  _fe_problem.cacheResidual(_tid, _tag_data);
-  _fe_problem.cacheResidualNeighbor(_tid, _tag_data);
+  _fe_problem.cacheResidual(_tid);
+  _fe_problem.cacheResidualNeighbor(_tid);
 
-  _fe_problem.addCachedResidual(_tid, _tag_data);
+  _fe_problem.addCachedResidual(_tid);
 }
 
 template <typename RangeType>
@@ -934,7 +924,6 @@ protected:
   using ComputeFVFluxThread<RangeType, AttribVectorTags>::_fe_problem;
   using ComputeFVFluxThread<RangeType, AttribVectorTags>::_tid;
   using ComputeFVFluxThread<RangeType, AttribVectorTags>::_num_cached;
-  using ComputeFVFluxThread<RangeType, AttribVectorTags>::_tag_data;
 
   void postFace(const FaceInfo & fi) override;
   void compute(FVFaceResidualObject & ro, const FaceInfo & fi) override
@@ -944,7 +933,7 @@ protected:
   void setup(SetupInterface & obj) override { obj.residualSetup(); }
   void addCached() override
   {
-    _fe_problem.addCachedResidual(_tid, _tag_data);
+    _fe_problem.addCachedResidual(_tid);
     _fe_problem.addCachedJacobian(_tid);
   }
 };
@@ -971,15 +960,15 @@ ComputeFVFluxRJThread<RangeType>::postFace(const FaceInfo & /*fi*/)
 {
   _num_cached++;
   // TODO: do we need both calls - or just the neighbor one? - confirm this
-  _fe_problem.cacheResidual(_tid, _tag_data);
-  _fe_problem.cacheResidualNeighbor(_tid, _tag_data);
+  _fe_problem.cacheResidual(_tid);
+  _fe_problem.cacheResidualNeighbor(_tid);
   _fe_problem.cacheJacobian(_tid);
   _fe_problem.cacheJacobianNeighbor(_tid);
 
   if (_num_cached % 20 == 0)
   {
     Threads::spin_mutex::scoped_lock lock(Threads::spin_mtx);
-    _fe_problem.addCachedResidual(_tid, _tag_data);
+    _fe_problem.addCachedResidual(_tid);
     _fe_problem.addCachedJacobian(_tid);
   }
 }

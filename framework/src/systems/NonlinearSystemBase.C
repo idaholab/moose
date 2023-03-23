@@ -1190,13 +1190,10 @@ NonlinearSystemBase::setConstraintSecondaryValues(NumericVector<Number> & soluti
 }
 
 void
-NonlinearSystemBase::constraintResiduals(NumericVector<Number> & residual,
-                                         bool displaced,
-                                         const std::set<TagID> & tags)
+NonlinearSystemBase::constraintResiduals(NumericVector<Number> & residual, bool displaced)
 {
   // Make sure the residual is in a good state
   residual.close();
-  const auto vector_tag_data = _fe_problem.getVectorTags(tags);
 
   std::map<std::pair<unsigned int, unsigned int>, PenetrationLocator *> * penetration_locators =
       NULL;
@@ -1301,8 +1298,8 @@ NonlinearSystemBase::constraintResiduals(NumericVector<Number> & residual,
                   residual_has_inserted_values = true;
                 }
                 else
-                  _fe_problem.cacheResidual(0, vector_tag_data);
-                _fe_problem.cacheResidualNeighbor(0, vector_tag_data);
+                  _fe_problem.cacheResidual(0);
+                _fe_problem.cacheResidualNeighbor(0);
               }
           }
         }
@@ -1406,10 +1403,10 @@ NonlinearSystemBase::constraintResiduals(NumericVector<Number> & residual,
 
           ec->reinit(info);
           ec->computeResidual();
-          _fe_problem.cacheResidual(tid, vector_tag_data);
-          _fe_problem.cacheResidualNeighbor(tid, vector_tag_data);
+          _fe_problem.cacheResidual(tid);
+          _fe_problem.cacheResidualNeighbor(tid);
         }
-        _fe_problem.addCachedResidual(tid, vector_tag_data);
+        _fe_problem.addCachedResidual(tid);
       }
     }
   }
@@ -1464,11 +1461,11 @@ NonlinearSystemBase::constraintResiduals(NumericVector<Number> & residual,
                   residual_has_inserted_values = true;
                 }
                 else
-                  _fe_problem.cacheResidual(0, vector_tag_data);
-                _fe_problem.cacheResidualNeighbor(0, vector_tag_data);
+                  _fe_problem.cacheResidual(0);
+                _fe_problem.cacheResidualNeighbor(0);
               }
             }
-            _fe_problem.addCachedResidual(0, vector_tag_data);
+            _fe_problem.addCachedResidual(0);
           }
         }
       }
@@ -1492,7 +1489,7 @@ NonlinearSystemBase::constraintResiduals(NumericVector<Number> & residual,
   }
 
   // We may have additional tagged vectors that also need to be accumulated
-  _fe_problem.addCachedResidual(0, vector_tag_data);
+  _fe_problem.addCachedResidual(0);
 }
 
 void
@@ -1576,7 +1573,7 @@ NonlinearSystemBase::computeResidualInternal(const std::set<TagID> & tags)
     unsigned int n_threads = libMesh::n_threads();
     for (unsigned int i = 0; i < n_threads;
          i++) // Add any cached residuals that might be hanging around
-      _fe_problem.addCachedResidual(i, vector_tag_data);
+      _fe_problem.addCachedResidual(i);
   }
   PARALLEL_CATCH;
 
@@ -1646,7 +1643,7 @@ NonlinearSystemBase::computeResidualInternal(const std::set<TagID> & tags)
         unsigned int n_threads = libMesh::n_threads();
         for (unsigned int i = 0; i < n_threads;
              i++) // Add any cached residuals that might be hanging around
-          _fe_problem.addCachedResidual(i, vector_tag_data);
+          _fe_problem.addCachedResidual(i);
       }
     }
   }
@@ -1674,7 +1671,7 @@ NonlinearSystemBase::computeResidualInternal(const std::set<TagID> & tags)
       unsigned int n_threads = libMesh::n_threads();
       for (unsigned int i = 0; i < n_threads;
            i++) // Add any cached residuals that might be hanging around
-        _fe_problem.addCachedResidual(i, vector_tag_data);
+        _fe_problem.addCachedResidual(i);
     }
   }
   PARALLEL_CATCH;
@@ -1710,11 +1707,11 @@ NonlinearSystemBase::computeResidualInternal(const std::set<TagID> & tags)
     PARALLEL_TRY
     {
       // Undisplaced Constraints
-      constraintResiduals(*_Re_non_time, false, tags);
+      constraintResiduals(*_Re_non_time, false);
 
       // Displaced Constraints
       if (_fe_problem.getDisplacedProblem())
-        constraintResiduals(*_Re_non_time, true, tags);
+        constraintResiduals(*_Re_non_time, true);
 
       if (_fe_problem.computingNonlinearResid())
         _constraints.residualEnd();
@@ -1797,12 +1794,11 @@ NonlinearSystemBase::computeResidualAndJacobianInternal(const std::set<TagID> & 
 
     mortarConstraints(Moose::ComputeType::ResidualAndJacobian, vector_tags, matrix_tags);
 
-    const auto vector_tag_data = _fe_problem.getVectorTags(vector_tags);
     unsigned int n_threads = libMesh::n_threads();
     for (unsigned int i = 0; i < n_threads;
          i++) // Add any cached residuals that might be hanging around
     {
-      _fe_problem.addCachedResidual(i, vector_tag_data);
+      _fe_problem.addCachedResidual(i);
       _fe_problem.addCachedJacobian(i);
     }
   }

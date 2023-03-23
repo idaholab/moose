@@ -243,9 +243,9 @@ public:
   virtual void addResidualNeighbor(THREAD_ID tid, const std::vector<VectorTag> & tags) override;
   virtual void addResidualLower(THREAD_ID tid, const std::vector<VectorTag> & tags) override;
 
-  virtual void cacheResidual(THREAD_ID tid, const std::vector<VectorTag> & tags) override;
-  virtual void cacheResidualNeighbor(THREAD_ID tid, const std::vector<VectorTag> & tags) override;
-  virtual void addCachedResidual(THREAD_ID tid, const std::vector<VectorTag> & tags) override;
+  virtual void cacheResidual(THREAD_ID tid) override;
+  virtual void cacheResidualNeighbor(THREAD_ID tid) override;
+  virtual void addCachedResidual(THREAD_ID tid) override;
 
   virtual void addCachedResidualDirectly(NumericVector<Number> & residual, THREAD_ID tid);
 

@@ -25,7 +25,7 @@ ComputeNodalKernelsThread::ComputeNodalKernelsThread(
   : ThreadedNodeLoop<ConstNodeRange, ConstNodeRange::const_iterator>(fe_problem),
     _fe_problem(fe_problem),
     _aux_sys(fe_problem.getAuxiliarySystem()),
-    _tags(_fe_problem.getVectorTags(tags)),
+    _tags(tags),
     _nodal_kernels(nodal_kernels),
     _num_cached(0)
 {
@@ -46,17 +46,14 @@ ComputeNodalKernelsThread::ComputeNodalKernelsThread(ComputeNodalKernelsThread &
 void
 ComputeNodalKernelsThread::pre()
 {
-  std::set<TagID> tag_ids;
-  for (const auto & tag : _tags)
-    tag_ids.insert(tag._id);
   _num_cached = 0;
 
-  if (!tag_ids.size() || tag_ids.size() == _fe_problem.numVectorTags(Moose::VECTOR_TAG_RESIDUAL))
+  if (!_tags.size() || _tags.size() == _fe_problem.numVectorTags(Moose::VECTOR_TAG_RESIDUAL))
     _nkernel_warehouse = &_nodal_kernels;
-  else if (tag_ids.size() == 1)
-    _nkernel_warehouse = &(_nodal_kernels.getVectorTagObjectWarehouse(*(tag_ids.begin()), _tid));
+  else if (_tags.size() == 1)
+    _nkernel_warehouse = &(_nodal_kernels.getVectorTagObjectWarehouse(*(_tags.begin()), _tid));
   else
-    _nkernel_warehouse = &(_nodal_kernels.getVectorTagsObjectWarehouse(tag_ids, _tid));
+    _nkernel_warehouse = &(_nodal_kernels.getVectorTagsObjectWarehouse(_tags, _tid));
 }
 
 void
@@ -93,7 +90,7 @@ ComputeNodalKernelsThread::onNode(ConstNodeRange::const_iterator & node_it)
   {
     _num_cached = 0;
     Threads::spin_mutex::scoped_lock lock(Threads::spin_mtx);
-    _fe_problem.addCachedResidual(_tid, _tags);
+    _fe_problem.addCachedResidual(_tid);
   }
 }
 

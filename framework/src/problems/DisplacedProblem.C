@@ -913,21 +913,21 @@ DisplacedProblem::addResidualLower(THREAD_ID tid, const std::vector<VectorTag> &
 }
 
 void
-DisplacedProblem::cacheResidual(THREAD_ID tid, const std::vector<VectorTag> & tags)
+DisplacedProblem::cacheResidual(THREAD_ID tid)
 {
-  _assembly[tid][currentNlSysNum()]->cacheResidual(tags);
+  _assembly[tid][currentNlSysNum()]->cacheResidual();
 }
 
 void
-DisplacedProblem::cacheResidualNeighbor(THREAD_ID tid, const std::vector<VectorTag> & tags)
+DisplacedProblem::cacheResidualNeighbor(THREAD_ID tid)
 {
-  _assembly[tid][currentNlSysNum()]->cacheResidualNeighbor(tags);
+  _assembly[tid][currentNlSysNum()]->cacheResidualNeighbor();
 }
 
 void
-DisplacedProblem::addCachedResidual(THREAD_ID tid, const std::vector<VectorTag> & tags)
+DisplacedProblem::addCachedResidual(THREAD_ID tid)
 {
-  _assembly[tid][currentNlSysNum()]->addCachedResiduals(tags);
+  _assembly[tid][currentNlSysNum()]->addCachedResiduals();
 }
 
 void

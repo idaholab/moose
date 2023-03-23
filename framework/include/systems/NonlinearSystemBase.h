@@ -254,9 +254,7 @@ public:
    * computed
    * @param displaced Controls whether to do the displaced Constraints or non-displaced
    */
-  void constraintResiduals(NumericVector<Number> & residual,
-                           bool displaced,
-                           const std::set<TagID> & tags);
+  void constraintResiduals(NumericVector<Number> & residual, bool displaced);
 
   /**
    * Computes residual for a given tag
