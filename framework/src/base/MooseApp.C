@@ -386,7 +386,7 @@ MooseApp::MooseApp(InputParameters parameters)
                                ? parameters.get<const MooseMesh *>("_master_displaced_mesh")
                                : nullptr),
     _mesh_generator_system(*this),
-    _execute_flags(moose::internal::getExecFlagRegistry().getFlags()),
+    _execute_flags(ExecFlagRegistry::getExecFlagRegistry().getFlags()),
     _automatic_automatic_scaling(getParam<bool>("automatic_automatic_scaling"))
 {
 #ifdef HAVE_GPERFTOOLS
