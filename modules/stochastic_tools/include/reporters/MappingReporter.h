@@ -13,12 +13,12 @@
 #include "StochasticReporter.h"
 #include "SurrogateModel.h"
 #include "ParallelSolutionStorage.h"
-#include "MappingBase.h"
+#include "MappingInterface.h"
 
 /**
  * A tool for output Sampler data.
  */
-class MappingReporter : public StochasticReporter
+class MappingReporter : public StochasticReporter, public MappingInterface
 {
 public:
   static InputParameters validParams();

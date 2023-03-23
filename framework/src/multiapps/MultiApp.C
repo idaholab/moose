@@ -1225,7 +1225,7 @@ rankConfig(dof_id_type rank,
 
   if (slot_for_rank[rank] < 0)
     // ranks assigned a negative slot don't have any apps running on them.
-    return {0, 0, 0, 0, false};
+    return {0, 0, 0, 0, false, 0};
   dof_id_type slot_num = slot_for_rank[rank];
 
   bool is_first_local_rank = rank == 0 || (slot_for_rank[rank - 1] != slot_for_rank[rank]);
@@ -1249,7 +1249,7 @@ rankConfig(dof_id_type rank,
   }
 
   if (batch_mode)
-    return {n_local_apps, app_index, 1, slot_num, is_first_local_rank};
+    return {n_local_apps, app_index, 1, slot_num, is_first_local_rank, my_first_rank};
   return {n_local_apps, app_index, n_local_apps, app_index, is_first_local_rank, my_first_rank};
 }
 

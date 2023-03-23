@@ -42,7 +42,7 @@ protected:
   unsigned int determineNumberOfModes(const VariableName & vname,
                                       const std::vector<Real> & converged_evs);
 
-  const std::vector<VariableName> _variable_names;
+  std::vector<VariableName> & _variable_names;
   const std::vector<unsigned int> _num_modes;
   const std::vector<Real> _energy_threshold;
 

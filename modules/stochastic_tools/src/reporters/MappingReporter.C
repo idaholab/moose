@@ -19,6 +19,7 @@ MappingReporter::validParams()
 {
   InputParameters params = StochasticReporter::validParams();
   params += SamplerInterface::validParams();
+  params += MappingInterface::validParams();
   params.addClassDescription("Blabla.");
   params.addRequiredParam<UserObjectName>("mapping", "Name of the mapping object.");
   params.addRequiredParam<std::vector<VariableName>>("variables",
@@ -30,6 +31,7 @@ MappingReporter::validParams()
 
 MappingReporter::MappingReporter(const InputParameters & parameters)
   : StochasticReporter(parameters),
+    MappingInterface(this),
     _sampler(isParamValid("sampler") ? &getSampler("sampler") : nullptr),
     _mapping_name(getParam<UserObjectName>("mapping")),
     _variable_names(getParam<std::vector<VariableName>>("variables"))

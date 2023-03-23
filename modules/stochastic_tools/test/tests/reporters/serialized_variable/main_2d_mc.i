@@ -116,4 +116,8 @@
     type = JSON
     execute_on = FINAL
   []
+  [rd]
+    type = MappingOutput
+    mappings = pod_mapping
+  []
 []

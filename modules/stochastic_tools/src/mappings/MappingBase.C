@@ -16,10 +16,13 @@ MappingBase::validParams()
   params.addClassDescription("Base class for mapping objects.");
   params.registerBase("MappingBase");
   params.registerSystemAttributeName("MappingBase");
+  params.addParam<std::string>(
+      "filename",
+      "Name of the restartable data file for cases when we would like to load the mapping.");
   return params;
 }
 
 MappingBase::MappingBase(const InputParameters & parameters)
-  : MooseObject(parameters), Restartable(this, "Mappings")
+  : MooseObject(parameters), RestartableModelInterface(this, _type + "_" + name())
 {
 }

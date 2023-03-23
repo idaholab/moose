@@ -11,12 +11,12 @@
 
 #include "StochasticToolsApp.h"
 #include "MooseObject.h"
-#include "Restartable.h"
+#include "RestartableModelInterface.h"
 
 #include "libmesh/petsc_vector.h"
 #include "libmesh/petsc_matrix.h"
 
-class MappingBase : public MooseObject, public Restartable
+class MappingBase : public MooseObject, public RestartableModelInterface
 {
 public:
   static InputParameters validParams();

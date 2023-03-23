@@ -39,48 +39,60 @@ PODMapping::validParams()
 
 PODMapping::PODMapping(const InputParameters & parameters)
   : MappingBase(parameters),
-    _variable_names(getParam<std::vector<VariableName>>("variables")),
+    _variable_names(isParamValid("filename")
+                        ? setModelData<std::vector<VariableName>>("variables")
+                        : declareModelData<std::vector<VariableName>>(
+                              "variables", getParam<std::vector<VariableName>>("variables"))),
     _num_modes(isParamValid("num_modes") ? getParam<std::vector<unsigned int>>("num_modes")
                                          : std::vector<unsigned int>()),
     _energy_threshold(isParamValid("energy_threshold")
                           ? getParam<std::vector<Real>>("energy_threshold")
                           : std::vector<Real>()),
-    _basis_functions(declareRestartableData<
-                     std::map<VariableName, std::vector<std::unique_ptr<DenseVector<Real>>>>>(
-        "basis_functions")),
+    _basis_functions(
+        isParamValid("filename")
+            ? setModelData<std::map<VariableName, std::vector<std::unique_ptr<DenseVector<Real>>>>>(
+                  "basis_functions")
+            : declareModelData<
+                  std::map<VariableName, std::vector<std::unique_ptr<DenseVector<Real>>>>>(
+                  "basis_functions")),
     _eigen_values(
-        declareRestartableData<std::map<VariableName, std::vector<Real>>>("eigen_values")),
+        isParamValid("filename")
+            ? setModelData<std::map<VariableName, std::vector<Real>>>("eigen_values")
+            : declareModelData<std::map<VariableName, std::vector<Real>>>("eigen_values")),
     _extra_slepc_options(getParam<std::string>("extra_slepc_options"))
-
 {
-  if (isParamValid("num_modes"))
+  if (!isParamValid("filename"))
   {
-    if (_num_modes.size() != _variable_names.size())
-      paramError("num_modes", "The number of modes should be defined for each variable!");
+    if (isParamValid("num_modes"))
+    {
+      if (_num_modes.size() != _variable_names.size())
+        paramError("num_modes", "The number of modes should be defined for each variable!");
 
-    for (const auto & mode : _num_modes)
-      if (!mode)
-        paramError("num_modes", "The number of modes should always be a positive!");
-  }
+      for (const auto & mode : _num_modes)
+        if (!mode)
+          paramError("num_modes", "The number of modes should always be a positive!");
+    }
 
-  if (isParamValid("energy_threshold"))
-  {
-    if (_energy_threshold.size() != _variable_names.size())
-      paramError("energy_threshold", "The energy thresholds should be defined for each variable!");
-
-    for (const auto & threshold : _energy_threshold)
-      if (threshold < 0 || threshold >= 1)
+    if (isParamValid("energy_threshold"))
+    {
+      if (_energy_threshold.size() != _variable_names.size())
         paramError("energy_threshold",
-                   "The energy thresholds should always be in the [0,1) range!");
-  }
+                   "The energy thresholds should be defined for each variable!");
 
-  for (const auto & vname : _variable_names)
-  {
-    _eigen_values.emplace(vname, std::vector<Real>());
-    _basis_functions.emplace(vname, std::vector<std::unique_ptr<DenseVector<Real>>>());
-    _svds.try_emplace(vname);
-    SVDCreate(_communicator.get(), &_svds[vname]);
-    _computed_svd.emplace(vname, false);
+      for (const auto & threshold : _energy_threshold)
+        if (threshold < 0 || threshold >= 1)
+          paramError("energy_threshold",
+                     "The energy thresholds should always be in the [0,1) range!");
+    }
+
+    for (const auto & vname : _variable_names)
+    {
+      _eigen_values.emplace(vname, std::vector<Real>());
+      _basis_functions.emplace(vname, std::vector<std::unique_ptr<DenseVector<Real>>>());
+      _svds.try_emplace(vname);
+      SVDCreate(_communicator.get(), &_svds[vname]);
+      _computed_svd.emplace(vname, false);
+    }
   }
 }
 

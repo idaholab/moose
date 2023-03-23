@@ -47,7 +47,7 @@ public:
   const std::string & modelMetaDataName() const { return _model_meta_data_name; }
 
 private:
-  /// Reference to the MooseObject that uses this interfface
+  /// Reference to the MooseObject that uses this interface
   const MooseObject & _object;
 
   /// The model meta data name. This is used to store the restartable data within the
