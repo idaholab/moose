@@ -64,7 +64,6 @@ name = 'finite_rr'
   type = ReferenceResidualProblem
   extra_tag_vectors = 'ref'
   reference_vector = 'ref'
-  converge_on = 'disp_x disp_y'
 []
 
 [Variables]
@@ -97,10 +96,10 @@ name = 'finite_rr'
     secondary = block_left
     formulation = mortar
     model = coulomb
-    normalize_c = true
-    c_normal = 1e6
-    c_tangential = 1e6
+    c_normal = 1e0
+    c_tangential = 1e-6
     friction_coefficient = 0.1
+    tangential_lm_scaling = 1.0e-10
   []
 []
 
@@ -159,14 +158,14 @@ name = 'finite_rr'
   solve_type = 'NEWTON'
   petsc_options = '-snes_converged_reason -ksp_converged_reason'
   petsc_options_iname = '-pc_type -pc_factor_shift_type -pc_factor_shift_amount'
-  petsc_options_value = 'lu        NONZERO               1e-12'
+  petsc_options_value = 'lu        NONZERO               1e-15'
   end_time = 5.3
   dt = 0.12
   dtmin = 0.12
   timestep_tolerance = 1e-6
-  line_search = 'none'
+  line_search = 'contact'
   nl_div_tol = 1e100
-  nl_abs_tol = 1e-9
+  nl_abs_tol = 1e-7
 []
 
 [Postprocessors]
@@ -225,10 +224,6 @@ name = 'finite_rr'
 
 [Outputs]
   file_base = ${name}
-  [exodus]
-    type = Exodus
-    execute_on = 'FAILED FINAL LINEAR'
-  []
   [comp]
     type = CSV
     show = 'contact'

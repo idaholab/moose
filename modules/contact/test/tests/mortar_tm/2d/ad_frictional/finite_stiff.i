@@ -56,13 +56,6 @@ name = 'finite_stiff'
   []
 []
 
-[Problem]
-  type = ReferenceResidualProblem
-  extra_tag_vectors = 'ref'
-  reference_vector = 'ref'
-  converge_on = 'disp_x disp_y'
-[]
-
 [GlobalParams]
   displacements = 'disp_x disp_y'
 []
@@ -86,7 +79,6 @@ name = 'finite_stiff'
     generate_output = 'stress_xx stress_yy stress_zz vonmises_stress hydrostatic_stress strain_xx '
                       'strain_yy strain_zz'
     block = 'plank block'
-    extra_vector_tags = 'ref'
     use_automatic_differentiation = true
   []
 []
@@ -97,11 +89,10 @@ name = 'finite_stiff'
     secondary = block_left
     formulation = mortar
     model = coulomb
-    c_normal = 1e4
-    c_tangential = 1e4
-    friction_coefficient = 0.1
-    # normal_lm_scaling = 1.0e-5
-    # tangential_lm_scaling = 1.0e-10
+    c_normal = 1e0
+    c_tangential = 1e-6
+    friction_coefficient = 0.2
+    tangential_lm_scaling = 1.0e-10
   []
 []
 
@@ -158,15 +149,17 @@ name = 'finite_stiff'
 [Executioner]
   type = Transient
   solve_type = 'NEWTON'
-  petsc_options = '-snes_converged_reason -ksp_converged_reason'
+  petsc_options = '-snes_converged_reason -ksp_converged_reason -snes_ksp_ew'
   petsc_options_iname = '-pc_type -pc_factor_shift_type -pc_factor_shift_amount'
   petsc_options_value = 'lu        NONZERO               1e-12'
+
   end_time = 5.3
-  dt = 0.08
-  dtmin = 0.08
+  dt = 0.12
+  dtmin = 0.12
   line_search = 'none'
   nl_div_tol = 1e100
   timestep_tolerance = 1e-6
+  l_abs_tol = 1e-13
   nl_abs_tol = 1e-9
   nl_rel_tol = 1e-14
 []
@@ -227,10 +220,6 @@ name = 'finite_stiff'
 
 [Outputs]
   file_base = ${name}
-  [exodus]
-    type = Exodus
-    execute_on = 'LINEAR'
-  []
   [comp]
     type = CSV
     show = 'contact'
