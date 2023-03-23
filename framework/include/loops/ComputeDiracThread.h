@@ -46,7 +46,7 @@ protected:
   bool _is_jacobian;
   NonlinearSystemBase & _nl;
 
-  const std::vector<VectorTag> _tags;
+  const std::set<TagID> & _tags;
 
   /// Storage for DiracKernel objects
   MooseObjectTagWarehouse<DiracKernelBase> & _dirac_kernels;

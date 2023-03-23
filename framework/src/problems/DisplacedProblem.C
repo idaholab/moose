@@ -895,21 +895,21 @@ DisplacedProblem::clearDiracInfo()
 }
 
 void
-DisplacedProblem::addResidual(THREAD_ID tid, const std::vector<VectorTag> & tags)
+DisplacedProblem::addResidual(THREAD_ID tid)
 {
-  _assembly[tid][currentNlSysNum()]->addResidual(tags);
+  _assembly[tid][currentNlSysNum()]->addResidual(getVectorTags(Moose::VECTOR_TAG_RESIDUAL));
 }
 
 void
-DisplacedProblem::addResidualNeighbor(THREAD_ID tid, const std::vector<VectorTag> & tags)
+DisplacedProblem::addResidualNeighbor(THREAD_ID tid)
 {
-  _assembly[tid][currentNlSysNum()]->addResidualNeighbor(tags);
+  _assembly[tid][currentNlSysNum()]->addResidualNeighbor(getVectorTags(Moose::VECTOR_TAG_RESIDUAL));
 }
 
 void
-DisplacedProblem::addResidualLower(THREAD_ID tid, const std::vector<VectorTag> & tags)
+DisplacedProblem::addResidualLower(THREAD_ID tid)
 {
-  _assembly[tid][currentNlSysNum()]->addResidualLower(tags);
+  _assembly[tid][currentNlSysNum()]->addResidualLower(getVectorTags(Moose::VECTOR_TAG_RESIDUAL));
 }
 
 void

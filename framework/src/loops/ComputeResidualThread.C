@@ -17,7 +17,7 @@
 
 ComputeResidualThread::ComputeResidualThread(FEProblemBase & fe_problem,
                                              const std::set<TagID> & tags)
-  : NonlinearThread(fe_problem), _tags(fe_problem.getVectorTags(tags))
+  : NonlinearThread(fe_problem), _tags(tags)
 {
 }
 
@@ -38,20 +38,20 @@ ComputeResidualThread::compute(ResidualObject & ro)
 void
 ComputeResidualThread::accumulateLower()
 {
-  _fe_problem.addResidualLower(_tid, _tags);
+  _fe_problem.addResidualLower(_tid);
 }
 
 void
 ComputeResidualThread::accumulateNeighbor()
 {
-  _fe_problem.addResidualNeighbor(_tid, _tags);
+  _fe_problem.addResidualNeighbor(_tid);
 }
 
 void
 ComputeResidualThread::accumulateNeighborLower()
 {
-  _fe_problem.addResidualNeighbor(_tid, _tags);
-  _fe_problem.addResidualLower(_tid, _tags);
+  _fe_problem.addResidualNeighbor(_tid);
+  _fe_problem.addResidualLower(_tid);
 }
 
 void
@@ -75,13 +75,9 @@ ComputeResidualThread::join(const ComputeResidualThread & /*y*/)
 void
 ComputeResidualThread::determineResidualObjects()
 {
-  std::set<TagID> tag_ids;
-  for (const auto & tag : _tags)
-    tag_ids.insert(tag._id);
-
   // If users pass a empty vector or a full size of vector,
   // we take all kernels
-  if (!tag_ids.size() || tag_ids.size() == _fe_problem.numVectorTags(Moose::VECTOR_TAG_RESIDUAL))
+  if (!_tags.size() || _tags.size() == _fe_problem.numVectorTags(Moose::VECTOR_TAG_RESIDUAL))
   {
     _tag_kernels = &_kernels;
     _dg_warehouse = &_dg_kernels;
@@ -92,18 +88,18 @@ ComputeResidualThread::determineResidualObjects()
   // We call tag based storage
   else if (_tags.size() == 1)
   {
-    _tag_kernels = &(_kernels.getVectorTagObjectWarehouse(*(tag_ids.begin()), _tid));
-    _dg_warehouse = &(_dg_kernels.getVectorTagObjectWarehouse(*(tag_ids.begin()), _tid));
-    _ibc_warehouse = &(_integrated_bcs.getVectorTagObjectWarehouse(*(tag_ids.begin()), _tid));
-    _ik_warehouse = &(_interface_kernels.getVectorTagObjectWarehouse(*(tag_ids.begin()), _tid));
+    _tag_kernels = &(_kernels.getVectorTagObjectWarehouse(*(_tags.begin()), _tid));
+    _dg_warehouse = &(_dg_kernels.getVectorTagObjectWarehouse(*(_tags.begin()), _tid));
+    _ibc_warehouse = &(_integrated_bcs.getVectorTagObjectWarehouse(*(_tags.begin()), _tid));
+    _ik_warehouse = &(_interface_kernels.getVectorTagObjectWarehouse(*(_tags.begin()), _tid));
   }
   // This one may be expensive
   else
   {
-    _tag_kernels = &(_kernels.getVectorTagsObjectWarehouse(tag_ids, _tid));
-    _dg_warehouse = &(_dg_kernels.getVectorTagsObjectWarehouse(tag_ids, _tid));
-    _ibc_warehouse = &(_integrated_bcs.getVectorTagsObjectWarehouse(tag_ids, _tid));
-    _ik_warehouse = &(_interface_kernels.getVectorTagsObjectWarehouse(tag_ids, _tid));
+    _tag_kernels = &(_kernels.getVectorTagsObjectWarehouse(_tags, _tid));
+    _dg_warehouse = &(_dg_kernels.getVectorTagsObjectWarehouse(_tags, _tid));
+    _ibc_warehouse = &(_integrated_bcs.getVectorTagsObjectWarehouse(_tags, _tid));
+    _ik_warehouse = &(_interface_kernels.getVectorTagsObjectWarehouse(_tags, _tid));
   }
 
   if (_fe_problem.haveFV())
@@ -114,7 +110,7 @@ ComputeResidualThread::determineResidualObjects()
         .template condition<AttribSystem>("FVElementalKernel")
         .template condition<AttribSubdomains>(_subdomain)
         .template condition<AttribThread>(_tid)
-        .template condition<AttribVectorTags>(tag_ids)
+        .template condition<AttribVectorTags>(_tags)
         .queryInto(_fv_kernels);
   }
 }

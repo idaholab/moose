@@ -1313,10 +1313,10 @@ public:
   virtual void computeIndicators();
   virtual void computeMarkers();
 
-  virtual void addResidual(THREAD_ID tid, const std::vector<VectorTag> & tags) override;
-  virtual void addResidualNeighbor(THREAD_ID tid, const std::vector<VectorTag> & tags) override;
-  virtual void addResidualLower(THREAD_ID tid, const std::vector<VectorTag> & tags) override;
-  virtual void addResidualScalar(THREAD_ID tid, const std::vector<VectorTag> & tags);
+  virtual void addResidual(THREAD_ID tid) override;
+  virtual void addResidualNeighbor(THREAD_ID tid) override;
+  virtual void addResidualLower(THREAD_ID tid) override;
+  virtual void addResidualScalar(THREAD_ID tid = 0);
 
   virtual void cacheResidual(THREAD_ID tid) override;
   virtual void cacheResidualNeighbor(THREAD_ID tid) override;

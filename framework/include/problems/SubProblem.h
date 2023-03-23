@@ -328,9 +328,9 @@ public:
   virtual unsigned int nNonlinearIterations(unsigned int nl_sys_num = 0) const;
   virtual unsigned int nLinearIterations(unsigned int nl_sys_num = 0) const;
 
-  virtual void addResidual(THREAD_ID tid, const std::vector<VectorTag> & tags) = 0;
-  virtual void addResidualNeighbor(THREAD_ID tid, const std::vector<VectorTag> & tags) = 0;
-  virtual void addResidualLower(THREAD_ID tid, const std::vector<VectorTag> & tags) = 0;
+  virtual void addResidual(THREAD_ID tid) = 0;
+  virtual void addResidualNeighbor(THREAD_ID tid) = 0;
+  virtual void addResidualLower(THREAD_ID tid) = 0;
 
   virtual void cacheResidual(THREAD_ID tid) = 0;
   virtual void cacheResidualNeighbor(THREAD_ID tid) = 0;

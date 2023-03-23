@@ -239,9 +239,9 @@ public:
   virtual void getDiracElements(std::set<const Elem *> & elems) override;
   virtual void clearDiracInfo() override;
 
-  virtual void addResidual(THREAD_ID tid, const std::vector<VectorTag> & tags) override;
-  virtual void addResidualNeighbor(THREAD_ID tid, const std::vector<VectorTag> & tags) override;
-  virtual void addResidualLower(THREAD_ID tid, const std::vector<VectorTag> & tags) override;
+  virtual void addResidual(THREAD_ID tid) override;
+  virtual void addResidualNeighbor(THREAD_ID tid) override;
+  virtual void addResidualLower(THREAD_ID tid) override;
 
   virtual void cacheResidual(THREAD_ID tid) override;
   virtual void cacheResidualNeighbor(THREAD_ID tid) override;

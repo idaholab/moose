@@ -26,7 +26,7 @@ ComputeDiracThread::ComputeDiracThread(FEProblemBase & feproblem,
   : ThreadedElementLoop<DistElemRange>(feproblem),
     _is_jacobian(is_jacobian),
     _nl(feproblem.currentNonlinearSystem()),
-    _tags(feproblem.getVectorTags(tags)),
+    _tags(tags),
     _dirac_kernels(_nl.getDiracKernelWarehouse())
 {
 }
@@ -68,20 +68,17 @@ ComputeDiracThread::subdomainChanged()
 
   // If users pass a empty vector or a full size of vector,
   // we take all kernels
-  std::set<TagID> tag_ids;
-  for (const auto & tag : _tags)
-    tag_ids.insert(tag._id);
-  if (!tag_ids.size() || tag_ids.size() == _fe_problem.numMatrixTags())
+  if (!_tags.size() || _tags.size() == _fe_problem.numMatrixTags())
     _dirac_warehouse = &_dirac_kernels;
   // If we have one tag only,  We call tag based storage
-  else if (tag_ids.size() == 1)
-    _dirac_warehouse =
-        _is_jacobian ? &(_dirac_kernels.getMatrixTagObjectWarehouse(*(tag_ids.begin()), _tid))
-                     : &(_dirac_kernels.getVectorTagObjectWarehouse(*(tag_ids.begin()), _tid));
+  else if (_tags.size() == 1)
+    _dirac_warehouse = _is_jacobian
+                           ? &(_dirac_kernels.getMatrixTagObjectWarehouse(*(_tags.begin()), _tid))
+                           : &(_dirac_kernels.getVectorTagObjectWarehouse(*(_tags.begin()), _tid));
   // This one may be expensive, and hopefully we do not use it so often
   else
-    _dirac_warehouse = _is_jacobian ? &(_dirac_kernels.getMatrixTagsObjectWarehouse(tag_ids, _tid))
-                                    : &(_dirac_kernels.getVectorTagsObjectWarehouse(tag_ids, _tid));
+    _dirac_warehouse = _is_jacobian ? &(_dirac_kernels.getMatrixTagsObjectWarehouse(_tags, _tid))
+                                    : &(_dirac_kernels.getVectorTagsObjectWarehouse(_tags, _tid));
 }
 
 void
@@ -153,7 +150,7 @@ ComputeDiracThread::postElement(const Elem * /*elem*/)
 {
   Threads::spin_mutex::scoped_lock lock(Threads::spin_mtx);
   if (!_is_jacobian)
-    _fe_problem.addResidual(_tid, _tags);
+    _fe_problem.addResidual(_tid);
   else
     _fe_problem.addJacobian(_tid);
 }
