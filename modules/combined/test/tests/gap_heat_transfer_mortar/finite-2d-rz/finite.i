@@ -122,6 +122,19 @@ name = 'finite'
   []
 []
 
+[UserObjects]
+  [weighted_gap_uo]
+    type = LMWeightedGapUserObject
+    primary_boundary = plank_right
+    secondary_boundary = block_left
+    primary_subdomain = frictionless_primary_subdomain
+    secondary_subdomain = frictionless_secondary_subdomain
+    lm_variable = frictionless_normal_lm
+    disp_x = disp_x
+    disp_y = disp_y
+  []
+[]
+
 [Constraints]
   [weighted_gap_lm]
     type = ComputeWeightedGapLMMechanicalContact
@@ -133,6 +146,7 @@ name = 'finite'
     disp_x = disp_x
     disp_y = disp_y
     use_displaced_mesh = true
+    weighted_gap_uo = weighted_gap_uo
   []
   [normal_x]
     type = NormalMortarMechanicalContact
@@ -145,6 +159,7 @@ name = 'finite'
     component = x
     use_displaced_mesh = true
     compute_lm_residuals = false
+    weighted_gap_uo = weighted_gap_uo
   []
   [normal_y]
     type = NormalMortarMechanicalContact
@@ -157,6 +172,7 @@ name = 'finite'
     component = y
     use_displaced_mesh = true
     compute_lm_residuals = false
+    weighted_gap_uo = weighted_gap_uo
   []
   [thermal_contact]
     type = GapConductanceConstraint
