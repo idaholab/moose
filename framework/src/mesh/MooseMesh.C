@@ -3313,6 +3313,10 @@ MooseMesh::buildFiniteVolumeInfo() const
 {
   if (!_finite_volume_info_dirty)
     return;
+
+  mooseAssert(!Threads::in_threads,
+              "This routine has not been implemented for threads. Please query this routine before "
+              "a threaded region or contact a MOOSE developer to discuss.");
   _finite_volume_info_dirty = false;
 
   using Keytype = std::pair<const Elem *, unsigned short int>;

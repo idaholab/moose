@@ -90,6 +90,8 @@ public:
   /// that is itself block restricted may modify the value to indicate \emph its sidedness. If there
   /// is ever a mismatch between the specified sidedness of a physics object and the sidedness of a
   /// functor, then we will error
+  /// If unspecified (nullptr), the evaluation will be two-sided, unless the functor is not defined
+  /// on one side of the face.
   const Elem * face_side;
 
   /**
