@@ -207,9 +207,8 @@ SetupMeshAction::modifyParamsForUseSplit(InputParameters & moose_object_params) 
   {
     if (split_file == "")
     {
-      if (_app.processor_id() == 0)
-        mooseError("Cannot use split mesh for a non-file mesh without specifying --split-file on "
-                   "command line");
+      mooseError("Cannot use split mesh for a non-file mesh without specifying --split-file on "
+                 "command line");
     }
 
     auto new_pars = FileMesh::validParams();
