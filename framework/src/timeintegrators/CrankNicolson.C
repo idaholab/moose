@@ -67,9 +67,9 @@ CrankNicolson::init()
   //       to be added on top of itself prohibited by PETSc.
   //       Objects executed on initial have been executed by FEProblem,
   //       so we can and should directly call NonlinearSystem residual evaluation.
-  _fe_problem.setCurrentResidualVectorTags({_nl.nonTimeVectorTag()}, {});
-  _nl.computeResidualTag(_nl.RHS(), _nl.nonTimeVectorTag(), {});
-  _fe_problem.clearCurrentResidualVectorTags({});
+  _fe_problem.setCurrentResidualVectorTags({_nl.nonTimeVectorTag()});
+  _nl.computeResidualTag(_nl.RHS(), _nl.nonTimeVectorTag());
+  _fe_problem.clearCurrentResidualVectorTags();
   _residual_old = _nl.RHS();
 }
 

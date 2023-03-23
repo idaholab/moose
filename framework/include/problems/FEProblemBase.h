@@ -2060,13 +2060,12 @@ public:
   /**
    * Set the current residual vector tag data structure based on the passed in tag IDs
    */
-  void setCurrentResidualVectorTags(const std::set<TagID> & vector_tags,
-                                    CurrentResidualVectorTagsKey);
+  void setCurrentResidualVectorTags(const std::set<TagID> & vector_tags);
 
   /**
    * Clear the current residual vector tag data structure
    */
-  void clearCurrentResidualVectorTags(CurrentResidualVectorTagsKey);
+  void clearCurrentResidualVectorTags();
 
 protected:
   /// Create extra tagged vectors and matrices
@@ -2618,13 +2617,13 @@ FEProblemBase::currentResidualVectorTags() const
 }
 
 inline void
-FEProblemBase::setCurrentResidualVectorTags(const std::set<TagID> & vector_tags,
-                                            CurrentResidualVectorTagsKey)
+FEProblemBase::setCurrentResidualVectorTags(const std::set<TagID> & vector_tags)
 {
   _current_residual_vector_tags = getVectorTags(vector_tags);
 }
 
-inline void FEProblemBase::clearCurrentResidualVectorTags(CurrentResidualVectorTagsKey)
+inline void
+FEProblemBase::clearCurrentResidualVectorTags()
 {
   _current_residual_vector_tags.clear();
 }

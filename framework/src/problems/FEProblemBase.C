@@ -5859,7 +5859,7 @@ FEProblemBase::computeResidualAndJacobian(const NumericVector<Number> & soln,
     for (const auto & residual_vector_tag : residual_vector_tags)
       _fe_vector_tags.insert(residual_vector_tag._id);
 
-    setCurrentResidualVectorTags(_fe_vector_tags, {});
+    setCurrentResidualVectorTags(_fe_vector_tags);
   }
 
   // matrix tags
@@ -6010,7 +6010,7 @@ FEProblemBase::computeResidualAndJacobian(const NumericVector<Number> & soln,
       _displaced_problem->setCurrentlyComputingResidualAndJacobian(false);
     }
 
-    clearCurrentResidualVectorTags({});
+    clearCurrentResidualVectorTags();
   }
   catch (MooseException & e)
   {
@@ -6126,7 +6126,7 @@ FEProblemBase::computeResidualTags(const std::set<TagID> & tags)
 
   TIME_SECTION("computeResidualTags", 5, "Computing Residual");
 
-  setCurrentResidualVectorTags(tags, {});
+  setCurrentResidualVectorTags(tags);
 
   _aux->zeroVariablesForResidual();
 
@@ -6218,10 +6218,10 @@ FEProblemBase::computeResidualTags(const std::set<TagID> & tags)
 
   _safe_access_tagged_vectors = false;
 
-  _current_nl_sys->computeResidualTags(tags, {});
+  _current_nl_sys->computeResidualTags(tags);
 
   _safe_access_tagged_vectors = true;
-  clearCurrentResidualVectorTags({});
+  clearCurrentResidualVectorTags();
 }
 
 void

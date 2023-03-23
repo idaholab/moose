@@ -257,29 +257,16 @@ public:
   void constraintResiduals(NumericVector<Number> & residual, bool displaced);
 
   /**
-   * Class that is used as a parameter to computeResidualTag(s) that allows only
-   * blessed classes to call said methods
-   */
-  class ComputeResidualTagKey
-  {
-    friend class FEProblemBase;
-    friend class CrankNicolson;
-    friend class NonlinearSystemBase;
-    ComputeResidualTagKey() {}
-    ComputeResidualTagKey(const ComputeResidualTagKey &) {}
-  };
-
-  /**
    * Computes residual for a given tag
    * @param residual Residual is formed in here
    * @param the tag of kernels for which the residual is to be computed.
    */
-  void computeResidualTag(NumericVector<Number> & residual, TagID tag_id, ComputeResidualTagKey);
+  void computeResidualTag(NumericVector<Number> & residual, TagID tag_id);
 
   /**
    * Form multiple tag-associated residual vectors for all the given tags
    */
-  void computeResidualTags(const std::set<TagID> & tags, ComputeResidualTagKey);
+  void computeResidualTags(const std::set<TagID> & tags);
 
   /**
    * Form possibly multiple tag-associated vectors and matrices
