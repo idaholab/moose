@@ -63,7 +63,6 @@ MortarArchardsLawAux::MortarArchardsLawAux(const InputParameters & parameters)
     _secondary_z_dot(_has_disp_z ? &_displacements[2]->adUDot() : nullptr),
     _primary_z_dot(_has_disp_z ? &_displacements[2]->adUDotNeighbor() : nullptr),
     _worn_depth(0),
-    _worn_out_depth_dt(0),
     _qp_gap_velocity_nodal(0)
 {
   if (!_displaced)
@@ -75,6 +74,8 @@ MortarArchardsLawAux::MortarArchardsLawAux(const InputParameters & parameters)
 Real
 MortarArchardsLawAux::computeValue()
 {
+  mooseAssert(_normals.size() == _test_lower.size(),
+              "Normals and test_lower must be the same size");
   _worn_depth = 0;
   for (_qp = 0; _qp < _qrule_msm->n_points(); _qp++)
   {
@@ -89,6 +90,12 @@ MortarArchardsLawAux::computeValue()
 void
 MortarArchardsLawAux::computeQpProperties()
 {
+  _msm_volume += _JxW_msm[_qp] * _coord_msm[_qp];
+}
+
+void
+MortarArchardsLawAux::computeQpIProperties()
+{
   RealVectorValue gap_velocity_vec;
   gap_velocity_vec(0) = MetaPhysicL::raw_value(_secondary_x_dot[_qp] - _primary_x_dot[_qp]);
   gap_velocity_vec(1) = MetaPhysicL::raw_value(_secondary_y_dot[_qp] - _primary_y_dot[_qp]);
@@ -100,17 +107,12 @@ MortarArchardsLawAux::computeQpProperties()
   gap_velocity_vec -= gap_velocity_vec.contract(_normals[_i]) * _normals[_i];
 
   // Compute norm of the relative tangential velocity (used to compute the weighted quantity)
-  const Real norm_tangential_vel = gap_velocity_vec.norm();
+  const auto norm_tangential_vel = gap_velocity_vec.norm();
 
-  _worn_out_depth_dt = norm_tangential_vel * _energy_wear_coefficient * _friction_coefficient *
-                       _normal_pressure[0] * _dt * _JxW_msm[_qp] * _coord_msm[_qp];
+  const auto worn_out_depth_dt = norm_tangential_vel * _energy_wear_coefficient *
+                                 _friction_coefficient * _normal_pressure[0] * _dt * _JxW_msm[_qp] *
+                                 _coord_msm[_qp];
 
-  _msm_volume += _JxW_msm[_qp] * _coord_msm[_qp];
-}
-
-void
-MortarArchardsLawAux::computeQpIProperties()
-{
   // Accumulate worn-out depth over time.
-  _worn_depth += _test_lower[_i][_qp] * _worn_out_depth_dt;
+  _worn_depth += _test_lower[_i][_qp] * worn_out_depth_dt;
 }

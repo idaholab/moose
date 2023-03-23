@@ -67,9 +67,6 @@ protected:
   /// The worn-out depth due to Archard's law (Aux Kernel computed value)
   Real _worn_depth;
 
-  /// Worn-out depth for this step.
-  Real _worn_out_depth_dt;
-
   /// The gap velocity vector at the current quadrature point, used when we are not interpolating the normal
   /// vector, multipled by JxW
   RealVectorValue _qp_gap_velocity_nodal;
