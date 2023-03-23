@@ -27,8 +27,8 @@ above command to your shell initialization file:
 echo "module load use.moose moose-dev" >> ~/.bash_profile
 ```
 
-!template load file=installation/clone_moose.md.template PATH=/scratch/$USER/projects
+!template load file=installation/clone_moose.md.template PATH=~/cluster_name/projects
 
-!template load file=installation/build_petsc_and_libmesh.md.template PATH=/scratch/$USER/projects
+!template load file=installation/build_petsc_and_libmesh.md.template PATH=~/cluster_name/projects
 
-!template load file=installation/test_moose.md.template PATH=/scratch/$USER/projects
+!template load file=installation/test_moose.md.template PATH=~/cluster_name/projects

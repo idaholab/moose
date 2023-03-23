@@ -4,8 +4,8 @@ The following instructions are for those operating on an HPC cluster.
 
 !alert note
 It is entirely possible your cluster may have too old of libraries. If this ends up being the case
-after following the below instructions, please follow our regular [Linux](installation/conda.md)
-instructions instead.
+after failing the below instructions, please follow our regular [Linux](installation/conda.md)
+instructions instead for an easier, but lower performance, installation.
 
 ## Pre-Reqs
 
