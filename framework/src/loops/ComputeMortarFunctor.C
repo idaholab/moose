@@ -129,18 +129,29 @@ ComputeMortarFunctor::operator()(const Moose::ComputeType compute_type)
     }
   };
 
-  Moose::Mortar::loopOverMortarSegments(iterators,
-                                        _assembly,
-                                        _subproblem,
-                                        _fe_problem,
-                                        _amg,
-                                        _displaced,
-                                        _mortar_constraints,
-                                        0,
-                                        _secondary_ip_sub_to_mats,
-                                        _primary_ip_sub_to_mats,
-                                        _secondary_boundary_mats,
-                                        act_functor);
+  PARALLEL_TRY
+  {
+    try
+    {
+      Moose::Mortar::loopOverMortarSegments(iterators,
+                                            _assembly,
+                                            _subproblem,
+                                            _fe_problem,
+                                            _amg,
+                                            _displaced,
+                                            _mortar_constraints,
+                                            0,
+                                            _secondary_ip_sub_to_mats,
+                                            _primary_ip_sub_to_mats,
+                                            _secondary_boundary_mats,
+                                            act_functor);
+    }
+    catch (MooseException & e)
+    {
+      _fe_problem.setException(e.what());
+    }
+  }
+  PARALLEL_CATCH;
 
   // Call any post operations for our mortar constraints
   for (auto * const mc : _mortar_constraints)
