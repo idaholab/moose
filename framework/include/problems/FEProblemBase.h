@@ -2045,6 +2045,29 @@ public:
 
   virtual const std::vector<VectorTag> & currentResidualVectorTags() const override;
 
+  /**
+   * Class that is used as a parameter to set/clearCurrentResidualVectorTags that allows only
+   * blessed classes to call said methods
+   */
+  class CurrentResidualVectorTagsKey
+  {
+    friend class CrankNicolson;
+    friend class FEProblemBase;
+    CurrentResidualVectorTagsKey() {}
+    CurrentResidualVectorTagsKey(const CurrentResidualVectorTagsKey &) {}
+  };
+
+  /**
+   * Set the current residual vector tag data structure based on the passed in tag IDs
+   */
+  void setCurrentResidualVectorTags(const std::set<TagID> & vector_tags,
+                                    CurrentResidualVectorTagsKey);
+
+  /**
+   * Clear the current residual vector tag data structure
+   */
+  void clearCurrentResidualVectorTags(CurrentResidualVectorTagsKey);
+
 protected:
   /// Create extra tagged vectors and matrices
   void createTagVectors();
@@ -2381,16 +2404,6 @@ private:
 
   void joinAndFinalize(TheWarehouse::Query query, bool isgen = false);
 
-  /**
-   * Set the current residual vector tag data structure based on the passed in tag IDs
-   */
-  void setCurrentResidualVectorTags(const std::set<TagID> & vector_tags);
-
-  /**
-   * Clear the current residual vector tag data structure
-   */
-  void clearCurrentResidualVectorTags();
-
   bool _error_on_jacobian_nonzero_reallocation;
   bool _ignore_zeros_in_jacobian;
   const bool _force_restart;
@@ -2605,13 +2618,13 @@ FEProblemBase::currentResidualVectorTags() const
 }
 
 inline void
-FEProblemBase::setCurrentResidualVectorTags(const std::set<TagID> & vector_tags)
+FEProblemBase::setCurrentResidualVectorTags(const std::set<TagID> & vector_tags,
+                                            CurrentResidualVectorTagsKey)
 {
   _current_residual_vector_tags = getVectorTags(vector_tags);
 }
 
-inline void
-FEProblemBase::clearCurrentResidualVectorTags()
+inline void FEProblemBase::clearCurrentResidualVectorTags(CurrentResidualVectorTagsKey)
 {
   _current_residual_vector_tags.clear();
 }

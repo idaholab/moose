@@ -727,7 +727,9 @@ NonlinearSystemBase::zeroVectorForResidual(const std::string & vector_name)
 }
 
 void
-NonlinearSystemBase::computeResidualTag(NumericVector<Number> & residual, TagID tag_id)
+NonlinearSystemBase::computeResidualTag(NumericVector<Number> & residual,
+                                        TagID tag_id,
+                                        ComputeResidualTagKey)
 {
   _nl_vector_tags.clear();
   _nl_vector_tags.insert(tag_id);
@@ -735,7 +737,7 @@ NonlinearSystemBase::computeResidualTag(NumericVector<Number> & residual, TagID 
 
   associateVectorToTag(residual, residualVectorTag());
 
-  computeResidualTags(_nl_vector_tags);
+  computeResidualTags(_nl_vector_tags, {});
 
   disassociateVectorFromTag(residual, residualVectorTag());
 }
@@ -745,11 +747,11 @@ NonlinearSystemBase::computeResidual(NumericVector<Number> & residual, TagID tag
 {
   mooseDeprecated(" Please use computeResidualTag");
 
-  computeResidualTag(residual, tag_id);
+  computeResidualTag(residual, tag_id, {});
 }
 
 void
-NonlinearSystemBase::computeResidualTags(const std::set<TagID> & tags)
+NonlinearSystemBase::computeResidualTags(const std::set<TagID> & tags, ComputeResidualTagKey)
 {
   parallel_object_only();
 
