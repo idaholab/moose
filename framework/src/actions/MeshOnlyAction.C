@@ -38,6 +38,7 @@ MeshOnlyAction::act()
   _console << mesh_ptr->getMesh().get_info(/* verbosity = */ 2) << std::endl;
 
   bool should_generate = false;
+
   // If no argument specified or if the argument following --mesh-only starts
   // with a dash, try to build an output filename based on the input mesh filename.
   if (mesh_file.empty() || (mesh_file[0] == '-'))

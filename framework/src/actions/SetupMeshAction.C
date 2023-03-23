@@ -292,6 +292,7 @@ SetupMeshAction::act()
 
   else if (_current_task == "set_mesh_base")
   {
+
     TIME_SECTION("SetupMeshAction::act::set_mesh_base", 1, "Setting Mesh", true);
 
     if (!_app.masterMesh() && !_mesh->hasMeshBase())
@@ -304,10 +305,13 @@ SetupMeshAction::act()
       if (!_app.getMeshGeneratorNames().empty() && !_app.isUseSplit() &&
           !((_app.isRecovering() || _app.isRestarting()) && _app.isUltimateMaster()))
       {
-        auto mesh_base = _app.getMeshGeneratorSystem().getMeshGeneratorMesh();
+        auto & mesh_generator_system = _app.getMeshGeneratorSystem();
+        auto mesh_base =
+            mesh_generator_system.getSavedMesh(mesh_generator_system.mainMeshGeneratorName());
         if (_mesh->allowRemoteElementRemoval() != mesh_base->allow_remote_element_removal())
           mooseError("The MooseMesh and libmesh::MeshBase object coming from mesh generators are "
                      "out of sync with respect to whether remote elements can be deleted");
+        mooseAssert(mesh_base, "Null mesh");
         _mesh->setMeshBase(std::move(mesh_base));
       }
       else

@@ -24,7 +24,6 @@ Content:
 
 Renderer:
     type: MooseDocs.base.MaterializeRenderer
-    google_analytics: True
 
 Extensions:
     disable_defaults: True
@@ -124,6 +123,9 @@ Extensions:
     MooseDocs.extensions.ifelse:
         active: True
     MooseDocs.extensions.algorithm: default
+    MooseDocs.extensions.analytics:
+        active: True
+        google_measurement_id: G-RH7BY5XXNW
 
 Translator:
     type: MooseDocs.base.Translator

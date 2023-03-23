@@ -38,5 +38,5 @@ void
 MeshGeneratorMesh::buildMesh()
 {
   if (!hasMeshBase())
-    _mesh = _app.getMeshGeneratorSystem().getMeshGeneratorMesh();
+    mooseError("The mesh base has not been set");
 }
