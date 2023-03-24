@@ -90,8 +90,6 @@
     input = 'block-dynamics-aux-fretting-wear-test.i'
     rel_err = 1.0e-3
     abs_zero = 2.0e-4
-    min_parallel = 1
-    max_parallel = 4
     min_ad_size = '50'
     map = False
     partial = True
