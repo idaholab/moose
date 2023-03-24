@@ -176,7 +176,9 @@ public:
   THREAD_ID numThreads() const { return _num_threads; }
 
   /**
-   * Output content of the warehouse to a string, meant to be output to the console
+   * Output the active content of the warehouse to a string, meant to be output to the console
+   * @param tid the thread id
+   * @param prefix a string to prepend to the string
    */
   std::string activeObjectsToFormattedString(THREAD_ID tid = 0,
                                              const std::string & prefix = "[DBG]") const;
@@ -754,10 +756,10 @@ std::string
 MooseObjectWarehouseBase<T>::activeObjectsToFormattedString(
     const THREAD_ID tid /*=0*/, const std::string & prefix /*="[DBG]"*/) const
 {
-  std::string output;
+  std::vector<std::string> output;
   for (const auto & object : _active_objects[tid])
-    output += object->name() + " ";
-  return ConsoleUtils::formatString(output, prefix);
+    output.push_back(object->name());
+  return ConsoleUtils::formatString(MooseUtils::join(output, " "), prefix);
 }
 
 template <typename T>

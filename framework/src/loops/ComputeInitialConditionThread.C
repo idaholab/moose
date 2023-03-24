@@ -114,10 +114,10 @@ ComputeInitialConditionThread::printGeneralExecutionInformation() const
   const InitialConditionWarehouse & ic_wh = _fe_problem.getInitialConditionWarehouse();
   if (_fe_problem.shouldPrintExecution(_tid) && ic_wh.hasActiveObjects())
   {
-    auto console = _fe_problem.console();
-    auto execute_on = _fe_problem.getCurrentExecuteOnFlag();
+    const auto & console = _fe_problem.console();
+    const auto execute_on = _fe_problem.getCurrentExecuteOnFlag();
     console << "[DBG] Executing initial conditions on elements on " << execute_on << std::endl;
-    console << "[DBG] List:" << std::endl;
+    console << "[DBG] Unordered list:" << std::endl;
     console << ic_wh.activeObjectsToFormattedString() << std::endl;
     console << "[DBG] The order of execution is defined by dependency resolution on every element"
             << std::endl;

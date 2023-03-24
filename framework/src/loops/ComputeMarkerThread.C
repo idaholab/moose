@@ -112,25 +112,24 @@ ComputeMarkerThread::join(const ComputeMarkerThread & /*y*/)
 void
 ComputeMarkerThread::printGeneralExecutionInformation() const
 {
-  if (_fe_problem.shouldPrintExecution(_tid))
-  {
-    auto console = _fe_problem.console();
-    auto execute_on = _fe_problem.getCurrentExecuteOnFlag();
-    console << "[DBG] Beginning elemental loop to compute Markers on " << execute_on << std::endl;
-  }
+  if (!_fe_problem.shouldPrintExecution(_tid))
+    return;
+  const auto & console = _fe_problem.console();
+  const auto execute_on = _fe_problem.getCurrentExecuteOnFlag();
+  console << "[DBG] Beginning elemental loop to compute Markers on " << execute_on << std::endl;
 }
 
 void
 ComputeMarkerThread::printBlockExecutionInformation() const
 {
-  if (_fe_problem.shouldPrintExecution(_tid) && _marker_whs.hasActiveObjects())
-  {
-    if (_blocks_exec_printed.count(_subdomain))
-      return;
-    auto console = _fe_problem.console();
-    console << "[DBG] Execution order on block: " << _subdomain << std::endl;
-    // TODO block restriction
-    console << _marker_whs.activeObjectsToFormattedString() << std::endl;
-    _blocks_exec_printed.insert(_subdomain);
-  }
+  if (!_fe_problem.shouldPrintExecution(_tid) || _blocks_exec_printed.count(_subdomain) ||
+      !_marker_whs.hasActiveBlockObjects(_subdomain, _tid))
+    return;
+
+  const auto & console = _fe_problem.console();
+  const std::vector<std::shared_ptr<Marker>> & markers =
+      _marker_whs.getActiveBlockObjects(_subdomain, _tid);
+  console << "[DBG] Execution order on block: " << _subdomain << std::endl;
+  printExecutionOrdering<Marker>(markers, false);
+  _blocks_exec_printed.insert(_subdomain);
 }

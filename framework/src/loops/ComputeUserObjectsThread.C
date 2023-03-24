@@ -408,8 +408,7 @@ ComputeUserObjectsThread::printBlockExecutionInformation() const
     printExecutionOrdering<InterfaceUserObject>(interface_objs, "interface user objects");
     console << "[DBG] Only user objects active on local element/sides are executed" << std::endl;
   }
-  else if (_fe_problem.shouldPrintExecution(_tid) && num_objects == 0 &&
-           _blocks_exec_printed.count(_subdomain) == 0)
+  else if (num_objects == 0 && !_blocks_exec_printed.count(_subdomain))
     console << "[DBG] No User Objects on block " << _subdomain << " on " << execute_on.name()
             << std::endl;
 

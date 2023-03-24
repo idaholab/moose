@@ -42,6 +42,7 @@ template <typename AuxKernelType>
 void
 ComputeNodalAuxBcsThread<AuxKernelType>::onNode(ConstBndNodeRange::const_iterator & node_it)
 {
+  std::abort(); //// jajajaajajajajajajajajaja
   const BndNode * bnode = *node_it;
 
   BoundaryID boundary_id = bnode->_bnd_id;
@@ -87,15 +88,16 @@ template <typename AuxKernelType>
 void
 ComputeNodalAuxBcsThread<AuxKernelType>::printGeneralExecutionInformation() const
 {
-  if (_fe_problem.shouldPrintExecution(_tid) && _storage.hasActiveObjects())
-  {
-    auto console = _fe_problem.console();
-    auto execute_on = _fe_problem.getCurrentExecuteOnFlag();
-    console << "[DBG] Executing nodal auxiliary kernels on boundary nodes on " << execute_on
-            << std::endl;
-    console << "[DBG] Ordering of the kernels on each boundary they are defined on:" << std::endl;
-    console << _storage.activeObjectsToFormattedString() << std::endl;
-  }
+  if (!_fe_problem.shouldPrintExecution(_tid) || !_storage.hasActiveObjects())
+    return;
+
+  const auto & console = _fe_problem.console();
+  const auto execute_on = _fe_problem.getCurrentExecuteOnFlag();
+  console << "[DBG] Executing nodal auxiliary kernels on boundary nodes on " << execute_on
+          << std::endl;
+  console << "[DBG] Ordering of the kernels on each boundary they are defined on:" << std::endl;
+  // TODO Check that all objects are active at this point
+  console << _storage.activeObjectsToFormattedString() << std::endl;
 }
 
 template class ComputeNodalAuxBcsThread<AuxKernel>;

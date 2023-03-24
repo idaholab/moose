@@ -113,30 +113,30 @@ ComputeNodalUserObjectsThread::join(const ComputeNodalUserObjectsThread & /*y*/)
 void
 ComputeNodalUserObjectsThread::printGeneralExecutionInformation() const
 {
-  if (_fe_problem.shouldPrintExecution(_tid))
+  if (!_fe_problem.shouldPrintExecution(_tid))
+    return;
+
+  // Get all nodal UOs
+  std::vector<MooseObject *> nodal_uos;
+  _query.clone()
+      .condition<AttribThread>(_tid)
+      .condition<AttribInterfaces>(Interfaces::NodalUserObject)
+      .queryInto(nodal_uos);
+
+  if (nodal_uos.size())
   {
-    // Get all nodal UOs
-    std::vector<MooseObject *> nodal_uos;
-    _query.clone()
-        .condition<AttribThread>(_tid)
-        .condition<AttribInterfaces>(Interfaces::NodalUserObject)
-        .queryInto(nodal_uos);
+    const auto & console = _fe_problem.console();
+    const auto execute_on = _fe_problem.getCurrentExecuteOnFlag();
+    console << "[DBG] Computing nodal user objects on " << execute_on << std::endl;
+    mooseDoOnce(
+        console << "[DBG] Ordering on nodes:" << std::endl;
+        console << "[DBG] - boundary restricted user objects" << std::endl;
+        console << "[DBG] - block restricted user objects" << std::endl;
+        console << "[DBG] Nodal UOs executed on each node will differ based on these restrictions"
+                << std::endl;);
 
-    if (nodal_uos.size())
-    {
-      auto console = _fe_problem.console();
-      auto execute_on = _fe_problem.getCurrentExecuteOnFlag();
-      console << "[DBG] Computing nodal user objects on " << execute_on << std::endl;
-      mooseDoOnce(
-          console << "[DBG] Ordering on nodes:" << std::endl;
-          console << "[DBG] - boundary restricted user objects" << std::endl;
-          console << "[DBG] - block restricted user objects" << std::endl;
-          console << "[DBG] Nodal UOs executed on each node will differ based on these restrictions"
-                  << std::endl;);
-
-      auto message = ConsoleUtils::mooseObjectVectorToString(nodal_uos);
-      message = "Order of execution:\n" + message;
-      console << ConsoleUtils::formatString(message, "[DBG]") << std::endl;
-    }
+    auto message = ConsoleUtils::mooseObjectVectorToString(nodal_uos);
+    message = "Order of execution:\n" + message;
+    console << ConsoleUtils::formatString(message, "[DBG]") << std::endl;
   }
 }

@@ -142,12 +142,12 @@ ComputeNodalKernelJacobiansThread::join(const ComputeNodalKernelJacobiansThread 
 void
 ComputeNodalKernelJacobiansThread::printGeneralExecutionInformation() const
 {
-  if (_fe_problem.shouldPrintExecution(_tid) && _nkernel_warehouse->hasActiveObjects())
-  {
-    auto console = _fe_problem.console();
-    auto execute_on = _fe_problem.getCurrentExecuteOnFlag();
-    console << "[DBG] Executing nodal kernels contribution to Jacobian on nodes on " << execute_on
-            << std::endl;
-    console << _nkernel_warehouse->activeObjectsToFormattedString() << std::endl;
-  }
+  if (!_fe_problem.shouldPrintExecution(_tid) || !_nkernel_warehouse->hasActiveObjects())
+    return;
+
+  const auto & console = _fe_problem.console();
+  const auto execute_on = _fe_problem.getCurrentExecuteOnFlag();
+  console << "[DBG] Executing nodal kernels contribution to Jacobian on nodes on " << execute_on
+          << std::endl;
+  console << _nkernel_warehouse->activeObjectsToFormattedString() << std::endl;
 }

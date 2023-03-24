@@ -167,33 +167,27 @@ template <typename AuxKernelType>
 void
 ComputeElemAuxVarsThread<AuxKernelType>::printGeneralExecutionInformation() const
 {
-  if (_fe_problem.shouldPrintExecution(_tid) && _aux_kernels.hasActiveObjects())
-  {
-    auto console = _fe_problem.console();
-    auto execute_on = _fe_problem.getCurrentExecuteOnFlag();
-    console << "[DBG] Executing auxiliary kernels on elements on " << execute_on << std::endl;
-  }
+  if (!_fe_problem.shouldPrintExecution(_tid) || !_aux_kernels.hasActiveObjects())
+    return;
+
+  const auto & console = _fe_problem.console();
+  const auto & execute_on = _fe_problem.getCurrentExecuteOnFlag();
+  console << "[DBG] Executing auxiliary kernels on elements on " << execute_on << std::endl;
 }
 
 template <typename AuxKernelType>
 void
 ComputeElemAuxVarsThread<AuxKernelType>::printBlockExecutionInformation() const
 {
-  if (_fe_problem.shouldPrintExecution(_tid) &&
-      _aux_kernels.hasActiveBlockObjects(_subdomain, _tid))
-  {
-    if (_blocks_exec_printed.count(_subdomain))
-      return;
-    auto console = _fe_problem.console();
-    std::vector<AuxKernelType *> kernels;
-    for (auto shared_ptr : _aux_kernels.getActiveBlockObjects(_subdomain, _tid))
-      kernels.push_back(shared_ptr.get());
+  if (!_fe_problem.shouldPrintExecution(_tid) || _blocks_exec_printed.count(_subdomain) ||
+      !_aux_kernels.hasActiveBlockObjects(_subdomain, _tid))
+    return;
 
-    if (kernels.size())
-      console << "[DBG] Ordering of AuxKernels on block " << _subdomain << std::endl;
-    ThreadedElementLoop<ConstElemRange>::printExecutionOrdering<AuxKernelType>(kernels, false);
-    _blocks_exec_printed.insert(_subdomain);
-  }
+  const auto & console = _fe_problem.console();
+  const auto & kernels = _aux_kernels.getActiveBlockObjects(_subdomain, _tid);
+  console << "[DBG] Ordering of AuxKernels on block " << _subdomain << std::endl;
+  printExecutionOrdering<AuxKernelType>(kernels, false);
+  _blocks_exec_printed.insert(_subdomain);
 }
 
 template class ComputeElemAuxVarsThread<AuxKernel>;

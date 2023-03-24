@@ -76,12 +76,13 @@ void
 ComputeNodalDampingThread::printGeneralExecutionInformation() const
 {
   const auto & damper_wh = _nl.getNodalDamperWarehouse();
-  if (_fe_problem.shouldPrintExecution(_tid) && damper_wh.hasActiveObjects())
-  {
-    auto console = _fe_problem.console();
-    auto execute_on = _fe_problem.getCurrentExecuteOnFlag();
-    console << "[DBG] Executing nodal dampers on " << execute_on << std::endl;
-    console << "[DBG] Ordering of the dampers on the blocks they are defined on:" << std::endl;
-    console << damper_wh.activeObjectsToFormattedString() << std::endl;
-  }
+  if (!_fe_problem.shouldPrintExecution(_tid) || !damper_wh.hasActiveObjects())
+    return;
+
+  const auto & console = _fe_problem.console();
+  const auto execute_on = _fe_problem.getCurrentExecuteOnFlag();
+  console << "[DBG] Executing nodal dampers on " << execute_on << std::endl;
+  console << "[DBG] Ordering of the dampers on the blocks they are defined on:" << std::endl;
+  // TODO Check that all objects are active at this point
+  console << damper_wh.activeObjectsToFormattedString() << std::endl;
 }

@@ -343,8 +343,8 @@ ComputeJacobianThread::printGeneralExecutionInformation() const
 {
   if (_fe_problem.shouldPrintExecution(_tid))
   {
-    auto console = _fe_problem.console();
-    auto execute_on = _fe_problem.getCurrentExecuteOnFlag();
+    const auto & console = _fe_problem.console();
+    const auto execute_on = _fe_problem.getCurrentExecuteOnFlag();
     console << "[DBG] Beginning elemental loop to compute Jacobian on " << execute_on << std::endl;
     mooseDoOnce(
         console << "[DBG] Execution order on each element:" << std::endl;
@@ -361,15 +361,15 @@ void
 ComputeJacobianThread::printBlockExecutionInformation() const
 {
   // Number of objects executing is approximated by size of warehouses
-  int num_objects = _kernels.size() + _fv_kernels.size() + _integrated_bcs.size() +
-                    _dg_kernels.size() + _interface_kernels.size();
-  auto console = _fe_problem.console();
+  const int num_objects = _kernels.size() + _fv_kernels.size() + _integrated_bcs.size() +
+                          _dg_kernels.size() + _interface_kernels.size();
+  const auto & console = _fe_problem.console();
   if (_fe_problem.shouldPrintExecution(_tid) && num_objects > 0)
   {
     if (_blocks_exec_printed.count(_subdomain))
       return;
     console << "[DBG] Ordering of Jacobian Objects on block " << _subdomain << std::endl;
-    if (_kernels.hasActiveObjects())
+    if (_kernels.hasActiveBlockObjects(_subdomain, _tid))
     {
       console << "[DBG] Ordering of kernels:" << std::endl;
       console << _kernels.activeObjectsToFormattedString() << std::endl;
@@ -385,24 +385,25 @@ ComputeJacobianThread::printBlockExecutionInformation() const
                           { return str_out + " " + kernel->name(); });
       console << ConsoleUtils::formatString(fvkernels, "[DBG]") << std::endl;
     }
-    if (_dg_kernels.hasActiveObjects())
+    if (_dg_kernels.hasActiveBlockObjects(_subdomain, _tid))
     {
       console << "[DBG] Ordering of DG kernels:" << std::endl;
       console << _dg_kernels.activeObjectsToFormattedString() << std::endl;
     }
-    if (_integrated_bcs.hasActiveObjects())
+    if (_integrated_bcs.hasActiveBlockObjects(_subdomain, _tid))
     {
       console << "[DBG] Ordering of boundary conditions:" << std::endl;
       console << _integrated_bcs.activeObjectsToFormattedString() << std::endl;
     }
-    if (_interface_kernels.hasActiveObjects())
+    if (_interface_kernels.hasActiveBlockObjects(_subdomain, _tid))
     {
       console << "[DBG] Ordering of interface kernels:" << std::endl;
       console << _interface_kernels.activeObjectsToFormattedString() << std::endl;
     }
-    _blocks_exec_printed.insert(_subdomain);
   }
   else if (_fe_problem.shouldPrintExecution(_tid) && num_objects == 0 &&
-           _blocks_exec_printed.count(_subdomain))
+           !_blocks_exec_printed.count(_subdomain))
     console << "[DBG] No Objects contributing to Jacobian on block " << _subdomain << std::endl;
+
+  _blocks_exec_printed.insert(_subdomain);
 }
