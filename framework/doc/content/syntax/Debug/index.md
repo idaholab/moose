@@ -13,16 +13,16 @@ A complete list of the available options is provided in [#debug-params].
 ## Residual outputs for debugging nonlinear convergence issues
 
 When solving multi-variable or multi-physics problems, it is often the case that the residual for a
-single variable is more problematic to converge than for the others. This may be because the underlying
-physics are tougher to solve, or because there are issues with the kernels for that variable!
+subset of variables is more problematic to converge than for the others. This may be because the underlying
+physics are tougher to solve, or because there are issues with the kernels for those variables!
 
 MOOSE provides two convenient debug boolean options to examine the convergence of nonlinear residuals:
 
 - [!param](/Debug/show_var_residual_norms) shows the residual norms for each nonlinear variable
-  (more like equation actually). The equation with the highest residual is the least converged.
-  This is the norm after scaling if equation scaling, automatic or not, is used.
+  equation. The equation with the highest residual is the least converged.
+  This is the norm after scaling if equation scaling, automatic or manual, is used.
 
-- [!param](/Debug/show_top_residuals) shows the residual norms only for the least converged equation/variable.
+- [!param](/Debug/show_top_residuals) shows the residual norms only for the least converged variable equation.
 
 
 Helpful information on debugging numerical convergence issues is provided in the [numerical troubleshooting page](application_usage/failed_solves.md).
@@ -48,17 +48,18 @@ For the automatic ordering of the mesh generators, please refer to the
 
 ### Solve and execution ordering
 
-Nearly every solve in MOOSE consists in a succession of operations on every nodes, quadrature points,
+Nearly every solve in MOOSE consists of a succession of operations on nodes, quadrature points,
 elements and elements' faces. These operations may be for example to compute the contribution of a
-kernel/boundary condition/others to the residual, Jacobian, etc.
+kernel/boundary condition/etc. to the residual, Jacobian, etc.
 
 The MOOSE `Debug` system offers the [!param](/Debug/show_execution_order) parameter to output the
 order of execution of each of these objects in those loops. This order may depend on local block/boundary
-restrictions, local or global dependency resolutions.
+restrictions, and local or global dependency resolutions.
 
 This parameter is most helpful to understand if `AuxKernels`, `UserObjects` and other systems which can
 interact in arbitrarily complex ways on a group of variables are indeed executed in the order desired
-by the modeler. If problematic, object execution may be reordered using various boolean parameters, `execute_on` flags and other manual dependency declarations.
+by the modeler. If problematic, object execution may be reordered using various boolean parameters, `execute_on` flags, and other manual dependency declarations.
+For example for UserObjects, the `execution_order_group` parameter lets the modeler select the ordering of executions of user objects.
 
 ## Other useful outputs available in other systems
 

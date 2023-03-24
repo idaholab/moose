@@ -60,7 +60,6 @@ protected:
    * Routine to output the ordering of objects within a vector. These objects must implement the
    * name() routine, and it must return a string or compatible type.
    *
-   * @tparam RangeType the type of the element-based loop
    * @tparam T the object type
    * @param objs the vector with all the objects (should be pointers)
    * @param objects_type the name of the type of objects. Defaults to the CPP object name
@@ -68,7 +67,7 @@ protected:
    * objects
    */
   template <typename T>
-  void printExecutionOrdering(const std::vector<T *> objs,
+  void printExecutionOrdering(const std::vector<T *> & objs,
                               const bool print_header = true,
                               const std::string & line_prefix = "[DBG]") const;
 };
@@ -136,18 +135,19 @@ ThreadedElementLoop<RangeType>::neighborSubdomainChanged()
 template <typename RangeType>
 template <typename T>
 void
-ThreadedElementLoop<RangeType>::printExecutionOrdering(const std::vector<T *> objs,
+ThreadedElementLoop<RangeType>::printExecutionOrdering(const std::vector<T *> & objs,
                                                        const bool print_header,
                                                        const std::string & line_prefix) const
 {
-  if (objs.size())
-  {
-    auto console = _fe_problem.console();
-    auto objects_type = MooseUtils::prettyCppType(objs[0]);
+  if (!objs.size())
+    return;
+ 
+    auto & console = _fe_problem.console();
+    const auto objects_type = MooseUtils::prettyCppType(objs[0]);
     std::vector<MooseObject *> moose_objs;
     for (auto obj_ptr : objs)
       moose_objs.push_back(dynamic_cast<MooseObject *>(obj_ptr));
-    auto names = ConsoleUtils::mooseObjectVectorToString(moose_objs);
+    const auto names = ConsoleUtils::mooseObjectVectorToString(moose_objs);
 
     // Print string with a DBG prefix and with sufficient line breaks
     std::string message = print_header ? "Executing " + objects_type + " on " +

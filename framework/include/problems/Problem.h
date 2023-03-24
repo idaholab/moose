@@ -46,6 +46,11 @@ public:
    * Return console handle
    */
   const ConsoleStream & console() const { return _console; }
+  
+  /**
+   * Return console handle
+   */
+  ConsoleStream & console() { return _console; }  
 
 protected:
   /// True if the CLI option is found

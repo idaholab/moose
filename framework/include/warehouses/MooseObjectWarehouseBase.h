@@ -751,8 +751,8 @@ MooseObjectWarehouseBase<T>::subdomainsCovered(std::set<SubdomainID> & subdomain
 
 template <typename T>
 std::string
-MooseObjectWarehouseBase<T>::activeObjectsToFormattedString(THREAD_ID tid /*=0*/,
-                                                            const std::string & prefix) const
+MooseObjectWarehouseBase<T>::activeObjectsToFormattedString(const THREAD_ID tid /*=0*/,
+                                                            const std::string & prefix /*="[DBG]"*/) const
 {
   std::string output;
   for (const auto & object : _active_objects[tid])

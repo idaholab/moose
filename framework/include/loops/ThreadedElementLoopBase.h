@@ -167,16 +167,16 @@ protected:
   SubdomainID _old_neighbor_subdomain;
 
   /// Print information about the loop ordering
-  virtual void printGeneralExecutionInformation() const {};
+  virtual void printGeneralExecutionInformation() const {}
 
   /// Print information about the particular ordering of objects on each block
-  virtual void printBlockExecutionInformation(){};
+  virtual void printBlockExecutionInformation(){}
 
   /// Keep track of which blocks were visited
   std::set<SubdomainID> _blocks_exec_printed;
 
   /// Resets the set of blocks visited
-  virtual void clearBlocksVisited() { _blocks_exec_printed.clear(); }
+  void clearBlocksVisited() { _blocks_exec_printed.clear(); }
 
 private:
   /**

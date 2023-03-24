@@ -49,7 +49,7 @@ protected:
   /// Print general information about the loop when it executes
   void printGeneralExecutionInformation() const override;
 
-  // Print list of specific objects executed and in which order
+  /// Print list of specific objects executed and in which order
   void printBlockExecutionInformation() override;
 
   FEProblemBase & _fe_problem;

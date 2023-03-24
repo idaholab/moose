@@ -46,7 +46,7 @@ protected:
   /// Print information about the loop, mostly order of execution of objects
   void printGeneralExecutionInformation() const override;
 
-  // Print list of specific objects executed and in which order
+  /// Print list of specific objects executed and in which order
   void printBlockExecutionInformation() override;
 
   /// the tags denoting the vectors we want our residual objects to fill

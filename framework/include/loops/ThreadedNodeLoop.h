@@ -73,7 +73,7 @@ protected:
   THREAD_ID _tid;
 
   /// Print information about the loop, mostly order of execution of objects
-  virtual void printGeneralExecutionInformation() const {};
+  virtual void printGeneralExecutionInformation() const {}
 };
 
 template <typename RangeType, typename IteratorType>

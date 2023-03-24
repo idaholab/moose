@@ -104,6 +104,6 @@ std::string formatString(std::string message, const std::string & prefix);
  * @param objs the vector with all the MooseObjects
  * @param sep a separator in between each object's name
  */
-std::string mooseObjectVectorToString(const std::vector<MooseObject *> objs,
+std::string mooseObjectVectorToString(const std::vector<MooseObject *> & objs,
                                       const std::string & sep = " ");
 } // ConsoleUtils namespace

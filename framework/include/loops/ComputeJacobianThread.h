@@ -69,7 +69,7 @@ protected:
   // Reference to Kernel storage structure
   MooseObjectTagWarehouse<KernelBase> & _kernels;
 
-  // Finite volume elemental kernel storage
+  /// Finite volume elemental kernel storage
   std::vector<FVElementalKernel *> _fv_kernels;
 
   // A pointer to different warehouse
@@ -82,9 +82,9 @@ protected:
   virtual void computeInternalFaceJacobian(const Elem * neighbor);
   virtual void computeInternalInterFaceJacobian(BoundaryID bnd_id);
 
-  // Print list of objects executed and in which order
+  /// Print list of objects executed and in which order
   void printGeneralExecutionInformation() const override;
 
-  // Print list of specific objects executed and in which order
+  /// Print list of specific objects executed and in which order
   void printBlockExecutionInformation() override;
 };

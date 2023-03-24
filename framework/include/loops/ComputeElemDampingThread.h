@@ -37,7 +37,7 @@ public:
   Real damping();
 
 protected:
-  // Print list of objects executed and in which order
+  /// Print list of objects executed and in which order
   void printGeneralExecutionInformation() const override;
 
   Real _damping;

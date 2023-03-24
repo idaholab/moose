@@ -113,13 +113,13 @@ public:
 
 protected:
   /// Print list of object types executed and in which order
-  virtual void printGeneralExecutionInformation() const {};
+  virtual void printGeneralExecutionInformation() const {}
 
   /// Print ordering of objects executed on each block
-  virtual void printBlockExecutionInformation(){};
+  virtual void printBlockExecutionInformation(){}
 
   /// Print ordering of objects exected on each boundary
-  virtual void printBoundaryExecutionInformation(const BoundaryID /* bnd_id */){};
+  virtual void printBoundaryExecutionInformation(const BoundaryID /* bnd_id */){}
 
   /// Reset lists of blocks and boundaries for which execution printing has been done
   void resetExecutionPrinting()
@@ -1026,7 +1026,7 @@ ComputeFVFluxThread<RangeType, AttributeTagType>::printGeneralExecutionInformati
 {
   if (_fe_problem.shouldPrintExecution(_tid) && _fv_flux_kernels.size())
   {
-    auto console = _fe_problem.console();
+    auto & console = _fe_problem.console();
     auto execute_on = _fe_problem.getCurrentExecuteOnFlag();
     console << "[DBG] Beginning finite volume flux objects loop on " << execute_on << std::endl;
     mooseDoOnce(console << "[DBG] Loop on faces (FaceInfo), objects ordered on each face: "
@@ -1046,10 +1046,10 @@ ComputeFVFluxThread<RangeType, AttributeTagType>::printBlockExecutionInformation
     const auto block_pair = std::make_pair(_subdomain, _neighbor_subdomain);
     if (_blocks_exec_printed.count(block_pair))
       return;
-    auto console = _fe_problem.console();
+    auto & console = _fe_problem.console();
     console << "[DBG] Flux kernels on block " << _subdomain << " and neighbor "
             << _neighbor_subdomain << std::endl;
-    std::string fv_flux_kernels =
+    const std::string fv_flux_kernels =
         std::accumulate(_fv_flux_kernels.begin(),
                         _fv_flux_kernels.end(),
                         std::string("[DBG]"),
@@ -1089,18 +1089,18 @@ ComputeFVFluxThread<RangeType, AttributeTagType>::printBoundaryExecutionInformat
 
   if (bcs.size())
   {
-    auto console = _fe_problem.console();
+    auto & console = _fe_problem.console();
     console << "[DBG] FVBCs on boundary " << bnd_id << " between subdomain " << _subdomain
             << " and neighbor " << _neighbor_subdomain << std::endl;
-    std::string fv_bcs = ConsoleUtils::mooseObjectVectorToString(bcs);
+    const std::string fv_bcs = ConsoleUtils::mooseObjectVectorToString(bcs);
     console << ConsoleUtils::formatString(fv_bcs, "[DBG]") << std::endl;
   }
   if (iks.size())
   {
-    auto console = _fe_problem.console();
+    auto & console = _fe_problem.console();
     console << "[DBG] FVIKs on boundary " << bnd_id << " between subdomain " << _subdomain
             << " and neighbor " << _neighbor_subdomain << std::endl;
-    std::string fv_iks = ConsoleUtils::mooseObjectVectorToString(iks);
+    const std::string fv_iks = ConsoleUtils::mooseObjectVectorToString(iks);
     console << ConsoleUtils::formatString(fv_iks, "[DBG]") << std::endl;
   }
   _boundaries_exec_printed.insert(bnd_id);
