@@ -24,7 +24,7 @@ offset = -0.045
   [frictional_lm]
     block = 3
     use_dual = true
-  #  scaling = 1.0e-5
+    scaling = 1.0e-5
   []
 []
 
@@ -43,7 +43,7 @@ offset = -0.045
     generate_output = 'stress_xx stress_yy'
     strain = FINITE
     block = '1 2'
-    zeta = 1.0
+    zeta = 0.04
     hht_alpha = 0.0
   []
   [inertia_x]
@@ -294,7 +294,7 @@ offset = -0.045
     type = FunctionDirichletBC
     variable = disp_x
     boundary = 50
-    function = '1e-2 * (cos(32.0 * pi / 4 * t) - 1.0)'
+    function = '1e-5 * (cos(32.0 * pi / 4 * t) - 1.0)'
   []
 []
 
@@ -310,7 +310,7 @@ offset = -0.045
   petsc_options_value = 'lu       superlu_dist                  NONZERO               1e-15'
   nl_max_its = 40
   l_max_its = 15
-  line_search = 'l2'
+  line_search = none
   snesmf_reuse_base = true
 
   [TimeIntegrator]
@@ -326,7 +326,6 @@ offset = -0.045
 
 [Outputs]
   exodus = true
-  checkpoint = true
 []
 
 [Preconditioning]

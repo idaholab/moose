@@ -77,7 +77,7 @@
     min_parallel = 1
     max_parallel = 4
     min_ad_size = '50'
-    cli_args = 'Executioner/end_time=0.15 '
+    cli_args = 'Executioner/end_time=0.2 '
                'Outputs/file_base=block-dynamics-aux-fretting-wear-test-quick_out'
     requirement = 'The contact module shall be able to compute nodal wear depth values in accordance with Archard '
                   'equation and the mortar gap velocity via mortar auxiliary kernels while including '
@@ -94,7 +94,7 @@
     map = False
     partial = True
     cli_args = 'Mesh/file=long-bottom-block-1elem-blocks-multiple-projections.e '
-               'Executioner/end_time=0.15 '
+               'Executioner/end_time=0.2 '
                'Outputs/file_base=block-dynamics-aux-fretting-wear-test-quick-multiple-projections_ou'
                't'
     requirement = 'The contact module shall be able to compute nodal wear depth values in accordance with Archard '
@@ -116,7 +116,7 @@
     map = False
     partial = True
     cli_args = 'Mesh/file=long-bottom-block-1elem-blocks-multiple-projections-lowerd.e '
-               'Executioner/end_time=0.15 Constraints/weighted_gap_lm/correct_edge_dropping=false '
+               'Executioner/end_time=0.2 Constraints/weighted_gap_lm/correct_edge_dropping=true '
                'Constraints/weighted_gap_lm/debug_mesh=true '
                'UserObjects/weighted_vel_uo/correct_edge_dropping=true UserObjects/weighted_vel_uo/debug_mesh=true '
                'Constraints/normal_x/correct_edge_dropping=true Constraints/normal_x/debug_mesh=true '

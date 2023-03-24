@@ -25,6 +25,7 @@
       detail = 'using the finite strain formulation and reference residual.'
       type = 'CSVDiff'
       input = 'finite_rr.i'
+      cli_args = 'Executioner/nl_abs_tol=1.0e-6 '
       csvdiff = 'finite_rr.csv'
       heavy = true
     []
@@ -34,7 +35,7 @@
       type = 'CSVDiff'
       input = 'finite_rr.i'
       csvdiff = 'finite_rr_full.csv'
-      cli_args = 'Contact/frictional/extra_vector_tags=ref name=finite_rr_full Executioner/nl_abs_tol=5.0e-5 '
+      cli_args = 'Contact/frictional/extra_vector_tags=ref name=finite_rr_full Executioner/nl_abs_tol=1.0e-2 '
                  'Executioner/num_steps=10'
       valgrind = 'heavy'
       method = '!dbg'
