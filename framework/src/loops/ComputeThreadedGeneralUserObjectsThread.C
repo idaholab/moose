@@ -54,15 +54,16 @@ void
 ComputeThreadedGeneralUserObjectsThread::printGeneralExecutionInformation(
     const GeneralUserObjectRange & range) const
 {
-  if (_fe_problem.shouldPrintExecution(0) && range.size())
-  {
-    auto console = _fe_problem.console();
-    auto execute_on = _fe_problem.getCurrentExecuteOnFlag();
-    console << "[DBG] Executing General User Objects on " << execute_on << std::endl;
-    console << "[DBG] Order of execution:" << std::endl;
-    std::string threaded_uos = "";
-    for (auto it = range.begin(); it != range.end(); ++it)
-      threaded_uos += (*it)->name() + " ";
-    console << ConsoleUtils::formatString(threaded_uos, "[DBG] ") << std::endl;
-  }
+  // TODO: Threaded UOs dont know their thread number so this will print too often
+  if (!_fe_problem.shouldPrintExecution(0) || !range.size())
+    return;
+
+  auto console = _fe_problem.console();
+  auto execute_on = _fe_problem.getCurrentExecuteOnFlag();
+  console << "[DBG] Executing General User Objects on " << execute_on << std::endl;
+  console << "[DBG] Order of execution:" << std::endl;
+  std::string threaded_uos = "";
+  for (auto it = range.begin(); it != range.end(); ++it)
+    threaded_uos += (*it)->name() + " ";
+  console << ConsoleUtils::formatString(threaded_uos, "[DBG] ") << std::endl;
 }
