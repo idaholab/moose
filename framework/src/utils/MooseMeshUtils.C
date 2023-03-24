@@ -113,9 +113,13 @@ getBoundaryIDs(const MeshBase & mesh,
       break;
     }
 
+    if (boundary_name[i].empty() && !generate_unknown)
+      mooseError("Incoming boundary name is empty and we are not generating unknown boundary IDs. "
+                 "This is invalid.");
+
     BoundaryID id;
 
-    if (!MooseUtils::isDigits(boundary_name[i]))
+    if (boundary_name[i].empty() || !MooseUtils::isDigits(boundary_name[i]))
     {
       /**
        * If the conversion from a name to a number fails, that means that this must be a named
@@ -186,6 +190,8 @@ BoundaryID
 getBoundaryID(const BoundaryName & boundary_name, const MeshBase & mesh)
 {
   BoundaryID id = Moose::INVALID_BOUNDARY_ID;
+  if (boundary_name.empty())
+    return id;
 
   if (!MooseUtils::isDigits(boundary_name))
     id = mesh.get_boundary_info().get_id_by_name(boundary_name);
@@ -205,6 +211,8 @@ getSubdomainID(const SubdomainName & subdomain_name, const MeshBase & mesh)
     mooseError("getSubdomainID() does not work with \"ANY_BLOCK_ID\"");
 
   SubdomainID id = Moose::INVALID_BLOCK_ID;
+  if (subdomain_name.empty())
+    return id;
 
   if (!MooseUtils::isDigits(subdomain_name))
     id = mesh.get_id_by_name(subdomain_name);
