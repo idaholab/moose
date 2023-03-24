@@ -30,7 +30,7 @@ namespace MisorientationAngleCalculator
     else
       s._misor =  tolerance_mis + 1;
 
-    for (unsigned i = 0; i < q3_twin.size(); ++i)
+    for (unsigned int i = 0; i < q3_twin.size(); ++i)
     {
       value_acos = dotQuaternion(mori_q1q2, q3_twin[i], qcs, qcs);
       if (value_acos <= 1.0 && value_acos >= -1.0)
@@ -40,18 +40,14 @@ namespace MisorientationAngleCalculator
 
       // Determine which type of twin boundary 0 ~ TT1 (tensile twins), 1 ~ CT1 (compression twins)
       if (s._is_twin)
-        switch (i)
-        {
-          case 0:
-              s._twin_type = TwinType::TT1;
-              break;
-          case 1:
-              s._twin_type = TwinType::ST1;
-              break;
-          default:
-              s._twin_type = TwinType::NONE;
-              break;
-        }
+      {
+        if (i == 0)
+          s._twin_type = TwinType::TT1;
+        else if (i == 1)
+          s._twin_type = TwinType::CT1;
+
+        break;
+      }
     }
     return s;
   }
@@ -158,8 +154,6 @@ namespace MisorientationAngleCalculator
 
   Real dotOuterQuaternion(const QuatReal & rot1, const std::vector<QuatReal> & rot2)
   {
-    // std::vector<Real> d_vec(rot2.size());
-
     Real d = 0;
     Real temp = 0;
     for (const auto i : index_range(rot2))
@@ -168,8 +162,6 @@ namespace MisorientationAngleCalculator
       if (temp > d)
         d = temp;
     }
-
-    // Real d = *std::max_element(d_vec.begin(), d_vec.end());
 
     return d;
   }

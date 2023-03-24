@@ -7,7 +7,8 @@
 typedef Eigen::Quaternion<Real> QuatReal;
 
 // set twin type
-enum class TwinType {TT1, ST1, NONE};
+// Y. Wang, Fundamentals of Recrystallization in Titanium Alloys, The University of Manchester (United Kingdom), 2014.
+enum class TwinType {TT1, CT1, NONE};
 
 // set the key orientation type
 enum class QuatType {getTwinning, getSSymm, getCSymm};
