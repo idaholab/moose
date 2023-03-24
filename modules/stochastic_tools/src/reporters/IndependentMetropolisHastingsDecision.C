@@ -34,21 +34,22 @@ IndependentMetropolisHastingsDecision::IndependentMetropolisHastingsDecision(
     paramError("sampler",
                "The selected sampler is not of type IndependentGaussianMetropolisHastings.");
 
-  _seed_outputs.resize(_num_confg);
+  _seed_outputs.resize(_num_confg_values);
+  _tpm_modified.assign(_props + 1, 1.0 / (_props + 1));
 }
 
 void
 IndependentMetropolisHastingsDecision::computeEvidence(std::vector<Real> & evidence,
                                                        DenseMatrix<Real> & inputs_matrix)
 {
-  std::vector<Real> out1(_num_confg);
+  std::vector<Real> out1(_num_confg_values);
   for (unsigned int i = 0; i < evidence.size(); ++i)
   {
     evidence[i] = 0.0;
     for (unsigned int j = 0; j < _priors.size(); ++j)
       evidence[i] += (std::log(_priors[j]->pdf(inputs_matrix(i, j))) -
                       std::log(_priors[j]->pdf(_seed_input[j])));
-    for (unsigned int j = 0; j < _num_confg; ++j)
+    for (unsigned int j = 0; j < _num_confg_values; ++j)
       out1[j] = _outputs_required[j * _props + i];
     for (unsigned int j = 0; j < _likelihoods.size(); ++j)
       evidence[i] += (_likelihoods[j]->function(out1) - _likelihoods[j]->function(_seed_outputs));
@@ -72,20 +73,30 @@ IndependentMetropolisHastingsDecision::nextSamples(std::vector<Real> & req_input
                                                    const std::vector<Real> & /*tv*/,
                                                    const unsigned int & parallel_index)
 {
-  unsigned int index =
-      AdaptiveMonteCarloUtils::weightedResample(_tpm_modified, _rnd_vec[parallel_index]);
-  if (index < _props)
+  const bool value = (_tpm_modified[0] == 1.0 / (_props + 1));
+  if (!value)
   {
-    for (unsigned int k = 0; k < _sampler.getNumberOfCols() - 1; ++k)
-      req_inputs[k] = inputs_matrix(index, k);
-    for (unsigned int k = 0; k < _num_confg; ++k)
-      _outputs_required[k * _props + parallel_index] = _outputs_sto[k * _props + index];
+    unsigned int index =
+        AdaptiveMonteCarloUtils::weightedResample(_tpm_modified, _rnd_vec[parallel_index]);
+    if (index < _props)
+    {
+      for (unsigned int k = 0; k < _sampler.getNumberOfCols() - _num_confg_params; ++k)
+        req_inputs[k] = inputs_matrix(index, k);
+      for (unsigned int k = 0; k < _num_confg_values; ++k)
+        _outputs_required[k * _props + parallel_index] = _outputs_sto[k * _props + index];
+    }
+    else
+    {
+      req_inputs = _seed_input;
+      for (unsigned int k = 0; k < _num_confg_values; ++k)
+        _outputs_required[k * _props + parallel_index] = _seed_outputs[k];
+    }
   }
   else
   {
-    req_inputs = _seed_input;
-    for (unsigned int k = 0; k < _num_confg; ++k)
-      _outputs_required[k * _props + parallel_index] = _seed_outputs[k];
+    for (unsigned int k = 0; k < _sampler.getNumberOfCols() - _num_confg_params; ++k)
+      req_inputs[k] = inputs_matrix(parallel_index, k);
+    _variance[parallel_index] = _new_var_samples[parallel_index];
   }
 }
 
@@ -93,6 +104,6 @@ void
 IndependentMetropolisHastingsDecision::nextSeeds()
 {
   _seed_input = _inputs[_props - 1];
-  for (unsigned int k = 0; k < _num_confg; ++k)
+  for (unsigned int k = 0; k < _num_confg_values; ++k)
     _seed_outputs[k] = _outputs_required[(k + 1) * _props - 1];
 }

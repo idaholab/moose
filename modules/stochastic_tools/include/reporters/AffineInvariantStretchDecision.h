@@ -31,5 +31,5 @@ private:
   const AffineInvariantStretchSampler * const _aiss;
 
   /// Affine step sizes
-  std::vector<Real> _step_size;
+  const std::vector<Real> & _step_size;
 };

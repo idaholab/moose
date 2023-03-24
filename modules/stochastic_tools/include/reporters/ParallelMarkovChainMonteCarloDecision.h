@@ -11,7 +11,7 @@
 
 #include "GeneralReporter.h"
 #include "ParallelMarkovChainMonteCarloBase.h"
-#include "Likelihood.h"
+#include "LikelihoodFunctionBase.h"
 #include "LikelihoodInterface.h"
 
 /**
@@ -64,11 +64,14 @@ protected:
   /// Transition probability matrix
   std::vector<Real> & _tpm;
 
-  /// Storage for the likelihood objects to be utilized
-  std::vector<const Likelihood *> _likelihoods;
+  /// Model variance term
+  std::vector<Real> & _variance;
 
-  /// Storage for prior distribution objects to be utilized
-  std::vector<const Distribution *> _priors;
+  /// Model noise term to pass to Likelihoods object
+  Real & _noise;
+
+  /// Storage for the likelihood objects to be utilized
+  std::vector<const LikelihoodFunctionBase *> _likelihoods;
 
   /// The MCMC sampler
   Sampler & _sampler;
@@ -76,20 +79,32 @@ protected:
   /// MCMC sampler base
   const ParallelMarkovChainMonteCarloBase * const _pmcmc;
 
-  /// Storage for the previous likelihood
-  // Real _likelihood_prev;
-
   /// Storage for the number of parallel proposals
   dof_id_type _props;
 
   /// Storage for the random numbers for decision making
   const std::vector<Real> & _rnd_vec;
 
-  /// Storage for the number of experimental configurations
-  dof_id_type _num_confg;
+  /// Storage for new proposed variance samples
+  const std::vector<Real> & _new_var_samples;
+
+  /// Storage for the priors
+  const std::vector<const Distribution *> _priors;
+
+  /// Storage for the prior over the variance
+  const Distribution * _var_prior;
+
+  /// Storage for the number of experimental configuration values
+  dof_id_type _num_confg_values;
+
+  /// Storage for the number of experimental configuration parameters
+  dof_id_type _num_confg_params;
 
   /// Storage for previous inputs
   DenseMatrix<Real> _data_prev;
+
+  /// Storage for previous variances
+  std::vector<Real> _var_prev;
 
   /// Storage for previous outputs
   std::vector<Real> _outputs_prev;

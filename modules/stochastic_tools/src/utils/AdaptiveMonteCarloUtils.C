@@ -94,10 +94,10 @@ computeVectorABS(const std::vector<Real> & data)
 unsigned int
 weightedResample(const std::vector<Real> & weights, Real rnd)
 {
-  unsigned int req_index;
+  unsigned int req_index = 0;
   for (unsigned int i = 0; i < weights.size(); ++i)
   {
-    if(rnd < weights[i])
+    if (rnd < weights[i])
     {
       req_index = i;
       break;
