@@ -121,7 +121,7 @@ ComputeMarkerThread::printGeneralExecutionInformation() const
 }
 
 void
-ComputeMarkerThread::printBlockExecutionInformation()
+ComputeMarkerThread::printBlockExecutionInformation() const
 {
   if (_fe_problem.shouldPrintExecution(_tid) && _marker_whs.hasActiveObjects())
   {
@@ -129,6 +129,7 @@ ComputeMarkerThread::printBlockExecutionInformation()
       return;
     auto console = _fe_problem.console();
     console << "[DBG] Execution order on block: " << _subdomain << std::endl;
+    // TODO block restriction
     console << _marker_whs.activeObjectsToFormattedString() << std::endl;
     _blocks_exec_printed.insert(_subdomain);
   }

@@ -169,18 +169,19 @@ ComputeElemAuxBcsThread<AuxKernelType>::printGeneralExecutionInformation() const
 template <typename AuxKernelType>
 void
 ComputeElemAuxBcsThread<AuxKernelType>::printBoundaryExecutionInformation(
-    unsigned int boundary_id, std::vector<std::shared_ptr<AuxKernelType>> kernels) const
+    unsigned int boundary_id, const std::vector<std::shared_ptr<AuxKernelType>> & kernels) const
 {
-  if (_fe_problem.shouldPrintExecution(_tid) && _storage.hasActiveObjects())
-  {
-    auto console = _fe_problem.console();
-    console << "[DBG] Ordering on boundary " << boundary_id << std::endl;
-    std::vector<MooseObject *> objs_ptrs;
-    for (auto kernel_ptr : kernels)
+  if (!_fe_problem.shouldPrintExecution(_tid) || !_storage.hasActiveObjects())
+    return;
+
+  auto console = _fe_problem.console();
+  console << "[DBG] Ordering on boundary " << boundary_id << std::endl;
+  std::vector<MooseObject *> objs_ptrs;
+  for (auto & kernel_ptr : kernels)
+    if (kernel_ptr->hasBoundary(boundary_id))
       objs_ptrs.push_back(dynamic_cast<MooseObject *>(kernel_ptr.get()));
-    std::string list_kernels = ConsoleUtils::mooseObjectVectorToString(objs_ptrs);
-    console << ConsoleUtils::formatString(list_kernels, "[DBG]") << std::endl;
-  }
+  std::string list_kernels = ConsoleUtils::mooseObjectVectorToString(objs_ptrs);
+  console << ConsoleUtils::formatString(list_kernels, "[DBG]") << std::endl;
 }
 
 template class ComputeElemAuxBcsThread<AuxKernel>;

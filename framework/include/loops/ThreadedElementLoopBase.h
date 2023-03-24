@@ -170,10 +170,10 @@ protected:
   virtual void printGeneralExecutionInformation() const {}
 
   /// Print information about the particular ordering of objects on each block
-  virtual void printBlockExecutionInformation(){}
+  virtual void printBlockExecutionInformation() const {}
 
   /// Keep track of which blocks were visited
-  std::set<SubdomainID> _blocks_exec_printed;
+  mutable std::set<SubdomainID> _blocks_exec_printed;
 
   /// Resets the set of blocks visited
   void clearBlocksVisited() { _blocks_exec_printed.clear(); }

@@ -177,7 +177,7 @@ ComputeElemAuxVarsThread<AuxKernelType>::printGeneralExecutionInformation() cons
 
 template <typename AuxKernelType>
 void
-ComputeElemAuxVarsThread<AuxKernelType>::printBlockExecutionInformation()
+ComputeElemAuxVarsThread<AuxKernelType>::printBlockExecutionInformation() const
 {
   if (_fe_problem.shouldPrintExecution(_tid) &&
       _aux_kernels.hasActiveBlockObjects(_subdomain, _tid))

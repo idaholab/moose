@@ -42,7 +42,7 @@ protected:
   void printGeneralExecutionInformation() const override;
 
   /// Print information about ordering of objects on each block
-  void printBlockExecutionInformation() override;
+  void printBlockExecutionInformation() const override;
 
   FEProblemBase & _fe_problem;
   AuxiliarySystem & _aux_sys;

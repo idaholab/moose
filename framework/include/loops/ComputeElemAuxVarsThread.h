@@ -43,7 +43,7 @@ protected:
   void printGeneralExecutionInformation() const override;
 
   /// Print list of specific objects executed and in which order
-  void printBlockExecutionInformation() override;
+  void printBlockExecutionInformation() const override;
 
   AuxiliarySystem & _aux_sys;
 

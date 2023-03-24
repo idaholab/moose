@@ -141,19 +141,18 @@ ThreadedElementLoop<RangeType>::printExecutionOrdering(const std::vector<T *> & 
 {
   if (!objs.size())
     return;
- 
-    auto & console = _fe_problem.console();
-    const auto objects_type = MooseUtils::prettyCppType(objs[0]);
-    std::vector<MooseObject *> moose_objs;
-    for (auto obj_ptr : objs)
-      moose_objs.push_back(dynamic_cast<MooseObject *>(obj_ptr));
-    const auto names = ConsoleUtils::mooseObjectVectorToString(moose_objs);
 
-    // Print string with a DBG prefix and with sufficient line breaks
-    std::string message = print_header ? "Executing " + objects_type + " on " +
-                                             _fe_problem.getCurrentExecuteOnFlag().name() + "\n"
-                                       : "";
-    message += (print_header ? "Order of execution:\n" : "") + names;
-    console << ConsoleUtils::formatString(message, line_prefix) << std::endl;
-  }
+  auto & console = _fe_problem.console();
+  const auto objects_type = MooseUtils::prettyCppType(objs[0]);
+  std::vector<MooseObject *> moose_objs;
+  for (auto obj_ptr : objs)
+    moose_objs.push_back(dynamic_cast<MooseObject *>(obj_ptr));
+  const auto names = ConsoleUtils::mooseObjectVectorToString(moose_objs);
+
+  // Print string with a DBG prefix and with sufficient line breaks
+  std::string message = print_header ? "Executing " + objects_type + " on " +
+                                           _fe_problem.getCurrentExecuteOnFlag().name() + "\n"
+                                     : "";
+  message += (print_header ? "Order of execution:\n" : "") + names;
+  console << ConsoleUtils::formatString(message, line_prefix) << std::endl;
 }

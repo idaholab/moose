@@ -358,7 +358,7 @@ ComputeJacobianThread::printGeneralExecutionInformation() const
 }
 
 void
-ComputeJacobianThread::printBlockExecutionInformation()
+ComputeJacobianThread::printBlockExecutionInformation() const
 {
   // Number of objects executing is approximated by size of warehouses
   int num_objects = _kernels.size() + _fv_kernels.size() + _integrated_bcs.size() +

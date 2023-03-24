@@ -64,11 +64,11 @@ protected:
   void printGeneralExecutionInformation() const override;
 
   /// Print information about the loop, mostly order of execution of particular objects
-  void printBlockExecutionInformation() override;
+  void printBlockExecutionInformation() const override;
 
   /// Format output of vector of UOs
   template <typename T>
-  void printVectorOrdering(std::vector<T *> uos, std::string name) const;
+  void printVectorOrdering(std::vector<T *> uos, const std::string & name) const;
 
 private:
   template <typename T>

@@ -116,10 +116,10 @@ protected:
   virtual void printGeneralExecutionInformation() const {}
 
   /// Print ordering of objects executed on each block
-  virtual void printBlockExecutionInformation(){}
+  virtual void printBlockExecutionInformation() const {}
 
   /// Print ordering of objects exected on each boundary
-  virtual void printBoundaryExecutionInformation(const BoundaryID /* bnd_id */){}
+  virtual void printBoundaryExecutionInformation(const BoundaryID /* bnd_id */) const {}
 
   /// Reset lists of blocks and boundaries for which execution printing has been done
   void resetExecutionPrinting()
@@ -147,10 +147,10 @@ protected:
   SubdomainID _old_neighbor_subdomain;
 
   /// Set to keep track of blocks for which we have printed the execution pattern
-  std::set<std::pair<const SubdomainID, const SubdomainID>> _blocks_exec_printed;
+  mutable std::set<std::pair<const SubdomainID, const SubdomainID>> _blocks_exec_printed;
 
   /// Set to keep track of boundaries for which we have printed the execution pattern
-  std::set<BoundaryID> _boundaries_exec_printed;
+  mutable std::set<BoundaryID> _boundaries_exec_printed;
 
   /// Holds caught runtime error messages
   std::string _error_message;
@@ -384,10 +384,10 @@ private:
   virtual void printGeneralExecutionInformation() const override;
 
   /// Print ordering of objects executed on each block
-  virtual void printBlockExecutionInformation() override;
+  virtual void printBlockExecutionInformation() const override;
 
   /// Print ordering of objects exected on each boundary
-  virtual void printBoundaryExecutionInformation(const BoundaryID bnd_id) override;
+  virtual void printBoundaryExecutionInformation(const BoundaryID bnd_id) const override;
 
   /// Variables
   std::set<MooseVariableFieldBase *> _fv_vars;
@@ -1039,31 +1039,31 @@ ComputeFVFluxThread<RangeType, AttributeTagType>::printGeneralExecutionInformati
 
 template <typename RangeType, typename AttributeTagType>
 void
-ComputeFVFluxThread<RangeType, AttributeTagType>::printBlockExecutionInformation()
+ComputeFVFluxThread<RangeType, AttributeTagType>::printBlockExecutionInformation() const
 {
-  if (_fe_problem.shouldPrintExecution(_tid) && _fv_flux_kernels.size())
-  {
-    const auto block_pair = std::make_pair(_subdomain, _neighbor_subdomain);
-    if (_blocks_exec_printed.count(block_pair))
-      return;
-    auto & console = _fe_problem.console();
-    console << "[DBG] Flux kernels on block " << _subdomain << " and neighbor "
-            << _neighbor_subdomain << std::endl;
-    const std::string fv_flux_kernels =
-        std::accumulate(_fv_flux_kernels.begin(),
-                        _fv_flux_kernels.end(),
-                        std::string("[DBG]"),
-                        [](const std::string & str_out, FVFluxKernel * kernel)
-                        { return str_out + " " + kernel->name(); });
-    console << ConsoleUtils::formatString(fv_flux_kernels, "[DBG]") << std::endl;
-    _blocks_exec_printed.insert(block_pair);
-  }
+  if (!_fe_problem.shouldPrintExecution(_tid) || !_fv_flux_kernels.size())
+    return;
+
+  const auto block_pair = std::make_pair(_subdomain, _neighbor_subdomain);
+  if (_blocks_exec_printed.count(block_pair))
+    return;
+  auto & console = _fe_problem.console();
+  console << "[DBG] Flux kernels on block " << _subdomain << " and neighbor " << _neighbor_subdomain
+          << std::endl;
+  const std::string fv_flux_kernels =
+      std::accumulate(_fv_flux_kernels.begin(),
+                      _fv_flux_kernels.end(),
+                      std::string("[DBG]"),
+                      [](const std::string & str_out, FVFluxKernel * kernel)
+                      { return str_out + " " + kernel->name(); });
+  console << ConsoleUtils::formatString(fv_flux_kernels, "[DBG]") << std::endl;
+  _blocks_exec_printed.insert(block_pair);
 }
 
 template <typename RangeType, typename AttributeTagType>
 void
 ComputeFVFluxThread<RangeType, AttributeTagType>::printBoundaryExecutionInformation(
-    const BoundaryID bnd_id)
+    const BoundaryID bnd_id) const
 {
   if (!_fe_problem.shouldPrintExecution(_tid))
     return;
