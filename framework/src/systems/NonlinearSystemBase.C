@@ -750,6 +750,8 @@ NonlinearSystemBase::computeResidual(NumericVector<Number> & residual, TagID tag
 void
 NonlinearSystemBase::computeResidualTags(const std::set<TagID> & tags)
 {
+  parallel_object_only();
+
   TIME_SECTION("nl::computeResidualTags", 5);
 
   _fe_problem.setCurrentNonlinearSystem(number());
@@ -1520,6 +1522,8 @@ NonlinearSystemBase::residualSetup()
 void
 NonlinearSystemBase::computeResidualInternal(const std::set<TagID> & tags)
 {
+  parallel_object_only();
+
   TIME_SECTION("computeResidualInternal", 3);
 
   residualSetup();
@@ -3555,6 +3559,8 @@ NonlinearSystemBase::setPreviousNewtonSolution(const NumericVector<Number> & sol
 void
 NonlinearSystemBase::mortarConstraints(const Moose::ComputeType compute_type)
 {
+  parallel_object_only();
+
   try
   {
     for (auto & map_pr : _undisplaced_mortar_functors)
