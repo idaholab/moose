@@ -1,0 +1,122 @@
+[Mesh]
+  [rmp]
+    type = ReactorMeshParams
+    dim = 3
+    geom = "Hex"
+    assembly_pitch = 14.685
+    axial_regions = '50.24 42.32 17.98 16.88 16.88 16.88 16.89 16.88 19.76 65.66 31.14 30.15'
+    axial_mesh_intervals = '3 2 1 1 1 1 1 1 1 4 2 2'
+    top_boundary_id = 201
+    bottom_boundary_id = 202
+    radial_boundary_id = 203
+  []
+  # Control
+  [assembly1]
+    type = PinMeshGenerator
+    reactor_params = rmp
+    pin_type = 1
+    pitch = 14.685
+    region_ids= '12; 9; 4; 4; 4; 4; 4; 5; 6; 6; 7; 15'
+    quad_center_elements = true
+    homogenized = true
+    use_as_assembly = true
+  []
+  # Inner Core
+  [assembly2]
+    type = PinMeshGenerator
+    reactor_params = rmp
+    pin_type = 2
+    pitch = 14.685
+    region_ids= '12; 9; 9; 1; 1; 1; 1; 1; 13; 14; 14; 15'
+    quad_center_elements = true
+    homogenized = true
+    use_as_assembly = true
+  []
+  # Test Fuel
+  [assembly3]
+    type = PinMeshGenerator
+    reactor_params = rmp
+    pin_type = 3
+    pitch = 14.685
+    region_ids= '12; 9; 9; 2; 2; 2; 2; 2; 13; 14; 14; 15'
+    quad_center_elements = true
+    homogenized = true
+    use_as_assembly = true
+  []
+  # Inner Reflector
+  [assembly4]
+    type = PinMeshGenerator
+    reactor_params = rmp
+    pin_type = 4
+    pitch = 14.685
+    region_ids= '12; 8; 8; 8; 8; 8; 8; 8; 8; 8; 8; 15'
+    quad_center_elements = true
+    homogenized = true
+    use_as_assembly = true
+  []
+  # Outer Core
+  [assembly5]
+    type = PinMeshGenerator
+    reactor_params = rmp
+    pin_type = 5
+    pitch = 14.685
+    region_ids= '12; 9; 9; 3; 3; 3; 3; 3; 13; 14; 14; 15'
+    quad_center_elements = true
+    homogenized = true
+    use_as_assembly = true
+  []
+  # Outer Reflector
+  [assembly6]
+    type = PinMeshGenerator
+    reactor_params = rmp
+    pin_type = 6
+    pitch = 14.685
+    region_ids= '12; 10; 10; 10; 10; 10; 10; 10; 10; 10; 10; 15'
+    quad_center_elements = true
+    homogenized = true
+    use_as_assembly = true
+  []
+  # Shield
+  [assembly7]
+    type = PinMeshGenerator
+    reactor_params = rmp
+    pin_type = 7
+    pitch = 14.685
+    region_ids= '12; 11; 11; 11; 11; 11; 11; 11; 11; 11; 11; 11'
+    quad_center_elements = true
+    homogenized = true
+    use_as_assembly = true
+  []
+  [core]
+    type = CoreMeshGenerator
+    inputs = 'assembly1 assembly2 assembly3 assembly4
+              assembly5 assembly6 assembly7 dummy'
+    dummy_assembly_name = dummy
+    pattern =   '  7   7   6   6   6   6   6   6   7   7;
+                 7   6   6   5   5   5   5   5   6   6   7;
+               6   6   5   5   3   3   3   3   5   5   6   6;
+             6   5   5   3   3   3   3   3   3   3   5   5   6;
+           6   5   3   3   3   3   4   4   3   3   3   3   5   6;
+         6   5   3   3   3   4   4   0   4   4   3   3   3   5   6;
+       6   5   3   3   4   4   2   1   1   3   4   4   3   3   5   6;
+     6   5   3   3   4   0   1   1   2   1   1   0   4   3   3   5   6;
+   7   6   5   3   3   4   1   0   1   1   0   1   4   3   3   5   6   7;
+ 7   6   5   3   3   4   3   1   1   0   1   1   2   4   3   3   5   6   7;
+   7   6   5   3   3   4   1   2   1   1   2   1   4   3   3   5   6   7;
+     6   5   3   3   4   0   1   1   0   1   1   0   4   3   3   5   6;
+       6   5   3   3   4   4   2   1   1   3   4   4   3   3   5   6;
+         6   5   3   3   3   4   4   0   4   4   3   3   3   5   6;
+           6   5   3   3   3   3   4   4   3   3   3   3   5   6;
+             6   5   5   3   3   3   3   3   3   3   5   5   6;
+               6   6   5   5   3   3   3   3   5   5   6   6;
+                 7   6   6   5   5   5   5   5   6   6   7;
+                   7   7   6   6   6   6   6   6   7   7'
+    extrude = true
+  []
+  [abtr_mesh]
+    type = ExtraElementIDCopyGenerator
+    input = core
+    source_extra_element_id = region_id
+    target_extra_element_ids = 'material_id'
+  []
+[]
