@@ -12,6 +12,7 @@
 #include "ParallelUniqueId.h"
 #include "FEProblemBase.h"
 #include "ThreadedElementLoopBase.h"
+#include "ConsoleUtils.h"
 
 // Forward declarations
 class SystemBase;
@@ -57,8 +58,9 @@ protected:
   FEProblemBase & _fe_problem;
 
   /**
-   * Routine to output the ordering of objects within a vector. These objects must implement the
-   * name() routine, and it must return a string or compatible type.
+   * Routine to output the ordering of objects within a vector of pointers to these objects.
+   * These objects must implement the name() routine, and it must return a string or compatible
+   * type.
    *
    * @tparam T the object type
    * @param objs the vector with all the objects (should be pointers)
@@ -68,6 +70,10 @@ protected:
    */
   template <typename T>
   void printExecutionOrdering(const std::vector<T *> & objs,
+                              const bool print_header = true,
+                              const std::string & line_prefix = "[DBG]") const;
+  template <typename T>
+  void printExecutionOrdering(const std::vector<std::shared_ptr<T>> & objs_ptrs,
                               const bool print_header = true,
                               const std::string & line_prefix = "[DBG]") const;
 };
@@ -155,4 +161,18 @@ ThreadedElementLoop<RangeType>::printExecutionOrdering(const std::vector<T *> & 
                                      : "";
   message += (print_header ? "Order of execution:\n" : "") + names;
   console << ConsoleUtils::formatString(message, line_prefix) << std::endl;
+}
+
+template <typename RangeType>
+template <typename T>
+void
+ThreadedElementLoop<RangeType>::printExecutionOrdering(
+    const std::vector<std::shared_ptr<T>> & objs_ptrs,
+    const bool print_header,
+    const std::string & line_prefix) const
+{
+  std::vector<T *> regular_ptrs;
+  for (auto shared_ptr : objs_ptrs)
+    regular_ptrs.push_back(shared_ptr.get());
+  printExecutionOrdering<T>(regular_ptrs, print_header, line_prefix);
 }
