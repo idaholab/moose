@@ -10,7 +10,6 @@
 #include "gtest/gtest.h"
 
 #include "MonotoneCubicInterpolation.h"
-
 #include <cmath>
 
 const double tol = 1e-8;
@@ -185,4 +184,52 @@ TEST(MonotoneCubicInterpolationTest, getSampleSize)
 
   MonotoneCubicInterpolation interp(x, y);
   EXPECT_EQ(interp.getSampleSize(), x.size());
+}
+
+TEST(MonotoneCubicInterpolationTest, errors)
+{
+  try
+  {
+    std::vector<double> x(2);
+    std::vector<double> y(3);
+    MonotoneCubicInterpolation interp(x, y);
+    FAIL() << "missing expected error";
+  }
+  catch (const std::exception & e)
+  {
+    std::string msg(e.what());
+    ASSERT_NE(msg.find("MonotoneCubicInterpolation: x and y vectors are not the same length"),
+              std::string::npos)
+        << "failed with unexpected error: " << msg;
+  }
+
+  try
+  {
+    std::vector<double> x(3);
+    std::vector<double> y(3);
+    x[0] = 4;
+    x[1] = 2;
+    MonotoneCubicInterpolation interp(x, y);
+    FAIL() << "missing expected error";
+  }
+  catch (const std::exception & e)
+  {
+    std::string msg(e.what());
+    ASSERT_NE(msg.find("x-values are not strictly increasing"), std::string::npos)
+        << "failed with unexpected error: " << msg;
+  }
+
+  try
+  {
+    std::vector<double> x(2);
+    std::vector<double> y(2);
+    MonotoneCubicInterpolation interp(x, y);
+    FAIL() << "missing expected error";
+  }
+  catch (const std::exception & e)
+  {
+    std::string msg(e.what());
+    ASSERT_NE(msg.find("2 points is not enough data for a cubic interpolation"), std::string::npos)
+        << "failed with unexpected error: " << msg;
+  }
 }
