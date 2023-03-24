@@ -8,7 +8,6 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "TestLikelihood.h"
-#include "Likelihood.h"
 
 registerMooseObject("StochasticToolsApp", TestLikelihood);
 
@@ -20,19 +19,19 @@ TestLikelihood::validParams()
   params.addClassDescription("Reporter to test a likelihood object.");
   params.addParam<ReporterValueName>(
       "function", "function", "Value of the density or mass function.");
-  params.addRequiredParam<std::vector<LikelihoodName>>("likelihoods", "Names of the likelihoods.");
+  params.addRequiredParam<std::vector<UserObjectName>>("likelihoods", "Names of likelihoods.");
   params.addRequiredParam<ReporterName>("model_pred", "Reporter with the model predictions.");
   return params;
 }
 
 TestLikelihood::TestLikelihood(const InputParameters & parameters)
   : GeneralReporter(parameters),
-    LikelihoodInterface(this),
+    LikelihoodInterface(parameters),
     _function(declareValue<std::vector<Real>>("function")),
     _model_pred(getReporterValue<std::vector<Real>>("model_pred"))
 {
-  for (const LikelihoodName & name : getParam<std::vector<LikelihoodName>>("likelihoods"))
-    _likelihoods.push_back(&getLikelihoodByName(name));
+  for (const UserObjectName & name : getParam<std::vector<UserObjectName>>("likelihoods"))
+    _likelihoods.push_back(getLikelihoodFunctionByName(name));
 
   _function.resize(_likelihoods.size());
 }

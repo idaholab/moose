@@ -21,22 +21,29 @@ public:
 
   AffineInvariantDifferentialEvolutionSampler(const InputParameters & parameters);
 
+  virtual int decisionStep() const override { return 2; }
+
 protected:
   virtual void proposeSamples(const unsigned int seed_value) override;
 
+  // virtual void proposeVarSamples(const unsigned int seed_value) override;
+
   /// Compute the differential evolution from the current state
-  void computeDifferential(const Real & state1,
-                           const Real & state2,
-                           const Real & rnd,
-                           const unsigned int & index,
-                           Real & diff);
+  void computeDifferential(
+      const Real & state1, const Real & state2, const Real & rnd, const Real & scale, Real & diff);
 
   /// Tune the internal parameters
-  void tuneParams(Real & gamma, Real & b, const unsigned int & index);
+  void tuneParams(Real & gamma, Real & b, const Real & scale);
 
   /// Reporter value with the previous state of all the walkers
   const std::vector<std::vector<Real>> & _previous_state;
 
+  /// Reporter value with the previous state of all the walkers for variance
+  const std::vector<Real> & _previous_state_var;
+
   /// Tuning options for the internal params
   const MooseEnum & _tuning_option;
+
+  /// Scales for the parameters
+  std::vector<Real> _scales;
 };

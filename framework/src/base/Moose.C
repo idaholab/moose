@@ -125,7 +125,6 @@ addActionTypes(Syntax & syntax)
 
   registerMooseObjectTask("add_function",                 Function,               false);
   registerMooseObjectTask("add_distribution",             Distribution,           false);
-  registerMooseObjectTask("add_likelihood",               Likelihood,             false);
   registerMooseObjectTask("add_sampler",                  Sampler,                false);
 
   registerMooseObjectTask("add_aux_kernel",               AuxKernel,              false);
@@ -306,7 +305,6 @@ addActionTypes(Syntax & syntax)
                            "(add_periodic_bc)"
                            "(add_user_object)"
                            "(add_distribution)"
-                           "(add_likelihood)"
                            "(add_sampler)"
                            "(setup_function_complete)"
                            "(setup_adaptivity)"
@@ -444,9 +442,6 @@ associateSyntaxInner(Syntax & syntax, ActionFactory & /*action_factory*/)
 
   registerSyntax("AddDistributionAction", "Distributions/*");
   syntax.registerSyntaxType("Distributions/*", "DistributionName");
-
-  registerSyntax("AddLikelihoodAction", "Likelihoods/*");
-  syntax.registerSyntaxType("Likelihoods/*", "LikelihoodName");
 
   registerSyntax("AddSamplerAction", "Samplers/*");
   syntax.registerSyntaxType("Samplers/*", "SamplerName");

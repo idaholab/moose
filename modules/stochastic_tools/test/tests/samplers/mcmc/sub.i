@@ -72,5 +72,4 @@ param3 = '${fparse mesh1}'
 
 [Outputs]
   console = 'false'
-  # csv = true
 []

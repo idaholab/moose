@@ -10,6 +10,7 @@
 #pragma once
 
 #include "GeneralReporter.h"
+#include "LikelihoodFunctionBase.h"
 #include "LikelihoodInterface.h"
 
 /**
@@ -30,7 +31,7 @@ protected:
 
 private:
   /// Storage for the likelihood objects to be utilized
-  std::vector<const Likelihood *> _likelihoods;
+  std::vector<const LikelihoodFunctionBase *> _likelihoods;
 
   /// model prediction values
   const std::vector<Real> & _model_pred;

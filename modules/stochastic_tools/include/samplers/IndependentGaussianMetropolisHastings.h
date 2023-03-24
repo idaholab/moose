@@ -21,6 +21,8 @@ public:
 
   IndependentGaussianMetropolisHastings(const InputParameters & parameters);
 
+  virtual int decisionStep() const override { return 2; }
+
 protected:
   virtual void proposeSamples(const unsigned int seed_value) override;
 
@@ -30,7 +32,4 @@ private:
 
   /// Standard deviations for making the next proposal
   const std::vector<Real> & _std_prop;
-
-  /// Initial values of the input params to get the MCMC scheme started
-  const std::vector<Real> & _initial_values;
 };

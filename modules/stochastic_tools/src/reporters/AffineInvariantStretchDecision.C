@@ -21,14 +21,12 @@ AffineInvariantStretchDecision::validParams()
 
 AffineInvariantStretchDecision::AffineInvariantStretchDecision(const InputParameters & parameters)
   : ParallelMarkovChainMonteCarloDecision(parameters),
-    _aiss(dynamic_cast<const AffineInvariantStretchSampler *>(&_sampler))
+    _aiss(dynamic_cast<const AffineInvariantStretchSampler *>(&_sampler)),
+    _step_size(_aiss->getAffineStepSize())
 {
   // Check whether the selected sampler is a stretch sampler or not
   if (!_aiss)
     paramError("sampler", "The selected sampler is not of type AffineInvariantStretchSampler.");
-
-  // Fetch the affine step sizes
-  _step_size = _aiss->getAffineStepSize();
 }
 
 void

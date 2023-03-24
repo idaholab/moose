@@ -11,16 +11,15 @@
 #include "Normal.h"
 #include "Uniform.h"
 
-registerMooseObjectAliased("StochasticToolsApp", AffineInvariantDifferentialEvolutionSampler, "AffineInvariantDES");
+registerMooseObjectAliased("StochasticToolsApp",
+                           AffineInvariantDifferentialEvolutionSampler,
+                           "AffineInvariantDES");
 
 /*
  Tuning options for the internal parameters
   1. Braak2006_static:
   - the gamma param is set to 2.38 / sqrt(2 * dim)
-  - the b param is set to 1e-6
-  2. Braak2006_scaled:
-  - the gamma param is set to 2.38 / sqrt(2 * dim)
-  - the b param is set to (upper_bound - lower_bound) * 1e-6
+  - the b param is set to (scale) * 1e-6
 */
 
 InputParameters
@@ -30,52 +29,58 @@ AffineInvariantDifferentialEvolutionSampler::validParams()
   params.addClassDescription("Perform Affine Invariant Ensemble MCMC with differential sampler.");
   params.addRequiredParam<ReporterName>(
       "previous_state", "Reporter value with the previous state of all the walkers.");
-  MooseEnum tuning_option("Braak2006_static Braak2006_scaled", "Braak2006_static");
-  params.addParam<MooseEnum>("tuning_option", tuning_option, "The tuning option for internal parameters.");
+  params.addRequiredParam<ReporterName>(
+      "previous_state_var",
+      "Reporter value with the previous state of all the walkers for variance.");
+  MooseEnum tuning_option("Braak2006_static", "Braak2006_static");
+  params.addParam<MooseEnum>(
+      "tuning_option", tuning_option, "The tuning option for internal parameters.");
+  params.addParam<std::vector<Real>>("scales", "Scales for the parameters.");
   return params;
 }
 
-AffineInvariantDifferentialEvolutionSampler::AffineInvariantDifferentialEvolutionSampler(const InputParameters & parameters)
+AffineInvariantDifferentialEvolutionSampler::AffineInvariantDifferentialEvolutionSampler(
+    const InputParameters & parameters)
   : ParallelMarkovChainMonteCarloBase(parameters),
     _previous_state(getReporterValue<std::vector<std::vector<Real>>>("previous_state")),
+    _previous_state_var(getReporterValue<std::vector<Real>>("previous_state_var")),
     _tuning_option(getParam<MooseEnum>("tuning_option"))
 {
   if (_num_parallel_proposals < 5)
-    mooseError("At least five parallel proposals should be used for the Differential Evolution Sampler.");
+    mooseError(
+        "At least five parallel proposals should be used for the Differential Evolution Sampler.");
 
   if (_num_parallel_proposals < _priors.size())
-    mooseWarning("It is recommended that the parallel proposals be greater than or equal to the inferred parameters.");
+    mooseWarning("It is recommended that the parallel proposals be greater than or equal to the "
+                 "inferred parameters.");
+
+  if (isParamValid("scales"))
+  {
+    _scales = getParam<std::vector<Real>>("scales");
+    if (_scales.size() != _priors.size())
+      mooseError("The number of scales provided should match the number of tunable params.");
+  }
+  else
+    _scales.assign(_priors.size(), 1.0);
 }
 
 void
-AffineInvariantDifferentialEvolutionSampler::computeDifferential(const Real & state1,
-                                                                 const Real & state2,
-                                                                 const Real & rnd,
-                                                                 const unsigned int & index,
-                                                                 Real & diff)
+AffineInvariantDifferentialEvolutionSampler::computeDifferential(
+    const Real & state1, const Real & state2, const Real & rnd, const Real & scale, Real & diff)
 {
   Real gamma;
   Real b;
-  tuneParams(gamma, b, index);
+  tuneParams(gamma, b, scale);
   diff = gamma * (state1 - state2) + Normal::quantile(rnd, 0.0, b);
 }
 
 void
-AffineInvariantDifferentialEvolutionSampler::tuneParams(Real & gamma,
-                                                        Real & b,
-                                                        const unsigned int & index)
+AffineInvariantDifferentialEvolutionSampler::tuneParams(Real & gamma, Real & b, const Real & scale)
 {
   if (_tuning_option == "Braak2006_static")
   {
     gamma = 2.38 / std::sqrt(2 * _priors.size());
-    b = 1e-6;
-  }
-  else if (_tuning_option == "Braak2006_scaled")
-  {
-    if (!_lb)
-      mooseError("The bounds need to be specified for the Braak2006_scaled tuning option.");
-    gamma = 2.38 / std::sqrt(2 * _priors.size());
-    b = 1e-6 * ((*_ub)[index] - (*_lb)[index]);
+    b = 1e-6 * scale;
   }
   else
     mooseError("Invalid tuning option ", std::string(_tuning_option));
@@ -97,13 +102,27 @@ AffineInvariantDifferentialEvolutionSampler::proposeSamples(const unsigned int s
       computeDifferential(_previous_state[index_req1][i],
                           _previous_state[index_req2][i],
                           getRand(seed_value),
-                          i,
+                          _scales[i],
                           diff);
       _new_samples[j][i] = (_step > decisionStep()) ? (_previous_state[j][i] + diff)
                                                     : _priors[i]->quantile(getRand(seed_value));
       if (_lb)
-        indicator = (_new_samples[j][i] < (*_lb)[i] || _new_samples[j][i] > (*_ub)[i]) ? 1 : indicator;
+        indicator =
+            (_new_samples[j][i] < (*_lb)[i] || _new_samples[j][i] > (*_ub)[i]) ? 1 : indicator;
     }
-    j = (!indicator) ? ++j : j;
+    if (_var_prior)
+    {
+      computeDifferential(_previous_state_var[index_req1],
+                          _previous_state_var[index_req2],
+                          getRand(seed_value),
+                          1.0,
+                          diff);
+      _new_var_samples[j] = (_step > decisionStep()) ? (_previous_state_var[j] + diff)
+                                                     : _var_prior->quantile(getRand(seed_value));
+      if (_new_var_samples[j] < 0.0)
+        indicator = 1;
+    }
+    if (!indicator)
+      ++j;
   }
 }
