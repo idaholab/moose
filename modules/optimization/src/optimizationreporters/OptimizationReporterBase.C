@@ -17,10 +17,10 @@ OptimizationReporterBase::validParams()
   params.registerBase("OptimizationReporterBase");
   params.addRequiredParam<std::vector<ReporterValueName>>(
       "parameter_names", "List of parameter names, one for each group of parameters.");
-  params.addParam<std::vector<Real>>(
-      "lower_bounds", std::vector<Real>(), "Constant lower bound for each group of parameters.");
-  params.addParam<std::vector<Real>>(
-      "upper_bounds", std::vector<Real>(), "Constant upper bound for each group of parameters.");
+  params.addParam<std::vector<std::vector<Real>>>(
+      "lower_bounds", "Constant lower bound for each group of parameters.");
+  params.addParam<std::vector<std::vector<Real>>>(
+      "upper_bounds", "Constant upper bound for each group of parameters.");
   params.registerBase("OptimizationReporterBase");
   return params;
 }
@@ -30,25 +30,8 @@ OptimizationReporterBase::OptimizationReporterBase(const InputParameters & param
     _parameter_names(getParam<std::vector<ReporterValueName>>("parameter_names")),
     _nparams(_parameter_names.size()),
     _parameters(_nparams),
-    _gradients(_nparams),
-    _lower_bounds(getParam<std::vector<Real>>("lower_bounds")),
-    _upper_bounds(getParam<std::vector<Real>>("upper_bounds"))
+    _gradients(_nparams)
 {
-  if (!_lower_bounds.empty() && _lower_bounds.size() != _nparams)
-    paramError("lower_bounds", "There must be a lower bound associated with each parameter.");
-  else if (!_upper_bounds.empty() && _upper_bounds.size() != _nparams)
-    paramError("upper_bounds", "There must be an upper bound associated with each parameter.");
-  else if (_lower_bounds.size() != _upper_bounds.size())
-    paramError((_lower_bounds.size() == 0 ? "upper_bounds" : "lower_bounds"),
-               "Both upper and lower bounds must be specified if bounds are used.");
-
-  for (const auto & i : make_range(_nparams))
-  {
-    _parameters[i] =
-        &declareValueByName<std::vector<Real>>(_parameter_names[i], REPORTER_MODE_REPLICATED);
-    _gradients[i] = &declareValueByName<std::vector<Real>>("grad_" + _parameter_names[i],
-                                                           REPORTER_MODE_REPLICATED);
-  }
 }
 
 Real
@@ -108,29 +91,131 @@ OptimizationReporterBase::updateParameters(const libMesh::PetscVector<Number> & 
 }
 
 Real
-OptimizationReporterBase::getLowerBound(dof_id_type i) const
+OptimizationReporterBase::getLowerBound(dof_id_type index) const
 {
+  std::pair<std::size_t, std::size_t> ij = getParameterIndex(index);
   return _lower_bounds.empty() ? std::numeric_limits<Real>::lowest()
-                               : _lower_bounds[getParameterIndex(i)];
+                               : _lower_bounds[ij.first][ij.second];
 }
 
 Real
-OptimizationReporterBase::getUpperBound(dof_id_type i) const
+OptimizationReporterBase::getUpperBound(dof_id_type index) const
 {
+  std::pair<std::size_t, std::size_t> ij = getParameterIndex(index);
   return _upper_bounds.empty() ? std::numeric_limits<Real>::max()
-                               : _upper_bounds[getParameterIndex(i)];
+                               : _upper_bounds[ij.first][ij.second];
 }
 
-unsigned int
-OptimizationReporterBase::getParameterIndex(dof_id_type i) const
+std::pair<std::size_t, std::size_t>
+OptimizationReporterBase::getParameterIndex(dof_id_type index) const
 {
-  dof_id_type dof = 0;
-  for (unsigned int p = 0; p < _nparams; ++p)
+  std::pair<std::size_t, std::size_t> ij;
+  dof_id_type params_per_group = 0;
+  for (std::size_t i = 0; i < _nparams; ++i)
   {
-    dof += _nvalues[p];
-    if (i < dof)
-      return p;
+    params_per_group += _nvalues[i];
+    if (index < params_per_group)
+    {
+      ij.first = i;
+      ij.second = index - (params_per_group - _nvalues[i]);
+      return ij;
+    }
   }
-  mooseError("DoF index ", i, " is outside of expected paramter vector of size ", _ndof, ".");
-  return 0;
+  mooseError("DoF index ", index, " is outside of expected paramter vector of size ", _ndof, ".");
+  return ij;
+}
+
+void
+OptimizationReporterBase::fillBounds()
+{
+  _lower_bounds = fillVectorOfVectors("lower_bounds");
+  _upper_bounds = fillVectorOfVectors("upper_bounds");
+
+  Real defaultValue = std::numeric_limits<Real>::lowest();
+  fillWithDefaults(defaultValue, _lower_bounds);
+  defaultValue = std::numeric_limits<Real>::max();
+  fillWithDefaults(defaultValue, _upper_bounds);
+
+  if (!_lower_bounds.empty() && _lower_bounds.size() != _nparams)
+    paramError("lower_bounds", "There must be a lower bound associated with each parameter.");
+  else if (!_upper_bounds.empty() && _upper_bounds.size() != _nparams)
+    paramError("upper_bounds", "There must be an upper bound associated with each parameter.");
+}
+
+void
+OptimizationReporterBase::fillInitialConditions()
+{
+  _initial_conditions = fillVectorOfVectors("initial_condition");
+  Real defaultValue = 0.0;
+  fillWithDefaults(defaultValue, _initial_conditions);
+}
+
+void
+OptimizationReporterBase::initializeOptimizationReporters()
+{
+  for (const auto & i : make_range(_nparams))
+  {
+    _parameters[i] =
+        &declareValueByName<std::vector<Real>>(_parameter_names[i], REPORTER_MODE_REPLICATED);
+    _parameters[i]->assign(_initial_conditions[i].begin(), _initial_conditions[i].end());
+    _gradients[i] = &declareValueByName<std::vector<Real>>("grad_" + _parameter_names[i],
+                                                           REPORTER_MODE_REPLICATED);
+    _gradients[i]->resize(_nvalues[i]);
+  }
+}
+
+void
+OptimizationReporterBase::fillWithDefaults(Real defaultValue,
+                                           std::vector<std::vector<Real>> & data) const
+{
+  if (data.empty())
+  {
+    // fill with zeros because initial conditions are not given in input file
+    for (auto & paramsPerGroup : _nvalues)
+    {
+      std::vector<Real> paramGroupDefaults(paramsPerGroup, defaultValue);
+      data.push_back(paramGroupDefaults);
+    }
+  }
+}
+
+std::vector<std::vector<Real>>
+OptimizationReporterBase::fillVectorOfVectors(std::string type) const
+{
+  std::vector<std::vector<Real>> parsedData;
+  if (isParamValid(type))
+  {
+    parsedData = getParam<std::vector<std::vector<Real>>>(type);
+    if (parsedData.size() != _nvalues.size())
+    {
+      paramError(type,
+                 "There must be a vector of ",
+                 type,
+                 " per parameter group.  The ",
+                 type,
+                 " input format is std::vector<std::vector<Real>> so each vector should be "
+                 "seperated by \";\" even if it is a single value per group for a constant ",
+                 type,
+                 ".");
+    }
+    for (std::size_t i = 0; i < parsedData.size(); ++i)
+    {
+      // The case when the initial condition is constant for each parameter group
+      if ((parsedData[i].size() == 1) && (parsedData[i].size() < _nvalues[i]))
+      {
+        std::vector<Real> params_group_constant(_nvalues[i], parsedData[i][0]);
+        parsedData[i] = params_group_constant;
+      }
+      else if ((parsedData[i].size() != 1) && (parsedData[i].size() != _nvalues[i]))
+      {
+        paramError(type,
+                   "When ",
+                   type,
+                   " are given in input file, there must either be a single value per parameter "
+                   "group or a value for every parameter.");
+      }
+    }
+  }
+
+  return parsedData;
 }

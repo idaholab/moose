@@ -22,8 +22,8 @@ OptimizationReporter::validParams()
   params.addRequiredParam<std::vector<dof_id_type>>(
       "num_values",
       "Number of parameter values associated with each parameter group in 'parameter_names'.");
-  params.addParam<std::vector<Real>>("initial_condition",
-                                     "Initial condition for each parameter value, default is 0.");
+  params.addParam<std::vector<std::vector<Real>>>(
+      "initial_condition", "Initial condition for each parameter value, default is 0.");
   return params;
 }
 
@@ -35,24 +35,12 @@ OptimizationReporter::OptimizationReporter(const InputParameters & parameters)
 
   // size checks
   if (_parameter_names.size() != _nvalues.size())
-    paramError("num_parameters",
-               "There should be a number in 'num_parameters' for each name in 'parameter_names'.");
-  std::vector<Real> initial_condition = isParamValid("initial_condition")
-                                            ? getParam<std::vector<Real>>("initial_condition")
-                                            : std::vector<Real>(_ndof, 0.0);
-  if (initial_condition.size() != _ndof)
-    paramError("initial_condition",
-               "Initial condition must be same length as the total number of parameter values.");
+    paramError(
+        "num_parameters",
+        "There should be a number in \'num_parameters\' for each name in \'parameter_names\'.");
 
-  unsigned int v = 0;
-  for (const auto & i : make_range(_nparams))
-  {
-    // initial conditions are different between this and ParameterMeshOptimization reporter
-    // these ICs are for every single parameter.  ParameterMeshOptimization defines a single
-    // condition for each group of parameters
-    _parameters[i]->assign(initial_condition.begin() + v,
-                           initial_condition.begin() + v + _nvalues[i]);
-    _gradients[i]->resize(_nvalues[i]);
-    v += _nvalues[i];
-  }
+  // fill lower, upper, initial conditions and setup reporters
+  fillBounds();
+  fillInitialConditions();
+  initializeOptimizationReporters();
 }

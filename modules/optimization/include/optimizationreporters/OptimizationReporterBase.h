@@ -84,13 +84,30 @@ protected:
    * This is the first function called in objective/gradient/hessian routine
    */
   virtual void updateParameters(const libMesh::PetscVector<Number> & x);
+
   /**
-   * Helper function to get index of the list of parameters from the dof index
+   * Helper function to get i,j index into the parameter vector of vector for
+   * an index into a flattened form of this parameter vector used by petsc
    *
-   * @param i The DoF index in the optimization vector
-   * @return unsigned int The index of the parameter the DoF is representing
+   * @param index The DoF index in the flattened parameter vector
+   * @return std::pair<size_t,size_t> The i,j index into the parameter vector of vector
    */
-  virtual unsigned int getParameterIndex(dof_id_type i) const;
+  virtual std::pair<std::size_t, std::size_t> getParameterIndex(dof_id_type index) const;
+
+  /**
+   * Fill lower and upper bounds vector of vector member data for each parameter in each group
+   */
+  void fillBounds();
+
+  /**
+   * Fill initial conditions vector of vector member data for each parameter in each group
+   */
+  void fillInitialConditions();
+
+  /**
+   * Initialize parameter and gradient reporters
+   */
+  void initializeOptimizationReporters();
 
   /// Parameter names
   const std::vector<ReporterValueName> & _parameter_names;
@@ -103,10 +120,13 @@ protected:
   std::vector<std::vector<Real> *> _gradients;
 
   /// Bounds of the parameters
-  const std::vector<Real> & _lower_bounds;
-  const std::vector<Real> & _upper_bounds;
+  std::vector<std::vector<Real>> _lower_bounds;
+  std::vector<std::vector<Real>> _upper_bounds;
 
-  /// Number of values for each parameter
+  /// initial conditions of the parameters
+  std::vector<std::vector<Real>> _initial_conditions;
+
+  /// Number of values for each parameter group
   std::vector<dof_id_type> _nvalues;
   /// Total number of parameters
   dof_id_type _ndof;
@@ -114,6 +134,21 @@ protected:
 private:
   friend class OptimizeSolve;
   friend class OptimizationReporterTest;
+
+  /**
+   * helper fill method for vector of vectors of parameters in each parameter group
+   * Called by fillBounds and fillInitialConditions
+   * @param type the param type to read
+   * @return std::vector<std::vector<Real>> value for each parameter in each group
+   */
+  std::vector<std::vector<Real>> fillVectorOfVectors(std::string type) const;
+
+  /**
+   * helper to fill fillBounds and fillInitialConditions with default values
+   * @param defaultValue value to fill with
+   * @param data member vector of vector to fill
+   */
+  void fillWithDefaults(Real defaultValue, std::vector<std::vector<Real>> & data) const;
 
   void setSimulationValuesForTesting(std::vector<Real> & data);
 };

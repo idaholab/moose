@@ -46,10 +46,8 @@ ParameterMeshOptimization::validParams()
   params.addParam<unsigned int>(
       "num_parameter_times", 1, "The number of time points the parameters represent.");
 
-  params.addParam<std::vector<Real>>(
-      "initial_condition",
-      std::vector<Real>(),
-      "Spatially constant initial condition for each group of parameters.");
+  params.addParam<std::vector<std::vector<Real>>>(
+      "initial_condition", "Spatially constant initial condition for each group of parameters.");
   return params;
 }
 
@@ -61,7 +59,7 @@ ParameterMeshOptimization::ParameterMeshOptimization(const InputParameters & par
   const auto & meshes = getParam<std::vector<FileName>>("parameter_meshes");
   const auto & families = getParam<MultiMooseEnum>("parameter_families");
   const auto & orders = getParam<MultiMooseEnum>("parameter_orders");
-  const auto & initial_condition = getParam<std::vector<Real>>("initial_condition");
+  // const auto & initial_condition = getParam<std::vector<Real>>("initial_condition");
   const auto & ntimes = getParam<unsigned int>("num_parameter_times");
 
   // Size checks
@@ -75,10 +73,6 @@ ParameterMeshOptimization::ParameterMeshOptimization(const InputParameters & par
     paramError("parameter_orders",
                "There must be an order associated with each group of parameters.");
 
-  if (!initial_condition.empty() && initial_condition.size() != _nparams)
-    paramError("initial_condition",
-               "There must be an initial condition associated with each group of parameters.");
-
   _ndof = 0;
   for (const auto & i : make_range(_nparams))
   {
@@ -90,11 +84,10 @@ ParameterMeshOptimization::ParameterMeshOptimization(const InputParameters & par
     ParameterMesh pmesh(fetype, meshes[i]);
     _nvalues[i] = pmesh.size() * ntimes;
     _ndof += _nvalues[i];
-
-    // initial conditions are different between this and OptimizationReporter
-    // these ICs are for each group of parameters .  OptimizationReporter defines an IC for every
-    // single parameter seperately
-    _parameters[i]->assign(_nvalues[i], initial_condition.empty() ? 0.0 : initial_condition[i]);
-    _gradients[i]->resize(_nvalues[i]);
   }
+
+  // fill lower, upper, initial conditions and setup reporters
+  fillBounds();
+  fillInitialConditions();
+  initializeOptimizationReporters();
 }

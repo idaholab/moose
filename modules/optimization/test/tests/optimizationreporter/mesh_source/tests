@@ -88,7 +88,7 @@
       input = main.i
       cli_args = 'OptimizationReporter/initial_condition=\'0 0\''
       max_threads = 1
-      expect_err = 'There must be an initial condition associated with each group of parameters\.'
+      expect_err = 'When initial_condition are given in input file, there must either be a single value per parameter group or a value for every parameter\.'
       detail = 'initial conditions;'
     []
     [lower_bound]
@@ -96,7 +96,7 @@
       input = main.i
       cli_args = 'OptimizationReporter/lower_bounds=\'0 0\''
       max_threads = 1
-      expect_err = 'There must be a lower bound associated with each parameter\.'
+      expect_err = 'When lower_bounds are given in input file, there must either be a single value per parameter group or a value for every parameter\.'
       detail = 'lower bounds;'
     []
     [upper_bound]
@@ -104,16 +104,8 @@
       input = main.i
       cli_args = 'OptimizationReporter/upper_bounds=\'0 0\''
       max_threads = 1
-      expect_err = 'There must be an upper bound associated with each parameter\.'
+      expect_err = 'When upper_bounds are given in input file, there must either be a single value per parameter group or a value for every parameter\.'
       detail = 'upper bounds;'
-    []
-    [upper_bound_no_lower]
-      type = RunException
-      input = main.i
-      cli_args = 'OptimizationReporter/upper_bounds=\'0\''
-      max_threads = 1
-      expect_err = 'Both upper and lower bounds must be specified if bounds are used\.'
-      detail = 'upper bounds with no lower bound specified;'
     []
   []
 
