@@ -118,7 +118,7 @@
     cli_args = 'Mesh/file=long-bottom-block-1elem-blocks-multiple-projections-lowerd.e '
                'Executioner/end_time=0.2 Constraints/weighted_gap_lm/correct_edge_dropping=true '
                'Constraints/weighted_gap_lm/debug_mesh=true '
-               'UserObjects/weighted_vel_uo/correct_edge_dropping=true UserObjects/weighted_vel_uo/debug_mesh=true '
+               'UserObjects/weighted_vel_uo/correct_edge_dropping=false UserObjects/weighted_vel_uo/debug_mesh=true '
                'Constraints/normal_x/correct_edge_dropping=true Constraints/normal_x/debug_mesh=true '
                'Constraints/normal_y/correct_edge_dropping=true Constraints/normal_y/debug_mesh=true '
                'Constraints/tangential_x/correct_edge_dropping=true '
