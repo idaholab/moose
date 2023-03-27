@@ -389,6 +389,9 @@ private:
   /// Print ordering of objects exected on each boundary
   virtual void printBoundaryExecutionInformation(const BoundaryID bnd_id) const override;
 
+  /// Utility to get the subdomain names from the ids
+  std::pair<SubdomainName, SubdomainName> getBlockNames() const;
+
   /// Variables
   std::set<MooseVariableFieldBase *> _fv_vars;
   std::set<MooseVariableFieldBase *> _elem_sub_fv_vars;
@@ -1024,17 +1027,16 @@ template <typename RangeType, typename AttributeTagType>
 void
 ComputeFVFluxThread<RangeType, AttributeTagType>::printGeneralExecutionInformation() const
 {
-  if (_fe_problem.shouldPrintExecution(_tid) && _fv_flux_kernels.size())
-  {
-    auto & console = _fe_problem.console();
-    auto execute_on = _fe_problem.getCurrentExecuteOnFlag();
-    console << "[DBG] Beginning finite volume flux objects loop on " << execute_on << std::endl;
-    mooseDoOnce(console << "[DBG] Loop on faces (FaceInfo), objects ordered on each face: "
-                        << std::endl;
-                console << "[DBG] - (finite volume) flux kernels" << std::endl;
-                console << "[DBG] - (finite volume) flux boundary conditions" << std::endl;
-                console << "[DBG] - (finite volume) interface kernels" << std::endl;);
-  }
+  if (!_fe_problem.shouldPrintExecution(_tid))
+    return;
+  auto & console = _fe_problem.console();
+  auto execute_on = _fe_problem.getCurrentExecuteOnFlag();
+  console << "[DBG] Beginning finite volume flux objects loop on " << execute_on << std::endl;
+  mooseDoOnce(console << "[DBG] Loop on faces (FaceInfo), objects ordered on each face: "
+                      << std::endl;
+              console << "[DBG] - (finite volume) flux kernels" << std::endl;
+              console << "[DBG] - (finite volume) flux boundary conditions" << std::endl;
+              console << "[DBG] - (finite volume) interface kernels" << std::endl;);
 }
 
 template <typename RangeType, typename AttributeTagType>
@@ -1044,19 +1046,25 @@ ComputeFVFluxThread<RangeType, AttributeTagType>::printBlockExecutionInformation
   if (!_fe_problem.shouldPrintExecution(_tid) || !_fv_flux_kernels.size())
     return;
 
+  // Print the location of the execution
   const auto block_pair = std::make_pair(_subdomain, _neighbor_subdomain);
+  const auto block_pair_names = this->getBlockNames();
   if (_blocks_exec_printed.count(block_pair))
     return;
   auto & console = _fe_problem.console();
-  console << "[DBG] Flux kernels on block " << _subdomain << " and neighbor " << _neighbor_subdomain
+  console << "[DBG] Flux kernels on block " << block_pair_names.first;
+  if (_neighbor_subdomain != Moose::INVALID_BLOCK_ID)
+    console << " and neighbor " << block_pair_names.second << std::endl;
+  else
+    console << " with no neighbor block" << std::endl;
+
+  // Print the list of objects
+  std::vector<MooseObject *> fv_flux_kernels;
+  for (const auto & fv_kernel : _fv_flux_kernels)
+    fv_flux_kernels.push_back(dynamic_cast<MooseObject *>(fv_kernel));
+  console << ConsoleUtils::formatString(ConsoleUtils::mooseObjectVectorToString(fv_flux_kernels),
+                                        "[DBG]")
           << std::endl;
-  const std::string fv_flux_kernels =
-      std::accumulate(_fv_flux_kernels.begin(),
-                      _fv_flux_kernels.end(),
-                      std::string("[DBG]"),
-                      [](const std::string & str_out, FVFluxKernel * kernel)
-                      { return str_out + " " + kernel->name(); });
-  console << ConsoleUtils::formatString(fv_flux_kernels, "[DBG]") << std::endl;
   _blocks_exec_printed.insert(block_pair);
 }
 
@@ -1087,21 +1095,43 @@ ComputeFVFluxThread<RangeType, AttributeTagType>::printBoundaryExecutionInformat
       .template condition<AttribBoundaries>(bnd_id)
       .queryInto(iks);
 
+  const auto block_pair_names = this->getBlockNames();
   if (bcs.size())
   {
     auto & console = _fe_problem.console();
-    console << "[DBG] FVBCs on boundary " << bnd_id << " between subdomain " << _subdomain
-            << " and neighbor " << _neighbor_subdomain << std::endl;
+    console << "[DBG] FVBCs on boundary " << bnd_id << " between subdomain "
+            << block_pair_names.first;
+    if (_neighbor_subdomain != Moose::INVALID_BLOCK_ID)
+      console << " and neighbor " << block_pair_names.second << std::endl;
+    else
+      console << " and the exterior of the mesh " << std::endl;
     const std::string fv_bcs = ConsoleUtils::mooseObjectVectorToString(bcs);
     console << ConsoleUtils::formatString(fv_bcs, "[DBG]") << std::endl;
   }
   if (iks.size())
   {
     auto & console = _fe_problem.console();
-    console << "[DBG] FVIKs on boundary " << bnd_id << " between subdomain " << _subdomain
-            << " and neighbor " << _neighbor_subdomain << std::endl;
+    console << "[DBG] FVIKs on boundary " << bnd_id << " between subdomain "
+            << block_pair_names.first;
+    if (_neighbor_subdomain != Moose::INVALID_BLOCK_ID)
+      console << " and neighbor " << block_pair_names.second << std::endl;
+    else
+      console << " and the exterior of the mesh " << std::endl;
     const std::string fv_iks = ConsoleUtils::mooseObjectVectorToString(iks);
     console << ConsoleUtils::formatString(fv_iks, "[DBG]") << std::endl;
   }
   _boundaries_exec_printed.insert(bnd_id);
+}
+
+template <typename RangeType, typename AttributeTagType>
+std::pair<SubdomainName, SubdomainName>
+ComputeFVFluxThread<RangeType, AttributeTagType>::getBlockNames() const
+{
+  auto block_names = std::make_pair(_mesh.getSubdomainName(_subdomain),
+                                    _mesh.getSubdomainName(_neighbor_subdomain));
+  if (block_names.first == "")
+    block_names.first = Moose::stringify(_subdomain);
+  if (block_names.second == "")
+    block_names.second = Moose::stringify(_neighbor_subdomain);
+  return block_names;
 }
