@@ -21,7 +21,7 @@ public:
   ADCZMComputeGlobalTractionBase(const InputParameters & parameters);
 
 protected:
-  virtual void computeQpProperties() override;
+  void computeQpProperties() override;
 
   // method computing the equilibrium traction, rotate local traction to the global coordinate
   // system

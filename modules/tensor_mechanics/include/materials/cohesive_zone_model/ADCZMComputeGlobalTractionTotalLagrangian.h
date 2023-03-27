@@ -23,7 +23,7 @@ public:
 protected:
   void initQpStatefulProperties() override;
 
-  virtual void computeEquilibriumTracion();
+  void computeEquilibriumTracion() override;
 
   /// computes the area ratio
   void computeAreaRatio();

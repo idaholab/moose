@@ -21,7 +21,7 @@ public:
   ADCZMComputeLocalTractionIncrementalBase(const InputParameters & parameters);
 
 protected:
-  virtual void computeInterfaceTraction();
+  void computeInterfaceTraction() override;
 
   /// method used to compute the traction increment
   virtual void computeInterfaceTractionIncrement() = 0;

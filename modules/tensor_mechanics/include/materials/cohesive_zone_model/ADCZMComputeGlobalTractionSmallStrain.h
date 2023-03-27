@@ -21,5 +21,5 @@ public:
   ADCZMComputeGlobalTractionSmallStrain(const InputParameters & parameters);
 
 protected:
-  virtual void computeEquilibriumTracion();
+  void computeEquilibriumTracion() override;
 };
