@@ -1193,6 +1193,16 @@ setsIntersect(const T & s1, const T & s2)
   return setsIntersect(s1.begin(), s1.end(), s2.begin(), s2.end());
 }
 
+/**
+ * Courtesy https://stackoverflow.com/a/8889045 and
+ * https://en.cppreference.com/w/cpp/string/byte/isdigit
+ * @return Whether every character in the string is a digit
+ */
+inline bool
+isDigits(const std::string & str)
+{
+  return std::all_of(str.begin(), str.end(), [](unsigned char c) { return std::isdigit(c); });
+}
 } // MooseUtils namespace
 
 /**

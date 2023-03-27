@@ -35,6 +35,20 @@ void changeBoundaryId(MeshBase & mesh,
  */
 std::vector<BoundaryID> getBoundaryIDs(const libMesh::MeshBase & mesh,
                                        const std::vector<BoundaryName> & boundary_name,
+                                       bool generate_unknown,
+                                       const std::set<BoundaryID> & mesh_boundary_ids);
+
+/**
+ * Gets the boundary IDs with their names.
+ *
+ * The ordering of the returned boundary ID vector matches the vector of the boundary
+ * names in \p boundary_name.
+ * When a boundary name is not available in the mesh, if \p generate_unknown is true
+ * a non-existant boundary ID will be returned, otherwise a BoundaryInfo::invalid_id
+ * will be returned.
+ */
+std::vector<BoundaryID> getBoundaryIDs(const libMesh::MeshBase & mesh,
+                                       const std::vector<BoundaryName> & boundary_name,
                                        bool generate_unknown);
 
 /**
@@ -67,6 +81,25 @@ BoundaryID getBoundaryID(const BoundaryName & boundary_name, const MeshBase & me
  */
 SubdomainID getSubdomainID(const SubdomainName & subdomain_name, const MeshBase & mesh);
 
+/**
+ * Get the associated subdomainIDs for the subdomain names that are passed in.
+ *
+ * @param mesh The mesh
+ * @param subdomain_name The names of the subdomains
+ * @param mesh_subdomains All the subdomain IDs that exist on the mesh
+ * @return The subdomain ids from the passed subdomain names.
+ */
+std::vector<subdomain_id_type> getSubdomainIDs(const libMesh::MeshBase & mesh,
+                                               const std::vector<SubdomainName> & subdomain_name,
+                                               const std::set<SubdomainID> & mesh_subdomains);
+
+/**
+ * Get the associated subdomainIDs for the subdomain names that are passed in.
+ *
+ * @param mesh The mesh
+ * @param subdomain_name The names of the subdomains
+ * @return The subdomain ids from the passed subdomain names.
+ */
 std::vector<subdomain_id_type> getSubdomainIDs(const libMesh::MeshBase & mesh,
                                                const std::vector<SubdomainName> & subdomain_name);
 
