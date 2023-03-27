@@ -112,4 +112,12 @@
                   'properties, that accounts for the crack perpendicularity to the property grading '
                   'and yield verified results.'
   []
+  [axisymmetric_solution_tran]
+    issues = '#23631'
+    type = 'CSVDiff'
+    input = 'axisymmetric_solution_tran.i'
+    csvdiff = 'axisymmetric_solution_tran_out.csv'
+    requirement = 'The Domain Integral Action shall compute verified stress intensity factors from the '
+                  'interaction integral for axisymmetric geometries and circumferential cracks.'
+  []
 []

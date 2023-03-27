@@ -1,0 +1,65 @@
+reset
+
+#{factor = 100}
+#{submodel_dim = 5*factor}
+#{crack_depth_major = 0.635*factor}
+#{crack_depth_loc_rel_left = 0.05 * 100}
+#{crack_depth_ref = 0.02 * 100}
+
+#{radius_center = 0.25*100} # 0.5 for no gap!!!
+#{thickness_two = 0.25*100}
+
+#{tilt_angle_minor = 0}
+#{tilt_angle_major = 0}
+
+# create brick x {submodel_dim} y {submodel_dim} z {submodel_dim}
+# volume 1 move {submodel_dim/2} {submodel_dim/2} {submodel_dim/2}
+
+create vertex {radius_center} 0 0
+create vertex {crack_depth_loc_rel_left + crack_depth_ref + radius_center - thickness_two} 0 0
+create vertex {crack_depth_loc_rel_left + radius_center - thickness_two} 0 0
+create vertex {crack_depth_loc_rel_left - crack_depth_ref + radius_center  - thickness_two} 0 0
+create vertex {radius_center  - thickness_two} 0 0
+create vertex {radius_center - thickness_two} {1.0*factor} 0
+create vertex {radius_center + thickness_two} {1.0*factor} 0
+create vertex {radius_center + thickness_two} 0 0
+
+create curve vertex 1, 2
+create curve vertex 2, 3
+create curve vertex 3, 4
+create curve vertex 4, 5
+create curve vertex 5, 6
+create curve vertex 6, 7
+create curve vertex 7, 8
+create curve vertex 8, 1
+
+create surface curve all
+
+block 1 surface 1
+sideset 1 curve 1
+sideset 2 curve 2
+sideset 3 curve 3
+sideset 4 curve 4
+sideset 5 curve 5
+sideset 6 curve 6
+sideset 7 curve 7
+sideset 8 curve 8
+
+sideset 5001 curve 1 2 8
+nodeset 5001 curve 1 2 8
+nodeset 1001 vertex 3
+nodeset 10001 vertex 3
+
+nodeset 10005 vertex 8
+
+
+curve 1 5 6 7 8 interval 40
+
+mesh surface 1
+
+refine curve 2 3 4
+refine vertex 3
+refine curve 2 3 4
+
+block all element type QUAD4
+export mesh "2drz_eshraghi.e" overwrite

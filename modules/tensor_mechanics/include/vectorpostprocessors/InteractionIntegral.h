@@ -66,10 +66,14 @@ protected:
    * @param aux_stress Auxiliary stress -- computed in this method
    * @param grad_disp Gradient of auxiliary displacement -- computed in this method
    * @param grad_disp Auxiliary strain (FGM) -- computed in this method
+   * @param aux_disp Auxiliary displacement -- computed in this method only for axisymmetric (RZ)
+   meshes
+
    */
   void computeAuxFields(RankTwoTensor & aux_stress,
                         RankTwoTensor & grad_disp,
-                        RankTwoTensor & aux_strain);
+                        RankTwoTensor & aux_strain,
+                        RankTwoTensor & aux_disp);
   /**
    * Compute the auxiliary fields, including the auxiliary stress and the
    * gradient of the auxiliary displacement for the current point (as
@@ -93,6 +97,8 @@ protected:
   std::vector<MooseVariableFEBase *> _fe_vars;
   /// FEType object defining order and family of displacement variables
   const FEType & _fe_type;
+  /// Displacement variables
+  std::vector<const VariableValue *> _disp;
   /// Gradient of displacements
   std::vector<const VariableGradient *> _grad_disp;
   /// Whether the temperature variable is coupled
