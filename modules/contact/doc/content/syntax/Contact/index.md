@@ -41,8 +41,8 @@ that can be created for various types of contact enforcement.
 | tangential_penalty | all          | [MechanicalContactConstraint](/constraints/MechanicalContactConstraint.md) |
 | ranfs              | frictionless | [RANFSNormalMechanicalContact](/constraints/RANFSNormalMechanicalContact.md) |
 | mortar             | all          | [MechanicalContactConstraint](/constraints/MechanicalContactConstraint.md) |
-| mortar             | all          | [NormalMortarMechanicalContact](/constraints/NormalMortarMechanicalContact.md) [NormalMortarLMMechanicalContact](/constraints/NormalMortarLMMechanicalContact.md) |
-| mortar             | coulomb      | [TangentialMortarMechanicalContact](/constraints/TangentialMortarMechanicalContact.md) [TangentialMortarLMMechanicalContact](/constraints/TangentialMortarLMMechanicalContact.md) |
+| mortar             | all          | [NormalMortarMechanicalContact](/constraints/NormalMortarMechanicalContact.md) [ComputeWeightedGapLMMechanicalContact.md] |
+| mortar             | coulomb      | [TangentialMortarMechanicalContact](/constraints/TangentialMortarMechanicalContact.md) [ComputeFrictionalForceLMMechanicalContact.md] |
 
 In addition to the Constraint class, several other objects are created, as shown in
 
@@ -94,7 +94,7 @@ Gap offset can be provided to the current contact formulation enforced using the
 
 ## Multiple contact pairs
 
-Users may need to set up mechanical contact between multiple contact pairs. For that application, users can provide arrays of primary and secondary boundary names which will match consecutively to define mechanical contact pairs. The same contact-related input parameters will be applied to all contact pairs defined in the action input. 
+Users may need to set up mechanical contact between multiple contact pairs. For that application, users can provide arrays of primary and secondary boundary names which will match consecutively to define mechanical contact pairs. The same contact-related input parameters will be applied to all contact pairs defined in the action input.
 
 !alert note
 The multiple contact pairs feature is not yet available for mortar contact.
