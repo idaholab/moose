@@ -95,8 +95,7 @@
     partial = True
     cli_args = 'Mesh/file=long-bottom-block-1elem-blocks-multiple-projections.e '
                'Executioner/end_time=0.2 '
-               'Outputs/file_base=block-dynamics-aux-fretting-wear-test-quick-multiple-projections_ou'
-               't'
+               'Outputs/file_base=block-dynamics-aux-fretting-wear-test-quick-multiple-projections_out'
     requirement = 'The contact module shall be able to compute nodal wear depth values in accordance with Archard '
                   'equation and the mortar gap velocity via mortar auxiliary kernels while including '
                   'these computations in the definition of mortar normal contact constraints in an '

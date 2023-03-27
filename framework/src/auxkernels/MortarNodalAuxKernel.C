@@ -82,6 +82,9 @@ template <typename ComputeValueType>
 void
 MortarNodalAuxKernelTempl<ComputeValueType>::compute()
 {
+  if (!_var.isNodalDefined())
+    return;
+
   ComputeValueType value(0);
   Real total_volume = 0;
 
