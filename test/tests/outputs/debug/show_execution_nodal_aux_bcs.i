@@ -35,19 +35,17 @@
   []
 []
 
-[NodalKernels]
-  [source]
-    type = UserForcingFunctionNodalKernel
-    variable = u
-    block = '1'
-    function = '1'
+[AuxVariables]
+  [v]
   []
-  [bc_all]
-    type = PenaltyDirichletNodalKernel
+[]
+
+[BCs]
+  [setting]
+    type = NeumannBC
     variable = u
-    value = 0
-    boundary = 'right bottom'
-    penalty = 1e10
+    boundary = 'top'
+    value = '4' 
   []
 []
 

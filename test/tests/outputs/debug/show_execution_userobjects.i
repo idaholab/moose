@@ -242,7 +242,12 @@
   []
 
   # Nodal UOs
-  [nodal_sampler]
+  [nodal_sampler_y]
+    type = NodalValueSampler
+    variable = v
+    sort_by = 'y'
+  []
+  [nodal_sampler_x]
     type = NodalValueSampler
     variable = v
     sort_by = 'x'

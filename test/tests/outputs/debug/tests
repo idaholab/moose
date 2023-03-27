@@ -108,21 +108,28 @@
     [regular_kernels_bcs]
       type = RunApp
       input = 'show_execution_kernels_bcs.i'
-      expect_out = '\[DBG\] bc_u_tb bc_ul bc_ur bc_ut bc_ub '
+      expect_out = '\[DBG\] diff1 test1 diff2 react forceu forcev'
       detail = 'objects contributing to the residual and Jacobian, notably regular kernels and boundary conditions,'
       cli_args = '--color off'
     []
-    [fv_kernels_bcs]
+    [fv_flux_kernels_bcs]
       type = RunApp
       input = 'show_execution_fv_flux_objects.i'
-      # FVBCs are not actually ordered
+      # FV flux kernels are not actually ordered
       expect_out = '\[DBG\] (2_burger|1_burgers) (1_burgers|2_burger)'
       detail = 'finite volume flux objects contributing to the residual and Jacobian, notably finite volume flux kernels and flux boundary conditions,'
+    []
+    [fv_elem_kernels]
+      type = RunApp
+      input = 'show_execution_fv_flux_objects.i'
+      cli_args = 'FVKernels/reac/type=FVReaction FVKernels/reac/variable=v --color off'
+      expect_out = '\[DBG\] time reac'
+      detail = 'finite volume elemental kernels,'
     []
     [nodal_kernel_bcs]
       type = RunApp
       input = 'show_execution_nodal_kernels_bcs.i'
-      expect_out = '\[DBG\] source bc_all '
+      expect_out = 'source bc_all'
       detail = 'nodal objects contributing to the residual, notably nodal kernels and boundary conditions,'
       cli_args = '--color off'
     []
@@ -141,6 +148,13 @@
       expect_out = 'h L2u H1error H1Semierror L2v_elem f_integral elem_sample'
       detail = 'user objects, including postprocessors, executed at the beginning and end of each time step,'
     []
+    [nodal_user_objects]
+      type = RunApp
+      input = 'show_execution_userobjects.i'
+      cli_args = "Debug/show_execution_order='TIMESTEP_BEGIN TIMESTEP_END' --color off"
+      expect_out = '\[DBG\] find_node nodal_sampler_y nodal_sampler_x'
+      detail = 'nodal user objects,'
+    []
     # This is one way to understand conservative transfers are only conservative if the conserved quantity linearly depends on the transferred quantity
     # The postprocessors are only executed once!
     [user_objects_transfers]
@@ -151,19 +165,26 @@
       detail = 'user objects, including postprocessors, executed on transfers between applications,'
     []
     # This should be useful if an indicator is executed after a marker, by accident
-    [adaptivity]
+    [adaptivity_side_indicator]
       type = RunApp
       input = 'show_execution_adaptivity.i'
       expect_out = '\[DBG\] indicator'
-      detail = 'each step of the adaptive refinement process,'
+      detail = 'each step of the adaptive refinement process, especially side-based indicators,'
       cli_args = '--color off'
+    []
+    [adaptivity_elem_indicator]
+      type = RunApp
+      input = 'show_execution_adaptivity.i'
+      expect_out = '\[DBG\] indicator_elem'
+      detail = 'each step of the adaptive refinement process, especially element-based indicators,'
+      cli_args = '--color off Markers/marker/indicator=indicator_elem Adaptivity/Indicators/indicator_elem/type=AnalyticalIndicator Adaptivity/Indicators/indicator_elem/function=4'
     []
     # Initial conditions use dependency resolution at node/element scale to execute
     [initial_conditions]
       type = RunApp
       input = 'show_execution_ics.i'
       expect_out = '\[DBG\] a_ic u_ic v_ic b_ic ghost_ic test_var_ic power'
-      detail = 'initial conditions of variables, and '
+      detail = 'initial conditions of variables,'
       cli_args = '--color off'
     []
     # Auxiliary kernels could be misordered easily, it is one of the most important goals of this
@@ -172,8 +193,14 @@
       type = RunApp
       input = 'show_execution_auxkernels.i'
       expect_out = '\[DBG\] b_saux c_saux'
-      detail = 'auxiliary kernels intermingled with initial conditions and user objects.'
+      detail = 'auxiliary kernels intermingled with initial conditions and user objects, and'
       cli_args = '--color off'
     []
+    [boundary_auxkernels]
+      type = RunApp
+      input = 'show_execution_auxkernels.i'
+      expect_out = '\[DBG\] Ordering on boundary 0\n\[DBG\] real_property'
+      detail = 'boundary restricted auxiliary kernels.'
+      cli_args = '--color off'
   []
 []

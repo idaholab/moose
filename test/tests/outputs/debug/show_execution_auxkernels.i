@@ -40,6 +40,11 @@
     family = MONOMIAL
     initial_condition = 3
   []
+  [d_elem]
+    order = CONSTANT
+    family = MONOMIAL
+    initial_condition = 3
+  []
 []
 
 [Variables]
@@ -98,6 +103,14 @@
     variable = b_elem
     v = a_elem
     execute_on = 'linear timestep_end'
+  []
+
+  # boundary auxkernel
+  [real_property]
+    type = MaterialRealAux
+    variable = d_elem
+    property = 3
+    boundary = 'top bottom'
   []
 []
 
