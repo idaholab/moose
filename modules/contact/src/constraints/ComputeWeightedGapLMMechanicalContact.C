@@ -206,6 +206,8 @@ ComputeWeightedGapLMMechanicalContact::computeJacobian(const Moose::MortarType m
 void
 ComputeWeightedGapLMMechanicalContact::post()
 {
+  parallel_object_only();
+
   Moose::Mortar::Contact::communicateGaps(
       _dof_to_weighted_gap, this->processor_id(), _mesh, _nodal, _normalize_c, _communicator);
 

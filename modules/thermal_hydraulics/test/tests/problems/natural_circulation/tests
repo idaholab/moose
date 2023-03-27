@@ -1,0 +1,14 @@
+[Tests]
+  design = 'FlowChannel1Phase.md JunctionOneToOne1Phase.md'
+  issues = '#23790'
+
+  [test]
+    type = XMLDiff
+    input = 'natural_circulation.i'
+    xmldiff = 'natural_circulation_out.xml'
+    rel_err = 1e-4 # parallel/threading tests require this
+    heavy = true
+    recover = false # run to steady-state; recover does not know when half transient ends
+    requirement = 'The system shall simulate a natural circulation loop using flow channels and junctions.'
+  []
+[]
