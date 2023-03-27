@@ -58,6 +58,7 @@ HeatStructure2DCoupler::addMooseObjects()
     params.set<MeshAlignment2D2D *>("_mesh_alignment") = &_mesh_alignment;
     params.set<FunctionName>("heat_transfer_coefficient") =
         getParam<FunctionName>("heat_transfer_coefficient");
+    params.set<Real>("coupling_area_fraction") = _coupling_area_fractions[i];
     if (_is_cylindrical[i])
     {
       const HeatStructureCylindricalBase & hs_cylindrical =

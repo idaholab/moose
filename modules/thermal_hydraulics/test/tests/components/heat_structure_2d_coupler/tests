@@ -33,6 +33,15 @@
     requirement = 'The system shall be able to couple two 2D plate heat structures.'
   []
 
+  [separated]
+    type = CSVDiff
+    input = 'separated.i'
+    csvdiff = 'separated_out.csv'
+    mesh_mode = 'replicated' # HeatStructure2DCoupler does not work with distributed mesh
+    issues = '#19851 #23853'
+    requirement = 'The system shall be able to couple two 2D cylindrical heat structures on separated surfaces.'
+  []
+
   [error_reporting]
     requirement = 'The system shall report an error for HeatStructure2DCoupler when'
 

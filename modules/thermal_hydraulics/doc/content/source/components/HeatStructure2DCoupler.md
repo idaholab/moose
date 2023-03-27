@@ -28,13 +28,22 @@ This component has the following restrictions:
 For the heat structure $k$, the incoming boundary heat flux $q_b$ is computed as
 
 \begin{equation}
-  q_b = \mathcal{H} (T_j - T_k) \eqc
+  q_b = \mathcal{H} (T_j - T_k) F_k \eqc
 \end{equation}
 where
 
 - $\mathcal{H}$ is the heat transfer coefficient,
-- $T_k$ is the surface temperature of the heat structure $k$, and
-- $T_j$ is the surface temperature of the coupled heat structure $j$.
+- $T_k$ is the surface temperature of the heat structure $k$,
+- $T_j$ is the surface temperature of the coupled heat structure $j$, and
+- $F_k$ is the area scaling factor of the heat structure $k$:
+
+!equation
+F_k = \left\{\begin{array}{l l}
+  1 & P_k \leq P_j\\
+  \frac{P_j}{P_k} & P_k > P_j\\
+  \end{array}\right. \eqc
+
+where $P_k$ is the perimeter of heat structure $k$.
 
 !syntax inputs /Components/HeatStructure2DCoupler
 

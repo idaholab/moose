@@ -47,13 +47,6 @@ HeatStructure2DRadiationCouplerRZ::init()
   if (hasComponentByName<HeatStructureBase>(_hs_names[0]) &&
       hasComponentByName<HeatStructureBase>(_hs_names[1]) && _hs_side_types.size() == 2)
   {
-    const HeatStructureBase & primary_hs = getComponentByName<HeatStructureBase>(_hs_names[0]);
-    const HeatStructureBase & secondary_hs = getComponentByName<HeatStructureBase>(_hs_names[1]);
-
-    _perimeters.resize(2);
-    _perimeters[0] = primary_hs.getUnitPerimeter(_hs_side_types[0]);
-    _perimeters[1] = secondary_hs.getUnitPerimeter(_hs_side_types[1]);
-
     _view_factors.resize(2);
     if (_perimeters[0] > _perimeters[1])
     {
