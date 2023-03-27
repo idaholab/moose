@@ -414,24 +414,22 @@ public:
   void init_context(FEMContext &) {}
 
   Output eval_at_node(const FEMContext &,
-                      unsigned int libmesh_dbg_var(i),
+                      unsigned int /*variable_index*/,
                       unsigned int /*elem_dim*/,
                       const Node & n,
                       bool /*extra_hanging_dofs*/,
                       const Real /*time*/)
   {
-    libmesh_assert_not_equal_to(i, 0);
     _points_requested.push_back(n);
     return 0;
   }
 
   Output eval_at_point(const FEMContext &,
-                       unsigned int libmesh_dbg_var(i),
+                       unsigned int /*variable_index*/,
                        const Point & n,
                        const Real /*time*/,
                        bool /*skip_context_check*/)
   {
-    libmesh_assert_not_equal_to(i, 0);
     _points_requested.push_back(n);
     return 0;
   }
