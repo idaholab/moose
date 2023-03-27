@@ -39,8 +39,8 @@ If you are operating on a personal Linux workstation, the easiest way to obtain 
 via the same tool used to obtain a developers environment in the Prerequisites section.
 
 !alert note title=Personal Air-Gapped Workstation
-Procuring the above on a personal air-gapped workstation will need to be your responsibility. We
-cannot instruct a means for bypassing such security.
+Procuring the above on a machine with no network access is beyond the scope of this document. Please
+work with your system administrator on satisfying the above prerequisites.
 
 ## Prepare Directory
 
@@ -139,7 +139,8 @@ PETSc, libMesh, and MOOSE, using your MPI Wrapper/Compiler established in earlie
 
 #### Verify MPI
 
-First, verify an MPI wrapper is in fact available:
+First, verify an MPI wrapper is in fact available. Do not close this terminal window after running
+the following commands. We need the following set for the remainder of these instructions:
 
 ```bash
 export CC=mpicc CXX=mpicxx FC=mpif90 F90=mpif90 F77=mpif77
@@ -148,11 +149,11 @@ which $CC $CXX $FC $F77
 
 The `which` command above should return paths to your MPI wrappers.
 
-If the above command returns nothing, or fewer paths than the 4 we were asking for, something is
+If the above command returns nothing, or fewer paths than the 4 we are asking for, something is
 wrong. You need to STOP, and figure out how to enable your MPI wrapper before proceeding. If you are
 operating on an HPC cluster, this normally involves loading an MPI module. If you are operating on
-your personal workstation, you need to follow the instructions on which ever MPI product you decided
-to install during the Prerequisites section.
+your personal workstation, you need to follow the instructions on which MPI product you decided to
+install during the Prerequisites section.
 
 #### Build PETSc
 
@@ -190,7 +191,7 @@ Proceed only if libMesh completed successfully.
 
 #### Build MOOSE
 
-With the support libraries built, you can now build MOOSE:
+With all the support libraries built, you can now build MOOSE:
 
 ```bash
 cd ~/offline/moose/test
@@ -204,7 +205,7 @@ Please submit a detailed log of the error, to the
 
 #### Test MOOSE
 
-With MOOSE built, test to see if it works in your environment:
+With MOOSE built, run tests to see if MOOSE works in your environment:
 
 ```bash
 cd ~/offline/moose/test
@@ -213,12 +214,13 @@ cd ~/offline/moose/test
 
 Due to the nature of an offline install, it is possible some tests will fail (missing common system
 binaries like `rsync`, or other network related tools not normally present on air-gapped machines).
-You will also see SKIPPED tests. Some tests are specific to Macintosh, or Linux only. Or some other
-constraint your machine does not satisfy.
 
-However, most tests should pass. If they don't, or you see `MAX FAILURES`, thats a problem! And it
-needs to be addressed before continuing. Please supply a report of the actual failure (scroll up a
-ways). For example the following does not help us (created with `./run_tests -i always_bad`):
+You will also see SKIPPED tests. This is normal as some tests are specific to Macintosh, some for
+Linux. Or some other constraint your machine does not satisfy.
+
+Most tests should pass. If they don't, or you see `MAX FAILURES`, thats a problem! And it needs to
+be addressed before continuing. Please supply a report of the actual failure (scroll up a ways). For
+example the following explains little (created with `./run_tests -i always_bad`):
 
 ```pre
 Final Test Results:
@@ -230,7 +232,7 @@ Ran 2 tests in 0.2 seconds. Average test time 0.0 seconds, maximum test time 0.0
 0 passed, 0 skipped, 0 pending, 2 FAILED
 ```
 
-You need to scroll up, and find/report the actual error:
+Instead, you need to scroll up and report the actual error:
 
 ```pre
 tests/test_harness.always_ok: Working Directory: /Users/me/projects/moose/test/tests/test_harness
@@ -253,7 +255,7 @@ tests/test_harness.always_bad .................................. FAILED (CODE 1)
 
 With MOOSE built and testing successfully, you should now be able to build your application. The
 only prerequisites before doing so, is to configure your environment to make use of your MPI
-wrapper, and to define where MOOSE resides:
+wrapper, and to define where your built copy of MOOSE resides:
 
 ```bash
 export CC=mpicc CXX=mpicxx FC=mpif90 F90=mpif90 F77=mpif77
@@ -261,11 +263,12 @@ export MOOSE_DIR=$HOME/offline/moose
 ```
 
 You will need to export the above variables each time you open a new terminal window on your HPC
-cluster, or personal workstation before you can perform any application development.
+cluster or personal workstation, before you can perform any application development.
 
-For this reason you may wish to add the above export commands to your shell startup profile. This is
-different for each shell type (and there are a lot). You'll want to read up on how to do this for
-Macintosh (usually ZSH: `~/.zshrc`), or Linux (usually BASH: `~/.bashrc`) respectfully.
+For this reason you may wish to add the above export commands to your shell startup profile so that
+these variables are always set. Achieving this is different for each shell type (and there are a
+lot). You'll want to read up on how to do this for Macintosh (usually ZSH: `~/.zshrc`), or Linux
+(usually BASH: `~/.bashrc`) respectfully.
 
 You can determine the shell your environment operates within by running the following command:
 
