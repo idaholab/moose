@@ -24,11 +24,19 @@ following:
 
 !include installation/manual_prereqs.md
 
-In addition, the target machine will need an MPI wrapper. We recommend one of the following:
+In addition, the target machine will need an MPI wrapper. We recommend one of the following
+products:
 
 - [MPICH](https://www.mpich.org/)
 
 - [OpenMPI](https://www.open-mpi.org/)
+
+Please choose one of the above and follow their instructions on how to build, install, and use your
+MPI wrapper of choice.
+
+!alert tip title=Linux MPI Wrapper
+If you are operating on a personal Linux workstation, the easiest way to obtain an MPI wrapper is
+via the same tool used to obtain a developers environment in the Prerequisites section.
 
 !alert note title=Personal Air-Gapped Workstation
 Procuring the above on a personal air-gapped workstation will need to be your responsibility. We
@@ -129,30 +137,31 @@ tar -xf offline.tar.gz -C ~/
 With the `~/offline` directory available in your target machine's home directory, we can now build
 PETSc, libMesh, and MOOSE, using your MPI Wrapper/Compiler established in earlier steps.
 
-#### PETSc
+#### Verify MPI
 
-Configure, build, and install PETSc to:`$HOME/libs/petsc`
-
-First, you should set your environment to make use of the compiler and MPI wrapper you established
-in earlier steps. On HPC machines, this normally involves loading modules. On a workstation, this
-may mean adjusting your PATH environment variable.
-
-Verify an MPI wrapper is available:
+First, verify an MPI wrapper is in fact available:
 
 ```bash
-which mpicc mpicxx mpif90 mpif77
+export CC=mpicc CXX=mpicxx FC=mpif90 F90=mpif90 F77=mpif77
+which $CC $CXX $FC $F77
 ```
 
-The `which` command above should return the paths to your MPI wrappers established in earlier steps.
-If it returns nothing, or fewer paths than the 4 we were asking for, something is wrong. You will
-need to figure out how to enable your MPI wrapper before proceeding.
+The `which` command above should return paths to your MPI wrappers.
 
-With your compilers ready for use, we can now build PETSc:
+If the above command returns nothing, or fewer paths than the 4 we were asking for, something is
+wrong. You need to STOP, and figure out how to enable your MPI wrapper before proceeding. If you are
+operating on an HPC cluster, this normally involves loading an MPI module. If you are operating on
+your personal workstation, you need to follow the instructions on which ever MPI product you decided
+to install during the Prerequisites section.
+
+#### Build PETSc
+
+Build PETSc using the following convenient script in addition to the supplied arguments:
 
 ```bash
 cd ~/offline/moose
-
-./scripts/update_and_rebuild_petsc.sh --skip-submodule-update --with-packages-download-dir=~/offline/downloads --prefix=$HOME/libs/petsc
+./scripts/update_and_rebuild_petsc.sh --skip-submodule-update \
+  --with-packages-download-dir=~/offline/downloads
 ```
 
 Unfortunately, any errors incurred during the above step is going to be beyond the scope of this
@@ -164,55 +173,9 @@ fulfill the dependency.
 
 Proceed only if PETSc completed successfully.
 
-!alert! note
-If you prefer to install PETSc in place (moose/petsc), then you need to take out `--prefix`
+#### Build libMesh
 
-```bash
-cd ~/offline/moose
-
-unset PETSC_DIR PETSC_ARCH
-./scripts/update_and_rebuild_petsc.sh --skip-submodule-update --with-packages-download-dir=~/offline/downloads
-```
-
-In this case, you need to `unset PETSC_DIR PETSC_ARCH` during libmesh compile.
-
-!alert-end!
-
-#### libMesh
-
-Configure, build, and install libMesh to: `$HOME/libs/libmesh`
-
-First, we need to tell libMesh where PETSc is installed, and instruct libMesh to specifically use
-MPI:
-
-```bash
-export PETSC_DIR=$HOME/libs/petsc
-export LIBMESH_DIR=$HOME/libs/libmesh
-export CC=mpicc CXX=mpicxx FC=mpif90 F90=mpif90 F77=mpif77
-```
-
-!alert! note
-If you selected to install PETSc in place earlier, you do not need to set `PETSC_DIR`. libMesh
-will pick up PETSc from petsc submodule. You may do the following to unset `PETSC_DIR`:
-
-```bash
-unset PETSC_DIR PETSC_ARCH
-```
-
-!alert-end!
-
-!alert! note
-If you want to install libMesh in place, you do not need to set `LIBMESH_DIR`. libMesh
-will be installed to inside of libMesh submodule. You may do the following to unset `LIBMESH_DIR`:
-
-```bash
-unset LIBMESH_DIR
-```
-
-!alert-end!
-
-
-Now we can configure, build, and install libMesh:
+Build libMesh using the following convenient script in addition to the supplied argument:
 
 ```bash
 cd ~/offline/moose
@@ -225,29 +188,12 @@ document. Please submit a detailed log of the error, to the
 
 Proceed only if libMesh completed successfully.
 
-#### MOOSE
+#### Build MOOSE
 
-First, we need to tell MOOSE  where libMesh is:
-
-```bash
-export LIBMESH_DIR=$HOME/libs/libmesh
-```
-
-!alert! note
-As mentioned earlier, if libMesh is installed in place, you do no need to set `LIBMESH_DIR`.
-MOOSE will look for libMesh submodule.
+With the support libraries built, you can now build MOOSE:
 
 ```bash
-unset LIBMESH_DIR
-```
-
-!alert-end!
-
-Now we can build MOOSE:
-
-```bash
-export MOOSE_DIR=~/offline/moose
-cd $MOOSE_DIR/test
+cd ~/offline/moose/test
 make -j 6
 ```
 
@@ -255,19 +201,74 @@ Again, any errors incurred during this step, is going to be beyond the scope of 
 Please submit a detailed log of the error, to the
 [MOOSE Discussion forum](https://github.com/idaholab/moose/discussions).
 
+
+#### Test MOOSE
+
+With MOOSE built, test to see if it works in your environment:
+
+```bash
+cd ~/offline/moose/test
+./run_tests -j 6
+```
+
+Due to the nature of an offline install, it is possible some tests will fail (missing common system
+binaries like `rsync`, or other network related tools not normally present on air-gapped machines).
+You will also see SKIPPED tests. Some tests are specific to Macintosh, or Linux only. Or some other
+constraint your machine does not satisfy.
+
+However, most tests should pass. If they don't, or you see `MAX FAILURES`, thats a problem! And it
+needs to be addressed before continuing. Please supply a report of the actual failure (scroll up a
+ways). For example the following does not help us (created with `./run_tests -i always_bad`):
+
+```pre
+Final Test Results:
+--------------------------------------------------------------------------------
+tests/test_harness.always_ok .................... FAILED (Application not found)
+tests/test_harness.always_bad .................................. FAILED (CODE 1)
+--------------------------------------------------------------------------------
+Ran 2 tests in 0.2 seconds. Average test time 0.0 seconds, maximum test time 0.0 seconds.
+0 passed, 0 skipped, 0 pending, 2 FAILED
+```
+
+You need to scroll up, and find/report the actual error:
+
+```pre
+tests/test_harness.always_ok: Working Directory: /Users/me/projects/moose/test/tests/test_harness
+tests/test_harness.always_ok: Running command:
+tests/test_harness.always_ok:
+tests/test_harness.always_ok: ######################################################################
+tests/test_harness.always_ok: Tester failed, reason: Application not found
+tests/test_harness.always_ok:
+tests/test_harness.always_ok .................... FAILED (Application not found)
+tests/test_harness.always_bad: Working Directory: /Users/me/projects/moose/test/tests/test_harness
+tests/test_harness.always_bad: Running command: false
+tests/test_harness.always_bad:
+tests/test_harness.always_bad: #####################################################################
+tests/test_harness.always_bad: Tester failed, reason: CODE 1
+tests/test_harness.always_bad:
+tests/test_harness.always_bad .................................. FAILED (CODE 1)
+```
+
 ## Your Application
 
-With all the libraries built, you are now able to build your application. To recap, there were
-several environment variables we previously set, which you will need to always set, when you perform
-any MOOSE-based development. Here are those environment variables again (setting them multiple times
-is harmless):
+With MOOSE built and testing successfully, you should now be able to build your application. The
+only prerequisites before doing so, is to configure your environment to make use of your MPI
+wrapper, and to define where MOOSE resides:
 
 ```bash
 export CC=mpicc CXX=mpicxx FC=mpif90 F90=mpif90 F77=mpif77
 export MOOSE_DIR=$HOME/offline/moose
 ```
 
-!alert tip
-You will need to perform the above, each and every time you log into the target machine and wish to
-perform development on your application. To that end, creating a special profile you can source in
-one command is recommended.
+You will need to export the above variables each time you open a new terminal window on your HPC
+cluster, or personal workstation before you can perform any application development.
+
+For this reason you may wish to add the above export commands to your shell startup profile. This is
+different for each shell type (and there are a lot). You'll want to read up on how to do this for
+Macintosh (usually ZSH: `~/.zshrc`), or Linux (usually BASH: `~/.bashrc`) respectfully.
+
+You can determine the shell your environment operates within by running the following command:
+
+```bash
+echo $0
+```
