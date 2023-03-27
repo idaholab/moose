@@ -18,6 +18,5 @@
     input = ext
     cut_line_params = '1 -2 0'
     new_boundary_id = 20
-    input_mesh_external_boundary_id = 100
   []
 []
