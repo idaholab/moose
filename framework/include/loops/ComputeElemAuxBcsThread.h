@@ -51,4 +51,7 @@ protected:
   /// Print list of specific objects executed and in which order
   void printBoundaryExecutionInformation(
       unsigned int boundary_id, const std::vector<std::shared_ptr<AuxKernelType>> & kernels) const;
+
+  /// Keeps track of which boundaries the loop has reported execution on
+  mutable std::set<SubdomainID> _boundaries_exec_printed;
 };

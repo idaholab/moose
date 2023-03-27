@@ -171,7 +171,8 @@ void
 ComputeElemAuxBcsThread<AuxKernelType>::printBoundaryExecutionInformation(
     unsigned int boundary_id, const std::vector<std::shared_ptr<AuxKernelType>> & kernels) const
 {
-  if (!_fe_problem.shouldPrintExecution(_tid) || !_storage.hasActiveObjects())
+  if (!_fe_problem.shouldPrintExecution(_tid) || !_storage.hasActiveObjects() ||
+      _boundaries_exec_printed.count(boundary_id))
     return;
 
   auto console = _fe_problem.console();
@@ -182,6 +183,7 @@ ComputeElemAuxBcsThread<AuxKernelType>::printBoundaryExecutionInformation(
       objs_ptrs.push_back(dynamic_cast<MooseObject *>(kernel_ptr.get()));
   std::string list_kernels = ConsoleUtils::mooseObjectVectorToString(objs_ptrs);
   console << ConsoleUtils::formatString(list_kernels, "[DBG]") << std::endl;
+  _boundaries_exec_printed.insert(boundary_id);
 }
 
 template class ComputeElemAuxBcsThread<AuxKernel>;
