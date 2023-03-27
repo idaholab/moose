@@ -1,13 +1,28 @@
 [Mesh]
-  type = GeneratedMesh
-  dim = 2
-  xmin = -1
-  xmax = 1
-  ymin = -1
-  ymax = 1
-  nx = 10
-  ny = 10
-  elem_type = QUAD9
+  [gmg]
+    type = GeneratedMeshGenerator
+    dim = 2
+    xmin = -1
+    xmax = 1
+    ymin = -1
+    ymax = 1
+    nx = 10
+    ny = 10
+    elem_type = QUAD9
+  []
+  [left]
+    type = ParsedSubdomainMeshGenerator
+    input = 'gmg'
+    combinatorial_geometry = 'x < 0.5'
+    block_id = '2'
+  []
+  [middle_boundary]
+    type = SideSetsBetweenSubdomainsGenerator
+    input = 'left'
+    primary_block = '0'
+    paired_block = '2'
+    new_boundary = 'middle'
+  []
 []
 
 [Functions]
@@ -149,6 +164,68 @@
     variable = u
     max_value = 1.5
     min_value = -20
+  []
+[]
+
+[InterfaceKernels]
+  [diff_2]
+    type = InterfaceDiffusion
+    variable = 'u'
+    neighbor_var = 'v'
+    boundary = 'middle'
+  []
+  [diff_1]
+    type = InterfaceDiffusion
+    variable = 'v'
+    neighbor_var = 'u'
+    boundary = 'middle'
+  []
+[]
+
+[DGKernels]
+  [diff_2]
+    type = DGDiffusion
+    variable = 'u'
+    epsilon = -1
+    sigma = 6
+  []
+  [diff_1]
+    type = DGDiffusion
+    variable = 'u'
+    epsilon = -1
+    sigma = 6
+  []
+[]
+
+[DiracKernels]
+  [source_2]
+    type = FunctionDiracSource
+    variable = 'u'
+    point = '0.1 0.1 0'
+    function = 'x + y'
+  []
+  [source_1]
+    type = FunctionDiracSource
+    variable = 'u'
+    point = '0.1 0.1 0'
+    function = 'x + y'
+    block = '2'
+  []
+  [source_0]
+    type = FunctionDiracSource
+    variable = 'u'
+    # in block 0, but since it's not block restricted it shows up as active in
+    # block 2 as well
+    point = '0.6 0.5 0'
+    function = 'x + y'
+  []
+[]
+
+[Materials]
+  [diff]
+    type = GenericConstantMaterial
+    prop_names = 'D D_neighbor'
+    prop_values = '0 0'
   []
 []
 

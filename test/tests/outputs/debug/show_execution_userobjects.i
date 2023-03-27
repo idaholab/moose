@@ -300,6 +300,28 @@
   [prime_1]
     type = PrimeProductUserObject
   []
+
+  # Domain user objects
+  [domain_2]
+    type = InterfaceDomainUserObject
+    u = u
+    v = v
+    block = '0'
+    robin_boundaries = 'left'
+    interface_boundaries = 'interface'
+    interface_penalty = 1e-10
+    nl_abs_tol = 1e1
+  []
+  [domain_1]
+    type = InterfaceDomainUserObject
+    u = u
+    v = v
+    block = '0 1'
+    robin_boundaries = 'left'
+    interface_boundaries = 'interface'
+    interface_penalty = 1e-10
+    nl_abs_tol = 1e1
+  []
 []
 
 [Executioner]

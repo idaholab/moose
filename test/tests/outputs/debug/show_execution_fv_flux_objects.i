@@ -6,6 +6,19 @@
     xmax = 10
     nx = 50
   []
+  [left]
+    type = ParsedSubdomainMeshGenerator
+    input = 'gen_mesh'
+    combinatorial_geometry = 'x < 0.5'
+    block_id = '2'
+  []
+  [middle_boundary]
+    type = SideSetsBetweenSubdomainsGenerator
+    input = 'left'
+    primary_block = '0'
+    paired_block = '2'
+    new_boundary = 'middle'
+  []
 []
 
 [Variables]
@@ -13,6 +26,10 @@
     family = MONOMIAL
     order = CONSTANT
     fv = true
+    block = 2
+  []
+  [u]
+    type = MooseVariableFVReal
   []
 []
 
@@ -38,18 +55,34 @@
     type = FVTimeKernel
     variable = v
   []
+  [time_u]
+    type = FVTimeKernel
+    variable = u
+  []
 []
 
 [FVBCs]
   [fv_burgers_right]
     type = FVBurgersOutflowBC
     variable = v
-    boundary = 'right'
+    boundary = 'middle'
   []
   [fv_burgers_left]
     type = FVBurgersOutflowBC
     variable = v
     boundary = 'left'
+  []
+[]
+
+[FVInterfaceKernels]
+  [diff]
+    type = FVOnlyAddDiffusionToOneSideOfInterface
+    variable1 = 'v'
+    variable2 = 'u'
+    boundary = 'middle'
+    coeff2 = '1'
+    subdomain1 = '2'
+    subdomain2 = '0'
   []
 []
 
