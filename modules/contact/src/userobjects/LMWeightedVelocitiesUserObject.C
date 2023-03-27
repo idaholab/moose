@@ -40,6 +40,18 @@ LMWeightedVelocitiesUserObject::LMWeightedVelocitiesUserObject(const InputParame
 {
   if (!_lm_normal_var || !_lm_variable_tangential_one)
     paramError("lm_variable_normal", "The Lagrange multiplier variables must be actual variables.");
+
+  auto check_type = [this](const auto & var, const auto & var_name)
+  {
+    if (!var.isNodal())
+      paramError(var_name,
+                 "The Lagrange multiplier variables must have degrees of freedom exclusively on "
+                 "nodes, e.g. they should probably be of finite element type 'Lagrange'.");
+  };
+  check_type(*_lm_normal_var, "lm_variable_normal");
+  check_type(*_lm_variable_tangential_one, "lm_variable_tangential_one");
+  if (_lm_variable_tangential_two)
+    check_type(*_lm_variable_tangential_two, "lm_variable_tangential_two");
 }
 
 const ADVariableValue &
@@ -64,10 +76,4 @@ const VariableTestValue &
 LMWeightedVelocitiesUserObject::test() const
 {
   return _lm_normal_var->phiLower();
-}
-
-bool
-LMWeightedVelocitiesUserObject::isWeightedGapNodal() const
-{
-  return _lm_normal_var->isNodal();
 }

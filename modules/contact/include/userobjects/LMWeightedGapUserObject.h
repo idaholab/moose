@@ -29,7 +29,6 @@ public:
 
 protected:
   virtual const VariableTestValue & test() const override;
-  virtual bool isWeightedGapNodal() const override;
   virtual bool constrainedByOwner() const override { return true; }
 
   /// The Lagrange multiplier variable representing the contact pressure

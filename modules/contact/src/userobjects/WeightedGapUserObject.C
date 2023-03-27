@@ -58,7 +58,6 @@ WeightedGapUserObject::initialSetup()
 {
   MortarUserObject::initialSetup();
   _test = &test();
-  _is_weighted_gap_nodal = isWeightedGapNodal();
 }
 
 void
@@ -115,9 +114,7 @@ WeightedGapUserObject::computeQpIProperties()
               "Making sure that _normals is the expected size");
 
   // Get the _dof_to_weighted_gap map
-  const DofObject * dof = _is_weighted_gap_nodal
-                              ? static_cast<const DofObject *>(_lower_secondary_elem->node_ptr(_i))
-                              : static_cast<const DofObject *>(_lower_secondary_elem);
+  const auto * const dof = static_cast<const DofObject *>(_lower_secondary_elem->node_ptr(_i));
 
   _dof_to_weighted_gap[dof].first += (*_test)[_i][_qp] * _qp_gap_nodal * _normals[_i];
 

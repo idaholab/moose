@@ -28,18 +28,17 @@ LMWeightedGapUserObject::LMWeightedGapUserObject(const InputParameters & paramet
   if (!_lm_var)
     paramError("lm_variable",
                "The Lagrange multiplier variable must be an actual variable and not a constant.");
+
+  if (!_lm_var->isNodal())
+    paramError("lm_variable",
+               "The Lagrange multiplier variable must have its degrees of freedom exclusively on "
+               "nodes, e.g. it should probably be of finite element type 'Lagrange'.");
 }
 
 const VariableTestValue &
 LMWeightedGapUserObject::test() const
 {
   return _lm_var->phiLower();
-}
-
-bool
-LMWeightedGapUserObject::isWeightedGapNodal() const
-{
-  return _lm_var->isNodal();
 }
 
 const ADVariableValue &

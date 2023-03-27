@@ -54,12 +54,6 @@ protected:
   virtual const VariableTestValue & test() const = 0;
 
   /**
-   * @return Whether the weighted gap is associated with nodes or elements (like for a CONSTANT
-   * MONOMIAL Lagrange multiplier)
-   */
-  virtual bool isWeightedGapNodal() const = 0;
-
-  /**
    * @return Whether the gap constraint will be enforced solely by the owner of the weighted gap or
    * will be enforced in a distributed way (like in a penalty method)
    */

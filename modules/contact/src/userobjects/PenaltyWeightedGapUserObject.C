@@ -24,18 +24,23 @@ PenaltyWeightedGapUserObject::validParams()
 PenaltyWeightedGapUserObject::PenaltyWeightedGapUserObject(const InputParameters & parameters)
   : WeightedGapUserObject(parameters), _penalty(getParam<Real>("penalty"))
 {
+  auto check_type = [this](const auto & var, const auto & var_name)
+  {
+    if (!var.isNodal())
+      paramError(var_name,
+                 "The displacement variables must have degrees of freedom exclusively on "
+                 "nodes, e.g. they should probably be of finite element type 'Lagrange'.");
+  };
+  check_type(*_disp_x_var, "disp_x");
+  check_type(*_disp_y_var, "disp_y");
+  if (_has_disp_z)
+    check_type(*_disp_z_var, "disp_z");
 }
 
 const VariableTestValue &
 PenaltyWeightedGapUserObject::test() const
 {
   return _disp_x_var->phiLower();
-}
-
-bool
-PenaltyWeightedGapUserObject::isWeightedGapNodal() const
-{
-  return _disp_x_var->isNodal();
 }
 
 const ADVariableValue &
