@@ -37,4 +37,12 @@ public:
 
   virtual void inverse_map(const std::vector<Real> & reduced_order_vector,
                            std::vector<Real> & full_order_vector) const = 0;
+
+  virtual const std::vector<VariableName> & getVariableNames() { return _variable_names; }
+
+  virtual const DenseVector<Real> & basis(const VariableName & vname,
+                                          const unsigned int base_i) = 0;
+
+protected:
+  std::vector<VariableName> & _variable_names;
 };

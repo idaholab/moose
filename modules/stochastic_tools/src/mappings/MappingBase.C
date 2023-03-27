@@ -21,6 +21,11 @@ MappingBase::validParams()
 }
 
 MappingBase::MappingBase(const InputParameters & parameters)
-  : MooseObject(parameters), RestartableModelInterface(this, _type + "_" + name())
+  : MooseObject(parameters),
+    RestartableModelInterface(this, _type + "_" + name()),
+    _variable_names(isParamValid("filename")
+                        ? setModelData<std::vector<VariableName>>("variables")
+                        : declareModelData<std::vector<VariableName>>(
+                              "variables", getParam<std::vector<VariableName>>("variables")))
 {
 }

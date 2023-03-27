@@ -10,11 +10,13 @@
 #pragma once
 
 // MOOSE includes
-#include "UserObject.h"
+#include "GeneralUserObject.h"
 #include "MappingInterface.h"
 #include "SurrogateModelInterface.h"
 
-class InverseMapping : public UserObject
+class InverseMapping : public GeneralUserObject,
+                       public MappingInterface,
+                       public SurrogateModelInterface
 {
 public:
   static InputParameters validParams();
@@ -25,12 +27,22 @@ public:
   void initialize() override {}
   void finalize() override {}
 
-  void threadJoin(const UserObject & uo) override{};
+  void initialSetup() override;
+
+  void threadJoin(const UserObject & /*uo*/) override{};
 
 protected:
-  MooseVariableBase * _variable_to_fill;
+  // void buildDoFMapping();
+
+  const std::vector<VariableName> & _var_names_to_fill;
+  const std::vector<VariableName> & _var_names_to_reconstruct;
+
+  std::vector<MooseVariableFieldBase *> _variable_to_fill;
+  std::vector<const MooseVariableFieldBase *> _variable_to_reconstruct;
+  std::vector<std::unordered_map<dof_id_type, dof_id_type>> _variable_dof_to_row;
+  std::vector<bool> _is_nodal;
   MappingBase * _mapping;
   SurrogateModel * _surrogate;
 
-  const std::vector<Real> & _input_parameters;
+  bool _is_elemental;
 };

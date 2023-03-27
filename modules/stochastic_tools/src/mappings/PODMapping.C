@@ -11,6 +11,7 @@
 #include <slepcsvd.h>
 #include "libmesh/parallel_object.h"
 #include "libmesh/petsc_vector.h"
+#include "libmesh/dense_vector.h"
 #include "MooseTypes.h"
 #include <petscdmda.h>
 
@@ -39,10 +40,6 @@ PODMapping::validParams()
 
 PODMapping::PODMapping(const InputParameters & parameters)
   : MappingBase(parameters),
-    _variable_names(isParamValid("filename")
-                        ? setModelData<std::vector<VariableName>>("variables")
-                        : declareModelData<std::vector<VariableName>>(
-                              "variables", getParam<std::vector<VariableName>>("variables"))),
     _num_modes(isParamValid("num_modes") ? getParam<std::vector<unsigned int>>("num_modes")
                                          : std::vector<unsigned int>()),
     _energy_threshold(isParamValid("energy_threshold")
@@ -360,4 +357,18 @@ PODMapping::inverse_map(const std::vector<Real> & reduced_order_vector,
                         std::vector<Real> & full_order_vector) const
 {
   std::cerr << "Something smart" << std::endl;
+}
+
+const DenseVector<Real> &
+PODMapping::basis(const VariableName & vname, const unsigned int base_i)
+{
+  mooseAssert(std::find(_variable_names.begin(), _variable_names.end(), vname) !=
+                  _variable_names.end(),
+              "Variable " + vname + " is not in PODMapping!");
+
+  mooseAssert(base_i < _basis_functions[vname].size(),
+              "The POD for " + vname + " only has " +
+                  std::to_string(_basis_functions[vname].size()) + " modes!");
+
+  return _basis_functions[vname][base_i];
 }

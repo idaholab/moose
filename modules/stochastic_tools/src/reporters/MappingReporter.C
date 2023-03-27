@@ -93,19 +93,7 @@ MappingReporter::MappingReporter(const InputParameters & parameters)
 void
 MappingReporter::initialSetup()
 {
-  std::vector<MappingBase *> mappings;
-  _fe_problem.theWarehouse()
-      .query()
-      .condition<AttribSystem>("MappingBase")
-      .condition<AttribName>(_mapping_name)
-      .queryInto(mappings);
-
-  if (mappings.empty())
-    paramError("mapping", "Unable to find mapping with name '", _mapping_name, "'");
-  else if (mappings.size() > 1)
-    paramError("mapping", "We found more than one mapping with the name '", _mapping_name, "'");
-
-  _mapping = mappings[0];
+  _mapping = &getMappingByName(_mapping_name);
 }
 
 void

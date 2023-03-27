@@ -39,11 +39,12 @@ public:
   void inverse_map(const std::vector<Real> & reduced_order_vector,
                    std::vector<Real> & full_order_vector) const override;
 
+  const DenseVector<Real> & basis(const VariableName & vname, const unsigned int base_i) override;
+
 protected:
   unsigned int determineNumberOfModes(const VariableName & vname,
                                       const std::vector<Real> & converged_evs);
 
-  std::vector<VariableName> & _variable_names;
   const std::vector<unsigned int> _num_modes;
   const std::vector<Real> _energy_threshold;
 

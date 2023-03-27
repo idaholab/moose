@@ -10,17 +10,21 @@
 #include "InverseMapping.h"
 #include "SubProblem.h"
 #include "Assembly.h"
+#include "NonlinearSystemBase.h"
 
 #include "libmesh/sparse_matrix.h"
+
+registerMooseObject("StochasticToolsApp", InverseMapping);
 
 InputParameters
 InverseMapping::validParams()
 {
-  InputParameters params = UserObject::validParams();
+  InputParameters params = GeneralUserObject::validParams();
 
-  params.addRequiredParam<UserObjectName>("surrogate", "Blabla.");
+  params.addParam<UserObjectName>("surrogate", "Blabla.");
   params.addRequiredParam<UserObjectName>("mapping", "Blabla.");
-  params.addRequiredParam<VariableName>("variable", "Blabla.");
+  params.addRequiredParam<std::vector<VariableName>>("variable_to_fill", "Blabla.");
+  params.addRequiredParam<std::vector<VariableName>>("variable_to_reconstruct", "Blabla");
   params.addRequiredParam<std::vector<Real>>("parameters", "Blabla");
   params.declareControllable("parameters");
 
@@ -28,12 +32,124 @@ InverseMapping::validParams()
 }
 
 InverseMapping::InverseMapping(const InputParameters & parameters)
-  : UserObject(parameters), _input_parameters(getParam<std::vector<Real>>("parameters"))
+  : GeneralUserObject(parameters),
+    MappingInterface(this),
+    SurrogateModelInterface(this),
+    _var_names_to_fill(getParam<std::vector<VariableName>>("variable_to_fill")),
+    _var_names_to_reconstruct(getParam<std::vector<VariableName>>("variable_to_reconstruct"))
 {
+  if (_var_names_to_fill.size() != _var_names_to_reconstruct.size())
+    paramError("variable_to_fill",
+               "The number of variables to fill should be the same as the number of entries in "
+               "`variable_to_reconstruct`");
+}
+
+void
+InverseMapping::initialSetup()
+{
+  _mapping = &getMapping("mapping");
+  _variable_to_fill.clear();
+  _variable_to_reconstruct.clear();
+  _is_nodal.clear();
+
+  const auto & mapping_variable_names = _mapping->getVariableNames();
+
+  for (const auto & var_i : index_range(_var_names_to_reconstruct))
+  {
+    if (std::find(mapping_variable_names.begin(),
+                  mapping_variable_names.end(),
+                  _var_names_to_reconstruct[var_i]) == mapping_variable_names.end())
+      paramError("variable_to_reconstruct",
+                 "Couldn't find mapping for " + _var_names_to_reconstruct[var_i] +
+                     "! Double check the training process and make sure that the mapping includes "
+                     "the given variable!");
+
+    _variable_to_fill.push_back(&_fe_problem.getVariable(_tid, _var_names_to_fill[var_i]));
+    _variable_to_reconstruct.push_back(
+        &_fe_problem.getVariable(_tid, _var_names_to_reconstruct[var_i]));
+
+    auto & fe_type_reconstruct = _variable_to_reconstruct.back()->feType();
+    auto & fe_type_fill = _variable_to_fill.back()->feType();
+
+    if (fe_type_reconstruct != fe_type_fill)
+      paramError("fe_type_fill",
+                 "The FEtype should match the ones defined for `variable_to_reconstruct`");
+
+    _is_nodal.push_back(fe_type_fill.family == LAGRANGE);
+  }
 }
 
 void
 InverseMapping::execute()
 {
-  std::cerr << "Something smart" << std::endl;
+
+  NonlinearSystemBase & nl = _fe_problem.getNonlinearSystemBase();
+
+  std::unique_ptr<NumericVector<Number>> temporary_vector = nl.solution().zero_clone();
+
+  for (auto var_i : index_range(_var_names_to_reconstruct))
+  {
+    MooseVariableFieldBase * var_to_fill = _variable_to_fill[var_i];
+    const MooseVariableFieldBase * var_to_reconstruct = _variable_to_reconstruct[var_i];
+
+    nl.setVariableGlobalDoFs(_var_names_to_reconstruct[var_i]);
+
+    const auto & dofs = nl.getVariableGlobalDoFs();
+
+    const auto & dof_map = var_to_reconstruct->sys().system().get_dof_map();
+
+    dof_id_type local_dof_begin = dof_map.first_dof();
+    dof_id_type local_dof_end = dof_map.end_dof();
+
+    for (const auto & dof_i : index_range(dofs))
+    {
+      if (dofs[dof_i] >= local_dof_begin && dofs[dof_i] < local_dof_end)
+      {
+        temporary_vector->set(dofs[dof_i],
+                              (_mapping->basis(_var_names_to_reconstruct[var_i], 0))(dof_i));
+      }
+    }
+
+    unsigned int to_sys_num = _variable_to_fill[var_i]->sys().system().number();
+    unsigned int to_var_num =
+        var_to_fill->sys().system().variable_number(_var_names_to_fill[var_i]);
+
+    unsigned int from_sys_num = var_to_reconstruct->sys().system().number();
+    unsigned int from_var_num =
+        var_to_reconstruct->sys().system().variable_number(_var_names_to_reconstruct[var_i]);
+    const MeshBase & to_mesh = _fe_problem.mesh().getMesh();
+
+    if (_is_nodal[var_i])
+    {
+
+      for (const auto & node : to_mesh.local_node_ptr_range())
+      {
+        if (node->n_dofs(to_sys_num, to_var_num) < 1)
+          continue;
+
+        const auto & to_dof_id = node->dof_number(to_sys_num, to_var_num, 0);
+        const auto & from_dof_id = node->dof_number(from_sys_num, from_var_num, 0);
+
+        var_to_fill->sys().solution().set(to_dof_id, (*temporary_vector)(from_dof_id));
+      }
+    }
+    else
+    {
+      for (auto & elem : as_range(to_mesh.local_elements_begin(), to_mesh.local_elements_end()))
+      {
+        const auto n_dofs = elem->n_dofs(to_sys_num, to_var_num);
+        if (n_dofs < 1)
+          continue;
+
+        for (auto dof_i : make_range(n_dofs))
+        {
+          const auto & to_dof_id = elem->dof_number(to_sys_num, to_var_num, dof_i);
+          const auto & from_dof_id = elem->dof_number(from_sys_num, from_var_num, dof_i);
+
+          var_to_fill->sys().solution().set(to_dof_id, (*temporary_vector)(from_dof_id));
+        }
+      }
+    }
+    var_to_fill->sys().solution().close();
+  }
 }
