@@ -12,8 +12,10 @@ This component has the following restrictions:
 - Only one boundary name may be provided in each of the
   [!param](/Components/HeatStructure2DCoupler/primary_boundary) and
   [!param](/Components/HeatStructure2DCoupler/secondary_boundary) parameters.
-- The meshes along the coupled boundaries must be coincident, i.e., each node
-  on each side must be at an identical location as a node on the other side.
+- The meshes along the coupled boundaries must be aligned. Each element on a
+  boundary is paired with the nearest element on the coupled boundary. The
+  alignment check requires that each element on a boundary has exactly one
+  element from the coupled boundary paired to it.
 
 !syntax parameters /Components/HeatStructure2DCoupler
 

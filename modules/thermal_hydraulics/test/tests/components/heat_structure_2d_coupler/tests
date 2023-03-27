@@ -85,13 +85,14 @@
       type = RunException
       input = 'heat_structure_2d_coupler.i'
       cli_args = "
+        Components/hs1/orientation='1 1 0'
         Components/hs3/inner_radius=0.8
         Postprocessors/E_tot/axis_dir='1 0 0'
         Postprocessors/E_tot/axis_point='0 0 0'"
-      expect_err = "The primary and secondary boundaries must have coincident meshes"
+      expect_err = "The primary and secondary boundaries must be aligned"
       mesh_mode = 'replicated'
 
-      detail = 'the boundary meshes are not coincident.'
+      detail = 'the boundary meshes are not aligned.'
     []
     [distributed_mesh]
       type = RunException

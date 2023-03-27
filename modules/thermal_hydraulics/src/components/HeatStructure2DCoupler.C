@@ -36,8 +36,8 @@ HeatStructure2DCoupler::check() const
 {
   HeatStructure2DCouplerBase::check();
 
-  if (!_mesh_alignment.meshesAreCoincident())
-    logError("The primary and secondary boundaries must have coincident meshes.");
+  if (!_mesh_alignment.meshesAreAligned())
+    logError("The primary and secondary boundaries must be aligned.");
 }
 
 void
