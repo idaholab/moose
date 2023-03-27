@@ -17,16 +17,12 @@ WeightedGapAux::validParams()
   InputParameters params = MortarNodalAuxKernel::validParams();
   params.addClassDescription(
       "Returns the specified variable as an auxiliary variable with the same value.");
-  params.addCoupledVar("v",
-                       "Optional variable to take the value of. If omitted the value of the "
-                       "`variable` itself is returned.");
   params.set<bool>("interpolate_normals") = false;
   return params;
 }
 
 WeightedGapAux::WeightedGapAux(const InputParameters & parameters)
   : MortarNodalAuxKernel(parameters), _weighted_gap(0), _qp_gap_nodal(0)
-
 {
 }
 
