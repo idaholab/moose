@@ -71,7 +71,7 @@ ThermochimicaNodalData::ThermochimicaNodalData(const InputParameters & parameter
   for (const auto i : make_range(_n_species))
   {
     auto species_var_name = getVar("output_species", i)->name();
-    auto semicolon = species_var_name.find("_");
+    auto semicolon = species_var_name.find(":");
     _sp_phase_name[i] = species_var_name.substr(0, semicolon);
     _sp_species_name[i] = species_var_name.substr(semicolon + 1);
   }
@@ -82,7 +82,7 @@ ThermochimicaNodalData::ThermochimicaNodalData(const InputParameters & parameter
     for (const auto i : make_range(_n_elements))
     {
       auto element_var_name = getVar("element_potentials", i)->name();
-      auto semicolon = element_var_name.find("_");
+      auto semicolon = element_var_name.find(":");
       _element_potentials[i] = element_var_name.substr(semicolon + 1);
     }
   }
