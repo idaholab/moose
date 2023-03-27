@@ -291,6 +291,15 @@
     var = v
     boundary = interface
   []
+
+  inactive = 'prime_1 prime_2'
+  # Threaded general user objects
+  [prime_2]
+    type = PrimeProductUserObject
+  []
+  [prime_1]
+    type = PrimeProductUserObject
+  []
 []
 
 [Executioner]
@@ -328,5 +337,5 @@
 []
 
 [Debug]
-  show_execution_order = 'NONE ALWAYS INITIAL NONLINEAR LINEAR TIMESTEP_BEGIN TIMESTEP_END FINAL'
+  show_execution_order = 'ALWAYS INITIAL NONLINEAR LINEAR TIMESTEP_BEGIN TIMESTEP_END FINAL'
 []

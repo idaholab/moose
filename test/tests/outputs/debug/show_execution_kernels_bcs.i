@@ -136,6 +136,22 @@
   []
 []
 
+[Dampers]
+  active = ''
+  [limit_v]
+    type = BoundingValueElementDamper
+    variable = v
+    max_value = 1.5
+    min_value = -20
+  []
+  [limit_u]
+    type = BoundingValueElementDamper
+    variable = u
+    max_value = 1.5
+    min_value = -20
+  []
+[]
+
 [Executioner]
   type = Steady
 

@@ -45,10 +45,20 @@
     type = NeumannBC
     variable = u
     boundary = 'top'
-    value = '4' 
+    value = '4'
   []
 []
 
 [Executioner]
   type = Steady
+[]
+
+[Dampers]
+  inactive = 'limit_u'
+  [limit_u]
+    type = BoundingValueNodalDamper
+    variable = u
+    max_value = 1.5
+    min_value = -20
+  []
 []
