@@ -7,7 +7,7 @@ It is entirely possible your cluster may have too old of libraries. If this ends
 after failing the below instructions, please follow our regular [Linux](installation/conda.md)
 instructions instead for an easier, but lower performance, installation.
 
-## Pre-Reqs
+## Prerequisites
 
 !include sqa/minimum_requirements.md
 
@@ -21,9 +21,11 @@ obtain the above requirements, please consult with your cluster administrators.
 
 ## Activate Environment
 
+!style! halign=left
 Activate your desired MPI environment (refer to your cluster administrators on how to do this).
 This *usually* involves `module load` commands. Please note again, that Intel compilers are not
 supported.
+!style-end!
 
 Sometimes after loading a proper MPI environment, it is still necessary to set some variables.
 Check to see if the following variables are set:
@@ -32,27 +34,36 @@ Check to see if the following variables are set:
 echo $CC $CXX $FC $F90 $F77
 ```
 
-If nothing returns, or what does return does *not* include MPI naming conventions, you need to set
-them manually (each and every time you load said environment):
+If nothing returns, or what does return does *not* include MPI naming conventions (`CC=gcc` and not
+`CC=mpicc` for example), you need to set them manually each and every time you load said
+environment:
 
 ```bash
 export CC=mpicc CXX=mpicxx FC=mpif90 F90=mpif90 F77=mpif77
 ```
 
+!include installation/start_up_profile.md
+
 ## Cloning MOOSE
 
+!style! halign=left
 !template load file=installation/clone_moose.md.template PATH=~/projects
+!style-end!
 
 ## PETSc and libMesh
 
+!style! halign=left
 MOOSE requires several support libraries in order to build or run properly. Both of these libraries
 (PETSc and libMesh) can be built using our supplied scripts:
+!style-end!
 
 !template load file=installation/build_petsc_and_libmesh.md.template PATH=~/projects
 
 ## Build and Test MOOSE
 
+!style! halign=left
 !template load file=installation/build_moose.md.template PATH=~/projects
+!style-end!
 
 !template load file=installation/test_moose.md.template PATH=~/projects
 

@@ -5,7 +5,7 @@ all of your MOOSE related work.
 To clone MOOSE, run the following commands in a terminal:
 
 ```bash
-mkdir {{PATH}}
+mkdir -p {{PATH}}
 cd {{PATH}}
 git clone https://github.com/idaholab/moose.git
 cd moose

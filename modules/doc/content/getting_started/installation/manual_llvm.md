@@ -1,6 +1,8 @@
 ## LLVM Clang
 
+!style! halign=left
 Clone the LLVM-Project:
+!style-end!
 
 !package! code max-height=500
 git clone https://github.com/llvm/llvm-project

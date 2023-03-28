@@ -1,7 +1,9 @@
 ## MPICH
 
+!style! halign=left
 Check and see if you already have an MPI wrapper available on your machine. One simple way of doing
 so, is to perform a `which` on several MPI wrapper binaries:
+!style-end!
 
 ```bash
 which mpicc mpicxx mpif90

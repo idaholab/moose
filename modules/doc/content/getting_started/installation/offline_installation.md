@@ -6,47 +6,61 @@ instructions will help you create an environment suitable for MOOSE-based develo
 Please be certain, that the machine in which you intend to perform the actual work (which this
 document will refer to as the 'target' machine), meets the following requirements:
 
-!include sqa/minimum_requirements.md
+## Prerequisites
 
-# Prerequisites
+!include sqa/minimum_requirements.md
 
 #### Air-Gapped HPC Clusters
 
-If the target machine is an HPC cluster, it is likely your cluster already has an MPI wrapper (and
-thus a GCC or LLVM compiler). Please contact your system administrator and ask them how to
-appropriately make use of your cluster's MPI wrapper and compiler. Please note, Intel compilers are
-not supported.
+!style! style=margin-left:30px
+If the target machine is an [!ac](HPC) cluster, it is likely your cluster already has a proper toolchain
+stack available. Please contact your system administrator and ask them how to appropriately make use
+of your cluster's MPI wrapper and compiler. Please note, Intel compilers are not supported.
+!style-end!
 
 #### Personal Workstation
 
+!style! style=margin-left:30px
 If the target machine is your personal workstation, that machine must sufficiently achieve the
 following:
+!style-end!
 
 !include installation/manual_prereqs.md
 
+!style! style=margin-left:30px
 In addition, the target machine will need an MPI wrapper. We recommend one of the following
 products:
+!style-end!
 
 - [MPICH](https://www.mpich.org/)
-
 - [OpenMPI](https://www.open-mpi.org/)
+- [MVAPICH](https://mvapich.cse.ohio-state.edu/)
 
-Please choose one of the above and follow their instructions on how to build, install, and use your
-MPI wrapper of choice.
+!style! style=margin-left:30px
+!alert! tip title=System MPI Wrapper
+For +Linux+ users, the easiest way to install an MPI wrapper is via the same system package manager
+tool used obtaining a developers environment. Examples:
 
-!alert tip title=Linux MPI Wrapper
-If you are operating on a personal Linux workstation, the easiest way to obtain an MPI wrapper is
-via the same tool used to obtain a developers environment in the Prerequisites section.
+```bash
+apt install openmpi  # Ubuntu, Debian
+dnf install mpich    # CentOS, Rocky, RHEL
+zypper install mpich # OpenSUSE
+```
+!alert-end!
 
 !alert note title=Personal Air-Gapped Workstation
 Procuring the above on a workstation with no network access is beyond the scope of this document.
 Please work with your system administrator on satisfying the above prerequisites.
 
+!style-end!
+
 ## Prepare Directory
 
+!style! halign=left
 PETSc, libMesh and MOOSE can all be obtained from one repository (the moose repository). First,
 create a top-level directory named 'offline', which will ultimately contain everything we need to
 transfer over to your target machine.
+!style-end!
 
 ```bash
 mkdir -p ~/offline/downloads
@@ -68,7 +82,6 @@ obtain a list of contributions we will need to download manually (`--with-packag
 
 ```bash
 cd ~/offline/moose
-
 ./scripts/update_and_rebuild_petsc.sh  --with-packages-download-dir=~/offline/downloads
 ```
 
@@ -134,8 +147,10 @@ tar -xf offline.tar.gz -C ~/
 
 ## Build Libraries
 
+!style! halign=left
 With the `~/offline` directory available in your target machine's home directory, we can now build
 PETSc, libMesh, and MOOSE, using your MPI Wrapper/Compiler established in earlier steps.
+!style-end!
 
 #### Verify MPI
 
@@ -180,9 +195,11 @@ Please submit a detailed log of the error, to the
 
 ## Your Application
 
+!style! halign=left
 With MOOSE built and testing successfully, you should now be able to build your application. The
 only prerequisites before doing so, is to configure your environment to make use of your MPI
 wrapper, and to define where your built copy of MOOSE resides:
+!style-end!
 
 ```bash
 export CC=mpicc CXX=mpicxx FC=mpif90 F90=mpif90 F77=mpif77
@@ -192,16 +209,7 @@ export MOOSE_DIR=$HOME/offline/moose
 You will need to export the above variables each time you open a new terminal window on your HPC
 cluster or personal workstation, before you can perform any application development.
 
-For this reason you may wish to add the above export commands to your shell startup profile so that
-these variables are always set. Achieving this is different for each shell type (and there are a
-lot). You'll want to read up on how to do this for Macintosh (usually ZSH: `~/.zshrc`), or Linux
-(usually BASH: `~/.bashrc`) respectively.
-
-You can determine the shell your environment operates within by running the following command:
-
-```bash
-echo $0
-```
+!include installation/start_up_profile.md
 
 Now that you have a working MOOSE, and you know how to make your MPI wrapper available, proceed to
 [building your own application](installation/offline_new_users.md).

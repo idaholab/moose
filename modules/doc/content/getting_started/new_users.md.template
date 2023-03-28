@@ -4,9 +4,11 @@ Welcome to MOOSE! This page describes some helpful ways to start developing with
 
 ## Create an Application id=create-an-app
 
+!style! halign=left
 MOOSE is designed for building custom applications, therefore to use MOOSE an application is
 required. An application is where code and input files are created for a particular problem or set
 of problems of interest.
+!style-end!
 
 To create an application, run the stork.sh script while sitting outside the MOOSE repository with
 a single argument: the name of your application:
@@ -39,8 +41,10 @@ each time [MOOSE is updated](installation/index.md#update).
 
 ### Enable Modules
 
+!style! halign=left
 To enable use of the various [modules/index.md] available from MOOSE in an application, modify the
 section of `{{PATH}}/your_app_name/Makefile` that is shown below.
+!style-end!
 
 !listing stork/Makefile.app
          link=False
@@ -58,18 +62,22 @@ as-needed.
 
 ## Learn More
 
+!style! halign=left
 With a working application next consider looking at the [examples_and_tutorials/index.md] page for
 a beginning tour of how to use input files and implement custom behavior in an application. The
 [first tutorial](tutorial01_app_development/index.md) demonstrates how MOOSE application
 development works. If you are interested in contributing to MOOSE please visit
 [framework_development/index.md].
+!style-end!
 
 ## Helpful Software id=helpful-software
 
+!style! halign=left
 A text editor is necessary for creating application files. There are many options available, so
 please feel free to chose an editor that meets your needs. A popular option for application
 developers is [VSCode](https://code.visualstudio.com/), which has community developed add-ons
 specifically for MOOSE: [VSCode MOOSE](VSCode.md).
+!style-end!
 
 A graphical post-processor, particularly one that can read
 [ExodusII](https://prod-ng.sandia.gov/techlib-noauth/access-control.cgi/1992/922137.pdf) files, is
@@ -93,9 +101,11 @@ you to visualize and process the results of your simulations.
 
 ## Customizing MOOSE id=configure
 
+!style! halign=left
 MOOSE can be customized by running a `configure` script in
 `$MOOSE_DIR`. Note that the `configure` script *must* be invoked from
 `$MOOSE_DIR`. Below we summarize the configuration options available:
+!style-end!
 
 ### Automatic Differentiation
 
