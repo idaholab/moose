@@ -85,13 +85,13 @@ MortarGapHeatTransferAction::MortarGapHeatTransferAction(const InputParameters &
   // We do not currently support building more than one condution or more than one radiation user
   // object from this action.
   const unsigned int conduction_build_uos =
-      std::count(_gap_flux_models.cbegin(),
-                 _gap_flux_models.cend(),
-                 MortarGapHeatTransfer::UserObjectToBuild::CONDUCTION);
+      cast_int<unsigned int>(std::count(_gap_flux_models.cbegin(),
+                                        _gap_flux_models.cend(),
+                                        MortarGapHeatTransfer::UserObjectToBuild::CONDUCTION));
   const unsigned int radiation_build_uos =
-      std::count(_gap_flux_models.cbegin(),
-                 _gap_flux_models.cend(),
-                 MortarGapHeatTransfer::UserObjectToBuild::RADIATION);
+      cast_int<unsigned int>(std::count(_gap_flux_models.cbegin(),
+                                        _gap_flux_models.cend(),
+                                        MortarGapHeatTransfer::UserObjectToBuild::RADIATION));
 
   if (conduction_build_uos > 1 || radiation_build_uos > 1)
     paramError("gap_flux_options",
