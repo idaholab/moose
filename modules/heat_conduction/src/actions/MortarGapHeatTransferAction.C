@@ -18,13 +18,6 @@
 #include "GapFluxModelRadiation.h"
 #include "GapFluxModelConduction.h"
 
-// Counter for modular user objects
-static unsigned int thermal_action_userobject_radiation_counter_uo = 0;
-static unsigned int thermal_action_userobject_conduction_counter_uo = 0;
-
-static unsigned int thermal_action_userobject_radiation_counter_constraint = 0;
-static unsigned int thermal_action_userobject_conduction_counter_constraint = 0;
-
 registerMooseAction("HeatConductionApp", MortarGapHeatTransferAction, "append_mesh_generator");
 registerMooseAction("HeatConductionApp", MortarGapHeatTransferAction, "add_mortar_variable");
 registerMooseAction("HeatConductionApp", MortarGapHeatTransferAction, "add_constraint");
@@ -264,13 +257,11 @@ MortarGapHeatTransferAction::addConstraints()
     for (const auto & uo_name : _gap_flux_models)
     {
       if (uo_name == MortarGapHeatTransfer::UserObjectToBuild::CONDUCTION)
-        uoname_strings.push_back(
-            "gap_flux_model_conduction_object_" + MooseUtils::shortName(name()) + "_" +
-            Moose::stringify(thermal_action_userobject_conduction_counter_constraint++));
+        uoname_strings.push_back("gap_flux_model_conduction_object_" +
+                                 MooseUtils::shortName(name()));
       else if (uo_name == MortarGapHeatTransfer::UserObjectToBuild::RADIATION)
-        uoname_strings.push_back(
-            "gap_flux_model_radiation_object_" + MooseUtils::shortName(name()) + "_" +
-            Moose::stringify(thermal_action_userobject_radiation_counter_constraint++));
+        uoname_strings.push_back("gap_flux_model_radiation_object_" +
+                                 MooseUtils::shortName(name()));
     }
 
     params.set<std::vector<UserObjectName>>("gap_flux_models") = uoname_strings;
@@ -334,11 +325,9 @@ MortarGapHeatTransferAction::addUserObjects()
 
       var_params.set<bool>("use_displaced_mesh") = true;
 
-      _problem->addUserObject(
-          "GapFluxModelConduction",
-          "gap_flux_model_conduction_object_" + MooseUtils::shortName(name()) + "_" +
-              Moose::stringify(thermal_action_userobject_conduction_counter_uo++),
-          var_params);
+      _problem->addUserObject("GapFluxModelConduction",
+                              "gap_flux_model_conduction_object_" + MooseUtils::shortName(name()),
+                              var_params);
     }
     else if (uo_name == MortarGapHeatTransfer::UserObjectToBuild::RADIATION)
 
@@ -357,11 +346,9 @@ MortarGapHeatTransferAction::addUserObjects()
 
       var_params.set<bool>("use_displaced_mesh") = true;
 
-      _problem->addUserObject(
-          "GapFluxModelRadiation",
-          "gap_flux_model_radiation_object_" + MooseUtils::shortName(name()) + "_" +
-              Moose::stringify(thermal_action_userobject_radiation_counter_uo++),
-          var_params);
+      _problem->addUserObject("GapFluxModelRadiation",
+                              "gap_flux_model_radiation_object_" + MooseUtils::shortName(name()),
+                              var_params);
     }
   }
 }
