@@ -19,7 +19,6 @@ GetMortarGapUOValue::validParams()
   params.addRequiredParam<UserObjectName>(
       "weighted_gap_uo", "The name of the weighted gap user object to query for values");
   params.set<bool>("use_displaced_mesh") = true;
-  params.set<ExecFlagEnum>("execute_on") = {EXEC_TIMESTEP_END};
   return params;
 }
 

@@ -26,7 +26,6 @@ TestWeightedGapUserObject::validParams()
   params.addRequiredCoupledVar("weighted_gap_aux_var", "The weighted gap auxiliary variable.");
   params.set<bool>("use_displaced_mesh") = true;
   params.set<bool>("interpolate_normals") = false;
-  params.set<ExecFlagEnum>("execute_on") = {EXEC_TIMESTEP_END};
   params.set<bool>("force_preaux") = true;
   return params;
 }

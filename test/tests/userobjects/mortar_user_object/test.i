@@ -29,6 +29,7 @@
     primary_subdomain = 20
     secondary_subdomain = 10
     weighted_gap_aux_var = "gap2"
+    execute_on = 'linear nonlinear timestep_end'
   []
 []
 
@@ -55,6 +56,7 @@
     variable = gap2
     boundary = 1
     weighted_gap_uo = weighted_gap_uo
+    execute_on = 'linear nonlinear timestep_end'
   []
 []
 

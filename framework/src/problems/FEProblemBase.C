@@ -4306,15 +4306,6 @@ FEProblemBase::computeUserObjectsInternal(const ExecFlagType & type,
       }
       for (auto obj : mortar)
         obj->finalize();
-
-      // if any userobject may have written to variables we need to close the aux solution
-      for (const auto * const obj : mortar)
-        if (obj->hasWritableCoupledVariables())
-        {
-          _aux->solution().close();
-          _aux->system().update();
-          break;
-        }
     }
 
     // Execute threaded general user objects
