@@ -3,7 +3,7 @@
 This object implements the residuals that enforce the constraint
 
 !equation
-\int_{\Omega} \phi = \int \phi_0
+\int_{\Omega} \phi = \int_{\Omega} \phi_0
 
 using a Lagrange multiplier approach. E.g. this object enforces the constraint
 that the average value of $\phi$ match $\phi_0$.

@@ -200,9 +200,10 @@ NSFVAction::validParams()
       Point(),
       "The XYZ coordinates where pressure needs to be pinned for incompressible simulations.");
 
-  params.addParam<Real>("pinned_pressure_value",
-                        1e5,
-                        "The value used for pinning the pressure (point value/domain average).");
+  params.addParam<PostprocessorName>(
+      "pinned_pressure_value",
+      "1e5",
+      "The value used for pinning the pressure (point value/domain average).");
 
   params.addParam<bool>("boussinesq_approximation", false, "True to have Boussinesq approximation");
 
@@ -1148,7 +1149,7 @@ NSFVAction::addINSMassKernels()
       kernel_type = "FVIntegralValueConstraint";
     InputParameters params = _factory.getValidParams(kernel_type);
     params.set<CoupledName>("lambda") = {"lambda"};
-    params.set<Real>("phi0") = getParam<Real>("pinned_pressure_value");
+    params.set<PostprocessorName>("phi0") = getParam<PostprocessorName>("pinned_pressure_value");
     params.set<NonlinearVariableName>("variable") = _pressure_name;
     if (pin_type == "point-value")
       params.set<Point>("point") = getParam<Point>("pinned_pressure_point");

@@ -21,7 +21,7 @@ FVBoundedValueConstraint::validParams()
   InputParameters params = FVScalarLagrangeMultiplierConstraint::validParams();
   params.addClassDescription(
       "This class is used to enforce a min or max value for a finite volume variable");
-  params.addRequiredParam<Real>("phi0", "The min or max bound");
+  params.setDocString("phi0", "The min or max bound");
   // Define the min/max enumeration
   MooseEnum type_options("lower_than=0 higher_than=1");
   params.addRequiredParam<MooseEnum>(
@@ -30,9 +30,7 @@ FVBoundedValueConstraint::validParams()
 }
 
 FVBoundedValueConstraint::FVBoundedValueConstraint(const InputParameters & parameters)
-  : FVScalarLagrangeMultiplierConstraint(parameters),
-    _phi0(getParam<Real>("phi0")),
-    _bound_type(getParam<MooseEnum>("bound_type"))
+  : FVScalarLagrangeMultiplierConstraint(parameters), _bound_type(getParam<MooseEnum>("bound_type"))
 {
 }
 

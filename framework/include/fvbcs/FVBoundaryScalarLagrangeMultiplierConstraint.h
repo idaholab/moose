@@ -9,32 +9,28 @@
 
 #pragma once
 
-#include "FVElementalKernel.h"
+#include "FVFluxBC.h"
 
 /**
- * Base class for implementing constraints on finite volume variable elemental values using scalar
+ * Base class for implementing constraints on boundaries for finite volume variables using scalar
  * Lagrange multipliers
  */
-class FVScalarLagrangeMultiplierConstraint : public FVElementalKernel
+class FVBoundaryScalarLagrangeMultiplierConstraint : public FVFluxBC
 {
 public:
   static InputParameters validParams();
 
-  FVScalarLagrangeMultiplierConstraint(const InputParameters & parameters);
+  FVBoundaryScalarLagrangeMultiplierConstraint(const InputParameters & parameters);
 
   const MooseVariableScalar & lambdaVariable() const { return _lambda_var; }
 
 protected:
-  /// The value that we want the average of the primal variable to be equal to
+  /// The value that we want the average/point-value/etc. of the primal variable to be equal to
   const PostprocessorValue & _phi0;
 
 private:
-  void computeResidual() override final;
-  void computeJacobian() override final;
-  using FVElementalKernel::computeOffDiagJacobian;
-  void computeOffDiagJacobian() override final;
-  void computeResidualAndJacobian() override final;
-  ADReal computeQpResidual() override = 0;
+  void computeResidual(const FaceInfo & fi) override final;
+  void computeJacobian(const FaceInfo & fi) override final;
 
   /// The Lagrange Multiplier variable
   const MooseVariableScalar & _lambda_var;
