@@ -103,18 +103,50 @@ LiquidMetalSubChannel1PhaseProblem::computeWijPrime(int iblock)
             std::acos(wire_lead_length /
                       std::sqrt(std::pow(wire_lead_length, 2) +
                                 std::pow(libMesh::pi * (rod_diameter + wire_diameter), 2)));
-        // Calculation of Turbulent Crossflow
-        auto dum1 = 0.14 * std::pow((pitch - rod_diameter) / rod_diameter, -0.5);
-        auto dum2 = libMesh::pi / 6 * std::pow((pitch - rod_diameter / 2), 2);
-        auto dum3 = libMesh::pi * std::pow(rod_diameter, 2) / 24;
-        auto dum4 = std::sqrt(3) / 4 * std::pow(pitch, 2);
-        auto dum5 = libMesh::pi * std::pow(rod_diameter, 2) / 8;
-        auto eps = dum1 * pow((dum2 - dum3) / (dum4 - dum5), 0.5) * std::tan(theta);
-        _WijPrime(i_gap, iz) =
-            eps * 0.5 *
-            (((*_mdot_soln)(node_in_i) + (*_mdot_soln)(node_in_j)) / (Si_in + Sj_in) +
-             ((*_mdot_soln)(node_out_i) + (*_mdot_soln)(node_out_j)) / (Si_out + Sj_out)) *
-            Sij;
+        // Calculation of flow regime
+        auto ReL = 320.0 * std::pow(10.0, pitch / rod_diameter - 1);
+        auto ReT = 10000.0 * std::pow(10.0, 0.7 * (pitch / rod_diameter - 1));
+        auto avg_massflux =
+            0.5 * (((*_mdot_soln)(node_in_i) + (*_mdot_soln)(node_in_j)) / (Si_in + Sj_in) +
+                   ((*_mdot_soln)(node_out_i) + (*_mdot_soln)(node_out_j)) / (Si_out + Sj_out));
+        auto w_perim_i = (*_w_perim_soln)(node_in_i);
+        auto w_perim_j = (*_w_perim_soln)(node_in_j);
+        auto mu_i = (*_mu_soln)(node_in_i);
+        auto mu_j = (*_mu_soln)(node_in_j);
+        // hydraulic diameter in the i direction
+        auto hD_i = 4.0 * Si_in / w_perim_i;
+        auto hD_j = 4.0 * Sj_in / w_perim_j;
+        auto avg_hD = 0.5 * (hD_i + hD_j);
+        auto avg_mu = 0.5 * (mu_i + mu_j);
+        auto Re = avg_massflux * avg_hD / avg_mu;
+        // Calculation of geometric parameters
+        auto Ar1 = libMesh::pi * (rod_diameter + wire_diameter) * wire_diameter / 6.0;
+        auto A1prime = (std::sqrt(3.0) / 4.0) * std::pow(pitch, 2) -
+                       libMesh::pi * std::pow(rod_diameter, 2) / 8.0;
+        auto A1 = A1prime - libMesh::pi * std::pow(wire_diameter, 2) / 8.0 / std::cos(theta);
+        auto Cm = 0.0;
+        if (Re < ReL)
+        {
+          Cm = 0.077 * std::pow((pitch - rod_diameter) / rod_diameter, -0.5);
+        }
+        else if (Re > ReT)
+        {
+          Cm = 0.14 * std::pow((pitch - rod_diameter) / rod_diameter, -0.5);
+        }
+        else
+        {
+          auto psi = (std::log(Re) - std::log(ReL)) / (std::log(ReT) - std::log(ReL));
+          auto gamma = 2.0 / 3.0;
+          Cm = 0.14 * std::pow((pitch - rod_diameter) / rod_diameter, -0.5) +
+               (0.14 * std::pow((pitch - rod_diameter) / rod_diameter, -0.5) -
+                0.077 * std::pow((pitch - rod_diameter) / rod_diameter, -0.5)) *
+                   std::pow(psi, gamma);
+        }
+        // Calculation of turbulent mixing parameter
+        auto beta = Cm * std::pow(Ar1 / A1, 0.5) * std::tan(theta);
+
+        // Calculation of turbulent crossflow
+        _WijPrime(i_gap, iz) = beta * avg_massflux * Sij;
       }
     }
   }
@@ -1080,7 +1112,6 @@ LiquidMetalSubChannel1PhaseProblem::computeh(int iblock)
         if (z_grid[iz] > unheated_length_entry &&
             z_grid[iz] <= unheated_length_entry + heated_length)
         {
-          // added_enthalpy = ((*_q_prime_soln)(node_out) + (*_q_prime_soln)(node_in)) * dz / 2.0;
           added_enthalpy = computeAddedHeatPin(i_ch, iz);
         }
         else
@@ -1104,18 +1135,49 @@ LiquidMetalSubChannel1PhaseProblem::computeh(int iblock)
               std::acos(wire_lead_length /
                         std::sqrt(std::pow(wire_lead_length, 2) +
                                   std::pow(libMesh::pi * (rod_diameter + wire_diameter), 2)));
+          auto Sij = dz * gap;
+          auto Si = (*_S_flow_soln)(node_in);
           // in/out channels for i_ch
           auto sweep_in = _tri_sch_mesh.getSweepFlowChans(i_ch).first;
           auto * node_sin = _subchannel_mesh.getChannelNode(sweep_in, iz - 1);
-          auto cs_t = 0.75 * std::pow(wire_lead_length / rod_diameter, 0.3);
-          auto ar2 = libMesh::pi * (rod_diameter + wire_diameter) * wire_diameter / 4.0;
-          auto a2p =
+
+          // Calculation of flow regime
+          auto ReL = 320.0 * std::pow(10.0, pitch / rod_diameter - 1);
+          auto ReT = 10000.0 * std::pow(10.0, 0.7 * (pitch / rod_diameter - 1));
+          auto massflux = (*_mdot_soln)(node_in) / Si;
+          auto w_perim = (*_w_perim_soln)(node_in);
+          auto mu = (*_mu_soln)(node_in);
+          // hydraulic diameter
+          auto hD = 4.0 * Si / w_perim;
+          auto Re = massflux * hD / mu;
+          // Calculation of geometric parameters
+          auto Ar2 = libMesh::pi * (rod_diameter + wire_diameter) * wire_diameter / 4.0;
+          auto A2prime =
               pitch * (w - rod_diameter / 2.0) - libMesh::pi * std::pow(rod_diameter, 2) / 8.0;
-          auto Sij_in = dz * gap;
-          auto Sij_out = dz * gap;
-          auto wsweep_in = gedge_ave * cs_t * std::pow((ar2 / a2p), 0.5) * std::tan(theta) * Sij_in;
-          auto wsweep_out =
-              gedge_ave * cs_t * std::pow((ar2 / a2p), 0.5) * std::tan(theta) * Sij_out;
+          auto A2 = A2prime - libMesh::pi * std::pow(wire_diameter, 2) / 8.0 / std::cos(theta);
+          auto Cs = 0.0;
+          if (Re < ReL)
+          {
+            Cs = 0.033 * std::pow(wire_lead_length / rod_diameter, 0.3);
+          }
+          else if (Re > ReT)
+          {
+            Cs = 0.75 * std::pow(wire_lead_length / rod_diameter, 0.3);
+          }
+          else
+          {
+            auto psi = (std::log(Re) - std::log(ReL)) / (std::log(ReT) - std::log(ReL));
+            auto gamma = 2.0 / 3.0;
+            Cs = 0.75 * std::pow(wire_lead_length / rod_diameter, 0.3) +
+                 (0.75 * std::pow(wire_lead_length / rod_diameter, 0.3) -
+                  0.033 * std::pow(wire_lead_length / rod_diameter, 0.3)) *
+                     std::pow(psi, gamma);
+          }
+          // Calculation of turbulent mixing parameter
+          auto beta = Cs * std::pow(Ar2 / A2, 0.5) * std::tan(theta);
+
+          auto wsweep_in = gedge_ave * beta * Sij;
+          auto wsweep_out = gedge_ave * beta * Sij;
           auto sweep_hin = (*_h_soln)(node_sin);
           auto sweep_hout = (*_h_soln)(node_in);
           sweep_enthalpy = (wsweep_in * sweep_hin - wsweep_out * sweep_hout);
@@ -1658,18 +1720,49 @@ LiquidMetalSubChannel1PhaseProblem::computeh(int iblock)
               std::acos(wire_lead_length /
                         std::sqrt(std::pow(wire_lead_length, 2) +
                                   std::pow(libMesh::pi * (rod_diameter + wire_diameter), 2)));
+          auto Sij = dz * gap;
+          auto Si = (*_S_flow_soln)(node_in);
           // in/out channels for i_ch
           auto sweep_in = _tri_sch_mesh.getSweepFlowChans(i_ch).first;
           auto * node_sin = _subchannel_mesh.getChannelNode(sweep_in, iz - 1);
-          auto cs_t = 0.75 * std::pow(wire_lead_length / rod_diameter, 0.3);
-          auto ar2 = libMesh::pi * (rod_diameter + wire_diameter) * wire_diameter / 4.0;
-          auto a2p =
+
+          // Calculation of flow regime
+          auto ReL = 320.0 * std::pow(10.0, pitch / rod_diameter - 1);
+          auto ReT = 10000.0 * std::pow(10.0, 0.7 * (pitch / rod_diameter - 1));
+          auto massflux = (*_mdot_soln)(node_in) / Si;
+          auto w_perim = (*_w_perim_soln)(node_in);
+          auto mu = (*_mu_soln)(node_in);
+          // hydraulic diameter
+          auto hD = 4.0 * Si / w_perim;
+          auto Re = massflux * hD / mu;
+          // Calculation of geometric parameters
+          auto Ar2 = libMesh::pi * (rod_diameter + wire_diameter) * wire_diameter / 4.0;
+          auto A2prime =
               pitch * (w - rod_diameter / 2.0) - libMesh::pi * std::pow(rod_diameter, 2) / 8.0;
-          auto Sij_in = dz * gap;
-          auto Sij_out = dz * gap;
-          auto wsweep_in = gedge_ave * cs_t * std::pow((ar2 / a2p), 0.5) * std::tan(theta) * Sij_in;
-          auto wsweep_out =
-              gedge_ave * cs_t * std::pow((ar2 / a2p), 0.5) * std::tan(theta) * Sij_out;
+          auto A2 = A2prime - libMesh::pi * std::pow(wire_diameter, 2) / 8.0 / std::cos(theta);
+          auto Cs = 0.0;
+          if (Re < ReL)
+          {
+            Cs = 0.033 * std::pow(wire_lead_length / rod_diameter, 0.3);
+          }
+          else if (Re > ReT)
+          {
+            Cs = 0.75 * std::pow(wire_lead_length / rod_diameter, 0.3);
+          }
+          else
+          {
+            auto psi = (std::log(Re) - std::log(ReL)) / (std::log(ReT) - std::log(ReL));
+            auto gamma = 2.0 / 3.0;
+            Cs = 0.75 * std::pow(wire_lead_length / rod_diameter, 0.3) +
+                 (0.75 * std::pow(wire_lead_length / rod_diameter, 0.3) -
+                  0.033 * std::pow(wire_lead_length / rod_diameter, 0.3)) *
+                     std::pow(psi, gamma);
+          }
+          // Calculation of turbulent mixing parameter
+          auto beta = Cs * std::pow(Ar2 / A2, 0.5) * std::tan(theta);
+
+          auto wsweep_in = gedge_ave * beta * Sij;
+          auto wsweep_out = gedge_ave * beta * Sij;
           auto sweep_hin = (*_h_soln)(node_sin);
           auto sweep_hout = (*_h_soln)(node_in);
           sweep_enthalpy = (wsweep_in * sweep_hin - wsweep_out * sweep_hout);

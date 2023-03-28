@@ -1,0 +1,11 @@
+[Tests]
+  [SHRT-17_SS_test]
+    type = Exodiff
+    input = 'XX09_SS_SHRT17.i'
+    exodiff  = 'XX09_SS_SHRT17_out.e'
+    custom_cmp = 'test.exodiff'
+    method = '!DBG'
+    valgrind = NONE
+    recover = false
+  []
+[]
