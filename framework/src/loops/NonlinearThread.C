@@ -37,7 +37,7 @@ NonlinearThread::NonlinearThread(FEProblemBase & fe_problem)
 NonlinearThread::NonlinearThread(NonlinearThread & x, Threads::split split)
   : ThreadedElementLoop<ConstElemRange>(x, split),
     _nl(x._nl),
-    _num_cached(0),
+    _num_cached(x._num_cached),
     _integrated_bcs(x._integrated_bcs),
     _dg_kernels(x._dg_kernels),
     _interface_kernels(x._interface_kernels),
@@ -80,12 +80,23 @@ NonlinearThread::subdomainChanged()
   _dg_warehouse->updateBlockMatPropDependency(_subdomain, needed_mat_props, _tid);
   _ik_warehouse->updateBoundaryMatPropDependency(needed_mat_props, _tid);
 
-  for (const auto fv_kernel : _fv_kernels)
+  if (_fe_problem.haveFV())
   {
-    const auto & fv_mv_deps = fv_kernel->getMooseVariableDependencies();
-    needed_moose_vars.insert(fv_mv_deps.begin(), fv_mv_deps.end());
-    const auto & fv_mp_deps = fv_kernel->getMatPropDependencies();
-    needed_mat_props.insert(fv_mp_deps.begin(), fv_mp_deps.end());
+    // Re-query the finite volume elemental kernels
+    _fv_kernels.clear();
+    _fe_problem.theWarehouse()
+        .query()
+        .template condition<AttribSystem>("FVElementalKernel")
+        .template condition<AttribSubdomains>(_subdomain)
+        .template condition<AttribThread>(_tid)
+        .queryInto(_fv_kernels);
+    for (const auto fv_kernel : _fv_kernels)
+    {
+      const auto & fv_mv_deps = fv_kernel->getMooseVariableDependencies();
+      needed_moose_vars.insert(fv_mv_deps.begin(), fv_mv_deps.end());
+      const auto & fv_mp_deps = fv_kernel->getMatPropDependencies();
+      needed_mat_props.insert(fv_mp_deps.begin(), fv_mp_deps.end());
+    }
   }
 
   _fe_problem.setActiveElementalMooseVariables(needed_moose_vars, _tid);
@@ -123,8 +134,9 @@ NonlinearThread::computeOnElement()
       compute(*kernel);
   }
 
-  for (auto kernel : _fv_kernels)
-    compute(*kernel);
+  if (_fe_problem.haveFV())
+    for (auto kernel : _fv_kernels)
+      compute(*kernel);
 }
 
 void
