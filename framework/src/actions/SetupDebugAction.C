@@ -120,9 +120,7 @@ SetupDebugAction::act()
 
   // Print execution information in all loops
   if (parameters().isParamSetByUser("show_execution_order"))
-  {
     _problem->setExecutionPrinting(getParam<ExecFlagEnum>("show_execution_order"));
-  }
 
   // Add pid aux
   if (getParam<bool>("output_process_domains") ||

@@ -35,9 +35,6 @@ MOOSE parses the input file and executes numerous [Actions](actions/Action.md) w
 load/build the mesh, create the variables, kernels, boundary conditions, output objects etc.
 The ordering of this process may be shown using the [!param](/Debug/show_actions) parameter.
 
-Most `Actions` are executed during initialization, but this option is also able to report on the execution of
-`Actions` during the solve.
-
 !alert note
 The dependencies of each `Action` should be declared in the source code of each `Action`. This enables MOOSE
 to perform automatic dependency resolution to correctly order them.

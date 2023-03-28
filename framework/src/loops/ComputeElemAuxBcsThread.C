@@ -159,8 +159,8 @@ ComputeElemAuxBcsThread<AuxKernelType>::printGeneralExecutionInformation() const
 {
   if (_fe_problem.shouldPrintExecution(_tid) && _storage.hasActiveObjects())
   {
-    auto console = _fe_problem.console();
-    auto execute_on = _fe_problem.getCurrentExecuteOnFlag();
+    const auto & console = _fe_problem.console();
+    const auto & execute_on = _fe_problem.getCurrentExecuteOnFlag();
     console << "[DBG] Executing boundary restricted auxkernels on boundary elements on "
             << execute_on << std::endl;
   }
@@ -175,7 +175,7 @@ ComputeElemAuxBcsThread<AuxKernelType>::printBoundaryExecutionInformation(
       _boundaries_exec_printed.count(boundary_id))
     return;
 
-  auto console = _fe_problem.console();
+  const auto & console = _fe_problem.console();
   console << "[DBG] Ordering on boundary " << boundary_id << std::endl;
   std::vector<MooseObject *> objs_ptrs;
   for (auto & kernel_ptr : kernels)

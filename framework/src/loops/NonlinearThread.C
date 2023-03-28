@@ -175,10 +175,8 @@ NonlinearThread::computeOnBoundary(BoundaryID bnd_id, const Elem * /*lower_d_ele
 {
   const auto & bcs = _ibc_warehouse->getActiveBoundaryObjects(bnd_id, _tid);
   for (const auto & bc : bcs)
-  {
     if (bc->shouldApply())
       compute(*bc);
-  }
 }
 
 void
@@ -267,32 +265,32 @@ NonlinearThread::computeOnInternalFace(const Elem * neighbor)
 void
 NonlinearThread::compute(KernelBase & kernel)
 {
-  compute(dynamic_cast<ResidualObject &>(kernel));
-};
+  compute(static_cast<ResidualObject &>(kernel));
+}
 
 void
 NonlinearThread::compute(FVElementalKernel & kernel)
 {
-  compute(dynamic_cast<ResidualObject &>(kernel));
-};
+  compute(static_cast<ResidualObject &>(kernel));
+}
 
 void
 NonlinearThread::compute(IntegratedBCBase & bc)
 {
-  compute(dynamic_cast<ResidualObject &>(bc));
+  compute(static_cast<ResidualObject &>(bc));
 };
 
 void
 NonlinearThread::compute(DGKernelBase & dg, const Elem * /*neighbor*/)
 {
-  compute(dynamic_cast<ResidualObject &>(dg));
-};
+  compute(static_cast<ResidualObject &>(dg));
+}
 
 void
 NonlinearThread::compute(InterfaceKernelBase & ik)
 {
-  compute(dynamic_cast<ResidualObject &>(ik));
-};
+  compute(static_cast<ResidualObject &>(ik));
+}
 
 void
 NonlinearThread::postElement(const Elem * /*elem*/)
@@ -334,13 +332,13 @@ NonlinearThread::printBlockExecutionInformation() const
   const int num_objects = _kernels.size() + _fv_kernels.size() + _integrated_bcs.size() +
                           _dg_kernels.size() + _interface_kernels.size();
   const auto & console = _fe_problem.console();
-  const auto b_name = _mesh.getSubdomainName(_subdomain);
+  const auto block_name = _mesh.getSubdomainName(_subdomain);
 
   if (_fe_problem.shouldPrintExecution(_tid) && num_objects > 0)
   {
     if (_blocks_exec_printed.count(_subdomain))
       return;
-    console << "[DBG] Ordering of " + objectType() + " Objects on block " << b_name << " ("
+    console << "[DBG] Ordering of " + objectType() + " Objects on block " << block_name << " ("
             << _subdomain << ")" << std::endl;
     if (_kernels.hasActiveBlockObjects(_subdomain, _tid))
     {
@@ -366,7 +364,7 @@ NonlinearThread::printBlockExecutionInformation() const
   }
   else if (_fe_problem.shouldPrintExecution(_tid) && num_objects == 0 &&
            !_blocks_exec_printed.count(_subdomain))
-    console << "[DBG] No Active " + objectType() + " Objects on block " << b_name << " ("
+    console << "[DBG] No Active " + objectType() + " Objects on block " << block_name << " ("
             << _subdomain << ")" << std::endl;
 
   _blocks_exec_printed.insert(_subdomain);

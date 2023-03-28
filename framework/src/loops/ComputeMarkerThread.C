@@ -115,7 +115,7 @@ ComputeMarkerThread::printGeneralExecutionInformation() const
   if (!_fe_problem.shouldPrintExecution(_tid))
     return;
   const auto & console = _fe_problem.console();
-  const auto execute_on = _fe_problem.getCurrentExecuteOnFlag();
+  const auto & execute_on = _fe_problem.getCurrentExecuteOnFlag();
   console << "[DBG] Beginning elemental loop to compute Markers on " << execute_on << std::endl;
 }
 
@@ -127,8 +127,7 @@ ComputeMarkerThread::printBlockExecutionInformation() const
     return;
 
   const auto & console = _fe_problem.console();
-  const std::vector<std::shared_ptr<Marker>> & markers =
-      _marker_whs.getActiveBlockObjects(_subdomain, _tid);
+  const auto & markers = _marker_whs.getActiveBlockObjects(_subdomain, _tid);
   console << "[DBG] Execution order on block: " << _subdomain << std::endl;
   printExecutionOrdering<Marker>(markers, false);
   _blocks_exec_printed.insert(_subdomain);

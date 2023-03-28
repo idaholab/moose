@@ -23,7 +23,6 @@
 #include "DomainUserObject.h"
 #include "AuxiliarySystem.h"
 #include "MooseTypes.h"
-#include "ThreadedElementLoop.h"
 
 #include "libmesh/numeric_vector.h"
 
@@ -329,8 +328,8 @@ ComputeUserObjectsThread::printGeneralExecutionInformation() const
 {
   if (_fe_problem.shouldPrintExecution(_tid))
   {
-    auto console = _fe_problem.console();
-    auto execute_on = _fe_problem.getCurrentExecuteOnFlag();
+    const auto & console = _fe_problem.console();
+    const auto & execute_on = _fe_problem.getCurrentExecuteOnFlag();
     console << "[DBG] Computing elemental user objects on " << execute_on << std::endl;
     mooseDoOnce(console << "[DBG] Execution order of objects types on each element then its sides:"
                         << std::endl;
@@ -381,17 +380,18 @@ ComputeUserObjectsThread::printBlockExecutionInformation() const
       domain_interface_uos.push_back(domain_uo);
 
   // Approximation of the number of user objects currently executing
-  int num_objects = _element_objs.size() + _domain_objs.size() + _shape_element_objs.size() +
-                    side_uos.size() + shapers.size() + _internal_side_objs.size() +
-                    interface_objs.size() + domain_interface_uos.size();
+  const auto num_objects = _element_objs.size() + _domain_objs.size() + _shape_element_objs.size() +
+                           side_uos.size() + shapers.size() + _internal_side_objs.size() +
+                           interface_objs.size() + domain_interface_uos.size();
 
-  auto console = _fe_problem.console();
-  auto execute_on = _fe_problem.getCurrentExecuteOnFlag();
+  const auto & console = _fe_problem.console();
+  const auto & execute_on = _fe_problem.getCurrentExecuteOnFlag();
 
   if (num_objects > 0)
   {
     if (_blocks_exec_printed.count(_subdomain))
       return;
+
     console << "[DBG] Ordering of User Objects on block " << _subdomain << std::endl;
     // Output specific ordering of objects
     printExecutionOrdering<ElementUserObject>(_element_objs, "element user objects");

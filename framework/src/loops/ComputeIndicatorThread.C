@@ -20,7 +20,6 @@
 // For dynamic casting to Coupleable
 #include "Material.h"
 #include "InterfaceMaterial.h"
-#include "ThreadedElementLoop.h"
 
 #include "libmesh/threads.h"
 
@@ -198,7 +197,7 @@ ComputeIndicatorThread::printGeneralExecutionInformation() const
     return;
 
   const auto & console = _fe_problem.console();
-  const auto execute_on = _fe_problem.getCurrentExecuteOnFlag();
+  const auto & execute_on = _fe_problem.getCurrentExecuteOnFlag();
   if (!_finalize)
     console << "[DBG] Executing indicators on elements then on internal sides on " << execute_on
             << std::endl;
@@ -215,15 +214,13 @@ ComputeIndicatorThread::printBlockExecutionInformation() const
   const auto & console = _fe_problem.console();
   if (_indicator_whs.hasActiveBlockObjects(_subdomain, _tid))
   {
-    const std::vector<std::shared_ptr<Indicator>> & indicators =
-        _indicator_whs.getActiveBlockObjects(_subdomain, _tid);
+    const auto & indicators = _indicator_whs.getActiveBlockObjects(_subdomain, _tid);
     console << "[DBG] Ordering of element indicators on block " << _subdomain << std::endl;
     printExecutionOrdering<Indicator>(indicators, false);
   }
   if (_internal_side_indicators.hasActiveBlockObjects(_subdomain, _tid))
   {
-    const std::vector<std::shared_ptr<InternalSideIndicator>> & indicators =
-        _internal_side_indicators.getActiveBlockObjects(_subdomain, _tid);
+    const auto & indicators = _internal_side_indicators.getActiveBlockObjects(_subdomain, _tid);
     console << "[DBG] Ordering of element internal sides indicators on block " << _subdomain
             << std::endl;
     printExecutionOrdering<InternalSideIndicator>(indicators, false);

@@ -48,11 +48,13 @@ public:
   virtual void post() override;
 
 protected:
+  ///@{
   /// Base class version just calls compute on each object for the element
   virtual void computeOnElement();
   virtual void computeOnBoundary(BoundaryID bnd_id, const Elem * lower_d_elem);
   virtual void computeOnInterface(BoundaryID bnd_id);
   virtual void computeOnInternalFace(const Elem * neighbor);
+  ///@}
 
   /**
    * Will dispatch to computeResidual/computeJacobian/computeResidualAndJacobian based on the
@@ -60,12 +62,14 @@ protected:
    */
   virtual void compute(ResidualObject & ro) = 0;
 
+  ///@{
   /// Defaults to forwarding to the residual object class
   virtual void compute(KernelBase & kernel);
   virtual void compute(FVElementalKernel & kernel);
   virtual void compute(IntegratedBCBase & bc);
   virtual void compute(DGKernelBase & dg, const Elem * neighbor);
   virtual void compute(InterfaceKernelBase & ik);
+  ///@}
 
   /**
    * Add neighbor residual/Jacobian into assembly global data
@@ -88,7 +92,7 @@ protected:
   virtual void accumulate() = 0;
 
   /**
-   * Determine the residual objects we will actually compute based on vector/matrix tag information
+   * Determine the objects we will actually compute based on vector/matrix tag information
    */
   virtual void determineObjectWarehouses() = 0;
 

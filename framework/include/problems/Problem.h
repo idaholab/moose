@@ -47,11 +47,6 @@ public:
    */
   const ConsoleStream & console() const { return _console; }
 
-  /**
-   * Return console handle
-   */
-  ConsoleStream & console() { return const_cast<ConsoleStream &>(_console); }
-
 protected:
   /// True if the CLI option is found
   bool _cli_option_found;

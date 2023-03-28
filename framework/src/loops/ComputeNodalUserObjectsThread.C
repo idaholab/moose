@@ -126,7 +126,7 @@ ComputeNodalUserObjectsThread::printGeneralExecutionInformation() const
   if (nodal_uos.size())
   {
     const auto & console = _fe_problem.console();
-    const auto execute_on = _fe_problem.getCurrentExecuteOnFlag();
+    const auto & execute_on = _fe_problem.getCurrentExecuteOnFlag();
     console << "[DBG] Computing nodal user objects on " << execute_on << std::endl;
     mooseDoOnce(
         console << "[DBG] Ordering on nodes:" << std::endl;

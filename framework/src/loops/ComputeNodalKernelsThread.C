@@ -106,7 +106,7 @@ ComputeNodalKernelsThread::printGeneralExecutionInformation() const
     return;
 
   const auto & console = _fe_problem.console();
-  const auto execute_on = _fe_problem.getCurrentExecuteOnFlag();
+  const auto & execute_on = _fe_problem.getCurrentExecuteOnFlag();
   console << "[DBG] Computing nodal kernels contribution to residual on nodes on " << execute_on
           << std::endl;
   console << "[DBG] Nodes at boundaries between blocks will execute lower block ID first"

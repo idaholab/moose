@@ -5,7 +5,7 @@
     input = 'show_var_residual_norms.i'
     expect_out = "\|residual\|_2 of individual variables:.*\|residual\|_2 of individual variables:.*\|residual\|_2 of individual variables:"
 
-    requirement = "The system shall be include the ability to display variable residual norms."
+    requirement = "The system shall include the ability to display variable residual norms."
     design = "VariableResidualNormsDebugOutput.md"
   []
 
@@ -23,7 +23,7 @@
     input = show_material_props.i
     expect_out = "Property Names:.*\"bnd_prop\""
 
-    requirement = "The system shall be include the ability to display material property information."
+    requirement = "The system shall include the ability to display material property information."
     design = "MaterialPropertyDebugOutput.md"
   []
 
@@ -42,7 +42,7 @@
     expect_out = "\[DBG\]\[\d+\].*'u'.*at node"
     max_parallel = 1
 
-    requirement = "The system shall be include the ability to display residual information for variables."
+    requirement = "The system shall include the ability to display residual information for variables."
     design = "TopResidualDebugOutput.md"
   []
 
@@ -64,7 +64,7 @@
     expect_out = "0 Linear[^*\n]*\n[^*\n]*1 Linear"
     max_parallel = 1
 
-    requirement = "The system shall be include the ability to display residual information for variables that is limited to non-linear iterations."
+    requirement = "The system shall include the ability to display residual information for variables that is limited to non-linear iterations."
     design = "TopResidualDebugOutput.md"
   []
 
@@ -75,7 +75,7 @@
     expect_out = "\[DBG\]\[\d+\].*'lambda' \(SCALAR\)"
     max_parallel = 1
 
-    requirement = "The system shall be include the ability to display residual information for scalar variables."
+    requirement = "The system shall include the ability to display residual information for scalar variables."
     design = "TopResidualDebugOutput.md"
   []
 
@@ -254,14 +254,14 @@
       type = RunApp
       input = 'show_execution_adaptivity.i'
       expect_out = '\[DBG\] indicator'
-      detail = 'each step of the adaptive refinement process, especially side-based indicators,'
+      detail = 'each step of the adaptive refinement process, including side-based indicators,'
       cli_args = '--color off'
     []
     [adaptivity_elem_indicator]
       type = RunApp
       input = 'show_execution_adaptivity.i'
       expect_out = '\[DBG\] indicator_elem'
-      detail = 'each step of the adaptive refinement process, especially element-based indicators,'
+      detail = 'each step of the adaptive refinement process, including element-based indicators,'
       cli_args = '--color off Adaptivity/Markers/marker/indicator=indicator_elem Adaptivity/Indicators/indicator_elem/type=AnalyticalIndicator Adaptivity/Indicators/indicator_elem/variable=u Adaptivity/Indicators/indicator_elem/function=4'
     []
     # Initial conditions use dependency resolution at node/element scale to execute

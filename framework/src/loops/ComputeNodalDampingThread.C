@@ -80,7 +80,7 @@ ComputeNodalDampingThread::printGeneralExecutionInformation() const
     return;
 
   const auto & console = _fe_problem.console();
-  const auto execute_on = _fe_problem.getCurrentExecuteOnFlag();
+  const auto & execute_on = _fe_problem.getCurrentExecuteOnFlag();
   console << "[DBG] Executing nodal dampers on " << execute_on << std::endl;
   console << "[DBG] Ordering of the dampers on the blocks they are defined on:" << std::endl;
   // TODO Check that all objects are active at this point

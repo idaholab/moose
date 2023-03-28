@@ -2448,9 +2448,6 @@ private:
   /// Flag used to indicate whether we are doing the uo/aux state check in execute
   bool _checking_uo_aux_state = false;
 
-  /// True if order of executions will be output
-  bool _print_execution;
-
   /// When to print the execution of loops
   ExecFlagEnum _print_execution_on;
 };

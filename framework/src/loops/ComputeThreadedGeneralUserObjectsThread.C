@@ -59,7 +59,7 @@ ComputeThreadedGeneralUserObjectsThread::printGeneralExecutionInformation(
     return;
 
   const auto & console = _fe_problem.console();
-  const auto execute_on = _fe_problem.getCurrentExecuteOnFlag();
+  const auto & execute_on = _fe_problem.getCurrentExecuteOnFlag();
   console << "[DBG] Executing Threaded General User Object " << (*range.begin())->name() << " on "
           << execute_on << std::endl;
 }

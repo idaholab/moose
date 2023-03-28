@@ -257,8 +257,7 @@ ComputeFullJacobianThread::computeOnInterface(BoundaryID bnd_id)
       unsigned int ivar = ivariable.number();
       unsigned int jvar = jvariable.number();
 
-      const std::vector<std::shared_ptr<InterfaceKernelBase>> & int_ks =
-          _ik_warehouse->getActiveBoundaryObjects(bnd_id, _tid);
+      const auto & int_ks = _ik_warehouse->getActiveBoundaryObjects(bnd_id, _tid);
       for (const auto & interface_kernel : int_ks)
       {
         if (!interface_kernel->isImplicit())

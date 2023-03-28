@@ -128,7 +128,6 @@
     function = slnv
     boundary = 'left right top bottom'
   []
-
   [bc_u_tb]
     type = CoupledKernelGradBC
     variable = u
@@ -136,7 +135,6 @@
     vel = '0.1 0.1'
     boundary = 'top bottom left right'
   []
-
   [bc_ul]
     type = FunctionNeumannBC
     variable = u
