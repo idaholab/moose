@@ -18,6 +18,8 @@
 #include "GapFluxModelRadiation.h"
 #include "GapFluxModelConduction.h"
 
+#include <algorithm>
+
 registerMooseAction("HeatConductionApp", MortarGapHeatTransferAction, "append_mesh_generator");
 registerMooseAction("HeatConductionApp", MortarGapHeatTransferAction, "add_mortar_variable");
 registerMooseAction("HeatConductionApp", MortarGapHeatTransferAction, "add_constraint");
@@ -77,10 +79,26 @@ MortarGapHeatTransferAction::MortarGapHeatTransferAction(const InputParameters &
         "to the action via the gap_flux_options parameter. Mixed use is not supported");
 
   for (unsigned int i = 0; i < getParam<MultiMooseEnum>("gap_flux_options").size(); i++)
-  {
     _gap_flux_models.push_back(static_cast<MortarGapHeatTransfer::UserObjectToBuild>(
         getParam<MultiMooseEnum>("gap_flux_options").get(i)));
-  }
+
+  // We do not currently support building more than one condution or more than one radiation user
+  // object from this action.
+  const unsigned int conduction_build_uos =
+      std::count(_gap_flux_models.cbegin(),
+                 _gap_flux_models.cend(),
+                 MortarGapHeatTransfer::UserObjectToBuild::CONDUCTION);
+  const unsigned int radiation_build_uos =
+      std::count(_gap_flux_models.cbegin(),
+                 _gap_flux_models.cend(),
+                 MortarGapHeatTransfer::UserObjectToBuild::RADIATION);
+
+  if (conduction_build_uos > 1 || radiation_build_uos > 1)
+    paramError("gap_flux_options",
+               "You cannot choose to have more than one conduction or more than one radiation user "
+               "objects when they are built by the action. If you want to superimpose multiple "
+               "physics, you can choose to create your own user objects and pass them to this "
+               "action via 'user_created_gap_flux_models'");
 
   if (params.isParamSetByUser("primary_subdomain") &&
       params.isParamSetByUser("secondary_subdomain"))
