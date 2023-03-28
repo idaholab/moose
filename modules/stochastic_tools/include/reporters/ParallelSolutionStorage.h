@@ -21,11 +21,20 @@ public:
   virtual void execute() override{};
   virtual void finalize() override {}
 
+  /**
+   * Add a new solution entry to the container.
+   * @param vname The name of the variable
+   * @param global_i The global index of the field
+   * @param solution The vector that needs to be added
+   */
   void addEntry(const VariableName & vname,
                 unsigned int global_i,
                 std::unique_ptr<DenseVector<Real>> solution);
-
-  std::map<unsigned int, std::vector<std::unique_ptr<DenseVector<Real>>>> &
+  /**
+   * Get the stored solution vectors for a given variable
+   * @param variable The name of the given variable
+   */
+  std::unordered_map<unsigned int, std::vector<std::unique_ptr<DenseVector<Real>>>> &
   getStorage(const VariableName & variable)
   {
     mooseAssert(_distributed_solutions.find(variable) != _distributed_solutions.end(),
@@ -34,41 +43,44 @@ public:
     return libmesh_map_find(_distributed_solutions, variable);
   }
 
-  std::map<VariableName, std::map<unsigned int, std::vector<std::unique_ptr<DenseVector<Real>>>>> &
+  /// Get the whole solution container
+  std::map<VariableName,
+           std::unordered_map<unsigned int, std::vector<std::unique_ptr<DenseVector<Real>>>>> &
   getStorage()
   {
     return _distributed_solutions;
   }
 
-  bool hasGlobalSample(unsigned int global_sample_i, const VariableName & variable)
-  {
-    if (_distributed_solutions.find(variable) == _distributed_solutions.end())
-      return false;
+  /**
+   * Determine if we have the solution vector with a given global sample index for a given
+   * variable.
+   * @param global_sample_i The global sample index of the solution field (fields if it is a t)
+   * @param variable The name of the variable whose data is requested
+   */
+  bool hasGlobalSample(unsigned int global_sample_i, const VariableName & variable);
 
-    auto & variable_storage = libmesh_map_find(_distributed_solutions, variable);
-
-    return (variable_storage.find(global_sample_i) != variable_storage.end());
-  }
-
+  /**
+   * Get the serialized solution field which is associated with a given
+   * global sample index and variable
+   * @param global_sample_i The global sampler index
+   * @param variable The variable name
+   */
   const std::vector<std::unique_ptr<DenseVector<Real>>> &
-  getGlobalSample(unsigned int global_sample_i, const VariableName & variable)
-  {
-    mooseAssert(_distributed_solutions.find(variable) != _distributed_solutions.end(),
-                "We don't have the requested variable!");
-    const auto & variable_storage = libmesh_map_find(_distributed_solutions, variable);
-    mooseAssert(variable_storage.find(global_sample_i) != variable_storage.end(),
-                "We don't have the requested global sample index! ");
+  getGlobalSample(unsigned int global_sample_i, const VariableName & variable);
 
-    return libmesh_map_find(variable_storage, global_sample_i);
-  }
-
-  void updateTimeStepNumbers();
-
+  /**
+   * Return the number of total stored solutions for a given variable
+   * @param vname The name of the variable
+   */
   unsigned int totalNumberOfStoredSolutions(const VariableName & vname);
 
-  void printEntries();
-
 protected:
-  std::map<VariableName, std::map<unsigned int, std::vector<std::unique_ptr<DenseVector<Real>>>>> &
+  /**
+   * The container of the solutions. It indexes based on: the variable name > global sample index >
+   * timestep index (for time-dependent simulations). This object stores a reference because we
+   * would like this to be restartable.
+   */
+  std::map<VariableName,
+           std::unordered_map<unsigned int, std::vector<std::unique_ptr<DenseVector<Real>>>>> &
       _distributed_solutions;
 };

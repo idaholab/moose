@@ -52,8 +52,12 @@ public:
   unpack(BufferIter in, Context *);
 };
 
+/**
+ * This object is responsible for packing and unpacking data stored in
+ * std::tuple<unsigned int, unsigned int, std::vector<Real>>.
+ */
 template <>
-class Packing<std::unique_ptr<DenseVector<Real>>>
+class Packing<std::tuple<unsigned int, unsigned int, std::vector<Real>>>
 {
 
 public:
@@ -63,17 +67,19 @@ public:
   static unsigned int packed_size(typename std::vector<Real>::const_iterator in);
 
   /// Getting the sizes of the packed objects using the object itself.
-  static unsigned int packable_size(const std::unique_ptr<DenseVector<Real>> & object,
-                                    const void *);
+  static unsigned int
+  packable_size(const std::tuple<unsigned int, unsigned int, std::vector<Real>> & object,
+                const void *);
 
   // Pack the objects on the sending process.
   template <typename Iter, typename Context>
-  static void
-  pack(const std::unique_ptr<DenseVector<Real>> & object, Iter data_out, const Context *);
+  static void pack(const std::tuple<unsigned int, unsigned int, std::vector<Real>> & object,
+                   Iter data_out,
+                   const Context *);
 
   // Unpack the object on the receiving process.
   template <typename BufferIter, typename Context>
-  static std::unique_ptr<DenseVector<Real>> unpack(BufferIter in, Context *);
+  static std::tuple<unsigned int, unsigned int, std::vector<Real>> unpack(BufferIter in, Context *);
 };
 
 } // namespace Parallel

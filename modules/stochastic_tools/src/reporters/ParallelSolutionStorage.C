@@ -16,16 +16,17 @@ InputParameters
 ParallelSolutionStorage::validParams()
 {
   InputParameters params = GeneralReporter::validParams();
-  params.addClassDescription("Something.");
+  params.addClassDescription("Parallel container to store serialized solution fields from "
+                             "simulations on sub-applications.");
   return params;
 }
 
 ParallelSolutionStorage::ParallelSolutionStorage(const InputParameters & parameters)
   : GeneralReporter(parameters),
     _distributed_solutions(
-        declareRestartableData<
-            std::map<VariableName,
-                     std::map<unsigned int, std::vector<std::unique_ptr<DenseVector<Real>>>>>>(
+        declareRestartableData<std::map<
+            VariableName,
+            std::unordered_map<unsigned int, std::vector<std::unique_ptr<DenseVector<Real>>>>>>(
             "distributed_solution"))
 {
 }
@@ -41,8 +42,9 @@ ParallelSolutionStorage::addEntry(const VariableName & vname,
                                   unsigned int global_i,
                                   std::unique_ptr<DenseVector<Real>> solution)
 {
+  // Emplace returns a pair to decide if we inserted a new element or not
   auto variable_insert_pair = _distributed_solutions.emplace(
-      vname, std::map<unsigned int, std::vector<std::unique_ptr<DenseVector<Real>>>>());
+      vname, std::unordered_map<unsigned int, std::vector<std::unique_ptr<DenseVector<Real>>>>());
 
   auto sample_insert_pair = variable_insert_pair.first->second.emplace(
       global_i, std::vector<std::unique_ptr<DenseVector<Real>>>());
@@ -62,20 +64,27 @@ ParallelSolutionStorage::totalNumberOfStoredSolutions(const VariableName & vname
   return count;
 }
 
-void
-ParallelSolutionStorage::printEntries()
+bool
+ParallelSolutionStorage::hasGlobalSample(unsigned int global_sample_i,
+                                         const VariableName & variable)
 {
-  std::ostringstream mystream;
-  mystream << "Processor " << processor_id() << std::endl;
-  for (const auto & var_it : _distributed_solutions)
-  {
-    mystream << "Variable: " << var_it.first << std::endl;
-    for (const auto & sample_it : var_it.second)
-    {
-      mystream << "Sample: " << sample_it.first << std::endl;
-      for (const auto & solution : sample_it.second)
-        mystream << Moose::stringify(solution->get_values()) << std::endl;
-    }
-  }
-  std::cerr << mystream.str() << std::endl;
+  if (_distributed_solutions.find(variable) == _distributed_solutions.end())
+    return false;
+
+  auto & variable_storage = libmesh_map_find(_distributed_solutions, variable);
+
+  return (variable_storage.find(global_sample_i) != variable_storage.end());
+}
+
+const std::vector<std::unique_ptr<DenseVector<Real>>> &
+ParallelSolutionStorage::getGlobalSample(unsigned int global_sample_i,
+                                         const VariableName & variable)
+{
+  mooseAssert(_distributed_solutions.find(variable) != _distributed_solutions.end(),
+              "We don't have the requested variable!");
+  const auto & variable_storage = libmesh_map_find(_distributed_solutions, variable);
+  mooseAssert(variable_storage.find(global_sample_i) != variable_storage.end(),
+              "We don't have the requested global sample index! ");
+
+  return libmesh_map_find(variable_storage, global_sample_i);
 }

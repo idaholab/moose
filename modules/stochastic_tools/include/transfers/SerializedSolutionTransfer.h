@@ -18,13 +18,19 @@
 // Forward declarations
 class ParallelSolutionStorage;
 
+/**
+ * This class is responsible for serializing solutions coming from subapps on
+ * specific processors. It is designed to serve as an interface between
+ * SolutionContainer and ParallelSolutionStorage objects.
+ */
 class SerializedSolutionTransfer : public StochasticToolsTransfer
 {
 public:
   static InputParameters validParams();
-  SerializedSolutionTransfer(const InputParameters & parameters);
-  virtual void initialSetup() override;
 
+  SerializedSolutionTransfer(const InputParameters & parameters);
+
+  virtual void initialSetup() override;
   virtual void execute() override;
 
   ///@{
@@ -41,21 +47,25 @@ public:
   ///@}
 
 protected:
-  /// The input multiapp casted into a PODFullSolveMultiapp to get access to the
-  /// specific pod attributes. Used in batch mode only and checking if the
-  /// correct MultiApp type has been provided.
+  /// The storage on the main application where the serialized solutions should be
+  /// transferred
   ParallelSolutionStorage * _parallel_storage;
 
+  /// The names of the variables which should be extracted from the solution vector
   std::vector<VariableName> _variable_names;
 
-  std::string _serialized_solution_reporter;
-
-  unsigned int _num_true_global_apps;
+  /// Link to the storage spaces on the subapplications (will only hold one in batch mode)
+  std::vector<SolutionContainer *> _solution_container;
 
 private:
+  /// Serialize on the root processor of the subapplication and transfer the result to the main application
   void transferToRoot(NonlinearSystemBase & app_nl_system, SolutionContainer & solution_container);
+
+  /// Serialize on methodically determined rank of the subapp and transfer to the main application
   void transferInParallel(NonlinearSystemBase & app_nl_system,
                           SolutionContainer & solution_container);
 
+  /// User determined switch that determines if we want to serialize on root only or distribute the
+  /// solutions between all the ranks of the subapp
   const bool _serialize_on_root;
 };

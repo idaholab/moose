@@ -34,7 +34,6 @@ SerializedSolutionTransfer::validParams()
 SerializedSolutionTransfer::SerializedSolutionTransfer(const InputParameters & parameters)
   : StochasticToolsTransfer(parameters),
     _variable_names(getParam<std::vector<VariableName>>("variables")),
-    _serialized_solution_reporter(getParam<std::string>("serialized_solution_reporter")),
     _serialize_on_root(getParam<bool>("serialize_on_root"))
 {
 }
@@ -42,6 +41,7 @@ SerializedSolutionTransfer::SerializedSolutionTransfer(const InputParameters & p
 void
 SerializedSolutionTransfer::initialSetup()
 {
+  // Check if we have the storage space to receive the serialized solution fields
   std::string parallel_storage_name = getParam<std::string>("parallel_storage_name");
 
   std::vector<UserObject *> reporters;
@@ -77,62 +77,65 @@ SerializedSolutionTransfer::execute()
 void
 SerializedSolutionTransfer::initializeFromMultiapp()
 {
-}
+  // First we fetch the solution containers from the subapps. This function is used
+  // in batch mode only so we will have one solution container on each rank
+  _solution_container.clear();
 
-void
-SerializedSolutionTransfer::executeFromMultiapp()
-{
-  // Getting the reference to the solution vector in the subapp.
+  const auto & serialized_solution_reporter = getParam<std::string>("serialized_solution_reporter");
+
   FEProblemBase & app_problem = getFromMultiApp()->appProblemBase(_app_index);
 
   std::vector<UserObject *> reporters;
   app_problem.theWarehouse()
       .query()
       .condition<AttribSystem>("UserObject")
-      .condition<AttribName>(_serialized_solution_reporter)
+      .condition<AttribName>(serialized_solution_reporter)
       .queryInto(reporters);
 
   if (reporters.empty())
     paramError("serialized_solution_reporter",
                "Unable to find reporter with name '",
-               _serialized_solution_reporter,
+               serialized_solution_reporter,
                "'");
   else if (reporters.size() > 1)
     paramError("serialized_solution_reporter",
                "We found more than one reporter with the name '",
-               _serialized_solution_reporter,
+               serialized_solution_reporter,
                "'");
 
-  SolutionContainer * solution_container = dynamic_cast<SolutionContainer *>(reporters[0]);
+  _solution_container.push_back(dynamic_cast<SolutionContainer *>(reporters[0]));
 
-  if (!solution_container)
+  if (!_solution_container[0])
     paramError("serialized_solution_reporter",
                "The parallel storage reporter is not of type '",
-               _serialized_solution_reporter,
+               serialized_solution_reporter,
                "'");
+}
 
+void
+SerializedSolutionTransfer::executeFromMultiapp()
+{
   if (getFromMultiApp()->hasLocalApp(_app_index))
   {
     FEProblemBase & app_problem = getFromMultiApp()->appProblemBase(_app_index);
     NonlinearSystemBase & nl = app_problem.getNonlinearSystemBase();
 
+    // Here we have to branch out based on if only the root processors
+    // need to participate in the transfer or if we would like to distribute the
+    // data among every processor of the subapplication
     if (_serialize_on_root)
-      transferToRoot(nl, *solution_container);
+      transferToRoot(nl, *_solution_container[0]);
     else
-      transferInParallel(nl, *solution_container);
+      transferInParallel(nl, *_solution_container[0]);
   }
-
-  _parallel_storage->printEntries();
 }
 
 void
 SerializedSolutionTransfer::transferInParallel(NonlinearSystemBase & app_nl_system,
                                                SolutionContainer & solution_container)
 {
-  dof_id_type new_local_entries_begin;
-  dof_id_type new_local_entries_end;
-  dof_id_type num_new_local_entries;
-
+  // We need to go through this MPI rank identification because the multiapp's
+  // communicator is not necessarily the communicator of the underlying MooseObject.
   int local_size;
   int local_rank;
   const MPI_Comm & app_comm = getFromMultiApp()->comm();
@@ -150,6 +153,12 @@ SerializedSolutionTransfer::transferInParallel(NonlinearSystemBase & app_nl_syst
                   TIMPI::OpFunction<dof_id_type>::sum(),
                   app_comm);
 
+  // We shall distribute the samples on the given application between its processors.
+  // Only using a linear partitioning here for the sake of simplicity.
+  dof_id_type new_local_entries_begin;
+  dof_id_type new_local_entries_end;
+  dof_id_type num_new_local_entries;
+
   MooseUtils::linearPartitionItems(num_app_entries,
                                    local_size,
                                    local_rank,
@@ -160,7 +169,7 @@ SerializedSolutionTransfer::transferInParallel(NonlinearSystemBase & app_nl_syst
   unsigned int local_app_index = _global_index - _sampler_ptr->getLocalRowBegin();
 
   // Looping over the variables to extract the corresponding solution values
-  // and copy them into the container of the trainer.
+  // and copy them into the container.
   for (unsigned int var_i = 0; var_i < _variable_names.size(); ++var_i)
   {
     // Getting the corresponding DoF indices for the variable.
@@ -171,6 +180,9 @@ SerializedSolutionTransfer::transferInParallel(NonlinearSystemBase & app_nl_syst
     {
       std::unique_ptr<DenseVector<Real>> serialized_solution =
           std::make_unique<DenseVector<Real>>();
+
+      // Localize the solution and add it to the local container on the rank
+      // which is supposed to own it
       solution_container.getSolution(solution_i)
           ->localize(serialized_solution->get_values(),
                      (local_app_index >= new_local_entries_begin &&
@@ -190,7 +202,6 @@ SerializedSolutionTransfer::transferToRoot(NonlinearSystemBase & app_nl_system,
                                            SolutionContainer & solution_container)
 {
   // Looping over the variables to extract the corresponding solution values
-  // and copy them into the container of the trainer.
   for (unsigned int var_i = 0; var_i < _variable_names.size(); ++var_i)
   {
     // Getting the corresponding DoF indices for the variable.
@@ -201,6 +212,8 @@ SerializedSolutionTransfer::transferToRoot(NonlinearSystemBase & app_nl_system,
     {
       std::unique_ptr<DenseVector<Real>> serialized_solution =
           std::make_unique<DenseVector<Real>>();
+
+      // In this case we always serialize on the root processor of the application.
       solution_container.getSolution(solution_i)
           ->localize(serialized_solution->get_values(),
                      getFromMultiApp()->isRootProcessor() ? app_nl_system.getVariableGlobalDoFs()

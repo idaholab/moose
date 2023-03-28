@@ -10,6 +10,8 @@
 // Stocastic Tools Includes
 #include "MappingReporter.h"
 #include "NonlinearSystemBase.h"
+#include "libmesh/parallel_sync.h"
+#include "VectorPacker.h"
 
 #include "Sampler.h"
 
@@ -107,6 +109,9 @@ MappingReporter::execute()
     const auto rank_config = _sampler->getRankConfig(true);
     if (_sampler)
     {
+      std::unordered_map<processor_id_type,
+                         std::vector<std::tuple<unsigned int, unsigned int, std::vector<Real>>>>
+          send_map;
       for (const auto sample_i : make_range(rank_config.num_local_sims))
       {
         std::vector<Real> data = _sampler->getNextLocalRow();
@@ -123,12 +128,33 @@ MappingReporter::execute()
               mooseError("MappingReporter is only supported for simulations with one solution "
                          "field per run!");
             _mapping->map(_variable_names[var_i], global_i, local_vector);
+            if (rank_config.is_first_local_rank)
+            {
+              (*_vector_real_values_parallel_storage[var_i])[sample_i] = local_vector;
+            }
+            else
+            {
+              send_map[rank_config.my_first_rank].emplace_back(
+                  var_i, sample_i, std::move(local_vector));
+            }
           }
-          comm().gather(rank_config.my_first_rank, local_vector);
-          if (rank_config.is_first_local_rank)
-            (*_vector_real_values_parallel_storage[var_i])[global_i] = local_vector;
         }
       }
+      auto functor =
+          [this](processor_id_type /*pid*/,
+                 const std::vector<std::tuple<unsigned int, unsigned int, std::vector<Real>>> &
+                     vectors)
+      {
+        for (auto & tuple : vectors)
+        {
+          const auto var_i = std::get<0>(tuple);
+          const auto sample_i = std::get<1>(tuple);
+          const auto & vector = std::get<2>(tuple);
+          (*_vector_real_values_parallel_storage[var_i])[sample_i] = vector;
+        }
+      };
+
+      Parallel::push_parallel_packed_range(_communicator, send_map, (void *)nullptr, functor);
     }
   }
   else

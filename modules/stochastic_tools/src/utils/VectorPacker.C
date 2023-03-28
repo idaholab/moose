@@ -45,7 +45,7 @@ Packing<std::tuple<unsigned int, unsigned int, std::shared_ptr<DenseVector<Real>
   // Adding spaces for the vector size, global sample index and variable index.
   total_size += 3;
 
-  // Adding spaces for the element of the vector The size of the vector.
+  // Adding spaces for the elements of the vector.
   total_size += vector_size;
 
   return total_size;
@@ -77,7 +77,7 @@ std::tuple<unsigned int, unsigned int, std::shared_ptr<DenseVector<Real>>>
 Packing<std::tuple<unsigned int, unsigned int, std::shared_ptr<DenseVector<Real>>>>::unpack(
     std::vector<Real>::const_iterator in, void *)
 {
-  // Decoding the vector lenght
+  // Decoding the vector length
   const std::size_t data_size = *in++;
   std::tuple<unsigned int, unsigned int, std::shared_ptr<DenseVector<Real>>> object;
 
@@ -95,56 +95,77 @@ Packing<std::tuple<unsigned int, unsigned int, std::shared_ptr<DenseVector<Real>
 }
 
 unsigned int
-Packing<std::unique_ptr<DenseVector<Real>>>::packable_size(
-    const std::unique_ptr<DenseVector<Real>> & object, const void *)
+Packing<std::tuple<unsigned int, unsigned int, std::vector<Real>>>::packable_size(
+    const std::tuple<unsigned int, unsigned int, std::vector<Real>> & object, const void *)
 {
-  mooseAssert(object, "Invalid object");
-
   unsigned int total_size = 0;
 
-  total_size += 1;
-  total_size += object->size();
+  // This package will contain a number for the global index, a number for the
+  // variable index and a number for the size of the vector. Then it contains
+  // every item in the vector as well.
+  total_size += 3;
+  total_size += std::get<2>(object).size();
 
   return total_size;
 }
 
 unsigned int
-Packing<std::unique_ptr<DenseVector<Real>>>::packed_size(
+Packing<std::tuple<unsigned int, unsigned int, std::vector<Real>>>::packed_size(
     typename std::vector<Real>::const_iterator in)
 {
   unsigned int total_size = 0;
 
-  total_size += 1;
-  total_size += *in++;
+  // The size of the vector
+  const unsigned int vector_size = *in++;
+
+  // Adding spaces for the vector size, global sample index and variable index.
+  total_size += 3;
+
+  // Adding spaces for the elements of the vector.
+  total_size += vector_size;
 
   return total_size;
 }
 
 template <>
 void
-Packing<std::unique_ptr<DenseVector<Real>>>::pack(
-    const std::unique_ptr<DenseVector<Real>> & object,
+Packing<std::tuple<unsigned int, unsigned int, std::vector<Real>>>::pack(
+    const std::tuple<unsigned int, unsigned int, std::vector<Real>> & object,
     std::back_insert_iterator<std::vector<Real>> data_out,
     const void *)
 {
   // Encoding the size of the vector
-  data_out = object->size();
+  const auto & vector = std::get<2>(object);
+  data_out = vector.size();
 
-  for (std::size_t i = 0; i < object->size(); ++i)
-    data_out = (*object)(i);
+  // Encoding variable index and the global index and the
+  data_out = std::get<0>(object);
+  data_out = std::get<1>(object);
+
+  // Encoding the vector elements
+  for (std::size_t i = 0; i < vector.size(); ++i)
+    data_out = vector[i];
 }
 
 template <>
-std::unique_ptr<DenseVector<Real>>
-Packing<std::unique_ptr<DenseVector<Real>>>::unpack(std::vector<Real>::const_iterator in, void *)
+std::tuple<unsigned int, unsigned int, std::vector<Real>>
+Packing<std::tuple<unsigned int, unsigned int, std::vector<Real>>>::unpack(
+    std::vector<Real>::const_iterator in, void *)
 {
+  // Decoding the vector length
   const std::size_t data_size = *in++;
-  std::unique_ptr<DenseVector<Real>> vector = std::make_unique<DenseVector<Real>>(data_size, 0.0);
+  std::tuple<unsigned int, unsigned int, std::vector<Real>> object;
 
-  auto & vector_values = vector->get_values();
+  // Decoding and filling the variable index and global sample index
+  std::get<0>(object) = *in++;
+  std::get<1>(object) = *in++;
+
+  // Decoding and filling the values in the vector.
+  auto & vector = std::get<2>(object);
+  vector.resize(data_size);
   for (std::size_t i = 0; i < data_size; ++i)
-    vector_values[i] = *in++;
-  return std::move(vector);
+    vector[i] = *in++;
+  return object;
 }
 
 } // namespace Parallel

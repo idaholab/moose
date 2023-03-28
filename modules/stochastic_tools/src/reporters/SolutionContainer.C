@@ -16,7 +16,8 @@ InputParameters
 SolutionContainer::validParams()
 {
   InputParameters params = GeneralReporter::validParams();
-  params.addClassDescription("Something.");
+  params.addClassDescription(
+      "Class responsible for collecting distributed solution vectors in one place.");
   return params;
 }
 
@@ -37,11 +38,7 @@ SolutionContainer::initialSetup()
 void
 SolutionContainer::execute()
 {
+  // Clone the current solution and append it to the vector
   auto cloned_solution = _fe_problem.getNonlinearSystemBase().solution().clone();
   _accumulated_solutions.push_back(std::move(cloned_solution));
-}
-
-void
-SolutionContainer::finalize()
-{
 }

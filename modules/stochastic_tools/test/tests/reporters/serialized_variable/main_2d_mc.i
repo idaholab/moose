@@ -4,13 +4,13 @@
 [Distributions]
   [S_dist]
     type = Uniform
-    lower_bound = 2.5
-    upper_bound = 7.5
+    lower_bound = 0
+    upper_bound = 10
   []
   [D_dist]
     type = Uniform
-    lower_bound = 2.5
-    upper_bound = 7.5
+    lower_bound = 0
+    upper_bound = 10
   []
 []
 
@@ -47,7 +47,8 @@
     type = PolynomialRegressionTrainer
     sampler = sample
     regression_type = ols
-    max_degree = 2
+    # penalty = 0.1
+    max_degree = 1
     response = reduced_solutions/v_pod_mapping
     response_type = vector_real
     execute_on = FINAL
@@ -66,7 +67,7 @@
     type = PODMapping
     solution_storage = parallel_storage
     variables = "u v"
-    num_modes = '4 4'
+    num_modes = '10 10'
     extra_slepc_options = "-svd_monitor_all"
   []
 []
@@ -85,7 +86,7 @@
     sampler = sample
     serialized_solution_reporter = solution_storage
     variables = 'u v'
-    serialize_on_root = true
+    serialize_on_root = false
   []
 []
 
