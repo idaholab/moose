@@ -63,6 +63,10 @@ ThermochimicaNodalData::ThermochimicaNodalData(const InputParameters & parameter
   {
     _el[i] = &coupledValue("elements", i);
     _el_name[i] = getVar("elements", i)->name();
+#ifdef THERMOCHIMICA_ENABLED
+    // check if the element symbol is valid
+    Thermochimica::atomicNumber(_el_name[i]);
+#endif
   }
 
   for (const auto i : make_range(_n_phases))
@@ -76,6 +80,9 @@ ThermochimicaNodalData::ThermochimicaNodalData(const InputParameters & parameter
       paramError("output_species", "No ':' separator found in variable '", species_var_name, "'");
     _sp_phase_name[i] = species_var_name.substr(0, colon);
     _sp_species_name[i] = species_var_name.substr(colon + 1);
+    if (std::find(_el_name.begin(), _el_name.end(), _sp_species_name[i]) == _el_name.end())
+      paramError(
+          "output_species", "Element '", _sp_species_name[i], "' was not found in the simulation.");
   }
 
   if (_output_element_potential)
@@ -89,6 +96,11 @@ ThermochimicaNodalData::ThermochimicaNodalData(const InputParameters & parameter
         paramError(
             "element_potentials", "No ':' separator found in variable '", element_var_name, "'");
       _element_potentials[i] = element_var_name.substr(colon + 1);
+      if (std::find(_el_name.begin(), _el_name.end(), _element_potentials[i]) == _el_name.end())
+        paramError("element_potentials",
+                   "Element '",
+                   _element_potentials[i],
+                   "' was not found in the simulation.");
     }
   }
 }
