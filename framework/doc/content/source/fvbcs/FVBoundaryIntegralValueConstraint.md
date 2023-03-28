@@ -5,9 +5,9 @@ This object implements the residuals that enforce the constraint
 !equation
 \int_{\partial \Omega} \phi = \int_{\partial \Omega} \phi_0
 
-using a Lagrange multiplier approach. E.g. this object enforces the constraint
-that the average value of $\phi$ match $\phi_0$ on the prescribed
-`boundary`. This object is the boundary version of the volumemtric object
+using a Lagrange multiplier approach. E.g. this object enforces the constraint that the average
+value of $\phi$ match $\phi_0$ on the prescribed `boundary` (denoted by $\partial \Omega$ in the
+equation above). This object is the boundary version of the volumetric object
 [FVIntegralValueConstraint.md].
 
 !alert warning
