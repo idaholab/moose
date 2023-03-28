@@ -1929,10 +1929,6 @@ MooseApp::loadLibraryAndDependencies(const std::string & library_filename,
                    "This doesn't necessarily indicate an error condition unless you believe that "
                    "the method should exist in that library.\n");
 #endif
-
-#ifdef LIBMESH_HAVE_DLOPEN
-      dlclose(handle);
-#endif
     }
     else // registration_method is valid!
     {
