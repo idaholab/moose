@@ -1170,8 +1170,8 @@ protected:
 
   struct DynamicLibraryInfo
   {
-    void * _library_handle;
-    std::unordered_set<std::string> _entry_symbols;
+    void * library_handle;
+    std::unordered_set<std::string> entry_symbols;
   };
 
   /// The library, registration method and the handle to the method

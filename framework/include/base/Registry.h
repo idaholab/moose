@@ -222,7 +222,7 @@ public:
     return getRegistry()._data_file_paths;
   }
 
-  ///@{ Don't allow creation through copy consturction or assignment
+  ///@{ Don't allow creation through copy construction or assignment
   Registry(Registry const &) = delete;
   void operator=(Registry const &) = delete;
   ///@}

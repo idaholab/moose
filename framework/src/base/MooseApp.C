@@ -1879,7 +1879,7 @@ MooseApp::loadLibraryAndDependencies(const std::string & library_filename,
   }
 
   // This should only occur if we have static linkage.
-  if (dl_lib_filename == "")
+  if (dl_lib_filename.empty())
     return;
 
   // Time to load the library, First see if we've already loaded this particular dynamic library
@@ -1897,9 +1897,9 @@ MooseApp::loadLibraryAndDependencies(const std::string & library_filename,
     MooseUtils::checkFileReadable(dl_lib_full_path, false, /*throw_on_unreadable=*/true);
 
 #ifdef LIBMESH_HAVE_DLOPEN
-    void * lib_handle = dlopen(dl_lib_full_path.c_str(), RTLD_LAZY);
+    void * const lib_handle = dlopen(dl_lib_full_path.c_str(), RTLD_LAZY);
 #else
-    void * lib_handle = nullptr;
+    void * const lib_handle = nullptr;
 #endif
 
     if (!lib_handle)
@@ -1919,7 +1919,7 @@ MooseApp::loadLibraryAndDependencies(const std::string & library_filename,
   }
 
   // Library has been loaded, check to see if we've called the requested registration method
-  std::string registration_method = params.get<std::string>("registration_method");
+  const auto registration_method = params.get<std::string>("registration_method");
   auto & entry_sym_from_curr_lib = dyn_lib_it->second._entry_symbols;
 
   if (entry_sym_from_curr_lib.find(registration_method) == entry_sym_from_curr_lib.end())
@@ -1929,10 +1929,10 @@ MooseApp::loadLibraryAndDependencies(const std::string & library_filename,
     // we also explicitly set the pointer to NULL if dlsym is not
     // available.
 #ifdef LIBMESH_HAVE_DLOPEN
-    void * registration_handle =
+    void * const registration_handle =
         dlsym(dyn_lib_it->second._library_handle, registration_method.c_str());
 #else
-    void * registration_handle = nullptr;
+    void * const registration_handle = nullptr;
 #endif
 
     if (registration_handle)
@@ -1942,14 +1942,14 @@ MooseApp::loadLibraryAndDependencies(const std::string & library_filename,
         case APPLICATION:
         {
           using register_app_t = void (*)();
-          register_app_t * reg_ptr = reinterpret_cast<register_app_t *>(&registration_handle);
+          register_app_t * const reg_ptr = reinterpret_cast<register_app_t *>(&registration_handle);
           (*reg_ptr)();
           break;
         }
         case REGALL:
         {
           using register_app_t = void (*)(Factory *, ActionFactory *, Syntax *);
-          register_app_t * reg_ptr = reinterpret_cast<register_app_t *>(&registration_handle);
+          register_app_t * const reg_ptr = reinterpret_cast<register_app_t *>(&registration_handle);
           (*reg_ptr)(params.get<Factory *>("factory"),
                      params.get<ActionFactory *>("action_factory"),
                      params.get<Syntax *>("syntax"));
@@ -1968,7 +1968,6 @@ MooseApp::loadLibraryAndDependencies(const std::string & library_filename,
       // We found a dynamic library that doesn't have a dynamic
       // registration method in it. This shouldn't be an error, so
       // we'll just move on.
-
       if (!registration_handle)
         mooseWarning("Unable to find extern \"C\" method \"",
                      registration_method,

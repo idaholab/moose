@@ -115,7 +115,7 @@ public:
     return _name_to_params_pointer;
   }
 
-  ///@{ Don't allow creation through copy consturction or assignment
+  ///@{ Don't allow creation through copy construction or assignment
   AppFactory(AppFactory const &) = delete;
   void operator=(AppFactory const &) = delete;
   ///@}
