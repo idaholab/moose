@@ -43,9 +43,12 @@ public:
   /// Return Singleton instance
   static ExecFlagRegistry & getExecFlagRegistry();
 
-  ///@{ Don't allow creation through copy consturction or assignment
+  ///@{ Don't allow creation through copy/move consturction or assignment
   ExecFlagRegistry(ExecFlagRegistry const &) = delete;
-  void operator=(ExecFlagRegistry const &) = delete;
+  ExecFlagRegistry & operator=(ExecFlagRegistry const &) = delete;
+
+  ExecFlagRegistry(ExecFlagRegistry &&) = delete;
+  ExecFlagRegistry & operator=(ExecFlagRegistry &&) = delete;
   ///@}
 
 private:
