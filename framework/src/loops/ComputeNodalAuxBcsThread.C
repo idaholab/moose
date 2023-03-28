@@ -42,7 +42,6 @@ template <typename AuxKernelType>
 void
 ComputeNodalAuxBcsThread<AuxKernelType>::onNode(ConstBndNodeRange::const_iterator & node_it)
 {
-  std::abort(); //// jajajaajajajajajajajajaja
   const BndNode * bnode = *node_it;
 
   BoundaryID boundary_id = bnode->_bnd_id;

@@ -41,7 +41,7 @@ protected:
   void accumulateNeighborLower() override;
   void accumulateLower() override;
   void accumulate() override;
-  void determineResidualObjects() override;
+  void determineObjectWarehouses() override;
 
   std::string objectType() const override { return "combined Jacobian & Residual"; }
 

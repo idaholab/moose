@@ -53,7 +53,7 @@ NonlinearThread::subdomainChanged()
 {
   // This should come first to setup the residual objects before we do dependency determination of
   // material properties and variables
-  determineResidualObjects();
+  determineObjectWarehouses();
 
   _fe_problem.subdomainSetup(_subdomain, _tid);
 
@@ -106,6 +106,16 @@ NonlinearThread::onElement(const Elem * elem)
 
   _fe_problem.reinitMaterials(_subdomain, _tid);
 
+  if (dynamic_cast<ComputeJacobianThread *>(this))
+    if (_nl.getScalarVariables(_tid).size() > 0)
+      _fe_problem.reinitOffDiagScalars(_tid);
+
+  computeOnElement();
+}
+
+void
+NonlinearThread::computeOnElement()
+{
   if (_tag_kernels->hasActiveBlockObjects(_subdomain, _tid))
   {
     const auto & kernels = _tag_kernels->getActiveBlockObjects(_subdomain, _tid);
@@ -125,8 +135,6 @@ NonlinearThread::onBoundary(const Elem * elem,
 {
   if (_ibc_warehouse->hasActiveBoundaryObjects(bnd_id, _tid))
   {
-    const auto & bcs = _ibc_warehouse->getActiveBoundaryObjects(bnd_id, _tid);
-
     _fe_problem.reinitElemFace(elem, side, bnd_id, _tid);
 
     // Needed to use lower-dimensional variables on Materials
@@ -140,17 +148,24 @@ NonlinearThread::onBoundary(const Elem * elem,
     _fe_problem.reinitMaterialsFace(elem->subdomain_id(), _tid);
     _fe_problem.reinitMaterialsBoundary(bnd_id, _tid);
 
-    for (const auto & bc : bcs)
-    {
-      if (bc->shouldApply())
-        compute(*bc);
-    }
+    computeOnBoundary(bnd_id, lower_d_elem);
 
     if (lower_d_elem)
     {
       Threads::spin_mutex::scoped_lock lock(Threads::spin_mtx);
       accumulateLower();
     }
+  }
+}
+
+void
+NonlinearThread::computeOnBoundary(BoundaryID bnd_id, const Elem * /*lower_d_elem*/)
+{
+  const auto & bcs = _ibc_warehouse->getActiveBoundaryObjects(bnd_id, _tid);
+  for (const auto & bc : bcs)
+  {
+    if (bc->shouldApply())
+      compute(*bc);
   }
 }
 
@@ -183,9 +198,7 @@ NonlinearThread::onInterface(const Elem * elem, unsigned int side, BoundaryID bn
       // with the current element and side
       _fe_problem.reinitMaterialsInterface(bnd_id, _tid);
 
-      const auto & int_ks = _ik_warehouse->getActiveBoundaryObjects(bnd_id, _tid);
-      for (const auto & interface_kernel : int_ks)
-        compute(*interface_kernel);
+      computeOnInterface(bnd_id);
 
       {
         Threads::spin_mutex::scoped_lock lock(Threads::spin_mtx);
@@ -193,6 +206,14 @@ NonlinearThread::onInterface(const Elem * elem, unsigned int side, BoundaryID bn
       }
     }
   }
+}
+
+void
+NonlinearThread::computeOnInterface(BoundaryID bnd_id)
+{
+  const auto & int_ks = _ik_warehouse->getActiveBoundaryObjects(bnd_id, _tid);
+  for (const auto & interface_kernel : int_ks)
+    compute(*interface_kernel);
 }
 
 void
@@ -213,10 +234,7 @@ NonlinearThread::onInternalSide(const Elem * elem, unsigned int side)
     SwapBackSentinel neighbor_sentinel(_fe_problem, &FEProblem::swapBackMaterialsNeighbor, _tid);
     _fe_problem.reinitMaterialsNeighbor(neighbor->subdomain_id(), _tid);
 
-    const auto & dgks = _dg_warehouse->getActiveBlockObjects(_subdomain, _tid);
-    for (const auto & dg_kernel : dgks)
-      if (dg_kernel->hasBlocks(neighbor->subdomain_id()))
-        compute(*dg_kernel);
+    computeOnInternalFace(neighbor);
 
     {
       Threads::spin_mutex::scoped_lock lock(Threads::spin_mtx);
@@ -224,6 +242,45 @@ NonlinearThread::onInternalSide(const Elem * elem, unsigned int side)
     }
   }
 }
+
+void
+NonlinearThread::computeOnInternalFace(const Elem * neighbor)
+{
+  const auto & dgks = _dg_warehouse->getActiveBlockObjects(_subdomain, _tid);
+  for (const auto & dg_kernel : dgks)
+    if (dg_kernel->hasBlocks(neighbor->subdomain_id()))
+      compute(*dg_kernel, neighbor);
+}
+
+void
+NonlinearThread::compute(KernelBase & kernel)
+{
+  compute(dynamic_cast<ResidualObject &>(kernel));
+};
+
+void
+NonlinearThread::compute(FVElementalKernel & kernel)
+{
+  compute(dynamic_cast<ResidualObject &>(kernel));
+};
+
+void
+NonlinearThread::compute(IntegratedBCBase & bc)
+{
+  compute(dynamic_cast<ResidualObject &>(bc));
+};
+
+void
+NonlinearThread::compute(DGKernelBase & dg, const Elem * /*neighbor*/)
+{
+  compute(dynamic_cast<ResidualObject &>(dg));
+};
+
+void
+NonlinearThread::compute(InterfaceKernelBase & ik)
+{
+  compute(dynamic_cast<ResidualObject &>(ik));
+};
 
 void
 NonlinearThread::postElement(const Elem * /*elem*/)

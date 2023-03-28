@@ -81,10 +81,10 @@ ComputeJacobianForScalingThread::operator()(const ConstElemRange & range,
 }
 
 void
-ComputeJacobianForScalingThread::computeJacobian()
+ComputeJacobianForScalingThread::computeOnElement()
 {
   if (_nl.offDiagonalsInAutoScaling())
-    ComputeFullJacobianThread::computeJacobian();
+    ComputeFullJacobianThread::computeOnElement();
   else
-    ComputeJacobianThread::computeJacobian();
+    ComputeJacobianThread::computeOnElement();
 }
