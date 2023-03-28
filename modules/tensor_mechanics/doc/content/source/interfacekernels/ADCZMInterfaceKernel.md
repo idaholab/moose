@@ -1,13 +1,13 @@
-# ADCZMInterfaceKernelTotalLagrangian
+# ADCZMInterfaceKernel
 
-!syntax description /InterfaceKernels/ADCZMInterfaceKernelTotalLagrangian
+!syntax description /InterfaceKernels/ADCZMInterfaceKernel
 
 ## Description
 
-This is the automatic-differentiation version of [`CZMInterfaceKernelTotalLagrangian`](CZMInterfaceKernelTotalLagrangian.md).
+This is the automatic-differentiation version of [`CZMInterfaceKernelSmallStrain`](CZMInterfaceKernelSmallStrain.md) and [`CZMInterfaceKernelTotalLagrangian`](CZMInterfaceKernelTotalLagrangian.md). The AD version works for both small strain and large deformation.
 
-!syntax parameters /Kernels/ADCZMInterfaceKernelTotalLagrangian
+!syntax parameters /InterfaceKernels/ADCZMInterfaceKernel
 
-!syntax inputs /Kernels/ADCZMInterfaceKernelTotalLagrangian
+!syntax inputs /InterfaceKernels/ADCZMInterfaceKernel
 
-!syntax children /Kernels/ADCZMInterfaceKernelTotalLagrangian
+!syntax children /InterfaceKernels/ADCZMInterfaceKernel

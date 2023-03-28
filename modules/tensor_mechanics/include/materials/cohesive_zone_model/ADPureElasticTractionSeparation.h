@@ -12,7 +12,8 @@
 #include "ADCZMComputeLocalTractionTotalBase.h"
 
 /**
- * Implementation of the purely elastic traction-separation law
+ * Implementation of the purely elastic traction-separation law. This is the AD equivalent of
+ *`PureElasticTractionSeparation`.
  **/
 class ADPureElasticTractionSeparation : public ADCZMComputeLocalTractionTotalBase
 {

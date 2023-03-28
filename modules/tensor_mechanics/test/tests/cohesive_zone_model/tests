@@ -397,15 +397,16 @@
     []
   []
 
-  [AD_CZM]
-    design = 'source/materials/cohesive_zone_model/SalehaniIrani3DCTraction.md'
-    issues = '#11546 #14527 #17156'
-    requirement = "The system shall be able to use the small strain and total lagrangian cohesive "
-                  "zone model formulation using automatic differentiation"
+  [AD_CZM_small]
+    design = 'source/materials/cohesive_zone_model/ADPureElasticTractionSeparation.md'
+    issues = '#23855'
+    requirement = "The system shall be able to use the small strain cohesive zone model formulation "
+                  "using automatic differentiation"
     [AD_solution]
       type = Exodiff
       input = 'ad_czm.i'
-      exodiff = 'ad_czm_out.e'
+      cli_args = 'Outputs/file_base=ad_czm_small_strain'
+      exodiff = 'ad_czm_small_strain.e'
       mesh_mode = REPLICATED
       recover = false
       detail = "The solution obtained using AD CZM shall match"
@@ -414,8 +415,35 @@
     [non_AD_solution]
       type = Exodiff
       input = 'ad_czm.i'
-      exodiff = 'ad_czm_out.e'
-      cli_args = 'Modules/TensorMechanics/CohesiveZoneMaster/interface/use_automatic_differentiation=false Materials/czm_mat/type=PureElasticTractionSeparation'
+      cli_args = 'Outputs/file_base=ad_czm_small_strain Modules/TensorMechanics/CohesiveZoneMaster/interface/use_automatic_differentiation=false Materials/czm_mat/type=PureElasticTractionSeparation'
+      exodiff = 'ad_czm_small_strain.e'
+      mesh_mode = REPLICATED
+      recover = false
+      detail = "the non-AD solution"
+      abs_zero = 1e-6
+    []
+  []
+
+  [AD_CZM_large]
+    design = 'source/materials/cohesive_zone_model/ADPureElasticTractionSeparation.md'
+    issues = '#23855'
+    requirement = "The system shall be able to use the total lagrangian cohesive zone model "
+                  "formulation using automatic differentiation"
+    [AD_solution]
+      type = Exodiff
+      input = 'ad_czm.i'
+      cli_args = 'Outputs/file_base=ad_czm_total_lagrangian Modules/TensorMechanics/CohesiveZoneMaster/interface/strain=FINITE'
+      exodiff = 'ad_czm_total_lagrangian.e'
+      mesh_mode = REPLICATED
+      recover = false
+      detail = "The solution obtained using AD CZM shall match"
+      abs_zero = 1e-6
+    []
+    [non_AD_solution]
+      type = Exodiff
+      input = 'ad_czm.i'
+      cli_args = 'Outputs/file_base=ad_czm_total_lagrangian Modules/TensorMechanics/CohesiveZoneMaster/interface/strain=FINITE Modules/TensorMechanics/CohesiveZoneMaster/interface/use_automatic_differentiation=false Materials/czm_mat/type=PureElasticTractionSeparation'
+      exodiff = 'ad_czm_total_lagrangian.e'
       mesh_mode = REPLICATED
       recover = false
       detail = "the non-AD solution"
