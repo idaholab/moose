@@ -168,13 +168,13 @@
 []
 
 [InterfaceKernels]
-  [diff_2]
+  [diff_ik_2]
     type = InterfaceDiffusion
     variable = 'u'
     neighbor_var = 'v'
     boundary = 'middle'
   []
-  [diff_1]
+  [diff_ik_1]
     type = InterfaceDiffusion
     variable = 'v'
     neighbor_var = 'u'
@@ -183,13 +183,13 @@
 []
 
 [DGKernels]
-  [diff_2]
+  [diff_dg_2]
     type = DGDiffusion
     variable = 'u'
     epsilon = -1
     sigma = 6
   []
-  [diff_1]
+  [diff_dg_1]
     type = DGDiffusion
     variable = 'u'
     epsilon = -1

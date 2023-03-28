@@ -75,7 +75,7 @@
 []
 
 [FVInterfaceKernels]
-  [diff]
+  [diff_ik]
     type = FVOnlyAddDiffusionToOneSideOfInterface
     variable1 = 'v'
     variable2 = 'u'

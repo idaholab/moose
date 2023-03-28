@@ -115,10 +115,9 @@
     [regular_bcs]
       type = RunApp
       input = 'show_execution_kernels_bcs.i'
-      expect_out = '\[DBG\] JAJAJAJAJAJ'
+      expect_out = '\[DBG\] bc_u_tb bc_ul bc_ur bc_ut bc_ub'
       detail = 'objects contributing to the residual and Jacobian, notably boundary conditions,'
-      # residuan and jacobian together for coverage purposes
-      cli_args = '--color off Exectioner/residual_and_jacobian_together=true'
+      cli_args = '--color off'
     []
     [elem_dampers]
       type = RunApp
@@ -130,7 +129,7 @@
     [interface_kernels]
       type = RunApp
       input = 'show_execution_kernels_bcs.i'
-      expect_out = '\[DBG\] diff_2 diff_1'
+      expect_out = '\[DBG\] diff_ik_2 diff_ik_1'
       detail = 'interface kernels,'
       cli_args = "--color off"
     []
@@ -144,7 +143,7 @@
     [dgkernels]
       type = RunApp
       input = 'show_execution_kernels_bcs.i'
-      expect_out = '\[DBG\] diff'
+      expect_out = '\[DBG\] diff_dg_2 diff_dg_1'
       detail = 'discontinuous Galerkin kernels,'
       cli_args = "--color off"
     []
@@ -153,6 +152,7 @@
     [fv_flux_kernels_bcs]
       type = RunApp
       input = 'show_execution_fv_flux_objects.i'
+      cli_args = '--color off'
       # FV flux kernels are not actually ordered
       expect_out = '\[DBG\] (2_burger|1_burgers) (1_burgers|2_burger)'
       detail = 'finite volume flux objects contributing to the residual and Jacobian, notably finite volume flux kernels and flux boundary conditions,'
@@ -161,21 +161,21 @@
       type = RunApp
       input = 'show_execution_fv_flux_objects.i'
       cli_args = 'FVKernels/reac/type=FVReaction FVKernels/reac/variable=v --color off'
-      expect_out = '\[DBG\] time reac'
+      expect_out = '\[DBG\] time time_u reac'
       detail = 'finite volume elemental kernels,'
     []
     [fv_interface_kernels]
       type = RunApp
       input = 'show_execution_fv_flux_objects.i'
       cli_args = '--color off'
-      expect_out = '\[DBG\] diff'
+      expect_out = '\[DBG\] diff_ik'
       detail = 'finite volume interface kernels,'
     []
     [fv_elem_kernels_res_and_jac_combined]
       type = RunApp
       input = 'show_execution_fv_flux_objects.i'
-      cli_args = 'FVKernels/reac/type=FVReaction FVKernels/reac/variable=v Exectioner/residual_and_jacobian_together=true --color off'
-      expect_out = '\[DBG\] time reac'
+      cli_args = 'FVKernels/reac/type=FVReaction FVKernels/reac/variable=v Executioner/residual_and_jacobian_together=true --color off'
+      expect_out = '\[DBG\] time time_u reac'
       detail = 'finite volume elemental kernels when combining both jacobian and residual computations,'
     []
     # Nodal loops
@@ -188,7 +188,7 @@
     []
     [nodal_dampers]
       type = RunApp
-      input = 'show_execution_nodal_kernels_bcs.i'
+      input = 'show_execution_nodal_aux_bcs.i'
       expect_out = '\[DBG\] limit_u'
       detail = 'nodal dampers,'
       cli_args = "--color off Dampers/inactive=''"
@@ -235,7 +235,7 @@
     [threaded_general_user_objects]
       type = RunApp
       input = 'show_execution_userobjects.i'
-      cli_args = "--color off Userobjects/inactive=''"
+      cli_args = "--color off UserObjects/inactive=''"
       expect_out = '\[DBG\] Executing Threaded General User Object prime_2 on TIMESTEP_END'
       detail = 'threaded general user objects,'
       max_threads = 20
@@ -262,7 +262,7 @@
       input = 'show_execution_adaptivity.i'
       expect_out = '\[DBG\] indicator_elem'
       detail = 'each step of the adaptive refinement process, especially element-based indicators,'
-      cli_args = '--color off Markers/marker/indicator=indicator_elem Adaptivity/Indicators/indicator_elem/type=AnalyticalIndicator Adaptivity/Indicators/indicator_elem/function=4'
+      cli_args = '--color off Adaptivity/Markers/marker/indicator=indicator_elem Adaptivity/Indicators/indicator_elem/type=AnalyticalIndicator Adaptivity/Indicators/indicator_elem/variable=u Adaptivity/Indicators/indicator_elem/function=4'
     []
     # Initial conditions use dependency resolution at node/element scale to execute
     [initial_conditions]
@@ -287,5 +287,6 @@
       expect_out = '\[DBG\] Ordering on boundary 0\n\[DBG\] real_property'
       detail = 'boundary restricted auxiliary kernels.'
       cli_args = '--color off'
+    []
   []
 []
