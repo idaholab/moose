@@ -23,15 +23,19 @@ PODMapping::validParams()
   InputParameters params = MappingBase::validParams();
   params.addParam<UserObjectName>(
       "solution_storage", "The name of the storage reporter where the snapshots are located.");
-  params.addParam<std::vector<VariableName>>(
-      "variables", "The names of the variables which need a reduced basis.");
-  params.addParam<std::vector<unsigned int>>(
+  params.addRequiredParam<std::vector<unsigned int>>(
       "num_modes",
       "The number of modes requested for each variable. Modes with 0 eigenvalues are filtered out, "
-      "so the real number of modes might be lower than this.");
+      "so the real number of modes might be lower than this. This is also used for setting the "
+      "subspace sizes for distributed singular value solves. By default the subspace used for the "
+      "SVD is twice as big as the number of requested vectors. For more information see the SLEPc "
+      "manual.");
   params.addParam<std::vector<Real>>(
       "energy_threshold",
-      "The energy threshold for the automatic selection (truncation) of the number of modes.");
+      std::vector<Real>(),
+      "The energy threshold for the automatic truncation of the number of modes. In general, the "
+      "lower this number is the more information is retained about the system by keeping more POD "
+      "modes.");
   params.addParam<std::string>("extra_slepc_options",
                                "",
                                "Additional options for the singular/eigenvalue solvers in SLEPc.");
@@ -40,35 +44,29 @@ PODMapping::validParams()
 
 PODMapping::PODMapping(const InputParameters & parameters)
   : MappingBase(parameters),
-    _num_modes(isParamValid("num_modes") ? getParam<std::vector<unsigned int>>("num_modes")
-                                         : std::vector<unsigned int>()),
-    _energy_threshold(isParamValid("energy_threshold")
-                          ? getParam<std::vector<Real>>("energy_threshold")
-                          : std::vector<Real>()),
+    _num_modes(getParam<std::vector<unsigned int>>("num_modes")),
+    _energy_threshold(getParam<std::vector<Real>>("energy_threshold")),
     _basis_functions(isParamValid("filename")
                          ? setModelData<std::map<VariableName, std::vector<DenseVector<Real>>>>(
                                "basis_functions")
                          : declareModelData<std::map<VariableName, std::vector<DenseVector<Real>>>>(
                                "basis_functions")),
-    _eigen_values(
+    _singular_values(
         isParamValid("filename")
-            ? setModelData<std::map<VariableName, std::vector<Real>>>("eigen_values")
-            : declareModelData<std::map<VariableName, std::vector<Real>>>("eigen_values")),
+            ? setModelData<std::map<VariableName, std::vector<Real>>>("singular_values")
+            : declareModelData<std::map<VariableName, std::vector<Real>>>("singular_values")),
     _extra_slepc_options(getParam<std::string>("extra_slepc_options"))
 {
   if (!isParamValid("filename"))
   {
-    if (isParamValid("num_modes"))
-    {
-      if (_num_modes.size() != _variable_names.size())
-        paramError("num_modes", "The number of modes should be defined for each variable!");
+    if (_num_modes.size() != _variable_names.size())
+      paramError("num_modes", "The number of modes should be defined for each variable!");
 
-      for (const auto & mode : _num_modes)
-        if (!mode)
-          paramError("num_modes", "The number of modes should always be a positive!");
-    }
+    for (const auto & mode : _num_modes)
+      if (!mode)
+        paramError("num_modes", "The number of modes should always be a positive integer!");
 
-    if (isParamValid("energy_threshold"))
+    if (_energy_threshold.size())
     {
       if (_energy_threshold.size() != _variable_names.size())
         paramError("energy_threshold",
@@ -82,7 +80,7 @@ PODMapping::PODMapping(const InputParameters & parameters)
 
     for (const auto & vname : _variable_names)
     {
-      _eigen_values.emplace(vname, std::vector<Real>());
+      _singular_values.emplace(vname, std::vector<Real>());
       _basis_functions.emplace(vname, std::vector<DenseVector<Real>>());
       _svds.try_emplace(vname);
       SVDCreate(_communicator.get(), &_svds[vname]);
@@ -94,9 +92,7 @@ PODMapping::PODMapping(const InputParameters & parameters)
 PODMapping::~PODMapping()
 {
   for (const auto & vname : _variable_names)
-  {
     SVDDestroy(&_svds[vname]);
-  }
 }
 
 unsigned int
@@ -110,23 +106,23 @@ PODMapping::determineNumberOfModes(const VariableName & vname,
 
   unsigned int var_i = std::distance(_variable_names.begin(), it);
 
-  if (_num_modes.size())
-  {
-    unsigned int num_requested_modes =
-        std::min((unsigned long)_num_modes[var_i], converged_evs.size());
-    for (auto mode_i : make_range(num_requested_modes))
-    {
-      if (std::pow(converged_evs[mode_i], 2) > std::numeric_limits<Real>::epsilon())
-      {
-        num_modes = mode_i + 1;
-      }
-    }
-  }
+  // We either use the number of modes defined by the user or the maximum number of converged modes.
+  // We don't want to use modes which are unconverged.
+  unsigned int num_requested_modes =
+      std::min((unsigned long)_num_modes[var_i], converged_evs.size());
 
+  // We also truncate modes that have a squared singular value below the rundoff
+  for (auto mode_i : make_range(num_requested_modes))
+    if (std::pow(converged_evs[mode_i], 2) > std::numeric_limits<Real>::epsilon())
+      num_modes = mode_i + 1;
+
+  // If the user specifies energy thresholds, we need to truncate based on that too
   if (_energy_threshold.size())
   {
     Real cumulative_evs = 0;
     Real sum_evs = 0;
+
+    // We need to include a little bit of a tolerance due to rundoff errors
     Real threshold = _energy_threshold[var_i] + std::numeric_limits<Real>::epsilon();
     for (auto mode_i : index_range(converged_evs))
     {
@@ -156,9 +152,9 @@ PODMapping::buildMapping(const VariableName & vname)
   unsigned int var_i = std::distance(_variable_names.begin(), it);
 
   UserObjectName parallel_storage_name = getParam<UserObjectName>("solution_storage");
-  /// Reference to FEProblemBase instance
   FEProblemBase & feproblem = *_pars.get<FEProblemBase *>("_fe_problem_base");
 
+  // Hopefully this method is not called too many times
   std::vector<UserObject *> reporters;
   feproblem.theWarehouse()
       .query()
@@ -183,8 +179,12 @@ PODMapping::buildMapping(const VariableName & vname)
                parallel_storage_name,
                "'");
 
+  // Define the petsc matrix which needs and SVD, we will populate it using the snapshots
   Mat mat;
 
+  // We make sure every rank knows how many global and local samples we have and how long the
+  // snapshots are. At this point we assume that the snapshots are the same size so we don't need to
+  // map them to a reference domain.
   unsigned int local_rows = 0;
   unsigned int snapshot_size = 0;
   unsigned int global_rows = 0;
@@ -198,6 +198,11 @@ PODMapping::buildMapping(const VariableName & vname)
   comm().sum(global_rows);
   comm().max(snapshot_size);
 
+  // The Lanczos method is preferred for symmetric semi positive definite matrices
+  // but it only works with sparse matrices at the moment (dense matrix leaks memory).
+  // So we create a sparse matrix with the distribution given in ParallelSolutionStorage.
+  // TODO: Figure out a way to use a dense matrix without leaking memory, that would
+  // avoid the overhead of using a sparse format for a dense matrix
   PetscErrorCode ierr = MatCreateAIJ(_communicator.get(),
                                      local_rows,
                                      snapshot_size,
@@ -210,9 +215,10 @@ PODMapping::buildMapping(const VariableName & vname)
                                      &mat);
   LIBMESH_CHKERR(ierr);
 
-  dof_id_type local_beg;
-  dof_id_type local_end;
-
+  // Check where the local rows begin in the matrix, we use these to convert from local to global
+  // indices
+  dof_id_type local_beg = 0;
+  dof_id_type local_end = 0;
   MatGetOwnershipRange(mat, numeric_petsc_cast(&local_beg), numeric_petsc_cast(&local_end));
 
   unsigned int counter = 0;
@@ -220,7 +226,12 @@ PODMapping::buildMapping(const VariableName & vname)
     for (const auto & row : _parallel_storage->getStorage(vname))
     {
       std::vector<PetscInt> rows(snapshot_size, (counter++) + local_beg);
-      std::vector<PetscInt> columns = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10};
+
+      // Fill the column indices with 0,1,...,snapshot_size-1
+      std::vector<PetscInt> columns(snapshot_size);
+      std::iota(std::begin(columns), std::end(columns), 0);
+
+      // Set the rows in the "sparse" matrix
       MatSetValues(mat,
                    1,
                    rows.data(),
@@ -230,80 +241,74 @@ PODMapping::buildMapping(const VariableName & vname)
                    INSERT_VALUES);
     }
 
+  // Assemble the matrix
   MatAssemblyBegin(mat, MAT_FINAL_ASSEMBLY);
   MatAssemblyEnd(mat, MAT_FINAL_ASSEMBLY);
 
-  ierr = MatView(mat, PETSC_VIEWER_STDOUT_SELF);
-  LIBMESH_CHKERR(ierr);
-
+  // Now we generate our SVD objects
   SVDCreate(_communicator.get(), &_svds[vname]);
   SVDSetOperators(_svds[vname], mat, NULL);
-  // SVDSetProblemType(svd, SVD_STANDARD);
+
+  // We want the Lanczos method, might give the choice to the user
+  // at some point
   SVDSetType(_svds[vname], SVDTRLANCZOS);
   ierr = PetscOptionsInsertString(NULL, _extra_slepc_options.c_str());
   LIBMESH_CHKERR(ierr);
+
+  // Set the subspace size for the Lanczos method, we take twice as many
+  // basis vectors as the requested number of POD modes. This guarantees in most of the case the
+  // convergence of the singular triplets.
   SVDSetFromOptions(_svds[vname]);
   SVDSetDimensions(_svds[vname],
                    _num_modes[var_i],
                    std::min(2 * _num_modes[var_i], global_rows),
                    std::min(2 * _num_modes[var_i], global_rows));
 
+  // Compute the singular value triplets
   ierr = SVDSolve(_svds[vname]);
   LIBMESH_CHKERR(ierr);
 
+  // Check how many singular triplets converged
   PetscInt nconv;
   ierr = SVDGetConverged(_svds[vname], &nconv);
   LIBMESH_CHKERR(ierr);
 
+  // We start extracting the basis functions and the singular values. The left singular
+  // vectors are supposed to be all on the root processor
+  PetscReal sigma;
   PetscVector<Real> u(_communicator);
-  // PetscVector<Real> v(_communicator);
   u.init(snapshot_size);
 
-  const numeric_index_type converted_asd = global_rows;
-  const numeric_index_type converted_local = local_rows;
-
-  // // std::cerr << converted_asd << std::endl;
-  // v.init(converted_asd, converted_local, false, PARALLEL);
-  PetscReal sigma;
-  // PetscReal error;
-
   _basis_functions[vname].clear();
-  _eigen_values[vname].clear();
+  _singular_values[vname].clear();
 
-  const auto emplaced_eigenvalues = _eigen_values.emplace(vname, std::vector<Real>());
+  const auto emplaced_singular_values = _singular_values.emplace(vname, std::vector<Real>());
 
-  if (emplaced_eigenvalues.second)
-    emplaced_eigenvalues.first->second.clear();
+  if (emplaced_singular_values.second)
+    emplaced_singular_values.first->second.clear();
 
+  // Fetch the singular value triplet and immediately save the singular value
   for (PetscInt j = 0; j < nconv; j++)
   {
     ierr = SVDGetSingularTriplet(_svds[vname], j, &sigma, NULL, NULL);
     LIBMESH_CHKERR(ierr);
-    emplaced_eigenvalues.first->second.emplace_back(sigma);
+    emplaced_singular_values.first->second.emplace_back(sigma);
   }
 
-  std::ostringstream mystream;
-  mystream << "Proc " << processor_id() << " EVs "
-           << Moose::stringify(emplaced_eigenvalues.first->second) << std::endl;
-
+  // Determine how many modes we need
   unsigned int num_requested_modes =
-      determineNumberOfModes(vname, emplaced_eigenvalues.first->second);
+      determineNumberOfModes(vname, emplaced_singular_values.first->second);
 
-  mystream << " Need this many modes " << num_requested_modes << std::endl;
-
+  // Only save the basis functions which are needed. We serialize the modes
+  // on every processor so all of them have access to every mode.
   for (PetscInt j = 0; j < num_requested_modes; j++)
   {
     SVDGetSingularTriplet(_svds[vname], j, &sigma, NULL, u.vec());
     DenseVector<Real> serialized_mode;
     u.localize(serialized_mode.get_values());
     _basis_functions[vname].push_back(std::move(serialized_mode));
-
-    mystream << " Mode " << j << " " << Moose::stringify(_basis_functions[vname][j].get_values())
-             << std::endl;
   }
   _computed_svd[vname] = true;
-
-  std::cerr << mystream.str() << std::endl;
 
   MatDestroy(&mat);
 }
@@ -336,20 +341,7 @@ PODMapping::map(const VariableName & vname,
   reduced_order_vector.clear();
   reduced_order_vector.resize(bases.size());
   for (auto base_i : index_range(bases))
-  {
-    std::ostringstream mystream;
-    mystream << "P " << processor_id() << " " << Moose::stringify(bases[base_i].get_values())
-             << std::endl;
-    std::cerr << mystream.str() << std::endl;
     reduced_order_vector[base_i] = bases[base_i].dot(full_order_vector);
-  }
-}
-
-void
-PODMapping::map(const NumericVector<Number> & full_order_vector,
-                std::vector<Real> & reduced_order_vector) const
-{
-  std::cerr << "Something smart" << std::endl;
 }
 
 void

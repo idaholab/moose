@@ -100,7 +100,7 @@
     surrogate = polyreg
     variable_to_fill = "v_pod"
     variable_to_reconstruct = "v"
-    parameters = '0 3'
+    parameters = '0 6'
     execute_on = INITIAL
   []
 []

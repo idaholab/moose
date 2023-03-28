@@ -14,18 +14,29 @@
 #include "FEProblemBase.h"
 #include "MappingBase.h"
 
+/**
+ * An interface class that helps getting access to Mapping objects
+ */
 class MappingInterface
 {
 public:
   static InputParameters validParams();
 
+  /// Construct using a moose object (usually the object which inherits from the interface)
   MappingInterface(const MooseObject * moose_object);
 
+  /**
+   * Get the mapping using the parameters of the moose object
+   * @param name The parameter name
+   */
   MappingBase & getMapping(const std::string & name) const;
 
+  /**
+   * Get the mapping by supplying the name of the object in the warehouse
+   * @param name The name of the mapping object
+   */
   MappingBase & getMappingByName(const UserObjectName & name) const;
 
-  ///@}
 private:
   /// Parameters of the object with this interface
   const InputParameters & _smi_params;
