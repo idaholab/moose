@@ -25,7 +25,7 @@ MOOSE provides two convenient debug boolean options to examine the convergence o
 - [!param](/Debug/show_top_residuals) shows the residual norms only for the least converged variable equation.
 
 
-Helpful information on debugging numerical convergence issues is provided in the [numerical troubleshooting page](application_usage/failed_solves.md).
+Helpful information on debugging numerical convergence issues is provided in the [numerical troubleshooting page](application_usage/failed_solves.md optional=True).
 
 ## Execution ordering output
 
@@ -63,12 +63,12 @@ For example for UserObjects, the `execution_order_group` parameter lets the mode
 The `[Debug]` system is not the only system that provides useful debugging information. We summarize
 these other helpful resources below:
 
-- to debug [MultiApps](/syntax/MultiApps/index.md) and [Transfers](/syntax/Transfers/index.md)-related
+- to debug [MultiApps](syntax/MultiApps/index.md) and [Transfers](syntax/Transfers/index.md)-related
   issues, the `FEProblem` parameter [!param](/Problem/FEProblem/verbose_multiapps) shows a helpful summary of
   transfers executed and important metadata about each `Transfer`.
 
 - to debug linear system convergence issues, numerous parameters may be passed to PETSc to make it more verbose.
-  They are summarized on this [page about debugging numerical issues](application_usage/failed_solves.md) and in
+  They are summarized on this [page about debugging numerical issues](application_usage/failed_solves.md optional=True) and in
   the [PETSc manual](https://www.mcs.anl.gov/petsc/petsc-current/docs/manualpages/).
 
 

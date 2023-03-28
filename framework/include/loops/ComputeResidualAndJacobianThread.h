@@ -36,6 +36,7 @@ public:
   void join(const ComputeResidualAndJacobianThread & /*y*/);
 
 protected:
+  using NonlinearThread::compute;
   void compute(ResidualObject & ro) override;
   void accumulateNeighbor() override;
   void accumulateNeighborLower() override;

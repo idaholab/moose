@@ -19,6 +19,7 @@
 #include "TimeKernel.h"
 #include "SwapBackSentinel.h"
 #include "FVTimeKernel.h"
+#include "ComputeJacobianThread.h"
 
 #include "libmesh/threads.h"
 
@@ -278,7 +279,7 @@ void
 NonlinearThread::compute(IntegratedBCBase & bc)
 {
   compute(static_cast<ResidualObject &>(bc));
-};
+}
 
 void
 NonlinearThread::compute(DGKernelBase & dg, const Elem * /*neighbor*/)

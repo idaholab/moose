@@ -132,6 +132,8 @@
       expect_out = '\[DBG\] diff_ik_2 diff_ik_1'
       detail = 'interface kernels,'
       cli_args = "--color off"
+      # no print if the interface is not on rank 0
+      max_parallel = 1
     []
     [dirac]
       type = RunApp
@@ -139,6 +141,8 @@
       expect_out = '\[DBG\] source_2 source_0'
       detail = 'Dirac kernels,'
       cli_args = "--color off"
+      # no print if the interface is not on rank 0
+      max_parallel = 1
     []
     [dgkernels]
       type = RunApp
@@ -238,7 +242,8 @@
       cli_args = "--color off UserObjects/inactive=''"
       expect_out = '\[DBG\] Executing Threaded General User Object prime_2 on TIMESTEP_END'
       detail = 'threaded general user objects,'
-      max_threads = 20
+      # The print is not thread-safe, because those objects don't know their thread id
+      max_threads = 1
     []
     # This is one way to understand conservative transfers are only conservative if the conserved quantity linearly depends on the transferred quantity
     # The postprocessors are only executed once!
