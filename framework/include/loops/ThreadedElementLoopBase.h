@@ -172,11 +172,17 @@ protected:
   /// Print information about the particular ordering of objects on each block
   virtual void printBlockExecutionInformation() const {}
 
+  /// Print information about the particular ordering of objects on each boundary
+  virtual void printBoundaryExecutionInformation(const unsigned int /*bid*/) const {}
+
   /// Keep track of which blocks were visited
   mutable std::set<SubdomainID> _blocks_exec_printed;
 
-  /// Resets the set of blocks visited
-  void clearBlocksVisited() { _blocks_exec_printed.clear(); }
+  /// Keep track of which boundaries were visited
+  mutable std::set<BoundaryID> _boundaries_exec_printed;
+
+  /// Resets the set of blocks and boundaries visited
+  void resetExecPrintedSets() const;
 
 private:
   /**
@@ -259,6 +265,7 @@ ThreadedElementLoopBase<RangeType>::operator()(const RangeType & range, bool byp
                  ++it)
             {
               preBoundary(elem, side, *it, lower_d_elem);
+              printBoundaryExecutionInformation(*it);
               onBoundary(elem, side, *it, lower_d_elem);
             }
 
@@ -289,7 +296,7 @@ ThreadedElementLoopBase<RangeType>::operator()(const RangeType & range, bool byp
       } // range
 
       post();
-      clearBlocksVisited();
+      resetExecPrintedSets();
     }
     catch (libMesh::LogicError & e)
     {
@@ -407,4 +414,12 @@ ThreadedElementLoopBase<RangeType>::shouldComputeInternalSide(const Elem & elem,
   // we only compute when we are visiting the finer element
   return (neighbor.active() && (neighbor.level() == elem.level()) && (elem_id < neighbor_id)) ||
          (neighbor.level() < elem.level());
+}
+
+template <typename RangeType>
+void
+ThreadedElementLoopBase<RangeType>::resetExecPrintedSets() const
+{
+  _blocks_exec_printed.clear();
+  _boundaries_exec_printed.clear();
 }

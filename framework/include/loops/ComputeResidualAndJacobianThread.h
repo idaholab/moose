@@ -43,11 +43,7 @@ protected:
   void accumulate() override;
   void determineResidualObjects() override;
 
-  /// Print information about the loop, mostly order of execution of objects
-  void printGeneralExecutionInformation() const override;
-
-  /// Print list of specific objects executed and in which order
-  void printBlockExecutionInformation() const override;
+  std::string objectType() const override { return "combined Jacobian & Residual"; }
 
   /// the tags denoting the vectors we want our residual objects to fill
   const std::set<TagID> & _vector_tags;

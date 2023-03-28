@@ -82,9 +82,5 @@ protected:
   virtual void computeInternalFaceJacobian(const Elem * neighbor);
   virtual void computeInternalInterFaceJacobian(BoundaryID bnd_id);
 
-  /// Print list of objects executed and in which order
-  void printGeneralExecutionInformation() const override;
-
-  /// Print list of specific objects executed and in which order
-  void printBlockExecutionInformation() const override;
+  // std::string objectType() const override { return "Jacobian"; }
 };

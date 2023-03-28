@@ -237,3 +237,99 @@ NonlinearThread::post()
   _fe_problem.clearActiveElementalMooseVariables(_tid);
   _fe_problem.clearActiveMaterialProperties(_tid);
 }
+
+void
+NonlinearThread::printGeneralExecutionInformation() const
+{
+  if (_fe_problem.shouldPrintExecution(_tid))
+  {
+    const auto & console = _fe_problem.console();
+    const auto execute_on = _fe_problem.getCurrentExecuteOnFlag();
+    console << "[DBG] Beginning elemental loop to compute " + objectType() + " on " << execute_on
+            << std::endl;
+    mooseDoOnce(
+        console << "[DBG] Execution order on each element:" << std::endl;
+        console << "[DBG] - kernels on element quadrature points" << std::endl;
+        console << "[DBG] - finite volume elemental kernels on element" << std::endl;
+        console << "[DBG] - integrated boundary conditions on element side quadrature points"
+                << std::endl;
+        console << "[DBG] - DG kernels on element side quadrature points" << std::endl;
+        console << "[DBG] - interface kernels on element side quadrature points" << std::endl;);
+  }
+}
+
+void
+NonlinearThread::printBlockExecutionInformation() const
+{
+  // Number of objects executing is approximated by size of warehouses
+  const int num_objects = _kernels.size() + _fv_kernels.size() + _integrated_bcs.size() +
+                          _dg_kernels.size() + _interface_kernels.size();
+  const auto & console = _fe_problem.console();
+  const auto b_name = _mesh.getSubdomainName(_subdomain);
+
+  if (_fe_problem.shouldPrintExecution(_tid) && num_objects > 0)
+  {
+    if (_blocks_exec_printed.count(_subdomain))
+      return;
+    console << "[DBG] Ordering of " + objectType() + " Objects on block " << b_name << " ("
+            << _subdomain << ")" << std::endl;
+    if (_kernels.hasActiveBlockObjects(_subdomain, _tid))
+    {
+      console << "[DBG] Ordering of kernels:" << std::endl;
+      console << _kernels.activeObjectsToFormattedString() << std::endl;
+    }
+    if (_fv_kernels.size())
+    {
+      console << "[DBG] Ordering of FV elemental kernels:" << std::endl;
+      std::string fvkernels =
+          std::accumulate(_fv_kernels.begin() + 1,
+                          _fv_kernels.end(),
+                          _fv_kernels[0]->name(),
+                          [](const std::string & str_out, FVElementalKernel * kernel)
+                          { return str_out + " " + kernel->name(); });
+      console << ConsoleUtils::formatString(fvkernels, "[DBG]") << std::endl;
+    }
+    if (_dg_kernels.hasActiveBlockObjects(_subdomain, _tid))
+    {
+      console << "[DBG] Ordering of DG kernels:" << std::endl;
+      console << _dg_kernels.activeObjectsToFormattedString() << std::endl;
+    }
+  }
+  else if (_fe_problem.shouldPrintExecution(_tid) && num_objects == 0 &&
+           !_blocks_exec_printed.count(_subdomain))
+    console << "[DBG] No Active " + objectType() + " Objects on block " << b_name << " ("
+            << _subdomain << ")" << std::endl;
+
+  _blocks_exec_printed.insert(_subdomain);
+}
+
+void
+NonlinearThread::printBoundaryExecutionInformation(const unsigned int bid) const
+{
+  if (!_fe_problem.shouldPrintExecution(_tid) || _boundaries_exec_printed.count(bid) ||
+      (!_integrated_bcs.hasActiveBoundaryObjects(bid, _tid) &&
+       !_interface_kernels.hasActiveBoundaryObjects(bid, _tid)))
+    return;
+
+  const auto & console = _fe_problem.console();
+  const auto b_name = _mesh.getBoundaryName(bid);
+  console << "[DBG] Ordering of " + objectType() + " Objects on boundary " << b_name << " (" << bid
+          << ")" << std::endl;
+
+  if (_integrated_bcs.hasActiveBoundaryObjects(bid, _tid))
+  {
+    console << "[DBG] Ordering of integrated boundary conditions:" << std::endl;
+    console << _integrated_bcs.activeObjectsToFormattedString() << std::endl;
+  }
+
+  // We have not checked if we have a neighbor. This could be premature for saying we are executing
+  // interface kernels. However, we should assume the execution will happen on another side of the
+  // same boundary
+  if (_interface_kernels.hasActiveBoundaryObjects(bid, _tid))
+  {
+    console << "[DBG] Ordering of interface kernels:" << std::endl;
+    console << _interface_kernels.activeObjectsToFormattedString() << std::endl;
+  }
+
+  _boundaries_exec_printed.insert(bid);
+}

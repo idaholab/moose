@@ -79,6 +79,18 @@ protected:
    */
   virtual void determineResidualObjects() = 0;
 
+  /// Print information about the loop, mostly order of execution of objects
+  void printGeneralExecutionInformation() const override;
+
+  /// Print list of specific objects executed on each block and in which order
+  void printBlockExecutionInformation() const override;
+
+  /// Print list of specific objects executed on each boundary and in which order
+  void printBoundaryExecutionInformation(const unsigned int bid) const override;
+
+  /// Return what the loops is meant to compute
+  virtual std::string objectType() const { return ""; };
+
   NonlinearSystemBase & _nl;
   unsigned int _num_cached;
 
