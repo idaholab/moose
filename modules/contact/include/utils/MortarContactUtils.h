@@ -48,7 +48,7 @@ communicateVelocities(std::unordered_map<const DofObject *, std::array<T, 2>> & 
                       const MooseMesh & mesh,
                       const bool nodal,
                       const Parallel::Communicator & communicator,
-                      const bool send_data_back)
+                      const bool /*send_data_back*/)
 {
   const auto our_proc_id = communicator.rank();
 
@@ -67,12 +67,10 @@ communicateVelocities(std::unordered_map<const DofObject *, std::array<T, 2>> & 
   }
 
   const auto & lm_mesh = mesh.getMesh();
-  std::unordered_map<processor_id_type, std::vector<const DofObject *>>
-      pid_to_dof_object_for_sending_back;
 
   auto action_functor =
-      [nodal, our_proc_id, &lm_mesh, &dof_map, &pid_to_dof_object_for_sending_back, send_data_back](
-          const processor_id_type pid, const std::vector<Datum> & sent_data)
+      [nodal, our_proc_id, &lm_mesh, &dof_map](const processor_id_type libmesh_dbg_var(pid),
+                                               const std::vector<Datum> & sent_data)
   {
     mooseAssert(pid != our_proc_id, "We do not send messages to ourself here");
     libmesh_ignore(our_proc_id);
@@ -85,53 +83,12 @@ communicateVelocities(std::unordered_map<const DofObject *, std::array<T, 2>> & 
                 : static_cast<const DofObject *>(lm_mesh.elem_ptr(dof_id));
       mooseAssert(dof_object, "This should be non-null");
 
-      if (send_data_back)
-        pid_to_dof_object_for_sending_back[pid].push_back(dof_object);
-
       dof_map[dof_object][0] += pr.second[0];
       dof_map[dof_object][1] += pr.second[1];
     }
   };
 
   TIMPI::push_parallel_vector_data(communicator, push_data, action_functor);
-
-  // Now send data back if requested
-  if (!send_data_back)
-    return;
-
-  std::unordered_map<processor_id_type, std::vector<Datum>> push_back_data;
-
-  for (const auto & [pid, dof_objects] : pid_to_dof_object_for_sending_back)
-  {
-    auto & pid_send_data = push_back_data[pid];
-    pid_send_data.reserve(dof_objects.size());
-    for (const DofObject * const dof_object : dof_objects)
-    {
-      const auto & [tangent_one, tangent_two] = libmesh_map_find(dof_map, dof_object);
-      pid_send_data.push_back({dof_object->id(), {tangent_one, tangent_two}});
-    }
-  }
-
-  auto sent_back_action_functor =
-      [nodal, our_proc_id, &lm_mesh, &dof_map](const processor_id_type libmesh_dbg_var(pid),
-                                               const std::vector<Datum> & sent_data)
-  {
-    mooseAssert(pid != our_proc_id, "We do not send messages to ourself here");
-    libmesh_ignore(our_proc_id);
-
-    for (auto & [dof_id, tangents] : sent_data)
-    {
-      const auto * const dof_object =
-          nodal ? static_cast<const DofObject *>(lm_mesh.node_ptr(dof_id))
-                : static_cast<const DofObject *>(lm_mesh.elem_ptr(dof_id));
-      mooseAssert(dof_object, "This should be non-null");
-      auto & [our_tangent_one, our_tangent_two] = dof_map[dof_object];
-      our_tangent_one = tangents[0];
-      our_tangent_two = tangents[1];
-    }
-  };
-
-  TIMPI::push_parallel_vector_data(communicator, push_back_data, sent_back_action_functor);
 }
 
 /**
