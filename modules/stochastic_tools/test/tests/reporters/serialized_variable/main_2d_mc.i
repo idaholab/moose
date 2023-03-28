@@ -123,5 +123,6 @@
   [rom]
     type = SurrogateTrainerOutput
     trainers = polyreg
+    execute_on = FINAL
   []
 []

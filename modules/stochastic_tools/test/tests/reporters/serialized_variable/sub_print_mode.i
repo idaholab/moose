@@ -96,12 +96,19 @@
 [UserObjects]
   [im]
     type = InverseMapping
-    surrogate = "blabla"
     mapping = pod
-    variable_to_fill = "u_pod v_pod"
-    variable_to_reconstruct = "u v"
-    parameters = '1 2 3'
+    surrogate = polyreg
+    variable_to_fill = "v_pod"
+    variable_to_reconstruct = "v"
+    parameters = '2 2'
     execute_on = INITIAL
+  []
+[]
+
+[Surrogates]
+  [polyreg]
+    type = PolynomialRegressionSurrogate
+    filename = "main_2d_mc_rom_polyreg.rd"
   []
 []
 

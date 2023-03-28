@@ -26,6 +26,7 @@ PolynomialRegressionSurrogate::PolynomialRegressionSurrogate(const InputParamete
     _power_matrix(getModelData<std::vector<std::vector<unsigned int>>>("_power_matrix")),
     _max_degree(getModelData<unsigned int>("_max_degree"))
 {
+  std::cerr << "smg" << std::endl;
 }
 
 Real

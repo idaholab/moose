@@ -353,10 +353,29 @@ PODMapping::map(const NumericVector<Number> & full_order_vector,
 }
 
 void
-PODMapping::inverse_map(const std::vector<Real> & reduced_order_vector,
-                        std::vector<Real> & full_order_vector) const
+PODMapping::inverse_map(const VariableName & vname,
+                        const std::vector<Real> & reduced_order_vector,
+                        DenseVector<Real> & full_order_vector) const
 {
-  std::cerr << "Something smart" << std::endl;
+  mooseAssert(std::find(_variable_names.begin(), _variable_names.end(), vname) !=
+                  _variable_names.end(),
+              "Variable " + vname + " is not in PODMapping!");
+
+  if (reduced_order_vector.size() != _basis_functions[vname].size())
+    mooseError("Then umber of supplied reduced-order coefficients (",
+               reduced_order_vector.size(),
+               ") Is not the same as the number of basisfunctions (",
+               _basis_functions[vname].size(),
+               ") for variable ",
+               vname,
+               "!");
+  // This zeros the vector too
+  full_order_vector.resize(_basis_functions[vname][0].size());
+
+  for (auto base_i : index_range(reduced_order_vector))
+    for (unsigned int dof_i = 0; dof_i < _basis_functions[vname][base_i].size(); ++dof_i)
+      full_order_vector(dof_i) +=
+          reduced_order_vector[base_i] * _basis_functions[vname][base_i](dof_i);
 }
 
 const DenseVector<Real> &

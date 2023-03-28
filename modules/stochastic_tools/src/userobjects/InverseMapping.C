@@ -21,7 +21,8 @@ InverseMapping::validParams()
 {
   InputParameters params = GeneralUserObject::validParams();
 
-  params.addParam<UserObjectName>("surrogate", "Blabla.");
+  params.addParam<std::vector<UserObjectName>>(
+      "surrogate", std::vector<UserObjectName>(), "Blabla.");
   params.addRequiredParam<UserObjectName>("mapping", "Blabla.");
   params.addRequiredParam<std::vector<VariableName>>("variable_to_fill", "Blabla.");
   params.addRequiredParam<std::vector<VariableName>>("variable_to_reconstruct", "Blabla");
@@ -36,18 +37,37 @@ InverseMapping::InverseMapping(const InputParameters & parameters)
     MappingInterface(this),
     SurrogateModelInterface(this),
     _var_names_to_fill(getParam<std::vector<VariableName>>("variable_to_fill")),
-    _var_names_to_reconstruct(getParam<std::vector<VariableName>>("variable_to_reconstruct"))
+    _var_names_to_reconstruct(getParam<std::vector<VariableName>>("variable_to_reconstruct")),
+    _surrogate_model_names(getParam<std::vector<UserObjectName>>("surrogate")),
+    _input_parameters(getParam<std::vector<Real>>("parameters"))
 {
   if (_var_names_to_fill.size() != _var_names_to_reconstruct.size())
     paramError("variable_to_fill",
                "The number of variables to fill should be the same as the number of entries in "
                "`variable_to_reconstruct`");
+  if (_surrogate_model_names.size())
+  {
+    if (_var_names_to_fill.size() != _surrogate_model_names.size())
+      paramError("surrogate",
+                 "The number of surrogates should match the number of variables which need to be "
+                 "reconstructed!");
+  }
 }
 
 void
 InverseMapping::initialSetup()
 {
   _mapping = &getMapping("mapping");
+
+  if (_surrogate_model_names.size())
+  {
+    _surrogate_models.clear();
+    for (const auto & name : _surrogate_model_names)
+    {
+      _surrogate_models.push_back(&getSurrogateModelByName(name));
+    }
+  }
+
   _variable_to_fill.clear();
   _variable_to_reconstruct.clear();
   _is_nodal.clear();
@@ -89,6 +109,20 @@ InverseMapping::execute()
 
   for (auto var_i : index_range(_var_names_to_reconstruct))
   {
+    std::vector<Real> reduced_coefficients;
+    if (_surrogate_models.size())
+    {
+      _surrogate_models[var_i]->evaluate(_input_parameters, reduced_coefficients);
+    }
+    else
+    {
+      reduced_coefficients = _input_parameters;
+    }
+
+    DenseVector<Real> reconstructed_solution;
+    _mapping->inverse_map(
+        _var_names_to_reconstruct[var_i], reduced_coefficients, reconstructed_solution);
+
     MooseVariableFieldBase * var_to_fill = _variable_to_fill[var_i];
     const MooseVariableFieldBase * var_to_reconstruct = _variable_to_reconstruct[var_i];
 
@@ -105,8 +139,7 @@ InverseMapping::execute()
     {
       if (dofs[dof_i] >= local_dof_begin && dofs[dof_i] < local_dof_end)
       {
-        temporary_vector->set(dofs[dof_i],
-                              (_mapping->basis(_var_names_to_reconstruct[var_i], 0))(dof_i));
+        temporary_vector->set(dofs[dof_i], reconstructed_solution(dof_i));
       }
     }
 

@@ -13,6 +13,7 @@
 #include "GeneralUserObject.h"
 #include "MappingInterface.h"
 #include "SurrogateModelInterface.h"
+#include "SurrogateModel.h"
 
 class InverseMapping : public GeneralUserObject,
                        public MappingInterface,
@@ -32,17 +33,16 @@ public:
   void threadJoin(const UserObject & /*uo*/) override{};
 
 protected:
-  // void buildDoFMapping();
-
   const std::vector<VariableName> & _var_names_to_fill;
   const std::vector<VariableName> & _var_names_to_reconstruct;
+  const std::vector<UserObjectName> & _surrogate_model_names;
 
   std::vector<MooseVariableFieldBase *> _variable_to_fill;
   std::vector<const MooseVariableFieldBase *> _variable_to_reconstruct;
   std::vector<std::unordered_map<dof_id_type, dof_id_type>> _variable_dof_to_row;
   std::vector<bool> _is_nodal;
   MappingBase * _mapping;
-  SurrogateModel * _surrogate;
+  std::vector<SurrogateModel *> _surrogate_models;
 
-  bool _is_elemental;
+  const std::vector<Real> & _input_parameters;
 };

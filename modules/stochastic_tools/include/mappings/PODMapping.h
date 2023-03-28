@@ -36,8 +36,9 @@ public:
            const unsigned int global_sample_i,
            std::vector<Real> & reduced_order_vector) const override;
 
-  void inverse_map(const std::vector<Real> & reduced_order_vector,
-                   std::vector<Real> & full_order_vector) const override;
+  void inverse_map(const VariableName & vname,
+                   const std::vector<Real> & reduced_order_vector,
+                   DenseVector<Real> & full_order_vector) const override;
 
   const DenseVector<Real> & basis(const VariableName & vname, const unsigned int base_i) override;
 
