@@ -10,6 +10,11 @@
 #include "ExecFlagRegistry.h"
 #include "MooseUtils.h"
 
+namespace moose
+{
+namespace internal
+{
+
 ExecFlagRegistry &
 ExecFlagRegistry::getExecFlagRegistry()
 {
@@ -36,3 +41,6 @@ ExecFlagRegistry::registerFlag(const std::string & name, const bool is_default)
 
   return flag;
 }
+
+} // internal
+} // moose

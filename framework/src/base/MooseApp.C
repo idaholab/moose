@@ -386,7 +386,7 @@ MooseApp::MooseApp(InputParameters parameters)
                                ? parameters.get<const MooseMesh *>("_master_displaced_mesh")
                                : nullptr),
     _mesh_generator_system(*this),
-    _execute_flags(ExecFlagRegistry::getExecFlagRegistry().getFlags()),
+    _execute_flags(moose::internal::ExecFlagRegistry::getExecFlagRegistry().getFlags()),
     _automatic_automatic_scaling(getParam<bool>("automatic_automatic_scaling"))
 {
 #ifdef HAVE_GPERFTOOLS
@@ -610,7 +610,7 @@ MooseApp::~MooseApp()
 #ifdef LIBMESH_HAVE_DLOPEN
   // Close any open dynamic libraries
   for (const auto & lib_pair : _lib_handles)
-    dlclose(lib_pair.second._library_handle);
+    dlclose(lib_pair.second.library_handle);
 #endif
 }
 
@@ -1910,7 +1910,7 @@ MooseApp::loadLibraryAndDependencies(const std::string & library_filename,
                  "dependencies listed in the supplied library (see otool or ldd).\n");
 
     DynamicLibraryInfo lib_info;
-    lib_info._library_handle = lib_handle;
+    lib_info.library_handle = lib_handle;
 
     auto insert_ret = _lib_handles.insert(std::make_pair(library_filename, lib_info));
     mooseAssert(insert_ret.second == true, "Error inserting into lib_handles map");
@@ -1920,7 +1920,7 @@ MooseApp::loadLibraryAndDependencies(const std::string & library_filename,
 
   // Library has been loaded, check to see if we've called the requested registration method
   const auto registration_method = params.get<std::string>("registration_method");
-  auto & entry_sym_from_curr_lib = dyn_lib_it->second._entry_symbols;
+  auto & entry_sym_from_curr_lib = dyn_lib_it->second.entry_symbols;
 
   if (entry_sym_from_curr_lib.find(registration_method) == entry_sym_from_curr_lib.end())
   {
@@ -1929,10 +1929,10 @@ MooseApp::loadLibraryAndDependencies(const std::string & library_filename,
     // we also explicitly set the pointer to NULL if dlsym is not
     // available.
 #ifdef LIBMESH_HAVE_DLOPEN
-    void * const registration_handle =
-        dlsym(dyn_lib_it->second._library_handle, registration_method.c_str());
+    void * registration_handle =
+        dlsym(dyn_lib_it->second.library_handle, registration_method.c_str());
 #else
-    void * const registration_handle = nullptr;
+    void * registration_handle = nullptr;
 #endif
 
     if (registration_handle)

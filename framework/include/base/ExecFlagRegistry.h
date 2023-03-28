@@ -11,7 +11,10 @@
 
 #include "ExecFlagEnum.h"
 
-class ExecFlagRegistry;
+namespace moose
+{
+namespace internal
+{
 
 /**
  * Registry for statically defining execute flags with consistent numbering.
@@ -56,6 +59,10 @@ private:
   ExecFlagEnum _default_flags;
 };
 
-#define registerExecFlag(flag) ExecFlagRegistry::getExecFlagRegistry().registerFlag(flag, false)
+} // internal
+} // moose
+
+#define registerExecFlag(flag)                                                                     \
+  moose::internal::ExecFlagRegistry::getExecFlagRegistry().registerFlag(flag, false)
 #define registerDefaultExecFlag(flag)                                                              \
-  ExecFlagRegistry::getExecFlagRegistry().registerFlag(flag, true)
+  moose::internal::ExecFlagRegistry::getExecFlagRegistry().registerFlag(flag, true)
