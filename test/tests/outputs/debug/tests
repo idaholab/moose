@@ -229,7 +229,7 @@
       type = RunApp
       input = 'show_execution_userobjects.i'
       cli_args = "--color off"
-      expect_out = '\[DBG\] dofs memory line'
+      expect_out = "\[DBG\] Initializing, executing & finalizing general UO 'dofs' on TIMESTEP_END\n\[DBG\] Initializing, executing & finalizing general UO 'memory' on TIMESTEP_END\n\[DBG\] Initializing, executing & finalizing general UO 'line' on TIMESTEP_END"
       detail = 'general user objects,'
     []
     [threaded_general_user_objects]

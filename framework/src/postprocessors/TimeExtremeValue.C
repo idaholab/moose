@@ -108,7 +108,7 @@ TimeExtremeValue::execute()
       break;
 
     default:
-      mooseError("Unrecognzed ExtremeType");
+      mooseError("Unrecognized ExtremeType");
   }
 }
 

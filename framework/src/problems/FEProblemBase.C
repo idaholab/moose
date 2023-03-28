@@ -4072,6 +4072,9 @@ FEProblemBase::joinAndFinalize(TheWarehouse::Query query, bool isgen)
     if (isgen)
     {
       // general user objects are not run in their own threaded loop object - so run them here
+      if (shouldPrintExecution(0))
+        _console << "[DBG] Initializing, executing & finalizing general UO '" << obj->name()
+                 << "' on " << _current_execute_on_flag.name() << std::endl;
       obj->initialize();
       obj->execute();
     }

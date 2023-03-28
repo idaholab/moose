@@ -60,10 +60,6 @@ ComputeThreadedGeneralUserObjectsThread::printGeneralExecutionInformation(
 
   const auto & console = _fe_problem.console();
   const auto execute_on = _fe_problem.getCurrentExecuteOnFlag();
-  console << "[DBG] Executing General User Objects on " << execute_on << std::endl;
-  console << "[DBG] Order of execution:" << std::endl;
-  std::vector<std::string> threaded_uos;
-  for (auto it = range.begin(); it != range.end(); ++it)
-    threaded_uos.push_back((*it)->name());
-  console << ConsoleUtils::formatString(MooseUtils::join(threaded_uos, " "), "[DBG] ") << std::endl;
+  console << "[DBG] Executing Threaded General User Object " << (*range.begin())->name() << " on "
+          << execute_on << std::endl;
 }
