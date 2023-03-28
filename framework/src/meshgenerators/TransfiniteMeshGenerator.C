@@ -501,7 +501,8 @@ TransfiniteMeshGenerator::computeMidPoint(const Point & P1,
   const Real ym = (P1(1) + P2(1)) / 2;
   // The arc can be inverted into the domain (concave) or outward (convex)
   // we use the convention that if the height is given as negative we seek a concave arc
-  // if "height" is positive then we seek a convex arc
+  // if "height" is positive then we seek a convex arc.
+  // The outward vector is sufficient to determine the direction of the arc.
   const Real dist = std::abs(height);
   const int orient = (height >= 0) ? 1 : -1;
   Point MidPoint;
