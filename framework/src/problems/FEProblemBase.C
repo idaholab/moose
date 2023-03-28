@@ -3297,7 +3297,7 @@ FEProblemBase::addMaterialHelper(std::vector<MaterialWarehouse *> warehouses,
   if (_displaced_problem && parameters.get<bool>("use_displaced_mesh"))
   {
     parameters.set<SubProblem *>("_subproblem") = _displaced_problem.get();
-    _reinit_displaced_elem = true;
+    _reinit_displaced_elem = _reinit_displaced_face = _reinit_displaced_neighbor = true;
   }
   else
   {
