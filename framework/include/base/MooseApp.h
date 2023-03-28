@@ -1321,8 +1321,14 @@ private:
   /// Cache for a Backup to use for restart / recovery
   std::shared_ptr<Backup> _cached_backup;
 
-  /// Execution flags for this App
-  const ExecFlagEnum & _execute_flags;
+  /**
+   * Execution flags for this App. Note: These are copied on purpose instead of maintaining a
+   * reference to the ExecFlagRegistry registry. In the Multiapp case, the registry may be
+   * augmented, changing the flags "known" to the application in the middle of executing the setup.
+   * This causes issues with the application having to process flags that aren't specifically
+   * registered.
+   */
+  const ExecFlagEnum _execute_flags;
 
   /// Whether to turn on automatic scaling by default
   const bool _automatic_automatic_scaling;
