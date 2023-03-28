@@ -39,8 +39,8 @@ If you are operating on a personal Linux workstation, the easiest way to obtain 
 via the same tool used to obtain a developers environment in the Prerequisites section.
 
 !alert note title=Personal Air-Gapped Workstation
-Procuring the above on a machine with no network access is beyond the scope of this document. Please
-work with your system administrator on satisfying the above prerequisites.
+Procuring the above on a workstation with no network access is beyond the scope of this document.
+Please work with your system administrator on satisfying the above prerequisites.
 
 ## Prepare Directory
 
@@ -155,15 +155,11 @@ operating on an HPC cluster, this normally involves loading an MPI module. If yo
 your personal workstation, you need to follow the instructions on which MPI product you decided to
 install during the Prerequisites section.
 
-#### Build PETSc
+#### Build PETSc and libMesh
 
-Build PETSc using the following convenient script in addition to the supplied arguments:
+Build PETSc and libMesh by instructing these libraries to use the offline directory you created:
 
-```bash
-cd ~/offline/moose
-./scripts/update_and_rebuild_petsc.sh --skip-submodule-update \
-  --with-packages-download-dir=~/offline/downloads
-```
+!template load file=installation/build_petsc_and_libmesh.md.template PATH=~/offline PETSC_ARGS1=--skip-submodule-update PETSC_ARGS2=--with-packages-download-dir=~/offline/downloads LIBMESH_ARGS1=--skip-submodule-update
 
 Unfortunately, any errors incurred during the above step is going to be beyond the scope of this
 document. Most likely, an error will be related to a missing library by one of the myriad
@@ -172,84 +168,15 @@ contributions we are asking to build PETSc with. Please submit a detailed log of
 asked to contact your system administrator; Errors of this nature normally require admin rights to
 fulfill the dependency.
 
-Proceed only if PETSc completed successfully.
+#### Build and Test MOOSE
 
-#### Build libMesh
-
-Build libMesh using the following convenient script in addition to the supplied argument:
-
-```bash
-cd ~/offline/moose
-./scripts/update_and_rebuild_libmesh.sh --skip-submodule-update
-```
-
-Unfortunately, any errors incurred during these steps is going to be beyond the scope of this
-document. Please submit a detailed log of the error, to the
-[MOOSE Discussion forum](https://github.com/idaholab/moose/discussions).
-
-Proceed only if libMesh completed successfully.
-
-#### Build MOOSE
-
-With all the support libraries built, you can now build MOOSE:
-
-```bash
-cd ~/offline/moose/test
-make -j 6
-```
+!template load file=installation/build_moose.md.template PATH=~/offline
 
 Again, any errors incurred during this step, is going to be beyond the scope of this document.
 Please submit a detailed log of the error, to the
 [MOOSE Discussion forum](https://github.com/idaholab/moose/discussions).
 
-
-#### Test MOOSE
-
-With MOOSE built, run tests to see if MOOSE works in your environment:
-
-```bash
-cd ~/offline/moose/test
-./run_tests -j 6
-```
-
-Due to the nature of an offline install, it is possible some tests will fail (missing common system
-binaries like `rsync`, or other network related tools not normally present on air-gapped machines).
-
-You will also see SKIPPED tests. This is normal as some tests are specific to Macintosh, some for
-Linux. Or some other constraint your machine does not satisfy.
-
-Most tests should pass. If they don't, or you see `MAX FAILURES`, thats a problem! And it needs to
-be addressed before continuing. Please supply a report of the actual failure (scroll up a ways). For
-example the following explains little (created with `./run_tests -i always_bad`):
-
-```pre
-Final Test Results:
---------------------------------------------------------------------------------
-tests/test_harness.always_ok .................... FAILED (Application not found)
-tests/test_harness.always_bad .................................. FAILED (CODE 1)
---------------------------------------------------------------------------------
-Ran 2 tests in 0.2 seconds. Average test time 0.0 seconds, maximum test time 0.0 seconds.
-0 passed, 0 skipped, 0 pending, 2 FAILED
-```
-
-Instead, you need to scroll up and report the actual error:
-
-```pre
-tests/test_harness.always_ok: Working Directory: /Users/me/projects/moose/test/tests/test_harness
-tests/test_harness.always_ok: Running command:
-tests/test_harness.always_ok:
-tests/test_harness.always_ok: ######################################################################
-tests/test_harness.always_ok: Tester failed, reason: Application not found
-tests/test_harness.always_ok:
-tests/test_harness.always_ok .................... FAILED (Application not found)
-tests/test_harness.always_bad: Working Directory: /Users/me/projects/moose/test/tests/test_harness
-tests/test_harness.always_bad: Running command: false
-tests/test_harness.always_bad:
-tests/test_harness.always_bad: #####################################################################
-tests/test_harness.always_bad: Tester failed, reason: CODE 1
-tests/test_harness.always_bad:
-tests/test_harness.always_bad .................................. FAILED (CODE 1)
-```
+!template load file=installation/test_moose.md.template PATH=~/offline
 
 ## Your Application
 
@@ -268,10 +195,13 @@ cluster or personal workstation, before you can perform any application developm
 For this reason you may wish to add the above export commands to your shell startup profile so that
 these variables are always set. Achieving this is different for each shell type (and there are a
 lot). You'll want to read up on how to do this for Macintosh (usually ZSH: `~/.zshrc`), or Linux
-(usually BASH: `~/.bashrc`) respectfully.
+(usually BASH: `~/.bashrc`) respectively.
 
 You can determine the shell your environment operates within by running the following command:
 
 ```bash
 echo $0
 ```
+
+Now that you have a working MOOSE, and you know how to make your MPI wrapper available, proceed to
+[building your own application](installation/offline_new_users.md).

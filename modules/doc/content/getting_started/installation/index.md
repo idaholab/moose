@@ -22,7 +22,7 @@ When the above does not quite fit your needs, the following instructions are ava
 
 !include installation/installation_troubleshooting.md
 
-!include installation/update_moose.md
+!template load file=installation/update_moose.md.template PATH=~/projects
 
 !content pagination use_title=True
                     previous=getting_started/index.md

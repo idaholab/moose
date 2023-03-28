@@ -11,7 +11,8 @@ instructions instead for an easier, but lower performance, installation.
 
 !include sqa/minimum_requirements.md
 
-- CMake. A modern version of CMake is required to build some of the meta packages we need to include in PETSc
+- CMake. A modern version of CMake is required to build some of the meta packages we need to include
+  in PETSc
 - Python 3.x Development libraries
 
 Your cluster will most likely have these requirements available via some form of environment
@@ -38,8 +39,22 @@ them manually (each and every time you load said environment):
 export CC=mpicc CXX=mpicxx FC=mpif90 F90=mpif90 F77=mpif77
 ```
 
+## Cloning MOOSE
+
 !template load file=installation/clone_moose.md.template PATH=~/projects
+
+## PETSc and libMesh
+
+MOOSE requires several support libraries in order to build or run properly. Both of these libraries
+(PETSc and libMesh) can be built using our supplied scripts:
 
 !template load file=installation/build_petsc_and_libmesh.md.template PATH=~/projects
 
+## Build and Test MOOSE
+
+!template load file=installation/build_moose.md.template PATH=~/projects
+
 !template load file=installation/test_moose.md.template PATH=~/projects
+
+With tests passing you can continue to
+[building your own application](installation/hpc_new_users.md).

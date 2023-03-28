@@ -8,10 +8,17 @@ instructions to create an environment on your machine using Conda.
 
 !include getting_started/installation/install_conda_moose.md
 
-!include getting_started/installation/clone_moose.md optional=True
+## Cloning MOOSE
 
-!include getting_started/installation/test_moose.md optional=True
+!template load file=installation/clone_moose.md.template PATH=~/projects
 
-Head back over to the [getting_started/installation/index.md optional=True] page to continue your tour of MOOSE.
+## Build and Test MOOSE
+
+!template load file=installation/build_moose.md.template PATH=~/projects
+
+!template load file=installation/test_moose.md.template PATH=~/projects
+
+If your tests ran successfully, head back over to the
+[getting_started/installation/index.md optional=True] page to continue your tour of MOOSE.
 
 !include getting_started/installation/uninstall_conda.md

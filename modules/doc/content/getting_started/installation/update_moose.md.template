@@ -17,7 +17,7 @@ mamba update --all
 Update MOOSE repository:
 
 ```bash
-cd ~/projects/moose
+cd {{PATH}}/moose
 git fetch origin
 git rebase origin/master
 ```
@@ -26,7 +26,7 @@ Then return to your application, re-compile, and test (see the
 [getting_started/new_users.md#create-an-app] discussion for more information).
 
 ```bash
-cd ~/projects/YourAppName
+cd {{PATH}}/YourAppName
 make clobberall
 make -j4
 ./run_tests -j4

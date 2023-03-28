@@ -7,7 +7,9 @@ pre-built versions of MOOSE. To request access to these clusters, please follow 
 Once access has been granted, log into Sawtooth or Lemhi using either [inl/hpc_ondemand.md]
 Interactive Shell services, or directly by following our [SSH Primer](inl/hpc_remote.md).
 
-!include installation/clone_moose.md
+## Cloning Moose
+
+!template load file=installation/clone_moose.md.template PATH=~/projects
 
 ## Load Modules
 

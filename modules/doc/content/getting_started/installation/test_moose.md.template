@@ -1,10 +1,12 @@
-## Compile and Test MOOSE
+To test MOOSE, run the following commands:
 
 ```bash
 cd {{PATH}}/moose/test
-make -j 6
 ./run_tests -j 6
 ```
 
-If the installation was successful you should see most of the tests passing (some tests will be
-skipped depending on your system environment), and no failures.
+Some tests are SKIPPED. This is normal as some tests are specific to available resources, or some
+other constraint your machine does not satisfy. If you see failures, or you see `MAX FAILURES`,
+thats a problem! And it needs to be addressed before continuing:
+
+!include faq/example_failing_test.md

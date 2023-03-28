@@ -27,8 +27,22 @@ above command to your shell initialization file:
 echo "module load use.moose moose-dev" >> ~/.bash_profile
 ```
 
+## Cloning MOOSE
+
 !template load file=installation/clone_moose.md.template PATH=~/cluster_name/projects
+
+## Build PETSc and libMesh
+
+MOOSE requires several support libraries in order to build or run properly. Both of these libraries
+(PETSc and libMesh) can be built using our supplied scripts:
 
 !template load file=installation/build_petsc_and_libmesh.md.template PATH=~/cluster_name/projects
 
+## Build and Test MOOSE
+
+!template load file=installation/build_moose.md.template PATH=~/cluster_name/projects
+
 !template load file=installation/test_moose.md.template PATH=~/cluster_name/projects
+
+With tests passing you can continue to
+[building your own application](installation/inl_hpc_new_users.md).
