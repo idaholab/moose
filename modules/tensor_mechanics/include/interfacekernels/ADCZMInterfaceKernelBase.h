@@ -12,11 +12,11 @@
 #include "ADInterfaceKernel.h"
 
 /// AD equivalent of CZMInterfaceKernelBase
-class ADCZMInterfaceKernel : public ADInterfaceKernel
+class ADCZMInterfaceKernelBase : public ADInterfaceKernel
 {
 public:
   static InputParameters validParams();
-  ADCZMInterfaceKernel(const InputParameters & parameters);
+  ADCZMInterfaceKernelBase(const InputParameters & parameters);
 
 protected:
   ADReal computeQpResidual(Moose::DGResidualType type) override;

@@ -59,7 +59,8 @@ CohesiveZoneAction::CohesiveZoneAction(const InputParameters & params)
   {
     case Strain::Small:
     {
-      _czm_kernel_name = _use_AD ? "ADCZMInterfaceKernel" : "CZMInterfaceKernelSmallStrain";
+      _czm_kernel_name =
+          _use_AD ? "ADCZMInterfaceKernelSmallStrain" : "CZMInterfaceKernelSmallStrain";
       _disp_jump_provider_name = _use_AD ? "ADCZMComputeDisplacementJumpSmallStrain"
                                          : "CZMComputeDisplacementJumpSmallStrain";
       _equilibrium_traction_calculator_name =
@@ -68,7 +69,8 @@ CohesiveZoneAction::CohesiveZoneAction(const InputParameters & params)
     }
     case Strain::Finite:
     {
-      _czm_kernel_name = _use_AD ? "ADCZMInterfaceKernel" : "CZMInterfaceKernelTotalLagrangian";
+      _czm_kernel_name =
+          _use_AD ? "ADCZMInterfaceKernelTotalLagrangian" : "CZMInterfaceKernelTotalLagrangian";
       _disp_jump_provider_name = _use_AD ? "ADCZMComputeDisplacementJumpTotalLagrangian"
                                          : "CZMComputeDisplacementJumpTotalLagrangian";
       _equilibrium_traction_calculator_name = _use_AD ? "ADCZMComputeGlobalTractionTotalLagrangian"

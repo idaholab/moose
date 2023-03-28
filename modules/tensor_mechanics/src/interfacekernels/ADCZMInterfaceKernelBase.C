@@ -7,19 +7,17 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "ADCZMInterfaceKernel.h"
+#include "ADCZMInterfaceKernelBase.h"
 #include "CZMInterfaceKernelBase.h"
 
-registerMooseObject("TensorMechanicsApp", ADCZMInterfaceKernel);
-
 InputParameters
-ADCZMInterfaceKernel::validParams()
+ADCZMInterfaceKernelBase::validParams()
 {
   InputParameters params = CZMInterfaceKernelBase::validParams();
   return params;
 }
 
-ADCZMInterfaceKernel::ADCZMInterfaceKernel(const InputParameters & parameters)
+ADCZMInterfaceKernelBase::ADCZMInterfaceKernelBase(const InputParameters & parameters)
   : ADInterfaceKernel(parameters),
     _base_name(isParamValid("base_name") && !getParam<std::string>("base_name").empty()
                    ? getParam<std::string>("base_name") + "_"
@@ -38,7 +36,7 @@ ADCZMInterfaceKernel::ADCZMInterfaceKernel(const InputParameters & parameters)
 }
 
 ADReal
-ADCZMInterfaceKernel::computeQpResidual(Moose::DGResidualType type)
+ADCZMInterfaceKernelBase::computeQpResidual(Moose::DGResidualType type)
 {
   ADReal r = _traction_global[_qp](_component);
 
