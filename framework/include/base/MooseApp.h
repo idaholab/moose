@@ -1168,8 +1168,14 @@ protected:
   /// this map when removing relationship managers/ghosting functors
   std::unordered_map<RelationshipManager *, std::shared_ptr<GhostingFunctor>> _undisp_to_disp_rms;
 
+  struct DynamicLibraryInfo
+  {
+    void * _library_handle;
+    std::unordered_set<std::string> _entry_symbols;
+  };
+
   /// The library, registration method and the handle to the method
-  std::map<std::pair<std::string, std::string>, void *> _lib_handles;
+  std::unordered_map<std::string, DynamicLibraryInfo> _lib_handles;
 
 private:
   ///@{
