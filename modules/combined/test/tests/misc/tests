@@ -1,0 +1,9 @@
+[Tests]
+  design = 'Materials/index.md'
+  issues = '#23348'
+  [test_reinit_face]
+   type = RunApp
+   input = re_init_face.i
+   requirement = "The system shall properly reset itself after adding a material using a displaced mesh."
+  []
+[]
