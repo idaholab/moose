@@ -22,7 +22,7 @@ The convention for the corners numbering should follow Fig. 1, prescribed in the
 
 This generator allows any type of curvilinear edges. In Fig. 2 we show a mesh where the bottom edge has an inward arc circle. However, this algorithm generates a mesh for any parametrized edge, or given set of points on an edge. For arcs of a circle, since they are widely encountered in applications, we customized an approach that requires a user to specify only the deviation from a straight line in the middle of an edge. 
 
-The default distribution of points on an edge is equidistant and nothing expplicit needs to be specified. However, for meshes that need to capture more scales in different regions we have two additional options that can be prescribed.  The distribution of points on an edge can be either provided as a discrete set of points, using the edge type `DISCRETE`, or as a bias along the edge. The only requirement is that opposite edges have the same number of points.
+The default distribution of points on an edge is equidistant and nothing explicit needs to be specified. However, for meshes that need to capture more scales in different regions we have two additional options that can be prescribed.  The distribution of points on an edge can be either provided as a discrete set of points, using the edge type `DISCRETE`, or as a bias along the edge. The only requirement is that opposite edges have the same number of points.
 
 ## Example 
 
@@ -48,7 +48,7 @@ This mesh generator considers 4 types of edges defined in `edge_type`, where `ed
     block=Mesh/transf
 
 
-  - `DISCRETE`, constructs a line along a set of points provided by the user in the order represented by arrows in Fig. 1, a test is available in [discrete_generator.i](test/tests/meshgenerators/transfinite_generator/discrete_generator.i) and illustrated in Fig. 4. This option is the only one that does not support a different point redistribution since it is assumed the user desires those edge points explicitely. Along an edge described by this option the `bias_x` and `bias_y` parameters will have no effect. 
+  - `DISCRETE`, constructs a line along a set of points provided by the user in the order represented by arrows in Fig. 1, a test is available in [discrete_generator.i](test/tests/meshgenerators/transfinite_generator/discrete_generator.i) and illustrated in Fig. 4. This option is the only one that does not support a different point redistribution, i.e. the options `bias_x` and `bias_y` will have no effect, since it is assumed the user desires those edge points explicitly. 
 
   - `PARSED`, constructs a curvilinear edge as provided by a parametrization chosen by the user. The test [parsed_generator.i](test/tests/meshgenerators/transfinite_generator/parsed_generator.i) constructs a stenotic pipe using the parametrization of the top and bottom edges. The only requirement the user needs to take into account is to map the parametrization to the reference interval `[0, 1]`. 
 

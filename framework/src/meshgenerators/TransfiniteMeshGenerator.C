@@ -69,9 +69,9 @@ TransfiniteMeshGenerator::validParams()
                              "arccircle, for DISCRETE a set of points, or "
                              "a paramterization via the PARSED option. Opposite edges may have "
                              "different distributions s long as the "
-                             "number of points is identical. Along oppsite edges a different point "
+                             "number of points is identical. Along opposite edges a different point "
                              "distribution can be prescribed "
-                             "via the options bias_x or bias_y for oposing edges.");
+                             "via the options bias_x or bias_y for opposing edges.");
 
   params.addParamNamesToGroup("bottom_type left_type top_type right_type", "Edge type");
   params.addParamNamesToGroup("bottom_parameter left_parameter top_parameter right_parameter",
@@ -134,35 +134,22 @@ TransfiniteMeshGenerator::generate()
 
   const unsigned long int total_nodes = _nx * _ny;
 
-  std::vector<Point> edge_bottom; // parametrized via nx
-  std::vector<Point> edge_top;    // parametrized via nx
-  std::vector<Point> edge_left;   // parametrized via ny
-  std::vector<Point> edge_right;  // parametrized via ny
-  edge_bottom.resize(_nx);
-  edge_top.resize(_nx);
-  edge_left.resize(_ny);
-  edge_right.resize(_ny);
-
-  std::vector<Real> param_x_dir;
-  std::vector<Real> param_y_dir;
-  param_x_dir.resize(_nx);
-  param_y_dir.resize(_ny);
   // we take [0,1] as the reference interval and we need to set the biases upfront
   Real edge_length = 1.0;
-  param_x_dir = getPointsDistribution(edge_length, _nx, _bias_x);
-  param_y_dir = getPointsDistribution(edge_length, _ny, _bias_y);
+  std::vector<Real> param_x_dir = getPointsDistribution(edge_length, _nx, _bias_x);
+  std::vector<Real> param_y_dir = getPointsDistribution(edge_length, _ny, _bias_y);
 
-  edge_bottom =
+  std::vector<Point> edge_bottom =
       getEdge(V00, V10, _nx, _bottom_type, _bottom_parameter, outward_vec[0], param_x_dir);
-  edge_top = getEdge(V01, V11, _nx, _top_type, _top_parameter, outward_vec[1], param_x_dir);
-  edge_left = getEdge(V00, V01, _ny, _left_type, _left_parameter, outward_vec[2], param_y_dir);
-  edge_right = getEdge(V10, V11, _ny, _right_type, _right_parameter, outward_vec[3], param_y_dir);
+  std::vector<Point> edge_top = getEdge(V01, V11, _nx, _top_type, _top_parameter, outward_vec[1], param_x_dir);
+  std::vector<Point> edge_left = getEdge(V00, V01, _ny, _left_type, _left_parameter, outward_vec[2], param_y_dir);
+  std::vector<Point> edge_right = getEdge(V10, V11, _ny, _right_type, _right_parameter, outward_vec[3], param_y_dir);
 
   // Used for the parametrization on edge pairs, provided by the point distribution according to
   // biases
   Real rx_coord, sy_coord;
 
-  std::vector<Node *> nodes(total_nodes); // can be done using .reserve as well
+  std::vector<Node *> nodes(total_nodes);
   unsigned int node_id = 0;
   unsigned int el_id = 0;
 
@@ -295,8 +282,7 @@ TransfiniteMeshGenerator::getLineEdge(const Point & P1,
                                       const Point & P2,
                                       const std::vector<Real> & param_vec)
 {
-  std::vector<Point> edge;
-  edge.resize(param_vec.size());
+  std::vector<Point> edge(param_vec.size());
   auto it = 0;
 
   for (auto rx : param_vec)
@@ -316,7 +302,7 @@ TransfiniteMeshGenerator::getParsedEdge(const std::string & parameter,
   edge.resize(param_vec.size());
 
   std::vector<std::string> param_coords;
-  MooseUtils::tokenize(parameter, param_coords, 1, "&&");
+  MooseUtils::tokenize(parameter, param_coords, 1, " ; ");
 
   auto it = 0;
   for (auto rx : param_vec)
@@ -385,7 +371,7 @@ TransfiniteMeshGenerator::getCircarcEdge(const Point & P1,
   Point x0 = (P1 - P0);
   Point x1 = (P2 - P0);
 
-  // The case when the edge spans quadrants 1 and 4 requires special treament
+  // The case when the edge spans quadrants 1 and 4 requires special treatment
   // to periodically switch we compute the angle that needs added to one edge
   // to identify the entire edge span
   mooseAssert(x0.norm() > 0.0 && x1.norm() > 0.0,
@@ -449,7 +435,6 @@ TransfiniteMeshGenerator::getPointsDistribution(const Real & edge_length,
   else
   {
     const Real interval = edge_length / Real(np - 1);
-    Real rx = 0.0;
     for (unsigned int iter = 0; iter < np; iter++)
     {
       rx = getMapInterval(Real(iter) * interval, 0.0, edge_length, 0.0, 1.0);
@@ -463,7 +448,7 @@ Real
 TransfiniteMeshGenerator::computeRadius(const Point & P1, const Point & P2, const Point & P3) const
 {
   Point temp1 = P1 - P2;
-  Real a2 = temp1.norm_sq(); // a is the distance from P1 to P2, but we only it squared
+  Real a2 = temp1.norm_sq(); // a is the distance from P1 to P2, but we only need it squared
   Point temp2 = P3 - P1;
   Real b2 = temp2.norm_sq();
   Real dr = std::sqrt(b2 - a2 / 4.0);

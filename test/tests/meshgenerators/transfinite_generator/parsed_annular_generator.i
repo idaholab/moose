@@ -11,8 +11,8 @@
     right_type = PARSED
     top_type = LINE
     bottom_type = LINE
-    left_parameter = 'cos(r*pi/2) && sin(r*pi/2)'
-    right_parameter = '5*cos(r*pi/2) && 5*sin(r*pi/2)'
+    left_parameter = 'cos(r*pi/2) ; sin(r*pi/2)'
+    right_parameter = '5*cos(r*pi/2) ; 5*sin(r*pi/2)'
   []
 []
 
