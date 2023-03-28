@@ -37,4 +37,21 @@
     rel_err = 1e-3 # this is the same error thermochimica uses for its internal tests
     required_submodule = 'contrib/thermochimica'
   []
+
+  [separator_error1]
+    type = RunException
+    input = MoRu.i
+    expect_err = "No ':' separator found in variable 'HCPN_Mo'"
+    cli_args = "GlobalParams/output_species='BCCN:Mo HCPN_Mo BCCN:Ru HCPN:Ru'"
+    issues = '#23865'
+    requirement = 'The system shall throw an error if an invalid output species format is detected'
+  []
+  [separator_error2]
+    type = RunException
+    input = MoRu.i
+    expect_err = "No ':' separator found in variable 'cp_Ru'"
+    cli_args = "GlobalParams/element_potentials='cp:Mo cp_Ru'"
+    issues = '#23865'
+    requirement = 'The system shall throw an error if an invalid element potential format is detected'
+  []
 []
