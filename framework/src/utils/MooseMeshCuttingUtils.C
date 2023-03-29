@@ -56,7 +56,8 @@ lineRemoverMoveNode(ReplicatedMesh & mesh,
       (*elem_it)->subdomain_id() = block_id_to_remove;
   }
 
-  // Identify the nodes near the boundary
+  // Identify all the nodes that are on the interface between block_id_to_remove and other blocks
+  // !!! We need a check here: if a node is on the retaining side, the removed element has a different subdomain id
   std::vector<dof_id_type> node_list;
   for (auto elem_it = mesh.active_subdomain_set_elements_begin(subdomain_ids_set);
        elem_it != mesh.active_subdomain_set_elements_end(subdomain_ids_set);
@@ -75,14 +76,17 @@ lineRemoverMoveNode(ReplicatedMesh & mesh,
         }
     }
   }
+  // Remove duplicate nodes
   const auto unique_it = std::unique(node_list.begin(), node_list.end());
   node_list.resize(std::distance(node_list.begin(), unique_it));
   // Mark those nodes that are on a boundary that requires conformality
   // If both nodes of a side are involved, we should only move one node
   std::vector<bool> node_list_flag(node_list.size(), false);
   std::vector<Point> node_list_point(node_list.size(), Point(0.0, 0.0, 0.0));
+  // Loop over all the selected sides
   for (unsigned int i = 0; i < slc_bdry_side_list.size(); i++)
   {
+    // Get the two node ids of the side
     dof_id_type side_id_0 = mesh.elem_ptr(std::get<0>(slc_bdry_side_list[i]))
                                 ->side_ptr(std::get<1>(slc_bdry_side_list[i]))
                                 ->node_ptr(0)
@@ -91,13 +95,13 @@ lineRemoverMoveNode(ReplicatedMesh & mesh,
                                 ->side_ptr(std::get<1>(slc_bdry_side_list[i]))
                                 ->node_ptr(1)
                                 ->id();
-    // True means the bdry node is in the node list of the trimming interface
+    // True means the selected bdry node is in the node list of the trimming interface
     bool side_id_0_in =
         !(std::find(node_list.begin(), node_list.end(), side_id_0) == node_list.end());
     bool side_id_1_in =
         !(std::find(node_list.begin(), node_list.end(), side_id_1) == node_list.end());
 
-    // True means on the removal side
+    // True means the selected bdry node is on the removal side of the trimming interface
     bool side_node_0_remove = lineSideDeterminator((*mesh.node_ptr(side_id_0))(0),
                                                    (*mesh.node_ptr(side_id_0))(1),
                                                    bdry_pars[0],
@@ -112,14 +116,15 @@ lineRemoverMoveNode(ReplicatedMesh & mesh,
                                                    side_to_remove);
     // If both nodes of that side are involved in the trimming interface
     if (side_id_0_in && side_id_1_in)
-      // The side needs to be removed from the sideset
+      // The side needs to be removed from the sideset because it is not longer an interface
       // The other node will be handled by other element's side
       boundary_info.remove_side(mesh.elem_ptr(std::get<0>(slc_bdry_side_list[i])),
                                 std::get<1>(slc_bdry_side_list[i]),
                                 std::get<2>(slc_bdry_side_list[i]));
-    // Node 0 is on the removal side while node 1 is on the retaining side
+    // If node 0 is on the trimming interface, and the side is cut by the trimming line
     else if (side_id_0_in && (side_node_0_remove != side_node_1_remove))
     {
+      // Use the intersection point as the destination of the node after moving
       node_list_flag[std::distance(
           node_list.begin(), std::find(node_list.begin(), node_list.end(), side_id_0))] = true;
       const Point p0 = *mesh.node_ptr(side_id_0);
@@ -127,16 +132,12 @@ lineRemoverMoveNode(ReplicatedMesh & mesh,
 
       node_list_point[std::distance(node_list.begin(),
                                     std::find(node_list.begin(), node_list.end(), side_id_0))] =
-          twoLineIntersection(bdry_pars[0],
-                              bdry_pars[1],
-                              bdry_pars[2],
-                              p0(1) - p1(1),
-                              p1(0) - p0(0),
-                              -(p0(0) * (p0(1) - p1(1)) + (p1(0) - p0(0)) * p0(1)));
+          twoPointandLineIntersection(p0, p1, bdry_pars[0], bdry_pars[1], bdry_pars[2]);
     }
-    // Node 1 is on the removal side while node 0 is on the retaining side
+    // If node 1 is on the trimming interface, and the side is cut by the trimming line
     else if (side_id_1_in && (side_node_0_remove != side_node_1_remove))
     {
+      // Use the intersection point as the destination of the node after moving
       node_list_flag[std::distance(
           node_list.begin(), std::find(node_list.begin(), node_list.end(), side_id_1))] = true;
       const Point p0 = *mesh.node_ptr(side_id_0);
@@ -144,12 +145,7 @@ lineRemoverMoveNode(ReplicatedMesh & mesh,
 
       node_list_point[std::distance(node_list.begin(),
                                     std::find(node_list.begin(), node_list.end(), side_id_1))] =
-          twoLineIntersection(bdry_pars[0],
-                              bdry_pars[1],
-                              bdry_pars[2],
-                              p0(1) - p1(1),
-                              p1(0) - p0(0),
-                              -(p0(0) * (p0(1) - p1(1)) + (p1(0) - p0(0)) * p0(1)));
+          twoPointandLineIntersection(p0, p1, bdry_pars[0], bdry_pars[1], bdry_pars[2]);
     }
   }
 
@@ -209,6 +205,8 @@ lineRemoverMoveNode(ReplicatedMesh & mesh,
   for (const auto & zero_elem : zero_elems)
     mesh.delete_elem(mesh.elem_ptr(zero_elem));
   mesh.contract();
+  // As we modified the side_list, it is safer to clear the node_list
+  boundary_info.clear_boundary_node_ids();
   mesh.prepare_for_use();
 }
 
@@ -281,8 +279,10 @@ quasiTriElementsFixer(ReplicatedMesh & mesh,
   // Loop over all the identified degenerate QUAD elements
   for (const auto & bad_elem : bad_elems_rec)
   {
-    std::vector<boundary_id_type> elem_bdry_container;
-    // elems 2 and 3 are the neighboring elements of the degenerate element corresponding to the two
+    std::vector<boundary_id_type> elem_bdry_container_0;
+    std::vector<boundary_id_type> elem_bdry_container_1;
+    std::vector<boundary_id_type> elem_bdry_container_2;
+    // elems 1 and 2 are the neighboring elements of the degenerate element corresponding to the two
     // collinear sides.
     Elem * elem_0 = std::get<0>(bad_elem);
     Elem * elem_1 = elem_0->neighbor_ptr(std::get<1>(bad_elem));
@@ -290,7 +290,13 @@ quasiTriElementsFixer(ReplicatedMesh & mesh,
     // If the elems 2 and 3 do not exist, the two sides are on the external boundary formed by
     // trimming.
     if (elem_1 == nullptr && elem_2 == nullptr)
-      mesh.get_boundary_info().boundary_ids(elem_0, std::get<1>(bad_elem), elem_bdry_container);
+    {
+      mesh.get_boundary_info().boundary_ids(
+          elem_0, (std::get<1>(bad_elem) + 1) % elem_0->n_vertices(), elem_bdry_container_0);
+      mesh.get_boundary_info().boundary_ids(
+          elem_0, (std::get<1>(bad_elem) + 2) % elem_0->n_vertices(), elem_bdry_container_1);
+      mesh.get_boundary_info().boundary_ids(elem_0, std::get<1>(bad_elem), elem_bdry_container_2);
+    }
     else
       throw MooseException("The input mesh has degenerate quad element before trimming.");
 
@@ -311,7 +317,11 @@ quasiTriElementsFixer(ReplicatedMesh & mesh,
     elem_Tri3->set_node(1) = pt1;
     elem_Tri3->set_node(2) = pt2;
     // Retain the boundary information
-    for (auto bdry_id : elem_bdry_container)
+    for (auto bdry_id : elem_bdry_container_0)
+      boundary_info.add_side(elem_Tri3, 0, bdry_id);
+    for (auto bdry_id : elem_bdry_container_1)
+      boundary_info.add_side(elem_Tri3, 1, bdry_id);
+    for (auto bdry_id : elem_bdry_container_2)
       boundary_info.add_side(elem_Tri3, 2, bdry_id);
     // Assign subdomain id for the TRI element by shifting its original subdomain id
     elem_Tri3->subdomain_id() = elem_block_id + tri_subdomain_id_shift;
