@@ -28,6 +28,7 @@ lineRemoverMoveNode(ReplicatedMesh & mesh,
                     const std::set<subdomain_id_type> subdomain_ids_set,
                     const boundary_id_type trimming_section_boundary_id,
                     const boundary_id_type external_boundary_id,
+                    const std::vector<boundary_id_type> other_boundaries_to_conform,
                     const bool assign_ext_to_new,
                     const bool side_to_remove)
 {
@@ -39,7 +40,10 @@ lineRemoverMoveNode(ReplicatedMesh & mesh,
   // Only select the boundaries_to_conform
   std::vector<std::tuple<dof_id_type, unsigned short int, boundary_id_type>> slc_bdry_side_list;
   for (unsigned int i = 0; i < bdry_side_list.size(); i++)
-    if (std::get<2>(bdry_side_list[i]) == external_boundary_id)
+    if (std::get<2>(bdry_side_list[i]) == external_boundary_id ||
+        std::find(other_boundaries_to_conform.begin(),
+                  other_boundaries_to_conform.end(),
+                  std::get<2>(bdry_side_list[i])) != other_boundaries_to_conform.end())
       slc_bdry_side_list.push_back(bdry_side_list[i]);
 
   // Assign block id for elements to be removed

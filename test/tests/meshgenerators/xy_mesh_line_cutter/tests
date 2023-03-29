@@ -44,6 +44,18 @@
     cli_args = 'Mesh/mlc/cutting_type=MOV_NODE 
                 --mesh-only multi_block_cut_node.e'
   []
+  [multi_block_cut_node_other_boundaries]
+    type = 'Exodiff'
+    input = 'multi_block_cut.i'
+    exodiff = 'multi_block_cut_node_other_boundaries.e'
+    mesh_mode = 'REPLICATED'
+    recover = false
+    requirement = 'The system shall cut a multi-subdomain mesh using the node moving method with interface boundaries that need to conform.'
+    allow_warnings = true
+    cli_args = 'Mesh/mlc/cutting_type=MOV_NODE 
+                Mesh/mlc/other_boundaries_to_conform="12 23 34 45"
+                --mesh-only multi_block_cut_node_other_boundaries.e'
+  []
   [err_non_2d_mesh]
     type = 'RunException'
     input = 'simple_cut.i'

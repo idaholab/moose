@@ -244,6 +244,7 @@ PolygonMeshTrimmerBase::peripheralTrimmer(
                                                    subdomain_ids_set,
                                                    peripheral_trimming_section_boundary_id,
                                                    external_boundary_id,
+                                                   std::vector<boundary_id_type>(),
                                                    true);
       }
       catch (MooseException & e)

@@ -15,9 +15,37 @@
       old_boundary = '1 2 3 4'
       new_boundary = '100 100 100 100'
   []
+  [interface12]
+    type = SideSetsBetweenSubdomainsGenerator
+    input = ext
+    primary_block = '1'
+    paired_block = '2'
+    new_boundary = '12'
+  []
+  [interface23]
+    type = SideSetsBetweenSubdomainsGenerator
+    input = interface12
+    primary_block = '2'
+    paired_block = '3'
+    new_boundary = '23'
+  []
+  [interface34]
+    type = SideSetsBetweenSubdomainsGenerator
+    input = interface23
+    primary_block = '3'
+    paired_block = '4'
+    new_boundary = '34'
+  []
+  [interface45]
+    type = SideSetsBetweenSubdomainsGenerator
+    input = interface34
+    primary_block = '4'
+    paired_block = '5'
+    new_boundary = '45'
+  []
   [mlc]
     type = XYMeshLineCutter
-    input = ext
+    input = interface45
     cut_line_params = '1 -2 0'
     new_boundary_id = 20
     input_mesh_external_boundary_id = 100

@@ -37,6 +37,8 @@ protected:
   const boundary_id_type _new_boundary_id;
   /// Boundary id of the external boundary of the input mesh (only needed for MOV_NODE method)
   const boundary_id_type _input_mesh_external_boundary_id;
+  /// IDs of the other boundaries that need to be conformed to during nodes moving (only needed for MOV_NODE method)
+  const std::vector<boundary_id_type> _other_boundaries_to_conform;
   /// SubdomainName suffix used to rename the converted triangular elements
   const SubdomainName _tri_elem_subdomain_name_suffix;
   /// Customized id shift to define subdomain ids of the converted triangular elements

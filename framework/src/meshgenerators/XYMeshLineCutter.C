@@ -37,6 +37,9 @@ XYMeshLineCutter::validParams()
       "new_boundary_id", "Boundary id to be assigned to the boundary formed by the cutting.");
   params.addParam<boundary_id_type>("input_mesh_external_boundary_id",
                                     "Boundary id of the external boundary of the input mesh.");
+  params.addParam<std::vector<boundary_id_type>>(
+      "other_boundaries_to_conform",
+      "IDs of the other boundaries that need to be conformed to during nodes moving.");
 
   params.addParam<SubdomainName>(
       "tri_elem_subdomain_name_suffix",
@@ -66,6 +69,10 @@ XYMeshLineCutter::XYMeshLineCutter(const InputParameters & parameters)
         isParamValid("input_mesh_external_boundary_id")
             ? getParam<boundary_id_type>("input_mesh_external_boundary_id")
             : Moose::INVALID_BOUNDARY_ID),
+    _other_boundaries_to_conform(
+        isParamValid("other_boundaries_to_conform")
+            ? getParam<std::vector<boundary_id_type>>("other_boundaries_to_conform")
+            : std::vector<boundary_id_type>()),
     _tri_elem_subdomain_name_suffix(getParam<SubdomainName>("tri_elem_subdomain_name_suffix")),
     _tri_elem_subdomain_shift(isParamValid("tri_elem_subdomain_shift")
                                   ? getParam<subdomain_id_type>("tri_elem_subdomain_shift")
@@ -131,7 +138,8 @@ XYMeshLineCutter::generate()
                                                  block_id_to_remove,
                                                  subdomain_ids_set,
                                                  _new_boundary_id,
-                                                 _input_mesh_external_boundary_id);
+                                                 _input_mesh_external_boundary_id,
+                                                 _other_boundaries_to_conform);
     }
     catch (MooseException & e)
     {
