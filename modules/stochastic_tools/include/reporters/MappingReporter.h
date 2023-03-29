@@ -11,33 +11,43 @@
 
 // MOOSE includes
 #include "StochasticReporter.h"
-#include "SurrogateModel.h"
 #include "ParallelSolutionStorage.h"
 #include "MappingInterface.h"
 
 /**
- * A tool for output Sampler data.
+ * A tool to reduce solution fields to coordinates in the latent space.
  */
 class MappingReporter : public StochasticReporter, public MappingInterface
 {
 public:
   static InputParameters validParams();
-
   MappingReporter(const InputParameters & parameters);
+
   virtual void initialize() override {}
   void initialSetup() override;
   virtual void execute() override;
   virtual void finalize() override {}
 
 protected:
-  Sampler * _sampler;
-
+  /// If we already have solution fields stored from previous runs, we can use their
+  /// ParallelStorageObject to obtain the corresponding coefficients
   ParallelSolutionStorage * _parallel_storage;
 
-  const UserObjectName _mapping_name;
-  const std::vector<VariableName> _variable_names;
+  /// We only need the sampler to check which coefficients whould go to which processor
+  /// in case a ParallelSolutionStorage is used
+  Sampler * _sampler;
+
+  /// The name of the mapping object we would like to use
+  const UserObjectName & _mapping_name;
+  /// Link to the mapping object, we need this to be a pointer due to the fact that we can only fetch this in initialSetup
   MappingBase * _mapping;
 
+  /// The variables we would like to map
+  const std::vector<VariableName> & _variable_names;
+
+  ///@{
+  /// Links to the storage spaces (reporters) where we collect the coefficients
   std::vector<std::vector<std::vector<Real>> *> _vector_real_values_parallel_storage;
   std::vector<std::vector<Real> *> _vector_real_values;
+  ///@}
 };
