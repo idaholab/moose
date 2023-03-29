@@ -200,7 +200,6 @@ ifeq ($(RICHARDS),yes)
   include $(FRAMEWORK_DIR)/app.mk
 endif
 
-# Depended on by optimization
 ifeq ($(STOCHASTIC_TOOLS),yes)
   APPLICATION_DIR    := $(MOOSE_DIR)/modules/stochastic_tools
   APPLICATION_NAME   := stochastic_tools
@@ -211,7 +210,7 @@ endif
 # The modules that follow are purposefully ordered such that all of their
 # dependencies are defined first
 
-# Depended on by navier_stokes, fsi (through navier_stokes), and optimization
+# Depended on by navier_stokes, fsi (through navier_stokes)
 ifeq ($(HEAT_CONDUCTION),yes)
   APPLICATION_DIR    := $(MOOSE_DIR)/modules/heat_conduction
   APPLICATION_NAME   := heat_conduction
