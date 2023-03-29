@@ -72,7 +72,7 @@
       type = RunException
       input = coarse_elem_restrict_subdomain.i
       cli_args = 'Mesh/assign2/subdomains="1 2 foo"'
-      expect_err = 'The requested subdomains do not exist on the fine mesh: 2,foo'
+      expect_err = 'The requested subdomains do not exist on the fine mesh: 2, foo'
       detail = 'requested subdomain restriction does not exist on the fine mesh'
     []
   []
