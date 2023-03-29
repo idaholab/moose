@@ -13,9 +13,9 @@
 #include "libmesh/face_tri3.h"
 
 /**
- * This XYMeshLineCutter object is designed to trim the input mesh by removing all the elements on one
- * side of a given straight line with special processing on the elements crossed by the cutting line
- * to ensure a smooth cross-section.
+ * This XYMeshLineCutter object is designed to trim the input mesh by removing all the elements on
+ * one side of a given straight line with special processing on the elements crossed by the cutting
+ * line to ensure a smooth cross-section.
  */
 class XYMeshLineCutter : public MeshGenerator
 {

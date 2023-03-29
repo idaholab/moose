@@ -48,7 +48,8 @@ XYMeshLineCutter::validParams()
       "Customized id shift to define subdomain ids of the converted triangular elements.");
 
   params.addClassDescription(
-      "This XYMeshLineCutter object is designed to trim the input mesh by removing all the elements "
+      "This XYMeshLineCutter object is designed to trim the input mesh by removing all the "
+      "elements "
       "on one side of a given straight line with special processing on the elements crossed by the "
       "cutting line to ensure a smooth cross-section.");
 
