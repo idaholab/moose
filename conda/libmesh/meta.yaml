@@ -2,10 +2,10 @@
 # REMEMBER TO UPDATE the .yaml files for the following packages:
 #   template/
 #   moose/
-{% set build = 0 %}
+{% set build = 1 %}
 {% set strbuild = "build_" + build|string %}
-{% set version = "2023.03.02" %}
-{% set vtk_friendly_version = "9.1" %}
+{% set version = "2023.03.29" %}
+{% set vtk_friendly_version = "9.2" %}
 
 package:
   name: moose-libmesh
