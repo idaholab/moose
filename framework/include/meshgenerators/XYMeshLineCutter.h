@@ -13,16 +13,16 @@
 #include "libmesh/face_tri3.h"
 
 /**
- * This MeshLineCutter object is designed to trim the input mesh by removing all the elements on one
+ * This XYMeshLineCutter object is designed to trim the input mesh by removing all the elements on one
  * side of a given straight line with special processing on the elements crossed by the cutting line
  * to ensure a smooth cross-section.
  */
-class MeshLineCutter : public MeshGenerator
+class XYMeshLineCutter : public MeshGenerator
 {
 public:
   static InputParameters validParams();
 
-  MeshLineCutter(const InputParameters & parameters);
+  XYMeshLineCutter(const InputParameters & parameters);
 
   std::unique_ptr<MeshBase> generate() override;
 

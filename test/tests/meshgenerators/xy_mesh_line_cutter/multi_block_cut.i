@@ -9,17 +9,17 @@
     preserve_volumes = false
     smoothing_max_it = 3
   []
-  [rename]
-      type = RenameBlockGenerator
+  [ext]
+      type = RenameBoundaryGenerator
       input = ccmg
-      old_block = '1 2'
-      new_block = 'center center_trimmer_tri'
+      old_boundary = '1 2 3 4'
+      new_boundary = '100 100 100 100'
   []
   [mlc]
-    type = MeshLineCutter
-    input = rename
+    type = XYMeshLineCutter
+    input = ext
     cut_line_params = '1 -2 0'
     new_boundary_id = 20
-    input_mesh_external_boundary_id = 1
+    input_mesh_external_boundary_id = 100
   []
 []

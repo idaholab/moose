@@ -14,7 +14,7 @@
     block = 0
   []
   [mlc]
-    type = MeshLineCutter
+    type = XYMeshLineCutter
     input = ext
     cut_line_params = '1 -2 0'
     new_boundary_id = 20

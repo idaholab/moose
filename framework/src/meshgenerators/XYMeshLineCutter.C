@@ -7,16 +7,16 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "MeshLineCutter.h"
+#include "XYMeshLineCutter.h"
 #include "MooseMeshCuttingUtils.h"
 
 // C++ includes
 #include <cmath>
 
-registerMooseObject("MooseApp", MeshLineCutter);
+registerMooseObject("MooseApp", XYMeshLineCutter);
 
 InputParameters
-MeshLineCutter::validParams()
+XYMeshLineCutter::validParams()
 {
   InputParameters params = MeshGenerator::validParams();
 
@@ -48,14 +48,14 @@ MeshLineCutter::validParams()
       "Customized id shift to define subdomain ids of the converted triangular elements.");
 
   params.addClassDescription(
-      "This MeshLineCutter object is designed to trim the input mesh by removing all the elements "
+      "This XYMeshLineCutter object is designed to trim the input mesh by removing all the elements "
       "on one side of a given straight line with special processing on the elements crossed by the "
       "cutting line to ensure a smooth cross-section.");
 
   return params;
 }
 
-MeshLineCutter::MeshLineCutter(const InputParameters & parameters)
+XYMeshLineCutter::XYMeshLineCutter(const InputParameters & parameters)
   : MeshGenerator(parameters),
     _cutting_type(getParam<MooseEnum>("cutting_type").template getEnum<CutType>()),
     _input_name(getParam<MeshGeneratorName>("input")),
@@ -83,7 +83,7 @@ MeshLineCutter::MeshLineCutter(const InputParameters & parameters)
 }
 
 std::unique_ptr<MeshBase>
-MeshLineCutter::generate()
+XYMeshLineCutter::generate()
 {
   auto replicated_mesh_ptr = dynamic_cast<ReplicatedMesh *>(_input.get());
   if (!replicated_mesh_ptr)

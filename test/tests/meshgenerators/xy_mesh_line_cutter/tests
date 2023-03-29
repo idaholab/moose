@@ -1,5 +1,5 @@
 [Tests]
-  design = 'meshgenerators/MeshLineCutter.md'
+  design = 'meshgenerators/XYMeshLineCutter.md'
   issues = '#23844'
   [simple_cut_elem]
     type = 'Exodiff'
