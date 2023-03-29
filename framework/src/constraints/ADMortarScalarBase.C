@@ -35,9 +35,6 @@ ADMortarScalarBase::ADMortarScalarBase(const InputParameters & parameters)
     _k_order(_use_scalar ? _kappa_var_ptr->order() : 0),
     _kappa(_use_scalar ? _kappa_var_ptr->adSln() : _ad_zero)
 {
-#ifndef MOOSE_GLOBAL_AD_INDEXING
-  mooseError("ADMortarScalarBase only supported for global AD indexing");
-#endif
 }
 
 void
@@ -78,13 +75,9 @@ ADMortarScalarBase::computeJacobian()
     for (_h = 0; _h < _k_order; _h++)
       scalar_residuals[_h] += _JxW_msm[_qp] * _coord[_qp] * computeScalarQpResidual();
   }
-#ifdef MOOSE_GLOBAL_AD_INDEXING
   _assembly.processUnconstrainedResidualsAndJacobian(scalar_residuals,
                                                      _kappa_var_ptr->dofIndices(),
                                                      _vector_tags,
                                                      _matrix_tags,
                                                      _kappa_var_ptr->scalingFactor());
-#else
-  mooseError("ADMortarScalarBase only supported for global AD indexing");
-#endif
 }

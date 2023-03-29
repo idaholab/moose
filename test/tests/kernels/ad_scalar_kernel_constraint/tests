@@ -9,14 +9,12 @@
       exodiff = 'scalar_constraint_kernel_RJ_out.e'
       # This problem only has 4 elements and therefore does not seem to run on > 4 procs.
       cli_args = 'Executioner/residual_and_jacobian_together=false'
-      ad_indexing_type = 'global'
       detail = 'showing the correct results with separate computation of residual and Jacobian'
     []
     [jacobian_separate]
       type = 'PetscJacobianTester'
       run_sim = True
       input = 'scalar_constraint_kernel_RJ.i'
-      ad_indexing_type = 'global'
       detail = 'verifying the separated Jacobian'
       cli_args = 'Executioner/residual_and_jacobian_together=false'
       prereq = 'kernel_dirichlet/physics_separate'
@@ -27,7 +25,6 @@
       exodiff = 'scalar_constraint_kernel_RJ_out.e'
       # This problem only has 4 elements and therefore does not seem to run on > 4 procs.
       cli_args = 'Executioner/residual_and_jacobian_together=true'
-      ad_indexing_type = 'global'
       detail = 'showing the correct results with computation of residual and Jacobian together'
       prereq = 'kernel_dirichlet/jacobian_separate'
     []
@@ -35,7 +32,6 @@
       type = 'PetscJacobianTester'
       run_sim = True
       input = 'scalar_constraint_kernel_RJ.i'
-      ad_indexing_type = 'global'
       detail = 'verifying the Jacobian together'
       cli_args = 'Executioner/residual_and_jacobian_together=true'
       prereq = 'kernel_dirichlet/physics_together'
@@ -50,14 +46,12 @@
       csvdiff = 'scalar_constraint_together_out.csv'
       # This problem only has 4 elements and therefore does not seem to run on > 4 procs.
       cli_args = 'Executioner/residual_and_jacobian_together=false'
-      ad_indexing_type = 'global'
       detail = 'showing the correct results with separate computation of residual and Jacobian for Neumann'
     []
     [jacobian_separate]
       type = 'PetscJacobianTester'
       run_sim = True
       input = 'scalar_constraint_together.i'
-      ad_indexing_type = 'global'
       detail = 'verifying the separated Jacobian for Neumann'
       cli_args = 'Executioner/residual_and_jacobian_together=false'
       prereq = 'kernel_neumann/physics_separate'
@@ -68,7 +62,6 @@
       csvdiff = 'scalar_constraint_together_out.csv'
       # This problem only has 4 elements and therefore does not seem to run on > 4 procs.
       cli_args = 'Executioner/residual_and_jacobian_together=true'
-      ad_indexing_type = 'global'
       detail = 'showing the correct results with computation of residual and Jacobian together for Neumann'
       prereq = 'kernel_neumann/jacobian_separate'
     []
@@ -76,7 +69,6 @@
       type = 'PetscJacobianTester'
       run_sim = True
       input = 'scalar_constraint_together.i'
-      ad_indexing_type = 'global'
       detail = 'verifying the Jacobian together for Neumann'
       cli_args = 'Executioner/residual_and_jacobian_together=true'
       prereq = 'kernel_neumann/physics_together'
@@ -90,7 +82,6 @@
     # This problem only has 4 elements and therefore does not seem to run on > 4 procs.
     max_parallel = 4
     requirement = 'The system shall solve the constrained Neumann problem using the AD Lagrange multiplier approach with LU solver, computing the residual and Jacobian simultaneously.'
-    ad_indexing_type = 'global'
   []
 
   [bipass]
@@ -100,7 +91,6 @@
     # This problem only has 4 elements and therefore does not seem to run on > 4 procs.
     max_parallel = 4
     requirement = 'The system shall support the ability to include the AD scalar wrapper but not actually using a scalar variable.'
-    ad_indexing_type = 'global'
   []
 
   [override]
@@ -108,6 +98,5 @@
     input = 'diffusion_override_scalar.i'
     expect_err = 'A scalar_variable has been set and compute_scalar_residuals=true, but the computeScalarQpResidual method was not overridden. Accidental call of base class?'
     requirement = 'The system shall error if a user assigns a scalar and requests evaluation of scalar residuals, but does not override the quadrature point residual evaluation routine in their derived class.'
-    ad_indexing_type = 'global'
   []
 []

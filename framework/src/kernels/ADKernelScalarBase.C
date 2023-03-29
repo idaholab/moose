@@ -40,9 +40,6 @@ ADKernelScalarBase::ADKernelScalarBase(const InputParameters & parameters)
     _k_order(_use_scalar ? _kappa_var_ptr->order() : 0),
     _kappa(_use_scalar ? _kappa_var_ptr->adSln() : _ad_zero)
 {
-#ifndef MOOSE_GLOBAL_AD_INDEXING
-  mooseError("ADKernelScalarBase only supported for global AD indexing");
-#endif
 }
 
 void
