@@ -386,7 +386,7 @@ MooseApp::MooseApp(InputParameters parameters)
                                ? parameters.get<const MooseMesh *>("_master_displaced_mesh")
                                : nullptr),
     _mesh_generator_system(*this),
-    _execute_flags(moose::internal::getExecFlagRegistry().getFlags()),
+    _execute_flags(moose::internal::ExecFlagRegistry::getExecFlagRegistry().getFlags()),
     _automatic_automatic_scaling(getParam<bool>("automatic_automatic_scaling"))
 {
 #ifdef HAVE_GPERFTOOLS
@@ -609,8 +609,8 @@ MooseApp::~MooseApp()
 
 #ifdef LIBMESH_HAVE_DLOPEN
   // Close any open dynamic libraries
-  for (const auto & it : _lib_handles)
-    dlclose(it.second);
+  for (const auto & lib_pair : _lib_handles)
+    dlclose(lib_pair.second.library_handle);
 #endif
 }
 
@@ -1851,10 +1851,10 @@ MooseApp::loadLibraryAndDependencies(const std::string & library_filename,
   // .la)
   pcrecpp::RE re_deps("(/\\S*\\.la)");
 
-  std::ifstream handle(library_filename.c_str());
-  if (handle.is_open())
+  std::ifstream la_handle(library_filename.c_str());
+  if (la_handle.is_open())
   {
-    while (std::getline(handle, line))
+    while (std::getline(la_handle, line))
     {
       // Look for the system dependent dynamic library filename to open
       if (line.find("dlname=") != std::string::npos)
@@ -1875,14 +1875,18 @@ MooseApp::loadLibraryAndDependencies(const std::string & library_filename,
         break;
       }
     }
-    handle.close();
+    la_handle.close();
   }
 
-  std::string registration_method_name = params.get<std::string>("registration_method");
+  // This should only occur if we have static linkage.
+  if (dl_lib_filename.empty())
+    return;
+
   // Time to load the library, First see if we've already loaded this particular dynamic library
-  if (_lib_handles.find(std::make_pair(library_filename, registration_method_name)) ==
-          _lib_handles.end() && // make sure we haven't already loaded this library
-      dl_lib_filename != "") // AND make sure we have a library name (we won't for static linkage)
+  //     1) make sure we haven't already loaded this library
+  // AND 2) make sure we have a library name (we won't for static linkage)
+  auto dyn_lib_it = _lib_handles.find(library_filename);
+  if (dyn_lib_it == _lib_handles.end())
   {
     std::pair<std::string, std::string> lib_name_parts =
         MooseUtils::splitFileName(library_filename);
@@ -1893,63 +1897,59 @@ MooseApp::loadLibraryAndDependencies(const std::string & library_filename,
     MooseUtils::checkFileReadable(dl_lib_full_path, false, /*throw_on_unreadable=*/true);
 
 #ifdef LIBMESH_HAVE_DLOPEN
-    void * handle = dlopen(dl_lib_full_path.c_str(), RTLD_LAZY);
+    void * const lib_handle = dlopen(dl_lib_full_path.c_str(), RTLD_LAZY);
 #else
-    void * handle = nullptr;
+    void * const lib_handle = nullptr;
 #endif
 
-    if (!handle)
+    if (!lib_handle)
       mooseError("The library file \"",
                  dl_lib_full_path,
                  "\" exists and has proper permissions, but cannot by dynamically loaded.\nThis "
                  "generally means that the loader was unable to load one or more of the "
                  "dependencies listed in the supplied library (see otool or ldd).\n");
 
-// get the pointer to the method in the library.  The dlsym()
-// function returns a null pointer if the symbol cannot be found,
-// we also explicitly set the pointer to NULL if dlsym is not
-// available.
+    DynamicLibraryInfo lib_info;
+    lib_info.library_handle = lib_handle;
+
+    auto insert_ret = _lib_handles.insert(std::make_pair(library_filename, lib_info));
+    mooseAssert(insert_ret.second == true, "Error inserting into lib_handles map");
+
+    dyn_lib_it = insert_ret.first;
+  }
+
+  // Library has been loaded, check to see if we've called the requested registration method
+  const auto registration_method = params.get<std::string>("registration_method");
+  auto & entry_sym_from_curr_lib = dyn_lib_it->second.entry_symbols;
+
+  if (entry_sym_from_curr_lib.find(registration_method) == entry_sym_from_curr_lib.end())
+  {
+    // get the pointer to the method in the library.  The dlsym()
+    // function returns a null pointer if the symbol cannot be found,
+    // we also explicitly set the pointer to NULL if dlsym is not
+    // available.
 #ifdef LIBMESH_HAVE_DLOPEN
-    void * registration_method = dlsym(handle, registration_method_name.c_str());
+    void * registration_handle =
+        dlsym(dyn_lib_it->second.library_handle, registration_method.c_str());
 #else
-    void * registration_method = nullptr;
+    void * registration_handle = nullptr;
 #endif
 
-    if (!registration_method)
+    if (registration_handle)
     {
-// We found a dynamic library that doesn't have a dynamic
-// registration method in it. This shouldn't be an error, so
-// we'll just move on.
-#ifdef DEBUG
-      mooseWarning("Unable to find extern \"C\" method \"",
-                   registration_method_name,
-                   "\" in library: ",
-                   dl_lib_full_path,
-                   ".\n",
-                   "This doesn't necessarily indicate an error condition unless you believe that "
-                   "the method should exist in that library.\n");
-#endif
-
-#ifdef LIBMESH_HAVE_DLOPEN
-      dlclose(handle);
-#endif
-    }
-    else // registration_method is valid!
-    {
-      // TODO: Look into cleaning this up
       switch (params.get<RegistrationType>("reg_type"))
       {
         case APPLICATION:
         {
-          typedef void (*register_app_t)();
-          register_app_t * reg_ptr = reinterpret_cast<register_app_t *>(&registration_method);
+          using register_app_t = void (*)();
+          register_app_t * const reg_ptr = reinterpret_cast<register_app_t *>(&registration_handle);
           (*reg_ptr)();
           break;
         }
         case REGALL:
         {
-          typedef void (*register_app_t)(Factory *, ActionFactory *, Syntax *);
-          register_app_t * reg_ptr = reinterpret_cast<register_app_t *>(&registration_method);
+          using register_app_t = void (*)(Factory *, ActionFactory *, Syntax *);
+          register_app_t * const reg_ptr = reinterpret_cast<register_app_t *>(&registration_handle);
           (*reg_ptr)(params.get<Factory *>("factory"),
                      params.get<ActionFactory *>("action_factory"),
                      params.get<Syntax *>("syntax"));
@@ -1959,9 +1959,24 @@ MooseApp::loadLibraryAndDependencies(const std::string & library_filename,
           mooseError("Unhandled RegistrationType");
       }
 
-      // Store the handle so we can close it later
-      _lib_handles.insert(
-          std::make_pair(std::make_pair(library_filename, registration_method_name), handle));
+      entry_sym_from_curr_lib.insert(registration_method);
+    }
+    else
+    {
+
+#ifdef DEBUG
+      // We found a dynamic library that doesn't have a dynamic
+      // registration method in it. This shouldn't be an error, so
+      // we'll just move on.
+      if (!registration_handle)
+        mooseWarning("Unable to find extern \"C\" method \"",
+                     registration_method,
+                     "\" in library: ",
+                     dyn_lib_it->first,
+                     ".\n",
+                     "This doesn't necessarily indicate an error condition unless you believe that "
+                     "the method should exist in that library.\n");
+#endif
     }
   }
 }
@@ -1972,7 +1987,7 @@ MooseApp::getLoadedLibraryPaths() const
   // Return the paths but not the open file handles
   std::set<std::string> paths;
   for (const auto & it : _lib_handles)
-    paths.insert(it.first.first);
+    paths.insert(it.first);
 
   return paths;
 }
@@ -2374,14 +2389,15 @@ MooseApp::attachRelationshipManagers(Moose::RelationshipManagerType rm_type,
         if (rm_type == Moose::RelationshipManagerType::COUPLING)
           // We actually need to add this to the FEProblemBase NonlinearSystemBase's DofMap
           // because the DisplacedProblem "nonlinear" DisplacedSystem doesn't have any matrices
-          // for which to do coupling. It's actually horrifying to me that we are adding a coupling
-          // functor, that is going to determine its couplings based on a displaced MeshBase object,
-          // to a System associated with the undisplaced MeshBase object (there is only ever one
-          // EquationSystems object per MeshBase object and visa versa). So here I'm left with the
-          // choice of whether to pass in a MeshBase object that is *not* the MeshBase object that
-          // will actually determine the couplings or to pass in the MeshBase object that is
-          // inconsistent with the System DofMap that we are adding the coupling functor for! Let's
-          // err on the side of *libMesh* consistency and pass properly paired MeshBase-DofMap
+          // for which to do coupling. It's actually horrifying to me that we are adding a
+          // coupling functor, that is going to determine its couplings based on a displaced
+          // MeshBase object, to a System associated with the undisplaced MeshBase object (there
+          // is only ever one EquationSystems object per MeshBase object and visa versa). So here
+          // I'm left with the choice of whether to pass in a MeshBase object that is *not* the
+          // MeshBase object that will actually determine the couplings or to pass in the MeshBase
+          // object that is inconsistent with the System DofMap that we are adding the coupling
+          // functor for! Let's err on the side of *libMesh* consistency and pass properly paired
+          // MeshBase-DofMap
           problem.addCouplingGhostingFunctor(
               createRMFromTemplateAndInit(*rm, undisp_mesh, &undisp_nl_dof_map),
               /*to_mesh = */ false);

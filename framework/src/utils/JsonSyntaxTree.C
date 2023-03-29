@@ -177,7 +177,7 @@ JsonSyntaxTree::addGlobal()
 
     // Just create a list of registered app names
     nlohmann::json apps;
-    auto factory = AppFactory::instance();
+    auto & factory = AppFactory::instance();
     for (auto app = factory.registeredObjectsBegin(); app != factory.registeredObjectsEnd(); ++app)
       apps.push_back(app->first);
 

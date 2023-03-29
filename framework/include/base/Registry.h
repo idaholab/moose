@@ -222,6 +222,14 @@ public:
     return getRegistry()._data_file_paths;
   }
 
+  ///@{ Don't allow creation through copy/move construction or assignment
+  Registry(Registry const &) = delete;
+  Registry & operator=(Registry const &) = delete;
+
+  Registry(Registry &&) = delete;
+  Registry & operator=(Registry &&) = delete;
+  ///@}
+
 private:
   Registry(){};
 

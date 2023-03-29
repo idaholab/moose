@@ -977,7 +977,7 @@ toLower(const std::string & name)
 ExecFlagEnum
 getDefaultExecFlagEnum()
 {
-  return moose::internal::getExecFlagRegistry().getDefaultFlags();
+  return moose::internal::ExecFlagRegistry::getExecFlagRegistry().getDefaultFlags();
 }
 
 int
