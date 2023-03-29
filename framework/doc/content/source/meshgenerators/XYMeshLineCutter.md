@@ -23,7 +23,7 @@ The simple example of this mesh generator is to cut a square mesh that contains 
 
 The simple mesh shown above can be cut by `XYMeshLineCutter` with `CUT_ELEM` method using the following input block:
 
-!listing test/tests/meshgenerators/mesh_line_cutter/simple_cut.i block=Mesh/mlc
+!listing test/tests/meshgenerators/xy_mesh_line_cutter/simple_cut.i block=Mesh/mlc
 
 The mesh after the line cutting using `CUT_ELEM` method is shown in [simple_cut_elem]
 
@@ -50,7 +50,7 @@ On the other hand, if a more complex mesh that contains multiple subdomains need
 
 The complex mesh shown above can be cut by `XYMeshLineCutter` with `CUT_ELEM` method using the following input block:
 
-!listing test/tests/meshgenerators/mesh_line_cutter/multi_block_cut.i block=Mesh/mlc
+!listing test/tests/meshgenerators/xy_mesh_line_cutter/multi_block_cut.i block=Mesh/mlc
 
 The mesh after the line cutting using `CUT_ELEM` method is shown in [complex_cut_elem]
 
