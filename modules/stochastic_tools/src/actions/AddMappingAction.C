@@ -18,7 +18,7 @@ InputParameters
 AddMappingAction::validParams()
 {
   InputParameters params = MooseObjectAction::validParams();
-  params.addClassDescription("Adds Mapping objects.");
+  params.addClassDescription("Adds Mapping objects from a [Mappings] block.");
   return params;
 }
 

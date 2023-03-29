@@ -19,7 +19,8 @@ InputParameters
 LoadMappingDataAction::validParams()
 {
   InputParameters params = Action::validParams();
-  params.addClassDescription("Blabla.");
+  params.addClassDescription(
+      "Load the model data for the objects defined in the [Mappings] block.");
   return params;
 }
 
@@ -28,6 +29,7 @@ LoadMappingDataAction::LoadMappingDataAction(const InputParameters & params) : A
 void
 LoadMappingDataAction::act()
 {
+  // We fetch the mapping objects and then load the necessary data
   std::vector<MappingBase *> objects;
   _app.theWarehouse().query().condition<AttribSystem>("MappingBase").queryInto(objects);
   for (auto mapping_ptr : objects)
@@ -38,12 +40,10 @@ LoadMappingDataAction::act()
 }
 
 void
-LoadMappingDataAction::load(const MappingBase & model)
+LoadMappingDataAction::load(const MappingBase & mapping)
 {
-  std::cerr << model.isParamValid("filename") << std::endl;
-  std::cerr << model.getParam<FileName>("filename") << std::endl;
   // File to load
-  const FileName & filename = model.getParam<FileName>("filename");
+  const FileName & filename = mapping.getParam<FileName>("filename");
 
   // Create the object that will load in data
   RestartableDataIO data_io(_app);
@@ -53,10 +53,10 @@ LoadMappingDataAction::load(const MappingBase & model)
   // Read header
   bool pass = data_io.readRestartableDataHeaderFromFile(filename, false);
   if (!pass)
-    model.paramError("filename", "The supplied file '", filename, "' failed to load.");
+    mapping.paramError("filename", "The supplied file '", filename, "' failed to load.");
 
   // Get the data object that the loaded data will be applied
-  const RestartableDataMap & meta_data = _app.getRestartableDataMap(model.modelMetaDataName());
+  const RestartableDataMap & meta_data = _app.getRestartableDataMap(mapping.modelMetaDataName());
 
   // Read the supplied file
   std::unordered_set<std::string> filter_names;

@@ -11,6 +11,10 @@
 
 #include "GeneralReporter.h"
 
+/**
+ * A Reporter which stores serialized solution fields for given variables in a distributed fashion.
+ * The solutions can be inserted from subapps using the SerializedSolutionTransfer.
+ */
 class ParallelSolutionStorage : public GeneralReporter
 {
 public:

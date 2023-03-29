@@ -69,7 +69,8 @@ struct LocalRankConfig
   /// only transfer data to a given subapp once even though it may be running on
   /// multiple procs/ranks.
   bool is_first_local_rank;
-
+  /// For every rank working on a subapp, we store the first rank on each
+  /// process to make the communication to root simpler on the main app
   processor_id_type my_first_rank;
 };
 

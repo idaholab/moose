@@ -11,6 +11,9 @@
 
 #include "MooseObjectAction.h"
 
+/**
+ * Action to add Mapping objects from a [Mappings] block
+ */
 class AddMappingAction : public MooseObjectAction
 {
 public:

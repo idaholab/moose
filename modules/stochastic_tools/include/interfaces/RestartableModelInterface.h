@@ -15,7 +15,7 @@
 /**
  * An interface class which manages the model data save and load functionalities from moose objects
  * (such as surrogates, mappings, etc.) in the stochastic tools module.
- * */
+ */
 class RestartableModelInterface
 {
 public:

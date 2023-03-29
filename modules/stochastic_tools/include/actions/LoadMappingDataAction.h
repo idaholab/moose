@@ -10,8 +10,11 @@
 #pragma once
 
 #include "Action.h"
-class SurrogateModel;
+class MappingBase;
 
+/**
+ * Action for loading the model data for the mapping objects
+ */
 class LoadMappingDataAction : public Action
 {
 public:
@@ -20,5 +23,9 @@ public:
   virtual void act() override;
 
 private:
-  void load(const MappingBase & model);
+  /**
+   * Load the necessary information for the given model
+   * @param model Reference to the Mapping object whose data shall be loaded
+   */
+  void load(const MappingBase & mapping);
 };

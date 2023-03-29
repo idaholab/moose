@@ -419,13 +419,6 @@ dataStore(std::ostream & stream, DenseVector<T> & v, void * context)
 }
 
 template <typename T>
-void
-dataStore(std::ostream & stream, DenseVector<T> *& v, void * context)
-{
-  dataStore(stream, *v, context);
-}
-
-template <typename T>
 void dataStore(std::ostream & stream, TensorValue<T> & v, void * context);
 
 template <typename T>
@@ -720,13 +713,6 @@ dataLoad(std::istream & stream, DenseVector<T> & v, void * context)
     dataLoad(stream, r, context);
     v(i) = r;
   }
-}
-
-template <typename T>
-void
-dataLoad(std::istream & stream, DenseVector<T> *& v, void * context)
-{
-  dataLoad(stream, *v, context);
 }
 
 template <typename T>
