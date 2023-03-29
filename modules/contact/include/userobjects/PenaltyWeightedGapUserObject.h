@@ -15,7 +15,8 @@ template <typename>
 class MooseVariableFE;
 
 /**
- * Base class for creating new nodally-based mortar user objects
+ * User object for computing weighted gaps and contact pressure for penalty based
+ * mortar constraints
  */
 class PenaltyWeightedGapUserObject : public WeightedGapUserObject
 {
