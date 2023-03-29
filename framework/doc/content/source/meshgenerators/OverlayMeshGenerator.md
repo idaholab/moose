@@ -4,7 +4,7 @@
 
 ## Overview
 
-The `OverlayMeshGenerator` object is the built-in mesh generation capable of creating an overlaying mesh with the given mesh block. The overlay mesh uses DistributedRectilinearMeshGenerator(DistributedRectilinearMeshGenerator.md) as sub-generator. The input parameters for DistributedRectilinearMeshGenerator are all available for OverlayMeshGenerator. The required input parameters are [!param](/Mesh/OverlayMeshGenerator/dim) (the dimension of the domain) and [!param](/Mesh/OverlayMeshGenerator/input) (the base mesh we want to overlay).
+The `OverlayMeshGenerator` object is the built-in mesh generation capable of creating an overlaying mesh with the given mesh block. The overlay mesh uses [DistributedRectilinearMeshGenerator.md] as sub-generator. The input parameters for DistributedRectilinearMeshGenerator are all available for OverlayMeshGenerator. The required input parameters are [!param](/Mesh/OverlayMeshGenerator/dim) (the dimension of the domain) and [!param](/Mesh/OverlayMeshGenerator/input) (the base mesh we want to overlay).
 
 ## Example Syntax
 
