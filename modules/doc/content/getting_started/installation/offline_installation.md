@@ -58,18 +58,19 @@ Please work with your system administrator on satisfying the above prerequisites
 
 !style! halign=left
 PETSc, libMesh and MOOSE can all be obtained from one repository (the moose repository). First,
-create a top-level directory named 'offline', which will ultimately contain everything we need to
-transfer over to your target machine.
+create a top-level directory named `~/projects`, which will contain everything we need to transfer
+over to your target machine.
 !style-end!
 
 ```bash
-mkdir -p ~/offline/downloads
+mkdir -p ~/projects/downloads
 ```
 
-Next, enter the offline directory, and perform the cloning operation to obtain all three libraries:
+Next, enter the `~/projects` directory, and perform the cloning operation to obtain all three
+libraries:
 
 ```bash
-cd ~/offline
+cd ~/projects
 git clone https://github.com/idaholab/moose.git
 cd moose
 git checkout master
@@ -81,8 +82,8 @@ With PETSc cloned as part of the group obtained above, we can use a configure op
 obtain a list of contributions we will need to download manually (`--with-package-download-dir`):
 
 ```bash
-cd ~/offline/moose
-./scripts/update_and_rebuild_petsc.sh  --with-packages-download-dir=~/offline/downloads
+cd ~/projects/moose
+./scripts/update_and_rebuild_petsc.sh  --with-packages-download-dir=~/projects/downloads
 ```
 
 As an example, the above command should return something like the following:
@@ -91,7 +92,7 @@ As an example, the above command should return something like the following:
 ===============================================================================
              Configuring PETSc to compile on your system
 ===============================================================================
-Download the following packages to /home/you/offline/downloads
+Download the following packages to /home/you/projects/downloads
 
 fblaslapack ['git://https://bitbucket.org/petsc/pkg-fblaslapack', 'https://bitbucket.org/petsc/pkg-fblaslapack/get/v3.4.2-p3.tar.gz']
 hypre ['git://https://github.com/hypre-space/hypre', 'https://github.com/hypre-space/hypre/archive/93baaa8c9.tar.gz']
@@ -105,14 +106,14 @@ slepc ['git://https://gitlab.com/slepc/slepc.git', 'https://gitlab.com/slepc/sle
 ```
 
 Your job, will be to parse through the above jargon, and download these packages to
-`~/offline/downloads`. Be certain to preserve the file name. PETSc is listing several means for
+`~/projects/downloads`. Be certain to preserve the file name. PETSc is listing several means for
 which you can obtain these contributions (using either git or traditional web link). For the purpose
 of simplicity, we will use the traditional web method.
 
 +Example ONLY, as file names may be deprecated!:+
 
 ```bash
-cd ~/offline/downloads
+cd ~/projects/downloads
 curl -L -O https://bitbucket.org/petsc/pkg-fblaslapack/get/v3.4.2-p3.tar.gz
 curl -L -O https://github.com/hypre-space/hypre/archive/93baaa8c9.tar.gz
 curl -L -O https://bitbucket.org/petsc/pkg-metis/get/v5.1.0-p8.tar.gz
@@ -125,14 +126,15 @@ curl -L -O https://gitlab.com/slepc/slepc/-/archive/v3.13.3/slepc-v3.13.3.tar.gz
 ```
 
 At this point, everything necessary should be downloaded and available in the directory hierarchy at
-`~/offline`. At this time, you may copy this directory to your offline-no-internet access machine's
+`~/projects`. At this time, you may copy this directory to your offline-no-internet access machine's
 home directory. At the time of this writing, tallying up the disc space used equates to
-approximately ~2GB. Depending on your internet connection, you may want to compress the entire
-~/offline directory instead (saves about 500Mb):
+approximately 2GB. Depending on your internet connection, you may want to compress the entire
+`~/projects/downloads` and `~/projects/moose` directories into a single compressed tarball archive
+(saves about 500Mb):
 
 ```bash
 cd ~/
-tar -pzcf offline.tar.gz offline
+tar -pzcf offline.tar.gz projects/downloads projects/moose
 ```
 
 !alert note
@@ -148,8 +150,9 @@ tar -xf offline.tar.gz -C ~/
 ## Build Libraries
 
 !style! halign=left
-With the `~/offline` directory available in your target machine's home directory, we can now build
-PETSc, libMesh, and MOOSE, using your MPI Wrapper/Compiler established in earlier steps.
+With `~/projects/moose` and `~/projects/downloads` directories available on the target machine, we
+can now build PETSc, libMesh and MOOSE, using your MPI Wrapper/Compiler established in earlier
+steps.
 !style-end!
 
 #### Verify MPI
@@ -172,9 +175,9 @@ install during the Prerequisites section.
 
 #### Build PETSc and libMesh
 
-Build PETSc and libMesh by instructing these libraries to use the offline directory you created:
+Build PETSc and libMesh by instructing these libraries to use the downloads directory you created:
 
-!template load file=installation/build_petsc_and_libmesh.md.template PATH=~/offline PETSC_ARGS1=--skip-submodule-update PETSC_ARGS2=--with-packages-download-dir=~/offline/downloads LIBMESH_ARGS1=--skip-submodule-update
+!template load file=installation/build_petsc_and_libmesh.md.template PATH=~/projects PETSC_ARGS1=--skip-submodule-update PETSC_ARGS2=--with-packages-download-dir=~/projects/downloads LIBMESH_ARGS1=--skip-submodule-update
 
 Unfortunately, any errors incurred during the above step is going to be beyond the scope of this
 document. Most likely, an error will be related to a missing library by one of the myriad
@@ -185,13 +188,13 @@ fulfill the dependency.
 
 #### Build and Test MOOSE
 
-!template load file=installation/build_moose.md.template PATH=~/offline
+!template load file=installation/build_moose.md.template PATH=~/projects
 
 Again, any errors incurred during this step, is going to be beyond the scope of this document.
 Please submit a detailed log of the error, to the
 [MOOSE Discussion forum](https://github.com/idaholab/moose/discussions).
 
-!template load file=installation/test_moose.md.template PATH=~/offline
+!template load file=installation/test_moose.md.template PATH=~/projects
 
 ## Your Application
 
@@ -203,7 +206,6 @@ wrapper, and to define where your built copy of MOOSE resides:
 
 ```bash
 export CC=mpicc CXX=mpicxx FC=mpif90 F90=mpif90 F77=mpif77
-export MOOSE_DIR=$HOME/offline/moose
 ```
 
 You will need to export the above variables each time you open a new terminal window on your HPC
@@ -212,4 +214,8 @@ cluster or personal workstation, before you can perform any application developm
 !include installation/start_up_profile.md
 
 Now that you have a working MOOSE, and you know how to make your MPI wrapper available, proceed to
-[building your own application](installation/offline_new_users.md).
+'New Users' to begin your tour of MOOSE!
+
+!content pagination use_title=True
+                    previous=installation/offline_index.md
+                    next=getting_started/offline_new_users.md

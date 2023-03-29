@@ -1,4 +1,4 @@
-### Troubleshooting
+## Troubleshooting
 
 !style! halign=left
 Please see the MOOSE [FAQ](help/faq/index.md optional=True) page for common issues. If your issue is not listed, this

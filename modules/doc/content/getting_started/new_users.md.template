@@ -2,6 +2,11 @@
 
 Welcome to MOOSE! This page describes some helpful ways to start developing with MOOSE.
 
+<!-- UPDATE=false to load false_update_moose.md page (hack needed for Offline installs) -->
+<!-- leave empty to load up normal update instructions -->
+
+!template load file=installation/{{UPDATE}}update_moose.md.template PATH={{PATH}}
+
 ## Create an Application id=create-an-app
 
 !style! halign=left
@@ -37,7 +42,7 @@ make -j 6
 
 If the application is working correctly, the output shows a single passing test. This indicates that
 the application is ready to be further developed. Be sure to recompile and tests the application
-each time [MOOSE is updated](installation/index.md#update).
+each time you update moose MOOSE.
 
 ### Enable Modules
 
@@ -117,3 +122,9 @@ MOOSE can be customized by running a `configure` script in
   default is 50. A smaller number may be chosen for increased speed; a larger number may be required
   for 3D problems or problems with coupling between many variables.
 - `--prefix`: Specify a target installation path. Useful if you plan on running `make install`.
+
+!include installation/installation_troubleshooting.md
+
+!content pagination use_title=True
+                    previous=installation/{{PAGE_HEIR}}index.md
+                    next=examples_and_tutorials/{{PAGE_HEIR}}index.md

@@ -64,5 +64,8 @@ MOOSE requires several support libraries in order to build or run properly. Both
 
 !template load file=installation/test_moose.md.template PATH=~/cluster_name/projects
 
-With tests passing you can continue to
-[building your own application](installation/inl_hpc_new_users.md).
+Now that you have a working MOOSE, proceed to 'New Users' to begin your tour of MOOSE!
+
+!content pagination use_title=True
+                    previous=installation/inl_hpc_index.md
+                    next=getting_started/inl_hpc_new_users.md
