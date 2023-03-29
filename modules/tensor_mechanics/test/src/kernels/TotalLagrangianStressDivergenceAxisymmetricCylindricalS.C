@@ -9,4 +9,5 @@
 
 #include "TotalLagrangianStressDivergenceAxisymmetricCylindricalS.h"
 
-registerMooseObject("TensorMechanicsTestApp", TotalLagrangianStressDivergenceAxisymmetricCylindricalS);
+registerMooseObject("TensorMechanicsTestApp",
+                    TotalLagrangianStressDivergenceAxisymmetricCylindricalS);

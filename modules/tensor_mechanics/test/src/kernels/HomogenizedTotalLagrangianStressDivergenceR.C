@@ -27,7 +27,8 @@ HomogenizedTotalLagrangianStressDivergenceR::validParams()
   InputParameters params = TotalLagrangianStressDivergenceS::validParams();
   params.addClassDescription("Total Lagrangian stress equilibrium kernel with "
                              "homogenization constraint Jacobian terms");
-  params.renameCoupledVar("scalar_variable", "macro_var", "Optional scalar field with the macro gradient");
+  params.renameCoupledVar(
+      "scalar_variable", "macro_var", "Optional scalar field with the macro gradient");
   params.addRequiredCoupledVar("macro_other", "Other components of coupled scalar variable");
   params.addRequiredParam<unsigned int>("prime_scalar", "Either 0=_var or 1=_other scalar");
   params.addRequiredParam<MultiMooseEnum>(
