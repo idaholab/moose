@@ -6,8 +6,12 @@
 //*
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
+
 #include "OverlayMeshGenerator.h"
 #include "CastUniquePointer.h"
+#include "DistributedRectilinearMeshGenerator.h"
+#include "InputParameters.h"
+
 // libMesh includes
 #include "libmesh/mesh_generation.h"
 #include "libmesh/unstructured_mesh.h"
@@ -16,54 +20,18 @@
 #include "libmesh/mesh_tools.h"
 
 registerMooseObject("MooseApp", OverlayMeshGenerator);
+
 InputParameters
 OverlayMeshGenerator::validParams()
 {
   InputParameters params = MeshGenerator::validParams();
-  params.addClassDescription("This OverlayMeshGenerator creates a Cartesian mesh using "
-                             "DistributedRectilinearMeshGenerator in "
-                             "the mesh block region.");
-  params.addRequiredParam<MeshGeneratorName>("input", "The base mesh we want to overlay");
-  MooseEnum dims("1=1 2 3");
-  params.addRequiredParam<MooseEnum>(
-      "dim", dims, "The dimension of the mesh to be generated"); // Make this parameter required
-  params.addParam<dof_id_type>("nx", 1, "Number of elements in the X direction");
-  params.addParam<dof_id_type>("ny", 1, "Number of elements in the Y direction");
-  params.addParam<dof_id_type>("nz", 1, "Number of elements in the Z direction");
-  params.addParam<processor_id_type>(
-      "num_cores_for_partition",
-      0,
-      "Number of cores for partitioning the graph (dafaults to the number of MPI ranks)");
-  params.addRangeCheckedParam<unsigned>(
-      "num_side_layers",
-      2,
-      "num_side_layers>=1 & num_side_layers<5",
-      "Number of layers of off-processor side neighbors is reserved during mesh generation");
-  MooseEnum partition("graph linear square", "graph", false);
-  params.addParam<MooseEnum>(
-      "partition", partition, "Which method (graph linear square) use to partition mesh");
-  MooseEnum elem_types = MooseMesh::elemTypes();
-  params.addParam<MooseEnum>("elem_type",
-                             elem_types,
-                             "The type of element from libMesh to "
-                             "generate (default: linear element for "
-                             "requested dimension)");
 
-  params.addRangeCheckedParam<Real>(
-      "bias_x",
-      1.,
-      "bias_x>=0.5 & bias_x<=2",
-      "The amount by which to grow (or shrink) the cells in the x-direction.");
-  params.addRangeCheckedParam<Real>(
-      "bias_y",
-      1.,
-      "bias_y>=0.5 & bias_y<=2",
-      "The amount by which to grow (or shrink) the cells in the y-direction.");
-  params.addRangeCheckedParam<Real>(
-      "bias_z",
-      1.,
-      "bias_z>=0.5 & bias_z<=2",
-      "The amount by which to grow (or shrink) the cells in the z-direction.");
+  params += DistributedRectilinearMeshGenerator::validParams();
+  params.addRequiredParam<MeshGeneratorName>("input", "The base mesh we want to overlay");
+
+  params.addClassDescription("Creates a Cartesian mesh overlaying "
+                             "the input mesh region.");
+
   return params;
 }
 
@@ -78,35 +46,30 @@ OverlayMeshGenerator::OverlayMeshGenerator(const InputParameters & parameters)
 
   _input_mesh = &getMeshByName(_mesh_name);
 
-  auto params = _app.getFactory().getValidParams("DistributedRectilinearMeshGenerator");
+  auto input_params = _app.getFactory().getValidParams("DistributedRectilinearMeshGenerator");
 
-  params.set<MooseEnum>("dim") = _dim;
-
-  params.set<dof_id_type>("nx") = getParam<dof_id_type>("nx");
-  params.set<dof_id_type>("ny") = getParam<dof_id_type>("ny");
-  params.set<dof_id_type>("nz") = getParam<dof_id_type>("nz");
-
-  params.set<Real>("xmin") = 0;
-  params.set<Real>("ymin") = 0;
-  params.set<Real>("zmin") = 0;
-  params.set<Real>("xmax") = 1;
-  params.set<Real>("ymax") = 1;
-  params.set<Real>("zmax") = 1;
-
-  params.set<Real>("bias_x") = getParam<Real>("bias_x");
-  params.set<Real>("bias_y") = getParam<Real>("bias_y");
-  params.set<Real>("bias_z") = getParam<Real>("bias_z");
-
-  params.set<unsigned>("num_side_layers") = getParam<unsigned>("num_side_layers");
-  params.set<processor_id_type>("num_cores_for_partition") =
-      getParam<processor_id_type>("num_cores_for_partition");
-
-  params.set<MooseEnum>("partition") = getParam<MooseEnum>("partition");
-  params.set<MooseEnum>("elem_type") = getParam<MooseEnum>("elem_type");
+  input_params.applySpecificParameters(parameters,
+                                       {"dim",
+                                        "nx",
+                                        "ny",
+                                        "nz",
+                                        "xmin",
+                                        "ymin",
+                                        "zmin",
+                                        "xmax",
+                                        "ymax",
+                                        "zmax",
+                                        "bias_x",
+                                        "bias_y",
+                                        "bias_z",
+                                        "num_side_layers",
+                                        "num_cores_for_partition",
+                                        "partition",
+                                        "elem_type"});
 
   addMeshSubgenerator("DistributedRectilinearMeshGenerator",
                       _mesh_name + "_distributedrectilinearmeshgenerator",
-                      params);
+                      input_params);
   _build_mesh = &getMeshByName(_mesh_name + "_distributedrectilinearmeshgenerator");
 }
 std::unique_ptr<MeshBase>
@@ -126,13 +89,13 @@ OverlayMeshGenerator::generate()
   if (scale_factor(0) != 1 || scale_factor(1) != 1 || scale_factor(2) != 1)
     MeshTools::Modification::scale(*build_mesh, scale_factor(0), scale_factor(1), scale_factor(2));
 
-  RealVectorValue translate_factor;
-  translate_factor = bbox_input.min();
+  RealVectorValue translation_vector;
+  translation_vector = bbox_input.min();
 
   // translate
-  if (translate_factor(0) != 0 || translate_factor(1) != 0 || translate_factor(2) != 0)
+  if (translation_vector(0) != 0 || translation_vector(1) != 0 || translation_vector(2) != 0)
     MeshTools::Modification::translate(
-        *build_mesh, translate_factor(0), translate_factor(1), translate_factor(2));
+        *build_mesh, translation_vector(0), translation_vector(1), translation_vector(2));
 
   return dynamic_pointer_cast<MeshBase>(build_mesh);
 }

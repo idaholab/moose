@@ -2,7 +2,7 @@
   issues = '#23513'
   design = 'meshgenerators/OverlayMeshGenerator.md'
   [Test]
-    requirement = 'The system shall be able to create a distributedrectilinear mesh overlaying with the given mesh.'
+    requirement = 'The system shall be able to create in a distributed manner a rectilinear mesh overlaying with the given mesh.'
     type = 'Exodiff'
     input = 'overlay_mesh_generator.i'
     cli_args = '--mesh-only'
