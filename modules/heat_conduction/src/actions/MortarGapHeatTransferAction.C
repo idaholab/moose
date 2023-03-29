@@ -18,12 +18,7 @@
 #include "GapFluxModelRadiation.h"
 #include "GapFluxModelConduction.h"
 
-// Counter for modular user objects
-static unsigned int thermal_action_userobject_radiation_counter_uo = 0;
-static unsigned int thermal_action_userobject_conduction_counter_uo = 0;
-
-static unsigned int thermal_action_userobject_radiation_counter_constraint = 0;
-static unsigned int thermal_action_userobject_conduction_counter_constraint = 0;
+#include <algorithm>
 
 registerMooseAction("HeatConductionApp", MortarGapHeatTransferAction, "append_mesh_generator");
 registerMooseAction("HeatConductionApp", MortarGapHeatTransferAction, "add_mortar_variable");
@@ -84,10 +79,26 @@ MortarGapHeatTransferAction::MortarGapHeatTransferAction(const InputParameters &
         "to the action via the gap_flux_options parameter. Mixed use is not supported");
 
   for (unsigned int i = 0; i < getParam<MultiMooseEnum>("gap_flux_options").size(); i++)
-  {
     _gap_flux_models.push_back(static_cast<MortarGapHeatTransfer::UserObjectToBuild>(
         getParam<MultiMooseEnum>("gap_flux_options").get(i)));
-  }
+
+  // We do not currently support building more than one condution or more than one radiation user
+  // object from this action.
+  const unsigned int conduction_build_uos =
+      cast_int<unsigned int>(std::count(_gap_flux_models.cbegin(),
+                                        _gap_flux_models.cend(),
+                                        MortarGapHeatTransfer::UserObjectToBuild::CONDUCTION));
+  const unsigned int radiation_build_uos =
+      cast_int<unsigned int>(std::count(_gap_flux_models.cbegin(),
+                                        _gap_flux_models.cend(),
+                                        MortarGapHeatTransfer::UserObjectToBuild::RADIATION));
+
+  if (conduction_build_uos > 1 || radiation_build_uos > 1)
+    paramError("gap_flux_options",
+               "You cannot choose to have more than one conduction or more than one radiation user "
+               "objects when they are built by the action. If you want to superimpose multiple "
+               "physics, you can choose to create your own user objects and pass them to this "
+               "action via 'user_created_gap_flux_models'");
 
   if (params.isParamSetByUser("primary_subdomain") &&
       params.isParamSetByUser("secondary_subdomain"))
@@ -264,13 +275,11 @@ MortarGapHeatTransferAction::addConstraints()
     for (const auto & uo_name : _gap_flux_models)
     {
       if (uo_name == MortarGapHeatTransfer::UserObjectToBuild::CONDUCTION)
-        uoname_strings.push_back(
-            "gap_flux_model_conduction_object_" + MooseUtils::shortName(name()) + "_" +
-            Moose::stringify(thermal_action_userobject_conduction_counter_constraint++));
+        uoname_strings.push_back("gap_flux_model_conduction_object_" +
+                                 MooseUtils::shortName(name()));
       else if (uo_name == MortarGapHeatTransfer::UserObjectToBuild::RADIATION)
-        uoname_strings.push_back(
-            "gap_flux_model_radiation_object_" + MooseUtils::shortName(name()) + "_" +
-            Moose::stringify(thermal_action_userobject_radiation_counter_constraint++));
+        uoname_strings.push_back("gap_flux_model_radiation_object_" +
+                                 MooseUtils::shortName(name()));
     }
 
     params.set<std::vector<UserObjectName>>("gap_flux_models") = uoname_strings;
@@ -334,11 +343,9 @@ MortarGapHeatTransferAction::addUserObjects()
 
       var_params.set<bool>("use_displaced_mesh") = true;
 
-      _problem->addUserObject(
-          "GapFluxModelConduction",
-          "gap_flux_model_conduction_object_" + MooseUtils::shortName(name()) + "_" +
-              Moose::stringify(thermal_action_userobject_conduction_counter_uo++),
-          var_params);
+      _problem->addUserObject("GapFluxModelConduction",
+                              "gap_flux_model_conduction_object_" + MooseUtils::shortName(name()),
+                              var_params);
     }
     else if (uo_name == MortarGapHeatTransfer::UserObjectToBuild::RADIATION)
 
@@ -357,11 +364,9 @@ MortarGapHeatTransferAction::addUserObjects()
 
       var_params.set<bool>("use_displaced_mesh") = true;
 
-      _problem->addUserObject(
-          "GapFluxModelRadiation",
-          "gap_flux_model_radiation_object_" + MooseUtils::shortName(name()) + "_" +
-              Moose::stringify(thermal_action_userobject_radiation_counter_uo++),
-          var_params);
+      _problem->addUserObject("GapFluxModelRadiation",
+                              "gap_flux_model_radiation_object_" + MooseUtils::shortName(name()),
+                              var_params);
     }
   }
 }

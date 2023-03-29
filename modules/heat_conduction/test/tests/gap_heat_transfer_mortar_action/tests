@@ -54,4 +54,13 @@
                   'for two ways of building gap heat transfer options and error out, to avoid having '
                   'misleading input files.'
   []
+  [modular_gap_heat_transfer_mortar_displaced_radiation_conduction_action_too_many_uos]
+    type = RunException
+    input = 'modular_gap_heat_transfer_mortar_displaced_radiation_conduction_action.i'
+    cli_args = "MortarGapHeatTransfer/mortar_heat_transfer/gap_flux_options='CONDUCTION RADIATION CONDUCTION'"
+    expect_err = 'You cannot choose to have more than one conduction or more than one radiation user'
+    requirement = 'We shall be able to inform the user that the mortar gap heat transfer action '
+                  'cannot internally build more than one conduction or more than one radiation user '
+                  'object.'
+  []
 []
