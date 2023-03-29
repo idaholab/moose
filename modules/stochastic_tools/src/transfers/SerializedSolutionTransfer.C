@@ -22,13 +22,17 @@ SerializedSolutionTransfer::validParams()
   InputParameters params = StochasticToolsTransfer::validParams();
   params.addClassDescription(
       "Serializes and transfers solution vectors for given variables from sub-applications.");
-  params.addRequiredParam<std::string>("parallel_storage_name", "Something here.");
-  params.addRequiredParam<std::string>("serialized_solution_reporter", "Something here.");
-  params.addRequiredParam<std::vector<VariableName>>("variables", "Something.");
+  params.addRequiredParam<std::string>("parallel_storage",
+                                       "The name of the parallel storage reporter.");
+  params.addRequiredParam<std::string>("solution_container",
+                                       "The name of the solution container on the subapp.");
+  params.addRequiredParam<std::vector<VariableName>>(
+      "variables",
+      "The names of the variables which should be serialized and transferred to this application.");
   params.addParam<bool>(
       "serialize_on_root",
       false,
-      "If we only want to gather the solution fields on the root procesors of the subapps.");
+      "If we only want to gather the solution fields on the root processors of the subapps.");
   return params;
 }
 

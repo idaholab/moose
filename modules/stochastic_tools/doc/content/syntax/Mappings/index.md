@@ -2,12 +2,39 @@
 
 ## Overview
 
+The mapping system is dedicated to hold objects which map high-dimensional solution vectors
+to lower-dimensional spaces (latent spaces). These objects do not get executed on their own, but only used
+in other objects which need mapping functionality.
 
 ## Creating a Mapping
 
-A covariance function is created by inheriting from `CovarainceFunctionBase` and overriding the methods in the base class.
+A mapping object can be created by inheriting from `MappingBase` and overriding the methods in the base class.
+These methods describe the mapping from high to low dimensional spaces and the corresponding inverse mapping procedures.
 
 ## Using a Mapping
+
+#### The Mappings block
+
+In an input file, one can create Mapping Objects by specifying them in the `[Mappings]` block.
+
+#### Mapping from high- to low-dimensional spaces
+
+High-dimensional data can be mapped to lower-dimensional spaces using [MappingReporter.md].
+This can either map the fields in a [ParallelSolutionStorage.md] or map multiple solution variables in a given
+nonlinear system. The results are stored in a standard vector format in the reporter data structure.
+
+#### Inverse mapping from low- to high-dimensional spaces
+
+Low-dimensional data can be mapped to higher-dimensional spaces using [InverseMapping.md].
+This can either utilize surrogate models to determine the low-dimensional vectors given
+a specific set of model parameters or take a custom low-dimensional vector and use inverse mapping
+to populate `AuxVariable`s with the reconstructed approximate fields.
+
+#### MappingInterface
+
+By inheriting from `MappingInterface`, classes can easily fetch mapping objects
+from the object warehouse using the helper functions. Good examples are the [MappingReporter.md] and
+[InverseMapping.md].
 
 ## Example Input File Syntax
 
