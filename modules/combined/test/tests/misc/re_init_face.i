@@ -18,6 +18,7 @@
     add_variables = true
   []
 []
+
 [Variables]
   [disp_x]
     order = FIRST
@@ -44,19 +45,16 @@
   []
 []
 
-
 [Executioner]
   type = Transient
   dt = 0.3
   num_steps = 3
 []
 
-
 [Postprocessors]
-  [cause_of_failure]
+  [side_average]
     type = SideAverageValue
     boundary = right
     variable = disp_x
   []
 []
-

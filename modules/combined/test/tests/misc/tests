@@ -4,6 +4,6 @@
   [test_reinit_face]
    type = RunApp
    input = re_init_face.i
-   requirement = "The system shall properly reset itself after adding a material using a displaced mesh."
+   requirement = "The system shall be able to perform requested material computation on faces of a displaced mesh even if no other face objects are executing on the displaced mesh."
   []
 []
