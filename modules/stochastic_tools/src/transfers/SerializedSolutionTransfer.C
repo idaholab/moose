@@ -20,7 +20,8 @@ InputParameters
 SerializedSolutionTransfer::validParams()
 {
   InputParameters params = StochasticToolsTransfer::validParams();
-  params.addClassDescription("Noice.");
+  params.addClassDescription(
+      "Serializes and transfers solution vectors for given variables from sub-applications.");
   params.addRequiredParam<std::string>("parallel_storage_name", "Something here.");
   params.addRequiredParam<std::string>("serialized_solution_reporter", "Something here.");
   params.addRequiredParam<std::vector<VariableName>>("variables", "Something.");

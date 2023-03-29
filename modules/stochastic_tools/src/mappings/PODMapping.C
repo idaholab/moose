@@ -21,6 +21,8 @@ InputParameters
 PODMapping::validParams()
 {
   InputParameters params = MappingBase::validParams();
+  params.addClassDescription("Class which provides a Proper Orthogonal Decomposition-based mapping "
+                             "between full-order and reduced-order spaces.");
   params.addParam<UserObjectName>(
       "solution_storage", "The name of the storage reporter where the snapshots are located.");
   params.addRequiredParam<std::vector<unsigned int>>(

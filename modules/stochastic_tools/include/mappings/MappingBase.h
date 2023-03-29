@@ -16,6 +16,10 @@
 #include "libmesh/petsc_vector.h"
 #include "libmesh/petsc_matrix.h"
 
+/**
+ * This is an abstract base class for objects that provide mapping a full-order
+ * and a latent space.
+ */
 class MappingBase : public MooseObject, public RestartableModelInterface
 {
 public:

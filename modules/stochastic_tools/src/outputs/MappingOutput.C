@@ -20,7 +20,7 @@ InputParameters
 MappingOutput::validParams()
 {
   InputParameters params = FileOutput::validParams();
-  params.addClassDescription("Output for trained surrogate model data.");
+  params.addClassDescription("Output for mapping model data.");
   params.addRequiredParam<std::vector<UserObjectName>>("mappings",
                                                        "A list of Mapping objects to output.");
   return params;

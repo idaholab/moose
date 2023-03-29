@@ -13,6 +13,9 @@
 #include "MappingInterface.h"
 #include "MappingBase.h"
 
+/**
+ * Class which is used to output valuable data in binary format from Mapping objects
+ */
 class MappingOutput : public FileOutput, public MappingInterface
 {
 public:
@@ -23,6 +26,6 @@ protected:
   virtual void output(const ExecFlagType & type) override;
 
 private:
-  /// List of supplied SurrogateModel objects
+  /// List of supplied Mapping objects
   const std::vector<UserObjectName> & _mappings;
 };

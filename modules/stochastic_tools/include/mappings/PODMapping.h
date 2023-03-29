@@ -15,6 +15,10 @@
 #include "libmesh/parallel_object.h"
 #include "libmesh/petsc_vector.h"
 
+/**
+ * Class which provides a Proper Orthogonal Decomposition (POD)-based mapping between
+ * full-order and reduced-order spaces.
+ */
 class PODMapping : public MappingBase
 {
 public:

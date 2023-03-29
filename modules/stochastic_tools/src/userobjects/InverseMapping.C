@@ -21,12 +21,24 @@ InverseMapping::validParams()
 {
   InputParameters params = GeneralUserObject::validParams();
 
+  params.addClassDescription("Evaluates surrogate models and maps the results back to a full "
+                             "solution field for given variables.");
   params.addParam<std::vector<UserObjectName>>(
-      "surrogate", std::vector<UserObjectName>(), "Blabla.");
-  params.addRequiredParam<UserObjectName>("mapping", "Blabla.");
-  params.addRequiredParam<std::vector<VariableName>>("variable_to_fill", "Blabla.");
-  params.addRequiredParam<std::vector<VariableName>>("variable_to_reconstruct", "Blabla");
-  params.addRequiredParam<std::vector<Real>>("parameters", "Blabla");
+      "surrogate", std::vector<UserObjectName>(), "The names of the surrogates for each variable.");
+  params.addRequiredParam<UserObjectName>(
+      "mapping", "The name of the mapping object which provides the inverse mapping function.");
+  params.addRequiredParam<std::vector<VariableName>>(
+      "variable_to_fill",
+      "The names of the aux variables that this object is supposed to populate with the "
+      "reconstructed results.");
+  params.addRequiredParam<std::vector<VariableName>>(
+      "variable_to_reconstruct",
+      "The names of the variables in the nonlinear system which we would like to approximate. this "
+      "is important for DoF informations.");
+  params.addRequiredParam<std::vector<Real>>(
+      "parameters",
+      "The input parameters for the surrogate. If no surrogate is supplied these are assumed to be "
+      "the coordinates in the latent space.");
   params.declareControllable("parameters");
 
   return params;
@@ -74,6 +86,7 @@ InverseMapping::initialSetup()
 
   const auto & mapping_variable_names = _mapping->getVariableNames();
 
+  // We query the links to the MooseVariables mentioned in the input parameters
   for (const auto & var_i : index_range(_var_names_to_reconstruct))
   {
     if (std::find(mapping_variable_names.begin(),
@@ -95,6 +108,8 @@ InverseMapping::initialSetup()
       paramError("fe_type_fill",
                  "The FEtype should match the ones defined for `variable_to_reconstruct`");
 
+    // For now, we assume that the user only uses lagrange for nodal basis, every other
+    // use case should be elemental.
     _is_nodal.push_back(fe_type_fill.family == LAGRANGE);
   }
 }
@@ -105,20 +120,19 @@ InverseMapping::execute()
 
   NonlinearSystemBase & nl = _fe_problem.getNonlinearSystemBase();
 
+  // We create a temporary solution vector that will store the reconstructed solution.
   std::unique_ptr<NumericVector<Number>> temporary_vector = nl.solution().zero_clone();
 
   for (auto var_i : index_range(_var_names_to_reconstruct))
   {
     std::vector<Real> reduced_coefficients;
     if (_surrogate_models.size())
-    {
       _surrogate_models[var_i]->evaluate(_input_parameters, reduced_coefficients);
-    }
     else
-    {
       reduced_coefficients = _input_parameters;
-    }
 
+    // The sanity check on the size of reduced_coefficients is happening in the inverse mapping
+    // function
     DenseVector<Real> reconstructed_solution;
     _mapping->inverse_map(
         _var_names_to_reconstruct[var_i], reduced_coefficients, reconstructed_solution);
@@ -126,23 +140,26 @@ InverseMapping::execute()
     MooseVariableFieldBase * var_to_fill = _variable_to_fill[var_i];
     const MooseVariableFieldBase * var_to_reconstruct = _variable_to_reconstruct[var_i];
 
+    // We set the global DoF indices of the requested variable. The underlying assumption here is
+    // that we are reconstructing the solution in an application which has the same ordering in the
+    // extracted `dofs` vector as the one which was used to serialize the solution vectors in
+    // `SerializedSolutionTransfer`.
     nl.setVariableGlobalDoFs(_var_names_to_reconstruct[var_i]);
 
+    // Get the DoF indices
     const auto & dofs = nl.getVariableGlobalDoFs();
 
+    // Get the dof map to be able to determine the local dofs easily
     const auto & dof_map = var_to_reconstruct->sys().system().get_dof_map();
-
     dof_id_type local_dof_begin = dof_map.first_dof();
     dof_id_type local_dof_end = dof_map.end_dof();
 
+    // Populate the temporary vector with the reconstructed solution
     for (const auto & dof_i : index_range(dofs))
-    {
       if (dofs[dof_i] >= local_dof_begin && dofs[dof_i] < local_dof_end)
-      {
         temporary_vector->set(dofs[dof_i], reconstructed_solution(dof_i));
-      }
-    }
 
+    // Get the system and variable numbers for the dof objects
     unsigned int to_sys_num = _variable_to_fill[var_i]->sys().system().number();
     unsigned int to_var_num =
         var_to_fill->sys().system().variable_number(_var_names_to_fill[var_i]);
@@ -150,32 +167,41 @@ InverseMapping::execute()
     unsigned int from_sys_num = var_to_reconstruct->sys().system().number();
     unsigned int from_var_num =
         var_to_reconstruct->sys().system().variable_number(_var_names_to_reconstruct[var_i]);
+
+    // Get a link to the mesh for the loops over dof objects
     const MeshBase & to_mesh = _fe_problem.mesh().getMesh();
 
+    // If the variable is nodal, we can do a nodal loop
     if (_is_nodal[var_i])
     {
-
       for (const auto & node : to_mesh.local_node_ptr_range())
       {
+        // We have nothing to do if we don't have dofs at this node
         if (node->n_dofs(to_sys_num, to_var_num) < 1)
           continue;
 
+        // Get the dof ids for the from/to variables
         const auto & to_dof_id = node->dof_number(to_sys_num, to_var_num, 0);
         const auto & from_dof_id = node->dof_number(from_sys_num, from_var_num, 0);
 
+        // Fill the dof of the auxiliary variable using the dof of the temporary variable
         var_to_fill->sys().solution().set(to_dof_id, (*temporary_vector)(from_dof_id));
       }
     }
+    // Otherwise we have to do an element loop
     else
     {
       for (auto & elem : as_range(to_mesh.local_elements_begin(), to_mesh.local_elements_end()))
       {
+        // Check how many dofs we have on the currant element, if none we have nothing to do
         const auto n_dofs = elem->n_dofs(to_sys_num, to_var_num);
         if (n_dofs < 1)
           continue;
 
+        // Loop over the dofs and pupulate the auxiliary variable
         for (auto dof_i : make_range(n_dofs))
         {
+          // Get the dof for the from/to variables
           const auto & to_dof_id = elem->dof_number(to_sys_num, to_var_num, dof_i);
           const auto & from_dof_id = elem->dof_number(from_sys_num, from_var_num, dof_i);
 
@@ -183,6 +209,8 @@ InverseMapping::execute()
         }
       }
     }
+
+    // Close the solution to make sure we can output auxvariable
     var_to_fill->sys().solution().close();
   }
 }
