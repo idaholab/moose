@@ -257,17 +257,12 @@ public:
                                 unsigned int time_index = 0) const override;
 
 protected:
-  /// For broadcasting values if it is of fundamental type
-  template <typename Q = T>
-  typename std::enable_if<MooseUtils::canBroadcast<Q>::value, void>::type broadcast()
+  void broadcast()
   {
-    this->comm().broadcast(this->_state.value());
-  }
-  /// Error if trying to broadcast not fundamental type
-  template <typename Q = T>
-  typename std::enable_if<!MooseUtils::canBroadcast<Q>::value, void>::type broadcast()
-  {
-    mooseError("Can only broadcast fundamental types.");
+    if constexpr (MooseUtils::canBroadcast<T>::value)
+      this->comm().broadcast(this->_state.value());
+    else
+      mooseError("Cannot broadcast Reporter type '", MooseUtils::prettyCppType<T>(), "'");
   }
 
   /// Output meta data to JSON, see JSONOutput

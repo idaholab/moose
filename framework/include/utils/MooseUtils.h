@@ -1006,13 +1006,7 @@ template <typename T>
 struct canBroadcast
 {
   static constexpr bool value = std::is_base_of<TIMPI::DataType, TIMPI::StandardType<T>>::value ||
-                                std::is_same<T, std::string>::value;
-};
-template <typename T>
-struct canBroadcast<std::vector<T>>
-{
-  static constexpr bool value = std::is_base_of<TIMPI::DataType, TIMPI::StandardType<T>>::value ||
-                                std::is_same<T, std::string>::value;
+                                TIMPI::Has_buffer_type<TIMPI::Packing<T>>::value;
 };
 
 ///@{ Comparison helpers that support the MooseUtils::Any wildcard which will match any value
