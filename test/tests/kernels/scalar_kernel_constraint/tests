@@ -27,7 +27,7 @@
     csvdiff = 'diffusion_bipass_scalar_out.csv'
     # This problem only has 4 elements and therefore does not seem to run on > 4 procs.
     max_parallel = 4
-    requirement = 'The system shall support the ability to include the scalar wrapper but not actually using a scalar variable.'
+    requirement = 'The system shall support the ability to include the scalar wrapper but not actually use a scalar variable.'
   []
 
   [override]

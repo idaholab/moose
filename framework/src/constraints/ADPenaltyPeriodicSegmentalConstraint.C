@@ -40,7 +40,7 @@ ADPenaltyPeriodicSegmentalConstraint::ADPenaltyPeriodicSegmentalConstraint(
     _pen_scale(getParam<Real>("penalty_value"))
 {
   if (_kappa_aux_ptr->kind() != Moose::VarKindType::VAR_AUXILIARY)
-    mooseError("Must assign auxiliary scalar variable to sigma, rather than nonlinear variable");
+    paramError("sigma", "Must assign auxiliary scalar variable to sigma, rather than nonlinear variable");
 }
 
 // Compute the stability parameters to use for all quadrature points
@@ -49,6 +49,7 @@ ADPenaltyPeriodicSegmentalConstraint::precalculateResidual()
 {
   precalculateStability();
 }
+
 // Compute the temperature jump for current quadrature point
 void
 ADPenaltyPeriodicSegmentalConstraint::initScalarQpResidual()

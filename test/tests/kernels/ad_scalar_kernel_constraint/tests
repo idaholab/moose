@@ -89,7 +89,7 @@
     csvdiff = 'scalar_constraint_together_out.csv'
     # This problem only has 4 elements and therefore does not seem to run on > 4 procs.
     max_parallel = 4
-    requirement = 'The system shall solve the constrained Neumann problem using the AD Lagrange multiplier approach with LU solver; residual and Jacobian together.'
+    requirement = 'The system shall solve the constrained Neumann problem using the AD Lagrange multiplier approach with LU solver, computing the residual and Jacobian simultaneously.'
     ad_indexing_type = 'global'
   []
 
@@ -107,7 +107,7 @@
     type = RunException
     input = 'diffusion_override_scalar.i'
     expect_err = 'A scalar_variable has been set and compute_scalar_residuals=true, but the computeScalarQpResidual method was not overridden. Accidental call of base class?'
-    requirement = 'User can only assign scalars and compute residuals if the AD Qp class is overridden.'
+    requirement = 'The system shall error if a user assigns a scalar and requests evaluation of scalar residuals, but does not override the quadrature point residual evaluation routine in their derived class.'
     ad_indexing_type = 'global'
   []
 []

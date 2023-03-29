@@ -32,7 +32,7 @@ PeriodicSegmentalConstraint::PeriodicSegmentalConstraint(const InputParameters &
     _kappa_aux(coupledScalarValue("sigma"))
 {
   if (_kappa_aux_ptr->kind() != Moose::VarKindType::VAR_AUXILIARY)
-    mooseError("Must assign auxiliary scalar variable to sigma, rather than nonlinear variable");
+    paramError("sigma", "Must assign auxiliary scalar variable to sigma, rather than nonlinear variable");
 }
 
 Real
