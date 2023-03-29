@@ -29,7 +29,7 @@ namespace MooseMeshCuttingUtils
  * @param trimming_section_boundary_id ID of the new external boundary formed due to
  * trimming
  * @param external_boundary_id ID of the external boundary of the input mesh
- * @param assign_ext_to_trim whether to assign external_boundary_id to the new boundary formed by
+ * @param assign_ext_to_new whether to assign external_boundary_id to the new boundary formed by
  * removal
  * @param side_to_remove which side of the mesh needs to be removed: true means ax+by+c>0 and
  * false means ax+by+c<0

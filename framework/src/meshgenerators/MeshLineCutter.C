@@ -50,7 +50,7 @@ MeshLineCutter::validParams()
   params.addClassDescription(
       "This MeshLineCutter object is designed to trim the input mesh by removing all the elements "
       "on one side of a given straight line with special processing on the elements crossed by the "
-      "cutting line to ensure a smooth cross-section..");
+      "cutting line to ensure a smooth cross-section.");
 
   return params;
 }
