@@ -188,6 +188,12 @@ Coupleable::checkFuncType(const std::string var_name, VarType t, FuncAge age) co
   if (t == VarType::Gradient && _c_nodal)
     mooseError(_c_name, ": nodal variables do not have gradients");
 
+  const auto * var = getVar(var_name, 0);
+  if (t == VarType::Gradient && var->feType().family == MONOMIAL && var->feType().order == 0)
+    mooseWarning("A gradient has been requested on a constant monomial variable. Constant "
+                 "monomials have zero gradient within an element. The gradient between elements "
+                 "is NOT captured by using the Coupleable interface");
+
   if (age == FuncAge::Old || age == FuncAge::Older || t == VarType::GradientDot ||
       t == VarType::Dot)
     validateExecutionerType(var_name, "coupled[Vector][Gradient/Dot]Old[er]");
