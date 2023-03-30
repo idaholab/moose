@@ -1397,64 +1397,8 @@ std::vector<BoundaryID>
 MooseMesh::getBoundaryIDs(const std::vector<BoundaryName> & boundary_name,
                           bool generate_unknown) const
 {
-  const BoundaryInfo & boundary_info = getMesh().get_boundary_info();
-  const std::map<BoundaryID, std::string> & sideset_map = boundary_info.get_sideset_name_map();
-  const std::map<BoundaryID, std::string> & nodeset_map = boundary_info.get_nodeset_name_map();
-
-  BoundaryID max_boundary_local_id = 0;
-  /* It is required to generate a new ID for a given name. It is used often in mesh modifiers such
-   * as SideSetsBetweenSubdomains. Then we need to check the current boundary ids since they are
-   * changing during "mesh modify()", and figure out the right max boundary ID. Most of mesh
-   * modifiers are running in serial, and we won't involve a global communication.
-   */
-  if (generate_unknown)
-  {
-    const std::set<BoundaryID> & local_bids = getMesh().get_boundary_info().get_boundary_ids();
-    max_boundary_local_id = local_bids.empty() ? 0 : *(local_bids.rbegin());
-    /* We should not hit this often */
-    if (!getMesh().is_serial())
-      _communicator.max(max_boundary_local_id);
-  }
-
-  BoundaryID max_boundary_id = _mesh_boundary_ids.empty() ? 0 : *(_mesh_boundary_ids.rbegin());
-
-  max_boundary_id =
-      max_boundary_id > max_boundary_local_id ? max_boundary_id : max_boundary_local_id;
-
-  std::vector<BoundaryID> ids(boundary_name.size());
-  for (unsigned int i = 0; i < boundary_name.size(); i++)
-  {
-    if (boundary_name[i] == "ANY_BOUNDARY_ID")
-    {
-      ids.assign(_mesh_boundary_ids.begin(), _mesh_boundary_ids.end());
-      if (i)
-        mooseWarning("You passed \"ANY_BOUNDARY_ID\" in addition to other boundary_names.  This "
-                     "may be a logic error.");
-      break;
-    }
-
-    BoundaryID id;
-    std::istringstream ss(boundary_name[i]);
-
-    if (!(ss >> id) || !ss.eof())
-    {
-      /**
-       * If the conversion from a name to a number fails, that means that this must be a named
-       * boundary.  We will look in the complete map for this sideset and create a new name/ID pair
-       * if requested.
-       */
-      if (generate_unknown &&
-          !MooseUtils::doesMapContainValue(sideset_map, std::string(boundary_name[i])) &&
-          !MooseUtils::doesMapContainValue(nodeset_map, std::string(boundary_name[i])))
-        id = ++max_boundary_id;
-      else
-        id = boundary_info.get_id_by_name(boundary_name[i]);
-    }
-
-    ids[i] = id;
-  }
-
-  return ids;
+  return MooseMeshUtils::getBoundaryIDs(
+      getMesh(), boundary_name, generate_unknown, _mesh_boundary_ids);
 }
 
 SubdomainID
@@ -1469,23 +1413,7 @@ MooseMesh::getSubdomainID(const SubdomainName & subdomain_name) const
 std::vector<SubdomainID>
 MooseMesh::getSubdomainIDs(const std::vector<SubdomainName> & subdomain_name) const
 {
-  std::vector<SubdomainID> ids(subdomain_name.size());
-
-  for (unsigned int i = 0; i < subdomain_name.size(); i++)
-  {
-    if (subdomain_name[i] == "ANY_BLOCK_ID")
-    {
-      ids.assign(_mesh_subdomains.begin(), _mesh_subdomains.end());
-      if (i)
-        mooseWarning("You passed \"ANY_BLOCK_ID\" in addition to other block names.  This may be a "
-                     "logic error.");
-      break;
-    }
-
-    ids[i] = MooseMeshUtils::getSubdomainID(subdomain_name[i], getMesh());
-  }
-
-  return ids;
+  return MooseMeshUtils::getSubdomainIDs(getMesh(), subdomain_name, _mesh_subdomains);
 }
 
 void

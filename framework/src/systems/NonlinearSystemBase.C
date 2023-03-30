@@ -73,6 +73,7 @@
 #include "MooseError.h"
 #include "FVElementalKernel.h"
 #include "FVScalarLagrangeMultiplierConstraint.h"
+#include "FVBoundaryScalarLagrangeMultiplierConstraint.h"
 #include "FVFluxKernel.h"
 #include "FVScalarLagrangeMultiplierInterface.h"
 #include "UserObject.h"
@@ -3415,6 +3416,16 @@ NonlinearSystemBase::checkKernelCoverage(const std::set<SubdomainID> & mesh_subd
     for (auto fvik : fv_interface_kernels)
       if (auto scalar_fvik = dynamic_cast<FVScalarLagrangeMultiplierInterface *>(fvik))
         kernel_variables.insert(scalar_fvik->lambdaVariable().name());
+
+    std::vector<FVFluxBC *> fv_flux_bcs;
+    _fe_problem.theWarehouse()
+        .query()
+        .template condition<AttribSystem>("FVFluxBC")
+        .queryInto(fv_flux_bcs);
+
+    for (auto fvbc : fv_flux_bcs)
+      if (auto scalar_fvbc = dynamic_cast<FVBoundaryScalarLagrangeMultiplierConstraint *>(fvbc))
+        kernel_variables.insert(scalar_fvbc->lambdaVariable().name());
   }
 
   // Check kernel coverage of subdomains (blocks) in your mesh

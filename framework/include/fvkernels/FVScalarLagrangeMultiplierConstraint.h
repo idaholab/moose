@@ -24,6 +24,10 @@ public:
 
   const MooseVariableScalar & lambdaVariable() const { return _lambda_var; }
 
+protected:
+  /// The value that we want the average of the primal variable to be equal to
+  const PostprocessorValue & _phi0;
+
 private:
   void computeResidual() override final;
   void computeJacobian() override final;

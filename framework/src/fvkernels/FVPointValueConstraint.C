@@ -21,8 +21,7 @@ FVPointValueConstraint::validParams()
   InputParameters params = FVScalarLagrangeMultiplierConstraint::validParams();
   params.addClassDescription("This class is used to enforce integral of phi = volume * phi_0 "
                              "with a Lagrange multiplier approach.");
-  params.addRequiredParam<Real>("phi0",
-                                "What we want the point value of the primal variable to be.");
+  params.setDocString("phi0", "What we want the point value of the primal variable to be.");
   params.addRequiredParam<Point>(
       "point", "The XYZ coordinates of the points where the value shall be enforced.");
   return params;
@@ -30,7 +29,6 @@ FVPointValueConstraint::validParams()
 
 FVPointValueConstraint::FVPointValueConstraint(const InputParameters & parameters)
   : FVScalarLagrangeMultiplierConstraint(parameters),
-    _phi0(getParam<Real>("phi0")),
     _point(getParam<Point>("point")),
     _my_elem(nullptr)
 {
