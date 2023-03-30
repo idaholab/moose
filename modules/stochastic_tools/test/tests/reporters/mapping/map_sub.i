@@ -75,18 +75,20 @@
   []
 []
 
+[Mappings]
+  inactive = pod
+  [pod]
+    type = PODMapping
+    filename = "map_training_data_pod_mapping.rd"
+    num_modes = '5 5'
+  []
+[]
+
 [Executioner]
   type = Steady
   solve_type = NEWTON
   petsc_options_iname = '-pc_type -pc_hypre_type'
   petsc_options_value = 'hypre boomeramg'
-[]
-
-[Mappings]
-  [pod]
-    type = PODMapping
-    filename = "main_2d_mc_rd_pod_mapping.rd"
-  []
 []
 
 [Controls]
@@ -96,9 +98,14 @@
 []
 
 [Reporters]
+  inactive = "pod_coeffs"
+  [solution_storage]
+    type = SolutionContainer
+    execute_on = 'FINAL'
+  []
   [pod_coeffs]
     type = MappingReporter
     mapping = pod
-    variables = "v"
+    variables = "u v"
   []
 []

@@ -22,20 +22,12 @@
     execute_on = initial
     min_procs_per_row = 2
   []
-  [sample_test]
-    type = MonteCarlo
-    num_rows = 100
-    distributions = 'S_dist D_dist'
-    execute_on = initial
-    min_procs_per_row = 2
-    seed = 11
-  []
 []
 
 [MultiApps]
   [worker]
     type = SamplerFullSolveMultiApp
-    input_files = sub_load_map.i
+    input_files = map_sub.i
     sampler = sample
     mode = batch-restore
     min_procs_per_app = 2
@@ -53,7 +45,8 @@
     type = SamplerReporterTransfer
     from_multi_app = worker
     stochastic_reporter = results
-    from_reporter = 'pod_coeffs/v_pod'
+    from_reporter = 'pod_coeffs/u_pod pod_coeffs/v_pod'
+    sampler = sample
   []
 []
 
@@ -68,4 +61,5 @@
     type = JSON
     execute_on = FINAL
   []
+  file_base = map_variable
 []
