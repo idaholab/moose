@@ -96,14 +96,15 @@ BernoulliPressureVariable::isDirichletBoundaryFace(const FaceInfo & fi,
 
 ADReal
 BernoulliPressureVariable::getDirichletBoundaryFaceValue(const FaceInfo & fi,
-                                                         const Elem * const elem) const
+                                                         const Elem * const elem,
+                                                         const Moose::TimeArg & time) const
 {
   mooseAssert(isDirichletBoundaryFace(fi, elem), "This better be a Dirichlet face");
 
   if (INSFVPressureVariable::isDirichletBoundaryFace(fi, elem))
-    return INSFVPressureVariable::getDirichletBoundaryFaceValue(fi, elem);
+    return INSFVPressureVariable::getDirichletBoundaryFaceValue(fi, elem, time);
 
-  const auto [is_jump_face, eps_elem, eps_neighbor] = NS::isPorosityJumpFace(*_eps, fi);
+  const auto [is_jump_face, eps_elem, eps_neighbor] = NS::isPorosityJumpFace(*_eps, fi, time);
 #ifndef NDEBUG
   mooseAssert(is_jump_face,
               "If we are not a traditional Dirichlet face, then we must be a jump face");
@@ -128,7 +129,7 @@ BernoulliPressureVariable::getDirichletBoundaryFaceValue(const FaceInfo & fi,
   // GeneralFunctorFluidProps in which the density is a function of the pressure then we will
   // infinitely recurse using the below line of code:
   // const auto rho_elem = (*_rho)(face_elem), rho_neighbor = (*_rho)(face_neighbor);
-  const auto rho = (*_rho)(downwind_face);
+  const auto rho = (*_rho)(downwind_face, time);
 
   const VectorValue<ADReal> interstitial_vel_elem = vel_elem * (1 / eps_elem);
   const VectorValue<ADReal> interstitial_vel_neighbor = vel_neighbor * (1 / eps_neighbor);
@@ -141,6 +142,6 @@ BernoulliPressureVariable::getDirichletBoundaryFaceValue(const FaceInfo & fi,
       fi_elem_is_upwind ? bernoulli_vel_chunk_elem : bernoulli_vel_chunk_neighbor;
   const auto & downwind_bernoulli_vel_chunk =
       fi_elem_is_upwind ? bernoulli_vel_chunk_neighbor : bernoulli_vel_chunk_elem;
-  const auto p_downwind = (*this)(downwind_face);
+  const auto p_downwind = (*this)(downwind_face, time);
   return p_downwind + downwind_bernoulli_vel_chunk - upwind_bernoulli_vel_chunk;
 }

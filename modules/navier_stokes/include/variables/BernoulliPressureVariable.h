@@ -34,7 +34,9 @@ public:
 protected:
   bool isDirichletBoundaryFace(const FaceInfo & fi, const Elem * elem) const override;
 
-  ADReal getDirichletBoundaryFaceValue(const FaceInfo & fi, const Elem * elem) const override;
+  ADReal getDirichletBoundaryFaceValue(const FaceInfo & fi,
+                                       const Elem * elem,
+                                       const Moose::TimeArg & time) const override;
 
   /**
    * Checks to see whether the provided element is upwind of the provided face

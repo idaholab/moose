@@ -89,13 +89,13 @@ INSFVVelocityVariable::getExtrapolatedBoundaryFaceValue(const FaceInfo & fi,
     }
   }();
 
-  if (_two_term_boundary_expansion && isFullyDevelopedFlowFace(fi))
+  if (two_term_expansion && isFullyDevelopedFlowFace(fi))
   {
     const Point vector_to_face = elem_to_extrapolate_from_is_fi_elem
                                      ? (fi.faceCentroid() - fi.elemCentroid())
                                      : (fi.faceCentroid() - fi.neighborCentroid());
-    boundary_value = uncorrectedAdGradSln(fi, correct_skewness, time) * vector_to_face +
-                     getElemValue(elem_to_extrapolate_from, Moose::TimeArg{});
+    boundary_value = uncorrectedAdGradSln(fi, time, correct_skewness) * vector_to_face +
+                     getElemValue(elem_to_extrapolate_from, time);
   }
   else
     boundary_value = INSFVVariable::getExtrapolatedBoundaryFaceValue(
@@ -106,32 +106,32 @@ INSFVVelocityVariable::getExtrapolatedBoundaryFaceValue(const FaceInfo & fi,
 
 VectorValue<ADReal>
 INSFVVelocityVariable::uncorrectedAdGradSln(const FaceInfo & fi,
-                                            const bool correct_skewness,
-                                            const TimeArg time) const
+                                            const TimeArg & time,
+                                            const bool correct_skewness) const
 {
   VectorValue<ADReal> unc_grad;
   if (_two_term_boundary_expansion && isFullyDevelopedFlowFace(fi))
   {
-    const auto & cell_gradient = adGradSln(&fi.elem(), correct_skewness);
+    const auto & cell_gradient = adGradSln(&fi.elem(), time, correct_skewness);
     const auto & normal = fi.normal();
     unc_grad = cell_gradient - (cell_gradient * normal) * normal;
   }
   else
-    unc_grad = INSFVVariable::uncorrectedAdGradSln(fi, correct_skewness);
+    unc_grad = INSFVVariable::uncorrectedAdGradSln(fi, time, correct_skewness);
 
   return unc_grad;
 }
 
 const VectorValue<ADReal> &
 INSFVVelocityVariable::adGradSln(const Elem * const elem,
-                                 bool correct_skewness,
-                                 const TimeArg time) const
+                                 const TimeArg & time,
+                                 bool correct_skewness) const
 {
   VectorValue<ADReal> * value_pointer = &_temp_cell_gradient;
 
   // We ensure that no caching takes place when we compute skewness-corrected
   // quantities.
-  if (_cache_cell_gradients && !correct_skewness)
+  if (_cache_cell_gradients && !correct_skewness && time.state == 0)
   {
     auto it = _elem_to_grad.find(elem);
 
@@ -139,7 +139,7 @@ INSFVVelocityVariable::adGradSln(const Elem * const elem,
       return it->second;
   }
 
-  ADReal elem_value = getElemValue(elem, Moose::TimeArg{});
+  ADReal elem_value = getElemValue(elem, time);
 
   // We'll save off the extrapolated boundary faces (ebf) for later assignment to the cache (these
   // are the keys). The boolean in the pair will denote whether the ebf face is a fully developed
@@ -215,6 +215,7 @@ INSFVVelocityVariable::adGradSln(const Elem * const elem,
                            &grad_b,
                            &fdf_grad_centroid_coeffs,
                            correct_skewness,
+                           &time,
                            this](const Elem & functor_elem,
                                  const Elem * const neighbor,
                                  const FaceInfo * const fi,
@@ -268,13 +269,16 @@ INSFVVelocityVariable::adGradSln(const Elem * const elem,
       }
       else if (isInternalFace(*fi))
         grad_b +=
-            surface_vector *
-            (*this)(Moose::FaceArg(
-                {fi, Moose::FV::LimiterType::CentralDifference, true, correct_skewness, nullptr}));
+            surface_vector * (*this)(Moose::FaceArg({fi,
+                                                     Moose::FV::LimiterType::CentralDifference,
+                                                     true,
+                                                     correct_skewness,
+                                                     nullptr}),
+                                     time);
       else
       {
         mooseAssert(isDirichletBoundaryFace(*fi, &functor_elem), "We've run out of face types");
-        grad_b += surface_vector * getDirichletBoundaryFaceValue(*fi, &functor_elem);
+        grad_b += surface_vector * getDirichletBoundaryFaceValue(*fi, &functor_elem, time);
       }
 
       if (!volume_set)
@@ -411,7 +415,7 @@ INSFVVelocityVariable::adGradSln(const Elem * const elem,
                 "I believe we should only get singular systems when two-term boundary expansion is "
                 "being used");
     const_cast<INSFVVelocityVariable *>(this)->_two_term_boundary_expansion = false;
-    const auto & grad = adGradSln(elem, correct_skewness);
+    const auto & grad = adGradSln(elem, time, correct_skewness);
 
     // Two term boundary expansion should only fail at domain corners. We want to keep trying it
     // at other boundary locations

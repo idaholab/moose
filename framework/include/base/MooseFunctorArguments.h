@@ -143,8 +143,6 @@ using ElemSideQpArg = std::tuple<const libMesh::Elem *, unsigned int, unsigned i
  */
 struct TimeArg
 {
-  TimeArg() : state(0), iteration_type(SolutionIterationType::Time) {}
-
   TimeArg(unsigned int state_in) : state(state_in), iteration_type(SolutionIterationType::Time) {}
 
   TimeArg(unsigned int state_in, SolutionIterationType iteration_type_in)
@@ -158,5 +156,16 @@ struct TimeArg
 
   /// The solution iteration type, e.g. time or nonlinear
   SolutionIterationType iteration_type;
+
+private:
+  TimeArg() : state(0), iteration_type(SolutionIterationType::Time) {}
+
+  friend TimeArg currentTimeFunctorArg();
 };
+
+inline TimeArg
+currentTimeFunctorArg()
+{
+  return {};
+}
 }

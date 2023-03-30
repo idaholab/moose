@@ -519,10 +519,11 @@ INSFVRhieChowInterpolator::getVelocity(const Moose::FV::InterpMethod m,
   if (w)
     velocity(2) = (*w)(face);
 
-  // Return if Rhie-Chow was not requested or if we have a porosity jump
-  if (m == Moose::FV::InterpMethod::Average ||
-      std::get<0>(NS::isPorosityJumpFace(epsilon(tid), fi)))
-    return velocity;
+  const auto current_time = Moose::currentTimeFunctorArg()
+
+      // Return if Rhie-Chow was not requested or if we have a porosity jump
+      if (m == Moose::FV::InterpMethod::Average ||
+          std::get<0>(NS::isPorosityJumpFace(epsilon(tid), fi, current_time))) return velocity;
 
   mooseAssert(((m == Moose::FV::InterpMethod::RhieChow) &&
                (_velocity_interp_method == Moose::FV::InterpMethod::RhieChow)) ||
@@ -535,11 +536,11 @@ INSFVRhieChowInterpolator::getVelocity(const Moose::FV::InterpMethod m,
 
   // Get pressure gradient. This is the uncorrected gradient plus a correction from cell centroid
   // values on either side of the face
-  const VectorValue<ADReal> & grad_p = p.adGradSln(fi);
+  const VectorValue<ADReal> & grad_p = p.adGradSln(fi, current_time);
 
   // Get uncorrected pressure gradient. This will use the element centroid gradient if we are
   // along a boundary face
-  const VectorValue<ADReal> & unc_grad_p = p.uncorrectedAdGradSln(fi);
+  const VectorValue<ADReal> & unc_grad_p = p.uncorrectedAdGradSln(fi, current_time);
 
   const Point & elem_centroid = fi.elemCentroid();
   const Point & neighbor_centroid = fi.neighborCentroid();
@@ -547,7 +548,7 @@ INSFVRhieChowInterpolator::getVelocity(const Moose::FV::InterpMethod m,
   Real neighbor_volume = fi.neighborVolume();
 
   // Now we need to perform the computations of D
-  const auto elem_a = (*_a_read[tid])(makeElemArg(elem));
+  const auto elem_a = (*_a_read[tid])(makeElemArg(elem), current_time);
 
   mooseAssert(UserObject::_subproblem.getCoordSystem(elem->subdomain_id()) ==
                   UserObject::_subproblem.getCoordSystem(neighbor->subdomain_id()),

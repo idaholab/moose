@@ -62,6 +62,7 @@ INSFVMomentumAdvection::computeResidualsAndAData(const FaceInfo & fi)
   _face_info = &fi;
   _normal = fi.normal();
   _face_type = fi.faceType(_var.name());
+  const auto current_time = Moose::currentTimeFunctorArg();
 
   using namespace Moose::FV;
 
@@ -76,9 +77,9 @@ INSFVMomentumAdvection::computeResidualsAndAData(const FaceInfo & fi)
     const auto ssf = singleSidedFaceArg();
     const Elem * const sided_elem = ssf.face_side;
     const auto dof_number = sided_elem->dof_number(_sys.number(), _var.number(), 0);
-    const auto rho_face = _rho(ssf);
-    const auto eps_face = epsilon()(ssf);
-    const auto u_face = _var(ssf);
+    const auto rho_face = _rho(ssf, current_time);
+    const auto eps_face = epsilon()(ssf, current_time);
+    const auto u_face = _var(ssf, current_time);
     const Real d_u_face_d_dof = u_face.derivatives()[dof_number];
     const auto coeff = _normal * v_face * rho_face / eps_face;
 
@@ -99,7 +100,7 @@ INSFVMomentumAdvection::computeResidualsAndAData(const FaceInfo & fi)
     const Moose::FaceArg advected_face_arg{
         &fi, limiterType(_advected_interp_method), elem_is_upwind, correct_skewness, nullptr};
     if (const auto [is_jump, eps_elem_face, eps_neighbor_face] =
-            NS::isPorosityJumpFace(epsilon(), fi);
+            NS::isPorosityJumpFace(epsilon(), fi, current_time);
         is_jump)
     {
       // For a weakly compressible formulation, the density should not depend on pressure and

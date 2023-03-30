@@ -23,16 +23,16 @@ public:
 
   using INSFVVariable::adGradSln;
   const VectorValue<ADReal> & adGradSln(const Elem * const elem,
-                                        bool correct_skewness = false,
-                                        TimeArg time = {}) const override;
+                                        const TimeArg & time,
+                                        bool correct_skewness = false) const override;
 
   /**
    * @return the uncorrected surface gradient on face \p fi
    */
   using INSFVVariable::uncorrectedAdGradSln;
   VectorValue<ADReal> uncorrectedAdGradSln(const FaceInfo & fi,
-                                           const bool correct_skewness = false,
-                                           TimeArg time = {}) const override;
+                                           const TimeArg & time,
+                                           const bool correct_skewness = false) const override;
 
 protected:
   /**

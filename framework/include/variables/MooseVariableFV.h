@@ -262,13 +262,14 @@ public:
    * method *cannot* call \p getBoundaryFaceValue because that method itself may lead to a call to
    * \p adGradSln(const Elem * const) resulting in infinite recursion
    * @param elem The element for which to retrieve the gradient
-   * @param correct_skewness Whether to perform skew corrections
    * @param time Temporal argument which describes at what time state we want to evaluate the
    * variable
+   * @param correct_skewness Whether to perform skew corrections
    * @return The gradient at the element centroid
    */
-  virtual const VectorValue<ADReal> &
-  adGradSln(const Elem * const elem, const bool correct_skewness = false, TimeArg time = {}) const;
+  virtual const VectorValue<ADReal> & adGradSln(const Elem * const elem,
+                                                const TimeArg & time,
+                                                const bool correct_skewness = false) const;
 
   /**
    * Retrieve (or potentially compute) a cross-diffusion-corrected gradient on the provided face.
@@ -276,12 +277,12 @@ public:
    * solution values on the face-neighbor cells than a linear interpolation between cell center
    * gradients does
    * @param face The face for which to retrieve the gradient.
-   * @param correct_skewness Whether to perform skew corrections
    * @param time Temporal argument which describes at what time state we want to evaluate the
    * variable
+   * @param correct_skewness Whether to perform skew corrections
    */
   virtual VectorValue<ADReal>
-  adGradSln(const FaceInfo & fi, const bool correct_skewness = false, TimeArg time = {}) const;
+  adGradSln(const FaceInfo & fi, const TimeArg & time, const bool correct_skewness = false) const;
 
   /**
    * Retrieve (or potentially compute) the uncorrected gradient on the provided face. This
@@ -291,13 +292,13 @@ public:
    * interpolation process does. This is commonly known as a cross-diffusion correction. Correction
    * is done in \p adGradSln(const FaceInfo & fi)
    * @param face The face for which to retrieve the gradient
-   * @param correct_skewness Whether to perform skew corrections
    * @param time Temporal argument which describes at what time state we want to evaluate the
    * variable
+   * @param correct_skewness Whether to perform skew corrections
    */
   virtual VectorValue<ADReal> uncorrectedAdGradSln(const FaceInfo & fi,
-                                                   const bool correct_skewness = false,
-                                                   TimeArg time = {}) const;
+                                                   const TimeArg & time,
+                                                   const bool correct_skewness = false) const;
 
   /**
    * Retrieve the solution value at a boundary face. If we're using a one term Taylor series
@@ -305,8 +306,9 @@ public:
    * then we will compute the gradient if necessary to help us interpolate from the element centroid
    * value to the face
    */
-  ADReal
-  getBoundaryFaceValue(const FaceInfo & fi, bool correct_skewness = false, TimeArg time = {}) const;
+  ADReal getBoundaryFaceValue(const FaceInfo & fi,
+                              const TimeArg & time,
+                              bool correct_skewness = false) const;
 
   const ADTemplateVariableSecond<OutputType> & adSecondSln() const override
   {
@@ -492,10 +494,13 @@ protected:
    * is the reason for the existence of the \p elem parameter, to indicate sidedness
    * @param fi The face information object
    * @param elem An element that can be used to indicate sidedness of the face
+   * @param time A temporal argument indicating at what time state to evaluate the variable
    * @return The Dirichlet value on the boundary face associated with \p fi (and potentially \p
    * elem)
    */
-  virtual ADReal getDirichletBoundaryFaceValue(const FaceInfo & fi, const Elem * elem) const;
+  virtual ADReal getDirichletBoundaryFaceValue(const FaceInfo & fi,
+                                               const Elem * elem,
+                                               const Moose::TimeArg & time) const;
 
   /**
    * Returns whether this is an extrapolated boundary face. An extrapolated boundary face is

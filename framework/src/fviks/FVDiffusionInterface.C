@@ -51,7 +51,7 @@ FVDiffusionInterface::computeQpResidual()
   // Form a finite difference gradient across the interface
   Point one_over_gradient_support = _face_info->elemCentroid() - _face_info->neighborCentroid();
   one_over_gradient_support /= (one_over_gradient_support * one_over_gradient_support);
-  Moose::TimeArg current_time{};
+  const auto current_time = Moose::currentTimeFunctorArg();
   const auto gradient = elemIsOne()
                             ? (var1().getElemValue(&_face_info->elem(), current_time) -
                                var2().getElemValue(_face_info->neighborPtr(), current_time)) *
