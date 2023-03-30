@@ -105,7 +105,7 @@ TransfiniteMeshGenerator::TransfiniteMeshGenerator(const InputParameters & param
   _func_params.resize(1);
 
   mooseAssert((_nx > 1) && (_ny > 1),
-              "A minimum of 2 points is needed on each edge. Note the user needs to consider edge "
+              "A minimum of 2 points is needed on each edge, i.e. the user needs to consider edge "
               "vertices as well.");
 }
 std::unique_ptr<MeshBase>
