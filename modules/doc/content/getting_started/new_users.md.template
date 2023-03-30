@@ -34,15 +34,20 @@ error.
 
 ### Compile and Test Your Application id=compile
 
+!style! halign=left
+Enter you application's directory, build and then run tests:
+!style-end!
+
 ```bash
 cd {{PATH}}/YourAppName
 make -j 6
 ./run_tests -j 6
 ```
 
+
 If the application is working correctly, the output shows a single passing test. This indicates that
-the application is ready to be further developed. Be sure to recompile and tests the application
-each time you update moose MOOSE.
+the application is ready to be further developed. Be sure to recompile and test the application each
+time you update moose MOOSE.
 
 ### Enable Modules
 

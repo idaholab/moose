@@ -1,7 +1,9 @@
 ## MOOSE Packages id=moosepackages
 
+!style! halign=left
 Create a unique conda environment for [!ac](MOOSE), named `moose`, and install the MOOSE dependency
 packages:
+!style-end!
 
 ```bash
 mamba create -n moose moose-tools moose-libmesh
