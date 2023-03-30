@@ -7,7 +7,6 @@
       type = 'Exodiff'
       input = 'scalar_constraint_kernel_RJ.i'
       exodiff = 'scalar_constraint_kernel_RJ_out.e'
-      # This problem only has 4 elements and therefore does not seem to run on > 4 procs.
       cli_args = 'Executioner/residual_and_jacobian_together=false'
       detail = 'showing the correct results with separate computation of residual and Jacobian'
     []
@@ -23,7 +22,6 @@
       type = 'Exodiff'
       input = 'scalar_constraint_kernel_RJ.i'
       exodiff = 'scalar_constraint_kernel_RJ_out.e'
-      # This problem only has 4 elements and therefore does not seem to run on > 4 procs.
       cli_args = 'Executioner/residual_and_jacobian_together=true'
       detail = 'showing the correct results with computation of residual and Jacobian together'
       prereq = 'kernel_dirichlet/jacobian_separate'
@@ -44,7 +42,6 @@
       type = 'CSVDiff'
       input = 'scalar_constraint_together.i'
       csvdiff = 'scalar_constraint_together_out.csv'
-      # This problem only has 4 elements and therefore does not seem to run on > 4 procs.
       cli_args = 'Executioner/residual_and_jacobian_together=false'
       detail = 'showing the correct results with separate computation of residual and Jacobian for Neumann'
     []
@@ -60,7 +57,6 @@
       type = 'CSVDiff'
       input = 'scalar_constraint_together.i'
       csvdiff = 'scalar_constraint_together_out.csv'
-      # This problem only has 4 elements and therefore does not seem to run on > 4 procs.
       cli_args = 'Executioner/residual_and_jacobian_together=true'
       detail = 'showing the correct results with computation of residual and Jacobian together for Neumann'
       prereq = 'kernel_neumann/jacobian_separate'
@@ -79,8 +75,6 @@
     type = 'CSVDiff'
     input = 'scalar_constraint_together.i'
     csvdiff = 'scalar_constraint_together_out.csv'
-    # This problem only has 4 elements and therefore does not seem to run on > 4 procs.
-    max_parallel = 4
     requirement = 'The system shall solve the constrained Neumann problem using the AD Lagrange multiplier approach with LU solver, computing the residual and Jacobian simultaneously.'
   []
 
@@ -88,8 +82,6 @@
     type = 'CSVDiff'
     input = 'diffusion_bipass_scalar.i'
     csvdiff = 'diffusion_bipass_scalar_out.csv'
-    # This problem only has 4 elements and therefore does not seem to run on > 4 procs.
-    max_parallel = 4
     requirement = 'The system shall support the ability to include the AD scalar wrapper but not actually using a scalar variable.'
   []
 

@@ -138,10 +138,9 @@
   l_tol = 1.e-10
   nl_max_its = 10
   # This example builds an indefinite matrix, so "-pc_type hypre -pc_hypre_type boomeramg" cannot
-  # be used reliably on this problem. ILU(0) seems to do OK in both serial and parallel in my testing,
-  # I have not seen any zero pivot issues.
-  petsc_options_iname = '-pc_type -sub_pc_type'
-  petsc_options_value = 'bjacobi  ilu'
+  # be used reliably on this problem
+  petsc_options_iname = '-pc_type -pc_factor_shift_type'
+  petsc_options_value = 'lu       NONZERO'
   # This is a linear problem, so we don't need to recompute the
   # Jacobian. This isn't a big deal for a Steady problems, however, as
   # there is only one solve.
