@@ -6,34 +6,16 @@
 []
 
 [Variables]
-  [u]
-  []
   [v]
   []
 []
 
 [AuxVariables]
-  [u_pod]
-  []
   [v_pod]
   []
 []
 
-[Problem]
-  solve = false
-[]
-
 [Kernels]
-  [diffusion_u]
-    type = MatDiffusion
-    variable = u
-    diffusivity = D_u
-  []
-  [source_u]
-    type = BodyForce
-    variable = u
-    value = 1.0
-  []
   [diffusion_v]
     type = MatDiffusion
     variable = v
@@ -47,31 +29,14 @@
 []
 
 [Materials]
-  [diffusivity_u]
-    type = GenericConstantMaterial
-    prop_names = D_u
-    prop_values = 2.0
-  []
   [diffusivity_v]
     type = GenericConstantMaterial
     prop_names = D_v
-    prop_values = 4.0
+    prop_values = 2.0
   []
 []
 
 [BCs]
-  [left_u]
-    type = DirichletBC
-    variable = u
-    boundary = left
-    value = 0
-  []
-  [right_u]
-    type = DirichletBC
-    variable = u
-    boundary = right
-    value = 0
-  []
   [left_v]
     type = DirichletBC
     variable = v
@@ -82,7 +47,7 @@
     type = DirichletBC
     variable = v
     boundary = right
-    value = 0
+    value = 5
   []
 []
 
@@ -100,40 +65,36 @@
     surrogate = polyreg
     variable_to_fill = "v_pod"
     variable_to_reconstruct = "v"
-    parameters = '0 6'
-    execute_on = INITIAL
+    parameters = '2 5'
+    execute_on = TIMESTEP_END
   []
 []
 
 [Surrogates]
   [polyreg]
     type = PolynomialRegressionSurrogate
-    filename = "main_2d_mc_rom_polyreg.rd"
+    filename = "create_mapping_main_rom_polyreg.rd"
   []
 []
 
 [Mappings]
   [pod]
     type = PODMapping
-    filename = "main_2d_mc_rd_pod_mapping.rd"
+    filename = "create_mapping_main_mapping_pod_mapping.rd"
+    num_modes = 2
   []
 []
 
-[Controls]
-  [stochastic]
-    type = SamplerReceiver
-  []
-[]
-
-[Reporters]
-  [pod_coeffs]
-    type = MappingReporter
-    mapping = pod
-    variables = "v"
+[Postprocessors]
+  [error]
+    type = ElementL2Difference
+    variable = v
+    other_variable = v_pod
+    execute_on = FINAL
   []
 []
 
 [Outputs]
   exodus = true
-  execute_on = 'INITIAL TIMESTEP_END'
+  execute_on = 'FINAL'
 []

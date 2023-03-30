@@ -22,14 +22,6 @@
     execute_on = initial
     min_procs_per_row = 2
   []
-  [sample_test]
-    type = MonteCarlo
-    num_rows = 100
-    distributions = 'S_dist D_dist'
-    execute_on = initial
-    min_procs_per_row = 2
-    seed = 11
-  []
 []
 
 [MultiApps]
@@ -47,7 +39,6 @@
     type = PolynomialRegressionTrainer
     sampler = sample
     regression_type = ols
-    # penalty = 0.1
     max_degree = 1
     response = reduced_solutions/v_pod_mapping
     response_type = vector_real
@@ -55,19 +46,12 @@
   []
 []
 
-[Surrogates]
-  [polyreg]
-    type = PolynomialRegressionSurrogate
-    trainer = polyreg
-  []
-[]
-
 [Mappings]
   [pod_mapping]
     type = PODMapping
     solution_storage = parallel_storage
-    variables = "u v"
-    num_modes = '10 10'
+    variables = "v"
+    num_modes = '10'
     extra_slepc_options = "-svd_monitor_all"
   []
 []
@@ -77,15 +61,15 @@
     type = SamplerParameterTransfer
     to_multi_app = worker
     sampler = sample
-    parameters = 'Kernels/source_u/value BCs/right_v/value'
+    parameters = 'Kernels/source_v/value BCs/right_v/value'
   []
   [solution_transfer]
     type = SerializedSolutionTransfer
-    parallel_storage_name = parallel_storage
+    parallel_storage = parallel_storage
     from_multi_app = worker
     sampler = sample
-    serialized_solution_reporter = solution_storage
-    variables = 'u v'
+    solution_container = solution_storage
+    variables = 'v'
     serialize_on_root = false
   []
 []
@@ -93,22 +77,16 @@
 [Reporters]
   [parallel_storage]
     type = ParallelSolutionStorage
+    variables = 'v'
+    outputs = none
   []
   [reduced_solutions]
     type = MappingReporter
     sampler = sample
     parallel_storage = parallel_storage
     mapping = pod_mapping
-    variables = "u v"
-    execute_on = timestep_end
-  []
-  [eval]
-    type = EvaluateSurrogate
-    model = polyreg
-    response_type = vector_real
-    parallel_type = ROOT
-    execute_on = FINAL
-    sampler = sample_test
+    variables = "v"
+    execute_on = timestep_end # To make sure the trainer sees the results on FINAL
   []
 []
 
@@ -120,7 +98,9 @@
   [mapping]
     type = MappingOutput
     mappings = pod_mapping
+    execute_on = FINAL
   []
+
   [rom]
     type = SurrogateTrainerOutput
     trainers = polyreg
