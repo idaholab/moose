@@ -1,0 +1,25 @@
+[Tests]
+  issues = '#23619'
+  design = 'SerializedSolutionTransfer.md'
+
+  [transfer_fully_distributed]
+    type = JSONDiff
+    requirement = 'The system shall be able to distribute the solution samples among the processors of each subapplication, serialize and transfer them to a parallel storage on the corresponding ranks.'
+    input = sst_main.i
+    jsondiff = 'serialization.json serialization.json.1 serialization.json.2 serialization.json.3'
+    cli_args = "Outputs/file_base=serialization Transfers/solution_transfer/serialize_on_root=true"
+
+    min_parallel = 4
+    max_parallel = 4
+  []
+  [transfer_on_roots]
+    type = JSONDiff
+    requirement = 'The system shall be able to serialize solution samples on the root process of each subapplication and transfer results to a parallel storage.'
+    input = sst_main.i
+    jsondiff = 'no_serialization.json no_serialization.json.1 no_serialization.json.2 no_serialization.json.3'
+    cli_args = "Outputs/file_base=no_serialization Transfers/solution_transfer/serialize_on_root=false "
+               "Transfers/solution_transfer/variables='u' Reporters/parallel_storage/variables='u'"
+    min_parallel = 4
+    max_parallel = 4
+  []
+[]
