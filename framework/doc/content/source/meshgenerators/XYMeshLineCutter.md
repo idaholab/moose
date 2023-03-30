@@ -66,7 +66,12 @@ Alternatively, the complex mesh can also be cut with the `MOV_NODE` method and p
       id=complex_cut_node
       caption=The complex multi-block mesh cut using the `MOV_NODE` method.
 
-By comparing the output meshes produced using the two methods, it is clear that the `CUT_ELEM` method preserve the original shape better but creates fine TRI3 elements near the cutting line. On the other hand, the `MOV_NODE` method is free from the "fine elements" issue, but does skew the interface near the cutting line slightly if this interface is not symmetric near the cutting line. The skewing can be relieved by listing the interface boundary ids in [!param](/Mesh/XYMeshLineCutter/other_boundaries_to_conform). Therefore, users should make a wise selection on the method according to their specific applications.
+By comparing the output meshes produced using the two methods, it is clear that the `CUT_ELEM` method preserve the original shape better but creates fine TRI3 elements near the cutting line. On the other hand, the `MOV_NODE` method is free from the "fine elements" issue, but does skew the interface near the cutting line slightly if this interface is not symmetric near the cutting line. The skewing can be relieved by listing the interface boundary ids in [!param](/Mesh/XYMeshLineCutter/other_boundaries_to_conform), as shown in [complex_cut_node_extra]. In summary, users should make a wise selection on the method according to their specific applications.
+
+!media mesh_modifiers/complex_cut_node_extra_bdry.png
+      style=display: block;margin-left:auto;margin-right:auto;width:40%;
+      id=complex_cut_node_extra
+      caption=The complex multi-block mesh cut using the `MOV_NODE` method with all interfaces provided as `other_boundaries_to_conform`.
 
 !syntax parameters /Mesh/XYMeshLineCutter
 

@@ -119,6 +119,13 @@ quasiTriElementsFixer(ReplicatedMesh & mesh,
 std::vector<std::pair<Real, unsigned int>> vertex_angles(Elem & elem);
 
 /**
+ * Calculates the distances between the vertices of a given 2D element
+ * @param elem the element that needs to be investigated
+ * @return values of all the distances, sorted by their value
+ */
+std::vector<std::pair<Real, unsigned int>> vertex_distances(Elem & elem);
+
+/**
  * Split a TRI3 element into three TRI3 elements based on two nodes on the two sides of the triangle
  * @param mesh input mesh with the TRI3 element that needs to be split
  * @param elem_id id of the TRI3 element that needs to be split

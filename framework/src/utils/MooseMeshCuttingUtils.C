@@ -47,17 +47,65 @@ lineRemoverMoveNode(ReplicatedMesh & mesh,
       slc_bdry_side_list.push_back(bdry_side_list[i]);
 
   // Assign block id for elements to be removed
+  // Also record the elements crossed by the line and with its average vertices on the removal side
+  std::vector<dof_id_type> crossed_elems_to_remove;
   for (auto elem_it = mesh.active_elements_begin(); elem_it != mesh.active_elements_end();
        elem_it++)
   {
-    const auto p_x = (*elem_it)->vertex_average()(0);
-    const auto p_y = (*elem_it)->vertex_average()(1);
-    if (lineSideDeterminator(p_x, p_y, bdry_pars[0], bdry_pars[1], bdry_pars[2], side_to_remove))
+    // Check all the vertices of the element
+    unsigned short removal_side_count = 0;
+    for (unsigned int i = 0; i < (*elem_it)->n_vertices(); i++)
+    {
+      if (lineSideDeterminator((*elem_it)->point(i)(0),
+                               (*elem_it)->point(i)(1),
+                               bdry_pars[0],
+                               bdry_pars[1],
+                               bdry_pars[2],
+                               side_to_remove))
+        removal_side_count++;
+    }
+    if (removal_side_count == (*elem_it)->n_vertices())
+    {
       (*elem_it)->subdomain_id() = block_id_to_remove;
+      continue;
+    }
+    // Check the average of the vertices of the element
+    if (lineSideDeterminator((*elem_it)->vertex_average()(0),
+                             (*elem_it)->vertex_average()(1),
+                             bdry_pars[0],
+                             bdry_pars[1],
+                             bdry_pars[2],
+                             side_to_remove))
+      crossed_elems_to_remove.push_back((*elem_it)->id());
+  }
+  // Check each crossed element to see if removing it would lead to boundary moving
+  for (const auto & elem_id : crossed_elems_to_remove)
+  {
+    bool remove_flag = true;
+    for (unsigned int i = 0; i < mesh.elem_ptr(elem_id)->n_sides(); i++)
+    {
+      if (mesh.elem_ptr(elem_id)->neighbor_ptr(i) != nullptr)
+        if (mesh.elem_ptr(elem_id)->neighbor_ptr(i)->subdomain_id() != block_id_to_remove &&
+            std::find(crossed_elems_to_remove.begin(),
+                      crossed_elems_to_remove.end(),
+                      mesh.elem_ptr(elem_id)->neighbor_ptr(i)->id()) ==
+                crossed_elems_to_remove.end())
+        {
+          if (mesh.elem_ptr(elem_id)->subdomain_id() !=
+              mesh.elem_ptr(elem_id)->neighbor_ptr(i)->subdomain_id())
+          {
+            remove_flag = false;
+            break;
+          }
+        }
+    }
+    if (remove_flag)
+      mesh.elem_ptr(elem_id)->subdomain_id() = block_id_to_remove;
   }
 
   // Identify all the nodes that are on the interface between block_id_to_remove and other blocks
-  // !!! We need a check here: if a node is on the retaining side, the removed element has a different subdomain id
+  // !!! We need a check here: if a node is on the retaining side, the removed element has a
+  // different subdomain id
   std::vector<dof_id_type> node_list;
   for (auto elem_it = mesh.active_subdomain_set_elements_begin(subdomain_ids_set);
        elem_it != mesh.active_subdomain_set_elements_end(subdomain_ids_set);
@@ -266,14 +314,26 @@ quasiTriElementsFixer(ReplicatedMesh & mesh,
               "The TRI elements subdomain id to be assigned may exceed the numeric limit.");
   const unsigned int n_elem_extra_ids = mesh.n_elem_integers();
   std::vector<dof_id_type> exist_extra_ids(n_elem_extra_ids);
-  std::vector<std::tuple<Elem *, unsigned int, bool>> bad_elems_rec;
-  // Loop over all the active elements to find any degenerate QUAD elements (i.e., QUAD elements
-  // with three collinear nodes).
+  std::vector<std::tuple<Elem *, unsigned int, bool, bool>> bad_elems_rec;
+  // Loop over all the active elements to find any degenerate QUAD elements
   for (auto & elem : as_range(mesh.active_elements_begin(), mesh.active_elements_end()))
   {
+    // Two types of degenerate QUAD elements are identified:
+    // (1) QUAD elements with three collinear vertices
+    // (2) QUAD elements with two overlapped vertices
     const auto elem_angles = vertex_angles(*elem);
+    const auto elem_distances = vertex_distances(*elem);
+    // Type 1
     if (MooseUtils::absoluteFuzzyEqual(elem_angles.front().first, M_PI, 0.001))
-      bad_elems_rec.push_back(std::make_tuple(elem, elem_angles.front().second, false));
+    {
+      bad_elems_rec.push_back(std::make_tuple(elem, elem_angles.front().second, false, true));
+      continue;
+    }
+    // Type 2
+    if (MooseUtils::absoluteFuzzyEqual(elem_distances.front().first, 0.0))
+    {
+      bad_elems_rec.push_back(std::make_tuple(elem, elem_distances.front().second, false, false));
+    }
   }
   std::set<subdomain_id_type> new_subdomain_ids;
   // Loop over all the identified degenerate QUAD elements
@@ -282,23 +342,25 @@ quasiTriElementsFixer(ReplicatedMesh & mesh,
     std::vector<boundary_id_type> elem_bdry_container_0;
     std::vector<boundary_id_type> elem_bdry_container_1;
     std::vector<boundary_id_type> elem_bdry_container_2;
-    // elems 1 and 2 are the neighboring elements of the degenerate element corresponding to the two
-    // collinear sides.
+
     Elem * elem_0 = std::get<0>(bad_elem);
-    Elem * elem_1 = elem_0->neighbor_ptr(std::get<1>(bad_elem));
-    Elem * elem_2 = elem_0->neighbor_ptr((std::get<1>(bad_elem) - 1) % elem_0->n_vertices());
-    // If the elems 2 and 3 do not exist, the two sides are on the external boundary formed by
-    // trimming.
-    if (elem_1 == nullptr && elem_2 == nullptr)
+    if (std::get<3>(bad_elem))
     {
-      mesh.get_boundary_info().boundary_ids(
-          elem_0, (std::get<1>(bad_elem) + 1) % elem_0->n_vertices(), elem_bdry_container_0);
-      mesh.get_boundary_info().boundary_ids(
-          elem_0, (std::get<1>(bad_elem) + 2) % elem_0->n_vertices(), elem_bdry_container_1);
-      mesh.get_boundary_info().boundary_ids(elem_0, std::get<1>(bad_elem), elem_bdry_container_2);
+      // elems 1 and 2 are the neighboring elements of the degenerate element corresponding to the
+      // two collinear sides.
+      // For the degenerated element with three colinear vertices, if the elems 2 and 3 do not
+      // exist, the two sides are on the external boundary formed by trimming.
+      Elem * elem_1 = elem_0->neighbor_ptr(std::get<1>(bad_elem));
+      Elem * elem_2 = elem_0->neighbor_ptr((std::get<1>(bad_elem) - 1) % elem_0->n_vertices());
+      if ((elem_1 != nullptr || elem_2 != nullptr))
+        throw MooseException("The input mesh has degenerate quad element before trimming.");
     }
-    else
-      throw MooseException("The input mesh has degenerate quad element before trimming.");
+    mesh.get_boundary_info().boundary_ids(
+        elem_0, (std::get<1>(bad_elem) + 1) % elem_0->n_vertices(), elem_bdry_container_0);
+    mesh.get_boundary_info().boundary_ids(
+        elem_0, (std::get<1>(bad_elem) + 2) % elem_0->n_vertices(), elem_bdry_container_1);
+    mesh.get_boundary_info().boundary_ids(
+        elem_0, (std::get<1>(bad_elem) + 3) % elem_0->n_vertices(), elem_bdry_container_2);
 
     // Record subdomain id of the degenerate element
     auto elem_block_id = elem_0->subdomain_id();
@@ -370,6 +432,21 @@ vertex_angles(Elem & elem)
   }
   std::sort(angles.begin(), angles.end(), std::greater<>());
   return angles;
+}
+
+std::vector<std::pair<Real, unsigned int>>
+vertex_distances(Elem & elem)
+{
+  std::vector<std::pair<Real, unsigned int>> distances;
+  const unsigned int n_vertices = elem.n_vertices();
+
+  for (unsigned int i = 0; i < n_vertices; i++)
+  {
+    Point v1 = (*elem.node_ptr((i + 1) % n_vertices) - *elem.node_ptr(i % n_vertices));
+    distances.push_back(std::make_pair(v1.norm(), i));
+    std::sort(distances.begin(), distances.end());
+  }
+  return distances;
 }
 
 void
