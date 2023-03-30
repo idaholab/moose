@@ -47,9 +47,7 @@ void
 ParallelSolutionStorage::initialSetup()
 {
   for (const auto & vname : _variable_names)
-  {
     _distributed_solutions[vname].clear();
-  }
 }
 
 void

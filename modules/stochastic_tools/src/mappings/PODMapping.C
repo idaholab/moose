@@ -25,7 +25,7 @@ PODMapping::validParams()
                              "between full-order and reduced-order spaces.");
   params.addParam<UserObjectName>(
       "solution_storage", "The name of the storage reporter where the snapshots are located.");
-  params.addRequiredParam<std::vector<unsigned int>>(
+  params.addRequiredParam<std::vector<dof_id_type>>(
       "num_modes",
       "The number of modes requested for each variable. Modes with 0 eigenvalues are filtered out, "
       "so the real number of modes might be lower than this. This is also used for setting the "
@@ -46,13 +46,20 @@ PODMapping::validParams()
 
 PODMapping::PODMapping(const InputParameters & parameters)
   : MappingBase(parameters),
-    _num_modes(getParam<std::vector<unsigned int>>("num_modes")),
+    _num_modes(getParam<std::vector<dof_id_type>>("num_modes")),
     _energy_threshold(getParam<std::vector<Real>>("energy_threshold")),
-    _basis_functions(isParamValid("filename")
-                         ? setModelData<std::map<VariableName, std::vector<DenseVector<Real>>>>(
-                               "basis_functions")
-                         : declareModelData<std::map<VariableName, std::vector<DenseVector<Real>>>>(
-                               "basis_functions")),
+    _left_basis_functions(
+        isParamValid("filename")
+            ? setModelData<std::map<VariableName, std::vector<DenseVector<Real>>>>(
+                  "left_basis_functions")
+            : declareModelData<std::map<VariableName, std::vector<DenseVector<Real>>>>(
+                  "left_basis_functions")),
+    _right_basis_functions(
+        isParamValid("filename")
+            ? setModelData<std::map<VariableName, std::vector<DenseVector<Real>>>>(
+                  "right_basis_functions")
+            : declareModelData<std::map<VariableName, std::vector<DenseVector<Real>>>>(
+                  "right_basis_functions")),
     _singular_values(
         isParamValid("filename")
             ? setModelData<std::map<VariableName, std::vector<Real>>>("singular_values")
@@ -83,7 +90,8 @@ PODMapping::PODMapping(const InputParameters & parameters)
     for (const auto & vname : _variable_names)
     {
       _singular_values.emplace(vname, std::vector<Real>());
-      _basis_functions.emplace(vname, std::vector<DenseVector<Real>>());
+      _left_basis_functions.emplace(vname, std::vector<DenseVector<Real>>());
+      _right_basis_functions.emplace(vname, std::vector<DenseVector<Real>>());
       _svds.try_emplace(vname);
       SVDCreate(_communicator.get(), &_svds[vname]);
       _computed_svd.emplace(vname, false);
@@ -97,11 +105,11 @@ PODMapping::~PODMapping()
     SVDDestroy(&_svds[vname]);
 }
 
-unsigned int
+dof_id_type
 PODMapping::determineNumberOfModes(const VariableName & vname,
                                    const std::vector<Real> & converged_evs)
 {
-  unsigned int num_modes = 0;
+  dof_id_type num_modes = 0;
 
   auto it = std::find(_variable_names.begin(), _variable_names.end(), vname);
   mooseAssert(it != _variable_names.end(), "Variable " + vname + " is not in PODMapping!");
@@ -187,14 +195,15 @@ PODMapping::buildMapping(const VariableName & vname)
   // We make sure every rank knows how many global and local samples we have and how long the
   // snapshots are. At this point we assume that the snapshots are the same size so we don't need to
   // map them to a reference domain.
-  unsigned int local_rows = 0;
-  unsigned int snapshot_size = 0;
-  unsigned int global_rows = 0;
+  dof_id_type local_rows = 0;
+  dof_id_type snapshot_size = 0;
+  dof_id_type global_rows = 0;
   if (_parallel_storage->getStorage().size())
   {
     local_rows = _parallel_storage->getStorage(vname).size();
     global_rows = local_rows;
-    snapshot_size = _parallel_storage->getStorage(vname).begin()->second[0].size();
+    if (_parallel_storage->getStorage(vname).size())
+      snapshot_size = _parallel_storage->getStorage(vname).begin()->second[0].size();
   }
 
   comm().sum(global_rows);
@@ -281,7 +290,11 @@ PODMapping::buildMapping(const VariableName & vname)
   PetscVector<Real> u(_communicator);
   u.init(snapshot_size);
 
-  _basis_functions[vname].clear();
+  PetscVector<Real> v(_communicator);
+  v.init(global_rows, local_rows, false, PARALLEL);
+
+  _left_basis_functions[vname].clear();
+  _right_basis_functions[vname].clear();
   _singular_values[vname].clear();
 
   const auto emplaced_singular_values = _singular_values.emplace(vname, std::vector<Real>());
@@ -305,10 +318,14 @@ PODMapping::buildMapping(const VariableName & vname)
   // on every processor so all of them have access to every mode.
   for (PetscInt j = 0; j < num_requested_modes; j++)
   {
-    SVDGetSingularTriplet(_svds[vname], j, &sigma, NULL, u.vec());
-    DenseVector<Real> serialized_mode;
-    u.localize(serialized_mode.get_values());
-    _basis_functions[vname].push_back(std::move(serialized_mode));
+    SVDGetSingularTriplet(_svds[vname], j, NULL, v.vec(), u.vec());
+    DenseVector<Real> serialized_left_mode;
+    u.localize(serialized_left_mode.get_values());
+    _left_basis_functions[vname].push_back(std::move(serialized_left_mode));
+
+    DenseVector<Real> serialized_right_mode;
+    v.localize(serialized_right_mode.get_values());
+    _right_basis_functions[vname].push_back(std::move(serialized_right_mode));
   }
   _computed_svd[vname] = true;
 
@@ -321,11 +338,11 @@ PODMapping::map(const VariableName & vname,
                 std::vector<Real> & reduced_order_vector) const
 {
   mooseAssert(_parallel_storage, "We need the parallel solution storage for this operation.");
-  mooseAssert(_basis_functions.find(vname) != _basis_functions.end(),
+  mooseAssert(_left_basis_functions.find(vname) != _left_basis_functions.end(),
               "The bases for the requested variable are not available!");
   const auto & snapshot = _parallel_storage->getGlobalSample(global_sample_i, vname)[0];
 
-  const auto & bases = _basis_functions[vname];
+  const auto & bases = _left_basis_functions[vname];
 
   reduced_order_vector.clear();
   reduced_order_vector.resize(bases.size());
@@ -338,7 +355,7 @@ PODMapping::map(const VariableName & vname,
                 const DenseVector<Real> & full_order_vector,
                 std::vector<Real> & reduced_order_vector) const
 {
-  const auto & bases = _basis_functions[vname];
+  const auto & bases = _left_basis_functions[vname];
 
   reduced_order_vector.clear();
   reduced_order_vector.resize(bases.size());
@@ -355,33 +372,47 @@ PODMapping::inverse_map(const VariableName & vname,
                   _variable_names.end(),
               "Variable " + vname + " is not in PODMapping!");
 
-  if (reduced_order_vector.size() != _basis_functions[vname].size())
+  if (reduced_order_vector.size() != _left_basis_functions[vname].size())
     mooseError("Then umber of supplied reduced-order coefficients (",
                reduced_order_vector.size(),
                ") Is not the same as the number of basisfunctions (",
-               _basis_functions[vname].size(),
+               _left_basis_functions[vname].size(),
                ") for variable ",
                vname,
                "!");
-  // This zeros the vector too
-  full_order_vector.resize(_basis_functions[vname][0].size());
+  // This zeros the DenseVector too
+  full_order_vector.resize(_left_basis_functions[vname][0].size());
 
   for (auto base_i : index_range(reduced_order_vector))
-    for (unsigned int dof_i = 0; dof_i < _basis_functions[vname][base_i].size(); ++dof_i)
+    for (unsigned int dof_i = 0; dof_i < _left_basis_functions[vname][base_i].size(); ++dof_i)
       full_order_vector(dof_i) +=
-          reduced_order_vector[base_i] * _basis_functions[vname][base_i](dof_i);
+          reduced_order_vector[base_i] * _left_basis_functions[vname][base_i](dof_i);
 }
 
 const DenseVector<Real> &
-PODMapping::basis(const VariableName & vname, const unsigned int base_i)
+PODMapping::leftBase(const VariableName & vname, const unsigned int base_i)
 {
   mooseAssert(std::find(_variable_names.begin(), _variable_names.end(), vname) !=
                   _variable_names.end(),
               "Variable " + vname + " is not in PODMapping!");
 
-  mooseAssert(base_i < _basis_functions[vname].size(),
+  mooseAssert(base_i < _left_basis_functions[vname].size(),
               "The POD for " + vname + " only has " +
-                  std::to_string(_basis_functions[vname].size()) + " modes!");
+                  std::to_string(_left_basis_functions[vname].size()) + " left modes!");
 
-  return _basis_functions[vname][base_i];
+  return _left_basis_functions[vname][base_i];
+}
+
+const DenseVector<Real> &
+PODMapping::rightBase(const VariableName & vname, const unsigned int base_i)
+{
+  mooseAssert(std::find(_variable_names.begin(), _variable_names.end(), vname) !=
+                  _variable_names.end(),
+              "Variable " + vname + " is not in PODMapping!");
+
+  mooseAssert(base_i < _right_basis_functions[vname].size(),
+              "The POD for " + vname + " only has " +
+                  std::to_string(_right_basis_functions[vname].size()) + " right modes!");
+
+  return _right_basis_functions[vname][base_i];
 }
