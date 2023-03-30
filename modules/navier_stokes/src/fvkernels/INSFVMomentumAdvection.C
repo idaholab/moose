@@ -135,7 +135,8 @@ INSFVMomentumAdvection::computeResidualsAndAData(const FaceInfo & fi)
     }
     else
     {
-      const auto [interp_coeffs, advected] = interpCoeffsAndAdvected(*_rho_u, advected_face_arg);
+      const auto [interp_coeffs, advected] =
+          interpCoeffsAndAdvected(*_rho_u, advected_face_arg, Moose::TimeArg{});
 
       const auto elem_arg = elemArg();
       const auto neighbor_arg = neighborArg();

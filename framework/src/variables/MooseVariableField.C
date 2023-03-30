@@ -81,7 +81,7 @@ MooseVariableField<OutputType>::computeSolution(const Elem * const elem,
   for (const auto dof_index : dof_indices)
   {
     dof_values.push_back(ADReal(global_soln(dof_index)));
-    if (do_derivatives)
+    if (do_derivatives && time.state == 0)
       Moose::derivInsert(dof_values.back().derivatives(), dof_index, 1.);
     if (computing_dot)
     {

@@ -254,7 +254,7 @@ INSFVRhieChowInterpolator::fillARead()
       else
         w_comp = &_zero_functor;
 
-      _a_aux[tid] = std::make_unique<VectorCompositeFunctor<ADReal>>(
+      _a_aux[tid] = std::make_unique<Moose::VectorCompositeFunctor<ADReal>>(
           "RC_a_coeffs",
           UserObject::_subproblem.getFunctor<ADReal>(deduceFunctorName("a_u"), tid, name(), true),
           *v_comp,

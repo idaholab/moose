@@ -161,13 +161,13 @@ protected:
    */
   ///@{
   /// The x-component of 'a'
-  VectorComponentFunctor<ADReal> _ax;
+  Moose::VectorComponentFunctor<ADReal> _ax;
 
   /// The y-component of 'a'
-  VectorComponentFunctor<ADReal> _ay;
+  Moose::VectorComponentFunctor<ADReal> _ay;
 
   /// The z-component of 'a'
-  VectorComponentFunctor<ADReal> _az;
+  Moose::VectorComponentFunctor<ADReal> _az;
   ///@}
 
   /// The number of the nonlinear system in which the monolithic momentum and continuity equations are located

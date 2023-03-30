@@ -66,8 +66,10 @@ INSFVVelocityVariable::INSFVVelocityVariable(const InputParameters & params) : I
 
 ADReal
 INSFVVelocityVariable::getExtrapolatedBoundaryFaceValue(const FaceInfo & fi,
-                                                        bool two_term_expansion,
-                                                        const Elem * elem_to_extrapolate_from) const
+                                                        const bool two_term_expansion,
+                                                        const bool correct_skewness,
+                                                        const Elem * elem_to_extrapolate_from,
+                                                        const TimeArg & time) const
 {
   ADReal boundary_value;
   bool elem_to_extrapolate_from_is_fi_elem;
@@ -92,18 +94,20 @@ INSFVVelocityVariable::getExtrapolatedBoundaryFaceValue(const FaceInfo & fi,
     const Point vector_to_face = elem_to_extrapolate_from_is_fi_elem
                                      ? (fi.faceCentroid() - fi.elemCentroid())
                                      : (fi.faceCentroid() - fi.neighborCentroid());
-    boundary_value =
-        uncorrectedAdGradSln(fi) * vector_to_face + getElemValue(elem_to_extrapolate_from);
+    boundary_value = uncorrectedAdGradSln(fi, correct_skewness, time) * vector_to_face +
+                     getElemValue(elem_to_extrapolate_from, Moose::TimeArg{});
   }
   else
     boundary_value = INSFVVariable::getExtrapolatedBoundaryFaceValue(
-        fi, two_term_expansion, elem_to_extrapolate_from);
+        fi, two_term_expansion, correct_skewness, elem_to_extrapolate_from, time);
 
   return boundary_value;
 }
 
 VectorValue<ADReal>
-INSFVVelocityVariable::uncorrectedAdGradSln(const FaceInfo & fi, const bool correct_skewness) const
+INSFVVelocityVariable::uncorrectedAdGradSln(const FaceInfo & fi,
+                                            const bool correct_skewness,
+                                            const TimeArg time) const
 {
   VectorValue<ADReal> unc_grad;
   if (_two_term_boundary_expansion && isFullyDevelopedFlowFace(fi))
@@ -119,7 +123,9 @@ INSFVVelocityVariable::uncorrectedAdGradSln(const FaceInfo & fi, const bool corr
 }
 
 const VectorValue<ADReal> &
-INSFVVelocityVariable::adGradSln(const Elem * const elem, bool correct_skewness) const
+INSFVVelocityVariable::adGradSln(const Elem * const elem,
+                                 bool correct_skewness,
+                                 const TimeArg time) const
 {
   VectorValue<ADReal> * value_pointer = &_temp_cell_gradient;
 
@@ -133,7 +139,7 @@ INSFVVelocityVariable::adGradSln(const Elem * const elem, bool correct_skewness)
       return it->second;
   }
 
-  ADReal elem_value = getElemValue(elem);
+  ADReal elem_value = getElemValue(elem, Moose::TimeArg{});
 
   // We'll save off the extrapolated boundary faces (ebf) for later assignment to the cache (these
   // are the keys). The boolean in the pair will denote whether the ebf face is a fully developed

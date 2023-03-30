@@ -34,6 +34,7 @@ public:
   using ElemQpArg = Moose::ElemQpArg;
   using ElemSideQpArg = Moose::ElemSideQpArg;
   using ElemPointArg = Moose::ElemPointArg;
+  using TimeArg = Moose::TimeArg;
 
   /**
    * Use this constructor when you want the object to live everywhere on the mesh
@@ -64,15 +65,15 @@ private:
   /// on all subdomains
   const std::set<SubdomainID> _sub_ids;
 
-  ValueType evaluate(const ElemArg & elem_arg, unsigned int) const override;
-  ValueType evaluate(const ElemPointArg & elem_point, const unsigned int state) const override;
-  ValueType evaluate(const FaceArg & face, unsigned int) const override;
-  ValueType evaluate(const ElemQpArg &, unsigned int) const override;
-  ValueType evaluate(const ElemSideQpArg &, unsigned int) const override;
+  ValueType evaluate(const ElemArg & elem_arg, const TimeArg &) const override;
+  ValueType evaluate(const ElemPointArg & elem_point, const TimeArg & state) const override;
+  ValueType evaluate(const FaceArg & face, const TimeArg &) const override;
+  ValueType evaluate(const ElemQpArg &, const TimeArg &) const override;
+  ValueType evaluate(const ElemSideQpArg &, const TimeArg &) const override;
 
   using Moose::FunctorBase<T>::evaluateGradient;
-  GradientType evaluateGradient(const ElemArg & elem_arg, unsigned int) const override;
-  GradientType evaluateGradient(const FaceArg & face, unsigned int) const override;
+  GradientType evaluateGradient(const ElemArg & elem_arg, const TimeArg & time) const override;
+  GradientType evaluateGradient(const FaceArg & face, const TimeArg & time) const override;
 };
 
 template <typename T, typename Map>
@@ -124,7 +125,7 @@ CellCenteredMapFunctor<T, Map>::hasBlocks(const SubdomainID sub_id) const
 
 template <typename T, typename Map>
 typename CellCenteredMapFunctor<T, Map>::ValueType
-CellCenteredMapFunctor<T, Map>::evaluate(const ElemArg & elem_arg, unsigned int) const
+CellCenteredMapFunctor<T, Map>::evaluate(const ElemArg & elem_arg, const TimeArg &) const
 {
   const Elem * const elem = elem_arg.elem;
 
@@ -152,16 +153,16 @@ CellCenteredMapFunctor<T, Map>::evaluate(const ElemArg & elem_arg, unsigned int)
 template <typename T, typename Map>
 typename CellCenteredMapFunctor<T, Map>::ValueType
 CellCenteredMapFunctor<T, Map>::evaluate(const ElemPointArg & elem_point,
-                                         const unsigned int state) const
+                                         const TimeArg & time) const
 {
-  return (*this)(elem_point.makeElem(), state) +
+  return (*this)(elem_point.makeElem(), time) +
          (elem_point.point - elem_point.elem->vertex_average()) *
-             this->gradient(elem_point.makeElem(), state);
+             this->gradient(elem_point.makeElem(), time);
 }
 
 template <typename T, typename Map>
 typename CellCenteredMapFunctor<T, Map>::ValueType
-CellCenteredMapFunctor<T, Map>::evaluate(const FaceArg & face, unsigned int) const
+CellCenteredMapFunctor<T, Map>::evaluate(const FaceArg & face, const TimeArg & time) const
 {
   const auto & fi = *face.fi;
   mooseAssert(face.limiter_type == Moose::FV::LimiterType::CentralDifference,
@@ -170,50 +171,51 @@ CellCenteredMapFunctor<T, Map>::evaluate(const FaceArg & face, unsigned int) con
   const bool defined_on_elem = hasBlocks(&fi.elem());
   const bool defined_on_neighbor = hasBlocks(fi.neighborPtr());
   if (defined_on_elem && defined_on_neighbor)
-    return Moose::FV::linearInterpolation(*this, face);
+    return Moose::FV::linearInterpolation(*this, face, time);
 
   if (defined_on_elem)
   {
     const auto elem_arg = face.makeElem();
-    const auto elem_value = (*this)(elem_arg);
+    const auto elem_value = (*this)(elem_arg, time);
     // Two term expansion
-    return elem_value + this->gradient(elem_arg) * (fi.faceCentroid() - fi.elemCentroid());
+    return elem_value + this->gradient(elem_arg, time) * (fi.faceCentroid() - fi.elemCentroid());
   }
   else
   {
     mooseAssert(defined_on_neighbor, "We should be defined on one of the sides");
     const auto neighbor_arg = face.makeNeighbor();
-    const auto neighbor_value = (*this)(neighbor_arg);
+    const auto neighbor_value = (*this)(neighbor_arg, time);
     // Two term expansion
     return neighbor_value +
-           this->gradient(neighbor_arg) * (fi.faceCentroid() - fi.neighborCentroid());
+           this->gradient(neighbor_arg, time) * (fi.faceCentroid() - fi.neighborCentroid());
   }
 }
 
 template <typename T, typename Map>
 typename CellCenteredMapFunctor<T, Map>::ValueType
-CellCenteredMapFunctor<T, Map>::evaluate(const ElemQpArg &, unsigned int) const
+CellCenteredMapFunctor<T, Map>::evaluate(const ElemQpArg &, const TimeArg &) const
 {
   mooseError("not implemented");
 }
 
 template <typename T, typename Map>
 typename CellCenteredMapFunctor<T, Map>::ValueType
-CellCenteredMapFunctor<T, Map>::evaluate(const ElemSideQpArg &, unsigned int) const
+CellCenteredMapFunctor<T, Map>::evaluate(const ElemSideQpArg &, const TimeArg &) const
 {
   mooseError("not implemented");
 }
 
 template <typename T, typename Map>
 typename CellCenteredMapFunctor<T, Map>::GradientType
-CellCenteredMapFunctor<T, Map>::evaluateGradient(const ElemArg & elem_arg, unsigned int) const
+CellCenteredMapFunctor<T, Map>::evaluateGradient(const ElemArg & elem_arg,
+                                                 const TimeArg & time) const
 {
-  return Moose::FV::greenGaussGradient(elem_arg, *this, true, _mesh);
+  return Moose::FV::greenGaussGradient(elem_arg, time, *this, true, _mesh);
 }
 
 template <typename T, typename Map>
 typename CellCenteredMapFunctor<T, Map>::GradientType
-CellCenteredMapFunctor<T, Map>::evaluateGradient(const FaceArg & face, unsigned int) const
+CellCenteredMapFunctor<T, Map>::evaluateGradient(const FaceArg & face, const TimeArg & time) const
 {
-  return Moose::FV::greenGaussGradient(face, *this, true, _mesh);
+  return Moose::FV::greenGaussGradient(face, time, *this, true, _mesh);
 }

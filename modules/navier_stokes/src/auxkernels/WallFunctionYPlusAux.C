@@ -96,11 +96,11 @@ WallFunctionYPlusAux::computeValue()
     return 0;
 
   // Get the velocity vector
-  ADRealVectorValue velocity(_u_var->getElemValue(&elem));
+  ADRealVectorValue velocity(_u_var->getElemValue(&elem, {}));
   if (_v_var)
-    velocity(1) = _v_var->getElemValue(&elem);
+    velocity(1) = _v_var->getElemValue(&elem, {});
   if (_w_var)
-    velocity(2) = _w_var->getElemValue(&elem);
+    velocity(2) = _w_var->getElemValue(&elem, {});
 
   // Compute the velocity and direction of the velocity component that is parallel to the wall
   Real dist = std::abs(wall_vec * normal);
