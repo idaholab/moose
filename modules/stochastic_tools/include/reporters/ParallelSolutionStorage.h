@@ -31,14 +31,13 @@ public:
    * @param global_i The global index of the field
    * @param solution The vector that needs to be added
    */
-  void addEntry(const VariableName & vname,
-                unsigned int global_i,
-                std::unique_ptr<DenseVector<Real>> solution);
+  void
+  addEntry(const VariableName & vname, unsigned int global_i, const DenseVector<Real> & solution);
   /**
    * Get the stored solution vectors for a given variable
    * @param variable The name of the given variable
    */
-  std::unordered_map<unsigned int, std::vector<std::unique_ptr<DenseVector<Real>>>> &
+  std::unordered_map<unsigned int, std::vector<DenseVector<Real>>> &
   getStorage(const VariableName & variable)
   {
     mooseAssert(_distributed_solutions.find(variable) != _distributed_solutions.end(),
@@ -48,8 +47,7 @@ public:
   }
 
   /// Get the whole solution container
-  std::map<VariableName,
-           std::unordered_map<unsigned int, std::vector<std::unique_ptr<DenseVector<Real>>>>> &
+  std::map<VariableName, std::unordered_map<unsigned int, std::vector<DenseVector<Real>>>> &
   getStorage()
   {
     return _distributed_solutions;
@@ -69,8 +67,8 @@ public:
    * @param global_sample_i The global sampler index
    * @param variable The variable name
    */
-  const std::vector<std::unique_ptr<DenseVector<Real>>> &
-  getGlobalSample(unsigned int global_sample_i, const VariableName & variable);
+  const std::vector<DenseVector<Real>> & getGlobalSample(unsigned int global_sample_i,
+                                                         const VariableName & variable);
 
   /**
    * Return the number of total stored solutions for a given variable
@@ -78,13 +76,24 @@ public:
    */
   unsigned int totalNumberOfStoredSolutions(const VariableName & vname);
 
+  /// Get the variable names which we can receive
+  const std::vector<VariableName> & variableNames() { return _variable_names; }
+
 protected:
   /**
    * The container of the solutions. It indexes based on: the variable name > global sample index >
    * timestep index (for time-dependent simulations). This object stores a reference because we
    * would like this to be restartable.
    */
-  std::map<VariableName,
-           std::unordered_map<unsigned int, std::vector<std::unique_ptr<DenseVector<Real>>>>> &
+  std::map<VariableName, std::unordered_map<unsigned int, std::vector<DenseVector<Real>>>> &
       _distributed_solutions;
+
+private:
+  /// The names of the variables whose serialized solution this object is supposed to receive.
+  const std::vector<VariableName> & _variable_names;
 };
+
+void to_json(
+    nlohmann::json & json,
+    const std::map<VariableName, std::unordered_map<unsigned int, std::vector<DenseVector<Real>>>> &
+        solution_storage);

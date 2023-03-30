@@ -1,0 +1,80 @@
+{
+    "app_name": "main",
+    "current_time": "Thu Mar 30 10:51:18 2023",
+    "executable": "/Users/germp/projects/moose/modules/stochastic_tools/test/tests/reporters/parallel_storage/../../../../stochastic_tools-dbg",
+    "executable_time": "Thu Mar 30 10:50:41 2023",
+    "libmesh_version": "",
+    "moose_version": "git commit 593f596f7e on 2023-03-30",
+    "number_of_parts": 2,
+    "part": 0,
+    "petsc_version": "3.16.6",
+    "reporters": {
+        "parallel_storage": {
+            "type": "ParallelSolutionStorage",
+            "values": {
+                "parallel_solution_storage": {
+                    "type": "std::map<VariableName, std::unordered_map<unsigned int, std::vector<libMesh::DenseVector<double>>, std::hash<unsigned int>, std::equal_to<unsigned int>, std::allocator<std::pair<unsigned int const, std::vector<libMesh::DenseVector<double>> > > >, std::less<VariableName>, std::allocator<std::pair<VariableName const, std::unordered_map<unsigned int, std::vector<libMesh::DenseVector<double>>, std::hash<unsigned int>, std::equal_to<unsigned int>, std::allocator<std::pair<unsigned int const, std::vector<libMesh::DenseVector<double>> > > > > > >"
+                }
+            }
+        }
+    },
+    "slepc_version": "3.16.2",
+    "time_steps": [
+        {
+            "parallel_storage": {
+                "parallel_solution_storage": {
+                    "u": {
+                        "0": [
+                            [
+                                0.0,
+                                9.926999546244913,
+                                15.88319927399186,
+                                17.868599183240843,
+                                15.88319927399186,
+                                9.926999546244911,
+                                0.0
+                            ]
+                        ],
+                        "1": [
+                            [
+                                0.0,
+                                4.884840824098017,
+                                7.815745318556828,
+                                8.792713483376431,
+                                7.815745318556828,
+                                4.884840824098017,
+                                0.0
+                            ]
+                        ]
+                    },
+                    "v": {
+                        "0": [
+                            [
+                                0.0,
+                                0.8913743705221334,
+                                1.532748741044267,
+                                1.9241231115664004,
+                                2.0654974820885337,
+                                1.956871852610667,
+                                1.5982462231328003
+                            ]
+                        ],
+                        "1": [
+                            [
+                                0.0,
+                                2.1858085930557767,
+                                4.121617186111553,
+                                5.80742577916733,
+                                7.243234372223108,
+                                8.429042965278885,
+                                9.364851558334664
+                            ]
+                        ]
+                    }
+                }
+            },
+            "time": 2.0,
+            "time_step": 2
+        }
+    ]
+}

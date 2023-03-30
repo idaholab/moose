@@ -18,36 +18,51 @@ ParallelSolutionStorage::validParams()
   InputParameters params = GeneralReporter::validParams();
   params.addClassDescription("Parallel container to store serialized solution fields from "
                              "simulations on sub-applications.");
+  params.addRequiredParam<std::vector<VariableName>>(
+      "variables",
+      "The names of the variables whose serialized solution this object is supposed to receive.");
+
+  // Making this required to make sure nobody prints full solution vectors on accident
+  params.makeParamRequired<std::vector<OutputName>>("outputs");
   return params;
 }
 
 ParallelSolutionStorage::ParallelSolutionStorage(const InputParameters & parameters)
   : GeneralReporter(parameters),
     _distributed_solutions(
-        declareRestartableData<std::map<
-            VariableName,
-            std::unordered_map<unsigned int, std::vector<std::unique_ptr<DenseVector<Real>>>>>>(
-            "distributed_solution"))
+        declareValueByName<
+            std::map<VariableName,
+                     std::unordered_map<unsigned int, std::vector<DenseVector<Real>>>>>(
+            "parallel_solution_storage", REPORTER_MODE_DISTRIBUTED)),
+    _variable_names(getParam<std::vector<VariableName>>("variables"))
 {
+  for (const auto & vname : _variable_names)
+  {
+    _distributed_solutions.emplace(
+        vname, std::unordered_map<unsigned int, std::vector<DenseVector<Real>>>());
+  }
 }
 
 void
 ParallelSolutionStorage::initialSetup()
 {
-  _distributed_solutions.clear();
+  for (const auto & vname : _variable_names)
+  {
+    _distributed_solutions[vname].clear();
+  }
 }
 
 void
 ParallelSolutionStorage::addEntry(const VariableName & vname,
                                   unsigned int global_i,
-                                  std::unique_ptr<DenseVector<Real>> solution)
+                                  const DenseVector<Real> & solution)
 {
-  // Emplace returns a pair to decide if we inserted a new element or not
-  auto variable_insert_pair = _distributed_solutions.emplace(
-      vname, std::unordered_map<unsigned int, std::vector<std::unique_ptr<DenseVector<Real>>>>());
+  mooseAssert(std::find(_variable_names.begin(), _variable_names.end(), vname) !=
+                  _variable_names.end(),
+              "We are trying to add a variable that we cannot receive!");
 
-  auto sample_insert_pair = variable_insert_pair.first->second.emplace(
-      global_i, std::vector<std::unique_ptr<DenseVector<Real>>>());
+  auto sample_insert_pair =
+      _distributed_solutions[vname].emplace(global_i, std::vector<DenseVector<Real>>());
 
   sample_insert_pair.first->second.push_back(std::move(solution));
 }
@@ -76,7 +91,7 @@ ParallelSolutionStorage::hasGlobalSample(unsigned int global_sample_i,
   return (variable_storage.find(global_sample_i) != variable_storage.end());
 }
 
-const std::vector<std::unique_ptr<DenseVector<Real>>> &
+const std::vector<DenseVector<Real>> &
 ParallelSolutionStorage::getGlobalSample(unsigned int global_sample_i,
                                          const VariableName & variable)
 {
@@ -87,4 +102,25 @@ ParallelSolutionStorage::getGlobalSample(unsigned int global_sample_i,
               "We don't have the requested global sample index! ");
 
   return libmesh_map_find(variable_storage, global_sample_i);
+}
+
+void
+to_json(
+    nlohmann::json & json,
+    const std::map<VariableName, std::unordered_map<unsigned int, std::vector<DenseVector<Real>>>> &
+        solution_storage)
+{
+  for (const auto & vname_pair : solution_storage)
+  {
+    auto & variable_storage = json[vname_pair.first];
+    for (const auto & sample_pair : vname_pair.second)
+    {
+      auto & sample_storage = variable_storage[std::to_string(sample_pair.first)];
+      sample_storage = std::vector<std::vector<Real>>();
+      for (const auto & sample : sample_pair.second)
+      {
+        sample_storage.push_back(sample.get_values());
+      }
+    }
+  }
 }

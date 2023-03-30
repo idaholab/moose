@@ -194,7 +194,7 @@ PODMapping::buildMapping(const VariableName & vname)
   {
     local_rows = _parallel_storage->getStorage(vname).size();
     global_rows = local_rows;
-    snapshot_size = _parallel_storage->getStorage(vname).begin()->second[0]->size();
+    snapshot_size = _parallel_storage->getStorage(vname).begin()->second[0].size();
   }
 
   comm().sum(global_rows);
@@ -239,7 +239,7 @@ PODMapping::buildMapping(const VariableName & vname)
                    rows.data(),
                    snapshot_size,
                    columns.data(),
-                   row.second[0]->get_values().data(),
+                   row.second[0].get_values().data(),
                    INSERT_VALUES);
     }
 
@@ -323,7 +323,7 @@ PODMapping::map(const VariableName & vname,
   mooseAssert(_parallel_storage, "We need the parallel solution storage for this operation.");
   mooseAssert(_basis_functions.find(vname) != _basis_functions.end(),
               "The bases for the requested variable are not available!");
-  const auto & snapshot = *_parallel_storage->getGlobalSample(global_sample_i, vname)[0];
+  const auto & snapshot = _parallel_storage->getGlobalSample(global_sample_i, vname)[0];
 
   const auto & bases = _basis_functions[vname];
 

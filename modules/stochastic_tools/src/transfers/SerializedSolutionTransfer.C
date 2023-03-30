@@ -47,7 +47,7 @@ void
 SerializedSolutionTransfer::initialSetup()
 {
   // Check if we have the storage space to receive the serialized solution fields
-  std::string parallel_storage_name = getParam<std::string>("parallel_storage_name");
+  std::string parallel_storage_name = getParam<std::string>("parallel_storage");
 
   std::vector<UserObject *> reporters;
   _fe_problem.theWarehouse()
@@ -86,7 +86,7 @@ SerializedSolutionTransfer::initializeFromMultiapp()
   // in batch mode only so we will have one solution container on each rank
   _solution_container.clear();
 
-  const auto & serialized_solution_reporter = getParam<std::string>("serialized_solution_reporter");
+  const auto & serialized_solution_reporter = getParam<std::string>("solution_container");
 
   FEProblemBase & app_problem = getFromMultiApp()->appProblemBase(_app_index);
 
@@ -98,12 +98,12 @@ SerializedSolutionTransfer::initializeFromMultiapp()
       .queryInto(reporters);
 
   if (reporters.empty())
-    paramError("serialized_solution_reporter",
+    paramError("solution_container",
                "Unable to find reporter with name '",
                serialized_solution_reporter,
                "'");
   else if (reporters.size() > 1)
-    paramError("serialized_solution_reporter",
+    paramError("solution_container",
                "We found more than one reporter with the name '",
                serialized_solution_reporter,
                "'");
@@ -111,7 +111,7 @@ SerializedSolutionTransfer::initializeFromMultiapp()
   _solution_container.push_back(dynamic_cast<SolutionContainer *>(reporters[0]));
 
   if (!_solution_container[0])
-    paramError("serialized_solution_reporter",
+    paramError("solution_container",
                "The parallel storage reporter is not of type '",
                serialized_solution_reporter,
                "'");
@@ -183,21 +183,19 @@ SerializedSolutionTransfer::transferInParallel(NonlinearSystemBase & app_nl_syst
     for (unsigned int solution_i = 0; solution_i < solution_container.getContainer().size();
          ++solution_i)
     {
-      std::unique_ptr<DenseVector<Real>> serialized_solution =
-          std::make_unique<DenseVector<Real>>();
+      DenseVector<Real> serialized_solution;
 
       // Localize the solution and add it to the local container on the rank
       // which is supposed to own it
       solution_container.getSolution(solution_i)
-          ->localize(serialized_solution->get_values(),
+          ->localize(serialized_solution.get_values(),
                      (local_app_index >= new_local_entries_begin &&
                       local_app_index < new_local_entries_end)
                          ? app_nl_system.getVariableGlobalDoFs()
                          : std::vector<dof_id_type>());
 
       if (local_app_index >= new_local_entries_begin && local_app_index < new_local_entries_end)
-        _parallel_storage->addEntry(
-            _variable_names[var_i], _global_index, std::move(serialized_solution));
+        _parallel_storage->addEntry(_variable_names[var_i], _global_index, serialized_solution);
     }
   }
 }
@@ -215,18 +213,16 @@ SerializedSolutionTransfer::transferToRoot(NonlinearSystemBase & app_nl_system,
     for (unsigned int solution_i = 0; solution_i < solution_container.getContainer().size();
          ++solution_i)
     {
-      std::unique_ptr<DenseVector<Real>> serialized_solution =
-          std::make_unique<DenseVector<Real>>();
+      DenseVector<Real> serialized_solution;
 
       // In this case we always serialize on the root processor of the application.
       solution_container.getSolution(solution_i)
-          ->localize(serialized_solution->get_values(),
+          ->localize(serialized_solution.get_values(),
                      getFromMultiApp()->isRootProcessor() ? app_nl_system.getVariableGlobalDoFs()
                                                           : std::vector<dof_id_type>());
 
       if (getFromMultiApp()->isRootProcessor())
-        _parallel_storage->addEntry(
-            _variable_names[var_i], _global_index, std::move(serialized_solution));
+        _parallel_storage->addEntry(_variable_names[var_i], _global_index, serialized_solution);
     }
   }
 }
