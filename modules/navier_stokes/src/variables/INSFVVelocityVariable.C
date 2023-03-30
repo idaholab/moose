@@ -227,7 +227,7 @@ INSFVVelocityVariable::adGradSln(const Elem * const elem,
       mooseAssert(elem == &functor_elem,
                   "Just a sanity check that the element being passed in is the one we passed out.");
 
-      if (isExtrapolatedBoundaryFace(*fi, &functor_elem))
+      if (isExtrapolatedBoundaryFace(*fi, &functor_elem, time))
       {
         if (_two_term_boundary_expansion)
         {
@@ -277,7 +277,8 @@ INSFVVelocityVariable::adGradSln(const Elem * const elem,
                                      time);
       else
       {
-        mooseAssert(isDirichletBoundaryFace(*fi, &functor_elem), "We've run out of face types");
+        mooseAssert(isDirichletBoundaryFace(*fi, &functor_elem, time),
+                    "We've run out of face types");
         grad_b += surface_vector * getDirichletBoundaryFaceValue(*fi, &functor_elem, time);
       }
 

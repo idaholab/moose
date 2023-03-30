@@ -135,7 +135,7 @@ public:
    * Returns whether this (sided) face is an extrapolated boundary face for
    * this functor
    */
-  virtual bool isExtrapolatedBoundaryFace(const FaceInfo &, const Elem *) const
+  virtual bool isExtrapolatedBoundaryFace(const FaceInfo &, const Elem *, const TimeArg &) const
   {
     mooseError("not implemented");
   }
@@ -397,7 +397,8 @@ FunctorBase<T>::queryFVArgCache(std::map<SpaceArg, ValueType> & cache_data,
 
   if (inserted)
     // value not ready to go
-    value = evaluate(space, 0);
+    // this function is only called from functions that assert we are in the current time state
+    value = evaluate(space, currentTimeFunctorArg());
 
   return value;
 }
@@ -838,9 +839,10 @@ public:
   }
 
   virtual bool isExtrapolatedBoundaryFace(const FaceInfo & fi,
-                                          const Elem * const elem) const override
+                                          const Elem * const elem,
+                                          const TimeArg & time) const override
   {
-    return _wrapped->isExtrapolatedBoundaryFace(fi, elem);
+    return _wrapped->isExtrapolatedBoundaryFace(fi, elem, time);
   }
   virtual bool isConstant() const override { return _wrapped->isConstant(); }
   virtual bool hasBlocks(const SubdomainID id) const override { return _wrapped->hasBlocks(id); }

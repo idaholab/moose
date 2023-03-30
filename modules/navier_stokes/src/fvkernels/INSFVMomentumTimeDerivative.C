@@ -32,7 +32,9 @@ void
 INSFVMomentumTimeDerivative::gatherRCData(const Elem & elem)
 {
   const auto e = makeElemArg(&elem);
-  const auto residual = _rho(e) * _var.dot(e) * _assembly.elementVolume(&elem);
+  const auto current_time = Moose::currentTimeFunctorArg();
+  const auto residual =
+      _rho(e, current_time) * _var.dot(e, current_time) * _assembly.elementVolume(&elem);
   const auto dof_number = elem.dof_number(_sys.number(), _var.number(), 0);
   const Real a = residual.derivatives()[dof_number];
 

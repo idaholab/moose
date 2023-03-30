@@ -368,6 +368,7 @@ interpolate(InterpMethod m,
 /// those calculations should be handled appropriately by this function.
 ADReal gradUDotNormal(const FaceInfo & face_info,
                       const MooseVariableFV<Real> & fv_var,
+                      const Moose::TimeArg & time,
                       bool correct_skewness = false);
 
 /**

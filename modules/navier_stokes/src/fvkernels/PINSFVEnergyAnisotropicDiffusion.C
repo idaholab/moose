@@ -56,27 +56,31 @@ PINSFVEnergyAnisotropicDiffusion::computeQpResidual()
 {
   // Interpolate thermal conductivity times porosity on the face
   ADRealVectorValue k_eps_face;
+  const auto current_time = Moose::currentTimeFunctorArg();
   if (onBoundary(*_face_info))
   {
     const auto ssf = singleSidedFaceArg();
-    k_eps_face = _porosity_factored_in ? _k(ssf) : _k(ssf) * _eps(ssf);
+    k_eps_face = _porosity_factored_in ? _k(ssf, current_time)
+                                       : _k(ssf, current_time) * _eps(ssf, current_time);
   }
   else
   {
     const auto face_elem = elemArg();
     const auto face_neighbor = neighborArg();
 
-    const auto value1 =
-        _porosity_factored_in ? _k(face_elem) : _k(face_neighbor) * _eps(face_neighbor);
-    const auto value2 =
-        _porosity_factored_in ? _k(face_neighbor) : _k(face_neighbor) * _eps(face_neighbor);
+    const auto value1 = _porosity_factored_in
+                            ? _k(face_elem, current_time)
+                            : _k(face_neighbor, current_time) * _eps(face_neighbor, current_time);
+    const auto value2 = _porosity_factored_in
+                            ? _k(face_neighbor, current_time)
+                            : _k(face_neighbor, current_time) * _eps(face_neighbor, current_time);
 
     Moose::FV::interpolate(_k_interp_method, k_eps_face, value1, value2, *_face_info, true);
   }
 
   // Compute the temperature gradient times the conductivity tensor
   ADRealVectorValue kappa_grad_T;
-  const auto & grad_T = _var.adGradSln(*_face_info);
+  const auto & grad_T = _var.adGradSln(*_face_info, current_time);
   for (std::size_t i = 0; i < LIBMESH_DIM; i++)
     kappa_grad_T(i) = k_eps_face(i) * grad_T(i);
 

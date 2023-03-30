@@ -46,14 +46,19 @@ INSFVMomentumDiffusion::INSFVMomentumDiffusion(const InputParameters & params)
 ADReal
 INSFVMomentumDiffusion::computeStrongResidual()
 {
-  const auto dudn = gradUDotNormal();
+  const auto current_time = Moose::currentTimeFunctorArg();
+  const auto dudn = gradUDotNormal(current_time);
   ADReal face_mu;
 
   if (onBoundary(*_face_info))
-    face_mu = _mu(makeCDFace(*_face_info));
+    face_mu = _mu(makeCDFace(*_face_info), current_time);
   else
-    Moose::FV::interpolate(
-        _mu_interp_method, face_mu, _mu(elemArg()), _mu(neighborArg()), *_face_info, true);
+    Moose::FV::interpolate(_mu_interp_method,
+                           face_mu,
+                           _mu(elemArg(), current_time),
+                           _mu(neighborArg(), current_time),
+                           *_face_info,
+                           true);
 
   if (_face_type == FaceInfo::VarFaceNeighbors::ELEM ||
       _face_type == FaceInfo::VarFaceNeighbors::BOTH)

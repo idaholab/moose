@@ -58,8 +58,8 @@ FVOneVarDiffusionInterface::computeQpResidual()
   ADReal coef;
   interpolate(_coeff_interp_method,
               coef,
-              coef_elem(elemArg()),
-              coef_neighbor(neighborArg()),
+              coef_elem(elemArg(), Moose::currentTimeFunctorArg()),
+              coef_neighbor(neighborArg(), Moose::currentTimeFunctorArg()),
               *_face_info,
               true);
 

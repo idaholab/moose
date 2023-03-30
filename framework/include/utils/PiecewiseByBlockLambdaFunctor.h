@@ -52,7 +52,9 @@ public:
 
   virtual ~PiecewiseByBlockLambdaFunctor() = default;
 
-  bool isExtrapolatedBoundaryFace(const FaceInfo & fi, const Elem * elem) const override;
+  bool isExtrapolatedBoundaryFace(const FaceInfo & fi,
+                                  const Elem * elem,
+                                  const Moose::TimeArg & time) const override;
 
   bool hasBlocks(SubdomainID id) const override;
 
@@ -166,7 +168,8 @@ PiecewiseByBlockLambdaFunctor<T>::setFunctor(const MooseMesh & mesh,
 template <typename T>
 bool
 PiecewiseByBlockLambdaFunctor<T>::isExtrapolatedBoundaryFace(const FaceInfo & fi,
-                                                             const Elem *) const
+                                                             const Elem *,
+                                                             const Moose::TimeArg &) const
 {
   if (!fi.neighborPtr())
     return true;

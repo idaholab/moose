@@ -42,20 +42,25 @@ ADReal
 FVDiffusion::computeQpResidual()
 {
   using namespace Moose::FV;
+  const auto current_time = Moose::currentTimeFunctorArg();
 
-  auto dudn = gradUDotNormal();
+  auto dudn = gradUDotNormal(current_time);
   ADReal coeff;
 
   // If we are on internal faces, we interpolate the diffusivity as usual
   if (_var.isInternalFace(*_face_info))
-    interpolate(
-        _coeff_interp_method, coeff, _coeff(elemArg()), _coeff(neighborArg()), *_face_info, true);
+    interpolate(_coeff_interp_method,
+                coeff,
+                _coeff(elemArg(), current_time),
+                _coeff(neighborArg(), current_time),
+                *_face_info,
+                true);
   // Else we just use the boundary values (which depend on how the diffusion
   // coefficient is constructed)
   else
   {
     const auto face = singleSidedFaceArg();
-    coeff = _coeff(face);
+    coeff = _coeff(face, current_time);
   }
 
   return -1 * coeff * dudn;

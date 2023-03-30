@@ -30,5 +30,7 @@ FVBoundaryIntegralValueConstraint::FVBoundaryIntegralValueConstraint(
 ADReal
 FVBoundaryIntegralValueConstraint::computeQpResidual()
 {
-  return _var(makeFace(*_face_info, Moose::FV::LimiterType::CentralDifference, true)) - _phi0;
+  return _var(makeFace(*_face_info, Moose::FV::LimiterType::CentralDifference, true),
+              Moose::currentTimeFunctorArg()) -
+         _phi0;
 }

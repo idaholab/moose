@@ -109,7 +109,7 @@ greenGaussGradient(const ElemArg & elem_arg,
       mooseAssert(elem_arg.elem == &functor_elem,
                   "Just a sanity check that the element being passed in is the one we passed out.");
 
-      if (functor.isExtrapolatedBoundaryFace(*fi, elem_arg.elem))
+      if (functor.isExtrapolatedBoundaryFace(*fi, elem_arg.elem, time_arg))
       {
         if (two_term_boundary_expansion)
         {
@@ -362,7 +362,7 @@ greenGaussGradient(const ElemArg & elem_arg,
                    const MooseMesh & mesh)
 {
   // Determine the size of the container
-  const auto vals = functor(elem_arg);
+  const auto vals = functor(elem_arg, time_arg);
   typedef typename Moose::FunctorBase<std::vector<T>>::GradientType GradientType;
   GradientType ret(vals.size());
   for (const auto i : index_range(ret))
@@ -387,7 +387,7 @@ greenGaussGradient(const FaceArg & face_arg,
                    const MooseMesh & mesh)
 {
   // Determine the size of the container
-  const auto vals = functor(face_arg);
+  const auto vals = functor(face_arg, time_arg);
   typedef typename Moose::FunctorBase<std::vector<T>>::GradientType GradientType;
   GradientType ret(vals.size());
   for (const auto i : index_range(ret))

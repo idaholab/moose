@@ -54,6 +54,7 @@ FVConvectionCorrelationInterface::computeQpResidual()
 {
   const Elem * current_elem = elemIsOne() ? &_face_info->elem() : _face_info->neighborPtr();
   const Elem * bulk_elem;
+  const auto current_time = Moose::currentTimeFunctorArg();
   if (!_use_wall_cell)
   {
     Point p = _face_info->faceCentroid();
@@ -82,6 +83,6 @@ FVConvectionCorrelationInterface::computeQpResidual()
   auto multipler =
       _normal * (_face_info->faceCentroid() - bulk_elem->vertex_average()) > 0 ? 1 : -1;
 
-  return multipler * _htc(face_arg_side1) *
-         (_temp_fluid(bulk_elem_arg) - _temp_solid(face_arg_side2));
+  return multipler * _htc(face_arg_side1, current_time) *
+         (_temp_fluid(bulk_elem_arg, current_time) - _temp_solid(face_arg_side2, current_time));
 }

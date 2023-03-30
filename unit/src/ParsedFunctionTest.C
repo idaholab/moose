@@ -60,11 +60,11 @@ TEST_F(ParsedFunctionTest, basicConstructor)
   const auto elem_arg = Moose::ElemArg{elem, false};
   const Point vtx_average = elem->vertex_average();
   f_traditional = f.value(0, vtx_average);
-  f_functor = f_wrapped(elem_arg, 0);
+  f_functor = f_wrapped(elem_arg, Moose::currentTimeFunctorArg());
   gradient_traditional = f.gradient(0, vtx_average);
-  gradient_functor = f_wrapped.gradient(elem_arg, 0);
+  gradient_functor = f_wrapped.gradient(elem_arg, Moose::currentTimeFunctorArg());
   dot_traditional = f.timeDerivative(0, vtx_average);
-  dot_functor = f_wrapped.dot(elem_arg, 0);
+  dot_functor = f_wrapped.dot(elem_arg, Moose::currentTimeFunctorArg());
   test_eq();
 
   unsigned int side = libMesh::invalid_uint;
@@ -79,11 +79,11 @@ TEST_F(ParsedFunctionTest, basicConstructor)
   const FaceInfo * const fi = _mesh->faceInfo(elem, side);
   auto face = Moose::FaceArg({fi, Moose::FV::LimiterType::CentralDifference, true, false, nullptr});
   f_traditional = f.value(0, fi->faceCentroid());
-  f_functor = f_wrapped(face, 0);
+  f_functor = f_wrapped(face, Moose::currentTimeFunctorArg());
   gradient_traditional = f.gradient(0, fi->faceCentroid());
-  gradient_functor = f_wrapped.gradient(face, 0);
+  gradient_functor = f_wrapped.gradient(face, Moose::currentTimeFunctorArg());
   dot_traditional = f.timeDerivative(0, fi->faceCentroid());
-  dot_functor = f_wrapped.dot(face, 0);
+  dot_functor = f_wrapped.dot(face, Moose::currentTimeFunctorArg());
   test_eq();
 
   // Test ElemQp overloads
@@ -96,11 +96,11 @@ TEST_F(ParsedFunctionTest, basicConstructor)
   fe->reinit(elem);
   auto elem_qp = std::make_tuple(elem, 0, &qrule);
   f_traditional = f.value(0, xyz[0]);
-  f_functor = f_wrapped(elem_qp, 0);
+  f_functor = f_wrapped(elem_qp, Moose::currentTimeFunctorArg());
   gradient_traditional = f.gradient(0, xyz[0]);
-  gradient_functor = f_wrapped.gradient(elem_qp, 0);
+  gradient_functor = f_wrapped.gradient(elem_qp, Moose::currentTimeFunctorArg());
   dot_traditional = f.timeDerivative(0, xyz[0]);
-  dot_functor = f_wrapped.dot(elem_qp, 0);
+  dot_functor = f_wrapped.dot(elem_qp, Moose::currentTimeFunctorArg());
   test_eq();
 
   // Test ElemSideQp overloads
@@ -109,22 +109,22 @@ TEST_F(ParsedFunctionTest, basicConstructor)
   fe->reinit(elem, side);
   auto elem_side_qp = std::make_tuple(elem, side, 0, &qrule_face);
   f_traditional = f.value(0, xyz[0]);
-  f_functor = f_wrapped(elem_side_qp, 0);
+  f_functor = f_wrapped(elem_side_qp, Moose::currentTimeFunctorArg());
   gradient_traditional = f.gradient(0, xyz[0]);
-  gradient_functor = f_wrapped.gradient(elem_side_qp, 0);
+  gradient_functor = f_wrapped.gradient(elem_side_qp, Moose::currentTimeFunctorArg());
   dot_traditional = f.timeDerivative(0, xyz[0]);
-  dot_functor = f_wrapped.dot(elem_side_qp, 0);
+  dot_functor = f_wrapped.dot(elem_side_qp, Moose::currentTimeFunctorArg());
   test_eq();
 
   // Test elem_point overloads
   const Point test_point(0.5, 0.5, 0.5);
   const auto elem_point = Moose::ElemPointArg{elem, test_point, false};
   f_traditional = f.value(0, test_point);
-  f_functor = f_wrapped(elem_point, 0);
+  f_functor = f_wrapped(elem_point, Moose::currentTimeFunctorArg());
   gradient_traditional = f.gradient(0, test_point);
-  gradient_functor = f_wrapped.gradient(elem_point, 0);
+  gradient_functor = f_wrapped.gradient(elem_point, Moose::currentTimeFunctorArg());
   dot_traditional = f.timeDerivative(0, test_point);
-  dot_functor = f_wrapped.dot(elem_point, 0);
+  dot_functor = f_wrapped.dot(elem_point, Moose::currentTimeFunctorArg());
   test_eq();
 }
 

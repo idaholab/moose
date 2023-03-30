@@ -56,9 +56,10 @@ PINSFVMomentumPressureFlux::computeQpResidual()
 
   const auto * const elem_ptr = use_elem ? &_face_info->elem() : _face_info->neighborPtr();
   const auto & elem = makeElemArg(elem_ptr);
+  const auto current_time = Moose::currentTimeFunctorArg();
 
   if (onBoundary(*_face_info))
-    eps_p_interface = _eps(elem) * _p(singleSidedFaceArg());
+    eps_p_interface = _eps(elem, current_time) * _p(singleSidedFaceArg(), current_time);
   else
   {
     const auto * neighbor_ptr = use_elem ? _face_info->neighborPtr() : &_face_info->elem();
@@ -66,8 +67,8 @@ PINSFVMomentumPressureFlux::computeQpResidual()
 
     Moose::FV::interpolate(Moose::FV::InterpMethod::Average,
                            eps_p_interface,
-                           _eps(elem) * _p(elem),
-                           _eps(neighbor) * _p(neighbor),
+                           _eps(elem, current_time) * _p(elem, current_time),
+                           _eps(neighbor, current_time) * _p(neighbor, current_time),
                            *_face_info,
                            true);
   }

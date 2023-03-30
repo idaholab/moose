@@ -49,12 +49,13 @@ ADReal
 INSFVMassAdvectionOutflowBC::computeQpResidual()
 {
   const auto boundary_face = singleSidedFaceArg();
+  const auto current_time = Moose::currentTimeFunctorArg();
 
-  ADRealVectorValue v(_u(boundary_face));
+  ADRealVectorValue v(_u(boundary_face, current_time));
   if (_v)
-    v(1) = (*_v)(boundary_face);
+    v(1) = (*_v)(boundary_face, current_time);
   if (_w)
-    v(2) = (*_w)(boundary_face);
+    v(2) = (*_w)(boundary_face, current_time);
 
-  return _normal * v * _rho(boundary_face);
+  return _normal * v * _rho(boundary_face, current_time);
 }

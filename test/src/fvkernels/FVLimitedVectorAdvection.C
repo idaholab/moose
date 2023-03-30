@@ -52,9 +52,9 @@ FVLimitedVectorAdvection::computeQpResidual()
   ADReal phi_f;
 
   if (_var.isInternalFace(*_face_info))
-    phi_f = interpolate(_vector, face, Moose::TimeArg{})(_index);
+    phi_f = interpolate(_vector, face, Moose::currentTimeFunctorArg())(_index);
   else
-    phi_f = _var(face);
+    phi_f = _var(face, Moose::currentTimeFunctorArg());
 
   return _normal * _velocity * phi_f;
 }

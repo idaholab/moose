@@ -56,17 +56,18 @@ INSFVMixingLengthTurbulentViscosityAux::computeValue()
 {
   constexpr Real offset = 1e-15; // prevents explosion of sqrt(x) derivative to infinity
   const Elem & elem = *_current_elem;
+  const auto current_time = Moose::currentTimeFunctorArg();
 
-  const auto & grad_u = _u_var->adGradSln(&elem);
+  const auto & grad_u = _u_var->adGradSln(&elem, current_time);
   ADReal symmetric_strain_tensor_norm = 2.0 * Utility::pow<2>(grad_u(0));
   if (_dim >= 2)
   {
-    const auto & grad_v = _v_var->adGradSln(&elem);
+    const auto & grad_v = _v_var->adGradSln(&elem, current_time);
     symmetric_strain_tensor_norm +=
         2.0 * Utility::pow<2>(grad_v(1)) + Utility::pow<2>(grad_v(0) + grad_u(1));
     if (_dim >= 3)
     {
-      const auto & grad_w = _w_var->adGradSln(&elem);
+      const auto & grad_w = _w_var->adGradSln(&elem, current_time);
       symmetric_strain_tensor_norm += 2.0 * Utility::pow<2>(grad_w(2)) +
                                       Utility::pow<2>(grad_u(2) + grad_w(0)) +
                                       Utility::pow<2>(grad_v(2) + grad_w(1));

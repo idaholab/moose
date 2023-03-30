@@ -58,17 +58,18 @@ WCNSFVMixingLengthEnergyDiffusion::computeQpResidual()
   constexpr Real offset = 1e-15; // prevents explosion of sqrt(x) derivative to infinity
 
   const auto face = makeCDFace(*_face_info);
+  const auto current_time = Moose::currentTimeFunctorArg();
 
-  const auto grad_u = _u.gradient(face);
+  const auto grad_u = _u.gradient(face, current_time);
   ADReal symmetric_strain_tensor_norm = 2.0 * Utility::pow<2>(grad_u(0));
   if (_dim >= 2)
   {
-    const auto grad_v = _v->gradient(face);
+    const auto grad_v = _v->gradient(face, current_time);
     symmetric_strain_tensor_norm +=
         2.0 * Utility::pow<2>(grad_v(1)) + Utility::pow<2>(grad_v(0) + grad_u(1));
     if (_dim >= 3)
     {
-      const auto grad_w = _w->gradient(face);
+      const auto grad_w = _w->gradient(face, current_time);
       symmetric_strain_tensor_norm += 2.0 * Utility::pow<2>(grad_w(2)) +
                                       Utility::pow<2>(grad_u(2) + grad_w(0)) +
                                       Utility::pow<2>(grad_v(2) + grad_w(1));
@@ -78,7 +79,7 @@ WCNSFVMixingLengthEnergyDiffusion::computeQpResidual()
   symmetric_strain_tensor_norm = std::sqrt(symmetric_strain_tensor_norm + offset);
 
   // Interpolate the mixing length to the face
-  ADReal mixing_len = _mixing_len(face);
+  ADReal mixing_len = _mixing_len(face, current_time);
 
   // Compute the eddy diffusivity for momentum
   ADReal eddy_diff = symmetric_strain_tensor_norm * mixing_len * mixing_len;
@@ -87,13 +88,13 @@ WCNSFVMixingLengthEnergyDiffusion::computeQpResidual()
   // the scalar variable
   eddy_diff /= _schmidt_number;
 
-  const auto dTdn = gradUDotNormal();
+  const auto dTdn = gradUDotNormal(current_time);
 
   ADReal rho_cp_face;
   if (onBoundary(*_face_info))
   {
     const auto ssf = singleSidedFaceArg();
-    rho_cp_face = _rho(ssf) * _cp(ssf);
+    rho_cp_face = _rho(ssf, current_time) * _cp(ssf, current_time);
   }
   else
   {
@@ -102,8 +103,8 @@ WCNSFVMixingLengthEnergyDiffusion::computeQpResidual()
     const auto face_neighbor = neighborArg();
     interpolate(Moose::FV::InterpMethod::Average,
                 rho_cp_face,
-                _rho(face_elem) * _cp(face_elem),
-                _rho(face_neighbor) * _cp(face_neighbor),
+                _rho(face_elem, current_time) * _cp(face_elem, current_time),
+                _rho(face_neighbor, current_time) * _cp(face_neighbor, current_time),
                 *_face_info,
                 true);
   }

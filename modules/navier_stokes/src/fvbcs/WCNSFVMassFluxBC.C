@@ -56,7 +56,8 @@ WCNSFVMassFluxBC::computeQpResidual()
     checkForInternalDirection();
     const Point incoming_vector = !_direction_specified_by_user ? _face_info->normal() : _direction;
     const Real cos_angle = std::abs(incoming_vector * _face_info->normal());
-    return -_scaling_factor * (*_velocity_pp) * cos_angle * (*_rho)(singleSidedFaceArg());
+    return -_scaling_factor * (*_velocity_pp) * cos_angle *
+           (*_rho)(singleSidedFaceArg(), Moose::currentTimeFunctorArg());
   }
   else
     return -_scaling_factor * (*_mdot_pp) / (*_area_pp);

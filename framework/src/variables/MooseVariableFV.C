@@ -482,7 +482,9 @@ MooseVariableFV<OutputType>::getElemValue(const Elem * const elem, const TimeArg
 
 template <typename OutputType>
 bool
-MooseVariableFV<OutputType>::isDirichletBoundaryFace(const FaceInfo & fi, const Elem *) const
+MooseVariableFV<OutputType>::isDirichletBoundaryFace(const FaceInfo & fi,
+                                                     const Elem *,
+                                                     const Moose::TimeArg &) const
 {
   const auto & pr = getDirichletBC(fi);
 
@@ -497,7 +499,7 @@ MooseVariableFV<OutputType>::getDirichletBoundaryFaceValue(
     const Elem * const libmesh_dbg_var(elem),
     const Moose::TimeArg & libmesh_dbg_var(time)) const
 {
-  mooseAssert(isDirichletBoundaryFace(fi, elem),
+  mooseAssert(isDirichletBoundaryFace(fi, elem, time),
               "This function should only be called on Dirichlet boundary faces.");
   mooseAssert(time.state == 0,
               "getDirichletBoundaryFaceValue currently only supports evaluating at the current "
@@ -516,9 +518,10 @@ MooseVariableFV<OutputType>::getDirichletBoundaryFaceValue(
 template <typename OutputType>
 bool
 MooseVariableFV<OutputType>::isExtrapolatedBoundaryFace(const FaceInfo & fi,
-                                                        const Elem * const elem) const
+                                                        const Elem * const elem,
+                                                        const Moose::TimeArg & time) const
 {
-  if (isDirichletBoundaryFace(fi, elem))
+  if (isDirichletBoundaryFace(fi, elem, time))
     return false;
   else
     return !this->isInternalFace(fi);
@@ -532,7 +535,7 @@ MooseVariableFV<OutputType>::getExtrapolatedBoundaryFaceValue(const FaceInfo & f
                                                               const Elem * elem_to_extrapolate_from,
                                                               const TimeArg & time) const
 {
-  mooseAssert(isExtrapolatedBoundaryFace(fi, elem_to_extrapolate_from),
+  mooseAssert(isExtrapolatedBoundaryFace(fi, elem_to_extrapolate_from, time),
               "This function should only be called on extrapolated boundary faces");
 
   ADReal boundary_value;
@@ -580,9 +583,9 @@ MooseVariableFV<OutputType>::getBoundaryFaceValue(const FaceInfo & fi,
   mooseAssert(!this->isInternalFace(fi),
               "A boundary face value has been requested on an internal face.");
 
-  if (isDirichletBoundaryFace(fi, nullptr))
+  if (isDirichletBoundaryFace(fi, nullptr, time))
     return getDirichletBoundaryFaceValue(fi, nullptr, time);
-  else if (isExtrapolatedBoundaryFace(fi, nullptr))
+  else if (isExtrapolatedBoundaryFace(fi, nullptr, time))
     return getExtrapolatedBoundaryFaceValue(
         fi, _two_term_boundary_expansion, correct_skewness, nullptr, time);
 
@@ -734,14 +737,14 @@ MooseVariableFV<OutputType>::evaluate(const FaceArg & face, const TimeArg & time
 {
   const FaceInfo * const fi = face.fi;
   mooseAssert(fi, "The face information must be non-null");
-  if (isDirichletBoundaryFace(*fi, face.face_side))
+  if (isDirichletBoundaryFace(*fi, face.face_side, time))
   {
     mooseAssert(time.state == 0,
                 "We have not yet added support for evaluting Dirichlet boundary conditions at "
                 "states other than the current solution state (e.g. current time)");
     return getDirichletBoundaryFaceValue(*fi, face.face_side, time);
   }
-  else if (isExtrapolatedBoundaryFace(*fi, face.face_side))
+  else if (isExtrapolatedBoundaryFace(*fi, face.face_side, time))
   {
     bool two_term_boundary_expansion = _two_term_boundary_expansion;
     if (face.limiter_type == Moose::FV::LimiterType::Upwind)

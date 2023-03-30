@@ -34,7 +34,9 @@ public:
   {
   }
 
-  bool isExtrapolatedBoundaryFace(const FaceInfo & fi, const Elem * elem) const override;
+  bool isExtrapolatedBoundaryFace(const FaceInfo & fi,
+                                  const Elem * elem,
+                                  const Moose::TimeArg & time) const override;
   bool hasBlocks(SubdomainID sub_id) const override { return _vector.hasBlocks(sub_id); }
 
 private:
@@ -83,8 +85,10 @@ private:
 
 template <typename T>
 bool
-VectorComponentFunctor<T>::isExtrapolatedBoundaryFace(const FaceInfo & fi, const Elem * elem) const
+VectorComponentFunctor<T>::isExtrapolatedBoundaryFace(const FaceInfo & fi,
+                                                      const Elem * elem,
+                                                      const Moose::TimeArg & time) const
 {
-  return _vector.isExtrapolatedBoundaryFace(fi, elem);
+  return _vector.isExtrapolatedBoundaryFace(fi, elem, time);
 }
 }

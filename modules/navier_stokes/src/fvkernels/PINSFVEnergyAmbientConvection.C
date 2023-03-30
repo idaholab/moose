@@ -39,8 +39,11 @@ ADReal
 PINSFVEnergyAmbientConvection::computeQpResidual()
 {
   const auto & elem = makeElemArg(_current_elem);
+  const auto current_time = Moose::currentTimeFunctorArg();
   if (_is_solid)
-    return -_h_solid_fluid(elem) * (_temp_fluid(elem) - _temp_solid(elem));
+    return -_h_solid_fluid(elem, current_time) *
+           (_temp_fluid(elem, current_time) - _temp_solid(elem, current_time));
   else
-    return _h_solid_fluid(elem) * (_temp_fluid(elem) - _temp_solid(elem));
+    return _h_solid_fluid(elem, current_time) *
+           (_temp_fluid(elem, current_time) - _temp_solid(elem, current_time));
 }

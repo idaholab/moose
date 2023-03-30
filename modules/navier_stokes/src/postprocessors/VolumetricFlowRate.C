@@ -121,9 +121,11 @@ VolumetricFlowRate::computeFaceInfoIntegral(const FaceInfo * fi)
 {
   mooseAssert(fi, "We should have a face info in " + name());
   mooseAssert(_adv_quant, "We should have an advected quantity in " + name());
+  const auto current_time = Moose::currentTimeFunctorArg();
 
   // Get face value for velocity
-  const auto vel = MetaPhysicL::raw_value(_rc_uo->getVelocity(_velocity_interp_method, *fi, _tid));
+  const auto vel =
+      MetaPhysicL::raw_value(_rc_uo->getVelocity(_velocity_interp_method, *fi, current_time, _tid));
   const bool correct_skewness =
       _advected_interp_method == Moose::FV::InterpMethod::SkewCorrectedAverage;
 
@@ -132,7 +134,8 @@ VolumetricFlowRate::computeFaceInfoIntegral(const FaceInfo * fi)
                                     Moose::FV::limiterType(_advected_interp_method),
                                     MetaPhysicL::raw_value(vel) * fi->normal() > 0,
                                     correct_skewness,
-                                    nullptr})));
+                                    nullptr}),
+                    current_time));
   return fi->normal() * adv_quant_face * vel;
 }
 
@@ -143,8 +146,8 @@ VolumetricFlowRate::computeQpIntegral()
     return _advected_variable[_qp] * RealVectorValue(_vel_x[_qp], _vel_y[_qp], _vel_z[_qp]) *
            _normals[_qp];
   else if (_advected_mat_prop_supplied)
-    return MetaPhysicL::raw_value(
-               _advected_material_property(std::make_tuple(_current_elem, _qp, _qrule))) *
+    return MetaPhysicL::raw_value(_advected_material_property(
+               std::make_tuple(_current_elem, _qp, _qrule), Moose::currentTimeFunctorArg())) *
            RealVectorValue(_vel_x[_qp], _vel_y[_qp], _vel_z[_qp]) * _normals[_qp];
   else
     return RealVectorValue(_vel_x[_qp], _vel_y[_qp], _vel_z[_qp]) * _normals[_qp];

@@ -31,7 +31,9 @@ void
 ScalarPropFromFunctorProp::computeQpProperties()
 {
   if (!_bnd && !_neighbor)
-    _prop[_qp] = _functor(std::make_tuple(_current_elem, _qp, _qrule));
+    _prop[_qp] =
+        _functor(std::make_tuple(_current_elem, _qp, _qrule), Moose::currentTimeFunctorArg());
   else
-    _prop[_qp] = _functor(std::make_tuple(_current_elem, _current_side, _qp, _qrule));
+    _prop[_qp] = _functor(std::make_tuple(_current_elem, _current_side, _qp, _qrule),
+                          Moose::currentTimeFunctorArg());
 }

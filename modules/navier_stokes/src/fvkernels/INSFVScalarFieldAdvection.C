@@ -27,8 +27,12 @@ INSFVScalarFieldAdvection::INSFVScalarFieldAdvection(const InputParameters & par
 ADReal
 INSFVScalarFieldAdvection::computeQpResidual()
 {
-  const auto v = _rc_vel_provider.getVelocity(_velocity_interp_method, *_face_info, _tid);
-  const auto var_face = _var(makeFace(
-      *_face_info, limiterType(_advected_interp_method), MetaPhysicL::raw_value(v) * _normal > 0));
+  const auto current_time = Moose::currentTimeFunctorArg();
+  const auto v =
+      _rc_vel_provider.getVelocity(_velocity_interp_method, *_face_info, current_time, _tid);
+  const auto var_face = _var(makeFace(*_face_info,
+                                      limiterType(_advected_interp_method),
+                                      MetaPhysicL::raw_value(v) * _normal > 0),
+                             current_time);
   return _normal * v * var_face;
 }

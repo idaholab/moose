@@ -82,7 +82,7 @@ InterfaceIntegralVariableValuePostprocessor::computeQpIntegral()
     // FIXME Make sure getInternalFaceValue uses the right interpolation method, see #16585
     else
       u = u_neighbor =
-          MetaPhysicL::raw_value((*_fv_variable)(makeCDFace(*_fi, Moose::currentTimeFunctorArg())));
+          MetaPhysicL::raw_value((*_fv_variable)(makeCDFace(*_fi), Moose::currentTimeFunctorArg()));
 
     return InterfaceValueTools::getQuantity(_interface_value_type, u, u_neighbor);
   }

@@ -102,7 +102,7 @@ namespace NS
 std::tuple<bool, ADReal, ADReal>
 isPorosityJumpFace(const Moose::Functor<ADReal> & porosity,
                    const FaceInfo & fi,
-                   const TimeArg & time)
+                   const Moose::TimeArg & time)
 {
   if (!fi.neighborPtr() || (fi.elem().subdomain_id() == fi.neighbor().subdomain_id()))
     // We've agreed to only support porosity jump treatment at subdomain boundaries

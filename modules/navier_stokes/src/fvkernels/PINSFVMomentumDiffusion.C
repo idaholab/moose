@@ -46,27 +46,29 @@ PINSFVMomentumDiffusion::computeStrongResidual()
 
   const auto elem_face = elemArg();
   const auto neighbor_face = neighborArg();
+  const auto current_time = Moose::currentTimeFunctorArg();
 
   // Compute the diffusion driven by the velocity gradient
   // Interpolate viscosity divided by porosity on the face
   ADReal mu_face;
 
-  const auto mu_elem = has_elem ? _mu(elem_face) : _mu(neighbor_face);
-  const auto eps_elem = has_elem ? _eps(elem_face) : _eps(neighbor_face);
+  const auto mu_elem = has_elem ? _mu(elem_face, current_time) : _mu(neighbor_face, current_time);
+  const auto eps_elem =
+      has_elem ? _eps(elem_face, current_time) : _eps(neighbor_face, current_time);
 
   ADReal mu_neighbor;
   ADReal eps_neighbor;
   if (onBoundary(*_face_info))
-    mu_face = _mu(singleSidedFaceArg());
+    mu_face = _mu(singleSidedFaceArg(), current_time);
   else
   {
-    mu_neighbor = has_elem ? _mu(neighbor_face) : _mu(elem_face);
-    eps_neighbor = has_neighbor ? _eps(neighbor_face) : _eps(elem_face);
+    mu_neighbor = has_elem ? _mu(neighbor_face, current_time) : _mu(elem_face, current_time);
+    eps_neighbor = has_neighbor ? _eps(neighbor_face, current_time) : _eps(elem_face, current_time);
     interpolate(Moose::FV::InterpMethod::Average, mu_face, mu_elem, mu_neighbor, *_face_info, true);
   }
 
   // Compute face superficial velocity gradient
-  auto dudn = _var.gradient(makeCDFace(*_face_info)) * _face_info->normal();
+  auto dudn = _var.gradient(makeCDFace(*_face_info), current_time) * _face_info->normal();
 
   if (has_elem)
   {
@@ -89,20 +91,22 @@ PINSFVMomentumDiffusion::computeStrongResidual()
   // Get the face porosity gradient separately
   const auto & grad_eps_face =
       (has_elem && has_neighbor)
-          ? MetaPhysicL::raw_value(_eps.gradient(makeCDFace(*_face_info)))
+          ? MetaPhysicL::raw_value(_eps.gradient(makeCDFace(*_face_info), current_time))
           : MetaPhysicL::raw_value(_eps.gradient(
-                makeElemArg(has_elem ? &_face_info->elem() : _face_info->neighborPtr())));
+                makeElemArg(has_elem ? &_face_info->elem() : _face_info->neighborPtr()),
+                current_time));
 
   // Interpolate to get the face value
   ADReal coeff_face;
-  const auto coeff_one_side = has_elem ? mu_elem / eps_elem * _var(elem_face)
-                                       : mu_neighbor / eps_neighbor * _var(neighbor_face);
+  const auto coeff_one_side = has_elem
+                                  ? mu_elem / eps_elem * _var(elem_face, current_time)
+                                  : mu_neighbor / eps_neighbor * _var(neighbor_face, current_time);
   if (onBoundary(*_face_info))
     coeff_face = coeff_one_side;
   else
   {
     mooseAssert(has_elem, "We should be defined on the element side if we're not on a boundary");
-    const auto coeff_neighbor = mu_neighbor / eps_neighbor * _var(neighbor_face);
+    const auto coeff_neighbor = mu_neighbor / eps_neighbor * _var(neighbor_face, current_time);
     interpolate(Moose::FV::InterpMethod::Average,
                 coeff_face,
                 coeff_one_side,

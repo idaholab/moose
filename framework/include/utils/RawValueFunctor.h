@@ -28,9 +28,10 @@ public:
   }
 
   virtual bool isExtrapolatedBoundaryFace(const FaceInfo & fi,
-                                          const Elem * const elem) const override
+                                          const Elem * const elem,
+                                          const Moose::TimeArg & time) const override
   {
-    return _ad_functor.isExtrapolatedBoundaryFace(fi, elem);
+    return _ad_functor.isExtrapolatedBoundaryFace(fi, elem, time);
   }
   virtual bool isConstant() const override { return _ad_functor.isConstant(); }
   virtual bool hasBlocks(const SubdomainID id) const override { return _ad_functor.hasBlocks(id); }

@@ -17,10 +17,11 @@ namespace FV
 ADReal
 gradUDotNormal(const FaceInfo & face_info,
                const MooseVariableFV<Real> & fv_var,
+               const Moose::TimeArg & time,
                bool correct_skewness)
 
 {
-  return fv_var.adGradSln(face_info, correct_skewness) * face_info.normal();
+  return fv_var.adGradSln(face_info, time, correct_skewness) * face_info.normal();
 }
 
 bool

@@ -63,8 +63,9 @@ INSFVMixingLengthReynoldsStress::computeStrongResidual()
   constexpr Real offset = 1e-15; // prevents explosion of sqrt(x) derivative to infinity
 
   const auto face = makeCDFace(*_face_info);
+  const auto current_time = Moose::currentTimeFunctorArg();
 
-  const auto grad_u = _u.gradient(face);
+  const auto grad_u = _u.gradient(face, current_time);
   // Compute the dot product of the strain rate tensor and the normal vector
   // aka (grad_v + grad_v^T) * n_hat
   ADReal norm_strain_rate = grad_u(_axis_index) * _normal(0);
@@ -72,11 +73,11 @@ INSFVMixingLengthReynoldsStress::computeStrongResidual()
   ADRealVectorValue grad_w;
   if (_dim >= 2)
   {
-    grad_v = _v->gradient(face);
+    grad_v = _v->gradient(face, current_time);
     norm_strain_rate += grad_v(_axis_index) * _normal(1);
     if (_dim >= 3)
     {
-      grad_w = _w->gradient(face);
+      grad_w = _w->gradient(face, current_time);
       norm_strain_rate += grad_w(_axis_index) * _normal(2);
     }
   }
@@ -97,12 +98,12 @@ INSFVMixingLengthReynoldsStress::computeStrongResidual()
   symmetric_strain_tensor_norm = std::sqrt(symmetric_strain_tensor_norm + offset);
 
   // Interpolate the mixing length to the face
-  const ADReal mixing_len = _mixing_len(face);
+  const ADReal mixing_len = _mixing_len(face, current_time);
 
   // Compute the eddy diffusivity
   ADReal eddy_diff = symmetric_strain_tensor_norm * mixing_len * mixing_len;
 
-  const ADReal rho = _rho(face);
+  const ADReal rho = _rho(face, current_time);
 
   if (_face_type == FaceInfo::VarFaceNeighbors::ELEM ||
       _face_type == FaceInfo::VarFaceNeighbors::BOTH)

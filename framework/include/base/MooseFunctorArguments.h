@@ -143,6 +143,12 @@ using ElemSideQpArg = std::tuple<const libMesh::Elem *, unsigned int, unsigned i
  */
 struct TimeArg
 {
+  /**
+   * Prevent implicit conversions from boolean to avoid users accidentally constructing a time
+   * argument when they meant to construct a skewness argument, etc.
+   */
+  TimeArg(bool) = delete;
+
   TimeArg(unsigned int state_in) : state(state_in), iteration_type(SolutionIterationType::Time) {}
 
   TimeArg(unsigned int state_in, SolutionIterationType iteration_type_in)

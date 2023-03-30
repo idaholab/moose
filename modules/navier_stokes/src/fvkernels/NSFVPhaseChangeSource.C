@@ -41,10 +41,11 @@ NSFVPhaseChangeSource::computeQpResidual()
   using namespace MetaPhysicL;
 
   const auto elem_arg = makeElemArg(_current_elem);
+  const auto current_time = Moose::currentTimeFunctorArg();
 
-  const auto T_sol = _T_solidus(elem_arg);
-  const auto T_liq = _T_liquidus(elem_arg);
-  const auto T = _var(elem_arg);
+  const auto T_sol = _T_solidus(elem_arg, current_time);
+  const auto T_liq = _T_liquidus(elem_arg, current_time);
+  const auto T = _var(elem_arg, current_time);
 
   // This is necessary to have a bounded derivative
   // Otherwise the nonlinear solve won't converge!
@@ -52,7 +53,8 @@ NSFVPhaseChangeSource::computeQpResidual()
 
   // The (6.0) comes from the integral of x*(1-x) between 0 and 1.
   const auto source_index = std::max(6.0 * fl * (1 - fl), (ADReal)0);
-  const auto pre_factor = (_L(elem_arg) * _rho(elem_arg)) / (T_liq - T_sol);
+  const auto pre_factor =
+      (_L(elem_arg, current_time) * _rho(elem_arg, current_time)) / (T_liq - T_sol);
 
-  return source_index * pre_factor * _var.dot(elem_arg);
+  return source_index * pre_factor * _var.dot(elem_arg, current_time);
 }

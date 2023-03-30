@@ -36,8 +36,9 @@ FunctorGapFluxModelConduction::FunctorGapFluxModelConduction(const InputParamete
 ADReal
 FunctorGapFluxModelConduction::computeFlux() const
 {
-  return computeConductionFlux(_T(_secondary_point),
-                               _T(_primary_point),
-                               0.5 * (_gap_conductivity_multiplier(_secondary_point) +
-                                      _gap_conductivity_multiplier(_primary_point)));
+  const auto current_time = Moose::currentTimeFunctorArg();
+  return computeConductionFlux(_T(_secondary_point, current_time),
+                               _T(_primary_point, current_time),
+                               0.5 * (_gap_conductivity_multiplier(_secondary_point, current_time) +
+                                      _gap_conductivity_multiplier(_primary_point, current_time)));
 }

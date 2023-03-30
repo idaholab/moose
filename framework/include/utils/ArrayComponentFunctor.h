@@ -32,7 +32,9 @@ public:
   {
   }
 
-  bool isExtrapolatedBoundaryFace(const FaceInfo & fi, const Elem * elem) const override;
+  bool isExtrapolatedBoundaryFace(const FaceInfo & fi,
+                                  const Elem * elem,
+                                  const Moose::TimeArg & time) const override;
   bool hasBlocks(SubdomainID sub_id) const override { return _array.hasBlocks(sub_id); }
 
 private:
@@ -77,8 +79,8 @@ private:
 template <typename T, typename ArrayTypeFunctor>
 bool
 ArrayComponentFunctor<T, ArrayTypeFunctor>::isExtrapolatedBoundaryFace(
-    const FaceInfo & fi, const Elem * const elem) const
+    const FaceInfo & fi, const Elem * const elem, const Moose::TimeArg & time) const
 {
-  return _array.isExtrapolatedBoundaryFace(fi, elem);
+  return _array.isExtrapolatedBoundaryFace(fi, elem, time);
 }
 }

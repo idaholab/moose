@@ -88,7 +88,8 @@ WCNSFVScalarFluxBC::computeQpResidual()
       return -_scaling_factor * *_velocity_pp * *_scalar_value_pp * cos_angle;
     }
     else
-      return -_scaling_factor * *_mdot_pp / *_area_pp / (*_rho)(singleSidedFaceArg()) / cos_angle *
+      return -_scaling_factor * *_mdot_pp / *_area_pp /
+             (*_rho)(singleSidedFaceArg(), Moose::currentTimeFunctorArg()) / cos_angle *
              *_scalar_value_pp;
   }
 }

@@ -47,5 +47,6 @@ ADReal
 PINSFVMomentumPressurePorosityGradient::computeQpResidual()
 {
   const auto & elem = makeElemArg(_current_elem);
-  return -_p(elem) * _eps.gradient(elem)(_index);
+  const auto current_time = Moose::currentTimeFunctorArg();
+  return -_p(elem, current_time) * _eps.gradient(elem, current_time)(_index);
 }

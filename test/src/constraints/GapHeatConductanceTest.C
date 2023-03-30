@@ -74,12 +74,15 @@ GapHeatConductanceTest::computeQpResidual(MortarType type)
       const auto u_secondary =
           _functor_evals_for_primal
               ? _secondary_var(
-                    ElemPointArg({_interior_secondary_elem, _phys_points_secondary[_qp], false}))
+                    ElemPointArg({_interior_secondary_elem, _phys_points_secondary[_qp], false}),
+                    Moose::currentTimeFunctorArg())
               : _u_secondary[_qp];
-      const auto u_primary = _functor_evals_for_primal
-                                 ? _primary_var(ElemPointArg(
-                                       {_interior_primary_elem, _phys_points_primary[_qp], false}))
-                                 : _u_primary[_qp];
+      const auto u_primary =
+          _functor_evals_for_primal
+              ? _primary_var(
+                    ElemPointArg({_interior_primary_elem, _phys_points_primary[_qp], false}),
+                    Moose::currentTimeFunctorArg())
+              : _u_primary[_qp];
       return _test[_i][_qp] * (_lambda[_qp] - heat_transfer_coeff * (u_secondary - u_primary));
     }
 

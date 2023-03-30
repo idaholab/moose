@@ -29,8 +29,11 @@ INSFVMassAdvection::INSFVMassAdvection(const InputParameters & params)
 ADReal
 INSFVMassAdvection::computeQpResidual()
 {
-  const auto v = _rc_vel_provider.getVelocity(_velocity_interp_method, *_face_info, _tid);
-  const auto rho_face = _rho(makeFace(
-      *_face_info, limiterType(_advected_interp_method), MetaPhysicL::raw_value(v) * _normal > 0));
+  const auto v = _rc_vel_provider.getVelocity(
+      _velocity_interp_method, *_face_info, Moose::currentTimeFunctorArg(), _tid);
+  const auto rho_face = _rho(makeFace(*_face_info,
+                                      limiterType(_advected_interp_method),
+                                      MetaPhysicL::raw_value(v) * _normal > 0),
+                             Moose::currentTimeFunctorArg());
   return _normal * v * rho_face;
 }

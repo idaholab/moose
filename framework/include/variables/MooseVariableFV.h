@@ -480,10 +480,13 @@ protected:
    * extrapolation to determine its value
    * @param fi The face information object
    * @param elem An element that can be used to indicate sidedness of the face
+   * @param time The time at which to determine whether the face is a Dirichlet face or not
    * @return Whether the potentially sided (as indicated by \p elem) \p fi is a Dirichlet boundary
    * face for this variable
    */
-  virtual bool isDirichletBoundaryFace(const FaceInfo & fi, const Elem * elem) const;
+  virtual bool isDirichletBoundaryFace(const FaceInfo & fi,
+                                       const Elem * elem,
+                                       const Moose::TimeArg & time) const;
 
   /**
    * Retrieves a Dirichlet boundary value for the provided face. Callers of this method should be
@@ -512,10 +515,13 @@ protected:
    * extrapolation to determine its value
    * @param fi The face information object
    * @param elem An element that can be used to indicate sidedness of the face
+   * @param time The time at which to determine whether the face is extrapolated or not
    * @return Whether the potentially sided (as indicated by \p elem) \p fi is an extrapolated
    * boundary face for this variable
    */
-  bool isExtrapolatedBoundaryFace(const FaceInfo & fi, const Elem * elem) const override;
+  bool isExtrapolatedBoundaryFace(const FaceInfo & fi,
+                                  const Elem * elem,
+                                  const Moose::TimeArg & time) const override;
 
   /**
    * Retrieves an extrapolated boundary value for the provided face. Callers of this method should
@@ -704,24 +710,24 @@ MooseVariableFV<OutputType>::evaluate(const ElemArg & elem_arg, const TimeArg & 
 
 template <typename OutputType>
 typename MooseVariableFV<OutputType>::GradientType
-MooseVariableFV<OutputType>::evaluateGradient(const ElemQpArg & qp_arg, const TimeArg &) const
+MooseVariableFV<OutputType>::evaluateGradient(const ElemQpArg & qp_arg, const TimeArg & time) const
 {
-  return adGradSln(std::get<0>(qp_arg), false);
+  return adGradSln(std::get<0>(qp_arg), time, false);
 }
 
 template <typename OutputType>
 typename MooseVariableFV<OutputType>::GradientType
-MooseVariableFV<OutputType>::evaluateGradient(const ElemArg & elem_arg, const TimeArg &) const
+MooseVariableFV<OutputType>::evaluateGradient(const ElemArg & elem_arg, const TimeArg & time) const
 {
-  return adGradSln(elem_arg.elem, elem_arg.correct_skewness);
+  return adGradSln(elem_arg.elem, time, elem_arg.correct_skewness);
 }
 
 template <typename OutputType>
 typename MooseVariableFV<OutputType>::GradientType
-MooseVariableFV<OutputType>::evaluateGradient(const FaceArg & face, const TimeArg &) const
+MooseVariableFV<OutputType>::evaluateGradient(const FaceArg & face, const TimeArg & time) const
 {
   mooseAssert(face.fi, "We must have a non-null face information");
-  return adGradSln(*face.fi, face.correct_skewness);
+  return adGradSln(*face.fi, time, face.correct_skewness);
 }
 
 template <typename OutputType>

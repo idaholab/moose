@@ -63,17 +63,18 @@ RealVectorValue
 FunctorElementalGradientAuxTempl<is_ad>::computeValue()
 {
   using MetaPhysicL::raw_value;
+  const auto current_time = Moose::currentTimeFunctorArg();
   if (_use_qp_arg)
   {
     const auto qp_arg = std::make_tuple(_current_elem, _qp, _qrule);
-    return raw_value(_factor(qp_arg)) * raw_value(_factor_matprop[_qp]) *
-           raw_value(_functor.gradient(qp_arg));
+    return raw_value(_factor(qp_arg, current_time)) * raw_value(_factor_matprop[_qp]) *
+           raw_value(_functor.gradient(qp_arg, current_time));
   }
   else
   {
     const auto elem_arg = makeElemArg(_current_elem);
     mooseAssert(_qp == 0, "Only one Qp per element expected when using an elemental argument");
-    return raw_value(_factor(elem_arg)) * raw_value(_factor_matprop[_qp]) *
-           raw_value(_functor.gradient(elem_arg));
+    return raw_value(_factor(elem_arg, current_time)) * raw_value(_factor_matprop[_qp]) *
+           raw_value(_functor.gradient(elem_arg, current_time));
   }
 }

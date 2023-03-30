@@ -35,5 +35,5 @@ INSFVMomentumGravity::INSFVMomentumGravity(const InputParameters & params)
 ADReal
 INSFVMomentumGravity::computeQpResidual()
 {
-  return -_rho(makeElemArg(_current_elem)) * _gravity(_index);
+  return -_rho(makeElemArg(_current_elem), Moose::currentTimeFunctorArg()) * _gravity(_index);
 }

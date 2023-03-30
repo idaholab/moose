@@ -33,6 +33,8 @@ TestFaceToCellReconstruction::TestFaceToCellReconstruction(const InputParameters
 void
 TestFaceToCellReconstruction::initialize()
 {
+  const auto current_time = Moose::currentTimeFunctorArg();
+
   for (auto & fi : _fe_problem.mesh().faceInfo())
   {
     const auto & face_center = fi->faceCentroid();
@@ -52,7 +54,7 @@ TestFaceToCellReconstruction::initialize()
                                 cos(elem_centroid(0)) * sin(elem_centroid(1)),
                                 0);
 
-    RealVectorValue diff = exact_value - _face_values(elem_arg);
+    RealVectorValue diff = exact_value - _face_values(elem_arg, current_time);
     _reconstruction_error += diff * diff * elem_volume;
   }
 

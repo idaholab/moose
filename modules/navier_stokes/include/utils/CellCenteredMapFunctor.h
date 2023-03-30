@@ -49,7 +49,9 @@ public:
                          const std::set<SubdomainID> & sub_ids,
                          const std::string & name);
 
-  bool isExtrapolatedBoundaryFace(const FaceInfo & fi, const Elem * elem) const override;
+  bool isExtrapolatedBoundaryFace(const FaceInfo & fi,
+                                  const Elem * elem,
+                                  const TimeArg & time) const override;
   bool hasBlocks(SubdomainID sub_id) const override;
 
   /**
@@ -95,7 +97,9 @@ CellCenteredMapFunctor<T, Map>::CellCenteredMapFunctor(const MooseMesh & mesh,
 
 template <typename T, typename Map>
 bool
-CellCenteredMapFunctor<T, Map>::isExtrapolatedBoundaryFace(const FaceInfo & fi, const Elem *) const
+CellCenteredMapFunctor<T, Map>::isExtrapolatedBoundaryFace(const FaceInfo & fi,
+                                                           const Elem *,
+                                                           const TimeArg &) const
 {
   const bool defined_on_elem = hasBlocks(&fi.elem());
   const bool defined_on_neighbor = hasBlocks(fi.neighborPtr());

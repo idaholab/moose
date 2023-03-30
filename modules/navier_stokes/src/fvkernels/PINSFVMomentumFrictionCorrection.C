@@ -63,6 +63,7 @@ PINSFVMomentumFrictionCorrection::gatherRCData(const FaceInfo & fi)
 
   const auto elem_face = elemArg();
   const auto neighbor_face = neighborArg();
+  const auto current_time = Moose::currentTimeFunctorArg();
 
   Point _face_centroid = _face_info->faceCentroid();
   Point _elem_centroid = _face_info->elemCentroid();
@@ -78,15 +79,19 @@ PINSFVMomentumFrictionCorrection::gatherRCData(const FaceInfo & fi)
   {
     if (_use_Darcy_friction_model)
     {
-      friction_term_elem += (*_cL)(elem_face)(_index)*_rho(elem_face) / _eps(elem_face);
+      friction_term_elem += (*_cL)(elem_face, current_time)(_index)*_rho(elem_face, current_time) /
+                            _eps(elem_face, current_time);
       friction_term_neighbor +=
-          (*_cL)(neighbor_face)(_index)*_rho(neighbor_face) / _eps(neighbor_face);
+          (*_cL)(neighbor_face, current_time)(_index)*_rho(neighbor_face, current_time) /
+          _eps(neighbor_face, current_time);
     }
     if (_use_Forchheimer_friction_model)
     {
-      friction_term_elem += (*_cQ)(elem_face)(_index)*_rho(elem_face) / _eps(elem_face);
+      friction_term_elem += (*_cQ)(elem_face, current_time)(_index)*_rho(elem_face, current_time) /
+                            _eps(elem_face, current_time);
       friction_term_neighbor +=
-          (*_cQ)(neighbor_face)(_index)*_rho(neighbor_face) / _eps(neighbor_face);
+          (*_cQ)(neighbor_face, current_time)(_index)*_rho(neighbor_face, current_time) /
+          _eps(neighbor_face, current_time);
     }
 
     Point _neighbor_centroid = _face_info->neighborCentroid();
@@ -109,9 +114,11 @@ PINSFVMomentumFrictionCorrection::gatherRCData(const FaceInfo & fi)
     const auto face =
         makeFace(*_face_info, Moose::FV::limiterType(Moose::FV::InterpMethod::Average), true);
     if (_use_Darcy_friction_model)
-      friction_term_elem += (*_cL)(face)(_index)*_rho(face) / _eps(face);
+      friction_term_elem +=
+          (*_cL)(face, current_time)(_index)*_rho(face, current_time) / _eps(face, current_time);
     if (_use_Forchheimer_friction_model)
-      friction_term_elem += (*_cQ)(face)(_index)*_rho(face) / _eps(face);
+      friction_term_elem +=
+          (*_cQ)(face, current_time)(_index)*_rho(face, current_time) / _eps(face, current_time);
 
     Real geometric_factor =
         _consistent_scaling * std::pow((_elem_centroid - _face_centroid).norm(), 2);
@@ -120,7 +127,7 @@ PINSFVMomentumFrictionCorrection::gatherRCData(const FaceInfo & fi)
   }
 
   // Compute face superficial velocity gradient
-  auto dudn = _var.gradient(makeCDFace(*_face_info)) * _face_info->normal();
+  auto dudn = _var.gradient(makeCDFace(*_face_info), current_time) * _face_info->normal();
 
   if (_face_type == FaceInfo::VarFaceNeighbors::ELEM ||
       _face_type == FaceInfo::VarFaceNeighbors::BOTH)

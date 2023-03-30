@@ -44,16 +44,18 @@ Real
 ReynoldsNumberFunctorAux::computeValue()
 {
   using MetaPhysicL::raw_value;
+  const auto current_time = Moose::currentTimeFunctorArg();
+
   if (_use_qp_arg)
   {
     const auto qp_arg = std::make_tuple(_current_elem, _qp, _qrule);
-    return _current_elem->hmax() * raw_value(_rho(qp_arg)) * raw_value(_speed(qp_arg)) /
-           raw_value(_mu(qp_arg));
+    return _current_elem->hmax() * raw_value(_rho(qp_arg, current_time)) *
+           raw_value(_speed(qp_arg, current_time)) / raw_value(_mu(qp_arg, current_time));
   }
   else
   {
     const auto elem_arg = makeElemArg(_current_elem);
-    return _current_elem->hmax() * raw_value(_rho(elem_arg)) * raw_value(_speed(elem_arg)) /
-           raw_value(_mu(elem_arg));
+    return _current_elem->hmax() * raw_value(_rho(elem_arg, current_time)) *
+           raw_value(_speed(elem_arg, current_time)) / raw_value(_mu(elem_arg, current_time));
   }
 }

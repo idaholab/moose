@@ -43,25 +43,26 @@ Real
 DivergenceAuxTempl<is_ad>::computeValue()
 {
   using MetaPhysicL::raw_value;
+  const auto current_time = Moose::currentTimeFunctorArg();
   Real divergence = 0;
   if (_use_qp_arg)
   {
     const auto qp_arg = std::make_tuple(_current_elem, _qp, _qrule);
-    divergence += raw_value(_u.gradient(qp_arg)(0));
+    divergence += raw_value(_u.gradient(qp_arg, current_time)(0));
     if (_v)
-      divergence += raw_value(_v->gradient(qp_arg)(1));
+      divergence += raw_value(_v->gradient(qp_arg, current_time)(1));
     if (_w)
-      divergence += raw_value(_w->gradient(qp_arg)(2));
+      divergence += raw_value(_w->gradient(qp_arg, current_time)(2));
     return divergence;
   }
   else
   {
     const auto elem_arg = makeElemArg(_current_elem);
-    divergence += raw_value(_u.gradient(elem_arg)(0));
+    divergence += raw_value(_u.gradient(elem_arg, current_time)(0));
     if (_v)
-      divergence += raw_value(_v->gradient(elem_arg)(1));
+      divergence += raw_value(_v->gradient(elem_arg, current_time)(1));
     if (_w)
-      divergence += raw_value(_w->gradient(elem_arg)(2));
+      divergence += raw_value(_w->gradient(elem_arg, current_time)(2));
     return divergence;
   }
 }

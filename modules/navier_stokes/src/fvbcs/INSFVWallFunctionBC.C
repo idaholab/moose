@@ -44,12 +44,13 @@ INSFVWallFunctionBC::computeStrongResidual()
   // Get the velocity vector
   const FaceInfo & fi = *_face_info;
   const Elem & elem = fi.elem();
-  Moose::ElemArg elem_arg{&elem, false};
-  ADRealVectorValue velocity(_u(elem_arg));
+  const Moose::ElemArg elem_arg{&elem, false};
+  const auto current_time = Moose::currentTimeFunctorArg();
+  ADRealVectorValue velocity(_u(elem_arg, current_time));
   if (_v)
-    velocity(1) = (*_v)(elem_arg);
+    velocity(1) = (*_v)(elem_arg, current_time);
   if (_w)
-    velocity(2) = (*_w)(elem_arg);
+    velocity(2) = (*_w)(elem_arg, current_time);
 
   // Compute the velocity magnitude (parallel_speed) and
   // direction of the tangential velocity component (parallel_dir)
@@ -66,8 +67,9 @@ INSFVWallFunctionBC::computeStrongResidual()
     return parallel_speed;
 
   // Compute the friction velocity and the wall shear stress
-  const auto rho = _rho(makeElemArg(&elem));
-  ADReal u_star = NS::findUStar(_mu(makeElemArg(&elem)), rho, parallel_speed, dist.value());
+  const auto rho = _rho(makeElemArg(&elem), current_time);
+  ADReal u_star =
+      NS::findUStar(_mu(makeElemArg(&elem), current_time), rho, parallel_speed, dist.value());
   ADReal tau = u_star * u_star * rho;
   _a *= tau;
 
