@@ -1,4 +1,4 @@
-# Mapping system
+# Mapping System
 
 ## Overview
 
@@ -15,7 +15,7 @@ These methods describe the mapping from high to low dimensional spaces and the c
 
 #### The Mappings block
 
-In an input file, one can create Mapping Objects by specifying them in the `[Mappings]` block.
+In an input file, one can create Mapping Objects by specifying them in the `Mappings` block.
 
 #### Mapping from high- to low-dimensional spaces
 
@@ -38,10 +38,10 @@ from the object warehouse using the helper functions. Good examples are the [Map
 
 ## Example Input File Syntax
 
-% !listing test/tests/surrogates/gaussian_process/GP_squared_exponential_training.i block=Covariance
+!listing serialized_variable/main_2d_mc.i block=Mappings
 
 !syntax list /Mappings objects=True actions=False subsystems=False
 
-!syntax list /Mappings objects=False actions=False subsystems=True
-
 !syntax list /Mappings objects=False actions=True subsystems=False
+
+!syntax list /Mappings objects=False actions=False subsystems=True

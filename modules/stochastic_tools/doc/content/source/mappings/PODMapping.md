@@ -46,20 +46,20 @@ The process for building the mapping is the following:
    singular vector computed in the decomposition. We assume that the solution vector of the system for variable $v$
    can be expressed as
 
-   !equation id=svd
+   !equation id=inverse-mapping
    \boldsymbol{s}_v \approx \boldsymbol{U}_v \boldsymbol{c}_v~,
 
    where vector $\boldsymbol{c}_v$ contains the reduced-order coefficients (or coordinates in the latent) space
    in the low-dimensional space. Considering that te left singular vector vector matrix is unitary, we can
    express the mapping from high to low dimensional spaces as:
 
-   !equation id=svd
+   !equation id=mapping
    \boldsymbol{c}_v = \boldsymbol{U}^T_v \boldsymbol{s}_v~.
 
 4. The last step in this process consists of filtering out singular triplets which do not contribute to the
    description of variation in the variable fields. For this, we utilize the singular values as follows:
 
-   !equation id=svd
+   !equation id=truncation
    \begin{array}{lr}
         \text{keep basis vector $I$}, & \text{if\quad} \left(1 - \frac{\sum\limits_{i=1}^{I} \sigma^2_{v,i}}{\sum\limits_{i=1}^{r_v} \sigma_{v,i}^2}\right) < \tau_v\\ & \\
         \text{discard}, & \text{otherwise.}
