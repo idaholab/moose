@@ -12,7 +12,6 @@
 {#- MOOSE_DOCS_FLAGS: Doc options to pass during the make install                             -#}
 {#- METHOD: The method to build; defaults to "opt"                                            -#}
 {#- TEST_DIRS: Directories to test in the %test section; defaults to just "tests"             -#}
-{#- EXTRA_MAMBA_PACKAGES: Extra mamba packages to install                                     -#}
 
 {#- Civet Specific jinja arguments                                                            -#}
 {#- allowed_to_fail: BOOL, specific to Civet. Only available in %post, %test section          -#}
@@ -33,6 +32,7 @@ From: {{ APPTAINER_FROM }}
     ROOT_BUILD_DIR={{ ROOT_BUILD_DIR }}
     APPLICATION_DIR={{ APPLICATION_DIR }}
     MOOSE_DIR={{ MOOSE_DIR }}
+    TEST_DIRS={{ TEST_DIRS }}
 
     # Build directory in the container
     BUILD_DIR=${APPTAINER_ROOTFS}${ROOT_BUILD_DIR}
@@ -69,6 +69,7 @@ From: {{ APPTAINER_FROM }}
 {%- endif %}
 
 %environment
+    export MOOSE_APPLICATION_NAME={{ BINARY_NAME }}
 {%- if BINARY_NAME == 'moose-combined' %}
     export PATH=/opt/moose/bin:$PATH
 {%- else %}
@@ -77,6 +78,7 @@ From: {{ APPTAINER_FROM }}
 {%- if SECTION_ENVIRONMENT is defined %}
     {{ SECTION_ENVIRONMENT }}
 {%- endif %}
+
 %post
     # Load jinja vars
 {%- if SECTION_POST_PRE is defined %}
@@ -105,11 +107,6 @@ From: {{ APPTAINER_FROM }}
     # These are needed for documentation and will be removed later
     EXTRA_DOC_PACKAGES="livereload pybtex beautifulsoup4"
     mamba install -yq $EXTRA_DOC_PACKAGES
-{%- endif %}
-
-{%- if EXTRA_MAMBA_PACKAGES is defined %}
-    # Install extra mamba packages
-    mamba install -yq {{ EXTRA_MAMBA_PACKAGES }}
 {%- endif %}
 
     # Setup install
@@ -169,54 +166,38 @@ From: {{ APPTAINER_FROM }}
     ln -s combined-opt moose-opt
 {%- endif %}
 
-    # Install moose-tools from moose-base container
-    source /root/install_moose_tools.sh
 {%- if SECTION_POST_POST is defined %}
     {{ SECTION_POST_POST }}
 {%- endif %}
+
+    # Setup the apptainer directory for metadata/testing/etc
+    APP_APPTAINER=${MOOSE_PREFIX}/moose-apptainer
+    mkdir ${APP_APPTAINER}
+    chmod 755 ${APP_APPTAINER}
+    # Create the test script for this application
+    TEST_SCRIPT=${APP_APPTAINER}/test.sh
+    echo "#!/bin/bash" > ${TEST_SCRIPT}
+    echo "set -e" >> ${TEST_SCRIPT}
+    echo "/opt/moose-apptainer/test_binary.sh ${MOOSE_PREFIX}/bin/$(basename ${MOOSE_PREFIX})-${METHOD} \"${TEST_DIRS:-tests}\" \$*" >> ${TEST_SCRIPT}
+    chmod 755 ${TEST_SCRIPT}
+    # Create info file
+    INFO_FILE=${APP_APPTAINER}/info.yaml
+    echo "moose_apptainer_version: $(python ${MOOSE_DIR}/scripts/versioner.py moose)" > ${INFO_FILE}
+    echo "moose_git_version: $(cd $MOOSE_DIR; git rev-parse HEAD)" >> ${INFO_FILE}
+    chmod 644 ${INFO_FILE}
+    # Copy in the def file
+    DEF_FILE=${APP_APPTAINER}/def.def
+    cp /.singularity.d/Singularity ${DEF_FILE}
+    chmod 644 ${DEF_FILE}
+
     # Cleanup
     rm -rf $TEMP_LOC
+    dnf clean all
 
 %test
-    # Force error shell behavior
-    set -e
-    # Load jinja vars
-{%- if SECTION_TEST_PRE is defined %}
-    {{ SECTION_TEST_PRE }}
-{%- endif %}
 {%- if BINARY_NAME == 'moose-combined' %}
-    BINARY_NAME=combined
+    MOOSE_PREFIX=/opt/moose
 {%- else %}
-    BINARY_NAME={{ BINARY_NAME }}
+    MOOSE_PREFIX=/opt/{{ BINARY_NAME }}
 {%- endif %}
-    METHOD={{ METHOD or "opt" }}
-    TEST_DIRS={{ TEST_DIRS or "tests" }}
-
-    # Temp location for copying and running in
-    TEMP_LOC=$(mktemp -u -d /tmp/${BINARY_NAME}test.XXXXXX)
-    # Really make sure that we nuke the temp location in all circumstances
-    trap "if [ -e $TEMP_LOC ]; then rm -rf $TEMP_LOC; fi" EXIT HUP INT TERM
-{%- if SECTION_TEST_PRE_TEST is defined %}
-    {{ SECTION_TEST_PRE_TEST }}
-{%- endif %}
-    # Copy and run each subset of tests
-    for TEST_DIR in ${TEST_DIRS}; do
-        mkdir -p $TEMP_LOC
-        cd $TEMP_LOC
-        ${BINARY_NAME}-${METHOD} --copy-inputs $TEST_DIR
-        cd ${BINARY_NAME}/${TEST_DIR}
-{%- if allowed_to_fail is defined %}
-        # CIVET allowed_to_fail is True
-        set +e
-{%- endif %}
-        ${BINARY_NAME}-${METHOD} --run -j ${MOOSE_JOBS:-1} -t
-{%- if allowed_to_fail is defined %}
-        # CIVET allowed_to_fail not allowed for remainder steps
-{%- endif %}
-        # force error shell behavior for remainder steps
-        set -e
-        rm -rf $TEMP_LOC
-    done
-{%- if SECTION_TEST_POST is defined %}
-    {{ SECTION_TEST_POST }}
-{%- endif %}
+    ${MOOSE_PREFIX}/moose-apptainer/test.sh
