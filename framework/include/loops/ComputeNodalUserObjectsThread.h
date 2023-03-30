@@ -26,6 +26,8 @@ public:
 
   virtual ~ComputeNodalUserObjectsThread();
 
+  void subdomainChanged();
+
   virtual void onNode(ConstNodeRange::const_iterator & node_it) override;
 
   void join(const ComputeNodalUserObjectsThread & /*y*/);
@@ -33,6 +35,7 @@ public:
 private:
   const TheWarehouse::Query _query;
   AuxiliarySystem & _aux_sys;
+  std::set<SubdomainID> _block_ids;
 
   static Threads::spin_mutex writable_variable_mutex;
 };

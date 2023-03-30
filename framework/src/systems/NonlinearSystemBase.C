@@ -1529,6 +1529,8 @@ NonlinearSystemBase::computeResidualInternal(const std::set<TagID> & tags)
 
   residualSetup();
 
+  const auto vector_tag_data = _fe_problem.getVectorTags(tags);
+
   // Residual contributions from UOs - for now this is used for ray tracing
   // and ray kernels that contribute to the residual (think line sources)
   std::vector<UserObject *> uos;
@@ -1674,7 +1676,7 @@ NonlinearSystemBase::computeResidualInternal(const std::set<TagID> & tags)
   }
   PARALLEL_CATCH;
 
-  mortarConstraints(Moose::ComputeType::Residual);
+  mortarConstraints(Moose::ComputeType::Residual, tags, {});
 
   if (_residual_copy.get())
   {
@@ -1790,7 +1792,7 @@ NonlinearSystemBase::computeResidualAndJacobianInternal(const std::set<TagID> & 
       Threads::parallel_reduce(faces, fvrj);
     }
 
-    mortarConstraints(Moose::ComputeType::ResidualAndJacobian);
+    mortarConstraints(Moose::ComputeType::ResidualAndJacobian, vector_tags, matrix_tags);
 
     unsigned int n_threads = libMesh::n_threads();
     for (unsigned int i = 0; i < n_threads;
@@ -2646,7 +2648,7 @@ NonlinearSystemBase::computeJacobianInternal(const std::set<TagID> & tags)
       Threads::parallel_reduce(faces, fvj);
     }
 
-    mortarConstraints(Moose::ComputeType::Jacobian);
+    mortarConstraints(Moose::ComputeType::Jacobian, {}, tags);
 
     // Get our element range for looping over
     ConstElemRange & elem_range = *_mesh.getActiveLocalElementRange();
@@ -3568,17 +3570,19 @@ NonlinearSystemBase::setPreviousNewtonSolution(const NumericVector<Number> & sol
 }
 
 void
-NonlinearSystemBase::mortarConstraints(const Moose::ComputeType compute_type)
+NonlinearSystemBase::mortarConstraints(const Moose::ComputeType compute_type,
+                                       const std::set<TagID> & vector_tags,
+                                       const std::set<TagID> & matrix_tags)
 {
   parallel_object_only();
 
   try
   {
     for (auto & map_pr : _undisplaced_mortar_functors)
-      map_pr.second(compute_type);
+      map_pr.second(compute_type, vector_tags, matrix_tags);
 
     for (auto & map_pr : _displaced_mortar_functors)
-      map_pr.second(compute_type);
+      map_pr.second(compute_type, vector_tags, matrix_tags);
   }
   catch (MetaPhysicL::LogicError &)
   {

@@ -133,6 +133,7 @@ public:
    * Get a VectorTag from a TagID.
    */
   virtual const VectorTag & getVectorTag(const TagID tag_id) const;
+  std::vector<VectorTag> getVectorTags(const std::set<TagID> & tag_ids) const;
 
   /**
    * Get a TagID from a TagName.
@@ -880,6 +881,11 @@ public:
   void registerUnfilledFunctorRequest(T * functor_interface,
                                       const std::string & functor_name,
                                       THREAD_ID tid);
+
+  /**
+   * Return the residual vector tags we are currently computing
+   */
+  virtual const std::vector<VectorTag> & currentResidualVectorTags() const = 0;
 
 protected:
   /**
