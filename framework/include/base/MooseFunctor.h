@@ -81,12 +81,11 @@ public:
    * Same as their \p evaluate overloads with the same arguments but allows for caching
    * implementation. These are the methods a user will call in their code
    */
-  ValueType operator()(const ElemArg & elem, TimeArg time = currentTimeFunctorArg()) const;
-  ValueType operator()(const FaceArg & face, TimeArg time = currentTimeFunctorArg()) const;
-  ValueType operator()(const ElemQpArg & qp, TimeArg time = currentTimeFunctorArg()) const;
-  ValueType operator()(const ElemSideQpArg & qp, TimeArg time = currentTimeFunctorArg()) const;
-  ValueType operator()(const ElemPointArg & elem_point,
-                       TimeArg time = currentTimeFunctorArg()) const;
+  ValueType operator()(const ElemArg & elem, TimeArg time) const;
+  ValueType operator()(const FaceArg & face, TimeArg time) const;
+  ValueType operator()(const ElemQpArg & qp, TimeArg time) const;
+  ValueType operator()(const ElemSideQpArg & qp, TimeArg time) const;
+  ValueType operator()(const ElemPointArg & elem_point, TimeArg time) const;
   ///@}
 
   ///@{
@@ -94,12 +93,11 @@ public:
    * Same as their \p evaluateGradient overloads with the same arguments but allows for caching
    * implementation. These are the methods a user will call in their code
    */
-  GradientType gradient(const ElemArg & elem, TimeArg time = currentTimeFunctorArg()) const;
-  GradientType gradient(const FaceArg & face, TimeArg time = currentTimeFunctorArg()) const;
-  GradientType gradient(const ElemQpArg & qp, TimeArg time = currentTimeFunctorArg()) const;
-  GradientType gradient(const ElemSideQpArg & qp, TimeArg time = currentTimeFunctorArg()) const;
-  GradientType gradient(const ElemPointArg & elem_point,
-                        TimeArg time = currentTimeFunctorArg()) const;
+  GradientType gradient(const ElemArg & elem, TimeArg time) const;
+  GradientType gradient(const FaceArg & face, TimeArg time) const;
+  GradientType gradient(const ElemQpArg & qp, TimeArg time) const;
+  GradientType gradient(const ElemSideQpArg & qp, TimeArg time) const;
+  GradientType gradient(const ElemPointArg & elem_point, TimeArg time) const;
   ///@}
 
   ///@{
@@ -107,11 +105,11 @@ public:
    * Same as their \p evaluateDot overloads with the same arguments but allows for caching
    * implementation. These are the methods a user will call in their code
    */
-  DotType dot(const ElemArg & elem, TimeArg time = currentTimeFunctorArg()) const;
-  DotType dot(const FaceArg & face, TimeArg time = currentTimeFunctorArg()) const;
-  DotType dot(const ElemQpArg & qp, TimeArg time = currentTimeFunctorArg()) const;
-  DotType dot(const ElemSideQpArg & qp, TimeArg time = currentTimeFunctorArg()) const;
-  DotType dot(const ElemPointArg & elem_point, TimeArg time = currentTimeFunctorArg()) const;
+  DotType dot(const ElemArg & elem, TimeArg time) const;
+  DotType dot(const FaceArg & face, TimeArg time) const;
+  DotType dot(const ElemQpArg & qp, TimeArg time) const;
+  DotType dot(const ElemSideQpArg & qp, TimeArg time) const;
+  DotType dot(const ElemPointArg & elem_point, TimeArg time) const;
   ///@}
 
   virtual void residualSetup() override;
