@@ -79,6 +79,8 @@ def command_line_options(subparser, parent):
                                                      "temporary sites to be functional.")
     parser.add_argument('--hide-source', action='store_true',
                         help="Shortcut for setting the 'hide_source' option in the modal extension.")
+    parser.add_argument('--pre-build-script', default=None,
+                        help="Optional script to run before building documentation. This is typically used to generate files like plots that will be used by documentation.")
 
 class MooseDocsWatcher(livereload.watcher.Watcher):
     """
@@ -166,6 +168,11 @@ def main(options):
     # Infinite nested dict
     tree = lambda: collections.defaultdict(tree)
     kwargs = tree()
+
+    # Run the pre-build script if specified
+    if options.pre_build_script:
+        LOG.info("Executing the provided pre-build script: {}".format(os.path.abspath(options.pre_build_script)))
+        subprocess.call(os.path.abspath(options.pre_build_script))
 
     # Setup executioner
     if options.executioner:
