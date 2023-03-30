@@ -9,21 +9,12 @@
 
 #pragma once
 
-#include <shared_mutex>
-
 #include "ExecFlagEnum.h"
 
 namespace moose
 {
 namespace internal
 {
-
-class ExecFlagRegistry;
-
-/**
- * Get the global ExecFlagRegistry singleton.
- */
-ExecFlagRegistry & getExecFlagRegistry();
 
 /**
  * Registry for statically defining execute flags with consistent numbering.
@@ -49,17 +40,20 @@ public:
    */
   const ExecFlagEnum & getDefaultFlags() const { return _default_flags; };
 
+  /// Return Singleton instance
+  static ExecFlagRegistry & getExecFlagRegistry();
+
+  ///@{ Don't allow creation through copy/move consturction or assignment
+  ExecFlagRegistry(ExecFlagRegistry const &) = delete;
+  ExecFlagRegistry & operator=(ExecFlagRegistry const &) = delete;
+
+  ExecFlagRegistry(ExecFlagRegistry &&) = delete;
+  ExecFlagRegistry & operator=(ExecFlagRegistry &&) = delete;
+  ///@}
+
 private:
-  ExecFlagRegistry();
-
-  /// So it can be constructed
-  friend ExecFlagRegistry & getExecFlagRegistry();
-
-  /// Mutex for guarding access to _flags
-  std::shared_mutex _flags_mutex;
-
-  /// Mutex for guarding access to _default_flags;
-  std::shared_mutex _default_flags_mutex;
+  // Private constructor for singleton pattern
+  ExecFlagRegistry() {}
 
   /// The registered flags
   ExecFlagEnum _flags;
@@ -68,9 +62,10 @@ private:
   ExecFlagEnum _default_flags;
 };
 
-}
-}
+} // internal
+} // moose
 
-#define registerExecFlag(flag) moose::internal::getExecFlagRegistry().registerFlag(flag, false)
+#define registerExecFlag(flag)                                                                     \
+  moose::internal::ExecFlagRegistry::getExecFlagRegistry().registerFlag(flag, false)
 #define registerDefaultExecFlag(flag)                                                              \
-  moose::internal::getExecFlagRegistry().registerFlag(flag, true)
+  moose::internal::ExecFlagRegistry::getExecFlagRegistry().registerFlag(flag, true)

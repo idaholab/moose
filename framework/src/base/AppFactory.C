@@ -12,12 +12,11 @@
 #include "InputParameters.h"
 #include "MooseApp.h"
 
-AppFactory AppFactory::_instance = AppFactory();
-
 AppFactory &
 AppFactory::instance()
 {
-  return _instance;
+  static AppFactory instance;
+  return instance;
 }
 
 AppFactory::~AppFactory() {}

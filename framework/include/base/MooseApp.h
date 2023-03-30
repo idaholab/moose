@@ -1168,8 +1168,14 @@ protected:
   /// this map when removing relationship managers/ghosting functors
   std::unordered_map<RelationshipManager *, std::shared_ptr<GhostingFunctor>> _undisp_to_disp_rms;
 
+  struct DynamicLibraryInfo
+  {
+    void * library_handle;
+    std::unordered_set<std::string> entry_symbols;
+  };
+
   /// The library, registration method and the handle to the method
-  std::map<std::pair<std::string, std::string>, void *> _lib_handles;
+  std::unordered_map<std::string, DynamicLibraryInfo> _lib_handles;
 
 private:
   ///@{
@@ -1321,8 +1327,14 @@ private:
   /// Cache for a Backup to use for restart / recovery
   std::shared_ptr<Backup> _cached_backup;
 
-  /// Execution flags for this App
-  const ExecFlagEnum & _execute_flags;
+  /**
+   * Execution flags for this App. Note: These are copied on purpose instead of maintaining a
+   * reference to the ExecFlagRegistry registry. In the Multiapp case, the registry may be
+   * augmented, changing the flags "known" to the application in the middle of executing the setup.
+   * This causes issues with the application having to process flags that aren't specifically
+   * registered.
+   */
+  const ExecFlagEnum _execute_flags;
 
   /// Whether to turn on automatic scaling by default
   const bool _automatic_automatic_scaling;
