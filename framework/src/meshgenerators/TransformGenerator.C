@@ -84,5 +84,8 @@ TransformGenerator::generate()
       break;
   }
 
+  mesh->cache_elem_data();
+  // Displacement of the mesh has invalidated the point locator data (e.g. bounding boxes)
+  mesh->clear_point_locator();
   return dynamic_pointer_cast<MeshBase>(mesh);
 }
