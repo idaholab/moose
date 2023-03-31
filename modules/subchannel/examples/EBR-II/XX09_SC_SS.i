@@ -1,12 +1,12 @@
 # Following Benchmark Specifications and Data Requirements for EBR-II Shutdown Heat Removal Tests SHRT-17 and SHRT-45R
 # Available at: https://publications.anl.gov/anlpubs/2012/06/73647.pdf
 ###################################################
-#Steady state subchannel calcultion,with adapted massflow rate
+#Steady state subchannel calcultion
 # Thermal-hydraulics parameters
 ###################################################
 T_in = 624.70556 #Kelvin
 Total_Surface_Area = 0.000854322 #m3
-mass_flux_in = ${fparse 2.6923 / Total_Surface_Area} #
+mass_flux_in = ${fparse 2.45 / Total_Surface_Area} # ${fparse 2.6923 / Total_Surface_Area} #
 #P_out = 43850.66 # Pa plus 4.778 meters of Na to the free surface in pool or Plus 0.57 meters of Na to core outlet.
 P_out = 2.0e5
 Power_initial = 486200 #W (Page 26,35 of ANL document)
@@ -163,7 +163,7 @@ unheated_length_exit = ${fparse 26.9*scale_factor}
     type = TriPowerIC
     variable = q_prime
     power = ${Power_initial}
-    filename = "pin_power_profile61_uniform.txt"
+    filename = "pin_power_profile61.txt"
     # axial_heat_rate = axial_heat_rate
   []
 

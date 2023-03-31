@@ -2,8 +2,8 @@
 ##### LOAD MODULES ###############
 import numpy as np
 import matplotlib.pyplot as plt
-scData = np.genfromtxt("subchannel_out.csv", skip_header=1, delimiter=',')
-scData45 = np.genfromtxt("XX09_SC_tr_out.csv", skip_header=1, delimiter=',')
+scData = np.genfromtxt("SC_tr_out.csv", skip_header=1, delimiter=',')
+scData45 = np.genfromtxt("SC45_tr_out.csv", skip_header=1, delimiter=',')
 EXP = np.genfromtxt("TTC-31_EXP.csv", skip_header=1, delimiter=',')
 EXP45 = np.genfromtxt("TTC-31_EXP45.csv", skip_header=1, delimiter=',')
 TTC_EXP = np.genfromtxt("TTC_EXP.csv", skip_header=1, delimiter=',')
@@ -13,25 +13,24 @@ NETFLOW = np.genfromtxt("TTC-31_NETFLOW.csv", skip_header=1, delimiter=',')
 NETFLOW45 = np.genfromtxt("TTC-31_NETFLOW45.csv", skip_header=1, delimiter=',')
 SC_TTC = np.genfromtxt("XX09_TTC.csv", skip_header=2, delimiter=',')
 SC_TTC45 = np.genfromtxt("XX09_TTC45.csv", skip_header=2, delimiter=',')
-# SC_TTC_corrected = np.genfromtxt("XX09_SC_SS_out.csv", skip_header=2, delimiter=',')
+SC_TTC_corrected = np.genfromtxt(
+    "XX09_SC_corrected.csv", skip_header=2, delimiter=',')
 SC_MTC = np.genfromtxt("SC_MTC.csv", skip_header=2, delimiter=',')
 SC_14TC = np.genfromtxt("SC_14TC.csv", skip_header=2, delimiter=',')
 SC_14TC45 = np.genfromtxt("SC_14TC45.csv", skip_header=2, delimiter=',')
-massflow_SHRT17 = np.genfromtxt("massflow_SHRT17.csv", skip_header=1, delimiter=',')
-massflow_SHRT45 = np.genfromtxt("massflow_SHRT45.csv", skip_header=1, delimiter=',')
-power_SHRT17 = np.genfromtxt("power_history_SHRT17.csv", skip_header=0, delimiter=',')
-power_SHRT45 = np.genfromtxt("power_history_SHRT45.csv", skip_header=0, delimiter=',')
+massflow_SHRT17 = np.genfromtxt(
+    "massflow_SHRT17.csv", skip_header=1, delimiter=',')
+massflow_SHRT45 = np.genfromtxt(
+    "massflow_SHRT45.csv", skip_header=1, delimiter=',')
+power_SHRT17 = np.genfromtxt(
+    "power_history_SHRT17.csv", skip_header=0, delimiter=',')
+power_SHRT45 = np.genfromtxt(
+    "power_history_SHRT45.csv", skip_header=0, delimiter=',')
 EXP_MTC = np.genfromtxt("EXP_MTC.csv", skip_header=1, delimiter=',')
 DASSH_MTC = np.genfromtxt("DASSH_MTC.csv", skip_header=1, delimiter=',')
 EXP_14TC = np.genfromtxt("EXP_14TC.csv", skip_header=1, delimiter=',')
 EXP_14TC45 = np.genfromtxt("EXP_14TC45.csv", skip_header=1, delimiter=',')
 DASSH_14TC = np.genfromtxt("DASSH_14TC.csv", skip_header=1, delimiter=',')
-coupled_default = np.genfromtxt("Pr_SC_SS_out_default.csv",
-                        skip_header=2, delimiter=',')
-coupled_negative = np.genfromtxt("Pr_SC_SS_out_negative.csv",
-                        skip_header=2, delimiter=',')
-coupled_zero = np.genfromtxt("Pr_SC_SS_out_zero.csv",
-                        skip_header=2, delimiter=',')
 coupled = np.genfromtxt("Pr_SC_SS_out_subchannel0.csv",
                         skip_header=2, delimiter=',')
 
@@ -39,6 +38,31 @@ coupled = np.genfromtxt("Pr_SC_SS_out_subchannel0.csv",
 plt.rcParams["font.family"] = "serif"
 plt.rcParams["mathtext.fontset"] = "dejavuserif"
 ###############################################
+
+inlet_temperature = 624.70556
+A28 = 7.3898e5
+A29 = 3.154e5
+A30 = 1.1340e3
+A31 = -2.2153e-1
+A32 = 1.1156e-4
+dt = 2503.3 - inlet_temperature
+cp = A28 / dt / dt + A29 / dt + A30 + A31 * dt + A32 * dt * dt
+print(cp)
+
+A48 = 1.1045e2
+A49 = -6.5112e-2
+A50 = 1.5430e-5
+A51 = -2.4617e-9
+k = A48 + A49 * inlet_temperature + A50 * inlet_temperature * inlet_temperature +\
+    A51 * inlet_temperature * inlet_temperature * inlet_temperature
+print(k)
+
+A12 = 1.00423e3
+A13 = -0.21390
+A14 = -1.1046e-5
+rho = (A12 + A13 * inlet_temperature + A14 *
+       inlet_temperature * inlet_temperature)
+print(rho)
 
 plt.figure()
 plt.plot(scData[6:, 0], scData[6:, 1], "k",
@@ -53,12 +77,6 @@ plt.legend(fontsize=12)
 plt.xticks(fontsize=14)
 plt.yticks(fontsize=14)
 plt.grid()
-# ax2 = plt.twinx()
-# make a plot with different y-axis using second axis object
-# ax2.plot(massflow_SHRT17[:, 0], massflow[:, 1]/2.450,
-#          "b", label="normalized massflow")
-# ax2.legend(fontsize=12, loc='center right')
-# ax2.set_ylabel("Massflow [-]", color="blue", fontsize=14)
 plt.savefig("Transient_Temperature.png")
 plt.show()
 
@@ -100,62 +118,14 @@ plt.show()
 
 
 plt.figure()
-plt.plot(massflow[:, 0], massflow[:, 1]/2.450,
-         "k", label="normalized massflow")
-plt.title(r"Transient massflow XX09" "\n" "SHRT-17", fontsize=13)
-plt.xlabel(r'$time~[sec]$', fontsize=14)
-plt.ylabel(r'$Massflow~[-]$', fontsize=14)
-plt.legend(fontsize=12)
-plt.xticks(fontsize=14)
-plt.yticks(fontsize=14)
-plt.grid()
-plt.savefig("Transient_Massflow.png")
-
-plt.figure()
-plt.plot(power[:, 0], power[:, 1], "k", label="normalized power")
-plt.title(r"Transient power of assembly" "\n" "SHRT-17", fontsize=13)
-plt.xlabel(r'$time~[sec]$', fontsize=14)
-plt.ylabel(r'$Power~[-]$', fontsize=14)
-plt.legend(fontsize=12)
-plt.xticks(fontsize=14)
-plt.yticks(fontsize=14)
-plt.grid()
-plt.savefig("Transient_Power.png")
-
-inlet_temperature = 624.70556
-A28 = 7.3898e5
-A29 = 3.154e5
-A30 = 1.1340e3
-A31 = -2.2153e-1
-A32 = 1.1156e-4
-dt = 2503.3 - inlet_temperature
-cp = A28 / dt / dt + A29 / dt + A30 + A31 * dt + A32 * dt * dt
-print(cp)
-
-A48 = 1.1045e2
-A49 = -6.5112e-2
-A50 = 1.5430e-5
-A51 = -2.4617e-9
-k = A48 + A49 * inlet_temperature + A50 * inlet_temperature * inlet_temperature +\
-    A51 * inlet_temperature * inlet_temperature * inlet_temperature
-print(k)
-
-A12 = 1.00423e3
-A13 = -0.21390
-A14 = -1.1046e-5
-rho = (A12 + A13 * inlet_temperature + A14 *
-       inlet_temperature * inlet_temperature)
-print(rho)
-
-plt.figure()
 plt.plot(TTC_EXP[:, 1] + 273.15, "r", marker='D',
          markerfacecolor="r", label="EXP")
 plt.plot(TTC_DASSH[:, 1] + 273.15, "b", marker='D',
          markerfacecolor="b", label="DASSH")
 plt.plot(SC_TTC[1:], "k", marker='D',
          markerfacecolor="k", label="SC")
-# plt.plot(SC_TTC_corrected[1:], "g", marker='D',
-#          markerfacecolor="g", label="SC power profile corrected")
+plt.plot(SC_TTC_corrected[1:], "g", marker='D',
+         markerfacecolor="g", label="SC power profile corrected")
 plt.plot(coupled[1:], "k-.", marker='D',
          markerfacecolor="k", label="Pr-SC power profile corrected")
 plt.title(r"Temperature profile 0.322m downstream of heated section" "\n" "XX09 TTC SHRT-17, Initial steady state", fontsize=13)

@@ -7,7 +7,6 @@
 T_in = 616.4 #Kelvin
 Total_Surface_Area = 0.000854322 #m3
 mass_flux_in = ${fparse 2.427 / Total_Surface_Area}
-#P_out = 43850.66 # Pa plus 4.778 meters of Na to the free surface in pool or Plus 0.57 meters of Na to core outlet.
 P_out = 2.0e5
 Power_initial = 379800 #W (Page 26,35 of ANL document)
 ###################################################
