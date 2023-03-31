@@ -253,5 +253,5 @@ kEpsilonViscosityAux::computeValue()
     mu_t = mu_t_wall;
   }
 
-  return mu_t;
+  return std::abs(mu_t);
 }

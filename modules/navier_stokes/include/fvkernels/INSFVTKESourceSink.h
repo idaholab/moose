@@ -84,4 +84,7 @@ protected:
 
   /// -- Constants of the method
   static constexpr Real _von_karman{0.4187};
+
+  /// -- Time storing
+  Real _stored_time;
 };

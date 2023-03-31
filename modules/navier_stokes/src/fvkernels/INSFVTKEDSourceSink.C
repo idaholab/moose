@@ -97,6 +97,7 @@ INSFVTKEDSourceSink::INSFVTKEDSourceSink(const InputParameters & params)
                "INSFVVelocityVariable.");
 
   _loc_dt = _dt;
+  _stored_time = _fe_problem.time();
   for (const auto & elem : _fe_problem.mesh().getMesh().element_ptr_range())
   {
     _symmetric_strain_tensor_norm_old[elem] = 0.0;
@@ -212,7 +213,7 @@ INSFVTKEDSourceSink::computeQpResidual()
   {
     // constexpr Real offset = 0.0; // prevents explosion of sqrt(x) derivative to infinity
 
-    if (_loc_dt != _dt)
+    if ((_fe_problem.time() > _stored_time) && (_dt >= _loc_dt))
     {
 
       const auto & grad_u = _u_var->adGradSln(_current_elem);
@@ -237,7 +238,7 @@ INSFVTKEDSourceSink::computeQpResidual()
         }
       }
 
-      auto production_k = _mu_t(makeElemArg(_current_elem)) * symmetric_strain_tensor_norm.value();
+      auto production_k = _mu_t(makeElemArg(_current_elem)) * symmetric_strain_tensor_norm;
 
       auto time_scale = std::abs(_k(makeElemArg(_current_elem)) / _var(makeElemArg(_current_elem)));
 
@@ -250,7 +251,19 @@ INSFVTKEDSourceSink::computeQpResidual()
 
       _pevious_production[_current_elem] = production.value();
       _pevious_destruction[_current_elem] = destruction.value();
+
+      if (std::abs(_pevious_production[_current_elem]) >
+          10 * std::abs(_pevious_destruction[_current_elem]))
+        _pevious_production[_current_elem] = 10 * std::abs(_pevious_destruction[_current_elem])
+                                             * _pevious_production[_current_elem] / std::abs(_pevious_production[_current_elem]);
+
+      if (std::abs(_pevious_destruction[_current_elem]) >
+          2 * std::abs(_pevious_production[_current_elem]))
+        _pevious_destruction[_current_elem] = 2 * std::abs(_pevious_production[_current_elem])
+                                            * _pevious_destruction[_current_elem] / std::abs(_pevious_destruction[_current_elem]);
+
       _loc_dt = _dt;
+      _stored_time = _fe_problem.time();
     }
 
     // Implicit relaxation
@@ -301,7 +314,8 @@ INSFVTKEDSourceSink::computeQpResidual()
 
     // production += std::max(destruction - production, 0.0) * scaling;
 
-    residual += _pevious_destruction[_current_elem] - _pevious_production[_current_elem];
+    residual = _pevious_destruction[_current_elem] - _pevious_production[_current_elem];
+    residual += _rho(makeElemArg(_current_elem))*_var.dot(makeElemArg(_current_elem));
 
     // residual *= (1.0 - scaling);
 

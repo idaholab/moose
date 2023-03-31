@@ -95,6 +95,7 @@ INSFVTKESourceSink::INSFVTKESourceSink(const InputParameters & params)
                "INSFVVelocityVariable.");
 
   _loc_dt = _dt;
+  _stored_time = _fe_problem.time();
 
   for (const auto & elem : _fe_problem.mesh().getMesh().element_ptr_range())
   {
@@ -207,7 +208,7 @@ INSFVTKESourceSink::computeQpResidual()
   }
   else
   {
-    if (_loc_dt != _dt)
+    if ((_fe_problem.time() > _stored_time) && (_dt >= _loc_dt))
     {
 
       const auto & grad_u = _u_var->adGradSln(_current_elem);
@@ -232,7 +233,7 @@ INSFVTKESourceSink::computeQpResidual()
         }
       }
 
-      production = _mu_t(makeElemArg(_current_elem)) * symmetric_strain_tensor_norm.value();
+      production = _mu_t(makeElemArg(_current_elem)) * symmetric_strain_tensor_norm;
       if (_linearized_model)
       {
         auto linear_variable =
@@ -249,7 +250,19 @@ INSFVTKESourceSink::computeQpResidual()
 
       _pevious_production[_current_elem] = production.value();
       _pevious_destruction[_current_elem] = destruction.value();
+
+      if (std::abs(_pevious_production[_current_elem]) >
+          10 * std::abs(_pevious_destruction[_current_elem]))
+        _pevious_production[_current_elem] = 10 * std::abs(_pevious_destruction[_current_elem])
+                                             * _pevious_production[_current_elem] / std::abs(_pevious_production[_current_elem]);
+
+      if (std::abs(_pevious_destruction[_current_elem]) >
+          2 * std::abs(_pevious_production[_current_elem]))
+        _pevious_destruction[_current_elem] = 2 * std::abs(_pevious_production[_current_elem])
+                                            * _pevious_destruction[_current_elem] / std::abs(_pevious_destruction[_current_elem]);
+
       _loc_dt = _dt;
+      _stored_time = _fe_problem.time();
     }
 
     // Solver Relaxation
@@ -293,6 +306,7 @@ INSFVTKESourceSink::computeQpResidual()
     // }
 
     residual = _pevious_destruction[_current_elem] - _pevious_production[_current_elem];
+    residual += _rho(makeElemArg(_current_elem))*_var.dot(makeElemArg(_current_elem));
 
     // residual *= (1.0 - scaling);
 

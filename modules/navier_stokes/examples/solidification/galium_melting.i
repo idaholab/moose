@@ -19,8 +19,8 @@ advected_interp_method = 'upwind'
 velocity_interp_method = 'rc'
 T_cold = 301.15
 T_hot = 311.15
-Nx = 100
-Ny = 50
+Nx = 20
+Ny = 10
 
 [GlobalParams]
   rhie_chow_user_object = 'rc'
@@ -342,7 +342,7 @@ Ny = 50
 
   # Time-stepping parameters
   start_time = 0.0
-  end_time = 200.0
+  end_time = 50.0
 
   [TimeStepper]
     type = IterationAdaptiveDT
