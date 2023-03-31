@@ -1,3 +1,7 @@
+Some tests are SKIPPED. This is normal as some tests are specific to available resources, or some
+other constraint your machine does not satisfy. If you see failures, or you see `MAX FAILURES`,
+thats a problem! And it needs to be addressed before continuing:
+
 - Supply a report of the *actual* failure (scroll up a ways). For example the following snippet does
   not give the full picture  (created with `./run_tests -i always_bad`):
 

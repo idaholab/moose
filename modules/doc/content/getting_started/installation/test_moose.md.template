@@ -5,8 +5,4 @@ cd {{PATH}}/moose/test
 ./run_tests -j 6
 ```
 
-Some tests are SKIPPED. This is normal as some tests are specific to available resources, or some
-other constraint your machine does not satisfy. If you see failures, or you see `MAX FAILURES`,
-thats a problem! And it needs to be addressed before continuing:
-
-!include faq/example_failing_test.md
+!include faq/example_failing_test.md optional=true
