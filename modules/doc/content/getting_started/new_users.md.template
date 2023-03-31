@@ -2,11 +2,6 @@
 
 Welcome to MOOSE! This page describes some helpful ways to start developing with MOOSE.
 
-<!-- UPDATE=false to load false_update_moose.md page (hack needed for Offline installs) -->
-<!-- leave empty to load up normal update instructions -->
-
-!template load file=installation/{{UPDATE}}update_moose.md.template PATH={{PATH}}
-
 ## Create an Application id=create-an-app
 
 !style! halign=left
@@ -68,6 +63,11 @@ in the [#compile] section.
 !alert tip title=Only enable modules needed
 Each module enabled will increase compilation times, thus it is recommended to enable modules
 as-needed.
+
+<!-- UPDATE=false to load false_update_moose.md page (hack needed for Offline installs) -->
+<!-- leave empty to load up normal update instructions -->
+
+!template load file=installation/{{UPDATE}}update_moose.md.template PATH={{PATH}}
 
 ## Learn More
 

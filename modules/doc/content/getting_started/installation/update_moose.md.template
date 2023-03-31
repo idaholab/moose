@@ -6,6 +6,8 @@ continuously. Therefore, it is important that you continue to update MOOSE as yo
 your application(s); weekly updates are recommended.
 !style-end!
 
+*If this is your first day with MOOSE, you are already up to date. Come back in a week!*
+
 Update MOOSE repository:
 
 ```bash
