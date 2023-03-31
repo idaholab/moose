@@ -46,6 +46,18 @@ apt install openmpi  # Ubuntu, Debian
 dnf install mpich    # CentOS, Rocky, RHEL
 zypper install mpich # OpenSUSE
 ```
+
+If you choose this method, more likely than not you will still need to export variables to enable
+your MPI wrapper:
+
+```bash
+export CC=mpicc CXX=mpicxx FC=mpif90 F90=mpif90 F77=mpif77
+```
+
+Exporting variables is only temporary in the session you executed them in.
+
+!include installation/start_up_profile.md
+
 !alert-end!
 
 !alert note title=Personal Air-Gapped Workstation
@@ -157,21 +169,17 @@ steps.
 
 #### Verify MPI
 
-First, verify an MPI wrapper is in fact available. Do not close this terminal window after running
-the following commands. We need the following set for the remainder of these instructions:
+!style! halign=left
+Before proceeding verify that your MPI wrapper is accessible:
+!style-end!
 
 ```bash
-export CC=mpicc CXX=mpicxx FC=mpif90 F90=mpif90 F77=mpif77
 which $CC $CXX $FC $F77
 ```
 
-The `which` command above should return paths to your MPI wrappers.
-
-If the above command returns nothing, or fewer paths than the 4 we are asking for, something is
-wrong. You need to STOP, and figure out how to enable your MPI wrapper before proceeding. If you are
-operating on an HPC cluster, this normally involves loading an MPI module. If you are operating on
-your personal workstation, you need to follow the instructions on which MPI product you decided to
-install during the Prerequisites section.
+If the above command returns nothing, produces errors, or fewer paths than the 4 we are asking for,
+something is wrong. You need to STOP, and figure out how to enable your MPI wrapper before
+proceeding (discussed in the Prerequisites section).
 
 #### Build PETSc and libMesh
 
@@ -195,23 +203,6 @@ Please submit a detailed log of the error, to the
 [MOOSE Discussion forum](https://github.com/idaholab/moose/discussions).
 
 !template load file=installation/test_moose.md.template PATH=~/projects
-
-## Your Application
-
-!style! halign=left
-With MOOSE built and testing successfully, you should now be able to build your application. The
-only prerequisites before doing so, is to configure your environment to make use of your MPI
-wrapper, and to define where your built copy of MOOSE resides:
-!style-end!
-
-```bash
-export CC=mpicc CXX=mpicxx FC=mpif90 F90=mpif90 F77=mpif77
-```
-
-You will need to export the above variables each time you open a new terminal window on your HPC
-cluster or personal workstation, before you can perform any application development.
-
-!include installation/start_up_profile.md
 
 Now that you have a working MOOSE, and you know how to make your MPI wrapper available, proceed to
 'New Users' to begin your tour of MOOSE!
