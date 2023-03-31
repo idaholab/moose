@@ -102,7 +102,7 @@ OptimizationFunctionInnerProductHelper::getVector(std::vector<Real> & result)
       it.second.resize(nvar);
     result.assign(nvar, 0.0);
 
-    // Integrate in time using quadrature rule
+    // Integrate in time
     std::sort(_time_ip.begin(),
               _time_ip.end(),
               [](const std::pair<Real, std::vector<Real>> & a,
@@ -111,9 +111,8 @@ OptimizationFunctionInnerProductHelper::getVector(std::vector<Real> & result)
     // accumulative manner by storing the integration over previous time steps. However, this
     // is a relatively cheap operation and considering all cases where time steps may be
     // repeated would be difficult.
-    for (std::size_t ti = 1; ti < _time_ip.size(); ++ti)
+    for (const auto & ti : _time_ip)
       for (const auto & i : make_range(nvar))
-        result[i] += (_time_ip[ti].second[i] + _time_ip[ti - 1].second[i]) / 2.0 *
-                     (_time_ip[ti].first - _time_ip[ti - 1].first);
+        result[i] += ti.second[i];
   }
 }
