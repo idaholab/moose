@@ -47,7 +47,7 @@
     [bounded]
       type = Exodiff
       input = main.i
-      cli_args = 'OptimizationReporter/upper_bounds=100 OptimizationReporter/lower_bounds=0
+      cli_args = 'OptimizationReporter/constant_group_upper_bounds=100 OptimizationReporter/constant_group_lower_bounds=0
                   Executioner/tao_solver=taoblmvm -tao_ls_type unit
                   Outputs/file_base=main_bounded_out'
       exodiff = main_bounded_out_forward0.e
@@ -62,6 +62,23 @@
       prereq = 'mesh_source/mesh'
       max_threads = 1 # Optimize executioner does not support multiple threads
       detail = 'performing the inverse optimization with an automatically computed adjoint;'
+    []
+    [restartMesh]
+      type = CheckFiles
+      input = parameter_mesh_restart.i
+      prereq = 'mesh_source/linear'
+      check_files = parameter_mesh_restart_out.e
+      recover = False
+      detail = 'creating a mesh with initial conditions;'
+    []
+    [linearRestart]
+      type = CSVDiff
+      input = main_linearRestart.i
+      csvdiff = main_linearRestart_out_optInfo_0001.csv
+      abs_zero = 1e-4
+      prereq = 'mesh_source/restartMesh'
+      max_threads = 1 # Optimize executioner does not support multiple threads
+      detail = 'performing the inverse optimization with exact solution initial conditions that will make it converge in a single step;'
     []
   []
 
@@ -94,7 +111,7 @@
     [initial_condition]
       type = RunException
       input = main.i
-      cli_args = 'OptimizationReporter/initial_condition=\'0 0\''
+      cli_args = 'OptimizationReporter/constant_group_initial_condition=\'0 0\''
       max_threads = 1 # Optimize executioner does not support multiple threads
       expect_err = 'There must be an initial condition associated with each group of parameters\.'
       detail = 'initial conditions;'
@@ -102,7 +119,7 @@
     [lower_bound]
       type = RunException
       input = main.i
-      cli_args = 'OptimizationReporter/lower_bounds=\'0 0\''
+      cli_args = 'OptimizationReporter/constant_group_lower_bounds=\'0 0\''
       max_threads = 1 # Optimize executioner does not support multiple threads
       expect_err = 'There must be a lower bound associated with each parameter\.'
       detail = 'lower bounds;'
@@ -110,7 +127,7 @@
     [upper_bound]
       type = RunException
       input = main.i
-      cli_args = 'OptimizationReporter/upper_bounds=\'0 0\''
+      cli_args = 'OptimizationReporter/constant_group_upper_bounds=\'0 0\''
       max_threads = 1 # Optimize executioner does not support multiple threads
       expect_err = 'There must be an upper bound associated with each parameter\.'
       detail = 'upper bounds;'

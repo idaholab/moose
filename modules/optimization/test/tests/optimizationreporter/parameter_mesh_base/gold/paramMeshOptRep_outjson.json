@@ -1,0 +1,209 @@
+{
+    "reporters": {
+        "OptimizationReporter": {
+            "type": "ParameterMeshOptimization",
+            "values": {
+                "grad_parameter": {
+                    "type": "std::vector<double>"
+                },
+                "measurement_time": {
+                    "type": "std::vector<double>"
+                },
+                "measurement_values": {
+                    "type": "std::vector<double>"
+                },
+                "measurement_xcoord": {
+                    "type": "std::vector<double>"
+                },
+                "measurement_ycoord": {
+                    "type": "std::vector<double>"
+                },
+                "measurement_zcoord": {
+                    "type": "std::vector<double>"
+                },
+                "misfit_values": {
+                    "type": "std::vector<double>"
+                },
+                "parameter": {
+                    "type": "std::vector<double>"
+                },
+                "simulation_values": {
+                    "type": "std::vector<double>"
+                }
+            }
+        }
+    },
+    "time_steps": [
+        {
+            "OptimizationReporter": {
+                "grad_parameter": [
+                    0.0,
+                    0.0,
+                    0.0,
+                    0.0,
+                    0.0,
+                    0.0,
+                    0.0,
+                    0.0,
+                    0.0,
+                    0.0,
+                    0.0,
+                    0.0,
+                    0.0,
+                    0.0,
+                    0.0,
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "measurement_time": [
+                    0.0,
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "measurement_values": [
+                    11.0,
+                    12.0,
+                    13.0,
+                    14.0
+                ],
+                "measurement_xcoord": [
+                    0.1,
+                    0.4,
+                    0.7,
+                    1.0
+                ],
+                "measurement_ycoord": [
+                    0.2,
+                    0.5,
+                    0.8,
+                    1.1
+                ],
+                "measurement_zcoord": [
+                    0.3,
+                    0.6,
+                    0.9,
+                    1.2
+                ],
+                "misfit_values": [
+                    0.0,
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "parameter": [
+                    0.0,
+                    0.5,
+                    0.5,
+                    0.0,
+                    1.0,
+                    1.0,
+                    0.0,
+                    0.5,
+                    0.5,
+                    0.0,
+                    1.0,
+                    1.0,
+                    0.0,
+                    0.5,
+                    0.5,
+                    0.0,
+                    1.0,
+                    1.0
+                ],
+                "simulation_values": []
+            },
+            "time": 0.0,
+            "time_step": 0
+        },
+        {
+            "OptimizationReporter": {
+                "grad_parameter": [
+                    0.0,
+                    0.0,
+                    0.0,
+                    0.0,
+                    0.0,
+                    0.0,
+                    0.0,
+                    0.0,
+                    0.0,
+                    0.0,
+                    0.0,
+                    0.0,
+                    0.0,
+                    0.0,
+                    0.0,
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "measurement_time": [
+                    0.0,
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "measurement_values": [
+                    11.0,
+                    12.0,
+                    13.0,
+                    14.0
+                ],
+                "measurement_xcoord": [
+                    0.1,
+                    0.4,
+                    0.7,
+                    1.0
+                ],
+                "measurement_ycoord": [
+                    0.2,
+                    0.5,
+                    0.8,
+                    1.1
+                ],
+                "measurement_zcoord": [
+                    0.3,
+                    0.6,
+                    0.9,
+                    1.2
+                ],
+                "misfit_values": [
+                    100.0,
+                    200.0,
+                    300.0,
+                    300.0
+                ],
+                "parameter": [
+                    10.0,
+                    20.0,
+                    30.0,
+                    40.0,
+                    50.0,
+                    60.0,
+                    0.0,
+                    0.0,
+                    0.0,
+                    0.0,
+                    0.0,
+                    0.0,
+                    0.0,
+                    0.0,
+                    0.0,
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "simulation_values": [
+                    111.0,
+                    212.0,
+                    313.0,
+                    314.0
+                ]
+            },
+            "time": 1.0,
+            "time_step": 1
+        }
+    ]
+}

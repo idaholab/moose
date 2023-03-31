@@ -30,7 +30,6 @@ public:
   void finalize() override{};
 
 private:
-  const Real _tol;
   /// Communicator used for operations
   const libMesh::Parallel::Communicator _my_comm;
   OptimizationReporterBase * _optReporter = nullptr;
