@@ -380,28 +380,27 @@ class ApptainerGenerator:
         moose_sha = subprocess.check_output(moose_sha_command, encoding='utf-8', cwd=MOOSE_DIR).rstrip()
 
         definition += '\n\n%labels\n'
-        def add_label(definition, key, value):
+        def add_label(key, value):
             name = 'moose.' + self.project
             if hasattr(self.args, 'modify') and self.args.modify is not None:
                 name += '.modified'
-            definition += f'    {name}.{key} {value}\n'
+            return f'    {name}.{key} {value}\n'
 
-        add_label(definition, 'build.host', socket.gethostname())
-        add_label(definition, 'build.user', os.getenv('USER'))
-        add_label(definition, 'moose.gitsha', moose_sha)
-        add_label(definition, 'version', self.library_meta['tag'])
+        definition += add_label('build.host', socket.gethostname())
+        definition += add_label('build.user', os.getenv('USER'))
+        definition += add_label('moose.gitsha', moose_sha)
+        definition += add_label('version', self.library_meta['tag'])
 
         # If we have CIVET info, add the url
         if 'CIVET_SERVER' in os.environ and 'CIVET_JOB_ID' in os.environ:
             civet_server = os.environ.get('CIVET_SERVER')
             civet_job_id = os.environ.get('CIVET_JOB_ID')
-            add_label(definition, 'build.civetjob', f'{civet_server}/job/{civet_job_id}')
+            definition += add_label('build.civetjob', f'{civet_server}/job/{civet_job_id}')
 
         # For libmesh and petsc, also add the commit
         if self.args.library in ['petsc', 'libmesh']:
-            add_label(definition,
-                      f'{self.args.library}.gitsha',
-                      self.submodule_sha(MOOSE_DIR, self.args.library))
+            definition += add_label(f'{self.args.library}.gitsha',
+                                    self.submodule_sha(MOOSE_DIR, self.args.library))
 
         return definition
 
@@ -506,22 +505,12 @@ class ApptainerGenerator:
     def get_sif_labels(sif_path):
         inspect_cmd = ['apptainer', 'inspect', '-j', sif_path]
         inspection = json.loads(subprocess.check_output(inspect_cmd).decode(sys.stdout.encoding))
-
-        if 'labels' in inspection['data']['attributes']:
-            return inspection['data']['attributes']['labels']
-        return {}
+        return inspection['data']['attributes'].get('labels', {})
 
     @staticmethod
     def build_oras_annotations(container_path, extra_annotations={}):
-        inspect_cmd = ['apptainer', 'inspect', '-j', container_path]
-        inspection = json.loads(subprocess.check_output(inspect_cmd).decode(sys.stdout.encoding))
-
         annotations = {'$manifest': {}}
-        if 'labels' in inspection['data']['attributes']:
-            labels = ApptainerGenerator.get_sif_labels(container_path)
-            for key, value in labels.items():
-                if key not in ['Authors:', 'Version:']:
-                    annotations['$manifest'][key] = value
+        annotations['$manifest'].update(ApptainerGenerator.get_sif_labels(container_path))
         annotations['$manifest'].update(extra_annotations)
         return annotations
 
