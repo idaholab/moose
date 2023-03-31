@@ -36,6 +36,8 @@ public:
 
   virtual ~NonlinearThread();
 
+  virtual void operator()(const ConstElemRange & range, bool bypass_threading = false) override;
+
   virtual void subdomainChanged() override;
   virtual void onElement(const Elem * elem) override;
   virtual void onBoundary(const Elem * elem,
@@ -106,4 +108,7 @@ protected:
 
   /// Current subdomain FVElementalKernels
   std::vector<FVElementalKernel *> _fv_kernels;
+
+  /// Whether there are any active residual objects; otherwise we will do an early return
+  const bool _has_active_objects;
 };
