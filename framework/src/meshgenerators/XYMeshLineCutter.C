@@ -117,11 +117,11 @@ XYMeshLineCutter::generate()
     try
     {
       MooseMeshXYCuttingUtils::lineRemoverCutElem(mesh,
-                                                _cut_line_params,
-                                                tri_subdomain_id_shift,
-                                                _tri_elem_subdomain_name_suffix,
-                                                block_id_to_remove,
-                                                _new_boundary_id);
+                                                  _cut_line_params,
+                                                  tri_subdomain_id_shift,
+                                                  _tri_elem_subdomain_name_suffix,
+                                                  block_id_to_remove,
+                                                  _new_boundary_id);
     }
     catch (MooseException & e)
     {
@@ -136,12 +136,12 @@ XYMeshLineCutter::generate()
     try
     {
       MooseMeshXYCuttingUtils::lineRemoverMoveNode(mesh,
-                                                 _cut_line_params,
-                                                 block_id_to_remove,
-                                                 subdomain_ids_set,
-                                                 _new_boundary_id,
-                                                 _input_mesh_external_boundary_id,
-                                                 _other_boundaries_to_conform);
+                                                   _cut_line_params,
+                                                   block_id_to_remove,
+                                                   subdomain_ids_set,
+                                                   _new_boundary_id,
+                                                   _input_mesh_external_boundary_id,
+                                                   _other_boundaries_to_conform);
     }
     catch (MooseException & e)
     {

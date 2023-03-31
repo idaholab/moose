@@ -93,8 +93,11 @@ Point twoLineIntersection(const Real param_11,
  * @param param_3 parameter 3 (c) in line formula a*x+b*y+c=0 for the second straight line
  * @return intersect point of the two lines
  */
-Point twoPointandLineIntersection(
-    const Point & pt1, const Point & pt2, const Real param_1, const Real param_2, const Real param_3);
+Point twoPointandLineIntersection(const Point & pt1,
+                                  const Point & pt2,
+                                  const Real param_1,
+                                  const Real param_2,
+                                  const Real param_3);
 
 /**
  * Fixes degenerate QUAD elements created by the hexagonal mesh trimming by converting them into

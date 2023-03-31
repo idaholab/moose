@@ -182,11 +182,11 @@ PolygonMeshTrimmerBase::centerTrimmer(ReplicatedMesh & mesh,
     try
     {
       MooseMeshXYCuttingUtils::lineRemoverMoveNode(mesh,
-                                                 bdry_pars[i],
-                                                 block_id_to_remove,
-                                                 subdomain_ids_set,
-                                                 center_trimming_section_boundary_id,
-                                                 external_boundary_id);
+                                                   bdry_pars[i],
+                                                   block_id_to_remove,
+                                                   subdomain_ids_set,
+                                                   center_trimming_section_boundary_id,
+                                                   external_boundary_id);
     }
     catch (MooseException & e)
     {
@@ -239,13 +239,13 @@ PolygonMeshTrimmerBase::peripheralTrimmer(
       try
       {
         MooseMeshXYCuttingUtils::lineRemoverMoveNode(mesh,
-                                                   bdry_pars[i],
-                                                   block_id_to_remove,
-                                                   subdomain_ids_set,
-                                                   peripheral_trimming_section_boundary_id,
-                                                   external_boundary_id,
-                                                   std::vector<boundary_id_type>(),
-                                                   true);
+                                                     bdry_pars[i],
+                                                     block_id_to_remove,
+                                                     subdomain_ids_set,
+                                                     peripheral_trimming_section_boundary_id,
+                                                     external_boundary_id,
+                                                     std::vector<boundary_id_type>(),
+                                                     true);
       }
       catch (MooseException & e)
       {
