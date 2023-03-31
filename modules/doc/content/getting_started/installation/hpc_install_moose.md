@@ -34,8 +34,8 @@ Check to see if the following variables are set:
 echo $CC $CXX $FC $F90 $F77
 ```
 
-If nothing returns, or what does return does *not* include MPI naming conventions (`CC=gcc` and not
-`CC=mpicc` for example), you need to set them manually each and every time you load said
+If nothing returns, or what does return does *not* include MPI naming conventions (`$CC` is `gcc`
+and not `mpicc` like we need), you need to set them manually each and every time you load said
 environment:
 
 ```bash

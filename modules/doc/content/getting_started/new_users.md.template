@@ -32,10 +32,10 @@ applications, but you are free to choose whatever name suits your needs.
 Do not attempt to run this script while inside the MOOSE repository. Doing so will result in an
 error.
 
-### Compile and Test Your Application id=compile
+## Build and Test id=compile
 
 !style! halign=left
-Enter you application's directory, build and then run tests:
+Enter your application's directory, build your application and then run tests:
 !style-end!
 
 ```bash
@@ -44,10 +44,9 @@ make -j 6
 ./run_tests -j 6
 ```
 
-
-If the application is working correctly, the output shows a single passing test. This indicates that
-the application is ready to be further developed. Be sure to recompile and test the application each
-time you update moose MOOSE.
+If your application is working correctly, the output shows a single passing test. This indicates
+that your application is ready to be further developed. Be sure to recompile and test your
+application each time you update MOOSE.
 
 ### Enable Modules
 

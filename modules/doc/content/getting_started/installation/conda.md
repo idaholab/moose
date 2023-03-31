@@ -24,9 +24,6 @@ instructions to create an environment on your machine using Conda.
 
 !template load file=installation/test_moose.md.template PATH=~/projects
 
-If your tests ran successfully, head back over to the
-[getting_started/installation/index.md optional=True] page to continue your tour of MOOSE.
-
 !include getting_started/installation/uninstall_conda.md
 
 !include installation/conda_pagination.md optional=True
