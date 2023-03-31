@@ -2500,6 +2500,18 @@ MooseMesh::effectiveSpatialDimension() const
   return 1;
 }
 
+unsigned int
+MooseMesh::getBlocksMaxDimension(const std::vector<SubdomainName> & blocks) const
+{
+  unsigned short dim = 0;
+  const auto subdomain_ids = getSubdomainIDs(blocks);
+  const std::set<SubdomainID> subdomain_ids_set(subdomain_ids.begin(), subdomain_ids.end());
+  for (const auto & elem : getMesh().active_subdomain_set_elements_ptr_range(subdomain_ids_set))
+    dim = std::max(dim, elem->dim());
+
+  return dim;
+}
+
 std::vector<BoundaryID>
 MooseMesh::getBoundaryIDs(const Elem * const elem, const unsigned short int side) const
 {

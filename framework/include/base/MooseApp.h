@@ -713,7 +713,7 @@ public:
   const MooseMesh * masterMesh() const { return _master_mesh; }
 
   /**
-   * Returns a pointer to the master mesh
+   * Returns a pointer to the master displaced mesh
    */
   const MooseMesh * masterDisplacedMesh() const { return _master_displaced_mesh; }
 
