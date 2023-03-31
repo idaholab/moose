@@ -15,7 +15,7 @@ These methods describe the mapping from high to low dimensional spaces and the c
 
 #### The Mappings block
 
-In an input file, one can create Mapping Objects by specifying them in the `Mappings` block.
+In an input file, one can create Mapping Objects by specifying them in the `[Mappings]` block.
 
 #### Mapping from high- to low-dimensional spaces
 

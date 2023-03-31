@@ -81,7 +81,7 @@ Creating a mapping object:
 
 Loading a mapping object:
 
-!listing test/tests/userobjects/inverse_mappings/inverse_map.i block=Mappings
+!listing test/tests/userobjects/inverse_mapping/inverse_map.i block=Mappings
 
 ## Syntax
 
