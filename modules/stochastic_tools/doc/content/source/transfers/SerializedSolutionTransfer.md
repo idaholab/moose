@@ -21,7 +21,9 @@ using the communicator of the sub-application. Based on the value of the [!param
 
 ## Example Syntax
 
-SOMETHING HERE
+!listing test/tests/transfers/serialized_solution_transfer/sst_main.i block=Transfers
+
+## Synatax
 
 !syntax parameters /Transfers/SerializedSolutionTransfer
 

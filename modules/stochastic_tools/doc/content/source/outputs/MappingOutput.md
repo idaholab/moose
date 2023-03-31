@@ -5,12 +5,13 @@
 ## Overview
 
 [Mapping objects](Mappings/index.md), once trained, can be output to a binary file for later
-use by using this object. All data within the model that was delcared using
+use by using this object. All data within the model that was declared using
 `declareMappingData` is automatically stored in the generated file.
 
 ## Example Input File Syntax
 
-SOMETHING HERE
+!listing test/tests/reporters/mapping/map_main.i block=Outputs
+## Syntax
 
 !syntax parameters /Outputs/MappingOutput
 

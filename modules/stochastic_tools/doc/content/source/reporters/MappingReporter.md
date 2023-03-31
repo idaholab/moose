@@ -25,7 +25,11 @@ mapping object from the `Mappings` block. The variables which need to be mapped 
 
 ## Example Input File Syntax
 
-SOMETHINGHERE
+!listing test/tests/reporters/mapping/map_main.i block=Reporters
+
+!listing test/tests/reporters/mapping/load_main.i block=Reporters
+
+## Syntax
 
 !syntax parameters /Reporters/MappingReporter
 

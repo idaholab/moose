@@ -21,7 +21,9 @@ this object expect the user to input the real variable name as well using the [!
 
 ## Example Input File Syntax
 
-SOMETHINGHERE
+!listing test/tests/userobjects/inverse_mapping/inverse_map.i block=UserObjects
+
+## Syntax
 
 !syntax parameters /UserObjects/InverseMapping
 

@@ -413,16 +413,16 @@ PODMapping::leftBase(const VariableName & vname, const unsigned int base_i)
   return _left_basis_functions[vname][base_i];
 }
 
-  const DenseVector<Real> &
-  PODMapping::rightBase(const VariableName & vname, const unsigned int base_i)
-  {
-    mooseAssert(std::find(_variable_names.begin(), _variable_names.end(), vname) !=
-                    _variable_names.end(),
-                "Variable " + vname + " is not in PODMapping!");
+const DenseVector<Real> &
+PODMapping::rightBase(const VariableName & vname, const unsigned int base_i)
+{
+  mooseAssert(std::find(_variable_names.begin(), _variable_names.end(), vname) !=
+                  _variable_names.end(),
+              "Variable " + vname + " is not in PODMapping!");
 
-    mooseAssert(base_i < _right_basis_functions[vname].size(),
-                "The POD for " + vname + " only has " +
-                    std::to_string(_right_basis_functions[vname].size()) + " right modes!");
+  mooseAssert(base_i < _right_basis_functions[vname].size(),
+              "The POD for " + vname + " only has " +
+                  std::to_string(_right_basis_functions[vname].size()) + " right modes!");
 
-    return _right_basis_functions[vname][base_i];
-  }
+  return _right_basis_functions[vname][base_i];
+}

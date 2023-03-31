@@ -67,11 +67,20 @@ The process for building the mapping is the following:
 
    The filtering parameter $\tau_v$ van be specified for every variable using input parameter [!param](/Mappings/PODMapping/energy_threshold).
 
-
+Once a mapping is trained, one can save it into a binary file using [MappingOutput.md] and load it by specifying
+the [!param](/Mappings/PODMapping/filename) parameter in the object.
 
 ## Example Input File Syntax
 
-% !listing test/tests/surrogates/gaussian_process/GP_Matern_half_int.i block=Covariance
+Creating a mapping object:
+
+!listing test/tests/mappings/pod_mapping/pod_mapping_main.i block=Mappings
+
+Loading a mapping object:
+
+!listing test/tests/userobjects/inverse_mappings/inverse_map.i block=Mappings
+
+## Syntax
 
 !syntax parameters /Mappings/PODMapping
 

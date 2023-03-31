@@ -9,7 +9,9 @@ The solution fields are kept distributed suing the communicator of the applicati
 
 ## Example Input File Syntax
 
-SOMETHINGHERE
+!listing test/tests/reporters/parallel_storage/sub.i block=Reporters
+
+## Syntax
 
 !syntax parameters /Reporters/SolutionContainer
 

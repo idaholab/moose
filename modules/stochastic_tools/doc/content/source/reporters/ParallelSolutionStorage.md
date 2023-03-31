@@ -18,7 +18,9 @@ global sample index. External objects can deposit data in this container using t
 
 ## Example Input File Syntax
 
-SOMETHINGHERE
+!listing test/tests/reporters/parallel_storage/parallel_storage_main.i block=Reporters
+
+## Syntax
 
 !syntax parameters /Reporters/ParallelSolutionStorage
 
