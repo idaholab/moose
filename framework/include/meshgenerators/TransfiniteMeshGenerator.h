@@ -80,15 +80,16 @@ protected:
   // The input is expected to be the distance from a stright line at the middle of an edge
   Real computeRadius(const Point & P1, const Point & P2, const Point & P3) const;
 
-  //To generate the origin of a circle that passes through 3 points we need to solve a system of
+  // To generate the origin of a circle that passes through 3 points we need to solve a system of
   // 3 equations. The system is solved separately and this routine implements its solution.
   Point computeOrigin(const Point & P1, const Point & P2, const Point & P3) const;
 
-  //Given two points and a distance from a straight line at the middle of the edge, we have two
+  // Given two points and a distance from a straight line at the middle of the edge, we have two
   // possible solutions for the origin of the circle. This routine chooses the midpoint given
   // the orientation of the edge specified by the outward vector. The user provides the orientation
-  // using a sign convention on the "dist" parameter, with positive for inward and negative for outward.
-  // The outward vector is precalculated and used in the routine to choose the correct midpoint.
+  // using a sign convention on the "dist" parameter, with positive for inward and negative for
+  // outward. The outward vector is precalculated and used in the routine to choose the correct
+  // midpoint.
   Point computeMidPoint(const Point & P1,
                         const Point & P2,
                         const Real & dist,

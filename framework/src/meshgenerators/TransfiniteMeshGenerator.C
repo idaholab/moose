@@ -60,18 +60,19 @@ TransfiniteMeshGenerator::validParams()
       "bias_y>=1.0 & bias_y<=2",
       "The amount by which to grow (or shrink) the cells in the y-direction.");
 
-  params.addClassDescription("Creates a QUAD4 mesh given a set of corner vertices and edge types. "
-                             "The edge type can be either LINE, CIRCARC, DISCRETE or PARSED, with "
-                             "LINE as the default option. "
-                             "For the non-default options the user needs to specify additional "
-                             "parameters via the edge_parameter option "
-                             "as follows: for CIRCARC the deviation of the midpoint from an "
-                             "arccircle, for DISCRETE a set of points, or "
-                             "a paramterization via the PARSED option. Opposite edges may have "
-                             "different distributions s long as the "
-                             "number of points is identical. Along opposite edges a different point "
-                             "distribution can be prescribed "
-                             "via the options bias_x or bias_y for opposing edges.");
+  params.addClassDescription(
+      "Creates a QUAD4 mesh given a set of corner vertices and edge types. "
+      "The edge type can be either LINE, CIRCARC, DISCRETE or PARSED, with "
+      "LINE as the default option. "
+      "For the non-default options the user needs to specify additional "
+      "parameters via the edge_parameter option "
+      "as follows: for CIRCARC the deviation of the midpoint from an "
+      "arccircle, for DISCRETE a set of points, or "
+      "a paramterization via the PARSED option. Opposite edges may have "
+      "different distributions s long as the "
+      "number of points is identical. Along opposite edges a different point "
+      "distribution can be prescribed "
+      "via the options bias_x or bias_y for opposing edges.");
 
   params.addParamNamesToGroup("bottom_type left_type top_type right_type", "Edge type");
   params.addParamNamesToGroup("bottom_parameter left_parameter top_parameter right_parameter",
@@ -141,9 +142,12 @@ TransfiniteMeshGenerator::generate()
 
   std::vector<Point> edge_bottom =
       getEdge(V00, V10, _nx, _bottom_type, _bottom_parameter, outward_vec[0], param_x_dir);
-  std::vector<Point> edge_top = getEdge(V01, V11, _nx, _top_type, _top_parameter, outward_vec[1], param_x_dir);
-  std::vector<Point> edge_left = getEdge(V00, V01, _ny, _left_type, _left_parameter, outward_vec[2], param_y_dir);
-  std::vector<Point> edge_right = getEdge(V10, V11, _ny, _right_type, _right_parameter, outward_vec[3], param_y_dir);
+  std::vector<Point> edge_top =
+      getEdge(V01, V11, _nx, _top_type, _top_parameter, outward_vec[1], param_x_dir);
+  std::vector<Point> edge_left =
+      getEdge(V00, V01, _ny, _left_type, _left_parameter, outward_vec[2], param_y_dir);
+  std::vector<Point> edge_right =
+      getEdge(V10, V11, _ny, _right_type, _right_parameter, outward_vec[3], param_y_dir);
 
   // Used for the parametrization on edge pairs, provided by the point distribution according to
   // biases
