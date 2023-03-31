@@ -8,7 +8,7 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "PolygonMeshTrimmerBase.h"
-#include "MooseMeshCuttingUtils.h"
+#include "MooseMeshXYCuttingUtils.h"
 #include "MooseMeshUtils.h"
 #include "MathUtils.h"
 
@@ -149,7 +149,7 @@ PolygonMeshTrimmerBase::generate()
         _center_trimming_section_boundary;
   }
 
-  if (MooseMeshCuttingUtils::quasiTriElementsFixer(
+  if (MooseMeshXYCuttingUtils::quasiTriElementsFixer(
           mesh, subdomain_ids_set, _tri_elem_subdomain_shift, _tri_elem_subdomain_name_suffix))
     mesh.prepare_for_use();
 
@@ -181,7 +181,7 @@ PolygonMeshTrimmerBase::centerTrimmer(ReplicatedMesh & mesh,
   for (unsigned int i = 0; i < bdry_pars.size(); i++)
     try
     {
-      MooseMeshCuttingUtils::lineRemoverMoveNode(mesh,
+      MooseMeshXYCuttingUtils::lineRemoverMoveNode(mesh,
                                                  bdry_pars[i],
                                                  block_id_to_remove,
                                                  subdomain_ids_set,
@@ -238,7 +238,7 @@ PolygonMeshTrimmerBase::peripheralTrimmer(
     if (trim_peripheral_region[i])
       try
       {
-        MooseMeshCuttingUtils::lineRemoverMoveNode(mesh,
+        MooseMeshXYCuttingUtils::lineRemoverMoveNode(mesh,
                                                    bdry_pars[i],
                                                    block_id_to_remove,
                                                    subdomain_ids_set,

@@ -17,7 +17,7 @@
 #include "MooseTypes.h"
 #include "FaceInfo.h"
 
-namespace MooseMeshCuttingUtils
+namespace MooseMeshXYCuttingUtils
 {
 /**
  * Removes all the elements on one side of a given line and deforms the elements intercepted by
@@ -37,12 +37,12 @@ namespace MooseMeshCuttingUtils
  * false means ax+by+c<0
  */
 void lineRemoverMoveNode(ReplicatedMesh & mesh,
-                         const std::vector<Real> bdry_pars,
+                         const std::vector<Real> & bdry_pars,
                          const subdomain_id_type block_id_to_remove,
-                         const std::set<subdomain_id_type> subdomain_ids_set,
+                         const std::set<subdomain_id_type> & subdomain_ids_set,
                          const boundary_id_type trimming_section_boundary_id,
                          const boundary_id_type external_boundary_id,
-                         const std::vector<boundary_id_type> other_boundaries_to_conform =
+                         const std::vector<boundary_id_type> & other_boundaries_to_conform =
                              std::vector<boundary_id_type>(),
                          const bool assign_ext_to_new = false,
                          const bool side_to_remove = true);
@@ -94,7 +94,7 @@ Point twoLineIntersection(const Real param_11,
  * @return intersect point of the two lines
  */
 Point twoPointandLineIntersection(
-    const Point pt1, const Point pt2, const Real param_1, const Real param_2, const Real param_3);
+    const Point & pt1, const Point & pt2, const Real param_1, const Real param_2, const Real param_3);
 
 /**
  * Fixes degenerate QUAD elements created by the hexagonal mesh trimming by converting them into
@@ -107,7 +107,7 @@ Point twoPointandLineIntersection(
  */
 bool
 quasiTriElementsFixer(ReplicatedMesh & mesh,
-                      const std::set<subdomain_id_type> subdomain_ids_set,
+                      const std::set<subdomain_id_type> & subdomain_ids_set,
                       const subdomain_id_type tri_elem_subdomain_shift = Moose::INVALID_BLOCK_ID,
                       const SubdomainName tri_elem_subdomain_name_suffix = "tri");
 
@@ -116,14 +116,14 @@ quasiTriElementsFixer(ReplicatedMesh & mesh,
  * @param elem the element that needs to be investigated
  * @return sizes of all the internal angles, sorted by their size
  */
-std::vector<std::pair<Real, unsigned int>> vertex_angles(Elem & elem);
+std::vector<std::pair<Real, unsigned int>> vertex_angles(const Elem & elem);
 
 /**
  * Calculates the distances between the vertices of a given 2D element
  * @param elem the element that needs to be investigated
  * @return values of all the distances, sorted by their value
  */
-std::vector<std::pair<Real, unsigned int>> vertex_distances(Elem & elem);
+std::vector<std::pair<Real, unsigned int>> vertex_distances(const Elem & elem);
 
 /**
  * Split a TRI3 element into three TRI3 elements based on two nodes on the two sides of the triangle
@@ -186,7 +186,7 @@ void quadElemSplitter(ReplicatedMesh & mesh,
  * due to the conversion
  */
 void quadToTriOnLine(ReplicatedMesh & mesh,
-                     const std::vector<Real> cut_line_params,
+                     const std::vector<Real> & cut_line_params,
                      const dof_id_type tri_subdomain_id_shift,
                      const SubdomainName tri_elem_subdomain_name_suffix);
 
@@ -200,7 +200,7 @@ void quadToTriOnLine(ReplicatedMesh & mesh,
  * @param new_boundary_id boundary id of the new boundary that forms due to the trimming
  */
 void lineRemoverCutElemTri(ReplicatedMesh & mesh,
-                           const std::vector<Real> cut_line_params,
+                           const std::vector<Real> & cut_line_params,
                            const subdomain_id_type block_id_to_remove,
                            const boundary_id_type new_boundary_id);
 
@@ -218,7 +218,7 @@ void lineRemoverCutElemTri(ReplicatedMesh & mesh,
  * @param new_boundary_id boundary id of the new boundary that forms due to the trimming
  */
 void lineRemoverCutElem(ReplicatedMesh & mesh,
-                        const std::vector<Real> cut_line_params,
+                        const std::vector<Real> & cut_line_params,
                         const dof_id_type tri_subdomain_id_shift,
                         const SubdomainName tri_elem_subdomain_name_suffix,
                         const subdomain_id_type block_id_to_remove,

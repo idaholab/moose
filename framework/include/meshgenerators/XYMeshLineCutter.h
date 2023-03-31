@@ -28,7 +28,7 @@ public:
 
 protected:
   /// Method to cut the input mesh
-  const enum class CutType { CUT_ELEM, MOV_NODE } _cutting_type;
+  const enum class CutType { CUT_ELEM_TRI, MOV_NODE } _cutting_type;
   /// Name of the input mesh
   const MeshGeneratorName _input_name;
   /// Cutting line parameters, which are a, b, and c in line equation a*x+b*y+c=0. Note that a*x+b*y+c>0 part is being removed.

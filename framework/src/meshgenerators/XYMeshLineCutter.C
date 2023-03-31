@@ -8,7 +8,8 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "XYMeshLineCutter.h"
-#include "MooseMeshCuttingUtils.h"
+#include "MooseMeshXYCuttingUtils.h"
+#include "MooseMeshUtils.h"
 
 // C++ includes
 #include <cmath>
@@ -20,11 +21,12 @@ XYMeshLineCutter::validParams()
 {
   InputParameters params = MeshGenerator::validParams();
 
-  MooseEnum cutting_type("CUT_ELEM MOV_NODE", "CUT_ELEM");
+  MooseEnum cutting_type("CUT_ELEM_TRI MOV_NODE", "CUT_ELEM_TRI");
   params.addParam<MooseEnum>(
       "cutting_type",
       cutting_type,
-      "Which method is to be used to cut the input mesh. 'CUT_ELEM' is the recommended method but "
+      "Which method is to be used to cut the input mesh. 'CUT_ELEM_TRI' is the recommended method "
+      "but "
       "it may cause fine elements near the cutting line, while 'MOV_NODE' deforms subdomain "
       "boundaries if they are not perpendicular to the cutting line.");
 
@@ -52,9 +54,8 @@ XYMeshLineCutter::validParams()
 
   params.addClassDescription(
       "This XYMeshLineCutter object is designed to trim the input mesh by removing all the "
-      "elements "
-      "on one side of a given straight line with special processing on the elements crossed by the "
-      "cutting line to ensure a smooth cross-section.");
+      "elements on one side of a given straight line with special processing on the elements "
+      "crossed by the cutting line to ensure a smooth cross-section.");
 
   return params;
 }
@@ -81,7 +82,8 @@ XYMeshLineCutter::XYMeshLineCutter(const InputParameters & parameters)
 {
   if (_cut_line_params.size() != 3)
     paramError("cut_line_params", "this parameter must have three elements.");
-  if (_cut_line_params[0] < libMesh::TOLERANCE && _cut_line_params[1] < libMesh::TOLERANCE)
+  if (MooseUtils::absoluteFuzzyEqual(_cut_line_params[0], 0.0) &&
+      MooseUtils::absoluteFuzzyEqual(_cut_line_params[1], 0.0))
     paramError("cut_line_params", "At lease one of the first two elements must be non-zero.");
   if (_input_mesh_external_boundary_id == Moose::INVALID_BOUNDARY_ID &&
       _cutting_type == CutType::MOV_NODE)
@@ -104,17 +106,17 @@ XYMeshLineCutter::generate()
 
   std::set<subdomain_id_type> subdomain_ids_set;
   mesh.subdomain_ids(subdomain_ids_set);
-  const subdomain_id_type max_subdomain_id = *subdomain_ids_set.rbegin() + 2;
-  const subdomain_id_type block_id_to_remove = max_subdomain_id - 1;
+  const subdomain_id_type max_subdomain_id = *subdomain_ids_set.rbegin();
+  const subdomain_id_type block_id_to_remove = max_subdomain_id + 1;
   const subdomain_id_type tri_subdomain_id_shift =
-      _tri_elem_subdomain_shift == Moose::INVALID_BLOCK_ID ? max_subdomain_id
+      _tri_elem_subdomain_shift == Moose::INVALID_BLOCK_ID ? max_subdomain_id + 2
                                                            : _tri_elem_subdomain_shift;
 
-  if (_cutting_type == CutType::CUT_ELEM)
+  if (_cutting_type == CutType::CUT_ELEM_TRI)
   {
     try
     {
-      MooseMeshCuttingUtils::lineRemoverCutElem(mesh,
+      MooseMeshXYCuttingUtils::lineRemoverCutElem(mesh,
                                                 _cut_line_params,
                                                 tri_subdomain_id_shift,
                                                 _tri_elem_subdomain_name_suffix,
@@ -133,7 +135,7 @@ XYMeshLineCutter::generate()
   {
     try
     {
-      MooseMeshCuttingUtils::lineRemoverMoveNode(mesh,
+      MooseMeshXYCuttingUtils::lineRemoverMoveNode(mesh,
                                                  _cut_line_params,
                                                  block_id_to_remove,
                                                  subdomain_ids_set,
@@ -151,7 +153,7 @@ XYMeshLineCutter::generate()
         paramError("tri_elem_subdomain_name_suffix",
                    "The new subdomain name already exists in the mesh.");
     }
-    MooseMeshCuttingUtils::quasiTriElementsFixer(
+    MooseMeshXYCuttingUtils::quasiTriElementsFixer(
         mesh, subdomain_ids_set, tri_subdomain_id_shift, _tri_elem_subdomain_name_suffix);
   }
 

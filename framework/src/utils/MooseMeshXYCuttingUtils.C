@@ -8,7 +8,7 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 // MOOSE includes
-#include "MooseMeshCuttingUtils.h"
+#include "MooseMeshXYCuttingUtils.h"
 #include "MooseMeshUtils.h"
 
 #include "libmesh/elem.h"
@@ -18,25 +18,23 @@
 #include "libmesh/parallel_algebra.h"
 #include "libmesh/face_tri3.h"
 
-namespace MooseMeshCuttingUtils
+namespace MooseMeshXYCuttingUtils
 {
 
 void
 lineRemoverMoveNode(ReplicatedMesh & mesh,
-                    const std::vector<Real> bdry_pars,
+                    const std::vector<Real> & bdry_pars,
                     const subdomain_id_type block_id_to_remove,
-                    const std::set<subdomain_id_type> subdomain_ids_set,
+                    const std::set<subdomain_id_type> & subdomain_ids_set,
                     const boundary_id_type trimming_section_boundary_id,
                     const boundary_id_type external_boundary_id,
-                    const std::vector<boundary_id_type> other_boundaries_to_conform,
+                    const std::vector<boundary_id_type> & other_boundaries_to_conform,
                     const bool assign_ext_to_new,
                     const bool side_to_remove)
 {
   // Build boundary information of the mesh
   BoundaryInfo & boundary_info = mesh.get_boundary_info();
   auto bdry_side_list = boundary_info.build_side_list();
-  boundary_info.build_node_list_from_side_list();
-  auto bdry_node_list = boundary_info.build_node_list();
   // Only select the boundaries_to_conform
   std::vector<std::tuple<dof_id_type, unsigned short int, boundary_id_type>> slc_bdry_side_list;
   for (unsigned int i = 0; i < bdry_side_list.size(); i++)
@@ -56,6 +54,10 @@ lineRemoverMoveNode(ReplicatedMesh & mesh,
     unsigned short removal_side_count = 0;
     for (unsigned int i = 0; i < (*elem_it)->n_vertices(); i++)
     {
+      // First check if the vertex is on the XY-Plane
+      if (!MooseUtils::absoluteFuzzyEqual((*elem_it)->point(i)(2), 0.0))
+        mooseError(
+            "MooseMeshXYCuttingUtils::lineRemoverMoveNode() only works for 2D meshes in XY plane.");
       if (lineSideDeterminator((*elem_it)->point(i)(0),
                                (*elem_it)->point(i)(1),
                                bdry_pars[0],
@@ -114,7 +116,7 @@ lineRemoverMoveNode(ReplicatedMesh & mesh,
     for (unsigned int i = 0; i < (*elem_it)->n_sides(); i++)
     {
       if ((*elem_it)->neighbor_ptr(i) != nullptr)
-        if ((*((*elem_it)->neighbor_ptr(i))).subdomain_id() == block_id_to_remove)
+        if ((*elem_it)->neighbor_ptr(i)->subdomain_id() == block_id_to_remove)
         {
           node_list.push_back((*elem_it)->side_ptr(i)->node_ptr(0)->id());
           node_list.push_back((*elem_it)->side_ptr(i)->node_ptr(1)->id());
@@ -200,14 +202,12 @@ lineRemoverMoveNode(ReplicatedMesh & mesh,
   // move nodes
   for (unsigned int i = 0; i < node_list.size(); i++)
   {
-    // Only one node in trimmed region
-    // This means the node is on both the trimming boundary and the original external boundary.
-    // In order to keep the shape of the original external boundary, the node is moved along the
-    // original external boundary.
+    // This means the node is on both the trimming boundary and the original external
+    // boundary/selected interface boundaries. In order to keep the shape of the original external
+    // boundary, the node is moved along the original external boundary.
     if (node_list_flag[i])
       *(mesh.node_ptr(node_list[i])) = node_list_point[i];
-    // Two nodes in trimmed region, only one is moved
-    // This means the node is in the middle of the trimming boundary.
+    // This means the node does not need to conform to any boundaries.
     // Just move it along the normal direction of the trimming line.
     else
     {
@@ -286,8 +286,11 @@ twoLineIntersection(const Real param_11,
 }
 
 Point
-twoPointandLineIntersection(
-    const Point pt1, const Point pt2, const Real param_1, const Real param_2, const Real param_3)
+twoPointandLineIntersection(const Point & pt1,
+                            const Point & pt2,
+                            const Real param_1,
+                            const Real param_2,
+                            const Real param_3)
 {
   return twoLineIntersection(param_1,
                              param_2,
@@ -299,7 +302,7 @@ twoPointandLineIntersection(
 
 bool
 quasiTriElementsFixer(ReplicatedMesh & mesh,
-                      const std::set<subdomain_id_type> subdomain_ids_set,
+                      const std::set<subdomain_id_type> & subdomain_ids_set,
                       const subdomain_id_type tri_elem_subdomain_shift,
                       const SubdomainName tri_elem_subdomain_name_suffix)
 {
@@ -414,7 +417,7 @@ quasiTriElementsFixer(ReplicatedMesh & mesh,
 }
 
 std::vector<std::pair<Real, unsigned int>>
-vertex_angles(Elem & elem)
+vertex_angles(const Elem & elem)
 {
   std::vector<std::pair<Real, unsigned int>> angles;
   const unsigned int n_vertices = elem.n_vertices();
@@ -435,7 +438,7 @@ vertex_angles(Elem & elem)
 }
 
 std::vector<std::pair<Real, unsigned int>>
-vertex_distances(Elem & elem)
+vertex_distances(const Elem & elem)
 {
   std::vector<std::pair<Real, unsigned int>> distances;
   const unsigned int n_vertices = elem.n_vertices();
@@ -444,8 +447,8 @@ vertex_distances(Elem & elem)
   {
     Point v1 = (*elem.node_ptr((i + 1) % n_vertices) - *elem.node_ptr(i % n_vertices));
     distances.push_back(std::make_pair(v1.norm(), i));
-    std::sort(distances.begin(), distances.end());
   }
+  std::sort(distances.begin(), distances.end());
   return distances;
 }
 
@@ -654,7 +657,7 @@ quadElemSplitter(ReplicatedMesh & mesh,
 
 void
 quadToTriOnLine(ReplicatedMesh & mesh,
-                const std::vector<Real> cut_line_params,
+                const std::vector<Real> & cut_line_params,
                 const dof_id_type tri_subdomain_id_shift,
                 const SubdomainName tri_elem_subdomain_name_suffix)
 {
@@ -713,11 +716,11 @@ quadToTriOnLine(ReplicatedMesh & mesh,
 
 void
 lineRemoverCutElemTri(ReplicatedMesh & mesh,
-                      const std::vector<Real> cut_line_params,
+                      const std::vector<Real> & cut_line_params,
                       const subdomain_id_type block_id_to_remove,
                       const boundary_id_type new_boundary_id)
 {
-  // Find All the elements that is across the cutting line
+  // Find all the elements that are across the cutting line
   std::vector<dof_id_type> cross_elems;
   // A vector for element specific information
   std::vector<std::vector<std::pair<dof_id_type, dof_id_type>>> node_pairs_vec;
@@ -728,15 +731,16 @@ lineRemoverCutElemTri(ReplicatedMesh & mesh,
   {
     std::vector<unsigned short> node_side_rec;
     const auto n_vertices = (*elem_it)->n_vertices();
+    node_side_rec.resize(n_vertices);
     for (unsigned int i = 0; i < n_vertices; i++)
     {
+      // First check if the vertex is in the XY Plane
+      if (!MooseUtils::absoluteFuzzyEqual((*elem_it)->point(i)(2), 0.0))
+        mooseError("MooseMeshXYCuttingUtils::lineRemoverCutElemTri() only works for 2D meshes in "
+                   "XY Plane.");
       const Point v_point = (*elem_it)->point(i);
-      node_side_rec.push_back(lineSideDeterminator(v_point(0),
-                                                   v_point(1),
-                                                   cut_line_params[0],
-                                                   cut_line_params[1],
-                                                   cut_line_params[2],
-                                                   true));
+      node_side_rec[i] = lineSideDeterminator(
+          v_point(0), v_point(1), cut_line_params[0], cut_line_params[1], cut_line_params[2], true);
     }
     if (std::accumulate(node_side_rec.begin(), node_side_rec.end(), 0) == (int)node_side_rec.size())
     {
@@ -903,7 +907,7 @@ lineRemoverCutElemTri(ReplicatedMesh & mesh,
 
 void
 lineRemoverCutElem(ReplicatedMesh & mesh,
-                   const std::vector<Real> cut_line_params,
+                   const std::vector<Real> & cut_line_params,
                    const dof_id_type tri_subdomain_id_shift,
                    const SubdomainName tri_elem_subdomain_name_suffix,
                    const subdomain_id_type block_id_to_remove,
