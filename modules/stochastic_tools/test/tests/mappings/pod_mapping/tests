@@ -9,7 +9,7 @@
     jsondiff = 'serial.json'
     cli_args = "Outputs/file_base=serial"
     max_parallel = 1
-    petsc_version = ">=3.8"
+    petsc_version = ">=3.14"
   []
   [svd_2_proc_per_app]
     type = JSONDiff
@@ -20,7 +20,7 @@
     cli_args = "Outputs/file_base=two_procs_per_app Transfers/solution_transfer/serialize_on_root=false"
     min_parallel = 2
     max_parallel = 2
-    petsc_version = ">=3.8"
+    petsc_version = ">=3.14"
   []
   [svd_2_proc_per_app_root]
     type = JSONDiff
@@ -30,6 +30,6 @@
     cli_args = "Outputs/file_base=two_procs_per_app_root Transfers/solution_transfer/serialize_on_root=true"
     min_parallel = 2
     max_parallel = 2
-    petsc_version = ">=3.8"
+    petsc_version = ">=3.14"
   []
 []

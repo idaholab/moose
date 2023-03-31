@@ -87,7 +87,7 @@ PODMapping::PODMapping(const InputParameters & parameters)
                      "The energy thresholds should always be in the [0,1) range!");
     }
 
-#if PETSC_VERSION_LESS_THAN(3, 8, 0)
+#if PETSC_VERSION_LESS_THAN(3, 14, 0)
     mooseError("PODMapping is not supported with PETSc version below 3.8!");
 #else
     for (const auto & vname : _variable_names)
@@ -105,7 +105,7 @@ PODMapping::PODMapping(const InputParameters & parameters)
 
 PODMapping::~PODMapping()
 {
-#if !PETSC_VERSION_LESS_THAN(3, 8, 0)
+#if !PETSC_VERSION_LESS_THAN(3, 14, 0)
   for (const auto & vname : _variable_names)
     SVDDestroy(&_svds[vname]);
 #endif
@@ -163,7 +163,7 @@ PODMapping::determineNumberOfModes(const VariableName & vname,
 void
 PODMapping::buildMapping(const VariableName & vname)
 {
-#if !PETSC_VERSION_LESS_THAN(3, 8, 0)
+#if !PETSC_VERSION_LESS_THAN(3, 14, 0)
 
   auto it = std::find(_variable_names.begin(), _variable_names.end(), vname);
   mooseAssert(it != _variable_names.end(), "Variable " + vname + " is not in PODMapping!");
