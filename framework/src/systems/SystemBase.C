@@ -1268,11 +1268,13 @@ SystemBase::copySolutionsBackwards()
 {
   system().update();
 
-  const auto states =
-      _solution_states[static_cast<unsigned short>(Moose::SolutionIterationType::Time)].size();
-  if (states > 1)
-    for (unsigned int i = 1; i <= states - 1; ++i)
-      solutionState(i) = solutionState(0);
+  for (const auto iteration_index : index_range(_solution_states))
+  {
+    const auto states = _solution_states[iteration_index].size();
+    if (states > 1)
+      for (unsigned int i = 1; i <= states - 1; ++i)
+        solutionState(i) = solutionState(0);
+  }
 
   if (solutionUDotOld())
     *solutionUDotOld() = *solutionUDot();
@@ -1382,6 +1384,8 @@ SystemBase::oldSolutionStateVectorName(const unsigned int state,
     else if (state == 2)
       return Moose::OLDER_SOLUTION_TAG;
   }
+  else if (iteration_type == Moose::SolutionIterationType::Nonlinear && state == 1)
+    return Moose::PREVIOUS_NL_SOLUTION_TAG;
 
   return "solution_state_" + std::to_string(state) + "_" + Moose::stringify(iteration_type);
 }

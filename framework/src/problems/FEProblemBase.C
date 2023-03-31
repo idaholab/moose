@@ -517,10 +517,16 @@ FEProblemBase::createTagSolutions()
 
   if (getParam<bool>("previous_nl_solution_required"))
   {
-    auto tag = addVectorTag(Moose::PREVIOUS_NL_SOLUTION_TAG, Moose::VECTOR_TAG_SOLUTION);
-    for (auto & nl : _nl)
-      nl->addVector(tag, false, GHOSTED);
-    _aux->addVector(tag, false, GHOSTED);
+    // We'll populate the zeroth state of the nonlinear iterations with the current solution for
+    // ease of use in doing things like copying solutions backwards. We're just storing pointers in
+    // the solution states containers so populating the zeroth state does not cost us the memory of
+    // a new vector
+    for (const auto i : make_range(0, 2))
+    {
+      for (auto & nl : _nl)
+        nl->needSolutionState(i, Moose::SolutionIterationType::Nonlinear);
+      _aux->needSolutionState(i, Moose::SolutionIterationType::Nonlinear);
+    }
   }
 
   auto tag = addVectorTag(Moose::SOLUTION_TAG, Moose::VECTOR_TAG_SOLUTION);
