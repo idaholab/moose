@@ -130,8 +130,10 @@ private:
   /// Link to the parallel storage which holds the solution fields that are used for the SVD
   ParallelSolutionStorage * _parallel_storage;
 
+#if !PETSC_VERSION_LESS_THAN(3, 8, 0)
   /// Storage for SLEPC's SVD objects for each variable.
   std::map<VariableName, SVD> _svds;
+#endif
 
   /// Bool to decide if we already have the SVD or not to make sure it is
   /// not computed multiple times unless the user requests it

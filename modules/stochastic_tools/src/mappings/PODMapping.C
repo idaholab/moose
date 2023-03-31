@@ -87,6 +87,9 @@ PODMapping::PODMapping(const InputParameters & parameters)
                      "The energy thresholds should always be in the [0,1) range!");
     }
 
+#if PETSC_VERSION_LESS_THAN(3, 8, 0)
+    mooseError("PODMapping is not supported with PETSc version below 3.8!");
+#else
     for (const auto & vname : _variable_names)
     {
       _singular_values.emplace(vname, std::vector<Real>());
@@ -96,13 +99,16 @@ PODMapping::PODMapping(const InputParameters & parameters)
       SVDCreate(_communicator.get(), &_svds[vname]);
       _computed_svd.emplace(vname, false);
     }
+#endif
   }
 }
 
 PODMapping::~PODMapping()
 {
+#if !PETSC_VERSION_LESS_THAN(3, 8, 0)
   for (const auto & vname : _variable_names)
     SVDDestroy(&_svds[vname]);
+#endif
 }
 
 dof_id_type
@@ -116,8 +122,8 @@ PODMapping::determineNumberOfModes(const VariableName & vname,
 
   unsigned int var_i = std::distance(_variable_names.begin(), it);
 
-  // We either use the number of modes defined by the user or the maximum number of converged modes.
-  // We don't want to use modes which are unconverged.
+  // We either use the number of modes defined by the user or the maximum number of converged
+  // modes. We don't want to use modes which are unconverged.
   unsigned int num_requested_modes =
       std::min((unsigned long)_num_modes[var_i], converged_evs.size());
 
@@ -157,6 +163,8 @@ PODMapping::determineNumberOfModes(const VariableName & vname,
 void
 PODMapping::buildMapping(const VariableName & vname)
 {
+#if !PETSC_VERSION_LESS_THAN(3, 8, 0)
+
   auto it = std::find(_variable_names.begin(), _variable_names.end(), vname);
   mooseAssert(it != _variable_names.end(), "Variable " + vname + " is not in PODMapping!");
   unsigned int var_i = std::distance(_variable_names.begin(), it);
@@ -193,8 +201,8 @@ PODMapping::buildMapping(const VariableName & vname)
   Mat mat;
 
   // We make sure every rank knows how many global and local samples we have and how long the
-  // snapshots are. At this point we assume that the snapshots are the same size so we don't need to
-  // map them to a reference domain.
+  // snapshots are. At this point we assume that the snapshots are the same size so we don't need
+  // to map them to a reference domain.
   dof_id_type local_rows = 0;
   dof_id_type snapshot_size = 0;
   dof_id_type global_rows = 0;
@@ -330,6 +338,8 @@ PODMapping::buildMapping(const VariableName & vname)
   _computed_svd[vname] = true;
 
   MatDestroy(&mat);
+
+#endif
 }
 
 void
@@ -403,16 +413,16 @@ PODMapping::leftBase(const VariableName & vname, const unsigned int base_i)
   return _left_basis_functions[vname][base_i];
 }
 
-const DenseVector<Real> &
-PODMapping::rightBase(const VariableName & vname, const unsigned int base_i)
-{
-  mooseAssert(std::find(_variable_names.begin(), _variable_names.end(), vname) !=
-                  _variable_names.end(),
-              "Variable " + vname + " is not in PODMapping!");
+  const DenseVector<Real> &
+  PODMapping::rightBase(const VariableName & vname, const unsigned int base_i)
+  {
+    mooseAssert(std::find(_variable_names.begin(), _variable_names.end(), vname) !=
+                    _variable_names.end(),
+                "Variable " + vname + " is not in PODMapping!");
 
-  mooseAssert(base_i < _right_basis_functions[vname].size(),
-              "The POD for " + vname + " only has " +
-                  std::to_string(_right_basis_functions[vname].size()) + " right modes!");
+    mooseAssert(base_i < _right_basis_functions[vname].size(),
+                "The POD for " + vname + " only has " +
+                    std::to_string(_right_basis_functions[vname].size()) + " right modes!");
 
-  return _right_basis_functions[vname][base_i];
-}
+    return _right_basis_functions[vname][base_i];
+  }
