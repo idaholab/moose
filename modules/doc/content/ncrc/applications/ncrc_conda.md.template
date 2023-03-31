@@ -9,7 +9,7 @@
 Using the ncrc client, install {{ApplicationName}}:
 
 ```bash
-$ (base) > ncrc install {{ApplicationLower}}
+ncrc install {{ApplicationLower}}
 
 Username: johndoe
 PIN+TOKEN:
@@ -22,14 +22,14 @@ You will need to supply your INL HPC username, and your PIN+TOKEN to proceed.
 Once installation has finished (this can take a few minutes), you need to activate this environment:
 
 ```bash
-$ (base) ~> mamba activate {{ApplicationLower}}
+mamba activate {{ApplicationLower}}
 $ ({{ApplicationLower}}) ~>
 ```
 
 With {{ApplicationName}} activated (denoted by the prompt header), `{{binary_method}}` becomes available within your PATH. This makes `{{binary_method}}` available for execution from any directory.
 
 ```bash
-$ ({{ApplicationLower}}) ~> {{binary_method}} --help
+{{binary_method}} --help
 
 <The {{ApplicationName}} help page is displayed>
 ```
@@ -37,8 +37,8 @@ $ ({{ApplicationLower}}) ~> {{binary_method}} --help
 A good first usage, would be to run the built-in tests. You should run this command while somewhere in your home directory (somewhere where you and only you has write access):
 
 ```bash
-$ ({{ApplicationLower}}) ~> cd ~/
-$ ({{ApplicationLower}}) ~> {{binary_method}} --copy-inputs tests
+cd ~/
+{{binary_method}} --copy-inputs tests
 
 <Output of files being copied is displayed>
 
@@ -48,8 +48,8 @@ Directory successfully copied into ./{{binary}}/tests/
 The very last line indicates the directory you need to enter next in order to run the tests. In our case `./{{binary}}/tests`. Change into this directory, and then run the tests:
 
 ```bash
-$ ({{ApplicationLower}}) ~> cd ./{{binary}}/tests
-$ ({{ApplicationLower}}) ~/{{binary}}/tests> {{binary_method}} --run -j 5
+cd ./{{binary}}/tests
+{{binary_method}} --run -j 5
 
 <Output of tests being run>
 ```
