@@ -163,6 +163,12 @@ BlockRestrictable::initializeBlockRestrictable(const MooseObject * moose_object)
       moose_object->paramError("block", msg.str());
     }
   }
+
+  // Get the mesh dimension for the blocks
+  if (blockRestricted())
+    _blk_dim = _blk_mesh->getBlocksMaxDimension(_blocks);
+  else
+    _blk_dim = _blk_mesh->dimension();
 }
 
 bool
