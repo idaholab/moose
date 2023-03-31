@@ -12,6 +12,6 @@ The ncrc client must be installed and used while in the `(base)` Conda environme
 Add INL Conda Repository channel:
 
 ```bash
-$ (base) ~> conda config --add channels https://conda.software.inl.gov/public
-$ (base) ~> conda install ncrc
+conda config --add channels https://conda.software.inl.gov/public
+conda install ncrc
 ```
