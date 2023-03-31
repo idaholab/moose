@@ -1,15 +1,14 @@
 # Following Benchmark Specifications and Data Requirements for EBR-II Shutdown Heat Removal Tests SHRT-17 and SHRT-45R
 # Available at: https://publications.anl.gov/anlpubs/2012/06/73647.pdf
-$ Steady state subchannel calculation, with nominal mass flow rate
 ###################################################
+#Steady state subchannel calcultion
 # Thermal-hydraulics parameters
 ###################################################
-T_in = 624.70556 #Kelvin
+T_in = 616.4 #Kelvin
 Total_Surface_Area = 0.000854322 #m3
-mass_flux_in = ${fparse 2.450 / Total_Surface_Area}
-#P_out = 43850.66 # Pa plus 4.778 meters of Na to the free surface in pool or Plus 0.57 meters of Na to core outlet.
+mass_flux_in = ${fparse 2.667 / Total_Surface_Area} #${fparse 2.427 / Total_Surface_Area}
 P_out = 2.0e5
-Power_initial = 486200 #W (Page 26,35 of ANL document)
+Power_initial = 379800 #W (Page 26,35 of ANL document)
 ###################################################
 # Geometric parameters
 ###################################################
@@ -48,6 +47,26 @@ unheated_length_exit = ${fparse 26.9*scale_factor}
     unheated_length_exit = ${unheated_length_exit}
     heated_length = ${heated_length}
     pitch = ${fuel_pin_pitch}
+  []
+
+  [duct]
+    type = TriDuctMeshGenerator
+    input = fuel_pins
+    nrings = ${n_rings}
+    n_cells = 50
+    flat_to_flat = ${inner_duct_in}
+    unheated_length_exit = ${unheated_length_exit}
+    heated_length = ${heated_length}
+    pitch = ${fuel_pin_pitch}
+  []
+[]
+
+[Functions]
+  [axial_heat_rate]
+    type = ParsedFunction
+    value = '(pi/2)*sin(pi*z/L)'
+    vars = 'L'
+    vals = '${heated_length}'
   []
 []
 
@@ -91,6 +110,12 @@ unheated_length_exit = ${fparse 26.9*scale_factor}
   [Tpin]
     block = fuel_pins
   []
+  [q_prime_duct]
+    block = duct
+  []
+  [Tduct]
+    block = duct
+  []
 []
 
 [FluidProperties]
@@ -110,7 +135,7 @@ unheated_length_exit = ${fparse 26.9*scale_factor}
   compute_viscosity = true
   compute_power = true
   P_tol = 1.0e-4
-  T_tol = 1.0e-4
+  T_tol = 1.0e-5
   implicit = true
   segregated = false
   interpolation_scheme = 'upwind'
@@ -132,6 +157,7 @@ unheated_length_exit = ${fparse 26.9*scale_factor}
     variable = q_prime
     power = ${Power_initial}
     filename = "pin_power_profile61.txt"
+    # axial_heat_rate = axial_heat_rate
   []
 
   [T_ic]
@@ -208,68 +234,131 @@ unheated_length_exit = ${fparse 26.9*scale_factor}
 []
 
 [Postprocessors]
-  [TTC-27]
+  # [TTC-27]
+  #   type = SubChannelPointValue
+  #   variable = T
+  #   index = 91
+  #   execute_on = 'TIMESTEP_END'
+  #   height = 0.322
+  # []
+  # [TTC-28]
+  #   type = SubChannelPointValue
+  #   variable = T
+  #   index = 50
+  #   execute_on = 'TIMESTEP_END'
+  #   height = 0.322
+  # []
+  # [TTC-29]
+  #   type = SubChannelPointValue
+  #   variable = T
+  #   index = 21
+  #   execute_on = 'TIMESTEP_END'
+  #   height = 0.322
+  # []
+  # [TTC-30]
+  #   type = SubChannelPointValue
+  #   variable = T
+  #   index = 4
+  #   execute_on = 'TIMESTEP_END'
+  #   height = 0.322
+  # []
+  # [TTC-31]
+  #   type = SubChannelPointValue
+  #   variable = T
+  #   index = 2
+  #   execute_on = 'TIMESTEP_END'
+  #   height = 0.322
+  # []
+  # [TTC-32]
+  #   type = SubChannelPointValue
+  #   variable = T
+  #   index = 16
+  #   execute_on = 'TIMESTEP_END'
+  #   height = 0.322
+  # []
+  # [TTC-33]
+  #   type = SubChannelPointValue
+  #   variable = T
+  #   index = 42
+  #   execute_on = 'TIMESTEP_END'
+  #   height = 0.322
+  # []
+  # [TTC-34]
+  #   type = SubChannelPointValue
+  #   variable = T
+  #   index = 80
+  #   execute_on = 'TIMESTEP_END'
+  #   height = 0.322
+  # []
+  # [TTC-35]
+  #   type = SubChannelPointValue
+  #   variable = T
+  #   index = 107
+  #   execute_on = 'TIMESTEP_END'
+  #   height = 0.322
+  # []
+  # [MTC-20]
+  # type = SubChannelPointValue
+  # variable = T
+  # index = 33
+  # execute_on = 'TIMESTEP_END'
+  # height = 0.172
+  # []
+  # [MTC-22]
+  #   type = SubChannelPointValue
+  #   variable = T
+  #   index = 3
+  #   execute_on = 'TIMESTEP_END'
+  #   height = 0.172
+  # []
+  # [MTC-24]
+  #   type = SubChannelPointValue
+  #   variable = T
+  #   index = 28
+  #   execute_on = 'TIMESTEP_END'
+  #   height = 0.172
+  # []
+  # [MTC-25]
+  #   type = SubChannelPointValue
+  #   variable = T
+  #   index = 60
+  #   execute_on = 'TIMESTEP_END'
+  #   height = 0.172
+  # []
+  # [MTC-26]
+  #   type = SubChannelPointValue
+  #   variable = T
+  #   index = 106
+  #   execute_on = 'TIMESTEP_END'
+  #   height = 0.172
+  # []
+  [14TC-37]
     type = SubChannelPointValue
     variable = T
-    index = 91
+    index = 52
     execute_on = 'TIMESTEP_END'
-    height = 0.322
+    height = 0.480
   []
-  [TTC-28]
+  [14TC-39]
     type = SubChannelPointValue
     variable = T
-    index = 50
+    index = 6
     execute_on = 'TIMESTEP_END'
-    height = 0.322
+    height = 0.480
   []
-  [TTC-29]
+  [14TC-41]
     type = SubChannelPointValue
     variable = T
-    index = 21
+    index = 40
     execute_on = 'TIMESTEP_END'
-    height = 0.322
+    height = 0.480
   []
-  [TTC-30]
+  [14TC-43]
     type = SubChannelPointValue
     variable = T
-    index = 4
+    index = 105
     execute_on = 'TIMESTEP_END'
-    height = 0.322
-  []
-  [TTC-31]
-    type = SubChannelPointValue
-    variable = T
-    index = 2
-    execute_on = 'TIMESTEP_END'
-    height = 0.322
-  []
-  [TTC-32]
-    type = SubChannelPointValue
-    variable = T
-    index = 16
-    execute_on = 'TIMESTEP_END'
-    height = 0.322
-  []
-  [TTC-33]
-    type = SubChannelPointValue
-    variable = T
-    index = 42
-    execute_on = 'TIMESTEP_END'
-    height = 0.322
-  []
-  [TTC-34]
-    type = SubChannelPointValue
-    variable = T
-    index = 80
-    execute_on = 'TIMESTEP_END'
-    height = 0.322
-  []
-  [TTC-35]
-    type = SubChannelPointValue
-    variable = T
-    index = 107
-    execute_on = 'TIMESTEP_END'
-    height = 0.322
+    height = 0.480
   []
 []
 
