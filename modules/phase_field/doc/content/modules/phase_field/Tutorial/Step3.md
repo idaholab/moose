@@ -108,8 +108,8 @@ We are also interested in how the size of the time step changes throughout the s
     type = NumResidualEvaluations
   [../]
   [./active_time]           # Time computer spent on simulation
-    type = RunTime
-    time_type = active
+    type = PerformanceData
+    event =  ACTIVE
   [../]
 []
 ```
