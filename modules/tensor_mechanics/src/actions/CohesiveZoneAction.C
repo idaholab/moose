@@ -36,6 +36,7 @@ CohesiveZoneAction::CohesiveZoneAction(const InputParameters & params)
   : CohesiveZoneActionBase(params),
     _displacements(getParam<std::vector<VariableName>>("displacements")),
     _ndisp(_displacements.size()),
+    _use_AD(getParam<bool>("use_automatic_differentiation")),
     _base_name(isParamValid("base_name") && !getParam<std::string>("base_name").empty()
                    ? getParam<std::string>("base_name")
                    : ""),
@@ -58,16 +59,22 @@ CohesiveZoneAction::CohesiveZoneAction(const InputParameters & params)
   {
     case Strain::Small:
     {
-      _czm_kernel_name = "CZMInterfaceKernelSmallStrain";
-      _disp_jump_provider_name = "CZMComputeDisplacementJumpSmallStrain";
-      _equilibrium_traction_calculator_name = "CZMComputeGlobalTractionSmallStrain";
+      _czm_kernel_name =
+          _use_AD ? "ADCZMInterfaceKernelSmallStrain" : "CZMInterfaceKernelSmallStrain";
+      _disp_jump_provider_name = _use_AD ? "ADCZMComputeDisplacementJumpSmallStrain"
+                                         : "CZMComputeDisplacementJumpSmallStrain";
+      _equilibrium_traction_calculator_name =
+          _use_AD ? "ADCZMComputeGlobalTractionSmallStrain" : "CZMComputeGlobalTractionSmallStrain";
       break;
     }
     case Strain::Finite:
     {
-      _czm_kernel_name = "CZMInterfaceKernelTotalLagrangian";
-      _disp_jump_provider_name = "CZMComputeDisplacementJumpTotalLagrangian";
-      _equilibrium_traction_calculator_name = "CZMComputeGlobalTractionTotalLagrangian";
+      _czm_kernel_name =
+          _use_AD ? "ADCZMInterfaceKernelTotalLagrangian" : "CZMInterfaceKernelTotalLagrangian";
+      _disp_jump_provider_name = _use_AD ? "ADCZMComputeDisplacementJumpTotalLagrangian"
+                                         : "CZMComputeDisplacementJumpTotalLagrangian";
+      _equilibrium_traction_calculator_name = _use_AD ? "ADCZMComputeGlobalTractionTotalLagrangian"
+                                                      : "CZMComputeGlobalTractionTotalLagrangian";
       break;
     }
     default:
@@ -296,20 +303,20 @@ CohesiveZoneAction::actOutputGeneration()
   // Add output AuxKernels
   else if (_current_task == "add_aux_kernel")
   {
-
+    const std::string material_output_aux_name = _use_AD ? "ADMaterialRealAux" : "MaterialRealAux";
     // Loop through output aux variables
     unsigned int index = 0;
     for (auto out : _generate_output)
     {
       if (_material_output_family[index] == "MONOMIAL")
       {
-        InputParameters params = _factory.getValidParams("MaterialRealAux");
+        InputParameters params = _factory.getValidParams(material_output_aux_name);
         params.set<MaterialPropertyName>("property") = addBaseName(out);
         params.set<AuxVariableName>("variable") = addBaseName(out);
         params.set<ExecFlagEnum>("execute_on") = EXEC_TIMESTEP_END;
         params.set<std::vector<BoundaryName>>("boundary") = _boundary;
         params.set<bool>("check_boundary_restricted") = false;
-        _problem->addAuxKernel("MaterialRealAux", addBaseName(out) + '_' + name(), params);
+        _problem->addAuxKernel(material_output_aux_name, addBaseName(out) + '_' + name(), params);
       }
       index++;
     }
@@ -334,7 +341,8 @@ CohesiveZoneAction::actOutputMatProp()
               for (unsigned int a = 0; a < 3; ++a)
                 if (vq.first + '_' + _component_table[a] == out)
                 {
-                  auto type = "CZMRealVectorCartesianComponent";
+                  auto type = _use_AD ? "ADCZMRealVectorCartesianComponent"
+                                      : "CZMRealVectorCartesianComponent";
                   params = _factory.getValidParams(type);
                   params.set<std::string>("real_vector_value") = vq.second;
                   params.set<unsigned int>("index") = a;
@@ -353,7 +361,7 @@ CohesiveZoneAction::actOutputMatProp()
                       _vector_direction_table,
                       [&](std::string prop_name, std::string direction)
                       {
-                        auto type = "CZMRealVectorScalar";
+                        auto type = _use_AD ? "ADCZMRealVectorScalar" : "CZMRealVectorScalar";
                         params = _factory.getValidParams(type);
                         params.set<std::string>("real_vector_value") = prop_name;
                         params.set<MooseEnum>("direction") = direction;
