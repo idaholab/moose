@@ -41,6 +41,8 @@ SerializedSolutionTransfer::SerializedSolutionTransfer(const InputParameters & p
     _variable_names(getParam<std::vector<VariableName>>("variables")),
     _serialize_on_root(getParam<bool>("serialize_on_root"))
 {
+  if (hasToMultiApp())
+    paramError("to_multi_app", "To and between multiapp directions are not implemented");
 }
 
 void
@@ -75,12 +77,48 @@ SerializedSolutionTransfer::initialSetup()
 }
 
 void
-SerializedSolutionTransfer::execute()
+SerializedSolutionTransfer::initializeInNormalMode()
 {
+  _solution_container.clear();
+  const dof_id_type n = getFromMultiApp()->numGlobalApps();
+  const auto & serialized_solution_reporter = getParam<std::string>("solution_container");
+
+  for (MooseIndex(n) i = 0; i < n; i++)
+  {
+
+    if (getFromMultiApp()->hasLocalApp(i))
+    {
+      FEProblemBase & app_problem = getFromMultiApp()->appProblemBase(i);
+
+      std::vector<UserObject *> reporters;
+      app_problem.theWarehouse()
+          .query()
+          .condition<AttribSystem>("UserObject")
+          .condition<AttribName>(serialized_solution_reporter)
+          .queryInto(reporters);
+
+      if (reporters.empty())
+        paramError("solution_container",
+                   "Unable to find reporter with name '",
+                   serialized_solution_reporter,
+                   "'");
+      else if (reporters.size() > 1)
+        paramError("solution_container",
+                   "We found more than one reporter with the name '",
+                   serialized_solution_reporter,
+                   "'");
+
+      _solution_container.push_back(dynamic_cast<SolutionContainer *>(reporters[0]));
+
+      if (!_solution_container[i - _sampler_ptr->getLocalRowBegin()])
+        paramError("solution_container",
+                   "The parallel storage reporter is not of type 'SolutionContainer'");
+    }
+  }
 }
 
 void
-SerializedSolutionTransfer::initializeFromMultiapp()
+SerializedSolutionTransfer::initializeInBatchMode()
 {
   // First we fetch the solution containers from the subapps. This function is used
   // in batch mode only so we will have one solution container on each rank
@@ -112,14 +150,42 @@ SerializedSolutionTransfer::initializeFromMultiapp()
 
   if (!_solution_container[0])
     paramError("solution_container",
-               "The parallel storage reporter is not of type '",
-               serialized_solution_reporter,
-               "'");
+               "The parallel storage reporter is not of type 'SolutionContainer'");
+}
+
+void
+SerializedSolutionTransfer::execute()
+{
+  initializeInNormalMode();
+
+  const dof_id_type n = getFromMultiApp()->numGlobalApps();
+
+  for (MooseIndex(n) i = 0; i < n; i++)
+  {
+    if (getFromMultiApp()->hasLocalApp(i))
+    {
+      FEProblemBase & app_problem = getFromMultiApp()->appProblemBase(i);
+      NonlinearSystemBase & nl = app_problem.getNonlinearSystemBase();
+
+      // Converting the local indexing to global sample indices
+      const unsigned int local_i = i - _sampler_ptr->getLocalRowBegin();
+
+      // Here we have to branch out based on if only the root processors
+      // need to participate in the transfer or if we would like to distribute the
+      // data among every processor of the subapplication
+      if (_serialize_on_root)
+        transferToRoot(nl, *_solution_container[local_i], i);
+      else
+        transferInParallel(nl, *_solution_container[local_i], i);
+    }
+  }
 }
 
 void
 SerializedSolutionTransfer::executeFromMultiapp()
 {
+  initializeInBatchMode();
+
   if (getFromMultiApp()->hasLocalApp(_app_index))
   {
     FEProblemBase & app_problem = getFromMultiApp()->appProblemBase(_app_index);
@@ -129,15 +195,16 @@ SerializedSolutionTransfer::executeFromMultiapp()
     // need to participate in the transfer or if we would like to distribute the
     // data among every processor of the subapplication
     if (_serialize_on_root)
-      transferToRoot(nl, *_solution_container[0]);
+      transferToRoot(nl, *_solution_container[0], _global_index);
     else
-      transferInParallel(nl, *_solution_container[0]);
+      transferInParallel(nl, *_solution_container[0], _global_index);
   }
 }
 
 void
 SerializedSolutionTransfer::transferInParallel(NonlinearSystemBase & app_nl_system,
-                                               SolutionContainer & solution_container)
+                                               SolutionContainer & solution_container,
+                                               const dof_id_type global_i)
 {
   // We need to go through this MPI rank identification because the multiapp's
   // communicator is not necessarily the communicator of the underlying MooseObject.
@@ -171,7 +238,7 @@ SerializedSolutionTransfer::transferInParallel(NonlinearSystemBase & app_nl_syst
                                    new_local_entries_begin,
                                    new_local_entries_end);
 
-  unsigned int local_app_index = _global_index - _sampler_ptr->getLocalRowBegin();
+  unsigned int local_app_index = global_i - _sampler_ptr->getLocalRowBegin();
 
   // Looping over the variables to extract the corresponding solution values
   // and copy them into the container.
@@ -187,6 +254,7 @@ SerializedSolutionTransfer::transferInParallel(NonlinearSystemBase & app_nl_syst
 
       // Localize the solution and add it to the local container on the rank
       // which is supposed to own it
+
       solution_container.getSolution(solution_i)
           ->localize(serialized_solution.get_values(),
                      (local_app_index >= new_local_entries_begin &&
@@ -195,14 +263,15 @@ SerializedSolutionTransfer::transferInParallel(NonlinearSystemBase & app_nl_syst
                          : std::vector<dof_id_type>());
 
       if (local_app_index >= new_local_entries_begin && local_app_index < new_local_entries_end)
-        _parallel_storage->addEntry(_variable_names[var_i], _global_index, serialized_solution);
+        _parallel_storage->addEntry(_variable_names[var_i], global_i, serialized_solution);
     }
   }
 }
 
 void
 SerializedSolutionTransfer::transferToRoot(NonlinearSystemBase & app_nl_system,
-                                           SolutionContainer & solution_container)
+                                           SolutionContainer & solution_container,
+                                           const dof_id_type global_i)
 {
   // Looping over the variables to extract the corresponding solution values
   for (unsigned int var_i = 0; var_i < _variable_names.size(); ++var_i)
@@ -222,27 +291,7 @@ SerializedSolutionTransfer::transferToRoot(NonlinearSystemBase & app_nl_system,
                                                           : std::vector<dof_id_type>());
 
       if (getFromMultiApp()->isRootProcessor())
-        _parallel_storage->addEntry(_variable_names[var_i], _global_index, serialized_solution);
+        _parallel_storage->addEntry(_variable_names[var_i], global_i, serialized_solution);
     }
   }
-}
-
-void
-SerializedSolutionTransfer::finalizeFromMultiapp()
-{
-}
-
-void
-SerializedSolutionTransfer::initializeToMultiapp()
-{
-}
-
-void
-SerializedSolutionTransfer::executeToMultiapp()
-{
-}
-
-void
-SerializedSolutionTransfer::finalizeToMultiapp()
-{
 }

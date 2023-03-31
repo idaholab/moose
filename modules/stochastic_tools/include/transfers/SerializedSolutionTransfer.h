@@ -37,13 +37,13 @@ public:
   /**
    * Methods used when running in batch mode (see SamplerFullSolveMultiApp)
    */
-  virtual void initializeFromMultiapp() override;
-  virtual void executeFromMultiapp() override;
-  virtual void finalizeFromMultiapp() override;
+  void initializeFromMultiapp() override{};
+  void executeFromMultiapp() override;
+  void finalizeFromMultiapp() override{};
 
-  virtual void initializeToMultiapp() override;
-  virtual void executeToMultiapp() override;
-  virtual void finalizeToMultiapp() override;
+  void initializeToMultiapp() override{};
+  void executeToMultiapp() override{};
+  void finalizeToMultiapp() override{};
   ///@}
 
 protected:
@@ -59,11 +59,28 @@ protected:
 
 private:
   /// Serialize on the root processor of the subapplication and transfer the result to the main application
-  void transferToRoot(NonlinearSystemBase & app_nl_system, SolutionContainer & solution_container);
+  void transferToRoot(NonlinearSystemBase & app_nl_system,
+                      SolutionContainer & solution_container,
+                      const dof_id_type global_i);
 
   /// Serialize on methodically determined rank of the subapp and transfer to the main application
   void transferInParallel(NonlinearSystemBase & app_nl_system,
-                          SolutionContainer & solution_container);
+                          SolutionContainer & solution_container,
+                          const dof_id_type global_i);
+
+  /**
+   * Initializes the solution container if the multiapp is run in normal mode. We need this because
+   * in normal mode we don't have a function for initialization besides `initialSetup()`, which
+   * is execute every time regardless of the multiapp settings.
+   */
+  void initializeInNormalMode();
+
+  /// This guy queries the solution container addresses from the subapps. We need to redo this
+  /// Every time initialSetup() (batch-reset) is called on the subapp because the address
+  /// of SolutionContainer changes. Considering that the transfer doesn't know the multiapp
+  /// setting, we use the same approach for batch-restore as well, which might be a little
+  /// wasteful if the execution of the subapps is very fast (usually not the case).
+  void initializeInBatchMode();
 
   /// User determined switch that determines if we want to serialize on root only or distribute the
   /// solutions between all the ranks of the subapp

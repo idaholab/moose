@@ -161,7 +161,11 @@ PODMapping::determineNumberOfModes(const VariableName & vname,
 }
 
 void
-PODMapping::buildMapping(const VariableName & vname)
+PODMapping::buildMapping(const VariableName &
+#if !PETSC_VERSION_LESS_THAN(3, 14, 0)
+                             vname
+#endif
+)
 {
 #if !PETSC_VERSION_LESS_THAN(3, 14, 0)
 

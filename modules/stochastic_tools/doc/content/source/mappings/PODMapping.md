@@ -4,6 +4,9 @@
 
 ## Overview
 
+!alert warning
+This object is only compatible with PETSc versions above 3.14.
+
 A mapping which uses a Proper Orthogonal Decomposition (POD) to establish mapping between
 (high-dimensional) solution vectors coming from numerical simulations and corresponding coefficients
 in lower-dimensional spaces (latent spaces). For the use cases in MOOSE, this method is equivalent to
