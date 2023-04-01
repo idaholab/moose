@@ -897,37 +897,37 @@ DisplacedProblem::clearDiracInfo()
 void
 DisplacedProblem::addResidual(THREAD_ID tid)
 {
-  _assembly[tid][currentNlSysNum()]->addResidual(currentResidualVectorTags());
+  _assembly[tid][currentNlSysNum()]->addResidual(getVectorTags(Moose::VECTOR_TAG_RESIDUAL));
 }
 
 void
 DisplacedProblem::addResidualNeighbor(THREAD_ID tid)
 {
-  _assembly[tid][currentNlSysNum()]->addResidualNeighbor(currentResidualVectorTags());
+  _assembly[tid][currentNlSysNum()]->addResidualNeighbor(getVectorTags(Moose::VECTOR_TAG_RESIDUAL));
 }
 
 void
 DisplacedProblem::addResidualLower(THREAD_ID tid)
 {
-  _assembly[tid][currentNlSysNum()]->addResidualLower(currentResidualVectorTags());
+  _assembly[tid][currentNlSysNum()]->addResidualLower(getVectorTags(Moose::VECTOR_TAG_RESIDUAL));
 }
 
 void
 DisplacedProblem::cacheResidual(THREAD_ID tid)
 {
-  _assembly[tid][currentNlSysNum()]->cacheResidual(currentResidualVectorTags());
+  _assembly[tid][currentNlSysNum()]->cacheResidual();
 }
 
 void
 DisplacedProblem::cacheResidualNeighbor(THREAD_ID tid)
 {
-  _assembly[tid][currentNlSysNum()]->cacheResidualNeighbor(currentResidualVectorTags());
+  _assembly[tid][currentNlSysNum()]->cacheResidualNeighbor();
 }
 
 void
 DisplacedProblem::addCachedResidual(THREAD_ID tid)
 {
-  _assembly[tid][currentNlSysNum()]->addCachedResiduals(currentResidualVectorTags());
+  _assembly[tid][currentNlSysNum()]->addCachedResiduals();
 }
 
 void
@@ -1293,10 +1293,4 @@ std::size_t
 DisplacedProblem::numNonlinearSystems() const
 {
   return _mproblem.numNonlinearSystems();
-}
-
-const std::vector<VectorTag> &
-DisplacedProblem::currentResidualVectorTags() const
-{
-  return _mproblem.currentResidualVectorTags();
 }

@@ -44,9 +44,7 @@ public:
   /**
    * Loops over the mortar segment mesh and computes the residual/Jacobian
    */
-  void operator()(Moose::ComputeType compute_type,
-                  const std::set<TagID> & vector_tag_ids,
-                  const std::set<TagID> & matrix_tag_ids);
+  void operator()(Moose::ComputeType compute_type);
 
 private:
   /// The mortar constraints to loop over when on each element. These must be

@@ -144,18 +144,6 @@ SubProblem::getVectorTag(const TagID tag_id) const
   return _vector_tags[tag_id];
 }
 
-std::vector<VectorTag>
-SubProblem::getVectorTags(const std::set<TagID> & tag_ids) const
-{
-  mooseAssert(verifyVectorTags(), "Vector tag storage invalid");
-
-  std::vector<VectorTag> tags;
-  tags.reserve(tag_ids.size());
-  for (const auto & tag_id : tag_ids)
-    tags.push_back(getVectorTag(tag_id));
-  return tags;
-}
-
 const std::vector<VectorTag> &
 SubProblem::getVectorTags(const Moose::VectorTagType type /* = Moose::VECTOR_TAG_ANY */) const
 {

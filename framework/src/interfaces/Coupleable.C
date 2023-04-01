@@ -754,10 +754,9 @@ Coupleable::coupledVectorTagDofValue(const std::string & var_name,
 
 const ArrayVariableValue &
 Coupleable::coupledVectorTagArrayDofValue(const std::string & var_name,
-                                          const std::string & tag_name,
-                                          unsigned int comp) const
+                                          const std::string & tag_name) const
 {
-  return vectorTagDofValueHelper<RealEigenVector>(var_name, tag_name, comp);
+  return vectorTagDofValueHelper<RealEigenVector>(var_name, tag_name);
 }
 
 const VariableValue &

@@ -81,7 +81,7 @@ public:
 
   /**
    * Class that is used as a parameter to add[Parent/Child]() that allows only
-   * MeshGeneratorSystem methods to call said methods
+   * MooseApp methods to call said methods
    */
   class AddParentChildKey
   {
