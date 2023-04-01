@@ -170,7 +170,7 @@
     component = 0
     kappa_other = kappa_y
     correct_edge_dropping = true
-    pen_scale = 1.e3
+    penalty_value = 1.e3
   []
   [periodiclry]
     type = TestPeriodicSole
@@ -184,7 +184,7 @@
     component = 1
     kappa_other = kappa_x
     correct_edge_dropping = true
-    pen_scale = 1.e3
+    penalty_value = 1.e3
   []
   [mortarbt]
     type = PenaltyEqualValueConstraint
@@ -208,7 +208,7 @@
     component = 0
     kappa_other = kappa_y
     correct_edge_dropping = true
-    pen_scale = 1.e3
+    penalty_value = 1.e3
   []
   [periodicbty]
     type = TestPeriodicSole
@@ -223,7 +223,7 @@
     kappa_other = kappa_x
     correct_edge_dropping = true
     compute_scalar_residuals = true
-    pen_scale = 1.e3
+    penalty_value = 1.e3
   []
 []
 

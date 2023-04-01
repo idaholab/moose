@@ -7,6 +7,12 @@
     csvdiff = 'penalty_periodic_simple2d_out.csv'
     requirement = "The system shall assemble primary/secondary mortar constraints coupled to scalar variables in a two dimensional problem."
   []
+  [periodic_simple2d_flip]
+    type = 'CSVDiff'
+    input = 'penalty_periodic_simple2d_flip.i'
+    csvdiff = 'penalty_periodic_simple2d_flip_out.csv'
+    requirement = "The penalty periodic segmental constraint is independent of the designation of primary and secondary surfaces."
+  []
   [periodic_simple2d]
     type = 'CSVDiff'
     input = 'periodic_simple2d.i'

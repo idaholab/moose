@@ -102,7 +102,7 @@ value. Examples of the source codes below demonstrate this fact.
 ## Examples from Source Code id=MSB-examples
 
 As mentioned, the `computeScalarQpResidual` method +should+ be overridden for both flavors of 
-ortar constraints, non-AD and AD. As an example, consider the scalar residual weak form terms of the 
+mortar constraints, non-AD and AD. As an example, consider the scalar residual weak form terms of the 
 [`PeriodicSegmentalConstraint`](/PeriodicSegmentalConstraint.md) class:
 
 \begin{equation}

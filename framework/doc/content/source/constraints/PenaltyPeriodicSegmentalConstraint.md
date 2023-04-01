@@ -29,8 +29,7 @@ The corresponding weak form is (using inner-product notation):
 \end{aligned}
 
 where $\epsilon$ is the average diffusive gradient to be solved for,
-$\sigma$ is the imposed average diffusive flux, and $\lambda$ is the
-Lagrange multiplier that imposes this average constraint.
+and $\sigma$ is the average diffusive flux imposed through the penalty constraint.
 The jump operator is defined for a single valued or vector valued field
 as $\llbracket u \rrbracket = u^{+} - u^{-}$ and
 $\llbracket \vec{x} \rrbracket = \vec{x}^{+} - \vec{x}^{-}$, respectively.

@@ -19,7 +19,10 @@ TestPeriodicSole::validParams()
   params.addRequiredCoupledVar("kappa_aux", "Controlled scalar averaging variable");
   params.addRequiredCoupledVar("kappa_other", "Other component of coupled scalar variable");
   params.addRequiredParam<unsigned int>("component", "Which direction this kernel acts in");
-  params.addParam<Real>("pen_scale", 1.0, "Increase or decrease the penalty");
+  params.addParam<Real>(
+      "penalty_value",
+      1.0,
+      "Penalty value used to impose a generalized force capturing the mortar constraint equation");
 
   return params;
 }
@@ -38,7 +41,7 @@ TestPeriodicSole::TestPeriodicSole(const InputParameters & parameters)
     _kappa_other(coupledScalarValue("kappa_other")),
     _current_elem_volume(_assembly.elemVolume()),
     _current_side_volume(_assembly.sideElemVolume()),
-    _pen_scale(getParam<Real>("pen_scale"))
+    _pen_scale(getParam<Real>("penalty_value"))
 {
 }
 
