@@ -219,11 +219,23 @@ void lineRemoverCutElemTri(ReplicatedMesh & mesh,
  * @param block_id_to_remove a temporary subdomain id used to mark the elements that need to be
  * removed
  * @param new_boundary_id boundary id of the new boundary that forms due to the trimming
+ * @param improve_boundary_tri_elems flag to indicate whether the boundary TRI3 elements need to be
+ * improved
  */
 void lineRemoverCutElem(ReplicatedMesh & mesh,
                         const std::vector<Real> & cut_line_params,
                         const dof_id_type tri_subdomain_id_shift,
                         const SubdomainName tri_elem_subdomain_name_suffix,
                         const subdomain_id_type block_id_to_remove,
-                        const boundary_id_type new_boundary_id);
+                        const boundary_id_type new_boundary_id,
+                        const bool improve_boundary_tri_elems = false);
+
+/**
+ * Improve the element quality of the boundary TRI3 elements of the given boundary
+ * @param mesh input mesh with the boundary TRI3 elements that need to be improved
+ * @param boundary_to_improve boundary id of the boundary that needs to be improved
+ */
+void
+boundaryTriElemImprover(ReplicatedMesh & mesh,
+                        const boundary_id_type boundary_to_improve);                        
 }

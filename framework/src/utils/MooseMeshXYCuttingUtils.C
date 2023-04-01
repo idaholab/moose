@@ -911,12 +911,134 @@ lineRemoverCutElem(ReplicatedMesh & mesh,
                    const dof_id_type tri_subdomain_id_shift,
                    const SubdomainName tri_elem_subdomain_name_suffix,
                    const subdomain_id_type block_id_to_remove,
-                   const boundary_id_type new_boundary_id)
+                   const boundary_id_type new_boundary_id,
+                   const bool improve_boundary_tri_elems)
 {
   // Convert any quad elements crossed by the line into tri elements
   quadToTriOnLine(mesh, cut_line_params, tri_subdomain_id_shift, tri_elem_subdomain_name_suffix);
   // Then do the cutting for the preprocessed mesh that only contains tri elements crossed by the
   // cut line
   lineRemoverCutElemTri(mesh, cut_line_params, block_id_to_remove, new_boundary_id);
+
+  if (improve_boundary_tri_elems)
+    boundaryTriElemImprover(mesh, new_boundary_id);
+}
+
+void
+boundaryTriElemImprover(ReplicatedMesh & mesh, const boundary_id_type boundary_to_improve)
+{
+  if (!MooseMeshUtils::hasBoundaryID(mesh, boundary_to_improve))
+    mooseError(
+        "MooseMeshXYCuttingUtils::boundaryTriElemImprover(): The boundary_to_improve provided "
+        "does not exist in the given mesh.");
+  BoundaryInfo & boundary_info = mesh.get_boundary_info();
+  auto side_list = boundary_info.build_side_list();
+  // Here we would like to collect the following informaton for all the TRI3 elements on the
+  // boundary: Key: node id of the off-boundary node Value: a vector of tuples, each tuple contains
+  // the following information:
+  // 1. The element id of the element that is on the boundary to improve
+  // 2. the one node id of that element that is on the boundary to improve
+  // 3. the other node id of the element that is on the boundary to improve
+  std::map<dof_id_type, std::vector<std::tuple<dof_id_type, dof_id_type, dof_id_type>>>
+      tri3_elem_info;
+  for (const auto & side : side_list)
+  {
+    if (std::get<2>(side) == boundary_to_improve)
+    {
+      Elem * elem = mesh.elem_ptr(std::get<0>(side));
+      if (elem->type() == TRI3)
+      {
+        const auto key_node_id = elem->node_id((std::get<1>(side) + 2) % 3);
+        const auto value_elem_id = elem->id();
+        const auto value_node_id_1 = elem->node_id(std::get<1>(side));
+        const auto value_node_id_2 = elem->node_id((std::get<1>(side) + 1) % 3);
+        tri3_elem_info[key_node_id].push_back(
+            std::make_tuple(value_elem_id, value_node_id_1, value_node_id_2));
+      }
+    }
+  }
+  // Now check if any group of TRI3 sharing an off-boundary node can be improved.
+  for (const auto & tri_group : tri3_elem_info)
+  {
+    // It is possible to improve only when more than one TRI3 elements share the same off-boundary
+    // node
+    if (tri_group.second.size() > 1)
+    {
+      std::vector<std::pair<dof_id_type, dof_id_type>> node_assm;
+      std::vector<dof_id_type> ordered_node_list;
+      for (const auto & tri : tri_group.second)
+      {
+        node_assm.push_back(std::make_pair(std::get<1>(tri), std::get<2>(tri)));
+      }
+      //
+      bool isFlipped = false;
+      // Start from the first element, try to find a chain of nodes
+      ordered_node_list.push_back(node_assm.front().first);
+      ordered_node_list.push_back(node_assm.front().second);
+      // Remove the element that has been added to ordered_node_list
+      node_assm.erase(node_assm.begin());
+      const unsigned int node_assm_size_0 = node_assm.size();
+      for (unsigned int i = 0; i < node_assm_size_0; i++)
+      {
+        // Find nodes to expand the chain
+        dof_id_type end_node_id = ordered_node_list.back();
+        auto isMatch1 = [end_node_id](std::pair<dof_id_type, dof_id_type> old_id_pair)
+        { return old_id_pair.first == end_node_id; };
+        auto isMatch2 = [end_node_id](std::pair<dof_id_type, dof_id_type> old_id_pair)
+        { return old_id_pair.second == end_node_id; };
+        auto result = std::find_if(node_assm.begin(), node_assm.end(), isMatch1);
+        bool match_first;
+        if (result == node_assm.end())
+        {
+          match_first = false;
+          result = std::find_if(node_assm.begin(), node_assm.end(), isMatch2);
+        }
+        else
+        {
+          match_first = true;
+        }
+        // If found, add the node to boundary_ordered_node_list
+        if (result != node_assm.end())
+        {
+          ordered_node_list.push_back(match_first ? (*result).second : (*result).first);
+          node_assm.erase(result);
+        }
+        // If there are still elements in node_assm and result ==
+        // node_assm.end(), this means the curve is not a loop, the
+        // ordered_node_list is flipped and try the other direction that has not
+        // been examined yet.
+        else
+        {
+          if (isFlipped)
+            // Flipped twice; this means the node list has at least two segments.
+            throw MooseException("The node list provided has more than one segments.");
+
+          // mark the first flip event.
+          isFlipped = true;
+          std::reverse(ordered_node_list.begin(), ordered_node_list.end());
+          // As this iteration is wasted, set the iterator backward
+          i--;
+        }
+      }
+      // Temp: create a single TRI3 element to replace the original ones
+      // TODO: Need to distinguish original subdomain id
+      // TODO: Need to retain the original boundary id other than boundary_to_improve
+      // TODO: Need to check if the new element is inverted
+      // TODO: check if improvement is needed
+      Elem * elem_Tri3_new = mesh.add_elem(new Tri3);
+      elem_Tri3_new->set_node(0) = mesh.node_ptr(tri_group.first);
+      elem_Tri3_new->set_node(1) = mesh.node_ptr(ordered_node_list.front());
+      elem_Tri3_new->set_node(2) = mesh.node_ptr(ordered_node_list.back());
+      boundary_info.add_side(elem_Tri3_new, 1, boundary_to_improve);
+      elem_Tri3_new->subdomain_id() =
+          mesh.elem_ptr(std::get<0>(tri_group.second.front()))->subdomain_id();
+      // Remove the original TRI3 elements
+      for (const auto & tri : tri_group.second)
+      {
+        mesh.delete_elem(mesh.elem_ptr(std::get<0>(tri)));
+      }
+    }
+  }
+  mesh.contract();
 }
 }
