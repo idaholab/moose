@@ -34,6 +34,17 @@ HexToTetMeshGenerator::HexToTetMeshGenerator(const InputParameters & parameters)
   _tet4_nodes.push_back({6, 1, 5, 7});
   _tet4_nodes.push_back({2, 3, 1, 7});
   _tet4_nodes.push_back({6, 2, 1, 7});
+
+//    {0, 2, 1}, 
+//    {0, 1, 3}, 
+//    {1, 2, 3}, 
+//    {2, 0, 3}  
+
+  // there are six faces on the parent element, which we need to map to the faces of
+  // the daughter elements in order to properly retain the sideset information
+//  _daughter_face_to_parent_face.resize(TET4_ELEM_PER_HEX8);
+//  _daughter_face_to_parent_face[0].push_back({0, 0});
+//  _daughter_face_to_parent_face[0].push_back({1, 0});
 }
 
 std::unique_ptr<MeshBase>
@@ -80,12 +91,12 @@ HexToTetMeshGenerator::generate()
       elem_node_ids[i].push_back(elem->node_ref(j).id());
     }
 
-    std::vector<boundary_id_type> b;
-    for (unsigned short int s = 0; s < Hex8::num_sides; ++s)
-    {
-      boundary_info.boundary_ids(elem, s, b);
-      //elem_face_boundary_ids[i][s].push_back(b);
-    }
+//    std::vector<boundary_id_type> b;
+//    for (unsigned short int s = 0; s < Hex8::num_sides; ++s)
+//    {
+//      boundary_info.boundary_ids(elem, s, b);
+//      //elem_face_boundary_ids[i][s].push_back(b);
+//    }
 
     i++;
   }
