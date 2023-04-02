@@ -33,6 +33,17 @@
     allow_warnings = true
     cli_args = '--mesh-only multi_block_cut_elem.e'
   []
+  [multi_block_cut_elem_improve]
+    type = 'Exodiff'
+    input = 'multi_block_cut.i'
+    exodiff = 'multi_block_cut_elem_imp.e'
+    mesh_mode = 'REPLICATED'
+    recover = false
+    requirement = 'The system shall cut a multi-subdomain mesh using the element cutting method and perform TRI3 element improvement.'
+    allow_warnings = true
+    cli_args = 'Mesh/mlc/improve_tri_elements=true
+                --mesh-only multi_block_cut_elem_imp.e'
+  []
   [multi_block_cut_node]
     type = 'Exodiff'
     input = 'multi_block_cut.i'

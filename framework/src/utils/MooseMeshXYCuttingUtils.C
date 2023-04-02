@@ -962,83 +962,199 @@ boundaryTriElemImprover(ReplicatedMesh & mesh, const boundary_id_type boundary_t
   {
     // It is possible to improve only when more than one TRI3 elements share the same off-boundary
     // node
-    if (tri_group.second.size() > 1)
+    std::vector<std::pair<dof_id_type, dof_id_type>> node_assm;
+    std::vector<dof_id_type> elem_id_list;
+    for (const auto & tri : tri_group.second)
     {
-      std::vector<std::pair<dof_id_type, dof_id_type>> node_assm;
-      std::vector<dof_id_type> ordered_node_list;
-      for (const auto & tri : tri_group.second)
-      {
-        node_assm.push_back(std::make_pair(std::get<1>(tri), std::get<2>(tri)));
-      }
-      //
-      bool isFlipped = false;
-      // Start from the first element, try to find a chain of nodes
-      ordered_node_list.push_back(node_assm.front().first);
-      ordered_node_list.push_back(node_assm.front().second);
-      // Remove the element that has been added to ordered_node_list
-      node_assm.erase(node_assm.begin());
-      const unsigned int node_assm_size_0 = node_assm.size();
-      for (unsigned int i = 0; i < node_assm_size_0; i++)
-      {
-        // Find nodes to expand the chain
-        dof_id_type end_node_id = ordered_node_list.back();
-        auto isMatch1 = [end_node_id](std::pair<dof_id_type, dof_id_type> old_id_pair)
-        { return old_id_pair.first == end_node_id; };
-        auto isMatch2 = [end_node_id](std::pair<dof_id_type, dof_id_type> old_id_pair)
-        { return old_id_pair.second == end_node_id; };
-        auto result = std::find_if(node_assm.begin(), node_assm.end(), isMatch1);
-        bool match_first;
-        if (result == node_assm.end())
-        {
-          match_first = false;
-          result = std::find_if(node_assm.begin(), node_assm.end(), isMatch2);
-        }
-        else
-        {
-          match_first = true;
-        }
-        // If found, add the node to boundary_ordered_node_list
-        if (result != node_assm.end())
-        {
-          ordered_node_list.push_back(match_first ? (*result).second : (*result).first);
-          node_assm.erase(result);
-        }
-        // If there are still elements in node_assm and result ==
-        // node_assm.end(), this means the curve is not a loop, the
-        // ordered_node_list is flipped and try the other direction that has not
-        // been examined yet.
-        else
-        {
-          if (isFlipped)
-            // Flipped twice; this means the node list has at least two segments.
-            throw MooseException("The node list provided has more than one segments.");
+      node_assm.push_back(std::make_pair(std::get<1>(tri), std::get<2>(tri)));
+      elem_id_list.push_back(std::get<0>(tri));
+    }
+    std::vector<dof_id_type> ordered_node_list;
+    std::vector<dof_id_type> ordered_elem_list;
+    makeOrderedNodeList(node_assm, ordered_node_list, elem_id_list, ordered_elem_list);
 
-          // mark the first flip event.
-          isFlipped = true;
-          std::reverse(ordered_node_list.begin(), ordered_node_list.end());
-          // As this iteration is wasted, set the iterator backward
-          i--;
-        }
-      }
-      // Temp: create a single TRI3 element to replace the original ones
-      // TODO: Need to distinguish original subdomain id
-      // TODO: Need to retain the original boundary id other than boundary_to_improve
-      // TODO: Need to check if the new element is inverted
-      // TODO: check if improvement is needed
-      Elem * elem_Tri3_new = mesh.add_elem(new Tri3);
-      elem_Tri3_new->set_node(0) = mesh.node_ptr(tri_group.first);
-      elem_Tri3_new->set_node(1) = mesh.node_ptr(ordered_node_list.front());
-      elem_Tri3_new->set_node(2) = mesh.node_ptr(ordered_node_list.back());
-      boundary_info.add_side(elem_Tri3_new, 1, boundary_to_improve);
-      elem_Tri3_new->subdomain_id() =
-          mesh.elem_ptr(std::get<0>(tri_group.second.front()))->subdomain_id();
-      // Remove the original TRI3 elements
-      for (const auto & tri : tri_group.second)
+    // For all the elements sharing the same off-boundary node, we need to know how many separated
+    // subdomains are involved
+    std::vector<std::pair<subdomain_id_type, unsigned int>> blocks_info;
+    for (const auto & elem_id : ordered_elem_list)
+    {
+      if (blocks_info.empty())
       {
-        mesh.delete_elem(mesh.elem_ptr(std::get<0>(tri)));
+        blocks_info.push_back(std::make_pair(mesh.elem_ptr(elem_id)->subdomain_id(), 1));
+      }
+      else
+      {
+        if (mesh.elem_ptr(elem_id)->subdomain_id() == blocks_info.back().first)
+          blocks_info.back().second++;
+        else
+          blocks_info.push_back(std::make_pair(mesh.elem_ptr(elem_id)->subdomain_id(), 1));
       }
     }
+    // For each separated subdomain, we try to improve the boundary elements
+    unsigned int side_counter = 0;
+    for (const auto & block_info : blocks_info)
+    {
+      const auto node_1 = mesh.node_ptr(ordered_node_list[side_counter]);
+      const auto node_2 = mesh.node_ptr(ordered_node_list[side_counter + block_info.second]);
+      const auto node_0 = mesh.node_ptr(tri_group.first);
+      const Point v1 = *node_1 - *node_0;
+      const Point v2 = *node_2 - *node_0;
+      const Real angle = std::acos(v1 * v2 / v1.norm() / v2.norm()) / M_PI * 180.0;
+      const std::vector<dof_id_type> block_elems(ordered_elem_list.begin() + side_counter,
+                                                 ordered_elem_list.begin() + side_counter +
+                                                     block_info.second);
+      // Ideally we want this angle to be 60 degrees
+      // In reality, we want one TRI3 element if the angle is less than 90 degrees;
+      // we want two TRI3 elements if the angle is greater than 90 degrees and less than 135
+      // degrees; we want three TRI3 elements if the angle is greater than 135 degrees and less than
+      // 180 degrees.
+      if (angle < 90.0)
+      {
+        // if there is only one original TRI3 element, we do not need to improve it
+        if (block_info.second != 1)
+        {
+          makeImprovedTriElement(mesh,
+                                 tri_group.first,
+                                 ordered_node_list[side_counter],
+                                 ordered_node_list[side_counter + block_info.second],
+                                 block_info.first,
+                                 boundary_to_improve,
+                                 block_elems);
+        }
+      }
+      else if (angle < 135.0)
+      {
+        const auto node_m = mesh.add_point((*node_1 + *node_2) / 2.0);
+        makeImprovedTriElement(mesh,
+                               tri_group.first,
+                               ordered_node_list[side_counter],
+                               node_m->id(),
+                               block_info.first,
+                               boundary_to_improve);
+        makeImprovedTriElement(mesh,
+                               tri_group.first,
+                               node_m->id(),
+                               ordered_node_list[side_counter + block_info.second],
+                               block_info.first,
+                               boundary_to_improve,
+                               block_elems);
+      }
+      else
+      {
+        const auto node_m1 = mesh.add_point((*node_1 * 2.0 + *node_2) / 3.0);
+        const auto node_m2 = mesh.add_point((*node_1 + *node_2 * 2.0) / 3.0);
+        makeImprovedTriElement(mesh,
+                               tri_group.first,
+                               ordered_node_list[side_counter],
+                               node_m1->id(),
+                               block_info.first,
+                               boundary_to_improve);
+        makeImprovedTriElement(mesh,
+                               tri_group.first,
+                               node_m1->id(),
+                               node_m2->id(),
+                               block_info.first,
+                               boundary_to_improve);
+        makeImprovedTriElement(mesh,
+                               tri_group.first,
+                               node_m2->id(),
+                               ordered_node_list[side_counter + block_info.second],
+                               block_info.first,
+                               boundary_to_improve,
+                               block_elems);
+      }
+      side_counter += block_info.second;
+    }
+    // TODO: Need to retain the original boundary id other than boundary_to_improve
+    // TODO: Need to check if the new element is inverted
   }
   mesh.contract();
+}
+
+void
+makeImprovedTriElement(ReplicatedMesh & mesh,
+                       const dof_id_type node_id_0,
+                       const dof_id_type node_id_1,
+                       const dof_id_type node_id_2,
+                       const subdomain_id_type subdomain_id,
+                       const boundary_id_type boundary_id,
+                       const std::vector<dof_id_type> & elem_id_list)
+{
+  BoundaryInfo & boundary_info = mesh.get_boundary_info();
+  Elem * elem_Tri3_new = mesh.add_elem(new Tri3);
+  elem_Tri3_new->set_node(0) = mesh.node_ptr(node_id_0);
+  elem_Tri3_new->set_node(1) = mesh.node_ptr(node_id_1);
+  elem_Tri3_new->set_node(2) = mesh.node_ptr(node_id_2);
+  boundary_info.add_side(elem_Tri3_new, 1, boundary_id);
+  elem_Tri3_new->subdomain_id() = subdomain_id;
+  // Remove the original TRI3 elements
+  for (const auto & elem_id : elem_id_list)
+  {
+    mesh.delete_elem(mesh.elem_ptr(elem_id));
+  }
+}
+
+void
+makeOrderedNodeList(std::vector<std::pair<dof_id_type, dof_id_type>> & node_assm,
+                    std::vector<dof_id_type> & ordered_node_list,
+                    std::vector<dof_id_type> & elem_id_list,
+                    std::vector<dof_id_type> & ordered_elem_id_list)
+{
+  // a flag to indicate if the ordered_node_list has been reversed
+  bool isFlipped = false;
+  // Start from the first element, try to find a chain of nodes
+  ordered_node_list.push_back(node_assm.front().first);
+  ordered_node_list.push_back(node_assm.front().second);
+  ordered_elem_id_list.push_back(elem_id_list.front());
+  // Remove the element that has been added to ordered_node_list
+  node_assm.erase(node_assm.begin());
+  elem_id_list.erase(elem_id_list.begin());
+  const unsigned int node_assm_size_0 = node_assm.size();
+  for (unsigned int i = 0; i < node_assm_size_0; i++)
+  {
+    // Find nodes to expand the chain
+    dof_id_type end_node_id = ordered_node_list.back();
+    auto isMatch1 = [end_node_id](std::pair<dof_id_type, dof_id_type> old_id_pair)
+    { return old_id_pair.first == end_node_id; };
+    auto isMatch2 = [end_node_id](std::pair<dof_id_type, dof_id_type> old_id_pair)
+    { return old_id_pair.second == end_node_id; };
+    auto result = std::find_if(node_assm.begin(), node_assm.end(), isMatch1);
+    bool match_first;
+    if (result == node_assm.end())
+    {
+      match_first = false;
+      result = std::find_if(node_assm.begin(), node_assm.end(), isMatch2);
+    }
+    else
+    {
+      match_first = true;
+    }
+    // If found, add the node to boundary_ordered_node_list
+    if (result != node_assm.end())
+    {
+      ordered_node_list.push_back(match_first ? (*result).second : (*result).first);
+      node_assm.erase(result);
+      const auto elem_index = std::distance(node_assm.begin(), result);
+      ordered_elem_id_list.push_back(elem_id_list[elem_index]);
+      elem_id_list.erase(elem_id_list.begin() + elem_index);
+    }
+    // If there are still elements in node_assm and result ==
+    // node_assm.end(), this means the curve is not a loop, the
+    // ordered_node_list is flipped and try the other direction that has not
+    // been examined yet.
+    else
+    {
+      if (isFlipped)
+        // Flipped twice; this means the node list has at least two segments.
+        throw MooseException("The node list provided has more than one segments.");
+
+      // mark the first flip event.
+      isFlipped = true;
+      std::reverse(ordered_node_list.begin(), ordered_node_list.end());
+      std::reverse(ordered_elem_id_list.begin(), ordered_elem_id_list.end());
+      // As this iteration is wasted, set the iterator backward
+      i--;
+    }
+  }
 }
 }

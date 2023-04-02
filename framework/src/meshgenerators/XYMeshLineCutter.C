@@ -51,6 +51,8 @@ XYMeshLineCutter::validParams()
   params.addParam<subdomain_id_type>(
       "tri_elem_subdomain_shift",
       "Customized id shift to define subdomain ids of the converted triangular elements.");
+  params.addParam<bool>(
+      "improve_tri_elements", false, "Whether to improve TRI3 elements after CUT_ELEM_TRI method.");
 
   params.addClassDescription(
       "This XYMeshLineCutter object is designed to trim the input mesh by removing all the "
@@ -78,6 +80,7 @@ XYMeshLineCutter::XYMeshLineCutter(const InputParameters & parameters)
     _tri_elem_subdomain_shift(isParamValid("tri_elem_subdomain_shift")
                                   ? getParam<subdomain_id_type>("tri_elem_subdomain_shift")
                                   : Moose::INVALID_BLOCK_ID),
+    _improve_tri_elements(getParam<bool>("improve_tri_elements")),
     _input(getMeshByName(_input_name))
 {
   if (_cut_line_params.size() != 3)
@@ -121,7 +124,8 @@ XYMeshLineCutter::generate()
                                                   tri_subdomain_id_shift,
                                                   _tri_elem_subdomain_name_suffix,
                                                   block_id_to_remove,
-                                                  _new_boundary_id);
+                                                  _new_boundary_id,
+                                                  _improve_tri_elements);
     }
     catch (MooseException & e)
     {

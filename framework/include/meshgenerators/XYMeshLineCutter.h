@@ -43,6 +43,8 @@ protected:
   const SubdomainName _tri_elem_subdomain_name_suffix;
   /// Customized id shift to define subdomain ids of the converted triangular elements
   const subdomain_id_type _tri_elem_subdomain_shift;
+  /// Whether to improve TRI3 elements after CUT_ELEM_TRI method
+  const bool _improve_tri_elements;
   /// Reference to input mesh pointer
   std::unique_ptr<MeshBase> & _input;
 };

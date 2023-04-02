@@ -235,7 +235,37 @@ void lineRemoverCutElem(ReplicatedMesh & mesh,
  * @param mesh input mesh with the boundary TRI3 elements that need to be improved
  * @param boundary_to_improve boundary id of the boundary that needs to be improved
  */
+void boundaryTriElemImprover(ReplicatedMesh & mesh, const boundary_id_type boundary_to_improve);
+
+/**
+ * Make a TRI3 element with the given node ids and subdomain id with boundary information
+ * @param mesh input mesh where the TRI3 element needs to be added
+ * @param node_id_0 id of the first node of the TRI3 element
+ * @param node_id_1 id of the second node of the TRI3 element
+ * @param node_id_2 id of the third node of the TRI3 element
+ * @param subdomain_id subdomain id of the TRI3 element
+ * @param boundary_id boundary id of the TRI3 element's second side
+ * @param elem_id_list list of elements that need to be removed
+ */
 void
-boundaryTriElemImprover(ReplicatedMesh & mesh,
-                        const boundary_id_type boundary_to_improve);                        
+makeImprovedTriElement(ReplicatedMesh & mesh,
+                       const dof_id_type node_id_0,
+                       const dof_id_type node_id_1,
+                       const dof_id_type node_id_2,
+                       const subdomain_id_type subdomain_id,
+                       const boundary_id_type boundary_id,
+                       const std::vector<dof_id_type> & elem_id_list = std::vector<dof_id_type>());
+
+/**
+ * Convert a list of sides in the form of a vector of pairs of node ids into a list of ordered nodes
+ * based on connectivity
+ * @param node_assm vector of pairs of node ids that represent the sides
+ * @param ordered_node_list vector of node ids that represent the ordered nodes
+ * @param elem_id_list vector of element ids that represent the elements that contain the sides
+ * @param ordered_elem_id_list vector of element corresponding to the ordered nodes
+ * */
+void makeOrderedNodeList(std::vector<std::pair<dof_id_type, dof_id_type>> & node_assm,
+                         std::vector<dof_id_type> & ordered_node_list,
+                         std::vector<dof_id_type> & elem_id_list,
+                         std::vector<dof_id_type> & ordered_elem_id_list);
 }

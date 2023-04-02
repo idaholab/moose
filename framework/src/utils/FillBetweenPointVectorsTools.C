@@ -9,6 +9,7 @@
 
 #include "FillBetweenPointVectorsTools.h"
 #include "MooseMeshUtils.h"
+#include "MooseMeshXYCuttingUtils.h"
 #include "MooseMesh.h"
 #include "MeshGenerator.h"
 #include "MooseError.h"
