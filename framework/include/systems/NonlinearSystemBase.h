@@ -734,9 +734,7 @@ protected:
   /**
    * Do mortar constraint residual/jacobian computations
    */
-  void mortarConstraints(Moose::ComputeType compute_type,
-                         const std::set<TagID> & vector_tags,
-                         const std::set<TagID> & matrix_tags);
+  void mortarConstraints(Moose::ComputeType compute_type);
 
   /**
    * Compute a "Jacobian" for automatic scaling purposes

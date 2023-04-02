@@ -39,36 +39,9 @@ ComputeNodalUserObjectsThread::ComputeNodalUserObjectsThread(ComputeNodalUserObj
 ComputeNodalUserObjectsThread::~ComputeNodalUserObjectsThread() {}
 
 void
-ComputeNodalUserObjectsThread::subdomainChanged()
-{
-  std::vector<NodalUserObject *> objs;
-  _query.clone()
-      .condition<AttribThread>(_tid)
-      .condition<AttribInterfaces>(Interfaces::NodalUserObject)
-      .queryInto(objs);
-
-  std::set<TagID> needed_vector_tags;
-  for (const auto obj : objs)
-  {
-    auto & vector_tags = obj->getFEVariableCoupleableVectorTags();
-    needed_vector_tags.insert(vector_tags.begin(), vector_tags.end());
-  }
-  _fe_problem.setActiveFEVariableCoupleableVectorTags(needed_vector_tags, _tid);
-}
-
-void
 ComputeNodalUserObjectsThread::onNode(ConstNodeRange::const_iterator & node_it)
 {
   const Node * node = *node_it;
-
-  const auto & block_ids = _aux_sys.mesh().getNodeBlockIds(*node);
-  if (_block_ids != block_ids)
-  {
-    _block_ids.clear();
-    _block_ids.insert(block_ids.begin(), block_ids.end());
-    subdomainChanged();
-  }
-
   _fe_problem.reinitNode(node, _tid);
 
   std::vector<NodalUserObject *> objs;
@@ -106,6 +79,7 @@ ComputeNodalUserObjectsThread::onNode(ConstNodeRange::const_iterator & node_it)
   // To inforce the unique execution this vector is populated and checked if the unique flag is
   // enabled.
   std::set<NodalUserObject *> computed;
+  const std::set<SubdomainID> & block_ids = _fe_problem.mesh().getNodeBlockIds(*node);
   for (const auto & block : block_ids)
   {
     _query.clone()

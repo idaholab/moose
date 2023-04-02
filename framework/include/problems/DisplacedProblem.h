@@ -360,8 +360,6 @@ public:
 
   unsigned int currentNlSysNum() const override;
 
-  virtual const std::vector<VectorTag> & currentResidualVectorTags() const override;
-
 protected:
   FEProblemBase & _mproblem;
   MooseMesh & _mesh;

@@ -3244,11 +3244,11 @@ Assembly::addResidualScalar(const std::vector<VectorTag> & vector_tags)
 }
 
 void
-Assembly::cacheResidual(const std::vector<VectorTag> & tags)
+Assembly::cacheResidual()
 {
   const std::vector<MooseVariableFEBase *> & vars = _sys.getVariables(_tid);
   for (const auto & var : vars)
-    for (const auto & vector_tag : tags)
+    for (const auto & vector_tag : _residual_vector_tags)
       if (_sys.hasVector(vector_tag._id))
         cacheResidualBlock(_cached_residual_values[vector_tag._type_id],
                            _cached_residual_rows[vector_tag._type_id],
@@ -3338,11 +3338,11 @@ Assembly::cacheResidualNodes(const DenseVector<Number> & res,
 }
 
 void
-Assembly::cacheResidualNeighbor(const std::vector<VectorTag> & tags)
+Assembly::cacheResidualNeighbor()
 {
   const std::vector<MooseVariableFEBase *> & vars = _sys.getVariables(_tid);
   for (const auto & var : vars)
-    for (const auto & vector_tag : tags)
+    for (const auto & vector_tag : _residual_vector_tags)
       if (_sys.hasVector(vector_tag._id))
         cacheResidualBlock(_cached_residual_values[vector_tag._type_id],
                            _cached_residual_rows[vector_tag._type_id],
@@ -3353,11 +3353,11 @@ Assembly::cacheResidualNeighbor(const std::vector<VectorTag> & tags)
 }
 
 void
-Assembly::cacheResidualLower(const std::vector<VectorTag> & tags)
+Assembly::cacheResidualLower()
 {
   const std::vector<MooseVariableFEBase *> & vars = _sys.getVariables(_tid);
   for (const auto & var : vars)
-    for (const auto & vector_tag : tags)
+    for (const auto & vector_tag : _residual_vector_tags)
       if (_sys.hasVector(vector_tag._id))
         cacheResidualBlock(_cached_residual_values[vector_tag._type_id],
                            _cached_residual_rows[vector_tag._type_id],
@@ -3368,9 +3368,9 @@ Assembly::cacheResidualLower(const std::vector<VectorTag> & tags)
 }
 
 void
-Assembly::addCachedResiduals(const std::vector<VectorTag> & tags)
+Assembly::addCachedResiduals()
 {
-  for (const auto & vector_tag : tags)
+  for (const auto & vector_tag : _residual_vector_tags)
   {
     if (!_sys.hasVector(vector_tag._id))
     {
