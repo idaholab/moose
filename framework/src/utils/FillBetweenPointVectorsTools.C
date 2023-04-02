@@ -630,58 +630,10 @@ isClosedLoop(ReplicatedMesh & mesh,
              const Point origin_pt,
              const std::string input_type)
 {
-  bool isFlipped = false;
-  // Start from the first element, try to find a chain of nodes
-  ordered_node_list.push_back(node_assm.front().first);
-  ordered_node_list.push_back(node_assm.front().second);
-  // Remove the element that has been added to ordered_node_list
-  node_assm.erase(node_assm.begin());
-  const unsigned int node_assm_size_0 = node_assm.size();
-  for (unsigned int i = 0; i < node_assm_size_0; i++)
-  {
-    // Find nodes to expand the chain
-    dof_id_type end_node_id = ordered_node_list.back();
-    auto isMatch1 = [end_node_id](std::pair<dof_id_type, dof_id_type> old_id_pair)
-    { return old_id_pair.first == end_node_id; };
-    auto isMatch2 = [end_node_id](std::pair<dof_id_type, dof_id_type> old_id_pair)
-    { return old_id_pair.second == end_node_id; };
-    auto result = std::find_if(node_assm.begin(), node_assm.end(), isMatch1);
-    bool match_first;
-    if (result == node_assm.end())
-    {
-      match_first = false;
-      result = std::find_if(node_assm.begin(), node_assm.end(), isMatch2);
-    }
-    else
-    {
-      match_first = true;
-    }
-    // If found, add the node to boundary_ordered_node_list
-    if (result != node_assm.end())
-    {
-      ordered_node_list.push_back(match_first ? (*result).second : (*result).first);
-      node_assm.erase(result);
-    }
-    // If there are still elements in node_assm and result ==
-    // node_assm.end(), this means the curve is not a loop, the
-    // ordered_node_list is flipped and try the other direction that has not
-    // been examined yet.
-    else
-    {
-      if (isFlipped)
-        // Flipped twice; this means the curve has at least two segments.
-        // This is invalid type #1
-        throw MooseException("This mesh generator does not work for the provided ",
-                             input_type,
-                             " as it has more than one segments.");
-
-      // mark the first flip event.
-      isFlipped = true;
-      std::reverse(ordered_node_list.begin(), ordered_node_list.end());
-      // As this iteration is wasted, set the iterator backward
-      i--;
-    }
-  }
+  std::vector<dof_id_type> dummy_elem_list = std::vector<dof_id_type>(node_assm.size(), 0);
+  std::vector<dof_id_type> ordered_dummy_elem_list;
+  MooseMeshXYCuttingUtils::makeOrderedNodeList(
+      node_assm, ordered_node_list, dummy_elem_list, ordered_dummy_elem_list);
   // If the code ever gets here, node_assm is empty.
   // If the ordered_node_list front and back are not the same, the boundary is not a loop.
   // This is not done inside the loop just for some potential applications in the future.
