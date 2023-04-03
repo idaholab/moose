@@ -122,4 +122,14 @@
     cli_args = 'Mesh/mlc/cutting_type=MOV_NODE
                 --mesh-only simple_cut_err.e'
   []
+  [err_tri_improve_for_node_moving]
+    type = 'RunException'
+    input = 'simple_cut.i'
+    mesh_mode = 'REPLICATED'
+    expect_err = 'This parameter is not supported when'
+    requirement = 'The system shall throw an error if the tri element improvement is enabled under the node moving mode.'
+    cli_args = 'Mesh/mlc/cutting_type=MOV_NODE
+                Mesh/mlc/improve_tri_elements=true
+                --mesh-only simple_cut_err.e'
+  []  
 [] 

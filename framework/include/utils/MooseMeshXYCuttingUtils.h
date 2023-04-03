@@ -244,17 +244,19 @@ void boundaryTriElemImprover(ReplicatedMesh & mesh, const boundary_id_type bound
  * @param node_id_1 id of the second node of the TRI3 element
  * @param node_id_2 id of the third node of the TRI3 element
  * @param subdomain_id subdomain id of the TRI3 element
- * @param boundary_id boundary id of the TRI3 element's second side
- * @param elem_id_list list of elements that need to be removed
+ * @param boundary_ids_for_side_1 boundary ids of the second side of the TRI3 element
+ * @param boundary_ids_for_side_0 boundary ids of the first side of the TRI3 element
+ * @param boundary_ids_for_side_2 boundary ids of the third side of the TRI3 element
  */
-void
-makeImprovedTriElement(ReplicatedMesh & mesh,
-                       const dof_id_type node_id_0,
-                       const dof_id_type node_id_1,
-                       const dof_id_type node_id_2,
-                       const subdomain_id_type subdomain_id,
-                       const boundary_id_type boundary_id,
-                       const std::vector<dof_id_type> & elem_id_list = std::vector<dof_id_type>());
+void makeImprovedTriElement(
+    ReplicatedMesh & mesh,
+    const dof_id_type node_id_0,
+    const dof_id_type node_id_1,
+    const dof_id_type node_id_2,
+    const subdomain_id_type subdomain_id,
+    const std::vector<boundary_id_type> boundary_ids_for_side_1 = std::vector<boundary_id_type>(),
+    const std::vector<boundary_id_type> boundary_ids_for_side_0 = std::vector<boundary_id_type>(),
+    const std::vector<boundary_id_type> boundary_ids_for_side_2 = std::vector<boundary_id_type>());
 
 /**
  * Convert a list of sides in the form of a vector of pairs of node ids into a list of ordered nodes
@@ -268,4 +270,22 @@ void makeOrderedNodeList(std::vector<std::pair<dof_id_type, dof_id_type>> & node
                          std::vector<dof_id_type> & ordered_node_list,
                          std::vector<dof_id_type> & elem_id_list,
                          std::vector<dof_id_type> & ordered_elem_id_list);
+
+/**
+ * Check if there is a side in an element that contains the given pair of nodes; if yes, also find
+ * the side id and the direction of the two nodes
+ * @param mesh input mesh with the element that needs to be checked
+ * @param elem_id id of the element that needs to be checked
+ * @param node_id_0 id of the first node of the pair
+ * @param node_id_1 id of the second node of the pair
+ * @param side_id id of the side that contains the pair of nodes
+ * @param is_inverse flag to indicate if the two nodes are in the same direction as the side
+ * @return true if the element contains the side with the given pair of nodes
+ */
+bool elemSideLocator(ReplicatedMesh & mesh,
+                     const dof_id_type elem_id,
+                     const dof_id_type node_id_0,
+                     const dof_id_type node_id_1,
+                     unsigned short & side_id,
+                     bool & is_inverse);
 }

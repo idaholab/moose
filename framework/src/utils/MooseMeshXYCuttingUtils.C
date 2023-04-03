@@ -957,6 +957,8 @@ boundaryTriElemImprover(ReplicatedMesh & mesh, const boundary_id_type boundary_t
       }
     }
   }
+  // Elements that need to be removed
+  std::vector<dof_id_type> elems_to_remove;
   // Now check if any group of TRI3 sharing an off-boundary node can be improved.
   for (const auto & tri_group : tri3_elem_info)
   {
@@ -972,6 +974,8 @@ boundaryTriElemImprover(ReplicatedMesh & mesh, const boundary_id_type boundary_t
     std::vector<dof_id_type> ordered_node_list;
     std::vector<dof_id_type> ordered_elem_list;
     makeOrderedNodeList(node_assm, ordered_node_list, elem_id_list, ordered_elem_list);
+    elems_to_remove.insert(
+        elems_to_remove.end(), ordered_elem_list.begin(), ordered_elem_list.end());
 
     // For all the elements sharing the same off-boundary node, we need to know how many separated
     // subdomains are involved
@@ -995,6 +999,7 @@ boundaryTriElemImprover(ReplicatedMesh & mesh, const boundary_id_type boundary_t
     for (const auto & block_info : blocks_info)
     {
       const auto node_1 = mesh.node_ptr(ordered_node_list[side_counter]);
+      // we do not need to subtract 1 for node_2
       const auto node_2 = mesh.node_ptr(ordered_node_list[side_counter + block_info.second]);
       const auto node_0 = mesh.node_ptr(tri_group.first);
       const Point v1 = *node_1 - *node_0;
@@ -1003,6 +1008,34 @@ boundaryTriElemImprover(ReplicatedMesh & mesh, const boundary_id_type boundary_t
       const std::vector<dof_id_type> block_elems(ordered_elem_list.begin() + side_counter,
                                                  ordered_elem_list.begin() + side_counter +
                                                      block_info.second);
+      // We assume that there are no sidesets defined inside a subdomain
+      // For the first TRI3 element, we want to check if its side defined by node_0 and node_1 is
+      // defined in any sidesets
+      unsigned short side_id_0;
+      unsigned short side_id_t;
+      bool is_inverse_0;
+      bool is_inverse_t;
+      elemSideLocator(mesh,
+                      block_elems[side_counter],
+                      tri_group.first,
+                      ordered_node_list[side_counter],
+                      side_id_0,
+                      is_inverse_0);
+      elemSideLocator(mesh,
+                      block_elems[side_counter + block_info.second - 1],
+                      ordered_node_list[side_counter + block_info.second],
+                      tri_group.first,
+                      side_id_t,
+                      is_inverse_t);
+      // Collect boundary information of the identified sides
+      std::vector<boundary_id_type> side_0_boundary_ids;
+      boundary_info.boundary_ids(
+          mesh.elem_ptr(block_elems[side_counter]), side_id_0, side_0_boundary_ids);
+      std::vector<boundary_id_type> side_t_boundary_ids;
+      boundary_info.boundary_ids(mesh.elem_ptr(block_elems[side_counter + block_info.second - 1]),
+                                 side_id_t,
+                                 side_t_boundary_ids);
+
       // Ideally we want this angle to be 60 degrees
       // In reality, we want one TRI3 element if the angle is less than 90 degrees;
       // we want two TRI3 elements if the angle is greater than 90 degrees and less than 135
@@ -1010,17 +1043,14 @@ boundaryTriElemImprover(ReplicatedMesh & mesh, const boundary_id_type boundary_t
       // 180 degrees.
       if (angle < 90.0)
       {
-        // if there is only one original TRI3 element, we do not need to improve it
-        if (block_info.second != 1)
-        {
-          makeImprovedTriElement(mesh,
-                                 tri_group.first,
-                                 ordered_node_list[side_counter],
-                                 ordered_node_list[side_counter + block_info.second],
-                                 block_info.first,
-                                 boundary_to_improve,
-                                 block_elems);
-        }
+        makeImprovedTriElement(mesh,
+                               tri_group.first,
+                               ordered_node_list[side_counter],
+                               ordered_node_list[side_counter + block_info.second],
+                               block_info.first,
+                               {boundary_to_improve},
+                               side_0_boundary_ids,
+                               side_t_boundary_ids);
       }
       else if (angle < 135.0)
       {
@@ -1030,14 +1060,17 @@ boundaryTriElemImprover(ReplicatedMesh & mesh, const boundary_id_type boundary_t
                                ordered_node_list[side_counter],
                                node_m->id(),
                                block_info.first,
-                               boundary_to_improve);
+                               {boundary_to_improve},
+                               side_0_boundary_ids,
+                               std::vector<boundary_id_type>());
         makeImprovedTriElement(mesh,
                                tri_group.first,
                                node_m->id(),
                                ordered_node_list[side_counter + block_info.second],
                                block_info.first,
-                               boundary_to_improve,
-                               block_elems);
+                               {boundary_to_improve},
+                               std::vector<boundary_id_type>(),
+                               side_t_boundary_ids);
       }
       else
       {
@@ -1048,26 +1081,33 @@ boundaryTriElemImprover(ReplicatedMesh & mesh, const boundary_id_type boundary_t
                                ordered_node_list[side_counter],
                                node_m1->id(),
                                block_info.first,
-                               boundary_to_improve);
+                               {boundary_to_improve},
+                               side_0_boundary_ids,
+                               std::vector<boundary_id_type>());
         makeImprovedTriElement(mesh,
                                tri_group.first,
                                node_m1->id(),
                                node_m2->id(),
                                block_info.first,
-                               boundary_to_improve);
+                               {boundary_to_improve},
+                               std::vector<boundary_id_type>(),
+                               std::vector<boundary_id_type>());
         makeImprovedTriElement(mesh,
                                tri_group.first,
                                node_m2->id(),
                                ordered_node_list[side_counter + block_info.second],
                                block_info.first,
-                               boundary_to_improve,
-                               block_elems);
+                               {boundary_to_improve},
+                               std::vector<boundary_id_type>(),
+                               side_t_boundary_ids);
       }
       side_counter += block_info.second;
     }
-    // TODO: Need to retain the original boundary id other than boundary_to_improve
-    // TODO: Need to check if the new element is inverted
+    // TODO: Need to check if the new element is inverted?
   }
+  // Delete the original elements
+  for (const auto & elem_to_remove : elems_to_remove)
+    mesh.delete_elem(mesh.elem_ptr(elem_to_remove));
   mesh.contract();
 }
 
@@ -1077,21 +1117,22 @@ makeImprovedTriElement(ReplicatedMesh & mesh,
                        const dof_id_type node_id_1,
                        const dof_id_type node_id_2,
                        const subdomain_id_type subdomain_id,
-                       const boundary_id_type boundary_id,
-                       const std::vector<dof_id_type> & elem_id_list)
+                       const std::vector<boundary_id_type> boundary_ids_for_side_1,
+                       const std::vector<boundary_id_type> boundary_ids_for_side_0,
+                       const std::vector<boundary_id_type> boundary_ids_for_side_2)
 {
   BoundaryInfo & boundary_info = mesh.get_boundary_info();
   Elem * elem_Tri3_new = mesh.add_elem(new Tri3);
   elem_Tri3_new->set_node(0) = mesh.node_ptr(node_id_0);
   elem_Tri3_new->set_node(1) = mesh.node_ptr(node_id_1);
   elem_Tri3_new->set_node(2) = mesh.node_ptr(node_id_2);
-  boundary_info.add_side(elem_Tri3_new, 1, boundary_id);
+  for (const auto & boundary_id_for_side_0 : boundary_ids_for_side_0)
+    boundary_info.add_side(elem_Tri3_new, 0, boundary_id_for_side_0);
+  for (const auto & boundary_id_for_side_1 : boundary_ids_for_side_1)
+    boundary_info.add_side(elem_Tri3_new, 1, boundary_id_for_side_1);
+  for (const auto & boundary_id_for_side_2 : boundary_ids_for_side_2)
+    boundary_info.add_side(elem_Tri3_new, 2, boundary_id_for_side_2);
   elem_Tri3_new->subdomain_id() = subdomain_id;
-  // Remove the original TRI3 elements
-  for (const auto & elem_id : elem_id_list)
-  {
-    mesh.delete_elem(mesh.elem_ptr(elem_id));
-  }
 }
 
 void
@@ -1156,5 +1197,34 @@ makeOrderedNodeList(std::vector<std::pair<dof_id_type, dof_id_type>> & node_assm
       i--;
     }
   }
+}
+
+bool
+elemSideLocator(ReplicatedMesh & mesh,
+                const dof_id_type elem_id,
+                const dof_id_type node_id_0,
+                const dof_id_type node_id_1,
+                unsigned short & side_id,
+                bool & is_inverse)
+{
+  Elem * elem = mesh.elem_ptr(elem_id);
+  for (unsigned short i = 0; i < elem->n_sides(); i++)
+  {
+    if (elem->side_ptr(i)->node_ptr(0)->id() == node_id_0 &&
+        elem->side_ptr(i)->node_ptr(1)->id() == node_id_1)
+    {
+      side_id = i;
+      is_inverse = false;
+      return true;
+    }
+    else if (elem->side_ptr(i)->node_ptr(0)->id() == node_id_1 &&
+             elem->side_ptr(i)->node_ptr(1)->id() == node_id_0)
+    {
+      side_id = i;
+      is_inverse = true;
+      return true;
+    }
+  }
+  return false;
 }
 }

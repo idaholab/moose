@@ -88,6 +88,10 @@ XYMeshLineCutter::XYMeshLineCutter(const InputParameters & parameters)
   if (MooseUtils::absoluteFuzzyEqual(_cut_line_params[0], 0.0) &&
       MooseUtils::absoluteFuzzyEqual(_cut_line_params[1], 0.0))
     paramError("cut_line_params", "At lease one of the first two elements must be non-zero.");
+  if (_cutting_type == CutType::MOV_NODE && _improve_tri_elements)
+    paramError("improve_tri_elements",
+               "This parameter is not supported when 'MOV_NODE' method is selected as "
+               "'cutting_type'.");
   if (_input_mesh_external_boundary_id == Moose::INVALID_BOUNDARY_ID &&
       _cutting_type == CutType::MOV_NODE)
     paramError(
