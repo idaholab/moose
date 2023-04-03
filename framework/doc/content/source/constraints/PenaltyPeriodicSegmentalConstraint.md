@@ -8,6 +8,9 @@ This `Constraint` demonstrates the usage of the scalar augmentation class descri
 The other terms in the weak form are handled using the [PenaltyEqualValueConstraint](/PenaltyEqualValueConstraint.md)
 as described below.
 
+In comparison to Dirichlet or Neumann conditions, periodic boundary conditions have been found
+to typically be the most accurate (fastest converging) approach for applying macro-to-micro scale
+transition constraints.
 Several methods for imposing periodic boundary conditions exist, each with pros and cons.
 For example, the periodic constraint will only be satisfied approximately by this method.
 Alternatively, the periodic condition can be imposed by the Lagrange multiplier method using [PeriodicSegmentalConstraint.md] or one of the other periodic approaches in `MOOSE`.
@@ -30,12 +33,15 @@ The corresponding weak form is (using inner-product notation):
 
 where $\epsilon$ is the average diffusive gradient to be solved for,
 and $\sigma$ is the average diffusive flux imposed through the penalty constraint.
+Also, $\psi$ is the test function of the diffusive variable $u$,
+and $\vec{\kappa}$ is an arbitrary test vector (spatially uniform)
+to impose the constraint involving the scalar variable $\vec{\epsilon}$.
 The jump operator is defined for a single valued or vector valued field
 as $\llbracket u \rrbracket = u^{+} - u^{-}$ and
 $\llbracket \vec{x} \rrbracket = \vec{x}^{+} - \vec{x}^{-}$, respectively.
 Finally, $\tau$ is a penalty parameter to impose the constraint.
 
-Note: The periodic constraint $\llbracket u \rrbracket = \vec{\epsilon} \cdot \llbracket \vec{x} \rrbracket$
+Note: The macro-to-micro constraint $\llbracket u \rrbracket = \vec{\epsilon} \cdot \llbracket \vec{x} \rrbracket$
 will only be satisfied approximately by this method, depending on the size of the penalty parameter.
 
 ## Input File Parameters

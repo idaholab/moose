@@ -41,7 +41,9 @@ other object classes:
 
 The principal purpose of these scalar augmentation classes is to add standard
 quadrature loops and assembly routines to handle the contributions from a single added
-scalar variable to that object, including the entire row of the Jacobian. Lists of interfaces for
+scalar variable to that object, including the entire row of the Jacobian. 
+This scalar variable is referred to as the "focus" scalar variable of that object.
+Lists of interfaces for
 the quadrature point routines are given in the links below. This system is currently being
 developed and will extend to the other residual objects.
 

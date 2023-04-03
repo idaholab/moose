@@ -17,7 +17,7 @@ Developers should read all sections; users can find [#KSB-parameters] described 
 
 ## Creation of Kernel Scalar Coupling Classes id=KSB-coupling
 
-Each `Kernel` object has a focus field variable or spatial variable; its job is to contribute to the
+Each `Kernel` object has a +focus+ field variable or spatial variable; its job is to contribute to the
 residual as well as the row of the Jacobian matrix. Herein, as in the source code of `Kernels`, this
 spatial variable will be called `_var`. In a coupled (multi-phyics) weak form, all domain integral terms
 containing the test function of `_var` are potential candidates for `Kernel` contributions.
@@ -139,6 +139,16 @@ The AD version of this object, [`ADScalarLMKernel`](/ADScalarLMKernel.md), only 
 implementation. A solely AD source file would only need to override `computeScalarQpResidual` and `computeQpResidual` and leave all the Jacobian methods as base definitions, which return zero. See 
 [MortarScalarBase](source/constraints/MortarScalarBase.md) for examples of AD-only and non-AD separate classes.
 
+As a more complicated example of the scalar augmentation system for kernels, the Tensor Mechanics test
+app contains headers, source, and test files for an alternative implementation of the
+"HomogenizedTotalLagrangianStressDivergence" system from the Tensor Mechanics module. This Kernel is
+designated with the suffix "S" to distinguish from the existing objects in the module. Also, there are
+other intermediate classes such as "TotalLagrangianStressDivergence" that are also designated with
+an "S" suffix. These other classes are needed since the lower class needs to also derive from
+`KernelScalarBase`. Meanwhile, they do not need the `scalar_variable` parameter and function
+identically to their original module source object; see the [#KSB-parameters] section for a comment
+about leaving this parameter blank.
+
 The scalar augmentation system is designed such that multiple scalar variables can be coupled to
 an instance of the Kernel class, each focusing on one scalar from the list. This approach is similar
 to how Tensor Mechanics module classes operator on one component variable of the displacement vector
@@ -148,8 +158,10 @@ and off-diagonal Jacobian terms in a logical way and document this for the user.
 Examples of two schemes for decomposing the coupling terms and having multiple scalar variables are
 contained in the source files of the Tensor Mechanics module test directory as well as input files
 `2drow.i` and `2dsole.i`, with listings below. The comments within these header and source files
-should be consulted to visualize how the rows and columns of the relevant residual and Jacobian
-contributions are handled.
+serve as documentation and should be consulted to visualize how the rows and columns of the relevant
+residual and Jacobian contributions are handled. The suffix "R" refers to assembling the entire row
+of the Jacobian in one object, and the suffix "A" refers to assembling symmetric pairs of the residual
+and Jacobian; see the header file for clarification.
 
 !listing modules/tensor_mechanics/test/include/kernels/HomogenizedTotalLagrangianStressDivergenceR.h id=HTLSDR-header
          re=/// Total Lagrangian formulation.*?}

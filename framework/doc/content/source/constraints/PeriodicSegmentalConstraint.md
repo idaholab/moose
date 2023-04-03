@@ -8,6 +8,9 @@ This `Constraint` demonstrates the usage of the scalar augmentation class descri
 The other terms in the weak form are handled using the [EqualValueConstraint](/EqualValueConstraint.md)
 as described below.
 
+In comparison to Dirichlet or Neumann conditions, periodic boundary conditions have been found
+to typically be the most accurate (fastest converging) approach for applying macro-to-micro scale
+transition constraints.
 Several methods for imposing periodic boundary conditions exist, each with pros and cons.
 For example, the mortar approach requires an extra Lagrange multiplier field.
 Alternatively, the periodic condition can be imposed by the penalty method using [PenaltyPeriodicSegmentalConstraint.md] or one of the other periodic approaches in `MOOSE`.
@@ -39,11 +42,14 @@ The corresponding weak form is (using inner-product notation):
 
 !equation id=weak-form
 \begin{aligned}
-  (\nabla w, D \nabla u)_\Omega - \langle \llbracket w \rrbracket,\lambda \rangle _{\Gamma^+} = 0\\
-  -\langle \mu , \llbracket u \rrbracket \rangle _{\Gamma^+} + \langle \mu , \vec{\epsilon} \cdot \llbracket \vec{x} \rrbracket \rangle _{\Gamma^+} = 0\\
+  (\nabla \psi, D \nabla u)_\Omega - \langle \llbracket \psi \rrbracket,\lambda \rangle _{\Gamma^+} = 0\\
+  -\langle \Phi , \llbracket u \rrbracket \rangle _{\Gamma^+} + \langle \Phi , \vec{\epsilon} \cdot \llbracket \vec{x} \rrbracket \rangle _{\Gamma^+} = 0\\
   \langle \vec{\kappa} \cdot \llbracket \vec{x} \rrbracket, \lambda \rangle _{\Gamma^+} = \langle \vec{\kappa} \cdot \llbracket \vec{x} \rrbracket, \vec{\sigma} \cdot \hat{n} \rangle _{\Gamma^+}
 \end{aligned}
 
+where $\psi$ is the test function of the diffusive variable $u$, $\Phi$ is the test function
+for the Lagrange multiplier $\lambda$, and $\vec{\kappa}$ is an arbitrary test vector (spatially uniform)
+to impose the constraint involving the scalar variable $\vec{\epsilon}$.
 As is typical for mixed-field problems with Lagrange multipliers, the shape functions for
 $u$ and $\lambda$ need to be chosen to satisfy the Babuska-Brezzi inf-sup condition if
 stabilization is not added to the system. As discussed in [!cite](reis_mortar_2014),

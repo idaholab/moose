@@ -22,7 +22,7 @@ Developers should read all sections; users can find [#MSB-parameters] described 
 
 `MortarConstraint` objects are designed to handle weak-form contributions from both surface-based
 lower-dimensional (Lagrange multiplier) variables and domain-based (primary and secondary) spatial
-variables. For these three focus spatial variables, its job is to contribute to the associated rows
+variables. For these three +focus+ spatial variables, its job is to contribute to the associated rows
 of the residual and the Jacobian matrix. Herein, as in the source code of `MortarConstraints`, these
 spatial variables will be called (see Mortar [syntax/Constraints/index.md#MC-parameters] for the analogous
 input parameter names):
