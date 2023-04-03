@@ -1,0 +1,94 @@
+[Tests]
+  issues = '#22174'
+  design = 'source/kernels/ADScalarLMKernel.md'
+  [kernel_dirichlet]
+    requirement = 'The system will produce a harmonic function with a prescribed average value,'
+    [physics_separate]
+      type = 'Exodiff'
+      input = 'scalar_constraint_kernel_RJ.i'
+      exodiff = 'scalar_constraint_kernel_RJ_out.e'
+      cli_args = 'Executioner/residual_and_jacobian_together=false'
+      detail = 'showing the correct results with separate computation of residual and Jacobian'
+    []
+    [jacobian_separate]
+      type = 'PetscJacobianTester'
+      run_sim = True
+      input = 'scalar_constraint_kernel_RJ.i'
+      detail = 'verifying the separated Jacobian'
+      cli_args = 'Executioner/residual_and_jacobian_together=false'
+      prereq = 'kernel_dirichlet/physics_separate'
+    []
+    [physics_together]
+      type = 'Exodiff'
+      input = 'scalar_constraint_kernel_RJ.i'
+      exodiff = 'scalar_constraint_kernel_RJ_out.e'
+      cli_args = 'Executioner/residual_and_jacobian_together=true'
+      detail = 'showing the correct results with computation of residual and Jacobian together'
+      prereq = 'kernel_dirichlet/jacobian_separate'
+    []
+    [jacobian_together]
+      type = 'PetscJacobianTester'
+      run_sim = True
+      input = 'scalar_constraint_kernel_RJ.i'
+      detail = 'verifying the Jacobian together'
+      cli_args = 'Executioner/residual_and_jacobian_together=true'
+      prereq = 'kernel_dirichlet/physics_together'
+    []
+  []
+
+  [kernel_neumann]
+    requirement = 'The system shall solve the constrained Neumann problem using the AD Lagrange multiplier approach with LU solver,'
+    [physics_separate]
+      type = 'CSVDiff'
+      input = 'scalar_constraint_together.i'
+      csvdiff = 'scalar_constraint_together_out.csv'
+      cli_args = 'Executioner/residual_and_jacobian_together=false'
+      detail = 'showing the correct results with separate computation of residual and Jacobian for Neumann'
+    []
+    [jacobian_separate]
+      type = 'PetscJacobianTester'
+      run_sim = True
+      input = 'scalar_constraint_together.i'
+      detail = 'verifying the separated Jacobian for Neumann'
+      cli_args = 'Executioner/residual_and_jacobian_together=false'
+      prereq = 'kernel_neumann/physics_separate'
+    []
+    [physics_together]
+      type = 'CSVDiff'
+      input = 'scalar_constraint_together.i'
+      csvdiff = 'scalar_constraint_together_out.csv'
+      cli_args = 'Executioner/residual_and_jacobian_together=true'
+      detail = 'showing the correct results with computation of residual and Jacobian together for Neumann'
+      prereq = 'kernel_neumann/jacobian_separate'
+    []
+    [jacobian_together]
+      type = 'PetscJacobianTester'
+      run_sim = True
+      input = 'scalar_constraint_together.i'
+      detail = 'verifying the Jacobian together for Neumann'
+      cli_args = 'Executioner/residual_and_jacobian_together=true'
+      prereq = 'kernel_neumann/physics_together'
+    []
+  []
+
+  [kernel_together]
+    type = 'CSVDiff'
+    input = 'scalar_constraint_together.i'
+    csvdiff = 'scalar_constraint_together_out.csv'
+    requirement = 'The system shall solve the constrained Neumann problem using the AD Lagrange multiplier approach with LU solver, computing the residual and Jacobian simultaneously.'
+  []
+
+  [bipass]
+    type = 'CSVDiff'
+    input = 'diffusion_bipass_scalar.i'
+    csvdiff = 'diffusion_bipass_scalar_out.csv'
+    requirement = 'The system shall support the ability to include the AD scalar wrapper but not actually using a scalar variable.'
+  []
+
+  [override]
+    type = RunException
+    input = 'diffusion_override_scalar.i'
+    expect_err = 'A scalar_variable has been set and compute_scalar_residuals=true, but the computeScalarQpResidual method was not overridden. Accidental call of base class?'
+    requirement = 'The system shall error if a user assigns a scalar and requests evaluation of scalar residuals, but does not override the quadrature point residual evaluation routine in their derived class.'
+  []
+[]

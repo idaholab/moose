@@ -7,7 +7,8 @@ The constraint is imposed using a lagrange multiplier variable. The `NodalEqualV
 Constraining two nodes can be used to impose continuity conditions or to pin
 two independent systems on disjoint meshes together. The limitation to two
 nodes means that this kernel is not designed to work on sidesets or interfaces, except in 1D.
-To impose an equal value constraint on a sideset, please prefer the [EqualValueConstraint.md].
+To impose an equal value constraint on a sideset, please prefer the
+[EqualValueConstraint](source/constraints/EqualValueConstraint.md).
 
 ## Example input syntax
 

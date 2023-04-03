@@ -1,0 +1,68 @@
+[Tests]
+  issues = '#22174'
+  design = 'source/constraints/PenaltyPeriodicSegmentalConstraint.md'
+  [penalty_periodic_simple2d]
+    type = 'CSVDiff'
+    input = 'penalty_periodic_simple2d.i'
+    csvdiff = 'penalty_periodic_simple2d_out.csv'
+    requirement = "The system shall assemble primary/secondary mortar constraints coupled to scalar variables in a two dimensional problem."
+  []
+  [periodic_simple2d_flip]
+    type = 'CSVDiff'
+    input = 'penalty_periodic_simple2d_flip.i'
+    csvdiff = 'penalty_periodic_simple2d_flip_out.csv'
+    requirement = "The penalty periodic segmental constraint is independent of the designation of primary and secondary surfaces."
+  []
+  [periodic_simple2d]
+    type = 'CSVDiff'
+    input = 'periodic_simple2d.i'
+    csvdiff = 'periodic_simple2d_out.csv'
+    requirement = "The system shall assemble lower dimensional variable mortar constraints coupled to scalar variables in a two dimensional problem."
+    min_ad_size = 100
+  []
+  [penalty_periodic_simple3d]
+    type = 'CSVDiff'
+    input = 'penalty_periodic_simple3d.i'
+    csvdiff = 'penalty_periodic_simple3d_out.csv'
+    requirement = "The system shall assemble primary/secondary mortar constraints coupled to scalar variables in a three dimensional problem."
+    min_ad_size = 100
+  []
+  [periodic_simple3d]
+    type = 'CSVDiff'
+    input = 'periodic_simple3d.i'
+    csvdiff = 'periodic_simple3d_out.csv'
+    requirement = "The system shall assemble lower variable mortar constraints coupled to scalar variables in a three dimensional problem."
+    min_ad_size = 100
+  []
+  [periodic_aux2d]
+    type = 'CSVDiff'
+    input = 'periodic_aux2d.i'
+    csvdiff = 'periodic_aux2d_out.csv'
+    requirement = "The coupled scalar variable for mortar surfaces can be an auxiliary variable for debugging."
+    min_ad_size = 100
+  []
+  [penalty_periodic_checker2d]
+    type = 'CSVDiff'
+    input = 'penalty_periodic_checker2d.i'
+    csvdiff = 'penalty_periodic_checker2d_out.csv'
+    requirement = "Mortar surfaces coupled with scalar variables can handle nonuniform conductivity."
+  []
+  [periodic_checker2d]
+    type = 'CSVDiff'
+    input = 'periodic_checker2d.i'
+    csvdiff = 'periodic_checker2d_out.csv'
+    requirement = "Mortar surfaces coupled with scalar variables can handle nonuniform conductivity using Lagrange multipliers."
+  []
+  [testperiodicsole]
+    type = 'CSVDiff'
+    input = 'testperiodicsole.i'
+    csvdiff = 'testperiodicsole_out.csv'
+    requirement = "The system shall be able to assemble mortar constraints with multiple distinct coupled scalar variables."
+  []
+  [auxiliary]
+    type = RunException
+    input = 'penalty_periodic_aux.i'
+    expect_err = 'Must assign auxiliary scalar variable to sigma, rather than nonlinear variable'
+    requirement = 'The system shall error if a nonlinear variable is applied for sigma instead of an auxiliary variable.'
+  []
+[]

@@ -1,0 +1,50 @@
+[Tests]
+  issues = '#22174'
+  design = 'source/kernels/ScalarLMKernel.md'
+
+  [2d-strainS]
+    type = CSVDiff
+    input = '2dscalar.i'
+    csvdiff = '2d-strain_out.csv'
+    cli_args = "Outputs/file_base=2d-strain_out constraint_types='strain none none strain strain "
+               "none none none none' targets='strain11 strain12 strain22'"
+    requirement = "Homogenization from scalar wrapper class with strain constraints hits the targets in 2D"
+    allow_test_objects = true
+  []
+  [2d-stressS]
+    type = CSVDiff
+    input = '2dscalar.i'
+    csvdiff = '2d-stress_out.csv'
+    cli_args = "Outputs/file_base=2d-stress_out constraint_types='stress none none stress stress "
+               "none none none none' targets='stress11 stress12 stress22'"
+    requirement = "Homogenization from scalar wrapper class with stress constraints hits the targets in 2D"
+    allow_test_objects = true
+  []
+  [2d-mixedS]
+    type = CSVDiff
+    input = '2dscalar.i'
+    csvdiff = '2d-mixed_out.csv'
+    cli_args = "Outputs/file_base=2d-mixed_out constraint_types='stress none none stress strain none "
+               "none none none' targets='stress11 stress12 strain22'"
+    requirement = "Homogenization from scalar wrapper class with mixed stress and strain constraints hits the targets in 2D"
+    allow_test_objects = true
+  []
+  [2d-stressA]
+    type = CSVDiff
+    input = '2dsole.i'
+    csvdiff = '2dsole_out.csv'
+    cli_args = "constraint_types='stress none none stress stress "
+               "none none none none' targets='stress11 stress12 stress22'"
+    requirement = "Framework scalar kernel wrapper correctly assembles scalar-to-scalar coupling Jacobian"
+    allow_test_objects = true
+  []
+  [2d-stressR]
+    type = CSVDiff
+    input = '2drow.i'
+    csvdiff = '2drow_out.csv'
+    cli_args = "constraint_types='stress none none stress stress "
+               "none none none none' targets='stress11 stress12 stress22'"
+    requirement = "Framework scalar kernel wrapper correctly assembles Jacobian by rows"
+    allow_test_objects = true
+  []
+[]
