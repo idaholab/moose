@@ -273,7 +273,7 @@ void makeOrderedNodeList(std::vector<std::pair<dof_id_type, dof_id_type>> & node
 
 /**
  * Check if there is a side in an element that contains the given pair of nodes; if yes, also find
- * the side id and the direction of the two nodes
+ * the side id and the direction of the two nodes in the side
  * @param mesh input mesh with the element that needs to be checked
  * @param elem_id id of the element that needs to be checked
  * @param node_id_0 id of the first node of the pair

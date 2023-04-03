@@ -7,7 +7,7 @@
     exodiff = 'simple_cut_elem.e'
     mesh_mode = 'REPLICATED'
     recover = false
-    requirement = 'The system shall cut a simple one-subdomain mesh using the element cutting method.'
+    requirement = 'The system shall be able to cut a simple one-subdomain mesh using the triangle element cutting method.'
     allow_warnings = true
     cli_args = '--mesh-only simple_cut_elem.e'
   []
@@ -17,7 +17,7 @@
     exodiff = 'simple_cut_node.e'
     mesh_mode = 'REPLICATED'
     recover = false
-    requirement = 'The system shall cut a simple one-subdomain mesh using the node moving method.'
+    requirement = 'The system shall be able to cut a simple one-subdomain mesh using the node moving method.'
     allow_warnings = true
     cli_args = 'Mesh/mlc/cutting_type=MOV_NODE
                 Mesh/mlc/input_mesh_external_boundary_id=100 
@@ -29,7 +29,7 @@
     exodiff = 'multi_block_cut_elem.e'
     mesh_mode = 'REPLICATED'
     recover = false
-    requirement = 'The system shall cut a multi-subdomain mesh using the element cutting method.'
+    requirement = 'The system shall be able to cut a multi-subdomain mesh using the triangle element cutting method.'
     allow_warnings = true
     cli_args = '--mesh-only multi_block_cut_elem.e'
   []
@@ -39,7 +39,7 @@
     exodiff = 'multi_block_cut_elem_imp.e'
     mesh_mode = 'REPLICATED'
     recover = false
-    requirement = 'The system shall cut a multi-subdomain mesh using the element cutting method and perform TRI3 element improvement.'
+    requirement = 'The system shall be able to cut a multi-subdomain mesh using the element cutting method and improve the quality of triangular elements on the boundary.'
     allow_warnings = true
     cli_args = 'Mesh/mlc/improve_tri_elements=true
                 --mesh-only multi_block_cut_elem_imp.e'
@@ -50,7 +50,7 @@
     exodiff = 'multi_block_cut_node.e'
     mesh_mode = 'REPLICATED'
     recover = false
-    requirement = 'The system shall cut a multi-subdomain mesh using the node moving method.'
+    requirement = 'The system shall be able to cut a multi-subdomain mesh using the node moving method.'
     allow_warnings = true
     cli_args = 'Mesh/mlc/cutting_type=MOV_NODE 
                 --mesh-only multi_block_cut_node.e'
@@ -61,7 +61,7 @@
     exodiff = 'multi_block_cut_node_other_boundaries.e'
     mesh_mode = 'REPLICATED'
     recover = false
-    requirement = 'The system shall cut a multi-subdomain mesh using the node moving method with interface boundaries that need to conform.'
+    requirement = 'The system shall be able to cut a multi-subdomain mesh using the node moving method with interface boundaries that need to conform.'
     allow_warnings = true
     cli_args = 'Mesh/mlc/cutting_type=MOV_NODE 
                 Mesh/mlc/other_boundaries_to_conform="12 23 34 45"
@@ -81,7 +81,7 @@
     input = 'err_multi_block_cut.i'
     mesh_mode = 'REPLICATED'
     expect_err = 'The new subdomain name already exists in the mesh'
-    requirement = 'The system shall throw an error if the given name of the tri element block already exists in the input mesh in the element cutting mode.'
+    requirement = 'The system shall throw an error if the given name of the triangle element block, created during mesh line cutting, already exists in the input mesh, in the element cutting mode.'
     allow_warnings = true
     cli_args = '--mesh-only err_multi_block_cut.e'
   []
@@ -90,7 +90,7 @@
     input = 'err_multi_block_cut.i'
     mesh_mode = 'REPLICATED'
     expect_err = 'The new subdomain name already exists in the mesh'
-    requirement = 'The system shall throw an error if the given name of the tri element block already exists in the input mesh in the node moving mode.'
+    requirement = 'The system shall throw an error if the given name of the triangular element block, created during mesh line cutting, already exists in the input mesh in the node moving mode.'
     allow_warnings = true
     cli_args = 'Mesh/mlc/cutting_type=MOV_NODE
                 --mesh-only err_multi_block_cut.e'
@@ -127,7 +127,7 @@
     input = 'simple_cut.i'
     mesh_mode = 'REPLICATED'
     expect_err = 'This parameter is not supported when'
-    requirement = 'The system shall throw an error if the tri element improvement is enabled under the node moving mode.'
+    requirement = 'The system shall throw an error if the triangle element improvement is enabled under the node moving mode.'
     cli_args = 'Mesh/mlc/cutting_type=MOV_NODE
                 Mesh/mlc/improve_tri_elements=true
                 --mesh-only simple_cut_err.e'

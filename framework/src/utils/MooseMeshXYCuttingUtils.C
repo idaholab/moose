@@ -933,9 +933,9 @@ boundaryTriElemImprover(ReplicatedMesh & mesh, const boundary_id_type boundary_t
         "does not exist in the given mesh.");
   BoundaryInfo & boundary_info = mesh.get_boundary_info();
   auto side_list = boundary_info.build_side_list();
-  // Here we would like to collect the following informaton for all the TRI3 elements on the
-  // boundary: Key: node id of the off-boundary node Value: a vector of tuples, each tuple contains
-  // the following information:
+  // Here we would like to collect the following information for all the TRI3 elements on the boundary:
+  // Key: node id of the off-boundary node
+  // Value: a vector of tuples, each tuple contains the following information:
   // 1. The element id of the element that is on the boundary to improve
   // 2. the one node id of that element that is on the boundary to improve
   // 3. the other node id of the element that is on the boundary to improve

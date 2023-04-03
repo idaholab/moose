@@ -26,8 +26,7 @@ XYMeshLineCutter::validParams()
       "cutting_type",
       cutting_type,
       "Which method is to be used to cut the input mesh. 'CUT_ELEM_TRI' is the recommended method "
-      "but "
-      "it may cause fine elements near the cutting line, while 'MOV_NODE' deforms subdomain "
+      "but it may cause fine elements near the cutting line, while 'MOV_NODE' deforms subdomain "
       "boundaries if they are not perpendicular to the cutting line.");
 
   params.addRequiredParam<MeshGeneratorName>("input", "The input mesh that needs to be trimmed.");
