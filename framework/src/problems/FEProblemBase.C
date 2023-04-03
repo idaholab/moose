@@ -5993,8 +5993,6 @@ FEProblemBase::computeResidualAndJacobian(const NumericVector<Number> & soln,
 
     executeControls(EXEC_LINEAR);
 
-    _current_execute_on_flag = EXEC_NONE;
-
     _app.getOutputWarehouse().residualSetup();
 
     _safe_access_tagged_vectors = false;
@@ -6030,6 +6028,9 @@ FEProblemBase::computeResidualAndJacobian(const NumericVector<Number> & soln,
     mooseError("An unhandled MooseException was raised during residual computation.  Please "
                "contact the MOOSE team for assistance.");
   }
+
+  // Reset execution flag as after this point we are no longer on LINEAR
+  _current_execute_on_flag = EXEC_NONE;
 }
 
 void
@@ -6224,6 +6225,7 @@ FEProblemBase::computeResidualTags(const std::set<TagID> & tags)
 
   _safe_access_tagged_vectors = true;
 
+  // Reset execution flag as after this point we are no longer on LINEAR
   _current_execute_on_flag = EXEC_NONE;
 }
 
@@ -6355,8 +6357,6 @@ FEProblemBase::computeJacobianTags(const std::set<TagID> & tags)
 
     _current_nl_sys->computeJacobianTags(tags);
 
-    _current_execute_on_flag = EXEC_NONE;
-
     // For explicit Euler calculations for example we often compute the Jacobian one time and then
     // re-use it over and over. If we're performing automatic scaling, we don't want to use that
     // kernel, diagonal-block only Jacobian for our actual matrix when performing solves!
@@ -6368,6 +6368,9 @@ FEProblemBase::computeJacobianTags(const std::set<TagID> & tags)
       _displaced_problem->setCurrentlyComputingJacobian(false);
     _safe_access_tagged_matrices = true;
   }
+
+  // Reset execute_on flag as after this point we are no longer on NONLINEAR
+  _current_execute_on_flag = EXEC_NONE;
 }
 
 void
