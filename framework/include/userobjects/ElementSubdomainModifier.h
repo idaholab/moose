@@ -82,7 +82,8 @@ private:
   void updateMovingBoundaryInfo(MooseMesh & mesh, const std::vector<const Elem *> & moved_elems);
 
   // Update the complement boundary (both the underlying sideset and nodeset)
-  void updateComplementBoundaryInfo(MooseMesh & mesh, const std::vector<const Elem *> & moved_elems);
+  void updateComplementBoundaryInfo(MooseMesh & mesh,
+                                    const std::vector<const Elem *> & moved_elems);
 
   // Remove ghosted element sides
   void pushBoundarySideInfo(MooseMesh & mesh);
