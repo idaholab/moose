@@ -93,6 +93,16 @@ public:
   virtual MooseVariable & primaryVariable() { return _primary_var; }
 
   /**
+   * The primary boundary ID for this constraint.
+   */
+  virtual BoundaryID primaryBoundary() { return _primary; }
+
+  /**
+   * The secondary boundary ID for this constraint.
+   */
+  virtual BoundaryID secondaryBoundary() { return _secondary; }
+
+  /**
    * The variable number that this object operates on.
    */
   const MooseVariable & variable() const override { return _var; }

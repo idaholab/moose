@@ -31,4 +31,22 @@
     rel_err = 1.0e-4
     allow_warnings = true
   []
+  [split_sidesets]
+    type = 'Exodiff'
+    input = 'split_sidesets.i'
+    exodiff = 'split_sidesets_out.e'
+    requirement = 'The system shall compute mechanical contact with multiple pairs, which are defined with separate contact sidesets.'
+    abs_zero = 1.0e-4
+    rel_err = 1.0e-4
+    allow_warnings = true
+  []
+  [continuous_sidesets]
+    type = 'Exodiff'
+    input = 'continuous_sidesets.i'
+    exodiff = 'continuous_sidesets_out.e'
+    requirement = 'The system shall compute mechanical contact allowing a secondary surface to enforce constraints with multiple primary surfaces.'
+    abs_zero = 1.0e-4
+    rel_err = 1.0e-4
+    allow_warnings = true
+  []
 []
