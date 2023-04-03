@@ -361,8 +361,8 @@ GrainTracker::finalize()
    */
   broadcastAndUpdateGrainData();
 
-  if (_merge_grains_based_misorientaion && _t_step > 2)
-    remapGrainsMerge();
+  if (_merge_grains_based_misorientaion && _t_step > _tracking_step)
+    remapMisorientedGrains();
 
   /**
    * Remap Grains
@@ -813,7 +813,7 @@ GrainTracker::trackGrains()
         // Must be a nucleating grain (status is still not set)
         if (grain._status == Status::CLEAR)
         {
-          auto new_index = 0; //getNextUniqueID();
+          auto new_index = getNextUniqueID();
           grain._id = new_index;          // Set the ID
           grain._status = Status::MARKED; // Mark it
 
@@ -828,7 +828,7 @@ GrainTracker::trackGrains()
     }
 
     // The reason for _t_step > 2 is to allow reasonable refinement of the mesh at grain boundaries.
-    if (_merge_grains_based_misorientaion && _t_step > 2)
+    if (_merge_grains_based_misorientaion && _t_step > _tracking_step)
       mergeGrainsBasedMisorientation();
 
     // Case 2 (inactive grains in _feature_sets_old)
@@ -1184,9 +1184,8 @@ GrainTracker::remapGrains()
   }
 }
 void
-GrainTracker::remapGrainsMerge()
+GrainTracker::remapMisorientedGrains()
 {
-  _console << "This function needs to be defined in the derived class\n" << std::endl;
 }
 
 void

@@ -21,7 +21,7 @@ protected:
   virtual void createAdjacentIDVector();
 
   // remap grain with the same Grain ID
-  virtual void remapGrainsMerge() override;
+  virtual void remapMisorientedGrains() override;
 
   const EulerAngleProvider & _euler;
   MisorientationAngleData _s_misorientation_angle;  

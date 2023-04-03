@@ -117,7 +117,7 @@ protected:
   /**
    * This method is called after mergeGrainsBasedMisorientation to remap grains that have the same Grain ID.
    */
-  virtual void remapGrainsMerge();
+  virtual void remapMisorientedGrains();
 
   /**
    * This method is called after trackGrains to remap grains that are too close to each other.

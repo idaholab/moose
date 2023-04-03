@@ -90,7 +90,7 @@ GrainTrackerMerge::createAdjacentIDVector()
 }
 
 void 
-GrainTrackerMerge::remapGrainsMerge()
+GrainTrackerMerge::remapMisorientedGrains()
 {
   // This data structure is used to store the mapping from Grain ID to new variable index
   std::map<unsigned int, std::size_t> grain_id_to_new_var_merge_grain;
@@ -152,13 +152,7 @@ GrainTrackerMerge::remapGrainsMerge()
         swapSolutionValues(grain, new_var_it->second, cache, RemapCacheMode::USE);
     }
 
-    _nl.solution().close();
-    _nl.solutionOld().close();
-    _nl.solutionOlder().close();
-
-    _fe_problem.getNonlinearSystemBase().system().update();
-
-    _console << COLOR_RED << "Swaps complete in remapGrainsMerge" << std::endl;
+    _console << COLOR_GREEN << "Swaps complete in remapMisorientedGrains" << std::endl;
     _console << std::endl;
   }  
 }
