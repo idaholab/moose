@@ -1719,6 +1719,14 @@ public:
                        const std::set<TagID> & matrix_tags);
 
   /**
+   * This simply caches the derivative values for the corresponding column indices for the provided
+   * \p matrix_tags, without applying any scaling factors
+   */
+  void processJacobianNoScaling(const ADReal & residual,
+                                dof_id_type dof_index,
+                                const std::set<TagID> & matrix_tags);
+
+  /**
    * This performs the duties of both \p processResidual and \p processJacobian
    */
   void processResidualAndJacobian(const ADReal & residual,
@@ -2142,6 +2150,15 @@ private:
   {
     return _jacobian_block_nonlocal_used[tag][ivar][_block_diagonal_matrix ? 0 : jvar];
   }
+
+  /**
+   * This simply caches the derivative values for the corresponding column indices for the provided
+   * \p matrix_tags, and applies the supplied scaling factor
+   */
+  void processJacobian(const ADReal & residual,
+                       dof_id_type dof_index,
+                       const std::set<TagID> & matrix_tags,
+                       Real scaling_factor);
 
   SystemBase & _sys;
   SubProblem & _subproblem;
@@ -2821,8 +2838,9 @@ Assembly::adGradPhi<RealVectorValue>(const MooseVariableFE<RealVectorValue> & v)
 
 inline void
 Assembly::processJacobian(const ADReal & residual,
-                          const dof_id_type row_index,
-                          const std::set<TagID> & matrix_tags)
+                          const dof_id_type dof_index,
+                          const std::set<TagID> & matrix_tags,
+                          const Real scaling_factor)
 {
   const auto & derivs = residual.derivatives();
 
@@ -2831,20 +2849,35 @@ Assembly::processJacobian(const ADReal & residual,
 
   mooseAssert(column_indices.size() == values.size(), "Indices and values size must be the same");
 
-  const Real scalar = _scaling_vector ? (*_scaling_vector)(row_index) : 1.;
-
   for (std::size_t i = 0; i < column_indices.size(); ++i)
-    cacheJacobian(row_index, column_indices[i], values[i] * scalar, matrix_tags);
+    cacheJacobian(dof_index, column_indices[i], values[i] * scaling_factor, matrix_tags);
+}
+
+inline void
+Assembly::processJacobian(const ADReal & residual,
+                          const dof_id_type dof_index,
+                          const std::set<TagID> & matrix_tags)
+{
+  const Real scalar = _scaling_vector ? (*_scaling_vector)(dof_index) : 1.;
+  processJacobian(residual, dof_index, matrix_tags, scalar);
+}
+
+inline void
+Assembly::processJacobianNoScaling(const ADReal & residual,
+                                   const dof_id_type dof_index,
+                                   const std::set<TagID> & matrix_tags)
+{
+  processJacobian(residual, dof_index, matrix_tags, 1);
 }
 
 template <typename LocalFunctor>
 void
 Assembly::processJacobian(const ADReal & residual,
-                          const dof_id_type row_index,
+                          const dof_id_type dof_index,
                           const std::set<TagID> & matrix_tags,
                           LocalFunctor &)
 {
-  processJacobian(residual, row_index, matrix_tags);
+  processJacobian(residual, dof_index, matrix_tags);
 }
 
 template <typename LocalFunctor>
