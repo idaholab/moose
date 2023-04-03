@@ -1,0 +1,26 @@
+## Staying Up To Date id=update
+
+!style! halign=left
+MOOSE does not use traditional versioning, is under heavy development, and is being updated
+continuously. Therefore, it is important that you continue to update MOOSE as you use it to develop
+your application(s); weekly updates are recommended.
+!style-end!
+
+*If this is your first day with MOOSE, you are already up to date. Come back in a week!*
+
+Update MOOSE repository:
+
+```bash
+cd {{PATH}}/moose
+git fetch origin
+git rebase origin/master
+```
+
+Then return to your application, re-compile, and test:
+
+```bash
+cd {{PATH}}/YourAppName
+make clobberall
+make -j4
+./run_tests -j4
+```

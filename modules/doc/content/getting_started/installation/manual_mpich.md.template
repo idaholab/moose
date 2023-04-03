@@ -1,0 +1,59 @@
+## MPICH
+
+!style! halign=left
+Check and see if you already have an MPI wrapper available on your machine. One simple way of doing
+so, is to perform a `which` on several MPI wrapper binaries:
+!style-end!
+
+```bash
+which mpicc mpicxx mpif90
+```
+
+If the above command returns with paths to their respected binaries, you will want to work with your
+system package manager to remove or suppress it.
+
+!alert warning
+Having two completely different MPI wrappers being made available simultaneously is prone to
+failure.
+
+Download MPICH [!package!mpich]
+
+!package! code
+curl -L -O http://www.mpich.org/static/downloads/__MPICH__/mpich-__MPICH__.tar.gz
+tar -xf mpich-__MPICH__.tar.gz -C .
+!package-end!
+
+Create an out-of-tree build location and configure MPICH using the recommended arguments:
+
+!package! code max-height=500
+mkdir mpich-__MPICH__/{{compiler}}-build
+cd mpich-__MPICH__/{{compiler}}-build
+
+../configure --prefix=/target/installation/path/mpich-__MPICH__ \
+--enable-shared \
+--enable-sharedlibs={{compiler}} \
+--enable-fast=O2 \
+--enable-debuginfo \
+--enable-totalview \
+--enable-two-level-namespace \
+CC={{CC}} \
+CXX={{CXX}} \
+FC=gfortran \
+F77=gfortran \
+F90='' \
+CFLAGS='' \
+CXXFLAGS='' \
+FFLAGS='-fallow-argument-mismatch' \
+FCFLAGS='-fallow-argument-mismatch' \
+F90FLAGS='' \
+F77FLAGS=''
+!package-end!
+
+With `configure` complete and error free, build and install MPICH:
+
+```bash
+make -j 6
+make install
+```
+
+Follow the onscreen instructions on how to make use of your new MPI wrapper.
