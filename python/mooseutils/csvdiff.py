@@ -188,6 +188,7 @@ class CSVDiffer(CSVTools):
         self.custom_columns = args.custom_columns
         self.custom_rel_err = args.custom_rel_err
         self.custom_abs_zero = args.custom_abs_zero
+        self.ignore = args.ignore_fields
         self.__only_compare_custom = False
 
     def __enter__(self):
@@ -289,47 +290,53 @@ class CSVDiffer(CSVTools):
             for val1, val2 in zip( table1[key], table2[key] ):
                 # if customized tolerances specified use them otherwise
                 # use the default
-                if self.custom_columns:
-                    try:
-                        abs_zero = abs_zero_map[key]
-                    except:
-                        abs_zero = self.abs_zero
-                if abs(val1) < abs_zero:
-                    val1 = 0
-                if abs(val2) < abs_zero:
-                    val2 = 0
+                if self.ignore is not None:
+                    if key not in self.ignore:
+                        print("key={}".format(key))
 
-                # disallow nan in the gold file
-                if math.isnan(val1):
-                    self.addError(self.files[0], "The values in column \"" + key.strip() + "\" contain NaN")
+                        for a in self.ignore:
+                            print("ignore={}".format(a))
+                        if self.custom_columns:
+                            try:
+                                abs_zero = abs_zero_map[key]
+                            except:
+                                abs_zero = self.abs_zero
+                        if abs(val1) < abs_zero:
+                            val1 = 0
+                        if abs(val2) < abs_zero:
+                            val2 = 0
 
-                # disallow inf in the gold file
-                if math.isinf(val1):
-                    self.addError(self.files[0], "The values in column \"" + key.strip() + "\" contain Inf")
+                        # disallow nan in the gold file
+                        if math.isnan(val1):
+                            self.addError(self.files[0], "The values in column \"" + key.strip() + "\" contain NaN")
 
-                # if they're both exactly zero (due to the threshold above) then they're equal so pass this test
-                if val1 == 0 and val2 == 0:
-                    continue
+                        # disallow inf in the gold file
+                        if math.isinf(val1):
+                            self.addError(self.files[0], "The values in column \"" + key.strip() + "\" contain Inf")
 
-                rel_diff = 0
-                if max( abs(val1), abs(val2) ) > 0:
-                    rel_diff = abs( ( val1 - val2 ) / max( abs(val1), abs(val2) ) )
+                        # if they're both exactly zero (due to the threshold above) then they're equal so pass this test
+                        if val1 == 0 and val2 == 0:
+                            continue
 
-                # if customized tolerances specified use them otherwise
-                # use the default
-                if self.custom_columns:
-                    try:
-                        rel_tol = rel_err_map[key]
-                    except:
-                        rel_tol = self.rel_tol
-                if rel_diff > rel_tol:
-                    self.addError(self.files[1], "The values in column \"%s\" don't match. \n\trelative diff:   %.3e ~ %.3e = %.3e (%.3e)" % (key.strip(),
+                        rel_diff = 0
+                        if max( abs(val1), abs(val2) ) > 0:
+                            rel_diff = abs( ( val1 - val2 ) / max( abs(val1), abs(val2) ) )
+
+                        # if customized tolerances specified use them otherwise
+                        # use the default
+                        if self.custom_columns:
+                            try:
+                                rel_tol = rel_err_map[key]
+                            except:
+                                rel_tol = self.rel_tol
+                        if rel_diff > rel_tol:
+                            self.addError(self.files[1], "The values in column \"%s\" don't match. \n\trelative diff:   %.3e ~ %.3e = %.3e (%.3e)" % (key.strip(),
                                                                                                                                             val1,
                                                                                                                                             val2,
                                                                                                                                             rel_diff,
                                                                                                                                             Decimal(rel_diff)))
-                    # assume all other vals in this column are wrong too, so don't report them
-                    break
+                            # assume all other vals in this column are wrong too, so don't report them
+                            break
 
         # Loop over variable names to check if any are missing from all the
         # CSV files being compared

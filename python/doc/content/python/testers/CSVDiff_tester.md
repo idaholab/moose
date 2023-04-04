@@ -26,7 +26,6 @@ Test configuration options are added to the `tests` file.
 
 - `ignore_columns`: Exclude columns in csv file from csv diff comparison.
 
-- `custom_columns`: Only perform csv diff comparison on select set of columns in csv file.
 
 
 Other test commands & restrictions may be found in the [TestHarness documentation](TestHarness.md).
