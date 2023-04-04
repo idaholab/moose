@@ -7,5 +7,6 @@
     allow_test_objects = true
     threading = '!pthreads'
     required_objects = 'SalineFluidProperties'
+    required_submodule = 'contrib/saline'
   []
 []
