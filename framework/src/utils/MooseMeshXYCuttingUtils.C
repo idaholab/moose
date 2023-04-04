@@ -489,6 +489,12 @@ triElemSplitter(ReplicatedMesh & mesh,
     }
   }
 
+  const unsigned int n_elem_extra_ids = mesh.n_elem_integers();
+  std::vector<dof_id_type> exist_extra_ids(n_elem_extra_ids);
+  // Record all the element extra integers of the original element
+  for (unsigned int j = 0; j < n_elem_extra_ids; j++)
+    exist_extra_ids[j] = mesh.elem_ptr(elem_id)->get_extra_integer(j);
+
   Elem * elem_Tri3_0 = mesh.add_elem(new Tri3);
   elem_Tri3_0->set_node(0) = mesh.node_ptr(nid_0);
   elem_Tri3_0->set_node(1) = mesh.node_ptr(nid_m1);
@@ -504,6 +510,13 @@ triElemSplitter(ReplicatedMesh & mesh,
   elem_Tri3_2->set_node(1) = mesh.node_ptr(nid_m2);
   elem_Tri3_2->set_node(2) = mesh.node_ptr(nid_1);
   elem_Tri3_2->subdomain_id() = double_elem_side_id;
+  // Retain element extra integers
+  for (unsigned int j = 0; j < n_elem_extra_ids; j++)
+  {
+    elem_Tri3_0->set_extra_integer(j, exist_extra_ids[j]);
+    elem_Tri3_1->set_extra_integer(j, exist_extra_ids[j]);
+    elem_Tri3_2->set_extra_integer(j, exist_extra_ids[j]);
+  }
 
   // Add sideset information to the new elements
   for (const auto & side_info_0 : elem_side_list[0])
@@ -551,6 +564,12 @@ triElemSplitter(ReplicatedMesh & mesh,
     }
   }
 
+  const unsigned int n_elem_extra_ids = mesh.n_elem_integers();
+  std::vector<dof_id_type> exist_extra_ids(n_elem_extra_ids);
+  // Record all the element extra integers of the original element
+  for (unsigned int j = 0; j < n_elem_extra_ids; j++)
+    exist_extra_ids[j] = mesh.elem_ptr(elem_id)->get_extra_integer(j);
+
   Elem * elem_Tri3_0 = mesh.add_elem(new Tri3);
   elem_Tri3_0->set_node(0) = mesh.node_ptr(nid_0);
   elem_Tri3_0->set_node(1) = mesh.node_ptr(nid_1);
@@ -561,6 +580,12 @@ triElemSplitter(ReplicatedMesh & mesh,
   elem_Tri3_1->set_node(1) = mesh.node_ptr(nid_m);
   elem_Tri3_1->set_node(2) = mesh.node_ptr(nid_2);
   elem_Tri3_1->subdomain_id() = second_elem_side_id;
+  // Retain element extra integers
+  for (unsigned int j = 0; j < n_elem_extra_ids; j++)
+  {
+    elem_Tri3_0->set_extra_integer(j, exist_extra_ids[j]);
+    elem_Tri3_1->set_extra_integer(j, exist_extra_ids[j]);
+  }
 
   // Add sideset information to the new elements
   for (const auto & side_info_0 : elem_side_list[0])
@@ -602,6 +627,12 @@ quadElemSplitter(ReplicatedMesh & mesh,
   auto node_2 = mesh.elem_ptr(elem_id)->node_ptr(2);
   auto node_3 = mesh.elem_ptr(elem_id)->node_ptr(3);
 
+  const unsigned int n_elem_extra_ids = mesh.n_elem_integers();
+  std::vector<dof_id_type> exist_extra_ids(n_elem_extra_ids);
+  // Record all the element extra integers of the original quad element
+  for (unsigned int j = 0; j < n_elem_extra_ids; j++)
+    exist_extra_ids[j] = mesh.elem_ptr(elem_id)->get_extra_integer(j);
+
   // There are two trivial ways to split a quad element
   // We prefer the way that leads to triangles with similar areas
   if (std::abs((*node_1 - *node_0).cross(*node_3 - *node_0).norm() -
@@ -619,6 +650,12 @@ quadElemSplitter(ReplicatedMesh & mesh,
     elem_Tri3_1->set_node(1) = node_2;
     elem_Tri3_1->set_node(2) = node_3;
     elem_Tri3_1->subdomain_id() = mesh.elem_ptr(elem_id)->subdomain_id() + tri_elem_subdomain_shift;
+    // Retain element extra integers
+    for (unsigned int j = 0; j < n_elem_extra_ids; j++)
+    {
+      elem_Tri3_0->set_extra_integer(j, exist_extra_ids[j]);
+      elem_Tri3_1->set_extra_integer(j, exist_extra_ids[j]);
+    }
 
     // Add sideset information to the new elements
     for (const auto & side_info_0 : elem_side_list[0])
@@ -642,6 +679,12 @@ quadElemSplitter(ReplicatedMesh & mesh,
     elem_Tri3_1->set_node(1) = node_2;
     elem_Tri3_1->set_node(2) = node_3;
     elem_Tri3_1->subdomain_id() = mesh.elem_ptr(elem_id)->subdomain_id() + tri_elem_subdomain_shift;
+    // Retain element extra integers
+    for (unsigned int j = 0; j < n_elem_extra_ids; j++)
+    {
+      elem_Tri3_0->set_extra_integer(j, exist_extra_ids[j]);
+      elem_Tri3_1->set_extra_integer(j, exist_extra_ids[j]);
+    }
 
     // Add sideset information to the new elements
     for (const auto & side_info_0 : elem_side_list[0])
