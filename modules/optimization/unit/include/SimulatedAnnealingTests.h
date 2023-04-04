@@ -11,9 +11,22 @@
 #include <string>
 #include <math.h>
 
-//simulated annealing capabilities
-#include "SimulatedAnnealing.h"
+// simulated annealing capabilities
+//#include "SimulatedAnnealing.h"
+#include "MooseTypes.h"
 
+class ItinerantPeddler
+{
+public:
+  ItinerantPeddler(const std::vector<Real> & cust_loc);
+  static void distance(Real & objective,
+                       const std::vector<Real> & rparams,
+                       const std::vector<int> & iparams,
+                       void * ctx);
+  std::vector<Real> _customer_locations;
+};
+
+/*
 using namespace std;
 
 // number of customers
@@ -33,3 +46,4 @@ double dist(double *loc1, double *loc2);
 
 // continuous functions to optimize over
 double comb_func(double *x);
+*/
