@@ -81,7 +81,7 @@
 
 [Variables]
   [u]
-    order = FIRST
+    order = SECOND
     family = LAGRANGE
   []
   [epsilon]
