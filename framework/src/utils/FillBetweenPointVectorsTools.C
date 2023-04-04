@@ -9,7 +9,6 @@
 
 #include "FillBetweenPointVectorsTools.h"
 #include "MooseMeshUtils.h"
-#include "MooseMeshXYCuttingUtils.h"
 #include "MooseMesh.h"
 #include "MeshGenerator.h"
 #include "MooseError.h"
@@ -632,8 +631,8 @@ isClosedLoop(ReplicatedMesh & mesh,
 {
   std::vector<dof_id_type> dummy_elem_list = std::vector<dof_id_type>(node_assm.size(), 0);
   std::vector<dof_id_type> ordered_dummy_elem_list;
-  MooseMeshXYCuttingUtils::makeOrderedNodeList(
-      node_assm, ordered_node_list, dummy_elem_list, ordered_dummy_elem_list);
+  MooseMeshUtils::makeOrderedNodeList(
+      node_assm, dummy_elem_list, ordered_node_list, ordered_dummy_elem_list);
   // If the code ever gets here, node_assm is empty.
   // If the ordered_node_list front and back are not the same, the boundary is not a loop.
   // This is not done inside the loop just for some potential applications in the future.

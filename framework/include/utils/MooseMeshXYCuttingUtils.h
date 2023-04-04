@@ -259,19 +259,6 @@ void makeImprovedTriElement(
     const std::vector<boundary_id_type> boundary_ids_for_side_2 = std::vector<boundary_id_type>());
 
 /**
- * Convert a list of sides in the form of a vector of pairs of node ids into a list of ordered nodes
- * based on connectivity
- * @param node_assm vector of pairs of node ids that represent the sides
- * @param ordered_node_list vector of node ids that represent the ordered nodes
- * @param elem_id_list vector of element ids that represent the elements that contain the sides
- * @param ordered_elem_id_list vector of element corresponding to the ordered nodes
- * */
-void makeOrderedNodeList(std::vector<std::pair<dof_id_type, dof_id_type>> & node_assm,
-                         std::vector<dof_id_type> & ordered_node_list,
-                         std::vector<dof_id_type> & elem_id_list,
-                         std::vector<dof_id_type> & ordered_elem_id_list);
-
-/**
  * Check if there is a side in an element that contains the given pair of nodes; if yes, also find
  * the side id and the direction of the two nodes in the side
  * @param mesh input mesh with the element that needs to be checked

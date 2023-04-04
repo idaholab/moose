@@ -973,7 +973,8 @@ boundaryTriElemImprover(ReplicatedMesh & mesh, const boundary_id_type boundary_t
     }
     std::vector<dof_id_type> ordered_node_list;
     std::vector<dof_id_type> ordered_elem_list;
-    makeOrderedNodeList(node_assm, ordered_node_list, elem_id_list, ordered_elem_list);
+    MooseMeshUtils::makeOrderedNodeList(
+        node_assm, elem_id_list, ordered_node_list, ordered_elem_list);
     elems_to_remove.insert(
         elems_to_remove.end(), ordered_elem_list.begin(), ordered_elem_list.end());
 
@@ -1016,13 +1017,13 @@ boundaryTriElemImprover(ReplicatedMesh & mesh, const boundary_id_type boundary_t
       bool is_inverse_0;
       bool is_inverse_t;
       elemSideLocator(mesh,
-                      block_elems[side_counter],
+                      block_elems.front(),
                       tri_group.first,
                       ordered_node_list[side_counter],
                       side_id_0,
                       is_inverse_0);
       elemSideLocator(mesh,
-                      block_elems[side_counter + block_info.second - 1],
+                      block_elems.back(),
                       ordered_node_list[side_counter + block_info.second],
                       tri_group.first,
                       side_id_t,
@@ -1030,11 +1031,9 @@ boundaryTriElemImprover(ReplicatedMesh & mesh, const boundary_id_type boundary_t
       // Collect boundary information of the identified sides
       std::vector<boundary_id_type> side_0_boundary_ids;
       boundary_info.boundary_ids(
-          mesh.elem_ptr(block_elems[side_counter]), side_id_0, side_0_boundary_ids);
+          mesh.elem_ptr(block_elems.front()), side_id_0, side_0_boundary_ids);
       std::vector<boundary_id_type> side_t_boundary_ids;
-      boundary_info.boundary_ids(mesh.elem_ptr(block_elems[side_counter + block_info.second - 1]),
-                                 side_id_t,
-                                 side_t_boundary_ids);
+      boundary_info.boundary_ids(mesh.elem_ptr(block_elems.back()), side_id_t, side_t_boundary_ids);
 
       // Ideally we want this angle to be 60 degrees
       // In reality, we want one TRI3 element if the angle is less than 90 degrees;
@@ -1133,70 +1132,6 @@ makeImprovedTriElement(ReplicatedMesh & mesh,
   for (const auto & boundary_id_for_side_2 : boundary_ids_for_side_2)
     boundary_info.add_side(elem_Tri3_new, 2, boundary_id_for_side_2);
   elem_Tri3_new->subdomain_id() = subdomain_id;
-}
-
-void
-makeOrderedNodeList(std::vector<std::pair<dof_id_type, dof_id_type>> & node_assm,
-                    std::vector<dof_id_type> & ordered_node_list,
-                    std::vector<dof_id_type> & elem_id_list,
-                    std::vector<dof_id_type> & ordered_elem_id_list)
-{
-  // a flag to indicate if the ordered_node_list has been reversed
-  bool isFlipped = false;
-  // Start from the first element, try to find a chain of nodes
-  ordered_node_list.push_back(node_assm.front().first);
-  ordered_node_list.push_back(node_assm.front().second);
-  ordered_elem_id_list.push_back(elem_id_list.front());
-  // Remove the element that has been added to ordered_node_list
-  node_assm.erase(node_assm.begin());
-  elem_id_list.erase(elem_id_list.begin());
-  const unsigned int node_assm_size_0 = node_assm.size();
-  for (unsigned int i = 0; i < node_assm_size_0; i++)
-  {
-    // Find nodes to expand the chain
-    dof_id_type end_node_id = ordered_node_list.back();
-    auto isMatch1 = [end_node_id](std::pair<dof_id_type, dof_id_type> old_id_pair)
-    { return old_id_pair.first == end_node_id; };
-    auto isMatch2 = [end_node_id](std::pair<dof_id_type, dof_id_type> old_id_pair)
-    { return old_id_pair.second == end_node_id; };
-    auto result = std::find_if(node_assm.begin(), node_assm.end(), isMatch1);
-    bool match_first;
-    if (result == node_assm.end())
-    {
-      match_first = false;
-      result = std::find_if(node_assm.begin(), node_assm.end(), isMatch2);
-    }
-    else
-    {
-      match_first = true;
-    }
-    // If found, add the node to boundary_ordered_node_list
-    if (result != node_assm.end())
-    {
-      ordered_node_list.push_back(match_first ? (*result).second : (*result).first);
-      node_assm.erase(result);
-      const auto elem_index = std::distance(node_assm.begin(), result);
-      ordered_elem_id_list.push_back(elem_id_list[elem_index]);
-      elem_id_list.erase(elem_id_list.begin() + elem_index);
-    }
-    // If there are still elements in node_assm and result ==
-    // node_assm.end(), this means the curve is not a loop, the
-    // ordered_node_list is flipped and try the other direction that has not
-    // been examined yet.
-    else
-    {
-      if (isFlipped)
-        // Flipped twice; this means the node list has at least two segments.
-        throw MooseException("The node list provided has more than one segments.");
-
-      // mark the first flip event.
-      isFlipped = true;
-      std::reverse(ordered_node_list.begin(), ordered_node_list.end());
-      std::reverse(ordered_elem_id_list.begin(), ordered_elem_id_list.end());
-      // As this iteration is wasted, set the iterator backward
-      i--;
-    }
-  }
 }
 
 bool

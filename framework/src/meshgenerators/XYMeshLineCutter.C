@@ -134,8 +134,9 @@ XYMeshLineCutter::generate()
     {
       if (((std::string)e.what()).compare("The new subdomain name already exists in the mesh.") ==
           0)
-        paramError("tri_elem_subdomain_name_suffix",
-                   "The new subdomain name already exists in the mesh.");
+        paramError("tri_elem_subdomain_name_suffix", e.what());
+      else
+        mooseError("In XYMeshLineCutter with 'CUT_ELEM_TRI' mode, " + (std::string)e.what());
     }
   }
   else
@@ -154,11 +155,12 @@ XYMeshLineCutter::generate()
     {
       if (((std::string)e.what())
               .compare("The input mesh has degenerate quad element before trimming.") == 0)
-        paramError("input", "The input mesh has degenerate quad element before trimming.");
+        paramError("input", e.what());
       else if (((std::string)e.what())
                    .compare("The new subdomain name already exists in the mesh.") == 0)
-        paramError("tri_elem_subdomain_name_suffix",
-                   "The new subdomain name already exists in the mesh.");
+        paramError("tri_elem_subdomain_name_suffix", e.what());
+      else
+        mooseError("In XYMeshLineCutter with 'MOV_NODE' mode, " + (std::string)e.what());
     }
     MooseMeshXYCuttingUtils::quasiTriElementsFixer(
         mesh, subdomain_ids_set, tri_subdomain_id_shift, _tri_elem_subdomain_name_suffix);
