@@ -95,12 +95,12 @@ public:
   /**
    * The primary boundary ID for this constraint.
    */
-  virtual BoundaryID primaryBoundary() { return _primary; }
+  BoundaryID primaryBoundary() const { return _primary; }
 
   /**
    * The secondary boundary ID for this constraint.
    */
-  virtual BoundaryID secondaryBoundary() { return _secondary; }
+  BoundaryID secondaryBoundary() const { return _secondary; }
 
   /**
    * The variable number that this object operates on.
