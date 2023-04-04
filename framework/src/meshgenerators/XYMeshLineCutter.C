@@ -11,6 +11,8 @@
 #include "MooseMeshXYCuttingUtils.h"
 #include "MooseMeshUtils.h"
 
+#include "libmesh/mesh_modification.h"
+
 // C++ includes
 #include <cmath>
 
@@ -117,6 +119,9 @@ XYMeshLineCutter::generate()
   const subdomain_id_type tri_subdomain_id_shift =
       _tri_elem_subdomain_shift == Moose::INVALID_BLOCK_ID ? max_subdomain_id + 2
                                                            : _tri_elem_subdomain_shift;
+  // Use a unique new boundary id as the temporary boundary id for _new_boundary_id
+  // This help prevent issues when _new_boundary_id is already used in the mesh
+  boundary_id_type new_boundary_id_tmp = MooseMeshUtils::getNextFreeBoundaryID(mesh);
 
   if (_cutting_type == CutType::CUT_ELEM_TRI)
   {
@@ -127,7 +132,7 @@ XYMeshLineCutter::generate()
                                                   tri_subdomain_id_shift,
                                                   _tri_elem_subdomain_name_suffix,
                                                   block_id_to_remove,
-                                                  _new_boundary_id,
+                                                  new_boundary_id_tmp,
                                                   _improve_tri_elements);
     }
     catch (MooseException & e)
@@ -147,7 +152,7 @@ XYMeshLineCutter::generate()
                                                    _cut_line_params,
                                                    block_id_to_remove,
                                                    subdomain_ids_set,
-                                                   _new_boundary_id,
+                                                   new_boundary_id_tmp,
                                                    _input_mesh_external_boundary_id,
                                                    _other_boundaries_to_conform);
     }
@@ -165,6 +170,9 @@ XYMeshLineCutter::generate()
     MooseMeshXYCuttingUtils::quasiTriElementsFixer(
         mesh, subdomain_ids_set, tri_subdomain_id_shift, _tri_elem_subdomain_name_suffix);
   }
+
+  // Then rename the temporary boundary id to _new_boundary_id
+  MeshTools::Modification::change_boundary_id(mesh, new_boundary_id_tmp, _new_boundary_id);
 
   mesh.prepare_for_use();
   return std::move(_input);
