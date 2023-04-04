@@ -69,11 +69,11 @@ OptimizationReporter::OptimizationReporter(const InputParameters & parameters)
 std::vector<Real>
 OptimizationReporter::fillParamsVector(std::string type, Real default_value) const
 {
-  std::vector<std::vector<Real>> parsedData;
+  std::vector<std::vector<Real>> parsed_data;
   if (isParamValid(type))
   {
-    parsedData = getParam<std::vector<std::vector<Real>>>(type);
-    if (parsedData.size() != _nvalues.size())
+    parsed_data = getParam<std::vector<std::vector<Real>>>(type);
+    if (parsed_data.size() != _nvalues.size())
     {
       paramError(type,
                  "There must be a vector of ",
@@ -85,38 +85,28 @@ OptimizationReporter::fillParamsVector(std::string type, Real default_value) con
                  type,
                  ".");
     }
-    for (std::size_t i = 0; i < parsedData.size(); ++i)
+    for (std::size_t i = 0; i < parsed_data.size(); ++i)
     {
       // The case when the initial condition is constant for each parameter group
-      if ((parsedData[i].size() == 1) && (parsedData[i].size() < _nvalues[i]))
-      {
-        std::vector<Real> params_group_constant(_nvalues[i], parsedData[i][0]);
-        parsedData[i] = params_group_constant;
-      }
-      else if ((parsedData[i].size() != 1) && (parsedData[i].size() != _nvalues[i]))
-      {
+      if (parsed_data[i].size() == 1)
+        parsed_data[i].resize(_nvalues[i], parsed_data[i][0]);
+      else if (parsed_data[i].size() != _nvalues[i])
         paramError(type,
                    "When ",
                    type,
                    " are given in input file, there must either be a single value per parameter "
                    "group or a value for every parameter in the group.");
-      }
     }
   }
 
-  if (parsedData.empty())
-  {
-    // fill with default values
-    for (auto & params_per_group : _nvalues)
-    {
-      std::vector<Real> param_group_defaults(params_per_group, default_value);
-      parsedData.push_back(param_group_defaults);
-    }
-  }
+  // fill with default values
+  if (parsed_data.empty())
+    for (const auto & params_per_group : _nvalues)
+      parsed_data.emplace_back(params_per_group, default_value);
 
   // flatten into single vector
   std::vector<Real> flattened_data;
-  for (auto & vec : parsedData)
+  for (const auto & vec : parsed_data)
     flattened_data.insert(flattened_data.end(), vec.begin(), vec.end());
 
   return flattened_data;
