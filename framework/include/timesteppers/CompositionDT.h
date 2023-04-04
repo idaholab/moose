@@ -10,44 +10,65 @@
 #pragma once
 
 #include "TimeStepper.h"
+#include "TimeSequenceStepperBase.h"
 
 class CompositionDT : public TimeStepper
 {
 public:
   static InputParameters validParams();
 
-  static MooseEnum getCompositionTypes()
-  {
-    return MooseEnum("max min average limiting", "average");
-  }
+  // The available composition types
+  static MooseEnum getCompositionTypes() { return MooseEnum("max min"); }
 
   CompositionDT(const InputParameters & parameters);
 
-  Real produceCompositionDT();
+  // Find the maximum time step size within all input time stepper(s)
+  Real maxTimeStep(const std::map<const std::string, Real> & dts);
 
-  Real maxTimeStep();
+  // Find the minimum time step size within all input time stepper(s)
+  Real minTimeStep(const std::map<const std::string, Real> & dts);
 
-  Real minTimeStep();
+  /**
+   * Find the composed time step size by applying composition rule and compare with the time step
+   * size from base time stepper
+   * @param dts stores time step size(s) from input time stepper(s)
+   * @param basedt time step size from the base time stepper
+   */
+  Real produceCompositionDT(const std::map<const std::string, Real> & dts, const Real & basedt);
 
-  Real averageTimeStep();
+  // Setup a time stepper with the given name
+  std::shared_ptr<TimeStepper> setupTimeStepper(const std::string & name);
 
-  Real limitingTimeStep();
+  // Setup a time sequence stepper with the given name
+  std::shared_ptr<TimeSequenceStepperBase> setupSequenceStepper(const std::string & stpper_name);
+
+  // Estimate the time step size needed to hit a user specified time
+  Real produceHitDT(const Real & composeDT);
 
 protected:
-  //  virtual void init() override;
   virtual Real computeInitialDT() override;
+
   virtual Real computeDT() override;
 
 private:
-  MooseEnum _composition_type;
-
-  const std::vector<std::string> _inputs;
-
+  // the time step size computed by the Composition TimeStepper
   Real _dt;
 
-  Real _has_initial_dt;
+  // whether or not has an initial time step size
+  bool _has_initial_dt;
 
+  // the initial time step size
   Real _initial_dt;
 
-  std::map<std::string, Real> _dts;
+  // the name of the base time stepper
+  const std::string _base_timestepper;
+
+  // the name of the time sequence stepper
+  std::string _hit_timestepper_name;
+
+  // the composition type for input time stepper(s)
+  MooseEnum _composition_type;
+
+  // the names of input time stepper(s)
+  std::vector<std::string> _inputs;
 };

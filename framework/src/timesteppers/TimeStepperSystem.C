@@ -8,12 +8,14 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "TimeStepperSystem.h"
-
+#include "TimeSequenceStepperBase.h"
 #include "TimeStepper.h"
 #include "FEProblem.h"
 #include "SubProblem.h"
 #include "Transient.h"
 #include "MooseApp.h"
+
+#include <regex>
 
 TimeStepperSystem::TimeStepperSystem(MooseApp & app)
   : PerfGraphInterface(app.perfGraph(), "TimeStepperSystem"), ParallelObject(app), _app(app)
@@ -78,11 +80,20 @@ TimeStepperSystem::createTimeStepper(
 
   const auto & [type, params] = type_params_pair;
   mooseAssert(comm().verify(type + stepper_name), "Inconsistent construction order");
-
-  std::shared_ptr<TimeStepper> ts =
-      _app.getFactory().create<TimeStepper>(type, stepper_name, params);
-
   mooseAssert(!_time_steppers.count(stepper_name), "Already created");
+
+  std::regex time_sequence(".*SequenceStepper");
+
+  if (!std::regex_match(type, time_sequence))
+  {
+    std::shared_ptr<TimeStepper> ts =
+        _app.getFactory().create<TimeStepper>(type, stepper_name, params);
+    mooseAssert(ts, "Not successfully created");
+    return ts;
+  }
+
+  std::shared_ptr<TimeSequenceStepperBase> ts =
+      _app.getFactory().create<TimeSequenceStepperBase>(type, stepper_name, params);
   mooseAssert(ts, "Not successfully created");
 
   return ts;

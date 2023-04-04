@@ -24,6 +24,12 @@ public:
 
   void setupSequence(const std::vector<Real> & times);
 
+  // Increase the current step count by one
+  void increaseCurrentStep() { _current_step++; };
+
+  // Get the time of the current step from input time sequence
+  Real getNextTimeInSequence() { return _time_sequence[_current_step]; };
+
   virtual void init() override {}
   virtual void step() override;
 

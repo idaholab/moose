@@ -11,6 +11,9 @@
 
 #include "MooseObjectAction.h"
 
+/**
+ * Add all timestepper(s) info from input
+ */
 class AddTimeStepperAction : public MooseObjectAction
 {
 public:
