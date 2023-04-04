@@ -306,7 +306,7 @@ TransfiniteMeshGenerator::getParsedEdge(const std::string & parameter,
   edge.resize(param_vec.size());
 
   std::vector<std::string> param_coords;
-  MooseUtils::tokenize(parameter, param_coords, 1, " ; ");
+  MooseUtils::tokenize(parameter, param_coords, 1, ";");
 
   auto it = 0;
   for (auto rx : param_vec)
@@ -317,6 +317,7 @@ TransfiniteMeshGenerator::getParsedEdge(const std::string & parameter,
     y_coord = _parsed_func->Eval(&rx);
     edge[it] = Point(x_coord, y_coord, 0.0);
     it++;
+    //cout<<"x_coord = "<<x_coord<<", y_coord = "<<y_coord<<std::endl;
   }
 
   return edge;
