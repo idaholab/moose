@@ -486,7 +486,14 @@ TEST(HitTests, RenderCases)
        "foo='why'\n' separate '  'strings?'",
        "foo = 'why separate strings?'",
        0},
+      // WASP-HIT preserves quotes before blank lines as tested below, but blank lines are rendered
+      // prior to the next non-blank node with blank lines that trail all content not being emitted
+      // so a newline was trimmed from the expected output
+#ifdef WASP_ENABLED
+      {"preserve quotes preceding blankline", "foo = '42'\n\n", "foo = '42'", 0},
+#else
       {"preserve quotes preceding blankline", "foo = '42'\n\n", "foo = '42'\n", 0},
+#endif
       {"preserve block comment (#10889)",
        "[hello]\n  foo = '42'\n\n  # comment\n  bar = 'baz'\n[]",
        "[hello]\n  foo = '42'\n\n  # comment\n  bar = 'baz'\n[]",
@@ -494,6 +501,16 @@ TEST(HitTests, RenderCases)
       {"preserve block comment 2 (#10889)",
        "[hello]\n  foo = '42'\n  # comment\n  bar = 'baz'\n[]",
        "[hello]\n  foo = '42'\n  # comment\n  bar = 'baz'\n[]",
+       0},
+      {"complex newline render",
+       "[section01]\n\n  field01 = 10\n\n\n\n  field02 = '20'\n\n  [section02]"
+       "\n\n    field03 = '30 31 32 33'\n\n\n    field04 = 40\n    [section03]"
+       "\n\n\n\n\n\n      field05 = \"double 50 quoted 51 string\"\n\n\n    []"
+       "\n\n\n    field06 = 60\n\n\n\n  []\n  field07 = '70 71 72 73 74'\n\n[]",
+       "[section01]\n\n  field01 = 10\n\n\n\n  field02 = '20'\n\n  [section02]"
+       "\n\n    field03 = '30 31 32 33'\n\n\n    field04 = 40\n    [section03]"
+       "\n\n\n\n\n\n      field05 = \"double 50 quoted 51 string\"\n\n\n    []"
+       "\n\n\n    field06 = 60\n\n\n\n  []\n  field07 = '70 71 72 73 74'\n\n[]",
        0},
   };
 

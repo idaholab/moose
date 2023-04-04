@@ -1,5 +1,10 @@
-#ifndef HIT_PARSE
-#define HIT_PARSE
+#pragma once
+
+#ifdef WASP_ENABLED
+
+#include "wasp_parse.h"
+
+#else
 
 #include <algorithm>
 #include <cstdint>
@@ -647,4 +652,4 @@ public:
 
 } // namespace hit
 
-#endif
+#endif // not WASP_ENABLED

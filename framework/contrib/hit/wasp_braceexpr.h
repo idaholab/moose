@@ -1,12 +1,17 @@
+//* This file is part of the MOOSE framework
+//* https://www.mooseframework.org
+//*
+//* All rights reserved, see COPYRIGHT for full restrictions
+//* https://github.com/idaholab/moose/blob/master/COPYRIGHT
+//*
+//* Licensed under LGPL 2.1, please see LICENSE for details
+//* https://www.gnu.org/licenses/lgpl-2.1.html
+
 #pragma once
 
 #ifdef WASP_ENABLED
 
-#include "wasp_braceexpr.h"
-
-#else
-
-#include "parse.h"
+#include "wasp_parse.h"
 
 #include <string>
 #include <vector>
@@ -121,6 +126,6 @@ private:
   ReplaceEvaler _replace;
 };
 
-} // namespace hit
+} // namespace wasp_hit
 
-#endif // not WASP_ENABLED
+#endif // WASP_ENABLED

@@ -1,6 +1,15 @@
-#ifndef WASP_ENABLED
+//* This file is part of the MOOSE framework
+//* https://www.mooseframework.org
+//*
+//* All rights reserved, see COPYRIGHT for full restrictions
+//* https://github.com/idaholab/moose/blob/master/COPYRIGHT
+//*
+//* Licensed under LGPL 2.1, please see LICENSE for details
+//* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "braceexpr.h"
+#ifdef WASP_ENABLED
+
+#include "wasp_braceexpr.h"
 
 #include <cstdlib>
 #include <iostream>
@@ -213,6 +222,6 @@ parseBraceBody(const std::string & input, size_t start, BraceNode & n)
   return start;
 }
 
-} // namespace hit
+} // namespace wasp_hit
 
-#endif // not WASP_ENABLED
+#endif // WASP_ENABLED

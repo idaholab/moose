@@ -1,3 +1,4 @@
+#ifndef WASP_ENABLED
 
 #include <algorithm>
 #include <iterator>
@@ -1308,3 +1309,5 @@ Formatter::sortGroup(const std::vector<Node *> & nodes,
 #define EOF TMPEOF
 
 } // namespace hit
+
+#endif // not WASP_ENABLED

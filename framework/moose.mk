@@ -33,7 +33,7 @@ pcre_LIB       :=  $(pcre_DIR)/libpcre-$(METHOD).la
 pcre_deps      := $(patsubst %.cc, %.$(obj-suffix).d, $(pcre_srcfiles)) \
 
 #
-# hit (new getpot parser)
+# hit
 #
 HIT_DIR ?= $(MOOSE_DIR)/framework/contrib/hit
 hit_CONTENT   := $(shell ls $(HIT_DIR) 2> /dev/null)
@@ -53,6 +53,19 @@ hit_CLI          := $(HIT_DIR)/hit
 # hit python bindings
 #
 pyhit_srcfiles  := $(HIT_DIR)/hit.cpp $(HIT_DIR)/lex.cc $(HIT_DIR)/parse.cc $(HIT_DIR)/braceexpr.cc
+
+#
+# wasp hit, which can override hit
+#
+WASP_DIR      ?= $(MOOSE_DIR)/framework/contrib/wasp/install
+wasp_CONTENT  := $(shell ls $(WASP_DIR) 2> /dev/null)
+ifneq ($(wasp_CONTENT),)
+	libmesh_CXXFLAGS += -DWASP_ENABLED
+	hit_srcfiles     += $(HIT_DIR)/wasp_braceexpr.cc
+	pyhit_srcfiles   += $(HIT_DIR)/wasp_braceexpr.cc
+	wasp_incfiles    := $(WASP_DIR)/include
+	wasp_LIB         := $(wildcard $(WASP_DIR)/lib/*wasp*) -Wl,-rpath,$(WASP_DIR)/lib
+endif
 
 #
 # Conditional parts if the user wants to compile MOOSE with torchlib
@@ -195,6 +208,7 @@ moose_INC_DIRS := $(filter-out $(ignore_contrib_include), $(moose_INC_DIRS))
 
 moose_INC_DIRS += $(gtest_DIR)
 moose_INC_DIRS += $(HIT_DIR)
+moose_INC_DIRS += $(wasp_incfiles)
 moose_INCLUDE  := $(foreach i, $(moose_INC_DIRS), -I$(i))
 
 #libmesh_INCLUDE := $(moose_INCLUDE) $(libmesh_INCLUDE)
@@ -202,7 +216,7 @@ moose_INCLUDE  := $(foreach i, $(moose_INC_DIRS), -I$(i))
 # Making a .la object instead.  This is what you make out of .lo objects...
 moose_LIB := $(FRAMEWORK_DIR)/libmoose-$(METHOD).la
 
-moose_LIBS := $(moose_LIB) $(pcre_LIB) $(hit_LIB)
+moose_LIBS := $(moose_LIB) $(pcre_LIB) $(hit_LIB) $(wasp_LIB)
 
 ### Unity Build ###
 ifeq ($(MOOSE_UNITY),true)
@@ -483,7 +497,7 @@ libpath_pcre = $(MOOSE_DIR)/framework/contrib/pcre/$(libname_pcre)
 
 # Set up app-specific variables for MOOSE, so that it can use the same clean target as the apps
 app_EXEC := $(exodiff_APP)
-app_LIB  := $(moose_LIBS) $(pcre_LIB) $(gtest_LIB) $(hit_LIB) $(pyhit_LIB)
+app_LIB  := $(moose_LIBS) $(pcre_LIB) $(gtest_LIB) $(hit_LIB) $(pyhit_LIB) $(wasp_LIB)
 app_objects := $(moose_objects) $(exodiff_objects) $(pcre_objects) $(gtest_objects) $(hit_objects)
 app_deps := $(moose_deps) $(exodiff_deps) $(pcre_deps) $(gtest_deps) $(hit_deps)
 
