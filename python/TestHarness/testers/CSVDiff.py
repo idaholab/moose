@@ -21,6 +21,8 @@ class CSVDiff(FileTester):
         params.addParam('override_rel_err',   [], "A list of customized relative error tolerances.")
         params.addParam('override_abs_zero',   [], "A list of customized absolute zero tolerances.")
         params.addParam('comparison_file', "Use supplied custom comparison config file.")
+        params.addParam('ignore_columns', [], "A list of variables which will not be included in the CSVDiffs operation.")
+        params.addParam('custom_columns', [], "A list of select columns which will be included in the CSVDiff operation.")
 
         return params
 
@@ -70,6 +72,12 @@ class CSVDiff(FileTester):
 
             if self.specs.isValid('override_abs_zero'):
                 csvdiff.append('--custom-abs-zero %s' % (' '.join(self.specs['override_abs_zero'])))
+
+            if self.specs.isValid('ignore_columns'):
+                csvdiff.append('--ignore-fields %s' % (' '.join(self.specs['ignore_columns'])))
+
+            if self.specs.isValid('custom_columns'):
+                csvdiff.append('--custom-columns %s' % (' '.join(self.specs['custom_columns'])))
 
             commands.append(' '.join(csvdiff))
 
