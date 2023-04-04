@@ -1023,19 +1023,28 @@ boundaryTriElemImprover(ReplicatedMesh & mesh, const boundary_id_type boundary_t
 
     // For all the elements sharing the same off-boundary node, we need to know how many separated
     // subdomains are involved
-    std::vector<std::pair<subdomain_id_type, unsigned int>> blocks_info;
+    // If there are extra element ids defined on the mesh, they also want to retain their boundaries
+    const unsigned int n_elem_extra_ids = mesh.n_elem_integers();
+    std::vector<std::tuple<subdomain_id_type, std::vector<dof_id_type>, unsigned int>> blocks_info;
     for (const auto & elem_id : ordered_elem_list)
     {
+      std::vector<dof_id_type> exist_extra_ids(n_elem_extra_ids);
+      // Record all the element extra integers of the original quad element
+      for (unsigned int j = 0; j < n_elem_extra_ids; j++)
+        exist_extra_ids[j] = mesh.elem_ptr(elem_id)->get_extra_integer(j);
       if (blocks_info.empty())
       {
-        blocks_info.push_back(std::make_pair(mesh.elem_ptr(elem_id)->subdomain_id(), 1));
+        blocks_info.push_back(
+            std::make_tuple(mesh.elem_ptr(elem_id)->subdomain_id(), exist_extra_ids, 1));
       }
       else
       {
-        if (mesh.elem_ptr(elem_id)->subdomain_id() == blocks_info.back().first)
-          blocks_info.back().second++;
+        if (mesh.elem_ptr(elem_id)->subdomain_id() == std::get<0>(blocks_info.back()) &&
+            exist_extra_ids == std::get<1>(blocks_info.back()))
+          std::get<2>(blocks_info.back())++;
         else
-          blocks_info.push_back(std::make_pair(mesh.elem_ptr(elem_id)->subdomain_id(), 1));
+          blocks_info.push_back(
+              std::make_tuple(mesh.elem_ptr(elem_id)->subdomain_id(), exist_extra_ids, 1));
       }
     }
     // For each separated subdomain, we try to improve the boundary elements
@@ -1044,14 +1053,14 @@ boundaryTriElemImprover(ReplicatedMesh & mesh, const boundary_id_type boundary_t
     {
       const auto node_1 = mesh.node_ptr(ordered_node_list[side_counter]);
       // we do not need to subtract 1 for node_2
-      const auto node_2 = mesh.node_ptr(ordered_node_list[side_counter + block_info.second]);
+      const auto node_2 = mesh.node_ptr(ordered_node_list[side_counter + std::get<2>(block_info)]);
       const auto node_0 = mesh.node_ptr(tri_group.first);
       const Point v1 = *node_1 - *node_0;
       const Point v2 = *node_2 - *node_0;
       const Real angle = std::acos(v1 * v2 / v1.norm() / v2.norm()) / M_PI * 180.0;
       const std::vector<dof_id_type> block_elems(ordered_elem_list.begin() + side_counter,
                                                  ordered_elem_list.begin() + side_counter +
-                                                     block_info.second);
+                                                     std::get<2>(block_info));
       // We assume that there are no sidesets defined inside a subdomain
       // For the first TRI3 element, we want to check if its side defined by node_0 and node_1 is
       // defined in any sidesets
@@ -1067,7 +1076,7 @@ boundaryTriElemImprover(ReplicatedMesh & mesh, const boundary_id_type boundary_t
                       is_inverse_0);
       elemSideLocator(mesh,
                       block_elems.back(),
-                      ordered_node_list[side_counter + block_info.second],
+                      ordered_node_list[side_counter + std::get<2>(block_info)],
                       tri_group.first,
                       side_id_t,
                       is_inverse_t);
@@ -1088,8 +1097,9 @@ boundaryTriElemImprover(ReplicatedMesh & mesh, const boundary_id_type boundary_t
         makeImprovedTriElement(mesh,
                                tri_group.first,
                                ordered_node_list[side_counter],
-                               ordered_node_list[side_counter + block_info.second],
-                               block_info.first,
+                               ordered_node_list[side_counter + std::get<2>(block_info)],
+                               std::get<0>(block_info),
+                               std::get<1>(block_info),
                                {boundary_to_improve},
                                side_0_boundary_ids,
                                side_t_boundary_ids);
@@ -1101,15 +1111,17 @@ boundaryTriElemImprover(ReplicatedMesh & mesh, const boundary_id_type boundary_t
                                tri_group.first,
                                ordered_node_list[side_counter],
                                node_m->id(),
-                               block_info.first,
+                               std::get<0>(block_info),
+                               std::get<1>(block_info),
                                {boundary_to_improve},
                                side_0_boundary_ids,
                                std::vector<boundary_id_type>());
         makeImprovedTriElement(mesh,
                                tri_group.first,
                                node_m->id(),
-                               ordered_node_list[side_counter + block_info.second],
-                               block_info.first,
+                               ordered_node_list[side_counter + std::get<2>(block_info)],
+                               std::get<0>(block_info),
+                               std::get<1>(block_info),
                                {boundary_to_improve},
                                std::vector<boundary_id_type>(),
                                side_t_boundary_ids);
@@ -1122,7 +1134,8 @@ boundaryTriElemImprover(ReplicatedMesh & mesh, const boundary_id_type boundary_t
                                tri_group.first,
                                ordered_node_list[side_counter],
                                node_m1->id(),
-                               block_info.first,
+                               std::get<0>(block_info),
+                               std::get<1>(block_info),
                                {boundary_to_improve},
                                side_0_boundary_ids,
                                std::vector<boundary_id_type>());
@@ -1130,20 +1143,22 @@ boundaryTriElemImprover(ReplicatedMesh & mesh, const boundary_id_type boundary_t
                                tri_group.first,
                                node_m1->id(),
                                node_m2->id(),
-                               block_info.first,
+                               std::get<0>(block_info),
+                               std::get<1>(block_info),
                                {boundary_to_improve},
                                std::vector<boundary_id_type>(),
                                std::vector<boundary_id_type>());
         makeImprovedTriElement(mesh,
                                tri_group.first,
                                node_m2->id(),
-                               ordered_node_list[side_counter + block_info.second],
-                               block_info.first,
+                               ordered_node_list[side_counter + std::get<2>(block_info)],
+                               std::get<0>(block_info),
+                               std::get<1>(block_info),
                                {boundary_to_improve},
                                std::vector<boundary_id_type>(),
                                side_t_boundary_ids);
       }
-      side_counter += block_info.second;
+      side_counter += std::get<2>(block_info);
     }
     // TODO: Need to check if the new element is inverted?
   }
@@ -1159,9 +1174,10 @@ makeImprovedTriElement(ReplicatedMesh & mesh,
                        const dof_id_type node_id_1,
                        const dof_id_type node_id_2,
                        const subdomain_id_type subdomain_id,
-                       const std::vector<boundary_id_type> boundary_ids_for_side_1,
-                       const std::vector<boundary_id_type> boundary_ids_for_side_0,
-                       const std::vector<boundary_id_type> boundary_ids_for_side_2)
+                       const std::vector<dof_id_type> & extra_elem_ids,
+                       const std::vector<boundary_id_type> & boundary_ids_for_side_1,
+                       const std::vector<boundary_id_type> & boundary_ids_for_side_0,
+                       const std::vector<boundary_id_type> & boundary_ids_for_side_2)
 {
   BoundaryInfo & boundary_info = mesh.get_boundary_info();
   Elem * elem_Tri3_new = mesh.add_elem(new Tri3);
@@ -1175,6 +1191,11 @@ makeImprovedTriElement(ReplicatedMesh & mesh,
   for (const auto & boundary_id_for_side_2 : boundary_ids_for_side_2)
     boundary_info.add_side(elem_Tri3_new, 2, boundary_id_for_side_2);
   elem_Tri3_new->subdomain_id() = subdomain_id;
+  // Retain element extra integers
+  for (unsigned int j = 0; j < extra_elem_ids.size(); j++)
+  {
+    elem_Tri3_new->set_extra_integer(j, extra_elem_ids[j]);
+  }
 }
 
 bool

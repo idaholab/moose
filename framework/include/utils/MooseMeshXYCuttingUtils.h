@@ -244,6 +244,7 @@ void boundaryTriElemImprover(ReplicatedMesh & mesh, const boundary_id_type bound
  * @param node_id_1 id of the second node of the TRI3 element
  * @param node_id_2 id of the third node of the TRI3 element
  * @param subdomain_id subdomain id of the TRI3 element
+ * @param extra_elem_ids extra element ids to be assigned to the TRI3 element
  * @param boundary_ids_for_side_1 boundary ids of the second side of the TRI3 element
  * @param boundary_ids_for_side_0 boundary ids of the first side of the TRI3 element
  * @param boundary_ids_for_side_2 boundary ids of the third side of the TRI3 element
@@ -254,9 +255,10 @@ void makeImprovedTriElement(
     const dof_id_type node_id_1,
     const dof_id_type node_id_2,
     const subdomain_id_type subdomain_id,
-    const std::vector<boundary_id_type> boundary_ids_for_side_1 = std::vector<boundary_id_type>(),
-    const std::vector<boundary_id_type> boundary_ids_for_side_0 = std::vector<boundary_id_type>(),
-    const std::vector<boundary_id_type> boundary_ids_for_side_2 = std::vector<boundary_id_type>());
+    const std::vector<dof_id_type> & extra_elem_ids,
+    const std::vector<boundary_id_type> & boundary_ids_for_side_1 = std::vector<boundary_id_type>(),
+    const std::vector<boundary_id_type> & boundary_ids_for_side_0 = std::vector<boundary_id_type>(),
+    const std::vector<boundary_id_type> & boundary_ids_for_side_2 = std::vector<boundary_id_type>());
 
 /**
  * Check if there is a side in an element that contains the given pair of nodes; if yes, also find
