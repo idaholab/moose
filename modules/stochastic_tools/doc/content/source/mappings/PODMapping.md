@@ -4,9 +4,6 @@
 
 ## Overview
 
-!alert warning
-This object is only compatible with PETSc versions above 3.14.
-
 A mapping which uses a Proper Orthogonal Decomposition (POD) to establish mapping between
 (high-dimensional) solution vectors coming from numerical simulations and corresponding coefficients
 in lower-dimensional spaces (latent spaces). For the use cases in MOOSE, this method is equivalent to
@@ -19,7 +16,7 @@ The process for building the mapping is the following:
    process is established in [SolutionContainer.md], [SerializedSolutionTransfer.md] and
    [ParallelSolutionStorage.md].
 
-2. Once the snapshots are at out disposal, we organize them into a snapshot matrix ($\boldsymbol{S}$) as follows:
+2. Once the snapshots are at our disposal, we organize them into a snapshot matrix ($\boldsymbol{S}$) as follows:
 
    !equation id=data-matrix
    \boldsymbol{S}_{v} = \left[\boldsymbol{s}_{v,\mu_1,t_1}~\boldsymbol{s}_{v,\mu_1,t_2}~\boldsymbol{s}_{v,\mu_1,t_3}~ ... ~\boldsymbol{s}_{v,\mu_1,t_{N_{T_{\mu_1}}}}~ \boldsymbol{s}_{v,\mu_2,t_1}~ \boldsymbol{s}_{v,\mu_2,t_2}~ ...~ \boldsymbol{s}_{v,\mu_{N_\mu},t_{N-1}}~ \boldsymbol{s}_{v,\mu_{N_\mu},t_{N_{T_{\mu_{N_\mu}}}}} \right]~,
@@ -72,6 +69,9 @@ The process for building the mapping is the following:
 
 Once a mapping is trained, one can save it into a binary file using [MappingOutput.md] and load it by specifying
 the [!param](/Mappings/PODMapping/filename) parameter in the object.
+
+!alert warning
+This object is only compatible with PETSc versions above 3.14 with SLEPc support.
 
 ## Example Input File Syntax
 

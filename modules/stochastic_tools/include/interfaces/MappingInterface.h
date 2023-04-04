@@ -43,7 +43,4 @@ private:
 
   /// Reference to FEProblemBase instance
   FEProblemBase & _smi_feproblem;
-
-  /// Thread ID
-  const THREAD_ID _smi_tid;
 };

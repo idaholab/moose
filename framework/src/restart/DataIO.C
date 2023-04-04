@@ -42,7 +42,7 @@ template <>
 void
 dataStore(std::ostream & stream, VariableName & v, void * context)
 {
-  std::string & name = dynamic_cast<std::string &>(v);
+  auto & name = static_cast<std::string &>(v);
   dataStore(stream, name, context);
 }
 
@@ -344,7 +344,7 @@ template <>
 void
 dataLoad(std::istream & stream, VariableName & v, void * context)
 {
-  std::string & name = dynamic_cast<std::string &>(v);
+  auto & name = static_cast<std::string &>(v);
   dataLoad(stream, name, context);
 }
 

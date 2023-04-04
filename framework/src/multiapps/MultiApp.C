@@ -1180,11 +1180,11 @@ MultiApp::getCommandLineArgsParamHelper(unsigned int local_app)
 }
 
 LocalRankConfig
-rankConfig(dof_id_type rank,
-           dof_id_type nprocs,
+rankConfig(processor_id_type rank,
+           processor_id_type nprocs,
            dof_id_type napps,
-           dof_id_type min_app_procs,
-           dof_id_type max_app_procs,
+           processor_id_type min_app_procs,
+           processor_id_type max_app_procs,
            bool batch_mode)
 {
   if (min_app_procs > nprocs)
@@ -1197,16 +1197,17 @@ rankConfig(dof_id_type rank,
   // A "slot" is a group of procs/ranks that are grouped together to run a
   // single (sub)app/sim in parallel.
 
-  auto slot_size = std::max(std::min(nprocs / napps, max_app_procs), min_app_procs);
-  dof_id_type nslots = std::min(nprocs / slot_size, napps);
-  auto leftover_procs = nprocs - nslots * slot_size;
-  auto apps_per_slot = napps / nslots;
-  auto leftover_apps = napps % nslots;
+  dof_id_type slot_size =
+      std::max(std::min(nprocs / napps, (dof_id_type)max_app_procs), (dof_id_type)min_app_procs);
+  processor_id_type nslots = std::min(nprocs / slot_size, napps);
+  processor_id_type leftover_procs = nprocs - nslots * slot_size;
+  dof_id_type apps_per_slot = napps / nslots;
+  dof_id_type leftover_apps = napps % nslots;
 
   std::vector<int> slot_for_rank(nprocs);
-  dof_id_type slot = 0;
-  dof_id_type procs_in_slot = 0;
-  for (dof_id_type rankiter = 0; rankiter <= rank; rankiter++)
+  processor_id_type slot = 0;
+  processor_id_type procs_in_slot = 0;
+  for (processor_id_type rankiter = 0; rankiter <= rank; rankiter++)
   {
     if (slot < nslots)
       slot_for_rank[rankiter] = slot;
@@ -1226,23 +1227,21 @@ rankConfig(dof_id_type rank,
   if (slot_for_rank[rank] < 0)
     // ranks assigned a negative slot don't have any apps running on them.
     return {0, 0, 0, 0, false, 0};
-  dof_id_type slot_num = slot_for_rank[rank];
+  processor_id_type slot_num = slot_for_rank[rank];
 
   bool is_first_local_rank = rank == 0 || (slot_for_rank[rank - 1] != slot_for_rank[rank]);
-  auto n_local_apps = apps_per_slot + 1 * (slot_num < leftover_apps);
+  dof_id_type n_local_apps = apps_per_slot + 1 * (slot_num < leftover_apps);
 
   processor_id_type my_first_rank = 0;
-  for (dof_id_type rankiter = rank; rankiter > 0; rankiter--)
-  {
+  for (processor_id_type rankiter = rank; rankiter > 0; rankiter--)
     if (slot_for_rank[rank] != slot_for_rank[rankiter])
     {
       my_first_rank = slot_for_rank[rankiter + 1];
       break;
     }
-  }
 
   dof_id_type app_index = 0;
-  for (dof_id_type slot = 0; slot < slot_num; slot++)
+  for (processor_id_type slot = 0; slot < slot_num; slot++)
   {
     auto num_slot_apps = apps_per_slot + 1 * (slot < leftover_apps);
     app_index += num_slot_apps;

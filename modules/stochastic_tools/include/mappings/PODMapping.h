@@ -25,7 +25,7 @@ public:
   static InputParameters validParams();
   PODMapping(const InputParameters & parameters);
 
-  ~PODMapping();
+  virtual ~PODMapping();
 
   virtual void buildMapping(const VariableName & vname) override;
 
@@ -55,34 +55,19 @@ public:
    * Return all of the left basis functions for a given variable
    * @param vname The name of the variable.
    */
-  const std::vector<DenseVector<Real>> & leftBasis(const VariableName & vname)
-  {
-    mooseAssert(_left_basis_functions.find(vname) != _left_basis_functions.end(),
-                "We should have the requested variable!");
-    return _left_basis_functions[vname];
-  }
+  const std::vector<DenseVector<Real>> & leftBasis(const VariableName & vname);
 
   /**
    * Return all of the right basis functions for a given variable
    * @param vname The name of the variable.
    */
-  const std::vector<DenseVector<Real>> & rightBasis(const VariableName & vname)
-  {
-    mooseAssert(_right_basis_functions.find(vname) != _right_basis_functions.end(),
-                "We should have the requested variable!");
-    return _right_basis_functions[vname];
-  }
+  const std::vector<DenseVector<Real>> & rightBasis(const VariableName & vname);
 
   /**
    * Return all of the singular values for a given variable
    * @param vname The name of the variable.
    */
-  const std::vector<Real> & singularValues(const VariableName & vname)
-  {
-    mooseAssert(_singular_values.find(vname) != _singular_values.end(),
-                "We should have the requested variable!");
-    return _singular_values[vname];
-  }
+  const std::vector<Real> & singularValues(const VariableName & vname);
 
   /**
    * Get the `base_i`-th left basis function for a given variable

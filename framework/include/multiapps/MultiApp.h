@@ -85,11 +85,11 @@ struct LocalRankConfig
 /// Each proc calls this function in order to determine which (sub)apps among
 /// the global list of all subapps for a multiapp should be run by the given
 /// rank.
-LocalRankConfig rankConfig(dof_id_type rank,
-                           dof_id_type nprocs,
+LocalRankConfig rankConfig(processor_id_type rank,
+                           processor_id_type nprocs,
                            dof_id_type napps,
-                           dof_id_type min_app_procs,
-                           dof_id_type max_app_procs,
+                           processor_id_type min_app_procs,
+                           processor_id_type max_app_procs,
                            bool batch_mode = false);
 
 /**

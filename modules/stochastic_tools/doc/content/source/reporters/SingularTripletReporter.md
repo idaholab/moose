@@ -1,4 +1,4 @@
-# SolutionContainer
+# SingularTripletReporter
 
 !syntax description /Reporters/SingularTripletReporter
 

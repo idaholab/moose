@@ -21,8 +21,7 @@ MappingInterface::validParams()
 
 MappingInterface::MappingInterface(const MooseObject * moose_object)
   : _smi_params(moose_object->parameters()),
-    _smi_feproblem(*_smi_params.get<FEProblemBase *>("_fe_problem_base")),
-    _smi_tid(_smi_params.have_parameter<THREAD_ID>("_tid") ? _smi_params.get<THREAD_ID>("_tid") : 0)
+    _smi_feproblem(*_smi_params.get<FEProblemBase *>("_fe_problem_base"))
 {
 }
 

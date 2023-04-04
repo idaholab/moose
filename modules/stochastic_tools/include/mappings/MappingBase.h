@@ -69,6 +69,6 @@ public:
   virtual const std::vector<VariableName> & getVariableNames() { return _variable_names; }
 
 protected:
-  // Storage for the names of the variables this mapping can handle
+  /// Storage for the names of the variables this mapping can handle
   const std::vector<VariableName> & _variable_names;
 };

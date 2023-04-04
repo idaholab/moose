@@ -430,3 +430,33 @@ PODMapping::rightBase(const VariableName & vname, const unsigned int base_i)
 
   return _right_basis_functions[vname][base_i];
 }
+
+const std::vector<DenseVector<Real>> &
+PODMapping::leftBasis(const VariableName & vname)
+{
+  if (_left_basis_functions.find(vname) == _left_basis_functions.end())
+    mooseError("We are trying to access container for variable '",
+               vname,
+               "' but we don't have it in the POD mapping!");
+  return _left_basis_functions[vname];
+}
+
+const std::vector<DenseVector<Real>> &
+PODMapping::rightBasis(const VariableName & vname)
+{
+  if (_right_basis_functions.find(vname) == _right_basis_functions.end())
+    mooseError("We are trying to access container for variable '",
+               vname,
+               "' but we don't have it in the POD mapping!");
+  return _right_basis_functions[vname];
+}
+
+const std::vector<Real> &
+PODMapping::singularValues(const VariableName & vname)
+{
+  if (_singular_values.find(vname) == _singular_values.end())
+    mooseError("We are trying to access container for variable '",
+               vname,
+               "' but we don't have it in the POD mapping!");
+  return _singular_values[vname];
+}
