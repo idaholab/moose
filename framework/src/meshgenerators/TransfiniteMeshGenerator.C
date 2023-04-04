@@ -317,7 +317,6 @@ TransfiniteMeshGenerator::getParsedEdge(const std::string & parameter,
     y_coord = _parsed_func->Eval(&rx);
     edge[it] = Point(x_coord, y_coord, 0.0);
     it++;
-    // cout<<"x_coord = "<<x_coord<<", y_coord = "<<y_coord<<std::endl;
   }
 
   return edge;
