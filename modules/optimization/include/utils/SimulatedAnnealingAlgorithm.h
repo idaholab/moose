@@ -33,6 +33,12 @@ public:
     TrigAdd
   };
 
+  enum RealNeighborSelection
+  {
+    RandomDirectionStretching,
+    BoxSampling
+  };
+
   /// purely virtual optimize function
   void solve() override;
 
@@ -41,6 +47,10 @@ public:
   unsigned int & numSwaps() { return _num_swaps; }
   unsigned int & numReassignments() { return _num_reassignments; }
   void setValidReassignmentOptions(const std::set<int> & options);
+  Real & relativePerturbationSize() { return _relative_perturbation; }
+  void setLowerLimits(const std::vector<Real> & lower_limits);
+  void setUpperLimits(const std::vector<Real> & upper_limits);
+  RealNeighborSelection & realNeighborSelection() { return _real_perturbation_type; }
   ///@}
 
 protected:
@@ -55,6 +65,9 @@ protected:
 
   /// computes the probability with which a neigbor objective value will be accepted given current objective value and temperature
   Real acceptProbability(Real curr_obj, Real neigh_obj, Real curr_temp) const;
+
+  /// random direction on the unit sphere
+  void randomDirection(unsigned int size, std::vector<Real> & direction) const;
 
   /// state size of the integer space
   unsigned int _int_state_size;
@@ -90,5 +103,14 @@ protected:
   unsigned int _num_swaps;
   unsigned int _num_reassignments;
   std::vector<int> _valid_options;
+  ///@}
+
+  ///@{ parameters governing the creation of neighbors for real params
+  RealNeighborSelection _real_perturbation_type;
+  Real _relative_perturbation;
+  bool _upper_limit_provided;
+  bool _lower_limit_provided;
+  std::vector<Real> _parameter_lower_limit;
+  std::vector<Real> _parameter_upper_limit;
   ///@}
 };

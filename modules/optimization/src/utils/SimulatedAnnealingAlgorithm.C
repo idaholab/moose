@@ -20,7 +20,11 @@ SimulatedAnnealingAlgorithm::SimulatedAnnealingAlgorithm()
     _monotonic_cooling(true),
     _res_var(0.0),
     _num_swaps(1),
-    _num_reassignments(0)
+    _num_reassignments(0),
+    _real_perturbation_type(RandomDirectionStretching),
+    _relative_perturbation(0.05),
+    _upper_limit_provided(false),
+    _lower_limit_provided(false)
 {
 }
 
@@ -29,16 +33,16 @@ SimulatedAnnealingAlgorithm::solve()
 {
   // check that solution size has been set
   if (_size == 0)
-    ::mooseError("Solution size is zero. Most likely setInitialSolution was not called.");
+    mooseError("Solution size is zero. Most likely setInitialSolution was not called.");
 
   // check neighbor generation options for int params
   if (_int_state_size > 0 && _num_reassignments > 0 && _valid_options.size() < 2)
-    ::mooseError("If the number of reassignments for neigbor generation is > 0, then the number of "
-                 "valid options must be at least 2.");
+    mooseError("If the number of reassignments for neigbor generation is > 0, then the number of "
+               "valid options must be at least 2.");
 
   if (_int_state_size > 0 && _num_swaps + _num_reassignments == 0)
-    ::mooseError("The problem has a non-zero number of categorical parameters, but the number of "
-                 "swaps and number of reassignments for neighbor generation are both 0.");
+    mooseError("The problem has a non-zero number of categorical parameters, but the number of "
+               "swaps and number of reassignments for neighbor generation are both 0.");
 
   // set neighbor & best states
   std::vector<Real> neighbor_real_solution = _current_real_solution;
@@ -133,17 +137,59 @@ void
 SimulatedAnnealingAlgorithm::createNeigborReal(const std::vector<Real> & real_sol,
                                                std::vector<Real> & real_neigh) const
 {
-  //
   if (_real_size == 0)
   {
     real_neigh = {};
     return;
   }
 
-  // set neighbor to the current state
-  real_neigh = real_sol;
+  Real norm = 0;
+  for (auto & p : real_sol)
+    norm += p * p;
+  norm = std::sqrt(norm);
 
-  // we use
+  switch (_real_perturbation_type)
+  {
+    case RandomDirectionStretching:
+      // we need to loop until we find a perturbation
+      // that does not violate the parameter limits
+      while (true)
+      {
+        Real norm_perturbation = norm * _relative_perturbation * MooseRandom::randNormal(0.0, 1.0);
+        std::vector<Real> dir;
+        randomDirection(_real_size, dir);
+
+        bool accept = true;
+        for (unsigned int j = 0; j < _real_size; ++j)
+        {
+          real_neigh[j] = real_sol[j] + norm_perturbation * dir[j];
+
+          if (_upper_limit_provided && real_neigh[j] > _parameter_upper_limit[j])
+            accept = false;
+
+          if (_lower_limit_provided && real_neigh[j] < _parameter_lower_limit[j])
+            accept = false;
+
+          if (!accept)
+            break;
+        }
+
+        if (accept)
+          return;
+      }
+      break;
+    case BoxSampling:
+      if (!_upper_limit_provided || !_lower_limit_provided)
+        mooseError("Upper and lower limits must be provided for BoxSampling");
+
+      for (unsigned int j = 0; j < _real_size; ++j)
+        real_neigh[j] =
+            _parameter_lower_limit[j] +
+            MooseRandom::rand() * (_parameter_upper_limit[j] - _parameter_lower_limit[j]);
+      break;
+    default:
+      mooseError("Unrecognized neigbor perturation selection");
+  }
 }
 
 void
@@ -226,4 +272,43 @@ SimulatedAnnealingAlgorithm::setValidReassignmentOptions(const std::set<int> & o
   unsigned int j = 0;
   for (auto & p : options)
     _valid_options[j++] = p;
+}
+
+void
+SimulatedAnnealingAlgorithm::setLowerLimits(const std::vector<Real> & lower_limits)
+{
+  _lower_limit_provided = true;
+  _parameter_lower_limit = lower_limits;
+  if (_parameter_lower_limit.size() != _real_size)
+    mooseError("Lower limits has incorrect size");
+}
+
+void
+SimulatedAnnealingAlgorithm::setUpperLimits(const std::vector<Real> & upper_limits)
+{
+  _upper_limit_provided = true;
+  _parameter_upper_limit = upper_limits;
+  if (_parameter_upper_limit.size() != _real_size)
+    mooseError("Upper limits has incorrect size");
+}
+
+// Muller & Marsaglia (‘Normalized Gaussians’)
+void
+SimulatedAnnealingAlgorithm::randomDirection(unsigned int size, std::vector<Real> & direction) const
+{
+  direction.resize(size);
+
+  // set direction to a vector normally distributed random variables
+  for (unsigned int j = 0; j < size; ++j)
+    direction[j] = MooseRandom::randNormal(0.0, 1.0);
+
+  // compute the norm of direction
+  Real norm = 0.0;
+  for (auto & p : direction)
+    norm += p * p;
+  norm = std::sqrt(norm);
+
+  // normalize
+  for (unsigned int j = 0; j < size; ++j)
+    direction[j] /= norm;
 }
