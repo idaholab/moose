@@ -258,7 +258,8 @@ void makeImprovedTriElement(
     const std::vector<dof_id_type> & extra_elem_ids,
     const std::vector<boundary_id_type> & boundary_ids_for_side_1 = std::vector<boundary_id_type>(),
     const std::vector<boundary_id_type> & boundary_ids_for_side_0 = std::vector<boundary_id_type>(),
-    const std::vector<boundary_id_type> & boundary_ids_for_side_2 = std::vector<boundary_id_type>());
+    const std::vector<boundary_id_type> & boundary_ids_for_side_2 =
+        std::vector<boundary_id_type>());
 
 /**
  * Check if there is a side in an element that contains the given pair of nodes; if yes, also find
