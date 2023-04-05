@@ -6,7 +6,7 @@
     type = 'JSONDiff'
     input = 'accumulate_reporter.i'
     jsondiff = 'accumulate_reporter_out.json'
-    skip_keys = 'type'
+    keep_reporter_types = True
     requirement = 'The system shall be able to accumulate reporter values over time steps into a vector reporter value.'
   []
 []

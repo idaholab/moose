@@ -6,7 +6,7 @@
     type = 'JSONDiff'
     input = 'constant_reporter.i'
     jsondiff = 'constant_reporter_out.json'
-    skip_keys = 'type'
+    keep_reporter_types = true
     requirement = 'The system shall be able to produce arbitrary integer, real number, dof_id_types and string scalar/vector values for use in other calculations.'
   []
   [errors]
