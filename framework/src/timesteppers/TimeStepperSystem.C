@@ -127,7 +127,7 @@ TimeStepperSystem::setFinalTimeStepperName()
   auto final_stepper = _app.getExecutioner()->getParam<std::string>("final_time_stepper");
   for (const auto & [name, type_params_pair] : _time_stepper_params)
   {
-    const auto & [type, params] = type_params_pair;
+    const auto & type = type_params_pair.first;
 
     if (type == "CompositionDT")
       _final_time_stepper_name = name;
