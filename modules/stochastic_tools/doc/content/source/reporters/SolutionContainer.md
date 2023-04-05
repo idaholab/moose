@@ -5,7 +5,7 @@
 ## Overview
 
 This object is responsible for accumulating solution fields over the course of a simulation.
-The solution fields are kept distributed suing the communicator of the application.
+The solution fields are kept distributed using the communicator of the application.
 
 ## Example Input File Syntax
 

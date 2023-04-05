@@ -37,13 +37,13 @@ public:
   /**
    * Methods used when running in batch mode (see SamplerFullSolveMultiApp)
    */
-  void initializeFromMultiapp() override{};
+  void initializeFromMultiapp() override {}
   void executeFromMultiapp() override;
-  void finalizeFromMultiapp() override{};
+  void finalizeFromMultiapp() override {}
 
-  void initializeToMultiapp() override{};
-  void executeToMultiapp() override{};
-  void finalizeToMultiapp() override{};
+  void initializeToMultiapp() override {}
+  void executeToMultiapp() override {}
+  void finalizeToMultiapp() override {}
   ///@}
 
 protected:
@@ -63,7 +63,12 @@ private:
                       SolutionContainer & solution_container,
                       const dof_id_type global_i);
 
-  /// Serialize on methodically determined rank of the subapp and transfer to the main application
+  /**
+   * Serialize on methodically determined rank of the subapp and transfer to the main application.
+   * Example: Let's say we have 5 samples and 3 processors on a sub-application.
+   * In this case, we will serialize the first two on rank 1, the second two on rank
+   * 2 and the last one on rank 3.
+   */
   void transferInParallel(NonlinearSystemBase & app_nl_system,
                           SolutionContainer & solution_container,
                           const dof_id_type global_i);
@@ -75,8 +80,8 @@ private:
    */
   void initializeInNormalMode();
 
-  /// This guy queries the solution container addresses from the subapps. We need to redo this
-  /// Every time initialSetup() (batch-reset) is called on the subapp because the address
+  /// This routine queries the solution container addresses from the subapps. We need to redo this
+  /// every time initialSetup() (batch-reset) is called on the subapp because the address
   /// of SolutionContainer changes. Considering that the transfer doesn't know the multiapp
   /// setting, we use the same approach for batch-restore as well, which might be a little
   /// wasteful if the execution of the subapps is very fast (usually not the case).

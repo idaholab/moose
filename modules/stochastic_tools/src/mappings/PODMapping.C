@@ -124,8 +124,7 @@ PODMapping::determineNumberOfModes(const VariableName & vname,
 
   // We either use the number of modes defined by the user or the maximum number of converged
   // modes. We don't want to use modes which are unconverged.
-  unsigned int num_requested_modes =
-      std::min((unsigned long)_num_modes[var_i], converged_evs.size());
+  std::size_t num_requested_modes = std::min((std::size_t)_num_modes[var_i], converged_evs.size());
 
   // We also truncate modes that have a squared singular value below the rundoff
   for (auto mode_i : make_range(num_requested_modes))

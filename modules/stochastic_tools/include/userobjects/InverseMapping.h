@@ -67,7 +67,7 @@ protected:
   /// coordinates in the latent space
   std::vector<SurrogateModel *> _surrogate_models;
 
-  /// Input parameters for the surrogate models. If no surroagtes are given,
+  /// Input parameters for the surrogate models. If no surrogates are given,
   /// we assume that these are the coordinates in the latent space
   const std::vector<Real> & _input_parameters;
 };

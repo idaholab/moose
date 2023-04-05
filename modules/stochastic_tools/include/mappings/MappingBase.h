@@ -17,7 +17,7 @@
 #include "libmesh/petsc_matrix.h"
 
 /**
- * This is an abstract base class for objects that provide mapping a full-order
+ * This is an abstract base class for objects that provide mapping between a full-order
  * and a latent space.
  */
 class MappingBase : public MooseObject, public RestartableModelInterface
@@ -65,7 +65,7 @@ public:
                            const std::vector<Real> & reduced_order_vector,
                            DenseVector<Real> & full_order_vector) const = 0;
 
-  /// Get the available variable names in this mattpinf
+  /// Get the available variable names in this mapping
   virtual const std::vector<VariableName> & getVariableNames() { return _variable_names; }
 
 protected:

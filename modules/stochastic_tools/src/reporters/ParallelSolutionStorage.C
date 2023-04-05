@@ -102,6 +102,16 @@ ParallelSolutionStorage::getGlobalSample(unsigned int global_sample_i,
   return libmesh_map_find(variable_storage, global_sample_i);
 }
 
+std::unordered_map<unsigned int, std::vector<DenseVector<Real>>> &
+ParallelSolutionStorage::getStorage(const VariableName & variable)
+{
+  if (_distributed_solutions.find(variable) == _distributed_solutions.end())
+    mooseError(
+        "We are trying to access container for variable '", variable, "' but we don't have it!");
+
+  return libmesh_map_find(_distributed_solutions, variable);
+}
+
 void
 to_json(
     nlohmann::json & json,

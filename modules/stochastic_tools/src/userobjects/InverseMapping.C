@@ -71,14 +71,9 @@ InverseMapping::initialSetup()
 {
   _mapping = &getMapping("mapping");
 
-  if (_surrogate_model_names.size())
-  {
-    _surrogate_models.clear();
-    for (const auto & name : _surrogate_model_names)
-    {
-      _surrogate_models.push_back(&getSurrogateModelByName(name));
-    }
-  }
+  _surrogate_models.clear();
+  for (const auto & name : _surrogate_model_names)
+    _surrogate_models.push_back(&getSurrogateModelByName(name));
 
   _variable_to_fill.clear();
   _variable_to_reconstruct.clear();
@@ -110,7 +105,7 @@ InverseMapping::initialSetup()
 
     // For now, we assume that the user only uses lagrange for nodal basis, every other
     // use case should be elemental.
-    _is_nodal.push_back(fe_type_fill.family == LAGRANGE);
+    _is_nodal.push_back(_variable_to_fill.back()->isNodal());
   }
 }
 

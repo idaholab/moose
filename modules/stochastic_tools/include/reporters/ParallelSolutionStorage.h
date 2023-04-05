@@ -38,13 +38,7 @@ public:
    * @param variable The name of the given variable
    */
   std::unordered_map<unsigned int, std::vector<DenseVector<Real>>> &
-  getStorage(const VariableName & variable)
-  {
-    mooseAssert(_distributed_solutions.find(variable) != _distributed_solutions.end(),
-                "We don't have the requested variable!");
-
-    return libmesh_map_find(_distributed_solutions, variable);
-  }
+  getStorage(const VariableName & variable);
 
   /// Get the whole solution container
   std::map<VariableName, std::unordered_map<unsigned int, std::vector<DenseVector<Real>>>> &
@@ -56,7 +50,7 @@ public:
   /**
    * Determine if we have the solution vector with a given global sample index for a given
    * variable.
-   * @param global_sample_i The global sample index of the solution field (fields if it is a t)
+   * @param global_sample_i The global sample index of the solution field
    * @param variable The name of the variable whose data is requested
    */
   bool hasGlobalSample(unsigned int global_sample_i, const VariableName & variable);

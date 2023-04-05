@@ -15,7 +15,7 @@
     # Note: this test should result in the same reporter values as the one above. Due to reporter naming difference, we
     # needed two different gold files. If something causes mismatch between the values in the two gold files, look for bugs.
     type = JSONDiff
-    requirement = 'The system should be able to extract and map variables in nonlinear system into a ltaent (low-dimensional) space.'
+    requirement = 'The system should be able to extract and map variables in nonlinear system into a latent (low-dimensional) space.'
     input = load_main.i
     cli_args = "worker:Mappings/inactive='' worker:Reporters/inactive=''"
     jsondiff = 'map_variable.json'

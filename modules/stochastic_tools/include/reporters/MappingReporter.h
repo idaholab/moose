@@ -33,7 +33,7 @@ protected:
   /// ParallelStorageObject to obtain the corresponding coefficients
   ParallelSolutionStorage * _parallel_storage;
 
-  /// We only need the sampler to check which coefficients whould go to which processor
+  /// We only need the sampler to check which coefficients would go to which processor
   /// in case a ParallelSolutionStorage is used
   Sampler * _sampler;
 

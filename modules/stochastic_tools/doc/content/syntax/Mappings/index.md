@@ -2,7 +2,7 @@
 
 ## Overview
 
-The mapping system is dedicated to hold objects which map high-dimensional solution vectors
+The mapping system is dedicated to holding objects which map high-dimensional solution vectors
 to lower-dimensional spaces (latent spaces). These objects do not get executed on their own, but only used
 in other objects which need mapping functionality.
 
