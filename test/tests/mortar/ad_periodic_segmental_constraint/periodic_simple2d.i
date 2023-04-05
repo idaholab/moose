@@ -173,8 +173,8 @@
 
 [Executioner]
   type = Steady
-  petsc_options_iname = '-pc_type -pc_factor_mat_solver_package'
-  petsc_options_value = 'lu superlu_dist'
+  petsc_options_iname = '-pc_type'
+  petsc_options_value = 'lu'
   solve_type = NEWTON
 []
 
