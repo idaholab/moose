@@ -130,10 +130,11 @@ Transient::validParams()
                         "Whether to check the auxiliary system for convergence to steady-state. If "
                         "false, then the nonlinear system is used.");
 
-  params.addParam<std::string>("final_time_stepper",
-                               std::string(),
-                               "The time stepper to use if multiple TimeSteppers are provided "
-                               "without a CompositionTimeStepper");
+  params.addParam<std::string>(
+      "final_time_stepper",
+      std::string(),
+      "The final time stepper to use if multiple time steppers are provided "
+      "without a CompositionTimeStepper");
 
   params.addParamNamesToGroup(
       "steady_state_detection steady_state_tolerance steady_state_start_time check_aux",
