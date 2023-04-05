@@ -64,9 +64,7 @@ SetupTimeStepperAction::act()
       _moose_object_pars.set<SubProblem *>("_subproblem") = _problem.get();
       _moose_object_pars.set<Transient *>("_executioner") = transient;
 
-      _moose_object_pars.set<Real>("dt") = getParam<Real>("dt");
-
-      ts = _factory.create<TimeStepper>(_type, "ConstantDT", _moose_object_pars);
+      ts = _factory.create<TimeStepper>(_type, "TimeStepper", _moose_object_pars);
     }
     mooseAssert(ts, "Missing final TimeStepper");
     transient->setTimeStepper(ts);
