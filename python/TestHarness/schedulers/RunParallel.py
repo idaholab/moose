@@ -80,7 +80,7 @@ class RunParallel(Scheduler):
                 self.setSuccessfulMessage(tester)
         except Exception as e:
             output += 'Python exception encountered:\n\n' + traceback.format_exc()
-            tester.setStatus(tester.error, 'PYTHON EXCEPTION')
+            tester.setStatus(tester.error, 'TESTER EXCEPTION')
 
         if job.getOutputFile():
             job.addMetaData(DIRTY_FILES=[job.getOutputFile()])
