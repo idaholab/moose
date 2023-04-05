@@ -1,0 +1,81 @@
+[Tests]
+  issues = '#23740'
+  design = 'CompositionDT.md'
+
+  [time_sequence]
+    requirement = 'The system shall support composing time step size with multiple time steppers'
+
+    [max]
+      type = 'Exodiff'
+      input = 'composition_dt.i'
+      exodiff = 'composition_dt_max.e'
+      cli_args = "Outputs/file_base='composition_dt_max'"
+      detail = 'Use the maximum time step size of input time steppers,'
+    []
+    [min]
+      type = 'Exodiff'
+      input = 'composition_dt.i'
+      exodiff = 'composition_dt_min.e'
+      cli_args = "Executioner/TimeStepper/CompositionDT/composition_type=min Outputs/file_base='composition_dt_min'"
+
+      detail = 'Use the minumum time step size of input time steppers,'
+    []
+    [timesequence_to_hit]
+      type = 'Exodiff'
+      input = 'composition_dt.i'
+      exodiff = 'composition_dt_hit.e'
+      cli_args = "Executioner/TimeStepper/CompositionDT/times_to_hit_timestepper=Timesequence Outputs/file_base='composition_dt_hit'"
+
+      detail = 'Hit the time points specified by the user'
+    []
+
+  []
+
+  [restart]
+    requirement = 'The system shall support the ability to run a calculation for the purpose of '
+                  'creating a time sequence recover file:'
+    [timestepper_pre]
+      type = 'RunApp'
+      input = 'composition_dt_restart.i'
+      recover = false
+
+      detail = 'when writing the checkpoint file,'
+    []
+
+    [timestepper_restart]
+      type = 'Exodiff'
+      input = 'composition_dt_cont.i'
+      exodiff = 'composition_dt_cont_out.e'
+      recover = false
+      prereq = 'restart/timestepper_pre'
+
+      detail = 'when writing the checkpoint file,'
+    []
+  []
+
+  [failure_tests]
+
+    requirement = 'The system shall throw out a meaningful error when something goes wrong'
+
+    [timestepper_name]
+      type = 'RunException'
+      input = 'composition_dt.i'
+      expect_err = "The user-defined time stepper name: 'TimeStepper' is a reserved name"
+      cli_args = 'Executioner/TimeStepper/TimeStepper/type=ConstantDT'
+      recover = false
+
+      detail = "'TimeStepper' is a system reserved name"
+    []
+
+    [timesequencestepper]
+      type = 'RunException'
+      input = 'composition_dt.i'
+      expect_err = 'A TimeSequenceStepper type is required to generate times to hit'
+      cli_args = 'Executioner/TimeStepper/CompositionDT/times_to_hit_timestepper=ConstDT1'
+      recover = false
+
+      detail = 'Check if input time stepper type meets requirement'
+    []
+
+  []
+[]

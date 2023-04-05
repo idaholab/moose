@@ -139,9 +139,10 @@ Transient::validParams()
       "steady_state_detection steady_state_tolerance steady_state_start_time check_aux",
       "Steady State Detection");
 
-  params.addParamNamesToGroup("start_time dtmin dtmax n_startup_steps trans_ss_check ss_check_tol "
-                              "ss_tmin abort_on_solve_fail timestep_tolerance use_multiapp_dt",
-                              "Advanced");
+  params.addParamNamesToGroup(
+      "start_time dtmin dtmax n_startup_steps trans_ss_check ss_check_tol "
+      "ss_tmin abort_on_solve_fail timestep_tolerance use_multiapp_dt final_time_stepper",
+      "Advanced");
 
   params.addParamNamesToGroup("time_periods time_period_starts time_period_ends", "Time Periods");
 
