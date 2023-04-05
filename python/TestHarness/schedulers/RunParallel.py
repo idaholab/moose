@@ -10,6 +10,7 @@
 import traceback
 
 from TestHarness.schedulers.Scheduler import Scheduler
+from TestHarness.StatusSystem import StatusSystem
 from TestHarness import util
 
 class RunParallel(Scheduler):
@@ -80,7 +81,7 @@ class RunParallel(Scheduler):
                 self.setSuccessfulMessage(tester)
         except Exception as e:
             output += 'Python exception encountered:\n\n' + traceback.format_exc()
-            tester.setStatus(tester.error, 'PYTHON EXCEPTION')
+            tester.setStatus(StatusSystem().error, 'TESTER EXCEPTION')
 
         if job.getOutputFile():
             job.addMetaData(DIRTY_FILES=[job.getOutputFile()])

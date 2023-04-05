@@ -123,15 +123,16 @@ class ImageDiffer(object):
             return
 
         # Compute the error using "Structural Similarity Index"
-        try:
-            # skimage version >= 0.17
-            import skimage.metrics
-            self.__error = skimage.metrics.structural_similarity(self.__data[0], self.__data[1], multichannel=True)
-        except:
-            # legacy support
-            import skimage.measure
-            self.__error = skimage.measure.compare_ssim(self.__data[0], self.__data[1], multichannel=True)
-
+        import skimage.metrics
+        ss_kwargs = {}
+        # For non grayscale images, the last axis is the channel
+        if len(self.__data[0].shape) == 3:
+            ss_kwargs['channel_axis'] = 2
+        self.__error = skimage.metrics.structural_similarity(self.__data[0],
+                                                             self.__data[1],
+                                                             multichannel=True,
+                                                             data_range=1.0, #imread on [0, 1]
+                                                             **ss_kwargs)
 
         # Report the error
         if self.__error < self.__allowed:
