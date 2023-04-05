@@ -14,6 +14,7 @@
 #include "SubProblem.h"
 #include "Transient.h"
 #include "MooseApp.h"
+#include "InputParameters.h"
 
 #include <regex>
 
@@ -40,6 +41,9 @@ TimeStepperSystem::addTimeStepper(const std::string & type,
   new_params.set<SubProblem *>("_subproblem") = subproblem;
   new_params.set<Transient *>("_executioner") = transient;
 
+  if (name == "TimeStepper")
+    mooseError("The user-defined time stepper name: '", name, "' is a reserved name");
+
   // set the subproblem, set
   // Need to add this to the param map so that createTimeStepper can use it
   _time_stepper_params.emplace(std::piecewise_construct,
@@ -63,7 +67,7 @@ TimeStepperSystem::createAddedTimeSteppers()
     }
   }
 
-  // Create and store the final time stepper here beacuse composition time stepper depends on other
+  // Create and store the final time stepper here because composition time stepper depends on other
   // time steppers
   _time_steppers.emplace(
       _final_time_stepper_name,

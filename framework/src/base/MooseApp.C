@@ -387,7 +387,7 @@ MooseApp::MooseApp(InputParameters parameters)
                                : nullptr),
     _mesh_generator_system(*this),
     _time_stepper_system(*this),
-    _execute_flags(moose::internal::getExecFlagRegistry().getFlags()),
+    _execute_flags(moose::internal::ExecFlagRegistry::getExecFlagRegistry().getFlags()),
     _automatic_automatic_scaling(getParam<bool>("automatic_automatic_scaling"))
 {
 #ifdef HAVE_GPERFTOOLS

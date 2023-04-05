@@ -12,8 +12,6 @@
 #include "Transient.h"
 #include "TimeSequenceStepperBase.h"
 
-#include <numeric>
-
 registerMooseObject("MooseApp", CompositionDT);
 
 InputParameters
@@ -55,8 +53,7 @@ CompositionDT::CompositionDT(const InputParameters & parameters)
   : TimeStepper(parameters),
     _has_initial_dt(isParamValid("dt")),
     _initial_dt(_has_initial_dt ? getParam<Real>("dt") : 0.),
-    _base_timestepper(parameters.get<std::string>("base_timestepper")),
-    _composition_type(parameters.get<MooseEnum>("composition_type"))
+    _base_timestepper(getParam<std::string>("base_timestepper"))
 {
   if (isParamValid("input_timesteppers"))
     _inputs = parameters.get<std::vector<std::string>>("input_timesteppers");
@@ -112,7 +109,6 @@ CompositionDT::setupSequenceStepper(const std::string & stpper_name)
     mooseError("A TimeSequenceStepper type is required to generate times to hit");
 
   hit_timestepper->init();
-  hit_timestepper->computeStep();
 
   return hit_timestepper;
 }
@@ -139,30 +135,21 @@ CompositionDT::produceCompositionDT(const std::map<const std::string, Real> & dt
                                     const Real & base_dt)
 {
   Real composeDT = 0;
-  switch (_composition_type)
-  {
-    case 0: /*max*/
-      composeDT = std::min(maxTimeStep(dts), base_dt);
-    case 1: /*min*/
-      composeDT = std::max(minTimeStep(dts), base_dt);
-    default:
-      if (isParamValid("times_to_hit_timestepper"))
-      {
-        composeDT = base_dt;
-      }
-      else
-      {
-        mooseError("CompositionDT: A composition type is required for input TimeSteppers or the "
-                   "supplied "
-                   "composition type is not in the list. Available "
-                   "options are: ",
-                   getCompositionTypes().getRawNames());
-      }
-  }
+
+  auto composition_type = getParam<MooseEnum>("composition_type");
+
+  if (composition_type == "max")
+    composeDT = std::min(maxTimeStep(dts), base_dt);
+
+  else if (composition_type == "min")
+    composeDT = std::max(minTimeStep(dts), base_dt);
 
   if (isParamValid("times_to_hit_timestepper"))
   {
-    return produceHitDT(composeDT);
+    if (composeDT != 0)
+      return produceHitDT(composeDT);
+    else
+      return produceHitDT(base_dt);
   }
 
   return composeDT;
@@ -183,8 +170,9 @@ CompositionDT::produceHitDT(const Real & composeDT)
     dt = std::min(next_time_to_hit - _time, composeDT);
   }
   else
+  {
     dt = std::min(next_time_to_hit - _time, composeDT);
+  }
 
   return dt;
 }
-

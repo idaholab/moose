@@ -66,9 +66,6 @@ private:
   // the name of the time sequence stepper
   std::string _hit_timestepper_name;
 
-  // the composition type for input time stepper(s)
-  MooseEnum _composition_type;
-
   // the names of input time stepper(s)
   std::vector<std::string> _inputs;
 };

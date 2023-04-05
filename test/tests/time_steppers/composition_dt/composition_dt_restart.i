@@ -47,7 +47,7 @@
 
 [Executioner]
   type = Transient
-  num_steps = 5
+  end_time = 0.8
   solve_type = PJFNK
   petsc_options_iname = '-pc_type -pc_hypre_type'
   petsc_options_value = 'hypre boomeramg'
@@ -61,7 +61,7 @@
 
     [ConstDT2]
       type = ConstantDT
-      dt = 0.1
+      dt = 0.3
     []
 
     [LogConstDT]
@@ -72,18 +72,23 @@
 
     [Timesequence]
       type = TimeSequenceStepper
-      time_sequence  = '0  0.25 0.3 0.5 0.8'
+      time_sequence  = '0  0.5 0.8 1 1.2'
     []
 
     [CompositionDT]
       type = CompositionDT
-      input_timesteppers = 'ConstDT1 ConstDT2'
-      base_timestepper = 'LogConstDT'
+      input_timesteppers = 'ConstDT1 LogConstDT'
+      base_timestepper = 'ConstDT2'
       composition_type = 'max'
+      times_to_hit_timestepper = 'Timesequence'
     []
   []
 []
 
 [Outputs]
-  exodus = true
+  [checkpoint]
+    type = Checkpoint
+    num_files = 4
+  []
+  file_base='restart_test'
 []

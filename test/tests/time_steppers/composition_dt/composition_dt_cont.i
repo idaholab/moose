@@ -7,10 +7,11 @@
 
 
 [Mesh]
-  type = GeneratedMesh
-  dim = 2
-  nx = 10
-  ny = 10
+  file = restart_test_cp/0002_mesh.cpr
+[]
+
+[Problem]
+  restart_file_base = restart_test_cp/0002
 []
 
 [Variables]
@@ -47,7 +48,7 @@
 
 [Executioner]
   type = Transient
-  num_steps = 5
+  end_time = 1.2
   solve_type = PJFNK
   petsc_options_iname = '-pc_type -pc_hypre_type'
   petsc_options_value = 'hypre boomeramg'
@@ -61,7 +62,7 @@
 
     [ConstDT2]
       type = ConstantDT
-      dt = 0.1
+      dt = 0.3
     []
 
     [LogConstDT]
@@ -72,18 +73,19 @@
 
     [Timesequence]
       type = TimeSequenceStepper
-      time_sequence  = '0  0.25 0.3 0.5 0.8'
+      time_sequence  = '0  0.5 0.8 1 1.2'
     []
 
     [CompositionDT]
       type = CompositionDT
-      input_timesteppers = 'ConstDT1 ConstDT2'
-      base_timestepper = 'LogConstDT'
+      input_timesteppers = 'ConstDT1 LogConstDT'
+      base_timestepper = 'ConstDT2'
       composition_type = 'max'
+      times_to_hit_timestepper = 'Timesequence'
     []
   []
 []
 
 [Outputs]
-  exodus = true
+  exodus=true
 []
