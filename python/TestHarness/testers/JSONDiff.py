@@ -36,7 +36,7 @@ class JSONDiff(SchemaDiff):
                                             'petsc_version',
                                             'slepc_version'])
         if not params['keep_reporter_types']:
-            self.exclude_regex_paths.append("root\['reporters'\]\[.*\]\['values'\]\[.*\]\['type'\]")
+            self.specs['ignored_regex_items'].append('reporters/.*/values/.*/type')
 
         # Form something like root['key1']['key2']... for each entry
         for entry in self.specs['ignored_regex_items']:
