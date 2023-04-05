@@ -13,6 +13,7 @@
 #include "FileOutput.h"
 #include "RestartableDataIO.h"
 
+#include <chrono>
 #include <deque>
 
 /**
@@ -123,6 +124,9 @@ private:
 
   /// Vector of checkpoint filename structures
   std::deque<CheckpointFileNames> _file_names;
+
+  /// Starting time compared against to see if we should automatically print out a checkpoint
+  std::chrono::time_point<std::chrono::steady_clock> start_time;
 
   static constexpr auto ASCII_MESH_SUFFIX = "_mesh.cpa";
   static constexpr auto BINARY_MESH_SUFFIX = "_mesh.cpr";
