@@ -90,12 +90,31 @@ OptimizationReporter::setInitialCondition(libMesh::PetscVector<Number> & x)
 }
 
 void
+OptimizationReporter::setInitialCondition(std::vector<int> & ix, std::vector<Real> & rx)
+{
+  rx.resize(_ndof);
+  unsigned int n = 0;
+  for (const auto & param : _parameters)
+    for (const auto & val : *param)
+      rx[n++] = val;
+}
+
+void
 OptimizationReporter::updateParameters(const libMesh::PetscVector<Number> & x)
 {
   dof_id_type n = 0;
   for (auto & param : _parameters)
     for (auto & val : *param)
       val = x(n++);
+}
+
+void
+OptimizationReporter::updateParameters(const std::vector<int> & ix, const std::vector<Real> & rx)
+{
+  dof_id_type n = 0;
+  for (auto & param : _parameters)
+    for (auto & val : *param)
+      val = rx[n++];
 }
 
 void

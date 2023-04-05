@@ -34,6 +34,8 @@ public:
    */
   virtual void setInitialCondition(libMesh::PetscVector<Number> & param) = 0;
 
+  virtual void setInitialCondition(std::vector<int> & ix, std::vector<Real> & rx) {}
+
   /**
    * Function to override misfit values with the simulated values from the matrix free hessian
    * forward solve
@@ -72,12 +74,14 @@ public:
    */
   virtual dof_id_type getNumParams() const = 0;
 
+  virtual void updateParameters(const std::vector<int> & ix, const std::vector<Real> & rx) {}
 protected:
   /**
    * Function to set parameters.
    * This is the first function called in objective/gradient/hessian routine
    */
   virtual void updateParameters(const libMesh::PetscVector<Number> & x) = 0;
+
 
 private:
   friend class OptimizeSolve;

@@ -20,6 +20,7 @@ public:
    * Constructor.
    */
   CustomOptimizationAlgorithm();
+  virtual ~CustomOptimizationAlgorithm() = default;
 
   /// sets the objective routine
   void setObjectiveRoutine(void (*fncptr)(Real & objective,
