@@ -126,12 +126,12 @@ MultiApp::validParams()
   // Set the default execution time
   params.set<ExecFlagEnum>("execute_on", true) = EXEC_TIMESTEP_BEGIN;
 
-  params.addParam<unsigned int>("max_procs_per_app",
-                                std::numeric_limits<unsigned int>::max(),
+  params.addParam<processor_id_type>("max_procs_per_app",
+                                std::numeric_limits<processor_id_type>::max(),
                                 "Maximum number of processors to give to each App in this "
                                 "MultiApp.  Useful for restricting small solves to just a few "
                                 "procs so they don't get spread out");
-  params.addParam<unsigned int>("min_procs_per_app",
+  params.addParam<processor_id_type>("min_procs_per_app",
                                 1,
                                 "Minimum number of processors to give to each App in this "
                                 "MultiApp.  Useful for larger, distributed mesh solves.");
@@ -264,8 +264,8 @@ MultiApp::MultiApp(const InputParameters & parameters)
     _my_rank(0),
     _inflation(getParam<Real>("bounding_box_inflation")),
     _bounding_box_padding(getParam<Point>("bounding_box_padding")),
-    _max_procs_per_app(getParam<unsigned int>("max_procs_per_app")),
-    _min_procs_per_app(getParam<unsigned int>("min_procs_per_app")),
+    _max_procs_per_app(getParam<processor_id_type>("max_procs_per_app")),
+    _min_procs_per_app(getParam<processor_id_type>("min_procs_per_app")),
     _output_in_position(getParam<bool>("output_in_position")),
     _global_time_offset(getParam<Real>("global_time_offset")),
     _reset_times(getParam<std::vector<Real>>("reset_time")),
@@ -1197,12 +1197,17 @@ rankConfig(processor_id_type rank,
   // A "slot" is a group of procs/ranks that are grouped together to run a
   // single (sub)app/sim in parallel.
 
-  dof_id_type slot_size =
-      std::max(std::min(nprocs / napps, (dof_id_type)max_app_procs), (dof_id_type)min_app_procs);
-  processor_id_type nslots = std::min(nprocs / slot_size, napps);
-  processor_id_type leftover_procs = nprocs - nslots * slot_size;
-  dof_id_type apps_per_slot = napps / nslots;
-  dof_id_type leftover_apps = napps % nslots;
+  const processor_id_type slot_size =
+      std::max(std::min(cast_int<processor_id_type>(nprocs / napps), max_app_procs), min_app_procs);
+  const processor_id_type nslots = std::min(
+      nprocs / slot_size,
+      cast_int<processor_id_type>(std::min(
+          static_cast<dof_id_type>(std::numeric_limits<processor_id_type>::max()), napps)));
+  mooseAssert(nprocs >= (nslots * slot_size),
+              "Ensure that leftover procs is represented by an unsigned type");
+  const processor_id_type leftover_procs = nprocs - nslots * slot_size;
+  const dof_id_type apps_per_slot = napps / nslots;
+  const dof_id_type leftover_apps = napps % nslots;
 
   std::vector<int> slot_for_rank(nprocs);
   processor_id_type slot = 0;
@@ -1210,7 +1215,7 @@ rankConfig(processor_id_type rank,
   for (processor_id_type rankiter = 0; rankiter <= rank; rankiter++)
   {
     if (slot < nslots)
-      slot_for_rank[rankiter] = slot;
+      slot_for_rank[rankiter] = cast_int<int>(slot);
     else
       slot_for_rank[rankiter] = -1;
     procs_in_slot++;
@@ -1227,23 +1232,23 @@ rankConfig(processor_id_type rank,
   if (slot_for_rank[rank] < 0)
     // ranks assigned a negative slot don't have any apps running on them.
     return {0, 0, 0, 0, false, 0};
-  processor_id_type slot_num = slot_for_rank[rank];
+  const processor_id_type slot_num = cast_int<processor_id_type>(slot_for_rank[rank]);
 
-  bool is_first_local_rank = rank == 0 || (slot_for_rank[rank - 1] != slot_for_rank[rank]);
-  dof_id_type n_local_apps = apps_per_slot + 1 * (slot_num < leftover_apps);
+  const bool is_first_local_rank = rank == 0 || (slot_for_rank[rank - 1] != slot_for_rank[rank]);
+  const dof_id_type n_local_apps = apps_per_slot + 1 * (slot_num < leftover_apps);
 
   processor_id_type my_first_rank = 0;
   for (processor_id_type rankiter = rank; rankiter > 0; rankiter--)
     if (slot_for_rank[rank] != slot_for_rank[rankiter])
     {
-      my_first_rank = slot_for_rank[rankiter + 1];
+      my_first_rank = cast_int<processor_id_type>(slot_for_rank[rankiter + 1]);
       break;
     }
 
   dof_id_type app_index = 0;
   for (processor_id_type slot = 0; slot < slot_num; slot++)
   {
-    auto num_slot_apps = apps_per_slot + 1 * (slot < leftover_apps);
+    const dof_id_type num_slot_apps = apps_per_slot + 1 * (slot < leftover_apps);
     app_index += num_slot_apps;
   }
 

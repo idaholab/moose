@@ -545,10 +545,10 @@ protected:
   Point _bounding_box_padding;
 
   /// Maximum number of processors to give to each app
-  unsigned int _max_procs_per_app;
+  processor_id_type _max_procs_per_app;
 
   /// Minimum number of processors to give to each app
-  unsigned int _min_procs_per_app;
+  processor_id_type _min_procs_per_app;
 
   /// Whether or not to move the output of the MultiApp into position
   bool _output_in_position;
