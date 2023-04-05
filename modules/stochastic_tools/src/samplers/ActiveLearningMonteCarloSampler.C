@@ -33,7 +33,7 @@ ActiveLearningMonteCarloSampler::validParams()
       "num_samples",
       "num_samples>0",
       "Number of samples to use (the total number of steps taken will be equal to this number + "
-      "the number of re-training steps.");
+      "the number of re-training steps).");
   return params;
 }
 

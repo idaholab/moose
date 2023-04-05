@@ -47,7 +47,7 @@ The Sampler block of the input file is presented below. As with the regular [Mon
 
 ### `ActiveLearningGaussianProcess` and `GaussianProcess`
 
-The surrogate Trainers block of the input file is presented below. As with the regular [GaussianProcessTrainer](GaussianProcessTrainer.md), this block has the required parameters for training a GP model. The key difference with [ActiveLearningGaussianProcess](ActiveLearningGaussianProcess.md) is that it permits re-training of the GP model on the fly; this functionality is used by the `ActiveLearningGPDecision` Reporter. The below block presents [ActiveLearningGaussianProcess](ActiveLearningGaussianProcess.md) relying on Adam optimization for re-training the GP model. 
+The surrogate Trainers block of the input file is presented below. As with the regular [GaussianProcessTrainer](GaussianProcessTrainer.md), this block has the required parameters for training a GP model. The key difference with [ActiveLearningGaussianProcess](ActiveLearningGaussianProcess.md) is that it permits re-training of the GP model on the fly; this functionality is used by the `ActiveLearningGPDecision` Reporter. The below block presents [ActiveLearningGaussianProcess](ActiveLearningGaussianProcess.md) relying on Adam optimization for re-training the GP model.
 
 !listing modules/stochastic_tools/test/tests/reporters/ActiveLearningGP/main_adam.i block=Trainers
 
@@ -65,16 +65,16 @@ The `Reporters` block of the input file is presented below. It requires the name
 
 In addition, the [!param](/Reporters/ActiveLearningGPDecision/n_train) parameter specifies the number of initial steps after which the GP model is first trained. [!param](/Reporters/ActiveLearningGPDecision/al_gp) specifies the name of [ActiveLearningGaussianProcess](ActiveLearningGaussianProcess.md) for facilitating GP re-training and [!param](/Reporters/ActiveLearningGPDecision/gp_evaluator) specifies the name of `GaussianProcess` for facilitating GP predictions and uncertainty quantification.
 
-Finally, [!param](/Reporters/ActiveLearningGPDecision/learning_function) specifies the name of the acquisition (or learning) function. [!param](/Reporters/ActiveLearningGPDecision/learning_function_parameter)specifies a parameter for the acquisition (or learning) function; it may or may not be required depending upon the type of the acquisition (or learning) function used. For example, the U acquisition (or learning) function requires [!param](/Reporters/ActiveLearningGPDecision/learning_function_parameter) but the COV acquisition (or learning) function does not. [!param](/Reporters/ActiveLearningGPDecision/learning_function_threshold) specifies the acceptable threshold for the acquisition (or learning) function beyond which the GP predictions are marked as poor.
+Finally, [!param](/Reporters/ActiveLearningGPDecision/learning_function) specifies the name of the acquisition (or learning) function. [!param](/Reporters/ActiveLearningGPDecision/learning_function_parameter) specifies a parameter for the acquisition (or learning) function; it may or may not be required depending upon the type of the acquisition (or learning) function used. For example, the U acquisition (or learning) function requires [!param](/Reporters/ActiveLearningGPDecision/learning_function_parameter) but the COV acquisition (or learning) function does not. [!param](/Reporters/ActiveLearningGPDecision/learning_function_threshold) specifies the acceptable threshold for the acquisition (or learning) function beyond which the GP predictions are marked as poor.
 
 !listing modules/stochastic_tools/test/tests/reporters/ActiveLearningGP/main_adam.i block=Reporters
 
 ## Output format
 
-The recommended output format for using active learning is a json file. For each time step, the json file contains vectors of input samples, `need_sample` bool variables (indicating good/poor GP predictions), GP mean predictions, and associated standard deviations. The total number of samples equal the prescribed time steps times the [!param](/Samplers/ActiveLearningMonteCarloSampler/num_batch) specified the Samplers block. The total number of times `need_sample` value is `True` is the total samples for which GP re-training is required after the initial training.
+The recommended output format for using active learning is a json file. For each time step, the json file contains vectors of input samples, `need_sample` bool variables (indicating good/poor GP predictions), GP mean predictions, and associated standard deviations. The total number of samples equals [!param](/Samplers/ActiveLearningMonteCarloSampler/num_samples), including the [!param](/Reporters/ActiveLearningGPDecision/n_train) samples used for training. The total number of times `need_sample` value is `True` is the total samples for which GP re-training is required after the initial training.
 
-!alert note title=Effective number of output samples
-When processing the json file, the samples whose `need_sample` value is `True` need to be ignored to avoid repeated results. Therefore, the effective number of output samples is prescribed time steps times the [!param](/Samplers/ActiveLearningMonteCarloSampler/num_batch) specified in the Samplers block minus the number of times `need_sample` value is True. 
+!alert note title=Number of output samples
+When processing the json file, the samples whose `need_sample` value is `True` need to be ignored to avoid repeated results. Therefore, the number of output samples with `need_sample` set to False should be equal to [!param](/Samplers/ActiveLearningMonteCarloSampler/num_samples), as any re-training step does not count as an accepted sample.
 
 !syntax parameters /Reporters/ActiveLearningGPDecision
 
