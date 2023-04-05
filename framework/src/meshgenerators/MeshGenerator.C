@@ -36,7 +36,7 @@ MeshGenerator::validParams()
                         "Whether or not to output the mesh file in the nemesis"
                         "format (only if output = true)");
 
-  params.addParamNamesToGroup("show_info output", "Debug Helper");
+  params.addParamNamesToGroup("show_info output", "Debugging");
 
   params.addParamNamesToGroup("save_with_name", "Save in Mesh");
 
