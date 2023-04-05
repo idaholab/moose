@@ -20,7 +20,7 @@ velocity=1
 
 [Kernels]
   [./adv]
-    type = Advection
+    type = AdvectionSUPG
     variable = c
     forcing_func = 'ffn'
   [../]
