@@ -9,7 +9,6 @@
 
 #pragma once
 
-#include "MooseApp.h"
 #include "TimeStepper.h"
 #include "PerfGraphInterface.h"
 #include "libmesh/parallel_object.h"
