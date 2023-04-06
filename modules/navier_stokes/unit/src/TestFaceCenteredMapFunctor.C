@@ -146,8 +146,7 @@ TEST(FaceCenteredMapFunctorTest, testArgs)
   try
   {
     unrestricted_error_test(
-        FaceArg{&all_fi[2], LimiterType::CentralDifference, true, false, nullptr},
-        autoState());
+        FaceArg{&all_fi[2], LimiterType::CentralDifference, true, false, nullptr}, autoState());
     EXPECT_TRUE(false);
   }
   catch (std::runtime_error & e)

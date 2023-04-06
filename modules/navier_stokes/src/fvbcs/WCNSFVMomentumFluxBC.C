@@ -72,8 +72,7 @@ WCNSFVMomentumFluxBC::computeQpResidual()
   // have to correct back to get the right velocity magnitude
   {
     const auto velocity_magnitude =
-        (*_mdot_pp) /
-        ((*_area_pp) * (*_rho)(singleSidedFaceArg(), autoState()) * cos_angle);
+        (*_mdot_pp) / ((*_area_pp) * (*_rho)(singleSidedFaceArg(), autoState()) * cos_angle);
     return -_scaling_factor * (*_mdot_pp) / (*_area_pp) * incoming_vector(_index) *
            velocity_magnitude;
   }

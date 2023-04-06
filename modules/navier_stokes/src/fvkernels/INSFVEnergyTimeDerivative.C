@@ -38,6 +38,5 @@ ADReal
 INSFVEnergyTimeDerivative::computeQpResidual()
 {
   const auto & elem_arg = makeElemArg(_current_elem);
-  return _rho(elem_arg, autoState()) * _cp(elem_arg, autoState()) *
-         _var.dot(elem_arg, autoState());
+  return _rho(elem_arg, autoState()) * _cp(elem_arg, autoState()) * _var.dot(elem_arg, autoState());
 }

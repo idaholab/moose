@@ -44,8 +44,8 @@ FVFunctorConvectiveHeatFluxBC::computeQpResidual()
   // defined on this boundary condition's side
   const Moose::FaceArg face{
       _face_info, Moose::FV::LimiterType::CentralDifference, true, false, nullptr};
-  const auto flux = _htc(face, autoState()) *
-                    (_T_bulk(face, autoState()) - _T_solid(face, autoState()));
+  const auto flux =
+      _htc(face, autoState()) * (_T_bulk(face, autoState()) - _T_solid(face, autoState()));
   if (_is_solid)
     return -flux;
   else

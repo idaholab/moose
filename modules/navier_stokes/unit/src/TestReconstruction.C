@@ -151,8 +151,8 @@ testReconstruction(const Moose::CoordinateSystemType coord_type)
         error += diff * diff * current_h * current_h;
 
         // Test CellCenteredMapFunctor ElemPointArg overload
-        const auto elem_point_eval = container(
-            Moose::ElemPointArg({elem, elem->vertex_average(), false}), autoState());
+        const auto elem_point_eval =
+            container(Moose::ElemPointArg({elem, elem->vertex_average(), false}), autoState());
         for (const auto d : make_range(Moose::dim))
           EXPECT_TRUE(MooseUtils::absoluteFuzzyEqual(current(d), elem_point_eval(d)));
       };

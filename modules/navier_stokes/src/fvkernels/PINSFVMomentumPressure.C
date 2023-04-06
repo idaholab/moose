@@ -35,6 +35,5 @@ PINSFVMomentumPressure::PINSFVMomentumPressure(const InputParameters & params)
 ADReal
 PINSFVMomentumPressure::computeQpResidual()
 {
-  return _eps(makeElemArg(_current_elem), autoState()) *
-         INSFVMomentumPressure::computeQpResidual();
+  return _eps(makeElemArg(_current_elem), autoState()) * INSFVMomentumPressure::computeQpResidual();
 }
