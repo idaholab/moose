@@ -50,14 +50,14 @@ public:
   VectorCompositeFunctor(const MooseFunctorName & name, const FunctorBase<T> & x_comp);
 
 private:
-  ValueType evaluate(const ElemArg & elem_arg, const StateArg & time) const override;
-  ValueType evaluate(const FaceArg & face, const StateArg & time) const override;
-  ValueType evaluate(const ElemQpArg & elem_qp, const StateArg & time) const override;
-  ValueType evaluate(const ElemSideQpArg & elem_side_qp, const StateArg & time) const override;
-  ValueType evaluate(const ElemPointArg & elem_point_arg, const StateArg & time) const override;
+  ValueType evaluate(const ElemArg & elem_arg, const StateArg & state) const override;
+  ValueType evaluate(const FaceArg & face, const StateArg & state) const override;
+  ValueType evaluate(const ElemQpArg & elem_qp, const StateArg & state) const override;
+  ValueType evaluate(const ElemSideQpArg & elem_side_qp, const StateArg & state) const override;
+  ValueType evaluate(const ElemPointArg & elem_point_arg, const StateArg & state) const override;
 
   using FunctorBase<VectorValue<T>>::evaluateGradient;
-  GradientType evaluateGradient(const ElemArg & elem_arg, const StateArg & time) const override;
+  GradientType evaluateGradient(const ElemArg & elem_arg, const StateArg & state) const override;
 
   /// Possible holder of constant-0 y-component functor. This will be allocated if the user only
   /// supplies one component functor during construction
@@ -110,47 +110,49 @@ VectorCompositeFunctor<T>::VectorCompositeFunctor(const MooseFunctorName & name,
 
 template <typename T>
 typename VectorCompositeFunctor<T>::ValueType
-VectorCompositeFunctor<T>::evaluate(const ElemArg & elem_arg, const StateArg & time) const
+VectorCompositeFunctor<T>::evaluate(const ElemArg & elem_arg, const StateArg & state) const
 {
-  return {_x_comp(elem_arg, time), _y_comp(elem_arg, time), _z_comp(elem_arg, time)};
+  return {_x_comp(elem_arg, state), _y_comp(elem_arg, state), _z_comp(elem_arg, state)};
 }
 
 template <typename T>
 typename VectorCompositeFunctor<T>::ValueType
-VectorCompositeFunctor<T>::evaluate(const FaceArg & face, const StateArg & time) const
+VectorCompositeFunctor<T>::evaluate(const FaceArg & face, const StateArg & state) const
 {
-  return {_x_comp(face, time), _y_comp(face, time), _z_comp(face, time)};
+  return {_x_comp(face, state), _y_comp(face, state), _z_comp(face, state)};
 }
 
 template <typename T>
 typename VectorCompositeFunctor<T>::ValueType
-VectorCompositeFunctor<T>::evaluate(const ElemQpArg & elem_qp, const StateArg & time) const
+VectorCompositeFunctor<T>::evaluate(const ElemQpArg & elem_qp, const StateArg & state) const
 {
-  return {_x_comp(elem_qp, time), _y_comp(elem_qp, time), _z_comp(elem_qp, time)};
+  return {_x_comp(elem_qp, state), _y_comp(elem_qp, state), _z_comp(elem_qp, state)};
 }
 
 template <typename T>
 typename VectorCompositeFunctor<T>::ValueType
-VectorCompositeFunctor<T>::evaluate(const ElemSideQpArg & elem_side_qp, const StateArg & time) const
+VectorCompositeFunctor<T>::evaluate(const ElemSideQpArg & elem_side_qp,
+                                    const StateArg & state) const
 {
-  return {_x_comp(elem_side_qp, time), _y_comp(elem_side_qp, time), _z_comp(elem_side_qp, time)};
+  return {_x_comp(elem_side_qp, state), _y_comp(elem_side_qp, state), _z_comp(elem_side_qp, state)};
 }
 
 template <typename T>
 typename VectorCompositeFunctor<T>::ValueType
 VectorCompositeFunctor<T>::evaluate(const ElemPointArg & elem_point_arg,
-                                    const StateArg & time) const
+                                    const StateArg & state) const
 {
-  return {
-      _x_comp(elem_point_arg, time), _y_comp(elem_point_arg, time), _z_comp(elem_point_arg, time)};
+  return {_x_comp(elem_point_arg, state),
+          _y_comp(elem_point_arg, state),
+          _z_comp(elem_point_arg, state)};
 }
 
 template <typename T>
 typename VectorCompositeFunctor<T>::GradientType
-VectorCompositeFunctor<T>::evaluateGradient(const ElemArg & elem_arg, const StateArg & time) const
+VectorCompositeFunctor<T>::evaluateGradient(const ElemArg & elem_arg, const StateArg & state) const
 {
-  return {_x_comp.gradient(elem_arg, time),
-          _y_comp.gradient(elem_arg, time),
-          _z_comp.gradient(elem_arg, time)};
+  return {_x_comp.gradient(elem_arg, state),
+          _y_comp.gradient(elem_arg, state),
+          _z_comp.gradient(elem_arg, state)};
 }
 }

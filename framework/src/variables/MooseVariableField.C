@@ -51,7 +51,7 @@ template <typename Shapes, typename Solution, typename GradShapes, typename Grad
 void
 MooseVariableField<OutputType>::computeSolution(const Elem * const elem,
                                                 const QBase * const qrule,
-                                                const StateArg & time,
+                                                const StateArg & state,
                                                 const Shapes & phi,
                                                 Solution & local_soln,
                                                 const GradShapes & grad_phi,
@@ -75,13 +75,13 @@ MooseVariableField<OutputType>::computeSolution(const Elem * const elem,
   // which is wrong during things like finite difference Jacobian evaluation, e.g. when PETSc
   // perturbs the solution vector we feed these perturbations into the current_local_solution
   // while the libMesh solution is frozen in the non-perturbed state
-  const auto & global_soln = (time.state == 0)
+  const auto & global_soln = (state.state == 0)
                                  ? *_sys.currentSolution()
-                                 : _sys.solutionState(time.state, time.iteration_type);
+                                 : _sys.solutionState(state.state, state.iteration_type);
   for (const auto dof_index : dof_indices)
   {
     dof_values.push_back(ADReal(global_soln(dof_index)));
-    if (do_derivatives && time.state == 0)
+    if (do_derivatives && state.state == 0)
       Moose::derivInsert(dof_values.back().derivatives(), dof_index, 1.);
     if (computing_dot)
     {
@@ -121,7 +121,7 @@ MooseVariableField<OutputType>::computeSolution(const Elem * const elem,
 template <typename OutputType>
 void
 MooseVariableField<OutputType>::evaluateOnElement(const ElemQpArg & elem_qp,
-                                                  const StateArg & time) const
+                                                  const StateArg & state) const
 {
   mooseAssert(this->hasBlocks(std::get<0>(elem_qp)->subdomain_id()),
               "This variable doesn't exist in the requested block!");
@@ -144,7 +144,7 @@ MooseVariableField<OutputType>::evaluateOnElement(const ElemQpArg & elem_qp,
 
     computeSolution(elem,
                     qrule.get(),
-                    time,
+                    state,
                     phi,
                     _current_elem_qp_functor_sln,
                     dphi,
@@ -162,9 +162,9 @@ MooseVariableField<RealEigenVector>::evaluateOnElement(const ElemQpArg &, const 
 
 template <typename OutputType>
 typename MooseVariableField<OutputType>::ValueType
-MooseVariableField<OutputType>::evaluate(const ElemQpArg & elem_qp, const StateArg & time) const
+MooseVariableField<OutputType>::evaluate(const ElemQpArg & elem_qp, const StateArg & state) const
 {
-  evaluateOnElement(elem_qp, time);
+  evaluateOnElement(elem_qp, state);
   const auto qp = std::get<1>(elem_qp);
   mooseAssert(qp < _current_elem_qp_functor_sln.size(),
               "The requested " << qp << " is outside our solution size");
@@ -174,9 +174,9 @@ MooseVariableField<OutputType>::evaluate(const ElemQpArg & elem_qp, const StateA
 template <typename OutputType>
 typename MooseVariableField<OutputType>::GradientType
 MooseVariableField<OutputType>::evaluateGradient(const ElemQpArg & elem_qp,
-                                                 const StateArg & time) const
+                                                 const StateArg & state) const
 {
-  evaluateOnElement(elem_qp, time);
+  evaluateOnElement(elem_qp, state);
   const auto qp = std::get<1>(elem_qp);
   mooseAssert(qp < _current_elem_qp_functor_gradient.size(),
               "The requested " << qp << " is outside our gradient size");
@@ -185,12 +185,12 @@ MooseVariableField<OutputType>::evaluateGradient(const ElemQpArg & elem_qp,
 
 template <typename OutputType>
 typename MooseVariableField<OutputType>::DotType
-MooseVariableField<OutputType>::evaluateDot(const ElemQpArg & elem_qp, const StateArg & time) const
+MooseVariableField<OutputType>::evaluateDot(const ElemQpArg & elem_qp, const StateArg & state) const
 {
   mooseAssert(_time_integrator && _time_integrator->dt(),
               "A time derivative is being requested but we do not have a time integrator so we'll "
               "have no idea how to compute it");
-  evaluateOnElement(elem_qp, time);
+  evaluateOnElement(elem_qp, state);
   const auto qp = std::get<1>(elem_qp);
   mooseAssert(qp < _current_elem_qp_functor_dot.size(),
               "The requested " << qp << " is outside our dot size");
@@ -200,7 +200,7 @@ MooseVariableField<OutputType>::evaluateDot(const ElemQpArg & elem_qp, const Sta
 template <typename OutputType>
 void
 MooseVariableField<OutputType>::evaluateOnElementSide(const ElemSideQpArg & elem_side_qp,
-                                                      const StateArg & time) const
+                                                      const StateArg & state) const
 {
   mooseAssert(this->hasBlocks(std::get<0>(elem_side_qp)->subdomain_id()),
               "This variable doesn't exist in the requested block!");
@@ -225,7 +225,7 @@ MooseVariableField<OutputType>::evaluateOnElementSide(const ElemSideQpArg & elem
 
     computeSolution(elem,
                     qrule.get(),
-                    time,
+                    state,
                     phi,
                     _current_elem_side_qp_functor_sln,
                     dphi,
@@ -245,9 +245,9 @@ MooseVariableField<RealEigenVector>::evaluateOnElementSide(const ElemSideQpArg &
 template <typename OutputType>
 typename MooseVariableField<OutputType>::ValueType
 MooseVariableField<OutputType>::evaluate(const ElemSideQpArg & elem_side_qp,
-                                         const StateArg & time) const
+                                         const StateArg & state) const
 {
-  evaluateOnElementSide(elem_side_qp, time);
+  evaluateOnElementSide(elem_side_qp, state);
   const auto qp = std::get<2>(elem_side_qp);
   mooseAssert(qp < _current_elem_side_qp_functor_sln.size(),
               "The requested " << qp << " is outside our solution size");
@@ -257,9 +257,9 @@ MooseVariableField<OutputType>::evaluate(const ElemSideQpArg & elem_side_qp,
 template <typename OutputType>
 typename MooseVariableField<OutputType>::GradientType
 MooseVariableField<OutputType>::evaluateGradient(const ElemSideQpArg & elem_side_qp,
-                                                 const StateArg & time) const
+                                                 const StateArg & state) const
 {
-  evaluateOnElementSide(elem_side_qp, time);
+  evaluateOnElementSide(elem_side_qp, state);
   const auto qp = std::get<2>(elem_side_qp);
   mooseAssert(qp < _current_elem_side_qp_functor_gradient.size(),
               "The requested " << qp << " is outside our gradient size");
@@ -269,12 +269,12 @@ MooseVariableField<OutputType>::evaluateGradient(const ElemSideQpArg & elem_side
 template <typename OutputType>
 typename MooseVariableField<OutputType>::DotType
 MooseVariableField<OutputType>::evaluateDot(const ElemSideQpArg & elem_side_qp,
-                                            const StateArg & time) const
+                                            const StateArg & state) const
 {
   mooseAssert(_time_integrator && _time_integrator->dt(),
               "A time derivative is being requested but we do not have a time integrator so we'll "
               "have no idea how to compute it");
-  evaluateOnElementSide(elem_side_qp, time);
+  evaluateOnElementSide(elem_side_qp, state);
   const auto qp = std::get<2>(elem_side_qp);
   mooseAssert(qp < _current_elem_side_qp_functor_dot.size(),
               "The requested " << qp << " is outside our dot size");
@@ -284,11 +284,11 @@ MooseVariableField<OutputType>::evaluateDot(const ElemSideQpArg & elem_side_qp,
 template <typename OutputType>
 typename MooseVariableField<OutputType>::ValueType
 MooseVariableField<OutputType>::evaluate(const ElemPointArg & elem_point,
-                                         const StateArg & time) const
+                                         const StateArg & state) const
 {
-  return (*this)(elem_point.makeElem(), time) +
+  return (*this)(elem_point.makeElem(), state) +
          (elem_point.point - elem_point.elem->vertex_average()) *
-             this->gradient(elem_point.makeElem(), time);
+             this->gradient(elem_point.makeElem(), state);
 }
 
 template <>

@@ -36,7 +36,7 @@ public:
 
   bool isExtrapolatedBoundaryFace(const FaceInfo & fi,
                                   const Elem * elem,
-                                  const Moose::StateArg & time) const override;
+                                  const Moose::StateArg & state) const override;
   bool hasBlocks(SubdomainID sub_id) const override { return _vector.hasBlocks(sub_id); }
 
 private:
@@ -46,41 +46,42 @@ private:
   /// The component at which we'll index the parent vector functor evaluation result
   const unsigned int _component;
 
-  ValueType evaluate(const ElemArg & elem, const StateArg & time) const override final
+  ValueType evaluate(const ElemArg & elem, const StateArg & state) const override final
   {
-    return _vector(elem, time)(_component);
+    return _vector(elem, state)(_component);
   }
 
-  ValueType evaluate(const FaceArg & face, const StateArg & time) const override final
+  ValueType evaluate(const FaceArg & face, const StateArg & state) const override final
   {
-    return _vector(face, time)(_component);
+    return _vector(face, state)(_component);
   }
 
-  ValueType evaluate(const ElemQpArg & elem_qp, const StateArg & time) const override final
+  ValueType evaluate(const ElemQpArg & elem_qp, const StateArg & state) const override final
   {
-    return _vector(elem_qp, time)(_component);
+    return _vector(elem_qp, state)(_component);
   }
 
-  ValueType evaluate(const ElemSideQpArg & elem_side_qp, const StateArg & time) const override final
+  ValueType evaluate(const ElemSideQpArg & elem_side_qp,
+                     const StateArg & state) const override final
   {
-    return _vector(elem_side_qp, time)(_component);
+    return _vector(elem_side_qp, state)(_component);
   }
 
-  ValueType evaluate(const ElemPointArg & elem_point, const StateArg & time) const override final
+  ValueType evaluate(const ElemPointArg & elem_point, const StateArg & state) const override final
   {
-    return _vector(elem_point, time)(_component);
+    return _vector(elem_point, state)(_component);
   }
 
   using FunctorBase<T>::evaluateGradient;
   GradientType evaluateGradient(const ElemArg & elem_arg,
-                                const StateArg & time) const override final
+                                const StateArg & state) const override final
   {
-    return _vector.gradient(elem_arg, time).row(_component);
+    return _vector.gradient(elem_arg, state).row(_component);
   }
 
-  GradientType evaluateGradient(const FaceArg & face, const StateArg & time) const override final
+  GradientType evaluateGradient(const FaceArg & face, const StateArg & state) const override final
   {
-    return _vector.gradient(face, time).row(_component);
+    return _vector.gradient(face, state).row(_component);
   }
 };
 
@@ -88,8 +89,8 @@ template <typename T>
 bool
 VectorComponentFunctor<T>::isExtrapolatedBoundaryFace(const FaceInfo & fi,
                                                       const Elem * elem,
-                                                      const Moose::StateArg & time) const
+                                                      const Moose::StateArg & state) const
 {
-  return _vector.isExtrapolatedBoundaryFace(fi, elem, time);
+  return _vector.isExtrapolatedBoundaryFace(fi, elem, state);
 }
 }

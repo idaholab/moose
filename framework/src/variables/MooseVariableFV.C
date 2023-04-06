@@ -442,7 +442,7 @@ MooseVariableFV<OutputType>::getFluxBCs(const FaceInfo & fi) const
 
 template <typename OutputType>
 ADReal
-MooseVariableFV<OutputType>::getElemValue(const Elem * const elem, const StateArg & time) const
+MooseVariableFV<OutputType>::getElemValue(const Elem * const elem, const StateArg & state) const
 {
   mooseAssert(elem,
               "The elem shall exist! This typically occurs when the "
@@ -467,13 +467,13 @@ MooseVariableFV<OutputType>::getElemValue(const Elem * const elem, const StateAr
   // which is wrong during things like finite difference Jacobian evaluation, e.g. when PETSc
   // perturbs the solution vector we feed these perturbations into the current_local_solution
   // while the libMesh solution is frozen in the non-perturbed state
-  const auto & global_soln = (time.state == 0)
+  const auto & global_soln = (state.state == 0)
                                  ? *_sys.currentSolution()
-                                 : _sys.solutionState(time.state, time.iteration_type);
+                                 : _sys.solutionState(state.state, state.iteration_type);
 
   ADReal value = global_soln(index);
 
-  if (ADReal::do_derivatives && time.state == 0 &&
+  if (ADReal::do_derivatives && state.state == 0 &&
       this->_sys.number() == this->_subproblem.currentNlSysNum())
     Moose::derivInsert(value.derivatives(), index, 1.);
 
@@ -497,11 +497,11 @@ ADReal
 MooseVariableFV<OutputType>::getDirichletBoundaryFaceValue(
     const FaceInfo & fi,
     const Elem * const libmesh_dbg_var(elem),
-    const Moose::StateArg & libmesh_dbg_var(time)) const
+    const Moose::StateArg & libmesh_dbg_var(state)) const
 {
-  mooseAssert(isDirichletBoundaryFace(fi, elem, time),
+  mooseAssert(isDirichletBoundaryFace(fi, elem, state),
               "This function should only be called on Dirichlet boundary faces.");
-  mooseAssert(time.state == 0,
+  mooseAssert(state.state == 0,
               "getDirichletBoundaryFaceValue currently only supports evaluating at the current "
               "time/iteration state");
 
@@ -519,9 +519,9 @@ template <typename OutputType>
 bool
 MooseVariableFV<OutputType>::isExtrapolatedBoundaryFace(const FaceInfo & fi,
                                                         const Elem * const elem,
-                                                        const Moose::StateArg & time) const
+                                                        const Moose::StateArg & state) const
 {
-  if (isDirichletBoundaryFace(fi, elem, time))
+  if (isDirichletBoundaryFace(fi, elem, state))
     return false;
   else
     return !this->isInternalFace(fi);
@@ -533,9 +533,9 @@ MooseVariableFV<OutputType>::getExtrapolatedBoundaryFaceValue(const FaceInfo & f
                                                               const bool two_term_expansion,
                                                               const bool correct_skewness,
                                                               const Elem * elem_to_extrapolate_from,
-                                                              const StateArg & time) const
+                                                              const StateArg & state) const
 {
-  mooseAssert(isExtrapolatedBoundaryFace(fi, elem_to_extrapolate_from, time),
+  mooseAssert(isExtrapolatedBoundaryFace(fi, elem_to_extrapolate_from, state),
               "This function should only be called on extrapolated boundary faces");
 
   ADReal boundary_value;
@@ -565,11 +565,11 @@ MooseVariableFV<OutputType>::getExtrapolatedBoundaryFaceValue(const FaceInfo & f
     const Point vector_to_face = elem_to_extrapolate_from_is_fi_elem
                                      ? (fi.faceCentroid() - fi.elemCentroid())
                                      : (fi.faceCentroid() - fi.neighborCentroid());
-    boundary_value = adGradSln(elem_to_extrapolate_from, time, correct_skewness) * vector_to_face +
-                     getElemValue(elem_to_extrapolate_from, time);
+    boundary_value = adGradSln(elem_to_extrapolate_from, state, correct_skewness) * vector_to_face +
+                     getElemValue(elem_to_extrapolate_from, state);
   }
   else
-    boundary_value = getElemValue(elem_to_extrapolate_from, time);
+    boundary_value = getElemValue(elem_to_extrapolate_from, state);
 
   return boundary_value;
 }
@@ -577,17 +577,17 @@ MooseVariableFV<OutputType>::getExtrapolatedBoundaryFaceValue(const FaceInfo & f
 template <typename OutputType>
 ADReal
 MooseVariableFV<OutputType>::getBoundaryFaceValue(const FaceInfo & fi,
-                                                  const StateArg & time,
+                                                  const StateArg & state,
                                                   const bool correct_skewness) const
 {
   mooseAssert(!this->isInternalFace(fi),
               "A boundary face value has been requested on an internal face.");
 
-  if (isDirichletBoundaryFace(fi, nullptr, time))
-    return getDirichletBoundaryFaceValue(fi, nullptr, time);
-  else if (isExtrapolatedBoundaryFace(fi, nullptr, time))
+  if (isDirichletBoundaryFace(fi, nullptr, state))
+    return getDirichletBoundaryFaceValue(fi, nullptr, state);
+  else if (isExtrapolatedBoundaryFace(fi, nullptr, state))
     return getExtrapolatedBoundaryFaceValue(
-        fi, _two_term_boundary_expansion, correct_skewness, nullptr, time);
+        fi, _two_term_boundary_expansion, correct_skewness, nullptr, state);
 
   mooseError("Unknown boundary face type!");
 }
@@ -595,12 +595,12 @@ MooseVariableFV<OutputType>::getBoundaryFaceValue(const FaceInfo & fi,
 template <typename OutputType>
 const VectorValue<ADReal> &
 MooseVariableFV<OutputType>::adGradSln(const Elem * const elem,
-                                       const StateArg & time,
+                                       const StateArg & state,
                                        const bool correct_skewness) const
 {
   // We ensure that no caching takes place when we compute skewness-corrected
   // quantities.
-  if (_cache_cell_gradients && !correct_skewness && time.state == 0)
+  if (_cache_cell_gradients && !correct_skewness && state.state == 0)
   {
     auto it = _elem_to_grad.find(elem);
 
@@ -609,9 +609,9 @@ MooseVariableFV<OutputType>::adGradSln(const Elem * const elem,
   }
 
   auto grad = FV::greenGaussGradient(
-      ElemArg({elem, correct_skewness}), time, *this, _two_term_boundary_expansion, this->_mesh);
+      ElemArg({elem, correct_skewness}), state, *this, _two_term_boundary_expansion, this->_mesh);
 
-  if (_cache_cell_gradients && !correct_skewness && time.state == 0)
+  if (_cache_cell_gradients && !correct_skewness && state.state == 0)
   {
     auto pr = _elem_to_grad.emplace(elem, std::move(grad));
     mooseAssert(pr.second, "Insertion should have just happened.");
@@ -627,21 +627,21 @@ MooseVariableFV<OutputType>::adGradSln(const Elem * const elem,
 template <typename OutputType>
 VectorValue<ADReal>
 MooseVariableFV<OutputType>::uncorrectedAdGradSln(const FaceInfo & fi,
-                                                  const StateArg & time,
+                                                  const StateArg & state,
                                                   const bool correct_skewness) const
 {
   const bool var_defined_on_elem = this->hasBlocks(fi.elem().subdomain_id());
   const Elem * const elem_one = var_defined_on_elem ? &fi.elem() : fi.neighborPtr();
   const Elem * const elem_two = var_defined_on_elem ? fi.neighborPtr() : &fi.elem();
 
-  const VectorValue<ADReal> elem_one_grad = adGradSln(elem_one, time, correct_skewness);
+  const VectorValue<ADReal> elem_one_grad = adGradSln(elem_one, state, correct_skewness);
 
   // If we have a neighbor then we interpolate between the two to the face. If we do not, then we
   // apply a zero Hessian assumption and use the element centroid gradient as the uncorrected face
   // gradient
   if (elem_two && this->hasBlocks(elem_two->subdomain_id()))
   {
-    const VectorValue<ADReal> & elem_two_grad = adGradSln(elem_two, time, correct_skewness);
+    const VectorValue<ADReal> & elem_two_grad = adGradSln(elem_two, state, correct_skewness);
 
     // Uncorrected gradient value
     return Moose::FV::linearInterpolation(elem_one_grad, elem_two_grad, fi, var_defined_on_elem);
@@ -653,7 +653,7 @@ MooseVariableFV<OutputType>::uncorrectedAdGradSln(const FaceInfo & fi,
 template <typename OutputType>
 VectorValue<ADReal>
 MooseVariableFV<OutputType>::adGradSln(const FaceInfo & fi,
-                                       const StateArg & time,
+                                       const StateArg & state,
                                        const bool correct_skewness) const
 {
   const bool var_defined_on_elem = this->hasBlocks(fi.elem().subdomain_id());
@@ -663,11 +663,11 @@ MooseVariableFV<OutputType>::adGradSln(const FaceInfo & fi,
   const bool is_internal_face = this->isInternalFace(fi);
 
   const ADReal side_one_value = (!is_internal_face && !var_defined_on_elem)
-                                    ? getBoundaryFaceValue(fi, time, correct_skewness)
-                                    : getElemValue(elem, time);
+                                    ? getBoundaryFaceValue(fi, state, correct_skewness)
+                                    : getElemValue(elem, state);
   const ADReal side_two_value = (var_defined_on_elem && !is_internal_face)
-                                    ? getBoundaryFaceValue(fi, time, correct_skewness)
-                                    : getElemValue(neighbor, time);
+                                    ? getBoundaryFaceValue(fi, state, correct_skewness)
+                                    : getElemValue(neighbor, state);
 
   const auto delta =
       this->isInternalFace(fi)
@@ -685,7 +685,7 @@ MooseVariableFV<OutputType>::adGradSln(const FaceInfo & fi,
   {
     // We are using an orthogonal approach for the non-orthogonal correction, for more information
     // see Hrvoje Jasak's PhD Thesis (Imperial College, 1996)
-    const auto & interpolated_gradient = uncorrectedAdGradSln(fi, time, correct_skewness);
+    const auto & interpolated_gradient = uncorrectedAdGradSln(fi, state, correct_skewness);
     face_grad += interpolated_gradient - (interpolated_gradient * fi.eCN()) * fi.eCN();
   }
 
@@ -733,18 +733,18 @@ MooseVariableFV<OutputType>::clearAllDofIndices()
 
 template <typename OutputType>
 typename MooseVariableFV<OutputType>::ValueType
-MooseVariableFV<OutputType>::evaluate(const FaceArg & face, const StateArg & time) const
+MooseVariableFV<OutputType>::evaluate(const FaceArg & face, const StateArg & state) const
 {
   const FaceInfo * const fi = face.fi;
   mooseAssert(fi, "The face information must be non-null");
-  if (isDirichletBoundaryFace(*fi, face.face_side, time))
+  if (isDirichletBoundaryFace(*fi, face.face_side, state))
   {
-    mooseAssert(time.state == 0,
+    mooseAssert(state.state == 0,
                 "We have not yet added support for evaluting Dirichlet boundary conditions at "
                 "states other than the current solution state (e.g. current time)");
-    return getDirichletBoundaryFaceValue(*fi, face.face_side, time);
+    return getDirichletBoundaryFaceValue(*fi, face.face_side, state);
   }
-  else if (isExtrapolatedBoundaryFace(*fi, face.face_side, time))
+  else if (isExtrapolatedBoundaryFace(*fi, face.face_side, state))
   {
     bool two_term_boundary_expansion = _two_term_boundary_expansion;
     if (face.limiter_type == Moose::FV::LimiterType::Upwind)
@@ -752,13 +752,13 @@ MooseVariableFV<OutputType>::evaluate(const FaceArg & face, const StateArg & tim
           (!face.elem_is_upwind && face.face_side == fi->neighborPtr()))
         two_term_boundary_expansion = false;
     return getExtrapolatedBoundaryFaceValue(
-        *fi, two_term_boundary_expansion, face.correct_skewness, face.face_side, time);
+        *fi, two_term_boundary_expansion, face.correct_skewness, face.face_side, state);
   }
   else
   {
     mooseAssert(this->isInternalFace(*fi),
                 "We must be either Dirichlet, extrapolated, or internal");
-    return Moose::FV::interpolate(*this, face, time);
+    return Moose::FV::interpolate(*this, face, state);
   }
 }
 
@@ -771,10 +771,10 @@ MooseVariableFV<OutputType>::evaluateDot(const ElemArg &, const StateArg &) cons
 
 template <>
 ADReal
-MooseVariableFV<Real>::evaluateDot(const ElemArg & elem_arg, const StateArg & time) const
+MooseVariableFV<Real>::evaluateDot(const ElemArg & elem_arg, const StateArg & state) const
 {
   const Elem * const elem = elem_arg.elem;
-  mooseAssert(time.state == 0,
+  mooseAssert(state.state == 0,
               "We dot not currently support any time derivative evaluations other than for the "
               "current time-step");
   mooseAssert(_time_integrator && _time_integrator->dt(),
@@ -792,7 +792,8 @@ MooseVariableFV<Real>::evaluateDot(const ElemArg & elem_arg, const StateArg & ti
   if (_var_kind == Moose::VAR_NONLINEAR)
   {
     ADReal dot = (*_solution)(dof_index);
-    if (ADReal::do_derivatives && time.state == 0 && _sys.number() == _subproblem.currentNlSysNum())
+    if (ADReal::do_derivatives && state.state == 0 &&
+        _sys.number() == _subproblem.currentNlSysNum())
       Moose::derivInsert(dot.derivatives(), dof_index, 1.);
     _time_integrator->computeADTimeDerivatives(dot, dof_index, _ad_real_dummy);
     return dot;

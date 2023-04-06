@@ -368,18 +368,18 @@ protected:
   using ElemPointArg = Moose::ElemPointArg;
   using StateArg = Moose::StateArg;
 
-  ValueType evaluate(const ElemQpArg & elem_qp, const StateArg & time) const override final;
+  ValueType evaluate(const ElemQpArg & elem_qp, const StateArg & state) const override final;
   ValueType evaluate(const ElemSideQpArg & elem_side_qp,
-                     const StateArg & time) const override final;
-  ValueType evaluate(const ElemPointArg & elem_point, const StateArg & time) const override final;
+                     const StateArg & state) const override final;
+  ValueType evaluate(const ElemPointArg & elem_point, const StateArg & state) const override final;
 
-  GradientType evaluateGradient(const ElemQpArg & elem_qp, const StateArg & time) const override;
+  GradientType evaluateGradient(const ElemQpArg & elem_qp, const StateArg & state) const override;
   GradientType evaluateGradient(const ElemSideQpArg & elem_side_qp,
-                                const StateArg & time) const override final;
+                                const StateArg & state) const override final;
 
-  DotType evaluateDot(const ElemQpArg & elem_qp, const StateArg & time) const override final;
+  DotType evaluateDot(const ElemQpArg & elem_qp, const StateArg & state) const override final;
   DotType evaluateDot(const ElemSideQpArg & elem_side_qp,
-                      const StateArg & time) const override final;
+                      const StateArg & state) const override final;
 
   /// the time integrator used for computing time derivatives
   const TimeIntegrator * const _time_integrator;
@@ -394,7 +394,7 @@ private:
   template <typename Shapes, typename Solution, typename GradShapes, typename GradSolution>
   void computeSolution(const Elem * elem,
                        const QBase *,
-                       const StateArg & time,
+                       const StateArg & state,
                        const Shapes & phi,
                        Solution & local_soln,
                        const GradShapes & grad_phi,
@@ -404,12 +404,12 @@ private:
   /**
    * Evaluate solution and gradient for the \p elem_qp argument
    */
-  void evaluateOnElement(const ElemQpArg & elem_qp, const StateArg & time) const;
+  void evaluateOnElement(const ElemQpArg & elem_qp, const StateArg & state) const;
 
   /**
    * Evaluate solution and gradient for the \p elem_side_qp argument
    */
-  void evaluateOnElementSide(const ElemSideQpArg & elem_side_qp, const StateArg & time) const;
+  void evaluateOnElementSide(const ElemSideQpArg & elem_side_qp, const StateArg & state) const;
 
   /// Keep track of the current elem-qp functor element in order to enable local caching (e.g. if we
   /// call evaluate on the same element, but just with a different quadrature point, we can return

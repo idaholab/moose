@@ -34,7 +34,7 @@ public:
 
   bool isExtrapolatedBoundaryFace(const FaceInfo & fi,
                                   const Elem * elem,
-                                  const Moose::StateArg & time) const override;
+                                  const Moose::StateArg & state) const override;
   bool hasBlocks(SubdomainID sub_id) const override { return _array.hasBlocks(sub_id); }
 
 private:
@@ -44,43 +44,44 @@ private:
   /// The component at which we'll index the parent array functor evaluation result
   const unsigned int _component;
 
-  ValueType evaluate(const ElemArg & elem, const StateArg & time) const override final
+  ValueType evaluate(const ElemArg & elem, const StateArg & state) const override final
   {
-    return _array(elem, time)[_component];
+    return _array(elem, state)[_component];
   }
 
-  ValueType evaluate(const FaceArg & face, const StateArg & time) const override final
+  ValueType evaluate(const FaceArg & face, const StateArg & state) const override final
   {
-    return _array(face, time)[_component];
+    return _array(face, state)[_component];
   }
 
-  ValueType evaluate(const ElemQpArg & elem_qp, const StateArg & time) const override final
+  ValueType evaluate(const ElemQpArg & elem_qp, const StateArg & state) const override final
   {
-    return _array(elem_qp, time)[_component];
+    return _array(elem_qp, state)[_component];
   }
 
-  ValueType evaluate(const ElemSideQpArg & elem_side_qp, const StateArg & time) const override final
+  ValueType evaluate(const ElemSideQpArg & elem_side_qp,
+                     const StateArg & state) const override final
   {
-    return _array(elem_side_qp, time)[_component];
+    return _array(elem_side_qp, state)[_component];
   }
 
-  ValueType evaluate(const ElemPointArg & elem_point, const StateArg & time) const override final
+  ValueType evaluate(const ElemPointArg & elem_point, const StateArg & state) const override final
   {
-    return _array(elem_point, time)[_component];
+    return _array(elem_point, state)[_component];
   }
 
   using FunctorBase<T>::evaluateGradient;
-  GradientType evaluateGradient(const ElemArg & elem, const StateArg & time) const override final
+  GradientType evaluateGradient(const ElemArg & elem, const StateArg & state) const override final
   {
-    return _array.gradient(elem, time)[_component];
+    return _array.gradient(elem, state)[_component];
   }
 };
 
 template <typename T, typename ArrayTypeFunctor>
 bool
 ArrayComponentFunctor<T, ArrayTypeFunctor>::isExtrapolatedBoundaryFace(
-    const FaceInfo & fi, const Elem * const elem, const Moose::StateArg & time) const
+    const FaceInfo & fi, const Elem * const elem, const Moose::StateArg & state) const
 {
-  return _array.isExtrapolatedBoundaryFace(fi, elem, time);
+  return _array.isExtrapolatedBoundaryFace(fi, elem, state);
 }
 }
