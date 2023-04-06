@@ -53,13 +53,13 @@ FVOneVarDiffusionInterface::computeQpResidual()
   const auto & coef_elem = elemIsOne() ? _coeff1 : _coeff2;
   const auto & coef_neighbor = elemIsOne() ? _coeff2 : _coeff1;
 
-  const auto & grad = var1().adGradSln(*_face_info, Moose::currentState());
+  const auto & grad = var1().adGradSln(*_face_info, Moose::autoState());
 
   ADReal coef;
   interpolate(_coeff_interp_method,
               coef,
-              coef_elem(elemArg(), Moose::currentState()),
-              coef_neighbor(neighborArg(), Moose::currentState()),
+              coef_elem(elemArg(), Moose::autoState()),
+              coef_neighbor(neighborArg(), Moose::autoState()),
               *_face_info,
               true);
 
