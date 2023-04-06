@@ -54,7 +54,7 @@ PINSFVEnergyDiffusion::computeQpResidual()
 {
   // Interpolate thermal conductivity times porosity on the face
   ADReal k_eps_face;
-  const auto state = autoState();
+  const auto state = determineState();
 
   if (onBoundary(*_face_info))
   {

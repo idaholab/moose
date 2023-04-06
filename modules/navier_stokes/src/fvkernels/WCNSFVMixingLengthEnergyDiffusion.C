@@ -58,7 +58,7 @@ WCNSFVMixingLengthEnergyDiffusion::computeQpResidual()
   constexpr Real offset = 1e-15; // prevents explosion of sqrt(x) derivative to infinity
 
   const auto face = makeCDFace(*_face_info);
-  const auto state = autoState();
+  const auto state = determineState();
 
   const auto grad_u = _u.gradient(face, state);
   ADReal symmetric_strain_tensor_norm = 2.0 * Utility::pow<2>(grad_u(0));

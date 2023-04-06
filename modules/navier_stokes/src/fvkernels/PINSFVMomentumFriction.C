@@ -48,7 +48,7 @@ PINSFVMomentumFriction::gatherRCData(const Elem & elem)
 {
   ADReal friction_term = 0;
   const auto elem_arg = makeElemArg(&elem);
-  const auto state = autoState();
+  const auto state = determineState();
 
   if (_use_Darcy_friction_model)
     friction_term += (*_cL)(elem_arg, state)(_index)*_rho(elem_arg, state) / _eps(elem_arg, state);

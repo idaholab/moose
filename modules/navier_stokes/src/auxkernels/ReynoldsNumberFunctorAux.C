@@ -44,7 +44,7 @@ Real
 ReynoldsNumberFunctorAux::computeValue()
 {
   using MetaPhysicL::raw_value;
-  const auto state = autoState();
+  const auto state = determineState();
 
   if (_use_qp_arg)
   {

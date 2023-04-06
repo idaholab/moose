@@ -71,8 +71,8 @@ SideIntegralFunctorPostprocessorTempl<is_ad>::computeLocalContribution(const T &
   const bool has_elem = checkFunctorDefinedOnSideBlock();
 
   if (has_elem)
-    return MetaPhysicL::raw_value(_prefactor(functor_arg, autoState()) *
-                                  _functor(functor_arg, autoState()));
+    return MetaPhysicL::raw_value(_prefactor(functor_arg, determineState()) *
+                                  _functor(functor_arg, determineState()));
   else
   {
     if (!_partial_integral)

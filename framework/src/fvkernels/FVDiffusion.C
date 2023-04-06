@@ -42,7 +42,7 @@ ADReal
 FVDiffusion::computeQpResidual()
 {
   using namespace Moose::FV;
-  const auto state = autoState();
+  const auto state = determineState();
 
   auto dudn = gradUDotNormal(state);
   ADReal coeff;

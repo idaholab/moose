@@ -95,7 +95,7 @@ WallFunctionYPlusAux::computeValue()
   if (!wall_bounded)
     return 0;
 
-  const auto state = autoState();
+  const auto state = determineState();
 
   // Get the velocity vector
   ADRealVectorValue velocity(_u_var->getElemValue(&elem, state));

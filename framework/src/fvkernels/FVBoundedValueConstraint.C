@@ -38,9 +38,9 @@ ADReal
 FVBoundedValueConstraint::computeQpResidual()
 {
   if (_bound_type == BoundType::LOWER_THAN && _u[_qp] > _phi0)
-    return _var(makeElemArg(_current_elem), autoState()) - _phi0;
+    return _var(makeElemArg(_current_elem), determineState()) - _phi0;
   else if (_bound_type == BoundType::HIGHER_THAN && _u[_qp] < _phi0)
-    return _phi0 - _var(makeElemArg(_current_elem), autoState());
+    return _phi0 - _var(makeElemArg(_current_elem), determineState());
   else
     return 0;
 }

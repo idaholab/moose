@@ -117,7 +117,7 @@ NSFVFunctorHeatFluxBC::computeQpResidual()
 
   // Get the functor argument for the face
   const auto face_arg = singleSidedFaceArg();
-  const auto state = autoState();
+  const auto state = determineState();
 
   if (_locality == NS::settings::local)
   {

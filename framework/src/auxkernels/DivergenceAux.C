@@ -43,7 +43,7 @@ Real
 DivergenceAuxTempl<is_ad>::computeValue()
 {
   using MetaPhysicL::raw_value;
-  const auto state = autoState();
+  const auto state = determineState();
   Real divergence = 0;
   if (_use_qp_arg)
   {

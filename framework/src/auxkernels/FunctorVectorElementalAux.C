@@ -45,7 +45,7 @@ Real
 FunctorVectorElementalAuxTempl<is_ad>::computeValue()
 {
   const auto elem_arg = makeElemArg(_current_elem);
-  const auto state = autoState();
+  const auto state = determineState();
   return MetaPhysicL::raw_value(_factor(elem_arg, state)) *
          MetaPhysicL::raw_value(_functor(elem_arg, state)(_component));
 }

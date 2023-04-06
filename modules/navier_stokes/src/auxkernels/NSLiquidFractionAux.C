@@ -38,7 +38,7 @@ NSLiquidFractionAux::computeValue()
   using namespace MetaPhysicL;
 
   const auto elem_arg = makeElemArg(_current_elem);
-  const auto state = autoState();
+  const auto state = determineState();
 
   if (raw_value(_T_liquidus(elem_arg, state)) < raw_value(_T_solidus(elem_arg, state)))
     mooseError("The specified liquidus temperature is smaller than the solidus temperature.");

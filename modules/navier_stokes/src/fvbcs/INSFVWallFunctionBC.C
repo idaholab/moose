@@ -45,7 +45,7 @@ INSFVWallFunctionBC::computeStrongResidual()
   const FaceInfo & fi = *_face_info;
   const Elem & elem = fi.elem();
   const Moose::ElemArg elem_arg{&elem, false};
-  const auto state = autoState();
+  const auto state = determineState();
   ADRealVectorValue velocity(_u(elem_arg, state));
   if (_v)
     velocity(1) = (*_v)(elem_arg, state);

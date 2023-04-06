@@ -59,7 +59,7 @@ INSFVMomentumAdvectionOutflowBC::gatherRCData(const FaceInfo & fi)
     _normal = -_normal;
 
   const auto boundary_face = singleSidedFaceArg();
-  const auto state = autoState();
+  const auto state = determineState();
   ADRealVectorValue v(_u(boundary_face, state));
   if (_v)
     v(1) = (*_v)(boundary_face, state);

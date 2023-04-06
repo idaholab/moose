@@ -46,7 +46,7 @@ INSFVMomentumDiffusion::INSFVMomentumDiffusion(const InputParameters & params)
 ADReal
 INSFVMomentumDiffusion::computeStrongResidual()
 {
-  const auto state = autoState();
+  const auto state = determineState();
   const auto dudn = gradUDotNormal(state);
   ADReal face_mu;
 

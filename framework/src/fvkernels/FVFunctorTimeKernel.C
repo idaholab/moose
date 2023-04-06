@@ -38,5 +38,5 @@ FVFunctorTimeKernel::FVFunctorTimeKernel(const InputParameters & parameters)
 ADReal
 FVFunctorTimeKernel::computeQpResidual()
 {
-  return _functor.dot(makeElemArg(_current_elem), autoState());
+  return _functor.dot(makeElemArg(_current_elem), determineState());
 }

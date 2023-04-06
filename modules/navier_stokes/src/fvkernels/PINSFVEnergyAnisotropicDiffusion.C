@@ -56,7 +56,7 @@ PINSFVEnergyAnisotropicDiffusion::computeQpResidual()
 {
   // Interpolate thermal conductivity times porosity on the face
   ADRealVectorValue k_eps_face;
-  const auto state = autoState();
+  const auto state = determineState();
   if (onBoundary(*_face_info))
   {
     const auto ssf = singleSidedFaceArg();

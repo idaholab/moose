@@ -35,6 +35,6 @@ PINSFVMomentumBoussinesq::PINSFVMomentumBoussinesq(const InputParameters & param
 ADReal
 PINSFVMomentumBoussinesq::computeQpResidual()
 {
-  return _eps(makeElemArg(_current_elem), autoState()) *
+  return _eps(makeElemArg(_current_elem), determineState()) *
          INSFVMomentumBoussinesq::computeQpResidual();
 }

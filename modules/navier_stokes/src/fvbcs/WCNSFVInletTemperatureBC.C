@@ -84,7 +84,7 @@ WCNSFVInletTemperatureBC::WCNSFVInletTemperatureBC(const InputParameters & param
 ADReal
 WCNSFVInletTemperatureBC::boundaryValue(const FaceInfo & fi) const
 {
-  const auto state = autoState();
+  const auto state = determineState();
 
   if (_area_pp)
     if (MooseUtils::absoluteFuzzyEqual(*_area_pp, 0))

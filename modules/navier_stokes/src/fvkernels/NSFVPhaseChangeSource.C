@@ -41,7 +41,7 @@ NSFVPhaseChangeSource::computeQpResidual()
   using namespace MetaPhysicL;
 
   const auto elem_arg = makeElemArg(_current_elem);
-  const auto state = autoState();
+  const auto state = determineState();
 
   const auto T_sol = _T_solidus(elem_arg, state);
   const auto T_liq = _T_liquidus(elem_arg, state);

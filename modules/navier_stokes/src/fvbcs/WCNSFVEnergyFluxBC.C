@@ -70,7 +70,7 @@ WCNSFVEnergyFluxBC::WCNSFVEnergyFluxBC(const InputParameters & params)
 ADReal
 WCNSFVEnergyFluxBC::computeQpResidual()
 {
-  const auto state = autoState();
+  const auto state = determineState();
 
   if (_area_pp)
     if (MooseUtils::absoluteFuzzyEqual(*_area_pp, 0))

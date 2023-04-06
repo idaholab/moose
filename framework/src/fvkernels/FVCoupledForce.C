@@ -32,5 +32,5 @@ FVCoupledForce::FVCoupledForce(const InputParameters & parameters)
 ADReal
 FVCoupledForce::computeQpResidual()
 {
-  return -_coef * _v(makeElemArg(_current_elem), autoState());
+  return -_coef * _v(makeElemArg(_current_elem), determineState());
 }

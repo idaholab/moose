@@ -46,7 +46,7 @@ PINSFVMomentumDiffusion::computeStrongResidual()
 
   const auto elem_face = elemArg();
   const auto neighbor_face = neighborArg();
-  const auto state = autoState();
+  const auto state = determineState();
 
   // Compute the diffusion driven by the velocity gradient
   // Interpolate viscosity divided by porosity on the face

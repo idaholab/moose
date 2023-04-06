@@ -121,7 +121,7 @@ VolumetricFlowRate::computeFaceInfoIntegral(const FaceInfo * fi)
 {
   mooseAssert(fi, "We should have a face info in " + name());
   mooseAssert(_adv_quant, "We should have an advected quantity in " + name());
-  const auto state = autoState();
+  const auto state = determineState();
 
   // Get face value for velocity
   const auto vel =
@@ -147,7 +147,7 @@ VolumetricFlowRate::computeQpIntegral()
            _normals[_qp];
   else if (_advected_mat_prop_supplied)
     return MetaPhysicL::raw_value(_advected_material_property(
-               std::make_tuple(_current_elem, _qp, _qrule), autoState())) *
+               std::make_tuple(_current_elem, _qp, _qrule), determineState())) *
            RealVectorValue(_vel_x[_qp], _vel_y[_qp], _vel_z[_qp]) * _normals[_qp];
   else
     return RealVectorValue(_vel_x[_qp], _vel_y[_qp], _vel_z[_qp]) * _normals[_qp];

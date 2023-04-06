@@ -40,7 +40,7 @@ WCNSFVMomentumTimeDerivative::gatherRCData(const Elem & elem)
   // INSFVMomentumTimeDerivative::gatherRCData
 
   const auto elem_arg = makeElemArg(&elem);
-  const auto state = autoState();
+  const auto state = determineState();
   const auto rho_dot = _rho_dot(elem_arg, state);
   const auto var_dot = _var.dot(elem_arg, state);
   const auto rho = _rho(elem_arg, state);

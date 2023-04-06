@@ -54,7 +54,7 @@ FVConvectionCorrelationInterface::computeQpResidual()
 {
   const Elem * current_elem = elemIsOne() ? &_face_info->elem() : _face_info->neighborPtr();
   const Elem * bulk_elem;
-  const auto state = autoState();
+  const auto state = determineState();
   if (!_use_wall_cell)
   {
     Point p = _face_info->faceCentroid();

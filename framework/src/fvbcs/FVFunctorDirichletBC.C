@@ -33,5 +33,5 @@ template <bool is_ad>
 ADReal
 FVFunctorDirichletBCTempl<is_ad>::boundaryValue(const FaceInfo & fi) const
 {
-  return _functor(singleSidedFaceArg(&fi), autoState());
+  return _functor(singleSidedFaceArg(&fi), determineState());
 }

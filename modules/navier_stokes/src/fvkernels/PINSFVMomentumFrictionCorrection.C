@@ -63,7 +63,7 @@ PINSFVMomentumFrictionCorrection::gatherRCData(const FaceInfo & fi)
 
   const auto elem_face = elemArg();
   const auto neighbor_face = neighborArg();
-  const auto state = autoState();
+  const auto state = determineState();
 
   Point _face_centroid = _face_info->faceCentroid();
   Point _elem_centroid = _face_info->elemCentroid();

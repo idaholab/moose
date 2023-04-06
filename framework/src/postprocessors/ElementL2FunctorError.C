@@ -48,8 +48,8 @@ Real
 ElementL2FunctorErrorTempl<is_ad>::computeQpIntegral()
 {
   Moose::ElemQpArg elem_qp = {_current_elem, _qp, _qrule};
-  Real diff = MetaPhysicL::raw_value(_approx(elem_qp, autoState())) -
-              MetaPhysicL::raw_value(_exact(elem_qp, autoState()));
+  Real diff = MetaPhysicL::raw_value(_approx(elem_qp, determineState())) -
+              MetaPhysicL::raw_value(_exact(elem_qp, determineState()));
   return diff * diff;
 }
 

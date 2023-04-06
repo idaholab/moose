@@ -43,7 +43,7 @@ protected:
    * are implicit then we will return the current state. If we are not, then we will return the old
    * state
    */
-  Moose::StateArg autoState() const;
+  Moose::StateArg determineState() const;
 
   const InputParameters & _ti_params;
 
@@ -77,7 +77,7 @@ private:
 };
 
 inline Moose::StateArg
-TransientInterface::autoState() const
+TransientInterface::determineState() const
 {
   return _is_implicit ? Moose::currentState() : Moose::oldState();
 }

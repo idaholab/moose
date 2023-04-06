@@ -36,7 +36,7 @@ FunctorGapFluxModelConduction::FunctorGapFluxModelConduction(const InputParamete
 ADReal
 FunctorGapFluxModelConduction::computeFlux() const
 {
-  const auto state = autoState();
+  const auto state = determineState();
   return computeConductionFlux(_T(_secondary_point, state),
                                _T(_primary_point, state),
                                0.5 * (_gap_conductivity_multiplier(_secondary_point, state) +

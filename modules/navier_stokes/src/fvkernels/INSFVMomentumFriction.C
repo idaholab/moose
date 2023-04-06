@@ -46,11 +46,11 @@ void
 INSFVMomentumFriction::gatherRCData(const Elem & elem)
 {
   const auto & elem_arg = makeElemArg(&elem);
-  const auto state = autoState();
+  const auto state = determineState();
 
   ADReal coefficient = 0.0;
   if (_linear_friction)
-    coefficient += (*_linear_friction)(elem_arg, autoState());
+    coefficient += (*_linear_friction)(elem_arg, determineState());
   if (_quadratic_friction)
     coefficient += (*_quadratic_friction)(elem_arg, state) * std::abs(_u_functor(elem_arg, state));
 

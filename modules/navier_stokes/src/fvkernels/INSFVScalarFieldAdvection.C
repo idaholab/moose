@@ -27,7 +27,7 @@ INSFVScalarFieldAdvection::INSFVScalarFieldAdvection(const InputParameters & par
 ADReal
 INSFVScalarFieldAdvection::computeQpResidual()
 {
-  const auto state = autoState();
+  const auto state = determineState();
   const auto v = _rc_vel_provider.getVelocity(_velocity_interp_method, *_face_info, state, _tid);
   const auto var_face = _var(makeFace(*_face_info,
                                       limiterType(_advected_interp_method),

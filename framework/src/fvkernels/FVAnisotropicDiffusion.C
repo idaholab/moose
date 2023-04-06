@@ -45,7 +45,7 @@ FVAnisotropicDiffusion::FVAnisotropicDiffusion(const InputParameters & params)
 ADReal
 FVAnisotropicDiffusion::computeQpResidual()
 {
-  const auto state = autoState();
+  const auto state = determineState();
   const auto & grad_T = _var.adGradSln(*_face_info,
                                        state,
                                        _var.faceInterpolationMethod() ==

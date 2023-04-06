@@ -49,7 +49,7 @@ ADReal
 INSFVMassAdvectionOutflowBC::computeQpResidual()
 {
   const auto boundary_face = singleSidedFaceArg();
-  const auto state = autoState();
+  const auto state = determineState();
 
   ADRealVectorValue v(_u(boundary_face, state));
   if (_v)

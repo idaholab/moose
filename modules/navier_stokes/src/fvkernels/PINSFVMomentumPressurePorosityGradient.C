@@ -47,6 +47,6 @@ ADReal
 PINSFVMomentumPressurePorosityGradient::computeQpResidual()
 {
   const auto & elem = makeElemArg(_current_elem);
-  const auto state = autoState();
+  const auto state = determineState();
   return -_p(elem, state) * _eps.gradient(elem, state)(_index);
 }

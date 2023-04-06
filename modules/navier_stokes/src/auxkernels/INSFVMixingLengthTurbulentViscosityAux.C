@@ -56,7 +56,7 @@ INSFVMixingLengthTurbulentViscosityAux::computeValue()
 {
   constexpr Real offset = 1e-15; // prevents explosion of sqrt(x) derivative to infinity
   const Elem & elem = *_current_elem;
-  const auto state = autoState();
+  const auto state = determineState();
 
   const auto & grad_u = _u_var->adGradSln(&elem, state);
   ADReal symmetric_strain_tensor_norm = 2.0 * Utility::pow<2>(grad_u(0));

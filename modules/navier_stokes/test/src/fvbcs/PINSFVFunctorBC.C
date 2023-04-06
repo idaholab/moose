@@ -89,7 +89,7 @@ PINSFVFunctorBC::computeQpResidual()
   // No interpolation on a boundary so argument values to fi_elem_is_upwind do not
   // matter
   const auto boundary_face = singleSidedFaceArg();
-  const auto state = autoState();
+  const auto state = determineState();
 
   const VectorValue<ADReal> sup_vel(_sup_vel_x(boundary_face, state),
                                     _sup_vel_y ? (*_sup_vel_y)(boundary_face, state) : ADReal(0),

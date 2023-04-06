@@ -56,7 +56,7 @@ PINSFVMomentumPressureFlux::computeQpResidual()
 
   const auto * const elem_ptr = use_elem ? &_face_info->elem() : _face_info->neighborPtr();
   const auto & elem = makeElemArg(elem_ptr);
-  const auto state = autoState();
+  const auto state = determineState();
 
   if (onBoundary(*_face_info))
     eps_p_interface = _eps(elem, state) * _p(singleSidedFaceArg(), state);

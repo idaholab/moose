@@ -33,7 +33,7 @@ TestFaceToCellReconstruction::TestFaceToCellReconstruction(const InputParameters
 void
 TestFaceToCellReconstruction::initialize()
 {
-  const auto state = autoState();
+  const auto state = determineState();
 
   for (auto & fi : _fe_problem.mesh().faceInfo())
   {

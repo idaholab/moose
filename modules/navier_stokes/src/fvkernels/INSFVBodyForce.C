@@ -37,5 +37,5 @@ INSFVBodyForce::INSFVBodyForce(const InputParameters & parameters)
 ADReal
 INSFVBodyForce::computeQpResidual()
 {
-  return -_scale * _postprocessor * _functor(makeElemArg(_current_elem), autoState());
+  return -_scale * _postprocessor * _functor(makeElemArg(_current_elem), determineState());
 }

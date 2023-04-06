@@ -55,7 +55,7 @@ Real
 FunctorElementalAuxTempl<is_ad>::computeValue()
 {
   using MetaPhysicL::raw_value;
-  const auto state = autoState();
+  const auto state = determineState();
   if (_use_qp_arg)
   {
     const auto qp_arg = std::make_tuple(_current_elem, _qp, _qrule);
