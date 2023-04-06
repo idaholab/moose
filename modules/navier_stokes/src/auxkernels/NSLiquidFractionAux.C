@@ -38,7 +38,7 @@ NSLiquidFractionAux::computeValue()
   using namespace MetaPhysicL;
 
   const auto elem_arg = makeElemArg(_current_elem);
-  const auto current_time = Moose::currentState();
+  const auto current_time = autoState();
 
   if (raw_value(_T_liquidus(elem_arg, current_time)) <
       raw_value(_T_solidus(elem_arg, current_time)))

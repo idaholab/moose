@@ -44,7 +44,7 @@ Real
 ReynoldsNumberFunctorAux::computeValue()
 {
   using MetaPhysicL::raw_value;
-  const auto current_time = Moose::currentState();
+  const auto current_time = autoState();
 
   if (_use_qp_arg)
   {

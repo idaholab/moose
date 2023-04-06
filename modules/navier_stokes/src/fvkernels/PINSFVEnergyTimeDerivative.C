@@ -58,7 +58,7 @@ PINSFVEnergyTimeDerivative::computeQpResidual()
   else
   {
     auto elem_arg = makeElemArg(_current_elem);
-    const auto current_time = Moose::currentState();
+    const auto current_time = autoState();
     auto time_derivative = _rho(elem_arg, current_time) * _cp(elem_arg, current_time) *
                            _var.dot(elem_arg, current_time);
     if (_rho_dot)

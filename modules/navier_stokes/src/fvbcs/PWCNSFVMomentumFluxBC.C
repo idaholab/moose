@@ -30,5 +30,5 @@ ADReal
 PWCNSFVMomentumFluxBC::computeQpResidual()
 {
   return WCNSFVMomentumFluxBC::computeQpResidual() /
-         _eps(singleSidedFaceArg(), Moose::currentState());
+         _eps(singleSidedFaceArg(), autoState());
 }

@@ -46,7 +46,7 @@ INSFVMomentumDiffusion::INSFVMomentumDiffusion(const InputParameters & params)
 ADReal
 INSFVMomentumDiffusion::computeStrongResidual()
 {
-  const auto current_time = Moose::currentState();
+  const auto current_time = autoState();
   const auto dudn = gradUDotNormal(current_time);
   ADReal face_mu;
 

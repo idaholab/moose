@@ -52,7 +52,7 @@ INSFVMixingLengthScalarDiffusion::computeQpResidual()
   constexpr Real offset = 1e-15; // prevents explosion of sqrt(x) derivative to infinity
 
   auto face = makeCDFace(*_face_info);
-  const auto current_time = Moose::currentState();
+  const auto current_time = autoState();
 
   const auto grad_u = _u.gradient(face, current_time);
   ADReal symmetric_strain_tensor_norm = 2.0 * Utility::pow<2>(grad_u(0));

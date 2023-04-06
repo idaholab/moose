@@ -215,7 +215,7 @@ PressureDrop::computeFaceInfoWeightedPressureIntegral(const FaceInfo * const fi)
   const bool correct_skewness =
       _weight_interp_method == Moose::FV::InterpMethod::SkewCorrectedAverage;
   const auto elem_arg = std::make_tuple(_current_elem, _qp, _qrule);
-  const auto current_time = Moose::currentState();
+  const auto current_time = autoState();
   mooseAssert(_qp == 0, "Only one quadrature point");
 
   if (_weighting_functor)
@@ -243,7 +243,7 @@ PressureDrop::computeFaceInfoWeightIntegral(const FaceInfo * fi) const
   mooseAssert(fi, "We should have a face info in " + name());
   auto elem_arg = std::make_tuple(_current_elem, _qp, _qrule);
   mooseAssert(_qp == 0, "Only one quadrature point");
-  const auto current_time = Moose::currentState();
+  const auto current_time = autoState();
 
   const bool correct_skewness =
       _weight_interp_method == Moose::FV::InterpMethod::SkewCorrectedAverage;
@@ -266,7 +266,7 @@ Real
 PressureDrop::computeQpWeightedPressureIntegral() const
 {
   auto elem_side_arg = std::make_tuple(_current_elem, _current_side, _qp, _qrule);
-  const auto current_time = Moose::currentState();
+  const auto current_time = autoState();
   if (_weighting_functor)
     return (*_weighting_functor)(elem_side_arg, current_time) * _normals[_qp] *
            _pressure(elem_side_arg, current_time);
@@ -278,7 +278,7 @@ Real
 PressureDrop::computeQpWeightIntegral() const
 {
   auto elem_side_arg = std::make_tuple(_current_elem, _current_side, _qp, _qrule);
-  const auto current_time = Moose::currentState();
+  const auto current_time = autoState();
   if (_weighting_functor)
     return (*_weighting_functor)(elem_side_arg, current_time) * _normals[_qp];
   else

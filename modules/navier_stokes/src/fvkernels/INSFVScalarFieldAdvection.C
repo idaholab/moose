@@ -27,7 +27,7 @@ INSFVScalarFieldAdvection::INSFVScalarFieldAdvection(const InputParameters & par
 ADReal
 INSFVScalarFieldAdvection::computeQpResidual()
 {
-  const auto current_time = Moose::currentState();
+  const auto current_time = autoState();
   const auto v =
       _rc_vel_provider.getVelocity(_velocity_interp_method, *_face_info, current_time, _tid);
   const auto var_face = _var(makeFace(*_face_info,

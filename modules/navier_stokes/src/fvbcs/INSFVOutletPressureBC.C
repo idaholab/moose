@@ -50,7 +50,7 @@ ADReal
 INSFVOutletPressureBC::boundaryValue(const FaceInfo & fi) const
 {
   if (_functor)
-    return (*_functor)(singleSidedFaceArg(&fi), Moose::currentState());
+    return (*_functor)(singleSidedFaceArg(&fi), autoState());
   else if (_function)
     return _function->value(_t, fi.faceCentroid());
   else

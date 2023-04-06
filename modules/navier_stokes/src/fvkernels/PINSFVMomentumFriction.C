@@ -48,7 +48,7 @@ PINSFVMomentumFriction::gatherRCData(const Elem & elem)
 {
   ADReal friction_term = 0;
   const auto elem_arg = makeElemArg(&elem);
-  const auto current_time = Moose::currentState();
+  const auto current_time = autoState();
 
   if (_use_Darcy_friction_model)
     friction_term += (*_cL)(elem_arg, current_time)(_index)*_rho(elem_arg, current_time) /

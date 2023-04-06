@@ -89,7 +89,7 @@ PINSFVFunctorBC::computeQpResidual()
   // No interpolation on a boundary so argument values to fi_elem_is_upwind do not
   // matter
   const auto boundary_face = singleSidedFaceArg();
-  const auto current_time = Moose::currentState();
+  const auto current_time = autoState();
 
   const VectorValue<ADReal> sup_vel(
       _sup_vel_x(boundary_face, current_time),

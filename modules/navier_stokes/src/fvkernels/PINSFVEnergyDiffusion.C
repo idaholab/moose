@@ -54,7 +54,7 @@ PINSFVEnergyDiffusion::computeQpResidual()
 {
   // Interpolate thermal conductivity times porosity on the face
   ADReal k_eps_face;
-  const auto current_time = Moose::currentState();
+  const auto current_time = autoState();
 
   if (onBoundary(*_face_info))
   {

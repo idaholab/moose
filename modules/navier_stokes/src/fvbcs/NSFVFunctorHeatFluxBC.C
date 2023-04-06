@@ -117,7 +117,7 @@ NSFVFunctorHeatFluxBC::computeQpResidual()
 
   // Get the functor argument for the face
   const auto face_arg = singleSidedFaceArg();
-  const auto current_time = Moose::currentState();
+  const auto current_time = autoState();
 
   if (_locality == NS::settings::local)
   {

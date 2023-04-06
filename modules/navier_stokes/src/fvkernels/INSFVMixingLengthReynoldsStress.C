@@ -63,7 +63,7 @@ INSFVMixingLengthReynoldsStress::computeStrongResidual()
   constexpr Real offset = 1e-15; // prevents explosion of sqrt(x) derivative to infinity
 
   const auto face = makeCDFace(*_face_info);
-  const auto current_time = Moose::currentState();
+  const auto current_time = autoState();
 
   const auto grad_u = _u.gradient(face, current_time);
   // Compute the dot product of the strain rate tensor and the normal vector
