@@ -77,7 +77,7 @@ public:
   using ElemQpArg = Moose::ElemQpArg;
   using ElemArg = Moose::ElemArg;
   using FaceArg = Moose::FaceArg;
-  using StateArg = Moose::TimeArg;
+  using StateArg = Moose::StateArg;
 
   static InputParameters validParams();
 

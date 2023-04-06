@@ -688,7 +688,7 @@ private:
   using ElemQpArg = Moose::ElemQpArg;
   using ElemSideQpArg = Moose::ElemSideQpArg;
   using FaceArg = Moose::FaceArg;
-  using StateArg = Moose::TimeArg;
+  using StateArg = Moose::StateArg;
 
   ValueType evaluate(const ElemArg &, const StateArg &) const override final
   {

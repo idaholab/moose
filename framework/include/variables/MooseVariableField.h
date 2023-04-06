@@ -366,7 +366,7 @@ protected:
   using ElemQpArg = Moose::ElemQpArg;
   using ElemSideQpArg = Moose::ElemSideQpArg;
   using ElemPointArg = Moose::ElemPointArg;
-  using StateArg = Moose::TimeArg;
+  using StateArg = Moose::StateArg;
 
   ValueType evaluate(const ElemQpArg & elem_qp, const StateArg & time) const override final;
   ValueType evaluate(const ElemSideQpArg & elem_side_qp,

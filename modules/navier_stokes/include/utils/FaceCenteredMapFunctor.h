@@ -33,7 +33,7 @@ public:
   using ElemQpArg = Moose::ElemQpArg;
   using ElemSideQpArg = Moose::ElemSideQpArg;
   using ElemPointArg = Moose::ElemPointArg;
-  using StateArg = Moose::TimeArg;
+  using StateArg = Moose::StateArg;
 
   FaceCenteredMapFunctor(const MooseMesh & mesh, const std::string & name);
 

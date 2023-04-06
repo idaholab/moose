@@ -34,7 +34,7 @@ public:
   using ElemQpArg = Moose::ElemQpArg;
   using ElemSideQpArg = Moose::ElemSideQpArg;
   using ElemPointArg = Moose::ElemPointArg;
-  using StateArg = Moose::TimeArg;
+  using StateArg = Moose::StateArg;
 
   /**
    * Use this constructor when you want the object to live everywhere on the mesh
