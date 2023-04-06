@@ -73,15 +73,15 @@ InterfaceIntegralVariableValuePostprocessor::computeQpIntegral()
     Real u, u_neighbor;
     if (_fv_variable != _neighbor_fv_variable)
     {
-      u = MetaPhysicL::raw_value(_fv_variable->getBoundaryFaceValue(*_fi, Moose::currentState()));
+      u = MetaPhysicL::raw_value(_fv_variable->getBoundaryFaceValue(*_fi, autoState()));
       u_neighbor = MetaPhysicL::raw_value(
-          _neighbor_fv_variable->getBoundaryFaceValue(*_fi, Moose::currentState()));
+          _neighbor_fv_variable->getBoundaryFaceValue(*_fi, autoState()));
     }
     // If only one variable is specified, assume this is an internal interface
     // FIXME Make sure getInternalFaceValue uses the right interpolation method, see #16585
     else
       u = u_neighbor =
-          MetaPhysicL::raw_value((*_fv_variable)(makeCDFace(*_fi), Moose::currentState()));
+          MetaPhysicL::raw_value((*_fv_variable)(makeCDFace(*_fi), autoState()));
 
     return InterfaceValueTools::getQuantity(_interface_value_type, u, u_neighbor);
   }
