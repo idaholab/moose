@@ -1,7 +1,6 @@
 # INL HPC Cluster
 
-This page aims at preparing your HPC environment for proper MOOSE installation while operating on
-[!ac](INL) [!ac](HPC) machines.
+The following instructions are for those operating on [!ac](INL) [!ac](HPC) machines.
 
 Requesting access (shell account) to [!ac](INL) [!ac](HPC) machines is handled by the
 [NCRC](https://inl.gov/ncrc/) group.
@@ -12,8 +11,10 @@ application applicable to you.
 
 ## Environment id=environment
 
+!style! halign=left
 While operating on one of our [!ac](INL) [!ac](HPC) clusters, you need only load a couple of
 modules to obtain a proper compiler environment:
+!style-end!
 
 - +[!ac](HPC) Sawtooth or Lemhi+ (required each time you log in):
 
@@ -28,84 +29,43 @@ above command to your shell initialization file:
 echo "module load use.moose moose-dev" >> ~/.bash_profile
 ```
 
-## Cloning MOOSE id=clone
+## Cloning MOOSE
 
-MOOSE is hosted on [GitHub](https://github.com/idaholab/moose) as an open-source project.
-Many open-source MOOSE-based applications may also be obtained from GitHub, while others will
-require officially requesting source code access through the [NCRC](https://inl.gov/ncrc).
+!style! halign=left
+Follow the below instructions, and replace `cluster_name` placeholder with either `lemhi` or
+`sawtooth` accordingly.
+!style-end!
 
-MOOSE and the application you want should be cloned on the scratch storage space. This file system
-is much faster than the file system that hosts your home directory. For example to clone MOOSE:
+!alert! warning title=Replace +'cluster_name'+ accordingly!
+[!ac](INL) [!ac](HPC) machines use a shared home directory structure (things you create/do on Lemhi
+will be available on Sawtooth). If you do not separate your projects directory based on the cluster
+you are operating on (or some other identifier), you risk developing under one environment and then
+executing on another. Mistakes like this will cause the odd failure and cost you time to solve/fix.
+!alert-end!
 
-```bash
-cd /scratch/$USER
-mkdir projects
-cd projects
-git clone https://github.com/idaholab/moose
-cd moose
-git checkout master
-```
+!style! halign=left
+!template load file=installation/clone_moose.md.template PATH=~/cluster_name/projects
+!style-end!
 
-## Building MOOSE id=build
+## Build PETSc and libMesh
 
-Building MOOSE involves applying updates, building PETSc and libMesh, and finally running make.
-
-### Applying Updates
-
-Changes being made by other developers become available to you via your origin remote. This section
-will show you how to apply these changes to your local moose repository.
-
-First, perform a fetch operation:
-
-```bash
-cd /scratch/$USER/projects/moose
-git fetch origin
-```
-
-The `fetch origin` git command updates your local references with that of the origin remote. It
-does not modify any source files.
-
-Once the fetch operation completes, we can perform a `reset` operation. If there are any changes,
-this process will conform your local copy to that of origin:
-
-```bash
-git reset --hard origin/master
-```
-
-### Building PETSc and libMesh
-
+!style! halign=left
 MOOSE requires several support libraries in order to build or run properly. Both of these libraries
 (PETSc and libMesh) can be built using our supplied scripts:
+!style-end!
 
-```
-  cd /scratch/$USER/projects/moose/scripts
-  export MOOSE_JOBS=6
-  ./update_and_rebuild_petsc.sh
-  ./update_and_rebuild_libmesh.sh
-```
+!template load file=installation/build_petsc_and_libmesh.md.template PATH=~/cluster_name/projects
 
-### Running Make
+## Build and Test MOOSE
 
-With everything up to date, we can now build MOOSE:
+!style! halign=left
+!template load file=installation/build_moose.md.template PATH=~/cluster_name/projects
+!style-end!
 
-```bash
-cd /scratch/$USER/projects/moose/test
-make -j 6
-```
+!template load file=installation/test_moose.md.template PATH=~/cluster_name/projects
 
-!alert note title=If you are here updating and `make` fails above
-Try: `make clobberall` and then run `make` again. +clobberall+ deletes the stale object/library
-files left behind from a previous build, which is sometimes necessary for a successful build.
+Now that you have a working MOOSE, proceed to 'New Users' to begin your tour of MOOSE!
 
-## Running Tests id=runtests
-
-With MOOSE/test built, we can now run tests to verify a working binary (and environment).
-
-```bash
-cd /scratch/$USER/projects/moose/test
-./run_tests -j 6
-```
-
-This operation can take some time to complete. There are more ways to test MOOSE than the above
-example. Vist our [TestHarness](TestHarness.md) page to learn more about this system,
-available influential environment variables, modifying how the output is displayed, and more.
+!content pagination use_title=True
+                    previous=installation/inl_hpc_index.md
+                    next=getting_started/inl_hpc_new_users.md

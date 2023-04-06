@@ -10,11 +10,23 @@
 #pragma once
 
 #include "InterfaceMaterial.h"
+
+#define usingCZMComputeDisplacementJumpBaseMembers                                                 \
+  usingInterfaceMaterialMembers;                                                                   \
+  using CZMComputeDisplacementJumpBase<is_ad>::_base_name;                                         \
+  using CZMComputeDisplacementJumpBase<is_ad>::_ndisp;                                             \
+  using CZMComputeDisplacementJumpBase<is_ad>::_disp;                                              \
+  using CZMComputeDisplacementJumpBase<is_ad>::_disp_neighbor;                                     \
+  using CZMComputeDisplacementJumpBase<is_ad>::_displacement_jump_global;                          \
+  using CZMComputeDisplacementJumpBase<is_ad>::_interface_displacement_jump;                       \
+  using CZMComputeDisplacementJumpBase<is_ad>::_czm_total_rotation
+
 /**
  * This interface material class computes the displacement jump in the interface natural coordinate
  * system. The transformation between local and global coordinates shall be defined in
  * computeLocalDisplacementJump.
  */
+template <bool is_ad>
 class CZMComputeDisplacementJumpBase : public InterfaceMaterial
 {
 public:
@@ -35,24 +47,21 @@ protected:
   /// Base name of the material system
   const std::string _base_name;
 
-  /// the interface normal in the undeformed configuration
-  const MooseArray<Point> & _normals;
-
   /// number of displacement components
   const unsigned int _ndisp;
 
   /// the coupled displacement and neighbor displacement values
   ///@{
-  std::vector<const VariableValue *> _disp;
-  std::vector<const VariableValue *> _disp_neighbor;
+  std::vector<const GenericVariableValue<is_ad> *> _disp;
+  std::vector<const GenericVariableValue<is_ad> *> _disp_neighbor;
   ///@}
 
   /// the displacement jump in global and interface coordiantes
   ///@{
-  MaterialProperty<RealVectorValue> & _displacement_jump_global;
-  MaterialProperty<RealVectorValue> & _interface_displacement_jump;
+  GenericMaterialProperty<RealVectorValue, is_ad> & _displacement_jump_global;
+  GenericMaterialProperty<RealVectorValue, is_ad> & _interface_displacement_jump;
   ///@}
 
   /// the rotation matrix transforming from the interface to the global coordinate systems
-  MaterialProperty<RankTwoTensor> & _czm_total_rotation;
+  GenericMaterialProperty<RankTwoTensor, is_ad> & _czm_total_rotation;
 };

@@ -13,7 +13,7 @@ where $V_0$ is a given constant, using a Lagrange multiplier approach. The resid
 \end{equation}
 
 In particular, this Kernel implements the residual contribution from
-the $\lambda$ in [eq:eq1] , and their Jacobian contributions. See also [AverageValueConstraint.md] for the residual of the Lagrange multiplier variable.
+the $\lambda$ in [eq:eq1] , and their Jacobian contributions. See also [AverageValueConstraint](source/scalarkernels/AverageValueConstraint.md) for the residual of the Lagrange multiplier variable.
 
 The detailed description of the derivation can be found at [scalar_constraint_kernel](https://github.com/idaholab/large_media/blob/master/framework/scalar_constraint_kernel.pdf).
 

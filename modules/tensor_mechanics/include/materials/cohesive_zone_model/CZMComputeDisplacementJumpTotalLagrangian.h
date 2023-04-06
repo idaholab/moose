@@ -10,15 +10,17 @@
 #pragma once
 
 #include "CZMComputeDisplacementJumpBase.h"
+
 /**
  * Compute the displacement jump in interface coordinates across a cohesive zone for the total
  * Lagrangian formulation.
  */
-class CZMComputeDisplacementJumpTotalLagrangian : public CZMComputeDisplacementJumpBase
+template <bool is_ad>
+class CZMComputeDisplacementJumpTotalLagrangianTempl : public CZMComputeDisplacementJumpBase<is_ad>
 {
 public:
   static InputParameters validParams();
-  CZMComputeDisplacementJumpTotalLagrangian(const InputParameters & parameters);
+  CZMComputeDisplacementJumpTotalLagrangianTempl(const InputParameters & parameters);
 
 protected:
   void initQpStatefulProperties() override;
@@ -35,16 +37,23 @@ protected:
 
   /// the coupled displacement and neighbor displacement gradient
   ///@{
-  std::vector<const VariableGradient *> _grad_disp;
-  std::vector<const VariableGradient *> _grad_disp_neighbor;
+  std::vector<const GenericVariableGradient<is_ad> *> _grad_disp;
+  std::vector<const GenericVariableGradient<is_ad> *> _grad_disp_neighbor;
   ///@}
 
   /// the interface deformation gradient
-  MaterialProperty<RankTwoTensor> & _F;
+  GenericMaterialProperty<RankTwoTensor, is_ad> & _F;
 
   /// the interface rotation caused by deformation and rigid body motion
-  MaterialProperty<RankTwoTensor> & _R;
+  GenericMaterialProperty<RankTwoTensor, is_ad> & _R;
 
   /// the rotation matrix transforming from local to global coordinates in the undeformed configuration
-  MaterialProperty<RankTwoTensor> & _czm_reference_rotation;
+  GenericMaterialProperty<RankTwoTensor, is_ad> & _czm_reference_rotation;
+
+  usingCZMComputeDisplacementJumpBaseMembers;
 };
+
+typedef CZMComputeDisplacementJumpTotalLagrangianTempl<false>
+    CZMComputeDisplacementJumpTotalLagrangian;
+typedef CZMComputeDisplacementJumpTotalLagrangianTempl<true>
+    ADCZMComputeDisplacementJumpTotalLagrangian;

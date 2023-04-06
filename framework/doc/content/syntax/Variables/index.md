@@ -6,8 +6,14 @@ The `Variables` block within an input file is utilized to define the unknowns wi
 of partial differential equations. These unknowns are often referred to as nonlinear variables
 within documentation. The nonlinear variables defined within this block are used by
 [Kernel objects](syntax/Kernels/index.md) to define the equations for a simulation.
+Also, scalar variables that are constant in space but evolve in time can be described by
+ordinary differential equations.
 
-TODO: mention FV variables and how they are similar+different
+Documentation on the major classes of variables are presented in:
+
+- [MooseVariableBase](source/variables/MooseVariableBase.md): for typical finite element
+  nonlinear variables and scalar variables
+- [MooseVariableFV](source/variables/MooseVariableFV.md): for finite volume variables
 
 ## Example
 

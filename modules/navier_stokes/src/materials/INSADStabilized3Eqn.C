@@ -44,13 +44,13 @@ INSADStabilized3Eqn::computeQpProperties()
 {
   INSADTauMaterialTempl<INSAD3Eqn>::computeQpProperties();
 
-  auto dissipation_coefficient = _k[_qp] / (_rho[_qp] * _cp[_qp]);
-  auto transient_part = _has_energy_transient ? 4. / (_dt * _dt) : 0.;
-  _tau_energy[_qp] = _alpha / std::sqrt(transient_part +
-                                        (2. * _velocity[_qp].norm() / _hmax) *
-                                            (2. * _velocity[_qp].norm() / _hmax) +
-                                        9. * (4. * dissipation_coefficient / (_hmax * _hmax)) *
-                                            (4. * dissipation_coefficient / (_hmax * _hmax)));
+  const auto dissipation_coefficient = _k[_qp] / (_rho[_qp] * _cp[_qp]);
+  const auto transient_part = _has_energy_transient ? 4. / (_dt * _dt) : 0.;
+  const auto speed = NS::computeSpeed(_velocity[_qp]);
+  _tau_energy[_qp] =
+      _alpha / std::sqrt(transient_part + (2. * speed / _hmax) * (2. * speed / _hmax) +
+                         9. * (4. * dissipation_coefficient / (_hmax * _hmax)) *
+                             (4. * dissipation_coefficient / (_hmax * _hmax)));
 
   // Start with the conductive term
   _temperature_strong_residual[_qp] = -_k[_qp] * _second_temperature[_qp].tr();

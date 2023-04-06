@@ -1,0 +1,43 @@
+[Tests]
+  issues = '#22174'
+  design = 'source/constraints/ADPenaltyPeriodicSegmentalConstraint.md'
+  [penalty_periodic_simple2d]
+    type = 'CSVDiff'
+    input = 'penalty_periodic_simple2d.i'
+    csvdiff = 'penalty_periodic_simple2d_out.csv'
+    requirement = "The system shall assemble primary/secondary AD mortar constraints coupled to scalar variables."
+  []
+  [periodic_simple2d]
+    type = 'CSVDiff'
+    input = 'periodic_simple2d.i'
+    csvdiff = 'periodic_simple2d_out.csv'
+    requirement = "The system shall assemble lower variable AD mortar constraints coupled to scalar variables."
+    min_ad_size = 100
+  []
+  [penalty_periodic_simple3d]
+    type = 'CSVDiff'
+    input = 'penalty_periodic_simple3d.i'
+    csvdiff = 'penalty_periodic_simple3d_out.csv'
+    requirement = "The system shall assemble primary/secondary AD mortar constraints coupled to 3d scalar variables."
+    min_ad_size = 100
+  []
+  [periodic_simple3d]
+    type = 'CSVDiff'
+    input = 'periodic_simple3d.i'
+    csvdiff = 'periodic_simple3d_out.csv'
+    requirement = "The system shall assemble lower variable AD mortar constraints coupled to 3d scalar variables."
+    min_ad_size = 100
+  []
+  [penalty_periodic_checker2d]
+    type = 'CSVDiff'
+    input = 'penalty_periodic_checker2d.i'
+    csvdiff = 'penalty_periodic_checker2d_out.csv'
+    requirement = "AD mortar surfaces coupled with scalar variables can handle nonuniform conductivity."
+  []
+  [testperiodicsole]
+    type = 'CSVDiff'
+    input = 'testperiodicsole.i'
+    csvdiff = 'testperiodicsole_out.csv'
+    requirement = "The system shall assemble AD mortar constraints with multiple distinct coupled scalar variables."
+  []
+[]

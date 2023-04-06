@@ -69,7 +69,8 @@ protected:
    */
   void ghostMortarInterfaceCouplings(const processor_id_type p,
                                      const Elem * const elem,
-                                     map_type & coupled_elements);
+                                     map_type & coupled_elements,
+                                     const AutomaticMortarGeneration & amg) const;
 
   /**
    * Query the mortar interface couplings of the query element. If a lower dimensional secondary
@@ -79,21 +80,22 @@ protected:
    */
   void ghostLowerDSecondaryElemPointNeighbors(const processor_id_type p,
                                               const Elem * const query_elem,
-                                              map_type & coupled_elements);
+                                              map_type & coupled_elements,
+                                              BoundaryID secondary_boundary_id,
+                                              SubdomainID secondary_subdomain_id,
+                                              const AutomaticMortarGeneration & amg) const;
 
   void ghostHigherDNeighbors(const processor_id_type p,
                              const Elem * const query_elem,
-                             map_type & coupled_elements);
+                             map_type & coupled_elements,
+                             BoundaryID secondary_boundary_id,
+                             SubdomainID secondary_subdomain_id,
+                             const AutomaticMortarGeneration & amg) const;
 
-  /**
-   * fill boundary id, subdomain id, and mortar mesh generation object data members
-   */
-  void fillDataMembers();
-
-  BoundaryName _primary_boundary_name;
-  BoundaryName _secondary_boundary_name;
-  SubdomainName _primary_subdomain_name;
-  SubdomainName _secondary_subdomain_name;
+  const BoundaryName _primary_boundary_name;
+  const BoundaryName _secondary_boundary_name;
+  const SubdomainName _primary_subdomain_name;
+  const SubdomainName _secondary_subdomain_name;
 
   /// Whether this relationship manager is called when coupling functors are called when building
   /// the matrix sparsity pattern
@@ -107,17 +109,6 @@ protected:
   /// second order mortar with finite volume primal variables, because in order for the method to be
   /// second order we must use cell gradients, which couples in the neighbor cells
   const bool _ghost_higher_d_neighbors;
-
-  /// Whether this ghosting functor is being called while we are sill in the mesh generation phase
-  bool _generating_mesh = true;
-
-  BoundaryID _primary_boundary_id = Moose::INVALID_BOUNDARY_ID;
-  BoundaryID _secondary_boundary_id = Moose::INVALID_BOUNDARY_ID;
-  SubdomainID _primary_subdomain_id = Moose::INVALID_BLOCK_ID;
-  SubdomainID _secondary_subdomain_id = Moose::INVALID_BLOCK_ID;
-
-  /// the mortar mesh generation object
-  AutomaticMortarGeneration * _amg = nullptr;
 
   /// null matrix for generating full variable coupling
   const CouplingMatrix * const _null_mat = nullptr;

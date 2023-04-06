@@ -1,0 +1,74 @@
+{% set build = 0 %}
+{% set strbuild = "build_" + build|string %}
+{% set version = "2023.04.04" %}
+
+package:
+  name: moose-wasp
+  version: {{ version }}
+
+source:
+  - path: ../../framework/contrib/wasp
+  - path: ../../scripts/configure_wasp.sh
+
+build:
+  number: {{ build }}
+  string: {{ strbuild }}
+  skip: true  # [win]
+  script_env:
+    - MOOSE_JOBS
+  run_exports:
+    - {{ pin_subpackage('moose-wasp', max_pin='x.x')}}
+
+requirements:
+  build:
+    - {{ compiler('c') }}
+    - {{ compiler('cxx') }}
+    - {{ compiler('fortran') }}
+    - cmake
+    - pkg-config
+
+test:
+  commands:
+    - ddilist --version
+    - ddiselect --version
+    - ddivalid --version
+    - ddivalidjson --version
+    - ddixml --version
+    - docprint --version
+    - eddilist --version
+    - eddiselect --version
+    - eddivalid --version
+    - eddivalidjson --version
+    - eddixml --version
+    - halite --version
+    - halitelist --version
+    - hitlist --version
+    - hitselect --version
+    - hitvalid --version
+    - hitvalidjson --version
+    - hitxml --version
+    - jsonlist --version
+    - jsonselect --version
+    - jsonxml --version
+    - sonjson --version
+    - sonlist --version
+    - sonschemaskel --version
+    - sonselect --version
+    - sonserver --version
+    - sonvalid --version
+    - sonvalidjson --version
+    - sonvalidxml --version
+    - sonxml --version
+    - substitute --version
+
+about:
+  home: https://code.ornl.gov/neams-workbench/wasp
+  license: OPEN SOURCE LICENSE (Permissive)
+  license_file: LICENSE
+  summary: >
+    The Workbench Analysis Sequence Processor (WASP) was developed to streamline lexing, parsing,
+    access, validation, and analysis of ascii text files.
+extra:
+  recipe-maintainers:
+    - milljm
+    - loganharbour

@@ -61,7 +61,6 @@ CZMInterfaceKernelBase::CZMInterfaceKernelBase(const InputParameters & parameter
 Real
 CZMInterfaceKernelBase::computeQpResidual(Moose::DGResidualType type)
 {
-
   Real r = _traction_global[_qp](_component);
 
   switch (type)

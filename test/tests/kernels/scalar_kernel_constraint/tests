@@ -1,0 +1,24 @@
+[Tests]
+  issues = '#22174'
+  design = 'source/kernels/ScalarLMKernel.md'
+  [kernel]
+    type = 'Exodiff'
+    input = 'scalar_constraint_kernel.i'
+    exodiff = 'scalar_constraint_kernel_out.e'
+    requirement = 'The system shall solve a constrained Neumann problem and volume averaging using the Lagrange multiplier approach derived from a scalar augmentation class.'
+  []
+
+  [bipass]
+    type = 'CSVDiff'
+    input = 'diffusion_bipass_scalar.i'
+    csvdiff = 'diffusion_bipass_scalar_out.csv'
+    requirement = 'The system shall support the ability to include the scalar wrapper but not actually use a scalar variable.'
+  []
+
+  [override]
+    type = RunException
+    input = 'diffusion_override_scalar.i'
+    expect_err = 'A scalar_variable has been set and compute_scalar_residuals=true, but the computeScalarQpResidual method was not overridden. Accidental call of base class?'
+    requirement = 'The system shall error if a derived object uses scalars and computes scalar residuals but does not override the quadrature point residual calculation routine.'
+  []
+[]

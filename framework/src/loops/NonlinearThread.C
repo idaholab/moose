@@ -29,7 +29,10 @@ NonlinearThread::NonlinearThread(FEProblemBase & fe_problem)
     _integrated_bcs(_nl.getIntegratedBCWarehouse()),
     _dg_kernels(_nl.getDGKernelWarehouse()),
     _interface_kernels(_nl.getInterfaceKernelWarehouse()),
-    _kernels(_nl.getKernelWarehouse())
+    _kernels(_nl.getKernelWarehouse()),
+    _has_active_objects(_integrated_bcs.hasActiveObjects() || _dg_kernels.hasActiveObjects() ||
+                        _interface_kernels.hasActiveObjects() || _kernels.hasActiveObjects() ||
+                        _fe_problem.haveFV())
 {
 }
 
@@ -42,11 +45,19 @@ NonlinearThread::NonlinearThread(NonlinearThread & x, Threads::split split)
     _dg_kernels(x._dg_kernels),
     _interface_kernels(x._interface_kernels),
     _kernels(x._kernels),
-    _tag_kernels(x._tag_kernels)
+    _tag_kernels(x._tag_kernels),
+    _has_active_objects(x._has_active_objects)
 {
 }
 
 NonlinearThread::~NonlinearThread() {}
+
+void
+NonlinearThread::operator()(const ConstElemRange & range, bool bypass_threading)
+{
+  if (_has_active_objects)
+    ThreadedElementLoop<ConstElemRange>::operator()(range, bypass_threading);
+}
 
 void
 NonlinearThread::subdomainChanged()

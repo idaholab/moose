@@ -14,6 +14,17 @@
 #include "NeighborCoupleable.h"
 #include "TwoMaterialPropertyInterface.h"
 
+#define usingInterfaceMaterialMembers                                                              \
+  usingMaterialBaseMembers;                                                                        \
+  usingNeighborCoupleableMembers;                                                                  \
+  using InterfaceMaterial::_q_point;                                                               \
+  using InterfaceMaterial::_qrule;                                                                 \
+  using InterfaceMaterial::_JxW;                                                                   \
+  using InterfaceMaterial::_current_elem;                                                          \
+  using InterfaceMaterial::_neighbor_elem;                                                         \
+  using InterfaceMaterial::_current_side;                                                          \
+  using InterfaceMaterial::_neighbor_side
+
 /**
  * Interface materials compute MaterialProperties.
  */
