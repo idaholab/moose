@@ -43,7 +43,7 @@ Real
 DivergenceAuxTempl<is_ad>::computeValue()
 {
   using MetaPhysicL::raw_value;
-  const auto current_time = Moose::currentTimeFunctorArg();
+  const auto current_time = Moose::currentState();
   Real divergence = 0;
   if (_use_qp_arg)
   {

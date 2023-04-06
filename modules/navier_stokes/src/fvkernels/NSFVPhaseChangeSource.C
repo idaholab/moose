@@ -41,7 +41,7 @@ NSFVPhaseChangeSource::computeQpResidual()
   using namespace MetaPhysicL;
 
   const auto elem_arg = makeElemArg(_current_elem);
-  const auto current_time = Moose::currentTimeFunctorArg();
+  const auto current_time = Moose::currentState();
 
   const auto T_sol = _T_solidus(elem_arg, current_time);
   const auto T_liq = _T_liquidus(elem_arg, current_time);

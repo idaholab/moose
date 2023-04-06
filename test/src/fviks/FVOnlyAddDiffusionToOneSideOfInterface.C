@@ -73,6 +73,6 @@ FVOnlyAddDiffusionToOneSideOfInterface::computeJacobian(const FaceInfo & fi)
 ADReal
 FVOnlyAddDiffusionToOneSideOfInterface::computeQpResidual()
 {
-  return _normal * -_coeff2(singleSidedFaceArg(var2()), Moose::currentTimeFunctorArg()) *
-         var2().adGradSln(*_face_info, Moose::currentTimeFunctorArg());
+  return _normal * -_coeff2(singleSidedFaceArg(var2()), Moose::currentState()) *
+         var2().adGradSln(*_face_info, Moose::currentState());
 }

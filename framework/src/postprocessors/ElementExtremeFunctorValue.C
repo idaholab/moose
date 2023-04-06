@@ -49,9 +49,8 @@ ElementExtremeFunctorValueTempl<is_ad>::getProxyValuePair()
   // Most element evaluations do not use skewness correction,
   // but this could become a parameter in the future
   Moose::ElemArg elem = makeElemArg(_current_elem);
-  return std::make_pair(
-      MetaPhysicL::raw_value(_proxy_functor(elem, Moose::currentTimeFunctorArg())),
-      MetaPhysicL::raw_value(_functor(elem, Moose::currentTimeFunctorArg())));
+  return std::make_pair(MetaPhysicL::raw_value(_proxy_functor(elem, Moose::currentState())),
+                        MetaPhysicL::raw_value(_functor(elem, Moose::currentState())));
 }
 
 template class ElementExtremeFunctorValueTempl<false>;

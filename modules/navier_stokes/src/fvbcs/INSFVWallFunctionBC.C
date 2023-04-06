@@ -45,7 +45,7 @@ INSFVWallFunctionBC::computeStrongResidual()
   const FaceInfo & fi = *_face_info;
   const Elem & elem = fi.elem();
   const Moose::ElemArg elem_arg{&elem, false};
-  const auto current_time = Moose::currentTimeFunctorArg();
+  const auto current_time = Moose::currentState();
   ADRealVectorValue velocity(_u(elem_arg, current_time));
   if (_v)
     velocity(1) = (*_v)(elem_arg, current_time);

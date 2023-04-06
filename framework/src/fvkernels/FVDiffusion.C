@@ -42,7 +42,7 @@ ADReal
 FVDiffusion::computeQpResidual()
 {
   using namespace Moose::FV;
-  const auto current_time = Moose::currentTimeFunctorArg();
+  const auto current_time = Moose::currentState();
 
   auto dudn = gradUDotNormal(current_time);
   ADReal coeff;

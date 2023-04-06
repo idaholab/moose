@@ -37,6 +37,5 @@ INSFVBodyForce::INSFVBodyForce(const InputParameters & parameters)
 ADReal
 INSFVBodyForce::computeQpResidual()
 {
-  return -_scale * _postprocessor *
-         _functor(makeElemArg(_current_elem), Moose::currentTimeFunctorArg());
+  return -_scale * _postprocessor * _functor(makeElemArg(_current_elem), Moose::currentState());
 }

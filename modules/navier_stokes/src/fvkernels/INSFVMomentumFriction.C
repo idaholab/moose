@@ -46,11 +46,11 @@ void
 INSFVMomentumFriction::gatherRCData(const Elem & elem)
 {
   const auto & elem_arg = makeElemArg(&elem);
-  const auto current_time = Moose::currentTimeFunctorArg();
+  const auto current_time = Moose::currentState();
 
   ADReal coefficient = 0.0;
   if (_linear_friction)
-    coefficient += (*_linear_friction)(elem_arg, Moose::currentTimeFunctorArg());
+    coefficient += (*_linear_friction)(elem_arg, Moose::currentState());
   if (_quadratic_friction)
     coefficient += (*_quadratic_friction)(elem_arg, current_time) *
                    std::abs(_u_functor(elem_arg, current_time));

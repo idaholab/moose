@@ -86,7 +86,7 @@ TEST(FaceCenteredMapFunctorTest, testArgs)
     const auto face_arg =
         Moose::FaceArg{&fi, Moose::FV::LimiterType::CentralDifference, true, false, nullptr};
 
-    const auto result = u(face_arg, Moose::currentTimeFunctorArg());
+    const auto result = u(face_arg, Moose::currentState());
 
     EXPECT_NEAR(result(0), -sin(face_center(0)) * cos(face_center(1)), 1e-14);
     EXPECT_NEAR(result(1), cos(face_center(0)) * sin(face_center(1)), 1e-14);
@@ -99,7 +99,7 @@ TEST(FaceCenteredMapFunctorTest, testArgs)
   {
     try
     {
-      u.gradient(arg, Moose::currentTimeFunctorArg());
+      u.gradient(arg, Moose::currentState());
       EXPECT_TRUE(false);
     }
     catch (std::runtime_error & e)
@@ -114,7 +114,7 @@ TEST(FaceCenteredMapFunctorTest, testArgs)
   {
     try
     {
-      u(arg, Moose::currentTimeFunctorArg());
+      u(arg, Moose::currentState());
       EXPECT_TRUE(false);
     }
     catch (std::runtime_error & e)
@@ -147,7 +147,7 @@ TEST(FaceCenteredMapFunctorTest, testArgs)
   {
     unrestricted_error_test(
         FaceArg{&all_fi[2], LimiterType::CentralDifference, true, false, nullptr},
-        Moose::currentTimeFunctorArg());
+        Moose::currentState());
     EXPECT_TRUE(false);
   }
   catch (std::runtime_error & e)
@@ -161,7 +161,7 @@ TEST(FaceCenteredMapFunctorTest, testArgs)
   try
   {
     restricted_error_test(FaceArg{&all_fi[2], LimiterType::CentralDifference, true, false, nullptr},
-                          Moose::currentTimeFunctorArg());
+                          Moose::currentState());
     EXPECT_TRUE(false);
   }
   catch (std::runtime_error & e)

@@ -29,6 +29,6 @@ FunctorGapFluxModelRadiation::FunctorGapFluxModelRadiation(const InputParameters
 ADReal
 FunctorGapFluxModelRadiation::computeFlux() const
 {
-  return computeRadiationFlux(_T(_secondary_point, Moose::currentTimeFunctorArg()),
-                              _T(_primary_point, Moose::currentTimeFunctorArg()));
+  return computeRadiationFlux(_T(_secondary_point, Moose::currentState()),
+                              _T(_primary_point, Moose::currentState()));
 }

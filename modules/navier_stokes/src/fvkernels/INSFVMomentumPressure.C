@@ -43,5 +43,5 @@ ADReal
 INSFVMomentumPressure::computeQpResidual()
 {
   return _p.gradient(Moose::ElemArg{_current_elem, _correct_skewness},
-                     Moose::currentTimeFunctorArg())(_index);
+                     Moose::currentState())(_index);
 }

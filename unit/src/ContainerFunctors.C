@@ -90,7 +90,7 @@ TEST(ContainerFunctors, Test)
     for (const auto * const face : faces)
     {
       const auto face_arg = Moose::FaceArg({face, limiter_type, true, false, nullptr});
-      const auto current_time = Moose::currentTimeFunctorArg();
+      const auto current_time = Moose::currentState();
       EXPECT_TRUE(vector_functor(face_arg, current_time)[0] == 1.);
       EXPECT_TRUE(array_functor(face_arg, current_time)[0] == 1.);
 

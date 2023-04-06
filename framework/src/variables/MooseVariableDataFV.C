@@ -576,7 +576,7 @@ MooseVariableDataFV<OutputType>::computeAD(const unsigned int num_dofs, const un
 
   if (_need_ad_grad_u)
     assignForAllQps(static_cast<const MooseVariableFV<OutputType> &>(_var).adGradSln(
-                        _elem, Moose::currentTimeFunctorArg()),
+                        _elem, Moose::currentState()),
                     _ad_grad_u,
                     nqp);
 

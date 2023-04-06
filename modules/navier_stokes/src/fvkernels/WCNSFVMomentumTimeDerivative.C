@@ -40,7 +40,7 @@ WCNSFVMomentumTimeDerivative::gatherRCData(const Elem & elem)
   // INSFVMomentumTimeDerivative::gatherRCData
 
   const auto elem_arg = makeElemArg(&elem);
-  const auto current_time = Moose::currentTimeFunctorArg();
+  const auto current_time = Moose::currentState();
   const auto rho_dot = _rho_dot(elem_arg, current_time);
   const auto var_dot = _var.dot(elem_arg, current_time);
   const auto rho = _rho(elem_arg, current_time);

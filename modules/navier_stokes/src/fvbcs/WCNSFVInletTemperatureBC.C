@@ -84,7 +84,7 @@ WCNSFVInletTemperatureBC::WCNSFVInletTemperatureBC(const InputParameters & param
 ADReal
 WCNSFVInletTemperatureBC::boundaryValue(const FaceInfo & fi) const
 {
-  const auto current_time = Moose::currentTimeFunctorArg();
+  const auto current_time = Moose::currentState();
 
   if (_area_pp)
     if (MooseUtils::absoluteFuzzyEqual(*_area_pp, 0))

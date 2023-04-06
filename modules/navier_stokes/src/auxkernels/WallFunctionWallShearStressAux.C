@@ -95,7 +95,7 @@ WallFunctionWallShearStressAux::computeValue()
   if (!wall_bounded)
     return 0;
 
-  const auto current_time = Moose::currentTimeFunctorArg();
+  const auto current_time = Moose::currentState();
 
   // Get the velocity vector
   ADRealVectorValue velocity(_u_var->getElemValue(&elem, current_time));

@@ -396,7 +396,7 @@ FunctorBase<T>::queryFVArgCache(std::map<SpaceArg, ValueType> & cache_data,
   if (inserted)
     // value not ready to go
     // this function is only called from functions that assert we are in the current time state
-    value = evaluate(space, currentTimeFunctorArg());
+    value = evaluate(space, currentState());
 
   return value;
 }

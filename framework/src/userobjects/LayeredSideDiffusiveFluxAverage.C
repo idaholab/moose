@@ -44,7 +44,7 @@ LayeredSideDiffusiveFluxAverage::computeQpIntegral()
     mooseAssert(fi, "We should have a face info");
 
     // Get the gradient of the variable on the face
-    const auto & grad_u = _fv_variable->adGradSln(*fi, Moose::currentTimeFunctorArg());
+    const auto & grad_u = _fv_variable->adGradSln(*fi, Moose::currentState());
 
     // FIXME Get the diffusion coefficient on the face, see #16809
     return -MetaPhysicL::raw_value(_diffusion_coef[_qp] * grad_u * _normals[_qp]);

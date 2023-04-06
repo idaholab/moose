@@ -55,7 +55,7 @@ Real
 FunctorElementalAuxTempl<is_ad>::computeValue()
 {
   using MetaPhysicL::raw_value;
-  const auto current_time = Moose::currentTimeFunctorArg();
+  const auto current_time = Moose::currentState();
   if (_use_qp_arg)
   {
     const auto qp_arg = std::make_tuple(_current_elem, _qp, _qrule);

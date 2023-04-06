@@ -32,6 +32,6 @@ FVTwoVarContinuityConstraint::FVTwoVarContinuityConstraint(const InputParameters
 ADReal
 FVTwoVarContinuityConstraint::computeQpResidual()
 {
-  return var1().getBoundaryFaceValue(*_face_info, Moose::currentTimeFunctorArg()) -
-         var2().getBoundaryFaceValue(*_face_info, Moose::currentTimeFunctorArg());
+  return var1().getBoundaryFaceValue(*_face_info, Moose::currentState()) -
+         var2().getBoundaryFaceValue(*_face_info, Moose::currentState());
 }

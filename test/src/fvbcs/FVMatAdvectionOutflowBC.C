@@ -54,8 +54,8 @@ ADReal
 FVMatAdvectionOutflowBC::computeQpResidual()
 {
   const auto ssf = singleSidedFaceArg();
-  ADRealVectorValue v = _vel(ssf, Moose::currentTimeFunctorArg());
-  ADReal adv_quant_boundary = _adv_quant(ssf, Moose::currentTimeFunctorArg());
+  ADRealVectorValue v = _vel(ssf, Moose::currentState());
+  ADReal adv_quant_boundary = _adv_quant(ssf, Moose::currentState());
 
   return _normal * v * adv_quant_boundary;
 }

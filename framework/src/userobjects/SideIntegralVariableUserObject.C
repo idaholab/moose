@@ -41,8 +41,7 @@ SideIntegralVariableUserObject::computeQpIntegral()
     const FaceInfo * const fi = _mesh.faceInfo(_current_elem, _current_side);
     mooseAssert(fi, "We should have a face info");
 
-    return MetaPhysicL::raw_value(
-        _fv_variable->getBoundaryFaceValue(*fi, Moose::currentTimeFunctorArg()));
+    return MetaPhysicL::raw_value(_fv_variable->getBoundaryFaceValue(*fi, Moose::currentState()));
   }
   else
     return _u[_qp];

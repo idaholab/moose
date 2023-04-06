@@ -46,7 +46,7 @@ ADReal
 INSFVMomentumBoussinesq::computeQpResidual()
 {
   const auto elem = makeElemArg(_current_elem);
-  const auto current_time = Moose::currentTimeFunctorArg();
+  const auto current_time = Moose::currentState();
   return _alpha(elem, current_time) * _gravity(_index) * _rho(elem, current_time) *
          (_temperature(elem, current_time) - _ref_temperature);
 }

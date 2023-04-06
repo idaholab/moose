@@ -46,7 +46,7 @@ PINSFVMomentumDiffusion::computeStrongResidual()
 
   const auto elem_face = elemArg();
   const auto neighbor_face = neighborArg();
-  const auto current_time = Moose::currentTimeFunctorArg();
+  const auto current_time = Moose::currentState();
 
   // Compute the diffusion driven by the velocity gradient
   // Interpolate viscosity divided by porosity on the face

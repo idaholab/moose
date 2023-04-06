@@ -44,7 +44,7 @@ INSFVSymmetryVelocityBC::gatherRCData(const FaceInfo & fi)
   const bool use_elem = _face_info->faceType(_var.name()) == FaceInfo::VarFaceNeighbors::ELEM;
   const auto elem_arg =
       use_elem ? makeElemArg(&_face_info->elem()) : makeElemArg(_face_info->neighborPtr());
-  const auto current_time = Moose::currentTimeFunctorArg();
+  const auto current_time = Moose::currentState();
   const auto normal = use_elem ? _face_info->normal() : Point(-_face_info->normal());
   const Point & cell_centroid =
       use_elem ? _face_info->elemCentroid() : _face_info->neighborCentroid();

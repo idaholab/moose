@@ -172,11 +172,11 @@ struct StateArg
 private:
   StateArg() : state(0), iteration_type(SolutionIterationType::Time) {}
 
-  friend StateArg currentTimeFunctorArg();
+  friend StateArg currentState();
 };
 
 inline StateArg
-currentTimeFunctorArg()
+currentState()
 {
   return {};
 }

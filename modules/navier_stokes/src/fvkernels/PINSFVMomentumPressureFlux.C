@@ -56,7 +56,7 @@ PINSFVMomentumPressureFlux::computeQpResidual()
 
   const auto * const elem_ptr = use_elem ? &_face_info->elem() : _face_info->neighborPtr();
   const auto & elem = makeElemArg(elem_ptr);
-  const auto current_time = Moose::currentTimeFunctorArg();
+  const auto current_time = Moose::currentState();
 
   if (onBoundary(*_face_info))
     eps_p_interface = _eps(elem, current_time) * _p(singleSidedFaceArg(), current_time);

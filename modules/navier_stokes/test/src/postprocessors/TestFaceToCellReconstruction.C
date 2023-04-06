@@ -33,7 +33,7 @@ TestFaceToCellReconstruction::TestFaceToCellReconstruction(const InputParameters
 void
 TestFaceToCellReconstruction::initialize()
 {
-  const auto current_time = Moose::currentTimeFunctorArg();
+  const auto current_time = Moose::currentState();
 
   for (auto & fi : _fe_problem.mesh().faceInfo())
   {

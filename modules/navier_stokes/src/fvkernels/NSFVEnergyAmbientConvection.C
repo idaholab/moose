@@ -28,7 +28,7 @@ ADReal
 NSFVEnergyAmbientConvection::computeQpResidual()
 {
   auto elem_arg = makeElemArg(_current_elem);
-  const auto current_time = Moose::currentTimeFunctorArg();
+  const auto current_time = Moose::currentState();
   return _alpha(elem_arg, current_time) *
          (_var(elem_arg, current_time) - _temp_ambient(elem_arg, current_time));
 }

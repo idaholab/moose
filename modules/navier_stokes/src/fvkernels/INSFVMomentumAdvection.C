@@ -62,7 +62,7 @@ INSFVMomentumAdvection::computeResidualsAndAData(const FaceInfo & fi)
   _face_info = &fi;
   _normal = fi.normal();
   _face_type = fi.faceType(_var.name());
-  const auto current_time = Moose::currentTimeFunctorArg();
+  const auto current_time = Moose::currentState();
 
   using namespace Moose::FV;
 

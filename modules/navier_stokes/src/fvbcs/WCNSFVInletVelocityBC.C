@@ -67,7 +67,7 @@ WCNSFVInletVelocityBC::boundaryValue(const FaceInfo & fi) const
     return _scaling_factor * (*_velocity_pp);
   else
   {
-    ADReal rho = (*_rho)(singleSidedFaceArg(&fi), Moose::currentTimeFunctorArg());
+    ADReal rho = (*_rho)(singleSidedFaceArg(&fi), Moose::currentState());
 
     return _scaling_factor * (*_mdot_pp) / (*_area_pp * rho);
   }

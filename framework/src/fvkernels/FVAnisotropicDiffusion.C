@@ -45,7 +45,7 @@ FVAnisotropicDiffusion::FVAnisotropicDiffusion(const InputParameters & params)
 ADReal
 FVAnisotropicDiffusion::computeQpResidual()
 {
-  const auto current_time = Moose::currentTimeFunctorArg();
+  const auto current_time = Moose::currentState();
   const auto & grad_T = _var.adGradSln(*_face_info,
                                        current_time,
                                        _var.faceInterpolationMethod() ==

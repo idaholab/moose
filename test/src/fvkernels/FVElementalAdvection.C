@@ -49,9 +49,9 @@ FVElementalAdvection::FVElementalAdvection(const InputParameters & params)
 ADReal
 FVElementalAdvection::computeQpResidual()
 {
-  auto resid = _velocity * (_grad_prop ? (*_grad_prop)[_qp]
-                                       : _var.gradient(makeElemArg(_current_elem),
-                                                       Moose::currentTimeFunctorArg()));
+  auto resid =
+      _velocity * (_grad_prop ? (*_grad_prop)[_qp]
+                              : _var.gradient(makeElemArg(_current_elem), Moose::currentState()));
 
   if (_subproblem.getCoordSystem(_current_elem->subdomain_id()) == Moose::COORD_RZ)
   {

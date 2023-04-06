@@ -66,12 +66,12 @@ Real
 SideDiffusiveFluxIntegralTempl<is_ad, T>::computeFaceInfoIntegral(const FaceInfo * const fi)
 {
   // Get the gradient of the variable on the face
-  const auto grad_u = MetaPhysicL::raw_value(
-      _fv_variable->gradient(makeCDFace(*fi), Moose::currentTimeFunctorArg()));
+  const auto grad_u =
+      MetaPhysicL::raw_value(_fv_variable->gradient(makeCDFace(*fi), Moose::currentState()));
 
   return -diffusivityGradientProduct(grad_u,
                                      MetaPhysicL::raw_value((*_functor_diffusion_coef)(
-                                         makeCDFace(*fi), Moose::currentTimeFunctorArg()))) *
+                                         makeCDFace(*fi), Moose::currentState()))) *
          _normals[_qp];
 }
 

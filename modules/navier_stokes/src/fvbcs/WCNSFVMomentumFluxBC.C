@@ -65,7 +65,7 @@ WCNSFVMomentumFluxBC::computeQpResidual()
     // In the case when the stream comes with an angle we need to multiply this quantity
     // with the dot product of the surface normal and the incoming jet direction
     return -_scaling_factor * std::pow((*_velocity_pp), 2) * incoming_vector(_index) * cos_angle *
-           (*_rho)(singleSidedFaceArg(), Moose::currentTimeFunctorArg());
+           (*_rho)(singleSidedFaceArg(), Moose::currentState());
   }
   else
   // In this case the cosine of the angle is already incorporated in mdot so we will
@@ -73,7 +73,7 @@ WCNSFVMomentumFluxBC::computeQpResidual()
   {
     const auto velocity_magnitude =
         (*_mdot_pp) /
-        ((*_area_pp) * (*_rho)(singleSidedFaceArg(), Moose::currentTimeFunctorArg()) * cos_angle);
+        ((*_area_pp) * (*_rho)(singleSidedFaceArg(), Moose::currentState()) * cos_angle);
     return -_scaling_factor * (*_mdot_pp) / (*_area_pp) * incoming_vector(_index) *
            velocity_magnitude;
   }
