@@ -163,6 +163,7 @@ struct StateArg
 
   /// The state. Zero represents the most recent state, so for any kind of iteration type, a zero
   /// state represents the current state, e.g. current solution
+  /// One may represent the 'old' value (one before, in the iteration_type specified), and two an 'older' or two steps away state
   unsigned int state;
 
   /// The solution iteration type, e.g. time or nonlinear
