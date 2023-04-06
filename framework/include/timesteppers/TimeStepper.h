@@ -15,6 +15,7 @@
 
 class FEProblemBase;
 class Transient;
+class TimeStepperSystem;
 
 /**
  * Base class for time stepping
