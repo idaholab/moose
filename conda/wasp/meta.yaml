@@ -21,12 +21,11 @@ build:
 
 requirements:
   build:
-    - {{ moose_mpich }}
+    - {{ compiler('c') }}
+    - {{ compiler('cxx') }}
+    - {{ compiler('fortran') }}
+    - cmake
     - pkg-config
-  host:
-    - {{ moose_mpich }}
-  run:
-    - {{ moose_mpich }}
 
 test:
   commands:
