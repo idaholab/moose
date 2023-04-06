@@ -47,6 +47,10 @@ Checkpoint::validParams()
 
   // Advanced settings
   params.addParam<bool>("binary", true, "Toggle the output of binary files");
+  params.addParam<int>(
+      "autosave_interval",
+      600,
+      "Time in seconds that the checkpoint should wait to print out an automatic backup.");
   params.addParamNamesToGroup("binary", "Advanced");
   return params;
 }
@@ -61,8 +65,13 @@ Checkpoint::Checkpoint(const InputParameters & parameters)
     _restartable_data(_app.getRestartableData()),
     _restartable_data_io(RestartableDataIO(*_problem_ptr))
 {
-  if (_is_autosave == SYSTEM_AUTOSAVE || (_is_autosave == MODIFIED_EXISTING))
-    start_time = std::chrono::steady_clock::now();
+}
+
+void
+Checkpoint::initialSetup()
+{
+  _autosave_interval = std::chrono::seconds(getParam<int>("autosave_interval"));
+  start_time = std::chrono::steady_clock::now();
 }
 
 std::string
@@ -104,27 +113,32 @@ Checkpoint::outputStep(const ExecFlagType & type)
 bool
 Checkpoint::shouldOutput(const ExecFlagType & type)
 {
+
   // Check if the checkpoint should "normally" output, i.e. if it was created
   // through checkpoint=true
   bool shouldOutput = (onInterval() || type == EXEC_FINAL) ? FileOutput::shouldOutput(type) : false;
 
+  // Check if we should output an autosave based on a time interval.
+  auto curr_time = std::chrono::steady_clock::now();
+  auto elapsed = std::chrono::duration_cast<std::chrono::seconds>(curr_time - start_time);
+  if (shouldOutput and elapsed >= _autosave_interval)
+  {
+    start_time = std::chrono::steady_clock::now();
+    _console << std::to_string(_autosave_interval.count()) +
+                    " seconds have elapsed, autosaving checkpoint..."
+             << std::endl;
+    return true;
+  }
   // If this is either a auto-created checkpoint, or if its an existing checkpoint acting
   // as the autosave and that checkpoint isn't on its interval, then output.
   if (_is_autosave == SYSTEM_AUTOSAVE || (_is_autosave == MODIFIED_EXISTING && !shouldOutput))
   {
-    auto curr_time = std::chrono::steady_clock::now();
-    auto elapsed = std::chrono::duration_cast<std::chrono::minutes>(curr_time - start_time);
-    if (elapsed >= std::chrono::minutes(10))
-    {
-      start_time = std::chrono::steady_clock::now();
-      return true;
-    }
     // If this is a pure system-created autosave through AutoCheckpointAction,
     // then sync across processes and only output one time per signal received.
     comm().max(Moose::interrupt_signal_number);
     shouldOutput = (Moose::interrupt_signal_number != 0);
     if (shouldOutput)
-      _console << "Unix signal SIGUSR1 detected. Outputting checkpoint file. \n";
+      _console << "Unix signal SIGUSR1 detected. Outputting checkpoint file. " << std::endl;
     Moose::interrupt_signal_number = 0;
   }
   return shouldOutput;

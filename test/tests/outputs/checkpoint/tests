@@ -155,4 +155,25 @@
       detail = "be capable of restarting a simulation from the output data."
     []
   []
+  [autosave_timer]
+    type = RunApp
+    expect_out = "1 seconds have elapsed, autosaving checkpoint..."
+    input = autosavetimer.i
+    recover = false
+    max_parallel = 1
+    max_threads = 1
+    requirement = "The system shall output an automatic checkpoint after a specified interval of time."
+    issues = "#12722"
+  []
+  [autosave_timer_system]
+    type = RunApp
+    expect_out = "1 seconds have elapsed, autosaving checkpoint..."
+    input = autosavetimer.i
+    cli_args = "Outputs/cp/type=TestAutosaveTimedCheckpoint"
+    recover = false
+    max_parallel = 1
+    max_threads = 1
+    requirement = "The system shall output an automatic checkpoint after an amount of time, regardless of whether a regular checkpoint object exists in the system."
+    issues = "#12722"
+  []
 []

@@ -63,6 +63,8 @@ public:
    */
   Checkpoint(const InputParameters & parameters);
 
+  virtual void initialSetup() override;
+
   /**
    * Returns the base filename for the checkpoint files
    */
@@ -88,6 +90,9 @@ public:
   /// Sets the autosave flag manually if the object has already been initialized.
   void setAutosaveFlag(AutosaveType flag) { _is_autosave = flag; }
 
+  // Needed to manually change _is_autosave after construction to test the timer.
+  friend class TestAutosaveTimedCheckpoint;
+
 protected:
   /**
    * Outputs a checkpoint file.
@@ -103,6 +108,9 @@ private:
 
   /// Determines if this checkpoint is an autosave, and what kind of autosave it is.
   AutosaveType _is_autosave;
+
+  /// Determines how long to wait in seconds before printing out an automatic checkpoint. Set to 10 minutes by default.
+  std::chrono::duration<int, std::ratio<1>> _autosave_interval;
 
   /// Max no. of output files to store
   unsigned int _num_files;
