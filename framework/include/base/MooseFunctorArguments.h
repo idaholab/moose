@@ -139,7 +139,12 @@ using ElemQpArg = std::tuple<const libMesh::Elem *, unsigned int, const QBase *>
 using ElemSideQpArg = std::tuple<const libMesh::Elem *, unsigned int, unsigned int, const QBase *>;
 
 /**
- * Temporal argument for evaluating functors
+ * State argument for evaluating functors. The iteration type indicates whether you want to evaluate
+ * a functor based on some iterate state of a transient calculation, nonlinear solve, etc. The state
+ * indicates which iterate of the iterate type we want to evaluate on. A state of 0 indicates
+ * "current", e.g. the current time or the current nonlinear iteration (which should actually be
+ * equivalent); a state of 1 indicates the most-recent "old" time or the most recent previous
+ * nonlinear iteration, etc.
  */
 struct StateArg
 {
