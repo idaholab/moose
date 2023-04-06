@@ -45,7 +45,7 @@ Real
 FunctorVectorElementalAuxTempl<is_ad>::computeValue()
 {
   const auto elem_arg = makeElemArg(_current_elem);
-  const auto current_time = Moose::currentState();
+  const auto current_time = Moose::autoState();
   return MetaPhysicL::raw_value(_factor(elem_arg, current_time)) *
          MetaPhysicL::raw_value(_functor(elem_arg, current_time)(_component));
 }
