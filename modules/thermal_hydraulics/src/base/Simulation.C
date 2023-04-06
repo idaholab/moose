@@ -268,51 +268,139 @@ Simulation::printComponentLoops() const
 }
 
 void
-Simulation::addSimVariable(bool nl, const VariableName & name, FEType type, Real scaling_factor)
+Simulation::addSimVariable(bool nl, const VariableName & name, FEType fe_type, Real scaling_factor)
 {
-  if (_vars.find(name) == _vars.end())
+  checkVariableNameLength(name);
+
+  if (fe_type.family != SCALAR)
+    mooseError("This method should only be used for scalar variables.");
+
+  if (_vars.find(name) == _vars.end()) // variable is new
   {
     VariableInfo vi;
+    InputParameters & params = vi._params;
+
     vi._nl = nl;
-    vi._type = type;
-    vi._scaling_factor = scaling_factor;
+    vi._var_type = "MooseVariableScalar";
+    params = _thm_factory.getValidParams(vi._var_type);
+
+    auto family = AddVariableAction::getNonlinearVariableFamilies();
+    family = Utility::enum_to_string(fe_type.family);
+    params.set<MooseEnum>("family") = family;
+
+    auto order = AddVariableAction::getNonlinearVariableOrders();
+    order = Utility::enum_to_string<Order>(fe_type.order);
+    params.set<MooseEnum>("order") = order;
+
+    if (nl)
+      params.set<std::vector<Real>>("scaling") = {scaling_factor};
+    else if (!MooseUtils::absoluteFuzzyEqual(scaling_factor, 1.0))
+      mooseError("Aux variables cannot be provided a residual scaling factor.");
+
     _vars[name] = vi;
   }
   else
-  {
-    VariableInfo & vi = _vars[name];
-    if (vi._type != type)
-      mooseError(
-          "A component is trying to add variable of the same name but with different order/type");
-  }
+    // One of the two cases is true:
+    // - This variable was previously added as a scalar variable, and scalar
+    //   variables should not be added more than once, since there is no block
+    //   restriction to extend, as there is in the field variable version of this
+    //   method.
+    // - This variable was previously added as a field variable, and a variable
+    //   may have only one type (this method is used for scalar variables only).
+    mooseError("The variable '", name, "' was already added.");
 }
 
 void
 Simulation::addSimVariable(bool nl,
                            const VariableName & name,
-                           FEType type,
+                           FEType fe_type,
                            const std::vector<SubdomainName> & subdomain_names,
-                           Real scaling_factor /* = 1.*/)
+                           Real scaling_factor)
 {
-  if (_vars.find(name) == _vars.end())
+  checkVariableNameLength(name);
+
+  if (fe_type.family == SCALAR)
+    mooseDeprecated(
+        "The version of Simulation::addSimVariable() with subdomain names can no longer be used "
+        "with scalar variables since scalar variables cannot be block-restricted. Use the version "
+        "of Simulation::addSimVariable() without subdomain names instead.");
+
+  if (_vars.find(name) == _vars.end()) // variable is new
   {
     VariableInfo vi;
+    InputParameters & params = vi._params;
+
     vi._nl = nl;
-    vi._type = type;
-    for (auto && sdn : subdomain_names)
-      vi._subdomain.insert(sdn);
-    vi._scaling_factor = scaling_factor;
+    vi._var_type = "MooseVariable";
+    params = _thm_factory.getValidParams(vi._var_type);
+    params.set<std::vector<SubdomainName>>("block") = subdomain_names;
+
+    auto family = AddVariableAction::getNonlinearVariableFamilies();
+    family = Utility::enum_to_string(fe_type.family);
+    params.set<MooseEnum>("family") = family;
+
+    auto order = AddVariableAction::getNonlinearVariableOrders();
+    order = Utility::enum_to_string<Order>(fe_type.order);
+    params.set<MooseEnum>("order") = order;
+
+    if (nl)
+      params.set<std::vector<Real>>("scaling") = {scaling_factor};
+    else if (!MooseUtils::absoluteFuzzyEqual(scaling_factor, 1.0))
+      mooseError("Aux variables cannot be provided a residual scaling factor.");
+
     _vars[name] = vi;
   }
-  else
+  else // variable was previously added
   {
     VariableInfo & vi = _vars[name];
-    if (vi._type != type)
-      mooseError(
-          "A component is trying to add variable of the same name but with different order/type");
-    for (auto && sdn : subdomain_names)
-      vi._subdomain.insert(sdn);
+    InputParameters & params = vi._params;
+
+    if (vi._nl != nl)
+      mooseError("The variable '",
+                 name,
+                 "' has already been added in a different system (nonlinear or aux).");
+
+    if (vi._var_type != "MooseVariable")
+      mooseError("The variable '",
+                 name,
+                 "' has already been added with a different type than 'MooseVariable'.");
+
+    auto family = AddVariableAction::getNonlinearVariableFamilies();
+    family = Utility::enum_to_string(fe_type.family);
+    if (!params.get<MooseEnum>("family").compareCurrent(family))
+      mooseError("The variable '", name, "' has already been added with a different FE family.");
+
+    auto order = AddVariableAction::getNonlinearVariableOrders();
+    order = Utility::enum_to_string<Order>(fe_type.order);
+    if (!params.get<MooseEnum>("order").compareCurrent(order))
+      mooseError("The variable '", name, "' has already been added with a different FE order.");
+
+    // If already block-restricted, extend the block restriction
+    if (params.isParamValid("block"))
+    {
+      auto blocks = params.get<std::vector<SubdomainName>>("block");
+      for (const auto & subdomain_name : subdomain_names)
+        if (std::find(blocks.begin(), blocks.end(), subdomain_name) == blocks.end())
+          blocks.push_back(subdomain_name);
+      params.set<std::vector<SubdomainName>>("block") = blocks;
+    }
+    else
+      params.set<std::vector<SubdomainName>>("block") = subdomain_names;
+
+    if (params.isParamValid("scaling"))
+      if (!MooseUtils::absoluteFuzzyEqual(params.get<std::vector<Real>>("scaling")[0],
+                                          scaling_factor))
+        mooseError(
+            "The variable '", name, "' has already been added with a different scaling factor.");
   }
+}
+
+void
+Simulation::checkVariableNameLength(const std::string & name) const
+{
+  if (name.size() > THM::MAX_VARIABLE_LENGTH)
+    mooseError(
+        "Variable name '", name, "' is too long. The limit is ", THM::MAX_VARIABLE_LENGTH, ".");
 }
 
 void
@@ -431,69 +519,13 @@ Simulation::addVariables()
   // pass the variables to MOOSE
   for (auto && v : _vars)
   {
-    VariableName name = v.first;
-    if (name.size() > THM::MAX_VARIABLE_LENGTH)
-      mooseError(
-          "Variable name '", name, "' is too long. The limit is ", THM::MAX_VARIABLE_LENGTH, ".");
-
+    const VariableName & name = v.first;
     VariableInfo & vi = v.second;
 
-    if (vi._type.family != SCALAR)
-    {
-      auto order = AddVariableAction::getNonlinearVariableOrders();
-      order = Utility::enum_to_string<Order>(vi._type.order);
-      auto family = AddVariableAction::getNonlinearVariableFamilies();
-      family = Utility::enum_to_string(vi._type.family);
-
-      auto var_type = "MooseVariable";
-      InputParameters params = _thm_factory.getValidParams(var_type);
-      params.set<MooseEnum>("order") = order;
-      params.set<MooseEnum>("family") = family;
-      if (!vi._subdomain.empty())
-      {
-        std::vector<SubdomainName> subdomains(vi._subdomain.begin(), vi._subdomain.end());
-        params.set<std::vector<SubdomainName>>("block") = subdomains;
-      }
-
-      if (vi._nl)
-      {
-        params.set<std::vector<Real>>("scaling") = {vi._scaling_factor};
-        _fe_problem.addVariable(var_type, name, params);
-      }
-      else
-        _fe_problem.addAuxVariable(var_type, name, params);
-    }
-  }
-
-  // pass the scalar variables to MOOSE
-  for (auto && v : _vars)
-  {
-    const VariableName & name = v.first;
-    if (name.size() > THM::MAX_VARIABLE_LENGTH)
-      mooseError(
-          "Variable name '", name, "' is too long. The limit is ", THM::MAX_VARIABLE_LENGTH, ".");
-    const VariableInfo & vi = v.second;
-
-    if (vi._type.family == SCALAR)
-    {
-      auto order = AddVariableAction::getNonlinearVariableOrders();
-      order = Utility::enum_to_string<Order>(vi._type.order);
-      auto family = AddVariableAction::getNonlinearVariableFamilies();
-      family = Utility::enum_to_string(vi._type.family);
-
-      auto var_type = "MooseVariableScalar";
-      InputParameters params = _thm_factory.getValidParams(var_type);
-      params.set<MooseEnum>("order") = order;
-      params.set<MooseEnum>("family") = family;
-
-      if (vi._nl)
-      {
-        params.set<std::vector<Real>>("scaling") = {vi._scaling_factor};
-        _fe_problem.addVariable(var_type, name, params);
-      }
-      else
-        _fe_problem.addAuxVariable(var_type, name, params);
-    }
+    if (vi._nl)
+      _fe_problem.addVariable(vi._var_type, name, vi._params);
+    else
+      _fe_problem.addAuxVariable(vi._var_type, name, vi._params);
   }
 
   if (hasInitialConditionsFromFile())
@@ -517,9 +549,9 @@ Simulation::setupInitialConditionsFromFile()
   for (auto && v : _vars)
   {
     const VariableName & var_name = v.first;
-    VariableInfo & vi = v.second;
+    const VariableInfo & vi = v.second;
 
-    if (vi._type.family == SCALAR)
+    if (vi._var_type == "MooseVariableScalar")
     {
       std::string class_name = "ScalarSolutionInitialCondition";
       InputParameters params = _thm_factory.getValidParams(class_name);
@@ -535,11 +567,9 @@ Simulation::setupInitialConditionsFromFile()
       params.set<VariableName>("variable") = var_name;
       params.set<VariableName>("from_variable") = var_name;
       params.set<UserObjectName>("solution_uo") = suo_name;
-      if (vi._subdomain.size() > 0)
-      {
-        std::vector<SubdomainName> subdomains(vi._subdomain.begin(), vi._subdomain.end());
-        params.set<std::vector<SubdomainName>>("block") = subdomains;
-      }
+      if (vi._params.isParamValid("block"))
+        params.set<std::vector<SubdomainName>>("block") =
+            vi._params.get<std::vector<SubdomainName>>("block");
       _fe_problem.addInitialCondition(class_name, genName(var_name, "ic"), params);
     }
   }
