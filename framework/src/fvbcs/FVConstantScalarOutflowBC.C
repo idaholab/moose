@@ -35,5 +35,5 @@ FVConstantScalarOutflowBC::computeQpResidual()
 
   // This will either be second or first order accurate depending on whether the user has asked
   // for a two term expansion in their input file
-  return _normal * _velocity * _var.getBoundaryFaceValue(*_face_info, Moose::currentState());
+  return _normal * _velocity * _var.getBoundaryFaceValue(*_face_info, Moose::autoState());
 }
