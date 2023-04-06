@@ -26,5 +26,5 @@ public:
 
   bool isExtrapolatedBoundaryFace(const FaceInfo & fi,
                                   const Elem * elem,
-                                  const Moose::TimeArg & time) const override;
+                                  const Moose::StateArg & time) const override;
 };

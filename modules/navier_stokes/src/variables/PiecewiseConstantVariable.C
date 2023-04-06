@@ -27,7 +27,7 @@ PiecewiseConstantVariable::PiecewiseConstantVariable(const InputParameters & par
 bool
 PiecewiseConstantVariable::isExtrapolatedBoundaryFace(const FaceInfo & fi,
                                                       const Elem * const elem,
-                                                      const Moose::TimeArg & time) const
+                                                      const Moose::StateArg & time) const
 {
   if (isDirichletBoundaryFace(fi, elem, time))
     return false;

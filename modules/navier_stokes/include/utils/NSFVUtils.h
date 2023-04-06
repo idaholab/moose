@@ -69,5 +69,5 @@ namespace NS
  */
 std::tuple<bool, ADReal, ADReal> isPorosityJumpFace(const Moose::Functor<ADReal> & porosity,
                                                     const FaceInfo & fi,
-                                                    const Moose::TimeArg & time);
+                                                    const Moose::StateArg & time);
 }

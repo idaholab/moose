@@ -264,7 +264,7 @@ interpolate(InterpMethod m,
  */
 template <typename T>
 T
-linearInterpolation(const FunctorBase<T> & functor, const FaceArg & face, const TimeArg & time)
+linearInterpolation(const FunctorBase<T> & functor, const FaceArg & face, const StateArg & time)
 {
   mooseAssert(face.limiter_type == LimiterType::CentralDifference,
               "this interpolation method is meant for linear interpolations");
@@ -368,7 +368,7 @@ interpolate(InterpMethod m,
 /// those calculations should be handled appropriately by this function.
 ADReal gradUDotNormal(const FaceInfo & face_info,
                       const MooseVariableFV<Real> & fv_var,
-                      const Moose::TimeArg & time,
+                      const Moose::StateArg & time,
                       bool correct_skewness = false);
 
 /**
@@ -499,7 +499,7 @@ interpolate(const Limiter & limiter,
  */
 template <typename T, typename Enable = typename std::enable_if<ScalarTraits<T>::value>::type>
 std::pair<std::pair<T, T>, std::pair<T, T>>
-interpCoeffsAndAdvected(const FunctorBase<T> & functor, const FaceArg & face, const TimeArg & time)
+interpCoeffsAndAdvected(const FunctorBase<T> & functor, const FaceArg & face, const StateArg & time)
 {
   typedef typename FunctorBase<T>::GradientType GradientType;
   static const GradientType zero(0);
@@ -535,7 +535,7 @@ interpCoeffsAndAdvected(const FunctorBase<T> & functor, const FaceArg & face, co
 
 template <typename T, typename Enable = typename std::enable_if<ScalarTraits<T>::value>::type>
 T
-interpolate(const FunctorBase<T> & functor, const FaceArg & face, const TimeArg & time)
+interpolate(const FunctorBase<T> & functor, const FaceArg & face, const StateArg & time)
 {
   // Special handling for central differencing as it is the only interpolation method which
   // currently supports skew correction
@@ -548,7 +548,9 @@ interpolate(const FunctorBase<T> & functor, const FaceArg & face, const TimeArg 
 
 template <typename T>
 VectorValue<T>
-interpolate(const FunctorBase<VectorValue<T>> & functor, const FaceArg & face, const TimeArg & time)
+interpolate(const FunctorBase<VectorValue<T>> & functor,
+            const FaceArg & face,
+            const StateArg & time)
 {
   static const VectorValue<T> grad_zero(0);
 
@@ -596,7 +598,7 @@ interpolate(const FunctorBase<VectorValue<T>> & functor, const FaceArg & face, c
 
 template <typename T>
 T
-containerInterpolate(const FunctorBase<T> & functor, const FaceArg & face, const TimeArg & time)
+containerInterpolate(const FunctorBase<T> & functor, const FaceArg & face, const StateArg & time)
 {
   typedef typename FunctorBase<T>::GradientType ContainerGradientType;
   typedef typename ContainerGradientType::value_type GradientType;
@@ -647,7 +649,9 @@ containerInterpolate(const FunctorBase<T> & functor, const FaceArg & face, const
 
 template <typename T>
 std::vector<T>
-interpolate(const FunctorBase<std::vector<T>> & functor, const FaceArg & face, const TimeArg & time)
+interpolate(const FunctorBase<std::vector<T>> & functor,
+            const FaceArg & face,
+            const StateArg & time)
 {
   return containerInterpolate(functor, face, time);
 }
@@ -656,7 +660,7 @@ template <typename T, std::size_t N>
 std::array<T, N>
 interpolate(const FunctorBase<std::array<T, N>> & functor,
             const FaceArg & face,
-            const TimeArg & time)
+            const StateArg & time)
 {
   return containerInterpolate(functor, face, time);
 }

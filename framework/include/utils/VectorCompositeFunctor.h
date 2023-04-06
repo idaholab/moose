@@ -50,14 +50,14 @@ public:
   VectorCompositeFunctor(const MooseFunctorName & name, const FunctorBase<T> & x_comp);
 
 private:
-  ValueType evaluate(const ElemArg & elem_arg, const TimeArg & time) const override;
-  ValueType evaluate(const FaceArg & face, const TimeArg & time) const override;
-  ValueType evaluate(const ElemQpArg & elem_qp, const TimeArg & time) const override;
-  ValueType evaluate(const ElemSideQpArg & elem_side_qp, const TimeArg & time) const override;
-  ValueType evaluate(const ElemPointArg & elem_point_arg, const TimeArg & time) const override;
+  ValueType evaluate(const ElemArg & elem_arg, const StateArg & time) const override;
+  ValueType evaluate(const FaceArg & face, const StateArg & time) const override;
+  ValueType evaluate(const ElemQpArg & elem_qp, const StateArg & time) const override;
+  ValueType evaluate(const ElemSideQpArg & elem_side_qp, const StateArg & time) const override;
+  ValueType evaluate(const ElemPointArg & elem_point_arg, const StateArg & time) const override;
 
   using FunctorBase<VectorValue<T>>::evaluateGradient;
-  GradientType evaluateGradient(const ElemArg & elem_arg, const TimeArg & time) const override;
+  GradientType evaluateGradient(const ElemArg & elem_arg, const StateArg & time) const override;
 
   /// Possible holder of constant-0 y-component functor. This will be allocated if the user only
   /// supplies one component functor during construction
@@ -110,35 +110,36 @@ VectorCompositeFunctor<T>::VectorCompositeFunctor(const MooseFunctorName & name,
 
 template <typename T>
 typename VectorCompositeFunctor<T>::ValueType
-VectorCompositeFunctor<T>::evaluate(const ElemArg & elem_arg, const TimeArg & time) const
+VectorCompositeFunctor<T>::evaluate(const ElemArg & elem_arg, const StateArg & time) const
 {
   return {_x_comp(elem_arg, time), _y_comp(elem_arg, time), _z_comp(elem_arg, time)};
 }
 
 template <typename T>
 typename VectorCompositeFunctor<T>::ValueType
-VectorCompositeFunctor<T>::evaluate(const FaceArg & face, const TimeArg & time) const
+VectorCompositeFunctor<T>::evaluate(const FaceArg & face, const StateArg & time) const
 {
   return {_x_comp(face, time), _y_comp(face, time), _z_comp(face, time)};
 }
 
 template <typename T>
 typename VectorCompositeFunctor<T>::ValueType
-VectorCompositeFunctor<T>::evaluate(const ElemQpArg & elem_qp, const TimeArg & time) const
+VectorCompositeFunctor<T>::evaluate(const ElemQpArg & elem_qp, const StateArg & time) const
 {
   return {_x_comp(elem_qp, time), _y_comp(elem_qp, time), _z_comp(elem_qp, time)};
 }
 
 template <typename T>
 typename VectorCompositeFunctor<T>::ValueType
-VectorCompositeFunctor<T>::evaluate(const ElemSideQpArg & elem_side_qp, const TimeArg & time) const
+VectorCompositeFunctor<T>::evaluate(const ElemSideQpArg & elem_side_qp, const StateArg & time) const
 {
   return {_x_comp(elem_side_qp, time), _y_comp(elem_side_qp, time), _z_comp(elem_side_qp, time)};
 }
 
 template <typename T>
 typename VectorCompositeFunctor<T>::ValueType
-VectorCompositeFunctor<T>::evaluate(const ElemPointArg & elem_point_arg, const TimeArg & time) const
+VectorCompositeFunctor<T>::evaluate(const ElemPointArg & elem_point_arg,
+                                    const StateArg & time) const
 {
   return {
       _x_comp(elem_point_arg, time), _y_comp(elem_point_arg, time), _z_comp(elem_point_arg, time)};
@@ -146,7 +147,7 @@ VectorCompositeFunctor<T>::evaluate(const ElemPointArg & elem_point_arg, const T
 
 template <typename T>
 typename VectorCompositeFunctor<T>::GradientType
-VectorCompositeFunctor<T>::evaluateGradient(const ElemArg & elem_arg, const TimeArg & time) const
+VectorCompositeFunctor<T>::evaluateGradient(const ElemArg & elem_arg, const StateArg & time) const
 {
   return {_x_comp.gradient(elem_arg, time),
           _y_comp.gradient(elem_arg, time),

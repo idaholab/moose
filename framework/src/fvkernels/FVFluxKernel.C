@@ -269,7 +269,7 @@ FVFluxKernel::computeResidualAndJacobian(const FaceInfo & fi)
 }
 
 ADReal
-FVFluxKernel::gradUDotNormal(const Moose::TimeArg & time) const
+FVFluxKernel::gradUDotNormal(const Moose::StateArg & time) const
 {
   mooseAssert(_face_info, "the face info should be non-null");
 

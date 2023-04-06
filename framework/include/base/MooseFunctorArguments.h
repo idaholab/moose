@@ -141,17 +141,17 @@ using ElemSideQpArg = std::tuple<const libMesh::Elem *, unsigned int, unsigned i
 /**
  * Temporal argument for evaluating functors
  */
-struct TimeArg
+struct StateArg
 {
   /**
    * Prevent implicit conversions from boolean to avoid users accidentally constructing a time
    * argument when they meant to construct a skewness argument, etc.
    */
-  TimeArg(bool) = delete;
+  StateArg(bool) = delete;
 
-  TimeArg(unsigned int state_in) : state(state_in), iteration_type(SolutionIterationType::Time) {}
+  StateArg(unsigned int state_in) : state(state_in), iteration_type(SolutionIterationType::Time) {}
 
-  TimeArg(unsigned int state_in, SolutionIterationType iteration_type_in)
+  StateArg(unsigned int state_in, SolutionIterationType iteration_type_in)
     : state(state_in), iteration_type(iteration_type_in)
   {
   }
@@ -164,12 +164,12 @@ struct TimeArg
   SolutionIterationType iteration_type;
 
 private:
-  TimeArg() : state(0), iteration_type(SolutionIterationType::Time) {}
+  StateArg() : state(0), iteration_type(SolutionIterationType::Time) {}
 
-  friend TimeArg currentTimeFunctorArg();
+  friend StateArg currentTimeFunctorArg();
 };
 
-inline TimeArg
+inline StateArg
 currentTimeFunctorArg()
 {
   return {};

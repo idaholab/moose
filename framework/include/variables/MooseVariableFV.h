@@ -77,7 +77,7 @@ public:
   using ElemQpArg = Moose::ElemQpArg;
   using ElemArg = Moose::ElemArg;
   using FaceArg = Moose::FaceArg;
-  using TimeArg = Moose::TimeArg;
+  using StateArg = Moose::TimeArg;
 
   static InputParameters validParams();
 
@@ -268,7 +268,7 @@ public:
    * @return The gradient at the element centroid
    */
   virtual const VectorValue<ADReal> & adGradSln(const Elem * const elem,
-                                                const TimeArg & time,
+                                                const StateArg & time,
                                                 const bool correct_skewness = false) const;
 
   /**
@@ -282,7 +282,7 @@ public:
    * @param correct_skewness Whether to perform skew corrections
    */
   virtual VectorValue<ADReal>
-  adGradSln(const FaceInfo & fi, const TimeArg & time, const bool correct_skewness = false) const;
+  adGradSln(const FaceInfo & fi, const StateArg & time, const bool correct_skewness = false) const;
 
   /**
    * Retrieve (or potentially compute) the uncorrected gradient on the provided face. This
@@ -297,7 +297,7 @@ public:
    * @param correct_skewness Whether to perform skew corrections
    */
   virtual VectorValue<ADReal> uncorrectedAdGradSln(const FaceInfo & fi,
-                                                   const TimeArg & time,
+                                                   const StateArg & time,
                                                    const bool correct_skewness = false) const;
 
   /**
@@ -307,7 +307,7 @@ public:
    * value to the face
    */
   ADReal getBoundaryFaceValue(const FaceInfo & fi,
-                              const TimeArg & time,
+                              const StateArg & time,
                               bool correct_skewness = false) const;
 
   const ADTemplateVariableSecond<OutputType> & adSecondSln() const override
@@ -452,7 +452,7 @@ public:
    * @param time Temporal argument which describes at what time state we want to evaluate the
    * variable
    */
-  ADReal getElemValue(const Elem * elem, const TimeArg & time) const;
+  ADReal getElemValue(const Elem * elem, const StateArg & time) const;
 
   using FunctorArg = typename Moose::ADType<OutputType>::type;
   using typename Moose::FunctorBase<FunctorArg>::ValueType;
@@ -486,7 +486,7 @@ protected:
    */
   virtual bool isDirichletBoundaryFace(const FaceInfo & fi,
                                        const Elem * elem,
-                                       const Moose::TimeArg & time) const;
+                                       const Moose::StateArg & time) const;
 
   /**
    * Retrieves a Dirichlet boundary value for the provided face. Callers of this method should be
@@ -503,7 +503,7 @@ protected:
    */
   virtual ADReal getDirichletBoundaryFaceValue(const FaceInfo & fi,
                                                const Elem * elem,
-                                               const Moose::TimeArg & time) const;
+                                               const Moose::StateArg & time) const;
 
   /**
    * Returns whether this is an extrapolated boundary face. An extrapolated boundary face is
@@ -521,7 +521,7 @@ protected:
    */
   bool isExtrapolatedBoundaryFace(const FaceInfo & fi,
                                   const Elem * elem,
-                                  const Moose::TimeArg & time) const override;
+                                  const Moose::StateArg & time) const override;
 
   /**
    * Retrieves an extrapolated boundary value for the provided face. Callers of this method should
@@ -547,19 +547,19 @@ protected:
                                                   bool two_term_expansion,
                                                   bool correct_skewness,
                                                   const Elem * elem_side_to_extrapolate_from,
-                                                  const TimeArg & time) const;
+                                                  const StateArg & time) const;
 
 private:
   using MooseVariableField<OutputType>::evaluate;
   using MooseVariableField<OutputType>::evaluateGradient;
   using MooseVariableField<OutputType>::evaluateDot;
 
-  ValueType evaluate(const ElemArg & elem, const TimeArg &) const override final;
-  ValueType evaluate(const FaceArg & face, const TimeArg &) const override final;
-  GradientType evaluateGradient(const ElemQpArg & qp_arg, const TimeArg &) const override final;
-  GradientType evaluateGradient(const ElemArg & elem_arg, const TimeArg &) const override final;
-  GradientType evaluateGradient(const FaceArg & face, const TimeArg &) const override final;
-  DotType evaluateDot(const ElemArg & elem, const TimeArg &) const override final;
+  ValueType evaluate(const ElemArg & elem, const StateArg &) const override final;
+  ValueType evaluate(const FaceArg & face, const StateArg &) const override final;
+  GradientType evaluateGradient(const ElemQpArg & qp_arg, const StateArg &) const override final;
+  GradientType evaluateGradient(const ElemArg & elem_arg, const StateArg &) const override final;
+  GradientType evaluateGradient(const FaceArg & face, const StateArg &) const override final;
+  DotType evaluateDot(const ElemArg & elem, const StateArg &) const override final;
 
   /**
    * Setup the boundary to Dirichlet BC map
@@ -703,28 +703,28 @@ MooseVariableFV<OutputType>::adDofValuesNeighbor() const
 
 template <typename OutputType>
 typename MooseVariableFV<OutputType>::ValueType
-MooseVariableFV<OutputType>::evaluate(const ElemArg & elem_arg, const TimeArg & time) const
+MooseVariableFV<OutputType>::evaluate(const ElemArg & elem_arg, const StateArg & time) const
 {
   return getElemValue(elem_arg.elem, time);
 }
 
 template <typename OutputType>
 typename MooseVariableFV<OutputType>::GradientType
-MooseVariableFV<OutputType>::evaluateGradient(const ElemQpArg & qp_arg, const TimeArg & time) const
+MooseVariableFV<OutputType>::evaluateGradient(const ElemQpArg & qp_arg, const StateArg & time) const
 {
   return adGradSln(std::get<0>(qp_arg), time, false);
 }
 
 template <typename OutputType>
 typename MooseVariableFV<OutputType>::GradientType
-MooseVariableFV<OutputType>::evaluateGradient(const ElemArg & elem_arg, const TimeArg & time) const
+MooseVariableFV<OutputType>::evaluateGradient(const ElemArg & elem_arg, const StateArg & time) const
 {
   return adGradSln(elem_arg.elem, time, elem_arg.correct_skewness);
 }
 
 template <typename OutputType>
 typename MooseVariableFV<OutputType>::GradientType
-MooseVariableFV<OutputType>::evaluateGradient(const FaceArg & face, const TimeArg & time) const
+MooseVariableFV<OutputType>::evaluateGradient(const FaceArg & face, const StateArg & time) const
 {
   mooseAssert(face.fi, "We must have a non-null face information");
   return adGradSln(*face.fi, time, face.correct_skewness);
@@ -756,4 +756,4 @@ MooseVariableFV<OutputType>::meshChanged()
 }
 
 template <>
-ADReal MooseVariableFV<Real>::evaluateDot(const ElemArg & elem, const TimeArg & time) const;
+ADReal MooseVariableFV<Real>::evaluateDot(const ElemArg & elem, const StateArg & time) const;

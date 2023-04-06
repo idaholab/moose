@@ -29,7 +29,7 @@ public:
 
   virtual bool isExtrapolatedBoundaryFace(const FaceInfo & fi,
                                           const Elem * const elem,
-                                          const Moose::TimeArg & time) const override
+                                          const Moose::StateArg & time) const override
   {
     return _ad_functor.isExtrapolatedBoundaryFace(fi, elem, time);
   }
@@ -45,66 +45,66 @@ protected:
   /**
    * Forward calls to wrapped object
    */
-  ValueType evaluate(const ElemArg & elem, const TimeArg & time) const override
+  ValueType evaluate(const ElemArg & elem, const StateArg & time) const override
   {
     return MetaPhysicL::raw_value(_ad_functor(elem, time));
   }
-  ValueType evaluate(const FaceArg & face, const TimeArg & time) const override
+  ValueType evaluate(const FaceArg & face, const StateArg & time) const override
   {
     return MetaPhysicL::raw_value(_ad_functor(face, time));
   }
-  ValueType evaluate(const ElemQpArg & qp, const TimeArg & time) const override
+  ValueType evaluate(const ElemQpArg & qp, const StateArg & time) const override
   {
     return MetaPhysicL::raw_value(_ad_functor(qp, time));
   }
-  ValueType evaluate(const ElemSideQpArg & qp, const TimeArg & time) const override
+  ValueType evaluate(const ElemSideQpArg & qp, const StateArg & time) const override
   {
     return MetaPhysicL::raw_value(_ad_functor(qp, time));
   }
-  ValueType evaluate(const ElemPointArg & elem_point, const TimeArg & time) const override
+  ValueType evaluate(const ElemPointArg & elem_point, const StateArg & time) const override
   {
     return MetaPhysicL::raw_value(_ad_functor(elem_point, time));
   }
 
-  GradientType evaluateGradient(const ElemArg & elem, const TimeArg & time) const override
+  GradientType evaluateGradient(const ElemArg & elem, const StateArg & time) const override
   {
     return MetaPhysicL::raw_value(_ad_functor.gradient(elem, time));
   }
-  GradientType evaluateGradient(const FaceArg & face, const TimeArg & time) const override
+  GradientType evaluateGradient(const FaceArg & face, const StateArg & time) const override
   {
     return MetaPhysicL::raw_value(_ad_functor.gradient(face, time));
   }
-  GradientType evaluateGradient(const ElemQpArg & qp, const TimeArg & time) const override
+  GradientType evaluateGradient(const ElemQpArg & qp, const StateArg & time) const override
   {
     return MetaPhysicL::raw_value(_ad_functor.gradient(qp, time));
   }
-  GradientType evaluateGradient(const ElemSideQpArg & qp, const TimeArg & time) const override
+  GradientType evaluateGradient(const ElemSideQpArg & qp, const StateArg & time) const override
   {
     return MetaPhysicL::raw_value(_ad_functor.gradient(qp, time));
   }
   GradientType evaluateGradient(const ElemPointArg & elem_point,
-                                const TimeArg & time) const override
+                                const StateArg & time) const override
   {
     return MetaPhysicL::raw_value(_ad_functor.gradient(elem_point, time));
   }
 
-  DotType evaluateDot(const ElemArg & elem, const TimeArg & time) const override
+  DotType evaluateDot(const ElemArg & elem, const StateArg & time) const override
   {
     return MetaPhysicL::raw_value(_ad_functor.dot(elem, time));
   }
-  DotType evaluateDot(const FaceArg & face, const TimeArg & time) const override
+  DotType evaluateDot(const FaceArg & face, const StateArg & time) const override
   {
     return MetaPhysicL::raw_value(_ad_functor.dot(face, time));
   }
-  DotType evaluateDot(const ElemQpArg & qp, const TimeArg & time) const override
+  DotType evaluateDot(const ElemQpArg & qp, const StateArg & time) const override
   {
     return MetaPhysicL::raw_value(_ad_functor.dot(qp, time));
   }
-  DotType evaluateDot(const ElemSideQpArg & qp, const TimeArg & time) const override
+  DotType evaluateDot(const ElemSideQpArg & qp, const StateArg & time) const override
   {
     return MetaPhysicL::raw_value(_ad_functor.dot(qp, time));
   }
-  DotType evaluateDot(const ElemPointArg & elem_point, const TimeArg & time) const override
+  DotType evaluateDot(const ElemPointArg & elem_point, const StateArg & time) const override
   {
     return MetaPhysicL::raw_value(_ad_functor.dot(elem_point, time));
   }

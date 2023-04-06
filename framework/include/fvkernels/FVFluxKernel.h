@@ -59,7 +59,7 @@ protected:
   /// Calculates and returns "grad_u dot normal" on the face to be used for
   /// diffusive terms.  If using any cross-diffusion corrections, etc. all
   /// those calculations will be handled for appropriately by this function.
-  virtual ADReal gradUDotNormal(const Moose::TimeArg & time) const;
+  virtual ADReal gradUDotNormal(const Moose::StateArg & time) const;
 
   /// Kernels are called even on boundaries in case one is for a variable with
   /// a dirichlet BC - in which case we need to run the kernel with a

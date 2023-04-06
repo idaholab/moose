@@ -72,7 +72,7 @@ public:
    */
   VectorValue<ADReal> getVelocity(Moose::FV::InterpMethod m,
                                   const FaceInfo & fi,
-                                  const Moose::TimeArg & time,
+                                  const Moose::StateArg & time,
                                   THREAD_ID tid) const;
 
   /// Return the interpolation method used for velocity

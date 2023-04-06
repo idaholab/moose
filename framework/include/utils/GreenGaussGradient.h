@@ -38,7 +38,7 @@ namespace FV
 template <typename T, typename Enable = typename std::enable_if<ScalarTraits<T>::value>::type>
 VectorValue<T>
 greenGaussGradient(const ElemArg & elem_arg,
-                   const TimeArg & time_arg,
+                   const StateArg & time_arg,
                    const FunctorBase<T> & functor,
                    const bool two_term_boundary_expansion,
                    const MooseMesh & mesh)
@@ -256,7 +256,7 @@ greenGaussGradient(const ElemArg & elem_arg,
 template <typename T, typename Enable = typename std::enable_if<ScalarTraits<T>::value>::type>
 VectorValue<T>
 greenGaussGradient(const FaceArg & face_arg,
-                   const TimeArg & time_arg,
+                   const StateArg & time_arg,
                    const FunctorBase<T> & functor,
                    const bool two_term_boundary_expansion,
                    const MooseMesh & mesh)
@@ -314,7 +314,7 @@ greenGaussGradient(const FaceArg & face_arg,
 template <typename T>
 TensorValue<T>
 greenGaussGradient(const ElemArg & elem_arg,
-                   const TimeArg & time_arg,
+                   const StateArg & time_arg,
                    const Moose::FunctorBase<VectorValue<T>> & functor,
                    const bool two_term_boundary_expansion,
                    const MooseMesh & mesh)
@@ -335,7 +335,7 @@ greenGaussGradient(const ElemArg & elem_arg,
 template <typename T>
 TensorValue<T>
 greenGaussGradient(const FaceArg & face_arg,
-                   const TimeArg & time_arg,
+                   const StateArg & time_arg,
                    const Moose::FunctorBase<VectorValue<T>> & functor,
                    const bool two_term_boundary_expansion,
                    const MooseMesh & mesh)
@@ -356,7 +356,7 @@ greenGaussGradient(const FaceArg & face_arg,
 template <typename T>
 typename Moose::FunctorBase<std::vector<T>>::GradientType
 greenGaussGradient(const ElemArg & elem_arg,
-                   const TimeArg & time_arg,
+                   const StateArg & time_arg,
                    const Moose::FunctorBase<std::vector<T>> & functor,
                    const bool two_term_boundary_expansion,
                    const MooseMesh & mesh)
@@ -381,7 +381,7 @@ greenGaussGradient(const ElemArg & elem_arg,
 template <typename T>
 typename Moose::FunctorBase<std::vector<T>>::GradientType
 greenGaussGradient(const FaceArg & face_arg,
-                   const TimeArg & time_arg,
+                   const StateArg & time_arg,
                    const Moose::FunctorBase<std::vector<T>> & functor,
                    const bool two_term_boundary_expansion,
                    const MooseMesh & mesh)
@@ -406,7 +406,7 @@ greenGaussGradient(const FaceArg & face_arg,
 template <typename T, std::size_t N>
 typename Moose::FunctorBase<std::array<T, N>>::GradientType
 greenGaussGradient(const ElemArg & elem_arg,
-                   const TimeArg & time_arg,
+                   const StateArg & time_arg,
                    const Moose::FunctorBase<std::array<T, N>> & functor,
                    const bool two_term_boundary_expansion,
                    const MooseMesh & mesh)
@@ -429,7 +429,7 @@ greenGaussGradient(const ElemArg & elem_arg,
 template <typename T, std::size_t N>
 typename Moose::FunctorBase<std::array<T, N>>::GradientType
 greenGaussGradient(const FaceArg & face_arg,
-                   const TimeArg & time_arg,
+                   const StateArg & time_arg,
                    const Moose::FunctorBase<std::array<T, N>> & functor,
                    const bool two_term_boundary_expansion,
                    const MooseMesh & mesh)

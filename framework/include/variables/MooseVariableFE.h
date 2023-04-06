@@ -688,13 +688,13 @@ private:
   using ElemQpArg = Moose::ElemQpArg;
   using ElemSideQpArg = Moose::ElemSideQpArg;
   using FaceArg = Moose::FaceArg;
-  using TimeArg = Moose::TimeArg;
+  using StateArg = Moose::TimeArg;
 
-  ValueType evaluate(const ElemArg &, const TimeArg &) const override final
+  ValueType evaluate(const ElemArg &, const StateArg &) const override final
   {
     mooseError("Elem functor overload not yet implemented for finite element variables");
   }
-  ValueType evaluate(const FaceArg &, const TimeArg &) const override final
+  ValueType evaluate(const FaceArg &, const StateArg &) const override final
   {
     mooseError("Face info functor overload not yet implemented for finite element variables");
   }

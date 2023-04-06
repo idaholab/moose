@@ -54,7 +54,7 @@ public:
 
   bool isExtrapolatedBoundaryFace(const FaceInfo & fi,
                                   const Elem * elem,
-                                  const Moose::TimeArg & time) const override;
+                                  const Moose::StateArg & time) const override;
 
   bool hasBlocks(SubdomainID id) const override;
 
@@ -65,25 +65,25 @@ public:
   using typename Moose::FunctorBase<T>::FunctorReturnType;
 
 protected:
-  using ElemFn = std::function<T(const Moose::ElemArg &, const Moose::TimeArg &)>;
-  using FaceFn = std::function<T(const Moose::FaceArg &, const Moose::TimeArg &)>;
-  using ElemQpFn = std::function<T(const Moose::ElemQpArg &, const Moose::TimeArg &)>;
-  using ElemSideQpFn = std::function<T(const Moose::ElemSideQpArg &, const Moose::TimeArg &)>;
-  using ElemPointFn = std::function<T(const Moose::ElemPointArg &, const Moose::TimeArg &)>;
+  using ElemFn = std::function<T(const Moose::ElemArg &, const Moose::StateArg &)>;
+  using FaceFn = std::function<T(const Moose::FaceArg &, const Moose::StateArg &)>;
+  using ElemQpFn = std::function<T(const Moose::ElemQpArg &, const Moose::StateArg &)>;
+  using ElemSideQpFn = std::function<T(const Moose::ElemSideQpArg &, const Moose::StateArg &)>;
+  using ElemPointFn = std::function<T(const Moose::ElemPointArg &, const Moose::StateArg &)>;
 
-  ValueType evaluate(const Moose::ElemArg & elem_arg, const Moose::TimeArg & time) const override;
-  ValueType evaluate(const Moose::FaceArg & face, const Moose::TimeArg & time) const override;
-  ValueType evaluate(const Moose::ElemQpArg & elem_qp, const Moose::TimeArg & time) const override;
+  ValueType evaluate(const Moose::ElemArg & elem_arg, const Moose::StateArg & time) const override;
+  ValueType evaluate(const Moose::FaceArg & face, const Moose::StateArg & time) const override;
+  ValueType evaluate(const Moose::ElemQpArg & elem_qp, const Moose::StateArg & time) const override;
   ValueType evaluate(const Moose::ElemSideQpArg & elem_side_qp,
-                     const Moose::TimeArg & time) const override;
+                     const Moose::StateArg & time) const override;
   ValueType evaluate(const Moose::ElemPointArg & elem_point,
-                     const Moose::TimeArg & time) const override;
+                     const Moose::StateArg & time) const override;
 
   using Moose::FunctorBase<T>::evaluateGradient;
   GradientType evaluateGradient(const Moose::ElemArg & elem_arg,
-                                const Moose::TimeArg &) const override;
+                                const Moose::StateArg &) const override;
   GradientType evaluateGradient(const Moose::FaceArg & face_arg,
-                                const Moose::TimeArg &) const override;
+                                const Moose::StateArg &) const override;
 
 private:
   /**
@@ -169,7 +169,7 @@ template <typename T>
 bool
 PiecewiseByBlockLambdaFunctor<T>::isExtrapolatedBoundaryFace(const FaceInfo & fi,
                                                              const Elem *,
-                                                             const Moose::TimeArg &) const
+                                                             const Moose::StateArg &) const
 {
   if (!fi.neighborPtr())
     return true;
@@ -213,7 +213,7 @@ PiecewiseByBlockLambdaFunctor<T>::subdomainErrorMessage(const SubdomainID sub_id
 template <typename T>
 typename PiecewiseByBlockLambdaFunctor<T>::ValueType
 PiecewiseByBlockLambdaFunctor<T>::evaluate(const Moose::ElemArg & elem_arg,
-                                           const Moose::TimeArg & time) const
+                                           const Moose::StateArg & time) const
 {
   const Elem * const elem = elem_arg.elem;
   mooseAssert(elem && elem != libMesh::remote_elem,
@@ -228,7 +228,7 @@ PiecewiseByBlockLambdaFunctor<T>::evaluate(const Moose::ElemArg & elem_arg,
 template <typename T>
 typename PiecewiseByBlockLambdaFunctor<T>::ValueType
 PiecewiseByBlockLambdaFunctor<T>::evaluate(const Moose::FaceArg & face,
-                                           const Moose::TimeArg & time) const
+                                           const Moose::StateArg & time) const
 {
   using namespace Moose::FV;
 
@@ -250,7 +250,7 @@ PiecewiseByBlockLambdaFunctor<T>::evaluate(const Moose::FaceArg & face,
 template <typename T>
 typename PiecewiseByBlockLambdaFunctor<T>::ValueType
 PiecewiseByBlockLambdaFunctor<T>::evaluate(const Moose::ElemQpArg & elem_qp,
-                                           const Moose::TimeArg & time) const
+                                           const Moose::StateArg & time) const
 {
   const auto sub_id = std::get<0>(elem_qp)->subdomain_id();
   auto it = _elem_qp_functor.find(sub_id);
@@ -263,7 +263,7 @@ PiecewiseByBlockLambdaFunctor<T>::evaluate(const Moose::ElemQpArg & elem_qp,
 template <typename T>
 typename PiecewiseByBlockLambdaFunctor<T>::ValueType
 PiecewiseByBlockLambdaFunctor<T>::evaluate(const Moose::ElemSideQpArg & elem_side_qp,
-                                           const Moose::TimeArg & time) const
+                                           const Moose::StateArg & time) const
 {
   const auto sub_id = std::get<0>(elem_side_qp)->subdomain_id();
   auto it = _elem_side_qp_functor.find(sub_id);
@@ -276,7 +276,7 @@ PiecewiseByBlockLambdaFunctor<T>::evaluate(const Moose::ElemSideQpArg & elem_sid
 template <typename T>
 typename PiecewiseByBlockLambdaFunctor<T>::ValueType
 PiecewiseByBlockLambdaFunctor<T>::evaluate(const Moose::ElemPointArg & elem_point_arg,
-                                           const Moose::TimeArg & time) const
+                                           const Moose::StateArg & time) const
 {
   const Elem * const elem = elem_point_arg.elem;
   mooseAssert(elem && elem != libMesh::remote_elem,
@@ -291,7 +291,7 @@ PiecewiseByBlockLambdaFunctor<T>::evaluate(const Moose::ElemPointArg & elem_poin
 template <typename T>
 typename PiecewiseByBlockLambdaFunctor<T>::GradientType
 PiecewiseByBlockLambdaFunctor<T>::evaluateGradient(const Moose::ElemArg & elem_arg,
-                                                   const Moose::TimeArg & time) const
+                                                   const Moose::StateArg & time) const
 {
   return Moose::FV::greenGaussGradient(elem_arg, time, *this, true, _mesh);
 }
@@ -299,7 +299,7 @@ PiecewiseByBlockLambdaFunctor<T>::evaluateGradient(const Moose::ElemArg & elem_a
 template <typename T>
 typename PiecewiseByBlockLambdaFunctor<T>::GradientType
 PiecewiseByBlockLambdaFunctor<T>::evaluateGradient(const Moose::FaceArg & face_arg,
-                                                   const Moose::TimeArg & time) const
+                                                   const Moose::StateArg & time) const
 {
   return Moose::FV::greenGaussGradient(face_arg, time, *this, true, _mesh);
 }

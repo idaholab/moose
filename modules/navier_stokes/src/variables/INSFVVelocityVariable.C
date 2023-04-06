@@ -69,7 +69,7 @@ INSFVVelocityVariable::getExtrapolatedBoundaryFaceValue(const FaceInfo & fi,
                                                         const bool two_term_expansion,
                                                         const bool correct_skewness,
                                                         const Elem * elem_to_extrapolate_from,
-                                                        const TimeArg & time) const
+                                                        const StateArg & time) const
 {
   ADReal boundary_value;
   bool elem_to_extrapolate_from_is_fi_elem;
@@ -106,7 +106,7 @@ INSFVVelocityVariable::getExtrapolatedBoundaryFaceValue(const FaceInfo & fi,
 
 VectorValue<ADReal>
 INSFVVelocityVariable::uncorrectedAdGradSln(const FaceInfo & fi,
-                                            const TimeArg & time,
+                                            const StateArg & time,
                                             const bool correct_skewness) const
 {
   VectorValue<ADReal> unc_grad;
@@ -124,7 +124,7 @@ INSFVVelocityVariable::uncorrectedAdGradSln(const FaceInfo & fi,
 
 const VectorValue<ADReal> &
 INSFVVelocityVariable::adGradSln(const Elem * const elem,
-                                 const TimeArg & time,
+                                 const StateArg & time,
                                  bool correct_skewness) const
 {
   VectorValue<ADReal> * value_pointer = &_temp_cell_gradient;

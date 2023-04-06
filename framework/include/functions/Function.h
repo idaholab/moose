@@ -149,7 +149,7 @@ private:
   /**
    * @return the time associated with the requested \p state
    */
-  Real getTime(const Moose::TimeArg & time) const;
+  Real getTime(const Moose::StateArg & time) const;
 
   using ElemArg = Moose::ElemArg;
   using ElemQpArg = Moose::ElemQpArg;
@@ -157,32 +157,32 @@ private:
   using FaceArg = Moose::FaceArg;
   using ElemPointArg = Moose::ElemPointArg;
 
-  ValueType evaluate(const ElemArg & elem, const Moose::TimeArg & time) const override final;
-  ValueType evaluate(const FaceArg & face, const Moose::TimeArg & time) const override final;
-  ValueType evaluate(const ElemQpArg & qp, const Moose::TimeArg & time) const override final;
+  ValueType evaluate(const ElemArg & elem, const Moose::StateArg & time) const override final;
+  ValueType evaluate(const FaceArg & face, const Moose::StateArg & time) const override final;
+  ValueType evaluate(const ElemQpArg & qp, const Moose::StateArg & time) const override final;
   ValueType evaluate(const ElemSideQpArg & elem_side_qp,
-                     const Moose::TimeArg & time) const override final;
+                     const Moose::StateArg & time) const override final;
   ValueType evaluate(const ElemPointArg & elem_point,
-                     const Moose::TimeArg & time) const override final;
+                     const Moose::StateArg & time) const override final;
 
   GradientType evaluateGradient(const ElemArg & elem,
-                                const Moose::TimeArg & time) const override final;
+                                const Moose::StateArg & time) const override final;
   GradientType evaluateGradient(const FaceArg & face,
-                                const Moose::TimeArg & time) const override final;
+                                const Moose::StateArg & time) const override final;
   GradientType evaluateGradient(const ElemQpArg & qp,
-                                const Moose::TimeArg & time) const override final;
+                                const Moose::StateArg & time) const override final;
   GradientType evaluateGradient(const ElemSideQpArg & elem_side_qp,
-                                const Moose::TimeArg & time) const override final;
+                                const Moose::StateArg & time) const override final;
   GradientType evaluateGradient(const ElemPointArg & elem_point,
-                                const Moose::TimeArg & time) const override final;
+                                const Moose::StateArg & time) const override final;
 
-  DotType evaluateDot(const ElemArg & elem, const Moose::TimeArg & time) const override final;
-  DotType evaluateDot(const FaceArg & face, const Moose::TimeArg & time) const override final;
-  DotType evaluateDot(const ElemQpArg & qp, const Moose::TimeArg & time) const override final;
+  DotType evaluateDot(const ElemArg & elem, const Moose::StateArg & time) const override final;
+  DotType evaluateDot(const FaceArg & face, const Moose::StateArg & time) const override final;
+  DotType evaluateDot(const ElemQpArg & qp, const Moose::StateArg & time) const override final;
   DotType evaluateDot(const ElemSideQpArg & elem_side_qp,
-                      const Moose::TimeArg & time) const override final;
+                      const Moose::StateArg & time) const override final;
   DotType evaluateDot(const ElemPointArg & elem_point,
-                      const Moose::TimeArg & time) const override final;
+                      const Moose::StateArg & time) const override final;
 
   /**
    * Compute \p _current_elem_qp_functor_xyz if we are on a new element

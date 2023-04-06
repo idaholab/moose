@@ -29,7 +29,7 @@ ADReal
 FVSecondOrderRxnLagged::computeQpResidual()
 {
   const auto elem = makeElemArg(_current_elem);
-  const auto lag_time = _lag ? Moose::TimeArg{1, Moose::SolutionIterationType::Nonlinear}
+  const auto lag_time = _lag ? Moose::StateArg{1, Moose::SolutionIterationType::Nonlinear}
                              : Moose::currentTimeFunctorArg();
   return _u_functor(elem, Moose::currentTimeFunctorArg()) * _u_functor(elem, lag_time);
 }

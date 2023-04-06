@@ -38,11 +38,11 @@ public:
   bool hasBlocks(SubdomainID) const override { return true; }
 
 private:
-  ValueType evaluate(const ElemArg &, const TimeArg &) const override final { return 0; }
-  ValueType evaluate(const FaceArg &, const TimeArg &) const override final { return 0; }
-  ValueType evaluate(const ElemQpArg &, const TimeArg &) const override final { return 0; }
-  ValueType evaluate(const ElemSideQpArg &, const TimeArg &) const override final { return 0; }
-  ValueType evaluate(const ElemPointArg &, const TimeArg &) const override final { return 0; }
+  ValueType evaluate(const ElemArg &, const StateArg &) const override final { return 0; }
+  ValueType evaluate(const FaceArg &, const StateArg &) const override final { return 0; }
+  ValueType evaluate(const ElemQpArg &, const StateArg &) const override final { return 0; }
+  ValueType evaluate(const ElemSideQpArg &, const StateArg &) const override final { return 0; }
+  ValueType evaluate(const ElemPointArg &, const StateArg &) const override final { return 0; }
 };
 
 template <typename T>
@@ -53,19 +53,21 @@ public:
 
   WithGradientTestFunctor(const MooseMesh & mesh) : _mesh(mesh) {}
 
-  bool isExtrapolatedBoundaryFace(const FaceInfo & fi, const Elem *, const TimeArg &) const override
+  bool
+  isExtrapolatedBoundaryFace(const FaceInfo & fi, const Elem *, const StateArg &) const override
   {
     return !fi.neighborPtr();
   }
 
 private:
   using TestFunctor<T>::evaluateGradient;
-  GradientType evaluateGradient(const ElemArg & elem_arg, const TimeArg & time) const override final
+  GradientType evaluateGradient(const ElemArg & elem_arg,
+                                const StateArg & time) const override final
   {
     return greenGaussGradient(elem_arg, time, *this, true, _mesh);
   }
 
-  GradientType evaluateGradient(const FaceArg & face, const TimeArg & time) const override final
+  GradientType evaluateGradient(const FaceArg & face, const StateArg & time) const override final
   {
     return greenGaussGradient(face, time, *this, true, _mesh);
   }

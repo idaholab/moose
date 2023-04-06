@@ -52,7 +52,7 @@ BernoulliPressureVariable::initialSetup()
 std::pair<bool, ADRealVectorValue>
 BernoulliPressureVariable::elemIsUpwind(const Elem & elem,
                                         const FaceInfo & fi,
-                                        const Moose::TimeArg & time) const
+                                        const Moose::StateArg & time) const
 {
   const Moose::FaceArg face{&fi, Moose::FV::LimiterType::CentralDifference, true, false, nullptr};
 
@@ -66,7 +66,7 @@ BernoulliPressureVariable::elemIsUpwind(const Elem & elem,
 bool
 BernoulliPressureVariable::isExtrapolatedBoundaryFace(const FaceInfo & fi,
                                                       const Elem * const elem,
-                                                      const Moose::TimeArg & time) const
+                                                      const Moose::StateArg & time) const
 {
   if (isDirichletBoundaryFace(fi, elem, time))
     return false;
@@ -86,7 +86,7 @@ BernoulliPressureVariable::isExtrapolatedBoundaryFace(const FaceInfo & fi,
 bool
 BernoulliPressureVariable::isDirichletBoundaryFace(const FaceInfo & fi,
                                                    const Elem * const elem,
-                                                   const Moose::TimeArg & time) const
+                                                   const Moose::StateArg & time) const
 {
   if (INSFVPressureVariable::isDirichletBoundaryFace(fi, elem, time))
     return true;
@@ -101,7 +101,7 @@ BernoulliPressureVariable::isDirichletBoundaryFace(const FaceInfo & fi,
 ADReal
 BernoulliPressureVariable::getDirichletBoundaryFaceValue(const FaceInfo & fi,
                                                          const Elem * const elem,
-                                                         const Moose::TimeArg & time) const
+                                                         const Moose::StateArg & time) const
 {
   mooseAssert(isDirichletBoundaryFace(fi, elem, time), "This better be a Dirichlet face");
 

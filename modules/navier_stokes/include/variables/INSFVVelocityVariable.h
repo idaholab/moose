@@ -23,7 +23,7 @@ public:
 
   using INSFVVariable::adGradSln;
   const VectorValue<ADReal> & adGradSln(const Elem * const elem,
-                                        const TimeArg & time,
+                                        const StateArg & time,
                                         bool correct_skewness = false) const override;
 
   /**
@@ -31,7 +31,7 @@ public:
    */
   using INSFVVariable::uncorrectedAdGradSln;
   VectorValue<ADReal> uncorrectedAdGradSln(const FaceInfo & fi,
-                                           const TimeArg & time,
+                                           const StateArg & time,
                                            const bool correct_skewness = false) const override;
 
 protected:
@@ -43,5 +43,5 @@ protected:
                                           bool two_term_expansion,
                                           bool correct_skewness,
                                           const Elem * elem_side_to_extrapolate_from,
-                                          const TimeArg & time) const override;
+                                          const StateArg & time) const override;
 };

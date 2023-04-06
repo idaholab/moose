@@ -486,7 +486,7 @@ INSFVRhieChowInterpolator::ghostADataOnBoundary(const BoundaryID boundary_id)
 VectorValue<ADReal>
 INSFVRhieChowInterpolator::getVelocity(const Moose::FV::InterpMethod m,
                                        const FaceInfo & fi,
-                                       const Moose::TimeArg & time,
+                                       const Moose::StateArg & time,
                                        const THREAD_ID tid) const
 {
   const Elem * const elem = &fi.elem();

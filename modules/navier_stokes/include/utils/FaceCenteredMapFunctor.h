@@ -33,7 +33,7 @@ public:
   using ElemQpArg = Moose::ElemQpArg;
   using ElemSideQpArg = Moose::ElemSideQpArg;
   using ElemPointArg = Moose::ElemPointArg;
-  using TimeArg = Moose::TimeArg;
+  using StateArg = Moose::TimeArg;
 
   FaceCenteredMapFunctor(const MooseMesh & mesh, const std::string & name);
 
@@ -51,12 +51,12 @@ private:
   /// on all subdomains
   const std::set<SubdomainID> _sub_ids;
 
-  ValueType evaluate(const ElemArg & elem_arg, const TimeArg & time) const override final;
-  ValueType evaluate(const FaceArg & face, const TimeArg & time) const override final;
+  ValueType evaluate(const ElemArg & elem_arg, const StateArg & time) const override final;
+  ValueType evaluate(const FaceArg & face, const StateArg & time) const override final;
   ValueType evaluate(const FaceInfo * const fi) const;
-  ValueType evaluate(const ElemPointArg &, const TimeArg &) const override;
-  ValueType evaluate(const ElemQpArg &, const TimeArg &) const override;
-  ValueType evaluate(const ElemSideQpArg &, const TimeArg &) const override;
+  ValueType evaluate(const ElemPointArg &, const StateArg &) const override;
+  ValueType evaluate(const ElemQpArg &, const StateArg &) const override;
+  ValueType evaluate(const ElemSideQpArg &, const StateArg &) const override;
 };
 
 template <typename T, typename Map>
@@ -85,21 +85,21 @@ FaceCenteredMapFunctor<T, Map>::hasBlocks(const SubdomainID sub_id) const
 
 template <typename T, typename Map>
 typename FaceCenteredMapFunctor<T, Map>::ValueType
-FaceCenteredMapFunctor<T, Map>::evaluate(const ElemPointArg &, const TimeArg &) const
+FaceCenteredMapFunctor<T, Map>::evaluate(const ElemPointArg &, const StateArg &) const
 {
   mooseError("not implemented");
 }
 
 template <typename T, typename Map>
 typename FaceCenteredMapFunctor<T, Map>::ValueType
-FaceCenteredMapFunctor<T, Map>::evaluate(const ElemQpArg &, const TimeArg &) const
+FaceCenteredMapFunctor<T, Map>::evaluate(const ElemQpArg &, const StateArg &) const
 {
   mooseError("not implemented");
 }
 
 template <typename T, typename Map>
 typename FaceCenteredMapFunctor<T, Map>::ValueType
-FaceCenteredMapFunctor<T, Map>::evaluate(const ElemSideQpArg &, const TimeArg &) const
+FaceCenteredMapFunctor<T, Map>::evaluate(const ElemSideQpArg &, const StateArg &) const
 {
   mooseError("not implemented");
 }
