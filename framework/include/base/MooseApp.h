@@ -47,6 +47,7 @@ class SystemInfo;
 class CommandLine;
 class RelationshipManager;
 class SolutionInvalidity;
+class TimeStepperSystem;
 
 namespace libMesh
 {

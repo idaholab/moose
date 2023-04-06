@@ -49,7 +49,7 @@
       recover = false
       prereq = 'restart/timestepper_pre'
 
-      detail = 'when writing the checkpoint file,'
+      detail = 'restart from the checkpoint file.'
     []
   []
 
