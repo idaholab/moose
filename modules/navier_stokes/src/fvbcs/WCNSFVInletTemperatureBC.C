@@ -84,7 +84,7 @@ WCNSFVInletTemperatureBC::WCNSFVInletTemperatureBC(const InputParameters & param
 ADReal
 WCNSFVInletTemperatureBC::boundaryValue(const FaceInfo & fi) const
 {
-  const auto current_time = autoState();
+  const auto state = autoState();
 
   if (_area_pp)
     if (MooseUtils::absoluteFuzzyEqual(*_area_pp, 0))
@@ -94,14 +94,14 @@ WCNSFVInletTemperatureBC::boundaryValue(const FaceInfo & fi) const
     return *_temperature_pp;
   else if (_velocity_pp)
   {
-    ADReal rho = (*_rho)(singleSidedFaceArg(&fi), current_time);
-    ADReal cp = (*_cp)(singleSidedFaceArg(&fi), current_time);
+    ADReal rho = (*_rho)(singleSidedFaceArg(&fi), state);
+    ADReal cp = (*_cp)(singleSidedFaceArg(&fi), state);
 
     return _scaling_factor * (*_energy_pp) / (*_area_pp * rho * *_velocity_pp * cp);
   }
   else
   {
-    ADReal cp = (*_cp)(singleSidedFaceArg(&fi), current_time);
+    ADReal cp = (*_cp)(singleSidedFaceArg(&fi), state);
 
     return _scaling_factor * (*_energy_pp) / (*_mdot_pp * cp);
   }

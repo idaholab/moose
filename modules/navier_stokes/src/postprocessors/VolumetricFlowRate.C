@@ -121,11 +121,11 @@ VolumetricFlowRate::computeFaceInfoIntegral(const FaceInfo * fi)
 {
   mooseAssert(fi, "We should have a face info in " + name());
   mooseAssert(_adv_quant, "We should have an advected quantity in " + name());
-  const auto current_time = autoState();
+  const auto state = autoState();
 
   // Get face value for velocity
   const auto vel =
-      MetaPhysicL::raw_value(_rc_uo->getVelocity(_velocity_interp_method, *fi, current_time, _tid));
+      MetaPhysicL::raw_value(_rc_uo->getVelocity(_velocity_interp_method, *fi, state, _tid));
   const bool correct_skewness =
       _advected_interp_method == Moose::FV::InterpMethod::SkewCorrectedAverage;
 
@@ -135,7 +135,7 @@ VolumetricFlowRate::computeFaceInfoIntegral(const FaceInfo * fi)
                                     MetaPhysicL::raw_value(vel) * fi->normal() > 0,
                                     correct_skewness,
                                     nullptr}),
-                    current_time));
+                    state));
   return fi->normal() * adv_quant_face * vel;
 }
 

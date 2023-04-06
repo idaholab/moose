@@ -117,7 +117,7 @@ NSFVFunctorHeatFluxBC::computeQpResidual()
 
   // Get the functor argument for the face
   const auto face_arg = singleSidedFaceArg();
-  const auto current_time = autoState();
+  const auto state = autoState();
 
   if (_locality == NS::settings::local)
   {
@@ -125,13 +125,13 @@ NSFVFunctorHeatFluxBC::computeQpResidual()
     {
       case NS::splitting::porosity:
       {
-        fraction = (*_eps)(face_arg, current_time);
+        fraction = (*_eps)(face_arg, state);
         break;
       }
       case NS::splitting::thermal_conductivity:
       {
-        ADReal d = (*_k_f)(face_arg, current_time) + (*_k_s)(face_arg, current_time);
-        fraction = d > tol ? (*_k_f)(face_arg, current_time) / d : 0.5;
+        ADReal d = (*_k_f)(face_arg, state) + (*_k_s)(face_arg, state);
+        fraction = d > tol ? (*_k_f)(face_arg, state) / d : 0.5;
         break;
       }
       case NS::splitting::effective_thermal_conductivity:
@@ -143,15 +143,15 @@ NSFVFunctorHeatFluxBC::computeQpResidual()
         // division by sqrt(3) ensures equivalence with a non-vector form of kappa with
         // 3 components
         ADReal kappa;
-        if ((MooseUtils::absoluteFuzzyEqual((*_kappa)(face_arg, current_time)(0), 0)) &&
-            (MooseUtils::absoluteFuzzyEqual((*_kappa)(face_arg, current_time)(1), 0)) &&
-            (MooseUtils::absoluteFuzzyEqual((*_kappa)(face_arg, current_time)(2), 0)))
+        if ((MooseUtils::absoluteFuzzyEqual((*_kappa)(face_arg, state)(0), 0)) &&
+            (MooseUtils::absoluteFuzzyEqual((*_kappa)(face_arg, state)(1), 0)) &&
+            (MooseUtils::absoluteFuzzyEqual((*_kappa)(face_arg, state)(2), 0)))
           kappa = 1e-42;
         else
-          kappa = (*_kappa)(face_arg, current_time).norm() / std::sqrt(3.0);
+          kappa = (*_kappa)(face_arg, state).norm() / std::sqrt(3.0);
 
-        ADReal d = (*_eps)(face_arg, current_time) * kappa + (*_kappa_s)(face_arg, current_time);
-        fraction = d > tol ? (*_eps)(face_arg, current_time) * kappa / d : 0.5;
+        ADReal d = (*_eps)(face_arg, state) * kappa + (*_kappa_s)(face_arg, state);
+        fraction = d > tol ? (*_eps)(face_arg, state) * kappa / d : 0.5;
         break;
       }
     }

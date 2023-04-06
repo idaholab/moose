@@ -215,7 +215,7 @@ PressureDrop::computeFaceInfoWeightedPressureIntegral(const FaceInfo * const fi)
   const bool correct_skewness =
       _weight_interp_method == Moose::FV::InterpMethod::SkewCorrectedAverage;
   const auto elem_arg = std::make_tuple(_current_elem, _qp, _qrule);
-  const auto current_time = autoState();
+  const auto state = autoState();
   mooseAssert(_qp == 0, "Only one quadrature point");
 
   if (_weighting_functor)
@@ -223,17 +223,17 @@ PressureDrop::computeFaceInfoWeightedPressureIntegral(const FaceInfo * const fi)
     const auto ssf = Moose::FaceArg(
         {fi,
          Moose::FV::limiterType(_weight_interp_method),
-         MetaPhysicL::raw_value((*_weighting_functor)(elem_arg, current_time)) * fi->normal() > 0,
+         MetaPhysicL::raw_value((*_weighting_functor)(elem_arg, state)) * fi->normal() > 0,
          correct_skewness,
          nullptr});
-    const auto face_weighting = MetaPhysicL::raw_value((*_weighting_functor)(ssf, current_time));
-    return fi->normal() * face_weighting * _pressure(ssf, current_time);
+    const auto face_weighting = MetaPhysicL::raw_value((*_weighting_functor)(ssf, state));
+    return fi->normal() * face_weighting * _pressure(ssf, state);
   }
   else
   {
     const auto ssf = Moose::FaceArg(
         {fi, Moose::FV::limiterType(_weight_interp_method), true, correct_skewness, nullptr});
-    return _pressure(ssf, current_time);
+    return _pressure(ssf, state);
   }
 }
 
@@ -243,7 +243,7 @@ PressureDrop::computeFaceInfoWeightIntegral(const FaceInfo * fi) const
   mooseAssert(fi, "We should have a face info in " + name());
   auto elem_arg = std::make_tuple(_current_elem, _qp, _qrule);
   mooseAssert(_qp == 0, "Only one quadrature point");
-  const auto current_time = autoState();
+  const auto state = autoState();
 
   const bool correct_skewness =
       _weight_interp_method == Moose::FV::InterpMethod::SkewCorrectedAverage;
@@ -253,10 +253,10 @@ PressureDrop::computeFaceInfoWeightIntegral(const FaceInfo * fi) const
     const auto ssf = Moose::FaceArg(
         {fi,
          Moose::FV::limiterType(_weight_interp_method),
-         MetaPhysicL::raw_value((*_weighting_functor)(elem_arg, current_time)) * fi->normal() > 0,
+         MetaPhysicL::raw_value((*_weighting_functor)(elem_arg, state)) * fi->normal() > 0,
          correct_skewness,
          nullptr});
-    return fi->normal() * MetaPhysicL::raw_value((*_weighting_functor)(ssf, current_time));
+    return fi->normal() * MetaPhysicL::raw_value((*_weighting_functor)(ssf, state));
   }
   else
     return 1;
@@ -266,21 +266,21 @@ Real
 PressureDrop::computeQpWeightedPressureIntegral() const
 {
   auto elem_side_arg = std::make_tuple(_current_elem, _current_side, _qp, _qrule);
-  const auto current_time = autoState();
+  const auto state = autoState();
   if (_weighting_functor)
-    return (*_weighting_functor)(elem_side_arg, current_time) * _normals[_qp] *
-           _pressure(elem_side_arg, current_time);
+    return (*_weighting_functor)(elem_side_arg, state) * _normals[_qp] *
+           _pressure(elem_side_arg, state);
   else
-    return _pressure(elem_side_arg, current_time);
+    return _pressure(elem_side_arg, state);
 }
 
 Real
 PressureDrop::computeQpWeightIntegral() const
 {
   auto elem_side_arg = std::make_tuple(_current_elem, _current_side, _qp, _qrule);
-  const auto current_time = autoState();
+  const auto state = autoState();
   if (_weighting_functor)
-    return (*_weighting_functor)(elem_side_arg, current_time) * _normals[_qp];
+    return (*_weighting_functor)(elem_side_arg, state) * _normals[_qp];
   else
     return 1;
 }

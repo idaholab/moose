@@ -40,11 +40,11 @@ WCNSFVMomentumTimeDerivative::gatherRCData(const Elem & elem)
   // INSFVMomentumTimeDerivative::gatherRCData
 
   const auto elem_arg = makeElemArg(&elem);
-  const auto current_time = autoState();
-  const auto rho_dot = _rho_dot(elem_arg, current_time);
-  const auto var_dot = _var.dot(elem_arg, current_time);
-  const auto rho = _rho(elem_arg, current_time);
-  const auto var = _var(elem_arg, current_time);
+  const auto state = autoState();
+  const auto rho_dot = _rho_dot(elem_arg, state);
+  const auto var_dot = _var.dot(elem_arg, state);
+  const auto rho = _rho(elem_arg, state);
+  const auto var = _var(elem_arg, state);
 
   const auto dof_number = elem.dof_number(_sys.number(), _var.number(), 0);
   mooseAssert(var.derivatives()[dof_number] == 1.,

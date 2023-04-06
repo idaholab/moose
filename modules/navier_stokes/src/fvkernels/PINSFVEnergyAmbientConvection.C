@@ -39,11 +39,9 @@ ADReal
 PINSFVEnergyAmbientConvection::computeQpResidual()
 {
   const auto & elem = makeElemArg(_current_elem);
-  const auto current_time = autoState();
+  const auto state = autoState();
   if (_is_solid)
-    return -_h_solid_fluid(elem, current_time) *
-           (_temp_fluid(elem, current_time) - _temp_solid(elem, current_time));
+    return -_h_solid_fluid(elem, state) * (_temp_fluid(elem, state) - _temp_solid(elem, state));
   else
-    return _h_solid_fluid(elem, current_time) *
-           (_temp_fluid(elem, current_time) - _temp_solid(elem, current_time));
+    return _h_solid_fluid(elem, state) * (_temp_fluid(elem, state) - _temp_solid(elem, state));
 }

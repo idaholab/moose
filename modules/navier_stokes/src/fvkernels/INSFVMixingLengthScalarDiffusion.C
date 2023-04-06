@@ -52,18 +52,18 @@ INSFVMixingLengthScalarDiffusion::computeQpResidual()
   constexpr Real offset = 1e-15; // prevents explosion of sqrt(x) derivative to infinity
 
   auto face = makeCDFace(*_face_info);
-  const auto current_time = autoState();
+  const auto state = autoState();
 
-  const auto grad_u = _u.gradient(face, current_time);
+  const auto grad_u = _u.gradient(face, state);
   ADReal symmetric_strain_tensor_norm = 2.0 * Utility::pow<2>(grad_u(0));
   if (_dim >= 2)
   {
-    const auto grad_v = _v->gradient(face, current_time);
+    const auto grad_v = _v->gradient(face, state);
     symmetric_strain_tensor_norm +=
         2.0 * Utility::pow<2>(grad_v(1)) + Utility::pow<2>(grad_v(0) + grad_u(1));
     if (_dim >= 3)
     {
-      const auto grad_w = _w->gradient(face, current_time);
+      const auto grad_w = _w->gradient(face, state);
       symmetric_strain_tensor_norm += 2.0 * Utility::pow<2>(grad_w(2)) +
                                       Utility::pow<2>(grad_u(2) + grad_w(0)) +
                                       Utility::pow<2>(grad_v(2) + grad_w(1));
@@ -73,7 +73,7 @@ INSFVMixingLengthScalarDiffusion::computeQpResidual()
   symmetric_strain_tensor_norm = std::sqrt(symmetric_strain_tensor_norm + offset);
 
   // Interpolate the mixing length to the face
-  ADReal mixing_len = _mixing_len(face, current_time);
+  ADReal mixing_len = _mixing_len(face, state);
 
   // Compute the eddy diffusivity for momentum
   ADReal eddy_diff = symmetric_strain_tensor_norm * mixing_len * mixing_len;
@@ -83,6 +83,6 @@ INSFVMixingLengthScalarDiffusion::computeQpResidual()
   eddy_diff /= _schmidt_number;
 
   // Compute the diffusive flux of the scalar variable
-  auto dudn = gradUDotNormal(current_time);
+  auto dudn = gradUDotNormal(state);
   return -1 * eddy_diff * dudn;
 }

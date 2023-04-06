@@ -46,19 +46,18 @@ void
 INSFVMomentumFriction::gatherRCData(const Elem & elem)
 {
   const auto & elem_arg = makeElemArg(&elem);
-  const auto current_time = autoState();
+  const auto state = autoState();
 
   ADReal coefficient = 0.0;
   if (_linear_friction)
     coefficient += (*_linear_friction)(elem_arg, autoState());
   if (_quadratic_friction)
-    coefficient += (*_quadratic_friction)(elem_arg, current_time) *
-                   std::abs(_u_functor(elem_arg, current_time));
+    coefficient += (*_quadratic_friction)(elem_arg, state) * std::abs(_u_functor(elem_arg, state));
 
   coefficient *= _assembly.elementVolume(&elem);
 
   _rc_uo.addToA(&elem, _index, coefficient);
 
   const auto dof_number = elem.dof_number(_sys.number(), _var.number(), 0);
-  processResidualAndJacobian(coefficient * _u_functor(elem_arg, current_time), dof_number);
+  processResidualAndJacobian(coefficient * _u_functor(elem_arg, state), dof_number);
 }

@@ -33,7 +33,7 @@ TestFaceToCellReconstruction::TestFaceToCellReconstruction(const InputParameters
 void
 TestFaceToCellReconstruction::initialize()
 {
-  const auto current_time = autoState();
+  const auto state = autoState();
 
   for (auto & fi : _fe_problem.mesh().faceInfo())
   {
@@ -54,7 +54,7 @@ TestFaceToCellReconstruction::initialize()
                                 cos(elem_centroid(0)) * sin(elem_centroid(1)),
                                 0);
 
-    RealVectorValue diff = exact_value - _face_values(elem_arg, current_time);
+    RealVectorValue diff = exact_value - _face_values(elem_arg, state);
     _reconstruction_error += diff * diff * elem_volume;
   }
 

@@ -70,7 +70,7 @@ WCNSFVEnergyFluxBC::WCNSFVEnergyFluxBC(const InputParameters & params)
 ADReal
 WCNSFVEnergyFluxBC::computeQpResidual()
 {
-  const auto current_time = autoState();
+  const auto state = autoState();
 
   if (_area_pp)
     if (MooseUtils::absoluteFuzzyEqual(*_area_pp, 0))
@@ -96,11 +96,11 @@ WCNSFVEnergyFluxBC::computeQpResidual()
       const Point incoming_vector =
           !_direction_specified_by_user ? _face_info->normal() : _direction;
       const Real cos_angle = std::abs(incoming_vector * _face_info->normal());
-      return -_scaling_factor * (*_rho)(singleSidedFaceArg(), current_time) * *_velocity_pp *
-             cos_angle * (*_cp)(singleSidedFaceArg(), current_time) * *_temperature_pp;
+      return -_scaling_factor * (*_rho)(singleSidedFaceArg(), state) * *_velocity_pp * cos_angle *
+             (*_cp)(singleSidedFaceArg(), state) * *_temperature_pp;
     }
     else
-      return -_scaling_factor * *_mdot_pp / *_area_pp * (*_cp)(singleSidedFaceArg(), current_time) *
+      return -_scaling_factor * *_mdot_pp / *_area_pp * (*_cp)(singleSidedFaceArg(), state) *
              *_temperature_pp;
   }
 }
