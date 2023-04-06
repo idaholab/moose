@@ -6,8 +6,10 @@
     type = 'JSONDiff'
     input = 'constant_reporter.i'
     jsondiff = 'constant_reporter_out.json'
-    skip_keys = 'type'
     requirement = 'The system shall be able to produce arbitrary integer, real number, dof_id_types and string scalar/vector values for use in other calculations.'
+    keep_reporter_types = true
+    # dof id type varies based on 32 bit, 64 bit, and machine
+    ignored_regex_items = 'reporters/constant/values/dofid_.*/type'
   []
   [errors]
     requirement = 'The system shall throw an error when producing constant reporter values if '

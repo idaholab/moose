@@ -1200,9 +1200,11 @@ prettyCppType(const std::string & cpp_type)
   // On mac many of the std:: classes are inline namespaced with __1
   // On linux std::string can be inline namespaced with __cxx11
   std::string s = cpp_type;
+  // Remove all spaces surrounding a >
+  pcrecpp::RE("\\s(?=>)").GlobalReplace("", &s);
   pcrecpp::RE("std::__\\w+::").GlobalReplace("std::", &s);
   // It would be nice if std::string actually looked normal
-  pcrecpp::RE("\\s*std::basic_string<char, std::char_traits<char>, std::allocator<char> >\\s*")
+  pcrecpp::RE("\\s*std::basic_string<char, std::char_traits<char>, std::allocator<char>>\\s*")
       .GlobalReplace("std::string", &s);
   // It would be nice if std::vector looked normal
   pcrecpp::RE r("std::vector<([[:print:]]+),\\s?std::allocator<\\s?\\1\\s?>\\s?>");

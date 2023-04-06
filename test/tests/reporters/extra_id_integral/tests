@@ -10,6 +10,7 @@
       cli_args = "Outputs/file_base='extra_id_integral_default'"
       detail = 'single variable integral with single extra ID'
       recover = false
+      keep_reporter_types = true
     []
     [multi_ids]
       type = 'JSONDiff'
@@ -18,6 +19,7 @@
       cli_args = "Reporters/extra_id_integral/id_name='assembly_id pin_id' Outputs/file_base='extra_id_integral_multi_ids'"
       detail = 'single variable integral with multiple extra IDs'
       recover = false
+      keep_reporter_types = true
     []
     [multi_ids_multi_vars]
       type = 'JSONDiff'
@@ -26,6 +28,7 @@
       cli_args = "Reporters/extra_id_integral/id_name='assembly_id pin_id' Reporters/extra_id_integral/variable='value1 value2' Outputs/file_base='extra_id_integral_multi_vars'"
       detail = 'multiple variable integrals with multiple extra IDs'
       recover = false
+      keep_reporter_types = true
     []
   []
 []
