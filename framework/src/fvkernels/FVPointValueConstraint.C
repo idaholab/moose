@@ -59,7 +59,7 @@ ADReal
 FVPointValueConstraint::computeQpResidual()
 {
   if (_current_elem == _my_elem)
-    return _var(makeElemArg(_current_elem), Moose::autoState()) - _phi0;
+    return _var(makeElemArg(_current_elem), autoState()) - _phi0;
   else
     return 0;
 }
