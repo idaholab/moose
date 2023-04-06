@@ -180,4 +180,16 @@ currentState()
 {
   return {};
 }
+
+inline StateArg
+oldState()
+{
+  return {(unsigned int)1};
+}
+
+inline StateArg
+previousNonlinearState()
+{
+  return {(unsigned int)1, SolutionIterationType::Nonlinear};
+}
 }
