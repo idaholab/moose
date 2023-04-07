@@ -157,6 +157,19 @@ public:
                       Real scaling_factor = 1.0);
 
   /**
+   * Queues a generic variable to be added to the nonlinear or aux system.
+   *
+   * @param[in] nl   True if this is a nonlinear (solution) variable
+   * @param[in] var_type   Type (class) of the variable
+   * @param[in] name   Name of the variable
+   * @param[in] params   Input parameters for the variable
+   */
+  void addSimVariable(bool nl,
+                      const std::string & var_type,
+                      const VariableName & name,
+                      const InputParameters & params);
+
+  /**
    * Reports an error if the variable name is not too long
    */
   void checkVariableNameLength(const std::string & name) const;

@@ -396,6 +396,80 @@ Simulation::addSimVariable(bool nl,
 }
 
 void
+Simulation::addSimVariable(bool nl,
+                           const std::string & var_type,
+                           const VariableName & name,
+                           const InputParameters & params)
+{
+  checkVariableNameLength(name);
+
+  if (_vars.find(name) == _vars.end()) // variable is new
+  {
+    VariableInfo vi;
+    vi._nl = nl;
+    vi._var_type = var_type;
+    vi._params = params;
+
+    _vars[name] = vi;
+  }
+  else // variable was previously added
+  {
+    VariableInfo & vi = _vars[name];
+    InputParameters & vi_params = vi._params;
+
+    if (vi._nl != nl)
+      mooseError("The variable '",
+                 name,
+                 "' has already been added in a different system (nonlinear or aux).");
+
+    if (vi._var_type != var_type)
+      mooseError("The variable '",
+                 name,
+                 "' has already been added with a different type than '",
+                 var_type,
+                 "'.");
+
+    // Check that all valid parameters (other than 'block') are consistent
+    for (auto it = params.begin(); it != params.end(); it++)
+    {
+      const std::string param_name = it->first;
+      if (param_name == "block")
+      {
+        if (vi_params.isParamValid("block"))
+        {
+          auto blocks = vi_params.get<std::vector<SubdomainName>>("block");
+          const auto new_blocks = params.get<std::vector<SubdomainName>>("block");
+          for (const auto & subdomain_name : new_blocks)
+            if (std::find(blocks.begin(), blocks.end(), subdomain_name) == blocks.end())
+              blocks.push_back(subdomain_name);
+          vi_params.set<std::vector<SubdomainName>>("block") = blocks;
+        }
+        else
+          mooseError("The variable '", name, "' was added previously without block restriction.");
+      }
+      else if (params.isParamValid(param_name))
+      {
+        if (vi_params.isParamValid(param_name))
+        {
+          if (params.rawParamVal(param_name) != vi_params.rawParamVal(param_name))
+            mooseError("The variable '",
+                       name,
+                       "' was added previously with a different value for the parameter '",
+                       param_name,
+                       "'.");
+        }
+        else
+          mooseError("The variable '",
+                     name,
+                     "' was added previously without the parameter '",
+                     param_name,
+                     "'.");
+      }
+    }
+  }
+}
+
+void
 Simulation::checkVariableNameLength(const std::string & name) const
 {
   if (name.size() > THM::MAX_VARIABLE_LENGTH)
