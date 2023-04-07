@@ -12,6 +12,7 @@
 #include "MooseUtils.h"
 #include "LinearInterpolation.h"
 #include "FillBetweenPointVectorsTools.h"
+#include "CastUniquePointer.h"
 
 // C++ includes
 #include <cmath> // for atan2
