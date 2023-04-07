@@ -28,5 +28,5 @@ public:
   void operator()(const libMesh::ConstElemRange & range, bool bypass_threading = false) final;
 
 protected:
-  virtual void computeJacobian() override;
+  virtual void computeOnElement() override;
 };

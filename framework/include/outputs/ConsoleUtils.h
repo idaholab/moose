@@ -15,6 +15,7 @@
 // Forward declarations
 class MooseApp;
 class FEProblemBase;
+class MooseObject;
 
 // libMesh forward declarations
 namespace libMesh
@@ -90,4 +91,19 @@ std::string outputLegacyInformation(MooseApp & app);
  */
 void insertNewline(std::stringstream & oss, std::streampos & begin, std::streampos & curr);
 
+/**
+ * Add new lines and prefixes to a string for pretty display in output
+ * NOTE: This makes a copy of the string, on purpose, to be able to return
+ *       a modified copy
+ * @return the formatted string
+ */
+std::string formatString(std::string message, const std::string & prefix);
+
+/**
+ * Routine to output the name of MooseObjects in a string
+ * @param objs the vector with all the MooseObjects
+ * @param sep a separator in between each object's name
+ */
+std::string mooseObjectVectorToString(const std::vector<MooseObject *> & objs,
+                                      const std::string & sep = " ");
 } // ConsoleUtils namespace

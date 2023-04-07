@@ -74,3 +74,18 @@ ComputeElemDampingThread::join(const ComputeElemDampingThread & y)
   if (y._damping < _damping)
     _damping = y._damping;
 }
+
+void
+ComputeElemDampingThread::printGeneralExecutionInformation() const
+{
+  const auto & damper_wh = _nl.getElementDamperWarehouse();
+  if (!_fe_problem.shouldPrintExecution(_tid) || !damper_wh.hasActiveObjects())
+    return;
+
+  const auto & console = _fe_problem.console();
+  const auto & execute_on = _fe_problem.getCurrentExecuteOnFlag();
+  console << "[DBG] Beginning elemental loop to compute damping on " << execute_on << std::endl;
+  // Dampers are currently not block restricted
+  console << "[DBG] Ordering of dampers " << std::endl;
+  console << damper_wh.activeObjectsToFormattedString() << std::endl;
+}

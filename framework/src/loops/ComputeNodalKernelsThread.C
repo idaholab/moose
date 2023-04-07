@@ -98,3 +98,19 @@ void
 ComputeNodalKernelsThread::join(const ComputeNodalKernelsThread & /*y*/)
 {
 }
+
+void
+ComputeNodalKernelsThread::printGeneralExecutionInformation() const
+{
+  if (!_fe_problem.shouldPrintExecution(_tid) || !_nkernel_warehouse->hasActiveObjects())
+    return;
+
+  const auto & console = _fe_problem.console();
+  const auto & execute_on = _fe_problem.getCurrentExecuteOnFlag();
+  console << "[DBG] Computing nodal kernels contribution to residual on nodes on " << execute_on
+          << std::endl;
+  console << "[DBG] Nodes at boundaries between blocks will execute lower block ID first"
+          << std::endl;
+  console << "[DBG] Ordering of the nodal kernels on nodes they are defined on:" << std::endl;
+  console << _nkernel_warehouse->activeObjectsToFormattedString() << std::endl;
+}

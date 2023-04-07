@@ -45,7 +45,7 @@ public:
   virtual void threadJoin(const UserObject & y) override;
   virtual void meshChanged() override;
 
-  /// quaddrature point data
+  /// quadrature point data
   struct QPData
   {
     /// physical coordinates of the quadrature point

@@ -18,6 +18,7 @@
 #include "Moose.h"
 #include "ADReal.h"
 #include "ExecutablePath.h"
+#include "ConsoleUtils.h"
 
 #include "libmesh/compare_types.h"
 #include "libmesh/bounding_box.h"
@@ -661,10 +662,11 @@ void MaterialPropertyStorageDump(
  * @param message The message that will be indented
  * @param color The color to apply to the prefix (default CYAN)
  * @param indent_first_line If true this will indent the first line too (default)
+ * @param post_prefix A string to append right after the prefix, defaults to a column and a space
  *
  * Takes a message like the following and indents it with another color code (see below)
  *
- * Input messsage:
+ * Input message:
  * COLOR_YELLOW
  * *** Warning ***
  * Something bad has happened and we want to draw attention to it with color
@@ -678,7 +680,7 @@ void MaterialPropertyStorageDump(
  * COLOR_DEFAULT
  *
  * Also handles single line color codes
- * COLOR_CYAN sub_app: 0 Nonline |R| = COLOR_GREEN 1.0e-10 COLOR_DEFAULT
+ * COLOR_CYAN sub_app: 0 Nonlinear |R| = COLOR_GREEN 1.0e-10 COLOR_DEFAULT
  *
  * Not indenting the first line is useful in the case where the first line is actually finishing
  * the line before it.
@@ -686,10 +688,11 @@ void MaterialPropertyStorageDump(
 void indentMessage(const std::string & prefix,
                    std::string & message,
                    const char * color = COLOR_CYAN,
-                   bool dont_indent_first_line = true);
+                   bool dont_indent_first_line = true,
+                   const std::string & post_prefix = ": ");
 
 /**
- * remove ANSI escape sequences for teminal color from msg
+ * remove ANSI escape sequences for terminal color from msg
  */
 std::string & removeColor(std::string & msg);
 

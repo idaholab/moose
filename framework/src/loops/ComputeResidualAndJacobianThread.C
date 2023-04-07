@@ -88,7 +88,7 @@ ComputeResidualAndJacobianThread::join(const ComputeResidualAndJacobianThread & 
 }
 
 void
-ComputeResidualAndJacobianThread::determineResidualObjects()
+ComputeResidualAndJacobianThread::determineObjectWarehouses()
 {
   if (_vector_tags.size() &&
       _vector_tags.size() != _fe_problem.numVectorTags(Moose::VECTOR_TAG_RESIDUAL))

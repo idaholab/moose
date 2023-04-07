@@ -26,12 +26,16 @@ public:
   void join(const ComputeResidualThread & /*y*/);
 
 protected:
+  using NonlinearThread::compute;
   void compute(ResidualObject & ro) override;
+
   void accumulateNeighbor() override;
   void accumulateNeighborLower() override;
   void accumulateLower() override;
   void accumulate() override;
-  void determineResidualObjects() override;
+  void determineObjectWarehouses() override;
+
+  std::string objectType() const override { return "Residual"; }
 
   /// the tags denoting the vectors we want our residual objects to fill
   const std::set<TagID> & _tags;

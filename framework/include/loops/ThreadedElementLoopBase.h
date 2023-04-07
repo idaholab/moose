@@ -166,6 +166,24 @@ protected:
   /// The subdomain for the last neighbor
   SubdomainID _old_neighbor_subdomain;
 
+  /// Print information about the loop ordering
+  virtual void printGeneralExecutionInformation() const {}
+
+  /// Print information about the particular ordering of objects on each block
+  virtual void printBlockExecutionInformation() const {}
+
+  /// Print information about the particular ordering of objects on each boundary
+  virtual void printBoundaryExecutionInformation(const unsigned int /*bid*/) const {}
+
+  /// Keep track of which blocks were visited
+  mutable std::set<SubdomainID> _blocks_exec_printed;
+
+  /// Keep track of which boundaries were visited
+  mutable std::set<BoundaryID> _boundaries_exec_printed;
+
+  /// Resets the set of blocks and boundaries visited
+  void resetExecPrintedSets() const;
+
 private:
   /**
    * Whether to compute the internal side for the provided element-neighbor pair. Typically this
@@ -205,6 +223,7 @@ ThreadedElementLoopBase<RangeType>::operator()(const RangeType & range, bool byp
       _tid = bypass_threading ? 0 : puid.id;
 
       pre();
+      printGeneralExecutionInformation();
 
       _subdomain = Moose::INVALID_BLOCK_ID;
       _neighbor_subdomain = Moose::INVALID_BLOCK_ID;
@@ -221,7 +240,10 @@ ThreadedElementLoopBase<RangeType>::operator()(const RangeType & range, bool byp
         _old_subdomain = _subdomain;
         _subdomain = elem->subdomain_id();
         if (_subdomain != _old_subdomain)
+        {
           subdomainChanged();
+          printBlockExecutionInformation();
+        }
 
         onElement(elem);
 
@@ -243,6 +265,7 @@ ThreadedElementLoopBase<RangeType>::operator()(const RangeType & range, bool byp
                  ++it)
             {
               preBoundary(elem, side, *it, lower_d_elem);
+              printBoundaryExecutionInformation(*it);
               onBoundary(elem, side, *it, lower_d_elem);
             }
 
@@ -273,6 +296,7 @@ ThreadedElementLoopBase<RangeType>::operator()(const RangeType & range, bool byp
       } // range
 
       post();
+      resetExecPrintedSets();
     }
     catch (libMesh::LogicError & e)
     {
@@ -385,9 +409,17 @@ ThreadedElementLoopBase<RangeType>::shouldComputeInternalSide(const Elem & elem,
   // When looping over elements and then sides, we need to make sure that we do not duplicate
   // effort, e.g. if a face is shared by element 1 and element 2, then we do not want to do compute
   // work both when we are visiting element 1 *and* then later when visiting element 2. Our rule is
-  // to only compute when we are visting the element that has the lower element id when element and
+  // to only compute when we are visiting the element that has the lower element id when element and
   // neighbor are of the same adaptivity level, and then if they are not of the same level, then
   // we only compute when we are visiting the finer element
   return (neighbor.active() && (neighbor.level() == elem.level()) && (elem_id < neighbor_id)) ||
          (neighbor.level() < elem.level());
+}
+
+template <typename RangeType>
+void
+ThreadedElementLoopBase<RangeType>::resetExecPrintedSets() const
+{
+  _blocks_exec_printed.clear();
+  _boundaries_exec_printed.clear();
 }

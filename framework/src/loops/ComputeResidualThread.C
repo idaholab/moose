@@ -73,7 +73,7 @@ ComputeResidualThread::join(const ComputeResidualThread & /*y*/)
 }
 
 void
-ComputeResidualThread::determineResidualObjects()
+ComputeResidualThread::determineObjectWarehouses()
 {
   // If users pass a empty vector or a full size of vector,
   // we take all kernels

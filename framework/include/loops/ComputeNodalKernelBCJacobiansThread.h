@@ -35,6 +35,9 @@ public:
   void join(const ComputeNodalKernelBCJacobiansThread & /*y*/);
 
 protected:
+  /// Print information about the loop, mostly order of execution of objects
+  void printGeneralExecutionInformation() const override;
+
   FEProblemBase & _fe_problem;
 
   AuxiliarySystem & _aux_sys;
