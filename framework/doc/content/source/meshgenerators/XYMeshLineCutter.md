@@ -59,7 +59,7 @@ The mesh after the line cutting using `CUT_ELEM_TRI` method is shown in [complex
       id=complex_cut_elem
       caption=The complex multi-block mesh cut using the `CUT_ELEM_TRI` method.
 
-The fine elements issue near the cutting line can be relieved by enable [!param](/Mesh/XYMeshLineCutter/improve_tri_elements), as shown in [complex_cut_elem_improve].
+The fine elements issue near the cutting line can be relieved by enabling [!param](/Mesh/XYMeshLineCutter/improve_tri_elements), as shown in [complex_cut_elem_improve].
 
 !media mesh_modifiers/complex_cut_elem_improve.png
       style=display: block;margin-left:auto;margin-right:auto;width:40%;

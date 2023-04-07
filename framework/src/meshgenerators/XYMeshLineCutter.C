@@ -111,7 +111,7 @@ XYMeshLineCutter::generate()
     paramError("input", "Only 2D meshes are supported.");
 
   ReplicatedMesh & mesh = *replicated_mesh_ptr;
-
+  // Subdomain ID for TRI elements arising of QUAD element cuts must be new
   std::set<subdomain_id_type> subdomain_ids_set;
   mesh.subdomain_ids(subdomain_ids_set);
   const subdomain_id_type max_subdomain_id = *subdomain_ids_set.rbegin();
@@ -119,6 +119,7 @@ XYMeshLineCutter::generate()
   const subdomain_id_type tri_subdomain_id_shift =
       _tri_elem_subdomain_shift == Moose::INVALID_BLOCK_ID ? max_subdomain_id + 2
                                                            : _tri_elem_subdomain_shift;
+
   // Use a unique new boundary id as the temporary boundary id for _new_boundary_id
   // This help prevent issues when _new_boundary_id is already used in the mesh
   boundary_id_type new_boundary_id_tmp = MooseMeshUtils::getNextFreeBoundaryID(mesh);

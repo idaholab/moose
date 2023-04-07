@@ -1024,6 +1024,7 @@ boundaryTriElemImprover(ReplicatedMesh & mesh, const boundary_id_type boundary_t
     // For all the elements sharing the same off-boundary node, we need to know how many separated
     // subdomains are involved
     // If there are extra element ids defined on the mesh, they also want to retain their boundaries
+    // Only triangle elements that share a side can be merged
     const unsigned int n_elem_extra_ids = mesh.n_elem_integers();
     std::vector<std::tuple<subdomain_id_type, std::vector<dof_id_type>, unsigned int>> blocks_info;
     for (const auto & elem_id : ordered_elem_list)
@@ -1047,7 +1048,7 @@ boundaryTriElemImprover(ReplicatedMesh & mesh, const boundary_id_type boundary_t
               std::make_tuple(mesh.elem_ptr(elem_id)->subdomain_id(), exist_extra_ids, 1));
       }
     }
-    // For each separated subdomain, we try to improve the boundary elements
+    // For each separated subdomain / set of extra ids, we try to improve the boundary elements
     unsigned int side_counter = 0;
     for (const auto & block_info : blocks_info)
     {
@@ -1106,6 +1107,7 @@ boundaryTriElemImprover(ReplicatedMesh & mesh, const boundary_id_type boundary_t
       }
       else if (angle < 135.0)
       {
+        // We can just add the middle node because there's nothing on the other side
         const auto node_m = mesh.add_point((*node_1 + *node_2) / 2.0);
         makeImprovedTriElement(mesh,
                                tri_group.first,
