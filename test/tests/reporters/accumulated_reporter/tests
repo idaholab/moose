@@ -6,7 +6,9 @@
     type = 'JSONDiff'
     input = 'accumulate_reporter.i'
     jsondiff = 'accumulate_reporter_out.json'
-    skip_keys = 'type'
+    keep_reporter_types = true
     requirement = 'The system shall be able to accumulate reporter values over time steps into a vector reporter value.'
+    # dof id type varies based on 32 bit, 64 bit, and machine
+    ignored_regex_items = 'reporters/accumulate/values/rep:dofid.*/type'
   []
 []

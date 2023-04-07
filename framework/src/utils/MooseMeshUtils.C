@@ -283,27 +283,25 @@ getExtraIDUniqueCombinationMap(const MeshBase & mesh,
       MooseMeshUtils::getExtraIDUniqueCombinationMap(mesh, block_ids, extra_ids);
   // parsing extra ids based on ref_parsed_ids
   std::set<std::pair<dof_id_type, dof_id_type>> unique_ids;
+  std::map<std::pair<dof_id_type, dof_id_type>, std::set<const Elem *>> map_unique_id_to_elem;
   for (const auto & elem : mesh.active_element_ptr_range())
   {
     if (block_restricted && block_ids.find(elem->subdomain_id()) == block_ids.end())
       continue;
     const dof_id_type id1 = base_parsed_ids[elem->id()];
     const dof_id_type id2 = elem->get_extra_integer(id_index);
-    if (!unique_ids.count(std::pair<dof_id_type, dof_id_type>(id1, id2)))
-      unique_ids.insert(std::pair<dof_id_type, dof_id_type>(id1, id2));
+    const std::pair<dof_id_type, dof_id_type> ids = std::make_pair(id1, id2);
+    unique_ids.insert(ids);
+    map_unique_id_to_elem[ids].insert(elem);
   }
   mesh.comm().set_union(unique_ids);
   std::map<dof_id_type, dof_id_type> parsed_ids;
-  for (const auto & elem : mesh.active_element_ptr_range())
+
+  for (const auto & [ids, elements] : map_unique_id_to_elem)
   {
-    if (block_restricted && block_ids.find(elem->subdomain_id()) == block_ids.end())
-      continue;
-    const dof_id_type id1 = base_parsed_ids[elem->id()];
-    const dof_id_type id2 = elem->get_extra_integer(id_index);
-    parsed_ids[elem->id()] = std::distance(
-        unique_ids.begin(),
-        std::find(
-            unique_ids.begin(), unique_ids.end(), std::pair<dof_id_type, dof_id_type>(id1, id2)));
+    const dof_id_type new_id = std::distance(unique_ids.begin(), unique_ids.find(ids));
+    for (const Elem * elem : elements)
+      parsed_ids[elem->id()] = new_id;
   }
   return parsed_ids;
 }

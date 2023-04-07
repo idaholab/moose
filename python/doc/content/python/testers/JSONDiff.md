@@ -16,8 +16,14 @@ Test configuration options are added to the `tests` file.
 
 - `rel_err`: Sets a relative error comparison tolerance, defaults to 5.5e-6.
 
-
 Other test commands & restrictions may be found in the [TestHarness documentation](TestHarness.md).
+
+### MOOSE-Specific
+
+The following options are specific to MOOSE JSON output:
+
+- `keep_system_information`: Whether or not to diff the system information reported by MOOSE; this defaults to false because typically diffing on executable name, run time, etc, is not useful for testing
+- `keep_reporter_types` Whether or not to diff the reporter types output by the MOOSE reporter system
 
 ## Example test configuration in the MOOSE test suite
 

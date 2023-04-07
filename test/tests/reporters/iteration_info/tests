@@ -10,6 +10,7 @@
       jsondiff = iteration_info_out.json
       recover = false # iteration info changes with --recover
       skip_keys = 'part number_of_parts'
+      keep_reporter_types = true
 
       detail = "that outputs all information be default;"
     []
@@ -21,6 +22,7 @@
       cli_args = 'Reporters/iteration_info/items=time timestep Outputs/file_base=limit_out'
       recover = false # iteration info changes with --recover
       skip_keys = 'part number_of_parts'
+      keep_reporter_types = true
 
       detail = "that outputs specific information;"
     []
@@ -31,6 +33,8 @@
       jsondiff = iteration_info_steady_out.json
       recover = false # iteration info changes with --recover
       skip_keys = 'part number_of_parts'
+      keep_reporter_types = true
+
 
       detail = "automatically disables items based on execution;"
     []
