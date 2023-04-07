@@ -1018,8 +1018,6 @@ boundaryTriElemImprover(ReplicatedMesh & mesh, const boundary_id_type boundary_t
     std::vector<dof_id_type> ordered_elem_list;
     MooseMeshUtils::makeOrderedNodeList(
         node_assm, elem_id_list, ordered_node_list, ordered_elem_list);
-    elems_to_remove.insert(
-        elems_to_remove.end(), ordered_elem_list.begin(), ordered_elem_list.end());
 
     // For all the elements sharing the same off-boundary node, we need to know how many separated
     // subdomains are involved
@@ -1033,20 +1031,17 @@ boundaryTriElemImprover(ReplicatedMesh & mesh, const boundary_id_type boundary_t
       // Record all the element extra integers of the original quad element
       for (unsigned int j = 0; j < n_elem_extra_ids; j++)
         exist_extra_ids[j] = mesh.elem_ptr(elem_id)->get_extra_integer(j);
-      if (blocks_info.empty())
-      {
-        blocks_info.push_back(
-            std::make_tuple(mesh.elem_ptr(elem_id)->subdomain_id(), exist_extra_ids, 1));
-      }
-      else
+      if (!blocks_info.empty())
       {
         if (mesh.elem_ptr(elem_id)->subdomain_id() == std::get<0>(blocks_info.back()) &&
             exist_extra_ids == std::get<1>(blocks_info.back()))
+        {
           std::get<2>(blocks_info.back())++;
-        else
-          blocks_info.push_back(
-              std::make_tuple(mesh.elem_ptr(elem_id)->subdomain_id(), exist_extra_ids, 1));
+          continue;
+        }
       }
+      blocks_info.push_back(
+          std::make_tuple(mesh.elem_ptr(elem_id)->subdomain_id(), exist_extra_ids, 1));
     }
     // For each separated subdomain / set of extra ids, we try to improve the boundary elements
     unsigned int side_counter = 0;
@@ -1095,15 +1090,19 @@ boundaryTriElemImprover(ReplicatedMesh & mesh, const boundary_id_type boundary_t
       // 180 degrees.
       if (angle < 90.0)
       {
-        makeImprovedTriElement(mesh,
-                               tri_group.first,
-                               ordered_node_list[side_counter],
-                               ordered_node_list[side_counter + std::get<2>(block_info)],
-                               std::get<0>(block_info),
-                               std::get<1>(block_info),
-                               {boundary_to_improve},
-                               side_0_boundary_ids,
-                               side_t_boundary_ids);
+        if (std::get<2>(block_info) > 1)
+        {
+          makeImprovedTriElement(mesh,
+                                 tri_group.first,
+                                 ordered_node_list[side_counter],
+                                 ordered_node_list[side_counter + std::get<2>(block_info)],
+                                 std::get<0>(block_info),
+                                 std::get<1>(block_info),
+                                 {boundary_to_improve},
+                                 side_0_boundary_ids,
+                                 side_t_boundary_ids);
+          elems_to_remove.insert(elems_to_remove.end(), block_elems.begin(), block_elems.end());
+        }
       }
       else if (angle < 135.0)
       {
@@ -1127,6 +1126,7 @@ boundaryTriElemImprover(ReplicatedMesh & mesh, const boundary_id_type boundary_t
                                {boundary_to_improve},
                                std::vector<boundary_id_type>(),
                                side_t_boundary_ids);
+        elems_to_remove.insert(elems_to_remove.end(), block_elems.begin(), block_elems.end());
       }
       else
       {
@@ -1159,6 +1159,7 @@ boundaryTriElemImprover(ReplicatedMesh & mesh, const boundary_id_type boundary_t
                                {boundary_to_improve},
                                std::vector<boundary_id_type>(),
                                side_t_boundary_ids);
+        elems_to_remove.insert(elems_to_remove.end(), block_elems.begin(), block_elems.end());
       }
       side_counter += std::get<2>(block_info);
     }
