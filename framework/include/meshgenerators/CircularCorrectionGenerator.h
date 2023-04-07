@@ -58,7 +58,8 @@ protected:
    * @param bd_side_list list of sides on the circular boundary
    * @param circle_center center of the circular boundary
    * @param is_closed_loop whether the boundary is a closed loop or not
-   * @param c_coeff a reference variable to contain the coefficient that multiplies the azimuthal angles
+   * @param c_coeff a reference variable to contain the coefficient that multiplies the azimuthal
+   * angles
    * @param end_node_disp a reference variable to contain the displacement of the end node of the
    * partial circular boundary
    * @return radius correction factor to preserve circular area
