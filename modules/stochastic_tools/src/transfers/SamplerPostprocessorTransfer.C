@@ -14,6 +14,7 @@
 #include "SamplerReceiver.h"
 #include "StochasticResults.h"
 #include "Sampler.h"
+#include "Executioner.h"
 
 registerMooseObject("StochasticToolsApp", SamplerPostprocessorTransfer);
 
@@ -129,11 +130,10 @@ SamplerPostprocessorTransfer::executeFromMultiapp()
     {
       if (getFromMultiApp()->hasLocalApp(i))
       {
-        FEProblemBase & app_problem = getFromMultiApp()->appProblemBase(i);
-        if (app_problem.converged() || _keep_diverge)
+        if (getFromMultiApp()->getExecutioner(i)->lastSolveConverged() || _keep_diverge)
           for (std::size_t j = 0; j < _sub_pp_names.size(); ++j)
             _current_data[j].emplace_back(
-                app_problem.getPostprocessorValueByName(_sub_pp_names[j]));
+                getFromMultiApp()->appProblemBase(i).getPostprocessorValueByName(_sub_pp_names[j]));
         else
           for (std::size_t j = 0; j < _sub_pp_names.size(); ++j)
             _current_data[j].emplace_back(std::numeric_limits<double>::quiet_NaN());
@@ -161,9 +161,9 @@ SamplerPostprocessorTransfer::execute()
     current.reserve(_sampler_ptr->getNumberOfLocalRows());
     for (dof_id_type i = _sampler_ptr->getLocalRowBegin(); i < _sampler_ptr->getLocalRowEnd(); ++i)
     {
-      FEProblemBase & app_problem = getFromMultiApp()->appProblemBase(i);
-      if (app_problem.converged() || _keep_diverge)
-        current.emplace_back(app_problem.getPostprocessorValueByName(_sub_pp_names[j]));
+      if (getFromMultiApp()->getExecutioner(i)->lastSolveConverged() || _keep_diverge)
+        current.emplace_back(
+            getFromMultiApp()->appProblemBase(i).getPostprocessorValueByName(_sub_pp_names[j]));
       else
         current.emplace_back(std::numeric_limits<double>::quiet_NaN());
     }
