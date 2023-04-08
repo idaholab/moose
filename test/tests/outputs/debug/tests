@@ -160,6 +160,8 @@
       # FV flux kernels are not actually ordered
       expect_out = '\[DBG\] (2_burger|1_burgers) (1_burgers|2_burger)'
       detail = 'finite volume flux objects contributing to the residual and Jacobian, notably finite volume flux kernels and flux boundary conditions,'
+      # in parallel, no guarantee block 2 is present on rank 0
+      max_parallel = 1
     []
     [fv_elem_kernels]
       type = RunApp
@@ -167,6 +169,8 @@
       cli_args = 'FVKernels/reac/type=FVReaction FVKernels/reac/variable=v --color off'
       expect_out = '\[DBG\] time time_u reac'
       detail = 'finite volume elemental kernels,'
+      # in parallel, no guarantee block 2 is present on rank 0
+      max_parallel = 1
     []
     [fv_interface_kernels]
       type = RunApp
@@ -174,6 +178,8 @@
       cli_args = '--color off'
       expect_out = '\[DBG\] diff_ik'
       detail = 'finite volume interface kernels,'
+      # in parallel, no guarantee block 2 is present on rank 0
+      max_parallel = 1
     []
     [fv_elem_kernels_res_and_jac_combined]
       type = RunApp
@@ -181,6 +187,8 @@
       cli_args = 'FVKernels/reac/type=FVReaction FVKernels/reac/variable=v Executioner/residual_and_jacobian_together=true --color off'
       expect_out = '\[DBG\] time time_u reac'
       detail = 'finite volume elemental kernels when combining both jacobian and residual computations,'
+      # in parallel, no guarantee block 2 is present on rank 0
+      max_parallel = 1
     []
     # Nodal loops
     [nodal_kernel_bcs]
@@ -210,7 +218,7 @@
       type = RunApp
       input = 'show_execution_userobjects.i'
       cli_args = "Debug/show_execution_order='TIMESTEP_BEGIN TIMESTEP_END'"
-      expect_out = 'h L2u H1error H1Semierror L2v_elem f_integral elem_sample'
+      expect_out = 'h L2u H1error H1Semierror L2v_elem f_integral (int_v int_v_elem |)elem_sample'
       detail = 'user objects, including postprocessors, executed at the beginning and end of each time step,'
     []
     [nodal_user_objects]
@@ -224,9 +232,10 @@
       type = RunApp
       input = 'show_execution_userobjects.i'
       cli_args = "--color off"
-      # This corresponds to one print on the subdomain 0. It could be extended to checking
+      # The full print corresponds to one print on the subdomain 0. It could be extended to checking
       # the boundary and interface execution
-      expect_out = '\[DBG\] domain_2 domain_1'
+      # Sometimes, block 0 is not present on rank 0, hence the regex pattern
+      expect_out = '\[DBG\] (domain_2 |)domain_1'
       detail = 'domain user objects,'
     []
     [general_user_objects]
@@ -289,9 +298,11 @@
     [boundary_auxkernels]
       type = RunApp
       input = 'show_execution_auxkernels.i'
-      expect_out = '\[DBG\] Ordering on boundary 0\n\[DBG\] real_property'
+      expect_out = '\[DBG\] Ordering on boundary [0-3]\n\[DBG\] real_property'
       detail = 'boundary restricted auxiliary kernels.'
       cli_args = '--color off'
+      # No guarantee to have a single boundary on rank 0 beyond one rank
+      max_parallel = 4
     []
   []
 []
