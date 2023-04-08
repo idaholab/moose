@@ -273,8 +273,11 @@ FEProblemBase::validParams()
   params.addParamNamesToGroup(
       "skip_nl_system_check kernel_coverage_check boundary_restricted_node_integrity_check "
       "boundary_restricted_elem_integrity_check material_coverage_check fv_bcs_integrity_check "
-      "material_dependency_check",
+      "material_dependency_check check_uo_aux_state error_on_jacobian_nonzero_reallocation",
       "Simulation checks");
+  params.addParamNamesToGroup("use_nonlinear previous_nl_solution_required nl_sys_names "
+                              "error_on_jacobian_nonzero_reallocation ignore_zeros_in_jacobian",
+                              "Nonlinear system(s)");
   params.addParamNamesToGroup("restart_file_base force_restart skip_additional_restart_data",
                               "Restart");
   params.addParamNamesToGroup("verbose_multiapps parallel_barrier_messaging", "Verbosity");
