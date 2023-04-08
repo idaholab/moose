@@ -1,7 +1,7 @@
 [Tests]
   design = 'meshgenerators/CircularCorrectionGenerator.md'
   issues = '#23972'
-  [three_full_rings]
+  [two_full_rings]
     type = 'Exodiff'
     input = 'radius_corr.i'
     exodiff = 'radius_corr_in.e'

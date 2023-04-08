@@ -183,7 +183,7 @@ CircularCorrectionGenerator::generate()
     const Point pt_start = *(input_mesh->node_ptr(ordered_node_list.front()));
     const Point pt_end = *(input_mesh->node_ptr(ordered_node_list.back()));
     // The direction of the span of the partial boundary (which is an arc)
-    const Point span_direction = (pt_start - pt_end).unit();
+    const Point span_direction = is_bdry_closed ? Point(0.0, 0.0, 0.0) : (pt_start - pt_end).unit();
     // Although these are also calculated for a full circular boundary, they are not used
 
     // Find the center of the circular boundary's azimuthal angle and the half of the azimuthal
