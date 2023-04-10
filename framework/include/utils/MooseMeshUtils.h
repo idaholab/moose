@@ -240,4 +240,17 @@ bool hasBoundaryID(MeshBase & input_mesh, const BoundaryID & id);
  * @param boundary name
  */
 bool hasBoundaryName(MeshBase & input_mesh, const BoundaryName & name);
+
+/**
+ * Convert a list of sides in the form of a vector of pairs of node ids into a list of ordered nodes
+ * based on connectivity
+ * @param node_assm vector of pairs of node ids that represent the sides
+ * @param elem_id_list vector of element ids that represent the elements that contain the sides
+ * @param ordered_node_list vector of node ids that represent the ordered nodes
+ * @param ordered_elem_id_list vector of element corresponding to the ordered nodes
+ * */
+void makeOrderedNodeList(std::vector<std::pair<dof_id_type, dof_id_type>> & node_assm,
+                         std::vector<dof_id_type> & elem_id_list,
+                         std::vector<dof_id_type> & ordered_node_list,
+                         std::vector<dof_id_type> & ordered_elem_id_list);
 }
