@@ -277,6 +277,8 @@ MooseApp::validParams()
       false,
       "Keep standard output from all processors when running in parallel");
 
+  params.addCommandLineParam<std::string>("timpi_sync", "--timpi_sync <sync type>", "nbx", "foo");
+
   // Options for debugging
   params.addCommandLineParam<std::string>("start_in_debugger",
                                           "--start-in-debugger <debugger>",
@@ -588,6 +590,18 @@ MooseApp::MooseApp(InputParameters parameters)
                     " to remove this deprecation warning.");
 
   Moose::out << std::flush;
+
+  const auto & timpi_sync = parameters.get<std::string>("timpi_sync");
+  auto sync_type = TIMPI::Communicator::NBX;
+  if (timpi_sync == "sendreceive")
+    sync_type = TIMPI::Communicator::SENDRECEIVE;
+  else if (timpi_sync == "alltoall")
+    sync_type = TIMPI::Communicator::ALLTOALL_COUNTS;
+  else if (timpi_sync != "nbx")
+    mooseError("Unrecognized --timpi_sync type ", timpi_sync);
+  const_cast<Parallel::Communicator &>(comm()).sync_type(sync_type);
+
+  const_cast<Parallel::Communicator &>(comm()).sync_type(TIMPI::Communicator::ALLTOALL_COUNTS);
 }
 
 MooseApp::~MooseApp()
