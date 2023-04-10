@@ -8020,6 +8020,7 @@ FEProblemBase::shouldPrintExecution(const THREAD_ID tid) const
     return true;
   else
     return false;
+}
 
 std::vector<MortarUserObject *>
 FEProblemBase::getMortarUserObjects(const BoundaryID primary_boundary_id,
