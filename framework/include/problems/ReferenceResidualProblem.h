@@ -70,6 +70,12 @@ public:
     LOCAL_LINF
   };
 
+  enum class ZeroReferenceType
+  {
+    ZERO_TOLERANCE,
+    RELATIVE_TOLERANCE
+  };
+
 protected:
   ///@{
   /// List of solution variable names whose reference residuals will be stored,
@@ -129,6 +135,9 @@ protected:
 
   /// Container for normalization type
   FEMNormType _norm_type;
+
+  /// Container for zero reference residual behavior type
+  ZeroReferenceType _zero_ref_type;
 };
 
 template <typename T>
