@@ -153,6 +153,13 @@ MooseMesh::validParams()
       "restrictions for subdomains initially containing no elements, which can occur, for example, "
       "in additive manufacturing simulations which dynamically add and remove elements.");
 
+  params.addParam<bool>("force_prepare_for_use",
+                        true,
+                        "Whether to force a prepare_for_use() call to the libMesh MeshBase object "
+                        "during preparation of the MOOSE mesh. This should only be set to false if "
+                        "a user is confident that the mesh generators they are using correctly "
+                        "flag the state of the mesh, e.g. call set_isnt_prepared()");
+
   params += MooseAppCoordTransform::validParams();
 
   // This indicates that the derived mesh type accepts a MeshGenerator, and should be set to true in
@@ -165,9 +172,9 @@ MooseMesh::validParams()
   params.registerBase("MooseMesh");
 
   // groups
-  params.addParamNamesToGroup(
-      "dim nemesis patch_update_strategy construct_node_list_from_side_list patch_size",
-      "Advanced");
+  params.addParamNamesToGroup("dim nemesis patch_update_strategy "
+                              "construct_node_list_from_side_list patch_size force_prepare_for_use",
+                              "Advanced");
   params.addParamNamesToGroup("partitioner centroid_partitioner_direction", "Partitioning");
 
   return params;
@@ -207,7 +214,8 @@ MooseMesh::MooseMesh(const InputParameters & parameters)
     _need_ghost_ghosted_boundaries(true),
     _is_displaced(false),
     _rz_coord_axis(getParam<MooseEnum>("rz_coord_axis")),
-    _coord_system_set(false)
+    _coord_system_set(false),
+    _force_prepare_for_use(getParam<bool>("force_prepare_for_use"))
 {
   if (isParamValid("ghosting_patch_size") && (_patch_update_strategy != Moose::Iteration))
     mooseError("Ghosting patch size parameter has to be set in the mesh block "
@@ -263,7 +271,8 @@ MooseMesh::MooseMesh(const MooseMesh & other_mesh)
     _coord_sys(other_mesh._coord_sys),
     _rz_coord_axis(other_mesh._rz_coord_axis),
     _coord_system_set(other_mesh._coord_system_set),
-    _provided_coord_blocks(other_mesh._provided_coord_blocks)
+    _provided_coord_blocks(other_mesh._provided_coord_blocks),
+    _force_prepare_for_use(other_mesh._force_prepare_for_use)
 {
   // Note: this calls BoundaryInfo::operator= without changing the
   // ownership semantics of either Mesh's BoundaryInfo object.
@@ -352,11 +361,18 @@ MooseMesh::prepare(bool)
     // For whatever reason we do not want to allow renumbering here nor ever in the future?
     getMesh().allow_renumbering(false);
 
-  if (!_mesh->is_prepared())
+  // Too many mesh generators forget to mark the mesh as unprepared. Until we create a good
+  // verification check that forces mesh generator developers to properly mark the state of the
+  // mesh, we need to ensure that the mesh is prepared so our simulation can run properly. Once we
+  // have a trusted verification check, then we can remove use of the _force_prepare_for_use boolean
+  // member
+  if (!_mesh->is_prepared() || _force_prepare_for_use)
   {
     _mesh->prepare_for_use();
-
     _moose_mesh_prepared = false;
+    // Only force prepare once since the force-prepare flag's purpose is just to ensure we have a
+    // prepare_for_use after mesh generation
+    _force_prepare_for_use = false;
   }
 
   if (_moose_mesh_prepared)

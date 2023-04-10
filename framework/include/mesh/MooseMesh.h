@@ -1620,6 +1620,11 @@ private:
   /// Set for holding user-provided coordinate system type block names
   std::vector<SubdomainName> _provided_coord_blocks;
 
+  /// Whether to force a prepare_for_use() call to the libMesh MeshBase object during preparation of
+  /// the MOOSE mesh. This should only be set to false if a user is confident that the mesh
+  /// generators they are using correctly flag the state of the mesh, e.g. call set_isnt_prepared()
+  bool _force_prepare_for_use;
+
   template <typename T>
   struct MeshType;
 };
