@@ -95,6 +95,8 @@
   nl_rel_tol = 1e-8
   num_steps = 1
   dt = 0.05
+  nl_forced_its = 1
+  line_search = none
 []
 
 [Debug]
