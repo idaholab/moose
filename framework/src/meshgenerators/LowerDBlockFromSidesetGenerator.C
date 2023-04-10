@@ -121,8 +121,10 @@ LowerDBlockFromSidesetGenerator::generate()
       // Don't need to send to self
       if (pid != mesh->processor_id() && need_boundary_elems[pid])
       {
-        push_element_data[pid] = elements_to_send;
-        push_node_data[pid] = connected_nodes;
+        if (elements_to_send.size())
+          push_element_data[pid] = elements_to_send;
+        if (connected_nodes.size())
+          push_node_data[pid] = connected_nodes;
       }
 
     auto node_action_functor = [](processor_id_type, const auto &)
