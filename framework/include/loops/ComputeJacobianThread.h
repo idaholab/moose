@@ -9,7 +9,7 @@
 
 #pragma once
 
-#include "ThreadedElementLoop.h"
+#include "NonlinearThread.h"
 #include "MooseObjectTagWarehouse.h"
 
 #include "libmesh/elem_range.h"
@@ -21,8 +21,9 @@ class IntegratedBCBase;
 class DGKernelBase;
 class InterfaceKernelBase;
 class Kernel;
+class FVElementalKernel;
 
-class ComputeJacobianThread : public ThreadedElementLoop<ConstElemRange>
+class ComputeJacobianThread : public NonlinearThread
 {
 public:
   ComputeJacobianThread(FEProblemBase & fe_problem, const std::set<TagID> & tags);
@@ -32,49 +33,25 @@ public:
 
   virtual ~ComputeJacobianThread();
 
-  virtual void subdomainChanged() override;
-  virtual void onElement(const Elem * elem) override;
-  virtual void onBoundary(const Elem * elem,
-                          unsigned int side,
-                          BoundaryID bnd_id,
-                          const Elem * lower_d_elem = nullptr) override;
-  virtual void onInternalSide(const Elem * elem, unsigned int side) override;
-  virtual void onInterface(const Elem * elem, unsigned int side, BoundaryID bnd_id) override;
   virtual void postElement(const Elem * /*elem*/) override;
-  virtual void post() override;
 
   void join(const ComputeJacobianThread & /*y*/);
 
 protected:
-  NonlinearSystemBase & _nl;
-
-  unsigned int _num_cached;
-
-  // Reference to BC storage structures
-  MooseObjectTagWarehouse<IntegratedBCBase> & _integrated_bcs;
-
-  MooseObjectWarehouse<IntegratedBCBase> * _ibc_warehouse;
-
-  // Reference to DGKernel storage structure
-  MooseObjectTagWarehouse<DGKernelBase> & _dg_kernels;
-
-  MooseObjectWarehouse<DGKernelBase> * _dg_warehouse;
-
-  // Reference to interface kernel storage structure
-  MooseObjectTagWarehouse<InterfaceKernelBase> & _interface_kernels;
-
-  MooseObjectWarehouse<InterfaceKernelBase> * _ik_warehouse;
-
-  // Reference to Kernel storage structure
-  MooseObjectTagWarehouse<KernelBase> & _kernels;
-
-  // A pointer to different warehouse
-  MooseObjectWarehouse<KernelBase> * _warehouse;
-
   const std::set<TagID> & _tags;
 
-  virtual void computeJacobian();
-  virtual void computeFaceJacobian(BoundaryID bnd_id, const Elem * lower_d_elem);
-  virtual void computeInternalFaceJacobian(const Elem * neighbor);
-  virtual void computeInternalInterFaceJacobian(BoundaryID bnd_id);
+  void determineObjectWarehouses() override;
+  void accumulateNeighbor() override;
+  virtual void accumulateNeighborLower() override;
+  virtual void accumulateLower() override;
+  virtual void accumulate() override{};
+
+  virtual void compute(ResidualObject &) override { mooseError("Not implemented"); };
+  void compute(KernelBase & kernel) override;
+  void compute(FVElementalKernel & kernel) override;
+  void compute(IntegratedBCBase & bc) override;
+  void compute(DGKernelBase & dg, const Elem * neighbor) override;
+  void compute(InterfaceKernelBase & ik) override;
+
+  std::string objectType() const override { return "Jacobian"; }
 };

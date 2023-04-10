@@ -38,6 +38,9 @@ public:
   Real damping();
 
 protected:
+  /// Print information about the loop, mostly order of execution of objects
+  void printGeneralExecutionInformation() const override;
+
   Real _damping;
   NonlinearSystemBase & _nl;
   const MooseObjectWarehouse<NodalDamper> & _nodal_dampers;

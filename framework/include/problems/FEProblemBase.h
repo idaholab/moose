@@ -2043,6 +2043,17 @@ public:
    */
   bool failNextNonlinearConvergenceCheck() const { return _fail_next_nonlinear_convergence_check; }
 
+  /*
+   * Set the status of loop order of execution printing
+   * @param print_exec set of execution flags to print on
+   */
+  void setExecutionPrinting(const ExecFlagEnum & print_exec) { _print_execution_on = print_exec; };
+
+  /**
+   * Check whether the problem should output execution orders at this time
+   */
+  bool shouldPrintExecution(const THREAD_ID tid) const;
+
 protected:
   /// Create extra tagged vectors and matrices
   void createTagVectors();
@@ -2436,6 +2447,9 @@ private:
 
   /// Flag used to indicate whether we are doing the uo/aux state check in execute
   bool _checking_uo_aux_state = false;
+
+  /// When to print the execution of loops
+  ExecFlagEnum _print_execution_on;
 };
 
 using FVProblemBase = FEProblemBase;

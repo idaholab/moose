@@ -51,6 +51,9 @@ public:
   virtual void caughtMooseException(MooseException &);
 
 protected:
+  /// Print information about the loop, mostly order of execution of objects
+  void printGeneralExecutionInformation(const GeneralUserObjectRange & range) const;
+
   /// FEProblem running this thread
   FEProblemBase & _fe_problem;
 };

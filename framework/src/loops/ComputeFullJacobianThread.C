@@ -37,7 +37,7 @@ ComputeFullJacobianThread::ComputeFullJacobianThread(ComputeFullJacobianThread &
 ComputeFullJacobianThread::~ComputeFullJacobianThread() {}
 
 void
-ComputeFullJacobianThread::computeJacobian()
+ComputeFullJacobianThread::computeOnElement()
 {
   auto & ce = _fe_problem.couplingEntries(_tid, _nl.number());
   for (const auto & it : ce)
@@ -52,11 +52,11 @@ ComputeFullJacobianThread::computeJacobian()
     unsigned int jvar = jvariable.number();
 
     if (ivariable.activeOnSubdomain(_subdomain) && jvariable.activeOnSubdomain(_subdomain) &&
-        _warehouse->hasActiveVariableBlockObjects(ivar, _subdomain, _tid))
+        _tag_kernels->hasActiveVariableBlockObjects(ivar, _subdomain, _tid))
     {
       // only if there are dofs for j-variable (if it is subdomain restricted var, there may not be
       // any)
-      const auto & kernels = _warehouse->getActiveVariableBlockObjects(ivar, _subdomain, _tid);
+      const auto & kernels = _tag_kernels->getActiveVariableBlockObjects(ivar, _subdomain, _tid);
       for (const auto & kernel : kernels)
         if ((kernel->variable().number() == ivar) && kernel->isImplicit())
         {
@@ -82,9 +82,9 @@ ComputeFullJacobianThread::computeJacobian()
       unsigned int jvar = jvariable.number();
 
       if (ivariable.activeOnSubdomain(_subdomain) && jvariable.activeOnSubdomain(_subdomain) &&
-          _warehouse->hasActiveVariableBlockObjects(ivar, _subdomain, _tid))
+          _tag_kernels->hasActiveVariableBlockObjects(ivar, _subdomain, _tid))
       {
-        const auto & kernels = _warehouse->getActiveVariableBlockObjects(ivar, _subdomain, _tid);
+        const auto & kernels = _tag_kernels->getActiveVariableBlockObjects(ivar, _subdomain, _tid);
         for (const auto & kernel : kernels)
         {
           std::shared_ptr<NonlocalKernel> nonlocal_kernel =
@@ -107,11 +107,11 @@ ComputeFullJacobianThread::computeJacobian()
     const std::vector<MooseVariableFieldBase *> & vars = _nl.getVariables(_tid);
     for (const auto & ivariable : vars)
       if (ivariable->activeOnSubdomain(_subdomain) > 0 &&
-          _warehouse->hasActiveVariableBlockObjects(ivariable->number(), _subdomain, _tid))
+          _tag_kernels->hasActiveVariableBlockObjects(ivariable->number(), _subdomain, _tid))
       {
         // for each variable get the list of active kernels
         const auto & kernels =
-            _warehouse->getActiveVariableBlockObjects(ivariable->number(), _subdomain, _tid);
+            _tag_kernels->getActiveVariableBlockObjects(ivariable->number(), _subdomain, _tid);
         for (const auto & kernel : kernels)
           if (kernel->isImplicit())
           {
@@ -127,24 +127,13 @@ ComputeFullJacobianThread::computeJacobian()
   }
 
   if (_fe_problem.haveFV())
-  {
-    std::vector<FVElementalKernel *> fv_kernels;
-    _fe_problem.theWarehouse()
-        .query()
-        .template condition<AttribSystem>("FVElementalKernel")
-        .template condition<AttribSubdomains>(_subdomain)
-        .template condition<AttribThread>(_tid)
-        .template condition<AttribMatrixTags>(_tags)
-        .queryInto(fv_kernels);
-
-    for (auto fv_kernel : fv_kernels)
+    for (auto fv_kernel : _fv_kernels)
       if (fv_kernel->isImplicit())
         fv_kernel->computeOffDiagJacobian();
-  }
 }
 
 void
-ComputeFullJacobianThread::computeFaceJacobian(BoundaryID bnd_id, const Elem * lower_d_elem)
+ComputeFullJacobianThread::computeOnBoundary(BoundaryID bnd_id, const Elem * lower_d_elem)
 {
   auto & ce = _fe_problem.couplingEntries(_tid);
   for (const auto & it : ce)
@@ -252,7 +241,43 @@ ComputeFullJacobianThread::computeFaceJacobian(BoundaryID bnd_id, const Elem * l
 }
 
 void
-ComputeFullJacobianThread::computeInternalFaceJacobian(const Elem * neighbor)
+ComputeFullJacobianThread::computeOnInterface(BoundaryID bnd_id)
+{
+  if (_ik_warehouse->hasActiveBoundaryObjects(bnd_id, _tid))
+  {
+    const auto & ce = _fe_problem.couplingEntries(_tid);
+    for (const auto & it : ce)
+    {
+      MooseVariableFieldBase & ivariable = *(it.first);
+      MooseVariableFieldBase & jvariable = *(it.second);
+
+      if (ivariable.isFV())
+        continue;
+
+      unsigned int ivar = ivariable.number();
+      unsigned int jvar = jvariable.number();
+
+      const auto & int_ks = _ik_warehouse->getActiveBoundaryObjects(bnd_id, _tid);
+      for (const auto & interface_kernel : int_ks)
+      {
+        if (!interface_kernel->isImplicit())
+          continue;
+
+        interface_kernel->prepareShapes(jvar);
+        interface_kernel->prepareNeighborShapes(jvar);
+
+        if (interface_kernel->variable().number() == ivar)
+          interface_kernel->computeElementOffDiagJacobian(jvar);
+
+        if (interface_kernel->neighborVariable().number() == ivar)
+          interface_kernel->computeNeighborOffDiagJacobian(jvar);
+      }
+    }
+  }
+}
+
+void
+ComputeFullJacobianThread::computeOnInternalFace(const Elem * neighbor)
 {
   if (_dg_warehouse->hasActiveBlockObjects(_subdomain, _tid))
   {
@@ -281,43 +306,6 @@ ComputeFullJacobianThread::computeInternalFaceJacobian(const Elem * neighbor)
           dg->prepareNeighborShapes(jvar);
           dg->computeOffDiagJacobian(jvar);
         }
-      }
-    }
-  }
-}
-
-void
-ComputeFullJacobianThread::computeInternalInterFaceJacobian(BoundaryID bnd_id)
-{
-  if (_ik_warehouse->hasActiveBoundaryObjects(bnd_id, _tid))
-  {
-    const auto & ce = _fe_problem.couplingEntries(_tid);
-    for (const auto & it : ce)
-    {
-      MooseVariableFieldBase & ivariable = *(it.first);
-      MooseVariableFieldBase & jvariable = *(it.second);
-
-      if (ivariable.isFV())
-        continue;
-
-      unsigned int ivar = ivariable.number();
-      unsigned int jvar = jvariable.number();
-
-      const std::vector<std::shared_ptr<InterfaceKernelBase>> & int_ks =
-          _ik_warehouse->getActiveBoundaryObjects(bnd_id, _tid);
-      for (const auto & interface_kernel : int_ks)
-      {
-        if (!interface_kernel->isImplicit())
-          continue;
-
-        interface_kernel->prepareShapes(jvar);
-        interface_kernel->prepareNeighborShapes(jvar);
-
-        if (interface_kernel->variable().number() == ivar)
-          interface_kernel->computeElementOffDiagJacobian(jvar);
-
-        if (interface_kernel->neighborVariable().number() == ivar)
-          interface_kernel->computeNeighborOffDiagJacobian(jvar);
       }
     }
   }

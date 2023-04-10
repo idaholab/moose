@@ -385,7 +385,8 @@ FEProblemBase::FEProblemBase(const InputParameters & parameters)
     _u_dotdot_old_requested(false),
     _has_mortar(false),
     _num_grid_steps(0),
-    _displaced_neighbor_ref_pts("invert_elem_phys use_undisplaced_ref unset", "unset")
+    _displaced_neighbor_ref_pts("invert_elem_phys use_undisplaced_ref unset", "unset"),
+    _print_execution_on()
 {
   //  Initialize static do_derivatives member. We initialize this to true so that all the default AD
   //  things that we setup early in the simulation actually get their derivative vectors initalized.
@@ -4071,6 +4072,9 @@ FEProblemBase::joinAndFinalize(TheWarehouse::Query query, bool isgen)
     if (isgen)
     {
       // general user objects are not run in their own threaded loop object - so run them here
+      if (shouldPrintExecution(0))
+        _console << "[DBG] Initializing, executing & finalizing general UO '" << obj->name()
+                 << "' on " << _current_execute_on_flag.name() << std::endl;
       obj->initialize();
       obj->execute();
     }
@@ -4105,12 +4109,15 @@ FEProblemBase::computeUserObjectByName(const ExecFlagType & type,
                                        const Moose::AuxGroup & group,
                                        const std::string & name)
 {
+  const auto old_exec_flag = _current_execute_on_flag;
+  _current_execute_on_flag = type;
   TheWarehouse::Query query = theWarehouse()
                                   .query()
                                   .condition<AttribSystem>("UserObject")
                                   .condition<AttribExecOns>(type)
                                   .condition<AttribName>(name);
   computeUserObjectsInternal(type, group, query);
+  _current_execute_on_flag = old_exec_flag;
 }
 
 void
@@ -5986,8 +5993,6 @@ FEProblemBase::computeResidualAndJacobian(const NumericVector<Number> & soln,
 
     executeControls(EXEC_LINEAR);
 
-    _current_execute_on_flag = EXEC_NONE;
-
     _app.getOutputWarehouse().residualSetup();
 
     _safe_access_tagged_vectors = false;
@@ -6023,6 +6028,9 @@ FEProblemBase::computeResidualAndJacobian(const NumericVector<Number> & soln,
     mooseError("An unhandled MooseException was raised during residual computation.  Please "
                "contact the MOOSE team for assistance.");
   }
+
+  // Reset execution flag as after this point we are no longer on LINEAR
+  _current_execute_on_flag = EXEC_NONE;
 }
 
 void
@@ -6209,8 +6217,6 @@ FEProblemBase::computeResidualTags(const std::set<TagID> & tags)
 
   executeControls(EXEC_LINEAR);
 
-  _current_execute_on_flag = EXEC_NONE;
-
   _app.getOutputWarehouse().residualSetup();
 
   _safe_access_tagged_vectors = false;
@@ -6218,6 +6224,9 @@ FEProblemBase::computeResidualTags(const std::set<TagID> & tags)
   _current_nl_sys->computeResidualTags(tags);
 
   _safe_access_tagged_vectors = true;
+
+  // Reset execution flag as after this point we are no longer on LINEAR
+  _current_execute_on_flag = EXEC_NONE;
 }
 
 void
@@ -6348,8 +6357,6 @@ FEProblemBase::computeJacobianTags(const std::set<TagID> & tags)
 
     _current_nl_sys->computeJacobianTags(tags);
 
-    _current_execute_on_flag = EXEC_NONE;
-
     // For explicit Euler calculations for example we often compute the Jacobian one time and then
     // re-use it over and over. If we're performing automatic scaling, we don't want to use that
     // kernel, diagonal-block only Jacobian for our actual matrix when performing solves!
@@ -6361,6 +6368,9 @@ FEProblemBase::computeJacobianTags(const std::set<TagID> & tags)
       _displaced_problem->setCurrentlyComputingJacobian(false);
     _safe_access_tagged_matrices = true;
   }
+
+  // Reset execute_on flag as after this point we are no longer on NONLINEAR
+  _current_execute_on_flag = EXEC_NONE;
 }
 
 void
@@ -7945,4 +7955,18 @@ unsigned int
 FEProblemBase::currentNlSysNum() const
 {
   return currentNonlinearSystem().number();
+}
+
+bool
+FEProblemBase::shouldPrintExecution(const THREAD_ID tid) const
+{
+  // For now, only support printing from thread 0
+  if (tid != 0)
+    return false;
+
+  if (_print_execution_on.contains(_current_execute_on_flag) ||
+      _print_execution_on.contains(EXEC_ALWAYS))
+    return true;
+  else
+    return false;
 }

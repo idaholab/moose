@@ -15,6 +15,7 @@
 #include "SwapBackSentinel.h"
 #include "FEProblem.h"
 #include "MaterialBase.h"
+#include "ThreadedElementLoop.h"
 
 #include "libmesh/threads.h"
 
@@ -160,6 +161,33 @@ template <typename AuxKernelType>
 void
 ComputeElemAuxVarsThread<AuxKernelType>::join(const ComputeElemAuxVarsThread & /*y*/)
 {
+}
+
+template <typename AuxKernelType>
+void
+ComputeElemAuxVarsThread<AuxKernelType>::printGeneralExecutionInformation() const
+{
+  if (!_fe_problem.shouldPrintExecution(_tid) || !_aux_kernels.hasActiveObjects())
+    return;
+
+  const auto & console = _fe_problem.console();
+  const auto & execute_on = _fe_problem.getCurrentExecuteOnFlag();
+  console << "[DBG] Executing auxiliary kernels on elements on " << execute_on << std::endl;
+}
+
+template <typename AuxKernelType>
+void
+ComputeElemAuxVarsThread<AuxKernelType>::printBlockExecutionInformation() const
+{
+  if (!_fe_problem.shouldPrintExecution(_tid) || _blocks_exec_printed.count(_subdomain) ||
+      !_aux_kernels.hasActiveBlockObjects(_subdomain, _tid))
+    return;
+
+  const auto & console = _fe_problem.console();
+  const auto & kernels = _aux_kernels.getActiveBlockObjects(_subdomain, _tid);
+  console << "[DBG] Ordering of AuxKernels on block " << _subdomain << std::endl;
+  printExecutionOrdering<AuxKernelType>(kernels, false);
+  _blocks_exec_printed.insert(_subdomain);
 }
 
 template class ComputeElemAuxVarsThread<AuxKernel>;

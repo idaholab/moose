@@ -37,6 +37,7 @@ ComputeThreadedGeneralUserObjectsThread::operator()(const GeneralUserObjectRange
 {
   try
   {
+    printGeneralExecutionInformation(range);
     for (auto it = range.begin(); it != range.end(); ++it)
     {
       auto & tguo = *it;
@@ -47,4 +48,18 @@ ComputeThreadedGeneralUserObjectsThread::operator()(const GeneralUserObjectRange
   {
     caughtMooseException(e);
   }
+}
+
+void
+ComputeThreadedGeneralUserObjectsThread::printGeneralExecutionInformation(
+    const GeneralUserObjectRange & range) const
+{
+  // TODO: Threaded UOs dont know their thread number so this will print too often
+  if (!_fe_problem.shouldPrintExecution(0) || !range.size())
+    return;
+
+  const auto & console = _fe_problem.console();
+  const auto & execute_on = _fe_problem.getCurrentExecuteOnFlag();
+  console << "[DBG] Executing Threaded General User Object " << (*range.begin())->name() << " on "
+          << execute_on << std::endl;
 }

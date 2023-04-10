@@ -146,6 +146,21 @@ ComputeNodalAuxVarsThread<AuxKernelType>::join(const ComputeNodalAuxVarsThread &
 {
 }
 
+template <typename AuxKernelType>
+void
+ComputeNodalAuxVarsThread<AuxKernelType>::printGeneralExecutionInformation() const
+{
+  if (!_fe_problem.shouldPrintExecution(_tid) || !_storage.hasActiveObjects())
+    return;
+
+  const auto & console = _fe_problem.console();
+  const auto & execute_on = _fe_problem.getCurrentExecuteOnFlag();
+  console << "[DBG] Beginning nodal loop of nodal auxiliary kernels on " << execute_on << std::endl;
+  console << "[DBG] Ordering of the kernels on each block they are defined on:" << std::endl;
+  // TODO Check that all objects are active at this point
+  console << _storage.activeObjectsToFormattedString() << std::endl;
+}
+
 template class ComputeNodalAuxVarsThread<AuxKernel>;
 template class ComputeNodalAuxVarsThread<VectorAuxKernel>;
 template class ComputeNodalAuxVarsThread<ArrayAuxKernel>;
