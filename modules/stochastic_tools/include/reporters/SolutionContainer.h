@@ -38,14 +38,7 @@ public:
    * Return one of the stored solution vectors
    * @param local_i The index of the locally stored solution vector
    */
-  const std::unique_ptr<NumericVector<Number>> & getSolution(unsigned int local_i)
-  {
-    mooseAssert(local_i < _accumulated_solutions.size(),
-                "The container only has (" + std::to_string(_accumulated_solutions.size()) +
-                    ") solutions so we cannot find any with index (" + std::to_string(local_i) +
-                    ")!");
-    return _accumulated_solutions[local_i];
-  }
+  const std::unique_ptr<NumericVector<Number>> & getSolution(unsigned int local_i) const;
 
 protected:
   /// Dynamic container for solution vectors. We store pointers to make sure that the change in size

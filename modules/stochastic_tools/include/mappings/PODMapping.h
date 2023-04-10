@@ -11,6 +11,8 @@
 
 #include "MappingBase.h"
 #include "ParallelSolutionStorage.h"
+#include "UserObjectInterface.h"
+
 #include <slepcsvd.h>
 #include "libmesh/parallel_object.h"
 #include "libmesh/petsc_vector.h"
@@ -19,7 +21,7 @@
  * Class which provides a Proper Orthogonal Decomposition (POD)-based mapping between
  * full-order and reduced-order spaces.
  */
-class PODMapping : public MappingBase
+class PODMapping : public MappingBase, public UserObjectInterface
 {
 public:
   static InputParameters validParams();
@@ -113,7 +115,7 @@ protected:
 
 private:
   /// Link to the parallel storage which holds the solution fields that are used for the SVD
-  ParallelSolutionStorage * _parallel_storage;
+  const ParallelSolutionStorage * _parallel_storage;
 
 #if !PETSC_VERSION_LESS_THAN(3, 14, 0)
   /// Storage for SLEPC's SVD objects for each variable.

@@ -17,7 +17,8 @@ SolutionContainer::validParams()
 {
   InputParameters params = GeneralReporter::validParams();
   params.addClassDescription(
-      "Class responsible for collecting distributed solution vectors in one place.");
+      "Class responsible for collecting distributed solution vectors into a container. We append "
+      "a new distributed solution vector (containing all variables) at every execution.");
   return params;
 }
 
@@ -33,6 +34,16 @@ void
 SolutionContainer::initialSetup()
 {
   _accumulated_solutions.clear();
+}
+
+const std::unique_ptr<NumericVector<Number>> &
+SolutionContainer::getSolution(unsigned int local_i) const
+{
+  mooseAssert(local_i < _accumulated_solutions.size(),
+              "The container only has (" + std::to_string(_accumulated_solutions.size()) +
+                  ") solutions so we cannot find any with index (" + std::to_string(local_i) +
+                  ")!");
+  return _accumulated_solutions[local_i];
 }
 
 void

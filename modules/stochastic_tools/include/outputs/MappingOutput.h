@@ -27,5 +27,5 @@ protected:
 
 private:
   /// List of supplied Mapping objects
-  const std::vector<UserObjectName> & _mappings;
+  const std::vector<std::string> & _mappings;
 };

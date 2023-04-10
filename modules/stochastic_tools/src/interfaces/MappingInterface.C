@@ -8,9 +8,6 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "MappingInterface.h"
-#include "SurrogateTrainer.h"
-#include "MappingBase.h"
-#include "SubProblem.h"
 #include "MooseTypes.h"
 
 InputParameters

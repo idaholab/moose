@@ -25,7 +25,7 @@ public:
 private:
   /**
    * Load the necessary information for the given model
-   * @param model Reference to the Mapping object whose data shall be loaded
+   * @param mapping Reference to the Mapping object whose data shall be loaded
    */
   void load(const MappingBase & mapping);
 };

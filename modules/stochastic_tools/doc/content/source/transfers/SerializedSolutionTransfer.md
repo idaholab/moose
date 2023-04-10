@@ -21,9 +21,13 @@ using the communicator of the sub-application. Based on the value of the [!param
 
 ## Example Syntax
 
+The following input file snippet shows how to use the serialized solution transfer to
+extract variables `u` and `v` from the data stored on the apps within MultiApp `worker` into a
+parallel storage reporter with a name of `parallel_storage`.
+
 !listing test/tests/transfers/serialized_solution_transfer/sst_main.i block=Transfers
 
-## Synatax
+## Syntax
 
 !syntax parameters /Transfers/SerializedSolutionTransfer
 

@@ -66,7 +66,7 @@ ParallelSolutionStorage::addEntry(const VariableName & vname,
 }
 
 unsigned int
-ParallelSolutionStorage::totalNumberOfStoredSolutions(const VariableName & vname)
+ParallelSolutionStorage::totalNumberOfStoredSolutions(const VariableName & vname) const
 {
   const auto & samples = libmesh_map_find(_distributed_solutions, vname);
 
@@ -79,7 +79,7 @@ ParallelSolutionStorage::totalNumberOfStoredSolutions(const VariableName & vname
 
 bool
 ParallelSolutionStorage::hasGlobalSample(unsigned int global_sample_i,
-                                         const VariableName & variable)
+                                         const VariableName & variable) const
 {
   if (_distributed_solutions.find(variable) == _distributed_solutions.end())
     return false;
@@ -91,7 +91,7 @@ ParallelSolutionStorage::hasGlobalSample(unsigned int global_sample_i,
 
 const std::vector<DenseVector<Real>> &
 ParallelSolutionStorage::getGlobalSample(unsigned int global_sample_i,
-                                         const VariableName & variable)
+                                         const VariableName & variable) const
 {
   mooseAssert(_distributed_solutions.find(variable) != _distributed_solutions.end(),
               "We don't have the requested variable!");
@@ -104,6 +104,16 @@ ParallelSolutionStorage::getGlobalSample(unsigned int global_sample_i,
 
 std::unordered_map<unsigned int, std::vector<DenseVector<Real>>> &
 ParallelSolutionStorage::getStorage(const VariableName & variable)
+{
+  if (_distributed_solutions.find(variable) == _distributed_solutions.end())
+    mooseError(
+        "We are trying to access container for variable '", variable, "' but we don't have it!");
+
+  return libmesh_map_find(_distributed_solutions, variable);
+}
+
+const std::unordered_map<unsigned int, std::vector<DenseVector<Real>>> &
+ParallelSolutionStorage::getStorage(const VariableName & variable) const
 {
   if (_distributed_solutions.find(variable) == _distributed_solutions.end())
     mooseError(

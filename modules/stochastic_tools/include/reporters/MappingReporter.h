@@ -13,6 +13,7 @@
 #include "StochasticReporter.h"
 #include "ParallelSolutionStorage.h"
 #include "MappingInterface.h"
+#include "UserObjectInterface.h"
 
 /**
  * A tool to reduce solution fields to coordinates in the latent space.
@@ -29,9 +30,15 @@ public:
   virtual void finalize() override {}
 
 protected:
+  /// Map the available data in a parallel storage into the latent space
+  void mapParallelStorageData();
+
+  /// Map the available data in variables into the latent space
+  void mapVariableData();
+
   /// If we already have solution fields stored from previous runs, we can use their
   /// ParallelStorageObject to obtain the corresponding coefficients
-  ParallelSolutionStorage * _parallel_storage;
+  const ParallelSolutionStorage * _parallel_storage;
 
   /// We only need the sampler to check which coefficients would go to which processor
   /// in case a ParallelSolutionStorage is used

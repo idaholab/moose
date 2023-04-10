@@ -34,7 +34,6 @@ public:
   void finalize() override {}
 
   void initialSetup() override;
-  void threadJoin(const UserObject & /*uo*/) override{};
 
 protected:
   /// The names of the variables (aux variables) which serve as a container
@@ -54,11 +53,6 @@ protected:
   /// Links to the MooseVariables from the nonlinear system whose dof numbering
   /// we need to populate the auxvariables
   std::vector<const MooseVariableFieldBase *> _variable_to_reconstruct;
-
-  /// If the variables are nodal or not. In case of nodal variables we can do a
-  /// nodal loop, whereas for everything else we need to do an elemental loop for
-  /// copying DoF values
-  std::vector<bool> _is_nodal;
 
   /// Link to the mapping object which provides the inverse mapping function
   MappingBase * _mapping;

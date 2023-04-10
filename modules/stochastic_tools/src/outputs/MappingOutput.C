@@ -9,8 +9,6 @@
 
 // Moose includes
 #include "MappingOutput.h"
-#include "SurrogateTrainer.h"
-#include "FEProblem.h"
 #include "RestartableDataIO.h"
 #include "RestartableData.h"
 
@@ -21,15 +19,15 @@ MappingOutput::validParams()
 {
   InputParameters params = FileOutput::validParams();
   params.addClassDescription("Output for mapping model data.");
-  params.addRequiredParam<std::vector<UserObjectName>>("mappings",
-                                                       "A list of Mapping objects to output.");
+  params.addRequiredParam<std::vector<std::string>>("mappings",
+                                                    "A list of Mapping objects to output.");
   return params;
 }
 
 MappingOutput::MappingOutput(const InputParameters & parameters)
   : FileOutput(parameters),
     MappingInterface(this),
-    _mappings(getParam<std::vector<UserObjectName>>("mappings"))
+    _mappings(getParam<std::vector<std::string>>("mappings"))
 {
 }
 

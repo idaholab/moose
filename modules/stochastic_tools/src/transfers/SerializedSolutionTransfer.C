@@ -11,8 +11,6 @@
 #include "SerializedSolutionTransfer.h"
 #include "NonlinearSystemBase.h"
 #include "Sampler.h"
-#include "VectorPacker.h"
-#include "timpi/communicator.h"
 
 registerMooseObject("StochasticToolsApp", SerializedSolutionTransfer);
 
@@ -49,72 +47,24 @@ void
 SerializedSolutionTransfer::initialSetup()
 {
   // Check if we have the storage space to receive the serialized solution fields
-  std::string parallel_storage_name = getParam<std::string>("parallel_storage");
-
-  std::vector<UserObject *> reporters;
-  _fe_problem.theWarehouse()
-      .query()
-      .condition<AttribSystem>("UserObject")
-      .condition<AttribName>(parallel_storage_name)
-      .queryInto(reporters);
-
-  if (reporters.empty())
-    paramError(
-        "parallel_storage_name", "Unable to find reporter with name '", parallel_storage_name, "'");
-  else if (reporters.size() > 1)
-    paramError("parallel_storage_name",
-               "We found more than one reporter with the name '",
-               parallel_storage_name,
-               "'");
-
-  _parallel_storage = dynamic_cast<ParallelSolutionStorage *>(reporters[0]);
-
-  if (!_parallel_storage)
-    paramError("parallel_storage_name",
-               "The parallel storage reporter is not of type '",
-               parallel_storage_name,
-               "'");
+  _parallel_storage = &_fe_problem.getUserObject<ParallelSolutionStorage>(
+      getParam<std::string>("parallel_storage"));
 }
 
 void
 SerializedSolutionTransfer::initializeInNormalMode()
 {
   _solution_container.clear();
-  const dof_id_type n = getFromMultiApp()->numGlobalApps();
+  const auto n = getFromMultiApp()->numGlobalApps();
   const auto & serialized_solution_reporter = getParam<std::string>("solution_container");
 
   for (MooseIndex(n) i = 0; i < n; i++)
-  {
-
     if (getFromMultiApp()->hasLocalApp(i))
     {
       FEProblemBase & app_problem = getFromMultiApp()->appProblemBase(i);
-
-      std::vector<UserObject *> reporters;
-      app_problem.theWarehouse()
-          .query()
-          .condition<AttribSystem>("UserObject")
-          .condition<AttribName>(serialized_solution_reporter)
-          .queryInto(reporters);
-
-      if (reporters.empty())
-        paramError("solution_container",
-                   "Unable to find reporter with name '",
-                   serialized_solution_reporter,
-                   "'");
-      else if (reporters.size() > 1)
-        paramError("solution_container",
-                   "We found more than one reporter with the name '",
-                   serialized_solution_reporter,
-                   "'");
-
-      _solution_container.push_back(dynamic_cast<SolutionContainer *>(reporters[0]));
-
-      if (!_solution_container[i - _sampler_ptr->getLocalRowBegin()])
-        paramError("solution_container",
-                   "The parallel storage reporter is not of type 'SolutionContainer'");
+      _solution_container.push_back(
+          &app_problem.getUserObject<SolutionContainer>(serialized_solution_reporter));
     }
-  }
 }
 
 void
@@ -124,33 +74,10 @@ SerializedSolutionTransfer::initializeInBatchMode()
   // in batch mode only so we will have one solution container on each rank
   _solution_container.clear();
 
-  const auto & serialized_solution_reporter = getParam<std::string>("solution_container");
-
   FEProblemBase & app_problem = getFromMultiApp()->appProblemBase(_app_index);
 
-  std::vector<UserObject *> reporters;
-  app_problem.theWarehouse()
-      .query()
-      .condition<AttribSystem>("UserObject")
-      .condition<AttribName>(serialized_solution_reporter)
-      .queryInto(reporters);
-
-  if (reporters.empty())
-    paramError("solution_container",
-               "Unable to find reporter with name '",
-               serialized_solution_reporter,
-               "'");
-  else if (reporters.size() > 1)
-    paramError("solution_container",
-               "We found more than one reporter with the name '",
-               serialized_solution_reporter,
-               "'");
-
-  _solution_container.push_back(dynamic_cast<SolutionContainer *>(reporters[0]));
-
-  if (!_solution_container[0])
-    paramError("solution_container",
-               "The parallel storage reporter is not of type 'SolutionContainer'");
+  _solution_container.push_back(
+      &app_problem.getUserObject<SolutionContainer>(getParam<std::string>("solution_container")));
 }
 
 void
@@ -158,7 +85,7 @@ SerializedSolutionTransfer::execute()
 {
   initializeInNormalMode();
 
-  const dof_id_type n = getFromMultiApp()->numGlobalApps();
+  const auto n = getFromMultiApp()->numGlobalApps();
 
   for (MooseIndex(n) i = 0; i < n; i++)
   {

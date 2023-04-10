@@ -77,7 +77,6 @@ InverseMapping::initialSetup()
 
   _variable_to_fill.clear();
   _variable_to_reconstruct.clear();
-  _is_nodal.clear();
 
   const auto & mapping_variable_names = _mapping->getVariableNames();
 
@@ -100,12 +99,11 @@ InverseMapping::initialSetup()
     auto & fe_type_fill = _variable_to_fill.back()->feType();
 
     if (fe_type_reconstruct != fe_type_fill)
-      paramError("fe_type_fill",
+      paramError("variable_to_fill",
                  "The FEtype should match the ones defined for `variable_to_reconstruct`");
 
-    // For now, we assume that the user only uses lagrange for nodal basis, every other
-    // use case should be elemental.
-    _is_nodal.push_back(_variable_to_fill.back()->isNodal());
+    if (fe_type_reconstruct.family == SCALAR)
+      paramError("variable_to_fill", "InverseMapping does not support SCALAR variables!");
   }
 }
 
@@ -166,26 +164,30 @@ InverseMapping::execute()
     // Get a link to the mesh for the loops over dof objects
     const MeshBase & to_mesh = _fe_problem.mesh().getMesh();
 
-    // If the variable is nodal, we can do a nodal loop
-    if (_is_nodal[var_i])
+    // First, we cover nodal degrees of freedom.
+    for (const auto & node : to_mesh.local_node_ptr_range())
     {
-      for (const auto & node : to_mesh.local_node_ptr_range())
-      {
-        // We have nothing to do if we don't have dofs at this node
-        if (node->n_dofs(to_sys_num, to_var_num) < 1)
-          continue;
+      const auto n_dofs = node->n_dofs(to_sys_num, to_var_num);
+      // We have nothing to do if we don't have dofs at this node
+      if (n_dofs < 1)
+        continue;
 
+      // For special cases we might have multiple dofs for the same node (hierarchic types)
+      for (auto dof_i : make_range(n_dofs))
+      {
         // Get the dof ids for the from/to variables
-        const auto & to_dof_id = node->dof_number(to_sys_num, to_var_num, 0);
-        const auto & from_dof_id = node->dof_number(from_sys_num, from_var_num, 0);
+        const auto & to_dof_id = node->dof_number(to_sys_num, to_var_num, dof_i);
+        const auto & from_dof_id = node->dof_number(from_sys_num, from_var_num, dof_i);
 
         // Fill the dof of the auxiliary variable using the dof of the temporary variable
         var_to_fill->sys().solution().set(to_dof_id, (*temporary_vector)(from_dof_id));
       }
     }
-    // Otherwise we have to do an element loop
-    else
-    {
+
+    // Then we move on to element-based degrees of freedom. Considering that we don't
+    // support scalar variables at the moment, this should take care of every remaining
+    // local entry. Of course, we'll only need this part if the variable is not nodal.
+    if (!_variable_to_reconstruct[var_i]->isNodal())
       for (auto & elem : as_range(to_mesh.local_elements_begin(), to_mesh.local_elements_end()))
       {
         // Check how many dofs we have on the currant element, if none we have nothing to do
@@ -193,7 +195,7 @@ InverseMapping::execute()
         if (n_dofs < 1)
           continue;
 
-        // Loop over the dofs and pupulate the auxiliary variable
+        // Loop over the dofs and populate the auxiliary variable
         for (auto dof_i : make_range(n_dofs))
         {
           // Get the dof for the from/to variables
@@ -203,7 +205,6 @@ InverseMapping::execute()
           var_to_fill->sys().solution().set(to_dof_id, (*temporary_vector)(from_dof_id));
         }
       }
-    }
 
     // Close the solution to make sure we can output auxvariable
     var_to_fill->sys().solution().close();

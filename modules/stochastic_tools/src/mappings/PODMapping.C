@@ -46,6 +46,7 @@ PODMapping::validParams()
 
 PODMapping::PODMapping(const InputParameters & parameters)
   : MappingBase(parameters),
+    UserObjectInterface(this),
     _num_modes(getParam<std::vector<dof_id_type>>("num_modes")),
     _energy_threshold(getParam<std::vector<Real>>("energy_threshold")),
     _left_basis_functions(
@@ -64,7 +65,10 @@ PODMapping::PODMapping(const InputParameters & parameters)
         isParamValid("filename")
             ? setModelData<std::map<VariableName, std::vector<Real>>>("singular_values")
             : declareModelData<std::map<VariableName, std::vector<Real>>>("singular_values")),
-    _extra_slepc_options(getParam<std::string>("extra_slepc_options"))
+    _extra_slepc_options(getParam<std::string>("extra_slepc_options")),
+    _parallel_storage(isParamValid("solution_storage")
+                          ? &getUserObject<ParallelSolutionStorage>("solution_storage")
+                          : nullptr)
 {
   if (!isParamValid("filename"))
   {
@@ -126,37 +130,21 @@ PODMapping::determineNumberOfModes(const VariableName & vname,
   // modes. We don't want to use modes which are unconverged.
   std::size_t num_requested_modes = std::min((std::size_t)_num_modes[var_i], converged_evs.size());
 
-  // We also truncate modes that have a squared singular value below the rundoff
-  for (auto mode_i : make_range(num_requested_modes))
-    if (std::pow(converged_evs[mode_i], 2) > std::numeric_limits<Real>::epsilon())
-      num_modes = mode_i + 1;
+  // Grab a cumulative sum of singular value squared
+  std::vector<Real> ev_sum(converged_evs.begin(), converged_evs.begin() + num_requested_modes);
+  std::partial_sum(ev_sum.cbegin(),
+                   ev_sum.cend(),
+                   ev_sum.begin(),
+                   [](Real sum, Real ev) { return sum + ev * ev; });
 
-  // If the user specifies energy thresholds, we need to truncate based on that too
-  if (_energy_threshold.size())
-  {
-    Real cumulative_evs = 0;
-    Real sum_evs = 0;
+  // Find the first element that satisfies the threshold
+  const Real threshold = (_energy_threshold.empty() ? 0.0 : _energy_threshold[var_i]) +
+                         std::numeric_limits<Real>::epsilon();
+  for (num_modes = 0; num_modes < ev_sum.size(); ++num_modes)
+    if (ev_sum[num_modes] / ev_sum.back() > 1 - threshold)
+      break;
 
-    // We need to include a little bit of a tolerance due to rundoff errors
-    Real threshold = _energy_threshold[var_i] + std::numeric_limits<Real>::epsilon();
-    for (auto mode_i : index_range(converged_evs))
-    {
-      Real ev = std::pow(converged_evs[mode_i], 2);
-      sum_evs += (ev > std::numeric_limits<Real>::epsilon()) ? ev : 0.0;
-    }
-    for (auto mode_i : index_range(converged_evs))
-    {
-      Real ev = std::pow(converged_evs[mode_i], 2);
-      cumulative_evs += (ev > std::numeric_limits<Real>::epsilon()) ? ev : 0.0;
-      if (cumulative_evs / sum_evs > 1 - threshold)
-      {
-        num_modes = mode_i + 1;
-        break;
-      }
-    }
-  }
-
-  return num_modes;
+  return num_modes + 1;
 }
 
 void
@@ -168,37 +156,14 @@ PODMapping::buildMapping(const VariableName &
 {
 #if !PETSC_VERSION_LESS_THAN(3, 14, 0)
 
+  if (!_parallel_storage)
+    paramError(
+        "solution_storage",
+        "The parallel storage reporter is not supplied! We cannot build a mapping without data!");
+
   auto it = std::find(_variable_names.begin(), _variable_names.end(), vname);
   mooseAssert(it != _variable_names.end(), "Variable " + vname + " is not in PODMapping!");
   unsigned int var_i = std::distance(_variable_names.begin(), it);
-
-  UserObjectName parallel_storage_name = getParam<UserObjectName>("solution_storage");
-  FEProblemBase & feproblem = *_pars.get<FEProblemBase *>("_fe_problem_base");
-
-  // Hopefully this method is not called too many times
-  std::vector<UserObject *> reporters;
-  feproblem.theWarehouse()
-      .query()
-      .condition<AttribSystem>("UserObject")
-      .condition<AttribName>(parallel_storage_name)
-      .queryInto(reporters);
-
-  if (reporters.empty())
-    paramError(
-        "solution_storage", "Unable to find reporter with name '", parallel_storage_name, "'");
-  else if (reporters.size() > 1)
-    paramError("solution_storage",
-               "We found more than one reporter with the name '",
-               parallel_storage_name,
-               "'");
-
-  _parallel_storage = dynamic_cast<ParallelSolutionStorage *>(reporters[0]);
-
-  if (!_parallel_storage)
-    paramError("solution_storage",
-               "The parallel storage reporter is not of type '",
-               parallel_storage_name,
-               "'");
 
   // Define the petsc matrix which needs and SVD, we will populate it using the snapshots
   Mat mat;
@@ -297,7 +262,7 @@ PODMapping::buildMapping(const VariableName &
 
   // We start extracting the basis functions and the singular values. The left singular
   // vectors are supposed to be all on the root processor
-  PetscReal sigma;
+  // PetscReal sigma;
   PetscVector<Real> u(_communicator);
   u.init(snapshot_size);
 
@@ -308,36 +273,28 @@ PODMapping::buildMapping(const VariableName &
   _right_basis_functions[vname].clear();
   _singular_values[vname].clear();
 
-  const auto emplaced_singular_values = _singular_values.emplace(vname, std::vector<Real>());
-
-  if (emplaced_singular_values.second)
-    emplaced_singular_values.first->second.clear();
-
+  auto & emplaced_singular_values =
+      _singular_values.emplace(vname, std::vector<Real>()).first->second;
+  emplaced_singular_values.resize(nconv);
   // Fetch the singular value triplet and immediately save the singular value
-  for (PetscInt j = 0; j < nconv; j++)
+  for (PetscInt j = 0; j < nconv; ++j)
   {
-    ierr = SVDGetSingularTriplet(_svds[vname], j, &sigma, NULL, NULL);
+    ierr = SVDGetSingularTriplet(_svds[vname], j, &emplaced_singular_values[j], NULL, NULL);
     LIBMESH_CHKERR(ierr);
-    emplaced_singular_values.first->second.emplace_back(sigma);
   }
-
   // Determine how many modes we need
-  unsigned int num_requested_modes =
-      determineNumberOfModes(vname, emplaced_singular_values.first->second);
-
+  unsigned int num_requested_modes = determineNumberOfModes(vname, emplaced_singular_values);
   // Only save the basis functions which are needed. We serialize the modes
   // on every processor so all of them have access to every mode.
-  for (PetscInt j = 0; j < num_requested_modes; j++)
+  _left_basis_functions[vname].resize(num_requested_modes);
+  _right_basis_functions[vname].resize(num_requested_modes);
+  for (PetscInt j = 0; j < num_requested_modes; ++j)
   {
     SVDGetSingularTriplet(_svds[vname], j, NULL, v.vec(), u.vec());
-    DenseVector<Real> serialized_left_mode;
-    u.localize(serialized_left_mode.get_values());
-    _left_basis_functions[vname].push_back(std::move(serialized_left_mode));
-
-    DenseVector<Real> serialized_right_mode;
-    v.localize(serialized_right_mode.get_values());
-    _right_basis_functions[vname].push_back(std::move(serialized_right_mode));
+    u.localize(_left_basis_functions[vname][j].get_values());
+    v.localize(_right_basis_functions[vname][j].get_values());
   }
+
   _computed_svd[vname] = true;
 
   MatDestroy(&mat);
@@ -353,6 +310,9 @@ PODMapping::map(const VariableName & vname,
   mooseAssert(_parallel_storage, "We need the parallel solution storage for this operation.");
   mooseAssert(_left_basis_functions.find(vname) != _left_basis_functions.end(),
               "The bases for the requested variable are not available!");
+
+  // This takes the 0th snapshot because we only support steady-state simulations
+  // at the moment.
   const auto & snapshot = _parallel_storage->getGlobalSample(global_sample_i, vname)[0];
 
   const auto & bases = _left_basis_functions[vname];
@@ -386,9 +346,9 @@ PODMapping::inverse_map(const VariableName & vname,
               "Variable " + vname + " is not in PODMapping!");
 
   if (reduced_order_vector.size() != _left_basis_functions[vname].size())
-    mooseError("Then umber of supplied reduced-order coefficients (",
+    mooseError("The number of supplied reduced-order coefficients (",
                reduced_order_vector.size(),
-               ") Is not the same as the number of basisfunctions (",
+               ") is not the same as the number of basis functions (",
                _left_basis_functions[vname].size(),
                ") for variable ",
                vname,

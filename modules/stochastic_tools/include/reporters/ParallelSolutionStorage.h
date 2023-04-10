@@ -37,15 +37,28 @@ public:
    * Get the stored solution vectors for a given variable
    * @param variable The name of the given variable
    */
+  ///@{
   std::unordered_map<unsigned int, std::vector<DenseVector<Real>>> &
   getStorage(const VariableName & variable);
 
+  const std::unordered_map<unsigned int, std::vector<DenseVector<Real>>> &
+  getStorage(const VariableName & variable) const;
+  ///@}
+
   /// Get the whole solution container
+  ///@{
   std::map<VariableName, std::unordered_map<unsigned int, std::vector<DenseVector<Real>>>> &
   getStorage()
   {
     return _distributed_solutions;
   }
+
+  const std::map<VariableName, std::unordered_map<unsigned int, std::vector<DenseVector<Real>>>> &
+  getStorage() const
+  {
+    return _distributed_solutions;
+  }
+  ///@}
 
   /**
    * Determine if we have the solution vector with a given global sample index for a given
@@ -53,7 +66,7 @@ public:
    * @param global_sample_i The global sample index of the solution field
    * @param variable The name of the variable whose data is requested
    */
-  bool hasGlobalSample(unsigned int global_sample_i, const VariableName & variable);
+  bool hasGlobalSample(unsigned int global_sample_i, const VariableName & variable) const;
 
   /**
    * Get the serialized solution field which is associated with a given
@@ -62,16 +75,16 @@ public:
    * @param variable The variable name
    */
   const std::vector<DenseVector<Real>> & getGlobalSample(unsigned int global_sample_i,
-                                                         const VariableName & variable);
+                                                         const VariableName & variable) const;
 
   /**
    * Return the number of total stored solutions for a given variable
    * @param vname The name of the variable
    */
-  unsigned int totalNumberOfStoredSolutions(const VariableName & vname);
+  unsigned int totalNumberOfStoredSolutions(const VariableName & vname) const;
 
   /// Get the variable names which we can receive
-  const std::vector<VariableName> & variableNames() { return _variable_names; }
+  const std::vector<VariableName> & variableNames() const { return _variable_names; }
 
 protected:
   /**
