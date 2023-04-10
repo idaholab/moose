@@ -301,9 +301,8 @@ std::vector<Point>
 TransfiniteMeshGenerator::getParsedEdge(const std::string & parameter,
                                         const std::vector<Real> & param_vec)
 {
-  std::vector<Point> edge;
+  std::vector<Point>  edge(param_vec.size());
   Real x_coord, y_coord;
-  edge.resize(param_vec.size());
 
   std::vector<std::string> param_coords;
   MooseUtils::tokenize(parameter, param_coords, 1, ";");
@@ -325,15 +324,13 @@ TransfiniteMeshGenerator::getParsedEdge(const std::string & parameter,
 std::vector<Point>
 TransfiniteMeshGenerator::getDiscreteEdge(const unsigned int & np, const std::string & parameter)
 {
-  std::vector<Point> edge;
-
+  std::vector<Point> edge(np);
   std::vector<std::string> string_points;
   MooseUtils::tokenize(parameter, string_points, 1, "\n");
   if (string_points.size() != np)
     mooseError("DISCRETE: the number of discrete points does not match the number of points on the"
                "opposite edge.");
 
-  edge.resize(np);
   auto it = 0;
   for (unsigned int iter = 0; iter < string_points.size(); iter++)
   {
@@ -353,8 +350,7 @@ TransfiniteMeshGenerator::getCircarcEdge(const Point & P1,
                                          const Point & outward,
                                          const std::vector<Real> & param_vec)
 {
-  std::vector<Point> edge; // output, to be returned variable
-  edge.resize(param_vec.size());
+  std::vector<Point> edge(param_vec.size());
 
   std::vector<Real> param_coords;
   MooseUtils::tokenizeAndConvert(parameter, param_coords, "&&");
