@@ -25,6 +25,17 @@
     requirement = 'Contact module shall solve frictional contact between a semicircular tool and '
                   'flexible base material.'
   []
+  [ironing_penalty]
+    type = 'Exodiff'
+    exodiff = 'ironing_penalty_out.e'
+    input = 'ironing_penalty.i'
+    rel_err = 1.0e-4
+    min_parallel = 4
+    min_ad_size = '200'
+    cli_args = 'Executioner/end_time=0.15'
+    requirement = 'Contact module shall solve frictional contact between a semicircular tool and '
+                  'flexible base material using a penalty approach to mortar contact.'
+  []
   [frictional_bouncing_block]
     type = 'CSVDiff'
     csvdiff = 'frictional_bouncing_block_checkfile_cont_press_0029.csv '
