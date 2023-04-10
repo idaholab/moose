@@ -1,0 +1,125 @@
+reset
+
+# Parameters: Dimensions in mm
+#{W = 50}
+#{a = 26.43}
+#{B = 0.5*W}
+
+# To avoid stress concentration ahead of crack
+#{h = 1.2}
+#{hex_dimension = 1.0}
+#{hex_dimension_sm = 0.9} # small
+#{offset_x = 2.001} # small
+#{offset_y = 0.866025 + 0.001} # small
+
+#{value = 0.02}
+#{interval_fine = 10.0}
+#{interval_coarse = 10.0}
+
+# First HEXAGON
+create vertex {hex_dimension} 0 0
+create vertex {0.5*hex_dimension} {0.866025*hex_dimension} 0
+create vertex {-0.5*hex_dimension} {0.866025*hex_dimension} 0
+create vertex {-1.0*hex_dimension} 0 0
+create vertex {-0.5*hex_dimension} {-0.866025*hex_dimension} 0
+create vertex {0.5*hex_dimension} {-0.866025*hex_dimension} 0
+
+# Create hexagon surface
+create surface vertex 1,2,3,4,5,6
+
+# Additional surface to subtract the geometry
+create vertex {hex_dimension_sm} 0 0
+create vertex {0.5*hex_dimension_sm} {0.866025*hex_dimension_sm} 0
+create vertex {-0.5*hex_dimension_sm} {0.866025*hex_dimension_sm} 0
+create vertex {-1.0*hex_dimension_sm} 0 0
+create vertex {-0.5*hex_dimension_sm} {-0.866025*hex_dimension_sm} 0
+create vertex {0.5*hex_dimension_sm} {-0.866025*hex_dimension_sm} 0
+create surface vertex 7,8,9,10,11,12
+
+subtract 2 from 1
+
+# Second HEXAGON
+create vertex {hex_dimension + offset_x} {0 + offset_y} 0
+create vertex {0.5*hex_dimension + offset_x} {0.866025*hex_dimension + offset_y} 0
+create vertex {-0.5*hex_dimension + offset_x} {0.866025*hex_dimension + offset_y} 0
+create vertex {-1.0*hex_dimension + offset_x} {0 + offset_y} 0
+create vertex {-0.5*hex_dimension + offset_x} {-0.866025*hex_dimension + offset_y} 0
+create vertex {0.5*hex_dimension + offset_x} {-0.866025*hex_dimension + offset_y} 0
+
+create surface vertex 19,20,21,22,23,24
+
+create vertex {hex_dimension_sm + offset_x} {0 + offset_y} 0
+create vertex {0.5*hex_dimension_sm + offset_x} {0.866025*hex_dimension_sm + offset_y} 0
+create vertex {-0.5*hex_dimension_sm + offset_x} {0.866025*hex_dimension_sm + offset_y} 0
+create vertex {-1.0*hex_dimension_sm + offset_x} {0 + offset_y} 0
+create vertex {-0.5*hex_dimension_sm + offset_x} {-0.866025*hex_dimension_sm + offset_y} 0
+create vertex {0.5*hex_dimension_sm + offset_x} {-0.866025*hex_dimension_sm + offset_y} 0
+
+create surface vertex 25,26,27,28,29,30
+subtract 4 from 3
+
+move surface 6 about x {-hex_dimension/2.0}
+
+# Third HEXAGON
+
+create vertex {hex_dimension + offset_x} {0 - offset_y} 0
+create vertex {0.5*hex_dimension + offset_x} {0.866025*hex_dimension - offset_y} 0
+create vertex {-0.5*hex_dimension + offset_x} {0.866025*hex_dimension - offset_y} 0
+create vertex {-1.0*hex_dimension + offset_x} {0 - offset_y} 0
+create vertex {-0.5*hex_dimension + offset_x} {-0.866025*hex_dimension - offset_y} 0
+create vertex {0.5*hex_dimension + offset_x} {-0.866025*hex_dimension - offset_y} 0
+
+create surface vertex 37,38,39,40,41,42
+
+create vertex {hex_dimension_sm + offset_x} {0 - offset_y} 0
+create vertex {0.5*hex_dimension_sm + offset_x} {0.866025*hex_dimension_sm - offset_y} 0
+create vertex {-0.5*hex_dimension_sm + offset_x} {0.866025*hex_dimension_sm - offset_y} 0
+create vertex {-1.0*hex_dimension_sm + offset_x} {0 - offset_y} 0
+create vertex {-0.5*hex_dimension_sm + offset_x} {-0.866025*hex_dimension_sm - offset_y} 0
+create vertex {0.5*hex_dimension_sm + offset_x} {-0.866025*hex_dimension_sm - offset_y} 0
+create surface vertex 43,44,45,46,47,48
+subtract 6 from 5
+move surface 9 about x {-hex_dimension/2.0}
+
+
+### START MESHING
+
+surface 3 6 9 interval 3
+mesh surface 3 6 9
+
+# Pinning BCs
+nodeset 1001 vertex 3
+nodeset 1002 vertex 4
+nodeset 2001 vertex 21
+nodeset 2002 vertex 20
+nodeset 3001 vertex 37
+nodeset 3002 vertex 42
+
+# Contact sidesets
+sideset 102 curve 1 2 5 6
+sideset 201 curve 21 22 23 24
+sideset 301 curve 37 38 39 40
+
+# Internal pressure sidesets
+sideset 110 curve 13 14 15 16 17 18
+sideset 210 curve 31 32 33 34 35 36
+sideset 310 curve 49 50 51 52 53 54
+
+# Split contact sidesets
+sideset 1111 curve 1
+sideset 2222 curve 6
+sideset 3333 curve 22
+sideset 4444 curve 39
+sideset 5555 curve 38
+sideset 6666 curve 23
+
+block 1 surface 3
+block 2 surface 6
+block 3 surface 9
+
+block 1 elem QUAD4
+block 2 elem QUAD4
+block 3 elem QUAD4
+
+
+export mesh "/Users/marta3/projects3/moose/modules/contact/test/tests/multiple_secondary_nts/three_hexagons.e" overwrite

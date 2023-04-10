@@ -6,10 +6,10 @@
 [Mesh]
   [file]
     type = FileMeshGenerator
-    file = three_hexagons_coarse.e
+    file = three_hexagons.e
   []
-  patch_size = 10
-  patch_update_strategy = auto
+  patch_size = 100
+  patch_update_strategy = always
 []
 
 [Functions]
@@ -28,12 +28,10 @@
   []
 []
 
-[Modules/TensorMechanics/Master]
-  [all]
-    add_variables = true
-    strain = FINITE
+[Kernels]
+  [TensorMechanics]
+    use_displaced_mesh = true
     block = '1 2 3'
-    planar_formulation = PLANE_STRAIN
   []
 []
 
@@ -54,12 +52,7 @@
     [hex1_pressure]
       boundary = '110'
       function = pressure
-      factor = 80
-    []
-    [hex2_pressure]
-      boundary = '210'
-      function = pressure
-      factor = 50
+      factor = 200
     []
   []
 []
@@ -72,6 +65,8 @@
     secondary = '102 102 301'
     penalty = 2e+03
     normalize_penalty = true
+    normal_smoothing_distance = 0.2
+    tangential_tolerance = 0.1
   []
 []
 
@@ -81,6 +76,10 @@
     block = '1 2 3'
     youngs_modulus = 1e4
     poissons_ratio = 0.0
+  []
+  [hex_strain]
+    type = ComputePlaneFiniteStrain
+    block = '1 2 3'
   []
   [hex_stress]
     type = ComputeFiniteStrainElasticStress
@@ -103,16 +102,18 @@
   petsc_options_iname = '-pc_type '
   petsc_options_value = 'lu       '
 
-  line_search = 'none'
+  line_search = 'basic'
 
   nl_abs_tol = 1e-6
   nl_rel_tol = 1e-10
 
   l_max_its = 20
   dt = 0.5
-  end_time = 4.0
+  end_time = 1.5
 []
 
 [Outputs]
   exodus = true
+  perf_graph = true
+  hide = 'penetration nodal_area'
 []
