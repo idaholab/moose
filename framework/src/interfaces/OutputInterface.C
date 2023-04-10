@@ -21,7 +21,7 @@ OutputInterface::validParams()
   InputParameters params = emptyInputParameters();
   params.addClassDescription("Interface to handle the restriction of outputs from objects");
   params.addParam<std::vector<OutputName>>("outputs",
-                                           "Vector of output names were you would like "
+                                           "Vector of output names where you would like "
                                            "to restrict the output of variables(s) "
                                            "associated with this object");
 
