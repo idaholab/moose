@@ -425,7 +425,7 @@ TraceRay::exitsElem(const Elem * elem,
         if (_study.verifyTraceIntersections() && !_study.sideIsNonPlanar(elem, s) &&
             !_elem_side_builder(*elem, s).contains_point(current_intersection_point))
           failTrace("Intersected side does not contain intersection point",
-                    /* warning = */ false,
+                    _study.tolerateFailure(),
                     __LINE__);
 #endif
 
