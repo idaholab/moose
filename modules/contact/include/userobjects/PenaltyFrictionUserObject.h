@@ -26,6 +26,7 @@ public:
 
   virtual const ADVariableValue & contactPressure() const override;
   virtual const ADVariableValue & contactTangentialPressureDirOne() const override;
+  virtual const ADVariableValue & contactTangentialPressureDirTwo() const override;
 
   virtual void initialize() override;
   virtual void reinit() override;
@@ -75,4 +76,7 @@ protected:
 
   /// The first frictional contact pressure on the mortar segment quadrature points
   ADVariableValue _frictional_contact_force_one;
+
+  /// The second frictional contact pressure on the mortar segment quadrature points
+  ADVariableValue _frictional_contact_force_two;
 };
