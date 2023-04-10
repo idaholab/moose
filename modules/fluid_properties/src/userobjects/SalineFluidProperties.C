@@ -122,7 +122,8 @@ SalineFluidProperties::h_from_p_T(
 {
   enthalpy = h_from_p_T(0.0, temperature);
   dh_dp = 0.0;
-  dh_dT = (h_from_p_T(0.0, temperature + 1.0) - enthalpy) / 1.0;
+  // finite difference approximate
+  dh_dT = (h_from_p_T(0.0, temperature * (1 + 1e-6)) - enthalpy) / (temperature * 1e-6);
 }
 
 Real
