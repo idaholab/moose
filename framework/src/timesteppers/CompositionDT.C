@@ -37,7 +37,7 @@ CompositionDT::validParams()
   params.addParam<std::string>("times_to_hit_timestepper",
                                "Provide user specified time to hit with a time sequence stepper");
 
-  params.addParam<Real>("dt", "Initial value of dt");
+  params.addParam<Real>("initial_dt", "Initial value of dt");
 
   params.addParamNamesToGroup("input_timesteppers composition_type",
                               "Time Steppers for composition");
@@ -51,8 +51,8 @@ CompositionDT::validParams()
 
 CompositionDT::CompositionDT(const InputParameters & parameters)
   : TimeStepper(parameters),
-    _has_initial_dt(isParamValid("dt")),
-    _initial_dt(_has_initial_dt ? getParam<Real>("dt") : 0.),
+    _has_initial_dt(isParamValid("initial_dt")),
+    _initial_dt(_has_initial_dt ? getParam<Real>("initial_dt") : 0.),
     _base_timestepper(getParam<std::string>("base_timestepper"))
 {
   if (isParamValid("input_timesteppers"))
@@ -78,20 +78,20 @@ CompositionDT::computeDT()
 
   for (const auto & name : _inputs)
   {
-    auto time_stepper = setupTimeStepper(name);
+    auto time_stepper = getTimeStepper(name);
     Real dt = time_stepper->getCurrentDT();
 
     dts.emplace(name, dt);
   }
 
-  auto base_stepper = setupTimeStepper(_base_timestepper);
+  auto base_stepper = getTimeStepper(_base_timestepper);
   _dt = produceCompositionDT(std::as_const(dts), base_stepper->getCurrentDT());
 
   return _dt;
 }
 
 std::shared_ptr<TimeStepper>
-CompositionDT::setupTimeStepper(const std::string & stpper_name)
+CompositionDT::getTimeStepper(const std::string & stpper_name)
 {
   auto time_stepper = _app.getTimeStepperSystem().getTimeStepper(stpper_name);
   mooseAssert(time_stepper, "Not exist");
@@ -101,7 +101,7 @@ CompositionDT::setupTimeStepper(const std::string & stpper_name)
 }
 
 std::shared_ptr<TimeSequenceStepperBase>
-CompositionDT::setupSequenceStepper(const std::string & stpper_name)
+CompositionDT::getSequenceStepper(const std::string & stpper_name)
 {
   auto time_stepper = _app.getTimeStepperSystem().getTimeStepper(stpper_name);
   auto hit_timestepper = std::dynamic_pointer_cast<TimeSequenceStepperBase>(time_stepper);
@@ -158,7 +158,7 @@ CompositionDT::produceCompositionDT(const std::map<const std::string, Real> & dt
 Real
 CompositionDT::produceHitDT(const Real & composeDT)
 {
-  auto ts = setupSequenceStepper(_hit_timestepper_name);
+  auto ts = getSequenceStepper(_hit_timestepper_name);
   Real dt;
 
   Real next_time_to_hit = ts->getNextTimeInSequence();

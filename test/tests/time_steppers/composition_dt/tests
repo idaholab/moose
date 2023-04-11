@@ -3,14 +3,14 @@
   design = 'CompositionDT.md'
 
   [time_sequence]
-    requirement = 'The system shall support composing time step size with multiple time steppers'
+    requirement = 'The system shall support composing time step size from multiple time steppers by'
 
     [max]
       type = 'Exodiff'
       input = 'composition_dt.i'
       exodiff = 'composition_dt_max.e'
       cli_args = "Outputs/file_base='composition_dt_max'"
-      detail = 'Use the maximum time step size of input time steppers,'
+      detail = 'using the maximum time step size of input time steppers,'
     []
     [min]
       type = 'Exodiff'
@@ -18,7 +18,7 @@
       exodiff = 'composition_dt_min.e'
       cli_args = "Executioner/TimeStepper/CompositionDT/composition_type=min Outputs/file_base='composition_dt_min'"
 
-      detail = 'Use the minumum time step size of input time steppers,'
+      detail = 'using the minimum time step size of input time steppers,'
     []
     [timesequence_to_hit]
       type = 'Exodiff'
@@ -26,7 +26,7 @@
       exodiff = 'composition_dt_hit.e'
       cli_args = "Executioner/TimeStepper/CompositionDT/times_to_hit_timestepper=Timesequence Outputs/file_base='composition_dt_hit'"
 
-      detail = 'Hit the time points specified by the user'
+      detail = 'hitting the time points specified by a TimesequenceStepper selected by the user'
     []
 
   []
@@ -64,7 +64,7 @@
       cli_args = 'Executioner/TimeStepper/TimeStepper/type=ConstantDT'
       recover = false
 
-      detail = "'TimeStepper' is a system reserved name"
+      detail = "'when a user uses a reserved time stepper name"
     []
 
     [timesequencestepper]
@@ -74,7 +74,7 @@
       cli_args = 'Executioner/TimeStepper/CompositionDT/times_to_hit_timestepper=ConstDT1'
       recover = false
 
-      detail = 'Check if input time stepper type meets requirement'
+      detail = 'when the wrong type of time stepper is provided to indicate the times to hit by the stepper'
     []
 
   []

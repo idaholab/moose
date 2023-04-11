@@ -134,7 +134,7 @@ Transient::validParams()
       "final_time_stepper",
       std::string(),
       "The final time stepper to use if multiple time steppers are provided "
-      "without a CompositionTimeStepper");
+      "without a CompositionDT");
 
   params.addParamNamesToGroup(
       "steady_state_detection steady_state_tolerance steady_state_start_time check_aux",

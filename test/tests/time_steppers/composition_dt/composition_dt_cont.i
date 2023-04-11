@@ -1,11 +1,3 @@
-###########################################################
-# This is a simple test with a time-dependent problem
-# demonstrating the use of the TimeStepper system.
-#
-# @Requirement F1.20
-###########################################################
-
-
 [Mesh]
   file = restart_test_cp/0002_mesh.cpr
 []
