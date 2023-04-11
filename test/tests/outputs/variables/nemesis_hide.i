@@ -18,6 +18,8 @@
   # out for the "Mesh" information.
   parallel_type = distributed
 
+  allow_final_prepare_for_use = false
+
   [./Partitioner]
     type = LibmeshPartitioner
     partitioner = linear
