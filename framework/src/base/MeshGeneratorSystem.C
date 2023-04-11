@@ -14,7 +14,10 @@
 #include "DependencyResolver.h"
 
 MeshGeneratorSystem::MeshGeneratorSystem(MooseApp & app)
-  : PerfGraphInterface(app.perfGraph(), "MeshGeneratorSystem"), ParallelObject(app), _app(app)
+  : PerfGraphInterface(app.perfGraph(), "MeshGeneratorSystem"),
+    ParallelObject(app),
+    _app(app),
+    _has_bmbb(false)
 {
 }
 
@@ -31,6 +34,9 @@ MeshGeneratorSystem::addMeshGenerator(const std::string & type,
   // constructing mesh generators (not "adding" them, where we simply store their parameters)
   if (_app.constructingMeshGenerators())
     createMeshGenerator(name);
+
+  if (type == "BreakMeshByBlockGenerator")
+    _has_bmbb = true;
 }
 
 const MeshGenerator &
@@ -339,6 +345,11 @@ MeshGeneratorSystem::executeMeshGenerators()
       const auto & name = generator->name();
 
       auto current_mesh = generator->generateInternal();
+      if (!_has_bmbb)
+        // Assume the worst of our developers until we have established a bullet-proof verification
+        // of whether the state of is_prepared() accurately reflects the true preparedness of the
+        // mesh
+        current_mesh->set_isnt_prepared();
 
       // Now we need to possibly give this mesh to downstream generators
       auto & outputs = _mesh_generator_outputs[name];

@@ -203,4 +203,8 @@ private:
 
   /// Holds the map of save in mesh -> name
   std::map<std::string, std::unique_ptr<MeshBase>> _save_in_meshes;
+
+  /// Whether any of the mesh generators are a \p BreakMeshByBlockGenerator. If so, then we will not
+  /// call \p set_isnt_prepared() after \p generate()
+  bool _has_bmbb;
 };
