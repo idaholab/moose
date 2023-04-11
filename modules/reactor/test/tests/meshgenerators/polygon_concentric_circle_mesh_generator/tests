@@ -1,6 +1,6 @@
 [Tests]
   design = 'meshgenerators/PolygonConcentricCircleMeshGenerator.md'
-  issues = '#18628 #20514 #20637 #21420 #23367 #23520'
+  issues = '#18628 #20514 #20637 #21420 #23367 #23520 #24025'
   [back_only]
     type = 'Exodiff'
     input = 'poly_2d.i'
@@ -159,6 +159,20 @@
                 Mesh/gen/background_radial_bias=0.5
                 --mesh-only "poly_2d_full_biasing.e"'
     requirement ='The system shall generate a radially biased hexagon mesh with rings and ducts.'
+    recover = false
+  []
+  [back_only_boundary_layers]
+    type = 'Exodiff'
+    input = 'poly_2d.i'
+    exodiff = 'poly_2d_back_only_boundary_layers.e'
+    cli_args = 'Mesh/gen/background_inner_boundary_layer_width="2.0"
+                Mesh/gen/background_inner_boundary_layer_intervals="2"
+                Mesh/gen/background_inner_boundary_layer_bias="2.0"
+                Mesh/gen/background_outer_boundary_layer_width="2.0"
+                Mesh/gen/background_outer_boundary_layer_intervals="2"
+                Mesh/gen/background_outer_boundary_layer_bias="0.5"
+                --mesh-only "poly_2d_back_only_boundary_layers.e"'
+    requirement ='The system shall generate a hexagon mesh with boundary layer.'
     recover = false
   []
   [full_boundary_layers]

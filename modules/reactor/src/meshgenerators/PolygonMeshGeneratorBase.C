@@ -222,7 +222,8 @@ PolygonMeshGeneratorBase::buildSlice(
   {
     total_ring_layers.push_back(background_inner_boundary_layer_params.intervals);
     rings_bias_terms.push_back(inner_background_bias_terms);
-    ring_radii.push_back(ring_radii.back() + background_inner_boundary_layer_params.width);
+    ring_radii.push_back((ring_radii.empty() ? 0.0 : ring_radii.back()) +
+                         background_inner_boundary_layer_params.width);
     has_rings = true;
   }
 
@@ -232,7 +233,9 @@ PolygonMeshGeneratorBase::buildSlice(
     total_ducts_layers.push_back(background_outer_boundary_layer_params.intervals);
     duct_bias_terms.insert(duct_bias_terms.begin(), outer_background_bias_terms);
     ducts_center_dist.insert(ducts_center_dist.begin(),
-                             ducts_center_dist.front() -
+                             (ducts_center_dist.empty()
+                                  ? pitch / 2.0 / std::cos(M_PI / virtual_side_number)
+                                  : ducts_center_dist.front()) -
                                  background_outer_boundary_layer_params.width);
     has_ducts = true;
   }
@@ -393,11 +396,15 @@ PolygonMeshGeneratorBase::buildSlice(
   if (has_rings) //  define the rings in each subdomain
   {
     subdomain_rings = total_ring_layers;
-    subdomain_rings.front() = subdomain_rings.front() - 1; // remove the inner TRI mesh subdomain
+    subdomain_rings.front() -= 1; // remove the inner TRI mesh subdomain
     if (background_inner_boundary_layer_params.intervals)
+    {
       subdomain_rings.back() =
           background_inner_boundary_layer_params.intervals + background_intervals +
           background_outer_boundary_layer_params.intervals; // add the background region
+      if (ring_radii.size() == 1)
+        subdomain_rings.back() -= 1; // remove the inner TRI mesh subdomain
+    }
     else
       subdomain_rings.push_back(background_inner_boundary_layer_params.intervals +
                                 background_intervals +
@@ -408,7 +415,7 @@ PolygonMeshGeneratorBase::buildSlice(
     subdomain_rings.push_back(
         background_inner_boundary_layer_params.intervals + background_intervals +
         background_outer_boundary_layer_params.intervals); // add the background region
-    subdomain_rings[0] = subdomain_rings[0] - 1;           // remove the inner TRI mesh subdomain
+    subdomain_rings[0] -= 1;                               // remove the inner TRI mesh subdomain
   }
 
   if (has_ducts)
