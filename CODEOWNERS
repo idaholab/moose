@@ -21,17 +21,22 @@
 /framework/src @lindsayad
 /framework/*/base @roystgnr
 /framework/*/base/MeshGeneratorSystem* @loganharbour
+/framework/*/dampers @GiudGiud
 /framework/*/executioners/*Solve* @GiudGiud
 /framework/*/materials/Derivative* @dschwen
 /framework/*/materials/Material* @roystgnr
 /framework/*/materials/Parsed* @dschwen
-/framework/*/mesh @roystgnr
-/framework/*/meshgenerators @roystgnr
+/framework/*/mesh @roystgnr @GiudGiud
+/framework/*/meshgenerators @roystgnr @GiudGiud
 /framework/*/multiapps @GiudGiud
+/framework/*/loops @GiudGiud
 /framework/*/outputs @roystgnr
+/framework/*/postprocessors @GiudGiud
 /framework/*/reporters @loganharbour @zachmprince
 /framework/*/samplers @zachmprince
 /framework/*/systems @roystgnr
+/framework/*/timeintegrators @GiudGiud
+/framework/*/timesteppers @GiudGiud
 /framework/*/transfers @GiudGiud @roystgnr
 /framework/*/utils/Units* @dschwen
 /framework/*/*/*Jump* @roystgnr
