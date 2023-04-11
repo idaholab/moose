@@ -107,14 +107,6 @@
       expect_err = 'There must be an upper bound associated with each parameter\.'
       detail = 'upper bounds;'
     []
-    [upper_bound_no_lower]
-      type = RunException
-      input = main.i
-      cli_args = 'OptimizationReporter/upper_bounds=\'0\''
-      max_threads = 1
-      expect_err = 'Both upper and lower bounds must be specified if bounds are used\.'
-      detail = 'upper bounds with no lower bound specified;'
-    []
   []
 
   [interpolation_errors]

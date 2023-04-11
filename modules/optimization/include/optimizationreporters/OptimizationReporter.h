@@ -19,4 +19,7 @@ class OptimizationReporter : public OptimizationReporterBase
 public:
   static InputParameters validParams();
   OptimizationReporter(const InputParameters & parameters);
+
+private:
+  std::vector<Real> fillParamsVector(std::string type, Real default_value) const;
 };

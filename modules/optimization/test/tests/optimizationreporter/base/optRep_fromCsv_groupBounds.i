@@ -19,9 +19,9 @@
   type = OptimizationReporter
   parameter_names = 'p1 p2 p3'
   num_values = '2 4 6'
-  initial_condition = '1 2 3 4 5 6 7 8 9 10 11 12'
-  upper_bounds = '110 210 310'
-  lower_bounds = '-1 -2 -3'
+  initial_condition = '1; 3; 7'
+  upper_bounds = '110; 210; 310'
+  lower_bounds = '-1; -2; -3'
   measurement_file = 'measurementData.csv'
   file_xcoord = 'coordx'
   file_ycoord ='y'
