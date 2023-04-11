@@ -403,7 +403,7 @@ PolygonMeshGeneratorBase::buildSlice(
           background_inner_boundary_layer_params.intervals + background_intervals +
           background_outer_boundary_layer_params.intervals; // add the background region
       if (ring_radii.size() == 1)
-        subdomain_rings.back() -= 1;                        // remove the inner TRI mesh subdomain
+        subdomain_rings.back() -= 1; // remove the inner TRI mesh subdomain
     }
     else
       subdomain_rings.push_back(background_inner_boundary_layer_params.intervals +
