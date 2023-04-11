@@ -23,6 +23,11 @@ public:
   virtual void check() const override;
   virtual Real getUnitPerimeter(const HeatStructureSideType & side) const override;
 
+  /**
+   * Gets the depth of the plate
+   */
+  const Real & getDepth() const { return _depth; }
+
 protected:
   virtual bool useCylindricalTransformation() const override { return false; }
 
