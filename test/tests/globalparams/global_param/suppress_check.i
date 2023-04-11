@@ -1,5 +1,8 @@
 [GlobalParams]
+  # This is suppressed in markers for adaptivity
   use_displaced_mesh = true
+  # This is suppressed in the custom user object
+  suppressed_param = true
 []
 
 [Mesh]
@@ -42,6 +45,12 @@
   []
   initial_marker = boundary
   initial_steps = 1
+[]
+
+[UserObjects]
+  [tester]
+    type = TestGlobalParamSuppression
+  []
 []
 
 [Outputs]
