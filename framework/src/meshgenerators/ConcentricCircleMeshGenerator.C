@@ -752,7 +752,7 @@ ConcentricCircleMeshGenerator::generate()
       MeshTools::Modification::change_boundary_id(other_mesh, 7, 4);
       mesh->prepare_for_use();
       other_mesh.prepare_for_use();
-      mesh->stitch_meshes(other_mesh, 1, 3, TOLERANCE, true);
+      mesh->stitch_meshes(other_mesh, 1, 3, TOLERANCE, true, /*verbose=*/false);
       mesh->get_boundary_info().sideset_name(1) = "left";
       mesh->get_boundary_info().sideset_name(2) = "bottom";
       mesh->get_boundary_info().sideset_name(3) = "right";
@@ -765,7 +765,7 @@ ConcentricCircleMeshGenerator::generate()
       MeshTools::Modification::change_boundary_id(other_mesh, 5, 2);
       mesh->prepare_for_use();
       other_mesh.prepare_for_use();
-      mesh->stitch_meshes(other_mesh, 1, 1, TOLERANCE, true);
+      mesh->stitch_meshes(other_mesh, 1, 1, TOLERANCE, true, /*verbose=*/false);
 
       MeshTools::Modification::change_boundary_id(*mesh, 2, 1);
       MeshTools::Modification::change_boundary_id(*mesh, 3, 2);
@@ -791,7 +791,7 @@ ConcentricCircleMeshGenerator::generate()
       MeshTools::Modification::change_boundary_id(other_mesh, 7, 2);
       mesh->prepare_for_use();
       other_mesh.prepare_for_use();
-      mesh->stitch_meshes(other_mesh, 2, 4, TOLERANCE, true);
+      mesh->stitch_meshes(other_mesh, 2, 4, TOLERANCE, true, /*verbose=*/false);
       mesh->get_boundary_info().sideset_name(1) = "left";
       mesh->get_boundary_info().sideset_name(2) = "bottom";
       mesh->get_boundary_info().sideset_name(3) = "right";
@@ -804,7 +804,7 @@ ConcentricCircleMeshGenerator::generate()
       MeshTools::Modification::change_boundary_id(other_mesh, 5, 2);
       mesh->prepare_for_use();
       other_mesh.prepare_for_use();
-      mesh->stitch_meshes(other_mesh, 2, 2, TOLERANCE, true);
+      mesh->stitch_meshes(other_mesh, 2, 2, TOLERANCE, true, /*verbose=*/false);
 
       MeshTools::Modification::change_boundary_id(*mesh, 3, 2);
       mesh->get_boundary_info().sideset_name(1) = "left";
@@ -839,7 +839,7 @@ ConcentricCircleMeshGenerator::generate()
       MeshTools::Modification::change_boundary_id(*mesh, 7, 1);
       mesh->prepare_for_use();
       other_mesh.prepare_for_use();
-      mesh->stitch_meshes(other_mesh, 4, 2, TOLERANCE, true);
+      mesh->stitch_meshes(other_mesh, 4, 2, TOLERANCE, true, /*verbose=*/false);
       mesh->get_boundary_info().sideset_name(1) = "left";
       mesh->get_boundary_info().sideset_name(2) = "bottom";
       mesh->get_boundary_info().sideset_name(3) = "right";
@@ -852,7 +852,7 @@ ConcentricCircleMeshGenerator::generate()
       MeshTools::Modification::change_boundary_id(*mesh, 5, 2);
       mesh->prepare_for_use();
       other_mesh.prepare_for_use();
-      mesh->stitch_meshes(other_mesh, 1, 1, TOLERANCE, true);
+      mesh->stitch_meshes(other_mesh, 1, 1, TOLERANCE, true, /*verbose=*/false);
 
       MeshTools::Modification::change_boundary_id(*mesh, 2, 1);
       MeshTools::Modification::change_boundary_id(*mesh, 3, 2);
@@ -887,7 +887,7 @@ ConcentricCircleMeshGenerator::generate()
       MeshTools::Modification::change_boundary_id(*mesh, 7, 2);
       mesh->prepare_for_use();
       other_mesh.prepare_for_use();
-      mesh->stitch_meshes(other_mesh, 1, 3, TOLERANCE, true);
+      mesh->stitch_meshes(other_mesh, 1, 3, TOLERANCE, true, /*verbose=*/false);
       mesh->get_boundary_info().sideset_name(1) = "left";
       mesh->get_boundary_info().sideset_name(2) = "bottom";
       mesh->get_boundary_info().sideset_name(3) = "right";
@@ -900,7 +900,7 @@ ConcentricCircleMeshGenerator::generate()
       MeshTools::Modification::change_boundary_id(*mesh, 5, 2);
       mesh->prepare_for_use();
       other_mesh.prepare_for_use();
-      mesh->stitch_meshes(other_mesh, 1, 1, TOLERANCE, true);
+      mesh->stitch_meshes(other_mesh, 1, 1, TOLERANCE, true, /*verbose=*/false);
 
       MeshTools::Modification::change_boundary_id(*mesh, 2, 1);
       MeshTools::Modification::change_boundary_id(*mesh, 3, 2);
@@ -929,7 +929,7 @@ ConcentricCircleMeshGenerator::generate()
       mesh->prepare_for_use();
       portion_two.prepare_for_use();
       // 'top_half'
-      mesh->stitch_meshes(portion_two, 1, 3, TOLERANCE, true);
+      mesh->stitch_meshes(portion_two, 1, 3, TOLERANCE, true, /*verbose=*/false);
 
       // 'bottom_half'
       ReplicatedMesh portion_bottom(*mesh);
@@ -944,7 +944,7 @@ ConcentricCircleMeshGenerator::generate()
       mesh->prepare_for_use();
       portion_bottom.prepare_for_use();
       // 'full'
-      mesh->stitch_meshes(portion_bottom, 2, 4, TOLERANCE, true);
+      mesh->stitch_meshes(portion_bottom, 2, 4, TOLERANCE, true, /*verbose=*/false);
 
       mesh->get_boundary_info().sideset_name(1) = "left";
       mesh->get_boundary_info().sideset_name(2) = "bottom";
@@ -960,14 +960,14 @@ ConcentricCircleMeshGenerator::generate()
       // 'top half'
       mesh->prepare_for_use();
       portion_two.prepare_for_use();
-      mesh->stitch_meshes(portion_two, 1, 1, TOLERANCE, true);
+      mesh->stitch_meshes(portion_two, 1, 1, TOLERANCE, true, /*verbose=*/false);
       // 'bottom half'
       ReplicatedMesh portion_bottom(*mesh);
       MeshTools::Modification::rotate(portion_bottom, 180, 0, 0);
       // 'full'
       mesh->prepare_for_use();
       portion_bottom.prepare_for_use();
-      mesh->stitch_meshes(portion_bottom, 2, 2, TOLERANCE, true);
+      mesh->stitch_meshes(portion_bottom, 2, 2, TOLERANCE, true, /*verbose=*/false);
       MeshTools::Modification::change_boundary_id(*mesh, 3, 1);
       mesh->get_boundary_info().sideset_name(1) = "outer";
       portion_bottom.clear();

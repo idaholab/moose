@@ -27,7 +27,9 @@ MeshGenerator::validParams()
                         "Whether or not to show mesh info after generating the mesh "
                         "(bounding box, element types, sidesets, nodesets, subdomains, etc)");
   params.addParam<std::string>(
-      "save_with_name", std::string(), "Save the current mesh with user-defined name");
+      "save_with_name",
+      std::string(),
+      "Keep the mesh from this mesh generator in memory with the name specified");
 
   params.addParam<bool>(
       "output", false, "Whether or not to output the mesh file after generating the mesh");
@@ -36,10 +38,8 @@ MeshGenerator::validParams()
                         "Whether or not to output the mesh file in the nemesis"
                         "format (only if output = true)");
 
-  params.addParamNamesToGroup("show_info output", "Debugging");
-
-  params.addParamNamesToGroup("save_with_name", "Save in Mesh");
-
+  params.addParamNamesToGroup("show_info output nemesis", "Debugging");
+  params.addParamNamesToGroup("save_with_name", "Advanced");
   params.registerBase("MeshGenerator");
 
   return params;
