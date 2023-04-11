@@ -1085,6 +1085,7 @@ NonlinearSystemBase::setConstraintSecondaryValues(NumericVector<Number> & soluti
     std::vector<dof_id_type> & secondary_nodes = pen_loc._nearest_node._secondary_nodes;
 
     BoundaryID secondary_boundary = pen_loc._secondary_boundary;
+    BoundaryID primary_boundary = pen_loc._primary_boundary;
 
     if (_constraints.hasActiveNodeFaceConstraints(secondary_boundary, displaced))
     {
@@ -1118,11 +1119,21 @@ NonlinearSystemBase::setConstraintSecondaryValues(NumericVector<Number> & soluti
             subproblem.reinitNeighborPhys(primary_elem, primary_side, points, 0);
 
             for (const auto & nfc : constraints)
+            {
+              // Return if this constraint does not correspond to the primary-secondary pair
+              // prepared by the outer loops.
+              // This continue statement is required when, e.g. one secondary surface constrains
+              // more than one primary surface.
+              if (nfc->secondaryBoundary() != secondary_boundary ||
+                  nfc->primaryBoundary() != primary_boundary)
+                continue;
+
               if (nfc->shouldApply())
               {
                 constraints_applied = true;
                 nfc->computeSecondaryValue(solution);
               }
+            }
           }
         }
       }
@@ -1234,6 +1245,7 @@ NonlinearSystemBase::constraintResiduals(NumericVector<Number> & residual, bool 
     std::vector<dof_id_type> & secondary_nodes = pen_loc._nearest_node._secondary_nodes;
 
     BoundaryID secondary_boundary = pen_loc._secondary_boundary;
+    BoundaryID primary_boundary = pen_loc._primary_boundary;
 
     if (_constraints.hasActiveNodeFaceConstraints(secondary_boundary, displaced))
     {
@@ -1271,6 +1283,15 @@ NonlinearSystemBase::constraintResiduals(NumericVector<Number> & residual, bool 
             subproblem.reinitNeighborPhys(primary_elem, primary_side, points, 0);
 
             for (const auto & nfc : constraints)
+            {
+              // Return if this constraint does not correspond to the primary-secondary pair
+              // prepared by the outer loops.
+              // This continue statement is required when, e.g. one secondary surface constrains
+              // more than one primary surface.
+              if (nfc->secondaryBoundary() != secondary_boundary ||
+                  nfc->primaryBoundary() != primary_boundary)
+                continue;
+
               if (nfc->shouldApply())
               {
                 constraints_applied = true;
@@ -1278,8 +1299,8 @@ NonlinearSystemBase::constraintResiduals(NumericVector<Number> & residual, bool 
 
                 if (nfc->overwriteSecondaryResidual())
                 {
-                  // The below will actually overwrite the residual for every single dof that lives
-                  // on the node. We definitely don't want to do that!
+                  // The below will actually overwrite the residual for every single dof that
+                  // lives on the node. We definitely don't want to do that!
                   // _fe_problem.setResidual(residual, 0);
 
                   const auto & secondary_var = nfc->variable();
@@ -1301,6 +1322,7 @@ NonlinearSystemBase::constraintResiduals(NumericVector<Number> & residual, bool 
                   _fe_problem.cacheResidual(0);
                 _fe_problem.cacheResidualNeighbor(0);
               }
+            }
           }
         }
       }
@@ -2120,6 +2142,7 @@ NonlinearSystemBase::constraintJacobians(bool displaced)
     std::vector<dof_id_type> & secondary_nodes = pen_loc._nearest_node._secondary_nodes;
 
     BoundaryID secondary_boundary = pen_loc._secondary_boundary;
+    BoundaryID primary_boundary = pen_loc._primary_boundary;
 
     zero_rows.clear();
     if (_constraints.hasActiveNodeFaceConstraints(secondary_boundary, displaced))
@@ -2154,6 +2177,14 @@ NonlinearSystemBase::constraintJacobians(bool displaced)
             subproblem.reinitNeighborPhys(primary_elem, primary_side, points, 0);
             for (const auto & nfc : constraints)
             {
+              // Return if this constraint does not correspond to the primary-secondary pair
+              // prepared by the outer loops.
+              // This continue statement is required when, e.g. one secondary surface constrains
+              // more than one primary surface.
+              if (nfc->secondaryBoundary() != secondary_boundary ||
+                  nfc->primaryBoundary() != primary_boundary)
+                continue;
+
               nfc->_jacobian = &jacobian;
 
               if (nfc->shouldApply())
