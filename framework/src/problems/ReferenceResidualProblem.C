@@ -71,7 +71,7 @@ ReferenceResidualProblem::validParams()
                          "vector to the L-infinity norm of the absolute reference vector to "
                          "determine relative convergence");
 
-  MooseEnum zero_ref_res("zero_tolerance relative_tolerance", "zero_tolerance");
+  MooseEnum zero_ref_res("zero_tolerance relative_tolerance", "relative_tolerance");
   params.addParam<MooseEnum>("zero_reference_residual_treatment",
                              zero_ref_res,
                              "Determine behavior if a reference residual value of zero is present "
