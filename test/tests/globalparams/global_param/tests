@@ -1,12 +1,27 @@
 [Tests]
   design = 'Parser.md'
-  issues = '#437'
+  issues = '#437 #8761'
 
-  [./global_param_test]
+  [global_param_test]
     type = 'Exodiff'
     input = 'global_param_test.i'
     exodiff = 'out.e'
 
     requirement = 'The system shall include an input file syntax that supports defining global options.'
-  [../]
+  []
+  
+  [test_suppress_ignore]
+    type = 'RunException'
+    input = 'suppress_check.i'
+    cli_args = "Adaptivity/Markers/boundary/use_displaced_mesh=true"
+    expect_err = "The parameter 'Adaptivity/Markers/boundary/use_displaced_mesh' is a private parameter and should not be used in an input file."
+    mesh_mode = REPLICATED
+    requirement = 'The system shall error if a private / suppressed parameter is set in the input file.'
+  []
+  [test_ignore]
+    type = 'RunApp'
+    input = 'suppress_check.i'
+    mesh_mode = REPLICATED
+    requirement = 'The system shall not apply global parameter options onto suppressed parameters.'
+  []
 []
