@@ -15,15 +15,18 @@
   []
   [cylinder_friction_penalty]
     type = 'CSVDiff'
-    csvdiff = 'cylinder_friction_penalty_check_x_disp_FINAL.csv cylinder_friction_penalty_check_cont_press_FINAL.csv '
-              'cylinder_friction_penalty_check_y_disp_FINAL.csv cylinder_friction_penalty_check_friction_FINAL.csv'
+    csvdiff = 'cylinder_friction_penalty_check_x_disp_FINAL.csv '
+              'cylinder_friction_penalty_check_cont_press_FINAL.csv '
+              'cylinder_friction_penalty_check_y_disp_FINAL.csv '
+              'cylinder_friction_penalty_check_friction_FINAL.csv'
     input = 'cylinder_friction_penalty.i'
     rel_err = 5.0e-4
     min_parallel = 4
     max_parallel = 4
     heavy = true
     min_ad_size = '50'
-    requirement = 'Contact module shall approximate frictional contact solution between a cylinder and a plane using penalty mortar contact.'
+    requirement = 'Contact module shall approximate frictional contact solution between a cylinder '
+                  'and a plane using penalty mortar contact.'
   []
   [ironing]
     type = 'CSVDiff'
@@ -37,8 +40,8 @@
                   'flexible base material.'
   []
   [ironing_penalty]
-    type = 'Exodiff'
-    exodiff = 'ironing_penalty_out.e'
+    type = 'CSVDiff'
+    csvdiff = 'ironing_penalty_chkfile_frictional_pressure_0013.csv'
     input = 'ironing_penalty.i'
     rel_err = 1.0e-4
     abs_zero = 1.0e-4
@@ -47,6 +50,19 @@
     requirement = 'Contact module shall solve frictional contact between a semicircular tool and '
                   'flexible base material using a penalty approach to mortar contact.'
   []
+  [ironing_penalty_action]
+    type = 'CSVDiff'
+    csvdiff = 'ironing_penalty_action_chkfile_frictional_pressure_0013.csv'
+    input = 'ironing_penalty_action.i'
+    rel_err = 1.0e-4
+    abs_zero = 1.0e-4
+    min_ad_size = '200'
+    cli_args = 'Executioner/end_time=0.15'
+    requirement = 'Contact module shall solve frictional contact between a semicircular tool and '
+                  'flexible base material using a penalty approach to mortar contact through the '
+                  'contact action.'
+  []
+
   [frictional_bouncing_block]
     type = 'CSVDiff'
     csvdiff = 'frictional_bouncing_block_checkfile_cont_press_0029.csv '
@@ -71,15 +87,20 @@
   []
   [frictional_bouncing_block_edge_dropping]
     type = 'CSVDiff'
-    csvdiff = 'frictional_bouncing_block_edge_dropping_cont_press_0023.csv frictional_bouncing_block_edge_dropping_friction_0023.csv'
+    csvdiff = 'frictional_bouncing_block_edge_dropping_cont_press_0023.csv '
+              'frictional_bouncing_block_edge_dropping_friction_0023.csv'
     input = 'frictional_bouncing_block.i'
     rel_err = 1.0e-4
     min_ad_size = '50'
     method = '!dbg'
     valgrind = 'none'
-    cli_args = "Constraints/weighted_gap_lm/correct_edge_dropping=true UserObjects/weighted_vel_uo/correct_edge_dropping=true Executioner/end_time=5.5 Outputs/file_base=frictional_bouncing_block_edge_dropping"
-    requirement = 'Contact module shall solve frictional contact between a bouncing block and a flexible substrate when correct edge dropping is enabled. '
-                  'Additional requirement is that the correct edge dropping treatment must yield same results as incorrect edge dropping treatment when '
-                  'there is not actual edge dropping, e.g.: All secondary surface projects to the primary surface.'
+    cli_args = "Constraints/weighted_gap_lm/correct_edge_dropping=true "
+               "UserObjects/weighted_vel_uo/correct_edge_dropping=true Executioner/end_time=5.5 "
+               "Outputs/file_base=frictional_bouncing_block_edge_dropping"
+    requirement = 'Contact module shall solve frictional contact between a bouncing block and a '
+                  'flexible substrate when correct edge dropping is enabled. Additional requirement '
+                  'is that the correct edge dropping treatment must yield same results as incorrect '
+                  'edge dropping treatment when there is not actual edge dropping, e.g.: All '
+                  'secondary surface projects to the primary surface.'
   []
 []

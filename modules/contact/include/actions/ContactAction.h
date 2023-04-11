@@ -27,7 +27,8 @@ enum class ContactFormulation
   PENALTY,
   AUGMENTED_LAGRANGE,
   TANGENTIAL_PENALTY,
-  MORTAR
+  MORTAR,
+  MORTAR_PENALTY
 };
 
 /**

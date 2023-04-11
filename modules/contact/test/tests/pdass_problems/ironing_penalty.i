@@ -161,29 +161,12 @@
   []
 []
 
-[Postprocessors]
-  [bot_react_x]
-    type = NodalSum
-    variable = saved_x
+[VectorPostprocessors]
+  [frictional_pressure]
+    type = NodalValueSampler
+    variable = penalty_normal_pressure
     boundary = 20
-  []
-  [bot_react_y]
-    type = NodalSum
-    variable = saved_y
-    boundary = 20
-  []
-  [top_react_x]
-    type = NodalSum
-    variable = saved_x
-    boundary = 10
-  []
-  [top_react_y]
-    type = NodalSum
-    variable = saved_y
-    boundary = 10
-  []
-  [_dt]
-    type = TimestepSize
+    sort_by = x
   []
 []
 
@@ -291,7 +274,6 @@
   perf_graph = true
   exodus = true
   csv = true
-
   [chkfile]
     type = CSV
     start_time = 0.0
