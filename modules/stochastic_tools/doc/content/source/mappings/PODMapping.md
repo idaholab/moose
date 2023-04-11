@@ -1,6 +1,6 @@
 # PODMapping
 
-!syntax description /Mappings/PODMapping
+!syntax description /VariableMappings/PODMapping
 
 ## Overview
 
@@ -34,11 +34,11 @@ The process for building the mapping is the following:
    Matrix $\boldsymbol{\Sigma}$ contains the singular values on its diagonal. Given that the size of the snapshot matrix
    is high, we use the parallel SVD solver available in SLEPc with a Lánczos method to solve the underlying
    eigenvalue problem and get only the requested number of singular values. Additional parameters for SLEPc to fine tune the
-   the solution algorithm can be supplied using input parameter [!param](/Mappings/PODMapping/extra_slepc_options).
+   the solution algorithm can be supplied using input parameter [!param](/VariableMappings/PODMapping/extra_slepc_options).
 
    The number of needed singular triplets
    ($\boldsymbol{u}_{v,i}, \sigma_{v,i}, \boldsymbol{v}_{v,i}$) for each variable can be prescribed using
-   the [!param](/Mappings/PODMapping/num_modes) parameter. The algorithm will select the minimum of these numbers and the
+   the [!param](/VariableMappings/PODMapping/num_modes) parameter. The algorithm will select the minimum of these numbers and the
    number of converged singular triplets. Let's denote these numbers by $r_v$.
 
    For this mapping object the transition from high-dimensional to low-dimensional and back is determined by the left
@@ -64,10 +64,10 @@ The process for building the mapping is the following:
         \text{discard}, & \text{otherwise.}
    \end{array}
 
-   The filtering parameter $\tau_v$ van be specified for every variable using input parameter [!param](/Mappings/PODMapping/energy_threshold).
+   The filtering parameter $\tau_v$ van be specified for every variable using input parameter [!param](/VariableMappings/PODMapping/energy_threshold).
 
 Once a mapping is trained, one can save it into a binary file using [MappingOutput.md] and load it by specifying
-the [!param](/Mappings/PODMapping/filename) parameter in the object.
+the [!param](/VariableMappings/PODMapping/filename) parameter in the object.
 
 !alert warning
 This object is only compatible with PETSc versions above 3.14 with SLEPc support.
@@ -76,16 +76,16 @@ This object is only compatible with PETSc versions above 3.14 with SLEPc support
 
 Creating a mapping object:
 
-!listing test/tests/mappings/pod_mapping/pod_mapping_main.i block=Mappings
+!listing test/tests/mappings/pod_mapping/pod_mapping_main.i block=VariableMappings
 
 Loading a mapping object:
 
-!listing test/tests/userobjects/inverse_mapping/inverse_map.i block=Mappings
+!listing test/tests/userobjects/inverse_mapping/inverse_map.i block=VariableMappings
 
 ## Syntax
 
-!syntax parameters /Mappings/PODMapping
+!syntax parameters /VariableMappings/PODMapping
 
-!syntax inputs /Mappings/PODMapping
+!syntax inputs /VariableMappings/PODMapping
 
-!syntax children /Mappings/PODMapping
+!syntax children /VariableMappings/PODMapping

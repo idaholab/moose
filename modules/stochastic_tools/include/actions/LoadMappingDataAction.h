@@ -10,7 +10,7 @@
 #pragma once
 
 #include "Action.h"
-class MappingBase;
+class VariableMappingBase;
 
 /**
  * Action for loading the model data for the mapping objects
@@ -27,5 +27,5 @@ private:
    * Load the necessary information for the given model
    * @param mapping Reference to the Mapping object whose data shall be loaded
    */
-  void load(const MappingBase & mapping);
+  void load(const VariableMappingBase & mapping);
 };

@@ -9,7 +9,7 @@
 
 #pragma once
 
-#include "MappingBase.h"
+#include "VariableMappingBase.h"
 #include "ParallelSolutionStorage.h"
 #include "UserObjectInterface.h"
 
@@ -21,7 +21,7 @@
  * Class which provides a Proper Orthogonal Decomposition (POD)-based mapping between
  * full-order and reduced-order spaces.
  */
-class PODMapping : public MappingBase, public UserObjectInterface
+class PODMapping : public VariableMappingBase, public UserObjectInterface
 {
 public:
   static InputParameters validParams();

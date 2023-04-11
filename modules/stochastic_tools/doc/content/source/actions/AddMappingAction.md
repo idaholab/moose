@@ -1,8 +1,8 @@
-# AddMappingAction
+# AddVariableMappingAction
 
-This action adds `MappingBase` objects contained within the `[Mappings]` block. For example,
+This action adds `VariableMappingBase` objects contained within the `[VariableMappings]` block. For example,
 the following block adds a [PODMapping.md] mapping object.
 
-!listing test/tests/mappings/pod_mapping/pod_mapping_main.i block=Mappings
+!listing test/tests/mappings/pod_mapping/pod_mapping_main.i block=VariableMappings
 
-!syntax parameters /Mappings/AddMappingAction
+!syntax parameters /VariableMappings/AddVariableMappingAction

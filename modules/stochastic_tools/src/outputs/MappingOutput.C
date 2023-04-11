@@ -39,7 +39,7 @@ MappingOutput::output(const ExecFlagType & /*type*/)
     RestartableDataIO restartable_data_io(_app);
     for (const auto & map_name : _mappings)
     {
-      const MappingBase & map = getMappingByName(map_name);
+      const VariableMappingBase & map = getMappingByName(map_name);
       const std::string filename =
           this->filename() + "_" + map_name + restartable_data_io.getRestartableDataExt();
 

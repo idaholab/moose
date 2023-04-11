@@ -8,7 +8,7 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "LoadMappingDataAction.h"
-#include "MappingBase.h"
+#include "VariableMappingBase.h"
 #include "FEProblem.h"
 #include "RestartableDataIO.h"
 #include "StochasticToolsApp.h"
@@ -20,7 +20,7 @@ LoadMappingDataAction::validParams()
 {
   InputParameters params = Action::validParams();
   params.addClassDescription(
-      "Load the model data for the objects defined in the [Mappings] block.");
+      "Load the model data for the objects defined in the [VariableMappings] block.");
   return params;
 }
 
@@ -30,8 +30,8 @@ void
 LoadMappingDataAction::act()
 {
   // We fetch the mapping objects and then load the necessary data
-  std::vector<MappingBase *> objects;
-  _app.theWarehouse().query().condition<AttribSystem>("MappingBase").queryInto(objects);
+  std::vector<VariableMappingBase *> objects;
+  _app.theWarehouse().query().condition<AttribSystem>("VariableMappingBase").queryInto(objects);
   for (auto mapping_ptr : objects)
   {
     if (mapping_ptr && mapping_ptr->isParamValid("filename"))
@@ -40,7 +40,7 @@ LoadMappingDataAction::act()
 }
 
 void
-LoadMappingDataAction::load(const MappingBase & mapping)
+LoadMappingDataAction::load(const VariableMappingBase & mapping)
 {
   // File to load
   const FileName & filename = mapping.getParam<FileName>("filename");

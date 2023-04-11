@@ -12,14 +12,14 @@
 #include "MooseObjectAction.h"
 
 /**
- * Action to add Mapping objects from a [Mappings] block
+ * Action to add Mapping objects from a [VariableMappings] block
  */
-class AddMappingAction : public MooseObjectAction
+class AddVariableMappingAction : public MooseObjectAction
 {
 public:
   static InputParameters validParams();
 
-  AddMappingAction(const InputParameters & params);
+  AddVariableMappingAction(const InputParameters & params);
 
   virtual void act() override;
 };

@@ -22,21 +22,21 @@ MappingInterface::MappingInterface(const MooseObject * moose_object)
 {
 }
 
-MappingBase &
+VariableMappingBase &
 MappingInterface::getMappingByName(const UserObjectName & name) const
 {
-  std::vector<MappingBase *> models;
+  std::vector<VariableMappingBase *> models;
   _smi_feproblem.theWarehouse()
       .query()
       .condition<AttribName>(name)
-      .condition<AttribSystem>("MappingBase")
+      .condition<AttribSystem>("VariableMappingBase")
       .queryInto(models);
   if (models.empty())
     mooseError("Unable to find a Mapping object with the name '" + name + "'");
   return *(models[0]);
 }
 
-MappingBase &
+VariableMappingBase &
 MappingInterface::getMapping(const std::string & name) const
 {
   return getMappingByName(_smi_params.get<UserObjectName>(name));

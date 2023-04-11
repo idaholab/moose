@@ -77,7 +77,7 @@
   []
 []
 
-[Mappings]
+[VariableMappings]
   [pod]
     type = PODMapping
     filename = "create_mapping_main_mapping_pod_mapping.rd"

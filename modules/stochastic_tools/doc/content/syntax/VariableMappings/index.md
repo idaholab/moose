@@ -1,4 +1,4 @@
-# Mapping System
+# VariableMapping System
 
 ## Overview
 
@@ -6,16 +6,16 @@ The mapping system is dedicated to holding objects which map high-dimensional so
 to lower-dimensional spaces (latent spaces). These objects do not get executed on their own, but only used
 in other objects which need mapping functionality.
 
-## Creating a Mapping
+## Creating a VariableMapping
 
-A mapping object can be created by inheriting from `MappingBase` and overriding the methods in the base class.
+A mapping object can be created by inheriting from `VariableMappingBase` and overriding the methods in the base class.
 These methods describe the mapping from high to low dimensional spaces and the corresponding inverse mapping procedures.
 
 ## Using a Mapping
 
-#### The Mappings block
+#### The VariableMappings block
 
-In an input file, one can create Mapping Objects by specifying them in the `[Mappings]` block.
+In an input file, one can create Mapping Objects by specifying them in the `[VariableMappings]` block.
 
 #### Mapping from high- to low-dimensional spaces
 
@@ -38,10 +38,10 @@ from the object warehouse using the helper functions. Good examples are the [Map
 
 ## Example Input File Syntax
 
-!listing test/tests/mappings/pod_mapping/pod_mapping_main.i block=Mappings
+!listing test/tests/mappings/pod_mapping/pod_mapping_main.i block=VariableMappings
 
-!syntax list /Mappings objects=True actions=False subsystems=False
+!syntax list /VariableMappings objects=True actions=False subsystems=False
 
-!syntax list /Mappings objects=False actions=True subsystems=False
+!syntax list /VariableMappings objects=False actions=True subsystems=False
 
-!syntax list /Mappings objects=False actions=False subsystems=True
+!syntax list /VariableMappings objects=False actions=False subsystems=True

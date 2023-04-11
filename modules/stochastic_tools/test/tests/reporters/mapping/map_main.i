@@ -34,7 +34,7 @@
   []
 []
 
-[Mappings]
+[VariableMappings]
   [pod_mapping]
     type = PODMapping
     solution_storage = parallel_storage

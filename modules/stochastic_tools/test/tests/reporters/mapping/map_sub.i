@@ -75,7 +75,7 @@
   []
 []
 
-[Mappings]
+[VariableMappings]
   inactive = pod
   [pod]
     type = PODMapping

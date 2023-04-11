@@ -20,11 +20,11 @@
  * This is an abstract base class for objects that provide mapping between a full-order
  * and a latent space.
  */
-class MappingBase : public MooseObject, public RestartableModelInterface
+class VariableMappingBase : public MooseObject, public RestartableModelInterface
 {
 public:
   static InputParameters validParams();
-  MappingBase(const InputParameters & parameters);
+  VariableMappingBase(const InputParameters & parameters);
 
   /**
    * Abstract function for building mapping for a given variable.

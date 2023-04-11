@@ -11,7 +11,7 @@
 
 #include "InputParameters.h"
 #include "FEProblemBase.h"
-#include "MappingBase.h"
+#include "VariableMappingBase.h"
 
 /**
  * An interface class that helps getting access to Mapping objects
@@ -28,13 +28,13 @@ public:
    * Get the mapping using the parameters of the moose object
    * @param name The parameter name
    */
-  MappingBase & getMapping(const std::string & name) const;
+  VariableMappingBase & getMapping(const std::string & name) const;
 
   /**
    * Get the mapping by supplying the name of the object in the warehouse
    * @param name The name of the mapping object
    */
-  MappingBase & getMappingByName(const UserObjectName & name) const;
+  VariableMappingBase & getMappingByName(const UserObjectName & name) const;
 
 private:
   /// Parameters of the object with this interface

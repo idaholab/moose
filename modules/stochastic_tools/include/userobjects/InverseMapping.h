@@ -55,7 +55,7 @@ protected:
   std::vector<const MooseVariableFieldBase *> _variable_to_reconstruct;
 
   /// Link to the mapping object which provides the inverse mapping function
-  MappingBase * _mapping;
+  VariableMappingBase * _mapping;
 
   /// Links to the surrogate models which provide functions to determine the
   /// coordinates in the latent space

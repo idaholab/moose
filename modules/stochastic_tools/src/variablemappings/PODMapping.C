@@ -20,7 +20,7 @@ registerMooseObject("StochasticToolsApp", PODMapping);
 InputParameters
 PODMapping::validParams()
 {
-  InputParameters params = MappingBase::validParams();
+  InputParameters params = VariableMappingBase::validParams();
   params.addClassDescription("Class which provides a Proper Orthogonal Decomposition-based mapping "
                              "between full-order and reduced-order spaces.");
   params.addParam<UserObjectName>(
@@ -45,7 +45,7 @@ PODMapping::validParams()
 }
 
 PODMapping::PODMapping(const InputParameters & parameters)
-  : MappingBase(parameters),
+  : VariableMappingBase(parameters),
     UserObjectInterface(this),
     _num_modes(getParam<std::vector<dof_id_type>>("num_modes")),
     _energy_threshold(getParam<std::vector<Real>>("energy_threshold")),

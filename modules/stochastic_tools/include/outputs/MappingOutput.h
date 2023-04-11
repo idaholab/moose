@@ -11,7 +11,7 @@
 
 #include "FileOutput.h"
 #include "MappingInterface.h"
-#include "MappingBase.h"
+#include "VariableMappingBase.h"
 
 /**
  * Class which is used to output valuable data in binary format from Mapping objects

@@ -17,7 +17,7 @@
     type = JSONDiff
     requirement = 'The system should be able to extract and map variables in nonlinear system into a latent (low-dimensional) space.'
     input = load_main.i
-    cli_args = "worker:Mappings/inactive='' worker:Reporters/inactive=''"
+    cli_args = "worker:VariableMappings/inactive='' worker:Reporters/inactive=''"
     jsondiff = 'map_variable.json'
     min_parallel=2
     max_parallel=2

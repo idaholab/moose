@@ -7,22 +7,22 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "MappingBase.h"
+#include "VariableMappingBase.h"
 
 InputParameters
-MappingBase::validParams()
+VariableMappingBase::validParams()
 {
   InputParameters params = MooseObject::validParams();
   params += RestartableModelInterface::validParams();
   params.addClassDescription("Base class for mapping objects.");
-  params.registerBase("MappingBase");
-  params.registerSystemAttributeName("MappingBase");
+  params.registerBase("VariableMappingBase");
+  params.registerSystemAttributeName("VariableMappingBase");
   params.addParam<std::vector<VariableName>>("variables",
                                              "The names of the variables which need a mapping.");
   return params;
 }
 
-MappingBase::MappingBase(const InputParameters & parameters)
+VariableMappingBase::VariableMappingBase(const InputParameters & parameters)
   : MooseObject(parameters),
     RestartableModelInterface(this, _type + "_" + name()),
     _variable_names(isParamValid("filename")

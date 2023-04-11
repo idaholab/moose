@@ -108,7 +108,7 @@ Extensions:
             interfaces: framework_development/interfaces/index.md
             kernels: syntax/Kernels/index.md
             linesearches: syntax/LineSearches/index.md
-            mappings: syntax/Mappings/index.md
+            mappings: syntax/VariableMappings/index.md
             markers: syntax/Adaptivity/Markers/index.md
             materials: syntax/Materials/index.md
             mesh: syntax/Mesh/index.md

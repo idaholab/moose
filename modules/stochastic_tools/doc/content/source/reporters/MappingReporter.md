@@ -7,7 +7,7 @@
 This object is responsible for mapping high-dimensional solution fields to low-dimensional
 vectors. The mapped vectors are then stored within the reporter data storage. The
 [!param](/Reporters/MappingReporter/mapping) parameter can be used to specify the
-mapping object from the `Mappings` block. The variables which need to be mapped can be defined using
+mapping object from the `VariableMappings` block. The variables which need to be mapped can be defined using
 [!param](/Reporters/MappingReporter/variables). There are two distinct ways to use this object:
 
 1. +In conjunction with a [ParallelSolutionStorage.md] object:+ In this case, the first time

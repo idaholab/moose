@@ -47,7 +47,7 @@ protected:
   /// The name of the mapping object we would like to use
   const UserObjectName & _mapping_name;
   /// Link to the mapping object, we need this to be a pointer due to the fact that we can only fetch this in initialSetup
-  MappingBase * _mapping;
+  VariableMappingBase * _mapping;
 
   /// The variables we would like to map
   const std::vector<VariableName> & _variable_names;
