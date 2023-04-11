@@ -50,6 +50,23 @@ PenaltyWeightedGapUserObject::contactPressure() const
 }
 
 void
+PenaltyWeightedGapUserObject::initialize()
+{
+  WeightedGapUserObject::initialize();
+  _dof_to_normal_pressure.clear();
+}
+
+Real
+PenaltyWeightedGapUserObject::getNormalContactPressure(const Node * const node) const
+{
+  for (auto & map_pr : _dof_to_normal_pressure)
+    if (map_pr.first->id() == node->id())
+      return MetaPhysicL::raw_value(
+          libmesh_map_find(_dof_to_normal_pressure, static_cast<const DofObject *>(map_pr.first)));
+  return 0.0;
+}
+
+void
 PenaltyWeightedGapUserObject::reinit()
 {
   _contact_force.resize(_qrule_msm->n_points());
@@ -64,6 +81,10 @@ PenaltyWeightedGapUserObject::reinit()
     const auto weighted_gap_for_calc = weighted_gap < 0 ? -weighted_gap : ADReal(0);
     const auto & test_i = (*_test)[i];
     for (const auto qp : make_range(_qrule_msm->n_points()))
+    {
       _contact_force[qp] += (test_i[qp] * _penalty) * weighted_gap_for_calc;
+      _dof_to_normal_pressure[static_cast<const DofObject *>(node)] =
+          MetaPhysicL::raw_value(_penalty * weighted_gap_for_calc);
+    }
   }
 }

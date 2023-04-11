@@ -16,7 +16,7 @@ class UserObject;
 /**
  * Function auxiliary value
  */
-class PressureMortarUserObjectAux : public AuxKernel
+class PenaltyMortarUserObjectAux : public AuxKernel
 {
 public:
   static InputParameters validParams();
@@ -25,7 +25,7 @@ public:
    * Factory constructor, takes parameters so that all derived classes can be built using the same
    * constructor.
    */
-  PressureMortarUserObjectAux(const InputParameters & parameters);
+  PenaltyMortarUserObjectAux(const InputParameters & parameters);
 
 protected:
   virtual Real computeValue() override;
@@ -36,13 +36,16 @@ protected:
   /// PenaltyFrictionUserObject to be queried for a value
   const UserObject * _user_object;
 
-  /// What type of constraint we are going to enforce
+  /// What type of contact quantity we are querying
   enum ContactQuantity
   {
-    ACCUMULATED_SLIP_ONE,
-    SLIP_ONE,
     NORMAL_PRESSURE,
+    ACCUMULATED_SLIP_ONE,
     FRICTIONAL_PRESSURE_ONE,
-    TANGENTIAL_VELOCITY_ONE
+    TANGENTIAL_VELOCITY_ONE,
+    ACCUMULATED_SLIP_TWO,
+    FRICTIONAL_PRESSURE_TWO,
+    TANGENTIAL_VELOCITY_TWO,
+    WEIGHTED_GAP
   };
 };

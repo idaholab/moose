@@ -85,7 +85,7 @@ PenaltyFrictionUserObject::timestepSetup()
     _dof_to_old_real_tangential_velocity.emplace(map_pr);
 
   for (auto & map_pr : _dof_to_normal_pressure)
-    _dof_to_old_normal_pressure.emplace(map_pr);
+    _dof_to_old_normal_pressure.emplace(map_pr.first, MetaPhysicL::raw_value(map_pr.second));
 
   for (auto & map_pr : _dof_to_accumulated_slip)
   {
@@ -112,8 +112,8 @@ PenaltyFrictionUserObject::getNormalContactPressure(const Node * const node) con
 {
   for (auto & map_pr : _dof_to_normal_pressure)
     if (map_pr.first->id() == node->id())
-      return libmesh_map_find(_dof_to_normal_pressure,
-                              static_cast<const DofObject *>(map_pr.first));
+      return MetaPhysicL::raw_value(
+          libmesh_map_find(_dof_to_normal_pressure, static_cast<const DofObject *>(map_pr.first)));
   return 0.0;
 }
 
@@ -123,8 +123,9 @@ PenaltyFrictionUserObject::getFrictionalContactPressure(const Node * const node,
 {
   for (auto & map_pr : _dof_to_frictional_pressure)
     if (map_pr.first->id() == node->id())
-      return libmesh_map_find(_dof_to_frictional_pressure,
-                              static_cast<const DofObject *>(map_pr.first))[component];
+      return MetaPhysicL::raw_value(libmesh_map_find(
+          _dof_to_frictional_pressure, static_cast<const DofObject *>(map_pr.first))[component]);
+
   return 0.0;
 }
 
@@ -157,6 +158,16 @@ PenaltyFrictionUserObject::getTangentialVelocity(const Node * const node,
   return 0.0;
 }
 
+Real
+PenaltyFrictionUserObject::getNormalWeightedGap(const Node * const node) const
+{
+  for (auto & map_pr : _dof_to_real_weighted_gap)
+    if (map_pr.first->id() == node->id())
+      return MetaPhysicL::raw_value(libmesh_map_find(_dof_to_real_weighted_gap,
+                                                     static_cast<const DofObject *>(map_pr.first)));
+  return 0.0;
+}
+
 void
 PenaltyFrictionUserObject::reinit()
 {
@@ -176,7 +187,7 @@ PenaltyFrictionUserObject::reinit()
     {
       _contact_force[qp] += (test_i[qp] * _penalty) * weighted_gap_for_calc;
       _dof_to_normal_pressure[static_cast<const DofObject *>(node)] =
-          MetaPhysicL::raw_value(_penalty * weighted_gap_for_calc);
+          _penalty * weighted_gap_for_calc;
     }
   }
 
@@ -226,21 +237,21 @@ PenaltyFrictionUserObject::reinit()
     // End of preparing current accumulated slip
 
     // Get sign of relative velocity for both directions
-    Real sign_one = 0.0;
-    Real sign_two = 0.0;
+    ADReal sign_one = 0.0;
+    ADReal sign_two = 0.0;
 
     if (std::abs(_dof_to_real_tangential_velocity[static_cast<const DofObject *>(node)][0]) >
         TOLERANCE * TOLERANCE)
-      sign_one = MetaPhysicL::raw_value(
+      sign_one =
           (_dof_to_real_tangential_velocity[static_cast<const DofObject *>(node)][0]) /
-          std::abs(_dof_to_real_tangential_velocity[static_cast<const DofObject *>(node)][0]));
+          std::abs(_dof_to_real_tangential_velocity[static_cast<const DofObject *>(node)][0]);
 
     if (_has_disp_z &&
         std::abs(_dof_to_real_tangential_velocity[static_cast<const DofObject *>(node)][1]) >
             TOLERANCE * TOLERANCE)
-      sign_two = MetaPhysicL::raw_value(
+      sign_two =
           (_dof_to_real_tangential_velocity[static_cast<const DofObject *>(node)][1]) /
-          std::abs(_dof_to_real_tangential_velocity[static_cast<const DofObject *>(node)][1]));
+          std::abs(_dof_to_real_tangential_velocity[static_cast<const DofObject *>(node)][1]);
 
     // Only accumulate nodal frictional pressure if normal contact pressure is nonzero.
     if (_dof_to_normal_pressure[static_cast<const DofObject *>(node)] > TOLERANCE * TOLERANCE)
@@ -262,35 +273,42 @@ PenaltyFrictionUserObject::reinit()
   for (const auto i : make_range(_test->size()))
   {
     const Node * const node = _lower_secondary_elem->node_ptr(i);
-    auto & frictional_nodal_pressure_one =
-        _dof_to_frictional_pressure[static_cast<const DofObject *>(node)][0];
-    auto & frictional_nodal_pressure_two =
-        _dof_to_frictional_pressure[static_cast<const DofObject *>(node)][1];
 
-    if (!_has_disp_z &&
-        std::abs(frictional_nodal_pressure_one) >
-            _friction_coefficient * _dof_to_normal_pressure[static_cast<const DofObject *>(node)] &&
-        std::abs(frictional_nodal_pressure_one) > TOLERANCE * TOLERANCE)
+    // Only do check if normal pressure is nonzero.
+    if (_dof_to_normal_pressure[static_cast<const DofObject *>(node)] > TOLERANCE * TOLERANCE)
     {
-      Real sign = MetaPhysicL::raw_value(std::abs(frictional_nodal_pressure_one) /
-                                         frictional_nodal_pressure_one);
-      frictional_nodal_pressure_one = sign * _friction_coefficient *
-                                      _dof_to_normal_pressure[static_cast<const DofObject *>(node)];
-    }
-    else if (_has_disp_z && std::sqrt(MathUtils::pow(frictional_nodal_pressure_one, 2) +
-                                      MathUtils::pow(frictional_nodal_pressure_two, 2)) >
-                                _friction_coefficient *
-                                    _dof_to_normal_pressure[static_cast<const DofObject *>(node)])
-    {
-      const auto current_friction_size =
-          std::sqrt(MathUtils::pow(frictional_nodal_pressure_one, 2) +
-                    MathUtils::pow(frictional_nodal_pressure_two, 2));
-      frictional_nodal_pressure_one = frictional_nodal_pressure_one / current_friction_size *
-                                      _friction_coefficient *
-                                      _dof_to_normal_pressure[static_cast<const DofObject *>(node)];
-      frictional_nodal_pressure_two = frictional_nodal_pressure_two / current_friction_size *
-                                      _friction_coefficient *
-                                      _dof_to_normal_pressure[static_cast<const DofObject *>(node)];
+      auto & frictional_nodal_pressure_one =
+          _dof_to_frictional_pressure[static_cast<const DofObject *>(node)][0];
+      auto & frictional_nodal_pressure_two =
+          _dof_to_frictional_pressure[static_cast<const DofObject *>(node)][1];
+
+      if (!_has_disp_z &&
+          std::abs(frictional_nodal_pressure_one) >
+              _friction_coefficient *
+                  _dof_to_normal_pressure[static_cast<const DofObject *>(node)] &&
+          std::abs(frictional_nodal_pressure_one) > TOLERANCE * TOLERANCE)
+      {
+        ADReal sign = std::abs(frictional_nodal_pressure_one) / frictional_nodal_pressure_one;
+        frictional_nodal_pressure_one =
+            sign * _friction_coefficient *
+            _dof_to_normal_pressure[static_cast<const DofObject *>(node)];
+      }
+      else if (_has_disp_z &&
+               std::sqrt(frictional_nodal_pressure_one * frictional_nodal_pressure_one +
+                         frictional_nodal_pressure_two * frictional_nodal_pressure_two) >
+                   _friction_coefficient *
+                       _dof_to_normal_pressure[static_cast<const DofObject *>(node)])
+      {
+        const auto current_friction_length =
+            std::sqrt(frictional_nodal_pressure_one * frictional_nodal_pressure_one +
+                      frictional_nodal_pressure_two * frictional_nodal_pressure_two);
+        frictional_nodal_pressure_one =
+            frictional_nodal_pressure_one / current_friction_length * _friction_coefficient *
+            _dof_to_normal_pressure[static_cast<const DofObject *>(node)];
+        frictional_nodal_pressure_two =
+            frictional_nodal_pressure_two / current_friction_length * _friction_coefficient *
+            _dof_to_normal_pressure[static_cast<const DofObject *>(node)];
+      }
     }
   }
 

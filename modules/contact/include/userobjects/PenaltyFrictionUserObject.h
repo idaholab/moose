@@ -36,6 +36,7 @@ public:
   Real getFrictionalContactPressure(const Node * const node, const unsigned int component) const;
   Real getAccumulatedSlip(const Node * const node, const unsigned int component) const;
   Real getTangentialVelocity(const Node * const node, const unsigned int component) const;
+Real getNormalWeightedGap(const Node * const node) const;
 
 protected:
   virtual const VariableTestValue & test() const override;
@@ -63,13 +64,13 @@ protected:
   std::unordered_map<const DofObject *, std::array<ADReal, 2>> _dof_to_old_accumulated_slip;
 
   /// Map from degree of freedom to normal pressure
-  std::unordered_map<const DofObject *, Real> _dof_to_normal_pressure;
+  std::unordered_map<const DofObject *, ADReal> _dof_to_normal_pressure;
 
   /// Map from degree of freedom to old normal pressure
   std::unordered_map<const DofObject *, Real> _dof_to_old_normal_pressure;
 
   /// Map from degree of freedom to both frictional (tangential) pressure direction
-  std::unordered_map<const DofObject *, std::array<Real, 2>> _dof_to_frictional_pressure;
+  std::unordered_map<const DofObject *, std::array<ADReal, 2>> _dof_to_frictional_pressure;
 
   /// The normal contact pressure on the mortar segument quadrature points
   ADVariableValue _contact_force;

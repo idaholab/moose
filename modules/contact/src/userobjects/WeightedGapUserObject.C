@@ -103,6 +103,8 @@ WeightedGapUserObject::computeQpProperties()
   // interpolated within the weak integration.
   _qp_gap_nodal = gap_vec * (_JxW_msm[_qp] * _coord[_qp]);
 
+  _qp_real_gap_nodal = gap_vec;
+
   // To do normalization of constraint coefficient (c_n)
   _qp_factor = _JxW_msm[_qp] * _coord[_qp];
 }
@@ -117,6 +119,7 @@ WeightedGapUserObject::computeQpIProperties()
   const auto * const dof = static_cast<const DofObject *>(_lower_secondary_elem->node_ptr(_i));
 
   _dof_to_weighted_gap[dof].first += (*_test)[_i][_qp] * _qp_gap_nodal * _normals[_i];
+  _dof_to_real_weighted_gap[dof] += (*_test)[_i][_qp] * _qp_real_gap_nodal * _normals[_i];
 
   if (_normalize_c)
     _dof_to_weighted_gap[dof].second += (*_test)[_i][_qp] * _qp_factor;
@@ -126,6 +129,7 @@ void
 WeightedGapUserObject::initialize()
 {
   _dof_to_weighted_gap.clear();
+  _dof_to_real_weighted_gap.clear();
 }
 
 void

@@ -108,4 +108,26 @@
     allow_warnings = true
     max_parallel = 1
   []
+  [frictional-mortar-3d-penalty]
+    type = 'Exodiff'
+    input = 'frictional-mortar-3d-penalty.i'
+    min_ad_size = 100
+    exodiff = 'frictional-mortar-3d-penalty_out.e'
+    requirement = 'The system shall solve a 3D frictional problem with mortar '
+                  'constraint using a penalty approach'
+    rel_err = 1.0e-5
+    abs_zero = 1.0e-5
+    max_parallel = 8
+  []
+  [frictionless-mortar-3d-penalty]
+    type = 'Exodiff'
+    input = 'frictionless-mortar-3d-penalty.i'
+    min_ad_size = 100
+    exodiff = 'frictionless-mortar-3d-penalty_out.e'
+    requirement = 'The system shall solve a 3D frictionless problem with mortar '
+                  'constraint using a penalty approach'
+    rel_err = 1.0e-5
+    abs_zero = 1.0e-5
+    max_parallel = 8
+  []
 []

@@ -3,9 +3,8 @@
   issues = '#17495'
   [cylinder_friction]
     type = 'CSVDiff'
-    csvdiff = 'cylinder_friction_check_friction_FINAL.csv cylinder_friction_check_x_disp_FINAL.csv '
-              'cylinder_friction_check_y_disp_FINAL.csv '
-              'cylinder_friction_check_cont_press_FINAL.csv'
+    csvdiff = 'cylinder_friction_check_x_disp_FINAL.csv cylinder_friction_check_cont_press_FINAL.csv '
+              'cylinder_friction_check_y_disp_FINAL.csv cylinder_friction_check_friction_FINAL.csv'
     input = 'cylinder_friction.i'
     rel_err = 5.0e-4
     min_parallel = 4
@@ -13,6 +12,18 @@
     heavy = true
     min_ad_size = '50'
     requirement = 'Contact module shall solve frictional contact between a cylinder and a plane.'
+  []
+  [cylinder_friction_penalty]
+    type = 'CSVDiff'
+    csvdiff = 'cylinder_friction_penalty_check_x_disp_FINAL.csv cylinder_friction_penalty_check_cont_press_FINAL.csv '
+              'cylinder_friction_penalty_check_y_disp_FINAL.csv cylinder_friction_penalty_check_friction_FINAL.csv'
+    input = 'cylinder_friction_penalty.i'
+    rel_err = 5.0e-4
+    min_parallel = 4
+    max_parallel = 4
+    heavy = true
+    min_ad_size = '50'
+    requirement = 'Contact module shall approximate frictional contact solution between a cylinder and a plane using penalty mortar contact.'
   []
   [ironing]
     type = 'CSVDiff'
