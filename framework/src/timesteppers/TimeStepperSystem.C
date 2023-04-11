@@ -34,8 +34,9 @@ TimeStepperSystem::addTimeStepper(const std::string & type,
   auto new_params = params;
 
   Transient * transient = dynamic_cast<Transient *>(_app.getExecutioner());
+  mooseAssert(transient, "Not exist");
   SubProblem * subproblem = dynamic_cast<SubProblem *>(&_app.feProblem());
-
+  mooseAssert(subproblem, "Not exist");
   // Set required parameters
   new_params.set<SubProblem *>("_subproblem") = subproblem;
   new_params.set<Transient *>("_executioner") = transient;
@@ -61,9 +62,8 @@ TimeStepperSystem::createAddedTimeSteppers()
   for (const auto & [name, type_params_pair] : _time_stepper_params)
   {
     if (name != _final_time_stepper_name)
-    {
+
       _time_steppers.emplace(name, createTimeStepper(name, type_params_pair));
-    }
   }
 
   // Create and store the final time stepper here because composition time stepper depends on other

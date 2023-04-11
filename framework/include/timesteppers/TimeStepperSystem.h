@@ -50,5 +50,6 @@ private:
   /// Owning storage for time steppers, map of name -> time steppers
   std::map<std::string, std::shared_ptr<TimeStepper>> _time_steppers;
 
+  /// Name of the time stepper, making the final step decisions, providing the time steps for the problem
   std::string _final_time_stepper_name;
 };

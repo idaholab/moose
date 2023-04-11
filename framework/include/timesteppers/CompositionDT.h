@@ -37,10 +37,10 @@ public:
   Real produceCompositionDT(const std::map<const std::string, Real> & dts, const Real & basedt);
 
   // Setup a time stepper with the given name
-  std::shared_ptr<TimeStepper> setupTimeStepper(const std::string & name);
+  std::shared_ptr<TimeStepper> getTimeStepper(const std::string & name);
 
   // Setup a time sequence stepper with the given name
-  std::shared_ptr<TimeSequenceStepperBase> setupSequenceStepper(const std::string & stpper_name);
+  std::shared_ptr<TimeSequenceStepperBase> getSequenceStepper(const std::string & stpper_name);
 
   // Estimate the time step size needed to hit a user specified time
   Real produceHitDT(const Real & composeDT);
