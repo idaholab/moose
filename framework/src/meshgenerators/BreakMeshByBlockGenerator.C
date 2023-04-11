@@ -332,6 +332,7 @@ BreakMeshByBlockGenerator::generate()
 
   addInterfaceBoundary(*mesh);
   Partitioner::set_node_processor_ids(*mesh);
+  _mesh->dontAllowFinalPrepareForUse();
   return dynamic_pointer_cast<MeshBase>(mesh);
 }
 
