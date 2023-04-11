@@ -539,6 +539,16 @@ ReferenceResidualProblem::checkConvergenceIndividVars(const Real fnorm,
                                                       const Real rtol,
                                                       const Real initial_residual_before_preset_bcs)
 {
+  // Convergence is checked via:
+  // 1) if group residual is less than group reference residual by relative tolerance
+  // 2) if group residual is less than absolute tolerance
+  // 3) if group reference residual is zero and:
+  //   3.1) Convergence type is ZERO_TOLERANCE and group residual is zero (rare, but possible, and
+  //        historically implemented way)
+  //   3.2) Convergence type is RELATIVE_TOLERANCE and group residual
+  //        is less than relative tolerance. (i.e., using the relative tolerance to check group
+  //        convergence in an absolute way)
+
   bool convergedRelative = true;
   if (_group_resid.size() > 0)
   {
