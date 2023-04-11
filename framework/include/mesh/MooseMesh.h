@@ -1225,11 +1225,6 @@ public:
    */
   bool isSplit() const { return _is_split; }
 
-  /**
-   * Don't allow \p MeshBase::prepare_for_use() to be called during \p this->prepare()
-   */
-  void dontAllowFinalPrepareForUse() { _allow_final_prepare_for_use = false; }
-
 protected:
   /// Deprecated (DO NOT USE)
   std::vector<std::unique_ptr<GhostingFunctor>> _ghosting_functors;
@@ -1625,13 +1620,6 @@ private:
 
   /// Set for holding user-provided coordinate system type block names
   std::vector<SubdomainName> _provided_coord_blocks;
-
-  /// Whether to allow a \p prepare_for_use() call to the libMesh \p MeshBase object during
-  /// preparation of the MOOSE mesh. This should only be set to false if the user is in the
-  /// unfortunate state of requiring that the mesh *not* be prepared for use, e.g. when using the \p
-  /// BreakMeshByBlockGenerator which needs links to former geometric neighbors. This member won't
-  /// help if there are \p prepare_for_use calls() during the mesh generation phase itself.
-  bool _allow_final_prepare_for_use;
 
   template <typename T>
   struct MeshType;

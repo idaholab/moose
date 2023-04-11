@@ -235,9 +235,6 @@ MeshGenerator::generateInternal()
 
   auto mesh = generate();
   mooseAssert(mesh, "Null output");
-  // Assume the worst of our developers until we have established a bullet-proof verification of
-  // whether the state of is_prepared() accurately reflects the true preparedness of the mesh
-  mesh->set_isnt_prepared();
 
   for (const auto & [requested_name, requested_mesh] : _requested_meshes)
     if (*requested_mesh)

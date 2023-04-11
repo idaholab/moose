@@ -153,15 +153,6 @@ MooseMesh::validParams()
       "restrictions for subdomains initially containing no elements, which can occur, for example, "
       "in additive manufacturing simulations which dynamically add and remove elements.");
 
-  params.addParam<bool>("allow_final_prepare_for_use",
-                        true,
-                        "Whether to allow a prepare_for_use() call to the libMesh MeshBase object "
-                        "during preparation of the MOOSE mesh. This should only be set to false if "
-                        "the user is in the unfortunate state of requiring that the mesh *not* be "
-                        "prepared for use, e.g. when using the 'BreakMeshByBlockGenerator' which "
-                        "needs links to former geometric neighbors. This option won't help if "
-                        "there are prepare_for_use calls during the mesh generation phase itself.");
-
   params += MooseAppCoordTransform::validParams();
 
   // This indicates that the derived mesh type accepts a MeshGenerator, and should be set to true in
@@ -175,8 +166,7 @@ MooseMesh::validParams()
 
   // groups
   params.addParamNamesToGroup(
-      "dim nemesis patch_update_strategy "
-      "construct_node_list_from_side_list patch_size allow_final_prepare_for_use",
+      "dim nemesis patch_update_strategy construct_node_list_from_side_list patch_size",
       "Advanced");
   params.addParamNamesToGroup("partitioner centroid_partitioner_direction", "Partitioning");
 
@@ -217,8 +207,7 @@ MooseMesh::MooseMesh(const InputParameters & parameters)
     _need_ghost_ghosted_boundaries(true),
     _is_displaced(false),
     _rz_coord_axis(getParam<MooseEnum>("rz_coord_axis")),
-    _coord_system_set(false),
-    _allow_final_prepare_for_use(getParam<bool>("allow_final_prepare_for_use"))
+    _coord_system_set(false)
 {
   if (isParamValid("ghosting_patch_size") && (_patch_update_strategy != Moose::Iteration))
     mooseError("Ghosting patch size parameter has to be set in the mesh block "
@@ -274,8 +263,7 @@ MooseMesh::MooseMesh(const MooseMesh & other_mesh)
     _coord_sys(other_mesh._coord_sys),
     _rz_coord_axis(other_mesh._rz_coord_axis),
     _coord_system_set(other_mesh._coord_system_set),
-    _provided_coord_blocks(other_mesh._provided_coord_blocks),
-    _allow_final_prepare_for_use(other_mesh._allow_final_prepare_for_use)
+    _provided_coord_blocks(other_mesh._provided_coord_blocks)
 {
   // Note: this calls BoundaryInfo::operator= without changing the
   // ownership semantics of either Mesh's BoundaryInfo object.
@@ -357,9 +345,6 @@ bool
 MooseMesh::prepare(const bool force_mesh_prepare)
 {
   TIME_SECTION("prepare", 2, "Preparing Mesh", true);
-  if (force_mesh_prepare && !_allow_final_prepare_for_use)
-    mooseError("'prepare' has been asked to force mesh preparation, however, we have also been "
-               "told not to allow any prepare_for_use calls");
 
   bool called_prepare_for_use = false;
 
@@ -369,7 +354,7 @@ MooseMesh::prepare(const bool force_mesh_prepare)
     // For whatever reason we do not want to allow renumbering here nor ever in the future?
     getMesh().allow_renumbering(false);
 
-  if ((!_mesh->is_prepared() || force_mesh_prepare) && _allow_final_prepare_for_use)
+  if (!_mesh->is_prepared() || force_mesh_prepare)
   {
     _mesh->prepare_for_use();
     _moose_mesh_prepared = false;
