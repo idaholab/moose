@@ -129,6 +129,10 @@ StitchedMeshGenerator::generate()
 
     const bool use_binary_search = (_algorithm == "BINARY");
 
+    // All meshes must be either prepared or not prepared to be stitched
+    if (mesh->is_prepared() && !meshes[i]->is_prepared())
+      meshes[i]->prepare_for_use();
+
     mesh->stitch_meshes(*meshes[i],
                         first,
                         second,

@@ -256,6 +256,8 @@ PatternedMeshGenerator::generate()
       const auto & increment_subdomain_map = cell_mesh.get_subdomain_name_map();
       mergeSubdomainNameMaps(main_subdomain_map, increment_subdomain_map);
 
+      if (_row_meshes[i]->is_prepared() && !cell_mesh.is_prepared())
+        cell_mesh.prepare_for_use();
       _row_meshes[i]->stitch_meshes(cell_mesh,
                                     right_bid,
                                     left_bid,
@@ -279,6 +281,8 @@ PatternedMeshGenerator::generate()
     const auto & increment_subdomain_map = _row_meshes[i]->get_subdomain_name_map();
     mergeSubdomainNameMaps(main_subdomain_map, increment_subdomain_map);
 
+    if (_row_meshes[0]->is_prepared() && !_row_meshes[i]->is_prepared())
+      _row_meshes[i]->prepare_for_use();
     _row_meshes[0]->stitch_meshes(*_row_meshes[i],
                                   bottom_bid,
                                   top_bid,
