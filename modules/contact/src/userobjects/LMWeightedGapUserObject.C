@@ -17,6 +17,8 @@ InputParameters
 LMWeightedGapUserObject::validParams()
 {
   InputParameters params = WeightedGapUserObject::validParams();
+  params.addClassDescription(
+      "Provides the mortar normal Lagrange multiplier for constraint enforcement.");
   params.addRequiredCoupledVar(
       "lm_variable", "The Lagrange multiplier variable representing the contact pressure.");
   return params;

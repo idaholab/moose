@@ -17,6 +17,7 @@ InputParameters
 PenaltyWeightedGapUserObject::validParams()
 {
   InputParameters params = WeightedGapUserObject::validParams();
+  params.addClassDescription("Computes the mortar normal contact force via a penalty approach.");
   params.addRequiredParam<Real>("penalty", "The penalty factor");
   return params;
 }

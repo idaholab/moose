@@ -17,6 +17,8 @@ InputParameters
 LMWeightedVelocitiesUserObject::validParams()
 {
   InputParameters params = WeightedVelocitiesUserObject::validParams();
+  params.addClassDescription("Provides the mortar contact Lagrange multipliers (normal and "
+                             "tangential) for constraint enforcement.");
   params.addRequiredCoupledVar(
       "lm_variable_normal",
       "The Lagrange multiplier variable representing the normal contact pressure value.");

@@ -17,6 +17,7 @@ InputParameters
 PenaltyFrictionUserObject::validParams()
 {
   InputParameters params = WeightedVelocitiesUserObject::validParams();
+  params.addClassDescription("Computes the mortar frictional contact force via a penalty approach.");
   params.addRequiredParam<Real>("penalty", "The penalty factor for normal interaction");
   params.addParam<Real>("penalty_friction", 0.0, "The penalty factor for frictional interaction");
   params.addRequiredParam<Real>("friction_coefficient",
