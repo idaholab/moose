@@ -1247,6 +1247,9 @@ Parser::extractParams(const std::string & prefix, InputParameters & p)
           mooseError("The parameter '",
                      full_name,
                      "' is a private parameter and should not be used in an input file.");
+        // avoid setting the parameter
+        else if (p.isPrivate(param_name) && in_global)
+          continue;
 
         auto & short_name = param_name;
         libMesh::Parameters::Value * par = MooseUtils::get(it.second);
