@@ -18,7 +18,7 @@ public:
 
   TestGlobalParamSuppression(const InputParameters & parameters);
 
-  virtual void initialize(){};
-  virtual void execute(){};
-  virtual void finalize(){};
+  virtual void initialize() override {}
+  virtual void execute() override {}
+  virtual void finalize() override {}
 };

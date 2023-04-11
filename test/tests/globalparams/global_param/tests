@@ -24,5 +24,4 @@
     mesh_mode = REPLICATED
     requirement = 'The system shall not apply global parameter options onto suppressed parameters.'
   []
-
 []
