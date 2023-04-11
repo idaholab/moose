@@ -475,11 +475,6 @@ public:
    */
   bool isSplitMesh() const;
 
-  /**
-   * Whether or not we are running with pre-split (distributed mesh)
-   */
-  bool isUseSplit() const;
-
   ///@{
   /**
    * Return true if the recovery file base is set

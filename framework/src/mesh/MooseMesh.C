@@ -159,6 +159,9 @@ MooseMesh::validParams()
   // derived types that do so.
   params.addPrivateParam<bool>("_mesh_generator_mesh", false);
 
+  // Whether or not the mesh is pre split
+  params.addPrivateParam<bool>("_is_split", false);
+
   params.registerBase("MooseMesh");
 
   // groups
@@ -196,6 +199,7 @@ MooseMesh::MooseMesh(const InputParameters & parameters)
     _patch_update_strategy(
         getParam<MooseEnum>("patch_update_strategy").getEnum<Moose::PatchUpdateType>()),
     _regular_orthogonal_mesh(false),
+    _is_split(getParam<bool>("_is_split")),
     _allow_recovery(true),
     _construct_node_list_from_side_list(getParam<bool>("construct_node_list_from_side_list")),
     _need_delete(false),
@@ -251,6 +255,7 @@ MooseMesh::MooseMesh(const MooseMesh & other_mesh)
     _max_leaf_size(other_mesh._max_leaf_size),
     _patch_update_strategy(other_mesh._patch_update_strategy),
     _regular_orthogonal_mesh(false),
+    _is_split(other_mesh._is_split),
     _construct_node_list_from_side_list(other_mesh._construct_node_list_from_side_list),
     _need_delete(other_mesh._need_delete),
     _allow_remote_element_removal(other_mesh._allow_remote_element_removal),
@@ -2383,7 +2388,7 @@ MooseMesh::determineUseDistributedMesh()
         _use_distributed_mesh = true;
       break;
     case ParallelType::REPLICATED:
-      if (_app.getDistributedMeshOnCommandLine() || _is_nemesis || _app.isUseSplit())
+      if (_app.getDistributedMeshOnCommandLine() || _is_nemesis || _is_split)
         _parallel_type_overridden = true;
       _use_distributed_mesh = false;
       break;
@@ -2394,7 +2399,7 @@ MooseMesh::determineUseDistributedMesh()
 
   // If the user specifies 'nemesis = true' in the Mesh block, or they are using --use-split,
   // we must use DistributedMesh.
-  if (_is_nemesis || _app.isUseSplit())
+  if (_is_nemesis || _is_split)
     _use_distributed_mesh = true;
 }
 

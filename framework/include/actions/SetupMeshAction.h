@@ -30,4 +30,7 @@ private:
    * @return The new type of object that will be built.
    */
   std::string modifyParamsForUseSplit(InputParameters & moose_object_params) const;
+
+  const bool _use_split;
+  const std::string _split_file;
 };

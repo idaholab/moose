@@ -153,7 +153,7 @@ AdaptivityAction::act()
     // we don't need to run mesh modifiers *again* after they ran already during the mesh
     // splitting process. Adaptivity::init must be called for any adaptivity to work, however, so we
     // can't just skip it for the useSplit case.
-    if (_app.isUseSplit())
+    if (_mesh->isSplit())
       adapt.init(0, 0);
     else
       adapt.init(getParam<unsigned int>("steps"), getParam<unsigned int>("initial_adaptivity"));

@@ -100,17 +100,34 @@ SetupMeshAction::validParams()
                         "have a simulation containing uniform refinement, adaptivity and stateful "
                         "material properties");
 
+  params.addParam<bool>(
+      "use_split",
+      false,
+      "Use split distributed mesh files; is overriden by the --use-split command line option");
+  params.addParam<std::string>("split_file",
+                               "",
+                               "Optional name of split mesh file(s) to write/read; is overridden "
+                               "by the --split-file command line option");
+
   // groups
   params.addParamNamesToGroup("displacements ghosted_boundaries ghosted_boundaries_inflation",
                               "Advanced");
   params.addParamNamesToGroup("second_order construct_side_list_from_node_list skip_partitioning",
                               "Advanced");
   params.addParamNamesToGroup("block_id block_name boundary_id boundary_name", "Add Names");
+  params.addParamNamesToGroup("use_split split_file", "Split Mesh");
 
   return params;
 }
 
-SetupMeshAction::SetupMeshAction(const InputParameters & params) : MooseObjectAction(params) {}
+SetupMeshAction::SetupMeshAction(const InputParameters & params)
+  : MooseObjectAction(params),
+    _use_split(getParam<bool>("use_split") || _app.getParam<bool>("use_split")),
+    _split_file(_app.getParam<std::string>("split_file").size()
+                    ? _app.getParam<std::string>("split_file")
+                    : getParam<std::string>("split_file"))
+{
+}
 
 void
 SetupMeshAction::setupMesh(MooseMesh * mesh)
@@ -189,10 +206,9 @@ SetupMeshAction::setupMesh(MooseMesh * mesh)
 std::string
 SetupMeshAction::modifyParamsForUseSplit(InputParameters & moose_object_params) const
 {
-  auto split_file = _app.parameters().get<std::string>("split_file");
-
   // Get the split_file extension, if there is one, and use that to decide
   // between .cpr and .cpa
+  auto split_file = _split_file;
   std::string split_file_ext;
   auto pos = split_file.rfind(".");
   if (pos != std::string::npos)
@@ -205,11 +221,9 @@ SetupMeshAction::modifyParamsForUseSplit(InputParameters & moose_object_params) 
 
   if (_type != "FileMesh")
   {
-    if (split_file == "")
-    {
+    if (split_file.empty())
       mooseError("Cannot use split mesh for a non-file mesh without specifying --split-file on "
-                 "command line");
-    }
+                 "command line or the Mesh/split_file parameter");
 
     auto new_pars = FileMesh::validParams();
 
@@ -222,12 +236,14 @@ SetupMeshAction::modifyParamsForUseSplit(InputParameters & moose_object_params) 
   }
   else
   {
-    if (split_file != "")
+    if (!split_file.empty())
       moose_object_params.set<MeshFileName>("file") = split_file;
     else
       moose_object_params.set<MeshFileName>("file") =
           MooseUtils::stripExtension(moose_object_params.get<MeshFileName>("file")) + ".cpr";
   }
+
+  moose_object_params.set<bool>("_is_split") = true;
 
   return "FileMesh";
 }
@@ -282,7 +298,7 @@ SetupMeshAction::act()
       }
 
       // switch non-file meshes to be a file-mesh if using a pre-split mesh configuration.
-      if (_app.isUseSplit())
+      if (_use_split)
         _type = modifyParamsForUseSplit(_moose_object_pars);
 
       _mesh = _factory.create<MooseMesh>(_type, "mesh", _moose_object_pars);
@@ -301,7 +317,7 @@ SetupMeshAction::act()
       // 1. We have mesh generators
       // 2. We are not using the pre-split mesh
       // 3. We are not: recovering/restarting and we are the master application
-      if (!_app.getMeshGeneratorNames().empty() && !_app.isUseSplit() &&
+      if (!_app.getMeshGeneratorNames().empty() && !_use_split &&
           !((_app.isRecovering() || _app.isRestarting()) && _app.isUltimateMaster()))
       {
         auto & mesh_generator_system = _app.getMeshGeneratorSystem();
