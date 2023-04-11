@@ -262,13 +262,15 @@ projectQPoints3d(const Elem * const msm_elem,
       auto & qp_back = q_pts.back();
       if (primal_elem->type() == TRI3 || primal_elem->type() == TRI6)
       {
-        if (qp_back(0) < 0 || qp_back(1) < 0 || qp_back(0) + qp_back(1) > 1)
+        if (qp_back(0) < -TOLERANCE || qp_back(1) < -TOLERANCE ||
+            qp_back(0) + qp_back(1) > (1 + TOLERANCE))
           mooseException("Quadrature point: ", qp_back, " out of bounds, truncating.");
       }
       else if (primal_elem->type() == QUAD4 || primal_elem->type() == QUAD8 ||
                primal_elem->type() == QUAD9)
       {
-        if (qp_back(0) < -1 || qp_back(0) > 1 || qp_back(1) < -1 || qp_back(1) > 1)
+        if (qp_back(0) < (-1 - TOLERANCE) || qp_back(0) > (1 + TOLERANCE) ||
+            qp_back(1) < (-1 - TOLERANCE) || qp_back(1) > (1 + TOLERANCE))
           mooseException("Quadrature point: ", qp_back, " out of bounds, truncating");
       }
     }
