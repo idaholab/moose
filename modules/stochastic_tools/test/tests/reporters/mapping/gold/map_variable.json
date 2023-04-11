@@ -1,13 +1,6 @@
 {
-    "app_name": "main",
-    "current_time": "Thu Mar 30 16:13:48 2023",
-    "executable": "/Users/germp/projects/moose/modules/stochastic_tools/stochastic_tools-opt",
-    "executable_time": "Thu Mar 30 11:22:04 2023",
-    "libmesh_version": "",
-    "moose_version": "git commit 593f596f7e on 2023-03-30",
     "number_of_parts": 2,
     "part": 0,
-    "petsc_version": "3.16.6",
     "reporters": {
         "results": {
             "type": "StochasticReporter",
@@ -30,7 +23,6 @@
             }
         }
     },
-    "slepc_version": "3.16.2",
     "time_steps": [
         {
             "results": {

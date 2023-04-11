@@ -133,24 +133,12 @@ SerializedSolutionTransfer::transferInParallel(NonlinearSystemBase & app_nl_syst
                                                SolutionContainer & solution_container,
                                                const dof_id_type global_i)
 {
-  // We need to go through this MPI rank identification because the multiapp's
+  // We need to go through this communicator because the multiapp's
   // communicator is not necessarily the communicator of the underlying MooseObject.
-  int local_size;
-  int local_rank;
-  const MPI_Comm & app_comm = getFromMultiApp()->comm();
-  MPI_Comm_size(app_comm, &local_size);
-  MPI_Comm_rank(app_comm, &local_rank);
 
+  const auto & comm = app_nl_system.comm();
   dof_id_type num_entries = _sampler_ptr->getNumberOfLocalRows();
-  dof_id_type num_app_entries = num_entries;
-
-  if (local_size > 1)
-    MPI_Allreduce(&num_entries,
-                  &num_app_entries,
-                  1,
-                  TIMPI::StandardType<dof_id_type>(&num_entries),
-                  TIMPI::OpFunction<dof_id_type>::sum(),
-                  app_comm);
+  comm.sum(num_entries);
 
   // We shall distribute the samples on the given application between its processors.
   // Only using a linear partitioning here for the sake of simplicity.
@@ -158,9 +146,9 @@ SerializedSolutionTransfer::transferInParallel(NonlinearSystemBase & app_nl_syst
   dof_id_type new_local_entries_end;
   dof_id_type num_new_local_entries;
 
-  MooseUtils::linearPartitionItems(num_app_entries,
-                                   local_size,
-                                   local_rank,
+  MooseUtils::linearPartitionItems(num_entries,
+                                   comm.size(),
+                                   comm.rank(),
                                    num_new_local_entries,
                                    new_local_entries_begin,
                                    new_local_entries_end);

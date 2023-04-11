@@ -363,7 +363,7 @@ PODMapping::inverse_map(const VariableName & vname,
 }
 
 const DenseVector<Real> &
-PODMapping::leftBase(const VariableName & vname, const unsigned int base_i)
+PODMapping::leftBasisFunction(const VariableName & vname, const unsigned int base_i)
 {
   mooseAssert(std::find(_variable_names.begin(), _variable_names.end(), vname) !=
                   _variable_names.end(),
@@ -377,7 +377,7 @@ PODMapping::leftBase(const VariableName & vname, const unsigned int base_i)
 }
 
 const DenseVector<Real> &
-PODMapping::rightBase(const VariableName & vname, const unsigned int base_i)
+PODMapping::rightBasisFunction(const VariableName & vname, const unsigned int base_i)
 {
   mooseAssert(std::find(_variable_names.begin(), _variable_names.end(), vname) !=
                   _variable_names.end(),

@@ -76,14 +76,16 @@ public:
    * @param vname The name of the variable
    * @param base_i The index of the basis function
    */
-  const DenseVector<Real> & leftBase(const VariableName & vname, const unsigned int base_i);
+  const DenseVector<Real> & leftBasisFunction(const VariableName & vname,
+                                              const unsigned int base_i);
 
   /**
    * Get the `base_i`-th right basis function for a given variable
    * @param vname The name of the variable
    * @param base_i The index of the basis function
    */
-  const DenseVector<Real> & rightBase(const VariableName & vname, const unsigned int base_i);
+  const DenseVector<Real> & rightBasisFunction(const VariableName & vname,
+                                               const unsigned int base_i);
 
 protected:
   /**
@@ -115,7 +117,7 @@ protected:
 
 private:
   /// Link to the parallel storage which holds the solution fields that are used for the SVD
-  const ParallelSolutionStorage * _parallel_storage;
+  const ParallelSolutionStorage * const _parallel_storage;
 
 #if !PETSC_VERSION_LESS_THAN(3, 14, 0)
   /// Storage for SLEPC's SVD objects for each variable.

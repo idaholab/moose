@@ -57,9 +57,10 @@
 []
 
 [Outputs]
-  [josn]
+  [json]
     type = JSON
     execute_on = FINAL
+    execute_system_information_on = none
   []
   file_base = map_variable
 []
