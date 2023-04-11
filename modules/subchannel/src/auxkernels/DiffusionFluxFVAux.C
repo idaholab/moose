@@ -45,8 +45,7 @@ DiffusionFluxFVAux::DiffusionFluxFVAux(const InputParameters & parameters)
 Real
 DiffusionFluxFVAux::computeValue()
 {
-
-  const auto _vec_grad = raw_value(_diffusion_var->adGradSln(_current_elem));
+  const auto _vec_grad = raw_value(_diffusion_var->adGradSln(_current_elem, determineState()));
   const Real gradient = _use_normal ? _vec_grad * _normals[_qp] : _vec_grad(_component);
   const Real diffusion_coef = _diffusion_coef ? (*_diffusion_coef)[_qp]
                                               : MetaPhysicL::raw_value((*_ad_diffusion_coef)[_qp]);
