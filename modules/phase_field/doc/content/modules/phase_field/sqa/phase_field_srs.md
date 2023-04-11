@@ -2,21 +2,19 @@
 
 !template! item key=system-scope
 !! system-scope-begin
-TODO: Put in phase-field specific text here
-The [!ac](MOOSE) Tensor Mechanics module provides an extensible set of capabilities for solving for mechanical deformation of solids and structures. It provides a set of C++ base classes that define interfaces for MOOSE `Material` objects that compute various mechanical behavior of materials at quadrature points, which include elastic properties, strains, eigenstrains, stresses, inelastic behavior, and damage. It also provides the needed `Kernel` classes to account for the contributions of the stress, inertia and damping in the solution for the displacement field that satisfies equilibrium. These models support one-, two-, and three-dimensional models of continuous materials, with variety of options for the treatment of the lower-dimensional models, including plane stress, plane strain, axisymmetry, and generalized plane strain. These models support both small- and finite-strain assumptions.
+The [!ac](MOOSE) Phase Field module provides an extensible set of capabilities for solving for microstructual evolution of multi-phase and multi-componeht systems using conserved and non-conserved order parameters. It provides a set of C++ classes that define interfaces for MOOSE `Kernel` objects that implement various common phase field formulations including polycrystalline grain growth models. These models support one-, two-, and three-dimensional simulation domains.
 
-For modeling discrete interfaces between solid elements, this module provides a system similar to that for continuous materials that permits the definition of traction-separation laws for cohesive behavior. It also has similar support for lower-dimensional elements to represent structural elements such as beams and shells. As for the continuum models, sets of `Material` and `Kernel` classes are defined for these cases.
+For modeling nucleation events the module includes a discrete nucleation system that supports nucleation based on order parameter pinning and artificial driving force insertion which enable nucleation events in conserved and non-conserved order parameter fields. Support is provided for physics informed timestepping and mesh refinement.
 
-This module also provides a comprehensive set of boundary conditions relevant for mechanics modeling, such as pressure and traction boundary conditions. It also provides extensive postprocessing capabilities for computing quantities relevant to mechanics, such as fracture integrals.
+Utilities for free energy extraction from thermodynamic databases are provided, as well as a phase field model that supports sublattice concentration models found in thermodynamic databases.
 
-In addition to defining the base classes that enable modeling arbitrary materials, this module also provides a set of specializations of those models for widely-used assumptions of material behavior. These include elasticity tensors defined in a variety of ways for isotropic and anisotropic materials, basic creep, plasticity and damage models, and models for eigenstrains due to thermal expansion.
+The module also comprises a set of initial conditions to set up common microstructures used in phase field modeling.
 !! system-scope-finish
 !template-end!
 
 !template! item key=system-purpose
 !! system-purpose-begin
-TODO: Put in phase-field specific text here
-The purpose of the [!ac](MOOSE) Tensor Mechanics module is to provide the foundational capabilities for computing mechanical deformation of solids and structures. It computes strains and stresses, and solves for the displacement field that satisfies equlibrium. It is intended to both provide a basic set of capabilities and also be readily extensible by applications based on it to represent specialized material behavior.
+The purpose of the [!ac](MOOSE) Phase Field module is to provide the foundational capabilities for phase field modeling of microstructure evolution. It implements commons single- and multi-phase phase field formalisms and enables teh modeling of multicomponent systems. It is intended to both provide a basic set of capabilities and also be readily extensible by applications based on it to represent specialized material behavior.
 !! system-purpose-finish
 !template-end!
 
