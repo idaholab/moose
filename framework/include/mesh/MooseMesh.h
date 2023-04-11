@@ -1214,6 +1214,9 @@ public:
   const std::unordered_map<std::pair<const Elem *, unsigned short int>, const Elem *> &
   getLowerDElemMap() const;
 
+  /**
+   * @return Whether or not this mesh comes from a split mesh
+   */
   bool isSplit() const { return _is_split; }
 
 protected:
