@@ -62,6 +62,7 @@ INSFVMomentumAdvection::computeResidualsAndAData(const FaceInfo & fi)
   _face_info = &fi;
   _normal = fi.normal();
   _face_type = fi.faceType(_var.name());
+  const auto state = determineState();
 
   using namespace Moose::FV;
 
@@ -69,16 +70,16 @@ INSFVMomentumAdvection::computeResidualsAndAData(const FaceInfo & fi)
 
   _elem_residual = 0, _neighbor_residual = 0, _ae = 0, _an = 0;
 
-  const auto v_face = _rc_vel_provider.getVelocity(_velocity_interp_method, fi, _tid);
+  const auto v_face = _rc_vel_provider.getVelocity(_velocity_interp_method, fi, state, _tid);
 
   if (onBoundary(fi))
   {
     const auto ssf = singleSidedFaceArg();
     const Elem * const sided_elem = ssf.face_side;
     const auto dof_number = sided_elem->dof_number(_sys.number(), _var.number(), 0);
-    const auto rho_face = _rho(ssf);
-    const auto eps_face = epsilon()(ssf);
-    const auto u_face = _var(ssf);
+    const auto rho_face = _rho(ssf, state);
+    const auto eps_face = epsilon()(ssf, state);
+    const auto u_face = _var(ssf, state);
     const Real d_u_face_d_dof = u_face.derivatives()[dof_number];
     const auto coeff = _normal * v_face * rho_face / eps_face;
 
@@ -99,14 +100,14 @@ INSFVMomentumAdvection::computeResidualsAndAData(const FaceInfo & fi)
     const Moose::FaceArg advected_face_arg{
         &fi, limiterType(_advected_interp_method), elem_is_upwind, correct_skewness, nullptr};
     if (const auto [is_jump, eps_elem_face, eps_neighbor_face] =
-            NS::isPorosityJumpFace(epsilon(), fi);
+            NS::isPorosityJumpFace(epsilon(), fi, state);
         is_jump)
     {
       // For a weakly compressible formulation, the density should not depend on pressure and
       // consequently the density should not be impacted by the pressure jump that occurs at a
       // porosity jump. Consequently we will allow evaluation of the density using both upstream and
       // downstream information
-      const auto rho_face = _rho(advected_face_arg);
+      const auto rho_face = _rho(advected_face_arg, state);
 
       // We set the + and - sides of the superficial velocity equal to the interpolated value
       const auto & var_elem_face = v_face(_index);
@@ -135,13 +136,15 @@ INSFVMomentumAdvection::computeResidualsAndAData(const FaceInfo & fi)
     }
     else
     {
-      const auto [interp_coeffs, advected] = interpCoeffsAndAdvected(*_rho_u, advected_face_arg);
+      const auto [interp_coeffs, advected] =
+          interpCoeffsAndAdvected(*_rho_u, advected_face_arg, state);
 
       const auto elem_arg = elemArg();
       const auto neighbor_arg = neighborArg();
 
-      const auto rho_elem = _rho(elem_arg), rho_neighbor = _rho(neighbor_arg);
-      const auto eps_elem = epsilon()(elem_arg), eps_neighbor = epsilon()(neighbor_arg);
+      const auto rho_elem = _rho(elem_arg, state), rho_neighbor = _rho(neighbor_arg, state);
+      const auto eps_elem = epsilon()(elem_arg, state),
+                 eps_neighbor = epsilon()(neighbor_arg, state);
       const auto var_elem = advected.first / rho_elem * eps_elem,
                  var_neighbor = advected.second / rho_neighbor * eps_neighbor;
 

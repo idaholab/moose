@@ -11,28 +11,32 @@
 
 #include "MooseFunctor.h"
 
+namespace Moose
+{
 /**
  * This is essentially a forwarding functor that forwards the spatial and temporal evaluation
  * arguments to the parent vector functor and then returns the result indexed at a given component.
  */
 template <typename T>
-class VectorComponentFunctor : public Moose::FunctorBase<T>
+class VectorComponentFunctor : public FunctorBase<T>
 {
 public:
-  using typename Moose::FunctorBase<T>::ValueType;
-  using typename Moose::FunctorBase<T>::GradientType;
-  using typename Moose::FunctorBase<T>::DotType;
+  using typename FunctorBase<T>::ValueType;
+  using typename FunctorBase<T>::GradientType;
+  using typename FunctorBase<T>::DotType;
   using VectorArg = typename libMesh::TensorTools::IncrementRank<T>::type;
-  using VectorFunctor = Moose::FunctorBase<VectorArg>;
+  using VectorFunctor = FunctorBase<VectorArg>;
 
   VectorComponentFunctor(const VectorFunctor & vector, const unsigned int component)
-    : Moose::FunctorBase<T>(vector.functorName() + "_" + std::to_string(component)),
+    : FunctorBase<T>(vector.functorName() + "_" + std::to_string(component)),
       _vector(vector),
       _component(component)
   {
   }
 
-  bool isExtrapolatedBoundaryFace(const FaceInfo & fi, const Elem * elem) const override;
+  bool isExtrapolatedBoundaryFace(const FaceInfo & fi,
+                                  const Elem * elem,
+                                  const Moose::StateArg & state) const override;
   bool hasBlocks(SubdomainID sub_id) const override { return _vector.hasBlocks(sub_id); }
 
 private:
@@ -42,43 +46,40 @@ private:
   /// The component at which we'll index the parent vector functor evaluation result
   const unsigned int _component;
 
-  ValueType evaluate(const Moose::ElemArg & elem, const unsigned int state) const override final
+  ValueType evaluate(const ElemArg & elem, const StateArg & state) const override final
   {
     return _vector(elem, state)(_component);
   }
 
-  ValueType evaluate(const Moose::FaceArg & face, const unsigned int state) const override final
+  ValueType evaluate(const FaceArg & face, const StateArg & state) const override final
   {
     return _vector(face, state)(_component);
   }
 
-  ValueType evaluate(const Moose::ElemQpArg & elem_qp,
-                     const unsigned int state) const override final
+  ValueType evaluate(const ElemQpArg & elem_qp, const StateArg & state) const override final
   {
     return _vector(elem_qp, state)(_component);
   }
 
-  ValueType evaluate(const Moose::ElemSideQpArg & elem_side_qp,
-                     const unsigned int state) const override final
+  ValueType evaluate(const ElemSideQpArg & elem_side_qp,
+                     const StateArg & state) const override final
   {
     return _vector(elem_side_qp, state)(_component);
   }
 
-  ValueType evaluate(const Moose::ElemPointArg & elem_point,
-                     const unsigned int state) const override final
+  ValueType evaluate(const ElemPointArg & elem_point, const StateArg & state) const override final
   {
     return _vector(elem_point, state)(_component);
   }
 
-  using Moose::FunctorBase<T>::evaluateGradient;
-  GradientType evaluateGradient(const Moose::ElemArg & elem_arg,
-                                const unsigned int state) const override final
+  using FunctorBase<T>::evaluateGradient;
+  GradientType evaluateGradient(const ElemArg & elem_arg,
+                                const StateArg & state) const override final
   {
     return _vector.gradient(elem_arg, state).row(_component);
   }
 
-  GradientType evaluateGradient(const Moose::FaceArg & face,
-                                const unsigned int state) const override final
+  GradientType evaluateGradient(const FaceArg & face, const StateArg & state) const override final
   {
     return _vector.gradient(face, state).row(_component);
   }
@@ -86,7 +87,10 @@ private:
 
 template <typename T>
 bool
-VectorComponentFunctor<T>::isExtrapolatedBoundaryFace(const FaceInfo & fi, const Elem * elem) const
+VectorComponentFunctor<T>::isExtrapolatedBoundaryFace(const FaceInfo & fi,
+                                                      const Elem * elem,
+                                                      const Moose::StateArg & state) const
 {
-  return _vector.isExtrapolatedBoundaryFace(fi, elem);
+  return _vector.isExtrapolatedBoundaryFace(fi, elem, state);
+}
 }

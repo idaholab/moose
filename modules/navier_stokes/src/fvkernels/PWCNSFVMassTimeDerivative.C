@@ -31,5 +31,6 @@ PWCNSFVMassTimeDerivative::PWCNSFVMassTimeDerivative(const InputParameters & par
 ADReal
 PWCNSFVMassTimeDerivative::computeQpResidual()
 {
-  return _eps(makeElemArg(_current_elem)) * WCNSFVMassTimeDerivative::computeQpResidual();
+  return _eps(makeElemArg(_current_elem), determineState()) *
+         WCNSFVMassTimeDerivative::computeQpResidual();
 }

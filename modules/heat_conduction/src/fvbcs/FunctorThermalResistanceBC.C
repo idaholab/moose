@@ -118,7 +118,7 @@ FunctorThermalResistanceBC::computeQpResidual()
   // surface temperature. We do know that the heat flux in the conduction layers
   // must match the heat flux in the parallel convection-radiation segment. For a
   // first guess, take the surface temperature as the average of _T and T_ambient.
-  _T_surface = 0.5 * (_T(face_arg) + _T_ambient);
+  _T_surface = 0.5 * (_T(face_arg, determineState()) + _T_ambient);
 
   // total flux perpendicular to boundary
   ADReal flux;
@@ -140,7 +140,7 @@ FunctorThermalResistanceBC::computeQpResidual()
       T_surface_previous = _T_surface;
 
       // compute the flux based on the conduction part of the circuit
-      flux = (_T(face_arg) - _T_surface) / _conduction_resistance;
+      flux = (_T(face_arg, determineState()) - _T_surface) / _conduction_resistance;
 
       computeParallelResistance();
 
@@ -162,8 +162,8 @@ FunctorThermalResistanceBC::computeQpResidual()
   // resistance to find the overall heat flux. For Cartesian, dividing by the
   // 'inner_radius' has no effect, but it is required for correct normalization
   // for cylindrical geometries.
-  flux =
-      (_T(face_arg) - _T_ambient) / (_conduction_resistance + _parallel_resistance) / _inner_radius;
+  flux = (_T(face_arg, determineState()) - _T_ambient) /
+         (_conduction_resistance + _parallel_resistance) / _inner_radius;
   return flux;
 }
 
@@ -179,5 +179,5 @@ FunctorThermalResistanceBC::computeParallelResistance()
 
   // for Cartesian, dividing by the 'outer_radius' has no effect, but it is
   // required for correct normalization for cylindrical geometries
-  _parallel_resistance = 1.0 / (hr + _h(face_arg)) / _outer_radius;
+  _parallel_resistance = 1.0 / (hr + _h(face_arg, determineState())) / _outer_radius;
 }

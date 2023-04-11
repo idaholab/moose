@@ -254,7 +254,7 @@ INSFVRhieChowInterpolator::fillARead()
       else
         w_comp = &_zero_functor;
 
-      _a_aux[tid] = std::make_unique<VectorCompositeFunctor<ADReal>>(
+      _a_aux[tid] = std::make_unique<Moose::VectorCompositeFunctor<ADReal>>(
           "RC_a_coeffs",
           UserObject::_subproblem.getFunctor<ADReal>(deduceFunctorName("a_u"), tid, name(), true),
           *v_comp,
@@ -486,6 +486,7 @@ INSFVRhieChowInterpolator::ghostADataOnBoundary(const BoundaryID boundary_id)
 VectorValue<ADReal>
 INSFVRhieChowInterpolator::getVelocity(const Moose::FV::InterpMethod m,
                                        const FaceInfo & fi,
+                                       const Moose::StateArg & time,
                                        const THREAD_ID tid) const
 {
   const Elem * const elem = &fi.elem();
@@ -505,7 +506,7 @@ INSFVRhieChowInterpolator::getVelocity(const Moose::FV::InterpMethod m,
     const Elem * const boundary_elem = hasBlocks(elem->subdomain_id()) ? elem : neighbor;
     const Moose::FaceArg boundary_face{
         &fi, Moose::FV::LimiterType::CentralDifference, true, correct_skewness, boundary_elem};
-    return vel(boundary_face);
+    return vel(boundary_face, time);
   }
 
   VectorValue<ADReal> velocity;
@@ -513,15 +514,15 @@ INSFVRhieChowInterpolator::getVelocity(const Moose::FV::InterpMethod m,
   Moose::FaceArg face{
       &fi, Moose::FV::LimiterType::CentralDifference, true, correct_skewness, nullptr};
   // Create the average face velocity (not corrected using RhieChow yet)
-  velocity(0) = (*u)(face);
+  velocity(0) = (*u)(face, time);
   if (v)
-    velocity(1) = (*v)(face);
+    velocity(1) = (*v)(face, time);
   if (w)
-    velocity(2) = (*w)(face);
+    velocity(2) = (*w)(face, time);
 
   // Return if Rhie-Chow was not requested or if we have a porosity jump
   if (m == Moose::FV::InterpMethod::Average ||
-      std::get<0>(NS::isPorosityJumpFace(epsilon(tid), fi)))
+      std::get<0>(NS::isPorosityJumpFace(epsilon(tid), fi, time)))
     return velocity;
 
   mooseAssert(((m == Moose::FV::InterpMethod::RhieChow) &&
@@ -535,11 +536,11 @@ INSFVRhieChowInterpolator::getVelocity(const Moose::FV::InterpMethod m,
 
   // Get pressure gradient. This is the uncorrected gradient plus a correction from cell centroid
   // values on either side of the face
-  const VectorValue<ADReal> & grad_p = p.adGradSln(fi);
+  const VectorValue<ADReal> & grad_p = p.adGradSln(fi, time);
 
   // Get uncorrected pressure gradient. This will use the element centroid gradient if we are
   // along a boundary face
-  const VectorValue<ADReal> & unc_grad_p = p.uncorrectedAdGradSln(fi);
+  const VectorValue<ADReal> & unc_grad_p = p.uncorrectedAdGradSln(fi, time);
 
   const Point & elem_centroid = fi.elemCentroid();
   const Point & neighbor_centroid = fi.neighborCentroid();
@@ -547,7 +548,7 @@ INSFVRhieChowInterpolator::getVelocity(const Moose::FV::InterpMethod m,
   Real neighbor_volume = fi.neighborVolume();
 
   // Now we need to perform the computations of D
-  const auto elem_a = (*_a_read[tid])(makeElemArg(elem));
+  const auto elem_a = (*_a_read[tid])(makeElemArg(elem), time);
 
   mooseAssert(UserObject::_subproblem.getCoordSystem(elem->subdomain_id()) ==
                   UserObject::_subproblem.getCoordSystem(neighbor->subdomain_id()),
@@ -567,7 +568,7 @@ INSFVRhieChowInterpolator::getVelocity(const Moose::FV::InterpMethod m,
 
   VectorValue<ADReal> face_D;
 
-  const auto neighbor_a = (*_a_read[tid])(makeElemArg(neighbor));
+  const auto neighbor_a = (*_a_read[tid])(makeElemArg(neighbor), time);
 
   coordTransformFactor(UserObject::_subproblem, neighbor->subdomain_id(), neighbor_centroid, coord);
   neighbor_volume *= coord;
@@ -588,7 +589,7 @@ INSFVRhieChowInterpolator::getVelocity(const Moose::FV::InterpMethod m,
   Moose::FV::interpolate(coeff_interp_method, face_D, elem_D, neighbor_D, fi, true);
 
   // evaluate face porosity, see (18) in Hanimann 2021 or (11) in Nordlund 2016
-  const auto face_eps = epsilon(tid)(face);
+  const auto face_eps = epsilon(tid)(face, time);
 
   // Perform the pressure correction. We don't use skewness-correction on the pressure since
   // it only influences the averaged cell gradients which cancel out in the correction

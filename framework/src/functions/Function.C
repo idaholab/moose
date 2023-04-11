@@ -112,9 +112,14 @@ Function::average() const
 }
 
 Real
-Function::getTime(const unsigned int state) const
+Function::getTime(const Moose::StateArg & state) const
 {
-  switch (state)
+  if (state.iteration_type != Moose::SolutionIterationType::Time)
+    // If we are any iteration type other than time (e.g. nonlinear), then temporally we are still
+    // in the present time
+    return _ti_feproblem.time();
+
+  switch (state.state)
   {
     case 0:
       return _ti_feproblem.time();
@@ -123,7 +128,7 @@ Function::getTime(const unsigned int state) const
       return _ti_feproblem.timeOld();
 
     default:
-      mooseError("unhandled state ", state, " in Function::getTime");
+      mooseError("unhandled state ", state.state, " in Function::getTime");
   }
 }
 
@@ -176,13 +181,13 @@ Function::determineElemSideXYZ(const ElemSideQpArg & elem_side_qp) const
 }
 
 typename Function::ValueType
-Function::evaluate(const ElemArg & elem_arg, const unsigned int state) const
+Function::evaluate(const ElemArg & elem_arg, const Moose::StateArg & state) const
 {
   return value(getTime(state), elem_arg.elem->vertex_average());
 }
 
 typename Function::ValueType
-Function::evaluate(const FaceArg & face, const unsigned int state) const
+Function::evaluate(const FaceArg & face, const Moose::StateArg & state) const
 {
   if (face.face_side && face.fi->neighborPtr() &&
       (face.fi->elem().subdomain_id() != face.fi->neighbor().subdomain_id()))
@@ -206,7 +211,7 @@ Function::evaluate(const FaceArg & face, const unsigned int state) const
 }
 
 typename Function::ValueType
-Function::evaluate(const ElemQpArg & elem_qp, const unsigned int state) const
+Function::evaluate(const ElemQpArg & elem_qp, const Moose::StateArg & state) const
 {
   determineElemXYZ(elem_qp);
   const auto qp = std::get<1>(elem_qp);
@@ -216,7 +221,7 @@ Function::evaluate(const ElemQpArg & elem_qp, const unsigned int state) const
 }
 
 typename Function::ValueType
-Function::evaluate(const ElemSideQpArg & elem_side_qp, const unsigned int state) const
+Function::evaluate(const ElemSideQpArg & elem_side_qp, const Moose::StateArg & state) const
 {
   determineElemSideXYZ(elem_side_qp);
   const auto qp = std::get<2>(elem_side_qp);
@@ -226,25 +231,25 @@ Function::evaluate(const ElemSideQpArg & elem_side_qp, const unsigned int state)
 }
 
 typename Function::ValueType
-Function::evaluate(const ElemPointArg & elem_point_arg, const unsigned int state) const
+Function::evaluate(const ElemPointArg & elem_point_arg, const Moose::StateArg & state) const
 {
   return value(getTime(state), elem_point_arg.point);
 }
 
 typename Function::GradientType
-Function::evaluateGradient(const ElemArg & elem_arg, const unsigned int state) const
+Function::evaluateGradient(const ElemArg & elem_arg, const Moose::StateArg & state) const
 {
   return gradient(getTime(state), elem_arg.elem->vertex_average());
 }
 
 typename Function::GradientType
-Function::evaluateGradient(const FaceArg & face, const unsigned int state) const
+Function::evaluateGradient(const FaceArg & face, const Moose::StateArg & state) const
 {
   return gradient(getTime(state), face.fi->faceCentroid());
 }
 
 typename Function::GradientType
-Function::evaluateGradient(const ElemQpArg & elem_qp, const unsigned int state) const
+Function::evaluateGradient(const ElemQpArg & elem_qp, const Moose::StateArg & state) const
 {
   determineElemXYZ(elem_qp);
   const auto qp = std::get<1>(elem_qp);
@@ -254,7 +259,7 @@ Function::evaluateGradient(const ElemQpArg & elem_qp, const unsigned int state) 
 }
 
 typename Function::GradientType
-Function::evaluateGradient(const ElemSideQpArg & elem_side_qp, const unsigned int state) const
+Function::evaluateGradient(const ElemSideQpArg & elem_side_qp, const Moose::StateArg & state) const
 {
   determineElemSideXYZ(elem_side_qp);
   const auto qp = std::get<2>(elem_side_qp);
@@ -264,25 +269,25 @@ Function::evaluateGradient(const ElemSideQpArg & elem_side_qp, const unsigned in
 }
 
 typename Function::GradientType
-Function::evaluateGradient(const ElemPointArg & elem_point_arg, const unsigned int state) const
+Function::evaluateGradient(const ElemPointArg & elem_point_arg, const Moose::StateArg & state) const
 {
   return gradient(getTime(state), elem_point_arg.point);
 }
 
 typename Function::DotType
-Function::evaluateDot(const ElemArg & elem_arg, const unsigned int state) const
+Function::evaluateDot(const ElemArg & elem_arg, const Moose::StateArg & state) const
 {
   return timeDerivative(getTime(state), elem_arg.elem->vertex_average());
 }
 
 typename Function::DotType
-Function::evaluateDot(const FaceArg & face, const unsigned int state) const
+Function::evaluateDot(const FaceArg & face, const Moose::StateArg & state) const
 {
   return timeDerivative(getTime(state), face.fi->faceCentroid());
 }
 
 typename Function::DotType
-Function::evaluateDot(const ElemQpArg & elem_qp, const unsigned int state) const
+Function::evaluateDot(const ElemQpArg & elem_qp, const Moose::StateArg & state) const
 {
   determineElemXYZ(elem_qp);
   const auto qp = std::get<1>(elem_qp);
@@ -292,7 +297,7 @@ Function::evaluateDot(const ElemQpArg & elem_qp, const unsigned int state) const
 }
 
 typename Function::DotType
-Function::evaluateDot(const ElemSideQpArg & elem_side_qp, const unsigned int state) const
+Function::evaluateDot(const ElemSideQpArg & elem_side_qp, const Moose::StateArg & state) const
 {
   determineElemSideXYZ(elem_side_qp);
   const auto qp = std::get<2>(elem_side_qp);
@@ -302,7 +307,7 @@ Function::evaluateDot(const ElemSideQpArg & elem_side_qp, const unsigned int sta
 }
 
 typename Function::DotType
-Function::evaluateDot(const ElemPointArg & elem_point_arg, const unsigned int state) const
+Function::evaluateDot(const ElemPointArg & elem_point_arg, const Moose::StateArg & state) const
 {
   return timeDerivative(getTime(state), elem_point_arg.point);
 }

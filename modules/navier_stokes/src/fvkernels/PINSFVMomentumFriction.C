@@ -48,16 +48,17 @@ PINSFVMomentumFriction::gatherRCData(const Elem & elem)
 {
   ADReal friction_term = 0;
   const auto elem_arg = makeElemArg(&elem);
+  const auto state = determineState();
 
   if (_use_Darcy_friction_model)
-    friction_term += (*_cL)(elem_arg)(_index)*_rho(elem_arg) / _eps(elem_arg);
+    friction_term += (*_cL)(elem_arg, state)(_index)*_rho(elem_arg, state) / _eps(elem_arg, state);
   if (_use_Forchheimer_friction_model)
-    friction_term += (*_cQ)(elem_arg)(_index)*_rho(elem_arg) / _eps(elem_arg);
+    friction_term += (*_cQ)(elem_arg, state)(_index)*_rho(elem_arg, state) / _eps(elem_arg, state);
 
   const auto coefficient = friction_term * _assembly.elementVolume(&elem);
 
   _rc_uo.addToA(&elem, _index, coefficient);
 
   const auto dof_number = elem.dof_number(_sys.number(), _var.number(), 0);
-  processResidualAndJacobian(coefficient * _u_functor(elem_arg), dof_number);
+  processResidualAndJacobian(coefficient * _u_functor(elem_arg, state), dof_number);
 }

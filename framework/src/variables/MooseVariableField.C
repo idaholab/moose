@@ -51,7 +51,7 @@ template <typename Shapes, typename Solution, typename GradShapes, typename Grad
 void
 MooseVariableField<OutputType>::computeSolution(const Elem * const elem,
                                                 const QBase * const qrule,
-                                                const unsigned int state,
+                                                const StateArg & state,
                                                 const Shapes & phi,
                                                 Solution & local_soln,
                                                 const GradShapes & grad_phi,
@@ -75,11 +75,13 @@ MooseVariableField<OutputType>::computeSolution(const Elem * const elem,
   // which is wrong during things like finite difference Jacobian evaluation, e.g. when PETSc
   // perturbs the solution vector we feed these perturbations into the current_local_solution
   // while the libMesh solution is frozen in the non-perturbed state
-  const auto & global_soln = (state == 0) ? *_sys.currentSolution() : _sys.solutionState(state);
+  const auto & global_soln = (state.state == 0)
+                                 ? *_sys.currentSolution()
+                                 : _sys.solutionState(state.state, state.iteration_type);
   for (const auto dof_index : dof_indices)
   {
     dof_values.push_back(ADReal(global_soln(dof_index)));
-    if (do_derivatives)
+    if (do_derivatives && state.state == 0)
       Moose::derivInsert(dof_values.back().derivatives(), dof_index, 1.);
     if (computing_dot)
     {
@@ -119,7 +121,7 @@ MooseVariableField<OutputType>::computeSolution(const Elem * const elem,
 template <typename OutputType>
 void
 MooseVariableField<OutputType>::evaluateOnElement(const ElemQpArg & elem_qp,
-                                                  const unsigned int state) const
+                                                  const StateArg & state) const
 {
   mooseAssert(this->hasBlocks(std::get<0>(elem_qp)->subdomain_id()),
               "This variable doesn't exist in the requested block!");
@@ -153,14 +155,14 @@ MooseVariableField<OutputType>::evaluateOnElement(const ElemQpArg & elem_qp,
 
 template <>
 void
-MooseVariableField<RealEigenVector>::evaluateOnElement(const ElemQpArg &, const unsigned int) const
+MooseVariableField<RealEigenVector>::evaluateOnElement(const ElemQpArg &, const StateArg &) const
 {
   mooseError("evaluate not implemented for array variables");
 }
 
 template <typename OutputType>
 typename MooseVariableField<OutputType>::ValueType
-MooseVariableField<OutputType>::evaluate(const ElemQpArg & elem_qp, const unsigned int state) const
+MooseVariableField<OutputType>::evaluate(const ElemQpArg & elem_qp, const StateArg & state) const
 {
   evaluateOnElement(elem_qp, state);
   const auto qp = std::get<1>(elem_qp);
@@ -172,7 +174,7 @@ MooseVariableField<OutputType>::evaluate(const ElemQpArg & elem_qp, const unsign
 template <typename OutputType>
 typename MooseVariableField<OutputType>::GradientType
 MooseVariableField<OutputType>::evaluateGradient(const ElemQpArg & elem_qp,
-                                                 const unsigned int state) const
+                                                 const StateArg & state) const
 {
   evaluateOnElement(elem_qp, state);
   const auto qp = std::get<1>(elem_qp);
@@ -183,8 +185,7 @@ MooseVariableField<OutputType>::evaluateGradient(const ElemQpArg & elem_qp,
 
 template <typename OutputType>
 typename MooseVariableField<OutputType>::DotType
-MooseVariableField<OutputType>::evaluateDot(const ElemQpArg & elem_qp,
-                                            const unsigned int state) const
+MooseVariableField<OutputType>::evaluateDot(const ElemQpArg & elem_qp, const StateArg & state) const
 {
   mooseAssert(_time_integrator && _time_integrator->dt(),
               "A time derivative is being requested but we do not have a time integrator so we'll "
@@ -199,7 +200,7 @@ MooseVariableField<OutputType>::evaluateDot(const ElemQpArg & elem_qp,
 template <typename OutputType>
 void
 MooseVariableField<OutputType>::evaluateOnElementSide(const ElemSideQpArg & elem_side_qp,
-                                                      const unsigned int state) const
+                                                      const StateArg & state) const
 {
   mooseAssert(this->hasBlocks(std::get<0>(elem_side_qp)->subdomain_id()),
               "This variable doesn't exist in the requested block!");
@@ -236,7 +237,7 @@ MooseVariableField<OutputType>::evaluateOnElementSide(const ElemSideQpArg & elem
 template <>
 void
 MooseVariableField<RealEigenVector>::evaluateOnElementSide(const ElemSideQpArg &,
-                                                           const unsigned int) const
+                                                           const StateArg &) const
 {
   mooseError("evaluate not implemented for array variables");
 }
@@ -244,7 +245,7 @@ MooseVariableField<RealEigenVector>::evaluateOnElementSide(const ElemSideQpArg &
 template <typename OutputType>
 typename MooseVariableField<OutputType>::ValueType
 MooseVariableField<OutputType>::evaluate(const ElemSideQpArg & elem_side_qp,
-                                         const unsigned int state) const
+                                         const StateArg & state) const
 {
   evaluateOnElementSide(elem_side_qp, state);
   const auto qp = std::get<2>(elem_side_qp);
@@ -256,7 +257,7 @@ MooseVariableField<OutputType>::evaluate(const ElemSideQpArg & elem_side_qp,
 template <typename OutputType>
 typename MooseVariableField<OutputType>::GradientType
 MooseVariableField<OutputType>::evaluateGradient(const ElemSideQpArg & elem_side_qp,
-                                                 const unsigned int state) const
+                                                 const StateArg & state) const
 {
   evaluateOnElementSide(elem_side_qp, state);
   const auto qp = std::get<2>(elem_side_qp);
@@ -268,7 +269,7 @@ MooseVariableField<OutputType>::evaluateGradient(const ElemSideQpArg & elem_side
 template <typename OutputType>
 typename MooseVariableField<OutputType>::DotType
 MooseVariableField<OutputType>::evaluateDot(const ElemSideQpArg & elem_side_qp,
-                                            const unsigned int state) const
+                                            const StateArg & state) const
 {
   mooseAssert(_time_integrator && _time_integrator->dt(),
               "A time derivative is being requested but we do not have a time integrator so we'll "
@@ -283,7 +284,7 @@ MooseVariableField<OutputType>::evaluateDot(const ElemSideQpArg & elem_side_qp,
 template <typename OutputType>
 typename MooseVariableField<OutputType>::ValueType
 MooseVariableField<OutputType>::evaluate(const ElemPointArg & elem_point,
-                                         const unsigned int state) const
+                                         const StateArg & state) const
 {
   return (*this)(elem_point.makeElem(), state) +
          (elem_point.point - elem_point.elem->vertex_average()) *
@@ -292,59 +293,60 @@ MooseVariableField<OutputType>::evaluate(const ElemPointArg & elem_point,
 
 template <>
 typename MooseVariableField<RealEigenVector>::ValueType
-MooseVariableField<RealEigenVector>::evaluate(const ElemQpArg &, unsigned int) const
+MooseVariableField<RealEigenVector>::evaluate(const ElemQpArg &, const StateArg &) const
 {
-  mooseError("MooseVariableField::evaluate(ElemQpArg &, unsigned int) overload not implemented for "
+  mooseError(
+      "MooseVariableField::evaluate(ElemQpArg &, const StateArg &) overload not implemented for "
+      "array variables");
+}
+
+template <>
+typename MooseVariableField<RealEigenVector>::ValueType
+MooseVariableField<RealEigenVector>::evaluate(const ElemSideQpArg &, const StateArg &) const
+{
+  mooseError("MooseVariableField::evaluate(ElemSideQpArg &, const StateArg &) overload not "
+             "implemented for "
              "array variables");
 }
 
 template <>
 typename MooseVariableField<RealEigenVector>::ValueType
-MooseVariableField<RealEigenVector>::evaluate(const ElemSideQpArg &, unsigned int) const
+MooseVariableField<RealEigenVector>::evaluate(const ElemPointArg &, const StateArg &) const
 {
   mooseError(
-      "MooseVariableField::evaluate(ElemSideQpArg &, unsigned int) overload not implemented for "
-      "array variables");
-}
-
-template <>
-typename MooseVariableField<RealEigenVector>::ValueType
-MooseVariableField<RealEigenVector>::evaluate(const ElemPointArg &, unsigned int) const
-{
-  mooseError(
-      "MooseVariableField::evaluate(ElemPointArg &, unsigned int) overload not implemented for "
+      "MooseVariableField::evaluate(ElemPointArg &, const StateArg &) overload not implemented for "
       "array variables");
 }
 
 template <>
 typename MooseVariableField<RealEigenVector>::GradientType
-MooseVariableField<RealEigenVector>::evaluateGradient(const ElemQpArg &, unsigned int) const
+MooseVariableField<RealEigenVector>::evaluateGradient(const ElemQpArg &, const StateArg &) const
 {
-  mooseError("MooseVariableField::evaluateGradient(ElemQpArg &, unsigned int) overload not "
+  mooseError("MooseVariableField::evaluateGradient(ElemQpArg &, const StateArg &) overload not "
              "implemented for array variables");
 }
 
 template <>
 typename MooseVariableField<RealEigenVector>::GradientType
-MooseVariableField<RealEigenVector>::evaluateGradient(const ElemSideQpArg &, unsigned int) const
+MooseVariableField<RealEigenVector>::evaluateGradient(const ElemSideQpArg &, const StateArg &) const
 {
-  mooseError("MooseVariableField::evaluateGradient(ElemSideQpArg &, unsigned int) overload not "
+  mooseError("MooseVariableField::evaluateGradient(ElemSideQpArg &, const StateArg &) overload not "
              "implemented for array variables");
 }
 
 template <>
 typename MooseVariableField<RealEigenVector>::DotType
-MooseVariableField<RealEigenVector>::evaluateDot(const ElemQpArg &, unsigned int) const
+MooseVariableField<RealEigenVector>::evaluateDot(const ElemQpArg &, const StateArg &) const
 {
-  mooseError("MooseVariableField::evaluateDot(ElemQpArg &, unsigned int) overload not "
+  mooseError("MooseVariableField::evaluateDot(ElemQpArg &, const StateArg &) overload not "
              "implemented for array variables");
 }
 
 template <>
 typename MooseVariableField<RealEigenVector>::DotType
-MooseVariableField<RealEigenVector>::evaluateDot(const ElemSideQpArg &, unsigned int) const
+MooseVariableField<RealEigenVector>::evaluateDot(const ElemSideQpArg &, const StateArg &) const
 {
-  mooseError("MooseVariableField::evaluateDot(ElemSideQpArg &, unsigned int) overload not "
+  mooseError("MooseVariableField::evaluateDot(ElemSideQpArg &, const StateArg &) overload not "
              "implemented for array variables");
 }
 

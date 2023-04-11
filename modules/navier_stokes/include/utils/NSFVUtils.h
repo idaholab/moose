@@ -62,10 +62,12 @@ namespace NS
  * Checks to see whether the porosity value jumps from one side to the other of the provided face
  * @param porosity the porosity
  * @param fi the face to inspect for porosity jumps
+ * @param time A temporal argument indicating at what time state to evaluate the porosity
  * @return a tuple where the zeroth member indicates whether there is a jump, the first member is
  * the porosity value on the "element" side of the face, and the second member is the porosity value
  * on the "neighbor" side of the face
  */
 std::tuple<bool, ADReal, ADReal> isPorosityJumpFace(const Moose::Functor<ADReal> & porosity,
-                                                    const FaceInfo & fi);
+                                                    const FaceInfo & fi,
+                                                    const Moose::StateArg & time);
 }

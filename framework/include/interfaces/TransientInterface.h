@@ -10,6 +10,7 @@
 #pragma once
 
 #include "Moose.h"
+#include "MooseFunctorArguments.h"
 
 #define usingTransientInterfaceMembers                                                             \
   using TransientInterface::_t;                                                                    \
@@ -37,6 +38,13 @@ public:
   bool isImplicit() { return _is_implicit; }
 
 protected:
+  /**
+   * Create a functor state argument that corresponds to the implicit state of this object. If we
+   * are implicit then we will return the current state. If we are not, then we will return the old
+   * state
+   */
+  Moose::StateArg determineState() const;
+
   const InputParameters & _ti_params;
 
   FEProblemBase & _ti_feproblem;
@@ -67,3 +75,9 @@ protected:
 private:
   const std::string _ti_name;
 };
+
+inline Moose::StateArg
+TransientInterface::determineState() const
+{
+  return _is_implicit ? Moose::currentState() : Moose::oldState();
+}

@@ -29,6 +29,6 @@ protected:
   const RealVectorValue _velocity;
 
   const Moose::FV::LimiterType _limiter_type;
-  const VectorCompositeFunctor<ADReal> _vector;
+  const Moose::VectorCompositeFunctor<ADReal> _vector;
   const unsigned int _index;
 };

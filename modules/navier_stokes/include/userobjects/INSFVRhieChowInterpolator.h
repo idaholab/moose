@@ -66,11 +66,14 @@ public:
    * @param m The velocity interpolation method. This is either Rhie-Chow or Average. Rhie-Chow is
    * recommended as it avoids checkerboards in the pressure field
    * @param fi The face that we wish to retrieve the velocity for
+   * @param time The time at which to evaluate the velocity
    * @param tid The thread ID
    * @return The face velocity
    */
-  VectorValue<ADReal>
-  getVelocity(Moose::FV::InterpMethod m, const FaceInfo & fi, THREAD_ID tid) const;
+  VectorValue<ADReal> getVelocity(Moose::FV::InterpMethod m,
+                                  const FaceInfo & fi,
+                                  const Moose::StateArg & time,
+                                  THREAD_ID tid) const;
 
   /// Return the interpolation method used for velocity
   Moose::FV::InterpMethod velocityInterpolationMethod() const { return _velocity_interp_method; }
@@ -161,13 +164,13 @@ protected:
    */
   ///@{
   /// The x-component of 'a'
-  VectorComponentFunctor<ADReal> _ax;
+  Moose::VectorComponentFunctor<ADReal> _ax;
 
   /// The y-component of 'a'
-  VectorComponentFunctor<ADReal> _ay;
+  Moose::VectorComponentFunctor<ADReal> _ay;
 
   /// The z-component of 'a'
-  VectorComponentFunctor<ADReal> _az;
+  Moose::VectorComponentFunctor<ADReal> _az;
   ///@}
 
   /// The number of the nonlinear system in which the monolithic momentum and continuity equations are located

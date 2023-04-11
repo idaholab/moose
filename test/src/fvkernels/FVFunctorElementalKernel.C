@@ -30,5 +30,5 @@ FVFunctorElementalKernel::FVFunctorElementalKernel(const InputParameters & param
 ADReal
 FVFunctorElementalKernel::computeQpResidual()
 {
-  return _functor(makeElemArg(_current_elem));
+  return _functor(makeElemArg(_current_elem), Moose::currentState());
 }

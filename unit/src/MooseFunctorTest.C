@@ -38,11 +38,11 @@ public:
   bool hasBlocks(SubdomainID) const override { return true; }
 
 private:
-  ValueType evaluate(const ElemArg &, unsigned int) const override final { return 0; }
-  ValueType evaluate(const FaceArg &, unsigned int) const override final { return 0; }
-  ValueType evaluate(const ElemQpArg &, unsigned int) const override final { return 0; }
-  ValueType evaluate(const ElemSideQpArg &, unsigned int) const override final { return 0; }
-  ValueType evaluate(const ElemPointArg &, unsigned int) const override final { return 0; }
+  ValueType evaluate(const ElemArg &, const StateArg &) const override final { return 0; }
+  ValueType evaluate(const FaceArg &, const StateArg &) const override final { return 0; }
+  ValueType evaluate(const ElemQpArg &, const StateArg &) const override final { return 0; }
+  ValueType evaluate(const ElemSideQpArg &, const StateArg &) const override final { return 0; }
+  ValueType evaluate(const ElemPointArg &, const StateArg &) const override final { return 0; }
 };
 
 template <typename T>
@@ -53,21 +53,23 @@ public:
 
   WithGradientTestFunctor(const MooseMesh & mesh) : _mesh(mesh) {}
 
-  bool isExtrapolatedBoundaryFace(const FaceInfo & fi, const Elem *) const override
+  bool
+  isExtrapolatedBoundaryFace(const FaceInfo & fi, const Elem *, const StateArg &) const override
   {
     return !fi.neighborPtr();
   }
 
 private:
   using TestFunctor<T>::evaluateGradient;
-  GradientType evaluateGradient(const ElemArg & elem_arg, unsigned int) const override final
+  GradientType evaluateGradient(const ElemArg & elem_arg,
+                                const StateArg & time) const override final
   {
-    return greenGaussGradient(elem_arg, *this, true, _mesh);
+    return greenGaussGradient(elem_arg, time, *this, true, _mesh);
   }
 
-  GradientType evaluateGradient(const FaceArg & face, unsigned int) const override final
+  GradientType evaluateGradient(const FaceArg & face, const StateArg & time) const override final
   {
-    return greenGaussGradient(face, *this, true, _mesh);
+    return greenGaussGradient(face, time, *this, true, _mesh);
   }
 
   const MooseMesh & _mesh;
@@ -119,14 +121,15 @@ TEST(MooseFunctorTest, testArgs)
   auto elem_qp = std::make_tuple(elem.get(), 0, &qrule);
   auto elem_side_qp = std::make_tuple(elem.get(), 0, 0, &qrule);
   auto elem_point = ElemPointArg({elem.get(), Point(0), false});
+  const auto current_time = Moose::currentState();
 
   // Test not-implemented errors
   {
-    auto test_dot = [&test](const auto & arg)
+    auto test_dot = [&test, &current_time](const auto & arg)
     {
       try
       {
-        test.dot(arg);
+        test.dot(arg, current_time);
         EXPECT_TRUE(false);
       }
       catch (std::runtime_error & e)
@@ -141,11 +144,11 @@ TEST(MooseFunctorTest, testArgs)
     test_dot(elem_side_qp);
     test_dot(elem_point);
 
-    auto test_gradient = [&test](const auto & arg)
+    auto test_gradient = [&test, &current_time](const auto & arg)
     {
       try
       {
-        test.gradient(arg);
+        test.gradient(arg, current_time);
         EXPECT_TRUE(false);
       }
       catch (std::runtime_error & e)
@@ -161,9 +164,9 @@ TEST(MooseFunctorTest, testArgs)
     test_gradient(elem_point);
   }
 
-  auto zero_gradient_test = [](const auto & functor, const auto & arg)
+  auto zero_gradient_test = [&current_time](const auto & functor, const auto & arg)
   {
-    const auto result = functor.gradient(arg);
+    const auto result = functor.gradient(arg, current_time);
     for (const auto i : make_range(unsigned(LIBMESH_DIM)))
       EXPECT_EQ(result(i), 0);
   };
@@ -171,11 +174,11 @@ TEST(MooseFunctorTest, testArgs)
   // Test ConstantFunctor
   {
     ConstantFunctor<Real> cf(2);
-    EXPECT_EQ(cf(elem_arg), 2);
-    EXPECT_EQ(cf(face), 2);
-    EXPECT_EQ(cf(elem_qp), 2);
-    EXPECT_EQ(cf(elem_side_qp), 2);
-    EXPECT_EQ(cf(elem_point), 2);
+    EXPECT_EQ(cf(elem_arg, current_time), 2);
+    EXPECT_EQ(cf(face, current_time), 2);
+    EXPECT_EQ(cf(elem_qp, current_time), 2);
+    EXPECT_EQ(cf(elem_side_qp, current_time), 2);
+    EXPECT_EQ(cf(elem_point, current_time), 2);
 
     zero_gradient_test(cf, elem_arg);
     zero_gradient_test(cf, face);
@@ -183,48 +186,61 @@ TEST(MooseFunctorTest, testArgs)
     zero_gradient_test(cf, elem_side_qp);
     zero_gradient_test(cf, elem_point);
 
-    EXPECT_EQ(cf.dot(elem_arg), 0);
-    EXPECT_EQ(cf.dot(face), 0);
-    EXPECT_EQ(cf.dot(elem_qp), 0);
-    EXPECT_EQ(cf.dot(elem_side_qp), 0);
-    EXPECT_EQ(cf.dot(elem_point), 0);
+    EXPECT_EQ(cf.dot(elem_arg, current_time), 0);
+    EXPECT_EQ(cf.dot(face, current_time), 0);
+    EXPECT_EQ(cf.dot(elem_qp, current_time), 0);
+    EXPECT_EQ(cf.dot(elem_side_qp, current_time), 0);
+    EXPECT_EQ(cf.dot(elem_point, current_time), 0);
 
     // Test AD up-type
     ADWrapperFunctor<ADReal> ad_cf(cf);
-    EXPECT_EQ(cf(elem_arg), MetaPhysicL::raw_value(ad_cf(elem_arg)));
-    EXPECT_EQ(cf(face), MetaPhysicL::raw_value(ad_cf(face)));
-    EXPECT_EQ(cf(elem_point), MetaPhysicL::raw_value(ad_cf(elem_point)));
-    EXPECT_EQ(cf(elem_qp), MetaPhysicL::raw_value(ad_cf(elem_qp)));
-    EXPECT_EQ(cf(elem_side_qp), MetaPhysicL::raw_value(ad_cf(elem_side_qp)));
-    EXPECT_EQ(cf.gradient(elem_arg)(0), MetaPhysicL::raw_value(ad_cf.gradient(elem_arg)(0)));
-    EXPECT_EQ(cf.gradient(face)(0), MetaPhysicL::raw_value(ad_cf.gradient(face)(0)));
-    EXPECT_EQ(cf.gradient(elem_point)(0), MetaPhysicL::raw_value(ad_cf.gradient(elem_point)(0)));
-    EXPECT_EQ(cf.gradient(elem_qp)(0), MetaPhysicL::raw_value(ad_cf.gradient(elem_qp)(0)));
-    EXPECT_EQ(cf.gradient(elem_side_qp)(0),
-              MetaPhysicL::raw_value(ad_cf.gradient(elem_side_qp)(0)));
-    EXPECT_EQ(cf.dot(elem_arg), MetaPhysicL::raw_value(ad_cf.dot(elem_arg)));
-    EXPECT_EQ(cf.dot(face), MetaPhysicL::raw_value(ad_cf.dot(face)));
-    EXPECT_EQ(cf.dot(elem_point), MetaPhysicL::raw_value(ad_cf.dot(elem_point)));
-    EXPECT_EQ(cf.dot(elem_qp), MetaPhysicL::raw_value(ad_cf.dot(elem_qp)));
-    EXPECT_EQ(cf.dot(elem_side_qp), MetaPhysicL::raw_value(ad_cf.dot(elem_side_qp)));
+    EXPECT_EQ(cf(elem_arg, current_time), MetaPhysicL::raw_value(ad_cf(elem_arg, current_time)));
+    EXPECT_EQ(cf(face, current_time), MetaPhysicL::raw_value(ad_cf(face, current_time)));
+    EXPECT_EQ(cf(elem_point, current_time),
+              MetaPhysicL::raw_value(ad_cf(elem_point, current_time)));
+    EXPECT_EQ(cf(elem_qp, current_time), MetaPhysicL::raw_value(ad_cf(elem_qp, current_time)));
+    EXPECT_EQ(cf(elem_side_qp, current_time),
+              MetaPhysicL::raw_value(ad_cf(elem_side_qp, current_time)));
+    EXPECT_EQ(cf.gradient(elem_arg, current_time)(0),
+              MetaPhysicL::raw_value(ad_cf.gradient(elem_arg, current_time)(0)));
+    EXPECT_EQ(cf.gradient(face, current_time)(0),
+              MetaPhysicL::raw_value(ad_cf.gradient(face, current_time)(0)));
+    EXPECT_EQ(cf.gradient(elem_point, current_time)(0),
+              MetaPhysicL::raw_value(ad_cf.gradient(elem_point, current_time)(0)));
+    EXPECT_EQ(cf.gradient(elem_qp, current_time)(0),
+              MetaPhysicL::raw_value(ad_cf.gradient(elem_qp, current_time)(0)));
+    EXPECT_EQ(cf.gradient(elem_side_qp, current_time)(0),
+              MetaPhysicL::raw_value(ad_cf.gradient(elem_side_qp, current_time)(0)));
+    EXPECT_EQ(cf.dot(elem_arg, current_time),
+              MetaPhysicL::raw_value(ad_cf.dot(elem_arg, current_time)));
+    EXPECT_EQ(cf.dot(face, current_time), MetaPhysicL::raw_value(ad_cf.dot(face, current_time)));
+    EXPECT_EQ(cf.dot(elem_point, current_time),
+              MetaPhysicL::raw_value(ad_cf.dot(elem_point, current_time)));
+    EXPECT_EQ(cf.dot(elem_qp, current_time),
+              MetaPhysicL::raw_value(ad_cf.dot(elem_qp, current_time)));
+    EXPECT_EQ(cf.dot(elem_side_qp, current_time),
+              MetaPhysicL::raw_value(ad_cf.dot(elem_side_qp, current_time)));
 
     // Test AD down-type
     RawValueFunctor<Real> raw_ad_cf(ad_cf);
-    EXPECT_EQ(cf(elem_arg), raw_ad_cf(elem_arg));
-    EXPECT_EQ(cf(face), raw_ad_cf(face));
-    EXPECT_EQ(cf(elem_point), raw_ad_cf(elem_point));
-    EXPECT_EQ(cf(elem_qp), raw_ad_cf(elem_qp));
-    EXPECT_EQ(cf(elem_side_qp), raw_ad_cf(elem_side_qp));
-    EXPECT_EQ(cf.gradient(elem_arg)(0), raw_ad_cf.gradient(elem_arg)(0));
-    EXPECT_EQ(cf.gradient(face)(0), raw_ad_cf.gradient(face)(0));
-    EXPECT_EQ(cf.gradient(elem_point)(0), raw_ad_cf.gradient(elem_point)(0));
-    EXPECT_EQ(cf.gradient(elem_qp)(0), raw_ad_cf.gradient(elem_qp)(0));
-    EXPECT_EQ(cf.gradient(elem_side_qp)(0), raw_ad_cf.gradient(elem_side_qp)(0));
-    EXPECT_EQ(cf.dot(elem_arg), raw_ad_cf.dot(elem_arg));
-    EXPECT_EQ(cf.dot(face), raw_ad_cf.dot(face));
-    EXPECT_EQ(cf.dot(elem_point), raw_ad_cf.dot(elem_point));
-    EXPECT_EQ(cf.dot(elem_qp), raw_ad_cf.dot(elem_qp));
-    EXPECT_EQ(cf.dot(elem_side_qp), raw_ad_cf.dot(elem_side_qp));
+    EXPECT_EQ(cf(elem_arg, current_time), raw_ad_cf(elem_arg, current_time));
+    EXPECT_EQ(cf(face, current_time), raw_ad_cf(face, current_time));
+    EXPECT_EQ(cf(elem_point, current_time), raw_ad_cf(elem_point, current_time));
+    EXPECT_EQ(cf(elem_qp, current_time), raw_ad_cf(elem_qp, current_time));
+    EXPECT_EQ(cf(elem_side_qp, current_time), raw_ad_cf(elem_side_qp, current_time));
+    EXPECT_EQ(cf.gradient(elem_arg, current_time)(0),
+              raw_ad_cf.gradient(elem_arg, current_time)(0));
+    EXPECT_EQ(cf.gradient(face, current_time)(0), raw_ad_cf.gradient(face, current_time)(0));
+    EXPECT_EQ(cf.gradient(elem_point, current_time)(0),
+              raw_ad_cf.gradient(elem_point, current_time)(0));
+    EXPECT_EQ(cf.gradient(elem_qp, current_time)(0), raw_ad_cf.gradient(elem_qp, current_time)(0));
+    EXPECT_EQ(cf.gradient(elem_side_qp, current_time)(0),
+              raw_ad_cf.gradient(elem_side_qp, current_time)(0));
+    EXPECT_EQ(cf.dot(elem_arg, current_time), raw_ad_cf.dot(elem_arg, current_time));
+    EXPECT_EQ(cf.dot(face, current_time), raw_ad_cf.dot(face, current_time));
+    EXPECT_EQ(cf.dot(elem_point, current_time), raw_ad_cf.dot(elem_point, current_time));
+    EXPECT_EQ(cf.dot(elem_qp, current_time), raw_ad_cf.dot(elem_qp, current_time));
+    EXPECT_EQ(cf.dot(elem_side_qp, current_time), raw_ad_cf.dot(elem_side_qp, current_time));
   }
 
   const char * argv[2] = {"foo", "\0"};
@@ -266,11 +282,11 @@ TEST(MooseFunctorTest, testArgs)
   {
     WithGradientTestFunctor<RealVectorValue> vec_test_func(*mesh);
     VectorComponentFunctor<Real> vec_comp(vec_test_func, 0);
-    EXPECT_EQ(vec_comp(elem_arg), 0);
-    EXPECT_EQ(vec_comp(face), 0);
-    EXPECT_EQ(vec_comp(elem_qp), 0);
-    EXPECT_EQ(vec_comp(elem_side_qp), 0);
-    EXPECT_EQ(vec_comp(elem_point), 0);
+    EXPECT_EQ(vec_comp(elem_arg, current_time), 0);
+    EXPECT_EQ(vec_comp(face, current_time), 0);
+    EXPECT_EQ(vec_comp(elem_qp, current_time), 0);
+    EXPECT_EQ(vec_comp(elem_side_qp, current_time), 0);
+    EXPECT_EQ(vec_comp(elem_point, current_time), 0);
 
     bool found_internal = false;
     for (const auto & mesh_fi : all_fi)
@@ -295,11 +311,11 @@ TEST(MooseFunctorTest, testArgs)
   // Test NullFunctor errors
   {
     NullFunctor<Real> null;
-    auto test_null_error = [&null](const auto & arg)
+    auto test_null_error = [&null, &current_time](const auto & arg)
     {
       try
       {
-        null(arg);
+        null(arg, current_time);
         EXPECT_TRUE(false);
       }
       catch (std::runtime_error & e)
@@ -324,11 +340,11 @@ TEST(MooseFunctorTest, testArgs)
       BypassFaceError<Real> errorfree(
           "errorfree", dummy_lammy, {EXEC_ALWAYS}, *mesh, mesh->meshSubdomains());
 
-      auto test_sub_error = [&errorful](const auto & arg)
+      auto test_sub_error = [&errorful, &current_time](const auto & arg)
       {
         try
         {
-          errorful(arg);
+          errorful(arg, current_time);
           EXPECT_TRUE(false);
         }
         catch (std::runtime_error & e)
@@ -347,7 +363,7 @@ TEST(MooseFunctorTest, testArgs)
       test_sub_error(elem_qp);
       test_sub_error(elem_side_qp);
       test_sub_error(elem_point);
-      EXPECT_EQ(errorfree(elem_point), 2);
+      EXPECT_EQ(errorfree(elem_point, current_time), 2);
     }
 
     // Test functions
@@ -363,7 +379,8 @@ TEST(MooseFunctorTest, testArgs)
       }
 
       for (const auto & mesh_fi : all_fi)
-        EXPECT_TRUE(zero.isExtrapolatedBoundaryFace(mesh_fi, nullptr) == !(mesh_fi.neighborPtr()));
+        EXPECT_TRUE(zero.isExtrapolatedBoundaryFace(mesh_fi, nullptr, current_time) ==
+                    !(mesh_fi.neighborPtr()));
     }
   }
 }
