@@ -34,7 +34,7 @@ HeatStructurePlate::HeatStructurePlate(const InputParameters & params)
   : HeatStructureBase(params), _depth(getParam<Real>("depth"))
 {
   _names = getParam<std::vector<std::string>>("names");
-  _number_of_hs = _names.size();
+  _n_regions = _names.size();
   for (unsigned int i = 0; i < _names.size(); i++)
     _name_index[_names[i]] = i;
 
@@ -49,9 +49,9 @@ HeatStructurePlate::HeatStructurePlate(const InputParameters & params)
 
   _num_rods = getParam<Real>("num_rods");
 
-  if (_width.size() == _number_of_hs)
+  if (_width.size() == _n_regions)
   {
-    for (unsigned int i = 0; i < _number_of_hs; i++)
+    for (unsigned int i = 0; i < _n_regions; i++)
       _volume.push_back(_num_rods * _width[i] * _depth * _length);
   }
 }

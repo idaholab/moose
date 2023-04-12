@@ -39,7 +39,7 @@ Component2D::validParams()
 }
 
 Component2D::Component2D(const InputParameters & params)
-  : GeneratedMeshComponent(params), _number_of_hs(0), _total_elem_number(0), _axial_offset(0.0)
+  : GeneratedMeshComponent(params), _n_regions(0), _total_elem_number(0), _axial_offset(0.0)
 {
 }
 
@@ -78,7 +78,7 @@ Component2D::build2DMesh()
 
     // loop over all heat structures
     unsigned int l = 1;
-    for (unsigned int j = 0; j < _number_of_hs; j++)
+    for (unsigned int j = 0; j < _n_regions; j++)
     {
       Real elem_length = _width[j] / _n_part_elems[j];
       for (unsigned int k = 0; k < _n_part_elems[j]; k++, l++)
@@ -105,7 +105,7 @@ Component2D::build2DMesh()
     for (unsigned int i_local = 0; i_local < _n_elems[i_section]; i_local++)
     {
       unsigned int j = 0;
-      for (unsigned int j_section = 0; j_section < _number_of_hs; j_section++)
+      for (unsigned int j_section = 0; j_section < _n_regions; j_section++)
         for (unsigned int j_local = 0; j_local < _n_part_elems[j_section]; j_local++)
         {
           Elem * elem = addElementQuad4(
@@ -147,7 +147,7 @@ Component2D::build2DMesh()
           if (_n_sections > 1 && _axial_region_names.size() == _n_sections &&
               i_section != _n_sections - 1 && i == i_section_end)
           {
-            const unsigned int k = i_section * _number_of_hs + j_section;
+            const unsigned int k = i_section * _n_regions + j_section;
             boundary_info.add_side(elem, 2, _interior_axial_per_radial_section_bc_id[k]);
             _hs_boundary_info[_boundary_names_interior_axial_per_radial_section[k]].push_back(
                 std::tuple<dof_id_type, unsigned short int>(elem->id(), 2));
@@ -185,7 +185,7 @@ Component2D::build2DMesh()
           }
 
           // interior radial boundaries (all axial sections)
-          if (_number_of_hs > 1 && _names.size() == _number_of_hs && j_section != 0)
+          if (_n_regions > 1 && _names.size() == _n_regions && j_section != 0)
           {
             unsigned int j_section_begin = 0;
             for (unsigned int jj_section = 0; jj_section < j_section; ++jj_section)
@@ -225,7 +225,7 @@ Component2D::build2DMesh2ndOrder()
 
     // loop over all heat structures
     unsigned int l = 1;
-    for (unsigned int j = 0; j < _number_of_hs; j++)
+    for (unsigned int j = 0; j < _n_regions; j++)
     {
       Real elem_length = _width[j] / (2. * _n_part_elems[j]);
       for (unsigned int k = 0; k < 2. * _n_part_elems[j]; k++, l++)
@@ -245,7 +245,7 @@ Component2D::build2DMesh2ndOrder()
     for (unsigned int i_local = 0; i_local < _n_elems[i_section]; i_local++)
     {
       unsigned int j = 0;
-      for (unsigned int j_section = 0; j_section < _number_of_hs; j_section++)
+      for (unsigned int j_section = 0; j_section < _n_regions; j_section++)
         for (unsigned int j_local = 0; j_local < _n_part_elems[j_section]; j_local++)
         {
           Elem * elem = addElementQuad9(node_ids[2 * i][2 * j],
@@ -317,7 +317,7 @@ Component2D::build2DMesh2ndOrder()
           }
 
           // interior radial boundaries
-          if (_number_of_hs > 1 && _names.size() == _number_of_hs && j_section != 0)
+          if (_n_regions > 1 && _names.size() == _n_regions && j_section != 0)
           {
             unsigned int j_section_begin = 0;
             for (unsigned int jj_section = 0; jj_section < j_section; ++jj_section)
@@ -341,11 +341,11 @@ Component2D::build2DMesh2ndOrder()
 void
 Component2D::buildMesh()
 {
-  if (_n_part_elems.size() != _number_of_hs || _width.size() != _number_of_hs)
+  if (_n_part_elems.size() != _n_regions || _width.size() != _n_regions)
     return;
 
   // Assign subdomain to each transverse region
-  for (unsigned int i = 0; i < _number_of_hs; i++)
+  for (unsigned int i = 0; i < _n_regions; i++)
   {
     // The coordinate system for MOOSE is always XYZ, even for axisymmetric
     // components, since we do the RZ integration ourselves until we can set

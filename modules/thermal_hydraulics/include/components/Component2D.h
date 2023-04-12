@@ -35,7 +35,7 @@ public:
   /**
    * Gets the number of transverse regions
    */
-  unsigned int getNumHS() const { return _number_of_hs; }
+  unsigned int getNumRegions() const { return _n_regions; }
 
   /**
    * Returns true if there is a transverse region of a given name
@@ -128,7 +128,7 @@ protected:
   void build2DMesh2ndOrder();
 
   /// Number of transverse regions
-  unsigned int _number_of_hs;
+  unsigned int _n_regions;
   /// Names of each transverse region
   std::vector<std::string> _names;
   /// Width of each transverse region
@@ -191,6 +191,7 @@ protected:
   /// Distance by which to offset the mesh from the component axis
   mutable Real _axial_offset;
 
+private:
 public:
   static InputParameters validParams();
 

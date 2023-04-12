@@ -20,7 +20,10 @@ HeatStructureBase::validParams()
 }
 
 HeatStructureBase::HeatStructureBase(const InputParameters & params)
-  : Component2D(params), HeatStructureInterface(this), _connected_to_flow_channel(false)
+  : Component2D(params),
+    HeatStructureInterface(this),
+    _connected_to_flow_channel(false),
+    _number_of_hs(_n_regions)
 {
 }
 
@@ -65,7 +68,7 @@ HeatStructureBase::addMooseObjects()
   {
     _hc_model->addMaterials();
 
-    for (unsigned int i = 0; i < _number_of_hs; i++)
+    for (unsigned int i = 0; i < _n_regions; i++)
     {
       const SolidMaterialProperties & smp =
           getTHMProblem().getUserObject<SolidMaterialProperties>(_material_names[i]);

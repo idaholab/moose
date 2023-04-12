@@ -70,6 +70,9 @@ protected:
   /// True if this heat structure is connected to at least one flow channel
   mutable bool _connected_to_flow_channel;
 
+  // This reference should be deleted after applications start using _n_regions:
+  unsigned int & _number_of_hs;
+
 public:
   static InputParameters validParams();
 };

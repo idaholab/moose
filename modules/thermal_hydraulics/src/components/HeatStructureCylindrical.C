@@ -33,7 +33,7 @@ HeatStructureCylindrical::HeatStructureCylindrical(const InputParameters & param
   : HeatStructureCylindricalBase(params)
 {
   _names = getParam<std::vector<std::string>>("names");
-  _number_of_hs = _names.size();
+  _n_regions = _names.size();
   for (unsigned int i = 0; i < _names.size(); i++)
     _name_index[_names[i]] = i;
 
@@ -50,10 +50,10 @@ HeatStructureCylindrical::HeatStructureCylindrical(const InputParameters & param
 
   _inner_radius = getParam<Real>("inner_radius");
 
-  if (_width.size() == _number_of_hs)
+  if (_width.size() == _n_regions)
   {
-    std::vector<Real> r(_number_of_hs + 1, _inner_radius);
-    for (unsigned int i = 0; i < _number_of_hs; i++)
+    std::vector<Real> r(_n_regions + 1, _inner_radius);
+    for (unsigned int i = 0; i < _n_regions; i++)
     {
       r[i + 1] = r[i] + _width[i];
       _volume.push_back(_num_rods * M_PI * (r[i + 1] * r[i + 1] - r[i] * r[i]) * _length);
