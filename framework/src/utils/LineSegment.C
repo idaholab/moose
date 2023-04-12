@@ -9,6 +9,8 @@
 
 #include "LineSegment.h"
 
+#include "JsonIO.h"
+
 #include "libmesh/plane.h"
 #include "libmesh/vector_value.h"
 
@@ -223,7 +225,13 @@ LineSegment::intersect(const LineSegment & l, Point & intersect_p) const
      */
 }
 
-template <>
+void
+LineSegment::set(const Point & p0, const Point & p1)
+{
+  setStart(p0);
+  setEnd(p1);
+}
+
 void
 dataStore(std::ostream & stream, LineSegment & l, void * context)
 {
@@ -231,23 +239,14 @@ dataStore(std::ostream & stream, LineSegment & l, void * context)
   dataStore(stream, l.end(), context);
 }
 
-template <>
 void
 dataLoad(std::istream & stream, LineSegment & l, void * context)
 {
-  Point start;
-  dataLoad(stream, start, context);
-  Point end;
-  dataLoad(stream, end, context);
-  l = LineSegment(start, end);
-}
-
-void
-to_json(nlohmann::json & json, const Point & p)
-{
-  json["x"] = p(0);
-  json["y"] = p(1);
-  json["z"] = p(2);
+  Point p0;
+  dataLoad(stream, p0, context);
+  Point p1;
+  dataLoad(stream, p1, context);
+  l.set(p0, p1);
 }
 
 void
