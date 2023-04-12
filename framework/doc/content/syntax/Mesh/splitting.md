@@ -59,7 +59,7 @@ To use a mesh split configuration use the `--use-split` flag (which takes no arg
 $ mpiexec -n 42 moose-app-opt -i your_input.i --use-split
 ```
 
-You may also use the `Mesh/use_split` input paremeter.
+You may also use the `Mesh/use_split` input parameter.
 
 This will cause MOOSE to look for a mesh split configuration with 42 chunks.  If one exists, MOOSE
 will use it running in a distributed mesh mode, otherwise an error will occur.  Note that you do
