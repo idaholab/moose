@@ -23,7 +23,7 @@
  * for the producer to get the value in the desired mode.
  *
  * On the consumer side, if needed the data supplied will be converted to the correct mode
- * automatically if needed and  possible. If the producer mode is not compatibable with
+ * automatically if needed and  possible. If the producer mode is not compatible with
  * the consumer mode, then an error is produced. The base ReporterContext handles the automatic
  * operations and error handling.
  *
