@@ -65,7 +65,7 @@ JSONOutput::filename()
 void
 JSONOutput::outputSystemInformation()
 {
-  storeHelper(_json, _app);
+  nlohmann::to_json(_json, _app);
 }
 
 void
