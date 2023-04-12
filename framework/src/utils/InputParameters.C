@@ -915,9 +915,7 @@ InputParameters::isParamSetByUser(const std::string & name_in) const
     return false;
   else
     // If the parameters is not located in the list, then it was set by the user
-    // If the parameter is private, and present in global params, it is ignored, therefore not set
-    return _params.count(name) > 0 && !_params.at(name)._set_by_add_param &&
-           !_params.at(name)._is_private;
+    return _params.count(name) > 0 && !_params.at(name)._set_by_add_param;
 }
 
 const std::string &
