@@ -38,7 +38,6 @@ thermal_expansion_coeff = 6.66e-6
   []
   [lm_pellet]
     block = 'pellet_secondary_subdomain'
-    use_dual = true
   []
 []
 
@@ -157,7 +156,6 @@ thermal_expansion_coeff = 6.66e-6
     primary = void_pellet_0
     secondary = void_pellet_1
     model = frictionless
-    penalty = 1e6
     formulation = mortar
     c_normal = 1e6
     correct_edge_dropping = true
@@ -207,7 +205,7 @@ thermal_expansion_coeff = 6.66e-6
   petsc_options_value = 'lu       superlu_dist                  NONZERO'
   automatic_scaling = true
   line_search = none
-  ignore_variables_for_autoscaling = 'pellet_normal_lm  lm_pellet '
+  ignore_variables_for_autoscaling = 'pellet_normal_lm'
   compute_scaling_once = true
   scaling_group_variables = 'disp_x disp_y disp_z; T_K'
   nl_rel_tol = 1e-50
