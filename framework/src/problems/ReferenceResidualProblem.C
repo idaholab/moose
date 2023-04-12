@@ -70,6 +70,17 @@ ReferenceResidualProblem::validParams()
                          "by the absolute reference "
                          "vector to the L-infinity norm of the absolute reference vector to "
                          "determine relative convergence");
+
+  MooseEnum zero_ref_res("zero_tolerance relative_tolerance", "relative_tolerance");
+  params.addParam<MooseEnum>("zero_reference_residual_treatment",
+                             zero_ref_res,
+                             "Determine behavior if a reference residual value of zero is present "
+                             "for a particular variable.");
+  zero_ref_res.addDocumentation("zero_tolerance",
+                                "Solve is treated as converged if the residual is zero");
+  zero_ref_res.addDocumentation(
+      "relative_tolerance",
+      "Solve is treated as converged if the residual is below the relative tolerance");
   return params;
 }
 
@@ -77,7 +88,9 @@ ReferenceResidualProblem::ReferenceResidualProblem(const InputParameters & param
   : FEProblem(params),
     _use_group_variables(false),
     _reference_vector(nullptr),
-    _converge_on(getParam<std::vector<NonlinearVariableName>>("converge_on"))
+    _converge_on(getParam<std::vector<NonlinearVariableName>>("converge_on")),
+    _zero_ref_type(
+        params.get<MooseEnum>("zero_reference_residual_treatment").getEnum<ZeroReferenceType>())
 {
   if (params.isParamValid("solution_variables"))
   {
@@ -481,7 +494,8 @@ ReferenceResidualProblem::nonlinearConvergenceSetup()
         const auto ref_var_name =
             _reference_vector ? _group_soln_var_names[i] + "_ref" : _group_ref_resid_var_names[i];
         out << "  " << std::setw(maxwrv + 2) << ref_var_name + ":" << std::setw(8)
-            << _group_ref_resid[i] << "  (" << std::setw(8) << _group_resid[i] / _group_ref_resid[i]
+            << _group_ref_resid[i] << "  (" << std::setw(8)
+            << (_group_ref_resid[i] ? _group_resid[i] / _group_ref_resid[i] : _group_resid[i])
             << ")";
       }
       out << '\n';
@@ -525,12 +539,26 @@ ReferenceResidualProblem::checkConvergenceIndividVars(const Real fnorm,
                                                       const Real rtol,
                                                       const Real initial_residual_before_preset_bcs)
 {
+  // Convergence is checked via:
+  // 1) if group residual is less than group reference residual by relative tolerance
+  // 2) if group residual is less than absolute tolerance
+  // 3) if group reference residual is zero and:
+  //   3.1) Convergence type is ZERO_TOLERANCE and group residual is zero (rare, but possible, and
+  //        historically implemented way)
+  //   3.2) Convergence type is RELATIVE_TOLERANCE and group residual
+  //        is less than relative tolerance. (i.e., using the relative tolerance to check group
+  //        convergence in an absolute way)
+
   bool convergedRelative = true;
   if (_group_resid.size() > 0)
   {
     for (unsigned int i = 0; i < _group_resid.size(); ++i)
       convergedRelative &=
-          ((_group_resid[i] < _group_ref_resid[i] * rtol) || (_group_resid[i] < abstol));
+          (_group_resid[i] < _group_ref_resid[i] * rtol || _group_resid[i] < abstol ||
+           (_group_ref_resid[i] == 0.0 &&
+            ((_zero_ref_type == ZeroReferenceType::ZERO_TOLERANCE && _group_resid[i] == 0.0) ||
+             (_zero_ref_type == ZeroReferenceType::RELATIVE_TOLERANCE &&
+              _group_resid[i] <= rtol))));
   }
 
   else if (fnorm > initial_residual_before_preset_bcs * rtol)

@@ -4,10 +4,6 @@
   nx = 10
 []
 
-[GlobalParams]
-  absolute_value_vector_tags = 'absref'
-[]
-
 [Problem]
   type = ReferenceResidualProblem
   # reference_vector = 'absref'
