@@ -102,6 +102,7 @@ ElementSubdomainModifier::initialize()
   _moved_elems.clear();
   _moved_displaced_elems.clear();
   _moved_nodes.clear();
+  _cached_subdomain_assignments.clear();
   _moving_boundary_subdomains.clear();
 }
 
@@ -127,12 +128,11 @@ ElementSubdomainModifier::execute()
     // Save the affected nodes so that we can later update/initialize the solution
     for (unsigned int i = 0; i < elem->n_nodes(); ++i)
       _moved_nodes.insert(elem->node_id(i));
-
-    elem->subdomain_id() = subdomain_id;
+    _cached_subdomain_assignments.emplace_back(elem, subdomain_id);
     _moved_elems.push_back(elem);
     if (displaced_elem)
     {
-      displaced_elem->subdomain_id() = subdomain_id;
+      _cached_subdomain_assignments.emplace_back(displaced_elem, subdomain_id);
       _moved_displaced_elems.push_back(displaced_elem);
     }
     // Change the parent's subdomain, if any
@@ -154,11 +154,18 @@ ElementSubdomainModifier::threadJoin(const UserObject & in_uo)
                                 uo._moved_displaced_elems.end());
 
   _moved_nodes.insert(uo._moved_nodes.begin(), uo._moved_nodes.end());
+  _cached_subdomain_assignments.insert(_cached_subdomain_assignments.end(),
+                                       uo._cached_subdomain_assignments.begin(),
+                                       uo._cached_subdomain_assignments.end());
 }
 
 void
 ElementSubdomainModifier::finalize()
 {
+  // apply cached subdomain changes
+  for (auto & [elem, subdomain_id] : _cached_subdomain_assignments)
+    elem->subdomain_id() = subdomain_id;
+
   _ghost_sides_to_add.clear();
   _ghost_sides_to_remove.clear();
   _ghost_nodes_to_remove.clear();
@@ -186,7 +193,6 @@ ElementSubdomainModifier::finalize()
                                         _displaced_problem->mesh().getMesh().elements_begin(),
                                         _displaced_problem->mesh().getMesh().elements_end(),
                                         sync_displaced);
-
     if (_moving_boundary_specified)
       updateMovingBoundaryInfo(_displaced_problem->mesh(), _moved_displaced_elems);
     if (_complement_moving_boundary_specified)

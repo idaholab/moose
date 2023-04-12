@@ -45,6 +45,14 @@
       detail = 'with solution'
     []
 
+    [displaced]
+      type = 'Exodiff'
+      input = 'initial_condition.i'
+      cli_args = 'AuxVariables/inactive="" Mesh/displacements="disp_x disp_y" Outputs/file_base=displaced_out Outputs/out/use_displaced=true'
+      exodiff = "displaced_out.e displaced_out.e-s002 displaced_out.e-s003 displaced_out.e-s004"
+      detail = 'with a displaced mesh'
+    []
+
     [stateful_property]
       type = 'Exodiff'
       input = 'stateful_property.i'
@@ -60,6 +68,16 @@
     exodiff = 'steady_out.e'
     requirement = 'The framework shall include the ability to change element subdomain for a steady '
                   'state simulation'
+  []
+
+  [subdomain_caching]
+    type = RunApp
+    input = 'initial_condition.i'
+    cli_args = 'Postprocessors/active=average'
+    issues = '#23371'
+    requirement = "The system shall only apply subdomain changes when the userobject is finalized to "
+                  "avoid subdomain id mismatches"
+    recover = false # not needed for this test, and will interfere with the `initial_condition` recover
   []
 
   [amr_moving_boundary]

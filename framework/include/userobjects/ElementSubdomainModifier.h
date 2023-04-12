@@ -150,6 +150,9 @@ private:
   std::unordered_map<processor_id_type, std::vector<dof_id_type>> _ghost_nodes_to_remove,
       _ghost_nodes_to_add;
 
+  /// Any subdomain change is stored in this map and only applied in finalize to avoid messing up other UOs
+  std::vector<std::pair<Elem *, SubdomainID>> _cached_subdomain_assignments;
+
   /// Subdomains between that the moving boundary is
   std::set<SubdomainID> _moving_boundary_subdomains;
 };
