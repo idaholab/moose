@@ -76,7 +76,7 @@ Component2D::build2DMesh()
     Node * nd = addNode(p);
     node_ids[i][0] = nd->id();
 
-    // loop over all heat structures
+    // loop over regions
     unsigned int l = 1;
     for (unsigned int j = 0; j < _n_regions; j++)
     {
@@ -116,13 +116,13 @@ Component2D::build2DMesh()
           if (i == 0)
           {
             boundary_info.add_side(elem, 0, _start_bc_id[0]);
-            _hs_boundary_info[_boundary_names_start[0]].push_back(
+            _boundary_info[_boundary_names_start[0]].push_back(
                 std::tuple<dof_id_type, unsigned short int>(elem->id(), 0));
           }
           if (i == _n_elem - 1)
           {
             boundary_info.add_side(elem, 2, _end_bc_id[0]);
-            _hs_boundary_info[_boundary_names_end[0]].push_back(
+            _boundary_info[_boundary_names_end[0]].push_back(
                 std::tuple<dof_id_type, unsigned short int>(elem->id(), 2));
           }
 
@@ -132,13 +132,13 @@ Component2D::build2DMesh()
             if (i == 0)
             {
               boundary_info.add_side(elem, 0, _radial_start_bc_id[j_section]);
-              _hs_boundary_info[_boundary_names_radial_start[j_section]].push_back(
+              _boundary_info[_boundary_names_radial_start[j_section]].push_back(
                   std::tuple<dof_id_type, unsigned short int>(elem->id(), 0));
             }
             if (i == _n_elem - 1)
             {
               boundary_info.add_side(elem, 2, _radial_end_bc_id[j_section]);
-              _hs_boundary_info[_boundary_names_radial_end[j_section]].push_back(
+              _boundary_info[_boundary_names_radial_end[j_section]].push_back(
                   std::tuple<dof_id_type, unsigned short int>(elem->id(), 2));
             }
           }
@@ -149,7 +149,7 @@ Component2D::build2DMesh()
           {
             const unsigned int k = i_section * _n_regions + j_section;
             boundary_info.add_side(elem, 2, _interior_axial_per_radial_section_bc_id[k]);
-            _hs_boundary_info[_boundary_names_interior_axial_per_radial_section[k]].push_back(
+            _boundary_info[_boundary_names_interior_axial_per_radial_section[k]].push_back(
                 std::tuple<dof_id_type, unsigned short int>(elem->id(), 2));
           }
 
@@ -157,13 +157,13 @@ Component2D::build2DMesh()
           if (j == 0)
           {
             boundary_info.add_side(elem, 1, _inner_bc_id[0]);
-            _hs_boundary_info[_boundary_names_inner[0]].push_back(
+            _boundary_info[_boundary_names_inner[0]].push_back(
                 std::tuple<dof_id_type, unsigned short int>(elem->id(), 1));
           }
           if (j == _total_elem_number - 1)
           {
             boundary_info.add_side(elem, 3, _outer_bc_id[0]);
-            _hs_boundary_info[_boundary_names_outer[0]].push_back(
+            _boundary_info[_boundary_names_outer[0]].push_back(
                 std::tuple<dof_id_type, unsigned short int>(elem->id(), 3));
           }
 
@@ -173,13 +173,13 @@ Component2D::build2DMesh()
             if (j == 0)
             {
               boundary_info.add_side(elem, 1, _axial_inner_bc_id[i_section]);
-              _hs_boundary_info[_boundary_names_axial_inner[i_section]].push_back(
+              _boundary_info[_boundary_names_axial_inner[i_section]].push_back(
                   std::tuple<dof_id_type, unsigned short int>(elem->id(), 1));
             }
             if (j == _total_elem_number - 1)
             {
               boundary_info.add_side(elem, 3, _axial_outer_bc_id[i_section]);
-              _hs_boundary_info[_boundary_names_axial_outer[i_section]].push_back(
+              _boundary_info[_boundary_names_axial_outer[i_section]].push_back(
                   std::tuple<dof_id_type, unsigned short int>(elem->id(), 3));
             }
           }
@@ -194,7 +194,7 @@ Component2D::build2DMesh()
             if (j == j_section_begin)
             {
               boundary_info.add_side(elem, 1, _inner_radial_bc_id[j_section - 1]);
-              _hs_boundary_info[_boundary_names_inner_radial[j_section - 1]].push_back(
+              _boundary_info[_boundary_names_inner_radial[j_section - 1]].push_back(
                   std::tuple<dof_id_type, unsigned short int>(elem->id(), 1));
             }
           }
@@ -210,12 +210,11 @@ Component2D::build2DMesh()
 void
 Component2D::build2DMesh2ndOrder()
 {
-  // loop on flow channel nodes to create heat structure nodes
   unsigned int n_axial_positions = _node_locations.size();
   std::vector<std::vector<unsigned int>> node_ids(
       n_axial_positions, std::vector<unsigned int>(2 * _total_elem_number + 1));
 
-  // loop over layers
+  // loop over axial positions
   for (unsigned int i = 0; i < n_axial_positions; i++)
   {
     Point p(_node_locations[i], _axial_offset, 0);
@@ -223,7 +222,7 @@ Component2D::build2DMesh2ndOrder()
     const Node * nd = addNode(p);
     node_ids[i][0] = nd->id();
 
-    // loop over all heat structures
+    // loop over regions
     unsigned int l = 1;
     for (unsigned int j = 0; j < _n_regions; j++)
     {
@@ -262,13 +261,13 @@ Component2D::build2DMesh2ndOrder()
           if (i == 0)
           {
             boundary_info.add_side(elem, 0, _start_bc_id[0]);
-            _hs_boundary_info[_boundary_names_start[0]].push_back(
+            _boundary_info[_boundary_names_start[0]].push_back(
                 std::tuple<dof_id_type, unsigned short int>(elem->id(), 0));
           }
           if (i == _n_elem - 1)
           {
             boundary_info.add_side(elem, 2, _end_bc_id[0]);
-            _hs_boundary_info[_boundary_names_end[0]].push_back(
+            _boundary_info[_boundary_names_end[0]].push_back(
                 std::tuple<dof_id_type, unsigned short int>(elem->id(), 2));
           }
           if (_names.size() > 1)
@@ -276,13 +275,13 @@ Component2D::build2DMesh2ndOrder()
             if (i == 0)
             {
               boundary_info.add_side(elem, 0, _radial_start_bc_id[j_section]);
-              _hs_boundary_info[_boundary_names_radial_start[j_section]].push_back(
+              _boundary_info[_boundary_names_radial_start[j_section]].push_back(
                   std::tuple<dof_id_type, unsigned short int>(elem->id(), 0));
             }
             if (i == _n_elem - 1)
             {
               boundary_info.add_side(elem, 2, _radial_end_bc_id[j_section]);
-              _hs_boundary_info[_boundary_names_radial_end[j_section]].push_back(
+              _boundary_info[_boundary_names_radial_end[j_section]].push_back(
                   std::tuple<dof_id_type, unsigned short int>(elem->id(), 2));
             }
           }
@@ -290,13 +289,13 @@ Component2D::build2DMesh2ndOrder()
           if (j == 0)
           {
             boundary_info.add_side(elem, 3, _inner_bc_id[0]);
-            _hs_boundary_info[_boundary_names_inner[0]].push_back(
+            _boundary_info[_boundary_names_inner[0]].push_back(
                 std::tuple<dof_id_type, unsigned short int>(elem->id(), 3));
           }
           if (j == _total_elem_number - 1)
           {
             boundary_info.add_side(elem, 1, _outer_bc_id[0]);
-            _hs_boundary_info[_boundary_names_outer[0]].push_back(
+            _boundary_info[_boundary_names_outer[0]].push_back(
                 std::tuple<dof_id_type, unsigned short int>(elem->id(), 1));
           }
 
@@ -305,13 +304,13 @@ Component2D::build2DMesh2ndOrder()
             if (j == 0)
             {
               boundary_info.add_side(elem, 1, _axial_inner_bc_id[i_section]);
-              _hs_boundary_info[_boundary_names_axial_inner[i_section]].push_back(
+              _boundary_info[_boundary_names_axial_inner[i_section]].push_back(
                   std::tuple<dof_id_type, unsigned short int>(elem->id(), 1));
             }
             if (j == _total_elem_number - 1)
             {
               boundary_info.add_side(elem, 3, _axial_outer_bc_id[i_section]);
-              _hs_boundary_info[_boundary_names_axial_outer[i_section]].push_back(
+              _boundary_info[_boundary_names_axial_outer[i_section]].push_back(
                   std::tuple<dof_id_type, unsigned short int>(elem->id(), 3));
             }
           }
@@ -326,7 +325,7 @@ Component2D::build2DMesh2ndOrder()
             if (j == j_section_begin)
             {
               boundary_info.add_side(elem, 1, _inner_radial_bc_id[j_section - 1]);
-              _hs_boundary_info[_boundary_names_inner_radial[j_section - 1]].push_back(
+              _boundary_info[_boundary_names_inner_radial[j_section - 1]].push_back(
                   std::tuple<dof_id_type, unsigned short int>(elem->id(), 1));
             }
           }
@@ -478,24 +477,19 @@ Component2D::getExternalBoundaryType(const BoundaryName & boundary_name) const
   else if (isBoundaryInVector(boundary_name, _boundary_names_end) ||
            isBoundaryInVector(boundary_name, _boundary_names_radial_end))
     return ExternalBoundaryType::END;
-  else if (isBoundaryInVector(boundary_name, _boundary_names_interior_axial_per_radial_section) ||
-           isBoundaryInVector(boundary_name, _boundary_names_inner_radial))
-    mooseError("The boundary '", boundary_name, "' is an interior boundary.");
+  else if (hasBoundary(boundary_name))
+    mooseError(name(), ": The boundary '", boundary_name, "' is an interior boundary.");
   else
-    mooseError("No heat structure side type was found for the boundary '", boundary_name, "'.");
+    mooseError(name(), ": The boundary '", boundary_name, "' does not exist on this component.");
 }
 
 const std::vector<std::tuple<dof_id_type, unsigned short int>> &
 Component2D::getBoundaryInfo(const BoundaryName & boundary_name) const
 {
-  if (_hs_boundary_info.find(boundary_name) != _hs_boundary_info.end())
-    return _hs_boundary_info.at(boundary_name);
+  if (_boundary_info.find(boundary_name) != _boundary_info.end())
+    return _boundary_info.at(boundary_name);
   else
-    mooseError("The heat structure boundary '",
-               boundary_name,
-               "' does not exist for the heat structure '",
-               name(),
-               "'.");
+    mooseError(name(), ": The boundary '", boundary_name, "' does not exist on this component.");
 }
 
 const std::vector<std::tuple<dof_id_type, unsigned short int>> &

@@ -185,8 +185,7 @@ protected:
   std::vector<BoundaryName> _boundary_names_inner_radial;
 
   /// Map of boundary name to list of tuples of element and side IDs for that boundary
-  std::map<BoundaryName, std::vector<std::tuple<dof_id_type, unsigned short int>>>
-      _hs_boundary_info;
+  std::map<BoundaryName, std::vector<std::tuple<dof_id_type, unsigned short int>>> _boundary_info;
 
   /// Distance by which to offset the mesh from the component axis
   mutable Real _axial_offset;
