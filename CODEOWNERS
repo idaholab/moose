@@ -17,6 +17,9 @@
 
 /.github @permcody
 
+/libmesh @roystgnr @lindsayad
+/petsc @lindsayad
+
 /framework/include @lindsayad
 /framework/src @lindsayad
 /framework/*/base @roystgnr
