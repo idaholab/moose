@@ -99,5 +99,5 @@ private:
   /// The distributions used for sampling
   const std::vector<std::unique_ptr<const PolynomialQuadrature::Polynomial>> & _poly;
 
-  friend void to_json(nlohmann::json & json, const PolynomialChaos *& pc);
+  friend void to_json(nlohmann::json & json, const PolynomialChaos * const & pc);
 };
