@@ -1,0 +1,42 @@
+{
+    "reporters": {
+        "multiapp": {
+            "type": "MultiAppPositions",
+            "values": {
+                "positions_1d": {
+                    "type": "std::vector<libMesh::Point>"
+                }
+            }
+        }
+    },
+    "time_steps": [
+        {
+            "multiapp": {
+                "positions_1d": [
+                    {
+                        "x": 1.0,
+                        "y": 0.0,
+                        "z": 0.0
+                    },
+                    {
+                        "x": 0.5,
+                        "y": 0.0,
+                        "z": 0.0
+                    },
+                    {
+                        "x": 0.7,
+                        "y": 0.4,
+                        "z": 1.0
+                    },
+                    {
+                        "x": 0.5,
+                        "y": 0.0,
+                        "z": 6.0
+                    }
+                ]
+            },
+            "time": 1.0,
+            "time_step": 2
+        }
+    ]
+}
