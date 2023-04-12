@@ -1,0 +1,33 @@
+[Tests]
+  issues = '#23587'
+  design = 'syntax/Positions/index.md'
+
+  [test]
+    requirement = "The system shall be able to load positions from"
+
+    [input]
+      type = 'JSONDiff'
+      input = 'input_positions.i'
+      jsondiff = ''
+      detail = 'a parameter in the input file,'
+    []
+    [file]
+      type = 'JSONDiff'
+      input = 'file_positions.i'
+      jsondiff = ''
+      detail = 'a text file,'
+    []
+    [mesh]
+      type = 'JSONDiff'
+      input = 'mesh_positions'
+      jsondiff = ''
+      detail = 'element centroids from a mesh,'
+    []
+    [reporter]
+      type = 'JSONDiff'
+      input = 'report_positions'
+      jsondiff = ''
+      detail = 'a reporter with the right format,'
+    []
+  []
+[]

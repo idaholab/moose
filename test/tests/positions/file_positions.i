@@ -7,10 +7,9 @@
 []
 
 [Positions]
-  [input]
-    type = InputPositions
-    positions = '0.1 0 0
-                 0.2 0 0.1'
+  [file]
+    type = FilePositions
+    files = '../multiapps/positions_from_file/positions.txt'
   []
 []
 
@@ -19,14 +18,13 @@
 []
 
 [Executioner]
-  type = Transient
-  # Test recover
-  num_steps = 2
+  type = Steady
 []
 
 [Outputs]
   [out]
     type = JSON
+    execute_on = FINAL
     execute_system_information_on = none
   []
 []
