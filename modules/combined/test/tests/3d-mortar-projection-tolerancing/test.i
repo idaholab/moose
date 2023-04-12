@@ -22,13 +22,13 @@ thermal_expansion_coeff = 6.66e-6
 
 [Variables]
   [disp_x]
-    block = 'pellet_inner pellet_outer '
+    block = 'pellet_inner pellet_outer'
   []
   [disp_y]
-    block = 'pellet_inner pellet_outer '
+    block = 'pellet_inner pellet_outer'
   []
   [disp_z]
-    block = 'pellet_inner pellet_outer '
+    block = 'pellet_inner pellet_outer'
   []
   [T_K]
     [InitialCondition]
@@ -54,14 +54,14 @@ thermal_expansion_coeff = 6.66e-6
     type = ADStressDivergenceTensors
     variable = disp_y
     component = 1
-    block = 'pellet_inner pellet_outer '
+    block = 'pellet_inner pellet_outer'
     use_displaced_mesh = false
   []
   [solid_z]
     type = ADStressDivergenceTensors
     variable = disp_z
     component = 2
-    block = 'pellet_inner pellet_outer '
+    block = 'pellet_inner pellet_outer'
     use_displaced_mesh = false
   []
   [timeder]
@@ -69,21 +69,21 @@ thermal_expansion_coeff = 6.66e-6
     variable = 'T_K'
     density_name = density
     specific_heat = specific_heat
-    block = 'pellet_inner pellet_outer '
+    block = 'pellet_inner pellet_outer'
     use_displaced_mesh = true
   []
   [diff]
     type = ADHeatConduction
     variable = 'T_K'
     thermal_conductivity = thermal_conductivity
-    block = 'pellet_inner pellet_outer '
+    block = 'pellet_inner pellet_outer'
     use_displaced_mesh = true
   []
   [heatsource]
     type = ADMatHeatSource
     variable = 'T_K'
     material_property = radial_source
-    block = 'pellet_inner pellet_outer '
+    block = 'pellet_inner pellet_outer'
     use_displaced_mesh = true
   []
 []
@@ -96,19 +96,19 @@ thermal_expansion_coeff = 6.66e-6
   [mirror_z]
     type = ADDirichletBC
     variable = disp_z
-    boundary = 'mirror_innerp mirror_outerp  '
+    boundary = 'mirror_innerp mirror_outerp'
     value = 0
   []
   [mirror_x]
     type = ADDirichletBC
     variable = disp_x
-    boundary = 'mirror_innerp mirror_outerp  '
+    boundary = 'mirror_innerp mirror_outerp'
     value = 0
   []
   [mirror_y]
     type = ADDirichletBC
     variable = disp_y
-    boundary = 'mirror_innerp mirror_outerp  '
+    boundary = 'mirror_innerp mirror_outerp'
     value = 0
   []
 []
@@ -132,14 +132,14 @@ thermal_expansion_coeff = 6.66e-6
     type = ADComputeSmallStrain
     displacements = 'disp_x disp_y disp_z'
     eigenstrain_names = eigenstrain #nameS!
-    block = 'pellet_inner pellet_outer '
+    block = 'pellet_inner pellet_outer'
   []
   [thermal_strain]
     type = ADComputeThermalExpansionEigenstrain
     stress_free_temperature = ${stress_free_temperature}
     thermal_expansion_coeff = ${thermal_expansion_coeff}
     eigenstrain_name = eigenstrain
-    block = 'pellet_inner pellet_outer '
+    block = 'pellet_inner pellet_outer'
   []
   [elasticity]
     type = ADComputeIsotropicElasticityTensor
@@ -148,7 +148,7 @@ thermal_expansion_coeff = 6.66e-6
   []
   [stress]
     type = ADComputeLinearElasticStress
-    block = 'pellet_inner pellet_outer '
+    block = 'pellet_inner pellet_outer'
   []
 []
 
@@ -168,7 +168,7 @@ thermal_expansion_coeff = 6.66e-6
   [conduction]
     type = GapFluxModelConduction
     temperature = T_K
-    boundary = 'void_pellet_0 void_pellet_1    '
+    boundary = 'void_pellet_0 void_pellet_1'
     gap_conductivity = 0.4
     use_displaced_mesh = true
   []
@@ -203,8 +203,8 @@ thermal_expansion_coeff = 6.66e-6
 [Executioner]
   type = Transient
   solve_type = NEWTON
-  petsc_options_iname = '-pc_type -pc_factor_mat_solver_package -pc_factor_shift_type -pc_factor_shift_amount '
-  petsc_options_value = 'lu      superlu_dist NONZERO 1e-14'
+  petsc_options_iname = '-pc_type -pc_factor_mat_solver_package -pc_factor_shift_type'
+  petsc_options_value = 'lu       superlu_dist                  NONZERO'
   automatic_scaling = true
   line_search = none
   ignore_variables_for_autoscaling = 'pellet_normal_lm  lm_pellet '
