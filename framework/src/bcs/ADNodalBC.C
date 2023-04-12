@@ -22,8 +22,14 @@ template <typename T>
 InputParameters
 ADNodalBCTempl<T>::validParams()
 {
-  InputParameters params = NodalBCBase::validParams();
+  return NodalBCBase::validParams();
+}
 
+template <>
+InputParameters
+ADNodalBCTempl<RealVectorValue>::validParams()
+{
+  InputParameters params = NodalBCBase::validParams();
   // The below parameters are useful for vector Nodal BCs
   params.addParam<bool>("set_x_comp", true, "Whether to set the x-component of the variable");
   params.addParam<bool>("set_y_comp", true, "Whether to set the y-component of the variable");
@@ -44,7 +50,9 @@ ADNodalBCTempl<T>::ADNodalBCTempl(const InputParameters & parameters)
     _current_node(_var.node()),
     _u(_var.adNodalValue()),
     _set_components(
-        {getParam<bool>("set_x_comp"), getParam<bool>("set_y_comp"), getParam<bool>("set_z_comp")}),
+        {std::is_same<T, RealVectorValue>::value ? getParam<bool>("set_x_comp") : true,
+         std::is_same<T, RealVectorValue>::value ? getParam<bool>("set_y_comp") : true,
+         std::is_same<T, RealVectorValue>::value ? getParam<bool>("set_z_comp") : true}),
     _undisplaced_assembly(_fe_problem.assembly(_tid, _sys.number()))
 {
   _subproblem.haveADObjects(true);

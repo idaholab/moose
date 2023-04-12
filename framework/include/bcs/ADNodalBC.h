@@ -43,7 +43,7 @@ protected:
   /// Value of the unknown variable this BC is acting on
   const typename Moose::ADType<T>::type & _u;
 
-  const std::vector<bool> _set_components;
+  const std::array<bool, 3> _set_components;
 
 private:
   void computeResidual() override final;
