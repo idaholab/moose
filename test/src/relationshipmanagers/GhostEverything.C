@@ -37,9 +37,7 @@ GhostEverything::GhostEverything(const GhostEverything & other) : RelationshipMa
 std::string
 GhostEverything::getInfo() const
 {
-  std::ostringstream oss;
-  oss << "GhostEverything";
-  return oss.str();
+  return "GhostEverything";
 }
 
 void

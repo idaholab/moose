@@ -39,6 +39,10 @@
   [pin]
     type = ADAverageValuePin
     variable = u
+    # This BC constrains a single degree of freedom on the node specified by the boundary name 'pin' but
+    # since only gradients of 'u' appear in the weak form and we have no other Dirichlet boundary conditions,
+    # constraining the single degree of freedom will make it appear as if we have constrained all the degrees of
+    # freedom in the system such that we have an average value of 0.
     boundary = 'pin'
   []
 []
