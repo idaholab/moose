@@ -80,7 +80,7 @@ protected:
   // The input is expected to be the distance from a stright line at the middle of an edge
   Real computeRadius(const Point & P1, const Point & P2, const Point & P3) const;
 
-  // To generate the origin of a circle that passes through 3 points we need to solve a system of
+  // To identify the origin of a circle that passes through 3 points we need to solve a system of
   // 3 equations. The system is solved separately and this routine implements its solution.
   Point computeOrigin(const Point & P1, const Point & P2, const Point & P3) const;
 
