@@ -46,4 +46,10 @@
     input = csvdiff.i
     csvdiff = csv_invalid.csv
   []
+  [schema_csvdiff_ignore_col]
+    type = CSVDiff
+    input = csvdiff.i
+    csvdiff = csvdiff_out.csv
+    ignored_columns = 'num_dofs'
+  []
 []

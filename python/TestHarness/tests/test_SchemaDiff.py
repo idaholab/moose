@@ -21,3 +21,5 @@ class TestHarnessTester(TestHarnessTestCase):
         self.assertRegex(output.decode('utf-8'), r'test_harness\.schema_invalid_csv.*?FAILED \(LOAD FAILED\)')
         self.assertNotRegex(output.decode('utf-8'), r'test_harness\.schema_csvdiff_override_rel.*?FAILED')
         self.assertNotRegex(output.decode('utf-8'), r'test_harness\.schema_csvdiff_override_abs_multi_col.*?FAILED')
+        self.assertNotRegex(output.decode('utf-8'), r'test_harness\.schema_csvdiff_ignore_col.*?FAILED')
+

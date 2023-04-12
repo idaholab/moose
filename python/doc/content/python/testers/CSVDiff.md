@@ -19,6 +19,8 @@ All `CSVDiff` files also contain the options for differs found in [SchemaDiff](S
 
 - `override_abs_zero`: A list of customized absolute zero tolerances, ordered corresponding to the index of the column in `override_columns`
 
+- `ignored_columns`: A list of column names to ignore when diffing. All values in these columns will not be compared
+
 If `rel_err` or `abs_zero` are set globally in the same test file as `override_rel_err` or `override_abs_zero`, the overrides in `override_rel_err` or equivalent will take priority over the global changes. For example, if `rel_err` is changed to `0.1`, and `override_rel_err` for the column `foo` is set to `0.00005`, then every other column will have its `rel_err` values set to `0.1`, and column `foo` will be set to `0.00005`.
 
 Other test commands & restrictions may be found in the [TestHarness documentation](TestHarness.md).

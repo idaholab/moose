@@ -21,10 +21,16 @@ class CSVDiff(SchemaDiff):
         params.addParam('override_columns',   [], "A list of variable names to customize the CSVDiff tolerances.")
         params.addParam('override_rel_err',   [], "A list of customized relative error tolerances.")
         params.addParam('override_abs_zero',   [], "A list of customized absolute zero tolerances.")
+        params.addParam('ignored_columns',      [], "A list of columns to ignore while diffing.")
         return params
 
     def __init__(self, name, params):
         params['schemadiff'] = params['csvdiff']
+        if params['ignored_items']:
+            from mooseutils import mooseWarning
+            mooseWarning('"ignored_items" aliases to ignored_columns in CSVDiff. Any values given will block diffing on column names that match.')
+            params['ignored_columns'] = params['ignored_items']
+            params['ignored_items'] = []
         SchemaDiff.__init__(self, name, params)
 
     def load_file(self, path1):
@@ -35,12 +41,14 @@ class CSVDiff(SchemaDiff):
                 for row in reader:
                 # Loop through each column in the row
                     for column, value in row.items():
-                        # If the column is not already in the output dictionary, add it
-                        if column not in output_dict:
-                            output_dict[column] = []
+                        # Simply don't include columns in the ignored columns list in the diff.
+                        if column not in self.specs['ignored_columns']:
+                            # If the column is not already in the output dictionary, add it
+                            if column not in output_dict:
+                                output_dict[column] = []
 
-                        # Add the value to the list for the corresponding column
-                        output_dict[column].append(value)
+                            # Add the value to the list for the corresponding column
+                            output_dict[column].append(value)
             return output_dict
         except Exception as e:
             return e
