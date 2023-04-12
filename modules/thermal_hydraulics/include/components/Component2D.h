@@ -109,10 +109,12 @@ public:
    */
   Real getAxialOffset() const { return _axial_offset; }
 
-  const std::vector<BoundaryName> & getOuterBoundaryNames() const;
-  const std::vector<BoundaryName> & getInnerBoundaryNames() const;
-  const std::vector<BoundaryName> & getStartBoundaryNames() const;
-  const std::vector<BoundaryName> & getEndBoundaryNames() const;
+  /**
+   * Gets the name of an external boundary by type
+   *
+   * @param[in] boundary_type   The external boundary type
+   */
+  const BoundaryName & getExternalBoundaryName(const ExternalBoundaryType & boundary_type) const;
 
 protected:
   virtual void check() const override;
@@ -163,14 +165,14 @@ protected:
   /// BC ID of the inner radial boundary regions of the component
   std::vector<unsigned int> _inner_radial_bc_id;
 
-  /// Boundary names of the outer side of the component
-  std::vector<BoundaryName> _boundary_names_outer;
-  /// Boundary names of the inner side of the component
-  std::vector<BoundaryName> _boundary_names_inner;
-  /// Boundary names of the start side of the component
-  std::vector<BoundaryName> _boundary_names_start;
-  /// Boundary names of the end side of the component
-  std::vector<BoundaryName> _boundary_names_end;
+  /// Boundary name of the outer side of the component
+  BoundaryName _boundary_name_outer;
+  /// Boundary name of the inner side of the component
+  BoundaryName _boundary_name_inner;
+  /// Boundary name of the start side of the component
+  BoundaryName _boundary_name_start;
+  /// Boundary name of the end side of the component
+  BoundaryName _boundary_name_end;
   /// Boundary names of the interior axial boundaries (per radial section) of the component
   std::vector<BoundaryName> _boundary_names_interior_axial_per_radial_section;
   /// Boundary names of the axial regions of the outer side of the component

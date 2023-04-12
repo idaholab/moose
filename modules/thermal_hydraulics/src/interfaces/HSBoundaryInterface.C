@@ -64,33 +64,5 @@ const BoundaryName &
 HSBoundaryInterface::getHSBoundaryName(const Component * const component) const
 {
   const HeatStructureBase & hs = component->getComponentByName<HeatStructureBase>(_hs_name);
-
-  switch (_hs_side)
-  {
-    case Component2D::ExternalBoundaryType::OUTER:
-      if (hs.getOuterBoundaryNames().size() > 0)
-        return hs.getOuterBoundaryNames()[0];
-      else
-        return THMMesh::INVALID_BOUNDARY_ID;
-
-    case Component2D::ExternalBoundaryType::INNER:
-      if (hs.getInnerBoundaryNames().size() > 0)
-        return hs.getInnerBoundaryNames()[0];
-      else
-        return THMMesh::INVALID_BOUNDARY_ID;
-
-    case Component2D::ExternalBoundaryType::START:
-      if (hs.getStartBoundaryNames().size() > 0)
-        return hs.getStartBoundaryNames()[0];
-      else
-        return THMMesh::INVALID_BOUNDARY_ID;
-
-    case Component2D::ExternalBoundaryType::END:
-      if (hs.getEndBoundaryNames().size() > 0)
-        return hs.getEndBoundaryNames()[0];
-      else
-        return THMMesh::INVALID_BOUNDARY_ID;
-  }
-
-  mooseError(component->name(), ": Unknown value of 'hs_side' parameter.");
+  return hs.getExternalBoundaryName(_hs_side);
 }
