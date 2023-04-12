@@ -6,8 +6,8 @@ InputParameters
 TestAutosaveTimedCheckpoint::validParams()
 {
   InputParameters params = Checkpoint::validParams();
-  // params.setParameters("is_autosave", AutosaveType::SYSTEM_AUTOSAVE);
-  // params.setParameters("file_base", std::string("autosave"));
+  params.addParam<bool>(
+      "test_system", false, "Test the system autosave rather than a regular checkpoint");
   return params;
 }
 
@@ -21,6 +21,7 @@ TestAutosaveTimedCheckpoint::~TestAutosaveTimedCheckpoint() {}
 void
 TestAutosaveTimedCheckpoint::initialSetup()
 {
-  _is_autosave = AutosaveType::SYSTEM_AUTOSAVE;
+  if (getParam<bool>("test_system"))
+    setAutosaveFlag(AutosaveType::SYSTEM_AUTOSAVE);
   Checkpoint::initialSetup();
 }

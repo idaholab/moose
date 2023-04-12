@@ -49,7 +49,7 @@
 
 [Outputs]
   [cp]
-    type = Checkpoint
-    autosave_interval = 1
+    type = TestAutosaveTimedCheckpoint
+    autosave_time_interval = 1
   []
 []

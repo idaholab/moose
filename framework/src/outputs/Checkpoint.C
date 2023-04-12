@@ -48,7 +48,7 @@ Checkpoint::validParams()
   // Advanced settings
   params.addParam<bool>("binary", true, "Toggle the output of binary files");
   params.addParam<int>(
-      "autosave_interval",
+      "autosave_time_interval",
       600,
       "Time in seconds that the checkpoint should wait to print out an automatic backup.");
   params.addParamNamesToGroup("binary", "Advanced");
@@ -58,6 +58,7 @@ Checkpoint::validParams()
 Checkpoint::Checkpoint(const InputParameters & parameters)
   : FileOutput(parameters),
     _is_autosave(getParam<AutosaveType>("is_autosave")),
+    _autosave_time_interval(std::chrono::seconds(getParam<int>("autosave_time_interval"))),
     _num_files(getParam<unsigned int>("num_files")),
     _suffix(getParam<std::string>("suffix")),
     _binary(getParam<bool>("binary")),
@@ -70,7 +71,6 @@ Checkpoint::Checkpoint(const InputParameters & parameters)
 void
 Checkpoint::initialSetup()
 {
-  _autosave_interval = std::chrono::seconds(getParam<int>("autosave_interval"));
   start_time = std::chrono::steady_clock::now();
 }
 
@@ -121,10 +121,11 @@ Checkpoint::shouldOutput(const ExecFlagType & type)
   // Check if we should output an autosave based on a time interval.
   auto curr_time = std::chrono::steady_clock::now();
   auto elapsed = std::chrono::duration_cast<std::chrono::seconds>(curr_time - start_time);
-  if (shouldOutput and elapsed >= _autosave_interval)
+  // Print only on timestep end to avoid weird issues
+  if (elapsed >= _autosave_time_interval and type == EXEC_TIMESTEP_END)
   {
     start_time = std::chrono::steady_clock::now();
-    _console << std::to_string(_autosave_interval.count()) +
+    _console << std::to_string(_autosave_time_interval.count()) +
                     " seconds have elapsed, autosaving checkpoint..."
              << std::endl;
     return true;

@@ -169,7 +169,7 @@
     type = RunApp
     expect_out = "1 seconds have elapsed, autosaving checkpoint..."
     input = autosavetimer.i
-    cli_args = "Outputs/cp/type=TestAutosaveTimedCheckpoint"
+    cli_args = "Outputs/cp/test_system=true"
     recover = false
     max_parallel = 1
     max_threads = 1
