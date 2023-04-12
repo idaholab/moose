@@ -33,7 +33,7 @@
       input = 'simple_diffusion.i'
       exodiff = 'simple_diffusion_out.e'
       cli_args = 'Mesh/use_split=true Mesh/split_file=foo UserObjects/splittester/type=SplitTester'
-      prereq = 'make_split'
+      prereq = 'use_split/from_cli'
       min_parallel = 3
       max_parallel = 3
 
@@ -160,7 +160,7 @@
 
     min_parallel = 3
     max_parallel = 3
-    prereq = 'use_split/from_cli'
+    prereq = 'use_split/from_input'
 
     issues = '#18635'
     design = 'Mesh/splitting.md FileMeshGenerator.md'
