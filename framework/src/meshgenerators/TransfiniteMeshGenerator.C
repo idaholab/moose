@@ -301,7 +301,7 @@ std::vector<Point>
 TransfiniteMeshGenerator::getParsedEdge(const std::string & parameter,
                                         const std::vector<Real> & param_vec)
 {
-  std::vector<Point>  edge(param_vec.size());
+  std::vector<Point> edge(param_vec.size());
   Real x_coord, y_coord;
 
   std::vector<std::string> param_coords;
