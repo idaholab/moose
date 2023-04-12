@@ -21,5 +21,7 @@ InputPositions::validParams()
 
 InputPositions::InputPositions(const InputParameters & parameters) : Positions(parameters)
 {
+  std::cout << _positions.size() << std::endl;
   _positions = getParam<std::vector<Point>>("positions");
+  std::cout << _positions.size() << std::endl;
 }
