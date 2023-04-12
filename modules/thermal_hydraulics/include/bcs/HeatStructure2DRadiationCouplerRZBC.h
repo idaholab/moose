@@ -10,11 +10,12 @@
 #pragma once
 
 #include "HeatStructure2DCouplerBCBase.h"
+#include "RZSymmetry.h"
 
 /**
  * Applies BC for HeatStructure2DRadiationCouplerRZ
  */
-class HeatStructure2DRadiationCouplerRZBC : public HeatStructure2DCouplerBCBase
+class HeatStructure2DRadiationCouplerRZBC : public HeatStructure2DCouplerBCBase, public RZSymmetry
 {
 public:
   HeatStructure2DRadiationCouplerRZBC(const InputParameters & parameters);
