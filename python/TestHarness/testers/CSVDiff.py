@@ -45,9 +45,6 @@ class CSVDiff(SchemaDiff):
         except Exception as e:
             return e
 
-    def processResults(self, moose_dir, options, output):
-        return SchemaDiff.processResults(self, moose_dir, options, output)
-
     def do_deepdiff(self,orig, comp, rel_err, abs_zero, exclude_values:list=None):
         diff = ""
         for col in orig:
