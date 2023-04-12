@@ -14,6 +14,8 @@
   [use_split]
     requirement = 'A mesh can be pre-split properly and used to generate equivalent results to '
                   'running a simulation with the unsplit mesh when'
+    issues = '#10623 #17318'
+    design = 'Mesh/splitting.md'
 
     [from_cli]
       type = 'Exodiff'
@@ -24,11 +26,7 @@
       min_parallel = 3
       max_parallel = 3
 
-      issues = '#10623'
-      design = 'Mesh/splitting.md'
       detail = 'set by command line'
-      requirement = 'A mesh can be pre-split properly and used to generate equivalent results to '
-                    'running a simulation with the unsplit mesh.'
     []
     [from_input]
       type = 'Exodiff'
@@ -39,8 +37,6 @@
       min_parallel = 3
       max_parallel = 3
 
-      issues = '#10623 #17318'
-      design = 'Mesh/splitting.md'
       detail = 'set by an input parameter'
     []
   []
