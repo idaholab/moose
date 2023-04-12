@@ -159,6 +159,7 @@ addActionTypes(Syntax & syntax)
   registerMooseObjectTask("add_postprocessor",            Postprocessor,          false);
   registerMooseObjectTask("add_vector_postprocessor",     VectorPostprocessor,    false);
   registerMooseObjectTask("add_reporter",                 Reporter,               false);
+  registerMooseObjectTask("add_position",                 Positions,              false);
 
   registerMooseObjectTask("add_indicator",                Indicator,              false);
   registerMooseObjectTask("add_marker",                   Marker,                 false);
@@ -321,6 +322,7 @@ addActionTypes(Syntax & syntax)
                            "(add_vector_postprocessor)" // MaterialVectorPostprocessor requires this
                                                         // to be after material objects are created.
                            "(add_reporter)"
+                           "(add_position)"
                            "(add_aux_kernel, add_bc, add_damper, add_dirac_kernel, add_kernel,"
                            " add_nodal_kernel, add_dg_kernel, add_fv_kernel, add_fv_bc, add_fv_ik,"
                            " add_interface_kernel, add_scalar_kernel, add_aux_scalar_kernel,"
@@ -466,6 +468,9 @@ associateSyntaxInner(Syntax & syntax, ActionFactory & /*action_factory*/)
 
   registerSyntax("AddReporterAction", "Reporters/*");
   syntax.registerSyntaxType("Reporters/*", "ReporterName");
+
+  registerSyntax("AddPositionAction", "Positions/*");
+  syntax.registerSyntaxType("Positions/*", "ReporterName");
 
   registerSyntax("AddDamperAction", "Dampers/*");
 
