@@ -20,7 +20,7 @@ public:
   HeatStructureCylindricalBase(const InputParameters & params);
 
   virtual void setupMesh() override;
-  virtual Real getUnitPerimeter(const HeatStructureSideType & side) const override;
+  virtual Real getUnitPerimeter(const ExternalBoundaryType & side) const override;
 
   /**
    * Get the inner radius of the heat structure

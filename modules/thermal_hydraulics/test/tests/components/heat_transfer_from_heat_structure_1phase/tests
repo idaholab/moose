@@ -142,7 +142,7 @@
     type = 'RunException'
     input = 'err.1phase.i'
     cli_args = "Components/hx/hs_side=asdf"
-    expect_err = "hx: Invalid option 'asdf' provided for 'hs_side' parameter. Valid options \(not case-sensitive\) are 'inner' and 'outer'."
+    expect_err = "hx: The parameter 'hs_side' was given an invalid value"
 
     requirement = "The system shall throw an error is the provided heat structure side is invalid."
     issues = '#19754'

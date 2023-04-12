@@ -68,16 +68,16 @@ HeatStructurePlate::check() const
 }
 
 Real
-HeatStructurePlate::getUnitPerimeter(const HeatStructureSideType & side) const
+HeatStructurePlate::getUnitPerimeter(const ExternalBoundaryType & side) const
 {
   switch (side)
   {
-    case HeatStructureSideType::OUTER:
-    case HeatStructureSideType::INNER:
+    case ExternalBoundaryType::OUTER:
+    case ExternalBoundaryType::INNER:
       return _depth;
 
-    case HeatStructureSideType::START:
-    case HeatStructureSideType::END:
+    case ExternalBoundaryType::START:
+    case ExternalBoundaryType::END:
       return std::numeric_limits<Real>::quiet_NaN();
   }
 

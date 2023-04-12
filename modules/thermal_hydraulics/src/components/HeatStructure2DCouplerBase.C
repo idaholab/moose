@@ -60,8 +60,8 @@ HeatStructure2DCouplerBase::init()
     {
       // Get the heat structure types
       _hs_side_types.resize(2);
-      _hs_side_types[0] = primary_hs.getHeatStructureSideType(_hs_boundaries[0]);
-      _hs_side_types[1] = secondary_hs.getHeatStructureSideType(_hs_boundaries[1]);
+      _hs_side_types[0] = primary_hs.getExternalBoundaryType(_hs_boundaries[0]);
+      _hs_side_types[1] = secondary_hs.getExternalBoundaryType(_hs_boundaries[1]);
 
       // Perimeters
       _perimeters.resize(2);

@@ -21,7 +21,7 @@ public:
   HeatStructurePlate(const InputParameters & params);
 
   virtual void check() const override;
-  virtual Real getUnitPerimeter(const HeatStructureSideType & side) const override;
+  virtual Real getUnitPerimeter(const ExternalBoundaryType & side) const override;
 
   /**
    * Gets the depth of the plate

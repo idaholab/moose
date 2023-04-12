@@ -37,7 +37,7 @@ protected:
   /// Flag for each heat structure deriving from HeatStructureCylindricalBase
   std::vector<bool> _is_cylindrical;
   /// Heat structure side types for each boundary
-  std::vector<HeatStructureSideType> _hs_side_types;
+  std::vector<Component2D::ExternalBoundaryType> _hs_side_types;
   /// Perimeters for the primary and secondary sides
   std::vector<Real> _perimeters;
   /// Area fractions by which to multiply coupling terms

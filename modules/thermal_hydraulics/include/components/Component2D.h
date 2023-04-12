@@ -14,6 +14,15 @@
 class Component2D : public GeneratedMeshComponent
 {
 public:
+  /// External boundary type
+  enum class ExternalBoundaryType
+  {
+    INNER = 0,
+    OUTER = 1,
+    START = 2,
+    END = 3
+  };
+
   Component2D(const InputParameters & params);
 
   virtual void buildMesh() override;
@@ -53,8 +62,17 @@ public:
 
   /**
    * Returns true if this component has the supplied boundary
+   *
+   * @param[in] boundary_name   Boundary name to check
    */
   bool hasBoundary(const BoundaryName & boundary_name) const;
+
+  /**
+   * Returns true if this component has the supplied external boundary
+   *
+   * @param[in] boundary_name   Boundary name to check
+   */
+  bool hasExternalBoundary(const BoundaryName & boundary_name) const;
 
   /**
    * Gets boundary info associated with the component boundary
@@ -68,9 +86,33 @@ public:
   getBoundaryInfo(const BoundaryName & boundary_name) const;
 
   /**
+   * Gets boundary info associated with a external boundary type
+   *
+   * @param[in] boundary_type   The external boundary type
+   * @return The list of tuples (element id, local side id) associated the external boundary type
+   */
+  const std::vector<std::tuple<dof_id_type, unsigned short int>> &
+  getBoundaryInfo(const ExternalBoundaryType & boundary_type) const;
+
+  /**
+   * Gets the external boundary type of the given boundary
+   *
+   * An error is thrown if the supplied boundary name does not exist in this
+   * component or if the boundary is interior.
+   *
+   * @param[in] boundary_name   Boundary name for which to get boundary type
+   */
+  ExternalBoundaryType getExternalBoundaryType(const BoundaryName & boundary_name) const;
+
+  /**
    * Gets the axial offset for the mesh
    */
   Real getAxialOffset() const { return _axial_offset; }
+
+  const std::vector<BoundaryName> & getOuterBoundaryNames() const;
+  const std::vector<BoundaryName> & getInnerBoundaryNames() const;
+  const std::vector<BoundaryName> & getStartBoundaryNames() const;
+  const std::vector<BoundaryName> & getEndBoundaryNames() const;
 
 protected:
   virtual void check() const override;
@@ -142,13 +184,6 @@ protected:
   /// Boundary names of the inner radial boundary regions of the component
   std::vector<BoundaryName> _boundary_names_inner_radial;
 
-  /// Nodes on the side of the "block"
-  std::map<std::string, std::vector<unsigned int>> _side_heat_node_ids;
-  /// Nodes at the outer side of the generated component
-  std::vector<unsigned int> _outer_heat_node_ids;
-  /// Nodes at the inner side of the generated component
-  std::vector<unsigned int> _inner_heat_node_ids;
-
   /// Map of boundary name to list of tuples of element and side IDs for that boundary
   std::map<BoundaryName, std::vector<std::tuple<dof_id_type, unsigned short int>>>
       _hs_boundary_info;
@@ -158,4 +193,20 @@ protected:
 
 public:
   static InputParameters validParams();
+
+  /**
+   * Gets the MooseEnum corresponding to ExternalBoundaryType
+   *
+   * @param[in] default_value   Default value; omit to have no default
+   */
+  static MooseEnum getExternalBoundaryTypeMooseEnum(const std::string & default_value = "");
+
+  /// map of external boundary type string to enum
+  static const std::map<std::string, ExternalBoundaryType> _external_boundary_type_to_enum;
 };
+
+namespace THM
+{
+template <>
+Component2D::ExternalBoundaryType stringToEnum(const std::string & s);
+}

@@ -9,6 +9,27 @@
 
 #include "Component2D.h"
 #include "THMMesh.h"
+#include "THMEnums.h"
+
+const std::map<std::string, Component2D::ExternalBoundaryType>
+    Component2D::_external_boundary_type_to_enum{{"INNER", ExternalBoundaryType::INNER},
+                                                 {"OUTER", ExternalBoundaryType::OUTER},
+                                                 {"START", ExternalBoundaryType::START},
+                                                 {"END", ExternalBoundaryType::END}};
+
+MooseEnum
+Component2D::getExternalBoundaryTypeMooseEnum(const std::string & name)
+{
+  return THM::getMooseEnum<ExternalBoundaryType>(name, _external_boundary_type_to_enum);
+}
+
+template <>
+Component2D::ExternalBoundaryType
+THM::stringToEnum(const std::string & s)
+{
+  return stringToEnum<Component2D::ExternalBoundaryType>(
+      s, Component2D::_external_boundary_type_to_enum);
+}
 
 InputParameters
 Component2D::validParams()
@@ -66,10 +87,7 @@ Component2D::build2DMesh()
         nd = addNode(p);
         node_ids[i][l] = nd->id();
       }
-      _side_heat_node_ids[_names[j]].push_back(nd->id());
     }
-    _inner_heat_node_ids.push_back(node_ids[i][0]);
-    _outer_heat_node_ids.push_back(node_ids[i][_total_elem_number]);
   }
 
   auto & boundary_info = mesh().getMesh().get_boundary_info();
@@ -216,10 +234,7 @@ Component2D::build2DMesh2ndOrder()
         nd = addNode(p);
         node_ids[i][l] = nd->id();
       }
-      _side_heat_node_ids[_names[j]].push_back(nd->id());
     }
-    _inner_heat_node_ids.push_back(node_ids[i][0]);
-    _outer_heat_node_ids.push_back(node_ids[i][_total_elem_number * 2]);
   }
 
   auto & boundary_info = mesh().getMesh().get_boundary_info();
@@ -435,6 +450,41 @@ Component2D::hasBoundary(const BoundaryName & boundary_name) const
          isBoundaryInVector(boundary_name, _boundary_names_inner_radial);
 }
 
+bool
+Component2D::hasExternalBoundary(const BoundaryName & boundary_name) const
+{
+  return isBoundaryInVector(boundary_name, _boundary_names_inner) ||
+         isBoundaryInVector(boundary_name, _boundary_names_axial_inner) ||
+         isBoundaryInVector(boundary_name, _boundary_names_outer) ||
+         isBoundaryInVector(boundary_name, _boundary_names_axial_outer) ||
+         isBoundaryInVector(boundary_name, _boundary_names_start) ||
+         isBoundaryInVector(boundary_name, _boundary_names_radial_start) ||
+         isBoundaryInVector(boundary_name, _boundary_names_end) ||
+         isBoundaryInVector(boundary_name, _boundary_names_radial_end);
+}
+
+Component2D::ExternalBoundaryType
+Component2D::getExternalBoundaryType(const BoundaryName & boundary_name) const
+{
+  if (isBoundaryInVector(boundary_name, _boundary_names_inner) ||
+      isBoundaryInVector(boundary_name, _boundary_names_axial_inner))
+    return ExternalBoundaryType::INNER;
+  else if (isBoundaryInVector(boundary_name, _boundary_names_outer) ||
+           isBoundaryInVector(boundary_name, _boundary_names_axial_outer))
+    return ExternalBoundaryType::OUTER;
+  else if (isBoundaryInVector(boundary_name, _boundary_names_start) ||
+           isBoundaryInVector(boundary_name, _boundary_names_radial_start))
+    return ExternalBoundaryType::START;
+  else if (isBoundaryInVector(boundary_name, _boundary_names_end) ||
+           isBoundaryInVector(boundary_name, _boundary_names_radial_end))
+    return ExternalBoundaryType::END;
+  else if (isBoundaryInVector(boundary_name, _boundary_names_interior_axial_per_radial_section) ||
+           isBoundaryInVector(boundary_name, _boundary_names_inner_radial))
+    mooseError("The boundary '", boundary_name, "' is an interior boundary.");
+  else
+    mooseError("No heat structure side type was found for the boundary '", boundary_name, "'.");
+}
+
 const std::vector<std::tuple<dof_id_type, unsigned short int>> &
 Component2D::getBoundaryInfo(const BoundaryName & boundary_name) const
 {
@@ -446,4 +496,54 @@ Component2D::getBoundaryInfo(const BoundaryName & boundary_name) const
                "' does not exist for the heat structure '",
                name(),
                "'.");
+}
+
+const std::vector<std::tuple<dof_id_type, unsigned short int>> &
+Component2D::getBoundaryInfo(const ExternalBoundaryType & boundary_type) const
+{
+  switch (boundary_type)
+  {
+    case ExternalBoundaryType::INNER:
+      return getBoundaryInfo(_boundary_names_inner[0]);
+    case ExternalBoundaryType::OUTER:
+      return getBoundaryInfo(_boundary_names_outer[0]);
+    case ExternalBoundaryType::START:
+      return getBoundaryInfo(_boundary_names_start[0]);
+    case ExternalBoundaryType::END:
+      return getBoundaryInfo(_boundary_names_end[0]);
+  }
+
+  mooseError(name(), ": Invalid external boundary type.");
+}
+
+const std::vector<BoundaryName> &
+Component2D::getOuterBoundaryNames() const
+{
+  checkSetupStatus(MESH_PREPARED);
+
+  return _boundary_names_outer;
+}
+
+const std::vector<BoundaryName> &
+Component2D::getInnerBoundaryNames() const
+{
+  checkSetupStatus(MESH_PREPARED);
+
+  return _boundary_names_inner;
+}
+
+const std::vector<BoundaryName> &
+Component2D::getStartBoundaryNames() const
+{
+  checkSetupStatus(MESH_PREPARED);
+
+  return _boundary_names_start;
+}
+
+const std::vector<BoundaryName> &
+Component2D::getEndBoundaryNames() const
+{
+  checkSetupStatus(MESH_PREPARED);
+
+  return _boundary_names_end;
 }

@@ -39,18 +39,18 @@ HeatStructureCylindricalBase::setupMesh()
 }
 
 Real
-HeatStructureCylindricalBase::getUnitPerimeter(const HeatStructureSideType & side) const
+HeatStructureCylindricalBase::getUnitPerimeter(const ExternalBoundaryType & side) const
 {
   switch (side)
   {
-    case HeatStructureSideType::OUTER:
+    case ExternalBoundaryType::OUTER:
       return 2 * M_PI * (_inner_radius + _total_width);
 
-    case HeatStructureSideType::INNER:
+    case ExternalBoundaryType::INNER:
       return 2 * M_PI * _inner_radius;
 
-    case HeatStructureSideType::START:
-    case HeatStructureSideType::END:
+    case ExternalBoundaryType::START:
+    case ExternalBoundaryType::END:
       return std::numeric_limits<Real>::quiet_NaN();
   }
 
