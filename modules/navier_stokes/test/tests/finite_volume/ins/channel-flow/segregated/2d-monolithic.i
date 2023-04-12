@@ -3,15 +3,14 @@ rho = 1.0
 advected_interp_method = 'average'
 velocity_interp_method = 'rc'
 
-momentum_tag = "non_pressure"
-
 [Mesh]
   [mesh]
     type = CartesianMeshGenerator
-    dim = 1
-    dx = '0.5 0.5'
-    ix = '16 16'
-    iy = '10'
+    dim = 2
+    dx = '0.2 0.2'
+    dy = '0.2'
+    ix = '2 2'
+    iy = '2'
     subdomain_id = '1 1'
   []
 []
@@ -21,14 +20,14 @@ momentum_tag = "non_pressure"
 []
 
 [Problem]
-  nl_sys_names = 'momentum_system pressure_system'
-  previous_nl_solution_required = true
+  error_on_jacobian_nonzero_reallocation = true
 []
 
 [UserObjects]
   [rc]
-    type = INSFVRhieChowInterpolatorSegregated
+    type = INSFVRhieChowInterpolator
     u = u
+    v = v
     pressure = pressure
   []
 []
@@ -37,12 +36,17 @@ momentum_tag = "non_pressure"
   [u]
     type = INSFVVelocityVariable
     initial_condition = 0.5
-    nl_sys = momentum_system
+    two_term_boundary_expansion = false
+  []
+  [v]
+    type = INSFVVelocityVariable
+    initial_condition = 0.0
+    two_term_boundary_expansion = false
   []
   [pressure]
     type = INSFVPressureVariable
-    nl_sys = pressure_system
     initial_condition = 0.2
+    two_term_boundary_expansion = false
   []
 []
 
@@ -54,15 +58,12 @@ momentum_tag = "non_pressure"
     velocity_interp_method = ${velocity_interp_method}
     rho = ${rho}
     momentum_component = 'x'
-    linearize = true
-    extra_vector_tags = ${momentum_tag}
   []
   [u_viscosity]
     type = INSFVMomentumDiffusion
     variable = u
     mu = ${mu}
     momentum_component = 'x'
-    extra_vector_tags = ${momentum_tag}
   []
   [u_pressure]
     type = INSFVMomentumPressure
@@ -70,18 +71,34 @@ momentum_tag = "non_pressure"
     momentum_component = 'x'
     pressure = pressure
   []
-  [p_diffusion]
-    type = FVAnisotropicDiffusion
-    variable = pressure
-    coeff = "Ainv"
-    coeff_interp_method = 'average'
+  [v_advection]
+    type = INSFVMomentumAdvection
+    variable = v
+    advected_interp_method = ${advected_interp_method}
+    velocity_interp_method = ${velocity_interp_method}
+    rho = ${rho}
+    momentum_component = 'y'
   []
-  [p_source]
-    type = FVDivergence
-    variable = pressure
-    vector_field = "HbyA"
-    force_boundary_execution = true
+  [v_viscosity]
+    type = INSFVMomentumDiffusion
+    variable = v
+    mu = ${mu}
+    momentum_component = 'y'
   []
+  [v_pressure]
+    type = INSFVMomentumPressure
+    variable = v
+    momentum_component = 'y'
+    pressure = pressure
+  []
+  [mass]
+    type = INSFVMassAdvection
+    variable = pressure
+    advected_interp_method = ${advected_interp_method}
+    velocity_interp_method = ${velocity_interp_method}
+    rho = ${rho}
+  []
+
 []
 
 [FVBCs]
@@ -90,6 +107,24 @@ momentum_tag = "non_pressure"
     boundary = 'left'
     variable = u
     function = '1.1'
+  []
+  [inlet-v]
+    type = INSFVInletVelocityBC
+    boundary = 'left'
+    variable = v
+    function = '0.0'
+  []
+  [walls-u]
+    type = INSFVNoSlipWallBC
+    boundary = 'top bottom'
+    variable = u
+    function = 0.0
+  []
+  [walls-v]
+    type = INSFVNoSlipWallBC
+    boundary = 'top bottom'
+    variable = v
+    function = 0.0
   []
   [outlet_p]
     type = INSFVOutletPressureBC
@@ -100,21 +135,11 @@ momentum_tag = "non_pressure"
 []
 
 [Executioner]
-  type = SIMPLE
+  type = Steady
   solve_type = 'NEWTON'
-  petsc_options_iname = '-pc_type -pc_hypre_type -pc_factor_shift_type'
-  petsc_options_value = 'hypre boomeramg NONZERO'
-  nl_max_its = 1
-  l_max_its = 1
+  petsc_options_iname = '-pc_type -pc_factor_shift_type'
+  petsc_options_value = 'lu NONZERO'
   line_search = 'none'
-  rhie_chow_user_object = 'rc'
-  momentum_system = 'momentum_system'
-  pressure_system = 'pressure_system'
-  momentum_tag = ${momentum_tag}
-  momentum_variable_relaxation = 0.75
-  pressure_variable_relaxation = 0.7
-  num_iterations = 100
-
 []
 
 [Postprocessors]
@@ -135,5 +160,5 @@ momentum_tag = "non_pressure"
   csv = true
   perf_graph = false
   print_nonlinear_residuals = false
-  print_linear_residuals = false
+  print_linear_residuals = true
 []

@@ -26,22 +26,37 @@ FVDivergence::validParams()
 }
 
 FVDivergence::FVDivergence(const InputParameters & params)
-  : FVFluxKernel(params), _vector_field(getFunctor<ADRealVectorValue>("vector_field"))
+  : FVFluxKernel(params), _vector_field(getFunctor<RealVectorValue>("vector_field"))
 {
-#ifndef MOOSE_GLOBAL_AD_INDEXING
-  mooseError(
-      "FVDivergence is not supported by local AD indexing. In order to use this object, please run "
-      "the configure script in the root MOOSE directory with the configure option "
-      "'--with-ad-indexing-type=global'. Note that global indexing is now the default "
-      "configuration for AD indexing type.");
-#endif
 }
 
 ADReal
 FVDivergence::computeQpResidual()
 {
-  const auto face = makeFace(*_face_info, limiterType(Moose::FV::InterpMethod::Average), false);
-  // We use this on the right hand side as a source so in the residual this will be a sink (ffactor
+  using namespace Moose::FV;
+
+  // const auto face = makeFace(*_face_info, limiterType(Moose::FV::InterpMethod::Average), false);
+
+  RealVectorValue vector;
+
+  // If we are on internal faces, we interpolate the diffusivity as usual
+  if (_var.isInternalFace(*_face_info))
+    interpolate(Moose::FV::InterpMethod::Average,
+                vector,
+                _vector_field(elemArg()),
+                _vector_field(neighborArg()),
+                *_face_info,
+                true);
+  // Else we just use the boundary values (which depend on how the diffusion
+  // coefficient is constructed)
+  else
+  {
+    const auto face = singleSidedFaceArg();
+    vector = _vector_field(face);
+  }
+
+  // We use this on the right hand side as a source so in the residual this will be a sink (factor
   // of -1)
-  return -1.0 * (_vector_field(face) * _normal);
+  std::cout << _face_info->faceCentroid() << " " <<  (vector * _normal)*_face_info->faceArea() << std::endl;
+  return -1.0 * (vector * _normal);
 }

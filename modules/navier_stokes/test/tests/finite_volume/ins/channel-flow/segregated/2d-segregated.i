@@ -8,10 +8,11 @@ momentum_tag = "non_pressure"
 [Mesh]
   [mesh]
     type = CartesianMeshGenerator
-    dim = 1
-    dx = '0.5 0.5'
-    ix = '16 16'
-    iy = '10'
+    dim = 2
+    dx = '0.2 0.2'
+    dy = '0.2'
+    ix = '2 2'
+    iy = '2'
     subdomain_id = '1 1'
   []
 []
@@ -23,12 +24,14 @@ momentum_tag = "non_pressure"
 [Problem]
   nl_sys_names = 'momentum_system pressure_system'
   previous_nl_solution_required = true
+  error_on_jacobian_nonzero_reallocation = true
 []
 
 [UserObjects]
   [rc]
     type = INSFVRhieChowInterpolatorSegregated
     u = u
+    v = v
     pressure = pressure
   []
 []
@@ -38,11 +41,19 @@ momentum_tag = "non_pressure"
     type = INSFVVelocityVariable
     initial_condition = 0.5
     nl_sys = momentum_system
+    two_term_boundary_expansion = false
+  []
+  [v]
+    type = INSFVVelocityVariable
+    initial_condition = 0.0
+    nl_sys = momentum_system
+    two_term_boundary_expansion = false
   []
   [pressure]
     type = INSFVPressureVariable
     nl_sys = pressure_system
     initial_condition = 0.2
+    two_term_boundary_expansion = false
   []
 []
 
@@ -70,6 +81,29 @@ momentum_tag = "non_pressure"
     momentum_component = 'x'
     pressure = pressure
   []
+  [v_advection]
+    type = INSFVMomentumAdvection
+    variable = v
+    advected_interp_method = ${advected_interp_method}
+    velocity_interp_method = ${velocity_interp_method}
+    rho = ${rho}
+    momentum_component = 'y'
+    linearize = true
+    extra_vector_tags = ${momentum_tag}
+  []
+  [v_viscosity]
+    type = INSFVMomentumDiffusion
+    variable = v
+    mu = ${mu}
+    momentum_component = 'y'
+    extra_vector_tags = ${momentum_tag}
+  []
+  [v_pressure]
+    type = INSFVMomentumPressure
+    variable = v
+    momentum_component = 'y'
+    pressure = pressure
+  []
   [p_diffusion]
     type = FVAnisotropicDiffusion
     variable = pressure
@@ -91,11 +125,35 @@ momentum_tag = "non_pressure"
     variable = u
     function = '1.1'
   []
+  [inlet-v]
+    type = INSFVInletVelocityBC
+    boundary = 'left'
+    variable = v
+    function = '0.0'
+  []
+  [walls-u]
+    type = INSFVNoSlipWallBC
+    boundary = 'top bottom'
+    variable = u
+    function = 0.0
+  []
+  [walls-v]
+    type = INSFVNoSlipWallBC
+    boundary = 'top bottom'
+    variable = v
+    function = 0.0
+  []
   [outlet_p]
     type = INSFVOutletPressureBC
     boundary = 'right'
     variable = pressure
     function = 1.4
+  []
+  [zero-grad-pressure]
+    type = FVFunctionNeumannBC
+    variable = pressure
+    boundary = 'top left bottom'
+    function = 0.0
   []
 []
 
@@ -104,16 +162,20 @@ momentum_tag = "non_pressure"
   solve_type = 'NEWTON'
   petsc_options_iname = '-pc_type -pc_hypre_type -pc_factor_shift_type'
   petsc_options_value = 'hypre boomeramg NONZERO'
+  petsc_options = ''
   nl_max_its = 1
-  l_max_its = 1
+  l_max_its = 200
+  l_abs_tol = 1e-9
   line_search = 'none'
   rhie_chow_user_object = 'rc'
   momentum_system = 'momentum_system'
   pressure_system = 'pressure_system'
   momentum_tag = ${momentum_tag}
-  momentum_variable_relaxation = 0.75
-  pressure_variable_relaxation = 0.7
-  num_iterations = 100
+  momentum_variable_relaxation = 0.9
+  pressure_variable_relaxation = 0.3
+  num_iterations = 1
+  pressure_absolute_tolerance = 1e-8
+  momentum_absolute_tolerance = 1e-8
 
 []
 
@@ -135,5 +197,5 @@ momentum_tag = "non_pressure"
   csv = true
   perf_graph = false
   print_nonlinear_residuals = false
-  print_linear_residuals = false
+  print_linear_residuals = true
 []

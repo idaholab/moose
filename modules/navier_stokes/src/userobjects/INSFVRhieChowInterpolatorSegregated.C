@@ -59,8 +59,8 @@ INSFVRhieChowInterpolatorSegregated::validParams()
 INSFVRhieChowInterpolatorSegregated::INSFVRhieChowInterpolatorSegregated(
     const InputParameters & params)
   : RhieChowInterpolatorBase(params),
-    _HbyA(_moose_mesh, _sub_ids, "HbyA"),
-    _Ainv(_moose_mesh, _sub_ids, "Ainv"),
+    _HbyA(_moose_mesh, _sub_ids, "HbyA", false),
+    _Ainv(_moose_mesh, _sub_ids, "Ainv", false),
     _vel(std::make_unique<PiecewiseByBlockLambdaFunctor<ADRealVectorValue>>(
         name(),
         [this](const auto & r, const auto & t) -> ADRealVectorValue
@@ -145,7 +145,7 @@ INSFVRhieChowInterpolatorSegregated::initFaceVelocities()
 void
 INSFVRhieChowInterpolatorSegregated::execute()
 {
-  computeHbyA();
+  // computeHbyA();
 }
 
 VectorValue<ADReal>
@@ -183,8 +183,23 @@ INSFVRhieChowInterpolatorSegregated::computeVelocity()
       const Moose::FaceArg face{
           fi, Moose::FV::LimiterType::CentralDifference, true, false, nullptr};
 
-      RealVectorValue Ainv = raw_value(_Ainv(face));
-      RealVectorValue HbyA = raw_value(_HbyA(face));
+      RealVectorValue Ainv; //  = raw_value(_Ainv(face));
+      RealVectorValue HbyA; //  = raw_value(_HbyA(face));
+
+      interpolate(Moose::FV::InterpMethod::Average,
+                  Ainv,
+                  _Ainv(makeElemArg(fi->elemPtr())),
+                  _Ainv(makeElemArg(fi->neighborPtr())),
+                  *fi,
+                  true);
+
+      interpolate(Moose::FV::InterpMethod::Average,
+                  HbyA,
+                  _HbyA(makeElemArg(fi->elemPtr())),
+                  _HbyA(makeElemArg(fi->neighborPtr())),
+                  *fi,
+                  true);
+
       RealVectorValue grad_p = raw_value(_p->gradient(face));
       for (const auto comp_index : make_range(_dim))
       {
@@ -223,7 +238,7 @@ INSFVRhieChowInterpolatorSegregated::computeVelocity()
 }
 
 void
-INSFVRhieChowInterpolatorSegregated::computeHbyA()
+INSFVRhieChowInterpolatorSegregated::computeHbyA(const Real & momentum_relaxation)
 {
   mooseAssert(_momentum_sys, "The momentum system shall be linked before calling this function!");
 
@@ -310,6 +325,16 @@ INSFVRhieChowInterpolatorSegregated::computeHbyA()
   std::cout << "A" << std::endl;
   Ainv_petsc->print();
   MatDiagonalSet(pmat->mat(), working_vector_petsc->vec(), INSERT_VALUES);
+  // Ainv_petsc->scale(0.8);
+
+  NumericVector<Number> * old_solution = dynamic_cast<PetscVector<Number> *>(
+      &_momentum_sys->getVector(Moose::PREVIOUS_NL_SOLUTION_TAG));
+
+  // solution->scale(relax);
+  // solution->add(1 - relax, *old_solution);
+
+  // solution->print();
+  // solution->close();
 
   std::cout << "H" << std::endl;
   pmat->print();
@@ -320,8 +345,23 @@ INSFVRhieChowInterpolatorSegregated::computeHbyA()
   working_vector_petsc->print();
 
   HbyA_petsc->add(*working_vector_petsc);
-
   std::cout << " H(u)-rhs" << std::endl;
+  HbyA->print();
+
+  *working_vector_petsc = 0.0;
+
+  // working_vector_petsc->add(-1.0 + momentum_relaxation, *solution);
+  working_vector_petsc->add(-1.0 + momentum_relaxation, *old_solution);
+  // working_vector_petsc->scale((1 - 0.9));
+
+  *working_vector_petsc *= *Ainv_petsc;
+
+  std::cout << "Relaxation source " << std::endl;
+  working_vector_petsc->print();
+
+  HbyA_petsc->add(*working_vector_petsc);
+
+  std::cout << " H(u)-rhs-relaxation_source" << std::endl;
   HbyA_petsc->print();
 
   *working_vector_petsc = 1.0;
@@ -338,19 +378,23 @@ INSFVRhieChowInterpolatorSegregated::computeHbyA()
   auto begin = _mesh.active_local_elements_begin();
   auto end = _mesh.active_local_elements_end();
 
-  const auto var_num = momentum_system.variable_number(_u->name());
+  std::vector<unsigned int> var_nums = {momentum_system.variable_number(_u->name())};
+  if (_v)
+    var_nums.push_back(momentum_system.variable_number(_v->name()));
+  if (_w)
+    var_nums.push_back(momentum_system.variable_number(_w->name()));
 
   for (auto it = begin; it != end; ++it)
   {
     const Elem * elem = *it;
     if (this->hasBlocks(elem->subdomain_id()))
     {
-      for (const auto comp_index : make_range(_dim))
+      for (auto comp_index : make_range(_dim))
       {
         const Real volume = _moose_mesh.elemInfo(elem->id()).volume();
-        const auto dof_index = elem->dof_number(momentum_system.number(), var_num, 0);
-        _HbyA[elem->id()](comp_index) = (*HbyA)(dof_index); // / volume;
-        _Ainv[elem->id()](comp_index) = (*Ainv)(dof_index); // / volume;
+        const auto dof_index = elem->dof_number(momentum_system.number(), var_nums[comp_index], 0);
+        _HbyA[elem->id()](comp_index) = (*HbyA)(dof_index);
+        _Ainv[elem->id()](comp_index) = (*Ainv)(dof_index) * volume;
       }
     }
   }

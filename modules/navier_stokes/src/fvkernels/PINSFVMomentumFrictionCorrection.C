@@ -52,17 +52,7 @@ PINSFVMomentumFrictionCorrection::PINSFVMomentumFrictionCorrection(const InputPa
 ADReal
 PINSFVMomentumFrictionCorrection::computeQpResidual()
 {
-<<<<<<< HEAD
-  if (skipForBoundary(fi))
-    return;
-
-  _face_info = &fi;
-  _normal = fi.normal();
-  _face_type = fi.faceType(_var.name());
-
-=======
 #ifdef MOOSE_GLOBAL_AD_INDEXING
->>>>>>> Enable computeQpResiudal for momentum kernels. (#22356)
   using namespace Moose::FV;
 
   const auto elem_face = elemArg();

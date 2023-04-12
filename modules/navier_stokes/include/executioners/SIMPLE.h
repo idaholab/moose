@@ -30,6 +30,11 @@ public:
   void execute() override;
   bool lastSolveConverged() const override { return _last_solve_converged; }
 
+  static PetscErrorCode relaxation_stuff(KSP ksp, Vec rhs, Vec x, void * ctx);
+
+  NonlinearSystemBase & getMomentumSystem() { return _momentum_sys; }
+  Real getMomentumRelaxation() { return _momentum_variable_relaxation; }
+
 protected:
   FEProblemBase & _problem;
 

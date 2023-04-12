@@ -63,13 +63,14 @@ public:
 
   void linkMomentumSystem(NonlinearSystemBase & momentum_system, const TagID & momentum_tag);
 
-protected:
   /**
    * Computes the inverse of the digaonal (1/A) of the system matrix plus the H/A components for the
    * pressure equation plus Rhie-Chow interpolation. This should nly be used with segregated
    * solvers.
    */
-  void computeHbyA();
+  void computeHbyA(const Real & momentum_relaxation);
+
+protected:
 
   /**
    * A map from element IDs to $HbyA_{ij} = (A_{offdiag}*\mathrm{(predicted~velocity)} -
@@ -77,17 +78,17 @@ protected:
    * multiplied by the predicted velocity minus the source terms from the right hand side of the
    * linearized momentum predictor stem.
    */
-  CellCenteredMapFunctor<ADRealVectorValue, std::unordered_map<dof_id_type, RealVectorValue>> _HbyA;
+  CellCenteredMapFunctor<RealVectorValue, std::unordered_map<dof_id_type, RealVectorValue>> _HbyA;
 
   /**
    * A map from element IDs to $1/A_ij$. ADD MORE
    */
-  CellCenteredMapFunctor<ADRealVectorValue, std::unordered_map<dof_id_type, RealVectorValue>> _Ainv;
+  CellCenteredMapFunctor<RealVectorValue, std::unordered_map<dof_id_type, RealVectorValue>> _Ainv;
 
   /// A functor for computing the (non-RC corrected) velocity
   std::unique_ptr<PiecewiseByBlockLambdaFunctor<ADRealVectorValue>> _vel;
 
-  FaceCenteredMapFunctor<ADRealVectorValue, std::unordered_map<dof_id_type, RealVectorValue>>
+  FaceCenteredMapFunctor<RealVectorValue, std::unordered_map<dof_id_type, RealVectorValue>>
       _face_velocity;
 
   /// Reference to the nonlinear system corresponding to the momentum equation

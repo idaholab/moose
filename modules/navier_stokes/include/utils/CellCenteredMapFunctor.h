@@ -39,7 +39,9 @@ public:
   /**
    * Use this constructor when you want the object to live everywhere on the mesh
    */
-  CellCenteredMapFunctor(const MooseMesh & mesh, const std::string & name);
+  CellCenteredMapFunctor(const MooseMesh & mesh,
+                         const std::string & name,
+                         const bool extrapolated_boundary = true);
 
   /**
    * Use this constructor if you want to potentially restrict this object to a specified set of
@@ -47,7 +49,8 @@ public:
    */
   CellCenteredMapFunctor(const MooseMesh & mesh,
                          const std::set<SubdomainID> & sub_ids,
-                         const std::string & name);
+                         const std::string & name,
+                         const bool extrapolated_boundary = true);
 
   bool isExtrapolatedBoundaryFace(const FaceInfo & fi,
                                   const Elem * elem,
@@ -67,11 +70,21 @@ private:
   /// on all subdomains
   const std::set<SubdomainID> _sub_ids;
 
+<<<<<<< HEAD
   ValueType evaluate(const ElemArg & elem_arg, const StateArg &) const override;
   ValueType evaluate(const ElemPointArg & elem_point, const StateArg & state) const override;
   ValueType evaluate(const FaceArg & face, const StateArg &) const override;
   ValueType evaluate(const ElemQpArg &, const StateArg &) const override;
   ValueType evaluate(const ElemSideQpArg &, const StateArg &) const override;
+=======
+  const bool _extrapolated_boundary;
+
+  ValueType evaluate(const ElemArg & elem_arg, unsigned int) const override;
+  ValueType evaluate(const ElemPointArg & elem_point, const unsigned int state) const override;
+  ValueType evaluate(const FaceArg & face, unsigned int) const override;
+  ValueType evaluate(const ElemQpArg &, unsigned int) const override;
+  ValueType evaluate(const ElemSideQpArg &, unsigned int) const override;
+>>>>>>> 2D problem fails, contraining of H/A is missing. (#22356)
 
   using Moose::FunctorBase<T>::evaluateGradient;
   GradientType evaluateGradient(const ElemArg & elem_arg, const StateArg & state) const override;
@@ -80,18 +93,21 @@ private:
 
 template <typename T, typename Map>
 CellCenteredMapFunctor<T, Map>::CellCenteredMapFunctor(const MooseMesh & mesh,
-                                                       const std::string & name)
-  : Moose::FunctorBase<T>(name), _mesh(mesh)
+                                                       const std::string & name,
+                                                       const bool extrapolated_boundary)
+  : Moose::FunctorBase<T>(name), _mesh(mesh), _extrapolated_boundary(extrapolated_boundary)
 {
 }
 
 template <typename T, typename Map>
 CellCenteredMapFunctor<T, Map>::CellCenteredMapFunctor(const MooseMesh & mesh,
                                                        const std::set<SubdomainID> & sub_ids,
-                                                       const std::string & name)
+                                                       const std::string & name,
+                                                       const bool extrapolated_boundary)
   : Moose::FunctorBase<T>(name),
     _mesh(mesh),
-    _sub_ids(sub_ids == mesh.meshSubdomains() ? std::set<SubdomainID>() : sub_ids)
+    _sub_ids(sub_ids == mesh.meshSubdomains() ? std::set<SubdomainID>() : sub_ids),
+    _extrapolated_boundary(extrapolated_boundary)
 {
 }
 
@@ -214,12 +230,12 @@ typename CellCenteredMapFunctor<T, Map>::GradientType
 CellCenteredMapFunctor<T, Map>::evaluateGradient(const ElemArg & elem_arg,
                                                  const StateArg & state) const
 {
-  return Moose::FV::greenGaussGradient(elem_arg, state, *this, true, _mesh);
+  return Moose::FV::greenGaussGradient(elem_arg, state, *this, _extrapolated_boundary, _mesh);
 }
 
 template <typename T, typename Map>
 typename CellCenteredMapFunctor<T, Map>::GradientType
 CellCenteredMapFunctor<T, Map>::evaluateGradient(const FaceArg & face, const StateArg & state) const
 {
-  return Moose::FV::greenGaussGradient(face, state, *this, true, _mesh);
+  return Moose::FV::greenGaussGradient(face, state, *this, _extrapolated_boundary, _mesh);
 }

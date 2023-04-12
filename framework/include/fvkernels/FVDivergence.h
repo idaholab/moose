@@ -31,5 +31,5 @@ protected:
   virtual ADReal computeQpResidual() override;
 
   /// The vector field whose divergence is added to the residual
-  const Moose::Functor<ADRealVectorValue> & _vector_field;
+  const Moose::Functor<RealVectorValue> & _vector_field;
 };
