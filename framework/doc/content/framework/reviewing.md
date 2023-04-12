@@ -1,32 +1,43 @@
 # Reviewing Pull Requests
 
 MOOSE is a large project with large numbers of users and contributors.
-While MOOSE seeks the highest standards of software quality, it
-is important to recognize that requiring perfection in proposed
-code changes is not realistic, given the large amount of activity,
-versus the limited availability of reviewers and time.
-The guidelines outlined on this page are designed to guide
-reviewers in finding the right balance between efficiency
-and software quality.
+Reviewers are bound by strict software quality standards, which they
+enforce through careful reviews, often at the expense of their own research.
+The guidelines outlined on this page are designed to help reviewers
+provide an environment welcoming of external contributions and deal with
+common situations. 
 
 ## Conduct
 
-- Be respectful.
+- Be respectful. Feel free to close the pull request if the contributor is not.
 - Try to be helpful. The reviewer is not expected to implement changes
   for the author, but the reviewer should try to ensure that
   the author has some direction, particularly if the author is a new
   or infrequent contributor.
-- Make it clear what are changes that you require, versus suggestions.
+- Make it clear what are large changes that you require, versus suggestions.
   For example, use "I suggest" for suggestions and imperative language,
   e.g., "Do this", for required changes.
+  Anything minor (typos, grammar, docstrings) is assumed to be required. If you
+  do not wish for something to be fixed, do not suggest the change.
 - If it would be helpful, provide the author with a link to the contributing
   guidelines page.
+- Feel free to ask questions. It's normal to not understand everything in the pull request when you have
+not written that code. Many times, the response to these questions should actually be added as comments
+in the code.
 - It is acceptable to make commits to the contributor's feature branch.
   Note that NQA-1 explicitly allows this, and an additional, independent
   review is only required if the additional commit(s) are significant.
 - If the author refuses the requested changes, request an additional
   reviewer (ideally a `CODEOWNER` for the affected lines) to make a
   final decision on the changes.
+  - If your comments are ignored / marked as resolved with no action, engage again on those same lines.
+    If this does not bring resolution, seek an additional reviewer.
+  - If a pull request is complex, it is ok to ask that it is split in several pull requests. It is also ok to refuse
+    "rider" commits changing code unrelated to the pull request at hand.
+  - Be timely. Pull requests should only linger when there are good reasons for them not to move forward.
+    If you cannot review, consider delegating the review to another member.
+- If there is a section of the code that you are not familiar with,
+  feel free to ask for another reviewer's opinion.
 
 ## Review Strategy
 
@@ -37,32 +48,36 @@ and software quality.
   number of users should be subjected to greater scrutiny. Also
   consider the likelihood of additional capability being built
   on top of these changes.
+  If the proposed changes do not allow for additional capability, this can be a reason
+  to refuse them.
 - Carefully consider the user interface, such as input parameters,
   particularly for potentially high profile changes.
-- Prioritize discovery of bugs that would manifest in very subtle,
-  difficult-to-discover ways, rather than those bugs that
-  would immediately become apparent, such as by an immediate error message.
+- Consider how the code will be understood outside of the context of a pull request. 
+Are the comments and documentation enough to understand what is going on without
+asking the initial developers.
 
 ## Testing
 
-- The reviewer is not expected to test out the proposed
-  changes, but this may be recommended in some cases when the
-  regression testing is deemed insufficient.
-- At the very least, testing should cover most of the new code lines.
+- At the very least, testing should cover all the features contributed, and most of the relevant code lines.
   Note that code coverage is automatically checked to meet a minimum
   value, but the reviewer may decide to override this failure if
   deemed justified. For example, a change may involve some branches
   in conditionals that should be impossible to hit.
 - The reviewer may request additional testing.
+- The reviewer may enable additional testing recipes. Anything with manual memory management
+  could benefit from a valgrind recipe. Anything with loose tolerances is likely to fail parallel testing,
+  feel free to add those recipes. 
 
 ## Documentation
 
 - Inline code documentation such as doxygen is not required but may be requested
-  when code is unclear.
+  when code is unclear. When unclear whether it's unclear, ask for more documentation.
 - Request documentation for new classes and systems and also for
   modifications to existing documentation where it is deemed important.
 - Thorough documentation is not required, but it should be accurate
   and error-free, and it should clarify anything unusual or unclear.
+- When capabilities in the code change, it's likely user documentation will need to be adapted. Always check out
+  the current state of the user documentation to make sure it does not become inaccurate.
 - If the changes are significant enough to communicate to the
   community, ensure there is a corresponding newsletter entry.
 
