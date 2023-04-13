@@ -63,7 +63,7 @@ outputMeshInformation(FEProblemBase & problem, bool verbose)
   if (verbose)
   {
     bool forced = moose_mesh.isParallelTypeForced();
-    bool pre_split = problem.getMooseApp().isUseSplit();
+    bool pre_split = moose_mesh.isSplit();
 
     // clang-format off
     oss << "\nMesh: " << '\n'

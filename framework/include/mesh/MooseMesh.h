@@ -1214,6 +1214,11 @@ public:
   const std::unordered_map<std::pair<const Elem *, unsigned short int>, const Elem *> &
   getLowerDElemMap() const;
 
+  /**
+   * @return Whether or not this mesh comes from a split mesh
+   */
+  bool isSplit() const { return _is_split; }
+
 protected:
   /// Deprecated (DO NOT USE)
   std::vector<std::unique_ptr<GhostingFunctor>> _ghosting_functors;
@@ -1383,6 +1388,9 @@ protected:
 
   /// A vector holding the paired boundaries for a regular orthogonal mesh
   std::vector<std::pair<BoundaryID, BoundaryID>> _paired_boundary;
+
+  /// Whether or not we are using a (pre-)split mesh (automatically DistributedMesh)
+  const bool _is_split;
 
   void cacheInfo();
   void freeBndNodes();

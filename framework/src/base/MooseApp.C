@@ -1137,12 +1137,6 @@ MooseApp::isSplitMesh() const
 }
 
 bool
-MooseApp::isUseSplit() const
-{
-  return _use_split;
-}
-
-bool
 MooseApp::hasRestartRecoverFileBase() const
 {
   return !_restart_recover_base.empty();

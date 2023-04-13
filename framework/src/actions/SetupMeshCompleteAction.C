@@ -50,7 +50,7 @@ SetupMeshCompleteAction::act()
     // we pre-split the coarse mesh, and load the pre-split mesh in parallel,
     // and then do a few levels of uniform refinements to have a fine mesh that
     // potentially resolves physics features.
-    if (_app.isUseSplit() && _mesh->skipRefineWhenUseSplit())
+    if (_mesh->isSplit() && _mesh->skipRefineWhenUseSplit())
       return;
 
     // uniform refinement has been done on master, so skip

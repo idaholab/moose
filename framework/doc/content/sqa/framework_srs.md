@@ -153,7 +153,7 @@ there are a few other modes that can be triggered with various command line flag
 | :- | :- |
 | `-i <input_file>` | Normal execution mode |
 | `--split-mesh <splits>` | Read the mesh block splitting the mesh into two or more pieces for use in a subsequent run |
-| `--use-split` | (inplies -i flag) Execute the the simulation but use pre-split mesh files instead of the mesh from the input file |
+| `--use-split` | (implies -i flag) Execute the the simulation but use pre-split mesh files instead of the mesh from the input file |
 | `--yaml` | Output all object descriptions and available parameters in YAML format |
 | `--json` | Output all object descriptions and available parameters in JSON format |
 | `--syntax` | Output all registered syntax |
