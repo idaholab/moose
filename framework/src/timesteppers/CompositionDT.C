@@ -69,14 +69,14 @@ CompositionDT::getSequenceSteppers()
   if (time_sequence_steppers.empty())
     return 0;
   Real hit_timestepper = std::numeric_limits<Real>::max();
-  for (auto const & [name, ptr] : time_sequence_steppers)
+  for (auto const & entry : time_sequence_steppers)
   {
-    ptr->init();
-    Real next_time_to_hit = ptr->getNextTimeInSequence();
+    entry.second->init();
+    Real next_time_to_hit = entry.second->getNextTimeInSequence();
     if (next_time_to_hit - _time <= _dt_min)
     {
-      ptr->increaseCurrentStep();
-      next_time_to_hit = ptr->getNextTimeInSequence();
+      entry.second->increaseCurrentStep();
+      next_time_to_hit = entry.second->getNextTimeInSequence();
     }
     if (hit_timestepper > next_time_to_hit)
       hit_timestepper = next_time_to_hit;
