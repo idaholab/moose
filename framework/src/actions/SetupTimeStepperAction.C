@@ -47,25 +47,21 @@ SetupTimeStepperAction::act()
     if (!transient)
       mooseError("You can setup time stepper only with executioners of transient type.");
 
+    _moose_object_pars.set<SubProblem *>("_subproblem") = _problem.get();
+    _moose_object_pars.set<Transient *>("_executioner") = transient;
     // Check if the user added any time steppers
     const auto & generator_actions = _awh.getActionListByName("add_time_stepper");
-
     // The user added timestepper(s)
     if (!generator_actions.empty())
     {
       auto & time_stepper_system = _app.getTimeStepperSystem();
-      time_stepper_system.setFinalTimeStepperName();
       time_stepper_system.createAddedTimeSteppers();
       ts = _app.getTimeStepperSystem().getFinalTimeStepper();
     }
     // The user did not add timestepper(s), so create a ConstantDT for them
     else
-    {
-      _moose_object_pars.set<SubProblem *>("_subproblem") = _problem.get();
-      _moose_object_pars.set<Transient *>("_executioner") = transient;
-
       ts = _factory.create<TimeStepper>(_type, "TimeStepper", _moose_object_pars);
-    }
+
     mooseAssert(ts, "Missing final TimeStepper");
     transient->setTimeStepper(ts);
   }

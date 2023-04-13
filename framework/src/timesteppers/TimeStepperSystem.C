@@ -8,7 +8,6 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "TimeStepperSystem.h"
-#include "TimeSequenceStepperBase.h"
 #include "FEProblem.h"
 #include "SubProblem.h"
 #include "Transient.h"
@@ -58,20 +57,15 @@ TimeStepperSystem::createAddedTimeSteppers()
   if (_time_stepper_params.empty())
     return;
 
+  std::regex time_sequence(".*SequenceStepper");
   // Store the name and dt of the time stepper except the final one into a map
   for (const auto & [name, type_params_pair] : _time_stepper_params)
   {
-    if (name != _final_time_stepper_name)
-
+    if (!std::regex_match(type_params_pair.first, time_sequence))
       _time_steppers.emplace(name, createTimeStepper(name, type_params_pair));
+    else
+      _time_sequence_steppers.emplace(name, createTimeSequenceStepper(name, type_params_pair));
   }
-
-  // Create and store the final time stepper here because composition time stepper depends on other
-  // time steppers
-  _time_steppers.emplace(
-      _final_time_stepper_name,
-      createTimeStepper(_final_time_stepper_name,
-                        _time_stepper_params.find(_final_time_stepper_name)->second));
 }
 
 std::shared_ptr<TimeStepper>
@@ -85,15 +79,25 @@ TimeStepperSystem::createTimeStepper(
   mooseAssert(comm().verify(type + stepper_name), "Inconsistent construction order");
   mooseAssert(!_time_steppers.count(stepper_name), "Already created");
 
-  std::regex time_sequence(".*SequenceStepper");
+  std::shared_ptr<TimeStepper> ts =
+      _app.getFactory().create<TimeStepper>(type, stepper_name, params);
+  mooseAssert(ts, "Not successfully created");
 
-  if (!std::regex_match(type, time_sequence))
-  {
-    std::shared_ptr<TimeStepper> ts =
-        _app.getFactory().create<TimeStepper>(type, stepper_name, params);
-    mooseAssert(ts, "Not successfully created");
-    return ts;
-  }
+  return ts;
+}
+
+std::shared_ptr<TimeSequenceStepperBase>
+TimeStepperSystem::createTimeSequenceStepper(
+    const std::string & stepper_name,
+    const std::pair<std::string, InputParameters> & type_params_pair)
+{
+  libmesh_parallel_only(comm());
+
+  const auto & [type, params] = type_params_pair;
+  mooseAssert(comm().verify(type + stepper_name), "Inconsistent construction order");
+  mooseAssert(!_time_steppers.count(stepper_name), "Already created");
+
+  std::regex time_sequence(".*SequenceStepper");
 
   std::shared_ptr<TimeSequenceStepperBase> ts =
       _app.getFactory().create<TimeSequenceStepperBase>(type, stepper_name, params);
@@ -121,20 +125,20 @@ TimeStepperSystem::getTimeStepper(const std::string & stepper_name)
 }
 
 void
-TimeStepperSystem::setFinalTimeStepperName()
+TimeStepperSystem::setFinalTimeStepper(const InputParameters & parameters)
 {
   auto final_stepper = _app.getExecutioner()->getParam<std::string>("final_time_stepper");
-  for (const auto & [name, type_params_pair] : _time_stepper_params)
-  {
-    const auto & type = type_params_pair.first;
 
-    if (type == "CompositionDT")
-      _final_time_stepper_name = name;
-    else if (!final_stepper.empty())
-      _final_time_stepper_name = final_stepper;
-    else
-      mooseError(
-          "Multiple TimeSteppers are used, please either select one as final TimeStepper using "
-          "'final_time_stepper' option or use 'CompositionDT' to create a composed DT.");
+  if (final_stepper.empty())
+  {
+
+    _final_time_stepper_name = "CompositionDT";
+    auto type_params_pair = std::make_pair(_final_time_stepper_name, parameters);
+    _time_steppers.emplace(_final_time_stepper_name,
+                           createTimeStepper(_final_time_stepper_name, type_params_pair));
   }
+  else if (_time_stepper_params.count(final_stepper))
+    _final_time_stepper_name = final_stepper;
+  else
+    mooseError("The selected final_time_stepper doesn't exist");
 }

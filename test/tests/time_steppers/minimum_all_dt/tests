@@ -1,0 +1,56 @@
+[Tests]
+  issues = '#23740'
+  design = 'CompositionDT.md'
+
+  [time_steppers]
+    requirement = 'The system shall support composing time step size from multiple time steppers by'
+
+  [final_time_stepper]
+    type = 'Exodiff'
+    input = 'minimum_all_dt.i'
+    exodiff = 'final_time_stepper.e'
+    cli_args = "Outputs/file_base='final_time_stepper' Executioner/final_time_stepper='ConstDT1'"
+    detail = 'allowing single time stepper while multiple time steppers are listed,'
+  []
+
+    [multiple_time_steppers]
+      type = 'Exodiff'
+      input = 'minimum_all_dt.i'
+      exodiff = 'multiple_timesteppers.e'
+      cli_args = "Outputs/file_base='multiple_timesteppers'"
+      detail = 'using the minimum time step size of input time steppers,'
+    []
+
+    [multiple_time_timesequence]
+      type = 'Exodiff'
+      input = 'minimum_all_dt_sequence.i'
+      exodiff = 'multiple_timesequence.e'
+
+      detail = 'hitting the time points specified by a TimesequenceStepper selected by the user'
+    []
+
+  []
+
+  [restart]
+    requirement = 'The system shall support the ability to run a calculation for the purpose of '
+                  'creating a time sequence recover file:'
+    [timestepper_pre]
+      type = 'RunApp'
+      input = 'minimum_all_dt_restart.i'
+      recover = false
+
+      detail = 'when writing the checkpoint file,'
+    []
+
+    [timestepper_restart]
+      type = 'Exodiff'
+      input = 'minimum_all_dt_cont.i'
+      exodiff = 'minimum_all_dt_cont_out.e'
+      recover = false
+      prereq = 'restart/timestepper_pre'
+
+      detail = 'restart from the checkpoint file.'
+    []
+  []
+
+[]

@@ -12,6 +12,7 @@
 #include "TimeStepper.h"
 #include "PerfGraphInterface.h"
 #include "libmesh/parallel_object.h"
+#include "TimeSequenceStepperBase.h"
 
 class MooseApp;
 /**
@@ -33,11 +34,23 @@ public:
   createTimeStepper(const std::string & stepper_name,
                     const std::pair<std::string, InputParameters> & type_params_pair);
 
+  std::shared_ptr<TimeSequenceStepperBase>
+  createTimeSequenceStepper(const std::string & stepper_name,
+                            const std::pair<std::string, InputParameters> & type_params_pair);
+
   std::shared_ptr<TimeStepper> getTimeStepper(const std::string & stepper_name);
+
+  std::map<std::string, std::shared_ptr<TimeStepper>> getTimeSteppers() { return _time_steppers; };
+  std::map<std::string, std::shared_ptr<TimeSequenceStepperBase>> getTimeSequenceSteppers()
+  {
+    return _time_sequence_steppers;
+  };
+
+  std::string getFinalTimeStepperName() { return _final_time_stepper_name; };
 
   std::shared_ptr<TimeStepper> getFinalTimeStepper();
 
-  void setFinalTimeStepperName();
+  void setFinalTimeStepper(const InputParameters & params);
 
 private:
   /// The MooseApp that owns this system
@@ -49,6 +62,9 @@ private:
 
   /// Owning storage for time steppers, map of name -> time steppers
   std::map<std::string, std::shared_ptr<TimeStepper>> _time_steppers;
+
+  /// Owning storage for time steppers, map of name -> time steppers
+  std::map<std::string, std::shared_ptr<TimeSequenceStepperBase>> _time_sequence_steppers;
 
   /// Name of the time stepper, making the final step decisions, providing the time steps for the problem
   std::string _final_time_stepper_name;
