@@ -63,6 +63,7 @@ SetupTimeStepperAction::act()
     {
       final_timestepper = "TimeStepper";
       apply_ts_params(_moose_object_pars);
+
       time_stepper_system.addTimeStepper(_type, final_timestepper, _moose_object_pars);
       if (user_set_final_timestepper)
         transient->paramError("final_time_stepper",
