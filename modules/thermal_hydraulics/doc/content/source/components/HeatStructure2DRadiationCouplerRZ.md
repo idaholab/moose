@@ -16,6 +16,8 @@ This component has the following restrictions:
   boundary is paired with the nearest element on the coupled boundary. The
   alignment check requires that each element on a boundary has exactly one
   element from the coupled boundary paired to it.
+- The boundaries must be radial, i.e., on either the inner or outer cylindrical
+  surfaces, not the flat surfaces.
 
 !syntax parameters /Components/HeatStructure2DRadiationCouplerRZ
 

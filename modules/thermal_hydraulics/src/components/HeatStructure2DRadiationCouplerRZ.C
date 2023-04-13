@@ -10,6 +10,7 @@
 #include "HeatStructure2DRadiationCouplerRZ.h"
 #include "HeatStructureCylindricalBase.h"
 #include "HeatConductionNames.h"
+#include "THMMesh.h"
 
 registerMooseObject("ThermalHydraulicsApp", HeatStructure2DRadiationCouplerRZ);
 
@@ -72,6 +73,21 @@ HeatStructure2DRadiationCouplerRZ::check() const
 
   if (!_mesh_alignment.meshesAreAligned())
     logError("The primary and secondary boundaries must be aligned.");
+
+  if (hasComponentByName<HeatStructureBase>(_hs_names[0]) &&
+      hasComponentByName<HeatStructureBase>(_hs_names[1]) && !constMesh().isDistributedMesh())
+  {
+    const HeatStructureBase & primary_hs = getComponentByName<HeatStructureBase>(_hs_names[0]);
+    const HeatStructureBase & secondary_hs = getComponentByName<HeatStructureBase>(_hs_names[1]);
+    if (primary_hs.hasBoundary(_hs_boundaries[0]) && secondary_hs.hasBoundary(_hs_boundaries[1]))
+    {
+      if (_hs_side_types[0] == Component2D::ExternalBoundaryType::START ||
+          _hs_side_types[0] == Component2D::ExternalBoundaryType::END ||
+          _hs_side_types[1] == Component2D::ExternalBoundaryType::START ||
+          _hs_side_types[1] == Component2D::ExternalBoundaryType::END)
+        logError("The primary and secondary boundaries must be radial boundaries.");
+    }
+  }
 }
 
 void
