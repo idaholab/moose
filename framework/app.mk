@@ -470,11 +470,12 @@ $(copy_input_targets):
 
 
 install_lib_%: % all
-	@echo "Installing $<"
 	@mkdir -p $(lib_install_dir)
 	@$(eval libname := $(shell grep "dlname='.*'" $< | sed -E "s/dlname='(.*)'/\1/g"))
-	@$(eval libdst := $(lib_install_dir)/$(libname))
-	@cp $(dir $<)$(libname) $(libdst)
+	@$(eval libdst := $(lib_install_dir)/$(libname))  # full installed path (includes library name)
+	@echo "Installing $(libdst)"
+	@cp $< $(lib_install_dir)           # Copy the library archive file
+	@cp $(dir $<)$(libname) $(libdst)   # Copy the library file
 	@$(call patch_rpath,$(libdst),../$(lib_install_suffix/.))
 	@$(call patch_relink,$(libdst),$(libpath_pcre),$(libname_pcre))
 	@$(call patch_relink,$(libdst),$(libpath_framework),$(libname_framework))
