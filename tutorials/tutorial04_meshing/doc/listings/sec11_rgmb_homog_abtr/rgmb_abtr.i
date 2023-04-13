@@ -10,8 +10,8 @@
     bottom_boundary_id = 202
     radial_boundary_id = 203
   []
-  # Control
-  [assembly1]
+  # Define homogenized assembly regions
+  [control]
     type = PinMeshGenerator
     reactor_params = rmp
     pin_type = 1
@@ -21,8 +21,7 @@
     homogenized = true
     use_as_assembly = true
   []
-  # Inner Core
-  [assembly2]
+  [inner_core]
     type = PinMeshGenerator
     reactor_params = rmp
     pin_type = 2
@@ -32,8 +31,7 @@
     homogenized = true
     use_as_assembly = true
   []
-  # Test Fuel
-  [assembly3]
+  [test_fuel]
     type = PinMeshGenerator
     reactor_params = rmp
     pin_type = 3
@@ -43,8 +41,7 @@
     homogenized = true
     use_as_assembly = true
   []
-  # Inner Reflector
-  [assembly4]
+  [inner_reflector]
     type = PinMeshGenerator
     reactor_params = rmp
     pin_type = 4
@@ -54,8 +51,7 @@
     homogenized = true
     use_as_assembly = true
   []
-  # Outer Core
-  [assembly5]
+  [outer_core]
     type = PinMeshGenerator
     reactor_params = rmp
     pin_type = 5
@@ -65,8 +61,7 @@
     homogenized = true
     use_as_assembly = true
   []
-  # Outer Reflector
-  [assembly6]
+  [outer_reflector]
     type = PinMeshGenerator
     reactor_params = rmp
     pin_type = 6
@@ -76,8 +71,7 @@
     homogenized = true
     use_as_assembly = true
   []
-  # Shield
-  [assembly7]
+  [shield]
     type = PinMeshGenerator
     reactor_params = rmp
     pin_type = 7
@@ -89,8 +83,8 @@
   []
   [core]
     type = CoreMeshGenerator
-    inputs = 'assembly1 assembly2 assembly3 assembly4
-              assembly5 assembly6 assembly7 dummy'
+    inputs = 'control inner_core test_fuel inner_reflector
+              outer_core outer_reflector shield dummy'
     dummy_assembly_name = dummy
     pattern =   '  7   7   6   6   6   6   6   6   7   7;
                  7   6   6   5   5   5   5   5   6   6   7;

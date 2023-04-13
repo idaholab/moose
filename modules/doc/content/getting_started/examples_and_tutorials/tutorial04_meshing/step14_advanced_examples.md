@@ -66,7 +66,7 @@ During the mesh refinement process, it is common to require finer discretization
 
 ### Mesh Biasing
 
-Mesh biasing applies non-uniform meshing subintervals within a specific region. For example, a fuel pin may generally require an axial meshing size of 5 cm, but at the very top and bottom of the active fuel zone where the power shape has a larger gradient, the user may require finer grids. This is possible using mesh biasing parameters available in AdvancedExtruderGenerator.
+Mesh biasing applies non-uniform meshing subintervals within a specific region. For example, a fuel pin may generally require an axial meshing size of 5 cm, but at the very top and bottom of the active fuel zone where the power shape has a larger gradient, the user may require finer grids. This is possible using mesh biasing parameters available in [AdvancedExtruderGenerator.md].
 
 !media tutorial04_meshing/aeg_ax_bias.png
        id=tutorial04-aeg_ax_bias
@@ -152,7 +152,7 @@ Finally, [XYDelaunayGenerator.md] is used to mesh the regions between the assemb
 
 ## Advanced Meshing Example: Filling Between Curves Example of using "FillBetweenSidesetsGenerator"
 
-The MSRE 2D lattice case pictured in [tutorial04-adv_ex_fbsg](left) was constructed using the [FillBetweenSidesetsGenerator.md] to connect "quarter" circular pins, as shown in [tutorial04-adv_ex_fbsg](right). First, [ConcentricCircleMeshGenerator.md] (a predecessor of [PolygonConcentricCircleMeshGenerator.md] which has a different set of input options and works only for square pin cells) was used to create two quarter pins .Each quarter pin mesh initially contains two duplicate "quarter pin" shaped blocks, and then one of the duplicate blocks is deleted in order to be able to label the sideset on the curved boundary as `curve_1` and `curve_2` in the two pins, respectively. This is the simplest possible procedure with the current [Mesh system](syntax/Mesh/index.md) in MOOSE, but could be improved in the future. These two pins were translated in space to move them apart from each other, and then [FillBetweenSidesetsGenerator.md] was used to mesh the area between `curve_1` and `curve_2`.
+The MSRE 2D lattice case pictured in [tutorial04-adv_ex_fbsg](left) was constructed using the [FillBetweenSidesetsGenerator.md] to connect "quarter" circular pins, as shown in [tutorial04-adv_ex_fbsg](right). First, [ConcentricCircleMeshGenerator.md] (a predecessor of [PolygonConcentricCircleMeshGenerator.md] which has a different set of input options and works only for square pin cells) was used to create two quarter pins. Each quarter pin mesh initially contains two duplicate "quarter pin" shaped blocks, and then one of the duplicate blocks is deleted in order to be able to label the sideset on the curved boundary as `curve_1` and `curve_2` in the two pins, respectively. This is the simplest possible procedure with the current [Mesh system](syntax/Mesh/index.md) in MOOSE, but could be improved in the future. These two pins were translated in space to move them apart from each other, and then [FillBetweenSidesetsGenerator.md] was used to mesh the area between `curve_1` and `curve_2`.
 
 !media tutorial04_meshing/adv_ex_fbsg.png
        id=tutorial04-adv_ex_fbsg

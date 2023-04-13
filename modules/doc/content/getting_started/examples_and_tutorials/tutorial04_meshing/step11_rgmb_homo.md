@@ -25,7 +25,7 @@ This example does not have any pin-level geometry as the assemblies are homogeni
 !listing sec11_rgmb_homog_abtr/rgmb_abtr.i
          id=tutorial04-rgmb_abtr-assembly
          caption=ABTR RGMB assembly example.
-         block=Mesh/assembly1
+         block=Mesh/control
 
 Tips
 

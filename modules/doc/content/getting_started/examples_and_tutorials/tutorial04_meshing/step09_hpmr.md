@@ -1,6 +1,6 @@
 # Example: Heat Pipe-Cooled Micro Reactor (HP-MR)
 
-This section covers the creation of a detailed 1/6 core Heat-Pipe Micro Reactor mesh using the following key steps:
+This section covers the creation of a detailed 1/6 core [Heat-Pipe Micro Reactor](https://mooseframework.inl.gov/virtual_test_bed/microreactors/mrad/mrad_model.html) mesh using the following key steps:
 
 1. Create fuel/moderator/heat-pipe pin cells
 2. Combine pins into a fuel assembly
@@ -19,7 +19,7 @@ This section covers the creation of a detailed 1/6 core Heat-Pipe Micro Reactor 
 
 ## Create Pin Unit Cell
 
-The pin cell represents the most basic element in the hierarchical structure of a reactor core. In the case of a heat-pipe micro reactor, typical pin cells include fuel, heat pipe, and moderator. These components are all generated using the PolygonConcentricCircleMeshGenerator. Every pin cell mesh property (e.g., ring radii and intervals) can be tailored to specific needs.
+The pin cell represents the most basic element in the hierarchical structure of a reactor core. In the case of a heat-pipe micro reactor, typical pin cells include fuel, heat pipe, and moderator. These components are all generated using the [PolygonConcentricCircleMeshGenerator.md]. Every pin cell mesh property (e.g., ring radii and intervals) can be tailored to specific needs.
 
 ### Object
 
@@ -348,8 +348,8 @@ To conserve computational resources, users may create a half core or 1/6 symmetr
 
 ### Geometry Features
 
-- Trimming plane defined by a point and a normal vector.
-- Elements that lie on one side of the plane will be deleted.
+- Trimming plane defined by a point and a normal vector
+- Elements whose centroids lie "above" (in the direction of the normal vector) the plane will be deleted
 - Set new outer boundary ID on sliced lines to be referenced later
 - To slice the full core in half
 
@@ -357,7 +357,7 @@ To conserve computational resources, users may create a half core or 1/6 symmetr
 
 - To slice the half core into 1/3
 
-  - +Point+ = $(0, 0, 0)$, +normal+ = $(10,  - 17.32, 0)$ (-60&deg; from -$x$)
+  - +Point+ = $(0, 0, 0)$, +normal+ = $(10, -17.32, 0)$ (-60&deg; from +$x$)
 
 ### Notes
 
@@ -421,7 +421,7 @@ We briefly describe some key steps which are required to use the resulting mesh 
 
 ### Assignment of Material Properties to Blocks
 
-All blocks in the mesh must be assigned to a material in Griffin. The blocks are depicted in (#hpmr_blocks)  (left) using different colors for each block. (##hpmr_blocks) (right) highlights two specific blocks and their associated material IDs as an example of block IDs that must be referenced in Griffin.
+All blocks in the mesh must be assigned to a material in Griffin. The blocks are depicted in [tutorial04-hpmr_blocks] (left) using different colors for each block. [tutorial04-hpmr_blocks] (right) highlights two specific blocks and their associated material IDs as an example of block IDs that must be referenced in Griffin.
 
 !media tutorial04_meshing/hpmr_blocks.png
        id=tutorial04-hpmr_blocks

@@ -24,7 +24,7 @@ RGMB consists of a few specific mesh generators which are to be called in order 
 
 ## PinMeshGenerator
 
-PinMeshGenerator calls PolygonConcentricCircleMeshGenerator to generate a Cartesian or hexagonal pin-like structure (pin, background, and duct)
+[PinMeshGenerator.md] calls [PolygonConcentricCircleMeshGenerator.md] to generate a Cartesian or hexagonal pin-like structure (pin, background, and duct)
 
 !listing sec10_rgmb_simple_examples/rgmb_core_cartesian.i
          id=tutorial04-rgmb_core_cartesian-pin1
