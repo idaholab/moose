@@ -375,7 +375,7 @@ template <typename T>
 void
 ReporterContext<T>::store(nlohmann::json & json) const
 {
-  storeHelper(json, this->_state.value());
+  nlohmann::to_json(json, this->_state.value());
 }
 
 template <typename T>

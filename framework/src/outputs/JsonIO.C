@@ -10,13 +10,9 @@
 #include "JsonIO.h"
 #include "MooseApp.h"
 #include "MooseRevision.h"
-#include "MultiApp.h"
-#include "PenetrationInfo.h"
-#include "MaterialPropertyStorage.h"
 #include "SystemInfo.h"
 
 #include "libmesh/libmesh_config.h"
-#include "libmesh/node.h"
 
 // MooseDocs:to_json_start
 void
