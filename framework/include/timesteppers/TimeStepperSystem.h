@@ -28,7 +28,7 @@ public:
                       const std::string & name,
                       const InputParameters & params);
 
-  void createAddedTimeSteppers();
+  void createAddedTimeSteppers(const std::string & final_timestepper_name);
 
   std::shared_ptr<TimeStepper>
   createTimeStepper(const std::string & stepper_name,
@@ -50,7 +50,7 @@ public:
 
   std::shared_ptr<TimeStepper> getFinalTimeStepper();
 
-  void setFinalTimeStepper(const InputParameters & params);
+  std::size_t getNumAddedTimeSteppers() const { return _time_stepper_params.size(); }
 
 private:
   /// The MooseApp that owns this system

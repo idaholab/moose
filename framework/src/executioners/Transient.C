@@ -132,7 +132,6 @@ Transient::validParams()
 
   params.addParam<std::string>(
       "final_time_stepper",
-      std::string(),
       "The final time stepper to use if multiple time steppers are provided "
       "without a CompositionDT");
 

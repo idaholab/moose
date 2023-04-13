@@ -40,7 +40,7 @@ TimeStepperSystem::addTimeStepper(const std::string & type,
   new_params.set<SubProblem *>("_subproblem") = subproblem;
   new_params.set<Transient *>("_executioner") = transient;
 
-  if (name == "TimeStepper")
+  if (name == "TimeStepper" && _app.actionWarehouse().getCurrentTaskName() != "setup_time_stepper")
     mooseError("The user-defined time stepper name: '", name, "' is a reserved name");
 
   // set the subproblem, set
@@ -51,11 +51,13 @@ TimeStepperSystem::addTimeStepper(const std::string & type,
 }
 
 void
-TimeStepperSystem::createAddedTimeSteppers()
+TimeStepperSystem::createAddedTimeSteppers(const std::string & final_timestepper_name)
 {
-  // No TimeSteppers were added via addTimeStepper()
-  if (_time_stepper_params.empty())
-    return;
+  mooseAssert(_final_time_stepper_name.empty(), "Should not be set");
+  if (_time_stepper_params.size() == 1)
+    _final_time_stepper_name = _time_stepper_params.begin()->first;
+  else
+    _final_time_stepper_name = final_timestepper_name;
 
   std::regex time_sequence(".*SequenceStepper");
   // Store the name and dt of the time stepper except the final one into a map
@@ -119,26 +121,7 @@ std::shared_ptr<TimeStepper>
 TimeStepperSystem::getTimeStepper(const std::string & stepper_name)
 {
   const auto find_stepper = _time_steppers.find(stepper_name);
-  mooseAssert(find_stepper != _time_steppers.end(), "Not added");
+  mooseAssert(find_stepper != _time_steppers.end(), stepper_name + " not added");
 
   return find_stepper->second;
-}
-
-void
-TimeStepperSystem::setFinalTimeStepper(const InputParameters & parameters)
-{
-  auto final_stepper = _app.getExecutioner()->getParam<std::string>("final_time_stepper");
-
-  if (final_stepper.empty())
-  {
-
-    _final_time_stepper_name = "CompositionDT";
-    auto type_params_pair = std::make_pair(_final_time_stepper_name, parameters);
-    _time_steppers.emplace(_final_time_stepper_name,
-                           createTimeStepper(_final_time_stepper_name, type_params_pair));
-  }
-  else if (_time_stepper_params.count(final_stepper))
-    _final_time_stepper_name = final_stepper;
-  else
-    mooseError("The selected final_time_stepper doesn't exist");
 }
