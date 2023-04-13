@@ -1439,9 +1439,10 @@ RayTracingStudy::verifyUniqueRayIDs(const std::vector<std::shared_ptr<Ray>>::con
   {
     // Package our local IDs and send to rank 0
     std::map<processor_id_type, std::vector<RayID>> send_ids;
-    send_ids.emplace(std::piecewise_construct,
-                     std::forward_as_tuple(0),
-                     std::forward_as_tuple(local_rays.begin(), local_rays.end()));
+    if (local_rays.size())
+      send_ids.emplace(std::piecewise_construct,
+                       std::forward_as_tuple(0),
+                       std::forward_as_tuple(local_rays.begin(), local_rays.end()));
     local_rays.clear();
 
     // Mapping on rank 0 from ID -> processor ID
