@@ -27,6 +27,11 @@ FlowComponentNS::FlowComponentNS(const InputParameters & parameters)
   checkCopyNSNodalVariables();
 }
 
+void FlowComponentNS::addRelationshipManagers(Moose::RelationshipManagerType /*input_rm_type*/)
+{
+  addRelationshipManagersFromParameters(getGhostParametersForRM());
+}
+
 void
 FlowComponentNS::addVariables()
 {

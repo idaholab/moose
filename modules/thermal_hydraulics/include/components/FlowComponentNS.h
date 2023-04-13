@@ -23,6 +23,7 @@ public:
 
   FlowComponentNS(const InputParameters & parameters);
 
+  virtual void addRelationshipManagers(Moose::RelationshipManagerType input_rm_type) override;
   virtual void addVariables() override;
   virtual void addMooseObjects() override;
 

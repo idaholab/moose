@@ -684,6 +684,11 @@ Simulation::addRelationshipManagers()
     if (!_thm_app.addRelationshipManager(rm))
       _thm_factory.releaseSharedObjects(*rm);
   }
+
+  for (auto && comp : _components)
+    comp->addRelationshipManagers(Moose::RelationshipManagerType::COUPLING |
+                                  Moose::RelationshipManagerType::ALGEBRAIC |
+                                  Moose::RelationshipManagerType::GEOMETRIC);
 }
 
 void
