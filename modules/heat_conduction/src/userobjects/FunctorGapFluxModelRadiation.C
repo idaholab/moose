@@ -29,5 +29,6 @@ FunctorGapFluxModelRadiation::FunctorGapFluxModelRadiation(const InputParameters
 ADReal
 FunctorGapFluxModelRadiation::computeFlux() const
 {
-  return computeRadiationFlux(_T(_secondary_point), _T(_primary_point));
+  return computeRadiationFlux(_T(_secondary_point, determineState()),
+                              _T(_primary_point, determineState()));
 }

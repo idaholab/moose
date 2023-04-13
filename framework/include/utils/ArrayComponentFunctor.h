@@ -11,26 +11,30 @@
 
 #include "MooseFunctor.h"
 
+namespace Moose
+{
 /**
  * This is essentially a forwarding functor that forwards the spatial and temporal evaluation
  * arguments to the parent array functor and then returns the result indexed at a given component.
  */
 template <typename T, typename ArrayTypeFunctor>
-class ArrayComponentFunctor : public Moose::FunctorBase<T>
+class ArrayComponentFunctor : public FunctorBase<T>
 {
 public:
-  using typename Moose::FunctorBase<T>::ValueType;
-  using typename Moose::FunctorBase<T>::GradientType;
-  using typename Moose::FunctorBase<T>::DotType;
+  using typename FunctorBase<T>::ValueType;
+  using typename FunctorBase<T>::GradientType;
+  using typename FunctorBase<T>::DotType;
 
   ArrayComponentFunctor(const ArrayTypeFunctor & array, const unsigned int component)
-    : Moose::FunctorBase<T>(array.functorName() + "_" + std::to_string(component)),
+    : FunctorBase<T>(array.functorName() + "_" + std::to_string(component)),
       _array(array),
       _component(component)
   {
   }
 
-  bool isExtrapolatedBoundaryFace(const FaceInfo & fi, const Elem * elem) const override;
+  bool isExtrapolatedBoundaryFace(const FaceInfo & fi,
+                                  const Elem * elem,
+                                  const Moose::StateArg & state) const override;
   bool hasBlocks(SubdomainID sub_id) const override { return _array.hasBlocks(sub_id); }
 
 private:
@@ -40,37 +44,34 @@ private:
   /// The component at which we'll index the parent array functor evaluation result
   const unsigned int _component;
 
-  ValueType evaluate(const Moose::ElemArg & elem, const unsigned int state) const override final
+  ValueType evaluate(const ElemArg & elem, const StateArg & state) const override final
   {
     return _array(elem, state)[_component];
   }
 
-  ValueType evaluate(const Moose::FaceArg & face, const unsigned int state) const override final
+  ValueType evaluate(const FaceArg & face, const StateArg & state) const override final
   {
     return _array(face, state)[_component];
   }
 
-  ValueType evaluate(const Moose::ElemQpArg & elem_qp,
-                     const unsigned int state) const override final
+  ValueType evaluate(const ElemQpArg & elem_qp, const StateArg & state) const override final
   {
     return _array(elem_qp, state)[_component];
   }
 
-  ValueType evaluate(const Moose::ElemSideQpArg & elem_side_qp,
-                     const unsigned int state) const override final
+  ValueType evaluate(const ElemSideQpArg & elem_side_qp,
+                     const StateArg & state) const override final
   {
     return _array(elem_side_qp, state)[_component];
   }
 
-  ValueType evaluate(const Moose::ElemPointArg & elem_point,
-                     const unsigned int state) const override final
+  ValueType evaluate(const ElemPointArg & elem_point, const StateArg & state) const override final
   {
     return _array(elem_point, state)[_component];
   }
 
-  using Moose::FunctorBase<T>::evaluateGradient;
-  GradientType evaluateGradient(const Moose::ElemArg & elem,
-                                const unsigned int state) const override final
+  using FunctorBase<T>::evaluateGradient;
+  GradientType evaluateGradient(const ElemArg & elem, const StateArg & state) const override final
   {
     return _array.gradient(elem, state)[_component];
   }
@@ -79,7 +80,8 @@ private:
 template <typename T, typename ArrayTypeFunctor>
 bool
 ArrayComponentFunctor<T, ArrayTypeFunctor>::isExtrapolatedBoundaryFace(
-    const FaceInfo & fi, const Elem * const elem) const
+    const FaceInfo & fi, const Elem * const elem, const Moose::StateArg & state) const
 {
-  return _array.isExtrapolatedBoundaryFace(fi, elem);
+  return _array.isExtrapolatedBoundaryFace(fi, elem, state);
+}
 }

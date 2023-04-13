@@ -269,7 +269,7 @@ FVFluxKernel::computeResidualAndJacobian(const FaceInfo & fi)
 }
 
 ADReal
-FVFluxKernel::gradUDotNormal() const
+FVFluxKernel::gradUDotNormal(const Moose::StateArg & time) const
 {
   mooseAssert(_face_info, "the face info should be non-null");
 
@@ -277,21 +277,7 @@ FVFluxKernel::gradUDotNormal() const
   const bool correct_skewness =
       (_var.faceInterpolationMethod() == Moose::FV::InterpMethod::SkewCorrectedAverage);
 
-  const Elem * const elem = &_face_info->elem();
-  const Elem * const neighbor = _face_info->neighborPtr();
-
-  bool var_defined_on_elem = _var.hasBlocks(_face_info->elem().subdomain_id());
-  bool is_internal_face = _var.isInternalFace(*_face_info);
-
-  const ADReal side_one_value = (!is_internal_face && !var_defined_on_elem)
-                                    ? _var.getBoundaryFaceValue(*_face_info)
-                                    : _var.getElemValue(elem);
-  const ADReal side_two_value = (var_defined_on_elem && !is_internal_face)
-                                    ? _var.getBoundaryFaceValue(*_face_info)
-                                    : _var.getElemValue(neighbor);
-
-  return Moose::FV::gradUDotNormal(
-      side_one_value, side_two_value, *_face_info, _var, correct_skewness);
+  return Moose::FV::gradUDotNormal(*_face_info, _var, time, correct_skewness);
 }
 
 Moose::ElemArg

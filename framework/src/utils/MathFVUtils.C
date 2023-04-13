@@ -14,16 +14,14 @@ namespace Moose
 {
 namespace FV
 {
-template <typename T, typename T2>
 ADReal
-gradUDotNormal(const T &,
-               const T2 &,
-               const FaceInfo & face_info,
+gradUDotNormal(const FaceInfo & face_info,
                const MooseVariableFV<Real> & fv_var,
+               const Moose::StateArg & time,
                bool correct_skewness)
 
 {
-  return fv_var.adGradSln(face_info, correct_skewness) * face_info.normal();
+  return fv_var.adGradSln(face_info, time, correct_skewness) * face_info.normal();
 }
 
 bool
@@ -85,10 +83,5 @@ selectInterpolationMethod(const std::string & interp_method)
                interp_method,
                " is not currently an option in Moose::FV::selectInterpolationMethod");
 }
-
-template ADReal gradUDotNormal(
-    const ADReal &, const ADReal &, const FaceInfo &, const MooseVariableFV<Real> &, bool);
-template ADReal
-gradUDotNormal(const ADReal &, const Real &, const FaceInfo &, const MooseVariableFV<Real> &, bool);
 }
 }

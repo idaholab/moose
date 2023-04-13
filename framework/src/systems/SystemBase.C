@@ -545,7 +545,8 @@ SystemBase::augmentSendList(std::vector<dof_id_type> & send_list)
 void
 SystemBase::saveOldSolutions()
 {
-  const auto states = _solution_states.size();
+  const auto states =
+      _solution_states[static_cast<unsigned short>(Moose::SolutionIterationType::Time)].size();
   if (states > 1)
   {
     _saved_solution_states.resize(states);
@@ -576,7 +577,8 @@ SystemBase::saveOldSolutions()
 void
 SystemBase::restoreOldSolutions()
 {
-  const auto states = _solution_states.size();
+  const auto states =
+      _solution_states[static_cast<unsigned short>(Moose::SolutionIterationType::Time)].size();
   if (states > 1)
     for (unsigned int i = 1; i <= states - 1; ++i)
       if (_saved_solution_states[i])
@@ -1266,10 +1268,13 @@ SystemBase::copySolutionsBackwards()
 {
   system().update();
 
-  const auto states = _solution_states.size();
-  if (states > 1)
-    for (unsigned int i = 1; i <= states - 1; ++i)
-      solutionState(i) = solutionState(0);
+  for (const auto iteration_index : index_range(_solution_states))
+  {
+    const auto states = _solution_states[iteration_index].size();
+    if (states > 1)
+      for (unsigned int i = 1; i <= states - 1; ++i)
+        solutionState(i) = solutionState(0);
+  }
 
   if (solutionUDotOld())
     *solutionUDotOld() = *solutionUDot();
@@ -1285,7 +1290,8 @@ SystemBase::copySolutionsBackwards()
 void
 SystemBase::copyOldSolutions()
 {
-  const auto states = _solution_states.size();
+  const auto states =
+      _solution_states[static_cast<unsigned short>(Moose::SolutionIterationType::Time)].size();
   if (states > 1)
     for (unsigned int i = states - 1; i > 0; --i)
       solutionState(i) = solutionState(i - 1);
@@ -1360,78 +1366,94 @@ SystemBase::initSolutionState()
   for (const auto & var : getScalarVariables(/* tid = */ 0))
     state = std::max(state, var->oldestSolutionStateRequested());
 
-  needSolutionState(state);
+  needSolutionState(state, Moose::SolutionIterationType::Time);
 
   _solution_states_initialized = true;
 }
 
 TagName
-SystemBase::oldSolutionStateVectorName(const unsigned int state) const
+SystemBase::oldSolutionStateVectorName(const unsigned int state,
+                                       const Moose::SolutionIterationType iteration_type) const
 {
   mooseAssert(state != 0, "Not an old state");
-  if (state == 1)
-    return Moose::OLD_SOLUTION_TAG;
-  else if (state == 2)
-    return Moose::OLDER_SOLUTION_TAG;
-  else
-    return "solution_state_" + std::to_string(state);
+
+  if (iteration_type == Moose::SolutionIterationType::Time)
+  {
+    if (state == 1)
+      return Moose::OLD_SOLUTION_TAG;
+    else if (state == 2)
+      return Moose::OLDER_SOLUTION_TAG;
+  }
+  else if (iteration_type == Moose::SolutionIterationType::Nonlinear && state == 1)
+    return Moose::PREVIOUS_NL_SOLUTION_TAG;
+
+  return "solution_state_" + std::to_string(state) + "_" + Moose::stringify(iteration_type);
 }
 
 const NumericVector<Number> &
-SystemBase::solutionState(const unsigned int state) const
+SystemBase::solutionState(const unsigned int state,
+                          const Moose::SolutionIterationType iteration_type) const
 {
-  if (!hasSolutionState(state))
-    mooseError("Solution state ",
+  if (!hasSolutionState(state, iteration_type))
+    mooseError("For iteration type '",
+               Moose::stringify(iteration_type),
+               "': solution state ",
                state,
                " was requested in ",
                name(),
                " but only up to state ",
-               _solution_states.size() - 1,
+               _solution_states[static_cast<unsigned short>(iteration_type)].size() - 1,
                " is available.");
 
+  const auto & solution_states = _solution_states[static_cast<unsigned short>(iteration_type)];
+
   if (state == 0)
-    mooseAssert(_solution_states[0] == &solutionInternal(), "Inconsistent current solution");
+    mooseAssert(solution_states[0] == &solutionInternal(), "Inconsistent current solution");
   else
-    mooseAssert(_solution_states[state] == &getVector(oldSolutionStateVectorName(state)),
+    mooseAssert(solution_states[state] ==
+                    &getVector(oldSolutionStateVectorName(state, iteration_type)),
                 "Inconsistent solution state");
 
-  return *_solution_states[state];
+  return *solution_states[state];
 }
 
 NumericVector<Number> &
-SystemBase::solutionState(const unsigned int state)
+SystemBase::solutionState(const unsigned int state,
+                          const Moose::SolutionIterationType iteration_type)
 {
-  if (!hasSolutionState(state))
-    needSolutionState(state);
-  return *_solution_states[state];
+  if (!hasSolutionState(state, iteration_type))
+    needSolutionState(state, iteration_type);
+  return *_solution_states[static_cast<unsigned short>(iteration_type)][state];
 }
 
 void
-SystemBase::needSolutionState(const unsigned int state)
+SystemBase::needSolutionState(const unsigned int state,
+                              const Moose::SolutionIterationType iteration_type)
 {
   libmesh_parallel_only(this->comm());
 
-  if (hasSolutionState(state))
+  if (hasSolutionState(state, iteration_type))
     return;
 
-  _solution_states.resize(state + 1);
+  auto & solution_states = _solution_states[static_cast<unsigned short>(iteration_type)];
+  solution_states.resize(state + 1);
 
   // The 0-th (current) solution state is owned by libMesh
-  if (!_solution_states[0])
-    _solution_states[0] = &solutionInternal();
+  if (!solution_states[0])
+    solution_states[0] = &solutionInternal();
   else
-    mooseAssert(_solution_states[0] == &solutionInternal(), "Inconsistent current solution");
+    mooseAssert(solution_states[0] == &solutionInternal(), "Inconsistent current solution");
 
   // We will manually add all states past current
   for (unsigned int i = 1; i <= state; ++i)
-    if (!_solution_states[i])
+    if (!solution_states[i])
     {
-      auto tag =
-          _subproblem.addVectorTag(oldSolutionStateVectorName(i), Moose::VECTOR_TAG_SOLUTION);
-      _solution_states[i] = &addVector(tag, true, GHOSTED);
+      auto tag = _subproblem.addVectorTag(oldSolutionStateVectorName(i, iteration_type),
+                                          Moose::VECTOR_TAG_SOLUTION);
+      solution_states[i] = &addVector(tag, true, GHOSTED);
     }
     else
-      mooseAssert(_solution_states[i] == &getVector(oldSolutionStateVectorName(i)),
+      mooseAssert(solution_states[i] == &getVector(oldSolutionStateVectorName(i, iteration_type)),
                   "Inconsistent solution state");
 }
 

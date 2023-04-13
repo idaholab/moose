@@ -37,5 +37,5 @@ FVIntegralValueConstraint::FVIntegralValueConstraint(const InputParameters & par
 ADReal
 FVIntegralValueConstraint::computeQpResidual()
 {
-  return _var(makeElemArg(_current_elem)) - _phi0;
+  return _var(makeElemArg(_current_elem), determineState()) - _phi0;
 }

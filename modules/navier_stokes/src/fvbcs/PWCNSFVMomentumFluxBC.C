@@ -29,5 +29,5 @@ PWCNSFVMomentumFluxBC::PWCNSFVMomentumFluxBC(const InputParameters & params)
 ADReal
 PWCNSFVMomentumFluxBC::computeQpResidual()
 {
-  return WCNSFVMomentumFluxBC::computeQpResidual() / _eps(singleSidedFaceArg());
+  return WCNSFVMomentumFluxBC::computeQpResidual() / _eps(singleSidedFaceArg(), determineState());
 }

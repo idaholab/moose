@@ -55,14 +55,15 @@ Real
 FunctorElementalAuxTempl<is_ad>::computeValue()
 {
   using MetaPhysicL::raw_value;
+  const auto state = determineState();
   if (_use_qp_arg)
   {
     const auto qp_arg = std::make_tuple(_current_elem, _qp, _qrule);
-    return raw_value(_factor(qp_arg)) * raw_value(_functor(qp_arg));
+    return raw_value(_factor(qp_arg, state)) * raw_value(_functor(qp_arg, state));
   }
   else
   {
     const auto elem_arg = makeElemArg(_current_elem);
-    return raw_value(_factor(elem_arg)) * raw_value(_functor(elem_arg));
+    return raw_value(_factor(elem_arg, state)) * raw_value(_functor(elem_arg, state));
   }
 }

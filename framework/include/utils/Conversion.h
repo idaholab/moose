@@ -112,6 +112,9 @@ std::string stringify(const std::string & s);
 /// Convert FEType from libMesh into string
 std::string stringify(FEFamily f);
 
+/// Convert SolutionIterationType into string
+std::string stringify(SolutionIterationType t);
+
 /// Add pair stringify to support maps
 template <typename T, typename U>
 std::string

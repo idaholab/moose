@@ -100,7 +100,9 @@ interpolationParameters()
 namespace NS
 {
 std::tuple<bool, ADReal, ADReal>
-isPorosityJumpFace(const Moose::Functor<ADReal> & porosity, const FaceInfo & fi)
+isPorosityJumpFace(const Moose::Functor<ADReal> & porosity,
+                   const FaceInfo & fi,
+                   const Moose::StateArg & time)
 {
   if (!fi.neighborPtr() || (fi.elem().subdomain_id() == fi.neighbor().subdomain_id()))
     // We've agreed to only support porosity jump treatment at subdomain boundaries
@@ -114,7 +116,7 @@ isPorosityJumpFace(const Moose::Functor<ADReal> & porosity, const FaceInfo & fi)
       &fi, Moose::FV::LimiterType::CentralDifference, true, false, fi.elemPtr()};
   const Moose::FaceArg face_neighbor{
       &fi, Moose::FV::LimiterType::CentralDifference, true, false, fi.neighborPtr()};
-  const auto eps_elem = porosity(face_elem), eps_neighbor = porosity(face_neighbor);
+  const auto eps_elem = porosity(face_elem, time), eps_neighbor = porosity(face_neighbor, time);
   return {!MooseUtils::relativeFuzzyEqual(eps_elem, eps_neighbor), eps_elem, eps_neighbor};
 }
 }

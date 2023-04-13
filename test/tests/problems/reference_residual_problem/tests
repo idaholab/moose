@@ -111,6 +111,20 @@
     requirement = 'The system shall have the ability to default to the traditional convergence checks if no '
                   'reference vector is provided in ReferenceResidualProblem.'
   []
+  [zero_tolerance_ref]
+    type = RunException
+    input = no_ref.i
+    expect_err = 'Solve failed'
+    cli_args = 'Problem/extra_tag_vectors=absref Problem/reference_vector=absref Problem/zero_reference_residual_treatment=zero_tolerance'
+    requirement = 'The system shall treat convergence with a zero reference residual value as requiring zero residual value for convergence.'
+  []
+  [zero_rel_tolerance_ref]
+    type = CSVDiff
+    input = no_ref.i
+    csvdiff = 'zero_rel_tolerance_ref_out.csv'
+    cli_args = 'Problem/extra_tag_vectors=absref Problem/reference_vector=absref Problem/zero_reference_residual_treatment=relative_tolerance Executioner/nl_rel_tol=1e-8 Outputs/file_base=zero_rel_tolerance_ref_out'
+    requirement = 'The system shall treat convergence with a zero reference residual value as converged if the residual is below the relative tolerance.'
+  []
   [error]
     requirement = 'When using ReferenceResidualProblem the system shall throw an error '
     [wrong_vector_tag_type]
@@ -137,7 +151,7 @@
     [not_residual_tag]
       type = RunException
       input = no_ref.i
-      cli_args = "Problem/extra_tag_solutions=absref"
+      cli_args = "Problem/extra_tag_solutions=absref GlobalParams/absolute_value_vector_tags=absref"
       expect_err = "is not a residual vector tag"
       detail = "if the reference vector is provided is not a residual vector tag."
     []

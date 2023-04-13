@@ -45,6 +45,8 @@ INSFVMomentumBoussinesq::INSFVMomentumBoussinesq(const InputParameters & params)
 ADReal
 INSFVMomentumBoussinesq::computeQpResidual()
 {
-  auto elem = makeElemArg(_current_elem);
-  return _alpha(elem) * _gravity(_index) * _rho(elem) * (_temperature(elem) - _ref_temperature);
+  const auto elem = makeElemArg(_current_elem);
+  const auto state = determineState();
+  return _alpha(elem, state) * _gravity(_index) * _rho(elem, state) *
+         (_temperature(elem, state) - _ref_temperature);
 }

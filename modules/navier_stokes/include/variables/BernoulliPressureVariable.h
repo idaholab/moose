@@ -27,23 +27,31 @@ public:
 
   static InputParameters validParams();
 
-  bool isExtrapolatedBoundaryFace(const FaceInfo & fi, const Elem * elem) const override;
+  bool isExtrapolatedBoundaryFace(const FaceInfo & fi,
+                                  const Elem * elem,
+                                  const Moose::StateArg & time) const override;
 
   void initialSetup() override;
 
 protected:
-  bool isDirichletBoundaryFace(const FaceInfo & fi, const Elem * elem) const override;
+  bool isDirichletBoundaryFace(const FaceInfo & fi,
+                               const Elem * elem,
+                               const Moose::StateArg & time) const override;
 
-  ADReal getDirichletBoundaryFaceValue(const FaceInfo & fi, const Elem * elem) const override;
+  ADReal getDirichletBoundaryFaceValue(const FaceInfo & fi,
+                                       const Elem * elem,
+                                       const Moose::StateArg & time) const override;
 
   /**
    * Checks to see whether the provided element is upwind of the provided face
    * @param elem the element to check whether it is upwind of the face
    * @param fi the face
+   * @param time The time at which to evaluate the velocity
    * @return a pair in which the first member is whether the element is upwind of the face and the
    * second member is the evaluated face superficial velocity
    */
-  std::pair<bool, ADRealVectorValue> elemIsUpwind(const Elem & elem, const FaceInfo & fi) const;
+  std::pair<bool, ADRealVectorValue>
+  elemIsUpwind(const Elem & elem, const FaceInfo & fi, const Moose::StateArg & time) const;
 
   /// The x-component of velocity
   const Moose::Functor<ADReal> * _u;
