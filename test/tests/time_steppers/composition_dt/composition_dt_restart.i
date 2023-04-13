@@ -56,12 +56,12 @@
   [TimeStepper]
     [ConstDT1]
       type = ConstantDT
-      dt = 0.2
+      dt = 0.1
     []
 
     [ConstDT2]
       type = ConstantDT
-      dt = 0.3
+      dt = 0.05
     []
 
     [LogConstDT]
@@ -77,10 +77,8 @@
 
     [CompositionDT]
       type = CompositionDT
-      input_timesteppers = 'ConstDT1 LogConstDT'
-      base_timestepper = 'ConstDT2'
-      composition_type = 'max'
-      times_to_hit_timestepper = 'Timesequence'
+      maximum_step_from = 'ConstDT1 ConstDT2'
+      base_timestepper = 'LogConstDT'
     []
   []
 []

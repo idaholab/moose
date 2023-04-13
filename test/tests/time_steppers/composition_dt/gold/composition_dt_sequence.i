@@ -1,9 +1,16 @@
-[Mesh]
-  file = restart_test_cp/0008_mesh.cpr
-[]
+###########################################################
+# This is a simple test with a time-dependent problem
+# demonstrating the use of the TimeStepper system.
+#
+# @Requirement F1.20
+###########################################################
 
-[Problem]
-  restart_file_base = restart_test_cp/0008
+
+[Mesh]
+  type = GeneratedMesh
+  dim = 2
+  nx = 10
+  ny = 10
 []
 
 [Variables]
@@ -40,7 +47,7 @@
 
 [Executioner]
   type = Transient
-  end_time = 1.2
+  end_time = 0.8
   solve_type = PJFNK
   petsc_options_iname = '-pc_type -pc_hypre_type'
   petsc_options_value = 'hypre boomeramg'
@@ -54,7 +61,7 @@
 
     [ConstDT2]
       type = ConstantDT
-      dt = 0.3
+      dt = 0.1
     []
 
     [LogConstDT]
@@ -63,19 +70,25 @@
       first_dt = 0.1
     []
 
-    [Timesequence]
+    [Timesequence1]
       type = TimeSequenceStepper
-      time_sequence  = '0  0.5 0.8 1 1.2'
+      time_sequence  = '0  0.25 0.3 0.5 0.8'
+    []
+
+    [Timesequence2]
+      type = TimeSequenceStepper
+      time_sequence  = '0  0.45 0.65'
     []
 
     [CompositionDT]
       type = CompositionDT
       maximum_step_from = 'ConstDT1 ConstDT2'
       base_timestepper = 'LogConstDT'
+      times_to_hit_timestepper = 'Timesequence1 Timesequence2'
     []
   []
 []
 
 [Outputs]
-  exodus=true
+  exodus = true
 []

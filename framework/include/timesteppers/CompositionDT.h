@@ -17,9 +17,6 @@ class CompositionDT : public TimeStepper
 public:
   static InputParameters validParams();
 
-  // The available composition types
-  static MooseEnum getCompositionTypes() { return MooseEnum("max min"); }
-
   CompositionDT(const InputParameters & parameters);
 
   // Find the maximum time step size within all input time stepper(s)
@@ -34,16 +31,13 @@ public:
    * @param dts stores time step size(s) from input time stepper(s)
    * @param basedt time step size from the base time stepper
    */
-  Real produceCompositionDT(const std::map<const std::string, Real> & dts, const Real & basedt);
+  Real produceCompositionDT(const Real & max_dt, const Real & min_dt, const Real & basedt);
 
   // Setup a time stepper with the given name
   std::shared_ptr<TimeStepper> getTimeStepper(const std::string & name);
 
-  // Setup a time sequence stepper with the given name
-  std::shared_ptr<TimeSequenceStepperBase> getSequenceStepper(const std::string & stpper_name);
-
-  // Estimate the time step size needed to hit a user specified time
-  Real produceHitDT(const Real & composeDT);
+  // Find the time point to hit at current time step
+  Real getSequenceSteppers();
 
 protected:
   virtual Real computeInitialDT() override;
@@ -64,8 +58,11 @@ private:
   const std::string _base_timestepper;
 
   // the name of the time sequence stepper
-  std::string _hit_timestepper_name;
+  std::vector<std::string> _hit_timestepper_name;
 
-  // the names of input time stepper(s)
-  std::vector<std::string> _inputs;
+  // the names of input time stepper(s) for maximum dt
+  std::vector<std::string> _maximum_step_inputs;
+
+  // the names of input time stepper(s) for minimum dt
+  std::vector<std::string> _minimum_step_inputs;
 };

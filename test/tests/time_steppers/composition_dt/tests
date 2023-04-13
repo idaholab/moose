@@ -16,15 +16,15 @@
       type = 'Exodiff'
       input = 'composition_dt.i'
       exodiff = 'composition_dt_min.e'
-      cli_args = "Executioner/TimeStepper/CompositionDT/composition_type=min Outputs/file_base='composition_dt_min'"
+      cli_args = "Executioner/TimeStepper/CompositionDT/minimum_step_from='ConstDT1 ConstDT2' Outputs/file_base='composition_dt_min'"
 
       detail = 'using the minimum time step size of input time steppers,'
     []
     [timesequence_to_hit]
       type = 'Exodiff'
-      input = 'composition_dt.i'
+      input = 'composition_dt_sequence.i'
       exodiff = 'composition_dt_hit.e'
-      cli_args = "Executioner/TimeStepper/CompositionDT/times_to_hit_timestepper=Timesequence Outputs/file_base='composition_dt_hit'"
+      cli_args = "Outputs/file_base='composition_dt_hit'"
 
       detail = 'hitting the time points specified by a TimesequenceStepper selected by the user'
     []
