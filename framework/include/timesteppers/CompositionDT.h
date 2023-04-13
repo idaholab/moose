@@ -38,7 +38,7 @@ public:
 
 protected:
   virtual Real computeDT() override;
-  virtual Real computeInitialDT()override;
+  virtual Real computeInitialDT() override;
 
 private:
   // the time step size computed by the Composition TimeStepper
