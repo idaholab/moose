@@ -38,8 +38,8 @@ protected:
   std::vector<bool> _is_cylindrical;
   /// Heat structure side types for each boundary
   std::vector<Component2D::ExternalBoundaryType> _hs_side_types;
-  /// Perimeters for the primary and secondary sides
-  std::vector<Real> _perimeters;
+  /// Areas for the primary and secondary sides
+  std::vector<Real> _areas;
   /// Area fractions by which to multiply coupling terms
   std::vector<Real> _coupling_area_fractions;
 

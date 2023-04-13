@@ -38,7 +38,7 @@ where $\mathcal{R}_i$ is sometimes described as a radiation resistance:
 
 !equation
 \mathcal{R}_i = \frac{1 - \epsilon_i}{\epsilon_i} + \frac{1}{F_{i,j}}
-  + \frac{1 - \epsilon_j}{\epsilon_j}\frac{P_i}{P_j} \eqc
+  + \frac{1 - \epsilon_j}{\epsilon_j}\frac{A_i}{A_j} \eqc
 
 where
 
@@ -46,7 +46,7 @@ where
 - $\sigma$ is the Stefan-Boltzmann constant,
 - $F_{i,j}$ is the view factor from surface $i$ to surface $j$,
 - $T_i$ is the temperature of surface $i$, and
-- $P_i$ is perimeter of surface $i$.
+- $A_i$ is the area of surface $i$.
 
 The surface $i$ that is enclosed by the other surface has its view factor
 set to unity:
@@ -57,7 +57,7 @@ F_{i,j} = 1 \eqc
 whereas the other is computed using the reciprocity rule:
 
 !equation
-F_{j,i} = \frac{P_i}{P_j} \eqp
+F_{j,i} = \frac{A_i}{A_j} \eqp
 
 !syntax inputs /Components/HeatStructure2DRadiationCouplerRZ
 

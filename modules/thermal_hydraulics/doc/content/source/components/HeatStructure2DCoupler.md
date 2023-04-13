@@ -39,11 +39,11 @@ where
 
 !equation
 F_k = \left\{\begin{array}{l l}
-  1 & P_k \leq P_j\\
-  \frac{P_j}{P_k} & P_k > P_j\\
+  1 & A_k \leq A_j\\
+  \frac{A_j}{A_k} & A_k > A_j\\
   \end{array}\right. \eqc
 
-where $P_k$ is the perimeter of heat structure $k$.
+where $A_k$ is the area of the heat structure boundary $k$.
 
 !syntax inputs /Components/HeatStructure2DCoupler
 

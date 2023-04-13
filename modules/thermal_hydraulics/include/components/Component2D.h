@@ -116,6 +116,30 @@ public:
    */
   const BoundaryName & getExternalBoundaryName(const ExternalBoundaryType & boundary_type) const;
 
+  /**
+   * Gets the area for a boundary
+   */
+  const Real & getBoundaryArea(const BoundaryName & boundary_name) const;
+
+  /**
+   * Computes the area of a radial boundary
+   *
+   * @param[in] length   Length of the radial boundary
+   * @param[in] y        Transverse position of the surface, which ranges from
+   *                     0 (inner) to total width (outer).
+   */
+  virtual Real computeRadialBoundaryArea(const Real & length, const Real & y) const = 0;
+
+  /**
+   * Computes the area of an axial boundary
+   *
+   * @param[in] y_min    Minimum transverse position of the surface, which ranges from
+   *                     0 (inner) to total width (outer).
+   * @param[in] y_max    Maximum transverse position of the surface, which ranges from
+   *                     0 (inner) to total width (outer).
+   */
+  virtual Real computeAxialBoundaryArea(const Real & y_min, const Real & y_max) const = 0;
+
 protected:
   virtual void check() const override;
 
@@ -145,13 +169,13 @@ protected:
   unsigned int _total_elem_number;
 
   /// BC ID of the component (outer)
-  std::vector<unsigned int> _outer_bc_id;
+  unsigned int _outer_bc_id;
   /// BC ID of the component (inner)
-  std::vector<unsigned int> _inner_bc_id;
+  unsigned int _inner_bc_id;
   /// BC ID of the component (start)
-  std::vector<unsigned int> _start_bc_id;
+  unsigned int _start_bc_id;
   /// BC ID of the component (end)
-  std::vector<unsigned int> _end_bc_id;
+  unsigned int _end_bc_id;
   /// BC ID of the interior axial boundaries (per radial section) of the component
   std::vector<unsigned int> _interior_axial_per_radial_section_bc_id;
   /// BC ID of the axial regions of the outer boundary of the component
@@ -185,6 +209,9 @@ protected:
   std::vector<BoundaryName> _boundary_names_radial_end;
   /// Boundary names of the inner radial boundary regions of the component
   std::vector<BoundaryName> _boundary_names_inner_radial;
+
+  /// Map of boundary name to boundary area
+  std::map<BoundaryName, Real> _boundary_name_to_area;
 
   /// Map of boundary name to list of tuples of element and side IDs for that boundary
   std::map<BoundaryName, std::vector<std::tuple<dof_id_type, unsigned short int>>> _boundary_info;

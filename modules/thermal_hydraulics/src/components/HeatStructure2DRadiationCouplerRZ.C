@@ -49,15 +49,15 @@ HeatStructure2DRadiationCouplerRZ::init()
       hasComponentByName<HeatStructureBase>(_hs_names[1]) && _hs_side_types.size() == 2)
   {
     _view_factors.resize(2);
-    if (_perimeters[0] > _perimeters[1])
+    if (_areas[0] > _areas[1])
     {
-      _view_factors[0] = _perimeters[1] / _perimeters[0];
+      _view_factors[0] = _areas[1] / _areas[0];
       _view_factors[1] = 1.0;
     }
     else
     {
       _view_factors[0] = 1.0;
-      _view_factors[1] = _perimeters[0] / _perimeters[1];
+      _view_factors[1] = _areas[0] / _areas[1];
     }
   }
 }
@@ -110,8 +110,8 @@ HeatStructure2DRadiationCouplerRZ::addMooseObjects()
     params.set<Real>("emissivity") = _emissivities[i];
     params.set<Real>("coupled_emissivity") = _emissivities[j];
     params.set<Real>("view_factor") = _view_factors[i];
-    params.set<Real>("perimeter") = _perimeters[i];
-    params.set<Real>("coupled_perimeter") = _perimeters[j];
+    params.set<Real>("area") = _areas[i];
+    params.set<Real>("coupled_area") = _areas[j];
     params.set<Real>("stefan_boltzmann_constant") = getParam<Real>("stefan_boltzmann_constant");
     params.set<Point>("axis_point") = hs_cyl.getPosition();
     params.set<RealVectorValue>("axis_dir") = hs_cyl.getDirection();

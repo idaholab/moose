@@ -83,3 +83,15 @@ HeatStructurePlate::getUnitPerimeter(const ExternalBoundaryType & side) const
 
   mooseError(name(), ": Unknown value of 'side' parameter.");
 }
+
+Real
+HeatStructurePlate::computeRadialBoundaryArea(const Real & length, const Real & /*y*/) const
+{
+  return length * _depth;
+}
+
+Real
+HeatStructurePlate::computeAxialBoundaryArea(const Real & y_min, const Real & y_max) const
+{
+  return (y_max - y_min) * _depth;
+}
