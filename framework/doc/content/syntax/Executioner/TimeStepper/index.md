@@ -7,7 +7,7 @@ time stepping, time stepping based on a function, or adaptive time stepping.
 
 These TimeSteppers can be used separately or used as inputs for [Composition TimeStepper](timesteppers/CompositionDT.md) to generate a composed time step size. If multiple TimeSteppers are used in `TimeStepper` block, the user is required to specify a [!param](/Executioner/Transient/final_time_stepper) to compute the time step size. Below is an example using multiple TimeSteppers input:
 
-!listing test/tests/time_steppers/composition_dt/composition_dt.i block=Executioner
+!listing test/tests/time_steppers/minimum_all_dt/minimum_all_dt.i block=Executioner
 
 !syntax list /Executioner/TimeStepper objects=True actions=False subsystems=False
 
