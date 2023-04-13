@@ -17,6 +17,9 @@
 
 /.github @permcody
 
+/libmesh @roystgnr @lindsayad @cticenhour @milljm @loganharbour
+/petsc @lindsayad @cticenhour @milljm @loganharbour
+
 /framework/include @lindsayad
 /framework/src @lindsayad
 /framework/*/base @roystgnr
