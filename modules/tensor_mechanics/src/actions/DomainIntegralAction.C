@@ -693,6 +693,8 @@ DomainIntegralAction::act()
       InputParameters params = _factory.getValidParams(vpp_type_name);
       params.set<UserObjectName>("crack_front_definition") = uo_name;
       params.set<bool>("use_displaced_mesh") = _use_displaced_mesh;
+      params.set<std::vector<SubdomainName>>("block") = {_blocks};
+
       if (_has_symmetry_plane)
         params.set<unsigned int>("symmetry_plane") = _symmetry_plane;
 
@@ -779,6 +781,7 @@ DomainIntegralAction::act()
       InputParameters params = _factory.getValidParams(vpp_type_name);
       params.set<ExecFlagEnum>("execute_on") = EXEC_TIMESTEP_END;
       params.set<Real>("poissons_ratio") = _poissons_ratio;
+
       for (unsigned int ring_index = 0; ring_index < _ring_vec.size(); ++ring_index)
       {
         std::string ki_name = "II_KI_";
