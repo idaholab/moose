@@ -2770,8 +2770,6 @@ NonlinearSystemBase::computeJacobianInternal(const std::set<TagID> & tags)
   }
   PARALLEL_CATCH;
 
-  closeTaggedMatrices(tags);
-
   // Have no idea how to have constraints work
   // with the tag system
   PARALLEL_TRY
@@ -2779,6 +2777,9 @@ NonlinearSystemBase::computeJacobianInternal(const std::set<TagID> & tags)
     // Add in Jacobian contributions from other Constraints
     if (_fe_problem._has_constraints)
     {
+      // Some constraints need values from the Jacobian
+      closeTaggedMatrices(tags);
+
       // Nodal Constraints
       enforceNodalConstraintsJacobian();
 
@@ -2791,8 +2792,6 @@ NonlinearSystemBase::computeJacobianInternal(const std::set<TagID> & tags)
     }
   }
   PARALLEL_CATCH;
-  if (_fe_problem._has_constraints)
-    closeTaggedMatrices(tags);
 
   // We need to close the save_in variables on the aux system before NodalBCBases clear the dofs
   // on boundary nodes
@@ -2810,90 +2809,102 @@ NonlinearSystemBase::computeJacobianInternal(const std::set<TagID> & tags)
     else
       nbc_warehouse = &(_nodal_bcs.getMatrixTagsObjectWarehouse(tags, 0));
 
-    // Cache the information about which BCs are coupled to which
-    // variables, so we don't have to figure it out for each node.
-    std::map<std::string, std::set<unsigned int>> bc_involved_vars;
-    const std::set<BoundaryID> & all_boundary_ids = _mesh.getBoundaryIDs();
-    for (const auto & bid : all_boundary_ids)
+    if (nbc_warehouse->hasActiveObjects())
     {
-      // Get reference to all the NodalBCs for this ID.  This is only
-      // safe if there are NodalBCBases there to be gotten...
-      if (nbc_warehouse->hasActiveBoundaryObjects(bid))
+      // We may be switching from add to set. Moreover, we rely on a call to MatZeroRows to enforce
+      // the nodal boundary condition constraints which requires that the matrix be truly assembled
+      // as opposed to just flushed. Consequently we can't do the following despite any desire to
+      // keep our initial sparsity pattern honored (see https://gitlab.com/petsc/petsc/-/issues/852)
+      //
+      // flushTaggedMatrices(tags);
+      closeTaggedMatrices(tags);
+
+      // Cache the information about which BCs are coupled to which
+      // variables, so we don't have to figure it out for each node.
+      std::map<std::string, std::set<unsigned int>> bc_involved_vars;
+      const std::set<BoundaryID> & all_boundary_ids = _mesh.getBoundaryIDs();
+      for (const auto & bid : all_boundary_ids)
       {
-        const auto & bcs = nbc_warehouse->getActiveBoundaryObjects(bid);
-        for (const auto & bc : bcs)
+        // Get reference to all the NodalBCs for this ID.  This is only
+        // safe if there are NodalBCBases there to be gotten...
+        if (nbc_warehouse->hasActiveBoundaryObjects(bid))
         {
-          const std::vector<MooseVariableFEBase *> & coupled_moose_vars = bc->getCoupledMooseVars();
-
-          // Create the set of "involved" MOOSE nonlinear vars, which includes all coupled vars
-          // and the BC's own variable
-          std::set<unsigned int> & var_set = bc_involved_vars[bc->name()];
-          for (const auto & coupled_var : coupled_moose_vars)
-            if (coupled_var->kind() == Moose::VAR_NONLINEAR)
-              var_set.insert(coupled_var->number());
-
-          var_set.insert(bc->variable().number());
-        }
-      }
-    }
-
-    // reinit scalar variables again. This reinit does not re-fill any of the scalar variable
-    // solution arrays because that was done above. It only will reorder the derivative
-    // information for AD calculations to be suitable for NodalBC calculations
-    for (unsigned int tid = 0; tid < libMesh::n_threads(); tid++)
-      _fe_problem.reinitScalars(tid, true);
-
-    // Get variable coupling list.  We do all the NodalBCBase stuff on
-    // thread 0...  The couplingEntries() data structure determines
-    // which variables are "coupled" as far as the preconditioner is
-    // concerned, not what variables a boundary condition specifically
-    // depends on.
-    auto & coupling_entries = _fe_problem.couplingEntries(/*_tid=*/0);
-
-    // Compute Jacobians for NodalBCBases
-    ConstBndNodeRange & bnd_nodes = *_mesh.getBoundaryNodeRange();
-    for (const auto & bnode : bnd_nodes)
-    {
-      BoundaryID boundary_id = bnode->_bnd_id;
-      Node * node = bnode->_node;
-
-      if (nbc_warehouse->hasActiveBoundaryObjects(boundary_id) &&
-          node->processor_id() == processor_id())
-      {
-        _fe_problem.reinitNodeFace(node, boundary_id, 0);
-
-        const auto & bcs = nbc_warehouse->getActiveBoundaryObjects(boundary_id);
-        for (const auto & bc : bcs)
-        {
-          // Get the set of involved MOOSE vars for this BC
-          std::set<unsigned int> & var_set = bc_involved_vars[bc->name()];
-
-          // Loop over all the variables whose Jacobian blocks are
-          // actually being computed, call computeOffDiagJacobian()
-          // for each one which is actually coupled (otherwise the
-          // value is zero.)
-          for (const auto & it : coupling_entries)
+          const auto & bcs = nbc_warehouse->getActiveBoundaryObjects(bid);
+          for (const auto & bc : bcs)
           {
-            unsigned int ivar = it.first->number(), jvar = it.second->number();
+            const std::vector<MooseVariableFEBase *> & coupled_moose_vars =
+                bc->getCoupledMooseVars();
 
-            // We are only going to call computeOffDiagJacobian() if:
-            // 1.) the BC's variable is ivar
-            // 2.) jvar is "involved" with the BC (including jvar==ivar), and
-            // 3.) the BC should apply.
-            if ((bc->variable().number() == ivar) && var_set.count(jvar) && bc->shouldApply())
-              bc->computeOffDiagJacobian(jvar);
+            // Create the set of "involved" MOOSE nonlinear vars, which includes all coupled vars
+            // and the BC's own variable
+            std::set<unsigned int> & var_set = bc_involved_vars[bc->name()];
+            for (const auto & coupled_var : coupled_moose_vars)
+              if (coupled_var->kind() == Moose::VAR_NONLINEAR)
+                var_set.insert(coupled_var->number());
+
+            var_set.insert(bc->variable().number());
           }
-
-          const auto & coupled_scalar_vars = bc->getCoupledMooseScalarVars();
-          for (const auto & jvariable : coupled_scalar_vars)
-            if (hasScalarVariable(jvariable->name()))
-              bc->computeOffDiagJacobianScalar(jvariable->number());
         }
       }
-    } // end loop over boundary nodes
 
-    // Set the cached NodalBCBase values in the Jacobian matrix
-    _fe_problem.assembly(0, number()).setCachedJacobian();
+      // reinit scalar variables again. This reinit does not re-fill any of the scalar variable
+      // solution arrays because that was done above. It only will reorder the derivative
+      // information for AD calculations to be suitable for NodalBC calculations
+      for (unsigned int tid = 0; tid < libMesh::n_threads(); tid++)
+        _fe_problem.reinitScalars(tid, true);
+
+      // Get variable coupling list.  We do all the NodalBCBase stuff on
+      // thread 0...  The couplingEntries() data structure determines
+      // which variables are "coupled" as far as the preconditioner is
+      // concerned, not what variables a boundary condition specifically
+      // depends on.
+      auto & coupling_entries = _fe_problem.couplingEntries(/*_tid=*/0);
+
+      // Compute Jacobians for NodalBCBases
+      ConstBndNodeRange & bnd_nodes = *_mesh.getBoundaryNodeRange();
+      for (const auto & bnode : bnd_nodes)
+      {
+        BoundaryID boundary_id = bnode->_bnd_id;
+        Node * node = bnode->_node;
+
+        if (nbc_warehouse->hasActiveBoundaryObjects(boundary_id) &&
+            node->processor_id() == processor_id())
+        {
+          _fe_problem.reinitNodeFace(node, boundary_id, 0);
+
+          const auto & bcs = nbc_warehouse->getActiveBoundaryObjects(boundary_id);
+          for (const auto & bc : bcs)
+          {
+            // Get the set of involved MOOSE vars for this BC
+            std::set<unsigned int> & var_set = bc_involved_vars[bc->name()];
+
+            // Loop over all the variables whose Jacobian blocks are
+            // actually being computed, call computeOffDiagJacobian()
+            // for each one which is actually coupled (otherwise the
+            // value is zero.)
+            for (const auto & it : coupling_entries)
+            {
+              unsigned int ivar = it.first->number(), jvar = it.second->number();
+
+              // We are only going to call computeOffDiagJacobian() if:
+              // 1.) the BC's variable is ivar
+              // 2.) jvar is "involved" with the BC (including jvar==ivar), and
+              // 3.) the BC should apply.
+              if ((bc->variable().number() == ivar) && var_set.count(jvar) && bc->shouldApply())
+                bc->computeOffDiagJacobian(jvar);
+            }
+
+            const auto & coupled_scalar_vars = bc->getCoupledMooseScalarVars();
+            for (const auto & jvariable : coupled_scalar_vars)
+              if (hasScalarVariable(jvariable->name()))
+                bc->computeOffDiagJacobianScalar(jvariable->number());
+          }
+        }
+      } // end loop over boundary nodes
+
+      // Set the cached NodalBCBase values in the Jacobian matrix
+      _fe_problem.assembly(0, number()).setCachedJacobian();
+    }
   }
   PARALLEL_CATCH;
 
