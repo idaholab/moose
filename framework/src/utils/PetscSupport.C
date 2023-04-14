@@ -285,7 +285,7 @@ petscNonlinearConverged(SNES snes,
                         void * ctx)
 {
   FEProblemBase & problem = *static_cast<FEProblemBase *>(ctx);
-  NonlinearSystemBase & system = problem.getNonlinearSystemBase();
+  NonlinearSystemBase & system = problem.currentNonlinearSystem();
 
   // Let's be nice and always check PETSc error codes.
   PetscErrorCode ierr = 0;
@@ -497,27 +497,30 @@ petscSetKSPDefaults(FEProblemBase & problem, KSP ksp)
 void
 petscSetDefaults(FEProblemBase & problem)
 {
-  // dig out PETSc solver
-  NonlinearSystemBase & nl = problem.getNonlinearSystemBase();
-  PetscNonlinearSolver<Number> * petsc_solver =
-      dynamic_cast<PetscNonlinearSolver<Number> *>(nl.nonlinearSolver());
-  SNES snes = petsc_solver->snes();
-  KSP ksp;
-  SNESGetKSP(snes, &ksp);
-
-  SNESSetMaxLinearSolveFailures(snes, 1000000);
-
-  // In 3.0.0, the context pointer must actually be used, and the
-  // final argument to KSPSetConvergenceTest() is a pointer to a
-  // routine for destroying said private data context.  In this case,
-  // we use the default context provided by PETSc in addition to
-  // a few other tests.
+  for (auto nl_index : make_range(problem.numNonlinearSystems()))
   {
-    auto ierr = SNESSetConvergenceTest(snes, petscNonlinearConverged, &problem, PETSC_NULL);
-    CHKERRABORT(nl.comm().get(), ierr);
-  }
+    // dig out PETSc solver
+    NonlinearSystemBase & nl = problem.getNonlinearSystemBase(nl_index);
+    PetscNonlinearSolver<Number> * petsc_solver =
+        dynamic_cast<PetscNonlinearSolver<Number> *>(nl.nonlinearSolver());
+    SNES snes = petsc_solver->snes();
+    KSP ksp;
+    SNESGetKSP(snes, &ksp);
 
-  petscSetKSPDefaults(problem, ksp);
+    SNESSetMaxLinearSolveFailures(snes, 1000000);
+
+    // In 3.0.0, the context pointer must actually be used, and the
+    // final argument to KSPSetConvergenceTest() is a pointer to a
+    // routine for destroying said private data context.  In this case,
+    // we use the default context provided by PETSc in addition to
+    // a few other tests.
+    {
+      auto ierr = SNESSetConvergenceTest(snes, petscNonlinearConverged, &problem, PETSC_NULL);
+      CHKERRABORT(nl.comm().get(), ierr);
+    }
+
+    petscSetKSPDefaults(problem, ksp);
+  }
 }
 
 void
@@ -540,20 +543,21 @@ storePetscOptions(FEProblemBase & fe_problem, const InputParameters & params)
           Moose::stringToEnum<Moose::LineSearchType>(line_search);
       fe_problem.solverParams()._line_search = enum_line_search;
       if (enum_line_search == LS_CONTACT || enum_line_search == LS_PROJECT)
-      {
-        NonlinearImplicitSystem * nl_system =
-            dynamic_cast<NonlinearImplicitSystem *>(&fe_problem.getNonlinearSystemBase().system());
-        if (!nl_system)
-          mooseError("You've requested a line search but you must be solving an EigenProblem. "
-                     "These two things are not consistent.");
-        PetscNonlinearSolver<Real> * petsc_nonlinear_solver =
-            dynamic_cast<PetscNonlinearSolver<Real> *>(nl_system->nonlinear_solver.get());
-        if (!petsc_nonlinear_solver)
-          mooseError("Currently the MOOSE line searches all use Petsc, so you "
-                     "must use Petsc as your non-linear solver.");
-        petsc_nonlinear_solver->linesearch_object =
-            std::make_unique<ComputeLineSearchObjectWrapper>(fe_problem);
-      }
+        for (auto nl_index : make_range(fe_problem.numNonlinearSystems()))
+        {
+          NonlinearImplicitSystem * nl_system = dynamic_cast<NonlinearImplicitSystem *>(
+              &fe_problem.getNonlinearSystemBase(nl_index).system());
+          if (!nl_system)
+            mooseError("You've requested a line search but you must be solving an EigenProblem. "
+                       "These two things are not consistent.");
+          PetscNonlinearSolver<Real> * petsc_nonlinear_solver =
+              dynamic_cast<PetscNonlinearSolver<Real> *>(nl_system->nonlinear_solver.get());
+          if (!petsc_nonlinear_solver)
+            mooseError("Currently the MOOSE line searches all use Petsc, so you "
+                       "must use Petsc as your non-linear solver.");
+          petsc_nonlinear_solver->linesearch_object =
+              std::make_unique<ComputeLineSearchObjectWrapper>(fe_problem);
+        }
     }
   }
 
