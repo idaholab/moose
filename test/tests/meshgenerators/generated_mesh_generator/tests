@@ -8,7 +8,6 @@
     requirement = 'The system shall be able to use libmesh mesh generation tools.'
     design = 'meshgenerators/GeneratedMeshGenerator.md'
     issues = '#11640'
-    mesh_mode = 'REPLICATED'
     recover = false
   []
 
@@ -22,7 +21,6 @@
                   'ids by a constant offset.'
     design = 'meshgenerators/GeneratedMeshGenerator.md'
     issues = '#11640'
-    mesh_mode = 'REPLICATED'
     recover = false
   []
 
@@ -38,7 +36,6 @@
       cli_args = '--mesh-only'
       exodiff = 'prefix_in.e'
       exodiff_opts = '-pedantic'
-      mesh_mode = 'REPLICATED'
       recover = false
 
       detail = "id and"
@@ -50,7 +47,6 @@
       cli_args = '--mesh-only'
       exodiff = 'prefix_in.e'
       exodiff_opts = '-pedantic -match_by_name'
-      mesh_mode = 'REPLICATED'
       recover = false
 
       detail = "include the added name."
@@ -69,7 +65,6 @@
       cli_args = '--mesh-only'
       exodiff = 'both_in.e'
       exodiff_opts = '-pedantic'
-      mesh_mode = 'REPLICATED'
       recover = false
 
       detail = "the shifted id and"
@@ -82,7 +77,6 @@
       cli_args = '--mesh-only'
       exodiff = 'both_in.e'
       exodiff_opts = '-pedantic -match_by_name'
-      mesh_mode = 'REPLICATED'
       recover = false
 
       detail = "include the added name."
@@ -100,7 +94,6 @@
                   'does not accept them'
     design = 'meshgenerators/GeneratedMeshGenerator.md'
     issues = '#13959'
-    mesh_mode = 'REPLICATED'
   []
 
   [with_subdomain_ids_test]
