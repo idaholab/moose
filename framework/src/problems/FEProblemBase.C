@@ -761,48 +761,7 @@ FEProblemBase::initialSetup()
 
   // Set up stateful material property redistribution, if we suspect
   // it may be necessary later.
-#ifdef LIBMESH_ENABLE_AMR
-  if ((_adaptivity.isOn() || _num_grid_steps) &&
-      (_material_props.hasStatefulProperties() || _bnd_material_props.hasStatefulProperties() ||
-       _neighbor_material_props.hasStatefulProperties()))
-  {
-    // Even on a serialized Mesh, we don't keep our material
-    // properties serialized, so we'll rely on the callback to
-    // redistribute() to redistribute properties at the same time
-    // libMesh is redistributing elements.
-    auto add_redistributer =
-        [this](MooseMesh & mesh, const std::string & redistributer_name, bool use_displaced_mesh)
-    {
-      InputParameters redistribute_params = RedistributeProperties::validParams();
-      redistribute_params.set<MooseApp *>("_moose_app") = &_app;
-      redistribute_params.set<std::string>("for_whom") = this->name();
-      redistribute_params.set<MooseMesh *>("mesh") = &mesh;
-      redistribute_params.set<Moose::RelationshipManagerType>("rm_type") =
-          Moose::RelationshipManagerType::GEOMETRIC;
-      redistribute_params.set<bool>("use_displaced_mesh") = use_displaced_mesh;
-
-      std::shared_ptr<RedistributeProperties> redistributer =
-          _factory.create<RedistributeProperties>(
-              "RedistributeProperties", redistributer_name, redistribute_params);
-
-      if (_material_props.hasStatefulProperties())
-        redistributer->addMaterialPropertyStorage(_material_data, _material_props);
-
-      if (_bnd_material_props.hasStatefulProperties())
-        redistributer->addMaterialPropertyStorage(_bnd_material_data, _bnd_material_props);
-
-      if (_neighbor_material_props.hasStatefulProperties())
-        redistributer->addMaterialPropertyStorage(_neighbor_material_data,
-                                                  _neighbor_material_props);
-
-      mesh.getMesh().add_ghosting_functor(redistributer);
-    };
-
-    add_redistributer(_mesh, "mesh_property_redistributer", false);
-    if (_displaced_problem)
-      add_redistributer(_displaced_problem->mesh(), "displaced_mesh_property_redistributer", true);
-  }
-#endif // LIBMESH_ENABLE_AMR
+  addAnyRedistributers();
 
   // Restart/recovery code
 
@@ -5251,6 +5210,54 @@ void
 FEProblemBase::clearActiveMaterialProperties(THREAD_ID tid)
 {
   _active_material_property_ids[tid].clear();
+}
+
+void
+FEProblemBase::addAnyRedistributers()
+{
+#ifdef LIBMESH_ENABLE_AMR
+  if ((_adaptivity.isOn() || _num_grid_steps) &&
+      (_material_props.hasStatefulProperties() || _bnd_material_props.hasStatefulProperties() ||
+       _neighbor_material_props.hasStatefulProperties()))
+  {
+    // Even on a serialized Mesh, we don't keep our material
+    // properties serialized, so we'll rely on the callback to
+    // redistribute() to redistribute properties at the same time
+    // libMesh is redistributing elements.
+    auto add_redistributer = [this](MooseMesh & mesh,
+                                    const std::string & redistributer_name,
+                                    const bool use_displaced_mesh)
+    {
+      InputParameters redistribute_params = RedistributeProperties::validParams();
+      redistribute_params.set<MooseApp *>("_moose_app") = &_app;
+      redistribute_params.set<std::string>("for_whom") = this->name();
+      redistribute_params.set<MooseMesh *>("mesh") = &mesh;
+      redistribute_params.set<Moose::RelationshipManagerType>("rm_type") =
+          Moose::RelationshipManagerType::GEOMETRIC;
+      redistribute_params.set<bool>("use_displaced_mesh") = use_displaced_mesh;
+
+      std::shared_ptr<RedistributeProperties> redistributer =
+          _factory.create<RedistributeProperties>(
+              "RedistributeProperties", redistributer_name, redistribute_params);
+
+      if (_material_props.hasStatefulProperties())
+        redistributer->addMaterialPropertyStorage(_material_data, _material_props);
+
+      if (_bnd_material_props.hasStatefulProperties())
+        redistributer->addMaterialPropertyStorage(_bnd_material_data, _bnd_material_props);
+
+      if (_neighbor_material_props.hasStatefulProperties())
+        redistributer->addMaterialPropertyStorage(_neighbor_material_data,
+                                                  _neighbor_material_props);
+
+      mesh.getMesh().add_ghosting_functor(redistributer);
+    };
+
+    add_redistributer(_mesh, "mesh_property_redistributer", false);
+    if (_displaced_problem)
+      add_redistributer(_displaced_problem->mesh(), "displaced_mesh_property_redistributer", true);
+  }
+#endif // LIBMESH_ENABLE_AMR
 }
 
 void
