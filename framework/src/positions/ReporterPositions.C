@@ -24,6 +24,12 @@ ReporterPositions::validParams()
 
 ReporterPositions::ReporterPositions(const InputParameters & parameters) : Positions(parameters)
 {
+  // TODO Check execute_on. I'm not sure how to retrieve execute_on for reporters.
+}
+
+void
+ReporterPositions::initialize()
+{
   std::vector<ReporterName> positions_reporters = getParam<std::vector<ReporterName>>("reporters");
   _positions_2d.resize(positions_reporters.size());
 

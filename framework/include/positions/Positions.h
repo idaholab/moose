@@ -35,7 +35,9 @@ public:
 protected:
   /// In charge of computing / loading the positions.
   virtual void initialize() override = 0;
-  void execute() override {}
+
+  /// By default, we wont execute often but "executing" will mean loading the positions
+  void execute() override { initialize(); }
   void finalize() override {}
 
   /// By default, Positions will call initial setup on mesh changed

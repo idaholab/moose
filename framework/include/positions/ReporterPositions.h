@@ -22,6 +22,6 @@ public:
   ReporterPositions(const InputParameters & parameters);
   virtual ~ReporterPositions() = default;
 
-  void initialize() override{};
+  void initialize() override;
   using Positions::_positions;
 };
