@@ -5452,8 +5452,7 @@ FEProblemBase::init()
         case Moose::COUPLING_DIAG:
           cm = std::make_unique<CouplingMatrix>(n_vars);
           for (unsigned int i = 0; i < n_vars; i++)
-            for (unsigned int j = 0; j < n_vars; j++)
-              (*cm)(i, j) = (i == j ? 1 : 0);
+            (*cm)(i, i) = 1;
           break;
 
           // for full jacobian
