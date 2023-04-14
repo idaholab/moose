@@ -25,7 +25,6 @@ class ComputeElemAuxVarsThread : public ThreadedElementLoop<ConstElemRange>
 public:
   ComputeElemAuxVarsThread(FEProblemBase & problem,
                            const MooseObjectWarehouse<AuxKernelType> & storage,
-                           const std::vector<std::vector<MooseVariableFEBase *>> & vars,
                            bool need_materials);
   // Splitting Constructor
   ComputeElemAuxVarsThread(ComputeElemAuxVarsThread & x, Threads::split split);
@@ -50,9 +49,5 @@ protected:
   /// Storage object containing active AuxKernel objects
   const MooseObjectWarehouse<AuxKernelType> & _aux_kernels;
 
-  const std::vector<std::vector<MooseVariableFEBase *>> & _aux_vars;
-
   bool _need_materials;
-
-  static Threads::spin_mutex writable_variable_mutex;
 };

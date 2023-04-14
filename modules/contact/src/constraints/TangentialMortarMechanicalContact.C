@@ -8,6 +8,7 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "TangentialMortarMechanicalContact.h"
+#include "WeightedVelocitiesUserObject.h"
 
 registerMooseObject("ContactApp", TangentialMortarMechanicalContact);
 
@@ -25,9 +26,11 @@ TangentialMortarMechanicalContact::validParams()
   params.addParam<MooseEnum>("direction",
                              direction,
                              "Tangent direction to compute the residual due to frictional contact");
-
   params.addClassDescription(
       "Used to apply tangential stresses from frictional contact using lagrange multipliers");
+  params.addRequiredParam<UserObjectName>("weighted_velocities_uo",
+                                          "The weighted velocities user object.");
+  params.set<bool>("interpolate_normals") = false;
   params.set<bool>("compute_lm_residual") = false;
   return params;
 }
@@ -36,7 +39,9 @@ TangentialMortarMechanicalContact::TangentialMortarMechanicalContact(
     const InputParameters & parameters)
   : ADMortarLagrangeConstraint(parameters),
     _component(getParam<MooseEnum>("component")),
-    _direction(getParam<MooseEnum>("direction"))
+    _direction(getParam<MooseEnum>("direction")),
+    _weighted_velocities_uo(const_cast<WeightedVelocitiesUserObject &>(
+        getUserObject<WeightedVelocitiesUserObject>("weighted_velocities_uo")))
 {
 }
 
@@ -44,6 +49,12 @@ ADReal
 TangentialMortarMechanicalContact::computeQpResidual(Moose::MortarType type)
 {
   const auto & nodal_tangents = amg().getNodalTangents(*_lower_secondary_elem);
+  MooseEnum direction("direction_1 direction_2", "direction_1");
+
+  const auto tangential_pressure =
+      _direction.compareCurrent(direction)
+          ? _weighted_velocities_uo.contactTangentialPressureDirOne()[_qp]
+          : _weighted_velocities_uo.contactTangentialPressureDirTwo()[_qp];
 
   switch (type)
   {
@@ -56,31 +67,19 @@ TangentialMortarMechanicalContact::computeQpResidual(Moose::MortarType type)
       // want to increase momentum in the system, which means we want an inflow of momentum, which
       // means we want the residual to be negative in that case. So the sign of this residual should
       // be the same as the sign of lambda
-
-      if (_interpolate_normals)
-        return _test_secondary[_i][_qp] * _lambda[_qp] * _tangents[_qp][_direction](_component) /
-               _tangents[_qp][_direction].norm();
-      else
       {
         const unsigned int tangent_index = libmesh_map_find(_secondary_ip_lowerd_map, _i);
-        return _test_secondary[_i][_qp] * _lambda[_qp] *
+        return _test_secondary[_i][_qp] * tangential_pressure *
                nodal_tangents[_direction][tangent_index](_component) /
                nodal_tangents[_direction][tangent_index].norm();
       }
     case Moose::MortarType::Primary:
-
-      // Equal and opposite reactions so we put a negative sign here
-      if (_interpolate_normals)
-        return -_test_primary[_i][_qp] * _lambda[_qp] * _tangents[_qp][_direction](_component) /
-               _tangents[_qp][_direction].norm();
-      else
-      {
-        const unsigned int tangent_index = libmesh_map_find(_primary_ip_lowerd_map, _i);
-        return -_test_primary[_i][_qp] * _lambda[_qp] *
-               nodal_tangents[_direction][tangent_index](_component) /
-               nodal_tangents[_direction][tangent_index].norm();
-      }
-
+    {
+      const unsigned int tangent_index = libmesh_map_find(_primary_ip_lowerd_map, _i);
+      return -_test_primary[_i][_qp] * tangential_pressure *
+             nodal_tangents[_direction][tangent_index](_component) /
+             nodal_tangents[_direction][tangent_index].norm();
+    }
     default:
       return 0;
   }

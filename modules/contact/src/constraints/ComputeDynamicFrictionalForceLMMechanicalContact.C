@@ -81,10 +81,6 @@ ComputeDynamicFrictionalForceLMMechanicalContact::ComputeDynamicFrictionalForceL
                "Three-dimensional mortar frictional contact simulations require an additional "
                "frictional Lagrange's multiplier to enforce a second tangential pressure");
 
-  mooseAssert(!_interpolate_normals,
-              "Dynamic mortar mechanical contact constraints require the surface geometry to be "
-              "attached to nodes");
-
   _friction_vars.push_back(getVar("friction_lm", 0));
 
   if (_3d)
@@ -172,11 +168,11 @@ ComputeDynamicFrictionalForceLMMechanicalContact::post()
   ComputeDynamicWeightedGapLMMechanicalContact::post();
 
   Moose::Mortar::Contact::communicateVelocities(
-      _dof_to_weighted_tangential_velocity, this->processor_id(), _mesh, _nodal, _communicator);
+      _dof_to_weighted_tangential_velocity, _mesh, _nodal, _communicator, false);
 
   if (_has_friction_function)
     Moose::Mortar::Contact::communicateVelocities(
-        _dof_to_real_tangential_velocity, this->processor_id(), _mesh, _nodal, _communicator);
+        _dof_to_real_tangential_velocity, _mesh, _nodal, _communicator, false);
 
   // Enforce frictional complementarity constraints
   for (const auto & pr : _dof_to_weighted_tangential_velocity)
@@ -211,11 +207,11 @@ ComputeDynamicFrictionalForceLMMechanicalContact::incorrectEdgeDroppingPost(
   ComputeDynamicWeightedGapLMMechanicalContact::incorrectEdgeDroppingPost(inactive_lm_nodes);
 
   Moose::Mortar::Contact::communicateVelocities(
-      _dof_to_weighted_tangential_velocity, this->processor_id(), _mesh, _nodal, _communicator);
+      _dof_to_weighted_tangential_velocity, _mesh, _nodal, _communicator, false);
 
   if (_has_friction_function)
     Moose::Mortar::Contact::communicateVelocities(
-        _dof_to_real_tangential_velocity, this->processor_id(), _mesh, _nodal, _communicator);
+        _dof_to_real_tangential_velocity, _mesh, _nodal, _communicator, false);
 
   // Enforce frictional complementarity constraints
   for (const auto & pr : _dof_to_weighted_tangential_velocity)

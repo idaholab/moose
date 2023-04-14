@@ -151,6 +151,20 @@
   []
 []
 
+[UserObjects]
+  [weighted_gap_uo]
+    type = LMWeightedGapUserObject
+    primary_boundary = '23'
+    secondary_boundary = '11'
+    primary_subdomain = 'primary_lower'
+    secondary_subdomain = 'secondary_lower'
+    lm_variable = normal_lm
+    correct_edge_dropping = true
+    disp_x = disp_x
+    disp_y = disp_y
+  []
+[]
+
 [Constraints]
   [normal_lm]
     type = ComputeWeightedGapLMMechanicalContact
@@ -163,6 +177,7 @@
     disp_y = disp_y
     use_displaced_mesh = true
     correct_edge_dropping = true
+    weighted_gap_uo = weighted_gap_uo
   []
   [normal_x]
     type = NormalMortarMechanicalContact
@@ -176,6 +191,7 @@
     use_displaced_mesh = true
     compute_lm_residuals = false
     correct_edge_dropping = true
+    weighted_gap_uo = weighted_gap_uo
   []
   [normal_y]
     type = NormalMortarMechanicalContact
@@ -189,6 +205,7 @@
     use_displaced_mesh = true
     compute_lm_residuals = false
     correct_edge_dropping = true
+    weighted_gap_uo = weighted_gap_uo
   []
 []
 

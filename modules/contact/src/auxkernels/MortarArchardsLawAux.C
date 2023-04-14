@@ -43,6 +43,8 @@ MortarArchardsLawAux::validParams()
   params.addRequiredParam<Real>(
       "energy_wear_coefficient",
       "Energy wear coefficient is a surface-dependent parameter used in Archard's wear law");
+  params.set<bool>("interpolate_normals") = false;
+
   return params;
 }
 
@@ -61,20 +63,8 @@ MortarArchardsLawAux::MortarArchardsLawAux(const InputParameters & parameters)
     _secondary_z_dot(_has_disp_z ? &_displacements[2]->adUDot() : nullptr),
     _primary_z_dot(_has_disp_z ? &_displacements[2]->adUDotNeighbor() : nullptr),
     _worn_depth(0),
-    _worn_out_depth_dt(0),
-    _qp_gap_velocity_nodal(0),
-    _i(0),
-    _qp(0)
+    _qp_gap_velocity_nodal(0)
 {
-  // Not sure what the relevance of the normal interpolation is with a mortar aux kernel (not much
-  // in general, I'd think). The interpolated normal is probably good here since there is no
-  // "decoupling" of constraints via dual bases, just a postprocessing computation that can
-  // potentially change the contact interface profile.
-  if (!_interpolate_normals)
-    paramError(
-        "interpolate_normals",
-        "The MortarArchardsLawAux auxiliary kernel requires the use of interpolated normals.");
-
   if (!_displaced)
     paramError("use_displaced_mesh",
                "The MortarArchardsLawAux auxiliary kernel requires the use of displaced meshes to "
@@ -84,13 +74,13 @@ MortarArchardsLawAux::MortarArchardsLawAux(const InputParameters & parameters)
 Real
 MortarArchardsLawAux::computeValue()
 {
-  setNormals();
-
+  mooseAssert(_normals.size() == _test_lower.size(),
+              "Normals and test_lower must be the same size");
   _worn_depth = 0;
   for (_qp = 0; _qp < _qrule_msm->n_points(); _qp++)
   {
     computeQpProperties();
-    for (_i = 0; _i < _test.size(); ++_i)
+    for (_i = 0; _i < _test_lower.size(); ++_i)
       computeQpIProperties();
   }
 
@@ -100,6 +90,12 @@ MortarArchardsLawAux::computeValue()
 void
 MortarArchardsLawAux::computeQpProperties()
 {
+  _msm_volume += _JxW_msm[_qp] * _coord_msm[_qp];
+}
+
+void
+MortarArchardsLawAux::computeQpIProperties()
+{
   RealVectorValue gap_velocity_vec;
   gap_velocity_vec(0) = MetaPhysicL::raw_value(_secondary_x_dot[_qp] - _primary_x_dot[_qp]);
   gap_velocity_vec(1) = MetaPhysicL::raw_value(_secondary_y_dot[_qp] - _primary_y_dot[_qp]);
@@ -108,20 +104,15 @@ MortarArchardsLawAux::computeQpProperties()
     gap_velocity_vec(2) = MetaPhysicL::raw_value((*_secondary_z_dot)[_qp] - (*_primary_z_dot)[_qp]);
 
   // Remove point-wise normal component of the relative velocity
-  gap_velocity_vec -= gap_velocity_vec.contract(_normals[_qp]) * _normals[_qp];
+  gap_velocity_vec -= gap_velocity_vec.contract(_normals[_i]) * _normals[_i];
 
   // Compute norm of the relative tangential velocity (used to compute the weighted quantity)
-  const Real norm_tangential_vel = gap_velocity_vec.norm();
+  const auto norm_tangential_vel = gap_velocity_vec.norm();
 
-  _worn_out_depth_dt = norm_tangential_vel * _energy_wear_coefficient * _friction_coefficient *
-                       _normal_pressure[0] * _dt * _JxW_msm[_qp] * _coord[_qp];
+  const auto worn_out_depth_dt = norm_tangential_vel * _energy_wear_coefficient *
+                                 _friction_coefficient * _normal_pressure[0] * _dt * _JxW_msm[_qp] *
+                                 _coord_msm[_qp];
 
-  _msm_volume += _JxW_msm[_qp] * _coord[_qp];
-}
-
-void
-MortarArchardsLawAux::computeQpIProperties()
-{
   // Accumulate worn-out depth over time.
-  _worn_depth += _test[_i][_qp] * _worn_out_depth_dt;
+  _worn_depth += _test_lower[_i][_qp] * worn_out_depth_dt;
 }

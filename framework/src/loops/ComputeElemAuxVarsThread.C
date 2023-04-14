@@ -20,18 +20,13 @@
 #include "libmesh/threads.h"
 
 template <typename AuxKernelType>
-Threads::spin_mutex ComputeElemAuxVarsThread<AuxKernelType>::writable_variable_mutex;
-
-template <typename AuxKernelType>
 ComputeElemAuxVarsThread<AuxKernelType>::ComputeElemAuxVarsThread(
     FEProblemBase & problem,
     const MooseObjectWarehouse<AuxKernelType> & storage,
-    const std::vector<std::vector<MooseVariableFEBase *>> & vars,
     bool need_materials)
   : ThreadedElementLoop<ConstElemRange>(problem),
     _aux_sys(problem.getAuxiliarySystem()),
     _aux_kernels(storage),
-    _aux_vars(vars),
     _need_materials(need_materials)
 {
 }
@@ -43,7 +38,6 @@ ComputeElemAuxVarsThread<AuxKernelType>::ComputeElemAuxVarsThread(ComputeElemAux
   : ThreadedElementLoop<ConstElemRange>(x._fe_problem),
     _aux_sys(x._aux_sys),
     _aux_kernels(x._aux_kernels),
-    _aux_vars(x._aux_vars),
     _need_materials(x._need_materials)
 {
 }
@@ -58,10 +52,6 @@ void
 ComputeElemAuxVarsThread<AuxKernelType>::subdomainChanged()
 {
   _fe_problem.subdomainSetup(_subdomain, _tid);
-
-  // prepare variables
-  for (auto * var : _aux_vars[_tid])
-    var->prepareAux();
 
   std::set<MooseVariableFEBase *> needed_moose_vars;
   std::set<unsigned int> needed_mat_props;
@@ -118,30 +108,16 @@ ComputeElemAuxVarsThread<AuxKernelType>::onElement(const Elem * elem)
     for (const auto & aux : kernels)
     {
       aux->compute();
+      aux->variable().insert(_aux_sys.solution());
 
       // update the aux solution vector if writable coupled variables are used
       if (aux->hasWritableCoupledVariables())
       {
-        Threads::spin_mutex::scoped_lock lock(writable_variable_mutex);
         for (auto * var : aux->getWritableCoupledVariables())
-        {
-          // insert into the global solution vector
           var->insert(_aux_sys.solution());
-          var->prepareAux();
-        }
 
-        // make solution values available for dependent AuxKernels
-        aux->variable().insert(_aux_sys.solution());
-        aux->variable().prepareAux();
         _fe_problem.reinitElem(elem, _tid);
       }
-    }
-
-    // update the solution vector
-    {
-      Threads::spin_mutex::scoped_lock lock(Threads::spin_mtx);
-      for (auto * var : _aux_vars[_tid])
-        var->insert(_aux_sys.solution());
     }
   }
 }

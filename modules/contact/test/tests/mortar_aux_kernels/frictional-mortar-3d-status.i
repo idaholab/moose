@@ -246,6 +246,23 @@ offset = 0.00
   []
 []
 
+[UserObjects]
+  [weighted_vel_uo]
+    type = LMWeightedVelocitiesUserObject
+    primary_boundary = 'bottom_top'
+    secondary_boundary = 'top_bottom'
+    primary_subdomain = 'primary_lower'
+    secondary_subdomain = 'secondary_lower'
+    secondary_variable = disp_x
+    lm_variable_normal = mortar_normal_lm
+    lm_variable_tangential_one = mortar_tangential_lm
+    lm_variable_tangential_two = mortar_tangential_3d_lm
+    disp_x = disp_x
+    disp_y = disp_y
+    disp_z = disp_z
+  []
+[]
+
 [Constraints]
   [friction]
     type = ComputeFrictionalForceLMMechanicalContact
@@ -263,7 +280,8 @@ offset = 0.00
     c_t = 1.0e1
     friction_lm = mortar_tangential_lm
     friction_lm_dir = mortar_tangential_3d_lm
-    interpolate_normals = false
+    weighted_gap_uo = weighted_vel_uo
+    weighted_velocities_uo = weighted_vel_uo
   []
   [normal_x]
     type = NormalMortarMechanicalContact
@@ -276,7 +294,7 @@ offset = 0.00
     component = x
     use_displaced_mesh = true
     compute_lm_residuals = false
-    interpolate_normals = false
+    weighted_gap_uo = weighted_vel_uo
   []
   [normal_y]
     type = NormalMortarMechanicalContact
@@ -289,7 +307,7 @@ offset = 0.00
     component = y
     use_displaced_mesh = true
     compute_lm_residuals = false
-    interpolate_normals = false
+    weighted_gap_uo = weighted_vel_uo
   []
   [normal_z]
     type = NormalMortarMechanicalContact
@@ -302,7 +320,7 @@ offset = 0.00
     component = z
     use_displaced_mesh = true
     compute_lm_residuals = false
-    interpolate_normals = false
+    weighted_gap_uo = weighted_vel_uo
   []
   [tangential_x]
     type = TangentialMortarMechanicalContact
@@ -315,7 +333,7 @@ offset = 0.00
     component = x
     use_displaced_mesh = true
     compute_lm_residuals = false
-    interpolate_normals = false
+    weighted_velocities_uo = weighted_vel_uo
   []
   [tangential_y]
     type = TangentialMortarMechanicalContact
@@ -328,7 +346,7 @@ offset = 0.00
     component = y
     use_displaced_mesh = true
     compute_lm_residuals = false
-    interpolate_normals = false
+    weighted_velocities_uo = weighted_vel_uo
   []
   [tangential_z]
     type = TangentialMortarMechanicalContact
@@ -341,7 +359,7 @@ offset = 0.00
     component = z
     use_displaced_mesh = true
     compute_lm_residuals = false
-    interpolate_normals = false
+    weighted_velocities_uo = weighted_vel_uo
   []
   [tangential_dir_x]
     type = TangentialMortarMechanicalContact
@@ -355,7 +373,7 @@ offset = 0.00
     direction = direction_2
     use_displaced_mesh = true
     compute_lm_residuals = false
-    interpolate_normals = false
+    weighted_velocities_uo = weighted_vel_uo
   []
   [tangential_dir_y]
     type = TangentialMortarMechanicalContact
@@ -369,7 +387,7 @@ offset = 0.00
     direction = direction_2
     use_displaced_mesh = true
     compute_lm_residuals = false
-    interpolate_normals = false
+    weighted_velocities_uo = weighted_vel_uo
   []
   [tangential_dir_z]
     type = TangentialMortarMechanicalContact
@@ -383,7 +401,7 @@ offset = 0.00
     direction = direction_2
     use_displaced_mesh = true
     compute_lm_residuals = false
-    interpolate_normals = false
+    weighted_velocities_uo = weighted_vel_uo
   []
 []
 

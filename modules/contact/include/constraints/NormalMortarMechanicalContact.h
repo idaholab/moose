@@ -11,6 +11,8 @@
 
 #include "ADMortarLagrangeConstraint.h"
 
+class WeightedGapUserObject;
+
 class NormalMortarMechanicalContact : public ADMortarLagrangeConstraint
 {
 public:
@@ -21,5 +23,9 @@ public:
 protected:
   ADReal computeQpResidual(Moose::MortarType type) final;
 
+  /// The displacement component that this object applies to
   const MooseEnum _component;
+
+  /// The weighted gap user object which supplies the contact force
+  WeightedGapUserObject & _weighted_gap_uo;
 };

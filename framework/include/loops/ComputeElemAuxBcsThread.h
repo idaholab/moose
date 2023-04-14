@@ -24,7 +24,6 @@ class ComputeElemAuxBcsThread
 public:
   ComputeElemAuxBcsThread(FEProblemBase & fe_problem,
                           const MooseObjectWarehouse<AuxKernelType> & storage,
-                          const std::vector<std::vector<MooseVariableFEBase *>> & vars,
                           bool need_materials);
   // Splitting Constructor
   ComputeElemAuxBcsThread(ComputeElemAuxBcsThread & x, Threads::split split);
@@ -40,8 +39,6 @@ protected:
 
   /// Storage object containing active AuxKernel objects
   const MooseObjectWarehouse<AuxKernelType> & _storage;
-
-  const std::vector<std::vector<MooseVariableFEBase *>> & _aux_vars;
 
   bool _need_materials;
 

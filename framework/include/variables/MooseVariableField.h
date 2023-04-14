@@ -285,6 +285,11 @@ public:
   virtual const FieldVariablePhiSecond & secondPhiNeighbor() const = 0;
 
   /**
+   * Return the variable's shape functions on a lower-dimensional element
+   */
+  virtual const FieldVariablePhiValue & phiLower() const = 0;
+
+  /**
    * Set local DOF values and evaluate the values on quadrature points
    */
   virtual void setDofValues(const DenseVector<OutputData> & values) = 0;

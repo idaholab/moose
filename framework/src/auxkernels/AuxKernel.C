@@ -79,7 +79,7 @@ AuxKernelTempl<ComputeValueType>::AuxKernelTempl(const InputParameters & paramet
   : MooseObject(parameters),
     MooseVariableInterface<ComputeValueType>(
         this,
-        parameters.getCheckedPointerParam<AuxiliarySystem *>("_aux_sys")
+        parameters.getCheckedPointerParam<SystemBase *>("_sys")
             ->getVariable(parameters.get<THREAD_ID>("_tid"),
                           parameters.get<AuxVariableName>("variable"))
             .isNodal(),
@@ -114,7 +114,7 @@ AuxKernelTempl<ComputeValueType>::AuxKernelTempl(const InputParameters & paramet
     _subproblem(*getCheckedPointerParam<SubProblem *>("_subproblem")),
     _sys(*getCheckedPointerParam<SystemBase *>("_sys")),
     _nl_sys(*getCheckedPointerParam<SystemBase *>("_nl_sys")),
-    _aux_sys(*getCheckedPointerParam<AuxiliarySystem *>("_aux_sys")),
+    _aux_sys(static_cast<AuxiliarySystem &>(_sys)),
     _tid(parameters.get<THREAD_ID>("_tid")),
     _var(_aux_sys.getActualFieldVariable<ComputeValueType>(
         _tid, parameters.get<AuxVariableName>("variable"))),

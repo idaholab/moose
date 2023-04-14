@@ -127,6 +127,8 @@ offset = -0.19
     secondary_subdomain = 3
     disp_x = disp_x
     disp_y = disp_y
+    correct_edge_dropping = true
+    execute_on = 'TIMESTEP_END'
   []
   [accel_x]
     type = NewmarkAccelAux
@@ -160,6 +162,19 @@ offset = -0.19
   []
 []
 
+[UserObjects]
+  [weighted_gap_uo]
+    type = LMWeightedGapUserObject
+    primary_boundary = 20
+    secondary_boundary = 10
+    primary_subdomain = 4
+    secondary_subdomain = 3
+    lm_variable = normal_lm
+    disp_x = disp_x
+    disp_y = disp_y
+  []
+[]
+
 [Constraints]
   [weighted_gap_lm]
     type = ComputeDynamicWeightedGapLMMechanicalContact
@@ -172,7 +187,6 @@ offset = -0.19
     disp_y = disp_y
     use_displaced_mesh = true
     c = 1e4
-    interpolate_normals = false
     capture_tolerance = 1.0e-5
     newmark_beta = 0.25
     newmark_gamma = 0.5
@@ -188,7 +202,7 @@ offset = -0.19
     component = x
     use_displaced_mesh = true
     compute_lm_residuals = false
-    interpolate_normals = false
+    weighted_gap_uo = weighted_gap_uo
   []
   [normal_y]
     type = NormalMortarMechanicalContact
@@ -201,7 +215,7 @@ offset = -0.19
     component = y
     use_displaced_mesh = true
     compute_lm_residuals = false
-    interpolate_normals = false
+    weighted_gap_uo = weighted_gap_uo
   []
 []
 

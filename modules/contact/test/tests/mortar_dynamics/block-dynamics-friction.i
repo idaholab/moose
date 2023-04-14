@@ -164,6 +164,25 @@ offset = -0.19
   []
 []
 
+
+
+# User object provides the contact force (e.g. LM)
+# for the application of the generalized force
+[UserObjects]
+  [weighted_vel_uo]
+    type = LMWeightedVelocitiesUserObject
+    primary_boundary = 20
+    secondary_boundary = 10
+    primary_subdomain = 4
+    secondary_subdomain = 3
+    lm_variable_normal = mechanical_normal_lm
+    lm_variable_tangential_one = mechanical_tangential_lm
+    secondary_variable = disp_x
+    disp_x = disp_x
+    disp_y = disp_y
+  []
+[]
+
 [Constraints]
   [weighted_gap_lm]
     type = ComputeDynamicFrictionalForceLMMechanicalContact
@@ -179,7 +198,6 @@ offset = -0.19
     c = 1e4
     c_t = 1e4
     mu = 0.5
-    interpolate_normals = false
     newmark_beta = 0.25
     newmark_gamma = 0.5
     capture_tolerance = 1.0e-5
@@ -195,7 +213,7 @@ offset = -0.19
     component = x
     use_displaced_mesh = true
     compute_lm_residuals = false
-    interpolate_normals = false
+    weighted_gap_uo = weighted_vel_uo
   []
   [normal_y]
     type = NormalMortarMechanicalContact
@@ -208,7 +226,7 @@ offset = -0.19
     component = y
     use_displaced_mesh = true
     compute_lm_residuals = false
-    interpolate_normals = false
+    weighted_gap_uo = weighted_vel_uo
   []
   [tangential_x]
     type = TangentialMortarMechanicalContact
@@ -221,7 +239,7 @@ offset = -0.19
     component = x
     use_displaced_mesh = true
     compute_lm_residuals = false
-    interpolate_normals = false
+    weighted_velocities_uo = weighted_vel_uo
   []
   [tangential_y]
     type = TangentialMortarMechanicalContact
@@ -234,7 +252,7 @@ offset = -0.19
     component = y
     use_displaced_mesh = true
     compute_lm_residuals = false
-    interpolate_normals = false
+    weighted_velocities_uo = weighted_vel_uo
   []
 []
 

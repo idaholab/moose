@@ -173,12 +173,10 @@ protected:
   void computeElementalArrayVars(ExecFlagType type);
 
   template <typename AuxKernelType>
-  void computeElementalVarsHelper(const MooseObjectWarehouse<AuxKernelType> & warehouse,
-                                  const std::vector<std::vector<MooseVariableFEBase *>> & vars);
+  void computeElementalVarsHelper(const MooseObjectWarehouse<AuxKernelType> & warehouse);
 
   template <typename AuxKernelType>
-  void computeNodalVarsHelper(const MooseObjectWarehouse<AuxKernelType> & warehouse,
-                              const std::vector<std::vector<MooseVariableFEBase *>> & vars);
+  void computeNodalVarsHelper(const MooseObjectWarehouse<AuxKernelType> & warehouse);
 
   FEProblemBase & _fe_problem;
 
@@ -204,18 +202,12 @@ protected:
 
   // Variables
   std::vector<std::vector<MooseVariableFEBase *>> _nodal_vars;
-  std::vector<std::vector<MooseVariableFEBase *>> _nodal_std_vars;
-  std::vector<std::vector<MooseVariableFEBase *>> _nodal_vec_vars;
-  std::vector<std::vector<MooseVariableFEBase *>> _nodal_array_vars;
 
   ///@{
   /**
    * Elemental variables. These may be either finite element or finite volume variables
    */
   std::vector<std::vector<MooseVariableFieldBase *>> _elem_vars;
-  std::vector<std::vector<MooseVariableFieldBase *>> _elem_std_vars;
-  std::vector<std::vector<MooseVariableFieldBase *>> _elem_vec_vars;
-  std::vector<std::vector<MooseVariableFieldBase *>> _elem_array_vars;
   ///@}
 
   // Storage for AuxScalarKernel objects

@@ -89,10 +89,10 @@ name = 'finite'
     secondary = block_left
     formulation = mortar
     model = coulomb
-    normalize_c = true
-    c_normal = 1e5
-    c_tangential = 1e5
+    c_normal = 1e0
+    c_tangential = 1e-6
     friction_coefficient = 0.1
+    tangential_lm_scaling = 1.0e-15
   []
 []
 
@@ -143,6 +143,13 @@ name = 'finite'
   [stress]
     type = ADComputeFiniteStrainElasticStress
     block = 'plank block'
+  []
+[]
+
+[Preconditioning]
+  [SMP]
+    type = SMP
+    full = true
   []
 []
 

@@ -8,6 +8,7 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "NormalMortarMechanicalContact.h"
+#include "WeightedGapUserObject.h"
 
 registerMooseObject("ContactApp", NormalMortarMechanicalContact);
 
@@ -22,11 +23,16 @@ NormalMortarMechanicalContact::validParams()
   params.addClassDescription(
       "This class is used to apply normal contact forces using lagrange multipliers");
   params.set<bool>("compute_lm_residual") = false;
+  params.set<bool>("interpolate_normals") = false;
+  params.addRequiredParam<UserObjectName>("weighted_gap_uo", "The weighted gap user object.");
   return params;
 }
 
 NormalMortarMechanicalContact::NormalMortarMechanicalContact(const InputParameters & parameters)
-  : ADMortarLagrangeConstraint(parameters), _component(getParam<MooseEnum>("component"))
+  : ADMortarLagrangeConstraint(parameters),
+    _component(getParam<MooseEnum>("component")),
+    _weighted_gap_uo(const_cast<WeightedGapUserObject &>(
+        getUserObject<WeightedGapUserObject>("weighted_gap_uo")))
 {
 }
 
@@ -45,27 +51,20 @@ NormalMortarMechanicalContact::computeQpResidual(Moose::MortarType type)
       // want because the force vector is in the positive direction (always opposite of the
       // normals).
       // Get the _dof_to_weighted_gap map
-
-      if (_interpolate_normals)
-        return _test_secondary[_i][_qp] * _lambda[_qp] * _normals[_qp](_component);
-      else
       {
         const auto normal_index = libmesh_map_find(_secondary_ip_lowerd_map, _i);
-        return _test_secondary[_i][_qp] * _lambda[_qp] * _normals[normal_index](_component);
+        return _test_secondary[_i][_qp] * _weighted_gap_uo.contactPressure()[_qp] *
+               _normals[normal_index](_component);
       }
 
     case Moose::MortarType::Primary:
       // The normal vector is signed according to the secondary face, so we need to introduce a
       // negative sign here
-
-      if (_interpolate_normals)
-        return -_test_primary[_i][_qp] * _lambda[_qp] * _normals[_qp](_component);
-      else
       {
         const auto normal_index = libmesh_map_find(_primary_ip_lowerd_map, _i);
-        return -_test_primary[_i][_qp] * _lambda[_qp] * _normals[normal_index](_component);
+        return -_test_primary[_i][_qp] * _weighted_gap_uo.contactPressure()[_qp] *
+               _normals[normal_index](_component);
       }
-
     default:
       return 0;
   }

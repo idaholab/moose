@@ -237,7 +237,7 @@ public:
   const FieldVariablePhiSecond & secondPhiFaceNeighbor() const override final;
   const FieldVariablePhiCurl & curlPhiFaceNeighbor() const;
 
-  const FieldVariablePhiValue & phiLower() const { return _lower_data->phi(); }
+  virtual const FieldVariablePhiValue & phiLower() const override { return _lower_data->phi(); }
   const FieldVariablePhiGradient & gradPhiLower() const { return _lower_data->gradPhi(); }
 
   const ADTemplateVariableTestGradient<OutputShape> & adGradPhi() const

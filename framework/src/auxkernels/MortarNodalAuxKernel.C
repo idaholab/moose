@@ -54,10 +54,13 @@ MortarNodalAuxKernelTempl<ComputeValueType>::MortarNodalAuxKernelTempl(
     _fe_problem(*this->template getCheckedPointerParam<FEProblemBase *>("_fe_problem_base")),
     _msm_volume(0),
     _incremental(this->template getParam<bool>("incremental")),
-    _u_old(uOld())
+    _u_old(uOld()),
+    _test_lower(_var.phiLower()),
+    _coord_msm(_assembly.mortarCoordTransformation())
 {
   if (!isNodal())
-    paramError("variable", "MortarNodalAuxKernel derivatives populate nodal aux variables only.");
+    paramError("variable",
+               "MortarNodalAuxKernel derived classes populate nodal aux variables only.");
 }
 
 template <typename ComputeValueType>
@@ -79,6 +82,9 @@ template <typename ComputeValueType>
 void
 MortarNodalAuxKernelTempl<ComputeValueType>::compute()
 {
+  if (!_var.isNodalDefined())
+    return;
+
   ComputeValueType value(0);
   Real total_volume = 0;
 
@@ -87,6 +93,7 @@ MortarNodalAuxKernelTempl<ComputeValueType>::compute()
   auto act_functor = [&value, &total_volume, this]()
   {
     _msm_volume = 0;
+    setNormals();
     value += computeValue();
     total_volume += _msm_volume;
   };
@@ -104,7 +111,8 @@ MortarNodalAuxKernelTempl<ComputeValueType>::compute()
                                         _secondary_ip_sub_to_mats,
                                         _primary_ip_sub_to_mats,
                                         _secondary_boundary_mats,
-                                        act_functor);
+                                        act_functor,
+                                        /*reinit_mortar_user_objects=*/false);
 
   // We have to reinit the node for this variable in order to get the dof index set for the node
   _var.reinitNode();
