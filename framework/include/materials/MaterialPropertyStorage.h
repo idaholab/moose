@@ -203,54 +203,17 @@ public:
 
   ///@{
   /**
-   * Const access methods to the stored material property data.
-   *
-   * We used to have non-const accessors too, but the violation of
-   * encapsulation there was too much.
+   * Access methods to the stored material property data.
    */
   const PropsType & props() const { return *_props_elem; }
   const PropsType & propsOld() const { return *_props_elem_old; }
   const PropsType & propsOlder() const { return *_props_elem_older; }
-  const MaterialProperties & props(const Elem * elem, unsigned int side) const
-  {
-    libmesh_assert(props().contains(elem));
-    libmesh_assert(props().find(elem)->second.contains(side));
-    return props().find(elem)->second.find(side)->second;
-  }
-  const MaterialProperties & propsOld(const Elem * elem, unsigned int side) const
-  {
-    libmesh_assert(propsOld().contains(elem));
-    libmesh_assert(propsOld().find(elem)->second.contains(side));
-    return propsOld().find(elem)->second.find(side)->second;
-  }
-  const MaterialProperties & propsOlder(const Elem * elem, unsigned int side) const
-  {
-    libmesh_assert(propsOlder().contains(elem));
-    libmesh_assert(propsOlder().find(elem)->second.contains(side));
-    return propsOlder().find(elem)->second.find(side)->second;
-  }
-  MaterialProperties & setProps(const Elem * elem, unsigned int side)
-  {
-    // Many problems rely on reinitMaterials also being the first
-    // init, and I'm not sure I can clean that up to reallow these
-    // assertions without also hurting performance on subsequent
-    // iterations.
-    // libmesh_assert(_props_elem->contains(elem));
-    // libmesh_assert((*_props_elem)[elem].contains(side));
-    return (*_props_elem)[elem][side];
-  }
-  MaterialProperties & setPropsOld(const Elem * elem, unsigned int side)
-  {
-    // libmesh_assert(_props_elem_old->contains(elem));
-    // libmesh_assert((*_props_elem_old)[elem].contains(side));
-    return (*_props_elem_old)[elem][side];
-  }
-  MaterialProperties & setPropsOlder(const Elem * elem, unsigned int side)
-  {
-    // libmesh_assert(_props_elem_older->contains(elem));
-    // libmesh_assert((*_props_elem_older)[elem].contains(side));
-    return (*_props_elem_older)[elem][side];
-  }
+  const MaterialProperties & props(const Elem * elem, unsigned int side) const;
+  const MaterialProperties & propsOld(const Elem * elem, unsigned int side) const;
+  const MaterialProperties & propsOlder(const Elem * elem, unsigned int side) const;
+  MaterialProperties & setProps(const Elem * elem, unsigned int side);
+  MaterialProperties & setPropsOld(const Elem * elem, unsigned int side);
+  MaterialProperties & setPropsOlder(const Elem * elem, unsigned int side);
   ///@}
 
   bool hasProperty(const std::string & prop_name) const;
@@ -351,6 +314,58 @@ private:
   friend void dataLoad<MaterialPropertyStorage>(std::istream &, MaterialPropertyStorage &, void *);
   friend void dataStore<MaterialPropertyStorage>(std::ostream &, MaterialPropertyStorage &, void *);
 };
+
+inline const MaterialProperties &
+MaterialPropertyStorage::props(const Elem * elem, unsigned int side) const
+{
+  libmesh_assert(props().contains(elem));
+  libmesh_assert(props().find(elem)->second.contains(side));
+  return props().find(elem)->second.find(side)->second;
+}
+
+inline const MaterialProperties &
+MaterialPropertyStorage::propsOld(const Elem * elem, unsigned int side) const
+{
+  libmesh_assert(propsOld().contains(elem));
+  libmesh_assert(propsOld().find(elem)->second.contains(side));
+  return propsOld().find(elem)->second.find(side)->second;
+}
+
+inline const MaterialProperties &
+MaterialPropertyStorage::propsOlder(const Elem * elem, unsigned int side) const
+{
+  libmesh_assert(propsOlder().contains(elem));
+  libmesh_assert(propsOlder().find(elem)->second.contains(side));
+  return propsOlder().find(elem)->second.find(side)->second;
+}
+
+inline MaterialProperties &
+MaterialPropertyStorage::setProps(const Elem * elem, unsigned int side)
+{
+  // Many problems rely on reinitMaterials also being the first
+  // init, and I'm not sure I can clean that up to reallow these
+  // assertions without also hurting performance on subsequent
+  // iterations.
+  // libmesh_assert(_props_elem->contains(elem));
+  // libmesh_assert((*_props_elem)[elem].contains(side));
+  return (*_props_elem)[elem][side];
+}
+
+inline MaterialProperties &
+MaterialPropertyStorage::setPropsOld(const Elem * elem, unsigned int side)
+{
+  // libmesh_assert(_props_elem_old->contains(elem));
+  // libmesh_assert((*_props_elem_old)[elem].contains(side));
+  return (*_props_elem_old)[elem][side];
+}
+
+inline MaterialProperties &
+MaterialPropertyStorage::setPropsOlder(const Elem * elem, unsigned int side)
+{
+  // libmesh_assert(_props_elem_older->contains(elem));
+  // libmesh_assert((*_props_elem_older)[elem].contains(side));
+  return (*_props_elem_older)[elem][side];
+}
 
 template <>
 inline void
