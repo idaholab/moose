@@ -36,7 +36,7 @@ public:
   Real getFrictionalContactPressure(const Node * const node, const unsigned int component) const;
   Real getAccumulatedSlip(const Node * const node, const unsigned int component) const;
   Real getTangentialVelocity(const Node * const node, const unsigned int component) const;
-Real getNormalWeightedGap(const Node * const node) const;
+  Real getNormalWeightedGap(const Node * const node) const;
 
 protected:
   virtual const VariableTestValue & test() const override;
