@@ -208,7 +208,7 @@ GeneratedMeshGenerator::generate()
   BoundaryInfo & boundary_info = mesh->get_boundary_info();
 
   // Copy, since we're modifying the container mid-iteration
-  const auto mesh_boundary_ids = boundary_info.get_boundary_ids();
+  const auto mesh_boundary_ids = boundary_info.get_global_boundary_ids();
   for (auto rit = mesh_boundary_ids.rbegin(); rit != mesh_boundary_ids.rend(); ++rit)
   {
     const std::string old_sideset_name = boundary_info.sideset_name(*rit);
