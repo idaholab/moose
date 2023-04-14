@@ -23,6 +23,13 @@
       jsondiff = 'element_centroid_positions_out.json'
       detail = 'element centroids from a mesh, with or without block restriction,'
     []
+    [blocks_and_extra_ids]
+      type = 'JSONDiff'
+      input = 'element_group_centroid_positions.i'
+      jsondiff = 'element_group_centroid_positions_out.json'
+      detail = 'centroids of groups of elements in the mesh,'
+      allow_warnings = true
+    []
     [reporter]
       type = 'JSONDiff'
       input = 'reporter_positions.i'
