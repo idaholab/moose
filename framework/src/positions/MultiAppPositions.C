@@ -17,6 +17,8 @@ MultiAppPositions::validParams()
   InputParameters params = Positions::validParams();
   params.addRequiredParam<std::vector<MultiAppName>>(
       "multiapps", "Name(s) of the multiapps providing the positions");
+  params.addClassDescription(
+      "Obtain positions from MultiApps. This must NOT be used to set the same multiapp positions");
   return params;
 }
 

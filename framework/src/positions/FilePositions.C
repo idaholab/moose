@@ -16,6 +16,7 @@ InputParameters
 FilePositions::validParams()
 {
   InputParameters params = Positions::validParams();
+  params.addClassDescription("Import positions from one or more files.");
   params.addRequiredParam<std::vector<FileName>>("files",
                                                  "Text file(s) with the positions, one per line");
   return params;

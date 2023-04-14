@@ -15,6 +15,7 @@ InputParameters
 ElementCentroidPositions::validParams()
 {
   InputParameters params = Positions::validParams();
+  params.addClassDescription("Positions of element centroids.");
   params += BlockRestrictable::validParams();
 
   return params;

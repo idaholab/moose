@@ -15,6 +15,7 @@ InputParameters
 InputPositions::validParams()
 {
   InputParameters params = Positions::validParams();
+  params.addClassDescription("Positions set directly from a user parameter in the input file");
   params.addRequiredParam<std::vector<Point>>("positions", "Positions");
   return params;
 }

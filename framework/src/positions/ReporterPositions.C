@@ -17,6 +17,8 @@ ReporterPositions::validParams()
   InputParameters params = Positions::validParams();
   params.addRequiredParam<std::vector<ReporterName>>("reporters",
                                                      "Reporter(s) containing the positions");
+  params.addClassDescription(
+      "Import positions from one or more reporters, for example other Positions");
   return params;
 }
 
