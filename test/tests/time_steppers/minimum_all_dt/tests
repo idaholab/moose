@@ -23,6 +23,7 @@
 
     [multiple_time_timesequence]
       type = 'Exodiff'
+      recover = false
       input = 'minimum_all_dt_sequence.i'
       exodiff = 'multiple_timesequence.e'
 

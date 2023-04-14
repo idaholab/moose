@@ -61,7 +61,7 @@ SetupTimeStepperAction::act()
     // The user did not add any time steppers, so create one for them
     if (!time_stepper_system.getNumAddedTimeSteppers())
     {
-      final_timestepper = "TimeStepper";
+      final_timestepper = _type;
       apply_ts_params(_moose_object_pars);
 
       time_stepper_system.addTimeStepper(_type, final_timestepper, _moose_object_pars);

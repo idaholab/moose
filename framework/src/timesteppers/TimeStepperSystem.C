@@ -123,10 +123,11 @@ TimeStepperSystem::getTimeStepper(const std::string & stepper_name)
   const auto find_stepper = _time_steppers.find(stepper_name);
   const auto find_sequence_stepper = _time_sequence_steppers.find(stepper_name);
 
-  mooseAssert(find_stepper != _time_steppers.end() &&
-                  find_sequence_stepper != _time_sequence_steppers.end(),
-              stepper_name + " not added");
   if (find_stepper != _time_steppers.end())
+  {
+    mooseAssert(find_stepper != _time_steppers.end(), stepper_name + " not added");
     return find_stepper->second;
+  }
+  mooseAssert(find_sequence_stepper != _time_sequence_steppers.end(), stepper_name + " not added");
   return find_sequence_stepper->second;
 }
