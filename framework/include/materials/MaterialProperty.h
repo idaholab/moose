@@ -434,7 +434,8 @@ dataLoad(std::istream & stream, MaterialProperties & v, void * context)
   const std::size_t old_size = mat_props.size();
 #endif
   loadHelper(stream, mat_props, context);
-  libmesh_assert_equal_to(old_size, mat_props.size());
+  mooseAssert(old_size == mat_props.size(),
+              "Loading MaterialProperties data into mis-sized target");
 }
 
 // Scalar Init Helper Function
