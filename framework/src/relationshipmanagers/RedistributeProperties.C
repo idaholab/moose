@@ -85,6 +85,10 @@ RedistributeProperties::redistribute()
 
     if (mat_prop_store->hasStatefulProperties())
     {
+      mooseAssert(
+          !Threads::in_threads,
+          "This routine has not been implemented for threads. Please query this routine before "
+          "a threaded region or contact a MOOSE developer to discuss.");
       MaterialData & my_mat_data = *((*mat_data)[/*_tid*/ 0]); // Not threaded
 
       std::array<MaterialPropertyStorage::PropsType *, 3> props_maps{
