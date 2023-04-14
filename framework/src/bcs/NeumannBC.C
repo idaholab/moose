@@ -17,7 +17,10 @@ InputParameters
 NeumannBCTempl<is_ad>::validParams()
 {
   InputParameters params = GenericIntegratedBC<is_ad>::validParams();
-  params.addParam<Real>("value", 0.0, "The value of the gradient on the boundary.");
+  params.addParam<Real>("value",
+                        0.0,
+                        "For a Laplacian problem, the value of the gradient dotted with the "
+                        "normals on the boundary.");
   params.declareControllable("value");
   params.addClassDescription("Imposes the integrated boundary condition "
                              "$\\frac{\\partial u}{\\partial n}=h$, "

@@ -22,8 +22,14 @@ template <typename T>
 InputParameters
 ADNodalBCTempl<T>::validParams()
 {
-  InputParameters params = NodalBCBase::validParams();
+  return NodalBCBase::validParams();
+}
 
+template <>
+InputParameters
+ADNodalBCTempl<RealVectorValue>::validParams()
+{
+  InputParameters params = NodalBCBase::validParams();
   // The below parameters are useful for vector Nodal BCs
   params.addParam<bool>("set_x_comp", true, "Whether to set the x-component of the variable");
   params.addParam<bool>("set_y_comp", true, "Whether to set the y-component of the variable");
@@ -44,7 +50,10 @@ ADNodalBCTempl<T>::ADNodalBCTempl(const InputParameters & parameters)
     _current_node(_var.node()),
     _u(_var.adNodalValue()),
     _set_components(
-        {getParam<bool>("set_x_comp"), getParam<bool>("set_y_comp"), getParam<bool>("set_z_comp")})
+        {std::is_same<T, RealVectorValue>::value ? getParam<bool>("set_x_comp") : true,
+         std::is_same<T, RealVectorValue>::value ? getParam<bool>("set_y_comp") : true,
+         std::is_same<T, RealVectorValue>::value ? getParam<bool>("set_z_comp") : true}),
+    _undisplaced_assembly(_fe_problem.assembly(_tid, _sys.number()))
 {
   _subproblem.haveADObjects(true);
 
@@ -67,6 +76,39 @@ conversionHelper(const libMesh::VectorValue<ADReal> & value, const unsigned int 
 }
 
 template <typename T>
+template <typename ADResidual>
+void
+ADNodalBCTempl<T>::processResidual(const ADResidual & residual,
+                                   const std::vector<dof_id_type> & dof_indices)
+{
+  mooseAssert(dof_indices.size() <= _set_components.size(),
+              "The number of dof indices must be less than the number of settable components");
+
+  for (auto tag_id : _vector_tags)
+    if (_sys.hasVector(tag_id))
+      for (const auto i : index_range(dof_indices))
+        if (_set_components[i])
+          _sys.getVector(tag_id).set(dof_indices[i], raw_value(conversionHelper(residual, i)));
+}
+
+template <typename T>
+template <typename ADResidual>
+void
+ADNodalBCTempl<T>::processJacobian(const ADResidual & residual,
+                                   const std::vector<dof_id_type> & dof_indices)
+{
+  mooseAssert(dof_indices.size() <= _set_components.size(),
+              "The number of dof indices must be less than the number of settable components");
+
+  for (const auto i : index_range(dof_indices))
+    if (_set_components[i])
+      // If we store into the displaced assembly for nodal bc objects the data never actually makes
+      // it into the global Jacobian
+      _undisplaced_assembly.processJacobianNoScaling(
+          conversionHelper(residual, i), dof_indices[i], _matrix_tags);
+}
+
+template <typename T>
 void
 ADNodalBCTempl<T>::computeResidual()
 {
@@ -74,141 +116,52 @@ ADNodalBCTempl<T>::computeResidual()
   if (dof_indices.empty())
     return;
 
-  mooseAssert(dof_indices.size() <= _set_components.size(),
-              "The number of dof indices must be less than the number of settable components");
+  const auto residual = computeQpResidual();
 
-  auto residual = computeQpResidual();
-
-  for (auto tag_id : _vector_tags)
-    if (_sys.hasVector(tag_id))
-      for (std::size_t i = 0; i < dof_indices.size(); ++i)
-        if (_set_components[i])
-          _sys.getVector(tag_id).set(dof_indices[i], raw_value(conversionHelper(residual, i)));
+  processResidual(residual, dof_indices);
 }
 
 template <typename T>
 void
 ADNodalBCTempl<T>::computeJacobian()
 {
-  const std::vector<dof_id_type> & cached_rows = _var.dofIndices();
-  if (cached_rows.empty())
+  const std::vector<dof_id_type> & dof_indices = _var.dofIndices();
+  if (dof_indices.empty())
     return;
 
-  auto residual = computeQpResidual();
+  const auto residual = computeQpResidual();
 
-  mooseAssert(cached_rows.size() <= _set_components.size(),
-              "The number of dof indices must be less than the number of settable components");
-
-  // Cache the user's computeQpJacobian() value for later use.
-  for (auto tag : _matrix_tags)
-    if (_sys.hasMatrix(tag))
-      for (std::size_t i = 0; i < cached_rows.size(); ++i)
-        if (_set_components[i])
-        {
-          _fe_problem.assembly(0, _sys.number())
-              .cacheJacobian(cached_rows[i],
-                             cached_rows[i],
-                             conversionHelper(residual, i).derivatives()[cached_rows[i]],
-                             tag);
-        }
+  processJacobian(residual, dof_indices);
 }
 
 template <typename T>
 void
 ADNodalBCTempl<T>::computeResidualAndJacobian()
 {
+  const std::vector<dof_id_type> & dof_indices = _var.dofIndices();
+  if (dof_indices.empty())
+    return;
+
   const auto residual = computeQpResidual();
-  const std::vector<dof_id_type> & cached_rows = _var.dofIndices();
 
-  mooseAssert(cached_rows.size() <= _set_components.size(),
-              "The number of dof indices must be less than the number of settable components");
-
-  // First the residuals
-  for (auto tag_id : _vector_tags)
-    if (_sys.hasVector(tag_id))
-      for (const auto i : index_range(cached_rows))
-        if (_set_components[i])
-          _sys.getVector(tag_id).set(cached_rows[i], raw_value(conversionHelper(residual, i)));
-
-  // Cache the user's computeQpJacobian() value for later use.
-  for (auto tag_id : _matrix_tags)
-    if (_sys.hasMatrix(tag_id))
-      for (const auto i : index_range(cached_rows))
-        if (_set_components[i])
-          _fe_problem.assembly(0, _sys.number())
-              .cacheJacobian(cached_rows[i],
-                             cached_rows[i],
-                             conversionHelper(residual, i).derivatives()[cached_rows[i]],
-                             tag_id);
+  processResidual(residual, dof_indices);
+  processJacobian(residual, dof_indices);
 }
 
 template <typename T>
 void
 ADNodalBCTempl<T>::computeOffDiagJacobian(const unsigned int jvar_num)
 {
+  // Only need to do this once because AD does all the derivatives at once
   if (jvar_num == _var.number())
     computeJacobian();
-  else
-  {
-    const std::vector<dof_id_type> & cached_rows = _var.dofIndices();
-    if (cached_rows.empty())
-      return;
-
-    auto residual = computeQpResidual();
-
-    mooseAssert(cached_rows.size() <= _set_components.size(),
-                "The number of dof indices must be less than the number of settable components");
-
-    // Note: this only works for Lagrange variables...
-    dof_id_type cached_col = _current_node->dof_number(_sys.number(), jvar_num, 0);
-
-    // Cache the user's computeQpJacobian() value for later use.
-    for (auto tag : _matrix_tags)
-      if (_sys.hasMatrix(tag))
-        for (std::size_t i = 0; i < cached_rows.size(); ++i)
-          if (_set_components[i])
-          {
-            _fe_problem.assembly(0, _sys.number())
-                .cacheJacobian(cached_rows[i],
-                               cached_col,
-                               conversionHelper(residual, i).derivatives()[cached_col],
-                               tag);
-          }
-  }
 }
 
 template <typename T>
 void
-ADNodalBCTempl<T>::computeOffDiagJacobianScalar(unsigned int jvar)
+ADNodalBCTempl<T>::computeOffDiagJacobianScalar(unsigned int)
 {
-  auto residual = computeQpResidual();
-  const std::vector<dof_id_type> & cached_rows = _var.dofIndices();
-
-  mooseAssert(cached_rows.size() <= _set_components.size(),
-              "The number of dof indices must be less than the number of settable components");
-
-  std::vector<dof_id_type> scalar_dof_indices;
-
-  _sys.dofMap().SCALAR_dof_indices(scalar_dof_indices, jvar);
-
-  // Our residuals rely on returning a single scalar and we don't provide any arguments to
-  // computeQpResidual so I think it only makes sense to assume that our SCALAR variable should be
-  // order one
-  mooseAssert(scalar_dof_indices.size() == 1,
-              "ADNodalBC only allows coupling of first order SCALAR variables");
-
-  // Cache the user's computeQpJacobian() value for later use.
-  for (auto tag : _matrix_tags)
-    if (_sys.hasMatrix(tag))
-      for (std::size_t i = 0; i < cached_rows.size(); ++i)
-        if (_set_components[i])
-        {
-          _fe_problem.assembly(0, _sys.number())
-              .cacheJacobian(cached_rows[i],
-                             scalar_dof_indices[0],
-                             conversionHelper(residual, i).derivatives()[scalar_dof_indices[0]],
-                             tag);
-        }
+  // scalar coupling will have been included in the all-at-once handling in computeOffDiagJacobian
 }
 
 template class ADNodalBCTempl<Real>;

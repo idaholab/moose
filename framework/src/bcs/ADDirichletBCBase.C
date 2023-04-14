@@ -30,7 +30,7 @@ ADDirichletBCBase::computeValue(NumericVector<Number> & current_solution)
 
   if (_var.isNodalDefined())
   {
-    auto && dof_idx = _var.nodalDofIndex();
+    const auto dof_idx = _var.nodalDofIndex();
     current_solution.set(dof_idx, MetaPhysicL::raw_value(computeQpValue()));
   }
 }
