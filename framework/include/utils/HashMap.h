@@ -21,14 +21,12 @@ public:
   inline T & operator[](const Key & k)
   {
     libMesh::Threads::spin_mutex::scoped_lock lock(spin_mutex);
-
     return std::unordered_map<Key, T>::operator[](k);
   }
 
   inline std::size_t erase(const Key & k)
   {
     libMesh::Threads::spin_mutex::scoped_lock lock(spin_mutex);
-
     return std::unordered_map<Key, T>::erase(k);
   }
 
@@ -38,14 +36,12 @@ public:
   inline iterator find(const Key & k)
   {
     libMesh::Threads::spin_mutex::scoped_lock lock(spin_mutex);
-
     return std::unordered_map<Key, T>::find(k);
   }
 
   inline const_iterator find(const Key & k) const
   {
     libMesh::Threads::spin_mutex::scoped_lock lock(spin_mutex);
-
     return std::unordered_map<Key, T>::find(k);
   }
 

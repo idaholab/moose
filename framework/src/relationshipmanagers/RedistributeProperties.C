@@ -20,7 +20,6 @@ InputParameters
 RedistributeProperties::validParams()
 {
   InputParameters params = RelationshipManager::validParams();
-
   return params;
 }
 

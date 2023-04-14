@@ -423,7 +423,6 @@ MaterialPropertyStorage::initProps(MaterialData & material_data,
 {
   this->initProps(material_data, *_props_elem, elem, side, n_qpoints);
   this->initProps(material_data, *_props_elem_old, elem, side, n_qpoints);
-
   if (this->hasOlderProperties())
     this->initProps(material_data, *_props_elem_older, elem, side, n_qpoints);
 }
