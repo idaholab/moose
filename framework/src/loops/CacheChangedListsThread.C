@@ -34,11 +34,11 @@ CacheChangedListsThread::onElement(const Elem * elem)
   // new children are.  Make sure to cache every such case exactly once.
   if (elem->refinement_flag() == Elem::JUST_REFINED)
   {
-    const Elem * parent = elem->parent();
+    const Elem * const parent = elem->parent();
     const unsigned int child_num = parent->which_child_am_i(elem);
 
     bool im_the_lowest_local_child = true;
-    for (unsigned int c = 0; c != child_num; ++c)
+    for (const auto c : make_range(child_num))
       if (parent->child_ptr(c) && parent->child_ptr(c) != remote_elem &&
           parent->child_ptr(c)->processor_id() == elem->processor_id())
         im_the_lowest_local_child = false;

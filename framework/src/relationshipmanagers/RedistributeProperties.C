@@ -92,7 +92,7 @@ RedistributeProperties::redistribute()
           mat_prop_store->_props_elem_old.get(),
           mat_prop_store->_props_elem_older.get()};
 
-      for (auto * props_map_ptr : props_maps)
+      for (auto * const props_map_ptr : props_maps)
       {
         MaterialPropertyStorage::PropsType & props_map = *props_map_ptr;
         typedef std::unordered_map<unsigned int, std::string> stored_props_type;
@@ -150,7 +150,7 @@ RedistributeProperties::redistribute()
               {
                 libmesh_assert(!prop_vals.empty());
 
-                for (PropertyValue * prop : prop_vals)
+                for (const PropertyValue * const prop : prop_vals)
                 {
                   libmesh_assert(prop);
                   n_q_points = std::max(n_q_points, prop->size());
