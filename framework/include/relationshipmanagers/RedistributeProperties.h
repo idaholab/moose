@@ -30,11 +30,20 @@ public:
 
   RedistributeProperties(const RedistributeProperties & other) = default;
 
+  /**
+   * This function doesn't actually add anything to \p
+   * coupled_elements - we solely use the \p redistribute()
+   * override to keep internal data structures up to date.
+   */
   virtual void operator()(const MeshBase::const_element_iterator & range_begin,
                           const MeshBase::const_element_iterator & range_end,
                           processor_id_type p,
                           map_type & coupled_elements) override;
 
+  /**
+   * Abstract GhostingFunctor code relies on clone(), which for us is
+   * just a copy construction into a new object.
+   */
   virtual std::unique_ptr<GhostingFunctor> clone() const override;
 
   virtual std::string getInfo() const override;
@@ -43,6 +52,11 @@ public:
 
   virtual void redistribute() override;
 
+  /**
+   * Pushes the given pair ( \p mat_data , \p mat_props ) onto our
+   * list of \p _materials data to redistribute each time our
+   * underlying mesh is redistributed.
+   */
   void addMaterialPropertyStorage(std::vector<std::shared_ptr<MaterialData>> & mat_data,
                                   MaterialPropertyStorage & mat_props);
 
