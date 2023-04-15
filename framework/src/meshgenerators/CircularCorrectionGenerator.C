@@ -82,6 +82,8 @@ std::unique_ptr<MeshBase>
 CircularCorrectionGenerator::generate()
 {
   auto input_mesh = dynamic_cast<ReplicatedMesh *>(_input.get());
+  if (!input_mesh)
+    paramError("input", "Input is not a replicated mesh, which is required");
 
   _input_mesh_circular_bids =
       MooseMeshUtils::getBoundaryIDs(*input_mesh, _input_mesh_circular_boundaries, false);
@@ -110,8 +112,10 @@ CircularCorrectionGenerator::generate()
         paramError("input_mesh_circular_boundaries", "Only boundaries in XY plane are supported.");
     }
   }
-  std::vector<std::vector<std::pair<Point, Point>>> input_circ_bds_sds(_input_mesh_circular_bids.size());
-  std::vector<std::vector<std::pair<dof_id_type, dof_id_type>>> input_circ_bds_sds_ids(_input_mesh_circular_bids.size());
+  std::vector<std::vector<std::pair<Point, Point>>> input_circ_bds_sds(
+      _input_mesh_circular_bids.size());
+  std::vector<std::vector<std::pair<dof_id_type, dof_id_type>>> input_circ_bds_sds_ids(
+      _input_mesh_circular_bids.size());
   // Loop over all the boundary sides
   for (unsigned int i = 0; i < side_list.size(); ++i)
   {
@@ -307,18 +311,22 @@ CircularCorrectionGenerator::circularCenterCalculator(const std::vector<Point> p
   const Real y12 = pts_list[0](1) - pts_list[farthest_pt_id](1);
   const Real y13 = pts_list[0](1) - pts_list[mid_pt_id](1);
 
-  const Real sx13 = std::pow(pts_list[0](0), 2.0) - std::pow(pts_list[mid_pt_id](0), 2.0);
-  const Real sy13 = std::pow(pts_list[0](1), 2.0) - std::pow(pts_list[mid_pt_id](1), 2.0);
+  const Real sx13 =
+      pts_list[0](0) * pts_list[0](0) - pts_list[mid_pt_id](0) * pts_list[mid_pt_id](0);
+  const Real sy13 =
+      pts_list[0](1) * pts_list[0](1) - pts_list[mid_pt_id](1) * pts_list[mid_pt_id](1);
 
-  const Real sx21 = std::pow(pts_list[farthest_pt_id](0), 2.0) - std::pow(pts_list[0](0), 2.0);
-  const Real sy21 = std::pow(pts_list[farthest_pt_id](1), 2.0) - std::pow(pts_list[0](1), 2.0);
+  const Real sx21 =
+      pts_list[farthest_pt_id](0) * pts_list[farthest_pt_id](0) - pts_list[0](0) * pts_list[0](0);
+  const Real sy21 =
+      pts_list[farthest_pt_id](1) * pts_list[farthest_pt_id](1) - pts_list[0](1) * pts_list[0](1);
 
   const Real f =
       (sx13 * x12 + sy13 * x12 + sx21 * x13 + sy21 * x13) / (2.0 * (-y13 * x12 + y12 * x13));
   const Real g =
       (sx13 * y12 + sy13 * y12 + sx21 * y13 + sy21 * y13) / (2.0 * (-x13 * y12 + x12 * y13));
 
-  const Real c = -std::pow(pts_list[0](0), 2.0) - std::pow(pts_list[0](1), 2.0) -
+  const Real c = -pts_list[0](0) * pts_list[0](0) - pts_list[0](1) * pts_list[0](1) -
                  2.0 * g * pts_list[0](0) - 2.0 * f * pts_list[0](1);
   const Real r2 = f * f + g * g - c;
 
@@ -378,7 +386,7 @@ CircularCorrectionGenerator::generalCirCorrFactor(
       ct++;
     }
 
-    if (ct >= 1000)
+    if (ct >= 100)
       mooseError("CircularCorrectionGenerator::generalCirCorrFactorNormal: "
                  "Newton-Raphson method did not converge.");
 
