@@ -1980,7 +1980,7 @@ MooseApp::loadLibraryAndDependencies(const std::string & library_filename,
                      dyn_lib_it->first,
                      ".\n",
                      "This doesn't necessarily indicate an error condition unless you believe that "
-                     "the method should exist in that library.\n");
+                     "the method should exist in that library.\n", lderror());
 #endif
     }
   }

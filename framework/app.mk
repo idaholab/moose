@@ -487,9 +487,9 @@ install_lib_%: %
 	@$(call patch_rpath,$(libdst),../$(lib_install_suffix/.))
 	@$(call patch_relink,$(libdst),$(libpath_pcre),$(libname_pcre))
 	@$(call patch_relink,$(libdst),$(libpath_framework),$(libname_framework))
-	@$(eval libnames := $(foreach lib,$(applibs),$(shell grep "dlname='.*'" $(lib) 2>/dev/null | sed -E "s/dlname='(.*)'/\1/g")))
-	@$(eval libpaths := $(foreach lib,$(applibs),$(dir $(lib))$(shell grep "dlname='.*'" $(lib) 2>/dev/null | sed -E "s/dlname='(.*)'/\1/g")))
-	@for lib in $(libpaths); do $(call patch_relink,$(libdst),$$lib,$$(basename $$lib)); done
+#@$(eval libnames := $(foreach lib,$(applibs),$(shell grep "dlname='.*'" $(lib) 2>/dev/null | sed -E "s/dlname='(.*)'/\1/g")))
+#	@$(eval libpaths := $(foreach lib,$(applibs),$(dir $(lib))$(shell grep "dlname='.*'" $(lib) 2>/dev/null | sed -E "s/dlname='(.*)'/\1/g")))
+#	@for lib in $(libpaths); do $(call patch_relink,$(libdst),$$lib,$$(basename $$lib)); done
 
 $(binlink): $(copy_input_targets)
 	ln -sf ../../bin/$(notdir $(app_EXEC)) $@
@@ -508,15 +508,9 @@ $(bindst): $(app_EXEC) $(copy_input_targets) install_$(APPLICATION_NAME)_docs $(
 	@mkdir -p $(bin_install_dir)
 	@cp $< $@
 	@$(call patch_rpath,$@,../$(lib_install_suffix)/.)
-	@$(eval libnames := $(foreach lib,$(applibs),$(shell grep "dlname='.*'" $(lib) 2>/dev/null | sed -E "s/dlname='(.*)'/\1/g")))
-	@$(eval libpaths := $(foreach lib,$(applibs),$(dir $(lib))$(shell grep "dlname='.*'" $(lib) 2>/dev/null | sed -E "s/dlname='(.*)'/\1/g")))
-	@for lib in $(libpaths); do $(call patch_relink,$@,$$lib,$$(basename $$lib)); done
-
-ifeq ($(want_exec),yes)
-install_bin: $(bindst)
-else
-install_bin:
-endif
+#	@$(eval libnames := $(foreach lib,$(applibs),$(shell grep "dlname='.*'" $(lib) 2>/dev/null | sed -E "s/dlname='(.*)'/\1/g")))
+#	@$(eval libpaths := $(foreach lib,$(applibs),$(dir $(lib))$(shell grep "dlname='.*'" $(lib) 2>/dev/null | sed -E "s/dlname='(.*)'/\1/g")))
+#	@for lib in $(libpaths); do $(call patch_relink,$@,$$lib,$$(basename $$lib)); done
 ####### end install stuff ##############
 
 # Clang static analyzer
