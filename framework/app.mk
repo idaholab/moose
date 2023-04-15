@@ -431,6 +431,11 @@ else
   install_bin:
 endif
 
+#lib_install_targets = $(foreach lib,$(applibs),$(dir $(lib))install_lib_$(notdir $(lib)))
+#ifneq ($(app_test_LIB),)
+#	lib_install_targets += $(dir $(app_test_LIB))install_lib_$(notdir $(app_test_LIB))
+#endif
+
 install_libs:: $(lib_install_targets)
 
 ifneq ($(wildcard $(APPLICATION_DIR)/data/.),)
@@ -469,13 +474,13 @@ $(copy_input_targets):
 	fi; \
 
 
-install_lib_%: % all
+install_lib_%: %
 	@mkdir -p $(lib_install_dir)
 	@$(eval libname := $(shell grep "dlname='.*'" $< | sed -E "s/dlname='(.*)'/\1/g"))
 	@$(eval libdst := $(lib_install_dir)/$(libname))  # full installed path (includes library name)
 	@$(eval source_dir := $(dir $<))
 	@$(eval la_installed = $(lib_install_dir)/$(notdir $<))
-	@echo "Installing $(libdst)"
+	@echo "Installing library $(libdst)"
 	@cp $< $(la_installed)                   # Copy the library archive file
 	@cp $(source_dir)/$(libname) $(libdst)   # Copy the library file
 	@$(call patch_la,$(la_installed),$(lib_install_dir))
