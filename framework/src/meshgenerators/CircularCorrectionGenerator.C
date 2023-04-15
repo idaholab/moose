@@ -92,8 +92,7 @@ CircularCorrectionGenerator::generate()
   std::vector<std::tuple<dof_id_type, boundary_id_type>> node_list =
       input_mesh->get_boundary_info().build_node_list();
 
-  std::vector<std::vector<Point>> input_circ_bds_pts;
-  input_circ_bds_pts.resize(_input_mesh_circular_bids.size());
+  std::vector<std::vector<Point>> input_circ_bds_pts(_input_mesh_circular_bids.size());
   // Loop over all the boundary nodes
   for (unsigned int i = 0; i < node_list.size(); ++i)
   {
@@ -111,10 +110,8 @@ CircularCorrectionGenerator::generate()
         paramError("input_mesh_circular_boundaries", "Only boundaries in XY plane are supported.");
     }
   }
-  std::vector<std::vector<std::pair<Point, Point>>> input_circ_bds_sds;
-  input_circ_bds_sds.resize(_input_mesh_circular_bids.size());
-  std::vector<std::vector<std::pair<dof_id_type, dof_id_type>>> input_circ_bds_sds_ids;
-  input_circ_bds_sds_ids.resize(_input_mesh_circular_bids.size());
+  std::vector<std::vector<std::pair<Point, Point>>> input_circ_bds_sds(_input_mesh_circular_bids.size());
+  std::vector<std::vector<std::pair<dof_id_type, dof_id_type>>> input_circ_bds_sds_ids(_input_mesh_circular_bids.size());
   // Loop over all the boundary sides
   for (unsigned int i = 0; i < side_list.size(); ++i)
   {
@@ -180,8 +177,8 @@ CircularCorrectionGenerator::generate()
     // Radial range that within which the nodes will be moved
     const Real transition_layer_thickness = _transition_layer_ratios[i] * bdry_rad;
     // For a partial boundary, we take out the start and end nodes from the ordered node list
-    const Point pt_start = *(input_mesh->node_ptr(ordered_node_list.front()));
-    const Point pt_end = *(input_mesh->node_ptr(ordered_node_list.back()));
+    const Point pt_start = input_mesh->point(ordered_node_list.front());
+    const Point pt_end = input_mesh->point(ordered_node_list.back());
     // The direction of the span of the partial boundary (which is an arc)
     const Point span_direction = is_bdry_closed ? Point(0.0, 0.0, 0.0) : (pt_start - pt_end).unit();
     // Although these are also calculated for a full circular boundary, they are not used
@@ -194,7 +191,7 @@ CircularCorrectionGenerator::generate()
     {
       // For a half circle, the center boundary azimuthal angle is the starting node's azimuthal
       // plus or minus pi/2
-      const Point pt_second = *(input_mesh->node_ptr(ordered_node_list[1]));
+      const Point pt_second = input_mesh->point(ordered_node_list[1]);
       const Real pt_start_azi =
           std::atan2(pt_start(1) - boundary_origin(1), pt_start(0) - boundary_origin(0));
       const Real pt_second_azi =
