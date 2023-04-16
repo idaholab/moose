@@ -218,7 +218,6 @@
       detail = 'three-dimensional tetrahedral elements'
       mumps = true
       heavy = true
-      cli_args = 'Mesh/gen/elem_type=TET4'
     []
   []
   [3d-rc]
