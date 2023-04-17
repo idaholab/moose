@@ -277,6 +277,13 @@ MooseApp::validParams()
       false,
       "Keep standard output from all processors when running in parallel");
 
+  params.addCommandLineParam<std::string>(
+      "timpi_sync",
+      "--timpi-sync <sync type>",
+      "nbx",
+      "Changes the sync type used in spare parallel communitations within the TIMPI library "
+      "(advanced option).");
+
   // Options for debugging
   params.addCommandLineParam<std::string>("start_in_debugger",
                                           "--start-in-debugger <debugger>",
@@ -389,6 +396,10 @@ MooseApp::MooseApp(InputParameters parameters)
     _execute_flags(moose::internal::ExecFlagRegistry::getExecFlagRegistry().getFlags()),
     _automatic_automatic_scaling(getParam<bool>("automatic_automatic_scaling"))
 {
+  // Set the TIMPI sync type via --timpi-sync
+  const auto & timpi_sync = parameters.get<std::string>("timpi_sync");
+  const_cast<Parallel::Communicator &>(comm()).sync_type(timpi_sync);
+
 #ifdef HAVE_GPERFTOOLS
   if (isUltimateMaster())
   {
