@@ -105,7 +105,7 @@ AbaqusUMATStress::AbaqusUMATStress(const InputParameters & parameters)
                       parameters.isParamSetByUser("euler_angle_2") ||
                       parameters.isParamSetByUser("euler_angle_3")),
     _decomposition_method(
-       getParam<MooseEnum>("decomposition_method").getEnum<ComputeFiniteStrain::DecompMethod>())
+        getParam<MooseEnum>("decomposition_method").getEnum<ComputeFiniteStrain::DecompMethod>())
 {
   if (!_use_one_based_indexing)
     mooseDeprecated(
@@ -405,5 +405,4 @@ AbaqusUMATStress::computeQpStress()
   }
   else if (_decomposition_method != ComputeFiniteStrain::DecompMethod::HughesWinget)
     _stress[_qp].rotate(_rotation_increment[_qp]);
-
 }
