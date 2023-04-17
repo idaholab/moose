@@ -103,6 +103,8 @@
 #include "BoundaryNodeIntegrityCheckThread.h"
 #include "BoundaryElemIntegrityCheckThread.h"
 #include "NodalBCBase.h"
+#include "MortarUserObject.h"
+#include "MortarUserObjectThread.h"
 
 #include "libmesh/exodusII_io.h"
 #include "libmesh/quadrature.h"
@@ -3707,6 +3709,7 @@ FEProblemBase::addUserObject(const std::string & user_object_name,
     auto duo = std::dynamic_pointer_cast<DomainUserObject>(user_object);
     auto guo = std::dynamic_pointer_cast<GeneralUserObject>(user_object);
     auto tguo = std::dynamic_pointer_cast<ThreadedGeneralUserObject>(user_object);
+    auto muo = std::dynamic_pointer_cast<MortarUserObject>(user_object);
 
     // Account for displaced mesh use
     if (_displaced_problem && parameters.get<bool>("use_displaced_mesh"))
@@ -3720,7 +3723,7 @@ FEProblemBase::addUserObject(const std::string & user_object_name,
         _reinit_displaced_neighbor = true;
     }
 
-    if (guo && !tguo)
+    if ((guo && !tguo) || muo)
       break;
   }
 }
@@ -4182,7 +4185,10 @@ FEProblemBase::computeUserObjectsInternal(const ExecFlagType & type,
     std::vector<UserObject *> nodal;
     query.clone().condition<AttribInterfaces>(Interfaces::NodalUserObject).queryInto(nodal);
 
-    if (userobjs.empty() && genobjs.empty() && tgobjs.empty() && nodal.empty())
+    std::vector<MortarUserObject *> mortar;
+    query.clone().condition<AttribInterfaces>(Interfaces::MortarUserObject).queryInto(mortar);
+
+    if (userobjs.empty() && genobjs.empty() && tgobjs.empty() && nodal.empty() && mortar.empty())
       continue;
 
     // Start the timer here since we have at least one active user object
@@ -4195,6 +4201,8 @@ FEProblemBase::computeUserObjectsInternal(const ExecFlagType & type,
         obj->residualSetup();
       for (auto obj : nodal)
         obj->residualSetup();
+      for (auto obj : mortar)
+        obj->residualSetup();
       for (auto obj : tgobjs)
         obj->residualSetup();
       for (auto obj : genobjs)
@@ -4205,6 +4213,8 @@ FEProblemBase::computeUserObjectsInternal(const ExecFlagType & type,
       for (auto obj : userobjs)
         obj->jacobianSetup();
       for (auto obj : nodal)
+        obj->jacobianSetup();
+      for (auto obj : mortar)
         obj->jacobianSetup();
       for (auto obj : tgobjs)
         obj->jacobianSetup();
@@ -4265,6 +4275,47 @@ FEProblemBase::computeUserObjectsInternal(const ExecFlagType & type,
         _aux->system().update();
         break;
       }
+
+    // Execute MortarUserObjects
+    {
+      for (auto obj : mortar)
+        obj->initialize();
+      if (!mortar.empty())
+      {
+        auto create_and_run_mortar_functors = [this, &mortar](const bool displaced)
+        {
+          // go over mortar interfaces and construct functors
+          const auto & mortar_interfaces = getMortarInterfaces(displaced);
+          for (const auto & mortar_interface : mortar_interfaces)
+          {
+            const auto primary_secondary_boundary_pair = mortar_interface.first;
+            auto mortar_uos_to_execute =
+                getMortarUserObjects(primary_secondary_boundary_pair.first,
+                                     primary_secondary_boundary_pair.second,
+                                     displaced,
+                                     mortar);
+            const auto & mortar_generation_object = mortar_interface.second;
+
+            auto * const subproblem = displaced
+                                          ? static_cast<SubProblem *>(_displaced_problem.get())
+                                          : static_cast<SubProblem *>(this);
+            MortarUserObjectThread muot(mortar_uos_to_execute,
+                                        mortar_generation_object,
+                                        *subproblem,
+                                        *this,
+                                        displaced,
+                                        subproblem->assembly(0, 0));
+            muot();
+          }
+        };
+
+        create_and_run_mortar_functors(false);
+        if (_displaced_problem)
+          create_and_run_mortar_functors(true);
+      }
+      for (auto obj : mortar)
+        obj->finalize();
+    }
 
     // Execute threaded general user objects
     for (auto obj : tgobjs)
@@ -5401,8 +5452,7 @@ FEProblemBase::init()
         case Moose::COUPLING_DIAG:
           cm = std::make_unique<CouplingMatrix>(n_vars);
           for (unsigned int i = 0; i < n_vars; i++)
-            for (unsigned int j = 0; j < n_vars; j++)
-              (*cm)(i, j) = (i == j ? 1 : 0);
+            (*cm)(i, i) = 1;
           break;
 
           // for full jacobian
@@ -7978,4 +8028,48 @@ FEProblemBase::shouldPrintExecution(const THREAD_ID tid) const
     return true;
   else
     return false;
+}
+
+std::vector<MortarUserObject *>
+FEProblemBase::getMortarUserObjects(const BoundaryID primary_boundary_id,
+                                    const BoundaryID secondary_boundary_id,
+                                    const bool displaced,
+                                    const std::vector<MortarUserObject *> & mortar_uo_superset)
+{
+  std::vector<MortarUserObject *> mortar_uos;
+  auto * const subproblem = displaced ? static_cast<SubProblem *>(_displaced_problem.get())
+                                      : static_cast<SubProblem *>(this);
+  for (auto * const obj : mortar_uo_superset)
+    if (obj->onInterface(primary_boundary_id, secondary_boundary_id) &&
+        (&obj->getSubProblem() == subproblem))
+      mortar_uos.push_back(obj);
+
+  return mortar_uos;
+}
+
+std::vector<MortarUserObject *>
+FEProblemBase::getMortarUserObjects(const BoundaryID primary_boundary_id,
+                                    const BoundaryID secondary_boundary_id,
+                                    const bool displaced)
+{
+  std::vector<MortarUserObject *> mortar_uos;
+  theWarehouse()
+      .query()
+      .condition<AttribInterfaces>(Interfaces::MortarUserObject)
+      .queryInto(mortar_uos);
+  return getMortarUserObjects(primary_boundary_id, secondary_boundary_id, displaced, mortar_uos);
+}
+
+void
+FEProblemBase::reinitMortarUserObjects(const BoundaryID primary_boundary_id,
+                                       const BoundaryID secondary_boundary_id,
+                                       const bool displaced)
+{
+  const auto mortar_uos =
+      getMortarUserObjects(primary_boundary_id, secondary_boundary_id, displaced);
+  for (auto * const mortar_uo : mortar_uos)
+  {
+    mortar_uo->setNormals();
+    mortar_uo->reinit();
+  }
 }

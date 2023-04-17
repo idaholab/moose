@@ -28,6 +28,7 @@
 #include "Reporter.h"
 #include "SystemBase.h"
 #include "DomainUserObject.h"
+#include "MortarUserObject.h"
 #include "ExecFlagRegistry.h"
 
 #include <algorithm>
@@ -66,6 +67,8 @@ operator<<(std::ostream & os, Interfaces & iface)
     os << "|Reporter";
   if (static_cast<bool>(iface & Interfaces::DomainUserObject))
     os << "|DomainUserObject";
+  if (static_cast<bool>(iface & Interfaces::MortarUserObject))
+    os << "|MortarUserObject";
   os << ")";
   return os;
 }
@@ -491,6 +494,7 @@ AttribInterfaces::initFrom(const MooseObject * obj)
   _val |= (unsigned int)Interfaces::BoundaryRestrictable      * (dynamic_cast<const BoundaryRestrictable *>(obj) != nullptr);
   _val |= (unsigned int)Interfaces::Reporter                  * (dynamic_cast<const Reporter *>(obj) != nullptr);
   _val |= (unsigned int)Interfaces::DomainUserObject          * (dynamic_cast<const DomainUserObject *>(obj) != nullptr);
+  _val |= (unsigned int)Interfaces::MortarUserObject          * (dynamic_cast<const MortarUserObject *>(obj) != nullptr);
   // clang-format on
 }
 

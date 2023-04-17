@@ -50,14 +50,13 @@ ComputeWeightedGapCartesianLMMechanicalContact::validParams()
   params.addCoupledVar("disp_z", "The z displacement variable");
   params.addParam<Real>(
       "c", 1e6, "Parameter for balancing the size of the gap and contact pressure");
-  params.set<bool>("interpolate_normals") = false;
   params.addRequiredCoupledVar("lm_x",
                                "Mechanical contact Lagrange multiplier along the x Cartesian axis");
   params.addRequiredCoupledVar(
       "lm_y", "Mechanical contact Lagrange multiplier along the y Cartesian axis.");
   params.addCoupledVar("lm_z",
                        "Mechanical contact Lagrange multiplier along the z Cartesian axis.");
-
+  params.set<bool>("interpolate_normals") = false;
   params.addParam<bool>(
       "normalize_c",
       false,
@@ -86,11 +85,6 @@ ComputeWeightedGapCartesianLMMechanicalContact::ComputeWeightedGapCartesianLMMec
     _disp_y_var(getVar("disp_y", 0)),
     _disp_z_var(_has_disp_z ? getVar("disp_z", 0) : nullptr)
 {
-  if (_interpolate_normals)
-    paramError("interpolate_normals",
-               "This version of normal mechanical contact does not allow mortar interpolation of "
-               "geometric vectors");
-
   _lm_vars.push_back(getVar("lm_x", 0));
   _lm_vars.push_back(getVar("lm_y", 0));
 
@@ -167,8 +161,7 @@ ComputeWeightedGapCartesianLMMechanicalContact::computeQpProperties()
 void
 ComputeWeightedGapCartesianLMMechanicalContact::computeQpIProperties()
 {
-  mooseAssert(_normals.size() ==
-                  (_interpolate_normals ? _test[_i].size() : _lower_secondary_elem->n_nodes()),
+  mooseAssert(_normals.size() == _lower_secondary_elem->n_nodes(),
               "Making sure that _normals is the expected size");
 
   // Get the _dof_to_weighted_gap map
@@ -254,7 +247,7 @@ void
 ComputeWeightedGapCartesianLMMechanicalContact::post()
 {
   Moose::Mortar::Contact::communicateGaps(
-      _dof_to_weighted_gap, this->processor_id(), _mesh, _nodal, _normalize_c, _communicator);
+      _dof_to_weighted_gap, _mesh, _nodal, _normalize_c, _communicator, false);
 
   for (const auto & pr : _dof_to_weighted_gap)
   {
@@ -273,7 +266,7 @@ ComputeWeightedGapCartesianLMMechanicalContact::incorrectEdgeDroppingPost(
     const std::unordered_set<const Node *> & inactive_lm_nodes)
 {
   Moose::Mortar::Contact::communicateGaps(
-      _dof_to_weighted_gap, this->processor_id(), _mesh, _nodal, _normalize_c, _communicator);
+      _dof_to_weighted_gap, _mesh, _nodal, _normalize_c, _communicator, false);
 
   for (const auto & pr : _dof_to_weighted_gap)
   {

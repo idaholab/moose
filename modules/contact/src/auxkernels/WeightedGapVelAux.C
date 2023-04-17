@@ -27,6 +27,7 @@ WeightedGapVelAux::validParams()
   params.addRequiredCoupledVar("disp_x", "The x displacement variable");
   params.addRequiredCoupledVar("disp_y", "The y displacement variable");
   params.addCoupledVar("disp_z", "The z displacement variable");
+  params.set<bool>("interpolate_normals") = false;
   params.addParam<bool>("use_displaced_mesh",
                         true,
                         "Whether to use the displaced mesh to compute the auxiliary kernel value.");
@@ -47,9 +48,7 @@ WeightedGapVelAux::WeightedGapVelAux(const InputParameters & parameters)
     _primary_z_dot(_has_disp_z ? &_disp_z->adUDotNeighbor() : nullptr),
     _weighted_gap_velocity(0),
     _qp_gap_velocity(0),
-    _qp_gap_velocity_nodal(0),
-    _i(0),
-    _qp(0)
+    _qp_gap_velocity_nodal(0)
 {
   if (!_displaced)
     paramWarning(
@@ -61,13 +60,11 @@ WeightedGapVelAux::WeightedGapVelAux(const InputParameters & parameters)
 Real
 WeightedGapVelAux::computeValue()
 {
-  setNormals();
-
   _weighted_gap_velocity = 0;
   for (_qp = 0; _qp < _qrule_msm->n_points(); _qp++)
   {
     computeQpProperties();
-    for (_i = 0; _i < _test.size(); ++_i)
+    for (_i = 0; _i < _test_lower.size(); ++_i)
       computeQpIProperties();
   }
 
@@ -84,19 +81,13 @@ WeightedGapVelAux::computeQpProperties()
   if (_has_disp_z)
     gap_velocity_vec(2) = MetaPhysicL::raw_value((*_secondary_z_dot)[_qp] - (*_primary_z_dot)[_qp]);
 
-  if (_interpolate_normals)
-    _qp_gap_velocity = gap_velocity_vec * (_normals[_qp] * _JxW_msm[_qp] * _coord[_qp]);
-  else
-    _qp_gap_velocity_nodal = gap_velocity_vec * (_JxW_msm[_qp] * _coord[_qp]);
+  _qp_gap_velocity_nodal = gap_velocity_vec * (_JxW_msm[_qp] * _coord_msm[_qp]);
 
-  _msm_volume += _JxW_msm[_qp] * _coord[_qp];
+  _msm_volume += _JxW_msm[_qp] * _coord_msm[_qp];
 }
 
 void
 WeightedGapVelAux::computeQpIProperties()
 {
-  if (_interpolate_normals)
-    _weighted_gap_velocity += _test[_i][_qp] * _qp_gap_velocity;
-  else
-    _weighted_gap_velocity += _test[_i][_qp] * _qp_gap_velocity_nodal * _normals[_i];
+  _weighted_gap_velocity += _test_lower[_i][_qp] * _qp_gap_velocity_nodal * _normals[_i];
 }

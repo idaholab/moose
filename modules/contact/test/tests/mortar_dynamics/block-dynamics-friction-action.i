@@ -155,7 +155,6 @@ offset = -0.19
     friction_coefficient = 0.5
     c_normal = 1.0e4
     c_tangential = 1.0e4
-    interpolate_normals = false
     mortar_dynamics = true
     newmark_beta = 0.25
     newmark_gamma = 0.5

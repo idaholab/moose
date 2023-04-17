@@ -27,6 +27,20 @@ offset = 1e-2
   [../]
 []
 
+# [AuxVariables]
+#   [pid]
+#     order = CONSTANT
+#     family = MONOMIAL
+#   []
+# []
+
+# [AuxKernels]
+#   [pid]
+#     type = ProcessorIDAux
+#     variable = pid
+#   []
+# []
+
 [ICs]
   [./disp_y]
     block = 2
@@ -48,6 +62,19 @@ offset = 1e-2
 []
 
 
+[UserObjects]
+  [weighted_gap_uo]
+    type = LMWeightedGapUserObject
+    primary_boundary = 20
+    secondary_boundary = 10
+    primary_subdomain = 4
+    secondary_subdomain = 3
+    lm_variable = normal_lm
+    disp_x = disp_x
+    disp_y = disp_y
+  []
+[]
+
 [Constraints]
   [./weighted_gap_lm]
     type = ComputeWeightedGapLMMechanicalContact
@@ -60,6 +87,7 @@ offset = 1e-2
     disp_y = disp_y
     use_displaced_mesh = true
     c = 1
+    weighted_gap_uo = weighted_gap_uo
   [../]
   [normal_x]
     type = NormalMortarMechanicalContact
@@ -72,6 +100,7 @@ offset = 1e-2
     component = x
     use_displaced_mesh = true
     compute_lm_residuals = false
+    weighted_gap_uo = weighted_gap_uo
   []
   [normal_y]
     type = NormalMortarMechanicalContact
@@ -84,6 +113,7 @@ offset = 1e-2
     component = y
     use_displaced_mesh = true
     compute_lm_residuals = false
+    weighted_gap_uo = weighted_gap_uo
   []
 []
 
@@ -132,6 +162,7 @@ offset = 1e-2
   line_search = 'none'
   snesmf_reuse_base = false
   abort_on_solve_fail = true
+  nl_rel_tol = 1e-12
 []
 
 [Debug]

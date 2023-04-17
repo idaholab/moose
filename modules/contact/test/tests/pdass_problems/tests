@@ -55,9 +55,9 @@
     min_ad_size = '50'
     method = '!dbg'
     valgrind = 'none'
-    cli_args = "Constraints/weighted_gap_lm/correct_edge_dropping=true Executioner/end_time=5.5 Outputs/file_base=frictional_bouncing_block_edge_dropping"
+    cli_args = "Constraints/weighted_gap_lm/correct_edge_dropping=true UserObjects/weighted_vel_uo/correct_edge_dropping=true Executioner/end_time=5.5 Outputs/file_base=frictional_bouncing_block_edge_dropping"
     requirement = 'Contact module shall solve frictional contact between a bouncing block and a flexible substrate when correct edge dropping is enabled. '
                   'Additional requirement is that the correct edge dropping treatment must yield same results as incorrect edge dropping treatment when '
-                  'there is not actual edge dropping, e.g.: All secondary surface projects to the primary surface.' 
+                  'there is not actual edge dropping, e.g.: All secondary surface projects to the primary surface.'
   []
 []

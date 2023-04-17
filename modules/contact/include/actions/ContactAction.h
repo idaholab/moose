@@ -89,9 +89,6 @@ protected:
   /// Whether to use the dual Mortar approach
   bool _use_dual;
 
-  /// Whether to use correct edge dropping treatment
-  const bool _correct_edge_dropping;
-
   /// Whether to generate the mortar mesh (useful in a restart simulation e.g.).
   const bool _generate_mortar_mesh;
 

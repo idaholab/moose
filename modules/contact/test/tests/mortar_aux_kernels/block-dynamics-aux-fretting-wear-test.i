@@ -24,7 +24,7 @@ offset = -0.045
   [frictional_lm]
     block = 3
     use_dual = true
-  #  scaling = 1.0e-5
+    scaling = 1.0e-5
   []
 []
 
@@ -43,7 +43,7 @@ offset = -0.045
     generate_output = 'stress_xx stress_yy'
     strain = FINITE
     block = '1 2'
-    zeta = 1.0
+    zeta = 0.04
     hht_alpha = 0.0
   []
   [inertia_x]
@@ -182,6 +182,21 @@ offset = -0.045
   []
 []
 
+[UserObjects]
+  [weighted_vel_uo]
+    type = LMWeightedVelocitiesUserObject
+    primary_boundary = 20
+    secondary_boundary = 10
+    primary_subdomain = 4
+    secondary_subdomain = 3
+    secondary_variable = disp_x
+    lm_variable_normal = normal_lm
+    lm_variable_tangential_one = frictional_lm
+    disp_x = disp_x
+    disp_y = disp_y
+  []
+[]
+
 [Constraints]
   [weighted_gap_lm]
     type = ComputeDynamicFrictionalForceLMMechanicalContact
@@ -199,7 +214,6 @@ offset = -0.045
     normalize_c = true
     mu = 0.5
     friction_lm = frictional_lm
-    interpolate_normals = false
     capture_tolerance = 1.0e-5
     newmark_beta = 0.25
     newmark_gamma = 0.5
@@ -215,7 +229,7 @@ offset = -0.045
     component = x
     use_displaced_mesh = true
     compute_lm_residuals = false
-    interpolate_normals = false
+    weighted_gap_uo = weighted_vel_uo
   []
   [normal_y]
     type = NormalMortarMechanicalContact
@@ -227,8 +241,7 @@ offset = -0.045
     secondary_variable = disp_y
     component = y
     use_displaced_mesh = true
-    compute_lm_residuals = false
-    interpolate_normals = false
+    weighted_gap_uo = weighted_vel_uo
   []
   [tangential_x]
     type = TangentialMortarMechanicalContact
@@ -241,7 +254,7 @@ offset = -0.045
     component = x
     use_displaced_mesh = true
     compute_lm_residuals = false
-    interpolate_normals = false
+    weighted_velocities_uo = weighted_vel_uo
   []
   [tangential_y]
     type = TangentialMortarMechanicalContact
@@ -254,7 +267,7 @@ offset = -0.045
     component = y
     use_displaced_mesh = true
     compute_lm_residuals = false
-    interpolate_normals = false
+    weighted_velocities_uo = weighted_vel_uo
   []
 []
 
@@ -281,7 +294,7 @@ offset = -0.045
     type = FunctionDirichletBC
     variable = disp_x
     boundary = 50
-    function = '1e-2 * (cos(32.0 * pi / 4 * t) - 1.0)'
+    function = '1e-5 * (cos(32.0 * pi / 4 * t) - 1.0)'
   []
 []
 
@@ -297,7 +310,7 @@ offset = -0.045
   petsc_options_value = 'lu       superlu_dist                  NONZERO               1e-15'
   nl_max_its = 40
   l_max_its = 15
-  line_search = 'l2'
+  line_search = none
   snesmf_reuse_base = true
 
   [TimeIntegrator]
@@ -313,7 +326,6 @@ offset = -0.045
 
 [Outputs]
   exodus = true
-  checkpoint = true
 []
 
 [Preconditioning]
@@ -324,14 +336,7 @@ offset = -0.045
 []
 
 [Postprocessors]
-  active = 'num_nl cumulative contact'
-  [num_nl]
-    type = NumNonlinearIterations
-  []
-  [cumulative]
-    type = CumulativeValuePostprocessor
-    postprocessor = num_nl
-  []
+  active = 'contact'
   [contact]
     type = ContactDOFSetSize
     variable = normal_lm

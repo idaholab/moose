@@ -22,7 +22,6 @@ CartesianMortarMechanicalContact::validParams()
   params.addClassDescription(
       "This class is used to apply normal contact forces using lagrange multipliers");
   params.set<bool>("compute_lm_residual") = false;
-  params.set<bool>("interpolate_normals") = false;
   return params;
 }
 
@@ -30,10 +29,6 @@ CartesianMortarMechanicalContact::CartesianMortarMechanicalContact(
     const InputParameters & parameters)
   : ADMortarLagrangeConstraint(parameters), _component(getParam<MooseEnum>("component"))
 {
-  if (_interpolate_normals)
-    paramError("interpolate_normals",
-               "This version of normal mechanical contact does not allow mortar interpolation of "
-               "geometry vectors");
 }
 
 ADReal

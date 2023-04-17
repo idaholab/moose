@@ -180,6 +180,21 @@ offset = -0.05
   []
 []
 
+[UserObjects]
+  [weighted_vel_uo]
+    type = LMWeightedVelocitiesUserObject
+    primary_boundary = 20
+    secondary_boundary = 10
+    primary_subdomain = 4
+    secondary_subdomain = 3
+    secondary_variable = disp_x
+    lm_variable_normal = normal_lm
+    lm_variable_tangential_one = frictional_lm
+    disp_x = disp_x
+    disp_y = disp_y
+  []
+[]
+
 [Constraints]
   [weighted_gap_lm]
     type = ComputeDynamicFrictionalForceLMMechanicalContact
@@ -195,7 +210,6 @@ offset = -0.05
     c_t = 1e6
     mu = 0.15
     friction_lm = frictional_lm
-    interpolate_normals = false
     capture_tolerance = 1.0e-5
     newmark_beta = 0.25
     newmark_gamma = 0.5
@@ -211,7 +225,7 @@ offset = -0.05
     component = x
     use_displaced_mesh = true
     compute_lm_residuals = false
-    interpolate_normals = false
+    weighted_gap_uo = weighted_vel_uo
   []
   [normal_y]
     type = NormalMortarMechanicalContact
@@ -224,7 +238,7 @@ offset = -0.05
     component = y
     use_displaced_mesh = true
     compute_lm_residuals = false
-    interpolate_normals = false
+    weighted_gap_uo = weighted_vel_uo
   []
   [tangential_x]
     type = TangentialMortarMechanicalContact
@@ -237,7 +251,7 @@ offset = -0.05
     component = x
     use_displaced_mesh = true
     compute_lm_residuals = false
-    interpolate_normals = false
+    weighted_velocities_uo = weighted_vel_uo
   []
   [tangential_y]
     type = TangentialMortarMechanicalContact
@@ -250,7 +264,7 @@ offset = -0.05
     component = y
     use_displaced_mesh = true
     compute_lm_residuals = false
-    interpolate_normals = false
+    weighted_velocities_uo = weighted_vel_uo
   []
 []
 
@@ -294,7 +308,7 @@ offset = -0.05
   nl_max_its = 40
   nl_abs_tol = 1.0e-11
   nl_rel_tol = 1.0e-11
-  line_search = 'l2'
+  line_search = 'none'
   snesmf_reuse_base = true
 
   [TimeIntegrator]

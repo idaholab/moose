@@ -161,7 +161,6 @@ offset = 0.00
     friction_coefficient = 0.4
     c_normal = 1e4
     c_tangential = 1.0e4
-    interpolate_normals = false
   []
 []
 

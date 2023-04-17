@@ -22,13 +22,10 @@ Threads::spin_mutex ComputeNodalAuxVarsThread<AuxKernelType>::writable_variable_
 
 template <typename AuxKernelType>
 ComputeNodalAuxVarsThread<AuxKernelType>::ComputeNodalAuxVarsThread(
-    FEProblemBase & fe_problem,
-    const MooseObjectWarehouse<AuxKernelType> & storage,
-    const std::vector<std::vector<MooseVariableFEBase *>> & vars)
+    FEProblemBase & fe_problem, const MooseObjectWarehouse<AuxKernelType> & storage)
   : ThreadedNodeLoop<ConstNodeRange, ConstNodeRange::const_iterator>(fe_problem),
     _aux_sys(fe_problem.getAuxiliarySystem()),
-    _storage(storage),
-    _aux_vars(vars)
+    _storage(storage)
 {
 }
 
@@ -38,8 +35,7 @@ ComputeNodalAuxVarsThread<AuxKernelType>::ComputeNodalAuxVarsThread(ComputeNodal
                                                                     Threads::split split)
   : ThreadedNodeLoop<ConstNodeRange, ConstNodeRange::const_iterator>(x, split),
     _aux_sys(x._aux_sys),
-    _storage(x._storage),
-    _aux_vars(x._aux_vars)
+    _storage(x._storage)
 {
 }
 
@@ -85,10 +81,6 @@ ComputeNodalAuxVarsThread<AuxKernelType>::onNode(ConstNodeRange::const_iterator 
     subdomainChanged();
   }
 
-  // prepare variables
-  for (auto * var : _aux_vars[_tid])
-    var->prepareAux();
-
   _fe_problem.reinitNode(node, _tid);
 
   // Get a map of all active block restricted AuxKernel objects
@@ -104,31 +96,24 @@ ComputeNodalAuxVarsThread<AuxKernelType>::onNode(ConstNodeRange::const_iterator 
       for (const auto & aux : iter->second)
       {
         aux->compute();
+        // This is the same conditional check that the aux kernel performs internally before calling
+        // computeValue and _var.setNodalValue. We don't want to attempt to insert into the solution
+        // if we don't actually have any dofs on this node
+        if (aux->variable().isNodalDefined())
+          aux->variable().insert(_aux_sys.solution());
 
         // update the aux solution vector if writable coupled variables are used
         if (aux->hasWritableCoupledVariables())
         {
-          Threads::spin_mutex::scoped_lock lock(writable_variable_mutex);
           for (auto * var : aux->getWritableCoupledVariables())
-          {
-            // insert into the global solution vector
-            var->insert(_aux_sys.solution());
-            var->prepareAux();
-          }
+            if (var->isNodalDefined())
+              // insert into the global solution vector
+              var->insert(_aux_sys.solution());
 
           // make solution values available for dependent AuxKernels
-          aux->variable().insert(_aux_sys.solution());
-          aux->variable().prepareAux();
           _fe_problem.reinitNode(node, _tid);
         }
       }
-  }
-
-  // We are done, so update the solution vector
-  {
-    Threads::spin_mutex::scoped_lock lock(Threads::spin_mtx);
-    for (auto * var : _aux_vars[_tid])
-      var->insert(_aux_sys.solution());
   }
 }
 
