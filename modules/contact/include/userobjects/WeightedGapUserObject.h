@@ -154,6 +154,12 @@ protected:
   const ADReal * _weighted_gap_ptr = nullptr;
   const Real * _normalization_ptr = nullptr;
 
+  /// Whether to use Petrov-Galerkin approach
+  const bool _use_petrov_galerkin;
+
+  /// The auxiliary Lagrange multiplier variable (used together whith the Petrov-Galerkin approach)
+  MooseVariable * const _aux_lm_var;
+
   /// A pointer to the test function associated with the weighted gap. We have this member so that
   /// we don't do virtual calls during inner quadrature-point/test-function loops
   const VariableTestValue * _test = nullptr;

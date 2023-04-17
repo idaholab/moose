@@ -24,6 +24,11 @@ WeightedGapUserObject::validParams()
   params.addRequiredCoupledVar("disp_x", "The x displacement variable");
   params.addRequiredCoupledVar("disp_y", "The y displacement variable");
   params.addCoupledVar("disp_z", "The z displacement variable");
+  params.addParam<bool>(
+      "use_petrov_galerkin", false, "Whether to use the Petrov-Galerkin approach.");
+  params.addCoupledVar("aux_lm",
+                       "Auxiliary Lagrange multiplier variable that is utilized together with the "
+                       "Petrov-Galerkin approach.");
   params.set<bool>("use_displaced_mesh") = true;
   params.set<bool>("interpolate_normals") = false;
   params.set<ExecFlagEnum>("execute_on") = {EXEC_LINEAR, EXEC_NONLINEAR};
@@ -45,18 +50,30 @@ WeightedGapUserObject::WeightedGapUserObject(const InputParameters & parameters)
     _primary_disp_y(_disp_y_var->adSlnNeighbor()),
     _secondary_disp_z(_has_disp_z ? &_disp_z_var->adSln() : nullptr),
     _primary_disp_z(_has_disp_z ? &_disp_z_var->adSlnNeighbor() : nullptr),
-    _coord(_assembly.mortarCoordTransformation())
+    _coord(_assembly.mortarCoordTransformation()),
+    _use_petrov_galerkin(getParam<bool>("use_petrov_galerkin")),
+    _aux_lm_var(isCoupled("aux_lm") ? getVar("aux_lm", 0) : nullptr)
 {
   if (!getParam<bool>("use_displaced_mesh"))
     paramError("use_displaced_mesh",
                "'use_displaced_mesh' must be true for the WeightedGapUserObject object");
+
+  if (_use_petrov_galerkin && (!isParamValid("aux_lm")))
+    paramError("use_petrov_galerkin",
+               "We need to specify an auxiliary variable `aux_lm` while using the Petrov-Galerkin "
+               "approach");
+
+  if (_use_petrov_galerkin && _aux_lm_var->useDual())
+    paramError("aux_lm",
+               "Auxiliary LM variable needs to use standard shape function, i.e., set `use_dual = "
+               "false`.");
 }
 
 void
 WeightedGapUserObject::initialSetup()
 {
   MortarUserObject::initialSetup();
-  _test = &test();
+  _test = _use_petrov_galerkin ? &_aux_lm_var->phiLower() : &test();
 }
 
 void

@@ -1,6 +1,6 @@
 [Examples]
   design = 'Constraints/index.md'
-  issues = '#13080 #15215'
+  issues = '#13080 #15215 #23802'
   [frictionless-compress-2d]
     type = 'CSVDiff'
     input = 'two_equal_blocks_compress_2d.i'
@@ -10,6 +10,17 @@
                   'same height come into contact using the dual basis'
     min_ad_size = 100
     abs_zero = 1.0e-8
+  []
+  [frictionless-compress-2d_pg]
+    type = 'CSVDiff'
+    input = 'two_equal_blocks_compress_2d_pg.i'
+    csvdiff = 'two_equal_blocks_compress_2d_pg_out.csv'
+    mesh_mode = 'REPLICATED'
+    requirement = 'The system shall simulate correct contact behavior in 2D when two blocks with the '
+                  'same height come into contact using the Petrov-Galerkin approach'
+    min_ad_size = 100
+    abs_zero = 1.0e-5
+    rel_err = 1e-3
   []
   [frictionless-compress-2d-nondual]
     type = 'CSVDiff'
@@ -31,6 +42,17 @@
     mesh_mode = 'REPLICATED'
     requirement = 'The system shall simulate correct contact behavior in 3D when two blocks with the '
                   'same height come into contact using the dual basis'
+    allow_test_objects = true
+    min_ad_size = 100
+    abs_zero = 1.0e-8
+  []
+  [frictionless-compress-3d_pg]
+    type = 'CSVDiff'
+    input = 'two_equal_blocks_compress_3d_pg.i'
+    csvdiff = 'two_equal_blocks_compress_3d_pg_out.csv'
+    mesh_mode = 'REPLICATED'
+    requirement = 'The system shall simulate correct contact behavior in 3D when two blocks with the '
+                  'same height come into contact using the Petrov-Galerkin approach'
     allow_test_objects = true
     min_ad_size = 100
     abs_zero = 1.0e-8

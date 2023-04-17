@@ -2,7 +2,7 @@
 
 [Examples]
   design = 'Constraints/index.md'
-  issues = '#13080'
+  issues = '#13080 #23802'
   [frictionless-mortar-3d]
     type = 'Exodiff'
     input = 'frictionless-mortar-3d.i'
@@ -13,6 +13,15 @@
                   'constraint'
     method = '!dbg'
     valgrind = 'none'
+  []
+  [frictionless-mortar-3d_pg]
+    type = 'Exodiff'
+    input = 'frictionless-mortar-3d_pg.i'
+    min_ad_size = 100
+    exodiff = 'frictionless-mortar-3d_pg_out.e'
+    mesh_mode = 'REPLICATED'
+    requirement = 'The system shall solve a 3D frictionless bouncing block problem with mortar '
+                  'constraint using Petrov-Galerkin approach'
   []
   [frictionless-mortar-3d-test-derivative-trimming]
     type = 'RunApp'
@@ -75,6 +84,17 @@
     abs_zero = 1.0e-5
     method = '!dbg'
     valgrind = 'none'
+  []
+  [frictional-mortar-3d-pg]
+    type = 'Exodiff'
+    input = 'frictional-mortar-3d_pg.i'
+    min_ad_size = 100
+    exodiff = 'frictional-mortar-3d_pg_out.e'
+    requirement = 'The system shall solve a 3D frictional bouncing block problem with mortar '
+                  'constraint using the Petrov-Galerkin approach'
+    rel_err = 1.0e-5
+    abs_zero = 1.0e-5
+    max_parallel = 8
   []
   [frictional-mortar-3d-function]
     type = 'Exodiff'
