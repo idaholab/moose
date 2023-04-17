@@ -39,14 +39,18 @@ IntersectionElemsHelper::ElemIntersectionMap()
 {
   for (const auto & elem : _mesh.active_local_element_ptr_range())
   {
+
     std::vector<const Elem *> intersect_elems;
-    for (const auto & overlay_elem : _overlay_mesh.active_local_element_ptr_range())
+    if (elem->on_boundary())
     {
-      if (isElemIntersection(elem, overlay_elem))
-        intersect_elems.push_back(overlay_elem);
+      for (const auto & overlay_elem : _overlay_mesh.active_local_element_ptr_range())
+      {
+        if (isElemIntersection(elem, overlay_elem))
+          intersect_elems.push_back(overlay_elem);
+      }
+      if (!intersect_elems.empty())
+        _main_elems_to_overlay[elem] = intersect_elems;
     }
-    if (!intersect_elems.empty())
-      _main_elems_to_overlay[elem] = intersect_elems;
     intersect_elems.clear();
   }
 
@@ -55,14 +59,14 @@ IntersectionElemsHelper::ElemIntersectionMap()
     std::vector<const Elem *> intersect_elems;
     for (const auto & elem : _mesh.active_local_element_ptr_range())
     {
-      if (isElemIntersection(elem, overlay_elem))
+      if (isElemIntersection(elem, overlay_elem) && elem->on_boundary())
         intersect_elems.push_back(elem);
     }
     if (!intersect_elems.empty())
       _overlay_elems_to_main[overlay_elem] = intersect_elems;
     intersect_elems.clear();
   }
-};
+}
 
 bool
 IntersectionElemsHelper::isElemIntersection(const Elem * elem, const Elem * cut_elem)
