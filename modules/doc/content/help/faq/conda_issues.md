@@ -107,7 +107,7 @@ section for what may look familiar, and follow those instructions:
   ```bash
   mamba activate base
   mamba env remove -n moose
-  mamba create -n moose moose-tools moose-libmesh
+  mamba create -n moose moose-dev
   mamba activate moose
   ```
 

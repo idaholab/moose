@@ -40,6 +40,11 @@ ifneq ($(SUFFIX),)
   app_LIB_SUFFIX := $(app_LIB_SUFFIX)_$(SUFFIX)
 endif
 
+ifeq ($(MOOSE_SKIP_DOCS),)
+  DOCUMENTATION := yes
+else
+  DOCUMENTATION := no
+endif
 ##############################################################################
 ######################### Application Variables ##############################
 ##############################################################################
@@ -375,25 +380,25 @@ endif
 # for more explanations/details.
 uniq = $(if $1,$(firstword $1) $(call uniq,$(filter-out $(firstword $1),$1)))
 compilertype := unknown
-applibs :=  $(app_test_LIB) $(app_LIBS) $(depend_test_libs)
-applibs := $(call uniq,$(applibs))
-ifeq ($(libmesh_static),yes)
-  ifneq (,$(findstring clang,$(CXX)))
+ifneq (,$(findstring clang,$(CXX)))
+  compilertype := clang
+else
+ifneq (,$(findstring g++,$(CXX)))
+  compilertype := gcc
+else
+ifneq (,$(findstring mpicxx,$(CXX)))
+  ifneq (,$(findstring clang,$(shell mpicxx -show)))
     compilertype := clang
   else
-  ifneq (,$(findstring g++,$(CXX)))
     compilertype := gcc
-  else
-  ifneq (,$(findstring mpicxx,$(CXX)))
-    ifneq (,$(findstring clang,$(shell mpicxx -show)))
-      compilertype := clang
-    else
-      compilertype := gcc
-    endif
   endif
-  endif
-  endif
+endif
+endif
+endif
+applibs :=  $(app_test_LIB) $(app_LIBS) $(depend_test_libs)
+applibs := $(call uniq,$(applibs))
 
+ifeq ($(libmesh_static),yes)
   ifeq ($(compilertype),clang)
     # replace .a with .dylib for testing in dynamic configuration:
     applibs := $(foreach lib,$(patsubst %.la,%.a,$(applibs)),-Wl,-force_load,$(lib))
@@ -401,6 +406,13 @@ ifeq ($(libmesh_static),yes)
     applibs := $(foreach lib,$(patsubst %.la,%.a,$(applibs)),-Wl,--whole-archive,$(lib),--no-whole-archive)
   endif
 endif
+
+# Write .AppName resource file
+writeredotsource := $(shell $(FRAMEWORK_DIR)/scripts/write_dotresource_file.py $(APPLICATION_DIR)/$(APPLICATION_NAME) \
+                    $(libmesh_CXXFLAGS) \
+                    install=$(want_exec) \
+                    compiler_type=$(compilertype) \
+                    documentation=$(DOCUMENTATION))
 
 # Codesign command (OS X Only)
 codesign :=
@@ -416,6 +428,7 @@ $(app_EXEC): $(app_LIBS) $(mesh_library) $(main_object) $(app_test_LIB) $(depend
 	@$(libmesh_LIBTOOL) --tag=CXX $(LIBTOOLFLAGS) --mode=link --quiet \
 	  $(libmesh_CXX) $(CXXFLAGS) $(libmesh_CXXFLAGS) -o $@ $(main_object) $(depend_test_libs_flags) $(applibs) $(ADDITIONAL_LIBS) $(libmesh_LDFLAGS) $(libmesh_LIBS) $(EXTERNAL_FLAGS)
 	@$(codesign)
+	@$(writedotresource)
 
 ###### install stuff #############
 docs_dir := $(APPLICATION_DIR)/doc
@@ -500,6 +513,19 @@ $(bindst): $(app_EXEC) $(copy_input_targets) install_$(APPLICATION_NAME)_docs $(
 	@mkdir -p $(bin_install_dir)
 	@cp $< $@
 	@$(call patch_rpath,$@,../$(lib_install_suffix)/.)
+<<<<<<< HEAD
+=======
+	@$(eval libnames := $(foreach lib,$(applibs),$(shell grep "dlname='.*'" $(lib) 2>/dev/null | sed -E "s/dlname='(.*)'/\1/g")))
+	@$(eval libpaths := $(foreach lib,$(applibs),$(dir $(lib))$(shell grep "dlname='.*'" $(lib) 2>/dev/null | sed -E "s/dlname='(.*)'/\1/g")))
+	@for lib in $(libpaths); do $(call patch_relink,$@,$$lib,$$(basename $$lib)); done
+	@cp $(APPLICATION_DIR)/.$(APPLICATION_NAME) $(bin_install_dir)
+
+ifeq ($(want_exec),yes)
+install_bin: $(bindst)
+else
+install_bin:
+endif
+>>>>>>> fc7494bcca (combined-opt documentation. Create dot resource)
 ####### end install stuff ##############
 
 # Clang static analyzer

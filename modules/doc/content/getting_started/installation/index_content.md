@@ -6,6 +6,7 @@ choice:
 - [Linux and MacOS](installation/conda.md)
 - [Docker](installation/docker.md)
 - [Windows Subsystem for Linux](installation/windows.md)
+- [Pre-Built MOOSE](installation/moose_conda_binary.md) (Excellent for Training)
 - [INL's HPC Pre-Built MOOSE](installation/inl_hpc_prebuilt_moose.md)
 - Optional packages:
 

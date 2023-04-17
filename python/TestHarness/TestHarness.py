@@ -516,6 +516,7 @@ class TestHarness:
         params['test_dir'] = test_dir
         params['relative_path'] = relative_path
         params['executable'] = testroot_params.get("executable", self.executable)
+        params['app_name'] = self.app_name
         params['hostname'] = self.host_name
         params['moose_dir'] = self.moose_dir
         params['moose_python_dir'] = self.moose_python_dir
@@ -922,6 +923,7 @@ class TestHarness:
         # Save executable-under-test name to self.executable
         exec_suffix = 'Windows' if platform.system() == 'Windows' else ''
         self.executable = app_name + '-' + self.options.method + exec_suffix
+        self.app_name = app_name
 
         # if the executable has a slash - assume it is a file path
         if '/' in app_name:

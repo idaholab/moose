@@ -1466,7 +1466,7 @@ MooseApp::showInputs() const
 std::string
 MooseApp::getInstallableInputs() const
 {
-  return "";
+  return "tests";
 }
 
 bool
