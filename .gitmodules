@@ -1,6 +1,6 @@
 [submodule "libmesh"]
     path = libmesh
-    url = ../../libMesh/libmesh
+    url = ../../dschwen/libmesh
     ignore = dirty
 [submodule "large_media"]
     path = large_media
