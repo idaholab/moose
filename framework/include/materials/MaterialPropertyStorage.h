@@ -318,24 +318,29 @@ private:
 inline const MaterialProperties &
 MaterialPropertyStorage::props(const Elem * elem, unsigned int side) const
 {
-  libmesh_assert(props().contains(elem));
-  libmesh_assert(props().find(elem)->second.contains(side));
+  mooseAssert(props().contains(elem), "Trying to read properties on an element that lacks them");
+  mooseAssert(props().find(elem)->second.contains(side),
+              "Trying to read properties on an element side that lacks them");
   return props().find(elem)->second.find(side)->second;
 }
 
 inline const MaterialProperties &
 MaterialPropertyStorage::propsOld(const Elem * elem, unsigned int side) const
 {
-  libmesh_assert(propsOld().contains(elem));
-  libmesh_assert(propsOld().find(elem)->second.contains(side));
+  mooseAssert(propsOld().contains(elem),
+              "Trying to read old properties on an element that lacks them");
+  mooseAssert(propsOld().find(elem)->second.contains(side),
+              "Trying to read old properties on an element side that lacks them");
   return propsOld().find(elem)->second.find(side)->second;
 }
 
 inline const MaterialProperties &
 MaterialPropertyStorage::propsOlder(const Elem * elem, unsigned int side) const
 {
-  libmesh_assert(propsOlder().contains(elem));
-  libmesh_assert(propsOlder().find(elem)->second.contains(side));
+  mooseAssert(propsOlder().contains(elem),
+              "Trying to read older properties on an element that lacks them");
+  mooseAssert(propsOlder().find(elem)->second.contains(side),
+              "Trying to read older properties on an element side that lacks them");
   return propsOlder().find(elem)->second.find(side)->second;
 }
 

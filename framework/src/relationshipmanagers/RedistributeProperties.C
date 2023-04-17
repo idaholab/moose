@@ -107,12 +107,14 @@ RedistributeProperties::redistribute()
         for (auto & [elem, elem_props_map] : props_map)
         {
           // There better be an element here
-          libmesh_assert(elem);
+          mooseAssert(elem, "Null element found in material property map?");
 
           // It had better be a *real* element here, not a dangling
           // pointer
-          libmesh_assert(elem->id() < mesh.max_elem_id());
-          libmesh_assert(elem->processor_id() < mesh.n_processors());
+          mooseAssert(elem->id() < mesh.max_elem_id(),
+                      "Invalid (dangling? corrupted?) element in material property map?");
+          mooseAssert(elem->processor_id() < mesh.n_processors(),
+                      "Invalid (corrupted?) element in material property map?");
 
           // If it's not in the particular mesh we're responsible for,
           // we can skip it.  MOOSE mixes non-displaced with displaced
@@ -126,14 +128,19 @@ RedistributeProperties::redistribute()
             target_pids.insert(elem->processor_id());
           else if (elem->subactive())
           {
-            libmesh_assert(elem->parent());
-            libmesh_assert(elem->parent()->refinement_flag() == Elem::JUST_COARSENED);
+            mooseAssert(elem->parent(),
+                        "Invalid (corrupted?) subactive element in material property map");
+            mooseAssert(
+                elem->parent()->refinement_flag() == Elem::JUST_COARSENED,
+                "Invalid (subactive child of not-just-coarsened) element in material property map");
             target_pids.insert(elem->parent()->processor_id());
           }
           else
           {
-            libmesh_assert(elem->ancestor());
-            libmesh_assert(elem->has_children());
+            mooseAssert(elem->ancestor(),
+                        "Unexpected relationship for element in material property map?");
+            mooseAssert(elem->has_children(),
+                        "Ancestor element with no children in material property map?");
             for (const Elem & child : elem->child_ref_range())
               target_pids.insert(child.processor_id());
           }
@@ -152,11 +159,12 @@ RedistributeProperties::redistribute()
               unsigned int n_q_points = 0;
               for (auto & [prop_id, prop_vals] : elem_props_map)
               {
-                libmesh_assert(!prop_vals.empty());
+                mooseAssert(!prop_vals.empty(),
+                            "Empty MaterialProperties in stateful properties map?");
 
                 for (const PropertyValue * const prop : prop_vals)
                 {
-                  libmesh_assert(prop);
+                  mooseAssert(prop, "Null pointer in MaterialProperties?");
                   n_q_points = std::max(n_q_points, prop->size());
                 }
 
@@ -194,7 +202,8 @@ RedistributeProperties::redistribute()
               // foolishly try to send it places.
               mat_prop_store_ptr->initProps(my_mat_data, props_map, elem, prop_id, n_q_points);
 
-              libmesh_assert(elem_props.contains(prop_id));
+              mooseAssert(elem_props.contains(prop_id),
+                          "Trying to load into a nonexistant property id?");
               MaterialProperties & mat_props = elem_props[prop_id];
               std::istringstream iss(prop_str);
               dataLoad(iss, mat_props, nullptr);
