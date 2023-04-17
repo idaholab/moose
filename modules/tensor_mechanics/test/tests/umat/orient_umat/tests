@@ -1,0 +1,92 @@
+[Tests]
+  # Hughes-Winget (hw) tests match Abaqus
+  [hw_reference]
+    type = 'Exodiff'
+    input = 'shear_top_umat.i'
+    exodiff = 'shear_top_umat_out.e'
+    library_mode = 'DYNAMIC'
+    valgrind = 'NONE'
+    cli_args = 'GlobalParams/decomposition_method=HughesWinget'
+  []
+  [hw_reference_umat_output]
+    type = 'RunApp'
+    input = 'shear_top_umat.i'
+    library_mode = 'DYNAMIC'
+    valgrind = 'NONE'
+    cli_args = 'GlobalParams/decomposition_method=HughesWinget'
+    expect_out = '
+ STRESS_ 1   -0.1757425
+ STRESS_ 2   -0.5954772
+ STRESS_ 3   -0.0436915
+ STRESS_ 4    0.9835696
+ STRESS_ 5    0.0729212
+ STRESS_ 6   -0.1727900
+ STRAIN_ 1    0.0000101
+ DSTRAIN_ 1    0.0000037
+ STRAIN_ 2   -0.0004222
+ DSTRAIN_ 2   -0.0001052
+ STRAIN_ 3    0.0001507
+ DSTRAIN_ 3    0.0000370
+ STRAIN_ 4    0.0020475
+ DSTRAIN_ 4    0.0005107
+ STRAIN_ 5    0.0001519
+ DSTRAIN_ 5    0.0000383
+ STRAIN_ 6   -0.0003596
+ DSTRAIN_ 6   -0.0000896
+ COORDS_ 1    0.3915195
+ COORDS_ 2    0.3857086
+ COORDS_ 3    0.3873709'
+  []
+
+  # rotated isotropic material module should give the same material (Cauchy) stress
+  [hw_rotated]
+    type = 'Exodiff'
+    input = 'shear_top_umat.i'
+    exodiff = 'shear_top_umat_out.e'
+    prereq = 'hw_reference'
+    library_mode = 'DYNAMIC'
+    valgrind = 'NONE'
+    cli_args = 'GlobalParams/decomposition_method=HughesWinget Materials/umat/euler_angle_1=-30'
+  []
+  # but the stress computed in the intermediate reference frame should be different
+  # values match Abaqus
+  [hw_rotated_umat_output]
+    type = 'RunApp'
+    input = 'shear_top_umat.i'
+    library_mode = 'DYNAMIC'
+    valgrind = 'NONE'
+    cli_args = 'GlobalParams/decomposition_method=HughesWinget Materials/umat/euler_angle_1=-30'
+    expect_out = '
+ STRESS_ 1    0.5677315
+ STRESS_ 2   -1.3387362
+ STRESS_ 3   -0.0439064
+ STRESS_ 4    0.3203801
+ STRESS_ 5   -0.0219378
+ STRESS_ 6   -0.1868725
+ STRAIN_ 1    0.0007858
+ DSTRAIN_ 1    0.0001968
+ STRAIN_ 2   -0.0011977
+ DSTRAIN_ 2   -0.0002982
+ STRAIN_ 3    0.0001505
+ DSTRAIN_ 3    0.0000369
+ STRAIN_ 4    0.0006666
+ DSTRAIN_ 4    0.0001664
+ STRAIN_ 5   -0.0000461
+ DSTRAIN_ 5   -0.0000109
+ STRAIN_ 6   -0.0003887
+ DSTRAIN_ 6   -0.0000972
+ COORDS_ 1    0.3915195
+ COORDS_ 2    0.3857086
+ COORDS_ 3    0.3873709'
+  []
+
+  # spot checked results from using Rashid kinematics to be within ~0.01% at final timestep, about what is expected for the two methods
+  [rashid_rotated]
+    type = 'Exodiff'
+    input = 'shear_top_umat.i'
+    exodiff = 'shear_top_umat_rashid_out.e'
+    library_mode = 'DYNAMIC'
+    valgrind = 'NONE'
+    cli_args = 'Materials/umat/euler_angle_1=-30 Outputs/file_base=shear_top_umat_rashid_out'
+  []
+[]
