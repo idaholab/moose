@@ -15,7 +15,6 @@ Content:
         root_dir: ${MOOSE_DIR}/large_media
         content:
             - tutorials/tutorial04_meshing/*
-            - tutorials/INL_Hex_Light_Presentation_Background_Thin.png
 
 Executioner:
     type: MooseDocs.base.Serial
@@ -52,4 +51,4 @@ Extensions:
         modal-link: False
     MooseDocs.extensions.reveal:
         translate: getting_started/examples_and_tutorials/tutorial04_meshing/presentation/index.md
-        background_image: INL_Hex_Light_Presentation_Background_Thin.png
+        background_image: DOE_NE_NEAMS_Light_Presentation_Background.png

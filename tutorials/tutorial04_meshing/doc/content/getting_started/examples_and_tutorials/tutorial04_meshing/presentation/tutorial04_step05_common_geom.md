@@ -29,7 +29,7 @@ A second set of mesh generators (Reactor Geometry Mesh Builder mesh generators) 
 !col small=12 medium=6 large=4
 
 !media tutorial04_meshing/base_ex_pccmg.png
-       style=width:100%;display:block;margin-left:auto;margin-right:auto;
+       style=width:75%;display:block;margin-left:auto;margin-right:auto;
 
 !row-end!
 
