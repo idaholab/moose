@@ -66,6 +66,7 @@ OverlayMeshGenerator::OverlayMeshGenerator(const InputParameters & parameters)
                                         "num_cores_for_partition",
                                         "partition",
                                         "elem_type"});
+  // input_params.set<Real>("xmin") = isParamValid("xmin") ? getParam<Real>("xmin") : -1;)
 
   addMeshSubgenerator("DistributedRectilinearMeshGenerator",
                       _mesh_name + "_distributedrectilinearmeshgenerator",
@@ -91,8 +92,6 @@ OverlayMeshGenerator::generate()
   {
     scale_factor(i) = std::abs(bbox_input.max()(i) - bbox_input.min()(i)) /
                       std::abs(bbox_build.max()(i) - bbox_build.min()(i));
-    translation_vector(i) =
-        (bbox_build.min()(i) - bbox_input.min()(i)) + (bbox_build.max()(i) - bbox_input.max()(i));
   }
 
   // scale
@@ -100,6 +99,16 @@ OverlayMeshGenerator::generate()
     MeshTools::Modification::scale(*build_mesh, scale_factor(0), scale_factor(1), scale_factor(2));
 
   // translate
+  for (auto i = 0; i < _dim; i++)
+  {
+    auto mid_build = 0.5 * (bbox_build.min()(i) + bbox_build.max()(i)) * scale_factor(i);
+    auto mid_input = 0.5 * (bbox_input.min()(i) + bbox_input.max()(i));
+    if (mid_build < mid_input)
+      translation_vector(i) = std::abs(mid_build - mid_input);
+    else
+      translation_vector(i) = -std::abs(mid_build - mid_input);
+  }
+
   if (translation_vector(0) != 0 || translation_vector(1) != 0 || translation_vector(2) != 0)
     MeshTools::Modification::translate(
         *build_mesh, translation_vector(0), translation_vector(1), translation_vector(2));
