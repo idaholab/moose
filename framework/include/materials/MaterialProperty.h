@@ -428,7 +428,14 @@ dataLoad(std::istream & stream, MaterialProperties & v, void * context)
   // Cast this to a vector so we can just piggy back on the vector store capability
   std::vector<PropertyValue *> & mat_props = static_cast<std::vector<PropertyValue *> &>(v);
 
+  // But the vector store capability should not be changing the vector
+  // size
+#ifndef NDEBUG
+  const std::size_t old_size = mat_props.size();
+#endif
   loadHelper(stream, mat_props, context);
+  mooseAssert(old_size == mat_props.size(),
+              "Loading MaterialProperties data into mis-sized target");
 }
 
 // Scalar Init Helper Function

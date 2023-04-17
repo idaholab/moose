@@ -27,9 +27,25 @@ CacheChangedListsThread::~CacheChangedListsThread() {}
 void
 CacheChangedListsThread::onElement(const Elem * elem)
 {
-  if (elem->refinement_flag() == Elem::INACTIVE && elem->has_children() &&
-      elem->child_ptr(0)->refinement_flag() == Elem::JUST_REFINED)
-    _refined_elements.push_back(elem);
+  // Cache any parents of local elements that have just been refined
+  // away.
+  //
+  // The parent itself might *not* be local, because only some of its
+  // new children are.  Make sure to cache every such case exactly once.
+  if (elem->refinement_flag() == Elem::JUST_REFINED)
+  {
+    const Elem * const parent = elem->parent();
+    const unsigned int child_num = parent->which_child_am_i(elem);
+
+    bool im_the_lowest_local_child = true;
+    for (const auto c : make_range(child_num))
+      if (parent->child_ptr(c) && parent->child_ptr(c) != remote_elem &&
+          parent->child_ptr(c)->processor_id() == elem->processor_id())
+        im_the_lowest_local_child = false;
+
+    if (im_the_lowest_local_child)
+      _refined_elements.push_back(parent);
+  }
 
   if (elem->refinement_flag() == Elem::JUST_COARSENED)
   {
