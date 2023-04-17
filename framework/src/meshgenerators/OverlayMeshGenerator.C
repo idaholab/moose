@@ -80,22 +80,29 @@ OverlayMeshGenerator::generate()
 
   // find the boundary of the input mesh box
   auto bbox_input = MeshTools::create_bounding_box(*input_mesh);
+  // find the boundary of the build mesh box
+  auto bbox_build = MeshTools::create_bounding_box(*build_mesh);
 
   // Transform the generated DistributedRectilinearMesh to overlay with the input mesh
   RealVectorValue scale_factor;
-  scale_factor = bbox_input.max() - bbox_input.min();
+  RealVectorValue translation_vector;
+
+  for (auto i = 0; i < _dim; i++)
+  {
+    scale_factor(i) = std::abs(bbox_input.max()(i) - bbox_input.min()(i)) /
+                      std::abs(bbox_build.max()(i) - bbox_build.min()(i));
+    translation_vector(i) =
+        (bbox_build.min()(i) - bbox_input.min()(i)) + (bbox_build.max()(i) - bbox_input.max()(i));
+  }
 
   // scale
   if (scale_factor(0) != 1 || scale_factor(1) != 1 || scale_factor(2) != 1)
     MeshTools::Modification::scale(*build_mesh, scale_factor(0), scale_factor(1), scale_factor(2));
-
-  RealVectorValue translation_vector;
-  translation_vector = bbox_input.min();
 
   // translate
   if (translation_vector(0) != 0 || translation_vector(1) != 0 || translation_vector(2) != 0)
     MeshTools::Modification::translate(
         *build_mesh, translation_vector(0), translation_vector(1), translation_vector(2));
 
-  return dynamic_pointer_cast<MeshBase>(build_mesh);
+  return build_mesh;
 }
