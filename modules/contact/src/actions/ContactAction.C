@@ -497,7 +497,8 @@ ContactAction::addContactPressureAuxKernel()
 void
 ContactAction::addRelationshipManagers(Moose::RelationshipManagerType input_rm_type)
 {
-  if (_formulation == ContactFormulation::MORTAR)
+  if (_formulation == ContactFormulation::MORTAR ||
+      _formulation == ContactFormulation::MORTAR_PENALTY)
   {
     auto params = MortarConstraintBase::validParams();
     params.set<bool>("use_displaced_mesh") = true;

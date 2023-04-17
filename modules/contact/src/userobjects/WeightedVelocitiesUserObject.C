@@ -157,6 +157,8 @@ WeightedVelocitiesUserObject::finalize()
                                                 _nodal,
                                                 _communicator,
                                                 send_data_back);
+  Moose::Mortar::Contact::communicateVelocities(
+      _dof_to_real_tangential_velocity, _subproblem.mesh(), _nodal, _communicator, send_data_back);
 }
 
 void

@@ -10,6 +10,9 @@
 #include "PenaltyFrictionUserObject.h"
 #include "MooseVariableFE.h"
 #include "SystemBase.h"
+#include "MortarUtils.h"
+#include "MooseUtils.h"
+#include "MortarContactUtils.h"
 
 registerMooseObject("ContactApp", PenaltyFrictionUserObject);
 
@@ -152,10 +155,10 @@ PenaltyFrictionUserObject::getTangentialVelocity(const Node * const node,
   for (auto & map_pr : _dof_to_real_tangential_velocity)
     if (map_pr.first->id() == node->id())
     {
-      const auto & tan_vel_x =
+      const auto & tan_vel_component =
           libmesh_map_find(_dof_to_real_tangential_velocity,
                            static_cast<const DofObject *>(map_pr.first))[component];
-      return MetaPhysicL::raw_value(tan_vel_x);
+      return MetaPhysicL::raw_value(tan_vel_component);
     }
   return 0.0;
 }
@@ -330,4 +333,20 @@ PenaltyFrictionUserObject::reinit()
       _frictional_contact_force_two[qp] += test_i[qp] * frictional_nodal_pressure_two;
     }
   }
+}
+
+void
+PenaltyFrictionUserObject::finalize()
+{
+  WeightedVelocitiesUserObject::finalize();
+
+  // If the constraint is performed by the owner, then we don't need any data sent back; the owner
+  // will take care of it. But if the constraint is not performed by the owner and we might have to
+  // do some of the constraining ourselves, then we need data sent back to us
+  const bool send_data_back = !constrainedByOwner();
+
+  Moose::Mortar::Contact::communicateVelocities(
+      _dof_to_accumulated_slip, _subproblem.mesh(), _nodal, _communicator, send_data_back);
+  Moose::Mortar::Contact::communicateReals(
+      _dof_to_normal_pressure, _subproblem.mesh(), _nodal, _communicator, send_data_back);
 }

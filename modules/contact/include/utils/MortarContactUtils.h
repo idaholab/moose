@@ -153,6 +153,22 @@ void communicateGaps(
     bool normalize_c,
     const Parallel::Communicator & communicator,
     bool send_data_back);
+
+/**
+ * This function is used to communicate real quantities across processes
+ * @param dof_to_adreal Map from degree of freedom to ADReal
+ * @param mesh Mesh used to locate nodes or elements
+ * @param nodal Whether the element has Lagrange interpolation
+ * @param communicator Process communicator
+ * @param send_data_back After aggregating data on the owning process, whether to send the aggregate
+ * back to senders. This can be necessary for things like penalty contact in which the constraint is
+ * not enforced by the owner but in a weighted way by the displacement constraints
+ */
+void communicateReals(std::unordered_map<const DofObject *, ADReal> & dof_to_adreal,
+                      const MooseMesh & mesh,
+                      bool nodal,
+                      const Parallel::Communicator & communicator,
+                      bool send_data_back);
 }
 }
 }

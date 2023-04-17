@@ -41,7 +41,7 @@
   []
   [ironing_penalty]
     type = 'CSVDiff'
-    csvdiff = 'ironing_penalty_chkfile_frictional_pressure_0013.csv'
+    csvdiff = 'ironing_penalty_out_penalty_normal_pressure_0012.csv'
     input = 'ironing_penalty.i'
     rel_err = 1.0e-4
     abs_zero = 1.0e-4
@@ -52,7 +52,7 @@
   []
   [ironing_penalty_action]
     type = 'CSVDiff'
-    csvdiff = 'ironing_penalty_action_chkfile_frictional_pressure_0013.csv'
+    csvdiff = 'ironing_penalty_action_out_penalty_normal_pressure_0012.csv'
     input = 'ironing_penalty_action.i'
     rel_err = 1.0e-4
     abs_zero = 1.0e-4

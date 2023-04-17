@@ -19,19 +19,11 @@ offset = 0.00
     order = FIRST
     family = LAGRANGE
   []
-  [tangential_vel_one]
-    order = FIRST
-    family = LAGRANGE
-  []
   [penalty_frictional_pressure_two]
     order = FIRST
     family = LAGRANGE
   []
   [accumulated_slip_two]
-    order = FIRST
-    family = LAGRANGE
-  []
-  [tangential_vel_two]
     order = FIRST
     family = LAGRANGE
   []
@@ -56,12 +48,6 @@ offset = 0.00
     user_object = friction_uo
     contact_quantity = accumulated_slip_one
   []
-  [penalty_tangential_vel_auxk]
-    type = PenaltyMortarUserObjectAux
-    variable = tangential_vel_one
-    user_object = friction_uo
-    contact_quantity = tangential_velocity_one
-  []
   [penalty_frictional_pressure_two_auxk]
     type = PenaltyMortarUserObjectAux
     variable = penalty_frictional_pressure_two
@@ -73,12 +59,6 @@ offset = 0.00
     variable = accumulated_slip_two
     user_object = friction_uo
     contact_quantity = accumulated_slip_two
-  []
-  [penalty_tangential_vel_two_auxk]
-    type = PenaltyMortarUserObjectAux
-    variable = tangential_vel_two
-    user_object = friction_uo
-    contact_quantity = tangential_velocity_two
   []
 []
 
@@ -205,7 +185,6 @@ offset = 0.00
     new_block_id = '10000'
     new_block_name = 'primary_lower'
   []
-  uniform_refine = 0
   allow_renumbering = false
 []
 
@@ -227,7 +206,7 @@ offset = 0.00
   [tensor]
     type = ComputeIsotropicElasticityTensor
     block = '1'
-    youngs_modulus = 1.0e4
+    youngs_modulus = 1.0e5
     poissons_ratio = 0.0
   []
   [stress]
@@ -261,7 +240,7 @@ offset = 0.00
     friction_coefficient = 0.4
     secondary_variable = disp_x
     penalty = 1e8
-    penalty_friction = 2e4
+    penalty_friction = 2e6
   []
 []
 
@@ -429,8 +408,8 @@ offset = 0.00
   petsc_options_value = 'lu       superlu_dist'
   l_max_its = 15
   nl_max_its = 30
-  nl_rel_tol = 1e-11
-  nl_abs_tol = 1e-12
+  nl_rel_tol = 1e-12
+  nl_abs_tol = 1e-13
   line_search = 'basic'
 []
 

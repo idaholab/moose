@@ -29,6 +29,7 @@ public:
   virtual const ADVariableValue & contactTangentialPressureDirTwo() const override;
 
   virtual void initialize() override;
+  virtual void finalize() override;
   virtual void reinit() override;
   virtual void timestepSetup() override;
 

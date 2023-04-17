@@ -11,6 +11,7 @@
 
   patch_update_strategy = auto
   patch_size = 20
+  allow_renumbering = false
 []
 
 [Variables]
@@ -161,11 +162,11 @@
 []
 
 [VectorPostprocessors]
-  [frictional_pressure]
+  [penalty_normal_pressure]
     type = NodalValueSampler
     variable = penalty_normal_pressure
-    boundary = 20
-    sort_by = x
+    boundary = 10
+    sort_by = id
   []
 []
 
@@ -290,7 +291,6 @@
     start_time = 0.0
     execute_vector_postprocessors_on = FINAL
   []
-
   [console]
     type = Console
     max_rows = 5

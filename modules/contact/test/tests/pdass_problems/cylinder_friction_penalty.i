@@ -22,6 +22,7 @@
     new_block_name = 'primary_lower'
     input = secondary
   []
+  allow_renumbering = false
 []
 
 [Problem]
@@ -279,13 +280,13 @@
   [x_disp]
     type = NodalValueSampler
     variable = disp_x
-    boundary = '3 4'
+    boundary = '3'
     sort_by = id
   []
   [y_disp]
     type = NodalValueSampler
     variable = disp_y
-    boundary = '3 4'
+    boundary = '3'
     sort_by = id
   []
   [cont_press]
