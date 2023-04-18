@@ -48,7 +48,7 @@
     new_sideset_name = 'circ'
   []
   [ccg]
-    type = CircularCorrectionGenerator
+    type = CircularBoundaryCorrectionGenerator
     input = add_bdry
     input_mesh_circular_boundaries = 'circ'
     custom_circular_tolerance = 1e-8

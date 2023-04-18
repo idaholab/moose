@@ -1,5 +1,5 @@
 [Tests]
-  design = 'meshgenerators/CircularCorrectionGenerator.md'
+  design = 'meshgenerators/CircularBoundaryCorrectionGenerator.md'
   issues = '#23972'
   [two_full_rings]
     type = 'Exodiff'

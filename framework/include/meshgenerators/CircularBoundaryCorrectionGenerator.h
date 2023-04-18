@@ -13,15 +13,15 @@
 #include "MooseMeshUtils.h"
 
 /**
- * This CircularCorrectionGenerator object is designed to correct full or partial circular
+ * This CircularBoundaryCorrectionGenerator object is designed to correct full or partial circular
  * boundaries in a 2D mesh to preserve areas.
  */
-class CircularCorrectionGenerator : public MeshGenerator
+class CircularBoundaryCorrectionGenerator : public MeshGenerator
 {
 public:
   static InputParameters validParams();
 
-  CircularCorrectionGenerator(const InputParameters & parameters);
+  CircularBoundaryCorrectionGenerator(const InputParameters & parameters);
 
   std::unique_ptr<MeshBase> generate() override;
 
@@ -58,9 +58,9 @@ protected:
    * @param bd_side_list list of sides on the circular boundary
    * @param circle_center center of the circular boundary
    * @param is_closed_loop whether the boundary is a closed loop or not
-   * @param c_coeff a reference variable to contain the coefficient that multiplies the azimuthal
+   * @param c_coeff a reference to a variable to contain the coefficient that multiplies the azimuthal
    * angles
-   * @param end_node_disp a reference variable to contain the displacement of the end node of the
+   * @param end_node_disp a reference to a variable to contain the displacement of the end node of the
    * partial circular boundary
    * @return radius correction factor to preserve circular area
    */
@@ -76,7 +76,7 @@ protected:
    * @param coeff coefficient before the angles inside the sine function
    * @return summation of the sine values of the angles
    */
-  Real SineSummation(const std::vector<Real> & th_list, const Real coeff) const;
+  Real sineSummation(const std::vector<Real> & th_list, const Real coeff) const;
 
   /**
    * Calculates the first derivative of the summation of the sine values of a list of angles
@@ -84,5 +84,5 @@ protected:
    * @param coeff coefficient before the angles inside the sine function
    * @return first derivative of the summation of the sine values of the angles
    */
-  Real SinePrimeSummation(const std::vector<Real> & th_list, const Real coeff) const;
+  Real sinePrimeSummation(const std::vector<Real> & th_list, const Real coeff) const;
 };

@@ -38,7 +38,7 @@
     hole_boundaries = '10'
   []
   [ccg]
-    type = CircularCorrectionGenerator
+    type = CircularBoundaryCorrectionGenerator
     input = xyd2
     input_mesh_circular_boundaries = '0 10'
     custom_circular_tolerance = 1e-8

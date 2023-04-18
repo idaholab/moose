@@ -7,7 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "CircularCorrectionGenerator.h"
+#include "CircularBoundaryCorrectionGenerator.h"
 
 #include "MooseUtils.h"
 #include "LinearInterpolation.h"
@@ -17,10 +17,10 @@
 // C++ includes
 #include <cmath> // for atan2
 
-registerMooseObject("MooseApp", CircularCorrectionGenerator);
+registerMooseObject("MooseApp", CircularBoundaryCorrectionGenerator);
 
 InputParameters
-CircularCorrectionGenerator::validParams()
+CircularBoundaryCorrectionGenerator::validParams()
 {
   InputParameters params = MeshGenerator::validParams();
 
@@ -44,13 +44,15 @@ CircularCorrectionGenerator::validParams()
       "Custom tolerances used to verify whether the provided boundaries are circular (default is "
       "1.0e-6).");
 
-  params.addClassDescription("This CircularCorrectionGenerator object is designed to correct full "
-                             "or partial circular boundaries in a 2D mesh to preserve areas.");
+  params.addClassDescription(
+      "This CircularBoundaryCorrectionGenerator object is designed to correct full "
+      "or partial circular boundaries in a 2D mesh to preserve areas.");
 
   return params;
 }
 
-CircularCorrectionGenerator::CircularCorrectionGenerator(const InputParameters & parameters)
+CircularBoundaryCorrectionGenerator::CircularBoundaryCorrectionGenerator(
+    const InputParameters & parameters)
   : MeshGenerator(parameters),
     _input_name(getParam<MeshGeneratorName>("input")),
     _input_mesh_circular_boundaries(
@@ -79,7 +81,7 @@ CircularCorrectionGenerator::CircularCorrectionGenerator(const InputParameters &
 }
 
 std::unique_ptr<MeshBase>
-CircularCorrectionGenerator::generate()
+CircularBoundaryCorrectionGenerator::generate()
 {
   auto input_mesh = dynamic_cast<ReplicatedMesh *>(_input.get());
   if (!input_mesh)
@@ -88,11 +90,9 @@ CircularCorrectionGenerator::generate()
   _input_mesh_circular_bids =
       MooseMeshUtils::getBoundaryIDs(*input_mesh, _input_mesh_circular_boundaries, false);
 
-  std::vector<std::tuple<dof_id_type, unsigned short int, boundary_id_type>> side_list =
-      input_mesh->get_boundary_info().build_side_list();
+  auto side_list = input_mesh->get_boundary_info().build_side_list();
   input_mesh->get_boundary_info().build_node_list_from_side_list();
-  std::vector<std::tuple<dof_id_type, boundary_id_type>> node_list =
-      input_mesh->get_boundary_info().build_node_list();
+  auto node_list = input_mesh->get_boundary_info().build_node_list();
 
   std::vector<std::vector<Point>> input_circ_bds_pts(_input_mesh_circular_bids.size());
   // Loop over all the boundary nodes
@@ -278,9 +278,9 @@ CircularCorrectionGenerator::generate()
 }
 
 Point
-CircularCorrectionGenerator::circularCenterCalculator(const std::vector<Point> pts_list,
-                                                      Real & radius,
-                                                      const Real tol)
+CircularBoundaryCorrectionGenerator::circularCenterCalculator(const std::vector<Point> pts_list,
+                                                              Real & radius,
+                                                              const Real tol)
 {
   // Usually, just using the first three points would work
   // Here a more complex selection is made in case the first three points are too close to each
@@ -340,9 +340,9 @@ CircularCorrectionGenerator::circularCenterCalculator(const std::vector<Point> p
 }
 
 Real
-CircularCorrectionGenerator::generalCirCorrFactor(
-    const std::vector<std::pair<Point, Point>> bd_side_list,
-    const Point circle_center,
+CircularBoundaryCorrectionGenerator::generalCirCorrFactor(
+    const std::vector<std::pair<Point, Point>> & bd_side_list,
+    const Point & circle_center,
     const bool is_closed_loop,
     Real & c_coeff,
     Real & end_node_disp) const
@@ -377,17 +377,17 @@ CircularCorrectionGenerator::generalCirCorrFactor(
     {
       c_old = c_new;
       const Real gc = k_2 + k_2 * std::cos(acc_azi * c_old) + k_1 * std::sin(acc_azi * c_old) -
-                      k_1 * SineSummation(d_azi_list, c_old);
+                      k_1 * sineSummation(d_azi_list, c_old);
       const Real gcp = -k_2 * acc_azi * std::sin(acc_azi * c_old) +
                        k_1 * acc_azi * std::cos(acc_azi * c_old) -
-                       k_1 * SinePrimeSummation(d_azi_list, c_old);
+                       k_1 * sinePrimeSummation(d_azi_list, c_old);
       c_new = c_old - gc / gcp;
       diff = std::abs(c_new - c_old);
       ct++;
     }
 
     if (ct >= 100)
-      mooseError("CircularCorrectionGenerator::generalCirCorrFactorNormal: "
+      mooseError("CircularBoundaryCorrectionGenerator::generalCirCorrFactorNormal: "
                  "Newton-Raphson method did not converge.");
 
     const Real norm_corr_factor = std::cos(0.5 * acc_azi) / std::cos(0.5 * acc_azi * c_new);
@@ -402,8 +402,8 @@ CircularCorrectionGenerator::generalCirCorrFactor(
 }
 
 Real
-CircularCorrectionGenerator::SineSummation(const std::vector<Real> & th_list,
-                                           const Real coeff) const
+CircularBoundaryCorrectionGenerator::sineSummation(const std::vector<Real> & th_list,
+                                                   const Real coeff) const
 {
   Real acc(0.0);
   for (const auto & th : th_list)
@@ -412,8 +412,8 @@ CircularCorrectionGenerator::SineSummation(const std::vector<Real> & th_list,
 }
 
 Real
-CircularCorrectionGenerator::SinePrimeSummation(const std::vector<Real> & th_list,
-                                                const Real coeff) const
+CircularBoundaryCorrectionGenerator::sinePrimeSummation(const std::vector<Real> & th_list,
+                                                        const Real coeff) const
 {
   Real acc(0.0);
   for (const auto & th : th_list)
