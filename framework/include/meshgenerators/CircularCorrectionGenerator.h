@@ -28,7 +28,7 @@ public:
 protected:
   /// Name of the mesh generator to get the input mesh
   const MeshGeneratorName _input_name;
-  /// Names of the circular boundaries of the 2D input mesh
+  /// Names of the circular boundaries of the 2D input mesh to correct
   const std::vector<BoundaryName> _input_mesh_circular_boundaries;
   /// Ratio parameters used to customize the transition area sizes
   const std::vector<Real> _transition_layer_ratios;
@@ -44,7 +44,7 @@ protected:
   /**
    * Calculates the center of a series of points on a circular boundary
    * @param pts_list list of points on the circular boundary
-   * @param radius a reference variable to contain the radius of the circular boundary to be
+   * @param radius a reference to a variable to contain the radius of the circular boundary to be
    * calculated
    * @param tol tolerance used to verify whether the boundary is circular or not
    * @return center of the circular boundary
@@ -54,7 +54,7 @@ protected:
                                  const Real tol = 1e-12);
 
   /**
-   * Calculates the radius correction factor basedn on a list of sides on a circular boundary
+   * Calculates the radius correction factor based on a list of sides on a circular boundary
    * @param bd_side_list list of sides on the circular boundary
    * @param circle_center center of the circular boundary
    * @param is_closed_loop whether the boundary is a closed loop or not
@@ -64,8 +64,8 @@ protected:
    * partial circular boundary
    * @return radius correction factor to preserve circular area
    */
-  Real generalCirCorrFactor(const std::vector<std::pair<Point, Point>> bd_side_list,
-                            const Point circle_center,
+  Real generalCirCorrFactor(const std::vector<std::pair<Point, Point>> & bd_side_list,
+                            const Point & circle_center,
                             const bool is_closed_loop,
                             Real & c_coeff,
                             Real & end_node_disp) const;

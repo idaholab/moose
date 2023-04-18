@@ -10,7 +10,7 @@ In a 2D mesh, a "circular boundary" consists of sides that connects a series of 
 
 Therefore, a corrected radius can be used to generate the "circle-like" polygon to enforce that the polygon area is the same as the original circle without polygonization. This can be achieved through the following equations.
 
-### Radial Nodes Moving
+### Moving Radial Nodes
 
 The most straightforward approach for circular correction is to move the nodes on the circular boundary in their respective radial directions (see the left sub-figure of [schematic]). In that case, the azimuthal angle intervals of the boundary sides do not change. Therefore, the algorithm is relatively simple. This is also the default approach of this mesh generator.
 
@@ -41,7 +41,7 @@ Where $f_{corr}$ is the correction factor used in this object to ensure volume p
       id=schematic
       caption=A schematic drawing showing the two approaches to correct the polygonization effect for a partial circular boundary
 
-### Nodes Moving in the Span Direction
+### Expanding Nodes in the Span Direction
 
 The radial nodes moving approach is undoubtedly the most generalized approach for a full circular boundary. However, for a partial circular boundary, moving the two end nodes in their radial directions may deform the original shape. Therefore, moving the end nodes in the span direction of the partial circular boundary (i.e., arc) provides an alternative approach (see the right subfigure of [schematic]). Moving the end nodes in the span direction inevitably changes the azimuthal angle intervals. To make this change consistent for all the boundary sides, a scaling coefficient, $c$, is applied to every $\theta_i$.
 
