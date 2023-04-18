@@ -1,8 +1,8 @@
 mu = 1.1
 rho = 1.1
-l = 2
+l = 200
 U = 1
-advected_interp_method = 'average'
+advected_interp_method = 'upwind'
 velocity_interp_method = 'rc'
 
 [GlobalParams]
@@ -29,6 +29,7 @@ velocity_interp_method = 'rc'
     nx = 100
     ny = 20
   []
+  uniform_refine = 4
 []
 
 [Variables]
@@ -137,7 +138,7 @@ velocity_interp_method = 'rc'
 []
 
 [Preconditioning]
-  active = SMP
+  active = FSP
   [FSP]
     type = FSP
     # It is the starting point of splitting
@@ -168,16 +169,19 @@ velocity_interp_method = 'rc'
       # (2) p = (-S)^{-1} p*
       # (3) u = Auu^{-1}(f_u-Aup*p)
 
-      petsc_options_iname = '-pc_fieldsplit_schur_fact_type  -pc_fieldsplit_schur_precondition -ksp_gmres_restart'
-      petsc_options_value = 'full                            selfp                             200'
+      petsc_options = '-ksp_monitor -snes_monitor -ksp_converged_reason -snes_converged_reason'
+      petsc_options_iname = '-pc_fieldsplit_schur_fact_type  -pc_fieldsplit_schur_precondition -ksp_gmres_restart -ksp_rtol -ksp_type'
+      petsc_options_value = 'full                            selfp                             300		  1e-4	     fgmres'
     []
     [u]
       vars = 'vel_x vel_y'
-      petsc_options_iname = '-pc_type -pc_hypre_type -ksp_type'
-      petsc_options_value = 'hypre    boomeramg      preonly'
+      petsc_options = '-pc_hpddm_block_splitting -pc_hpddm_define_subdomains -pc_hpddm_levels_1_eps_gen_non_hermitian -pc_hpddm_levels_1_st_share_sub_ksp -ksp_monitor -ksp_converged_reason'
+      petsc_options_iname = '-pc_type -pc_hpddm_coarse_mat_type -pc_hpddm_coarse_pc_type -pc_hpddm_levels_1_eps_nev -pc_hpddm_levels_1_st_matstructure -pc_hpddm_levels_1_sub_pc_factor_mat_solver_type -pc_hpddm_levels_1_sub_pc_type -ksp_type -ksp_rtol -ksp_gmres_restart -ksp_pc_side -pc_hpddm_coarse_pc_factor_mat_solver_type'
+      petsc_options_value = 'hpddm    aij			lu			 10			    SAME			       mumps						lu			       fgmres	 1e-2	   150		      right	   mumps'
     []
     [p]
       vars = 'pressure'
+      petsc_options = '-ksp_monitor -ksp_converged_reason'
       petsc_options_iname = '-ksp_type -pc_type'
       petsc_options_value = 'preonly   jacobi'
     []
@@ -191,9 +195,15 @@ velocity_interp_method = 'rc'
 []
 
 [Outputs]
+  print_linear_residuals = false
+  print_nonlinear_residuals = false
+  active = 'perf'
   [out]
     type = Exodus
     hide = 'Re'
+  []
+  [perf]
+    type = PerfGraphOutput
   []
 []
 
@@ -202,5 +212,12 @@ velocity_interp_method = 'rc'
     type = ParsedPostprocessor
     function = '${rho} * ${l} * ${U}'
     pp_names = ''
+  []
+  [lin]
+    type = NumLinearIterations
+  []
+  [cum_lin]
+    type = CumulativeValuePostprocessor
+    postprocessor = lin
   []
 []
