@@ -28,8 +28,8 @@ INSFEFluidEnergyDirichletBC::validParams()
 
   params.addParam<FunctionName>("v_fn", "Velocity function with time at the boundary");
 
-  params.addParam<Real>("T_scale", 1.0, "Coefficient to multiply by the temperature");
-  params.addParam<FunctionName>("T_fn", "1", "A function that describes the temperature");
+  params.addParam<Real>("T_scale", 1.0, "Coefficient to multiply the temperature with");
+  params.addParam<FunctionName>("T_fn", "A function that describes the temperature");
   params.addCoupledVar("T_scalar", "A scalar value is multiplied by the temperature");
 
   params.addRequiredParam<VectorValue<Real>>("out_norm", "out norm of the boundary");
@@ -45,10 +45,12 @@ INSFEFluidEnergyDirichletBC::INSFEFluidEnergyDirichletBC(const InputParameters &
     _w_vel(_mesh.dimension() == 3 ? coupledValueOld("w") : _zero),
     _T_scale(getParam<Real>("T_scale")),
     _T_scalar(isParamValid("T_scalar") ? coupledScalarValue("T_scalar") : _zero),
-    _has_vbc(parameters.isParamValid("v_fn")),
+    _has_vbc(isParamValid("v_fn")),
     _velocity_fn(_has_vbc ? &getFunction("v_fn") : NULL),
-    _temperature_fn(getFunction("T_fn"))
+    _T_fn(isParamValid("T_fn") ? &getFunction("T_fn") : NULL)
 {
+  if (isParamValid("T_scalar") == isParamValid("T_fn"))
+    mooseError("Please provide one and only one of 'T_scalar' and 'T_fn'");
 }
 
 bool
@@ -79,9 +81,8 @@ INSFEFluidEnergyDirichletBC::computeQpResidual()
 {
   if (isInlet())
   {
-    Real T_scalar = isParamValid("T_scalar") ? _T_scalar[0] : 1.0;
-    Real T_bc = _temperature_fn.value(_t, *_current_node) * T_scalar * _T_scale;
-    return _u[_qp] - T_bc;
+    Real T_bc = isParamValid("T_scalar") ? _T_scalar[0] : _T_fn->value(_t, *_current_node);
+    return _u[_qp] - _T_scale * T_bc;
   }
   else
     return 0.0;

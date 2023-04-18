@@ -42,5 +42,6 @@ protected:
 
   bool _has_vbc;
   const Function * _velocity_fn;
-  const Function & _temperature_fn;
+  bool _has_T_fn;
+  const Function * _T_fn;
 };
