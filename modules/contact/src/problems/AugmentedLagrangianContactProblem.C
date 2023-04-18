@@ -67,7 +67,6 @@ AugmentedLagrangianContactProblem::checkNonlinearConvergence(std::string & msg,
                                                              const Real ref_resid,
                                                              const Real /*div_threshold*/)
 {
-
   Real my_max_funcs = std::numeric_limits<int>::max();
   Real my_div_threshold = std::numeric_limits<Real>::max();
 
@@ -88,7 +87,7 @@ AugmentedLagrangianContactProblem::checkNonlinearConvergence(std::string & msg,
 
   _console << "Augmented Lagrangian contact iteration " << _num_lagmul_iterations << std::endl;
 
-  bool _augLM_repeat_step;
+  bool repeat_augmented_lagrange_step = false;
 
   if (reason == MooseNonlinearConvergenceReason::CONVERGED_FNORM_ABS ||
       reason == MooseNonlinearConvergenceReason::CONVERGED_FNORM_RELATIVE ||
@@ -101,53 +100,41 @@ AugmentedLagrangianContactProblem::checkNonlinearConvergence(std::string & msg,
 
       const ConstraintWarehouse & constraints = nonlinear_sys.getConstraintWarehouse();
 
-      std::map<std::pair<unsigned int, unsigned int>, PenetrationLocator *> * penetration_locators =
-          NULL;
+      // Get the penetration locator from the displaced mesh if it exist, otherwise get
+      // it from the undisplaced mesh.
+      const auto displaced_problem = getDisplacedProblem();
+      const auto & penetration_locators =
+          (displaced_problem ? displaced_problem->geomSearchData() : geomSearchData())
+              ._penetration_locators;
 
-      bool displaced = false;
-      _augLM_repeat_step = false;
-      if (getDisplacedProblem() == NULL)
+      for (const auto & it : penetration_locators)
       {
-        GeometricSearchData & geom_search_data = geomSearchData();
-        penetration_locators = &geom_search_data._penetration_locators;
-      }
-      else
-      {
-        GeometricSearchData & displaced_geom_search_data = getDisplacedProblem()->geomSearchData();
-        penetration_locators = &displaced_geom_search_data._penetration_locators;
-        displaced = true;
-      }
+        PenetrationLocator & penetration_locator = *(it.second);
 
-      for (const auto & it : *penetration_locators)
-      {
-        PenetrationLocator & pen_loc = *(it.second);
+        BoundaryID secondary_boundary = penetration_locator._secondary_boundary;
 
-        BoundaryID secondary_boundary = pen_loc._secondary_boundary;
-
-        if (constraints.hasActiveNodeFaceConstraints(secondary_boundary, displaced))
+        if (constraints.hasActiveNodeFaceConstraints(secondary_boundary, bool(displaced_problem)))
         {
           const auto & ncs =
-              constraints.getActiveNodeFaceConstraints(secondary_boundary, displaced);
+              constraints.getActiveNodeFaceConstraints(secondary_boundary, bool(displaced_problem));
 
           for (const auto & nc : ncs)
           {
-            if (std::dynamic_pointer_cast<MechanicalContactConstraint>(nc) == NULL)
+            if (const auto mcc = std::dynamic_pointer_cast<MechanicalContactConstraint>(nc); !mcc)
               mooseError("AugmentedLagrangianContactProblem: dynamic cast of "
                          "MechanicalContactConstraint object failed.");
 
-            if (!(std::dynamic_pointer_cast<MechanicalContactConstraint>(nc))
-                     ->AugmentedLagrangianContactConverged())
+            else if (!mcc->AugmentedLagrangianContactConverged())
             {
-              (std::dynamic_pointer_cast<MechanicalContactConstraint>(nc))
-                  ->updateAugmentedLagrangianMultiplier(false);
-              _augLM_repeat_step = true;
+              mcc->updateAugmentedLagrangianMultiplier(false);
+              repeat_augmented_lagrange_step = true;
               break;
             }
           }
         }
       }
 
-      if (_augLM_repeat_step)
+      if (repeat_augmented_lagrange_step)
       {
         // force it to keep iterating
         reason = MooseNonlinearConvergenceReason::ITERATING;
