@@ -17,7 +17,7 @@ Positions::validParams()
   params.addParam<ReporterName>("initial_positions",
                                 "Positions at the beginning of the simulation");
   // No need to refresh unless the mesh moved
-  params.set<ExecFlagEnum>("execute_on") = EXEC_NONE;
+  params.set<ExecFlagEnum>("execute_on") = EXEC_INITIAL;
   params.registerBase("Positions");
   return params;
 }
