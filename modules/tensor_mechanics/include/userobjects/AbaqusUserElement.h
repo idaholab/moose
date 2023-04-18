@@ -156,5 +156,8 @@ protected:
   std::size_t _statev_index_current;
   std::size_t _statev_index_old;
 
+  /// Abaqus element type
+  const int _jtype;
+
   friend class UELThread;
 };

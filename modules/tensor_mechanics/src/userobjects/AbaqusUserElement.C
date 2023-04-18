@@ -42,6 +42,8 @@ AbaqusUserElement::validParams()
   params.addRequiredParam<unsigned int>("num_state_vars",
                                         "The number of state variables this UMAT is going to use");
 
+  params.addParam<int>("jtype", 0, "Abaqus element type integer");
+
   return params;
 }
 
@@ -61,7 +63,8 @@ AbaqusUserElement::AbaqusUserElement(const InputParameters & params)
     _nprops(_props.size()),
     _nstatev(getParam<unsigned int>("num_state_vars")),
     _statev_index_current(0),
-    _statev_index_old(1)
+    _statev_index_old(1),
+    _jtype(getParam<int>("jtype"))
 {
   // coupled variables must be nonlinear scalar fields
   for (const auto & variable_name : _variable_names)

@@ -120,7 +120,7 @@ UELThread::onElement(const Elem * elem)
   _local_ke.resize(ndofel, ndofel);
 
   int nrhs = 1;              // : RHS should contain the residual vector
-  int jtype = 0;             // type of user element
+  int jtype = _uel_uo._jtype; // type of user element
   std::vector<Real> time(2); // dummy
   Real dt = 0;
   std::array<Real, 8> energy;
