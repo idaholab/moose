@@ -6,7 +6,6 @@
     jsondiff = 'find_intersection_elems.json'
     design = 'IntersectionElemsHelper.md'
     issues = '#24098'
-    allow_test_objects = true
     requirement = 'The capability shall create a two-way map between overlay mesh and main mesh.'
   []
 []

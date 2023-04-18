@@ -10,7 +10,7 @@
 #include "RayTracingOverlayMeshTest.h"
 #include "IntersectionElemsHelper.h"
 
-registerMooseObject("RayTracingTestApp", RayTracingOverlayMeshTest);
+registerMooseObject("RayTracingApp", RayTracingOverlayMeshTest);
 
 InputParameters
 RayTracingOverlayMeshTest::validParams()
