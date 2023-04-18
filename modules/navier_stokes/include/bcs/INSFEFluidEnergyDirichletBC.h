@@ -37,8 +37,10 @@ protected:
   const VariableValue & _v_vel;
   const VariableValue & _w_vel;
 
+  Real _T_scale;
+  const VariableValue & _T_scalar;
+
   bool _has_vbc;
-  bool _has_Tbc;
   const Function * _velocity_fn;
-  const Function * _temperature_fn;
+  const Function & _temperature_fn;
 };
