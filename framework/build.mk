@@ -230,7 +230,7 @@ endif
 %.$(obj-suffix) : %.f90
 	@echo "Compiling Fortran90 (in "$(METHOD)" mode) "$<"..."
 	@$(libmesh_LIBTOOL) --tag=FC $(LIBTOOLFLAGS) --mode=compile --quiet \
-	  $(libmesh_F90) $(libmesh_FFLAGS) $(app_INCLUDES) $(libmesh_INCLUDE) -c $< $(module_dir_flag) -o $@
+	  $(libmesh_F90) -ffree-line-length-none $(libmesh_FFLAGS) $(app_INCLUDES) $(libmesh_INCLUDE) -c $< $(module_dir_flag) -o $@
 
 # Add method to list of defines passed to the compiler
 libmesh_CXXFLAGS += -DMETHOD=$(METHOD)
@@ -326,7 +326,7 @@ PLUGIN_FLAGS := -shared -fPIC -Wl,-undefined,dynamic_lookup
 	@$(libmesh_F77) $(libmesh_FFLAGS) $(PLUGIN_FLAGS) $(app_INCLUDES) $(libmesh_INCLUDE) $< -o $@
 %-$(METHOD).plugin : %.f90
 	@echo "Compiling Fortan Plugin (in "$(METHOD)" mode) "$<"..."
-	@$(libmesh_F90) $(libmesh_FFLAGS) $(PLUGIN_FLAGS) $(app_INCLUDES) $(libmesh_INCLUDE) $< -o $@
+	@$(libmesh_F90) -ffree-line-length-none $(libmesh_FFLAGS) $(PLUGIN_FLAGS) $(app_INCLUDES) $(libmesh_INCLUDE) $< -o $@
 
 # Define the "test" target, we'll use a variable name so that we can override it without warnings if needed
 TEST ?= test

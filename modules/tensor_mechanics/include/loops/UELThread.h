@@ -28,7 +28,7 @@ protected:
   void onElement(const Elem * elem) override final;
 
 private:
-  /// @brief  current nonlenear system
+  /// Current nonlinear system
   NonlinearSystemBase & _sys;
 
   /// dof indices of all coupled variables

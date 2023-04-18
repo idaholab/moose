@@ -185,11 +185,14 @@ UELThread::onElement(const Elem * elem)
 
   // write to the residual vector
   if (do_residual)
-    for (const auto tag : _uel_uo.getVectorTags())
-      _sys.getVector(tag).add_vector(_local_re, _all_dof_indices);
+    _uel_uo.addResiduals(
+        _fe_problem.assembly(_tid, _sys.number()), _local_re, _all_dof_indices, 1.0);
 
   // write to the Jacobian (hope we don't have to transpose...)
   if (do_jacobian)
-    for (const auto tag : _uel_uo.getMatrixTags())
-      _sys.getMatrix(tag).add_matrix(_local_ke, _all_dof_indices);
+    _uel_uo.addJacobian(_fe_problem.assembly(_tid, _sys.number()),
+                        _local_ke,
+                        _all_dof_indices,
+                        _all_dof_indices,
+                        1.0);
 }
