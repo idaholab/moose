@@ -155,7 +155,6 @@ TransfiniteMeshGenerator::generate()
 
   std::vector<Node *> nodes(total_nodes);
   unsigned int node_id = 0;
-  unsigned int el_id = 0;
 
   Point newPt;
   Real r1_basis, r2_basis, s1_basis, s2_basis;
@@ -191,7 +190,6 @@ TransfiniteMeshGenerator::generate()
       elem->set_node(1) = nodes[idy + (idx + 1) * _ny];
       elem->set_node(2) = nodes[idy + 1 + (idx + 1) * _ny];
       elem->set_node(3) = nodes[idy + 1 + idx * _ny];
-      el_id++;
 
       if (idy == 0) // add bottom boundary (boundary_id = 0)
         boundary_info.add_side(elem, 0, 0);
@@ -460,22 +458,9 @@ Point
 TransfiniteMeshGenerator::computeOrigin(const Point & P1, const Point & P2, const Point & P3) const
 {
   // define interim quantities
-  Real a1, a2, A;
-  if (MooseUtils::absoluteFuzzyGreaterThan(std::abs(P2(0) - P1(0)), 0.0) ||
-      MooseUtils::absoluteFuzzyGreaterThan(std::abs(P2(1) - P1(1)), 0.0))
-  {
-    a1 = (2 * P3(0) - 2 * P1(0));
-    a2 = (2 * P3(1) - 2 * P1(1));
-    A = P3(1) * P3(1) - P1(0) * P1(0) + P3(0) * P3(0) - P1(1) * P1(1);
-  }
-  else
-  {
-    a1 = (2 * P2(0) - 2 * P1(0));
-    a2 = (2 * P2(1) - 2 * P1(1));
-    A = P2(1) * P2(1) - P1(0) * P1(0) + P2(0) * P2(0) - P1(1) * P1(1);
-  }
-  // note we need to have two cases since it may happen that either P1,P2 or
-  //  P1/P2,P3 are aligned with the system of coordinates
+  const Real a1 = (2 * P3(0) - 2 * P1(0));
+  const Real a2 = (2 * P3(1) - 2 * P1(1));
+  const Real A = P3(1) * P3(1) - P1(0) * P1(0) + P3(0) * P3(0) - P1(1) * P1(1);
   const Real b1 = (2 * P3(0) - 2 * P2(0));
   const Real b2 = (2 * P3(1) - 2 * P2(1));
   const Real B = P3(1) * P3(1) - P2(0) * P2(0) + P3(0) * P3(0) - P2(1) * P2(1);
@@ -483,7 +468,7 @@ TransfiniteMeshGenerator::computeOrigin(const Point & P1, const Point & P2, cons
               "The point provided cannot generate an arc circle on the edge specified."
               "The origin of the corresponding circle cannot be computed.");
 
-  const Real y0 = (a1 * b2) * (B / b2 - A * b1 / (a1 * b2)) / (a1 * b2 - a2 * b1);
+  const Real y0 = (a1 * B - A * b1) / (a1 * b2 - a2 * b1);
   const Real x0 = (A - y0 * a2) / a1;
 
   // fill in and return the origin point
