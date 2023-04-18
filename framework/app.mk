@@ -424,9 +424,11 @@ binlink = $(share_install_dir)/$(notdir $(app_EXEC))
 # Strip the trailing slashes (if provided) and transform into a suitable Makefile targets
 copy_input_targets := $(foreach dir,$(INSTALLABLE_DIRS),target_$(APPLICATION_NAME)_$(patsubst %/,%,$(dir)))
 
-lib_install_targets = $(foreach lib,$(applibs),$(dir $(lib))install_lib_$(notdir $(lib)))
-ifneq ($(app_test_LIB),)
-	lib_install_targets += $(dir $(app_test_LIB))install_lib_$(notdir $(app_test_LIB))
+ifeq ($(want_exec),yes)
+  install_bin: $(bindst)
+  lib_install_targets = $(foreach lib,$(applibs),$(dir $(lib))install_lib_$(notdir $(lib)))
+else
+  install_bin:
 endif
 
 install_libs:: $(lib_install_targets)
@@ -438,7 +440,7 @@ install_data:: install_data_$(APPLICATION_NAME)
 endif
 
 install_data_%:
-	@echo "Installing "$($@_src)"..."
+	@echo "Installing data "$($@_dst)"..."
 	@mkdir -p $($@_dst)
 	@cp -r $($@_src) $($@_dst)
 
@@ -480,10 +482,10 @@ install_lib_%: % all
 	@$(eval libpaths := $(foreach lib,$(applibs),$(dir $(lib))$(shell grep "dlname='.*'" $(lib) 2>/dev/null | sed -E "s/dlname='(.*)'/\1/g")))
 	@for lib in $(libpaths); do $(call patch_relink,$(libdst),$$lib,$$(basename $$lib)); done
 
-$(binlink): all $(copy_input_targets)
+$(binlink): $(copy_input_targets)
 	ln -sf ../../bin/$(notdir $(app_EXEC)) $@
 
-install_$(APPLICATION_NAME)_docs: install_python all
+install_$(APPLICATION_NAME)_docs: install_python $(app_EXEC)
 ifeq ($(MOOSE_SKIP_DOCS),)
 	@echo "Installing docs"
 	@mkdir -p $(docs_install_dir)
@@ -492,8 +494,8 @@ else
 	@echo "Skipping docs installation."
 endif
 
-$(bindst): $(app_EXEC) all $(copy_input_targets) install_$(APPLICATION_NAME)_docs $(binlink)
-	@echo "Installing $<"
+$(bindst): $(app_EXEC) $(copy_input_targets) install_$(APPLICATION_NAME)_docs $(binlink)
+	@echo "Installing binary $@"
 	@mkdir -p $(bin_install_dir)
 	@cp $< $@
 	@$(call patch_rpath,$@,../$(lib_install_suffix)/.)
