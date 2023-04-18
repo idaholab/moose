@@ -27,6 +27,7 @@ class MooseApp;
 class Backup;
 class MultiAppTransfer;
 class MultiAppCoordTransform;
+class Positions;
 
 // libMesh forward declarations
 namespace libMesh
@@ -302,7 +303,7 @@ public:
    * @param app The global app number you want the position for.
    * @return the position
    */
-  const Point & position(unsigned int app) const { return _positions[app]; }
+  const Point & position(unsigned int app) const;
 
   /**
    * "Reset" the App corresponding to the global App number
@@ -467,8 +468,12 @@ protected:
   /// The type of application to build
   std::string _app_type;
 
-  /// The positions of all of the apps
+  /// The positions of all of the apps (to be deprecated)
   std::vector<Point> _positions;
+  /// The positions of all of the apps, using the Positions system
+  std::vector<const Positions *> _positions_objs;
+  /// The offsets, in case multiple Positions objects are specified
+  std::vector<unsigned int> _positions_index_offsets;
 
   /// Toggle use of "positions"
   const bool _use_positions;

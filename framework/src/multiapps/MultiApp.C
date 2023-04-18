@@ -28,6 +28,7 @@
 #include "DelimitedFileReader.h"
 #include "MooseAppCoordTransform.h"
 #include "MultiAppTransfer.h"
+#include "Positions.h"
 #include "Transient.h"
 
 #include "libmesh/mesh_tools.h"
@@ -86,11 +87,15 @@ MultiApp::validParams()
       "positions",
       "The positions of the App locations.  Each set of 3 values will represent a "
       "Point.  This and 'positions_file' cannot be both supplied. If this and "
-      "'positions_file' are not supplied, a single position (0,0,0) will be used");
+      "'positions_file'/'_objects' are not supplied, a single position (0,0,0) will be used");
   params.addParam<std::vector<FileName>>("positions_file",
-                                         "A filename that should be looked in for positions. Each "
-                                         "set of 3 values in that file will represent a Point.  "
-                                         "This and 'positions' cannot be both supplied");
+                                         "Filename(s) that should be looked in for positions. Each"
+                                         " set of 3 values in that file will represent a Point.  "
+                                         "This and 'positions(_objects)' cannot be both supplied");
+  params.addParam<std::vector<ReporterName>>("positions_objects",
+                                             "The name of a Positions object that will contain the"
+                                             " locations of the sub-apps created. "
+                                             "This and 'positions(_file)' cannot be both supplied");
 
   params.addRequiredParam<std::vector<FileName>>(
       "input_files",
@@ -221,7 +226,8 @@ MultiApp::validParams()
   params.registerBase("MultiApp");
 
   params.addParamNamesToGroup("use_displaced_mesh wait_for_first_app_init", "Advanced");
-  params.addParamNamesToGroup("positions positions_file run_in_position output_in_position",
+  params.addParamNamesToGroup("positions positions_file positions_objects run_in_position "
+                              "output_in_position",
                               "Positions / transformations of the MultiApp frame of reference");
   params.addParamNamesToGroup("min_procs_per_app max_procs_per_app", "Parallelism");
   params.addParamNamesToGroup("reset_time reset_apps", "Reset MultiApp");
@@ -281,6 +287,12 @@ MultiApp::MultiApp(const InputParameters & parameters)
       parameters.isParamValid("cli_args_files"))
     paramError("cli_args",
                "'cli_args' and 'cli_args_files' cannot be specified simultaneously in MultiApp ");
+
+  if (!_use_positions && (isParamValid("positions") || isParamValid("positions_file") ||
+                          isParamValid("positions_objects")))
+    paramError("use_positions",
+               "This MultiApps has been set to not use positions, "
+               "but a 'positions' parameter has been set.");
 
   if ((_reset_apps.size() > 0 && _reset_times.size() == 0) ||
       (_reset_apps.size() == 0 && _reset_times.size() > 0))
@@ -508,10 +520,10 @@ MultiApp::fillPositions()
                "MultiApp ",
                _name);
 
-  if (isParamValid("positions") && isParamValid("positions_file"))
-    mooseError(
-        "Both 'positions' and 'positions_file' cannot be specified simultaneously in MultiApp ",
-        name());
+  if (isParamValid("positions") + isParamValid("positions_file") +
+          isParamValid("positions_objects") >
+      1)
+    mooseError("Only one 'positions' parameter may be specified");
 
   if (isParamValid("positions"))
   {
@@ -552,6 +564,53 @@ MultiApp::fillPositions()
       for (unsigned int i = 0; i < data.size(); ++i)
         if (input_files.size() != 1)
           _input_files.push_back(input_files[p_file_it]);
+    }
+  }
+  else if (isParamValid("positions_objects"))
+  {
+    std::vector<ReporterName> positions_param_objs =
+        getParam<std::vector<ReporterName>>("positions_objects");
+    std::vector<FileName> input_files = getParam<std::vector<FileName>>("input_files");
+
+    if (input_files.size() != 1 && positions_param_objs.size() != input_files.size())
+      mooseError("Number of input_files for MultiApp ",
+                 name(),
+                 " must either be only one or match the number of positions_objects specified");
+
+    // Clear out the _input_files because we're going to rebuild it
+    if (input_files.size() != 1)
+      _input_files.clear();
+
+    // Keeps track of where each positions object start in terms of subapp numbers
+    unsigned int offset = 0;
+
+    for (unsigned int p_obj_it = 0; p_obj_it < positions_param_objs.size(); p_obj_it++)
+    {
+      const std::string positions_name = positions_param_objs[p_obj_it];
+      const auto & reporter_data = _fe_problem.getReporterData();
+      const auto & data = reporter_data.getReporterValue<std::vector<Point>>(positions_name);
+
+      for (const auto & d : data)
+        _positions.push_back(d);
+
+      // Save the number of positions for this input file
+      _npositions_inputfile.push_back(data.size());
+
+      auto positions_obj =
+          dynamic_cast<const Positions *>(&_fe_problem.getUserObjectBase(positions_name));
+      if (!positions_obj)
+        paramError("positions_objects",
+                   positions_name + " is not of the expected type. Should be a Positions");
+
+      // Keep track of which positions is tied to what subapp
+      for (unsigned int i = 0; i < data.size(); ++i)
+      {
+        if (input_files.size() != 1)
+          _input_files.push_back(input_files[p_obj_it]);
+        _positions_objs.push_back(positions_obj);
+        _positions_index_offsets.push_back(offset);
+      }
+      offset += data.size();
     }
   }
   else
@@ -1270,4 +1329,15 @@ MultiApp::getMultiAppName(const std::string & base_name, dof_id_type index, dof_
   multiapp_name << base_name << std::setw(std::ceil(std::log10(total))) << std::setprecision(0)
                 << std::setfill('0') << std::right << index;
   return multiapp_name.str();
+}
+
+const Point &
+MultiApp::position(unsigned int app) const
+{
+  // If we're not using positions, it won't have changed
+  if (!_positions_objs.size())
+    return _positions[app];
+  else
+    // Find which Positions object is specifying it, and query a potentially updated value
+    return _positions_objs[app]->getPosition(app - _positions_index_offsets[app]);
 }

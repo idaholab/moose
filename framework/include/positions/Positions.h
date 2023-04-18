@@ -32,6 +32,11 @@ public:
   const std::vector<std::vector<std::vector<std::vector<Point>>>> & getPositionsVector4D() const;
   ///}
 
+  ///{
+  /// Getters for a single position at a known index
+  const Point & getPosition(unsigned int index, bool initial = false) const;
+  ///}
+
 protected:
   /// In charge of computing / loading the positions.
   virtual void initialize() override = 0;

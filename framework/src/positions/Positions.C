@@ -32,6 +32,20 @@ Positions::Positions(const InputParameters & parameters)
 {
 }
 
+const Point &
+Positions::getPosition(unsigned int index, bool initial) const
+{
+  mooseAssert(!initial || (_initial_positions && (*_initial_positions).size() < index),
+              "Initial positions is not sized or initialized appropriately");
+  mooseAssert(_positions.size() > index, "Positions retrieved with an out-of-bound index");
+  if (initial)
+    return (*_initial_positions)[index];
+  if (_positions.size())
+    return _positions[index];
+  else
+    mooseError("Positions vector has not been initialized.");
+}
+
 const std::vector<Point> &
 Positions::getPositions(bool initial) const
 {
@@ -41,7 +55,7 @@ Positions::getPositions(bool initial) const
     return _positions;
   else
     mooseError("Positions vector has not been initialized.");
-};
+}
 
 const std::vector<std::vector<Point>> &
 Positions::getPositionsVector2D() const
@@ -50,7 +64,7 @@ Positions::getPositionsVector2D() const
     return _positions_2d;
   else
     mooseError("2D positions vectors have not been initialized.");
-};
+}
 
 const std::vector<std::vector<std::vector<Point>>> &
 Positions::getPositionsVector3D() const
@@ -59,7 +73,7 @@ Positions::getPositionsVector3D() const
     return _positions_3d;
   else
     mooseError("3D positions vectors have not been initialized.");
-};
+}
 
 const std::vector<std::vector<std::vector<std::vector<Point>>>> &
 Positions::getPositionsVector4D() const
@@ -68,7 +82,7 @@ Positions::getPositionsVector4D() const
     return _positions_4d;
   else
     mooseError("4D positions vectors have not been initialized.");
-};
+}
 
 void
 Positions::unrollMultiDPositions()
