@@ -1761,7 +1761,7 @@ MooseApp::dynamicAppRegistration(const std::string & app_name,
   if (!AppFactory::instance().isRegistered(app_name))
   {
     std::ostringstream oss;
-    std::set<std::string> paths = getLoadedLibraryPaths();
+    std::set<std::string> paths = getLibrarySearchPaths(library_path);
 
     oss << "Unable to locate library for \"" << app_name
         << "\".\nWe attempted to locate the library \"" << appNameToLibName(app_name)
@@ -1815,30 +1815,12 @@ MooseApp::dynamicRegistration(const Parameters & params)
   else
     library_name = params.get<std::string>("library_name");
 
-  // Create a vector of paths that we can search inside for libraries
-  std::vector<std::string> paths;
-
-  std::string library_path = params.get<std::string>("library_path");
-
-  if (library_path != "")
-    MooseUtils::tokenize(library_path, paths, 1, ":");
-
-  char * moose_lib_path_env = std::getenv("MOOSE_LIBRARY_PATH");
-  if (moose_lib_path_env)
-  {
-    std::string moose_lib_path(moose_lib_path_env);
-    std::vector<std::string> tmp_paths;
-
-    MooseUtils::tokenize(moose_lib_path, tmp_paths, 1, ":");
-
-    // merge the two vectors together (all possible search paths)
-    paths.insert(paths.end(), tmp_paths.begin(), tmp_paths.end());
-  }
+  auto paths = getLibrarySearchPaths(params.get<std::string>("library_path"));
 
   // Attempt to dynamically load the library
   for (const auto & path : paths)
     if (MooseUtils::checkFileReadable(path + '/' + library_name, false, false))
-      loadLibraryAndDependencies(path + '/' + library_name, params);
+      loadLibraryAndDependencies(path + '/' + library_name, params, false);
     else
       mooseWarning("Unable to open library file \"",
                    path + '/' + library_name,
@@ -1847,7 +1829,8 @@ MooseApp::dynamicRegistration(const Parameters & params)
 
 void
 MooseApp::loadLibraryAndDependencies(const std::string & library_filename,
-                                     const Parameters & params)
+                                     const Parameters & params,
+                                     bool load_dependencies)
 {
   std::string line;
   std::string dl_lib_filename;
@@ -1856,31 +1839,34 @@ MooseApp::loadLibraryAndDependencies(const std::string & library_filename,
   // .la)
   pcrecpp::RE re_deps("(/\\S*\\.la)");
 
-  std::ifstream la_handle(library_filename.c_str());
-  if (la_handle.is_open())
+  if (load_dependencies)
   {
-    while (std::getline(la_handle, line))
+    std::ifstream la_handle(library_filename.c_str());
+    if (la_handle.is_open())
     {
-      // Look for the system dependent dynamic library filename to open
-      if (line.find("dlname=") != std::string::npos)
-        // Magic numbers are computed from length of this string "dlname=' and line minus that
-        // string plus quotes"
-        dl_lib_filename = line.substr(8, line.size() - 9);
-
-      if (line.find("dependency_libs=") != std::string::npos)
+      while (std::getline(la_handle, line))
       {
-        pcrecpp::StringPiece input(line);
-        pcrecpp::StringPiece depend_library;
-        while (re_deps.FindAndConsume(&input, &depend_library))
-          // Recurse here to load dependent libraries in depth-first order
-          loadLibraryAndDependencies(depend_library.as_string(), params);
+        // Look for the system dependent dynamic library filename to open
+        if (line.find("dlname=") != std::string::npos)
+          // Magic numbers are computed from length of this string "dlname=' and line minus that
+          // string plus quotes"
+          dl_lib_filename = line.substr(8, line.size() - 9);
 
-        // There's only one line in the .la file containing the dependency libs so break after
-        // finding it
-        break;
+        if (line.find("dependency_libs=") != std::string::npos)
+        {
+          pcrecpp::StringPiece input(line);
+          pcrecpp::StringPiece depend_library;
+          while (re_deps.FindAndConsume(&input, &depend_library))
+            // Recurse here to load dependent libraries in depth-first order
+            loadLibraryAndDependencies(depend_library.as_string(), params);
+
+          // There's only one line in the .la file containing the dependency libs so break after
+          // finding it
+          break;
+        }
       }
+      la_handle.close();
     }
-    la_handle.close();
   }
 
   // This should only occur if we have static linkage.
@@ -1980,7 +1966,8 @@ MooseApp::loadLibraryAndDependencies(const std::string & library_filename,
                      dyn_lib_it->first,
                      ".\n",
                      "This doesn't necessarily indicate an error condition unless you believe that "
-                     "the method should exist in that library.\n", lderror());
+                     "the method should exist in that library.\n",
+                     lderror());
 #endif
     }
   }
@@ -1993,6 +1980,32 @@ MooseApp::getLoadedLibraryPaths() const
   std::set<std::string> paths;
   for (const auto & it : _lib_handles)
     paths.insert(it.first);
+
+  return paths;
+}
+
+std::set<std::string>
+MooseApp::getLibrarySearchPaths(const std::string & library_path) const
+{
+  std::set<std::string> paths;
+
+  if (library_path != "")
+  {
+    std::vector<std::string> tmp_paths;
+    MooseUtils::tokenize(library_path, tmp_paths, 1, ":");
+
+    paths.insert(tmp_paths.begin(), tmp_paths.end());
+  }
+
+  char * moose_lib_path_env = std::getenv("MOOSE_LIBRARY_PATH");
+  if (moose_lib_path_env)
+  {
+    std::string moose_lib_path(moose_lib_path_env);
+    std::vector<std::string> tmp_paths;
+    MooseUtils::tokenize(moose_lib_path, tmp_paths, 1, ":");
+
+    paths.insert(tmp_paths.begin(), tmp_paths.end());
+  }
 
   return paths;
 }
