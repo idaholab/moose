@@ -36,13 +36,14 @@ CircularBoundaryCorrectionGenerator::validParams()
   params.addRangeCheckedParam<std::vector<Real>>(
       "transition_layer_ratios",
       "transition_layer_ratios>0&transition_layer_ratios<=1.0",
-      "Ratios to radii as the transition layers on both sides of the original radii.");
+      "Ratios to radii as the transition layers on both sides of the original radii (if this "
+      "parameter is not provided, 0.01 will be used).");
 
   params.addRangeCheckedParam<std::vector<Real>>(
       "custom_circular_tolerance",
       "custom_circular_tolerance>0",
-      "Custom tolerances used to verify whether the provided boundaries are circular (default is "
-      "1.0e-6).");
+      "Custom tolerances (L2 norm) used to verify whether the provided boundaries are circular "
+      "(default is 1.0e-6).");
 
   params.addClassDescription(
       "This CircularBoundaryCorrectionGenerator object is designed to correct full "
@@ -95,7 +96,8 @@ CircularBoundaryCorrectionGenerator::generate()
   auto node_list = input_mesh->get_boundary_info().build_node_list();
 
   std::vector<std::vector<Point>> input_circ_bds_pts(_input_mesh_circular_bids.size());
-  // Loop over all the boundary nodes
+  // Loop over all the boundary nodes and store the nodes (points) on each of the circular
+  // boundaries to be corrected
   for (unsigned int i = 0; i < node_list.size(); ++i)
   {
     auto node_list_it = std::find(_input_mesh_circular_bids.begin(),
@@ -116,7 +118,8 @@ CircularBoundaryCorrectionGenerator::generate()
       _input_mesh_circular_bids.size());
   std::vector<std::vector<std::pair<dof_id_type, dof_id_type>>> input_circ_bds_sds_ids(
       _input_mesh_circular_bids.size());
-  // Loop over all the boundary sides
+  // Loop over all the boundary sides and store the sides (node pairs) on each of the circular
+  // boundaries to be corrected
   for (unsigned int i = 0; i < side_list.size(); ++i)
   {
     auto side_list_it = std::find(_input_mesh_circular_bids.begin(),
@@ -133,7 +136,8 @@ CircularBoundaryCorrectionGenerator::generate()
     }
   }
 
-  // Recording nodes that have been modified to avert double-correction
+  // Computes the correction coefficient and apply it;
+  // Also records the nodes that have been modified to avert double-correction
   std::set<dof_id_type> mod_node_list;
   for (unsigned int i = 0; i < input_circ_bds_pts.size(); i++)
   {
@@ -149,23 +153,14 @@ CircularBoundaryCorrectionGenerator::generate()
     // Also make an ordered array of nodes
     Real dummy_max_rad;
     std::vector<dof_id_type> ordered_node_list;
-    bool is_bdry_closed = true;
-    try
-    {
-      FillBetweenPointVectorsTools::isClosedLoop(*input_mesh,
-                                                 dummy_max_rad,
-                                                 ordered_node_list,
-                                                 input_circ_bds_sds_ids[i],
-                                                 boundary_origin,
-                                                 "boundary");
-    }
-    catch (MooseException & e)
-    {
-      if (((std::string)e.what())
-              .compare("This mesh generator does not work for the provided boundary as it is not a "
-                       "closed loop.") == 0)
-        is_bdry_closed = false;
-    }
+    bool is_bdry_closed;
+    FillBetweenPointVectorsTools::isClosedLoop(*input_mesh,
+                                               dummy_max_rad,
+                                               ordered_node_list,
+                                               input_circ_bds_sds_ids[i],
+                                               boundary_origin,
+                                               "boundary",
+                                               is_bdry_closed);
 
     // If the user selects to move the end nodes of a partial circular boundary, we need to
     // calculate the displacement of the end nodes, which differs from the displacement of the
@@ -219,7 +214,8 @@ CircularBoundaryCorrectionGenerator::generate()
                                            ? pt_start_azi - center_bdry_azi + 2 * M_PI
                                            : pt_start_azi - center_bdry_azi));
     }
-    // Loop over all the nodes in the mesh
+    // Loop over all the nodes in the mesh to move the nodes in the transition layer so that the
+    // circular boundary is corrected
     for (auto & node : input_mesh->node_ptr_range())
     {
       // If the end nodes are set to move in the span direction, we should do so
@@ -252,16 +248,11 @@ CircularBoundaryCorrectionGenerator::generate()
       const Real tmp_pt_azi_new =
           (_move_end_nodes_in_span_direction ? c_coeff : 1.0) * angle_diff + center_bdry_azi;
       const Real mod_corr_factor =
-          pt_rad <= bdry_rad ? (pt_rad <= bdry_rad - transition_layer_thickness
-                                    ? 1.0
-                                    : 1.0 + (corr_factor - 1.0) *
-                                                (pt_rad - bdry_rad + transition_layer_thickness) /
-                                                transition_layer_thickness)
-                             : (pt_rad >= bdry_rad + transition_layer_thickness
-                                    ? 1.0
-                                    : 1.0 + (corr_factor - 1.0) *
-                                                (bdry_rad + transition_layer_thickness - pt_rad) /
-                                                transition_layer_thickness);
+          pt_rad <= bdry_rad
+              ? (1.0 + (corr_factor - 1.0) * (pt_rad - bdry_rad + transition_layer_thickness) /
+                           transition_layer_thickness)
+              : (1.0 + (corr_factor - 1.0) * (bdry_rad + transition_layer_thickness - pt_rad) /
+                           transition_layer_thickness);
       if (!MooseUtils::absoluteFuzzyEqual(mod_corr_factor, 1.0))
       {
         if (!mod_node_list.emplace((*node).id()).second)
@@ -273,6 +264,12 @@ CircularBoundaryCorrectionGenerator::generate()
       (*node) = tmp_pt_alt + boundary_origin;
     }
   }
+  // Loop over all the elements to check if any of them are inverted due to the correction
+  for (auto & elem : input_mesh->element_ptr_range())
+    if (elem->volume() < 0.0)
+      paramError("transition_layer_ratios",
+                 "some elements are inverted during circular boundary correction, consider tuning "
+                 "this parameter.");
 
   return dynamic_pointer_cast<MeshBase>(_input);
 }
@@ -415,6 +412,7 @@ Real
 CircularBoundaryCorrectionGenerator::sinePrimeSummation(const std::vector<Real> & th_list,
                                                         const Real coeff) const
 {
+  // Note that this calculates the derivative with regards to coeff
   Real acc(0.0);
   for (const auto & th : th_list)
     acc += th * std::cos(th * coeff);

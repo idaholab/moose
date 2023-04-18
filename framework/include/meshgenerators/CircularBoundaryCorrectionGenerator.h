@@ -58,10 +58,10 @@ protected:
    * @param bd_side_list list of sides on the circular boundary
    * @param circle_center center of the circular boundary
    * @param is_closed_loop whether the boundary is a closed loop or not
-   * @param c_coeff a reference to a variable to contain the coefficient that multiplies the azimuthal
-   * angles
-   * @param end_node_disp a reference to a variable to contain the displacement of the end node of the
-   * partial circular boundary
+   * @param c_coeff a reference to a variable to contain the coefficient that multiplies the
+   * azimuthal angles
+   * @param end_node_disp a reference to a variable to contain the displacement of the end node of
+   * the partial circular boundary
    * @return radius correction factor to preserve circular area
    */
   Real generalCirCorrFactor(const std::vector<std::pair<Point, Point>> & bd_side_list,
@@ -79,7 +79,8 @@ protected:
   Real sineSummation(const std::vector<Real> & th_list, const Real coeff) const;
 
   /**
-   * Calculates the first derivative of the summation of the sine values of a list of angles
+   * Calculates the first derivative with regards to coeff of the summation of the sine values of a
+   * list of angles
    * @param th_list list of angles
    * @param coeff coefficient before the angles inside the sine function
    * @return first derivative of the summation of the sine values of the angles

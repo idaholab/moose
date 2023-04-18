@@ -64,7 +64,7 @@ Users should set [!param](/Mesh/CircularBoundaryCorrectionGenerator/move_end_nod
 
 This object is capable of correcting multiple circular boundaries within a 2D mesh at the same time. Each circular boundary must be provided as a single boundary id/name in [!param](/Mesh/CircularBoundaryCorrectionGenerator/input_mesh_circular_boundaries).
 
-Moving the nodes on a circular boundary may flip the local elements. In order to reduce the probability of element flipping, a transition area is defined for each circular boundary, which is a ring area in which the nodes will be moved based on the correction factor. The moving distance fades as the node-to-circle distance increases. The transition area size can be customized in [!param](/Mesh/CircularBoundaryCorrectionGenerator/transition_layer_ratios).
+Moving the nodes on a circular boundary may flip the local elements. In order to reduce the probability of element flipping, a transition area is defined for each circular boundary, which is a ring area covering both inner and outer sides of the circular boundary in which the nodes will be moved based on the correction factor. The moving distance fades as the node-to-circle distance increases. The transition area size is defined using a fraction of the boundary radius, which can be customized in [!param](/Mesh/CircularBoundaryCorrectionGenerator/transition_layer_ratios).
 
 ## Example Syntax
 

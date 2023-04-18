@@ -299,15 +299,16 @@ bool isCurveOpenSingleSegment(ReplicatedMesh & mesh,
  * @param max_node_radius the maximum radius of the nodes in the series
  * @param ordered_node_list the ordered node ids on the given curve
  * @param origin_pt origin position of the given mesh (used for azimuthal angle calculation)
- * @return whether the series of nodes form a closed loop with consecutive nodes's azimuthal
- * angles change monotonically
+ * @param is_closed_loop whether the series of nodes form a closed loop with consecutive nodes's
+ * azimuthal angles change monotonically
  */
-bool isClosedLoop(ReplicatedMesh & mesh,
+void isClosedLoop(ReplicatedMesh & mesh,
                   Real & max_node_radius,
                   std::vector<dof_id_type> & ordered_node_list,
                   std::vector<std::pair<dof_id_type, dof_id_type>> & node_assm,
                   const Point origin_pt,
-                  const std::string input_type);
+                  const std::string input_type,
+                  bool & is_closed_loop);
 
 /**
  * Decides whether a boundary of a given mesh is an external boundary.
