@@ -17,7 +17,7 @@
 
 [Executioner]
   type = Optimize
-  tao_solver=taolmvm #nls
+  tao_solver=taonls
   tikhonov_coeff = 0.0001
   petsc_options_iname='-tao_gttol -tao_max_it -tao_nls_pc_type -tao_nls_ksp_type'
   petsc_options_value='1e-5 10 none cg'
