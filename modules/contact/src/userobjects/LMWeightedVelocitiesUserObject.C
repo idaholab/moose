@@ -40,8 +40,12 @@ LMWeightedVelocitiesUserObject::LMWeightedVelocitiesUserObject(const InputParame
                                     ? getVar("lm_variable_tangential_two", 0)
                                     : nullptr)
 {
-  if (!_lm_normal_var || !_lm_variable_tangential_one)
-    paramError("lm_variable_normal", "The Lagrange multiplier variables must be actual variables.");
+  if (isCoupledConstant("lm_variable_tangential_one") || isCoupledConstant("lm_variable_normal"))
+    paramError("lm_variable_normal",
+               "The Lagrange multiplier variable must be an actual variable and not a constant.");
+  else if (!_lm_normal_var || !_lm_variable_tangential_one)
+    paramError("lm_variable_normal",
+               "The Lagrange multiplier variables must be provided and be actual variables.");
 
   auto check_type = [this](const auto & var, const auto & var_name)
   {

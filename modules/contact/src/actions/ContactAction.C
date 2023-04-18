@@ -891,22 +891,22 @@ ContactAction::addMortarContact()
     addMechanicalContactConstraints(normal_lagrange_multiplier_name,
                                     action_name + "_normal_constraint_",
                                     "NormalMortarMechanicalContact",
-                                    false,
-                                    true);
+                                    /* is_additional_frictional_constraint = */ false,
+                                    /* is_normal_constraint = */ true);
 
     if (_model == ContactModel::COULOMB)
     {
       addMechanicalContactConstraints(tangential_lagrange_multiplier_name,
                                       action_name + "_tangential_constraint_",
                                       "TangentialMortarMechanicalContact",
-                                      false,
-                                      false);
+                                      /* is_additional_frictional_constraint = */ false,
+                                      /* is_normal_constraint = */ false);
       if (ndisp > 2)
         addMechanicalContactConstraints(tangential_lagrange_multiplier_3d_name,
                                         action_name + "_tangential_constraint_3d_",
                                         "TangentialMortarMechanicalContact",
-                                        true,
-                                        false);
+                                        /* is_additional_frictional_constraint = */ true,
+                                        /* is_normal_constraint = */ false);
     }
   }
 }

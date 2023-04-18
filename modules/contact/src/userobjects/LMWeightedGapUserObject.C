@@ -27,9 +27,12 @@ LMWeightedGapUserObject::validParams()
 LMWeightedGapUserObject::LMWeightedGapUserObject(const InputParameters & parameters)
   : WeightedGapUserObject(parameters), _lm_var(getVar("lm_variable", 0))
 {
-  if (!_lm_var)
+  if (isCoupledConstant("lm_variable"))
     paramError("lm_variable",
                "The Lagrange multiplier variable must be an actual variable and not a constant.");
+  else if (!_lm_var)
+    paramError("lm_variable",
+               "The Lagrange multiplier variable must be provided and be an actual variable.");
 
   if (!_lm_var->isNodal())
     paramError("lm_variable",
