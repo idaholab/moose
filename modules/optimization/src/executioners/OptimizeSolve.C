@@ -404,6 +404,10 @@ OptimizeSolve::applyHessian(libMesh::PetscVector<Number> & s, libMesh::PetscVect
     _inner_solve->solve();
 
   _obj_function->computeGradient(Hs);
+  // If this is to be moved to Optimization Reporter, do the following
+  // reporter->computeHsForRegularizer(s,Hs_reg);
+  // Hs.add(1.0,Hs_reg);
+  Hs.add(_tikhonov_parameter,s);
   _hess_iterate++;
   return 0;
 }
