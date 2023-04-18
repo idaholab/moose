@@ -32,20 +32,31 @@ public:
   /**
    * Determines the intersection points between the elements \p elem and \p cut_elem
    * and fills them into \p intersection_points.
+   *
+   * credit to @loganharbour
    */
   bool isElemIntersection(const Elem * elem, const Elem * cut_elem);
 
+  /**
+   * Store the intersection elems in two-way maps
+   * overlay -> main map use overlay elem as key
+   * main -> overlay map use main elem at the boundary as key
+   */
   void ElemIntersectionMap();
 
   /**
    * Whether or not the edges \p edge1 and \p edge2 intersect.
    * If they do intersect, the intersection is filled into \p intersection_point.
+   *
+   * credit to @loganharbour
    */
   bool edgesIntersect(const Elem & edge1, const Elem & edge2, Point & intersection_point) const;
 
   /**
    * Whether or not \p edge and \p side intersect.
    * If they do intersect, the intersection is filled into \p intersection_point.
+   *
+   * credit to @loganharbour
    */
   bool edgeIntersectsSide(const Elem & edge, const Elem & side, Point & intersection_point) const;
 
@@ -69,14 +80,12 @@ public:
   ElemSideBuilder _elem_side_builder;
 
 private:
-  /// Dummy communicator for the dummy mesh
-  libMesh::Parallel::Communicator _comm;
-  /// Dummy mesh that contains a single element used for TraceRayTools intersection methods
+  /// main mesh
   const MeshBase & _mesh;
-  /// Dummy mesh that contains a single element used for TraceRayTools intersection methods
+  /// overlay mesh
   const MeshBase & _overlay_mesh;
-  //   /// Contain intersection elems in overlay mesh
+  /// Contain intersection elems in overlay mesh
   std::map<const Elem *, std::vector<const Elem *>> _overlay_elems_to_main;
-  //   /// Contain intersection elems in main mesh
+  /// Contain intersection elems in main mesh
   std::map<const Elem *, std::vector<const Elem *>> _main_elems_to_overlay;
 };

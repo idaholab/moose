@@ -4,7 +4,7 @@
     recover = false
     input = 'find_intersect_elems.i'
     jsondiff = 'find_intersection_elems.json'
-    design = 'IntersectionElemsHelper.md'
+    design = 'IntersectionElemHelper.md'
     issues = '#24098'
     requirement = 'The capability shall create a two-way map between overlay mesh and main mesh.'
   []

@@ -15,7 +15,7 @@
 class IntersectionElemsReporter;
 
 /**
- * Reports the summary table of solution invalid warnings
+ * Reports the summary of the two-way mapping between main and overlay mesh
  */
 class IntersectionElemsReporter : public GeneralReporter
 {
