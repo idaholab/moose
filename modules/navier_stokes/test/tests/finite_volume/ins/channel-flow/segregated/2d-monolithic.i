@@ -10,7 +10,7 @@ velocity_interp_method = 'rc'
     dx = '0.2 0.2'
     dy = '0.2'
     ix = '2 2'
-    iy = '2'
+    iy = '4'
     subdomain_id = '1 1'
   []
 []
@@ -36,17 +36,14 @@ velocity_interp_method = 'rc'
   [u]
     type = INSFVVelocityVariable
     initial_condition = 0.5
-    two_term_boundary_expansion = false
   []
   [v]
     type = INSFVVelocityVariable
     initial_condition = 0.0
-    two_term_boundary_expansion = false
   []
   [pressure]
     type = INSFVPressureVariable
     initial_condition = 0.2
-    two_term_boundary_expansion = false
   []
 []
 
@@ -97,6 +94,7 @@ velocity_interp_method = 'rc'
     advected_interp_method = ${advected_interp_method}
     velocity_interp_method = ${velocity_interp_method}
     rho = ${rho}
+    boundaries_to_force = 'left top bottom'
   []
 
 []
@@ -124,6 +122,12 @@ velocity_interp_method = 'rc'
     type = INSFVNoSlipWallBC
     boundary = 'top bottom'
     variable = v
+    function = 0.0
+  []
+  [wall_p]
+    type = FVFunctionNeumannBC
+    boundary = 'left top bottom'
+    variable = pressure
     function = 0.0
   []
   [outlet_p]

@@ -42,7 +42,7 @@ public:
 
   void initFaceVelocities();
 
-  void computeVelocity();
+  void computeVelocity(const Real & momentum_relaxation);
 
   void addToA(const libMesh::Elem * /*elem*/,
               unsigned int /*component*/,
@@ -70,6 +70,10 @@ public:
    */
   void computeHbyA(const Real & momentum_relaxation);
 
+  void populateHbyA(NonlinearImplicitSystem & momentum_system,
+                    const NumericVector<Number> & raw_hbya,
+                    const std::vector<unsigned int> & var_nums);
+
 protected:
 
   /**
@@ -78,7 +82,7 @@ protected:
    * multiplied by the predicted velocity minus the source terms from the right hand side of the
    * linearized momentum predictor stem.
    */
-  CellCenteredMapFunctor<RealVectorValue, std::unordered_map<dof_id_type, RealVectorValue>> _HbyA;
+  FaceCenteredMapFunctor<RealVectorValue, std::unordered_map<dof_id_type, RealVectorValue>> _HbyA;
 
   /**
    * A map from element IDs to $1/A_ij$. ADD MORE

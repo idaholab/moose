@@ -9,11 +9,11 @@ momentum_tag = "non_pressure"
   [mesh]
     type = CartesianMeshGenerator
     dim = 2
-    dx = '0.2 0.2'
-    dy = '0.2'
-    ix = '2 2'
-    iy = '2'
-    subdomain_id = '1 1'
+    dx = '0.3'
+    dy = '0.3'
+    ix = '3'
+    iy = '3'
+    subdomain_id = '1'
   []
 []
 
@@ -162,20 +162,21 @@ momentum_tag = "non_pressure"
   solve_type = 'NEWTON'
   petsc_options_iname = '-pc_type -pc_hypre_type -pc_factor_shift_type'
   petsc_options_value = 'hypre boomeramg NONZERO'
-  petsc_options = ''
+  petsc_options = '-ksp_monitor'
   nl_max_its = 1
   l_max_its = 200
-  l_abs_tol = 1e-9
+  l_abs_tol = 1e-8
+  l_tol = 1e-8
   line_search = 'none'
   rhie_chow_user_object = 'rc'
   momentum_system = 'momentum_system'
   pressure_system = 'pressure_system'
   momentum_tag = ${momentum_tag}
-  momentum_variable_relaxation = 0.9
-  pressure_variable_relaxation = 0.3
-  num_iterations = 1
+  momentum_variable_relaxation = 0.96
+  pressure_variable_relaxation = 0.2
+  num_iterations = 100
   pressure_absolute_tolerance = 1e-8
-  momentum_absolute_tolerance = 1e-8
+  momentum_absolute_tolerance = 1e-5
 
 []
 
@@ -193,8 +194,8 @@ momentum_tag = "non_pressure"
 []
 
 [Outputs]
-  exodus = true
-  csv = true
+  exodus = false
+  csv = false
   perf_graph = false
   print_nonlinear_residuals = false
   print_linear_residuals = true

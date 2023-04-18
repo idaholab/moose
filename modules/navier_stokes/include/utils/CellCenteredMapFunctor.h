@@ -197,6 +197,8 @@ CellCenteredMapFunctor<T, Map>::evaluate(const FaceArg & face, const StateArg & 
   {
     const auto elem_arg = face.makeElem();
     const auto elem_value = (*this)(elem_arg, state);
+    if (!_extrapolated_boundary)
+      return elem_value;
     // Two term expansion
     return elem_value + this->gradient(elem_arg, state) * (fi.faceCentroid() - fi.elemCentroid());
   }
@@ -205,6 +207,9 @@ CellCenteredMapFunctor<T, Map>::evaluate(const FaceArg & face, const StateArg & 
     mooseAssert(defined_on_neighbor, "We should be defined on one of the sides");
     const auto neighbor_arg = face.makeNeighbor();
     const auto neighbor_value = (*this)(neighbor_arg, state);
+    if (!_extrapolated_boundary)
+      return neighbor_value;
+
     // Two term expansion
     return neighbor_value +
            this->gradient(neighbor_arg, state) * (fi.faceCentroid() - fi.neighborCentroid());

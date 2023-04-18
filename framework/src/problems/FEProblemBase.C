@@ -6748,6 +6748,8 @@ FEProblemBase::computePostCheck(NonlinearImplicitSystem & sys,
 
   if (vectorTagExists(Moose::PREVIOUS_NL_SOLUTION_TAG))
   {
+    std::cout << " Updating previous NL" << std::endl;
+    old_soln.print();
     _current_nl_sys->setPreviousNewtonSolution(old_soln);
     _aux->setPreviousNewtonSolution();
   }

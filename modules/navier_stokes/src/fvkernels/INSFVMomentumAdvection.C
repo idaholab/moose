@@ -102,12 +102,7 @@ INSFVMomentumAdvection::computeResidualsAndAData(const FaceInfo & fi)
     const auto eps_face = epsilon()(ssf, state);
     const auto u_face = _var(ssf, state);
     const Real d_u_face_d_dof = u_face.derivatives()[dof_number];
-<<<<<<< HEAD
     const auto coeff = vdotn * rho_face / eps_face;
-=======
-    const auto coeff = _linearize ? _normal * raw_value(v_face) * rho_face / eps_face
-                                  : _normal * v_face * rho_face / eps_face;
->>>>>>> Populate Ainv and HbyA functors with correct values. (#22356)
 
     if (sided_elem == fi.elemPtr())
     {
