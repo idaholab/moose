@@ -51,6 +51,10 @@
     order = FIRST
     family = LAGRANGE
   []
+  [real_weighted_gap]
+    order = FIRST
+    family = LAGRANGE
+  []
   [stress_xx]
     order = CONSTANT
     family = MONOMIAL
@@ -123,6 +127,12 @@
     variable = tangential_vel_one
     user_object = friction_uo
     contact_quantity = tangential_velocity_one
+  []
+  [real_weighted_gap_auxk]
+    type = PenaltyMortarUserObjectAux
+    variable = real_weighted_gap
+    user_object = friction_uo
+    contact_quantity = weighted_gap
   []
   [stress_xx]
     type = RankTwoAux

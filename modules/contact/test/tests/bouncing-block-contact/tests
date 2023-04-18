@@ -134,6 +134,16 @@
       cli_args = "Mesh/file=long-bottom-block-1elem-blocks-coarse.e Executioner/end_time=50 "
                  "Postprocessors/active=''"
     []
+    [penalty_action]
+      type = 'Exodiff'
+      input = frictionless-penalty-weighted-gap-action.i
+      exodiff = 'frictionless-penalty-weighted-gap-action_out.e'
+      detail = 'using a first order basis for displacements and penalty multiplication times the '
+               'negative gap distance to form the contact force via the contact action.'
+      map = true
+      cli_args = "Mesh/mesh_file/file=long-bottom-block-1elem-blocks-coarse.e Executioner/end_time=50 "
+                 "Postprocessors/active='' Outputs/hide='nodal_area contact_pressure penetration'"
+    []
   []
   [very_parallel_penalty]
     requirement = 'The system shall be able to communicate semilocal weighted gaps back to any process that contributed to computing said weighted gaps.'
