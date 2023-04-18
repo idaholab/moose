@@ -79,12 +79,18 @@
     type = GradientJumpIndicator
     variable = phi
   []
-  [Markers/marker]
-    type = BoundaryPreservedMarker
-    preserved_boundary = moving_boundary
-    indicator = indicator
-    coarsen = 0.2
-    refine = 0.5
+  [Markers]
+    [efm]
+      type = ErrorFractionMarker
+      indicator = indicator
+      coarsen = 0.2
+      refine = 0.5
+    []
+    [marker]
+      type = BoundaryPreservedMarker
+      preserved_boundary = moving_boundary
+      marker = 'efm'
+    []
   []
 []
 

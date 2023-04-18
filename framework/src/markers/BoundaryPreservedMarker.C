@@ -17,18 +17,21 @@ registerMooseObject("MooseApp", BoundaryPreservedMarker);
 InputParameters
 BoundaryPreservedMarker::validParams()
 {
-  InputParameters params = ErrorFractionMarker::validParams();
+  InputParameters params = Marker::validParams();
   params.addRequiredParam<BoundaryName>(
       "preserved_boundary",
       "The name of the boundary to be preserved. Will try to preserve the boundary during AMR");
-  params.addClassDescription(
-      "Marks elements for refinement or coarsening based on the fraction of "
-      "the min/max error from the supplied indicator, while preserving the given boundary.");
+  params.addRequiredParam<MarkerName>(
+      "marker", "The marker name to decide whether to carsen or refine elements.");
+  params.addClassDescription("Marks elements for refinement or coarsening based on the provided "
+                             "marker value, while preserving the given boundary.");
   return params;
 }
 
 BoundaryPreservedMarker::BoundaryPreservedMarker(const InputParameters & parameters)
-  : ErrorFractionMarker(parameters)
+  : Marker(parameters),
+    _marker_name(parameters.get<MarkerName>("marker")),
+    _marker(&getMarkerValue(_marker_name))
 {
   BoundaryName boundary_name = getParam<BoundaryName>("preserved_boundary");
   auto boundary_ids = MooseMeshUtils::getBoundaryIDs(_mesh, {boundary_name}, true);
@@ -52,17 +55,9 @@ BoundaryPreservedMarker::preserveBoundary(const Elem * const & _current_elem)
 Marker::MarkerValue
 BoundaryPreservedMarker::computeElementMarker()
 {
-  Real error = _error_vector[_current_elem->id()];
-
-  if (error > _refine_cutoff)
-    return REFINE;
-  else if (error < _coarsen_cutoff)
-  {
-    if (preserveBoundary(_current_elem))
-      return DO_NOTHING;
-    else
-      return COARSEN;
-  }
-
-  return DO_NOTHING;
+  MarkerValue marker_value = static_cast<MarkerValue>((*_marker)[0]);
+  if (marker_value == COARSEN && preserveBoundary(_current_elem))
+    return DO_NOTHING;
+  else
+    return marker_value;
 }

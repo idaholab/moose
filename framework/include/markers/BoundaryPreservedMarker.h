@@ -9,13 +9,13 @@
 
 #pragma once
 
-#include "ErrorFractionMarker.h"
+#include "Marker.h"
 
 /*
   Do not coarsen any element touching a given boundary in order to preserve the boundary
   libMesh will delete all boundaries for the elements to be coarsened.
 */
-class BoundaryPreservedMarker : public ErrorFractionMarker
+class BoundaryPreservedMarker : public Marker
 {
 public:
   static InputParameters validParams();
@@ -31,4 +31,8 @@ protected:
 
   // Boundary to be preserved during coarsening (AMR)
   BoundaryID _preserved_boundary;
+
+  MarkerName _marker_name;
+
+  const VariableValue * _marker;
 };

@@ -237,7 +237,7 @@ ElementSubdomainModifier::updateMovingBoundaryInfo(MooseMesh & mesh,
     2) Remove all the elements from the moving boundary. That literately
      deletes the moving boundary from the database.
     3) Append moved elements to the boundary element candidates.
-    4) Rectrouct the moving boundary using the boundary element candidates by
+    4) Reconstruct the moving boundary using the boundary element candidates by
      computing the sides that are shared by two subdomains
     5) Delete the old nodeset.
     6) Reconstruct a new nodeset using the new sideset.
