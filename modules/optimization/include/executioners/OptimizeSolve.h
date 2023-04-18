@@ -58,10 +58,11 @@ protected:
   virtual PetscErrorCode variableBounds(Tao tao);
 
   /// Objective routine
-  virtual Real objectiveFunction(const libMesh::PetscVector<Number> &param);
+  virtual Real objectiveFunction(const libMesh::PetscVector<Number> & param);
 
   /// Gradient routine
-  virtual void gradientFunction(const libMesh::PetscVector<Number> &param, libMesh::PetscVector<Number> & gradient);
+  virtual void gradientFunction(const libMesh::PetscVector<Number> & param,
+                                libMesh::PetscVector<Number> & gradient);
 
   /// Hessian application routine
   virtual PetscErrorCode applyHessian(libMesh::PetscVector<Number> & s,

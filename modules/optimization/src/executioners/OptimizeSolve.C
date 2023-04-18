@@ -22,8 +22,7 @@ OptimizeSolve::validParams()
                             "taoblmvm taonm taobqnls taoowlqn taogpcg taobmrm");
   params.addRequiredParam<MooseEnum>(
       "tao_solver", tao_solver_enum, "Tao solver to use for optimization.");
-  params.addParam<Real>(
-      "tikhonov_coeff", 0.0, "Coefficient for Tikhonov Regularization.");
+  params.addParam<Real>("tikhonov_coeff", 0.0, "Coefficient for Tikhonov Regularization.");
   ExecFlagEnum exec_enum = ExecFlagEnum();
   exec_enum.addAvailableFlags(EXEC_NONE,
                               OptimizationAppTypes::EXEC_FORWARD,
@@ -299,7 +298,7 @@ OptimizeSolve::objectiveAndGradientFunctionWrapper(
 
   libMesh::PetscVector<Number> grad(gradient, solver->_my_comm);
 
-  solver->gradientFunction(param,grad);
+  solver->gradientFunction(param, grad);
   return 0;
 }
 
@@ -337,7 +336,7 @@ OptimizeSolve::variableBoundsWrapper(Tao tao, Vec /*xl*/, Vec /*xu*/, void * ctx
 }
 
 Real
-OptimizeSolve::objectiveFunction(const libMesh::PetscVector<Number> &param)
+OptimizeSolve::objectiveFunction(const libMesh::PetscVector<Number> & param)
 {
   TIME_SECTION("objectiveFunction", 2, "Objective forward solve");
   _obj_function->updateParameters(*_parameters.get());
@@ -357,7 +356,8 @@ OptimizeSolve::objectiveFunction(const libMesh::PetscVector<Number> &param)
 }
 
 void
-OptimizeSolve::gradientFunction(const libMesh::PetscVector<Number> &param, libMesh::PetscVector<Number> & gradient)
+OptimizeSolve::gradientFunction(const libMesh::PetscVector<Number> & param,
+                                libMesh::PetscVector<Number> & gradient)
 {
   TIME_SECTION("gradientFunction", 2, "Gradient adjoint solve");
   _obj_function->updateParameters(*_parameters.get());
@@ -407,7 +407,7 @@ OptimizeSolve::applyHessian(libMesh::PetscVector<Number> & s, libMesh::PetscVect
   // If this is to be moved to Optimization Reporter, do the following
   // reporter->computeHsForRegularizer(s,Hs_reg);
   // Hs.add(1.0,Hs_reg);
-  Hs.add(_tikhonov_parameter,s);
+  Hs.add(_tikhonov_parameter, s);
   _hess_iterate++;
   return 0;
 }
