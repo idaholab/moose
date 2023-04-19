@@ -9,15 +9,15 @@
     cli_args = "--mesh-only rectangle.e"
     requirement = 'The system shall generate a mesh for the FlowComponentNS tests.'
   []
-  [pwcns]
+  [pincns]
     type = Exodiff
-    input = flow_component_ns_pwc.i
-    exodiff = flow_component_ns_pwc_out.e
+    input = flow_component_ns_pinc.i
+    exodiff = flow_component_ns_pinc_out.e
     abs_zero = 5e-6
     prereq = 'generate_mesh'
     method = "!dbg"
     valgrind = HEAVY
     recover = false # see #19126
-    requirement = 'The system shall model the porous, weakly compressible Navier-Stokes equations with a finite volume discretization, using a component.'
+    requirement = 'The system shall model the porous, incompressible Navier-Stokes equations with a finite volume discretization, using a component.'
   []
 []
