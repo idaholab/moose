@@ -58,7 +58,7 @@ The pin cell represents the most basic element in the hierarchical structure of 
        caption=Moderator Pin Cell.
        style=width:50%;display:block;margin-left:auto;margin-right:auto;
 
-!listing sec09_hpmr_example/hpmr.i
+!listing reactor_examples/hpmr/hpmr.i
          id=tutorial04-HPMR_9.1_Create_pin_unit_cell
          caption=Moderator Pin Cell.
          block=Mesh/moderator_pincell
@@ -100,7 +100,7 @@ Generated pin cell meshes (fuel, heat pipe, and moderator) are stitched into a f
        caption=Fuel hex assembly.
        style=width:50%;display:block;margin-left:auto;margin-right:auto;
 
-!listing sec09_hpmr_example/hpmr.i
+!listing reactor_examples/hpmr/hpmr.i
          id=tutorial04-HPMR_9.2_Patterned_Hex_Assembly
          caption=Fuel hex assembly.
          block=Mesh/fuel_assembly
@@ -127,7 +127,7 @@ The HP-MR utilizes several different assembly types, but as simplified example, 
        caption=Full fuel core assembly.
        style=width:50%;display:block;margin-left:auto;margin-right:auto;
 
-!listing sec09_hpmr_example/hpmr.i
+!listing reactor_examples/hpmr/hpmr.i
          id=tutorial04-HPMR_9.3_Patterned_Hex_Core
          caption=Full fuel core assembly.
          block=Mesh/fuel_core
@@ -177,7 +177,7 @@ Control drums are a type of control device used in some small reactor systems to
        caption=Control Drum Generation.
        style=width:50%;display:block;margin-left:auto;margin-right:auto;
 
-!listing sec09_hpmr_example/hpmr.i
+!listing reactor_examples/hpmr/hpmr.i
          id=tutorial04-HPMR_9.4_Control_Drum_Assembly-1
          caption=Control Drum Generation.
          block=Mesh/cd1_step1
@@ -189,7 +189,7 @@ Control drums are a type of control device used in some small reactor systems to
        caption=Block ID swaps.
        style=width:50%;display:block;margin-left:auto;margin-right:auto;
 
-!listing sec09_hpmr_example/hpmr.i
+!listing reactor_examples/hpmr/hpmr.i
          id=tutorial04-HPMR_9.4_Control_Drum_Assembly-2
          caption=Block ID swaps.
          block=Mesh/cd1
@@ -228,17 +228,17 @@ Other components of the reactor, such as reflectors and air holes, can also be c
        caption=Additional assembly types.
        style=width:50%;display:block;margin-left:auto;margin-right:auto;
 
-!listing sec09_hpmr_example/hpmr.i
+!listing reactor_examples/hpmr/hpmr.i
          id=tutorial04-HPMR_9.5_Additional_Assemblies_Reflector
          caption=Reflector assembly example.
          block=Mesh/refl1
 
-!listing sec09_hpmr_example/hpmr.i
+!listing reactor_examples/hpmr/hpmr.i
          id=tutorial04-HPMR_9.5_Additional_Assemblies_Air
          caption=Air center assembly example.
          block=Mesh/air_center
 
-!listing sec09_hpmr_example/hpmr.i
+!listing reactor_examples/hpmr/hpmr.i
          id=tutorial04-HPMR_9.5_Additional_Assemblies_Dummy
          caption=Dummy assembly example.
          block=Mesh/dummy
@@ -274,7 +274,7 @@ Generated reactor component meshes (fuel assembly, control drum, reflector, air 
        caption=Full core assembly.
        style=width:50%;display:block;margin-left:auto;margin-right:auto;
 
-!listing sec09_hpmr_example/hpmr.i
+!listing reactor_examples/hpmr/hpmr.i
          id=tutorial04-HPMR_9.6_Full_Core
          caption=Full core assembly.
          block=Mesh/core
@@ -303,7 +303,7 @@ Dummy blocks were used in the previous step to facilitate the core pattern but a
        caption=Full core assembly without dummies.
        style=width:50%;display:block;margin-left:auto;margin-right:auto;
 
-!listing sec09_hpmr_example/hpmr.i
+!listing reactor_examples/hpmr/hpmr.i
          id=tutorial04-HPMR_9.7_Delete_Dummies
          caption=Full core assembly without dummies.
          block=Mesh/del_dummy
@@ -333,7 +333,7 @@ A peripheral ring (shield) can be incorporated into the 2D reactor core using ei
        caption=Core periphery.
        style=width:50%;display:block;margin-left:auto;margin-right:auto;
 
-!listing sec09_hpmr_example/hpmr.i
+!listing reactor_examples/hpmr/hpmr.i
          id=tutorial04-HPMR_9.8_Add_Core_Periphery
          caption=Core periphery.
          block=Mesh/outer_shield
@@ -370,12 +370,12 @@ To conserve computational resources, users may create a half core or 1/6 symmetr
        caption=1/6 core slice in two steps.
        style=width:50%;display:block;margin-left:auto;margin-right:auto;
 
-!listing sec09_hpmr_example/hpmr.i
+!listing reactor_examples/hpmr/hpmr.i
          id=tutorial04-HPMR_9.9_Slice_to_1over6_Core-1
          caption=Slice full core in 1/2 example.
          block=Mesh/coreslice_1
 
-!listing sec09_hpmr_example/hpmr.i
+!listing reactor_examples/hpmr/hpmr.i
          id=tutorial04-HPMR_9.9_Slice_to_1over6_Core-2
          caption=Slice 1/2 core in 1/3 example.
          block=Mesh/coreslice_2
@@ -410,7 +410,7 @@ Here we explain the concept of subdomain swaps. By default, when 2D elements are
        caption=1/6 2D core extruded to 3D.
        style=width:50%;display:block;margin-left:auto;margin-right:auto;
 
-!listing sec09_hpmr_example/hpmr.i
+!listing reactor_examples/hpmr/hpmr.i
          id=tutorial04-HPMR_9.10_Extrude_to_3D
          caption=1/6 2D core extruded to 3D.
          block=Mesh/extrude
@@ -428,7 +428,7 @@ All blocks in the mesh must be assigned to a material in Griffin. The blocks are
        caption=Locations of blocks which are assigned to materials in the Griffin input file.
        style=width:50%;display:block;margin-left:auto;margin-right:auto;
 
-!listing sec09_hpmr_example/HPMR_griffin_materials.i
+!listing reactor_examples/hpmr/HPMR_griffin_materials.i
          id=tutorial04-HPMR_griffin_materials
          caption=Material property assignment example.
          block=Materials

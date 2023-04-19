@@ -26,13 +26,13 @@
 !row!
 !col small=12 medium=6 large=8
 
-!listing sec06_common_ops/peripheral_trim.i
+!listing base_mesh_generators/peripheral_trim.i
          block=Mesh/peripheral_trim
          link=False
 
 !col small=12 medium=6 large=4
 
-!listing sec06_common_ops/center_trim.i
+!listing base_mesh_generators/center_trim.i
          block=Mesh/center_trim
          link=False
 

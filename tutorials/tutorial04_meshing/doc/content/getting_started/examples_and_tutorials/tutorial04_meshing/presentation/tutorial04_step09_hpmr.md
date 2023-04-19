@@ -43,7 +43,7 @@
 !row!
 !col small=12 medium=6 large=8
 
-!listing sec09_hpmr_example/hpmr.i
+!listing reactor_examples/hpmr/hpmr.i
          block=Mesh/moderator_pincell
          link=False
 
@@ -68,7 +68,7 @@
 !row!
 !col small=12 medium=6 large=8
 
-!listing sec09_hpmr_example/hpmr.i
+!listing reactor_examples/hpmr/hpmr.i
          block=Mesh/fuel_assembly
          link=False
 
@@ -91,7 +91,7 @@
 !row!
 !col small=12 medium=6 large=8
 
-!listing sec09_hpmr_example/hpmr.i
+!listing reactor_examples/hpmr/hpmr.i
          block=Mesh/core
          link=False
 
@@ -127,7 +127,7 @@ Setup
 !row!
 !col small=12 medium=6 large=8
 
-!listing sec09_hpmr_example/hpmr.i
+!listing reactor_examples/hpmr/hpmr.i
          block=Mesh/cd1_step1
          link=False
 
@@ -141,7 +141,7 @@ Setup
 !row!
 !col small=12 medium=6 large=8
 
-!listing sec09_hpmr_example/hpmr.i
+!listing reactor_examples/hpmr/hpmr.i
          block=Mesh/cd1
          link=False
 
@@ -170,7 +170,7 @@ Setup
 !row!
 !col small=12 medium=6 large=8
 
-!listing sec09_hpmr_example/hpmr.i
+!listing reactor_examples/hpmr/hpmr.i
          block=Mesh/refl1
          link=False
 
@@ -199,7 +199,7 @@ Setup
 !row!
 !col small=12 medium=6 large=8
 
-!listing sec09_hpmr_example/hpmr.i
+!listing reactor_examples/hpmr/hpmr.i
          block=Mesh/core
          link=False
 
@@ -231,7 +231,7 @@ Setup
 
 !row-end!
 
-!listing sec09_hpmr_example/hpmr.i
+!listing reactor_examples/hpmr/hpmr.i
          block=Mesh/del_dummy
          link=False
 
@@ -248,7 +248,7 @@ Setup
 !row!
 !col small=12 medium=6 large=8
 
-!listing sec09_hpmr_example/hpmr.i
+!listing reactor_examples/hpmr/hpmr.i
          block=Mesh/outer_shield
          link=False
 
@@ -291,13 +291,13 @@ Setup
 !row!
 !col small=12 medium=6 large=8
 
-!listing sec09_hpmr_example/hpmr.i
+!listing reactor_examples/hpmr/hpmr.i
          block=Mesh/coreslice_1
          link=False
 
 !col small=12 medium=6 large=4
 
-!listing sec09_hpmr_example/hpmr.i
+!listing reactor_examples/hpmr/hpmr.i
          block=Mesh/coreslice_2
          link=False
 
@@ -328,7 +328,7 @@ Setup
 
 !row-end!
 
-!listing sec09_hpmr_example/hpmr.i
+!listing reactor_examples/hpmr/hpmr.i
          block=Mesh/extrude
          link=False
 
@@ -347,7 +347,7 @@ All blocks in the mesh must be assigned to a material in Griffin.
 !row!
 !col small=12 medium=6 large=8
 
-!listing sec09_hpmr_example/HPMR_griffin_materials.i
+!listing reactor_examples/hpmr/HPMR_griffin_materials.i
          block=Materials
          link=False
 

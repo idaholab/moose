@@ -17,7 +17,7 @@ RGMB consists of a few specific mesh generators which are to be called in order 
 
 [ReactorMeshParams.md] acts as a container for storing global data about the reactor geometry that needs to be retrieved at different stages of the RGMB mesh generation workflow. In particular, the union axial grid for the extruded geometry is defined here and propagated to the entire mesh upon the extrusion step.
 
-!listing sec10_rgmb_simple_examples/rgmb_core_cartesian.i
+!listing rgmb_mesh_generators/rgmb_core_cartesian.i
          id=tutorial04-rgmb_core_cartesian-rmp
          caption=Reactor Mesh Parameters example.
          block=Mesh/rmp
@@ -26,7 +26,7 @@ RGMB consists of a few specific mesh generators which are to be called in order 
 
 [PinMeshGenerator.md] calls [PolygonConcentricCircleMeshGenerator.md] to generate a Cartesian or hexagonal pin-like structure (pin, background, and duct)
 
-!listing sec10_rgmb_simple_examples/rgmb_core_cartesian.i
+!listing rgmb_mesh_generators/rgmb_core_cartesian.i
          id=tutorial04-rgmb_core_cartesian-pin1
          caption=RGMB Pin example.
          block=Mesh/pin1
@@ -40,7 +40,7 @@ The final mesh will contain one block (subdomain) for quadrilateral elements and
        caption=Example RGMB Cartesian pin cell mesh colored by `subdomain_id` (left) and `region_id` (right).
        style=width:50%;display:block;margin-left:auto;margin-right:auto;
 
-!listing sec10_rgmb_simple_examples/rgmb_core_cartesian.i
+!listing rgmb_mesh_generators/rgmb_core_cartesian.i
          id=tutorial04-rgmb_pinmesh_cart-pin1
          caption=Example RGMB Cartesian pin cell.
          block=Mesh/pin1
@@ -50,7 +50,7 @@ The final mesh will contain one block (subdomain) for quadrilateral elements and
        caption=Example RGMB hexagonal pin cell mesh colored by `subdomain_id` (left) and `region_id` (right).
        style=width:50%;display:block;margin-left:auto;margin-right:auto;
 
-!listing sec10_rgmb_simple_examples/rgmb_core_hexagonal.i
+!listing rgmb_mesh_generators/rgmb_core_hexagonal.i
          id=tutorial04-rgmb_pinmesh_hex-pin1
          caption=Example RGMB hexagonal pin cell.
          block=Mesh/pin1
@@ -71,7 +71,7 @@ The final mesh will contain one block (subdomain) for quadrilateral elements and
        caption=Cartesian assembly colored by `subdomain_id` (left), `region_id` (middle), and `pin_id` (right). Subdomain ids categorize elements as belonging to different subdomains (blocks), region ids categorize elements belonging to different regions (material zones), and `pin_ids` categorize elements belonging to different pin cells.
        style=width:75%;display:block;margin-left:auto;margin-right:auto;
 
-!listing sec10_rgmb_simple_examples/rgmb_core_cartesian.i
+!listing rgmb_mesh_generators/rgmb_core_cartesian.i
          id=tutorial04-rgmb_rgmb_core_cartesian
          caption=Example RGMB Cartesian assembly.
          block=Mesh/assembly1
@@ -90,7 +90,7 @@ The final mesh will contain one block (subdomain) for quadrilateral elements and
        caption=Hexagonal assembly colored by `subdomain_id` (left), `region_id` (middle), and `pin_id` (right). Subdomain ids categorize elements as belonging to different subdomains (blocks), region ids categorize elements belonging to different regions (material zones), and `pin_ids` categorize elements belonging to different pin cells.
        style=width:75%;display:block;margin-left:auto;margin-right:auto;
 
-!listing sec10_rgmb_simple_examples/rgmb_core_hexagonal.i
+!listing rgmb_mesh_generators/rgmb_core_hexagonal.i
          id=tutorial04-rgmb_rgmb_core_hexagonal
          caption=Example RGMB hexagonal assembly.
          block=Mesh/assembly1
@@ -108,7 +108,7 @@ Defining `dummy_assembly_name` and using it in inputs defines a dummy assembly i
        caption=Cartesian core colored by `subdomain_id` (left), `region_id` (middle), and `assembly_id` (right).
        style=width:75%;display:block;margin-left:auto;margin-right:auto;
 
-!listing sec10_rgmb_simple_examples/rgmb_core_cartesian.i
+!listing rgmb_mesh_generators/rgmb_core_cartesian.i
          id=tutorial04-rgmb_core_cart-core
          caption=Example RGMB Cartesian core.
          block=Mesh/rgmb_core
@@ -120,7 +120,7 @@ Defining `dummy_assembly_name` and using it in inputs defines a dummy assembly i
        caption=Hexagonal core colored by `subdomain_id` (left), `region_id` (middle), and `assembly_id` (right).
        style=width:75%;display:block;margin-left:auto;margin-right:auto;
 
-!listing sec10_rgmb_simple_examples/rgmb_core_hexagonal.i
+!listing rgmb_mesh_generators/rgmb_core_hexagonal.i
          id=tutorial04-rgmb_core_hex-core
          caption=Example RGMB Hexagonal core.
          block=Mesh/rgmb_core
@@ -134,7 +134,7 @@ A core periphery region can be added utilizing either the [PeripheralRingMeshGen
        caption=Hexagonal core with core periphery meshed.
        style=width:50%;display:block;margin-left:auto;margin-right:auto;
 
-!listing sec10_rgmb_simple_examples/rgmb_core_hexagonal_periphery.i
+!listing rgmb_mesh_generators/rgmb_core_hexagonal_periphery.i
          id=tutorial04-rgmb_core_hex-periphery
          caption=Example RGMB Hexagonal core with periphery.
          block=Mesh/rgmb_core

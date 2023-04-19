@@ -21,7 +21,7 @@ The RGMB system is useful for regular 2D or extruded 3D Cartesian or hexagonal g
 
 [ReactorMeshParams.md] acts as a container for storing global data about the reactor geometry that needs to be retrieved at different stages of the RGMB mesh generation workflow. In particular, the union axial grid for the extruded geometry is defined here and propagated to the entire mesh upon the extrusion step.
 
-!listing sec10_rgmb_simple_examples/rgmb_core_cartesian.i
+!listing rgmb_mesh_generators/rgmb_core_cartesian.i
          block=Mesh/rmp
          link=False
 
@@ -34,7 +34,7 @@ The RGMB system is useful for regular 2D or extruded 3D Cartesian or hexagonal g
 !row!
 !col small=12 medium=6 large=8
 
-!listing sec10_rgmb_simple_examples/rgmb_core_cartesian.i
+!listing rgmb_mesh_generators/rgmb_core_cartesian.i
          block=Mesh/pin1
          link=False
 
@@ -48,7 +48,7 @@ The RGMB system is useful for regular 2D or extruded 3D Cartesian or hexagonal g
 !row!
 !col small=12 medium=6 large=8
 
-!listing sec10_rgmb_simple_examples/rgmb_core_hexagonal.i
+!listing rgmb_mesh_generators/rgmb_core_hexagonal.i
          block=Mesh/pin1
          link=False
 
@@ -68,7 +68,7 @@ The RGMB system is useful for regular 2D or extruded 3D Cartesian or hexagonal g
 !row!
 !col small=12 medium=6 large=8
 
-!listing sec10_rgmb_simple_examples/rgmb_core_cartesian.i
+!listing rgmb_mesh_generators/rgmb_core_cartesian.i
          block=Mesh/assembly1
          link=False
 
@@ -82,7 +82,7 @@ The RGMB system is useful for regular 2D or extruded 3D Cartesian or hexagonal g
 !row!
 !col small=12 medium=6 large=8
 
-!listing sec10_rgmb_simple_examples/rgmb_core_hexagonal.i
+!listing rgmb_mesh_generators/rgmb_core_hexagonal.i
          block=Mesh/assembly1
          link=False
 
@@ -102,7 +102,7 @@ The RGMB system is useful for regular 2D or extruded 3D Cartesian or hexagonal g
 !row!
 !col small=12 medium=6 large=8
 
-!listing sec10_rgmb_simple_examples/rgmb_core_cartesian.i
+!listing rgmb_mesh_generators/rgmb_core_cartesian.i
          block=Mesh/rgmb_core
          link=False
 
@@ -116,7 +116,7 @@ The RGMB system is useful for regular 2D or extruded 3D Cartesian or hexagonal g
 !row!
 !col small=12 medium=6 large=8
 
-!listing sec10_rgmb_simple_examples/rgmb_core_hexagonal.i
+!listing rgmb_mesh_generators/rgmb_core_hexagonal.i
          block=Mesh/rgmb_core
          link=False
 
@@ -136,7 +136,7 @@ A core periphery region can be added utilizing either the [PeripheralRingMeshGen
 !row!
 !col small=12 medium=6 large=8
 
-!listing sec10_rgmb_simple_examples/rgmb_core_hexagonal_periphery.i
+!listing rgmb_mesh_generators/rgmb_core_hexagonal_periphery.i
          block=Mesh/rgmb_core
          link=False
 

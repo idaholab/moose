@@ -17,7 +17,7 @@ This example illustrates the use of RGMB mesh generators to define a 3D hexagona
 
 [ReactorMeshParams.md] contains global mesh/geometry parameters including whether the final mesh is 2D or 3D, Cartesian or hexagonal, assembly pitch, and the axial discretization for the final extruded geometry. This information will be accessible to the other RGMB mesh generators and consistently used.
 
-!listing sec11_rgmb_homog_abtr/rgmb_abtr.i
+!listing reactor_examples/rgmb_abtr/rgmb_abtr.i
          block=Mesh/rmp
          link=False
 
@@ -31,7 +31,7 @@ This example illustrates the use of RGMB mesh generators to define a 3D hexagona
 
 [PinMeshGenerator.md] is called multiple times to define the various homogeneous assemblies. Dummy assemblies are not required when building a core using RGMB, so they are not defined in this input.
 
-!listing sec11_rgmb_homog_abtr/rgmb_abtr.i
+!listing reactor_examples/rgmb_abtr/rgmb_abtr.i
          block=Mesh/control
          link=False
 
@@ -44,7 +44,7 @@ This example illustrates the use of RGMB mesh generators to define a 3D hexagona
 !row!
 !col small=12 medium=6 large=8
 
-!listing sec11_rgmb_homog_abtr/rgmb_abtr.i
+!listing reactor_examples/rgmb_abtr/rgmb_abtr.i
          block=Mesh/core
          link=False
 
@@ -64,13 +64,13 @@ This example illustrates the use of RGMB mesh generators to define a 3D hexagona
 
 Griffin recognizes material ID assignments through the `material_id` tag. Therefore, the `region_id` tags need to be renamed to `material_id`. This is done using [ExtraElementIDCopyGenerator.md].
 
-!listing sec11_rgmb_homog_abtr/rgmb_abtr.i
+!listing reactor_examples/rgmb_abtr/rgmb_abtr.i
          block=Mesh/abtr_mesh
          link=False
 
 Material definition in the Griffin input file is then greatly simplified since `material_id` is defined directly on mesh. No additional mapping is needed.
 
-!listing sec11_rgmb_homog_abtr/rgmb_abtr_griffin_options.i
+!listing reactor_examples/rgmb_abtr/rgmb_abtr_griffin_options.i
          block=Materials
          link=False
 
@@ -78,6 +78,6 @@ Material definition in the Griffin input file is then greatly simplified since `
 
 RGMB labels outer boundary sidesets with pre-defined names -- "top" for top boundary, "bottom" for bottom boundary, and "outer_core" for radial boundary. Boundary conditions are assigned to these sidesets in Griffin.
 
-!listing sec11_rgmb_homog_abtr/rgmb_abtr_griffin_options.i
+!listing reactor_examples/rgmb_abtr/rgmb_abtr_griffin_options.i
          block=TransportSystems
          link=False

@@ -44,7 +44,7 @@ The first step is to define unique mesh objects for each different assembly type
        caption=Homogeneous assembly defined with 2 quadrilateral elements.
        style=width:50%;display:block;margin-left:auto;margin-right:auto;
 
-!listing sec08_homog_ABTR/abtr.i
+!listing reactor_examples/abtr/abtr.i
          id=tutorial04-abtr_mesh_quads
          caption=Input to create a single homogenized assembly.
          block=Mesh/control
@@ -69,7 +69,7 @@ When we later stitch assemblies into a hexagonal core, the stitcher requires a "
 
 ### Example Input
 
-!listing sec08_homog_ABTR/abtr.i
+!listing reactor_examples/abtr/abtr.i
          id=tutorial04-abtr_mesh_dummy
          caption=Homogeneous dummy example.
          block=Mesh/dummy
@@ -97,7 +97,7 @@ Now that assemblies have been defined, we stitch the assemblies into a perfect h
        caption=2D core including dummy assemblies in the "empty" locations.
        style=width:50%;display:block;margin-left:auto;margin-right:auto;
 
-!listing sec08_homog_ABTR/abtr.i
+!listing reactor_examples/abtr/abtr.i
          id=tutorial04-abtr_mesh_core
          caption=Homogeneous core example.
          block=Mesh/core
@@ -125,7 +125,7 @@ Dummy assemblies were only included to facilitate the core pattern generation an
        caption=2D core after deletion of dummy assemblies colored by "subdomain_id"(left) and "assembly_id" (right).
        style=width:50%;display:block;margin-left:auto;margin-right:auto;
 
-!listing sec08_homog_ABTR/abtr.i
+!listing reactor_examples/abtr/abtr.i
          id=tutorial04-abtr_mesh_dummy_del
          caption=Homogeneous dummy deletion example.
          block=Mesh/del_dummy
@@ -159,7 +159,7 @@ The [AdvancedExtruderGenerator.md] can be used to perform 2D-to-3D extrusion, al
        caption=3D core after extrusion, colored by subdomain IDs.
        style=width:50%;display:block;margin-left:auto;margin-right:auto;
 
-!listing sec08_homog_ABTR/abtr.i
+!listing reactor_examples/abtr/abtr.i
          id=tutorial04-abtr_mesh_extrude
          caption=Homogeneous extrude example.
          block=Mesh/extrude
@@ -183,7 +183,7 @@ In order to facilitate output processing, we assign `plane_id` reporting IDs to 
        caption=3D ABTR colored by "plane_id" reporting ID.
        style=width:50%;display:block;margin-left:auto;margin-right:auto;
 
-!listing sec08_homog_ABTR/abtr.i
+!listing reactor_examples/abtr/abtr.i
          id=tutorial04-abtr_mesh_plane_id
          caption=Homogeneous plane ID example.
          block=Mesh/plane_id
@@ -207,7 +207,7 @@ Since [AdvancedExtruderGenerator.md] requires top and bottom boundary sidesets b
        caption=Sideset names and locations of the ABTR core mesh.
        style=width:50%;display:block;margin-left:auto;margin-right:auto;
 
-!listing sec08_homog_ABTR/abtr.i
+!listing reactor_examples/abtr/abtr.i
          id=tutorial04-abtr_mesh_plane_rename
          caption=Homogeneous boundary rename example.
          block=Mesh/abtr_mesh
@@ -224,7 +224,7 @@ Griffin's `MixedNeutronicsMaterial` defines the mesh-material mapping explicitly
 
 The key point is that the block IDs (`subdomain_id`) in the mesh need to be referenced in the Griffin input file in order to map materials to these blocks. A separate `MixedNeutronicsMaterial` should be defined in the Griffin input for each unique material ID pertaining to the input mesh.
 
-!listing sec08_homog_ABTR/abtr_cmfd.i
+!listing reactor_examples/abtr/abtr_cmfd.i
          id=tutorial04-abtr_cmfd
          caption=Homogeneous Griffin block assignment example.
          block=Materials/icore
@@ -233,7 +233,7 @@ The key point is that the block IDs (`subdomain_id`) in the mesh need to be refe
 
 Griffin requires boundary conditions to be applied to all external boundaries of the mesh (generally the top, bottom, and radial periphery for a typical 3D core). Boundary conditions are set in the `TransportSystems` block of Griffin. These outer boundary sidesets must be assigned to the appropriate boundary condition type (e.g.,  `VacuumBoundary`, `ReflectingBoundary`, etc.).
 
-!listing sec08_homog_ABTR/abtr_cmfd.i
+!listing reactor_examples/abtr/abtr_cmfd.i
          id=tutorial04-abtr_cmfd-transport
          caption=Homogeneous Griffin Transport Systems example.
          block=TransportSystems

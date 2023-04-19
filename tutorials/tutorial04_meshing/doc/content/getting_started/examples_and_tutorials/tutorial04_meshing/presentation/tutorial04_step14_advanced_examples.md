@@ -101,7 +101,7 @@ Mesh biasing applies non-uniform meshing subintervals within a specific region. 
 !row!
 !col small=12 medium=6 large=8
 
-!listing sec14_adv/ax_bias.i
+!listing adv_examples/ax_bias.i
          block=Mesh
          link=False
 
@@ -119,7 +119,7 @@ Similarly, the user may want to radially bias the mesh where solution gradients 
 !row!
 !col small=12 medium=6 large=8
 
-!listing sec14_adv/rad_bias_pccmg.i
+!listing adv_examples/rad_bias_pccmg.i
          block=Mesh
          link=False
 
@@ -135,7 +135,7 @@ Similarly, the user may want to radially bias the mesh where solution gradients 
 !row!
 !col small=12 medium=6 large=8
 
-!listing sec14_adv/rad_bias_prmg.i
+!listing adv_examples/rad_bias_prmg.i
          block=Mesh
          link=False
 
@@ -155,7 +155,7 @@ Boundary layers are commonly needed in thermal-hydraulic applications, where the
 !row!
 !col small=12 medium=6 large=8
 
-!listing sec14_adv/bdry_layer_pccmg.i
+!listing adv_examples/bdry_layer_pccmg.i
          block=Mesh
          link=False
 
@@ -199,7 +199,7 @@ First, define the regular small fuel pins and place them into the assembly as a 
 !row!
 !col small=12 medium=6 large=8
 
-!listing sec14_adv/oversize.i
+!listing adv_examples/oversize.i
          block=Mesh
          link=False
 
@@ -219,7 +219,7 @@ The MSRE 2D lattice case was constructed using the [FillBetweenSidesetsGenerator
 !row!
 !col small=12 medium=6 large=8
 
-!listing sec14_adv/quarter_circle_connect.i
+!listing adv_examples/quarter_circle_connect.i
          block=Mesh/connect_two_circles
          link=False
 

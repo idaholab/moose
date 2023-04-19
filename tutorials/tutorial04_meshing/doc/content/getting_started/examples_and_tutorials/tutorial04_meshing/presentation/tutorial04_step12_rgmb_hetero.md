@@ -15,7 +15,7 @@ This example illustrates the use of RGMB mesh generators to define a 3D pin-hete
 
 [ReactorMeshParams.md] contains global mesh/geometry parameters including the dimension (3D), type (hexagonal) and the axial discretization for the final geometry.
 
-!listing sec12_rgmb_het_lfr/rgmb_lfr_assembly.i
+!listing reactor_examples/rgmb_lfr/rgmb_lfr_assembly.i
          block=Mesh/rmp
          link=False
 
@@ -28,7 +28,7 @@ The pitch of the pin is specified with pitch, and the number of azimuthal sector
 !row!
 !col small=12 medium=6 large=8
 
-!listing sec12_rgmb_het_lfr/rgmb_lfr_assembly.i
+!listing reactor_examples/rgmb_lfr/rgmb_lfr_assembly.i
          block=Mesh/pin1
          link=False
 
@@ -47,7 +47,7 @@ The pitch of the pin is specified with pitch, and the number of azimuthal sector
 
 Extrusion is performed by using the `extrude`=`true` option and is performed after the 2D assembly geometry has been completed.
 
-!listing sec12_rgmb_het_lfr/rgmb_lfr_assembly.i
+!listing reactor_examples/rgmb_lfr/rgmb_lfr_assembly.i
          block=Mesh/assembly
          link=False
 
@@ -69,13 +69,13 @@ Materials IDs also assigned:
 
 `region_id` extra element integer needs to be renamed to `material_id` so that Griffin can recognize these values are material assignments
 
-!listing sec12_rgmb_het_lfr/rgmb_lfr_assembly.i
+!listing reactor_examples/rgmb_lfr/rgmb_lfr_assembly.i
          block=Mesh/lfr_assy
          link=False
 
 Boundary conditions are assigned to the outer boundary sidesets
 
-!listing sec12_rgmb_het_lfr/griffin_options.i
+!listing reactor_examples/rgmb_lfr/griffin_options.i
          block=TransportSystems
          link=False
 
@@ -83,6 +83,6 @@ Boundary conditions are assigned to the outer boundary sidesets
 
 Material definition is greatly simplified since `material_id` extra element ID is defined directly on mesh
 
-!listing sec12_rgmb_het_lfr/griffin_options.i
+!listing reactor_examples/rgmb_lfr/griffin_options.i
          block=Materials
          link=False

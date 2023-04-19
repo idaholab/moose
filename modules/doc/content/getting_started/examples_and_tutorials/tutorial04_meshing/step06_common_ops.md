@@ -30,12 +30,12 @@ An alternative type of symmetry occurs in certain "unit cells" which contain hal
        caption=Possible trimming lines of [HexagonMeshTrimmer.md].
        style=width:50%;display:block;margin-left:auto;margin-right:auto;
 
-!listing sec06_common_ops/peripheral_trim.i
+!listing base_mesh_generators/peripheral_trim.i
          id=tutorial04-peripheral_trim.i
          caption=Mesh peripheral trimming example input.
          block=Mesh/peripheral_trim
 
-!listing sec06_common_ops/center_trim.i
+!listing base_mesh_generators/center_trim.i
          id=tutorial04-center_trim.i
          caption=Mesh center trimming example input.
          block=Mesh/center_trim

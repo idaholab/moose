@@ -11,7 +11,7 @@ This example illustrates the use of RGMB mesh generators to define a 3D pin-hete
 
 [ReactorMeshParams.md] contains global mesh/geometry parameters including the dimension (3D), type (hexagonal) and the axial discretization for the final geometry.
 
-!listing sec12_rgmb_het_lfr/rgmb_lfr_assembly.i
+!listing reactor_examples/rgmb_lfr/rgmb_lfr_assembly.i
          id=tutorial04-rgmb_lfr-rmp
          caption=LFR RGMB Reactor Mesh Parameters example.
          block=Mesh/rmp
@@ -27,7 +27,7 @@ The pitch of the pin is specified with pitch, and the number of azimuthal sector
        caption=Example LFR assembly pin cell mesh colored by `subdomain_id`.
        style=width:50%;display:block;margin-left:auto;margin-right:auto;
 
-!listing sec12_rgmb_het_lfr/rgmb_lfr_assembly.i
+!listing reactor_examples/rgmb_lfr/rgmb_lfr_assembly.i
          id=tutorial04-rgmb_lfr-pin1
          caption=LFR RGMB pin example.
          block=Mesh/pin1
@@ -44,7 +44,7 @@ Whatever area remains between the outer pin boundaries and the inner half pitch 
 
 Extrusion is performed by using the `extrude`=`true` option and is performed after the 2D assembly geometry has been completed.
 
-!listing sec12_rgmb_het_lfr/rgmb_lfr_assembly.i
+!listing reactor_examples/rgmb_lfr/rgmb_lfr_assembly.i
          id=tutorial04-rgmb_lfr-assembly
          caption=LFR RGMB assembly example.
          block=Mesh/assembly
@@ -65,21 +65,21 @@ RGMB allows assignment of background coolant and duct region IDs which are added
 
 `region_id` extra element integer needs to be renamed to `material_id` so that Griffin can recognize these values are material assignments.
 
-!listing sec12_rgmb_het_lfr/rgmb_lfr_assembly.i
+!listing reactor_examples/rgmb_lfr/rgmb_lfr_assembly.i
          id=tutorial04-rgmb_lfr-material-id
          caption=LFR RGMB Material ID setup.
          block=Mesh/lfr_assy
 
 Boundary conditions are assigned to the outer boundary sidesets.
 
-!listing sec12_rgmb_het_lfr/griffin_options.i
+!listing reactor_examples/rgmb_lfr/griffin_options.i
          id=tutorial04-rgmb_lfr-transport
          caption=LFR RGMB boundary condition setup.
          block=TransportSystems
 
 Material definition is greatly simplified since `material_id` extra element ID is defined directly on mesh.
 
-!listing sec12_rgmb_het_lfr/griffin_options.i
+!listing reactor_examples/rgmb_lfr/griffin_options.i
          id=tutorial04-rgmb_lfr-materials
          caption=LFR RGMB materials setup.
          block=Materials
