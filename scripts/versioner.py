@@ -216,9 +216,9 @@ class Versioner:
 
     def influential_list(self, packages_yaml, library=None, recursive_meta=None):
         """ build and return influential dictionary """
-        # Key disctriptors that should be consider control identifiers. Anything else
-        # will be treated as trackable libraries.
-        not_libraries = ['dependencies', 'influential']
+        # key descriptors should to be treated as control identifiers. Anything else will
+        # be treated as trackable libraries.
+        key_descriptors = ['dependencies', 'influential']
         # key name for infuential file list value
         dep_key = 'influential'
         # key name for dependency value
@@ -230,7 +230,7 @@ class Versioner:
             # 'values' is a dictionary with more items to discover (recurse into)
             if isinstance(values, dict):
                 # 'package' is actually a library we wish to track
-                if package not in not_libraries:
+                if package not in key_descriptors:
                     recursive_meta[package] = {}
                 # recursive inspection of packages_yaml[library], preserve history (grow)
                 self.influential_list(packages_yaml[package],
