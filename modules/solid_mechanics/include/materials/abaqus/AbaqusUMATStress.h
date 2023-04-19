@@ -248,10 +248,10 @@ protected:
   const bool _use_one_based_indexing;
 
   /// Rotation information
-  RotationTensor _R;
+  const bool _use_orientation;
+  const RotationTensor _R;
   MaterialProperty<RankTwoTensor> & _total_rotation;
   const MaterialProperty<RankTwoTensor> & _total_rotation_old;
-  const bool _orientation_flag;
 
 private:
   /// Method being used to compute strain and rotation increments

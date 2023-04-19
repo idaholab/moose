@@ -51,9 +51,7 @@ AbaqusUMATStress::validParams()
       "displaced mesh for computing displacements and quantities based on the deformed state.");
   params.addParam<UserObjectName>(
       "step_user_object", "The StepUserObject that provides times from simulation loading steps.");
-  params.addParam<Real>("euler_angle_1", 0.0, "Euler angle in direction 1.");
-  params.addParam<Real>("euler_angle_2", 0.0, "Euler angle in direction 2.");
-  params.addParam<Real>("euler_angle_3", 0.0, "Euler angle in direction 3.");
+  params.addParam<RealVectorValue>("orientation", "Euler angles corresponding to the Abaqus ORIENTATION keyword.");
   return params;
 }
 
@@ -96,14 +94,10 @@ AbaqusUMATStress::AbaqusUMATStress(const InputParameters & parameters)
     _external_properties(_number_external_properties),
     _external_properties_old(_number_external_properties),
     _use_one_based_indexing(getParam<bool>("use_one_based_indexing")),
-    _R(RealVectorValue(getParam<Real>("euler_angle_1"),
-                       getParam<Real>("euler_angle_2"),
-                       getParam<Real>("euler_angle_3"))),
+    _use_orientation(isParamValid("orientation")),
+    _R(_use_orientation ? getParam<RealVectorValue>("orientation") : RealVectorValue(0.0)),
     _total_rotation(declareProperty<RankTwoTensor>("total_rotation")),
     _total_rotation_old(getMaterialPropertyOld<RankTwoTensor>("total_rotation")),
-    _orientation_flag(parameters.isParamSetByUser("euler_angle_1") ||
-                      parameters.isParamSetByUser("euler_angle_2") ||
-                      parameters.isParamSetByUser("euler_angle_3")),
     _decomposition_method(
         getParam<MooseEnum>("decomposition_method").getEnum<ComputeFiniteStrain::DecompMethod>())
 {
@@ -220,13 +214,13 @@ AbaqusUMATStress::computeQpStress()
   const Real * myDFGRD1 = &(FBar_fortran(0, 0));
   const Real * myDROT = &(DROT_fortran(0, 0));
 
-  // More local copies of materials so we can rotate
+  // More local copies of materials so we can (optionally) rotate
   RankTwoTensor stress_old = _stress_old[_qp];
   RankTwoTensor total_strain_old = _total_strain_old[_qp];
   RankTwoTensor strain_increment = _strain_increment[_qp];
 
   // check if we need to rotate to intermediate configuration
-  if (_orientation_flag)
+  if (_use_orientation)
   {
     // keep track of total rotation
     _total_rotation[_qp] = _rotation_increment[_qp] * _total_rotation_old[_qp];
@@ -397,7 +391,7 @@ AbaqusUMATStress::computeQpStress()
         }
 
   // check if we need to rotate from intermediate reference frame
-  if (_orientation_flag)
+  if (_use_orientation)
   {
     // rotate to current configuration
     _stress[_qp].rotate(_total_rotation[_qp]);
