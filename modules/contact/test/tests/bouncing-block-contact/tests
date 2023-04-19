@@ -141,24 +141,41 @@
       detail = 'using a first order basis for displacements and penalty multiplication times the '
                'negative gap distance to form the contact force via the contact action.'
       map = true
-      cli_args = "Mesh/mesh_file/file=long-bottom-block-1elem-blocks-coarse.e Executioner/end_time=50 "
-                 "Postprocessors/active='' Outputs/hide='nodal_area contact_pressure penetration'"
+      cli_args = "Mesh/mesh_file/file=long-bottom-block-1elem-blocks-coarse.e "
+                 "Executioner/end_time=50 Postprocessors/active='' Outputs/hide='nodal_area "
+                 "contact_pressure penetration'"
     []
   []
   [very_parallel_penalty]
-    requirement = 'The system shall be able to communicate semilocal weighted gaps back to any process that contributed to computing said weighted gaps.'
+    requirement = 'The system shall be able to communicate semilocal weighted velocities back to any '
+                  'process that contributed to computing said weighted gaps.'
     issues = '#21329'
     type = 'Exodiff'
     input = frictionless-penalty-weighted-gap.i
     exodiff = 'parallel-frictionless-penalty-weighted-gap_out.e'
     cli_args = "Mesh/file=long-bottom-block-1elem-blocks-coarse.e Executioner/end_time=50 "
-               "Postprocessors/active='' Outputs/file_base=parallel-frictionless-penalty-weighted-gap_out"
+               "Postprocessors/active='' "
+               "Outputs/file_base=parallel-frictionless-penalty-weighted-gap_out"
+    min_parallel = 13
+  []
+  [very_parallel_frictional_penalty]
+    requirement = 'The system shall be able to communicate semilocal weighted gaps and velocities '
+                  'back to any process that contributed to computing said weighted quantities. We '
+                  'check against the serial numerical results.'
+    issues = '#21329'
+    type = 'Exodiff'
+    input = frictional-penalty-weighted-vel.i
+    exodiff = 'parallel-frictional-penalty-weighted-vel_out.e'
+    cli_args = "Mesh/file=long-bottom-block-1elem-blocks-coarse.e Executioner/end_time=50 "
+               "Postprocessors/active='' "
+               "Outputs/file_base=parallel-frictional-penalty-weighted-vel_out"
     min_parallel = 13
   []
   [weighted_vel_pdass]
     requirement = 'The system shall support a variationally consistent mortar frictional constraints '
                   'with dual bases'
     issues = '#17495'
+
     [verbose]
       type = 'Exodiff'
       input = frictional-nodal-min-normal-lm-mortar-pdass-tangential-lm-mortar-disp.i

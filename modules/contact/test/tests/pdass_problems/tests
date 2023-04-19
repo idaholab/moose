@@ -62,7 +62,6 @@
                   'flexible base material using a penalty approach to mortar contact through the '
                   'contact action.'
   []
-
   [frictional_bouncing_block]
     type = 'CSVDiff'
     csvdiff = 'frictional_bouncing_block_checkfile_cont_press_0029.csv '
