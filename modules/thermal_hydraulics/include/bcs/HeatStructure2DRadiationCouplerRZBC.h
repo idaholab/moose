@@ -10,11 +10,12 @@
 #pragma once
 
 #include "HeatStructure2DCouplerBCBase.h"
+#include "RZSymmetry.h"
 
 /**
  * Applies BC for HeatStructure2DRadiationCouplerRZ
  */
-class HeatStructure2DRadiationCouplerRZBC : public HeatStructure2DCouplerBCBase
+class HeatStructure2DRadiationCouplerRZBC : public HeatStructure2DCouplerBCBase, public RZSymmetry
 {
 public:
   HeatStructure2DRadiationCouplerRZBC(const InputParameters & parameters);
@@ -28,10 +29,10 @@ protected:
   const Real & _coupled_emissivity;
   /// View factor of this boundary
   const Real & _view_factor;
-  /// Perimeter of this boundary
-  const Real & _perimeter;
-  /// Perimeter of the coupled boundary
-  const Real & _coupled_perimeter;
+  /// Area of this boundary
+  const Real & _area;
+  /// Area of the coupled boundary
+  const Real & _coupled_area;
   /// Stefan-Boltzmann constant
   const Real & _sigma;
   /// Radiation resistance

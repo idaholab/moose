@@ -29,8 +29,6 @@ protected:
   const std::vector<Real> _emissivities;
   /// View factors for the primary and secondary sides
   std::vector<Real> _view_factors;
-  /// Perimeters for the primary and secondary sides
-  std::vector<Real> _perimeters;
 
 public:
   static InputParameters validParams();

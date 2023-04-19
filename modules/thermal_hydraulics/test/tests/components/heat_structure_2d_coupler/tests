@@ -33,6 +33,15 @@
     requirement = 'The system shall be able to couple two 2D plate heat structures.'
   []
 
+  [separated]
+    type = CSVDiff
+    input = 'separated.i'
+    csvdiff = 'separated_out.csv'
+    mesh_mode = 'replicated' # HeatStructure2DCoupler does not work with distributed mesh
+    issues = '#19851 #23853'
+    requirement = 'The system shall be able to couple two 2D cylindrical heat structures on separated surfaces.'
+  []
+
   [error_reporting]
     requirement = 'The system shall report an error for HeatStructure2DCoupler when'
 
@@ -85,13 +94,14 @@
       type = RunException
       input = 'heat_structure_2d_coupler.i'
       cli_args = "
+        Components/hs1/orientation='1 1 0'
         Components/hs3/inner_radius=0.8
         Postprocessors/E_tot/axis_dir='1 0 0'
         Postprocessors/E_tot/axis_point='0 0 0'"
-      expect_err = "The primary and secondary boundaries must have coincident meshes"
+      expect_err = "The primary and secondary boundaries must be aligned"
       mesh_mode = 'replicated'
 
-      detail = 'the boundary meshes are not coincident.'
+      detail = 'the boundary meshes are not aligned.'
     []
     [distributed_mesh]
       type = RunException

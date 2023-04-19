@@ -227,6 +227,19 @@ public:
    */
   void addDependency(const std::string & dependency);
 
+  /**
+   * Gets an enum parameter
+   *
+   * This function takes the name of a MooseEnum parameter that is tied to an
+   * enum defined in THM. If the value is invalid, an error will be logged,
+   * and a negative integer will be cast into the enum type.
+   *
+   * @tparam    T       enum type
+   * @param[in] param   name of the MooseEnum parameter
+   */
+  template <typename T>
+  T getEnumParam(const std::string & param) const;
+
 protected:
   /**
    * Performs any post-constructor, pre-mesh-setup setup
@@ -261,19 +274,6 @@ protected:
    * Performs mesh setup such as creating mesh or naming mesh sets
    */
   virtual void setupMesh() {}
-
-  /**
-   * Gets an enum parameter
-   *
-   * This function takes the name of a MooseEnum parameter that is tied to an
-   * enum defined in THM. If the value is invalid, an error will be logged,
-   * and a negative integer will be cast into the enum type.
-   *
-   * @tparam    T       enum type
-   * @param[in] param   name of the MooseEnum parameter
-   */
-  template <typename T>
-  T getEnumParam(const std::string & param) const;
 
   /**
    * Runtime check to make sure that a parameter of specified type exists in the component's input
@@ -452,7 +452,7 @@ Component::getEnumParam(const std::string & param) const
 {
   const MooseEnum & moose_enum = getParam<MooseEnum>(param);
   const T value = THM::stringToEnum<T>(moose_enum);
-  if (value < 0)
+  if (static_cast<int>(value) < 0) // cast necessary for scoped enums
   {
     // Get the keys from the MooseEnum. Unfortunately, this returns a list of
     // *all* keys, including the invalid key that was supplied. Thus, that key
