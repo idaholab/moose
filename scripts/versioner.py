@@ -216,7 +216,7 @@ class Versioner:
 
     def influential_list(self, packages_yaml, library=None, recursive_meta=None):
         """ build and return influential dictionary """
-        # key descriptors should to be treated as control identifiers. Anything else will
+        # key descriptors to be treated as control identifiers. Anything else will
         # be treated as trackable libraries.
         key_descriptors = ['dependencies', 'influential']
         # key name for infuential file list value
