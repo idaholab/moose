@@ -62,7 +62,8 @@ ComputeMarkerThread::onElement(const Elem * elem)
   // Set up Sentinel class so that, even if reinitMaterials() throws, we
   // still remember to swap back during stack unwinding.
   SwapBackSentinel sentinel(_fe_problem,
-                            &FEProblem::swapBackMaterials, _tid,
+                            &FEProblem::swapBackMaterials,
+                            _tid,
                             _fe_problem.hasActiveMaterialProperties(_tid));
 
   _fe_problem.reinitMaterials(_subdomain, _tid);
