@@ -202,7 +202,7 @@ Component::addRelationshipManager(
   if (rm_input_parameter_func)
     rm_input_parameter_func(moose_object_pars, rm_params);
 
-  rm_params.set<MooseMesh *>("mesh") = &mesh();
+  rm_params.set<MooseMesh *>("mesh") = &_mesh;
 
   if (!rm_params.areAllRequiredParamsValid())
     mooseError("Missing required parameters for RelationshipManager " + rm_name + " for object " +
