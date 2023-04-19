@@ -15,7 +15,7 @@ template <typename>
 class MooseVariableFE;
 
 /**
- * User object for tangential pressures due to friction using a penalty approach
+ * User object that computes tangential pressures due to friction using a penalty approach
  */
 class PenaltyFrictionUserObject : public WeightedVelocitiesUserObject
 {
@@ -43,7 +43,7 @@ protected:
   virtual const VariableTestValue & test() const override;
   virtual bool constrainedByOwner() const override { return false; }
 
-  /// The penalty factor
+  /// The normal penalty factor
   const Real _penalty;
 
   /// The penalty factor for the frictional constraints

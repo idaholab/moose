@@ -35,14 +35,8 @@ public:
   /**
    * @return The contact force at quadrature points on the mortar segment
    */
-  virtual const ADVariableValue & contactTangentialPressureDirOne() const
-  {
-    mooseError("contactTangentialPressureDirOne shouldn't get called in the base class");
-  }
-  virtual const ADVariableValue & contactTangentialPressureDirTwo() const
-  {
-    mooseError("contactTangentialPressureDirTwo shouldn't get called in the base class");
-  }
+  virtual const ADVariableValue & contactTangentialPressureDirOne() const = 0;
+  virtual const ADVariableValue & contactTangentialPressureDirTwo() const = 0;
 
 protected:
   /**

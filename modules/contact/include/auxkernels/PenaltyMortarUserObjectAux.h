@@ -14,7 +14,7 @@
 class UserObject;
 
 /**
- * Function auxiliary value
+ * Auxiliary kernel to output mortar penalty contact quantities of interest
  */
 class PenaltyMortarUserObjectAux : public AuxKernel
 {

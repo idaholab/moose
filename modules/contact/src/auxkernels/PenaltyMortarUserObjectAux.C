@@ -18,8 +18,8 @@ InputParameters
 PenaltyMortarUserObjectAux::validParams()
 {
   InputParameters params = AuxKernel::validParams();
-  params.addClassDescription("Populates an auxiliary variable with a spatial value returned from a "
-                             "UserObject spatialValue method.");
+  params.addClassDescription(
+      "Populates an auxiliary variable with a contact quantities from penalty mortar contact.");
   MooseEnum contact_quantity("normal_pressure accumulated_slip_one "
                              "tangential_pressure_one tangential_velocity_one accumulated_slip_two "
                              "tangential_pressure_two tangential_velocity_two weighted_gap");
@@ -29,8 +29,8 @@ PenaltyMortarUserObjectAux::validParams()
       "The desired contact quantity to output as an auxiliary variable.");
   params.addRequiredParam<UserObjectName>(
       "user_object",
-      "The UserObject UserObject to get values from.  Note that the UserObject "
-      "_must_ implement the spatialValue() virtual function!");
+      "The penalty mortar user object to get values from.  Note that the user object "
+      "must implement the corresponding getter function.");
   return params;
 }
 
