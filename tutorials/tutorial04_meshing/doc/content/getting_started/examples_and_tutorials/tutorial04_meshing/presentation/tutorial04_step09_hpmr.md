@@ -43,7 +43,7 @@
 !row!
 !col small=12 medium=6 large=8
 
-!listing sec09_hpmr_example/HPMR_9.1_Create_pin_unit_cell.i
+!listing sec09_hpmr_example/hpmr.i
          block=Mesh/moderator_pincell
          link=False
 
@@ -68,7 +68,7 @@
 !row!
 !col small=12 medium=6 large=8
 
-!listing sec09_hpmr_example/HPMR_9.2_Patterned_Hex_Assembly.i
+!listing sec09_hpmr_example/hpmr.i
          block=Mesh/fuel_assembly
          link=False
 
@@ -91,7 +91,7 @@
 !row!
 !col small=12 medium=6 large=8
 
-!listing sec09_hpmr_example/HPMR_9.3_Patterned_Hex_Core.i
+!listing sec09_hpmr_example/hpmr.i
          block=Mesh/core
          link=False
 
@@ -127,7 +127,7 @@ Setup
 !row!
 !col small=12 medium=6 large=8
 
-!listing sec09_hpmr_example/HPMR_9.4_Control_Drum_Assembly.i
+!listing sec09_hpmr_example/hpmr.i
          block=Mesh/cd1_step1
          link=False
 
@@ -141,7 +141,7 @@ Setup
 !row!
 !col small=12 medium=6 large=8
 
-!listing sec09_hpmr_example/HPMR_9.4_Control_Drum_Assembly.i
+!listing sec09_hpmr_example/hpmr.i
          block=Mesh/cd1
          link=False
 
@@ -170,8 +170,8 @@ Setup
 !row!
 !col small=12 medium=6 large=8
 
-!listing sec09_hpmr_example/HPMR_9.5_Additional_Assemblies_Reflector_Air_Dummy.i
-         block=Mesh/refl0
+!listing sec09_hpmr_example/hpmr.i
+         block=Mesh/refl1
          link=False
 
 !col small=12 medium=6 large=4
@@ -199,7 +199,7 @@ Setup
 !row!
 !col small=12 medium=6 large=8
 
-!listing sec09_hpmr_example/HPMR_9.6_Full_Core.i
+!listing sec09_hpmr_example/hpmr.i
          block=Mesh/core
          link=False
 
@@ -231,7 +231,7 @@ Setup
 
 !row-end!
 
-!listing sec09_hpmr_example/HPMR_9.7_Delete_Dummies.i
+!listing sec09_hpmr_example/hpmr.i
          block=Mesh/del_dummy
          link=False
 
@@ -248,7 +248,7 @@ Setup
 !row!
 !col small=12 medium=6 large=8
 
-!listing sec09_hpmr_example/HPMR_9.8_Add_Core_Periphery.i
+!listing sec09_hpmr_example/hpmr.i
          block=Mesh/outer_shield
          link=False
 
@@ -291,13 +291,13 @@ Setup
 !row!
 !col small=12 medium=6 large=8
 
-!listing sec09_hpmr_example/HPMR_9.9_Slice_to_1over6_Core.i
+!listing sec09_hpmr_example/hpmr.i
          block=Mesh/coreslice_1
          link=False
 
 !col small=12 medium=6 large=4
 
-!listing sec09_hpmr_example/HPMR_9.9_Slice_to_1over6_Core.i
+!listing sec09_hpmr_example/hpmr.i
          block=Mesh/coreslice_2
          link=False
 
@@ -328,7 +328,7 @@ Setup
 
 !row-end!
 
-!listing sec09_hpmr_example/HPMR_9.10_Extrude_to_3D.i
+!listing sec09_hpmr_example/hpmr.i
          block=Mesh/extrude
          link=False
 

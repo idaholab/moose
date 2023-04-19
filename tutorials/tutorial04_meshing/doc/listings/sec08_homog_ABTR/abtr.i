@@ -4,8 +4,16 @@
 [Mesh]
 
   #################################      # This parameter allows us to execute the file but stop at this block so we can see intermediate output.
-  final_generator = control              # User: Change this to control, dummy, core, del_dummy, extrude, plane_id, abtr_mesh
+  final_generator = control              # User: Change this to
   ################################
+
+  # step 1: control
+  # step 2: dummy
+  # step 3: core
+  # step 4: del_dummy
+  # step 5: extrude
+  # step 6: plane_id
+  # step 7: abtr_mesh
 
   ### Step 1. Define homogeneous assembly types
   # There are 7 unique assembly types in the core. All assemblies of a given type will be considered the same in terms of materials/cross sections.
