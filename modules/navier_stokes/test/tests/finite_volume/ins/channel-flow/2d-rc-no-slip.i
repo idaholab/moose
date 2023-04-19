@@ -138,7 +138,7 @@ velocity_interp_method = 'rc'
 []
 
 [Preconditioning]
-  active = SMP
+  active = FSP
   [FSP]
     type = FSP
     # It is the starting point of splitting

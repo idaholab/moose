@@ -42,6 +42,7 @@
       abs_zero = 1e-9
       valgrind = HEAVY
       detail = 'monolithic preconditioning technique'
+       cli_args = 'Preconditioning/active=SMP'
     []
     [no-slip-field-split]
       type = 'Exodiff'
