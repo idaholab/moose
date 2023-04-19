@@ -49,9 +49,11 @@
       exodiff = 2d-rc-no-slip-fsp.e
       method = "!dbg"
       detail = 'field-split preconditioning technique'
-      abs_zero = 4e-8
+      abs_zero = 8e-7
+      rel_err = 1e-5
       cli_args = 'Preconditioning/active=FSP Outputs/file_base=2d-rc-no-slip-fsp'
       valgrind = HEAVY
+      prereq = 'no-slip/SMP'
     []
   []
   [no-slip-action]

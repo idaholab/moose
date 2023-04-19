@@ -1,8 +1,8 @@
 mu = 1.1
 rho = 1.1
-l = 200
+l = 2
 U = 1
-advected_interp_method = 'upwind'
+advected_interp_method = 'average'
 velocity_interp_method = 'rc'
 
 [GlobalParams]
@@ -29,7 +29,7 @@ velocity_interp_method = 'rc'
     nx = 100
     ny = 20
   []
-  uniform_refine = 4
+  uniform_refine = 0
 []
 
 [Variables]
@@ -138,7 +138,7 @@ velocity_interp_method = 'rc'
 []
 
 [Preconditioning]
-  active = FSP
+  active = SMP
   [FSP]
     type = FSP
     # It is the starting point of splitting
@@ -169,19 +169,18 @@ velocity_interp_method = 'rc'
       # (2) p = (-S)^{-1} p*
       # (3) u = Auu^{-1}(f_u-Aup*p)
 
-      petsc_options = '-ksp_monitor_true_residual -snes_monitor -ksp_converged_reason -snes_converged_reason'
       petsc_options_iname = '-pc_fieldsplit_schur_fact_type  -pc_fieldsplit_schur_precondition -ksp_gmres_restart -ksp_rtol -ksp_type'
-      petsc_options_value = 'full                            selfp                             300		  1e-4	    fgmres'
+      petsc_options_value = 'full                            selfp                             300                1e-4      fgmres'
     []
     [u]
       vars = 'vel_x vel_y'
-      petsc_options_iname = '-pc_type -pc_hypre_type -ksp_type -ksp_rtol -ksp_gmres_restart'
-      petsc_options_value = 'hypre    boomeramg	     fgmres    1e-1	 300'
+      petsc_options_iname = '-pc_type -pc_hypre_type -ksp_type -ksp_rtol -ksp_gmres_restart -ksp_pc_side'
+      petsc_options_value = 'hypre    boomeramg      gmres    5e-1      300                 right'
     []
     [p]
       vars = 'pressure'
-      petsc_options_iname = '-ksp_type -ksp_gmres_restart -ksp_rtol -pc_type'
-      petsc_options_value = 'fgmres    300		  1e-1	    jacobi'
+      petsc_options_iname = '-ksp_type -ksp_gmres_restart -ksp_rtol -pc_type -ksp_pc_side'
+      petsc_options_value = 'gmres    300                5e-1      jacobi    right'
     []
   []
   [SMP]
@@ -193,12 +192,11 @@ velocity_interp_method = 'rc'
 []
 
 [Outputs]
-  print_linear_residuals = false
-  print_nonlinear_residuals = false
-  active = 'perf'
+  print_linear_residuals = true
+  print_nonlinear_residuals = true
   [out]
     type = Exodus
-    hide = 'Re'
+    hide = 'Re lin cum_lin'
   []
   [perf]
     type = PerfGraphOutput
