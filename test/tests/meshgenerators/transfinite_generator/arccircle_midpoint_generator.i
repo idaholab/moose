@@ -11,7 +11,7 @@
     top_type = CIRCARC
     right_type = LINE
     left_type = LINE
-    top_parameter = '0.0 && 1.0 && 0.0'
+    top_parameter = '0.0 ; 1.0 ; 0.0'
   []
 []
 
