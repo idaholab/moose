@@ -12,7 +12,7 @@
 
 - Two types of trimming can be performed by [HexagonMeshTrimmer.md]: Peripheral Trimming and Through-the-Center Trimming.
 
-- Peripheral trimming can be performed on six possible lines, each of which is parallel to a side of the hexagon and crosses the center of the pins laid out in that direction..
+- Peripheral trimming can be performed on six possible lines, each of which is parallel to a side of the hexagon and crosses the center of the pins laid out in that direction
 - Peripheral trimming can only be used for assembly meshes
 - Through-the-center trimming can be used for both assembly and core meshes
 

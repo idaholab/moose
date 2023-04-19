@@ -191,7 +191,7 @@ Setup
 - 5 Input geometry types
 
   - Fuel assemblies
-  - "Other" Assemblies - Control drum (12 meshes), Reflector (5 meshes), Air hole center
+  - "Other" Assemblies - Control drum (12 meshes), Reflector (6 meshes), Air hole center
   - Dummy assemblies
 
 - "Empty" spots should be defined with dummy assemblies and later deleted.
@@ -378,12 +378,12 @@ We briefly touch on mesh generation for the Coarse Mesh Finite Difference accele
 !row!
 !col small=12 medium=6 large=8
 
-!media tutorial04_meshing/hpmr_coarse_mesh_cartesian_stencil_1.png
+!media tutorial04_meshing/hpmr_coarse_mesh_cartesian_stencil_2.png
        style=width:100%;display:block;margin-left:auto;margin-right:auto;
 
 !col small=12 medium=6 large=4
 
-!media tutorial04_meshing/hpmr_coarse_mesh_cartesian_stencil_2.png
+!media tutorial04_meshing/hpmr_coarse_mesh_cartesian_stencil_1.png
        style=width:100%;display:block;margin-left:auto;margin-right:auto;
 
 !row-end!

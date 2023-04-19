@@ -76,7 +76,7 @@
     reactor_params = rmp
     pin_type = 7
     pitch = 14.685
-    region_ids= '12; 11; 11; 11; 11; 11; 11; 11; 11; 11; 11; 11'
+    region_ids= '11; 11; 11; 11; 11; 11; 11; 11; 11; 11; 11; 11'
     quad_center_elements = true
     homogenized = true
     use_as_assembly = true

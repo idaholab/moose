@@ -31,9 +31,9 @@ RGMB consists of a few specific mesh generators which are to be called in order 
          caption=RGMB Pin example.
          block=Mesh/pin1
 
-Mesh contains one block (subdomain) for quadrilateral elements and one block for triangular elements. Regions with different materials regions are distinguished by the `region_id` reporting ID.
+The final mesh will contain one block (subdomain) for quadrilateral elements and one block for triangular elements. Regions with different materials are distinguished by the `region_id` reporting ID rather than by subdomain ID.
 
-`region_ids` 2D array parameter sets the `region_id` by radial region (rows) and axial region (column). The mesh generator creates a 2D geometry but stores the 3D material map for use after extrusion.
+`region_ids` is a 2D array parameter that sets the `region_id` by radial region (rows) and axial region (column). The 3D material map is stored for use after extrusion, which could happen at the pin, assembly, or core step, depending on the problem size.
 
 !media tutorial04_meshing/rgmb_pinmesh_cart.png
        id=tutorial04-rgmb_pinmesh_cart
@@ -47,12 +47,12 @@ Mesh contains one block (subdomain) for quadrilateral elements and one block for
 
 !media tutorial04_meshing/rgmb_pinmesh_hex.png
        id=tutorial04-rgmb_pinmesh_hex
-       caption=Example RGMB Cartesian pin cell mesh colored by `subdomain_id` (left) and `region_id` (right).
+       caption=Example RGMB hexagonal pin cell mesh colored by `subdomain_id` (left) and `region_id` (right).
        style=width:50%;display:block;margin-left:auto;margin-right:auto;
 
 !listing sec10_rgmb_simple_examples/rgmb_core_hexagonal.i
          id=tutorial04-rgmb_pinmesh_hex-pin1
-         caption=Example RGMB Cartesian pin cell.
+         caption=Example RGMB hexagonal pin cell.
          block=Mesh/pin1
 
 ## AssemblyMeshGenerator

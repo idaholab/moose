@@ -2,7 +2,7 @@
 
 ## Mesh Trimming Along Lines of Symmetry
 
-Reactor cores are often designed with lines of symmetry through the core center, which in turn entails a symmetric solution. To save computational resources, the mesh can be cut along lines of symmetry and reflective boundary conditions can be applied to solution at the cut interface. Through-the-center trimming is needed in this case.
+Reactor cores are often designed with lines of symmetry through the core center, which in turn entails a symmetric solution. To save computational resources, the mesh can be cut along lines of symmetry and reflective boundary conditions can be applied to the solution at the cut interface. Through-the-center mesh trimming is required to cut the mesh along these symmetry lines.
 
 An alternative type of symmetry occurs in certain "unit cells" which contain half-pins on the edge of the unit cell. When repeated (mirrored) on the lines of symmetry, these half-pins become full pins and part of a larger core structure. To create these unit cells, an assembly with multiple pins is created (with intact pins), and then peripheral trimming is applied to the assembly along any or all of six possible lines cutting through the outer ring of hexagonal pins.
 
@@ -17,9 +17,11 @@ An alternative type of symmetry occurs in certain "unit cells" which contain hal
 
 ### Notes
 
-- Peripheral trimming can be performed on six possible lines, each of which is parallel to a side of the hexagon and crosses the center of the pins laid out in that direction..
+- Peripheral trimming can be performed on six possible lines, each of which is parallel to a side of the hexagon and crosses the center of the pins laid out in that direction. Whether or not to trim a particular side of the hexagon is denoted by `1` (trim) or `0` (do not trim) in the 6-dimensional array `trim_peripheral_region`.
 - Peripheral trimming can only be used for assembly meshes
-- Through-the-center trimming can be used for both assembly and core meshes
+- Through-the-center trimming can be used for both assembly and core meshes. This mesh trimmer object RETAINS any sectors which are included between the trimming line defined by `center_trim_starting_index` to the trimming line defined by `center_trim_ending_index` swept out in a counterclockwise direction. Other sectors are discarded.
+- When trimming along a line that lies exactly on element boundaries and does not cross any element interiors, an alternative mesh generator called [PlaneDeletionGenerator.md] can perform equivalent functionality
+- When trimming along a line which crosses element interiors, [PlaneDeletionGenerator.md] leaves behind a zig-zag boundary, whereas these mesh generators smooth the trimmed boundary by moving nearby nodes to the trimmed line as needed. This may result in the creation of new triangular element blocks to avoid degenerate quadrilateral elements.
 
 ### Example
 

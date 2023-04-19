@@ -60,7 +60,7 @@ This tutorial covers the generation of mostly standard geometries, but many reac
        caption=2D generic pebble bed reactor meshes for Pronghorn (left) and Griffin (right) with flow streamlines from top inlet to bottom conical outlet.
        style=width:50%;display:block;margin-left:auto;margin-right:auto;
 
-## Advanced Meshing Examples: Boundary Layers and Biasing
+## Boundary Layers and Biasing
 
 During the mesh refinement process, it is common to require finer discretizations in one region and coarser discretizations in another region. The boundary layer and biasing features available in the Reactor Module allow the user to refine the mesh in areas of interest for the physics problem at hand.
 
@@ -114,7 +114,7 @@ Boundary layers are commonly needed in thermal-hydraulic applications, where the
          caption=[PolygonConcentricCircleMeshGenerator.md] boundary layer example.
          block=Mesh
 
-## Advanced Meshing Example: Stitching Assemblies with Different Pin Numbers
+## Stitching Assemblies with Different Pin Numbers
 
 Typical reactor cores are comprised of many different assembly types, each with different numbers of pins. When the pins are explicitly meshed, the number of nodes on the assembly boundary is determined by a combination of the number pins as well as the pin azimuthal discretization. It is difficult to find a reasonably low azimuthal discretization for each assembly such that all assemblies have the same number of nodes on their boundaries.
 
@@ -130,7 +130,7 @@ The best approach for this situation is to use [PatternedHexPeripheralModifier.m
          caption=Assemblies with different pin numbers example.
          block=Mesh
 
-## Advanced Meshing Example: Oversized Pin
+## Oversized Pin
 
 Some assemblies contain an oversized pin which intrudes on neighboring unit pin cells. Here, we describe one possible approach to mesh this situation.
 
@@ -150,7 +150,7 @@ Finally, [XYDelaunayGenerator.md] is used to mesh the regions between the assemb
          caption=Oversized pin example.
          block=Mesh
 
-## Advanced Meshing Example: Filling Between Curves Example of using "FillBetweenSidesetsGenerator"
+## Filling Between Curves using "FillBetweenSidesetsGenerator"
 
 The MSRE 2D lattice case pictured in [tutorial04-adv_ex_fbsg](left) was constructed using the [FillBetweenSidesetsGenerator.md] to connect "quarter" circular pins, as shown in [tutorial04-adv_ex_fbsg](right). First, [ConcentricCircleMeshGenerator.md] (a predecessor of [PolygonConcentricCircleMeshGenerator.md] which has a different set of input options and works only for square pin cells) was used to create two quarter pins. Each quarter pin mesh initially contains two duplicate "quarter pin" shaped blocks, and then one of the duplicate blocks is deleted in order to be able to label the sideset on the curved boundary as `curve_1` and `curve_2` in the two pins, respectively. This is the simplest possible procedure with the current [Mesh system](syntax/Mesh/index.md) in MOOSE, but could be improved in the future. These two pins were translated in space to move them apart from each other, and then [FillBetweenSidesetsGenerator.md] was used to mesh the area between `curve_1` and `curve_2`.
 
@@ -164,7 +164,7 @@ The MSRE 2D lattice case pictured in [tutorial04-adv_ex_fbsg](left) was construc
          caption=[FillBetweenSidesetsGenerator.md] example.
          block=Mesh/connect_two_circles
 
-## Advanced Meshing Example: Triangulation of Odd-Shaped Regions Using "ParsedCurveGenerator" and "XYDelaunayGenerator"
+## Triangulation of Odd-Shaped Regions Using "ParsedCurveGenerator" and "XYDelaunayGenerator"
 
 This example demonstrates how to place a control drum object in an arbitrary position in a core that may overlap subdomain boundaries.
 

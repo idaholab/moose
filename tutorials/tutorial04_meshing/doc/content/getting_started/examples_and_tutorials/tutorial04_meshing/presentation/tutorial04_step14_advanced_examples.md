@@ -88,7 +88,7 @@ This tutorial covers the generation of mostly standard geometries, but many reac
 
 !---
 
-## Advanced Meshing Examples: Boundary Layers and Biasing
+## Boundary Layers and Biasing
 
 During the mesh refinement process, it is common to require finer discretizations in one region and coarser discretizations in another region. The boundary layer and biasing features available in the Reactor Module allow the user to refine the mesh in areas of interest for the physics problem at hand.
 
@@ -212,7 +212,7 @@ First, define the regular small fuel pins and place them into the assembly as a 
 
 !---
 
-## Filling Between Curves Example of using "FillBetweenSidesetsGenerator"
+## Filling Between Curves using "FillBetweenSidesetsGenerator"
 
 The MSRE 2D lattice case was constructed using the [FillBetweenSidesetsGenerator.md] to connect "quarter" circular pins. First, [ConcentricCircleMeshGenerator.md] (a predecessor of [PolygonConcentricCircleMeshGenerator.md] which has a different set of input options and works only for square pin cells) was used to create two quarter pins. 
 

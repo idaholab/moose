@@ -1,6 +1,6 @@
 # Tutorial 4: Meshing id=tutorial-04
 
-In this tutorial the use of Reactor module mesh generators are presented for use as MOOSE Meshing.
+This tutorial describes how to use the [Reactor Module](modules/reactor/index.md) to mesh reactor core geometries.
 
 !style halign=center fontsize=150%
 [Tutorial 4: MOOSE Meshing Presentation](tutorial04_meshing/presentation/index.md alternative=missing_config.md)

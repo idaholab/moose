@@ -19,7 +19,7 @@ This section covers the creation of a detailed 1/6 core [Heat-Pipe Micro Reactor
 
 ## Create Pin Unit Cell
 
-The pin cell represents the most basic element in the hierarchical structure of a reactor core. In the case of a heat-pipe micro reactor, typical pin cells include fuel, heat pipe, and moderator. These components are all generated using the [PolygonConcentricCircleMeshGenerator.md]. Every pin cell mesh property (e.g., ring radii and intervals) can be tailored to specific needs.
+The pin cell represents the most basic element in the hierarchical structure of a reactor core. In the case of a heat-pipe micro reactor, typical pin cells include fuel, heat pipe, and moderator. These components are all generated using the [PolygonConcentricCircleMeshGenerator.md]. Every pin cell mesh property (e.g., ring radii and intervals) can be tailored to specific needs. The following example shows construction of the moderator pin cell. The heat pipe and fuel pin cells are constructed similarly.
 
 ### Object
 
@@ -170,7 +170,7 @@ Control drums are a type of control device used in some small reactor systems to
 - [HexagonConcentricCircleAdaptiveBoundaryMeshGenerator.md] is used in this case to create a "single pin" hexagonal assembly with sides matching another mesh. For example, in cases where the node counts on the edges of the control drum and fuel assembly differ, the [HexagonConcentricCircleAdaptiveBoundaryMeshGenerator.md] can automatically adjust the mesh density along the control drum's boundary to ensure compatibility.
 - This meshing method is intended for analyzing a static control drum position. For transient control drum rotation (and control rod insertion), this azimuthal block split is not needed as Griffin uses special material definitions to define the absorber location as a function of time.
 
-### Assembly Generation Example
+### Example (Step 1 - Generate Control Drum)
 
 !media tutorial04_meshing/hpmr_control_drum_1.png
        id=tutorial04-hpmr_control_drum_1
@@ -182,7 +182,7 @@ Control drums are a type of control device used in some small reactor systems to
          caption=Control Drum Generation.
          block=Mesh/cd1_step1
 
-### Block Split Example
+### Example (Step 2 - Block Splitting to Define Absorber Segment)
 
 !media tutorial04_meshing/hpmr_control_drum_2.png
        id=tutorial04-hpmr_control_drum_2
@@ -253,13 +253,13 @@ Generated reactor component meshes (fuel assembly, control drum, reflector, air 
 
 ### Geometry Features
 
-- Outer hex boundary disabled (`pattern_boundary`=`False`)
+- Outer hex boundary disabled (`pattern_boundary`=`none`)
 - Whole core rotated 60&deg;
 - 5 Input geometry types
 
   - Fuel assembly
   - Control drum (12 meshes created for different boundary arrangements)
-  - Reflector (5 meshes created for different boundary arrangements)
+  - Reflector (6 meshes created for different boundary arrangements)
   - Air hole center
   - Dummy assemblies
 
@@ -450,14 +450,14 @@ We briefly touch on mesh generation for the Coarse Mesh Finite Difference accele
 
 Examples of options 2 and 3 are provided in the following images.
 
-!media tutorial04_meshing/hpmr_coarse_mesh_cartesian_stencil_1.png
-       id=tutorial04-hpmr_coarse_mesh_cartesian_stencil_1
-       caption=Cartesian stencil used for coarse mesh generation of HPMR mesh (left), and HPMR mesh colored by `coarse_element_id`.
-       style=width:50%;display:block;margin-left:auto;margin-right:auto;
-
 !media tutorial04_meshing/hpmr_coarse_mesh_cartesian_stencil_2.png
        id=tutorial04-hpmr_coarse_mesh_cartesian_stencil_2
        caption=Separately generated fine-mesh stencil used for coarse mesh generation of HPMR mesh (left), and HPMR mesh colored by `coarse_element_id`.
+       style=width:50%;display:block;margin-left:auto;margin-right:auto;
+
+!media tutorial04_meshing/hpmr_coarse_mesh_cartesian_stencil_1.png
+       id=tutorial04-hpmr_coarse_mesh_cartesian_stencil_1
+       caption=Cartesian stencil used for coarse mesh generation of HPMR mesh (left), and HPMR mesh colored by `coarse_element_id`.
        style=width:50%;display:block;margin-left:auto;margin-right:auto;
 
 !content pagination previous=tutorial04_meshing/step08_abtr.md

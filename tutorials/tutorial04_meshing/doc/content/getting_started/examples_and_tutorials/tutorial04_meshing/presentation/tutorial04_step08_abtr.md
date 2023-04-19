@@ -48,8 +48,8 @@
 
 !row-end!
 
-!listing sec08_homog_ABTR/abtr_mesh_full.i
-         block=Mesh/hex0
+!listing sec08_homog_ABTR/abtr.i
+         block=Mesh/control
          link=False
 
 !---
@@ -74,7 +74,7 @@
 
 !row-end!
 
-!listing sec08_homog_ABTR/abtr_mesh_full.i
+!listing sec08_homog_ABTR/abtr.i
          block=Mesh/dummy
          link=False
 
@@ -91,7 +91,7 @@
 !row!
 !col small=12 medium=6 large=8
 
-!listing sec08_homog_ABTR/abtr_mesh_full.i
+!listing sec08_homog_ABTR/abtr.i
          block=Mesh/core
          link=False
 
@@ -122,7 +122,7 @@
 
 !row-end!
 
-!listing sec08_homog_ABTR/abtr_mesh_full.i
+!listing sec08_homog_ABTR/abtr.i
          block=Mesh/del_dummy
          link=False
 
@@ -142,7 +142,7 @@
 !row!
 !col small=12 medium=6 large=8
 
-!listing sec08_homog_ABTR/abtr_mesh_full.i
+!listing sec08_homog_ABTR/abtr.i
          block=Mesh/extrude
          link=False
 
@@ -171,7 +171,7 @@
 
 !row-end!
 
-!listing sec08_homog_ABTR/abtr_mesh_full.i
+!listing sec08_homog_ABTR/abtr.i
          block=Mesh/plane_id
          link=False
 
@@ -193,7 +193,7 @@
 
 !row-end!
 
-!listing sec08_homog_ABTR/abtr_mesh_full.i
+!listing sec08_homog_ABTR/abtr.i
          block=Mesh/abtr_mesh
          link=False
 

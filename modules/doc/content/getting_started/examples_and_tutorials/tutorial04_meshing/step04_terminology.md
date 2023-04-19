@@ -18,7 +18,7 @@ Before proceeding in this tutorial, we briefly define some terminology, limiting
 
 - +Finite Element (or simply Element)+
 
-  - An ordered grouping of nodes that defines the boundaries of a piece of the spatial domain. A typical element 2D has 3 (triangle) or 4 (quadrilateral) nodes. Straight lines connect the nodes to form the element shape. In 3D, typical elements have 6 (prism), 8 (hexahedron), 4 (tetrahedron) or 5 (pyramid) nodes. The full set of elements comprises the mesh which approximates the geometry. Basis functions from the FEM are defined on each element. Higher order elements may have additional nodes than those listed here. A mesh can consist of different types of elements
+  - An ordered grouping of nodes that defines the boundaries of a piece of the spatial domain. A typical first order 2D element has 3 (triangle) or 4 (quadrilateral) nodes. Straight lines connect the nodes to form the element shape. In 3D, typical elements have 6 (prism), 8 (hexahedron), 4 (tetrahedron) or 5 (pyramid) nodes. The full set of elements comprises the mesh which approximates the geometry. Basis functions from the FEM are defined on each element. Higher order elements may have additional nodes than those listed here. A mesh can consist of different types of elements
   - The mesh in [tutorial04-general_FEM_labels] has 48 unique elements (12 triangular in the center, and 36 quadrilateral).
 
 - +Block (or Subdomain)+
@@ -34,9 +34,7 @@ Before proceeding in this tutorial, we briefly define some terminology, limiting
 - +Sideset+
 
   - A grouping of element edges or faces categorized by their owning surfaces or volumes. These are associated with elements and this association is determined by a normal direction to the edge or face. Edges or faces may belong to more than one sideset.
-  - The mesh in [tutorial04-general_FEM_labels], has 3 unique sidesets: 1 exterior sideset and 2 interior sidesets. No sideset was created between the blue and red blocks because these actually represent the same material (fuel) and therefore there is no material interface, information transfer, or boundary condition to apply here.
-
-[tutorial04-general_FEM_labels] A unit pin cell mesh showing nodes, elements, blocks, and sidesets.
+  - The mesh in [tutorial04-general_FEM_labels] has 3 unique sidesets (1 exterior sideset and 2 interior sidesets). No sideset was created between the blue and red blocks because these actually represent the same material (fuel) and therefore there is no material interface, information transfer, or boundary condition to apply here.
 
 !media tutorial04_meshing/general_FEM_labels.png
        id=tutorial04-general_FEM_labels
