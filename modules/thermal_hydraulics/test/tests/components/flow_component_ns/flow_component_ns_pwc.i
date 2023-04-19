@@ -93,6 +93,10 @@ p_outlet = 0
   petsc_options_value = 'lu       NONZERO		mumps'
   line_search = 'none'
   nl_rel_tol = 1e-12
+  automatic_scaling = true
+  off_diagonals_in_auto_scaling = true
+  verbose = true
+  scaling_group_variables = 'superficial_vel_x superficial_vel_y'
 []
 
 [Debug]
