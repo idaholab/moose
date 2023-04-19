@@ -481,9 +481,9 @@ install_lib_%: %
 	@$(eval source_dir := $(dir $<))
 	@$(eval la_installed = $(lib_install_dir)/$(notdir $<))
 	@echo "Installing library $(libdst)"
-	@cp $< $(la_installed)                   # Copy the library archive file
+#	@cp $< $(la_installed)                   # Copy the library archive file
 	@cp $(source_dir)/$(libname) $(libdst)   # Copy the library file
-	@$(call patch_la,$(la_installed),$(lib_install_dir))
+#	@$(call patch_la,$(la_installed),$(lib_install_dir))
 	@$(call patch_rpath,$(libdst),../$(lib_install_suffix/.))
 	@$(call patch_relink,$(libdst),$(libpath_pcre),$(libname_pcre))
 	@$(call patch_relink,$(libdst),$(libpath_framework),$(libname_framework))

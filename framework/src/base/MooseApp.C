@@ -1839,34 +1839,34 @@ MooseApp::loadLibraryAndDependencies(const std::string & library_filename,
   // .la)
   pcrecpp::RE re_deps("(/\\S*\\.la)");
 
-  if (load_dependencies)
+  std::ifstream la_handle(library_filename.c_str());
+  if (la_handle.is_open())
   {
-    std::ifstream la_handle(library_filename.c_str());
-    if (la_handle.is_open())
+    while (std::getline(la_handle, line))
     {
-      while (std::getline(la_handle, line))
-      {
-        // Look for the system dependent dynamic library filename to open
-        if (line.find("dlname=") != std::string::npos)
-          // Magic numbers are computed from length of this string "dlname=' and line minus that
-          // string plus quotes"
-          dl_lib_filename = line.substr(8, line.size() - 9);
+      // Look for the system dependent dynamic library filename to open
+      if (line.find("dlname=") != std::string::npos)
+        // Magic numbers are computed from length of this string "dlname=' and line minus that
+        // string plus quotes"
+        dl_lib_filename = line.substr(8, line.size() - 9);
 
-        if (line.find("dependency_libs=") != std::string::npos)
+      if (line.find("dependency_libs=") != std::string::npos)
+      {
+        if (load_dependencies)
         {
           pcrecpp::StringPiece input(line);
           pcrecpp::StringPiece depend_library;
           while (re_deps.FindAndConsume(&input, &depend_library))
             // Recurse here to load dependent libraries in depth-first order
             loadLibraryAndDependencies(depend_library.as_string(), params);
-
-          // There's only one line in the .la file containing the dependency libs so break after
-          // finding it
-          break;
         }
+
+        // There's only one line in the .la file containing the dependency libs so break after
+        // finding it
+        break;
       }
-      la_handle.close();
     }
+    la_handle.close();
   }
 
   // This should only occur if we have static linkage.
@@ -1967,7 +1967,7 @@ MooseApp::loadLibraryAndDependencies(const std::string & library_filename,
                      ".\n",
                      "This doesn't necessarily indicate an error condition unless you believe that "
                      "the method should exist in that library.\n",
-                     lderror());
+                     dlerror());
 #endif
     }
   }
