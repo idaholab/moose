@@ -242,6 +242,9 @@ class ApptainerGenerator:
         self.run(command)
 
     def oras_call(self, command, loud=True, check=True, cwd=os.getcwd()):
+        """
+        Helper for calling a command with oras
+        """
         config_file = os.path.join(os.environ['HOME'], '.apptainer/docker-config.json')
         command = ['oras', '--registry-config', config_file] + command
 
@@ -277,22 +280,31 @@ class ApptainerGenerator:
         oras_uri = self.oras_uri(project, name, tag).replace('oras://', '')
         oras_command = ['push', oras_uri]
 
-        annotations = {}
+        annotations = extra_annotations.copy()
         for file in files:
+            # In order for oras pushes to not be awful, we need to push them all with
+            # a relative path and call the command from within the directory said fiels
+            # are in. Otherwise, the absolute paths end up in the artifact
             if not file.startswith(self.dir):
                 self.error(f'File {file} does not start with generation dir {self.dir}')
+
+            # Add the file type if we have a sif (this is needed for pushing sifs for apptainer)
             filetype_suffix = ''
             if file.endswith('.sif'):
+                # Add in the labels from the sif file as oras annotations
                 annotations = self.build_oras_annotations(file, extra_annotations=extra_annotations)
                 filetype_suffix = ':application/vnd.sylabs.sif.layer.v1.sif'
+
+            # Add the file to be pushed
             oras_command.append(os.path.basename(file) + filetype_suffix)
 
         with tempfile.NamedTemporaryFile(mode='w') as annotation_tf:
-            if annotations is not None:
-                with annotation_tf.file as tf:
-                    tf.write(json.dumps(annotations))
-                oras_command.extend(['--annotation-file', annotation_tf.name])
+            # Dump the annotations in a json file to be included
+            with annotation_tf.file as tf:
+                tf.write(json.dumps(annotations))
+            oras_command.extend(['--annotation-file', annotation_tf.name])
 
+            # Push away
             self.oras_call(oras_command, cwd=self.dir)
 
     @staticmethod
@@ -503,12 +515,18 @@ class ApptainerGenerator:
 
     @staticmethod
     def get_sif_labels(sif_path):
+        """
+        Gets the labels (if any) associated with a .sif container
+        """
         inspect_cmd = ['apptainer', 'inspect', '-j', sif_path]
         inspection = json.loads(subprocess.check_output(inspect_cmd).decode(sys.stdout.encoding))
         return inspection['data']['attributes'].get('labels', {})
 
     @staticmethod
     def build_oras_annotations(container_path, extra_annotations={}):
+        """
+        Builds the annotations for an oras push
+        """
         annotations = {'$manifest': {}}
         annotations['$manifest'].update(ApptainerGenerator.get_sif_labels(container_path))
         annotations['$manifest'].update(extra_annotations)
