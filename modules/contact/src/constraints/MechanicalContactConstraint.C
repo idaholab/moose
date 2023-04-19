@@ -218,9 +218,9 @@ MechanicalContactConstraint::timestepSetup()
 {
   if (_component == 0)
   {
-    updateContactStatefulData(true);
+    updateContactStatefulData(/* beginning_of_step = */ true);
     if (_formulation == ContactFormulation::AUGMENTED_LAGRANGE)
-      updateAugmentedLagrangianMultiplier(true);
+      updateAugmentedLagrangianMultiplier(0);
 
     _update_stateful_data = false;
 
@@ -235,13 +235,13 @@ MechanicalContactConstraint::jacobianSetup()
   if (_component == 0)
   {
     if (_update_stateful_data)
-      updateContactStatefulData();
+      updateContactStatefulData(/* beginning_of_step = */ false);
     _update_stateful_data = true;
   }
 }
 
 void
-MechanicalContactConstraint::updateAugmentedLagrangianMultiplier(bool beginning_of_step)
+MechanicalContactConstraint::updateAugmentedLagrangianMultiplier(unsigned int update_step_number)
 {
   for (auto & pinfo_pair : _penetration_locator._penetration_info)
   {
@@ -255,7 +255,7 @@ MechanicalContactConstraint::updateAugmentedLagrangianMultiplier(bool beginning_
         pinfo->_normal * (pinfo->_closest_point - _mesh.nodeRef(secondary_node_num)) -
         gapOffset(_mesh.nodePtr(secondary_node_num));
 
-    if (beginning_of_step && _model == ContactModel::COULOMB)
+    if (update_step_number == 0 && _model == ContactModel::COULOMB)
     {
       pinfo->_lagrange_multiplier_slip.zero();
       if (pinfo->isCaptured())
@@ -269,7 +269,7 @@ MechanicalContactConstraint::updateAugmentedLagrangianMultiplier(bool beginning_
 
       if (_model == ContactModel::COULOMB)
       {
-        if (!beginning_of_step)
+        if (update_step_number > 0)
         {
           Real penalty = getPenalty(*pinfo);
           RealVectorValue pen_force_normal =

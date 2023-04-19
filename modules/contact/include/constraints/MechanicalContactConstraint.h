@@ -35,9 +35,9 @@ public:
 
   virtual bool AugmentedLagrangianContactConverged();
 
-  virtual void updateAugmentedLagrangianMultiplier(bool beginning_of_step = false);
+  virtual void updateAugmentedLagrangianMultiplier(unsigned int update_step_number);
 
-  virtual void updateContactStatefulData(bool beginning_of_step = false);
+  virtual void updateContactStatefulData(bool beginning_of_step);
 
   virtual Real computeQpSecondaryValue() override;
 

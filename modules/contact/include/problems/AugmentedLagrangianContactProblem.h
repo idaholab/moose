@@ -45,6 +45,9 @@ public:
                             const Real div_threshold) override;
 
 private:
-  int _num_lagmul_iterations;
-  int _max_lagmul_iters;
+  /// maximum mumber of augmented lagrange iterations
+  const unsigned int _maximum_lagrangian_update_iterations;
+
+  /// current augmented lagrange iteration number
+  unsigned int _num_lagrangian_update_iterations;
 };
