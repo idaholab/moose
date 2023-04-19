@@ -51,7 +51,8 @@ AbaqusUMATStress::validParams()
       "displaced mesh for computing displacements and quantities based on the deformed state.");
   params.addParam<UserObjectName>(
       "step_user_object", "The StepUserObject that provides times from simulation loading steps.");
-  params.addParam<RealVectorValue>("orientation", "Euler angles corresponding to the Abaqus ORIENTATION keyword.");
+  params.addParam<RealVectorValue>("orientation",
+                                   "Euler angles corresponding to the Abaqus ORIENTATION keyword.");
   return params;
 }
 
