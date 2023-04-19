@@ -296,7 +296,7 @@ class ApptainerGenerator:
         """
         Find the dependency meta for the given library (if any)
         """
-        if len(self.meta[library]['dependencies']) > 1:
+        if len(self.meta[library].get('dependencies', [])) > 1:
             raise Exception('apptainer_generator does not yet support multiple dependencies')
 
         dependency = self.meta[library].get('dependencies', None)
