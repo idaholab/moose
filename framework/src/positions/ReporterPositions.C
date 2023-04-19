@@ -30,6 +30,8 @@ ReporterPositions::ReporterPositions(const InputParameters & parameters) : Posit
 void
 ReporterPositions::initialize()
 {
+  clearPositions();
+
   std::vector<ReporterName> positions_reporters = getParam<std::vector<ReporterName>>("reporters");
   _positions_2d.resize(positions_reporters.size());
 

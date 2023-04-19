@@ -85,6 +85,15 @@ Positions::getPositionsVector4D() const
 }
 
 void
+Positions::clearPositions()
+{
+  _positions.clear();
+  _positions_2d.clear();
+  _positions_3d.clear();
+  _positions_4d.clear();
+}
+
+void
 Positions::unrollMultiDPositions()
 {
   // Unroll in every dimension available

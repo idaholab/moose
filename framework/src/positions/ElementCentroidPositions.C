@@ -29,6 +29,8 @@ ElementCentroidPositions::ElementCentroidPositions(const InputParameters & param
 void
 ElementCentroidPositions::initialize()
 {
+  clearPositions();
+
   // By default, initialize should be called on meshChanged()
   // Gathering of positions is local, reporter system makes sure to make it global
   if (blockRestricted())

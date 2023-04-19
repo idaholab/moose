@@ -53,6 +53,9 @@ protected:
   void residualSetup() override {}
   void jacobianSetup() override {}
 
+  /// Clear all positions vectors
+  void clearPositions();
+
   /// Unrolls the multi-dimensional position vectors
   void unrollMultiDPositions();
 

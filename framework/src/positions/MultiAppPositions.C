@@ -27,6 +27,8 @@ MultiAppPositions::MultiAppPositions(const InputParameters & parameters) : Posit
 void
 MultiAppPositions::initialize()
 {
+  clearPositions();
+
   std::vector<MultiAppName> multiapps = getParam<std::vector<MultiAppName>>("multiapps");
   _positions_2d.resize(multiapps.size());
 

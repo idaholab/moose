@@ -90,6 +90,7 @@ ElementGroupCentroidPositions::ElementGroupCentroidPositions(const InputParamete
 void
 ElementGroupCentroidPositions::initialize()
 {
+  clearPositions();
   // By default, initialize should be called on meshChanged()
 
   // If users did not specify a value for an extra element integer, they want all the bins
