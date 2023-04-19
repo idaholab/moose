@@ -209,7 +209,7 @@
       type = 'Exodiff'
       input = 2d-rc-no-slip.i
       exodiff = 2d-rc-no-slip-tris.e
-      cli_args = 'Mesh/gen/elem_type=TRI3 GlobalParams/two_term_boundary_expansion=false Outputs/file_base=2d-rc-no-slip-tris'
+      cli_args = 'Mesh/gen/elem_type=TRI3 GlobalParams/two_term_boundary_expansion=false Outputs/file_base=2d-rc-no-slip-tris Preconditioning/active=SMP'
       valgrind = HEAVY
       detail = 'two-dimensional triangular elements'
       abs_zero = 1e-9
