@@ -5190,8 +5190,7 @@ void
 FEProblemBase::setActiveMaterialProperties(const std::set<unsigned int> & mat_prop_ids,
                                            THREAD_ID tid)
 {
-  if (!mat_prop_ids.empty())
-    _active_material_property_ids[tid] = mat_prop_ids;
+  _active_material_property_ids[tid] = mat_prop_ids;
 }
 
 const std::set<unsigned int> &
