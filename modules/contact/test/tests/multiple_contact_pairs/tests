@@ -11,6 +11,18 @@
     requirement = 'The system shall set up node-face interactions between multiple surface pairs '
                   'using the Contact action.'
   []
+  [multiple_pairs_cleanup]
+    type = Exodiff
+    input = 'multiple_pairs.i'
+    exodiff = 'multiple_pairs_cleanup_out.e'
+    abs_zero = 1.0e-8
+    rel_err = 1.0e-5
+    cli_args = "Postprocessors/active='' Contact/action_name/primary='20 20 101' "
+               "Contact/action_name/secondary='10 101 20' "
+               "Outputs/file_base=multiple_pairs_cleanup_out"
+    requirement = 'The system shall set up node-face interactions between multiple surface pairs '
+                  'using the Contact action and remove repeated contact pairs.'
+  []
   [three_hexagons_coarse]
     type = 'Exodiff'
     input = 'three_hexagons_coarse.i'
@@ -35,7 +47,8 @@
     type = 'Exodiff'
     input = 'split_sidesets.i'
     exodiff = 'split_sidesets_out.e'
-    requirement = 'The system shall compute mechanical contact with multiple pairs, which are defined with separate contact sidesets.'
+    requirement = 'The system shall compute mechanical contact with multiple pairs, which are '
+                  'defined with separate contact sidesets.'
     abs_zero = 1.0e-4
     rel_err = 1.0e-4
     allow_warnings = true
@@ -44,7 +57,8 @@
     type = 'Exodiff'
     input = 'continuous_sidesets.i'
     exodiff = 'continuous_sidesets_out.e'
-    requirement = 'The system shall compute mechanical contact allowing a secondary surface to enforce constraints with multiple primary surfaces.'
+    requirement = 'The system shall compute mechanical contact allowing a secondary surface to '
+                  'enforce constraints with multiple primary surfaces.'
     abs_zero = 1.0e-4
     rel_err = 1.0e-4
     allow_warnings = true

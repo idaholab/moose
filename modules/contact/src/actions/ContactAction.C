@@ -253,6 +253,45 @@ ContactAction::ContactAction(const InputParameters & params)
   else if (getParam<bool>("ping_pong_protection"))
     paramError("ping_pong_protection",
                "The 'ping_pong_protection' option can only be used with the 'ranfs' formulation");
+
+  // Remove repeated interactions
+  std::vector<std::pair<BoundaryName, BoundaryName>> lean_boundary_pairs;
+
+  for (const auto & [primary, secondary] : _boundary_pairs)
+  {
+    const auto & primary_lambda = primary;
+    const auto & secondary_lambda = secondary;
+
+    auto it = std::find_if(lean_boundary_pairs.begin(),
+                           lean_boundary_pairs.end(),
+                           [&](const std::pair<BoundaryName, BoundaryName> & boundary_pairs)
+                           {
+                             bool exist = false;
+                             const bool match_one = boundary_pairs.second == secondary_lambda &&
+                                                    boundary_pairs.first == primary_lambda;
+                             const bool match_two = boundary_pairs.second == primary_lambda &&
+                                                    boundary_pairs.first == secondary_lambda;
+                             exist = match_one || match_two;
+                             return exist;
+                           });
+
+    if (it == lean_boundary_pairs.end())
+      lean_boundary_pairs.push_back({primary, secondary});
+    else
+      mooseInfo("Contact pair ",
+                primary,
+                "--",
+                secondary,
+                " has been removed from the contact interaction list due to "
+                "duplicates in the input file.");
+  }
+
+  _boundary_pairs = lean_boundary_pairs;
+
+  if (_boundary_pairs.size() == 0)
+    paramError("primary",
+               "Number of contact pairs after removing repeated ones is zero. Please revise your "
+               "input file.");
 }
 
 void
@@ -415,8 +454,26 @@ ContactAction::act()
   if (_current_task == "add_user_object")
   {
     auto var_params = _factory.getValidParams("NodalArea");
-    var_params.set<std::vector<BoundaryName>>("boundary") =
-        getParam<std::vector<BoundaryName>>("secondary");
+
+    // Get secondary_boundary_vector from possibly updated set from the
+    // ContactAction constructor cleanup
+    const auto actions = _awh.getActions<ContactAction>();
+
+    std::size_t all_action_pairs_size = 0;
+    for (const auto * const action : actions)
+      all_action_pairs_size += action->_boundary_pairs.size();
+
+    std::vector<BoundaryName> secondary_boundary_vector(all_action_pairs_size);
+
+    std::size_t i = 0;
+    for (const auto * const action : actions)
+      for (const auto j : index_range(action->_boundary_pairs))
+      {
+        secondary_boundary_vector[i] = action->_boundary_pairs[j].second;
+        i++;
+      }
+
+    var_params.set<std::vector<BoundaryName>>("boundary") = secondary_boundary_vector;
     var_params.set<std::vector<VariableName>>("variable") = {"nodal_area"};
 
     mooseAssert(_problem, "Problem pointer is NULL");
@@ -434,7 +491,7 @@ ContactAction::addContactPressureAuxKernel()
 {
   // Add ContactPressureAux: Only one object for all contact pairs
   // if (_formulation != ContactFormulation::MORTAR)
-  auto actions = _awh.getActions<ContactAction>();
+  const auto actions = _awh.getActions<ContactAction>();
 
   // Increment counter for contact action objects
   contact_action_counter++;
@@ -442,23 +499,21 @@ ContactAction::addContactPressureAuxKernel()
   // Add auxiliary kernel if we are the last contact action object.
   if (contact_action_counter == actions.size())
   {
-    size_t all_action_pairs_size = 0;
-    for (const auto & action : actions)
+    std::size_t all_action_pairs_size = 0;
+    for (const auto * const action : actions)
       all_action_pairs_size += action->_boundary_pairs.size();
 
     std::vector<BoundaryName> boundary_vector(all_action_pairs_size);
     std::vector<BoundaryName> pair_boundary_vector(all_action_pairs_size);
 
-    size_t i = 0;
-    for (const auto & action : actions)
-    {
-      for (const auto j : make_range(action->_boundary_pairs.size()))
+    std::size_t i = 0;
+    for (const auto * const action : actions)
+      for (const auto j : index_range(action->_boundary_pairs))
       {
         pair_boundary_vector[i] = action->_boundary_pairs[j].first;
         boundary_vector[i] = action->_boundary_pairs[j].second;
         i++;
       }
-    }
 
     InputParameters params = _factory.getValidParams("ContactPressureAux");
     params.applyParameters(parameters(), {"order"});
