@@ -39,7 +39,7 @@ protected:
   const std::vector<bool> & _flag_sample;
 
   /// True if the sampling is completed
-  bool _is_sampling_completed;
+  bool _is_sampling_completed = false;
 
 private:
   /// Track the current step of the main App
