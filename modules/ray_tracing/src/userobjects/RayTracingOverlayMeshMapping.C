@@ -179,7 +179,7 @@ RayTracingOverlayMeshMapping::sync_map(
     data_to_send[0].emplace_back(elem, to_elems);
   }
 
-  const auto receive_data = [&main_overlay_map](const auto & data)
+  const auto receive_data = [&main_overlay_map](const processor_id_type, const auto & data)
   {
     for (const auto & [elem, to_elems] : data)
     {
