@@ -74,6 +74,17 @@ CrankNicolson::init()
 void
 CrankNicolson::postResidual(NumericVector<Number> & residual)
 {
+  // PETSc 3.19 insists on having closed vectors when doing VecAXPY,
+  // and that's probably a good idea with earlier versions too, but
+  // we don't always get here with _Re_time closed.  close() is
+  // slow but a closed() check is fast and embarrassingly
+  // parallel, so let's just test them all.
+  if (!_Re_time.closed())
+    _Re_time.close();
+  if (!_Re_non_time.closed())
+    _Re_non_time.close();
+  if (!_residual_old.closed())
+    _residual_old.close();
   residual += _Re_time;
   residual += _Re_non_time;
   residual += _residual_old;
