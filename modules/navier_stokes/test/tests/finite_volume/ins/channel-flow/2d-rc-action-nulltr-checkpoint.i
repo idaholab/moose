@@ -2,16 +2,15 @@ mu = 1.1
 rho = 1.1
 
 [Mesh]
-  [gen]
-    type = GeneratedMeshGenerator
-    dim = 2
-    xmin = 0
-    xmax = 10
-    ymin = -1
-    ymax = 1
-    nx = 100
-    ny = 20
-  []
+  file = 2d-rc-action_restart_cp/LATEST
+[]
+
+[Problem]
+  kernel_coverage_check = false
+  material_coverage_check = false
+  restart_file_base = 2d-rc-action_restart_cp/LATEST
+  force_restart = true
+  skip_additional_restart_data = true # to be able to restart from a Steady solution
 []
 
 [Modules]
@@ -22,9 +21,6 @@ rho = 1.1
 
     density = 'rho'
     dynamic_viscosity = 'mu'
-
-    initial_velocity = '1 1 0'
-    initial_pressure = 0.0
 
     inlet_boundaries = 'left'
     momentum_inlet_types = 'fixed-velocity'
@@ -46,19 +42,17 @@ rho = 1.1
 []
 
 [Executioner]
-  type = Steady
+  type = Transient
+  dt = 1
+  num_steps = 1
   solve_type = 'NEWTON'
   petsc_options_iname = '-pc_type -pc_factor_shift_type'
   petsc_options_value = 'lu NONZERO'
   nl_rel_tol = 1e-12
+  nl_abs_tol = 1e-8
 []
 
 [Outputs]
   exodus = true
   csv = true
-
-  [restart]
-    type = Checkpoint
-    additional_execute_on = 'FINAL'
-  []
 []
