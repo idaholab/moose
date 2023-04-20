@@ -31,9 +31,6 @@ protected:
   /// ID location (inside of outside of box)
   MooseEnum _location;
 
-  /// Block ID to assign to the region
-  subdomain_id_type _block_id;
-
   /// List of boundary names to select
   std::vector<BoundaryName> _boundaries_old;
 
