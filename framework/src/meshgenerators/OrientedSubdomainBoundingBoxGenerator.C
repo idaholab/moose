@@ -58,5 +58,6 @@ OrientedSubdomainBoundingBoxGenerator::generate()
       elem->subdomain_id() = _block_id;
   }
 
+  mesh->set_isnt_prepared();
   return dynamic_pointer_cast<MeshBase>(mesh);
 }
