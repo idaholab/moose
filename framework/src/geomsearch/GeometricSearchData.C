@@ -18,6 +18,7 @@
 
 #include "libmesh/elem.h"
 #include "libmesh/node.h"
+#include "libmesh/int_range.h"
 
 GeometricSearchData::GeometricSearchData(SubProblem & subproblem, MooseMesh & mesh)
   : _subproblem(subproblem), _mesh(mesh), _first(true)
@@ -144,14 +145,14 @@ GeometricSearchData::getPenetrationLocator(const BoundaryName & primary,
                                            const BoundaryName & secondary,
                                            Order order)
 {
-  unsigned int primary_id = _mesh.getBoundaryID(primary);
-  unsigned int secondary_id = _mesh.getBoundaryID(secondary);
+  auto primary_id = _mesh.getBoundaryID(primary);
+  auto secondary_id = _mesh.getBoundaryID(secondary);
 
   _subproblem.addGhostedBoundary(primary_id);
   _subproblem.addGhostedBoundary(secondary_id);
 
   PenetrationLocator * pl =
-      _penetration_locators[std::pair<unsigned int, unsigned int>(primary_id, secondary_id)];
+      _penetration_locators[std::pair<BoundaryID, BoundaryID>(primary_id, secondary_id)];
 
   if (!pl)
   {
@@ -162,7 +163,7 @@ GeometricSearchData::getPenetrationLocator(const BoundaryName & primary,
                                 secondary_id,
                                 order,
                                 getNearestNodeLocator(primary_id, secondary_id));
-    _penetration_locators[std::pair<unsigned int, unsigned int>(primary_id, secondary_id)] = pl;
+    _penetration_locators[std::pair<BoundaryID, BoundaryID>(primary_id, secondary_id)] = pl;
   }
 
   return *pl;
@@ -173,21 +174,19 @@ GeometricSearchData::getQuadraturePenetrationLocator(const BoundaryName & primar
                                                      const BoundaryName & secondary,
                                                      Order order)
 {
-  unsigned int primary_id = _mesh.getBoundaryID(primary);
-  unsigned int secondary_id = _mesh.getBoundaryID(secondary);
+  auto primary_id = _mesh.getBoundaryID(primary);
+  auto secondary_id = _mesh.getBoundaryID(secondary);
 
   _subproblem.addGhostedBoundary(primary_id);
   _subproblem.addGhostedBoundary(secondary_id);
 
   // Generate a new boundary id
-  // TODO: Make this better!
-  unsigned int base_id = 1e6;
-  unsigned int qsecondary_id = secondary_id + base_id;
+  auto qsecondary_id = -secondary_id;
 
   _secondary_to_qsecondary[secondary_id] = qsecondary_id;
 
   PenetrationLocator * pl =
-      _penetration_locators[std::pair<unsigned int, unsigned int>(primary_id, qsecondary_id)];
+      _penetration_locators[std::pair<BoundaryID, BoundaryID>(primary_id, qsecondary_id)];
 
   if (!pl)
   {
@@ -198,7 +197,7 @@ GeometricSearchData::getQuadraturePenetrationLocator(const BoundaryName & primar
                                 qsecondary_id,
                                 order,
                                 getQuadratureNearestNodeLocator(primary_id, secondary_id));
-    _penetration_locators[std::pair<unsigned int, unsigned int>(primary_id, qsecondary_id)] = pl;
+    _penetration_locators[std::pair<BoundaryID, BoundaryID>(primary_id, qsecondary_id)] = pl;
   }
 
   return *pl;
@@ -208,8 +207,8 @@ NearestNodeLocator &
 GeometricSearchData::getNearestNodeLocator(const BoundaryName & primary,
                                            const BoundaryName & secondary)
 {
-  unsigned int primary_id = _mesh.getBoundaryID(primary);
-  unsigned int secondary_id = _mesh.getBoundaryID(secondary);
+  auto primary_id = _mesh.getBoundaryID(primary);
+  auto secondary_id = _mesh.getBoundaryID(secondary);
 
   _subproblem.addGhostedBoundary(primary_id);
   _subproblem.addGhostedBoundary(secondary_id);
@@ -218,11 +217,11 @@ GeometricSearchData::getNearestNodeLocator(const BoundaryName & primary,
 }
 
 NearestNodeLocator &
-GeometricSearchData::getNearestNodeLocator(const unsigned int primary_id,
-                                           const unsigned int secondary_id)
+GeometricSearchData::getNearestNodeLocator(const BoundaryID primary_id,
+                                           const BoundaryID secondary_id)
 {
   NearestNodeLocator * nnl =
-      _nearest_node_locators[std::pair<unsigned int, unsigned int>(primary_id, secondary_id)];
+      _nearest_node_locators[std::pair<BoundaryID, BoundaryID>(primary_id, secondary_id)];
 
   _subproblem.addGhostedBoundary(primary_id);
   _subproblem.addGhostedBoundary(secondary_id);
@@ -230,7 +229,7 @@ GeometricSearchData::getNearestNodeLocator(const unsigned int primary_id,
   if (!nnl)
   {
     nnl = new NearestNodeLocator(_subproblem, _mesh, primary_id, secondary_id);
-    _nearest_node_locators[std::pair<unsigned int, unsigned int>(primary_id, secondary_id)] = nnl;
+    _nearest_node_locators[std::pair<BoundaryID, BoundaryID>(primary_id, secondary_id)] = nnl;
   }
 
   return *nnl;
@@ -240,8 +239,8 @@ NearestNodeLocator &
 GeometricSearchData::getQuadratureNearestNodeLocator(const BoundaryName & primary,
                                                      const BoundaryName & secondary)
 {
-  unsigned int primary_id = _mesh.getBoundaryID(primary);
-  unsigned int secondary_id = _mesh.getBoundaryID(secondary);
+  auto primary_id = _mesh.getBoundaryID(primary);
+  auto secondary_id = _mesh.getBoundaryID(secondary);
 
   _subproblem.addGhostedBoundary(primary_id);
   _subproblem.addGhostedBoundary(secondary_id);
@@ -250,21 +249,18 @@ GeometricSearchData::getQuadratureNearestNodeLocator(const BoundaryName & primar
 }
 
 NearestNodeLocator &
-GeometricSearchData::getQuadratureNearestNodeLocator(const unsigned int primary_id,
-                                                     const unsigned int secondary_id)
+GeometricSearchData::getQuadratureNearestNodeLocator(const BoundaryID primary_id,
+                                                     const BoundaryID secondary_id)
 {
-  // TODO: Make this better!
-  unsigned int base_id = 1e6;
-  unsigned int qsecondary_id = secondary_id + base_id;
+  BoundaryID qsecondary_id = -secondary_id;
 
   _secondary_to_qsecondary[secondary_id] = qsecondary_id;
-
   return getNearestNodeLocator(primary_id, qsecondary_id);
 }
 
 void
-GeometricSearchData::generateQuadratureNodes(unsigned int secondary_id,
-                                             unsigned int qsecondary_id,
+GeometricSearchData::generateQuadratureNodes(BoundaryID secondary_id,
+                                             BoundaryID qsecondary_id,
                                              bool reiniting)
 {
   // Have we already generated quadrature nodes for this boundary id?
@@ -282,7 +278,7 @@ GeometricSearchData::generateQuadratureNodes(unsigned int secondary_id,
   for (const auto & belem : range)
   {
     const Elem * elem = belem->_elem;
-    unsigned short int side = belem->_side;
+    auto side = belem->_side;
     BoundaryID boundary_id = belem->_bnd_id;
 
     if (elem->processor_id() == _subproblem.processor_id())
@@ -294,7 +290,7 @@ GeometricSearchData::generateQuadratureNodes(unsigned int secondary_id,
         _subproblem.setCurrentSubdomainID(elem, 0);
         _subproblem.assembly(0, 0).reinit(elem, side);
 
-        for (unsigned int qp = 0; qp < points_face.size(); qp++)
+        for (const auto qp : index_range(points_face))
           _mesh.addQuadratureNode(elem, side, qp, qsecondary_id, points_face[qp]);
       }
     }
@@ -302,14 +298,14 @@ GeometricSearchData::generateQuadratureNodes(unsigned int secondary_id,
 }
 
 void
-GeometricSearchData::addElementPairLocator(const unsigned int & interface_id,
+GeometricSearchData::addElementPairLocator(const BoundaryID & interface_id,
                                            std::shared_ptr<ElementPairLocator> epl)
 {
   _element_pair_locators[interface_id] = epl;
 }
 
 void
-GeometricSearchData::updateQuadratureNodes(unsigned int secondary_id)
+GeometricSearchData::updateQuadratureNodes(BoundaryID secondary_id)
 {
   const MooseArray<Point> & points_face = _subproblem.assembly(0, 0).qPointsFace();
 
@@ -329,15 +325,14 @@ GeometricSearchData::updateQuadratureNodes(unsigned int secondary_id)
         _subproblem.setCurrentSubdomainID(elem, 0);
         _subproblem.assembly(0, 0).reinit(elem, side);
 
-        for (unsigned int qp = 0; qp < points_face.size(); qp++)
+        for (const auto qp : index_range(points_face))
           (*_mesh.getQuadratureNode(elem, side, qp)) = points_face[qp];
       }
     }
   }
 }
 
-void
-GeometricSearchData::reinitQuadratureNodes(unsigned int /*secondary_id*/)
+void GeometricSearchData::reinitQuadratureNodes(BoundaryID /*secondary_id*/)
 {
   // Regenerate the quadrature nodes
   for (const auto & it : _secondary_to_qsecondary)

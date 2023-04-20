@@ -1054,8 +1054,6 @@ NonlinearSystemBase::enforceNodalConstraintsJacobian()
 void
 NonlinearSystemBase::setConstraintSecondaryValues(NumericVector<Number> & solution, bool displaced)
 {
-  std::map<std::pair<unsigned int, unsigned int>, PenetrationLocator *> * penetration_locators =
-      NULL;
 
   if (displaced)
     mooseAssert(_fe_problem.getDisplacedProblem(),
@@ -1063,22 +1061,11 @@ NonlinearSystemBase::setConstraintSecondaryValues(NumericVector<Number> & soluti
                 "displaced problem");
   auto & subproblem = displaced ? static_cast<SubProblem &>(*_fe_problem.getDisplacedProblem())
                                 : static_cast<SubProblem &>(_fe_problem);
-
-  if (!displaced)
-  {
-    GeometricSearchData & geom_search_data = _fe_problem.geomSearchData();
-    penetration_locators = &geom_search_data._penetration_locators;
-  }
-  else
-  {
-    GeometricSearchData & displaced_geom_search_data =
-        _fe_problem.getDisplacedProblem()->geomSearchData();
-    penetration_locators = &displaced_geom_search_data._penetration_locators;
-  }
+  const auto & penetration_locators = subproblem.geomSearchData()._penetration_locators;
 
   bool constraints_applied = false;
 
-  for (const auto & it : *penetration_locators)
+  for (const auto & it : penetration_locators)
   {
     PenetrationLocator & pen_loc = *(it.second);
 
@@ -1206,33 +1193,19 @@ NonlinearSystemBase::constraintResiduals(NumericVector<Number> & residual, bool 
   // Make sure the residual is in a good state
   residual.close();
 
-  std::map<std::pair<unsigned int, unsigned int>, PenetrationLocator *> * penetration_locators =
-      NULL;
-
   if (displaced)
     mooseAssert(_fe_problem.getDisplacedProblem(),
                 "If we're calling this method with displaced = true, then we better well have a "
                 "displaced problem");
   auto & subproblem = displaced ? static_cast<SubProblem &>(*_fe_problem.getDisplacedProblem())
                                 : static_cast<SubProblem &>(_fe_problem);
-
-  if (!displaced)
-  {
-    GeometricSearchData & geom_search_data = _fe_problem.geomSearchData();
-    penetration_locators = &geom_search_data._penetration_locators;
-  }
-  else
-  {
-    GeometricSearchData & displaced_geom_search_data =
-        _fe_problem.getDisplacedProblem()->geomSearchData();
-    penetration_locators = &displaced_geom_search_data._penetration_locators;
-  }
+  const auto & penetration_locators = subproblem.geomSearchData()._penetration_locators;
 
   bool constraints_applied;
   bool residual_has_inserted_values = false;
   if (!_assemble_constraints_separately)
     constraints_applied = false;
-  for (const auto & it : *penetration_locators)
+  for (const auto & it : penetration_locators)
   {
     if (_assemble_constraints_separately)
     {
@@ -1374,22 +1347,9 @@ NonlinearSystemBase::constraintResiduals(NumericVector<Number> & residual, bool 
   }
 
   // go over element-element constraint interface
-  std::map<unsigned int, std::shared_ptr<ElementPairLocator>> * element_pair_locators = nullptr;
-
-  if (!displaced)
-  {
-    GeometricSearchData & geom_search_data = _fe_problem.geomSearchData();
-    element_pair_locators = &geom_search_data._element_pair_locators;
-  }
-  else
-  {
-    GeometricSearchData & displaced_geom_search_data =
-        _fe_problem.getDisplacedProblem()->geomSearchData();
-    element_pair_locators = &displaced_geom_search_data._element_pair_locators;
-  }
-
   THREAD_ID tid = 0;
-  for (const auto & it : *element_pair_locators)
+  const auto & element_pair_locators = subproblem.geomSearchData()._element_pair_locators;
+  for (const auto & it : element_pair_locators)
   {
     ElementPairLocator & elem_pair_loc = *(it.second);
 
@@ -1957,10 +1917,8 @@ NonlinearSystemBase::findImplicitGeometricCouplingEntries(
     GeometricSearchData & geom_search_data,
     std::unordered_map<dof_id_type, std::vector<dof_id_type>> & graph)
 {
-  std::map<std::pair<unsigned int, unsigned int>, NearestNodeLocator *> & nearest_node_locators =
-      geom_search_data._nearest_node_locators;
-
   const auto & node_to_elem_map = _mesh.nodeToElemMap();
+  const auto & nearest_node_locators = geom_search_data._nearest_node_locators;
   for (const auto & it : nearest_node_locators)
   {
     std::vector<dof_id_type> & secondary_nodes = it.second->_secondary_nodes;
@@ -2104,8 +2062,6 @@ NonlinearSystemBase::constraintJacobians(bool displaced)
         static_cast<PetscMatrix<Number> &>(jacobian).mat(), MAT_IGNORE_ZERO_ENTRIES, PETSC_TRUE);
 
   std::vector<numeric_index_type> zero_rows;
-  std::map<std::pair<unsigned int, unsigned int>, PenetrationLocator *> * penetration_locators =
-      NULL;
 
   if (displaced)
     mooseAssert(_fe_problem.getDisplacedProblem(),
@@ -2113,23 +2069,12 @@ NonlinearSystemBase::constraintJacobians(bool displaced)
                 "displaced problem");
   auto & subproblem = displaced ? static_cast<SubProblem &>(*_fe_problem.getDisplacedProblem())
                                 : static_cast<SubProblem &>(_fe_problem);
-
-  if (!displaced)
-  {
-    GeometricSearchData & geom_search_data = _fe_problem.geomSearchData();
-    penetration_locators = &geom_search_data._penetration_locators;
-  }
-  else
-  {
-    GeometricSearchData & displaced_geom_search_data =
-        _fe_problem.getDisplacedProblem()->geomSearchData();
-    penetration_locators = &displaced_geom_search_data._penetration_locators;
-  }
+  const auto & penetration_locators = subproblem.geomSearchData()._penetration_locators;
 
   bool constraints_applied;
   if (!_assemble_constraints_separately)
     constraints_applied = false;
-  for (const auto & it : *penetration_locators)
+  for (const auto & it : penetration_locators)
   {
     if (_assemble_constraints_separately)
     {
@@ -2331,21 +2276,8 @@ NonlinearSystemBase::constraintJacobians(bool displaced)
 
   THREAD_ID tid = 0;
   // go over element-element constraint interface
-  std::map<unsigned int, std::shared_ptr<ElementPairLocator>> * element_pair_locators = nullptr;
-
-  if (!displaced)
-  {
-    GeometricSearchData & geom_search_data = _fe_problem.geomSearchData();
-    element_pair_locators = &geom_search_data._element_pair_locators;
-  }
-  else
-  {
-    GeometricSearchData & displaced_geom_search_data =
-        _fe_problem.getDisplacedProblem()->geomSearchData();
-    element_pair_locators = &displaced_geom_search_data._element_pair_locators;
-  }
-
-  for (const auto & it : *element_pair_locators)
+  const auto & element_pair_locators = subproblem.geomSearchData()._element_pair_locators;
+  for (const auto & it : element_pair_locators)
   {
     ElementPairLocator & elem_pair_loc = *(it.second);
 

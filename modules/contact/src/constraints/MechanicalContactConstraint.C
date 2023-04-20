@@ -17,6 +17,7 @@
 #include "SystemBase.h"
 #include "Assembly.h"
 #include "MooseMesh.h"
+#include "MathUtils.h"
 #include "AugmentedLagrangianContactProblem.h"
 #include "Executioner.h"
 #include "AddVariableAction.h"
@@ -27,6 +28,8 @@
 #include "libmesh/sparse_matrix.h"
 
 registerMooseObject("ContactApp", MechanicalContactConstraint);
+
+const unsigned int MechanicalContactConstraint::no_iterations = 0;
 
 InputParameters
 MechanicalContactConstraint::validParams()
@@ -55,6 +58,10 @@ MechanicalContactConstraint::validParams()
       "penalty",
       1e8,
       "The penalty to apply.  This can vary depending on the stiffness of your materials");
+  params.addParam<Real>("penalty_multiplier",
+                        1.0,
+                        "The grwoth factor for the penaly applied at the end of each augmented "
+                        "Lagrange update iteration");
   params.addParam<Real>("friction_coefficient", 0, "The friction coefficient");
   params.addParam<Real>("tangential_tolerance",
                         "Tangential distance to extend edges of contact surfaces");
@@ -121,6 +128,7 @@ MechanicalContactConstraint::MechanicalContactConstraint(const InputParameters &
     _formulation(getParam<MooseEnum>("formulation").getEnum<ContactFormulation>()),
     _normalize_penalty(getParam<bool>("normalize_penalty")),
     _penalty(getParam<Real>("penalty")),
+    _penalty_multiplier(getParam<Real>("penalty_multiplier")),
     _friction_coefficient(getParam<Real>("friction_coefficient")),
     _tension_release(getParam<Real>("tension_release")),
     _capture_tolerance(getParam<Real>("capture_tolerance")),
@@ -144,7 +152,12 @@ MechanicalContactConstraint::MechanicalContactConstraint(const InputParameters &
     _connected_secondary_nodes_jacobian(getParam<bool>("connected_secondary_nodes_jacobian")),
     _non_displacement_vars_jacobian(getParam<bool>("non_displacement_variables_jacobian")),
     _contact_linesearch(dynamic_cast<ContactLineSearchBase *>(_subproblem.getLineSearch())),
-    _print_contact_nodes(getParam<bool>("print_contact_nodes"))
+    _print_contact_nodes(getParam<bool>("print_contact_nodes")),
+    _augmented_lagrange_problem(dynamic_cast<AugmentedLagrangianContactProblem *>(&_fe_problem)),
+    _augmented_lagrange_update_iteration(
+        _augmented_lagrange_problem
+            ? _augmented_lagrange_problem->getNumLagrangianUpdateIterations()
+            : no_iterations)
 {
   _overwrite_secondary_residual = false;
 
@@ -185,8 +198,7 @@ MechanicalContactConstraint::MechanicalContactConstraint(const InputParameters &
     if (_model == ContactModel::GLUED)
       mooseError("The Augmented Lagrangian contact formulation does not support GLUED case.");
 
-    FEProblemBase * fe_problem = getParam<FEProblemBase *>("_fe_problem_base");
-    if (dynamic_cast<AugmentedLagrangianContactProblem *>(fe_problem) == NULL)
+    if (!_augmented_lagrange_problem)
       mooseError("The Augmented Lagrangian contact formulation must use "
                  "AugmentedLagrangianContactProblem.");
 
@@ -220,7 +232,7 @@ MechanicalContactConstraint::timestepSetup()
   {
     updateContactStatefulData(/* beginning_of_step = */ true);
     if (_formulation == ContactFormulation::AUGMENTED_LAGRANGE)
-      updateAugmentedLagrangianMultiplier(0);
+      updateAugmentedLagrangianMultiplier(/* beginning_of_step = */ true);
 
     _update_stateful_data = false;
 
@@ -241,7 +253,7 @@ MechanicalContactConstraint::jacobianSetup()
 }
 
 void
-MechanicalContactConstraint::updateAugmentedLagrangianMultiplier(unsigned int update_step_number)
+MechanicalContactConstraint::updateAugmentedLagrangianMultiplier(bool beginning_of_step)
 {
   for (auto & pinfo_pair : _penetration_locator._penetration_info)
   {
@@ -255,7 +267,7 @@ MechanicalContactConstraint::updateAugmentedLagrangianMultiplier(unsigned int up
         pinfo->_normal * (pinfo->_closest_point - _mesh.nodeRef(secondary_node_num)) -
         gapOffset(_mesh.nodePtr(secondary_node_num));
 
-    if (update_step_number == 0 && _model == ContactModel::COULOMB)
+    if (beginning_of_step && _model == ContactModel::COULOMB)
     {
       pinfo->_lagrange_multiplier_slip.zero();
       if (pinfo->isCaptured())
@@ -269,7 +281,7 @@ MechanicalContactConstraint::updateAugmentedLagrangianMultiplier(unsigned int up
 
       if (_model == ContactModel::COULOMB)
       {
-        if (update_step_number > 0)
+        if (!beginning_of_step)
         {
           Real penalty = getPenalty(*pinfo);
           RealVectorValue pen_force_normal =
@@ -1716,8 +1728,7 @@ MechanicalContactConstraint::getPenalty(PenetrationInfo & pinfo)
   Real penalty = _penalty;
   if (_normalize_penalty)
     penalty *= nodalArea(pinfo);
-
-  return penalty;
+  return penalty * MathUtils::pow(_penalty_multiplier, _augmented_lagrange_update_iteration);
 }
 
 Real
@@ -1727,7 +1738,7 @@ MechanicalContactConstraint::getTangentialPenalty(PenetrationInfo & pinfo)
   if (_normalize_penalty)
     penalty *= nodalArea(pinfo);
 
-  return penalty;
+  return penalty * MathUtils::pow(_penalty_multiplier, _augmented_lagrange_update_iteration);
 }
 
 void
