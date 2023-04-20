@@ -20,8 +20,7 @@ MeshingTutorialTestApp::validParams()
   return params;
 }
 
-MeshingTutorialTestApp::MeshingTutorialTestApp(InputParameters parameters)
-  : MooseApp(parameters)
+MeshingTutorialTestApp::MeshingTutorialTestApp(InputParameters parameters) : MooseApp(parameters)
 {
   MeshingTutorialTestApp::registerAll(
       _factory, _action_factory, _syntax, getParam<bool>("allow_test_objects"));
@@ -30,10 +29,7 @@ MeshingTutorialTestApp::MeshingTutorialTestApp(InputParameters parameters)
 MeshingTutorialTestApp::~MeshingTutorialTestApp() {}
 
 void
-MeshingTutorialTestApp::registerAll(Factory & f,
-                                         ActionFactory & af,
-                                         Syntax & s,
-                                         bool use_test_objs)
+MeshingTutorialTestApp::registerAll(Factory & f, ActionFactory & af, Syntax & s, bool use_test_objs)
 {
   MeshingTutorialApp::registerAll(f, af, s);
   if (use_test_objs)
