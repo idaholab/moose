@@ -90,6 +90,7 @@ AllSideSetsByNormalsGenerator::generate()
 
   finalize();
 
+  mesh->set_isnt_prepared();
   return dynamic_pointer_cast<MeshBase>(mesh);
 }
 
