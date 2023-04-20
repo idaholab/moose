@@ -358,6 +358,16 @@ MaterialPropertyStorage::swapBack(MaterialData & material_data,
   if (hasOlderProperties())
     shallowSwapDataBack(
         _stateful_prop_id_to_prop_id, setPropsOlder(&elem, side), material_data.propsOlder());
+
+  // Workaround for MOOSE difficulties in keeping materialless
+  // elements (e.g. Lower D elements in Mortar code) materialless
+  if (props(&elem, side).empty())
+    (*_props_elem)[&elem].erase(side);
+  if (propsOld(&elem, side).empty())
+    (*_props_elem_old)[&elem].erase(side);
+  if (hasOlderProperties())
+    if (propsOlder(&elem, side).empty())
+      (*_props_elem_older)[&elem].erase(side);
 }
 
 bool
