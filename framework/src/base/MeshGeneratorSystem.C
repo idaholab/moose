@@ -13,6 +13,8 @@
 #include "MeshGenerator.h"
 #include "DependencyResolver.h"
 
+#include "libmesh/mesh_tools.h"
+
 MeshGeneratorSystem::MeshGeneratorSystem(MooseApp & app)
   : PerfGraphInterface(app.perfGraph(), "MeshGeneratorSystem"),
     ParallelObject(app),
@@ -345,11 +347,16 @@ MeshGeneratorSystem::executeMeshGenerators()
       const auto & name = generator->name();
 
       auto current_mesh = generator->generateInternal();
-      if (!_has_bmbb)
-        // Assume the worst of our developers until we have established a bullet-proof verification
-        // of whether the state of is_prepared() accurately reflects the true preparedness of the
-        // mesh
-        current_mesh->set_isnt_prepared();
+#ifdef DEBUG
+      // Assert that the mesh is either marked as not prepared or if it is marked as prepared,
+      // that it's *actually* prepared
+      if (!_has_bmbb && !MeshTools::valid_is_prepared(*current_mesh))
+        mooseError("'",
+                   name,
+                   "' is marked as prepared but is not actually prepared. Please edit the '",
+                   generator->type(),
+                   "' class to call 'set_isnt_prepared()'");
+#endif
 
       // Now we need to possibly give this mesh to downstream generators
       auto & outputs = _mesh_generator_outputs[name];
