@@ -1,0 +1,30 @@
+[Tests]
+  design = tutorial04_verification/index.md
+  issues = '#24041'
+  parallel_scheduling = True
+  requirement = "The system shall include example problems for meshing tutorial reactor examples."
+
+  [abtr]
+    type = RunApp
+    input = 'abtr/abtr.i'
+    cli_args= '--mesh-only --error-deprecated'
+  []
+
+  [hpmr]
+    type = RunApp
+    input = 'hpmr/hpmr.i'
+    cli_args= '--mesh-only --error-deprecated'
+  []
+
+  [rgmb_abtr]
+    type = RunApp
+    input = 'rgmb_abtr/rgmb_abtr.i'
+    cli_args= '--mesh-only --error-deprecated'
+  []
+
+  [rgmb_lfr_assembly]
+    type = RunApp
+    input = 'rgmb_lfr/rgmb_lfr_assembly.i'
+    cli_args= '--mesh-only --error-deprecated'
+  []
+[]
