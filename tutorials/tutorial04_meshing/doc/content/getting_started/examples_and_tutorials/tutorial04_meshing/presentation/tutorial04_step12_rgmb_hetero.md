@@ -75,7 +75,7 @@ Materials IDs also assigned:
 
 Boundary conditions are assigned to the outer boundary sidesets
 
-!listing reactor_examples/rgmb_lfr/griffin_options.i
+!listing reactor_examples/rgmb_lfr/rgmb_lfr_griffin_snippet.i
          block=TransportSystems
          link=False
 
@@ -83,6 +83,6 @@ Boundary conditions are assigned to the outer boundary sidesets
 
 Material definition is greatly simplified since `material_id` extra element ID is defined directly on mesh
 
-!listing reactor_examples/rgmb_lfr/griffin_options.i
+!listing reactor_examples/rgmb_lfr/rgmb_lfr_griffin_snippet.i
          block=Materials
          link=False

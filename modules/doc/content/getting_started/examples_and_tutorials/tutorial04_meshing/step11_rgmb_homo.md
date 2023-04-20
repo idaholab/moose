@@ -70,14 +70,14 @@ Griffin recognizes material ID assignments through the `material_id` tag. Theref
 
 Material definition in the Griffin input file is then greatly simplified since `material_id` is defined directly on mesh. No additional mapping is needed.
 
-!listing reactor_examples/rgmb_abtr/rgmb_abtr_griffin_options.i
+!listing reactor_examples/rgmb_abtr/rgmb_abtr_griffin_snippet.i
          id=tutorial04-abtr_griffin_materials
          caption=Griffin materials setup.
          block=Materials
 
 RGMB labels outer boundary sidesets with pre-defined names -- "top" for top boundary, "bottom" for bottom boundary, and "outer_core" for radial boundary. Boundary conditions are assigned to these sidesets in Griffin.
 
-!listing reactor_examples/rgmb_abtr/rgmb_abtr_griffin_options.i
+!listing reactor_examples/rgmb_abtr/rgmb_abtr_griffin_snippet.i
          id=tutorial04-abtr_griffin_bcs
          caption=Griffin Boundary conditions setup.
          block=TransportSystems

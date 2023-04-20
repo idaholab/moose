@@ -224,8 +224,8 @@ Griffin's `MixedNeutronicsMaterial` defines the mesh-material mapping explicitly
 
 The key point is that the block IDs (`subdomain_id`) in the mesh need to be referenced in the Griffin input file in order to map materials to these blocks. A separate `MixedNeutronicsMaterial` should be defined in the Griffin input for each unique material ID pertaining to the input mesh.
 
-!listing reactor_examples/abtr/abtr_cmfd.i
-         id=tutorial04-abtr_cmfd
+!listing reactor_examples/abtr/abtr_griffin_snippet.i
+         id=tutorial04-abtr_griffin_snippet
          caption=Homogeneous Griffin block assignment example.
          block=Materials/icore
 
@@ -233,8 +233,8 @@ The key point is that the block IDs (`subdomain_id`) in the mesh need to be refe
 
 Griffin requires boundary conditions to be applied to all external boundaries of the mesh (generally the top, bottom, and radial periphery for a typical 3D core). Boundary conditions are set in the `TransportSystems` block of Griffin. These outer boundary sidesets must be assigned to the appropriate boundary condition type (e.g.,  `VacuumBoundary`, `ReflectingBoundary`, etc.).
 
-!listing reactor_examples/abtr/abtr_cmfd.i
-         id=tutorial04-abtr_cmfd-transport
+!listing reactor_examples/abtr/abtr_griffin_snippet.i
+         id=tutorial04-abtr_griffin_snippet-transport
          caption=Homogeneous Griffin Transport Systems example.
          block=TransportSystems
 

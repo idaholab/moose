@@ -428,8 +428,8 @@ All blocks in the mesh must be assigned to a material in Griffin. The blocks are
        caption=Locations of blocks which are assigned to materials in the Griffin input file.
        style=width:50%;display:block;margin-left:auto;margin-right:auto;
 
-!listing reactor_examples/hpmr/HPMR_griffin_materials.i
-         id=tutorial04-HPMR_griffin_materials
+!listing reactor_examples/hpmr/hpmr_griffin_snippet.i
+         id=tutorial04-hpmr_griffin_snippet
          caption=Material property assignment example.
          block=Materials
 

@@ -72,14 +72,14 @@ RGMB allows assignment of background coolant and duct region IDs which are added
 
 Boundary conditions are assigned to the outer boundary sidesets.
 
-!listing reactor_examples/rgmb_lfr/griffin_options.i
+!listing reactor_examples/rgmb_lfr/rgmb_lfr_griffin_snippet.i
          id=tutorial04-rgmb_lfr-transport
          caption=LFR RGMB boundary condition setup.
          block=TransportSystems
 
 Material definition is greatly simplified since `material_id` extra element ID is defined directly on mesh.
 
-!listing reactor_examples/rgmb_lfr/griffin_options.i
+!listing reactor_examples/rgmb_lfr/rgmb_lfr_griffin_snippet.i
          id=tutorial04-rgmb_lfr-materials
          caption=LFR RGMB materials setup.
          block=Materials

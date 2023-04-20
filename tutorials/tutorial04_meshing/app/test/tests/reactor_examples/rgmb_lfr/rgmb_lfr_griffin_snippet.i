@@ -1,25 +1,4 @@
-[Mesh]
-  [final_mesh]
-    type = CoarseMeshExtraElementIDGenerator
-    input = lfr_assy
-    coarse_mesh = lfr_assy_cm
-    extra_element_id_name = coarse_element_id
-  []
-[]
-
-[Executioner]
-  type = SweepUpdate
-  verbose = true
-
-  richardson_value = eigenvalue
-  richardson_abs_tol = 1e-6
-  richardson_max_its = 500
-  inner_solve_type = SI
-  max_inner_its = 8
-
-  cmfd_acceleration = true
-  coarse_element_id = coarse_element_id
-[]
+### This file contains a snippet from a Griffin input file. This file is not runnable in this form. ###
 
 [TransportSystems]
   particle = neutron
@@ -1290,47 +1269,4 @@
        pseudo_PB208IJ:1.206694E-02
     '
   []
-[]
-
-[AuxVariables]
-  [volume]
-    family = MONOMIAL
-    order = CONSTANT
-    initial_condition = 1
-  []
-  [x_coord]
-    family = LAGRANGE
-    order = FIRST
-    [InitialCondition]
-      type = FunctionIC
-      function = x
-    []
-  []
-  [y_coord]
-    family = LAGRANGE
-    order = FIRST
-    [InitialCondition]
-      type = FunctionIC
-      function = y
-    []
-  []
-[]
-
-[PowerDensity]
-  power = 3700000.0 # W
-  power_density_variable = power_density
-[]
-
-[Outputs]
-  [console]
-    type = Console
-    outlier_variable_norms = false
-  []
-  [pgraph]
-    type = PerfGraphOutput
-    level = 2
-  []
-  exodus = true
-  csv = true
-  execute_on = 'timestep_end'
 []

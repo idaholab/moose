@@ -347,7 +347,7 @@ All blocks in the mesh must be assigned to a material in Griffin.
 !row!
 !col small=12 medium=6 large=8
 
-!listing reactor_examples/hpmr/HPMR_griffin_materials.i
+!listing reactor_examples/hpmr/hpmr_griffin_snippet.i
          block=Materials
          link=False
 

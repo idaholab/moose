@@ -1,3 +1,5 @@
+### This file contains a snippet from a Griffin input file. This file is not runnable in this form. ###
+
 [Materials]
   [mat1]
     type = CoupledFeedbackNeutronicsMaterial
