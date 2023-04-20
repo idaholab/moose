@@ -33,14 +33,29 @@
     prereq = free-slip-action
   []
   [no-slip]
-    type = 'Exodiff'
-    input = 2d-rc-no-slip.i
-    exodiff = 2d-rc-no-slip_out.e
-    method = "!dbg"
-    requirement = 'The system shall be able to model no-slip conditions in a channel; specifically, moving down the channel, the tangential velocity shall develop a parabolic profile.'
-    abs_zero = 1e-9
-    cli_args = '-pc_type lu -pc_factor_shift_type NONZERO'
-    valgrind = HEAVY
+    requirement = 'The system shall be able to model no-slip conditions in a channel; specifically, moving down the channel, the tangential velocity shall develop a parabolic profile. This problem shall be solvable using a'
+    [SMP]
+      type = 'Exodiff'
+      input = 2d-rc-no-slip.i
+      exodiff = 2d-rc-no-slip_out.e
+      method = "!dbg"
+      abs_zero = 1e-9
+      valgrind = HEAVY
+      detail = 'monolithic preconditioning technique'
+       cli_args = 'Preconditioning/active=SMP'
+    []
+    [no-slip-field-split]
+      type = 'Exodiff'
+      input = 2d-rc-no-slip.i
+      exodiff = 2d-rc-no-slip-fsp.e
+      method = "!dbg"
+      detail = 'field-split preconditioning technique'
+      abs_zero = 8e-7
+      rel_err = 1e-5
+      cli_args = 'Preconditioning/active=FSP Outputs/file_base=2d-rc-no-slip-fsp'
+      valgrind = HEAVY
+      prereq = 'no-slip/SMP'
+    []
   []
   [no-slip-action]
     type = 'Exodiff'
@@ -194,7 +209,7 @@
       type = 'Exodiff'
       input = 2d-rc-no-slip.i
       exodiff = 2d-rc-no-slip-tris.e
-      cli_args = 'Mesh/gen/elem_type=TRI3 GlobalParams/two_term_boundary_expansion=false Outputs/file_base=2d-rc-no-slip-tris'
+      cli_args = 'Mesh/gen/elem_type=TRI3 GlobalParams/two_term_boundary_expansion=false Outputs/file_base=2d-rc-no-slip-tris Preconditioning/active=SMP'
       valgrind = HEAVY
       detail = 'two-dimensional triangular elements'
       abs_zero = 1e-9
