@@ -56,7 +56,7 @@ protected:
   // This is the main routine for constructing edges according to the user input
   std::vector<Point> getEdge(const Point & P1,
                              const Point & P2,
-                             const unsigned int & np,
+                             const unsigned int np,
                              const MooseEnum & type,
                              const std::string & parameter,
                              const Point & outward,
@@ -71,7 +71,7 @@ protected:
                                     const Point & outward,
                                     const std::vector<Real> & param_vec);
 
-  std::vector<Point> getDiscreteEdge(const unsigned int & np, const std::string & parameter);
+  std::vector<Point> getDiscreteEdge(const unsigned int np, const std::string & parameter);
 
   std::vector<Point>
   getLineEdge(const Point & P1, const Point & P2, const std::vector<Real> & param_vec);
@@ -92,7 +92,7 @@ protected:
   // midpoint.
   Point computeMidPoint(const Point & P1,
                         const Point & P2,
-                        const Real & dist,
+                        const Real dist,
                         const Point & outward) const;
 
   // The following routine is necessary for the parametrization of opposite edges
@@ -101,10 +101,10 @@ protected:
   // This routine maps a point x\in[a, b] to the corresponding point in the interval [c, d].
 
   Real getMapInterval(
-      const Real & xab, const Real & a, const Real & b, const Real & c, const Real & d) const;
+      const Real xab, const Real a, const Real b, const Real c, const Real d) const;
 
   std::vector<Real>
-  getPointsDistribution(const Real & edge_length, const unsigned int & np, const Real & bias) const;
+  getPointsDistribution(const Real edge_length, const unsigned int np, const Real bias) const;
 
   usingFunctionParserUtilsMembers(false);
 };

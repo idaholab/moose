@@ -224,7 +224,7 @@ TransfiniteMeshGenerator::generate()
 std::vector<Point>
 TransfiniteMeshGenerator::getEdge(const Point & P1,
                                   const Point & P2,
-                                  const unsigned int & np,
+                                  const unsigned int np,
                                   const MooseEnum & type,
                                   const std::string & parameter,
                                   const Point & outward,
@@ -320,7 +320,7 @@ TransfiniteMeshGenerator::getParsedEdge(const std::string & parameter,
 }
 
 std::vector<Point>
-TransfiniteMeshGenerator::getDiscreteEdge(const unsigned int & np, const std::string & parameter)
+TransfiniteMeshGenerator::getDiscreteEdge(const unsigned int np, const std::string & parameter)
 {
   std::vector<Point> edge(np);
   std::vector<std::string> string_points;
@@ -400,7 +400,7 @@ TransfiniteMeshGenerator::getCircarcEdge(const Point & P1,
 
 Real
 TransfiniteMeshGenerator::getMapInterval(
-    const Real & xab, const Real & a, const Real & b, const Real & c, const Real & d) const
+    const Real xab, const Real a, const Real b, const Real c, const Real d) const
 // this routine maps a point x\in[a, b] to the corresponding point in the interval [c, d]
 {
   mooseAssert(std::abs(b - a) > 0.0,
@@ -411,9 +411,9 @@ TransfiniteMeshGenerator::getMapInterval(
 }
 
 std::vector<Real>
-TransfiniteMeshGenerator::getPointsDistribution(const Real & edge_length,
-                                                const unsigned int & np,
-                                                const Real & bias) const
+TransfiniteMeshGenerator::getPointsDistribution(const Real edge_length,
+                                                const unsigned int np,
+                                                const Real bias) const
 {
   std::vector<Real> param_vec;
   Real rx = 0.0;
@@ -479,7 +479,7 @@ TransfiniteMeshGenerator::computeOrigin(const Point & P1, const Point & P2, cons
 Point
 TransfiniteMeshGenerator::computeMidPoint(const Point & P1,
                                           const Point & P2,
-                                          const Real & height,
+                                          const Real height,
                                           const Point & outward) const
 {
   const Real xm = (P1(0) + P2(0)) / 2;
