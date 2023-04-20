@@ -10,10 +10,10 @@
 #pragma once
 
 #include "GeneralReporter.h"
-#include "RayTracingOverlayMeshTest.h"
+#include "RayTracingOverlayMeshMapping.h"
 
 class IntersectionElemsReporter;
-
+class RayTracingOverlayMeshMapping;
 /**
  * Reports the summary of the two-way mapping between main and overlay mesh
  */
@@ -26,8 +26,17 @@ public:
 
   void initialize() override {}
   void finalize() override {}
-  void execute() override {}
-};
+  void execute() override final;
 
-// Store solution invalid warnings to a json file
-void to_json(nlohmann::json & json, const RayTracingOverlayMeshTest * const & overlay_mesh_test);
+private:
+  const bool _serialize;
+  // The reference to RayTracingOverlayMeshMapping
+  const RayTracingOverlayMeshMapping & _overlay_mesh_mapping;
+  /**
+   *  Store the intersection elem IDs in two-way maps
+   */
+  // main -> overlay map use main elem at the boundary as key
+  std::map<dof_id_type, std::set<dof_id_type>> & _to_overlay;
+  // overlay -> main map use overlay elem as key
+  std::map<dof_id_type, std::set<dof_id_type>> & _from_overlay;
+};

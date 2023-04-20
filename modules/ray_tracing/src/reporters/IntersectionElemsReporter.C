@@ -8,8 +8,7 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "IntersectionElemsReporter.h"
-
-#include "RayTracingOverlayMeshTest.h"
+#include "RayTracingOverlayMeshMapping.h"
 
 registerMooseObject("RayTracingApp", IntersectionElemsReporter);
 
@@ -18,47 +17,27 @@ IntersectionElemsReporter::validParams()
 {
   InputParameters params = GeneralReporter::validParams();
   params.addRequiredParam<UserObjectName>(
-      "overlay_uo_name", "The name of the RayTracingOverlayMeshTest user object to pull data from");
+      "overlay_uo_name",
+      "The name of the RayTracingOverlayMeshMapping user object to pull data from");
+  params.addParam<bool>("serialize", false, "True to serialize the data on rank 0");
   params.addClassDescription("Reports the elems mapping between ovelay mesh and main mesh.");
   return params;
 }
 
 IntersectionElemsReporter::IntersectionElemsReporter(const InputParameters & parameters)
-  : GeneralReporter(parameters)
+  : GeneralReporter(parameters),
+    _serialize(getParam<bool>("serialize")),
+    _overlay_mesh_mapping(getUserObject<RayTracingOverlayMeshMapping>("overlay_uo_name")),
+    _to_overlay(declareValueByName<std::map<dof_id_type, std::set<dof_id_type>>>(
+        "to_overlay", _serialize ? REPORTER_MODE_ROOT : REPORTER_MODE_DISTRIBUTED)),
+    _from_overlay(declareValueByName<std::map<dof_id_type, std::set<dof_id_type>>>(
+        "from_overlay", _serialize ? REPORTER_MODE_ROOT : REPORTER_MODE_DISTRIBUTED))
 {
-  declareValueByName<const RayTracingOverlayMeshTest *>(
-      "overlay_mesh_test",
-      REPORTER_MODE_ROOT,
-      &getUserObject<RayTracingOverlayMeshTest>("overlay_uo_name"));
 }
 
 void
-to_json(nlohmann::json & json, const RayTracingOverlayMeshTest * const & overlay_mesh_test)
+IntersectionElemsReporter::execute()
 {
-
-  const auto build_data_structure = [&json](const auto & map, auto & type)
-  {
-    nlohmann::json entry;
-    if (map.size() == 0)
-      // Create an empty array
-      json = nlohmann::json::array();
-    else
-      // Output data to json
-      for (auto main_elem = map.begin(); main_elem != map.end(); main_elem++)
-      {
-        std::string main_id = type + "_id";
-        entry[main_id] = main_elem->first;
-        auto array = main_elem->second;
-        entry["mapping_id"] = array;
-        json.push_back(entry);
-      }
-  };
-  // Build data structure for store
-  auto & main_entry = overlay_mesh_test->getOverlayElemstoMain();
-  auto & overlay_entry = overlay_mesh_test->getMainElemstoOverlay();
-
-  std::string type = overlay_mesh_test->getMainMeshName();
-  build_data_structure(main_entry, type);
-  type = overlay_mesh_test->getOverlayMeshName();
-  build_data_structure(overlay_entry, type);
+  _to_overlay = _overlay_mesh_mapping.overlayIDMap(true, _serialize);
+  _from_overlay = _overlay_mesh_mapping.overlayIDMap(false, _serialize);
 }

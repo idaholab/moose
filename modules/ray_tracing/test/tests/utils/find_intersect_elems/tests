@@ -1,11 +1,29 @@
 [Tests]
   [find_intersection_elems]
-    type = JSONDiff
-    recover = false
-    input = 'find_intersect_elems.i'
-    jsondiff = 'find_intersection_elems.json'
-    design = 'IntersectionElemHelper.md'
-    issues = '#24098'
-    requirement = 'The capability shall create a two-way map between overlay mesh and main mesh.'
+
+  design = 'RayTracingOverlayMeshMapping.md'
+  issues = '#24098'
+  requirement = 'The capability shall create a two-way map between overlay mesh and main mesh.'
+
+    [serialize]
+      type = JSONDiff
+      recover = false
+      input = 'find_intersect_elems.i'
+      jsondiff = 'find_intersect_elems.json'
+      cli_args = 'Reporters/find_intersection_elems/serialize=true'
+      detail = 'keep the mapping in main processsor'
+    []
+
+    [distribute]
+      type = JSONDiff
+      recover = false
+      input = 'find_intersect_elems.i'
+      jsondiff = 'intersect_elems_distribute.json intersect_elems_distribute.json.1 intersect_elems_distribute.json.2'
+      min_parallel = 3
+      max_parallel = 3
+      cli_args = "Outputs/file_base='intersect_elems_distribute'"
+      detail = 'have the distribute mapping in all processsors'
+    []
   []
+
 []

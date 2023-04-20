@@ -1,6 +1,6 @@
 # IntersectionElemsReporter
 
-A Reporter object for store the mapping information between the overlay mesh and main mesh.
+A Reporter object for store the mapping information between the overlay mesh and main mesh boundary region.
 
 ## Example Input Syntax
 

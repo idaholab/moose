@@ -29,14 +29,13 @@
     type = OverlayMeshGenerator
     input = 'left_and_right'
     dim = 2
-    nx = 2
-    ny = 2
+    nx = 3
+    ny = 3
     xmin = -3
     xmax = 6
     ymin = -5.5
     ymax = 5.5
     save_with_name='overlay_mesh'
-    output = true
   []
   final_generator = 'left_and_right'
 []
@@ -47,14 +46,14 @@
 []
 
 [UserObjects/test]
-  type = RayTracingOverlayMeshTest
+  type = RayTracingOverlayMeshMapping
   overlay_mesh = 'overlay_mesh'
 []
 
 [Reporters/find_intersection_elems]
   type = IntersectionElemsReporter
   overlay_uo_name = test
-  execute_on = initial
+  execute_on = final
 []
 
 [Executioner]
@@ -63,7 +62,7 @@
 
 
 [Outputs]
-  file_base = 'find_intersection_elems'
+  file_base = 'find_intersect_elems'
   [out]
     type = JSON
     execute_on = 'FINAL'
