@@ -48,35 +48,35 @@
     # Define the complex boundary shape using ParsedCurveMG
     [pcg1]
         type = ParsedCurveGenerator
-        x_formulus = 't1:=t;
-                      t2:=t-1;
-                      t3:=t-2;
-                      t4:=t-3;
-                      x1:=r*cos(t1*(th1-th0)+th0);
-                      x2_0:=r*cos(th1);
-                      x2_1:=x2_0-Lx;
-                      x2:=x2_0+(x2_1-x2_0)*t2;
-                      rs:=abs(r*sin(th1));
-                      rth0:=1.5*pi;
-                      rth1:=0.5*pi;
-                      x3:=x2_1+rs*cos(rth0+(rth1-rth0)*t3);
-                      x4_1:=r*cos(th1);
-                      x4_0:=x4_1-Lx;
-                      x4:=x4_0+(x4_1-x4_0)*t4;
-                      if(t<1,x1,if(t<2,x2,if(t<3,x3,x4)))'
-        y_formulus = 't1:=t;
-                      t2:=t-1;
-                      t3:=t-2;
-                      t4:=t-3;
-                      y1:=r*sin(t1*(th1-th0)+th0);
-                      y2:=r*sin(th1);
-                      rs:=abs(r*sin(th1));
-                      rth0:=1.5*pi;
-                      rth1:=0.5*pi;
-                      y3:=rs*sin(rth0+(rth1-rth0)*t3);
-                      y4:=r*sin(th0);
-                      if(t<1,y1,if(t<2,y2,if(t<3,y3,y4)))'
-        critical_t_series = '0 1 2 3 4'
+        x_formula = 't1:=t;
+                     t2:=t-1;
+                     t3:=t-2;
+                     t4:=t-3;
+                     x1:=r*cos(t1*(th1-th0)+th0);
+                     x2_0:=r*cos(th1);
+                     x2_1:=x2_0-Lx;
+                     x2:=x2_0+(x2_1-x2_0)*t2;
+                     rs:=abs(r*sin(th1));
+                     rth0:=1.5*pi;
+                     rth1:=0.5*pi;
+                     x3:=x2_1+rs*cos(rth0+(rth1-rth0)*t3);
+                     x4_1:=r*cos(th1);
+                     x4_0:=x4_1-Lx;
+                     x4:=x4_0+(x4_1-x4_0)*t4;
+                     if(t<1,x1,if(t<2,x2,if(t<3,x3,x4)))'
+        y_formula = 't1:=t;
+                     t2:=t-1;
+                     t3:=t-2;
+                     t4:=t-3;
+                     y1:=r*sin(t1*(th1-th0)+th0);
+                     y2:=r*sin(th1);
+                     rs:=abs(r*sin(th1));
+                     rth0:=1.5*pi;
+                     rth1:=0.5*pi;
+                     y3:=rs*sin(rth0+(rth1-rth0)*t3);
+                     y4:=r*sin(th0);
+                     if(t<1,y1,if(t<2,y2,if(t<3,y3,y4)))'
+        section_bounding_t_values  = '0 1 2 3 4'
         constant_names =       'pi           r    th0               th1                    Lx'
         constant_expressions = '${fparse pi} 100.0 ${fparse pi/9.0} ${fparse pi/9.0*17.0} 10.0'
         nums_segments = '50 3 15 3'
@@ -167,9 +167,9 @@
     # Define the circular curve boundary
     [pcg2]
         type = ParsedCurveGenerator
-        x_formulus = 'r*cos(t)'
-        y_formulus = 'r*sin(t)'
-        critical_t_series = '0 ${fparse 2*pi}'
+        x_formula = 'r*cos(t)'
+        y_formula = 'r*sin(t)'
+        section_bounding_t_values = '0 ${fparse 2*pi}'
         constant_names =       'pi           r'
         constant_expressions = '${fparse pi} 140.0'
         nums_segments = '100'

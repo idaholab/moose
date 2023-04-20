@@ -113,7 +113,7 @@
 
   [cd1_step1]
     type =HexagonConcentricCircleAdaptiveBoundaryMeshGenerator
-    inputs = 'fuel_assembly fuel_assembly'
+    meshes_to_adapt_to = 'fuel_assembly fuel_assembly'
     sides_to_adapt = '3 4'
     num_sectors_per_side= '4 4 4 4 4 4'
     hexagon_size = 13.376
@@ -136,7 +136,7 @@
 
   [cd2_step1]
     type =HexagonConcentricCircleAdaptiveBoundaryMeshGenerator
-    inputs = 'fuel_assembly fuel_assembly fuel_assembly'
+    meshes_to_adapt_to = 'fuel_assembly fuel_assembly fuel_assembly'
     sides_to_adapt = '2 3 4'
     num_sectors_per_side= '4 4 4 4 4 4'
     hexagon_size = 13.376
@@ -159,7 +159,7 @@
 
   [cd3_step1]
     type =HexagonConcentricCircleAdaptiveBoundaryMeshGenerator
-    inputs = 'fuel_assembly fuel_assembly'
+    meshes_to_adapt_to = 'fuel_assembly fuel_assembly'
     sides_to_adapt = '2 3'
     num_sectors_per_side= '4 4 4 4 4 4'
     hexagon_size = 13.376
@@ -182,7 +182,7 @@
 
  [cd4_step1]
     type =HexagonConcentricCircleAdaptiveBoundaryMeshGenerator
-    inputs = 'fuel_assembly fuel_assembly fuel_assembly'
+    meshes_to_adapt_to = 'fuel_assembly fuel_assembly fuel_assembly'
     sides_to_adapt = '1 2 3'
     num_sectors_per_side= '4 4 4 4 4 4'
     hexagon_size = 13.376
@@ -205,7 +205,7 @@
 
   [cd5_step1]
     type =HexagonConcentricCircleAdaptiveBoundaryMeshGenerator
-    inputs = 'fuel_assembly fuel_assembly'
+    meshes_to_adapt_to = 'fuel_assembly fuel_assembly'
     sides_to_adapt = '1 2'
     num_sectors_per_side= '4 4 4 4 4 4'
     hexagon_size = 13.376
@@ -228,7 +228,7 @@
 
   [cd6_step1]
     type =HexagonConcentricCircleAdaptiveBoundaryMeshGenerator
-    inputs = ' fuel_assembly fuel_assembly fuel_assembly'
+    meshes_to_adapt_to = ' fuel_assembly fuel_assembly fuel_assembly'
     sides_to_adapt = '0 1 2'
     num_sectors_per_side= '4 4 4 4 4 4'
     hexagon_size = 13.376
@@ -251,7 +251,7 @@
 
   [cd7_step1]
     type =HexagonConcentricCircleAdaptiveBoundaryMeshGenerator
-    inputs = 'fuel_assembly fuel_assembly'
+    meshes_to_adapt_to = 'fuel_assembly fuel_assembly'
     sides_to_adapt = '0 1'
     num_sectors_per_side= '4 4 4 4 4 4'
     hexagon_size = 13.376
@@ -274,7 +274,7 @@
 
   [cd8_step1]
     type =HexagonConcentricCircleAdaptiveBoundaryMeshGenerator
-    inputs = ' fuel_assembly fuel_assembly fuel_assembly'
+    meshes_to_adapt_to = ' fuel_assembly fuel_assembly fuel_assembly'
     sides_to_adapt = '0 1 5'
     num_sectors_per_side= '4 4 4 4 4 4'
     hexagon_size = 13.376
@@ -297,7 +297,7 @@
 
   [cd9_step1]
     type =HexagonConcentricCircleAdaptiveBoundaryMeshGenerator
-    inputs = 'fuel_assembly fuel_assembly'
+    meshes_to_adapt_to = 'fuel_assembly fuel_assembly'
     sides_to_adapt = '0 5'
     num_sectors_per_side= '4 4 4 4 4 4'
     hexagon_size = 13.376
@@ -320,7 +320,7 @@
 
   [cd10_step1]
     type =HexagonConcentricCircleAdaptiveBoundaryMeshGenerator
-    inputs = 'fuel_assembly fuel_assembly fuel_assembly'
+    meshes_to_adapt_to = 'fuel_assembly fuel_assembly fuel_assembly'
     sides_to_adapt = '0 4 5'
     num_sectors_per_side= '4 4 4 4 4 4'
     hexagon_size = 13.376
@@ -343,7 +343,7 @@
 
   [cd11_step1]
     type =HexagonConcentricCircleAdaptiveBoundaryMeshGenerator
-    inputs = 'fuel_assembly fuel_assembly'
+    meshes_to_adapt_to = 'fuel_assembly fuel_assembly'
     sides_to_adapt = '4 5'
     num_sectors_per_side= '4 4 4 4 4 4'
     hexagon_size = 13.376
@@ -366,7 +366,7 @@
 
   [cd12_step1]
     type =HexagonConcentricCircleAdaptiveBoundaryMeshGenerator
-    inputs = 'fuel_assembly fuel_assembly fuel_assembly'
+    meshes_to_adapt_to = 'fuel_assembly fuel_assembly fuel_assembly'
     sides_to_adapt = '3 4 5'
     num_sectors_per_side= '4 4 4 4 4 4'
     hexagon_size = 13.376
@@ -394,7 +394,7 @@
 
   [refl1]
     type =HexagonConcentricCircleAdaptiveBoundaryMeshGenerator
-    inputs = 'fuel_assembly'
+    meshes_to_adapt_to = 'fuel_assembly'
     sides_to_adapt = '4'
     num_sectors_per_side= '4 4 4 4 4 4'
     hexagon_size = 13.376
@@ -404,7 +404,7 @@
 
   [refl2]
     type =HexagonConcentricCircleAdaptiveBoundaryMeshGenerator
-    inputs = 'fuel_assembly'
+    meshes_to_adapt_to = 'fuel_assembly'
     sides_to_adapt = '5'
     num_sectors_per_side= '4 4 4 4 4 4'
     hexagon_size = 13.376
@@ -414,7 +414,7 @@
 
   [refl3]
     type =HexagonConcentricCircleAdaptiveBoundaryMeshGenerator
-    inputs = 'fuel_assembly'
+    meshes_to_adapt_to = 'fuel_assembly'
     sides_to_adapt = '0'
     num_sectors_per_side= '4 4 4 4 4 4'
     hexagon_size = 13.376
@@ -424,7 +424,7 @@
 
   [refl4]
     type =HexagonConcentricCircleAdaptiveBoundaryMeshGenerator
-    inputs = 'fuel_assembly'
+    meshes_to_adapt_to = 'fuel_assembly'
     sides_to_adapt = '1'
     num_sectors_per_side= '4 4 4 4 4 4'
     hexagon_size = 13.376
@@ -434,7 +434,7 @@
 
   [refl5]
     type =HexagonConcentricCircleAdaptiveBoundaryMeshGenerator
-    inputs = 'fuel_assembly'
+    meshes_to_adapt_to = 'fuel_assembly'
     sides_to_adapt = '2'
     num_sectors_per_side= '4 4 4 4 4 4'
     hexagon_size = 13.376
@@ -444,7 +444,7 @@
 
   [refl6]
     type =HexagonConcentricCircleAdaptiveBoundaryMeshGenerator
-    inputs = 'fuel_assembly'
+    meshes_to_adapt_to = 'fuel_assembly'
     sides_to_adapt = '3'
     num_sectors_per_side= '4 4 4 4 4 4'
     hexagon_size = 13.376
@@ -455,7 +455,7 @@
   [air_center]
     type =HexagonConcentricCircleAdaptiveBoundaryMeshGenerator
     num_sectors_per_side= '4 4 4 4 4 4'
-    inputs = 'fuel_assembly fuel_assembly fuel_assembly fuel_assembly fuel_assembly fuel_assembly'
+    meshes_to_adapt_to = 'fuel_assembly fuel_assembly fuel_assembly fuel_assembly fuel_assembly fuel_assembly'
     sides_to_adapt = '0 1 2 3 4 5'
     hexagon_size = 13.376
     background_intervals = 2
