@@ -90,18 +90,15 @@ protected:
   // using a sign convention on the "dist" parameter, with positive for inward and negative for
   // outward. The outward vector is precalculated and used in the routine to choose the correct
   // midpoint.
-  Point computeMidPoint(const Point & P1,
-                        const Point & P2,
-                        const Real dist,
-                        const Point & outward) const;
+  Point
+  computeMidPoint(const Point & P1, const Point & P2, const Real dist, const Point & outward) const;
 
   // The following routine is necessary for the parametrization of opposite edges
   // To assure we have the same parameterization on opposite edges we need to map it to
   //  a reference interval, i.e. [0, 1], and refer back and forth as needed.
   // This routine maps a point x\in[a, b] to the corresponding point in the interval [c, d].
 
-  Real getMapInterval(
-      const Real xab, const Real a, const Real b, const Real c, const Real d) const;
+  Real getMapInterval(const Real xab, const Real a, const Real b, const Real c, const Real d) const;
 
   std::vector<Real>
   getPointsDistribution(const Real edge_length, const unsigned int np, const Real bias) const;
