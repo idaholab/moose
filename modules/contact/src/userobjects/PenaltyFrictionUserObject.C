@@ -350,6 +350,4 @@ PenaltyFrictionUserObject::finalize()
 
   Moose::Mortar::Contact::communicateVelocities(
       _dof_to_accumulated_slip, _subproblem.mesh(), _nodal, _communicator, send_data_back);
-  Moose::Mortar::Contact::communicateReals(
-      _dof_to_normal_pressure, _subproblem.mesh(), _nodal, _communicator, send_data_back);
 }
