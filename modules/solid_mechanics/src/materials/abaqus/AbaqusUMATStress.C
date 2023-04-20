@@ -52,7 +52,7 @@ AbaqusUMATStress::validParams()
   params.addParam<UserObjectName>(
       "step_user_object", "The StepUserObject that provides times from simulation loading steps.");
   params.addParam<RealVectorValue>("orientation",
-                                   "Euler angles corresponding to the Abaqus ORIENTATION keyword.");
+                                   "Euler angles that describe the orientation of the local material coordinate system.");
   return params;
 }
 
