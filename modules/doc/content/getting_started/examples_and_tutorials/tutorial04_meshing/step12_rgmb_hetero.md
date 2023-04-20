@@ -20,7 +20,7 @@ This example illustrates the use of RGMB mesh generators to define a 3D pin-hete
 
 Although all the pins are geometrically identical, each ring of pins may use different material multigroup cross sections in later neutronics calculations. We select to distinguish pins by ring (7 rings) by creating a [PinMeshGenerator.md] instance for each ring. If the materials (cross sections) are identical across all pins, only one pin definition would be necessary. The 'pin_type' parameter should be unique for each pin type (1 through 7).
 
-The pitch of the pin is specified with pitch, and the number of azimuthal sectors is specified with `num_sectors`. The number or radial blocks and radial subintevals is specified through the array `mesh_intervals`. In this case, the pin has 4 important radii corresponding to the central helium gap radius, outer fuel radius, inner cladding radius, and outer cladding radius. These input parameters differ slightly from [PolygonConcentricCircleMeshGenerator.md], and no advanced options like boundary layer meshing are exposed currently.
+The pitch of the pin is specified with pitch, and the number of azimuthal sectors is specified with `num_sectors`. The number or radial blocks and radial sub-intevals is specified through the array `mesh_intervals`. In this case, the pin has 4 important radii corresponding to the central helium gap radius, outer fuel radius, inner cladding radius, and outer cladding radius. These input parameters differ slightly from [PolygonConcentricCircleMeshGenerator.md], and no advanced options like boundary layer meshing are exposed currently.
 
 !media tutorial04_meshing/lfr_pinmesh.png
        id=tutorial04-lfr_pinmesh

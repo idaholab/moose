@@ -35,7 +35,7 @@ Tips
 
 ## CoreMeshGenerator
 
-Now that the assemblies have been defined, they are placed into a lattice using [CoreMeshGenerator.md]. While [CoreMeshGenerator.md] still requires a perfect hexagonal pattern like [PatternedHexMeshGenerator.md], it has some additional intelligence to automatically handle dummy assembly creation and deletion. The user need only provide a fake mesh input reference 'dummy' (this object has not been actually created) and tell [CoreMeshGenerator.md] through the `dummy_assembly_name` parameter that the mesh input called `dummy` is a dummy assembly (empty space). The dummy assemblies will be created and deleted behind the scenes with no effort from the user.
+Now that the assemblies have been defined, they are placed into a lattice using [CoreMeshGenerator.md]. While [CoreMeshGenerator.md] still requires a perfect hexagonal pattern like [PatternedHexMeshGenerator.md], it automatically handles dummy assembly creation and deletion. The user need only provide a fake mesh input reference 'dummy' (this object has not been actually created) and tell [CoreMeshGenerator.md] through the `dummy_assembly_name` parameter that the mesh input called `dummy` is a dummy assembly (empty space). The dummy assemblies will be created and deleted behind the scenes with no effort from the user.
 
 Since we want to extrude the 2D core, we use the `extrude`=`true` parameter within [CoreMeshGenerator.md]. The step simultaneously extrudes the geometry and applies the regions IDs to all axial layers as defined in the [PinMeshGenerator.md] objects.
 

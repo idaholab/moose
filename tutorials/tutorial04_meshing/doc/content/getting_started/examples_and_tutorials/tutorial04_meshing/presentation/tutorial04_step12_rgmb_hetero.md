@@ -23,7 +23,7 @@ This example illustrates the use of RGMB mesh generators to define a 3D pin-hete
 
 ## PinMeshGenerator
 
-The pitch of the pin is specified with pitch, and the number of azimuthal sectors is specified with `num_sectors`. The number or radial blocks and radial subintevals is specified through the array `mesh_intervals`. In this case, the pin has 4 important radii corresponding to the central helium gap radius, outer fuel radius, inner cladding radius, and outer cladding radius.
+The pitch of the pin is specified with pitch, and the number of azimuthal sectors is specified with `num_sectors`. The number or radial blocks and radial sub-intevals is specified through the array `mesh_intervals`. In this case, the pin has 4 important radii corresponding to the central helium gap radius, outer fuel radius, inner cladding radius, and outer cladding radius.
 
 !row!
 !col small=12 medium=6 large=8

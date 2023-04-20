@@ -33,10 +33,10 @@ This tutorial covers the generation of mostly standard geometries, but many reac
 
 - [PolygonConcentricCircleMeshGenerator.md] and [PatternedHexMeshGenerator.md] generate pins and assemblies
 - [XYDelaunayGenerator.md] generates control rod holes and reflector assemblies
-- [StitchedMeshGenerator.md] merges control rod holes with fuel g reflector assemblies
+- [StitchedMeshGenerator.md] merges control rod holes with fuel and reflector assemblies
 - [HexagonConcentricCircleAdaptiveBoundaryMeshGenerator.md] generates ducts for reflector assembly that can be stitched with other assembles.
-- [PatternedHexMeshGenerator.md] merges fuel and reflector assemblies into the core
-- [PeripheralRingMeshGenerator.md] adds circular boundary surrounding the core
+- [PatternedHexMeshGenerator.md] generates a lattice of fuel and reflector assemblies into the core
+- [PeripheralRingMeshGenerator.md] adds a circular boundary surrounding the core
 - [AdvancedExtruderGenerator.md] performs 2D to 3D extrusion for the core
 - [DepletionIDGenerator.md] sets up assembly-wise depletion zones
 

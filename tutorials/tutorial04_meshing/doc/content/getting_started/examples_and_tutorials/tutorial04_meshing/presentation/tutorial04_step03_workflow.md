@@ -23,14 +23,14 @@ The meshing workflow for a standard reactor core follows the general hierarchica
 Use any executable with the Reactor module compiled, such as  or `$MOOSE_DIR/modules/reactor-opt` along with the `--mesh-only` command line option:
 
 ```bash
-$MOOSE_DIR/modules/reactor/reactor-opt -i reactormesh.i --mesh-only
+$MOOSE_DIR/modules/reactor/reactor-opt -i <my_meshing_input.i> --mesh-only
 ```
 
 The `--mesh-only` optional command line parameter executes only the `[Mesh`] block of the input file and outputs the generated mesh. This is useful while building and testing the mesh as it doesn't require the rest of the MOOSE problem be defined in the input file. Recent updates to the `--mesh-only` option now allow the mesh output in Exodus format to include the extra element integer IDs defined on the mesh by default for convenient visualization purposes.
 
 When you are satisfied with your mesh input, you may invoke MOOSE without the `--mesh-only` option to execute the entire input file (mesh building and physics input).
 
-Executables of any MOOSE applications that contain the Reactor module in their `Makefile` can also be used, such as Griffin, Sockeye, and BlueCRAB.
+Executables of any MOOSE applications that contain the Reactor module in their `Makefile` can also be used, such as Griffin, Sockeye, Pronghorn, and BlueCRAB.
 
 !---
 

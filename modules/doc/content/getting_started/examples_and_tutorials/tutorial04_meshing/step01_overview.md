@@ -4,8 +4,7 @@
 
 MOOSE's [Reactor Module](modules/reactor/index.md) provides targeted capability for generating finite element meshes of common nuclear reactor core geometries. This module permits a reactor analyst to rapidly build finite element meshes of reactor pins, assemblies, and cores by augmenting MOOSE's existing Mesh System, which contains general meshing operations such as extrusion, rotation, and triangulation.
 
-The [Reactor Module](modules/reactor/index.md) contains mesh generation objects which a user calls from the `[Mesh]` block of a MOOSE input file. The user constructs sequences of these mesh generation objects to build custom Cartesian and hexagonal-based pins, assemblies, and cores. This module can also create rotating control drums and core periphery zones (outer barrel / shield). Mesh control features include the option to automatically preserve fuel pin volume, boundary layers, mesh biasing, and labeling of elements as they belong to specific components (e.g. pin, assembly,
-plane).
+The [Reactor Module](modules/reactor/index.md) contains mesh generation objects which a user calls from the `[Mesh]` block of a MOOSE input file. The user constructs sequences of these mesh generation objects to build custom Cartesian and hexagonal-based pins, assemblies, and cores. This module can also create rotating control drums and core periphery zones (outer barrel / shield). Mesh control features include the option to automatically preserve fuel pin volume, boundary layers, mesh biasing, and labeling of elements as they belong to specific components (e.g. pin, assembly, plane).
 
 For more exotic geometries, [Reactor Module](modules/reactor/index.md) objects may be combined with the powerful [`XYDelaunayGenerator`](XYDelaunayGenerator.md) contained in the Mesh System or with [`FillBetweenPointVectorsTools`](FillBetweenPointVectorsTools.md).
 

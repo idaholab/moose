@@ -1,6 +1,5 @@
 # Heat Pipe-Cooled Micro Reactor - 3D Core with Heterogeneous Assemblies
 
-# the default unit is cm; apply block [scale] if mesh needs the unit of m.
 [Mesh]
 
   #################################      # This parameter allows us to execute the file but stop at this block so we can see intermediate output.

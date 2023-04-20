@@ -33,7 +33,7 @@ RGMB consists of a few specific mesh generators which are to be called in order 
 
 The final mesh will contain one block (subdomain) for quadrilateral elements and one block for triangular elements. Regions with different materials are distinguished by the `region_id` reporting ID rather than by subdomain ID.
 
-`region_ids` is a 2D array parameter that sets the `region_id` by radial region (rows) and axial region (column). The 3D material map is stored for use after extrusion, which could happen at the pin, assembly, or core step, depending on the problem size.
+`region_ids` is a 2D array parameter that sets the `region_id` by radial region (rows) and axial region (column). The 3D material map is stored for use after extrusion, which could happen at the pin, assembly, or core step, whichever step is final for the problem of interest.
 
 !media tutorial04_meshing/rgmb_pinmesh_cart.png
        id=tutorial04-rgmb_pinmesh_cart
