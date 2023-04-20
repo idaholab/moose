@@ -1,5 +1,5 @@
 [Mesh]
-  allow_renumbering = 0
+
   [hex_in]
     type = FileMeshGenerator
     file = gold/abtr_mesh.e
