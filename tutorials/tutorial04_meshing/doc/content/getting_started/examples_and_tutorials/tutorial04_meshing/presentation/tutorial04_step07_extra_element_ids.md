@@ -16,11 +16,11 @@ Reporting IDs can be leveraged to post-process solution data into tables by usin
 - [PatternedHexMeshGenerator.md] (Hexagonal)
 
 - Assign reporting IDs for input geometric components (pins or assemblies) during lattice mesh generations.
-- Supports the following default numbering scheme (`assign_type` = `'cell'`):
+- Supports the following numbering schemes (set with [!param](/Mesh/PatternedHexMeshGenerator/assign_type)):
 
-  - `Cell` (default): Assign unique IDs for each component in the lattice in sequential order (begins at 0 in the top left corner of the pattern).
-  - `Pattern`: assign a different ID for each unique input component
-  - `Manual`: use a manual numbering scheme provided by user
+  - `cell` (default): Assign unique IDs for each component in the lattice in sequential order (begins at 0 in the top left corner of the pattern).
+  - `pattern`: assign a different ID for each unique input component
+  - `manual`: use a manual numbering scheme provided by user
 - When assembly duct regions are present, these regions are numbered sequentially starting from the inner-most region to the outer-most region.
 
 - Pin and Assembly IDs are applied during creations of assemblies and core, respectively.
@@ -49,8 +49,8 @@ Reporting IDs can be leveraged to post-process solution data into tables by usin
 
 - Supports other numbering schemes:
 
-  - `assign_type` = `'pattern'`: Assign IDs based on the ID of the input file component as listed in the pattern
-  - `assign_type` = `'manual'`: Assign IDs based on a user-defined mapping defined in an array 'id_pattern'
+  - [!param](/Mesh/PatternedHexMeshGenerator/assign_type) = `pattern`: Assign IDs based on the ID of the input file component as listed in the pattern
+  - [!param](/Mesh/PatternedHexMeshGenerator/assign_type) = `manual`: Assign IDs based on a user-defined mapping defined in an array [!param](/Mesh/PatternedHexMeshGenerator/id_pattern)
 
 !row!
 !col small=12 medium=6 large=8

@@ -42,8 +42,8 @@ The pin cell represents the most basic element in the hierarchical structure of 
   - 1.15 units apothem
   - 1 interval
 
-- Volumes preserved (`preserve_volumes`=`True`)
-- TRI center elements (`quad_center_elements`=`False`)
+- Volumes preserved ([!param](/Mesh/PolygonConcentricCircleMeshGenerator/preserve_volumes)=`True`)
+- TRI center elements ([!param](/Mesh/PolygonConcentricCircleMeshGenerator/quad_center_elements)=`False`)
 
 ### Notes
 
@@ -165,7 +165,7 @@ Control drums are a type of control device used in some small reactor systems to
 
 ### Notes
 
-- Circular volumes preserved regardless of meshing fidelity (`preserve_volumes`=`true`)
+- Circular volumes preserved regardless of meshing fidelity ([!param](/Mesh/PolygonConcentricCircleMeshGenerator/preserve_volumes)=`true`)
 - Side node adaptation performed for instances with neighboring fuel assemblies. The reference side number (sides_to_adapt) and assembly neighbor meshes (inputs) are taken as input so that the nodes can be placed correctly on the control drum mesh to match the neighbor meshes.
 - [HexagonConcentricCircleAdaptiveBoundaryMeshGenerator.md] is used in this case to create a "single pin" hexagonal assembly with sides matching another mesh. For example, in cases where the node counts on the edges of the control drum and fuel assembly differ, the [HexagonConcentricCircleAdaptiveBoundaryMeshGenerator.md] can automatically adjust the mesh density along the control drum's boundary to ensure compatibility.
 - This meshing method is intended for analyzing a static control drum position. For transient control drum rotation (and control rod insertion), this azimuthal block split is not needed as Griffin uses special material definitions to define the absorber location as a function of time.
@@ -253,7 +253,7 @@ Generated reactor component meshes (fuel assembly, control drum, reflector, air 
 
 ### Geometry Features
 
-- Outer hex boundary disabled (`pattern_boundary`=`none`)
+- Outer hex boundary disabled ([!param](/Mesh/PatternedHexMeshGenerator/pattern_boundary)=`none`)
 - Whole core rotated 60&deg;
 - 5 Input geometry types
 
@@ -401,7 +401,7 @@ Extrude the 2D $(x,y)$ mesh in +$z$ direction $(0, 0, 1)$
 
 ### Notes
 
-Here we explain the concept of subdomain swaps. By default, when 2D elements are extruded to 3D using [AdvancedExtruderGenerator.md], they retain the same subdomain IDs as their original 2D elements. In the 3D HPMR, distinct subdomain IDs are required for the upper and lower reflector regions, as well as for the core center region. This can be achieved using the subdomain swap function in the [AdvancedExtruderGenerator.md] through the `subdomain_swaps` parameter. Each element of the `subdomain_swaps` vector contains subdomain remapping information for a specific elevation, with the first element representing the initial extruded elevation. For instance, a 2D moderator mesh with block ID `100` can be extruded to 3D using the following `subdomain_swaps`: `'100 1000; 100 100; 100 1000'`, where `1000` is the block ID of the reflector. The generated mesh will be defined to be three layers with the upper and bottom meshes of block ID `1000` and the center region maintain the block ID of `100`. The resulting mesh will have three layers, with the top and bottom layers having a block ID of `1000` (reflector), while the central region retains the block ID of `100` (moderator).
+Here we explain the concept of subdomain swaps. By default, when 2D elements are extruded to 3D using [AdvancedExtruderGenerator.md], they retain the same subdomain IDs as their original 2D elements. In the 3D HPMR, distinct subdomain IDs are required for the upper and lower reflector regions, as well as for the core center region. This can be achieved using the subdomain swap function in the [AdvancedExtruderGenerator.md] through the [!param](/Mesh/AdvancedExtruderGenerator/subdomain_swaps) parameter. Each element of the [!param](/Mesh/AdvancedExtruderGenerator/subdomain_swaps) vector contains subdomain remapping information for a specific elevation, with the first element representing the initial extruded elevation. For instance, a 2D moderator mesh with block ID `100` can be extruded to 3D using the following [!param](/Mesh/AdvancedExtruderGenerator/subdomain_swaps): `'100 1000; 100 100; 100 1000'`, where `1000` is the block ID of the reflector. The generated mesh will be defined to be three layers with the upper and bottom meshes of block ID `1000` and the center region maintain the block ID of `100`. The resulting mesh will have three layers, with the top and bottom layers having a block ID of `1000` (reflector), while the central region retains the block ID of `100` (moderator).
 
 ### Example
 

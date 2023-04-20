@@ -25,9 +25,9 @@ This example illustrates the use of RGMB mesh generators to define a 3D hexagona
 
 ## PinMeshGenerator
 
-- This example does not have any pin-level geometry as the assemblies are homogenized. However, we still start with [PinMeshGenerator.md]. 
-- To define homogenized assemblies, [PinMeshGenerator.md] is used with `use_as_assembly` set to `true`. 
-- In addition, `homogenized` = `true` is used to indicate that this region is homogenized and [SimpleHexagonGenerator.md] should be called to discretize the assembly instead of [PolygonConcentricCircleMeshGenerator.md].
+- This example does not have any pin-level geometry as the assemblies are homogenized. However, we still start with [PinMeshGenerator.md].
+- To define homogenized assemblies, [PinMeshGenerator.md] is used with [!param](/Mesh/PinMeshGenerator/use_as_assembly) set to `true`.
+- In addition, [!param](/Mesh/PinMeshGenerator/homogenized) = `true` is used to indicate that this region is homogenized and [SimpleHexagonGenerator.md] should be called to discretize the assembly instead of [PolygonConcentricCircleMeshGenerator.md].
 
 [PinMeshGenerator.md] is called multiple times to define the various homogeneous assemblies. Dummy assemblies are not required when building a core using RGMB, so they are not defined in this input.
 

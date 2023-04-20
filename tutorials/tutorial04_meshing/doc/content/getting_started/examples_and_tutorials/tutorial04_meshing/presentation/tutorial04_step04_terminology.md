@@ -19,7 +19,7 @@ Before proceeding in this tutorial, we briefly define some terminology, limiting
 
 - +Finite Element (or simply Element)+
 
-  - An ordered grouping of nodes that defines the boundaries of a piece of the spatial domain. A typical first order 2D element has 3 (triangle) or 4 (quadrilateral) nodes. Straight lines connect the nodes to form the element shape. In 3D, typical elements have 6 (prism), 8 (hexahedron), 4 (tetrahedron) or 5 (pyramid) nodes. The full set of elements comprises the mesh which approximates the geometry. Basis functions from the FEM are defined on each element. Higher order elements may have additional nodes than those listed here. A mesh can consist of different types of elements
+  - An ordered grouping of nodes that defines the boundaries of a piece of the spatial domain. A typical first order 2D element has 3 (triangle) or 4 (quadrilateral) nodes. Straight lines connect the nodes to form the element shape. In 3D, typical elements have 6 (triangular prism), 8 (hexahedron), 4 (tetrahedron) or 5 (pyramid) nodes. The full set of elements comprises the mesh which approximates the geometry. Basis functions from the FEM are defined on each element. Higher order elements may have additional nodes than those listed here. A mesh can consist of different types of elements
   - This mesh has 48 unique elements (12 triangular in the center, and 36 quadrilateral).
 
 !media tutorial04_meshing/general_FEM_labels.png

@@ -23,7 +23,7 @@ This example illustrates the use of RGMB mesh generators to define a 3D pin-hete
 
 ## PinMeshGenerator
 
-The pitch of the pin is specified with pitch, and the number of azimuthal sectors is specified with `num_sectors`. The number or radial blocks and radial sub-intevals is specified through the array `mesh_intervals`. In this case, the pin has 4 important radii corresponding to the central helium gap radius, outer fuel radius, inner cladding radius, and outer cladding radius.
+The pitch of the pin is specified with pitch, and the number of azimuthal sectors is specified with [!param](/Mesh/PinMeshGenerator/num_sectors). The number or radial blocks and radial sub-intevals is specified through the array [!param](/Mesh/PinMeshGenerator/mesh_intervals). In this case, the pin has 4 important radii corresponding to the central helium gap radius, outer fuel radius, inner cladding radius, and outer cladding radius.
 
 !row!
 !col small=12 medium=6 large=8
@@ -45,7 +45,7 @@ The pitch of the pin is specified with pitch, and the number of azimuthal sector
 
 [AssemblyMeshGenerator.md] takes the pin types previously defined and places them into a regular hexagonal grid. Additionally, coolant and duct regions need to be added around the pins in order to create the assembly geometry.
 
-Extrusion is performed by using the `extrude`=`true` option and is performed after the 2D assembly geometry has been completed.
+Extrusion is performed by using the [!param](/Mesh/AssemblyMeshGenerator/extrude)=`true` option and is performed after the 2D assembly geometry has been completed.
 
 !listing reactor_examples/rgmb_lfr/rgmb_lfr_assembly.i
          block=Mesh/assembly

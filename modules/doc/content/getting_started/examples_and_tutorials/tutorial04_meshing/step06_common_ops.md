@@ -17,9 +17,9 @@ An alternative type of symmetry occurs in certain "unit cells" which contain hal
 
 ### Notes
 
-- Peripheral trimming can be performed on six possible lines, each of which is parallel to a side of the hexagon and crosses the center of the pins laid out in that direction. Whether or not to trim a particular side of the hexagon is denoted by `1` (trim) or `0` (do not trim) in the 6-dimensional array `trim_peripheral_region`.
+- Peripheral trimming can be performed on six possible lines, each of which is parallel to a side of the hexagon and crosses the center of the pins laid out in that direction. Whether or not to trim a particular side of the hexagon is denoted by `1` (trim) or `0` (do not trim) in the 6-dimensional array [!param](/Mesh/HexagonMeshTrimmer/trim_peripheral_region).
 - Peripheral trimming can only be used for assembly meshes
-- Through-the-center trimming can be used for both assembly and core meshes. This mesh trimmer object RETAINS any sectors which are included between the trimming line defined by `center_trim_starting_index` to the trimming line defined by `center_trim_ending_index` swept out in a counterclockwise direction. Other sectors are discarded.
+- Through-the-center trimming can be used for both assembly and core meshes. This mesh trimmer object RETAINS any sectors which are included between the trimming line defined by [!param](/Mesh/HexagonMeshTrimmer/center_trim_starting_index) to the trimming line defined by [!param](/Mesh/HexagonMeshTrimmer/center_trim_ending_index) swept out in a counterclockwise direction. Other sectors are discarded.
 - When trimming along a line that lies exactly on element boundaries and does not cross any element interiors, an alternative mesh generator called [PlaneDeletionGenerator.md] can perform equivalent functionality
 - When trimming along a line which crosses element interiors, [PlaneDeletionGenerator.md] leaves behind a zig-zag boundary, whereas these mesh generators smooth the trimmed boundary by moving nearby nodes to the trimmed line as needed. This may result in the creation of new triangular element blocks to avoid degenerate quadrilateral elements.
 

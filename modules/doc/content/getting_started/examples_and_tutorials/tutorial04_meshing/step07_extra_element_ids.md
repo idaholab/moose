@@ -10,7 +10,7 @@ Reporting IDs can be leveraged to post-process solution data into tables by usin
 
 In addition to being used to stitch together Cartesian and hexagonal grids from smaller unit meshes, [PatternedCartesianMeshGenerator.md] and [PatternedHexMeshGenerator.md] can also assign reporting IDs to the mesh during the stitching process. When using these mesh generators to stitch pins into an assembly, a pin reporting ID (e.g., `pin_id`) is relevant.  When stitching assemblies into a core, an assembly reporting ID (e.g., `assembly_id`) is relevant.
 
-Since the mesh generators understand the pin or assembly pattern, IDs can be applied in one of several ways: `cell` (default), `pattern`, or `manual`. In the `cell` numbering pattern, each cell is given a unique ID starting with 0 in the upper left-hand corner of the hexagon grid, increasing monotonically from left to right, top to bottom up until N-1 for the final pin location. Duct regions are assigned reporting IDs starting with the next available integer following pin region assignment. Certain regions can be excluded from being labeled with an ID, for example dummy regions that will later be deleted. This can be accommodated by listing mesh objects in the `exclude_id` parameter. Usage of this parameter is helpful to retain sequential numbering when dummy regions are later deleted.
+Since the mesh generators understand the pin or assembly pattern, IDs can be applied in one of several ways: `cell` (default), `pattern`, or `manual`. In the `cell` numbering pattern, each cell is given a unique ID starting with 0 in the upper left-hand corner of the hexagon grid, increasing monotonically from left to right, top to bottom up until N-1 for the final pin location. Duct regions are assigned reporting IDs starting with the next available integer following pin region assignment. Certain regions can be excluded from being labeled with an ID, for example dummy regions that will later be deleted. This can be accommodated by listing mesh objects in the [!param](/Mesh/PatternedHexMeshGenerator/exclude_id) parameter. Usage of this parameter is helpful to retain sequential numbering when dummy regions are later deleted.
 
 ### Object
 
@@ -20,11 +20,11 @@ Since the mesh generators understand the pin or assembly pattern, IDs can be app
 ### Features
 
 - Assign reporting IDs for input geometric components (pins or assemblies) during lattice mesh generations.
-- Supports the following default numbering scheme (`assign_type` = `'cell'`):
+- Supports the following numbering schemes (set with [!param](/Mesh/PatternedHexMeshGenerator/assign_type)):
 
-  - `Cell` (default): Assign unique IDs for each component in the lattice in sequential order (begins at 0 in the top left corner of the pattern).
-  - `Pattern`: assign a different ID for each unique input component
-  - `Manual`: use a manual numbering scheme provided by user
+  - `cell` (default): Assign unique IDs for each component in the lattice in sequential order (begins at 0 in the top left corner of the pattern).
+  - `pattern`: assign a different ID for each unique input component
+  - `manual`: use a manual numbering scheme provided by user
 - When assembly duct regions are present, these regions are numbered sequentially starting from the inner-most region to the outer-most region.
 
 ### Notes
@@ -47,8 +47,8 @@ Since the mesh generators understand the pin or assembly pattern, IDs can be app
 
 Supports other numbering schemes:
 
-- `assign_type` = `'pattern'`: Assign IDs based on the ID of the input file component as listed in the pattern
-- `assign_type` = `'manual'`: Assign IDs based on a user-defined mapping defined in an array 'id_pattern'
+- [!param](/Mesh/PatternedHexMeshGenerator/assign_type) = `pattern`: Assign IDs based on the ID of the input file component as listed in the pattern
+- [!param](/Mesh/PatternedHexMeshGenerator/assign_type) = `manual`: Assign IDs based on a user-defined mapping defined in an array [!param](/Mesh/PatternedHexMeshGenerator/id_pattern)
 
 !media tutorial04_meshing/eeid_assign_type_example.png
        id=tutorial04-eeid_assign_type_example

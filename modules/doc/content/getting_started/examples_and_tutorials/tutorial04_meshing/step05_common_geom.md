@@ -6,7 +6,7 @@ A second set of mesh generators (Reactor Geometry Mesh Builder mesh generators) 
 
 ## Pin Cell
 
-Pin cells form the basis of most reactor geometries and consist of concentric circular regions (fuel, clad, etc.) surrounded by a coolant zone. Sometimes, a ducted structural region surrounds the coolant zone. Due to the prevalence of pin cells in both hexagonal and Cartesian geometry, a dedicated mesh generator, [PolygonConcentricCircleMeshGenerator.md], was created for pin cell generation of any regular polygon (three sides or more). It is important to note that the meshed circular areas can be forced to preserve area regardless of the discretization fidelity. This is very useful for mesh convergence studies in which changing the discretization could add or remove fuel from the problem. Preserving the fuel area or volume using `preserve_volume=true` is highly recommended. This mesh generator can also be used when there is no fuel pin (e.g., an empty duct).
+Pin cells form the basis of most reactor geometries and consist of concentric circular regions (fuel, clad, etc.) surrounded by a coolant zone. Sometimes, a ducted structural region surrounds the coolant zone. Due to the prevalence of pin cells in both hexagonal and Cartesian geometry, a dedicated mesh generator, [PolygonConcentricCircleMeshGenerator.md], was created for pin cell generation of any regular polygon (three sides or more). It is important to note that the meshed circular areas can be forced to preserve area regardless of the discretization fidelity. This is very useful for mesh convergence studies in which changing the discretization could add or remove fuel from the problem. Preserving the fuel area or volume using the [!param](/Mesh/PolygonConcentricCircleMeshGenerator/preserve_volumes) parameter is highly recommended. This mesh generator can also be used when there is no fuel pin (e.g., an empty duct).
 
 ### Object
 
@@ -83,7 +83,7 @@ Assemblies with multiple heterogeneous pins are a very common reactor geometry c
 
 ### Notes
 
-- When generating an assembly mesh using [PatternedHexMeshGenerator.md], be sure to set `generate_core_metadata` as `false`. This tells MOOSE that the constructed object is an assembly rather than a core (and consequently permits some operations downstream differently than if it were a core).
+- When generating an assembly mesh using [PatternedHexMeshGenerator.md], be sure to set [!param](/Mesh/PatternedHexMeshGenerator/generate_core_metadata) as `false`. This tells MOOSE that the constructed object is an assembly rather than a core (and consequently permits some operations downstream differently than if it were a core).
 - When generating an assembly mesh, [PolygonConcentricCircleMeshGenerator.md] objects which define the hexagonal unit pin cells are generally used as inputs.
 
 ### Example
@@ -114,8 +114,8 @@ Another type of assembly in a reactor core is an assembly with a single pin (suc
 
 ### Notes
 
-- It can be used without specifying `sides_to_adapt` and `meshes_to_adapt_to` to generate [PolygonConcentricCircleMeshGenerator.md]-style hexagonal mesh with assembly mesh metadata. The azimuthal discretization of the sides listed in `sides_to_adapt` will be identical to the input meshes `meshes_to_adapt_to` and overwrite the appropriate entry(s) in `num_sectors_per_side`.
-- The size of the hexagon (`hexagon_size`) must match the size of the input meshes. Default style for providing `hexagon_size` is `apothem` (half-pitch).
+- It can be used without specifying [!param](/Mesh/HexagonConcentricCircleAdaptiveBoundaryMeshGenerator/sides_to_adapt) and [!param](/Mesh/HexagonConcentricCircleAdaptiveBoundaryMeshGenerator/meshes_to_adapt_to) to generate [PolygonConcentricCircleMeshGenerator.md]-style hexagonal mesh with assembly mesh metadata. The azimuthal discretization of the sides listed in [!param](/Mesh/HexagonConcentricCircleAdaptiveBoundaryMeshGenerator/sides_to_adapt) will be identical to the input meshes [!param](/Mesh/HexagonConcentricCircleAdaptiveBoundaryMeshGenerator/meshes_to_adapt_to) and overwrite the appropriate entry(s) in [!param](/Mesh/HexagonConcentricCircleAdaptiveBoundaryMeshGenerator/num_sectors_per_side).
+- The size of the hexagon ([!param](/Mesh/HexagonConcentricCircleAdaptiveBoundaryMeshGenerator/hexagon_size)) must match the size of the input meshes. Default style for providing [!param](/Mesh/HexagonConcentricCircleAdaptiveBoundaryMeshGenerator/hexagon_size) is `apothem` (half-pitch).
 
 ### Example
 
@@ -131,7 +131,7 @@ Another type of assembly in a reactor core is an assembly with a single pin (suc
 
 ## Core
 
-The highest level of reactor geometry is generally the core, which consists of multiple assemblies patterned together. [PatternedHexMeshGenerator.md] can be used to create cores similar to how it is used to create assemblies. The main difference is that the inputs to a core object are assemblies rather than pins, and the parameter `generate_core_metadata` should be set to `true` when creating a core. This tells MOOSE that the generated object is a core rather than an assembly, which is required to identify eligible mesh operations after creation (for example trimming along a line).
+The highest level of reactor geometry is generally the core, which consists of multiple assemblies patterned together. [PatternedHexMeshGenerator.md] can be used to create cores similar to how it is used to create assemblies. The main difference is that the inputs to a core object are assemblies rather than pins, and the parameter [!param](/Mesh/PatternedHexMeshGenerator/generate_core_metadata) should be set to `true` when creating a core. This tells MOOSE that the generated object is a core rather than an assembly, which is required to identify eligible mesh operations after creation (for example trimming along a line).
 
 ### Object
 
@@ -145,7 +145,7 @@ The highest level of reactor geometry is generally the core, which consists of m
 ### Notes
 
 - Assembly meshes generated by [PatternedHexMeshGenerator.md], [HexagonConcentricCircleAdaptiveBoundaryMeshGenerator.md] and [SimpleHexagonGenerator.md] can be used as inputs. If [SimpleHexagonGenerator.md] is used, the assemblies are homogenized.
-- Core mesh generation should include the parameter `generate_core_metadata` as `true`.
+- Core mesh generation should include the parameter [!param](/Mesh/PatternedHexMeshGenerator/generate_core_metadata) as `true`.
 
 ### Example
 

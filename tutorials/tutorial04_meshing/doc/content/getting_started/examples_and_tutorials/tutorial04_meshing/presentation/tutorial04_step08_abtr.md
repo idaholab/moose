@@ -39,7 +39,7 @@
 - Assign unique block ID to each assembly type
 
 - Each assembly type requires its own definition so that different materials can later be assigned to different assemblies (using block id as a differentiating factor)
-- Alternatively, using `element_type` = `TRI` discretizes hexagonal assembly into 6 triangles
+- Alternatively, using [!param](/Mesh/SimpleHexagonGenerator/element_type) = `TRI` discretizes hexagonal assembly into 6 triangles
 
 !col small=12 medium=6 large=4
 
@@ -86,7 +86,7 @@
 
 - Uses all generated real assemblies and dummy assembly as input
 
-- The parameters `id_name`, `assign_type`, and `exclude_id` define how the `assembly_id` reporting ID will be generated. We exclude the dummy assemblies from being assigned IDs.
+- The parameters [!param](/Mesh/PatternedHexMeshGenerator/id_name), [!param](/Mesh/PatternedHexMeshGenerator/assign_type), and [!param](/Mesh/PatternedHexMeshGenerator/exclude_id) define how the `assembly_id` reporting ID will be generated. We exclude the dummy assemblies from being assigned IDs.
 
 !row!
 !col small=12 medium=6 large=8
@@ -113,7 +113,7 @@
 
 - Remove "dummy" assemblies added for core hex patterning
 
-- Set `new_boundary` to same value as outer boundary in `Mesh/core/external_boundary_name` to update the outer boundary sideset along the location of deleted assemblies
+- Set [!param](/Mesh/BlockDeletionGenerator/new_boundary) to same value as outer boundary in `Mesh/core/external_boundary_name` to update the outer boundary sideset along the location of deleted assemblies
 
 !col small=12 medium=6 large=4
 
@@ -137,7 +137,7 @@
 - Split into multiple intervals, definite heights and number of layers for each
 - Set top/bottom boundary IDs to be referenced later
 
-- Assign new block IDs to each axial level using `subdomain_swaps`
+- Assign new block IDs to each axial level using [!param](/Mesh/AdvancedExtruderGenerator/subdomain_swaps)
 
 !row!
 !col small=12 medium=6 large=8

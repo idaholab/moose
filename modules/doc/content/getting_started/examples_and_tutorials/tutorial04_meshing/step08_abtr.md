@@ -19,7 +19,7 @@ The step-by-step instructions to build the mesh are followed by notes on how to 
 
 ## Define Homogeneous Hexagonal Assemblies
 
-The first step is to define unique mesh objects for each different assembly type (fuel, control, shield, reflector, dummy). Since this is a homogenized model, we use SimpleHexagonGenerator to create each assembly mesh.
+The first step is to define unique mesh objects for each different assembly type (fuel, control, shield, reflector, dummy). Since this is a homogenized model, we use [SimpleHexagonGenerator.md] to create each assembly mesh.
 
 ### Object
 
@@ -35,7 +35,7 @@ The first step is to define unique mesh objects for each different assembly type
 ### Notes
 
 - Each assembly type requires its own definition so that different materials can later be assigned to different assemblies (using block id as a differentiating factor)
-- Alternatively, using `element_type` = `TRI` discretizes hexagonal assembly into 6 triangles
+- Alternatively, using [!param](/Mesh/SimpleHexagonGenerator/element_type) = `TRI` discretizes hexagonal assembly into 6 triangles
 
 ### Example
 
@@ -88,7 +88,7 @@ Now that assemblies have been defined, we stitch the assemblies into a perfect h
 
 ### Notes
 
-- The parameters `id_name`, `assign_type`, and `exclude_id` define how the `assembly_id` reporting ID will be generated. We exclude the dummy assemblies from being assigned IDs.
+- The parameters [!param](/Mesh/PatternedHexMeshGenerator/id_name), [!param](/Mesh/PatternedHexMeshGenerator/assign_type), and [!param](/Mesh/PatternedHexMeshGenerator/exclude_id) define how the `assembly_id` reporting ID will be generated. We exclude the dummy assemblies from being assigned IDs.
 
 ### Example
 
@@ -116,7 +116,7 @@ Dummy assemblies were only included to facilitate the core pattern generation an
 
 ### Notes
 
-- Set `new_boundary` to same value as outer boundary in `Mesh/core/external_boundary_name` to update the outer boundary sideset along the location of deleted assemblies
+- Set [!param](/Mesh/BlockDeletionGenerator/new_boundary) to same value as outer boundary in `Mesh/core/external_boundary_name` to update the outer boundary sideset along the location of deleted assemblies
 
 ### Example
 
@@ -149,8 +149,8 @@ The [AdvancedExtruderGenerator.md] can be used to perform 2D-to-3D extrusion, al
 
 ### Notes
 
-- Assign new block IDs to each axial level using `subdomain_swaps`.  This will allow you to later assign different materials on each axial level
-- `bottom_boundary` and `top_boundary` parameters are used to assign the boundary IDs of the bottom and top boundary sidesets
+- Assign new block IDs to each axial level using [!param](/Mesh/AdvancedExtruderGenerator/subdomain_swaps). This will allow you to later assign different materials on each axial level
+- [!param](/Mesh/AdvancedExtruderGenerator/bottom_boundary) and [!param](/Mesh/AdvancedExtruderGenerator/top_boundary) parameters are used to assign the boundary IDs of the bottom and top boundary sidesets
 
 ### Example
 

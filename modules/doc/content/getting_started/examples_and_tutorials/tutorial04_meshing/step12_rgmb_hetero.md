@@ -18,9 +18,9 @@ This example illustrates the use of RGMB mesh generators to define a 3D pin-hete
 
 ## PinMeshGenerator
 
-Although all the pins are geometrically identical, each ring of pins may use different material multigroup cross sections in later neutronics calculations. We select to distinguish pins by ring (7 rings) by creating a [PinMeshGenerator.md] instance for each ring. If the materials (cross sections) are identical across all pins, only one pin definition would be necessary. The 'pin_type' parameter should be unique for each pin type (1 through 7).
+Although all the pins are geometrically identical, each ring of pins may use different material multigroup cross sections in later neutronics calculations. We select to distinguish pins by ring (7 rings) by creating a [PinMeshGenerator.md] instance for each ring. If the materials (cross sections) are identical across all pins, only one pin definition would be necessary. The [!param](/Mesh/PinMeshGenerator/pin_type) parameter should be unique for each pin type (1 through 7).
 
-The pitch of the pin is specified with pitch, and the number of azimuthal sectors is specified with `num_sectors`. The number or radial blocks and radial sub-intevals is specified through the array `mesh_intervals`. In this case, the pin has 4 important radii corresponding to the central helium gap radius, outer fuel radius, inner cladding radius, and outer cladding radius. These input parameters differ slightly from [PolygonConcentricCircleMeshGenerator.md], and no advanced options like boundary layer meshing are exposed currently.
+The pitch of the pin is specified with pitch, and the number of azimuthal sectors is specified with [!param](/Mesh/PinMeshGenerator/num_sectors). The number or radial blocks and radial sub-intevals is specified through the array [!param](/Mesh/PinMeshGenerator/mesh_intervals). In this case, the pin has 4 important radii corresponding to the central helium gap radius, outer fuel radius, inner cladding radius, and outer cladding radius. These input parameters differ slightly from [PolygonConcentricCircleMeshGenerator.md], and no advanced options like boundary layer meshing are exposed currently.
 
 !media tutorial04_meshing/lfr_pinmesh.png
        id=tutorial04-lfr_pinmesh
@@ -32,17 +32,17 @@ The pitch of the pin is specified with pitch, and the number of azimuthal sector
          caption=LFR RGMB pin example.
          block=Mesh/pin1
 
-`region_ids` is a 2-dimensional array where each row assigns to radial layer `region_ids` on a given axial layer, with the bottom layer defined first. Each pin has multiple radial regions (hole, fuel, clad, coolant) which must be defined for each axial layer.
+[!param](/Mesh/PinMeshGenerator/region_ids) is a 2-dimensional array where each row assigns to radial layer `region_id`s on a given axial layer, with the bottom layer defined first. Each pin has multiple radial regions (hole, fuel, clad, coolant) which must be defined for each axial layer.
 
 ## AssemblyMeshGenerator
 
 [AssemblyMeshGenerator.md] takes the 7 pin types previously defined and places them into a regular hexagonal grid. Additionally, coolant and duct regions need to be added around the pins in order to create the assembly geometry.
 
-The assembly pitch has already been defined in [ReactorMeshParams.md] and forms the outer edge of the assembly duct. The inner half pitch of the duct should be specified using the `duct_halfpitch` parameter. Additional duct blocks can be created by adding more radii values to this parameter, remembering that each value must be less than the assembly `half_pitch`. The radial meshing subintervals for the duct are defined with the `duct_intervals` option.
+The assembly pitch has already been defined in [ReactorMeshParams.md] and forms the outer edge of the assembly duct. The inner half pitch of the duct should be specified using the [!param](/Mesh/AssemblyMeshGenerator/duct_halfpitch) parameter. Additional duct blocks can be created by adding more radii values to this parameter, remembering that each value must be less than half of the [!param](/Mesh/ReactorMeshParams/assembly_pitch) parameter. The radial meshing subintervals for the duct are defined with the [!param](/Mesh/AssemblyMeshGenerator/duct_intervals) option.
 
-Whatever area remains between the outer pin boundaries and the inner half pitch of the duct is filled in with "background" region (representing coolant, in this case). The radial meshing subintervals for the coolant are defined with the `background_intervals` option.
+Whatever area remains between the outer pin boundaries and the inner half pitch of the duct is filled in with "background" region (representing coolant, in this case). The radial meshing subintervals for the coolant are defined with the [!param](/Mesh/AssemblyMeshGenerator/background_intervals) option.
 
-Extrusion is performed by using the `extrude`=`true` option and is performed after the 2D assembly geometry has been completed.
+Extrusion is performed by using the [!param](/Mesh/AssemblyMeshGenerator/extrude)=`true` option and is performed after the 2D assembly geometry has been completed.
 
 !listing reactor_examples/rgmb_lfr/rgmb_lfr_assembly.i
          id=tutorial04-rgmb_lfr-assembly

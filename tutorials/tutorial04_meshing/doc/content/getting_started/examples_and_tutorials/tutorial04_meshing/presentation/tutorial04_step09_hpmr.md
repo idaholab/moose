@@ -33,8 +33,8 @@
 - [PolygonConcentricCircleMeshGenerator.md]
 
 - Center, outer ring, background region
-- Volumes preserved (`preserve_volumes`=`True`)
-- TRI center elements (`quad_center_elements`=`False`)
+- Volumes preserved ([!param](/Mesh/PolygonConcentricCircleMeshGenerator/preserve_volumes)=`True`)
+- TRI center elements ([!param](/Mesh/PolygonConcentricCircleMeshGenerator/quad_center_elements)=`False`)
 
 - Center of pin unit cell can be meshed by triangular or quadratic elements
 - Duct regions can also be added to the outer periphery (not used in this example)
@@ -116,7 +116,7 @@ Setup
 
 - 3 regions (Center region, Absorber Ring, Hexagonal background)
 
-- Circular volumes preserved regardless of meshing fidelity (`preserve_volumes`=`true`)
+- Circular volumes preserved regardless of meshing fidelity ([!param](/Mesh/PolygonConcentricCircleMeshGenerator/preserve_volumes)=`true`)
 - Side node adaptation performed for instances with neighboring fuel assemblies
 - [HexagonConcentricCircleAdaptiveBoundaryMeshGenerator.md] is used in this case to create a "single pin" hexagonal assembly with sides matching another mesh
 

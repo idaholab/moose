@@ -33,7 +33,7 @@ RGMB consists of a few specific mesh generators which are to be called in order 
 
 The final mesh will contain one block (subdomain) for quadrilateral elements and one block for triangular elements. Regions with different materials are distinguished by the `region_id` reporting ID rather than by subdomain ID.
 
-`region_ids` is a 2D array parameter that sets the `region_id` by radial region (rows) and axial region (column). The 3D material map is stored for use after extrusion, which could happen at the pin, assembly, or core step, whichever step is final for the problem of interest.
+[!param](/Mesh/PinMeshGenerator/region_ids) is a 2D array parameter that sets the `region_id` by radial region (rows) and axial region (column). The 3D material map is stored for use after extrusion, which could happen at the pin, assembly, or core step, whichever step is final for the problem of interest.
 
 !media tutorial04_meshing/rgmb_pinmesh_cart.png
        id=tutorial04-rgmb_pinmesh_cart
@@ -68,7 +68,7 @@ The final mesh will contain one block (subdomain) for quadrilateral elements and
 
 !media tutorial04_meshing/rgmb_assemblymesh_cart_blockid.png
        id=tutorial04-rgmb_assemblymesh_cart_blockid
-       caption=Cartesian assembly colored by `subdomain_id` (left), `region_id` (middle), and `pin_id` (right). Subdomain ids categorize elements as belonging to different subdomains (blocks), region ids categorize elements belonging to different regions (material zones), and `pin_ids` categorize elements belonging to different pin cells.
+       caption=Cartesian assembly colored by `subdomain_id` (left), `region_id` (middle), and `pin_id` (right). Subdomain ids categorize elements as belonging to different subdomains (blocks), region ids categorize elements belonging to different regions (material zones), and pin ids categorize elements belonging to different pin cells.
        style=width:75%;display:block;margin-left:auto;margin-right:auto;
 
 !listing rgmb_mesh_generators/rgmb_core_cartesian.i
@@ -87,7 +87,7 @@ The final mesh will contain one block (subdomain) for quadrilateral elements and
 
 !media tutorial04_meshing/rgmb_assemblymesh_hex.png
        id=tutorial04-rgmb_assemblymesh_hex
-       caption=Hexagonal assembly colored by `subdomain_id` (left), `region_id` (middle), and `pin_id` (right). Subdomain ids categorize elements as belonging to different subdomains (blocks), region ids categorize elements belonging to different regions (material zones), and `pin_ids` categorize elements belonging to different pin cells.
+       caption=Hexagonal assembly colored by `subdomain_id` (left), `region_id` (middle), and `pin_id` (right). Subdomain ids categorize elements as belonging to different subdomains (blocks), region ids categorize elements belonging to different regions (material zones), and pin ids categorize elements belonging to different pin cells.
        style=width:75%;display:block;margin-left:auto;margin-right:auto;
 
 !listing rgmb_mesh_generators/rgmb_core_hexagonal.i
@@ -99,7 +99,7 @@ The final mesh will contain one block (subdomain) for quadrilateral elements and
 
 [CoreMeshGenerator.md] calls [PatternedHexMeshGenerator.md] or [PatternedMeshGenerator.md] to generate a Cartesian or hexagonal lattice of assembly-like structures.
 
-Defining `dummy_assembly_name` and using it in inputs defines a dummy assembly in the core
+Defining [!param](/Mesh/CoreMeshGenerator/dummy_assembly_name) and using it in inputs defines a dummy assembly in the core.
 
 ### Cartesian Core Example
 
