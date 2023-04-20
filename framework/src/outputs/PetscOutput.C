@@ -148,14 +148,14 @@ PetscOutput::solveSetup()
   if (_execute_on.contains(EXEC_NONLINEAR) &&
       (_time >= _nonlinear_start_time - _t_tol && _time <= _nonlinear_end_time + _t_tol))
   {
-    PetscErrorCode ierr = SNESMonitorSet(snes, petscNonlinearOutput, this, PETSC_NULL);
+    PetscErrorCode ierr = SNESMonitorSet(snes, petscNonlinearOutput, this, LIBMESH_PETSC_NULLPTR);
     CHKERRABORT(_communicator.get(), ierr);
   }
 
   if (_execute_on.contains(EXEC_LINEAR) &&
       (_time >= _linear_start_time - _t_tol && _time <= _linear_end_time + _t_tol))
   {
-    PetscErrorCode ierr = KSPMonitorSet(ksp, petscLinearOutput, this, PETSC_NULL);
+    PetscErrorCode ierr = KSPMonitorSet(ksp, petscLinearOutput, this, LIBMESH_PETSC_NULLPTR);
     CHKERRABORT(_communicator.get(), ierr);
   }
 }
