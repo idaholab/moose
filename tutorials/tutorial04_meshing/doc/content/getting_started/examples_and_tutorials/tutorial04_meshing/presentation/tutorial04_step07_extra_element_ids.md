@@ -55,7 +55,7 @@ Reporting IDs can be leveraged to post-process solution data into tables by usin
 !row!
 !col small=12 medium=6 large=8
 
-!listing modules/reactor/test/tests/meshgenerators/reporting_id/hexagonal_id/core_reporting_id.i
+!listing base_mesh_generators/alternative_pattern_reporting_id.i
          block=Mesh
          link=False
 
@@ -88,8 +88,8 @@ Reporting IDs can be leveraged to post-process solution data into tables by usin
 
 !row-end!
 
-!listing test/tests/meshgenerators/plane_id_mesh_generator/plane_id_pin3d.i
-         block=Mesh/pin3d_id
+!listing base_mesh_generators/plane_id.i
+         block=Mesh/CORE_3D
          link=False
 
 !---
@@ -140,6 +140,6 @@ Reporting IDs can be leveraged to post-process solution data into tables by usin
 
 !row-end!
 
-!listing test/tests/vectorpostprocessors/extra_id_integral/extra_id_vpp.i
+!listing base_mesh_generators/reporting_id_vpp.i
          block=VectorPostprocessors
          link=False

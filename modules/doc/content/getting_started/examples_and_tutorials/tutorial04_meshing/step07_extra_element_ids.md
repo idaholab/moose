@@ -39,8 +39,13 @@ Since the mesh generators understand the pin or assembly pattern, IDs can be app
        style=width:50%;display:block;margin-left:auto;margin-right:auto;
 
 !listing modules/reactor/test/tests/meshgenerators/reporting_id/cartesian_id/core_reporting_id.i
-         id=tutorial04-core_reporting_id.i
-         caption=Cell pattern reporting ID example.
+         id=tutorial04-core_reporting_id_cart.i
+         caption=Cell pattern reporting ID example for Cartesian lattices.
+         block=Mesh
+
+!listing modules/reactor/test/tests/meshgenerators/reporting_id/hexagonal_id/core_reporting_id.i
+         id=tutorial04-core_reporting_id_hex.i
+         caption=Cell pattern reporting ID example for hexagonal lattices.
          block=Mesh
 
 ### Alternative Pattern Example
@@ -55,8 +60,8 @@ Supports other numbering schemes:
        caption=Pattern (left) and Manual (right) Numbering scheme, colored by Pin ID.
        style=width:50%;display:block;margin-left:auto;margin-right:auto;
 
-!listing modules/reactor/test/tests/meshgenerators/reporting_id/hexagonal_id/core_reporting_id.i
-         id=tutorial04-core_alt_reporting_id.i
+!listing base_mesh_generators/alternative_pattern_reporting_id.i
+         id=tutorial04-alternative_pattern_reporting_id.i
          caption=Alternative pattern reporting ID example.
          block=Mesh
 
@@ -85,10 +90,10 @@ Users often wish to postprocess solutions along the axial dimension. The [PlaneI
        caption=Simplified extruded cores with (left) and without (right) subinterval numberings on center region, colored by plane IDs.
        style=width:50%;display:block;margin-left:auto;margin-right:auto;
 
-!listing test/tests/meshgenerators/plane_id_mesh_generator/plane_id_pin3d.i
-         id=tutorial04-plane_id_pin3d.i
+!listing base_mesh_generators/plane_id.i
+         id=tutorial04-plane_id.i
          caption=Plane ID example.
-         block=Mesh/pin3d_id
+         block=Mesh/CORE_3D
 
 ## Applying Depletion IDs
 
@@ -143,10 +148,10 @@ After performing a physics simulation using a mesh with reporting IDs, the solut
 !media tutorial04_meshing/eeid_reporting_id_vpp_example.png
        id=tutorial04-eeid_reporting_id_vpp_example
        caption=Example of vector post-processing utilizing reporting IDs.
-       style=width:50%;display:block;margin-left:auto;margin-right:auto;
+       style=width:75%;display:block;margin-left:auto;margin-right:auto;
 
-!listing test/tests/vectorpostprocessors/extra_id_integral/extra_id_vpp.i
-         id=tutorial04-extra_id_vpp.i
+!listing base_mesh_generators/reporting_id_vpp.i
+         id=tutorial04-reporting_id_vpp.i
          caption=Vector post-processing example.
          block=VectorPostprocessors
 

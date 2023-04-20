@@ -15,4 +15,22 @@
     input = 'peripheral_trim.i'
     cli_args= '--mesh-only --error-deprecated'
   []
+
+  [plane_id]
+    type = RunApp
+    input = 'plane_id.i'
+    cli_args= '--mesh-only --error-deprecated'
+  []
+
+  [reporting_id_vpp]
+    type = RunApp
+    input = 'reporting_id_vpp.i'
+    cli_args= '--mesh-only --error-deprecated'
+  []
+
+  [alternative_pattern_reporting_id]
+    type = RunApp
+    input = 'alternative_pattern_reporting_id.i'
+    cli_args= '--mesh-only --error-deprecated'
+  []
 []
