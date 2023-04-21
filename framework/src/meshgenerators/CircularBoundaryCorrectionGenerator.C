@@ -154,19 +154,14 @@ CircularBoundaryCorrectionGenerator::generate()
     Real dummy_max_rad;
     std::vector<dof_id_type> ordered_node_list;
     bool is_bdry_closed;
-    try
-    {
-      FillBetweenPointVectorsTools::isClosedLoop(*input_mesh,
-                                                 dummy_max_rad,
-                                                 ordered_node_list,
-                                                 input_circ_bds_sds_ids[i],
-                                                 boundary_origin,
-                                                 "boundary",
-                                                 is_bdry_closed);
-    }
-    catch (const MooseException & e)
-    {
-    }
+    FillBetweenPointVectorsTools::isClosedLoop(*input_mesh,
+                                               dummy_max_rad,
+                                               ordered_node_list,
+                                               input_circ_bds_sds_ids[i],
+                                               boundary_origin,
+                                               "boundary",
+                                               is_bdry_closed,
+                                               true);
 
     // If the user selects to move the end nodes of a partial circular boundary, we need to
     // calculate the displacement of the end nodes, which differs from the displacement of the

@@ -634,7 +634,8 @@ isClosedLoop(ReplicatedMesh & mesh,
              std::vector<std::pair<dof_id_type, dof_id_type>> & node_assm,
              const Point origin_pt,
              const std::string input_type,
-             bool & is_closed_loop)
+             bool & is_closed_loop,
+             const bool suppress_exception)
 {
   std::vector<dof_id_type> dummy_elem_list = std::vector<dof_id_type>(node_assm.size(), 0);
   std::vector<dof_id_type> ordered_dummy_elem_list;
@@ -647,9 +648,10 @@ isClosedLoop(ReplicatedMesh & mesh,
   if (ordered_node_list.front() != ordered_node_list.back())
   {
     // This is invalid type #2
-    throw MooseException("This mesh generator does not work for the provided ",
-                         input_type,
-                         " as it is not a closed loop.");
+    if (!suppress_exception)
+      throw MooseException("This mesh generator does not work for the provided ",
+                           input_type,
+                           " as it is not a closed loop.");
   }
   // It the curve is a loop, check if azimuthal angles change monotonically
   else
@@ -669,11 +671,14 @@ isClosedLoop(ReplicatedMesh & mesh,
     }
     std::sort(ordered_node_azi_list.begin(), ordered_node_azi_list.end());
     if (ordered_node_azi_list.front() * ordered_node_azi_list.back() < 0.0)
+    {
       // This is invalid type #3
-      throw MooseException(
-          "This mesh generator does not work for the provided ",
-          input_type,
-          " as azimuthal angles of consecutive nodes do not change monotonically.");
+      if (!suppress_exception)
+        throw MooseException(
+            "This mesh generator does not work for the provided ",
+            input_type,
+            " as azimuthal angles of consecutive nodes do not change monotonically.");
+    }
     else
       is_closed_loop = true;
   }
