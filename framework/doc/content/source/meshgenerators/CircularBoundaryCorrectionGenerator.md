@@ -6,9 +6,9 @@
 
 The `CircularBoundaryCorrectionGenerator` object performs radius correction to preserve circular area considering polygonization effect for full or partial circular boundaries in a 2D mesh.
 
-In a 2D mesh, a "circular boundary" consists of sides that connects a series of nodes on the circle, which actually form a polygon boundary. Due to the polygonization effect, the area within a "circular boundary" in a 2D mesh is actually smaller than a real circle with the same radius. Such a discrepancy could cause issues in some simulations that involve physics that is sensitive to volume conservation (e.g., neutronics).
+In a 2D mesh, a "circular boundary" consists of sides that connect a series of nodes on the circle, which actually form a polygon boundary. Due to the polygonization effect, the area within a "circular boundary" in a 2D mesh is actually smaller than a real circle with the same radius. Such a discrepancy could cause issues in some simulations that involve physics that are sensitive to volume conservation.
 
-Therefore, a corrected radius can be used to generate the "circle-like" polygon to enforce that the polygon area is the same as the original circle without polygonization. This can be achieved through the following equations.
+Therefore, a corrected radius can be used to generate the "circle-like" polygon to enforce that the polygon area is the same as the original circle without polygonization. This can be achieved with either of the follow approaches.
 
 ### Moving Radial Nodes
 
@@ -42,16 +42,17 @@ Where $f_{corr}$ is the correction factor used in this object to ensure volume p
       caption=A schematic drawing showing the two approaches to correct the polygonization effect for a partial circular boundary
 
 ### Azimuthally Displacing Nodes in the Span Direction
+
 The radial nodes moving approach is undoubtedly the most generalized approach for a full circular boundary. However, for a partial circular boundary, moving the two end nodes in their radial directions may deform the original shape. Therefore, moving the end nodes in the span direction of the partial circular boundary (i.e., arc) provides an alternative approach (see the right subfigure of [schematic]). Moving the end nodes in the span direction inevitably changes the azimuthal angle intervals. To make this change consistent for all the boundary sides, a scaling coefficient, $c$, is applied to every $\theta_i$.
 
 !equation id=scaling_theta
 \theta_i^{corr}=c\theta_i
 
 !equation id=span_relation
-f=\frac{r_{polygon}}{r_{circle}}=\frac{cos\left(\Sigma_i~\theta_i/2\right)}{cos\left(c\Sigma_i~\theta_i/2\right)}=\sqrt{\frac{\Sigma_i~\theta_i-\sin\left(\Sigma_i~\theta_i\right)}{\Sigma_i~\sin\left(c\theta_i\right)-\sin\left(c\Sigma_i~\theta_i\right)}}
+f=\frac{r_{polygon}}{r_{circle}}=\frac{\cos\left(\Sigma_i~\theta_i/2\right)}{\cos\left(c\Sigma_i~\theta_i/2\right)}=\sqrt{\frac{\Sigma_i~\theta_i-\sin\left(\Sigma_i~\theta_i\right)}{\Sigma_i~\sin\left(c\theta_i\right)-\sin\left(c\Sigma_i~\theta_i\right)}}
 
 !equation id=span_relation_2
-f^2=\frac{1+cos\left(\Sigma_i~\theta_i\right)}{1+cos\left(c\Sigma_i~\theta_i\right)}=\frac{\Sigma_i~\theta_i-\sin\left(\Sigma_i~\theta_i\right)}{\Sigma_i~\sin\left(c\theta_i\right)-\sin\left(c\Sigma_i~\theta_i\right)}
+f^2=\frac{1+\cos\left(\Sigma_i~\theta_i\right)}{1+\cos\left(c\Sigma_i~\theta_i\right)}=\frac{\Sigma_i~\theta_i-\sin\left(\Sigma_i~\theta_i\right)}{\Sigma_i~\sin\left(c\theta_i\right)-\sin\left(c\Sigma_i~\theta_i\right)}
 
  Note that if the partial circular boundary happens to be a half circle (i.e., $\Sigma_i~\theta_i=\pi$), [span_relation_2] cannot be solved as both numerator and denominator are zero. In that case the span direction is also the radial direction. Therefore, $c$ has a trivial value of unity; and the node moving should be calculated using the "radial nodes moving" approach. If the boundary if not a half circle (i.e., $\Sigma_i~\theta_i\neq\pi$), the above equation is solved by Newton-Raphson method to obtain $c$. The displacement of the end nodes ($e_{end}$) can be calculated as follows.
 

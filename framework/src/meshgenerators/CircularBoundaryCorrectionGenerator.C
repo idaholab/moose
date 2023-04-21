@@ -177,8 +177,12 @@ CircularBoundaryCorrectionGenerator::generate()
     // corr_factor < 1 means the partial boundary is more than a half circle
     // corr_factor = 1 means the boundary is a full circle or a half circle
     Real c_coeff;
-    const Real corr_factor = generalCirCorrFactor(
-        input_circ_bds_sds[i], boundary_origin, is_bdry_closed, c_coeff, end_node_disp);
+    const Real corr_factor = generateRadialCorrectionFactor(input_circ_bds_sds[i],
+                                                            boundary_origin,
+                                                            is_bdry_closed,
+                                                            _move_end_nodes_in_span_direction,
+                                                            c_coeff,
+                                                            end_node_disp);
     // Radial range that within which the nodes will be moved
     const Real transition_layer_thickness = _transition_layer_ratios[i] * bdry_rad;
     // For a partial boundary, we take out the start and end nodes from the ordered node list
@@ -228,12 +232,16 @@ CircularBoundaryCorrectionGenerator::generate()
       if (node->id() == ordered_node_list.front() && _move_end_nodes_in_span_direction &&
           end_node_disp >= 0.0)
       {
+        if (!mod_node_list.emplace((*node).id()).second)
+          paramError("transition_layer_ratios", "the transition layers are overlapped.");
         (*node) = (*node) + end_node_disp * bdry_rad * span_direction;
         continue;
       }
       if (node->id() == ordered_node_list.back() && _move_end_nodes_in_span_direction &&
           end_node_disp >= 0.0)
       {
+        if (!mod_node_list.emplace((*node).id()).second)
+          paramError("transition_layer_ratios", "the transition layers are overlapped.");
         (*node) = (*node) - end_node_disp * bdry_rad * span_direction;
         continue;
       }
@@ -281,9 +289,9 @@ CircularBoundaryCorrectionGenerator::generate()
 }
 
 Point
-CircularBoundaryCorrectionGenerator::circularCenterCalculator(const std::vector<Point> pts_list,
+CircularBoundaryCorrectionGenerator::circularCenterCalculator(const std::vector<Point> & pts_list,
                                                               Real & radius,
-                                                              const Real tol)
+                                                              const Real tol) const
 {
   // Usually, just using the first three points would work
   // Here a more complex selection is made in case the first three points are too close to each
@@ -343,13 +351,17 @@ CircularBoundaryCorrectionGenerator::circularCenterCalculator(const std::vector<
 }
 
 Real
-CircularBoundaryCorrectionGenerator::generalCirCorrFactor(
+CircularBoundaryCorrectionGenerator::generateRadialCorrectionFactor(
     const std::vector<std::pair<Point, Point>> & bd_side_list,
     const Point & circle_center,
     const bool is_closed_loop,
+    const bool move_end_nodes_in_span_direction,
     Real & c_coeff,
     Real & end_node_disp) const
 {
+  if (bd_side_list.empty())
+    mooseError("The 'bd_side_list' argument of "
+               "CircularBoundaryCorrectionGenerator::generateRadialCorrectionFactor is empty.");
   Real acc_area(0.0);
   Real acc_azi(0.0);
   std::vector<Real> d_azi_list;
@@ -357,7 +369,7 @@ CircularBoundaryCorrectionGenerator::generalCirCorrFactor(
   {
     const Point v1 = bd_side.first - circle_center;
     const Point v2 = bd_side.second - circle_center;
-    // Use cross to calculate r * r * sin(d_azi_i)
+    // Use cross to calculate r * r * sin(d_azi_i) and then normalized by r * r to get sin(d_azi_i)
     acc_area += v1.cross(v2).norm() / v1.norm() / v2.norm();
     const Real azi1 = std::atan2(v1(1), v1(0));
     const Real azi2 = std::atan2(v2(1), v2(0));
@@ -367,7 +379,8 @@ CircularBoundaryCorrectionGenerator::generalCirCorrFactor(
     d_azi_list.push_back(d_azi);
   }
 
-  if (!MooseUtils::absoluteFuzzyEqual(acc_azi, M_PI) && !is_closed_loop)
+  if (!MooseUtils::absoluteFuzzyEqual(acc_azi, M_PI) && !is_closed_loop &&
+      move_end_nodes_in_span_direction)
   {
     const Real k_1 = 1.0 + std::cos(acc_azi);
     const Real k_2 = acc_azi - std::sin(acc_azi);
@@ -390,8 +403,8 @@ CircularBoundaryCorrectionGenerator::generalCirCorrFactor(
     }
 
     if (ct >= 100)
-      mooseError("CircularBoundaryCorrectionGenerator::generalCirCorrFactorNormal: "
-                 "Newton-Raphson method did not converge.");
+      mooseError("Newton-Raphson method did not converge for generating the azimuthal correction "
+                 "factor for circular area preservation.");
 
     const Real norm_corr_factor = std::cos(0.5 * acc_azi) / std::cos(0.5 * acc_azi * c_new);
     end_node_disp = norm_corr_factor * std::sin(0.5 * acc_azi * c_new) - std::sin(0.5 * acc_azi);

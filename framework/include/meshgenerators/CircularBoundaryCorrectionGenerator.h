@@ -49,26 +49,29 @@ protected:
    * @param tol tolerance used to verify whether the boundary is circular or not
    * @return center of the circular boundary
    */
-  Point circularCenterCalculator(const std::vector<Point> pts_list,
+  Point circularCenterCalculator(const std::vector<Point> & pts_list,
                                  Real & radius,
-                                 const Real tol = 1e-12);
+                                 const Real tol = 1e-12) const;
 
   /**
    * Calculates the radius correction factor based on a list of sides on a circular boundary
    * @param bd_side_list list of sides on the circular boundary
    * @param circle_center center of the circular boundary
    * @param is_closed_loop whether the boundary is a closed loop or not
+   * @param move_end_nodes_in_span_direction whether to move the end nodes of the partial circular
+   * boundary in the span direction
    * @param c_coeff a reference to a variable to contain the coefficient that multiplies the
    * azimuthal angles
    * @param end_node_disp a reference to a variable to contain the displacement of the end node of
    * the partial circular boundary
    * @return radius correction factor to preserve circular area
    */
-  Real generalCirCorrFactor(const std::vector<std::pair<Point, Point>> & bd_side_list,
-                            const Point & circle_center,
-                            const bool is_closed_loop,
-                            Real & c_coeff,
-                            Real & end_node_disp) const;
+  Real generateRadialCorrectionFactor(const std::vector<std::pair<Point, Point>> & bd_side_list,
+                                      const Point & circle_center,
+                                      const bool is_closed_loop,
+                                      const bool move_end_nodes_in_span_direction,
+                                      Real & c_coeff,
+                                      Real & end_node_disp) const;
 
   /**
    * Calculates the summation of the sine values of a list of angles
