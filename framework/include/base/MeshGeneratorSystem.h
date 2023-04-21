@@ -145,6 +145,11 @@ public:
    */
   static std::string mainMeshGeneratorName() { return "main"; };
 
+  /**
+   * @return Whether any of our mesh generators were of type \p BreakMeshByBlockGenerator
+   */
+  bool hasBreakMeshByBlockGenerator() const { return _has_bmbb; }
+
 private:
   /**
    * Gets the MeshGeneratorNames that are referenced in an object's parameters.
@@ -204,7 +209,6 @@ private:
   /// Holds the map of save in mesh -> name
   std::map<std::string, std::unique_ptr<MeshBase>> _save_in_meshes;
 
-  /// Whether any of the mesh generators are a \p BreakMeshByBlockGenerator. If so, then we will not
-  /// call \p set_isnt_prepared() after \p generate()
+  /// Whether any of the mesh generators are a \p BreakMeshByBlockGenerator
   bool _has_bmbb;
 };
