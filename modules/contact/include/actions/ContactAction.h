@@ -111,4 +111,8 @@ private:
    * Add single contact pressure auxiliary kernel for various contact action objects
    */
   void addContactPressureAuxKernel();
+  /**
+   * Remove repeated contact pairs in the input file.
+   */
+  void removeRepeatedPairs();
 };
