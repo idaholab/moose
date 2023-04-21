@@ -1188,6 +1188,14 @@
     design = 'PorousFlow1PhaseHysP.md'
     issues = '#16129'
   [../]
+  [./1phase_bc]
+    type = CSVDiff
+    input = '1phase_bc.i'
+    csvdiff = '1phase_bc_out.csv'
+    requirement = 'PorousFlow shall be able to compute saturation in 1-phase hysteretic systems, as the system evolves in time along the primary drying curve and then along a first-order wetting curve, when the input file has a PorousFlow boundary condition'
+    design = 'PorousFlow1PhaseHysP.md'
+    issues = '#23871'
+  [../]
   [./1phase_3rd]
     type = CSVDiff
     input = '1phase_3rd.i'

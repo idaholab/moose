@@ -40,6 +40,7 @@ VolumeJunction1Phase::validParams()
   params.addParam<Real>("K", 0., "Form loss factor [-]");
   params.addParam<Real>("A_ref", "Reference area [m^2]");
 
+  params.declareControllable("K");
   params.addClassDescription("Junction between 1-phase flow channels that has a non-zero volume");
 
   return params;
@@ -193,6 +194,7 @@ VolumeJunction1Phase::buildVolumeJunctionUserObject()
     params.set<UserObjectName>("fp") = _fp_name;
     params.set<ExecFlagEnum>("execute_on") = execute_on;
     getTHMProblem().addUserObject(class_name, _junction_uo_name, params);
+    connectObject(params, _junction_uo_name, "K");
   }
 }
 

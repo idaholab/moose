@@ -43,10 +43,11 @@ HSBoundary::check() const
     // Check that no perimeter is zero; if so, there is not physically a boundary
     for (unsigned int i = 0; i < _boundary.size(); i++)
     {
-      if (hs.hasHeatStructureSideType(_boundary[i]))
+      if (hs.hasExternalBoundary(_boundary[i]))
       {
-        auto hs_side = hs.getHeatStructureSideType(_boundary[i]);
-        if ((hs_side == HeatStructureSideType::INNER) || (hs_side == HeatStructureSideType::OUTER))
+        auto hs_side = hs.getExternalBoundaryType(_boundary[i]);
+        if ((hs_side == Component2D::ExternalBoundaryType::INNER) ||
+            (hs_side == Component2D::ExternalBoundaryType::OUTER))
         {
           if (MooseUtils::absoluteFuzzyEqual(hs.getUnitPerimeter(hs_side), 0))
             logError("The heat structure side of the heat structure '",

@@ -9,6 +9,27 @@
 
 #include "Component2D.h"
 #include "THMMesh.h"
+#include "THMEnums.h"
+
+const std::map<std::string, Component2D::ExternalBoundaryType>
+    Component2D::_external_boundary_type_to_enum{{"INNER", ExternalBoundaryType::INNER},
+                                                 {"OUTER", ExternalBoundaryType::OUTER},
+                                                 {"START", ExternalBoundaryType::START},
+                                                 {"END", ExternalBoundaryType::END}};
+
+MooseEnum
+Component2D::getExternalBoundaryTypeMooseEnum(const std::string & name)
+{
+  return THM::getMooseEnum<ExternalBoundaryType>(name, _external_boundary_type_to_enum);
+}
+
+template <>
+Component2D::ExternalBoundaryType
+THM::stringToEnum(const std::string & s)
+{
+  return stringToEnum<Component2D::ExternalBoundaryType>(
+      s, Component2D::_external_boundary_type_to_enum);
+}
 
 InputParameters
 Component2D::validParams()
@@ -18,7 +39,7 @@ Component2D::validParams()
 }
 
 Component2D::Component2D(const InputParameters & params)
-  : GeneratedMeshComponent(params), _number_of_hs(0), _total_elem_number(0), _axial_offset(0.0)
+  : GeneratedMeshComponent(params), _n_regions(0), _total_elem_number(0), _axial_offset(0.0)
 {
 }
 
@@ -55,9 +76,9 @@ Component2D::build2DMesh()
     Node * nd = addNode(p);
     node_ids[i][0] = nd->id();
 
-    // loop over all heat structures
+    // loop over regions
     unsigned int l = 1;
-    for (unsigned int j = 0; j < _number_of_hs; j++)
+    for (unsigned int j = 0; j < _n_regions; j++)
     {
       Real elem_length = _width[j] / _n_part_elems[j];
       for (unsigned int k = 0; k < _n_part_elems[j]; k++, l++)
@@ -66,10 +87,7 @@ Component2D::build2DMesh()
         nd = addNode(p);
         node_ids[i][l] = nd->id();
       }
-      _side_heat_node_ids[_names[j]].push_back(nd->id());
     }
-    _inner_heat_node_ids.push_back(node_ids[i][0]);
-    _outer_heat_node_ids.push_back(node_ids[i][_total_elem_number]);
   }
 
   auto & boundary_info = mesh().getMesh().get_boundary_info();
@@ -87,7 +105,7 @@ Component2D::build2DMesh()
     for (unsigned int i_local = 0; i_local < _n_elems[i_section]; i_local++)
     {
       unsigned int j = 0;
-      for (unsigned int j_section = 0; j_section < _number_of_hs; j_section++)
+      for (unsigned int j_section = 0; j_section < _n_regions; j_section++)
         for (unsigned int j_local = 0; j_local < _n_part_elems[j_section]; j_local++)
         {
           Elem * elem = addElementQuad4(
@@ -97,14 +115,14 @@ Component2D::build2DMesh()
           // exterior axial boundaries (all radial sections)
           if (i == 0)
           {
-            boundary_info.add_side(elem, 0, _start_bc_id[0]);
-            _hs_boundary_info[_boundary_names_start[0]].push_back(
+            boundary_info.add_side(elem, 0, _start_bc_id);
+            _boundary_info[_boundary_name_start].push_back(
                 std::tuple<dof_id_type, unsigned short int>(elem->id(), 0));
           }
           if (i == _n_elem - 1)
           {
-            boundary_info.add_side(elem, 2, _end_bc_id[0]);
-            _hs_boundary_info[_boundary_names_end[0]].push_back(
+            boundary_info.add_side(elem, 2, _end_bc_id);
+            _boundary_info[_boundary_name_end].push_back(
                 std::tuple<dof_id_type, unsigned short int>(elem->id(), 2));
           }
 
@@ -114,13 +132,13 @@ Component2D::build2DMesh()
             if (i == 0)
             {
               boundary_info.add_side(elem, 0, _radial_start_bc_id[j_section]);
-              _hs_boundary_info[_boundary_names_radial_start[j_section]].push_back(
+              _boundary_info[_boundary_names_radial_start[j_section]].push_back(
                   std::tuple<dof_id_type, unsigned short int>(elem->id(), 0));
             }
             if (i == _n_elem - 1)
             {
               boundary_info.add_side(elem, 2, _radial_end_bc_id[j_section]);
-              _hs_boundary_info[_boundary_names_radial_end[j_section]].push_back(
+              _boundary_info[_boundary_names_radial_end[j_section]].push_back(
                   std::tuple<dof_id_type, unsigned short int>(elem->id(), 2));
             }
           }
@@ -129,23 +147,23 @@ Component2D::build2DMesh()
           if (_n_sections > 1 && _axial_region_names.size() == _n_sections &&
               i_section != _n_sections - 1 && i == i_section_end)
           {
-            const unsigned int k = i_section * _number_of_hs + j_section;
+            const unsigned int k = i_section * _n_regions + j_section;
             boundary_info.add_side(elem, 2, _interior_axial_per_radial_section_bc_id[k]);
-            _hs_boundary_info[_boundary_names_interior_axial_per_radial_section[k]].push_back(
+            _boundary_info[_boundary_names_interior_axial_per_radial_section[k]].push_back(
                 std::tuple<dof_id_type, unsigned short int>(elem->id(), 2));
           }
 
           // exterior radial boundaries (all axial sections)
           if (j == 0)
           {
-            boundary_info.add_side(elem, 1, _inner_bc_id[0]);
-            _hs_boundary_info[_boundary_names_inner[0]].push_back(
+            boundary_info.add_side(elem, 1, _inner_bc_id);
+            _boundary_info[_boundary_name_inner].push_back(
                 std::tuple<dof_id_type, unsigned short int>(elem->id(), 1));
           }
           if (j == _total_elem_number - 1)
           {
-            boundary_info.add_side(elem, 3, _outer_bc_id[0]);
-            _hs_boundary_info[_boundary_names_outer[0]].push_back(
+            boundary_info.add_side(elem, 3, _outer_bc_id);
+            _boundary_info[_boundary_name_outer].push_back(
                 std::tuple<dof_id_type, unsigned short int>(elem->id(), 3));
           }
 
@@ -155,19 +173,19 @@ Component2D::build2DMesh()
             if (j == 0)
             {
               boundary_info.add_side(elem, 1, _axial_inner_bc_id[i_section]);
-              _hs_boundary_info[_boundary_names_axial_inner[i_section]].push_back(
+              _boundary_info[_boundary_names_axial_inner[i_section]].push_back(
                   std::tuple<dof_id_type, unsigned short int>(elem->id(), 1));
             }
             if (j == _total_elem_number - 1)
             {
               boundary_info.add_side(elem, 3, _axial_outer_bc_id[i_section]);
-              _hs_boundary_info[_boundary_names_axial_outer[i_section]].push_back(
+              _boundary_info[_boundary_names_axial_outer[i_section]].push_back(
                   std::tuple<dof_id_type, unsigned short int>(elem->id(), 3));
             }
           }
 
           // interior radial boundaries (all axial sections)
-          if (_number_of_hs > 1 && _names.size() == _number_of_hs && j_section != 0)
+          if (_n_regions > 1 && _names.size() == _n_regions && j_section != 0)
           {
             unsigned int j_section_begin = 0;
             for (unsigned int jj_section = 0; jj_section < j_section; ++jj_section)
@@ -176,7 +194,7 @@ Component2D::build2DMesh()
             if (j == j_section_begin)
             {
               boundary_info.add_side(elem, 1, _inner_radial_bc_id[j_section - 1]);
-              _hs_boundary_info[_boundary_names_inner_radial[j_section - 1]].push_back(
+              _boundary_info[_boundary_names_inner_radial[j_section - 1]].push_back(
                   std::tuple<dof_id_type, unsigned short int>(elem->id(), 1));
             }
           }
@@ -192,12 +210,11 @@ Component2D::build2DMesh()
 void
 Component2D::build2DMesh2ndOrder()
 {
-  // loop on flow channel nodes to create heat structure nodes
   unsigned int n_axial_positions = _node_locations.size();
   std::vector<std::vector<unsigned int>> node_ids(
       n_axial_positions, std::vector<unsigned int>(2 * _total_elem_number + 1));
 
-  // loop over layers
+  // loop over axial positions
   for (unsigned int i = 0; i < n_axial_positions; i++)
   {
     Point p(_node_locations[i], _axial_offset, 0);
@@ -205,9 +222,9 @@ Component2D::build2DMesh2ndOrder()
     const Node * nd = addNode(p);
     node_ids[i][0] = nd->id();
 
-    // loop over all heat structures
+    // loop over regions
     unsigned int l = 1;
-    for (unsigned int j = 0; j < _number_of_hs; j++)
+    for (unsigned int j = 0; j < _n_regions; j++)
     {
       Real elem_length = _width[j] / (2. * _n_part_elems[j]);
       for (unsigned int k = 0; k < 2. * _n_part_elems[j]; k++, l++)
@@ -216,10 +233,7 @@ Component2D::build2DMesh2ndOrder()
         nd = addNode(p);
         node_ids[i][l] = nd->id();
       }
-      _side_heat_node_ids[_names[j]].push_back(nd->id());
     }
-    _inner_heat_node_ids.push_back(node_ids[i][0]);
-    _outer_heat_node_ids.push_back(node_ids[i][_total_elem_number * 2]);
   }
 
   auto & boundary_info = mesh().getMesh().get_boundary_info();
@@ -230,7 +244,7 @@ Component2D::build2DMesh2ndOrder()
     for (unsigned int i_local = 0; i_local < _n_elems[i_section]; i_local++)
     {
       unsigned int j = 0;
-      for (unsigned int j_section = 0; j_section < _number_of_hs; j_section++)
+      for (unsigned int j_section = 0; j_section < _n_regions; j_section++)
         for (unsigned int j_local = 0; j_local < _n_part_elems[j_section]; j_local++)
         {
           Elem * elem = addElementQuad9(node_ids[2 * i][2 * j],
@@ -246,14 +260,14 @@ Component2D::build2DMesh2ndOrder()
 
           if (i == 0)
           {
-            boundary_info.add_side(elem, 0, _start_bc_id[0]);
-            _hs_boundary_info[_boundary_names_start[0]].push_back(
+            boundary_info.add_side(elem, 0, _start_bc_id);
+            _boundary_info[_boundary_name_start].push_back(
                 std::tuple<dof_id_type, unsigned short int>(elem->id(), 0));
           }
           if (i == _n_elem - 1)
           {
-            boundary_info.add_side(elem, 2, _end_bc_id[0]);
-            _hs_boundary_info[_boundary_names_end[0]].push_back(
+            boundary_info.add_side(elem, 2, _end_bc_id);
+            _boundary_info[_boundary_name_end].push_back(
                 std::tuple<dof_id_type, unsigned short int>(elem->id(), 2));
           }
           if (_names.size() > 1)
@@ -261,27 +275,27 @@ Component2D::build2DMesh2ndOrder()
             if (i == 0)
             {
               boundary_info.add_side(elem, 0, _radial_start_bc_id[j_section]);
-              _hs_boundary_info[_boundary_names_radial_start[j_section]].push_back(
+              _boundary_info[_boundary_names_radial_start[j_section]].push_back(
                   std::tuple<dof_id_type, unsigned short int>(elem->id(), 0));
             }
             if (i == _n_elem - 1)
             {
               boundary_info.add_side(elem, 2, _radial_end_bc_id[j_section]);
-              _hs_boundary_info[_boundary_names_radial_end[j_section]].push_back(
+              _boundary_info[_boundary_names_radial_end[j_section]].push_back(
                   std::tuple<dof_id_type, unsigned short int>(elem->id(), 2));
             }
           }
 
           if (j == 0)
           {
-            boundary_info.add_side(elem, 3, _inner_bc_id[0]);
-            _hs_boundary_info[_boundary_names_inner[0]].push_back(
+            boundary_info.add_side(elem, 3, _inner_bc_id);
+            _boundary_info[_boundary_name_inner].push_back(
                 std::tuple<dof_id_type, unsigned short int>(elem->id(), 3));
           }
           if (j == _total_elem_number - 1)
           {
-            boundary_info.add_side(elem, 1, _outer_bc_id[0]);
-            _hs_boundary_info[_boundary_names_outer[0]].push_back(
+            boundary_info.add_side(elem, 1, _outer_bc_id);
+            _boundary_info[_boundary_name_outer].push_back(
                 std::tuple<dof_id_type, unsigned short int>(elem->id(), 1));
           }
 
@@ -290,19 +304,19 @@ Component2D::build2DMesh2ndOrder()
             if (j == 0)
             {
               boundary_info.add_side(elem, 1, _axial_inner_bc_id[i_section]);
-              _hs_boundary_info[_boundary_names_axial_inner[i_section]].push_back(
+              _boundary_info[_boundary_names_axial_inner[i_section]].push_back(
                   std::tuple<dof_id_type, unsigned short int>(elem->id(), 1));
             }
             if (j == _total_elem_number - 1)
             {
               boundary_info.add_side(elem, 3, _axial_outer_bc_id[i_section]);
-              _hs_boundary_info[_boundary_names_axial_outer[i_section]].push_back(
+              _boundary_info[_boundary_names_axial_outer[i_section]].push_back(
                   std::tuple<dof_id_type, unsigned short int>(elem->id(), 3));
             }
           }
 
           // interior radial boundaries
-          if (_number_of_hs > 1 && _names.size() == _number_of_hs && j_section != 0)
+          if (_n_regions > 1 && _names.size() == _n_regions && j_section != 0)
           {
             unsigned int j_section_begin = 0;
             for (unsigned int jj_section = 0; jj_section < j_section; ++jj_section)
@@ -311,7 +325,7 @@ Component2D::build2DMesh2ndOrder()
             if (j == j_section_begin)
             {
               boundary_info.add_side(elem, 1, _inner_radial_bc_id[j_section - 1]);
-              _hs_boundary_info[_boundary_names_inner_radial[j_section - 1]].push_back(
+              _boundary_info[_boundary_names_inner_radial[j_section - 1]].push_back(
                   std::tuple<dof_id_type, unsigned short int>(elem->id(), 1));
             }
           }
@@ -326,11 +340,11 @@ Component2D::build2DMesh2ndOrder()
 void
 Component2D::buildMesh()
 {
-  if (_n_part_elems.size() != _number_of_hs || _width.size() != _number_of_hs)
+  if (_n_part_elems.size() != _n_regions || _width.size() != _n_regions)
     return;
 
   // Assign subdomain to each transverse region
-  for (unsigned int i = 0; i < _number_of_hs; i++)
+  for (unsigned int i = 0; i < _n_regions; i++)
   {
     // The coordinate system for MOOSE is always XYZ, even for axisymmetric
     // components, since we do the RZ integration ourselves until we can set
@@ -339,47 +353,82 @@ Component2D::buildMesh()
   }
 
   // Create boundary IDs and associated boundary names
-  _inner_bc_id.push_back(mesh().getNextBoundaryId());
-  _outer_bc_id.push_back(mesh().getNextBoundaryId());
-  _boundary_names_inner.push_back(genName(name(), "inner"));
-  _boundary_names_outer.push_back(genName(name(), "outer"));
+  _inner_bc_id = mesh().getNextBoundaryId();
+  _outer_bc_id = mesh().getNextBoundaryId();
+  _boundary_name_inner = genName(name(), "inner");
+  _boundary_name_outer = genName(name(), "outer");
+  _boundary_name_to_area[_boundary_name_inner] = computeRadialBoundaryArea(_length, 0.0);
+  _boundary_name_to_area[_boundary_name_outer] =
+      computeRadialBoundaryArea(_length, getTotalWidth());
   if (_n_sections > 1 && _axial_region_names.size() == _n_sections)
     for (unsigned int i = 0; i < _n_sections; i++)
     {
       _axial_inner_bc_id.push_back(mesh().getNextBoundaryId());
       _axial_outer_bc_id.push_back(mesh().getNextBoundaryId());
-      _boundary_names_axial_inner.push_back(genName(name(), _axial_region_names[i], "inner"));
-      _boundary_names_axial_outer.push_back(genName(name(), _axial_region_names[i], "outer"));
+      const BoundaryName boundary_name_axial_inner =
+          genName(name(), _axial_region_names[i], "inner");
+      const BoundaryName boundary_name_axial_outer =
+          genName(name(), _axial_region_names[i], "outer");
+      _boundary_names_axial_inner.push_back(boundary_name_axial_inner);
+      _boundary_names_axial_outer.push_back(boundary_name_axial_outer);
+      _boundary_name_to_area[boundary_name_axial_inner] =
+          computeRadialBoundaryArea(_lengths[i], 0.0);
+      _boundary_name_to_area[boundary_name_axial_outer] =
+          computeRadialBoundaryArea(_lengths[i], getTotalWidth());
     }
 
   // exterior axial boundaries
-  _start_bc_id.push_back(mesh().getNextBoundaryId());
-  _end_bc_id.push_back(mesh().getNextBoundaryId());
-  _boundary_names_start.push_back(genName(name(), "start"));
-  _boundary_names_end.push_back(genName(name(), "end"));
+  _start_bc_id = mesh().getNextBoundaryId();
+  _end_bc_id = mesh().getNextBoundaryId();
+  _boundary_name_start = genName(name(), "start");
+  _boundary_name_end = genName(name(), "end");
+  _boundary_name_to_area[_boundary_name_start] = computeAxialBoundaryArea(0.0, getTotalWidth());
+  _boundary_name_to_area[_boundary_name_end] = computeAxialBoundaryArea(0.0, getTotalWidth());
   if (_names.size() > 1)
+  {
+    Real y1 = 0.0;
     for (unsigned int i = 0; i < _names.size(); i++)
     {
+      const Real y2 = y1 + _width[i];
+
       _radial_start_bc_id.push_back(mesh().getNextBoundaryId());
       _radial_end_bc_id.push_back(mesh().getNextBoundaryId());
-      _boundary_names_radial_start.push_back(genName(name(), _names[i], "start"));
-      _boundary_names_radial_end.push_back(genName(name(), _names[i], "end"));
+      const BoundaryName boundary_name_radial_start = genName(name(), _names[i], "start");
+      const BoundaryName boundary_name_radial_end = genName(name(), _names[i], "end");
+      _boundary_names_radial_start.push_back(boundary_name_radial_start);
+      _boundary_names_radial_end.push_back(boundary_name_radial_end);
+      _boundary_name_to_area[boundary_name_radial_start] = computeAxialBoundaryArea(y1, y2);
+      _boundary_name_to_area[boundary_name_radial_end] = computeAxialBoundaryArea(y1, y2);
       if (i != _names.size() - 1)
       {
         _inner_radial_bc_id.push_back(mesh().getNextBoundaryId());
-        _boundary_names_inner_radial.push_back(genName(name(), _names[i], _names[i + 1]));
+        const BoundaryName boundary_name_inner_radial = genName(name(), _names[i], _names[i + 1]);
+        _boundary_names_inner_radial.push_back(boundary_name_inner_radial);
+        _boundary_name_to_area[boundary_name_inner_radial] = computeRadialBoundaryArea(_length, y2);
       }
+      y1 = y2;
     }
+  }
 
   // interior axial boundaries
   if (_n_sections > 1 && _axial_region_names.size() == _n_sections)
     for (unsigned int i = 0; i < _n_sections - 1; i++)
+    {
+      Real y1 = 0.0;
       for (unsigned int j = 0; j < _names.size(); j++)
       {
+        const Real y2 = y1 + _width[j];
+
         _interior_axial_per_radial_section_bc_id.push_back(mesh().getNextBoundaryId());
+        const BoundaryName boundary_name_interior_axial_per_radial_section =
+            genName(name(), _names[j], _axial_region_names[i] + ":" + _axial_region_names[i + 1]);
         _boundary_names_interior_axial_per_radial_section.push_back(
-            genName(name(), _names[j], _axial_region_names[i] + ":" + _axial_region_names[i + 1]));
+            boundary_name_interior_axial_per_radial_section);
+        _boundary_name_to_area[boundary_name_interior_axial_per_radial_section] =
+            computeAxialBoundaryArea(y1, y2);
+        y1 = y2;
       }
+    }
 
   // Build the mesh
   if (usingSecondOrderMesh())
@@ -389,16 +438,16 @@ Component2D::buildMesh()
 
   // Set boundary names
   auto & binfo = mesh().getMesh().get_boundary_info();
-  binfo.sideset_name(_inner_bc_id[0]) = _boundary_names_inner[0];
-  binfo.sideset_name(_outer_bc_id[0]) = _boundary_names_outer[0];
+  binfo.sideset_name(_inner_bc_id) = _boundary_name_inner;
+  binfo.sideset_name(_outer_bc_id) = _boundary_name_outer;
   if (_n_sections > 1 && _axial_region_names.size() == _n_sections)
     for (unsigned int i = 0; i < _n_sections; i++)
     {
       binfo.sideset_name(_axial_inner_bc_id[i]) = _boundary_names_axial_inner[i];
       binfo.sideset_name(_axial_outer_bc_id[i]) = _boundary_names_axial_outer[i];
     }
-  binfo.sideset_name(_start_bc_id[0]) = _boundary_names_start[0];
-  binfo.sideset_name(_end_bc_id[0]) = _boundary_names_end[0];
+  binfo.sideset_name(_start_bc_id) = _boundary_name_start;
+  binfo.sideset_name(_end_bc_id) = _boundary_name_end;
   if (_names.size() > 1)
     for (unsigned int i = 0; i < _names.size(); i++)
     {
@@ -423,27 +472,107 @@ Component2D::isBoundaryInVector(const BoundaryName & boundary_name,
 bool
 Component2D::hasBoundary(const BoundaryName & boundary_name) const
 {
-  return isBoundaryInVector(boundary_name, _boundary_names_inner) ||
-         isBoundaryInVector(boundary_name, _boundary_names_axial_inner) ||
-         isBoundaryInVector(boundary_name, _boundary_names_outer) ||
-         isBoundaryInVector(boundary_name, _boundary_names_axial_outer) ||
-         isBoundaryInVector(boundary_name, _boundary_names_start) ||
-         isBoundaryInVector(boundary_name, _boundary_names_radial_start) ||
-         isBoundaryInVector(boundary_name, _boundary_names_end) ||
-         isBoundaryInVector(boundary_name, _boundary_names_radial_end) ||
+  checkSetupStatus(MESH_PREPARED);
+
+  return hasExternalBoundary(boundary_name) ||
          isBoundaryInVector(boundary_name, _boundary_names_interior_axial_per_radial_section) ||
          isBoundaryInVector(boundary_name, _boundary_names_inner_radial);
+}
+
+bool
+Component2D::hasExternalBoundary(const BoundaryName & boundary_name) const
+{
+  checkSetupStatus(MESH_PREPARED);
+
+  return boundary_name == _boundary_name_inner || boundary_name == _boundary_name_outer ||
+         boundary_name == _boundary_name_start || boundary_name == _boundary_name_end ||
+         isBoundaryInVector(boundary_name, _boundary_names_axial_inner) ||
+         isBoundaryInVector(boundary_name, _boundary_names_axial_outer) ||
+         isBoundaryInVector(boundary_name, _boundary_names_radial_start) ||
+         isBoundaryInVector(boundary_name, _boundary_names_radial_end);
+}
+
+Component2D::ExternalBoundaryType
+Component2D::getExternalBoundaryType(const BoundaryName & boundary_name) const
+{
+  checkSetupStatus(MESH_PREPARED);
+
+  if (boundary_name == _boundary_name_inner ||
+      isBoundaryInVector(boundary_name, _boundary_names_axial_inner))
+    return ExternalBoundaryType::INNER;
+  else if (boundary_name == _boundary_name_outer ||
+           isBoundaryInVector(boundary_name, _boundary_names_axial_outer))
+    return ExternalBoundaryType::OUTER;
+  else if (boundary_name == _boundary_name_start ||
+           isBoundaryInVector(boundary_name, _boundary_names_radial_start))
+    return ExternalBoundaryType::START;
+  else if (boundary_name == _boundary_name_end ||
+           isBoundaryInVector(boundary_name, _boundary_names_radial_end))
+    return ExternalBoundaryType::END;
+  else if (hasBoundary(boundary_name))
+    mooseError(name(), ": The boundary '", boundary_name, "' is an interior boundary.");
+  else
+    mooseError(name(), ": The boundary '", boundary_name, "' does not exist on this component.");
 }
 
 const std::vector<std::tuple<dof_id_type, unsigned short int>> &
 Component2D::getBoundaryInfo(const BoundaryName & boundary_name) const
 {
-  if (_hs_boundary_info.find(boundary_name) != _hs_boundary_info.end())
-    return _hs_boundary_info.at(boundary_name);
+  checkSetupStatus(MESH_PREPARED);
+
+  if (_boundary_info.find(boundary_name) != _boundary_info.end())
+    return _boundary_info.at(boundary_name);
   else
-    mooseError("The heat structure boundary '",
-               boundary_name,
-               "' does not exist for the heat structure '",
-               name(),
-               "'.");
+    mooseError(name(), ": The boundary '", boundary_name, "' does not exist on this component.");
+}
+
+const std::vector<std::tuple<dof_id_type, unsigned short int>> &
+Component2D::getBoundaryInfo(const ExternalBoundaryType & boundary_type) const
+{
+  checkSetupStatus(MESH_PREPARED);
+
+  switch (boundary_type)
+  {
+    case ExternalBoundaryType::INNER:
+      return getBoundaryInfo(_boundary_name_inner);
+    case ExternalBoundaryType::OUTER:
+      return getBoundaryInfo(_boundary_name_outer);
+    case ExternalBoundaryType::START:
+      return getBoundaryInfo(_boundary_name_start);
+    case ExternalBoundaryType::END:
+      return getBoundaryInfo(_boundary_name_end);
+    default:
+      mooseError(name(), ": Invalid external boundary type.");
+  }
+}
+
+const BoundaryName &
+Component2D::getExternalBoundaryName(const ExternalBoundaryType & boundary_type) const
+{
+  checkSetupStatus(MESH_PREPARED);
+
+  switch (boundary_type)
+  {
+    case ExternalBoundaryType::OUTER:
+      return _boundary_name_outer;
+    case ExternalBoundaryType::INNER:
+      return _boundary_name_inner;
+    case ExternalBoundaryType::START:
+      return _boundary_name_start;
+    case ExternalBoundaryType::END:
+      return _boundary_name_end;
+    default:
+      mooseError(name(), ": Invalid external boundary type.");
+  }
+}
+
+const Real &
+Component2D::getBoundaryArea(const BoundaryName & boundary_name) const
+{
+  checkSetupStatus(MESH_PREPARED);
+
+  if (_boundary_name_to_area.find(boundary_name) != _boundary_name_to_area.end())
+    return _boundary_name_to_area.at(boundary_name);
+  else
+    mooseError(name(), ": The boundary '", boundary_name, "' does not exist on this component.");
 }

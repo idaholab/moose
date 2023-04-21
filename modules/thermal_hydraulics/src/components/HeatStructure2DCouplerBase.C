@@ -60,8 +60,26 @@ HeatStructure2DCouplerBase::init()
     {
       // Get the heat structure types
       _hs_side_types.resize(2);
-      _hs_side_types[0] = primary_hs.getHeatStructureSideType(_hs_boundaries[0]);
-      _hs_side_types[1] = secondary_hs.getHeatStructureSideType(_hs_boundaries[1]);
+      _hs_side_types[0] = primary_hs.getExternalBoundaryType(_hs_boundaries[0]);
+      _hs_side_types[1] = secondary_hs.getExternalBoundaryType(_hs_boundaries[1]);
+
+      // Areas
+      _areas.resize(2);
+      _areas[0] = primary_hs.getBoundaryArea(_hs_boundaries[0]);
+      _areas[1] = secondary_hs.getBoundaryArea(_hs_boundaries[1]);
+
+      // Compute the coupling area fractions in case areas are not equal
+      _coupling_area_fractions.resize(2);
+      if (_areas[0] > _areas[1])
+      {
+        _coupling_area_fractions[0] = _areas[1] / _areas[0];
+        _coupling_area_fractions[1] = 1.0;
+      }
+      else
+      {
+        _coupling_area_fractions[0] = 1.0;
+        _coupling_area_fractions[1] = _areas[0] / _areas[1];
+      }
 
       // Initialize the alignment mapping
       _mesh_alignment.initialize(primary_hs.getBoundaryInfo(_hs_boundaries[0]),

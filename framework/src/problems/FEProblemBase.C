@@ -105,6 +105,7 @@
 #include "NodalBCBase.h"
 #include "MortarUserObject.h"
 #include "MortarUserObjectThread.h"
+#include "RedistributeProperties.h"
 
 #include "libmesh/exodusII_io.h"
 #include "libmesh/quadrature.h"
@@ -757,6 +758,12 @@ FEProblemBase::initialSetup()
                                    std::vector<RealTensor>(getMaxQps(), RealTensor(0.)));
     }
   }
+
+  // Set up stateful material property redistribution, if we suspect
+  // it may be necessary later.
+  addAnyRedistributers();
+
+  // Restart/recovery code
 
   if (_app.isRecovering() && (_app.isUltimateMaster() || _force_restart))
   {
@@ -5183,8 +5190,7 @@ void
 FEProblemBase::setActiveMaterialProperties(const std::set<unsigned int> & mat_prop_ids,
                                            THREAD_ID tid)
 {
-  if (!mat_prop_ids.empty())
-    _active_material_property_ids[tid] = mat_prop_ids;
+  _active_material_property_ids[tid] = mat_prop_ids;
 }
 
 const std::set<unsigned int> &
@@ -5203,6 +5209,54 @@ void
 FEProblemBase::clearActiveMaterialProperties(THREAD_ID tid)
 {
   _active_material_property_ids[tid].clear();
+}
+
+void
+FEProblemBase::addAnyRedistributers()
+{
+#ifdef LIBMESH_ENABLE_AMR
+  if ((_adaptivity.isOn() || _num_grid_steps) &&
+      (_material_props.hasStatefulProperties() || _bnd_material_props.hasStatefulProperties() ||
+       _neighbor_material_props.hasStatefulProperties()))
+  {
+    // Even on a serialized Mesh, we don't keep our material
+    // properties serialized, so we'll rely on the callback to
+    // redistribute() to redistribute properties at the same time
+    // libMesh is redistributing elements.
+    auto add_redistributer = [this](MooseMesh & mesh,
+                                    const std::string & redistributer_name,
+                                    const bool use_displaced_mesh)
+    {
+      InputParameters redistribute_params = RedistributeProperties::validParams();
+      redistribute_params.set<MooseApp *>("_moose_app") = &_app;
+      redistribute_params.set<std::string>("for_whom") = this->name();
+      redistribute_params.set<MooseMesh *>("mesh") = &mesh;
+      redistribute_params.set<Moose::RelationshipManagerType>("rm_type") =
+          Moose::RelationshipManagerType::GEOMETRIC;
+      redistribute_params.set<bool>("use_displaced_mesh") = use_displaced_mesh;
+
+      std::shared_ptr<RedistributeProperties> redistributer =
+          _factory.create<RedistributeProperties>(
+              "RedistributeProperties", redistributer_name, redistribute_params);
+
+      if (_material_props.hasStatefulProperties())
+        redistributer->addMaterialPropertyStorage(_material_data, _material_props);
+
+      if (_bnd_material_props.hasStatefulProperties())
+        redistributer->addMaterialPropertyStorage(_bnd_material_data, _bnd_material_props);
+
+      if (_neighbor_material_props.hasStatefulProperties())
+        redistributer->addMaterialPropertyStorage(_neighbor_material_data,
+                                                  _neighbor_material_props);
+
+      mesh.getMesh().add_ghosting_functor(redistributer);
+    };
+
+    add_redistributer(_mesh, "mesh_property_redistributer", false);
+    if (_displaced_problem)
+      add_redistributer(_displaced_problem->mesh(), "displaced_mesh_property_redistributer", true);
+  }
+#endif // LIBMESH_ENABLE_AMR
 }
 
 void
@@ -7014,13 +7068,14 @@ FEProblemBase::meshChangedHelper(bool intermediate_change)
 
   reinitBecauseOfGhostingOrNewGeomObjects(/*mortar_changed=*/true);
 
-  // We need to create new storage for the new elements and copy stateful properties from the old
-  // elements.
+  // We need to create new storage for newly active elements, and copy
+  // stateful properties from the old elements.
   if (_has_initialized_stateful &&
       (_material_props.hasStatefulProperties() || _bnd_material_props.hasStatefulProperties()))
   {
+    // Prolong properties onto newly refined elements' children
     {
-      ProjectMaterialProperties pmp(true,
+      ProjectMaterialProperties pmp(/* refine = */ true,
                                     *this,
                                     _material_data,
                                     _bnd_material_data,
@@ -7037,11 +7092,13 @@ FEProblemBase::meshChangedHelper(bool intermediate_change)
       {
         _material_props.eraseProperty(elem);
         _bnd_material_props.eraseProperty(elem);
+        _neighbor_material_props.eraseProperty(elem);
       }
     }
 
+    // Restrict properties onto newly coarsened elements
     {
-      ProjectMaterialProperties pmp(false,
+      ProjectMaterialProperties pmp(/* refine = */ false,
                                     *this,
                                     _material_data,
                                     _bnd_material_data,
@@ -7057,6 +7114,7 @@ FEProblemBase::meshChangedHelper(bool intermediate_change)
         {
           _material_props.eraseProperty(child);
           _bnd_material_props.eraseProperty(child);
+          _neighbor_material_props.eraseProperty(child);
         }
       }
     }
@@ -7114,27 +7172,8 @@ FEProblemBase::checkProblemIntegrity()
         (_material_props.hasStatefulProperties() || _bnd_material_props.hasStatefulProperties() ||
          _neighbor_material_props.hasStatefulProperties()))
     {
-      _console << "Using EXPERIMENTAL Stateful Material Property projection with Adaptivity!\n";
-
-      if (n_processors() > 1)
-      {
-        if (_mesh.uniformRefineLevel() > 0 && _mesh.getMesh().skip_partitioning() == false)
-          mooseError("This simulation is using uniform refinement on the mesh, with stateful "
-                     "properties and adaptivity. "
-                     "You must skip partitioning to run this case:\nMesh/skip_partitioning=true");
-
-        _console << "\nWarning! Mesh re-partitioning is disabled while using stateful material "
-                    "properties!  This can lead to large load imbalances and degraded "
-                    "performance!!\n\n";
-        _mesh.getMesh().skip_partitioning(true);
-
-        _mesh.errorIfDistributedMesh("StatefulMaterials + Adaptivity");
-
-        if (_displaced_problem)
-          _displaced_problem->mesh().getMesh().skip_partitioning(true);
-      }
-
-      _console << std::flush;
+      _console << "Using EXPERIMENTAL Stateful Material Property projection with Adaptivity!\n"
+               << std::flush;
     }
 #endif
 

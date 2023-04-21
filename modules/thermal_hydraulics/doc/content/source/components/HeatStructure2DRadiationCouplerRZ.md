@@ -16,6 +16,8 @@ This component has the following restrictions:
   boundary is paired with the nearest element on the coupled boundary. The
   alignment check requires that each element on a boundary has exactly one
   element from the coupled boundary paired to it.
+- The boundaries must be radial, i.e., on either the inner or outer cylindrical
+  surfaces, not the flat surfaces.
 
 !syntax parameters /Components/HeatStructure2DRadiationCouplerRZ
 
@@ -36,7 +38,7 @@ where $\mathcal{R}_i$ is sometimes described as a radiation resistance:
 
 !equation
 \mathcal{R}_i = \frac{1 - \epsilon_i}{\epsilon_i} + \frac{1}{F_{i,j}}
-  + \frac{1 - \epsilon_j}{\epsilon_j}\frac{P_i}{P_j} \eqc
+  + \frac{1 - \epsilon_j}{\epsilon_j}\frac{A_i}{A_j} \eqc
 
 where
 
@@ -44,7 +46,7 @@ where
 - $\sigma$ is the Stefan-Boltzmann constant,
 - $F_{i,j}$ is the view factor from surface $i$ to surface $j$,
 - $T_i$ is the temperature of surface $i$, and
-- $P_i$ is perimeter of surface $i$.
+- $A_i$ is the area of surface $i$.
 
 The surface $i$ that is enclosed by the other surface has its view factor
 set to unity:
@@ -55,7 +57,7 @@ F_{i,j} = 1 \eqc
 whereas the other is computed using the reciprocity rule:
 
 !equation
-F_{j,i} = \frac{P_i}{P_j} \eqp
+F_{j,i} = \frac{A_i}{A_j} \eqp
 
 !syntax inputs /Components/HeatStructure2DRadiationCouplerRZ
 

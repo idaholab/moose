@@ -9,6 +9,7 @@
 
 #include "HeatSourceFromTotalPower.h"
 #include "HeatStructureCylindricalBase.h"
+#include "HeatStructurePlate.h"
 #include "TotalPowerBase.h"
 
 registerMooseObject("ThermalHydraulicsApp", HeatSourceFromTotalPower);
@@ -62,23 +63,24 @@ HeatSourceFromTotalPower::addMooseObjects()
   const HeatStructureInterface & hs = getComponent<HeatStructureInterface>("hs");
   const HeatStructureBase * hs_base = dynamic_cast<const HeatStructureBase *>(&hs);
 
-  Real n_units, length, P_unit;
+  Real n_units, length;
   if (hs_base)
   {
     n_units = hs_base->getNumberOfUnits();
     length = hs_base->getLength();
-    P_unit = hs_base->getUnitPerimeter(HeatStructureSideType::OUTER);
   }
   else // HeatStructureFromFile3D
   {
     n_units = 1.0;
     length = 1.0;
-    P_unit = 1.0;
   }
 
   const HeatStructureCylindricalBase * hs_cyl =
       dynamic_cast<const HeatStructureCylindricalBase *>(&hs);
   const bool is_cylindrical = hs_cyl != nullptr;
+
+  const HeatStructurePlate * hs_plate = dynamic_cast<const HeatStructurePlate *>(&hs);
+  const bool is_plate = hs_plate != nullptr;
 
   if (!_has_psf)
   {
@@ -131,12 +133,11 @@ HeatSourceFromTotalPower::addMooseObjects()
       pars.set<RealVectorValue>("axis_dir") = hs_cyl->getDirection();
       pars.set<Real>("offset") = hs_cyl->getInnerRadius() - hs_cyl->getAxialOffset();
     }
-    else
+    else if (is_plate)
     {
       // For plate heat structure, the element integral of the power shape only
       // integrates over x and y, not z, so the depth still needs to be applied.
-      // getUnitPerimeter() with an arbitrary side gives the depth.
-      pars.set<Real>("scale") = 1.0 / P_unit;
+      pars.set<Real>("scale") = 1.0 / hs_plate->getDepth();
     }
     pars.set<PostprocessorName>("power_shape_integral_pp") = power_shape_integral_name;
     std::string mon = genName(name(), "heat_src");
