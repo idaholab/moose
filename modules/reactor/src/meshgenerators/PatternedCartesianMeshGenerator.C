@@ -809,6 +809,7 @@ PatternedCartesianMeshGenerator::generate()
     new_nodeset_map.insert(input_nodeset_map.begin(), input_nodeset_map.end());
   }
 
+  out_mesh->set_isnt_prepared();
   auto mesh = dynamic_pointer_cast<MeshBase>(out_mesh);
   // before return, add reporting IDs if _use_reporting_id is set true
   if (_use_reporting_id)
