@@ -12,6 +12,7 @@
 #include "SystemBase.h"
 #include "MortarUtils.h"
 #include "MooseUtils.h"
+#include "MathUtils.h"
 #include "MortarContactUtils.h"
 
 registerMooseObject("ContactApp", PenaltyFrictionUserObject);
@@ -24,7 +25,6 @@ PenaltyFrictionUserObject::validParams()
       "Computes the mortar frictional contact force via a penalty approach.");
   params.addRequiredParam<Real>("penalty", "The penalty factor for normal interaction.");
   params.addParam<Real>("penalty_friction",
-                        0.0,
                         "The penalty factor for frictional interaction. If not provide, the normal "
                         "penalty factor is also used for the frictional problem.");
   params.addRequiredParam<Real>("friction_coefficient",
@@ -35,8 +35,8 @@ PenaltyFrictionUserObject::validParams()
 PenaltyFrictionUserObject::PenaltyFrictionUserObject(const InputParameters & parameters)
   : WeightedVelocitiesUserObject(parameters),
     _penalty(getParam<Real>("penalty")),
-    _penalty_friction(isParamSetByUser("penalty_friction") ? getParam<Real>("penalty_friction")
-                                                           : getParam<Real>("penalty")),
+    _penalty_friction(isParamValid("penalty_friction") ? getParam<Real>("penalty_friction")
+                                                       : getParam<Real>("penalty")),
     _friction_coefficient(getParam<Real>("friction_coefficient"))
 {
   auto check_type = [this](const auto & var, const auto & var_name)
@@ -250,16 +250,14 @@ PenaltyFrictionUserObject::reinit()
 
     if (std::abs(_dof_to_real_tangential_velocity[static_cast<const DofObject *>(node)][0]) >
         TOLERANCE * TOLERANCE)
-      sign_one =
-          (_dof_to_real_tangential_velocity[static_cast<const DofObject *>(node)][0]) /
-          std::abs(_dof_to_real_tangential_velocity[static_cast<const DofObject *>(node)][0]);
+      sign_one = MathUtils::sign(
+          _dof_to_real_tangential_velocity[static_cast<const DofObject *>(node)][0]);
 
     if (_has_disp_z &&
         std::abs(_dof_to_real_tangential_velocity[static_cast<const DofObject *>(node)][1]) >
             TOLERANCE * TOLERANCE)
-      sign_two =
-          (_dof_to_real_tangential_velocity[static_cast<const DofObject *>(node)][1]) /
-          std::abs(_dof_to_real_tangential_velocity[static_cast<const DofObject *>(node)][1]);
+      sign_two = MathUtils::sign(
+          _dof_to_real_tangential_velocity[static_cast<const DofObject *>(node)][1]);
 
     // Only accumulate nodal frictional pressure if normal contact pressure is nonzero.
     if (_dof_to_normal_pressure[static_cast<const DofObject *>(node)] > TOLERANCE * TOLERANCE)
@@ -296,7 +294,7 @@ PenaltyFrictionUserObject::reinit()
                   _dof_to_normal_pressure[static_cast<const DofObject *>(node)] &&
           std::abs(frictional_nodal_pressure_one) > TOLERANCE * TOLERANCE)
       {
-        ADReal sign = std::abs(frictional_nodal_pressure_one) / frictional_nodal_pressure_one;
+        ADReal sign = MathUtils::sign(frictional_nodal_pressure_one);
         frictional_nodal_pressure_one =
             sign * _friction_coefficient *
             _dof_to_normal_pressure[static_cast<const DofObject *>(node)];
