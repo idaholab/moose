@@ -1,4 +1,4 @@
-# Meshing with MOOSE id=title
+# MOOSE Reactor Module Tutorial: Meshing Reactor Geometries id=title
 
 !style halign=center
 [www.mooseframework.org](index.md exact=True)

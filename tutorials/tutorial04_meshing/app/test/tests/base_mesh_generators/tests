@@ -24,6 +24,13 @@
     cli_args= '--mesh-only --error-deprecated'
   []
 
+  [depletion_id]
+    requirement = "The system shall include example input for meshing tutorial depletion id example."
+    type = RunApp
+    input = 'depletion_id.i'
+    cli_args= '--mesh-only --error-deprecated'
+  []
+
   [reporting_id_vpp]
     requirement = "The system shall include example input for meshing tutorial reporting id VPP example."
     type = RunApp

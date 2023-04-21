@@ -38,7 +38,7 @@ Since the mesh generators understand the pin or assembly pattern, IDs can be app
        caption=Typical Cartesian (left) and hexagonal (right) cores, colored by Pin ID (top) and Assembly ID (bottom).
        style=width:50%;display:block;margin-left:auto;margin-right:auto;
 
-!listing modules/reactor/test/tests/meshgenerators/reporting_id/cartesian_id/core_reporting_id.i
+!listing modules/reactor/test/tests/meshgenerators/reporting_id/cartesian_id/patterned_cartesian_core_reporting_id.i
          id=tutorial04-core_reporting_id_cart.i
          caption=Cell pattern reporting ID example for Cartesian lattices.
          block=Mesh
@@ -92,7 +92,7 @@ Users often wish to postprocess solutions along the axial dimension. The [PlaneI
 
 !listing base_mesh_generators/plane_id.i
          id=tutorial04-plane_id.i
-         caption=Plane ID example.
+         caption=Plane ID example with subinterval numbering. Removing the [!param](/Mesh/PlaneIDMeshGenerator/num_ids_per_plane) parameter will produce the same core without subinterval numbering.
          block=Mesh/CORE_3D
 
 ## Applying Depletion IDs
@@ -120,10 +120,10 @@ The [DepletionIDGenerator.md] is useful for defining neutronics depletion zones.
        caption=Generating depletion ID using pin and assembly reporting IDs.
        style=width:50%;display:block;margin-left:auto;margin-right:auto;
 
-!listing modules/reactor/test/tests/meshgenerators/reporting_id/depletion_id/depletion_id.i
+!listing base_mesh_generators/depletion_id.i
          id=tutorial04-depletion_id.i
          caption=Depletion ID example.
-         block=Mesh/depl_map
+         block=Mesh/depletion_id
 
 ## Querying Output Data using Reporting IDs
 

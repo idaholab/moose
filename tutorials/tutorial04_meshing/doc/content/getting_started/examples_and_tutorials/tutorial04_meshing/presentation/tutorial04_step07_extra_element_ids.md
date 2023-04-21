@@ -37,7 +37,7 @@ Reporting IDs can be leveraged to post-process solution data into tables by usin
 
 !col small=12 medium=6 large=4
 
-!listing modules/reactor/test/tests/meshgenerators/reporting_id/cartesian_id/core_reporting_id.i
+!listing modules/reactor/test/tests/meshgenerators/reporting_id/cartesian_id/patterned_cartesian_core_reporting_id.i
          block=Mesh
          link=False
 
@@ -114,8 +114,8 @@ Reporting IDs can be leveraged to post-process solution data into tables by usin
 
 !row-end!
 
-!listing modules/reactor/test/tests/meshgenerators/reporting_id/depletion_id/depletion_id.i
-         block=Mesh/depl_map
+!listing base_mesh_generators/depletion_id.i
+         block=Mesh/depletion_id
          link=False
 
 !---
