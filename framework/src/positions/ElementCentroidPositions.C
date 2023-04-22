@@ -24,6 +24,8 @@ ElementCentroidPositions::validParams()
 ElementCentroidPositions::ElementCentroidPositions(const InputParameters & parameters)
   : Positions(parameters), BlockRestrictable(this), _mesh(_fe_problem.mesh())
 {
+  // Mesh is ready at construction
+  initialize();
 }
 
 void

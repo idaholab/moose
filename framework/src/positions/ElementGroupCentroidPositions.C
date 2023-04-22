@@ -85,6 +85,9 @@ ElementGroupCentroidPositions::ElementGroupCentroidPositions(const InputParamete
   }
   else
     _blocks_in_use = false;
+
+  // Mesh is ready at construction
+  initialize();
 }
 
 void

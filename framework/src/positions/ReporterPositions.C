@@ -24,6 +24,7 @@ ReporterPositions::validParams()
 
 ReporterPositions::ReporterPositions(const InputParameters & parameters) : Positions(parameters)
 {
+  initialize();
   // TODO Check execute_on. I'm not sure how to retrieve execute_on for reporters.
 }
 

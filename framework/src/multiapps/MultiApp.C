@@ -587,8 +587,10 @@ MultiApp::fillPositions()
     for (unsigned int p_obj_it = 0; p_obj_it < positions_param_objs.size(); p_obj_it++)
     {
       const std::string positions_name = positions_param_objs[p_obj_it];
-      const auto & reporter_data = _fe_problem.getReporterData();
-      const auto & data = reporter_data.getReporterValue<std::vector<Point>>(positions_name);
+      auto positions_obj = dynamic_cast<const Positions *>(
+          &_fe_problem.getUserObjectBase(MooseUtils::split(positions_name, "/")[0]));
+
+      auto data = positions_obj->getPositions(true);
 
       for (const auto & d : data)
         _positions.push_back(d);
@@ -596,11 +598,9 @@ MultiApp::fillPositions()
       // Save the number of positions for this input file
       _npositions_inputfile.push_back(data.size());
 
-      auto positions_obj =
-          dynamic_cast<const Positions *>(&_fe_problem.getUserObjectBase(positions_name));
       if (!positions_obj)
         paramError("positions_objects",
-                   positions_name + " is not of the expected type. Should be a Positions");
+                   "'" + positions_name + "' is not of the expected type. Should be a Positions");
 
       // Keep track of which positions is tied to what subapp
       for (unsigned int i = 0; i < data.size(); ++i)

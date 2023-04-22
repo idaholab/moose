@@ -17,7 +17,7 @@ Positions::validParams()
   params.addParam<ReporterName>("initial_positions",
                                 "Positions at the beginning of the simulation");
   // No need to refresh unless the mesh moved
-  params.set<ExecFlagEnum>("execute_on") = EXEC_INITIAL;
+  params.set<ExecFlagEnum>("execute_on") = EXEC_NONE;
   params.registerBase("Positions");
   return params;
 }
@@ -35,10 +35,11 @@ Positions::Positions(const InputParameters & parameters)
 const Point &
 Positions::getPosition(unsigned int index, bool initial) const
 {
-  mooseAssert(!initial || (_initial_positions && (*_initial_positions).size() < index),
+  mooseAssert(!initial || (!_initial_positions || (*_initial_positions).size() < index),
               "Initial positions is not sized or initialized appropriately");
-  mooseAssert(_positions.size() > index, "Positions retrieved with an out-of-bound index");
-  if (initial)
+  mooseAssert(initial || _positions.size() > index,
+              "Positions retrieved with an out-of-bound index");
+  if (initial && _initial_positions)
     return (*_initial_positions)[index];
   if (_positions.size())
     return _positions[index];
@@ -49,7 +50,7 @@ Positions::getPosition(unsigned int index, bool initial) const
 const std::vector<Point> &
 Positions::getPositions(bool initial) const
 {
-  if (initial)
+  if (initial && _initial_positions)
     return *_initial_positions;
   if (_positions.size())
     return _positions;
