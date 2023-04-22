@@ -12,12 +12,12 @@
 #include "MooseObjectAction.h"
 
 /**
- * Build Position objects within the [Positions] input file block
+ * Build Positions objects within the [Positions] input file block
  */
-class AddPositionAction : public MooseObjectAction
+class AddPositionsAction : public MooseObjectAction
 {
 public:
   static InputParameters validParams();
-  AddPositionAction(const InputParameters & params);
+  AddPositionsAction(const InputParameters & params);
   virtual void act() override;
 };

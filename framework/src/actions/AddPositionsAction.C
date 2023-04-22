@@ -7,23 +7,25 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "AddPositionAction.h"
+#include "AddPositionsAction.h"
 #include "FEProblem.h"
 
-registerMooseAction("MooseApp", AddPositionAction, "add_position");
+registerMooseAction("MooseApp", AddPositionsAction, "add_positions");
 
 InputParameters
-AddPositionAction::validParams()
+AddPositionsAction::validParams()
 {
   InputParameters params = MooseObjectAction::validParams();
-  params.addClassDescription("Add a Position object to the simulation.");
+  params.addClassDescription("Add a Positions object to the simulation.");
   return params;
 }
 
-AddPositionAction::AddPositionAction(const InputParameters & params) : MooseObjectAction(params) {}
+AddPositionsAction::AddPositionsAction(const InputParameters & params) : MooseObjectAction(params)
+{
+}
 
 void
-AddPositionAction::act()
+AddPositionsAction::act()
 {
   _problem->addReporter(_type, _name, _moose_object_pars);
 }

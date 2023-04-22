@@ -70,6 +70,7 @@ class ElementUserObject;
 class InternalSideUserObject;
 class InterfaceUserObject;
 class GeneralUserObject;
+class Positions;
 class Function;
 class Distribution;
 class Sampler;
@@ -934,6 +935,13 @@ public:
    * @return Const reference to the user object
    */
   const UserObject & getUserObjectBase(const std::string & name, const THREAD_ID tid = 0) const;
+
+  /**
+   * Get the Positions object by its name
+   * @param name The name of the Positions object being retrieved
+   * @return Const reference to the Positions object
+   */
+  const Positions & getPositionsObject(const std::string & name) const;
 
   /**
    * Check if there if a user object of given name
