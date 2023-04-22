@@ -147,6 +147,6 @@ protected:
   static Threads::spin_mutex _contact_set_mutex;
 
   AugmentedLagrangianContactProblem * const _augmented_lagrange_problem;
-  const static unsigned int no_iterations;
-  const unsigned int & _augmented_lagrange_update_iteration;
+  const static unsigned int _no_iterations;
+  const unsigned int & _lagrangian_iteration_number;
 };

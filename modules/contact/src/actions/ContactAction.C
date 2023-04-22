@@ -73,7 +73,7 @@ ContactAction::validParams()
       "The penalty to apply.  This can vary depending on the stiffness of your materials");
   params.addParam<Real>("penalty_multiplier",
                         1.0,
-                        "The grwoth factor for the penaly applied at the end of each augmented "
+                        "The growth factor for the penalty applied at the end of each augmented "
                         "Lagrange update iteration");
   params.addParam<Real>("friction_coefficient", 0, "The friction coefficient");
   params.addParam<Real>("tension_release",

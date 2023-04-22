@@ -29,7 +29,7 @@
 
 registerMooseObject("ContactApp", MechanicalContactConstraint);
 
-const unsigned int MechanicalContactConstraint::no_iterations = 0;
+const unsigned int MechanicalContactConstraint::_no_iterations = 0;
 
 InputParameters
 MechanicalContactConstraint::validParams()
@@ -60,7 +60,7 @@ MechanicalContactConstraint::validParams()
       "The penalty to apply.  This can vary depending on the stiffness of your materials");
   params.addParam<Real>("penalty_multiplier",
                         1.0,
-                        "The grwoth factor for the penaly applied at the end of each augmented "
+                        "The growth factor for the penalty applied at the end of each augmented "
                         "Lagrange update iteration");
   params.addParam<Real>("friction_coefficient", 0, "The friction coefficient");
   params.addParam<Real>("tangential_tolerance",
@@ -154,10 +154,9 @@ MechanicalContactConstraint::MechanicalContactConstraint(const InputParameters &
     _contact_linesearch(dynamic_cast<ContactLineSearchBase *>(_subproblem.getLineSearch())),
     _print_contact_nodes(getParam<bool>("print_contact_nodes")),
     _augmented_lagrange_problem(dynamic_cast<AugmentedLagrangianContactProblem *>(&_fe_problem)),
-    _augmented_lagrange_update_iteration(
-        _augmented_lagrange_problem
-            ? _augmented_lagrange_problem->getNumLagrangianUpdateIterations()
-            : no_iterations)
+    _lagrangian_iteration_number(_augmented_lagrange_problem
+                                     ? _augmented_lagrange_problem->getLagrangianIterationNumber()
+                                     : _no_iterations)
 {
   _overwrite_secondary_residual = false;
 
@@ -1728,7 +1727,7 @@ MechanicalContactConstraint::getPenalty(PenetrationInfo & pinfo)
   Real penalty = _penalty;
   if (_normalize_penalty)
     penalty *= nodalArea(pinfo);
-  return penalty * MathUtils::pow(_penalty_multiplier, _augmented_lagrange_update_iteration);
+  return penalty * MathUtils::pow(_penalty_multiplier, _lagrangian_iteration_number);
 }
 
 Real
@@ -1738,7 +1737,7 @@ MechanicalContactConstraint::getTangentialPenalty(PenetrationInfo & pinfo)
   if (_normalize_penalty)
     penalty *= nodalArea(pinfo);
 
-  return penalty * MathUtils::pow(_penalty_multiplier, _augmented_lagrange_update_iteration);
+  return penalty * MathUtils::pow(_penalty_multiplier, _lagrangian_iteration_number);
 }
 
 void

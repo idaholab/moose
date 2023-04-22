@@ -174,14 +174,14 @@ GeometricSearchData::getQuadraturePenetrationLocator(const BoundaryName & primar
                                                      const BoundaryName & secondary,
                                                      Order order)
 {
-  auto primary_id = _mesh.getBoundaryID(primary);
-  auto secondary_id = _mesh.getBoundaryID(secondary);
+  const auto primary_id = _mesh.getBoundaryID(primary);
+  const auto secondary_id = _mesh.getBoundaryID(secondary);
 
   _subproblem.addGhostedBoundary(primary_id);
   _subproblem.addGhostedBoundary(secondary_id);
 
   // Generate a new boundary id
-  auto qsecondary_id = -secondary_id;
+  const auto qsecondary_id = -secondary_id;
 
   _secondary_to_qsecondary[secondary_id] = qsecondary_id;
 
@@ -207,8 +207,8 @@ NearestNodeLocator &
 GeometricSearchData::getNearestNodeLocator(const BoundaryName & primary,
                                            const BoundaryName & secondary)
 {
-  auto primary_id = _mesh.getBoundaryID(primary);
-  auto secondary_id = _mesh.getBoundaryID(secondary);
+  const auto primary_id = _mesh.getBoundaryID(primary);
+  const auto secondary_id = _mesh.getBoundaryID(secondary);
 
   _subproblem.addGhostedBoundary(primary_id);
   _subproblem.addGhostedBoundary(secondary_id);
@@ -239,8 +239,8 @@ NearestNodeLocator &
 GeometricSearchData::getQuadratureNearestNodeLocator(const BoundaryName & primary,
                                                      const BoundaryName & secondary)
 {
-  auto primary_id = _mesh.getBoundaryID(primary);
-  auto secondary_id = _mesh.getBoundaryID(secondary);
+  const auto primary_id = _mesh.getBoundaryID(primary);
+  const auto secondary_id = _mesh.getBoundaryID(secondary);
 
   _subproblem.addGhostedBoundary(primary_id);
   _subproblem.addGhostedBoundary(secondary_id);
@@ -252,15 +252,15 @@ NearestNodeLocator &
 GeometricSearchData::getQuadratureNearestNodeLocator(const BoundaryID primary_id,
                                                      const BoundaryID secondary_id)
 {
-  BoundaryID qsecondary_id = -secondary_id;
+  const auto qsecondary_id = -secondary_id;
 
   _secondary_to_qsecondary[secondary_id] = qsecondary_id;
   return getNearestNodeLocator(primary_id, qsecondary_id);
 }
 
 void
-GeometricSearchData::generateQuadratureNodes(BoundaryID secondary_id,
-                                             BoundaryID qsecondary_id,
+GeometricSearchData::generateQuadratureNodes(const BoundaryID secondary_id,
+                                             const BoundaryID qsecondary_id,
                                              bool reiniting)
 {
   // Have we already generated quadrature nodes for this boundary id?
@@ -278,8 +278,8 @@ GeometricSearchData::generateQuadratureNodes(BoundaryID secondary_id,
   for (const auto & belem : range)
   {
     const Elem * elem = belem->_elem;
-    auto side = belem->_side;
-    BoundaryID boundary_id = belem->_bnd_id;
+    const auto side = belem->_side;
+    const auto boundary_id = belem->_bnd_id;
 
     if (elem->processor_id() == _subproblem.processor_id())
     {
@@ -298,14 +298,14 @@ GeometricSearchData::generateQuadratureNodes(BoundaryID secondary_id,
 }
 
 void
-GeometricSearchData::addElementPairLocator(const BoundaryID & interface_id,
+GeometricSearchData::addElementPairLocator(const BoundaryID interface_id,
                                            std::shared_ptr<ElementPairLocator> epl)
 {
   _element_pair_locators[interface_id] = epl;
 }
 
 void
-GeometricSearchData::updateQuadratureNodes(BoundaryID secondary_id)
+GeometricSearchData::updateQuadratureNodes(const BoundaryID secondary_id)
 {
   const MooseArray<Point> & points_face = _subproblem.assembly(0, 0).qPointsFace();
 
@@ -313,8 +313,8 @@ GeometricSearchData::updateQuadratureNodes(BoundaryID secondary_id)
   for (const auto & belem : range)
   {
     const Elem * elem = belem->_elem;
-    unsigned short int side = belem->_side;
-    BoundaryID boundary_id = belem->_bnd_id;
+    const auto side = belem->_side;
+    const auto boundary_id = belem->_bnd_id;
 
     if (elem->processor_id() == _subproblem.processor_id())
     {
@@ -332,7 +332,8 @@ GeometricSearchData::updateQuadratureNodes(BoundaryID secondary_id)
   }
 }
 
-void GeometricSearchData::reinitQuadratureNodes(BoundaryID /*secondary_id*/)
+void
+GeometricSearchData::reinitQuadratureNodes(const BoundaryID /*secondary_id*/)
 {
   // Regenerate the quadrature nodes
   for (const auto & it : _secondary_to_qsecondary)

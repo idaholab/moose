@@ -40,14 +40,14 @@ AugmentedLagrangianContactProblem::validParams()
 
 AugmentedLagrangianContactProblem::AugmentedLagrangianContactProblem(const InputParameters & params)
   : ReferenceResidualProblem(params),
-    _maximum_lagrangian_update_iterations(getParam<int>("maximum_lagrangian_update_iterations"))
+    _maximum_number_lagrangian_iterations(getParam<int>("maximum_lagrangian_update_iterations"))
 {
 }
 
 void
 AugmentedLagrangianContactProblem::timestepSetup()
 {
-  _num_lagrangian_update_iterations = 0;
+  _lagrangian_iteration_number = 0;
   ReferenceResidualProblem::timestepSetup();
 }
 
@@ -84,7 +84,7 @@ AugmentedLagrangianContactProblem::checkNonlinearConvergence(std::string & msg,
                                                           ref_resid,
                                                           my_div_threshold);
 
-  _console << "Augmented Lagrangian contact iteration " << _num_lagrangian_update_iterations
+  _console << "Augmented Lagrangian contact iteration " << _lagrangian_iteration_number
            << std::endl;
 
   bool repeat_augmented_lagrange_step = false;
@@ -93,7 +93,7 @@ AugmentedLagrangianContactProblem::checkNonlinearConvergence(std::string & msg,
       reason == MooseNonlinearConvergenceReason::CONVERGED_FNORM_RELATIVE ||
       reason == MooseNonlinearConvergenceReason::CONVERGED_SNORM_RELATIVE)
   {
-    if (_num_lagrangian_update_iterations < _maximum_lagrangian_update_iterations)
+    if (_lagrangian_iteration_number < _maximum_number_lagrangian_iterations)
     {
       auto & nonlinear_sys = currentNonlinearSystem();
       nonlinear_sys.update();
@@ -148,7 +148,7 @@ AugmentedLagrangianContactProblem::checkNonlinearConvergence(std::string & msg,
       // repeat update step if necessary
       if (repeat_augmented_lagrange_step)
       {
-        _num_lagrangian_update_iterations++;
+        _lagrangian_iteration_number++;
 
         // Each contact pair will have constraints for all displacements, but those share the
         // Lagrange multipliers, which are stored on the penetration locator. We call update

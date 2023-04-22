@@ -64,8 +64,7 @@ public:
     return _penetration_locators;
   }
 
-  void addElementPairLocator(const BoundaryID & interface_id,
-                             std::shared_ptr<ElementPairLocator> epl);
+  void addElementPairLocator(BoundaryID interface_id, std::shared_ptr<ElementPairLocator> epl);
 
   /**
    * Update all of the search objects.
@@ -119,19 +118,19 @@ private:
    * nodeset
    * @param reiniting Whether we are reinitializing, e.g. whether we need to re-generate q-nodes
    */
-  void generateQuadratureNodes(BoundaryID secondary_id,
-                               BoundaryID qsecondary_id,
+  void generateQuadratureNodes(const BoundaryID secondary_id,
+                               const BoundaryID qsecondary_id,
                                bool reiniting = false);
 
   /**
    * Update the positions of the quadrature nodes.
    */
-  void updateQuadratureNodes(BoundaryID secondary_id);
+  void updateQuadratureNodes(const BoundaryID secondary_id);
 
   /**
    * Completely redo quadrature nodes
    */
-  void reinitQuadratureNodes(BoundaryID secondary_id);
+  void reinitQuadratureNodes(const BoundaryID secondary_id);
 
   /**
    * Denotes whether this is the first time the geometric search objects have been updated.

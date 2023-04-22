@@ -44,15 +44,12 @@ public:
                             const Real ref_resid,
                             const Real div_threshold) override;
 
-  const unsigned int & getNumLagrangianUpdateIterations() const
-  {
-    return _num_lagrangian_update_iterations;
-  }
+  const unsigned int & getLagrangianIterationNumber() const { return _lagrangian_iteration_number; }
 
 private:
   /// maximum mumber of augmented lagrange iterations
-  const unsigned int _maximum_lagrangian_update_iterations;
+  const unsigned int _maximum_number_lagrangian_iterations;
 
   /// current augmented lagrange iteration number
-  unsigned int _num_lagrangian_update_iterations;
+  unsigned int _lagrangian_iteration_number;
 };
