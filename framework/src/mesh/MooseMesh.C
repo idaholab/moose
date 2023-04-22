@@ -21,7 +21,6 @@
 #include "MooseVariableBase.h"
 #include "MooseMeshUtils.h"
 #include "MooseAppCoordTransform.h"
-#include "MeshGeneratorSystem.h"
 
 #include <utility>
 
@@ -355,12 +354,7 @@ MooseMesh::prepare(const bool force_mesh_prepare)
     // For whatever reason we do not want to allow renumbering here nor ever in the future?
     getMesh().allow_renumbering(false);
 
-  const bool has_bmbb = _app.getMeshGeneratorSystem().hasBreakMeshByBlockGenerator();
-  if (has_bmbb && force_mesh_prepare)
-    mooseError("We have been asked to forcibly prepare the mesh, but we have a "
-               "BreakMeshByBlockGenerator so we can't");
-
-  if (!has_bmbb && (!_mesh->is_prepared() || force_mesh_prepare))
+  if (!_mesh->is_prepared() || force_mesh_prepare)
   {
     _mesh->prepare_for_use();
     _moose_mesh_prepared = false;
