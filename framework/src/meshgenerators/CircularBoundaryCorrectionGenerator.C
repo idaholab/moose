@@ -398,7 +398,7 @@ CircularBoundaryCorrectionGenerator::generateRadialCorrectionFactor(
     }
 
     if (ct >= 100)
-      mooseError("Newton-Raphson method did not converge for generating the azimuthal correction "
+      mooseError("Newton-Raphson method did not converge for generating the radial correction "
                  "factor for circular area preservation.");
 
     const Real norm_corr_factor = std::cos(0.5 * acc_azi) / std::cos(0.5 * acc_azi * c_new);

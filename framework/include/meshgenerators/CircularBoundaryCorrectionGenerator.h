@@ -42,7 +42,7 @@ protected:
   std::unique_ptr<MeshBase> & _input;
 
   /**
-   * Calculates the center of a series of points on a circular boundary
+   * Calculates the center of the circle/partial circle formed by a vector of points
    * @param pts_list list of points on the circular boundary
    * @param radius a reference to a variable to contain the radius of the circular boundary to be
    * calculated

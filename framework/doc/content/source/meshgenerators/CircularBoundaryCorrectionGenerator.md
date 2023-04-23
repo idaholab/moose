@@ -4,11 +4,11 @@
 
 ## Overview
 
-The `CircularBoundaryCorrectionGenerator` object performs radius correction to preserve circular area considering polygonization effect for full or partial circular boundaries in a 2D mesh.
+The `CircularBoundaryCorrectionGenerator` object performs radius correction to preserve circular area considering polygonization effect for full or partial circular boundaries in a 2D mesh within the `Z=0` plane.
 
 In a 2D mesh, a "circular boundary" consists of sides that connect a series of nodes on the circle, which actually form a polygon boundary. Due to the polygonization effect, the area within a "circular boundary" in a 2D mesh is actually smaller than a real circle with the same radius. Such a discrepancy could cause issues in some simulations that involve physics that are sensitive to volume conservation.
 
-Therefore, a corrected radius can be used to generate the "circle-like" polygon to enforce that the polygon area is the same as the original circle without polygonization. This can be achieved with either of the follow approaches.
+Therefore, a corrected radius can be used to generate the "circle-like" polygon to enforce that the polygon area is the same as the original circle without polygonization. This can be achieved with either of the following approaches.
 
 ### Moving Radial Nodes
 
@@ -41,9 +41,9 @@ Where $f_{corr}$ is the correction factor used in this object to ensure volume p
       id=schematic
       caption=A schematic drawing showing the two approaches to correct the polygonization effect for a partial circular boundary
 
-### Azimuthally Displacing Nodes in the Span Direction
+### Optional additional circular boundary expansion in the span direction
 
-The radial nodes moving approach is undoubtedly the most generalized approach for a full circular boundary. However, for a partial circular boundary, moving the two end nodes in their radial directions may deform the original shape. Therefore, moving the end nodes in the span direction of the partial circular boundary (i.e., arc) provides an alternative approach (see the right subfigure of [schematic]). Moving the end nodes in the span direction inevitably changes the azimuthal angle intervals. To make this change consistent for all the boundary sides, a scaling coefficient, $c$, is applied to every $\theta_i$.
+Moving the radial nodes is undoubtedly the most generalized approach for a full circular boundary. However, for a partial circular boundary, moving the two end nodes in their radial directions may deform the original shape. Therefore, moving the end nodes in the span direction of the partial circular boundary (i.e., arc) provides an alternative approach (see the right subfigure of [schematic]). Moving the end nodes in the span direction inevitably changes the azimuthal angle intervals. To make this change consistent for all the boundary sides, a scaling coefficient, $c$, is applied to every $\theta_i$.
 
 !equation id=scaling_theta
 \theta_i^{corr}=c\theta_i
