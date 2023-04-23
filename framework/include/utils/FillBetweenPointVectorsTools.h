@@ -301,7 +301,8 @@ bool isCurveOpenSingleSegment(ReplicatedMesh & mesh,
  * @param origin_pt origin position of the given mesh (used for azimuthal angle calculation)
  * @param is_closed_loop whether the series of nodes form a closed loop with consecutive nodes's
  * azimuthal angles change monotonically
- * @param suppress_exception whether to suppress the exceptions thrown by this function if the boundary is not closed
+ * @param suppress_exception whether to suppress the exceptions thrown by this function if the
+ * boundary is not closed
  */
 void isClosedLoop(ReplicatedMesh & mesh,
                   Real & max_node_radius,
