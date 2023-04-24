@@ -1820,7 +1820,7 @@ MooseApp::dynamicRegistration(const Parameters & params)
   // Attempt to dynamically load the library
   for (const auto & path : paths)
     if (MooseUtils::checkFileReadable(path + '/' + library_name, false, false))
-      loadLibraryAndDependencies(path + '/' + library_name, params, false);
+      loadLibraryAndDependencies(path + '/' + library_name, params, true);
     else
       mooseWarning("Unable to open library file \"",
                    path + '/' + library_name,
