@@ -1599,7 +1599,7 @@ FEProblemBase::prepareAssembly(THREAD_ID tid)
 void
 FEProblemBase::addResidual(THREAD_ID tid)
 {
-  _assembly[tid][_current_nl_sys->number()]->addResidual(getVectorTags(Moose::VECTOR_TAG_RESIDUAL));
+  _assembly[tid][_current_nl_sys->number()]->addResidual(currentResidualVectorTags());
 
   if (_displaced_problem)
     _displaced_problem->addResidual(tid);
@@ -1608,8 +1608,7 @@ FEProblemBase::addResidual(THREAD_ID tid)
 void
 FEProblemBase::addResidualNeighbor(THREAD_ID tid)
 {
-  _assembly[tid][_current_nl_sys->number()]->addResidualNeighbor(
-      getVectorTags(Moose::VECTOR_TAG_RESIDUAL));
+  _assembly[tid][_current_nl_sys->number()]->addResidualNeighbor(currentResidualVectorTags());
 
   if (_displaced_problem)
     _displaced_problem->addResidualNeighbor(tid);
@@ -1618,8 +1617,7 @@ FEProblemBase::addResidualNeighbor(THREAD_ID tid)
 void
 FEProblemBase::addResidualLower(THREAD_ID tid)
 {
-  _assembly[tid][_current_nl_sys->number()]->addResidualLower(
-      getVectorTags(Moose::VECTOR_TAG_RESIDUAL));
+  _assembly[tid][_current_nl_sys->number()]->addResidualLower(currentResidualVectorTags());
 
   if (_displaced_problem)
     _displaced_problem->addResidualLower(tid);
@@ -1628,14 +1626,13 @@ FEProblemBase::addResidualLower(THREAD_ID tid)
 void
 FEProblemBase::addResidualScalar(THREAD_ID tid /* = 0*/)
 {
-  _assembly[tid][_current_nl_sys->number()]->addResidualScalar(
-      getVectorTags(Moose::VECTOR_TAG_RESIDUAL));
+  _assembly[tid][_current_nl_sys->number()]->addResidualScalar(currentResidualVectorTags());
 }
 
 void
 FEProblemBase::cacheResidual(THREAD_ID tid)
 {
-  _assembly[tid][_current_nl_sys->number()]->cacheResidual();
+  _assembly[tid][_current_nl_sys->number()]->cacheResidual(currentResidualVectorTags());
   if (_displaced_problem)
     _displaced_problem->cacheResidual(tid);
 }
@@ -1643,7 +1640,7 @@ FEProblemBase::cacheResidual(THREAD_ID tid)
 void
 FEProblemBase::cacheResidualNeighbor(THREAD_ID tid)
 {
-  _assembly[tid][_current_nl_sys->number()]->cacheResidualNeighbor();
+  _assembly[tid][_current_nl_sys->number()]->cacheResidualNeighbor(currentResidualVectorTags());
   if (_displaced_problem)
     _displaced_problem->cacheResidualNeighbor(tid);
 }
@@ -1651,7 +1648,7 @@ FEProblemBase::cacheResidualNeighbor(THREAD_ID tid)
 void
 FEProblemBase::addCachedResidual(THREAD_ID tid)
 {
-  _assembly[tid][_current_nl_sys->number()]->addCachedResiduals();
+  _assembly[tid][_current_nl_sys->number()]->addCachedResiduals(currentResidualVectorTags());
 
   if (_displaced_problem)
     _displaced_problem->addCachedResidual(tid);
@@ -5981,6 +5978,8 @@ FEProblemBase::computeResidualAndJacobian(const NumericVector<Number> & soln,
 
     for (const auto & residual_vector_tag : residual_vector_tags)
       _fe_vector_tags.insert(residual_vector_tag._id);
+
+    setCurrentResidualVectorTags(_fe_vector_tags);
   }
 
   // matrix tags
@@ -6128,6 +6127,8 @@ FEProblemBase::computeResidualAndJacobian(const NumericVector<Number> & soln,
       _displaced_problem->setCurrentlyComputingJacobian(false);
       _displaced_problem->setCurrentlyComputingResidualAndJacobian(false);
     }
+
+    clearCurrentResidualVectorTags();
   }
   catch (MooseException & e)
   {
@@ -6246,6 +6247,8 @@ FEProblemBase::computeResidualTags(const std::set<TagID> & tags)
 
   TIME_SECTION("computeResidualTags", 5, "Computing Residual");
 
+  setCurrentResidualVectorTags(tags);
+
   _aux->zeroVariablesForResidual();
 
   unsigned int n_threads = libMesh::n_threads();
@@ -6340,6 +6343,8 @@ FEProblemBase::computeResidualTags(const std::set<TagID> & tags)
 
   // Reset execution flag as after this point we are no longer on LINEAR
   _current_execute_on_flag = EXEC_NONE;
+
+  clearCurrentResidualVectorTags();
 }
 
 void

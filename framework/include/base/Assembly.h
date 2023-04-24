@@ -793,7 +793,7 @@ public:
    * Takes the values that are currently in _sub_Re of all field variables and appends them to
    * the cached values.
    */
-  void cacheResidual();
+  void cacheResidual(const std::vector<VectorTag> & tags);
 
   /**
    * Cache individual residual contributions.  These will ultimately get added to the residual when
@@ -836,19 +836,19 @@ public:
    * Takes the values that are currently in _sub_Rn of all field variables and appends them to
    * the cached values.
    */
-  void cacheResidualNeighbor();
+  void cacheResidualNeighbor(const std::vector<VectorTag> & tags);
 
   /**
    * Takes the values that are currently in _sub_Rl and appends them to the cached values.
    */
-  void cacheResidualLower();
+  void cacheResidualLower(const std::vector<VectorTag> & tags);
 
   /**
    * Pushes all cached residuals to the global residual vectors associated with each tag.
    *
    * Note that this will also clear the cache.
    */
-  void addCachedResiduals();
+  void addCachedResiduals(const std::vector<VectorTag> & tags);
 
   /**
    * Clears all of the residuals in _cached_residual_rows and _cached_residual_values
