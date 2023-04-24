@@ -15,6 +15,7 @@
 
 // Forward Declarations
 class ContactLineSearchBase;
+class AugmentedLagrangianContactProblem;
 enum class ContactModel;
 enum class ContactFormulation;
 
@@ -35,9 +36,8 @@ public:
 
   virtual bool AugmentedLagrangianContactConverged();
 
-  virtual void updateAugmentedLagrangianMultiplier(bool beginning_of_step = false);
-
-  virtual void updateContactStatefulData(bool beginning_of_step = false);
+  virtual void updateAugmentedLagrangianMultiplier(bool beginning_of_step);
+  virtual void updateContactStatefulData(bool beginning_of_step);
 
   virtual Real computeQpSecondaryValue() override;
 
@@ -98,6 +98,7 @@ protected:
   const bool _normalize_penalty;
 
   const Real _penalty;
+  const Real _penalty_multiplier;
   Real _penalty_tangential;
   const Real _friction_coefficient;
   const Real _tension_release;
@@ -144,4 +145,8 @@ protected:
 
   const bool _print_contact_nodes;
   static Threads::spin_mutex _contact_set_mutex;
+
+  AugmentedLagrangianContactProblem * const _augmented_lagrange_problem;
+  const static unsigned int _no_iterations;
+  const unsigned int & _lagrangian_iteration_number;
 };
