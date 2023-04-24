@@ -10,6 +10,7 @@
 #pragma once
 
 #include "WeightedGapUserObject.h"
+#include "PenaltyMortarAugmentedLagrangeInterface.h"
 
 template <typename>
 class MooseVariableFE;
@@ -18,7 +19,8 @@ class MooseVariableFE;
  * User object for computing weighted gaps and contact pressure for penalty based
  * mortar constraints
  */
-class PenaltyWeightedGapUserObject : public WeightedGapUserObject
+class PenaltyWeightedGapUserObject : public WeightedGapUserObject,
+                                     public PenaltyMortarAugmentedLagrangeInterface
 {
 public:
   static InputParameters validParams();
@@ -29,6 +31,9 @@ public:
   virtual void initialize() override;
   virtual void reinit() override;
   virtual Real getNormalContactPressure(const Node * const node) const override;
+
+  virtual bool isContactConverged() const override { return true; }
+  virtual void updateAugmentedLagrangianMultipliers() override {}
 
 protected:
   virtual const VariableTestValue & test() const override;

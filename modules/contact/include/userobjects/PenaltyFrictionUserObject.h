@@ -10,11 +10,13 @@
 #pragma once
 
 #include "WeightedVelocitiesUserObject.h"
+#include "PenaltyMortarAugmentedLagrangeInterface.h"
 
 /**
  * User object that computes tangential pressures due to friction using a penalty approach
  */
-class PenaltyFrictionUserObject : public WeightedVelocitiesUserObject
+class PenaltyFrictionUserObject : public WeightedVelocitiesUserObject,
+                                  public PenaltyMortarAugmentedLagrangeInterface
 {
 public:
   static InputParameters validParams();
@@ -38,6 +40,9 @@ public:
                                   const unsigned int component) const override;
   virtual Real getTangentialVelocity(const Node * const node,
                                      const unsigned int component) const override;
+
+  virtual bool isContactConverged() const override { return true; }
+  virtual void updateAugmentedLagrangianMultipliers() override {}
 
 protected:
   virtual const VariableTestValue & test() const override;

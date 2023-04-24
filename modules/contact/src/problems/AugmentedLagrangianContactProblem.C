@@ -24,6 +24,8 @@
 #include "Executioner.h"
 #include "AddVariableAction.h"
 #include "ConstraintWarehouse.h"
+#include "MortarUserObject.h"
+#include "PenaltyMortarAugmentedLagrangeInterface.h"
 
 registerMooseObject("ContactApp", AugmentedLagrangianContactProblem);
 
@@ -145,6 +147,24 @@ AugmentedLagrangianContactProblem::checkNonlinearConvergence(std::string & msg,
           }
       }
 
+      // next loop over penalty mortar user objects
+      std::vector<MortarUserObject *> mortar_uos;
+      std::list<PenaltyMortarAugmentedLagrangeInterface *> pmuos;
+      theWarehouse()
+          .query()
+          .condition<AttribInterfaces>(Interfaces::MortarUserObject)
+          .queryInto(mortar_uos);
+      for (auto * muo : mortar_uos)
+        if (auto * pmuo = dynamic_cast<PenaltyMortarAugmentedLagrangeInterface *>(muo); pmuo)
+        {
+          // keep a list of all penalty mortar user objects for a later multiplier update
+          pmuos.push_back(pmuo);
+
+          // check if any of the constraints is not yet converged
+          if (!repeat_augmented_lagrange_step && !pmuo->isContactConverged())
+            repeat_augmented_lagrange_step = true;
+        }
+
       // repeat update step if necessary
       if (repeat_augmented_lagrange_step)
       {
@@ -155,6 +175,10 @@ AugmentedLagrangianContactProblem::checkNonlinearConvergence(std::string & msg,
         // only for the first constraint for each contact pair.
         for (const auto & mcc : mccs)
           mcc->updateAugmentedLagrangianMultiplier(/* beginning_of_step = */ false);
+
+        // Update all penalty mortar user objects
+        for (const auto & pmuo : pmuos)
+          pmuo->updateAugmentedLagrangianMultipliers();
 
         // force it to keep iterating
         reason = MooseNonlinearConvergenceReason::ITERATING;
