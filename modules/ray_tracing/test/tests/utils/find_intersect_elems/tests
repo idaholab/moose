@@ -10,6 +10,7 @@
       recover = false
       input = 'find_intersect_elems.i'
       jsondiff = 'find_intersect_elems.json'
+      mesh_mode = REPLICATED
       cli_args = 'Reporters/find_intersection_elems/serialize=true'
       detail = 'keep the mapping in main processsor'
     []
