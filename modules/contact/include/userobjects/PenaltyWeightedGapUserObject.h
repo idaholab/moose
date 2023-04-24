@@ -14,6 +14,7 @@
 
 template <typename>
 class MooseVariableFE;
+class AugmentedLagrangianContactProblem;
 
 /**
  * User object for computing weighted gaps and contact pressure for penalty based
@@ -27,13 +28,15 @@ public:
 
   PenaltyWeightedGapUserObject(const InputParameters & parameters);
 
+  virtual void timestepSetup() override;
+
   virtual const ADVariableValue & contactPressure() const override;
   virtual void initialize() override;
   virtual void reinit() override;
   virtual Real getNormalContactPressure(const Node * const node) const override;
 
-  virtual bool isContactConverged() const override { return true; }
-  virtual void updateAugmentedLagrangianMultipliers() override {}
+  virtual bool isContactConverged() const override;
+  virtual void updateAugmentedLagrangianMultipliers() override;
 
 protected:
   virtual const VariableTestValue & test() const override;
@@ -42,9 +45,24 @@ protected:
   /// The penalty factor
   const Real _penalty;
 
+  /// penalty growth factor for augmented Lagrange
+  const Real _penalty_multiplier;
+
+  /// penetration tolerance for augmented Lagrange contact
+  const Real _penetration_tolerance;
+
   /// The contact force on the mortar segument quadrature points
   ADVariableValue _contact_force;
 
   /// Map from degree of freedom to normal pressure for reporting
   std::unordered_map<const DofObject *, Real> _dof_to_normal_pressure;
+
+  ///@{ augmented Lagrange probmen and iteration number
+  AugmentedLagrangianContactProblem * const _augmented_lagrange_problem;
+  const static unsigned int _no_iterations;
+  const unsigned int & _lagrangian_iteration_number;
+  ///@}
+
+  /// Map from degree of freedom to augmented lagrange multiplier
+  std::unordered_map<const DofObject *, Real> _dof_to_lagrange_multiplier;
 };

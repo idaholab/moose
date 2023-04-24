@@ -8,10 +8,13 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "PenaltyWeightedGapUserObject.h"
+#include "AugmentedLagrangianContactProblem.h"
 #include "MooseVariableFE.h"
 #include "SystemBase.h"
 
 registerMooseObject("ContactApp", PenaltyWeightedGapUserObject);
+
+const unsigned int PenaltyWeightedGapUserObject::_no_iterations = 0;
 
 InputParameters
 PenaltyWeightedGapUserObject::validParams()
@@ -19,11 +22,31 @@ PenaltyWeightedGapUserObject::validParams()
   InputParameters params = WeightedGapUserObject::validParams();
   params.addClassDescription("Computes the mortar normal contact force via a penalty approach.");
   params.addRequiredParam<Real>("penalty", "The penalty factor");
+  params.addRangeCheckedParam<Real>(
+      "penalty_multiplier",
+      1.0,
+      "penalty_multiplier > 0",
+      "The penalty growth factor between augmented Lagrange iterations");
+  params.addRangeCheckedParam<Real>(
+      "penetration_tolerance",
+      1e-9,
+      "penetration_tolerance > 0",
+      "Acceptable penetration distance at which augmented Lagrange iterations can be stopped");
+
+  params.addParamNamesToGroup("penalty_multiplier penetration_tolerance", "Augmented Lagrange");
+
   return params;
 }
 
 PenaltyWeightedGapUserObject::PenaltyWeightedGapUserObject(const InputParameters & parameters)
-  : WeightedGapUserObject(parameters), _penalty(getParam<Real>("penalty"))
+  : WeightedGapUserObject(parameters),
+    _penalty(getParam<Real>("penalty")),
+    _penalty_multiplier(getParam<Real>("penalty_multiplier")),
+    _penetration_tolerance(getParam<Real>("penetration_tolerance")),
+    _augmented_lagrange_problem(dynamic_cast<AugmentedLagrangianContactProblem *>(&_fe_problem)),
+    _lagrangian_iteration_number(_augmented_lagrange_problem
+                                     ? _augmented_lagrange_problem->getLagrangianIterationNumber()
+                                     : _no_iterations)
 {
   auto check_type = [this](const auto & var, const auto & var_name)
   {
@@ -80,13 +103,42 @@ PenaltyWeightedGapUserObject::reinit()
     const Node * const node = _lower_secondary_elem->node_ptr(i);
     const auto & weighted_gap =
         libmesh_map_find(_dof_to_weighted_gap, static_cast<const DofObject *>(node)).first;
+    const auto lagrange_multiplier =
+        _augmented_lagrange_problem
+            ? libmesh_map_find(_dof_to_lagrange_multiplier, static_cast<const DofObject *>(node))
+            : 0.0;
     const auto weighted_gap_for_calc = weighted_gap < 0 ? -weighted_gap : ADReal(0);
     const auto & test_i = (*_test)[i];
     for (const auto qp : make_range(_qrule_msm->n_points()))
     {
-      _contact_force[qp] += (test_i[qp] * _penalty) * weighted_gap_for_calc;
+      _contact_force[qp] += test_i[qp] * (_penalty * weighted_gap_for_calc + lagrange_multiplier);
       _dof_to_normal_pressure[static_cast<const DofObject *>(node)] =
-          MetaPhysicL::raw_value(_penalty * weighted_gap_for_calc);
+          MetaPhysicL::raw_value(_penalty * weighted_gap_for_calc + lagrange_multiplier);
     }
+  }
+}
+
+void
+PenaltyWeightedGapUserObject::timestepSetup()
+{
+  _dof_to_lagrange_multiplier.clear();
+}
+
+bool
+PenaltyWeightedGapUserObject::isContactConverged() const
+{
+  for (const auto & [dof_object, gap] : _dof_to_real_weighted_gap)
+    if (gap < -_penetration_tolerance)
+      return false;
+  return true;
+}
+
+void
+PenaltyWeightedGapUserObject::updateAugmentedLagrangianMultipliers()
+{
+  for (const auto & [dof_object, gap] : _dof_to_weighted_gap)
+  {
+    const auto gap_for_calc = gap.first < 0 ? MetaPhysicL::raw_value(-gap.first) : 0.0;
+    _dof_to_lagrange_multiplier[dof_object] += gap_for_calc * _penalty;
   }
 }
