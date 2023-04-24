@@ -51,26 +51,26 @@
     type = FullSolveMultiApp
     input_files = 'apps_from_positions.i'
     cli_args = "MultiApps/active='';Positions/active='';Outputs/active=''"
-    positions_objects = input/positions_1d
+    positions_objects = input
   []
   [m2]
     type = FullSolveMultiApp
     input_files = 'apps_from_positions.i'
     cli_args = "MultiApps/active='';Positions/active='';Outputs/active=''"
-    positions_objects = 'input/positions_1d file/positions_1d'
+    positions_objects = 'input file'
   []
   # Those Positions are executed too late
   [m3]
     type = TransientMultiApp
     input_files = 'apps_from_positions.i'
     cli_args = "MultiApps/active='';Positions/active='';Outputs/active=''"
-    positions_objects = reporter_forward/positions_1d
+    positions_objects = reporter_forward
   []
   [m4]
     type = TransientMultiApp
     input_files = 'apps_from_positions.i'
     cli_args = "MultiApps/active='';Positions/active='';Outputs/active=''"
-    positions_objects = mesh/positions_1d
+    positions_objects = mesh
   []
 []
 

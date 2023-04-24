@@ -1362,6 +1362,7 @@ Parser::extractParams(const std::string & prefix, InputParameters & p)
         setscalar(MooseFunctorName, string);
         setscalar(MaterialName, string);
         setscalar(DistributionName, string);
+        setscalar(PositionsName, string);
         setscalar(SamplerName, string);
         setscalar(TagName, string);
         setscalar(MeshGeneratorName, string);
@@ -1433,6 +1434,7 @@ Parser::extractParams(const std::string & prefix, InputParameters & p)
         setvector(MeshGeneratorName, string);
         setvector(ExtraElementIDName, string);
         setvector(ReporterName, string);
+        setvector(PositionsName, string);
         setvector(ReporterValueName, string);
         setvector(ExecutorName, string);
         setvector(NonlinearSystemName, string);

@@ -470,7 +470,7 @@ associateSyntaxInner(Syntax & syntax, ActionFactory & /*action_factory*/)
   syntax.registerSyntaxType("Reporters/*", "ReporterName");
 
   registerSyntax("AddPositionsAction", "Positions/*");
-  syntax.registerSyntaxType("Positions/*", "ReporterName");
+  syntax.registerSyntaxType("Positions/*", "PositionsName");
 
   registerSyntax("AddDamperAction", "Dampers/*");
 
