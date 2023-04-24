@@ -985,13 +985,13 @@ void
 NSFVAction::addINSInitialConditions()
 {
   // do not set initial conditions if we load from file
-  if (getParam<bool>("initialize_variables_from_mesh_file"))
+  if (_app.isRestarting() || getParam<bool>("initialize_variables_from_mesh_file"))
     return;
 
   InputParameters params = _factory.getValidParams("FunctionIC");
   auto vvalue = getParam<std::vector<FunctionName>>("initial_velocity");
 
-  if (_create_velocity)
+  if (_create_velocity && (!_app.isRestarting() || _pars.isParamSetByUser("initial_velocity")))
     for (unsigned int d = 0; d < _dim; ++d)
     {
       params.set<VariableName>("variable") = _velocity_name[d];
@@ -1000,25 +1000,25 @@ NSFVAction::addINSInitialConditions()
       _problem->addInitialCondition("FunctionIC", _velocity_name[d] + "_ic", params);
     }
 
-  if (_create_pressure)
+  if (_create_pressure && (!_app.isRestarting() || _pars.isParamSetByUser("initial_pressure")))
   {
     params.set<VariableName>("variable") = _pressure_name;
     params.set<FunctionName>("function") = getParam<FunctionName>("initial_pressure");
 
     _problem->addInitialCondition("FunctionIC", _pressure_name + "_ic", params);
   }
-  if (_has_energy_equation)
-  {
-    if (_create_fluid_temperature)
-    {
-      params.set<VariableName>("variable") = _fluid_temperature_name;
-      params.set<FunctionName>("function") = getParam<FunctionName>("initial_temperature");
 
-      _problem->addInitialCondition("FunctionIC", _fluid_temperature_name + "_ic", params);
-    }
+  if (_has_energy_equation && _create_fluid_temperature &&
+      (!_app.isRestarting() || _pars.isParamSetByUser("initial_temperature")))
+  {
+    params.set<VariableName>("variable") = _fluid_temperature_name;
+    params.set<FunctionName>("function") = getParam<FunctionName>("initial_temperature");
+
+    _problem->addInitialCondition("FunctionIC", _fluid_temperature_name + "_ic", params);
   }
 
-  if (_has_scalar_equation)
+  if (_has_scalar_equation &&
+      (!_app.isRestarting() || _pars.isParamSetByUser("initial_scalar_variables")))
   {
     unsigned int ic_counter = 0;
     for (unsigned int name_i = 0; name_i < _passive_scalar_names.size(); ++name_i)
@@ -2816,8 +2816,8 @@ NSFVAction::checkPassiveScalarParameterErrors()
 }
 
 void
-NSFVAction::checkDependentParameterError(const std::string main_parameter,
-                                         const std::vector<std::string> dependent_parameters,
+NSFVAction::checkDependentParameterError(const std::string & main_parameter,
+                                         const std::vector<std::string> & dependent_parameters,
                                          const bool should_be_defined)
 {
   for (const auto & param : dependent_parameters)
