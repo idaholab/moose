@@ -157,8 +157,19 @@ MultiAppGeneralFieldNearestNodeTransfer::evaluateInterpValuesNearestNode(
     outgoing_vals[i_pt].second = std::numeric_limits<Real>::max();
     bool point_found = false;
 
+<<<<<<< HEAD
     // Loop on all source problems
     for (MooseIndex(_from_problems.size()) i_from = 0; i_from < _from_problems.size(); ++i_from)
+=======
+    unsigned int num_sources;
+    if (!_nearest_positions_obj)
+      num_sources = _from_problems.size();
+    else
+      num_sources = _nearest_positions_obj->getPositions(/*initial=*/false).size();
+
+    // Loop on all sources
+    for (unsigned int i_from = 0; i_from < num_sources; ++i_from)
+>>>>>>> ba8e7df55a (Add nearest positions parameter to general field transfers)
     {
       std::vector<std::size_t> return_index(_num_nearest_points);
       std::vector<Real> return_dist_sqr(_num_nearest_points);

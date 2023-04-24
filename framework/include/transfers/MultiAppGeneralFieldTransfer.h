@@ -19,6 +19,8 @@
 #include "libmesh/mesh_function.h"
 #include "libmesh/parallel_algebra.h" // for communicator send and receive stuff
 
+class Positions;
+
 /**
  * It is a general field transfer. It will do the following things
  * 1) From part of source domain to part of domain. Support subdomains/boundaries to
@@ -151,6 +153,10 @@ protected:
   //       If both apps are the same rank, the closest app is used, the point has an invalid value
   //       If each app are on a different rank, the second closest return a valid value, it gets
   //       used
+
+  // Positions object to use to match target points and origin points as closest to the same
+  // Position
+  const Positions * _nearest_positions_obj;
 
   /// Whether the source app mesh must actually contain the points for them to be considered or whether
   /// the bounding box is enough. If false, we can interpolate between apps

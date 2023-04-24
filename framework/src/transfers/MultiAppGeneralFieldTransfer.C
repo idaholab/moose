@@ -15,6 +15,8 @@
 #include "MooseMesh.h"
 #include "MooseTypes.h"
 #include "MooseVariableFE.h"
+#include "Positions.h"
+#include "MultiAppPositions.h" // remove after use_nearest_app deprecation
 
 // libmesh includes
 #include "libmesh/point_locator_base.h"
@@ -108,7 +110,8 @@ MultiAppGeneralFieldTransfer::validParams()
   params.addParamNamesToGroup(
       "to_blocks from_blocks to_boundaries from_boundaries elemental_boundary_restriction",
       "Transfer spatial restriction");
-  params.addParamNamesToGroup("greedy_search use_nearest_app search_value_conflicts",
+  params.addParamNamesToGroup("greedy_search use_nearest_app use_nearest_position "
+                              "search_value_conflicts",
                               "Search algorithm");
   params.addParamNamesToGroup("error_on_miss from_app_must_contain_point extrapolation_constant",
                               "Extrapolation behavior");
@@ -144,6 +147,29 @@ MultiAppGeneralFieldTransfer::MultiAppGeneralFieldTransfer(const InputParameters
   if (_to_var_names.size() != _to_var_components.size() && _to_var_components.size() > 0)
     paramError("target_variable_components",
                "This parameter must be equal to the number of target variables");
+
+  // Make deprecated 'use_nearest_app' parameter rely on Positions
+  if (_use_nearest_app)
+  {
+    if (_nearest_positions_obj)
+      paramError("use_nearest_app", "Cannot use nearest-app and nearest-position together");
+    if (!hasFromMultiApp())
+      mooseError("Should have a source multiapp when using the nearest-app informed search");
+    auto pos_params = MultiAppPositions::validParams();
+    pos_params.set<std::vector<MultiAppName>>("multiapps") = {getMultiApp()->name()};
+    pos_params.set<MooseApp *>("_moose_app") =
+        parameters.getCheckedPointerParam<MooseApp *>("_moose_app");
+    _fe_problem.addReporter("MultiAppPositions", "_created_for_" + name(), pos_params);
+    _nearest_positions_obj = &_fe_problem.getPositionsObject("_created_for_" + name());
+  }
+
+  // Dont let users get wrecked by bounding boxes if it looks like they are trying to extrapolate
+  if (!_source_app_must_contain_point &&
+      (_nearest_positions_obj || isParamSetByUser("from_app_must_contain_point")))
+    if (!isParamSetByUser("bbox_factor") && !isParamSetByUser("fixed_bounding_box_size"))
+      mooseWarning(
+          "Extrapolation (nearest-source options, outside-app source) parameters have been passed, "
+          "but no subapp bounding box expansion parameters have been passed.");
 }
 
 void
