@@ -32,6 +32,17 @@
     requirement = 'The system shall be able to initialize variables added by NSFV action from the mesh file.'
     prereq = free-slip-action
   []
+  [checkpoint-restart]
+    type = 'RunApp'
+    input = 2d-rc-action-nulltr-checkpoint.i
+    absent_out = '1 Nonlinear'
+    method = "!dbg"
+    valgrind = heavy
+    requirement = 'The system shall be able to restart a transient calculation from a steady calculation and immediately register the steady solution as a solution to the transient problem.'
+    issues = '#24144'
+    cli_args = 'Outputs/exodus=false'
+    prereq = free-slip-action
+  []
   [no-slip]
     requirement = 'The system shall be able to model no-slip conditions in a channel; specifically, moving down the channel, the tangential velocity shall develop a parabolic profile. This problem shall be solvable using a'
     [SMP]
