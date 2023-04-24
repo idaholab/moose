@@ -271,23 +271,22 @@ ContactAction::removeRepeatedPairs()
 
   for (const auto & [primary, secondary] : _boundary_pairs)
   {
-    const auto & primary_lambda = primary;
-    const auto & secondary_lambda = secondary;
-
+    // Structured bindings are not capturable (primary_copy, secondary_copy)
     auto it = std::find_if(lean_boundary_pairs.begin(),
                            lean_boundary_pairs.end(),
-                           [&](const std::pair<BoundaryName, BoundaryName> & lean_pair)
+                           [&, primary_copy = primary, secondary_copy = secondary](
+                               const std::pair<BoundaryName, BoundaryName> & lean_pair)
                            {
-                             const bool match_one = lean_pair.second == secondary_lambda &&
-                                                    lean_pair.first == primary_lambda;
-                             const bool match_two = lean_pair.second == primary_lambda &&
-                                                    lean_pair.first == secondary_lambda;
+                             const bool match_one = lean_pair.second == secondary_copy &&
+                                                    lean_pair.first == primary_copy;
+                             const bool match_two = lean_pair.second == primary_copy &&
+                                                    lean_pair.first == secondary_copy;
                              const bool exist = match_one || match_two;
                              return exist;
                            });
 
     if (it == lean_boundary_pairs.end())
-      lean_boundary_pairs.push_back({primary, secondary});
+      lean_boundary_pairs.emplace_back(primary, secondary);
     else
       mooseInfo("Contact pair ",
                 primary,
