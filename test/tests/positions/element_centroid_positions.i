@@ -36,6 +36,13 @@
   type = Steady
 []
 
+[Postprocessors]
+  [num_pos]
+    type = NumPositions
+    positions = all_mesh
+  []
+[]
+
 [Outputs]
   [out]
     type = JSON
