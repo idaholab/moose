@@ -25,7 +25,7 @@ Positions::validParams()
 Positions::Positions(const InputParameters & parameters)
   : GeneralReporter(parameters),
     _initial_positions(isParamValid("initial_positions")
-                           ? &getReporterValue<std::vector<Point>>("initialPositions")
+                           ? &getReporterValue<std::vector<Point>>("initial_positions")
                            : nullptr),
     _positions(declareValueByName<std::vector<Point>, ReporterVectorContext<Point>>(
         "positions_1d", REPORTER_MODE_REPLICATED))
@@ -35,10 +35,19 @@ Positions::Positions(const InputParameters & parameters)
 const Point &
 Positions::getPosition(unsigned int index, bool initial) const
 {
-  mooseAssert(!initial || (!_initial_positions || (*_initial_positions).size() < index),
-              "Initial positions is not sized or initialized appropriately");
-  mooseAssert(initial || _positions.size() > index,
-              "Positions retrieved with an out-of-bound index");
+  // Check sizes of inital positions
+  if (initial && _initial_positions && (*_initial_positions).size() < index)
+    mooseError("Initial positions is not sized or initialized appropriately");
+
+  // Check sizes of regular positions
+  if (!initial)
+  {
+    if (_initial_positions && _positions.size() != (*_initial_positions).size())
+      mooseError("Initial positions and current positions array length do not match");
+    else if (_positions.size() < index)
+      mooseError("Positions retrieved with an out-of-bound index");
+  }
+
   if (initial && _initial_positions)
     return (*_initial_positions)[index];
   if (_positions.size())
