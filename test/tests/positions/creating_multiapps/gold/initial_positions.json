@@ -1,0 +1,143 @@
+{
+    "reporters": {
+        "results_m1": {
+            "type": "MultiAppPositions",
+            "values": {
+                "positions_1d": {
+                    "type": "std::vector<libMesh::Point>"
+                }
+            }
+        },
+        "results_m2": {
+            "type": "MultiAppPositions",
+            "values": {
+                "positions_1d": {
+                    "type": "std::vector<libMesh::Point>"
+                }
+            }
+        },
+        "results_m3": {
+            "type": "MultiAppPositions",
+            "values": {
+                "positions_1d": {
+                    "type": "std::vector<libMesh::Point>"
+                }
+            }
+        },
+        "results_m4": {
+            "type": "MultiAppPositions",
+            "values": {
+                "positions_1d": {
+                    "type": "std::vector<libMesh::Point>"
+                }
+            }
+        }
+    },
+    "time_steps": [
+        {
+            "results_m1": {
+                "positions_1d": [
+                    {
+                        "x": 0.0,
+                        "y": 1.0,
+                        "z": 0.0
+                    },
+                    {
+                        "x": 1.0,
+                        "y": 0.0,
+                        "z": 2.0
+                    },
+                    {
+                        "x": 0.0,
+                        "y": 1.0,
+                        "z": 1.0
+                    },
+                    {
+                        "x": 1.0,
+                        "y": 3.0,
+                        "z": 2.0
+                    }
+                ]
+            },
+            "results_m2": {
+                "positions_1d": [
+                    {
+                        "x": 0.0,
+                        "y": 1.0,
+                        "z": 0.0
+                    },
+                    {
+                        "x": 1.0,
+                        "y": 0.0,
+                        "z": 2.0
+                    },
+                    {
+                        "x": 0.0,
+                        "y": 1.0,
+                        "z": 1.0
+                    },
+                    {
+                        "x": 1.0,
+                        "y": 3.0,
+                        "z": 2.0
+                    },
+                    {
+                        "x": 0.0,
+                        "y": 0.0,
+                        "z": 0.0
+                    },
+                    {
+                        "x": 0.5,
+                        "y": 0.5,
+                        "z": 0.0
+                    },
+                    {
+                        "x": 0.6,
+                        "y": 0.6,
+                        "z": 0.0
+                    },
+                    {
+                        "x": 0.7,
+                        "y": 0.7,
+                        "z": 0.0
+                    }
+                ]
+            },
+            "results_m3": {
+                "positions_1d": [
+                    {
+                        "x": 0.0,
+                        "y": 0.0,
+                        "z": 0.0
+                    },
+                    {
+                        "x": 0.5,
+                        "y": 0.5,
+                        "z": 0.0
+                    },
+                    {
+                        "x": 0.6,
+                        "y": 0.6,
+                        "z": 0.0
+                    },
+                    {
+                        "x": 0.7,
+                        "y": 0.7,
+                        "z": 0.0
+                    }
+                ]
+            },
+            "results_m4": {
+                "positions_1d": [
+                    {
+                        "x": 0.5,
+                        "y": 0.0,
+                        "z": 0.0
+                    }
+                ]
+            },
+            "time": 1.0,
+            "time_step": 2
+        }
+    ]
+}
