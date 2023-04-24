@@ -78,9 +78,9 @@ EigenKernel::EigenKernel(const InputParameters & parameters)
 void
 EigenKernel::computeResidual()
 {
-  DenseVector<Number> & re = _assembly.residualBlock(_var.number());
-  _local_re.resize(re.size());
-  _local_re.zero();
+  prepareVectorTag(_assembly, _var.number());
+
+  precalculateResidual();
 
   mooseAssert(*_eigenvalue != 0.0, "Can't divide by zero eigenvalue in EigenKernel!");
   Real one_over_eigen = 1.0 / *_eigenvalue;
@@ -88,8 +88,7 @@ EigenKernel::computeResidual()
     for (_qp = 0; _qp < _qrule->n_points(); _qp++)
       _local_re(_i) += _JxW[_qp] * _coord[_qp] * one_over_eigen * computeQpResidual();
 
-  re += _local_re;
-
+  accumulateTaggedLocalResidual();
   if (_has_save_in)
   {
     Threads::spin_mutex::scoped_lock lock(Threads::spin_mtx);
@@ -104,10 +103,9 @@ EigenKernel::computeJacobian()
   if (!_is_implicit)
     return;
 
-  DenseMatrix<Number> & ke = _assembly.jacobianBlock(_var.number(), _var.number());
-  _local_ke.resize(ke.m(), ke.n());
-  _local_ke.zero();
+  prepareMatrixTag(_assembly, _var.number(), _var.number());
 
+  precalculateJacobian();
   mooseAssert(*_eigenvalue != 0.0, "Can't divide by zero eigenvalue in EigenKernel!");
   Real one_over_eigen = 1.0 / *_eigenvalue;
   for (_i = 0; _i < _test.size(); _i++)
@@ -115,18 +113,14 @@ EigenKernel::computeJacobian()
       for (_qp = 0; _qp < _qrule->n_points(); _qp++)
         _local_ke(_i, _j) += _JxW[_qp] * _coord[_qp] * one_over_eigen * computeQpJacobian();
 
-  ke += _local_ke;
+  accumulateTaggedLocalMatrix();
 
-  if (_has_diag_save_in)
+  if (_has_diag_save_in && !_sys.computingScalingJacobian())
   {
-    unsigned int rows = ke.m();
-    DenseVector<Number> diag(rows);
-    for (unsigned int i = 0; i < rows; i++)
-      diag(i) = _local_ke(i, i);
-
+    DenseVector<Number> diag = _assembly.getJacobianDiagonal(_local_ke);
     Threads::spin_mutex::scoped_lock lock(Threads::spin_mtx);
-    for (unsigned int i = 0; i < _diag_save_in.size(); i++)
-      _diag_save_in[i]->sys().solution().add_vector(diag, _diag_save_in[i]->dofIndices());
+    for (const auto & var : _diag_save_in)
+      var->sys().solution().add_vector(diag, var->dofIndices());
   }
 }
 
@@ -142,23 +136,45 @@ EigenKernel::computeOffDiagJacobian(const unsigned int jvar_num)
   {
     const auto & jvar = getVariable(jvar_num);
 
-    DenseMatrix<Number> & ke = _assembly.jacobianBlock(_var.number(), jvar_num);
-    _local_ke.resize(ke.m(), ke.n());
-    _local_ke.zero();
+    prepareMatrixTag(_assembly, _var.number(), jvar_num);
 
     // This (undisplaced) jvar could potentially yield the wrong phi size if this object is acting
     // on the displaced mesh
     auto phi_size = jvar.dofIndices().size();
+    mooseAssert(
+        phi_size * jvar.count() == _local_ke.n(),
+        "The size of the phi container does not match the number of local Jacobian columns");
 
+    if (_local_ke.m() != _test.size())
+      return;
+
+    precalculateOffDiagJacobian(jvar_num);
     mooseAssert(*_eigenvalue != 0.0, "Can't divide by zero eigenvalue in EigenKernel!");
     Real one_over_eigen = 1.0 / *_eigenvalue;
-    for (_i = 0; _i < _test.size(); _i++)
-      for (_j = 0; _j < phi_size; _j++)
-        for (_qp = 0; _qp < _qrule->n_points(); _qp++)
-          _local_ke(_i, _j) +=
-              _JxW[_qp] * _coord[_qp] * one_over_eigen * computeQpOffDiagJacobian(jvar_num);
+    if (jvar.count() == 1)
+    {
+      for (_i = 0; _i < _test.size(); _i++)
+        for (_j = 0; _j < phi_size; _j++)
+          for (_qp = 0; _qp < _qrule->n_points(); _qp++)
+            _local_ke(_i, _j) +=
+                _JxW[_qp] * _coord[_qp] * one_over_eigen * computeQpOffDiagJacobian(jvar.number());
+    }
+    else
+    {
+      unsigned int n = phi_size;
+      for (_i = 0; _i < _test.size(); _i++)
+        for (_j = 0; _j < n; _j++)
+          for (_qp = 0; _qp < _qrule->n_points(); _qp++)
+          {
+            RealEigenVector v = _JxW[_qp] * _coord[_qp] * one_over_eigen *
+                                computeQpOffDiagJacobianArray(static_cast<ArrayMooseVariable &>(
+                                    const_cast<MooseVariableFieldBase &>(jvar)));
+            for (unsigned int k = 0; k < v.size(); ++k)
+              _local_ke(_i, _j + k * n) += v(k);
+          }
+    }
 
-    ke += _local_ke;
+    accumulateTaggedLocalMatrix();
   }
 }
 
