@@ -985,7 +985,7 @@ void
 NSFVAction::addINSInitialConditions()
 {
   // do not set initial conditions if we load from file
-  if (_app.isRestarting() || getParam<bool>("initialize_variables_from_mesh_file"))
+  if (getParam<bool>("initialize_variables_from_mesh_file"))
     return;
 
   InputParameters params = _factory.getValidParams("FunctionIC");
