@@ -5,7 +5,7 @@
   type = OptimizationReporter
   parameter_names = 'D'
   num_values = '4'
-  initial_condition = '1 1 1 1'
+  initial_condition = '0.01 0.01 0.01 0.01'
 
   measurement_file = forward_out_data_0011.csv
   file_xcoord = measurement_xcoord
@@ -44,5 +44,7 @@
 [Executioner]
   type = Optimize
   tao_solver = taonm
+  petsc_options_iname = '-tao_gatol'
+  petsc_options_value = '1e-6'
   verbose = true
 []

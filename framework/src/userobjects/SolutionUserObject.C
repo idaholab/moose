@@ -262,6 +262,11 @@ SolutionUserObject::readExodusII()
 
   // Build nodal/elemental variable lists, limit to variables listed in 'system_variables', if
   // provided
+  // This function could be called more than once, so clear the member variables so we don't keep
+  // adding to the vectors
+  _nodal_variables.clear();
+  _elemental_variables.clear();
+  _scalar_variables.clear();
   if (!_system_variables.empty())
   {
     for (const auto & var_name : _system_variables)

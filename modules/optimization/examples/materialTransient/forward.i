@@ -64,7 +64,7 @@
     real_vector_names = 'D_x_coord D_y_coord D_vals'
     real_vector_values = '0.25 0.75 0.25 0.75;
                           0.25 0.25 0.75 0.75;
-                          1  0.1   0.1   0.01' # Reference solution
+                          1  0.2   0.2   0.05' # Reference solution
     outputs = none
   []
   [data]

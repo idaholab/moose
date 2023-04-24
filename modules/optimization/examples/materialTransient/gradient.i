@@ -52,8 +52,6 @@
     type = GenericFunctionMaterial
     prop_names = 'D'
     prop_values = 'diffc_fun'
-    output_properties = 'D'
-    outputs = 'exodus'
   []
 []
 
@@ -122,8 +120,4 @@
 
   dt = 0.1
   num_steps = 10
-[]
-
-[Outputs]
-  exodus = true
 []

@@ -28,14 +28,10 @@ public:
   virtual void timestepSetup() override;
 
 protected:
-  /**
-   * Get the forward problem time based on the adjoint backwards time stepping
-   *
-   * @return Real Forward simulation time
-   */
-  Real getActualTime() const { return _reverse_time_end ? *_reverse_time_end - _t + _dt : _t; }
-
-private:
-  const Real * const _reverse_time_end;
+  /// Optional input for mapping between adjoint simulation time and adjoint simulation time
+  const Real & _reverse_time_end;
+  /// The system time of the last instance the file was loaded
   std::time_t _file_mod_time;
+  /// The forward simulation time for last instance the solution was updated
+  Real _actual_interpolation_time;
 };

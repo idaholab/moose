@@ -5,9 +5,9 @@
   type = OptimizationReporter
   parameter_names = 'D'
   num_values = '4'
-  initial_condition = '1 1 1 1'
-  upper_bounds = '1e3'
-  lower_bounds = '1e-2'
+  initial_condition = '0.01 0.01 0.01 0.01'
+  upper_bounds = '1e2'
+  lower_bounds = '1e-3'
 
   measurement_file = forward_out_data_0011.csv
   file_xcoord = measurement_xcoord
@@ -55,14 +55,6 @@
     from_reporters = 'data/simulation_values'
     to_reporters = 'OptimizationReporter/simulation_values'
   []
-  # Need this so that the final forward solution is set in the initial time step of the adjoint simulation
-  [forward_to_adjoint]
-    type = MultiAppCopyTransfer
-    from_multi_app = forward
-    to_multi_app = adjoint
-    source_variable = u
-    variable = u
-  []
   [to_adjoint]
     type = MultiAppReporterTransfer
     to_multi_app = adjoint
@@ -92,5 +84,4 @@
   tao_solver = taobqnls
   petsc_options_iname = '-tao_gatol'
   petsc_options_value = '1e-4'
-  verbose = true
 []
