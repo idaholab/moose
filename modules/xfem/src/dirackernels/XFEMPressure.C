@@ -13,6 +13,8 @@
 #include "ElementPairLocator.h"
 #include "FEProblem.h"
 
+#include "libmesh/int_range.h"
+
 registerMooseObject("XFEMApp", XFEMPressure);
 
 InputParameters
@@ -30,10 +32,9 @@ XFEMPressure::XFEMPressure(const InputParameters & parameters)
   : DiracKernel(parameters),
     _component(getParam<unsigned int>("component")),
     _factor(getParam<Real>("factor")),
-    _function(isParamValid("function") ? &getFunction("function") : NULL)
+    _function(isParamValid("function") ? &getFunction("function") : nullptr),
+    _element_pair_locators(_subproblem.geomSearchData()._element_pair_locators)
 {
-  GeometricSearchData & geo_search_data = _subproblem.geomSearchData();
-  _element_pair_locators = &geo_search_data._element_pair_locators;
 }
 
 void
@@ -42,25 +43,17 @@ XFEMPressure::addPoints()
   _elem_qp_normal.clear();
   _elem_qp_JxW.clear();
 
-  for (std::map<unsigned int, std::shared_ptr<ElementPairLocator>>::iterator it_epl =
-           _element_pair_locators->begin();
-       it_epl != _element_pair_locators->end();
-       ++it_epl)
+  for (const auto & epl : _element_pair_locators)
   {
-    ElementPairLocator & elem_pair_loc = *it_epl->second;
-    // go over pair elements
-    const std::list<std::pair<const Elem *, const Elem *>> & elem_pairs =
-        elem_pair_loc.getElemPairs();
-    for (std::list<std::pair<const Elem *, const Elem *>>::const_iterator it_ep =
-             elem_pairs.begin();
-         it_ep != elem_pairs.end();
-         ++it_ep)
+    ElementPairLocator & elem_pair_loc = *epl.second;
+    // go over element pairs
+    const auto & elem_pairs = elem_pair_loc.getElemPairs();
+    for (const auto & elem_pair : elem_pairs)
     {
-      const Elem * elem1 = it_ep->first;
-      const Elem * elem2 = it_ep->second;
-      const ElementPairInfo & info = elem_pair_loc.getElemPairInfo(*it_ep);
+      const auto [elem1, elem2] = elem_pair;
+      const ElementPairInfo & info = elem_pair_loc.getElemPairInfo(elem_pair);
 
-      for (unsigned int i = 0; i < info._elem1_constraint_q_point.size(); ++i)
+      for (const auto i : index_range(info._elem1_constraint_q_point))
       {
         _elem_qp_normal[elem1][i] = -info._elem1_normal;
         _elem_qp_normal[elem2][i] = -info._elem2_normal;

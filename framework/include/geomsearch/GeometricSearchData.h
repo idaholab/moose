@@ -50,22 +50,21 @@ public:
 
   NearestNodeLocator & getNearestNodeLocator(const BoundaryName & primary,
                                              const BoundaryName & secondary);
-  NearestNodeLocator & getNearestNodeLocator(const unsigned int primary_id,
-                                             const unsigned int secondary_id);
+  NearestNodeLocator & getNearestNodeLocator(const BoundaryID primary_id,
+                                             const BoundaryID secondary_id);
 
   NearestNodeLocator & getQuadratureNearestNodeLocator(const BoundaryName & primary,
                                                        const BoundaryName & secondary);
-  NearestNodeLocator & getQuadratureNearestNodeLocator(const unsigned int primary_id,
-                                                       const unsigned int secondary_id);
+  NearestNodeLocator & getQuadratureNearestNodeLocator(const BoundaryID primary_id,
+                                                       const BoundaryID secondary_id);
 
-  const std::map<std::pair<unsigned int, unsigned int>, PenetrationLocator *> &
+  const std::map<std::pair<BoundaryID, BoundaryID>, PenetrationLocator *> &
   getPenetrationLocators() const
   {
     return _penetration_locators;
   }
 
-  void addElementPairLocator(const unsigned int & interface_id,
-                             std::shared_ptr<ElementPairLocator> epl);
+  void addElementPairLocator(BoundaryID interface_id, std::shared_ptr<ElementPairLocator> epl);
 
   /**
    * Update all of the search objects.
@@ -98,16 +97,16 @@ public:
   // protected:
   SubProblem & _subproblem;
   MooseMesh & _mesh;
-  std::map<std::pair<unsigned int, unsigned int>, PenetrationLocator *> _penetration_locators;
-  std::map<std::pair<unsigned int, unsigned int>, NearestNodeLocator *> _nearest_node_locators;
-  std::map<unsigned int, std::shared_ptr<ElementPairLocator>> _element_pair_locators;
+  std::map<std::pair<BoundaryID, BoundaryID>, PenetrationLocator *> _penetration_locators;
+  std::map<std::pair<BoundaryID, BoundaryID>, NearestNodeLocator *> _nearest_node_locators;
+  std::map<BoundaryID, std::shared_ptr<ElementPairLocator>> _element_pair_locators;
 
 protected:
   /// These are _real_ boundaries that have quadrature nodes on them.
-  std::set<unsigned int> _quadrature_boundaries;
+  std::set<BoundaryID> _quadrature_boundaries;
 
   /// A mapping of the real boundary id to the secondary boundary ids
-  std::map<unsigned int, unsigned int> _secondary_to_qsecondary;
+  std::map<BoundaryID, BoundaryID> _secondary_to_qsecondary;
 
 private:
   /**
@@ -119,19 +118,19 @@ private:
    * nodeset
    * @param reiniting Whether we are reinitializing, e.g. whether we need to re-generate q-nodes
    */
-  void generateQuadratureNodes(unsigned int secondary_id,
-                               unsigned int qsecondary_id,
+  void generateQuadratureNodes(const BoundaryID secondary_id,
+                               const BoundaryID qsecondary_id,
                                bool reiniting = false);
 
   /**
    * Update the positions of the quadrature nodes.
    */
-  void updateQuadratureNodes(unsigned int secondary_id);
+  void updateQuadratureNodes(const BoundaryID secondary_id);
 
   /**
    * Completely redo quadrature nodes
    */
-  void reinitQuadratureNodes(unsigned int secondary_id);
+  void reinitQuadratureNodes(const BoundaryID secondary_id);
 
   /**
    * Denotes whether this is the first time the geometric search objects have been updated.
