@@ -17,6 +17,11 @@
 #include "NonlinearSystemBase.h"
 #include "Parser.h"
 
+#include <set>
+#include <algorithm>
+#include <unordered_map>
+#include <limits>
+
 #include "libmesh/petsc_nonlinear_solver.h"
 #include "libmesh/string_to_enum.h"
 
@@ -32,17 +37,19 @@ static unsigned int contact_userobject_counter = 0;
 // Counter for distinct contact action objects
 static unsigned int contact_action_counter = 0;
 
-// for mortar subdomains
+// For mortar subdomains
 registerMooseAction("ContactApp", ContactAction, "append_mesh_generator");
 registerMooseAction("ContactApp", ContactAction, "add_aux_variable");
-// for mortar Lagrange multiplier
+// For mortar Lagrange multiplier
 registerMooseAction("ContactApp", ContactAction, "add_contact_aux_variable");
 registerMooseAction("ContactApp", ContactAction, "add_mortar_variable");
 registerMooseAction("ContactApp", ContactAction, "add_aux_kernel");
-// for mortar constraint
+// For mortar constraint
 registerMooseAction("ContactApp", ContactAction, "add_constraint");
 registerMooseAction("ContactApp", ContactAction, "output_penetration_info_vars");
 registerMooseAction("ContactApp", ContactAction, "add_user_object");
+// For automatic generation of contact pairs
+registerMooseAction("ContactApp", ContactAction, "check_generated_mesh");
 
 InputParameters
 ContactAction::validParams()
@@ -50,10 +57,18 @@ ContactAction::validParams()
   InputParameters params = Action::validParams();
   params += ContactAction::commonParameters();
 
-  params.addRequiredParam<std::vector<BoundaryName>>(
+  params.addParam<std::vector<BoundaryName>>(
       "primary", "The list of boundary IDs referring to primary sidesets");
-  params.addRequiredParam<std::vector<BoundaryName>>(
+  params.addParam<std::vector<BoundaryName>>(
       "secondary", "The list of boundary IDs referring to secondary sidesets");
+  params.addParam<std::vector<BoundaryName>>(
+      "nodeset_list",
+      "The list of boundary IDs referring to nodesets which will define solid centers of gravity. "
+      "These, in turn, will generate unique primary-secondary pairs with no consideration for the "
+      "selection of side within the pair. This capability is intended for use when many "
+      "bodies with straight extrusion axis (or a 2D tiled pattern) can be in contact with "
+      "neighbors. If this input is chosen to describe "
+      "contacting surfaces, separate 'primary' and 'secondary' inputs cannot be utilized. ");
   params.addDeprecatedParam<MeshGeneratorName>(
       "mesh",
       "The mesh generator for mortar method",
@@ -62,11 +77,9 @@ ContactAction::validParams()
                                 "Offset to gap distance from secondary side");
   params.addParam<VariableName>("mapped_primary_gap_offset",
                                 "Offset to gap distance mapped from primary side");
-
   params.addParam<std::vector<VariableName>>(
       "displacements",
       "The displacements appropriate for the simulation geometry and coordinate system");
-
   params.addParam<Real>(
       "penalty",
       1e8,
@@ -191,8 +204,24 @@ ContactAction::ContactAction(const InputParameters & params)
     _model(getParam<MooseEnum>("model").getEnum<ContactModel>()),
     _formulation(getParam<MooseEnum>("formulation").getEnum<ContactFormulation>()),
     _generate_mortar_mesh(getParam<bool>("generate_mortar_mesh")),
-    _mortar_dynamics(getParam<bool>("mortar_dynamics"))
+    _mortar_dynamics(getParam<bool>("mortar_dynamics")),
+    _mesh(nullptr)
 {
+  // Check for automatic selection of contact pairs.
+  if (getParam<std::vector<BoundaryName>>("nodeset_list").size() > 1)
+    _nodeset_list = getParam<std::vector<BoundaryName>>("nodeset_list");
+
+  if (_nodeset_list.size() > 0 && _boundary_pairs.size() != 0)
+    paramError(
+        "nodeset_list",
+        "If a nodeset list is provided, primary and secondary surfaces will be identified "
+        "automatically. Therefore, one cannot provide a nodeset list and primary/secondary lists.");
+  else if (_nodeset_list.size() == 0 && _boundary_pairs.size() == 0)
+    paramError("primary",
+               "'primary' and 'secondary' surfaces or a list of nodesets for automatic pair "
+               "generation need to be provided.");
+
+  // End of checks for automatic selection of contact pairs.
 
   if (_boundary_pairs.size() != 1 && _formulation == ContactFormulation::MORTAR)
     paramError("formulation", "When using mortar, a vector of contact pairs cannot be used");
@@ -276,7 +305,7 @@ ContactAction::ContactAction(const InputParameters & params)
 void
 ContactAction::removeRepeatedPairs()
 {
-  if (_boundary_pairs.size() == 0)
+  if (_boundary_pairs.size() == 0 && _nodeset_list.size() == 0)
     paramError(
         "primary",
         "Number of contact pairs in the contact action is zero. Please revise your input file.");
@@ -962,6 +991,9 @@ ContactAction::addMortarContact()
 void
 ContactAction::addNodeFaceContact()
 {
+  if (_current_task == "check_generated_mesh" && _nodeset_list.size() > 0)
+    createSidesetPairsFromGeometry();
+
   if (_current_task != "add_constraint")
     return;
 
@@ -1026,6 +1058,101 @@ ContactAction::addNodeFaceContact()
       _problem->addConstraint(constraint_type, name, params);
     }
   }
+}
+
+void
+ContactAction::createSidesetPairsFromGeometry()
+{
+  mooseInfo("The contact action is reading the list of sidesets and matching them assuming that: "
+            "1) Those sidesets wrap around the surfaces of the bodies, 2) Axisymmetry of the "
+            "geometry and the mesh exists. Deviations from axisymmetry may give rise to wrong "
+            "contact pairing. The user is encouraged to check the numerical results.");
+
+  _mesh = &_problem->mesh();
+
+  // Compute centers of gravity for each nodeset
+  std::vector<std::pair<BoundaryName, Point>> nodeset_list_cog;
+
+  if (_mesh)
+  {
+    const auto & nodeset_ids = _mesh->meshNodesetIds();
+
+    // Loop over sidesets
+    for (const auto & nodeset_id : _nodeset_list)
+    {
+      // If the nodeset provided in the input file isn't in the mesh, error out.
+      const auto find_set = nodeset_ids.find(_mesh->getBoundaryID(nodeset_id));
+      if (find_set == nodeset_ids.end())
+        paramError("nodeset_list",
+                   "The nodeset ",
+                   nodeset_id,
+                   " provided for the contact action is not in the mesh. "
+                   "Please revise your input file.");
+
+      // Accumulate components for center of gravity computations
+      Point cog(0.0, 0.0, 0.0);
+      std::vector<dof_id_type> nodelist = _mesh->getNodeList(_mesh->getBoundaryID(nodeset_id));
+
+      for (const auto & it : nodelist)
+      {
+        const Node * const node = _mesh->queryNodePtr(it);
+        cog += *node;
+      }
+
+      cog(0) /= nodelist.size();
+      cog(1) /= nodelist.size();
+      cog(2) /= nodelist.size();
+
+      nodeset_list_cog.emplace_back(nodeset_id, cog);
+    }
+  }
+  else
+    mooseError("Mesh is not available for automatic generation of pairs in the contact action");
+
+  // Vectors of distances for each pair
+  std::vector<std::pair<std::pair<BoundaryName, BoundaryName>, Real>> pairs_distances;
+
+  // Assign distances to identify nearby pairs.
+  for (std::size_t i = 0; i < nodeset_list_cog.size() - 1; i++)
+    for (std::size_t j = i + 1; j < nodeset_list_cog.size(); j++)
+    {
+      const Point & distance_vector = nodeset_list_cog[i].second - nodeset_list_cog[j].second;
+
+      if (nodeset_list_cog[i].first != nodeset_list_cog[j].first)
+      {
+        const Real distance = distance_vector.norm();
+        const std::pair pair = std::make_pair(nodeset_list_cog[i].first, nodeset_list_cog[j].first);
+        pairs_distances.emplace_back(std::make_pair(pair, distance));
+      }
+    }
+
+  Real minimum_representative_distance(std::numeric_limits<Real>::max());
+
+  // Iterate over pairs-distance and find a represenh
+  for (const auto & pair_distance : pairs_distances)
+    if (pair_distance.second > TOLERANCE && pair_distance.second < minimum_representative_distance)
+      minimum_representative_distance = pair_distance.second;
+
+  // Apply a tolerance to the minimum distance to avoid missing pairs
+  minimum_representative_distance *= 1.1;
+
+  mooseInfo("Reference distance between bodies for automatically assigning contact pairs in "
+            "contact action is: ",
+            minimum_representative_distance);
+
+  // Loop over all pairs and add those whose distance isn't trivial
+  // and less than the threshold distance
+  std::vector<std::pair<std::pair<BoundaryName, BoundaryName>, Real>> lean_pairs_distances;
+  for (const auto & pair_distance : pairs_distances)
+    if (pair_distance.second > TOLERANCE || pair_distance.second < minimum_representative_distance)
+      lean_pairs_distances.emplace_back(pair_distance);
+
+  // Create the boundary pairs (possibly with repeated pairs depending on user input)
+  for (const auto & lean_pairs_distance : lean_pairs_distances)
+    _boundary_pairs.push_back({lean_pairs_distance.first.first, lean_pairs_distance.first.second});
+
+  // Let's remove possibly repeated pairs
+  removeRepeatedPairs();
 }
 
 MooseEnum

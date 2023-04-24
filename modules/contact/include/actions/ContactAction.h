@@ -81,6 +81,9 @@ protected:
   /// Primary/Secondary boundary name pairs for mechanical contact
   std::vector<std::pair<BoundaryName, BoundaryName>> _boundary_pairs;
 
+  /// List of all possible nodesets for contact for automatic pairing (optional)
+  std::vector<BoundaryName> _nodeset_list;
+
   /// Contact model type enum
   const ContactModel _model;
 
@@ -99,6 +102,9 @@ protected:
   /// Type that we use in Actions for declaring coupling
   typedef std::vector<VariableName> CoupledName;
 
+  /// Reference to mesh.
+  MooseMesh * _mesh;
+
 private:
   /**
    * Generate mesh and other Moose objects for Mortar contact
@@ -113,7 +119,11 @@ private:
    */
   void addContactPressureAuxKernel();
   /**
-   * Remove repeated contact pairs in the input file.
+   * Remove repeated contact pairs from boundary pairs.
    */
   void removeRepeatedPairs();
+  /**
+   * Create contact pairs from wrap-around sidesets for axisymmetric bodies.
+   */
+  void createSidesetPairsFromGeometry();
 };
