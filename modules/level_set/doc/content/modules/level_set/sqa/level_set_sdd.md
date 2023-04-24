@@ -27,7 +27,7 @@ The {{module}} module inherits the wide range of pluggable systems from MOOSE. M
 information regarding MOOSE system design can be found in the framework [framework_sdd.md#system-design]
 section.
 
-The level set module provides basic functionality to solve the level set equation. The detailed information on the theory can be found at [Level Set Module Theory](level_set/theory.md). Kernels for advection, stabilization and re-initialization are provided. Several functions to compute initial conditions for the level set variable are available. Adaptivity is achieved through a specialized MOOSE problem [LevelSetProblem](syntax/base/LevelSetProblem.md).
+The level set module provides basic functionality to solve the level set equation. The detailed information on the theory can be found at [Level Set Module Theory](level_set/theory.md). Kernels for advection, stabilization and re-initialization are provided. Several functions to compute initial conditions for the level set variable are available. Adaptivity is achieved through a specialized MOOSE problem [LevelSetProblem](source/base/LevelSetProblem.md).
 
 Documentation for each object, data structure, and process specific to the
 module are kept up-to-date alongside the MOOSE documentation. Expected failure
