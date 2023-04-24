@@ -5,7 +5,7 @@
 ## Overview
 
 This object serves as a central storage for serialized solution fields in a stochastic
-simulation. The solution fields are indexed by variable name and global sample index.
+simulation. The solution fields are indexed by variable name (alphabetically) and global sample index.
 The solutions are stored in a parallel fashion, distributed based on which process
 deposits the serialized solution field.
 For time-dependent simulations this object holds multiple solution fields for each

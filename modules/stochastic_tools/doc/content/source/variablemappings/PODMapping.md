@@ -76,7 +76,7 @@ This object is only compatible with PETSc versions above 3.14 with SLEPc support
 
 Creating a mapping object:
 
-!listing test/tests/mappings/pod_mapping/pod_mapping_main.i block=VariableMappings
+!listing test/tests/variablemappings/pod_mapping/pod_mapping_main.i block=VariableMappings
 
 Loading a mapping object:
 

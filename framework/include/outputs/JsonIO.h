@@ -28,5 +28,5 @@ void to_json(nlohmann::json & json, const VariableName & var_name);
 namespace libMesh
 {
 void to_json(nlohmann::json & json, const Point & p);
-void to_json(nlohmann::json & json, const DenseVector<Real> & var_name);
+void to_json(nlohmann::json & json, const DenseVector<Real> & vector);
 }

@@ -11,7 +11,7 @@ the [!param](/Reporters/SingularTripletReporter/variables) parameter.
 
 ## Example Input File Syntax
 
-!listing test/tests/mappings/pod_mapping/pod_mapping_main.i block=Reporters
+!listing test/tests/variablemappings/pod_mapping/pod_mapping_main.i block=Reporters
 
 ## Syntax
 

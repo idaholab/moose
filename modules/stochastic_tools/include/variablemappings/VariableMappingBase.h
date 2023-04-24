@@ -71,4 +71,8 @@ public:
 protected:
   /// Storage for the names of the variables this mapping can handle
   const std::vector<VariableName> & _variable_names;
+
+  /// Bool to decide if we already have the mapping built or not to make sure it is
+  /// not computed multiple times unless the user requests it
+  std::map<VariableName, bool> & _mapping_ready_to_use;
 };

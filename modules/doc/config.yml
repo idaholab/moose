@@ -82,7 +82,9 @@ Extensions:
             richards: !include modules/richards/doc/remove.yml
             stochastic_tools: !include modules/stochastic_tools/doc/remove.yml
     MooseDocs.extensions.common:
-        shortcuts: !include framework/doc/globals.yml
+        shortcuts:
+            framework: !include framework/doc/globals.yml
+            stochastic_tools: !include modules/stochastic_tools/doc/globals.yml
     MooseDocs.extensions.acronym:
         acronyms: !include framework/doc/acronyms.yml
     MooseDocs.extensions.content:

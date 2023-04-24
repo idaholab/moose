@@ -28,6 +28,11 @@ VariableMappingBase::VariableMappingBase(const InputParameters & parameters)
     _variable_names(isParamValid("filename")
                         ? getModelData<std::vector<VariableName>>("variables")
                         : declareModelData<std::vector<VariableName>>(
-                              "variables", getParam<std::vector<VariableName>>("variables")))
+                              "variables", getParam<std::vector<VariableName>>("variables"))),
+    _mapping_ready_to_use(
+        isParamValid("filename")
+            ? setModelData<std::map<VariableName, bool>>("mapping_ready_to_use")
+            : declareModelData<std::map<VariableName, bool>>("mapping_ready_to_use"))
+
 {
 }

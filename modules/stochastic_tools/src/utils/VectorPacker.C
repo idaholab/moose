@@ -150,7 +150,7 @@ Packing<std::tuple<unsigned int, unsigned int, std::vector<Real>>>::pack(
 template <>
 std::tuple<unsigned int, unsigned int, std::vector<Real>>
 Packing<std::tuple<unsigned int, unsigned int, std::vector<Real>>>::unpack(
-    std::vector<Real>::const_iterator in, void *)
+    std::vector<Real>::const_iterator in, void * /*context*/)
 {
   // Decoding the vector length
   const std::size_t data_size = *in++;

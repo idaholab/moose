@@ -38,7 +38,7 @@ from the object warehouse using the helper functions. Good examples are the [Map
 
 ## Example Input File Syntax
 
-!listing test/tests/mappings/pod_mapping/pod_mapping_main.i block=VariableMappings
+!listing test/tests/variablemappings/pod_mapping/pod_mapping_main.i block=VariableMappings
 
 !syntax list /VariableMappings objects=True actions=False subsystems=False
 
