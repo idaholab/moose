@@ -1,11 +1,9 @@
-assembly_pitch = 16.4165
-
 [Mesh]
   [rmp]
     type = ReactorMeshParams
     dim = 3
     geom = "Hex"
-    assembly_pitch = ${fparse assembly_pitch}
+    assembly_pitch = 16.4165
     axial_regions = '10.07 30.79 6.56 85.85 1.52 106.07 1.51 12.13 5.05 93.87'
     axial_mesh_intervals = '1 3 1 9 1 20 1 2 1 9'
     top_boundary_id = 201
