@@ -162,7 +162,6 @@ MultiAppGeneralFieldTransfer::MultiAppGeneralFieldTransfer(const InputParameters
     _fe_problem.addReporter("MultiAppPositions", "_created_for_" + name(), pos_params);
     _nearest_positions_obj = &_fe_problem.getPositionsObject("_created_for_" + name());
   }
-
   // Dont let users get wrecked by bounding boxes if it looks like they are trying to extrapolate
   if (!_source_app_must_contain_point &&
       (_nearest_positions_obj || isParamSetByUser("from_app_must_contain_point")))
