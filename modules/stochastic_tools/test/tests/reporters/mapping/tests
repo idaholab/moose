@@ -4,7 +4,7 @@
 
   [from_parallelstorage]
     type = JSONDiff
-    requirement = 'The system should be able to map the solutions in a ParallelSolutionStorage container into a latent space.'
+    requirement = 'The system should be able to map the solutions in a snapshot container into a latent space.'
     input = map_main.i
     jsondiff = 'map_training_data.json'
     min_parallel=2

@@ -43,7 +43,3 @@ protected:
   std::map<VariableName, std::vector<Real>> & _singular_values;
   ///@}
 };
-
-/// Function facilitating printing singular vectors into JSON
-void to_json(nlohmann::json & json,
-             const std::map<VariableName, std::vector<DenseVector<Real>>> & modes);

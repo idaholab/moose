@@ -328,6 +328,9 @@ PODMapping::map(const VariableName & vname,
                 const DenseVector<Real> & full_order_vector,
                 std::vector<Real> & reduced_order_vector) const
 {
+  mooseAssert(_left_basis_functions.find(vname) != _left_basis_functions.end(),
+              "The bases for the requested variable are not available!");
+
   const auto & bases = _left_basis_functions[vname];
 
   reduced_order_vector.clear();

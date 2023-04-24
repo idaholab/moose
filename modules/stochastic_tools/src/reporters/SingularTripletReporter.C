@@ -8,6 +8,7 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "SingularTripletReporter.h"
+#include "JsonIO.h"
 
 registerMooseObject("StochasticToolsApp", SingularTripletReporter);
 
@@ -91,16 +92,5 @@ SingularTripletReporter::execute()
       _left_singular_vectors[vname].push_back(left_modes[mode_i]);
       _right_singular_vectors[vname].push_back(right_modes[mode_i]);
     }
-  }
-}
-
-void
-to_json(nlohmann::json & json, const std::map<VariableName, std::vector<DenseVector<Real>>> & modes)
-{
-  for (const auto & vname_pair : modes)
-  {
-    auto & variable_storage = json[vname_pair.first];
-    for (const auto & sample : vname_pair.second)
-      variable_storage.push_back(sample.get_values());
   }
 }
