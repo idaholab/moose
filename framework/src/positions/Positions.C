@@ -18,8 +18,8 @@ Positions::validParams()
   params.addParam<ReporterName>("initial_positions",
                                 "Positions at the beginning of the simulation");
 
-  // This parameter should be set by each derived class depending on whether positions generation
-  // is replicated or distributed. We want positions to be replicated across all ranks
+  // This parameter should be set by each derived class depending on whether the generation of
+  // positions is replicated or distributed. We want positions to be replicated across all ranks
   params.addRequiredParam<bool>("auto_broadcast",
                                 "Wether Positions should be broadcasted across all ranks");
   // This parameter should be set by each derived class depending on whether positions should
@@ -70,6 +70,33 @@ Positions::getPosition(unsigned int index, bool initial) const
     return _positions[index];
   else
     mooseError("Positions vector has not been initialized.");
+}
+
+const Point &
+Positions::getNearestPosition(const Point & target) const
+{
+  // TODO Use faster & fancier machinery such as a KNN-partition
+  unsigned int nearest_index = 0;
+  Real nearest_distance_sq = std::numeric_limits<float>::max();
+  for (const auto & pt : _positions)
+    if ((pt - target).norm_sq() < nearest_distance_sq)
+    {
+      nearest_index = &pt - &_positions[0];
+      nearest_distance_sq = (pt - target).norm_sq();
+    }
+
+#ifndef NDEBUG
+  // Check that no two positions are equidistant to the target
+  for (const auto & pt : _positions)
+    if (MooseUtils::absoluteFuzzyEqual((pt - target).norm_sq(), nearest_distance_sq) &&
+        (nearest_index != (&pt - &_positions[0])))
+      mooseWarning("Search for nearest position found several matches: " +
+                       Moose::stringify(_positions[&pt - &_positions[0]]) + " and " +
+                       Moose::stringify(_positions[nearest_index]),
+                   " at a distance of " + std::to_string(std::sqrt(nearest_distance_sq)));
+#endif
+
+  return _positions[nearest_index];
 }
 
 const std::vector<Point> &

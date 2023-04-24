@@ -32,10 +32,11 @@ public:
   const std::vector<std::vector<std::vector<std::vector<Point>>>> & getPositionsVector4D() const;
   ///}
 
-  ///{
-  /// Getters for a single position at a known index
+  /// Getter for a single position at a known index
   const Point & getPosition(unsigned int index, bool initial = false) const;
-  ///}
+
+  /// Find the nearest Position for a given point
+  const Point & getNearestPosition(const Point & target) const;
 
 protected:
   /// In charge of computing / loading the positions.
