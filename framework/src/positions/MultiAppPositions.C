@@ -8,6 +8,8 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "MultiAppPositions.h"
+#include "FEProblemBase.h"
+#include "DisplacedProblem.h"
 
 registerMooseObject("MooseApp", MultiAppPositions);
 
@@ -17,6 +19,10 @@ MultiAppPositions::validParams()
   InputParameters params = Positions::validParams();
   params.addRequiredParam<std::vector<MultiAppName>>(
       "multiapps", "Name(s) of the multiapps providing the positions");
+  params.addParam<bool>("use_apps_centroid",
+                        false,
+                        "Whether to use the mesh centroid offset by the app position rather than "
+                        "just the position of each child app");
 
   // Execute after multiapps have been created
   params.set<ExecFlagEnum>("execute_on") = EXEC_INITIAL;
@@ -31,7 +37,10 @@ MultiAppPositions::validParams()
   return params;
 }
 
-MultiAppPositions::MultiAppPositions(const InputParameters & parameters) : Positions(parameters) {}
+MultiAppPositions::MultiAppPositions(const InputParameters & parameters)
+  : Positions(parameters), _use_apps_centroid(getParam<bool>("use_apps_centroid"))
+{
+}
 
 void
 MultiAppPositions::initialize()
@@ -49,8 +58,24 @@ MultiAppPositions::initialize()
     for (const auto & i_global : make_range(multiapp->numGlobalApps()))
     {
       auto p = multiapp->position(i_global);
-      _positions.push_back(p);
-      _positions_2d[m_it].push_back(p);
+      if (!_use_apps_centroid)
+      {
+        _positions.push_back(p);
+        _positions_2d[m_it].push_back(p);
+      }
+      else
+      {
+        // Get the centroid of each subapp mesh
+        auto & fe_problem_base = multiapp->appProblemBase(i_global);
+        MeshBase & mesh = (getParam<bool>("use_displaced_mesh") &&
+                           fe_problem_base.getDisplacedProblem().get() != NULL)
+                              ? fe_problem_base.getDisplacedProblem()->mesh().getMesh()
+                              : fe_problem_base.mesh().getMesh();
+        Point centroid = MooseMeshUtils::meshCentroidCalculator(mesh);
+
+        _positions.push_back(p + centroid);
+        _positions_2d[m_it].push_back(p + centroid);
+      }
     }
   }
 }
