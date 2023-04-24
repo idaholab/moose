@@ -16,6 +16,7 @@
 #include "libmesh/parallel_algebra.h"
 
 registerMooseObject("MooseApp", CentroidMultiApp);
+// TODO: Deprecate and use Positions system
 
 InputParameters
 CentroidMultiApp::validParams()
@@ -27,6 +28,7 @@ CentroidMultiApp::validParams()
       " mesh.");
   params.suppressParameter<std::vector<Point>>("positions");
   params.suppressParameter<std::vector<FileName>>("positions_file");
+  params.suppressParameter<std::vector<PositionsName>>("positions_objects");
   return params;
 }
 

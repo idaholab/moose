@@ -65,6 +65,7 @@ MultiApp::validParams()
     app_types_strings << it->first << " ";
   MooseEnum app_types_options(app_types_strings.str(), "", true);
 
+  // Dynamic loading
   params.addParam<MooseEnum>("app_type",
                              app_types_options,
                              "The type of application to build (applications not "
@@ -83,6 +84,8 @@ MultiApp::validParams()
                         false,
                         "Tells MOOSE to manually load library dependencies. This should not be "
                         "necessary and is hear for debugging/troubleshooting.");
+
+  // Subapp positions
   params.addParam<std::vector<Point>>(
       "positions",
       "The positions of the App locations.  Each set of 3 values will represent a "
@@ -92,10 +95,18 @@ MultiApp::validParams()
                                          "Filename(s) that should be looked in for positions. Each"
                                          " set of 3 values in that file will represent a Point.  "
                                          "This and 'positions(_objects)' cannot be both supplied");
-  params.addParam<std::vector<ReporterName>>("positions_objects",
-                                             "The name of a Positions object that will contain the"
-                                             " locations of the sub-apps created. "
-                                             "This and 'positions(_file)' cannot be both supplied");
+  params.addParam<std::vector<PositionsName>>("positions_objects",
+                                              "The name of a Positions object that will contain "
+                                              "the locations of the sub-apps created. This and "
+                                              "'positions(_file)' cannot be both supplied");
+  params.addParam<bool>(
+      "output_in_position",
+      false,
+      "If true this will cause the output from the MultiApp to be 'moved' by its position vector");
+  params.addParam<bool>(
+      "run_in_position",
+      false,
+      "If true this will cause the mesh from the MultiApp to be 'moved' by its position vector");
 
   params.addRequiredParam<std::vector<FileName>>(
       "input_files",
@@ -132,27 +143,19 @@ MultiApp::validParams()
       "This is only needed if your sub-application needs to perform some setup "
       "actions in quiet, without other sub-applications working at the same time.");
 
-  params.addParam<bool>(
-      "output_in_position",
-      false,
-      "If true this will cause the output from the MultiApp to be 'moved' by its position vector");
-  params.addParam<bool>(
-      "run_in_position",
-      false,
-      "If true this will cause the mesh from the MultiApp to be 'moved' by its position vector");
-
   params.addParam<Real>("global_time_offset",
                         0,
                         "The time offset relative to the parent application for the purpose of "
                         "starting a subapp at a different time from the parent application. The "
                         "global time will be ahead by the offset specified here.");
+
+  // Resetting subapps
   params.addParam<std::vector<Real>>(
       "reset_time",
       std::vector<Real>(),
       "The time(s) at which to reset Apps given by the 'reset_apps' parameter.  "
       "Resetting an App means that it is destroyed and recreated, possibly "
       "modeling the insertion of 'new' material for that app.");
-
   params.addParam<std::vector<unsigned int>>(
       "reset_apps",
       "The Apps that will be reset when 'reset_time' is hit.  These are the App "
@@ -160,6 +163,7 @@ MultiApp::validParams()
       "Resetting an App means that it is destroyed and recreated, possibly modeling "
       "the insertion of 'new' material for that app.");
 
+  // Moving subapps
   params.addParam<Real>(
       "move_time",
       std::numeric_limits<Real>::max(),
@@ -169,7 +173,6 @@ MultiApp::validParams()
       "move_apps",
       "Apps, designated by their 'numbers' starting with 0 corresponding to the order "
       "of the App positions, to be moved at move_time to move_positions");
-
   params.addParam<std::vector<Point>>("move_positions",
                                       "The positions corresponding to each move_app.");
 
@@ -185,6 +188,7 @@ MultiApp::validParams()
       "to pass to the sub apps. Each line of a file is set to each sub app. If only "
       "one line is provided, it will be applied to all sub apps.");
 
+  // Fixed point iterations
   params.addRangeCheckedParam<Real>("relaxation_factor",
                                     1.0,
                                     "relaxation_factor>0 & relaxation_factor<2",
@@ -204,6 +208,12 @@ MultiApp::validParams()
       std::vector<PostprocessorName>(),
       "List of subapp postprocessors to use coupling "
       "algorithm on during Multiapp coupling iterations");
+  params.addParam<bool>("keep_solution_during_restore",
+                        false,
+                        "This is useful when doing MultiApp coupling iterations. It takes the "
+                        "final solution from the previous coupling iteration"
+                        "and re-uses it as the initial guess "
+                        "for the next coupling iteration");
 
   params.addDeprecatedParam<bool>("clone_master_mesh",
                                   false,
@@ -211,13 +221,6 @@ MultiApp::validParams()
                                   "clone_master_mesh is deprecated, use clone_parent_mesh instead");
   params.addParam<bool>(
       "clone_parent_mesh", false, "True to clone parent app mesh and use it for this MultiApp.");
-
-  params.addParam<bool>("keep_solution_during_restore",
-                        false,
-                        "This is useful when doing MultiApp coupling iterations. It takes the "
-                        "final solution from the previous coupling iteration"
-                        "and re-uses it as the initial guess "
-                        "for the next coupling iteration");
 
   params.addPrivateParam<std::shared_ptr<CommandLine>>("_command_line");
   params.addPrivateParam<bool>("use_positions", true);
@@ -568,8 +571,8 @@ MultiApp::fillPositions()
   }
   else if (isParamValid("positions_objects"))
   {
-    std::vector<ReporterName> positions_param_objs =
-        getParam<std::vector<ReporterName>>("positions_objects");
+    std::vector<PositionsName> positions_param_objs =
+        getParam<std::vector<PositionsName>>("positions_objects");
     std::vector<FileName> input_files = getParam<std::vector<FileName>>("input_files");
 
     if (input_files.size() != 1 && positions_param_objs.size() != input_files.size())
@@ -587,8 +590,7 @@ MultiApp::fillPositions()
     for (unsigned int p_obj_it = 0; p_obj_it < positions_param_objs.size(); p_obj_it++)
     {
       const std::string positions_name = positions_param_objs[p_obj_it];
-      auto positions_obj = dynamic_cast<const Positions *>(
-          &_fe_problem.getUserObjectBase(MooseUtils::split(positions_name, "/")[0]));
+      auto positions_obj = &_fe_problem.getPositionsObject(positions_name);
 
       auto data = positions_obj->getPositions(true);
 
