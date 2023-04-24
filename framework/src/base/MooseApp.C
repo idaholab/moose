@@ -1873,17 +1873,20 @@ MooseApp::loadLibraryAndDependencies(const std::string & library_filename,
   if (dl_lib_filename.empty())
     return;
 
+  const auto & [dir, file_name] = MooseUtils::splitFileName(library_filename);
+
   // Time to load the library, First see if we've already loaded this particular dynamic library
   //     1) make sure we haven't already loaded this library
   // AND 2) make sure we have a library name (we won't for static linkage)
-  auto dyn_lib_it = _lib_handles.find(library_filename);
+  //
+  // Note: Here was are going to assume uniqueness based on the filename alone. This has significant
+  // implications for applications that have have "diamond" inheritance of libraries (usually
+  // modules) We will only load one of those libraries, versions be damned.
+  auto dyn_lib_it = _lib_handles.find(file_name);
   if (dyn_lib_it == _lib_handles.end())
   {
-    std::pair<std::string, std::string> lib_name_parts =
-        MooseUtils::splitFileName(library_filename);
-
     // Assemble the actual filename using the base path of the *.la file and the dl_lib_filename
-    std::string dl_lib_full_path = lib_name_parts.first + '/' + dl_lib_filename;
+    const auto & dl_lib_full_path = dir + '/' + dl_lib_filename;
 
     MooseUtils::checkFileReadable(dl_lib_full_path, false, /*throw_on_unreadable=*/true);
 
@@ -1902,8 +1905,9 @@ MooseApp::loadLibraryAndDependencies(const std::string & library_filename,
 
     DynamicLibraryInfo lib_info;
     lib_info.library_handle = lib_handle;
+    lib_info.full_path = library_filename;
 
-    auto insert_ret = _lib_handles.insert(std::make_pair(library_filename, lib_info));
+    auto insert_ret = _lib_handles.insert(std::make_pair(file_name, lib_info));
     mooseAssert(insert_ret.second == true, "Error inserting into lib_handles map");
 
     dyn_lib_it = insert_ret.first;
