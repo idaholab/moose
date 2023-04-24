@@ -893,7 +893,7 @@ setSinglePetscOption(const std::string & name, const std::string & value)
   // PETSc 3.7.0 and later version.  First argument is the options
   // database to use, NULL indicates the default global database.
   ierr = PetscOptionsSetValue(
-      LIBMESH_PETSC_NULLPTR, name.c_str(), value == "" ? PETSC_NULL : value.c_str());
+      LIBMESH_PETSC_NULLPTR, name.c_str(), value == "" ? LIBMESH_PETSC_NULLPTR : value.c_str());
 #endif
 
   // Not convenient to use the usual error checking macro, because we
