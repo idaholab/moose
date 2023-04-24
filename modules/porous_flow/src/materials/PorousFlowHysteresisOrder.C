@@ -134,17 +134,27 @@ PorousFlowHysteresisOrder::computeQpProperties()
   // would be nice if we could compute them only at the start of each timestep instead of every
   // nonlinear iteration
 
+  // For finite elements involved in boundary-condition calculations, number of nodes > number of
+  // quadpoints.  Material values on these elements are not computed during initial setup, which
+  // means that for timestep = 1, _sat_older.size() = number of quadpoints.  Since
+  // computeQpProperties() is computed with 0 <= _qp < number of nodes (for nodal materials), this
+  // results in an out-of-bounds error on _sat_older.  PorousFlow's implementation of hysteresis
+  // lags one timestep behind, and assumes that _sat_older = _sat_old at timestep = 1 anyway, so
+  // just use it:
+  const MaterialProperty<std::vector<Real>> & sat_older =
+      (_nodal_material && _sat_old.size() != _sat_older.size()) ? _sat_old : _sat_older;
+
   // whether saturation has been reducing ("drying" or "draining"):
   const bool drying = (_hys_order_old[_qp] % 2 == 0);
   // whether have been drying but are now increasing saturation ("wetting" or "imbibing"):
-  const bool dry2wet = drying && (_sat_old[_qp][_liquid_ph_num] > _sat_older[_qp][_liquid_ph_num]);
+  const bool dry2wet = drying && (_sat_old[_qp][_liquid_ph_num] > sat_older[_qp][_liquid_ph_num]);
   // whether have been wetting but are now decreasing saturation:
-  const bool wet2dry = !drying && (_sat_old[_qp][_liquid_ph_num] < _sat_older[_qp][_liquid_ph_num]);
+  const bool wet2dry = !drying && (_sat_old[_qp][_liquid_ph_num] < sat_older[_qp][_liquid_ph_num]);
   if ((dry2wet || wet2dry) && _hys_order_old[_qp] < PorousFlowConstants::MAX_HYSTERESIS_ORDER)
   {
     _hys_order[_qp] = _hys_order_old[_qp] + 1;
     _hys_sat_tps[_qp] = _hys_sat_tps_old[_qp];
-    _hys_sat_tps[_qp].at(_hys_order_old[_qp]) = _sat_older[_qp][_liquid_ph_num];
+    _hys_sat_tps[_qp].at(_hys_order_old[_qp]) = sat_older[_qp][_liquid_ph_num];
   }
   else
   {

@@ -176,7 +176,7 @@ petscSetupDM(NonlinearSystemBase & nl)
 {
   PetscErrorCode ierr;
   PetscBool ismoose;
-  DM dm = PETSC_NULL;
+  DM dm = LIBMESH_PETSC_NULLPTR;
 
   // Initialize the part of the DM package that's packaged with Moose; in the PETSc source tree this
   // call would be in DMInitializePackage()
@@ -229,7 +229,7 @@ addPetscOptionsFromCommandline()
 #if PETSC_VERSION_LESS_THAN(3, 7, 0)
     PetscOptionsInsert(&argc, &args, NULL);
 #else
-    PetscOptionsInsert(PETSC_NULL, &argc, &args, NULL);
+    PetscOptionsInsert(LIBMESH_PETSC_NULLPTR, &argc, &args, NULL);
 #endif
   }
 }
@@ -243,7 +243,7 @@ petscSetOptions(FEProblemBase & problem)
 #if PETSC_VERSION_LESS_THAN(3, 7, 0)
   PetscOptionsClear();
 #else
-  PetscOptionsClear(PETSC_NULL);
+  PetscOptionsClear(LIBMESH_PETSC_NULLPTR);
 #endif
 
   setSolverOptions(problem.solverParams());
@@ -515,7 +515,8 @@ petscSetDefaults(FEProblemBase & problem)
     // we use the default context provided by PETSc in addition to
     // a few other tests.
     {
-      auto ierr = SNESSetConvergenceTest(snes, petscNonlinearConverged, &problem, PETSC_NULL);
+      auto ierr =
+          SNESSetConvergenceTest(snes, petscNonlinearConverged, &problem, LIBMESH_PETSC_NULLPTR);
       CHKERRABORT(nl.comm().get(), ierr);
     }
 
@@ -887,11 +888,12 @@ setSinglePetscOption(const std::string & name, const std::string & value)
   PetscErrorCode ierr;
 
 #if PETSC_VERSION_LESS_THAN(3, 7, 0)
-  ierr = PetscOptionsSetValue(name.c_str(), value == "" ? PETSC_NULL : value.c_str());
+  ierr = PetscOptionsSetValue(name.c_str(), value == "" ? LIBMESH_PETSC_NULLPTR : value.c_str());
 #else
   // PETSc 3.7.0 and later version.  First argument is the options
   // database to use, NULL indicates the default global database.
-  ierr = PetscOptionsSetValue(PETSC_NULL, name.c_str(), value == "" ? PETSC_NULL : value.c_str());
+  ierr = PetscOptionsSetValue(
+      LIBMESH_PETSC_NULLPTR, name.c_str(), value == "" ? LIBMESH_PETSC_NULLPTR : value.c_str());
 #endif
 
   // Not convenient to use the usual error checking macro, because we

@@ -25,7 +25,7 @@ std::map<std::string, unsigned int> MaterialPropertyStorage::_prop_ids;
  * @param data_from Source data
  */
 void
-shallowCopyData(const std::vector<unsigned int> & stateful_prop_ids,
+shallowSwapData(const std::vector<unsigned int> & stateful_prop_ids,
                 MaterialProperties & data,
                 MaterialProperties & data_from)
 {
@@ -41,7 +41,7 @@ shallowCopyData(const std::vector<unsigned int> & stateful_prop_ids,
 }
 
 void
-shallowCopyDataBack(const std::vector<unsigned int> & stateful_prop_ids,
+shallowSwapDataBack(const std::vector<unsigned int> & stateful_prop_ids,
                     MaterialProperties & data,
                     MaterialProperties & data_from)
 {
@@ -57,14 +57,11 @@ shallowCopyDataBack(const std::vector<unsigned int> & stateful_prop_ids,
 }
 
 MaterialPropertyStorage::MaterialPropertyStorage()
-  : _has_stateful_props(false), _has_older_prop(false)
+  : _has_stateful_props(false), _has_older_prop(false), _spin_mtx(libMesh::Threads::spin_mtx)
 {
-  _props_elem =
-      std::make_unique<HashMap<const Elem *, HashMap<unsigned int, MaterialProperties>>>();
-  _props_elem_old =
-      std::make_unique<HashMap<const Elem *, HashMap<unsigned int, MaterialProperties>>>();
-  _props_elem_older =
-      std::make_unique<HashMap<const Elem *, HashMap<unsigned int, MaterialProperties>>>();
+  _props_elem = std::make_unique<PropsType>();
+  _props_elem_old = std::make_unique<PropsType>();
+  _props_elem_older = std::make_unique<PropsType>();
 }
 
 MaterialPropertyStorage::~MaterialPropertyStorage() { releaseProperties(); }
@@ -107,6 +104,7 @@ MaterialPropertyStorage::eraseProperty(const Elem * elem)
 
 void
 MaterialPropertyStorage::prolongStatefulProps(
+    processor_id_type pid,
     const std::vector<std::vector<QpMap>> & refinement_map,
     const QBase & qrule,
     const QBase & qrule_face,
@@ -153,6 +151,11 @@ MaterialPropertyStorage::prolongStatefulProps(
       continue;
 
     const Elem * child_elem = elem.child_ptr(child);
+
+    // If it's not a local child then it'll be prolonged where it is
+    // local
+    if (child_elem->processor_id() != pid)
+      continue;
 
     mooseAssert(child < refinement_map.size(), "Refinement_map vector not initialized");
     const std::vector<QpMap> & child_map = refinement_map[child];
@@ -272,9 +275,9 @@ MaterialPropertyStorage::initStatefulProps(MaterialData & material_data,
   // Copy the properties to Old and Older as needed
   for (unsigned int i = 0; i < _stateful_prop_id_to_prop_id.size(); ++i)
   {
-    auto curr = props(&elem, side)[i];
-    auto old = propsOld(&elem, side)[i];
-    auto older = propsOlder(&elem, side)[i];
+    auto curr = setProps(&elem, side)[i];
+    auto old = setPropsOld(&elem, side)[i];
+    PropertyValue * older = hasOlderProperties() ? setPropsOlder(&elem, side)[i] : nullptr;
     for (unsigned int qp = 0; qp < n_qpoints; ++qp)
     {
       old->qpCopy(qp, curr, qp);
@@ -333,13 +336,13 @@ MaterialPropertyStorage::copy(MaterialData & material_data,
 void
 MaterialPropertyStorage::swap(MaterialData & material_data, const Elem & elem, unsigned int side)
 {
-  Threads::spin_mutex::scoped_lock lock(Threads::spin_mtx);
+  Threads::spin_mutex::scoped_lock lock(this->_spin_mtx);
 
-  shallowCopyData(_stateful_prop_id_to_prop_id, material_data.props(), props(&elem, side));
-  shallowCopyData(_stateful_prop_id_to_prop_id, material_data.propsOld(), propsOld(&elem, side));
+  shallowSwapData(_stateful_prop_id_to_prop_id, material_data.props(), setProps(&elem, side));
+  shallowSwapData(_stateful_prop_id_to_prop_id, material_data.propsOld(), setPropsOld(&elem, side));
   if (hasOlderProperties())
-    shallowCopyData(
-        _stateful_prop_id_to_prop_id, material_data.propsOlder(), propsOlder(&elem, side));
+    shallowSwapData(
+        _stateful_prop_id_to_prop_id, material_data.propsOlder(), setPropsOlder(&elem, side));
 }
 
 void
@@ -347,14 +350,24 @@ MaterialPropertyStorage::swapBack(MaterialData & material_data,
                                   const Elem & elem,
                                   unsigned int side)
 {
-  Threads::spin_mutex::scoped_lock lock(Threads::spin_mtx);
+  Threads::spin_mutex::scoped_lock lock(this->_spin_mtx);
 
-  shallowCopyDataBack(_stateful_prop_id_to_prop_id, props(&elem, side), material_data.props());
-  shallowCopyDataBack(
-      _stateful_prop_id_to_prop_id, propsOld(&elem, side), material_data.propsOld());
+  shallowSwapDataBack(_stateful_prop_id_to_prop_id, setProps(&elem, side), material_data.props());
+  shallowSwapDataBack(
+      _stateful_prop_id_to_prop_id, setPropsOld(&elem, side), material_data.propsOld());
   if (hasOlderProperties())
-    shallowCopyDataBack(
-        _stateful_prop_id_to_prop_id, propsOlder(&elem, side), material_data.propsOlder());
+    shallowSwapDataBack(
+        _stateful_prop_id_to_prop_id, setPropsOlder(&elem, side), material_data.propsOlder());
+
+  // Workaround for MOOSE difficulties in keeping materialless
+  // elements (e.g. Lower D elements in Mortar code) materialless
+  if (props(&elem, side).empty())
+    (*_props_elem)[&elem].erase(side);
+  if (propsOld(&elem, side).empty())
+    (*_props_elem_old)[&elem].erase(side);
+  if (hasOlderProperties())
+    if (propsOlder(&elem, side).empty())
+      (*_props_elem_older)[&elem].erase(side);
 }
 
 bool
@@ -418,32 +431,36 @@ MaterialPropertyStorage::initProps(MaterialData & material_data,
                                    unsigned int side,
                                    unsigned int n_qpoints)
 {
+  this->initProps(material_data, *_props_elem, elem, side, n_qpoints);
+  this->initProps(material_data, *_props_elem_old, elem, side, n_qpoints);
+  if (this->hasOlderProperties())
+    this->initProps(material_data, *_props_elem_older, elem, side, n_qpoints);
+}
+
+void
+MaterialPropertyStorage::initProps(MaterialData & material_data,
+                                   PropsType & mat_props_map,
+                                   const Elem * elem,
+                                   unsigned int side,
+                                   unsigned int n_qpoints)
+{
   material_data.resize(n_qpoints);
   auto n = _stateful_prop_id_to_prop_id.size();
+
+  MaterialProperties & mat_props = mat_props_map[elem][side];
 
   // In some special cases, material_data might be larger than n_qpoints
   if (material_data.isOnlyResizeIfSmaller())
     n_qpoints = material_data.nQPoints();
 
-  if (props(elem, side).size() < n)
-    props(elem, side).resize(n, nullptr);
-  if (propsOld(elem, side).size() < n)
-    propsOld(elem, side).resize(n, nullptr);
-  if (propsOlder(elem, side).size() < n)
-    propsOlder(elem, side).resize(n, nullptr);
+  if (mat_props.size() < n)
+    mat_props.resize(n, nullptr);
 
   // init properties (allocate memory. etc)
   for (unsigned int i = 0; i < n; i++)
   {
     auto prop_id = _stateful_prop_id_to_prop_id[i];
-    // duplicate the stateful property in property storage (all three states - we will reuse the
-    // allocated memory there)
-    // also allocating the right amount of memory, so we do not have to resize, etc.
-    if (props(elem, side)[i] == nullptr)
-      props(elem, side)[i] = material_data.props()[prop_id]->init(n_qpoints);
-    if (propsOld(elem, side)[i] == nullptr)
-      propsOld(elem, side)[i] = material_data.propsOld()[prop_id]->init(n_qpoints);
-    if (hasOlderProperties() && propsOlder(elem, side)[i] == nullptr)
-      propsOlder(elem, side)[i] = material_data.propsOlder()[prop_id]->init(n_qpoints);
+    if (mat_props[i] == nullptr)
+      mat_props[i] = material_data.props()[prop_id]->init(n_qpoints);
   }
 }

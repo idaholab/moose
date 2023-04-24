@@ -21,6 +21,11 @@ public:
 
   ActiveLearningMonteCarloSampler(const InputParameters & parameters);
 
+  /**
+   * Returns true if the adaptive sampling is completed
+   */
+  virtual bool isAdaptiveSamplingCompleted() const override { return _is_sampling_completed; }
+
 protected:
   /// Gather all the samples
   virtual void sampleSetUp(const Sampler::SampleMode mode) override;
@@ -33,6 +38,9 @@ protected:
   /// Flag samples if the surrogate prediction was inadequate
   const std::vector<bool> & _flag_sample;
 
+  /// True if the sampling is completed
+  bool _is_sampling_completed = false;
+
 private:
   /// Track the current step of the main App
   const int & _step;
@@ -42,6 +50,12 @@ private:
 
   /// Ensure that the sampler proceeds in a sequential fashion
   int _check_step;
+
+  /// Number of samples requested
+  const int & _num_samples;
+
+  /// Number of retraining performed
+  int _retraining_steps = 0;
 
   /// Storage for previously accepted samples by the decision reporter system
   std::vector<std::vector<Real>> _inputs_sto;

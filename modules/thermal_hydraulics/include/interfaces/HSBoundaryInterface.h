@@ -38,9 +38,9 @@ protected:
   /// Heat structure side enum
   const MooseEnum & _hs_side_enum;
   /// Heat structure side
-  const HeatStructureSideType _hs_side;
-  /// True of valid heat structure side was provided
-  bool _hs_side_valid;
+  const Component2D::ExternalBoundaryType _hs_side;
+  /// True if valid heat structure side was provided
+  const bool _hs_side_valid;
 
 public:
   static InputParameters validParams();

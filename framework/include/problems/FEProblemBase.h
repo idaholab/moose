@@ -2421,6 +2421,12 @@ private:
   determineNonlinearSystem(const std::string & var_name,
                            bool error_if_not_found = false) const override;
 
+  /*
+   * Test if stateful property redistribution is expected to be
+   * necessary, and set it up if so.
+   */
+  void addAnyRedistributers();
+
   void updateMaxQps();
 
   void joinAndFinalize(TheWarehouse::Query query, bool isgen = false);

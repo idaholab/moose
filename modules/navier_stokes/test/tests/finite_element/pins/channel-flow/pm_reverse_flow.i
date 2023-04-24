@@ -77,6 +77,11 @@
   [vol_heat]
     initial_condition = 1e6
   []
+  [T_out_scalar]
+    family = SCALAR
+    order = FIRST
+    initial_condition = 630
+  []
 []
 
 [Materials]
@@ -188,7 +193,7 @@
     variable = T
     boundary = 'right'
     out_norm = '1 0 0'
-    T_fn = 630
+    T_scalar = T_out_scalar
   []
 []
 
@@ -256,5 +261,6 @@
   [out]
     type = Exodus
     use_displaced = false
+    hide = 'T_out_scalar'
   []
 []

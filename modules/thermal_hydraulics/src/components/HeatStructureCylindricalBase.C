@@ -39,20 +39,32 @@ HeatStructureCylindricalBase::setupMesh()
 }
 
 Real
-HeatStructureCylindricalBase::getUnitPerimeter(const HeatStructureSideType & side) const
+HeatStructureCylindricalBase::getUnitPerimeter(const ExternalBoundaryType & side) const
 {
   switch (side)
   {
-    case HeatStructureSideType::OUTER:
+    case ExternalBoundaryType::OUTER:
       return 2 * M_PI * (_inner_radius + _total_width);
 
-    case HeatStructureSideType::INNER:
+    case ExternalBoundaryType::INNER:
       return 2 * M_PI * _inner_radius;
 
-    case HeatStructureSideType::START:
-    case HeatStructureSideType::END:
+    case ExternalBoundaryType::START:
+    case ExternalBoundaryType::END:
       return std::numeric_limits<Real>::quiet_NaN();
   }
 
   mooseError(name(), ": Unknown value of 'side' parameter.");
+}
+
+Real
+HeatStructureCylindricalBase::computeRadialBoundaryArea(const Real & length, const Real & y) const
+{
+  return length * 2 * libMesh::pi * (_inner_radius + y);
+}
+
+Real
+HeatStructureCylindricalBase::computeAxialBoundaryArea(const Real & y_min, const Real & y_max) const
+{
+  return libMesh::pi * (std::pow(_inner_radius + y_max, 2) - std::pow(_inner_radius + y_min, 2));
 }

@@ -76,6 +76,10 @@ ContactAction::validParams()
       1e8,
       "The penalty factor to apply in mortar penalty frictional constraints.  It is applied to the "
       "tangential accumulated slip to build the frictional force");
+  params.addParam<Real>("penalty_multiplier",
+                        1.0,
+                        "The growth factor for the penalty applied at the end of each augmented "
+                        "Lagrange update iteration");
   params.addParam<Real>("friction_coefficient", 0, "The friction coefficient");
   params.addParam<Real>("tension_release",
                         0.0,

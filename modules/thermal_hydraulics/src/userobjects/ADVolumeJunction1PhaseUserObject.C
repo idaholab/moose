@@ -44,6 +44,7 @@ ADVolumeJunction1PhaseUserObject::validParams()
   params.addClassDescription(
       "Computes and caches flux and residual vectors for a 1-phase volume junction");
 
+  params.declareControllable("K");
   return params;
 }
 

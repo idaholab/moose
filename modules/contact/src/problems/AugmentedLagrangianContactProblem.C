@@ -40,15 +40,14 @@ AugmentedLagrangianContactProblem::validParams()
 
 AugmentedLagrangianContactProblem::AugmentedLagrangianContactProblem(const InputParameters & params)
   : ReferenceResidualProblem(params),
-    _num_lagmul_iterations(0),
-    _max_lagmul_iters(getParam<int>("maximum_lagrangian_update_iterations"))
+    _maximum_number_lagrangian_iterations(getParam<int>("maximum_lagrangian_update_iterations"))
 {
 }
 
 void
 AugmentedLagrangianContactProblem::timestepSetup()
 {
-  _num_lagmul_iterations = 0;
+  _lagrangian_iteration_number = 0;
   ReferenceResidualProblem::timestepSetup();
 }
 
@@ -67,7 +66,6 @@ AugmentedLagrangianContactProblem::checkNonlinearConvergence(std::string & msg,
                                                              const Real ref_resid,
                                                              const Real /*div_threshold*/)
 {
-
   Real my_max_funcs = std::numeric_limits<int>::max();
   Real my_div_threshold = std::numeric_limits<Real>::max();
 
@@ -86,73 +84,81 @@ AugmentedLagrangianContactProblem::checkNonlinearConvergence(std::string & msg,
                                                           ref_resid,
                                                           my_div_threshold);
 
-  _console << "Augmented Lagrangian contact iteration " << _num_lagmul_iterations << std::endl;
+  _console << "Augmented Lagrangian contact iteration " << _lagrangian_iteration_number
+           << std::endl;
 
-  bool _augLM_repeat_step;
+  bool repeat_augmented_lagrange_step = false;
 
   if (reason == MooseNonlinearConvergenceReason::CONVERGED_FNORM_ABS ||
       reason == MooseNonlinearConvergenceReason::CONVERGED_FNORM_RELATIVE ||
       reason == MooseNonlinearConvergenceReason::CONVERGED_SNORM_RELATIVE)
   {
-    if (_num_lagmul_iterations < _max_lagmul_iters)
+    if (_lagrangian_iteration_number < _maximum_number_lagrangian_iterations)
     {
-      NonlinearSystemBase & nonlinear_sys = getNonlinearSystemBase();
+      auto & nonlinear_sys = currentNonlinearSystem();
       nonlinear_sys.update();
 
+      // Get the penetration locator from the displaced mesh if it exist, otherwise get
+      // it from the undisplaced mesh.
+      const auto displaced_problem = getDisplacedProblem();
+      const auto & penetration_locators =
+          (displaced_problem ? displaced_problem->geomSearchData() : geomSearchData())
+              ._penetration_locators;
+
+      // loop over contact pairs (penetration locators)
       const ConstraintWarehouse & constraints = nonlinear_sys.getConstraintWarehouse();
-
-      std::map<std::pair<unsigned int, unsigned int>, PenetrationLocator *> * penetration_locators =
-          NULL;
-
-      bool displaced = false;
-      _augLM_repeat_step = false;
-      if (getDisplacedProblem() == NULL)
+      std::list<std::shared_ptr<MechanicalContactConstraint>> mccs;
+      for (const auto & pair : penetration_locators)
       {
-        GeometricSearchData & geom_search_data = geomSearchData();
-        penetration_locators = &geom_search_data._penetration_locators;
-      }
-      else
-      {
-        GeometricSearchData & displaced_geom_search_data = getDisplacedProblem()->geomSearchData();
-        penetration_locators = &displaced_geom_search_data._penetration_locators;
-        displaced = true;
-      }
+        const auto & boundaries = pair.first;
 
-      for (const auto & it : *penetration_locators)
-      {
-        PenetrationLocator & pen_loc = *(it.second);
+        if (!constraints.hasActiveNodeFaceConstraints(boundaries.second, bool(displaced_problem)))
+          continue;
+        const auto & ncs =
+            constraints.getActiveNodeFaceConstraints(boundaries.second, bool(displaced_problem));
 
-        BoundaryID secondary_boundary = pen_loc._secondary_boundary;
-
-        if (constraints.hasActiveNodeFaceConstraints(secondary_boundary, displaced))
-        {
-          const auto & ncs =
-              constraints.getActiveNodeFaceConstraints(secondary_boundary, displaced);
-
-          for (const auto & nc : ncs)
+        mccs.emplace_back(nullptr);
+        for (const auto & nc : ncs)
+          if (const auto mcc = std::dynamic_pointer_cast<MechanicalContactConstraint>(nc); !mcc)
+            mooseError("AugmentedLagrangianContactProblem: dynamic cast of "
+                       "MechanicalContactConstraint object failed.");
+          else
           {
-            if (std::dynamic_pointer_cast<MechanicalContactConstraint>(nc) == NULL)
-              mooseError("AugmentedLagrangianContactProblem: dynamic cast of "
-                         "MechanicalContactConstraint object failed.");
+            // Return if this constraint does not correspond to the primary-secondary pair
+            // prepared by the outer loops.
+            // This continue statement is required when, e.g. one secondary surface constrains
+            // more than one primary surface.
+            if (mcc->secondaryBoundary() != boundaries.second ||
+                mcc->primaryBoundary() != boundaries.first)
+              continue;
 
-            if (!(std::dynamic_pointer_cast<MechanicalContactConstraint>(nc))
-                     ->AugmentedLagrangianContactConverged())
+            // save one constraint pointer for each contact pair
+            if (!mccs.back())
+              mccs.back() = mcc;
+
+            // check if any of the constraints is not yet converged
+            if (repeat_augmented_lagrange_step || !mcc->AugmentedLagrangianContactConverged())
             {
-              (std::dynamic_pointer_cast<MechanicalContactConstraint>(nc))
-                  ->updateAugmentedLagrangianMultiplier(false);
-              _augLM_repeat_step = true;
+              repeat_augmented_lagrange_step = true;
               break;
             }
           }
-        }
       }
 
-      if (_augLM_repeat_step)
+      // repeat update step if necessary
+      if (repeat_augmented_lagrange_step)
       {
+        _lagrangian_iteration_number++;
+
+        // Each contact pair will have constraints for all displacements, but those share the
+        // Lagrange multipliers, which are stored on the penetration locator. We call update
+        // only for the first constraint for each contact pair.
+        for (const auto & mcc : mccs)
+          mcc->updateAugmentedLagrangianMultiplier(/* beginning_of_step = */ false);
+
         // force it to keep iterating
         reason = MooseNonlinearConvergenceReason::ITERATING;
         _console << "Augmented Lagrangian Multiplier needs updating." << std::endl;
-        _num_lagmul_iterations++;
       }
       else
         _console << "Augmented Lagrangian contact constraint enforcement is satisfied."
