@@ -43,7 +43,9 @@ protected:
 
   /// By default, we wont execute often but "executing" will mean loading the positions
   void execute() override { initialize(); }
-  void finalize() override {}
+
+  /// In charge of reduction across all ranks & sorting for consistent output
+  void finalize() override;
 
   /// By default, Positions will call initial setup on mesh changed
   void meshChanged() override { initialSetup(); };
@@ -76,6 +78,13 @@ protected:
 
   /// 4D storage for all the positions : space & time
   std::vector<std::vector<std::vector<std::vector<Point>>>> _positions_4d;
+
+  /// Whether generation of positions is distributed or not (and therefore needs a broadcast)
+  const bool _need_broadcast;
+  /// Whether positions should be sorted. Be careful with sorting! For example if initial positions
+  /// are not sorted, then we switch to sorted positions, the mapping might be odd
+  /// User is also likely to have sorted their positions file, their input parameter etc
+  const bool _need_sort;
 };
 
 void dataStore(std::ostream & stream, const std::vector<Point> & positions, void * context);

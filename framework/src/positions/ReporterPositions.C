@@ -17,6 +17,12 @@ ReporterPositions::validParams()
   InputParameters params = Positions::validParams();
   params.addRequiredParam<std::vector<ReporterName>>("reporters",
                                                      "Reporter(s) containing the positions");
+
+  // Use reporter ordering
+  params.set<bool>("auto_sort") = false;
+  // User reporter broadcasting behavior
+  params.set<bool>("auto_broadcast") = false;
+
   params.addClassDescription(
       "Import positions from one or more reporters, for example other Positions");
   return params;
@@ -24,7 +30,10 @@ ReporterPositions::validParams()
 
 ReporterPositions::ReporterPositions(const InputParameters & parameters) : Positions(parameters)
 {
+  // Attempt to obtain the positions. Will only succeed for other Positions at this point
   initialize();
+  // Sort if needed
+  finalize();
   // TODO Check execute_on. I'm not sure how to retrieve execute_on for reporters.
 }
 

@@ -18,6 +18,11 @@ ElementCentroidPositions::validParams()
   params.addClassDescription("Positions of element centroids.");
   params += BlockRestrictable::validParams();
 
+  // Element centroids could be sorted by XYZ or by id. Default to not sorting
+  params.set<bool>("auto_sort") = false;
+  // Gathered locally, should be broadcast on every process
+  params.set<bool>("auto_broadcast") = true;
+
   return params;
 }
 
@@ -26,6 +31,8 @@ ElementCentroidPositions::ElementCentroidPositions(const InputParameters & param
 {
   // Mesh is ready at construction
   initialize();
+  // Trigger synchronization as the initialization is distributed
+  finalize();
 }
 
 void

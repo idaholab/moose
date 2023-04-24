@@ -211,7 +211,7 @@ public:
    *
    * If you recall, the original VectorPostprocessor system included the ability to perform some
    * scatter and broadcast actions via the special call on the storage helper object. This
-   * is a replacement for that method that leverages the RepoorterContext objects to perform
+   * is a replacement for that method that leverages the ReporterContext objects to perform
    * value specific actions, including some automatic operations depending how the data is
    * produced and consumed.
    *
@@ -398,7 +398,7 @@ ReporterData::declareReporterValue(const ReporterName & reporter_name,
 
   // They key in _states (ReporterName) is not unique by special type. This is done on purpose
   // because we want to store reporter names a single name regardless of special type.
-  // Beacuse of this, we have the case where someone could request a reporter value
+  // Because of this, we have the case where someone could request a reporter value
   // that is later declared as a pp or a vpp value. In this case, when it is first
   // requested, the _state entry will have a key and name with a special type of ANY.
   // When it's declared here (later), we will still find the correct entry because

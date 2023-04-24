@@ -17,10 +17,17 @@ MultiAppPositions::validParams()
   InputParameters params = Positions::validParams();
   params.addRequiredParam<std::vector<MultiAppName>>(
       "multiapps", "Name(s) of the multiapps providing the positions");
+
   // Execute after multiapps have been created
   params.set<ExecFlagEnum>("execute_on") = EXEC_INITIAL;
+  // Positions of subapps should stay ordered the same as the subapps
+  params.set<bool>("auto_sort") = false;
+  // Subapp positions are known for all processes already
+  params.set<bool>("auto_broadcast") = false;
+
   params.addClassDescription(
-      "Obtain positions from MultiApps. This must NOT be used to set the same multiapp positions");
+      "Obtain positions from MultiApps. This may only be used to set the positions of those same "
+      "multiapps if an 'initial_positions' parameter is used.");
   return params;
 }
 

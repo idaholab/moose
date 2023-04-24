@@ -17,6 +17,12 @@ InputPositions::validParams()
   InputParameters params = Positions::validParams();
   params.addClassDescription("Positions set directly from a user parameter in the input file");
   params.addRequiredParam<std::vector<Point>>("positions", "Positions");
+
+  // Inputs should not be re-ordered
+  params.set<bool>("auto_sort") = false;
+  // Positions are known for all processes already
+  params.set<bool>("auto_broadcast") = false;
+
   return params;
 }
 

@@ -14,10 +14,23 @@ Positions::validParams()
 {
   InputParameters params = GeneralReporter::validParams();
 
+  // leverage reporter interface to keep track of consumers
   params.addParam<ReporterName>("initial_positions",
                                 "Positions at the beginning of the simulation");
-  // No need to refresh unless the mesh moved
+
+  // This parameter should be set by each derived class depending on whether positions generation
+  // is replicated or distributed. We want positions to be replicated across all ranks
+  params.addRequiredParam<bool>("auto_broadcast",
+                                "Wether Positions should be broadcasted across all ranks");
+  // This parameter should be set by each derived class depending on whether positions should
+  // be sorted after being communicated. Sorting is usually undesirable, as the user input order
+  // should be respected. It may be only desirable for testing reproducibility
+  params.addRequiredParam<bool>("auto_sort", "Whether Positions should be sorted by coordinates");
+
+  // In general, no need to refresh Positions unless the mesh moved
   params.set<ExecFlagEnum>("execute_on") = EXEC_NONE;
+
+  params.addParamNamesToGroup("auto_broadcast auto_sort", "Advanced");
   params.registerBase("Positions");
   return params;
 }
@@ -27,8 +40,11 @@ Positions::Positions(const InputParameters & parameters)
     _initial_positions(isParamValid("initial_positions")
                            ? &getReporterValue<std::vector<Point>>("initial_positions")
                            : nullptr),
+    // Positions will be replicated on every rank so transfers may query positions from all ranks
     _positions(declareValueByName<std::vector<Point>, ReporterVectorContext<Point>>(
-        "positions_1d", REPORTER_MODE_REPLICATED))
+        "positions_1d", REPORTER_MODE_REPLICATED)),
+    _need_broadcast(getParam<bool>("auto_broadcast")),
+    _need_sort(getParam<bool>("auto_sort"))
 {
 }
 
@@ -158,4 +174,44 @@ Positions::unrollMultiDPositions()
       mooseError("Positions::unrollMultiDPositions() may only be called if there is at least one "
                  "non-empty positions vector.");
   }
+}
+
+void
+Positions::finalize()
+{
+  // Gather up the positions vector on all ranks
+
+  if (_need_broadcast)
+  {
+    // TODO: be able to do this
+    // _communicator.allgather(_positions, /* identical buffer lengths = */ false);
+
+    // Other notes to explain why we do this:
+    // - The vector broadcasting code is for VPPs, so it's *currently* not accessible as we have
+    //   vectors of points, not reals
+    // - The consumer/producer reporter interface can keep track of whether a reduction is needed
+    //   (for example if a consumer needs replicated data, but the producer is distributed) however,
+    //   we have currently made the decision that positions should ALWAYS be replicated
+
+    // Gather all components of all positions
+    std::vector<Real> x(_positions.size()), y(_positions.size()), z(_positions.size());
+    for (const auto & pt : _positions)
+    {
+      x[&pt - &_positions[0]] = pt(0);
+      y[&pt - &_positions[0]] = pt(1);
+      z[&pt - &_positions[0]] = pt(2);
+    }
+
+    _communicator.allgather(x, /* identical buffer lengths = */ false);
+    _communicator.allgather(y, /* identical buffer lengths = */ false);
+    _communicator.allgather(z, /* identical buffer lengths = */ false);
+
+    _positions.resize(x.size());
+    for (auto & pt : _positions)
+      pt = Point(x[&pt - &_positions[0]], y[&pt - &_positions[0]], z[&pt - &_positions[0]]);
+  }
+
+  // Sort positions by X then Y then Z
+  if (_need_sort)
+    std::sort(_positions.begin(), _positions.end());
 }

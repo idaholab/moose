@@ -19,6 +19,12 @@ FilePositions::validParams()
   params.addClassDescription("Import positions from one or more files.");
   params.addRequiredParam<std::vector<FileName>>("files",
                                                  "Text file(s) with the positions, one per line");
+
+  // Input from file should not be re-ordered
+  params.set<bool>("auto_sort") = false;
+  // File is loaded on all processes
+  params.set<bool>("auto_broadcast") = false;
+
   return params;
 }
 

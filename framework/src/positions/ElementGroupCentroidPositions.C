@@ -28,6 +28,11 @@ ElementGroupCentroidPositions::validParams()
       "Specific ID(s), for each extra id name, for grouping elements. "
       "If empty, all *valid* ids will be used to bin");
 
+  // Order already arises from the block/ID bins
+  params.set<bool>("auto_sort") = false;
+  // Full replicated mesh is used on every rank to generate positions
+  params.set<bool>("auto_broadcast") = false;
+
   return params;
 }
 
@@ -88,6 +93,8 @@ ElementGroupCentroidPositions::ElementGroupCentroidPositions(const InputParamete
 
   // Mesh is ready at construction
   initialize();
+  // Sort the output (by XYZ) if requested
+  finalize();
 }
 
 void

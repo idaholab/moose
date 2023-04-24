@@ -21,10 +21,14 @@
 [Positions]
   [all_mesh]
     type = ElementCentroidPositions
+    # For testing reproducibility
+    auto_sort = true
   []
   [block_1]
     type = ElementCentroidPositions
     block = 1
+    # For testing reproducibility
+    auto_sort = true
   []
 []
 
