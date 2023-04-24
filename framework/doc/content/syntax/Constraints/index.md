@@ -16,6 +16,8 @@ of the description is focused on the application of mortar constraints for surfa
 
 The mortar system in MOOSE uses a segment-based approach for evaluation of mortar integrals; for information on the automatic generation of mortar segment meshes see [AutomaticMortarGeneration.md].
 
+One has the option to use Petrov-Galerkin interpolation for the Lagrange multiplier variable in mortar-based constraints. This is typically useful for mechanical contact problems (see [Petrov-Galerkin_approach_for_Lagrange_multipliers.md]).
+
 ### Overview
 
 An excellent overview of the conservative mortar constraint implementation in MOOSE for 2D problems is given in

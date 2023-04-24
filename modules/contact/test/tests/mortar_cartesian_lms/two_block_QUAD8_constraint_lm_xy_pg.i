@@ -105,6 +105,14 @@ velocity = 0.1
   []
 []
 
+[AuxVariables]
+  [aux_lm]
+    block = 'secondary_lower'
+    order=SECOND
+    use_dual = false
+  []
+[]
+
 [Modules/TensorMechanics/Master]
   [all]
     strain = FINITE
@@ -191,6 +199,8 @@ velocity = 0.1
     use_displaced_mesh = true
     correct_edge_dropping = true
     interpolate_normals = false
+    use_petrov_galerkin = true
+    aux_lm = aux_lm
   []
   [normal_x]
     type = CartesianMortarMechanicalContact
@@ -204,6 +214,8 @@ velocity = 0.1
     use_displaced_mesh = true
     compute_lm_residuals = false
     correct_edge_dropping = true
+    use_petrov_galerkin = true
+    aux_lm = aux_lm
   []
   [normal_y]
     type = CartesianMortarMechanicalContact
@@ -217,6 +229,8 @@ velocity = 0.1
     use_displaced_mesh = true
     compute_lm_residuals = false
     correct_edge_dropping = true
+    use_petrov_galerkin = true
+    aux_lm = aux_lm
   []
 []
 
@@ -235,6 +249,7 @@ velocity = 0.1
   petsc_options_value = 'lu        superlu_dist                  NONZERO               1e-10'
 
   line_search = none
+
 
   dt = 0.1
   dtmin = 0.1

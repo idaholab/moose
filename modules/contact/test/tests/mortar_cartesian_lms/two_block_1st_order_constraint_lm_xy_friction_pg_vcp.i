@@ -3,8 +3,9 @@
   volumetric_locking_correction = true
 []
 
-theta = 45
+theta = 0
 velocity = 0.1
+refine = 3
 
 [Mesh]
   [left_block]
@@ -16,7 +17,7 @@ velocity = 0.1
     ymax = 0
     nx = 1
     ny = 3
-    elem_type = QUAD8
+    elem_type = QUAD4
   []
   [left_block_sidesets]
     type = RenameBoundaryGenerator
@@ -44,7 +45,7 @@ velocity = 0.1
     ymax = 0
     nx = 1
     ny = 2
-    elem_type = QUAD8
+    elem_type = QUAD4
   []
   [right_block_sidesets]
     type = RenameBoundaryGenerator
@@ -90,18 +91,56 @@ velocity = 0.1
     transform = ROTATE
     vector_value = '0 0 ${theta}'
   []
+
+  uniform_refine = ${refine}
 []
 
 [Variables]
   [lm_x]
     block = 'secondary_lower'
-    order=SECOND
     use_dual = true
   []
   [lm_y]
     block = 'secondary_lower'
-    order=SECOND
     use_dual = true
+  []
+[]
+
+[AuxVariables]
+  [normal_lm]
+    family = LAGRANGE
+    order = FIRST
+  []
+  [tangent_lm]
+    family = LAGRANGE
+    order = FIRST
+  []
+  [aux_lm]
+    block = 'secondary_lower'
+    use_dual = false
+  []
+[]
+
+[AuxKernels]
+  [normal_lm]
+    type = MortarPressureComponentAux
+    variable = normal_lm
+    primary_boundary = '23'
+    secondary_boundary = '11'
+    lm_var_x = lm_x
+    lm_var_y = lm_y
+    component = 'NORMAL'
+    boundary = '11'
+  []
+  [tangent_lm]
+    type = MortarPressureComponentAux
+    variable = tangent_lm
+    primary_boundary = '23'
+    secondary_boundary = '11'
+    lm_var_x = lm_x
+    lm_var_y = lm_y
+    component = 'tangent1'
+    boundary = '11'
   []
 []
 
@@ -156,7 +195,7 @@ velocity = 0.1
   [elasticity_tensor_left]
     type = ComputeIsotropicElasticityTensor
     block = 1
-    youngs_modulus = 1.0e6
+    youngs_modulus = 1.0e4
     poissons_ratio = 0.3
   []
   [stress_left]
@@ -167,7 +206,7 @@ velocity = 0.1
   [elasticity_tensor_right]
     type = ComputeIsotropicElasticityTensor
     block = 2
-    youngs_modulus = 1.0e6
+    youngs_modulus = 1.0e8
     poissons_ratio = 0.3
   []
   [stress_right]
@@ -178,7 +217,8 @@ velocity = 0.1
 
 [Constraints]
   [weighted_gap_lm]
-    type = ComputeWeightedGapCartesianLMMechanicalContact
+    type = ComputeFrictionalForceCartesianLMMechanicalContact # ComputeCartesianLMFrictionMechanicalContact
+    # type = ComputeWeightedGapLMMechanicalContact
     primary_boundary = '23'
     secondary_boundary = '11'
     primary_subdomain = 'primary_lower'
@@ -190,7 +230,10 @@ velocity = 0.1
     disp_y = disp_y
     use_displaced_mesh = true
     correct_edge_dropping = true
-    interpolate_normals = false
+    mu = 1.0
+    c_t = 1.0e5
+    use_petrov_galerkin = true
+    aux_lm = aux_lm
   []
   [normal_x]
     type = CartesianMortarMechanicalContact
@@ -204,6 +247,8 @@ velocity = 0.1
     use_displaced_mesh = true
     compute_lm_residuals = false
     correct_edge_dropping = true
+    use_petrov_galerkin = true
+    aux_lm = aux_lm
   []
   [normal_y]
     type = CartesianMortarMechanicalContact
@@ -217,13 +262,20 @@ velocity = 0.1
     use_displaced_mesh = true
     compute_lm_residuals = false
     correct_edge_dropping = true
+    use_petrov_galerkin = true
+    aux_lm = aux_lm
   []
 []
 
 [Preconditioning]
-  [smp]
-    type = SMP
+  [vcp]
+    type = VCP
     full = true
+    lm_variable = 'lm_x lm_y'
+    primary_variable = 'disp_x disp_y'
+    preconditioner = 'LU'
+    is_lm_coupling_diagonal = false
+    adaptive_condensation = true
   []
 []
 
@@ -231,30 +283,24 @@ velocity = 0.1
   type = Transient
   solve_type = 'NEWTON'
 
-  petsc_options_iname = '-pc_type -pc_factor_mat_solver_package -pc_factor_shift_type -pc_factor_shift_amount'
-  petsc_options_value = 'lu        superlu_dist                  NONZERO               1e-10'
+  petsc_options_iname = '-mat_mffd_err -pc_factor_shift_type -pc_factor_shift_amount'
+  petsc_options_value = ' 1e-8          NONZERO               1e-15'
 
   line_search = none
 
   dt = 0.1
   dtmin = 0.1
   end_time = 1.0
-
   l_max_its = 100
 
   nl_max_its = 20
-  nl_rel_tol = 1e-6
+  nl_rel_tol = 1e-8
   snesmf_reuse_base = false
 []
 
 [Outputs]
-  exodus = false
-  file_base = './output/2nd_order_${theta}_degree_QUAD8_out'
-  [comp]
-    type = CSV
-    show = 'tot_lin_it tot_nonlin_it'
-    execute_on = 'FINAL'
-  []
+  exodus = true
+  csv = true
 []
 
 [Postprocessors]
@@ -303,5 +349,29 @@ velocity = 0.1
   [tot_nonlin_it]
     type = CumulativeValuePostprocessor
     postprocessor = num_nonlin_it
+  []
+  [max_norma_lm]
+    type = ElementExtremeValue
+    variable = normal_lm
+  []
+  [min_norma_lm]
+    type = ElementExtremeValue
+    variable = normal_lm
+    value_type = min
+  []
+[]
+
+[VectorPostprocessors]
+  [normal_lm]
+    type = NodalValueSampler
+    block = 'secondary_lower'
+    variable = normal_lm
+    sort_by = 'y'
+  []
+  [tangent_lm]
+    type = NodalValueSampler
+    block = 'secondary_lower'
+    variable = tangent_lm
+    sort_by = 'y'
   []
 []
