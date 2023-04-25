@@ -35,7 +35,6 @@ MultiAppGeneralFieldNearestNodeTransfer::validParams()
                                 "selected from the same origin mesh!");
 
   // Nearest node is historically more an extrapolation transfer
-  params.set<bool>("from_app_must_contain_point") = false;
   params.set<Real>("extrapolation_constant") = GeneralFieldTransfer::BetterOutOfMeshValue;
   params.suppressParameter<Real>("extrapolation_constant");
   // We dont keep track of both point distance to app and to nearest node
@@ -50,6 +49,11 @@ MultiAppGeneralFieldNearestNodeTransfer::MultiAppGeneralFieldNearestNodeTransfer
   : MultiAppGeneralFieldTransfer(parameters),
     _num_nearest_points(getParam<unsigned int>("num_nearest_points"))
 {
+  if (_source_app_must_contain_point && _nearest_positions_obj)
+    paramError("use_nearest_positions",
+               "We do not support using both nearest positions matching and checking if target "
+               "points are within an app domain because the KDTrees for nearest-positions matching "
+               "are (currently) built with data from multiple applications.");
 }
 
 void

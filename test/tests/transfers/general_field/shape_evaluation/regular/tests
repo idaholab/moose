@@ -60,6 +60,7 @@
       # Only makes sense for receiving from multiple subapps, other transfers are inactive
       cli_args = "Outputs/file_base=nearest_subapp Transfers/active='from_sub from_sub_elem'
           Transfers/from_sub/use_nearest_app=true Transfers/from_sub_elem/use_nearest_app=true
+          Transfers/from_sub/bbox_factor=1.00000001 Transfers/from_sub_elem/bbox_factor=1.00000001
           MultiApps/sub/positions='0.000001 0.0001 0 0.4111111 0.41120101 0 0.699932 0.099993 0'
           MultiApps/sub/cli_args='Mesh/xmax=0.8;Mesh/ymax=0.7'"
       detail = "when using the closest app rather than the first valid value to chose a value"
@@ -139,6 +140,7 @@
       # and equidistant from 0 0 0 and 0.1 0 0, the subapp positions
       cli_args = "Outputs/file_base=nearest_subapp Transfers/active='from_sub from_sub_elem'
           Transfers/from_sub/use_nearest_app=true Transfers/from_sub_elem/use_nearest_app=true
+          Transfers/from_sub/bbox_factor=1 Transfers/from_sub_elem/bbox_factor=1
           MultiApps/sub/positions='0 0 0 0.1 0 0'
           Transfers/from_sub/search_value_conflicts=true Transfers/from_sub_elem/search_value_conflicts=true
           MultiApps/sub/cli_args='Mesh/xmin=-0.4;Mesh/xmax=0.8;Mesh/ymax=0.7'"
@@ -149,3 +151,4 @@
     []
   []
 []
+

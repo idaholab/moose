@@ -43,6 +43,10 @@ MultiAppGeneralFieldShapeEvaluationTransfer::MultiAppGeneralFieldShapeEvaluation
     const InputParameters & parameters)
   : MultiAppGeneralFieldTransfer(parameters)
 {
+  // Nearest point isn't well defined for sending app-based data from main app to a multiapp
+  if (_nearest_positions_obj && isParamValid("to_multi_app") && !isParamValid("from_multi_app"))
+    paramError("use_nearest_position",
+               "Cannot use nearest-position algorithm when sending from the main application");
 }
 
 void
