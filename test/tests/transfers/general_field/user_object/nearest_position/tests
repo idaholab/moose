@@ -21,6 +21,21 @@
     []
   []
 
+  [multiple_subapps]
+    type = 'Exodiff'
+    input = 'main_between_multiapp.i'
+    exodiff = 'main_between_multiapp_out_ma10.e main_between_multiapp_out_ma11.e
+               main_between_multiapp_out_ma20.e main_between_multiapp_out_ma21.e'
+    requirement = 'The system shall be able to send data from a user object in a subapp to another subapp while following a nearest-positions algorithm'
+    # Explanation of the results:
+    # - in ma10, the '-1' band is because the 'positions' of the apps are used to find who's nearest, and in the vertical
+    #   band, the app on the right is nearest but the band is outside of its bounding box, so the value is invalid
+    # - in ma11, the band on the left is for a similar reason. The right subapp position is closer to all points in ma11
+    #   but it does not extend over that band
+    # - in ma20, the only point that is closer to ma10's position is in the bottom left corner, everything else is closer to ma11
+    # - all of ma21 is closer to ma11's position, no value is selected from ma10
+  []
+
   [warnings]
     requirement = "The system shall emit a warning if"
     [nearest_app]
