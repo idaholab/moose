@@ -43,7 +43,8 @@ public:
   virtual Real getNormalContactPressure(const Node * const /*node*/) const
   {
     mooseError("Not available in base class.");
-  };
+  }
+
   /**
    * @param node Node pointer
    * @return The normal contact pressure at the node
@@ -59,7 +60,7 @@ public:
                                             const unsigned int /*component*/) const
   {
     mooseError("Not available in base class.");
-  };
+  }
 
   /**
    * @param node Node pointer
@@ -70,7 +71,7 @@ public:
                                   const unsigned int /*component*/) const
   {
     mooseError("Not available in base class.");
-  };
+  }
 
   /**
    * @param node Node pointer
@@ -81,7 +82,7 @@ public:
                                      const unsigned int /*component*/) const
   {
     mooseError("Not available in base class.");
-  };
+  }
 
 protected:
   /**
@@ -148,9 +149,6 @@ protected:
 
   /// A map from node to weighted gap and normalization (if requested)
   std::unordered_map<const DofObject *, std::pair<ADReal, Real>> _dof_to_weighted_gap;
-
-  /// A map from node to unscaled weighted gap
-  std::unordered_map<const DofObject *, ADReal> _dof_to_real_weighted_gap;
 
   /// A pointer members that can be used to help avoid copying ADReals
   const ADReal * _weighted_gap_ptr = nullptr;

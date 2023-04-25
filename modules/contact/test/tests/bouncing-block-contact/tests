@@ -147,7 +147,7 @@
     []
   []
   [very_parallel_penalty]
-    requirement = 'The system shall be able to communicate semilocal weighted velocities back to any '
+    requirement = 'The system shall be able to communicate semilocal weighted gaps back to any '
                   'process that contributed to computing said weighted gaps.'
     issues = '#21329'
     type = 'Exodiff'

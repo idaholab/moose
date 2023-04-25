@@ -31,7 +31,6 @@ public:
   virtual void timestepSetup() override;
 
   virtual Real getNormalContactPressure(const Node * const node) const override;
-  virtual Real getNormalWeightedGap(const Node * const node) const override;
 
   virtual Real getFrictionalContactPressure(const Node * const node,
                                             const unsigned int component) const override;

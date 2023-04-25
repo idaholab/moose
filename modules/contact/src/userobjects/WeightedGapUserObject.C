@@ -117,15 +117,12 @@ WeightedGapUserObject::computeQpIProperties()
 
   _dof_to_weighted_gap[dof].first += (*_test)[_i][_qp] * _qp_gap_nodal * _normals[_i];
   _dof_to_weighted_gap[dof].second += (*_test)[_i][_qp] * _qp_factor;
-  _dof_to_real_weighted_gap[dof] =
-      _dof_to_weighted_gap[dof].first / _dof_to_weighted_gap[dof].second;
 }
 
 void
 WeightedGapUserObject::initialize()
 {
   _dof_to_weighted_gap.clear();
-  _dof_to_real_weighted_gap.clear();
 }
 
 void
@@ -157,10 +154,11 @@ WeightedGapUserObject::execute()
 Real
 WeightedGapUserObject::getNormalWeightedGap(const Node * const node) const
 {
-  const auto it = _dof_to_real_weighted_gap.find(_subproblem.mesh().nodePtr(node->id()));
+  const auto it = _dof_to_weighted_gap.find(_subproblem.mesh().nodePtr(node->id()));
 
-  if (it != _dof_to_real_weighted_gap.end())
-    return MetaPhysicL::raw_value(it->second);
+  // We are returning the physical weighted gap for analysis purposes
+  if (it != _dof_to_weighted_gap.end())
+    return MetaPhysicL::raw_value(it->second.first / it->second.second);
   else
     return 0.0;
 }
