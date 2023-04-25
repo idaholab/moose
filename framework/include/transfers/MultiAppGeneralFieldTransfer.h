@@ -139,6 +139,14 @@ protected:
                     const PointLocatorBase * const pl,
                     const Point & pt) const;
 
+  /**
+   * Whether a point is closest to a position at the index specified than any other position
+   * @param pos_index the index of the position to consider in the positions vector
+   * @param pt the point
+   * @return whether the point is closest to this position than any other in the positions vector
+   */
+  bool closestToPosition(unsigned int pos_index, const Point & pt) const;
+
   /// Origin array/vector variable components
   const std::vector<unsigned int> _from_var_components;
 

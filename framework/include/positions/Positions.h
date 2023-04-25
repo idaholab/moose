@@ -36,7 +36,7 @@ public:
   const Point & getPosition(unsigned int index, bool initial) const;
 
   /// Find the nearest Position for a given point
-  const Point & getNearestPosition(const Point & target) const;
+  const Point & getNearestPosition(const Point & target, bool initial = false) const;
 
 protected:
   /// In charge of computing / loading the positions.

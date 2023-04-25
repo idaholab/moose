@@ -74,8 +74,14 @@ Positions::getPosition(unsigned int index, bool initial) const
 }
 
 const Point &
-Positions::getNearestPosition(const Point & target) const
+Positions::getNearestPosition(const Point & target, const bool initial) const
 {
+  const std::vector<Point> * positions;
+  if (initial)
+    positions = _initial_positions;
+  else
+    positions = &_positions;
+
   // TODO Use faster & fancier machinery such as a KNN-partition
   std::size_t nearest_index = 0;
   auto nearest_distance_sq = std::numeric_limits<Real>::max();
@@ -100,7 +106,7 @@ Positions::getNearestPosition(const Point & target) const
           " at a distance of " + std::to_string(std::sqrt(nearest_distance_sq)));
 #endif
 
-  return _positions[nearest_index];
+  return (*positions)[nearest_index];
 }
 
 const std::vector<Point> &

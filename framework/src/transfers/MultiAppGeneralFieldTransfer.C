@@ -94,8 +94,13 @@ MultiAppGeneralFieldTransfer::validParams()
   params.addParam<bool>(
       "use_nearest_app",
       false,
-      "When True, transfers from a child application will work by finding the nearest "
-      "(using the `location`) sub-app and query that app for the value to transfer.");
+      "When True, transfers from a child application will work by finding the nearest (using "
+      "the `position` + mesh centroid) sub-app and query that app for the value to transfer.");
+  params.addParam<PositionsName>(
+      "use_nearest_position",
+      "Name of the the Positions object (in main app) such that transfers to/from a child "
+      "application will work by finding the nearest position to a target and query only the "
+      "app / points closer to this position than any other position for the value to transfer.");
   params.addParam<bool>(
       "from_app_must_contain_point",
       false,
@@ -124,6 +129,10 @@ MultiAppGeneralFieldTransfer::MultiAppGeneralFieldTransfer(const InputParameters
     _from_var_components(getParam<std::vector<unsigned int>>("source_variable_components")),
     _to_var_components(getParam<std::vector<unsigned int>>("target_variable_components")),
     _use_nearest_app(getParam<bool>("use_nearest_app")),
+    _nearest_positions_obj(
+        isParamValid("use_nearest_position")
+            ? &_fe_problem.getPositionsObject(getParam<PositionsName>("use_nearest_position"))
+            : nullptr),
     _source_app_must_contain_point(getParam<bool>("from_app_must_contain_point")),
     _elemental_boundary_restriction_on_sides(
         getParam<MooseEnum>("elemental_boundary_restriction") == "sides"),
@@ -148,7 +157,7 @@ MultiAppGeneralFieldTransfer::MultiAppGeneralFieldTransfer(const InputParameters
     paramError("target_variable_components",
                "This parameter must be equal to the number of target variables");
 
-  // Make deprecated 'use_nearest_app' parameter rely on Positions
+  // Make simple 'use_nearest_app' parameter rely on Positions
   if (_use_nearest_app)
   {
     if (_nearest_positions_obj)
@@ -1110,6 +1119,15 @@ MultiAppGeneralFieldTransfer::onBoundaries(const std::set<BoundaryID> & boundari
   if (!elem)
     return false;
   return onBoundaries(boundaries, mesh, elem);
+}
+
+bool
+MultiAppGeneralFieldTransfer::closestToPosition(unsigned int pos_index, const Point & pt) const
+{
+  mooseAssert(_nearest_positions_obj, "Should not be here without a positions object");
+  bool initial = _fe_problem.getCurrentExecuteOnFlag() == EXEC_INITIAL;
+  return _nearest_positions_obj->getPosition(pos_index, initial) ==
+         _nearest_positions_obj->getNearestPosition(pt);
 }
 
 Real

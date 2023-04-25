@@ -36,32 +36,27 @@ protected:
 
 private:
   /*
-   * Build mesh functions
+   * Build KD-Trees for each local app
    * @param var_index the index of the variable being transferred
-   * @param local_points all the local nodes, in all the local apps (outer-indexing)
-   * @param local_values all the values at the local nodes, in all the local apps (outer-indexing)
+   * @details fills _local_kdtrees, _local_points and _local_values
+   *          Indexing is: local apps (outer-indexing) OR positions (if using nearest_positions),
+   *          local nodes (inner-indexing)
    */
-  void buildKDTrees(const unsigned int var_index,
-                    std::vector<std::shared_ptr<KDTree>> & local_kdtrees,
-                    std::vector<std::vector<Point>> & local_points,
-                    std::vector<std::vector<Real>> & local_values);
+  void buildKDTrees(const unsigned int var_index);
 
   /*
    * Evaluate interpolation values for incoming points
-   * @param local_kdtrees the KD-Trees for all the local source app(s)
-   * @param local_points all the local nodes, in all the local apps (outer-indexing)
-   * @param local_values all the values at the local nodes, in all the local apps (outer-indexing)
    * @param incoming_points all the points at which we need values
    * @param outgoing_vals vector containing the values and distances from point to nearest node
    */
-  void evaluateInterpValuesNearestNode(const std::vector<std::shared_ptr<KDTree>> & local_kdtrees,
-                                       const std::vector<std::vector<Point>> & local_points,
-                                       const std::vector<std::vector<Real>> & local_values,
-                                       const std::vector<Point> & incoming_points,
+  void evaluateInterpValuesNearestNode(const std::vector<Point> & incoming_points,
                                        std::vector<std::pair<Real, Real>> & outgoing_vals);
 
   /// KD-Trees for all the local source apps
   std::vector<std::shared_ptr<KDTree>> _local_kdtrees;
+
+  /// KD-Trees for nodes nearest to a given position on each local source app
+  std::vector<std::vector<std::shared_ptr<KDTree>>> _local_positions_kdtrees;
 
   /// All the nodes that meet the spatial restrictions in all the local source apps
   std::vector<std::vector<Point>> _local_points;
