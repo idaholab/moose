@@ -36,7 +36,7 @@ public:
   void initialSetup() override;
 
 protected:
-  /// The names of the variables (aux variables) which serve as a container
+  /// The names of the variables which serve as a container
   /// for the reconstructed solution
   const std::vector<VariableName> & _var_names_to_fill;
 
@@ -47,11 +47,11 @@ protected:
   /// The names of the surrogate models for each variable
   const std::vector<UserObjectName> & _surrogate_model_names;
 
-  /// Links to the MooseVariables of the requested auxvariables
+  /// Links to the MooseVariables of the requested variables
   std::vector<MooseVariableFieldBase *> _variable_to_fill;
 
   /// Links to the MooseVariables from the nonlinear system whose dof numbering
-  /// we need to populate the auxvariables
+  /// we need to populate the variables in (variables_to_fill)
   std::vector<const MooseVariableFieldBase *> _variable_to_reconstruct;
 
   /// Link to the mapping object which provides the inverse mapping function

@@ -29,7 +29,7 @@ InverseMapping::validParams()
       "mapping", "The name of the mapping object which provides the inverse mapping function.");
   params.addRequiredParam<std::vector<VariableName>>(
       "variable_to_fill",
-      "The names of the aux variables that this object is supposed to populate with the "
+      "The names of the variables that this object is supposed to populate with the "
       "reconstructed results.");
   params.addRequiredParam<std::vector<VariableName>>(
       "variable_to_reconstruct",
@@ -179,7 +179,7 @@ InverseMapping::execute()
         const auto & to_dof_id = node->dof_number(to_sys_num, to_var_num, dof_i);
         const auto & from_dof_id = node->dof_number(from_sys_num, from_var_num, dof_i);
 
-        // Fill the dof of the auxiliary variable using the dof of the temporary variable
+        // Fill the dof of the variable using the dof of the temporary variable
         var_to_fill->sys().solution().set(to_dof_id, (*temporary_vector)(from_dof_id));
       }
     }
@@ -195,7 +195,7 @@ InverseMapping::execute()
         if (n_dofs < 1)
           continue;
 
-        // Loop over the dofs and populate the auxiliary variable
+        // Loop over the dofs and populate the variable
         for (auto dof_i : make_range(n_dofs))
         {
           // Get the dof for the from/to variables
@@ -206,7 +206,7 @@ InverseMapping::execute()
         }
       }
 
-    // Close the solution to make sure we can output auxvariable
+    // Close the solution to make sure we can output the variable
     var_to_fill->sys().solution().close();
   }
 }
