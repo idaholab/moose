@@ -107,37 +107,34 @@ ADHeatTransferFromHeatStructure3D1PhaseUserObject::initialize()
 void
 ADHeatTransferFromHeatStructure3D1PhaseUserObject::execute()
 {
-  if (_current_elem->processor_id() == this->processor_id())
+  unsigned int n_qpts_fch = _qrule->n_points();
+  for (auto elem_id : _hs_elem_ids)
   {
-    unsigned int n_qpts_fch = _qrule->n_points();
-    for (auto elem_id : _hs_elem_ids)
+    unsigned int n_qpts_hs = _elem_qp_map[elem_id].size();
+    const dof_id_type & nearest_elem_id = _fch_alignment.getNearestElemID(elem_id);
+    if (nearest_elem_id == _current_elem->id())
     {
-      unsigned int n_qpts_hs = _elem_qp_map[elem_id].size();
-      const dof_id_type & nearest_elem_id = _fch_alignment.getNearestElemID(elem_id);
-      if (nearest_elem_id == _current_elem->id())
+      _heated_perimeter[_current_elem->id()].resize(n_qpts_fch);
+      _heated_perimeter[elem_id].resize(n_qpts_hs);
+
+      _T_fluid[_current_elem->id()].resize(n_qpts_fch);
+      _T_fluid[elem_id].resize(n_qpts_hs);
+
+      _htc[_current_elem->id()].resize(n_qpts_fch);
+      _htc[elem_id].resize(n_qpts_hs);
+
+      for (unsigned int qp_hs = 0; qp_hs < n_qpts_hs; qp_hs++)
       {
-        _heated_perimeter[_current_elem->id()].resize(n_qpts_fch);
-        _heated_perimeter[elem_id].resize(n_qpts_hs);
+        unsigned int nearest_qp = _elem_qp_map[elem_id][qp_hs];
 
-        _T_fluid[_current_elem->id()].resize(n_qpts_fch);
-        _T_fluid[elem_id].resize(n_qpts_hs);
+        _T_fluid[_current_elem->id()][nearest_qp] = _T[nearest_qp];
+        _T_fluid[elem_id][qp_hs] = _T[nearest_qp];
 
-        _htc[_current_elem->id()].resize(n_qpts_fch);
-        _htc[elem_id].resize(n_qpts_hs);
+        _htc[_current_elem->id()][nearest_qp] = _Hw[nearest_qp];
+        _htc[elem_id][qp_hs] = _Hw[nearest_qp];
 
-        for (unsigned int qp_hs = 0; qp_hs < n_qpts_hs; qp_hs++)
-        {
-          unsigned int nearest_qp = _elem_qp_map[elem_id][qp_hs];
-
-          _T_fluid[_current_elem->id()][nearest_qp] = _T[nearest_qp];
-          _T_fluid[elem_id][qp_hs] = _T[nearest_qp];
-
-          _htc[_current_elem->id()][nearest_qp] = _Hw[nearest_qp];
-          _htc[elem_id][qp_hs] = _Hw[nearest_qp];
-
-          _heated_perimeter[_current_elem->id()][nearest_qp] = _P_hf[nearest_qp];
-          _heated_perimeter[elem_id][qp_hs] = _P_hf[nearest_qp];
-        }
+        _heated_perimeter[_current_elem->id()][nearest_qp] = _P_hf[nearest_qp];
+        _heated_perimeter[elem_id][qp_hs] = _P_hf[nearest_qp];
       }
     }
   }

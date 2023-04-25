@@ -51,23 +51,21 @@ void
 FlowChannelHeatStructureCouplerUserObject::execute()
 {
   unsigned int n_qpts = _qrule->n_points();
-  if (_current_elem->processor_id() == this->processor_id())
+
+  _fc_elem_id = _current_elem->id();
+  _hs_elem_id = _mesh_alignment.getCoupledElemID(_fc_elem_id);
+
+  const auto map_ptrs = getCachedQuantityMaps();
+  for (const auto map_ptr : map_ptrs)
   {
-    _fc_elem_id = _current_elem->id();
-    _hs_elem_id = _mesh_alignment.getCoupledElemID(_fc_elem_id);
+    (*map_ptr)[_fc_elem_id].resize(n_qpts);
+    (*map_ptr)[_hs_elem_id].resize(n_qpts);
+  }
 
-    const auto map_ptrs = getCachedQuantityMaps();
-    for (const auto map_ptr : map_ptrs)
-    {
-      (*map_ptr)[_fc_elem_id].resize(n_qpts);
-      (*map_ptr)[_hs_elem_id].resize(n_qpts);
-    }
-
-    for (_fc_qp = 0; _fc_qp < n_qpts; _fc_qp++)
-    {
-      _hs_qp = _mesh_alignment.getCoupledElemQpIndex(_fc_elem_id, _fc_qp);
-      computeQpCachedQuantities();
-    }
+  for (_fc_qp = 0; _fc_qp < n_qpts; _fc_qp++)
+  {
+    _hs_qp = _mesh_alignment.getCoupledElemQpIndex(_fc_elem_id, _fc_qp);
+    computeQpCachedQuantities();
   }
 }
 
