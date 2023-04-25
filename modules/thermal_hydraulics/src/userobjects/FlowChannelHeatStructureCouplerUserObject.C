@@ -8,9 +8,7 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "FlowChannelHeatStructureCouplerUserObject.h"
-#include "MooseMesh.h"
-#include "KDTree.h"
-#include "Assembly.h"
+#include "FlowChannelAlignment.h"
 #include "metaphysicl/parallel_dualnumber.h"
 #include "metaphysicl/parallel_numberarray.h"
 #include "metaphysicl/parallel_semidynamicsparsenumberarray.h"
@@ -19,8 +17,9 @@ InputParameters
 FlowChannelHeatStructureCouplerUserObject::validParams()
 {
   InputParameters params = ElementUserObject::validParams();
-  params.addRequiredParam<FlowChannelAlignment *>("_fch_alignment",
-                                                  "Flow channel alignment object");
+  params.addDeprecatedParam<FlowChannelAlignment *>(
+      "_fch_alignment", "Flow channel alignment object", "Use '_mesh_alignment' instead.");
+  params.addParam<MeshAlignment *>("_mesh_alignment", "Mesh alignment object");
   params.addClassDescription(
       "Base class for caching quantities computed between flow channels and heat structures.");
   return params;
@@ -33,9 +32,11 @@ FlowChannelHeatStructureCouplerUserObject::FlowChannelHeatStructureCouplerUserOb
     _hs_elem_id(0),
     _fc_qp(0),
     _hs_qp(0),
-    _fch_alignment(*getParam<FlowChannelAlignment *>("_fch_alignment")),
-    _elem_qp_map(buildQuadraturePointMap())
+    _mesh_alignment(isParamValid("_mesh_alignment")
+                        ? *getParam<MeshAlignment *>("_mesh_alignment")
+                        : *getParam<FlowChannelAlignment *>("_fch_alignment"))
 {
+  _mesh_alignment.buildCoupledElemQpIndexMap(_assembly);
 }
 
 void
@@ -53,7 +54,7 @@ FlowChannelHeatStructureCouplerUserObject::execute()
   if (_current_elem->processor_id() == this->processor_id())
   {
     _fc_elem_id = _current_elem->id();
-    _hs_elem_id = _fch_alignment.getNearestElemID(_current_elem->id());
+    _hs_elem_id = _mesh_alignment.getCoupledElemID(_fc_elem_id);
 
     const auto map_ptrs = getCachedQuantityMaps();
     for (const auto map_ptr : map_ptrs)
@@ -64,7 +65,7 @@ FlowChannelHeatStructureCouplerUserObject::execute()
 
     for (_fc_qp = 0; _fc_qp < n_qpts; _fc_qp++)
     {
-      _hs_qp = _elem_qp_map.at(_fc_elem_id)[_fc_qp];
+      _hs_qp = _mesh_alignment.getCoupledElemQpIndex(_fc_elem_id, _fc_qp);
       computeQpCachedQuantities();
     }
   }
@@ -109,60 +110,6 @@ FlowChannelHeatStructureCouplerUserObject::getCachedQuantity(
                " for element ",
                elem_id,
                " was requested but not computed.");
-}
-
-std::map<dof_id_type, std::vector<unsigned int>>
-FlowChannelHeatStructureCouplerUserObject::buildQuadraturePointMap() const
-{
-  const auto & hs_boundary_info = _fch_alignment.getMasterBoundaryInfo();
-  const auto & fc_elem_ids = _fch_alignment.getSlaveElementIDs();
-
-  // build list of q-points for each heat structure element
-  std::map<dof_id_type, std::vector<Point>> hs_elem_qps;
-  for (const auto & elem_and_side : hs_boundary_info)
-  {
-    auto elem_id = std::get<0>(elem_and_side);
-    auto side_id = std::get<1>(elem_and_side);
-    const Elem * elem = _mesh.elemPtr(elem_id);
-    _assembly.setCurrentSubdomainID(elem->subdomain_id());
-    _assembly.reinit(elem, side_id);
-    const MooseArray<Point> & q_points = _assembly.qPointsFace();
-    for (std::size_t i = 0; i < q_points.size(); i++)
-      hs_elem_qps[elem_id].push_back(q_points[i]);
-  }
-
-  // build list of q-points for each flow channel element
-  std::map<dof_id_type, std::vector<Point>> fc_elem_qps;
-  for (const auto & elem_id : fc_elem_ids)
-  {
-    const Elem * elem = _mesh.elemPtr(elem_id);
-    _assembly.setCurrentSubdomainID(elem->subdomain_id());
-    _assembly.reinit(elem);
-    const MooseArray<Point> & q_points = _assembly.qPoints();
-    for (std::size_t i = 0; i < q_points.size(); i++)
-      fc_elem_qps[elem_id].push_back(q_points[i]);
-  }
-
-  // build mapping
-  std::map<dof_id_type, std::vector<unsigned int>> elem_qp_map;
-  for (auto elem_id : fc_elem_ids)
-  {
-    dof_id_type nearest_elem_id = _fch_alignment.getNearestElemID(elem_id);
-
-    std::vector<Point> & fc_qps = fc_elem_qps[elem_id];
-    std::vector<Point> & hs_qps = hs_elem_qps[nearest_elem_id];
-    elem_qp_map[elem_id].resize(fc_qps.size());
-    KDTree kd_tree_qp(hs_qps, 5);
-    for (std::size_t i = 0; i < fc_qps.size(); i++)
-    {
-      unsigned int patch_size = 1;
-      std::vector<std::size_t> return_index(patch_size);
-      kd_tree_qp.neighborSearch(fc_qps[i], patch_size, return_index);
-      elem_qp_map[elem_id][i] = return_index[0];
-    }
-  }
-
-  return elem_qp_map;
 }
 
 void
