@@ -4,7 +4,6 @@
     input = 'steady_state.i'
     exodiff = 'steady_state_out.e'
     recover = false
-    mesh_mode = 'replicated'
 
     requirement = 'The system shall be able to produce an exodus file for setting initial conditions in volume junctions'
     design = 'HeatTransferFromHeatStructure1Phase.md'
@@ -17,7 +16,6 @@
     exodiff = 'test_out.e'
     prereq = steady_state
     recover = false
-    mesh_mode = 'replicated'
 
     requirement = 'The system shall be able to use an exodus file for setting initial conditions in volume junctions'
     design = 'HeatTransferFromHeatStructure1Phase.md SolutionInitialCondition.md'
