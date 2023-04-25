@@ -46,12 +46,40 @@ HeatStructure2DCouplerBase::HeatStructure2DCouplerBase(const InputParameters & p
 }
 
 void
+HeatStructure2DCouplerBase::setupMesh()
+{
+  BoundaryBase::setupMesh();
+
+  if (hasComponentByName<HeatStructureBase>(_hs_names[0]) &&
+      hasComponentByName<HeatStructureBase>(_hs_names[1]))
+  {
+    const HeatStructureBase & primary_hs = getComponentByName<HeatStructureBase>(_hs_names[0]);
+    const HeatStructureBase & secondary_hs = getComponentByName<HeatStructureBase>(_hs_names[1]);
+
+    if (primary_hs.hasBoundary(_hs_boundaries[0]) && secondary_hs.hasBoundary(_hs_boundaries[1]))
+    {
+      // Initialize the alignment mapping
+      _mesh_alignment.initialize(primary_hs.getBoundaryInfo(_hs_boundaries[0]),
+                                 secondary_hs.getBoundaryInfo(_hs_boundaries[1]));
+
+      // Add entries to sparsity pattern for coupling
+      if (_mesh_alignment.meshesAreAligned())
+        for (const auto & elem_id : _mesh_alignment.getPrimaryElemIDs())
+        {
+          if (_mesh_alignment.hasCoupledElemID(elem_id))
+            getTHMProblem().augmentSparsity(elem_id, _mesh_alignment.getCoupledElemID(elem_id));
+        }
+    }
+  }
+}
+
+void
 HeatStructure2DCouplerBase::init()
 {
   BoundaryBase::init();
 
   if (hasComponentByName<HeatStructureBase>(_hs_names[0]) &&
-      hasComponentByName<HeatStructureBase>(_hs_names[1]) && !constMesh().isDistributedMesh())
+      hasComponentByName<HeatStructureBase>(_hs_names[1]))
   {
     const HeatStructureBase & primary_hs = getComponentByName<HeatStructureBase>(_hs_names[0]);
     const HeatStructureBase & secondary_hs = getComponentByName<HeatStructureBase>(_hs_names[1]);
@@ -80,19 +108,6 @@ HeatStructure2DCouplerBase::init()
         _coupling_area_fractions[0] = 1.0;
         _coupling_area_fractions[1] = _areas[0] / _areas[1];
       }
-
-      // Initialize the alignment mapping
-      _mesh_alignment.initialize(primary_hs.getBoundaryInfo(_hs_boundaries[0]),
-                                 secondary_hs.getBoundaryInfo(_hs_boundaries[1]));
-
-      // Add entries to sparsity pattern for coupling
-      if (_mesh_alignment.meshesAreAligned())
-        for (const auto & elem_id : _mesh_alignment.getPrimaryBoundaryElemIDs())
-        {
-          const auto neighbor_elem_id = _mesh_alignment.getNeighborElemID(elem_id);
-          if (neighbor_elem_id != DofObject::invalid_id)
-            getTHMProblem().augmentSparsity(elem_id, neighbor_elem_id);
-        }
     }
   }
 
@@ -133,7 +148,4 @@ HeatStructure2DCouplerBase::check() const
 
   if ((_is_plate[0] && _is_cylindrical[1]) || (_is_cylindrical[0] && _is_plate[1]))
     logError("The coupled heat structures must have the same type.");
-
-  if (constMesh().isDistributedMesh())
-    logError("HeatStructure2DCouplerBase does not work with a distributed mesh.");
 }
