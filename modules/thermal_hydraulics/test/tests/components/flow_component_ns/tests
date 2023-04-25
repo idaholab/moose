@@ -6,6 +6,7 @@
     type = Exodiff
     input = rectangle.i
     exodiff = rectangle.e
+    recover = false # No transient, just mesh generation
     cli_args = "--mesh-only rectangle.e"
     requirement = 'The system shall generate a mesh for the FlowComponentNS tests.'
   []
