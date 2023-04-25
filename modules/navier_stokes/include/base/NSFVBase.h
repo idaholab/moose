@@ -163,8 +163,8 @@ protected:
                                  const std::vector<std::string> parameter_names);
   /// Throws an error if any of the parameters are defined from a vector while the
   /// the corresponding main parameter is disabled
-  void checkDependentParameterError(const std::string main_parameter,
-                                    const std::vector<std::string> dependent_parameters,
+  void checkDependentParameterError(const std::string & main_parameter,
+                                    const std::vector<std::string> & dependent_parameters,
                                     const bool should_be_defined = false);
 
   /// Checks that sufficient Rhie Chow coefficients have been defined for the given dimension, used
@@ -1406,7 +1406,8 @@ NSFVBase<BaseType>::addINSInitialConditions()
   assignBlocks(params, _blocks);
   auto vvalue = parameters().template get<std::vector<FunctionName>>("initial_velocity");
 
-  if (_create_velocity)
+  if (_create_velocity &&
+      (!_app.isRestarting() || parameters().isParamSetByUser("initial_velocity")))
     for (unsigned int d = 0; d < _dim; ++d)
     {
       params.template set<VariableName>("variable") = _velocity_name[d];
@@ -1415,7 +1416,8 @@ NSFVBase<BaseType>::addINSInitialConditions()
       addNSInitialCondition("FunctionIC", prefix() + _velocity_name[d] + "_ic", params);
     }
 
-  if (_create_pressure)
+  if (_create_pressure &&
+      (!_app.isRestarting() || parameters().isParamSetByUser("initial_pressure")))
   {
     params.template set<VariableName>("variable") = _pressure_name;
     params.template set<FunctionName>("function") =
@@ -1423,19 +1425,19 @@ NSFVBase<BaseType>::addINSInitialConditions()
 
     addNSInitialCondition("FunctionIC", prefix() + _pressure_name + "_ic", params);
   }
-  if (_has_energy_equation)
-  {
-    if (_create_fluid_temperature)
-    {
-      params.template set<VariableName>("variable") = _fluid_temperature_name;
-      params.template set<FunctionName>("function") =
-          parameters().template get<FunctionName>("initial_temperature");
 
-      addNSInitialCondition("FunctionIC", prefix() + _fluid_temperature_name + "_ic", params);
-    }
+  if (_has_energy_equation && _create_fluid_temperature &&
+      (!_app.isRestarting() || parameters().isParamSetByUser("initial_temperature")))
+  {
+    params.template set<VariableName>("variable") = _fluid_temperature_name;
+    params.template set<FunctionName>("function") =
+        parameters().template get<FunctionName>("initial_temperature");
+
+    addNSInitialCondition("FunctionIC", prefix() + _fluid_temperature_name + "_ic", params);
   }
 
-  if (_has_scalar_equation)
+  if (_has_scalar_equation &&
+      (!_app.isRestarting() || parameters().isParamSetByUser("initial_scalar_variables")))
   {
     unsigned int ic_counter = 0;
     for (unsigned int name_i = 0; name_i < _passive_scalar_names.size(); ++name_i)
@@ -3416,8 +3418,8 @@ NSFVBase<BaseType>::checkBlockwiseConsistency(const std::string block_param_name
 template <class BaseType>
 void
 NSFVBase<BaseType>::checkDependentParameterError(
-    const std::string main_parameter,
-    const std::vector<std::string> dependent_parameters,
+    const std::string & main_parameter,
+    const std::vector<std::string> & dependent_parameters,
     const bool should_be_defined)
 {
   for (const auto & param : dependent_parameters)
