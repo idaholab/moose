@@ -70,6 +70,9 @@ protected:
   /// Strong residual corresponding to coupled force term
   ADMaterialProperty<RealVectorValue> & _coupled_force_strong_residual;
 
+  /// Strong residual corresponding to convected mesh term
+  ADMaterialProperty<RealVectorValue> & _convected_mesh_strong_residual;
+
   // /// Future addition pending addition of INSADMMSKernel.
   // /// Strong residual corresponding to the mms function term
   // MaterialProperty<RealVectorValue> & _mms_function_strong_residual;
@@ -124,4 +127,16 @@ protected:
 
   /// optional vector function(s)
   std::vector<const Function *> _coupled_force_vector_function;
+
+  /// Whether we have mesh convection
+  bool _has_convected_mesh;
+
+  /// The time derivative with respect to x-displacement
+  const ADVariableValue * _disp_x_dot;
+
+  /// The time derivative with respect to y-displacement
+  const ADVariableValue * _disp_y_dot;
+
+  /// The time derivative with respect to z-displacement
+  const ADVariableValue * _disp_z_dot;
 };

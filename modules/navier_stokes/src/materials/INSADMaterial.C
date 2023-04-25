@@ -49,6 +49,8 @@ INSADMaterial::INSADMaterial(const InputParameters & parameters)
     _boussinesq_strong_residual(declareADProperty<RealVectorValue>("boussinesq_strong_residual")),
     _coupled_force_strong_residual(
         declareADProperty<RealVectorValue>("coupled_force_strong_residual")),
+    _convected_mesh_strong_residual(
+        declareADProperty<RealVectorValue>("convected_mesh_strong_residual")),
     // _mms_function_strong_residual(declareProperty<RealVectorValue>("mms_function_strong_residual")),
     _use_displaced_mesh(getParam<bool>("use_displaced_mesh")),
     _ad_q_point(_bnd ? _assembly.adQPointsFace() : _assembly.adQPoints()),
@@ -107,6 +109,30 @@ INSADMaterial::subdomainSetup()
   else
     _gravity_vector = 0;
 
+  if ((_has_convected_mesh =
+           _object_tracker->get<bool>("has_convected_mesh", _current_subdomain_id)))
+  {
+    auto set_disp_dot = [&](auto *& pointer_data_member, const auto & disp_name)
+    {
+      pointer_data_member =
+          &_subproblem
+               .getStandardVariable(
+                   _tid, _object_tracker->get<VariableName>(disp_name, _current_subdomain_id))
+               .adUDot();
+    };
+    set_disp_dot(_disp_x_dot, "disp_x");
+    if (_object_tracker->isTrackerParamValid("disp_y", _current_subdomain_id))
+      set_disp_dot(_disp_y_dot, "disp_y");
+    else
+      _disp_y_dot = nullptr;
+    if (_object_tracker->isTrackerParamValid("disp_z", _current_subdomain_id))
+      set_disp_dot(_disp_z_dot, "disp_z");
+    else
+      _disp_z_dot = nullptr;
+  }
+  else
+    _disp_x_dot = _disp_y_dot = _disp_z_dot = nullptr;
+
   _viscous_form = static_cast<std::string>(
       _object_tracker->get<MooseEnum>("viscous_form", _current_subdomain_id));
 
@@ -151,6 +177,17 @@ INSADMaterial::computeQpProperties()
   if (_has_boussinesq)
     _boussinesq_strong_residual[_qp] = (*_boussinesq_alpha)[_qp] * _gravity_vector * _rho[_qp] *
                                        ((*_temperature)[_qp] - (*_ref_temp)[_qp]);
+
+  if (_has_convected_mesh)
+  {
+    ADRealVectorValue disp_dot((*_disp_x_dot)[_qp]);
+    if (_disp_y_dot)
+      disp_dot(1) = (*_disp_y_dot)[_qp];
+    if (_disp_z_dot)
+      disp_dot(2) = (*_disp_z_dot)[_qp];
+    _convected_mesh_strong_residual[_qp] = -_rho[_qp] * _grad_velocity[_qp].left_multiply(disp_dot);
+  }
+
   if (_has_coupled_force)
   {
     _coupled_force_strong_residual[_qp] = 0;
