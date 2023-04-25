@@ -321,8 +321,8 @@ private:
                                  const std::vector<std::string> parameter_names);
   /// Throws an error if any of the parameters are defined from a vector while the
   /// the corresponding main parameter is disabled
-  void checkDependentParameterError(const std::string main_parameter,
-                                    const std::vector<std::string> dependent_parameters,
+  void checkDependentParameterError(const std::string & main_parameter,
+                                    const std::vector<std::string> & dependent_parameters,
                                     const bool should_be_defined = false);
 
   /// Checks that sufficient Rhie Chow coefficients have been defined for the given dimension, used
