@@ -146,3 +146,13 @@ A core periphery region can be added utilizing either the [PeripheralRingMeshGen
        style=width:100%;display:block;margin-left:auto;margin-right:auto;
 
 !row-end!
+
+!---
+
+## Default Block and External Boundary Names
+
+An RGMB case can terminate at the pin, assembly, or core "level". Pins and assemblies always have a "type" assigned (a numeric integer specified as [!param](/Mesh/PinMeshGenerator/pin_type) for pins and [!param](/Mesh/AssemblyMeshGenerator/assembly_type) for assemblies), whereas cores do not. The "level" and "type" are used in the naming schemes for the blocks and outer boundary as follows:
+
+- The default block names in the final mesh are `RGMB_(level)(type)` and `RGMB_(level)(type)_TRI` (if triangular elements are present). For example, `RGMB_PIN1` and `RMGB_PIN1_TRI`, or `RGMB_ASSEMBLY1` and `RGMB_ASSEMBLY1_TRI`, or `RGMB_CORE` and `RGMB_CORE_TRI`, for workflows ending at the pin, assembly or core level, respectively.
+- The default outer boundary names in the radial dimension are `outer_(level)_(type)`. For example, for workflows ending at the pin, assembly or core level respectively, the outer boundary names are `outer_pin_1`, `outer_assembly_1` and `outer_core`.
+- If the problem is extruded in the axial dimension, the `top` and `bottom` boundaries also exist.

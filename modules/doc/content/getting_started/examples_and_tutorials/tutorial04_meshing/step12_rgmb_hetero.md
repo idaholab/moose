@@ -70,14 +70,14 @@ RGMB allows assignment of background coolant and duct region IDs which are added
          caption=LFR RGMB Material ID setup.
          block=Mesh/lfr_assy
 
-Boundary conditions are assigned to the outer boundary sidesets.
+Boundary conditions are assigned to the outer boundary sidesets. The default outer boundary name for an assembly with [!param](/Mesh/AssemblyMeshGenerator/assembly_type) `1` is `outer_assembly_1`.
 
 !listing reactor_examples/rgmb_lfr/rgmb_lfr_griffin_snippet.i
          id=tutorial04-rgmb_lfr-transport
          caption=LFR RGMB boundary condition setup.
          block=TransportSystems
 
-Material definition is greatly simplified since `material_id` extra element ID is defined directly on mesh.
+Material definition is greatly simplified since the `material_id` extra element ID is defined directly on mesh. Just the blocks need to be listed. The remainder of the file shown here simply describes the composition of the materials by isotope, and where to find them in the library file. There is no mapping performed in Griffin.
 
 !listing reactor_examples/rgmb_lfr/rgmb_lfr_griffin_snippet.i
          id=tutorial04-rgmb_lfr-materials

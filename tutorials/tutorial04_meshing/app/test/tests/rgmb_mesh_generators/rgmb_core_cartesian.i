@@ -65,8 +65,7 @@
 
   [rgmb_core]
     type = CoreMeshGenerator
-    inputs = 'assembly1 assembly2 empty'
-    dummy_assembly_name = empty
+    inputs = 'assembly1 assembly2'
     pattern = '1 0;
                0 1'
     extrude = true
