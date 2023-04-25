@@ -82,9 +82,7 @@ Extensions:
             richards: !include modules/richards/doc/remove.yml
             stochastic_tools: !include modules/stochastic_tools/doc/remove.yml
     MooseDocs.extensions.common:
-        shortcuts:
-            framework: !include framework/doc/globals.yml
-            stochastic_tools: !include modules/stochastic_tools/doc/globals.yml
+        shortcuts: !include framework/doc/globals.yml
     MooseDocs.extensions.acronym:
         acronyms: !include framework/doc/acronyms.yml
     MooseDocs.extensions.content:
@@ -110,7 +108,6 @@ Extensions:
             interfaces: framework_development/interfaces/index.md
             kernels: syntax/Kernels/index.md
             linesearches: syntax/LineSearches/index.md
-            mappings: syntax/VariableMappings/index.md
             markers: syntax/Adaptivity/Markers/index.md
             materials: syntax/Materials/index.md
             mesh: syntax/Mesh/index.md
@@ -141,6 +138,7 @@ Extensions:
             userobject: syntax/UserObjects/index.md
             userobjects: syntax/UserObjects/index.md
             utils: framework_development/utils/index.md
+            variablemappings: syntax/VariableMappings/index.md
             variables: syntax/Variables/index.md
             vectorpostprocessors: syntax/VectorPostprocessors/index.md
     MooseDocs.extensions.civet:

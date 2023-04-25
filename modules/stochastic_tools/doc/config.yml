@@ -23,7 +23,6 @@ Extensions:
     MooseDocs.extensions.common:
         shortcuts:
             framework: !include framework/doc/globals.yml
-            stochastic_tools: !include modules/stochastic_tools/doc/globals.yml
     MooseDocs.extensions.acronym:
         acronyms: !include framework/doc/acronyms.yml
     MooseDocs.extensions.template:

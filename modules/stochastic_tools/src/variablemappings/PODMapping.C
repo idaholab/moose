@@ -313,7 +313,7 @@ PODMapping::map(const VariableName & vname,
   mooseAssert(_parallel_storage, "We need the parallel solution storage for this operation.");
   mooseAssert(_left_basis_functions.find(vname) != _left_basis_functions.end(),
               "The bases for the requested variable are not available!");
-  mooseAssert(_mapping_ready_to_use.find(vname) == _mapping_ready_to_use.end() &&
+  mooseAssert(_mapping_ready_to_use.find(vname) != _mapping_ready_to_use.end() &&
                   _mapping_ready_to_use[vname],
               "The mapping for variable " + vname + "is not ready to use!");
 
@@ -334,7 +334,7 @@ PODMapping::map(const VariableName & vname,
                 const DenseVector<Real> & full_order_vector,
                 std::vector<Real> & reduced_order_vector) const
 {
-  mooseAssert(_mapping_ready_to_use.find(vname) == _mapping_ready_to_use.end() &&
+  mooseAssert(_mapping_ready_to_use.find(vname) != _mapping_ready_to_use.end() &&
                   _mapping_ready_to_use[vname],
               "The mapping for variable " + vname + "is not ready to use!");
 
@@ -358,7 +358,7 @@ PODMapping::inverse_map(const VariableName & vname,
                   _variable_names.end(),
               "Variable " + vname + " is not in PODMapping!");
 
-  mooseAssert(_mapping_ready_to_use.find(vname) == _mapping_ready_to_use.end() &&
+  mooseAssert(_mapping_ready_to_use.find(vname) != _mapping_ready_to_use.end() &&
                   _mapping_ready_to_use[vname],
               "The mapping for variable " + vname + "is not ready to use!");
 
@@ -386,7 +386,7 @@ PODMapping::leftBasisFunction(const VariableName & vname, const unsigned int bas
                   _variable_names.end(),
               "Variable " + vname + " is not in PODMapping!");
 
-  mooseAssert(_mapping_ready_to_use.find(vname) == _mapping_ready_to_use.end() &&
+  mooseAssert(_mapping_ready_to_use.find(vname) != _mapping_ready_to_use.end() &&
                   _mapping_ready_to_use[vname],
               "The mapping for variable " + vname + "is not ready to use!");
 
@@ -404,7 +404,7 @@ PODMapping::rightBasisFunction(const VariableName & vname, const unsigned int ba
                   _variable_names.end(),
               "Variable " + vname + " is not in PODMapping!");
 
-  mooseAssert(_mapping_ready_to_use.find(vname) == _mapping_ready_to_use.end() &&
+  mooseAssert(_mapping_ready_to_use.find(vname) != _mapping_ready_to_use.end() &&
                   _mapping_ready_to_use[vname],
               "The mapping for variable " + vname + "is not ready to use!");
 
@@ -418,7 +418,7 @@ PODMapping::rightBasisFunction(const VariableName & vname, const unsigned int ba
 const std::vector<DenseVector<Real>> &
 PODMapping::leftBasis(const VariableName & vname)
 {
-  mooseAssert(_mapping_ready_to_use.find(vname) == _mapping_ready_to_use.end() &&
+  mooseAssert(_mapping_ready_to_use.find(vname) != _mapping_ready_to_use.end() &&
                   _mapping_ready_to_use[vname],
               "The mapping for variable " + vname + "is not ready to use!");
 
@@ -432,7 +432,7 @@ PODMapping::leftBasis(const VariableName & vname)
 const std::vector<DenseVector<Real>> &
 PODMapping::rightBasis(const VariableName & vname)
 {
-  mooseAssert(_mapping_ready_to_use.find(vname) == _mapping_ready_to_use.end() &&
+  mooseAssert(_mapping_ready_to_use.find(vname) != _mapping_ready_to_use.end() &&
                   _mapping_ready_to_use[vname],
               "The mapping for variable " + vname + "is not ready to use!");
 
@@ -446,7 +446,7 @@ PODMapping::rightBasis(const VariableName & vname)
 const std::vector<Real> &
 PODMapping::singularValues(const VariableName & vname)
 {
-  mooseAssert(_mapping_ready_to_use.find(vname) == _mapping_ready_to_use.end() &&
+  mooseAssert(_mapping_ready_to_use.find(vname) != _mapping_ready_to_use.end() &&
                   _mapping_ready_to_use[vname],
               "The mapping for variable " + vname + "is not ready to use!");
 
