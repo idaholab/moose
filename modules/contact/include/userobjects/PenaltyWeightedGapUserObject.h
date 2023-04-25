@@ -28,7 +28,7 @@ public:
   virtual const ADVariableValue & contactPressure() const override;
   virtual void initialize() override;
   virtual void reinit() override;
-  Real getNormalContactPressure(const Node * const node) const;
+  virtual Real getNormalContactPressure(const Node * const node) const override;
 
 protected:
   virtual const VariableTestValue & test() const override;

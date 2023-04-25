@@ -12,7 +12,7 @@
 #include "AuxKernel.h"
 #include "MooseEnum.h"
 
-class UserObject;
+class WeightedGapUserObject;
 
 /**
  * Auxiliary kernel to output mortar penalty contact quantities of interest
@@ -47,6 +47,6 @@ protected:
   /// What penalty mortar contact quantity we'd like to output
   const ContactQuantityEnum _contact_quantity;
 
-  /// PenaltyFrictionUserObject to be queried for a value
-  const UserObject * _user_object;
+  /// The user object inputted by the user to obtain the contact quantities
+  const WeightedGapUserObject * _user_object;
 };

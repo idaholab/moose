@@ -60,11 +60,12 @@ PenaltyWeightedGapUserObject::initialize()
 Real
 PenaltyWeightedGapUserObject::getNormalContactPressure(const Node * const node) const
 {
-  for (auto & map_pr : _dof_to_normal_pressure)
-    if (map_pr.first->id() == node->id())
-      return MetaPhysicL::raw_value(
-          libmesh_map_find(_dof_to_normal_pressure, static_cast<const DofObject *>(map_pr.first)));
-  return 0.0;
+  const auto it = _dof_to_normal_pressure.find(_subproblem.mesh().nodePtr(node->id()));
+
+  if (it != _dof_to_normal_pressure.end())
+    return MetaPhysicL::raw_value(it->second);
+  else
+    return 0.0;
 }
 
 void

@@ -153,3 +153,14 @@ WeightedGapUserObject::execute()
       computeQpIProperties();
   }
 }
+
+Real
+WeightedGapUserObject::getNormalWeightedGap(const Node * const node) const
+{
+  const auto it = _dof_to_real_weighted_gap.find(_subproblem.mesh().nodePtr(node->id()));
+
+  if (it != _dof_to_real_weighted_gap.end())
+    return MetaPhysicL::raw_value(it->second);
+  else
+    return 0.0;
+}

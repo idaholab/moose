@@ -1,4 +1,3 @@
-
 # PenaltyMortarUserObjectAux
 
 ## Description
@@ -12,8 +11,6 @@ is to be used in conjunction with mortar penalty contact user objects, namely
 Quantities that this object can output include: the normal and friction
 pressure values, accumulated slip distances, tangential relative velocities,
 and weighted gap values.
-
-!syntax description /AuxKernels/PenaltyMortarUserObjectAux
 
 !syntax parameters /AuxKernels/PenaltyMortarUserObjectAux
 

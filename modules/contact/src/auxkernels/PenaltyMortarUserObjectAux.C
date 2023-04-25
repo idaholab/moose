@@ -9,8 +9,7 @@
 
 #include "PenaltyMortarUserObjectAux.h"
 
-#include "PenaltyFrictionUserObject.h"
-#include "PenaltyWeightedGapUserObject.h"
+#include "WeightedGapUserObject.h"
 
 registerMooseObject("ContactApp", PenaltyMortarUserObjectAux);
 
@@ -38,21 +37,17 @@ PenaltyMortarUserObjectAux::PenaltyMortarUserObjectAux(const InputParameters & p
   : AuxKernel(parameters),
     _contact_quantity(getParam<MooseEnum>("contact_quantity").getEnum<ContactQuantityEnum>())
 {
-  _user_object = &(parameters.get<FEProblemBase *>("_fe_problem_base")
-                       ->getUserObjectBase(getParam<UserObjectName>("user_object")));
-
   if (!isNodal())
     mooseError("This auxiliary kernel requires nodal variables to obtain contact pressure values");
 
-  if (dynamic_cast<const PenaltyWeightedGapUserObject *>(_user_object) &&
-      _contact_quantity != ContactQuantityEnum::NORMAL_PRESSURE)
-    paramError(
-        "contact_quantity",
-        "The contact quantity requested is not available for penalty weighted gap user objects.");
+  _user_object = dynamic_cast<const WeightedGapUserObject *>(
+      &(parameters.get<FEProblemBase *>("_fe_problem_base")
+            ->getUserObjectBase(getParam<UserObjectName>("user_object"))));
 
-  if (!dynamic_cast<const PenaltyWeightedGapUserObject *>(_user_object) &&
-      !dynamic_cast<const PenaltyFrictionUserObject *>(_user_object))
-    paramError("user_object", "User object type is not supported");
+  if (!_user_object)
+    paramError("user_object",
+               "The contact quantity requested is not available for the user object requires. Make "
+               "sure the penalty mortar contact user object is of the correct type.");
 }
 
 Real
@@ -61,44 +56,28 @@ PenaltyMortarUserObjectAux::computeValue()
   switch (_contact_quantity)
   {
     case ContactQuantityEnum::NORMAL_PRESSURE:
-      if (dynamic_cast<const PenaltyWeightedGapUserObject *>(_user_object))
-        return static_cast<const PenaltyWeightedGapUserObject *>(_user_object)
-            ->getNormalContactPressure(_current_node);
-      else
-        return static_cast<const PenaltyFrictionUserObject *>(_user_object)
-            ->getNormalContactPressure(_current_node);
-
+      return _user_object->getNormalContactPressure(_current_node);
       break;
     case ContactQuantityEnum::WEIGHTED_GAP:
-      return static_cast<const PenaltyFrictionUserObject *>(_user_object)
-          ->getNormalWeightedGap(_current_node);
+      return _user_object->getNormalWeightedGap(_current_node);
       break;
     case ContactQuantityEnum::FRICTIONAL_PRESSURE_ONE:
-      return static_cast<const PenaltyFrictionUserObject *>(_user_object)
-          ->getFrictionalContactPressure(_current_node, 0);
+      return _user_object->getFrictionalContactPressure(_current_node, 0);
       break;
     case ContactQuantityEnum::ACCUMULATED_SLIP_ONE:
-      return static_cast<const PenaltyFrictionUserObject *>(_user_object)
-          ->getAccumulatedSlip(_current_node, 0);
+      return _user_object->getAccumulatedSlip(_current_node, 0);
       break;
     case ContactQuantityEnum::TANGENTIAL_VELOCITY_ONE:
-      return static_cast<const PenaltyFrictionUserObject *>(_user_object)
-          ->getTangentialVelocity(_current_node, 0);
+      return _user_object->getTangentialVelocity(_current_node, 0);
       break;
-
     case ContactQuantityEnum::FRICTIONAL_PRESSURE_TWO:
-      return static_cast<const PenaltyFrictionUserObject *>(_user_object)
-          ->getFrictionalContactPressure(_current_node, 1);
+      return _user_object->getFrictionalContactPressure(_current_node, 1);
       break;
-
     case ContactQuantityEnum::ACCUMULATED_SLIP_TWO:
-      return static_cast<const PenaltyFrictionUserObject *>(_user_object)
-          ->getAccumulatedSlip(_current_node, 1);
+      return _user_object->getAccumulatedSlip(_current_node, 1);
       break;
-
     case ContactQuantityEnum::TANGENTIAL_VELOCITY_TWO:
-      return static_cast<const PenaltyFrictionUserObject *>(_user_object)
-          ->getTangentialVelocity(_current_node, 1);
+      return _user_object->getTangentialVelocity(_current_node, 1);
       break;
     default:
       mooseError("Internal error: Contact quantity request in PressureMortarUserObjectAux is not "

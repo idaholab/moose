@@ -20,8 +20,6 @@ multiplier when exact enforcement is used
  (see [ComputeWeightedGapLMMechanicalContact](/ComputeWeightedGapLMMechanicalContact.md)). This object is set up automatically
 when using the contact action [ContactAction](/ContactAction.md).
 
-!syntax description /UserObjects/PenaltyWeightedGapUserObject
-
 !syntax parameters /UserObjects/PenaltyWeightedGapUserObject
 
 !syntax inputs /UserObjects/PenaltyWeightedGapUserObject

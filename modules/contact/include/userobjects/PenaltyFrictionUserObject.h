@@ -11,9 +11,6 @@
 
 #include "WeightedVelocitiesUserObject.h"
 
-template <typename>
-class MooseVariableFE;
-
 /**
  * User object that computes tangential pressures due to friction using a penalty approach
  */
@@ -33,11 +30,15 @@ public:
   virtual void reinit() override;
   virtual void timestepSetup() override;
 
-  Real getNormalContactPressure(const Node * const node) const;
-  Real getFrictionalContactPressure(const Node * const node, const unsigned int component) const;
-  Real getAccumulatedSlip(const Node * const node, const unsigned int component) const;
-  Real getTangentialVelocity(const Node * const node, const unsigned int component) const;
-  Real getNormalWeightedGap(const Node * const node) const;
+  virtual Real getNormalContactPressure(const Node * const node) const override;
+  virtual Real getNormalWeightedGap(const Node * const node) const override;
+
+  virtual Real getFrictionalContactPressure(const Node * const node,
+                                            const unsigned int component) const override;
+  virtual Real getAccumulatedSlip(const Node * const node,
+                                  const unsigned int component) const override;
+  virtual Real getTangentialVelocity(const Node * const node,
+                                     const unsigned int component) const override;
 
 protected:
   virtual const VariableTestValue & test() const override;

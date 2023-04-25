@@ -97,7 +97,7 @@ PenaltyFrictionUserObject::timestepSetup()
 
   for (auto & map_pr : _dof_to_accumulated_slip)
   {
-    if (_dof_to_old_normal_pressure[map_pr.first] >
+    if (libmesh_map_find(_dof_to_old_normal_pressure, map_pr.first) >
         TOLERANCE * TOLERANCE) // Only if it had normal pressure. Otherwise, restart count
       _dof_to_old_accumulated_slip.emplace(map_pr);
     else
@@ -118,62 +118,60 @@ PenaltyFrictionUserObject::initialize()
 Real
 PenaltyFrictionUserObject::getNormalContactPressure(const Node * const node) const
 {
-  for (auto & map_pr : _dof_to_normal_pressure)
-    if (map_pr.first->id() == node->id())
-      return MetaPhysicL::raw_value(
-          libmesh_map_find(_dof_to_normal_pressure, static_cast<const DofObject *>(map_pr.first)));
-  return 0.0;
+  const auto it = _dof_to_normal_pressure.find(_subproblem.mesh().nodePtr(node->id()));
+
+  if (it != _dof_to_normal_pressure.end())
+    return MetaPhysicL::raw_value(it->second);
+  else
+    return 0.0;
 }
 
 Real
 PenaltyFrictionUserObject::getFrictionalContactPressure(const Node * const node,
                                                         const unsigned int component) const
 {
-  for (auto & map_pr : _dof_to_frictional_pressure)
-    if (map_pr.first->id() == node->id())
-      return MetaPhysicL::raw_value(libmesh_map_find(
-          _dof_to_frictional_pressure, static_cast<const DofObject *>(map_pr.first))[component]);
+  const auto it = _dof_to_frictional_pressure.find(_subproblem.mesh().nodePtr(node->id()));
 
-  return 0.0;
+  if (it != _dof_to_frictional_pressure.end())
+    return MetaPhysicL::raw_value(it->second[component]);
+  else
+    return 0.0;
 }
 
 Real
 PenaltyFrictionUserObject::getAccumulatedSlip(const Node * const node,
                                               const unsigned int component) const
 {
-  for (auto & map_pr : _dof_to_accumulated_slip)
-    if (map_pr.first->id() == node->id())
-    {
-      const auto & slip_x = libmesh_map_find(
-          _dof_to_accumulated_slip, static_cast<const DofObject *>(map_pr.first))[component];
-      return MetaPhysicL::raw_value(slip_x);
-    }
-  return 0.0;
+  const auto it = _dof_to_accumulated_slip.find(_subproblem.mesh().nodePtr(node->id()));
+
+  if (it != _dof_to_accumulated_slip.end())
+    return MetaPhysicL::raw_value(it->second[component]);
+  else
+    return 0.0;
 }
 
 Real
 PenaltyFrictionUserObject::getTangentialVelocity(const Node * const node,
                                                  const unsigned int component) const
 {
-  for (auto & map_pr : _dof_to_real_tangential_velocity)
-    if (map_pr.first->id() == node->id())
-    {
-      const auto & tan_vel_component =
-          libmesh_map_find(_dof_to_real_tangential_velocity,
-                           static_cast<const DofObject *>(map_pr.first))[component];
-      return MetaPhysicL::raw_value(tan_vel_component);
-    }
-  return 0.0;
+
+  const auto it = _dof_to_real_tangential_velocity.find(_subproblem.mesh().nodePtr(node->id()));
+
+  if (it != _dof_to_real_tangential_velocity.end())
+    return MetaPhysicL::raw_value(it->second[component]);
+  else
+    return 0.0;
 }
 
 Real
 PenaltyFrictionUserObject::getNormalWeightedGap(const Node * const node) const
 {
-  for (auto & map_pr : _dof_to_real_weighted_gap)
-    if (map_pr.first->id() == node->id())
-      return MetaPhysicL::raw_value(libmesh_map_find(_dof_to_real_weighted_gap,
-                                                     static_cast<const DofObject *>(map_pr.first)));
-  return 0.0;
+  const auto it = _dof_to_real_weighted_gap.find(_subproblem.mesh().nodePtr(node->id()));
+
+  if (it != _dof_to_real_weighted_gap.end())
+    return MetaPhysicL::raw_value(it->second);
+  else
+    return 0.0;
 }
 
 void
