@@ -973,6 +973,12 @@ MultiApp::appTransferVector(unsigned int app, std::string var_name)
 }
 
 bool
+MultiApp::isFirstLocalRank() const
+{
+  return _rank_config.is_first_local_rank;
+}
+
+bool
 MultiApp::hasLocalApp(unsigned int global_app) const
 {
   if (_has_an_app && global_app >= _first_local_app &&

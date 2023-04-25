@@ -40,6 +40,9 @@ MultiAppPositions::validParams()
 MultiAppPositions::MultiAppPositions(const InputParameters & parameters)
   : Positions(parameters), _use_apps_centroid(getParam<bool>("use_apps_centroid"))
 {
+  // Centroids cannot be computed for non-local apps
+  if (_use_apps_centroid)
+    _need_broadcast = true;
 }
 
 void
@@ -63,18 +66,25 @@ MultiAppPositions::initialize()
         _positions.push_back(p);
         _positions_2d[m_it].push_back(p);
       }
+      // Get the centroid of each subapp mesh
       else
       {
-        // Get the centroid of each subapp mesh
+        // Cant compute centroid if does not own the mesh
+        if (!multiapp->hasLocalApp(i_global))
+          continue;
         auto & fe_problem_base = multiapp->appProblemBase(i_global);
-        MeshBase & mesh = (getParam<bool>("use_displaced_mesh") &&
-                           fe_problem_base.getDisplacedProblem().get() != NULL)
-                              ? fe_problem_base.getDisplacedProblem()->mesh().getMesh()
-                              : fe_problem_base.mesh().getMesh();
+        const MeshBase & mesh = (getParam<bool>("use_displaced_mesh") &&
+                                 fe_problem_base.getDisplacedProblem().get() != NULL)
+                                    ? fe_problem_base.getDisplacedProblem()->mesh().getMesh()
+                                    : fe_problem_base.mesh().getMesh();
         Point centroid = MooseMeshUtils::meshCentroidCalculator(mesh);
 
-        _positions.push_back(p + centroid);
-        _positions_2d[m_it].push_back(p + centroid);
+        // There's a broadcast after, no need to add on every rank
+        if (multiapp->isFirstLocalRank())
+        {
+          _positions.push_back(p + centroid);
+          _positions_2d[m_it].push_back(p + centroid);
+        }
       }
     }
   }

@@ -81,7 +81,7 @@ protected:
   std::vector<std::vector<std::vector<std::vector<Point>>>> _positions_4d;
 
   /// Whether generation of positions is distributed or not (and therefore needs a broadcast)
-  const bool _need_broadcast;
+  bool _need_broadcast;
   /// Whether positions should be sorted. Be careful with sorting! For example if initial positions
   /// are not sorted, then we switch to sorted positions, the mapping might be odd
   /// User is also likely to have sorted their positions file, their input parameter etc

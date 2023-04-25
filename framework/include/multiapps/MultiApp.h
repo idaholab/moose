@@ -281,6 +281,11 @@ public:
   unsigned int firstLocalApp() { return _first_local_app; }
 
   /**
+   * @return Whether this rank is the first rank of the subapp(s) it's involved in
+   */
+  bool isFirstLocalRank() const;
+
+  /**
    * Whether or not this MultiApp has an app on this processor.
    */
   bool hasApp() { return _has_an_app; }
