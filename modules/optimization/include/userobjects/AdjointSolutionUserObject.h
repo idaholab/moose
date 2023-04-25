@@ -28,7 +28,7 @@ public:
   virtual void timestepSetup() override;
 
 protected:
-  /// Optional input for mapping between adjoint simulation time and adjoint simulation time
+  /// Mapping between adjoint simulation time and adjoint simulation time
   const Real & _reverse_time_end;
   /// The system time of the last instance the file was loaded
   std::time_t _file_mod_time;
