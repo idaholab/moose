@@ -32,8 +32,6 @@ public:
   virtual void reinit() override;
   virtual void timestepSetup() override;
 
-  virtual Real getNormalContactPressure(const Node * const node) const override;
-
   virtual Real getFrictionalContactPressure(const Node * const node,
                                             const unsigned int component) const override;
   virtual Real getAccumulatedSlip(const Node * const node,
@@ -41,8 +39,8 @@ public:
   virtual Real getTangentialVelocity(const Node * const node,
                                      const unsigned int component) const override;
 
-  virtual bool isContactConverged() const override { return true; }
-  virtual void updateAugmentedLagrangianMultipliers() override {}
+  virtual bool isContactConverged() override;
+  virtual void updateAugmentedLagrangianMultipliers() override;
 
 protected:
   virtual const VariableTestValue & test() const override;

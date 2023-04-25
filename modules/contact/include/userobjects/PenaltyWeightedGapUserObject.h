@@ -33,9 +33,10 @@ public:
   virtual const ADVariableValue & contactPressure() const override;
   virtual void initialize() override;
   virtual void reinit() override;
+
   virtual Real getNormalContactPressure(const Node * const node) const override;
 
-  virtual bool isContactConverged() const override;
+  virtual bool isContactConverged() override;
   virtual void updateAugmentedLagrangianMultipliers() override;
 
 protected:
@@ -65,4 +66,6 @@ protected:
 
   /// Map from degree of freedom to augmented lagrange multiplier
   std::unordered_map<const DofObject *, Real> _dof_to_lagrange_multiplier;
+
+  bool _new_time_step;
 };

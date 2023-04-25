@@ -52,6 +52,14 @@ public:
   virtual Real getNormalWeightedGap(const Node * const /*node*/) const;
 
   /**
+   * Compute physical gap from integration gap quantity
+   */
+  Real physicalGap(const std::pair<ADReal, Real> & gap) const
+  {
+    return MetaPhysicL::raw_value(gap.first) / gap.second;
+  }
+
+  /**
    * @param node Node pointer
    * @param component Component of the frictional pressure vector
    * @return The frictional contact pressure at the node

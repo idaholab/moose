@@ -46,7 +46,8 @@ PenaltyWeightedGapUserObject::PenaltyWeightedGapUserObject(const InputParameters
     _augmented_lagrange_problem(dynamic_cast<AugmentedLagrangianContactProblem *>(&_fe_problem)),
     _lagrangian_iteration_number(_augmented_lagrange_problem
                                      ? _augmented_lagrange_problem->getLagrangianIterationNumber()
-                                     : _no_iterations)
+                                     : _no_iterations),
+    _new_time_step(true)
 {
   auto check_type = [this](const auto & var, const auto & var_name)
   {
@@ -101,18 +102,15 @@ PenaltyWeightedGapUserObject::reinit()
   for (const auto i : make_range(_test->size()))
   {
     const Node * const node = _lower_secondary_elem->node_ptr(i);
-    const auto & weighted_gap =
-        libmesh_map_find(_dof_to_weighted_gap, static_cast<const DofObject *>(node)).first;
+    const auto & weighted_gap = libmesh_map_find(_dof_to_weighted_gap, node).first;
     const auto lagrange_multiplier =
-        _augmented_lagrange_problem
-            ? libmesh_map_find(_dof_to_lagrange_multiplier, static_cast<const DofObject *>(node))
-            : 0.0;
+        _augmented_lagrange_problem ? _dof_to_lagrange_multiplier[node] : 0.0;
     const auto weighted_gap_for_calc = weighted_gap < 0 ? -weighted_gap : ADReal(0);
     const auto & test_i = (*_test)[i];
     for (const auto qp : make_range(_qrule_msm->n_points()))
     {
       _contact_force[qp] += test_i[qp] * (_penalty * weighted_gap_for_calc + lagrange_multiplier);
-      _dof_to_normal_pressure[static_cast<const DofObject *>(node)] =
+      _dof_to_normal_pressure[node] =
           MetaPhysicL::raw_value(_penalty * weighted_gap_for_calc + lagrange_multiplier);
     }
   }
@@ -121,24 +119,62 @@ PenaltyWeightedGapUserObject::reinit()
 void
 PenaltyWeightedGapUserObject::timestepSetup()
 {
-  _dof_to_lagrange_multiplier.clear();
+  // _dof_to_lagrange_multiplier.clear();
+  // _new_time_step = true;
 }
 
 bool
-PenaltyWeightedGapUserObject::isContactConverged() const
+PenaltyWeightedGapUserObject::isContactConverged()
 {
-  for (const auto & [dof_object, gap] : _dof_to_real_weighted_gap)
-    if (gap < -_penetration_tolerance)
+  std::cout << "Gap: ";
+  for (const auto & [dof_object, gap] : _dof_to_weighted_gap)
+    std::cout << physicalGap(gap) << ' ';
+  std::cout << '\n';
+
+  // // release contact (this could introduce ping pong)
+  // bool converged = true;
+  // for (const auto & [dof_object, gap] : _dof_to_weighted_gap)
+  //   if (gap > _penetration_tolerance && _dof_to_lagrange_multiplier[dof_object] > 0)
+  //   {
+  //     _dof_to_lagrange_multiplier[dof_object] = 0.0;
+  //     converged = false;
+  //   }
+  // if (!converged)
+  //   return false;
+
+  // check if penetration is below threshold
+  for (const auto & [dof_object, gap] : _dof_to_weighted_gap)
+    if (physicalGap(gap) < -_penetration_tolerance ||
+        (physicalGap(gap) > _penetration_tolerance && _dof_to_lagrange_multiplier[dof_object] > 0))
       return false;
+
   return true;
 }
 
 void
 PenaltyWeightedGapUserObject::updateAugmentedLagrangianMultipliers()
 {
-  for (const auto & [dof_object, gap] : _dof_to_weighted_gap)
+  std::cout << "old LMs: ";
+  for (const auto & [dof_object, lagrange_multiplier] : _dof_to_lagrange_multiplier)
+    std::cout << lagrange_multiplier << ' ';
+  std::cout << '\n';
+
+  // for (const auto & [dof_object, gap] : _dof_to_weighted_gap)
+
+  for (auto & [dof_object, lagrange_multiplier] : _dof_to_lagrange_multiplier)
   {
-    const auto gap_for_calc = gap.first < 0 ? MetaPhysicL::raw_value(-gap.first) : 0.0;
-    _dof_to_lagrange_multiplier[dof_object] += gap_for_calc * _penalty;
+    const auto & gap =
+        MetaPhysicL::raw_value(libmesh_map_find(_dof_to_weighted_gap, dof_object).first);
+    lagrange_multiplier += -gap * _penalty;
+    if (lagrange_multiplier < 0.0)
+      lagrange_multiplier = 0.0;
+
+    // const auto gap_for_calc = gap.first < 0 ? MetaPhysicL::raw_value(-gap.first) : 0.0;
+    // _dof_to_lagrange_multiplier[dof_object] += gap_for_calc * _penalty;
   }
+
+  std::cout << "new LMs: ";
+  for (const auto & [dof_object, lagrange_multiplier] : _dof_to_lagrange_multiplier)
+    std::cout << lagrange_multiplier << ' ';
+  std::cout << '\n';
 }

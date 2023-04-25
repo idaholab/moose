@@ -158,7 +158,7 @@ WeightedGapUserObject::getNormalWeightedGap(const Node * const node) const
 
   // We are returning the physical weighted gap for analysis purposes
   if (it != _dof_to_weighted_gap.end())
-    return MetaPhysicL::raw_value(it->second.first / it->second.second);
+    return physicalGap(it->second);
   else
     return 0.0;
 }

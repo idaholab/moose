@@ -142,7 +142,6 @@ offset = 1e-2
 []
 
 [Postprocessors]
-  active = 'num_nl cumulative'
   [num_nl]
     type = NumNonlinearIterations
   []

@@ -16,6 +16,6 @@
 class PenaltyMortarAugmentedLagrangeInterface
 {
 public:
-  virtual bool isContactConverged() const = 0;
+  virtual bool isContactConverged() = 0;
   virtual void updateAugmentedLagrangianMultipliers() = 0;
 };
