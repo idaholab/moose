@@ -2062,6 +2062,30 @@ public:
                                BoundaryID secondary_boundary_id,
                                bool displaced);
 
+  virtual const std::vector<VectorTag> & currentResidualVectorTags() const override;
+
+  /**
+   * Class that is used as a parameter to set/clearCurrentResidualVectorTags that allows only
+   * blessed classes to call said methods
+   */
+  class CurrentResidualVectorTagsKey
+  {
+    friend class CrankNicolson;
+    friend class FEProblemBase;
+    CurrentResidualVectorTagsKey() {}
+    CurrentResidualVectorTagsKey(const CurrentResidualVectorTagsKey &) {}
+  };
+
+  /**
+   * Set the current residual vector tag data structure based on the passed in tag IDs
+   */
+  void setCurrentResidualVectorTags(const std::set<TagID> & vector_tags);
+
+  /**
+   * Clear the current residual vector tag data structure
+   */
+  void clearCurrentResidualVectorTags();
+
 protected:
   /// Create extra tagged vectors and matrices
   void createTagVectors();
@@ -2491,6 +2515,11 @@ private:
 
   /// When to print the execution of loops
   ExecFlagEnum _print_execution_on;
+
+  /// A data member to store the residual vector tag(s) passed into \p computeResidualTag(s). This
+  /// data member will be used when APIs like \p cacheResidual, \p addCachedResiduals, etc. are
+  /// called
+  std::vector<VectorTag> _current_residual_vector_tags;
 };
 
 using FVProblemBase = FEProblemBase;
@@ -2634,4 +2663,22 @@ FEProblemBase::fvBCsIntegrityCheck(const bool fv_bcs_integrity_check)
     return;
 
   _fv_bcs_integrity_check = fv_bcs_integrity_check;
+}
+
+inline const std::vector<VectorTag> &
+FEProblemBase::currentResidualVectorTags() const
+{
+  return _current_residual_vector_tags;
+}
+
+inline void
+FEProblemBase::setCurrentResidualVectorTags(const std::set<TagID> & vector_tags)
+{
+  _current_residual_vector_tags = getVectorTags(vector_tags);
+}
+
+inline void
+FEProblemBase::clearCurrentResidualVectorTags()
+{
+  _current_residual_vector_tags.clear();
 }
