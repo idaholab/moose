@@ -1,0 +1,60 @@
+[Tests]
+  issues = '#23587'
+  design = 'transfers/MultiAppGeneralFieldUserObjectTransfer.md'
+
+  [2d_overlay]
+    requirement = "The system shall be able to transfer user-defined spatial data on the origin "
+                  "problem"
+    [nearest_app]
+      type = 'Exodiff'
+      input = 'main.i'
+      exodiff = 'main_out.e'
+      detail = "and restrict the origin of the data using a nearest-app algorithm,"
+    []
+    [nearest_position]
+      type = 'Exodiff'
+      input = 'main.i'
+      cli_args = 'Transfers/from_sub/use_nearest_app=false Transfers/from_sub/use_nearest_position=input
+                  Transfers/from_sub_elem/use_nearest_app=false Transfers/from_sub_elem/use_nearest_position=input'
+      exodiff = 'main_out.e'
+      detail = "and restrict the origin of the data using a nearest-position algorithm."
+    []
+  []
+
+  [warnings]
+    requirement = "The system shall emit a warning if"
+    [nearest_app]
+      type = 'RunException'
+      input = 'main.i'
+      cli_args = 'Transfers/from_sub_v2/type=MultiAppGeneralFieldUserObjectTransfer
+                  Transfers/from_sub_v2/from_multi_app=sub
+                  Transfers/from_sub_v2/source_user_object=to_main
+                  Transfers/from_sub_v2/variable=from_sub
+                  Transfers/from_sub_v2/use_nearest_app=true'
+      expect_err = 'no subapp bounding box expansion parameters'
+      detail = "parameters meant for extrapolation of transfers are passed with no expansion of the "
+               "bounding box, as this is likely unintended."
+    []
+  []
+
+  [errors]
+    requirement = 'The system shall error if'
+    [from_main_app]
+      type = 'RunException'
+      input = 'main.i'
+      cli_args = 'Transfers/to_sub_elem/use_nearest_app=true'
+      allow_warnings = true
+      expect_err = 'Cannot use nearest-position algorithm when sending from the main application'
+      detail = "a nearest-point algorithm is used for sending app-based data from a main app to "
+               "multi-apps as the data naturally lives near only one of the positions,"
+    []
+    [nearest_position_and_app]
+      type = 'RunException'
+      input = 'main.i'
+      cli_args = 'Transfers/from_sub/use_nearest_app=true Transfers/from_sub/use_nearest_position=input'
+      expect_err = 'Cannot use nearest-app and nearest-position together'
+      detail = "a nearest-point algorithm is requested for use at the same time as nearest-app "
+               "algorithm."
+    []
+  []
+[]
