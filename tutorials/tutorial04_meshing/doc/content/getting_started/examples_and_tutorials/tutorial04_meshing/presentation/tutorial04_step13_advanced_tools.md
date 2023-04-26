@@ -15,7 +15,7 @@ The [ParsedCurveGenerator.md] object generates a 3D curve mesh composed of EDGE2
 
 !col small=12 medium=6 large=4
 
-!media tutorial04_meshing/adv_parsedcurve.png
+!media reactor/meshgenerators/xyz_curve.png
        style=width:100%;display:block;margin-left:auto;margin-right:auto;
 
 !row-end!
@@ -26,7 +26,7 @@ The [ParsedCurveGenerator.md] object generates a 3D curve mesh composed of EDGE2
 
 Several mesh generators are available to the user to generate a "transition layer" between two curves. Behind the scenes, these mesh generators use MOOSE's [FillBetweenPointVectorsTools](FillBetweenPointVectorsTools.md) capability to generate a "transition layer" between two given curves (in the form of two vectors of points).
 
-!media tutorial04_meshing/adv_fbpvt.png
+!media framework/utils/transition_layer.png
        style=width:60%;display:block;margin-left:auto;margin-right:auto;
 
 !---
@@ -35,7 +35,7 @@ Several mesh generators are available to the user to generate a "transition laye
 
 The [FillBetweenCurvesGenerator.md] object is designed to generate a transition layer to connect two boundaries of two input meshes. The user provides two 1D meshes (curves) which should be connected to each other with transition layers.
 
-!media tutorial04_meshing/adv_fillbetweencurves.png
+!media reactor/meshgenerators/fill_between_curves.png
        style=width:50%;display:block;margin-left:auto;margin-right:auto;
 
 !---
@@ -44,7 +44,7 @@ The [FillBetweenCurvesGenerator.md] object is designed to generate a transition 
 
 The [FillBetweenSidesetsGenerator.md] object is designed to generate a transition layer to connect two boundaries of two input meshes. The user provides two 2D input meshes with sidesets. These sidesets specify which boundaries of each mesh should be connected to the other mesh with a transitional layer.
 
-!media tutorial04_meshing/adv_fillbetweensidesets.png
+!media framework/meshgenerators/transition_layer_stitched.png
        style=width:60%;display:block;margin-left:auto;margin-right:auto;
 
 !---
@@ -53,7 +53,7 @@ The [FillBetweenSidesetsGenerator.md] object is designed to generate a transitio
 
 This [FillBetweenPointVectorsGenerator.md] object generates a transition layer between two point vectors with different numbers of nodes. The user should provide two vectors of points as well as the number of layers of elements to create between the two vectors.
 
-!media tutorial04_meshing/adv_fillbetweenpointvectors.png
+!media framework/meshgenerators/transition_layer_examples.png
        style=width:40%;display:block;margin-left:auto;margin-right:auto;
 
 !---
@@ -73,7 +73,7 @@ This [FillBetweenPointVectorsGenerator.md] object generates a transition layer b
 
 !col small=12 medium=6 large=4
 
-!media tutorial04_meshing/adv_xydg.png
+!media framework/meshgenerators/poly2tri_with_holes.png
        style=width:80%;display:block;margin-left:auto;margin-right:auto;
 
 !row-end!
