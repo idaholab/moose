@@ -23,7 +23,7 @@ RestartableModelInterface::RestartableModelInterface(const MooseObject * object,
                                                      const std::string & meta_data_name)
   : _model_meta_data_name(meta_data_name),
     _object(object),
-    _restartable(_object->getMooseApp(), "", "", 0, false, meta_data_name)
+    _restartable(_object->getMooseApp(), "", "", 0, read_only, meta_data_name)
 {
   _object->getMooseApp().registerRestartableDataMapName(_model_meta_data_name, _object->name());
 }
