@@ -4,7 +4,7 @@ Before proceeding in this tutorial, we briefly define some terminology, limiting
 
 - +Finite Element Method (FEM)+
 
-  - A numerical technique to solve PDEs which first requires that the spatial domain be divided into a mesh consisting of a finite number of discretized pieces. (FEM is the foundation of the MOOSE framework.)
+  - A numerical technique to solve PDEs which first requires that the spatial domain be divided into a mesh consisting of a finite number of discretized pieces. (FEM is one of the foundations of the MOOSE framework.)
 
 - +Mesh+
 
@@ -13,12 +13,12 @@ Before proceeding in this tutorial, we briefly define some terminology, limiting
 
 - +Node+
 
-  - A coordinate point in space which will be used along with other nodes to define the boundaries of an element.
+  - A coordinate point in space, connected to one or more elements, which will be used along with other nodes to define element shape.
   - Nodes are highlighted as small circles in [tutorial04-general_FEM_labels]. Nodes specify the vertices of linear triangular and quadrilateral elements.
 
 - +Finite Element (or simply Element)+
 
-  - An ordered grouping of nodes that defines the boundaries of a piece of the spatial domain. A typical first order 2D element has 3 (triangle) or 4 (quadrilateral) nodes. Straight lines connect the nodes to form the element shape. In 3D, typical elements have 6 (triangular prism), 8 (hexahedron), 4 (tetrahedron) or 5 (pyramid) nodes. The full set of elements comprises the mesh which approximates the geometry. Basis functions from the FEM are defined on each element. Higher order elements may have additional nodes than those listed here. A mesh can consist of different types of elements
+  - An ordered grouping of nodes that defines the boundaries of a piece of the spatial domain. A typical first order 2D element has 3 (triangle) or 4 (quadrilateral) nodes. Straight lines connect the nodes to form the element shape. In 3D, typical elements have 6 (triangular prism), 8 (hexahedron), 4 (tetrahedron) or 5 (pyramid) nodes. The full set of elements comprises the mesh which approximates the geometry. Basis functions from the FEM are defined on each element. Higher order elements may have additional nodes than those listed here, and may have curved geometries. A mesh can consist of different types of elements.
   - The mesh in [tutorial04-general_FEM_labels] has 48 unique elements (12 triangular in the center, and 36 quadrilateral).
 
 - +Block (or Subdomain)+

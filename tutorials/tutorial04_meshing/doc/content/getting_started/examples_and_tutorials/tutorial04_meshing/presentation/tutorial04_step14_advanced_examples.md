@@ -34,7 +34,7 @@ This tutorial covers the generation of mostly standard geometries, but many reac
 - [XYDelaunayGenerator.md] is employed for meshing the irregular areas.
 - [PeripheralTriangleMeshGenerator.md] is utilized to add layers of triangular mesh onto an existing circular mesh.
 - !alert construction
-  CircularCorrectionGenerator, which is currently under development, is used to adjust a circle to preserve its volume.
+  CircularCorrectionGenerator, which is currently under development, is used to adjust a discretized circle to match the true circle's volume.
 
 !col small=12 medium=6 large=4
 

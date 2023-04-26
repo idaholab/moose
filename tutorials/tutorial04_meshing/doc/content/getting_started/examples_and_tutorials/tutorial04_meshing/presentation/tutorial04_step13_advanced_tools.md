@@ -24,7 +24,7 @@ The [ParsedCurveGenerator.md] object generates a 3D curve mesh composed of EDGE2
 
 ## FillBetweenCurvesGenerator, FillBetweenPointVectorsGenerator, and FillBetweenSidesetsGenerator
 
-Several mesh generators are available to the user to generate a "transition layer" between two curves. Behind the scenes, these mesh generators use MOOSE's [FillBetweenPointVectorsTools](FillBetweenPointVectorsTools.md) capability to generate a "transition layer" between two given curves (in the form of two vectors of points).
+Several mesh generators are available to the user to generate a "transition layer" between two curves using linear triangle elements (TRI3). Behind the scenes, these mesh generators use MOOSE's [FillBetweenPointVectorsTools](FillBetweenPointVectorsTools.md) capability to generate a "transition layer" between two given curves (in the form of two vectors of points).
 
 !media framework/utils/transition_layer.png
        style=width:60%;display:block;margin-left:auto;margin-right:auto;
