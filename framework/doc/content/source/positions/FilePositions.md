@@ -12,6 +12,6 @@ The `FilePositions` is similar the `positions_file` argument of [MultiApps](synt
 
 !syntax parameters /Positions/FilePositions
 
-!syntax MultiApps /Positions/FilePositions
+!syntax inputs /Positions/FilePositions
 
 !syntax children /Positions/FilePositions

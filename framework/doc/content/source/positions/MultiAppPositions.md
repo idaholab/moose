@@ -20,6 +20,6 @@ In this example, the `MultiAppPositions` is obtaining the positions of three `Mu
 
 !syntax parameters /Positions/MultiAppPositions
 
-!syntax MultiApps /Positions/MultiAppPositions
+!syntax inputs /Positions/MultiAppPositions
 
 !syntax children /Positions/MultiAppPositions

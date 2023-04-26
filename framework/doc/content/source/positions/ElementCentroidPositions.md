@@ -13,6 +13,6 @@ enables creating the same subapps as the `CentroidMultiApp`, except that it is n
 
 !syntax parameters /Positions/ElementCentroidPositions
 
-!syntax ElementCentroids /Positions/ElementCentroidPositions
+!syntax inputs /Positions/ElementCentroidPositions
 
 !syntax children /Positions/ElementCentroidPositions

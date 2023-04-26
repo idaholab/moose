@@ -15,6 +15,6 @@ in the back-end.
 
 !syntax parameters /Positions/ReporterPositions
 
-!syntax MultiApps /Positions/ReporterPositions
+!syntax inputs /Positions/ReporterPositions
 
 !syntax children /Positions/ReporterPositions
