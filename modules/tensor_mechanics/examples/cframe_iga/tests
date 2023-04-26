@@ -9,6 +9,8 @@
     xmldiff = 'cframe_iga_out_001.pvtu cframe_iga_out_001_0.vtu'
     # Too large for debug and valgrind
     method = '!DBG'
+    # See #24187
+    petsc_version = '>=3.12.0'
     valgrind = none
   []
 []
