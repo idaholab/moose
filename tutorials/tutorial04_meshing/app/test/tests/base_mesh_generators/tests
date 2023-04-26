@@ -44,4 +44,11 @@
     input = 'alternative_pattern_reporting_id.i'
     cli_args= '--mesh-only --error-deprecated'
   []
+
+  [common_geo]
+    requirement = "The system shall include example input for meshing tutorial common geometry example."
+    type = RunApp
+    input = 'common_geo.i'
+    cli_args= '--mesh-only --error-deprecated'
+  []
 []

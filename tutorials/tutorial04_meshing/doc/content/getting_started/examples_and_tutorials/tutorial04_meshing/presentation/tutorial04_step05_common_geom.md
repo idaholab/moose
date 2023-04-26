@@ -22,14 +22,14 @@ A second set of mesh generators (Reactor Geometry Mesh Builder mesh generators) 
 !row!
 !col small=12 medium=6 large=8
 
-!listing modules/reactor/test/tests/meshgenerators/patterned_hex_mesh_generator/patterned_pattern.i
+!listing base_mesh_generators/common_geo.i
          block=Mesh/hex_1
          link=False
 
 !col small=12 medium=6 large=4
 
 !media tutorial04_meshing/base_ex_pccmg.png
-       style=width:75%;display:block;margin-left:auto;margin-right:auto;
+       style=width:50%;display:block;margin-left:auto;margin-right:auto;
 
 !row-end!
 
@@ -65,9 +65,6 @@ A second set of mesh generators (Reactor Geometry Mesh Builder mesh generators) 
 
 ## Assembly (with multiple heterogeneous pins)
 
-!row!
-!col small=12 medium=6 large=8
-
 - [PatternedHexMeshGenerator.md]
 - (Cartesian sibling -- [PatternedCartesianMeshGenerator.md])
 
@@ -77,16 +74,19 @@ A second set of mesh generators (Reactor Geometry Mesh Builder mesh generators) 
 - When generating an assembly mesh using [PatternedHexMeshGenerator.md], be sure to set [!param](/Mesh/PatternedHexMeshGenerator/generate_core_metadata) as `false`
 - When generating an assembly mesh, [PolygonConcentricCircleMeshGenerator.md]objects which define the hexagonal unit pin cells are generally used as inputs
 
+!row!
+!col small=12 medium=6 large=8
+
+!listing base_mesh_generators/common_geo.i
+         block=Mesh/pattern_assm
+         link=False
+
 !col small=12 medium=6 large=4
 
 !media tutorial04_meshing/base_ex_phmg_assm.png
-       style=width:100%;display:block;margin-left:auto;margin-right:auto;
+       style=width:50%;display:block;margin-left:auto;margin-right:auto;
 
 !row-end!
-
-!listing modules/reactor/test/tests/meshgenerators/patterned_hex_mesh_generator/patterned_pattern.i
-         block=Mesh/pattern_1
-         link=False
 
 !---
 
@@ -136,8 +136,8 @@ A second set of mesh generators (Reactor Geometry Mesh Builder mesh generators) 
 
 !row-end!
 
-!listing modules/reactor/test/tests/meshgenerators/patterned_hex_mesh_generator/patterned_pattern_cd.i
-         block=Mesh/pattern_2
+!listing base_mesh_generators/common_geo.i
+         block=Mesh/pattern_core
          link=False
 
 !---
@@ -157,11 +157,11 @@ A second set of mesh generators (Reactor Geometry Mesh Builder mesh generators) 
 !col small=12 medium=6 large=4
 
 !media tutorial04_meshing/base_ex_prmg.png
-       style=width:100%;display:block;margin-left:auto;margin-right:auto;
+       style=width:60%;display:block;margin-left:auto;margin-right:auto;
 
 !row-end!
 
-!listing modules/reactor/test/tests/meshgenerators/peripheral_ring_mesh_generator/core_ring.i
+!listing base_mesh_generators/common_geo.i
          block=Mesh/pr
          link=False
 
@@ -183,10 +183,10 @@ A second set of mesh generators (Reactor Geometry Mesh Builder mesh generators) 
 !col small=12 medium=6 large=4
 
 !media tutorial04_meshing/base_ex_ptmg.png
-       style=width:100%;display:block;margin-left:auto;margin-right:auto;
+       style=width:60%;display:block;margin-left:auto;margin-right:auto;
 
 !row-end!
 
-!listing modules/reactor/test/tests/meshgenerators/peripheral_triangle_mesh_generator/abtr_tri.i
-         block=Mesh/tmg
+!listing base_mesh_generators/common_geo.i
+         block=Mesh/pt
          link=False

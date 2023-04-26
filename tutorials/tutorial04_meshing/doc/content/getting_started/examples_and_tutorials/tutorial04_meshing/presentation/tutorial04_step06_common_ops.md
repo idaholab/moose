@@ -23,17 +23,34 @@
 
 !row-end!
 
+!---
+
+## Mesh Trimming Examples
+
 !row!
 !col small=12 medium=6 large=8
 
-!listing base_mesh_generators/peripheral_trim.i
-         block=Mesh/peripheral_trim
+!media tutorial04_meshing/base_ex_peripheral_trim.png
+       style=width:75%;display:block;margin-left:auto;margin-right:auto;
+
+!col small=12 medium=6 large=4
+
+!media tutorial04_meshing/base_ex_center_trim.png
+       style=width:75%;display:block;margin-left:auto;margin-right:auto;
+
+!row-end!
+
+!row!
+!col small=12 medium=6 large=8
+
+!listing base_mesh_generators/common_geo.i
+         block=Mesh/pattern_assm_peri_trim
          link=False
 
 !col small=12 medium=6 large=4
 
-!listing base_mesh_generators/center_trim.i
-         block=Mesh/center_trim
+!listing base_mesh_generators/common_geo.i
+         block=Mesh/core_trim
          link=False
 
 !row-end!
@@ -59,33 +76,31 @@
 
 !row-end!
 
-!listing modules/reactor/test/tests/meshgenerators/patterned_hex_peripheral_modifier/single_hex.i
-         block=Mesh/pmg
+!listing base_mesh_generators/common_geo.i
+         block=Mesh/pattern_assm_peri_mod
          link=False
 
 !---
 
 ## Extrusion to 3D
 
-!row!
-!col small=12 medium=6 large=8
-
 - [AdvancedExtruderGenerator.md]
-
 - Extrudes a 1D mesh into 2D, or a 2D mesh into 3D
 - Variable height / number of layers within each elevation
 - Variable growth factors of axial element sizes within each elevation
 - Remap subdomain IDs, boundary IDs and element extra integers within each elevation as well as interface boundaries between neighboring elevation layers.
-
 - Extrusion may be performed along any direction specified by an $(x,y,z)$ vector. Most common is $(0,0,1)$ (+$z$-direction).
+
+!row!
+!col small=12 medium=6 large=8
+
+!listing base_mesh_generators/common_geo.i
+         block=Mesh/core_ext
+         link=False
 
 !col small=12 medium=6 large=4
 
 !media tutorial04_meshing/base_ex_aeg.png
-       style=width:100%;display:block;margin-left:auto;margin-right:auto;
+       style=width:50%;display:block;margin-left:auto;margin-right:auto;
 
 !row-end!
-
-!listing test/tests/meshgenerators/advanced_extruder_generator/advanced_extruder_with_element_extra_integer_swap.i
-         block=Mesh/extrude
-         link=False
