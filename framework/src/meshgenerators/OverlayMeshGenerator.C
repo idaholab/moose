@@ -29,7 +29,7 @@ OverlayMeshGenerator::validParams()
   // Use GeneratedMeshGenerator for now, will go back to DistributedRectilinearMeshGenerator when
   // distributed mesh is considered for overlay mapping
   params += GeneratedMeshGenerator::validParams();
-  //  params += DistributedRectilinearMeshGenerator::validParams();
+
   params.addRequiredParam<MeshGeneratorName>("input", "The base mesh we want to overlay");
 
   params.addClassDescription("Creates a Cartesian mesh overlaying "
@@ -50,7 +50,6 @@ OverlayMeshGenerator::OverlayMeshGenerator(const InputParameters & parameters)
   _input_mesh = &getMeshByName(_mesh_name);
 
   auto input_params = _app.getFactory().getValidParams("GeneratedMeshGenerator");
-  // auto input_params = _app.getFactory().getValidParams("DistributedRectilinearMeshGenerator");
 
   input_params.applySpecificParameters(parameters,
                                        {"dim",
@@ -68,32 +67,10 @@ OverlayMeshGenerator::OverlayMeshGenerator(const InputParameters & parameters)
                                         "bias_z",
                                         "elem_type"});
 
-    // input_params.applySpecificParameters(parameters,
-    //                                      {"dim",
-    //                                       "nx",
-    //                                       "ny",
-    //                                       "nz",
-    //                                       "xmin",
-    //                                       "ymin",
-    //                                       "zmin",
-    //                                       "xmax",
-    //                                       "ymax",
-    //                                       "zmax",
-    //                                       "bias_x",
-    //                                       "bias_y",
-    //                                       "bias_z",
-    //                                       "num_side_layers",
-    //                                       "num_cores_for_partition",
-    //                                       "partition",
-    //                                       "elem_type"});
+  addMeshSubgenerator(
+      "GeneratedMeshGenerator", _mesh_name + "_generatedMeshGenerator", input_params);
 
-    addMeshSubgenerator(
-        "GeneratedMeshGenerator", _mesh_name + "_generatedMeshGenerator", input_params);
-    // addMeshSubgenerator("DistributedRectilinearMeshGenerator",
-    //                    _mesh_name + "_distributedrectilinearmeshgenerator",
-    //                    input_params);
-    _build_mesh = &getMeshByName(_mesh_name + "_generatedMeshGenerator");
-    //_build_mesh = &getMeshByName(_mesh_name + "_distributedrectilinearmeshgenerator");
+  _build_mesh = &getMeshByName(_mesh_name + "_generatedMeshGenerator");
 }
 std::unique_ptr<MeshBase>
 OverlayMeshGenerator::generate()
