@@ -44,7 +44,7 @@ An alternative type of symmetry occurs in certain "unit cells" which contain hal
 
 !media tutorial04_meshing/base_ex_center_trim.png
        id=tutorial04-base_ex_center_trim
-       caption=Mesh peripheral trimming example.
+       caption=Mesh center trimming example.
        style=width:50%;display:block;margin-left:auto;margin-right:auto;
 
 !listing base_mesh_generators/common_geo.i

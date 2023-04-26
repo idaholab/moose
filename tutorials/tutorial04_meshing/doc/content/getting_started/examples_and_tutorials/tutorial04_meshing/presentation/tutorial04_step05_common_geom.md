@@ -50,8 +50,8 @@ A second set of mesh generators (Reactor Geometry Mesh Builder mesh generators) 
 !row!
 !col small=12 medium=6 large=8
 
-!listing modules/reactor/test/tests/meshgenerators/simple_hexagon_generator/sim_hex.i
-         block=Mesh
+!listing base_mesh_generators/common_geo.i
+         block=Mesh/hex_simple
          link=False
 
 !col small=12 medium=6 large=4
@@ -110,8 +110,8 @@ A second set of mesh generators (Reactor Geometry Mesh Builder mesh generators) 
 
 !row-end!
 
-!listing modules/reactor/test/tests/meshgenerators/hexagon_concentric_circle_adaptive_boundary_generator/hex_2d.i
-         block=Mesh/gen
+!listing base_mesh_generators/common_geo.i
+         block=Mesh/adaptive_assm
          link=False
 
 !---

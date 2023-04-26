@@ -62,10 +62,10 @@ Assemblies are one level higher than pins in the hierarchical lattice geometry s
        caption=Example output of the TRI, QUAD, and HYBRID (one quadrilateral layer) mode, respectively, of [SimpleHexagonGenerator.md].
        style=width:50%;display:block;margin-left:auto;margin-right:auto;
 
-!listing modules/reactor/test/tests/meshgenerators/simple_hexagon_generator/sim_hex.i
+!listing base_mesh_generators/common_geo.i
          id=tutorial04-sim_hex.i
          caption=Homogenized assembly example input.
-         block=Mesh
+         block=Mesh/hex_simple
 
 ## Assembly (with multiple heterogeneous pins)
 
@@ -124,10 +124,10 @@ Another type of assembly in a reactor core is an assembly with a single pin (suc
        caption=A schematic drawing showing the input and generated meshes of [HexagonConcentricCircleAdaptiveBoundaryMeshGenerator.md].
        style=width:50%;display:block;margin-left:auto;margin-right:auto;
 
-!listing modules/reactor/test/tests/meshgenerators/hexagon_concentric_circle_adaptive_boundary_generator/hex_2d.i
+!listing base_mesh_generators/common_geo.i
          id=tutorial04-hex_2d.i
-         caption=Single "pin" assembly example input.
-         block=Mesh
+         caption= Reflector-style assembly example input.
+         block=Mesh/adaptive_assm
 
 ## Core
 
