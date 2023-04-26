@@ -220,6 +220,9 @@ Adaptivity::adaptMesh(std::string marker_name /*=std::string()*/)
   if (distributed_adaptivity)
     _mesh_refinement->make_flags_parallel_consistent();
 
+  if (_p_refinement_flag)
+    _mesh_refinement->switch_h_to_p_refinement();
+
   // Perform refinement and coarsening
   mesh_changed = _mesh_refinement->refine_and_coarsen_elements();
 
@@ -229,6 +232,10 @@ Adaptivity::adaptMesh(std::string marker_name /*=std::string()*/)
     // we sync them here.
     if (distributed_adaptivity)
       _displaced_mesh_refinement->make_flags_parallel_consistent();
+
+    if (_p_refinement_flag)
+      _displaced_mesh_refinement->switch_h_to_p_refinement();
+
 #ifndef NDEBUG
     bool displaced_mesh_changed =
 #endif
@@ -376,6 +383,12 @@ bool
 Adaptivity::isAdaptivityDue()
 {
   return _mesh_refinement_on && (_start_time <= _t && _t < _stop_time) && _step % _interval == 0;
+}
+
+void
+Adaptivity::switchHToPRefinement()
+{
+  _p_refinement_flag = true;
 }
 
 #endif // LIBMESH_ENABLE_AMR

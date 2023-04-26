@@ -9,6 +9,15 @@
     requirement = "The system shall support solving 2D diffusion using the discontinuous Galerkin "
                   "method."
   []
+  [p_refinement_test]
+    type = 'Exodiff'
+    input = '2d_diffusion_dg_test.i'
+    cli_args = 'Outputs/file_base=p_refinement Executioner/Adaptivity/switch_h_to_p_refinement=true'
+    exodiff = 'p_refinement.e-s003'
+    max_parallel = 1
+    requirement = "The system shall support solving 2D diffusion using the discontinuous Galerkin "
+                  "method with p-refinement."
+  []
   [constMonomial]
     type = 'Exodiff'
     input = '2d_diffusion_dg_test.i'
