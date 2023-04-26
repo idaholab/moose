@@ -2,11 +2,39 @@
 
 !---
 
-When using an unstructured finite element mesh format for reactor analysis, it can be challenging to identify which individual elements belong to each geometric component, which is necessary for assigning properties and for extracting integral quantities from the output solution. The block ID (also called subdomain ID) has been used in the past for bookkeeping of elements, which requires each bookkeeping region to have a different block ID. If there are multiple hierarchical levels in geometries (e.g., pin, assembly), block ID is not sufficient to track all the associations of a given element association. Additionally, using an excessive number of blocks in a mesh can cause performance degradation in MOOSE compared to using only a few blocks. Reporting IDs were introduced as a practical solution to this bookkeeping issue.  Reporting IDs are extra integer ID tags assigned on each element which designate association with a specific reactor component or zone, such as pin ID or assembly ID. Multiple reporting IDs may be assigned on each element to track different information (e.g., pin number, assembly number, plane number).
+## Why do we need Reporting IDs?
 
-The automatic assignment of reporting IDs to elements in a mesh is provided through several mesh generators, as described in the following sections. Collections of elements forming pins and assemblies are identifiable without providing information about their physical location since the mesh generators themselves understand the concept of pins and assemblies.
+- In reactor simulations, we want to bookkeep the individual elements belonging to each geometric component
 
-Reporting IDs can be leveraged to post-process solution data into tables by using the [ExtraIDIntegralVectorPostprocessor.md]. This postprocessor integrates the solution based on reporting IDs. Component-wise values such as pin-by-pin power distribution can be easily yielded by specifying integration over pin and assembly reporting IDs to this postprocessor.
+  - Assign material properties to the mesh in different regions
+  - Extract integral quantities from the solution in different regions
+- Using numerous block IDs just to differentiate regions is not practical or sufficient
+
+  - Using excessive blocks can cause performance degradation in MOOSE
+  - Multiple hierarchical levels in geometries (e.g., pin, assembly) cannot be represented with blocks
+- Reporting IDs were introduced as a practical solution to this bookkeeping issue
+
+!---
+
+## What are Reporting IDs?
+
+- Reporting IDs are extra integer ID tags assigned on each element of the mesh
+
+  - A reporting ID consists of a name (e.g. pin_id, assembly_id) and an assigned value (e.g. 1, 2, 3...)
+  - A reporting ID designates association with a specific reactor component or zone, such as pin ID or assembly ID
+  - An element may have multiple reporting IDs to track different information (e.g., pin number, assembly number, plane number).
+- How do we get reporting IDs on mesh elements?
+
+  - The automatic assignment of reporting IDs to elements in a mesh is provided through several mesh generators that "understand" the concept of pins, assemblies, planes, etc.
+  - There is no need to provide physical locations or coordinates of elements in order to assign IDs
+
+!---
+
+## How can we use reporting IDs?
+
+- Reporting IDs can be used to assign material properties
+- Reporting IDs can be used to create additional unique zones (e.g. depletion zones)
+- Reporting IDs can be leveraged to post-process solution data into tables by using the [ExtraIDIntegralVectorPostprocessor.md]. This postprocessor integrates the solution based on reporting IDs. Component-wise values such as pin-by-pin power distribution can be easily yielded by specifying integration over pin and assembly reporting IDs to this postprocessor.
 
 !---
 

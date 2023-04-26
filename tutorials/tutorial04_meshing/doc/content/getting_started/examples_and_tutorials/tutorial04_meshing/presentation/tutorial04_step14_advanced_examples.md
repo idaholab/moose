@@ -114,6 +114,8 @@ Mesh biasing applies non-uniform meshing subintervals within a specific region. 
 
 !---
 
+### Radial Mesh Biasing
+
 Similarly, the user may want to radially bias the mesh where solution gradients are known to be high, for example at the edge of a fuel pin or control rod. This is possible using mesh biasing parameters in [PolygonConcentricCircleMeshGenerator.md] as well as [PeripheralRingMeshGenerator.md].
 
 !row!
@@ -131,6 +133,8 @@ Similarly, the user may want to radially bias the mesh where solution gradients 
 !row-end!
 
 !---
+
+### Radial Mesh Biasing in Core Periphery
 
 !row!
 !col small=12 medium=6 large=8
