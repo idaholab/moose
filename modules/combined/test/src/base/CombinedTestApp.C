@@ -13,6 +13,7 @@
 #include "ActionFactory.h"
 #include "AppFactory.h"
 #include "MooseSyntax.h"
+#include "CombinedRevision.h"
 
 #include "ChemicalReactionsTestApp.h"
 #include "ContactTestApp.h"
@@ -107,6 +108,12 @@ CombinedTestApp::registerApps()
   // need to design the API so that all registered apps and modules also get
   // immediate access to the buildable apps for use in Multiapps.
   registerApp(ThermalHydraulicsApp);
+}
+
+std::string
+CombinedTestApp::getInstallableInputs() const
+{
+  return COMBINED_INSTALLABLE_DIRS;
 }
 
 void
