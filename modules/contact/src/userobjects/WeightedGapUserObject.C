@@ -34,7 +34,6 @@ WeightedGapUserObject::validParams()
 WeightedGapUserObject::WeightedGapUserObject(const InputParameters & parameters)
   : MortarUserObject(parameters),
     _fe_problem(*getCheckedPointerParam<FEProblemBase *>("_fe_problem_base")),
-    _normalize_c(true),
     _nodal(getVar("disp_x", 0)->feType().family == LAGRANGE),
     _disp_x_var(getVar("disp_x", 0)),
     _disp_y_var(getVar("disp_y", 0)),
@@ -117,9 +116,7 @@ WeightedGapUserObject::computeQpIProperties()
   const auto * const dof = static_cast<const DofObject *>(_lower_secondary_elem->node_ptr(_i));
 
   _dof_to_weighted_gap[dof].first += (*_test)[_i][_qp] * _qp_gap_nodal * _normals[_i];
-
-  if (_normalize_c)
-    _dof_to_weighted_gap[dof].second += (*_test)[_i][_qp] * _qp_factor;
+  _dof_to_weighted_gap[dof].second += (*_test)[_i][_qp] * _qp_factor;
 }
 
 void
@@ -138,7 +135,7 @@ WeightedGapUserObject::finalize()
   Moose::Mortar::Contact::communicateGaps(_dof_to_weighted_gap,
                                           _subproblem.mesh(),
                                           _nodal,
-                                          _normalize_c,
+                                          /*normalize_c*/ true,
                                           _communicator,
                                           send_data_back);
 }
@@ -152,4 +149,16 @@ WeightedGapUserObject::execute()
     for (_i = 0; _i < _test->size(); ++_i)
       computeQpIProperties();
   }
+}
+
+Real
+WeightedGapUserObject::getNormalWeightedGap(const Node * const node) const
+{
+  const auto it = _dof_to_weighted_gap.find(_subproblem.mesh().nodePtr(node->id()));
+
+  // We are returning the physical weighted gap for analysis purposes
+  if (it != _dof_to_weighted_gap.end())
+    return MetaPhysicL::raw_value(it->second.first / it->second.second);
+  else
+    return 0.0;
 }
