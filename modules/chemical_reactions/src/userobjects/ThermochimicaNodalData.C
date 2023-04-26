@@ -16,6 +16,9 @@
 #include "checkUnits.h"
 #endif
 
+// Required coupled variable data
+// Species list thermochimica
+
 registerMooseObject("ChemicalReactionsApp", ThermochimicaNodalData);
 
 InputParameters
@@ -28,7 +31,7 @@ ThermochimicaNodalData::validParams()
   params.addRequiredCoupledVar("elements", "Amounts of elements");
   params.addCoupledVar("element_potentials", "Chemical potentials of elements");
 
-  params.addParam<Real>("pressure", 1.0, "Pressure");
+  params.addCoupledVar("pressure", 1.0, "Pressure");
   params.addRequiredCoupledVar("temperature", "Coupled temperature");
 
   params.addParam<bool>("reinit_requested", true, "Should Thermochimica use re-initialization?");
@@ -37,9 +40,17 @@ ThermochimicaNodalData::validParams()
   return params;
 }
 
+// else
+// {
+//   [ _db_number_soln_phases, _db_number_con_phases ] = Thermochimica::getNumberPhasesDatabase();
+
+//   _db_phase_names = Thermochimica::getPhaseNames();
+//   _db_species_names = Thermochimica::getSolnSpeciesNames();
+// }
+
 ThermochimicaNodalData::ThermochimicaNodalData(const InputParameters & parameters)
   : NodalUserObject(parameters),
-    _pressure(getParam<Real>("pressure")),
+    _pressure(coupledValue("pressure")),
     _temperature(coupledValue("temperature")),
     _reinit_requested(getParam<bool>("reinit_requested")),
     _n_phases(coupledComponents("output_phases")),
@@ -65,9 +76,15 @@ ThermochimicaNodalData::ThermochimicaNodalData(const InputParameters & parameter
     _el_name[i] = getVar("elements", i)->name();
 #ifdef THERMOCHIMICA_ENABLED
     // check if the element symbol is valid
-    Thermochimica::atomicNumber(_el_name[i]);
+    _el_id.resize(_n_elements);
+    _el_id[i] = Thermochimica::atomicNumber(_el_name[i]);
 #endif
   }
+
+  // Consistency checks
+  _db_num_phases = Thermochimica::getNumberPhasesDatabase();
+  _db_phase_names = Thermochimica::getPhaseNames();
+  // _db_species_names = Thermochimica::getSpeciesNames();
 
   for (const auto i : make_range(_n_phases))
     _ph_name[i] = getVar("output_phases", i)->name();
@@ -115,7 +132,7 @@ ThermochimicaNodalData::execute()
 {
 #ifdef THERMOCHIMICA_ENABLED
   auto temperature = _temperature[_qp];
-  auto pressure = _pressure;
+  auto pressure = _pressure[_qp];
 
   // Set temperature and pressure for thermochemistry solver
   Thermochimica::setTemperaturePressure(temperature, pressure);
@@ -124,7 +141,7 @@ ThermochimicaNodalData::execute()
 
   // Set element masses
   for (const auto i : make_range(_n_elements))
-    Thermochimica::setElementMass(Thermochimica::atomicNumber(_el_name[i]), (*_el[i])[_qp]);
+    Thermochimica::setElementMass(_el_id[i], (*_el[i])[_qp]);
 
   // Optionally ask for a re-initialization (if reinit_requested == true)
   reinitDataMooseToTc();
@@ -149,6 +166,7 @@ ThermochimicaNodalData::execute()
     d._phase_indices.resize(_n_phases);
     for (const auto i : make_range(_n_phases))
     {
+      // Is this maybe constant? No it isn't for now
       auto [index, idbg] = Thermochimica::getPhaseIndex(_ph_name[i]);
       if (idbg != 0)
         mooseError("Failed to get index of phase '", _ph_name[i], "'");
@@ -163,6 +181,7 @@ ThermochimicaNodalData::execute()
     for (const auto i : make_range(_n_species))
     {
       auto [fraction, idbg] =
+          // can we somehow use IDs instead of strings here?
           Thermochimica::getOutputMolSpeciesPhase(_sp_phase_name[i], _sp_species_name[i]);
 
       if (idbg == 0)

@@ -58,7 +58,7 @@ public:
   const Data & getNodalData(dof_id_type node_id) const;
 
 protected:
-  Real _pressure;
+  const VariableValue & _pressure;
   const VariableValue & _temperature;
 
   // re-initialization data
@@ -70,6 +70,11 @@ protected:
 
   std::vector<const VariableValue *> _el;
   std::vector<std::string> _el_name;
+  std::vector<unsigned int> _el_id;
+
+  std::pair<int, int> _db_num_phases;
+  std::vector<std::string> _db_phase_names;
+  std::vector<std::string> _db_species_names;
 
   std::vector<std::string> _ph_name;
   std::vector<std::string> _sp_phase_name;
