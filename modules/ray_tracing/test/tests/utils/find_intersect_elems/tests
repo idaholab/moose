@@ -5,7 +5,7 @@
   issues = '#24098'
   requirement = 'The capability shall create a two-way map between overlay mesh and main mesh.'
 
-    [serialize]
+    [replicated]
       type = JSONDiff
       recover = false
       input = 'find_intersect_elems.i'
@@ -22,7 +22,7 @@
       jsondiff = 'intersect_elems_distribute.json intersect_elems_distribute.json.1 intersect_elems_distribute.json.2'
       min_parallel = 3
       max_parallel = 3
-      cli_args = "Outputs/file_base='intersect_elems_distribute'"
+      cli_args = "Mesh/parallel_type=distributed Outputs/file_base='intersect_elems_distribute'"
       detail = 'have the distribute mapping in all processsors'
     []
   []
