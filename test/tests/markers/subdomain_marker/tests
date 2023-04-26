@@ -1,0 +1,21 @@
+[Tests]
+  group = 'Marker'
+  design = "/Markers/index.md /SubdomainMarker.md"
+  issues = '#24183'
+
+  [./mark_only]
+    type = 'Exodiff'
+    input = 'subdomain_marker_test.i'
+    exodiff = 'subdomain_marker_test_out.e'
+    scale_refine = 2
+    requirement = "The adaptivity system shall create an auxiliary field variable that marks "
+                  "elements for refinement within a mesh subdomain."
+  [../]
+  [./mark_and_adapt]
+    type = 'Exodiff'
+    input = 'subdomain_marker_adapt_test.i'
+    exodiff = 'subdomain_marker_adapt_test_out.e-s002'
+    scale_refine = 2
+    requirement = "The adaptivity system shall adapt the mesh within a mesh subdomain."
+  [../]
+[]
