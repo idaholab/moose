@@ -55,6 +55,14 @@
       prereq = 'mesh_source/mesh'
       detail = 'performing the inverse optimization with bounds;'
     []
+    [auto_adjoint]
+      type = Exodiff
+      input = main_auto_adjoint.i
+      exodiff = main_auto_adjoint_out_forward0.e
+      prereq = 'mesh_source/mesh'
+      max_threads = 1
+      detail = 'performing the inverse optimization with an automatically computed adjoint;'
+    []
   []
 
   [mismatch_errors]

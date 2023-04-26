@@ -1,13 +1,26 @@
 [Tests]
   issues = '#21885'
   design = 'Optimize.md NearestReporterCoordinatesFunction.md ElementOptimizationDiffusionCoefFunctionInnerProduct.md'
-  [taoblmvm]
-    type = CSVDiff
-    max_threads = 1
-    input = main.i
-    abs_zero = 1e-2
-    csvdiff = main_out_OptimizationReporter_0001.csv
-    recover = false
-    requirement = 'The system shall be able to invert for the material properties of two separate materials'
+  [bimaterial]
+    requirement = 'The system shall be able to invert for the material properties of two separate materials using'
+    [taoblmvm]
+      type = CSVDiff
+      max_threads = 1
+      input = main.i
+      abs_zero = 1e-2
+      csvdiff = main_out_OptimizationReporter_0001.csv
+      recover = false
+      detail = 'gradient computed in separate multiapp;'
+    []
+    [auto_adjoint]
+      type = CSVDiff
+      input = main_auto_adjoint.i
+      cli_args = 'Outputs/file_base=main_out'
+      csvdiff = main_out_OptimizationReporter_0001.csv
+      max_threads = 1
+      abs_zero = 1e-2
+      recover = false
+      detail = 'gradient computed with automatically computed adjoint;'
+    []
   []
 []
