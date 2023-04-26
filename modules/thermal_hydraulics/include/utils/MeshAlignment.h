@@ -9,18 +9,19 @@
 
 #pragma once
 
-#include "MooseMesh.h"
+#include "MeshAlignmentBase.h"
 
 class Assembly;
 
 /**
  * Builds mapping between two aligned subdomains/boundaries
  *
- * This class handles the following cases:
+ * This class handles cases where there is a 1:1 mapping between elements on the
+ * primary and secondary meshes:
  * - 1D subdomain coupled to 2D boundary
  * - 2D boundary coupled to 2D boundary
  */
-class MeshAlignment
+class MeshAlignment : public MeshAlignmentBase
 {
 public:
   /**
@@ -75,11 +76,6 @@ public:
   bool meshesAreAligned() const { return _meshes_are_aligned; }
 
   /**
-   * Returns the list of element IDs on the primary boundary
-   */
-  const std::vector<dof_id_type> & getPrimaryElemIDs() const { return _primary_elem_ids; }
-
-  /**
    * Returns true if the element ID has a coupled element ID
    *
    * @param[in] elem_id Element ID for which to find the coupled element ID
@@ -125,37 +121,6 @@ protected:
   void buildMapping();
 
   /**
-   * Extracts mesh information from 1D elements
-   *
-   * @param[in] elem_ids       Vector of element IDs
-   * @param[out] elem_points   Vector of element centroids
-   * @param[out] node_ids      Vector of node IDs
-   * @param[out] node_points   Vector of node points
-   */
-  void extractFrom1DElements(const std::vector<dof_id_type> & elem_ids,
-                             std::vector<Point> & elem_points,
-                             std::vector<dof_id_type> & node_ids,
-                             std::vector<Point> & node_points) const;
-
-  /**
-   * Extracts mesh information from boundary info
-   *
-   * @param[in] boundary_info  Vector of tuples of element ID and side ID on boundary
-   * @param[out] elem_ids      Vector of element IDs
-   * @param[out] side_ids      Vector of side IDs
-   * @param[out] side_points   Vector of side centroids
-   * @param[out] node_ids      Vector of node IDs
-   * @param[out] node_points   Vector of node points
-   */
-  void extractFromBoundaryInfo(
-      const std::vector<std::tuple<dof_id_type, unsigned short int>> & boundary_info,
-      std::vector<dof_id_type> & elem_ids,
-      std::vector<unsigned short int> & side_ids,
-      std::vector<Point> & side_points,
-      std::vector<dof_id_type> & node_ids,
-      std::vector<Point> & node_points) const;
-
-  /**
    * Gets the local quadrature point map for the primary or secondary side
    *
    * @param[in] assembly   Assembly
@@ -166,32 +131,6 @@ protected:
   getLocalQuadraturePointMap(Assembly & assembly,
                              const std::vector<dof_id_type> & elem_ids,
                              const std::vector<unsigned short int> & side_ids) const;
-
-  /// Mesh
-  const MooseMesh & _mesh;
-
-  /// List of primary element IDs
-  std::vector<dof_id_type> _primary_elem_ids;
-  /// List of secondary element IDs
-  std::vector<dof_id_type> _secondary_elem_ids;
-  /// List of primary element points
-  std::vector<Point> _primary_elem_points;
-  /// List of secondary element points
-  std::vector<Point> _secondary_elem_points;
-
-  /// List of primary side IDs (if any)
-  std::vector<unsigned short int> _primary_side_ids;
-  /// List of secondary side IDs (if any)
-  std::vector<unsigned short int> _secondary_side_ids;
-
-  /// List of primary node IDs
-  std::vector<dof_id_type> _primary_node_ids;
-  /// List of secondary node IDs
-  std::vector<dof_id_type> _secondary_node_ids;
-  /// List of primary node points
-  std::vector<Point> _primary_node_points;
-  /// List of secondary node points
-  std::vector<Point> _secondary_node_points;
 
   /// Map of element ID to coupled element ID
   std::map<dof_id_type, dof_id_type> _coupled_elem_ids;
