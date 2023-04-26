@@ -67,7 +67,7 @@ as-needed.
 <!-- UPDATE=false to load false_update_moose.md page (hack needed for Offline installs) -->
 <!-- leave empty to load up normal update instructions -->
 
-!template load file=installation/{{UPDATE}}update_moose.md.template PATH={{PATH}}
+!template load file=installation/{{UPDATE}}update_moose.md.template PATH={{PATH}} CONDA_UPDATE={{CONDA_UPDATE}}
 
 ## Learn More
 

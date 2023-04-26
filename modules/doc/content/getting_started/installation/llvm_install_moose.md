@@ -12,3 +12,5 @@
 
 If the installation was successful you should see most of the tests passing (some tests will be
 skipped depending on your system environment), and no failures.
+
+!template load file=installation/manual_installation_pagination.md.template COMPILER=llvm

@@ -817,7 +817,14 @@ def readResourceFile(exe, app_name):
     return {}
 
 # TODO: Deprecate when we can remove getExeObjects
-def getExeRegisteredApps(exe, app_name):
+def getExeRegisteredApps(exe):
+    """
+    Gets a list of registered applications
+    """
+    data = getExeJSON(exe)
+    return data.get('global', {}).get('registered_apps', [])
+
+def getRegisteredApps(exe, app_name):
     """
     Gets a list of registered applications
     """

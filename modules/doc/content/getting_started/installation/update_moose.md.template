@@ -16,6 +16,8 @@ git fetch origin
 git rebase origin/master
 ```
 
+!template load file={{CONDA_UPDATE}}update_conda.md
+
 Then return to your application, re-compile, and test:
 
 ```bash

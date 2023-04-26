@@ -58,20 +58,24 @@ While unnecessary, performing the following will provide numerous example input 
 
 Example input files are located in `~/projects/moose/examples` directory.
 
-!include getting_started/installation/uninstall_conda.md
-
-## Examples
+## Run an Example
 
 !style! halign=left
-Most of the following examples and tutorials in the next section assume you are developing your own
-application, or requiring that you have built MOOSE from source. You can ignore these requirements
-while using the Pre-Built MOOSE binary. Where applicable, skip directly to creating an input file,
-and attempt to run it using:
+To run `moose` using an example input file from within the MOOSE repository, perform the
+following:
 !style-end!
 
 ```bash
-moose -i <some input file>.i
+cd ~/projects/moose/examples/ex01_inputfile
+moose -i ex01.i
 ```
+
+## More Examples
+
+!style! halign=left
+Continue on to see more examples and tuturials using MOOSE! However, most of the next section is
+geared towards building your own application.
+!style-end!
 
 !content pagination use_title=True
                     previous=installation/index.md

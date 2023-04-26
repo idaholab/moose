@@ -83,7 +83,7 @@ class Tester(MooseObject):
         params.addParam('libpng',        ['ALL'], "A test that runs only if libpng is available ('ALL', 'TRUE', 'FALSE')")
         params.addParam('libtorch',      ['ALL'], "A test that runs only if libtorch is available ('ALL', 'TRUE', 'FALSE')")
         params.addParam('libtorch_version', ['ALL'], "A list of libtorch versions for which this test will run on, supports normal comparison operators ('<', '>', etc...)")
-        params.addParam('installed',     False, "A test that runs only if it is installed ('TRUE', 'FALSE')")
+        params.addParam('skip_installed', False, "A test that does not run if it is installed ('TRUE', 'FALSE')")
 
         params.addParam('depend_files',  [], "A test that only runs if all depend files exist (files listed are expected to be relative to the base directory, not the test directory")
         params.addParam('env_vars',      [], "A test that only runs if all the environment variables listed exist")
@@ -600,10 +600,12 @@ class Tester(MooseObject):
                 reasons['depend_files'] = 'DEPEND FILES'
 
         # Verify if this is an installed executable
-        if self.specs["installed"]:
-            checks["installed"] = util.check_isinstalled(self.specs["executable"],
-                                                               self.specs["app_name"])
-            if checks["installed"]:
+        if self.specs['skip_installed']:
+            installed = util.check_isinstalled(self.specs["executable"],
+                                                         self.specs["app_name"])
+            with open('/Users/milljm/testing.log', 'w') as f:
+                f.write(str(installed))
+            if installed:
                 reasons['installed'] = 'test not relocatable (make install)'
 
         # We calculate the exe_objects only if we need them

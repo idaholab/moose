@@ -32,7 +32,7 @@ Sawtooth or Lemhi.
 Once loaded, `moose-opt` becomes available. You need now only provide input files to run
 simulations. Example input files are available within the MOOSE repository (next section).
 
-## Run Example
+## Run an Example
 
 !style! halign=left
 To run `moose-opt` using an example input file from within the MOOSE repository, perform the
@@ -96,3 +96,14 @@ Downloads folder:
 cd ~/Downloads
 scp <your hpc user id>@hpclogin:~/projects/moose/examples/ex01_inputfile/ex01_out.e .
 ```
+
+## Examples
+
+!style! halign=left
+Continue on to see more examples and tuturials using MOOSE! However, most of the next section is
+geared towards building your own application.
+!style-end!
+
+!content pagination use_title=True
+                    previous=installation/index.md
+                    next=examples_and_tutorials/index_without_new_users.md

@@ -14,4 +14,4 @@ should not blindly be 'cut and pasted' into your terminal.
 !include manual_mpich_gcc.md
 
 With the compiler stack ready, you can proceed to
-[Obtaining and Building MOOSE](getting_started/installation/install_moose.md).
+[Obtaining and Building MOOSE](getting_started/installation/gcc_install_moose.md).

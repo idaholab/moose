@@ -275,4 +275,10 @@
     requirement = "The system shall test for a valid json output dump"
     issues = '#21967'
   []
+  [skipped_installed]
+    type = PythonUnitTest
+    input = test_Installed.py
+    requirement = "The system shall skip tests not capable of being run if installed"
+    issues = '#24195'
+  []
 []
