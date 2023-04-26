@@ -20,7 +20,7 @@
     input = 'main_between_multiapp.i'
     exodiff = 'main_between_multiapp_out_ma10.e main_between_multiapp_out_ma11.e
                main_between_multiapp_out_ma20.e main_between_multiapp_out_ma21.e'
-    requirement = 'The system shall be able to send data from a user object in a subapp to another subapp while following a nearest-positions algorithm'
+    requirement = 'The system shall be able to send data in a subapp to another subapp using a nearest-node algorithm nested within a nearest-positions algorithm.'
   []
 
   [errors]
