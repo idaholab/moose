@@ -36,6 +36,54 @@ public:
    */
   virtual const ADVariableValue & contactPressure() const = 0;
 
+  /**
+   * @param node Node pointer
+   * @return The normal contact pressure at the node
+   */
+  virtual Real getNormalContactPressure(const Node * const /*node*/) const
+  {
+    mooseError("Not available in base class.");
+  }
+
+  /**
+   * @param node Node pointer
+   * @return The normal contact pressure at the node
+   */
+  virtual Real getNormalWeightedGap(const Node * const /*node*/) const;
+
+  /**
+   * @param node Node pointer
+   * @param component Component of the frictional pressure vector
+   * @return The frictional contact pressure at the node
+   */
+  virtual Real getFrictionalContactPressure(const Node * const /*node*/,
+                                            const unsigned int /*component*/) const
+  {
+    mooseError("Not available in base class.");
+  }
+
+  /**
+   * @param node Node pointer
+   * @param component Component of the local slip vector
+   * @return The accumulated slip at the node
+   */
+  virtual Real getAccumulatedSlip(const Node * const /*node*/,
+                                  const unsigned int /*component*/) const
+  {
+    mooseError("Not available in base class.");
+  }
+
+  /**
+   * @param node Node pointer
+   * @param component Component of the local slip vector
+   * @return The tangential velocity at the node with local components
+   */
+  virtual Real getTangentialVelocity(const Node * const /*node*/,
+                                     const unsigned int /*component*/) const
+  {
+    mooseError("Not available in base class.");
+  }
+
 protected:
   /**
    * Computes properties that are functions only of the current quadrature point (\p _qp), e.g.
@@ -67,9 +115,6 @@ protected:
 
   /// The value of the LM at the current quadrature point
   Real _qp_factor;
-
-  /// Whether to normalize weighted gap by weighting function norm
-  bool _normalize_c;
 
   /// Whether the dof objects are nodal; if they're not, then they're elemental
   const bool _nodal;

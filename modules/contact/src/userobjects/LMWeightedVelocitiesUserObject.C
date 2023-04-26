@@ -17,6 +17,8 @@ InputParameters
 LMWeightedVelocitiesUserObject::validParams()
 {
   InputParameters params = WeightedVelocitiesUserObject::validParams();
+  params.addClassDescription("Provides the mortar contact Lagrange multipliers (normal and "
+                             "tangential) for constraint enforcement.");
   params.addRequiredCoupledVar(
       "lm_variable_normal",
       "The Lagrange multiplier variable representing the normal contact pressure value.");
@@ -38,9 +40,23 @@ LMWeightedVelocitiesUserObject::LMWeightedVelocitiesUserObject(const InputParame
                                     ? getVar("lm_variable_tangential_two", 0)
                                     : nullptr)
 {
-  if (!_lm_normal_var || !_lm_variable_tangential_one)
-    paramError("lm_variable_normal", "The Lagrange multiplier variables must be actual variables.");
+  // Check that user inputted a variable
+  auto check_input = [this](const auto var, const auto & var_name)
+  {
+    if (isCoupledConstant(var_name))
+      paramError("lm_variable_normal",
+                 "The Lagrange multiplier variable must be an actual variable and not a constant.");
+    else if (!var)
+      paramError(var_name,
+                 "The Lagrange multiplier variables must be provided and be actual variables.");
+  };
 
+  check_input(_lm_normal_var, "lm_variable_normal");
+  check_input(_lm_variable_tangential_one, "lm_variable_tangential_one");
+  if (_lm_variable_tangential_two)
+    check_input(_lm_variable_tangential_two, "lm_variable_tangential_two");
+
+  // Check that user inputted the right type of variable
   auto check_type = [this](const auto & var, const auto & var_name)
   {
     if (!var.isNodal())
@@ -48,6 +64,7 @@ LMWeightedVelocitiesUserObject::LMWeightedVelocitiesUserObject(const InputParame
                  "The Lagrange multiplier variables must have degrees of freedom exclusively on "
                  "nodes, e.g. they should probably be of finite element type 'Lagrange'.");
   };
+
   check_type(*_lm_normal_var, "lm_variable_normal");
   check_type(*_lm_variable_tangential_one, "lm_variable_tangential_one");
   if (_lm_variable_tangential_two)

@@ -17,6 +17,7 @@ InputParameters
 PenaltyWeightedGapUserObject::validParams()
 {
   InputParameters params = WeightedGapUserObject::validParams();
+  params.addClassDescription("Computes the mortar normal contact force via a penalty approach.");
   params.addRequiredParam<Real>("penalty", "The penalty factor");
   return params;
 }
@@ -50,6 +51,24 @@ PenaltyWeightedGapUserObject::contactPressure() const
 }
 
 void
+PenaltyWeightedGapUserObject::initialize()
+{
+  WeightedGapUserObject::initialize();
+  _dof_to_normal_pressure.clear();
+}
+
+Real
+PenaltyWeightedGapUserObject::getNormalContactPressure(const Node * const node) const
+{
+  const auto it = _dof_to_normal_pressure.find(_subproblem.mesh().nodePtr(node->id()));
+
+  if (it != _dof_to_normal_pressure.end())
+    return MetaPhysicL::raw_value(it->second);
+  else
+    return 0.0;
+}
+
+void
 PenaltyWeightedGapUserObject::reinit()
 {
   _contact_force.resize(_qrule_msm->n_points());
@@ -64,6 +83,10 @@ PenaltyWeightedGapUserObject::reinit()
     const auto weighted_gap_for_calc = weighted_gap < 0 ? -weighted_gap : ADReal(0);
     const auto & test_i = (*_test)[i];
     for (const auto qp : make_range(_qrule_msm->n_points()))
+    {
       _contact_force[qp] += (test_i[qp] * _penalty) * weighted_gap_for_calc;
+      _dof_to_normal_pressure[static_cast<const DofObject *>(node)] =
+          MetaPhysicL::raw_value(_penalty * weighted_gap_for_calc);
+    }
   }
 }

@@ -26,7 +26,9 @@ public:
   PenaltyWeightedGapUserObject(const InputParameters & parameters);
 
   virtual const ADVariableValue & contactPressure() const override;
+  virtual void initialize() override;
   virtual void reinit() override;
+  virtual Real getNormalContactPressure(const Node * const node) const override;
 
 protected:
   virtual const VariableTestValue & test() const override;
@@ -37,4 +39,7 @@ protected:
 
   /// The contact force on the mortar segument quadrature points
   ADVariableValue _contact_force;
+
+  /// Map from degree of freedom to normal pressure for reporting
+  std::unordered_map<const DofObject *, Real> _dof_to_normal_pressure;
 };
