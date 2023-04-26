@@ -50,7 +50,7 @@ MultiAppGeneralFieldNearestNodeTransfer::MultiAppGeneralFieldNearestNodeTransfer
     _num_nearest_points(getParam<unsigned int>("num_nearest_points"))
 {
   if (_source_app_must_contain_point && _nearest_positions_obj)
-    paramError("use_nearest_positions",
+    paramError("use_nearest_position",
                "We do not support using both nearest positions matching and checking if target "
                "points are within an app domain because the KDTrees for nearest-positions matching "
                "are (currently) built with data from multiple applications.");
@@ -73,7 +73,7 @@ MultiAppGeneralFieldNearestNodeTransfer::buildKDTrees(const unsigned int var_ind
   if (!_nearest_positions_obj)
     num_sources = _from_problems.size();
   else
-    num_sources = _nearest_positions_obj->getPositions().size();
+    num_sources = _nearest_positions_obj->getPositions(/*initial=*/false).size();
 
   _local_kdtrees.resize(num_sources);
   _local_points.resize(num_sources);
@@ -122,7 +122,8 @@ MultiAppGeneralFieldNearestNodeTransfer::buildKDTrees(const unsigned int var_ind
           if (!_from_boundaries.empty() && !onBoundaries(_from_boundaries, from_mesh, node))
             continue;
 
-          if (_nearest_positions_obj && !closestToPosition(i_source, *node))
+          if (_nearest_positions_obj &&
+              !closestToPosition(i_source, *node + _from_positions[i_from]))
             continue;
 
           auto dof = node->dof_number(from_sys.number(), from_var_num, 0);
@@ -144,7 +145,8 @@ MultiAppGeneralFieldNearestNodeTransfer::buildKDTrees(const unsigned int var_ind
           if (!_from_boundaries.empty() && !onBoundaries(_from_boundaries, from_mesh, elem))
             continue;
 
-          if (_nearest_positions_obj && !closestToPosition(i_source, elem->vertex_average()))
+          if (_nearest_positions_obj &&
+              !closestToPosition(i_source, elem->vertex_average() + _from_positions[i_from]))
             continue;
 
           auto dof = elem->dof_number(from_sys.number(), from_var_num, 0);
@@ -190,6 +192,10 @@ MultiAppGeneralFieldNearestNodeTransfer::evaluateInterpValuesNearestNode(
     // Loop on all sources
     for (unsigned int i_from = 0; i_from < num_sources; ++i_from)
     {
+      // Only use the KDTree from the closest position if in "nearest-position" mode
+      if (_nearest_positions_obj && !closestToPosition(i_from, pt))
+        continue;
+
       std::vector<std::size_t> return_index(_num_nearest_points);
       std::vector<Real> return_dist_sqr(_num_nearest_points);
 
@@ -229,6 +235,10 @@ MultiAppGeneralFieldNearestNodeTransfer::evaluateInterpValuesNearestNode(
 
       for (unsigned int i_from = 0; i_from < num_sources; ++i_from)
       {
+        // Only use the KDTree from the closest position if in "nearest-position" mode
+        if (_nearest_positions_obj && !closestToPosition(i_from, pt))
+          continue;
+
         unsigned int num_search = _num_nearest_points + 1;
         std::vector<std::size_t> return_index(num_search);
         std::vector<Real> return_dist_sqr(num_search);
