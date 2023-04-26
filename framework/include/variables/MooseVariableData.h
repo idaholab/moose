@@ -358,7 +358,7 @@ public:
    * Write a nodal value to the passed-in solution vector
    */
   void insertNodalValue(NumericVector<Number> & residual, const OutputData & v);
-  OutputData getNodalValue(const Node & node, Moose::SolutionState state) const;
+  OutputType getNodalValue(const Node & node, Moose::SolutionState state) const;
   OutputData
   getElementalValue(const Elem * elem, Moose::SolutionState state, unsigned int idx = 0) const;
 

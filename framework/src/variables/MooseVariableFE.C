@@ -171,42 +171,42 @@ MooseVariableFE<OutputType>::getDofIndices(const Elem * elem,
 }
 
 template <typename OutputType>
-typename MooseVariableFE<OutputType>::OutputData
+OutputType
 MooseVariableFE<OutputType>::getNodalValue(const Node & node) const
 {
   return _element_data->getNodalValue(node, Moose::Current);
 }
 
 template <typename OutputType>
-typename MooseVariableFE<OutputType>::OutputData
+OutputType
 MooseVariableFE<OutputType>::getNodalValueOld(const Node & node) const
 {
   return _element_data->getNodalValue(node, Moose::Old);
 }
 
 template <typename OutputType>
-typename MooseVariableFE<OutputType>::OutputData
+OutputType
 MooseVariableFE<OutputType>::getNodalValueOlder(const Node & node) const
 {
   return _element_data->getNodalValue(node, Moose::Older);
 }
 
 template <typename OutputType>
-typename MooseVariableFE<OutputType>::OutputData
+OutputType
 MooseVariableFE<OutputType>::getElementalValue(const Elem * elem, unsigned int idx) const
 {
   return _element_data->getElementalValue(elem, Moose::Current, idx);
 }
 
 template <typename OutputType>
-typename MooseVariableFE<OutputType>::OutputData
+OutputType
 MooseVariableFE<OutputType>::getElementalValueOld(const Elem * elem, unsigned int idx) const
 {
   return _element_data->getElementalValue(elem, Moose::Old, idx);
 }
 
 template <typename OutputType>
-typename MooseVariableFE<OutputType>::OutputData
+OutputType
 MooseVariableFE<OutputType>::getElementalValueOlder(const Elem * elem, unsigned int idx) const
 {
   return _element_data->getElementalValue(elem, Moose::Older, idx);

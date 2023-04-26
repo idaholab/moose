@@ -1233,7 +1233,7 @@ MooseVariableData<RealEigenVector>::insertNodalValue(NumericVector<Number> & res
 }
 
 template <typename OutputType>
-typename MooseVariableData<OutputType>::OutputData
+OutputType
 MooseVariableData<OutputType>::getNodalValue(const Node & node, Moose::SolutionState state) const
 {
   mooseAssert(_subproblem.mesh().isSemiLocal(const_cast<Node *>(&node)), "Node is not Semilocal");
@@ -1261,6 +1261,46 @@ MooseVariableData<OutputType>::getNodalValue(const Node & node, Moose::SolutionS
     default:
       mooseError("PreviousNL not currently supported for getNodalValue");
   }
+}
+
+template <>
+RealVectorValue
+MooseVariableData<RealVectorValue>::getNodalValue(const Node & node,
+                                                  Moose::SolutionState state) const
+{
+  mooseAssert(_subproblem.mesh().isSemiLocal(const_cast<Node *>(&node)), "Node is not Semilocal");
+
+  // Make sure that the node has DOFs
+  /* Note, this is a reproduction of an assert within libMesh::Node::dof_number, this is done to
+   * produce a better error (see misc/check_error.node_value_off_block) */
+  mooseAssert(node.n_dofs(_sys.number(), _var_num) > 0,
+              "Node " << node.id() << " does not contain any dofs for the "
+                      << _sys.system().variable_name(_var_num) << " variable");
+
+  dof_id_type dof = node.dof_number(_sys.number(), _var_num, 0);
+  auto num_dofs = node.n_comp(_sys.number(), _var_num);
+  RealVectorValue v(num_dofs);
+  switch (state)
+  {
+    case Moose::Current:
+      for (unsigned int i = 0; i < num_dofs; ++i)
+        v(i) = (*_sys.currentSolution())(dof++);
+      break;
+
+    case Moose::Old:
+      for (unsigned int i = 0; i < num_dofs; ++i)
+        v(i) = _sys.solutionOld()(dof++);
+      break;
+
+    case Moose::Older:
+      for (unsigned int i = 0; i < num_dofs; ++i)
+        v(i) = _sys.solutionOlder()(dof++);
+      break;
+
+    default:
+      mooseError("PreviousNL not currently supported for getNodalValue");
+  }
+  return v;
 }
 
 template <>
