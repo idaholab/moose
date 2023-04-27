@@ -91,6 +91,7 @@ public:
   captureDump(addFunction,            "Functions")
   captureDump(addFVKernel,            "FVKernels")
   captureDump(addIndicator,           "Adaptivity/Indicators")
+  captureDump(addUserObject,          "UserObject")
   captureDump(addInitialCondition,    "ICs")
   captureDump(addInterfaceKernel,     "InterfaceKernels")
   captureDump(addKernel,              "Kernels")
