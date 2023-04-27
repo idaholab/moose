@@ -210,9 +210,6 @@ def main(options):
             LOG.info('Initializing translator object loaded from %s', config_files[index])
         translator.init(contents[index])
 
-        # init methods can add pages (e.g., civet.py), but don't add pages from another translator
-        contents[index] = [page for page in translator.getPages() if page.translator is translator]
-
     # Identify the first translator in the list as the "primary" one for convenience
     primary = translators[0]
     pooled = sorted(primary.getPages(), key=(lambda p: p.local))
@@ -253,12 +250,17 @@ def main(options):
         LOG.info("Cleaning destination %s", primary.destination)
         shutil.rmtree(primary.destination)
 
-    # Update contents lists if only building certain files
-    if options.files:
-        for index, translator in enumerate(translators):
-            func = lambda p: (p in contents[index]
-                              and any([p.local.startswith(f) for f in options.files]))
-            contents[index] = translator.findPages(func)
+    def getPages(translator):
+        # init methods can add pages (e.g., civet.py), but don't add pages from another translator
+        pages = [page for page in translator.getPages() if page.translator is translator]
+        if options.files:
+            func = lambda page: (page in pages
+                                 and any([page.local.startswith(f) for f in options.files]))
+            pages = translator.findPages(func)
+        return pages
+
+    for index, translator in enumerate(translators):
+        contents[index] = getPages(translator)
 
     # Execute the read and tokenize methods on all translators
     for index, translator in enumerate(translators):
@@ -270,6 +272,12 @@ def main(options):
     for index, translator in enumerate(translators):
         if subconfigs:
             LOG.info('Writing content specified by %s', config_files[index])
+
+        # We need to update pages here because it's possible that pages were
+        # added during reading/tokenizing, e.g., the media extension's plot
+        # script capability, which generates a plot on the fly.
+        contents[index] = getPages(translator)
+
         translator.execute(contents[index], num_threads=options.num_threads, read=False, tokenize=False)
 
     LOG.info('Total Time [%s sec.]', time.time() - t)

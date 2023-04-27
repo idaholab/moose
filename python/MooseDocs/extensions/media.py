@@ -7,11 +7,12 @@
 #* Licensed under LGPL 2.1, please see LICENSE for details
 #* https://www.gnu.org/licenses/lgpl-2.1.html
 import os
+import subprocess
 import logging
 import mooseutils
 from ..common import exceptions
 from ..base import components, Extension, LatexRenderer
-from ..tree import tokens, html, latex
+from ..tree import tokens, html, latex, pages
 from . import command, floats
 
 LOG = logging.getLogger(__name__)
@@ -79,12 +80,42 @@ class ImageCommand(command.CommandComponent):
     @staticmethod
     def defaultSettings():
         settings = command.CommandComponent.defaultSettings()
+        settings['plot_script'] = (None, "Python plot script to run before rendering")
         settings['latex_src'] = (None, "Image to utilize when rendering with LaTeX")
         settings['dark_src'] = (None, "Image to utilize with dark HTML theme")
         settings.update(floats.caption_settings())
         return settings
 
     def createToken(self, parent, info, page, settings):
+
+        if settings['plot_script']:
+            # Find the plot script
+            script_page = self.translator.findPage(settings['plot_script'])
+            script_path = script_page.source
+            script_localname = script_page.local
+            script_absdir, script_name = os.path.split(script_path)
+            script_localdir, script_name = os.path.split(script_localname)
+
+            # Generate the plot
+            LOG.info("Executing plot script %s", script_path)
+            subprocess.run(["python", script_path], capture_output=True)
+
+            # Currently the plot is assumed to reside in the same directory as the plot script.
+            plot_name = info['subcommand']
+            plot_path = os.path.join(script_absdir, plot_name)
+            plot_localname = os.path.join(script_localdir, plot_name)
+
+            # Throw error if the expected plot does not exist
+            if not os.path.isfile(plot_path):
+                LOG.error("The plot script '%s' must generate the plot '%s'", script_localname, plot_localname)
+
+            # Add the plot page if the plot did not exist before building
+            print(plot_localname)
+            if not self.translator.findPage(plot_localname, throw_on_zero=False, exact=False):
+                plot_page = pages.File(plot_localname, source=plot_path)
+                self.translator.addPage(plot_page)
+                self.translator.initPage(plot_page)
+                print("Added")
 
         flt = floats.create_float(parent, self.extension, self.reader, page, settings,
                                   bottom=True, **self.attributes(settings))

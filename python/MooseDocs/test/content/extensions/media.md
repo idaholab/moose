@@ -34,6 +34,12 @@
        id=idaho-flag
        style=width:75%;text-align:center;
 
+!media generated_plot.jpg
+       plot_script=generate_plot.py
+       id=generated-plot
+       caption=A generated plot
+       style=width:75%;text-align:center;
+
 ### Links to Images
 
 Montana: [montana-flag]
@@ -42,6 +48,7 @@ New York: [newyork-flag]
 
 Idaho: [idaho-flag]
 
+Generated Plot: [generated-plot]
 
 ### Width
 
