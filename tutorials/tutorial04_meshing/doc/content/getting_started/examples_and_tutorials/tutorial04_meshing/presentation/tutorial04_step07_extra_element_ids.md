@@ -77,8 +77,8 @@
 
 - Supports other numbering schemes:
 
-  - [!param](/Mesh/PatternedHexMeshGenerator/assign_type) = `pattern`: Assign IDs based on the ID of the input file component as listed in the pattern
-  - [!param](/Mesh/PatternedHexMeshGenerator/assign_type) = `manual`: Assign IDs based on a user-defined mapping defined in an array [!param](/Mesh/PatternedHexMeshGenerator/id_pattern)
+  - [!param](/Mesh/PatternedHexMeshGenerator/assign_type) = `pattern`: Assign IDs identical to the already-provided [!param](/Mesh/PatternedHexMeshGenerator/pattern) array
+  - [!param](/Mesh/PatternedHexMeshGenerator/assign_type) = `manual`: Assign IDs based on a user-defined mapping in the optional [!param](/Mesh/PatternedHexMeshGenerator/id_pattern) array, which may differ from the required [!param](/Mesh/PatternedHexMeshGenerator/pattern) array
 
 !row!
 !col small=12 medium=6 large=8
