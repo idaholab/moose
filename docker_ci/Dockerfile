@@ -106,7 +106,7 @@ COPY scripts/update_and_rebuild_petsc.sh ${MOOSE_DIR}/scripts/update_and_rebuild
 COPY scripts/configure_petsc.sh ${MOOSE_DIR}/scripts/configure_petsc.sh
 RUN git clone https://gitlab.com/petsc/petsc.git ; \
 cd petsc && git checkout ${PETSC_REV} && cd .. ; \
-PETSC_PREFIX=$PETSC_DIR ./scripts/update_and_rebuild_petsc.sh ${PETSC_OPTIONS} --download-cmake ; \
+PETSC_PREFIX=$PETSC_DIR ./scripts/update_and_rebuild_petsc.sh ${PETSC_OPTIONS} ; \
 rm -rf petsc/* petsc/.* || true ; \
 # Ensure PETSc was installed based on present of library directory
 if [ ! -d $PETSC_DIR/lib/petsc ]; then exit 1; fi

@@ -62,7 +62,8 @@ yum install -y \
   sudo \
   file \
   zlib-devel \
-  rsync
+  rsync \
+  cmake
 
 # Clear cache
 yum clean all
