@@ -52,6 +52,15 @@ public:
   /**
    * This class constructor is used for non-Moose-based objects like interfaces. A name for the
    * storage as well as a system name must be passed in along with the thread ID explicitly.
+   * @param moose_app Reference to the application
+   * @param name The name which is used when constructing the full-names of the restartable data.
+   *             It is used with the following logic: `system_name/name/data_name`.
+   *             (e.g. UserObjects/diffusion_kernel/coefficient). In most of the cases this is the
+   *             name of the moose object.
+   * @param system_name The name of the system where this object belongs to.
+   * @param tid The thread ID.
+   * @param read_only Switch to restrict the data for read-only.
+   * @param metaname The name of the datamap where the restartable objects should be registered to.
    */
   Restartable(MooseApp & moose_app,
               const std::string & name,
@@ -75,15 +84,15 @@ public:
 
   /**
    * Declare a piece of data as "restartable" and initialize it
-   * Similar to `declareRestartableData` but returns a const reference to the object.
+   * Similar to `declareRestartableData` but returns a const reference to the object
+   * and does not allow forwarded arguments.
    *
    * NOTE: This returns a _ const reference_!  Make sure you store it in a _const reference_!
    *
    * @param data_name The name of the data (usually just use the same name as the member variable)
-   * @param args Arguments to forward to the constructor of the data
    */
   template <typename T, typename... Args>
-  const T & getRestartableData(const std::string & data_name, Args &&... args) const;
+  const T & getRestartableData(const std::string & data_name) const;
 
 protected:
   /**
@@ -100,21 +109,6 @@ protected:
   template <typename T, typename... Args>
   T &
   declareRestartableDataWithContext(const std::string & data_name, void * context, Args &&... args);
-
-  /**
-   * Declare a piece of data as "restartable" and initialize it.
-   * Similar to `declareRestartableDataWithContext` but returns a const reference to the object.
-   *
-   * NOTE: This returns a _ const reference_!  Make sure you store it in a _const reference_!
-   *
-   * @param data_name The name of the data (usually just use the same name as the member variable)
-   * @param context Context pointer that will be passed to the load and store functions
-   * @param args Arguments to forward to the constructor of the data
-   */
-  template <typename T, typename... Args>
-  const T & getRestartableDataWithContext(const std::string & data_name,
-                                          void * context,
-                                          Args &&... args) const;
 
   /**
    * Declare a piece of data as "recoverable" and initialize it.
@@ -224,9 +218,9 @@ Restartable::declareRestartableData(const std::string & data_name, Args &&... ar
 
 template <typename T, typename... Args>
 const T &
-Restartable::getRestartableData(const std::string & data_name, Args &&... args) const
+Restartable::getRestartableData(const std::string & data_name) const
 {
-  return getRestartableDataWithContext<T>(data_name, nullptr, std::forward<Args>(args)...);
+  return declareRestartableDataHelper<T>(data_name, nullptr).get();
 }
 
 template <typename T, typename... Args>
@@ -236,16 +230,6 @@ Restartable::declareRestartableDataWithContext(const std::string & data_name,
                                                Args &&... args)
 {
   return declareRestartableDataHelper<T>(data_name, context, std::forward<Args>(args)...).set();
-}
-
-template <typename T, typename... Args>
-const T &
-Restartable::getRestartableDataWithContext(const std::string & data_name,
-                                           void * context,
-                                           Args &&... args) const
-{
-  return std::as_const(
-      declareRestartableDataHelper<T>(data_name, context, std::forward<Args>(args)...).get());
 }
 
 template <typename T, typename... Args>
