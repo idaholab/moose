@@ -25,11 +25,6 @@ public:
 protected:
   virtual void computeQpProperties() override;
 
-  /**
-   * compute the strong form corresponding to RZ pieces of the viscous term
-   */
-  void viscousTermRZ();
-
   /// velocity
   const ADVectorVariableValue & _velocity;
 
@@ -53,10 +48,6 @@ protected:
 
   /// Strong residual corresponding to the momentum advective term
   ADMaterialProperty<RealVectorValue> & _advective_strong_residual;
-
-  /// Strong residual corresponding to the momentum viscous term. This is only used by stabilization
-  /// kernels
-  ADMaterialProperty<RealVectorValue> & _viscous_strong_residual;
 
   /// Strong residual corresponding to the momentum transient term
   ADMaterialProperty<RealVectorValue> & _td_strong_residual;
