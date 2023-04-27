@@ -18,6 +18,7 @@
 #include "NavierStokesMethods.h"
 
 #include "libmesh/elem.h"
+#include "libmesh/node.h"
 
 #include <vector>
 
@@ -50,7 +51,12 @@ protected:
   using T::_coord_sys;
   using T::_coupled_force_strong_residual;
   using T::_current_elem;
-  using T::_displacements;
+  using T::_disp_x_num;
+  using T::_disp_x_sys_num;
+  using T::_disp_y_num;
+  using T::_disp_y_sys_num;
+  using T::_disp_z_num;
+  using T::_disp_z_sys_num;
   using T::_dt;
   using T::_fe_problem;
   using T::_grad_p;
@@ -96,27 +102,31 @@ template <typename T>
 void
 INSADTauMaterialTempl<T>::computeHMax()
 {
-  if (!_displacements.size())
+  if (_disp_x_num == libMesh::invalid_uint || !ADReal::do_derivatives)
   {
     _hmax = _current_elem->hmax();
     return;
   }
 
   _hmax = 0;
+  std::array<unsigned int, 3> disps = {_disp_x_num, _disp_y_num, _disp_z_num};
+  std::array<unsigned int, 3> disp_sys_nums = {_disp_x_sys_num, _disp_y_sys_num, _disp_z_sys_num};
 
   for (unsigned int n_outer = 0; n_outer < _current_elem->n_vertices(); n_outer++)
     for (unsigned int n_inner = n_outer + 1; n_inner < _current_elem->n_vertices(); n_inner++)
     {
       VectorValue<DualReal> diff = (_current_elem->point(n_outer) - _current_elem->point(n_inner));
-      unsigned dimension = 0;
-      for (const auto & disp_num : _displacements)
+      for (const auto i : index_range(disps))
       {
-        diff(dimension)
-            .derivatives()[disp_num * _fe_problem.getNonlinearSystemBase().getMaxVarNDofsPerElem() +
-                           n_outer] = 1.;
-        diff(dimension++)
-            .derivatives()[disp_num * _fe_problem.getNonlinearSystemBase().getMaxVarNDofsPerElem() +
-                           n_inner] = -1.;
+        const auto disp_num = disps[i];
+        if (disp_num == libMesh::invalid_uint)
+          continue;
+        const auto sys_num = disp_sys_nums[i];
+
+        diff(i).derivatives().insert(
+            _current_elem->node_ref(n_outer).dof_number(sys_num, disp_num, 0)) = 1.;
+        diff(i).derivatives().insert(
+            _current_elem->node_ref(n_inner).dof_number(sys_num, disp_num, 0)) = -1.;
       }
 
       _hmax = std::max(_hmax, diff.norm_sq());

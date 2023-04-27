@@ -139,4 +139,11 @@ protected:
 
   /// The time derivative with respect to z-displacement
   const ADVariableValue * _disp_z_dot;
+
+  unsigned int _disp_x_num = libMesh::invalid_uint;
+  unsigned int _disp_y_num = libMesh::invalid_uint;
+  unsigned int _disp_z_num = libMesh::invalid_uint;
+  unsigned int _disp_x_sys_num = libMesh::invalid_uint;
+  unsigned int _disp_y_sys_num = libMesh::invalid_uint;
+  unsigned int _disp_z_sys_num = libMesh::invalid_uint;
 };

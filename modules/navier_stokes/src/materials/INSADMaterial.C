@@ -12,6 +12,7 @@
 #include "Assembly.h"
 #include "INSADObjectTracker.h"
 #include "FEProblemBase.h"
+#include "NonlinearSystemBase.h"
 #include "NS.h"
 
 registerMooseObject("NavierStokesApp", INSADMaterial);
@@ -112,23 +113,51 @@ INSADMaterial::subdomainSetup()
   if ((_has_convected_mesh =
            _object_tracker->get<bool>("has_convected_mesh", _current_subdomain_id)))
   {
-    auto set_disp_dot = [&](auto *& pointer_data_member, const auto & disp_name)
-    {
-      pointer_data_member =
-          &_subproblem
-               .getStandardVariable(
-                   _tid, _object_tracker->get<VariableName>(disp_name, _current_subdomain_id))
-               .adUDot();
-    };
-    set_disp_dot(_disp_x_dot, "disp_x");
+    auto & disp_x = _subproblem.getStandardVariable(
+        _tid, _object_tracker->get<VariableName>("disp_x", _current_subdomain_id));
+    _disp_x_dot = &disp_x.adUDot();
+    _disp_x_sys_num = disp_x.sys().number();
+    _disp_x_num =
+        disp_x.kind() == (Moose::VarKindType::VAR_NONLINEAR &&
+                          (_disp_x_sys_num == _fe_problem.currentNonlinearSystem().number()))
+            ? disp_x.number()
+            : libMesh::invalid_uint;
     if (_object_tracker->isTrackerParamValid("disp_y", _current_subdomain_id))
-      set_disp_dot(_disp_y_dot, "disp_y");
+    {
+      auto & disp_y = _subproblem.getStandardVariable(
+          _tid, _object_tracker->get<VariableName>("disp_y", _current_subdomain_id));
+      _disp_y_dot = &disp_y.adUDot();
+      _disp_y_sys_num = disp_y.sys().number();
+      _disp_y_num =
+          disp_y.kind() == (Moose::VarKindType::VAR_NONLINEAR &&
+                            (_disp_y_sys_num == _fe_problem.currentNonlinearSystem().number()))
+              ? disp_y.number()
+              : libMesh::invalid_uint;
+    }
     else
+    {
       _disp_y_dot = nullptr;
+      _disp_y_sys_num = libMesh::invalid_uint;
+      _disp_y_num = libMesh::invalid_uint;
+    }
     if (_object_tracker->isTrackerParamValid("disp_z", _current_subdomain_id))
-      set_disp_dot(_disp_z_dot, "disp_z");
+    {
+      auto & disp_z = _subproblem.getStandardVariable(
+          _tid, _object_tracker->get<VariableName>("disp_z", _current_subdomain_id));
+      _disp_z_dot = &disp_z.adUDot();
+      _disp_z_sys_num = disp_z.sys().number();
+      _disp_z_num =
+          disp_z.kind() == (Moose::VarKindType::VAR_NONLINEAR &&
+                            (_disp_z_sys_num == _fe_problem.currentNonlinearSystem().number()))
+              ? disp_z.number()
+              : libMesh::invalid_uint;
+    }
     else
+    {
       _disp_z_dot = nullptr;
+      _disp_z_sys_num = libMesh::invalid_uint;
+      _disp_z_num = libMesh::invalid_uint;
+    }
   }
   else
     _disp_x_dot = _disp_y_dot = _disp_z_dot = nullptr;
