@@ -73,8 +73,20 @@ ConditionalSampleReporterTempl<T>::ConditionalSampleReporterTempl(
     this->paramError("function", "Invalid function:\n", _function, "\n", _func_F->ErrorMsg());
   if (!_disable_fpoptimizer)
     _func_F->Optimize();
+
   if (_enable_jit)
+  {
+    // let rank 0 do the JIT compilation first
+    if (this->_communicator.rank() != 0)
+      this->_communicator.barrier();
+
     _func_F->JITCompile();
+
+    // wait for ranks > 0 to catch up
+    if (this->_communicator.rank() == 0)
+      this->_communicator.barrier();
+  }
+
   _func_params.resize(_sampler_vars.size() + (_use_time ? 1 : 0));
 }
 
