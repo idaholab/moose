@@ -122,5 +122,5 @@ MOOSE can be customized by running a `configure` script in
 !include installation/installation_troubleshooting.md
 
 !content pagination use_title=True
-                    previous=installation/{{PAGE_HEIR}}index.md
+                    previous=installation/{{BACK}}
                     next=examples_and_tutorials/{{PAGE_HEIR}}index.md
