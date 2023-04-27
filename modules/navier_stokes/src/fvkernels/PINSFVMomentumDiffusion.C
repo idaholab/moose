@@ -96,14 +96,17 @@ PINSFVMomentumDiffusion::computeStrongResidual()
 
   // Interpolate to get the face value
   ADReal coeff_face;
-  const auto coeff_one_side = has_elem ? mu_elem / eps_elem * _var(elem_face, state)
-                                       : mu_neighbor / eps_neighbor * _var(neighbor_face, state);
+  // At this point, we already computed mu_elem/eps_elem by knowing which element owns the
+  // face, so it is enough to switch between the variable evaluation here
+  const auto coeff_one_side =
+      mu_elem / eps_elem * (has_elem ? _var(elem_face, state) : _var(neighbor_face, state));
   if (onBoundary(*_face_info))
     coeff_face = coeff_one_side;
   else
   {
     mooseAssert(has_elem, "We should be defined on the element side if we're not on a boundary");
-    const auto coeff_neighbor = mu_neighbor / eps_neighbor * _var(neighbor_face, state);
+    const auto coeff_neighbor = mu_neighbor / eps_neighbor *
+                                (has_elem ? _var(neighbor_face, state) : _var(elem_face, state));
     interpolate(Moose::FV::InterpMethod::Average,
                 coeff_face,
                 coeff_one_side,
