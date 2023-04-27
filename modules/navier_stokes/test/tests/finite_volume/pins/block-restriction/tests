@@ -7,5 +7,6 @@
     input = with-empty-block.i
     exodiff = with-empty-block_out.e
     abs_zero = 1e-9
+    mesh_mode = REPLICATED # because the bounding box generator does not work with distributed
   []
 []
