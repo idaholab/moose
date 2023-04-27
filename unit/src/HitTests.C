@@ -502,6 +502,7 @@ TEST(HitTests, RenderCases)
        "[hello]\n  foo = '42'\n  # comment\n  bar = 'baz'\n[]",
        "[hello]\n  foo = '42'\n  # comment\n  bar = 'baz'\n[]",
        0},
+#ifdef WASP_ENABLED
       {"complex newline render",
        "[section01]\n\n  field01 = 10\n\n\n\n  field02 = '20'\n\n  [section02]"
        "\n\n    field03 = '30 31 32 33'\n\n\n    field04 = 40\n    [section03]"
@@ -512,6 +513,7 @@ TEST(HitTests, RenderCases)
        "\n\n\n\n\n\n      field05 = \"double 50 quoted 51 string\"\n\n\n    []"
        "\n\n\n    field06 = 60\n\n\n\n  []\n  field07 = '70 71 72 73 74'\n\n[]",
        0},
+#endif
   };
 
   for (size_t i = 0; i < sizeof(cases) / sizeof(RenderCase); i++)
