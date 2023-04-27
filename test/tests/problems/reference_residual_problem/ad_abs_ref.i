@@ -45,13 +45,13 @@
     variable = v
   []
   [v_neg_force]
-    type = BodyForce
+    type = ADBodyForce
     variable = v
     value = ${fparse -1 / 2}
     function = ramp
   []
   [v_force]
-    type = BodyForce
+    type = ADBodyForce
     variable = v
     value = 1
     function = ramp
