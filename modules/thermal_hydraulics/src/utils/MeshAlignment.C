@@ -150,7 +150,7 @@ MeshAlignment::buildCoupledElemQpIndexMap(Assembly & assembly)
                   "The numbers of quadrature points for each element must be the same");
 
       _coupled_elem_qp_indices[primary_elem_id].resize(primary_qps.size());
-      KDTree kd_tree_qp(secondary_qps, 5);
+      KDTree kd_tree_qp(secondary_qps, _mesh.getMaxLeafSize());
       for (std::size_t i = 0; i < primary_qps.size(); i++)
       {
         unsigned int patch_size = 1;

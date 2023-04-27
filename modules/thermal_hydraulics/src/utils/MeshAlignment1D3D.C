@@ -90,7 +90,7 @@ MeshAlignment1D3D::buildCoupledElemQpIndexMap(Assembly & assembly)
         const std::vector<Point> secondary_qps = assembly.qPointsFace().stdVector();
 
         _secondary_elem_id_to_qp_indices[secondary_elem_id].resize(secondary_qps.size());
-        KDTree kd_tree_qp(primary_qps, 5);
+        KDTree kd_tree_qp(primary_qps, _mesh.getMaxLeafSize());
         for (std::size_t i = 0; i < secondary_qps.size(); i++)
         {
           unsigned int patch_size = 1;
