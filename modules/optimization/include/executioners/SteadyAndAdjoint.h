@@ -22,11 +22,21 @@ public:
 
   SteadyAndAdjoint(const InputParameters & parameters);
 
+  /**
+   * This call is basically a copy from Steady without the AMR loop. The difference is a call to the
+   * adjoint solver after the fixed point solver
+   *
+   */
   virtual void execute() override;
 
+  /**
+   * Copy of the functionality from Steady to keep track of whether the latest solve converged
+   */
   virtual bool lastSolveConverged() const override { return _last_solve_converged; }
 
 protected:
+  /// The solver which computes the adjoint system. This is where the real magic happens,
+  /// so it is recommended to look into this object to understand the algorithm.
   AdjointSolve _adjoint_solve;
 
 private:

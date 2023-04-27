@@ -59,6 +59,8 @@ AdjointSolve::solve()
     return false;
   }
 
+  checkIntegrity();
+
   // Convenient references
   // Adjoint matrix, solution, and right-hand-side
   auto & matrix = dynamic_cast<ImplicitSystem *>(&_nl_forward.system())->get_system_matrix();
@@ -147,4 +149,15 @@ AdjointSolve::applyNodalBCs(SparseMatrix<Number> & matrix,
       mooseError("Using PETSc matrices and vectors is required for applying homogenized boundary "
                  "conditions.");
   }
+}
+
+void
+AdjointSolve::checkIntegrity()
+{
+  // Main thing is that the number of dofs in each system is the same
+  if (_nl_forward.system().n_dofs() != _nl_adjoint.system().n_dofs())
+    mooseError(
+        "The forward and adjoint systems do not seem to be the same size. This could be due to (1) "
+        "the number of variables added to each system is not the same, (2) variables do not have "
+        "consistent family/order, (3) variables do not have the same block restriction.");
 }
