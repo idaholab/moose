@@ -570,7 +570,8 @@ Simulation::addRelationshipManagers()
     const std::string class_name = "AugmentSparsityBetweenElements";
     auto params = _thm_factory.getValidParams(class_name);
     params.set<Moose::RelationshipManagerType>("rm_type") =
-        Moose::RelationshipManagerType::ALGEBRAIC | Moose::RelationshipManagerType::GEOMETRIC;
+        Moose::RelationshipManagerType::COUPLING | Moose::RelationshipManagerType::ALGEBRAIC |
+        Moose::RelationshipManagerType::GEOMETRIC;
     params.set<std::string>("for_whom") = _fe_problem.name();
     params.set<MooseMesh *>("mesh") = &_thm_mesh;
     params.set<std::map<dof_id_type, std::vector<dof_id_type>> *>("_elem_map") =

@@ -17,7 +17,6 @@
 \s+hx:secondary
 \s+inlet
 \s+outlet"
-    mesh_mode = 'replicated'
   []
 
   [err.no_smp]

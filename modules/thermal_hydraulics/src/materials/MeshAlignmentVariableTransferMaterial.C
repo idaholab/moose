@@ -7,32 +7,26 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "VariableValueTransferMaterial.h"
+#include "MeshAlignmentVariableTransferMaterial.h"
 #include "SubProblem.h"
 #include "SystemBase.h"
-#include "NearestNodeLocator.h"
-#include "PenetrationLocator.h"
 #include "Assembly.h"
 #include "ADUtils.h"
 #include "MooseVariableBase.h"
+#include "MeshAlignment.h"
 
 #include "libmesh/node.h"
 #include "libmesh/elem.h"
 
-registerMooseObject("ThermalHydraulicsApp", VariableValueTransferMaterial);
+registerMooseObject("ThermalHydraulicsApp", MeshAlignmentVariableTransferMaterial);
 
 InputParameters
-VariableValueTransferMaterial::validParams()
+MeshAlignmentVariableTransferMaterial::validParams()
 {
   InputParameters params = Material::validParams();
+
   params.addClassDescription("Creates an AD material property for a variable transferred from the "
                              "boundary of a 2D mesh onto a 1D mesh.");
-  params.addRequiredParam<BoundaryName>(
-      "secondary_boundary",
-      "The boundary coincident with the 1D domain block that we are transferring data to (e.g. the "
-      "block this material is executing on).");
-  params.addRequiredParam<BoundaryName>("primary_boundary",
-                                        "The boundary of the 2D structure  to get the value from.");
 
   // Have to use std::string to circumvent block restrictable testing
   params.addRequiredParam<std::string>("paired_variable", "The variable to get the value of.");
@@ -40,50 +34,45 @@ VariableValueTransferMaterial::validParams()
       "property_name",
       "The name of the material property that will be "
       "declared that will represent the transferred variable.");
+  params.addRequiredParam<MeshAlignment *>("_mesh_alignment", "Mesh alignment object");
   return params;
 }
 
-VariableValueTransferMaterial::VariableValueTransferMaterial(const InputParameters & parameters)
+MeshAlignmentVariableTransferMaterial::MeshAlignmentVariableTransferMaterial(
+    const InputParameters & parameters)
   : Material(parameters),
-    _penetration_locator(getPenetrationLocator(getParam<BoundaryName>("primary_boundary"),
-                                               getParam<BoundaryName>("secondary_boundary"),
-                                               Order(FIRST))),
-    _nearest_node(_penetration_locator._nearest_node),
     _nl_sys(_subproblem.systemBaseNonlinear()),
     _serialized_solution(_nl_sys.currentSolution()),
     _paired_variable(
         _subproblem
             .getVariable(_tid, getParam<std::string>("paired_variable"), Moose::VAR_NONLINEAR)
             .number()),
+    _mesh_alignment(*getParam<MeshAlignment *>("_mesh_alignment")),
     _prop(declareADProperty<Real>(getParam<MaterialPropertyName>("property_name"))),
     _phi(_assembly.fePhi<Real>(FEType(FIRST, LAGRANGE)))
 {
-  _penetration_locator.setCheckWhetherReasonable(false);
-
-  mooseDeprecated("VariableValueTransferMaterial is deprecated. Use "
-                  "MeshAlignmentVariableTransferMaterial instead.");
 }
 
 void
-VariableValueTransferMaterial::computeProperties()
+MeshAlignmentVariableTransferMaterial::computeProperties()
 {
-  std::vector<ADReal> T_w_nodal_values;
+  std::vector<ADReal> nodal_values;
   for (const auto i : _current_elem->node_index_range())
   {
-    const Node & nd = _current_elem->node_ref(i);
+    const Node & node = _current_elem->node_ref(i);
 
     // Assumes the variable you are coupling to is from the nonlinear system for now.
-    const Node * const nearest = _nearest_node.nearestNode(nd.id());
-    mooseAssert(nearest, "I do not have the nearest node for you");
-    const auto dof_number = nearest->dof_number(_nl_sys.number(), _paired_variable, 0);
-    T_w_nodal_values.push_back((*_serialized_solution)(dof_number));
-    Moose::derivInsert(T_w_nodal_values.back().derivatives(), dof_number, 1.);
+    const auto coupled_node_id = _mesh_alignment.getCoupledNodeID(node.id());
+    const Node * const coupled_node = _mesh.nodePtr(coupled_node_id);
+    const auto dof_number = coupled_node->dof_number(_nl_sys.number(), _paired_variable, 0);
+    nodal_values.push_back((*_serialized_solution)(dof_number));
+    Moose::derivInsert(nodal_values.back().derivatives(), dof_number, 1.0);
   }
 
   for (const auto qp : make_range(_qrule->n_points()))
   {
     _prop[qp] = 0;
     for (const auto i : _current_elem->node_index_range())
-      _prop[qp] += T_w_nodal_values[i] * _phi[i][qp];
+      _prop[qp] += nodal_values[i] * _phi[i][qp];
   }
 }

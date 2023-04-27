@@ -55,7 +55,7 @@ HeatStructure2DCoupler::addMooseObjects()
     params.set<NonlinearVariableName>("variable") = HeatConductionModel::TEMPERATURE;
     params.set<std::string>("coupled_variable") = HeatConductionModel::TEMPERATURE;
     params.set<std::vector<BoundaryName>>("boundary") = {_hs_boundaries[i]};
-    params.set<MeshAlignment2D2D *>("_mesh_alignment") = &_mesh_alignment;
+    params.set<MeshAlignment *>("_mesh_alignment") = &_mesh_alignment;
     params.set<FunctionName>("heat_transfer_coefficient") =
         getParam<FunctionName>("heat_transfer_coefficient");
     params.set<Real>("coupling_area_fraction") = _coupling_area_fractions[i];

@@ -75,7 +75,7 @@ HeatStructure2DRadiationCouplerRZ::check() const
     logError("The primary and secondary boundaries must be aligned.");
 
   if (hasComponentByName<HeatStructureBase>(_hs_names[0]) &&
-      hasComponentByName<HeatStructureBase>(_hs_names[1]) && !constMesh().isDistributedMesh())
+      hasComponentByName<HeatStructureBase>(_hs_names[1]))
   {
     const HeatStructureBase & primary_hs = getComponentByName<HeatStructureBase>(_hs_names[0]);
     const HeatStructureBase & secondary_hs = getComponentByName<HeatStructureBase>(_hs_names[1]);
@@ -106,7 +106,7 @@ HeatStructure2DRadiationCouplerRZ::addMooseObjects()
     params.set<NonlinearVariableName>("variable") = HeatConductionModel::TEMPERATURE;
     params.set<std::string>("coupled_variable") = HeatConductionModel::TEMPERATURE;
     params.set<std::vector<BoundaryName>>("boundary") = {_hs_boundaries[i]};
-    params.set<MeshAlignment2D2D *>("_mesh_alignment") = &_mesh_alignment;
+    params.set<MeshAlignment *>("_mesh_alignment") = &_mesh_alignment;
     params.set<Real>("emissivity") = _emissivities[i];
     params.set<Real>("coupled_emissivity") = _emissivities[j];
     params.set<Real>("view_factor") = _view_factors[i];

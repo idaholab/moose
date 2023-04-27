@@ -11,7 +11,7 @@
 
 #include "ADIntegratedBC.h"
 
-class MeshAlignment2D2D;
+class MeshAlignment;
 
 /**
  * Base class for BC for components derived from HeatStructure2DCouplerBase
@@ -30,7 +30,7 @@ protected:
   /// Variable number of the variable to transfer
   const unsigned int _coupled_variable_number;
   /// Mesh alignment object
-  const MeshAlignment2D2D & _mesh_alignment;
+  MeshAlignment & _mesh_alignment;
 
   /// Nonlinear system
   const SystemBase & _nl_sys;

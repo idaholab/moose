@@ -10,7 +10,7 @@
 #pragma once
 
 #include "BoundaryBase.h"
-#include "MeshAlignment2D2D.h"
+#include "MeshAlignment.h"
 #include "HeatStructureBase.h"
 
 /**
@@ -22,6 +22,7 @@ public:
   HeatStructure2DCouplerBase(const InputParameters & parameters);
 
 protected:
+  virtual void setupMesh() override;
   virtual void init() override;
   virtual void check() const override;
 
@@ -31,7 +32,7 @@ protected:
   const std::vector<BoundaryName> _hs_boundaries;
 
   /// Mesh alignment
-  MeshAlignment2D2D _mesh_alignment;
+  MeshAlignment _mesh_alignment;
   /// Flag for each heat structure being HeatStructurePlate
   std::vector<bool> _is_plate;
   /// Flag for each heat structure deriving from HeatStructureCylindricalBase
