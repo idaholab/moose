@@ -52,8 +52,8 @@ Since the mesh generators understand the pin or assembly pattern, IDs can be app
 
 Supports other numbering schemes:
 
-- [!param](/Mesh/PatternedHexMeshGenerator/assign_type) = `pattern`: Assign IDs based on the ID of the input file component as listed in the pattern
-- [!param](/Mesh/PatternedHexMeshGenerator/assign_type) = `manual`: Assign IDs based on a user-defined mapping defined in an array [!param](/Mesh/PatternedHexMeshGenerator/id_pattern)
+- [!param](/Mesh/PatternedHexMeshGenerator/assign_type) = `pattern`: Assign IDs identical to the already-provided [!param](/Mesh/PatternedHexMeshGenerator/pattern) array
+- [!param](/Mesh/PatternedHexMeshGenerator/assign_type) = `manual`: Assign IDs based on a user-defined mapping in the optional [!param](/Mesh/PatternedHexMeshGenerator/id_pattern) array, which may differ from the required [!param](/Mesh/PatternedHexMeshGenerator/pattern) array
 
 !media tutorial04_meshing/eeid_assign_type_example.png
        id=tutorial04-eeid_assign_type_example

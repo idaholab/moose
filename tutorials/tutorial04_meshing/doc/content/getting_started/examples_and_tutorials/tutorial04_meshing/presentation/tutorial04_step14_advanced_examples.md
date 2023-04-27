@@ -218,7 +218,7 @@ First, define the regular small fuel pins and place them into the assembly as a 
 
 ## Filling Between Curves using "FillBetweenSidesetsGenerator"
 
-The MSRE 2D lattice case was constructed using the [FillBetweenSidesetsGenerator.md] to connect "quarter" circular pins. First, [ConcentricCircleMeshGenerator.md] (a predecessor of [PolygonConcentricCircleMeshGenerator.md] which has a different set of input options and works only for square pin cells) was used to create two quarter pins. 
+The MSRE 2D lattice case was constructed using the [FillBetweenSidesetsGenerator.md] to connect "quarter" circular pins. First, [ConcentricCircleMeshGenerator.md] (a predecessor of [PolygonConcentricCircleMeshGenerator.md] which has a different set of input options and works only for square pin cells) was used to create two quarter pins.
 
 !row!
 !col small=12 medium=6 large=8
