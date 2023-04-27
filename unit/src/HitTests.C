@@ -486,9 +486,9 @@ TEST(HitTests, RenderCases)
        "foo='why'\n' separate '  'strings?'",
        "foo = 'why separate strings?'",
        0},
-      // WASP-HIT preserves quotes before blank lines as tested below, but blank lines are rendered
-      // prior to the next non-blank node with blank lines that trail all content not being emitted
-      // so a newline was trimmed from the expected output
+  // WASP-HIT preserves quotes before blank lines as tested below, but blank lines are rendered
+  // prior to the next non-blank node with blank lines that trail all content not being emitted
+  // so a newline was trimmed from the expected output
 #ifdef WASP_ENABLED
       {"preserve quotes preceding blankline", "foo = '42'\n\n", "foo = '42'", 0},
 #else
