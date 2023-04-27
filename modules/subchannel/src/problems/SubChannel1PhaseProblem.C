@@ -3050,23 +3050,6 @@ SubChannel1PhaseProblem::initializeSolution()
       auto * node_out = _subchannel_mesh.getChannelNode(i_ch, iz);
       auto * node_in = _subchannel_mesh.getChannelNode(i_ch, iz - 1);
       _mdot_soln->set(node_out, (*_mdot_soln)(node_in));
-      _h_soln->set(node_out, (*_h_soln)(node_in));
-    }
-  }
-  for (unsigned int iz = last_node; iz > first_node - 1; iz--)
-  {
-    for (unsigned int i_ch = 0; i_ch < _n_channels; i_ch++)
-    {
-      auto * node_bottom = _subchannel_mesh.getChannelNode(i_ch, iz - 1);
-      auto * node_top = _subchannel_mesh.getChannelNode(i_ch, iz - 1);
-      _P_soln->set(node_bottom, (*_P_soln)(node_top));
-    }
-  }
-  for (unsigned int iz = first_node + 1; iz < last_node + 1; iz++)
-  {
-    for (unsigned int i_gap = 0; i_gap < _n_gaps; i_gap++)
-    {
-      _Wij(i_gap, iz) = _Wij(i_gap, iz - 1);
     }
   }
 }
@@ -3075,6 +3058,9 @@ void
 SubChannel1PhaseProblem::externalSolve()
 {
   _console << "Executing subchannel solver\n";
+  initializeSolution();
+  if (_verbose_subchannel)
+    _console << "Solution initialized" << std::endl;
   auto P_error = 1.0;
   unsigned int P_it = 0;
   unsigned int P_it_max;
@@ -3086,12 +3072,7 @@ SubChannel1PhaseProblem::externalSolve()
 
   if ((_n_blocks == 1) && (_segregated_bool))
     P_it_max = 5;
-  if (!_segregated_bool)
-  {
-    initializeSolution();
-    if (_verbose_subchannel)
-      _console << "Solution initialized" << std::endl;
-  }
+
   while ((P_error > _P_tol && P_it < P_it_max))
   {
     P_it += 1;
