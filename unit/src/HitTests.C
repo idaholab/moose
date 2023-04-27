@@ -202,7 +202,12 @@ TEST(HitTests, ParseFields)
       {"float1", "foo=4.2", "foo", "4.2", hit::Field::Kind::Float},
       {"float2", "foo=.42", "foo", ".42", hit::Field::Kind::Float},
       {"float3", "foo=1e10", "foo", "1e10", hit::Field::Kind::Float},
-      {"float4", "foo=e-23", "foo", "e-23", hit::Field::Kind::Float},
+      {"float4", "foo=e-23", "foo", "e-23", // why do we even support this?
+#ifdef WASP_ENABLED
+      hit::Field::Kind::String},
+#else
+      hit::Field::Kind::Float},
+#endif
       {"float5", "foo=12.345e+67", "foo", "12.345e+67", hit::Field::Kind::Float},
       {"bool-true1", "foo=true", "foo", "true", hit::Field::Kind::Bool},
       {"bool-true2", "foo=yes", "foo", "yes", hit::Field::Kind::Bool},
@@ -331,7 +336,11 @@ TEST(HitTests, BraceExpressions)
        "     }",
        "foo",
        "42",
+#ifdef WASP_ENABLED
+       hit::Field::Kind::Int},
+#else
        hit::Field::Kind::String},
+#endif
       {"fparse", "foo=${fparse 40 + 2}\n", "foo", "42", hit::Field::Kind::Float},
       {"fparse-dep-chain",
        "foo=${fparse 42} bar=${fparse foo}",
