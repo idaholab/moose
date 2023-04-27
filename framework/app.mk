@@ -410,7 +410,6 @@ endif
 # Write .AppName resource file
 writeredotsource := $(shell $(FRAMEWORK_DIR)/scripts/write_dotresource_file.py $(APPLICATION_DIR)/$(APPLICATION_NAME) \
                     $(libmesh_CXXFLAGS) \
-                    install=$(want_exec) \
                     compiler_type=$(compilertype) \
                     documentation=$(DOCUMENTATION))
 
@@ -518,7 +517,6 @@ $(bindst): $(app_EXEC) $(copy_input_targets) install_$(APPLICATION_NAME)_docs $(
 	@$(eval libnames := $(foreach lib,$(applibs),$(shell grep "dlname='.*'" $(lib) 2>/dev/null | sed -E "s/dlname='(.*)'/\1/g")))
 	@$(eval libpaths := $(foreach lib,$(applibs),$(dir $(lib))$(shell grep "dlname='.*'" $(lib) 2>/dev/null | sed -E "s/dlname='(.*)'/\1/g")))
 	@for lib in $(libpaths); do $(call patch_relink,$@,$$lib,$$(basename $$lib)); done
-	@cp $(APPLICATION_DIR)/.$(APPLICATION_NAME) $(bin_install_dir)
 
 ifeq ($(want_exec),yes)
 install_bin: $(bindst)

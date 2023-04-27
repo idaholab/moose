@@ -49,13 +49,28 @@ def get_parts(parts_list):
 
 def main(args):
     """
-    parse incoming args, then write to file.
+    parse incoming args, then update file.
     """
     file_name = f'.{os.path.basename(args[1])}'
     file_path = os.path.dirname(args[1])
-    yaml_contents = get_parts(args[1:])
-    with open(os.path.join(file_path, file_name), 'w', encoding='utf-8') as stream:
-        yaml.dump(yaml_contents, stream, default_flow_style=False)
+    full_path = os.path.join(file_path, file_name)
+    new_parts = get_parts(args[1:])
+    file_attribs = 'w+'
+    if os.path.exists(full_path):
+        file_attribs = 'r+'
+    with open(full_path, file_attribs, encoding='utf-8') as contents:
+        try:
+            _incoming = yaml.safe_load(contents)
+            if isinstance(_incoming, dict):
+                _incoming.update(new_parts)
+            else:
+                _incoming = new_parts
+        # We will overwrite on parse errors
+        except yaml.parser.ParserError:
+            _incoming = new_parts
+        contents.seek(0)
+        contents.truncate()
+        yaml.dump(_incoming, contents, default_flow_style=False)
 
 if __name__ == '__main__':
     sys.exit(main(sys.argv))
