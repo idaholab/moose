@@ -1070,44 +1070,47 @@ ContactAction::createSidesetPairsFromGeometry()
 
   _mesh = &_problem->mesh();
 
+  if (!_mesh)
+    mooseError("Internal error in contact action.");
+
+  if (!_mesh->getMesh().is_serial())
+    paramError(
+        "nodeset_list",
+        "The generation of automatic contact pairs in the contact action requires a serial mesh.");
+
   // Compute centers of gravity for each nodeset
   std::vector<std::pair<BoundaryName, Point>> nodeset_list_cog;
 
-  if (_mesh)
+  const auto & nodeset_ids = _mesh->meshNodesetIds();
+
+  // Loop over nodesets
+  for (const auto & nodeset_id : _nodeset_list)
   {
-    const auto & nodeset_ids = _mesh->meshNodesetIds();
+    // If the nodeset provided in the input file isn't in the mesh, error out.
+    const auto find_set = nodeset_ids.find(_mesh->getBoundaryID(nodeset_id));
+    if (find_set == nodeset_ids.end())
+      paramError("nodeset_list",
+                 "The nodeset ",
+                 nodeset_id,
+                 " provided for the contact action is not in the mesh. "
+                 "Please revise your input file.");
 
-    // Loop over sidesets
-    for (const auto & nodeset_id : _nodeset_list)
+    // Accumulate components for center of gravity computations
+    Point cog(0.0, 0.0, 0.0);
+    std::vector<dof_id_type> nodelist = _mesh->getNodeList(_mesh->getBoundaryID(nodeset_id));
+
+    for (const auto & it : nodelist)
     {
-      // If the nodeset provided in the input file isn't in the mesh, error out.
-      const auto find_set = nodeset_ids.find(_mesh->getBoundaryID(nodeset_id));
-      if (find_set == nodeset_ids.end())
-        paramError("nodeset_list",
-                   "The nodeset ",
-                   nodeset_id,
-                   " provided for the contact action is not in the mesh. "
-                   "Please revise your input file.");
-
-      // Accumulate components for center of gravity computations
-      Point cog(0.0, 0.0, 0.0);
-      std::vector<dof_id_type> nodelist = _mesh->getNodeList(_mesh->getBoundaryID(nodeset_id));
-
-      for (const auto & it : nodelist)
-      {
-        const Node * const node = _mesh->queryNodePtr(it);
-        cog += *node;
-      }
-
-      cog(0) /= nodelist.size();
-      cog(1) /= nodelist.size();
-      cog(2) /= nodelist.size();
-
-      nodeset_list_cog.emplace_back(nodeset_id, cog);
+      const Node * const node = _mesh->queryNodePtr(it);
+      cog += *node;
     }
+
+    cog(0) /= nodelist.size();
+    cog(1) /= nodelist.size();
+    cog(2) /= nodelist.size();
+
+    nodeset_list_cog.emplace_back(nodeset_id, cog);
   }
-  else
-    mooseError("Mesh is not available for automatic generation of pairs in the contact action");
 
   // Vectors of distances for each pair
   std::vector<std::pair<std::pair<BoundaryName, BoundaryName>, Real>> pairs_distances;
@@ -1134,7 +1137,7 @@ ContactAction::createSidesetPairsFromGeometry()
       minimum_representative_distance = pair_distance.second;
 
   // Apply a tolerance to the minimum distance to avoid missing pairs
-  minimum_representative_distance *= 1.1;
+  minimum_representative_distance *= 1.3;
 
   mooseInfo("Reference distance between bodies for automatically assigning contact pairs in "
             "contact action is: ",
@@ -1144,8 +1147,16 @@ ContactAction::createSidesetPairsFromGeometry()
   // and less than the threshold distance
   std::vector<std::pair<std::pair<BoundaryName, BoundaryName>, Real>> lean_pairs_distances;
   for (const auto & pair_distance : pairs_distances)
-    if (pair_distance.second > TOLERANCE || pair_distance.second < minimum_representative_distance)
+    if (pair_distance.second > TOLERANCE && pair_distance.second < minimum_representative_distance)
+    {
       lean_pairs_distances.emplace_back(pair_distance);
+      mooseInfoRepeated("Generating contact pair ",
+                        pair_distance.first.first,
+                        "--",
+                        pair_distance.first.second,
+                        ", with a relative distance of ",
+                        pair_distance.second);
+    }
 
   // Create the boundary pairs (possibly with repeated pairs depending on user input)
   for (const auto & lean_pairs_distance : lean_pairs_distances)
