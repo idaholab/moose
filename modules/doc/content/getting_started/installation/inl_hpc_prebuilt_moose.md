@@ -101,7 +101,7 @@ scp <your hpc user id>@hpclogin:~/projects/moose/examples/ex01_inputfile/ex01_ou
 
 !style! halign=left
 Continue on to see more examples and tuturials using MOOSE! However, most of the next section is
-geared towards building your own application.
+geared towards developing your own application.
 !style-end!
 
 !content pagination use_title=True

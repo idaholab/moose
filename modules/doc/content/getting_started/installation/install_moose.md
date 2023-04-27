@@ -8,6 +8,8 @@
 
 ## Compile and Test MOOSE
 
+!template load file=installation/build_moose.md.template PATH=~/projects
+
 !template load file=installation/test_moose.md.template PATH=~/projects
 
 If the installation was successful you should see most of the tests passing (some tests will be
