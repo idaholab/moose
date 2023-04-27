@@ -51,17 +51,10 @@ From: {{ APPTAINER_FROM }}
     MOOSE_TEST_TOOLS_VERSION={{ MOOSE_TEST_TOOLS_VERSION }}
     CONDA_ALT_CHANNEL={{ CONDA_ALT_CHANNEL }}
     export MOOSE_JOBS={{ MOOSE_JOBS }}
-    export WASP_DIR={{ WASP_DIR }}
 
     # Pinned versions
     MAMBAFORGE_VERSION=23.1.0-1
     PYTHON_VERSION=3.10
-
-    # Build and install wasp
-    cd ${ROOT_BUILD_DIR}/moose
-    ./scripts/update_and_rebuild_wasp.sh -D CMAKE_INSTALL_PREFIX:STRING=${WASP_DIR}
-    cd ..
-    rm -rf moose
 
     # Install mamba in MOOSE_MAMBAFORGE
     curl -L https://github.com/conda-forge/miniforge/releases/download/${MAMBAFORGE_VERSION}/Mambaforge-${MAMBAFORGE_VERSION}-Linux-x86_64.sh -o ${ROOT_BUILD_DIR}/mambaforge.sh
@@ -92,11 +85,18 @@ From: {{ APPTAINER_FROM }}
     # Other Development container installs
     dnf --enablerepo=powertools install -y lcov doxygen
     pip3 --no-cache install lcov-cobertura
-    # need to add lcov-cobertura
     {%- endif %}
 
     # Few packages needed by apps
     dnf install -y fftw-devel gsl-devel
+
+    # Build and install wasp
+    # This is redundant; hopefully we can use the one from conda in the future
+    export WASP_DIR={{ WASP_DIR }}
+    cd ${ROOT_BUILD_DIR}/moose
+    ./scripts/update_and_rebuild_wasp.sh -D CMAKE_INSTALL_PREFIX:STRING=${WASP_DIR}
+    cd ..
+    rm -rf moose
 
     # Clean up
     conda clean -ya
