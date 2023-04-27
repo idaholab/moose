@@ -40,7 +40,7 @@ hit_CONTENT   := $(shell ls $(HIT_DIR) 2> /dev/null)
 ifeq ($(hit_CONTENT),)
   $(error The HIT input file parser does not seem to be available. If set, make sure the HIT_DIR environment variable is set to the correct location of your HIT parser.)
 endif
-hit_srcfiles  := $(HIT_DIR)/parse.cc $(HIT_DIR)/lex.cc $(HIT_DIR)/braceexpr.cc
+hit_srcfiles  := $(HIT_DIR)/parse.cc $(HIT_DIR)/lex.cc $(HIT_DIR)/braceexpr.cc $(HIT_DIR)/wasp_braceexpr.cc
 hit_objects   := $(patsubst %.cc, %.$(obj-suffix), $(hit_srcfiles))
 hit_LIB       := $(HIT_DIR)/libhit-$(METHOD).la
 # dependency files
@@ -52,30 +52,35 @@ hit_CLI          := $(HIT_DIR)/hit
 #
 # hit python bindings
 #
-pyhit_srcfiles  := $(HIT_DIR)/hit.cpp $(HIT_DIR)/lex.cc $(HIT_DIR)/parse.cc $(HIT_DIR)/braceexpr.cc
+pyhit_srcfiles  := $(HIT_DIR)/hit.cpp $(HIT_DIR)/lex.cc $(HIT_DIR)/parse.cc $(HIT_DIR)/braceexpr.cc $(HIT_DIR)/wasp_braceexpr.cc
+
+#
+# Dynamic library suffix
+#
+lib_suffix := so
+ifeq ($(UNAME_S),Darwin)
+	lib_suffix := dylib
+endif
 
 #
 # wasp hit, which can override hit
 #
-WASP_DIR      ?= $(MOOSE_DIR)/framework/contrib/wasp/install
-wasp_CONTENT  := $(shell ls $(WASP_DIR) 2> /dev/null)
-ifneq ($(wasp_CONTENT),)
-	libmesh_CXXFLAGS += -DWASP_ENABLED
-	hit_srcfiles     += $(HIT_DIR)/wasp_braceexpr.cc
-	pyhit_srcfiles   += $(HIT_DIR)/wasp_braceexpr.cc
-	wasp_incfiles    := $(WASP_DIR)/include
-	wasp_LIB         := $(wildcard $(WASP_DIR)/lib/*wasp*) -Wl,-rpath,$(WASP_DIR)/lib
+WASP_DIR            ?= $(MOOSE_DIR)/framework/contrib/wasp/install
+wasp_LIBS           := libwaspcore libwasphit
+wasp_LIBS           := $(foreach libname,$(wasp_LIBS),$(WASP_DIR)/lib/$(libname).$(lib_suffix))
+ifneq ($(wildcard $(firstword $(wasp_LIBS))),)
+	libmesh_CXXFLAGS  += -DWASP_ENABLED
+	wasp_incfiles     := $(WASP_DIR)/include
+	libmesh_LDFLAGS   += -Wl,-rpath,$(WASP_DIR)/lib
+else
+	wasp_LIBS         :=
 endif
 
 #
 # Conditional parts if the user wants to compile MOOSE with torchlib
 #
 ifeq ($(ENABLE_LIBTORCH),true)
-  UNAME_S := $(shell uname -s)
-	LIBTORCH_LIB := libtorch.so
-  ifeq ($(UNAME_S),Darwin)
-    LIBTORCH_LIB := libtorch.dylib
-  endif
+	LIBTORCH_LIB := libtorch.$(lib_suffix)
 
   ifneq ($(wildcard $(LIBTORCH_DIR)/lib/$(LIBTORCH_LIB)),)
     # Enabling parts that have pytorch dependencies
@@ -216,7 +221,7 @@ moose_INCLUDE  := $(foreach i, $(moose_INC_DIRS), -I$(i))
 # Making a .la object instead.  This is what you make out of .lo objects...
 moose_LIB := $(FRAMEWORK_DIR)/libmoose-$(METHOD).la
 
-moose_LIBS := $(moose_LIB) $(pcre_LIB) $(hit_LIB) $(wasp_LIB)
+moose_LIBS := $(moose_LIB) $(pcre_LIB) $(hit_LIB) $(wasp_LIBS)
 
 ### Unity Build ###
 ifeq ($(MOOSE_UNITY),true)
@@ -374,10 +379,10 @@ $(gtest_LIB): $(gtest_objects)
 $(hit_LIB): $(hit_objects)
 	@echo "Linking Library "$@"..."
 	@$(libmesh_LIBTOOL) --tag=CC $(LIBTOOLFLAGS) --mode=link --quiet \
-	  $(libmesh_CXX) $(CXXFLAGS) $(libmesh_CXXFLAGS) -o $@ $(hit_objects) $(libmesh_LDFLAGS) $(libmesh_LIBS) $(EXTERNAL_FLAGS) -rpath $(HIT_DIR)
+	  $(libmesh_CXX) $(CXXFLAGS) $(libmesh_CXXFLAGS) -o $@ $(hit_objects) $(libmesh_LDFLAGS) $(libmesh_LIBS) $(wasp_LIBS) $(EXTERNAL_FLAGS) -rpath $(HIT_DIR)
 	@$(libmesh_LIBTOOL) --mode=install --quiet install -c $(hit_LIB) $(HIT_DIR)
 
-$(moose_LIB): $(moose_objects) $(pcre_LIB) $(gtest_LIB) $(hit_LIB) $(pyhit_LIB)
+$(moose_LIB): $(moose_objects) $(pcre_LIB) $(gtest_LIB)
 	@echo "Linking Library "$@"..."
 	@$(libmesh_LIBTOOL) --tag=CXX $(LIBTOOLFLAGS) --mode=link --quiet \
 	  $(libmesh_CXX) $(CXXFLAGS) $(libmesh_CXXFLAGS) -o $@ $(moose_objects) $(pcre_LIB) $(png_LIB) $(libmesh_LDFLAGS) $(libmesh_LIBS) $(EXTERNAL_FLAGS) -rpath $(FRAMEWORK_DIR)
@@ -497,7 +502,7 @@ libpath_pcre = $(MOOSE_DIR)/framework/contrib/pcre/$(libname_pcre)
 
 # Set up app-specific variables for MOOSE, so that it can use the same clean target as the apps
 app_EXEC := $(exodiff_APP)
-app_LIB  := $(moose_LIBS) $(pcre_LIB) $(gtest_LIB) $(hit_LIB) $(pyhit_LIB) $(wasp_LIB)
+app_LIB  := $(moose_LIBS) $(pcre_LIB) $(gtest_LIB) $(hit_LIB) $(pyhit_LIB) $(wasp_LIBS)
 app_objects := $(moose_objects) $(exodiff_objects) $(pcre_objects) $(gtest_objects) $(hit_objects)
 app_deps := $(moose_deps) $(exodiff_deps) $(pcre_deps) $(gtest_deps) $(hit_deps)
 
