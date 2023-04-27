@@ -58,7 +58,7 @@ pyhit_srcfiles  := $(HIT_DIR)/hit.cpp $(HIT_DIR)/lex.cc $(HIT_DIR)/parse.cc $(HI
 # Dynamic library suffix
 #
 lib_suffix := so
-ifeq ($(UNAME_S),Darwin)
+ifeq ($(shell uname -s),Darwin)
 	lib_suffix := dylib
 endif
 
