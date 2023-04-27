@@ -108,7 +108,7 @@ MultiAppGeneralFieldTransfer::validParams()
       "allows for interpolation between origin app meshes. Origin app bounding boxes are still "
       "considered so you may want to increase them with 'fixed_bounding_box_size'");
   params.addParam<bool>("search_value_conflicts",
-                        false,
+                        true,
                         "Whether to look for potential conflicts between two valid and different "
                         "source values for any target point");
 
