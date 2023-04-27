@@ -26,7 +26,7 @@
   [checked_pointer_param_test]
     type = 'RunException'
     input = 'checked_pointer_param_test.i'
-    expect_err = "checked_pointer_param_test.i:3.2: syntax error, unexpected invalid token, expecting ="
+    expect_err = "(checked_pointer_param_test.i:3.2: syntax error, unexpected invalid token, expecting =|checked_pointer_param_test.i:3: expected '=' after parameter name 'x', got '\[')"
     requirement = 'The system shall report an error when a null pointer-checked parameter is retrieved from the InputParameters object.'
     issues = '#10356'
   []
