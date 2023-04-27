@@ -1,0 +1,41 @@
+[Tests]
+  design = 'AdjointSolutionUserObject.md'
+  issues = '#22215'
+
+  [adjoint_solution]
+    requirement = 'The system shall be able to load a time-dependent solution from an exodus file while reversing the timesteps by'
+    [forward]
+      type = CheckFiles
+      input = forward.i
+      check_files = 'forward_out.e'
+      detail = 'producing the exodus file;'
+    []
+    [reverse]
+      type = RunApp
+      input = adjoint.i
+      prereq = adjoint_solution/forward
+      detail = 'loading on to the same mesh;'
+    []
+    [reverse_space_interp]
+      type = RunApp
+      input = adjoint.i
+      cli_args = 'Mesh/gmg/nx=5'
+      prereq = adjoint_solution/forward
+      detail = 'loading on to a coarser mesh;'
+    []
+    [reverse_time_interp]
+      type = RunApp
+      input = adjoint.i
+      cli_args = 'Executioner/dt=1.25 Functions/u_reverse_fun/expression="(x + y) * (11.25 - t)"'
+      prereq = adjoint_solution/forward
+      detail = 'interpolating different time steps;'
+    []
+    [error_file_format]
+      type = RunException
+      input = adjoint.i
+      cli_args = 'UserObjects/u_reverse_solution/mesh=forward_out.xda'
+      expect_err = 'Performing transient adjoint simulation currently only works if the forward solution is written and read from exodus format.'
+      detail = 'erroring if file is not exodus;'
+    []
+  []
+[]

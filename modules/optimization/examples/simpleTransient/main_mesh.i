@@ -53,6 +53,6 @@
   solve_on = none
   tao_solver = taolmvm
   petsc_options_iname = '-tao_gatol -tao_ls_type'
-  petsc_options_value = '1e-3 unit'
+  petsc_options_value = '1e-2 unit'
   verbose = true
 []
