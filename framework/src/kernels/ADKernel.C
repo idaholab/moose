@@ -127,6 +127,8 @@ ADKernelTempl<T>::computeResidual()
       for (_i = 0; _i < _test.size(); _i++)
         residuals[_i] += raw_value(_JxW[_qp] * _coord[_qp] * computeQpResidual());
 
+  accumulateAbsolueValueLocalResidual(residuals);
+
   _assembly.processResiduals(residuals, _var.dofIndices(), _vector_tags, _var.scalingFactor());
 
   if (_has_save_in)

@@ -109,6 +109,13 @@ public:
   void accumulateTaggedLocalResidual();
 
   /**
+   * Local residual blocks  will be appended by adding the absolute value of the  current local
+   * kernel residual. It should be called after the local element vector has been computed.
+   */
+  void accumulateAbsolueValueLocalResidual(const std::vector<Real> & local_re);
+  void accumulateAbsolueValueLocalResidual(const DenseVector<Number> & local_re);
+
+  /**
    * Local residual blocks will assigned as the current local kernel residual.
    * It should be called after the local element vector has been computed.
    */
