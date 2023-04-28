@@ -42,8 +42,8 @@ A second set of mesh generators (Reactor Geometry Mesh Builder mesh generators) 
 - Three modes are available to discretize the hexagon:
 
   - +TRI+: 6 triangles (default)
-  - +QUAD+: 2 quadrilateral
-  - +HYBRID+: 6 triangles + 6 \* layer number quadrilateral per assembly
+  - +QUAD+: 2 quadrilateral elements
+  - +HYBRID+: 6 triangles + 6 \* number of layers of quadrilateral elements
 
 !row!
 !col small=12 medium=6 large=8
@@ -73,18 +73,17 @@ A second set of mesh generators (Reactor Geometry Mesh Builder mesh generators) 
 - Optional background and duct regions
 
 - When generating an assembly mesh using [PatternedHexMeshGenerator.md], be sure to set [!param](/Mesh/PatternedHexMeshGenerator/generate_core_metadata) as `false`
-- When generating an assembly mesh, [PolygonConcentricCircleMeshGenerator.md]objects which define the hexagonal unit pin cells are generally used as inputs
-- The input pattern will be automatically rotated 90 degrees CCW unless otherwise specified with [!param](/Mesh/PatternedHexMeshGenerator/rotate_angle)
+- Input will be automatically rotated 90 degrees CCW unless specified with [!param](/Mesh/PatternedHexMeshGenerator/rotate_angle)
+- !media tutorial04_meshing/base_ex_phmg_assm.png
+       style=width:50%;display:block;margin-left:auto;margin-right:auto;
 
 !col small=12 medium=6 large=8
 
 !listing base_mesh_generators/common_geo.i
          block=Mesh/pattern_assm
          link=False
-
-!media tutorial04_meshing/base_ex_phmg_assm.png
-
 !row-end!
+
 
 !---
 

@@ -53,8 +53,8 @@ Assemblies are one level higher than pins in the hierarchical lattice geometry s
 - Three modes are available to discretize the hexagon:
 
   - +TRI+: 6 triangles (default)
-  - +QUAD+: 2 quadrilateral
-  - +HYBRID+: 6 triangles + 6 \* layer number quadrilateral per assembly
+  - +QUAD+: 2 quadrilateral elements
+  - +HYBRID+: 6 triangles + 6 \* number of layers of quadrilateral elements
 
 ### Example
 

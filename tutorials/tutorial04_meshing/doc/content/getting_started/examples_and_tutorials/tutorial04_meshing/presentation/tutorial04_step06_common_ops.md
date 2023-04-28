@@ -84,23 +84,23 @@
 
 ## Extrusion to 3D
 
-- [AdvancedExtruderGenerator.md]
-- Extrudes a 1D mesh into 2D, or a 2D mesh into 3D
-- Variable height / number of layers within each elevation
-- Variable growth factors of axial element sizes within each elevation
-- Remap subdomain IDs, boundary IDs and element extra integers within each elevation as well as interface boundaries between neighboring elevation layers.
-- Extrusion may be performed along any direction specified by an $(x,y,z)$ vector. Most common is $(0,0,1)$ (+$z$-direction).
-
 !row!
 !col small=12 medium=6 large=8
 
-!listing base_mesh_generators/common_geo.i
-         block=Mesh/core_ext
-         link=False
+- [AdvancedExtruderGenerator.md]
+- Extrudes a 1D mesh into 2D, or 2D into 3D
+- Variable height / # of layers in each elevation
+- Variable growth factors of axial element sizes within each elevation
+- Remap subdomain IDs, boundary IDs and element EEIDs in each elevation and boundaries between neighboring elevations
+- Extrusion may be performed along any direction specified by an $(x,y,z)$ vector. Most common is $(0,0,1)$ (+$z$-direction).
 
 !col small=12 medium=6 large=4
 
 !media tutorial04_meshing/base_ex_aeg.png
-       style=width:50%;display:block;margin-left:auto;margin-right:auto;
+       style=width:60%;display:block;margin-left:auto;margin-right:auto;
 
 !row-end!
+
+!listing base_mesh_generators/common_geo.i
+         block=Mesh/core_ext
+         link=False

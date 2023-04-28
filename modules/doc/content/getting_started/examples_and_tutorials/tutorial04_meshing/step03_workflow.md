@@ -4,7 +4,7 @@
 
 MOOSE's Mesh System and Reactor Module contains numerous "MeshGenerator" objects which either (a) create a mesh from scratch or (b) perform operations on existing meshes. To create a mesh, the user must define a sequence of MeshGenerator object calls inside the `[Mesh]` block to construct a geometry beginning with the smallest components (pins) and building up to larger components (core). For example, after pins are defined, they can be patterned into an assembly, and assemblies can then be patterned into a core. Application of a peripheral core zone, trimming along symmetry lines and extrusion to 3D are optional in the final steps.
 
-The meshing workflow for a standard reactor core follows the general hierarchical process of identifying key features in the geometry and building them hierarchically in terms of smallest to largest (pins, assemblies, cores, core periphery):
+The meshing workflow for a standard reactor core follows the general hierarchical process of identifying key features in the geometry and building them hierarchically in terms of smallest to largest (pins, assemblies, core, core periphery):
 
 1. Define pins
 2. Define assembly by patterning existing pins into a lattice and adding coolant background and/or duct region
@@ -25,11 +25,22 @@ The `--mesh-only` optional command line parameter executes only the `[Mesh]` blo
 
 When you are satisfied with your mesh input, you may invoke MOOSE without the `--mesh-only` option to execute the entire input file (mesh building and physics input).
 
-Executables of any MOOSE applications that contain the Reactor module in their `Makefile` can also be used, such as Griffin, Sockeye, Pronghorn, and BlueCRAB.
+Executables of any MOOSE applications that contain the Reactor module in their `Makefile` can also be used, such as Griffin, Sockeye, Pronghorn, Cardinal, and BlueCRAB.
 
 ## Visualization with ParaView
 
 The [Exodus](outputs/Exodus.md) output format is the preferred way to write out simulation results from MOOSE simulations. This format is supported by [ParaView](https://www.paraview.org/), [VisIt](https://visit-dav.github.io/visit-website/), and other postprocessing applications. ParaView is most commonly used, but the visualization procedure is similar for other programs.
+
+To save a lot of clicks, the following settings are recommended (in `Edit`->`Settings`):
+
+- +Auto Apply+: Automatically apply changes in the 'Properties' panel
+- +Load All Variables+: Load all variables when loading a data set
+- +Default Time Step+: Go to last timestep
+
+!media tutorial04_meshing/paraview-defaults.png
+       id=tutorial04-paraview-defaults
+       caption=Recommended default settings in ParaView. [!cite](ParaView2005)
+       style=width:50%;display:block;margin-left:auto;margin-right:auto;
 
 To visually inspect a mesh, first load the Exodus output file (ending in `.e`) into ParaView. Select the `Open` button in the top left corner, browse to the Exodus mesh file, click `OK`, and click the `Apply` button in the Properties dialogue in the lower left corner.
 

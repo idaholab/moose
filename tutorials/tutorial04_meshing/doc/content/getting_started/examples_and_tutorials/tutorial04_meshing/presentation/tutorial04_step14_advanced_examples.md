@@ -238,52 +238,117 @@ The MSRE 2D lattice case was constructed using the [FillBetweenSidesetsGenerator
 
 ## Triangulation of Odd-Shaped Regions Using "ParsedCurveGenerator" and "XYDelaunayGenerator"
 
+This example demonstrates how to place a control drum object in an arbitrary position in a core that may overlap subdomain boundaries.
+
+First, the center assembly is created using regular pins and procedures.
+
 !row!
 !col small=12 medium=6 large=8
 
-- This example demonstrates how to place a control drum object in an arbitrary position in a core that may overlap subdomain boundaries.
-
-- First, the center assembly is created using regular pins and procedures.  Two circular peripheral regions are added (yellow, purple zones).
-
-- Next, the complex boundary shape which is the outer edge of the light blue zone is defined using [ParsedCurveGenerator.md] and analytic piecewise functions. The interior of this boundary is then filled in, including the center assembly, using [XYDelaunayGenerator.md].
+!listing adv_examples/pcg_xyd.i
+         block=Mesh/hex_1 Mesh/pattern
+         link=False
 
 !col small=12 medium=6 large=4
 
-!media tutorial04_meshing/adv_ex_pcg_and_xyd.png
+!media tutorial04_meshing/adv_ex_pcg_xy_patterned_pins.png
        style=width:100%;display:block;margin-left:auto;margin-right:auto;
 
 !row-end!
 
-Continued...
-
 !---
+
+## Triangulation of Odd-Shaped Regions (cont.)
+
+Next, two circular peripheral regions are added using [PeripheralTriangleMeshGenerator.md] (yellow, purple zones).
 
 !row!
 !col small=12 medium=6 large=8
 
-- The control drum object is defined including the absorber arc using [PolygonConcentricCircleMeshGenerator.md] and [AzimuthalBlockSplitGenerator.md], then the background region of the control drum is deleted to leave only the circular part. This mesh is then translated into the desired position of the final mesh using [TransformGenerator.md].
-
-- The small red pin in the dark blue zone is defined similarly (not requiring [AzimuthalBlockSplitGenerator.md]).
+!listing adv_examples/pcg_xyd.i
+         block=Mesh/tmg1 Mesh/tmg2
+         link=False
 
 !col small=12 medium=6 large=4
 
-!media tutorial04_meshing/adv_ex_pcg_and_xyd.png
+!media tutorial04_meshing/adv_ex_pcg_xy_patterned_pins_with_rings.png
        style=width:100%;display:block;margin-left:auto;margin-right:auto;
 
 !row-end!
 
-Continued...
-
 !---
+
+## Triangulation of Odd-Shaped Regions (cont.)
+
+Next, the complex boundary shape which is the outer edge of the light blue zone is defined using [ParsedCurveGenerator.md] and analytic piecewise functions. The interior of this boundary is then filled in, including the center assembly, using [XYDelaunayGenerator.md].
 
 !row!
 !col small=12 medium=6 large=8
 
-- The outer boundary of the dark blue zone is then generated using [ParsedCurveGenerator.md] and analytical functions.
+!listing adv_examples/pcg_xyd.i
+         block=Mesh/pcg1 Mesh/xydg1
+         link=False
 
-- [XYDelaunayGenerator.md] is again used to fill the dark blue regions, keeping the light blue region and assembly, control drum, and small pin.
+!col small=12 medium=6 large=4
 
-- Finally, a circular peripheral region is added at the end (yellow).
+!media tutorial04_meshing/adv_ex_pcg_xy_patterned_pins_with_irregular_peripheral_region.png
+       style=width:100%;display:block;margin-left:auto;margin-right:auto;
+
+!row-end!
+
+!---
+
+## Triangulation of Odd-Shaped Regions (cont.)
+
+The control drum object is defined including the absorber arc using [PolygonConcentricCircleMeshGenerator.md] and [AzimuthalBlockSplitGenerator.md], then the background region of the control drum is deleted to leave only the circular part. This mesh is then translated into the desired position of the final mesh using [TransformGenerator.md]. The small red pin is defined similarly (not requiring [AzimuthalBlockSplitGenerator.md]).
+
+!row!
+!col small=12 medium=6 large=8
+
+!listing adv_examples/pcg_xyd.i
+         block=Mesh/cd Mesh/cd_azi_define Mesh/cd_bd Mesh/cd_translate Mesh/outer_pin Mesh/op_bd Mesh/op_translate
+         link=False
+
+!col small=12 medium=6 large=4
+
+!media tutorial04_meshing/adv_ex_pcg_xy_three_holes_for_xyd.png
+       style=width:100%;display:block;margin-left:auto;margin-right:auto;
+
+!row-end!
+
+!---
+
+## Triangulation of Odd-Shaped Regions (cont.)
+
+The outer boundary of the dark blue zone is then generated using [ParsedCurveGenerator.md] and analytical functions. [XYDelaunayGenerator.md] is again used to fill the dark blue regions, keeping the light blue region and assembly, control drum, and small pin.
+
+!row!
+!col small=12 medium=6 large=8
+
+!listing adv_examples/pcg_xyd.i
+         block=Mesh/pcg2 Mesh/xydg2
+         link=False
+
+!col small=12 medium=6 large=4
+
+!media tutorial04_meshing/adv_ex_pcg_xy_second_xyd.png
+       style=width:100%;display:block;margin-left:auto;margin-right:auto;
+
+!row-end!
+
+!---
+
+## Triangulation of Odd-Shaped Regions (cont.)
+
+Finally, a circular peripheral region is added at the end using [PeripheralTriangleMeshGenerator.md] (yellow).
+
+!row!
+!col small=12 medium=6 large=8
+
+
+!listing adv_examples/pcg_xyd.i
+         block=Mesh/tmg3
+         link=False
 
 !col small=12 medium=6 large=4
 
