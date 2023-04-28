@@ -47,6 +47,12 @@ All transfers derived from this base class should be able to support:
 !alert note
 Examine each derived object's respective documentation for feature support.
 
+!alert note
+Floating point equidistance detection is turned on by default and will limit the scalability
+of the transfer. Please set [!param](/Transfers/MultiAppGeneralFieldNearestNodeTransfer/search_value_conflicts)
+to `false` for large cases.
+
+
 ## Features not supported
 
 The following features cannot be supported by general field transfers, as a limitation of

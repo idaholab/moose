@@ -865,6 +865,16 @@ MultiAppGeneralFieldTransfer::outputValueConflicts(
         received_conflict_string);
   }
 
+  if (_local_conflicts.empty() && _received_conflicts.empty())
+  {
+    if (isParamSetByUser("search_value_conflict"))
+      mooseInfo("Automated diagnosis did not detect floating point indetermination in transfer");
+    else if (_to_problems.size() > 10 || _from_problems.size() > 10)
+      mooseInfo("Automated diagnosis did not detect any floating point indetermination in "
+                "transfer. You may consider turning it off using `search_value_conflicts=false` "
+                "to improve performance/scalability.");
+  }
+
   // Reset the conflicts vectors, to be used for checking conflicts when transferring the next
   // variable
   _local_conflicts.clear();
