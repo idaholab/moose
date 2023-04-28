@@ -47,30 +47,38 @@ def get_parts(parts_list):
                                        method)(parts_list)}
     return growing
 
+def update_resource(full_path, parts_dict):
+    """
+    update resource file
+    """
+    with open(full_path, 'r', encoding='utf-8') as stream:
+        try:
+            _old_parts = yaml.safe_load(stream)
+            _old_parts.update(parts_dict)
+        # We will overwrite on parse errors
+        except yaml.parser.ParserError:
+            _old_parts = parts_dict
+    create_resource(full_path, _old_parts)
+
+def create_resource(full_path, parts_dict):
+    """
+    create resource file
+    """
+    with open(full_path, 'w+', encoding='utf-8') as stream:
+        yaml.dump(parts_dict, stream, default_flow_style=False)
+
 def main(args):
     """
     parse incoming args, then update file.
+    Arg1 is path to file to append/create
+    Arg2:* space separate key=value pairs
     """
-    file_name = f'.{os.path.basename(args[1])}'
-    file_path = os.path.dirname(args[1])
-    full_path = os.path.join(file_path, file_name)
-    new_parts = get_parts(args[1:])
-    file_attribs = 'w+'
+    full_path = args[1]
+    new_parts = get_parts(args[2:])
     if os.path.exists(full_path):
-        file_attribs = 'r+'
-    with open(full_path, file_attribs, encoding='utf-8') as contents:
-        try:
-            _incoming = yaml.safe_load(contents)
-            if isinstance(_incoming, dict):
-                _incoming.update(new_parts)
-            else:
-                _incoming = new_parts
-        # We will overwrite on parse errors
-        except yaml.parser.ParserError:
-            _incoming = new_parts
-        contents.seek(0)
-        contents.truncate()
-        yaml.dump(_incoming, contents, default_flow_style=False)
+        update_resource(full_path, new_parts)
+    else:
+        create_resource(full_path, new_parts)
 
 if __name__ == '__main__':
     sys.exit(main(sys.argv))

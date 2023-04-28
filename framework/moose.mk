@@ -444,7 +444,7 @@ moose_share_dir = $(share_dir)/moose
 python_install_dir = $(moose_share_dir)/python
 bin_install_dir = $(PREFIX)/bin
 
-install: all install_libs install_bin install_harness install_exodiff install_adreal_monolith install_hit install_data install_dot_resource
+install: all install_libs install_bin install_harness install_exodiff install_adreal_monolith install_hit install_data
 
 install_data::
 	@mkdir -p $(moose_share_dir)
@@ -480,12 +480,6 @@ install_hit: all
 	@echo "Installing HIT"
 	@mkdir -p $(bin_install_dir)
 	@cp $(MOOSE_DIR)/framework/contrib/hit/hit $(bin_install_dir)/
-
-install_dot_resource:
-	@mkdir -p $(bin_install_dir)
-	@cp $(APPLICATION_DIR)/.$(APPLICATION_NAME) $(bin_install_dir)/.$(APPLICATION_NAME)
-	$(shell $(MOOSE_DIR)/framework/scripts/write_dotresource_file.py $(bin_install_dir)/$(APPLICATION_NAME) \
-	install=true)
 
 lib_install_suffix = lib/$(APPLICATION_NAME)
 lib_install_dir = $(PREFIX)/$(lib_install_suffix)

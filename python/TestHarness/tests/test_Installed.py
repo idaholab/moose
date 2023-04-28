@@ -14,7 +14,7 @@ import TestHarness
 from contextlib import redirect_stdout
 
 class TestHarnessTester(unittest.TestCase):
-    @mock.patch.object(TestHarness.util, 'check_isinstalled')
+    @mock.patch.object(TestHarness.util, 'checkInstalled')
     def mocked_output(self, mocked, expect_fail, mocked_return):
         MOOSE_DIR = os.getenv('MOOSE_DIR')
         os.chdir(f'{MOOSE_DIR}/test')

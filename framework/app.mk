@@ -340,12 +340,17 @@ $(app_HEADER): $(app_HEADER_deps)
 	$(shell $(FRAMEWORK_DIR)/scripts/get_repo_revision.py $(curr_dir) $@ $(curr_app))
 	@ln -sf $@ $(all_header_dir)
 
+#
+# .APPNAME resource file
+#
+app_resource = $(APPLICATION_DIR)/$(APPLICATION_NAME).yaml
+
 # Target-specific Variable Values (See GNU-make manual)
 $(app_LIB): curr_objs := $(app_objects)
 $(app_LIB): curr_dir  := $(APPLICATION_DIR)
 $(app_LIB): curr_deps := $(depend_libs)
 $(app_LIB): curr_libs := $(depend_libs_flags)
-$(app_LIB): $(app_HEADER) $(app_plugin_deps) $(depend_libs) $(app_objects) $(ADDITIONAL_DEPEND_LIBS)
+$(app_LIB): $(app_HEADER) $(app_plugin_deps) $(depend_libs) $(app_objects) $(ADDITIONAL_DEPEND_LIBS) $(dot_resource)
 	@echo "Linking Library "$@"..."
 	@$(libmesh_LIBTOOL) --tag=CXX $(LIBTOOLFLAGS) --mode=link --quiet \
 	  $(libmesh_CXX) $(CXXFLAGS) $(libmesh_CXXFLAGS) -o $@ $(curr_objs) $(libmesh_LDFLAGS) $(EXTERNAL_FLAGS) -rpath $(curr_dir)/lib $(curr_libs)
@@ -407,11 +412,20 @@ ifeq ($(libmesh_static),yes)
   endif
 endif
 
-# Write .AppName resource file
-writeredotsource := $(shell $(FRAMEWORK_DIR)/scripts/write_dotresource_file.py $(APPLICATION_DIR)/$(APPLICATION_NAME) \
-                    $(libmesh_CXXFLAGS) \
-                    compiler_type=$(compilertype) \
-                    documentation=$(DOCUMENTATION))
+# Write resource file
+$(app_resource):
+	@echo "Creating resource file"
+	@$(shell $(FRAMEWORK_DIR)/scripts/write_appresource_file.py $(app_resource) $(APPLICATION_NAME) \
+     $(libmesh_CXXFLAGS) \
+     compiler_type=$(compilertype) \
+     documentation=$(DOCUMENTATION))
+
+# Update and Copy resource file to prefix/bin
+install_$(APPLICATION_NAME)_resource:
+	@echo "Installing $(APPLICATION_NAME).yaml resource file"
+	@$(shell $(FRAMEWORK_DIR)/scripts/write_appresource_file.py $(app_resource) $(APPLICATION_NAME) install=true)
+	@mkdir -p $(bin_install_dir)
+	@cp $(app_resource) $(bin_install_dir)
 
 # Codesign command (OS X Only)
 codesign :=
@@ -422,12 +436,11 @@ ifneq (,$(findstring darwin,$(libmesh_HOST)))
   endif
 endif
 
-$(app_EXEC): $(app_LIBS) $(mesh_library) $(main_object) $(app_test_LIB) $(depend_test_libs) $(ADDITIONAL_DEPEND_LIBS)
+$(app_EXEC): $(app_LIBS) $(mesh_library) $(main_object) $(app_test_LIB) $(depend_test_libs) $(ADDITIONAL_DEPEND_LIBS) $(app_resource)
 	@echo "Linking Executable "$@"..."
 	@$(libmesh_LIBTOOL) --tag=CXX $(LIBTOOLFLAGS) --mode=link --quiet \
 	  $(libmesh_CXX) $(CXXFLAGS) $(libmesh_CXXFLAGS) -o $@ $(main_object) $(depend_test_libs_flags) $(applibs) $(ADDITIONAL_LIBS) $(libmesh_LDFLAGS) $(libmesh_LIBS) $(EXTERNAL_FLAGS)
 	@$(codesign)
-	@$(writedotresource)
 
 ###### install stuff #############
 docs_dir := $(APPLICATION_DIR)/doc
@@ -507,7 +520,7 @@ else
 	@echo "Skipping docs installation."
 endif
 
-$(bindst): $(app_EXEC) $(copy_input_targets) install_$(APPLICATION_NAME)_docs $(binlink)
+$(bindst): $(app_EXEC) $(copy_input_targets) install_$(APPLICATION_NAME)_docs install_$(APPLICATION_NAME)_resource $(binlink)
 	@echo "Installing binary $@"
 	@mkdir -p $(bin_install_dir)
 	@cp $< $@

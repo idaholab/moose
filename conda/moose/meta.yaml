@@ -12,8 +12,6 @@ package:
 
 source:
   - path: ../../../moose
-  - patches:
-      - gap_heat_transfer_umat.patch
 
 build:
   number: {{ build }}

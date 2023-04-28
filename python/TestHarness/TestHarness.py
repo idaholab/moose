@@ -251,7 +251,6 @@ class TestHarness:
         checks = {}
         checks['platform'] = util.getPlatforms()
         checks['submodules'] = util.getInitializedSubmodules(self.run_tests_dir)
-        checks['installed'] = util.checkInstalled(self.run_tests_dir)
         checks['exe_objects'] = None # This gets calculated on demand
         checks['registered_apps'] = None # This gets extracted on demand
 
@@ -340,6 +339,9 @@ class TestHarness:
         self.options._checks = checks
 
         self.initialize(argv, app_name)
+
+        # executable is available after initalize
+        checks['installed'] = util.checkInstalled(self.executable, app_name)
 
         os.chdir(self._orig_cwd)
 

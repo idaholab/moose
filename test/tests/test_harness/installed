@@ -1,0 +1,7 @@
+[Tests]
+  [./installed_skipped]
+    type = RunApp
+    input = good.i
+    skip_installed = true
+  [../]
+[]

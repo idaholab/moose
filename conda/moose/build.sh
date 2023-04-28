@@ -12,6 +12,7 @@ make -j $CORES
 make install -j $CORES
 cd ${PREFIX}/moose/bin
 ln -s combined-opt moose-opt
+ln -s combined-opt moose
 
 mkdir -p "${PREFIX}/etc/conda/activate.d" "${PREFIX}/etc/conda/deactivate.d"
 cat <<EOF > "${PREFIX}/etc/conda/activate.d/activate_${PKG_NAME}.sh"

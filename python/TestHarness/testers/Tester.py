@@ -83,7 +83,7 @@ class Tester(MooseObject):
         params.addParam('libpng',        ['ALL'], "A test that runs only if libpng is available ('ALL', 'TRUE', 'FALSE')")
         params.addParam('libtorch',      ['ALL'], "A test that runs only if libtorch is available ('ALL', 'TRUE', 'FALSE')")
         params.addParam('libtorch_version', ['ALL'], "A list of libtorch versions for which this test will run on, supports normal comparison operators ('<', '>', etc...)")
-        params.addParam('skip_installed', False, "A test that does not run if it is installed ('TRUE', 'FALSE')")
+        params.addParam('skip_installed', False, "A test that does not run if it is installed")
 
         params.addParam('depend_files',  [], "A test that only runs if all depend files exist (files listed are expected to be relative to the base directory, not the test directory")
         params.addParam('env_vars',      [], "A test that only runs if all the environment variables listed exist")
@@ -582,6 +582,10 @@ class Tester(MooseObject):
             if inverse_set == match_found:
                 reasons[check] = re.sub(r'\[|\]', '', check).upper() + operator_display + ', '.join(test_platforms)
 
+        # Check for relocated binary (make install)
+        if self.specs['skip_installed'] and checks['installed']:
+            reasons['skip_installed'] = 'test not relocatable (make install)'
+
         # Check for heavy tests
         if options.all_tests or options.heavy_tests:
             if not self.specs['heavy'] and options.heavy_tests:
@@ -598,15 +602,6 @@ class Tester(MooseObject):
         for file in self.specs['depend_files']:
             if not os.path.isfile(os.path.join(self.specs['base_dir'], file)):
                 reasons['depend_files'] = 'DEPEND FILES'
-
-        # Verify if this is an installed executable
-        if self.specs['skip_installed']:
-            installed = util.check_isinstalled(self.specs["executable"],
-                                                         self.specs["app_name"])
-            with open('/Users/milljm/testing.log', 'w') as f:
-                f.write(str(installed))
-            if installed:
-                reasons['installed'] = 'test not relocatable (make install)'
 
         # We calculate the exe_objects only if we need them
         if self.specs["required_objects"] and checks["exe_objects"] is None:

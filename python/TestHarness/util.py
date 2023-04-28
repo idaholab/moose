@@ -245,7 +245,7 @@ def formatStatusMessage(job, status, message, options):
 
     # Add caveats if requested
     if job.isPass() and options.extra_info:
-        for check in list(options._checks.keys()):
+        for check in options._checks.keys():
             if job.specs.isValid(check) and not 'ALL' in job.specs[check]:
                 job.addCaveats(check)
 
@@ -725,32 +725,12 @@ def getInitializedSubmodules(root_dir):
     # This ignores submodules that have a '-' at the beginning which means they are not initialized
     return re.findall(r'^[ +]\S+ (\S+)', output, flags=re.MULTILINE)
 
-def checkInstalled(root_dir):
+def checkInstalled(executable, app_name):
     """
-    Returns a set containing 'ALL' and whether or not the TestHarness
-    is running in an "installed" directory. Since we don't have a fool-proof
-    way of knowing whether a binary is installed or not... Actually we really
-    don't have even a "bad" way of telling. People can install tests just about
-    anywhere that they can write too so we'll see all sorts of good and bad
-    practices. So, for now, let's just detect whether or not we are in a Git
-    repository since usually installed tests won't be in a git area.
-
-    - If somebody tarballs MOOSE up, this report an incorrect result
-    - If somebody installs tests into their git repository, this report an incorrect results
-
-    Neither of these cases a significant risk.
+    Read resource file and determin if binary was relocated
     """
-
-    option_set = set(['ALL'])
-
-    # If we are in a git repo assume we are not installed
-    output = str(runCommand("git submodule status", cwd=root_dir))
-    if output.startswith("ERROR"):
-        option_set.add('TRUE')
-    else:
-        option_set.add('FALSE')
-
-    return option_set
+    resource_content = readResourceFile(executable, app_name)
+    return resource_content.get('install', False)
 
 def addObjectsFromBlock(objs, node, block_name):
     """
@@ -806,10 +786,10 @@ def getExeObjects(exe):
 
 def readResourceFile(exe, app_name):
     resource_path = os.path.join(os.path.dirname(os.path.abspath(exe)),
-                                 f'.{app_name}')
+                                 f'{app_name}.yaml')
     if os.path.exists(resource_path):
         try:
-            with open(resource_path, 'r') as stream:
+            with open(resource_path, 'r', encoding='utf-8') as stream:
                 return yaml.safe_load(stream)
         except yaml.YAMLError:
             print(f'resource file parse failure: {resource_path}')
@@ -830,13 +810,6 @@ def getRegisteredApps(exe, app_name):
     """
     resource_content = readResourceFile(exe, app_name)
     return resource_content.get('registered_apps', [])
-
-def check_isinstalled(exe, app_name):
-    """
-    Read .resource file and determine if we are installed
-    """
-    resource_content = readResourceFile(exe, app_name)
-    return resource_content.get('install', False)
 
 def checkOutputForPattern(output, re_pattern):
     """
