@@ -122,7 +122,7 @@ struct RegistryEntryBase : public RegistryEntryData
   virtual std::shared_ptr<Action> buildAction(const InputParameters & parameters) = 0;
   virtual InputParameters buildParameters() = 0;
   /// resolve the name from _classname, _alias, and _name
-  std::string name()
+  std::string name() const
   {
     std::string name = _name;
     if (name.empty())
@@ -174,12 +174,7 @@ public:
   {
     const auto info = std::make_shared<RegistryEntry<T>>(base_info);
     getRegistry()._per_label_objects[info->_label].push_back(info);
-    std::string name = info._name;
-    if (name.empty())
-      name = info._alias;
-    if (name.empty())
-      name = info._classname;
-    getRegistry()._type_to_classname[typeid(T).name()] = name;
+    getRegistry()._type_to_classname[typeid(T).name()] = info->name();
     return 0;
   }
 
@@ -191,7 +186,7 @@ public:
   {
     const auto info = std::make_shared<RegistryEntry<T>>(base_info);
     getRegistry()._per_label_actions[info->_label].push_back(info);
-    getRegistry()._type_to_classname[typeid(T).name()] = info._classname;
+    getRegistry()._type_to_classname[typeid(T).name()] = info->_classname;
     return 0;
   }
 
@@ -242,6 +237,10 @@ public:
     return getRegistry()._data_file_paths;
   }
 
+  /// returns the name() for a registered class
+  template <typename T>
+  static std::string getRegisteredName();
+
   ///@{ Don't allow creation through copy/move construction or assignment
   Registry(Registry const &) = delete;
   Registry & operator=(Registry const &) = delete;
@@ -260,6 +259,16 @@ private:
   std::vector<std::string> _data_file_paths;
   std::map<std::string, std::string> _type_to_classname;
 };
+
+template <typename T>
+std::string
+Registry::getRegisteredName()
+{
+  for (const auto & [name, reg_ptr] : getRegistry()._name_to_entry)
+    if (std::dynamic_pointer_cast<T>(reg_ptr))
+      return name;
+  mooseError("The object of C++ type '", demangle(typeid(T).name()), "' has not registered.");
+}
 
 template <typename T>
 MooseObjectPtr
