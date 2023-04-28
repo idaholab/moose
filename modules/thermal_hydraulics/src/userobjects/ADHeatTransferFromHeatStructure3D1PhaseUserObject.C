@@ -9,9 +9,6 @@
 
 #include "ADHeatTransferFromHeatStructure3D1PhaseUserObject.h"
 #include "THMIndices3Eqn.h"
-#include "MooseMesh.h"
-#include "KDTree.h"
-#include "Assembly.h"
 #include "metaphysicl/parallel_dualnumber.h"
 #include "metaphysicl/parallel_numberarray.h"
 #include "metaphysicl/parallel_semidynamicsparsenumberarray.h"
@@ -22,8 +19,7 @@ InputParameters
 ADHeatTransferFromHeatStructure3D1PhaseUserObject::validParams()
 {
   InputParameters params = ElementUserObject::validParams();
-  params.addRequiredParam<FlowChannel3DAlignment *>("_fch_alignment",
-                                                    "Flow channel alignement object");
+  params.addRequiredParam<MeshAlignment1D3D *>("_mesh_alignment", "Mesh alignment object");
   params.addRequiredCoupledVar("P_hf", "Heat flux perimeter");
   params.addRequiredParam<MaterialPropertyName>("T", "Fluid temperature");
   params.addRequiredParam<MaterialPropertyName>("Hw", "Convective heat transfer coefficient");
@@ -35,65 +31,12 @@ ADHeatTransferFromHeatStructure3D1PhaseUserObject::validParams()
 ADHeatTransferFromHeatStructure3D1PhaseUserObject::
     ADHeatTransferFromHeatStructure3D1PhaseUserObject(const InputParameters & parameters)
   : ElementUserObject(parameters),
-    _fch_alignment(*getParam<FlowChannel3DAlignment *>("_fch_alignment")),
+    _mesh_alignment(*getParam<MeshAlignment1D3D *>("_mesh_alignment")),
     _P_hf(adCoupledValue("P_hf")),
     _Hw(getADMaterialProperty<Real>("Hw")),
-    _T(getADMaterialProperty<Real>("T")),
-    _hs_elem_ids(_fch_alignment.getHSElementsIDs())
+    _T(getADMaterialProperty<Real>("T"))
 {
-
-  const auto & hs_boundary_info = _fch_alignment.getHSBoundaryInfo();
-  const auto & fch_elem_ids = _fch_alignment.getFlowChannelElementIDs();
-
-  // list of q-points per hs elements
-  std::map<dof_id_type, std::vector<Point>> hs_elem_qps;
-  // list of q-points per fch elements
-  std::map<dof_id_type, std::vector<Point>> fch_elem_qps;
-
-  for (const auto & t : hs_boundary_info)
-  {
-    auto elem_id = std::get<0>(t);
-    auto side_id = std::get<1>(t);
-    const Elem * elem = _mesh.elemPtr(elem_id);
-    // 2D elements
-    _assembly.setCurrentSubdomainID(elem->subdomain_id());
-    _assembly.reinit(elem, side_id);
-    const MooseArray<Point> & q_points = _assembly.qPointsFace();
-    if (q_points.size() == 0)
-      mooseError(name(), ": No quadrature points found for element ", elem_id);
-    for (std::size_t i = 0; i < q_points.size(); i++)
-      hs_elem_qps[elem_id].push_back(q_points[i]);
-  }
-
-  for (const auto & elem_id : fch_elem_ids)
-  {
-    const Elem * elem = _mesh.elemPtr(elem_id);
-    // 1D elements
-    _assembly.setCurrentSubdomainID(elem->subdomain_id());
-    _assembly.reinit(elem);
-    const MooseArray<Point> & q_points = _assembly.qPoints();
-    if (q_points.size() == 0)
-      mooseError("No quadrature points found for element ", elem_id);
-    for (std::size_t i = 0; i < q_points.size(); i++)
-      fch_elem_qps[elem_id].push_back(q_points[i]);
-  }
-
-  // now find out how q-points correspond to each other on the (hs, fch) pair of elements
-  for (auto elem_id : _hs_elem_ids)
-  {
-    dof_id_type nearest_elem_id = _fch_alignment.getNearestElemID(elem_id);
-    std::vector<Point> & fch_qps = fch_elem_qps[nearest_elem_id];
-    std::vector<Point> & hs_qps = hs_elem_qps[elem_id];
-    _elem_qp_map[elem_id].resize(hs_qps.size());
-    KDTree kd_tree_qp(fch_qps, _mesh.getMaxLeafSize());
-    for (std::size_t i = 0; i < hs_qps.size(); i++)
-    {
-      unsigned int patch_size = 1;
-      std::vector<std::size_t> return_index(patch_size);
-      kd_tree_qp.neighborSearch(hs_qps[i], patch_size, return_index);
-      _elem_qp_map[elem_id][i] = return_index[0];
-    }
-  }
+  _mesh_alignment.buildCoupledElemQpIndexMap(_assembly);
 }
 
 void
@@ -107,38 +50,26 @@ ADHeatTransferFromHeatStructure3D1PhaseUserObject::initialize()
 void
 ADHeatTransferFromHeatStructure3D1PhaseUserObject::execute()
 {
-  if (_current_elem->processor_id() == this->processor_id())
+  const auto & primary_elem_id = _current_elem->id();
+
+  const auto & secondary_elem_ids = _mesh_alignment.getCoupledSecondaryElemIDs(primary_elem_id);
+  for (const auto & secondary_elem_id : secondary_elem_ids)
   {
-    unsigned int n_qpts_fch = _qrule->n_points();
-    for (auto elem_id : _hs_elem_ids)
+    const auto secondary_n_qps =
+        _mesh_alignment.getSecondaryNumberOfQuadraturePoints(secondary_elem_id);
+
+    _T_fluid[secondary_elem_id].resize(secondary_n_qps);
+    _htc[secondary_elem_id].resize(secondary_n_qps);
+    _heated_perimeter[secondary_elem_id].resize(secondary_n_qps);
+
+    for (unsigned int secondary_qp = 0; secondary_qp < secondary_n_qps; secondary_qp++)
     {
-      unsigned int n_qpts_hs = _elem_qp_map[elem_id].size();
-      const dof_id_type & nearest_elem_id = _fch_alignment.getNearestElemID(elem_id);
-      if (nearest_elem_id == _current_elem->id())
-      {
-        _heated_perimeter[_current_elem->id()].resize(n_qpts_fch);
-        _heated_perimeter[elem_id].resize(n_qpts_hs);
+      const auto primary_qp =
+          _mesh_alignment.getCoupledPrimaryElemQpIndex(secondary_elem_id, secondary_qp);
 
-        _T_fluid[_current_elem->id()].resize(n_qpts_fch);
-        _T_fluid[elem_id].resize(n_qpts_hs);
-
-        _htc[_current_elem->id()].resize(n_qpts_fch);
-        _htc[elem_id].resize(n_qpts_hs);
-
-        for (unsigned int qp_hs = 0; qp_hs < n_qpts_hs; qp_hs++)
-        {
-          unsigned int nearest_qp = _elem_qp_map[elem_id][qp_hs];
-
-          _T_fluid[_current_elem->id()][nearest_qp] = _T[nearest_qp];
-          _T_fluid[elem_id][qp_hs] = _T[nearest_qp];
-
-          _htc[_current_elem->id()][nearest_qp] = _Hw[nearest_qp];
-          _htc[elem_id][qp_hs] = _Hw[nearest_qp];
-
-          _heated_perimeter[_current_elem->id()][nearest_qp] = _P_hf[nearest_qp];
-          _heated_perimeter[elem_id][qp_hs] = _P_hf[nearest_qp];
-        }
-      }
+      _T_fluid[secondary_elem_id][secondary_qp] = _T[primary_qp];
+      _htc[secondary_elem_id][secondary_qp] = _Hw[primary_qp];
+      _heated_perimeter[secondary_elem_id][secondary_qp] = _P_hf[primary_qp];
     }
   }
 }

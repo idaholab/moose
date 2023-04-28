@@ -89,7 +89,7 @@ protected:
   std::vector<Moose::CoordinateSystemType> _coord_sys;
   /// List of node IDs this components owns
   std::vector<dof_id_type> _node_ids;
-  /// Elements ids of this flow channel component
+  /// Elements ids of this component
   std::vector<dof_id_type> _elem_ids;
 
 public:

@@ -79,7 +79,7 @@ public:
 
 protected:
   /// Primary/Secondary boundary name pairs for mechanical contact
-  const std::vector<std::pair<BoundaryName, BoundaryName>> _boundary_pairs;
+  std::vector<std::pair<BoundaryName, BoundaryName>> _boundary_pairs;
 
   /// Contact model type enum
   const ContactModel _model;
@@ -112,4 +112,8 @@ private:
    * Add single contact pressure auxiliary kernel for various contact action objects
    */
   void addContactPressureAuxKernel();
+  /**
+   * Remove repeated contact pairs in the input file.
+   */
+  void removeRepeatedPairs();
 };

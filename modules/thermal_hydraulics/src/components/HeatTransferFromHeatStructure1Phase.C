@@ -32,7 +32,8 @@ HeatTransferFromHeatStructure1Phase::HeatTransferFromHeatStructure1Phase(
     const InputParameters & parameters)
   : HeatTransferFromTemperature1Phase(parameters),
     HSBoundaryInterface(this),
-    _fch_alignment(constMesh())
+    _fch_alignment(constMesh()),
+    _mesh_alignment(constMesh())
 {
 }
 
@@ -62,13 +63,13 @@ HeatTransferFromHeatStructure1Phase::setupMesh()
     const FlowChannel1Phase & flow_channel =
         getComponentByName<FlowChannel1Phase>(_flow_channel_name);
 
-    _fch_alignment.build(hs.getBoundaryInfo(_hs_side), flow_channel.getElementIDs());
+    _mesh_alignment.initialize(flow_channel.getElementIDs(), hs.getBoundaryInfo(_hs_side));
+    _fch_alignment.initialize(flow_channel.getElementIDs(), hs.getBoundaryInfo(_hs_side));
 
     for (auto & elem_id : flow_channel.getElementIDs())
     {
-      dof_id_type nearest_elem_id = _fch_alignment.getNearestElemID(elem_id);
-      if (nearest_elem_id != DofObject::invalid_id)
-        getTHMProblem().augmentSparsity(elem_id, nearest_elem_id);
+      if (_mesh_alignment.hasCoupledElemID(elem_id))
+        getTHMProblem().augmentSparsity(elem_id, _mesh_alignment.getCoupledElemID(elem_id));
     }
   }
 }
@@ -110,7 +111,7 @@ HeatTransferFromHeatStructure1Phase::check() const
 
     if (_hs_side_valid)
     {
-      if (!_fch_alignment.check(flow_channel.getElementIDs()))
+      if (!_mesh_alignment.meshesAreAligned())
         logError("The centers of the elements of flow channel '",
                  _flow_channel_name,
                  "' do not align with the centers of the specified heat structure side.");
@@ -149,7 +150,7 @@ HeatTransferFromHeatStructure1Phase::addMooseObjects()
     const std::string class_name = "ADHeatFluxFromHeatStructure3EqnUserObject";
     InputParameters params = _factory.getValidParams(class_name);
     params.set<std::vector<SubdomainName>>("block") = flow_channel.getSubdomainNames();
-    params.set<FlowChannelAlignment *>("_fch_alignment") = &_fch_alignment;
+    params.set<MeshAlignment *>("_mesh_alignment") = &_mesh_alignment;
     params.set<MaterialPropertyName>("T_wall") = _T_wall_name + "_coupled";
     params.set<std::vector<VariableName>>("P_hf") = {_P_hf_name};
     params.set<MaterialPropertyName>("Hw") = _Hw_1phase_name;
@@ -181,13 +182,12 @@ HeatTransferFromHeatStructure1Phase::addMooseObjects()
 
   // Transfer the temperature of the solid onto the flow channel
   {
-    std::string class_name = "VariableValueTransferMaterial";
+    std::string class_name = "MeshAlignmentVariableTransferMaterial";
     InputParameters params = _factory.getValidParams(class_name);
     params.set<std::vector<SubdomainName>>("block") = flow_channel.getSubdomainNames();
     params.set<MaterialPropertyName>("property_name") = _T_wall_name + "_coupled";
-    params.set<BoundaryName>("secondary_boundary") = {getSlaveSideName()};
-    params.set<BoundaryName>("primary_boundary") = getMasterSideName();
     params.set<std::string>("paired_variable") = HeatConductionModel::TEMPERATURE;
+    params.set<MeshAlignment *>("_mesh_alignment") = &_mesh_alignment;
     getTHMProblem().addMaterial(class_name, genName(name(), "T_wall_transfer_mat"), params);
   }
 

@@ -10,7 +10,7 @@
 #pragma once
 
 #include "ElementUserObject.h"
-#include "FlowChannelAlignment.h"
+#include "MeshAlignment.h"
 
 /**
  * Base class for caching quantities computed between flow channels and heat structures.
@@ -33,7 +33,7 @@ public:
    */
   const dof_id_type & getNearestElem(dof_id_type elem_id) const
   {
-    return _fch_alignment.getNearestElemID(elem_id);
+    return _mesh_alignment.getCoupledElemID(elem_id);
   }
 
 protected:
@@ -63,19 +63,12 @@ protected:
 
 private:
   /**
-   * Builds the map of element ID to
-   */
-  std::map<dof_id_type, std::vector<unsigned int>> buildQuadraturePointMap() const;
-
-  /**
    * Parallel gather of all local contributions into one global map
    */
   void allGatherMap(std::map<dof_id_type, std::vector<ADReal>> & data);
 
-  /// Flow channel alignment object
-  const FlowChannelAlignment & _fch_alignment;
-  /// How qpoint indices are mapped from slave side to master side per element
-  const std::map<dof_id_type, std::vector<unsigned int>> _elem_qp_map;
+  /// Mesh alignment object
+  MeshAlignment & _mesh_alignment;
 
   /**
    * Computes the cached quantities at a quadrature point

@@ -43,7 +43,7 @@ HeatTransferFromHeatStructure3D1Phase::HeatTransferFromHeatStructure3D1Phase(
     _flow_channel_names(getParam<std::vector<std::string>>("flow_channels")),
     _boundary(getParam<BoundaryName>("boundary")),
     _hs_name(getParam<std::string>("hs")),
-    _fch_alignment(constMesh()),
+    _mesh_alignment(constMesh()),
     _layered_average_uo_direction(MooseEnum("x y z"))
 {
   for (const auto & fch_name : _flow_channel_names)
@@ -92,13 +92,16 @@ HeatTransferFromHeatStructure3D1Phase::setupMesh()
         bnd_info.push_back(std::tuple<dof_id_type, unsigned short int>(elem_id, side));
       }
 
-      _fch_alignment.build(bnd_info, fchs_elem_ids);
+      _mesh_alignment.initialize(fchs_elem_ids, bnd_info);
 
-      for (auto & elem_id : fchs_elem_ids)
+      for (const auto & fc_elem_id : fchs_elem_ids)
       {
-        dof_id_type nearest_elem_id = _fch_alignment.getNearestElemID(elem_id);
-        if (nearest_elem_id != DofObject::invalid_id)
-          getTHMProblem().augmentSparsity(elem_id, nearest_elem_id);
+        if (_mesh_alignment.hasCoupledSecondaryElemIDs(fc_elem_id))
+        {
+          const auto & hs_elem_ids = _mesh_alignment.getCoupledSecondaryElemIDs(fc_elem_id);
+          for (const auto & hs_elem_id : hs_elem_ids)
+            getTHMProblem().augmentSparsity(fc_elem_id, hs_elem_id);
+        }
       }
     }
   }
@@ -316,7 +319,7 @@ HeatTransferFromHeatStructure3D1Phase::addMooseObjects()
     const std::string class_name = "ADHeatTransferFromHeatStructure3D1PhaseUserObject";
     InputParameters params = _factory.getValidParams(class_name);
     params.set<std::vector<SubdomainName>>("block") = _flow_channel_subdomains;
-    params.set<FlowChannel3DAlignment *>("_fch_alignment") = &_fch_alignment;
+    params.set<MeshAlignment1D3D *>("_mesh_alignment") = &_mesh_alignment;
     params.set<std::vector<VariableName>>("P_hf") = {_P_hf_name};
     params.set<MaterialPropertyName>("Hw") = _Hw_1phase_name;
     params.set<MaterialPropertyName>("T") = FlowModelSinglePhase::TEMPERATURE;

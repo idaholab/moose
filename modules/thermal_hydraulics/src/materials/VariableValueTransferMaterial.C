@@ -59,6 +59,9 @@ VariableValueTransferMaterial::VariableValueTransferMaterial(const InputParamete
     _phi(_assembly.fePhi<Real>(FEType(FIRST, LAGRANGE)))
 {
   _penetration_locator.setCheckWhetherReasonable(false);
+
+  mooseDeprecated("VariableValueTransferMaterial is deprecated. Use "
+                  "MeshAlignmentVariableTransferMaterial instead.");
 }
 
 void

@@ -12,6 +12,5 @@
     exodiff = 'surrogate_power_profile_out.e'
     prereq = 'power_profile'
     recover = false
-    mesh_mode = 'replicated'
   []
 []
