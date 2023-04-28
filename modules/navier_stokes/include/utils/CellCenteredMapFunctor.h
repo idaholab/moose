@@ -70,21 +70,13 @@ private:
   /// on all subdomains
   const std::set<SubdomainID> _sub_ids;
 
-<<<<<<< HEAD
   ValueType evaluate(const ElemArg & elem_arg, const StateArg &) const override;
   ValueType evaluate(const ElemPointArg & elem_point, const StateArg & state) const override;
   ValueType evaluate(const FaceArg & face, const StateArg &) const override;
   ValueType evaluate(const ElemQpArg &, const StateArg &) const override;
   ValueType evaluate(const ElemSideQpArg &, const StateArg &) const override;
-=======
-  const bool _extrapolated_boundary;
 
-  ValueType evaluate(const ElemArg & elem_arg, unsigned int) const override;
-  ValueType evaluate(const ElemPointArg & elem_point, const unsigned int state) const override;
-  ValueType evaluate(const FaceArg & face, unsigned int) const override;
-  ValueType evaluate(const ElemQpArg &, unsigned int) const override;
-  ValueType evaluate(const ElemSideQpArg &, unsigned int) const override;
->>>>>>> 2D problem fails, contraining of H/A is missing. (#22356)
+  const bool _extrapolated_boundary;
 
   using Moose::FunctorBase<T>::evaluateGradient;
   GradientType evaluateGradient(const ElemArg & elem_arg, const StateArg & state) const override;

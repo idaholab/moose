@@ -35,7 +35,7 @@ public:
   static InputParameters validParams();
   INSFVRhieChowInterpolatorSegregated(const InputParameters & params);
 
-  VectorValue<ADReal> getVelocity(cconst FaceInfo & fi,
+  VectorValue<ADReal> getVelocity(const FaceInfo & fi,
                                   const Moose::StateArg & time,
                                   THREAD_ID tid,
                                   Moose::FV::InterpMethod m) const override;
@@ -75,7 +75,6 @@ public:
                     const std::vector<unsigned int> & var_nums);
 
 protected:
-
   /**
    * A map from element IDs to $HbyA_{ij} = (A_{offdiag}*\mathrm{(predicted~velocity)} -
    * \mathrm{Source})_{ij}/A_{ij}$. So this contains the offdiagonal part of the system matrix

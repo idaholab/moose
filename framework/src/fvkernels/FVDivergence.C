@@ -38,7 +38,7 @@ FVDivergence::computeQpResidual()
   // const auto face = makeFace(*_face_info, limiterType(Moose::FV::InterpMethod::Average), false);
   const auto face =
       makeFace(*_face_info, Moose::FV::limiterType(Moose::FV::InterpMethod::Average), true);
-  RealVectorValue vector = _vector_field(face);
+  RealVectorValue vector = _vector_field(face, determineState());
 
   // // If we are on internal faces, we interpolate the diffusivity as usual
   // if (_var.isInternalFace(*_face_info))

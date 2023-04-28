@@ -122,7 +122,7 @@ INSFVRhieChowInterpolatorSegregated::initFaceVelocities()
       const Moose::FaceArg face{
           fi, Moose::FV::LimiterType::CentralDifference, true, false, nullptr};
 
-      _face_velocity[fi->id()] = raw_value((*_vel)(face));
+      _face_velocity[fi->id()] = raw_value((*_vel)(face, Moose::currentState()));
       // _console << "Computing initial face velocity " << fi->id() <<
       // raw_value(_face_velocity(face))
       //          << std::endl;
@@ -135,7 +135,7 @@ INSFVRhieChowInterpolatorSegregated::initFaceVelocities()
       const Moose::FaceArg boundary_face{
           fi, Moose::FV::LimiterType::CentralDifference, true, false, boundary_elem};
 
-      _face_velocity[fi->id()] = raw_value((*_vel)(boundary_face));
+      _face_velocity[fi->id()] = raw_value((*_vel)(boundary_face, Moose::currentState()));
       // _console << "Computing initial face velocity " << fi->id()
       //          << raw_value(_face_velocity(boundary_face)) << std::endl;
     }
@@ -191,12 +191,12 @@ INSFVRhieChowInterpolatorSegregated::computeVelocity(const Real & momentum_relax
           fi, Moose::FV::LimiterType::CentralDifference, true, false, nullptr};
 
       RealVectorValue Ainv; //  = raw_value(_Ainv(face));
-      RealVectorValue HbyA = raw_value(_HbyA(face));
+      RealVectorValue HbyA = raw_value(_HbyA(face, Moose::currentState()));
 
       interpolate(Moose::FV::InterpMethod::Average,
                   Ainv,
-                  _Ainv(makeElemArg(fi->elemPtr())),
-                  _Ainv(makeElemArg(fi->neighborPtr())),
+                  _Ainv(makeElemArg(fi->elemPtr()), Moose::currentState()),
+                  _Ainv(makeElemArg(fi->neighborPtr()), Moose::currentState()),
                   *fi,
                   true);
 
@@ -207,9 +207,7 @@ INSFVRhieChowInterpolatorSegregated::computeVelocity(const Real & momentum_relax
       //             *fi,
       //             true);
 
-
-
-      RealVectorValue grad_p = raw_value(_p->gradient(face));
+      RealVectorValue grad_p = raw_value(_p->gradient(face, Moose::currentState()));
       for (const auto comp_index : make_range(_dim))
       {
         _face_velocity[fi->id()](comp_index) =
@@ -225,16 +223,17 @@ INSFVRhieChowInterpolatorSegregated::computeVelocity(const Real & momentum_relax
       const Moose::FaceArg boundary_face{
           fi, Moose::FV::LimiterType::CentralDifference, true, false, boundary_elem};
 
-      if (_u->isDirichletBoundaryFace(*fi, boundary_elem))
+      if (_u->isDirichletBoundaryFace(*fi, boundary_elem, Moose::currentState()))
       {
-        _face_velocity[fi->id()] = -raw_value(_HbyA(boundary_face)); // raw_value((*_vel)(boundary_face));
+        _face_velocity[fi->id()] = -raw_value(
+            _HbyA(boundary_face, Moose::currentState())); // raw_value((*_vel)(boundary_face));
         // _console << "ID " << fi->id() << raw_value(_face_velocity(boundary_face)) << std::endl;
       }
       else
       {
-        RealVectorValue Ainv = raw_value(_Ainv(boundary_face));
-        RealVectorValue HbyA = raw_value(_HbyA(boundary_face));
-        RealVectorValue grad_p = raw_value(_p->gradient(boundary_face));
+        RealVectorValue Ainv = raw_value(_Ainv(boundary_face, Moose::currentState()));
+        RealVectorValue HbyA = raw_value(_HbyA(boundary_face, Moose::currentState()));
+        RealVectorValue grad_p = raw_value(_p->gradient(boundary_face, Moose::currentState()));
         for (const auto comp_index : make_range(_dim))
         {
           _face_velocity[fi->id()](comp_index) =
@@ -261,16 +260,18 @@ INSFVRhieChowInterpolatorSegregated::populateHbyA(NonlinearImplicitSystem & mome
       const Elem * neighbor = fi->neighborPtr();
       for (auto comp_index : make_range(_dim))
       {
-        const auto dof_index_elem = elem->dof_number(momentum_system.number(), var_nums[comp_index], 0);
-        const auto dof_index_neighbor = neighbor->dof_number(momentum_system.number(), var_nums[comp_index], 0);
+        const auto dof_index_elem =
+            elem->dof_number(momentum_system.number(), var_nums[comp_index], 0);
+        const auto dof_index_neighbor =
+            neighbor->dof_number(momentum_system.number(), var_nums[comp_index], 0);
 
         _HbyA[fi->id()](comp_index) = 0.0;
         interpolate(Moose::FV::InterpMethod::Average,
-                  _HbyA[fi->id()](comp_index),
-                  raw_hbya(dof_index_elem),
-                  raw_hbya(dof_index_neighbor),
-                  *fi,
-                  true);
+                    _HbyA[fi->id()](comp_index),
+                    raw_hbya(dof_index_elem),
+                    raw_hbya(dof_index_neighbor),
+                    *fi,
+                    true);
       }
     }
     else if (Moose::FV::onBoundary(*_u, *fi))
@@ -281,16 +282,17 @@ INSFVRhieChowInterpolatorSegregated::populateHbyA(NonlinearImplicitSystem & mome
       const Moose::FaceArg boundary_face{
           fi, Moose::FV::LimiterType::CentralDifference, true, false, boundary_elem};
 
-      if (_u->isDirichletBoundaryFace(*fi, boundary_elem))
+      if (_u->isDirichletBoundaryFace(*fi, boundary_elem, Moose::currentState()))
       {
-        _HbyA[fi->id()] = -raw_value((*_vel)(boundary_face));
+        _HbyA[fi->id()] = -raw_value((*_vel)(boundary_face, Moose::currentState()));
         // _console << "ID " << fi->id() << raw_value(_face_velocity(boundary_face)) << std::endl;
       }
       else
       {
         for (const auto comp_index : make_range(_dim))
         {
-          const auto dof_index_elem = boundary_elem->dof_number(momentum_system.number(), var_nums[comp_index], 0);
+          const auto dof_index_elem =
+              boundary_elem->dof_number(momentum_system.number(), var_nums[comp_index], 0);
           _HbyA[fi->id()](comp_index) = raw_hbya(dof_index_elem);
         }
       }
@@ -462,7 +464,7 @@ INSFVRhieChowInterpolatorSegregated::computeHbyA(const Real & momentum_relaxatio
       {
         const Real volume = _moose_mesh.elemInfo(elem->id()).volume();
         const auto dof_index = elem->dof_number(momentum_system.number(), var_nums[comp_index], 0);
-        _Ainv[elem->id()](comp_index) = (*Ainv)(dof_index) * volume;
+        _Ainv[elem->id()](comp_index) = (*Ainv)(dof_index)*volume;
       }
     }
   }
