@@ -136,10 +136,30 @@ CircularBoundaryCorrectionGenerator::generate()
     {
       const auto side =
           input_mesh->elem_ptr(std::get<0>(side_list[i]))->side_ptr(std::get<1>(side_list[i]));
-      input_circ_bds_sds[std::distance(_input_mesh_circular_bids.begin(), side_list_it)].push_back(
-          std::make_pair(side->point(0), side->point(1)));
-      input_circ_bds_sds_ids[std::distance(_input_mesh_circular_bids.begin(), side_list_it)]
-          .push_back(std::make_pair(side->node_id(0), side->node_id(1)));
+      // In case the sideset contains a pair of duplicated sides with different orientations, we
+      // only store the first side found.
+      if (std::find(
+              input_circ_bds_sds_ids[std::distance(_input_mesh_circular_bids.begin(), side_list_it)]
+                  .begin(),
+              input_circ_bds_sds_ids[std::distance(_input_mesh_circular_bids.begin(), side_list_it)]
+                  .end(),
+              std::make_pair(side->node_id(0), side->node_id(1))) ==
+              input_circ_bds_sds_ids[std::distance(_input_mesh_circular_bids.begin(), side_list_it)]
+                  .end() &&
+          std::find(
+              input_circ_bds_sds_ids[std::distance(_input_mesh_circular_bids.begin(), side_list_it)]
+                  .begin(),
+              input_circ_bds_sds_ids[std::distance(_input_mesh_circular_bids.begin(), side_list_it)]
+                  .end(),
+              std::make_pair(side->node_id(1), side->node_id(0))) ==
+              input_circ_bds_sds_ids[std::distance(_input_mesh_circular_bids.begin(), side_list_it)]
+                  .end())
+      {
+        input_circ_bds_sds[std::distance(_input_mesh_circular_bids.begin(), side_list_it)]
+            .push_back(std::make_pair(side->point(0), side->point(1)));
+        input_circ_bds_sds_ids[std::distance(_input_mesh_circular_bids.begin(), side_list_it)]
+            .push_back(std::make_pair(side->node_id(0), side->node_id(1)));
+      }
     }
   }
 
