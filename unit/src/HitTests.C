@@ -200,6 +200,11 @@ TEST(HitTests, ParseFields){
         {"int", "foo=42", "foo", "42", hit::Field::Kind::Int},
         {"float1", "foo=4.2", "foo", "4.2", hit::Field::Kind::Float},
         {"float2", "foo=.42", "foo", ".42", hit::Field::Kind::Float},
+        // Previously, the HIT lexer designated "e-23" below as a 'float' from the text pattern
+        // alone but the MOOSE string-to-float conversion logic does not support this no
+        // coefficient syntax so even through the kind method called this a 'float', retrieving
+        // it as a float would fail however WASP-HIT reuses the convert and retrieve logic for
+        // consistent field categorization making "foo=e-23" be designated now as a 'string'
         {"float3", "foo=1e10", "foo", "1e10", hit::Field::Kind::Float},
         {"float4",
          "foo=e-23",
@@ -339,6 +344,8 @@ TEST(HitTests, BraceExpressions){
          "hello/boo",
          "baz",
          hit::Field::Kind::String},
+        // WASP-HIT evaluates the brace expression below to "foo=42" and
+        // designates 'int' as the kind
         {"multi-line brace expression",
          "foo=${raw 4\n"
          "          2\n"
