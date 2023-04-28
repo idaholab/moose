@@ -20,7 +20,7 @@ class AugmentedLagrangianContactProblem;
  * User object for computing weighted gaps and contact pressure for penalty based
  * mortar constraints
  */
-class PenaltyWeightedGapUserObject : public WeightedGapUserObject,
+class PenaltyWeightedGapUserObject : virtual public WeightedGapUserObject,
                                      public PenaltyMortarAugmentedLagrangeInterface
 {
 public:
@@ -43,6 +43,9 @@ protected:
   virtual const VariableTestValue & test() const override;
   virtual bool constrainedByOwner() const override { return false; }
 
+  void selfInitialize();
+  void selfTimestepSetup();
+
   /// The penalty factor
   const Real _penalty;
 
@@ -56,7 +59,7 @@ protected:
   ADVariableValue _contact_force;
 
   /// Map from degree of freedom to normal pressure for reporting
-  std::unordered_map<const DofObject *, Real> _dof_to_normal_pressure;
+  std::unordered_map<const DofObject *, ADReal> _dof_to_normal_pressure;
 
   ///@{ augmented Lagrange probmen and iteration number
   AugmentedLagrangianContactProblem * const _augmented_lagrange_problem;

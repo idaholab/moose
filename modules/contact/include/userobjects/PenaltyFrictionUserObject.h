@@ -9,21 +9,21 @@
 
 #pragma once
 
+#include "PenaltyWeightedGapUserObject.h"
 #include "WeightedVelocitiesUserObject.h"
 #include "PenaltyMortarAugmentedLagrangeInterface.h"
 
 /**
  * User object that computes tangential pressures due to friction using a penalty approach
  */
-class PenaltyFrictionUserObject : public WeightedVelocitiesUserObject,
-                                  public PenaltyMortarAugmentedLagrangeInterface
+class PenaltyFrictionUserObject : virtual public PenaltyWeightedGapUserObject,
+                                  virtual public WeightedVelocitiesUserObject
 {
 public:
   static InputParameters validParams();
 
   PenaltyFrictionUserObject(const InputParameters & parameters);
 
-  virtual const ADVariableValue & contactPressure() const override;
   virtual const ADVariableValue & contactTangentialPressureDirOne() const override;
   virtual const ADVariableValue & contactTangentialPressureDirTwo() const override;
 
@@ -55,20 +55,11 @@ protected:
   /// The friction coefficient
   const Real _friction_coefficient;
 
-  /// Map from degree of freedom to old weighted gap
-  std::unordered_map<const DofObject *, ADReal> _dof_to_old_weighted_gap;
-
-  /// Map from degree of freedom to old physical (not weighted) tangential velocity
-  std::unordered_map<const DofObject *, std::array<ADReal, 2>> _dof_to_old_real_tangential_velocity;
-
   /// Map from degree of freedom to accumulated slip
   std::unordered_map<const DofObject *, std::array<ADReal, 2>> _dof_to_accumulated_slip;
 
   /// Map from degree of freedom to old accumulated slip
-  std::unordered_map<const DofObject *, std::array<ADReal, 2>> _dof_to_old_accumulated_slip;
-
-  /// Map from degree of freedom to normal pressure
-  std::unordered_map<const DofObject *, ADReal> _dof_to_normal_pressure;
+  std::unordered_map<const DofObject *, std::array<Real, 2>> _dof_to_old_accumulated_slip;
 
   /// Map from degree of freedom to old normal pressure
   std::unordered_map<const DofObject *, Real> _dof_to_old_normal_pressure;
@@ -76,12 +67,16 @@ protected:
   /// Map from degree of freedom to both frictional (tangential) pressure direction
   std::unordered_map<const DofObject *, std::array<ADReal, 2>> _dof_to_frictional_pressure;
 
-  /// The normal contact pressure on the mortar segument quadrature points
-  ADVariableValue _contact_force;
-
   /// The first frictional contact pressure on the mortar segment quadrature points
   ADVariableValue _frictional_contact_force_one;
 
   /// The second frictional contact pressure on the mortar segment quadrature points
   ADVariableValue _frictional_contact_force_two;
+
+  /// Map from degree of freedom to augmented lagrange multiplier
+  std::unordered_map<const DofObject *, std::pair<Real, Real>>
+      _dof_to_frictional_lagrange_multipliers;
+
+  /// Current delta t... or timestep size.
+  const Real & _dt;
 };

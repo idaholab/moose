@@ -75,10 +75,16 @@ PenaltyWeightedGapUserObject::contactPressure() const
 }
 
 void
+PenaltyWeightedGapUserObject::selfInitialize()
+{
+  _dof_to_normal_pressure.clear();
+}
+
+void
 PenaltyWeightedGapUserObject::initialize()
 {
   WeightedGapUserObject::initialize();
-  _dof_to_normal_pressure.clear();
+  selfInitialize();
 }
 
 Real
@@ -107,20 +113,25 @@ PenaltyWeightedGapUserObject::reinit()
         _augmented_lagrange_problem ? _dof_to_lagrange_multiplier[node] : 0.0;
     const auto weighted_gap_for_calc = weighted_gap < 0 ? -weighted_gap : ADReal(0);
     const auto & test_i = (*_test)[i];
+
+    const auto normal_pressure = _penalty * weighted_gap_for_calc + lagrange_multiplier;
+    _dof_to_normal_pressure[node] = normal_pressure;
     for (const auto qp : make_range(_qrule_msm->n_points()))
-    {
-      _contact_force[qp] += test_i[qp] * (_penalty * weighted_gap_for_calc + lagrange_multiplier);
-      _dof_to_normal_pressure[node] =
-          MetaPhysicL::raw_value(_penalty * weighted_gap_for_calc + lagrange_multiplier);
-    }
+      _contact_force[qp] += test_i[qp] * normal_pressure;
   }
+}
+
+void
+PenaltyWeightedGapUserObject::selfTimestepSetup()
+{
+  // _dof_to_lagrange_multiplier.clear();
+  // _new_time_step = true;
 }
 
 void
 PenaltyWeightedGapUserObject::timestepSetup()
 {
-  // _dof_to_lagrange_multiplier.clear();
-  // _new_time_step = true;
+  selfTimestepSetup();
 }
 
 bool

@@ -133,13 +133,18 @@ WeightedVelocitiesUserObject::computeQpIProperties()
 }
 
 void
+WeightedVelocitiesUserObject::selfInitialize()
+{
+  _dof_to_weighted_tangential_velocity.clear();
+  _dof_to_real_tangential_velocity.clear();
+}
+
+void
 WeightedVelocitiesUserObject::initialize()
 {
   // Clear weighted gaps
   WeightedGapUserObject::initialize();
-
-  _dof_to_weighted_tangential_velocity.clear();
-  _dof_to_real_tangential_velocity.clear();
+  selfInitialize();
 }
 
 void

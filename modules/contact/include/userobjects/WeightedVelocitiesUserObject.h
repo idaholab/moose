@@ -14,7 +14,7 @@
 /**
  * Creates dof object to weighted tangential velocities map
  */
-class WeightedVelocitiesUserObject : public WeightedGapUserObject
+class WeightedVelocitiesUserObject : virtual public WeightedGapUserObject
 {
 public:
   static InputParameters validParams();
@@ -49,6 +49,9 @@ protected:
    * Computes properties that are functions both of \p _qp and \p _i, for example the weighted gap
    */
   virtual void computeQpIProperties() override;
+
+  void selfInitialize();
+  void selfTimestepSetup() {}
 
   /// A map from node to two weighted tangential velocities
   std::unordered_map<const DofObject *, std::array<ADReal, 2>> _dof_to_weighted_tangential_velocity;
