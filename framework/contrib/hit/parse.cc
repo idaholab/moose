@@ -178,9 +178,9 @@ Node::Node(const std::string & field, const std::string & val) : _parent(nullptr
 {
   std::string input = field + " = " + val;
   Node * root = hit::parse("field", input);
-  root = root->_children.front();
-  _dhi = root->_dhi;
-  _hnv = root->_hnv;
+  const auto & first_child = *root->_children.front();
+  _dhi = first_child._dhi;
+  _hnv = first_child._hnv;
   delete root;
 }
 
@@ -188,10 +188,10 @@ Node::Node(const std::string & section) : _parent(nullptr)
 {
   std::string input = "[" + (section.empty() ? "-" : section) + "][]";
   Node * root = hit::parse("section", input);
-  root = root->_children.front();
-  _dhi = root->_dhi;
-  _hnv = root->_hnv;
-  for (auto child : root->_children)
+  const auto & first_child = *root->_children.front();
+  _dhi = first_child._dhi;
+  _hnv = first_child._hnv;
+  for (auto child : first_child._children)
     addChild(child->clone());
   delete root;
 }
@@ -200,9 +200,9 @@ Node::Node(const std::string & comment, bool is_inline) : _parent(nullptr)
 {
   (void)is_inline; // suppress unused variable warning
   Node * root = hit::parse("comment", comment);
-  root = root->_children.front();
-  _dhi = root->_dhi;
-  _hnv = root->_hnv;
+  const auto & first_child = *root->_children.front();
+  _dhi = first_child._dhi;
+  _hnv = first_child._hnv;
   delete root;
 }
 #else
