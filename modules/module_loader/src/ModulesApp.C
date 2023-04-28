@@ -92,20 +92,6 @@
 #include "ExternalPetscSolverApp.h"
 #endif
 
-///@{
-/**
- * Dummy methods to clear unused parameter warnings from compiler
- */
-void
-clearUnusedWarnings(Factory & /*factory*/)
-{
-}
-void
-clearUnusedWarnings(Syntax & /*syntax*/, ActionFactory & /*action_factory*/)
-{
-}
-///@}
-
 InputParameters
 ModulesApp::validParams()
 {
@@ -398,6 +384,10 @@ ModulesApp::registerExecFlags(Factory & factory)
 void
 ModulesApp::registerAll(Factory & f, ActionFactory & af, Syntax & s)
 {
+  mooseDeprecated(
+      "\"registerAll\" in Modules is deprecated. Please update your *App.C file to call the new "
+      "templated \"registerAllObjects\" method (e.g. ModulesApp::registerAllobject<MyApp>(...))");
+
 #ifdef CHEMICAL_REACTIONS_ENABLED
   ChemicalReactionsApp::registerAll(f, af, s);
 #endif
