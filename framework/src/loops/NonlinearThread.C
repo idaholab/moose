@@ -98,6 +98,7 @@ NonlinearThread::subdomainChanged()
     _fv_kernels.clear();
     _fe_problem.theWarehouse()
         .query()
+        .template condition<AttribSysNum>(_nl.number())
         .template condition<AttribSystem>("FVElementalKernel")
         .template condition<AttribSubdomains>(_subdomain)
         .template condition<AttribThread>(_tid)
