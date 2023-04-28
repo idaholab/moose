@@ -77,4 +77,12 @@
     expect_err = "the boundary provided is not circular."
     requirement = "The system shall throw an error if the provided boundary to correct is not circular."
   []
+  [err_full_cirles_and_span_direction]
+    type = RunException
+    input = 'radius_corr.i'
+    cli_args = 'Mesh/ccg/move_end_nodes_in_span_direction="true"
+                --mesh-only err.e'
+    expect_err = "all the boundaries are closed, this parameter should be be set as"
+    requirement = "The system shall throw an error if the provided boundaries are all full circles and the parameter to move the end nodes in the span direction is set to true."
+  []  
 []

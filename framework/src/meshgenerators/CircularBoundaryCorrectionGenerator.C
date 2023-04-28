@@ -139,6 +139,8 @@ CircularBoundaryCorrectionGenerator::generate()
   // Computes the correction coefficient and apply it;
   // Also records the nodes that have been modified to avert double-correction
   std::set<dof_id_type> mod_node_list;
+  // And check if any of the boundaries are partial circles
+  bool has_partial_circle = false;
   for (unsigned int i = 0; i < input_circ_bds_pts.size(); i++)
   {
     auto & input_circ_bd_pts = input_circ_bds_pts[i];
@@ -163,6 +165,7 @@ CircularBoundaryCorrectionGenerator::generate()
                                                is_bdry_closed,
                                                true);
 
+    has_partial_circle = has_partial_circle || !is_bdry_closed;
     // If the user selects to move the end nodes of a partial circular boundary, we need to
     // calculate the displacement of the end nodes, which differs from the displacement of the
     // other nodes
@@ -273,6 +276,9 @@ CircularBoundaryCorrectionGenerator::generate()
       (*node) = tmp_pt_alt + boundary_origin;
     }
   }
+  if (!has_partial_circle && _move_end_nodes_in_span_direction)
+    paramError("move_end_nodes_in_span_direction",
+               "all the boundaries are closed, this parameter should be be set as 'true'.");
   // Loop over all the elements to check if any of them are inverted due to the correction
   for (auto & elem : input_mesh->element_ptr_range())
     if (elem->volume() < 0.0)
