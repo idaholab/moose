@@ -150,7 +150,7 @@ git checkout ${WASP_REV} ; \
 git submodule update --init --recursive ; \
 cd ../../.. ; \
 ./scripts/update_and_rebuild_wasp.sh -D CMAKE_INSTALL_PREFIX:STRING=${WASP_DIR} ; \
-rm -rf framework || true ; \
+rm -rf framework || true
 
 #-----------------------------------------------------------------------------#
 # Copy and build MOOSE framework, test, and optionally modules
