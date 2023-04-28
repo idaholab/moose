@@ -18,7 +18,7 @@ Aside from the mesh generators, this `reactor` module also includes a Function o
 
 ## Tutorial
 
-This module is demonstrated in detail in the [MOOSE Reactor Module Meshing Tutorial](tutorial04_meshing/index.md).
+This module is demonstrated in detail in the [MOOSE Reactor Module Meshing Tutorial](https://mooseframework.inl.gov/modules/reactor/index.html).
 
 ## Objects and Syntax
 
