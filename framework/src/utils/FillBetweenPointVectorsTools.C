@@ -504,12 +504,15 @@ isBoundarySimpleClosedLoop(ReplicatedMesh & mesh,
                                                       ->node_id(1)));
     }
   }
-  return isClosedLoop(mesh,
-                      max_node_radius,
-                      boundary_ordered_node_list,
-                      boundary_node_assm,
-                      origin_pt,
-                      "external boundary");
+  bool is_closed_loop;
+  isClosedLoop(mesh,
+               max_node_radius,
+               boundary_ordered_node_list,
+               boundary_node_assm,
+               origin_pt,
+               "external boundary",
+               is_closed_loop);
+  return is_closed_loop;
 }
 
 bool
@@ -581,7 +584,10 @@ isCurveSimpleClosedLoop(ReplicatedMesh & mesh,
   std::vector<std::pair<dof_id_type, dof_id_type>> node_assm;
   for (auto it = mesh.active_elements_begin(); it != mesh.active_elements_end(); it++)
     node_assm.push_back(std::make_pair((*it)->node_id(0), (*it)->node_id(1)));
-  return isClosedLoop(mesh, max_node_radius, ordered_node_list, node_assm, origin_pt, "curve");
+  bool is_closed_loop;
+  isClosedLoop(
+      mesh, max_node_radius, ordered_node_list, node_assm, origin_pt, "curve", is_closed_loop);
+  return is_closed_loop;
 }
 
 bool
@@ -621,16 +627,19 @@ isCurveOpenSingleSegment(ReplicatedMesh & mesh,
   return false;
 }
 
-bool
+void
 isClosedLoop(ReplicatedMesh & mesh,
              Real & max_node_radius,
              std::vector<dof_id_type> & ordered_node_list,
              std::vector<std::pair<dof_id_type, dof_id_type>> & node_assm,
              const Point origin_pt,
-             const std::string input_type)
+             const std::string input_type,
+             bool & is_closed_loop,
+             const bool suppress_exception)
 {
   std::vector<dof_id_type> dummy_elem_list = std::vector<dof_id_type>(node_assm.size(), 0);
   std::vector<dof_id_type> ordered_dummy_elem_list;
+  is_closed_loop = false;
   MooseMeshUtils::makeOrderedNodeList(
       node_assm, dummy_elem_list, ordered_node_list, ordered_dummy_elem_list);
   // If the code ever gets here, node_assm is empty.
@@ -639,10 +648,10 @@ isClosedLoop(ReplicatedMesh & mesh,
   if (ordered_node_list.front() != ordered_node_list.back())
   {
     // This is invalid type #2
-    throw MooseException("This mesh generator does not work for the provided ",
-                         input_type,
-                         " as it is not a closed loop.");
-    return false;
+    if (!suppress_exception)
+      throw MooseException("This mesh generator does not work for the provided ",
+                           input_type,
+                           " as it is not a closed loop.");
   }
   // It the curve is a loop, check if azimuthal angles change monotonically
   else
@@ -662,13 +671,16 @@ isClosedLoop(ReplicatedMesh & mesh,
     }
     std::sort(ordered_node_azi_list.begin(), ordered_node_azi_list.end());
     if (ordered_node_azi_list.front() * ordered_node_azi_list.back() < 0.0)
+    {
       // This is invalid type #3
-      throw MooseException(
-          "This mesh generator does not work for the provided ",
-          input_type,
-          " as azimuthal angles of consecutive nodes do not change monotonically.");
+      if (!suppress_exception)
+        throw MooseException(
+            "This mesh generator does not work for the provided ",
+            input_type,
+            " as azimuthal angles of consecutive nodes do not change monotonically.");
+    }
     else
-      return true;
+      is_closed_loop = true;
   }
 }
 
