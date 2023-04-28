@@ -88,6 +88,13 @@ CircularBoundaryCorrectionGenerator::generate()
   if (!input_mesh)
     paramError("input", "Input is not a replicated mesh, which is required");
 
+  // Check if the input mesh has the given boundaries
+  for (const auto & bd : _input_mesh_circular_boundaries)
+  {
+    if (!MooseMeshUtils::hasBoundaryName(*input_mesh, bd))
+      paramError("input_mesh_circular_boundaries",
+                 "the boundary '" + bd + "' does not exist in the input mesh.");
+  }
   _input_mesh_circular_bids =
       MooseMeshUtils::getBoundaryIDs(*input_mesh, _input_mesh_circular_boundaries, false);
 
