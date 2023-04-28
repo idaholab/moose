@@ -82,6 +82,9 @@ From: {{ APPTAINER_FROM }}
     # need to add lcov-cobertura
     {%- endif %}
 
+    # Few packages needed by apps
+    dnf install -y fftw-devel gsl-devel
+
     # Setup the install script to be ran in a later
     # container that packages up the environment for a
     # smaller install into MOOSE_TOOLS_DIR
@@ -116,4 +119,5 @@ rm /root/install_moose_tools.sh' > /root/install_moose_tools.sh
 
     # Clean up
     conda clean -ya
+    dnf clean all
     rm -rf ${TEMP_LOC}
