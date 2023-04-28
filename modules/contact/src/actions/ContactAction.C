@@ -668,10 +668,8 @@ ContactAction::addMortarContact()
       var_params.set<bool>("use_displaced_mesh") = true;
       var_params.set<std::vector<VariableName>>("lm_variable") = {normal_lagrange_multiplier_name};
 
-      _problem->addUserObject("LMWeightedGapUserObject",
-                              "lm_weightedgap_object_" +
-                                  Moose::stringify(contact_userobject_counter),
-                              var_params);
+      _problem->addUserObject(
+          "LMWeightedGapUserObject", "lm_weightedgap_object_" + name(), var_params);
     }
     else if (_model == ContactModel::COULOMB && _formulation == ContactFormulation::MORTAR)
     {
@@ -696,10 +694,8 @@ ContactAction::addMortarContact()
         var_params.set<std::vector<VariableName>>("lm_variable_tangential_two") = {
             tangential_lagrange_multiplier_3d_name};
 
-      _problem->addUserObject("LMWeightedVelocitiesUserObject",
-                              "lm_weightedvelocities_object_" +
-                                  Moose::stringify(contact_userobject_counter),
-                              var_params);
+      _problem->addUserObject(
+          "LMWeightedVelocitiesUserObject", "lm_weightedvelocities_object_" + name(), var_params);
     }
 
     if (_model != ContactModel::COULOMB && _formulation == ContactFormulation::MORTAR_PENALTY)
@@ -718,10 +714,8 @@ ContactAction::addMortarContact()
         var_params.set<std::vector<VariableName>>("disp_z") = {displacements[2]};
       var_params.set<bool>("use_displaced_mesh") = true;
 
-      _problem->addUserObject("PenaltyWeightedGapUserObject",
-                              "penalty_weightedgap_object_" +
-                                  Moose::stringify(contact_userobject_counter),
-                              var_params);
+      _problem->addUserObject(
+          "PenaltyWeightedGapUserObject", "penalty_weightedgap_object_" + name(), var_params);
       _problem->haveADObjects(true);
     }
     else if (_model == ContactModel::COULOMB && _formulation == ContactFormulation::MORTAR_PENALTY)
@@ -743,10 +737,8 @@ ContactAction::addMortarContact()
       var_params.set<Real>("penalty") = getParam<Real>("penalty");
       var_params.set<Real>("penalty_friction") = getParam<Real>("penalty_friction");
 
-      _problem->addUserObject("PenaltyFrictionUserObject",
-                              "penalty_friction_object_" +
-                                  Moose::stringify(contact_userobject_counter),
-                              var_params);
+      _problem->addUserObject(
+          "PenaltyFrictionUserObject", "penalty_friction_object_" + name(), var_params);
       _problem->haveADObjects(true);
     }
   }
@@ -773,9 +765,7 @@ ContactAction::addMortarContact()
           params.set<CoupledName>("wear_depth") = getParam<CoupledName>("wear_depth");
       }
       else // We need user objects for quasistatic constraints
-        params.set<UserObjectName>("weighted_gap_uo") =
-            "lm_weightedgap_object_" +
-            Moose::stringify(contact_userobject_counter - 1); // Adjust for order
+        params.set<UserObjectName>("weighted_gap_uo") = "lm_weightedgap_object_" + name();
 
       params.set<bool>("correct_edge_dropping") = getParam<bool>("correct_edge_dropping");
       params.set<BoundaryName>("primary_boundary") = _boundary_pairs[0].first;
@@ -822,12 +812,9 @@ ContactAction::addMortarContact()
       }
       else
       { // We need user objects for quasistatic constraints
-        params.set<UserObjectName>("weighted_gap_uo") =
-            "lm_weightedvelocities_object_" +
-            Moose::stringify(contact_userobject_counter - 1); // Adjust for order
+        params.set<UserObjectName>("weighted_gap_uo") = "lm_weightedvelocities_object_" + name();
         params.set<UserObjectName>("weighted_velocities_uo") =
-            "lm_weightedvelocities_object_" +
-            Moose::stringify(contact_userobject_counter - 1); // Adjust for order
+            "lm_weightedvelocities_object_" + name();
       }
 
       params.set<bool>("correct_edge_dropping") = getParam<bool>("correct_edge_dropping");
@@ -903,32 +890,22 @@ ContactAction::addMortarContact()
 
         if (is_normal_constraint && _model != ContactModel::COULOMB &&
             _formulation == ContactFormulation::MORTAR)
-          params.set<UserObjectName>("weighted_gap_uo") =
-              "lm_weightedgap_object_" +
-              Moose::stringify(contact_userobject_counter - 1); // Adjust for order
+          params.set<UserObjectName>("weighted_gap_uo") = "lm_weightedgap_object_" + name();
         else if (is_normal_constraint && _model == ContactModel::COULOMB &&
                  _formulation == ContactFormulation::MORTAR)
-          params.set<UserObjectName>("weighted_gap_uo") =
-              "lm_weightedvelocities_object_" +
-              Moose::stringify(contact_userobject_counter - 1); // Adjust for order
+          params.set<UserObjectName>("weighted_gap_uo") = "lm_weightedvelocities_object_" + name();
         else if (_formulation == ContactFormulation::MORTAR)
           params.set<UserObjectName>("weighted_velocities_uo") =
-              "lm_weightedvelocities_object_" +
-              Moose::stringify(contact_userobject_counter - 1); // Adjust for order
+              "lm_weightedvelocities_object_" + name();
         else if (is_normal_constraint && _model != ContactModel::COULOMB &&
                  _formulation == ContactFormulation::MORTAR_PENALTY)
-          params.set<UserObjectName>("weighted_gap_uo") =
-              "penalty_weightedgap_object_" +
-              Moose::stringify(contact_userobject_counter - 1); // Adjust for order
+          params.set<UserObjectName>("weighted_gap_uo") = "penalty_weightedgap_object_" + name();
         else if (is_normal_constraint && _model == ContactModel::COULOMB &&
                  _formulation == ContactFormulation::MORTAR_PENALTY)
-          params.set<UserObjectName>("weighted_gap_uo") =
-              "penalty_friction_object_" +
-              Moose::stringify(contact_userobject_counter - 1); // Adjust for order
+          params.set<UserObjectName>("weighted_gap_uo") = "penalty_friction_object_" + name();
         else if (_formulation == ContactFormulation::MORTAR_PENALTY)
           params.set<UserObjectName>("weighted_velocities_uo") =
-              "penalty_friction_object_" +
-              Moose::stringify(contact_userobject_counter - 1); // Adjust for order
+              "penalty_friction_object_" + name();
 
         _problem->addConstraint(constraint_type, constraint_name, params);
       }
