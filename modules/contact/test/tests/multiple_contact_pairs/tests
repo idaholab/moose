@@ -60,6 +60,17 @@
     rel_err = 1.0e-4
     allow_warnings = true
   []
+  [four_hexagons_coarse_automatic_pair]
+    type = 'RunApp'
+    issues = '#24122'
+    input = 'four_hexagons_coarse_automatic_pair.i'
+    expect_out = 'Excluding contact pair 102--401'
+    cli_args = "Postprocessors/active=''"
+    requirement = 'The system shall be able to, under conditions of contact sideset and solid '
+                  'axisymmetry, assign primary-secondary contact pairs automatically excluding '
+                  'contact surfaces that cannot come into contact.'
+    allow_warnings = true
+  []
   [three_hexagons_coarse_automatic_pair_error]
     type = 'RunException'
     issues = '#24122'

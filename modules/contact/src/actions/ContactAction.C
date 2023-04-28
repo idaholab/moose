@@ -1066,7 +1066,8 @@ ContactAction::createSidesetPairsFromGeometry()
   mooseInfo("The contact action is reading the list of sidesets and matching them assuming that: "
             "1) Those sidesets wrap around the surfaces of the bodies, 2) Axisymmetry of the "
             "geometry and the mesh exists. Deviations from axisymmetry may give rise to wrong "
-            "contact pairing. The user is encouraged to check the numerical results.");
+            "contact pairing. The user is encouraged to check the screen output to confirm pairs "
+            "were assigned correctly.");
 
   _mesh = &_problem->mesh();
 
@@ -1137,7 +1138,7 @@ ContactAction::createSidesetPairsFromGeometry()
       minimum_representative_distance = pair_distance.second;
 
   // Apply a tolerance to the minimum distance to avoid missing pairs
-  minimum_representative_distance *= 1.3;
+  minimum_representative_distance *= 1.2;
 
   mooseInfo("Reference distance between bodies for automatically assigning contact pairs in "
             "contact action is: ",
@@ -1157,6 +1158,13 @@ ContactAction::createSidesetPairsFromGeometry()
                         ", with a relative distance of ",
                         pair_distance.second);
     }
+    else
+      mooseInfoRepeated("Excluding contact pair ",
+                        pair_distance.first.first,
+                        "--",
+                        pair_distance.first.second,
+                        ", with a relative distance of ",
+                        pair_distance.second);
 
   // Create the boundary pairs (possibly with repeated pairs depending on user input)
   for (const auto & lean_pairs_distance : lean_pairs_distances)

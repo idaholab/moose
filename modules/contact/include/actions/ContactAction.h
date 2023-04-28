@@ -103,7 +103,7 @@ protected:
   typedef std::vector<VariableName> CoupledName;
 
   /// Reference to mesh.
-  MooseMesh * _mesh;
+  const MooseMesh * _mesh;
 
 private:
   /**
