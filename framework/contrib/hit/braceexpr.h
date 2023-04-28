@@ -1,11 +1,5 @@
 #pragma once
 
-#ifdef WASP_ENABLED
-
-#include "wasp_braceexpr.h"
-
-#else
-
 #include "parse.h"
 
 #include <string>
@@ -122,5 +116,3 @@ private:
 };
 
 } // namespace hit
-
-#endif // not WASP_ENABLED

@@ -1,5 +1,3 @@
-#ifndef WASP_ENABLED
-
 #include "braceexpr.h"
 
 #include <cstdlib>
@@ -214,5 +212,3 @@ parseBraceBody(const std::string & input, size_t start, BraceNode & n)
 }
 
 } // namespace hit
-
-#endif // not WASP_ENABLED
