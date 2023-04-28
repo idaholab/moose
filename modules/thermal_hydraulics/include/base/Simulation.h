@@ -170,7 +170,7 @@ public:
                       const InputParameters & params);
 
   /**
-   * Reports an error if the variable name is not too long
+   * Reports an error if the variable name is too long
    */
   void checkVariableNameLength(const std::string & name) const;
 

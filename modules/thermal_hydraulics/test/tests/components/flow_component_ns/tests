@@ -18,7 +18,6 @@
     prereq = 'generate_mesh'
     method = "!dbg"
     valgrind = HEAVY
-    recover = false # see #19126
     requirement = 'The system shall model the porous, incompressible Navier-Stokes equations with a finite volume discretization, using a component.'
   []
 []
