@@ -14,123 +14,13 @@
 #include <ctime>
 
 // MOOSE includes
+#include "Registry.h"
 #include "MooseObject.h"
 #include "MooseTypes.h"
 #include "FileLineInfo.h"
 
 // Forward declarations
 class InputParameters;
-
-/**
- * Macros
- */
-#define stringifyName(name) #name
-#define registerObject(name) factory.reg<name>(stringifyName(name), __FILE__, __LINE__)
-#define registerNamedObject(obj, name)                                                             \
-  do                                                                                               \
-  {                                                                                                \
-    factory.reg<obj>(name, __FILE__, __LINE__);                                                    \
-    factory.associateNameToClass(name, stringifyName(obj));                                        \
-  } while (0)
-
-#define registerDeprecatedObject(name, time)                                                       \
-  factory.regDeprecated<name>(stringifyName(name), time, __FILE__, __LINE__)
-
-#define registerDeprecatedObjectWithReplacement(dep_obj, replacement_name, time)                   \
-  factory.regReplaced<dep_obj>(stringifyName(dep_obj), replacement_name, time, __FILE__, __LINE__)
-
-#define registerRenamedObject(orig_name, new_obj, time)                                            \
-  factory.renameObject<new_obj>(orig_name, stringifyName(new_obj), time, __FILE__, __LINE__)
-
-// for backward compatibility
-#define registerKernel(name) registerObject(name)
-#define registerNodalKernel(name) registerObject(name)
-#define registerBoundaryCondition(name) registerObject(name)
-#define registerAux(name) registerObject(name)
-#define registerAuxKernel(name) registerObject(name)
-#define registerMaterial(name) registerObject(name)
-#define registerPostprocessor(name) registerObject(name)
-#define registerVectorPostprocessor(name) registerObject(name)
-#define registerInitialCondition(name) registerObject(name)
-#define registerDamper(name) registerObject(name)
-#define registerDiracKernel(name) registerObject(name)
-#define registerDGKernel(name) registerObject(name)
-#define registerInterfaceKernel(name) registerObject(name)
-#define registerExecutioner(name) registerObject(name)
-#define registerFunction(name) registerObject(name)
-#define registerDistribution(name) registerObject(name)
-#define registerSampler(name) registerObject(name)
-#define registerMesh(name) registerObject(name)
-#define registerConstraint(name) registerObject(name)
-#define registerScalarKernel(name) registerObject(name)
-#define registerUserObject(name) registerObject(name)
-#define registerPreconditioner(name) registerObject(name)
-#define registerIndicator(name) registerObject(name)
-#define registerMarker(name) registerObject(name)
-#define registerProblem(name) registerObject(name)
-#define registerMultiApp(name) registerObject(name)
-#define registerTransfer(name) registerObject(name)
-#define registerTimeStepper(name) registerObject(name)
-#define registerTimeIntegrator(name) registerObject(name)
-#define registerPredictor(name) registerObject(name)
-#define registerSplit(name) registerObject(name)
-#define registerOutput(name) registerObject(name)
-#define registerControl(name) registerObject(name)
-#define registerPartitioner(name) registerObject(name)
-#define registerRelationshipManager(name) registerObject(name)
-
-#define registerNamedKernel(obj, name) registerNamedObject(obj, name)
-#define registerNamedNodalKernel(obj, name) registerNamedObject(obj, name)
-#define registerNamedBoundaryCondition(obj, name) registerNamedObject(obj, name)
-#define registerNamedAux(obj, name) registerNamedObject(obj, name)
-#define registerNamedAuxKernel(name) registerNamedObject(obj, name)
-#define registerNamedMaterial(obj, name) registerNamedObject(obj, name)
-#define registerNamedPostprocessor(obj, name) registerNamedObject(obj, name)
-#define registerNamedVectorPostprocessor(obj, name) registerNamedObject(obj, name)
-#define registerNamedInitialCondition(obj, name) registerNamedObject(obj, name)
-#define registerNamedDamper(obj, name) registerNamedObject(obj, name)
-#define registerNamedDiracKernel(obj, name) registerNamedObject(obj, name)
-#define registerNamedDGKernel(obj, name) registerNamedObject(obj, name)
-#define registerNamedExecutioner(obj, name) registerNamedObject(obj, name)
-#define registerNamedFunction(obj, name) registerNamedObject(obj, name)
-#define registerNamedDistribution(obj, name) registerNamedObject(obj, name)
-#define registerNamedSampler(obj, name) registerNamedObject(obj, name)
-#define registerNamedMesh(obj, name) registerNamedObject(obj, name)
-#define registerNamedConstraint(obj, name) registerNamedObject(obj, name)
-#define registerNamedUserObject(obj, name) registerNamedObject(obj, name)
-#define registerNamedPreconditioner(obj, name) registerNamedObject(obj, name)
-#define registerNamedIndicator(obj, name) registerNamedObject(obj, name)
-#define registerNamedMarker(obj, name) registerNamedObject(obj, name)
-#define registerNamedProblem(obj, name) registerNamedObject(obj, name)
-#define registerNamedMultiApp(obj, name) registerNamedObject(obj, name)
-#define registerNamedTransfer(obj, name) registerNamedObject(obj, name)
-#define registerNamedTimeStepper(obj, name) registerNamedObject(obj, name)
-#define registerNamedTimeIntegrator(obj, name) registerNamedObject(obj, name)
-#define registerNamedPredictor(obj, name) registerNamedObject(obj, name)
-#define registerNamedSplit(obj, name) registerNamedObject(obj, name)
-#define registerNamedOutput(obj, name) registerNamedObject(obj, name)
-#define registerNamedControl(obj, name) registerNamedObject(obj, name)
-#define registerNamedPartitioner(obj, name) registerNamedObject(obj, name);
-
-/**
- * alias to wrap shared pointer type
- */
-using MooseObjectPtr = std::shared_ptr<MooseObject>;
-
-/**
- * alias for validParams function
- */
-using paramsPtr = InputParameters (*)();
-
-/**
- * alias for method to build objects
- */
-using buildPtr = MooseObjectPtr (*)(const InputParameters & parameters);
-
-/**
- * alias for registered Object iterator
- */
-using registeredMooseObjectIterator = std::map<std::string, paramsPtr>::iterator;
 
 /**
  * Generic factory class for build all sorts of objects
@@ -141,24 +31,7 @@ public:
   Factory(MooseApp & app);
   virtual ~Factory();
 
-  /**
-   * Register a new object
-   * @param obj_name Name of the object to register
-   */
-  template <typename T>
-  void reg(const std::string & obj_name, const std::string & file = "", int line = -1)
-  {
-    reg("", obj_name, &buildObject<T>, &moose::internal::callValidParams<T>, "", "", file, line);
-  }
-
-  void reg(const std::string & label,
-           const std::string & obj_name,
-           const buildPtr & build_ptr,
-           const paramsPtr & params_ptr,
-           const std::string & deprecated_time = "",
-           const std::string & replacement_name = "",
-           const std::string & file = "",
-           int line = -1);
+  void reg(RegistryEntryPtr obj);
 
   /**
    * Gets file and line information where an object was initially registered.
@@ -182,82 +55,6 @@ public:
   std::string associatedClassName(const std::string & name) const;
 
   /**
-   * Register a deprecated object that expires
-   * @param obj_name The name of the object to register
-   * @param t_str String containing the expiration date for the object in "MM/DD/YYYY HH:MM"
-   * format. Note that the HH:MM is not optional
-   *
-   * Note: Params file and line are supplied by the macro
-   */
-  template <typename T>
-  void regDeprecated(const std::string & obj_name,
-                     const std::string t_str,
-                     const std::string & file,
-                     int line)
-  {
-    reg("", obj_name, &buildObject<T>, &moose::internal::callValidParams<T>, t_str, "", file, line);
-  }
-
-  /**
-   * Registers an object as deprecated and associates it with the replacement name.
-   * @param dep_obj - The name (type) of the object being registered (the deprecated type)
-   * @param replacement_name - The name of the object replacing the deprecated object (new name)
-   * @param time_str - Time at which the deprecated message prints as  an error "MM/DD/YYYY HH:MM"
-   * Note that the HH:MM is not optional
-   *
-   * Note: Params file and line are supplied by the macro
-   */
-  template <typename T>
-  void regReplaced(const std::string & dep_obj,
-                   const std::string & replacement_name,
-                   const std::string time_str,
-                   const std::string & file,
-                   int line)
-  {
-    reg("",
-        dep_obj,
-        &buildObject<T>,
-        &moose::internal::callValidParams<T>,
-        time_str,
-        replacement_name,
-        file,
-        line);
-  }
-
-  /**
-   * Used when an existing object's name changes
-   *
-   * Template T: The type of the new class
-   *
-   * @param orig_name The name of the original class
-   * @param new_name The name of the new class
-   * @param time_str The date the deprecation will expire
-   *
-   * Note: Params file and line are supplied by the macro
-   */
-  template <typename T>
-  void renameObject(const std::string & orig_name,
-                    const std::string & new_name,
-                    const std::string time_str,
-                    const std::string & file,
-                    int line)
-  {
-    // Deprecate the old name
-    // Store the time
-    _deprecated_time[orig_name] = parseTime(time_str);
-
-    // Store the new name
-    _deprecated_name[orig_name] = new_name;
-
-    // Register the new object with the old name
-    reg<T>(orig_name, __FILE__, __LINE__);
-    associateNameToClass(orig_name, new_name);
-
-    // Register the new object with the new name
-    reg<T>(new_name, file, line);
-  }
-
-  /**
    * Get valid parameters for the object
    * @param name Name of the object whose parameter we are requesting
    * @return Parameters of the object
@@ -273,11 +70,11 @@ public:
    * @param print_deprecated controls the deprecated message
    * @return The created object
    */
-  std::shared_ptr<MooseObject> create(const std::string & obj_name,
-                                      const std::string & name,
-                                      const InputParameters & parameters,
-                                      THREAD_ID tid = 0,
-                                      bool print_deprecated = true);
+  MooseObjectPtr create(const std::string & obj_name,
+                        const std::string & name,
+                        const InputParameters & parameters,
+                        THREAD_ID tid = 0,
+                        bool print_deprecated = true);
 
   /**
    * Build an object (must be registered)
@@ -322,12 +119,7 @@ public:
   /**
    * Access to registered object iterator (begin)
    */
-  registeredMooseObjectIterator registeredObjectsBegin() { return _name_to_params_pointer.begin(); }
-
-  /**
-   * Access to registered object iterator (end)
-   */
-  registeredMooseObjectIterator registeredObjectsEnd() { return _name_to_params_pointer.end(); }
+  const auto & registeredObjects() { return _name_to_object; }
 
   /**
    * Get a list of all constructed Moose Object types
@@ -356,23 +148,11 @@ private:
    */
   void reportUnregisteredError(const std::string & obj_name) const;
 
-  /**
-   * Build an object of type T
-   */
-  template <typename T>
-  static MooseObjectPtr buildObject(const InputParameters & parameters)
-  {
-    return std::make_shared<T>(parameters);
-  }
-
   /// Reference to the application
   MooseApp & _app;
 
-  /// Storage for pointers to the object
-  std::map<std::string, buildPtr> _name_to_build_pointer;
-
-  /// Storage for pointers to the parameters objects
-  std::map<std::string, paramsPtr> _name_to_params_pointer;
+  /// Storage for pointers to the object registry entry
+  std::map<std::string, RegistryEntryPtr> _name_to_object;
 
   FileLineInfoMap _name_to_line;
 

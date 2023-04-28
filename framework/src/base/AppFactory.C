@@ -15,8 +15,12 @@
 AppFactory &
 AppFactory::instance()
 {
-  static AppFactory instance;
-  return instance;
+  // We need a naked new here (_not_ a smart pointer or object instance) due to what seems like a
+  // bug in clang's static object destruction when using dynamic library loading.
+  static AppFactory * instance = nullptr;
+  if (!instance)
+    instance = new AppFactory;
+  return *instance;
 }
 
 AppFactory::~AppFactory() {}
@@ -24,11 +28,10 @@ AppFactory::~AppFactory() {}
 InputParameters
 AppFactory::getValidParams(const std::string & name)
 {
-  if (_name_to_params_pointer.find(name) == _name_to_params_pointer.end())
+  if (_name_to_build_info.find(name) == _name_to_build_info.end())
     mooseError(std::string("A '") + name + "' is not a registered object\n\n");
 
-  InputParameters params = _name_to_params_pointer[name]();
-  return params;
+  return _name_to_build_info[name]->buildParameters();
 }
 
 MooseAppPtr
@@ -61,7 +64,7 @@ AppFactory::createShared(const std::string & app_type,
                          MPI_Comm comm_world_in)
 {
   // Error if the application type is not located
-  if (_name_to_build_pointer.find(app_type) == _name_to_build_pointer.end())
+  if (_name_to_build_info.find(app_type) == _name_to_build_info.end())
     mooseError("Object '" + app_type + "' was not registered.");
 
   // Take the app_type and add it to the parameters so that it can be retrieved in the Application
@@ -83,5 +86,5 @@ AppFactory::createShared(const std::string & app_type,
   command_line->addCommandLineOptionsFromParams(parameters);
   command_line->populateInputParams(parameters);
 
-  return (*_name_to_build_pointer[app_type])(parameters);
+  return _name_to_build_info[app_type]->build(parameters);
 }

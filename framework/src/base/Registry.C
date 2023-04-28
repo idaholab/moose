@@ -20,20 +20,12 @@
 Registry &
 Registry::getRegistry()
 {
-  static Registry registry_singleton;
-  return registry_singleton;
-}
-
-void
-Registry::addInner(const RegistryEntry & info)
-{
-  getRegistry()._per_label_objects[info._label].push_back(info);
-}
-
-void
-Registry::addActionInner(const RegistryEntry & info)
-{
-  getRegistry()._per_label_actions[info._label].push_back(info);
+  // We need a naked new here (_not_ a smart pointer or object instance) due to what seems like a
+  // bug in clang's static object destruction when using dynamic library loading.
+  static Registry * registry_singleton = nullptr;
+  if (!registry_singleton)
+    registry_singleton = new Registry();
+  return *registry_singleton;
 }
 
 void
@@ -49,30 +41,23 @@ Registry::registerObjectsTo(Factory & f, const std::set<std::string> & labels)
 
     for (const auto & obj : r._per_label_objects[label])
     {
-      std::string name = obj._name;
+      std::string name = obj->_name;
       if (name.empty())
-        name = obj._alias;
+        name = obj->_alias;
       if (name.empty())
-        name = obj._classname;
+        name = obj->_classname;
 
       r._name_to_entry[name] = obj;
 
-      f.reg(obj._label,
-            name,
-            obj._build_ptr,
-            obj._params_ptr,
-            obj._deprecated_time,
-            obj._replaced_by,
-            obj._file,
-            obj._line);
+      f.reg(obj);
 
-      if (!obj._alias.empty())
-        f.associateNameToClass(name, obj._classname);
+      if (!obj->_alias.empty())
+        f.associateNameToClass(name, obj->_classname);
     }
   }
 }
 
-RegistryEntry &
+RegistryEntryPtr
 Registry::objData(const std::string & name)
 {
   auto & r = getRegistry();
@@ -97,8 +82,7 @@ Registry::registerActionsTo(ActionFactory & f, const std::set<std::string> & lab
       continue;
 
     for (const auto & obj : r._per_label_actions[label])
-      f.reg(
-          obj._classname, obj._name, obj._build_action_ptr, obj._params_ptr, obj._file, obj._line);
+      f.reg(obj);
   }
 }
 

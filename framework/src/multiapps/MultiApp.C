@@ -60,9 +60,8 @@ MultiApp::validParams()
                         "the undisplaced mesh will still be used.");
 
   std::ostringstream app_types_strings;
-  registeredMooseAppIterator it = AppFactory::instance().registeredObjectsBegin();
-  for (; it != AppFactory::instance().registeredObjectsEnd(); ++it)
-    app_types_strings << it->first << " ";
+  for (const auto & name_bi_pair : AppFactory::instance().registeredObjects())
+    app_types_strings << name_bi_pair.first << " ";
   MooseEnum app_types_options(app_types_strings.str(), "", true);
 
   // Dynamic loading

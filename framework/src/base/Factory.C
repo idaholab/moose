@@ -8,6 +8,7 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "Factory.h"
+#include "Registry.h"
 #include "InfixIterator.h"
 #include "InputParameterWarehouse.h"
 // Just for testing...
@@ -18,15 +19,15 @@ Factory::Factory(MooseApp & app) : _app(app) {}
 Factory::~Factory() {}
 
 void
-Factory::reg(const std::string & label,
-             const std::string & obj_name,
-             const buildPtr & build_ptr,
-             const paramsPtr & params_ptr,
-             const std::string & deprecated_time,
-             const std::string & replacement_name,
-             const std::string & file,
-             int line)
+Factory::reg(std::shared_ptr<RegistryEntryBase> obj)
 {
+  const std::string obj_name = obj->name();
+  const std::string & label = obj->_label;
+  const std::string & deprecated_time = obj->_deprecated_time;
+  const std::string & replacement_name = obj->_replaced_by;
+  const std::string & file = obj->_file;
+  const int line = obj->_line;
+
   // do nothing if we have already added this exact object before
   auto key = std::make_pair(label, obj_name);
   if (_objects_by_label.find(key) != _objects_by_label.end())
@@ -44,13 +45,12 @@ Factory::reg(const std::string & label,
   if (_registerable_objects.empty() ||
       _registerable_objects.find(obj_name) != _registerable_objects.end())
   {
-    if (_name_to_build_pointer.find(obj_name) != _name_to_build_pointer.end())
+    if (_name_to_object.find(obj_name) != _name_to_object.end())
       mooseError("Object '" + obj_name + "' registered from multiple files: ",
                  file,
                  " and ",
                  _name_to_line.getInfo(obj_name).file());
-    _name_to_build_pointer[obj_name] = build_ptr;
-    _name_to_params_pointer[obj_name] = params_ptr;
+    _name_to_object[obj_name] = obj;
     _objects_by_label.insert(key);
   }
   _name_to_line.addInfo(obj_name, file, line);
@@ -66,24 +66,23 @@ Factory::reg(const std::string & label,
 InputParameters
 Factory::getValidParams(const std::string & obj_name)
 {
-  std::map<std::string, paramsPtr>::iterator it = _name_to_params_pointer.find(obj_name);
+  const auto it = _name_to_object.find(obj_name);
 
   // Check if the object is registered
-  if (it == _name_to_params_pointer.end())
+  if (it == _name_to_object.end())
     reportUnregisteredError(obj_name);
 
   // Print out deprecated message, if it exists
   deprecatedMessage(obj_name);
 
   // Return the parameters
-  paramsPtr & func = it->second;
-  InputParameters params = (*func)();
+  auto params = it->second->buildParameters();
   params.addPrivateParam("_moose_app", &_app);
 
   return params;
 }
 
-MooseObjectPtr
+std::shared_ptr<MooseObject>
 Factory::create(const std::string & obj_name,
                 const std::string & name,
                 const InputParameters & parameters,
@@ -94,10 +93,10 @@ Factory::create(const std::string & obj_name,
     mooseDeprecated("Factory::create() is deprecated, please use Factory::create<T>() instead");
 
   // Pointer to the object constructor
-  std::map<std::string, buildPtr>::iterator it = _name_to_build_pointer.find(obj_name);
+  const auto it = _name_to_object.find(obj_name);
 
   // Check if the object is registered
-  if (it == _name_to_build_pointer.end())
+  if (it == _name_to_object.end())
     reportUnregisteredError(obj_name);
 
   // Print out deprecated message, if it exists
@@ -121,8 +120,7 @@ Factory::create(const std::string & obj_name,
     _app.actionWarehouse().problemBase()->setInputParametersFEProblem(params);
 
   // call the function pointer to build the object
-  buildPtr & func = it->second;
-  auto obj = (*func)(params);
+  auto obj = it->second->build(params);
 
   auto fep = std::dynamic_pointer_cast<FEProblemBase>(obj);
   if (fep)
@@ -199,7 +197,7 @@ Factory::parseTime(const std::string t_str)
 void
 Factory::deprecatedMessage(const std::string obj_name)
 {
-  std::map<std::string, std::time_t>::iterator time_it = _deprecated_time.find(obj_name);
+  const auto time_it = _deprecated_time.find(obj_name);
 
   // If the object is not deprecated return
   if (time_it == _deprecated_time.end())
@@ -224,7 +222,7 @@ Factory::deprecatedMessage(const std::string obj_name)
   // Message storage
   std::ostringstream msg;
 
-  std::map<std::string, std::string>::iterator name_it = _deprecated_name.find(obj_name);
+  const auto name_it = _deprecated_name.find(obj_name);
 
   // Expired object
   if (now > t_end)

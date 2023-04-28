@@ -27,19 +27,25 @@ class InputParameters;
 using MooseAppPtr = std::shared_ptr<MooseApp>;
 
 /**
- * alias for validParams function
+ * Polymorphic data structure with parameter and object build access.
  */
-using paramsPtr = InputParameters (*)();
+struct AppFactoryBuildInfoBase
+{
+  virtual MooseAppPtr build(const InputParameters & params) = 0;
+  virtual InputParameters buildParameters() = 0;
+  virtual ~AppFactoryBuildInfoBase() = default;
+};
+template <typename T>
+struct AppFactoryBuildInfo : public AppFactoryBuildInfoBase
+{
+  virtual MooseAppPtr build(const InputParameters & params) override
+  {
+    return std::make_shared<T>(params);
+  }
+  virtual InputParameters buildParameters() override { return T::validParams(); }
+};
 
-/**
- * alias for method to build objects
- */
-using appBuildPtr = MooseAppPtr (*)(const InputParameters & parameters);
-
-/**
- * alias for registered Object iterator
- */
-using registeredMooseAppIterator = std::map<std::string, paramsPtr>::iterator;
+using AppFactoryBuildInfoMap = std::map<std::string, std::shared_ptr<AppFactoryBuildInfoBase>>;
 
 /**
  * Generic AppFactory class for building Application objects
@@ -89,31 +95,24 @@ public:
                            InputParameters parameters,
                            MPI_Comm COMM_WORLD_IN);
 
-  ///@{
   /**
-   * Returns iterators to the begin/end of the registered objects data structure: a name ->
-   * validParams function pointer.
+   * Returns a reference to the from names to AppFactoryBuildInfo pointers
    */
-  registeredMooseAppIterator registeredObjectsBegin() { return _name_to_params_pointer.begin(); }
-  registeredMooseAppIterator registeredObjectsEnd() { return _name_to_params_pointer.end(); }
-  ///@}
+  const auto & registeredObjects() { return _name_to_build_info; }
 
   /**
    * Returns a Boolean indicating whether an application type has been registered
    */
   bool isRegistered(const std::string & app_name) const
   {
-    return _name_to_params_pointer.count(app_name);
+    return _name_to_build_info.count(app_name);
   }
 
   /**
    * Returns the map of object name to a function pointer for building said object's
    * input parameters.
    */
-  const std::map<std::string, paramsPtr> & registeredObjectParamPointers() const
-  {
-    return _name_to_params_pointer;
-  }
+  const AppFactoryBuildInfoMap & registeredObjectBuildInfos() const { return _name_to_build_info; }
 
   ///@{ Don't allow creation through copy/move construction or assignment
   AppFactory(AppFactory const &) = delete;
@@ -124,19 +123,11 @@ public:
   ///@}
 
 protected:
-  std::map<std::string, appBuildPtr> _name_to_build_pointer;
-
-  std::map<std::string, paramsPtr> _name_to_params_pointer;
+  AppFactoryBuildInfoMap _name_to_build_info;
 
 private:
   // Private constructor for singleton pattern
   AppFactory() {}
-
-  template <class T>
-  static MooseAppPtr buildApp(const InputParameters & parameters)
-  {
-    return std::make_shared<T>(parameters);
-  }
 };
 
 template <typename T>
@@ -146,6 +137,5 @@ AppFactory::reg(const std::string & name)
   if (isRegistered(name))
     return;
 
-  _name_to_build_pointer[name] = &buildApp<T>;
-  _name_to_params_pointer[name] = &moose::internal::callValidParams<T>;
+  _name_to_build_info[name] = std::make_shared<AppFactoryBuildInfo<T>>();
 }

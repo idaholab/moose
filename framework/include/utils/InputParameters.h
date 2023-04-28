@@ -1814,19 +1814,3 @@ InputParameters::have_parameter(std::string_view name_in) const
 
   return Parameters::have_parameter<T>(name);
 }
-
-namespace moose
-{
-namespace internal
-{
-/**
- * Calls the valid parameter method for the object of type T.
- */
-template <typename T>
-InputParameters
-callValidParams()
-{
-  return T::validParams();
-}
-}
-}
