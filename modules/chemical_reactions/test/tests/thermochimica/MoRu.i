@@ -16,6 +16,9 @@
 
 [ChemicalComposition]
   thermofile = Kaye_NobleMetals.dat
+  tunit = K
+  punit = atm
+  munit = moles
 []
 
 [ICs]

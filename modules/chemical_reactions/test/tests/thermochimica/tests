@@ -100,4 +100,15 @@
     max_threads = 1
     required_submodule = 'contrib/thermochimica'
   []
+  [wrong_phase]
+    type = RunException
+    input = MoRu.i
+    expect_err = "Phase 'RandomPhase' was not found in the simulation."
+    cli_args = "GlobalParams/output_phases='BCCN HCPN RandomPhase' UserObjects/data/output_phases='BCCN HCPN RandomPhase'"
+    requirement = 'The system shall throw an error if a phase absent from the simulation is specified for phase output'
+    design = ThermochimicaNodalData.md
+
+    max_threads = 1
+    required_submodule = 'contrib/thermochimica'
+  []
 []

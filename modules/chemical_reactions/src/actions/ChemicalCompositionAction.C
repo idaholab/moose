@@ -40,14 +40,13 @@ ChemicalCompositionAction::validParams()
   params.addParam<FileName>("initial_values", "The CSV file name with initial conditions.");
   params.addParam<FileName>("thermofile", "Thermodynamics model file");
 
-  MooseEnum tUnit("K C F R", "K");
-  params.addParam<MooseEnum>("tunit", tUnit, "Temperature Unit");
-  MooseEnum pUnit("atm psi bar Pa kPa", "atm");
-  params.addParam<MooseEnum>("punit", pUnit, "Pressure Unit");
+  MooseEnum tUnit("K C F R");
+  params.addRequiredParam<MooseEnum>("tunit", tUnit, "Temperature Unit");
+  MooseEnum pUnit("atm psi bar Pa kPa");
+  params.addRequiredParam<MooseEnum>("punit", pUnit, "Pressure Unit");
   MooseEnum mUnit(
-      "mole_fraction atom_fraction atoms moles gram-atoms mass_fraction kilograms grams pounds",
-      "moles");
-  params.addParam<MooseEnum>("munit", mUnit, "Mass Unit");
+      "mole_fraction atom_fraction atoms moles gram-atoms mass_fraction kilograms grams pounds");
+  params.addRequiredParam<MooseEnum>("munit", mUnit, "Mass Unit");
 
   params.addParam<std::vector<std::string>>("output_phases", "List of phases to be output");
   params.addParam<std::vector<std::string>>(

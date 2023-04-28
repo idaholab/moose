@@ -40,14 +40,6 @@ ThermochimicaNodalData::validParams()
   return params;
 }
 
-// else
-// {
-//   [ _db_number_soln_phases, _db_number_con_phases ] = Thermochimica::getNumberPhasesDatabase();
-
-//   _db_phase_names = Thermochimica::getPhaseNames();
-//   _db_species_names = Thermochimica::getSolnSpeciesNames();
-// }
-
 ThermochimicaNodalData::ThermochimicaNodalData(const InputParameters & parameters)
   : NodalUserObject(parameters),
     _pressure(coupledValue("pressure")),
@@ -83,11 +75,16 @@ ThermochimicaNodalData::ThermochimicaNodalData(const InputParameters & parameter
 
   // Consistency checks
   _db_num_phases = Thermochimica::getNumberPhasesDatabase();
-  _db_phase_names = Thermochimica::getPhaseNames();
-  // _db_species_names = Thermochimica::getSpeciesNames();
+  _db_phase_names = Thermochimica::getPhaseNamesDatabase();
+  _db_species_names = Thermochimica::getSpeciesDatabase();
 
   for (const auto i : make_range(_n_phases))
+  {
     _ph_name[i] = getVar("output_phases", i)->name();
+    if (std::find(_db_phase_names.begin(), _db_phase_names.end(), _ph_name[i]) ==
+        _db_phase_names.end())
+      paramError("output_phases", "Phase '", _ph_name[i], "' was not found in the simulation.");
+  }
 
   for (const auto i : make_range(_n_species))
   {
@@ -96,10 +93,23 @@ ThermochimicaNodalData::ThermochimicaNodalData(const InputParameters & parameter
     if (colon == std::string::npos)
       paramError("output_species", "No ':' separator found in variable '", species_var_name, "'");
     _sp_phase_name[i] = species_var_name.substr(0, colon);
+    if (std::find(_db_phase_names.begin(), _db_phase_names.end(), _sp_phase_name[i]) ==
+        _db_phase_names.end())
+      paramError("output_species",
+                 "Phase name '",
+                 _sp_phase_name[i],
+                 "' of output species '",
+                 species_var_name,
+                 "' was not found in the simulation.");
     _sp_species_name[i] = species_var_name.substr(colon + 1);
-    if (std::find(_el_name.begin(), _el_name.end(), _sp_species_name[i]) == _el_name.end())
+    auto ph_index =
+        std::distance(_db_phase_names.begin(),
+                      std::find(_db_phase_names.begin(), _db_phase_names.end(), _sp_phase_name[i]));
+    if (std::find(_db_species_names[ph_index].begin(),
+                  _db_species_names[ph_index].end(),
+                  _sp_species_name[i]) == _db_species_names[ph_index].end())
       paramError(
-          "output_species", "Element '", _sp_species_name[i], "' was not found in the simulation.");
+          "output_species", "Species '", _sp_species_name[i], "' was not found in the simulation.");
   }
 
   if (_output_element_potential)

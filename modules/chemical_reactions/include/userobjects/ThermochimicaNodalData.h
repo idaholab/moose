@@ -74,7 +74,7 @@ protected:
 
   std::pair<int, int> _db_num_phases;
   std::vector<std::string> _db_phase_names;
-  std::vector<std::string> _db_species_names;
+  std::vector<std::vector<std::string>> _db_species_names;
 
   std::vector<std::string> _ph_name;
   std::vector<std::string> _sp_phase_name;
