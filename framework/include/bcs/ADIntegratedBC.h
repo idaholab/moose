@@ -94,12 +94,9 @@ private:
   void addJacobian(const MooseVariableFieldBase & jvar);
 
   /**
-   * compute all the Jacobian entries, but for non-global indexing only add the matrix coupling
-   * entries specified by \p coupling_entries
+   * compute all the Jacobian entries
    */
-  void computeADJacobian(
-      const std::vector<std::pair<MooseVariableFieldBase *, MooseVariableFieldBase *>> &
-          coupling_entries);
+  void computeADJacobian();
 };
 
 using ADIntegratedBC = ADIntegratedBCTempl<Real>;
