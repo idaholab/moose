@@ -1830,7 +1830,7 @@ MooseApp::dynamicRegistration(const Parameters & params)
 void
 MooseApp::loadLibraryAndDependencies(const std::string & library_filename,
                                      const Parameters & params,
-                                     bool load_dependencies)
+                                     const bool load_dependencies)
 {
   std::string line;
   std::string dl_lib_filename;
@@ -1878,15 +1878,14 @@ MooseApp::loadLibraryAndDependencies(const std::string & library_filename,
   // Time to load the library, First see if we've already loaded this particular dynamic library
   //     1) make sure we haven't already loaded this library
   // AND 2) make sure we have a library name (we won't for static linkage)
-  //
   // Note: Here was are going to assume uniqueness based on the filename alone. This has significant
-  // implications for applications that have have "diamond" inheritance of libraries (usually
-  // modules) We will only load one of those libraries, versions be damned.
+  // implications for applications that have "diamond" inheritance of libraries (usually
+  // modules). We will only load one of those libraries, versions be damned.
   auto dyn_lib_it = _lib_handles.find(file_name);
   if (dyn_lib_it == _lib_handles.end())
   {
     // Assemble the actual filename using the base path of the *.la file and the dl_lib_filename
-    const auto & dl_lib_full_path = dir + '/' + dl_lib_filename;
+    const auto dl_lib_full_path = dir + '/' + dl_lib_filename;
 
     MooseUtils::checkFileReadable(dl_lib_full_path, false, /*throw_on_unreadable=*/true);
 
@@ -1993,7 +1992,7 @@ MooseApp::getLibrarySearchPaths(const std::string & library_path) const
 {
   std::set<std::string> paths;
 
-  if (library_path != "")
+  if (!library_path.empty())
   {
     std::vector<std::string> tmp_paths;
     MooseUtils::tokenize(library_path, tmp_paths, 1, ":");
