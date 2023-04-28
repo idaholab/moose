@@ -11,8 +11,8 @@ momentum_tag = "non_pressure"
     dim = 2
     dx = '0.3'
     dy = '0.3'
-    ix = '3'
-    iy = '3'
+    ix = '6'
+    iy = '6'
     subdomain_id = '1'
   []
 []
@@ -164,17 +164,17 @@ momentum_tag = "non_pressure"
   petsc_options_value = 'hypre boomeramg NONZERO'
   petsc_options = '-ksp_monitor'
   nl_max_its = 1
-  l_max_its = 200
-  l_abs_tol = 1e-8
-  l_tol = 1e-8
+  l_max_its = 400
+  l_abs_tol = 1e-10
+  l_tol = 1e-10
   line_search = 'none'
   rhie_chow_user_object = 'rc'
   momentum_system = 'momentum_system'
   pressure_system = 'pressure_system'
   momentum_tag = ${momentum_tag}
-  momentum_variable_relaxation = 0.96
-  pressure_variable_relaxation = 0.2
-  num_iterations = 100
+  momentum_variable_relaxation = 1.0
+  pressure_variable_relaxation = 0.3
+  num_iterations = 3
   pressure_absolute_tolerance = 1e-8
   momentum_absolute_tolerance = 1e-5
 

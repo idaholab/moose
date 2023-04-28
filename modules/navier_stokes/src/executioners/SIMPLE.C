@@ -257,13 +257,13 @@ SIMPLE::execute()
 
     // Moose::PetscSupport::petscSetOptions(_problem);
 
-    std::cout << "old pressure" << std::endl;
-    pressure_solution_old->print();
+    // std::cout << "old pressure" << std::endl;
+    // pressure_solution_old->print();
 
     _problem.solve(_pressure_sys_number);
 
-    std::cout << "old pressure" << std::endl;
-    pressure_solution_old->print();
+    // std::cout << "old pressure" << std::endl;
+    // pressure_solution_old->print();
 
     pressure_residual = _pressure_sys._initial_residual_after_preset_bcs;
 
@@ -295,10 +295,10 @@ SIMPLE::execute()
 
     PetscScalar relax = _pressure_variable_relaxation;
 
-    std::cout << "new pressure" << std::endl;
-    pressure_solution->print();
-    std::cout << "old pressure" << std::endl;
-    pressure_solution_old->print();
+    // std::cout << "new pressure" << std::endl;
+    // pressure_solution->print();
+    // std::cout << "old pressure" << std::endl;
+    // pressure_solution_old->print();
 
     pressure_solution->scale(relax);
     pressure_solution->add(1 - relax, *pressure_solution_old);
@@ -312,8 +312,8 @@ SIMPLE::execute()
     *pressure_solution_old = *pressure_solution;
     _pressure_sys.setSolution(*pressure_solution);
 
-    std::cout << "old pressure" << std::endl;
-    pressure_solution_old->print();
+    // std::cout << "old pressure" << std::endl;
+    // pressure_solution_old->print();
 
     // ierr = VecAYPX(solution->vec(), relax, vvv);
 
