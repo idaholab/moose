@@ -169,8 +169,6 @@ From: {{ APPTAINER_FROM }}
     ln -s combined-opt moose-opt
 {%- endif %}
 
-    # Install moose-tools from moose-base container
-    source /root/install_moose_tools.sh
 {%- if SECTION_POST_POST is defined %}
     {{ SECTION_POST_POST }}
 {%- endif %}
