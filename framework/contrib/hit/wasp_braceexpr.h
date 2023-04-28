@@ -11,7 +11,7 @@
 
 #ifdef WASP_ENABLED
 
-#include "wasp_parse.h"
+#include "parse.h"
 
 #include <string>
 #include <vector>
