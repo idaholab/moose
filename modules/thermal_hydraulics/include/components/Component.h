@@ -288,9 +288,8 @@ protected:
    * This method was copied from Action.
    *
    * @param moose_object_pars The MooseObject to inspect for RelationshipManagers to add
-   * @return Whether any relationship manager was added
    */
-  bool addRelationshipManagersFromParameters(const InputParameters & moose_object_pars);
+  void addRelationshipManagersFromParameters(const InputParameters & moose_object_pars);
 
   /**
    * Runtime check to make sure that a parameter of specified type exists in the component's input
@@ -425,9 +424,8 @@ private:
    *                                requesting MooseObject's validParams function
    * @param sys_type A RMSystemType that can be used to limit the systems and consequent dof_maps
    *                 that the RM can be attached to
-   * @return Whether a relationship manager was added
    */
-  bool
+  void
   addRelationshipManager(const InputParameters & moose_object_pars,
                          std::string rm_name,
                          Moose::RelationshipManagerType rm_type,

@@ -159,12 +159,10 @@ Component::checkComponentExistsByName(const std::string & comp_name) const
     logError("The component '", comp_name, "' does not exist");
 }
 
-bool
+void
 Component::addRelationshipManagersFromParameters(const InputParameters & moose_object_pars)
 {
   const auto & buildable_types = moose_object_pars.getBuildableRelationshipManagerTypes();
-
-  bool added = false;
 
   for (const auto & buildable_type : buildable_types)
   {
@@ -172,14 +170,11 @@ Component::addRelationshipManagersFromParameters(const InputParameters & moose_o
     auto & rm_type = std::get<1>(buildable_type);
     auto rm_input_parameter_func = std::get<2>(buildable_type);
 
-    added = addRelationshipManager(moose_object_pars, rm_name, rm_type, rm_input_parameter_func) ||
-            added;
+    addRelationshipManager(moose_object_pars, rm_name, rm_type, rm_input_parameter_func);
   }
-
-  return added;
 }
 
-bool
+void
 Component::addRelationshipManager(
     const InputParameters & moose_object_pars,
     std::string rm_name,
@@ -217,8 +212,6 @@ Component::addRelationshipManager(
     _factory.releaseSharedObjects(*rm_obj);
   else // we added it
     unique_object_id++;
-
-  return added;
 }
 
 void

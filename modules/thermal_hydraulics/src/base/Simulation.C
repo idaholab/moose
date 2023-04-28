@@ -325,6 +325,12 @@ Simulation::addSimVariable(bool nl,
         "with scalar variables since scalar variables cannot be block-restricted. Use the version "
         "of Simulation::addSimVariable() without subdomain names instead.");
 
+#ifdef DEBUG
+  for (const auto & subdomain_name : subdomain_names)
+    mooseAssert(subdomain_name != "ANY_BLOCK_ID",
+                "'ANY_BLOCK_ID' cannot be used for adding field variables in components.");
+#endif
+
   if (_vars.find(name) == _vars.end()) // variable is new
   {
     VariableInfo vi;
