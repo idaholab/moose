@@ -5870,7 +5870,7 @@ FEProblemBase::addTimeIntegrator(const std::string & type,
   parameters.set<SubProblem *>("_subproblem") = this;
   _aux->addTimeIntegrator(type, name + ":aux", parameters);
   for (auto & nl : _nl)
-    nl->addTimeIntegrator(type, name, parameters);
+    nl->addTimeIntegrator(type, name + (_nl.size() > 1 ? ":" + nl->name() : ""), parameters);
   _has_time_integrator = true;
 
   // add vectors to store u_dot, u_dotdot, udot_old, u_dotdot_old and
