@@ -12,21 +12,18 @@
 #include "AuxKernel.h"
 
 /**
- * Self auxiliary value
+ * Projects from one variable to another
  */
-class SelfAux : public AuxKernel
+class ProjectionAux : public AuxKernel
 {
 public:
   static InputParameters validParams();
 
-  /**
-   * Factory constructor, takes parameters so that all derived classes can be built using the same
-   * constructor.
-   */
-  SelfAux(const InputParameters & parameters);
+  ProjectionAux(const InputParameters & parameters);
 
 protected:
   virtual Real computeValue() override;
 
+  /// The variable to project from
   const VariableValue & _v;
 };
