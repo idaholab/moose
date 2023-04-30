@@ -21,7 +21,8 @@ SolutionChangeOverTimePostprocessor::validParams()
   return params;
 }
 
-SolutionChangeOverTimePostprocessor::SolutionChangeOverTimePostprocessor(const InputParameters & parameters)
+SolutionChangeOverTimePostprocessor::SolutionChangeOverTimePostprocessor(
+    const InputParameters & parameters)
   : GeneralPostprocessor(parameters)
 {
   _transient_executioner = dynamic_cast<Transient *>(_app.getExecutioner());
