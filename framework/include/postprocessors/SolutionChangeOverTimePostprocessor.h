@@ -12,12 +12,12 @@
 #include "GeneralPostprocessor.h"
 #include "Transient.h"
 
-class SteadyStateRelativeChangeNorm : public GeneralPostprocessor
+class SolutionChangeOverTimePostprocessor : public GeneralPostprocessor
 {
 public:
   static InputParameters validParams();
 
-  SteadyStateRelativeChangeNorm(const InputParameters & parameters);
+  SolutionChangeOverTimePostprocessor(const InputParameters & parameters);
 
   virtual void initialize() override {}
   virtual void execute() override {}

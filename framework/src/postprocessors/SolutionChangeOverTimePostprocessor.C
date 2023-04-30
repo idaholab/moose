@@ -7,12 +7,12 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "SteadyStateRelativeChangeNorm.h"
+#include "SolutionChangeOverTimePostprocessor.h"
 
-registerMooseObject("MooseApp", SteadyStateRelativeChangeNorm);
+registerMooseObject("MooseApp", SolutionChangeOverTimePostprocessor);
 
 InputParameters
-SteadyStateRelativeChangeNorm::validParams()
+SolutionChangeOverTimePostprocessor::validParams()
 {
   InputParameters params = GeneralPostprocessor::validParams();
 
@@ -21,7 +21,7 @@ SteadyStateRelativeChangeNorm::validParams()
   return params;
 }
 
-SteadyStateRelativeChangeNorm::SteadyStateRelativeChangeNorm(const InputParameters & parameters)
+SolutionChangeOverTimePostprocessor::SolutionChangeOverTimePostprocessor(const InputParameters & parameters)
   : GeneralPostprocessor(parameters)
 {
   _transient_executioner = dynamic_cast<Transient *>(_app.getExecutioner());
@@ -30,7 +30,7 @@ SteadyStateRelativeChangeNorm::SteadyStateRelativeChangeNorm(const InputParamete
 }
 
 Real
-SteadyStateRelativeChangeNorm::getValue()
+SolutionChangeOverTimePostprocessor::getValue()
 {
   return _transient_executioner->getSolutionChangeNorm();
 }

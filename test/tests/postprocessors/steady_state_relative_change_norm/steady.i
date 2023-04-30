@@ -17,6 +17,6 @@
 
 [Postprocessors]
   [change]
-    type = SteadyStateRelativeChangeNorm
+    type = SolutionChangeOverTimePostprocessor
   []
 []

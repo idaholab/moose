@@ -3,14 +3,14 @@
     type = RunException
     input = steady.i
     expect_err = "This postprocessor can only be used with Transient-derived executioners!"
-    issue = '#24233'
+    issues = '#24233'
     requirement = "The system shall error if accessing a steady state relative change norm for non-transient executioners."
   []
   [transient]
     type = CSVDiff
     input = transient.i
     csvdiff = transient_out.csv
-    issue = '#24233'
+    issues = '#24233'
     requirement = "The system shall report the steady state relative differential norm as a postprocessor."
   []
 []
