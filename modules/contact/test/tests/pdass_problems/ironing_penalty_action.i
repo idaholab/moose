@@ -94,31 +94,31 @@
   [penalty_normal_pressure_auxk]
     type = PenaltyMortarUserObjectAux
     variable = penalty_normal_pressure
-    user_object = penalty_friction_object_0
+    user_object = penalty_friction_object_contact_block
     contact_quantity = normal_pressure
   []
   [penalty_frictional_pressure_auxk]
     type = PenaltyMortarUserObjectAux
     variable = penalty_frictional_pressure
-    user_object = penalty_friction_object_0
+    user_object = penalty_friction_object_contact_block
     contact_quantity = tangential_pressure_one
   []
   [penalty_accumulated_slip_auxk]
     type = PenaltyMortarUserObjectAux
     variable = accumulated_slip_one
-    user_object = penalty_friction_object_0
+    user_object = penalty_friction_object_contact_block
     contact_quantity = accumulated_slip_one
   []
   [penalty_tangential_vel_auxk]
     type = PenaltyMortarUserObjectAux
     variable = tangential_vel_one
-    user_object = penalty_friction_object_0
+    user_object = penalty_friction_object_contact_block
     contact_quantity = tangential_velocity_one
   []
   [real_weighted_gap_auxk]
     type = PenaltyMortarUserObjectAux
     variable = real_weighted_gap
-    user_object = penalty_friction_object_0
+    user_object = penalty_friction_object_contact_block
     contact_quantity = weighted_gap
   []
   [stress_xx]

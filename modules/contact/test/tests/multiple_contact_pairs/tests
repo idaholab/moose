@@ -23,6 +23,30 @@
     requirement = 'The system shall set up node-face interactions between multiple surface pairs '
                   'using the Contact action and remove repeated contact pairs.'
   []
+  [multiple_pairs_mortar]
+    type = Exodiff
+    input = 'multiple_pairs_mortar.i'
+    exodiff = 'multiple_pairs_mortar_out.e'
+    abs_zero = 1.0e-8
+    rel_err = 1.0e-5
+    cli_args = "Postprocessors/active=''"
+    map = False
+    partial = True
+    requirement = 'The system shall set up mortar interactions between multiple surface pairs '
+                  'using the Contact action with distinct input blocks.'
+  []
+  [multiple_pairs_mortar_friction]
+    type = Exodiff
+    input = 'multiple_pairs_mortar_friction.i'
+    exodiff = 'multiple_pairs_mortar_friction_out.e'
+    abs_zero = 1.0e-8
+    rel_err = 1.0e-5
+    cli_args = "Postprocessors/active=''"
+    map = False
+    partial = True
+    requirement = 'The system shall set up frictional mortar interactions between multiple surface pairs '
+                  'using the Contact action with distinct input blocks.'
+  []
   [three_hexagons_coarse]
     type = 'Exodiff'
     input = 'three_hexagons_coarse.i'
