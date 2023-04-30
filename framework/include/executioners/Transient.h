@@ -52,7 +52,12 @@ public:
   virtual void estimateTimeError();
 
   /**
-   * @return The the computed dt to use for this timestep.
+   * @return The steady state relative differential norm
+   */
+  virtual Real getSolutionChangeNorm() const { return _solution_change_norm; }
+
+  /**
+   * @return The computed dt to use for this timestep.
    */
   virtual Real getDT();
 
