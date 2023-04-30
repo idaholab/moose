@@ -17,7 +17,7 @@ SteadyStateRelativeChangeNorm::validParams()
   InputParameters params = GeneralPostprocessor::validParams();
 
   params.addClassDescription(
-      "Returns the relative change in the solution from the previous solve");
+      "Returns the relative change in the solution between the two previous time steps");
   return params;
 }
 
