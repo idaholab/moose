@@ -53,7 +53,6 @@
 [Postprocessors]
   [steady_norm]
     type = SteadyStateRelativeChangeNorm
-    execute_on = timestep_end
   []
 []
 
