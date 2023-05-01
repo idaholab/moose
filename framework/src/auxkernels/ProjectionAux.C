@@ -24,6 +24,17 @@ ProjectionAux::validParams()
 
   // Technically possible to project from nodal to elemental and back
   params.set<bool>("_allow_nodal_to_elemental_coupling") = true;
+
+  // We need some ghosting for all elemental to nodal projections
+  params.addParam<unsigned short>("ghost_layers", 1, "The number of layers of elements to ghost.");
+  params.addRelationshipManager(
+      "ElementPointNeighborLayers",
+      Moose::RelationshipManagerType::GEOMETRIC | Moose::RelationshipManagerType::ALGEBRAIC,
+      [](const InputParameters & obj_params, InputParameters & rm_params)
+      {
+        rm_params.set<unsigned short>("layers") = obj_params.get<unsigned short>("ghost_layers");
+        rm_params.set<bool>("use_displaced_mesh") = obj_params.get<bool>("use_displaced_mesh");
+      });
   return params;
 }
 
