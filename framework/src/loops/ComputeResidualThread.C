@@ -8,6 +8,7 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "ComputeResidualThread.h"
+#include "NonlinearSystemBase.h"
 #include "KernelBase.h"
 #include "DGKernelBase.h"
 #include "IntegratedBCBase.h"
@@ -107,6 +108,7 @@ ComputeResidualThread::determineObjectWarehouses()
     _fv_kernels.clear();
     _fe_problem.theWarehouse()
         .query()
+        .template condition<AttribSysNum>(_nl.number())
         .template condition<AttribSystem>("FVElementalKernel")
         .template condition<AttribSubdomains>(_subdomain)
         .template condition<AttribThread>(_tid)
