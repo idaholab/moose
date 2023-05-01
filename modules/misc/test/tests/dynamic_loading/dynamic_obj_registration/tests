@@ -80,7 +80,7 @@
   [./dynamic_object_loading_wrong_app]
     type = 'RunException'
     input = 'dynamic_wrong_lib.i'
-    expect_err = 'We loaded objects from the following libraries.*\n\t\.\./\.\./\.\./\.\./\.\./tensor_mechanics/lib/libtensor_mechanics'
+    expect_err = 'We loaded objects from the following libraries.*\n\tlibtensor_mechanics'
     library_mode = 'DYNAMIC'
 
     # Test must be run with the misc app to test dynamic loading

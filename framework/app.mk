@@ -469,18 +469,19 @@ $(copy_input_targets):
 	fi; \
 
 
-install_lib_%: % all
-	@echo "Installing $<"
+install_lib_%: %
 	@mkdir -p $(lib_install_dir)
 	@$(eval libname := $(shell grep "dlname='.*'" $< | sed -E "s/dlname='(.*)'/\1/g"))
-	@$(eval libdst := $(lib_install_dir)/$(libname))
-	@cp $(dir $<)$(libname) $(libdst)
+	@$(eval libdst := $(lib_install_dir)/$(libname))  # full installed path (includes library name)
+	@$(eval source_dir := $(dir $<))
+	@$(eval la_installed = $(lib_install_dir)/$(notdir $<))
+	@echo "Installing library $(libdst)"
+	@cp $< $(la_installed)                   # Copy the library archive file
+	@cp $(source_dir)/$(libname) $(libdst)   # Copy the library file
+	@$(call patch_la,$(la_installed),$(lib_install_dir))
 	@$(call patch_rpath,$(libdst),../$(lib_install_suffix/.))
 	@$(call patch_relink,$(libdst),$(libpath_pcre),$(libname_pcre))
 	@$(call patch_relink,$(libdst),$(libpath_framework),$(libname_framework))
-	@$(eval libnames := $(foreach lib,$(applibs),$(shell grep "dlname='.*'" $(lib) 2>/dev/null | sed -E "s/dlname='(.*)'/\1/g")))
-	@$(eval libpaths := $(foreach lib,$(applibs),$(dir $(lib))$(shell grep "dlname='.*'" $(lib) 2>/dev/null | sed -E "s/dlname='(.*)'/\1/g")))
-	@for lib in $(libpaths); do $(call patch_relink,$(libdst),$$lib,$$(basename $$lib)); done
 
 $(binlink): $(copy_input_targets)
 	ln -sf ../../bin/$(notdir $(app_EXEC)) $@
@@ -499,15 +500,6 @@ $(bindst): $(app_EXEC) $(copy_input_targets) install_$(APPLICATION_NAME)_docs $(
 	@mkdir -p $(bin_install_dir)
 	@cp $< $@
 	@$(call patch_rpath,$@,../$(lib_install_suffix)/.)
-	@$(eval libnames := $(foreach lib,$(applibs),$(shell grep "dlname='.*'" $(lib) 2>/dev/null | sed -E "s/dlname='(.*)'/\1/g")))
-	@$(eval libpaths := $(foreach lib,$(applibs),$(dir $(lib))$(shell grep "dlname='.*'" $(lib) 2>/dev/null | sed -E "s/dlname='(.*)'/\1/g")))
-	@for lib in $(libpaths); do $(call patch_relink,$@,$$lib,$$(basename $$lib)); done
-
-ifeq ($(want_exec),yes)
-install_bin: $(bindst)
-else
-install_bin:
-endif
 ####### end install stuff ##############
 
 # Clang static analyzer

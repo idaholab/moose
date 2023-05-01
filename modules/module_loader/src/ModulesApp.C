@@ -92,20 +92,6 @@
 #include "ExternalPetscSolverApp.h"
 #endif
 
-///@{
-/**
- * Dummy methods to clear unused parameter warnings from compiler
- */
-void
-clearUnusedWarnings(Factory & /*factory*/)
-{
-}
-void
-clearUnusedWarnings(Syntax & /*syntax*/, ActionFactory & /*action_factory*/)
-{
-}
-///@}
-
 InputParameters
 ModulesApp::validParams()
 {
@@ -214,7 +200,7 @@ ModulesApp::registerObjects(Factory & factory)
   XFEMApp::registerObjects(factory);
 #endif
 
-  clearUnusedWarnings(factory);
+  libmesh_ignore(factory);
 }
 
 void
@@ -305,7 +291,7 @@ ModulesApp::associateSyntax(Syntax & syntax, ActionFactory & action_factory)
   XFEMApp::associateSyntax(syntax, action_factory);
 #endif
 
-  clearUnusedWarnings(syntax, action_factory);
+  libmesh_ignore(syntax, action_factory);
 }
 
 void
@@ -392,12 +378,16 @@ ModulesApp::registerExecFlags(Factory & factory)
   XFEMApp::registerExecFlags(factory);
 #endif
 
-  clearUnusedWarnings(factory);
+  libmesh_ignore(factory);
 }
 
 void
 ModulesApp::registerAll(Factory & f, ActionFactory & af, Syntax & s)
 {
+  mooseDeprecated(
+      "\"registerAll\" in Modules is deprecated. Please update your *App.C file to call the new "
+      "templated \"registerAllObjects\" method (e.g. ModulesApp::registerAllobject<MyApp>(...))");
+
 #ifdef CHEMICAL_REACTIONS_ENABLED
   ChemicalReactionsApp::registerAll(f, af, s);
 #endif
@@ -498,8 +488,7 @@ ModulesApp::registerAll(Factory & f, ActionFactory & af, Syntax & s)
   ExternalPetscSolverApp::registerAll(f, af, s);
 #endif
 
-  clearUnusedWarnings(f);
-  clearUnusedWarnings(s, af);
+  libmesh_ignore(f, s, af);
 }
 
 extern "C" void

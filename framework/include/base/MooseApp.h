@@ -576,7 +576,8 @@ public:
                               const std::string & library_name);
   void dynamicAppRegistration(const std::string & app_name,
                               std::string library_path,
-                              const std::string & library_name);
+                              const std::string & library_name,
+                              bool lib_load_deps);
   ///@}
 
   /**
@@ -593,9 +594,14 @@ public:
   std::string libNameToAppName(const std::string & library_name) const;
 
   /**
-   * Return the loaded library filenames in a std::set
+   * Return the paths of loaded libraries
    */
   std::set<std::string> getLoadedLibraryPaths() const;
+
+  /**
+   * Return the paths searched by MOOSE when loading libraries
+   */
+  std::set<std::string> getLibrarySearchPaths(const std::string & library_path_from_param) const;
 
   /**
    * Get the InputParameterWarehouse for MooseObjects
@@ -964,7 +970,9 @@ protected:
    * Recursively loads libraries and dependencies in the proper order to fully register a
    * MOOSE application that may have several dependencies. REQUIRES: dynamic linking loader support.
    */
-  void loadLibraryAndDependencies(const std::string & library_filename, const Parameters & params);
+  void loadLibraryAndDependencies(const std::string & library_filename,
+                                  const Parameters & params,
+                                  bool load_dependencies = true);
 
   /// Constructor is protected so that this object is constructed through the AppFactory object
   MooseApp(InputParameters parameters);
@@ -1166,10 +1174,11 @@ protected:
   struct DynamicLibraryInfo
   {
     void * library_handle;
+    std::string full_path;
     std::unordered_set<std::string> entry_symbols;
   };
 
-  /// The library, registration method and the handle to the method
+  /// The library archive (name only), registration method and the handle to the method
   std::unordered_map<std::string, DynamicLibraryInfo> _lib_handles;
 
 private:
