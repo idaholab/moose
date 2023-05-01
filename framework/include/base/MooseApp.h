@@ -576,7 +576,8 @@ public:
                               const std::string & library_name);
   void dynamicAppRegistration(const std::string & app_name,
                               std::string library_path,
-                              const std::string & library_name);
+                              const std::string & library_name,
+                              bool lib_load_deps);
   ///@}
 
   /**

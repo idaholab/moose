@@ -1745,7 +1745,8 @@ MooseApp::getRestartableMetaData(const std::string & name,
 void
 MooseApp::dynamicAppRegistration(const std::string & app_name,
                                  std::string library_path,
-                                 const std::string & library_name)
+                                 const std::string & library_name,
+                                 bool lib_load_deps)
 {
 #ifdef LIBMESH_HAVE_DLOPEN
   Parameters params;
@@ -1754,6 +1755,7 @@ MooseApp::dynamicAppRegistration(const std::string & app_name,
   params.set<std::string>("registration_method") = app_name + "__registerApps";
   params.set<std::string>("library_path") = library_path;
   params.set<std::string>("library_name") = library_name;
+  params.set<bool>("library_load_dependencies") = lib_load_deps;
 
   dynamicRegistration(params);
 
@@ -1798,6 +1800,7 @@ MooseApp::dynamicAllRegistration(const std::string & app_name,
   params.set<Factory *>("factory") = factory;
   params.set<Syntax *>("syntax") = syntax;
   params.set<ActionFactory *>("action_factory") = action_factory;
+  params.set<bool>("library_load_dependencies") = false;
 
   dynamicRegistration(params);
 #else
@@ -1820,7 +1823,8 @@ MooseApp::dynamicRegistration(const Parameters & params)
   // Attempt to dynamically load the library
   for (const auto & path : paths)
     if (MooseUtils::checkFileReadable(path + '/' + library_name, false, false))
-      loadLibraryAndDependencies(path + '/' + library_name, params, true);
+      loadLibraryAndDependencies(
+          path + '/' + library_name, params, params.get<bool>("library_load_dependencies"));
     else
       mooseWarning("Unable to open library file \"",
                    path + '/' + library_name,
@@ -1858,7 +1862,7 @@ MooseApp::loadLibraryAndDependencies(const std::string & library_filename,
           pcrecpp::StringPiece depend_library;
           while (re_deps.FindAndConsume(&input, &depend_library))
             // Recurse here to load dependent libraries in depth-first order
-            loadLibraryAndDependencies(depend_library.as_string(), params);
+            loadLibraryAndDependencies(depend_library.as_string(), params, load_dependencies);
         }
 
         // There's only one line in the .la file containing the dependency libs so break after
