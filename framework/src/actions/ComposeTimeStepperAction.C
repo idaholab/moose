@@ -47,15 +47,17 @@ ComposeTimeStepperAction::act()
   auto & time_stepper_system = _app.getTimeStepperSystem();
   // The user add multiple timesteppers in [TimeSteppers] block, so
   // create a composition timestepper to compute final time step size
-  if (!_awh.getActionListByName("add_time_steppers").empty() &&
-      time_stepper_system.getNumAddedTimeSteppers() > 1)
+  if (!_awh.getActionListByName("add_time_steppers").empty())
   {
+    if (time_stepper_system.getNumAddedTimeSteppers() > 1)
+    {
 
-    auto final_timestepper = "CompositionDT";
-    auto new_params = _factory.getValidParams("CompositionDT");
-    if (isParamValid("lower_bound"))
-      new_params.set<std::vector<std::string>>("lower_bound") =
-          getParam<std::vector<std::string>>("lower_bound");
-    time_stepper_system.addTimeStepper("CompositionDT", final_timestepper, new_params);
+      auto final_timestepper = "CompositionDT";
+      auto new_params = _factory.getValidParams("CompositionDT");
+      if (isParamValid("lower_bound"))
+        new_params.set<std::vector<std::string>>("lower_bound") =
+            getParam<std::vector<std::string>>("lower_bound");
+      time_stepper_system.addTimeStepper("CompositionDT", final_timestepper, new_params);
+    }
   }
 }

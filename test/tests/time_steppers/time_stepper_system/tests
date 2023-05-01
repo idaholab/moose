@@ -2,17 +2,6 @@
   issues = '#23740'
   design = 'CompositionDT.md'
 
-  [deprecated_time_stepper_system]
-    requirement = 'The system shall support composing time step size from multiple time steppers by'
-    [time_stepper_block]
-      type = 'Exodiff'
-      input = 'deprecated_time_stepper.i'
-      exodiff = 'single_time_stepper.e'
-      cli_args = "Outputs/file_base='single_time_stepper'"
-      detail = 'allow using [TimeStepper] block,but provide deprecation info,'
-    []
- []
-
  [time_stepper_system]
     [multiple_time_steppers]
       type = 'Exodiff'
