@@ -72,7 +72,17 @@ ParsedPostprocessor::ParsedPostprocessor(const InputParameters & parameters)
 
   // just-in-time compile
   if (_enable_jit)
+  {
+    // let rank 0 do the JIT compilation first
+    if (_communicator.rank() != 0)
+      _communicator.barrier();
+
     _func_F->JITCompile();
+
+    // wait for ranks > 0 to catch up
+    if (_communicator.rank() == 0)
+      _communicator.barrier();
+  }
 
   // reserve storage for parameter passing buffer
   _func_params.resize(_n_pp + _use_t);
