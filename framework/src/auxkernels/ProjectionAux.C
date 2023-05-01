@@ -19,9 +19,7 @@ ProjectionAux::validParams()
   params.addClassDescription(
       "Returns the specified variable as an auxiliary variable with a projection of the source "
       "variable. If they are the same type, this amounts to a simple copy.");
-  params.addCoupledVar("v",
-                       "Optional variable to take the value of. If omitted the value of the "
-                       "`variable` itself is returned.");
+  params.addRequiredCoupledVar("v", "Variable to take the value of.");
 
   // Technically possible to project from nodal to elemental and back
   params.set<bool>("_allow_nodal_to_elemental_coupling") = true;
