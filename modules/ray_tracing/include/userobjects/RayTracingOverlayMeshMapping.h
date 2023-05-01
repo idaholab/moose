@@ -18,6 +18,11 @@
 #include "libmesh/elem_side_builder.h"
 #include "libmesh/parallel_object.h"
 #include "MooseMesh.h"
+
+/**
+ * A RayTracingStudy Helper class to generate an element mapping between the overlay mesh and the
+ * main mesh.
+ */
 class RayTracingOverlayMeshMapping : public GeneralUserObject
 {
 public:

@@ -31,6 +31,7 @@ RayTracingOverlayMeshMapping::validParams()
   auto params = GeneralUserObject::validParams();
 
   params.addRequiredParam<MeshGeneratorName>("overlay_mesh", "The base mesh we want to overlay");
+  params.addClassDescription("Build the elems mapping between ovelay mesh and main mesh.");
 
   return params;
 }
