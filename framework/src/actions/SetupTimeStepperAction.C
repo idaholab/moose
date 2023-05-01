@@ -32,8 +32,8 @@ SetupTimeStepperAction::SetupTimeStepperAction(const InputParameters & parameter
 void
 SetupTimeStepperAction::act()
 {
-
-  if (_problem->isTransient())
+  Transient * transient = dynamic_cast<Transient *>(_app.getExecutioner());
+  if (transient)
   {
     auto & time_stepper_system = _app.getTimeStepperSystem();
 

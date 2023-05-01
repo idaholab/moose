@@ -12,7 +12,7 @@
 #include "Action.h"
 
 /**
- *
+ * Set up the final time stepper for the simulation
  */
 class SetupTimeStepperAction : public Action
 {
