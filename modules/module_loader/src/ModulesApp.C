@@ -199,8 +199,6 @@ ModulesApp::registerObjects(Factory & factory)
 #ifdef XFEM_ENABLED
   XFEMApp::registerObjects(factory);
 #endif
-
-  clearUnusedWarnings(factory);
 }
 
 void
@@ -290,8 +288,6 @@ ModulesApp::associateSyntax(Syntax & syntax, ActionFactory & action_factory)
 #ifdef XFEM_ENABLED
   XFEMApp::associateSyntax(syntax, action_factory);
 #endif
-
-  clearUnusedWarnings(syntax, action_factory);
 }
 
 void
@@ -377,8 +373,6 @@ ModulesApp::registerExecFlags(Factory & factory)
 #ifdef XFEM_ENABLED
   XFEMApp::registerExecFlags(factory);
 #endif
-
-  clearUnusedWarnings(factory);
 }
 
 void
@@ -487,9 +481,6 @@ ModulesApp::registerAll(Factory & f, ActionFactory & af, Syntax & s)
 #ifdef EXTERNAL_PETSC_SOLVER_ENABLED
   ExternalPetscSolverApp::registerAll(f, af, s);
 #endif
-
-  clearUnusedWarnings(f);
-  clearUnusedWarnings(s, af);
 }
 
 extern "C" void

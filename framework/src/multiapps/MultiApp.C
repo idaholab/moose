@@ -82,7 +82,7 @@ MultiApp::validParams()
   params.addParam<bool>("library_load_dependencies",
                         false,
                         "Tells MOOSE to manually load library dependencies. This should not be "
-                        "necessary and is hear for debugging/troubhleshooting.");
+                        "necessary and is hear for debugging/troubleshooting.");
   params.addParam<std::vector<Point>>(
       "positions",
       "The positions of the App locations.  Each set of 3 values will represent a "

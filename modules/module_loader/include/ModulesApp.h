@@ -107,20 +107,6 @@ public:
   static void registerExecFlags(Factory & factory);
 };
 
-///@{
-/**
- * Dummy methods to clear unused parameter warnings from compiler
- */
-void
-clearUnusedWarnings(Factory & /*factory*/)
-{
-}
-void
-clearUnusedWarnings(Syntax & /*syntax*/, ActionFactory & /*action_factory*/)
-{
-}
-///@}
-
 template <typename T>
 void
 ModulesApp::registerAllObjects(Factory & f, ActionFactory & af, Syntax & s)
@@ -225,6 +211,5 @@ ModulesApp::registerAllObjects(Factory & f, ActionFactory & af, Syntax & s)
   ExternalPetscSolverApp::registerAll(f, af, s);
 #endif
 
-  clearUnusedWarnings(f);
-  clearUnusedWarnings(s, af);
+  libmesh_ignore(f, s, af);
 }
