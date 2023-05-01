@@ -199,6 +199,8 @@ ModulesApp::registerObjects(Factory & factory)
 #ifdef XFEM_ENABLED
   XFEMApp::registerObjects(factory);
 #endif
+
+  libmesh_ignore(factory);
 }
 
 void
@@ -288,6 +290,8 @@ ModulesApp::associateSyntax(Syntax & syntax, ActionFactory & action_factory)
 #ifdef XFEM_ENABLED
   XFEMApp::associateSyntax(syntax, action_factory);
 #endif
+
+  libmesh_ignore(syntax, action_factory);
 }
 
 void
@@ -373,6 +377,8 @@ ModulesApp::registerExecFlags(Factory & factory)
 #ifdef XFEM_ENABLED
   XFEMApp::registerExecFlags(factory);
 #endif
+
+  libmesh_ignore(factory);
 }
 
 void
@@ -481,6 +487,8 @@ ModulesApp::registerAll(Factory & f, ActionFactory & af, Syntax & s)
 #ifdef EXTERNAL_PETSC_SOLVER_ENABLED
   ExternalPetscSolverApp::registerAll(f, af, s);
 #endif
+
+  libmesh_ignore(f, s, af);
 }
 
 extern "C" void
