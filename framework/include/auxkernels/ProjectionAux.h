@@ -26,4 +26,10 @@ protected:
 
   /// The variable to project from
   const VariableValue & _v;
+
+  /// A reference to the variable to project from
+  const MooseVariable * _source_variable;
+
+  /// The system owning the source variable
+  const SystemBase & _source_sys;
 };
