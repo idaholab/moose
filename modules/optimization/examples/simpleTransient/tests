@@ -12,7 +12,7 @@
       rel_err = 1e-4
       heavy = true
       method = OPT
-      detail = 'only forward solve;'
+      detail = 'only a forward solve,'
     []
     [gradient]
       type = CSVDiff
@@ -22,7 +22,27 @@
       rel_err = 1e-4
       heavy = true
       method = OPT
-      detail = 'adjoint solve;'
+      detail = 'an adjoint solve,'
+    []
+    [auto_adjoint]
+      type = CSVDiff
+      input = main_auto_adjoint.i
+      cli_args = 'forward:Outputs/file_base=grad'
+      csvdiff = grad.csv
+      rel_err = 1e-4
+      heavy = true
+      method = OPT
+      detail = 'an automatically computed adjoint solve, and '
+    []
+    [nonlinear]
+      type = CSVDiff
+      input = main_auto_adjoint.i
+      cli_args = 'MultiApps/forward/input_files=nonlinear_forward_and_adjoint.i Outputs/file_base=nonlinear_auto_adjoint'
+      csvdiff = nonlinear_auto_adjoint_forward0.csv
+      rel_err = 1e-4
+      heavy = true
+      method = OPT
+      detail = 'nonlinear material properties.'
     []
   []
 

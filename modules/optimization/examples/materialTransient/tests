@@ -12,7 +12,7 @@
       method = '!dbg'
       valgrind = heavy
       max_threads = 1
-      detail = 'generating synthetic measurement data;'
+      detail = 'generating synthetic measurement data,'
     []
     [optimize_nograd]
       type = Exodiff
@@ -22,7 +22,7 @@
       method = '!dbg'
       valgrind = none
       max_threads = 1
-      detail = 'performing gradient-free optimization;'
+      detail = 'performing gradient-free optimization,'
     []
     [optimize_grad]
       type = Exodiff
@@ -32,7 +32,18 @@
       method = '!dbg'
       valgrind = heavy
       max_threads = 1
-      detail = 'performing gradient-based optimization;'
+      detail = 'performing gradient-based optimization, or'
+    []
+    [optimize_auto_adjoint]
+      type = Exodiff
+      input = optimize_auto_adjoint.i
+      cli_args = 'Outputs/file_base=optimize_grad_out'
+      exodiff = optimize_grad_out_forward0.e
+      prereq = material_transient/forward
+      method = '!dbg'
+      valgrind = heavy
+      max_threads = 1
+      detail = 'performing gradient-based optimization with an automatically computed adjoint.'
     []
   []
 []
