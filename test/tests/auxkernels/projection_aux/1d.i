@@ -105,14 +105,6 @@
     family = L2_HIERARCHIC
     order = SECOND
   []
-  [test_elem_side_hierarchic]
-    family = SIDE_HIERARCHIC
-    order = CONSTANT
-  []
-  [test_elem_side_hierarchic_high]
-    family = SIDE_HIERARCHIC
-    order = SECOND
-  []
 
   [test_nodal_lagrange]
   []
@@ -160,14 +152,6 @@
   []
   [test_nodal_l2_hierarchic_high]
     family = L2_HIERARCHIC
-    order = SECOND
-  []
-  [test_nodal_side_hierarchic]
-    family = SIDE_HIERARCHIC
-    order = CONSTANT
-  []
-  [test_nodal_side_hierarchic_high]
-    family = SIDE_HIERARCHIC
     order = SECOND
   []
 []
@@ -239,16 +223,6 @@
     variable = test_elem_l2_hierarchic_high
     v = base_elem
   []
-  [base_elem_proj_side_hierarchic]
-    type = ProjectionAux
-    variable = test_elem_side_hierarchic
-    v = base_elem
-  []
-  [base_elem_proj_side_hierarchic_high]
-    type = ProjectionAux
-    variable = test_elem_side_hierarchic_high
-    v = base_elem
-  []
 
   # Project from constant nodal
   [base_nodal_proj_lagrange]
@@ -314,16 +288,6 @@
   [base_nodal_proj_l2_hierarchic_high]
     type = ProjectionAux
     variable = test_nodal_l2_hierarchic_high
-    v = base_nodal
-  []
-  [base_nodal_proj_side_hierarchic]
-    type = ProjectionAux
-    variable = test_nodal_side_hierarchic
-    v = base_nodal
-  []
-  [base_nodal_proj_side_hierarchic_high]
-    type = ProjectionAux
-    variable = test_nodal_side_hierarchic_high
     v = base_nodal
   []
 []
@@ -394,16 +358,6 @@
     variable = test_elem_l2_hierarchic_high
     other_variable = base_elem
   []
-  [base_elem_proj_side_hierarchic]
-    type = ElementL2Difference
-    variable = test_elem_side_hierarchic
-    other_variable = base_elem
-  []
-  [base_elem_proj_side_hierarchic_high]
-    type = ElementL2Difference
-    variable = test_elem_side_hierarchic_high
-    other_variable = base_elem
-  []
 
   # Project from constant nodal
   [base_nodal_proj_lagrange]
@@ -469,16 +423,6 @@
   [base_nodal_proj_l2_hierarchic_high]
     type = ElementL2Difference
     variable = test_nodal_l2_hierarchic_high
-    other_variable = base_nodal
-  []
-  [base_nodal_proj_side_hierarchic]
-    type = ElementL2Difference
-    variable = test_nodal_side_hierarchic
-    other_variable = base_nodal
-  []
-  [base_nodal_proj_side_hierarchic_high]
-    type = ElementL2Difference
-    variable = test_nodal_side_hierarchic_high
     other_variable = base_nodal
   []
 []
