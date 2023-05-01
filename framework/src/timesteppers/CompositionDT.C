@@ -66,7 +66,7 @@ CompositionDT::computeDT()
       {
         ptr->computeStep();
         Real dt = ptr->getCurrentDT();
-        if (!lower_bound.count(name))
+        if (lower_bound.count(name))
           bound_dt.emplace(dt);
         else
           dts.emplace(dt);
@@ -113,7 +113,7 @@ CompositionDT::produceCompositionDT(const std::set<Real> & dts, const std::set<R
   auto ts = getSequenceSteppers();
 
   if (ts != 0)
-    return std::min(std::abs(ts - _time), std::max(minDT, lower_bound));
+    return std::min((ts - _time), std::max(minDT, lower_bound));
   else
     return std::max(minDT, lower_bound);
 }
