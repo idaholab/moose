@@ -9,17 +9,17 @@
 
 #pragma once
 
-#include "Action.h"
+#include "MooseObjectAction.h"
 
 /**
- *
+ * Compute the composition timestepper
  */
-class SetupTimeStepperAction : public Action
+class ComposeTimeStepperAction : public MooseObjectAction
 {
 public:
   static InputParameters validParams();
 
-  SetupTimeStepperAction(const InputParameters & parameters);
+  ComposeTimeStepperAction(const InputParameters & params);
 
   virtual void act() override;
 };

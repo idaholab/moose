@@ -1,0 +1,72 @@
+[Tests]
+  issues = '#23740'
+  design = 'CompositionDT.md'
+
+  [deprecated_time_stepper_system]
+    requirement = 'The system shall support composing time step size from multiple time steppers by'
+    [time_stepper_block]
+      type = 'Exodiff'
+      input = 'deprecated_time_stepper.i'
+      exodiff = 'single_time_stepper.e'
+      cli_args = "Outputs/file_base='single_time_stepper'"
+      detail = 'allow using [TimeStepper] block,but provide deprecation info,'
+    []
+ []
+
+ [time_stepper_system]
+    [multiple_time_steppers]
+      type = 'Exodiff'
+      input = 'multiple_timesteppers.i'
+      exodiff = 'multiple_timesteppers.e'
+      cli_args = "Outputs/file_base='multiple_timesteppers'"
+      detail = 'using the minimum time step size of input time steppers,'
+    []
+
+    [multiple_time_timesequence]
+      type = 'Exodiff'
+      recover = false
+      input = 'multiple_timesequences.i'
+      exodiff = 'multiple_timesequences.e'
+      cli_args = "Outputs/file_base='multiple_timesequences'"
+      detail = 'hitting the time points specified by multiple TimesequenceSteppers selected by the user,'
+    []
+
+    [lower_bound]
+      type = 'Exodiff'
+      input = 'lower_bound.i'
+      exodiff = 'lower_bound.e'
+      detail = 'provide a growing lower bound of the time step size,'
+    []
+
+    [controls]
+      type = 'Exodiff'
+      input = 'active_timesteppers.i'
+      exodiff = 'active_timesteppers.e'
+      detail = 'allow the user activates/deactivates timesteppers using control block,'
+    []
+
+  []
+
+  [restart]
+    requirement = 'The system shall support the ability to run a calculation for the purpose of '
+                  'creating a time sequence recover file:'
+    [timestepper_pre]
+      type = 'RunApp'
+      input = 'time_stepper_system_restart.i'
+      recover = false
+
+      detail = 'when writing the checkpoint file,'
+    []
+
+    [timestepper_restart]
+      type = 'Exodiff'
+      input = 'time_stepper_system.i'
+      exodiff = 'time_stepper_system_out.e'
+      recover = false
+      prereq = 'restart/timestepper_pre'
+
+      detail = 'restart from the checkpoint file.'
+    []
+  []
+
+[]

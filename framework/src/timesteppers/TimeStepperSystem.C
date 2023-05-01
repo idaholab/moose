@@ -40,7 +40,7 @@ TimeStepperSystem::addTimeStepper(const std::string & type,
   new_params.set<SubProblem *>("_subproblem") = subproblem;
   new_params.set<Transient *>("_executioner") = transient;
 
-  if (name == "TimeStepper" && _app.actionWarehouse().getCurrentTaskName() != "setup_time_stepper")
+  if (name == "TimeStepper" && _app.actionWarehouse().getCurrentTaskName() != "setup_time_steppers")
     mooseError("The user-defined time stepper name: '", name, "' is a reserved name");
 
   // set the subproblem, set
@@ -51,13 +51,13 @@ TimeStepperSystem::addTimeStepper(const std::string & type,
 }
 
 void
-TimeStepperSystem::createAddedTimeSteppers(const std::string & final_timestepper_name)
+TimeStepperSystem::createAddedTimeSteppers()
 {
   mooseAssert(_final_time_stepper_name.empty(), "Should not be set");
   if (_time_stepper_params.size() == 1)
     _final_time_stepper_name = _time_stepper_params.begin()->first;
   else
-    _final_time_stepper_name = final_timestepper_name;
+    _final_time_stepper_name = "CompositionDT";
 
   std::regex time_sequence(".*SequenceStepper");
   // Store the name and dt of the time stepper except the final one into a map
@@ -123,7 +123,7 @@ TimeStepperSystem::getTimeStepper(const std::string & stepper_name)
   const auto find_stepper = _time_steppers.find(stepper_name);
   const auto find_sequence_stepper = _time_sequence_steppers.find(stepper_name);
 
-  if (find_stepper != _time_steppers.end())
+  if (find_sequence_stepper == _time_sequence_steppers.end())
   {
     mooseAssert(find_stepper != _time_steppers.end(), stepper_name + " not added");
     return find_stepper->second;

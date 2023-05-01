@@ -19,16 +19,13 @@ public:
 
   CompositionDT(const InputParameters & parameters);
 
-  // Find the minimum time step size within all input time stepper(s)
-  Real minTimeStep(const std::map<const std::string, Real> & dts);
-
   /**
    * Find the composed time step size by applying composition rule and compare with the time step
    * size from base time stepper
    * @param dts stores time step size(s) from input time stepper(s)
    * @param basedt time step size from the base time stepper
    */
-  Real produceCompositionDT(const std::map<const std::string, Real> & dts);
+  Real produceCompositionDT(const std::set<Real> & dts, const std::set<Real> & bound_dts);
 
   // Find the time point to hit at current time step
   Real getSequenceSteppers();

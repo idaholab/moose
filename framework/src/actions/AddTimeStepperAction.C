@@ -13,12 +13,12 @@
 #include "MooseApp.h"
 
 registerMooseAction("MooseApp", AddTimeStepperAction, "add_time_stepper");
+registerMooseAction("MooseApp", AddTimeStepperAction, "add_time_steppers");
 
 InputParameters
 AddTimeStepperAction::validParams()
 {
   InputParameters params = MooseObjectAction::validParams();
-
   params.addClassDescription("Add a TimeStepper object to the simulation.");
   return params;
 }
@@ -31,5 +31,10 @@ AddTimeStepperAction::AddTimeStepperAction(const InputParameters & params)
 void
 AddTimeStepperAction::act()
 {
-  _app.getTimeStepperSystem().addTimeStepper(_type, _name, _moose_object_pars);
+  std::string name;
+  if (_current_task == "add_time_stepper")
+    name = _type;
+  else
+    name = _name;
+  _app.getTimeStepperSystem().addTimeStepper(_type, name, _moose_object_pars);
 }

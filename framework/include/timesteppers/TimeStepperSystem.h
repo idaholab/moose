@@ -28,7 +28,7 @@ public:
                       const std::string & name,
                       const InputParameters & params);
 
-  void createAddedTimeSteppers(const std::string & final_timestepper_name);
+  void createAddedTimeSteppers();
 
   std::shared_ptr<TimeStepper>
   createTimeStepper(const std::string & stepper_name,

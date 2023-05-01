@@ -18,6 +18,12 @@ CompositionDT::validParams()
 {
   InputParameters params = TimeStepper::validParams();
   params.addParam<Real>("initial_dt", "Initial value of dt");
+  params.addParam<std::vector<std::string>>(
+      "lower_bound",
+      "The input TimeSteppers to compose the lower bound time "
+      "step size.  This can either be N timesteppers or 1 "
+      "timestepper.");
+
   return params;
 }
 
@@ -45,19 +51,30 @@ CompositionDT::computeDT()
   if (time_steppers.empty())
     return 0;
 
-  std::map<const std::string, Real> dts;
+  std::set<Real> dts;
+  std::set<Real> bound_dt;
+
+  auto input_bound = getParam<std::vector<std::string>>("lower_bound");
+  std::set<std::string> lower_bound(input_bound.begin(), input_bound.end());
+
   for (auto const & [name, ptr] : time_steppers)
   {
     if (name != _app.getTimeStepperSystem().getFinalTimeStepperName())
     {
       mooseAssert(ptr, "Not exist");
-      ptr->computeStep();
-      Real dt = ptr->getCurrentDT();
-      dts.emplace(name, dt);
+      if (ptr->enabled())
+      {
+        ptr->computeStep();
+        Real dt = ptr->getCurrentDT();
+        if (!lower_bound.count(name))
+          bound_dt.emplace(dt);
+        else
+          dts.emplace(dt);
+      }
     }
   }
 
-  _dt = produceCompositionDT(std::as_const(dts));
+  _dt = produceCompositionDT(std::as_const(dts), std::as_const(bound_dt));
 
   return _dt;
 }
@@ -85,24 +102,18 @@ CompositionDT::getSequenceSteppers()
 }
 
 Real
-CompositionDT::minTimeStep(const std::map<const std::string, Real> & dts)
+CompositionDT::produceCompositionDT(const std::set<Real> & dts, const std::set<Real> & bound_dts)
 {
-  auto minDT = std::min_element(
-      dts.begin(), dts.end(), [](const auto & a, const auto & b) { return a.second < b.second; });
-  return minDT->second;
-}
-
-Real
-CompositionDT::produceCompositionDT(const std::map<const std::string, Real> & dts)
-{
-  Real minDT = 0;
-
-  minDT = minTimeStep(dts);
+  Real minDT, lower_bound = 0;
+  if (!dts.empty())
+    minDT = *dts.begin();
+  if (!bound_dts.empty())
+    lower_bound = *bound_dts.begin();
 
   auto ts = getSequenceSteppers();
 
   if (ts != 0)
-    return std::min(std::abs(ts - _time), minDT);
+    return std::min(std::abs(ts - _time), std::max(minDT, lower_bound));
   else
-    return minDT;
+    return std::max(minDT, lower_bound);
 }

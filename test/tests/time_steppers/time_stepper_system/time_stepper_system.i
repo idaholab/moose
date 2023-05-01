@@ -1,8 +1,9 @@
 [Mesh]
-  type = GeneratedMesh
-  dim = 2
-  nx = 10
-  ny = 10
+  file = restart_test_cp/0006_mesh.cpr
+[]
+
+[Problem]
+  restart_file_base = restart_test_cp/0006
 []
 
 [Variables]
@@ -39,12 +40,12 @@
 
 [Executioner]
   type = Transient
-  end_time = 0.8
+  end_time = 1.2
   solve_type = PJFNK
   petsc_options_iname = '-pc_type -pc_hypre_type'
   petsc_options_value = 'hypre boomeramg'
   # Pluggable TimeStepper System
-  [TimeStepper]
+  [TimeSteppers]
     [ConstDT1]
       type = ConstantDT
       dt = 0.2
@@ -52,7 +53,7 @@
 
     [ConstDT2]
       type = ConstantDT
-      dt = 0.1
+      dt = 0.3
     []
 
     [LogConstDT]
@@ -61,13 +62,13 @@
       first_dt = 0.1
     []
 
-    [Timesequence1]
+    [Timesequence]
       type = TimeSequenceStepper
-      time_sequence  = '0  0.25 0.3 0.5 0.8'
+      time_sequence  = '0  0.5 0.8 1 1.2'
     []
   []
 []
 
 [Outputs]
-  exodus = true
+  exodus=true
 []

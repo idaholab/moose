@@ -23,6 +23,8 @@ TimeStepper::validParams()
       0.5,
       "cutback_factor_at_failure>0 & cutback_factor_at_failure<1",
       "Factor to apply to timestep if a time step fails to converge.");
+  params.addParam<bool>("enable", true, "whether or not enable the time stepper");
+  params.declareControllable("enable");
 
   params.registerBase("TimeStepper");
 
@@ -53,6 +55,7 @@ TimeStepper::TimeStepper(const InputParameters & parameters)
     _has_reset_dt(false),
     _failure_count(0),
     _current_dt(declareRestartableData<Real>("current_dt", 1.0))
+
 {
 }
 
@@ -220,3 +223,4 @@ TimeStepper::forceNumSteps(const unsigned int num_steps)
 {
   _executioner.forceNumSteps(num_steps);
 }
+

@@ -147,8 +147,10 @@ addActionTypes(Syntax & syntax)
 
   registerMooseObjectTask("add_damper",                   Damper,                 false);
   registerMooseObjectTask("setup_predictor",              Predictor,              false);
-  registerMooseObjectTask("setup_time_stepper",           TimeStepper,            false);
+  //registerMooseObjectTask("setup_time_stepper",           TimeStepper,            false);
+  registerMooseObjectTask("add_time_steppers",            TimeStepper,            false);
   registerMooseObjectTask("add_time_stepper",             TimeStepper,            false);
+  registerMooseObjectTask("compose_time_stepper",         TimeStepper,            false);
   registerMooseObjectTask("setup_time_integrator",        TimeIntegrator,         false);
 
   registerMooseObjectTask("add_preconditioning",          MoosePreconditioner,    false);
@@ -206,6 +208,8 @@ addActionTypes(Syntax & syntax)
   registerTask("copy_nodal_vars", true);
   registerTask("copy_nodal_aux_vars", true);
   registerTask("setup_postprocessor_data", false);
+  registerTask("setup_time_steppers", true);
+  // registerTask("setup_time_stepper", false);
 
   registerTask("setup_dampers", true);
   registerTask("check_integrity", true);
@@ -305,8 +309,9 @@ addActionTypes(Syntax & syntax)
                            "(add_ic)"
                            "(add_constraint, add_field_split)"
                            "(add_preconditioning)"
-                           "(add_time_stepper)"
-                           "(setup_time_stepper)"
+                           "(add_time_stepper, add_time_steppers)"
+                           "(compose_time_stepper)"
+                           "(setup_time_steppers)"
                            "(ready_to_init)"
                            "(setup_dampers)"
                            "(setup_residual_debug)"
@@ -481,11 +486,15 @@ associateSyntaxInner(Syntax & syntax, ActionFactory & /*action_factory*/)
 
   registerSyntax("CreateExecutionerAction", "Executioner");
   registerSyntax("ReadExecutorParamsAction", "Executors/*");
-  registerSyntax("SetupTimeStepperAction", "Executioner/TimeStepper");
-  registerSyntax("AddTimeStepperAction", "Executioner/TimeStepper/*");
+  // registerSyntaxTask("SetupTimeStepperAction", "Executioner/TimeStepper", "setup_time_stepper");
+  // registerSyntaxTask("SetupTimeStepperAction", "Executioner/TimeSteppers/*",
+  // "setup_time_steppers");
+  registerSyntaxTask("AddTimeStepperAction", "Executioner/TimeSteppers/*", "add_time_steppers");
+  registerSyntaxTask("AddTimeStepperAction", "Executioner/TimeStepper", "add_time_stepper");
+  registerSyntaxTask(
+      "ComposeTimeStepperAction", "Executioner/TimeSteppers", "compose_time_stepper");
   registerSyntax("SetupTimeIntegratorAction", "Executioner/TimeIntegrator");
   syntax.registerSyntaxType("Executors/*", "ExecutorName");
-  syntax.registerSyntaxType("Executioner/TimeStepper/*", "TimeStepperName");
 
   registerSyntax("SetupQuadratureAction", "Executioner/Quadrature");
   registerSyntax("SetupPredictorAction", "Executioner/Predictor");
