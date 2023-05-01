@@ -29,7 +29,7 @@ ProjectionAux::validParams()
 
 ProjectionAux::ProjectionAux(const InputParameters & parameters)
   : AuxKernel(parameters),
-    _v(isCoupled("v") ? coupledValue("v") : _u),
+    _v(coupledValue("v")),
     _source_variable(getVar("v", 0)),
     _source_sys(_source_variable->sys())
 {
