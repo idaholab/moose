@@ -104,24 +104,18 @@ VolumeJunction1Phase::check() const
 void
 VolumeJunction1Phase::addVariables()
 {
-  auto connected_subdomains = getConnectedSubdomainNames();
-
+  getTHMProblem().addSimVariable(true, _rhoV_var_name, FEType(FIRST, SCALAR), _scaling_factor_rhoV);
   getTHMProblem().addSimVariable(
-      true, _rhoV_var_name, FEType(FIRST, SCALAR), connected_subdomains, _scaling_factor_rhoV);
+      true, _rhouV_var_name, FEType(FIRST, SCALAR), _scaling_factor_rhouV);
   getTHMProblem().addSimVariable(
-      true, _rhouV_var_name, FEType(FIRST, SCALAR), connected_subdomains, _scaling_factor_rhouV);
+      true, _rhovV_var_name, FEType(FIRST, SCALAR), _scaling_factor_rhovV);
   getTHMProblem().addSimVariable(
-      true, _rhovV_var_name, FEType(FIRST, SCALAR), connected_subdomains, _scaling_factor_rhovV);
+      true, _rhowV_var_name, FEType(FIRST, SCALAR), _scaling_factor_rhowV);
   getTHMProblem().addSimVariable(
-      true, _rhowV_var_name, FEType(FIRST, SCALAR), connected_subdomains, _scaling_factor_rhowV);
-  getTHMProblem().addSimVariable(
-      true, _rhoEV_var_name, FEType(FIRST, SCALAR), connected_subdomains, _scaling_factor_rhoEV);
-  getTHMProblem().addSimVariable(
-      false, _pressure_var_name, FEType(FIRST, SCALAR), connected_subdomains);
-  getTHMProblem().addSimVariable(
-      false, _temperature_var_name, FEType(FIRST, SCALAR), connected_subdomains);
-  getTHMProblem().addSimVariable(
-      false, _velocity_var_name, FEType(FIRST, SCALAR), connected_subdomains);
+      true, _rhoEV_var_name, FEType(FIRST, SCALAR), _scaling_factor_rhoEV);
+  getTHMProblem().addSimVariable(false, _pressure_var_name, FEType(FIRST, SCALAR));
+  getTHMProblem().addSimVariable(false, _temperature_var_name, FEType(FIRST, SCALAR));
+  getTHMProblem().addSimVariable(false, _velocity_var_name, FEType(FIRST, SCALAR));
 
   if (isParamValid("initial_p") && isParamValid("initial_T") && isParamValid("initial_vel_x") &&
       isParamValid("initial_vel_y") && isParamValid("initial_vel_z"))

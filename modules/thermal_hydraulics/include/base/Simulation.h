@@ -131,19 +131,48 @@ public:
   std::shared_ptr<ClosuresBase> getClosures(const std::string & name) const;
 
   /**
-   * Called by a component to announce a variable
-   * @param nl True is nonlinear variable is being added
-   * @param name The name of the variable
-   * @param type Type of the variable
-   * @param subdomain_id Subdomain of the variable
-   * @param scaling_factor Scaling factor for the variable
+   * Queues a variable of type MooseVariableScalar to be added to the nonlinear or aux system.
+   *
+   * @param[in] nl   True if this is a nonlinear (solution) variable
+   * @param[in] name   Name of the variable
+   * @param[in] fe_type   FEType of the variable
+   * @param[in] scaling_factor   Scaling factor for the variable
    */
-  void addSimVariable(bool nl, const VariableName & name, FEType type, Real scaling_factor = 1.);
+  void
+  addSimVariable(bool nl, const VariableName & name, FEType fe_type, Real scaling_factor = 1.0);
+
+  /**
+   * Queues a variable of type MooseVariable to be added to the nonlinear or aux system.
+   *
+   * @param[in] nl   True if this is a nonlinear (solution) variable
+   * @param[in] name   Name of the variable
+   * @param[in] fe_type   FEType of the variable
+   * @param[in] subdomain_names   List of subdomain names to add the variable to
+   * @param[in] scaling_factor   Scaling factor for the variable
+   */
   void addSimVariable(bool nl,
                       const VariableName & name,
-                      FEType type,
+                      FEType fe_type,
                       const std::vector<SubdomainName> & subdomain_names,
-                      Real scaling_factor = 1.);
+                      Real scaling_factor = 1.0);
+
+  /**
+   * Queues a generic variable to be added to the nonlinear or aux system.
+   *
+   * @param[in] nl   True if this is a nonlinear (solution) variable
+   * @param[in] var_type   Type (class) of the variable
+   * @param[in] name   Name of the variable
+   * @param[in] params   Input parameters for the variable
+   */
+  void addSimVariable(bool nl,
+                      const std::string & var_type,
+                      const VariableName & name,
+                      const InputParameters & params);
+
+  /**
+   * Reports an error if the variable name is too long
+   */
+  void checkVariableNameLength(const std::string & name) const;
 
   void addConstantIC(const VariableName & var_name,
                      Real value,
@@ -328,13 +357,22 @@ public:
   void addRelationshipManagers();
 
 protected:
+  /**
+   * Variable information
+   */
   struct VariableInfo
   {
-    bool _nl; ///< true if the variable is non-linear
-    FEType _type;
-    std::set<SubdomainName> _subdomain;
-    Real _scaling_factor;
+    /// True if the variable is a nonlinear (solution) variable; otherwise, aux
+    bool _nl;
+    /// Type (class) of the variable
+    std::string _var_type;
+    /// Input parameters
+    InputParameters _params;
+
+    VariableInfo() : _params(emptyInputParameters()) {}
   };
+
+  /// THM mesh
   THMMesh & _thm_mesh;
 
   /// Pointer to FEProblem representing this simulation

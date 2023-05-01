@@ -44,11 +44,11 @@ PINSFVSpeedFunctorMaterial::PINSFVSpeedFunctorMaterial(const InputParameters & p
       parameters.isParamSetByUser(NS::superficial_velocity_x) +
       parameters.isParamSetByUser(NS::superficial_velocity_y) +
       parameters.isParamSetByUser(NS::superficial_velocity_z);
-  if (num_components_specified != _mesh.dimension())
+  if (num_components_specified != blocksMaxDimension())
     mooseError("Only ",
                num_components_specified,
                " superficial velocity components were provided for a mesh of dimension ",
-               _mesh.dimension());
+               blocksMaxDimension());
 
   // Interstitial velocity is needed by certain correlations
   addFunctorProperty<ADRealVectorValue>(NS::velocity,

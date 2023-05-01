@@ -10,7 +10,7 @@
   [bad_restriction]
     type = RunException
     input = bad-restriction.i
-    expect_err = "Block restriction of interpolator user object.* doesn't match the block restriction of variable"
+    expect_err = "Block restriction of interpolator user object.* includes blocks not in the block restriction of variable"
     requirement = 'The system shall error if the interpolation object has block restriction different from the nonlinear flow variables.'
   []
 []

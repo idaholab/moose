@@ -6,6 +6,12 @@
 
 The `CombinerGenerator` allows the user to combine the outputs of multiple `MeshGenerator`s into a single mesh.  This is somewhat similar to the [StitchedMeshGenerator.md] with the difference being that `CombinerGenerator` makes no attempt to "heal" / "join" the mesh like [StitchedMeshGenerator.md] does.  There `CombinerGenerator` is more suited to creation of disjoint meshes (where the individual pieces are not directly tied together).
 
+!alert note title=Mesh naming precedence
+`CombinerGenerator` preserves subdomain names and boundary names (node sets, side sets, and edge sets).
+If the corresponding IDs exist in multiple meshes, then the meshes/copies listed
+later in [!param](/Mesh/CombinerGenerator/inputs)/[!param](/Mesh/CombinerGenerator/positions)
+take precedence.
+
 ## Usage
 
 There are three main ways to use the `CombinerGenerator`:
