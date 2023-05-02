@@ -6,6 +6,7 @@
   requirement = 'The capability shall create a two-way map between overlay mesh and main mesh.'
 
   [2D]
+    detail = 'in 2D mesh'
     [replicated]
       type = JSONDiff
       recover = false
@@ -29,6 +30,7 @@
   []
 
 [3D]
+  detail = 'in 3D mesh'
     [replicated]
       type = JSONDiff
       recover = false
