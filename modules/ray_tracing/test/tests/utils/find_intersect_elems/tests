@@ -5,6 +5,7 @@
   issues = '#24098'
   requirement = 'The capability shall create a two-way map between overlay mesh and main mesh.'
 
+  [2D]
     [replicated]
       type = JSONDiff
       recover = false
@@ -26,5 +27,29 @@
       detail = 'have the distribute mapping in all processsors'
     []
   []
+
+[3D]
+    [replicated]
+      type = JSONDiff
+      recover = false
+      input = 'find_intersect_elems_3D.i'
+      jsondiff = 'find_intersect_elems_3D.json'
+      mesh_mode = REPLICATED
+      cli_args = 'Mesh/parallel_type=replicated Reporters/find_intersection_elems/serialize=true'
+      detail = 'keep the mapping in main processsor'
+    []
+
+    [distribute]
+      type = JSONDiff
+      recover = false
+      input = 'find_intersect_elems_3D.i'
+      jsondiff = 'intersect_elems_distribute_3D.json intersect_elems_distribute_3D.json.1 intersect_elems_distribute_3D.json.2'
+      min_parallel = 3
+      max_parallel = 3
+      cli_args = "Mesh/parallel_type=distributed Outputs/file_base='intersect_elems_distribute_3D'"
+      detail = 'have the distribute mapping in all processsors'
+    []
+  []
+[]
 
 []
