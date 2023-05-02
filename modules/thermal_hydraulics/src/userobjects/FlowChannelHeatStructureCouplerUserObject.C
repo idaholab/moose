@@ -8,7 +8,6 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "FlowChannelHeatStructureCouplerUserObject.h"
-#include "FlowChannelAlignment.h"
 #include "metaphysicl/parallel_dualnumber.h"
 #include "metaphysicl/parallel_numberarray.h"
 #include "metaphysicl/parallel_semidynamicsparsenumberarray.h"
@@ -17,9 +16,7 @@ InputParameters
 FlowChannelHeatStructureCouplerUserObject::validParams()
 {
   InputParameters params = ElementUserObject::validParams();
-  params.addDeprecatedParam<FlowChannelAlignment *>(
-      "_fch_alignment", "Flow channel alignment object", "Use '_mesh_alignment' instead.");
-  params.addParam<MeshAlignment *>("_mesh_alignment", "Mesh alignment object");
+  params.addRequiredParam<MeshAlignment *>("_mesh_alignment", "Mesh alignment object");
   params.addClassDescription(
       "Base class for caching quantities computed between flow channels and heat structures.");
   return params;
@@ -32,9 +29,7 @@ FlowChannelHeatStructureCouplerUserObject::FlowChannelHeatStructureCouplerUserOb
     _hs_elem_id(0),
     _fc_qp(0),
     _hs_qp(0),
-    _mesh_alignment(isParamValid("_mesh_alignment")
-                        ? *getParam<MeshAlignment *>("_mesh_alignment")
-                        : *getParam<FlowChannelAlignment *>("_fch_alignment"))
+    _mesh_alignment(*getParam<MeshAlignment *>("_mesh_alignment"))
 {
   _mesh_alignment.buildCoupledElemQpIndexMap(_assembly);
 }

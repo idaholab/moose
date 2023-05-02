@@ -11,7 +11,7 @@
 
 #include "HeatTransferFromTemperature1Phase.h"
 #include "HSBoundaryInterface.h"
-#include "FlowChannelAlignment.h"
+#include "MeshAlignment.h"
 
 /**
  * Connects a 1-phase flow channel and a heat structure
@@ -45,8 +45,6 @@ protected:
    */
   const BoundaryName & getSlaveSideName() const;
 
-  // remove this one after removing in children:
-  FlowChannelAlignment _fch_alignment;
   /// Mesh alignment
   MeshAlignment _mesh_alignment;
 

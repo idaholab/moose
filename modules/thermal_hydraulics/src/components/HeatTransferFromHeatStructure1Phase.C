@@ -32,7 +32,6 @@ HeatTransferFromHeatStructure1Phase::HeatTransferFromHeatStructure1Phase(
     const InputParameters & parameters)
   : HeatTransferFromTemperature1Phase(parameters),
     HSBoundaryInterface(this),
-    _fch_alignment(constMesh()),
     _mesh_alignment(constMesh())
 {
 }
@@ -64,7 +63,6 @@ HeatTransferFromHeatStructure1Phase::setupMesh()
         getComponentByName<FlowChannel1Phase>(_flow_channel_name);
 
     _mesh_alignment.initialize(flow_channel.getElementIDs(), hs.getBoundaryInfo(_hs_side));
-    _fch_alignment.initialize(flow_channel.getElementIDs(), hs.getBoundaryInfo(_hs_side));
 
     for (auto & elem_id : flow_channel.getElementIDs())
     {
