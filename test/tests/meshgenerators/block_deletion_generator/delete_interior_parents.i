@@ -31,18 +31,18 @@
     input = lowerblock1
     primary_block = 1
     paired_block = 0
-    new_boundary = bar
-  []
-  [lowerblock2]
-    type = LowerDBlockFromSidesetGenerator
-    input = sideset2
-    sidesets = bar
-    new_block_id = 3
+    new_boundary = baz
   []
   [delete]
     type = BlockDeletionGenerator
-    input = lowerblock2
+    input = sideset2
     block = 0
+  []
+  [lowerblock2]
+    type = LowerDBlockFromSidesetGenerator
+    input = delete
+    sidesets = baz
+    new_block_id = 3
   []
 []
 
