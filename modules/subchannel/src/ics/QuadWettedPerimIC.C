@@ -20,7 +20,10 @@ registerMooseObject("SubChannelApp", QuadWettedPerimIC);
 InputParameters
 QuadWettedPerimIC::validParams()
 {
-  return QuadSubChannelBaseIC::validParams();
+  InputParameters params = QuadSubChannelBaseIC::validParams();
+  params.addClassDescription(
+      "Computes wetted perimeter of subchannels in a square lattice arrangement");
+  return params;
 }
 
 QuadWettedPerimIC::QuadWettedPerimIC(const InputParameters & params) : QuadSubChannelBaseIC(params)

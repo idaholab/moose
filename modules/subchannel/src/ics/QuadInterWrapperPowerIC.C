@@ -25,6 +25,8 @@ InputParameters
 QuadInterWrapperPowerIC::validParams()
 {
   InputParameters params = QuadInterWrapperBaseIC::validParams();
+  params.addClassDescription("Computes axial power rate [W/m] that goes into the inter-wrapper "
+                             "cells in a square lattice subchannel arrangement");
   params.addParam<Real>("power", 0.0, "[W]");
   params.addParam<std::string>("filename",
                                "file_was_not_found",

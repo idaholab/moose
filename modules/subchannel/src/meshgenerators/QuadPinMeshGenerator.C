@@ -44,6 +44,7 @@ InputParameters
 QuadPinMeshGenerator::validParams()
 {
   InputParameters params = MeshGenerator::validParams();
+  params.addClassDescription("Creates a mesh of 1D fuel pins in a square lattice arrangement");
   params.addRequiredParam<MeshGeneratorName>("input", "The corresponding subchannel mesh");
   params.addClassDescription("Creates a mesh in the location of the pin center lines");
   params.addParam<Real>("unheated_length_entry", 0.0, "Unheated length at entry [m]");

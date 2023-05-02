@@ -45,7 +45,7 @@ TriPinMeshGenerator::validParams()
 {
   InputParameters params = MeshGenerator::validParams();
   params.addRequiredParam<MeshGeneratorName>("input", "The corresponding subchannel mesh");
-  params.addClassDescription("Creates a mesh in the location of the pin center lines");
+  params.addClassDescription("Creates a fuel pin mesh in a triangular lattice arrangement");
   params.addParam<Real>("unheated_length_entry", 0.0, "Unheated length at entry [m]");
   params.addRequiredParam<Real>("heated_length", "Heated length [m]");
   params.addParam<Real>("unheated_length_exit", 0.0, "Unheated length at exit [m]");

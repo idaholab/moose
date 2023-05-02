@@ -21,6 +21,8 @@ InputParameters
 TriFlowAreaIC::validParams()
 {
   InputParameters params = TriSubChannelBaseIC::validParams();
+  params.addClassDescription(
+      "Computes flow area of subchannels in a triangular lattice arrangement");
   return params;
 }
 

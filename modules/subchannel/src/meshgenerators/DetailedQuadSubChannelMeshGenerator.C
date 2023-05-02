@@ -24,6 +24,8 @@ InputParameters
 DetailedQuadSubChannelMeshGenerator::validParams()
 {
   InputParameters params = MeshGenerator::validParams();
+  params.addClassDescription(
+      "Creates detailed mesh of subchannels in a square lattice arrangement");
   params.addRequiredParam<Real>("pitch", "Pitch [m]");
   params.addRequiredParam<Real>("rod_diameter", "Rod diameter [m]");
   params.addParam<Real>("unheated_length_entry", 0.0, "Unheated length at entry [m]");

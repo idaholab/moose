@@ -24,6 +24,8 @@ InputParameters
 TriInterWrapperMeshGenerator::validParams()
 {
   InputParameters params = MeshGenerator::validParams();
+  params.addClassDescription("Creates a mesh of inter-wrapper 1D cells around a triangular lattice "
+                             "subchannel arrangement");
   params.addRequiredParam<unsigned int>("n_cells", "The number of cells in the axial direction");
   params.addRequiredParam<Real>("assembly_pitch", "Pitch [m]");
   params.addParam<Real>("unheated_length_entry", 0.0, "Unheated length at entry [m]");

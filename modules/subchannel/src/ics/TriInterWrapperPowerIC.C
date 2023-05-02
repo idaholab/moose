@@ -22,6 +22,8 @@ InputParameters
 TriInterWrapperPowerIC::validParams()
 {
   InputParameters params = TriInterWrapperBaseIC::validParams();
+  params.addClassDescription("Computes linear power rate [W/m] that goes into interwrapper cells "
+                             "in a triangular subchannel lattice");
   params.addParam<Real>("power", 0.0, "The total heating power [W]");
   params.addParam<std::string>("filename",
                                "file_was_not_found",

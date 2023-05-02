@@ -24,6 +24,8 @@ InputParameters
 TriDuctMeshGenerator::validParams()
 {
   InputParameters params = MeshGenerator::validParams();
+  params.addClassDescription(
+      "Creates a mesh of 1D duct cells around a triangular lattice subchannel arrangement");
   params.addRequiredParam<MeshGeneratorName>("input", "The corresponding subchannel mesh");
   params.addParam<unsigned int>("block_id", 2, "Domain Index");
   params.addRequiredParam<unsigned int>("n_cells", "The number of cells in the axial direction");

@@ -52,6 +52,8 @@ PBSodiumFluidProperties::validParams()
 {
   InputParameters params = SinglePhaseFluidProperties::validParams();
   params.addParam<Real>("p_0", 1.e5, "Reference pressure");
+  params.addClassDescription(
+      "Class that provides the methods that realize the equations of state for Liquid Sodium");
   return params;
 }
 

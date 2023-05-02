@@ -24,6 +24,7 @@ InputParameters
 TriSubChannelMeshGenerator::validParams()
 {
   InputParameters params = MeshGenerator::validParams();
+  params.addClassDescription("Creates a subchannel mesh in a triangular lattice arrangement");
   params.addRequiredParam<unsigned int>("n_cells", "The number of cells in the axial direction");
   params.addRequiredParam<Real>("pitch", "Pitch [m]");
   params.addRequiredParam<Real>("rod_diameter", "Rod diameter [m]");

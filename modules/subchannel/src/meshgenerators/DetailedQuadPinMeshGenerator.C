@@ -22,6 +22,7 @@ InputParameters
 DetailedQuadPinMeshGenerator::validParams()
 {
   InputParameters params = DetailedPinMeshGeneratorBase::validParams();
+  params.addClassDescription("Creates detailed mesh of fuel pins in a square lattice arrangement");
   params.addRequiredParam<MeshGeneratorName>("input", "The corresponding subchannel mesh");
   params.addRequiredParam<unsigned int>("nx", "Number of channels in the x direction [-]");
   params.addRequiredParam<unsigned int>("ny", "Number of channels in the y direction [-]");
