@@ -158,7 +158,7 @@ public:
   virtual void buildMesh() = 0;
 
   /**
-   * Returns MeshBase::mesh_dimsension(), (not
+   * Returns MeshBase::mesh_dimension(), (not
    * MeshBase::spatial_dimension()!) of the underlying libMesh mesh
    * object.
    */
@@ -170,6 +170,11 @@ public:
    * mesh, respectively. Likewise a 2D mesh that has non-zero z coordinates is actually 3D mesh.
    */
   virtual unsigned int effectiveSpatialDimension() const;
+
+  /**
+   * Returns the maximum element dimension on the given blocks
+   */
+  unsigned int getBlocksMaxDimension(const std::vector<SubdomainName> & blocks) const;
 
   /**
    * Returns a vector of boundary IDs for the requested element on the

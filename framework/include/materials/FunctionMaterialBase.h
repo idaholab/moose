@@ -29,7 +29,8 @@
   using FunctionMaterialBase<T>::_arg_param_names;                                                 \
   using FunctionMaterialBase<T>::_arg_param_numbers;                                               \
   using FunctionMaterialBase<T>::_arg_constant_defaults;                                           \
-  using FunctionMaterialBase<T>::_prop_F
+  using FunctionMaterialBase<T>::_prop_F;                                                          \
+  using FunctionMaterialBase<T>::_communicator
 
 /**
  * Material base class, central to all Materials that provide a Function as a

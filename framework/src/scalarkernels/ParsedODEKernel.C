@@ -100,6 +100,10 @@ ParsedODEKernel::ParsedODEKernel(const InputParameters & parameters)
   // on-diagonal derivative
   _func_dFdu = std::make_shared<SymFunction>(*_func_F);
 
+  // let rank 0 do the work first (diff and JIT) to populate caches
+  if (_communicator.rank() != 0)
+    _communicator.barrier();
+
   if (_func_dFdu->AutoDiff(_var.name()) != -1)
     mooseError("Failed to take first derivative w.r.t. ", _var.name());
 
@@ -129,6 +133,10 @@ ParsedODEKernel::ParsedODEKernel(const InputParameters & parameters)
     for (unsigned int i = 0; i < _nargs; ++i)
       _func_dFdarg[i]->JITCompile();
   }
+
+  // wait for ranks > 0 to catch up
+  if (_communicator.rank() == 0)
+    _communicator.barrier();
 
   // reserve storage for parameter passing buffer
   _func_params.resize(1 + _nargs + _pp.size());

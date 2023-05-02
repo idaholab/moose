@@ -93,7 +93,7 @@ INSFVRhieChowInterpolator::INSFVRhieChowInterpolator(const InputParameters & par
     ADFunctorInterface(this),
     _moose_mesh(UserObject::_subproblem.mesh()),
     _mesh(_moose_mesh.getMesh()),
-    _dim(_moose_mesh.dimension()),
+    _dim(blocksMaxDimension()),
     _vel(libMesh::n_threads()),
     _p(dynamic_cast<INSFVPressureVariable *>(
         &UserObject::_subproblem.getVariable(0, getParam<VariableName>(NS::pressure)))),
@@ -134,16 +134,59 @@ INSFVRhieChowInterpolator::INSFVRhieChowInterpolator(const InputParameters & par
 
   auto check_blocks = [this](const auto & var)
   {
-    if (blockIDs() != var.blockIDs())
+    const auto & var_blocks = var.blockIDs();
+    const auto & uo_blocks = blockIDs();
+
+    // Error if this UO has any blocks that the variable does not
+    std::set<SubdomainID> uo_blocks_minus_var_blocks;
+    std::set_difference(
+        uo_blocks.begin(),
+        uo_blocks.end(),
+        var_blocks.begin(),
+        var_blocks.end(),
+        std::inserter(uo_blocks_minus_var_blocks, uo_blocks_minus_var_blocks.end()));
+    if (uo_blocks_minus_var_blocks.size() > 0)
       mooseError("Block restriction of interpolator user object '",
                  this->name(),
                  "' (",
                  Moose::stringify(blocks()),
-                 ") doesn't match the block restriction of variable '",
+                 ") includes blocks not in the block restriction of variable '",
                  var.name(),
                  "' (",
                  Moose::stringify(var.blocks()),
                  ")");
+
+    // Get the blocks in the variable but not this UO
+    std::set<SubdomainID> var_blocks_minus_uo_blocks;
+    std::set_difference(
+        var_blocks.begin(),
+        var_blocks.end(),
+        uo_blocks.begin(),
+        uo_blocks.end(),
+        std::inserter(var_blocks_minus_uo_blocks, var_blocks_minus_uo_blocks.end()));
+
+    // For each block in the variable but not this UO, error if there is connection
+    // to any blocks on the UO.
+    for (auto & block_id : var_blocks_minus_uo_blocks)
+    {
+      const auto connected_blocks = _moose_mesh.getBlockConnectedBlocks(block_id);
+      std::set<SubdomainID> connected_blocks_on_uo;
+      std::set_intersection(connected_blocks.begin(),
+                            connected_blocks.end(),
+                            uo_blocks.begin(),
+                            uo_blocks.end(),
+                            std::inserter(connected_blocks_on_uo, connected_blocks_on_uo.end()));
+      if (connected_blocks_on_uo.size() > 0)
+        mooseError("Block restriction of interpolator user object '",
+                   this->name(),
+                   "' (",
+                   Moose::stringify(uo_blocks),
+                   ") doesn't match the block restriction of variable '",
+                   var.name(),
+                   "' (",
+                   Moose::stringify(var_blocks),
+                   ")");
+    }
   };
 
   fill_container(NS::pressure, _ps);

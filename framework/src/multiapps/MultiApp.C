@@ -79,6 +79,10 @@ MultiApp::validParams()
       "library_name",
       "",
       "The file name of the library (*.la file) that will be dynamically loaded.");
+  params.addParam<bool>("library_load_dependencies",
+                        false,
+                        "Tells MOOSE to manually load library dependencies. This should not be "
+                        "necessary and is hear for debugging/troubleshooting.");
   params.addParam<std::vector<Point>>(
       "positions",
       "The positions of the App locations.  Each set of 3 values will represent a "
@@ -218,7 +222,8 @@ MultiApp::validParams()
   params.addParamNamesToGroup("relaxation_factor transformed_variables transformed_postprocessors "
                               "keep_solution_during_restore",
                               "Fixed point acceleration of MultiApp quantities");
-  params.addParamNamesToGroup("library_name library_path", "Dynamic loading");
+  params.addParamNamesToGroup("library_name library_path library_load_dependencies",
+                              "Dynamic loading");
   params.addParamNamesToGroup("cli_args cli_args_files", "Passing command line argument");
   return params;
 }
@@ -347,8 +352,10 @@ MultiApp::createApps()
 
   // If the user provided an unregistered app type, see if we can load it dynamically
   if (!AppFactory::instance().isRegistered(_app_type))
-    _app.dynamicAppRegistration(
-        _app_type, getParam<std::string>("library_path"), getParam<std::string>("library_name"));
+    _app.dynamicAppRegistration(_app_type,
+                                getParam<std::string>("library_path"),
+                                getParam<std::string>("library_name"),
+                                getParam<bool>("library_load_dependencies"));
 
   for (unsigned int i = 0; i < _my_num_apps; i++)
   {

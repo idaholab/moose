@@ -469,6 +469,7 @@ else
   patch_relink = :
   patch_rpath = patchelf --set-rpath '$$ORIGIN'/$(2):$$(patchelf --print-rpath $(1)) $(1)
 endif
+patch_la = $(FRAMEWORK_DIR)/scripts/patch_la.py $(1) $(2)
 
 libname_framework = $(shell grep "dlname='.*'" $(MOOSE_DIR)/framework/libmoose-$(METHOD).la 2>/dev/null | sed -E "s/dlname='(.*)'/\1/g")
 libpath_framework = $(MOOSE_DIR)/framework/$(libname_framework)

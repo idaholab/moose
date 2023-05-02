@@ -1,0 +1,12 @@
+[Tests]
+  issues = '#23794'
+  design = 'Mesh/index.md'
+  [test]
+    type = CSVDiff
+    input = 'blocks_max_dimension.i'
+    csvdiff = 'blocks_max_dimension_out.csv'
+    recover = false # no solve
+
+    requirement = 'The system shall get the correct mesh dimension for a list of subdomains.'
+  []
+[]
