@@ -18,18 +18,28 @@
 []
 
 [Functions]
-  [exact]
+  [exact-quadratic]
     type = ParsedFunction
-    expression = x
+    expression = '-(x-1)^2+1'
+  []
+  [exact-linear]
+    type = ParsedFunction
+    expression = 'x'
   []
 []
 
 [FVKernels]
+  inactive = 'source'
   [diff]
     type = FVDiffusion
     variable = u
     coeff = coeff
     use_point_neighbors = true
+  []
+  [source]
+    type = FVBodyForce
+    variable = u
+    function = 2
   []
 []
 
@@ -90,7 +100,7 @@
   [error]
     type = ElementL2Error
     variable = u
-    function = exact
+    function = exact-linear
     outputs = 'console csv'
     execute_on = 'timestep_end'
   []
