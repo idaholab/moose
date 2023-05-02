@@ -2513,6 +2513,8 @@ MooseMesh::getBlocksMaxDimension(const std::vector<SubdomainName> & blocks) cons
   for (const auto & elem : getMesh().active_subdomain_set_elements_ptr_range(subdomain_ids_set))
     dim = std::max(dim, elem->dim());
 
+  // Get the maximumal globally
+  _communicator.max(dim);
   return dim;
 }
 
