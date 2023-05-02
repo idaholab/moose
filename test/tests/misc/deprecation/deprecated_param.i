@@ -1,6 +1,6 @@
 [Mesh/gen]
   type = GeneratedMeshGenerator
-  dim =1
+  dim = 1
 []
 
 [Variables/u]
