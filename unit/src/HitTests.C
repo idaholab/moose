@@ -394,6 +394,14 @@ TEST(HitTests, BraceExpressions){
          "a",
          "42.97674418604651",
          hit::Field::Kind::Float},
+        {"multi-line value",
+         "foo = '1 2 3\n"
+         "4 5 6\n"
+         "7 8 9'\n"
+         "boo = ${foo}",
+         "boo",
+         "1 2 3\n4 5 6\n7 8 9",
+         hit::Field::Kind::String},
     };
 
 for (size_t i = 0; i < sizeof(cases) / sizeof(ValCase); i++)
