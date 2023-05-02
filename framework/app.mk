@@ -426,8 +426,7 @@ copy_input_targets := $(foreach dir,$(INSTALLABLE_DIRS),target_$(APPLICATION_NAM
 
 ifeq ($(want_exec),yes)
   install_bin: $(bindst)
-  applibs_filtered    = $(filter-out $(wasp_LIBS), $(applibs)) # don't install wasp
-  lib_install_targets = $(foreach lib,$(applibs_filtered),$(dir $(lib))install_lib_$(notdir $(lib)))
+  lib_install_targets = $(foreach lib,$(applibs),$(dir $(lib))install_lib_$(notdir $(lib)))
 else
   install_bin:
 endif
