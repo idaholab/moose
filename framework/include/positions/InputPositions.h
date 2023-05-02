@@ -13,7 +13,7 @@
 #include "Positions.h"
 
 /**
- * Simple positions from a parameter
+ * Simple positions from an input parameter
  */
 class InputPositions : public Positions
 {
@@ -22,6 +22,5 @@ public:
   InputPositions(const InputParameters & parameters);
   virtual ~InputPositions() = default;
 
-  void initialize() override{};
-  using Positions::_positions;
+  void initialize() override {}
 };

@@ -24,6 +24,6 @@ public:
   virtual ~ElementCentroidPositions() = default;
 
   virtual void initialize() override;
-  using Positions::_positions;
+
   MooseMesh & _mesh;
 };

@@ -1347,5 +1347,6 @@ MultiApp::position(unsigned int app) const
     return _positions[app];
   else
     // Find which Positions object is specifying it, and query a potentially updated value
-    return _positions_objs[app]->getPosition(app - _positions_index_offsets[app]);
+    return _positions_objs[app]->getPosition(app - _positions_index_offsets[app],
+                                             _fe_problem.getCurrentExecuteOnFlag() == EXEC_INITIAL);
 }

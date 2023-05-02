@@ -23,5 +23,4 @@ public:
   virtual ~ReporterPositions() = default;
 
   void initialize() override;
-  using Positions::_positions;
 };

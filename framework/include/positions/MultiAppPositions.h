@@ -24,8 +24,7 @@ public:
 
   // MultiApp positions are not known at construction
   void initialize() override;
-  using Positions::_positions;
 
-  /// Whether to use the subapp mesh centroids to compute the positions, in addition to the positions
+  /// Whether to use the subapp mesh centroids to compute the positions, further translated by the positions
   const bool _use_apps_centroid;
 };

@@ -79,6 +79,8 @@ public:
 
   /**
    * Sets the points on the line segment.
+   * @param p0 The start point of the line segment
+   * @param p1 The end point of the line segment
    */
   void set(const Point & p0, const Point & p1);
 

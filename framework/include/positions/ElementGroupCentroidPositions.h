@@ -24,12 +24,15 @@ public:
   virtual ~ElementGroupCentroidPositions() = default;
 
   void initialize() override;
-  using Positions::_positions;
+
   MooseMesh & _mesh;
 
   ///{
   /// How to group elements, to compute centroids for these groups
-  static MooseEnum groupTypeEnum() { return MooseEnum("block extra_id block_and_ids", "block"); }
+  static MooseEnum groupTypeEnum()
+  {
+    return MooseEnum("block extra_id block_and_extra_id", "block");
+  }
   MooseEnum _group_type;
   ///}
 

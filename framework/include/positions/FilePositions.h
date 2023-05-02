@@ -22,6 +22,5 @@ public:
   FilePositions(const InputParameters & parameters);
   virtual ~FilePositions() = default;
 
-  void initialize() override{};
-  using Positions::_positions;
+  void initialize() override {}
 };

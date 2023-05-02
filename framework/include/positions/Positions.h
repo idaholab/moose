@@ -14,7 +14,7 @@
 
 /**
  * Positions objects are under the hood Reporters.
- * But they are limited in to vectors or multi-dimensional vectors of points.
+ * But they are limited to vectors or multi-dimensional vectors of points.
  */
 class Positions : public GeneralReporter
 {
@@ -26,14 +26,14 @@ public:
   ///{
   /// Getters for the positions vector for the desired dimension
   /// 1D will be the only one guaranteed to succeed
-  const std::vector<Point> & getPositions(bool initial = false) const;
+  const std::vector<Point> & getPositions(bool initial) const;
   const std::vector<std::vector<Point>> & getPositionsVector2D() const;
   const std::vector<std::vector<std::vector<Point>>> & getPositionsVector3D() const;
   const std::vector<std::vector<std::vector<std::vector<Point>>>> & getPositionsVector4D() const;
   ///}
 
   /// Getter for a single position at a known index
-  const Point & getPosition(unsigned int index, bool initial = false) const;
+  const Point & getPosition(unsigned int index, bool initial) const;
 
   /// Find the nearest Position for a given point
   const Point & getNearestPosition(const Point & target) const;
@@ -43,18 +43,18 @@ protected:
   virtual void initialize() override = 0;
 
   /// By default, we wont execute often but "executing" will mean loading the positions
-  void execute() override { initialize(); }
+  virtual void execute() override { initialize(); }
 
   /// In charge of reduction across all ranks & sorting for consistent output
-  void finalize() override;
+  virtual void finalize() override;
 
   /// By default, Positions will call initial setup on mesh changed
-  void meshChanged() override { initialSetup(); };
+  virtual void meshChanged() override { initialSetup(); }
 
   /// By default, Positions will not be modified very regularly
-  void timestepSetup() override {}
-  void residualSetup() override {}
-  void jacobianSetup() override {}
+  virtual void timestepSetup() override {}
+  virtual void residualSetup() override {}
+  virtual void jacobianSetup() override {}
 
   /// Clear all positions vectors
   void clearPositions();
@@ -82,9 +82,10 @@ protected:
 
   /// Whether generation of positions is distributed or not (and therefore needs a broadcast)
   bool _need_broadcast;
+
   /// Whether positions should be sorted. Be careful with sorting! For example if initial positions
   /// are not sorted, then we switch to sorted positions, the mapping might be odd
-  /// User is also likely to have sorted their positions file, their input parameter etc
+  /// User may have also sorted their positions file, their input parameter etc
   const bool _need_sort;
 };
 
