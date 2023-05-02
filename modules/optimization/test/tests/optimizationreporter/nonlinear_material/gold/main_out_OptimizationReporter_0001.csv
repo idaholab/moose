@@ -1,0 +1,5 @@
+grad_heat_source,heat_source,measurement_values,measurement_xcoord,measurement_ycoord,measurement_zcoord,misfit_values,simulation_values,measurement_time
+0,333,1.98404,0.2,0.2,0,0,1.98404,0
+0,  0,1.91076,0.8,0.6,0,0,1.91076,0
+0,  0,1.56488,0.2,1.4,0,0,1.56488,0
+0,  0,1.23863,0.8,1.8,0,0,1.23863,0
