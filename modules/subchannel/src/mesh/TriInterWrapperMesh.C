@@ -22,6 +22,8 @@ InputParameters
 TriInterWrapperMesh::validParams()
 {
   InputParameters params = InterWrapperMesh::validParams();
+  params.addClassDescription("Creates an inter-wrappper mesh container arround a triangular "
+                             "lattice subchannel arrangement");
   return params;
 }
 

@@ -21,6 +21,8 @@ InputParameters
 QuadInterWrapperFlowAreaIC::validParams()
 {
   InputParameters params = QuadInterWrapperBaseIC::validParams();
+  params.addClassDescription("Computes cross-sectional area for inter-wrapper cells in a square "
+                             "lattice subchannel arrangement");
   return params;
 }
 

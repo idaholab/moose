@@ -20,7 +20,10 @@ registerMooseObject("SubChannelApp", TriInterWrapperWettedPerimIC);
 InputParameters
 TriInterWrapperWettedPerimIC::validParams()
 {
-  return TriSubChannelBaseIC::validParams();
+  InputParameters params = TriSubChannelBaseIC::validParams();
+  params.addClassDescription(
+      "Computes wetted perimeter of inter-wrapper cells in a triangualar subchannel lattice");
+  return params;
 }
 
 TriInterWrapperWettedPerimIC::TriInterWrapperWettedPerimIC(const InputParameters & params)

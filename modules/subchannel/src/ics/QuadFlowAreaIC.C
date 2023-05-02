@@ -20,7 +20,8 @@ InputParameters
 QuadFlowAreaIC::validParams()
 {
   InputParameters params = QuadSubChannelBaseIC::validParams();
-  params.addClassDescription("Computes subchannel flow area in the square lattice arrangement");
+  params.addClassDescription(
+      "Computes subchannel flow area in the square lattice subchannel arrangement");
   return params;
 }
 
