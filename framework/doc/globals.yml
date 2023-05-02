@@ -12,6 +12,7 @@ Kernels: /Kernels/index.md
 Functions: /Functions/index.md
 Postprocessors: /Postprocessors/index.md
 VectorPostprocessors: /VectorPostprocessors/index.md
+Positions: /Positions/index.md
 MultiApps: /MultiApps/index.md
 Samplers: /Samplers/index.md
 Markers: /Adaptivity/Markers/index.md

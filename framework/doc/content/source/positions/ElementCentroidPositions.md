@@ -9,7 +9,7 @@ to certain subdomains.
 
 !alert note
 The `ElementCentroidPositions`, when used in conjonction with a [TransientMultiApp.md]
-enables creating the same subapps as the `CentroidMultiApp`, except that it is not limited to transients.
+enables creating the same subapps as the [CentroidMultiApp.md], except that it is not limited to transients.
 
 !syntax parameters /Positions/ElementCentroidPositions
 

@@ -23,7 +23,7 @@ public:
   ElementCentroidPositions(const InputParameters & parameters);
   virtual ~ElementCentroidPositions() = default;
 
-  void initialize() override;
+  virtual void initialize() override;
   using Positions::_positions;
   MooseMesh & _mesh;
 };

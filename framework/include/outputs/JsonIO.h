@@ -21,7 +21,4 @@ class Point;
 // in which the object is found
 void to_json(nlohmann::json & json, const MooseApp & app); // MooseDocs:to_json
 
-namespace libMesh
-{
-void to_json(nlohmann::json & json, const Point & p);
-}
+void to_json(nlohmann::json & json, const libMesh::Point & p);

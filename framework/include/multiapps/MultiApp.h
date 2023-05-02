@@ -473,14 +473,15 @@ protected:
   /// The type of application to build
   std::string _app_type;
 
-  /// The positions of all of the apps (to be deprecated)
+  /// The positions of all of the apps, using input constant vectors (to be deprecated)
   std::vector<Point> _positions;
   /// The positions of all of the apps, using the Positions system
   std::vector<const Positions *> _positions_objs;
   /// The offsets, in case multiple Positions objects are specified
   std::vector<unsigned int> _positions_index_offsets;
 
-  /// Toggle use of "positions"
+  /// Toggle use of "positions". Subapps are created at each different position.
+  /// List of positions can be created using the Positions system
   const bool _use_positions;
 
   /// The input file for each app's simulation

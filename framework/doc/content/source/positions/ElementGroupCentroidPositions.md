@@ -9,7 +9,7 @@ assemblies, fuel pins, or axial levels of fuel pins, using the `assembly_id`, `p
 respectively in the Reactor module.
 
 Each block or extra element id specified in the parameters creates new
-bins, it does not indicate a wider group of element to compute the centroid of.
+bins; it does not indicate a wider group of element to compute the centroid of.
 
 So for example, if three blocks and two types of extra element ids are specified,
 and for the latter two and four specific ids are specified, then the centroids will be computed for
