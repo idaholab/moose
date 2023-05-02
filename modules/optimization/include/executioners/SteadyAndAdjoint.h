@@ -23,9 +23,8 @@ public:
   SteadyAndAdjoint(const InputParameters & parameters);
 
   /**
-   * This call is basically a copy from Steady without the AMR loop. The difference is a call to the
+   * This call is basically a copy from Steady without the AMR loop and with a call to the
    * adjoint solver after the fixed point solver
-   *
    */
   virtual void execute() override;
 

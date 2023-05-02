@@ -15,7 +15,7 @@
       abs_zero = 10
       # steady solve
       recover = false
-      detail = 'Hessian-based optimization;'
+      detail = 'Hessian-based optimization,'
     []
     [adjoint]
       type = CSVDiff
@@ -29,7 +29,7 @@
       abs_zero = 10
       # steady solve
       recover = false
-      detail = "gradient-based optimization;"
+      detail = "gradient-based optimization, or"
     []
     [auto_adjoint]
       type = CSVDiff
@@ -41,7 +41,7 @@
       abs_zero = 10
       # steady solve
       recover = false
-      detail = 'gradient-based optimization with automatically computed adjoint;'
+      detail = 'gradient-based optimization with an automatically computed adjoint.'
     []
   []
 []

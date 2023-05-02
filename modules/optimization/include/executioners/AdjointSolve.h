@@ -27,7 +27,6 @@ class NumericVector;
  * the forward model's Jacobian, using the converged solution. The source is computed by evaluating
  * the residual of a secondary nonlinear-system representing the adjoint system, in which the
  * adjoint solution is 0.
- *
  */
 class AdjointSolve : public SolveObject
 {
@@ -73,7 +72,7 @@ protected:
    * Say there is a BC setting the d-th DoF to a dirichlet condition on the forward problem.
    * This basically sets the d-th column of the matrix to zero,
    * the d-th entry of the matrix diagonal to one,
-   * and d-th entry of the RHS to the solution passed in.
+   * and the d-th entry of the RHS to the solution passed in.
    *
    * @param matrix The matrix whose columns are set to 0
    * @param solution The solution to replace the entries of the RHS

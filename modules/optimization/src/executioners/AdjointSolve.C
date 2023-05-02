@@ -63,15 +63,15 @@ AdjointSolve::solve()
 
   // Convenient references
   // Adjoint matrix, solution, and right-hand-side
-  auto & matrix = dynamic_cast<ImplicitSystem *>(&_nl_forward.system())->get_system_matrix();
+  auto & matrix = static_cast<ImplicitSystem &>(_nl_forward.system()).get_system_matrix();
   auto & solution = _nl_adjoint.solution();
   auto & rhs = _nl_adjoint.getResidualNonTimeVector();
   // Linear solver parameters
   auto & es = _problem.es();
-  const auto tol = es.parameters.set<Real>("linear solver tolerance");
+  const auto tol = es.parameters.get<Real>("linear solver tolerance");
   const auto maxits = es.parameters.get<unsigned int>("linear solver maximum iterations");
   // Linear solver for adjoint system
-  auto & solver = *dynamic_cast<ImplicitSystem *>(&_nl_adjoint.system())->get_linear_solver();
+  auto & solver = *static_cast<ImplicitSystem &>(_nl_adjoint.system()).get_linear_solver();
 
   // Assemble adjoint system by evaluating the forward Jacobian, computing the adjoint
   // residual/source, and homogenizing nodal BCs

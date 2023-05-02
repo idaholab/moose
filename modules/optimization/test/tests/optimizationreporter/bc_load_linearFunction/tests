@@ -13,7 +13,7 @@
       csvdiff = main_out_optInfo_0001.csv
       # steady solve
       recover = false
-      detail = "matrix-free Hessian approach;"
+      detail = "a matrix-free Hessian approach or"
     []
     [auto_adjoint]
       type = Exodiff
@@ -21,7 +21,7 @@
       exodiff = main_auto_adjoint_out_forward0.e
       max_threads = 1
       recover = false
-      detail = "automatic adjoint evaluation;"
+      detail = "automatic adjoint evaluation."
     []
   []
 []

@@ -7,7 +7,6 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-// MOOSE includes
 #include "SteadyAndAdjoint.h"
 
 registerMooseObject("OptimizationApp", SteadyAndAdjoint);
@@ -20,7 +19,7 @@ SteadyAndAdjoint::validParams()
   params.addClassDescription(
       "Executioner for evaluating steady-state simulations and their adjoint.");
 
-  // We need to full matrix for the adjoint solve, so set this to NEWTON
+  // We need the full matrix for the adjoint solve, so set this to NEWTON
   params.set<MooseEnum>("solve_type") = "newton";
   params.suppressParameter<MooseEnum>("solve_type");
 
