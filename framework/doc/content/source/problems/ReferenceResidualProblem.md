@@ -44,8 +44,11 @@ Use of this procedure requires that the user provide physically meaningful refer
 vector of the reaction loads (in the case of mechanics) or integrated fluxes (in the case of
 diffusion problems) is typically suitable for this purpose, as it provides a measure of the loading
 applied to the system. To make these reference quantities, simply add the
-`extra_vector_tags = <reference_vector_name>` param/value pair to the computing objects that you
+`extra_vector_tags = <reference_vector_name>` parameter/value pair to the computing objects that you
 want to add into the reference vector. An explicit example is given in [#example] below.
+Alternatively, the `absolute_value_vector_tags = <reference_vector_namme>` parameter/value pair can be
+used in the kernels to assemble the absolute value of the contribution to each degree of freedom
+affected by the kernel.
 
 Since relative convergence is computed differently with this approach, the nonlinear relative
 tolerance required to achieve the same error is typically different than with the default approach in
@@ -84,6 +87,11 @@ which is a problem-specific value that must be higher than the residual below wh
 the solution can no longer converge tighter due to numeric roundoff errors, but sufficiently
 low to ensure that the solution is converged when that limit is reached.
 
+Alternatively, the `absolute_value_vector_tags`
+parameter can be used in the kernels or the action that sets them up. This option does not
+rely on the use of Dirichlet BCs to compute a meaningful reference vector, and can typically
+remedy this issue.
+
 ## Example Input Syntax id=example
 
 !listing test/tests/problems/reference_residual_problem/reference_residual.i block=Problem
@@ -92,7 +100,7 @@ where the `extra_tag_vectors` parameter indicates the additional vectors that sh
 nonlinear system. This parameter must contain the name of the vector to be used for the
 `reference_vector`. In this example we only create one extra vector, the `ref` vector, that will be
 used for holding the reference residuals. To have computing objects add into the reference vector,
-simply add the `extra_vector_tags = <reference_vector_name>` param/value pair as illustrated below:
+simply add the `extra_vector_tags = <reference_vector_name>` parameter/value pair as illustrated below:
 
 !listing test/tests/problems/reference_residual_problem/reference_residual.i block=BCs
 
