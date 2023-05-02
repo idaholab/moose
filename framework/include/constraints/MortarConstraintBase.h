@@ -144,7 +144,7 @@ protected:
   const bool _use_petrov_galerkin;
 
   /// The auxiliary Lagrange multiplier variable (used together whith the Petrov-Galerkin approach)
-  MooseVariable * const _aux_lm_var;
+  const MooseVariable * const _aux_lm_var;
 
   /// The shape functions corresponding to the lagrange multiplier variable
   const VariableTestValue & _test;
