@@ -205,6 +205,11 @@ Factory::deprecatedMessage(const std::string obj_name)
   if (time_it == _deprecated_time.end())
     return;
 
+  // If the message has already been printed, return
+  if (_deprecated_types.count(obj_name))
+    return;
+  _deprecated_types.emplace(obj_name);
+
   // Get the current time
   std::time_t now;
   time(&now);
