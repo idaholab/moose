@@ -66,11 +66,15 @@ endif
 # wasp hit, which can override hit
 #
 WASP_DIR            ?= $(MOOSE_DIR)/framework/contrib/wasp/install
-wasp_LIBS           := $(wildcard $(WASP_DIR)/lib/libwasp*.$(lib_suffix))
+ifeq ($(shell uname -s),Darwin)
+	wasp_LIBS         := $(shell find -E $(WASP_DIR)/lib -regex ".*/lib[a-z]+.$(lib_suffix)")
+else
+	wasp_LIBS         := $(wildcard $(WASP_DIR)/lib/libwasp*$(lib_suffix))
+endif
 ifneq ($(wasp_LIBS),)
   wasp_LIBS         := $(notdir $(wasp_LIBS))
-  wasp_LIBS                         := $(patsubst %.so,%,$(wasp_LIBS))
-  wasp_LIBS                         := $(patsubst lib%,-l%,$(wasp_LIBS))
+  wasp_LIBS         := $(patsubst %.$(lib_suffix),%,$(wasp_LIBS))
+  wasp_LIBS         := $(patsubst lib%,-l%,$(wasp_LIBS))
   libmesh_CXXFLAGS  += -DWASP_ENABLED -I$(WASP_DIR)/include
   libmesh_LDFLAGS   += -Wl,-rpath,$(WASP_DIR)/lib -L$(WASP_DIR)/lib $(wasp_LIBS)
 endif
