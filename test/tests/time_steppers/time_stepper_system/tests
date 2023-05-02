@@ -1,7 +1,7 @@
 [Tests]
   issues = '#23740'
   design = 'syntax/Executioner/TimeSteppers/index.md AddTimeStepperAction.md '
-  'ComposeTimeStepperAction.md SetupTimeStepperAction.md'
+  'ComposeTimeStepperAction.md'
 
  [time_stepper_system]
   requirement = 'The system shall support the ability to use multiple time steppers/timesequences'
