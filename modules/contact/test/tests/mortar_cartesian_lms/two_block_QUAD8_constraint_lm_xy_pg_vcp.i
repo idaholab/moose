@@ -214,8 +214,6 @@ velocity = 0.1
     use_displaced_mesh = true
     compute_lm_residuals = false
     correct_edge_dropping = true
-    use_petrov_galerkin = true
-    aux_lm = aux_lm
   []
   [normal_y]
     type = CartesianMortarMechanicalContact
@@ -229,8 +227,6 @@ velocity = 0.1
     use_displaced_mesh = true
     compute_lm_residuals = false
     correct_edge_dropping = true
-    use_petrov_galerkin = true
-    aux_lm = aux_lm
   []
 []
 

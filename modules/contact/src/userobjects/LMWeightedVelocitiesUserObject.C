@@ -92,5 +92,5 @@ LMWeightedVelocitiesUserObject::contactPressure() const
 const VariableTestValue &
 LMWeightedVelocitiesUserObject::test() const
 {
-  return _lm_normal_var->phiLower();
+  return _use_petrov_galerkin ? _aux_lm_var->phiLower() : _lm_normal_var->phiLower();
 }

@@ -126,7 +126,9 @@ MortarConstraintBase::MortarConstraintBase(const InputParameters & parameters)
     _q_point(_assembly.qPointsMortar()),
     _use_petrov_galerkin(getParam<bool>("use_petrov_galerkin")),
     _aux_lm_var(isCoupled("aux_lm") ? getVar("aux_lm", 0) : nullptr),
-    _test(_var ? (_use_petrov_galerkin ? _aux_lm_var->phiLower() : _var->phiLower()) : _test_dummy),
+    _test(_var
+              ? ((_use_petrov_galerkin && _aux_lm_var) ? _aux_lm_var->phiLower() : _var->phiLower())
+              : _test_dummy),
     _test_secondary(_secondary_var.phiFace()),
     _test_primary(_primary_var.phiFaceNeighbor()),
     _grad_test_secondary(_secondary_var.gradPhiFace()),
@@ -142,7 +144,7 @@ MortarConstraintBase::MortarConstraintBase(const InputParameters & parameters)
     paramError("use_petrov_galerkin",
                "We need to set `use_dual = true` while using the Petrov-Galerkin approach");
 
-  if (_use_petrov_galerkin && (!isParamValid("aux_lm")))
+  if (_use_petrov_galerkin && ((!isParamValid("aux_lm")) || _aux_lm_var == nullptr))
     paramError("use_petrov_galerkin",
                "We need to specify an auxiliary variable `aux_lm` while using the Petrov-Galerkin "
                "approach");

@@ -272,8 +272,6 @@ offset = 0.00
     friction_lm_dir = mortar_tangential_3d_lm
     weighted_gap_uo = weighted_vel_uo
     weighted_velocities_uo = weighted_vel_uo
-    use_petrov_galerkin = true
-    aux_lm = aux_lm
   []
   [normal_x]
     type = NormalMortarMechanicalContact
@@ -287,8 +285,6 @@ offset = 0.00
     use_displaced_mesh = true
     compute_lm_residuals = false
     weighted_gap_uo = weighted_vel_uo
-    use_petrov_galerkin = true
-    aux_lm = aux_lm
   []
   [normal_y]
     type = NormalMortarMechanicalContact
@@ -302,8 +298,6 @@ offset = 0.00
     use_displaced_mesh = true
     compute_lm_residuals = false
     weighted_gap_uo = weighted_vel_uo
-    use_petrov_galerkin = true
-    aux_lm = aux_lm
   []
   [normal_z]
     type = NormalMortarMechanicalContact
@@ -317,8 +311,6 @@ offset = 0.00
     use_displaced_mesh = true
     compute_lm_residuals = false
     weighted_gap_uo = weighted_vel_uo
-    use_petrov_galerkin = true
-    aux_lm = aux_lm
   []
   [tangential_x]
     type = TangentialMortarMechanicalContact
@@ -332,8 +324,6 @@ offset = 0.00
     use_displaced_mesh = true
     compute_lm_residuals = false
     weighted_velocities_uo = weighted_vel_uo
-    use_petrov_galerkin = true
-    aux_lm = aux_lm
   []
   [tangential_y]
     type = TangentialMortarMechanicalContact
@@ -347,8 +337,6 @@ offset = 0.00
     use_displaced_mesh = true
     compute_lm_residuals = false
     weighted_velocities_uo = weighted_vel_uo
-    use_petrov_galerkin = true
-    aux_lm = aux_lm
   []
   [tangential_z]
     type = TangentialMortarMechanicalContact
@@ -362,8 +350,6 @@ offset = 0.00
     use_displaced_mesh = true
     compute_lm_residuals = false
     weighted_velocities_uo = weighted_vel_uo
-    use_petrov_galerkin = true
-    aux_lm = aux_lm
   []
   [tangential_dir_x]
     type = TangentialMortarMechanicalContact
@@ -378,8 +364,6 @@ offset = 0.00
     use_displaced_mesh = true
     compute_lm_residuals = false
     weighted_velocities_uo = weighted_vel_uo
-    use_petrov_galerkin = true
-    aux_lm = aux_lm
   []
   [tangential_dir_y]
     type = TangentialMortarMechanicalContact
@@ -394,8 +378,6 @@ offset = 0.00
     use_displaced_mesh = true
     compute_lm_residuals = false
     weighted_velocities_uo = weighted_vel_uo
-    use_petrov_galerkin = true
-    aux_lm = aux_lm
   []
   [tangential_dir_z]
     type = TangentialMortarMechanicalContact
@@ -410,8 +392,6 @@ offset = 0.00
     use_displaced_mesh = true
     compute_lm_residuals = false
     weighted_velocities_uo = weighted_vel_uo
-    use_petrov_galerkin = true
-    aux_lm = aux_lm
   []
 []
 

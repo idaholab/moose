@@ -217,8 +217,7 @@ refine = 3
 
 [Constraints]
   [weighted_gap_lm]
-    type = ComputeFrictionalForceCartesianLMMechanicalContact # ComputeCartesianLMFrictionMechanicalContact
-    # type = ComputeWeightedGapLMMechanicalContact
+    type = ComputeFrictionalForceCartesianLMMechanicalContact
     primary_boundary = '23'
     secondary_boundary = '11'
     primary_subdomain = 'primary_lower'
@@ -247,8 +246,6 @@ refine = 3
     use_displaced_mesh = true
     compute_lm_residuals = false
     correct_edge_dropping = true
-    use_petrov_galerkin = true
-    aux_lm = aux_lm
   []
   [normal_y]
     type = CartesianMortarMechanicalContact
@@ -262,8 +259,6 @@ refine = 3
     use_displaced_mesh = true
     compute_lm_residuals = false
     correct_edge_dropping = true
-    use_petrov_galerkin = true
-    aux_lm = aux_lm
   []
 []
 

@@ -214,8 +214,6 @@
     use_displaced_mesh = true
     correct_edge_dropping = true
     weighted_gap_uo = weighted_gap_uo
-    use_petrov_galerkin = true
-    aux_lm = aux_lm
   []
   [normal_x]
     type = NormalMortarMechanicalContact
@@ -230,8 +228,6 @@
     compute_lm_residuals = false
     correct_edge_dropping = true
     weighted_gap_uo = weighted_gap_uo
-    use_petrov_galerkin = true
-    aux_lm = aux_lm
   []
   [normal_y]
     type = NormalMortarMechanicalContact
@@ -246,8 +242,6 @@
     compute_lm_residuals = false
     correct_edge_dropping = true
     weighted_gap_uo = weighted_gap_uo
-    use_petrov_galerkin = true
-    aux_lm = aux_lm
   []
   [normal_z]
     type = NormalMortarMechanicalContact
@@ -262,8 +256,6 @@
     compute_lm_residuals = false
     correct_edge_dropping = true
     weighted_gap_uo = weighted_gap_uo
-    use_petrov_galerkin = true
-    aux_lm = aux_lm
   []
 []
 

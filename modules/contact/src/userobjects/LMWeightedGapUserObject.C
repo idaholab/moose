@@ -43,7 +43,7 @@ LMWeightedGapUserObject::LMWeightedGapUserObject(const InputParameters & paramet
 const VariableTestValue &
 LMWeightedGapUserObject::test() const
 {
-  return _lm_var->phiLower();
+  return _use_petrov_galerkin ? _aux_lm_var->phiLower() : _lm_var->phiLower();
 }
 
 const ADVariableValue &

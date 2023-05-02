@@ -58,7 +58,7 @@ WeightedGapUserObject::WeightedGapUserObject(const InputParameters & parameters)
     paramError("use_displaced_mesh",
                "'use_displaced_mesh' must be true for the WeightedGapUserObject object");
 
-  if (_use_petrov_galerkin && (!isParamValid("aux_lm")))
+  if (_use_petrov_galerkin && ((!isParamValid("aux_lm")) || _aux_lm_var == nullptr))
     paramError("use_petrov_galerkin",
                "We need to specify an auxiliary variable `aux_lm` while using the Petrov-Galerkin "
                "approach");
@@ -73,7 +73,7 @@ void
 WeightedGapUserObject::initialSetup()
 {
   MortarUserObject::initialSetup();
-  _test = _use_petrov_galerkin ? &_aux_lm_var->phiLower() : &test();
+  _test = &test();
 }
 
 void

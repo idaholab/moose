@@ -34,7 +34,6 @@
     input = 'frictionless-mortar-3d-action.i'
     min_ad_size = 100
     csvdiff = 'frictionless-mortar-3d-action_out_contact-pressure_0002.csv'
-    mesh_mode = 'REPLICATED'
     requirement = 'The system shall solve a 3D frictionless bouncing block problem with mortar '
                   'constraint using the contact action.'
     rel_err = 1.0e-5
@@ -47,7 +46,6 @@
     input = 'frictionless-mortar-3d-action.i'
     min_ad_size = 100
     csvdiff = 'frictionless-mortar-3d-action-correct-edge-dropping_out_contact-pressure_0002.csv'
-    mesh_mode = 'REPLICATED'
     requirement = 'The system shall solve a 3D frictionless bouncing block problem with mortar '
                   'constraint using the contact action and selecting the temporary flag correct edge '
                   'dropping.'
@@ -63,7 +61,6 @@
     input = 'frictionless-mortar-3d.i'
     min_ad_size = 100
     exodiff = 'mortar_segment_mesh.e'
-    mesh_mode = 'REPLICATED'
     cli_args = 'Executioner/end_time=0.5 Executioner/dtmin=0.5 Constraints/normal_lm/debug_mesh=true '
                'Constraints/normal_x/debug_mesh=true Constraints/normal_y/debug_mesh=true '
                'Constraints/normal_z/debug_mesh=true UserObjects/weighted_gap_uo/debug_mesh=true'
