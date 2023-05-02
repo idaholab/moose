@@ -59,7 +59,14 @@ ProjectionAux::computeValue()
 {
   if (!isNodal() || (_source_variable->isNodal() && _source_variable->order() >= _var.order()))
     return _v[_qp];
-  // Handle elemental variable projection into a nodal variable
+  // projecting continuous elemental variable onto a node
+  else if (!_source_variable->isNodal() && _source_variable->getContinuity() != DISCONTINUOUS &&
+           _source_variable->getContinuity() != SIDE_DISCONTINUOUS)
+    return _source_sys.system().point_value(
+        _source_variable->number(),
+        *_current_node,
+        _mesh.nodeToElemMap().find(_current_node->id())->second[0]);
+  // Handle discontinuous elemental variable projection into a nodal variable
   // AND nodal low order -> nodal higher order
   else
   {

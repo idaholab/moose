@@ -14,7 +14,7 @@ If the shape of the source cannot be reproduced by the target variable finite el
 the modeler is invited to measure the projection error using a [ElementL2Difference.md] postprocessor.
 
 !alert note
-Elemental variables are projected to nodal variables by computing nodal values as element-volume-weighted
+Elemental variables that are discontinuous at nodes are projected to nodal variables by computing nodal values as element-volume-weighted
 averages of the centroid values of neighbor elements.
 
 !syntax parameters /AuxKernels/ProjectionAux
