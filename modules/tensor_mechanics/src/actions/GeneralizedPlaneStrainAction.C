@@ -63,6 +63,9 @@ GeneralizedPlaneStrainAction::validParams()
   params.addParam<std::vector<TagName>>(
       "extra_vector_tags",
       "The tag names for extra vectors that residual data should be saved into");
+  params.addParam<std::vector<TagName>>("absolute_value_vector_tags",
+                                        "The tag names for extra vectors that the absolute value "
+                                        "of the residual should be accumulated into");
 
   return params;
 }
@@ -167,6 +170,9 @@ GeneralizedPlaneStrainAction::act()
     if (isParamValid("extra_vector_tags"))
       params.set<std::vector<TagName>>("extra_vector_tags") =
           getParam<std::vector<TagName>>("extra_vector_tags");
+    if (isParamValid("absolute_value_vector_tags"))
+      params.set<std::vector<TagName>>("absolute_value_vector_tags") =
+          getParam<std::vector<TagName>>("absolute_value_vector_tags");
 
     _problem->addScalarKernel(sk_type, _name + "_GeneralizedPlaneStrain", params);
   }
