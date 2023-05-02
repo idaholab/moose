@@ -46,13 +46,13 @@
 [AuxKernels]
   [do-no-1]
     variable = ten
-    type = SelfAux
+    type = ProjectionAux
     v = ten
   []
 
   [do-no-2]
     variable = 2k
-    type = SelfAux
+    type = ProjectionAux
     v = ten
   []
 

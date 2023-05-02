@@ -163,7 +163,7 @@ ChemicalCompositionAction::act()
   //
   if (_current_task == "add_aux_kernel")
   {
-    auto params = _factory.getValidParams("SelfAux");
+    auto params = _factory.getValidParams("ProjectionAux");
     params.set<ExecFlagEnum>("execute_on") = {EXEC_INITIAL, EXEC_TIMESTEP_END};
 
     for (const auto i : index_range(_phases))

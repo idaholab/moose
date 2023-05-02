@@ -35,7 +35,7 @@
 
 [AuxKernels]
   [ak]
-    type = SelfAux
+    type = ProjectionAux
     variable = e
     v = e
   []
