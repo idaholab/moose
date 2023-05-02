@@ -23,43 +23,8 @@ requirements:
   build:
     - {{ compiler('c') }}
     - {{ compiler('cxx') }}
-    - {{ compiler('fortran') }}
     - cmake
     - pkg-config
-
-test:
-  commands:
-    - ddilist --version
-    - ddiselect --version
-    - ddivalid --version
-    - ddivalidjson --version
-    - ddixml --version
-    - docprint --version
-    - eddilist --version
-    - eddiselect --version
-    - eddivalid --version
-    - eddivalidjson --version
-    - eddixml --version
-    - halite --version
-    - halitelist --version
-    - hitlist --version
-    - hitselect --version
-    - hitvalid --version
-    - hitvalidjson --version
-    - hitxml --version
-    - jsonlist --version
-    - jsonselect --version
-    - jsonxml --version
-    - sonjson --version
-    - sonlist --version
-    - sonschemaskel --version
-    - sonselect --version
-    - sonserver --version
-    - sonvalid --version
-    - sonvalidjson --version
-    - sonvalidxml --version
-    - sonxml --version
-    - substitute --version
 
 about:
   home: https://code.ornl.gov/neams-workbench/wasp

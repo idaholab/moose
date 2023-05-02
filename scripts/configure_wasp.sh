@@ -17,6 +17,9 @@ function configure_wasp()
 {
     cmake \
       -D CMAKE_BUILD_TYPE:STRING=RELEASE \
+      -D wasp_ENABLE_ALL_PACKAGES:BOOL=OFF \
+      -D wasp_ENABLE_wasphit:BOOL=ON \
+      -D wasp_ENABLE_wasplsp:BOOL=ON \
       -D wasp_ENABLE_testframework:BOOL=OFF \
       -D wasp_ENABLE_TESTS:BOOL=OFF \
       -D BUILD_SHARED_LIBS:BOOL=ON \
