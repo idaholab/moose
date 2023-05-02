@@ -63,9 +63,7 @@ ProjectionAux::computeValue()
   else if (!_source_variable->isNodal() && _source_variable->getContinuity() != DISCONTINUOUS &&
            _source_variable->getContinuity() != SIDE_DISCONTINUOUS)
     return _source_sys.system().point_value(
-        _source_variable->number(),
-        *_current_node,
-        _mesh.nodeToElemMap().find(_current_node->id())->second[0]);
+        _source_variable->number(), *_current_node, elemOnNodeVariableIsDefinedOn());
   // Handle discontinuous elemental variable projection into a nodal variable
   // AND nodal low order -> nodal higher order
   else
@@ -77,15 +75,18 @@ ProjectionAux::computeValue()
                 "Should have found an element around node " + std::to_string(_current_node->id()));
 
     // Get the neighbor element centroid values & element volumes
-    std::vector<Real> elem_values(elem_ids->second.size());
-    std::vector<Real> elem_volumes(elem_ids->second.size());
+    std::vector<Real> elem_values(elem_ids->second.size(), 0);
+    std::vector<Real> elem_volumes(elem_ids->second.size(), 0);
     auto index = 0;
     for (auto & id : elem_ids->second)
     {
       const auto & elem = _mesh.elemPtr(id);
-      elem_values[index] =
-          _source_sys.system().point_value(_source_variable->number(), elem->true_centroid(), elem);
-      elem_volumes[index] = elem->volume();
+      if (_source_variable->hasBlocks(elem->subdomain_id()))
+      {
+        elem_values[index] = _source_sys.system().point_value(
+            _source_variable->number(), elem->true_centroid(), elem);
+        elem_volumes[index] = elem->volume();
+      }
       index++;
     }
 
@@ -100,4 +101,13 @@ ProjectionAux::computeValue()
 
     return sum_weighted_values / sum_volumes;
   }
+}
+
+const Elem *
+ProjectionAux::elemOnNodeVariableIsDefinedOn() const
+{
+  for (const auto & elem_id : _mesh.nodeToElemMap().find(_current_node->id())->second)
+    if (_source_variable->hasBlocks(_mesh.elemPtr(elem_id)->subdomain_id()))
+      return _mesh.elemPtr(elem_id);
+  mooseError("Source variable is not defined everywhere the target variable is");
 }

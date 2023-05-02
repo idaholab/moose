@@ -32,4 +32,8 @@ protected:
 
   /// The system owning the source variable
   const SystemBase & _source_sys;
+
+private:
+  /// For a node, finds an element we can use to evaluate the (continuous) source variable
+  const Elem * elemOnNodeVariableIsDefinedOn() const;
 };
