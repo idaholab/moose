@@ -1,6 +1,6 @@
 # CompositionDT
 
-!syntax description /Executioner/TimeStepper/CompositionDT
+!syntax description /Executioner/TimeSteppers/CompositionDT
 
 ## Description
 

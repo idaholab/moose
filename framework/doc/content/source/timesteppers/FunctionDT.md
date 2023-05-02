@@ -1,6 +1,6 @@
 # FunctionDT
 
-!syntax description /Executioner/TimeStepper/FunctionDT
+!syntax description /Executioner/TimeSteppers/FunctionDT
 
 ## Description
 
@@ -27,8 +27,8 @@ If no `growth_factor` is provided by the user, the time step will only be govern
 
 !listing test/tests/time_steppers/function_dt/function_dt_min.i block=Executioner
 
-!syntax parameters /Executioner/TimeStepper/FunctionDT
+!syntax parameters /Executioner/TimeSteppers/FunctionDT
 
-!syntax inputs /Executioner/TimeStepper/FunctionDT
+!syntax inputs /Executioner/TimeSteppers/FunctionDT
 
-!syntax children /Executioner/TimeStepper/FunctionDT
+!syntax children /Executioner/TimeSteppers/FunctionDT

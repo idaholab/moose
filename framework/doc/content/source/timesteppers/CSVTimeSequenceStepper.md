@@ -13,8 +13,8 @@ If the solve fails to converge during a time step, the behavior of the
 `CSVTimeSequenceStepper` is the same as the [TimeSequenceStepper.md]. The
 time step will be cut then the time stepper will attempt to return to the original sequence.
 
-!syntax parameters /Executioner/TimeStepper/CSVTimeSequenceStepper
+!syntax parameters /Executioner/TimeSteppers/CSVTimeSequenceStepper
 
-!syntax inputs /Executioner/TimeStepper/CSVTimeSequenceStepper
+!syntax inputs /Executioner/TimeSteppers/CSVTimeSequenceStepper
 
-!syntax children /Executioner/TimeStepper/CSVTimeSequenceStepper
+!syntax children /Executioner/TimeSteppers/CSVTimeSequenceStepper

@@ -1,15 +1,15 @@
 # AB2PredictorCorrector
 
-!syntax description /Executioner/TimeStepper/AB2PredictorCorrector
+!syntax description /Executioner/TimeSteppers/AB2PredictorCorrector
 
 This time stepper first adds an [AdamsPredictor.md] to the problem. The predictor
 uses previous solutions to compute a predicted solution vector. This prediction is
 then compared using a $L\_infty$ norm to the solution. If the error is lower than
-[!param](/Executioner/TimeStepper/AB2PredictorCorrector/e_max),
+[!param](/Executioner/TimeSteppers/AB2PredictorCorrector/e_max),
 then the time step is accepted. If not, then it is reduced.
 
 The time step is regularly increased based on the
-[!param](/Executioner/TimeStepper/AB2PredictorCorrector/steps_between_increase) parameter. The
+[!param](/Executioner/TimeSteppers/AB2PredictorCorrector/steps_between_increase) parameter. The
 magnitude of the increase is based on the magnitude of the prediction error.
 
 The `AB2PredictorCorrector` may be used with the following three time integration schemes:
@@ -22,8 +22,8 @@ corrector scheme. The prediction and correction steps can be observed during the
 
 !listing test/tests/time_integrators/aee/aee.i block=Executioner
 
-!syntax parameters /Executioner/TimeStepper/AB2PredictorCorrector
+!syntax parameters /Executioner/TimeSteppers/AB2PredictorCorrector
 
-!syntax inputs /Executioner/TimeStepper/AB2PredictorCorrector
+!syntax inputs /Executioner/TimeSteppers/AB2PredictorCorrector
 
-!syntax children /Executioner/TimeStepper/AB2PredictorCorrector
+!syntax children /Executioner/TimeSteppers/AB2PredictorCorrector
