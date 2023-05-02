@@ -4,10 +4,15 @@
 
 ## Description
 
-The `CompositionDT` TimeStepper takes TimeSteppers in the input file and generates a composed time step size. It always produces the minimum time step size value of all the input TimeSteppers. The hit option ensures the TimeStepper hits the time specified by user input time sequence steppers. All together, The `CompositionDT` TimeStepper allows users to have a base time step with upper or lower limits and hit specified time points.
+The `CompositionDT` TimeStepper takes multiple time steppers as input and compute the minimum time step size among all time steppers as output. If any time sequence stepper(s) is supplied for input, CompositionDT will compare the computed minimum time step size with the one needs to hit the time point, then select the smaller value as output. An optional parameter lower_bound is provided to set a lower bound for the computed time step size.
 
-## Example Input Syntax
+The composition rules are listed with priority rank:
+1. The time points from time sequence stepper(s) must be hit;
+2. The time step size can not go below the lower_bound;
+3. Take the minimum value of all input time steppers.
 
-!listing test/tests/time_steppers/minimum_all_dt/minimum_all_dt.i block=Executioner
+An example of using multiple time steppers:
+
+!listing test/tests/time_steppers/time_stepper_system/multiple_timesteppers.i block=Executioner
 
 

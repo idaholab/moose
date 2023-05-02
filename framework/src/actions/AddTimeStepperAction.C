@@ -32,8 +32,10 @@ void
 AddTimeStepperAction::act()
 {
   std::string name;
+  // Task: add_time_stepper corresponding to [TimeStepper] block
   if (_current_task == "add_time_stepper")
     name = _type;
+  // Task: add_time_steppers corresponding to [TimeSteppers] block
   else
     name = _name;
   _app.getTimeStepperSystem().addTimeStepper(_type, name, _moose_object_pars);

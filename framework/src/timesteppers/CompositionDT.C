@@ -23,6 +23,8 @@ CompositionDT::validParams()
       "The input TimeSteppers to compose the lower bound time "
       "step size.  This can either be N timesteppers or 1 "
       "timestepper.");
+  params.addClassDescription("The time stepper take time steppers as input and find the minimum "
+                             "time step size within lower bound");
 
   return params;
 }

@@ -12,6 +12,18 @@
 #include "TimeStepper.h"
 #include "TimeSequenceStepperBase.h"
 
+/**
+ * A TimeStepper takes time steppers as input and compute the minimum time step size among all
+ * time steppers as output. If any time sequence stepper(s) is supplied for input, CompositionDT
+ * will compare the computed minimum time step size with the one needs to hit the time point, then
+ * select the smaller value as output. An optional parameter lower_bound is provided
+ * to set a lower bound for the computed time step size.
+ *
+ * The composition rules are listed with priority rank:
+ * 1. The time points from time sequence stepper(s) must be hit;
+ * 2. The time step size can not go below the lower_bound;
+ * 3. Take the minimum value of all input time steppers.
+ */
 class CompositionDT : public TimeStepper
 {
 public:
@@ -20,36 +32,27 @@ public:
   CompositionDT(const InputParameters & parameters);
 
   /**
-   * Find the composed time step size by applying composition rule and compare with the time step
-   * size from base time stepper
+   * Find the composed time step size by selecting the minimum value and compare it
+   * with the lower bound if provided
    * @param dts stores time step size(s) from input time stepper(s)
-   * @param basedt time step size from the base time stepper
+   * @param bound_dts stores time step size(s) from input lower bound time stepper(s)
    */
   Real produceCompositionDT(const std::set<Real> & dts, const std::set<Real> & bound_dts);
 
   // Find the time point to hit at current time step
   Real getSequenceSteppers();
 
-  // Estimate the time step size needed to hit a user specified time
-  Real produceHitDT(const Real & composeDT);
-
 protected:
   virtual Real computeDT() override;
   virtual Real computeInitialDT() override;
 
 private:
-  // the time step size computed by the Composition TimeStepper
+  // The time step size computed by the Composition TimeStepper
   Real _dt;
 
-  // whether or not has an initial time step size
+  // Whether or not has an initial time step size
   bool _has_initial_dt;
 
-  // the initial time step size
+  // The initial time step size
   Real _initial_dt;
-
-  // the name of the base time stepper
-  const std::string _base_timestepper;
-
-  // the name of the time sequence stepper
-  std::string _hit_timestepper_name;
 };

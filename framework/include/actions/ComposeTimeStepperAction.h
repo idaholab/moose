@@ -12,7 +12,7 @@
 #include "MooseObjectAction.h"
 
 /**
- * Compute the composition timestepper
+ * Add the composition time stepper as final time stepper
  */
 class ComposeTimeStepperAction : public MooseObjectAction
 {

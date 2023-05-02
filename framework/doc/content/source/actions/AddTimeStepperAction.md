@@ -2,14 +2,9 @@
 
 !syntax description /Executioner/TimeStepper/AddTimeStepperAction
 
-A time stepper is specified as an object inside the `[TimeStepper]` under the `[Executioner]` block
-as shown below
-
-!listing test/tests/time_steppers/minimum_all_dt/minimum_all_dt.i block=Executioner
-
-This action add all the time steppers in `[TimeStepper]` block to the transient executioner. The input time steppers can be used in `CompositionDT` to produce a composed time size with given composition rules.
+This action handles both `[TimeStepper]` and `[TimeSteppers]` blocks. It supports the use of the `[TimeStepper]` block where only one time stepper object can be specified and the use of `[TimeSteppers]` block where multiple time stepper objects can be specified to compose a time step size with given composition rules. If multiple time steppers(>1) are provided in `[TimeSteppers]` block, a time stepper object named `CompositionDT` will be added to the Time Stepper System which produces the composed time step size with input time steppers.
 
 
-More information about TimeStepper system may be found on the [TimeStepper System syntax documentation](syntax/Executioner/TimeStepper/index.md).
+More information about Time Stepper System and CompositionDT time stepper may be found on the [Time Stepper System syntax documentation](syntax/Executioner/TimeStepper/index.md).
 
-!syntax parameters /Executioner/TimeStepper/AddTimeStepperAction
+
