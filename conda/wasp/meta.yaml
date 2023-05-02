@@ -1,6 +1,6 @@
 {% set build = 0 %}
 {% set strbuild = "build_" + build|string %}
-{% set version = "2023.04.04" %}
+{% set version = "2023.05.01" %}
 
 package:
   name: moose-wasp
