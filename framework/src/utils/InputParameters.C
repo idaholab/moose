@@ -107,10 +107,11 @@ InputParameters::attemptPrintDeprecated(const std::string & name_in)
     auto emit_deprecation_message =
         [this](const auto & deprecated_name, const auto & deprecation_message)
     {
+      // This is user-facing, no need for a backtrace
       const auto current_show_trace = Moose::show_trace;
       Moose::show_trace = false;
       moose::internal::mooseDeprecatedStream(
-          Moose::out, false, false, errorPrefix(deprecated_name), ":\n", deprecation_message, "\n");
+          Moose::out, false, true, errorPrefix(deprecated_name), ":\n", deprecation_message, "\n");
       Moose::show_trace = current_show_trace;
       return true;
     };

@@ -88,6 +88,6 @@
     cli_args = 'Kernels/diff/type=OldNamedKernel Kernels/diff2/type=DeprecatedKernel'
     custom_evaluation_script = 'deprec_two_obj_custom_eval.py'
     issues = '#6780'
-    requirement = 'The system shall produce a warning indicating a possible replacement when deprecated code is superseded.'
+    requirement = 'The system shall produce a warning only once indicating a possible replacement of an object when deprecated code is superseded.'
   []
 []
