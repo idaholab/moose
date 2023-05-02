@@ -210,6 +210,10 @@ Factory::deprecatedMessage(const std::string obj_name)
     return;
   _deprecated_types.emplace(obj_name);
 
+  // We dont need a backtrace on this, this is user-facing
+  const auto current_show_trace = Moose::show_trace;
+  Moose::show_trace = false;
+
   // Get the current time
   std::time_t now;
   time(&now);
@@ -228,7 +232,7 @@ Factory::deprecatedMessage(const std::string obj_name)
     msg << "***** Invalid Object: " << obj_name << " *****\n";
     msg << "Expired on " << ctime(&t_end);
 
-    // Append replacement object, if it exsits
+    // Append replacement object, if it exists
     if (name_it != _deprecated_name.end())
       msg << "Update your application using the '" << name_it->second << "' object";
 
@@ -243,13 +247,14 @@ Factory::deprecatedMessage(const std::string obj_name)
     msg << "Deprecated Object: " << obj_name << "\n";
     msg << "This object will be removed on " << ctime(&t_end);
 
-    // Append replacement object, if it exsits
+    // Append replacement object, if it exists
     if (name_it != _deprecated_name.end())
       msg << "Replace " << obj_name << " with " << name_it->second;
 
     // Produce the error message
     mooseDeprecated(msg.str());
   }
+  Moose::show_trace = current_show_trace;
 }
 
 void
