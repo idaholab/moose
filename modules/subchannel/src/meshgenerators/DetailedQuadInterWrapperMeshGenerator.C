@@ -24,6 +24,8 @@ InputParameters
 DetailedQuadInterWrapperMeshGenerator::validParams()
 {
   InputParameters params = MeshGenerator::validParams();
+  params.addClassDescription(
+      "Creates detailed mesh of inter-wrapper cells in a square lattice subchannel arrangement");
   params.addRequiredParam<Real>("assembly_pitch", "Assembly Pitch [m]");
   params.addRequiredParam<Real>("assembly_side_x", "Rod diameter [m]");
   params.addRequiredParam<Real>("assembly_side_y", "Rod diameter [m]");

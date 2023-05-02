@@ -21,6 +21,8 @@ InputParameters
 ViscosityIC::validParams()
 {
   InputParameters params = InitialCondition::validParams();
+  params.addClassDescription(
+      "Computes viscosity of coolant based on initial conditions of pressure and temperature");
   params.addRequiredCoupledVar("T", "Temperature [K]");
   params.addRequiredParam<Real>("p", "Pressure [Pa]");
   params.addRequiredParam<UserObjectName>("fp", "Fluid properties user object name");

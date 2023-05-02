@@ -21,6 +21,8 @@ InputParameters
 TriInterWrapperFlowAreaIC::validParams()
 {
   InputParameters params = TriInterWrapperBaseIC::validParams();
+  params.addClassDescription(
+      "Computes flow area of inter-wrapper cells in a square subchannel lattice");
   return params;
 }
 

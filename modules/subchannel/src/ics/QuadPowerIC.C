@@ -25,6 +25,8 @@ InputParameters
 QuadPowerIC::validParams()
 {
   InputParameters params = QuadSubChannelBaseIC::validParams();
+  params.addClassDescription("Computes axial power rate [W/m] that goes into the subchannel cells "
+                             "or is assigned to the fuel pins, in a square lattice arrangement");
   params.addRequiredParam<Real>("power", "[W]");
   params.addRequiredParam<std::string>(
       "filename",
