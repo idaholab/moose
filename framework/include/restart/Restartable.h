@@ -69,6 +69,7 @@ public:
               const bool read_only = false,
               const RestartableDataMapName & metaname = "");
 
+protected:
   /**
    * Declare a piece of data as "restartable" and initialize it.
    * This means that in the event of a restart this piece of data
@@ -84,17 +85,17 @@ public:
 
   /**
    * Declare a piece of data as "restartable" and initialize it
-   * Similar to `declareRestartableData` but returns a const reference to the object
-   * and does not allow forwarded arguments.
+   * Similar to `declareRestartableData` but returns a const reference to the object.
+   * Forwarded arguments are not allowed in this case because we assume that the
+   * object is restarted and we won't need different constructors to initialize it.
    *
-   * NOTE: This returns a _ const reference_!  Make sure you store it in a _const reference_!
+   * NOTE: This returns a _const reference_!  Make sure you store it in a _const reference_!
    *
    * @param data_name The name of the data (usually just use the same name as the member variable)
    */
   template <typename T, typename... Args>
   const T & getRestartableData(const std::string & data_name) const;
 
-protected:
   /**
    * Declare a piece of data as "restartable" and initialize it.
    * This means that in the event of a restart this piece of data
@@ -179,10 +180,10 @@ protected:
   /// Flag for toggling read only status (see ReporterData)
   const bool _restartable_read_only;
 
+private:
   /// Restartable metadata name
   const RestartableDataMapName _metaname;
 
-private:
   /// The name of the object
   std::string _restartable_name;
 

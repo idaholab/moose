@@ -18,12 +18,12 @@ RestartableModelInterface::validParams()
   return params;
 }
 
-RestartableModelInterface::RestartableModelInterface(const MooseObject * object,
+RestartableModelInterface::RestartableModelInterface(const MooseObject & object,
                                                      const bool read_only,
                                                      const std::string & meta_data_name)
-  : _model_meta_data_name(meta_data_name),
-    _object(object),
-    _restartable(_object->getMooseApp(), "", "", 0, read_only, meta_data_name)
+  : _object(object),
+    _model_meta_data_name(meta_data_name),
+    _model_restartable(_object.getMooseApp(), "", "", 0, read_only, meta_data_name)
 {
-  _object->getMooseApp().registerRestartableDataMapName(_model_meta_data_name, _object->name());
+  _object.getMooseApp().registerRestartableDataMapName(_model_meta_data_name, _object.name());
 }

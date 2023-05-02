@@ -27,7 +27,7 @@ SurrogateTrainerBase::validParams()
 
 SurrogateTrainerBase::SurrogateTrainerBase(const InputParameters & parameters)
   : GeneralUserObject(parameters),
-    RestartableModelInterface(this, /*read_only=*/false, _type + "_" + name())
+    RestartableModelInterface(*this, /*read_only=*/false, _type + "_" + name())
 {
 }
 

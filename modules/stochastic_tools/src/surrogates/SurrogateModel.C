@@ -33,7 +33,7 @@ SurrogateModel::SurrogateModel(const InputParameters & parameters)
   : MooseObject(parameters),
     SamplerInterface(this),
     SurrogateModelInterface(this),
-    RestartableModelInterface(this,
+    RestartableModelInterface(*this,
                               /*read_only=*/true,
                               isParamValid("trainer")
                                   ? getSurrogateTrainer("trainer").modelMetaDataName()
