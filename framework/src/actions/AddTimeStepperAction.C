@@ -9,7 +9,6 @@
 
 #include "AddTimeStepperAction.h"
 #include "TimeStepper.h"
-#include "Factory.h"
 #include "MooseApp.h"
 
 registerMooseAction("MooseApp", AddTimeStepperAction, "add_time_stepper");

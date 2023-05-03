@@ -55,7 +55,6 @@ TimeStepper::TimeStepper(const InputParameters & parameters)
     _has_reset_dt(false),
     _failure_count(0),
     _current_dt(declareRestartableData<Real>("current_dt", 1.0))
-
 {
 }
 

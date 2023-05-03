@@ -32,7 +32,8 @@ ComposeTimeStepperAction::validParams()
       "step size.  This can either be N timesteppers or 1 "
       "timestepper.");
 
-  params.addClassDescription("Compute the composition time stepper with multiple time steppers.");
+  params.addClassDescription(
+      "Add the composition time stepper if multiple time steppers have been created.");
   return params;
 }
 
@@ -45,13 +46,12 @@ void
 ComposeTimeStepperAction::act()
 {
   auto & time_stepper_system = _app.getTimeStepperSystem();
-  // The user add multiple timesteppers in [TimeSteppers] block, so
+  // The user added multiple timesteppers in [TimeSteppers] block, so
   // create a composition timestepper to compute final time step size
   if (!_awh.getActionListByName("add_time_steppers").empty())
   {
     if (time_stepper_system.getNumAddedTimeSteppers() > 1)
     {
-
       auto final_timestepper = "CompositionDT";
       auto new_params = _factory.getValidParams("CompositionDT");
       if (isParamValid("lower_bound"))

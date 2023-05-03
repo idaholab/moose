@@ -38,7 +38,7 @@ public:
   createTimeSequenceStepper(const std::string & stepper_name,
                             const std::pair<std::string, InputParameters> & type_params_pair);
 
-  std::shared_ptr<TimeStepper> getTimeStepper(const std::string & stepper_name);
+  std::shared_ptr<TimeStepper> getTimeStepper(const std::string & stepper_name) const;
 
   std::map<std::string, std::shared_ptr<TimeStepper>> getTimeSteppers() { return _time_steppers; };
   std::map<std::string, std::shared_ptr<TimeSequenceStepperBase>> getTimeSequenceSteppers()
@@ -46,9 +46,9 @@ public:
     return _time_sequence_steppers;
   };
 
-  std::string getFinalTimeStepperName() { return _final_time_stepper_name; };
+  const std::string & getFinalTimeStepperName() { return _final_time_stepper_name; };
 
-  std::shared_ptr<TimeStepper> getFinalTimeStepper();
+  std::shared_ptr<TimeStepper> getFinalTimeStepper() const;
 
   std::size_t getNumAddedTimeSteppers() const { return _time_stepper_params.size(); }
 
@@ -63,7 +63,7 @@ private:
   /// Owning storage for time steppers, map of name -> time steppers
   std::map<std::string, std::shared_ptr<TimeStepper>> _time_steppers;
 
-  /// Owning storage for time steppers, map of name -> time steppers
+  /// Owning storage for time sequence steppers, map of name -> time sequence steppers
   std::map<std::string, std::shared_ptr<TimeSequenceStepperBase>> _time_sequence_steppers;
 
   /// Name of the time stepper, making the final step decisions, providing the time steps for the problem

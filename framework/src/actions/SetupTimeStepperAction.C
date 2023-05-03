@@ -37,15 +37,11 @@ SetupTimeStepperAction::act()
   {
     auto & time_stepper_system = _app.getTimeStepperSystem();
 
-    Transient * transient = dynamic_cast<Transient *>(_app.getExecutioner());
-    if (!transient)
-      mooseError("You can setup time stepper only with executioners of transient type.");
     // The user add a time stepper with [TimeStepper] or [TimeSteppers], create one for them
     auto no_time_stepper = _awh.getActionListByName("add_time_stepper").empty();
     auto no_time_steppers = _awh.getActionListByName("add_time_steppers").empty();
     if (!no_time_stepper || !no_time_steppers)
     {
-
       time_stepper_system.createAddedTimeSteppers();
 
       auto final_ts = time_stepper_system.getFinalTimeStepper();
@@ -53,14 +49,14 @@ SetupTimeStepperAction::act()
       mooseAssert(final_ts, "Missing final TimeStepper");
       transient->setTimeStepper(final_ts);
     }
-    // The user use [TimeStepper] for time stepper setup, give a depraction message
+    // The user used [TimeStepper] for time stepper setup, give a deprecation message
     if (!no_time_stepper && no_time_steppers)
       mooseDeprecated("The [TimeStepper] block is deprecated. Please use [TimeSteppers] instead.");
     // The user use both [TimeStepper] and [TimeSteppers] for time stepper setup, use input in
     // [TimeSteppers] block and give a warning message
     if (!no_time_stepper && !no_time_steppers)
-      mooseWarning("Both [TimeStepper] and [TimeSteppers] are used to setup the time stepper. The "
-                   "[TimeStepper] Block will be ignored. Note [TimeStepper] will be deprecated "
-                   "soon. Please consider [TimeSteppers] for future use.");
+      mooseError("Both [TimeStepper] and [TimeSteppers] are used to setup the time stepper. The "
+                 "[TimeStepper] Block will be ignored. Note [TimeStepper] will be deprecated "
+                 "soon. Please consider [TimeSteppers] for future use.");
   }
 }

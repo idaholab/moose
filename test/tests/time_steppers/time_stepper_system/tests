@@ -6,34 +6,34 @@
  [time_stepper_system]
   requirement = 'The system shall support the ability to use multiple time steppers/timesequences'
     [multiple_time_steppers]
-      type = 'Exodiff'
+      type = CSVDiff
       input = 'multiple_timesteppers.i'
-      exodiff = 'multiple_timesteppers.e'
+      csvdiff = 'multiple_timesteppers.csv'
       cli_args = "Outputs/file_base='multiple_timesteppers'"
       detail = 'using the minimum time step size of input time steppers,'
     []
 
     [multiple_time_timesequence]
-      type = 'Exodiff'
+      type = CSVDiff
       recover = false
       input = 'multiple_timesequences.i'
-      exodiff = 'multiple_timesequences.e'
+      csvdiff = 'multiple_timesequences.csv'
       cli_args = "Outputs/file_base='multiple_timesequences'"
-      detail = 'hitting the time points specified by multiple TimesequenceSteppers selected by the user,'
+      detail = 'with specific times to hit and still hit all of them,'
     []
 
     [lower_bound]
-      type = 'Exodiff'
+      type = CSVDiff
       input = 'lower_bound.i'
-      exodiff = 'lower_bound.e'
-      detail = 'provide a growing lower bound of the time step size,'
+      csvdiff = 'lower_bound.csv'
+      detail = 'and provide a (usually growing) lower bound of the time step size,'
     []
 
     [controls]
-      type = 'Exodiff'
+      type = CSVDiff
       input = 'active_timesteppers.i'
-      exodiff = 'active_timesteppers.e'
-      detail = 'allow the user activates/deactivates timesteppers using control block,'
+      csvdiff = 'active_timesteppers.csv'
+      detail = 'and allow the user to activate/deactivate timesteppers using control block,'
     []
 
   []
@@ -50,9 +50,9 @@
     []
 
     [timestepper_restart]
-      type = 'Exodiff'
+      type = CSVDiff
       input = 'time_stepper_system.i'
-      exodiff = 'time_stepper_system_out.e'
+      csvdiff = 'time_stepper_restart.csv'
       recover = false
       prereq = 'restart/timestepper_pre'
 

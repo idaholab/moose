@@ -11,6 +11,8 @@
 #include "MooseApp.h"
 #include "Transient.h"
 
+#include <limits>
+
 registerMooseObject("MooseApp", CompositionDT);
 
 InputParameters
@@ -20,11 +22,10 @@ CompositionDT::validParams()
   params.addParam<Real>("initial_dt", "Initial value of dt");
   params.addParam<std::vector<std::string>>(
       "lower_bound",
-      "The input TimeSteppers to compose the lower bound time "
-      "step size.  This can either be N timesteppers or 1 "
-      "timestepper.");
-  params.addClassDescription("The time stepper take time steppers as input and find the minimum "
-                             "time step size within lower bound");
+      "The maximum of these TimeSteppers will form the lower bound on the time "
+      "step size. A single or multiple time steppers may be specified.");
+  params.addClassDescription("The time stepper take all the other time steppers as input and "
+                             "return the minimum time step size.");
 
   return params;
 }
@@ -32,7 +33,8 @@ CompositionDT::validParams()
 CompositionDT::CompositionDT(const InputParameters & parameters)
   : TimeStepper(parameters),
     _has_initial_dt(isParamValid("initial_dt")),
-    _initial_dt(_has_initial_dt ? getParam<Real>("initial_dt") : 0.)
+    _initial_dt(_has_initial_dt ? getParam<Real>("initial_dt") : 0.),
+    _lower_bound(getParam<std::vector<std::string>>("lower_bound"))
 {
 }
 
@@ -56,8 +58,7 @@ CompositionDT::computeDT()
   std::set<Real> dts;
   std::set<Real> bound_dt;
 
-  auto input_bound = getParam<std::vector<std::string>>("lower_bound");
-  std::set<std::string> lower_bound(input_bound.begin(), input_bound.end());
+  std::set<std::string> lower_bound(_lower_bound.begin(), _lower_bound.end());
 
   for (auto const & [name, ptr] : time_steppers)
   {
@@ -82,25 +83,25 @@ CompositionDT::computeDT()
 }
 
 Real
-CompositionDT::getSequenceSteppers()
+CompositionDT::getSequenceSteppersNextTime()
 {
   auto time_sequence_steppers = _app.getTimeStepperSystem().getTimeSequenceSteppers();
   if (time_sequence_steppers.empty())
     return 0;
-  Real hit_timestepper = std::numeric_limits<Real>::max();
+  Real next_time_to_hit = std::numeric_limits<Real>::max();
   for (auto const & entry : time_sequence_steppers)
   {
     entry.second->init();
-    Real next_time_to_hit = entry.second->getNextTimeInSequence();
-    if (next_time_to_hit - _time <= _dt_min)
+    Real ts_time_to_hit = entry.second->getNextTimeInSequence();
+    if (ts_time_to_hit - _time <= _dt_min)
     {
       entry.second->increaseCurrentStep();
-      next_time_to_hit = entry.second->getNextTimeInSequence();
+      ts_time_to_hit = entry.second->getNextTimeInSequence();
     }
-    if (hit_timestepper > next_time_to_hit)
-      hit_timestepper = next_time_to_hit;
+    if (next_time_to_hit > ts_time_to_hit)
+      next_time_to_hit = ts_time_to_hit;
   }
-  return hit_timestepper;
+  return next_time_to_hit;
 }
 
 Real
@@ -110,9 +111,9 @@ CompositionDT::produceCompositionDT(const std::set<Real> & dts, const std::set<R
   if (!dts.empty())
     minDT = *dts.begin();
   if (!bound_dts.empty())
-    lower_bound = *bound_dts.begin();
+    lower_bound = *bound_dts.rbegin();
 
-  auto ts = getSequenceSteppers();
+  auto ts = getSequenceSteppersNextTime();
 
   if (ts != 0)
     return std::min((ts - _time), std::max(minDT, lower_bound));

@@ -1,6 +1,6 @@
 # TimeStepper System
 
-The method calculates the size of the time steps using either the `[TimeStepper]` block or the `[TimeSteppers]` block. The `[TimeStepper]` block takes only one time stepper while `[TimeSteppers]` block keeps the features of `[TimeStepper]` and also supports the composed time step size with multiple time steps inputs.
+This system is in charge of determining the time steps in a transient simulation using either the `[TimeStepper]` block or the `[TimeSteppers]` block. The `[TimeStepper]` block takes only one time stepper while `[TimeSteppers]` block keeps the features of `[TimeStepper]` and also supports the composed time step size with multiple time steps inputs.
 
 !alert warning
 The `[TimeStepper]` block will be deprecated soon in the future.
@@ -11,7 +11,13 @@ The time stepper system is controllable via [Controls](syntax/Controls/index.md)
 
 ## Example input syntax
 
+Below are two examples for multiple time steppers input and the control feature of time stepper system:
+
+This example shows the use of multiple time steppers to compose a final time step size. The time stepper system will always choose the minimum value of all input time step.
+
 !listing test/tests/time_steppers/time_stepper_system/multiple_timesteppers.i block=Executioner
+
+This example shows the control feature of the time stepper system. The `TimePeriod` control is used to specify a time period for only `ConstDT1` to be active.
 
 !listing test/tests/time_steppers/time_stepper_system/active_timesteppers.i  block=Executioner Controls
 

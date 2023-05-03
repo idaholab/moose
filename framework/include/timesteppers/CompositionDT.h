@@ -40,7 +40,7 @@ public:
   Real produceCompositionDT(const std::set<Real> & dts, const std::set<Real> & bound_dts);
 
   // Find the time point to hit at current time step
-  Real getSequenceSteppers();
+  Real getSequenceSteppersNextTime();
 
 protected:
   virtual Real computeDT() override;
@@ -55,4 +55,7 @@ private:
 
   // The initial time step size
   Real _initial_dt;
+
+  // The time stepper(s) input as lower bound of the time stepper size
+  std::vector<std::string> _lower_bound;
 };

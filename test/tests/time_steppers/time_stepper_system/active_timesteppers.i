@@ -43,7 +43,7 @@
   solve_type = PJFNK
   petsc_options_iname = '-pc_type -pc_hypre_type'
   petsc_options_value = 'hypre boomeramg'
-  # Pluggable TimeStepper System
+
   [TimeSteppers]
     [ConstDT1]
       type = ConstantDT
@@ -64,12 +64,17 @@
     disable_objects = 'TimeStepper::ConstDT2'
     start_time = '0'
     end_time = '0.3'
-   # reverse_on_false = true
   []
 []
 
+[Postprocessors]
+  [timestep]
+    type = TimePostprocessor
+    execute_on = 'timestep_end'
+  []
+[]
 
 [Outputs]
-  exodus = true
+  csv = true
   file_base='active_timesteppers'
 []
