@@ -158,7 +158,7 @@ protected:
   const bool _use_petrov_galerkin;
 
   /// The auxiliary Lagrange multiplier variable (used together whith the Petrov-Galerkin approach)
-  MooseVariable * const _aux_lm_var;
+  const MooseVariable * const _aux_lm_var;
 
   /// A pointer to the test function associated with the weighted gap. We have this member so that
   /// we don't do virtual calls during inner quadrature-point/test-function loops
