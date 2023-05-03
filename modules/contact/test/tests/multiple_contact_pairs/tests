@@ -53,7 +53,7 @@
     issues = '#24122'
     input = 'three_hexagons_coarse_automatic_pair.i'
     exodiff = 'three_hexagons_coarse_automatic_pair_out.e'
-    cli_args = "Contact/contact_pressure/nodeset_list='102 201 301' Postprocessors/active=''"
+    cli_args = "Contact/contact_pressure/sideset_list='102 201 301' Postprocessors/active=''"
     requirement = 'The system shall be able to, under conditions of contact sideset and solid '
                   'axisymmetry, assign primary-secondary contact pairs automatically.'
     abs_zero = 1.0e-4

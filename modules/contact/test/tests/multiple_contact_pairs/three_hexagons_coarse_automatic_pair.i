@@ -70,6 +70,7 @@
     model = frictionless
     penalty = 2e+03
     normalize_penalty = true
+    automatic_pair_distance = 2.75
   []
 []
 

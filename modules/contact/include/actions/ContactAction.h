@@ -81,8 +81,8 @@ protected:
   /// Primary/Secondary boundary name pairs for mechanical contact
   std::vector<std::pair<BoundaryName, BoundaryName>> _boundary_pairs;
 
-  /// List of all possible nodesets for contact for automatic pairing (optional)
-  std::vector<BoundaryName> _nodeset_list;
+  /// List of all possible sideset for contact for automatic pairing (optional)
+  std::vector<BoundaryName> _sideset_list;
 
   /// Contact model type enum
   const ContactModel _model;
