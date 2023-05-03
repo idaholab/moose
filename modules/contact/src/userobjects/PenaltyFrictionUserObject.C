@@ -171,10 +171,10 @@ PenaltyFrictionUserObject::reinit()
   // Normal contact pressure with penalty
   PenaltyWeightedGapUserObject::reinit();
 
-  // Frictional pressure (2D)
+  // Reset frictional pressure
   _frictional_contact_force_one.resize(_qrule_msm->n_points());
   for (const auto qp : make_range(_qrule_msm->n_points()))
-    _frictional_contact_force_one[qp] = 0;
+    _frictional_contact_force_one[qp] = 0.0;
 
   // Frictional pressure (3D only)
   _frictional_contact_force_two.resize(_qrule_msm->n_points());
@@ -185,6 +185,7 @@ PenaltyFrictionUserObject::reinit()
   {
     const Node * const node = _lower_secondary_elem->node_ptr(i);
     const auto & normal_pressure = _dof_to_normal_pressure[node];
+    auto & accumulated_slip = _dof_to_accumulated_slip[node];
 
     const auto & real_tangential_velocity =
         libmesh_map_find(_dof_to_real_tangential_velocity, node);
@@ -206,12 +207,12 @@ PenaltyFrictionUserObject::reinit()
     // Get current accumulated slip in both directions
     if (normal_pressure > TOLERANCE * TOLERANCE)
     {
-      _dof_to_accumulated_slip[node][0] = slip_direction_one + std::abs(slip_vel_one) * _dt;
+      accumulated_slip[0] = slip_direction_one + std::abs(slip_vel_one) * _dt;
       if (_has_disp_z)
-        _dof_to_accumulated_slip[node][1] = slip_direction_two + std::abs(slip_vel_two) * _dt;
+        accumulated_slip[1] = slip_direction_two + std::abs(slip_vel_two) * _dt;
     }
     else
-      _dof_to_accumulated_slip[node] = {0.0, 0.0};
+      accumulated_slip = {0.0, 0.0};
     // End of preparing current accumulated slip
 
     // Get sign of relative velocity for both directions
@@ -227,12 +228,10 @@ PenaltyFrictionUserObject::reinit()
     // Only accumulate nodal frictional pressure if normal contact pressure is nonzero.
     if (normal_pressure > TOLERANCE * TOLERANCE)
     {
-      _dof_to_frictional_pressure[node][0] =
-          sign_one * _penalty_friction * _dof_to_accumulated_slip[node][0];
+      _dof_to_frictional_pressure[node][0] = sign_one * _penalty_friction * accumulated_slip[0];
 
       if (_has_disp_z)
-        _dof_to_frictional_pressure[node][1] =
-            sign_two * _penalty_friction * _dof_to_accumulated_slip[node][1];
+        _dof_to_frictional_pressure[node][1] = sign_two * _penalty_friction * accumulated_slip[1];
     }
   }
 
