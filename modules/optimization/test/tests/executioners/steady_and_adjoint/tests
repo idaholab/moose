@@ -1,0 +1,38 @@
+[Tests]
+  design = 'SteadyAndAdjoint.md'
+  issues = '#23888'
+
+  [steady_and_adjoint]
+    requirement = 'The system shall by able to solve the adjoint version of steady-state problems that'
+    [self_adjoint]
+      type = Exodiff
+      input = self_adjoint.i
+      exodiff = self_adjoint_out.e
+      detail = 'are self-adjoint,'
+    []
+    [nonhomogeneous_bc]
+      type = Exodiff
+      input = nonhomogeneous_bc.i
+      exodiff = nonhomogeneous_bc_out.e
+      detail = 'have non-homogeneous boundary conditions,'
+    []
+    [multi_variable]
+      type = Exodiff
+      input = multi_variable.i
+      exodiff = multi_variable_out.e
+      detail = 'have multiple coupled variables,'
+    []
+    [array_variable]
+      type = Exodiff
+      input = array_variable.i
+      exodiff = array_variable_out.e
+      detail = 'use array variables, and'
+    []
+    [nonlinear]
+      type = Exodiff
+      input = nonlinear_diffusion.i
+      exodiff = nonlinear_diffusion_out.e
+      detail = 'have non-linear material properties.'
+    []
+  []
+[]
