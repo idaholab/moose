@@ -8,13 +8,14 @@ The MOOSE optimization module provides a flexible framework for solving inverse 
 - [Examples overview](optimization/examples/index.md)
 - [Example 1: Convective Boundary Conditions](materialInv_ConvectiveBC.md)
 - [Example 2: Constant Thermal Conductivity](materialInv_ConstK.md)
+- [Example 3: Transient Solve with Automatic Adjoint](material_transient.md)
 - [debuggingHelp.md]
 
 # Example: Constant Thermal Conductivity id=sec:ConstMaterialInversion
 
 In this example, material properties are the design parameters, described in this [section](theory/InvOptTheory.md#sec:material_inversion) on the theory page.  This is a nonlinear optimization problem where the design parameters show up in the derivative of the PDE, see [!eqref](theory/InvOptTheory.md#eq:kappaLambda).  Getting a nonlinear optimization problem to converge is dependent on the initial guess and bounds for the design parameters.  Even convergence doesn't guarantee a correct solution.  All of this makes material inversion problems more difficult to solve than the linear optimization problems for [force inversion](theory/InvOptTheory.md#sec:forceInv).
 
-## Main-App Optimization Executioner
+## Main-App Optimization Executioner id=sec:MultiAppExecutioner
 
 The main input file containing the optimization reporter, executioner and transfers is shown in [main].  The gradient of the PDE given by [!eqref](theory/InvOptTheory.md#eq:kappaLambda) requires the temperature field from the forward problem to be available in the adjoint problem.  This requires the forward problem temperature field be transferred to the adjoint problem.  The adjoint problem also needs to be executed with the same material properties used in the forward problem, see the `toAdjointParameter` transfer in [main].
 
