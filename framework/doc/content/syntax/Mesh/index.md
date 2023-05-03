@@ -31,6 +31,28 @@ together pieces of meshes, etc. There are several built-in generators but this s
 may or may not consumer the output from other generators and produce a single mesh. They can be chained together
 through dependencies so that complex meshes may be built up from a series of simple processes.
 
+### Mesh Generator development
+
+Mesh generator developers should call `mesh->set_isnt_prepared()` at the end of
+the `generate` routine unless they are confident that their mesh is indeed
+prepared. Examples of actions that render the mesh unprepared are
+
+- Translating, rotating, or scaling the mesh. This will conceptually change the
+  mesh bounding box, invalidate the point locator, and potentially change the
+  spatial dimension of the mesh (e.g. rotating a line from the x-axis into the
+  xy plane, etc.)
+- Adding elements. These elements will need their neighbor links set in order
+  for things like finite volume to work
+- Changing element subdomains. This will invalidate the mesh subdomain cached
+  data on the `libMesh::MeshBase` object
+- Changing boundary IDs. This invalidates global data (e.g. data aggregated
+  across all processes) in the `libMesh::BoundaryInfo` object
+
+When in doubt, the mesh is likely not prepared. Calling `set_isnt_prepared` is a
+defensive action that at worst will incur an unnecessary `prepare_for_use`,
+which may slow down the simulation setup, and at best may save follow-on mesh
+generators or simulation execution from undesirable behavior.
+
 ### DAG and final mesh selection
 
 When chaining together several MeshGenerators, you are implicitly creating a DAG (directed acyclic graph).
