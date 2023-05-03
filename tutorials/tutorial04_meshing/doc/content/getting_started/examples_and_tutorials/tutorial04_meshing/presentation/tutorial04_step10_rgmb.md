@@ -29,7 +29,7 @@ The RGMB system is useful for regular 2D or extruded 3D Cartesian or hexagonal g
 
 ## PinMeshGenerator
 
-[PinMeshGenerator.md] calls [PolygonConcentricCircleMeshGenerator.md] to generate a Cartesian or hexagonal pin-like structure (pin, background, and duct)
+[PinMeshGenerator.md] calls [PolygonConcentricCircleMeshGenerator.md] to generate a Cartesian or hexagonal pin-like structure (pin, background, and duct) (mesh colored by `subdomain_id` (left) and `region_id` (right))
 
 !row!
 !col small=12 medium=6 large=8
@@ -55,7 +55,7 @@ The RGMB system is useful for regular 2D or extruded 3D Cartesian or hexagonal g
 !col small=12 medium=6 large=4
 
 !media tutorial04_meshing/rgmb_pinmesh_hex.png
-       style=width:100%;display:block;margin-left:auto;margin-right:auto;
+       style=width:70%;display:block;margin-left:auto;margin-right:auto;
 
 !row-end!
 
@@ -63,7 +63,7 @@ The RGMB system is useful for regular 2D or extruded 3D Cartesian or hexagonal g
 
 ## AssemblyMeshGenerator
 
-[AssemblyMeshGenerator.md] calls [PatternedHexMeshGenerator.md] or [PatternedMeshGenerator.md] to generate a Cartesian or hexagonal lattice of pin-like structures.
+[AssemblyMeshGenerator.md] calls [PatternedHexMeshGenerator.md] or [PatternedMeshGenerator.md] to generate a Cartesian or hexagonal lattice of pin-like structures. (assembly colored by `subdomain_id` (left), `region_id` (middle), and `pin_id` (right))
 
 !row!
 !col small=12 medium=6 large=8
@@ -97,7 +97,7 @@ The RGMB system is useful for regular 2D or extruded 3D Cartesian or hexagonal g
 
 ## CoreMeshGenerator
 
-[CoreMeshGenerator.md] calls [PatternedHexMeshGenerator.md] or [PatternedMeshGenerator.md] to generate a Cartesian or hexagonal lattice of assembly-like structures.
+[CoreMeshGenerator.md] calls [PatternedHexMeshGenerator.md] or [PatternedMeshGenerator.md] to generate a Cartesian or hexagonal lattice of assembly-like structures. (core colored by `subdomain_id` (left), `region_id` (middle), and `assembly_id` (right))
 
 !row!
 !col small=12 medium=6 large=8

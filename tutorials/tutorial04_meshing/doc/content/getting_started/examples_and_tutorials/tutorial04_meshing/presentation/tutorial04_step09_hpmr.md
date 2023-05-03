@@ -92,7 +92,7 @@
 !col small=12 medium=6 large=8
 
 !listing reactor_examples/hpmr/hpmr.i
-         block=Mesh/core
+         block=Mesh/fuel_core
          link=False
 
 !col small=12 medium=6 large=4

@@ -59,7 +59,6 @@
     duct_intervals = 1
     duct_halfpitch = 2.2
     duct_region_ids = 8
-
   []
 
   [assembly2]

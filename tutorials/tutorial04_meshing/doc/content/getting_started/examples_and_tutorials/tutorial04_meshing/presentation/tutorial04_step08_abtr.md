@@ -247,6 +247,18 @@ This ABTR example uses option 1, where the CMFD acceleration uses the same mesh 
 
 - For each [ExtraIDIntegralVectorPostprocessor.md], a separate CSV file is generated to describe the integral variable quantity as a function of each combination of input reporting ID provided. Alternatively, [ExtraIDIntegralReporter.md] can output in JSON file format, which is more suitable for additional data parsing using script languages.
 
+!listing reactor_examples/abtr/abtr_griffin_snippet.i
+         block=PowerDensity VectorPostprocessors
+         link=False
+
+!---
+
+### Output Postprocessing
+
+- [ExtraIDIntegralVectorPostprocessor.md]
+
+- For each [ExtraIDIntegralVectorPostprocessor.md], a separate CSV file is generated to describe the integral variable quantity as a function of each combination of input reporting ID provided. Alternatively, [ExtraIDIntegralReporter.md] can output in JSON file format, which is more suitable for additional data parsing using script languages.
+
 !row!
 !col small=12 medium=6 large=8
 

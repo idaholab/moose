@@ -27,3 +27,26 @@
     isotopes = 'pseudo_ICORE'
   []
 []
+
+[PowerDensity]
+  power_density_variable = power
+  power = 60.0
+[]
+
+[VectorPostprocessors]
+  [assembly_power_2d]
+    type = ExtraIDIntegralVectorPostprocessor
+    variable = 'power'
+    id_name = 'assembly_id'
+  []
+  [axial_power]
+    type = ExtraIDIntegralVectorPostprocessor
+    variable = 'power'
+    id_name = 'plane_id'
+  []
+  [assembly_power_3d]
+    type = ExtraIDIntegralVectorPostprocessor
+    variable = 'power'
+    id_name = 'assembly_id plane_id'
+  []
+[]

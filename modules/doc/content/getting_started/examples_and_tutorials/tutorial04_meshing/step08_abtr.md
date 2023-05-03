@@ -272,6 +272,11 @@ MOOSE provides various ways to post-process mesh-based data. The reporting IDs a
        caption=Visualization of normalized axially integrated assembly power density for homogeneous ABTR core, processed from output CSV VectorPostprocessor data. This figure was generated with a custom script taking CSV-formatted power data as input.
        style=width:50%;display:block;margin-left:auto;margin-right:auto;
 
+!listing reactor_examples/abtr/abtr_griffin_snippet.i
+         id=tutorial04-abtr_griffin_snippet-transport
+         caption=Homogeneous Griffin postprocessor example.
+         block=PowerDensity VectorPostprocessors
+
 !bibtex bibliography !!include to make sure next/previous are last on page
 
 !content pagination previous=tutorial04_meshing/step07_extra_element_ids.md
