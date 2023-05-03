@@ -273,7 +273,7 @@ MOOSE provides various ways to post-process mesh-based data. The reporting IDs a
        style=width:50%;display:block;margin-left:auto;margin-right:auto;
 
 !listing reactor_examples/abtr/abtr_griffin_snippet.i
-         id=tutorial04-abtr_griffin_snippet-transport
+         id=tutorial04-abtr_griffin_snippet-postprocessors
          caption=Homogeneous Griffin postprocessor example.
          block=PowerDensity VectorPostprocessors
 
