@@ -12,8 +12,12 @@
 #include "DenseMatrix.h"
 #include "MooseTypes.h"
 #include "MultiMooseEnum.h"
+#include "Assembly.h"
 
 #include "libmesh/dense_vector.h"
+#include "metaphysicl/raw_type.h"
+
+#include <vector>
 
 // Forward declarations
 class InputParameters;
@@ -109,13 +113,6 @@ public:
   void accumulateTaggedLocalResidual();
 
   /**
-   * Local residual blocks  will be appended by adding the absolute value of the  current local
-   * kernel residual. It should be called after the local element vector has been computed.
-   */
-  void accumulateAbsolueValueLocalResidual(const std::vector<Real> & local_re);
-  void accumulateAbsolueValueLocalResidual(const DenseVector<Number> & local_re);
-
-  /**
    * Local residual blocks will assigned as the current local kernel residual.
    * It should be called after the local element vector has been computed.
    */
@@ -132,6 +129,24 @@ public:
    * It should be called after the local element matrix has been computed.
    */
   void assignTaggedLocalMatrix();
+
+  /**
+   * Process the provided incoming residuals corresponding to the provided dof indices
+   */
+  template <typename T>
+  void processResiduals(Assembly & assembly,
+                        const std::vector<T> & residuals,
+                        const std::vector<dof_id_type> & dof_indices,
+                        Real scaling_factor);
+
+  /**
+   * Process the provided incoming residuals and derivatives for the Jacobian, corresponding to the
+   * provided dof indices
+   */
+  void processResidualsAndJacobian(Assembly & assembly,
+                                   const std::vector<ADReal> & residuals,
+                                   const std::vector<dof_id_type> & dof_indices,
+                                   Real scaling_factor);
 
 protected:
   /// The residual tag ids this Kernel will contribute to
@@ -166,6 +181,11 @@ protected:
 
   /// Holds residual entries as they are accumulated by this Kernel
   DenseMatrix<Number> _local_ke;
+
+private:
+  /// A container to hold absolute values of residuals passed into \p processResiduals. We maintain
+  /// this data member to avoid constant dynamic heap allocations
+  std::vector<Real> _absolute_residuals;
 };
 
 #define usingTaggingInterfaceMembers                                                               \
@@ -180,3 +200,21 @@ protected:
   using TaggingInterface::prepareMatrixTagNeighbor;                                                \
   using TaggingInterface::prepareMatrixTagLower;                                                   \
   using TaggingInterface::_local_ke
+
+template <typename T>
+void
+TaggingInterface::processResiduals(Assembly & assembly,
+                                   const std::vector<T> & residuals,
+                                   const std::vector<dof_id_type> & dof_indices,
+                                   const Real scaling_factor)
+{
+  assembly.processResiduals(residuals, dof_indices, _vector_tags, scaling_factor);
+  if (!_abs_vector_tags.empty())
+  {
+    _absolute_residuals.resize(residuals.size());
+    for (const auto i : index_range(residuals))
+      _absolute_residuals[i] = std::abs(MetaPhysicL::raw_value(residuals[i]));
+
+    assembly.processResiduals(_absolute_residuals, dof_indices, _abs_vector_tags, scaling_factor);
+  }
+}

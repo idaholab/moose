@@ -268,25 +268,11 @@ TaggingInterface::prepareMatrixTagLower(Assembly & assembly,
 void
 TaggingInterface::accumulateTaggedLocalResidual()
 {
-  accumulateAbsolueValueLocalResidual(_local_re);
   for (auto & re : _re_blocks)
     *re += _local_re;
-}
-
-void
-TaggingInterface::accumulateAbsolueValueLocalResidual(const std::vector<Real> & /*local_re*/)
-{
-  // for (auto & absre : _absre_blocks)
-    // for (unsigned int i = 0; i < local_re.size(); ++i)
-      // (*absre)(i) += std::abs(local_re[i]); This results in segfault
-}
-
-void
-TaggingInterface::accumulateAbsolueValueLocalResidual(const DenseVector<Number> & local_re)
-{
   for (auto & absre : _absre_blocks)
-    for (const auto i : index_range(local_re))
-      (*absre)(i) += std::abs(local_re(i));
+    for (const auto i : index_range(_local_re))
+      (*absre)(i) += std::abs(_local_re(i));
 }
 
 void
@@ -314,3 +300,14 @@ TaggingInterface::assignTaggedLocalMatrix()
 }
 
 TaggingInterface::~TaggingInterface() {}
+
+void
+TaggingInterface::processResidualsAndJacobian(Assembly & assembly,
+                                              const std::vector<ADReal> & residuals,
+                                              const std::vector<dof_id_type> & dof_indices,
+                                              Real scaling_factor)
+{
+  processResiduals(assembly, residuals, dof_indices, scaling_factor);
+
+  assembly.processJacobian(residuals, dof_indices, _matrix_tags, scaling_factor);
+}

@@ -127,9 +127,7 @@ ADKernelTempl<T>::computeResidual()
       for (_i = 0; _i < _test.size(); _i++)
         residuals[_i] += raw_value(_JxW[_qp] * _coord[_qp] * computeQpResidual());
 
-  accumulateAbsolueValueLocalResidual(residuals);
-
-  _assembly.processResiduals(residuals, _var.dofIndices(), _vector_tags, _var.scalingFactor());
+  processResiduals(_assembly, residuals, _var.dofIndices(), _var.scalingFactor());
 
   if (_has_save_in)
     for (unsigned int i = 0; i < _save_in.size(); i++)
@@ -226,8 +224,7 @@ void
 ADKernelTempl<T>::computeResidualAndJacobian()
 {
   computeResidualsForJacobian();
-  _assembly.processResidualsAndJacobian(
-      _residuals, _var.dofIndices(), _vector_tags, _matrix_tags, _var.scalingFactor());
+  processResidualsAndJacobian(_assembly, _residuals, _var.dofIndices(), _var.scalingFactor());
 }
 
 template class ADKernelTempl<Real>;
