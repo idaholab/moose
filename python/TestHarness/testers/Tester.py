@@ -83,7 +83,7 @@ class Tester(MooseObject):
         params.addParam('libpng',        ['ALL'], "A test that runs only if libpng is available ('ALL', 'TRUE', 'FALSE')")
         params.addParam('libtorch',      ['ALL'], "A test that runs only if libtorch is available ('ALL', 'TRUE', 'FALSE')")
         params.addParam('libtorch_version', ['ALL'], "A list of libtorch versions for which this test will run on, supports normal comparison operators ('<', '>', etc...)")
-        params.addParam('skip_installed', False, "A test that does not run if it is installed")
+        params.addParam('installation_type',['ALL'], "A test that runs under certain executable installation configurations ('ALL', 'IN_TREE', 'RELOCATED')")
 
         params.addParam('depend_files',  [], "A test that only runs if all depend files exist (files listed are expected to be relative to the base directory, not the test directory")
         params.addParam('env_vars',      [], "A test that only runs if all the environment variables listed exist")
@@ -582,9 +582,10 @@ class Tester(MooseObject):
             if inverse_set == match_found:
                 reasons[check] = re.sub(r'\[|\]', '', check).upper() + operator_display + ', '.join(test_platforms)
 
-        # Check for relocated binary (make install)
-        if self.specs['skip_installed'] and checks['installed']:
-            reasons['skip_installed'] = 'test not relocatable (make install)'
+        # Check for binary location
+        if (self.specs['installation_type'] and
+            self.specs['installation_type'][0].upper() not in checks['installation_type']):
+            reasons['installation_type'] = f'test requires "{self.specs["installation_type"][0]}" binary'
 
         # Check for heavy tests
         if options.all_tests or options.heavy_tests:

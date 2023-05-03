@@ -265,3 +265,31 @@ share/
 # Ignore vscode local parameters
 .vscode/*
 
+# App Resource file (including modules/)
+/test/moose_test.yaml
+/modules/functional_expansion_tools/functional_expansion_tools.yaml
+/modules/solid_properties/solid_properties.yaml
+/modules/electromagnetics/electromagnetics.yaml
+/modules/contact/contact.yaml
+/modules/external_petsc_solver/external_petsc_solver.yaml
+/modules/xfem/xfem.yaml
+/modules/stochastic_tools/stochastic_tools.yaml
+/modules/scalar_transport/scalar_transport.yaml
+/modules/navier_stokes/navier_stokes.yaml
+/modules/chemical_reactions/chemical_reactions.yaml
+/modules/optimization/optimization.yaml
+/modules/peridynamics/peridynamics.yaml
+/modules/ray_tracing/ray_tracing.yaml
+/modules/phase_field/phase_field.yaml
+/modules/heat_conduction/heat_conduction.yaml
+/modules/tensor_mechanics/tensor_mechanics.yaml
+/modules/richards/richards.yaml
+/modules/level_set/level_set.yaml
+/modules/combined/combined.yaml
+/modules/fluid_properties/fluid_properties.yaml
+/modules/porous_flow/porous_flow.yaml
+/modules/geochemistry/geochemistry.yaml
+/modules/thermal_hydraulics/thermal_hydraulics.yaml
+/modules/reactor/reactor.yaml
+/modules/rdg/rdg.yaml
+/modules/fsi/fsi.yaml

@@ -21,7 +21,7 @@ class TestHarnessTester(unittest.TestCase):
         out = io.StringIO()
         with redirect_stdout(out):
             mocked_return.return_value=mocked
-            harness = TestHarness.TestHarness(['', '-i', 'installed', '-c'], MOOSE_DIR)
+            harness = TestHarness.TestHarness(['', '-i', 'install_type', '-c'], MOOSE_DIR)
             if expect_fail:
                 with self.assertRaises(SystemExit):
                     harness.findAndRunTests()
@@ -31,14 +31,18 @@ class TestHarnessTester(unittest.TestCase):
 
     def testInstalled(self):
         """
-        Test that it is a skipped scenario
+        Test which only runs if binary is installed
         """
-        out = self.mocked_output(True, False)
-        self.assertRegex(out, r'.*?test not relocatable \(make install\)')
+        out = self.mocked_output(set(['ALL', 'INSTALLED']), False)
+        self.assertRegex(out, r'.*?in_tree_type.*?"IN_TREE" binary] SKIP')
+        self.assertRegex(out, r'.*?installed_type.*?OK')
+        self.assertRegex(out, r'.*?all_type.*?OK')
 
-    def testSkipInstalled(self):
+    def testInTree(self):
         """
-        Test that it is a not skipped scenario
+        Test which only runs if binary is in_tree
         """
-        out = self.mocked_output(False, False)
-        self.assertRegex(out, r'.*?OK')
+        out = self.mocked_output(set(['ALL', 'IN_TREE']), False)
+        self.assertRegex(out, r'.*?installed_type.*?"INSTALLED" binary] SKIP')
+        self.assertRegex(out, r'.*?in_tree_type.*?OK')
+        self.assertRegex(out, r'.*?all_type.*?OK')

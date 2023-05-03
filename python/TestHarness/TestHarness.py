@@ -341,7 +341,7 @@ class TestHarness:
         self.initialize(argv, app_name)
 
         # executable is available after initalize
-        checks['installed'] = util.checkInstalled(self.executable, app_name)
+        checks['installation_type'] = util.checkInstalled(self.executable, app_name)
 
         os.chdir(self._orig_cwd)
 

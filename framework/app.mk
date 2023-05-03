@@ -350,7 +350,7 @@ $(app_LIB): curr_objs := $(app_objects)
 $(app_LIB): curr_dir  := $(APPLICATION_DIR)
 $(app_LIB): curr_deps := $(depend_libs)
 $(app_LIB): curr_libs := $(depend_libs_flags)
-$(app_LIB): $(app_HEADER) $(app_plugin_deps) $(depend_libs) $(app_objects) $(ADDITIONAL_DEPEND_LIBS) $(dot_resource)
+$(app_LIB): $(app_HEADER) $(app_plugin_deps) $(depend_libs) $(app_objects) $(ADDITIONAL_DEPEND_LIBS)
 	@echo "Linking Library "$@"..."
 	@$(libmesh_LIBTOOL) --tag=CXX $(LIBTOOLFLAGS) --mode=link --quiet \
 	  $(libmesh_CXX) $(CXXFLAGS) $(libmesh_CXXFLAGS) -o $@ $(curr_objs) $(libmesh_LDFLAGS) $(EXTERNAL_FLAGS) -rpath $(curr_dir)/lib $(curr_libs)
@@ -418,12 +418,13 @@ $(app_resource):
 	@$(shell $(FRAMEWORK_DIR)/scripts/write_appresource_file.py $(app_resource) $(APPLICATION_NAME) \
      $(libmesh_CXXFLAGS) \
      compiler_type=$(compilertype) \
-     documentation=$(DOCUMENTATION))
+     documentation=$(DOCUMENTATION) \
+     installation_type=in_tree)
 
 # Update and Copy resource file to prefix/bin
 install_$(APPLICATION_NAME)_resource:
 	@echo "Installing $(APPLICATION_NAME).yaml resource file"
-	@$(shell $(FRAMEWORK_DIR)/scripts/write_appresource_file.py $(app_resource) $(APPLICATION_NAME) install=true)
+	@$(shell $(FRAMEWORK_DIR)/scripts/write_appresource_file.py $(app_resource) $(APPLICATION_NAME) installation_type=relocated)
 	@mkdir -p $(bin_install_dir)
 	@cp $(app_resource) $(bin_install_dir)
 
@@ -525,8 +526,6 @@ $(bindst): $(app_EXEC) $(copy_input_targets) install_$(APPLICATION_NAME)_docs in
 	@mkdir -p $(bin_install_dir)
 	@cp $< $@
 	@$(call patch_rpath,$@,../$(lib_install_suffix)/.)
-<<<<<<< HEAD
-=======
 	@$(eval libnames := $(foreach lib,$(applibs),$(shell grep "dlname='.*'" $(lib) 2>/dev/null | sed -E "s/dlname='(.*)'/\1/g")))
 	@$(eval libpaths := $(foreach lib,$(applibs),$(dir $(lib))$(shell grep "dlname='.*'" $(lib) 2>/dev/null | sed -E "s/dlname='(.*)'/\1/g")))
 	@for lib in $(libpaths); do $(call patch_relink,$@,$$lib,$$(basename $$lib)); done
@@ -536,7 +535,6 @@ install_bin: $(bindst)
 else
 install_bin:
 endif
->>>>>>> fc7494bcca (combined-opt documentation. Create dot resource)
 ####### end install stuff ##############
 
 # Clang static analyzer

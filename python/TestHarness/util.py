@@ -729,8 +729,10 @@ def checkInstalled(executable, app_name):
     """
     Read resource file and determin if binary was relocated
     """
+    option_set = set(['ALL'])
     resource_content = readResourceFile(executable, app_name)
-    return resource_content.get('install', False)
+    option_set.add(resource_content.get('installation_type', 'ALL').upper())
+    return option_set
 
 def addObjectsFromBlock(objs, node, block_name):
     """
