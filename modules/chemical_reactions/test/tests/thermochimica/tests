@@ -76,19 +76,33 @@
     required_submodule = 'contrib/thermochimica'
   []
 
-  [wrong_element1]
+  [wrong_species1]
     type = RunException
     input = MoRu.i
-    expect_err = "Element 'Xe' was not found in the simulation."
+    expect_err = "Species 'Xe' was not found in the simulation."
     cli_args = "GlobalParams/output_species='BCCN:Mo HCPN:Xe BCCN:Ru HCPN:Ru'"
     issues = '#23865'
-    requirement = 'The system shall throw an error if an element absent from the simulation is specified for species output'
+    requirement = 'The system shall throw an error if a species absent from the database is specified for species output'
     design = ThermochimicaNodalData.md
 
     max_threads = 1
     required_submodule = 'contrib/thermochimica'
   []
-  [wrong_element2]
+  [wrong_species2]
+    type = RunException
+    input = MoRu.i
+    expect_err = "Phase name 'HCCN' of output species 'HCCN:Mo' was not found in the simulation."
+    cli_args = "GlobalParams/output_species='BCCN:Mo HCCN:Mo BCCN:Ru HCPN:Ru'"
+    issues = '#23865'
+    requirement = 'The system shall throw an error if a wrong phase name of a species is specified for species output'
+    design = ThermochimicaNodalData.md
+
+    max_threads = 1
+    required_submodule = 'contrib/thermochimica'
+  []
+
+
+  [wrong_element1]
     type = RunException
     input = MoRu.i
     expect_err = "Element 'W' was not found in the simulation."
@@ -100,6 +114,7 @@
     max_threads = 1
     required_submodule = 'contrib/thermochimica'
   []
+
   [wrong_phase]
     type = RunException
     input = MoRu.i

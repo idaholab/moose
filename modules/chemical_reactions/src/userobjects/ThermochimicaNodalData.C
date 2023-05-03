@@ -16,9 +16,6 @@
 #include "checkUnits.h"
 #endif
 
-// Required coupled variable data
-// Species list thermochimica
-
 registerMooseObject("ChemicalReactionsApp", ThermochimicaNodalData);
 
 InputParameters
