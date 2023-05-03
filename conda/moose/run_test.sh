@@ -1,5 +1,5 @@
 #!/bin/bash
-set -e
+set -ex
 # A list of module(s)/directories that we do not want to include for testing
 NOT_RUNNABLE=(doc module_load combined geochemistry misc navier_stokes tensor_mechanics)
 
