@@ -33,8 +33,7 @@ This tutorial covers the generation of mostly standard geometries, but many reac
 - [ParsedCurveGenerator.md] is used for creating the outline of complex shapes before mesh generation.
 - [XYDelaunayGenerator.md] is employed for meshing the irregular areas.
 - [PeripheralTriangleMeshGenerator.md] is utilized to add layers of triangular mesh onto an existing circular mesh.
-- !alert construction
-  CircularCorrectionGenerator, which is currently under development, is used to adjust a discretized circle to match the true circle's volume.
+- [CircularBoundaryCorrectionGenerator.md] is used to adjust a discretized circle to match the true circle's volume.
 
 !col small=12 medium=6 large=4
 
