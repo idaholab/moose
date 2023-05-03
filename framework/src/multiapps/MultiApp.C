@@ -120,6 +120,14 @@ MultiApp::validParams()
                                 1,
                                 "Minimum number of processors to give to each App in this "
                                 "MultiApp.  Useful for larger, distributed mesh solves.");
+  params.addParam<bool>(
+      "force_safe_app_init",
+      false,
+      "Advanced parameter that will create the first "
+      "sub-application on rank 0, then MPI_Barrier before creating the next N-1 apps (on all "
+      "ranks). "
+      "This is only needed if your sub-application needs to perform some setup "
+      "actions in quiet, without other sub-applications working at the same time.");
 
   params.addParam<bool>(
       "output_in_position",
@@ -216,7 +224,8 @@ MultiApp::validParams()
 
   params.addParamNamesToGroup("positions positions_file run_in_position output_in_position",
                               "Positions / transformations of the MultiApp frame of reference");
-  params.addParamNamesToGroup("min_procs_per_app max_procs_per_app", "Parallelism");
+  params.addParamNamesToGroup("min_procs_per_app max_procs_per_app force_safe_app_init",
+                              "Parallelism");
   params.addParamNamesToGroup("reset_time reset_apps", "Reset MultiApp");
   params.addParamNamesToGroup("move_time move_apps move_positions", "Timed move of MultiApps");
   params.addParamNamesToGroup("relaxation_factor transformed_variables transformed_postprocessors "
@@ -238,6 +247,7 @@ MultiApp::MultiApp(const InputParameters & parameters)
                                        : _fe_problem.getMooseApp().type()),
     _use_positions(getParam<bool>("use_positions")),
     _input_files(getParam<std::vector<FileName>>("input_files")),
+    _force_safe_app_init(getParam<bool>("force_safe_app_init")),
     _total_num_apps(0),
     _my_num_apps(0),
     _first_local_app(0),
@@ -357,11 +367,24 @@ MultiApp::createApps()
                                 getParam<std::string>("library_name"),
                                 getParam<bool>("library_load_dependencies"));
 
-  for (unsigned int i = 0; i < _my_num_apps; i++)
+  int start_app = 0;
+  if (_force_safe_app_init)
   {
-    createApp(i, _global_time_offset);
-    _app.parser().hitCLIFilter(_apps[i]->name(), _app.commandLine()->getArguments());
+    if (_orig_rank == 0)
+      createLocalApp(start_app++);
+
+    MPI_Barrier(_orig_comm);
   }
+
+  for (unsigned int i = start_app; i < _my_num_apps; i++)
+    createLocalApp(i);
+}
+
+void
+MultiApp::createLocalApp(const unsigned int & i)
+{
+  createApp(i, _global_time_offset);
+  _app.parser().hitCLIFilter(_apps[i]->name(), _app.commandLine()->getArguments());
 }
 
 void
