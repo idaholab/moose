@@ -44,7 +44,7 @@ to_json(nlohmann::json & json, const MooseApp & app)
 namespace libMesh
 {
 void
-to_json(nlohmann::json & json, const Point & p)
+to_json(nlohmann::json & json, const libMesh::Point & p)
 {
   json["x"] = p(0);
   json["y"] = p(1);

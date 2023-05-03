@@ -83,7 +83,7 @@ MultiApp::validParams()
   params.addParam<bool>("library_load_dependencies",
                         false,
                         "Tells MOOSE to manually load library dependencies. This should not be "
-                        "necessary and is hear for debugging/troubleshooting.");
+                        "necessary and is here for debugging/troubleshooting.");
 
   // Subapp positions
   params.addParam<std::vector<Point>>(
@@ -571,9 +571,8 @@ MultiApp::fillPositions()
   }
   else if (isParamValid("positions_objects"))
   {
-    std::vector<PositionsName> positions_param_objs =
-        getParam<std::vector<PositionsName>>("positions_objects");
-    std::vector<FileName> input_files = getParam<std::vector<FileName>>("input_files");
+    const auto & positions_param_objs = getParam<std::vector<PositionsName>>("positions_objects");
+    const auto & input_files = getParam<std::vector<FileName>>("input_files");
 
     if (input_files.size() != 1 && positions_param_objs.size() != input_files.size())
       mooseError("Number of input_files for MultiApp ",
@@ -587,13 +586,14 @@ MultiApp::fillPositions()
     // Keeps track of where each positions object start in terms of subapp numbers
     unsigned int offset = 0;
 
-    for (unsigned int p_obj_it = 0; p_obj_it < positions_param_objs.size(); p_obj_it++)
+    for (const auto p_obj_it : index_range(positions_param_objs))
     {
-      const std::string positions_name = positions_param_objs[p_obj_it];
+      const std::string & positions_name = positions_param_objs[p_obj_it];
       auto positions_obj = &_fe_problem.getPositionsObject(positions_name);
 
-      auto data = positions_obj->getPositions(true);
+      const auto & data = positions_obj->getPositions(true);
 
+      // Append all positions from this object
       for (const auto & d : data)
         _positions.push_back(d);
 
@@ -1343,10 +1343,9 @@ const Point &
 MultiApp::position(unsigned int app) const
 {
   // If we're not using positions, it won't have changed
-  if (!_positions_objs.size())
+  if (_positions_objs.empty())
     return _positions[app];
   else
     // Find which Positions object is specifying it, and query a potentially updated value
-    return _positions_objs[app]->getPosition(app - _positions_index_offsets[app],
-                                             _fe_problem.getCurrentExecuteOnFlag() == EXEC_INITIAL);
+    return _positions_objs[app]->getPosition(app - _positions_index_offsets[app], false);
 }

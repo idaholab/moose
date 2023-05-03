@@ -50,17 +50,17 @@ MultiAppPositions::initialize()
 {
   clearPositions();
 
-  std::vector<MultiAppName> multiapps = getParam<std::vector<MultiAppName>>("multiapps");
+  const auto & multiapps = getParam<std::vector<MultiAppName>>("multiapps");
   _positions_2d.resize(multiapps.size());
 
-  for (unsigned int m_it = 0; m_it < multiapps.size(); m_it++)
+  for (const auto m_it : index_range(multiapps))
   {
-    const std::string multiapp_name = multiapps[m_it];
+    const std::string & multiapp_name = multiapps[m_it];
     const auto & multiapp = _fe_problem.getMultiApp(multiapp_name);
 
     for (const auto & i_global : make_range(multiapp->numGlobalApps()))
     {
-      auto p = multiapp->position(i_global);
+      const auto p = multiapp->position(i_global);
       if (!_use_apps_centroid)
       {
         _positions.push_back(p);
@@ -77,7 +77,7 @@ MultiAppPositions::initialize()
                                  fe_problem_base.getDisplacedProblem().get() != NULL)
                                     ? fe_problem_base.getDisplacedProblem()->mesh().getMesh()
                                     : fe_problem_base.mesh().getMesh();
-        Point centroid = MooseMeshUtils::meshCentroidCalculator(mesh);
+        const Point centroid = MooseMeshUtils::meshCentroidCalculator(mesh);
 
         // There's a broadcast after, no need to add on every rank
         if (multiapp->isFirstLocalRank())

@@ -55,9 +55,7 @@ ReporterPointSource::ReporterPointSource(const InputParameters & parameters)
 {
   if (isParamValid("point_name") == (isParamValid("x_coord_name") && isParamValid("y_coord_name") &&
                                      isParamValid("z_coord_name")))
-  {
     paramError("Either supply x,y, and z reporters or a point reporter.");
-  }
 }
 
 void
@@ -68,7 +66,7 @@ ReporterPointSource::addPoints()
     if (_values.size() != _x_coord.size() || _values.size() != _y_coord.size() ||
         _values.size() != _z_coord.size())
     {
-      std::string errMsg =
+      const std::string errMsg =
           "The value and coordinate vectors are a different size.  \n"
           "There must be one value per coordinate.  If the sizes are \n"
           "zero, the reporter or reporter may not have been initialized with data \n"
@@ -85,7 +83,7 @@ ReporterPointSource::addPoints()
     _point_to_index.clear();
     for (std::size_t i = 0; i < _values.size(); ++i)
     {
-      Point pt(_x_coord[i], _y_coord[i], _z_coord[i]);
+      const Point pt(_x_coord[i], _y_coord[i], _z_coord[i]);
       _point_to_index[pt] = i;
       addPoint(pt, i);
     }
@@ -105,7 +103,7 @@ ReporterPointSource::addPoints()
 
       mooseError(errMsg);
     }
-    for (MooseIndex(_values) i = 0; i < _values.size(); ++i)
+    for (const auto i : index_range(_values))
     {
       _point_to_index[_point[i]] = i;
       addPoint(_point[i], i);

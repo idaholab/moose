@@ -42,12 +42,12 @@ ReporterPositions::initialize()
 {
   clearPositions();
 
-  std::vector<ReporterName> positions_reporters = getParam<std::vector<ReporterName>>("reporters");
+  const auto & positions_reporters = getParam<std::vector<ReporterName>>("reporters");
   _positions_2d.resize(positions_reporters.size());
 
-  for (unsigned int r_it = 0; r_it < positions_reporters.size(); r_it++)
+  for (const auto r_it : index_range(positions_reporters))
   {
-    const std::string reporter_name = positions_reporters[r_it];
+    const std::string & reporter_name = positions_reporters[r_it];
 
     const auto & reporter_data = _fe_problem.getReporterData();
     if (reporter_data.getReporterContextBase(reporter_name).getProducerModeEnum() ==

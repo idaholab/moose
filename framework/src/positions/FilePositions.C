@@ -30,11 +30,11 @@ FilePositions::validParams()
 
 FilePositions::FilePositions(const InputParameters & parameters) : Positions(parameters)
 {
-  std::vector<FileName> positions_files = getParam<std::vector<FileName>>("files");
+  const auto & positions_files = getParam<std::vector<FileName>>("files");
   _positions_2d.resize(positions_files.size());
 
   // Copied from MultiApp.C
-  for (unsigned int p_file_it = 0; p_file_it < positions_files.size(); p_file_it++)
+  for (const auto p_file_it : index_range(positions_files))
   {
     const std::string positions_file = positions_files[p_file_it];
     MooseUtils::DelimitedFileReader file(positions_file, &_communicator);

@@ -16,6 +16,7 @@
 #include "libmesh/parallel_algebra.h"
 
 registerMooseObject("MooseApp", CentroidMultiApp);
+
 // TODO: Deprecate and use Positions system
 
 InputParameters

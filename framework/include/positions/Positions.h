@@ -88,6 +88,3 @@ protected:
   /// User may have also sorted their positions file, their input parameter etc
   const bool _need_sort;
 };
-
-void dataStore(std::ostream & stream, const std::vector<Point> & positions, void * context);
-void dataLoad(std::istream & stream, const std::vector<Point> & positions, void * context);

@@ -8,6 +8,7 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "Positions.h"
+#include "libmesh/parallel_algebra.h"
 
 InputParameters
 Positions::validParams()
@@ -76,24 +77,27 @@ const Point &
 Positions::getNearestPosition(const Point & target) const
 {
   // TODO Use faster & fancier machinery such as a KNN-partition
-  unsigned int nearest_index = 0;
-  Real nearest_distance_sq = std::numeric_limits<float>::max();
-  for (const auto & pt : _positions)
+  std::size_t nearest_index = 0;
+  auto nearest_distance_sq = std::numeric_limits<Real>::max();
+  for (const auto i : index_range(_positions))
+  {
+    const auto & pt = _positions[i];
     if ((pt - target).norm_sq() < nearest_distance_sq)
     {
-      nearest_index = &pt - &_positions[0];
+      nearest_index = i;
       nearest_distance_sq = (pt - target).norm_sq();
     }
+  }
 
 #ifndef NDEBUG
   // Check that no two positions are equidistant to the target
-  for (const auto & pt : _positions)
-    if (MooseUtils::absoluteFuzzyEqual((pt - target).norm_sq(), nearest_distance_sq) &&
-        (nearest_index != (&pt - &_positions[0])))
-      mooseWarning("Search for nearest position found several matches: " +
-                       Moose::stringify(_positions[&pt - &_positions[0]]) + " and " +
-                       Moose::stringify(_positions[nearest_index]),
-                   " at a distance of " + std::to_string(std::sqrt(nearest_distance_sq)));
+  for (const auto i : index_range(_positions))
+    if (MooseUtils::absoluteFuzzyEqual((_positions[i] - target).norm_sq(), nearest_distance_sq) &&
+        (nearest_index != i))
+      mooseWarning(
+          "Search for nearest position found several matches: " + Moose::stringify(_positions[i]) +
+              " and " + Moose::stringify(_positions[nearest_index]),
+          " at a distance of " + std::to_string(std::sqrt(nearest_distance_sq)));
 #endif
 
   return _positions[nearest_index];
@@ -155,12 +159,12 @@ Positions::unrollMultiDPositions()
   std::vector<Point> temp_4d_unrolled;
   for (auto vec : _positions_2d)
     temp_2d_unrolled.insert(temp_2d_unrolled.end(), vec.begin(), vec.end());
-  for (auto vec_vec : _positions_3d)
-    for (auto vec : vec_vec)
+  for (const auto & vec_vec : _positions_3d)
+    for (const auto & vec : vec_vec)
       temp_3d_unrolled.insert(temp_3d_unrolled.end(), vec.begin(), vec.end());
-  for (auto vec_vec_vec : _positions_4d)
-    for (auto vec_vec : vec_vec_vec)
-      for (auto vec : vec_vec)
+  for (const auto & vec_vec_vec : _positions_4d)
+    for (const auto & vec_vec : vec_vec_vec)
+      for (const auto & vec : vec_vec)
         temp_4d_unrolled.insert(temp_4d_unrolled.end(), vec.begin(), vec.end());
 
   // for now we wont even tolerate a different ordering
@@ -209,34 +213,10 @@ Positions::finalize()
   // Gather up the positions vector on all ranks
 
   if (_need_broadcast)
-  {
-    // TODO: be able to do this
-    // _communicator.allgather(_positions, /* identical buffer lengths = */ false);
-
-    // Other notes to explain why we do this:
-    // - The vector broadcasting code is for VPPs, so it's *currently* not accessible as we have
-    //   vectors of points, not reals
-    // - The consumer/producer reporter interface can keep track of whether a reduction is needed
-    //   (for example if a consumer needs replicated data, but the producer is distributed) however,
-    //   we have currently made the decision that positions should ALWAYS be replicated
-
-    // Gather all components of all positions
-    std::vector<Real> x(_positions.size()), y(_positions.size()), z(_positions.size());
-    for (const auto & pt : _positions)
-    {
-      x[&pt - &_positions[0]] = pt(0);
-      y[&pt - &_positions[0]] = pt(1);
-      z[&pt - &_positions[0]] = pt(2);
-    }
-
-    _communicator.allgather(x, /* identical buffer lengths = */ false);
-    _communicator.allgather(y, /* identical buffer lengths = */ false);
-    _communicator.allgather(z, /* identical buffer lengths = */ false);
-
-    _positions.resize(x.size());
-    for (auto & pt : _positions)
-      pt = Point(x[&pt - &_positions[0]], y[&pt - &_positions[0]], z[&pt - &_positions[0]]);
-  }
+    // The consumer/producer reporter interface can keep track of whether a reduction is needed
+    // (for example if a consumer needs replicated data, but the producer is distributed) however,
+    // we have currently made the decision that positions should ALWAYS be replicated
+    _communicator.allgather(_positions, /* identical buffer lengths = */ false);
 
   // Sort positions by X then Y then Z
   if (_need_sort)

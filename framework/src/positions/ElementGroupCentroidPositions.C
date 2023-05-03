@@ -16,7 +16,7 @@ ElementGroupCentroidPositions::validParams()
 {
   InputParameters params = Positions::validParams();
   params += BlockRestrictable::validParams();
-  params.addClassDescription("Gets the Positions of the centroid of groups elements. "
+  params.addClassDescription("Gets the Positions of the centroid of groups of elements. "
                              "Groups may be defined using subdomains or element extra ids.");
 
   // To enable extra element ID groups
@@ -47,7 +47,7 @@ ElementGroupCentroidPositions::ElementGroupCentroidPositions(const InputParamete
   _mesh.errorIfDistributedMesh(type());
 
   // We are not excluding using both block restriction and extra element ids
-  if (_group_type == "extra_id" || _group_type == "block_and_ids")
+  if (_group_type == "extra_id" || _group_type == "block_and_extra_id")
   {
     _extra_id_names = getParam<std::vector<ExtraElementIDName>>("extra_id_name");
     for (const auto & name : _extra_id_names)
@@ -105,10 +105,10 @@ ElementGroupCentroidPositions::initialize()
 
   // If users did not specify a value for an extra element integer, they want all the bins
   // We'll need to loop through the mesh to find the element extra ids
-  for (MooseIndex(_extra_id_group_indices) i = 0; i < _extra_id_group_indices.size(); i++)
+  for (const auto i : index_range(_extra_id_group_indices))
   {
     auto & indices = _extra_id_group_indices[i];
-    if (indices.size() == 0)
+    if (indices.empty())
       for (const auto & elem : _mesh.getMesh().active_element_ptr_range())
       {
         auto local_id = id(*elem, _extra_id_indices[i], _blocks_in_use && i == 0);
@@ -216,11 +216,11 @@ ElementGroupCentroidPositions::initialize()
       _extra_id_group_indices.size());
 
   // Make index maps to go from the extra element id to the positions array index
-  for (MooseIndex(_extra_id_group_indices) i = 0; i < _extra_id_group_indices.size(); i++)
+  for (const auto i : index_range(_extra_id_group_indices))
   {
     auto & indices = _extra_id_group_indices[i];
     auto j = 0;
-    for (auto extra_id : indices)
+    for (const auto extra_id : indices)
       positions_indexing[i][extra_id] = j++;
   }
 
@@ -233,7 +233,7 @@ ElementGroupCentroidPositions::initialize()
     // Keeps track of indices in multi-D arrays
     std::vector<unsigned int> previous_indices(4);
 
-    for (MooseIndex(_extra_id_names) i = 0; i < _extra_id_names.size(); i++)
+    for (const auto i : index_range(_extra_id_names))
     {
       auto iter =
           positions_indexing[i].find(id(*elem, _extra_id_indices[i], _blocks_in_use && (i == 0)));
@@ -293,7 +293,7 @@ ElementGroupCentroidPositions::initialize()
       }
     }
   else if (_extra_id_names.size() == 2)
-    for (MooseIndex(_positions) i = 0; i < _positions_2d.size(); i++)
+    for (const auto i : index_range(_positions_2d))
       for (MooseIndex(_positions) j = 0; j < _positions_2d[i].size(); j++)
       {
         if (volumes_2d[i][j] != 0)
@@ -306,8 +306,8 @@ ElementGroupCentroidPositions::initialize()
         }
       }
   else if (_extra_id_names.size() == 3)
-    for (MooseIndex(_positions) i = 0; i < _positions_3d.size(); i++)
-      for (MooseIndex(_positions) j = 0; j < _positions_3d[i].size(); j++)
+    for (const auto i : index_range(_positions_3d))
+      for (const auto j : index_range(_positions_3d[i]))
         for (MooseIndex(_positions) k = 0; k < _positions_3d[i][j].size(); k++)
         {
           if (volumes_3d[i][j][k] != 0)
@@ -320,9 +320,9 @@ ElementGroupCentroidPositions::initialize()
           }
         }
   else if (_extra_id_names.size() == 4)
-    for (MooseIndex(_positions) i = 0; i < _positions_4d.size(); i++)
-      for (MooseIndex(_positions) j = 0; j < _positions_4d[i].size(); j++)
-        for (MooseIndex(_positions) k = 0; k < _positions_4d[i][j].size(); k++)
+    for (const auto i : index_range(_positions_4d))
+      for (const auto j : index_range(_positions_4d[i]))
+        for (const auto k : index_range(_positions_4d[i][j]))
           for (MooseIndex(_positions) l = 0; l < _positions_4d[i][j][k].size(); l++)
           {
             if (volumes_4d[i][j][k][l] != 0)

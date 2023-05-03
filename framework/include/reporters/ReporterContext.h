@@ -85,6 +85,9 @@ public:
   /// and include all the data including the old values.
   ///
   /// This method only outputs the current value within the JSONOutput object.
+  /// NOTE: nlohmann qualification is needed for argument json because the std::vector overload is
+  ///       not in the std namespace, it's in the nlohmann namespace, and will come up in argument
+  ///       dependent lookup (ADL) only because of this qualification.
   ///
   /// @see JsonIO.h
   /// @see JSONOutput.h

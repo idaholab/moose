@@ -6,6 +6,11 @@
   []
 []
 
+[AuxVariables]
+  [u]
+  []
+[]
+
 [Positions]
   [input]
     type = InputPositions
