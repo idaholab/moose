@@ -2,7 +2,7 @@
 
 !syntax description /Executioner/TimeSteppers/ComposeTimeStepperAction
 
-This action specifies the [CompositionDT.md] object when multiple time steppers are provided in the `[TimeSteppers]` block. If there are more than one time steppers are provided, it will add a CompositionDT in the time stepper system and make CompositionDT as the final time stepper to use in the transient simulations. An optional parameter [!param](/TimeSteppers/lower_bound) is provided to set a time stepper to provide a lower bound for the composed time step. It can be specified with any time stepper(s) in the `[TimeSteppers]` block.
+This action specifies the [CompositionDT.md] object when multiple time steppers are provided in the `[TimeSteppers]` block. If there are more than one time steppers are provided, it will add a CompositionDT in the time stepper system and make CompositionDT as the final time stepper to use in the transient simulations. An optional parameter [!param](/TimeSteppers/CompositionDT/lower_bound) is provided to set a time stepper to provide a lower bound for the composed time step. It can be specified with any time stepper(s) in the `[TimeSteppers]` block.
 
 An example of using a growing lower bound to limit the time step size as:
 
