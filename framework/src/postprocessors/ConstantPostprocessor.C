@@ -23,8 +23,7 @@ ConstantPostprocessor::validParams()
 }
 
 ConstantPostprocessor::ConstantPostprocessor(const InputParameters & params)
-  : GeneralPostprocessor(params),
-    _value(getParam<Real>("value"))
+  : GeneralPostprocessor(params), _value(getParam<Real>("value"))
 {
 }
 
