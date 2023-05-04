@@ -1,15 +1,20 @@
 #!/usr/bin/env python3
-#* This file is part of the MOOSE framework
-#* https://www.mooseframework.org
-#*
-#* All rights reserved, see COPYRIGHT for full restrictions
-#* https://github.com/idaholab/moose/blob/master/COPYRIGHT
-#*
-#* Licensed under LGPL 2.1, please see LICENSE for details
-#* https://www.gnu.org/licenses/lgpl-2.1.html
+# * This file is part of the MOOSE framework
+# * https://www.mooseframework.org
+# *
+# * All rights reserved, see COPYRIGHT for full restrictions
+# * https://github.com/idaholab/moose/blob/master/COPYRIGHT
+# *
+# * Licensed under LGPL 2.1, please see LICENSE for details
+# * https://www.gnu.org/licenses/lgpl-2.1.html
 
-import os, re, math, sys, argparse
+import os
+import re
+import math
+import sys
+import argparse
 from decimal import Decimal
+
 
 class CSVTools:
     def __init__(self):
@@ -18,7 +23,8 @@ class CSVTools:
 
     def addError(self, f, message):
         """Add error message and increment the error count"""
-        self.__msg.append('In file ' + os.path.basename(f.name) + ': ' + message)
+        self.__msg.append(
+            'In file ' + os.path.basename(f.name) + ': ' + message)
         self.__num_errors += 1
         return self.__msg
 
@@ -40,7 +46,7 @@ class CSVTools:
         for f in files:
             f.seek(0)
             text = f.read()
-            text = re.sub( r'\n\s*\n', '\n', text).strip()
+            text = re.sub(r'\n\s*\n', '\n', text).strip()
 
             # Exceptions occur if you try to parse a .e file
             try:
@@ -53,9 +59,10 @@ class CSVTools:
                 for row in lines:
                     vals = row.split(',')
                     if len(headers) != len(vals):
-                        self.addError(f, "Number of columns ("+str(len(vals))+") not the same as number of column names ("+str(len(headers))+") in row "+repr(row))
+                        self.addError(f, "Number of columns ("+str(len(vals)) +
+                                      ") not the same as number of column names ("+str(len(headers))+") in row "+repr(row))
                         break
-                    for header, val in zip(headers,vals):
+                    for header, val in zip(headers, vals):
                         try:
                             table[header].append(float(val))
                         except:
@@ -79,7 +86,7 @@ class CSVTools:
         # A set of known paramater naming conventions. The comparison file can have these set, and we will use them.
         zero_params = set(['floor', 'abs_zero', 'absolute'])
         tolerance_params = set(['relative', 'rel_tol'])
-        custom_params = {'RELATIVE' : 0.0, 'ZERO' : 0.0, 'FIELDS' : {} }
+        custom_params = {'RELATIVE': 0.0, 'ZERO': 0.0, 'FIELDS': {}}
 
         config_file.seek(0)
         for a_line in config_file:
@@ -88,9 +95,9 @@ class CSVTools:
 
             # Ignore this line if commented, is the 'time steps' header, or contains logical nots
             if s_line and \
-               (s_line.startswith("#") \
-                or s_line.lower().find('time steps') == 0 \
-                or s_line[0] == "!"):
+               (s_line.startswith("#")
+                or s_line.lower().find('time steps') == 0
+                    or s_line[0] == "!"):
                 continue
 
             field_key = re.findall(r'^\s+(\S+)', a_line)
@@ -101,24 +108,30 @@ class CSVTools:
             try:
                 # Possible global header containing floor params
                 if not re.match(r'^\s', a_line) and words.intersection(zero_params):
-                    custom_params['ZERO'] = self.getParamValues(words.intersection(zero_params).pop(), a_line)[0]
+                    custom_params['ZERO'] = self.getParamValues(
+                        words.intersection(zero_params).pop(), a_line)[0]
 
                 # Possible global header containing tolerance params
                 if not re.match(r'^\s', a_line) and words.intersection(tolerance_params):
-                    custom_params['RELATIVE'] = self.getParamValues(words.intersection(tolerance_params).pop(), a_line)[0]
+                    custom_params['RELATIVE'] = self.getParamValues(
+                        words.intersection(tolerance_params).pop(), a_line)[0]
 
                 # Possible field containing floor params
                 if field_key and words.intersection(zero_params):
-                    custom_params['FIELDS'][field_key[0]]['ZERO'] = self.getParamValues(words.intersection(zero_params).pop(), a_line)[0]
+                    custom_params['FIELDS'][field_key[0]]['ZERO'] = self.getParamValues(
+                        words.intersection(zero_params).pop(), a_line)[0]
 
                 # Possible field containing tolerance params
                 if field_key and words.intersection(tolerance_params):
-                    custom_params['FIELDS'][field_key[0]]['RELATIVE'] = self.getParamValues(words.intersection(tolerance_params).pop(), a_line)[0]
+                    custom_params['FIELDS'][field_key[0]]['RELATIVE'] = self.getParamValues(
+                        words.intersection(tolerance_params).pop(), a_line)[0]
 
             except IndexError:
-                self.addError(config_file, "Error parsing comparison file on line: \n%s" % (a_line))
+                self.addError(
+                    config_file, "Error parsing comparison file on line: \n%s" % (a_line))
 
         return custom_params
+
 
 class CSVSummary(CSVTools):
     def __init__(self, args):
@@ -145,13 +158,15 @@ class CSVSummary(CSVTools):
         if self.getNumErrors():
             return self.getMessages()
 
-        formatted_messages = ['GLOBAL VARIABLES relative %s floor %s' % (self.rel_tol, self.abs_zero) ]
+        formatted_messages = ['GLOBAL VARIABLES relative %s floor %s' % (
+            self.rel_tol, self.abs_zero)]
 
         field_len = []
         value_len = []
         for field, value in table1.items():
             field_len.append(len(field))
-            value_len.append(len("# min: %.3e @ t%d" % (Decimal(min(value)), value.index(min(value)))))
+            value_len.append(len("# min: %.3e @ t%d" %
+                             (Decimal(min(value)), value.index(min(value)))))
 
         field_justify = max(field_len) + 10
         value_justify = max(value_len) + 5
@@ -159,24 +174,28 @@ class CSVSummary(CSVTools):
         # Generate a 'TIME STEPS' summary line if a time field does not exist. This is to maintain compliance with an exodiff summary
         if 'time' not in [x.lower() for x in table1.keys()]:
             value_count = len(table1[list(table1.keys())[0]]) - 1
-            formatted_messages.insert(0, 'TIME STEPS relative 1 floor 0  # min: 0 @ t0  max: %d @ t%d\n' % (value_count, value_count))
+            formatted_messages.insert(
+                0, 'TIME STEPS relative 1 floor 0  # min: 0 @ t0  max: %d @ t%d\n' % (value_count, value_count))
 
         for field, value in table1.items():
             if field.lower() == 'time':
                 # Tolerance for time steps will be the same for value tolerances for now (future csvdiff capability will separate this tolerance)
-                formatted_messages.insert(0, 'TIME STEPS relative %s floor %s  # min: %d @ t%d  max: %d @ t%d\n' % \
-                                          ( self.rel_tol, self.abs_zero, min(value), value.index(min(value)), max(value), value.index(max(value))))
+                formatted_messages.insert(0, 'TIME STEPS relative %s floor %s  # min: %d @ t%d  max: %d @ t%d\n' %
+                                          (self.rel_tol, self.abs_zero, min(value), value.index(min(value)), max(value), value.index(max(value))))
 
-            formatted_messages.append('%s%s%s# min: %.3e @ t%d%smax: %.3e @ t%d' % \
+            formatted_messages.append('%s%s%s# min: %.3e @ t%d%smax: %.3e @ t%d' %
                                       (" "*4,
                                        field,
                                        " "*((field_justify - len(field)) + 10),
-                                       Decimal(min(value)), value.index(min(value)),
-                                       " "*((value_justify - len("# min: %.3e @ t%d" % (Decimal(min(value)), value.index(min(value))))) + 5),
+                                       Decimal(min(value)), value.index(
+                                           min(value)),
+                                       " "*((value_justify - len("# min: %.3e @ t%d" %
+                                            (Decimal(min(value)), value.index(min(value))))) + 5),
                                        Decimal(max(value)), value.index(max(value))))
 
         self.addMessage('\n'.join(formatted_messages))
         return self.getMessages()
+
 
 class CSVDiffer(CSVTools):
     def __init__(self, args):
@@ -188,6 +207,7 @@ class CSVDiffer(CSVTools):
         self.custom_columns = args.custom_columns
         self.custom_rel_err = args.custom_rel_err
         self.custom_abs_zero = args.custom_abs_zero
+        self.ignore = args.ignore_fields
         self.__only_compare_custom = False
 
     def __enter__(self):
@@ -234,8 +254,10 @@ class CSVDiffer(CSVTools):
         found_column = {}
         if self.custom_columns:
             for i in range(0, len(self.custom_columns)):
-                rel_err_map[self.custom_columns[i]] = float(self.custom_rel_err[i])
-                abs_zero_map[self.custom_columns[i]] = float(self.custom_abs_zero[i])
+                rel_err_map[self.custom_columns[i]] = float(
+                    self.custom_rel_err[i])
+                abs_zero_map[self.custom_columns[i]] = float(
+                    self.custom_abs_zero[i])
                 found_column[self.custom_columns[i]] = False
 
         # use this value to skip the rest of the tests when we've found an error
@@ -248,7 +270,7 @@ class CSVDiffer(CSVTools):
         # This way it reports what column is missing, not just # cols is different
         keys1 = table1.keys()
         keys2 = table2.keys()
-        (large,small) = (keys1,keys2)
+        (large, small) = (keys1, keys2)
 
         # check if custom tolerances used, column name exists in one of
         # the CSV files
@@ -257,16 +279,19 @@ class CSVDiffer(CSVTools):
             keys1 = self.custom_columns
             for key in self.custom_columns:
                 if key not in small or key not in large:
-                    self.addError(self.files[0], "Header '" + key + "' is missing")
+                    self.addError(
+                        self.files[0], "Header '" + key + "' is missing")
         elif len(keys1) < len(keys2):
-            (large,small) = (keys2,keys1)
+            (large, small) = (keys2, keys1)
             for key in large:
                 if key not in small:
-                    self.addError(self.files[0], "Header '" + key + "' is missing")
+                    self.addError(
+                        self.files[0], "Header '" + key + "' is missing")
         elif len(keys1) > len(keys2):
             for key in large:
                 if key not in small:
-                    self.addError(self.files[1], "Header '" + key + "' is missing")
+                    self.addError(
+                        self.files[1], "Header '" + key + "' is missing")
         else:
             for key in keys1:
                 found_column[key] = True
@@ -277,7 +302,8 @@ class CSVDiffer(CSVTools):
         # now check that each column is the same length
         for key in keys1:
             if len(table1[key]) != len(table2[key]):
-                self.addError(self.files[0], "Columns with header '" + key + "' aren't the same length")
+                self.addError(
+                    self.files[0], "Columns with header '" + key + "' aren't the same length")
                 # assume all columns are the same length, so don't report the other errors
                 break
 
@@ -286,9 +312,11 @@ class CSVDiffer(CSVTools):
 
         # now check all the values in the table
         for key in keys1:
-            for val1, val2 in zip( table1[key], table2[key] ):
+            for val1, val2 in zip(table1[key], table2[key]):
                 # if customized tolerances specified use them otherwise
                 # use the default
+                if self.ignore and key in self.ignore:
+                    break
                 if self.custom_columns:
                     try:
                         abs_zero = abs_zero_map[key]
@@ -301,19 +329,21 @@ class CSVDiffer(CSVTools):
 
                 # disallow nan in the gold file
                 if math.isnan(val1):
-                    self.addError(self.files[0], "The values in column \"" + key.strip() + "\" contain NaN")
+                    self.addError(
+                        self.files[0], "The values in column \"" + key.strip() + "\" contain NaN")
 
                 # disallow inf in the gold file
                 if math.isinf(val1):
-                    self.addError(self.files[0], "The values in column \"" + key.strip() + "\" contain Inf")
+                    self.addError(
+                        self.files[0], "The values in column \"" + key.strip() + "\" contain Inf")
 
                 # if they're both exactly zero (due to the threshold above) then they're equal so pass this test
                 if val1 == 0 and val2 == 0:
                     continue
 
                 rel_diff = 0
-                if max( abs(val1), abs(val2) ) > 0:
-                    rel_diff = abs( ( val1 - val2 ) / max( abs(val1), abs(val2) ) )
+                if max(abs(val1), abs(val2)) > 0:
+                    rel_diff = abs((val1 - val2) / max(abs(val1), abs(val2)))
 
                 # if customized tolerances specified use them otherwise
                 # use the default
@@ -324,21 +354,23 @@ class CSVDiffer(CSVTools):
                         rel_tol = self.rel_tol
                 if rel_diff > rel_tol:
                     self.addError(self.files[1], "The values in column \"%s\" don't match. \n\trelative diff:   %.3e ~ %.3e = %.3e (%.3e)" % (key.strip(),
-                                                                                                                                            val1,
-                                                                                                                                            val2,
-                                                                                                                                            rel_diff,
-                                                                                                                                            Decimal(rel_diff)))
+                                                                                                                                              val1,
+                                                                                                                                              val2,
+                                                                                                                                              rel_diff,
+                                                                                                                                              Decimal(rel_diff)))
                     # assume all other vals in this column are wrong too, so don't report them
                     break
 
         # Loop over variable names to check if any are missing from all the
         # CSV files being compared
         if self.custom_columns and not self.__only_compare_custom:
-           for mykey2 in self.custom_columns:
-               if not found_column[mykey2]:
-                  self.addError(self.files[0], "all CSV files Variable '" + mykey2 + "' in custom_columns is missing" )
+            for mykey2 in self.custom_columns:
+                if not found_column[mykey2]:
+                    self.addError(
+                        self.files[0], "all CSV files Variable '" + mykey2 + "' in custom_columns is missing")
 
         return self.getMessages()
+
 
 def verifyArgs(args):
     problems = []
@@ -349,21 +381,27 @@ def verifyArgs(args):
         problems.append('Specify two files to compare')
 
     elif args.csv_file and args.summary:
-        problems.append('Incorrect positional arguments, or you are trying to perform a diff and show a summary (can only do one or the other)')
+        problems.append(
+            'Incorrect positional arguments, or you are trying to perform a diff and show a summary (can only do one or the other)')
 
     elif args.summary and args.comparison_file:
-        print('Ignoring request to use config file while being asked to display a summary\n')
+        print(
+            'Ignoring request to use config file while being asked to display a summary\n')
 
     # Check if all custom args are populated correctly
-    unify_custom_args = [x for x in [args.custom_columns, args.custom_abs_zero, args.custom_rel_err] if x != None]
+    unify_custom_args = [x for x in [args.custom_columns,
+                                     args.custom_abs_zero, args.custom_rel_err] if x != None]
     if unify_custom_args and len(unify_custom_args) != 3:
-        problems.append('When using any --custom-* option, you must use all three')
+        problems.append(
+            'When using any --custom-* option, you must use all three')
     elif unify_custom_args:
         if len(set([len(x) for x in unify_custom_args])) > 1:
-            problems.append('All --custom-* options need to contain the same number of space separated items')
+            problems.append(
+                'All --custom-* options need to contain the same number of space separated items')
 
     if unify_custom_args and args.comparison_file:
-        problems.append('When supplying a config file (--comparison-file|-c), you can not use any --custom-* args')
+        problems.append(
+            'When supplying a config file (--comparison-file|-c), you can not use any --custom-* args')
 
     for a_problem in problems:
         print(a_problem)
@@ -372,19 +410,31 @@ def verifyArgs(args):
 
     return args
 
+
 def parseArgs(args=None):
-    parser = argparse.ArgumentParser(description='Tool for testing differences between two CSV files')
+    parser = argparse.ArgumentParser(
+        description='Tool for testing differences between two CSV files')
     parser.add_argument('csv_file', nargs='*', type=argparse.FileType('r'))
-    parser.add_argument('--summary', '-s', nargs=1, type=argparse.FileType('r'), metavar='csv_file', help='Produce a summary in csvdiff input format')
-    parser.add_argument('--comparison-file', '-c', type=argparse.FileType('r'), metavar='comparison_file', help='Use comparison configuration file (can be generated using --summary|-s)')
-    parser.add_argument('--ignore-fields', '-i', nargs='+', metavar='id', help='Ignore specified space-separated field IDs')
-    parser.add_argument('--diff-fields', '-f', nargs='+', metavar='id', help='Perform diff tests only on space-separated field IDs')
-    parser.add_argument('--abs-zero', metavar='absolute zero', default='1e-11', help='Value representing an absolute zero (default: 1e-11)')
-    parser.add_argument('--relative-tolerance', metavar='tolerance', default='5.5e-6', help='Value representing the acceptable tolerance between comparisons (default: 5.5e-6)')
-    parser.add_argument('--custom-columns', nargs='+', metavar='field', help='Space separated list of custom field IDs to compare')
-    parser.add_argument('--custom-abs-zero', nargs='+', metavar='exponential', help='Space separated list of corresponding exponential absolute zero values for --custom-colums')
-    parser.add_argument('--custom-rel-err', nargs='+', metavar='exponential', help='Space separated list of corresponding acceptable exponential tolerance values for --custom-colums')
+    parser.add_argument('--summary', '-s', nargs=1, type=argparse.FileType('r'),
+                        metavar='csv_file', help='Produce a summary in csvdiff input format')
+    parser.add_argument('--comparison-file', '-c', type=argparse.FileType('r'), metavar='comparison_file',
+                        help='Use comparison configuration file (can be generated using --summary|-s)')
+    parser.add_argument('--ignore-fields', '-i', nargs='+', metavar='id',
+                        help='Ignore specified space-separated field IDs')
+    parser.add_argument('--diff-fields', '-f', nargs='+', metavar='id',
+                        help='Perform diff tests only on space-separated field IDs')
+    parser.add_argument('--abs-zero', metavar='absolute zero', default='1e-11',
+                        help='Value representing an absolute zero (default: 1e-11)')
+    parser.add_argument('--relative-tolerance', metavar='tolerance', default='5.5e-6',
+                        help='Value representing the acceptable tolerance between comparisons (default: 5.5e-6)')
+    parser.add_argument('--custom-columns', nargs='+', metavar='field',
+                        help='Space separated list of custom field IDs to compare')
+    parser.add_argument('--custom-abs-zero', nargs='+', metavar='exponential',
+                        help='Space separated list of corresponding exponential absolute zero values for --custom-colums')
+    parser.add_argument('--custom-rel-err', nargs='+', metavar='exponential',
+                        help='Space separated list of corresponding acceptable exponential tolerance values for --custom-colums')
     return verifyArgs(parser.parse_args(args))
+
 
 if __name__ == '__main__':
     args = parseArgs()
