@@ -225,13 +225,20 @@ PenaltyFrictionUserObject::reinit()
     if (_has_disp_z && std::abs(_dof_to_real_tangential_velocity[node][1]) > TOLERANCE * TOLERANCE)
       sign_two = MathUtils::sign(_dof_to_real_tangential_velocity[node][1]);
 
+    // if using frictional lagrange multipliers, fetch them
+    static const std::pair<Real, Real> null_lm{0, 0};
+    const auto & [flm1, flm2] =
+        _augmented_lagrange_problem ? _dof_to_frictional_lagrange_multipliers[node] : null_lm;
+
     // Only accumulate nodal frictional pressure if normal contact pressure is nonzero.
     if (normal_pressure > TOLERANCE * TOLERANCE)
     {
-      _dof_to_frictional_pressure[node][0] = sign_one * _penalty_friction * accumulated_slip[0];
+      _dof_to_frictional_pressure[node][0] =
+          sign_one * (_penalty_friction * accumulated_slip[0] + flm1);
 
       if (_has_disp_z)
-        _dof_to_frictional_pressure[node][1] = sign_two * _penalty_friction * accumulated_slip[1];
+        _dof_to_frictional_pressure[node][1] =
+            sign_two * (_penalty_friction * accumulated_slip[1] + flm2);
     }
   }
 
@@ -332,15 +339,47 @@ PenaltyFrictionUserObject::updateAugmentedLagrangianMultipliers()
 
   ;
 
-  for (auto & [dof_object, lagrange_multipliers] : _dof_to_frictional_lagrange_multipliers)
+  for (auto & [node, lagrange_multipliers] : _dof_to_frictional_lagrange_multipliers)
   {
-    const auto & [flm1, flm2] = lagrange_multipliers;
-    // MetaPhysicL::raw_value(libmesh_map_find(_dof_to_weighted_gap, dof_object).first);
-    // lagrange_multiplier += -gap * _penalty;
-    // if (lagrange_multiplier < 0.0)
-    //   lagrange_multiplier = 0.0;
+    const auto & normal_pressure = _dof_to_normal_pressure[node];
 
-    // const auto gap_for_calc = gap.first < 0 ? MetaPhysicL::raw_value(-gap.first) : 0.0;
-    // _dof_to_lagrange_multiplier[dof_object] += gap_for_calc * _penalty;
+    // Get current accumulated slip in both directions
+    if (normal_pressure <= TOLERANCE * TOLERANCE)
+      continue;
+
+    auto & [flm1, flm2] = lagrange_multipliers;
+
+    auto & accumulated_slip = _dof_to_accumulated_slip[node];
+
+    const auto & real_tangential_velocity =
+        libmesh_map_find(_dof_to_real_tangential_velocity, node);
+    const auto & slip_vel_one = real_tangential_velocity[0];
+    const auto & slip_vel_two = real_tangential_velocity[1];
+
+    // Get accumulated slip in both directions
+    Real slip_direction_one = 0.0;
+    Real slip_direction_two = 0.0;
+
+    if (!_dof_to_old_accumulated_slip.empty())
+      std::tie(slip_direction_one, slip_direction_two) = _dof_to_old_accumulated_slip[node];
+
+    accumulated_slip[0] = slip_direction_one + std::abs(slip_vel_one) * _dt;
+    if (_has_disp_z)
+      accumulated_slip[1] = slip_direction_two + std::abs(slip_vel_two) * _dt;
+
+    // Get sign of relative velocity for both directions
+    ADReal sign_one = 0.0;
+    ADReal sign_two = 0.0;
+
+    if (std::abs(_dof_to_real_tangential_velocity[node][0]) > TOLERANCE * TOLERANCE)
+      sign_one = MathUtils::sign(_dof_to_real_tangential_velocity[node][0]);
+
+    if (_has_disp_z && std::abs(_dof_to_real_tangential_velocity[node][1]) > TOLERANCE * TOLERANCE)
+      sign_two = MathUtils::sign(_dof_to_real_tangential_velocity[node][1]);
+
+    // update LMs
+    flm1 += _penalty_friction * MetaPhysicL::raw_value(accumulated_slip[0]);
+    if (_has_disp_z)
+      flm2 += _penalty_friction * MetaPhysicL::raw_value(accumulated_slip[1]);
   }
 }
