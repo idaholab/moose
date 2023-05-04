@@ -27,7 +27,7 @@ public:
   LiquidWaterInterWrapper1PhaseProblem(const InputParameters & params);
 
 protected:
-  virtual double computeFrictionFactor(double Re) override;
+  virtual Real computeFrictionFactor(Real Re) override;
 
 public:
   static InputParameters validParams();

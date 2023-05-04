@@ -155,10 +155,10 @@ DetailedQuadSubChannelMeshGenerator::generate()
   mesh_base->reserve_nodes(n_points);
   mesh_base->reserve_elem(n_elems);
   // Build an array of points arranged in a circle on the xy-plane. (last and first node overlap)
-  const double radius = _rod_diameter / 2.0;
+  const Real radius = _rod_diameter / 2.0;
   std::array<Point, theta_res + 1> circle_points;
   {
-    double theta = 0;
+    Real theta = 0;
     for (unsigned int i = 0; i < theta_res + 1; i++)
     {
       circle_points[i](0) = radius * std::cos(theta);

@@ -147,17 +147,17 @@ DetailedQuadInterWrapperMeshGenerator::generate()
   // Build an array of points arranged in a square on the xy-plane. (last and first node overlap)
   // Mapping points in a circle to a square
   // See ttp://arxiv.org/abs/1509.06344 for proof
-  const double radius = 1.0;
+  const Real radius = 1.0;
   std::array<Point, theta_res + 1> circle_points;
   {
-    double theta = 0;
-    double u, v;
+    Real theta = 0;
+    Real u, v;
     for (unsigned int i = 0; i < theta_res + 1; i++)
     {
       u = radius * std::cos(theta);
       v = radius * std::sin(theta);
-      double val_check_u = std::abs(u) - std::sqrt(2.0) / 2.0;
-      double val_check_v = std::abs(v) - std::sqrt(2.0) / 2.0;
+      Real val_check_u = std::abs(u) - std::sqrt(2.0) / 2.0;
+      Real val_check_v = std::abs(v) - std::sqrt(2.0) / 2.0;
       if (val_check_u < 1e-5 && val_check_v < 1e-5)
       {
         circle_points[i](0) = u * 2.0 / std::sqrt(2);

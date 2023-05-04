@@ -28,8 +28,7 @@ public:
   LiquidWaterSubChannel1PhaseProblem(const InputParameters & params);
 
 protected:
-  virtual double computeFrictionFactor(double Re) override;
-  virtual double computeFrictionFactor(double Re, int i_ch) override;
+  virtual Real computeFrictionFactor(_friction_args_struct friction_args) override;
   QuadSubChannelMesh & _subchannel_mesh;
 
 public:

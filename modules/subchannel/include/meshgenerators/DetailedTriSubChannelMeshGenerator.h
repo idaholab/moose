@@ -28,7 +28,7 @@ public:
 
 protected:
   EChannelType getSubchannelType(unsigned int index) const { return _subch_type[index]; }
-  Point rotatePoint(Point b, double theta);
+  Point rotatePoint(Point b, Real theta);
   Point translatePoint(Point b, Point translation_vector);
   Point getRodPosition(unsigned int i) { return _rod_position[i]; }
   std::vector<Real> getSubchannelPosition(unsigned int i) { return _subchannel_position[i]; }

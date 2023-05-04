@@ -30,69 +30,78 @@ LiquidWaterSubChannel1PhaseProblem::LiquidWaterSubChannel1PhaseProblem(
 }
 
 double
-LiquidWaterSubChannel1PhaseProblem::computeFrictionFactor(double Re)
+LiquidWaterSubChannel1PhaseProblem::computeFrictionFactor(_friction_args_struct friction_args)
 {
-  double a, b;
-  if (Re < 1)
+  auto Re = friction_args.Re;
+  auto i_ch = friction_args.i_ch;
+  if (_default_friction_model)
   {
-    return 64.0;
-  }
-  else if (Re >= 1 and Re < 5000)
-  {
-    a = 64.0;
-    b = -1.0;
-  }
-  else if (Re >= 5000 and Re < 30000)
-  {
-    a = 0.316;
-    b = -0.25;
+    Real a, b;
+    if (Re < 1)
+    {
+      return 64.0;
+    }
+    else if (Re >= 1 and Re < 5000)
+    {
+      a = 64.0;
+      b = -1.0;
+    }
+    else if (Re >= 5000 and Re < 30000)
+    {
+      a = 0.316;
+      b = -0.25;
+    }
+    else
+    {
+      a = 0.184;
+      b = -0.20;
+    }
+    return a * std::pow(Re, b);
   }
   else
   {
-    a = 0.184;
-    b = -0.20;
-  }
-  return a * std::pow(Re, b);
-}
+    Real aL, b1L, b2L, CL, ratio;
+    Real aT, b1T, b2T, CT;
+    auto pitch = _subchannel_mesh.getPitch();
+    auto rod_diameter = _subchannel_mesh.getRodDiameter();
+    auto gap = _subchannel_mesh.getGap();
+    auto w = (rod_diameter / 2.0) + (pitch / 2.0) + gap;
+    auto p_over_d = pitch / rod_diameter;
+    auto w_over_d = w / rod_diameter;
+    auto ReL = std::pow(10, (p_over_d - 1)) * 320.0;
+    auto ReT = std::pow(10, 0.7 * (p_over_d - 1)) * 1.0E+4;
+    auto psi = std::log(Re / ReL) / std::log(ReT / ReL);
+    auto subch_type = _subchannel_mesh.getSubchannelType(i_ch);
+    const Real lambda = 7.0;
 
-double
-LiquidWaterSubChannel1PhaseProblem::computeFrictionFactor(double Re, int i_ch)
-{
-  double a, b1, b2, C, n, ratio;
-  auto pitch = _subchannel_mesh.getPitch();
-  auto rod_diameter = _subchannel_mesh.getRodDiameter();
-  auto gap = _subchannel_mesh.getGap();
-  auto w = (rod_diameter / 2.0) + (pitch / 2.0) + gap;
-  auto p_over_d = pitch / rod_diameter;
-  auto subch_type = _subchannel_mesh.getSubchannelType(i_ch);
-
-  if (Re < 2000.0)
-  {
-    n = 1.0;
     if (subch_type == EChannelType::CORNER)
     {
-      ratio = w / rod_diameter;
+      ratio = w_over_d;
       if ((1.0 <= p_over_d) && (p_over_d <= 1.1))
       {
-        a = 28.62, b1 = 715.9, b2 = -2807;
+        aL = 28.62, b1L = 715.9, b2L = -2807;
+        aT = 0.09755, b1T = 1.127, b2T = -6.304;
       }
       else if ((1.1 < p_over_d) && (p_over_d <= 1.5))
       {
-        a = 58.83, b1 = 160.7, b2 = -203.5;
+        aL = 58.83, b1L = 160.7, b2L = -203.5;
+        aT = 0.1452, b1T = 0.02681, b2T = -0.03411;
       }
       else
         mooseError(" Geometric parameters beyond scope of friction factor model ");
     }
     else if (subch_type == EChannelType::EDGE)
     {
-      ratio = w / rod_diameter;
+      ratio = w_over_d;
       if ((1.0 <= p_over_d) && (p_over_d <= 1.1))
       {
-        a = 26.18, b1 = 554.5, b2 = -1480;
+        aL = 26.18, b1L = 554.5, b2L = -1480;
+        aT = 0.09377, b1T = 0.8732, b2T = -3.341;
       }
       else if ((1.1 < p_over_d) && (p_over_d <= 1.5))
       {
-        a = 44.40, b1 = 256.7, b2 = -267.6;
+        aL = 44.40, b1L = 256.7, b2L = -267.6;
+        aT = 0.1430, b1T = 0.04199, b2T = -0.04428;
       }
       else
         mooseError(" Geometric parameters beyond scope of friction factor model ");
@@ -102,62 +111,39 @@ LiquidWaterSubChannel1PhaseProblem::computeFrictionFactor(double Re, int i_ch)
       ratio = p_over_d;
       if ((1.0 <= p_over_d) && (p_over_d <= 1.1))
       {
-        a = 26.37, b1 = 374.2, b2 = -493.9;
+        aL = 26.37, b1L = 374.2, b2L = -493.9;
+        aT = 0.09423, b1T = 0.5806, b2T = -1.239;
       }
       else if ((1.1 < p_over_d) && (p_over_d <= 1.5))
       {
-        a = 35.55, b1 = 263.7, b2 = -190.2;
+        aL = 35.55, b1L = 263.7, b2L = -190.2;
+        aT = 0.1339, b1T = 0.09059, b2T = -0.09926;
       }
       else
         mooseError(" Geometric parameters beyond scope of friction factor model ");
     }
-  }
-  else
-  {
-    n = 0.18;
-    if (subch_type == EChannelType::CORNER)
+
+    CL = aL + b1L * (ratio - 1) + b2L * (ratio - 1) * (ratio - 1);
+    CT = aT + b1T * (ratio - 1) + b2T * (ratio - 1) * (ratio - 1);
+
+    auto fL = CL / Re;
+    auto fT = CT * std::pow(Re, -0.18);
+
+    if (Re < ReL)
     {
-      ratio = w / rod_diameter;
-      if ((1.0 <= p_over_d) && (p_over_d <= 1.1))
-      {
-        a = 0.09755, b1 = 1.127, b2 = -6.304;
-      }
-      else if ((1.1 < p_over_d) && (p_over_d <= 1.5))
-      {
-        a = 0.1452, b1 = 0.02681, b2 = -0.03411;
-      }
-      else
-        mooseError(" Geometric parameters beyond scope of friction factor model ");
+      // laminar flow
+      return fL;
     }
-    else if (subch_type == EChannelType::EDGE)
+    else if (Re > ReT)
     {
-      ratio = w / rod_diameter;
-      if ((1.0 <= p_over_d) && (p_over_d <= 1.1))
-      {
-        a = 0.09377, b1 = 0.8732, b2 = -3.341;
-      }
-      else if ((1.1 < p_over_d) && (p_over_d <= 1.5))
-      {
-        a = 0.1430, b1 = 0.04199, b2 = -0.04428;
-      }
-      else
-        mooseError(" Geometric parameters beyond scope of friction factor model ");
+      // turbulent flow
+      return fT;
     }
     else
     {
-      ratio = p_over_d;
-      if ((1.0 <= p_over_d) && (p_over_d <= 1.1))
-      {
-        a = 0.09423, b1 = 0.5806, b2 = -1.239;
-      }
-      else if ((1.1 < p_over_d) && (p_over_d <= 1.5))
-      {
-        a = 0.1339, b1 = 0.09059, b2 = -0.09926;
-      }
-      else
-        mooseError(" Geometric parameters beyond scope of friction factor model ");
+      // transition flow
+      return fL * std::pow((1 - psi), 1.0 / 3.0) * (1 - std::pow(psi, lambda)) +
+             fT * std::pow(psi, 1.0 / 3.0);
     }
   }
-  C = a + b1 * (ratio - 1) + b2 * (ratio - 1) * (ratio - 1);
-  return C * std::pow(Re, -n);
 }

@@ -56,7 +56,7 @@ QuadPowerIC::QuadPowerIC(const InputParameters & params)
   _pin_power_correction.resize((ny - 1) * (nx - 1), 1);
   _pin_power_correction.setOnes();
 
-  double vin;
+  Real vin;
   ifstream inFile;
 
   inFile.open(_filename);

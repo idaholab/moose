@@ -30,14 +30,6 @@ LiquidMetalSubChannel1PhaseProblem::LiquidMetalSubChannel1PhaseProblem(
   : SubChannel1PhaseProblem(params),
     _tri_sch_mesh(dynamic_cast<TriSubChannelMesh &>(_subchannel_mesh))
 {
-  _outer_channels = 0.0;
-  for (unsigned int i_ch = 0; i_ch < _n_channels; i_ch++)
-  {
-    auto subch_type = _subchannel_mesh.getSubchannelType(i_ch);
-    if (subch_type == EChannelType::EDGE || subch_type == EChannelType::CORNER)
-      _outer_channels += 1.0;
-  }
-
   // Initializing heat conduction system
   createPetscMatrix(
       _hc_axial_heat_conduction_mat, _block_size * _n_channels, _block_size * _n_channels);
@@ -50,112 +42,14 @@ LiquidMetalSubChannel1PhaseProblem::LiquidMetalSubChannel1PhaseProblem(
 }
 
 double
-LiquidMetalSubChannel1PhaseProblem::computeFrictionFactor(double Re)
+LiquidMetalSubChannel1PhaseProblem::computeFrictionFactor(_friction_args_struct friction_args)
 {
-  _console << "Re number= " << Re << std::endl;
-  mooseError("This option for the friction factor is not currently used for sodium coolant");
-  return 0;
-}
+  auto Re = friction_args.Re;
+  auto i_ch = friction_args.i_ch;
+  auto S = friction_args.S;
+  auto w_perim = friction_args.w_perim;
+  auto Dh_i = friction_args.Dh_i;
 
-double
-LiquidMetalSubChannel1PhaseProblem::computeFrictionFactor(double Re, int /* i_ch */)
-{
-  _console << "Re number= " << Re << std::endl;
-  mooseError("This option for the friction factor is not currently used for sodium coolant");
-  return 0;
-}
-
-void
-LiquidMetalSubChannel1PhaseProblem::computeWijPrime(int iblock)
-{
-  unsigned int last_node = (iblock + 1) * _block_size;
-  unsigned int first_node = iblock * _block_size + 1;
-
-  for (unsigned int iz = first_node; iz < last_node + 1; iz++)
-  {
-    auto z_grid = _subchannel_mesh.getZGrid();
-    auto dz = z_grid[iz] - z_grid[iz - 1];
-    for (unsigned int i_gap = 0; i_gap < _n_gaps; i_gap++)
-    {
-      auto chans = _subchannel_mesh.getGapNeighborChannels(i_gap);
-      unsigned int i_ch = chans.first;
-      unsigned int j_ch = chans.second;
-      auto subch_type1 = _subchannel_mesh.getSubchannelType(i_ch);
-      auto subch_type2 = _subchannel_mesh.getSubchannelType(j_ch);
-      _WijPrime(i_gap, iz) = 0.0;
-      if (subch_type1 == EChannelType::CENTER || subch_type2 == EChannelType::CENTER)
-      {
-        auto * node_in_i = _subchannel_mesh.getChannelNode(i_ch, iz - 1);
-        auto * node_out_i = _subchannel_mesh.getChannelNode(i_ch, iz);
-        auto * node_in_j = _subchannel_mesh.getChannelNode(j_ch, iz - 1);
-        auto * node_out_j = _subchannel_mesh.getChannelNode(j_ch, iz);
-        auto Si_in = (*_S_flow_soln)(node_in_i);
-        auto Sj_in = (*_S_flow_soln)(node_in_j);
-        auto Si_out = (*_S_flow_soln)(node_out_i);
-        auto Sj_out = (*_S_flow_soln)(node_out_j);
-        // crossflow area between channels i,j (dz*gap_width)
-        auto Sij = dz * _subchannel_mesh.getGapWidth(i_gap);
-        const Real & pitch = _subchannel_mesh.getPitch();
-        const Real & rod_diameter = _subchannel_mesh.getRodDiameter();
-        const Real & wire_lead_length = _tri_sch_mesh.getWireLeadLength();
-        const Real & wire_diameter = _tri_sch_mesh.getWireDiameter();
-        auto theta =
-            std::acos(wire_lead_length /
-                      std::sqrt(std::pow(wire_lead_length, 2) +
-                                std::pow(libMesh::pi * (rod_diameter + wire_diameter), 2)));
-        // Calculation of flow regime
-        auto ReL = 320.0 * std::pow(10.0, pitch / rod_diameter - 1);
-        auto ReT = 10000.0 * std::pow(10.0, 0.7 * (pitch / rod_diameter - 1));
-        auto avg_massflux =
-            0.5 * (((*_mdot_soln)(node_in_i) + (*_mdot_soln)(node_in_j)) / (Si_in + Sj_in) +
-                   ((*_mdot_soln)(node_out_i) + (*_mdot_soln)(node_out_j)) / (Si_out + Sj_out));
-        auto w_perim_i = (*_w_perim_soln)(node_in_i);
-        auto w_perim_j = (*_w_perim_soln)(node_in_j);
-        auto mu_i = (*_mu_soln)(node_in_i);
-        auto mu_j = (*_mu_soln)(node_in_j);
-        // hydraulic diameter in the i direction
-        auto hD_i = 4.0 * Si_in / w_perim_i;
-        auto hD_j = 4.0 * Sj_in / w_perim_j;
-        auto avg_hD = 0.5 * (hD_i + hD_j);
-        auto avg_mu = 0.5 * (mu_i + mu_j);
-        auto Re = avg_massflux * avg_hD / avg_mu;
-        // Calculation of geometric parameters
-        auto Ar1 = libMesh::pi * (rod_diameter + wire_diameter) * wire_diameter / 6.0;
-        auto A1prime = (std::sqrt(3.0) / 4.0) * std::pow(pitch, 2) -
-                       libMesh::pi * std::pow(rod_diameter, 2) / 8.0;
-        auto A1 = A1prime - libMesh::pi * std::pow(wire_diameter, 2) / 8.0 / std::cos(theta);
-        auto Cm = 0.0;
-        if (Re < ReL)
-        {
-          Cm = 0.077 * std::pow((pitch - rod_diameter) / rod_diameter, -0.5);
-        }
-        else if (Re > ReT)
-        {
-          Cm = 0.14 * std::pow((pitch - rod_diameter) / rod_diameter, -0.5);
-        }
-        else
-        {
-          auto psi = (std::log(Re) - std::log(ReL)) / (std::log(ReT) - std::log(ReL));
-          auto gamma = 2.0 / 3.0;
-          Cm = 0.14 * std::pow((pitch - rod_diameter) / rod_diameter, -0.5) +
-               (0.14 * std::pow((pitch - rod_diameter) / rod_diameter, -0.5) -
-                0.077 * std::pow((pitch - rod_diameter) / rod_diameter, -0.5)) *
-                   std::pow(psi, gamma);
-        }
-        // Calculation of turbulent mixing parameter
-        auto beta = Cm * std::pow(Ar1 / A1, 0.5) * std::tan(theta);
-
-        // Calculation of turbulent crossflow
-        _WijPrime(i_gap, iz) = beta * avg_massflux * Sij;
-      }
-    }
-  }
-}
-
-double
-LiquidMetalSubChannel1PhaseProblem::computeFrictionFactor(
-    double Re, int i_ch, Real S, Real w_perim, Real Dh_i)
-{
   const Real & pitch = _subchannel_mesh.getPitch();
   const Real & rod_diameter = _subchannel_mesh.getRodDiameter();
   const Real & wire_lead_length = _tri_sch_mesh.getWireLeadLength();
@@ -167,7 +61,7 @@ LiquidMetalSubChannel1PhaseProblem::computeFrictionFactor(
   auto Reb_l = std::pow(10, (p_to_d - 1)) * 320.0;
   auto Reb_t = std::pow(10, 0.7 * (p_to_d - 1)) * 1.0E+4;
   const Real lambda = 7.0;
-  auto fib = std::log(Re / Reb_l) / std::log(Reb_t / Reb_l);
+  auto psi = std::log(Re / Reb_l) / std::log(Reb_t / Reb_l);
   Real a_l = 0.0;
   Real b1_l = 0.0;
   Real b2_l = 0.0;
@@ -325,8 +219,95 @@ LiquidMetalSubChannel1PhaseProblem::computeFrictionFactor(
   else
   {
     // transition flow
-    return f_l * std::pow((1 - fib), 1.0 / 3.0) * (1 - std::pow(fib, lambda)) +
-           f_t * std::pow(fib, 1.0 / 3.0);
+    return f_l * std::pow((1 - psi), 1.0 / 3.0) * (1 - std::pow(psi, lambda)) +
+           f_t * std::pow(psi, 1.0 / 3.0);
+  }
+}
+
+void
+LiquidMetalSubChannel1PhaseProblem::computeWijPrime(int iblock)
+{
+  unsigned int last_node = (iblock + 1) * _block_size;
+  unsigned int first_node = iblock * _block_size + 1;
+
+  for (unsigned int iz = first_node; iz < last_node + 1; iz++)
+  {
+    auto z_grid = _subchannel_mesh.getZGrid();
+    auto dz = z_grid[iz] - z_grid[iz - 1];
+    for (unsigned int i_gap = 0; i_gap < _n_gaps; i_gap++)
+    {
+      auto chans = _subchannel_mesh.getGapNeighborChannels(i_gap);
+      unsigned int i_ch = chans.first;
+      unsigned int j_ch = chans.second;
+      auto subch_type1 = _subchannel_mesh.getSubchannelType(i_ch);
+      auto subch_type2 = _subchannel_mesh.getSubchannelType(j_ch);
+      _WijPrime(i_gap, iz) = 0.0;
+      if (subch_type1 == EChannelType::CENTER || subch_type2 == EChannelType::CENTER)
+      {
+        auto * node_in_i = _subchannel_mesh.getChannelNode(i_ch, iz - 1);
+        auto * node_out_i = _subchannel_mesh.getChannelNode(i_ch, iz);
+        auto * node_in_j = _subchannel_mesh.getChannelNode(j_ch, iz - 1);
+        auto * node_out_j = _subchannel_mesh.getChannelNode(j_ch, iz);
+        auto Si_in = (*_S_flow_soln)(node_in_i);
+        auto Sj_in = (*_S_flow_soln)(node_in_j);
+        auto Si_out = (*_S_flow_soln)(node_out_i);
+        auto Sj_out = (*_S_flow_soln)(node_out_j);
+        // crossflow area between channels i,j (dz*gap_width)
+        auto Sij = dz * _subchannel_mesh.getGapWidth(i_gap);
+        const Real & pitch = _subchannel_mesh.getPitch();
+        const Real & rod_diameter = _subchannel_mesh.getRodDiameter();
+        const Real & wire_lead_length = _tri_sch_mesh.getWireLeadLength();
+        const Real & wire_diameter = _tri_sch_mesh.getWireDiameter();
+        auto theta =
+            std::acos(wire_lead_length /
+                      std::sqrt(std::pow(wire_lead_length, 2) +
+                                std::pow(libMesh::pi * (rod_diameter + wire_diameter), 2)));
+        // Calculation of flow regime
+        auto ReL = 320.0 * std::pow(10.0, pitch / rod_diameter - 1);
+        auto ReT = 10000.0 * std::pow(10.0, 0.7 * (pitch / rod_diameter - 1));
+        auto avg_massflux =
+            0.5 * (((*_mdot_soln)(node_in_i) + (*_mdot_soln)(node_in_j)) / (Si_in + Sj_in) +
+                   ((*_mdot_soln)(node_out_i) + (*_mdot_soln)(node_out_j)) / (Si_out + Sj_out));
+        auto w_perim_i = (*_w_perim_soln)(node_in_i);
+        auto w_perim_j = (*_w_perim_soln)(node_in_j);
+        auto mu_i = (*_mu_soln)(node_in_i);
+        auto mu_j = (*_mu_soln)(node_in_j);
+        // hydraulic diameter in the i direction
+        auto hD_i = 4.0 * Si_in / w_perim_i;
+        auto hD_j = 4.0 * Sj_in / w_perim_j;
+        auto avg_hD = 0.5 * (hD_i + hD_j);
+        auto avg_mu = 0.5 * (mu_i + mu_j);
+        auto Re = avg_massflux * avg_hD / avg_mu;
+        // Calculation of geometric parameters
+        auto Ar1 = libMesh::pi * (rod_diameter + wire_diameter) * wire_diameter / 6.0;
+        auto A1prime = (std::sqrt(3.0) / 4.0) * std::pow(pitch, 2) -
+                       libMesh::pi * std::pow(rod_diameter, 2) / 8.0;
+        auto A1 = A1prime - libMesh::pi * std::pow(wire_diameter, 2) / 8.0 / std::cos(theta);
+        auto Cm = 0.0;
+        if (Re < ReL)
+        {
+          Cm = 0.077 * std::pow((pitch - rod_diameter) / rod_diameter, -0.5);
+        }
+        else if (Re > ReT)
+        {
+          Cm = 0.14 * std::pow((pitch - rod_diameter) / rod_diameter, -0.5);
+        }
+        else
+        {
+          auto psi = (std::log(Re) - std::log(ReL)) / (std::log(ReT) - std::log(ReL));
+          auto gamma = 2.0 / 3.0;
+          Cm = 0.14 * std::pow((pitch - rod_diameter) / rod_diameter, -0.5) +
+               (0.14 * std::pow((pitch - rod_diameter) / rod_diameter, -0.5) -
+                0.077 * std::pow((pitch - rod_diameter) / rod_diameter, -0.5)) *
+                   std::pow(psi, gamma);
+        }
+        // Calculation of turbulent mixing parameter
+        auto beta = Cm * std::pow(Ar1 / A1, 0.5) * std::tan(theta);
+
+        // Calculation of turbulent crossflow
+        _WijPrime(i_gap, iz) = beta * avg_massflux * Sij;
+      }
+    }
   }
 }
 
@@ -384,516 +365,8 @@ LiquidMetalSubChannel1PhaseProblem::computeAddedHeatPin(unsigned int i_ch, unsig
   }
 }
 
-Real
-LiquidMetalSubChannel1PhaseProblem::computeAddedHeatDuct(unsigned int i_ch, unsigned int iz)
-{
-  if (_duct_mesh_exist)
-  {
-    auto subch_type = _subchannel_mesh.getSubchannelType(i_ch);
-    if (subch_type == EChannelType::EDGE || subch_type == EChannelType::CORNER)
-    {
-      auto dz = _z_grid[iz] - _z_grid[iz - 1];
-      auto * node_in_chan = _subchannel_mesh.getChannelNode(i_ch, iz - 1);
-      auto * node_out_chan = _subchannel_mesh.getChannelNode(i_ch, iz);
-      auto * node_in_duct = _subchannel_mesh.getDuctNodeFromChannel(node_in_chan);
-      auto * node_out_duct = _subchannel_mesh.getDuctNodeFromChannel(node_out_chan);
-      auto heat_rate_in = (*_q_prime_duct_soln)(node_in_duct);
-      auto heat_rate_out = (*_q_prime_duct_soln)(node_out_duct);
-      return 0.5 * (heat_rate_in + heat_rate_out) * dz / _outer_channels;
-    }
-    else
-    {
-      return 0.0;
-    }
-  }
-  else
-  {
-    return 0;
-  }
-}
-
-void
-LiquidMetalSubChannel1PhaseProblem::computeDP(int iblock)
-{
-  unsigned int last_node = (iblock + 1) * _block_size;
-  unsigned int first_node = iblock * _block_size + 1;
-
-  if (!_implicit_bool)
-  {
-    for (unsigned int iz = first_node; iz < last_node + 1; iz++)
-    {
-      auto z_grid = _subchannel_mesh.getZGrid();
-      auto k_grid = _subchannel_mesh.getKGrid();
-      auto dz = z_grid[iz] - z_grid[iz - 1];
-      for (unsigned int i_ch = 0; i_ch < _n_channels; i_ch++)
-      {
-        auto * node_in = _subchannel_mesh.getChannelNode(i_ch, iz - 1);
-        auto * node_out = _subchannel_mesh.getChannelNode(i_ch, iz);
-        auto rho_in = (*_rho_soln)(node_in);
-        auto rho_out = (*_rho_soln)(node_out);
-        auto mu_in = (*_mu_soln)(node_in);
-        auto S = (*_S_flow_soln)(node_in);
-        auto w_perim = (*_w_perim_soln)(node_in);
-        // hydraulic diameter in the i direction
-        auto Dh_i = 4.0 * S / w_perim;
-        auto time_term = _TR * ((*_mdot_soln)(node_out)-_mdot_soln->old(node_out)) * dz / _dt -
-                         dz * 2.0 * (*_mdot_soln)(node_out) * (rho_out - _rho_soln->old(node_out)) /
-                             rho_in / _dt;
-
-        auto mass_term1 =
-            std::pow((*_mdot_soln)(node_out), 2.0) * (1.0 / S / rho_out - 1.0 / S / rho_in);
-        auto mass_term2 = -2.0 * (*_mdot_soln)(node_out) * (*_SumWij_soln)(node_out) / S / rho_in;
-
-        auto crossflow_term = 0.0;
-        auto turbulent_term = 0.0;
-
-        unsigned int counter = 0;
-        for (auto i_gap : _subchannel_mesh.getChannelGaps(i_ch))
-        {
-          auto chans = _subchannel_mesh.getGapNeighborChannels(i_gap);
-          unsigned int ii_ch = chans.first;
-          unsigned int jj_ch = chans.second;
-          auto * node_in_i = _subchannel_mesh.getChannelNode(ii_ch, iz - 1);
-          auto * node_in_j = _subchannel_mesh.getChannelNode(jj_ch, iz - 1);
-          auto * node_out_i = _subchannel_mesh.getChannelNode(ii_ch, iz);
-          auto * node_out_j = _subchannel_mesh.getChannelNode(jj_ch, iz);
-          auto rho_i = (*_rho_soln)(node_in_i);
-          auto rho_j = (*_rho_soln)(node_in_j);
-          auto Si = (*_S_flow_soln)(node_in_i);
-          auto Sj = (*_S_flow_soln)(node_in_j);
-          auto u_star = 0.0;
-          // figure out donor axial velocity
-          if (_Wij(i_gap, iz) > 0.0)
-            u_star = (*_mdot_soln)(node_out_i) / Si / rho_i;
-          else
-            u_star = (*_mdot_soln)(node_out_j) / Sj / rho_j;
-
-          crossflow_term +=
-              _subchannel_mesh.getCrossflowSign(i_ch, counter) * _Wij(i_gap, iz) * u_star;
-
-          turbulent_term += _WijPrime(i_gap, iz) * (2 * (*_mdot_soln)(node_out) / rho_in / S -
-                                                    (*_mdot_soln)(node_out_j) / Sj / rho_j -
-                                                    (*_mdot_soln)(node_out_i) / Si / rho_i);
-          counter++;
-        }
-        turbulent_term *= _CT;
-
-        auto Re = (((*_mdot_soln)(node_in) / S) * Dh_i / mu_in);
-        auto fi = computeFrictionFactor(Re, i_ch, S, w_perim, Dh_i);
-        auto ki = k_grid[i_ch][iz - 1];
-        auto friction_term = (fi * dz / Dh_i + ki) * 0.5 *
-                             (std::pow((*_mdot_soln)(node_out), 2.0)) /
-                             (S * (*_rho_soln)(node_out));
-        auto gravity_term = _g_grav * (*_rho_soln)(node_out)*dz * S;
-        auto DP = std::pow(S, -1.0) * (time_term + mass_term1 + mass_term2 + crossflow_term +
-                                       turbulent_term + friction_term + gravity_term); // Pa
-        _DP_soln->set(node_out, DP);
-      }
-    }
-  }
-  else
-  {
-    MatZeroEntries(_amc_time_derivative_mat);
-    MatZeroEntries(_amc_advective_derivative_mat);
-    MatZeroEntries(_amc_cross_derivative_mat);
-    MatZeroEntries(_amc_friction_force_mat);
-    VecZeroEntries(_amc_time_derivative_rhs);
-    VecZeroEntries(_amc_advective_derivative_rhs);
-    VecZeroEntries(_amc_cross_derivative_rhs);
-    VecZeroEntries(_amc_friction_force_rhs);
-    VecZeroEntries(_amc_gravity_rhs);
-    MatZeroEntries(_amc_sys_mdot_mat);
-    VecZeroEntries(_amc_sys_mdot_rhs);
-
-    for (unsigned int iz = first_node; iz < last_node + 1; iz++)
-    {
-      auto z_grid = _subchannel_mesh.getZGrid();
-      auto k_grid = _subchannel_mesh.getKGrid();
-      auto dz = z_grid[iz] - z_grid[iz - 1];
-      auto iz_ind = iz - first_node;
-      for (unsigned int i_ch = 0; i_ch < _n_channels; i_ch++)
-      {
-        // inlet and outlet nodes
-        auto * node_in = _subchannel_mesh.getChannelNode(i_ch, iz - 1);
-        auto * node_out = _subchannel_mesh.getChannelNode(i_ch, iz);
-
-        // interpolation weight coefficient
-        PetscScalar Pe = 0.5;
-        if (_interpolation_scheme.compare("exponential") == 0)
-        {
-          // Compute the Peclet number
-          // S
-          auto S_in = (*_S_flow_soln)(node_in);
-          auto S_out = (*_S_flow_soln)(node_out);
-          auto S_interp = computeInterpolatedValue(S_out, S_in, "central_difference", 0.5);
-          // wetted perimeter
-          auto w_perim_in = (*_w_perim_soln)(node_in);
-          auto w_perim_out = (*_w_perim_soln)(node_out);
-          auto w_perim_interp =
-              this->computeInterpolatedValue(w_perim_out, w_perim_in, "central_difference", 0.5);
-          // mdot
-          auto mdot_loc = this->computeInterpolatedValue(
-              (*_mdot_soln)(node_out), (*_mdot_soln)(node_in), "central_difference", 0.5);
-          // dynamic viscosity
-          auto mu_in = (*_mu_soln)(node_in);
-          auto mu_out = (*_mu_soln)(node_out);
-          auto mu_interp = this->computeInterpolatedValue(mu_out, mu_in, "central_difference", 0.5);
-          // hydraulic diameter in the i direction
-          auto Dh_i = 4.0 * S_interp / w_perim_interp;
-          // Compute friction
-          auto Re = ((mdot_loc / S_interp) * Dh_i / mu_interp);
-          auto fi = computeFrictionFactor(Re, i_ch, S_interp, w_perim_interp, Dh_i);
-          auto ki = computeInterpolatedValue(
-              k_grid[i_ch][iz], k_grid[i_ch][iz - 1], "central_difference", 0.5);
-
-          Pe = 1.0 / ((fi * dz / Dh_i + ki) * 0.5) * mdot_loc / std::abs(mdot_loc);
-        }
-        // Computing interpolation weights
-        auto alpha = computeInterpolationCoefficients(_interpolation_scheme, Pe);
-
-        // inlet, outlet, and interpolated density
-        auto rho_in = (*_rho_soln)(node_in);
-        auto rho_out = (*_rho_soln)(node_out);
-        auto rho_interp =
-            this->computeInterpolatedValue(rho_out, rho_in, _interpolation_scheme, Pe);
-
-        // inlet, outlet, and interpolated viscosity
-        auto mu_in = (*_mu_soln)(node_in);
-        auto mu_out = (*_mu_soln)(node_out);
-        auto mu_interp = this->computeInterpolatedValue(mu_out, mu_in, _interpolation_scheme, Pe);
-
-        // inlet, outlet, and interpolated axial surface area
-        auto S_in = (*_S_flow_soln)(node_in);
-        auto S_out = (*_S_flow_soln)(node_out);
-        auto S_interp = this->computeInterpolatedValue(S_out, S_in, _interpolation_scheme, Pe);
-
-        // inlet, outlet, and interpolated wetted perimeter
-        auto w_perim_in = (*_w_perim_soln)(node_in);
-        auto w_perim_out = (*_w_perim_soln)(node_out);
-        auto w_perim_interp =
-            this->computeInterpolatedValue(w_perim_out, w_perim_in, _interpolation_scheme, Pe);
-
-        // hydraulic diameter in the i direction
-        auto Dh_i = 4.0 * S_interp / w_perim_interp;
-
-        /// Time derivative term
-        if (iz == first_node)
-        {
-          PetscScalar value_vec_tt = -1.0 * _TR * alpha * (*_mdot_soln)(node_in)*dz / _dt;
-          PetscInt row_vec_tt = i_ch + _n_channels * iz_ind;
-          VecSetValues(_amc_time_derivative_rhs, 1, &row_vec_tt, &value_vec_tt, ADD_VALUES);
-        }
-        else
-        {
-          PetscInt row_tt = i_ch + _n_channels * iz_ind;
-          PetscInt col_tt = i_ch + _n_channels * (iz_ind - 1);
-          PetscScalar value_tt = _TR * alpha * dz / _dt;
-          MatSetValues(_amc_time_derivative_mat, 1, &row_tt, 1, &col_tt, &value_tt, INSERT_VALUES);
-        }
-
-        // Adding diagonal elements
-        PetscInt row_tt = i_ch + _n_channels * iz_ind;
-        PetscInt col_tt = i_ch + _n_channels * iz_ind;
-        PetscScalar value_tt = _TR * (1.0 - alpha) * dz / _dt;
-        MatSetValues(_amc_time_derivative_mat, 1, &row_tt, 1, &col_tt, &value_tt, INSERT_VALUES);
-
-        // Adding RHS elements
-        PetscScalar mdot_old_interp = computeInterpolatedValue(
-            _mdot_soln->old(node_out), _mdot_soln->old(node_in), _interpolation_scheme, Pe);
-        PetscScalar value_vec_tt = _TR * mdot_old_interp * dz / _dt;
-        PetscInt row_vec_tt = i_ch + _n_channels * iz_ind;
-        VecSetValues(_amc_time_derivative_rhs, 1, &row_vec_tt, &value_vec_tt, ADD_VALUES);
-
-        /// Advective derivative term
-        if (iz == first_node)
-        {
-          PetscScalar value_vec_at = std::pow((*_mdot_soln)(node_in), 2.0) / (S_in * rho_in);
-          PetscInt row_vec_at = i_ch + _n_channels * iz_ind;
-          VecSetValues(_amc_advective_derivative_rhs, 1, &row_vec_at, &value_vec_at, ADD_VALUES);
-        }
-        else
-        {
-          PetscInt row_at = i_ch + _n_channels * iz_ind;
-          PetscInt col_at = i_ch + _n_channels * (iz_ind - 1);
-          PetscScalar value_at = -1.0 * std::abs((*_mdot_soln)(node_in)) / (S_in * rho_in);
-          MatSetValues(
-              _amc_advective_derivative_mat, 1, &row_at, 1, &col_at, &value_at, INSERT_VALUES);
-        }
-
-        // Adding diagonal elements
-        PetscInt row_at = i_ch + _n_channels * iz_ind;
-        PetscInt col_at = i_ch + _n_channels * iz_ind;
-        PetscScalar value_at = std::abs((*_mdot_soln)(node_out)) / (S_out * rho_out);
-        MatSetValues(
-            _amc_advective_derivative_mat, 1, &row_at, 1, &col_at, &value_at, INSERT_VALUES);
-
-        /// Cross derivative term
-        unsigned int counter = 0;
-        unsigned int cross_index = iz; // iz-1;
-        for (auto i_gap : _subchannel_mesh.getChannelGaps(i_ch))
-        {
-          auto chans = _subchannel_mesh.getGapNeighborChannels(i_gap);
-          unsigned int ii_ch = chans.first;
-          unsigned int jj_ch = chans.second;
-          auto * node_in_i = _subchannel_mesh.getChannelNode(ii_ch, iz - 1);
-          auto * node_in_j = _subchannel_mesh.getChannelNode(jj_ch, iz - 1);
-          auto * node_out_i = _subchannel_mesh.getChannelNode(ii_ch, iz);
-          auto * node_out_j = _subchannel_mesh.getChannelNode(jj_ch, iz);
-          auto rho_i = computeInterpolatedValue(
-              (*_rho_soln)(node_out_i), (*_rho_soln)(node_in_i), _interpolation_scheme, Pe);
-          auto rho_j = computeInterpolatedValue(
-              (*_rho_soln)(node_out_j), (*_rho_soln)(node_in_j), _interpolation_scheme, Pe);
-          auto S_i = computeInterpolatedValue(
-              (*_S_flow_soln)(node_out_i), (*_S_flow_soln)(node_in_i), _interpolation_scheme, Pe);
-          auto S_j = computeInterpolatedValue(
-              (*_S_flow_soln)(node_out_j), (*_S_flow_soln)(node_in_j), _interpolation_scheme, Pe);
-          auto u_star = 0.0;
-          // figure out donor axial velocity
-          if (_Wij(i_gap, cross_index) > 0.0)
-          {
-            if (iz == first_node)
-            {
-              u_star = (*_mdot_soln)(node_in_i) / S_i / rho_i;
-              PetscScalar value_vec_ct = -1.0 * alpha *
-                                         _subchannel_mesh.getCrossflowSign(i_ch, counter) *
-                                         _Wij(i_gap, cross_index) * u_star;
-              PetscInt row_vec_ct = i_ch + _n_channels * iz_ind;
-              VecSetValues(_amc_cross_derivative_rhs, 1, &row_vec_ct, &value_vec_ct, ADD_VALUES);
-            }
-            else
-            {
-              PetscScalar value_ct = alpha * _subchannel_mesh.getCrossflowSign(i_ch, counter) *
-                                     _Wij(i_gap, cross_index) / S_i / rho_i;
-              PetscInt row_ct = i_ch + _n_channels * iz_ind;
-              PetscInt col_ct = ii_ch + _n_channels * (iz_ind - 1);
-              MatSetValues(
-                  _amc_cross_derivative_mat, 1, &row_ct, 1, &col_ct, &value_ct, ADD_VALUES);
-            }
-            PetscScalar value_ct = (1.0 - alpha) *
-                                   _subchannel_mesh.getCrossflowSign(i_ch, counter) *
-                                   _Wij(i_gap, cross_index) / S_i / rho_i;
-            PetscInt row_ct = i_ch + _n_channels * iz_ind;
-            PetscInt col_ct = ii_ch + _n_channels * iz_ind;
-            MatSetValues(_amc_cross_derivative_mat, 1, &row_ct, 1, &col_ct, &value_ct, ADD_VALUES);
-          }
-          else if (_Wij(i_gap, cross_index) < 0.0) // _Wij=0 operations not necessary
-          {
-            if (iz == first_node)
-            {
-              u_star = (*_mdot_soln)(node_in_j) / S_j / rho_j;
-              PetscScalar value_vec_ct = -1.0 * alpha *
-                                         _subchannel_mesh.getCrossflowSign(i_ch, counter) *
-                                         _Wij(i_gap, cross_index) * u_star;
-              PetscInt row_vec_ct = i_ch + _n_channels * iz_ind;
-              VecSetValues(_amc_cross_derivative_rhs, 1, &row_vec_ct, &value_vec_ct, ADD_VALUES);
-            }
-            else
-            {
-              PetscScalar value_ct = alpha * _subchannel_mesh.getCrossflowSign(i_ch, counter) *
-                                     _Wij(i_gap, cross_index) / S_j / rho_j;
-              PetscInt row_ct = i_ch + _n_channels * iz_ind;
-              PetscInt col_ct = jj_ch + _n_channels * (iz_ind - 1);
-              MatSetValues(
-                  _amc_cross_derivative_mat, 1, &row_ct, 1, &col_ct, &value_ct, ADD_VALUES);
-            }
-            PetscScalar value_ct = (1.0 - alpha) *
-                                   _subchannel_mesh.getCrossflowSign(i_ch, counter) *
-                                   _Wij(i_gap, cross_index) / S_j / rho_j;
-            PetscInt row_ct = i_ch + _n_channels * iz_ind;
-            PetscInt col_ct = jj_ch + _n_channels * iz_ind;
-            MatSetValues(_amc_cross_derivative_mat, 1, &row_ct, 1, &col_ct, &value_ct, ADD_VALUES);
-          }
-
-          if (iz == first_node)
-          {
-            PetscScalar value_vec_ct = -2.0 * alpha * (*_mdot_soln)(node_in)*_CT *
-                                       _WijPrime(i_gap, cross_index) / (rho_interp * S_interp);
-            value_vec_ct += alpha * (*_mdot_soln)(node_in_j)*_CT * _WijPrime(i_gap, cross_index) /
-                            (rho_j * S_j);
-            value_vec_ct += alpha * (*_mdot_soln)(node_in_i)*_CT * _WijPrime(i_gap, cross_index) /
-                            (rho_i * S_i);
-            PetscInt row_vec_ct = i_ch + _n_channels * iz_ind;
-            VecSetValues(_amc_cross_derivative_rhs, 1, &row_vec_ct, &value_vec_ct, ADD_VALUES);
-          }
-          else
-          {
-            PetscScalar value_center_ct =
-                2.0 * alpha * _CT * _WijPrime(i_gap, cross_index) / (rho_interp * S_interp);
-            PetscInt row_ct = i_ch + _n_channels * iz_ind;
-            PetscInt col_ct = i_ch + _n_channels * (iz_ind - 1);
-            MatSetValues(
-                _amc_cross_derivative_mat, 1, &row_ct, 1, &col_ct, &value_center_ct, ADD_VALUES);
-
-            PetscScalar value_left_ct =
-                -1.0 * alpha * _CT * _WijPrime(i_gap, cross_index) / (rho_j * S_j);
-            row_ct = i_ch + _n_channels * iz_ind;
-            col_ct = jj_ch + _n_channels * (iz_ind - 1);
-            MatSetValues(
-                _amc_cross_derivative_mat, 1, &row_ct, 1, &col_ct, &value_left_ct, ADD_VALUES);
-
-            PetscScalar value_right_ct =
-                -1.0 * alpha * _CT * _WijPrime(i_gap, cross_index) / (rho_i * S_i);
-            row_ct = i_ch + _n_channels * iz_ind;
-            col_ct = ii_ch + _n_channels * (iz_ind - 1);
-            MatSetValues(
-                _amc_cross_derivative_mat, 1, &row_ct, 1, &col_ct, &value_right_ct, ADD_VALUES);
-          }
-
-          PetscScalar value_center_ct =
-              2.0 * (1.0 - alpha) * _CT * _WijPrime(i_gap, cross_index) / (rho_interp * S_interp);
-          PetscInt row_ct = i_ch + _n_channels * iz_ind;
-          PetscInt col_ct = i_ch + _n_channels * iz_ind;
-          MatSetValues(
-              _amc_cross_derivative_mat, 1, &row_ct, 1, &col_ct, &value_center_ct, ADD_VALUES);
-
-          PetscScalar value_left_ct =
-              -1.0 * (1.0 - alpha) * _CT * _WijPrime(i_gap, cross_index) / (rho_j * S_j);
-          row_ct = i_ch + _n_channels * iz_ind;
-          col_ct = jj_ch + _n_channels * iz_ind;
-          MatSetValues(
-              _amc_cross_derivative_mat, 1, &row_ct, 1, &col_ct, &value_left_ct, ADD_VALUES);
-
-          PetscScalar value_right_ct =
-              -1.0 * (1.0 - alpha) * _CT * _WijPrime(i_gap, cross_index) / (rho_i * S_i);
-          row_ct = i_ch + _n_channels * iz_ind;
-          col_ct = ii_ch + _n_channels * iz_ind;
-          MatSetValues(
-              _amc_cross_derivative_mat, 1, &row_ct, 1, &col_ct, &value_right_ct, ADD_VALUES);
-
-          counter++;
-        }
-
-        /// Friction term
-        PetscScalar mdot_interp = computeInterpolatedValue(
-            (*_mdot_soln)(node_out), (*_mdot_soln)(node_in), _interpolation_scheme, Pe);
-        auto Re = ((mdot_interp / S_interp) * Dh_i / mu_interp);
-        auto fi = computeFrictionFactor(Re, i_ch, S_interp, w_perim_interp, Dh_i);
-        auto ki = computeInterpolatedValue(
-            k_grid[i_ch][iz], k_grid[i_ch][iz - 1], _interpolation_scheme, Pe);
-        // _console << " ki : " << ki << "\n";
-        // _console << " fi : " << fi << "\n";
-        auto coef = (fi * dz / Dh_i + ki) * 0.5 * std::abs((*_mdot_soln)(node_out)) /
-                    (S_interp * rho_interp);
-        if (iz == first_node)
-        {
-          PetscScalar value_vec = -1.0 * alpha * coef * (*_mdot_soln)(node_in);
-          PetscInt row_vec = i_ch + _n_channels * iz_ind;
-          VecSetValues(_amc_friction_force_rhs, 1, &row_vec, &value_vec, ADD_VALUES);
-        }
-        else
-        {
-          PetscInt row = i_ch + _n_channels * iz_ind;
-          PetscInt col = i_ch + _n_channels * (iz_ind - 1);
-          PetscScalar value = alpha * coef;
-          MatSetValues(_amc_friction_force_mat, 1, &row, 1, &col, &value, INSERT_VALUES);
-        }
-
-        // Adding diagonal elements
-        PetscInt row = i_ch + _n_channels * iz_ind;
-        PetscInt col = i_ch + _n_channels * iz_ind;
-        PetscScalar value = (1.0 - alpha) * coef;
-        MatSetValues(_amc_friction_force_mat, 1, &row, 1, &col, &value, INSERT_VALUES);
-
-        /// Gravity force
-        PetscScalar value_vec = -1.0 * _g_grav * rho_interp * dz * S_interp;
-        PetscInt row_vec = i_ch + _n_channels * iz_ind;
-        VecSetValues(_amc_gravity_rhs, 1, &row_vec, &value_vec, ADD_VALUES);
-      }
-    }
-    /// Assembling system
-    MatZeroEntries(_amc_sys_mdot_mat);
-    VecZeroEntries(_amc_sys_mdot_rhs);
-    MatAssemblyBegin(_amc_time_derivative_mat, MAT_FINAL_ASSEMBLY);
-    MatAssemblyEnd(_amc_time_derivative_mat, MAT_FINAL_ASSEMBLY);
-    MatAssemblyBegin(_amc_advective_derivative_mat, MAT_FINAL_ASSEMBLY);
-    MatAssemblyEnd(_amc_advective_derivative_mat, MAT_FINAL_ASSEMBLY);
-    MatAssemblyBegin(_amc_cross_derivative_mat, MAT_FINAL_ASSEMBLY);
-    MatAssemblyEnd(_amc_cross_derivative_mat, MAT_FINAL_ASSEMBLY);
-    MatAssemblyBegin(_amc_friction_force_mat, MAT_FINAL_ASSEMBLY);
-    MatAssemblyEnd(_amc_friction_force_mat, MAT_FINAL_ASSEMBLY);
-    MatAssemblyBegin(_amc_sys_mdot_mat, MAT_FINAL_ASSEMBLY);
-    MatAssemblyEnd(_amc_sys_mdot_mat, MAT_FINAL_ASSEMBLY);
-    // Matrix
-#if !PETSC_VERSION_LESS_THAN(3, 15, 0)
-    MatAXPY(_amc_sys_mdot_mat, 1.0, _amc_time_derivative_mat, UNKNOWN_NONZERO_PATTERN);
-    MatAssemblyBegin(_amc_sys_mdot_mat, MAT_FINAL_ASSEMBLY);
-    MatAssemblyEnd(_amc_sys_mdot_mat, MAT_FINAL_ASSEMBLY);
-    MatAXPY(_amc_sys_mdot_mat, 1.0, _amc_advective_derivative_mat, UNKNOWN_NONZERO_PATTERN);
-    MatAssemblyBegin(_amc_sys_mdot_mat, MAT_FINAL_ASSEMBLY);
-    MatAssemblyEnd(_amc_sys_mdot_mat, MAT_FINAL_ASSEMBLY);
-    MatAXPY(_amc_sys_mdot_mat, 1.0, _amc_cross_derivative_mat, UNKNOWN_NONZERO_PATTERN);
-    MatAssemblyBegin(_amc_sys_mdot_mat, MAT_FINAL_ASSEMBLY);
-    MatAssemblyEnd(_amc_sys_mdot_mat, MAT_FINAL_ASSEMBLY);
-    MatAXPY(_amc_sys_mdot_mat, 1.0, _amc_friction_force_mat, UNKNOWN_NONZERO_PATTERN);
-#else
-    MatAXPY(_amc_sys_mdot_mat, 1.0, _amc_time_derivative_mat, DIFFERENT_NONZERO_PATTERN);
-    MatAssemblyBegin(_amc_sys_mdot_mat, MAT_FINAL_ASSEMBLY);
-    MatAssemblyEnd(_amc_sys_mdot_mat, MAT_FINAL_ASSEMBLY);
-    MatAXPY(_amc_sys_mdot_mat, 1.0, _amc_advective_derivative_mat, DIFFERENT_NONZERO_PATTERN);
-    MatAssemblyBegin(_amc_sys_mdot_mat, MAT_FINAL_ASSEMBLY);
-    MatAssemblyEnd(_amc_sys_mdot_mat, MAT_FINAL_ASSEMBLY);
-    MatAXPY(_amc_sys_mdot_mat, 1.0, _amc_cross_derivative_mat, DIFFERENT_NONZERO_PATTERN);
-    MatAssemblyBegin(_amc_sys_mdot_mat, MAT_FINAL_ASSEMBLY);
-    MatAssemblyEnd(_amc_sys_mdot_mat, MAT_FINAL_ASSEMBLY);
-    MatAXPY(_amc_sys_mdot_mat, 1.0, _amc_friction_force_mat, DIFFERENT_NONZERO_PATTERN);
-#endif
-    MatAssemblyBegin(_amc_sys_mdot_mat, MAT_FINAL_ASSEMBLY);
-    MatAssemblyEnd(_amc_sys_mdot_mat, MAT_FINAL_ASSEMBLY);
-    if (_verbose_subchannel)
-      _console << "Block: " << iblock << " - Linear momentum conservation matrix assembled"
-               << std::endl;
-    // RHS
-    VecAXPY(_amc_sys_mdot_rhs, 1.0, _amc_time_derivative_rhs);
-    VecAXPY(_amc_sys_mdot_rhs, 1.0, _amc_advective_derivative_rhs);
-    VecAXPY(_amc_sys_mdot_rhs, 1.0, _amc_cross_derivative_rhs);
-    VecAXPY(_amc_sys_mdot_rhs, 1.0, _amc_friction_force_rhs);
-    VecAXPY(_amc_sys_mdot_rhs, 1.0, _amc_gravity_rhs);
-
-    if (_segregated_bool)
-    {
-      // Assembly the matrix system
-      populateVectorFromHandle<SolutionHandle *>(
-          _prod, _mdot_soln, first_node, last_node, _n_channels);
-      Vec ls;
-      VecDuplicate(_amc_sys_mdot_rhs, &ls);
-      MatMult(_amc_sys_mdot_mat, _prod, ls);
-      VecAXPY(ls, -1.0, _amc_sys_mdot_rhs);
-      PetscScalar * xx;
-      VecGetArray(ls, &xx);
-      for (unsigned int iz = first_node; iz < last_node + 1; iz++)
-      {
-        auto iz_ind = iz - first_node;
-        for (unsigned int i_ch = 0; i_ch < _n_channels; i_ch++)
-        {
-          // Setting nodes
-          auto * node_in = _subchannel_mesh.getChannelNode(i_ch, iz - 1);
-          auto * node_out = _subchannel_mesh.getChannelNode(i_ch, iz);
-
-          // inlet, outlet, and interpolated axial surface area
-          auto S_in = (*_S_flow_soln)(node_in);
-          auto S_out = (*_S_flow_soln)(node_out);
-          auto S_interp = this->computeInterpolatedValue(S_out, S_in, _interpolation_scheme, 0.5);
-
-          // Setting solutions
-          if (S_interp != 0)
-          {
-            auto DP = std::pow(S_interp, -1.0) * xx[iz_ind * _n_channels + i_ch];
-            _DP_soln->set(node_out, DP);
-          }
-          else
-          {
-            auto DP = 0.0;
-            _DP_soln->set(node_out, DP);
-          }
-        }
-      }
-      VecDestroy(&ls);
-    }
-  }
-}
-
 double
-LiquidMetalSubChannel1PhaseProblem::computeMassFlowForDPDZ(double dpdz, int i_ch)
+LiquidMetalSubChannel1PhaseProblem::computeMassFlowForDPDZ(Real dpdz, int i_ch)
 {
   auto * node = _subchannel_mesh.getChannelNode(i_ch, 0);
   // initialize massflow
@@ -917,7 +390,12 @@ LiquidMetalSubChannel1PhaseProblem::computeMassFlowForDPDZ(double dpdz, int i_ch
 
     auto massflow_old = massflow;
     auto Rei = ((massflow / Si) * Dhi / mu);
-    auto fi = computeFrictionFactor(Rei, i_ch, Si, w_perim, Dhi);
+    _friction_args.Re = Rei;
+    _friction_args.i_ch = i_ch;
+    _friction_args.S = Si;
+    _friction_args.w_perim = w_perim;
+    _friction_args.Dh_i = Dhi;
+    auto fi = computeFrictionFactor(_friction_args);
     massflow = std::sqrt(2.0 * Dhi * dpdz * rho * std::pow(Si, 2.0) / fi);
     error = std::abs((massflow - massflow_old) / massflow_old);
   }
@@ -950,7 +428,12 @@ LiquidMetalSubChannel1PhaseProblem::enforceUniformDPDZAtInlet()
     auto Dhi = 4.0 * Si / w_perim;
     auto mu = _fp->mu_from_rho_T(rho_in, T_in);
     auto Rei = (((*_mdot_soln)(node_in) / Si) * Dhi / mu);
-    auto fi = computeFrictionFactor(Rei, i_ch, Si, w_perim, Dhi);
+    _friction_args.Re = Rei;
+    _friction_args.i_ch = i_ch;
+    _friction_args.S = Si;
+    _friction_args.w_perim = w_perim;
+    _friction_args.Dh_i = Dhi;
+    auto fi = computeFrictionFactor(_friction_args);
     dPdZ_i(i_ch) =
         (fi / Dhi) * 0.5 * (std::pow((*_mdot_soln)(node_in), 2.0)) / (std::pow(Si, 2.0) * rho_in);
   }
@@ -1104,11 +587,11 @@ LiquidMetalSubChannel1PhaseProblem::computeh(int iblock)
         auto volume = dz * (*_S_flow_soln)(node_in);
         auto mdot_out = (*_mdot_soln)(node_out);
         auto h_out = 0.0;
-        double sumWijh = 0.0;
-        double sumWijPrimeDhij = 0.0;
+        Real sumWijh = 0.0;
+        Real sumWijPrimeDhij = 0.0;
         Real e_cond = 0.0;
 
-        double added_enthalpy;
+        Real added_enthalpy;
         if (z_grid[iz] > unheated_length_entry &&
             z_grid[iz] <= unheated_length_entry + heated_length)
         {

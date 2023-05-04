@@ -55,7 +55,7 @@ QuadInterWrapperPowerIC::QuadInterWrapperPowerIC(const InputParameters & params)
   _power_dis.setZero();
   _assembly_power_correction.resize((ny - 1) * (nx - 1), 1);
   _assembly_power_correction.setOnes();
-  double vin;
+  Real vin;
   ifstream inFile;
 
   _console << "Power file: " << _filename << std::endl;

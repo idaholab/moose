@@ -194,8 +194,8 @@ QuadSubChannelMeshGenerator::QuadSubChannelMeshGenerator(const InputParameters &
   }
 
   // Defining the signs for positive and negative flows
-  double positive_flow = 1.0;
-  double negative_flow = -1.0;
+  Real positive_flow = 1.0;
+  Real negative_flow = -1.0;
 
   // Defining the subchannel types
   _subch_type.resize(_n_channels);
