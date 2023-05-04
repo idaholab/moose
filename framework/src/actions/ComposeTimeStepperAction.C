@@ -29,7 +29,7 @@ ComposeTimeStepperAction::validParams()
   params.addParam<std::vector<std::string>>(
       "lower_bound",
       "The input TimeSteppers to compose the lower bound time "
-      "step size.  This can either be N timesteppers or 1 "
+      "step size.  This can either be N timesteppers or one "
       "timestepper.");
 
   params.addClassDescription(
