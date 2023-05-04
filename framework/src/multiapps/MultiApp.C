@@ -368,7 +368,7 @@ MultiApp::createApps()
                                 getParam<bool>("library_load_dependencies"));
 
   bool rank_did_quiet_init = false;
-  int local_app;
+  unsigned int local_app;
   if (_force_safe_app_init)
   {
     if (hasLocalApp(0))
