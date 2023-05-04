@@ -1735,23 +1735,6 @@ public:
                                   const std::set<TagID> & matrix_tags);
 
   /**
-   * Process the \p derivatives() data of an \p ADReal. When using global indexing, this method
-   * simply caches the derivative values for the corresponding column indices for the provided
-   * \p matrix_tags. Note that this single dof overload will not call \p
-   * DofMap::constraint_element_matrix.
-   *
-   * If not using global indexing, then the user must provide a
-   * functor which takes three arguments: the <tt>ADReal residual</tt> that contains the derivatives
-   * to be processed, the \p row_index corresponding to the row index of the matrices that values
-   * should be added to, and the \p matrix_tags specifying the matrices that will  be added into
-   */
-  template <typename LocalFunctor>
-  void processJacobian(const ADReal & residual,
-                       dof_id_type dof_index,
-                       const std::set<TagID> & matrix_tags,
-                       LocalFunctor & local_functor);
-
-  /**
    * Process the supplied residual values. This is a mirror of of the non-templated version of \p
    * processResiduals except that it's meant for \emph only processing residuals (and not their
    * derivatives/Jacobian). We supply this API such that residual objects that leverage the AD
@@ -1779,22 +1762,14 @@ public:
                                    Real scaling_factor);
 
   /**
-   * Process the \p derivatives() data of a vector of \p ADReals. When using global indexing, this
+   * Process the \p derivatives() data of a vector of \p ADReals. This
    * method simply caches the derivative values for the corresponding column indices for the
    * provided \p matrix_tags. Note that this overload will call \p DofMap::constrain_element_matrix.
-   *
-   * If not using global indexing, then the user must provide a functor which takes three arguments:
-   * the <tt>std::vector<ADReal> residuals</tt> that contains the derivatives to be processed, the
-   * <tt>std::vector<dof_id_type>row_indices</tt> corresponding to the row indices of the matrices
-   * that values should be added to, and the \p matrix_tags specifying the matrices that will be
-   * added into
    */
-  template <typename LocalFunctor>
   void processJacobian(const std::vector<ADReal> & residuals,
                        const std::vector<dof_id_type> & row_indices,
                        const std::set<TagID> & matrix_tags,
-                       Real scaling_factor,
-                       LocalFunctor & local_functor);
+                       Real scaling_factor);
 
   /**
    * Same as \p processResiduals with the exception that constrain_element_vector and
@@ -2877,23 +2852,11 @@ Assembly::processJacobianNoScaling(const ADReal & residual,
   processJacobian(residual, dof_index, matrix_tags, 1);
 }
 
-template <typename LocalFunctor>
-void
-Assembly::processJacobian(const ADReal & residual,
-                          const dof_id_type dof_index,
-                          const std::set<TagID> & matrix_tags,
-                          LocalFunctor &)
-{
-  processJacobian(residual, dof_index, matrix_tags);
-}
-
-template <typename LocalFunctor>
-void
+inline void
 Assembly::processJacobian(const std::vector<ADReal> & residuals,
                           const std::vector<dof_id_type> & input_row_indices,
                           const std::set<TagID> & matrix_tags,
-                          const Real scaling_factor,
-                          LocalFunctor &)
+                          const Real scaling_factor)
 {
   processResidualsAndJacobian(residuals, input_row_indices, {}, matrix_tags, scaling_factor);
 }

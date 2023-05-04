@@ -179,9 +179,7 @@ template <typename T>
 void
 ADKernelTempl<T>::computeJacobian()
 {
-  const std::vector<std::pair<MooseVariableFieldBase *, MooseVariableFieldBase *>>
-      var_var_coupling = {std::make_pair(&_var, &_var)};
-  computeADJacobian(var_var_coupling);
+  computeADJacobian();
 
   if (_has_diag_save_in && !_sys.computingScalingJacobian())
     mooseError("_local_ke not computed for global AD indexing. Save-in is deprecated anyway. Use "
@@ -190,32 +188,11 @@ ADKernelTempl<T>::computeJacobian()
 
 template <typename T>
 void
-ADKernelTempl<T>::computeADJacobian(
-    const std::vector<std::pair<MooseVariableFieldBase *, MooseVariableFieldBase *>> &
-        coupling_entries)
+ADKernelTempl<T>::computeADJacobian()
 {
   computeResidualsForJacobian();
 
-  auto local_functor =
-      [&](const std::vector<ADReal> &, const std::vector<dof_id_type> &, const std::set<TagID> &)
-  {
-    for (const auto & it : coupling_entries)
-    {
-      const MooseVariableFEBase & ivariable = *(it.first);
-      const MooseVariableFEBase & jvariable = *(it.second);
-
-      unsigned int ivar = ivariable.number();
-
-      if (ivar != _var.number() || !jvariable.hasBlocks(_current_elem->subdomain_id()))
-        continue;
-
-      // Make sure to get the correct undisplaced/displaced variable
-      addJacobian(getVariable(jvariable.number()));
-    }
-  };
-
-  _assembly.processJacobian(
-      _residuals, dofIndices(), _matrix_tags, _var.scalingFactor(), local_functor);
+  _assembly.processJacobian(_residuals, dofIndices(), _matrix_tags, _var.scalingFactor());
 }
 
 template <typename T>
@@ -231,7 +208,7 @@ ADKernelTempl<T>::computeOffDiagJacobian(const unsigned int)
 {
   if (_my_elem != _current_elem)
   {
-    computeADJacobian(_assembly.couplingEntries());
+    computeADJacobian();
     _my_elem = _current_elem;
   }
 }
