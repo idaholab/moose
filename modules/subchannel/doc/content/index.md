@@ -10,6 +10,7 @@ and modules for many of its capabilities.
 
 !row!
 !col! small=12 medium=4 large=4 icon=get_app
+
 ## [Getting Started](getting_started/installation.md) class=center style=font-weight:200;font-size:150%;
 
 !style halign=center
@@ -28,7 +29,8 @@ General user notes on SubChannel can also be found [here](getting_started/user_n
 !col-end!
 
 !col! small=12 medium=4 large=4 icon=assessment
-## [Verification & Validation ](v&v/v&v-list.md) class=center style=font-weight:200;font-size:150%;
+
+## [Verification & Validation](v&v/v&v-list.md) class=center style=font-weight:200;font-size:150%
 
 !style halign=center
 Several problems originally developed for thermal-hydraulic subchannel codes have been used for the

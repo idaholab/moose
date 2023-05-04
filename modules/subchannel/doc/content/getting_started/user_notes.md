@@ -22,3 +22,9 @@ index, white is the fuel-pin index and red is the gap index.
     style=width:60%;margin-bottom:2%;margin:auto;
     id=hindex
     caption=Hexagonal Lattice subchannel index notation, in a $3$ ring sub-assemly.
+
+## Related articles/papers
+
+Development of a Single-Phase, Transient, Subchannel Code, within the MOOSE Multi-Physics Computational Framework [!cite](kyriakopoulos2022development)
+
+Demonstration of Pronghorn’s Subchannel Code Modeling of Liquid-Metal Reactors and Validation in Normal Operation Conditions and Blockage Scenarios [!cite](kyriakopoulos2023demonstration)

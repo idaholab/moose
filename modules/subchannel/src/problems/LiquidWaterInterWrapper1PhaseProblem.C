@@ -30,9 +30,9 @@ LiquidWaterInterWrapper1PhaseProblem::LiquidWaterInterWrapper1PhaseProblem(
 }
 
 double
-LiquidWaterInterWrapper1PhaseProblem::computeFrictionFactor(double Re)
+LiquidWaterInterWrapper1PhaseProblem::computeFrictionFactor(Real Re)
 {
-  double a, b;
+  Real a, b;
   if (Re < 1)
   {
     return 64.0;

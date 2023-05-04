@@ -50,7 +50,7 @@ protected:
   };
 
   /// Returns friction factor
-  virtual double computeFrictionFactor(double Re) = 0;
+  virtual Real computeFrictionFactor(Real Re) = 0;
   /// Computes diversion crossflow per gap for block iblock
   virtual void computeWijFromSolve(int iblock);
   /// Computes net diversion crossflow per channel for block iblock

@@ -159,6 +159,14 @@ SubChannel1PhaseProblem::SubChannel1PhaseProblem(const InputParameters & params)
   _Wij_residual_matrix.zero();
   _converged = true;
 
+  _outer_channels = 0.0;
+  for (unsigned int i_ch = 0; i_ch < _n_channels; i_ch++)
+  {
+    auto subch_type = _subchannel_mesh.getSubchannelType(i_ch);
+    if (subch_type == EChannelType::EDGE || subch_type == EChannelType::CORNER)
+      _outer_channels += 1.0;
+  }
+
   // Mass conservation components
   createPetscMatrix(_mc_sumWij_mat, _block_size * _n_channels, _block_size * _n_gaps);
   createPetscVector(_Wij_vec, _block_size * _n_gaps);
@@ -501,7 +509,7 @@ SubChannel1PhaseProblem::computeSumWij(int iblock)
       for (unsigned int i_ch = 0; i_ch < _n_channels; i_ch++)
       {
         auto * node_out = _subchannel_mesh.getChannelNode(i_ch, iz);
-        double sumWij = 0.0;
+        Real sumWij = 0.0;
         // Calculate sum of crossflow into channel i from channels j around i
         unsigned int counter = 0;
         for (auto i_gap : _subchannel_mesh.getChannelGaps(i_ch))
@@ -833,11 +841,12 @@ SubChannel1PhaseProblem::computeDP(int iblock)
         }
         turbulent_term *= _CT;
         auto Re = (((*_mdot_soln)(node_in) / S) * Dh_i / mu_in);
-        auto fi = 0.0;
-        if (_default_friction_model)
-          fi = computeFrictionFactor(Re);
-        else
-          fi = computeFrictionFactor(Re, i_ch);
+        _friction_args.Re = Re;
+        _friction_args.i_ch = i_ch;
+        _friction_args.S = S;
+        _friction_args.w_perim = w_perim;
+        _friction_args.Dh_i = Dh_i;
+        auto fi = computeFrictionFactor(_friction_args);
         auto ki = k_grid[i_ch][iz - 1];
         auto friction_term = (fi * dz / Dh_i + ki) * 0.5 *
                              (std::pow((*_mdot_soln)(node_out), 2.0)) /
@@ -893,11 +902,12 @@ SubChannel1PhaseProblem::computeDP(int iblock)
           auto Dh_i = 4.0 * S_interp / w_perim_interp;
           // Compute friction
           auto Re = ((mdot_loc / S_interp) * Dh_i / mu_interp);
-          auto fi = 0.0;
-          if (_default_friction_model)
-            fi = computeFrictionFactor(Re);
-          else
-            fi = computeFrictionFactor(Re, i_ch);
+          _friction_args.Re = Re;
+          _friction_args.i_ch = i_ch;
+          _friction_args.S = S_interp;
+          _friction_args.w_perim = w_perim_interp;
+          _friction_args.Dh_i = Dh_i;
+          auto fi = computeFrictionFactor(_friction_args);
           auto ki = computeInterpolatedValue(
               k_grid[i_ch][iz], k_grid[i_ch][iz - 1], "central_difference", 0.5);
           Pe = 1.0 / ((fi * dz / Dh_i + ki) * 0.5) * mdot_loc / std::abs(mdot_loc);
@@ -1119,11 +1129,12 @@ SubChannel1PhaseProblem::computeDP(int iblock)
         PetscScalar mdot_interp = computeInterpolatedValue(
             (*_mdot_soln)(node_out), (*_mdot_soln)(node_in), _interpolation_scheme, Pe);
         auto Re = ((mdot_interp / S_interp) * Dh_i / mu_interp);
-        auto fi = 0.0;
-        if (_default_friction_model)
-          fi = computeFrictionFactor(Re);
-        else
-          fi = computeFrictionFactor(Re, i_ch);
+        _friction_args.Re = Re;
+        _friction_args.i_ch = i_ch;
+        _friction_args.S = S_interp;
+        _friction_args.w_perim = w_perim_interp;
+        _friction_args.Dh_i = Dh_i;
+        auto fi = computeFrictionFactor(_friction_args);
         auto ki = computeInterpolatedValue(
             k_grid[i_ch][iz], k_grid[i_ch][iz - 1], _interpolation_scheme, Pe);
         auto coef = (fi * dz / Dh_i + ki) * 0.5 * std::abs((*_mdot_soln)(node_out)) /
@@ -1496,6 +1507,34 @@ SubChannel1PhaseProblem::computeAddedHeatPin(unsigned int i_ch, unsigned int iz)
   }
 }
 
+Real
+SubChannel1PhaseProblem::computeAddedHeatDuct(unsigned int i_ch, unsigned int iz)
+{
+  if (_duct_mesh_exist)
+  {
+    auto subch_type = _subchannel_mesh.getSubchannelType(i_ch);
+    if (subch_type == EChannelType::EDGE || subch_type == EChannelType::CORNER)
+    {
+      auto dz = _z_grid[iz] - _z_grid[iz - 1];
+      auto * node_in_chan = _subchannel_mesh.getChannelNode(i_ch, iz - 1);
+      auto * node_out_chan = _subchannel_mesh.getChannelNode(i_ch, iz);
+      auto * node_in_duct = _subchannel_mesh.getDuctNodeFromChannel(node_in_chan);
+      auto * node_out_duct = _subchannel_mesh.getDuctNodeFromChannel(node_out_chan);
+      auto heat_rate_in = (*_q_prime_duct_soln)(node_in_duct);
+      auto heat_rate_out = (*_q_prime_duct_soln)(node_out_duct);
+      return 0.5 * (heat_rate_in + heat_rate_out) * dz / _outer_channels;
+    }
+    else
+    {
+      return 0.0;
+    }
+  }
+  else
+  {
+    return 0;
+  }
+}
+
 void
 SubChannel1PhaseProblem::computeh(int iblock)
 {
@@ -1526,9 +1565,9 @@ SubChannel1PhaseProblem::computeh(int iblock)
         auto volume = dz * (*_S_flow_soln)(node_in);
         auto mdot_out = (*_mdot_soln)(node_out);
         auto h_out = 0.0;
-        double sumWijh = 0.0;
-        double sumWijPrimeDhij = 0.0;
-        double added_enthalpy;
+        Real sumWijh = 0.0;
+        Real sumWijPrimeDhij = 0.0;
+        Real added_enthalpy;
         if (_z_grid[iz] > unheated_length_entry &&
             _z_grid[iz] <= unheated_length_entry + heated_length)
           added_enthalpy = computeAddedHeatPin(i_ch, iz);
