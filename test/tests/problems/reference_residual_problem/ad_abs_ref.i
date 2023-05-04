@@ -30,18 +30,18 @@
 
 [Kernels]
   [u_dt]
-    type = TimeDerivative
+    type = ADTimeDerivative
     variable = u
   []
   [u_coupled_rx]
-    type = CoupledForce
+    type = ADCoupledForce
     variable = u
     v = v
     coef = 1
   []
 
   [v_dt]
-    type = TimeDerivative
+    type = ADTimeDerivative
     variable = v
   []
   [v_neg_force]
