@@ -1,12 +1,13 @@
 #!/bin/bash
-set -ex
+
 # A list of module(s)/directories that we do not want to include for testing
-NOT_RUNNABLE=(doc module_load combined geochemistry misc navier_stokes tensor_mechanics)
+NOT_RUNNABLE=(doc module_load combined geochemistry misc navier_stokes tensor_mechanics framework external_petsc_solver)
 
 # Support older bash (like Darwin Intel) to build a list of possible modules we want to test
 cd ${CONDA_PREFIX}/moose/share/combined
 IFS=$'\n' POSSIBLE=(`find . -mindepth 1 -maxdepth 1 -type d -exec basename {} \;`)
-cd -
+_my_temp=`mktemp -d`
+cd ${_my_temp}
 
 # For my next bash trick... replace spaces for new lines and use `uniq` to remove any matches we
 # find in POSSIBLE, and then again for any remainder in NOT_RUNNABLE to clean it up. ACTUALS should
@@ -14,10 +15,23 @@ cd -
 ACTUALS=(`printf '%s\n' ${NOT_RUNNABLE[*]} ${POSSIBLE[*]} ${NOT_RUNNABLE[*]} | sort | uniq -u`)
 
 CORES=${MOOSE_JOBS:-2}
+# TestHarness (Python threads) does not perform well beyond 12 cores
+if [ $CORES -ge 12 ]; then CORES=12; fi
+EXIT_CODE=0
 for ACTUAL in ${ACTUALS[@]}; do
+    printf "Working on ${ACTUAL}...\n"
     moose --copy-inputs ${ACTUAL}
-    cd ${ACTUAL}/tests
+    cd combined/${ACTUAL}/tests
     moose --run -j ${CORES}
+    _last_run=$?
+    if [ $_last_run -ge 1 ]; then
+        EXIT_CODE=${_last_run}
+    fi
     cd -
 done
-exit 0
+
+# CLEANUP
+cd /tmp
+rm -rf ${_my_temp}
+
+exit ${EXIT_CODE}

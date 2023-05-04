@@ -1,7 +1,7 @@
 #!/bin/bash
 
 set -eu
-if [ "$SKIP_DOCS" == "True" ]; then
+if [ "$(echo $SKIP_DOCS | tr '[:lower:]' '[:upper:]')" == "TRUE" ]; then
     export MOOSE_SKIP_DOCS=True
 fi
 ./configure --prefix=${PREFIX}/moose

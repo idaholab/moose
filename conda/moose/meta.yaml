@@ -31,6 +31,7 @@ requirements:
   run:
     - {{ moose_libmesh }}
     - {{ moose_python }}
+    - {{ moose_wasp }}
     - moose-tools
 
 test:

@@ -39,9 +39,7 @@ Extensions:
         repo: https://github.com/idaholab/moose
         google-cse: 000781241768298771085:pedtnlxdkx8
         menu:
-            Training:
-                MOOSE Framework (June): https://inlhrfedramp.gov1.qualtrics.com/jfe/form/SV_1RDZf244xsF1NK6
-                Reactor Meshing workshop: https://forms.office.com/Pages/ResponsePage.aspx?id=haH8DPcl40mK53BNUybihfvSXpIhvVBAkfHDzM_V-pZUQlczTDczOFhCRU1MWVc0N1ZaNjhSQzM4Uy4u&wdLOR=cFBABC253-9278-411E-AE37-EB57D314024F
+            Training: training/index.md
             Getting Started:
                 Installing MOOSE: getting_started/installation/index.md
                 Creating an Application: getting_started/new_users.md
