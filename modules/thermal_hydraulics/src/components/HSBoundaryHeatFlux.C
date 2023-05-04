@@ -20,8 +20,17 @@ HSBoundaryHeatFlux::validParams()
   InputParameters params = HSBoundary::validParams();
 
   params.addRequiredParam<FunctionName>("q", "Heat flux [W/m^2]");
-  params.addParam<PostprocessorName>("scale_pp",
-                                     "Post-processor by which to scale boundary condition");
+  params.addDeprecatedParam<PostprocessorName>(
+      "scale_pp",
+      "Post-processor by which to scale boundary condition",
+      "The 'scale' parameter is replacing the 'scale_pp' parameter. 'scale' is a function "
+      "parameter instead of a post-processor parameter. If you need to scale from a post-processor "
+      "value, use a PostprocessorFunction.");
+  params.addParam<FunctionName>("scale", 1.0, "Function by which to scale the boundary condition");
+  params.addParam<bool>(
+      "scale_heat_rate_pp",
+      true,
+      "If true, the scaling function is applied to the heat rate post-processor.");
 
   params.addClassDescription("Applies a specified heat flux to a heat structure boundary");
 
@@ -33,20 +42,6 @@ HSBoundaryHeatFlux::HSBoundaryHeatFlux(const InputParameters & params)
 
     _q_fn_name(getParam<FunctionName>("q"))
 {
-}
-
-void
-HSBoundaryHeatFlux::check() const
-{
-  HSBoundary::check();
-
-  if (isParamValid("scale_pp"))
-  {
-    const PostprocessorName & pp_name = getParam<PostprocessorName>("scale_pp");
-    if (!getTHMProblem().hasPostprocessor(pp_name))
-      logError("The post-processor name provided for the parameter 'scale_pp' is '" + pp_name +
-               "', but no post-processor of this name exists.");
-  }
 }
 
 void
@@ -69,6 +64,7 @@ HSBoundaryHeatFlux::addMooseObjects()
       pars.set<RealVectorValue>("axis_dir") = hs_cyl->getDirection();
       pars.set<Real>("offset") = hs_cyl->getInnerRadius() - hs_cyl->getAxialOffset();
     }
+    pars.set<FunctionName>("scale") = getParam<FunctionName>("scale");
     if (isParamValid("scale_pp"))
       pars.set<PostprocessorName>("scale_pp") = getParam<PostprocessorName>("scale_pp");
 
@@ -78,13 +74,15 @@ HSBoundaryHeatFlux::addMooseObjects()
   // Create integral PP for cylindrical heat structures
   if (is_cylindrical)
   {
-    const std::string class_name = "FunctionSideIntegralRZ";
+    const std::string class_name = "HeatRateHeatFluxRZ";
     InputParameters pars = _factory.getValidParams(class_name);
     pars.set<std::vector<BoundaryName>>("boundary") = _boundary;
     pars.set<FunctionName>("function") = _q_fn_name;
     pars.set<Point>("axis_point") = hs_cyl->getPosition();
     pars.set<RealVectorValue>("axis_dir") = hs_cyl->getDirection();
     pars.set<Real>("offset") = hs_cyl->getInnerRadius() - hs_cyl->getAxialOffset();
+    if (getParam<bool>("scale_heat_rate_pp"))
+      pars.set<FunctionName>("scale") = getParam<FunctionName>("scale");
     pars.set<ExecFlagEnum>("execute_on") = {EXEC_INITIAL, EXEC_TIMESTEP_END};
     getTHMProblem().addPostprocessor(class_name, genSafeName(name(), "integral"), pars);
   }

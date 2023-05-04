@@ -30,6 +30,8 @@ protected:
   const VariableValue & _T_ext;
   /// Heat transfer coefficient from external application
   const VariableValue & _htc_ext;
+  /// Function by which to scale the heat flux
+  const Function & _scale_fn;
 
 public:
   static InputParameters validParams();

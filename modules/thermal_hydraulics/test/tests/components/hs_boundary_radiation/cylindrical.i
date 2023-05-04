@@ -19,7 +19,8 @@ D_o = ${fparse D_i + 2 * thickness}
 A = ${fparse pi * D_o * L}
 heat_flux = ${fparse stefan_boltzmann * emissivity * view_factor * (T_ambient^4 - T_hs^4)}
 scale = 0.8
-E_change = ${fparse scale * heat_flux * A * t}
+power = ${fparse scale * heat_flux * A}
+E_change = ${fparse power * t}
 
 [HeatStructureMaterials]
   [hs_mat]
@@ -54,16 +55,11 @@ E_change = ${fparse scale * heat_flux * A * t}
     T_ambient = ${T_ambient}
     emissivity = ${emissivity}
     view_factor = ${view_factor}
-    scale_pp = bc_scale_pp
+    scale = ${scale}
   []
 []
 
 [Postprocessors]
-  [bc_scale_pp]
-    type = FunctionValuePostprocessor
-    function = ${scale}
-    execute_on = 'INITIAL TIMESTEP_END'
-  []
   [E_hs]
     type = ADHeatStructureEnergyRZ
     block = 'hs:region'
@@ -82,6 +78,13 @@ E_change = ${fparse scale * heat_flux * A * t}
     value2 = ${E_change}
     execute_on = 'INITIAL TIMESTEP_END'
   []
+
+  [heat_rate_pp_relerr]
+    type = RelativeDifferencePostprocessor
+    value1 = hs_boundary_integral
+    value2 = ${power}
+    execute_on = 'INITIAL'
+  []
 []
 
 [Executioner]
@@ -98,7 +101,7 @@ E_change = ${fparse scale * heat_flux * A * t}
 [Outputs]
   [out]
     type = CSV
-    show = 'E_change_relerr'
+    show = 'E_change_relerr heat_rate_pp_relerr'
     execute_on = 'FINAL'
   []
 []

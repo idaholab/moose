@@ -22,8 +22,6 @@ public:
   virtual void addMooseObjects() override;
 
 protected:
-  virtual void check() const override;
-
   /// Ambient temperature function name
   const FunctionName & _T_ambient_fn_name;
   /// Convective heat transfer coefficient function name

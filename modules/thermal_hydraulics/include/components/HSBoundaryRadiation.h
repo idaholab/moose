@@ -21,9 +21,5 @@ public:
 
   virtual void addMooseObjects() override;
 
-protected:
-  virtual void check() const override;
-
-public:
   static InputParameters validParams();
 };

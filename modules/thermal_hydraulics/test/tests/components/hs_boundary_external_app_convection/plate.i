@@ -44,15 +44,7 @@ scale = 0.8
     type = HSBoundaryExternalAppConvection
     boundary = 'hs:outer'
     hs = hs
-    scale_pp = bc_scale_pp
-  []
-[]
-
-[Postprocessors]
-  [bc_scale_pp]
-    type = FunctionValuePostprocessor
-    function = ${scale}
-    execute_on = 'INITIAL TIMESTEP_END'
+    scale = ${scale}
   []
 []
 

@@ -1,2 +1,2 @@
-time,E_change_relerr
-0.001,0
+time,E_change_relerr,heat_rate_pp_relerr
+0.001,0,0

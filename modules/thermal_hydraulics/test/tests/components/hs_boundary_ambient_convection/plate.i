@@ -67,16 +67,11 @@ E_change = ${fparse scale * heat_flux_integral * t}
     hs = hs
     T_ambient = T_ambient_fn
     htc_ambient = htc_ambient_fn
-    scale_pp = bc_scale_pp
+    scale = ${scale}
   []
 []
 
 [Postprocessors]
-  [bc_scale_pp]
-    type = FunctionValuePostprocessor
-    function = ${scale}
-    execute_on = 'INITIAL TIMESTEP_END'
-  []
   [E_hs]
     type = ADHeatStructureEnergy
     block = 'hs:region'

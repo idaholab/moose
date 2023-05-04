@@ -22,8 +22,6 @@ public:
   virtual void addMooseObjects() override;
 
 protected:
-  virtual void check() const override;
-
   /// Heat flux function name
   const FunctionName & _q_fn_name;
 

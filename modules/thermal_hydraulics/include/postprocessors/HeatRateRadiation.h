@@ -32,8 +32,8 @@ protected:
   const Function & _view_factor_fn;
   /// Stefan-Boltzmann constant
   const Real & _sigma_stefan_boltzmann;
-  /// Factor by which to scale integral, like when using a 2D domain
-  const Real & _scale;
+  /// Function by which to scale the heat flux
+  const Function & _scale_fn;
 
 public:
   static InputParameters validParams();
