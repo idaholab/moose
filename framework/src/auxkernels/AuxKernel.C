@@ -143,11 +143,6 @@ AuxKernelTempl<ComputeValueType>::AuxKernelTempl(const InputParameters & paramet
   addMooseVariableDependency(&_var);
   _supplied_vars.insert(parameters.get<AuxVariableName>("variable"));
 
-  const auto & coupled_vars = getCoupledVars();
-  for (const auto & it : coupled_vars)
-    for (const auto & var : it.second)
-      _depend_vars.insert(var->name());
-
   if (_bnd && !isNodal() && _check_boundary_restricted)
   {
     // when the variable is elemental and this aux kernel operates on boundaries,
@@ -218,11 +213,10 @@ template <typename ComputeValueType>
 void
 AuxKernelTempl<ComputeValueType>::coupledCallback(const std::string & var_name, bool is_old) const
 {
-  if (is_old)
+  if (!is_old)
   {
-    std::vector<VariableName> var_names = getParam<std::vector<VariableName>>(var_name);
-    for (const auto & name : var_names)
-      _depend_vars.erase(name);
+    const auto & var_names = getParam<std::vector<VariableName>>(var_name);
+    _depend_vars.insert(var_names.begin(), var_names.end());
   }
 }
 
