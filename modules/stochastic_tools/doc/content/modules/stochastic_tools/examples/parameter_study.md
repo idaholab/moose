@@ -235,8 +235,9 @@ that computes the spatial distribution of the temperature.
 
 The two significant modifications to the main input is the change to a [SamplerTransientMultiApp.md] and
 the addition of the [Executioner](syntax/Executioner/index.md) block. The combination of these two blocks
-will run the sampled sub-applications in tandem with the time-step defined in the main input. You will
-notice that the main input Executioner block is identical to the sub-app's.
+will run the sampled sub-applications in tandem with the time-step defined in the main input. The main
+application in this case will "drive" the overall simulation (and does support sub-cycling). Here, we
+use the same time stepping as in the sub-application.
 
 !listing examples/parameter_study/main_time.i block=MultiApps Executioner
 
