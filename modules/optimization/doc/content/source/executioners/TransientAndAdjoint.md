@@ -4,7 +4,7 @@
 
 ## Overview
 
-Similar to [SteadyAndAdjoint.md], this executioner can be used to solve a transient forward problem and it's adjoint. Like it's steady-state counterpart, this executioner has a two-step procedure, whereby performing the full forward transient solve (as in [Transient.md]) then stepping backward through the forward timesteps to solve the adjoint problem. To give context on what a transient adjoint looks like, let's start with the general time-depending partial differential equation (PDE):
+Similar to [SteadyAndAdjoint.md], this executioner can be used to solve a transient forward problem and it's adjoint. Like it's steady-state counterpart, this executioner has a two-step procedure, whereby performing the full forward transient solve (as in [Transient.md]) then stepping backward through the forward timesteps to solve the adjoint problem. To give context on what a transient adjoint looks like, let's start with the general time-dependent partial differential equation (PDE):
 
 !equation
 c(\vec{r}, t, u)\frac{\partial u(\vec{r}, t)}{\partial t} + R^{\mathrm{ss}}(u(\vec{r}, t)) = q(\vec{r}, t),
@@ -15,7 +15,9 @@ u(\vec{r}, t = 0) = u_0(\vec{r}),
 !equation
 \vec{r}\in \Omega, \quad t\in [0, t_N],
 
-where $c$ is a nonlinear coefficient on the time derivative, $R^{\mathrm{ss}}$ is the parts of the PDE that do not contain a time-derivative, and $q$ is some time-space-dependent source. This can be given in operator notation as:
+where $c$ is a nonlinear coefficient on the time derivative, $R^{\mathrm{ss}}$ is the parts of the PDE that do not contain a time-derivative, and $q$ is some time-space-dependent source.
+The first step in formulating an adjoint for this system is to linearize it around $u(t)$.
+Generally, this can be given in operator notation as:
 
 !equation
 \mathbf{M}(\mathbf{u}(t))\dot{\mathbf{u}}(t) + \mathbf{K}(\mathbf{u}(t))\mathbf{u}(t) = \mathbf{q}(t).
@@ -119,7 +121,7 @@ with $\lambda_{N+1} \equiv \mathbf{0}$.
 
 1. The adjoint solver only supports a consistent adjoint with [ImplicitEuler.md] time integration.
 1. Saving the forward solution at every time step can be extremely memory intensive, so there may be limitations on the number of timesteps of the forward problem based on system memory.
-1. [Exodus.md] cannot output the resulting adjoint solution. Although, [CSV.md] works as expected.
+1. [Exodus.md] cannot output the resulting adjoint solution. [CSV.md] and [JSONOutput.md] work as expected.
 
 ## Example Input File Syntax
 

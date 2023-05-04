@@ -48,6 +48,7 @@ public:
    * @param tstep Time step of the forward solution in which to store in _forward_solutions
    */
   void insertForwardSolution(int tstep);
+
   /**
    * Takes the previously saved forward solutions residing in the adjoint system and copies them to
    * the available solution states in the forward systems. This should be called at each adjoint
@@ -63,7 +64,7 @@ protected:
    * right-hand-side of the linear solve
    */
   virtual void assembleAdjointSystem(SparseMatrix<Number> & matrix,
-                                     NumericVector<Number> & solution,
+                                     const NumericVector<Number> & solution,
                                      NumericVector<Number> & rhs) override;
 
   /**
@@ -75,7 +76,8 @@ protected:
    * @param solution Current adjoint solution
    * @param residual Vector to save the result into
    */
-  void evaluateTimeResidual(NumericVector<Number> & solution, NumericVector<Number> & residual);
+  void evaluateTimeResidual(const NumericVector<Number> & solution,
+                            NumericVector<Number> & residual);
 
   /**
    * Prescribed name of the forward solution at a specified time step

@@ -85,7 +85,7 @@ TransientAndAdjoint::postExecute()
     return;
 
   // Looping backward through forward time steps
-  for (unsigned int n = 0; n < _forward_times.size() - 1; ++n)
+  for (const auto n : make_range(_forward_times.size() - 1))
   {
     // Set important time information so the Jacobian is properly computed in the forward system
     _t_step = _forward_times.size() - 1 - n;

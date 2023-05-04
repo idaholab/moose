@@ -49,7 +49,7 @@ AdjointTransientSolve::insertForwardSolution(int tstep)
   // Time step should not be negative
   if (tstep < 0)
     mooseError("Negative time step occurred.");
-  std::size_t t_step = tstep; // Avoid compiler warnings
+  auto t_step = cast_int<std::size_t>(tstep); // Avoid compiler warnings
   // Should not be inserting a time greater the last one inserted
   if (t_step > _forward_solutions.size())
     mooseError("Trying to insert a solution at a time-step greater than one past the  previously "
@@ -74,9 +74,9 @@ void
 AdjointTransientSolve::setForwardSolution(int tstep)
 {
   // Make sure the time step was saved
-  if (tstep < 0 || tstep >= (int)_forward_solutions.size())
+  if (tstep < 0 || tstep >= cast_int<int>(_forward_solutions.size()))
     mooseError("Could not find forward solution at time step ", tstep, ".");
-  std::size_t t_step = tstep; // Avoid compiler warnings
+  auto t_step = cast_int<std::size_t>(tstep); // Avoid compiler warnings
 
   // Copy the solutions to states that exist in the system
   unsigned int state = 0;
@@ -92,7 +92,7 @@ AdjointTransientSolve::setForwardSolution(int tstep)
 
 void
 AdjointTransientSolve::assembleAdjointSystem(SparseMatrix<Number> & matrix,
-                                             NumericVector<Number> & solution,
+                                             const NumericVector<Number> & solution,
                                              NumericVector<Number> & rhs)
 {
   // Assemble the steady-state version of the adjoint problem
@@ -102,13 +102,13 @@ AdjointTransientSolve::assembleAdjointSystem(SparseMatrix<Number> & matrix,
 }
 
 void
-AdjointTransientSolve::evaluateTimeResidual(NumericVector<Number> & solution,
+AdjointTransientSolve::evaluateTimeResidual(const NumericVector<Number> & solution,
                                             NumericVector<Number> & residual)
 {
   // This tag should exist, but the matrix might not necessarily be added
   auto time_matrix_tag = _problem.getMatrixTagID("TIME");
   // Use the adjoint system matrix to hold the time Jacobian
-  auto & time_matrix = dynamic_cast<ImplicitSystem *>(&_nl_adjoint.system())->get_system_matrix();
+  auto & time_matrix = static_cast<ImplicitSystem &>(_nl_adjoint.system()).get_system_matrix();
 
   // Make sure we tell the problem which system we are evaluating
   _problem.setCurrentNonlinearSystem(_forward_sys_num);

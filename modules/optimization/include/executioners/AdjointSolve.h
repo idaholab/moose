@@ -64,7 +64,7 @@ protected:
    * @param rhs The adjoint source (i.e. -residual)
    */
   virtual void assembleAdjointSystem(SparseMatrix<Number> & matrix,
-                                     NumericVector<Number> & solution,
+                                     const NumericVector<Number> & solution,
                                      NumericVector<Number> & rhs);
 
   /**
@@ -79,7 +79,7 @@ protected:
    * @param rhs  The RHS to to replace with the solution
    */
   void applyNodalBCs(SparseMatrix<Number> & matrix,
-                     NumericVector<Number> & solution,
+                     const NumericVector<Number> & solution,
                      NumericVector<Number> & rhs);
 
   /// The number of the nonlinear system representing the forward model

@@ -146,6 +146,9 @@
 []
 
 [Outputs]
+  # The default exodus object executes only during the forward system solve,
+  # so the adjoint variable in the resulting file will show only 0.
+  # Unfortunately, there is no way to output the adjoint variable with Exodus.
   exodus = true
   console = false
 []
