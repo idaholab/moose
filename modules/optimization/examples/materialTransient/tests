@@ -46,4 +46,19 @@
       detail = 'performing gradient-based optimization with an automatically computed adjoint.'
     []
   []
+
+  [auto_adjoint_nondefualt_sys_name]
+      type = Exodiff
+      input = optimize_auto_adjoint.i
+      cli_args = 'Outputs/file_base=optimize_grad_out
+                  forward:Variables/u/nl_sys=forward
+                  forward:Executioner/forward_system=forward
+                  forward:Problem/nl_sys_names=\'forward adjoint\''
+      exodiff = optimize_grad_out_forward0.e
+      prereq = material_transient/forward
+      method = '!dbg'
+      valgrind = heavy
+      max_threads = 1 # Optimize executioner does not support multiple threads
+      requirement = 'The system shall be able to perform inverse material optimization on a transient model by performing gradient-based optimization with an automatically computed adjoint using non-default system names.'
+  []
 []
