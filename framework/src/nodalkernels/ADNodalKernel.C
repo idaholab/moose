@@ -44,7 +44,7 @@ ADNodalKernel::computeResidual()
     auto res = MetaPhysicL::raw_value(computeQpResidual());
     processResiduals(_assembly,
                      std::array<Real, 1>{{res}},
-                     std::vector<dof_id_type>{{dof_idx}},
+                     std::vector<dof_id_type>({dof_idx}),
                      _var.scalingFactor());
   }
 }
@@ -59,7 +59,7 @@ ADNodalKernel::computeJacobian()
     const auto res = computeQpResidual();
     processJacobian(_assembly,
                     std::array<ADReal, 1>{{res}},
-                    std::vector<dof_id_type>{{dof_idx}},
+                    std::vector<dof_id_type>({dof_idx}),
                     _var.scalingFactor());
   }
 }

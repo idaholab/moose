@@ -312,11 +312,11 @@ ComputeDynamicFrictionalForceLMMechanicalContact::enforceConstraintOnDof3d(
 
   processResidualsAndJacobian(_assembly,
                               std::array<ADReal, 1>{{dof_residual}},
-                              std::vector<dof_id_type>{{friction_dof_indices[0]}},
+                              std::vector<dof_id_type>({friction_dof_indices[0]}),
                               _friction_vars[0]->scalingFactor());
   processResidualsAndJacobian(_assembly,
                               std::array<ADReal, 1>{{dof_residual_dir}},
-                              std::vector<dof_id_type>{{friction_dof_indices[1]}},
+                              std::vector<dof_id_type>({friction_dof_indices[1]}),
                               _friction_vars[1]->scalingFactor());
 }
 
@@ -363,7 +363,7 @@ ComputeDynamicFrictionalForceLMMechanicalContact::enforceConstraintOnDof(
 
   processResidualsAndJacobian(_assembly,
                               std::array<ADReal, 1>{{dof_residual}},
-                              std::vector<dof_id_type>{{friction_dof_index}},
+                              std::vector<dof_id_type>({friction_dof_index}),
                               _friction_vars[0]->scalingFactor());
 }
 

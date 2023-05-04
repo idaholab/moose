@@ -173,7 +173,7 @@ FVInterfaceKernel::processJacobian(const ADReal & resid,
 {
   processJacobian(_assembly,
                   std::array<ADReal, 1>{{resid}},
-                  std::vector<dof_id_type>{{dof_index}},
+                  std::vector<dof_id_type>({dof_index}),
                   scaling_factor);
 }
 

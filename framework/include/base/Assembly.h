@@ -2795,7 +2795,7 @@ Assembly::processJacobianNoScaling(const ADReal & residual,
                                    const std::set<TagID> & matrix_tags)
 {
   processJacobian(
-      std::array<ADReal, 1>{{residual}}, std::vector<dof_id_type>{{dof_index}}, matrix_tags, 1);
+      std::array<ADReal, 1>{{residual}}, std::vector<dof_id_type>({dof_index}), matrix_tags, 1);
 }
 
 template <typename Residuals>
