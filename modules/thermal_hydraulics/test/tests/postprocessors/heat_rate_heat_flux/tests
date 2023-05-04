@@ -1,0 +1,13 @@
+[Tests]
+  design = 'HeatRateHeatFlux.md'
+
+  [test]
+    type = 'CSVDiff'
+    input = 'heat_rate_heat_flux.i'
+    csvdiff = 'heat_rate_heat_flux_out.csv'
+    recover = false # no time steps
+
+    requirement = 'The system shall compute the heat rate for a user-provided heat flux function.'
+    issues = '#24261'
+  []
+[]
