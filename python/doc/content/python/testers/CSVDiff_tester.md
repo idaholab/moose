@@ -24,6 +24,9 @@ Test configuration options are added to the `tests` file.
 
 - `comparison_file`: Use supplied custom comparison config file.
 
+- `ignore_columns`: Exclude columns in csv file from csv diff comparison.
+
+
 
 Other test commands & restrictions may be found in the [TestHarness documentation](TestHarness.md).
 An example of a custom comparison file for a `CSVDiff` test is shown below.

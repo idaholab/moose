@@ -2,73 +2,80 @@
   design = 'CSVDiff.md'
   issues = '#12683 #12687'
   # Comparison file overrides
-  [./test_csvdiff_comparison_not_logic]
+  [test_csvdiff_comparison_not_logic]
     type = CSVDiff
     input = csvdiff_comparison_not_logic.i
     csvdiff = csvdiff_comparison_not_logic_out.csv
     # comparison file tests !z_field (test logical not)
     comparison_file = csvdiff_comparison_not_logic.cmp
     requirement = 'comparison file shall instruct csvdiff to ignore specified fields'
-  [../]
-  [./test_csvdiff_comparison_removed_field]
+  []
+  [test_csvdiff_comparison_removed_field]
     type = CSVDiff
     input = csvdiff_comparison_removed_field.i
     csvdiff = csvdiff_comparison_removed_field_out.csv
     # comparison file tests removed z_field (z_field not present in comparison file)
     comparison_file = csvdiff_comparison_removed_field.cmp
     requirement = 'comparison file shall instruct csvdiff to ignore missing fields'
-  [../]
-  [./test_csvdiff_comparison_floor]
+  []
+  [test_csvdiff_comparison_ignored_field]
+    type = CSVDiff
+    input = csvdiff_comparison_ignored_field.i
+    csvdiff = csvdiff_comparison_ignored_field_out.csv
+    ignore_columns = z_field
+    requirement = 'comparison file shall instruct csvdiff to ignore missing fields'
+  []
+  [test_csvdiff_comparison_floor]
     type = CSVDiff
     input = csvdiff_comparison_floor.i
     csvdiff = csvdiff_comparison_floor_out.csv
     # comparison file with field specific tolerances below absolute zero
     comparison_file = csvdiff_comparison_floor.cmp
     requirement = 'comparison file shall control an individual fields absolute zero tolerance'
-  [../]
-  [./test_csvdiff_comparison_global_floor]
+  []
+  [test_csvdiff_comparison_global_floor]
     type = CSVDiff
     input = csvdiff_comparison_global_floor.i
     csvdiff = csvdiff_comparison_global_floor_out.csv
     # comparison file with global tolerances below absolute zero
     comparison_file = csvdiff_comparison_global_floor.cmp
     requirement = 'comparison file shall control global absolute zero tolerances'
-  [../]
-  [./test_csvdiff_comparison_relative]
+  []
+  [test_csvdiff_comparison_relative]
     type = CSVDiff
     input = csvdiff_comparison_relative.i
     csvdiff = csvdiff_comparison_relative_out.csv
     # comparison file with field specific error tolerance
     comparison_file = csvdiff_comparison_relative.cmp
     requirement = 'comparison file shall control an individual fields error tolerance'
-  [../]
-  [./test_csvdiff_comparison_global_relative]
+  []
+  [test_csvdiff_comparison_global_relative]
     type = CSVDiff
     input = csvdiff_comparison_global_relative.i
     csvdiff = csvdiff_comparison_global_relative_out.csv
     # comparison file with global error tolerances
     comparison_file = csvdiff_comparison_global_relative.cmp
     requirement = 'comparison file shall control global error tolerances'
-  [../]
+  []
 
   # Spec file overrides
-  [./test_csvdiff_spec_override_global_relative]
+  [test_csvdiff_spec_override_global_relative]
     type = CSVDiff
     input = csvdiff_spec_override_global_relative.i
     csvdiff = csvdiff_spec_override_global_relative_out.csv
     # loose global relative tolerance
     rel_err = 1.0e+1
     requirement = 'spec file shall control global error tolerances'
-  [../]
-  [./test_csvdiff_spec_override_global_floor]
+  []
+  [test_csvdiff_spec_override_global_floor]
     type = CSVDiff
     input = csvdiff_spec_override_global_floor.i
     csvdiff = csvdiff_spec_override_global_floor_out.csv
     # loose global zero tolerance
     abs_zero = 1.0e+1
     requirement = 'spec file shall control global absolute zero tolerances'
-  [../]
-  [./test_csvdiff_spec_override_specific_relative]
+  []
+  [test_csvdiff_spec_override_specific_relative]
     type = CSVDiff
     input = csvdiff_spec_override_specific_relative.i
     csvdiff = csvdiff_spec_override_specific_relative_out.csv
@@ -77,8 +84,8 @@
     override_rel_err = 1.0e+1
     override_abs_zero = 1.0e-11
     requirement = 'spec file shall control a specific fields relative error tolerance'
-  [../]
-  [./test_csvdiff_spec_override_specific_floor]
+  []
+  [test_csvdiff_spec_override_specific_floor]
     type = CSVDiff
     input = csvdiff_spec_override_specific_floor.i
     csvdiff = csvdiff_spec_override_specific_floor_out.csv
@@ -87,5 +94,5 @@
     override_abs_zero = 1.0e+1
     override_rel_err = 5.5e-06
     requirement = 'spec file shall control a specific fields absolute zero tolerance'
-  [../]
+  []
 []
