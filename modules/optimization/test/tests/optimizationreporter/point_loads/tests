@@ -10,7 +10,7 @@
       type = CSVDiff
       input = main.i
       csvdiff = main_out_OptimizationReporter_0001.csv
-      max_threads = 1
+      max_threads = 1 # Optimize executioner does not support multiple threads
       rel_err = 0.1
       abs_zero = 10
       # steady solve
@@ -24,7 +24,7 @@
                  "Executioner/petsc_options_iname='-tao_gttol' "
                  "Executioner/petsc_options_value='1e-5'"
       csvdiff = main_out_OptimizationReporter_0001.csv
-      max_threads = 1
+      max_threads = 1 # Optimize executioner does not support multiple threads
       rel_err = 0.1
       abs_zero = 10
       # steady solve
@@ -36,7 +36,7 @@
       input = main_auto_adjoint.i
       cli_args = 'Outputs/file_base=main_out'
       csvdiff = main_out_OptimizationReporter_0001.csv
-      max_threads = 1
+      max_threads = 1 # Optimize executioner does not support multiple threads
       rel_err = 0.1
       abs_zero = 10
       # steady solve

@@ -11,7 +11,7 @@
       recover = False
       method = '!dbg'
       valgrind = heavy
-      max_threads = 1
+      max_threads = 1 # Optimize executioner does not support multiple threads
       detail = 'generating synthetic measurement data,'
     []
     [optimize_nograd]
@@ -21,7 +21,7 @@
       prereq = material_transient/forward
       method = '!dbg'
       valgrind = none
-      max_threads = 1
+      max_threads = 1 # Optimize executioner does not support multiple threads
       detail = 'performing gradient-free optimization,'
     []
     [optimize_grad]
@@ -31,7 +31,7 @@
       prereq = material_transient/forward
       method = '!dbg'
       valgrind = heavy
-      max_threads = 1
+      max_threads = 1 # Optimize executioner does not support multiple threads
       detail = 'performing gradient-based optimization, or'
     []
     [optimize_auto_adjoint]
@@ -42,7 +42,7 @@
       prereq = material_transient/forward
       method = '!dbg'
       valgrind = heavy
-      max_threads = 1
+      max_threads = 1 # Optimize executioner does not support multiple threads
       detail = 'performing gradient-based optimization with an automatically computed adjoint.'
     []
   []

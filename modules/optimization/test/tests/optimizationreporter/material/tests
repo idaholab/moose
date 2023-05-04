@@ -1,7 +1,7 @@
 [Tests]
   [adjoint_grad]
     type = CSVDiff
-    max_threads = 1
+    max_threads = 1 # Optimize executioner does not support multiple threads
     rel_err = 0.01
     abs_zero = 0.01
     input = main.i

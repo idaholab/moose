@@ -7,7 +7,7 @@
                   "the scale of the linear and constant functions are both being parameterized using"
     [iterOutput]
       type = CSVDiff
-      max_threads = 1
+      max_threads = 1 # Optimize executioner does not support multiple threads
       rel_err = 0.0000001
       input = main.i
       csvdiff = main_out_optInfo_0001.csv
@@ -19,7 +19,7 @@
       type = Exodiff
       input = main_auto_adjoint.i
       exodiff = main_auto_adjoint_out_forward0.e
-      max_threads = 1
+      max_threads = 1 # Optimize executioner does not support multiple threads
       recover = false
       detail = "automatic adjoint evaluation."
     []
