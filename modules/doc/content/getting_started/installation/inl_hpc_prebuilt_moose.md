@@ -9,12 +9,6 @@ pre-built versions of MOOSE. To request access to these clusters, please follow 
 Once access has been granted, log into Sawtooth or Lemhi using either [inl/hpc_ondemand.md]
 Interactive Shell services, or directly by following our [SSH Primer](inl/hpc_remote.md).
 
-## Cloning Moose
-
-!style! halign=left
-!template load file=installation/clone_moose.md.template PATH=~/projects
-!style-end!
-
 ## Load Modules
 
 !style! halign=left
@@ -29,26 +23,40 @@ module load use.moose moose-apps moose
 If you receive an error about modules not being known, please make sure you are logged into either
 Sawtooth or Lemhi.
 
-Once loaded, `moose-opt` becomes available. You need now only provide input files to run
-simulations. Example input files are available within the MOOSE repository (next section).
+Once loaded, `moose` becomes available. You need now only provide input files to run simulations.
+Example input files are available within the MOOSE repository (next section).
 
 ## Run an Example
 
 !style! halign=left
-To run `moose-opt` using an example input file from within the MOOSE repository, perform the
-following:
+HPC Pre-Built MOOSE comes with several examples you can run to make sure everything is sound, as
+well as moving some of the example inputs into a safe location you can play with.
 !style-end!
 
+There are examples for each physic solver available by name, in the following directory:
+
 ```bash
-cd ~/projects/moose/examples/ex01_inputfile
-moose-opt -i ex01.i
+ls $MOOSE_DIR/moose/share/combined
 ```
 
-`moose-opt` should run to completion without error. A resulting exodus file is generated in the same
-directory:
+!alert! note
+Not everything you find in this directory is a physic library. We are working on an elegant way to
+ask `moose` for all available solvers.
 
-```pre
-ex01_out.e
+For now, lets copy the reactor module into a safe location for editing:
+
+```bash
+mkdir -p ~/projects/examples
+cd ~/projects/examples
+moose --copy-inputs reactor_workshop
+```
+
+With the reactor module's examples/inputs/tests copied, move into reactor workshop directory and
+instruct `moose` to run the tests:
+
+```bash
+cd combined/reactor_workshop
+moose --run -j 6
 ```
 
 ## View Results

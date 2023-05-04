@@ -40,41 +40,48 @@ Verify `moose` is available:
 moose --help
 ```
 
-Should produce the help page.
-
-You can now execute `moose` when attempting to run problems:
-
-```bash
-moose -i <some input file>.i
-```
-
-## Cloning MOOSE
-
-!style! halign=left
-While unnecessary, performing the following will provide numerous example input files to execute.
-!style-end!
-
-!template load file=installation/clone_moose.md.template PATH=~/projects
-
-Example input files are located in `~/projects/moose/examples` directory.
+Should produce the help page. This simple command demonstrates that you have sucessfully installed
+the MOOSE Conda package.
 
 ## Run an Example
 
 !style! halign=left
-To run `moose` using an example input file from within the MOOSE repository, perform the
-following:
+A MOOSE installation binary comes with several examples you can run to make sure everything
+is sound, as well as moving some of the example inputs into a safe location you can play with.
 !style-end!
 
+There are examples for each physic solver available by name, in the following directory:
+
 ```bash
-cd ~/projects/moose/examples/ex01_inputfile
-moose -i ex01.i
+ls $CONDA_PREFIX/moose/share/combined
 ```
+
+!alert! note
+Not everything you find in this directory is a physic library. We are working on an elegant way to
+ask `moose` for all available solvers.
+
+For now, lets copy the reactor module into a safe location for editing:
+
+```bash
+mkdir -p ~/projects/examples
+cd ~/projects/examples
+moose --copy-inputs reactor_workshop
+```
+
+With the reactor module's examples/inputs/tests copied, move into reactor workshop directory and
+instruct `moose` to run the tests:
+
+```bash
+cd combined/reactor_workshop
+moose --run -j 6
+```
+
 
 ## More Examples
 
 !style! halign=left
 Continue on to see more examples and tuturials using MOOSE! However, most of the next section is
-geared towards building your own application.
+geared towards developing your own application.
 !style-end!
 
 !content pagination use_title=True
