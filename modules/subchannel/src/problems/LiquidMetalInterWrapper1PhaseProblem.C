@@ -33,9 +33,9 @@ LiquidMetalInterWrapper1PhaseProblem::LiquidMetalInterWrapper1PhaseProblem(
 }
 
 double
-LiquidMetalInterWrapper1PhaseProblem::computeFrictionFactor(double Re)
+LiquidMetalInterWrapper1PhaseProblem::computeFrictionFactor(Real Re)
 {
-  double a, b;
+  Real a, b;
   if (Re < 1)
   {
     return 64.0;
@@ -136,7 +136,7 @@ LiquidMetalInterWrapper1PhaseProblem::computeDP(int iblock)
 }
 
 double
-LiquidMetalInterWrapper1PhaseProblem::computeMassFlowForDPDZ(double dpdz, int i_ch)
+LiquidMetalInterWrapper1PhaseProblem::computeMassFlowForDPDZ(Real dpdz, int i_ch)
 {
   auto * node = _subchannel_mesh.getChannelNode(i_ch, 0);
   // initialize massflow
@@ -345,11 +345,11 @@ LiquidMetalInterWrapper1PhaseProblem::computeh(int iblock)
       auto volume = dz * (*_S_flow_soln)(node_in);
       auto mdot_out = (*_mdot_soln)(node_out);
       auto h_out = 0.0;
-      double sumWijh = 0.0;
-      double sumWijPrimeDhij = 0.0;
+      Real sumWijh = 0.0;
+      Real sumWijPrimeDhij = 0.0;
       Real e_cond = 0.0;
 
-      double added_enthalpy;
+      Real added_enthalpy;
       if (z_grid[iz] > unheated_length_entry && z_grid[iz] <= unheated_length_entry + heated_length)
         added_enthalpy = ((*_q_prime_soln)(node_out) + (*_q_prime_soln)(node_in)) * dz / 2.0;
       else

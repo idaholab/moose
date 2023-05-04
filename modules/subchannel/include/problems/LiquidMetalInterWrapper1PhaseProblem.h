@@ -32,13 +32,12 @@ protected:
    * for each subchannel.
    * Upgraded Cheng-Todreas Correlation (2018).
    */
-  /// computeFrictionFactor(double Re) is currently not used for sodium coolant
-  virtual double computeFrictionFactor(double Re) override;
+  virtual Real computeFrictionFactor(Real Re) override;
   /// computeDP(int iz) is defined/overridden in order to use the friction factor for sodium
   virtual void computeDP(int iblock) override;
-  /// computeMassFlowForDPDZ(double dpdz, int i_ch) and enforceUniformDPDZAtInlet()
+  /// computeMassFlowForDPDZ() and enforceUniformDPDZAtInlet()
   /// are overriden to define the sodium friction factor
-  virtual double computeMassFlowForDPDZ(double dpdz, int i_ch);
+  virtual Real computeMassFlowForDPDZ(Real dpdz, int i_ch);
   virtual void enforceUniformDPDZAtInlet();
   ///
   virtual void computeh(int iblock) override;

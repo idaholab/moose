@@ -32,19 +32,12 @@ protected:
    * for each subchannel.
    * Upgraded Cheng-Todreas Correlation (2018).
    */
-  double computeFrictionFactor(double Re, int i_ch, Real S, Real w_perim, Real Dh_i);
-  // computeFrictionFactor(double Re, int i_ch) is currently not used for sodium coolant
-  virtual double computeFrictionFactor(double Re) override;
-  virtual double computeFrictionFactor(double Re, int i_ch) override;
+  virtual Real computeFrictionFactor(_friction_args_struct friction_args) override;
   /// Computes added heat for channel i_ch and cell iz
   virtual Real computeAddedHeatPin(unsigned int i_ch, unsigned int iz) override;
-  /// Function that computes the heat flux added by the duct
-  virtual Real computeAddedHeatDuct(unsigned int i_ch, unsigned int iz);
-  /// computeDP(int iz) is defined/overridden in order to use the friction factor for sodium
-  virtual void computeDP(int iblock) override;
-  /// computeMassFlowForDPDZ(double dpdz, int i_ch) and enforceUniformDPDZAtInlet()
+  /// computeMassFlowForDPDZ(Real dpdz, int i_ch) and enforceUniformDPDZAtInlet()
   /// are overriden to define the sodium friction factor
-  virtual double computeMassFlowForDPDZ(double dpdz, int i_ch);
+  virtual Real computeMassFlowForDPDZ(Real dpdz, int i_ch);
   /**
    * solver with iterative option to enforce uniform inlet
    * pressure distribution option
@@ -60,7 +53,6 @@ protected:
   /// average relative error in pressure drop of channels
   Real _dpz_error;
   TriSubChannelMesh & _tri_sch_mesh;
-  Real _outer_channels;
 
   // Extra objects for heat conduction, which is important in sodium
   Mat _hc_axial_heat_conduction_mat;

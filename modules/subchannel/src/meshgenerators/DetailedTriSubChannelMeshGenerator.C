@@ -386,10 +386,10 @@ DetailedTriSubChannelMeshGenerator::generate()
   // Build an array of points arranged in a circle on the xy-plane. (last and first node overlap)
   // We build for both the square discretization in the edges and the triangular discretization
   // within the mesh
-  const double radius = _rod_diameter / 2.0;
+  const Real radius = _rod_diameter / 2.0;
   std::array<Point, theta_res_square + 1> circle_points_square;
   {
-    double theta = 0;
+    Real theta = 0;
     for (unsigned int i = 0; i < theta_res_square + 1; i++)
     {
       circle_points_square[i](0) = radius * std::cos(theta);
@@ -399,7 +399,7 @@ DetailedTriSubChannelMeshGenerator::generate()
   }
   std::array<Point, theta_res_triangle + 1> circle_points_triangle;
   {
-    double theta = 0;
+    Real theta = 0;
     for (unsigned int i = 0; i < theta_res_triangle + 1; i++)
     {
       circle_points_triangle[i](0) = radius * std::cos(theta);

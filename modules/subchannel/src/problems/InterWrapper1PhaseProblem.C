@@ -459,7 +459,7 @@ InterWrapper1PhaseProblem::computeSumWij(int iblock)
       for (unsigned int i_ch = 0; i_ch < _n_channels; i_ch++)
       {
         auto * node_out = _subchannel_mesh.getChannelNode(i_ch, iz);
-        double sumWij = 0.0;
+        Real sumWij = 0.0;
         // Calculate sum of crossflow into channel i from channels j around i
         unsigned int counter = 0;
         for (auto i_gap : _subchannel_mesh.getChannelGaps(i_ch))
@@ -1473,9 +1473,9 @@ InterWrapper1PhaseProblem::computeh(int iblock)
         auto volume = dz * (*_S_flow_soln)(node_in);
         auto mdot_out = (*_mdot_soln)(node_out);
         auto h_out = 0.0;
-        double sumWijh = 0.0;
-        double sumWijPrimeDhij = 0.0;
-        double added_enthalpy;
+        Real sumWijh = 0.0;
+        Real sumWijPrimeDhij = 0.0;
+        Real added_enthalpy;
         if (_z_grid[iz] > unheated_length_entry &&
             _z_grid[iz] <= unheated_length_entry + heated_length)
           added_enthalpy = computeAddedHeat(i_ch, iz);
@@ -3382,7 +3382,7 @@ InterWrapper1PhaseProblem::externalSolve()
       for (unsigned int iz = 0; iz < _n_cells + 1; ++iz)
       {
         auto * pin_node = _subchannel_mesh.getPinNode(i_pin, iz);
-        double sumTemp = 0.0;
+        Real sumTemp = 0.0;
         // Calculate sum of pin surface temperatures that the channels around the pin see
         for (auto i_ch : _subchannel_mesh.getPinChannels(i_pin))
         {

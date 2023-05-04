@@ -49,10 +49,14 @@ protected:
     Vec x;
   };
 
+  struct _friction_args_struct
+  {
+    int i_ch;
+    Real Re, S, w_perim, Dh_i;
+  } _friction_args;
+
   /// Returns friction factor
-  virtual double computeFrictionFactor(double Re) = 0;
-  /// Returns friction factor
-  virtual double computeFrictionFactor(double Re, int i_ch) = 0;
+  virtual Real computeFrictionFactor(_friction_args_struct friction_args) = 0;
   /// Computes diversion crossflow per gap for block iblock
   virtual void computeWijFromSolve(int iblock);
   /// Computes net diversion crossflow per channel for block iblock
@@ -77,6 +81,8 @@ protected:
   virtual void computeWij(int iblock);
   /// Computes added heat for channel i_ch and cell iz
   virtual Real computeAddedHeatPin(unsigned int i_ch, unsigned int iz);
+  /// Function that computes the heat flux added by the duct
+  virtual Real computeAddedHeatDuct(unsigned int i_ch, unsigned int iz);
   /// Computes Residual per gap for block iblock
   virtual libMesh::DenseVector<Real> residualFunction(int iblock,
                                                       libMesh::DenseVector<Real> solution);
@@ -113,6 +119,7 @@ protected:
   unsigned int _n_pins;
   unsigned int _n_channels;
   unsigned int _block_size;
+  Real _outer_channels;
   /// axial location of nodes
   std::vector<Real> _z_grid;
   Real _one;
