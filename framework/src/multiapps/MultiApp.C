@@ -367,17 +367,26 @@ MultiApp::createApps()
                                 getParam<std::string>("library_name"),
                                 getParam<bool>("library_load_dependencies"));
 
-  int start_app = 0;
+  bool rank_did_quiet_init = false;
+  int local_app;
   if (_force_safe_app_init)
   {
-    if (_orig_rank == 0)
-      createLocalApp(start_app++);
+    if (hasLocalApp(0))
+    {
+      rank_did_quiet_init = true;
+      local_app = globalAppToLocal(0);
+      createLocalApp(local_app);
+    }
 
     MPI_Barrier(_orig_comm);
   }
 
-  for (unsigned int i = start_app; i < _my_num_apps; i++)
+  for (unsigned int i = 0; i < _my_num_apps; i++)
+  {
+    if (rank_did_quiet_init && i == local_app)
+      continue;
     createLocalApp(i);
+  }
 }
 
 void
