@@ -191,8 +191,7 @@ void
 ADKernelTempl<T>::computeADJacobian()
 {
   computeResidualsForJacobian();
-
-  _assembly.processJacobian(_residuals, dofIndices(), _matrix_tags, _var.scalingFactor());
+  processJacobian(_assembly, _residuals, dofIndices(), _var.scalingFactor());
 }
 
 template <typename T>

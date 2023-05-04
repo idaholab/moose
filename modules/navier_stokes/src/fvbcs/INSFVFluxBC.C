@@ -33,5 +33,8 @@ INSFVFluxBC::processResidualAndJacobian(const ADReal & residual)
                                 : _face_info->neighborPtr();
   const auto dof_index = elem->dof_number(_sys.number(), _var.number(), 0);
 
-  _assembly.processResidualAndJacobian(residual, dof_index, _vector_tags, _matrix_tags);
+  processResidualsAndJacobian(_assembly,
+                              std::array<ADReal, 1>{{residual}},
+                              std::vector<dof_id_type>{{dof_index}},
+                              _var.scalingFactor());
 }

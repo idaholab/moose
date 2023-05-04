@@ -63,10 +63,8 @@ KernelScalarBase::computeScalarResidual()
       scalar_residuals[_h] += _JxW[_qp] * _coord[_qp] * computeScalarQpResidual();
   }
 
-  _assembly.processResiduals(scalar_residuals,
-                             _kappa_var_ptr->dofIndices(),
-                             _vector_tags,
-                             _kappa_var_ptr->scalingFactor());
+  processResiduals(
+      _assembly, scalar_residuals, _kappa_var_ptr->dofIndices(), _kappa_var_ptr->scalingFactor());
 }
 
 void

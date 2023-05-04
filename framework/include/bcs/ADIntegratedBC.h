@@ -89,11 +89,6 @@ protected:
 
 private:
   /**
-   * Add the Jacobian contribution for the provided variable
-   */
-  void addJacobian(const MooseVariableFieldBase & jvar);
-
-  /**
    * compute all the Jacobian entries
    */
   void computeADJacobian();

@@ -133,9 +133,9 @@ public:
   /**
    * Process the provided incoming residuals corresponding to the provided dof indices
    */
-  template <typename T>
+  template <typename Residuals>
   void processResiduals(Assembly & assembly,
-                        const std::vector<T> & residuals,
+                        const Residuals & residuals,
                         const std::vector<dof_id_type> & dof_indices,
                         Real scaling_factor);
 
@@ -143,10 +143,51 @@ public:
    * Process the provided incoming residuals and derivatives for the Jacobian, corresponding to the
    * provided dof indices
    */
+  template <typename Residuals>
   void processResidualsAndJacobian(Assembly & assembly,
-                                   const std::vector<ADReal> & residuals,
+                                   const Residuals & residuals,
                                    const std::vector<dof_id_type> & dof_indices,
                                    Real scaling_factor);
+
+  /**
+   * Process the provided incoming residualsderivatives for the Jacobian, corresponding to the
+   * provided dof indices
+   */
+  template <typename Residuals>
+  void processJacobian(Assembly & assembly,
+                       const Residuals & residuals,
+                       const std::vector<dof_id_type> & dof_indices,
+                       Real scaling_factor);
+
+  /**
+   * Process the provided incoming residuals corresponding to the provided dof indices without
+   * constraints
+   */
+  template <typename Residuals>
+  void processResidualsWithoutConstraints(Assembly & assembly,
+                                          const Residuals & residuals,
+                                          const std::vector<dof_id_type> & dof_indices,
+                                          Real scaling_factor);
+
+  /**
+   * Process the provided incoming residuals and derivatives for the Jacobian, corresponding to the
+   * provided dof indices without constraints
+   */
+  template <typename Residuals>
+  void processResidualsAndJacobianWithoutConstraints(Assembly & assembly,
+                                                     const Residuals & residuals,
+                                                     const std::vector<dof_id_type> & dof_indices,
+                                                     Real scaling_factor);
+
+  /**
+   * Process the provided incoming residualsderivatives for the Jacobian, corresponding to the
+   * provided dof indices without constraints
+   */
+  template <typename Residuals>
+  void processJacobianWithoutConstraints(Assembly & assembly,
+                                         const Residuals & residuals,
+                                         const std::vector<dof_id_type> & dof_indices,
+                                         Real scaling_factor);
 
 protected:
   /// The residual tag ids this Kernel will contribute to
@@ -201,10 +242,10 @@ private:
   using TaggingInterface::prepareMatrixTagLower;                                                   \
   using TaggingInterface::_local_ke
 
-template <typename T>
+template <typename Residuals>
 void
 TaggingInterface::processResiduals(Assembly & assembly,
-                                   const std::vector<T> & residuals,
+                                   const Residuals & residuals,
                                    const std::vector<dof_id_type> & dof_indices,
                                    const Real scaling_factor)
 {
@@ -217,4 +258,66 @@ TaggingInterface::processResiduals(Assembly & assembly,
 
     assembly.processResiduals(_absolute_residuals, dof_indices, _abs_vector_tags, scaling_factor);
   }
+}
+
+template <typename Residuals>
+void
+TaggingInterface::processResidualsWithoutConstraints(Assembly & assembly,
+                                                     const Residuals & residuals,
+                                                     const std::vector<dof_id_type> & dof_indices,
+                                                     const Real scaling_factor)
+{
+  assembly.processResidualsWithoutConstraints(residuals, dof_indices, _vector_tags, scaling_factor);
+  if (!_abs_vector_tags.empty())
+  {
+    _absolute_residuals.resize(residuals.size());
+    for (const auto i : index_range(residuals))
+      _absolute_residuals[i] = std::abs(MetaPhysicL::raw_value(residuals[i]));
+
+    assembly.processResidualsWithoutConstraints(
+        _absolute_residuals, dof_indices, _abs_vector_tags, scaling_factor);
+  }
+}
+
+template <typename Residuals>
+void
+TaggingInterface::processResidualsAndJacobian(Assembly & assembly,
+                                              const Residuals & residuals,
+                                              const std::vector<dof_id_type> & dof_indices,
+                                              Real scaling_factor)
+{
+  processResiduals(assembly, residuals, dof_indices, scaling_factor);
+  processJacobian(assembly, residuals, dof_indices, scaling_factor);
+}
+
+template <typename Residuals>
+void
+TaggingInterface::processJacobian(Assembly & assembly,
+                                  const Residuals & residuals,
+                                  const std::vector<dof_id_type> & dof_indices,
+                                  Real scaling_factor)
+{
+  assembly.processJacobian(residuals, dof_indices, _matrix_tags, scaling_factor);
+}
+
+template <typename Residuals>
+void
+TaggingInterface::processResidualsAndJacobianWithoutConstraints(
+    Assembly & assembly,
+    const Residuals & residuals,
+    const std::vector<dof_id_type> & dof_indices,
+    Real scaling_factor)
+{
+  processResidualsWithoutConstraints(assembly, residuals, dof_indices, scaling_factor);
+  processJacobianWithoutConstraints(assembly, residuals, dof_indices, scaling_factor);
+}
+
+template <typename Residuals>
+void
+TaggingInterface::processJacobianWithoutConstraints(Assembly & assembly,
+                                                    const Residuals & residuals,
+                                                    const std::vector<dof_id_type> & dof_indices,
+                                                    Real scaling_factor)
+{
+  assembly.processJacobianWithoutConstraints(residuals, dof_indices, _matrix_tags, scaling_factor);
 }

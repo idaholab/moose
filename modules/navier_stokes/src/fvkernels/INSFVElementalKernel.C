@@ -26,5 +26,8 @@ void
 INSFVElementalKernel::processResidualAndJacobian(const ADReal & residual,
                                                  const dof_id_type dof_index)
 {
-  _assembly.processResidualAndJacobian(residual, dof_index, _vector_tags, _matrix_tags);
+  processResidualsAndJacobian(_assembly,
+                              std::array<ADReal, 1>{{residual}},
+                              std::vector<dof_id_type>{{dof_index}},
+                              _var.scalingFactor());
 }

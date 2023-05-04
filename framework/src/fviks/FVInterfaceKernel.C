@@ -167,9 +167,14 @@ FVInterfaceKernel::processResidual(const Real resid,
 }
 
 void
-FVInterfaceKernel::processJacobian(const ADReal & resid, const dof_id_type dof_index)
+FVInterfaceKernel::processJacobian(const ADReal & resid,
+                                   const dof_id_type dof_index,
+                                   const Real scaling_factor)
 {
-  _assembly.processJacobian(resid, dof_index, _matrix_tags);
+  processJacobian(_assembly,
+                  std::array<ADReal, 1>{{resid}},
+                  std::vector<dof_id_type>{{dof_index}},
+                  scaling_factor);
 }
 
 void
@@ -202,11 +207,15 @@ FVInterfaceKernel::computeJacobian(const FaceInfo & fi)
       _elem_is_one ? _var2.dofIndicesNeighbor() : _var1.dofIndicesNeighbor();
   mooseAssert((elem_dof_indices.size() == 1) && (neigh_dof_indices.size() == 1),
               "We're currently built to use CONSTANT MONOMIALS");
+  const auto elem_scaling_factor = _elem_is_one ? _var1.scalingFactor() : _var2.scalingFactor();
+  const auto neigh_scaling_factor = _elem_is_one ? _var2.scalingFactor() : _var1.scalingFactor();
 
   const auto r = fi.faceArea() * fi.faceCoord() * computeQpResidual();
 
-  _assembly.processResidualAndJacobian(r, elem_dof_indices[0], _vector_tags, _matrix_tags);
-  _assembly.processResidualAndJacobian(-r, neigh_dof_indices[0], _vector_tags, _matrix_tags);
+  processResidualsAndJacobian(
+      _assembly, std::array<ADReal, 1>{{r}}, elem_dof_indices, elem_scaling_factor);
+  processResidualsAndJacobian(
+      _assembly, std::array<ADReal, 1>{{-r}}, neigh_dof_indices, neigh_scaling_factor);
 }
 
 Moose::ElemArg

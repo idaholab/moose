@@ -300,14 +300,3 @@ TaggingInterface::assignTaggedLocalMatrix()
 }
 
 TaggingInterface::~TaggingInterface() {}
-
-void
-TaggingInterface::processResidualsAndJacobian(Assembly & assembly,
-                                              const std::vector<ADReal> & residuals,
-                                              const std::vector<dof_id_type> & dof_indices,
-                                              Real scaling_factor)
-{
-  processResiduals(assembly, residuals, dof_indices, scaling_factor);
-
-  assembly.processJacobian(residuals, dof_indices, _matrix_tags, scaling_factor);
-}
