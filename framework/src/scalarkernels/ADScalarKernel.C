@@ -69,13 +69,5 @@ ADScalarKernel::computeADJacobian()
   for (_i = 0; _i < _var.order(); _i++)
     _residuals[_i] = computeQpResidual();
 
-  auto local_functor =
-      [&](const std::vector<ADReal> &, const std::vector<dof_id_type> &, const std::set<TagID> &)
-  {
-    mooseError("This functor should never be called; ADScalarKernel can only be used with "
-               "global AD indexing.");
-  };
-
-  _assembly.processJacobian(
-      _residuals, _var.dofIndices(), _matrix_tags, _var.scalingFactor(), local_functor);
+  _assembly.processJacobian(_residuals, _var.dofIndices(), _matrix_tags, _var.scalingFactor());
 }
