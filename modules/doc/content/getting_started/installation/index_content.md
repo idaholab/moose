@@ -7,7 +7,7 @@ choice:
 - [Pre-Built MOOSE](installation/moose_conda_binary.md) (Excellent for Training)
 - [Docker](installation/docker.md)
 - [Windows Subsystem for Linux](installation/windows.md)
-- [INL's HPC Pre-Built MOOSE](installation/inl_hpc_prebuilt_moose.md)
+- [INL's HPC Pre-Built MOOSE](installation/inl_hpc_prebuilt_moose.md) (Excellent for Training)
 - Optional packages:
 
   - [installation/install_libtorch.md]

@@ -50,15 +50,16 @@ A MOOSE installation binary comes with several examples you can run to make sure
 is sound, as well as moving some of the example inputs into a safe location you can play with.
 !style-end!
 
-There are examples for each physic solver available by name, in the following directory:
+There are examples for each physics solver available by name, in the following directory:
 
 ```bash
 ls $CONDA_PREFIX/moose/share/combined
 ```
 
 !alert! note
-Not everything you find in this directory is a physic library. We are working on an elegant way to
+Not everything you find in this directory is a physics library. We are working on an elegant way to
 ask `moose` for all available solvers.
+!alert-end!
 
 For now, lets copy the reactor module into a safe location for editing:
 
@@ -68,7 +69,12 @@ cd ~/projects/examples
 moose --copy-inputs reactor_workshop
 ```
 
-With the reactor module's examples/inputs/tests copied, move into reactor workshop directory and
+!alert! note
+Take note of the information being displayed in the output. `moose` is alerting to the directory
+structure it created. Which can sometimes not represent the exact wordage you provided as arguments.
+!alert-end!
+
+With the reactor module's examples and inputs copied, move into the reactor workshop directory and
 instruct `moose` to run the tests:
 
 ```bash
@@ -76,6 +82,64 @@ cd combined/reactor_workshop
 moose --run -j 6
 ```
 
+Testing will commence and take a few moments to finish. There may be several skipped tests for one
+reason or another. This is normal. However no test should fail.
+
+Next, we will run a single test manually, to demonstrate how you will ultimately be using `moose`.
+Navigate to the following directory, and run the following input file:
+
+```bash
+cd ~/projects/examples/combined/reactor_workshop/tests/reactor_examples/abtr/
+moose -i abtr.i --mesh-only --error-deprecated
+```
+
+You will see some information scroll by, and ultimately end back up at your prompt. If you perform a
+direcotry listing you should also see that an exodus file was generated in the process
+(`abtr_in.e`):
+
+```bash
+ls
+abtr_griffin_snippet.i  abtr.i  abtr_in.e
+```
+
+## Viewing Results
+
+!style! halign=left
+`abtr_in.e` can be opened with [Paraview](https://www.paraview.org/). A free tool available for all
+major operating systems for viewing mesh files of many sorts (including Exodus). Paraview is also
+available from Conda!
+!style-end!
+
+!alert! warning
+If you are interested in installing this package using Conda, you will need to do so in a new
+environment. As the `moose` environment you are using now is incompatible with some of the
+dependencies required. This means while you are running `moose` problems, you will need to be in the
+`moose` Conda environment. When you want to view results, you will need to be in `paraview`'s
+environment. Conda makes this easy, but it will be up to you to watch your prompt and understand
+when to activate one or the other.
+!alert-end!
+
+The easiest sollution is to open two terminal windows. While in one, you have `moose` activated.
+While in the other, you have `paraview` activated. Open a new terminal window now, and create the
+new `paraview` environment:
+
+```bash
+mamba activate base # just in case you have `moose` auto-activating
+mamba create -n paraview paraview
+mamba activate paraview
+```
+
+With paraview installed, you can now open `abtr_in.e` with the following command:
+
+```bash
+cd ~/projects/examples/combined/reactor_workshop/tests/reactor_examples/abtr/
+paraview abtr_in.e
+```
+
+!alert! note
+The very first time you attempt to run `paraview` it can take *minutes* before it launches.
+Consecutive launches are quick.
+!alert-end!
 
 ## More Examples
 

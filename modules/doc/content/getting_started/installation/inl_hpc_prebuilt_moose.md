@@ -23,8 +23,11 @@ module load use.moose moose-apps moose
 If you receive an error about modules not being known, please make sure you are logged into either
 Sawtooth or Lemhi.
 
+!alert tip
+In generally, Sawtooth may have a more up-to-date version.
+
 Once loaded, `moose` becomes available. You need now only provide input files to run simulations.
-Example input files are available within the MOOSE repository (next section).
+Example input files are also available while this module is loaded.
 
 ## Run an Example
 
@@ -33,15 +36,16 @@ HPC Pre-Built MOOSE comes with several examples you can run to make sure everyth
 well as moving some of the example inputs into a safe location you can play with.
 !style-end!
 
-There are examples for each physic solver available by name, in the following directory:
+There are examples for each physics solver available by name, in the following directory:
 
 ```bash
 ls $MOOSE_DIR/moose/share/combined
 ```
 
 !alert! note
-Not everything you find in this directory is a physic library. We are working on an elegant way to
+Not everything you find in this directory is a physics library. We are working on an elegant way to
 ask `moose` for all available solvers.
+!alert-end!
 
 For now, lets copy the reactor module into a safe location for editing:
 
@@ -51,13 +55,40 @@ cd ~/projects/examples
 moose --copy-inputs reactor_workshop
 ```
 
-With the reactor module's examples/inputs/tests copied, move into reactor workshop directory and
+!alert! note
+Take note of the information being displayed in the output. `moose` is alerting to the directory
+structure it created. Which can sometimes not represent the exact wordage you provided as arguments.
+!alert-end!
+
+With the reactor module's examples and inputs copied, move into the reactor workshop directory and
 instruct `moose` to run the tests:
 
 ```bash
 cd combined/reactor_workshop
 moose --run -j 6
 ```
+
+Testing will commence and take a few moments to finish. There may be several skipped tests for one
+reason or another. This is normal. However no test should fail.
+
+Next, we will run a single test manually, to demonstrate how you will ultimately be using `moose`.
+Navigate to the following directory, and run the following input file:
+
+```bash
+cd ~/projects/examples/combined/reactor_workshop/tests/reactor_examples/abtr/
+moose -i abtr.i --mesh-only --error-deprecated
+```
+
+You will see some information scroll by, and ultimately end back up at your prompt. If you perform a
+direcotry listing you should also see that an exodus file was generated in the process
+(`abtr_in.e`):
+
+```bash
+ls
+abtr_griffin_snippet.i  abtr.i  abtr_in.e
+```
+
+You can follow the instructions in the next section to use Paraview, to view this result.
 
 ## View Results
 
@@ -83,11 +114,10 @@ paraview
 Paraview should open. From here, you can select `File`, `Open`, and navigate to
 
 ```pre
-~/projects/moose/examples/ex01_inputfile
+~/projects/examples/combined/reactor_workshop/tests/reactor_examples/abtr/
 ```
 
-You should see your results file listed (`ex01_out.e`). Double click this file and enjoy the
-results!
+You should see the same `abtr_in.e` file. Double click on it, and Paraview should open it!
 
 In many cases it is more desirable to view results using your local machine. This is done by copying
 result files from the remote machine to your local machine using `scp` or `rsnyc`.
@@ -102,8 +132,12 @@ Downloads folder:
 
 ```bash
 cd ~/Downloads
-scp <your hpc user id>@hpclogin:~/projects/moose/examples/ex01_inputfile/ex01_out.e .
+scp <your hpc user id>@hpclogin:~/projects/examples/combined/reactor_workshop/tests/reactor_examples/abtr/abtr_in.e .
 ```
+
+!alert! note
+Perform the above command while on your machine. Not while on an HPC machine.
+!alert-end!
 
 ## Examples
 
