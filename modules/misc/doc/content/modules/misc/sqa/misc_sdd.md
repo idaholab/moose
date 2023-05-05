@@ -1,6 +1,7 @@
 !template load file=sqa/module_sdd.md.template category=misc module=Misc
+
 !template! item key=introduction
- The [!ac](MOOSE) {{module}} module provides a set of models that are used to support a variety of simulations performed using other MOOSE modules or MOOSE-based applications. This module relies on MOOSE for solving the systems of equations that are primarily defined by code outside this module, and simply provides commonly-used code modules that can support those calculations. This document describes the system design of the {{module}} module.
+ The [!ac](MOOSE) {{module}} module provides a set of objects that are used to support a variety of simulations performed using other MOOSE modules or MOOSE-based applications. This module relies on MOOSE for solving the systems of equations that are primarily defined by code outside this module, and simply provides commonly-used code objects that can support those calculations. This document describes the system design of the {{module}} module.
 !template-end!
 
 !template! item key=system-scope
@@ -22,5 +23,5 @@ The {{module}} module provides several specializations of MOOSE classes that are
 !template-end!
 
 !template! item key=system-structure
-The [!ac](MOOSE) {{module}} module relies on the MOOSE framework to provide the core functionality of solving multiphysics problems using the finite element method. The structure of the {{module}} module is based on defining C++ classes that derive from classes in the MOOSE framework to provide functionality for solution of a variety of physics problems. By using the interfaces defined in MOOSE base classes for these classes, this module is able to rely on MOOSE to execute these models at the appropriate times during the simulation and use their results in the desired ways.
+The [!ac](MOOSE) {{module}} module relies on the MOOSE framework to provide the core functionality of solving multiphysics problems using the finite element method. The structure of the {{module}} module is based on defining C++ classes that derive from base classes in the MOOSE framework to provide functionality for solution of a variety of physics problems. By using the interfaces defined in MOOSE for these classes, this module is able to rely on MOOSE to execute these models at the appropriate times during the simulation and use their results in the desired ways.
 !template-end!

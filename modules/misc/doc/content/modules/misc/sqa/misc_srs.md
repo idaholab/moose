@@ -4,7 +4,7 @@
 !! system-scope-begin
 The [!ac](MOOSE) Misc module is designed only to provide code modules that support the solution of physics models that are primarily defined by other MOOSE modules and MOOSE-based applications.
 
-The {{module}} module provides several specializations of MOOSE classes that are used to support calculations performed in a variety of physics calculations. These include `Kernel`, `AuxKernel`, `Material` and `Postprocessor` classes that computing terms in diffusion equations, compute density, internal volume, and perform other similar functions.
+The Misc module provides several specializations of MOOSE classes that are used to support calculations performed in a variety of physics calculations. These include `Kernel`, `AuxKernel`, `Material` and `Postprocessor` classes that computing terms in diffusion equations, compute density, internal volume, and perform other similar functions.
 !! system-scope-finish
 !template-end!
 

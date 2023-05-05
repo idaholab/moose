@@ -14,7 +14,7 @@ The module also comprises a set of initial conditions to set up common microstru
 
 !template! item key=system-purpose
 !! system-purpose-begin
-The purpose of the [!ac](MOOSE) Phase Field module is to provide the foundational capabilities for phase field modeling of microstructure evolution. It implements commons single- and multi-phase phase field formalisms and enables teh modeling of multicomponent systems. It is intended to both provide a basic set of capabilities and also be readily extensible by applications based on it to represent specialized material behavior.
+The purpose of the [!ac](MOOSE) Phase Field module is to provide the foundational capabilities for phase field modeling of microstructure evolution. It implements common single- and multi-phase phase field formalisms and enables the modeling of multicomponent systems. It is intended to both provide a basic set of capabilities and also be readily extensible by applications based on it to represent specialized material behavior.
 !! system-purpose-finish
 !template-end!
 
