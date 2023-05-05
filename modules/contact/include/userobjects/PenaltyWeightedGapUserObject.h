@@ -14,7 +14,7 @@
 
 template <typename>
 class MooseVariableFE;
-class AugmentedLagrangianContactProblem;
+class AugmentedLagrangianContactProblemInterface;
 
 /**
  * User object for computing weighted gaps and contact pressure for penalty based
@@ -62,7 +62,7 @@ protected:
   std::unordered_map<const DofObject *, ADReal> _dof_to_normal_pressure;
 
   ///@{ augmented Lagrange probmen and iteration number
-  AugmentedLagrangianContactProblem * const _augmented_lagrange_problem;
+  AugmentedLagrangianContactProblemInterface * const _augmented_lagrange_problem;
   const static unsigned int _no_iterations;
   const unsigned int & _lagrangian_iteration_number;
   ///@}

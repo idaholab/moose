@@ -22,9 +22,7 @@ public:
   WeightedVelocitiesUserObject(const InputParameters & parameters);
 
   virtual void initialize() override;
-  virtual void execute() override;
   virtual void finalize() override;
-  virtual void initialSetup() override;
 
   /**
    * Get the degree of freedom to weighted velocities information

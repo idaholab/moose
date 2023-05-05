@@ -15,7 +15,7 @@
 
 // Forward Declarations
 class ContactLineSearchBase;
-class AugmentedLagrangianContactProblem;
+class AugmentedLagrangianContactProblemInterface;
 enum class ContactModel;
 enum class ContactFormulation;
 
@@ -146,7 +146,7 @@ protected:
   const bool _print_contact_nodes;
   static Threads::spin_mutex _contact_set_mutex;
 
-  AugmentedLagrangianContactProblem * const _augmented_lagrange_problem;
+  AugmentedLagrangianContactProblemInterface * const _augmented_lagrange_problem;
   const static unsigned int _no_iterations;
   const unsigned int & _lagrangian_iteration_number;
 

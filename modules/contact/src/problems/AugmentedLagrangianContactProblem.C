@@ -28,63 +28,81 @@
 #include "PenaltyMortarAugmentedLagrangeInterface.h"
 
 registerMooseObject("ContactApp", AugmentedLagrangianContactProblem);
+registerMooseObject("ContactApp", AugmentedLagrangianContactFEProblem);
 
 InputParameters
-AugmentedLagrangianContactProblem::validParams()
+AugmentedLagrangianContactProblemInterface::validParams()
 {
-  InputParameters params = ReferenceResidualProblem::validParams();
+  auto params = emptyInputParameters();
   params.addParam<int>("maximum_lagrangian_update_iterations",
                        100,
                        "Maximum number of update Lagrangian Multiplier iterations per step");
+  return params;
+}
+
+AugmentedLagrangianContactProblemInterface::AugmentedLagrangianContactProblemInterface(
+    const InputParameters & params)
+  : _maximum_number_lagrangian_iterations(params.get<int>("maximum_lagrangian_update_iterations"))
+{
+}
+
+template <class T>
+InputParameters
+AugmentedLagrangianContactProblemTempl<T>::validParams()
+{
+  InputParameters params = T::validParams();
+  params += AugmentedLagrangianContactProblemInterface::validParams();
   params.addClassDescription("Manages nested solution for augmented Lagrange contact");
   return params;
 }
 
-AugmentedLagrangianContactProblem::AugmentedLagrangianContactProblem(const InputParameters & params)
-  : ReferenceResidualProblem(params),
-    _maximum_number_lagrangian_iterations(getParam<int>("maximum_lagrangian_update_iterations"))
+template <class T>
+AugmentedLagrangianContactProblemTempl<T>::AugmentedLagrangianContactProblemTempl(
+    const InputParameters & params)
+  : T(params), AugmentedLagrangianContactProblemInterface(params)
 {
 }
 
+template <class T>
 void
-AugmentedLagrangianContactProblem::timestepSetup()
+AugmentedLagrangianContactProblemTempl<T>::timestepSetup()
 {
   _lagrangian_iteration_number = 0;
-  ReferenceResidualProblem::timestepSetup();
+  T::timestepSetup();
 }
 
+template <class T>
 MooseNonlinearConvergenceReason
-AugmentedLagrangianContactProblem::checkNonlinearConvergence(std::string & msg,
-                                                             const PetscInt it,
-                                                             const Real xnorm,
-                                                             const Real snorm,
-                                                             const Real fnorm,
-                                                             const Real rtol,
-                                                             const Real divtol,
-                                                             const Real stol,
-                                                             const Real abstol,
-                                                             const PetscInt nfuncs,
-                                                             const PetscInt /*max_funcs*/,
-                                                             const Real ref_resid,
-                                                             const Real /*div_threshold*/)
+AugmentedLagrangianContactProblemTempl<T>::checkNonlinearConvergence(std::string & msg,
+                                                                     const PetscInt it,
+                                                                     const Real xnorm,
+                                                                     const Real snorm,
+                                                                     const Real fnorm,
+                                                                     const Real rtol,
+                                                                     const Real divtol,
+                                                                     const Real stol,
+                                                                     const Real abstol,
+                                                                     const PetscInt nfuncs,
+                                                                     const PetscInt /*max_funcs*/,
+                                                                     const Real ref_resid,
+                                                                     const Real /*div_threshold*/)
 {
   Real my_max_funcs = std::numeric_limits<int>::max();
   Real my_div_threshold = std::numeric_limits<Real>::max();
 
-  MooseNonlinearConvergenceReason reason =
-      ReferenceResidualProblem::checkNonlinearConvergence(msg,
-                                                          it,
-                                                          xnorm,
-                                                          snorm,
-                                                          fnorm,
-                                                          rtol,
-                                                          divtol,
-                                                          stol,
-                                                          abstol,
-                                                          nfuncs,
-                                                          my_max_funcs,
-                                                          ref_resid,
-                                                          my_div_threshold);
+  MooseNonlinearConvergenceReason reason = T::checkNonlinearConvergence(msg,
+                                                                        it,
+                                                                        xnorm,
+                                                                        snorm,
+                                                                        fnorm,
+                                                                        rtol,
+                                                                        divtol,
+                                                                        stol,
+                                                                        abstol,
+                                                                        nfuncs,
+                                                                        my_max_funcs,
+                                                                        ref_resid,
+                                                                        my_div_threshold);
 
   _console << "Augmented Lagrangian contact iteration " << _lagrangian_iteration_number
            << std::endl;
@@ -152,7 +170,7 @@ AugmentedLagrangianContactProblem::checkNonlinearConvergence(std::string & msg,
       std::list<PenaltyMortarAugmentedLagrangeInterface *> pmuos;
       theWarehouse()
           .query()
-          .condition<AttribInterfaces>(Interfaces::MortarUserObject)
+          .template condition<AttribInterfaces>(Interfaces::MortarUserObject)
           .queryInto(mortar_uos);
       for (auto * muo : mortar_uos)
         if (auto * pmuo = dynamic_cast<PenaltyMortarAugmentedLagrangeInterface *>(muo); pmuo)
@@ -198,3 +216,6 @@ AugmentedLagrangianContactProblem::checkNonlinearConvergence(std::string & msg,
 
   return reason;
 }
+
+template class AugmentedLagrangianContactProblemTempl<ReferenceResidualProblem>;
+template class AugmentedLagrangianContactProblemTempl<FEProblem>;

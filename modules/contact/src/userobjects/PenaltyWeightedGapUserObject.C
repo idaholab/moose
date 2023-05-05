@@ -43,7 +43,8 @@ PenaltyWeightedGapUserObject::PenaltyWeightedGapUserObject(const InputParameters
     _penalty(getParam<Real>("penalty")),
     _penalty_multiplier(getParam<Real>("penalty_multiplier")),
     _penetration_tolerance(getParam<Real>("penetration_tolerance")),
-    _augmented_lagrange_problem(dynamic_cast<AugmentedLagrangianContactProblem *>(&_fe_problem)),
+    _augmented_lagrange_problem(
+        dynamic_cast<AugmentedLagrangianContactProblemInterface *>(&_fe_problem)),
     _lagrangian_iteration_number(_augmented_lagrange_problem
                                      ? _augmented_lagrange_problem->getLagrangianIterationNumber()
                                      : _no_iterations),
@@ -173,16 +174,13 @@ PenaltyWeightedGapUserObject::updateAugmentedLagrangianMultipliers()
   // for (const auto & [dof_object, gap] : _dof_to_weighted_gap)
 
   for (auto & [dof_object, lagrange_multiplier] : _dof_to_lagrange_multiplier)
-  {
-    const auto & gap =
-        MetaPhysicL::raw_value(libmesh_map_find(_dof_to_weighted_gap, dof_object).first);
-    lagrange_multiplier += -gap * _penalty;
-    if (lagrange_multiplier < 0.0)
-      lagrange_multiplier = 0.0;
-
-    // const auto gap_for_calc = gap.first < 0 ? MetaPhysicL::raw_value(-gap.first) : 0.0;
-    // _dof_to_lagrange_multiplier[dof_object] += gap_for_calc * _penalty;
-  }
+    if (auto it = _dof_to_weighted_gap.find(dof_object); it != _dof_to_weighted_gap.end())
+    {
+      const auto & gap = MetaPhysicL::raw_value(it->second.first);
+      lagrange_multiplier += -gap * _penalty;
+      if (lagrange_multiplier < 0.0)
+        lagrange_multiplier = 0.0;
+    }
 
   std::cout << "new LMs: ";
   for (const auto & [dof_object, lagrange_multiplier] : _dof_to_lagrange_multiplier)

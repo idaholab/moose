@@ -317,12 +317,6 @@ PenaltyFrictionUserObject::isContactConverged()
   if (!PenaltyWeightedGapUserObject::isContactConverged())
     return false;
 
-  // next check frictional convergence
-  std::cout << "Gap: ";
-  for (const auto & [dof_object, gap] : _dof_to_weighted_gap)
-    std::cout << physicalGap(gap) << ' ';
-  std::cout << '\n';
-
   // check if penetration is below threshold
   for (const auto & [dof_object, gap] : _dof_to_weighted_gap)
     if (physicalGap(gap) < -_penetration_tolerance ||
