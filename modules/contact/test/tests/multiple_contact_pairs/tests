@@ -38,8 +38,8 @@
     issues = '#24122'
     input = 'three_hexagons_coarse.i'
     exodiff = 'three_hexagons_coarse_automatic_pair_reference_out.e'
-    cli_args = "Postprocessors/active='' Contact/contact_pressure/secondary='201 301 301' "
-               "Contact/contact_pressure/primary='102 102 201' "
+    cli_args = "Postprocessors/active='' Contact/contact_pressure/secondary='102 102 201' "
+               "Contact/contact_pressure/primary='201 301 301' "
                "Outputs/file_base=three_hexagons_coarse_automatic_pair_reference_out"
     requirement = 'The system shall assign and accumulate a single contact pressure auxiliary '
                   'variable for all contact pairs supplied to a single contact action object with a '

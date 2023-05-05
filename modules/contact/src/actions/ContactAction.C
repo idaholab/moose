@@ -1188,7 +1188,18 @@ ContactAction::createSidesetPairsFromGeometry()
 
   // Create the boundary pairs (possibly with repeated pairs depending on user input)
   for (const auto & lean_pairs_distance : lean_pairs_distances)
-    _boundary_pairs.push_back({lean_pairs_distance.first.first, lean_pairs_distance.first.second});
+  {
+    // Make sure secondary surface's boundary ID is less than primary surface's boundary ID.
+    // This is done to ensure some consistency in the boundary matching, which helps in defining
+    // auxiliary kernels in the input file.
+    if (_mesh->getBoundaryID(lean_pairs_distance.first.first) >
+        _mesh->getBoundaryID(lean_pairs_distance.first.second))
+      _boundary_pairs.push_back(
+          {lean_pairs_distance.first.first, lean_pairs_distance.first.second});
+    else
+      _boundary_pairs.push_back(
+          {lean_pairs_distance.first.second, lean_pairs_distance.first.first});
+  }
 
   // Let's remove possibly repeated pairs
   removeRepeatedPairs();
