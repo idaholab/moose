@@ -73,8 +73,8 @@
   [contact_pressure]
     formulation = penalty
     model = frictionless
-    sideset_list = '102 201 301 401'
-    automatic_pair_distance = 2.75
+    automatic_pairing_boundaries = '102 201 301 401'
+    automatic_pairing_distance = 2.75
     penalty = 2e+03
     normalize_penalty = true
   []
