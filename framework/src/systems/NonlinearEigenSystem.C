@@ -147,8 +147,8 @@ NonlinearEigenSystem::postAddResidualObject(ResidualObject & object)
       !dynamic_cast<EigenArrayDirichletBC *>(&object))
     object.useMatrixTag(_precond_tag);
 
-  auto & vtags = object.getVectorTags();
-  auto & mtags = object.getMatrixTags();
+  auto & vtags = object.getVectorTags({});
+  auto & mtags = object.getMatrixTags({});
   // If it is an eigen kernel, mark its variable as eigen
   if (vtags.find(_Bx_tag) != vtags.end() || mtags.find(_B_tag) != mtags.end())
   {

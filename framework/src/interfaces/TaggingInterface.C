@@ -49,9 +49,9 @@ TaggingInterface::validParams()
 }
 
 TaggingInterface::TaggingInterface(const MooseObject * moose_object)
-  : _moose_object(*moose_object),
-    _tag_params(_moose_object.parameters()),
-    _subproblem(*_tag_params.getCheckedPointerParam<SubProblem *>("_subproblem"))
+  : _subproblem(*moose_object->parameters().getCheckedPointerParam<SubProblem *>("_subproblem")),
+    _moose_object(*moose_object),
+    _tag_params(_moose_object.parameters())
 {
   auto & vector_tag_names = _tag_params.get<MultiMooseEnum>("vector_tags");
 

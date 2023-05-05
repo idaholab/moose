@@ -84,11 +84,9 @@ ADNodalBCTempl<T>::processResidual(const ADResidual & residual,
   mooseAssert(dof_indices.size() <= _set_components.size(),
               "The number of dof indices must be less than the number of settable components");
 
-  for (auto tag_id : _vector_tags)
-    if (_sys.hasVector(tag_id))
-      for (const auto i : index_range(dof_indices))
-        if (_set_components[i])
-          _sys.getVector(tag_id).set(dof_indices[i], raw_value(conversionHelper(residual, i)));
+  for (const auto i : index_range(dof_indices))
+    if (_set_components[i])
+      setResidual(_sys, raw_value(conversionHelper(residual, i)), dof_indices[i]);
 }
 
 template <typename T>
@@ -104,8 +102,10 @@ ADNodalBCTempl<T>::processJacobian(const ADResidual & residual,
     if (_set_components[i])
       // If we store into the displaced assembly for nodal bc objects the data never actually makes
       // it into the global Jacobian
-      _undisplaced_assembly.processJacobianNoScaling(
-          conversionHelper(residual, i), dof_indices[i], _matrix_tags);
+      processJacobian(_undisplaced_assembly,
+                      std::array<ADReal, 1>{{conversionHelper(residual, i)}},
+                      std::array<dof_id_type, 1>{{dof_indices[i]}},
+                      /*scaling_factor=*/1);
 }
 
 template <typename T>

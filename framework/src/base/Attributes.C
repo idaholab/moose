@@ -109,7 +109,7 @@ AttribMatrixTags::initFrom(const MooseObject * obj)
   auto t = dynamic_cast<const TaggingInterface *>(obj);
   if (t)
   {
-    for (auto & tag : t->getMatrixTags())
+    for (auto & tag : t->getMatrixTags({}))
       _vals.push_back(static_cast<int>(tag));
   }
 }
@@ -121,7 +121,7 @@ AttribVectorTags::initFrom(const MooseObject * obj)
   auto t = dynamic_cast<const TaggingInterface *>(obj);
   if (t)
   {
-    for (auto & tag : t->getVectorTags())
+    for (auto & tag : t->getVectorTags({}))
       _vals.push_back(static_cast<int>(tag));
   }
 }

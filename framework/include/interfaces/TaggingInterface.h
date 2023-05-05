@@ -13,6 +13,8 @@
 #include "MooseTypes.h"
 #include "MultiMooseEnum.h"
 #include "Assembly.h"
+#include "SystemBase.h"
+#include "MooseVariableFE.h"
 
 #include "libmesh/dense_vector.h"
 #include "metaphysicl/raw_type.h"
@@ -48,10 +50,41 @@ public:
 
   bool isMatrixTagged() { return _matrix_tags.size() > 0; }
 
-  const std::set<TagID> & getVectorTags() const { return _vector_tags; }
+  /**
+   * Class that is used as a parameter to getVectorTags() that allows only
+   * AttribVectorTags methods to call it
+   */
+  class GetVectorTagsKey
+  {
+    friend class AttribVectorTags;
+    friend class NonlinearEigenSystem;
+    template <typename>
+    friend class MooseObjectTagWarehouse;
 
-  const std::set<TagID> & getMatrixTags() const { return _matrix_tags; }
+    GetVectorTagsKey() {}
+    GetVectorTagsKey(const GetVectorTagsKey &) {}
+  };
 
+  const std::set<TagID> & getVectorTags(GetVectorTagsKey) const { return _vector_tags; }
+
+  /**
+   * Class that is used as a parameter to getMatrixTags() that allows only
+   * AttribMatrixTags methods to call it
+   */
+  class GetMatrixTagsKey
+  {
+    friend class AttribMatrixTags;
+    friend class NonlinearEigenSystem;
+    template <typename>
+    friend class MooseObjectTagWarehouse;
+
+    GetMatrixTagsKey() {}
+    GetMatrixTagsKey(const GetMatrixTagsKey &) {}
+  };
+
+  const std::set<TagID> & getMatrixTags(GetMatrixTagsKey) const { return _matrix_tags; }
+
+protected:
   /**
    * Prepare data for computing element residual the according to active tags.
    * Residual blocks for different tags will be extracted from Assembly.
@@ -133,63 +166,119 @@ public:
   /**
    * Process the provided incoming residuals corresponding to the provided dof indices
    */
-  template <typename Residuals>
+  template <typename Residuals, typename Indices>
   void processResiduals(Assembly & assembly,
                         const Residuals & residuals,
-                        const std::vector<dof_id_type> & dof_indices,
+                        const Indices & dof_indices,
                         Real scaling_factor);
 
   /**
    * Process the provided incoming residuals and derivatives for the Jacobian, corresponding to the
    * provided dof indices
    */
-  template <typename Residuals>
+  template <typename Residuals, typename Indices>
   void processResidualsAndJacobian(Assembly & assembly,
                                    const Residuals & residuals,
-                                   const std::vector<dof_id_type> & dof_indices,
+                                   const Indices & dof_indices,
                                    Real scaling_factor);
 
   /**
    * Process the provided incoming residualsderivatives for the Jacobian, corresponding to the
    * provided dof indices
    */
-  template <typename Residuals>
+  template <typename Residuals, typename Indices>
   void processJacobian(Assembly & assembly,
                        const Residuals & residuals,
-                       const std::vector<dof_id_type> & dof_indices,
+                       const Indices & dof_indices,
                        Real scaling_factor);
 
   /**
    * Process the provided incoming residuals corresponding to the provided dof indices without
    * constraints
    */
-  template <typename Residuals>
+  template <typename Residuals, typename Indices>
   void processResidualsWithoutConstraints(Assembly & assembly,
                                           const Residuals & residuals,
-                                          const std::vector<dof_id_type> & dof_indices,
+                                          const Indices & dof_indices,
                                           Real scaling_factor);
 
   /**
    * Process the provided incoming residuals and derivatives for the Jacobian, corresponding to the
    * provided dof indices without constraints
    */
-  template <typename Residuals>
+  template <typename Residuals, typename Indices>
   void processResidualsAndJacobianWithoutConstraints(Assembly & assembly,
                                                      const Residuals & residuals,
-                                                     const std::vector<dof_id_type> & dof_indices,
+                                                     const Indices & dof_indices,
                                                      Real scaling_factor);
 
   /**
    * Process the provided incoming residualsderivatives for the Jacobian, corresponding to the
    * provided dof indices without constraints
    */
-  template <typename Residuals>
+  template <typename Residuals, typename Indices>
   void processJacobianWithoutConstraints(Assembly & assembly,
                                          const Residuals & residuals,
-                                         const std::vector<dof_id_type> & dof_indices,
+                                         const Indices & dof_indices,
                                          Real scaling_factor);
 
-protected:
+  /**
+   * Process a single Jacobian element
+   */
+  void processJacobianElement(Assembly & assembly,
+                              dof_id_type row_index,
+                              dof_id_type column_index,
+                              Real value,
+                              Real scaling_factor) = delete;
+
+  /**
+   * Process a local Jacobian matrix
+   */
+  void processJacobian(Assembly & assembly,
+                       const std::vector<dof_id_type> & row_indices,
+                       const std::vector<dof_id_type> & column_indices,
+                       DenseMatrix<Real> & local_k,
+                       Real scaling_factor) = delete;
+
+  /**
+   * Process a single Jacobian element
+   */
+  void processJacobianElement(Assembly & assembly,
+                              Real value,
+                              dof_id_type row_index,
+                              dof_id_type column_index,
+                              Real scaling_factor);
+
+  /**
+   * Process a local Jacobian matrix
+   */
+  void processJacobian(Assembly & assembly,
+                       DenseMatrix<Real> & local_k,
+                       const std::vector<dof_id_type> & row_indices,
+                       const std::vector<dof_id_type> & column_indices,
+                       Real scaling_factor);
+
+  /**
+   * Set residual using the variables' insertion API
+   */
+  template <typename T>
+  void setResidual(SystemBase & sys, const T & residual, MooseVariableFE<T> & var);
+
+  /**
+   * Set residual at a specified degree of freedom index
+   */
+  void setResidual(SystemBase & sys, Real residual, dof_id_type dof_index);
+
+  /// SubProblem that contains tag info
+  SubProblem & _subproblem;
+
+  /// Holds residual entries as they are accumulated by this Kernel
+  DenseVector<Number> _local_re;
+
+  /// Holds residual entries as they are accumulated by this Kernel
+  DenseMatrix<Number> _local_ke;
+
+private:
   /// The residual tag ids this Kernel will contribute to
   std::set<TagID> _vector_tags;
 
@@ -205,9 +294,6 @@ protected:
   /// Parameters from moose object
   const InputParameters & _tag_params;
 
-  /// SubProblem that contains tag info
-  SubProblem & _subproblem;
-
   /// Residual blocks Vectors For each Tag
   std::vector<DenseVector<Number> *> _re_blocks;
 
@@ -217,13 +303,6 @@ protected:
   /// Kernel blocks Vectors For each Tag
   std::vector<DenseMatrix<Number> *> _ke_blocks;
 
-  /// Holds residual entries as they are accumulated by this Kernel
-  DenseVector<Number> _local_re;
-
-  /// Holds residual entries as they are accumulated by this Kernel
-  DenseMatrix<Number> _local_ke;
-
-private:
   /// A container to hold absolute values of residuals passed into \p processResiduals. We maintain
   /// this data member to avoid constant dynamic heap allocations
   std::vector<Real> _absolute_residuals;
@@ -242,11 +321,11 @@ private:
   using TaggingInterface::prepareMatrixTagLower;                                                   \
   using TaggingInterface::_local_ke
 
-template <typename Residuals>
+template <typename Residuals, typename Indices>
 void
 TaggingInterface::processResiduals(Assembly & assembly,
                                    const Residuals & residuals,
-                                   const std::vector<dof_id_type> & dof_indices,
+                                   const Indices & dof_indices,
                                    const Real scaling_factor)
 {
   assembly.processResiduals(residuals, dof_indices, _vector_tags, scaling_factor);
@@ -260,11 +339,11 @@ TaggingInterface::processResiduals(Assembly & assembly,
   }
 }
 
-template <typename Residuals>
+template <typename Residuals, typename Indices>
 void
 TaggingInterface::processResidualsWithoutConstraints(Assembly & assembly,
                                                      const Residuals & residuals,
-                                                     const std::vector<dof_id_type> & dof_indices,
+                                                     const Indices & dof_indices,
                                                      const Real scaling_factor)
 {
   assembly.processResidualsWithoutConstraints(residuals, dof_indices, _vector_tags, scaling_factor);
@@ -279,45 +358,82 @@ TaggingInterface::processResidualsWithoutConstraints(Assembly & assembly,
   }
 }
 
-template <typename Residuals>
+template <typename Residuals, typename Indices>
 void
 TaggingInterface::processResidualsAndJacobian(Assembly & assembly,
                                               const Residuals & residuals,
-                                              const std::vector<dof_id_type> & dof_indices,
+                                              const Indices & dof_indices,
                                               Real scaling_factor)
 {
   processResiduals(assembly, residuals, dof_indices, scaling_factor);
   processJacobian(assembly, residuals, dof_indices, scaling_factor);
 }
 
-template <typename Residuals>
+template <typename Residuals, typename Indices>
 void
 TaggingInterface::processJacobian(Assembly & assembly,
                                   const Residuals & residuals,
-                                  const std::vector<dof_id_type> & dof_indices,
+                                  const Indices & dof_indices,
                                   Real scaling_factor)
 {
   assembly.processJacobian(residuals, dof_indices, _matrix_tags, scaling_factor);
 }
 
-template <typename Residuals>
+template <typename Residuals, typename Indices>
 void
-TaggingInterface::processResidualsAndJacobianWithoutConstraints(
-    Assembly & assembly,
-    const Residuals & residuals,
-    const std::vector<dof_id_type> & dof_indices,
-    Real scaling_factor)
+TaggingInterface::processResidualsAndJacobianWithoutConstraints(Assembly & assembly,
+                                                                const Residuals & residuals,
+                                                                const Indices & dof_indices,
+                                                                Real scaling_factor)
 {
   processResidualsWithoutConstraints(assembly, residuals, dof_indices, scaling_factor);
   processJacobianWithoutConstraints(assembly, residuals, dof_indices, scaling_factor);
 }
 
-template <typename Residuals>
+template <typename Residuals, typename Indices>
 void
 TaggingInterface::processJacobianWithoutConstraints(Assembly & assembly,
                                                     const Residuals & residuals,
-                                                    const std::vector<dof_id_type> & dof_indices,
+                                                    const Indices & dof_indices,
                                                     Real scaling_factor)
 {
   assembly.processJacobianWithoutConstraints(residuals, dof_indices, _matrix_tags, scaling_factor);
+}
+
+inline void
+TaggingInterface::processJacobianElement(Assembly & assembly,
+                                         const Real value,
+                                         const dof_id_type row_index,
+                                         const dof_id_type column_index,
+                                         const Real scaling_factor)
+{
+  assembly.cacheJacobian(row_index, column_index, value * scaling_factor, _matrix_tags);
+}
+
+inline void
+TaggingInterface::processJacobian(Assembly & assembly,
+                                  DenseMatrix<Real> & local_k,
+                                  const std::vector<dof_id_type> & row_indices,
+                                  const std::vector<dof_id_type> & column_indices,
+                                  const Real scaling_factor)
+{
+  for (const auto matrix_tag : _matrix_tags)
+    assembly.cacheJacobianBlock(local_k, row_indices, column_indices, scaling_factor, matrix_tag);
+}
+
+template <typename T>
+void
+TaggingInterface::setResidual(SystemBase & sys, const T & residual, MooseVariableFE<T> & var)
+{
+  for (const auto tag_id : _vector_tags)
+    if (sys.hasVector(tag_id))
+      var.insertNodalValue(sys.getVector(tag_id), residual);
+}
+
+inline void
+TaggingInterface::setResidual(SystemBase & sys, const Real residual, const dof_id_type dof_index)
+{
+  for (const auto tag_id : _vector_tags)
+    if (sys.hasVector(tag_id))
+      sys.getVector(tag_id).set(dof_index, residual);
 }

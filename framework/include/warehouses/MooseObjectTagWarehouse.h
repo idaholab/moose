@@ -132,7 +132,7 @@ MooseObjectTagWarehouse<T>::getVectorTagObjectWarehouse(TagID tag_id, THREAD_ID 
   const auto & objects = MooseObjectWarehouse<T>::getObjects(tid);
   for (auto & object : objects)
   {
-    auto & tags = object->getVectorTags();
+    auto & tags = object->getVectorTags({});
     for (auto & tag : tags)
     {
       if (tag == tag_id)
@@ -165,7 +165,7 @@ MooseObjectTagWarehouse<T>::getMatrixTagObjectWarehouse(TagID tag_id, THREAD_ID 
   const auto & objects = MooseObjectWarehouse<T>::getObjects(tid);
   for (auto & object : objects)
   {
-    auto & tags = object->getMatrixTags();
+    auto & tags = object->getMatrixTags({});
     for (auto & tag : tags)
     {
       if (tag == tag_id)
@@ -201,7 +201,7 @@ MooseObjectTagWarehouse<T>::getVectorTagsObjectWarehouse(const std::set<TagID> &
   const auto & objects = MooseObjectWarehouse<T>::getObjects(tid);
   for (auto & object : objects)
   {
-    auto & tags = object->getVectorTags();
+    auto & tags = object->getVectorTags({});
     const auto & tags_end = tags.end();
     for (auto & v_tag : v_tags)
     {
@@ -238,7 +238,7 @@ MooseObjectTagWarehouse<T>::getMatrixTagsObjectWarehouse(const std::set<TagID> &
   const auto & objects = MooseObjectWarehouse<T>::getObjects(tid);
   for (auto & object : objects)
   {
-    auto & tags = object->getMatrixTags();
+    auto & tags = object->getMatrixTags({});
     const auto & tags_end = tags.end();
     for (auto & m_tag : m_tags)
     {

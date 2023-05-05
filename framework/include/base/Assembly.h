@@ -1930,9 +1930,9 @@ private:
    * behavior when doing pure residual evaluations, such as when evaluting linear residuals during
    * (P)JFNK. This method will call \p constrain_element_vector on the supplied residuals
    */
-  template <typename Residuals>
+  template <typename Residuals, typename Indices>
   void processResiduals(const Residuals & residuals,
-                        const std::vector<dof_id_type> & row_indices,
+                        const Indices & row_indices,
                         const std::set<TagID> & vector_tags,
                         Real scaling_factor);
 
@@ -1941,9 +1941,9 @@ private:
    * method simply caches the derivative values for the corresponding column indices for the
    * provided \p matrix_tags. Note that this overload will call \p DofMap::constrain_element_matrix.
    */
-  template <typename Residuals>
+  template <typename Residuals, typename Indices>
   void processJacobian(const Residuals & residuals,
-                       const std::vector<dof_id_type> & row_indices,
+                       const Indices & row_indices,
                        const std::set<TagID> & matrix_tags,
                        Real scaling_factor);
 
@@ -1955,9 +1955,9 @@ private:
    * behavior when doing pure residual evaluations, such as when evaluting linear residuals during
    * (P)JFNK. This method will \emph not call \p constrain_element_vector on the supplied residuals
    */
-  template <typename Residuals>
+  template <typename Residuals, typename Indices>
   void processResidualsWithoutConstraints(const Residuals & residuals,
-                                          const std::vector<dof_id_type> & row_indices,
+                                          const Indices & row_indices,
                                           const std::set<TagID> & vector_tags,
                                           Real scaling_factor);
 
@@ -1967,9 +1967,9 @@ private:
    * provided \p matrix_tags. Note that this overload will \emph not call \p
    * DofMap::constrain_element_matrix.
    */
-  template <typename Residuals>
+  template <typename Residuals, typename Indices>
   void processJacobianWithoutConstraints(const Residuals & residuals,
-                                         const std::vector<dof_id_type> & row_indices,
+                                         const Indices & row_indices,
                                          const std::set<TagID> & matrix_tags,
                                          Real scaling_factor);
 
@@ -2798,10 +2798,10 @@ Assembly::processJacobianNoScaling(const ADReal & residual,
       std::array<ADReal, 1>{{residual}}, std::vector<dof_id_type>({dof_index}), matrix_tags, 1);
 }
 
-template <typename Residuals>
+template <typename Residuals, typename Indices>
 void
 Assembly::processResiduals(const Residuals & residuals,
-                           const std::vector<dof_id_type> & input_row_indices,
+                           const Indices & input_row_indices,
                            const std::set<TagID> & vector_tags,
                            const Real scaling_factor)
 {
@@ -2821,7 +2821,7 @@ Assembly::processResiduals(const Residuals & residuals,
   }
 
   // Need to make a copy because we might modify this in constrain_element_vector
-  std::vector<dof_id_type> row_indices = input_row_indices;
+  std::vector<dof_id_type> row_indices(input_row_indices.begin(), input_row_indices.end());
 
   DenseVector<Number> element_vector(row_indices.size());
   for (const auto i : index_range(row_indices))
@@ -2836,10 +2836,10 @@ Assembly::processResiduals(const Residuals & residuals,
     cacheResidual(row_indices[i], element_vector(i), vector_tags);
 }
 
-template <typename Residuals>
+template <typename Residuals, typename Indices>
 void
 Assembly::processResidualsWithoutConstraints(const Residuals & residuals,
-                                             const std::vector<dof_id_type> & row_indices,
+                                             const Indices & row_indices,
                                              const std::set<TagID> & vector_tags,
                                              const Real scaling_factor)
 {
@@ -2853,10 +2853,10 @@ Assembly::processResidualsWithoutConstraints(const Residuals & residuals,
           row_indices[i], MetaPhysicL::raw_value(residuals[i]) * scaling_factor, vector_tags);
 }
 
-template <typename Residuals>
+template <typename Residuals, typename Indices>
 void
 Assembly::processJacobian(const Residuals & residuals,
-                          const std::vector<dof_id_type> & input_row_indices,
+                          const Indices & input_row_indices,
                           const std::set<TagID> & matrix_tags,
                           const Real scaling_factor)
 {
@@ -2894,7 +2894,7 @@ Assembly::processJacobian(const Residuals & residuals,
     return;
 
   // Need to make a copy because we might modify this in constrain_element_matrix
-  std::vector<dof_id_type> row_indices = input_row_indices;
+  std::vector<dof_id_type> row_indices(input_row_indices.begin(), input_row_indices.end());
 
   DenseMatrix<Number> element_matrix(row_indices.size(), column_indices.size());
   for (const auto i : index_range(row_indices))
@@ -2912,10 +2912,10 @@ Assembly::processJacobian(const Residuals & residuals,
       cacheJacobian(row_indices[i], column_indices[j], element_matrix(i, j), matrix_tags);
 }
 
-template <typename Residuals>
+template <typename Residuals, typename Indices>
 void
 Assembly::processJacobianWithoutConstraints(const Residuals & residuals,
-                                            const std::vector<dof_id_type> & row_indices,
+                                            const Indices & row_indices,
                                             const std::set<TagID> & matrix_tags,
                                             const Real scaling_factor)
 {
