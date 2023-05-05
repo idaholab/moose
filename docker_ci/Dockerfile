@@ -134,6 +134,25 @@ rm -rf libmesh/* libmesh/.* || true ; \
 if [ ! -d $LIBMESH_DIR/include/libmesh ]; then exit 1; fi
 
 #-----------------------------------------------------------------------------#
+# Install wasp to system path
+#-----------------------------------------------------------------------------#
+ARG WASP_REV=827479b89fb5b76a0865974d9f4ca404d55acce0
+ENV WASP_DIR=/usr/local/wasp
+
+COPY scripts/update_and_rebuild_wasp.sh ${MOOSE_DIR}/scripts/update_and_rebuild_wasp.sh
+COPY scripts/configure_wasp.sh ${MOOSE_DIR}/scripts/configure_wasp.sh
+
+RUN mkdir -p framework/contrib ; \
+cd framework/contrib ; \
+git clone https://code.ornl.gov/neams-workbench/wasp.git ; \
+cd wasp ; \
+git checkout ${WASP_REV} ; \
+git submodule update --init --recursive ; \
+cd ../../.. ; \
+./scripts/update_and_rebuild_wasp.sh -D CMAKE_INSTALL_PREFIX:STRING=${WASP_DIR} ; \
+rm -rf framework || true
+
+#-----------------------------------------------------------------------------#
 # Copy and build MOOSE framework, test, and optionally modules
 #-----------------------------------------------------------------------------#
 RUN chown -R dev:dev /opt /home/dev

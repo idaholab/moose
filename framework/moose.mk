@@ -33,7 +33,7 @@ pcre_LIB       :=  $(pcre_DIR)/libpcre-$(METHOD).la
 pcre_deps      := $(patsubst %.cc, %.$(obj-suffix).d, $(pcre_srcfiles)) \
 
 #
-# hit (new getpot parser)
+# hit
 #
 HIT_DIR ?= $(MOOSE_DIR)/framework/contrib/hit
 hit_CONTENT   := $(shell ls $(HIT_DIR) 2> /dev/null)
@@ -55,14 +55,35 @@ hit_CLI          := $(HIT_DIR)/hit
 pyhit_srcfiles  := $(HIT_DIR)/hit.cpp $(HIT_DIR)/lex.cc $(HIT_DIR)/parse.cc $(HIT_DIR)/braceexpr.cc
 
 #
+# Dynamic library suffix
+#
+lib_suffix := so
+ifeq ($(shell uname -s),Darwin)
+	lib_suffix := dylib
+endif
+
+#
+# wasp hit, which can override hit
+#
+WASP_DIR            ?= $(MOOSE_DIR)/framework/contrib/wasp/install
+ifeq ($(shell uname -s),Darwin)
+	wasp_LIBS         := $(shell find -E $(WASP_DIR)/lib -regex ".*/lib[a-z]+.$(lib_suffix)")
+else
+	wasp_LIBS         := $(wildcard $(WASP_DIR)/lib/libwasp*$(lib_suffix))
+endif
+ifneq ($(wasp_LIBS),)
+  wasp_LIBS         := $(notdir $(wasp_LIBS))
+  wasp_LIBS         := $(patsubst %.$(lib_suffix),%,$(wasp_LIBS))
+  wasp_LIBS         := $(patsubst lib%,-l%,$(wasp_LIBS))
+  libmesh_CXXFLAGS  += -DWASP_ENABLED -I$(WASP_DIR)/include
+  libmesh_LDFLAGS   += -Wl,-rpath,$(WASP_DIR)/lib -L$(WASP_DIR)/lib $(wasp_LIBS)
+endif
+
+#
 # Conditional parts if the user wants to compile MOOSE with torchlib
 #
 ifeq ($(ENABLE_LIBTORCH),true)
-  UNAME_S := $(shell uname -s)
-	LIBTORCH_LIB := libtorch.so
-  ifeq ($(UNAME_S),Darwin)
-    LIBTORCH_LIB := libtorch.dylib
-  endif
+	LIBTORCH_LIB := libtorch.$(lib_suffix)
 
   ifneq ($(wildcard $(LIBTORCH_DIR)/lib/$(LIBTORCH_LIB)),)
     # Enabling parts that have pytorch dependencies
@@ -195,6 +216,7 @@ moose_INC_DIRS := $(filter-out $(ignore_contrib_include), $(moose_INC_DIRS))
 
 moose_INC_DIRS += $(gtest_DIR)
 moose_INC_DIRS += $(HIT_DIR)
+moose_INC_DIRS += $(wasp_incfiles)
 moose_INCLUDE  := $(foreach i, $(moose_INC_DIRS), -I$(i))
 
 #libmesh_INCLUDE := $(moose_INCLUDE) $(libmesh_INCLUDE)
