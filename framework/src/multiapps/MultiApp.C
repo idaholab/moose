@@ -224,8 +224,7 @@ MultiApp::validParams()
 
   params.addParamNamesToGroup("positions positions_file run_in_position output_in_position",
                               "Positions / transformations of the MultiApp frame of reference");
-  params.addParamNamesToGroup("min_procs_per_app max_procs_per_app quiet_app_init",
-                              "Parallelism");
+  params.addParamNamesToGroup("min_procs_per_app max_procs_per_app quiet_app_init", "Parallelism");
   params.addParamNamesToGroup("reset_time reset_apps", "Reset MultiApp");
   params.addParamNamesToGroup("move_time move_apps move_positions", "Timed move of MultiApps");
   params.addParamNamesToGroup("relaxation_factor transformed_variables transformed_postprocessors "
