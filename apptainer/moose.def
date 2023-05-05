@@ -1,12 +1,17 @@
 {#- Required jinja arguments                                                                  -#}
 {#- APPTAINER_BOOTSTRAP: The BootStrap to use (typically localimage or oras)                  -#}
 {#- APPTAINER_FROM: The From to use (path to an image or an oras URI)                         -#}
+{#- MOOSE_DIR: Path on the host to the MOOSE repository                                       -#}
 
 {#- Optional jinja arguments                                                                  -#}
 {#- CONDA_ALT_CHANNEL: An alternate channel to add to conda                                   -#}
 {#- MOOSE_TOOLS_VERSION: The version to pin moose-tools to (if any)                           -#}
 {#- MOOSE_TEST_TOOLS_VERSION: The version to pin moose-test-tools to (if any)                 -#}
 {#- DEV_CONTAINER: Set to anything to add development packages                                -#}
+{#- MOOSE_JOBS: Number of jobs to pass to the builds                                          -#}
+
+{#- The within-container build directory to use                                               -#}
+{%- set ROOT_BUILD_DIR = '/root/build' -%}
 
 {#- Location to install mambaforge                                                            -#}
 {%- set MOOSE_MAMBAFORGE = '/opt/mambaforge3' -%}
@@ -14,35 +19,47 @@
 {#- Name of the environment to create in mamba                                                -#}
 {%- set MOOSE_MAMBA_ENV = 'moose' -%}
 
+{#- The installation location for wasp                                                        -#}
+{%- set WASP_DIR = '/opt/wasp' -%}
+
 BootStrap: {{ APPTAINER_BOOTSTRAP }}
 From: {{ APPTAINER_FROM }}
+
+%setup
+    # Copy moose from MOOSE_DIR into the container for building wasp
+    ROOT_BUILD_DIR=${APPTAINER_ROOTFS}{{ ROOT_BUILD_DIR }}
+    mkdir ${ROOT_BUILD_DIR}
+    MOOSE_DIR={{ MOOSE_DIR }}
+    cp -r ${MOOSE_DIR} ${ROOT_BUILD_DIR}/moose
+    cd ${ROOT_BUILD_DIR}/moose
+    git submodule update --init --recursive framework/contrib/wasp
 
 %environment
     export PATH={{ MOOSE_MAMBAFORGE }}/bin:$PATH
     source activate {{ MOOSE_MAMBAFORGE }}/envs/{{ MOOSE_MAMBA_ENV }}
 
+    export WASP_DIR={{ WASP_DIR }}
+    export PATH=${WASP_DIR}/bin:$PATH
 %post
     umask 022
 
-    # Setup temp location
-    TEMP_LOC=/root/build
-    mkdir $TEMP_LOC
-
     # Load jinja vars
+    ROOT_BUILD_DIR={{ ROOT_BUILD_DIR }}
     MOOSE_MAMBAFORGE={{ MOOSE_MAMBAFORGE }}
     MOOSE_MAMBA_ENV={{ MOOSE_MAMBA_ENV }}
     MOOSE_TOOLS_VERSION={{ MOOSE_TOOLS_VERSION }}
     MOOSE_TEST_TOOLS_VERSION={{ MOOSE_TEST_TOOLS_VERSION }}
     CONDA_ALT_CHANNEL={{ CONDA_ALT_CHANNEL }}
+    export MOOSE_JOBS={{ MOOSE_JOBS }}
 
     # Pinned versions
     MAMBAFORGE_VERSION=23.1.0-1
     PYTHON_VERSION=3.10
 
     # Install mamba in MOOSE_MAMBAFORGE
-    curl -L https://github.com/conda-forge/miniforge/releases/download/${MAMBAFORGE_VERSION}/Mambaforge-${MAMBAFORGE_VERSION}-Linux-x86_64.sh -o ${TEMP_LOC}/mambaforge.sh
-    bash ${TEMP_LOC}/mambaforge.sh -b -p ${MOOSE_MAMBAFORGE}
-    rm ${TEMP_LOC}/mambaforge.sh
+    curl -L https://github.com/conda-forge/miniforge/releases/download/${MAMBAFORGE_VERSION}/Mambaforge-${MAMBAFORGE_VERSION}-Linux-x86_64.sh -o ${ROOT_BUILD_DIR}/mambaforge.sh
+    bash ${ROOT_BUILD_DIR}/mambaforge.sh -b -p ${MOOSE_MAMBAFORGE}
+    rm ${ROOT_BUILD_DIR}/mambaforge.sh
     PATH=${MOOSE_MAMBAFORGE}/bin:$PATH
 
     # Add moose channels
@@ -68,13 +85,20 @@ From: {{ APPTAINER_FROM }}
     # Other Development container installs
     dnf --enablerepo=powertools install -y lcov doxygen
     pip3 --no-cache install lcov-cobertura
-    # need to add lcov-cobertura
     {%- endif %}
 
     # Few packages needed by apps
     dnf install -y fftw-devel gsl-devel
 
+    # Build and install wasp
+    # This is redundant; hopefully we can use the one from conda in the future
+    export WASP_DIR={{ WASP_DIR }}
+    cd ${ROOT_BUILD_DIR}/moose
+    ./scripts/update_and_rebuild_wasp.sh -D CMAKE_INSTALL_PREFIX:STRING=${WASP_DIR}
+    cd ..
+    rm -rf moose
+
     # Clean up
     conda clean -ya
     dnf clean all
-    rm -rf ${TEMP_LOC}
+    rm -rf ${ROOT_BUILD_DIR}
