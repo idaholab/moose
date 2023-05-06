@@ -152,12 +152,6 @@ protected:
   void accumulateTaggedLocalResidual();
 
   /**
-   * Local residual blocks for the specified tags will be appended by adding the current local
-   * kernel residual. It should be called after the local element vector has been computed.
-   */
-  void accumulateTaggedLocalResidual(const std::set<TagID> & vector_tags);
-
-  /**
    * Local residual blocks will assigned as the current local kernel residual.
    * It should be called after the local element vector has been computed.
    */
