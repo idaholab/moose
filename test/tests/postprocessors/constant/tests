@@ -1,0 +1,10 @@
+[Tests]
+  [receiver]
+    type = CSVDiff
+    input = receiver.i
+    csvdiff = receiver_out.csv
+    requirement = "The system shall allow the value of a postprocessor to be controllable."
+    design = 'ConstantPostprocessor.md'
+    issues = '#24247'
+  []
+[]
