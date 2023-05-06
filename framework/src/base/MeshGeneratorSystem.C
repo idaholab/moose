@@ -13,8 +13,13 @@
 #include "MeshGenerator.h"
 #include "DependencyResolver.h"
 
+#include "libmesh/mesh_tools.h"
+
 MeshGeneratorSystem::MeshGeneratorSystem(MooseApp & app)
-  : PerfGraphInterface(app.perfGraph(), "MeshGeneratorSystem"), ParallelObject(app), _app(app)
+  : PerfGraphInterface(app.perfGraph(), "MeshGeneratorSystem"),
+    ParallelObject(app),
+    _app(app),
+    _has_bmbb(false)
 {
 }
 
@@ -31,6 +36,9 @@ MeshGeneratorSystem::addMeshGenerator(const std::string & type,
   // constructing mesh generators (not "adding" them, where we simply store their parameters)
   if (_app.constructingMeshGenerators())
     createMeshGenerator(name);
+
+  if (type == "BreakMeshByBlockGenerator")
+    _has_bmbb = true;
 }
 
 const MeshGenerator &

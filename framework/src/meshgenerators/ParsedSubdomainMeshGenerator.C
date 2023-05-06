@@ -119,5 +119,6 @@ ParsedSubdomainMeshGenerator::generate()
   if (isParamValid("block_name"))
     mesh->subdomain_name(_block_id) = getParam<SubdomainName>("block_name");
 
+  mesh->set_isnt_prepared();
   return dynamic_pointer_cast<MeshBase>(mesh);
 }

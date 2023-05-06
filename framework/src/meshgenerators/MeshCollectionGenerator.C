@@ -119,5 +119,6 @@ MeshCollectionGenerator::generate()
     }
   }
 
+  mesh->set_isnt_prepared();
   return dynamic_pointer_cast<MeshBase>(mesh);
 }

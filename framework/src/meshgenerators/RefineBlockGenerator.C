@@ -65,6 +65,11 @@ RefineBlockGenerator::generate()
   std::unique_ptr<MeshBase> mesh = std::move(_input);
   int max = *std::max_element(_refinement.begin(), _refinement.end());
 
+  if (max > 0 && !mesh->is_replicated() && !mesh->is_prepared())
+    // refinement requires that (or at least it asserts that) the mesh is either replicated or
+    // prepared
+    mesh->prepare_for_use();
+
   return recursive_refine(block_ids, mesh, _refinement, max);
 }
 

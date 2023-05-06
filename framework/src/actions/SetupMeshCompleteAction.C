@@ -115,15 +115,17 @@ SetupMeshCompleteAction::act()
   else
   {
     // Prepare the mesh (may occur multiple times)
+    bool prepare_for_use_called = false;
     {
       TIME_SECTION("completeSetupUndisplaced", 2, "Setting Up Undisplaced Mesh");
-      _mesh->prepare();
+      prepare_for_use_called = _mesh->prepare();
     }
 
     if (_displaced_mesh)
     {
       TIME_SECTION("completeSetupDisplaced", 2, "Setting Up Displaced Mesh");
-      _displaced_mesh->prepare();
+      // If the reference mesh was prepared, then we must prepare also
+      _displaced_mesh->prepare(prepare_for_use_called);
     }
   }
 }

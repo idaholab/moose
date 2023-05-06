@@ -288,5 +288,6 @@ RenameBlockGenerator::generate()
   for (const auto & pair : new_names)
     mesh->subdomain_name(pair.first) = pair.second;
 
+  mesh->set_isnt_prepared();
   return dynamic_pointer_cast<MeshBase>(mesh);
 }
