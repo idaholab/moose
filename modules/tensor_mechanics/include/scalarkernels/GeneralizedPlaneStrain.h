@@ -29,10 +29,7 @@ public:
 
   const GeneralizedPlaneStrainUOInterface & _gps;
   const unsigned int _scalar_var_id;
-
-  /// The reference vector tag ID
-  std::set<TagID> _ref_tag_id;
-
-  /// The non-reference vector tag IDs
-  std::set<TagID> _non_ref_tags;
+  /// A pointer to the reference residual problem. This will be a nullptr if the problem type is not
+  /// \p ReferenceResidualProblem
+  const ReferenceResidualProblem * const _reference_residual_problem;
 };

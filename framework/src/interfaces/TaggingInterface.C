@@ -11,6 +11,7 @@
 #include "Conversion.h"
 #include "FEProblem.h"
 #include "Assembly.h"
+#include "ReferenceResidualProblem.h"
 
 #include "libmesh/dense_vector.h"
 
@@ -157,26 +158,66 @@ TaggingInterface::useMatrixTag(TagID tag_id)
 }
 
 void
-TaggingInterface::prepareVectorTag(Assembly & assembly, unsigned int ivar)
+TaggingInterface::prepareVectorTag(Assembly & assembly, const unsigned int ivar)
 {
-  _re_blocks.resize(_vector_tags.size());
-  mooseAssert(_vector_tags.size() >= 1, "we need at least one active tag");
-  auto vector_tag = _vector_tags.begin();
-  for (MooseIndex(_vector_tags) i = 0; i < _vector_tags.size(); i++, ++vector_tag)
+  prepareVectorTagInternal(assembly, ivar, _vector_tags, _abs_vector_tags, {}, {});
+}
+
+void
+TaggingInterface::prepareVectorTag(Assembly & assembly,
+                                   const unsigned int ivar,
+                                   const ReferenceResidualProblem * const ref_problem,
+                                   const bool prepare_non_ref_tags)
+{
+  if (ref_problem)
   {
-    const VectorTag & tag = _subproblem.getVectorTag(*vector_tag);
-    _re_blocks[i] = &assembly.residualBlock(ivar, tag._type_id);
+    const auto reference_tag_id = ref_problem->referenceVectorTagID({});
+    if (prepare_non_ref_tags)
+      prepareVectorTagInternal(
+          assembly, ivar, _vector_tags, _abs_vector_tags, {reference_tag_id}, {reference_tag_id});
+    else
+      prepareVectorTagInternal(assembly, ivar, {reference_tag_id}, {reference_tag_id}, {}, {});
   }
+  else
+  {
+    if (prepare_non_ref_tags)
+      prepareVectorTagInternal(assembly, ivar, _vector_tags, _abs_vector_tags, {}, {});
+    // else do nothing because there are no reference tags
+  }
+}
+
+void
+TaggingInterface::prepareVectorTagInternal(
+    Assembly & assembly,
+    const unsigned int ivar,
+    const std::set<TagID> & vector_tags,
+    const std::set<TagID> & absolute_value_vector_tags,
+    const std::set<TagID> & vector_tags_to_skip,
+    const std::set<TagID> & absolute_value_vector_tags_to_skip)
+{
+  mooseAssert(vector_tags.size() - vector_tags_to_skip.size() >= 1,
+              "we need at least one active tag");
+
+  auto prepare =
+      [this, ivar, &assembly](auto & re_blocks, const auto & tags, const auto & tags_to_skip)
+  {
+    re_blocks.resize(tags.size() - tags_to_skip.size());
+    std::size_t i = 0;
+    for (const auto tag_id : tags)
+    {
+      if (tags_to_skip.count(tag_id))
+        continue;
+
+      const VectorTag & tag = _subproblem.getVectorTag(tag_id);
+      re_blocks[i] = &assembly.residualBlock(ivar, tag._type_id);
+      ++i;
+    }
+  };
+
+  prepare(_re_blocks, vector_tags, vector_tags_to_skip);
+  prepare(_absre_blocks, absolute_value_vector_tags, absolute_value_vector_tags_to_skip);
 
   _local_re.resize(_re_blocks[0]->size());
-
-  _absre_blocks.resize(_abs_vector_tags.size());
-  vector_tag = _abs_vector_tags.begin();
-  for (MooseIndex(_abs_vector_tags) i = 0; i < _abs_vector_tags.size(); i++, ++vector_tag)
-  {
-    const VectorTag & tag = _subproblem.getVectorTag(*vector_tag);
-    _absre_blocks[i] = &assembly.residualBlock(ivar, tag._type_id);
-  }
 }
 
 void

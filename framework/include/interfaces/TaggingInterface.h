@@ -26,6 +26,7 @@ class InputParameters;
 class MooseObject;
 class SubProblem;
 class Assembly;
+class ReferenceResidualProblem;
 
 template <typename T>
 InputParameters validParams();
@@ -86,12 +87,17 @@ public:
 
 protected:
   /**
-   * Prepare data for computing element residual the according to active tags.
+   * Prepare data for computing element residual according to active tags.
    * Residual blocks for different tags will be extracted from Assembly.
    * A local residual will be zeroed. It should be called
    * right before the local element vector is computed.
    */
   void prepareVectorTag(Assembly & assembly, unsigned int ivar);
+
+  void prepareVectorTag(Assembly & assembly,
+                        unsigned int ivar,
+                        const ReferenceResidualProblem * ref_problem,
+                        bool prepare_non_ref_tags);
 
   /**
    * Prepare data for computing element residual the according to active tags
@@ -144,6 +150,12 @@ protected:
    * It should be called after the local element vector has been computed.
    */
   void accumulateTaggedLocalResidual();
+
+  /**
+   * Local residual blocks for the specified tags will be appended by adding the current local
+   * kernel residual. It should be called after the local element vector has been computed.
+   */
+  void accumulateTaggedLocalResidual(const std::set<TagID> & vector_tags);
 
   /**
    * Local residual blocks will assigned as the current local kernel residual.
@@ -279,6 +291,19 @@ protected:
   DenseMatrix<Number> _local_ke;
 
 private:
+  /**
+   * Prepare data for computing element residual according to the specified tags
+   * Residual blocks for different tags will be extracted from Assembly.
+   * A local residual will be zeroed. It should be called
+   * right before the local element vector is computed.
+   */
+  void prepareVectorTagInternal(Assembly & assembly,
+                                unsigned int ivar,
+                                const std::set<TagID> & vector_tags,
+                                const std::set<TagID> & absolute_value_vector_tags,
+                                const std::set<TagID> & vector_tags_to_skip,
+                                const std::set<TagID> & absolute_value_vector_tags_to_skip);
+
   /// The residual tag ids this Kernel will contribute to
   std::set<TagID> _vector_tags;
 
