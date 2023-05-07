@@ -5,19 +5,17 @@
     type = SignalTester
     input = 'simple_transient_diffusion_scaled.i'
     requirement = 'The app should write out a checkpoint file at any time by sending a signal to it.'
-    # needs to be long enough to avoid writing the checkpoint on step 0
-    # but short enough that the simulation has not finished
-    sleep_time = 1.5
+    # needs short enough that the simulation has not finished
+    sleep_time = 1
     method = 'opt'
     recover = false
     max_threads = 1
     max_parallel = 1
-    cli_args = 'Executioner/num_steps=70'
   []
   [test_signal_recover]
     type = RunApp
     input = 'simple_transient_diffusion_scaled.i'
-    cli_args = 'Executioner/num_steps=70 --recover'
+    cli_args = '--recover'
 
     #verify that the recovery is actually recovering and not starting from the beginning
     absent_out = 'Time Step 0,'
@@ -25,7 +23,7 @@
     #verify that the checkpoint actually stopped, rather than continuing to go on until completion
     #the checkpoint should write somewhere after the first step, and before the last step
     #to verify it is actually resuming from its autosave, we make sure it resumes one step before the last step
-    expect_out = 'Time Step 69,'
+    expect_out = 'Time Step 49,'
     method = 'opt'
     max_threads = 1
     max_parallel = 1
