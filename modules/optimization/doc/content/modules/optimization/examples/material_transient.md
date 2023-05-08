@@ -70,10 +70,20 @@ space and time from and to the forward problem are also set up in the driver inp
 
 !listing examples/materialTransient/optimize_auto_adjoint.i
 
-One single input file is used to simulation the physics for the optimization problem.
+One single input file is used to simulation the physics for the optimization problem. The core of the input
+file contains the definition of the physics that the user wants to model, as with most of MOOSE's
+simulations.
 In this case, a diffusion problem with Dirichlet boundary conditions is built. The forward and adjoint problems are run in two separate [nonlinear systems](NonlinearSystem.md), one for the forward problem and another one for the adjoint problem.
 These nonlinear systems are inputs to an executioner that drives the simulation of both problems, i.e. the [TransientAndAdjoint](TransientAndAdjoint.md) MOOSE object.
 
 !listing examples/materialTransient/forward_and_adjoint.i block=Problem
 
 !listing examples/materialTransient/forward_and_adjoint.i block=Variables
+
+For material inversion, the derivative of the objective function with respect to the material
+parameters needs to be computed. This quantity is problem-dependent. For this diffusion case,
+the vector posprocessor `ElementOptimizationDiffusionCoefFunctionInnerProduct` computes the inner
+product between the gradient of the adjoint variable and the gradient of the primal variables.
+
+!listing examples/materialTransient/forward_and_adjoint.i block=VectorPostprocessors
+
