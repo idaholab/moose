@@ -52,7 +52,7 @@ ADMortarScalarBase::computeResidual()
     for (_h = 0; _h < _k_order; _h++)
       scalar_residuals[_h] += _JxW_msm[_qp] * _coord[_qp] * raw_value(computeScalarQpResidual());
   }
-  processResiduals(
+  addResiduals(
       _assembly, scalar_residuals, _kappa_var_ptr->dofIndices(), _kappa_var_ptr->scalingFactor());
 }
 
@@ -73,6 +73,6 @@ ADMortarScalarBase::computeJacobian()
     for (_h = 0; _h < _k_order; _h++)
       scalar_residuals[_h] += _JxW_msm[_qp] * _coord[_qp] * computeScalarQpResidual();
   }
-  processResidualsAndJacobianWithoutConstraints(
+  addResidualsAndJacobianWithoutConstraints(
       _assembly, scalar_residuals, _kappa_var_ptr->dofIndices(), _kappa_var_ptr->scalingFactor());
 }

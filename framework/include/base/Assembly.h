@@ -1924,14 +1924,14 @@ protected:
 private:
   /**
    * Process the supplied residual values. This is a mirror of of the non-templated version of \p
-   * processResiduals except that it's meant for \emph only processing residuals (and not their
+   * addResiduals except that it's meant for \emph only processing residuals (and not their
    * derivatives/Jacobian). We supply this API such that residual objects that leverage the AD
    * version of this method when computing the Jacobian (or residual + Jacobian) can mirror the same
    * behavior when doing pure residual evaluations, such as when evaluting linear residuals during
    * (P)JFNK. This method will call \p constrain_element_vector on the supplied residuals
    */
   template <typename Residuals, typename Indices>
-  void processResiduals(const Residuals & residuals,
+  void addResiduals(const Residuals & residuals,
                         const Indices & row_indices,
                         const std::set<TagID> & vector_tags,
                         Real scaling_factor);
@@ -1949,14 +1949,14 @@ private:
 
   /**
    * Process the supplied residual values. This is a mirror of of the non-templated version of \p
-   * processResiduals except that it's meant for \emph only processing residuals (and not their
+   * addResiduals except that it's meant for \emph only processing residuals (and not their
    * derivatives/Jacobian). We supply this API such that residual objects that leverage the AD
    * version of this method when computing the Jacobian (or residual + Jacobian) can mirror the same
    * behavior when doing pure residual evaluations, such as when evaluting linear residuals during
    * (P)JFNK. This method will \emph not call \p constrain_element_vector on the supplied residuals
    */
   template <typename Residuals, typename Indices>
-  void processResidualsWithoutConstraints(const Residuals & residuals,
+  void addResidualsWithoutConstraints(const Residuals & residuals,
                                           const Indices & row_indices,
                                           const std::set<TagID> & vector_tags,
                                           Real scaling_factor);
@@ -2800,7 +2800,7 @@ Assembly::processJacobianNoScaling(const ADReal & residual,
 
 template <typename Residuals, typename Indices>
 void
-Assembly::processResiduals(const Residuals & residuals,
+Assembly::addResiduals(const Residuals & residuals,
                            const Indices & input_row_indices,
                            const std::set<TagID> & vector_tags,
                            const Real scaling_factor)
@@ -2816,7 +2816,7 @@ Assembly::processResiduals(const Residuals & residuals,
   {
     // No constraining is required. (This is likely a finite volume computation if we only have a
     // single dof)
-    processResidualsWithoutConstraints(residuals, input_row_indices, vector_tags, scaling_factor);
+    addResidualsWithoutConstraints(residuals, input_row_indices, vector_tags, scaling_factor);
     return;
   }
 
@@ -2838,7 +2838,7 @@ Assembly::processResiduals(const Residuals & residuals,
 
 template <typename Residuals, typename Indices>
 void
-Assembly::processResidualsWithoutConstraints(const Residuals & residuals,
+Assembly::addResidualsWithoutConstraints(const Residuals & residuals,
                                              const Indices & row_indices,
                                              const std::set<TagID> & vector_tags,
                                              const Real scaling_factor)

@@ -73,7 +73,7 @@ NodalKernel::computeResidual()
     const dof_id_type & dof_idx = _var.nodalDofIndex();
     _qp = 0;
     const Real res = computeQpResidual();
-    processResiduals(_assembly,
+    addResiduals(_assembly,
                      std::array<Real, 1>{{res}},
                      std::array<dof_id_type, 1>{{dof_idx}},
                      _var.scalingFactor());

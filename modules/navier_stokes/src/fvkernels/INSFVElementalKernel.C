@@ -23,10 +23,10 @@ INSFVElementalKernel::INSFVElementalKernel(const InputParameters & params)
 }
 
 void
-INSFVElementalKernel::processResidualAndJacobian(const ADReal & residual,
+INSFVElementalKernel::addResidualAndJacobian(const ADReal & residual,
                                                  const dof_id_type dof_index)
 {
-  processResidualsAndJacobian(_assembly,
+  addResidualsAndJacobian(_assembly,
                               std::array<ADReal, 1>{{residual}},
                               std::vector<dof_id_type>({dof_index}),
                               _var.scalingFactor());

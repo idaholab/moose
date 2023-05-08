@@ -40,9 +40,9 @@ FVOnlyAddDiffusionToOneSideOfInterface::computeResidual(const FaceInfo & fi)
   const auto r = MetaPhysicL::raw_value(fi.faceArea() * fi.faceCoord() * computeQpResidual());
 
   if (_elem_is_one)
-    processResidual(r, var_elem_num, false);
+    addResidual(r, var_elem_num, false);
   else
-    processResidual(-r, var_neigh_num, true);
+    addResidual(-r, var_neigh_num, true);
 }
 
 void
@@ -68,10 +68,10 @@ FVOnlyAddDiffusionToOneSideOfInterface::computeJacobian(const FaceInfo & fi)
   const auto r = fi.faceArea() * fi.faceCoord() * computeQpResidual();
 
   if (_elem_is_one)
-    processResidualsAndJacobian(
+    addResidualsAndJacobian(
         _assembly, std::array<ADReal, 1>{{r}}, elem_dof_indices, elem_scaling_factor);
   else
-    processResidualsAndJacobian(
+    addResidualsAndJacobian(
         _assembly, std::array<ADReal, 1>{{-r}}, neigh_dof_indices, neighbor_scaling_factor);
 }
 

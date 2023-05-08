@@ -203,7 +203,7 @@ INSFVMomentumAdvection::computeJacobian(const FaceInfo & fi)
   {
     mooseAssert(_var.dofIndices().size() == 1, "We're currently built to use CONSTANT MONOMIALS");
 
-    processResidualsAndJacobian(_assembly,
+    addResidualsAndJacobian(_assembly,
                                 std::array<ADReal, 1>{{_elem_residual}},
                                 _var.dofIndices(),
                                 _var.scalingFactor());
@@ -222,7 +222,7 @@ INSFVMomentumAdvection::computeJacobian(const FaceInfo & fi)
     mooseAssert(_var.dofIndicesNeighbor().size() == 1,
                 "We're currently built to use CONSTANT MONOMIALS");
 
-    processResidualsAndJacobian(_assembly,
+    addResidualsAndJacobian(_assembly,
                                 std::array<ADReal, 1>{{_neighbor_residual}},
                                 _var.dofIndicesNeighbor(),
                                 _var.scalingFactor());

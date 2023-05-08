@@ -37,11 +37,11 @@ void
 FVScalarLagrangeMultiplierConstraint::computeResidualAndJacobian()
 {
   const auto volume = _assembly.elemVolume();
-  processResidualsAndJacobian(_assembly,
+  addResidualsAndJacobian(_assembly,
                               std::array<ADReal, 1>{{_lambda[0] * volume}},
                               _var.dofIndices(),
                               _var.scalingFactor());
-  processResidualsAndJacobian(_assembly,
+  addResidualsAndJacobian(_assembly,
                               std::array<ADReal, 1>{{computeQpResidual() * volume}},
                               _lambda_var.dofIndices(),
                               _lambda_var.scalingFactor());
@@ -62,7 +62,7 @@ FVScalarLagrangeMultiplierConstraint::computeResidual()
   // make sure the scalar residuals get cached for later addition
   const auto lm_r = MetaPhysicL::raw_value(computeQpResidual()) * _assembly.elemVolume();
   mooseAssert(_lambda_var.dofIndices().size() == 1, "We should only have a single dof");
-  processResiduals(_assembly,
+  addResiduals(_assembly,
                    std::array<Real, 1>{{lm_r}},
                    _lambda_var.dofIndices(),
                    _lambda_var.scalingFactor());

@@ -62,7 +62,7 @@ void
 FVElementalKernel::computeResidualAndJacobian()
 {
   const auto r = computeQpResidual() * _assembly.elemVolume();
-  processResidualsAndJacobian(
+  addResidualsAndJacobian(
       _assembly, std::array<ADReal, 1>{{r}}, _var.dofIndices(), _var.scalingFactor());
 }
 

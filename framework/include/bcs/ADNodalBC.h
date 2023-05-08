@@ -56,7 +56,7 @@ private:
    * process the residual into the global data structures
    */
   template <typename ADResidual>
-  void processResidual(const ADResidual & residual, const std::vector<dof_id_type> & dof_indices);
+  void addResidual(const ADResidual & residual, const std::vector<dof_id_type> & dof_indices);
 
   using NodalBCBase::processJacobian;
   /**

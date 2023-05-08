@@ -42,7 +42,7 @@ ADNodalKernel::computeResidual()
     const auto dof_idx = _var.nodalDofIndex();
     _qp = 0;
     auto res = MetaPhysicL::raw_value(computeQpResidual());
-    processResiduals(_assembly,
+    addResiduals(_assembly,
                      std::array<Real, 1>{{res}},
                      std::vector<dof_id_type>({dof_idx}),
                      _var.scalingFactor());

@@ -26,14 +26,14 @@ INSFVFluxBC::INSFVFluxBC(const InputParameters & params)
 }
 
 void
-INSFVFluxBC::processResidualAndJacobian(const ADReal & residual)
+INSFVFluxBC::addResidualAndJacobian(const ADReal & residual)
 {
   const auto * const elem = (_face_type == FaceInfo::VarFaceNeighbors::ELEM)
                                 ? &_face_info->elem()
                                 : _face_info->neighborPtr();
   const auto dof_index = elem->dof_number(_sys.number(), _var.number(), 0);
 
-  processResidualsAndJacobian(_assembly,
+  addResidualsAndJacobian(_assembly,
                               std::array<ADReal, 1>{{residual}},
                               std::vector<dof_id_type>({dof_index}),
                               _var.scalingFactor());

@@ -157,7 +157,7 @@ FVInterfaceKernel::setupData(const FaceInfo & fi)
 }
 
 void
-FVInterfaceKernel::processResidual(const Real resid,
+FVInterfaceKernel::addResidual(const Real resid,
                                    const unsigned int var_num,
                                    const bool neighbor)
 {
@@ -187,8 +187,8 @@ FVInterfaceKernel::computeResidual(const FaceInfo & fi)
 
   const auto r = MetaPhysicL::raw_value(fi.faceArea() * fi.faceCoord() * computeQpResidual());
 
-  processResidual(r, var_elem_num, false);
-  processResidual(-r, var_neigh_num, true);
+  addResidual(r, var_elem_num, false);
+  addResidual(-r, var_neigh_num, true);
 }
 
 void
@@ -212,9 +212,9 @@ FVInterfaceKernel::computeJacobian(const FaceInfo & fi)
 
   const auto r = fi.faceArea() * fi.faceCoord() * computeQpResidual();
 
-  processResidualsAndJacobian(
+  addResidualsAndJacobian(
       _assembly, std::array<ADReal, 1>{{r}}, elem_dof_indices, elem_scaling_factor);
-  processResidualsAndJacobian(
+  addResidualsAndJacobian(
       _assembly, std::array<ADReal, 1>{{-r}}, neigh_dof_indices, neigh_scaling_factor);
 }
 

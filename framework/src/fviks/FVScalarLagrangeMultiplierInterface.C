@@ -42,13 +42,13 @@ FVScalarLagrangeMultiplierInterface::computeResidual(const FaceInfo & fi)
       MetaPhysicL::raw_value(_lambda[0]) * fi.faceArea() * fi.faceCoord() * (2 * _elem_is_one - 1);
 
   // Primal residual
-  processResidual(r, var_elem_num, false);
-  processResidual(-r, var_neigh_num, true);
+  addResidual(r, var_elem_num, false);
+  addResidual(-r, var_neigh_num, true);
 
   // LM residual. We may not have any actual ScalarKernels in our simulation so we need to manually
   // make sure the scalar residuals get cached for later addition
   const auto lm_r = MetaPhysicL::raw_value(computeQpResidual()) * fi.faceArea() * fi.faceCoord();
-  processResiduals(_assembly,
+  addResiduals(_assembly,
                    std::array<Real, 1>{{lm_r}},
                    _lambda_var.dofIndices(),
                    _lambda_var.scalingFactor());
@@ -69,15 +69,15 @@ FVScalarLagrangeMultiplierInterface::computeJacobian(const FaceInfo & fi)
 
   // Primal
   const auto primal_r = _lambda[0] * fi.faceArea() * fi.faceCoord() * (2 * _elem_is_one - 1);
-  processResidualsAndJacobian(
+  addResidualsAndJacobian(
       _assembly, std::array<ADReal, 1>{{primal_r}}, elem_dof_indices, elem_scaling_factor);
-  processResidualsAndJacobian(
+  addResidualsAndJacobian(
       _assembly, std::array<ADReal, 1>{{-primal_r}}, neigh_dof_indices, neigh_scaling_factor);
 
   // LM
   const auto lm_r = computeQpResidual() * fi.faceArea() * fi.faceCoord();
   mooseAssert(_lambda_var.dofIndices().size() == 1, "We should only have one dof");
-  processResidualsAndJacobian(_assembly,
+  addResidualsAndJacobian(_assembly,
                               std::array<ADReal, 1>{{lm_r}},
                               _lambda_var.dofIndices(),
                               _lambda_var.scalingFactor());

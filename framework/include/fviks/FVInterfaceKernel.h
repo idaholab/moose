@@ -133,7 +133,7 @@ protected:
   /**
    * Process the provided residual given \p var_num and whether this is on the neighbor side
    */
-  void processResidual(Real resid, unsigned int var_num, bool neighbor);
+  void addResidual(Real resid, unsigned int var_num, bool neighbor);
 
   using TaggingInterface::processJacobian;
   /**

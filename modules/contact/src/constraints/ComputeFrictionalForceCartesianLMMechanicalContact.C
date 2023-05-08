@@ -331,7 +331,7 @@ ComputeFrictionalForceCartesianLMMechanicalContact::enforceConstraintOnDof(
   else if (std::abs(nz) > threshold_for_Jacobian)
     component_normal = 2;
 
-  processResidualsAndJacobian(
+  addResidualsAndJacobian(
       _assembly,
       std::array<ADReal, 1>{{normal_dof_residual}},
       std::vector<dof_id_type>({component_normal == 0
@@ -340,7 +340,7 @@ ComputeFrictionalForceCartesianLMMechanicalContact::enforceConstraintOnDof(
       component_normal == 0 ? scaling_factor_x
                             : (component_normal == 1 ? scaling_factor_y : scaling_factor_z));
 
-  processResidualsAndJacobian(
+  addResidualsAndJacobian(
       _assembly,
       std::array<ADReal, 1>{{tangential_dof_residual}},
       std::vector<dof_id_type>(
@@ -348,7 +348,7 @@ ComputeFrictionalForceCartesianLMMechanicalContact::enforceConstraintOnDof(
       (component_normal == 0 || component_normal == 2) ? scaling_factor_y : scaling_factor_x);
 
   if (_has_disp_z)
-    processResidualsAndJacobian(
+    addResidualsAndJacobian(
         _assembly,
         std::array<ADReal, 1>{{tangential_dof_residual_dir}},
         std::vector<dof_id_type>(

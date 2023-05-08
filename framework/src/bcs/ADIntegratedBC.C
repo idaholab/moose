@@ -108,7 +108,7 @@ ADIntegratedBCTempl<T>::computeResidual()
       for (_i = 0; _i < _test.size(); _i++)
         _residuals[_i] += raw_value(_JxW[_qp] * _coord[_qp] * computeQpResidual());
 
-  processResiduals(_assembly, _residuals, _var.dofIndices(), _var.scalingFactor());
+  addResiduals(_assembly, _residuals, _var.dofIndices(), _var.scalingFactor());
 
   if (_has_save_in)
     for (unsigned int i = 0; i < _save_in.size(); i++)
@@ -143,7 +143,7 @@ void
 ADIntegratedBCTempl<T>::computeResidualAndJacobian()
 {
   computeResidualsForJacobian();
-  processResidualsAndJacobian(
+  addResidualsAndJacobian(
       _assembly, _residuals_and_jacobians, _var.dofIndices(), _var.scalingFactor());
 }
 

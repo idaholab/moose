@@ -78,7 +78,7 @@ conversionHelper(const libMesh::VectorValue<ADReal> & value, const unsigned int 
 template <typename T>
 template <typename ADResidual>
 void
-ADNodalBCTempl<T>::processResidual(const ADResidual & residual,
+ADNodalBCTempl<T>::addResidual(const ADResidual & residual,
                                    const std::vector<dof_id_type> & dof_indices)
 {
   mooseAssert(dof_indices.size() <= _set_components.size(),
@@ -118,7 +118,7 @@ ADNodalBCTempl<T>::computeResidual()
 
   const auto residual = computeQpResidual();
 
-  processResidual(residual, dof_indices);
+  addResidual(residual, dof_indices);
 }
 
 template <typename T>
@@ -144,7 +144,7 @@ ADNodalBCTempl<T>::computeResidualAndJacobian()
 
   const auto residual = computeQpResidual();
 
-  processResidual(residual, dof_indices);
+  addResidual(residual, dof_indices);
   processJacobian(residual, dof_indices);
 }
 

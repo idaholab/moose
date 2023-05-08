@@ -27,12 +27,12 @@ INSFVFluxKernel::INSFVFluxKernel(const InputParameters & params)
 }
 
 void
-INSFVFluxKernel::processResidualAndJacobian(const ADReal & residual)
+INSFVFluxKernel::addResidualAndJacobian(const ADReal & residual)
 {
   auto process_residual = [this](const ADReal & residual, const Elem & elem)
   {
     const auto dof_index = elem.dof_number(_sys.number(), _var.number(), 0);
-    processResidualsAndJacobian(_assembly,
+    addResidualsAndJacobian(_assembly,
                                 std::array<ADReal, 1>{{residual}},
                                 std::vector<dof_id_type>({dof_index}),
                                 _var.scalingFactor());

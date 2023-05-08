@@ -235,7 +235,7 @@ MortarConstraintBase::zeroInactiveLMDofs(const std::unordered_set<const Node *> 
       if (_assembly.computingResidual())
       {
         const Real lm_value = _var->getNodalValue(*node);
-        processResiduals(_assembly,
+        addResiduals(_assembly,
                          std::array<Real, 1>{{lm_value}},
                          std::array<dof_id_type, 1>{{dof_index}},
                          /*scaling_factor=*/1);
@@ -259,7 +259,7 @@ MortarConstraintBase::zeroInactiveLMDofs(const std::unordered_set<const Node *> 
         if (_assembly.computingResidual())
         {
           const Real lm_value = _var->getElementalValue(el, comp);
-          processResiduals(_assembly,
+          addResiduals(_assembly,
                            std::array<Real, 1>{{lm_value}},
                            std::array<dof_id_type, 1>{{dof_index}},
                            /*scaling_factor=*/1);

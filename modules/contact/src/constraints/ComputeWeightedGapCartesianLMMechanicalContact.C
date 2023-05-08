@@ -352,7 +352,7 @@ ComputeWeightedGapCartesianLMMechanicalContact::enforceConstraintOnDof(const Dof
 
   libmesh_ignore(component_normal);
 
-  processResidualsAndJacobian(
+  addResidualsAndJacobian(
       _assembly,
       std::array<ADReal, 1>{{normal_dof_residual}},
       std::vector<dof_id_type>({component_normal == 0
@@ -361,7 +361,7 @@ ComputeWeightedGapCartesianLMMechanicalContact::enforceConstraintOnDof(const Dof
       component_normal == 0 ? scaling_factor_x
                             : (component_normal == 1 ? scaling_factor_y : scaling_factor_z));
 
-  processResidualsAndJacobian(
+  addResidualsAndJacobian(
       _assembly,
       std::array<ADReal, 1>{{tangential_dof_residual}},
       std::vector<dof_id_type>(
@@ -369,7 +369,7 @@ ComputeWeightedGapCartesianLMMechanicalContact::enforceConstraintOnDof(const Dof
       (component_normal == 0 || component_normal == 2) ? scaling_factor_y : scaling_factor_x);
 
   if (_has_disp_z)
-    processResidualsAndJacobian(
+    addResidualsAndJacobian(
         _assembly,
         std::array<ADReal, 1>{{tangential_pressure_value_dir}},
         std::vector<dof_id_type>(

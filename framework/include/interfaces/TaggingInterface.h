@@ -173,7 +173,7 @@ protected:
    * Process the provided incoming residuals corresponding to the provided dof indices
    */
   template <typename Residuals, typename Indices>
-  void processResiduals(Assembly & assembly,
+  void addResiduals(Assembly & assembly,
                         const Residuals & residuals,
                         const Indices & dof_indices,
                         Real scaling_factor);
@@ -183,7 +183,7 @@ protected:
    * provided dof indices
    */
   template <typename Residuals, typename Indices>
-  void processResidualsAndJacobian(Assembly & assembly,
+  void addResidualsAndJacobian(Assembly & assembly,
                                    const Residuals & residuals,
                                    const Indices & dof_indices,
                                    Real scaling_factor);
@@ -203,7 +203,7 @@ protected:
    * constraints
    */
   template <typename Residuals, typename Indices>
-  void processResidualsWithoutConstraints(Assembly & assembly,
+  void addResidualsWithoutConstraints(Assembly & assembly,
                                           const Residuals & residuals,
                                           const Indices & dof_indices,
                                           Real scaling_factor);
@@ -213,7 +213,7 @@ protected:
    * provided dof indices without constraints
    */
   template <typename Residuals, typename Indices>
-  void processResidualsAndJacobianWithoutConstraints(Assembly & assembly,
+  void addResidualsAndJacobianWithoutConstraints(Assembly & assembly,
                                                      const Residuals & residuals,
                                                      const Indices & dof_indices,
                                                      Real scaling_factor);
@@ -328,7 +328,7 @@ private:
   /// Kernel blocks Vectors For each Tag
   std::vector<DenseMatrix<Number> *> _ke_blocks;
 
-  /// A container to hold absolute values of residuals passed into \p processResiduals. We maintain
+  /// A container to hold absolute values of residuals passed into \p addResiduals. We maintain
   /// this data member to avoid constant dynamic heap allocations
   std::vector<Real> _absolute_residuals;
 };
@@ -348,49 +348,49 @@ private:
 
 template <typename Residuals, typename Indices>
 void
-TaggingInterface::processResiduals(Assembly & assembly,
+TaggingInterface::addResiduals(Assembly & assembly,
                                    const Residuals & residuals,
                                    const Indices & dof_indices,
                                    const Real scaling_factor)
 {
-  assembly.processResiduals(residuals, dof_indices, _vector_tags, scaling_factor);
+  assembly.addResiduals(residuals, dof_indices, _vector_tags, scaling_factor);
   if (!_abs_vector_tags.empty())
   {
     _absolute_residuals.resize(residuals.size());
     for (const auto i : index_range(residuals))
       _absolute_residuals[i] = std::abs(MetaPhysicL::raw_value(residuals[i]));
 
-    assembly.processResiduals(_absolute_residuals, dof_indices, _abs_vector_tags, scaling_factor);
+    assembly.addResiduals(_absolute_residuals, dof_indices, _abs_vector_tags, scaling_factor);
   }
 }
 
 template <typename Residuals, typename Indices>
 void
-TaggingInterface::processResidualsWithoutConstraints(Assembly & assembly,
+TaggingInterface::addResidualsWithoutConstraints(Assembly & assembly,
                                                      const Residuals & residuals,
                                                      const Indices & dof_indices,
                                                      const Real scaling_factor)
 {
-  assembly.processResidualsWithoutConstraints(residuals, dof_indices, _vector_tags, scaling_factor);
+  assembly.addResidualsWithoutConstraints(residuals, dof_indices, _vector_tags, scaling_factor);
   if (!_abs_vector_tags.empty())
   {
     _absolute_residuals.resize(residuals.size());
     for (const auto i : index_range(residuals))
       _absolute_residuals[i] = std::abs(MetaPhysicL::raw_value(residuals[i]));
 
-    assembly.processResidualsWithoutConstraints(
+    assembly.addResidualsWithoutConstraints(
         _absolute_residuals, dof_indices, _abs_vector_tags, scaling_factor);
   }
 }
 
 template <typename Residuals, typename Indices>
 void
-TaggingInterface::processResidualsAndJacobian(Assembly & assembly,
+TaggingInterface::addResidualsAndJacobian(Assembly & assembly,
                                               const Residuals & residuals,
                                               const Indices & dof_indices,
                                               Real scaling_factor)
 {
-  processResiduals(assembly, residuals, dof_indices, scaling_factor);
+  addResiduals(assembly, residuals, dof_indices, scaling_factor);
   processJacobian(assembly, residuals, dof_indices, scaling_factor);
 }
 
@@ -406,12 +406,12 @@ TaggingInterface::processJacobian(Assembly & assembly,
 
 template <typename Residuals, typename Indices>
 void
-TaggingInterface::processResidualsAndJacobianWithoutConstraints(Assembly & assembly,
+TaggingInterface::addResidualsAndJacobianWithoutConstraints(Assembly & assembly,
                                                                 const Residuals & residuals,
                                                                 const Indices & dof_indices,
                                                                 Real scaling_factor)
 {
-  processResidualsWithoutConstraints(assembly, residuals, dof_indices, scaling_factor);
+  addResidualsWithoutConstraints(assembly, residuals, dof_indices, scaling_factor);
   processJacobianWithoutConstraints(assembly, residuals, dof_indices, scaling_factor);
 }
 
