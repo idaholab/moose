@@ -18,10 +18,15 @@ CORES=${MOOSE_JOBS:-2}
 # TestHarness (Python threads) does not perform well beyond 12 cores
 if [ $CORES -ge 12 ]; then CORES=12; fi
 EXIT_CODE=0
+# A hack for now, to make Darwin work
+PLACEHOLDER='tests'
+if [[ $(uname) == Darwin ]]; then
+    PLACEHOLDER=''
+fi
 for ACTUAL in ${ACTUALS[@]}; do
     printf "Working on ${ACTUAL}...\n"
     combined-opt --copy-inputs ${ACTUAL}
-    cd combined/${ACTUAL}/tests
+    cd combined/${ACTUAL}/${PLACEHOLDER}
     combined-opt --run -j ${CORES}
     _last_run=$?
     if [ $_last_run -ge 1 ]; then
