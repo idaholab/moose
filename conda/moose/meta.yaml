@@ -39,6 +39,7 @@ test:
   commands:
     - $PREFIX/moose/bin/combined-opt -h
     - $PREFIX/bin/moose-opt -h
+    - $PREFIX/bin/moose -h
 
 about:
   home: https://mooseframework.org/

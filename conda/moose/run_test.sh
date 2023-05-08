@@ -20,9 +20,9 @@ if [ $CORES -ge 12 ]; then CORES=12; fi
 EXIT_CODE=0
 for ACTUAL in ${ACTUALS[@]}; do
     printf "Working on ${ACTUAL}...\n"
-    moose --copy-inputs ${ACTUAL}
+    combined-opt --copy-inputs ${ACTUAL}
     cd combined/${ACTUAL}/tests
-    moose --run -j ${CORES}
+    combined-opt --run -j ${CORES}
     _last_run=$?
     if [ $_last_run -ge 1 ]; then
         EXIT_CODE=${_last_run}
