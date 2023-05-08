@@ -366,7 +366,7 @@ MultiApp::createApps()
                                 getParam<bool>("library_load_dependencies"));
 
   bool rank_did_quiet_init = false;
-  unsigned int local_app;
+  unsigned int local_app = libMesh::invalid_uint;
   if (_wait_for_first_app_init)
   {
     if (hasLocalApp(0))
@@ -388,7 +388,7 @@ MultiApp::createApps()
 }
 
 void
-MultiApp::createLocalApp(const unsigned int & i)
+MultiApp::createLocalApp(const unsigned int i)
 {
   createApp(i, _global_time_offset);
   _app.parser().hitCLIFilter(_apps[i]->name(), _app.commandLine()->getArguments());

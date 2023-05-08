@@ -135,7 +135,7 @@ public:
    * Create the i-th local app
    * @param[in] i local app index
    */
-  virtual void createLocalApp(const unsigned int & i);
+  virtual void createLocalApp(const unsigned int i);
 
   /**
    * Method to be called in main-app initial setup for create sub-apps if using positions is false.
