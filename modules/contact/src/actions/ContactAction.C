@@ -49,7 +49,7 @@ registerMooseAction("ContactApp", ContactAction, "add_constraint");
 registerMooseAction("ContactApp", ContactAction, "output_penetration_info_vars");
 registerMooseAction("ContactApp", ContactAction, "add_user_object");
 // For automatic generation of contact pairs
-registerMooseAction("ContactApp", ContactAction, "check_generated_mesh");
+registerMooseAction("ContactApp", ContactAction, "post_mesh_prepared");
 
 InputParameters
 ContactAction::validParams()
@@ -1005,7 +1005,7 @@ ContactAction::addMortarContact()
 void
 ContactAction::addNodeFaceContact()
 {
-  if (_current_task == "check_generated_mesh" && _automatic_pairing_boundaries.size() > 0)
+  if (_current_task == "post_mesh_prepared" && _automatic_pairing_boundaries.size() > 0)
     createSidesetPairsFromGeometry();
 
   if (_current_task != "add_constraint")
