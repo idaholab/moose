@@ -1,7 +1,7 @@
 !template load file=sqa/module_sdd.md.template category=misc module=Misc
 
 !template! item key=introduction
- The [!ac](MOOSE) {{module}} module provides a set of objects that are used to support a variety of simulations performed using other MOOSE modules or MOOSE-based applications. This module relies on MOOSE for solving the systems of equations that are primarily defined by code outside this module, and simply provides commonly-used code objects that can support those calculations. This document describes the system design of the {{module}} module.
+The [!ac](MOOSE) {{module}} module provides a set of objects that are used to support a variety of simulations performed using other MOOSE modules or MOOSE-based applications. This module relies on MOOSE for solving the systems of equations that are primarily defined by code outside this module, and simply provides commonly-used code objects that can support those calculations. This document describes the system design of the {{module}} module.
 !template-end!
 
 !template! item key=system-scope
