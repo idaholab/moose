@@ -193,7 +193,7 @@ protected:
    * provided dof indices
    */
   template <typename Residuals, typename Indices>
-  void processJacobian(Assembly & assembly,
+  void addJacobian(Assembly & assembly,
                        const Residuals & residuals,
                        const Indices & dof_indices,
                        Real scaling_factor);
@@ -223,7 +223,7 @@ protected:
    * provided dof indices without constraints
    */
   template <typename Residuals, typename Indices>
-  void processJacobianWithoutConstraints(Assembly & assembly,
+  void addJacobianWithoutConstraints(Assembly & assembly,
                                          const Residuals & residuals,
                                          const Indices & dof_indices,
                                          Real scaling_factor);
@@ -231,7 +231,7 @@ protected:
   /**
    * Process a single Jacobian element
    */
-  void processJacobianElement(Assembly & assembly,
+  void addJacobianElement(Assembly & assembly,
                               dof_id_type row_index,
                               dof_id_type column_index,
                               Real value,
@@ -240,7 +240,7 @@ protected:
   /**
    * Process a local Jacobian matrix
    */
-  void processJacobian(Assembly & assembly,
+  void addJacobian(Assembly & assembly,
                        const std::vector<dof_id_type> & row_indices,
                        const std::vector<dof_id_type> & column_indices,
                        DenseMatrix<Real> & local_k,
@@ -249,7 +249,7 @@ protected:
   /**
    * Process a single Jacobian element
    */
-  void processJacobianElement(Assembly & assembly,
+  void addJacobianElement(Assembly & assembly,
                               Real value,
                               dof_id_type row_index,
                               dof_id_type column_index,
@@ -258,7 +258,7 @@ protected:
   /**
    * Process a local Jacobian matrix
    */
-  void processJacobian(Assembly & assembly,
+  void addJacobian(Assembly & assembly,
                        DenseMatrix<Real> & local_k,
                        const std::vector<dof_id_type> & row_indices,
                        const std::vector<dof_id_type> & column_indices,
@@ -391,17 +391,17 @@ TaggingInterface::addResidualsAndJacobian(Assembly & assembly,
                                               Real scaling_factor)
 {
   addResiduals(assembly, residuals, dof_indices, scaling_factor);
-  processJacobian(assembly, residuals, dof_indices, scaling_factor);
+  addJacobian(assembly, residuals, dof_indices, scaling_factor);
 }
 
 template <typename Residuals, typename Indices>
 void
-TaggingInterface::processJacobian(Assembly & assembly,
+TaggingInterface::addJacobian(Assembly & assembly,
                                   const Residuals & residuals,
                                   const Indices & dof_indices,
                                   Real scaling_factor)
 {
-  assembly.processJacobian(residuals, dof_indices, _matrix_tags, scaling_factor);
+  assembly.addJacobian(residuals, dof_indices, _matrix_tags, scaling_factor);
 }
 
 template <typename Residuals, typename Indices>
@@ -412,21 +412,21 @@ TaggingInterface::addResidualsAndJacobianWithoutConstraints(Assembly & assembly,
                                                                 Real scaling_factor)
 {
   addResidualsWithoutConstraints(assembly, residuals, dof_indices, scaling_factor);
-  processJacobianWithoutConstraints(assembly, residuals, dof_indices, scaling_factor);
+  addJacobianWithoutConstraints(assembly, residuals, dof_indices, scaling_factor);
 }
 
 template <typename Residuals, typename Indices>
 void
-TaggingInterface::processJacobianWithoutConstraints(Assembly & assembly,
+TaggingInterface::addJacobianWithoutConstraints(Assembly & assembly,
                                                     const Residuals & residuals,
                                                     const Indices & dof_indices,
                                                     Real scaling_factor)
 {
-  assembly.processJacobianWithoutConstraints(residuals, dof_indices, _matrix_tags, scaling_factor);
+  assembly.addJacobianWithoutConstraints(residuals, dof_indices, _matrix_tags, scaling_factor);
 }
 
 inline void
-TaggingInterface::processJacobianElement(Assembly & assembly,
+TaggingInterface::addJacobianElement(Assembly & assembly,
                                          const Real value,
                                          const dof_id_type row_index,
                                          const dof_id_type column_index,
@@ -436,7 +436,7 @@ TaggingInterface::processJacobianElement(Assembly & assembly,
 }
 
 inline void
-TaggingInterface::processJacobian(Assembly & assembly,
+TaggingInterface::addJacobian(Assembly & assembly,
                                   DenseMatrix<Real> & local_k,
                                   const std::vector<dof_id_type> & row_indices,
                                   const std::vector<dof_id_type> & column_indices,

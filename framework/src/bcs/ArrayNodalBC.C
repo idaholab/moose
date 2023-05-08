@@ -60,7 +60,7 @@ ArrayNodalBC::computeJacobian()
     const dof_id_type cached_row = _var.nodalDofIndex();
 
     for (const auto i : make_range(_var.count()))
-      processJacobianElement(_fe_problem.assembly(0, _sys.number()),
+      addJacobianElement(_fe_problem.assembly(0, _sys.number()),
                              cached_val(i),
                              cached_row + i,
                              cached_row + i,
@@ -85,7 +85,7 @@ ArrayNodalBC::computeOffDiagJacobian(const unsigned int jvar_num)
   // Cache the user's computeQpJacobian() value for later use.
   for (const auto i : make_range(_var.count()))
     for (const auto j : make_range(jvar.count()))
-      processJacobianElement(_fe_problem.assembly(0, _sys.number()),
+      addJacobianElement(_fe_problem.assembly(0, _sys.number()),
                              cached_val(i, j),
                              cached_row + i,
                              cached_col + j,

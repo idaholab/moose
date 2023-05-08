@@ -90,7 +90,7 @@ KernelScalarBase::computeScalarJacobian()
         _local_ke(_h, _l) += _JxW[_qp] * _coord[_qp] * computeScalarQpJacobian();
   }
 
-  processJacobian(_assembly,
+  addJacobian(_assembly,
                   _local_ke,
                   _kappa_var_ptr->dofIndices(),
                   _kappa_var_ptr->dofIndices(),
@@ -160,7 +160,7 @@ KernelScalarBase::computeScalarOffDiagJacobian(const unsigned int jvar_num)
   else
     mooseError("Vector variable cannot be coupled into Kernel Scalar currently");
 
-  processJacobian(_assembly,
+  addJacobian(_assembly,
                   _local_ke,
                   _kappa_var_ptr->dofIndices(),
                   jvar.dofIndices(),
@@ -183,7 +183,7 @@ KernelScalarBase::computeOffDiagJacobianScalarLocal(const unsigned int svar_num)
         _local_ke(_i, _l) += _JxW[_qp] * _coord[_qp] * computeQpOffDiagJacobianScalar(svar_num);
   }
 
-  processJacobian(_assembly, _local_ke, _var.dofIndices(), svar.dofIndices(), _var.scalingFactor());
+  addJacobian(_assembly, _local_ke, _var.dofIndices(), svar.dofIndices(), _var.scalingFactor());
 }
 
 void
@@ -237,7 +237,7 @@ KernelScalarBase::computeScalarOffDiagJacobianScalar(const unsigned int svar_num
             _JxW[_qp] * _coord[_qp] * computeScalarQpOffDiagJacobianScalar(svar_num);
   }
 
-  processJacobian(_assembly,
+  addJacobian(_assembly,
                   _local_ke,
                   _kappa_var_ptr->dofIndices(),
                   svar.dofIndices(),

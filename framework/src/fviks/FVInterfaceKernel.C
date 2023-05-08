@@ -167,11 +167,11 @@ FVInterfaceKernel::addResidual(const Real resid,
 }
 
 void
-FVInterfaceKernel::processJacobian(const ADReal & resid,
+FVInterfaceKernel::addJacobian(const ADReal & resid,
                                    const dof_id_type dof_index,
                                    const Real scaling_factor)
 {
-  processJacobian(_assembly,
+  addJacobian(_assembly,
                   std::array<ADReal, 1>{{resid}},
                   std::vector<dof_id_type>({dof_index}),
                   scaling_factor);

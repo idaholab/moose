@@ -100,7 +100,7 @@ NodalBC::computeJacobian()
     const dof_id_type cached_row = _var.nodalDofIndex();
 
     // Cache the user's computeQpJacobian() value for later use.
-    processJacobianElement(_fe_problem.assembly(0, _sys.number()),
+    addJacobianElement(_fe_problem.assembly(0, _sys.number()),
                            cached_val,
                            cached_row,
                            cached_row,
@@ -134,7 +134,7 @@ NodalBC::computeOffDiagJacobian(const unsigned int jvar_num)
     const dof_id_type cached_col = _current_node->dof_number(_sys.number(), jvar_num, 0);
 
     // Cache the user's computeQpJacobian() value for later use.
-    processJacobianElement(_fe_problem.assembly(0, _sys.number()),
+    addJacobianElement(_fe_problem.assembly(0, _sys.number()),
                            cached_val,
                            cached_row,
                            cached_col,

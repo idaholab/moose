@@ -81,13 +81,13 @@ FVScalarLagrangeMultiplierConstraint::computeOffDiagJacobian()
               "The lambda variable should be first order");
   const auto primal_r = _lambda[0] * _assembly.elemVolume();
   mooseAssert(_var.dofIndices().size() == 1, "We should only have one dof");
-  processJacobian(
+  addJacobian(
       _assembly, std::array<ADReal, 1>{{primal_r}}, _var.dofIndices(), _var.scalingFactor());
 
   // LM
   const auto lm_r = computeQpResidual() * _assembly.elemVolume();
   mooseAssert(_lambda_var.dofIndices().size() == 1, "We should only have one dof");
-  processJacobian(_assembly,
+  addJacobian(_assembly,
                   std::array<ADReal, 1>{{lm_r}},
                   _lambda_var.dofIndices(),
                   _lambda_var.scalingFactor());

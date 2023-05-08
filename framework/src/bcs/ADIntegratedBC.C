@@ -163,7 +163,7 @@ void
 ADIntegratedBCTempl<T>::computeADJacobian()
 {
   computeResidualsForJacobian();
-  processJacobian(_assembly, _residuals_and_jacobians, _var.dofIndices(), _var.scalingFactor());
+  addJacobian(_assembly, _residuals_and_jacobians, _var.dofIndices(), _var.scalingFactor());
 }
 
 template <typename T>

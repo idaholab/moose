@@ -93,7 +93,7 @@ NodalKernel::computeJacobian()
     const Real cached_val = computeQpJacobian();
     const dof_id_type cached_row = _var.nodalDofIndex();
 
-    processJacobianElement(_assembly, cached_val, cached_row, cached_row, _var.scalingFactor());
+    addJacobianElement(_assembly, cached_val, cached_row, cached_row, _var.scalingFactor());
 
     if (_has_diag_save_in)
     {
@@ -122,7 +122,7 @@ NodalKernel::computeOffDiagJacobian(const unsigned int jvar_num)
       // Note: this only works for equal order Lagrange variables...
       const dof_id_type cached_col = _current_node->dof_number(_sys.number(), jvar.number(), 0);
 
-      processJacobianElement(_assembly, cached_val, cached_row, cached_col, _var.scalingFactor());
+      addJacobianElement(_assembly, cached_val, cached_row, cached_col, _var.scalingFactor());
     }
   }
 }

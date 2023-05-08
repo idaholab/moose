@@ -230,7 +230,7 @@ MortarConstraintBase::zeroInactiveLMDofs(const std::unordered_set<const Node *> 
       const auto dof_index = node->dof_number(sn, vn, 0);
       // No scaling; this is not physics
       if (_assembly.computingJacobian())
-        processJacobianElement(
+        addJacobianElement(
             _assembly, /*element_value=*/1, dof_index, dof_index, /*scaling_factor=*/1);
       if (_assembly.computingResidual())
       {
@@ -254,7 +254,7 @@ MortarConstraintBase::zeroInactiveLMDofs(const std::unordered_set<const Node *> 
         const auto dof_index = el->dof_number(sn, vn, comp);
         // No scaling; this is not physics
         if (_assembly.computingJacobian())
-          processJacobianElement(
+          addJacobianElement(
               _assembly, /*element_value=*/1, dof_index, dof_index, /*scaling_factor=*/1);
         if (_assembly.computingResidual())
         {

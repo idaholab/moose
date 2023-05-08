@@ -147,7 +147,7 @@ HomogenizedTotalLagrangianStressDivergenceS::computeScalarJacobian()
     }
   }
 
-  processJacobian(_assembly,
+  addJacobian(_assembly,
                   _local_ke,
                   _kappa_var_ptr->dofIndices(),
                   _kappa_var_ptr->dofIndices(),
@@ -181,7 +181,7 @@ HomogenizedTotalLagrangianStressDivergenceS::computeScalarOffDiagJacobian(
     }
   }
 
-  processJacobian(_assembly,
+  addJacobian(_assembly,
                   _local_ke,
                   _kappa_var_ptr->dofIndices(),
                   jvar.dofIndices(),
@@ -217,7 +217,7 @@ HomogenizedTotalLagrangianStressDivergenceS::computeOffDiagJacobianScalarLocal(
     }
   }
 
-  processJacobian(_assembly, _local_ke, _var.dofIndices(), svar.dofIndices(), _var.scalingFactor());
+  addJacobian(_assembly, _local_ke, _var.dofIndices(), svar.dofIndices(), _var.scalingFactor());
 }
 
 Real

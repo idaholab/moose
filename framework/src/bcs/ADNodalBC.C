@@ -92,7 +92,7 @@ ADNodalBCTempl<T>::addResidual(const ADResidual & residual,
 template <typename T>
 template <typename ADResidual>
 void
-ADNodalBCTempl<T>::processJacobian(const ADResidual & residual,
+ADNodalBCTempl<T>::addJacobian(const ADResidual & residual,
                                    const std::vector<dof_id_type> & dof_indices)
 {
   mooseAssert(dof_indices.size() <= _set_components.size(),
@@ -102,7 +102,7 @@ ADNodalBCTempl<T>::processJacobian(const ADResidual & residual,
     if (_set_components[i])
       // If we store into the displaced assembly for nodal bc objects the data never actually makes
       // it into the global Jacobian
-      processJacobian(_undisplaced_assembly,
+      addJacobian(_undisplaced_assembly,
                       std::array<ADReal, 1>{{conversionHelper(residual, i)}},
                       std::array<dof_id_type, 1>{{dof_indices[i]}},
                       /*scaling_factor=*/1);
@@ -131,7 +131,7 @@ ADNodalBCTempl<T>::computeJacobian()
 
   const auto residual = computeQpResidual();
 
-  processJacobian(residual, dof_indices);
+  addJacobian(residual, dof_indices);
 }
 
 template <typename T>
@@ -145,7 +145,7 @@ ADNodalBCTempl<T>::computeResidualAndJacobian()
   const auto residual = computeQpResidual();
 
   addResidual(residual, dof_indices);
-  processJacobian(residual, dof_indices);
+  addJacobian(residual, dof_indices);
 }
 
 template <typename T>

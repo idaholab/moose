@@ -1706,7 +1706,7 @@ public:
    * This simply caches the derivative values for the corresponding column indices for the provided
    * \p matrix_tags, without applying any scaling factors
    */
-  void processJacobianNoScaling(const ADReal & residual,
+  void addJacobianNoScaling(const ADReal & residual,
                                 dof_id_type dof_index,
                                 const std::set<TagID> & matrix_tags);
 
@@ -1942,7 +1942,7 @@ private:
    * provided \p matrix_tags. Note that this overload will call \p DofMap::constrain_element_matrix.
    */
   template <typename Residuals, typename Indices>
-  void processJacobian(const Residuals & residuals,
+  void addJacobian(const Residuals & residuals,
                        const Indices & row_indices,
                        const std::set<TagID> & matrix_tags,
                        Real scaling_factor);
@@ -1968,7 +1968,7 @@ private:
    * DofMap::constrain_element_matrix.
    */
   template <typename Residuals, typename Indices>
-  void processJacobianWithoutConstraints(const Residuals & residuals,
+  void addJacobianWithoutConstraints(const Residuals & residuals,
                                          const Indices & row_indices,
                                          const std::set<TagID> & matrix_tags,
                                          Real scaling_factor);
@@ -2790,11 +2790,11 @@ Assembly::adGradPhi<RealVectorValue>(const MooseVariableFE<RealVectorValue> & v)
 }
 
 inline void
-Assembly::processJacobianNoScaling(const ADReal & residual,
+Assembly::addJacobianNoScaling(const ADReal & residual,
                                    const dof_id_type dof_index,
                                    const std::set<TagID> & matrix_tags)
 {
-  processJacobian(
+  addJacobian(
       std::array<ADReal, 1>{{residual}}, std::vector<dof_id_type>({dof_index}), matrix_tags, 1);
 }
 
@@ -2855,7 +2855,7 @@ Assembly::addResidualsWithoutConstraints(const Residuals & residuals,
 
 template <typename Residuals, typename Indices>
 void
-Assembly::processJacobian(const Residuals & residuals,
+Assembly::addJacobian(const Residuals & residuals,
                           const Indices & input_row_indices,
                           const std::set<TagID> & matrix_tags,
                           const Real scaling_factor)
@@ -2867,7 +2867,7 @@ Assembly::processJacobian(const Residuals & residuals,
   {
     // No constraining is required. (This is likely a finite volume computation if we only have a
     // single dof)
-    processJacobianWithoutConstraints(residuals, input_row_indices, matrix_tags, scaling_factor);
+    addJacobianWithoutConstraints(residuals, input_row_indices, matrix_tags, scaling_factor);
     return;
   }
 
@@ -2914,7 +2914,7 @@ Assembly::processJacobian(const Residuals & residuals,
 
 template <typename Residuals, typename Indices>
 void
-Assembly::processJacobianWithoutConstraints(const Residuals & residuals,
+Assembly::addJacobianWithoutConstraints(const Residuals & residuals,
                                             const Indices & row_indices,
                                             const std::set<TagID> & matrix_tags,
                                             const Real scaling_factor)

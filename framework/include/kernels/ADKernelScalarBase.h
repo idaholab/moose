@@ -64,7 +64,7 @@ protected:
    * residuals up-front when doing loal derivative indexing because we can use those residuals to
    * fill \p _local_ke for every associated jvariable. We do not want to re-do these calculations
    * for every jvariable and corresponding \p _local_ke. For global indexing we will simply pass
-   * the computed \p _residuals directly to \p Assembly::processJacobian
+   * the computed \p _residuals directly to \p Assembly::addJacobian
    */
   virtual void computeScalarResidualsForJacobian();
 
