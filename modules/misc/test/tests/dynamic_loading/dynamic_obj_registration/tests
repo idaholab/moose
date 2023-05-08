@@ -10,6 +10,16 @@
     allow_warnings = true
   [../]
 
+  [./dynamic_object_loading2]
+    type = 'RunApp'
+    input = 'dynamic_objects2.i'
+    library_mode = 'DYNAMIC'
+
+    # Test must be run with the misc app to test dynamic loading
+    executable_pattern = 'misc-\w+$'
+    allow_warnings = true
+  [../]
+
   [./dynamic_object_loading_w_name]
     type = 'Exodiff'
     input = 'dynamic_objects.i'
