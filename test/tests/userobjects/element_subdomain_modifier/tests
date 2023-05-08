@@ -118,4 +118,12 @@
     mesh_mode = 'REPLICATED'
     requirement = 'The framework shall support applying integral BCs on the moving boundary with AMR in the element subdomain modifier'
   []
+
+  [error-distributed]
+    type = RunException
+    input = 'amr_bc.i'
+    expect_err = "Cannot use BoundaryPreservedMarker with DistributedMesh"
+    requirement = "The system shall produce an error when a boundary preserved marker is used with distributed mesh."
+    mesh_mode = 'DISTRIBUTED'
+  []
 []

@@ -33,6 +33,7 @@ BoundaryPreservedMarker::BoundaryPreservedMarker(const InputParameters & paramet
     _marker_name(parameters.get<MarkerName>("marker")),
     _marker(&getMarkerValue(_marker_name))
 {
+  _mesh.errorIfDistributedMesh(type());
   BoundaryName boundary_name = getParam<BoundaryName>("preserved_boundary");
   auto boundary_ids = MooseMeshUtils::getBoundaryIDs(_mesh, {boundary_name}, true);
   mooseAssert(boundary_ids.size() == 1, "Boundary does not exist");
