@@ -477,7 +477,7 @@ protected:
   std::vector<FileName> _input_files;
 
   /// Whether to create the first app on rank 0 while all other MPI ranks are idle
-  const bool & _quiet_app_init;
+  const bool & _wait_for_first_app_init;
 
   /// Number of positions for each input file
   std::vector<unsigned int> _npositions_inputfile;

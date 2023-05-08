@@ -120,7 +120,7 @@ MultiApp::validParams()
                                 "Minimum number of processors to give to each App in this "
                                 "MultiApp.  Useful for larger, distributed mesh solves.");
   params.addParam<bool>(
-      "quiet_app_init",
+      "wait_for_first_app_init",
       false,
       "Create the first sub-application on rank 0, then MPI_Barrier before "
       "creating the next N-1 apps (on all ranks). "
@@ -220,7 +220,7 @@ MultiApp::validParams()
   params.declareControllable("cli_args", {EXEC_PRE_MULTIAPP_SETUP});
   params.registerBase("MultiApp");
 
-  params.addParamNamesToGroup("use_displaced_mesh quiet_app_init", "Advanced");
+  params.addParamNamesToGroup("use_displaced_mesh wait_for_first_app_init", "Advanced");
   params.addParamNamesToGroup("positions positions_file run_in_position output_in_position",
                               "Positions / transformations of the MultiApp frame of reference");
   params.addParamNamesToGroup("min_procs_per_app max_procs_per_app", "Parallelism");
@@ -245,7 +245,7 @@ MultiApp::MultiApp(const InputParameters & parameters)
                                        : _fe_problem.getMooseApp().type()),
     _use_positions(getParam<bool>("use_positions")),
     _input_files(getParam<std::vector<FileName>>("input_files")),
-    _quiet_app_init(getParam<bool>("quiet_app_init")),
+    _wait_for_first_app_init(getParam<bool>("wait_for_first_app_init")),
     _total_num_apps(0),
     _my_num_apps(0),
     _first_local_app(0),
@@ -367,7 +367,7 @@ MultiApp::createApps()
 
   bool rank_did_quiet_init = false;
   unsigned int local_app;
-  if (_quiet_app_init)
+  if (_wait_for_first_app_init)
   {
     if (hasLocalApp(0))
     {
