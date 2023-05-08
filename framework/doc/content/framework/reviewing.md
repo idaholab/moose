@@ -12,16 +12,16 @@ Software quality assurance requires that pull requests be reviewed by at least o
 
 ## Conduct
 
-- Be respectful. Feel free to close the pull request if the contributor is not.
+- The MOOSE project strives to create a respectful environment for all contributors, reviewers, and users. Therefore, please be respectful during the pull request submission and review process. Pull requests can be closed if interactions do not meet this standard. 
 - Try to be helpful. The reviewer is not expected to implement changes
   for the author, but the reviewer should try to ensure that
   the author has some direction, particularly if the author is a new
   or infrequent contributor.
-- Make it clear what are large changes that you require, versus suggestions.
+- Make it clear what changes are required, versus suggestions.
   For example, use "I suggest" for suggestions and imperative language,
   e.g., "Do this", for required changes.
   Anything minor (typos, grammar, docstrings) is assumed to be required. If you
-  do not wish for something to be fixed, do not suggest the change.
+  do not wish for something to be changed, do not suggest the change.
 - If it would be helpful, provide the author with a link to the contributing
   guidelines page.
 - Feel free to ask questions. It's normal to not understand everything in the pull request when you have
