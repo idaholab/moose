@@ -15,7 +15,7 @@ ln -s combined-opt moose-opt
 ln -s combined-opt moose
 
 # Fix (hack) for moose -> moose symlink collision binary/copy inputs
-cd ${PREFIX}/share/moose
+cd ${PREFIX}/moose/share/moose
 for sdir in `ls ../combined`; do
     if [ -d ../combined/$sdir ] && [ ! -d $sdir ] && [ ! -f $sdir ] && [ ! -L $sdir ]; then
         ln -s ../combined/$sdir .
