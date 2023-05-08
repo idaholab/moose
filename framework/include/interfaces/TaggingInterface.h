@@ -275,6 +275,12 @@ protected:
    */
   void setResidual(SystemBase & sys, Real residual, dof_id_type dof_index);
 
+  /**
+   * Set residuals using the provided functor
+   */
+  template <typename SetResidualFunctor>
+  void setResidual(SystemBase & sys, SetResidualFunctor set_residual_functor);
+
   /// SubProblem that contains tag info
   SubProblem & _subproblem;
 
@@ -455,4 +461,13 @@ TaggingInterface::setResidual(SystemBase & sys, const Real residual, const dof_i
   for (const auto tag_id : _vector_tags)
     if (sys.hasVector(tag_id))
       sys.getVector(tag_id).set(dof_index, residual);
+}
+
+template <typename SetResidualFunctor>
+void
+TaggingInterface::setResidual(SystemBase & sys, const SetResidualFunctor set_residual_functor)
+{
+  for (const auto tag_id : _vector_tags)
+    if (sys.hasVector(tag_id))
+      set_residual_functor(sys.getVector(tag_id));
 }
