@@ -84,6 +84,8 @@ AbaqusUMATStress::AbaqusUMATStress(const InputParameters & parameters)
     _material_timestep(declareProperty<Real>(_base_name + "material_timestep_limit")),
     _rotation_increment(
         getOptionalMaterialProperty<RankTwoTensor>(_base_name + "rotation_increment")),
+    _rotation_increment_old(
+        getOptionalMaterialPropertyOld<RankTwoTensor>(_base_name + "rotation_increment")),
     _temperature(coupledValue("temperature")),
     _temperature_old(coupledValueOld("temperature")),
     _external_fields(isCoupled("external_fields") ? coupledValues("external_fields")
@@ -211,7 +213,22 @@ AbaqusUMATStress::computeQpStress()
   // therefore, all unsymmetric matrices must be transposed before passing them to Fortran
   RankTwoTensor FBar_old_fortran = _Fbar_old[_qp].transpose();
   RankTwoTensor FBar_fortran = _Fbar[_qp].transpose();
-  RankTwoTensor DROT_fortran = _rotation_increment[_qp].transpose();
+
+  // DROT needed by UMAT will depend on kinematics and whether or not an intermediate configuration
+  // is used
+  RankTwoTensor DROT_fortran;
+  if (_use_orientation)
+  {
+    DROT_fortran = RankTwoTensor::Identity();
+  }
+  else
+  {
+    if (_decomposition_method == ComputeFiniteStrain::DecompMethod::HughesWinget)
+      DROT_fortran = _rotation_increment[_qp].transpose();
+    else
+      DROT_fortran = _rotation_increment_old[_qp].transpose();
+  }
+
   const Real * myDFGRD0 = &(FBar_old_fortran(0, 0));
   const Real * myDFGRD1 = &(FBar_fortran(0, 0));
   const Real * myDROT = &(DROT_fortran(0, 0));
@@ -244,8 +261,6 @@ AbaqusUMATStress::computeQpStress()
   {
     _aqDFGRD0[i] = myDFGRD0[i];
     _aqDFGRD1[i] = myDFGRD1[i];
-    // TODO: Use old rotation increment for DROT if Rashid so UMAT state variables
-    // can be rotated to the same reference frame as stress (ie. old stress)
     _aqDROT[i] = myDROT[i];
   }
 

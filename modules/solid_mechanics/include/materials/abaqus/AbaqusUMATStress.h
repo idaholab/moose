@@ -224,6 +224,7 @@ protected:
 
   // Time step rotation increment
   const OptionalMaterialProperty<RankTwoTensor> & _rotation_increment;
+  const OptionalMaterialProperty<RankTwoTensor> & _rotation_increment_old;
 
   // Coupled temperature field
   const VariableValue & _temperature;
