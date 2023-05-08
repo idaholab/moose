@@ -66,15 +66,9 @@
 []
 
 [VectorPostprocessors]
-  [Cp]
+  [NodalData]
     type = NodalValueSampler
-    variable = 'cp:Mo cp:Ru'
-    execute_on = TIMESTEP_END
-    sort_by = id
-  []
-  [x]
-    type = NodalValueSampler
-    variable = 'Mo Ru'
+    variable = 'Mo Ru BCCN:Mo HCPN:Mo BCCN:Ru HCPN:Ru cp:Mo cp:Ru'
     execute_on = TIMESTEP_END
     sort_by = id
   []

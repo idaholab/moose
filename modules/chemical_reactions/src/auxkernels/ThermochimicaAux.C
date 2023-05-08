@@ -109,7 +109,7 @@ ThermochimicaAux::computeValue()
   // Save requested element potentials into coupled aux variables
   mooseAssert(_el_pot.size() == data._element_potential.size(), "Inconsistent sizes.");
   for (const auto i : make_range(_n_elements))
-    (*_el_pot[i])[_qp] = data._element_potential[i];
+    (*_el_pot[i])[_qp] = data._element_potential_for_output[i];
 #endif
 
   return n_active_phases;
