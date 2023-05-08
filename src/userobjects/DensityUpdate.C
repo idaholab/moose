@@ -1,4 +1,5 @@
 #include "DensityUpdate.h"
+#include <algorithm>
 
 registerMooseObject("troutApp", DensityUpdate);
 
@@ -114,11 +115,11 @@ Real
 DensityUpdate::computeUpdatedDensity(Real current_density, Real dc, Real lmid)
 {
   Real move = 0.05;
-  Real updated_density =
-      std::max(0.0,
-               std::min(1.0,
-                        std::min(current_density + move,
-                                 std::max(current_density - move,
-                                          current_density * std::sqrt(-dc / lmid)))));
+  Real updated_density = std::max(
+      0.0,
+      std::min(1.0,
+               std::min(current_density + move,
+                        std::max(current_density - move,
+                                 std::max(1e-5, current_density) * std::sqrt(-dc / lmid)))));
   return updated_density;
 }

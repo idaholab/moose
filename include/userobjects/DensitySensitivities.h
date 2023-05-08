@@ -19,5 +19,5 @@ protected:
   const RadialAverage::Result & _filter;
   MooseVariable & _density_sensitivity;
   const VariableName _design_density_name;
-  MooseVariable & _design_density;
+  const MooseVariable & _design_density;
 };
