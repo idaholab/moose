@@ -17,6 +17,6 @@
     recover = false
     exodiff = 'centroid_multiapp_out.e centroid_multiapp_out_sub1.e centroid_multiapp_out_sub3.e centroid_multiapp_out_sub5.e centroid_multiapp_out_sub7.e centroid_multiapp_out_sub0.e centroid_multiapp_out_sub2.e centroid_multiapp_out_sub4.e centroid_multiapp_out_sub6.e centroid_multiapp_out_sub8.e'
 
-    requirement = "The system shall optionally allow the first sub-app to fully initialize before launching the remaining N-1 apps in parallel."
+    requirement = "The system shall optionally allow the first sub-app to fully initialize before initializing all the remaining child apps in parallel."
   []
 []

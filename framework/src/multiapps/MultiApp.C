@@ -57,7 +57,6 @@ MultiApp::validParams()
                         "in the case this is true but no "
                         "displacements are provided in the Mesh block "
                         "the undisplaced mesh will still be used.");
-  params.addParamNamesToGroup("use_displaced_mesh", "Advanced");
 
   std::ostringstream app_types_strings;
   registeredMooseAppIterator it = AppFactory::instance().registeredObjectsBegin();
@@ -123,9 +122,8 @@ MultiApp::validParams()
   params.addParam<bool>(
       "quiet_app_init",
       false,
-      "Advanced parameter that will create the first "
-      "sub-application on rank 0, then MPI_Barrier before creating the next N-1 apps (on all "
-      "ranks). "
+      "Create the first sub-application on rank 0, then MPI_Barrier before "
+      "creating the next N-1 apps (on all ranks). "
       "This is only needed if your sub-application needs to perform some setup "
       "actions in quiet, without other sub-applications working at the same time.");
 
@@ -222,9 +220,10 @@ MultiApp::validParams()
   params.declareControllable("cli_args", {EXEC_PRE_MULTIAPP_SETUP});
   params.registerBase("MultiApp");
 
+  params.addParamNamesToGroup("use_displaced_mesh quiet_app_init", "Advanced");
   params.addParamNamesToGroup("positions positions_file run_in_position output_in_position",
                               "Positions / transformations of the MultiApp frame of reference");
-  params.addParamNamesToGroup("min_procs_per_app max_procs_per_app quiet_app_init", "Parallelism");
+  params.addParamNamesToGroup("min_procs_per_app max_procs_per_app", "Parallelism");
   params.addParamNamesToGroup("reset_time reset_apps", "Reset MultiApp");
   params.addParamNamesToGroup("move_time move_apps move_positions", "Timed move of MultiApps");
   params.addParamNamesToGroup("relaxation_factor transformed_variables transformed_postprocessors "
