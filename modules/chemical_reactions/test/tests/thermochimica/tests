@@ -81,7 +81,7 @@
     input = MoRu.i
     expect_err = "Species 'Xe' was not found in the simulation."
     cli_args = "GlobalParams/output_species='BCCN:Mo HCPN:Xe BCCN:Ru HCPN:Ru'"
-    issues = '#23865'
+    issues = '#23865 #24269'
     requirement = 'The system shall throw an error if a species absent from the database is specified for species output'
     design = ThermochimicaNodalData.md
 
@@ -93,7 +93,7 @@
     input = MoRu.i
     expect_err = "Phase name 'HCCN' of output species 'HCCN:Mo' was not found in the simulation."
     cli_args = "GlobalParams/output_species='BCCN:Mo HCCN:Mo BCCN:Ru HCPN:Ru'"
-    issues = '#23865'
+    issues = '#23865 #24269'
     requirement = 'The system shall throw an error if a wrong phase name of a species is specified for species output'
     design = ThermochimicaNodalData.md
 
@@ -120,6 +120,7 @@
     input = MoRu.i
     expect_err = "Phase 'RandomPhase' was not found in the simulation."
     cli_args = "GlobalParams/output_phases='BCCN HCPN RandomPhase' UserObjects/data/output_phases='BCCN HCPN RandomPhase'"
+    issues = '#24269'
     requirement = 'The system shall throw an error if a phase absent from the simulation is specified for phase output'
     design = ThermochimicaNodalData.md
 

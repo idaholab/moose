@@ -65,6 +65,22 @@
   type = Steady
 []
 
+[VectorPostprocessors]
+  [Cp]
+    type = NodalValueSampler
+    variable = 'cp:Mo cp:Ru'
+    execute_on = TIMESTEP_END
+    sort_by = id
+  []
+  [x]
+    type = NodalValueSampler
+    variable = 'Mo Ru'
+    execute_on = TIMESTEP_END
+    sort_by = id
+  []
+[]
+
 [Outputs]
   exodus = true
+  csv = true
 []
