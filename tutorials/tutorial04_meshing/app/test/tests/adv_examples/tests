@@ -1,0 +1,54 @@
+[Tests]
+  design = tutorial04_meshing/index.md
+  issues = '#24041'
+  parallel_scheduling = True
+
+  [ax_bias]
+    requirement = "The system shall include example input for meshing tutorial axial bias example."
+    type = RunApp
+    input = 'ax_bias.i'
+    cli_args= '--mesh-only --error-deprecated'
+  []
+
+  [rad_bias_prmg]
+    requirement = "The system shall include example input for meshing tutorial PRMG radial bias example."
+    type = RunApp
+    input = 'rad_bias_prmg.i'
+    cli_args= '--mesh-only --error-deprecated'
+  []
+
+  [bdry_layer_pccmg]
+    requirement = "The system shall include example input for meshing tutorial PCCMG boundary layer example."
+    type = RunApp
+    input = 'bdry_layer_pccmg.i'
+    cli_args= '--mesh-only --error-deprecated'
+  []
+
+  [rad_bias_pccmg]
+    requirement = "The system shall include example input for meshing tutorial PCCMG radial bias example."
+    type = RunApp
+    input = 'rad_bias_pccmg.i'
+    cli_args= '--mesh-only --error-deprecated'
+  []
+
+  [oversize]
+    requirement = "The system shall include example input for meshing tutorial oversized pin example."
+    type = RunApp
+    input = 'oversize.i'
+    cli_args= '--mesh-only --error-deprecated'
+  []
+
+  [pcg_xyd]
+    requirement = "The system shall include example input for meshing tutorial ParsedCurveGenerator example."
+    type = RunApp
+    input = 'pcg_xyd.i'
+    cli_args= '--mesh-only --error-deprecated'
+  []
+
+  [quarter_circle_connect]
+    requirement = "The system shall include example input for meshing tutorial quarter circle connection example."
+    type = RunApp
+    input = 'quarter_circle_connect.i'
+    cli_args= '--mesh-only --error-deprecated'
+  []
+[]

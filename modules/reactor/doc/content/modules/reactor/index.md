@@ -16,6 +16,10 @@ This module consists of a series of new mesh generators to enable meshing of rea
 
 Aside from the mesh generators, this `reactor` module also includes a Function object to enable dynamic simulation of rotational control drums in a reactor core mesh.
 
+## Tutorial
+
+This module is demonstrated in detail in the [MOOSE Reactor Module Meshing Tutorial](https://mooseframework.inl.gov/getting_started/examples_and_tutorials/tutorial04_meshing/index.html).
+
 ## Objects and Syntax
 
 !syntax complete groups=ReactorApp level=3

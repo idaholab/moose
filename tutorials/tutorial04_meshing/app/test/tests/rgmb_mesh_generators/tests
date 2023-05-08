@@ -1,0 +1,26 @@
+[Tests]
+  design = tutorial04_meshing/index.md
+  issues = '#24041'
+  parallel_scheduling = True
+
+  [rgmb_core_cartesian]
+    requirement = "The system shall include example input for meshing tutorial RGMB Cartesian core example."
+    type = RunApp
+    input = 'rgmb_core_cartesian.i'
+    cli_args= '--mesh-only --error-deprecated'
+  []
+
+  [rgmb_core_hexagonal]
+    requirement = "The system shall include example input for meshing tutorial RGMB hexagonal example."
+    type = RunApp
+    input = 'rgmb_core_hexagonal.i'
+    cli_args= '--mesh-only --error-deprecated'
+  []
+
+  [rgmb_core_hexagonal_periphery]
+    requirement = "The system shall include example input for meshing tutorial RGMB hexagonal core with periphery example."
+    type = RunApp
+    input = 'rgmb_core_hexagonal_periphery.i'
+    cli_args= '--mesh-only --error-deprecated'
+  []
+[]

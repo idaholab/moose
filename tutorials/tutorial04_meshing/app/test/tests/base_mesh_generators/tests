@@ -1,0 +1,54 @@
+[Tests]
+  design = tutorial04_meshing/index.md
+  issues = '#24041'
+  parallel_scheduling = True
+
+  [center_trim]
+    requirement = "The system shall include example input for meshing tutorial center trim example."
+    type = RunApp
+    input = 'center_trim.i'
+    cli_args= '--mesh-only --error-deprecated'
+  []
+
+  [peripheral_trim]
+    requirement = "The system shall include example input for meshing tutorial peripheral trim example."
+    type = RunApp
+    input = 'peripheral_trim.i'
+    cli_args= '--mesh-only --error-deprecated'
+  []
+
+  [plane_id]
+    requirement = "The system shall include example input for meshing tutorial plane id example."
+    type = RunApp
+    input = 'plane_id.i'
+    cli_args= '--mesh-only --error-deprecated'
+  []
+
+  [depletion_id]
+    requirement = "The system shall include example input for meshing tutorial depletion id example."
+    type = RunApp
+    input = 'depletion_id.i'
+    cli_args= '--mesh-only --error-deprecated'
+  []
+
+  [reporting_id_vpp]
+    requirement = "The system shall include example input for meshing tutorial reporting id VPP example."
+    type = RunApp
+    input = 'reporting_id_vpp.i'
+    cli_args= '--mesh-only --error-deprecated'
+  []
+
+  [alternative_pattern_reporting_id]
+    requirement = "The system shall include example input for meshing tutorial alternative pattern reporting id example."
+    type = RunApp
+    input = 'alternative_pattern_reporting_id.i'
+    cli_args= '--mesh-only --error-deprecated'
+  []
+
+  [common_geo]
+    requirement = "The system shall include example input for meshing tutorial common geometry example."
+    type = RunApp
+    input = 'common_geo.i'
+    cli_args= '--mesh-only --error-deprecated'
+  []
+[]

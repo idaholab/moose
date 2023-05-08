@@ -268,7 +268,7 @@ AssemblyMeshGenerator::AssemblyMeshGenerator(const InputParameters & parameters)
   {
     // Hex Geometry
     {
-      auto params = _app.getFactory().getValidParams("HexIDPatternedMeshGenerator");
+      auto params = _app.getFactory().getValidParams("PatternedHexMeshGenerator");
 
       params.set<std::string>("id_name") = "pin_id";
       params.set<MooseEnum>("assign_type") =
@@ -309,7 +309,7 @@ AssemblyMeshGenerator::AssemblyMeshGenerator(const InputParameters & parameters)
       params.set<boundary_id_type>("external_boundary_id") = _assembly_boundary_id;
       params.set<std::string>("external_boundary_name") = _assembly_boundary_name;
 
-      addMeshSubgenerator("HexIDPatternedMeshGenerator", name() + "_pattern", params);
+      addMeshSubgenerator("PatternedHexMeshGenerator", name() + "_pattern", params);
 
       // Pass mesh meta-data defined in subgenerator constructor to this MeshGenerator
       if (hasMeshProperty<Real>("pitch_meta", name() + "_pattern"))
