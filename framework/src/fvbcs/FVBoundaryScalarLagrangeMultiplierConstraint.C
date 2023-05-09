@@ -62,9 +62,9 @@ FVBoundaryScalarLagrangeMultiplierConstraint::computeResidual(const FaceInfo & f
   const auto lm_r = MetaPhysicL::raw_value(computeQpResidual()) * fi.faceArea() * fi.faceCoord();
   mooseAssert(_lambda_var.dofIndices().size() == 1, "We should only have a single dof");
   addResiduals(_assembly,
-                   std::array<Real, 1>{{lm_r}},
-                   _lambda_var.dofIndices(),
-                   _lambda_var.scalingFactor());
+               std::array<Real, 1>{{lm_r}},
+               _lambda_var.dofIndices(),
+               _lambda_var.scalingFactor());
 }
 
 void
@@ -101,7 +101,7 @@ FVBoundaryScalarLagrangeMultiplierConstraint::computeJacobian(const FaceInfo & f
   const auto lm_r = computeQpResidual() * (fi.faceArea() * fi.faceCoord());
   mooseAssert(_lambda_var.dofIndices().size() == 1, "We should only have one dof");
   addResidualsAndJacobian(_assembly,
-                              std::array<ADReal, 1>{{lm_r}},
-                              _lambda_var.dofIndices(),
-                              _lambda_var.scalingFactor());
+                          std::array<ADReal, 1>{{lm_r}},
+                          _lambda_var.dofIndices(),
+                          _lambda_var.scalingFactor());
 }

@@ -101,10 +101,10 @@ NodalBC::computeJacobian()
 
     // Cache the user's computeQpJacobian() value for later use.
     addJacobianElement(_fe_problem.assembly(0, _sys.number()),
-                           cached_val,
-                           cached_row,
-                           cached_row,
-                           /*scaling_factor=*/1);
+                       cached_val,
+                       cached_row,
+                       cached_row,
+                       /*scaling_factor=*/1);
 
     if (_has_diag_save_in)
       for (unsigned int i = 0; i < _diag_save_in.size(); i++)
@@ -135,10 +135,10 @@ NodalBC::computeOffDiagJacobian(const unsigned int jvar_num)
 
     // Cache the user's computeQpJacobian() value for later use.
     addJacobianElement(_fe_problem.assembly(0, _sys.number()),
-                           cached_val,
-                           cached_row,
-                           cached_col,
-                           /*scaling_factor=*/1);
+                       cached_val,
+                       cached_row,
+                       cached_col,
+                       /*scaling_factor=*/1);
   }
 }
 

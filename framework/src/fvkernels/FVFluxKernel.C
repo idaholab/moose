@@ -208,9 +208,9 @@ FVFluxKernel::computeJacobian(const FaceInfo & fi)
                 "We're currently built to use CONSTANT MONOMIALS");
 
     addResidualsAndJacobian(_assembly,
-                                std::array<ADReal, 1>{{neighbor_r}},
-                                _var.dofIndicesNeighbor(),
-                                _var.scalingFactor());
+                            std::array<ADReal, 1>{{neighbor_r}},
+                            _var.dofIndicesNeighbor(),
+                            _var.scalingFactor());
   }
 }
 

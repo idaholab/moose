@@ -39,9 +39,9 @@ TimeNodalKernel::computeResidual()
     _qp = 0;
     const Real res = computeQpResidual();
     addResiduals(_assembly,
-                     std::array<Real, 1>{{res}},
-                     std::array<dof_id_type, 1>{{dof_idx}},
-                     _var.scalingFactor());
+                 std::array<Real, 1>{{res}},
+                 std::array<dof_id_type, 1>{{dof_idx}},
+                 _var.scalingFactor());
 
     if (_has_save_in)
       for (const auto & var : _save_in)

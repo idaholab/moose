@@ -62,10 +62,10 @@ VectorNodalBC::computeJacobian()
   // Cache the user's computeQpJacobian() value for later use.
   for (const auto i : index_range(cached_rows))
     addJacobianElement(_fe_problem.assembly(0, _sys.number()),
-                           cached_val(i),
-                           cached_rows[i],
-                           cached_rows[i],
-                           /*scaling_factor=*/1);
+                       cached_val(i),
+                       cached_rows[i],
+                       cached_rows[i],
+                       /*scaling_factor=*/1);
 }
 
 void
@@ -86,10 +86,10 @@ VectorNodalBC::computeOffDiagJacobian(const unsigned int jvar_num)
     // Cache the user's computeQpJacobian() value for later use.
     for (const auto i : index_range(cached_rows))
       addJacobianElement(_fe_problem.assembly(0, _sys.number()),
-                             cached_val,
-                             cached_rows[i],
-                             cached_col,
-                             /*scaling_factor=*/1);
+                         cached_val,
+                         cached_rows[i],
+                         cached_col,
+                         /*scaling_factor=*/1);
   }
 }
 

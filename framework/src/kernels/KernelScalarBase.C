@@ -91,10 +91,10 @@ KernelScalarBase::computeScalarJacobian()
   }
 
   addJacobian(_assembly,
-                  _local_ke,
-                  _kappa_var_ptr->dofIndices(),
-                  _kappa_var_ptr->dofIndices(),
-                  _kappa_var_ptr->scalingFactor());
+              _local_ke,
+              _kappa_var_ptr->dofIndices(),
+              _kappa_var_ptr->dofIndices(),
+              _kappa_var_ptr->scalingFactor());
 }
 
 void
@@ -161,10 +161,10 @@ KernelScalarBase::computeScalarOffDiagJacobian(const unsigned int jvar_num)
     mooseError("Vector variable cannot be coupled into Kernel Scalar currently");
 
   addJacobian(_assembly,
-                  _local_ke,
-                  _kappa_var_ptr->dofIndices(),
-                  jvar.dofIndices(),
-                  _kappa_var_ptr->scalingFactor());
+              _local_ke,
+              _kappa_var_ptr->dofIndices(),
+              jvar.dofIndices(),
+              _kappa_var_ptr->scalingFactor());
 }
 
 void
@@ -238,8 +238,8 @@ KernelScalarBase::computeScalarOffDiagJacobianScalar(const unsigned int svar_num
   }
 
   addJacobian(_assembly,
-                  _local_ke,
-                  _kappa_var_ptr->dofIndices(),
-                  svar.dofIndices(),
-                  _kappa_var_ptr->scalingFactor());
+              _local_ke,
+              _kappa_var_ptr->dofIndices(),
+              svar.dofIndices(),
+              _kappa_var_ptr->scalingFactor());
 }

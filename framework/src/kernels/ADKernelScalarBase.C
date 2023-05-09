@@ -72,9 +72,9 @@ ADKernelScalarBase::computeJacobian()
   {
     computeScalarResidualsForJacobian();
     addResidualsAndJacobian(_assembly,
-                                _scalar_residuals,
-                                _kappa_var_ptr->dofIndices(),
-                                _kappa_var_ptr->scalingFactor());
+                            _scalar_residuals,
+                            _kappa_var_ptr->dofIndices(),
+                            _kappa_var_ptr->scalingFactor());
   }
 }
 
@@ -101,9 +101,9 @@ ADKernelScalarBase::computeResidualAndJacobian()
   {
     computeScalarResidualsForJacobian();
     addResidualsAndJacobian(_assembly,
-                                _scalar_residuals,
-                                _kappa_var_ptr->dofIndices(),
-                                _kappa_var_ptr->scalingFactor());
+                            _scalar_residuals,
+                            _kappa_var_ptr->dofIndices(),
+                            _kappa_var_ptr->scalingFactor());
   }
 }
 

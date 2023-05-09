@@ -38,13 +38,13 @@ FVScalarLagrangeMultiplierConstraint::computeResidualAndJacobian()
 {
   const auto volume = _assembly.elemVolume();
   addResidualsAndJacobian(_assembly,
-                              std::array<ADReal, 1>{{_lambda[0] * volume}},
-                              _var.dofIndices(),
-                              _var.scalingFactor());
+                          std::array<ADReal, 1>{{_lambda[0] * volume}},
+                          _var.dofIndices(),
+                          _var.scalingFactor());
   addResidualsAndJacobian(_assembly,
-                              std::array<ADReal, 1>{{computeQpResidual() * volume}},
-                              _lambda_var.dofIndices(),
-                              _lambda_var.scalingFactor());
+                          std::array<ADReal, 1>{{computeQpResidual() * volume}},
+                          _lambda_var.dofIndices(),
+                          _lambda_var.scalingFactor());
 }
 
 void
@@ -63,9 +63,9 @@ FVScalarLagrangeMultiplierConstraint::computeResidual()
   const auto lm_r = MetaPhysicL::raw_value(computeQpResidual()) * _assembly.elemVolume();
   mooseAssert(_lambda_var.dofIndices().size() == 1, "We should only have a single dof");
   addResiduals(_assembly,
-                   std::array<Real, 1>{{lm_r}},
-                   _lambda_var.dofIndices(),
-                   _lambda_var.scalingFactor());
+               std::array<Real, 1>{{lm_r}},
+               _lambda_var.dofIndices(),
+               _lambda_var.scalingFactor());
 }
 
 void
@@ -88,7 +88,7 @@ FVScalarLagrangeMultiplierConstraint::computeOffDiagJacobian()
   const auto lm_r = computeQpResidual() * _assembly.elemVolume();
   mooseAssert(_lambda_var.dofIndices().size() == 1, "We should only have one dof");
   addJacobian(_assembly,
-                  std::array<ADReal, 1>{{lm_r}},
-                  _lambda_var.dofIndices(),
-                  _lambda_var.scalingFactor());
+              std::array<ADReal, 1>{{lm_r}},
+              _lambda_var.dofIndices(),
+              _lambda_var.scalingFactor());
 }

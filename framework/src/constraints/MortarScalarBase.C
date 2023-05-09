@@ -121,10 +121,10 @@ MortarScalarBase::computeScalarJacobian()
   }
 
   addJacobian(_assembly,
-                  _local_ke,
-                  _kappa_var_ptr->dofIndices(),
-                  _kappa_var_ptr->dofIndices(),
-                  _kappa_var_ptr->scalingFactor());
+              _local_ke,
+              _kappa_var_ptr->dofIndices(),
+              _kappa_var_ptr->dofIndices(),
+              _kappa_var_ptr->scalingFactor());
 }
 
 void
@@ -217,10 +217,10 @@ MortarScalarBase::computeScalarOffDiagJacobian()
       }
 
       addJacobian(_assembly,
-                      _local_ke,
-                      _kappa_var_ptr->dofIndices(),
-                      dof_indices,
-                      _kappa_var_ptr->scalingFactor());
+                  _local_ke,
+                  _kappa_var_ptr->dofIndices(),
+                  dof_indices,
+                  _kappa_var_ptr->scalingFactor());
     }
   }
 }
@@ -293,8 +293,8 @@ MortarScalarBase::computeScalarOffDiagJacobianScalar(const unsigned int svar_num
   }
 
   addJacobian(_assembly,
-                  _local_ke,
-                  _kappa_var_ptr->dofIndices(),
-                  svar.dofIndices(),
-                  _kappa_var_ptr->scalingFactor());
+              _local_ke,
+              _kappa_var_ptr->dofIndices(),
+              svar.dofIndices(),
+              _kappa_var_ptr->scalingFactor());
 }

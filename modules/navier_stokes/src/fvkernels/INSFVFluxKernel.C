@@ -33,9 +33,9 @@ INSFVFluxKernel::addResidualAndJacobian(const ADReal & residual)
   {
     const auto dof_index = elem.dof_number(_sys.number(), _var.number(), 0);
     addResidualsAndJacobian(_assembly,
-                                std::array<ADReal, 1>{{residual}},
-                                std::vector<dof_id_type>({dof_index}),
-                                _var.scalingFactor());
+                            std::array<ADReal, 1>{{residual}},
+                            std::vector<dof_id_type>({dof_index}),
+                            _var.scalingFactor());
   };
 
   if (_face_type == FaceInfo::VarFaceNeighbors::ELEM ||

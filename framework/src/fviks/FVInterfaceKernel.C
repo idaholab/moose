@@ -157,9 +157,7 @@ FVInterfaceKernel::setupData(const FaceInfo & fi)
 }
 
 void
-FVInterfaceKernel::addResidual(const Real resid,
-                                   const unsigned int var_num,
-                                   const bool neighbor)
+FVInterfaceKernel::addResidual(const Real resid, const unsigned int var_num, const bool neighbor)
 {
   neighbor ? prepareVectorTagNeighbor(_assembly, var_num) : prepareVectorTag(_assembly, var_num);
   _local_re(0) = resid;
@@ -168,13 +166,13 @@ FVInterfaceKernel::addResidual(const Real resid,
 
 void
 FVInterfaceKernel::addJacobian(const ADReal & resid,
-                                   const dof_id_type dof_index,
-                                   const Real scaling_factor)
+                               const dof_id_type dof_index,
+                               const Real scaling_factor)
 {
   addJacobian(_assembly,
-                  std::array<ADReal, 1>{{resid}},
-                  std::vector<dof_id_type>({dof_index}),
-                  scaling_factor);
+              std::array<ADReal, 1>{{resid}},
+              std::vector<dof_id_type>({dof_index}),
+              scaling_factor);
 }
 
 void

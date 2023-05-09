@@ -49,9 +49,9 @@ FVScalarLagrangeMultiplierInterface::computeResidual(const FaceInfo & fi)
   // make sure the scalar residuals get cached for later addition
   const auto lm_r = MetaPhysicL::raw_value(computeQpResidual()) * fi.faceArea() * fi.faceCoord();
   addResiduals(_assembly,
-                   std::array<Real, 1>{{lm_r}},
-                   _lambda_var.dofIndices(),
-                   _lambda_var.scalingFactor());
+               std::array<Real, 1>{{lm_r}},
+               _lambda_var.dofIndices(),
+               _lambda_var.scalingFactor());
 }
 
 void
@@ -78,7 +78,7 @@ FVScalarLagrangeMultiplierInterface::computeJacobian(const FaceInfo & fi)
   const auto lm_r = computeQpResidual() * fi.faceArea() * fi.faceCoord();
   mooseAssert(_lambda_var.dofIndices().size() == 1, "We should only have one dof");
   addResidualsAndJacobian(_assembly,
-                              std::array<ADReal, 1>{{lm_r}},
-                              _lambda_var.dofIndices(),
-                              _lambda_var.scalingFactor());
+                          std::array<ADReal, 1>{{lm_r}},
+                          _lambda_var.dofIndices(),
+                          _lambda_var.scalingFactor());
 }

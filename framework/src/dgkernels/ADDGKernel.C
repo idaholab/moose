@@ -168,9 +168,9 @@ ADDGKernel::computeElemNeighJacobian(Moose::DGJacobianType type)
           computeQpResidual(type == Moose::ElementElement ? Moose::Element : Moose::Neighbor);
 
   addJacobian(_assembly,
-                  residuals,
-                  type == Moose::ElementElement ? _var.dofIndices() : _var.dofIndicesNeighbor(),
-                  _var.scalingFactor());
+              residuals,
+              type == Moose::ElementElement ? _var.dofIndices() : _var.dofIndicesNeighbor(),
+              _var.scalingFactor());
 
   if (_has_diag_save_in)
   {
@@ -220,7 +220,7 @@ ADDGKernel::computeOffDiagElemNeighJacobian(Moose::DGJacobianType type, const Mo
           computeQpResidual(type == Moose::ElementElement ? Moose::Element : Moose::Neighbor);
 
   addJacobian(_assembly,
-                  residuals,
-                  type == Moose::ElementElement ? _var.dofIndices() : _var.dofIndicesNeighbor(),
-                  _var.scalingFactor());
+              residuals,
+              type == Moose::ElementElement ? _var.dofIndices() : _var.dofIndicesNeighbor(),
+              _var.scalingFactor());
 }

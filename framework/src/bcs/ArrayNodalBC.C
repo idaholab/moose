@@ -61,10 +61,10 @@ ArrayNodalBC::computeJacobian()
 
     for (const auto i : make_range(_var.count()))
       addJacobianElement(_fe_problem.assembly(0, _sys.number()),
-                             cached_val(i),
-                             cached_row + i,
-                             cached_row + i,
-                             /*scaling_factor=*/1);
+                         cached_val(i),
+                         cached_row + i,
+                         cached_row + i,
+                         /*scaling_factor=*/1);
   }
 }
 
@@ -86,10 +86,10 @@ ArrayNodalBC::computeOffDiagJacobian(const unsigned int jvar_num)
   for (const auto i : make_range(_var.count()))
     for (const auto j : make_range(jvar.count()))
       addJacobianElement(_fe_problem.assembly(0, _sys.number()),
-                             cached_val(i, j),
-                             cached_row + i,
-                             cached_col + j,
-                             /*scaling_factor=*/1);
+                         cached_val(i, j),
+                         cached_row + i,
+                         cached_col + j,
+                         /*scaling_factor=*/1);
 }
 
 RealEigenVector
