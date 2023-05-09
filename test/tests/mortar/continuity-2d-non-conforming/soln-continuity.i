@@ -18,6 +18,10 @@
   [../]
 []
 
+[Problem]
+  kernel_coverage_check = false
+[]
+
 [Variables]
   [./T]
     block = '1 2'

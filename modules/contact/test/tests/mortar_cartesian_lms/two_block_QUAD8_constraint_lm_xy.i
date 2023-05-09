@@ -221,9 +221,14 @@ velocity = 0.1
 []
 
 [Preconditioning]
-  [smp]
-    type = SMP
+  [vcp]
+    type = VCP
     full = true
+    lm_variable = 'lm_x lm_y'
+    primary_variable = 'disp_x disp_y'
+    preconditioner = 'AMG'
+    is_lm_coupling_diagonal = false
+    adaptive_condensation = false
   []
 []
 
@@ -231,8 +236,13 @@ velocity = 0.1
   type = Transient
   solve_type = 'NEWTON'
 
-  petsc_options_iname = '-pc_type -pc_factor_mat_solver_package -pc_factor_shift_type -pc_factor_shift_amount'
-  petsc_options_value = 'lu        superlu_dist                  NONZERO               1e-10'
+  petsc_options = '-snes_converged_reason -ksp_converged_reason -snes_view'
+
+  petsc_options_iname = '-pc_type -pc_factor_mat_solver_package -mat_mffd_err -pc_factor_shift_type -pc_factor_shift_amount'
+  petsc_options_value = 'lu superlu_dist 1e-5          NONZERO               1e-10'
+
+  # petsc_options_iname = ' -pc_hypre_type -pc_hypre_boomeramg_max_iter'
+  # petsc_options_value = '  boomeramg      1'
 
   line_search = none
 

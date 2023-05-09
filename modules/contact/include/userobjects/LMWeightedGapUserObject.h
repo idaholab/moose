@@ -34,10 +34,4 @@ protected:
 
   /// The Lagrange multiplier variable representing the contact pressure
   const MooseVariableFE<Real> * const _lm_var;
-
-  /// Whether to use Petrov-Galerkin approach
-  const bool _use_petrov_galerkin;
-
-  /// The auxiliary Lagrange multiplier variable (used together whith the Petrov-Galerkin approach)
-  const MooseVariable * const _aux_lm_var;
 };
