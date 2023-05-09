@@ -1,0 +1,17 @@
+[Tests]
+    design = 'TopologyOptimization.md'
+    issues = '#1'
+    [top_opt_2d]
+      type = 'Exodiff'
+      input = 'top_opt_2d.i'
+      exodiff = 'top_opt_2d_out.e'
+      requirement = 'The system shall be able to solve a 2D topology optimization problem.'
+    []
+    [top_opt_3d]
+      type = 'Exodiff'
+      input = 'top_opt_3d.i'
+      exodiff = 'top_opt_3d_out.e'
+      requirement = 'The system shall be able to solve a 3D topology optimization problem.'
+      heavy = true
+    []
+  []
