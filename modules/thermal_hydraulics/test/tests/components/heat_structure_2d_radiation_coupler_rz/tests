@@ -7,8 +7,6 @@
     input = 'heat_structure_2d_radiation_coupler_rz.i'
     csvdiff = 'heat_structure_2d_radiation_coupler_rz.csv'
     abs_zero = 1e-5
-    ad_indexing_type = 'global'
-    mesh_mode = 'replicated'
     requirement = 'The system shall be able to couple two 2D cylindrical heat structures via radiation and conserve energy.'
   []
 
@@ -38,17 +36,8 @@
       input = 'heat_structure_2d_radiation_coupler_rz.i'
       cli_args = "Components/hs1/position='0.1 0.1 0'"
       expect_err = "The primary and secondary boundaries must be aligned"
-      mesh_mode = 'replicated'
 
       detail = 'the boundary meshes are not aligned.'
-    []
-    [distributed_mesh]
-      type = RunException
-      input = 'heat_structure_2d_radiation_coupler_rz.i'
-      expect_err = "HeatStructure2DCouplerBase does not work with a distributed mesh"
-      mesh_mode = 'distributed'
-
-      detail = 'the parallel mesh type is distributed.'
     []
   []
 []

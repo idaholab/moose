@@ -32,7 +32,6 @@ Content:
 Renderer:
     type: MooseDocs.base.MaterializeRenderer
     favicon: media/moose.ico
-    google_analytics: True
 
 Extensions:
     MooseDocs.extensions.navigation:
@@ -40,29 +39,30 @@ Extensions:
         repo: https://github.com/idaholab/moose
         google-cse: 000781241768298771085:pedtnlxdkx8
         menu:
+            Training:
+                MOOSE Framework (June): https://inlhrfedramp.gov1.qualtrics.com/jfe/form/SV_1RDZf244xsF1NK6
             Getting Started:
                 Installing MOOSE: getting_started/installation/index.md
                 Creating an Application: getting_started/new_users.md
                 Examples and Tutorials: getting_started/examples_and_tutorials/index.md
                 NCRC Applications: help/inl/applications.md
-                Supplemental Resources: getting_started/supplemental_resources/index.md
                 INL HPC Services: help/inl/index.md
+                Supplemental Resources: getting_started/supplemental_resources/index.md
+                Frequently Asked Questions: help/faq/index.md
+                Troubleshooting: help/troubleshooting.md
+                Help Forum: https://github.com/idaholab/moose/discussions
+                Contact Us: help/contact_us.md
             Documentation:
                 Application Usage: application_usage/index.md
                 Application Development: application_development/index.md
                 Framework Development: framework_development/index.md
-                Modules: modules/index.md
                 NCRC Applications: help/inl/applications.md
+                Modules: modules/index.md
                 MOOSEDocs: MooseDocs/index.md
                 Infrastructure: infrastructure/index.md
                 Syntax Index: syntax/index.md
                 Source Index: /source/index.md
                 A-to-Z Index: help/a-to-z.md
-            Help:
-                Frequently Asked Questions: help/faq/index.md
-                Troubleshooting: help/troubleshooting.md
-                Help Forum: https://github.com/idaholab/moose/discussions
-                Contact Us: help/contact_us.md
             Gallery: /gallery.md
             News: newsletter/index.md
             Citing: citing.md
@@ -182,6 +182,8 @@ Extensions:
         requirement-groups:
             dgkernels: DGKernel Objects
             interfacekernels: InterfaceKernel Objects
-
     MooseDocs.extensions.algorithm:
         active: True
+    MooseDocs.extensions.analytics:
+        active: True
+        google_measurement_id: G-RH7BY5XXNW

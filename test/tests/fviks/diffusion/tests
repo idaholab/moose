@@ -6,7 +6,6 @@
     type = Exodiff
     input = test.i
     exodiff = 'test_out.e'
-    ad_indexing_type = 'global'
   []
   [diffusion-harmonic]
     issues = '#21923'
@@ -15,7 +14,6 @@
     type = Exodiff
     input = test.i
     exodiff = 'harmonic.e'
-    ad_indexing_type = 'global'
     cli_args = "FVKernels/diff_left/coeff_interp_method=harmonic "
                "FVKernels/diff_right/coeff_interp_method=harmonic "
                "FVInterfaceKernels/interface/coeff_interp_method=harmonic "

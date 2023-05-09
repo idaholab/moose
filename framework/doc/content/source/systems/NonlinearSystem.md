@@ -373,12 +373,12 @@ slowly.  To improve convergence, PETSc and other iterative solver packages
 apply a [preconditioner](https://en.wikipedia.org/wiki/Preconditioner) to the
 system of equations/sparse matrix before applying the iterative solver.
 
-A great number of preconditioners exist, but 
+A great number of preconditioners exist, but
 [multigrid](https://en.wikipedia.org/wiki/Multigrid_method)
-methods are often among the best choices for problems without 
-significant hyperbolic character.  
-The [HYPRE](application_development/hypre.md optional=true) package, 
-specifically the 
+methods are often among the best choices for problems without
+significant hyperbolic character.
+The [HYPRE](application_development/hypre.md optional=true) package,
+specifically the
 BoomerAMG preconditioner, is often a good choice for a preconditioner to
 condition the system of equations resulting from the MOOSE simulation.
 
@@ -401,11 +401,11 @@ Setting
 
 in the `[Executioner]` block will reuse the same preconditioner until
 the number of linear iterations required to solve the linearized system of
-equations exceeds 20.   If the number of linear iterations exceeds 
+equations exceeds 20.   If the number of linear iterations exceeds
 `reuse_preconditioner_max_linear_its`
 the system does not immediately stop iterating on the current linearized
 system.  Instead it will continue until it either successfully solves
-the current system or reaches `l_max_its`.  It will then form a new 
+the current system or reaches `l_max_its`.  It will then form a new
 preconditioner for the next nonlinear iteration.
 
 Using these parameters in combination with a direct factorization of the
@@ -429,13 +429,13 @@ when using an expensive preconditioner, like a direct solver, as shown
 in this example.
 
 There are two differences between
-`reuse_preconditioner` and 
-setting up preconditioner reuse directly in PETSc with the 
+`reuse_preconditioner` and
+setting up preconditioner reuse directly in PETSc with the
 `-snes_lag_preconditioner_persists` and `-snes_lag_preconditioner` options:
 1. `-snes_lag_preconditioner X` will recalculate a new preconditioner
    every X linear iterations, regardless of the progress of the linear solve.
    `reuse_preconditioner_max_linear_its = X` will continue to reuse
-   the same preconditioner until the number of linear iterations 
+   the same preconditioner until the number of linear iterations
    required to solve the linearized equations exceeds X.
 2. By default libmesh deletes the PETSc `SNES` instance after each time
    step.  This means that regardless of how the reuse options are set,
@@ -451,7 +451,7 @@ affects how PETSc solves the linearized system of equations formed
 at each nonlinear iteration.  Ideally, if the reused preconditioner
 achieves the requested `l_tol` precision before iterating more than
 `l_max_its` times, preconditioner reuse will not affect the
-convergence of the nonlinear iterations compared to a case with the 
+convergence of the nonlinear iterations compared to a case with the
 reuse option off.  As described above,
 preconditioner reuse aims to decrease the time required to solve
 the linearized equations at each nonlinear iteration by reducing the
@@ -460,10 +460,10 @@ linear preconditioner.
 
 By contrast, modified Newton methods will affect the nonlinear
 convergence of the system without affecting how PETSc solves the
-linearized system of equations.  The goal of 
+linearized system of equations.  The goal of
 modified Newton methods is to reduce the time required to solve
 the nonlinear equations by forming a new Jacobian matrix less often.
 
 Put another way, preconditioner reuse aims to speed up solving the
-linear system of equations while modified Newton methods aim to 
+linear system of equations while modified Newton methods aim to
 accelerate solving the nonlinear equations.

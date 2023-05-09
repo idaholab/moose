@@ -7,14 +7,12 @@
     exodiff = 'dirichlet_out.e'
 
     requirement = 'The system shall run a simple 2D linear diffusion problem using the finite volume method with Dirichlet boundary conditions on a regular mesh.'
-    ad_indexing_type = 'global'
   []
   [dirichlet_rz]
     type = 'Exodiff'
     input = 'dirichlet_rz.i'
     exodiff = 'dirichlet_rz_out.e'
     requirement = 'The system shall run a simple 2D linear diffusion problem in RZ coordinates using the finite volume method with Dirichlet boundary conditions on a regular mesh.'
-    ad_indexing_type = 'global'
   []
   [dirichlet_full_jac]
     type = 'Exodiff'
@@ -24,7 +22,6 @@
     cli_args = 'Executioner/solve_type=NEWTON'
 
     requirement = 'The system shall be able to compute a full Jacobian matrix when performing finite volume computations'
-    ad_indexing_type = 'global'
   []
 
   [neumann]
@@ -33,14 +30,12 @@
       type = 'Exodiff'
       input = 'neumann.i'
       exodiff = 'neumann_out.e'
-      ad_indexing_type = 'global'
       detail = 'separately'
     []
     [neumann_together]
       type = 'Exodiff'
       input = 'neumann.i'
       exodiff = 'neumann_together.e'
-      ad_indexing_type = 'global'
       detail = 'together'
       cli_args = 'Outputs/file_base=neumann_together Executioner/residual_and_jacobian_together=true'
     []
@@ -52,7 +47,6 @@
     exodiff = 'transient_out.e'
     requirement = 'The system shall run a simple 2D transient linear diffusion problem using the finite volume method with Dirichlet boundary conditions on a regular mesh.'
     method = '!dbg'
-    ad_indexing_type = 'global'
   []
 
   [refinement]
@@ -62,14 +56,12 @@
       input = 'fv_only.i'
       exodiff = 'fv_only_out.e'
       detail = 'on an unrefined mesh'
-      ad_indexing_type = 'global'
     []
     [refinement]
       type = 'Exodiff'
       input = 'fv_only_refined.i'
       exodiff = 'fv_only_refined_out.e'
       detail = 'and on a mesh that has been refined to have the same amount of elements and achieve identical results'
-      ad_indexing_type = 'global'
     []
   []
 
@@ -78,7 +70,6 @@
     input = '3d_dirichlet.i'
     exodiff = '3d_dirichlet_out.e'
     requirement = 'The system shall be able solve a three-dimensional diffusion problem using the finite volume method.'
-    ad_indexing_type = 'global'
   []
 
   [1d_dirichlet]
@@ -86,7 +77,6 @@
     input = '1d_dirichlet.i'
     exodiff = '1d_dirichlet_out.e'
     requirement = 'The system shall be able solve a one-dimensional diffusion problem using the finite volume method.'
-    ad_indexing_type = 'global'
   []
 
   [unstructured-rz]
@@ -95,7 +85,6 @@
     exodiff = 'unstructured-rz_out.e'
     issues = '#15063'
     requirement = 'The system shall correctly account for differences between gradient and divergence operators in cylindrical coordinates.'
-    ad_indexing_type = 'global'
   []
 
   [gradient-jump]
@@ -104,7 +93,15 @@
     csvdiff = 'grad-adaptive_csv.csv'
     issues = '#20705'
     design = 'GradientJumpIndicator.md'
-    ad_indexing_type = 'global'
     requirement = 'The system shall be able to perform Laplacian-based adaptivity with finite volume variables.'
+  []
+
+  [constrained]
+    type = 'Exodiff'
+    input = 'dirichlet-constrained-average-value.i'
+    exodiff = 'dirichlet-constrained-average-value_out.e'
+    design = 'FVBoundaryIntegralValueConstraint.md'
+    issues = '#23745'
+    requirement = 'The system shall be able to impose the constraint that the average value of a variable on a boundary be a prescribed value.'
   []
 []

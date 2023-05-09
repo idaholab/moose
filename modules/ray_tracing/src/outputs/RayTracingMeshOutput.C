@@ -152,9 +152,12 @@ RayTracingMeshOutput::buildIDMap()
 
   // Fill all of my local Ray maxima to be sent to processor 0
   std::map<processor_id_type, std::vector<std::pair<RayID, dof_id_type>>> send_needed_nodes;
-  auto & root_entry = send_needed_nodes[0];
-  for (const auto & id_nodes_pair : local_ray_needed_nodes)
-    root_entry.emplace_back(id_nodes_pair);
+  if (local_ray_needed_nodes.size())
+  {
+    auto & root_entry = send_needed_nodes[0];
+    for (const auto & id_nodes_pair : local_ray_needed_nodes)
+      root_entry.emplace_back(id_nodes_pair);
+  }
 
   // The global map of ray -> required nodes needed to be filled on processor 0
   std::map<RayID, dof_id_type> global_needed_nodes;

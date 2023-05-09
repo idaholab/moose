@@ -64,66 +64,6 @@
   []
 []
 
-[AuxVariables]
-  [assembly_id]
-    family = MONOMIAL
-    order = CONSTANT
-  []
-  [assembly_type_id]
-    family = MONOMIAL
-    order = CONSTANT
-  []
-  [plane_id]
-    family = MONOMIAL
-    order = CONSTANT
-  []
-  [pin_id]
-    family = MONOMIAL
-    order = CONSTANT
-  []
-  [pin_type_id]
-    family = MONOMIAL
-    order = CONSTANT
-  []
-  [region_id]
-    family = MONOMIAL
-    order = CONSTANT
-  []
-[]
-
-[AuxKernels]
-  [assembly_id]
-    type = ExtraElementIDAux
-    variable = assembly_id
-    extra_id_name = assembly_id
-  []
-  [assembly_type_id]
-    type = ExtraElementIDAux
-    variable = assembly_type_id
-    extra_id_name = assembly_type_id
-  []
-  [plane_id]
-    type = ExtraElementIDAux
-    variable = plane_id
-    extra_id_name = plane_id
-  []
-  [pin_id]
-    type = ExtraElementIDAux
-    variable = pin_id
-    extra_id_name = pin_id
-  []
-  [pin_type_id]
-    type = ExtraElementIDAux
-    variable = pin_type_id
-    extra_id_name = pin_type_id
-  []
-  [region_id]
-    type = ExtraElementIDAux
-    variable = region_id
-    extra_id_name = region_id
-  []
-[]
-
 [Problem]
   solve = false
 []
@@ -133,7 +73,11 @@
 []
 
 [Outputs]
-  exodus = true
+  [out]
+    type = Exodus
+    execute_on = timestep_end
+    output_extra_element_ids = true
+    extra_element_ids_to_output = 'assembly_id assembly_type_id plane_id pin_id pin_type_id region_id'
+  []
   file_base = core_in
-  execute_on = timestep_end
 []

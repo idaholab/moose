@@ -17,6 +17,7 @@
 #include "FEProblem.h"
 #include "MooseApp.h"
 #include "MooseMesh.h"
+#include "MooseObject.h"
 #include "NonlinearSystem.h"
 #include "OutputWarehouse.h"
 #include "SystemInfo.h"
@@ -62,7 +63,7 @@ outputMeshInformation(FEProblemBase & problem, bool verbose)
   if (verbose)
   {
     bool forced = moose_mesh.isParallelTypeForced();
-    bool pre_split = problem.getMooseApp().isUseSplit();
+    bool pre_split = moose_mesh.isSplit();
 
     // clang-format off
     oss << "\nMesh: " << '\n'
@@ -280,14 +281,6 @@ outputNonlinearSystemInformation(FEProblemBase & problem)
   std::stringstream oss;
   oss << std::left;
 
-#ifndef MOOSE_SPARSE_AD
-  if (problem.haveADObjects())
-  {
-    oss << std::setw(console_field_width)
-        << "  AD size required: " << problem.getNonlinearSystemBase().requiredDerivativeSize()
-        << std::endl;
-  }
-#endif
   return outputSystemInformationHelper(oss, problem.getNonlinearSystemBase().system());
 }
 
@@ -418,6 +411,42 @@ insertNewline(std::stringstream & oss, std::streampos & begin, std::streampos & 
     begin = oss.tellp();
     oss << std::setw(console_field_width + 2) << ""; // "{ "
   }
+}
+
+std::string
+formatString(std::string message, const std::string & prefix)
+{
+  MooseUtils::indentMessage(prefix, message, COLOR_DEFAULT, true, " ");
+  std::stringstream stream;
+  std::streampos start = stream.tellp();
+  stream << message;
+  std::streampos end = stream.tellp();
+  insertNewline(stream, start, end);
+  auto formatted_string = stream.str();
+  // no need to end with a line break
+  if (formatted_string.back() == '\n')
+    formatted_string.pop_back();
+  return formatted_string;
+}
+
+std::string
+mooseObjectVectorToString(const std::vector<MooseObject *> & objs, const std::string & sep /*=""*/)
+{
+  std::string object_names = "";
+  if (objs.size())
+  {
+    // Gather all the object names
+    std::vector<std::string> names;
+    names.reserve(objs.size());
+    for (const auto & obj : objs)
+    {
+      mooseAssert(obj, "Trying to print a null object");
+      names.push_back(obj->name());
+    }
+
+    object_names = MooseUtils::join(names, sep);
+  }
+  return object_names;
 }
 
 } // ConsoleUtils namespace

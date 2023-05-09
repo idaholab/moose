@@ -236,6 +236,15 @@ public:
 
   void setFaceInfo(const FaceInfo & fi) { _face_info = &fi; }
 
+  /**
+   * Build the materials required by a set of consumer objects
+   */
+  template <typename Consumers>
+  static std::deque<MaterialBase *>
+  buildRequiredMaterials(const Consumers & mat_consumers,
+                         const std::vector<std::shared_ptr<MaterialBase>> & mats,
+                         const bool allow_stateful);
+
 protected:
   /**
    * Users must override this method.
@@ -464,4 +473,59 @@ MaterialBase::declareADPropertyByName(const std::string & prop_name_in)
           : MooseUtils::join(std::vector<std::string>({prop_name_in, _declare_suffix}), "_");
   registerPropName(prop_name, false, MaterialPropState::CURRENT);
   return materialData().declareADProperty<T>(prop_name);
+}
+
+template <typename Consumers>
+std::deque<MaterialBase *>
+MaterialBase::buildRequiredMaterials(const Consumers & mat_consumers,
+                                     const std::vector<std::shared_ptr<MaterialBase>> & mats,
+                                     const bool allow_stateful)
+{
+  std::deque<MaterialBase *> required_mats;
+
+  std::unordered_set<unsigned int> needed_mat_props;
+  for (const auto & consumer : mat_consumers)
+  {
+    const auto & mp_deps = consumer->getMatPropDependencies();
+    needed_mat_props.insert(mp_deps.begin(), mp_deps.end());
+  }
+
+  // A predicate of calling this function is that these materials come in already sorted by
+  // dependency with the front of the container having no other material dependencies and following
+  // materials potentially depending on the ones in front of them. So we can start at the back and
+  // iterate forward checking whether the current material supplies anything that is needed, and if
+  // not we discard it
+  for (auto it = mats.rbegin(); it != mats.rend(); ++it)
+  {
+    auto * const mat = it->get();
+    bool supplies_needed = false;
+
+    const auto & supplied_props = mat->getSuppliedPropIDs();
+
+    // Do O(N) with the small container
+    for (const auto supplied_prop : supplied_props)
+    {
+      if (needed_mat_props.count(supplied_prop))
+      {
+        supplies_needed = true;
+        break;
+      }
+    }
+
+    if (!supplies_needed)
+      continue;
+
+    if (!allow_stateful && mat->hasStatefulProperties())
+      ::mooseError(
+          "Someone called buildRequiredMaterials with allow_stateful = false but a material "
+          "dependency ",
+          mat->name(),
+          " computes stateful properties.");
+
+    const auto & mp_deps = mat->getMatPropDependencies();
+    needed_mat_props.insert(mp_deps.begin(), mp_deps.end());
+    required_mats.push_front(mat);
+  }
+
+  return required_mats;
 }

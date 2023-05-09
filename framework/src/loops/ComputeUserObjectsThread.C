@@ -22,6 +22,7 @@
 #include "MaterialBase.h"
 #include "DomainUserObject.h"
 #include "AuxiliarySystem.h"
+#include "MooseTypes.h"
 
 #include "libmesh/numeric_vector.h"
 
@@ -72,7 +73,7 @@ ComputeUserObjectsThread::subdomainChanged()
 
   objs.insert(objs.begin(), side_objs.begin(), side_objs.end());
 
-  // collect dependenciesand run subdomain setup
+  // collect dependencies and run subdomain setup
   _fe_problem.subdomainSetup(_subdomain, _tid);
 
   std::set<MooseVariableFEBase *> needed_moose_vars;
@@ -320,4 +321,97 @@ ComputeUserObjectsThread::post()
 void
 ComputeUserObjectsThread::join(const ComputeUserObjectsThread & /*y*/)
 {
+}
+
+void
+ComputeUserObjectsThread::printGeneralExecutionInformation() const
+{
+  if (_fe_problem.shouldPrintExecution(_tid))
+  {
+    const auto & console = _fe_problem.console();
+    const auto & execute_on = _fe_problem.getCurrentExecuteOnFlag();
+    console << "[DBG] Computing elemental user objects on " << execute_on << std::endl;
+    mooseDoOnce(console << "[DBG] Execution order of objects types on each element then its sides:"
+                        << std::endl;
+                // onElement
+                console << "[DBG] - element user objects" << std::endl;
+                console << "[DBG] - domain user objects" << std::endl;
+                console << "[DBG] - element user objects contributing to the Jacobian" << std::endl;
+
+                // onBoundary
+                console << "[DBG] - side user objects" << std::endl;
+                console << "[DBG] - domain user objects executing on sides" << std::endl;
+                console << "[DBG] - side user objects contributing to the Jacobian" << std::endl;
+
+                // onInternalSide
+                console << "[DBG] - internal side user objects" << std::endl;
+                console << "[DBG] - domain user objects executing on internal sides" << std::endl;
+
+                // onInterface
+                console << "[DBG] - interface user objects" << std::endl;
+                console << "[DBG] - domain user objects executing at interfaces" << std::endl;);
+  }
+}
+
+void
+ComputeUserObjectsThread::printBlockExecutionInformation() const
+{
+  if (!_fe_problem.shouldPrintExecution(_tid))
+    return;
+
+  // Gather all user objects that may execute
+  // TODO: restrict this gathering of boundary objects to boundaries that are present
+  // in the current block
+  std::vector<ShapeSideUserObject *> shapers;
+  const_cast<ComputeUserObjectsThread *>(this)->queryBoundary(
+      Interfaces::ShapeSideUserObject, Moose::ANY_BOUNDARY_ID, shapers);
+
+  std::vector<SideUserObject *> side_uos;
+  const_cast<ComputeUserObjectsThread *>(this)->queryBoundary(
+      Interfaces::SideUserObject, Moose::ANY_BOUNDARY_ID, side_uos);
+
+  std::vector<InterfaceUserObject *> interface_objs;
+  const_cast<ComputeUserObjectsThread *>(this)->queryBoundary(
+      Interfaces::InterfaceUserObject, Moose::ANY_BOUNDARY_ID, interface_objs);
+
+  std::vector<const DomainUserObject *> domain_interface_uos;
+  for (const auto * const domain_uo : _domain_objs)
+    if (domain_uo->shouldExecuteOnInterface())
+      domain_interface_uos.push_back(domain_uo);
+
+  // Approximation of the number of user objects currently executing
+  const auto num_objects = _element_objs.size() + _domain_objs.size() + _shape_element_objs.size() +
+                           side_uos.size() + shapers.size() + _internal_side_objs.size() +
+                           interface_objs.size() + domain_interface_uos.size();
+
+  const auto & console = _fe_problem.console();
+  const auto & execute_on = _fe_problem.getCurrentExecuteOnFlag();
+
+  if (num_objects > 0)
+  {
+    if (_blocks_exec_printed.count(_subdomain))
+      return;
+
+    console << "[DBG] Ordering of User Objects on block " << _subdomain << std::endl;
+    // Output specific ordering of objects
+    printExecutionOrdering<ElementUserObject>(_element_objs, "element user objects");
+    printExecutionOrdering<DomainUserObject>(_domain_objs, "domain user objects");
+    if (_fe_problem.currentlyComputingJacobian())
+      printExecutionOrdering<ShapeElementUserObject>(
+          _shape_element_objs, "element user objects contributing to the Jacobian");
+    printExecutionOrdering<SideUserObject>(side_uos, "side user objects");
+    if (_fe_problem.currentlyComputingJacobian())
+      printExecutionOrdering<ShapeSideUserObject>(shapers,
+                                                  "side user objects contributing to the Jacobian");
+    printExecutionOrdering<InternalSideUserObject>(_internal_side_objs,
+                                                   "internal side user objects");
+    printExecutionOrdering<InterfaceUserObject>(interface_objs, "interface user objects");
+    console << "[DBG] Only user objects active on local element/sides are executed" << std::endl;
+  }
+  else if (num_objects == 0 && !_blocks_exec_printed.count(_subdomain))
+    console << "[DBG] No User Objects on block " << _subdomain << " on " << execute_on.name()
+            << std::endl;
+
+  // Mark subdomain as having printed to avoid printing again
+  _blocks_exec_printed.insert(_subdomain);
 }

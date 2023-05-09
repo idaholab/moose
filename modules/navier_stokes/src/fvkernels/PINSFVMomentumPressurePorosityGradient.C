@@ -37,12 +37,6 @@ PINSFVMomentumPressurePorosityGradient::PINSFVMomentumPressurePorosityGradient(
     _eps(getFunctor<ADReal>(NS::porosity)),
     _index(getParam<MooseEnum>("momentum_component"))
 {
-#ifndef MOOSE_GLOBAL_AD_INDEXING
-  mooseError("PINSFV is not supported by local AD indexing. In order to use PINSFV, please run "
-             "the configure script in the root MOOSE directory with the configure option "
-             "'--with-ad-indexing-type=global'");
-#endif
-
   if (!dynamic_cast<PINSFVSuperficialVelocityVariable *>(&_var))
     mooseError(
         "PINSFVMomentumPressurePorosityGradient may only be used with a superficial velocity "
@@ -53,5 +47,6 @@ ADReal
 PINSFVMomentumPressurePorosityGradient::computeQpResidual()
 {
   const auto & elem = makeElemArg(_current_elem);
-  return -_p(elem) * _eps.gradient(elem)(_index);
+  const auto state = determineState();
+  return -_p(elem, state) * _eps.gradient(elem, state)(_index);
 }

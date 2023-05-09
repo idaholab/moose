@@ -8,7 +8,6 @@
               'rature_0001.csv'
     requirement = 'We shall be able to leverage mortar constraint and user objects to describe gap '
                   'heat transfer physics by spelling out those objects in the input file.'
-    ad_indexing_type = 'global'
   []
   [modular_gap_heat_transfer_mortar_displaced_radiation_conduction_action]
     type = CSVDiff
@@ -17,7 +16,6 @@
               'ature_0001.csv'
     requirement = 'We shall be able to leverage mortar constraints and user objects to describe gap '
                   'heat transfer physics by using the mortar thermal action in MOOSE.'
-    ad_indexing_type = 'global'
   []
   [modular_gap_heat_transfer_mortar_displaced_conduction_UOs_function]
     type = CSVDiff
@@ -27,7 +25,6 @@
     requirement = 'We shall be able to leverage mortar constraints and user objects to describe gap '
                   'heat transfer physics by using the mortar thermal action in MOOSE and describe '
                   'the gap conductance with a function of temperature.'
-    ad_indexing_type = 'global'
   []
   [modular_gap_heat_transfer_mortar_displaced_radiation_conduction_action_lowerd_exists]
     type = CSVDiff
@@ -37,7 +34,6 @@
     requirement = 'We shall be able to leverage mortar constraints and user objects to describe gap '
                   'heat transfer physics by using the mortar thermal action in MOOSE when the '
                   'lower-dimensional domains have already been appended to the mesh.'
-    ad_indexing_type = 'global'
   []
   [modular_gap_heat_transfer_mortar_displaced_radiation_conduction_action_existing_UOs]
     type = CSVDiff
@@ -47,7 +43,6 @@
     requirement = 'We shall be able to leverage mortar constraints and user objects to describe gap '
                   'heat transfer physics by using the mortar thermal action in MOOSE when the user '
                   'objects are manually built by the user in the input file.'
-    ad_indexing_type = 'global'
   []
   [modular_gap_heat_transfer_mortar_displaced_radiation_conduction_action_existing_UOs_error]
     type = RunException
@@ -58,6 +53,14 @@
     requirement = 'We shall be able to inform the user that he or she provided physics parameters '
                   'for two ways of building gap heat transfer options and error out, to avoid having '
                   'misleading input files.'
-    ad_indexing_type = 'global'
+  []
+  [modular_gap_heat_transfer_mortar_displaced_radiation_conduction_action_too_many_uos]
+    type = RunException
+    input = 'modular_gap_heat_transfer_mortar_displaced_radiation_conduction_action.i'
+    cli_args = "MortarGapHeatTransfer/mortar_heat_transfer/gap_flux_options='CONDUCTION RADIATION CONDUCTION'"
+    expect_err = 'You cannot choose to have more than one conduction or more than one radiation user'
+    requirement = 'We shall be able to inform the user that the mortar gap heat transfer action '
+                  'cannot internally build more than one conduction or more than one radiation user '
+                  'object.'
   []
 []

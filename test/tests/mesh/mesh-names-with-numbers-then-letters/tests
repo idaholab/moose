@@ -1,0 +1,10 @@
+[Tests]
+  design = MooseMesh.md
+  issues = '#23776'
+  [test]
+    type = Exodiff
+    input = test.i
+    exodiff = test_out.e
+    requirement = 'The system shall be able to process boundary and subdomain names that start with digits but which have non-digits later in the name.'
+  []
+[]

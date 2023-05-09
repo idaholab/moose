@@ -40,11 +40,6 @@ PINSFVMomentumPressureFlux::PINSFVMomentumPressureFlux(const InputParameters & p
     _p(getFunctor<ADReal>(NS::pressure)),
     _index(getParam<MooseEnum>("momentum_component"))
 {
-#ifndef MOOSE_GLOBAL_AD_INDEXING
-  mooseError("PINSFV is not supported by local AD indexing. In order to use PINSFV, please run "
-             "the configure script in the root MOOSE directory with the configure option "
-             "'--with-ad-indexing-type=global'");
-#endif
   if (!dynamic_cast<PINSFVSuperficialVelocityVariable *>(&_var))
     mooseError("PINSFVMomentumPressureFlux may only be used with a superficial velocity, "
                "of variable type PINSFVSuperficialVelocityVariable.");
@@ -61,9 +56,10 @@ PINSFVMomentumPressureFlux::computeQpResidual()
 
   const auto * const elem_ptr = use_elem ? &_face_info->elem() : _face_info->neighborPtr();
   const auto & elem = makeElemArg(elem_ptr);
+  const auto state = determineState();
 
   if (onBoundary(*_face_info))
-    eps_p_interface = _eps(elem) * _p(singleSidedFaceArg());
+    eps_p_interface = _eps(elem, state) * _p(singleSidedFaceArg(), state);
   else
   {
     const auto * neighbor_ptr = use_elem ? _face_info->neighborPtr() : &_face_info->elem();
@@ -71,8 +67,8 @@ PINSFVMomentumPressureFlux::computeQpResidual()
 
     Moose::FV::interpolate(Moose::FV::InterpMethod::Average,
                            eps_p_interface,
-                           _eps(elem) * _p(elem),
-                           _eps(neighbor) * _p(neighbor),
+                           _eps(elem, state) * _p(elem, state),
+                           _eps(neighbor, state) * _p(neighbor, state),
                            *_face_info,
                            true);
   }

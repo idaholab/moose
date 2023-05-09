@@ -7,6 +7,5 @@
     input = 'element_integral_test.i'
     csvdiff = 'out.csv'
     requirement = 'The system shall compute the element integral of a functor'
-    ad_indexing_type = 'global'
   []
 []

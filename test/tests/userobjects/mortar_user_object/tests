@@ -1,0 +1,19 @@
+[Tests]
+  design = 'UserObjects/index.md'
+  issues = '#21329'
+  [test]
+    requirement = 'The system shall be able to execute a user object on a mortar interface and obtain gap computations that are equivalent to an auxiliary kernel evaluation'
+    [reference]
+      input = test.i
+      exodiff = test_out.e
+      type = Exodiff
+      detail = 'on a reference, undisplaced mesh, and'
+    []
+    [displaced]
+      input = displaced_test.i
+      csvdiff = displaced_test_out.csv
+      type = CSVDiff
+      detail = 'on a displaced mesh.'
+    []
+  []
+[]

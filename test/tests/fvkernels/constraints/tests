@@ -1,31 +1,31 @@
 [Tests]
-  issues = '#20607'
-
+  issues = '#20607 #23745'
   [integral]
     type = Exodiff
     input = integral.i
     exodiff = 'integral_out.e'
-
     requirement = 'The system shall be able to impose a constraint on the domain integral of a variable.'
     design = 'FVIntegralValueConstraint.md'
-    ad_indexing_type = 'global'
+  []
+  [integral_transient]
+    type = Exodiff
+    input = integral_transient.i
+    exodiff = 'integral_transient_out.e'
+    requirement = 'The system shall be able to impose a constraint where the value of the constraint is provided by a postprocessor.'
+    design = 'FVIntegralValueConstraint.md'
   []
   [point_value]
     type = Exodiff
     input = 'point_value.i'
     exodiff = 'point_value_out.e'
-
     requirement = 'The system shall be able to impose a constraint on a single point value of a variable.'
     design = 'FVPointValueConstraint.md'
-    ad_indexing_type = 'global'
   []
   [bound]
     type = Exodiff
     input = 'bounded_value.i'
     exodiff = 'bounded_value_out.e'
-
     requirement = 'The system shall be able to impose bounds for the values of a variable.'
     design = 'FVBoundedValueConstraint.md'
-    ad_indexing_type = 'global'
   []
 []

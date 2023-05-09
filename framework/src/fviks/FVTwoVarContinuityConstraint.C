@@ -32,5 +32,6 @@ FVTwoVarContinuityConstraint::FVTwoVarContinuityConstraint(const InputParameters
 ADReal
 FVTwoVarContinuityConstraint::computeQpResidual()
 {
-  return var1().getBoundaryFaceValue(*_face_info) - var2().getBoundaryFaceValue(*_face_info);
+  return var1().getBoundaryFaceValue(*_face_info, determineState()) -
+         var2().getBoundaryFaceValue(*_face_info, determineState());
 }

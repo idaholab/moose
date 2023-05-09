@@ -51,7 +51,7 @@ Downloading: Ubuntu
 The requested operation is successful. Changes will not be effective until the system is rebooted.
 ```
 
-## Setup Linux and Enable GUI Dependencies
+### Setup Linux and Enable GUI Dependencies
 
 Once the restart is complete, a prompt will appear on next boot continuing the Ubuntu Linux
 installation and requesting a username for the new UNIX user account.
@@ -73,7 +73,7 @@ sudo apt upgrade
 sudo apt install x11-apps libglu1-mesa
 ```
 
-## Configure WSL to use VcXsrv
+### Configure WSL to use VcXsrv
 
 Modify the bash profile to allow WSL to connect to VcXsrv.
 

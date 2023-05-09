@@ -1,7 +1,7 @@
 # MAKE SURE THAT seacas_version and seacas_git_rev match if performing a version update!
 {% set build = "0" %}
-{% set seacas_version = "2022.10.14" %}
-{% set seacas_git_rev = "v2022-10-14" %}
+{% set seacas_version = "2023.02.03" %}
+{% set seacas_git_rev = "v2023-02-03" %}
 {% set strbuild = "build_" + build|string %}
 
 package:

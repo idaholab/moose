@@ -17,13 +17,10 @@
 
 template <typename AuxKernelType>
 ComputeNodalAuxBcsThread<AuxKernelType>::ComputeNodalAuxBcsThread(
-    FEProblemBase & fe_problem,
-    const MooseObjectWarehouse<AuxKernelType> & storage,
-    const std::vector<std::vector<MooseVariableFEBase *>> & vars)
+    FEProblemBase & fe_problem, const MooseObjectWarehouse<AuxKernelType> & storage)
   : ThreadedNodeLoop<ConstBndNodeRange, ConstBndNodeRange::const_iterator>(fe_problem),
     _aux_sys(fe_problem.getAuxiliarySystem()),
-    _storage(storage),
-    _aux_vars(vars)
+    _storage(storage)
 {
 }
 
@@ -33,8 +30,7 @@ ComputeNodalAuxBcsThread<AuxKernelType>::ComputeNodalAuxBcsThread(ComputeNodalAu
                                                                   Threads::split split)
   : ThreadedNodeLoop<ConstBndNodeRange, ConstBndNodeRange::const_iterator>(x, split),
     _aux_sys(x._aux_sys),
-    _storage(x._storage),
-    _aux_vars(x._aux_vars)
+    _storage(x._storage)
 {
 }
 
@@ -45,10 +41,6 @@ ComputeNodalAuxBcsThread<AuxKernelType>::onNode(ConstBndNodeRange::const_iterato
   const BndNode * bnode = *node_it;
 
   BoundaryID boundary_id = bnode->_bnd_id;
-
-  // prepare variables
-  for (auto * var : _aux_vars[_tid])
-    var->prepareAux();
 
   Node * node = bnode->_node;
 
@@ -64,16 +56,15 @@ ComputeNodalAuxBcsThread<AuxKernelType>::onNode(ConstBndNodeRange::const_iterato
       _fe_problem.reinitNodeFace(node, boundary_id, _tid);
 
       for (const auto & aux : iter->second)
+      {
         aux->compute();
+        // This is the same conditional check that the aux kernel performs internally before calling
+        // computeValue and _var.setNodalValue. We don't want to attempt to insert into the solution
+        // if we don't actually have any dofs on this node
+        if (aux->variable().isNodalDefined())
+          aux->variable().insert(_aux_sys.solution());
+      }
     }
-  }
-
-  // We are done, so update the solution vector
-  {
-    Threads::spin_mutex::scoped_lock lock(Threads::spin_mtx);
-    // update the solution vector
-    for (auto * var : _aux_vars[_tid])
-      var->insert(_aux_sys.solution());
   }
 }
 
@@ -81,6 +72,22 @@ template <typename AuxKernelType>
 void
 ComputeNodalAuxBcsThread<AuxKernelType>::join(const ComputeNodalAuxBcsThread & /*y*/)
 {
+}
+
+template <typename AuxKernelType>
+void
+ComputeNodalAuxBcsThread<AuxKernelType>::printGeneralExecutionInformation() const
+{
+  if (!_fe_problem.shouldPrintExecution(_tid) || !_storage.hasActiveObjects())
+    return;
+
+  const auto & console = _fe_problem.console();
+  const auto & execute_on = _fe_problem.getCurrentExecuteOnFlag();
+  console << "[DBG] Executing nodal auxiliary kernels on boundary nodes on " << execute_on
+          << std::endl;
+  console << "[DBG] Ordering of the kernels on each boundary they are defined on:" << std::endl;
+  // TODO Check that all objects are active at this point
+  console << _storage.activeObjectsToFormattedString() << std::endl;
 }
 
 template class ComputeNodalAuxBcsThread<AuxKernel>;

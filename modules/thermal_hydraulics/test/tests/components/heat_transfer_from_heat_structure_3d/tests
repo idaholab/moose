@@ -8,9 +8,7 @@
     input = 'phy.conservation.i'
     csvdiff = 'phy.conservation.csv'
     abs_zero = 1e-9
-    ad_indexing_type = 'global'
     recover = false
-    mesh_mode = 'replicated'
 
     requirement = 'The system shall conserve energy when using HeatTransferFromHeatStructure3D1Phase.'
   []
@@ -21,9 +19,7 @@
     csvdiff = 'phy.conservation_ss.csv'
     abs_zero = 1e-6
     max_time = 6000
-    ad_indexing_type = 'global'
     recover = false
-    mesh_mode = 'replicated'
 
     requirement = 'The system shall allow to connect multiple flow channels to a single boundary in HeatTransferFromHeatStructure3D1Phase.'
     issues = '#19831 #20298'
@@ -37,8 +33,6 @@
     abs_zero = 1e-6
     max_time = 6000
     prereq = phy:conservation_ss
-    ad_indexing_type = 'global'
-    mesh_mode = 'replicated'
 
     requirement = 'The system shall allow to connect flow channels that have negative orientation to a HeatTransferFromHeatStructure3D1Phase component.'
     issues = '#19831 #19879'
@@ -114,7 +108,6 @@
     difference_tol = 35000
     cli_args = "Debug/check_jacobian=true"
     max_parallel = 1
-    ad_indexing_type = 'global'
     requirement = 'The system shall correctly compute Jacobians for HeatTransferFromHeatStructure3D1Phase.'
   []
 []

@@ -144,6 +144,18 @@ SubProblem::getVectorTag(const TagID tag_id) const
   return _vector_tags[tag_id];
 }
 
+std::vector<VectorTag>
+SubProblem::getVectorTags(const std::set<TagID> & tag_ids) const
+{
+  mooseAssert(verifyVectorTags(), "Vector tag storage invalid");
+
+  std::vector<VectorTag> tags;
+  tags.reserve(tag_ids.size());
+  for (const auto & tag_id : tag_ids)
+    tags.push_back(getVectorTag(tag_id));
+  return tags;
+}
+
 const std::vector<VectorTag> &
 SubProblem::getVectorTags(const Moose::VectorTagType type /* = Moose::VECTOR_TAG_ANY */) const
 {
@@ -849,8 +861,10 @@ SubProblem::reinitElemFaceRef(const Elem * elem,
   // With the dof indices set in the moose variables, now let's properly size
   // our local residuals/Jacobians
   auto & current_assembly = assembly(tid, currentNlSysNum());
-  current_assembly.prepareJacobianBlock();
-  current_assembly.prepareResidual();
+  if (currentlyComputingJacobian() || currentlyComputingResidualAndJacobian())
+    current_assembly.prepareJacobianBlock();
+  if (!currentlyComputingJacobian())
+    current_assembly.prepareResidual();
 }
 
 void
@@ -1053,7 +1067,6 @@ SubProblem::automaticScaling() const
   return systemBaseNonlinear(0).automaticScaling();
 }
 
-#ifdef MOOSE_GLOBAL_AD_INDEXING
 void
 SubProblem::hasScalingVector()
 {
@@ -1061,7 +1074,6 @@ SubProblem::hasScalingVector()
     for (const auto nl_sys_num : make_range(numNonlinearSystems()))
       assembly(tid, nl_sys_num).hasScalingVector();
 }
-#endif
 
 void
 SubProblem::clearAllDofIndices()

@@ -13,7 +13,8 @@
     type = 'Exodiff'
     input = 'single_hex_pin_id.i'
     exodiff = 'single_hex_pin_id_exodus_1.e'
-    cli_args = 'Outputs/exodus_1/enable=true'
+    cli_args = 'Outputs/exodus_2/output_extra_element_ids=false
+                Outputs/exodus_1/enable=true'
     requirement ='The system shall generate a hexagonal assembly mesh with modified peripheral region and retain the specified reporting id.'
     recover = false
   []
@@ -23,6 +24,7 @@
     exodiff = 'single_hex_pin_id_exodus_2.e'
     cli_args = 'Mesh/pmg/extra_id_names_to_modify=pin_id
                 Mesh/pmg/new_extra_id_values_to_assign=10
+                Outputs/exodus_2/output_extra_element_ids=false
                 Outputs/exodus_2/enable=true'
     requirement ='The system shall generate a hexagonal assembly mesh with modified peripheral region and assign new values to the specified reporting id.'
     recover = false

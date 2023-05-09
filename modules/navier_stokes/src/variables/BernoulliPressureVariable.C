@@ -50,11 +50,13 @@ BernoulliPressureVariable::initialSetup()
 }
 
 std::pair<bool, ADRealVectorValue>
-BernoulliPressureVariable::elemIsUpwind(const Elem & elem, const FaceInfo & fi) const
+BernoulliPressureVariable::elemIsUpwind(const Elem & elem,
+                                        const FaceInfo & fi,
+                                        const Moose::StateArg & time) const
 {
   const Moose::FaceArg face{&fi, Moose::FV::LimiterType::CentralDifference, true, false, nullptr};
 
-  const VectorValue<ADReal> vel_face{(*_u)(face), (*_v)(face), (*_w)(face)};
+  const VectorValue<ADReal> vel_face{(*_u)(face, time), (*_v)(face, time), (*_w)(face, time)};
   const bool fi_elem_is_upwind = vel_face * fi.normal() > 0;
   const bool elem_is_upwind = &elem == &fi.elem() ? fi_elem_is_upwind : !fi_elem_is_upwind;
 
@@ -63,9 +65,10 @@ BernoulliPressureVariable::elemIsUpwind(const Elem & elem, const FaceInfo & fi) 
 
 bool
 BernoulliPressureVariable::isExtrapolatedBoundaryFace(const FaceInfo & fi,
-                                                      const Elem * const elem) const
+                                                      const Elem * const elem,
+                                                      const Moose::StateArg & time) const
 {
-  if (isDirichletBoundaryFace(fi, elem))
+  if (isDirichletBoundaryFace(fi, elem, time))
     return false;
   if (!isInternalFace(fi))
     // We are neither a Dirichlet nor an internal face
@@ -73,37 +76,39 @@ BernoulliPressureVariable::isExtrapolatedBoundaryFace(const FaceInfo & fi,
 
   // If we got here, then we're definitely on an internal face
 
-  if (std::get<0>(NS::isPorosityJumpFace(*_eps, fi)))
+  if (std::get<0>(NS::isPorosityJumpFace(*_eps, fi, time)))
     // We choose to extrapolate for the element that is downwind
-    return !std::get<0>(elemIsUpwind(*elem, fi));
+    return !std::get<0>(elemIsUpwind(*elem, fi, time));
 
   return false;
 }
 
 bool
 BernoulliPressureVariable::isDirichletBoundaryFace(const FaceInfo & fi,
-                                                   const Elem * const elem) const
+                                                   const Elem * const elem,
+                                                   const Moose::StateArg & time) const
 {
-  if (INSFVPressureVariable::isDirichletBoundaryFace(fi, elem))
+  if (INSFVPressureVariable::isDirichletBoundaryFace(fi, elem, time))
     return true;
 
-  if (isInternalFace(fi) && std::get<0>(NS::isPorosityJumpFace(*_eps, fi)))
+  if (isInternalFace(fi) && std::get<0>(NS::isPorosityJumpFace(*_eps, fi, time)))
     // We choose to apply the Dirichlet condition for the upwind element
-    return std::get<0>(elemIsUpwind(*elem, fi));
+    return std::get<0>(elemIsUpwind(*elem, fi, time));
 
   return false;
 }
 
 ADReal
 BernoulliPressureVariable::getDirichletBoundaryFaceValue(const FaceInfo & fi,
-                                                         const Elem * const elem) const
+                                                         const Elem * const elem,
+                                                         const Moose::StateArg & time) const
 {
-  mooseAssert(isDirichletBoundaryFace(fi, elem), "This better be a Dirichlet face");
+  mooseAssert(isDirichletBoundaryFace(fi, elem, time), "This better be a Dirichlet face");
 
-  if (INSFVPressureVariable::isDirichletBoundaryFace(fi, elem))
-    return INSFVPressureVariable::getDirichletBoundaryFaceValue(fi, elem);
+  if (INSFVPressureVariable::isDirichletBoundaryFace(fi, elem, time))
+    return INSFVPressureVariable::getDirichletBoundaryFaceValue(fi, elem, time);
 
-  const auto [is_jump_face, eps_elem, eps_neighbor] = NS::isPorosityJumpFace(*_eps, fi);
+  const auto [is_jump_face, eps_elem, eps_neighbor] = NS::isPorosityJumpFace(*_eps, fi, time);
 #ifndef NDEBUG
   mooseAssert(is_jump_face,
               "If we are not a traditional Dirichlet face, then we must be a jump face");
@@ -116,7 +121,7 @@ BernoulliPressureVariable::getDirichletBoundaryFaceValue(const FaceInfo & fi,
   const Moose::FaceArg face_neighbor{
       &fi, Moose::FV::LimiterType::CentralDifference, true, false, fi.neighborPtr()};
 
-  const auto [elem_is_upwind, vel_face] = elemIsUpwind(*elem, fi);
+  const auto [elem_is_upwind, vel_face] = elemIsUpwind(*elem, fi, time);
   const auto & vel_elem = vel_face;
   const auto & vel_neighbor = vel_face;
 
@@ -128,7 +133,7 @@ BernoulliPressureVariable::getDirichletBoundaryFaceValue(const FaceInfo & fi,
   // GeneralFunctorFluidProps in which the density is a function of the pressure then we will
   // infinitely recurse using the below line of code:
   // const auto rho_elem = (*_rho)(face_elem), rho_neighbor = (*_rho)(face_neighbor);
-  const auto rho = (*_rho)(downwind_face);
+  const auto rho = (*_rho)(downwind_face, time);
 
   const VectorValue<ADReal> interstitial_vel_elem = vel_elem * (1 / eps_elem);
   const VectorValue<ADReal> interstitial_vel_neighbor = vel_neighbor * (1 / eps_neighbor);
@@ -141,6 +146,6 @@ BernoulliPressureVariable::getDirichletBoundaryFaceValue(const FaceInfo & fi,
       fi_elem_is_upwind ? bernoulli_vel_chunk_elem : bernoulli_vel_chunk_neighbor;
   const auto & downwind_bernoulli_vel_chunk =
       fi_elem_is_upwind ? bernoulli_vel_chunk_neighbor : bernoulli_vel_chunk_elem;
-  const auto p_downwind = (*this)(downwind_face);
+  const auto p_downwind = (*this)(downwind_face, time);
   return p_downwind + downwind_bernoulli_vel_chunk - upwind_bernoulli_vel_chunk;
 }

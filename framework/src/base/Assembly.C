@@ -1000,14 +1000,8 @@ Assembly::computeSinglePointMapAD(const Elem * elem,
         if (do_derivatives)
           for (const auto & [disp_num, direction] : _disp_numbers_and_directions)
             if (node.n_dofs(sys_num, disp_num))
-              Moose::derivInsert(elem_point(direction).derivatives(),
-#ifdef MOOSE_GLOBAL_AD_INDEXING
-                                 node.dof_number(sys_num, disp_num, 0)
-#else
-                                 disp_num * _sys.getMaxVarNDofsPerElem() + i
-#endif
-                                     ,
-                                 1.);
+              Moose::derivInsert(
+                  elem_point(direction).derivatives(), node.dof_number(sys_num, disp_num, 0), 1.);
 
         _ad_dxyzdxi_map[p].add_scaled(elem_point, dphidxi_map[i][p]);
 
@@ -1055,14 +1049,8 @@ Assembly::computeSinglePointMapAD(const Elem * elem,
         libMesh::VectorValue<DualReal> elem_point = node;
         if (do_derivatives)
           for (const auto & [disp_num, direction] : _disp_numbers_and_directions)
-            Moose::derivInsert(elem_point(direction).derivatives(),
-#ifdef MOOSE_GLOBAL_AD_INDEXING
-                               node.dof_number(sys_num, disp_num, 0)
-#else
-                               disp_num * _sys.getMaxVarNDofsPerElem() + i
-#endif
-                                   ,
-                               1.);
+            Moose::derivInsert(
+                elem_point(direction).derivatives(), node.dof_number(sys_num, disp_num, 0), 1.);
 
         _ad_dxyzdxi_map[p].add_scaled(elem_point, dphidxi_map[i][p]);
         _ad_dxyzdeta_map[p].add_scaled(elem_point, dphideta_map[i][p]);
@@ -1137,14 +1125,8 @@ Assembly::computeSinglePointMapAD(const Elem * elem,
         libMesh::VectorValue<DualReal> elem_point = node;
         if (do_derivatives)
           for (const auto & [disp_num, direction] : _disp_numbers_and_directions)
-            Moose::derivInsert(elem_point(direction).derivatives(),
-#ifdef MOOSE_GLOBAL_AD_INDEXING
-                               node.dof_number(sys_num, disp_num, 0)
-#else
-                               disp_num * _sys.getMaxVarNDofsPerElem() + i
-#endif
-                                   ,
-                               1.);
+            Moose::derivInsert(
+                elem_point(direction).derivatives(), node.dof_number(sys_num, disp_num, 0), 1.);
 
         _ad_dxyzdxi_map[p].add_scaled(elem_point, dphidxi_map[i][p]);
         _ad_dxyzdeta_map[p].add_scaled(elem_point, dphideta_map[i][p]);
@@ -1319,20 +1301,11 @@ Assembly::computeFaceMap(const Elem & elem, const unsigned int side, const std::
       {
         const Node & node = side_elem.node_ref(0);
         side_point = node;
-#ifndef MOOSE_GLOBAL_AD_INDEXING
-        auto element_node_number = elem.local_side_node(side, 0);
-#endif
 
         if (do_derivatives)
           for (const auto & [disp_num, direction] : _disp_numbers_and_directions)
-            Moose::derivInsert(side_point(direction).derivatives(),
-#ifdef MOOSE_GLOBAL_AD_INDEXING
-                               node.dof_number(sys_num, disp_num, 0)
-#else
-                               disp_num * _sys.getMaxVarNDofsPerElem() + element_node_number
-#endif
-                                   ,
-                               1.);
+            Moose::derivInsert(
+                side_point(direction).derivatives(), node.dof_number(sys_num, disp_num, 0), 1.);
       }
 
       for (unsigned int p = 0; p < n_qp; p++)
@@ -1372,20 +1345,11 @@ Assembly::computeFaceMap(const Elem & elem, const unsigned int side, const std::
       {
         const Node & node = side_elem.node_ref(i);
         VectorValue<DualReal> side_point = node;
-#ifndef MOOSE_GLOBAL_AD_INDEXING
-        auto element_node_number = elem.local_side_node(side, i);
-#endif
 
         if (do_derivatives)
           for (const auto & [disp_num, direction] : _disp_numbers_and_directions)
-            Moose::derivInsert(side_point(direction).derivatives(),
-#ifdef MOOSE_GLOBAL_AD_INDEXING
-                               node.dof_number(sys_num, disp_num, 0)
-#else
-                               disp_num * _sys.getMaxVarNDofsPerElem() + element_node_number
-#endif
-                                   ,
-                               1.);
+            Moose::derivInsert(
+                side_point(direction).derivatives(), node.dof_number(sys_num, disp_num, 0), 1.);
 
         for (unsigned int p = 0; p < n_qp; p++)
         {
@@ -1447,20 +1411,11 @@ Assembly::computeFaceMap(const Elem & elem, const unsigned int side, const std::
       {
         const Node & node = side_elem.node_ref(i);
         VectorValue<DualReal> side_point = node;
-#ifndef MOOSE_GLOBAL_AD_INDEXING
-        auto element_node_number = elem.local_side_node(side, i);
-#endif
 
         if (do_derivatives)
           for (const auto & [disp_num, direction] : _disp_numbers_and_directions)
-            Moose::derivInsert(side_point(direction).derivatives(),
-#ifdef MOOSE_GLOBAL_AD_INDEXING
-                               node.dof_number(sys_num, disp_num, 0)
-#else
-                               disp_num * _sys.getMaxVarNDofsPerElem() + element_node_number
-#endif
-                                   ,
-                               1.);
+            Moose::derivInsert(
+                side_point(direction).derivatives(), node.dof_number(sys_num, disp_num, 0), 1.);
 
         for (unsigned int p = 0; p < n_qp; p++)
         {
@@ -2307,6 +2262,7 @@ Assembly::reinitMortarElem(const Elem * elem)
               "You should be calling reinitMortarElem on a lower dimensional element");
 
   _fe_msm->reinit(elem);
+  _msm_elem = elem;
 
   MooseArray<Point> array_q_points;
   array_q_points.shallowCopy(const_cast<std::vector<Point> &>(_fe_msm->get_xyz()));
@@ -3289,11 +3245,11 @@ Assembly::addResidualScalar(const std::vector<VectorTag> & vector_tags)
 }
 
 void
-Assembly::cacheResidual()
+Assembly::cacheResidual(const std::vector<VectorTag> & tags)
 {
   const std::vector<MooseVariableFEBase *> & vars = _sys.getVariables(_tid);
   for (const auto & var : vars)
-    for (const auto & vector_tag : _residual_vector_tags)
+    for (const auto & vector_tag : tags)
       if (_sys.hasVector(vector_tag._id))
         cacheResidualBlock(_cached_residual_values[vector_tag._type_id],
                            _cached_residual_rows[vector_tag._type_id],
@@ -3324,11 +3280,7 @@ Assembly::cacheResidual(dof_id_type dof, Real value, const std::set<TagID> & tag
 void
 Assembly::processResidual(Real value, const dof_id_type dof, const std::set<TagID> & tags)
 {
-  const Real scalar =
-#ifdef MOOSE_GLOBAL_AD_INDEXING
-      _scaling_vector ? (*_scaling_vector)(dof) :
-#endif
-                      1.;
+  const Real scalar = _scaling_vector ? (*_scaling_vector)(dof) : 1.;
   value *= scalar;
 
   for (const auto tag_id : tags)
@@ -3387,11 +3339,11 @@ Assembly::cacheResidualNodes(const DenseVector<Number> & res,
 }
 
 void
-Assembly::cacheResidualNeighbor()
+Assembly::cacheResidualNeighbor(const std::vector<VectorTag> & tags)
 {
   const std::vector<MooseVariableFEBase *> & vars = _sys.getVariables(_tid);
   for (const auto & var : vars)
-    for (const auto & vector_tag : _residual_vector_tags)
+    for (const auto & vector_tag : tags)
       if (_sys.hasVector(vector_tag._id))
         cacheResidualBlock(_cached_residual_values[vector_tag._type_id],
                            _cached_residual_rows[vector_tag._type_id],
@@ -3402,11 +3354,11 @@ Assembly::cacheResidualNeighbor()
 }
 
 void
-Assembly::cacheResidualLower()
+Assembly::cacheResidualLower(const std::vector<VectorTag> & tags)
 {
   const std::vector<MooseVariableFEBase *> & vars = _sys.getVariables(_tid);
   for (const auto & var : vars)
-    for (const auto & vector_tag : _residual_vector_tags)
+    for (const auto & vector_tag : tags)
       if (_sys.hasVector(vector_tag._id))
         cacheResidualBlock(_cached_residual_values[vector_tag._type_id],
                            _cached_residual_rows[vector_tag._type_id],
@@ -3417,9 +3369,9 @@ Assembly::cacheResidualLower()
 }
 
 void
-Assembly::addCachedResiduals()
+Assembly::addCachedResiduals(const std::vector<VectorTag> & tags)
 {
-  for (const auto & vector_tag : _residual_vector_tags)
+  for (const auto & vector_tag : tags)
   {
     if (!_sys.hasVector(vector_tag._id))
     {
@@ -4511,13 +4463,11 @@ Assembly::modifyFaceWeightsDueToXFEM(const Elem * elem, unsigned int side)
   }
 }
 
-#ifdef MOOSE_GLOBAL_AD_INDEXING
 void
 Assembly::hasScalingVector()
 {
   _scaling_vector = &_sys.getVector("scaling_factors");
 }
-#endif
 
 void
 Assembly::modifyArbitraryWeights(const std::vector<Real> & weights)
@@ -4529,7 +4479,6 @@ Assembly::modifyArbitraryWeights(const std::vector<Real> & weights)
     _current_JxW[i] = weights[i];
 }
 
-#ifdef MOOSE_GLOBAL_AD_INDEXING
 void
 Assembly::processUnconstrainedResidualsAndJacobian(const std::vector<ADReal> & residuals,
                                                    const std::vector<dof_id_type> & row_indices,
@@ -4560,7 +4509,6 @@ Assembly::processUnconstrainedResidualsAndJacobian(const std::vector<ADReal> & r
             row_index, column_indices[j], raw_derivatives[j] * scaling_factor, matrix_tags);
     }
 }
-#endif
 
 template <>
 const typename OutputTools<VectorValue<Real>>::VariablePhiValue &
@@ -4730,7 +4678,6 @@ Assembly::feCurlPhiFaceNeighbor<VectorValue<Real>>(FEType type) const
   return _vector_fe_shape_data_face_neighbor[type]->_curl_phi;
 }
 
-#ifdef MOOSE_GLOBAL_AD_INDEXING
 void
 Assembly::processResidualsAndJacobian(const std::vector<ADReal> & residuals,
                                       const std::vector<dof_id_type> & input_row_indices,
@@ -4788,7 +4735,6 @@ Assembly::processResidualsAndJacobian(const std::vector<ADReal> & residuals,
     for (const auto j : index_range(column_indices))
       cacheJacobian(row_indices[i], column_indices[j], element_matrix(i, j), matrix_tags);
 }
-#endif
 
 template void coordTransformFactor<Point, Real>(const SubProblem & s,
                                                 SubdomainID sub_id,

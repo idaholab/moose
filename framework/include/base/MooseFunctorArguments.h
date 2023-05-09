@@ -13,6 +13,7 @@
 
 #include "Limiter.h"
 #include "FaceInfo.h"
+#include "MooseTypes.h"
 #include "libmesh/elem.h"
 #include "libmesh/point.h"
 #include "libmesh/quadrature.h"
@@ -90,6 +91,8 @@ public:
   /// that is itself block restricted may modify the value to indicate \emph its sidedness. If there
   /// is ever a mismatch between the specified sidedness of a physics object and the sidedness of a
   /// functor, then we will error
+  /// If unspecified (nullptr), the evaluation will be two-sided, unless the functor is not defined
+  /// on one side of the face.
   const Elem * face_side;
 
   /**
@@ -134,4 +137,59 @@ using ElemQpArg = std::tuple<const libMesh::Elem *, unsigned int, const QBase *>
  * - The quadrature rule that can be used to initialize the functor on the given element and side
  */
 using ElemSideQpArg = std::tuple<const libMesh::Elem *, unsigned int, unsigned int, const QBase *>;
+
+/**
+ * State argument for evaluating functors. The iteration type indicates whether you want to evaluate
+ * a functor based on some iterate state of a transient calculation, nonlinear solve, etc. The state
+ * indicates which iterate of the iterate type we want to evaluate on. A state of 0 indicates
+ * "current", e.g. the current time or the current nonlinear iteration (which should actually be
+ * equivalent); a state of 1 indicates the most-recent "old" time or the most recent previous
+ * nonlinear iteration, etc.
+ */
+struct StateArg
+{
+  /**
+   * Prevent implicit conversions from boolean to avoid users accidentally constructing a time
+   * argument when they meant to construct a skewness argument, etc.
+   */
+  StateArg(bool) = delete;
+
+  StateArg(unsigned int state_in) : state(state_in), iteration_type(SolutionIterationType::Time) {}
+
+  StateArg(unsigned int state_in, SolutionIterationType iteration_type_in)
+    : state(state_in), iteration_type(iteration_type_in)
+  {
+  }
+
+  /// The state. Zero represents the most recent state, so for any kind of iteration type, a zero
+  /// state represents the current state, e.g. current solution
+  /// One may represent the 'old' value (one before, in the iteration_type specified), and two an 'older' or two steps away state
+  unsigned int state;
+
+  /// The solution iteration type, e.g. time or nonlinear
+  SolutionIterationType iteration_type;
+
+private:
+  StateArg() : state(0), iteration_type(SolutionIterationType::Time) {}
+
+  friend StateArg currentState();
+};
+
+inline StateArg
+currentState()
+{
+  return {};
+}
+
+inline StateArg
+oldState()
+{
+  return {(unsigned int)1};
+}
+
+inline StateArg
+previousNonlinearState()
+{
+  return {(unsigned int)1, SolutionIterationType::Nonlinear};
+}
 }

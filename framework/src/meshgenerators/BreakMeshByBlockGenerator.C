@@ -81,6 +81,9 @@ BreakMeshByBlockGenerator::generate()
   if (!mesh->is_replicated())
     mooseError("BreakMeshByBlockGenerator is not implemented for distributed meshes");
 
+  // Try to trick the rest of the world into thinking we're prepared
+  mesh->prepare_for_use();
+
   BoundaryInfo & boundary_info = mesh->get_boundary_info();
 
   // Handle block restrictions

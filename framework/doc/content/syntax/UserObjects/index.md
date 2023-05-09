@@ -36,6 +36,8 @@ and use the interface without the use of dynamic casts.
    and the secondary side of the internal boundary are available.
 - +DomainUserObject+: this object is capable of executing all the operations of
   a +ElementUserObject+, +InternalSideUserObject+, +SideUserObject+ and +InterfaceUserObject+.
+- +MortarUserObject+: "execute" is called for each mortar segment element corresponding to the
+  secondary-primary mortar interface pairing on each execution flag
 
 # Execution order
 

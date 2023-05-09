@@ -5,7 +5,6 @@
     type = CSVDiff
     input = functor_gradient.i
     csvdiff = functor_gradient_out_results_0001.csv
-    ad_indexing_type = 'global'
     requirement = "The system shall be able to compute a vector auxvariable given by scaling a "
                   "variable's gradient by a material property"
   []

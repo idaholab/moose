@@ -59,11 +59,6 @@ public:
   void setMisfitToSimulatedValues();
 
   /**
-   * Functions to check if bounds are set
-   */
-  bool hasBounds() const { return _upper_bounds.size() && _lower_bounds.size(); }
-
-  /**
    * Upper and lower bounds for each parameter being controlled
    *
    * @param i Parameter index
@@ -84,13 +79,6 @@ protected:
    * This is the first function called in objective/gradient/hessian routine
    */
   virtual void updateParameters(const libMesh::PetscVector<Number> & x);
-  /**
-   * Helper function to get index of the list of parameters from the dof index
-   *
-   * @param i The DoF index in the optimization vector
-   * @return unsigned int The index of the parameter the DoF is representing
-   */
-  virtual unsigned int getParameterIndex(dof_id_type i) const;
 
   /// Parameter names
   const std::vector<ReporterValueName> & _parameter_names;
@@ -103,8 +91,8 @@ protected:
   std::vector<std::vector<Real> *> _gradients;
 
   /// Bounds of the parameters
-  const std::vector<Real> & _lower_bounds;
-  const std::vector<Real> & _upper_bounds;
+  std::vector<Real> _lower_bounds;
+  std::vector<Real> _upper_bounds;
 
   /// Number of values for each parameter
   std::vector<dof_id_type> _nvalues;

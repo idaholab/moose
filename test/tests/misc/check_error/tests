@@ -26,8 +26,7 @@
   [checked_pointer_param_test]
     type = 'RunException'
     input = 'checked_pointer_param_test.i'
-    expect_err = "after parameter name"
-
+    expect_err = "(checked_pointer_param_test.i:3.2: syntax error, unexpected invalid token, expecting =|checked_pointer_param_test.i:3: expected '=' after parameter name 'x', got '\[')"
     requirement = 'The system shall report an error when a null pointer-checked parameter is retrieved from the InputParameters object.'
     issues = '#10356'
   []
@@ -396,7 +395,6 @@
 
     requirement = 'The system shall report an error if one or more domain blocks do not have any active FVKernels objects assigned.'
     issues = '#1405 #15196'
-    ad_indexing_type = 'global'
   []
 
   [incomplete_fvkernel_variable_coverage_test]
@@ -406,7 +404,6 @@
 
     requirement = 'The system shall report an error if one or more variables do not have any active FVKernel objects assigned.'
     issues = '#1405 #15196'
-    ad_indexing_type = 'global'
   []
 
   [invalid_elemental_to_nodal_couple_test]

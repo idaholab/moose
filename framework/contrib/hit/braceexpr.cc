@@ -1,4 +1,3 @@
-
 #include "braceexpr.h"
 
 #include <cstdlib>

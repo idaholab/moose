@@ -81,6 +81,15 @@ MortarConstraintBase::validParams()
       "While DEFAULT quadrature order is typically sufficiently accurate, exact integration of "
       "QUAD mortar faces requires SECOND order quadrature for FIRST variables and FOURTH order "
       "quadrature for SECOND order variables.");
+  params.addParam<bool>(
+      "use_petrov_galerkin",
+      false,
+      "Whether to use the Petrov-Galerkin approach for the mortar-based constraints. If set to "
+      "true, we use the standard basis as the test function and dual basis as "
+      "the shape function for the interpolation of the Lagrange multiplier variable.");
+  params.addCoupledVar("aux_lm",
+                       "Auxiliary Lagrange multiplier variable that is utilized together with the "
+                       "Petrov-Galerkin approach.");
   return params;
 }
 
@@ -115,19 +124,35 @@ MortarConstraintBase::MortarConstraintBase(const InputParameters & parameters)
     _tangents(_assembly.tangents()),
     _coord(_assembly.mortarCoordTransformation()),
     _q_point(_assembly.qPointsMortar()),
-    _test(_var ? _var->phiLower() : _test_dummy),
+    _use_petrov_galerkin(getParam<bool>("use_petrov_galerkin")),
+    _aux_lm_var(isCoupled("aux_lm") ? getVar("aux_lm", 0) : nullptr),
+    _test(_var
+              ? ((_use_petrov_galerkin && _aux_lm_var) ? _aux_lm_var->phiLower() : _var->phiLower())
+              : _test_dummy),
     _test_secondary(_secondary_var.phiFace()),
     _test_primary(_primary_var.phiFaceNeighbor()),
     _grad_test_secondary(_secondary_var.gradPhiFace()),
     _grad_test_primary(_primary_var.gradPhiFaceNeighbor()),
     _interior_secondary_elem(_assembly.elem()),
     _interior_primary_elem(_assembly.neighbor()),
-    _lower_secondary_elem(_assembly.lowerDElem()),
-    _lower_primary_elem(_assembly.neighborLowerDElem()),
     _displaced(getParam<bool>("use_displaced_mesh"))
 {
   if (_use_dual)
     _assembly.activateDual();
+
+  if (_use_petrov_galerkin && (!_use_dual))
+    paramError("use_petrov_galerkin",
+               "We need to set `use_dual = true` while using the Petrov-Galerkin approach");
+
+  if (_use_petrov_galerkin && ((!isParamValid("aux_lm")) || _aux_lm_var == nullptr))
+    paramError("use_petrov_galerkin",
+               "We need to specify an auxiliary variable `aux_lm` while using the Petrov-Galerkin "
+               "approach");
+
+  if (_use_petrov_galerkin && _aux_lm_var->useDual())
+    paramError("aux_lm",
+               "Auxiliary LM variable needs to use standard shape function, i.e., set `use_dual = "
+               "false`.");
 
   // Note parameter is discretization order, we then convert to quadrature order
   const MooseEnum p_order = getParam<MooseEnum>("quadrature");
@@ -147,7 +172,7 @@ MortarConstraintBase::MortarConstraintBase(const InputParameters & parameters)
 void
 MortarConstraintBase::computeResidual()
 {
-  setNormals();
+  precalculateResidual();
 
   if (_compute_primal_residuals)
   {
@@ -166,7 +191,7 @@ MortarConstraintBase::computeResidual()
 void
 MortarConstraintBase::computeJacobian()
 {
-  setNormals();
+  precalculateResidual();
 
   if (_compute_primal_residuals)
   {

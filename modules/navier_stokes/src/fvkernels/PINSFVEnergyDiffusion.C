@@ -44,11 +44,6 @@ PINSFVEnergyDiffusion::PINSFVEnergyDiffusion(const InputParameters & params)
     _k_interp_method(
         Moose::FV::selectInterpolationMethod(getParam<MooseEnum>("kappa_interp_method")))
 {
-#ifndef MOOSE_GLOBAL_AD_INDEXING
-  mooseError("PINSFV is not supported by local AD indexing. In order to use PINSFV, please run "
-             "the configure script in the root MOOSE directory with the configure option "
-             "'--with-ad-indexing-type=global'");
-#endif
   if (!dynamic_cast<INSFVEnergyVariable *>(&_var))
     mooseError("PINSFVEnergyDiffusion may only be used with a fluid temperature variable, "
                "of variable type INSFVEnergyVariable.");
@@ -59,27 +54,30 @@ PINSFVEnergyDiffusion::computeQpResidual()
 {
   // Interpolate thermal conductivity times porosity on the face
   ADReal k_eps_face;
+  const auto state = determineState();
 
   if (onBoundary(*_face_info))
   {
     const auto ssf = singleSidedFaceArg();
-    k_eps_face = _porosity_factored_in ? _k(ssf) : _k(ssf) * _eps(ssf);
+    k_eps_face = _porosity_factored_in ? _k(ssf, state) : _k(ssf, state) * _eps(ssf, state);
   }
   else
   {
     const auto face_elem = elemArg();
     const auto face_neighbor = neighborArg();
 
-    const auto value1 =
-        _porosity_factored_in ? _k(face_elem) : _k(face_neighbor) * _eps(face_neighbor);
-    const auto value2 =
-        _porosity_factored_in ? _k(face_neighbor) : _k(face_neighbor) * _eps(face_neighbor);
+    const auto value1 = _porosity_factored_in
+                            ? _k(face_elem, state)
+                            : _k(face_neighbor, state) * _eps(face_neighbor, state);
+    const auto value2 = _porosity_factored_in
+                            ? _k(face_neighbor, state)
+                            : _k(face_neighbor, state) * _eps(face_neighbor, state);
 
     Moose::FV::interpolate(_k_interp_method, k_eps_face, value1, value2, *_face_info, true);
   }
 
   // Compute the temperature gradient dotted with the surface normal
-  auto dTdn = gradUDotNormal();
+  auto dTdn = gradUDotNormal(state);
 
   return -k_eps_face * dTdn;
 }

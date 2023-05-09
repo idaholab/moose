@@ -10,6 +10,7 @@
 #pragma once
 
 #include "FEProblem.h"
+#include "libmesh/enum_norm_type.h"
 
 /**
  * FEProblemBase derived class to enable convergence checking relative to a user-specified
@@ -23,21 +24,17 @@ public:
   ReferenceResidualProblem(const InputParameters & params);
 
   virtual void initialSetup() override;
+
   void updateReferenceResidual();
-  virtual MooseNonlinearConvergenceReason
-  checkNonlinearConvergence(std::string & msg,
-                            const PetscInt it,
-                            const Real xnorm,
-                            const Real snorm,
-                            const Real fnorm,
-                            const Real rtol,
-                            const Real divtol,
-                            const Real stol,
-                            const Real abstol,
-                            const PetscInt nfuncs,
-                            const PetscInt max_funcs,
-                            const Real initial_residual_before_preset_bcs,
-                            const Real div_threshold) override;
+
+  virtual void nonlinearConvergenceSetup() override;
+
+  virtual bool checkRelativeConvergence(const PetscInt it,
+                                        const Real fnorm,
+                                        const Real the_residual,
+                                        const Real rtol,
+                                        const Real abstol,
+                                        std::ostringstream & oss) override;
 
   /**
    * Check the convergence by comparing the norm of each variable separately against
@@ -64,6 +61,14 @@ public:
    */
   template <typename T>
   void addGroupVariables(const std::set<T> & group_vars);
+
+  enum class NormalizationType
+  {
+    GLOBAL_L2,
+    LOCAL_L2,
+    GLOBAL_LINF,
+    LOCAL_LINF
+  };
 
 protected:
   ///@{
@@ -118,6 +123,15 @@ protected:
 
   std::vector<NonlinearVariableName> _converge_on;
   std::vector<bool> _converge_on_var;
+
+  /// Flag to optionally perform normalization of residual by reference residual before or after L2 norm is computed
+  bool _local_norm;
+
+  /// Container for normalization type
+  FEMNormType _norm_type;
+
+  /// Container for convergence treatment when the reference residual is zero
+  const enum class ZeroReferenceType { ZERO_TOLERANCE, RELATIVE_TOLERANCE } _zero_ref_type;
 };
 
 template <typename T>

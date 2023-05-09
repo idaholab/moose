@@ -27,11 +27,7 @@ namespace Moose
 inline bool
 globalADIndexing()
 {
-#ifdef MOOSE_GLOBAL_AD_INDEXING
   return true;
-#else
-  return false;
-#endif
 }
 
 /**

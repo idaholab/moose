@@ -5,6 +5,5 @@
     exodiff = '3eqn_out.e'
     abs_zero = 1e-6
     max_parallel = 1
-    ad_indexing_type = 'global'
   []
 []

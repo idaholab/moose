@@ -6,7 +6,7 @@ A = 0.1
   gravity_vector = '0 0 0'
 
   scaling_factor_1phase = '1 1 1e-5'
-  scaling_factor_rhoV  = 1
+  scaling_factor_rhoV = 1
   scaling_factor_rhouV = 1
   scaling_factor_rhovV = 1
   scaling_factor_rhowV = 1
@@ -42,6 +42,16 @@ A = 0.1
   []
 []
 
+[Functions]
+  [K_fn]
+    type = TimeRampFunction
+    initial_value = 0
+    initial_time = 2
+    ramp_duration = 5
+    final_value = 1
+  []
+[]
+
 [Components]
   [pipe1]
     type = FlowChannel1Phase
@@ -58,14 +68,12 @@ A = 0.1
     initial_p = 1e5
   []
 
-
   [junction]
     type = VolumeJunction1Phase
     connections = 'pipe1:out pipe2:in'
 
     position = '1 0 0'
     volume = 0.005
-
     initial_p = 1e5
     initial_vel_x = 1
     initial_vel_y = 0
@@ -83,6 +91,16 @@ A = 0.1
     type = Outlet1Phase
     input = 'pipe2:out'
     p = 1e5
+  []
+[]
+
+[ControlLogic]
+  active = ''
+  [K_crtl]
+    type = TimeFunctionComponentControl
+    component = junction
+    parameter = K
+    function = K_fn
   []
 []
 
@@ -130,7 +148,6 @@ A = 0.1
   l_tol = 1e-3
   l_max_its = 10
 []
-
 
 [Outputs]
   csv = true

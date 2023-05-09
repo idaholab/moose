@@ -24,6 +24,8 @@ public:
 protected:
   /// Heat transfer coefficient
   const Function & _htc;
+  /// Coupling area fraction
+  const Real & _coupling_area_fraction;
 
 public:
   static InputParameters validParams();

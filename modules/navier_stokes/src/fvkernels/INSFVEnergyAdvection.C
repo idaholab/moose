@@ -29,19 +29,16 @@ INSFVEnergyAdvection::INSFVEnergyAdvection(const InputParameters & params)
   if (!dynamic_cast<INSFVEnergyVariable *>(&_var))
     mooseError("PINSFVEnergyAdvection may only be used with a fluid temperature variable, "
                "of variable type INSFVEnergyVariable.");
-
-#ifndef MOOSE_GLOBAL_AD_INDEXING
-  mooseError("INSFV is not supported by local AD indexing. In order to use INSFV, please run the "
-             "configure script in the root MOOSE directory with the configure option "
-             "'--with-ad-indexing-type=global'");
-#endif
 }
 
 ADReal
 INSFVEnergyAdvection::computeQpResidual()
 {
-  const auto v = _rc_vel_provider.getVelocity(_velocity_interp_method, *_face_info, _tid);
-  const auto adv_quant_face = _adv_quant(makeFace(
-      *_face_info, limiterType(_advected_interp_method), MetaPhysicL::raw_value(v) * _normal > 0));
+  const auto v =
+      _rc_vel_provider.getVelocity(_velocity_interp_method, *_face_info, determineState(), _tid);
+  const auto adv_quant_face = _adv_quant(makeFace(*_face_info,
+                                                  limiterType(_advected_interp_method),
+                                                  MetaPhysicL::raw_value(v) * _normal > 0),
+                                         determineState());
   return _normal * v * adv_quant_face;
 }

@@ -94,7 +94,7 @@ Checkpoint::outputStep(const ExecFlagType & type)
   // Check whether we should output, then do it.
   if (shouldOutput(type))
   {
-    TIME_SECTION("outputStep", 2, "Outputting Step");
+    TIME_SECTION("outputStep", 2, "Outputting Checkpoint");
     output(type);
   }
 }
@@ -104,21 +104,26 @@ Checkpoint::shouldOutput(const ExecFlagType & type)
 {
   // Check if the checkpoint should "normally" output, i.e. if it was created
   // through checkpoint=true
-  bool shouldOutput = (onInterval() || type == EXEC_FINAL) ? FileOutput::shouldOutput(type) : false;
+  bool should_output =
+      (onInterval() || type == EXEC_FINAL) ? FileOutput::shouldOutput(type) : false;
 
   // If this is either a auto-created checkpoint, or if its an existing checkpoint acting
   // as the autosave and that checkpoint isn't on its interval, then output.
-  if (_is_autosave == SYSTEM_AUTOSAVE || (_is_autosave == MODIFIED_EXISTING && !shouldOutput))
+  if (_is_autosave == SYSTEM_AUTOSAVE || (_is_autosave == MODIFIED_EXISTING && !should_output))
   {
     // If this is a pure system-created autosave through AutoCheckpointAction,
     // then sync across processes and only output one time per signal received.
     comm().max(Moose::interrupt_signal_number);
-    shouldOutput = (Moose::interrupt_signal_number != 0);
-    if (shouldOutput)
+    // Reading checkpoint on time step 0 is not supported
+    should_output = (Moose::interrupt_signal_number != 0) && (timeStep() > 0);
+    if (should_output)
+    {
       _console << "Unix signal SIGUSR1 detected. Outputting checkpoint file. \n";
-    Moose::interrupt_signal_number = 0;
+      // Reset signal number since we output
+      Moose::interrupt_signal_number = 0;
+    }
   }
-  return shouldOutput;
+  return should_output;
 }
 
 void

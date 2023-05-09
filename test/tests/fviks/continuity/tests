@@ -8,7 +8,6 @@
       detail = 'separately'
       input = test.i
       exodiff = 'test_out.e'
-      ad_indexing_type = 'global'
       max_parallel = 20
     []
     [continuity_together]
@@ -16,7 +15,6 @@
       detail = 'together'
       input = test.i
       exodiff = 'test_together.e'
-      ad_indexing_type = 'global'
       max_parallel = 20
       cli_args = 'Outputs/file_base=test_together Executioner/residual_and_jacobian_together=true'
     []

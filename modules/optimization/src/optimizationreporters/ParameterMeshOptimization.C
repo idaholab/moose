@@ -46,10 +46,13 @@ ParameterMeshOptimization::validParams()
   params.addParam<unsigned int>(
       "num_parameter_times", 1, "The number of time points the parameters represent.");
 
+  params.addParam<std::vector<Real>>("initial_condition",
+                                     std::vector<Real>(),
+                                     "Constant initial condition for each group of parameters.");
   params.addParam<std::vector<Real>>(
-      "initial_condition",
-      std::vector<Real>(),
-      "Spatially constant initial condition for each group of parameters.");
+      "lower_bounds", std::vector<Real>(), "Constant lower bound for each group of parameters.");
+  params.addParam<std::vector<Real>>(
+      "upper_bounds", std::vector<Real>(), "Constant upper bound for each group of parameters.");
   return params;
 }
 
@@ -64,7 +67,10 @@ ParameterMeshOptimization::ParameterMeshOptimization(const InputParameters & par
   const auto & initial_condition = getParam<std::vector<Real>>("initial_condition");
   const auto & ntimes = getParam<unsigned int>("num_parameter_times");
 
-  // Size checks
+  const std::vector<Real> & constant_lower_bounds(getParam<std::vector<Real>>("lower_bounds"));
+  const std::vector<Real> & constant_upper_bounds(getParam<std::vector<Real>>("upper_bounds"));
+
+  // Size checks for data
   if (meshes.size() != _nparams)
     paramError("parameter_meshes",
                "There must be a mesh associated with each group of parameters.");
@@ -74,10 +80,14 @@ ParameterMeshOptimization::ParameterMeshOptimization(const InputParameters & par
   if (orders.size() > 1 && orders.size() != _nparams)
     paramError("parameter_orders",
                "There must be an order associated with each group of parameters.");
-
+  // Size checks for input file parameter data
   if (!initial_condition.empty() && initial_condition.size() != _nparams)
     paramError("initial_condition",
                "There must be an initial condition associated with each group of parameters.");
+  if (!constant_lower_bounds.empty() && constant_lower_bounds.size() != _nparams)
+    paramError("lower_bounds", "There must be a lower bound associated with each parameter.");
+  else if (!constant_upper_bounds.empty() && constant_upper_bounds.size() != _nparams)
+    paramError("upper_bounds", "There must be an upper bound associated with each parameter.");
 
   _ndof = 0;
   for (const auto & i : make_range(_nparams))
@@ -96,5 +106,13 @@ ParameterMeshOptimization::ParameterMeshOptimization(const InputParameters & par
     // single parameter seperately
     _parameters[i]->assign(_nvalues[i], initial_condition.empty() ? 0.0 : initial_condition[i]);
     _gradients[i]->resize(_nvalues[i]);
+
+    // assign lower and upper bounds
+    _lower_bounds.resize(_lower_bounds.size() + _nvalues[i],
+                         constant_lower_bounds.empty() ? std::numeric_limits<Real>::lowest()
+                                                       : constant_lower_bounds[i]);
+    _upper_bounds.resize(_upper_bounds.size() + _nvalues[i],
+                         constant_upper_bounds.empty() ? std::numeric_limits<Real>::max()
+                                                       : constant_upper_bounds[i]);
   }
 }

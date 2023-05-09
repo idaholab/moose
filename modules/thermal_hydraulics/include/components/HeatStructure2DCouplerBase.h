@@ -10,7 +10,7 @@
 #pragma once
 
 #include "BoundaryBase.h"
-#include "MeshAlignment2D2D.h"
+#include "MeshAlignment.h"
 #include "HeatStructureBase.h"
 
 /**
@@ -22,6 +22,7 @@ public:
   HeatStructure2DCouplerBase(const InputParameters & parameters);
 
 protected:
+  virtual void setupMesh() override;
   virtual void init() override;
   virtual void check() const override;
 
@@ -31,13 +32,17 @@ protected:
   const std::vector<BoundaryName> _hs_boundaries;
 
   /// Mesh alignment
-  MeshAlignment2D2D _mesh_alignment;
+  MeshAlignment _mesh_alignment;
   /// Flag for each heat structure being HeatStructurePlate
   std::vector<bool> _is_plate;
   /// Flag for each heat structure deriving from HeatStructureCylindricalBase
   std::vector<bool> _is_cylindrical;
   /// Heat structure side types for each boundary
-  std::vector<HeatStructureSideType> _hs_side_types;
+  std::vector<Component2D::ExternalBoundaryType> _hs_side_types;
+  /// Areas for the primary and secondary sides
+  std::vector<Real> _areas;
+  /// Area fractions by which to multiply coupling terms
+  std::vector<Real> _coupling_area_fractions;
 
 public:
   static InputParameters validParams();

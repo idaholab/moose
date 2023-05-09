@@ -19,7 +19,6 @@
     expect_out = '0 of 32 singular values'
     cli_args = 'nx=10 num_steps=5 -pc_type svd -pc_svd_monitor'
     custom_cmp = nodal.cmp
-    ad_indexing_type = global
   []
   [diagonal_lm_ncp_nodal_amg]
     input = diagonal-ncp-lm-nodal-enforcement.i
@@ -28,7 +27,6 @@
     cli_args = 'Outputs/file_base=diagonal-ncp-lm-nodal-enforcement-amg -pc_type hypre -pc_hypre_type boomeramg'
     requirement = 'Nodal enforcement of the positivity constraint shall be solvable using algebraic multi-grid'
     custom_cmp = nodal.cmp
-    ad_indexing_type = global
   []
   [interpolated_lm_ncp_nodal_constraint_enforcement]
     input = interpolated-ncp-lm-nodal-enforcement.i
@@ -59,6 +57,5 @@
     expect_out = '0 of 42 singular values'
     cli_args = 'nx=10 num_steps=5 -pc_type svd -pc_svd_monitor'
     # custom_cmp = nodal.cmp
-    ad_indexing_type = global
   []
 []

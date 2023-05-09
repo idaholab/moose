@@ -1,76 +1,111 @@
 [Tests]
-  [equal_area_x_direction]
-    type = 'CSVDiff'
-    input = 'equal_area_with_junction.i'
-    cli_args = 'Components/junction/volume=1.0'
-    # The gold file was actually produced with equal_area_no_junction.i and
-    # then renamed to equal_area_with_junction_out.csv.
-    csvdiff = 'equal_area_with_junction_out.csv'
-    ad_indexing_type = 'global'
-  []
-  [equal_area_not_x_direction]
-    type = 'CSVDiff'
-    input = 'equal_area_with_junction.i'
-    cli_args = '
-      Components/junction/volume=1.0
-      Functions/T0/axis=y
-      Components/pipe1/orientation="0 1 0"
-      Components/junction/position="0 1.02 0"
-      Components/junction/initial_vel_x=0
-      Components/junction/initial_vel_y=1
-      Components/pipe2/position="0 1.04 0"
-      Components/pipe2/orientation="0 1 0"
-      Postprocessors/junction_rhou/variable=junction:rhovV'
-    csvdiff = 'equal_area_with_junction_out.csv'
-    prereq = 'equal_area_x_direction'
-    ad_indexing_type = 'global'
-  []
+  design = 'VolumeJunction1Phase.md'
+  issues = '#19771'
+  [test_phy]
+    requirement = 'The system shall be able model a flow junction to connect:'
+    [equal_area_x_direction]
+      type = 'CSVDiff'
+      input = 'equal_area_with_junction.i'
+      cli_args = 'Components/junction/volume=1.0'
+      # The gold file was actually produced with equal_area_no_junction.i and
+      # then renamed to equal_area_with_junction_out.csv.
+      csvdiff = 'equal_area_with_junction_out.csv'
+      detail = '2 pipes of equal area in the x direction,'
+    []
+    [equal_area_not_x_direction]
+      type = 'CSVDiff'
+      input = 'equal_area_with_junction.i'
+      cli_args = '
+        Components/junction/volume=1.0
+        Functions/T0/axis=y
+        Components/pipe1/orientation="0 1 0"
+        Components/junction/position="0 1.02 0"
+        Components/junction/initial_vel_x=0
+        Components/junction/initial_vel_y=1
+        Components/pipe2/position="0 1.04 0"
+        Components/pipe2/orientation="0 1 0"
+        Postprocessors/junction_rhou/variable=junction:rhovV'
+      csvdiff = 'equal_area_with_junction_out.csv'
+      prereq = 'test_phy/equal_area_x_direction'
+      detail = '2 pipes of equal area not in the x direction,'
+    []
 
-  [phy:unequal_area]
-    type = 'CSVDiff'
-    input = 'phy.unequal_area.i'
-    csvdiff = 'phy.unequal_area_out.csv'
-    abs_zero = 5e-5
-    rel_err = 0
-    recover = false
-    ad_indexing_type = 'global'
+    [phy:unequal_area]
+      type = 'CSVDiff'
+      input = 'phy.unequal_area.i'
+      csvdiff = 'phy.unequal_area_out.csv'
+      abs_zero = 5e-5
+      rel_err = 0
+      recover = false
+      detail = '2 pipes of unequal area,'
+    []
+
+    [phy:deadend]
+      type = 'CSVDiff'
+      input = 'phy.deadend.i'
+      csvdiff = 'phy.deadend_out.csv'
+      abs_zero = 1e-5
+      rel_err = 0
+      detail = '3 pipes, 1 of which going to a dead-end,'
+    []
+
+    [phy:shower_syntax]
+      type = 'RunApp'
+      input = 'phy.shower.i'
+      check_input = true
+      recover = false
+      detail = '2 pipes with different temperatures mixing together into a third pipe with correct syntax,'
+    []
+
+    [phy:shower]
+      type = 'CSVDiff'
+      input = 'phy.shower.i'
+      csvdiff = 'phy.shower_out.csv'
+      abs_zero = 1e-9
+      rel_err = 0
+      heavy = true
+      detail = '2 pipes with different temperatures mixing together into a third pipe with correct results,'
+    []
+
+    [calorically_imperfect_gas]
+      type = 'CSVDiff'
+      input = 'junction_with_calorifically_imperfect_gas.i'
+      csvdiff = 'junction_with_calorifically_imperfect_gas_out.csv'
+      abs_zero = 5e-5
+      rel_err = 1e-4
+      detail = 'pipes with the calorically imperfect gas fluid properties,'
+    []
   []
+  [form_loss_tests]
+    requirement = 'The system shall allow the user to prescribe form losses in the volume jucntion component:'
+    [phy.form_loss]
+      type = 'CSVDiff'
+      input = 'phy.form_loss.i'
+      csvdiff = 'phy.form_loss.csv'
+      cli_args = 'Components/junction/K=1 Outputs/file_base=phy.form_loss'
+      rel_err = 2e-4
+      recover = false
+      detail = 'by specifying a constant loss coefficient and using the area of the first connected pipe, '
+    []
+    [phy.form_loss_Aref]
+      type = 'CSVDiff'
+      input = 'phy.form_loss.i'
+      csvdiff = 'phy.form_loss_Aref.csv'
+      cli_args = 'Components/junction/K=1 Components/junction/A_ref=0.2 Outputs/file_base=phy.form_loss_Aref'
+      rel_err = 2e-4
+      recover = false
+      detail = 'by specifying a constant loss coefficient and a reference flow area, and'
+    []
 
-  [phy:deadend]
-    type = 'CSVDiff'
-    input = 'phy.deadend.i'
-    csvdiff = 'phy.deadend_out.csv'
-    abs_zero = 1e-5
-    rel_err = 0
-    ad_indexing_type = 'global'
-  []
-
-
-  [phy:shower_syntax]
-    type = 'RunApp'
-    input = 'phy.shower.i'
-    check_input = true
-    recover = false
-    ad_indexing_type = 'global'
-  []
-
-  [phy:shower]
-    type = 'CSVDiff'
-    input = 'phy.shower.i'
-    csvdiff = 'phy.shower_out.csv'
-    abs_zero = 1e-9
-    rel_err = 0
-    heavy = true
-    ad_indexing_type = 'global'
-  []
-
-  [calorically_imperfect_gas]
-    type = 'CSVDiff'
-    input = 'junction_with_calorifically_imperfect_gas.i'
-    csvdiff = 'junction_with_calorifically_imperfect_gas_out.csv'
-    abs_zero = 5e-5
-    rel_err = 1e-4
-    ad_indexing_type = 'global'
+    [phy.form_loss_crtl]
+      type = 'CSVDiff'
+      input = 'phy.form_loss.i'
+      csvdiff = 'phy.form_loss_crtl.csv'
+      cli_args = 'Components/junction/K=1 ControlLogic/active=K_crtl Outputs/execute_on=TIMESTEP_END Outputs/file_base=phy.form_loss_crtl'
+      rel_err = 2e-4
+      recover = false
+      detail = 'by specifying the loss coefficient through the control system.'
+    []
   []
 
   # Tests conservation of mass and energy for 1-phase flow.
@@ -79,40 +114,23 @@
     input = 't_junction_1phase.i'
     csvdiff = 't_junction_1phase_out.csv'
     abs_zero = 1e-10
-    ad_indexing_type = 'global'
+    requirement = 'The system shall conserve mass and energy when a VolumJunction1Phase component is used'
   []
-
-  [phy.form_loss]
-    type = 'CSVDiff'
-    input = 'phy.form_loss.i'
-    csvdiff = 'phy.form_loss.csv'
-    cli_args = 'Components/junction/K=1 Outputs/file_base=phy.form_loss'
-    rel_err = 2e-4
-    recover = false
-    ad_indexing_type = 'global'
-  []
-
-  [phy.form_loss_Aref]
-    type = 'CSVDiff'
-    input = 'phy.form_loss.i'
-    csvdiff = 'phy.form_loss_Aref.csv'
-    cli_args = 'Components/junction/K=1 Components/junction/A_ref=0.2 Outputs/file_base=phy.form_loss_Aref'
-    rel_err = 2e-4
-    recover = false
-    ad_indexing_type = 'global'
-  []
-
   # error checking
   [err.missing_ics]
     type = 'RunException'
     input = 'err.missing_ics.i'
-    expect_err = "junction: The following initial condition parameters are missing: initial_p initial_T initial_vel_x initial_vel_y initial_vel_z"
+    expect_err = "junction: The following initial condition parameters are missing: initial_p "
+                 "initial_T initial_vel_x initial_vel_y initial_vel_z"
+    requirement = 'The system shall throw an error if initial conditions for the VolumeJunction1Phase component are missing.'
   []
 
   [err.missing_K]
     type = 'RunException'
     input = 'phy.form_loss.i'
     cli_args = '--error Components/junction/A_ref=1'
-    expect_err = "junction: Parameter 'A_ref' is specified, but 'K' is not specified, so the junction will behave as if there were no form loss."
+    expect_err = "junction: Parameter 'A_ref' is specified, but 'K' is not specified, so the "
+                 "junction will behave as if there were no form loss."
+    requirement = 'The system shall throw an error if the parameter "A_ref" is specifed and the paramter "K" is not specified.'
   []
 []

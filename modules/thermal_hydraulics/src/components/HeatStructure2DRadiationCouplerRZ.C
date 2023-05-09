@@ -10,6 +10,7 @@
 #include "HeatStructure2DRadiationCouplerRZ.h"
 #include "HeatStructureCylindricalBase.h"
 #include "HeatConductionNames.h"
+#include "THMMesh.h"
 
 registerMooseObject("ThermalHydraulicsApp", HeatStructure2DRadiationCouplerRZ);
 
@@ -47,23 +48,16 @@ HeatStructure2DRadiationCouplerRZ::init()
   if (hasComponentByName<HeatStructureBase>(_hs_names[0]) &&
       hasComponentByName<HeatStructureBase>(_hs_names[1]) && _hs_side_types.size() == 2)
   {
-    const HeatStructureBase & primary_hs = getComponentByName<HeatStructureBase>(_hs_names[0]);
-    const HeatStructureBase & secondary_hs = getComponentByName<HeatStructureBase>(_hs_names[1]);
-
-    _perimeters.resize(2);
-    _perimeters[0] = primary_hs.getUnitPerimeter(_hs_side_types[0]);
-    _perimeters[1] = secondary_hs.getUnitPerimeter(_hs_side_types[1]);
-
     _view_factors.resize(2);
-    if (_perimeters[0] > _perimeters[1])
+    if (_areas[0] > _areas[1])
     {
-      _view_factors[0] = _perimeters[1] / _perimeters[0];
+      _view_factors[0] = _areas[1] / _areas[0];
       _view_factors[1] = 1.0;
     }
     else
     {
       _view_factors[0] = 1.0;
-      _view_factors[1] = _perimeters[0] / _perimeters[1];
+      _view_factors[1] = _areas[0] / _areas[1];
     }
   }
 }
@@ -79,6 +73,21 @@ HeatStructure2DRadiationCouplerRZ::check() const
 
   if (!_mesh_alignment.meshesAreAligned())
     logError("The primary and secondary boundaries must be aligned.");
+
+  if (hasComponentByName<HeatStructureBase>(_hs_names[0]) &&
+      hasComponentByName<HeatStructureBase>(_hs_names[1]))
+  {
+    const HeatStructureBase & primary_hs = getComponentByName<HeatStructureBase>(_hs_names[0]);
+    const HeatStructureBase & secondary_hs = getComponentByName<HeatStructureBase>(_hs_names[1]);
+    if (primary_hs.hasBoundary(_hs_boundaries[0]) && secondary_hs.hasBoundary(_hs_boundaries[1]))
+    {
+      if (_hs_side_types[0] == Component2D::ExternalBoundaryType::START ||
+          _hs_side_types[0] == Component2D::ExternalBoundaryType::END ||
+          _hs_side_types[1] == Component2D::ExternalBoundaryType::START ||
+          _hs_side_types[1] == Component2D::ExternalBoundaryType::END)
+        logError("The primary and secondary boundaries must be radial boundaries.");
+    }
+  }
 }
 
 void
@@ -90,18 +99,23 @@ HeatStructure2DRadiationCouplerRZ::addMooseObjects()
   {
     const unsigned int j = i == 0 ? 1 : 0;
 
+    const auto & hs_cyl = getComponentByName<HeatStructureCylindricalBase>(_hs_names[i]);
+
     const std::string class_name = "HeatStructure2DRadiationCouplerRZBC";
     InputParameters params = _factory.getValidParams(class_name);
     params.set<NonlinearVariableName>("variable") = HeatConductionModel::TEMPERATURE;
     params.set<std::string>("coupled_variable") = HeatConductionModel::TEMPERATURE;
     params.set<std::vector<BoundaryName>>("boundary") = {_hs_boundaries[i]};
-    params.set<MeshAlignment2D2D *>("_mesh_alignment") = &_mesh_alignment;
+    params.set<MeshAlignment *>("_mesh_alignment") = &_mesh_alignment;
     params.set<Real>("emissivity") = _emissivities[i];
     params.set<Real>("coupled_emissivity") = _emissivities[j];
     params.set<Real>("view_factor") = _view_factors[i];
-    params.set<Real>("perimeter") = _perimeters[i];
-    params.set<Real>("coupled_perimeter") = _perimeters[j];
+    params.set<Real>("area") = _areas[i];
+    params.set<Real>("coupled_area") = _areas[j];
     params.set<Real>("stefan_boltzmann_constant") = getParam<Real>("stefan_boltzmann_constant");
+    params.set<Point>("axis_point") = hs_cyl.getPosition();
+    params.set<RealVectorValue>("axis_dir") = hs_cyl.getDirection();
+    params.set<Real>("offset") = hs_cyl.getInnerRadius() - hs_cyl.getAxialOffset();
     getTHMProblem().addBoundaryCondition(class_name, genName(name(), class_name, i), params);
   }
 }

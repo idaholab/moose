@@ -121,17 +121,19 @@ LowerDBlockFromSidesetGenerator::generate()
       // Don't need to send to self
       if (pid != mesh->processor_id() && need_boundary_elems[pid])
       {
-        push_element_data[pid] = elements_to_send;
-        push_node_data[pid] = connected_nodes;
+        if (elements_to_send.size())
+          push_element_data[pid] = elements_to_send;
+        if (connected_nodes.size())
+          push_node_data[pid] = connected_nodes;
       }
 
-    auto node_action_functor = [](processor_id_type, auto &)
+    auto node_action_functor = [](processor_id_type, const auto &)
     {
       // Node packing specialization already has unpacked node into mesh, so nothing to do
     };
     Parallel::push_parallel_packed_range(
         mesh->comm(), push_node_data, mesh.get(), node_action_functor);
-    auto elem_action_functor = [](processor_id_type, auto &)
+    auto elem_action_functor = [](processor_id_type, const auto &)
     {
       // Elem packing specialization already has unpacked elem into mesh, so nothing to do
     };

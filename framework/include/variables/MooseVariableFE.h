@@ -237,7 +237,7 @@ public:
   const FieldVariablePhiSecond & secondPhiFaceNeighbor() const override final;
   const FieldVariablePhiCurl & curlPhiFaceNeighbor() const;
 
-  const FieldVariablePhiValue & phiLower() const { return _lower_data->phi(); }
+  virtual const FieldVariablePhiValue & phiLower() const override { return _lower_data->phi(); }
   const FieldVariablePhiGradient & gradPhiLower() const { return _lower_data->gradPhi(); }
 
   const ADTemplateVariableTestGradient<OutputShape> & adGradPhi() const
@@ -688,12 +688,13 @@ private:
   using ElemQpArg = Moose::ElemQpArg;
   using ElemSideQpArg = Moose::ElemSideQpArg;
   using FaceArg = Moose::FaceArg;
+  using StateArg = Moose::StateArg;
 
-  ValueType evaluate(const ElemArg &, unsigned int) const override final
+  ValueType evaluate(const ElemArg &, const StateArg &) const override final
   {
     mooseError("Elem functor overload not yet implemented for finite element variables");
   }
-  ValueType evaluate(const FaceArg &, unsigned int) const override final
+  ValueType evaluate(const FaceArg &, const StateArg &) const override final
   {
     mooseError("Face info functor overload not yet implemented for finite element variables");
   }

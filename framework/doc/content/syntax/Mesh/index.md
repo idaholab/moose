@@ -31,6 +31,28 @@ together pieces of meshes, etc. There are several built-in generators but this s
 may or may not consumer the output from other generators and produce a single mesh. They can be chained together
 through dependencies so that complex meshes may be built up from a series of simple processes.
 
+### Mesh Generator development
+
+Mesh generator developers should call `mesh->set_isnt_prepared()` at the end of
+the `generate` routine unless they are confident that their mesh is indeed
+prepared. Examples of actions that render the mesh unprepared are
+
+- Translating, rotating, or scaling the mesh. This will conceptually change the
+  mesh bounding box, invalidate the point locator, and potentially change the
+  spatial dimension of the mesh (e.g. rotating a line from the x-axis into the
+  xy plane, etc.)
+- Adding elements. These elements will need their neighbor links set in order
+  for things like finite volume to work
+- Changing element subdomains. This will invalidate the mesh subdomain cached
+  data on the `libMesh::MeshBase` object
+- Changing boundary IDs. This invalidates global data (e.g. data aggregated
+  across all processes) in the `libMesh::BoundaryInfo` object
+
+When in doubt, the mesh is likely not prepared. Calling `set_isnt_prepared` is a
+defensive action that at worst will incur an unnecessary `prepare_for_use`,
+which may slow down the simulation setup, and at best may save follow-on mesh
+generators or simulation execution from undesirable behavior.
+
 ### DAG and final mesh selection
 
 When chaining together several MeshGenerators, you are implicitly creating a DAG (directed acyclic graph).
@@ -50,7 +72,32 @@ with Peacock) or used in other MOOSE input files for further combination/modific
 This can be achieved by using the command line option `--mesh-only`.  By default `--mesh-only` will write a
 mesh file with `_in.e` (the opposite of the `_out.e` that is appended from the output system)
 appended to the input file name.  You can also optionally provide a mesh filename to
-write out using `--mesh-only output_file.e`.
+write out using `--mesh-only output_file.e`. When using the `--mesh-only` option, by default any extra element integers
+defined on the mesh will also be outputted to the output Exodus file. To prevent extra element ids from being
+outputted, the parameter `output_extra_element_ids` should be set to `false` in the `[Ouputs]` block of the
+input file as shown below:
+
+```
+[Outputs]
+  [out]
+    type = Exodus
+    output_extra_element_ids = false
+  []
+[]
+```
+
+Alternatively, if only a subset of extra element ids should be outputted to the Exodus file, the parameter
+`extra_element_ids_to_output` should be set in the `[Outputs]` block of the input file like so:
+
+```
+[Outputs]
+  [out]
+    type = Exodus
+    output_extra_element_ids = true
+    extra_element_ids_to_output = 'id_to_output1 id_to_output2 ...'
+  []
+[]
+```
 
 Here are a couple of examples showing the usage of `--mesh-only`:
 

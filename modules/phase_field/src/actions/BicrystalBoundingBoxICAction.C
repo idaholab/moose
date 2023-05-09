@@ -72,9 +72,6 @@ BicrystalBoundingBoxICAction::act()
       poly_params.set<Real>("inside") = 0.0;
       poly_params.set<Real>("outside") = 1.0;
     }
-    if (isParamValid("block"))
-      poly_params.set<std::vector<SubdomainName>>("block") =
-          getParam<std::vector<SubdomainName>>("block");
 
     // Add initial condition
     _problem->addInitialCondition(

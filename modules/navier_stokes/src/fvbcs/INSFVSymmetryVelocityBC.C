@@ -33,11 +33,6 @@ INSFVSymmetryVelocityBC::INSFVSymmetryVelocityBC(const InputParameters & params)
     _mu(getFunctor<ADReal>("mu")),
     _dim(_subproblem.mesh().dimension())
 {
-#ifndef MOOSE_GLOBAL_AD_INDEXING
-  mooseError("INSFV is not supported by local AD indexing. In order to use INSFV, please run the "
-             "configure script in the root MOOSE directory with the configure option "
-             "'--with-ad-indexing-type=global'");
-#endif
 }
 
 void
@@ -49,12 +44,13 @@ INSFVSymmetryVelocityBC::gatherRCData(const FaceInfo & fi)
   const bool use_elem = _face_info->faceType(_var.name()) == FaceInfo::VarFaceNeighbors::ELEM;
   const auto elem_arg =
       use_elem ? makeElemArg(&_face_info->elem()) : makeElemArg(_face_info->neighborPtr());
+  const auto state = determineState();
   const auto normal = use_elem ? _face_info->normal() : Point(-_face_info->normal());
   const Point & cell_centroid =
       use_elem ? _face_info->elemCentroid() : _face_info->neighborCentroid();
-  const auto u_C = _u_functor(elem_arg);
-  const auto v_C = _v_functor(elem_arg);
-  const auto w_C = _w_functor(elem_arg);
+  const auto u_C = _u_functor(elem_arg, state);
+  const auto v_C = _v_functor(elem_arg, state);
+  const auto w_C = _w_functor(elem_arg, state);
 
   const auto d_perpendicular = std::abs((_face_info->faceCentroid() - cell_centroid) * normal);
 
@@ -62,7 +58,7 @@ INSFVSymmetryVelocityBC::gatherRCData(const FaceInfo & fi)
   // normal.norm() -> 1 here.
 
   const auto face = singleSidedFaceArg();
-  const auto mu_b = _mu(face);
+  const auto mu_b = _mu(face, state);
 
   ADReal v_dot_n = u_C * normal(0);
   if (_dim > 1)

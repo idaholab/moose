@@ -1,17 +1,17 @@
 [Benchmarks]
-    [./diffusion_100x100]
+    [diffusion_100x100]
         type = SpeedTest
         input = simple_diffusion.i
         cli_args = 'Mesh/nx=100 Mesh/ny=100'
-    [../]
-    [./diffusion_200x200]
+    []
+    [diffusion_200x200]
         type = SpeedTest
         input = simple_diffusion.i
         cli_args = 'Mesh/nx=200 Mesh/ny=200'
-    [../]
-    [./uniform_refine_4]
+    []
+    [uniform_refine_4]
         type = SpeedTest
         input = simple_diffusion.i
         cli_args = 'Mesh/uniform_refine=4'
-    [../]
+    []
 []

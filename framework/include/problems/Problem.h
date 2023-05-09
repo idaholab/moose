@@ -40,7 +40,12 @@ public:
    * Check of termination has been requested. This should be called by
    * transient Executioners in the keepGoing() member.
    */
-  virtual bool isSolveTerminationRequested() { return _termination_requested; };
+  virtual bool isSolveTerminationRequested() const { return _termination_requested; };
+
+  /**
+   * Return console handle
+   */
+  const ConsoleStream & console() const { return _console; }
 
 protected:
   /// True if the CLI option is found

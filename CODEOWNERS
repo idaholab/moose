@@ -17,25 +17,33 @@
 
 /.github @permcody
 
+/libmesh @roystgnr @lindsayad @cticenhour @milljm @loganharbour
+/petsc @lindsayad @cticenhour @milljm @loganharbour
+
 /framework/include @lindsayad
 /framework/src @lindsayad
-/framework/*/base @roystgnr
-/framework/*/base/MeshGeneratorSystem* @loganharbour
-/framework/*/executioners/*Solve* @GiudGiud
-/framework/*/materials/Derivative* @dschwen
-/framework/*/materials/Material* @roystgnr
-/framework/*/materials/Parsed* @dschwen
-/framework/*/mesh @roystgnr
-/framework/*/meshgenerators @roystgnr
-/framework/*/multiapps @GiudGiud
-/framework/*/outputs @roystgnr
-/framework/*/reporters @loganharbour @zachmprince
-/framework/*/samplers @zachmprince
-/framework/*/systems @roystgnr
-/framework/*/transfers @GiudGiud @roystgnr
-/framework/*/utils/Units* @dschwen
-/framework/*/*/*Jump* @roystgnr
-/framework/*/*/*Side* @roystgnr
+/framework/*/base @roystgnr @lindsayad
+/framework/*/base/MeshGeneratorSystem* @loganharbour @lindsayad
+/framework/*/dampers @GiudGiud @lindsayad
+/framework/*/executioners/*Solve* @GiudGiud @lindsayad
+/framework/*/materials/Derivative* @dschwen @lindsayad
+/framework/*/materials/Material* @roystgnr @lindsayad
+/framework/*/materials/Parsed* @dschwen @lindsayad
+/framework/*/mesh @roystgnr @GiudGiud @lindsayad
+/framework/*/meshgenerators @roystgnr @GiudGiud @lindsayad
+/framework/*/multiapps @GiudGiud @lindsayad
+/framework/*/loops @GiudGiud @lindsayad
+/framework/*/outputs @roystgnr @lindsayad
+/framework/*/postprocessors @GiudGiud @lindsayad
+/framework/*/reporters @loganharbour @zachmprince @lindsayad
+/framework/*/samplers @zachmprince @lindsayad
+/framework/*/systems @roystgnr @lindsayad
+/framework/*/timeintegrators @GiudGiud @lindsayad
+/framework/*/timesteppers @GiudGiud @lindsayad
+/framework/*/transfers @GiudGiud @roystgnr @lindsayad
+/framework/*/utils/Units* @dschwen @lindsayad
+/framework/*/*/*Jump* @roystgnr @lindsayad
+/framework/*/*/*Side* @roystgnr @lindsayad
 
 /modules/contact @bwspenc @lindsayad
 /modules/doc/content/getting_started/installation @milljm @loganharbour @cticenhour

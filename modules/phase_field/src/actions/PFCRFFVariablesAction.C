@@ -35,7 +35,8 @@ PFCRFFVariablesAction::validParams()
   params.addRequiredParam<unsigned int>(
       "num_L", "specifies the number of complex L variables will be solved for");
   params.addRequiredParam<std::string>("L_name_base", "Base name for the complex L variables");
-
+  params.addParam<std::vector<SubdomainName>>("block",
+                                              "Block restriction for the variables and kernels");
   return params;
 }
 
@@ -59,7 +60,7 @@ PFCRFFVariablesAction::act()
   auto type = AddVariableAction::variableType(fe_type);
   auto var_params = _factory.getValidParams(type);
 
-  var_params.applySpecificParameters(_pars, {"family", "order"});
+  var_params.applySpecificParameters(_pars, {"family", "order", "block"});
   var_params.set<std::vector<Real>>("scaling") = {getParam<Real>("scaling")};
 
   // Loop through the number of L variables

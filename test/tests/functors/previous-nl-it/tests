@@ -1,0 +1,41 @@
+[Tests]
+  issues = '#23630'
+  design = 'Materials/index.md'
+  [functors]
+    requirement = 'The system shall be able to solve a diffusion problem with a second order reaction term in which one operand is evaluated with the current solution state and the other operand is evaluated'
+    [no_lag]
+      type = Exodiff
+      input = test.i
+      exodiff = test_out.e
+      detail = 'with the current solution state, and'
+    []
+    [no_lag_jac]
+      type = PetscJacobianTester
+      input = test.i
+      run_sim = True
+      detail = 'show a perfect Jacobian, or'
+      difference_tol = 1e-6
+    []
+    [lag]
+      type = Exodiff
+      input = test.i
+      exodiff = lag.e
+      # Damping is required or else the result is wrong because the linearized problem will jump to
+      # the "root" in one nonlinear iteration, such that the final residual evaluation of the
+      # reaction kernel would have one operand correspond to the "root" solution and the other
+      # operand correspond to the uniform initial condition. By preventing the solver from jumping
+      # immediately to what it thinks is the solution, we force additional residual evaluations such
+      # that the values of the operands asymptotically approach each other
+      cli_args = 'FVKernels/rxn/lag=true Outputs/file_base=lag -snes_linesearch_damping 0.9'
+      detail = 'with the previous nonlinear iteration solution state, and'
+    []
+    [lag_jac]
+      type = PetscJacobianTester
+      input = test.i
+      run_sim = True
+      cli_args = 'FVKernels/rxn/lag=true -snes_linesearch_damping 0.9'
+      detail = 'show a perfect Jacobian.'
+      difference_tol = 1e-6
+    []
+  []
+[]

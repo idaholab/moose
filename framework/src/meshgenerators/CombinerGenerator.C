@@ -149,6 +149,7 @@ CombinerGenerator::generate()
       copyIntoMesh(*mesh, *other_mesh);
     }
 
+    mesh->set_isnt_prepared();
     return dynamic_pointer_cast<MeshBase>(mesh);
   }
   else // Case 2
@@ -206,6 +207,7 @@ CombinerGenerator::generate()
       }
     }
 
+    final_mesh->set_isnt_prepared();
     return dynamic_pointer_cast<MeshBase>(final_mesh);
   }
 }
@@ -252,6 +254,15 @@ CombinerGenerator::copyIntoMesh(UnstructuredMesh & destination, const Unstructur
   for (const auto & t : other_boundary.build_shellface_list())
     boundary.add_shellface(std::get<0>(t) + elem_delta, std::get<1>(t), std::get<2>(t));
 
+  for (auto elem : source.get_subdomain_name_map())
+    destination.set_subdomain_name_map().insert(elem);
+
+  for (auto elem : other_boundary.get_nodeset_name_map())
+    boundary.set_nodeset_name_map().insert(elem);
+
   for (auto elem : other_boundary.get_sideset_name_map())
     boundary.set_sideset_name_map().insert(elem);
+
+  for (auto elem : other_boundary.get_edgeset_name_map())
+    boundary.set_edgeset_name_map().insert(elem);
 }

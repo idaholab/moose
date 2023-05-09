@@ -409,5 +409,6 @@ XYDelaunayGenerator::generate()
                           use_binary_search);
     }
   }
+  mesh->prepare_for_use();
   return mesh;
 }

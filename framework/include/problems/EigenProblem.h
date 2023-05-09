@@ -179,11 +179,6 @@ public:
   unsigned int activeEigenvalueIndex() const { return _active_eigen_index; }
 
   /**
-   * Return console handle, and we use that in EPSMonitor to print out eigenvalue
-   */
-  const ConsoleStream & console() const { return _console; }
-
-  /**
    * Hook up monitors for SNES and KSP
    */
   virtual void initPetscOutput() override;

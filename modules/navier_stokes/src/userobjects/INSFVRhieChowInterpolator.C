@@ -93,7 +93,7 @@ INSFVRhieChowInterpolator::INSFVRhieChowInterpolator(const InputParameters & par
     ADFunctorInterface(this),
     _moose_mesh(UserObject::_subproblem.mesh()),
     _mesh(_moose_mesh.getMesh()),
-    _dim(_moose_mesh.dimension()),
+    _dim(blocksMaxDimension()),
     _vel(libMesh::n_threads()),
     _p(dynamic_cast<INSFVPressureVariable *>(
         &UserObject::_subproblem.getVariable(0, getParam<VariableName>(NS::pressure)))),
@@ -134,12 +134,59 @@ INSFVRhieChowInterpolator::INSFVRhieChowInterpolator(const InputParameters & par
 
   auto check_blocks = [this](const auto & var)
   {
-    if (blockIDs() != var.blockIDs())
+    const auto & var_blocks = var.blockIDs();
+    const auto & uo_blocks = blockIDs();
+
+    // Error if this UO has any blocks that the variable does not
+    std::set<SubdomainID> uo_blocks_minus_var_blocks;
+    std::set_difference(
+        uo_blocks.begin(),
+        uo_blocks.end(),
+        var_blocks.begin(),
+        var_blocks.end(),
+        std::inserter(uo_blocks_minus_var_blocks, uo_blocks_minus_var_blocks.end()));
+    if (uo_blocks_minus_var_blocks.size() > 0)
       mooseError("Block restriction of interpolator user object '",
                  this->name(),
-                 "' doesn't match the block restriction of variable '",
+                 "' (",
+                 Moose::stringify(blocks()),
+                 ") includes blocks not in the block restriction of variable '",
                  var.name(),
-                 "'");
+                 "' (",
+                 Moose::stringify(var.blocks()),
+                 ")");
+
+    // Get the blocks in the variable but not this UO
+    std::set<SubdomainID> var_blocks_minus_uo_blocks;
+    std::set_difference(
+        var_blocks.begin(),
+        var_blocks.end(),
+        uo_blocks.begin(),
+        uo_blocks.end(),
+        std::inserter(var_blocks_minus_uo_blocks, var_blocks_minus_uo_blocks.end()));
+
+    // For each block in the variable but not this UO, error if there is connection
+    // to any blocks on the UO.
+    for (auto & block_id : var_blocks_minus_uo_blocks)
+    {
+      const auto connected_blocks = _moose_mesh.getBlockConnectedBlocks(block_id);
+      std::set<SubdomainID> connected_blocks_on_uo;
+      std::set_intersection(connected_blocks.begin(),
+                            connected_blocks.end(),
+                            uo_blocks.begin(),
+                            uo_blocks.end(),
+                            std::inserter(connected_blocks_on_uo, connected_blocks_on_uo.end()));
+      if (connected_blocks_on_uo.size() > 0)
+        mooseError("Block restriction of interpolator user object '",
+                   this->name(),
+                   "' (",
+                   Moose::stringify(uo_blocks),
+                   ") doesn't match the block restriction of variable '",
+                   var.name(),
+                   "' (",
+                   Moose::stringify(var_blocks),
+                   ")");
+    }
   };
 
   fill_container(NS::pressure, _ps);
@@ -250,7 +297,7 @@ INSFVRhieChowInterpolator::fillARead()
       else
         w_comp = &_zero_functor;
 
-      _a_aux[tid] = std::make_unique<VectorCompositeFunctor<ADReal>>(
+      _a_aux[tid] = std::make_unique<Moose::VectorCompositeFunctor<ADReal>>(
           "RC_a_coeffs",
           UserObject::_subproblem.getFunctor<ADReal>(deduceFunctorName("a_u"), tid, name(), true),
           *v_comp,
@@ -383,7 +430,6 @@ INSFVRhieChowInterpolator::execute()
 void
 INSFVRhieChowInterpolator::finalize()
 {
-#ifdef MOOSE_GLOBAL_AD_INDEXING
   if (_a_data_provided || this->n_processors() == 1 ||
       _velocity_interp_method == Moose::FV::InterpMethod::Average)
     return;
@@ -449,9 +495,6 @@ INSFVRhieChowInterpolator::finalize()
     TIMPI::pull_parallel_vector_data(
         _communicator, pull_requests, gather_functor, action_functor, &example);
   }
-#else
-  mooseError("INSFVRhieChowInterpolator only supported for global AD indexing.");
-#endif
 }
 
 void
@@ -486,6 +529,7 @@ INSFVRhieChowInterpolator::ghostADataOnBoundary(const BoundaryID boundary_id)
 VectorValue<ADReal>
 INSFVRhieChowInterpolator::getVelocity(const Moose::FV::InterpMethod m,
                                        const FaceInfo & fi,
+                                       const Moose::StateArg & time,
                                        const THREAD_ID tid) const
 {
   const Elem * const elem = &fi.elem();
@@ -505,7 +549,7 @@ INSFVRhieChowInterpolator::getVelocity(const Moose::FV::InterpMethod m,
     const Elem * const boundary_elem = hasBlocks(elem->subdomain_id()) ? elem : neighbor;
     const Moose::FaceArg boundary_face{
         &fi, Moose::FV::LimiterType::CentralDifference, true, correct_skewness, boundary_elem};
-    return vel(boundary_face);
+    return vel(boundary_face, time);
   }
 
   VectorValue<ADReal> velocity;
@@ -513,15 +557,15 @@ INSFVRhieChowInterpolator::getVelocity(const Moose::FV::InterpMethod m,
   Moose::FaceArg face{
       &fi, Moose::FV::LimiterType::CentralDifference, true, correct_skewness, nullptr};
   // Create the average face velocity (not corrected using RhieChow yet)
-  velocity(0) = (*u)(face);
+  velocity(0) = (*u)(face, time);
   if (v)
-    velocity(1) = (*v)(face);
+    velocity(1) = (*v)(face, time);
   if (w)
-    velocity(2) = (*w)(face);
+    velocity(2) = (*w)(face, time);
 
   // Return if Rhie-Chow was not requested or if we have a porosity jump
   if (m == Moose::FV::InterpMethod::Average ||
-      std::get<0>(NS::isPorosityJumpFace(epsilon(tid), fi)))
+      std::get<0>(NS::isPorosityJumpFace(epsilon(tid), fi, time)))
     return velocity;
 
   mooseAssert(((m == Moose::FV::InterpMethod::RhieChow) &&
@@ -535,11 +579,11 @@ INSFVRhieChowInterpolator::getVelocity(const Moose::FV::InterpMethod m,
 
   // Get pressure gradient. This is the uncorrected gradient plus a correction from cell centroid
   // values on either side of the face
-  const VectorValue<ADReal> & grad_p = p.adGradSln(fi);
+  const VectorValue<ADReal> & grad_p = p.adGradSln(fi, time);
 
   // Get uncorrected pressure gradient. This will use the element centroid gradient if we are
   // along a boundary face
-  const VectorValue<ADReal> & unc_grad_p = p.uncorrectedAdGradSln(fi);
+  const VectorValue<ADReal> & unc_grad_p = p.uncorrectedAdGradSln(fi, time);
 
   const Point & elem_centroid = fi.elemCentroid();
   const Point & neighbor_centroid = fi.neighborCentroid();
@@ -547,7 +591,7 @@ INSFVRhieChowInterpolator::getVelocity(const Moose::FV::InterpMethod m,
   Real neighbor_volume = fi.neighborVolume();
 
   // Now we need to perform the computations of D
-  const auto elem_a = (*_a_read[tid])(makeElemArg(elem));
+  const auto elem_a = (*_a_read[tid])(makeElemArg(elem), time);
 
   mooseAssert(UserObject::_subproblem.getCoordSystem(elem->subdomain_id()) ==
                   UserObject::_subproblem.getCoordSystem(neighbor->subdomain_id()),
@@ -567,7 +611,7 @@ INSFVRhieChowInterpolator::getVelocity(const Moose::FV::InterpMethod m,
 
   VectorValue<ADReal> face_D;
 
-  const auto neighbor_a = (*_a_read[tid])(makeElemArg(neighbor));
+  const auto neighbor_a = (*_a_read[tid])(makeElemArg(neighbor), time);
 
   coordTransformFactor(UserObject::_subproblem, neighbor->subdomain_id(), neighbor_centroid, coord);
   neighbor_volume *= coord;
@@ -588,7 +632,7 @@ INSFVRhieChowInterpolator::getVelocity(const Moose::FV::InterpMethod m,
   Moose::FV::interpolate(coeff_interp_method, face_D, elem_D, neighbor_D, fi, true);
 
   // evaluate face porosity, see (18) in Hanimann 2021 or (11) in Nordlund 2016
-  const auto face_eps = epsilon(tid)(face);
+  const auto face_eps = epsilon(tid)(face, time);
 
   // Perform the pressure correction. We don't use skewness-correction on the pressure since
   // it only influences the averaged cell gradients which cancel out in the correction

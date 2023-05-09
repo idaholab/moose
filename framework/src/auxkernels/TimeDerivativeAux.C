@@ -51,11 +51,11 @@ TimeDerivativeAux::computeValue()
   if (_use_qp_arg)
   {
     const auto qp_arg = std::make_tuple(_current_elem, _qp, _qrule);
-    return _factor(qp_arg) * _functor.dot(qp_arg);
+    return _factor(qp_arg, determineState()) * _functor.dot(qp_arg, determineState());
   }
   else
   {
     const auto elem_arg = makeElemArg(_current_elem);
-    return _factor(elem_arg) * _functor.dot(elem_arg);
+    return _factor(elem_arg, determineState()) * _functor.dot(elem_arg, determineState());
   }
 }

@@ -1,0 +1,32 @@
+[Tests]
+  design = 'TransientAndAdjoint.md'
+  issues = '#23888'
+
+  [transient_and_adjoint]
+    requirement = 'The system shall be able to solve the adjoint version of transient problems that'
+    [self_adjoint]
+      type = CSVDiff
+      input = self_adjoint.i
+      csvdiff = 'self_adjoint_forward.csv self_adjoint_adjoint.csv'
+      detail = 'are self-adjoint,'
+    []
+    [multi_variable]
+      type = CSVDiff
+      input = multi_variable.i
+      csvdiff = 'multi_variable_forward.csv multi_variable_adjoint.csv'
+      detail = 'have multiple coupled variables,'
+    []
+    [nonlinear]
+      type = CSVDiff
+      input = nonlinear_diffusivity.i
+      csvdiff = 'nonlinear_diffusivity_forward.csv nonlinear_diffusivity_adjoint.csv'
+      detail = 'have non-linear steady-state material properties, and'
+    []
+    [nonuniform_tstep]
+      type = CSVDiff
+      input = nonuniform_tstep.i
+      csvdiff = 'nonuniform_tstep_forward.csv nonuniform_tstep_adjoint.csv'
+      detail = 'have non-uniform time stepping.'
+    []
+  []
+[]

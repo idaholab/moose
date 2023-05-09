@@ -10,6 +10,11 @@ offset = -0.045
     type = FileMeshGenerator
     file = long-bottom-block-1elem-blocks.e
   []
+  [remote]
+    type = BlockDeletionGenerator
+    input = file
+    block = '3 4'
+  []
 []
 
 [Variables]
@@ -77,10 +82,10 @@ offset = -0.045
 
 [AuxVariables]
   [worn_depth]
-    block = '3'
+    block = 'normal_secondary_subdomain'
   []
   [gap_vel]
-    block = '3'
+    block = 'normal_secondary_subdomain'
   []
 []
 
@@ -90,8 +95,8 @@ offset = -0.045
     variable = gap_vel
     primary_boundary = 20
     secondary_boundary = 10
-    primary_subdomain = 4
-    secondary_subdomain = 3
+    primary_subdomain = normal_primary_subdomain
+    secondary_subdomain = normal_secondary_subdomain
     disp_x = disp_x
     disp_y = disp_y
   []
@@ -118,7 +123,6 @@ offset = -0.045
     secondary = 10
     c_normal = 1e+06
     c_tangential = 1.0e+6
-    interpolate_normals = false
     capture_tolerance = 1.0e-5
     newmark_beta = 0.25
     newmark_gamma = 0.5

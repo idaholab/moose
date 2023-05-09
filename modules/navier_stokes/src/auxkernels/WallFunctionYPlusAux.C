@@ -95,12 +95,14 @@ WallFunctionYPlusAux::computeValue()
   if (!wall_bounded)
     return 0;
 
+  const auto state = determineState();
+
   // Get the velocity vector
-  ADRealVectorValue velocity(_u_var->getElemValue(&elem));
+  ADRealVectorValue velocity(_u_var->getElemValue(&elem, state));
   if (_v_var)
-    velocity(1) = _v_var->getElemValue(&elem);
+    velocity(1) = _v_var->getElemValue(&elem, state);
   if (_w_var)
-    velocity(2) = _w_var->getElemValue(&elem);
+    velocity(2) = _w_var->getElemValue(&elem, state);
 
   // Compute the velocity and direction of the velocity component that is parallel to the wall
   Real dist = std::abs(wall_vec * normal);
@@ -117,8 +119,8 @@ WallFunctionYPlusAux::computeValue()
 
   // Compute the friction velocity and the wall shear stress
   const auto elem_arg = makeElemArg(_current_elem);
-  const auto rho = _rho(elem_arg);
-  const auto mu = _mu(elem_arg);
+  const auto rho = _rho(elem_arg, state);
+  const auto mu = _mu(elem_arg, state);
   ADReal u_star = NS::findUStar(mu.value(), rho.value(), parallel_speed, dist);
   ADReal tau = u_star * u_star * rho;
 

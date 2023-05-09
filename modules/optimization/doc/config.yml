@@ -1,6 +1,10 @@
 Content:
   - framework/doc/content
   - modules/optimization/doc/content
+  - utility:
+      root_dir: modules/doc/content
+      content:
+          - help/development/analyze_jacobian.md
 
 Renderer:
   type: MooseDocs.base.MaterializeRenderer
@@ -33,3 +37,6 @@ Extensions:
       categories:
           framework: !include framework/doc/sqa_framework.yml
           optimization: !include modules/optimization/doc/sqa_optimization.yml
+
+  MooseDocs.extensions.algorithm:
+      active: True

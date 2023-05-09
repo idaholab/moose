@@ -406,9 +406,6 @@ OptimizeSolve::applyHessian(libMesh::PetscVector<Number> & s, libMesh::PetscVect
 PetscErrorCode
 OptimizeSolve::variableBounds(Tao tao)
 {
-  // get bounds
-  if (!_obj_function->hasBounds())
-    return 0;
   unsigned int sz = _obj_function->getNumParams();
 
   libMesh::PetscVector<Number> xl(_my_comm, sz);

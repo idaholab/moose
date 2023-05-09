@@ -132,6 +132,12 @@ public:
   void setupPositions();
 
   /**
+   * Create the i-th local app
+   * @param[in] i local app index
+   */
+  virtual void createLocalApp(const unsigned int i);
+
+  /**
    * Method to be called in main-app initial setup for create sub-apps if using positions is false.
    */
   virtual void initialSetup() override;
@@ -469,6 +475,9 @@ protected:
 
   /// The input file for each app's simulation
   std::vector<FileName> _input_files;
+
+  /// Whether to create the first app on rank 0 while all other MPI ranks are idle
+  const bool & _wait_for_first_app_init;
 
   /// Number of positions for each input file
   std::vector<unsigned int> _npositions_inputfile;

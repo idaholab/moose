@@ -1,0 +1,15 @@
+```bash
+cd {{PATH}}/moose/scripts
+export MOOSE_JOBS=6 METHODS=opt
+./update_and_rebuild_petsc.sh {{PETSC_ARGS1}} {{PETSC_ARGS2}}
+./update_and_rebuild_libmesh.sh {{LIBMESH_ARGS1}}
+```
+
+!alert! tip
+`MOOSE_JOBS` is a loose influential environment variable that dictates how many cores to use when
+executing many of our scripts.
+
+`METHODS` is an influential environment variable that dictates how to
+build libMesh. If this variable is not set, libMesh will by default build 4 methods (taking 4x
+longer to finish).
+!alert-end!

@@ -6,6 +6,5 @@
     input = 'fv_functor_dirichlet.i'
     exodiff = 'fv_functor_dirichlet_out.e'
     requirement = 'The system shall allow the use of functors to set Dirichlet boundary values for FV.'
-    ad_indexing_type = 'global'
   []
 []

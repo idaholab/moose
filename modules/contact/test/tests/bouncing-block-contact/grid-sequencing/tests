@@ -7,7 +7,6 @@
     exodiff = grid-sequencing_exo.e
     requirement = 'The system shall use grid sequencing in order to improve the performance of the nonlinear solve in a frictional contact problem'
     cli_args = 'Postprocessors/active=contact'
-    ad_indexing_type = global
     # Fix below when I understand duplicate element centroids
     map = False
     partial = True

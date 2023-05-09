@@ -22,9 +22,8 @@ template <typename AuxKernelType>
 class ComputeElemAuxBcsThread
 {
 public:
-  ComputeElemAuxBcsThread(FEProblemBase & problem,
+  ComputeElemAuxBcsThread(FEProblemBase & fe_problem,
                           const MooseObjectWarehouse<AuxKernelType> & storage,
-                          const std::vector<std::vector<MooseVariableFEBase *>> & vars,
                           bool need_materials);
   // Splitting Constructor
   ComputeElemAuxBcsThread(ComputeElemAuxBcsThread & x, Threads::split split);
@@ -34,14 +33,22 @@ public:
   void join(const ComputeElemAuxBcsThread & /*y*/);
 
 protected:
-  FEProblemBase & _problem;
+  FEProblemBase & _fe_problem;
   AuxiliarySystem & _aux_sys;
   THREAD_ID _tid;
 
   /// Storage object containing active AuxKernel objects
   const MooseObjectWarehouse<AuxKernelType> & _storage;
 
-  const std::vector<std::vector<MooseVariableFEBase *>> & _aux_vars;
-
   bool _need_materials;
+
+  /// Print list of object types executed and in which order
+  void printGeneralExecutionInformation() const;
+
+  /// Print list of specific objects executed and in which order
+  void printBoundaryExecutionInformation(
+      unsigned int boundary_id, const std::vector<std::shared_ptr<AuxKernelType>> & kernels) const;
+
+  /// Keeps track of which boundaries the loop has reported execution on
+  mutable std::set<SubdomainID> _boundaries_exec_printed;
 };

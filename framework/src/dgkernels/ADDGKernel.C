@@ -167,53 +167,11 @@ ADDGKernel::computeElemNeighJacobian(Moose::DGJacobianType type)
           _JxW[_qp] * _coord[_qp] *
           computeQpResidual(type == Moose::ElementElement ? Moose::Element : Moose::Neighbor);
 
-  auto local_functor = [&](const std::vector<ADReal> & input_residuals,
-                           const std::vector<dof_id_type> &,
-                           const std::set<TagID> &)
-  {
-    auto compute_jacobian_type = [&](const Moose::DGJacobianType nested_type)
-    {
-      const VariableTestValue & loc_phi =
-          (nested_type == Moose::ElementElement || nested_type == Moose::NeighborElement)
-              ? _phi
-              : _phi_neighbor;
-
-      prepareMatrixTagNeighbor(_assembly, _var.number(), _var.number(), nested_type);
-
-      auto ad_offset = Moose::adOffset(
-          _var.number(), _sys.getMaxVarNDofsPerElem(), nested_type, _sys.system().n_vars());
-
-      for (_i = 0; _i < test_space.size(); _i++)
-        for (_j = 0; _j < loc_phi.size(); _j++)
-        {
-#ifndef MOOSE_SPARSE_AD
-          mooseAssert(ad_offset + _j < MOOSE_AD_MAX_DOFS_PER_ELEM,
-                      "Out of bounds access in derivative vector.");
-#endif
-          _local_ke(_i, _j) += input_residuals[_i].derivatives()[ad_offset + _j];
-        }
-
-      accumulateTaggedLocalMatrix();
-    };
-
-    if (type == Moose::ElementElement)
-    {
-      compute_jacobian_type(Moose::ElementElement);
-      compute_jacobian_type(Moose::ElementNeighbor);
-    }
-    else
-    {
-      compute_jacobian_type(Moose::NeighborElement);
-      compute_jacobian_type(Moose::NeighborNeighbor);
-    }
-  };
-
   _assembly.processJacobian(residuals,
                             type == Moose::ElementElement ? _var.dofIndices()
                                                           : _var.dofIndicesNeighbor(),
                             _matrix_tags,
-                            _var.scalingFactor(),
-                            local_functor);
+                            _var.scalingFactor());
 
   if (_has_diag_save_in)
   {
@@ -262,71 +220,9 @@ ADDGKernel::computeOffDiagElemNeighJacobian(Moose::DGJacobianType type, const Mo
           _JxW[_qp] * _coord[_qp] *
           computeQpResidual(type == Moose::ElementElement ? Moose::Element : Moose::Neighbor);
 
-  auto local_functor = [&](const std::vector<ADReal> & input_residuals,
-                           const std::vector<dof_id_type> &,
-                           const std::set<TagID> &)
-  {
-    auto & ce = _assembly.couplingEntries();
-    for (const auto & it : ce)
-    {
-      MooseVariableFEBase & ivariable = *(it.first);
-      MooseVariableFEBase & jvariable = *(it.second);
-
-      unsigned int ivar = ivariable.number();
-      unsigned int jvar = jvariable.number();
-
-      if (ivar != _var.number())
-        continue;
-
-      auto compute_jacobian_type = [&](const Moose::DGJacobianType nested_type)
-      {
-        const VariableTestValue & loc_phi =
-            (nested_type == Moose::ElementElement || nested_type == Moose::NeighborElement)
-                ? _phi
-                : _phi_neighbor;
-        const auto jsub =
-            (nested_type == Moose::ElementElement || nested_type == Moose::NeighborElement)
-                ? _current_elem->subdomain_id()
-                : _neighbor_elem->subdomain_id();
-
-        if (!jvariable.hasBlocks(jsub))
-          return;
-
-        prepareMatrixTagNeighbor(_assembly, _var.number(), jvar, nested_type);
-
-        auto ad_offset = Moose::adOffset(
-            jvar, _sys.getMaxVarNDofsPerElem(), nested_type, _sys.system().n_vars());
-
-        for (_i = 0; _i < test_space.size(); _i++)
-          for (_j = 0; _j < loc_phi.size(); _j++)
-          {
-#ifndef MOOSE_SPARSE_AD
-            mooseAssert(ad_offset + _j < MOOSE_AD_MAX_DOFS_PER_ELEM,
-                        "Out of bounds access in derivative vector.");
-#endif
-            _local_ke(_i, _j) += input_residuals[_i].derivatives()[ad_offset + _j];
-          }
-
-        accumulateTaggedLocalMatrix();
-      };
-
-      if (type == Moose::ElementElement)
-      {
-        compute_jacobian_type(Moose::ElementElement);
-        compute_jacobian_type(Moose::ElementNeighbor);
-      }
-      else
-      {
-        compute_jacobian_type(Moose::NeighborElement);
-        compute_jacobian_type(Moose::NeighborNeighbor);
-      }
-    }
-  };
-
   _assembly.processJacobian(residuals,
                             type == Moose::ElementElement ? _var.dofIndices()
                                                           : _var.dofIndicesNeighbor(),
                             _matrix_tags,
-                            _var.scalingFactor(),
-                            local_functor);
+                            _var.scalingFactor());
 }

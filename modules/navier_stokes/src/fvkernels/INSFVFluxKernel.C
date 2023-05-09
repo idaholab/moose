@@ -29,7 +29,6 @@ INSFVFluxKernel::INSFVFluxKernel(const InputParameters & params)
 void
 INSFVFluxKernel::processResidualAndJacobian(const ADReal & residual)
 {
-#ifdef MOOSE_GLOBAL_AD_INDEXING
   auto process_residual = [this](const ADReal & residual, const Elem & elem)
   {
     const auto dof_index = elem.dof_number(_sys.number(), _var.number(), 0);
@@ -42,7 +41,4 @@ INSFVFluxKernel::processResidualAndJacobian(const ADReal & residual)
   if (_face_type == FaceInfo::VarFaceNeighbors::NEIGHBOR ||
       _face_type == FaceInfo::VarFaceNeighbors::BOTH)
     process_residual(-residual, _face_info->neighbor());
-#else
-  libmesh_ignore(residual);
-#endif
 }

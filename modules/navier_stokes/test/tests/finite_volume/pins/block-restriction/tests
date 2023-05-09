@@ -1,0 +1,12 @@
+[Tests]
+  [empty-block]
+    design = 'navier_stokes/pinsfv.md'
+    issues = '#24201'
+    requirement = 'The system shall be able to simulate a porous medium flow with block restriction.'
+    type = 'Exodiff'
+    input = with-empty-block.i
+    exodiff = with-empty-block_out.e
+    abs_zero = 1e-9
+    mesh_mode = REPLICATED # because the bounding box generator does not work with distributed
+  []
+[]

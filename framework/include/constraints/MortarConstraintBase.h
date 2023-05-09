@@ -53,12 +53,12 @@ public:
   /**
    * Method for computing the residual
    */
-  virtual void computeResidual() override final;
+  virtual void computeResidual() override;
 
   /**
    * Method for computing the Jacobian
    */
-  virtual void computeJacobian() override final;
+  virtual void computeJacobian() override;
 
   /**
    * compute the residual for the specified element type
@@ -140,6 +140,12 @@ protected:
   /// The quadrature points in physical space
   const std::vector<Point> & _q_point;
 
+  /// Whether to use Petrov-Galerkin approach
+  const bool _use_petrov_galerkin;
+
+  /// The auxiliary Lagrange multiplier variable (used together whith the Petrov-Galerkin approach)
+  const MooseVariable * const _aux_lm_var;
+
   /// The shape functions corresponding to the lagrange multiplier variable
   const VariableTestValue & _test;
 
@@ -160,17 +166,6 @@ protected:
 
   /// the higher-dimensional primary face element
   const Elem * const & _interior_primary_elem;
-
-  /// the lower-dimensional secondary element
-  const Elem * const & _lower_secondary_elem;
-
-  /// The primary face lower dimensional element (not the mortar element!). The mortar element
-  /// lives on the secondary side of the mortar interface and *may* correspond to \p
-  /// _lower_secondary_elem under the very specific circumstance that the nodes on the primary side
-  /// of the mortar interface exactly project onto the secondary side of the mortar interface. In
-  /// general projection of primary nodes will split the face elements on the secondary side of the
-  /// interface. It is these split elements that are the mortar segment mesh elements
-  Elem const * const & _lower_primary_elem;
 
   /// Whether this object operates on the displaced mesh
   const bool _displaced;

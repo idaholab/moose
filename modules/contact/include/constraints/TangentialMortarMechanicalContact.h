@@ -11,6 +11,8 @@
 
 #include "ADMortarLagrangeConstraint.h"
 
+class WeightedVelocitiesUserObject;
+
 class TangentialMortarMechanicalContact : public ADMortarLagrangeConstraint
 {
 public:
@@ -27,4 +29,7 @@ protected:
   /// Tangent direction used for computing the residual. In three-dimensions,
   /// there will be two tangent vectors.
   const MooseEnum _direction;
+
+  /// The weighted velocities user object which supplies the contact pressure tangential vectors
+  const WeightedVelocitiesUserObject & _weighted_velocities_uo;
 };

@@ -63,6 +63,10 @@ ThermochimicaNodalData::ThermochimicaNodalData(const InputParameters & parameter
   {
     _el[i] = &coupledValue("elements", i);
     _el_name[i] = getVar("elements", i)->name();
+#ifdef THERMOCHIMICA_ENABLED
+    // check if the element symbol is valid
+    Thermochimica::atomicNumber(_el_name[i]);
+#endif
   }
 
   for (const auto i : make_range(_n_phases))
@@ -71,9 +75,14 @@ ThermochimicaNodalData::ThermochimicaNodalData(const InputParameters & parameter
   for (const auto i : make_range(_n_species))
   {
     auto species_var_name = getVar("output_species", i)->name();
-    auto semicolon = species_var_name.find("_");
-    _sp_phase_name[i] = species_var_name.substr(0, semicolon);
-    _sp_species_name[i] = species_var_name.substr(semicolon + 1);
+    auto colon = species_var_name.find_last_of(':');
+    if (colon == std::string::npos)
+      paramError("output_species", "No ':' separator found in variable '", species_var_name, "'");
+    _sp_phase_name[i] = species_var_name.substr(0, colon);
+    _sp_species_name[i] = species_var_name.substr(colon + 1);
+    if (std::find(_el_name.begin(), _el_name.end(), _sp_species_name[i]) == _el_name.end())
+      paramError(
+          "output_species", "Element '", _sp_species_name[i], "' was not found in the simulation.");
   }
 
   if (_output_element_potential)
@@ -82,8 +91,16 @@ ThermochimicaNodalData::ThermochimicaNodalData(const InputParameters & parameter
     for (const auto i : make_range(_n_elements))
     {
       auto element_var_name = getVar("element_potentials", i)->name();
-      auto semicolon = element_var_name.find("_");
-      _element_potentials[i] = element_var_name.substr(semicolon + 1);
+      auto colon = element_var_name.find_last_of(':');
+      if (colon == std::string::npos)
+        paramError(
+            "element_potentials", "No ':' separator found in variable '", element_var_name, "'");
+      _element_potentials[i] = element_var_name.substr(colon + 1);
+      if (std::find(_el_name.begin(), _el_name.end(), _element_potentials[i]) == _el_name.end())
+        paramError("element_potentials",
+                   "Element '",
+                   _element_potentials[i],
+                   "' was not found in the simulation.");
     }
   }
 }

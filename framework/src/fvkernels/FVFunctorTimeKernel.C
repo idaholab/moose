@@ -33,17 +33,10 @@ FVFunctorTimeKernel::FVFunctorTimeKernel(const InputParameters & parameters)
                  ? static_cast<const Moose::FunctorBase<ADReal> &>(getFunctor<ADReal>("functor"))
                  : static_cast<Moose::FunctorBase<ADReal> &>(_var))
 {
-#ifndef MOOSE_GLOBAL_AD_INDEXING
-  mooseError(
-      "This objectis not supported by local AD indexing. In order to use this object, please run "
-      "the configure script in the root MOOSE directory with the configure option "
-      "'--with-ad-indexing-type=global'. Note that global indexing is now the default "
-      "configuration for AD indexing type.");
-#endif
 }
 
 ADReal
 FVFunctorTimeKernel::computeQpResidual()
 {
-  return _functor.dot(makeElemArg(_current_elem));
+  return _functor.dot(makeElemArg(_current_elem), determineState());
 }

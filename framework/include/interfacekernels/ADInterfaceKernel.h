@@ -68,6 +68,11 @@ protected:
   /// Compute residuals at quadrature points
   virtual ADReal computeQpResidual(Moose::DGResidualType type) = 0;
 
+  /**
+   * Put necessary evaluations depending on qp but independent on test functions here
+   */
+  virtual void initQpResidual(Moose::DGResidualType /* type */) {}
+
   /// The primary side MooseVariable
   MooseVariableFE<T> & _var;
 

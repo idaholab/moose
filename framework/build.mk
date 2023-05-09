@@ -11,6 +11,10 @@ MOOSE_JOBS        ?= 8
 # Include variables defined by MOOSE configure if it's been run
 -include $(MOOSE_DIR)/conf_vars.mk
 
+# PREFIX should be set in conf_vars. If however the user didn't run configure we
+# won't have a prefix. We'll use the automake default then:
+PREFIX ?= '/usr/local'
+
 # If the user has no environment variable
 # called METHOD, they get optimized mode.
 ifeq (x$(METHOD),x)

@@ -64,11 +64,11 @@ class ConvergencePlot(object):
             if not isinstance(label, list):
                 label = [label]
 
-        x = df[df.columns[0]]
+        x = np.array(df[df.columns[0]])
         lines = []
 
         for i in range(1,len(df.columns)):
-            y = df[df.columns[i]]
+            y = np.array(df[df.columns[i]])
 
             if label is None:
                 this_label = 'line-{}'.format(len(lines))

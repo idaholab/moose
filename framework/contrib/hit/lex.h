@@ -1,5 +1,4 @@
-#ifndef HIT_LEX
-#define HIT_LEX
+#pragma once
 
 #include <string>
 #include <vector>
@@ -173,5 +172,3 @@ std::vector<Token> tokenize(const std::string & fname, const std::string & input
 #define EOF TMPEOF
 
 } // namespace hit
-
-#endif

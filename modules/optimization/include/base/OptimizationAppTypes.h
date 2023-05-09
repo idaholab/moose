@@ -16,4 +16,7 @@ namespace OptimizationAppTypes
 extern const ExecFlagType EXEC_FORWARD;
 extern const ExecFlagType EXEC_ADJOINT;
 extern const ExecFlagType EXEC_HOMOGENEOUS_FORWARD;
+
+extern const ExecFlagType EXEC_ADJOINT_TIMESTEP_BEGIN;
+extern const ExecFlagType EXEC_ADJOINT_TIMESTEP_END;
 }

@@ -167,7 +167,7 @@ AB2PredictorCorrector::estimateTimeError(NumericVector<Number> & solution)
 {
   _pred1 = _fe_problem.getNonlinearSystemBase().getPredictor()->solutionPredictor();
   TimeIntegrator * ti = _fe_problem.getNonlinearSystemBase().getTimeIntegrator();
-  auto scheme = Moose::stringToEnum<Moose::TimeIntegratorType>(ti->name());
+  auto scheme = Moose::stringToEnum<Moose::TimeIntegratorType>(ti->type());
   Real dt_old = _my_dt_old;
   if (dt_old == 0)
     dt_old = _dt;

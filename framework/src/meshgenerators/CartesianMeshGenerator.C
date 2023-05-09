@@ -368,5 +368,6 @@ CartesianMeshGenerator::generate()
     }
   }
 
+  mesh->prepare_for_use();
   return dynamic_pointer_cast<MeshBase>(mesh);
 }

@@ -4,9 +4,9 @@
 
 The `PerfGraphLivePrint` (PGLP) object is responsible for printing information to the screen as a code is executing.  To perform this action PGLP is executing on a separate thread from the main thread.  This thread will be refered to as the "print thread".  The main thread keeps track of what is executing using the `TIME_SECTION` macro as part of [/PerfGraph.md].  PGLP then reads this information and decides whether or not to print information about what is currently happening.
 
-By default, PGLP prints information any time a section takes longer than one second to execute.  It will print out the "live print message" at that point, then it will print a single `.` for every second until the section ends.  When the section ends, both the memory and the time will be printed.
+By default, PGLP prints information any time a section takes longer than one second to execute.  It will print out the "live print message" at that point, then it will print a single `.` for every second until the section ends.  When the section ends, both the memory and the time will be printed. By default, the total memory used (by the simulation at this point) and the increment in time (e.g. the time for this section only) are printed.
 
-The other reason that PGLP prints is for a large increase in memory (by default 100MB).  If, after a section executes, the memory usage increaed by more than the limit, then PGLP will print the live print message and show how much memory and time was used by the section.  The memory limit is configurable from the input file.
+The other reason that PGLP prints is for a large increase in memory (by default 100MB).  If, after a section executes, the memory usage increased by more than the limit, then PGLP will print the live print message and show the current total memory consumption as well as the time was used by the section.  The memory limit is configurable from the input file.
 
 The PGLP primarily works by waking up every second and inspecting what the program has done / is currently doing, printing any necessary information and then going back to sleep.  It should be lightweight enough that it should not significantly disrupt the operation of the program.
 
@@ -24,7 +24,7 @@ This information is heavily utilized by the PGLP to know what to print and when.
 
 A `SectionIncrement` represents either the starting or ending state of a section.  `SectionIncrement`s are stored in an "execution list" (explained below) inside of `PerfGraph` as well as a `_print_thread_stack` in the PGLP.  The PGLP reads those in order to determine what the application is currently doing (and has done).
 
-The `SectionIncrement` objects are stored in a `std::array` called `_execution_list` in the `PerfGraph`.  This means they are all allocated up-front.  When a timed section is started, the next available `SectionIncrement` in the exeuction list is filled with the current time, current memory, and an `IncrementState` of `STARTED`.  When the PGLP wakes up it inspects the execution list to determine what the program has done and is doing and whether or not it needs to print anything.  Note that there is zero memory allocation during the execution of the program.
+The `SectionIncrement` objects are stored in a `std::array` called `_execution_list` in the `PerfGraph`.  This means they are all allocated up-front.  When a timed section is started, the next available `SectionIncrement` in the execution list is filled with the current time, current memory, and an `IncrementState` of `STARTED`.  When the PGLP wakes up it inspects the execution list to determine what the program has done and is doing and whether or not it needs to print anything.  Note that there is zero memory allocation during the execution of the program.
 
 ### PerfGraph::_execution_list
 

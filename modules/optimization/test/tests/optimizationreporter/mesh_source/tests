@@ -21,7 +21,7 @@
                   Outputs/file_base=main_constant_out'
       exodiff = main_constant_out_forward0.e
       prereq = 'mesh_source/mesh'
-      max_threads = 1
+      max_threads = 1 # Optimize executioner does not support multiple threads
       detail = 'performing the inverse optimization with a piece-wise source;'
     []
     [linear]
@@ -29,7 +29,7 @@
       input = main.i
       exodiff = main_out_forward0.e
       prereq = 'mesh_source/mesh'
-      max_threads = 1
+      max_threads = 1 # Optimize executioner does not support multiple threads
       detail = 'performing the inverse optimization with a linearly varying source;'
     []
     [second]
@@ -41,7 +41,7 @@
                   Outputs/file_base=main_second_out'
       exodiff = main_second_out_forward0.e
       prereq = 'mesh_source/mesh'
-      max_threads = 1
+      max_threads = 1 # Optimize executioner does not support multiple threads
       detail = 'performing the inverse optimization with a quadratically varying source;'
     []
     [bounded]
@@ -51,9 +51,17 @@
                   Executioner/tao_solver=taoblmvm -tao_ls_type unit
                   Outputs/file_base=main_bounded_out'
       exodiff = main_bounded_out_forward0.e
-      max_threads = 1
+      max_threads = 1 # Optimize executioner does not support multiple threads
       prereq = 'mesh_source/mesh'
       detail = 'performing the inverse optimization with bounds;'
+    []
+    [auto_adjoint]
+      type = Exodiff
+      input = main_auto_adjoint.i
+      exodiff = main_auto_adjoint_out_forward0.e
+      prereq = 'mesh_source/mesh'
+      max_threads = 1 # Optimize executioner does not support multiple threads
+      detail = 'performing the inverse optimization with an automatically computed adjoint;'
     []
   []
 
@@ -63,7 +71,7 @@
       type = RunException
       input = main.i
       cli_args = 'OptimizationReporter/parameter_meshes=\'parameter_mesh_in.e parameter_mesh_in.e\''
-      max_threads = 1
+      max_threads = 1 # Optimize executioner does not support multiple threads
       expect_err = 'There must be a mesh associated with each group of parameters\.'
       detail = 'meshes;'
     []
@@ -71,7 +79,7 @@
       type = RunException
       input = main.i
       cli_args = 'OptimizationReporter/parameter_families=\'LAGRANGE LAGRANGE\''
-      max_threads = 1
+      max_threads = 1 # Optimize executioner does not support multiple threads
       expect_err = 'There must be a family associated with each group of parameters\.'
       detail = 'finite-element families;'
     []
@@ -79,7 +87,7 @@
       type = RunException
       input = main.i
       cli_args = 'OptimizationReporter/parameter_orders=\'FIRST FIRST\''
-      max_threads = 1
+      max_threads = 1 # Optimize executioner does not support multiple threads
       expect_err = 'There must be an order associated with each group of parameters\.'
       detail = 'finite-element orders;'
     []
@@ -87,7 +95,7 @@
       type = RunException
       input = main.i
       cli_args = 'OptimizationReporter/initial_condition=\'0 0\''
-      max_threads = 1
+      max_threads = 1 # Optimize executioner does not support multiple threads
       expect_err = 'There must be an initial condition associated with each group of parameters\.'
       detail = 'initial conditions;'
     []
@@ -95,7 +103,7 @@
       type = RunException
       input = main.i
       cli_args = 'OptimizationReporter/lower_bounds=\'0 0\''
-      max_threads = 1
+      max_threads = 1 # Optimize executioner does not support multiple threads
       expect_err = 'There must be a lower bound associated with each parameter\.'
       detail = 'lower bounds;'
     []
@@ -103,17 +111,9 @@
       type = RunException
       input = main.i
       cli_args = 'OptimizationReporter/upper_bounds=\'0 0\''
-      max_threads = 1
+      max_threads = 1 # Optimize executioner does not support multiple threads
       expect_err = 'There must be an upper bound associated with each parameter\.'
       detail = 'upper bounds;'
-    []
-    [upper_bound_no_lower]
-      type = RunException
-      input = main.i
-      cli_args = 'OptimizationReporter/upper_bounds=\'0\''
-      max_threads = 1
-      expect_err = 'Both upper and lower bounds must be specified if bounds are used\.'
-      detail = 'upper bounds with no lower bound specified;'
     []
   []
 
@@ -124,7 +124,7 @@
       input = main.i
       cli_args = 'forward:Functions/src_func/order=SECOND'
       expect_err = 'Size of parameter vector \(\d+\) does not match number of degrees of freedom in mesh \(\d+\)\.'
-      max_threads = 1
+      max_threads = 1 # Optimize executioner does not support multiple threads
       prereq = 'mesh_source/mesh'
       detail = 'forward problem;'
     []
@@ -133,7 +133,7 @@
       input = main.i
       cli_args = 'adjoint:Functions/src_func/order=SECOND'
       expect_err = 'The gradient for parameter \w+ has changed, expected \d+ versus \d+\.'
-      max_threads = 1
+      max_threads = 1 # Optimize executioner does not support multiple threads
       prereq = 'mesh_source/mesh'
       detail = 'adjoint problem;'
     []

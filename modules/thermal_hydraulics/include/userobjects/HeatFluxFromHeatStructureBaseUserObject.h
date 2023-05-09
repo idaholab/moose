@@ -10,7 +10,7 @@
 #pragma once
 
 #include "ElementUserObject.h"
-#include "FlowChannelAlignment.h"
+#include "MeshAlignment.h"
 
 /**
  * Base class for caching heat flux between a flow channel and a heat structure.
@@ -47,19 +47,17 @@ public:
    */
   const dof_id_type & getNearestElem(dof_id_type elem_id) const
   {
-    return _fch_alignment.getNearestElemID(elem_id);
+    return _mesh_alignment.getCoupledElemID(elem_id);
   }
 
 protected:
   virtual Real computeQpHeatFlux() = 0;
   virtual DenseVector<Real> computeQpHeatFluxJacobian() = 0;
 
-  /// Flow channel alignment object
-  const FlowChannelAlignment & _fch_alignment;
+  /// Mesh alignment object
+  MeshAlignment & _mesh_alignment;
   /// Quadrature point index
   unsigned int _qp;
-  /// How qpoint indices are mapped from slave side to master side per element
-  std::map<dof_id_type, std::vector<unsigned int>> _elem_qp_map;
   /// Cached heated perimeter
   std::map<dof_id_type, std::vector<Real>> _heated_perimeter;
   /// Cached heat flux

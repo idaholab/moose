@@ -39,12 +39,6 @@ INSFVMomentumAdvectionOutflowBC::INSFVMomentumAdvectionOutflowBC(const InputPara
     _dim(_subproblem.mesh().dimension()),
     _rho(getFunctor<ADReal>(NS::density))
 {
-#ifndef MOOSE_GLOBAL_AD_INDEXING
-  mooseError("INSFV is not supported by local AD indexing. In order to use INSFV, please run the "
-             "configure script in the root MOOSE directory with the configure option "
-             "'--with-ad-indexing-type=global'");
-#endif
-
   if (_dim >= 2 && !_v)
     mooseError(
         "In two or more dimensions, the v velocity must be supplied using the 'v' parameter");
@@ -65,23 +59,23 @@ INSFVMomentumAdvectionOutflowBC::gatherRCData(const FaceInfo & fi)
     _normal = -_normal;
 
   const auto boundary_face = singleSidedFaceArg();
-
-  ADRealVectorValue v(_u(boundary_face));
+  const auto state = determineState();
+  ADRealVectorValue v(_u(boundary_face, state));
   if (_v)
-    v(1) = (*_v)(boundary_face);
+    v(1) = (*_v)(boundary_face, state);
   if (_w)
-    v(2) = (*_w)(boundary_face);
+    v(2) = (*_w)(boundary_face, state);
 
   const auto & elem = (_face_type == FaceInfo::VarFaceNeighbors::ELEM) ? _face_info->elem()
                                                                        : _face_info->neighbor();
-  const auto rho_boundary = _rho(boundary_face);
-  const auto eps_boundary = epsFunctor()(boundary_face);
+  const auto rho_boundary = _rho(boundary_face, state);
+  const auto eps_boundary = epsFunctor()(boundary_face, state);
 
   // This will tend to be an extrapolated boundary for the velocity in which case, when using two
   // term expansion, this boundary value will actually be a function of more than just the degree of
   // freedom at the cell centroid adjacent to the face, e.g. it can/will depend on surrounding cell
   // degrees of freedom as well
-  auto var_boundary = _var(boundary_face);
+  auto var_boundary = _var(boundary_face, state);
   const auto dof_number = elem.dof_number(_sys.number(), _var.number(), 0);
   ADReal a = var_boundary.derivatives()[dof_number];
   a *= _normal * v * rho_boundary / eps_boundary;

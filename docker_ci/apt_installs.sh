@@ -46,7 +46,8 @@ apt-get install -y \
   libgtest-dev \
   sudo \
   update-motd \
-  rsync
+  rsync \
+  cmake
 
 # Clear cache
 rm -rf /var/lib/apt/lists/*

@@ -35,3 +35,10 @@
                0 0 0'
   []
 []
+
+[Outputs]
+  [out]
+    type = Exodus
+    output_extra_element_ids = false
+  []
+[]

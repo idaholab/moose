@@ -3,7 +3,6 @@
     type = 'Exodiff'
     input = 'power_profile.i'
     exodiff = 'power_profile.e'
-    ad_indexing_type = 'global'
     recover = false
   []
 
@@ -12,8 +11,6 @@
     input = 'surrogate_power_profile.i'
     exodiff = 'surrogate_power_profile_out.e'
     prereq = 'power_profile'
-    ad_indexing_type = 'global'
     recover = false
-    mesh_mode = 'replicated'
   []
 []

@@ -1,0 +1,33 @@
+[Tests]
+  design = tutorial04_meshing/index.md
+  issues = '#24041'
+  parallel_scheduling = True
+
+  [abtr]
+    requirement = "The system shall include example input for meshing tutorial ABTR example."
+    type = RunApp
+    input = 'abtr/abtr.i'
+    cli_args= '--mesh-only --error-deprecated'
+  []
+
+  [hpmr]
+    requirement = "The system shall include example input for meshing tutorial HPMR example."
+    type = RunApp
+    input = 'hpmr/hpmr.i'
+    cli_args= '--mesh-only --error-deprecated'
+  []
+
+  [rgmb_abtr]
+    requirement = "The system shall include example input for meshing tutorial RGMB ABTR example."
+    type = RunApp
+    input = 'rgmb_abtr/rgmb_abtr.i'
+    cli_args= '--mesh-only --error-deprecated'
+  []
+
+  [rgmb_lfr_assembly]
+    requirement = "The system shall include example input for meshing tutorial RGMB HPMR example."
+    type = RunApp
+    input = 'rgmb_lfr/rgmb_lfr_assembly.i'
+    cli_args= '--mesh-only --error-deprecated'
+  []
+[]

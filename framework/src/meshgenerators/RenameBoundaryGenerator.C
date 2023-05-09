@@ -158,11 +158,7 @@ RenameBoundaryGenerator::generate()
   // Helper for checking whether or not a BoundaryName (which could be an ID or a name)
   // is really input as an ID
   const auto is_boundary_id = [](const BoundaryName & boundary_name)
-  {
-    std::istringstream ss(boundary_name);
-    BoundaryID id;
-    return !(!(ss >> id));
-  };
+  { return MooseUtils::isDigits(boundary_name); };
 
   const auto num_boundaries = _old_boundary.size();
 
@@ -309,5 +305,6 @@ RenameBoundaryGenerator::generate()
     boundary_info.nodeset_name(pair.first) = pair.second;
   }
 
+  mesh->set_isnt_prepared();
   return dynamic_pointer_cast<MeshBase>(mesh);
 }

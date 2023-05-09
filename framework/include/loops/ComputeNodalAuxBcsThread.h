@@ -23,8 +23,7 @@ class ComputeNodalAuxBcsThread
 {
 public:
   ComputeNodalAuxBcsThread(FEProblemBase & fe_problem,
-                           const MooseObjectWarehouse<AuxKernelType> & storage,
-                           const std::vector<std::vector<MooseVariableFEBase *>> & vars);
+                           const MooseObjectWarehouse<AuxKernelType> & storage);
 
   // Splitting Constructor
   ComputeNodalAuxBcsThread(ComputeNodalAuxBcsThread & x, Threads::split split);
@@ -34,10 +33,11 @@ public:
   void join(const ComputeNodalAuxBcsThread & /*y*/);
 
 protected:
+  /// Print information about the loop, mostly order of execution of objects
+  void printGeneralExecutionInformation() const override;
+
   AuxiliarySystem & _aux_sys;
 
   /// Storage object containing active AuxKernel objects
   const MooseObjectWarehouse<AuxKernelType> & _storage;
-
-  const std::vector<std::vector<MooseVariableFEBase *>> & _aux_vars;
 };

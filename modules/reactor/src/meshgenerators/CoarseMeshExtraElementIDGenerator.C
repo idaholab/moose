@@ -11,6 +11,8 @@
 
 registerMooseObject("ReactorApp", CoarseMeshExtraElementIDGenerator);
 
+#include "MooseMeshUtils.h"
+
 #include "libmesh/enum_point_locator_type.h"
 #include "libmesh/elem.h"
 #include "libmesh/mesh_serializer.h"
@@ -28,6 +30,8 @@ CoarseMeshExtraElementIDGenerator::validParams()
   params.addParam<std::string>(
       "coarse_mesh_extra_element_id",
       "Name for the extra element ID that is copied from the coarse mesh (default to element ID)");
+  params.addParam<std::vector<SubdomainName>>(
+      "subdomains", std::vector<SubdomainName>(), "Subdomains to apply extra element IDs to.");
   params.addParam<bool>("enforce_mesh_embedding",
                         false,
                         "True to error out when the input mesh is not embedded in the coarse mesh");
@@ -53,10 +57,41 @@ CoarseMeshExtraElementIDGenerator::generate()
   std::unique_ptr<MeshBase> mesh = std::move(_input);
 
   unsigned int coarse_id;
-  if (!mesh->has_elem_integer(_coarse_id_name))
+  const bool already_has_id = mesh->has_elem_integer(_coarse_id_name);
+  if (!already_has_id)
     coarse_id = mesh->add_elem_integer(_coarse_id_name);
   else
     coarse_id = mesh->get_elem_integer_index(_coarse_id_name);
+
+  // Get the requested subdomain IDs
+  std::set<SubdomainID> included_subdomains;
+  std::set<SubdomainName> bad_subdomains;
+  for (const auto & snm : getParam<std::vector<SubdomainName>>("subdomains"))
+  {
+    auto sid = MooseMeshUtils::getSubdomainID(snm, *mesh);
+    if (!MooseMeshUtils::hasSubdomainID(*mesh, sid))
+      bad_subdomains.insert(snm);
+    else
+      included_subdomains.insert(sid);
+  }
+  if (!bad_subdomains.empty())
+    paramError("subdomains",
+               "The requested subdomains do not exist on the fine mesh: ",
+               Moose::stringify(bad_subdomains));
+
+  // If we are not going through the entire mesh and the ID already exists, we need to offset the
+  // assigned ID so that we don't copy ones that are already there
+  dof_id_type id_offset = 0;
+  if (already_has_id && !included_subdomains.empty())
+  {
+    for (auto & elem : mesh->active_element_ptr_range())
+    {
+      dof_id_type elem_id = elem->get_extra_integer(coarse_id);
+      if (elem_id != DofObject::invalid_id && elem_id > id_offset)
+        id_offset = elem_id;
+    }
+    id_offset++;
+  }
 
   std::unique_ptr<MeshBase> coarse_mesh = std::move(_coarse_mesh);
 
@@ -91,7 +126,10 @@ CoarseMeshExtraElementIDGenerator::generate()
   point_locator->enable_out_of_mesh_mode();
 
   // loop through fine mesh elements and get element's centroid
-  for (auto & elem : mesh->active_element_ptr_range())
+  auto elem_range = included_subdomains.empty()
+                        ? mesh->active_element_ptr_range()
+                        : mesh->active_subdomain_set_elements_ptr_range(included_subdomains);
+  for (auto & elem : elem_range)
   {
     // Get the centroid of the fine elem
     Point centroid = elem->true_centroid();
@@ -113,6 +151,7 @@ CoarseMeshExtraElementIDGenerator::generate()
     }
     else
       elem_id = coarse_elem->id();
+    elem_id += id_offset;
 
     // Check if the fine elem is nested in the coarse element
     for (unsigned int n = 0; n < elem->n_nodes(); n++)

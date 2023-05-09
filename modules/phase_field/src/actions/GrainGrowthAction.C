@@ -77,6 +77,8 @@ GrainGrowthAction::validParams()
   params.addParam<bool>("use_automatic_differentiation",
                         false,
                         "Flag to use automatic differentiation (AD) objects when possible");
+  params.addParam<std::vector<SubdomainName>>("block",
+                                              "Block restriction for the variables and kernels");
 
   params.addParamNamesToGroup("scaling implicit use_displaced_mesh", "Advanced");
   params.addParamNamesToGroup("c en_ratio ndef", "Multiphysics");
@@ -106,7 +108,7 @@ GrainGrowthAction::act()
     auto type = AddVariableAction::variableType(_fe_type);
     auto var_params = _factory.getValidParams(type);
 
-    var_params.applySpecificParameters(_pars, {"family", "order"});
+    var_params.applySpecificParameters(_pars, {"family", "order", "block"});
     var_params.set<std::vector<Real>>("scaling") = {getParam<Real>("scaling")};
 
     // Create variable name
@@ -218,6 +220,7 @@ GrainGrowthAction::act()
     auto var_params = _factory.getValidParams("MooseVariable");
     var_params.set<MooseEnum>("family") = "LAGRANGE";
     var_params.set<MooseEnum>("order") = "FIRST";
+    var_params.applySpecificParameters(_pars, {"block"});
     _problem->addAuxVariable("MooseVariable", "bnds", var_params);
   }
 

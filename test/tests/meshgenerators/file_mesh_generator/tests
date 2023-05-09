@@ -28,6 +28,8 @@
     expect_out = 'Solve Converged'
     recover = false
     exodus_version = '>=8.0'
+    # See #24187
+    petsc_version = '>=3.12.0'
     # Set to >=9.0 once #21449 is resolved
     vtk_version = '>=9.1'
     max_parallel = 1
@@ -45,6 +47,8 @@
     expect_out = 'Solve Converged'
     recover = false
     exodus_version = '>=8.0'
+    # See #24187
+    petsc_version = '>=3.12.0'
     # Set to >=9.0 once #21449 is resolved
     vtk_version = '>=9.1'
     max_parallel = 1
@@ -62,6 +66,8 @@
     expect_out = 'Solve Converged'
     recover = false
     exodus_version = '>=8.0'
+    # See #24187
+    petsc_version = '>=3.12.0'
     # Set to >=9.0 once #21449 is resolved
     vtk_version = '>=9.1'
     max_parallel = 1

@@ -1,0 +1,20 @@
+[Tests]
+  issues = '#23940'
+  design = 'syntax/BCs/index.md'
+  [test]
+    requirement = 'The system shall be able to impose a nodal boundary condition constraint that involves nonlocal degrees of freedom and'
+    [residual]
+      detail = 'get the expected result in which the average value of the solution is zero, and'
+      type = Exodiff
+      input = test.i
+      exodiff = test_out.e
+    []
+    [jacobian]
+      detail = 'exhibit a perfect Jacobian.'
+      type = PetscJacobianTester
+      input = test.i
+      run_sim = True
+      difference_tol = 1e-6
+    []
+  []
+[]

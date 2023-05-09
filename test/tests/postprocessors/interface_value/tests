@@ -50,7 +50,6 @@
     cli_args = 'postprocessor_type=InterfaceAverageVariableValuePostprocessor'
     issues = '#11647 #16099'
     max_threads = 2
-    ad_indexing_type = 'global'
   [../]
   [./interface_integral_variable_value_postprocessor_fv_test]
     type = 'Exodiff'
@@ -69,6 +68,5 @@
     cli_args = 'postprocessor_type=InterfaceIntegralVariableValuePostprocessor'
     issues = '#11647 #16099'
     max_threads = 2
-    ad_indexing_type = 'global'
   [../]
 []

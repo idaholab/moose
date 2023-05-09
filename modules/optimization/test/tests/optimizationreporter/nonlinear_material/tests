@@ -1,0 +1,13 @@
+[Tests]
+  issues = '#23888'
+  design = 'Optimize.md OptimizationReporter/index.md'
+  [nonlinear_material]
+    type = CSVDiff
+    input = main.i
+    csvdiff = main_out_OptimizationReporter_0001.csv
+    abs_zero = 1e-5
+    max_threads = 1 # Optimize executioner does not support multiple threads
+    recover = False
+    requirement = 'The system shall be able perform inverse source optimization on a problem with nonlinear material properties using automatically computed adjoint.'
+  []
+[]

@@ -1,0 +1,65 @@
+[Tests]
+  design = 'MeshGenerator.md'
+  issues = '#23618'
+  [save_in_meshes_output]
+    requirement = 'The system shall make available additional meshes as requested by the user'
+
+    [REPLICATED]
+        type = 'Exodiff'
+        input = 'save_in_meshes_with_D.i'
+        exodiff = 'left_block_in.e'
+        recover = false
+        mesh_mode = REPLICATED
+
+        detail = 'and be able to save only one of the mesh generator meshes'
+    []
+  []
+  [save_in_name_error]
+    requirement = 'The system shall report a useful error when saving additional meshes when'
+
+    [repeat_save_in_name]
+      type = 'RunException'
+      input = 'save_in_meshes.i'
+      cli_args = "Mesh/A/save_with_name='A' Mesh/B/save_with_name='A' "
+      expect_err = "The save with name 'A' has already been used"
+
+      detail = 'the requested names are not unique,'
+    []
+
+    [save_in_name_as_main]
+      type = 'RunException'
+      input = 'save_in_meshes.i'
+      cli_args = "Mesh/A/save_with_name='main' "
+      expect_err = "The user-defined mesh name: 'main' is a reserved name"
+
+      detail = 'the requested name uses a reserved name,'
+    []
+
+    [save_in_name_for_final_mesh_generator]
+      type = 'RunException'
+      input = 'save_in_meshes.i'
+      cli_args = "Mesh/A_and_B/save_with_name='C' "
+      expect_err = "Cannot use the save in capability with the final mesh generator"
+
+      detail = 'trying to use the mesh-saving capability with the final mesh,'
+    []
+
+    [save_in_meshes_not_find]
+      type = 'RunException'
+      input = 'save_in_meshes_with_D.i'
+      cli_args ="UserObjects/test/find_mesh='right_block'"
+      expect_err = "Failed to find a saved mesh with the name 'right_block'"
+
+      detail = 'the requested saved mesh does not exist, and when'
+    []
+
+    [save_in_meshes_retreived_twice]
+      type = 'RunException'
+      input = 'save_in_meshes_with_D.i'
+      cli_args ="UserObjects/test/mesh_unique='left_block'"
+      expect_err = "While getting the saved mesh generator 'left_block', said mesh has already been retreived"
+
+      detail = 'the requested saved mesh has already been retrieved.'
+    []
+  []
+[]

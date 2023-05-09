@@ -81,7 +81,7 @@ public:
 
   /**
    * Class that is used as a parameter to add[Parent/Child]() that allows only
-   * MooseApp methods to call said methods
+   * MeshGeneratorSystem methods to call said methods
    */
   class AddParentChildKey
   {
@@ -131,7 +131,13 @@ public:
    * @returns Whether or not the MeshGenerator with the name \p name is a parent of this
    * MeshGenerator.
    */
-  bool isParentMeshGenerator(const MeshGeneratorName & name) const;
+  bool isParentMeshGenerator(const MeshGeneratorName & name, const bool direct = true) const;
+
+  /**
+   * @returns Whether or not the MeshGenerator with the name \p name is a child of this
+   * MeshGenerator.
+   */
+  bool isChildMeshGenerator(const MeshGeneratorName & name, const bool direct = true) const;
 
   /**
    * @returns Whether or not the name \p name is registered as a "null" mesh, that is,
@@ -140,6 +146,16 @@ public:
    * See declareNullMeshName().
    */
   bool isNullMeshName(const MeshGeneratorName & name) const { return _null_mesh_names.count(name); }
+
+  /**
+   * Return whether or not to save the current mesh
+   */
+  bool hasSaveMesh();
+
+  /**
+   * Return the name of the saved mesh
+   */
+  const std::string & getSavedMeshName() const;
 
 protected:
   /**
@@ -365,6 +381,9 @@ private:
 
   /// The declared "null" mesh names that will not represent a mesh in input; see declareNullMeshName()
   std::set<std::string> _null_mesh_names;
+
+  /// A user-defined name to save the mesh
+  const std::string & _save_with_name;
 };
 
 template <typename T, typename... Args>

@@ -1,0 +1,9 @@
+[Tests]
+  design = 'Materials/index.md'
+  issues = '#23348'
+  [test_reinit_face]
+   type = RunApp
+   input = re_init_face.i
+   requirement = "The system shall be able to perform requested material computation on faces of a displaced mesh even if no other face objects are executing on the displaced mesh."
+  []
+[]

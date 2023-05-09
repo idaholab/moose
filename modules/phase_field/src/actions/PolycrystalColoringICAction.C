@@ -46,11 +46,7 @@ PolycrystalColoringICAction::act()
     InputParameters poly_params = _factory.getValidParams("PolycrystalColoringIC");
     poly_params.set<VariableName>("variable") = _var_name_base + Moose::stringify(op);
     poly_params.set<unsigned int>("op_index") = op;
-    poly_params.set<UserObjectName>("polycrystal_ic_uo") =
-        getParam<UserObjectName>("polycrystal_ic_uo");
-    if (isParamValid("block"))
-      poly_params.set<std::vector<SubdomainName>>("block") =
-          getParam<std::vector<SubdomainName>>("block");
+    poly_params.applySpecificParameters(parameters(), {"polycrystal_ic_uo", "block"});
 
     // Add initial condition
     _problem->addInitialCondition(

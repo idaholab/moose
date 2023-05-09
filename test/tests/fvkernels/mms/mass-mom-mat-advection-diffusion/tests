@@ -6,7 +6,6 @@
     input = 'input.i'
     exodiff = 'input_out.e'
     requirement = 'The system shall be able to solve a coupled mass and momentum-type two equation system, which includes advection and diffusion.'
-    ad_indexing_type = 'global'
   []
   [mms]
     type = PythonUnitTest
@@ -15,7 +14,6 @@
     requirement = 'The system shall exhibit second order convergence for the unknown in a coupled mass and momentum-type two equation system.'
     method = '!dbg'
     min_parallel = 2
-    ad_indexing_type = 'global'
     required_python_packages = 'pandas matplotlib'
   []
 []

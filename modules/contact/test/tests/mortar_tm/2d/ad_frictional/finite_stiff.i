@@ -89,11 +89,10 @@ name = 'finite_stiff'
     secondary = block_left
     formulation = mortar
     model = coulomb
-    c_normal = 1e8
-    c_tangential = 1e8
-    friction_coefficient = 0.1
-    #normal_lm_scaling = 1.0e-5
-    #tangential_lm_scaling = 1.0e-5
+    c_normal = 1e0
+    c_tangential = 1e-6
+    friction_coefficient = 0.2
+    tangential_lm_scaling = 1.0e-10
   []
 []
 
@@ -150,16 +149,18 @@ name = 'finite_stiff'
 [Executioner]
   type = Transient
   solve_type = 'NEWTON'
-  petsc_options = '-snes_converged_reason -ksp_converged_reason'
+  petsc_options = '-snes_converged_reason -ksp_converged_reason -snes_ksp_ew'
   petsc_options_iname = '-pc_type -pc_factor_shift_type -pc_factor_shift_amount'
-  petsc_options_value = 'lu        NONZERO               1e-24'
+  petsc_options_value = 'lu        NONZERO               1e-12'
+
   end_time = 5.3
   dt = 0.12
   dtmin = 0.12
   line_search = 'none'
   nl_div_tol = 1e100
   timestep_tolerance = 1e-6
-  nl_abs_tol = 1e-4
+  l_abs_tol = 1e-13
+  nl_abs_tol = 1e-9
   nl_rel_tol = 1e-14
 []
 
@@ -219,7 +220,6 @@ name = 'finite_stiff'
 
 [Outputs]
   file_base = ${name}
-  exodus = true
   [comp]
     type = CSV
     show = 'contact'

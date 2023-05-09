@@ -8,7 +8,6 @@
       input = mixing_length_eddy_viscosity.i
       exodiff = mixing_length_eddy_viscosity_out.e
       method = "!dbg"
-      ad_indexing_type = 'global'
       mesh_mode = REPLICATED
       valgrind = 'none'
       recover = false
@@ -21,7 +20,6 @@
       input = steady.i
       exodiff = steady_out.e
       method = "!dbg"
-      ad_indexing_type = 'global'
       mesh_mode = REPLICATED
       valgrind = 'none'
       recover = false

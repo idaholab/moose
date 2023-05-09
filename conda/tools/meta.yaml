@@ -3,7 +3,7 @@
 #   template/ (must contain any python major.minor version this
 #              package is building. Usually the latest version.)
 {% set build = 0 %}
-{% set version = "2022.12.05" %}
+{% set version = "2023.05.01" %}
 
 package:
   name: moose-tools
@@ -44,9 +44,11 @@ about:
   license: LGPL 2.1
   summary: >
     This superficial module (moose-tools) acts as a top-level module designed to provide all
-    dependencies required in order to run the TestHarness, clang-format, and create MOOSE 
+    dependencies required in order to run the TestHarness, clang-format, and create MOOSE
     Documentation.
 
 extra:
   recipe-maintainers:
     - milljm
+    - cticenhour
+    - loganharbour

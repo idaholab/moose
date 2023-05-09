@@ -1,8 +1,22 @@
 # Constraints System
 
+The `Constraints` system provides functionality for describing interaction and coupling
+between various nodes, elements or surfaces in a model for which the topology may evolve
+during the course of the solution. Generically, within an interaction pair, the two sides
+are referred to as +Element+ and +Neighbor+ or +Secondary+ and +Primary+. A few examples
+of constraints include contact, mesh tying, and periodic boundary conditions.
+
+Since the topology of the interacting nodes and elements may evolve, the direct contributions
+to the residual and the Jacobian need to be provided by the developer by overriding the
+`computeResidual()` and `computeJacobian()` functions directly. Certain examples for node
+and element constraints are listed in the syntax list at the bottom of the page. The remainder
+of the description is focused on the application of mortar constraints for surface interaction.
+
 ## MortarConstraints
 
 The mortar system in MOOSE uses a segment-based approach for evaluation of mortar integrals; for information on the automatic generation of mortar segment meshes see [AutomaticMortarGeneration.md].
+
+One has the option to use Petrov-Galerkin interpolation for the Lagrange multiplier variable. This is typically useful for mechanical contact problems (see [Petrov-Galerkin_approach_for_Lagrange_multipliers.md]).
 
 ### Overview
 
@@ -34,7 +48,7 @@ Based on these observations the following recommendations are provided for using
 !alert note
 3D mortar often requires larger AD array sizes than specified by the default MOOSE configuration. To configure MOOSE with a larger array use configuration option `--with-derivative-size=<n>`. The AD size required for a problem depends on 1) problem physics, 2) the order of primal and Lagrange multiplier variables, and 3) the relative sizing of the secondary and primary meshes.
 
-### Parameters
+### Parameters id=MC-parameters
 
 There are four
 required parameters the user will always have to supply for a constraint derived
@@ -106,6 +120,21 @@ There are also some optional parameters that can be supplied to
   HEX27 meshes) requires FOURTH order integration.
 
 At present, either the `secondary_variable` or `primary_variable` parameter must be supplied.
+
+## Coupling with Scalar Variables
+
+If the weak form has contributions from scalar variables, then this contribution can be
+treated similarly as coupling from other spatial variables. See the
+[`Coupleable`](source/interfaces/Coupleable.md) interface for how to obtain the variable
+values. Residual contributions are simply added to the `computeQpResidual()` function.
+
+Because mortar-versions of `UserObjects` are not yet implemented, the only way to add
+contributions to the Jacobian, as well as the contribution of the mortar spatial variables
+to the scalar variable, is through deriving from the scalar augmentation class
+[`MortarScalarBase`](source/constraints/MortarScalarBase.md). This class provides
+standard interfaces for quadrature point contributions to primary, secondary, lower, and
+scalar variables in the residual and Jacobian. Additional discussion can be found at
+[`ScalarKernels`](syntax/ScalarKernels/index.md).
 
 !syntax list /Constraints objects=True actions=False subsystems=False
 

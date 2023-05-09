@@ -34,9 +34,6 @@ public:
 private:
   ADReal computeQpResidual() override final;
 
-  /// The value that we want the elemental value of the primal variable to be equal to
-  const Real _phi0;
-
   /// What type of bound (min or max) this kernel intends to apply
   const MooseEnum _bound_type;
 

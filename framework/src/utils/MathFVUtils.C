@@ -14,41 +14,14 @@ namespace Moose
 {
 namespace FV
 {
-template <typename T, typename T2>
 ADReal
-gradUDotNormal(const T &
-#ifndef MOOSE_GLOBAL_AD_INDEXING
-                   elem_value
-#endif
-               ,
-               const T2 &
-#ifndef MOOSE_GLOBAL_AD_INDEXING
-                   neighbor_value
-#endif
-               ,
-               const FaceInfo & face_info,
-               const MooseVariableFV<Real> &
-#ifdef MOOSE_GLOBAL_AD_INDEXING
-                   fv_var
-#endif
-               ,
-               bool
-#ifdef MOOSE_GLOBAL_AD_INDEXING
-                   correct_skewness
-#endif
-)
+gradUDotNormal(const FaceInfo & face_info,
+               const MooseVariableFV<Real> & fv_var,
+               const Moose::StateArg & time,
+               bool correct_skewness)
 
 {
-#ifdef MOOSE_GLOBAL_AD_INDEXING
-
-  return fv_var.adGradSln(face_info, correct_skewness) * face_info.normal();
-#else
-
-  // Orthogonal contribution
-  auto orthogonal = (neighbor_value - elem_value) / face_info.dCNMag();
-
-  return orthogonal; // TO-DO for local indexing: add non-orthogonal contribution
-#endif
+  return fv_var.adGradSln(face_info, time, correct_skewness) * face_info.normal();
 }
 
 bool
@@ -110,10 +83,5 @@ selectInterpolationMethod(const std::string & interp_method)
                interp_method,
                " is not currently an option in Moose::FV::selectInterpolationMethod");
 }
-
-template ADReal gradUDotNormal(
-    const ADReal &, const ADReal &, const FaceInfo &, const MooseVariableFV<Real> &, bool);
-template ADReal
-gradUDotNormal(const ADReal &, const Real &, const FaceInfo &, const MooseVariableFV<Real> &, bool);
 }
 }

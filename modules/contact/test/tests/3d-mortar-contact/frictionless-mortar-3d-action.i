@@ -173,7 +173,6 @@ offset = 0.00
     secondary = 'top_bottom'
     formulation = mortar
     model = frictionless
-    interpolate_normals = false
   []
 []
 

@@ -50,14 +50,13 @@ ComputeWeightedGapCartesianLMMechanicalContact::validParams()
   params.addCoupledVar("disp_z", "The z displacement variable");
   params.addParam<Real>(
       "c", 1e6, "Parameter for balancing the size of the gap and contact pressure");
-  params.set<bool>("interpolate_normals") = false;
   params.addRequiredCoupledVar("lm_x",
                                "Mechanical contact Lagrange multiplier along the x Cartesian axis");
   params.addRequiredCoupledVar(
       "lm_y", "Mechanical contact Lagrange multiplier along the y Cartesian axis.");
   params.addCoupledVar("lm_z",
                        "Mechanical contact Lagrange multiplier along the z Cartesian axis.");
-
+  params.set<bool>("interpolate_normals") = false;
   params.addParam<bool>(
       "normalize_c",
       false,
@@ -86,16 +85,6 @@ ComputeWeightedGapCartesianLMMechanicalContact::ComputeWeightedGapCartesianLMMec
     _disp_y_var(getVar("disp_y", 0)),
     _disp_z_var(_has_disp_z ? getVar("disp_z", 0) : nullptr)
 {
-#ifndef MOOSE_GLOBAL_AD_INDEXING
-  mooseError("ComputeWeightedGapLMMechanicalContact relies on use of the global indexing container "
-             "in order to make its implementation feasible");
-#endif
-
-  if (_interpolate_normals)
-    paramError("interpolate_normals",
-               "This version of normal mechanical contact does not allow mortar interpolation of "
-               "geometric vectors");
-
   _lm_vars.push_back(getVar("lm_x", 0));
   _lm_vars.push_back(getVar("lm_y", 0));
 
@@ -126,7 +115,6 @@ ADReal ComputeWeightedGapCartesianLMMechanicalContact::computeQpResidual(Moose::
 void
 ComputeWeightedGapCartesianLMMechanicalContact::computeQpProperties()
 {
-#ifdef MOOSE_GLOBAL_AD_INDEXING
   // Trim interior node variable derivatives
   const auto & primary_ip_lowerd_map = amg().getPrimaryIpToLowerElementMap(
       *_lower_primary_elem, *_lower_primary_elem->interior_parent(), *_lower_secondary_elem);
@@ -168,14 +156,12 @@ ComputeWeightedGapCartesianLMMechanicalContact::computeQpProperties()
 
   // To do normalization of constraint coefficient (c_n)
   _qp_factor = _JxW_msm[_qp] * _coord[_qp];
-#endif
 }
 
 void
 ComputeWeightedGapCartesianLMMechanicalContact::computeQpIProperties()
 {
-  mooseAssert(_normals.size() ==
-                  (_interpolate_normals ? _test[_i].size() : _lower_secondary_elem->n_nodes()),
+  mooseAssert(_normals.size() == _lower_secondary_elem->n_nodes(),
               "Making sure that _normals is the expected size");
 
   // Get the _dof_to_weighted_gap map
@@ -260,10 +246,8 @@ ComputeWeightedGapCartesianLMMechanicalContact::computeJacobian(const Moose::Mor
 void
 ComputeWeightedGapCartesianLMMechanicalContact::post()
 {
-#ifdef MOOSE_SPARSE_AD
   Moose::Mortar::Contact::communicateGaps(
-      _dof_to_weighted_gap, this->processor_id(), _mesh, _nodal, _normalize_c, _communicator);
-#endif
+      _dof_to_weighted_gap, _mesh, _nodal, _normalize_c, _communicator, false);
 
   for (const auto & pr : _dof_to_weighted_gap)
   {
@@ -281,10 +265,8 @@ void
 ComputeWeightedGapCartesianLMMechanicalContact::incorrectEdgeDroppingPost(
     const std::unordered_set<const Node *> & inactive_lm_nodes)
 {
-#ifdef MOOSE_SPARSE_AD
   Moose::Mortar::Contact::communicateGaps(
-      _dof_to_weighted_gap, this->processor_id(), _mesh, _nodal, _normalize_c, _communicator);
-#endif
+      _dof_to_weighted_gap, _mesh, _nodal, _normalize_c, _communicator, false);
 
   for (const auto & pr : _dof_to_weighted_gap)
   {
@@ -366,8 +348,6 @@ ComputeWeightedGapCartesianLMMechanicalContact::enforceConstraintOnDof(const Dof
 
   libmesh_ignore(component_normal);
 
-#ifdef MOOSE_GLOBAL_AD_INDEXING
-
   _assembly.processResidualAndJacobian(
       normal_dof_residual,
       component_normal == 0 ? dof_index_x : (component_normal == 1 ? dof_index_y : dof_index_z),
@@ -386,5 +366,4 @@ ComputeWeightedGapCartesianLMMechanicalContact::enforceConstraintOnDof(const Dof
         (component_normal == 0 || component_normal == 1) ? dof_index_z : dof_index_x,
         _vector_tags,
         _matrix_tags);
-#endif
 }

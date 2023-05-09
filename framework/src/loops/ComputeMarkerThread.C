@@ -61,7 +61,10 @@ ComputeMarkerThread::onElement(const Elem * elem)
 
   // Set up Sentinel class so that, even if reinitMaterials() throws, we
   // still remember to swap back during stack unwinding.
-  SwapBackSentinel sentinel(_fe_problem, &FEProblem::swapBackMaterials, _tid);
+  SwapBackSentinel sentinel(_fe_problem,
+                            &FEProblem::swapBackMaterials,
+                            _tid,
+                            _fe_problem.hasActiveMaterialProperties(_tid));
 
   _fe_problem.reinitMaterials(_subdomain, _tid);
 
@@ -107,4 +110,28 @@ ComputeMarkerThread::post()
 void
 ComputeMarkerThread::join(const ComputeMarkerThread & /*y*/)
 {
+}
+
+void
+ComputeMarkerThread::printGeneralExecutionInformation() const
+{
+  if (!_fe_problem.shouldPrintExecution(_tid))
+    return;
+  const auto & console = _fe_problem.console();
+  const auto & execute_on = _fe_problem.getCurrentExecuteOnFlag();
+  console << "[DBG] Beginning elemental loop to compute Markers on " << execute_on << std::endl;
+}
+
+void
+ComputeMarkerThread::printBlockExecutionInformation() const
+{
+  if (!_fe_problem.shouldPrintExecution(_tid) || _blocks_exec_printed.count(_subdomain) ||
+      !_marker_whs.hasActiveBlockObjects(_subdomain, _tid))
+    return;
+
+  const auto & console = _fe_problem.console();
+  const auto & markers = _marker_whs.getActiveBlockObjects(_subdomain, _tid);
+  console << "[DBG] Execution order on block: " << _subdomain << std::endl;
+  printExecutionOrdering<Marker>(markers, false);
+  _blocks_exec_printed.insert(_subdomain);
 }

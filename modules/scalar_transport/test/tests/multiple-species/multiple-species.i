@@ -190,6 +190,7 @@ d_t=1
   solve_type = NEWTON
   num_steps = 1000
   steady_state_detection = true
+  steady_state_tolerance = 3e-08
   dt = .1
 []
 

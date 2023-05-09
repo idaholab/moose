@@ -36,23 +36,6 @@ protected:
    */
   void computeJacobian(Moose::MortarType mortar_type) override;
 
-#ifdef MOOSE_GLOBAL_AD_INDEXING
-
-  /**
-   * Get rid of AD derivative entries by dof index
-   */
-  void trimDerivative(dof_id_type remove_derivative_index, ADReal & dual_number);
-
-  /**
-   * Get rid of interior node variable's derivatives
-   */
-  template <typename Variables, typename DualNumbers>
-  void
-  trimInteriorNodeDerivatives(const std::map<unsigned int, unsigned int> & primary_ip_lowerd_map,
-                              const Variables & moose_var,
-                              DualNumbers & ad_vars,
-                              const bool is_secondary);
-#endif
   void computeResidualAndJacobian() override;
 
 private:
@@ -75,39 +58,3 @@ protected:
   /// The primal solution gradient on the primary side
   const ADVariableGradient & _grad_u_primary;
 };
-
-#ifdef MOOSE_GLOBAL_AD_INDEXING
-template <typename Variables, typename DualNumbers>
-void
-ADMortarConstraint::trimInteriorNodeDerivatives(
-    const std::map<unsigned int, unsigned int> & domain_ip_lowerd_map,
-    const Variables & moose_vars,
-    DualNumbers & dual_numbers,
-    const bool is_secondary)
-{
-  // Remove interior node variable's derivatives from AD objects.
-  for (const auto dof_index :
-       (is_secondary ? make_range(_test_secondary.size()) : make_range(_test_primary.size())))
-    if (!domain_ip_lowerd_map.count(dof_index))
-    {
-      for (const auto * const moose_var : moose_vars)
-      {
-        // It's valid for a user to pass a container that represents a LIBMESH_DIM vector of
-        // component variables for which one or two of the variables may be null depending on the
-        // mesh dimension in the simulation
-        if (!moose_var)
-          continue;
-
-        mooseAssert(moose_var->isNodal(),
-                    "Trimming of interior node's derivatives is only supported for Lagrange "
-                    "elements in mortar constraints");
-
-        const auto remove_derivative_index = is_secondary
-                                                 ? moose_var->dofIndices()[dof_index]
-                                                 : moose_var->dofIndicesNeighbor()[dof_index];
-        for (auto & dual_number : dual_numbers)
-          trimDerivative(remove_derivative_index, dual_number);
-      }
-    }
-}
-#endif

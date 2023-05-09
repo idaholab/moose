@@ -19,6 +19,7 @@ HeatStructure2DCouplerBC::validParams()
 
   params.addRequiredParam<FunctionName>("heat_transfer_coefficient",
                                         "Heat transfer coefficient function");
+  params.addRequiredParam<Real>("coupling_area_fraction", "Coupling area fraction");
 
   params.addClassDescription("Applies BC for HeatStructure2DCoupler for plate heat structure");
 
@@ -28,7 +29,8 @@ HeatStructure2DCouplerBC::validParams()
 HeatStructure2DCouplerBC::HeatStructure2DCouplerBC(const InputParameters & parameters)
   : HeatStructure2DCouplerBCBase(parameters),
 
-    _htc(getFunction("heat_transfer_coefficient"))
+    _htc(getFunction("heat_transfer_coefficient")),
+    _coupling_area_fraction(getParam<Real>("coupling_area_fraction"))
 {
 }
 
@@ -36,5 +38,6 @@ ADReal
 HeatStructure2DCouplerBC::computeQpResidual()
 {
   const auto T_coupled = computeCoupledTemperature();
-  return _htc.value(_t, _q_point[_qp]) * (_u[_qp] - T_coupled) * _test[_i][_qp];
+  return _htc.value(_t, _q_point[_qp]) * (_u[_qp] - T_coupled) * _coupling_area_fraction *
+         _test[_i][_qp];
 }

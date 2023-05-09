@@ -32,11 +32,11 @@ public:
 
   const MooseVariableFE<T> & variable() const override { return _var; }
 
-private:
-  void computeJacobian() override final;
+protected:
+  void computeJacobian() override;
   void computeResidualAndJacobian() override;
-  void computeOffDiagJacobian(unsigned int) override final;
-  void computeOffDiagJacobianScalar(unsigned int jvar) override final;
+  void computeOffDiagJacobian(unsigned int) override;
+  void computeOffDiagJacobianScalar(unsigned int jvar) override;
 
   /**
    * Just as we allow someone deriving from this to modify the
@@ -122,12 +122,9 @@ private:
   void addJacobian(const MooseVariableFieldBase & jvariable);
 
   /**
-   * compute all the Jacobian entries, but for non-global indexing only add the matrix coupling
-   * entries specified by \p coupling_entries
+   * compute all the Jacobian entries
    */
-  void computeADJacobian(
-      const std::vector<std::pair<MooseVariableFieldBase *, MooseVariableFieldBase *>> &
-          coupling_entries);
+  void computeADJacobian();
 
   const Elem * _my_elem;
 };

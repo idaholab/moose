@@ -44,7 +44,7 @@ SideIntegralVariablePostprocessor::SideIntegralVariablePostprocessor(
 Real
 SideIntegralVariablePostprocessor::computeFaceInfoIntegral(const FaceInfo * const fi)
 {
-  return MetaPhysicL::raw_value((*_fv_variable)(makeCDFace(*fi)));
+  return MetaPhysicL::raw_value((*_fv_variable)(makeCDFace(*fi), determineState()));
 }
 
 Real

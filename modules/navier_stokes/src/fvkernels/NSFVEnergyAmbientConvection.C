@@ -28,5 +28,6 @@ ADReal
 NSFVEnergyAmbientConvection::computeQpResidual()
 {
   auto elem_arg = makeElemArg(_current_elem);
-  return _alpha(elem_arg) * (_var(elem_arg) - _temp_ambient(elem_arg));
+  const auto state = determineState();
+  return _alpha(elem_arg, state) * (_var(elem_arg, state) - _temp_ambient(elem_arg, state));
 }

@@ -1,0 +1,96 @@
+[Tests]
+  design = 'meshgenerators/CircularBoundaryCorrectionGenerator.md'
+  issues = '#23972'
+  [two_full_rings]
+    type = 'Exodiff'
+    input = 'radius_corr.i'
+    exodiff = 'radius_corr_in.e'
+    cli_args = '--mesh-only'
+    requirement = 'The system shall correct full circular boundaries radii to preserve areas.'
+    recover = false
+  []
+  [partial_curve_rad]
+    type = 'Exodiff'
+    input = 'partial_circle_rad.i'
+    exodiff = 'partial_circle_rad_in.e'
+    cli_args = '--mesh-only'
+    requirement = 'The system shall correct partial circular boundaries radii to preserve areas by moving all the nodes in the radial direction.'
+    recover = false
+  []
+  [partial_curve_span]
+    type = 'Exodiff'
+    input = 'partial_circle_span.i'
+    exodiff = 'partial_circle_span_in.e'
+    cli_args = '--mesh-only'
+    requirement = 'The system shall correct partial circular boundaries radii to preserve areas by moving all the node in the radial direction, as well as displacing the boundary end nodes in the span direction.'
+    recover = false
+  []  
+  [err_transition_layer_ratios_length]
+    type = RunException
+    input = 'radius_corr.i'
+    cli_args = 'Mesh/ccg/transition_layer_ratios=0.2
+                --mesh-only err.e'
+    expect_err = "this parameter must have the same length as"
+    requirement = "The system shall throw an error if the length of the provided customized transition layer rarios does not match the number of the boundaries to be corrected."
+  []
+  [err_custom_circular_tolerance_length]
+    type = RunException
+    input = 'radius_corr.i'
+    cli_args = 'Mesh/ccg/custom_circular_tolerance="1e-5 1e-5 1e-5"
+                --mesh-only err.e'
+    expect_err = "this parameter must have either a unity length or the same length as"
+    requirement = "The system shall throw an error if the length of the provided customized circular verification tolerance does not match the number of the boundaries to be corrected."
+  []
+  [err_non_xy_plane]
+    type = RunException
+    input = 'radius_corr.i'
+    cli_args = 'Mesh/rot/type=TransformGenerator
+                Mesh/rot/input=xyd2
+                Mesh/rot/transform=ROTATE
+                Mesh/rot/vector_value="0 90 0"
+                Mesh/ccg/input=rot
+                --mesh-only err.e'
+    expect_err = "Only boundaries in XY plane are supported."
+    requirement = "The system shall throw an error if the provided boundaries are not in XY plane."
+  []
+  [err_few_points]
+    type = RunException
+    input = 'partial_circle_rad.i'
+    cli_args = 'Mesh/add_bdry/combinatorial_geometry="abs(x^2+y^2-0.25)<tol&y>-0.1"
+                --mesh-only err.e'
+    expect_err = "too few nodes in one of the provided boundaries."
+    requirement = "The system shall throw an error if the provided boundary contains fewer than three nodes."
+  []
+  [err_overlapped_transition_area]
+    type = RunException
+    input = 'radius_corr.i'
+    cli_args = 'Mesh/ccg/transition_layer_ratios="0.5 0.5"
+                --mesh-only err.e'
+    expect_err = "the transition layers are overlapped."
+    requirement = "The system shall throw an error if any nodes are moved twice for radius correction."
+  []
+  [err_non_circular]
+    type = RunException
+    input = 'partial_circle_rad.i'
+    cli_args = 'Mesh/ccg/input_mesh_circular_boundaries="0"
+                --mesh-only err.e'
+    expect_err = "the boundary provided is not circular."
+    requirement = "The system shall throw an error if the provided boundary to correct is not circular."
+  []
+  [err_full_cirles_and_span_direction]
+    type = RunException
+    input = 'radius_corr.i'
+    cli_args = 'Mesh/ccg/move_end_nodes_in_span_direction="true"
+                --mesh-only err.e'
+    expect_err = "all the boundaries are closed, this parameter should be be set as"
+    requirement = "The system shall throw an error if the provided boundaries are all full circles and the parameter to move the end nodes in the span direction is set to true."
+  []
+  [err_boundary_not_found]
+    type = RunException
+    input = 'radius_corr.i'
+    cli_args = 'Mesh/ccg/input_mesh_circular_boundaries="0 5"
+                --mesh-only err.e'
+    expect_err = "does not exist in the input mesh"
+    requirement = "The system shall throw an error if an input boundary does not exist in the input mesh."
+  []
+[]

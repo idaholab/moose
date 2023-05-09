@@ -43,6 +43,12 @@ public:
   void join(const ComputeDiracThread & /*y*/);
 
 protected:
+  /// Output a message indicating execution on this execution flag
+  void printGeneralExecutionInformation() const override;
+
+  /// Output the order of execution of objects within the current subdomain
+  void printBlockExecutionInformation() const override;
+
   bool _is_jacobian;
   NonlinearSystemBase & _nl;
 

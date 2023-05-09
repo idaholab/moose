@@ -15,6 +15,7 @@ import traceback
 import codecs
 import shutil
 import moosetree
+import copy
 
 import MooseDocs
 from ..common import exceptions, mixins, report_error, Storage
@@ -229,7 +230,6 @@ class HTMLRenderer(Renderer):
         Return the default configuration.
         """
         config = Renderer.defaultConfig()
-        config['google_analytics'] = (False, "Enable Google Analytics.")
         config['favicon'] = (None, "The location of the website favicon.")
         config['extra-css'] = ([], "List of additional CSS files to include.")
         config['extra-js'] = ([],"List of additional JS files to include.")
@@ -239,9 +239,6 @@ class HTMLRenderer(Renderer):
         Renderer.__init__(self, *args, **kwargs)
         self.__global_files = dict()
 
-        if self.get('google_analytics', False):
-            self.addJavaScript('google_analytics', 'js/google_analytics.js')
-
     def getRoot(self):
         """Return the result node for inserting rendered html nodes."""
         root = html.Tag(None, '!DOCTYPE html', close=False)
@@ -249,18 +246,24 @@ class HTMLRenderer(Renderer):
         html.Tag(head, 'meta', charset="UTF-8", close=False)
         return html.Tag(root, 'body')
 
-    def addJavaScript(self, name, filename, page=None, head=False, **kwargs):
+    def addJavaScript(self, name, contents, page=None, head=False, **kwargs):
         """
         Add a javascript dependency. Do not attempt to call this function to add a global renderer
         file, i.e., with `page=None`, from within the read/tokenize/render/write methods.
+
+        If contents is a javascript file (ends in .js) or is a URL (begins with https), treat
+        it as an include. Otherwise, treat it as javascript to be imported.
         """
         key = (name, 'head_javascript' if head else 'javascript')
 
+        tag_key = 'src' if (contents.startswith('http') or contents.endswith('.js')) else 'string'
+        kwargs[tag_key] = contents
+
         # Add a global script to be included in all HTML pages, otherwise add a per-page script
         if page is None:
-            self.__global_files[key] = (filename, kwargs)
+            self.__global_files[key] = (contents, kwargs)
         else:
-            page.attributes.setdefault('renderer_files', dict())[key] = (filename, kwargs)
+            page.attributes.setdefault('renderer_files', dict())[key] = (contents, kwargs)
 
     def addCSS(self, name, filename, page=None, **kwargs):
         """
@@ -304,10 +307,12 @@ class HTMLRenderer(Renderer):
             name, kwargs = files.pop((key, context))
             if context == 'css':
                 html.Tag(head, 'link', href=rel(name), type="text/css", rel="stylesheet", **kwargs)
-            elif context == 'head_javascript':
-                html.Tag(head, 'script', type="text/javascript", src=rel(name), **kwargs)
-            elif context == 'javascript':
-                html.Tag(body.parent, 'script', type="text/javascript", src=rel(name), **kwargs)
+            elif context.endswith('javascript'):
+                js_node = head if context == 'head_javascript' else body.parent
+                if 'src' in kwargs:
+                    kwargs = copy.copy(kwargs)
+                    kwargs['src'] = rel(kwargs['src'])
+                html.Tag(js_node, 'script', type="text/javascript", **kwargs)
 
 class MaterializeRenderer(HTMLRenderer):
     """

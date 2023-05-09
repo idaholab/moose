@@ -41,30 +41,19 @@
   solve = false
 []
 
-[AuxVariables]
-  [pin_id]
-    family = MONOMIAL
-    order = CONSTANT
-  []
-[]
-
-[AuxKernels]
-  [set_pin_id]
-    type = ExtraElementIDAux
-    variable = pin_id
-    extra_id_name = pin_id
-  []
-[]
-
 [Outputs]
   [exodus_1]
     type = Exodus
     enable = false
     execute_on = TIMESTEP_END
+    output_extra_element_ids = true
+    extra_element_ids_to_output = 'pin_id'
   []
   [exodus_2]
     type = Exodus
     enable = false
     execute_on = TIMESTEP_END
+    output_extra_element_ids = true
+    extra_element_ids_to_output = 'pin_id'
   []
 []

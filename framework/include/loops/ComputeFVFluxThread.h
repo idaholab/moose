@@ -112,6 +112,22 @@ public:
   virtual void caughtMooseException(MooseException &) {}
 
 protected:
+  /// Print list of object types executed and in which order
+  virtual void printGeneralExecutionInformation() const {}
+
+  /// Print ordering of objects executed on each block
+  virtual void printBlockExecutionInformation() const {}
+
+  /// Print ordering of objects exected on each boundary
+  virtual void printBoundaryExecutionInformation(const BoundaryID /* bnd_id */) const {}
+
+  /// Reset lists of blocks and boundaries for which execution printing has been done
+  void resetExecutionPrinting()
+  {
+    _blocks_exec_printed.clear();
+    _boundaries_exec_printed.clear();
+  }
+
   FEProblemBase & _fe_problem;
   MooseMesh & _mesh;
   const std::set<TagID> & _tags;
@@ -129,6 +145,12 @@ protected:
 
   /// The subdomain for the last neighbor
   SubdomainID _old_neighbor_subdomain;
+
+  /// Set to keep track of blocks for which we have printed the execution pattern
+  mutable std::set<std::pair<const SubdomainID, const SubdomainID>> _blocks_exec_printed;
+
+  /// Set to keep track of boundaries for which we have printed the execution pattern
+  mutable std::set<BoundaryID> _boundaries_exec_printed;
 
   /// Holds caught runtime error messages
   std::string _error_message;
@@ -218,6 +240,7 @@ ThreadedFaceLoop<RangeType>::operator()(const RangeType & range, bool bypass_thr
       _tid = bypass_threading ? 0 : puid.id;
 
       pre();
+      printGeneralExecutionInformation();
 
       _subdomain = Moose::INVALID_BLOCK_ID;
       _neighbor_subdomain = Moose::INVALID_BLOCK_ID;
@@ -232,7 +255,10 @@ ThreadedFaceLoop<RangeType>::operator()(const RangeType & range, bool bypass_thr
         _old_subdomain = _subdomain;
         _subdomain = elem.subdomain_id();
         if (_subdomain != _old_subdomain)
+        {
           subdomainChanged();
+          printBlockExecutionInformation();
+        }
 
         _old_neighbor_subdomain = _neighbor_subdomain;
         if (const Elem * const neighbor = (*faceinfo)->neighborPtr())
@@ -244,7 +270,11 @@ ThreadedFaceLoop<RangeType>::operator()(const RangeType & range, bool bypass_thr
           _neighbor_subdomain = Moose::INVALID_BLOCK_ID;
 
         if (_neighbor_subdomain != _old_neighbor_subdomain)
+        {
           neighborSubdomainChanged();
+          // This is going to cause a lot more printing
+          printBlockExecutionInformation();
+        }
 
         onFace(**faceinfo);
         // Cache data now because onBoundary may clear it. E.g. there was a nasty bug for two
@@ -255,12 +285,18 @@ ThreadedFaceLoop<RangeType>::operator()(const RangeType & range, bool bypass_thr
 
         const std::set<BoundaryID> boundary_ids = (*faceinfo)->boundaryIDs();
         for (auto & it : boundary_ids)
+        {
+          printBoundaryExecutionInformation(it);
           onBoundary(**faceinfo, it);
+        }
 
         postFace(**faceinfo);
 
       } // range
       post();
+
+      // Clear execution printing sets to start printing on every block and boundary again
+      resetExecutionPrinting();
     }
     catch (libMesh::LogicError & e)
     {
@@ -333,6 +369,8 @@ protected:
   using ThreadedFaceLoop<RangeType>::_nl_system_num;
   using ThreadedFaceLoop<RangeType>::_subdomain;
   using ThreadedFaceLoop<RangeType>::_neighbor_subdomain;
+  using ThreadedFaceLoop<RangeType>::_blocks_exec_printed;
+  using ThreadedFaceLoop<RangeType>::_boundaries_exec_printed;
 
 private:
   void reinitVariables(const FaceInfo & fi);
@@ -341,6 +379,18 @@ private:
   static void emptyDifferenceTest(const std::set<unsigned int> & requested,
                                   const std::set<unsigned int> & supplied,
                                   std::set<unsigned int> & difference);
+
+  /// Print list of object types executed and in which order
+  virtual void printGeneralExecutionInformation() const override;
+
+  /// Print ordering of objects executed on each block
+  virtual void printBlockExecutionInformation() const override;
+
+  /// Print ordering of objects exected on each boundary
+  virtual void printBoundaryExecutionInformation(const BoundaryID bnd_id) const override;
+
+  /// Utility to get the subdomain names from the ids
+  std::pair<SubdomainName, SubdomainName> getBlockNames() const;
 
   /// Variables
   std::set<MooseVariableFieldBase *> _fv_vars;
@@ -971,4 +1021,117 @@ ComputeFVFluxRJThread<RangeType>::postFace(const FaceInfo & /*fi*/)
     _fe_problem.addCachedResidual(_tid);
     _fe_problem.addCachedJacobian(_tid);
   }
+}
+
+template <typename RangeType, typename AttributeTagType>
+void
+ComputeFVFluxThread<RangeType, AttributeTagType>::printGeneralExecutionInformation() const
+{
+  if (!_fe_problem.shouldPrintExecution(_tid))
+    return;
+  auto & console = _fe_problem.console();
+  auto execute_on = _fe_problem.getCurrentExecuteOnFlag();
+  console << "[DBG] Beginning finite volume flux objects loop on " << execute_on << std::endl;
+  mooseDoOnce(console << "[DBG] Loop on faces (FaceInfo), objects ordered on each face: "
+                      << std::endl;
+              console << "[DBG] - (finite volume) flux kernels" << std::endl;
+              console << "[DBG] - (finite volume) flux boundary conditions" << std::endl;
+              console << "[DBG] - (finite volume) interface kernels" << std::endl;);
+}
+
+template <typename RangeType, typename AttributeTagType>
+void
+ComputeFVFluxThread<RangeType, AttributeTagType>::printBlockExecutionInformation() const
+{
+  if (!_fe_problem.shouldPrintExecution(_tid) || !_fv_flux_kernels.size())
+    return;
+
+  // Print the location of the execution
+  const auto block_pair = std::make_pair(_subdomain, _neighbor_subdomain);
+  const auto block_pair_names = this->getBlockNames();
+  if (_blocks_exec_printed.count(block_pair))
+    return;
+  auto & console = _fe_problem.console();
+  console << "[DBG] Flux kernels on block " << block_pair_names.first;
+  if (_neighbor_subdomain != Moose::INVALID_BLOCK_ID)
+    console << " and neighbor " << block_pair_names.second << std::endl;
+  else
+    console << " with no neighbor block" << std::endl;
+
+  // Print the list of objects
+  std::vector<MooseObject *> fv_flux_kernels;
+  for (const auto & fv_kernel : _fv_flux_kernels)
+    fv_flux_kernels.push_back(dynamic_cast<MooseObject *>(fv_kernel));
+  console << ConsoleUtils::formatString(ConsoleUtils::mooseObjectVectorToString(fv_flux_kernels),
+                                        "[DBG]")
+          << std::endl;
+  _blocks_exec_printed.insert(block_pair);
+}
+
+template <typename RangeType, typename AttributeTagType>
+void
+ComputeFVFluxThread<RangeType, AttributeTagType>::printBoundaryExecutionInformation(
+    const BoundaryID bnd_id) const
+{
+  if (!_fe_problem.shouldPrintExecution(_tid))
+    return;
+  if (_boundaries_exec_printed.count(bnd_id))
+    return;
+  std::vector<MooseObject *> bcs;
+  _fe_problem.theWarehouse()
+      .query()
+      .template condition<AttribSystem>("FVFluxBC")
+      .template condition<AttribThread>(_tid)
+      .template condition<AttributeTagType>(_tags)
+      .template condition<AttribBoundaries>(bnd_id)
+      .queryInto(bcs);
+
+  std::vector<MooseObject *> iks;
+  _fe_problem.theWarehouse()
+      .query()
+      .template condition<AttribSystem>("FVInterfaceKernel")
+      .template condition<AttribThread>(_tid)
+      .template condition<AttributeTagType>(_tags)
+      .template condition<AttribBoundaries>(bnd_id)
+      .queryInto(iks);
+
+  const auto block_pair_names = this->getBlockNames();
+  if (bcs.size())
+  {
+    auto & console = _fe_problem.console();
+    console << "[DBG] FVBCs on boundary " << bnd_id << " between subdomain "
+            << block_pair_names.first;
+    if (_neighbor_subdomain != Moose::INVALID_BLOCK_ID)
+      console << " and neighbor " << block_pair_names.second << std::endl;
+    else
+      console << " and the exterior of the mesh " << std::endl;
+    const std::string fv_bcs = ConsoleUtils::mooseObjectVectorToString(bcs);
+    console << ConsoleUtils::formatString(fv_bcs, "[DBG]") << std::endl;
+  }
+  if (iks.size())
+  {
+    auto & console = _fe_problem.console();
+    console << "[DBG] FVIKs on boundary " << bnd_id << " between subdomain "
+            << block_pair_names.first;
+    if (_neighbor_subdomain != Moose::INVALID_BLOCK_ID)
+      console << " and neighbor " << block_pair_names.second << std::endl;
+    else
+      console << " and the exterior of the mesh " << std::endl;
+    const std::string fv_iks = ConsoleUtils::mooseObjectVectorToString(iks);
+    console << ConsoleUtils::formatString(fv_iks, "[DBG]") << std::endl;
+  }
+  _boundaries_exec_printed.insert(bnd_id);
+}
+
+template <typename RangeType, typename AttributeTagType>
+std::pair<SubdomainName, SubdomainName>
+ComputeFVFluxThread<RangeType, AttributeTagType>::getBlockNames() const
+{
+  auto block_names = std::make_pair(_mesh.getSubdomainName(_subdomain),
+                                    _mesh.getSubdomainName(_neighbor_subdomain));
+  if (block_names.first == "")
+    block_names.first = Moose::stringify(_subdomain);
+  if (block_names.second == "")
+    block_names.second = Moose::stringify(_neighbor_subdomain);
+  return block_names;
 }

@@ -3,6 +3,5 @@
     type = 'CSVDiff'
     input = 'test.i'
     csvdiff = 'test_out.csv'
-    ad_indexing_type = 'global'
   []
 []

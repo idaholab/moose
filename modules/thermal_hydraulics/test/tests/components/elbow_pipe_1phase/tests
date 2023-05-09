@@ -4,6 +4,5 @@
     input = 'phy.position.i'
     exodiff = 'phy.position_out.e'
     custom_cmp = 'phy.position.exodiff'
-    ad_indexing_type = 'global'
   []
 []

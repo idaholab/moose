@@ -13,7 +13,6 @@
     exodiff = 'transient-adapt_out.e transient-adapt_out.e-s002'
     requirement = 'The system shall be able to perform finite volume simulations with adaptivity and give correct results'
     cli_args = 'Variables/u/fv=true'
-    ad_indexing_type = 'global'
   []
   [steady-coarse]
     type = Exodiff
@@ -21,7 +20,6 @@
     exodiff = steady-adapt_out.e
     requirement = 'The system shall be able to combat a singular solve, resulting from two term boundary expansion during gradient computation, by reverting to a one term boundary expansion.'
     issues = '#16822'
-    ad_indexing_type = 'global'
   []
   [steady-mms]
     type = PythonUnitTest
@@ -32,6 +30,5 @@
     min_parallel = 16
     required_python_packages = 'pandas matplotlib'
     heavy = true
-    ad_indexing_type = 'global'
   []
 []

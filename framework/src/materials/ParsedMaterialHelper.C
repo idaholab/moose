@@ -185,7 +185,16 @@ ParsedMaterialHelper<is_ad>::functionParse(
   _func_params.resize(_nargs + nmat_props + _postprocessor_values.size());
 
   // perform next steps (either optimize or take derivatives and then optimize)
+
+  // let rank 0 do the work first to populate caches
+  if (_communicator.rank() != 0)
+    _communicator.barrier();
+
   functionsPostParse();
+
+  // wait for ranks > 0 to catch up
+  if (_communicator.rank() == 0)
+    _communicator.barrier();
 }
 
 template <bool is_ad>

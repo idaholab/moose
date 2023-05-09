@@ -1,5 +1,4 @@
-#ifndef HIT_BRACEEXPR
-#define HIT_BRACEEXPR
+#pragma once
 
 #include "parse.h"
 
@@ -117,5 +116,3 @@ private:
 };
 
 } // namespace hit
-
-#endif

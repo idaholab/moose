@@ -31,6 +31,9 @@ class SchemaDiff(RunApp):
         elif 'deepdiff' not in self.specs['required_python_packages']:
             self.specs['required_python_packages'] += ' deepdiff'
 
+        # So that derived classes can internally pass skip regex paths
+        self.exclude_regex_paths = []
+
     def prepare(self, options):
         if self.specs['delete_output_before_running'] == True:
             util.deleteFilesAndFolders(self.getTestDir(), self.specs['schemadiff'])
@@ -140,19 +143,24 @@ class SchemaDiff(RunApp):
                         return True #if the values in the pseudo-list are different, but all fall within the accepted rel_err, the list is skipped for diffing.
                     except ValueError:
                         return False
-        to_exclude = []
+        exclude_paths = []
         if exclude_values:
             for value in exclude_values:
                 search = orig | deepdiff.search.grep(value, case_sensitive=True)
                 search2 = comp | deepdiff.search.grep(value, case_sensitive=True)
                 if search:
                     for path in search["matched_paths"]:
-                        to_exclude.append(path)
+                        exclude_paths.append(path)
                 if search2:
                     for path in search2["matched_paths"]:
-                        to_exclude.append(path)
+                        exclude_paths.append(path)
 
-        return deepdiff.DeepDiff(orig,comp,exclude_paths=to_exclude,custom_operators=[testcompare(types=[str,float],rel_err=rel_err,abs_zero=abs_zero)]).pretty()
+        custom_operators = [testcompare(types=[str,float],rel_err=rel_err,abs_zero=abs_zero)]
+        return deepdiff.DeepDiff(orig,
+                                 comp,
+                                 exclude_paths=exclude_paths,
+                                 exclude_regex_paths=self.exclude_regex_paths,
+                                 custom_operators=custom_operators).pretty()
 
     #this is how we call the load_file in the derived classes, and also check for exceptions in the load
     #all python functions are virtual, so there is no templating, but some self shenanigans required

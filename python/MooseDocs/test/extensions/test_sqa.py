@@ -604,7 +604,7 @@ class TestSQARequiremetnsWithCollectionsAndTypesAST(MooseDocsTestCase):
     def testTypes(self):
         text = "!sqa requirements types=TestType link=False category=Demo"
         ast = self.tokenize(text)
-        self.assertSize(ast, 1)
+        self.assertSize(ast, 2)
         self.assertToken(ast(0), 'SQARequirementMatrix')
         self.assertSize(ast(0), 3)
         self.assertToken(ast(0,0), 'SQARequirementMatrixHeading', string='Tree')

@@ -15,7 +15,6 @@
 #include "InputParameters.h"
 #include "ExecFlagEnum.h"
 #include "InfixIterator.h"
-#include "MaterialBase.h"
 #include "Registry.h"
 #include "MortarConstraintBase.h"
 #include "MortarNodalAuxKernel.h"
@@ -697,10 +696,19 @@ removeColor(std::string & msg)
 }
 
 void
+addLineBreaks(std::string & message,
+              unsigned int line_width /*= ConsoleUtils::console_line_length*/)
+{
+  for (auto i : make_range(int(message.length() / line_width)))
+    message.insert((i + 1) * (line_width + 2) - 2, "\n");
+}
+
+void
 indentMessage(const std::string & prefix,
               std::string & message,
               const char * color /*= COLOR_CYAN*/,
-              bool indent_first_line)
+              bool indent_first_line,
+              const std::string & post_prefix)
 {
   // First we need to see if the message we need to indent (with color) also contains color codes
   // that span lines.
@@ -723,7 +731,7 @@ indentMessage(const std::string & prefix,
     match_color.FindAndConsume(&line_piece, &color_code);
 
     if (!first || indent_first_line)
-      colored_message += color + prefix + ": " + curr_color;
+      colored_message += color + prefix + post_prefix + curr_color;
 
     colored_message += line;
 
@@ -977,7 +985,7 @@ toLower(const std::string & name)
 ExecFlagEnum
 getDefaultExecFlagEnum()
 {
-  return moose::internal::getExecFlagRegistry().getDefaultFlags();
+  return moose::internal::ExecFlagRegistry::getExecFlagRegistry().getDefaultFlags();
 }
 
 int
@@ -1200,9 +1208,11 @@ prettyCppType(const std::string & cpp_type)
   // On mac many of the std:: classes are inline namespaced with __1
   // On linux std::string can be inline namespaced with __cxx11
   std::string s = cpp_type;
+  // Remove all spaces surrounding a >
+  pcrecpp::RE("\\s(?=>)").GlobalReplace("", &s);
   pcrecpp::RE("std::__\\w+::").GlobalReplace("std::", &s);
   // It would be nice if std::string actually looked normal
-  pcrecpp::RE("\\s*std::basic_string<char, std::char_traits<char>, std::allocator<char> >\\s*")
+  pcrecpp::RE("\\s*std::basic_string<char, std::char_traits<char>, std::allocator<char>>\\s*")
       .GlobalReplace("std::string", &s);
   // It would be nice if std::vector looked normal
   pcrecpp::RE r("std::vector<([[:print:]]+),\\s?std::allocator<\\s?\\1\\s?>\\s?>");
@@ -1211,73 +1221,6 @@ prettyCppType(const std::string & cpp_type)
   r.GlobalReplace("std::vector<\\1>", &s);
   return s;
 }
-
-template <typename Consumers>
-std::deque<MaterialBase *>
-buildRequiredMaterials(const Consumers & mat_consumers,
-                       const std::vector<std::shared_ptr<MaterialBase>> & mats,
-                       const bool allow_stateful)
-{
-  std::deque<MaterialBase *> required_mats;
-
-  std::unordered_set<unsigned int> needed_mat_props;
-  for (const auto & consumer : mat_consumers)
-  {
-    const auto & mp_deps = consumer->getMatPropDependencies();
-    needed_mat_props.insert(mp_deps.begin(), mp_deps.end());
-  }
-
-  // A predicate of calling this function is that these materials come in already sorted by
-  // dependency with the front of the container having no other material dependencies and following
-  // materials potentially depending on the ones in front of them. So we can start at the back and
-  // iterate forward checking whether the current material supplies anything that is needed, and if
-  // not we discard it
-  for (auto it = mats.rbegin(); it != mats.rend(); ++it)
-  {
-    auto * const mat = it->get();
-    bool supplies_needed = false;
-
-    const auto & supplied_props = mat->getSuppliedPropIDs();
-
-    // Do O(N) with the small container
-    for (const auto supplied_prop : supplied_props)
-    {
-      if (needed_mat_props.count(supplied_prop))
-      {
-        supplies_needed = true;
-        break;
-      }
-    }
-
-    if (!supplies_needed)
-      continue;
-
-    if (!allow_stateful && mat->hasStatefulProperties())
-      mooseError("Someone called buildRequiredMaterials with allow_stateful = false but a material "
-                 "dependency ",
-                 mat->name(),
-                 " computes stateful properties.");
-
-    const auto & mp_deps = mat->getMatPropDependencies();
-    needed_mat_props.insert(mp_deps.begin(), mp_deps.end());
-    required_mats.push_front(mat);
-  }
-
-  return required_mats;
-}
-
-template std::deque<MaterialBase *>
-buildRequiredMaterials(const std::vector<MortarConstraintBase *> &,
-                       const std::vector<std::shared_ptr<MaterialBase>> &,
-                       bool);
-template std::deque<MaterialBase *>
-buildRequiredMaterials(const std::array<const MortarNodalAuxKernelTempl<Real> *, 1> &,
-                       const std::vector<std::shared_ptr<MaterialBase>> &,
-                       bool);
-template std::deque<MaterialBase *>
-buildRequiredMaterials(const std::array<const MortarNodalAuxKernelTempl<RealVectorValue> *, 1> &,
-                       const std::vector<std::shared_ptr<MaterialBase>> &,
-                       bool);
 } // MooseUtils namespace
 
 std::string

@@ -15,8 +15,6 @@
 
 #include "libmesh/fe_type.h"
 
-// Forward declaration
-
 class NonconservedAction : public Action
 {
 public:

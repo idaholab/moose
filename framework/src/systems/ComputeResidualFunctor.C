@@ -19,6 +19,8 @@ ComputeResidualFunctor::residual(const NumericVector<Number> & soln,
                                  NumericVector<Number> & residual,
                                  NonlinearImplicitSystem & sys)
 {
+  libmesh_parallel_only(soln.comm());
+
   if (!_fe_problem.failNextNonlinearConvergenceCheck())
   {
     _fe_problem.computingNonlinearResid(true);

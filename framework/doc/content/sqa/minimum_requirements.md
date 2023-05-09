@@ -1,6 +1,8 @@
 ### Minimum System Requirements
 
+!style! halign=left
 In general, the following is required for MOOSE-based development:
+!style-end!
 
 - GCC/Clang C++17 compliant compiler (GCC @ [!package!minimum_gcc], Clang @ [!package!minimum_clang] or greater)
 

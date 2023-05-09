@@ -8,6 +8,7 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "ComputeResidualThread.h"
+#include "NonlinearSystemBase.h"
 #include "KernelBase.h"
 #include "DGKernelBase.h"
 #include "IntegratedBCBase.h"
@@ -73,7 +74,7 @@ ComputeResidualThread::join(const ComputeResidualThread & /*y*/)
 }
 
 void
-ComputeResidualThread::determineResidualObjects()
+ComputeResidualThread::determineObjectWarehouses()
 {
   // If users pass a empty vector or a full size of vector,
   // we take all kernels
@@ -107,6 +108,7 @@ ComputeResidualThread::determineResidualObjects()
     _fv_kernels.clear();
     _fe_problem.theWarehouse()
         .query()
+        .template condition<AttribSysNum>(_nl.number())
         .template condition<AttribSystem>("FVElementalKernel")
         .template condition<AttribSubdomains>(_subdomain)
         .template condition<AttribThread>(_tid)

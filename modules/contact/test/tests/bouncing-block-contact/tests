@@ -3,115 +3,6 @@
 [Tests]
   design = 'Constraints/index.md'
   issues = '#13080 #14454'
-  [frictionless-nodal-min-lm-mortar-disp-coarse]
-    type = 'Exodiff'
-    input = 'frictionless-nodal-min-lm-mortar-disp.i'
-    exodiff = 'frictionless-nodal-min-lm-mortar-disp_out.e'
-    mesh_mode = 'REPLICATED'
-    requirement = 'We will solve the frictionless bouncing block problem with nodal constraint '
-                  'enforcement, mortar application of forces, and min NCP function'
-    cli_args = "Mesh/file=long-bottom-block-1elem-blocks-coarse.e Executioner/end_time=50 "
-               "Postprocessors/active=''"
-  []
-  [frictionless-nodal-fb-lm-mortar-disp-coarse]
-    type = 'Exodiff'
-    input = 'frictionless-nodal-fb-lm-mortar-disp.i'
-    exodiff = 'frictionless-nodal-fb-lm-mortar-disp_out.e'
-    mesh_mode = 'REPLICATED'
-    requirement = 'We will solve the frictionless bouncing block problem with nodal constraint '
-                  'enforcement, mortar application of forces, and fb NCP function'
-    cli_args = "Mesh/file=long-bottom-block-1elem-blocks-coarse.e Executioner/end_time=50 "
-               "Postprocessors/active=''"
-  []
-  [frictionless-nodal-min-lm-nodal-disp-coarse]
-    type = 'Exodiff'
-    input = 'frictionless-nodal-min-lm-nodal-disp.i'
-    exodiff = 'frictionless-nodal-min-lm-nodal-disp_out.e'
-    mesh_mode = 'REPLICATED'
-    requirement = 'We will solve the frictionless bouncing block problem with nodal constraint '
-                  'enforcement, nodal application of forces, and min NCP function'
-    cli_args = "Mesh/file=long-bottom-block-1elem-blocks-coarse.e Executioner/end_time=50 "
-               "Postprocessors/active=''"
-  []
-  [frictionless-nodal-fb-lm-nodal-disp-coarse]
-    type = 'Exodiff'
-    input = 'frictionless-nodal-fb-lm-nodal-disp.i'
-    exodiff = 'frictionless-nodal-fb-lm-nodal-disp_out.e'
-    mesh_mode = 'REPLICATED'
-    requirement = 'We will solve the frictionless bouncing block problem with nodal constraint '
-                  'enforcement, nodal application of forces, and fb NCP function'
-    cli_args = "Mesh/file=long-bottom-block-1elem-blocks-coarse.e Executioner/end_time=50 "
-               "Postprocessors/active=''"
-  []
-  [frictionless-mortar-min-lm-mortar-disp-coarse]
-    allow_test_objects = true
-    type = 'Exodiff'
-    input = 'frictionless-mortar-min-lm-mortar-disp.i'
-    exodiff = 'frictionless-mortar-min-lm-mortar-disp_out.e'
-    mesh_mode = 'REPLICATED'
-    requirement = 'We will solve the frictionless bouncing block problem with mortar constraint '
-                  'enforcement, mortar application of forces, and min NCP function'
-    cli_args = "Mesh/file=long-bottom-block-1elem-blocks-coarse.e Executioner/end_time=50 "
-               "Postprocessors/active=''"
-  []
-  [frictionless-mortar-fb-lm-mortar-disp-coarse]
-    type = 'Exodiff'
-    input = 'frictionless-mortar-fb-lm-mortar-disp.i'
-    exodiff = 'frictionless-mortar-fb-lm-mortar-disp_out.e'
-    mesh_mode = 'REPLICATED'
-    requirement = 'We will solve the frictionless bouncing block problem with mortar constraint '
-                  'enforcement, mortar application of forces, and fb NCP function'
-    cli_args = "Mesh/file=long-bottom-block-1elem-blocks-coarse.e Executioner/end_time=50 "
-               "Postprocessors/active=''"
-  []
-  [frictional-mortar-min-lm-mortar-disp-coarse]
-    type = 'Exodiff'
-    input = 'frictional-mortar-min-lm-mortar-disp.i'
-    exodiff = 'frictional-mortar-min-lm-mortar-disp_out.e'
-    mesh_mode = 'REPLICATED'
-    requirement = 'We will solve the frictional bouncing block problem with mortar constraint '
-                  'enforcement, mortar application of forces, and min NCP function'
-    cli_args = "Mesh/file=long-bottom-block-1elem-blocks-coarse.e Executioner/end_time=50 "
-               "Postprocessors/active=''"
-    max_parallel = 1
-    abs_zero = 1e-9
-  []
-  [frictional-mortar-fb-lm-mortar-disp-coarse]
-    type = 'Exodiff'
-    input = 'frictional-mortar-fb-lm-mortar-disp.i'
-    exodiff = 'frictional-mortar-fb-lm-mortar-disp_out.e'
-    mesh_mode = 'REPLICATED'
-    requirement = 'We will solve the frictional bouncing block problem with mortar constraint '
-                  'enforcement, mortar application of forces, and fb NCP function'
-    cli_args = "Mesh/file=long-bottom-block-1elem-blocks-coarse.e Executioner/end_time=50 "
-               "Postprocessors/active=''"
-    allow_test_objects = true
-  []
-  [frictional-nodal-min-lm-mortar-disp-coarse]
-    type = 'Exodiff'
-    input = 'frictional-nodal-min-lm-mortar-disp.i'
-    exodiff = 'frictional-nodal-min-lm-mortar-disp_out.e'
-    mesh_mode = 'REPLICATED'
-    requirement = 'We will solve the frictional bouncing block problem with nodal constraint '
-                  'enforcement, mortar application of forces, and min NCP function'
-    cli_args = "Mesh/file=long-bottom-block-1elem-blocks-coarse.e Executioner/end_time=50 "
-               "Postprocessors/active='' Outputs/exodus/sync_only=true --redirect-output output.log"
-    allow_warnings = True
-    max_parallel = 1
-    method = 'OPT'
-    allow_test_objects = true
-    abs_zero = 1e-8
-  []
-  [frictional-nodal-min-normal-lm-mortar-fb-tangential-lm-mortar-disp-coarse]
-    type = 'Exodiff'
-    input = 'frictional-nodal-min-normal-lm-mortar-fb-tangential-lm-mortar-disp.i'
-    exodiff = 'frictional-nodal-min-normal-lm-mortar-fb-tangential-lm-mortar-disp_out.e'
-    mesh_mode = 'REPLICATED'
-    requirement = 'We will solve the frictional bouncing block problem with nodal constraint '
-                  'enforcment for the normal LM using min NCP, mortar constraint enforcement of the '
-                  'tangential LM with fb, and mortar application of forces'
-    cli_args = "Executioner/end_time=50 Postprocessors/active=''"
-  []
   [reduced_active_set]
     requirement = 'The system shall be able to solve frictionless mechanical contact using a reduced '
                   'active nonlinear function set scheme (RANFS) in conjunction with a node-face '
@@ -212,7 +103,6 @@
       detail = 'using equal, first order bases for displacements and the lagrange multiplier'
       cli_args = "Mesh/file=long-bottom-block-1elem-blocks-coarse.e Executioner/end_time=50 "
                  "Postprocessors/active=''"
-      ad_indexing_type = 'global'
     []
     [mixed_order]
       type = 'Exodiff'
@@ -222,30 +112,76 @@
                'lagrange multiplier'
       cli_args = "Mesh/file=long-bottom-block-1elem-blocks-coarse.e Executioner/end_time=50 "
                  "Postprocessors/active=''"
-      ad_indexing_type = 'global'
       min_ad_size = '73'
     []
     [equal_order_edge_dropping]
       type = 'Exodiff'
       input = frictionless-weighted-gap.i
       exodiff = 'frictionless-weighted-gap-edge-dropping_out.e'
-      detail = 'using equal, first order bases for displacements and the lagrange multiplier with correct edge dropping'
-      cli_args = "Mesh/file=long-bottom-block-1elem-blocks-coarse.e Constraints/weighted_gap_lm/correct_edge_dropping=true Executioner/end_time=50 Outputs/exodus=true Outputs/file_base=frictionless-weighted-gap-edge-dropping_out "
+      detail = 'using equal, first order bases for displacements and the lagrange multiplier with '
+               'correct edge dropping'
+      cli_args = "Mesh/file=long-bottom-block-1elem-blocks-coarse.e "
+                 "Constraints/weighted_gap_lm/correct_edge_dropping=true Executioner/end_time=50 "
+                 "Outputs/exodus=true Outputs/file_base=frictionless-weighted-gap-edge-dropping_out "
                  "Postprocessors/active=''"
-      ad_indexing_type = 'global'
     []
+    [penalty]
+      type = 'Exodiff'
+      input = frictionless-penalty-weighted-gap.i
+      exodiff = 'frictionless-penalty-weighted-gap_out.e'
+      detail = 'using a first order basis for displacements and penalty multiplication times the '
+               'negative gap distance to form the contact force.'
+      cli_args = "Mesh/file=long-bottom-block-1elem-blocks-coarse.e Executioner/end_time=50 "
+                 "Postprocessors/active=''"
+    []
+    [penalty_action]
+      type = 'Exodiff'
+      input = frictionless-penalty-weighted-gap-action.i
+      exodiff = 'frictionless-penalty-weighted-gap-action_out.e'
+      detail = 'using a first order basis for displacements and penalty multiplication times the '
+               'negative gap distance to form the contact force via the contact action.'
+      map = true
+      cli_args = "Mesh/mesh_file/file=long-bottom-block-1elem-blocks-coarse.e "
+                 "Executioner/end_time=50 Postprocessors/active='' Outputs/hide='nodal_area "
+                 "contact_pressure penetration'"
+    []
+  []
+  [very_parallel_penalty]
+    requirement = 'The system shall be able to communicate semilocal weighted gaps back to any '
+                  'process that contributed to computing said weighted gaps.'
+    issues = '#21329'
+    type = 'Exodiff'
+    input = frictionless-penalty-weighted-gap.i
+    exodiff = 'parallel-frictionless-penalty-weighted-gap_out.e'
+    cli_args = "Mesh/file=long-bottom-block-1elem-blocks-coarse.e Executioner/end_time=50 "
+               "Postprocessors/active='' "
+               "Outputs/file_base=parallel-frictionless-penalty-weighted-gap_out"
+    min_parallel = 13
+  []
+  [very_parallel_frictional_penalty]
+    requirement = 'The system shall be able to communicate semilocal weighted gaps and velocities '
+                  'back to any process that contributed to computing said weighted quantities. We '
+                  'check against the serial numerical results.'
+    issues = '#21329'
+    type = 'Exodiff'
+    input = frictional-penalty-weighted-vel.i
+    exodiff = 'parallel-frictional-penalty-weighted-vel_out.e'
+    cli_args = "Mesh/file=long-bottom-block-1elem-blocks-coarse.e Executioner/end_time=50 "
+               "Postprocessors/active='' "
+               "Outputs/file_base=parallel-frictional-penalty-weighted-vel_out"
+    min_parallel = 13
   []
   [weighted_vel_pdass]
     requirement = 'The system shall support a variationally consistent mortar frictional constraints '
                   'with dual bases'
     issues = '#17495'
+
     [verbose]
       type = 'Exodiff'
       input = frictional-nodal-min-normal-lm-mortar-pdass-tangential-lm-mortar-disp.i
       exodiff = 'frictional-nodal-min-normal-lm-mortar-pdass-tangential-lm-mortar-disp_out.e'
       detail = 'using verbose input file'
       cli_args = "Postprocessors/active=''"
-      ad_indexing_type = 'global'
       abs_zero = 5e-9
     []
     [action]
@@ -254,7 +190,6 @@
       exodiff = 'frictional-nodal-min-normal-lm-mortar-pdass-tangential-lm-mortar-action_out.e'
       detail = 'using the contact action'
       cli_args = "Postprocessors/active=''"
-      ad_indexing_type = 'global'
       abs_zero = 5e-9
     []
   []
@@ -262,9 +197,23 @@
     type = 'Exodiff'
     input = 'variational-frictional.i'
     exodiff = 'variational-frictional_out.e'
-    ad_indexing_type = 'global'
     cli_args = 'Outputs/hide=procid'
-    requirement = 'The system shall be able to solve a frictional, variationally consistent, mortar mechanical contact problem in which the secondary side of the contact interface is split between processes when run in parallel.'
+    requirement = 'The system shall be able to solve a frictional, variationally consistent, mortar '
+                  'mechanical contact problem in which the secondary side of the contact interface '
+                  'is split between processes when run in parallel.'
+    method = "!dbg"
+    valgrind = 'heavy'
+  []
+  [split_secondary_action]
+    type = 'Exodiff'
+    input = 'variational-frictional-action.i'
+    exodiff = 'variational-frictional-action_exodus.e'
+    cli_args = 'Outputs/hide=procid'
+    requirement = 'The system shall be able to solve a frictional, variationally consistent, mortar '
+                  'mechanical contact problem in which the secondary side of the contact interface '
+                  'is split between processes when run in parallel while using the contact action to '
+                  'build the set of constraints, user objects, and application of generalized '
+                  'forces.'
     method = "!dbg"
     valgrind = 'heavy'
   []
@@ -272,10 +221,10 @@
     type = 'Exodiff'
     input = 'mixed-weighted-gap-swapped.i'
     exodiff = 'mixed-weighted-gap-swapped_out.e'
-    requirement = 'The system shall not attempt to zero Lagrange multipliers that do not exist on inactive nodes.'
+    requirement = 'The system shall not attempt to zero Lagrange multipliers that do not exist on '
+                  'inactive nodes.'
     method = "!dbg"
     valgrind = 'heavy'
-    ad_indexing_type = 'global'
     min_ad_size = '100'
   []
 []

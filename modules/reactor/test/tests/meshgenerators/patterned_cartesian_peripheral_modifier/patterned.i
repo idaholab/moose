@@ -17,6 +17,7 @@ num_layer = 2
     preserve_volumes = on
     quad_center_elements = true
     flat_side_up = true
+    generate_side_specific_boundaries = true
   []
   [pattern_1]
     type = PatternedCartesianMeshGenerator
@@ -49,6 +50,7 @@ num_layer = 2
     preserve_volumes = on
     quad_center_elements = true
     flat_side_up = true
+    generate_side_specific_boundaries = true
   []
   [pattern_2]
     type = PatternedCartesianMeshGenerator
@@ -82,6 +84,7 @@ num_layer = 2
     preserve_volumes = on
     quad_center_elements = true
     flat_side_up = true
+    generate_side_specific_boundaries = true
   []
   [pattern_3]
     type = PatternedCartesianMeshGenerator
@@ -116,6 +119,7 @@ num_layer = 2
     preserve_volumes = on
     quad_center_elements = true
     flat_side_up = true
+    generate_side_specific_boundaries = true
   []
   [pattern_4]
     type = PatternedCartesianMeshGenerator
@@ -144,5 +148,12 @@ num_layer = 2
                3 2 1'
     pattern_boundary = none
     generate_core_metadata = true
+  []
+[]
+
+[Outputs]
+  [out]
+    type = Exodus
+    output_extra_element_ids = false
   []
 []

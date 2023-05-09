@@ -35,6 +35,7 @@ ADReal
 WCNSFVEnergyTimeDerivative::computeQpResidual()
 {
   const auto & elem_arg = makeElemArg(_current_elem);
+  const auto state = determineState();
   return INSFVEnergyTimeDerivative::computeQpResidual() +
-         _rho_dot(elem_arg) * _cp(elem_arg) * _var(elem_arg);
+         _rho_dot(elem_arg, state) * _cp(elem_arg, state) * _var(elem_arg, state);
 }

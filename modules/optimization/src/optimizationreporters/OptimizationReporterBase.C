@@ -17,10 +17,6 @@ OptimizationReporterBase::validParams()
   params.registerBase("OptimizationReporterBase");
   params.addRequiredParam<std::vector<ReporterValueName>>(
       "parameter_names", "List of parameter names, one for each group of parameters.");
-  params.addParam<std::vector<Real>>(
-      "lower_bounds", std::vector<Real>(), "Constant lower bound for each group of parameters.");
-  params.addParam<std::vector<Real>>(
-      "upper_bounds", std::vector<Real>(), "Constant upper bound for each group of parameters.");
   params.registerBase("OptimizationReporterBase");
   return params;
 }
@@ -30,18 +26,8 @@ OptimizationReporterBase::OptimizationReporterBase(const InputParameters & param
     _parameter_names(getParam<std::vector<ReporterValueName>>("parameter_names")),
     _nparams(_parameter_names.size()),
     _parameters(_nparams),
-    _gradients(_nparams),
-    _lower_bounds(getParam<std::vector<Real>>("lower_bounds")),
-    _upper_bounds(getParam<std::vector<Real>>("upper_bounds"))
+    _gradients(_nparams)
 {
-  if (!_lower_bounds.empty() && _lower_bounds.size() != _nparams)
-    paramError("lower_bounds", "There must be a lower bound associated with each parameter.");
-  else if (!_upper_bounds.empty() && _upper_bounds.size() != _nparams)
-    paramError("upper_bounds", "There must be an upper bound associated with each parameter.");
-  else if (_lower_bounds.size() != _upper_bounds.size())
-    paramError((_lower_bounds.size() == 0 ? "upper_bounds" : "lower_bounds"),
-               "Both upper and lower bounds must be specified if bounds are used.");
-
   for (const auto & i : make_range(_nparams))
   {
     _parameters[i] =
@@ -110,27 +96,11 @@ OptimizationReporterBase::updateParameters(const libMesh::PetscVector<Number> & 
 Real
 OptimizationReporterBase::getLowerBound(dof_id_type i) const
 {
-  return _lower_bounds.empty() ? std::numeric_limits<Real>::lowest()
-                               : _lower_bounds[getParameterIndex(i)];
+  return _lower_bounds[i];
 }
 
 Real
 OptimizationReporterBase::getUpperBound(dof_id_type i) const
 {
-  return _upper_bounds.empty() ? std::numeric_limits<Real>::max()
-                               : _upper_bounds[getParameterIndex(i)];
-}
-
-unsigned int
-OptimizationReporterBase::getParameterIndex(dof_id_type i) const
-{
-  dof_id_type dof = 0;
-  for (unsigned int p = 0; p < _nparams; ++p)
-  {
-    dof += _nvalues[p];
-    if (i < dof)
-      return p;
-  }
-  mooseError("DoF index ", i, " is outside of expected paramter vector of size ", _ndof, ".");
-  return 0;
+  return _upper_bounds[i];
 }

@@ -1,11 +1,66 @@
 [Tests]
-  [./test]
+  [time_test]
     type = RunApp
     input = perf_graph_live_print.i
     expect_out = "Testing Slowness"
 
     issues = '#15444'
     design = 'utils/PerfGraph.md'
-    requirement = 'The system shall allow for timing sections of code and having automated print-outs when they take too long or use too much memory'
-  [../]
+    requirement = 'The system shall allow for timing sections of code and having automated print-outs when they take too long.'
+  []
+
+  [nested_sections]
+    type = RunApp
+    input = perf_graph_live_print.i
+    cli_args = 'Problem/nest_inside_section=true'
+    # Checks the size of the printout as well, 62 characters after the text then a bracket
+    expect_out = "Testing Nested Slowness( |\.){62}\["
+
+    issues = '#15444'
+    design = 'utils/PerfGraphLivePrint.md'
+    requirement = 'The system shall allow for nested code timing sections and having automated print-outs of the code section names when they are taking a long time.'
+  []
+  [section_interrupted_by_regular_print]
+    # this test does not address the warnings 'direct to Moose::out' issue #23750
+    type = RunApp
+    input = perf_graph_live_print.i
+    cli_args = 'Problem/print_during_section=true'
+    expect_out = "Timed section just started, printing something though\n(Currently|Still|  Still)"
+
+    issues = '#23746'
+    design = 'utils/PerfGraphLivePrint.md'
+    requirement = 'The system shall be able to display the automatic print-out of a timed section even when an external print happened before the threshold for the automatic print-out was met.'
+  []
+
+  [multiapps]
+    type = RunApp
+    input = perf_graph_live_print.i
+    cli_args = "MultiApps/active='subapp' --color off"
+    expect_out = "subapp0: Testing Slowness"
+
+    issues = '#19114'
+    design = 'utils/PerfGraphLivePrint.md'
+    requirement = 'The system shall allow for automatic print-outs of timing sections within multiapps.'
+  []
+  [multiapps_and_nested]
+    type = RunApp
+    input = perf_graph_live_print.i
+    cli_args = "MultiApps/active='subapp' MultiApps/subapp/cli_args=Problem/nest_inside_section=true --color off"
+    expect_out = "subapp0:   Testing Nested Slowness( |\.){55}\["
+
+    issues = '#19114'
+    design = 'utils/PerfGraphLivePrint.md'
+    requirement = 'The system shall allow for automatic print-outs of nested timing sections within multiapps.'
+  []
+
+  [nested_multiapps]
+    type = RunApp
+    input = perf_graph_live_print.i
+    cli_args = "MultiApps/active='subapp' MultiApps/subapp/cli_args='MultiApps/active=subapp' --color off"
+    expect_out = "subapp0_subapp0: Testing Slowness"
+
+    issues = '#19114'
+    design = 'utils/PerfGraphLivePrint.md'
+    requirement = 'The system shall allow for automatic print-outs of timing sections within nested multiapps.'
+  []
 []

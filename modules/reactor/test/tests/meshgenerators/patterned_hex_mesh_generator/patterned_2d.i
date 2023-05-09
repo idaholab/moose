@@ -12,6 +12,7 @@
     background_block_names = background
     polygon_size = 5.0
     preserve_volumes = on
+    generate_side_specific_boundaries = true
   []
   [pattern]
     type = PatternedHexMeshGenerator

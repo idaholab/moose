@@ -17,8 +17,6 @@
 \s+hx:secondary
 \s+inlet
 \s+outlet"
-    ad_indexing_type = 'global'
-    mesh_mode = 'replicated'
   []
 
   [err.no_smp]

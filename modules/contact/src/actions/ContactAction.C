@@ -71,6 +71,15 @@ ContactAction::validParams()
       "penalty",
       1e8,
       "The penalty to apply.  This can vary depending on the stiffness of your materials");
+  params.addParam<Real>(
+      "penalty_friction",
+      1e8,
+      "The penalty factor to apply in mortar penalty frictional constraints.  It is applied to the "
+      "tangential accumulated slip to build the frictional force");
+  params.addParam<Real>("penalty_multiplier",
+                        1.0,
+                        "The growth factor for the penalty applied at the end of each augmented "
+                        "Lagrange update iteration");
   params.addParam<Real>("friction_coefficient", 0, "The friction coefficient");
   params.addParam<Real>("tension_release",
                         0.0,
@@ -127,14 +136,6 @@ ContactAction::validParams()
       1.,
       "Scaling factor to apply to the tangential LM variable for a mortar formulation");
   params.addParam<bool>(
-      "interpolate_normals",
-      true,
-      "Whether to interpolate the nodal normals for a mortar contact constraint (e.g. classic "
-      "idea of evaluating field at "
-      "quadrature points). If this is set to false, then non-interpolated nodal normals will be "
-      "used, and then the _normals member should be indexed with _i instead of _qp. This input "
-      "parameter is intended for developers.");
-  params.addParam<bool>(
       "normalize_c",
       false,
       "Whether to normalize c by weighting function norm for mortar contact. When unnormalized "
@@ -189,7 +190,6 @@ ContactAction::ContactAction(const InputParameters & params)
     _boundary_pairs(getParam<BoundaryName, BoundaryName>("primary", "secondary")),
     _model(getParam<MooseEnum>("model").getEnum<ContactModel>()),
     _formulation(getParam<MooseEnum>("formulation").getEnum<ContactFormulation>()),
-    _correct_edge_dropping(getParam<bool>("correct_edge_dropping")),
     _generate_mortar_mesh(getParam<bool>("generate_mortar_mesh")),
     _mortar_dynamics(getParam<bool>("mortar_dynamics"))
 {
@@ -200,6 +200,16 @@ ContactAction::ContactAction(const InputParameters & params)
   if (_formulation == ContactFormulation::TANGENTIAL_PENALTY && _model != ContactModel::COULOMB)
     paramError("formulation",
                "The 'tangential_penalty' formulation can only be used with the 'coulomb' model");
+
+  if (_formulation == ContactFormulation::MORTAR_PENALTY)
+  {
+    if (_model == ContactModel::GLUED)
+      paramError("model", "The penalty 'mortar' formulation does not support glued contact");
+
+    if (getParam<bool>("mortar_dynamics"))
+      paramError("mortar_dynamics",
+                 "The penalty 'mortar' formulation does not support implicit dynamic simulations");
+  }
 
   if (_formulation == ContactFormulation::MORTAR)
   {
@@ -258,6 +268,50 @@ ContactAction::ContactAction(const InputParameters & params)
   else if (getParam<bool>("ping_pong_protection"))
     paramError("ping_pong_protection",
                "The 'ping_pong_protection' option can only be used with the 'ranfs' formulation");
+
+  // Remove repeated pairs from input file.
+  removeRepeatedPairs();
+}
+
+void
+ContactAction::removeRepeatedPairs()
+{
+  if (_boundary_pairs.size() == 0)
+    paramError(
+        "primary",
+        "Number of contact pairs in the contact action is zero. Please revise your input file.");
+
+  // Remove repeated interactions
+  std::vector<std::pair<BoundaryName, BoundaryName>> lean_boundary_pairs;
+
+  for (const auto & [primary, secondary] : _boundary_pairs)
+  {
+    // Structured bindings are not capturable (primary_copy, secondary_copy)
+    auto it = std::find_if(lean_boundary_pairs.begin(),
+                           lean_boundary_pairs.end(),
+                           [&, primary_copy = primary, secondary_copy = secondary](
+                               const std::pair<BoundaryName, BoundaryName> & lean_pair)
+                           {
+                             const bool match_one = lean_pair.second == secondary_copy &&
+                                                    lean_pair.first == primary_copy;
+                             const bool match_two = lean_pair.second == primary_copy &&
+                                                    lean_pair.first == secondary_copy;
+                             const bool exist = match_one || match_two;
+                             return exist;
+                           });
+
+    if (it == lean_boundary_pairs.end())
+      lean_boundary_pairs.emplace_back(primary, secondary);
+    else
+      mooseInfo("Contact pair ",
+                primary,
+                "--",
+                secondary,
+                " has been removed from the contact interaction list due to "
+                "duplicates in the input file.");
+  }
+
+  _boundary_pairs = lean_boundary_pairs;
 }
 
 void
@@ -279,7 +333,8 @@ ContactAction::act()
       _problem->setSNESMFReuseBase(false, false);
   }
 
-  if (_formulation == ContactFormulation::MORTAR)
+  if (_formulation == ContactFormulation::MORTAR ||
+      _formulation == ContactFormulation::MORTAR_PENALTY)
     addMortarContact();
   else
     addNodeFaceContact();
@@ -420,8 +475,17 @@ ContactAction::act()
   if (_current_task == "add_user_object")
   {
     auto var_params = _factory.getValidParams("NodalArea");
-    var_params.set<std::vector<BoundaryName>>("boundary") =
-        getParam<std::vector<BoundaryName>>("secondary");
+
+    // Get secondary_boundary_vector from possibly updated set from the
+    // ContactAction constructor cleanup
+    const auto actions = _awh.getActions<ContactAction>();
+
+    std::vector<BoundaryName> secondary_boundary_vector;
+    for (const auto * const action : actions)
+      for (const auto j : index_range(action->_boundary_pairs))
+        secondary_boundary_vector.push_back(action->_boundary_pairs[j].second);
+
+    var_params.set<std::vector<BoundaryName>>("boundary") = secondary_boundary_vector;
     var_params.set<std::vector<VariableName>>("variable") = {"nodal_area"};
 
     mooseAssert(_problem, "Problem pointer is NULL");
@@ -439,31 +503,22 @@ ContactAction::addContactPressureAuxKernel()
 {
   // Add ContactPressureAux: Only one object for all contact pairs
   // if (_formulation != ContactFormulation::MORTAR)
-  auto actions = _awh.getActions<ContactAction>();
+  const auto actions = _awh.getActions<ContactAction>();
 
   // Increment counter for contact action objects
   contact_action_counter++;
-
   // Add auxiliary kernel if we are the last contact action object.
   if (contact_action_counter == actions.size())
   {
-    size_t all_action_pairs_size = 0;
-    for (const auto & action : actions)
-      all_action_pairs_size += action->_boundary_pairs.size();
+    std::vector<BoundaryName> boundary_vector;
+    std::vector<BoundaryName> pair_boundary_vector;
 
-    std::vector<BoundaryName> boundary_vector(all_action_pairs_size);
-    std::vector<BoundaryName> pair_boundary_vector(all_action_pairs_size);
-
-    size_t i = 0;
-    for (const auto & action : actions)
-    {
-      for (const auto j : make_range(action->_boundary_pairs.size()))
+    for (const auto * const action : actions)
+      for (const auto j : index_range(action->_boundary_pairs))
       {
-        pair_boundary_vector[i] = action->_boundary_pairs[j].first;
-        boundary_vector[i] = action->_boundary_pairs[j].second;
-        i++;
+        boundary_vector.push_back(action->_boundary_pairs[j].second);
+        pair_boundary_vector.push_back(action->_boundary_pairs[j].first);
       }
-    }
 
     InputParameters params = _factory.getValidParams("ContactPressureAux");
     params.applyParameters(parameters(), {"order"});
@@ -490,7 +545,8 @@ ContactAction::addContactPressureAuxKernel()
 void
 ContactAction::addRelationshipManagers(Moose::RelationshipManagerType input_rm_type)
 {
-  if (_formulation == ContactFormulation::MORTAR)
+  if (_formulation == ContactFormulation::MORTAR ||
+      _formulation == ContactFormulation::MORTAR_PENALTY)
   {
     auto params = MortarConstraintBase::validParams();
     params.set<bool>("use_displaced_mesh") = true;
@@ -545,7 +601,7 @@ ContactAction::addMortarContact()
     }
   }
 
-  if (_current_task == "add_mortar_variable")
+  if (_current_task == "add_mortar_variable" && _formulation == ContactFormulation::MORTAR)
   {
     // Add the lagrange multiplier on the secondary subdomain.
     const auto addLagrangeMultiplier =
@@ -593,14 +649,105 @@ ContactAction::addMortarContact()
     }
   }
 
+  if (_current_task == "add_user_object")
+  {
+
+    if (_model != ContactModel::COULOMB && _formulation == ContactFormulation::MORTAR)
+    {
+      auto var_params = _factory.getValidParams("LMWeightedGapUserObject");
+
+      var_params.set<BoundaryName>("primary_boundary") = _boundary_pairs[0].first;
+      var_params.set<BoundaryName>("secondary_boundary") = _boundary_pairs[0].second;
+      var_params.set<SubdomainName>("primary_subdomain") = primary_subdomain_name;
+      var_params.set<SubdomainName>("secondary_subdomain") = secondary_subdomain_name;
+      var_params.set<std::vector<VariableName>>("disp_x") = {displacements[0]};
+      var_params.set<bool>("correct_edge_dropping") = getParam<bool>("correct_edge_dropping");
+      var_params.set<std::vector<VariableName>>("disp_y") = {displacements[1]};
+      if (ndisp > 2)
+        var_params.set<std::vector<VariableName>>("disp_z") = {displacements[2]};
+      var_params.set<bool>("use_displaced_mesh") = true;
+      var_params.set<std::vector<VariableName>>("lm_variable") = {normal_lagrange_multiplier_name};
+
+      _problem->addUserObject(
+          "LMWeightedGapUserObject", "lm_weightedgap_object_" + name(), var_params);
+    }
+    else if (_model == ContactModel::COULOMB && _formulation == ContactFormulation::MORTAR)
+    {
+      auto var_params = _factory.getValidParams("LMWeightedVelocitiesUserObject");
+      var_params.set<BoundaryName>("primary_boundary") = _boundary_pairs[0].first;
+      var_params.set<BoundaryName>("secondary_boundary") = _boundary_pairs[0].second;
+      var_params.set<SubdomainName>("primary_subdomain") = primary_subdomain_name;
+      var_params.set<SubdomainName>("secondary_subdomain") = secondary_subdomain_name;
+      var_params.set<std::vector<VariableName>>("disp_x") = {displacements[0]};
+      var_params.set<bool>("correct_edge_dropping") = getParam<bool>("correct_edge_dropping");
+      var_params.set<std::vector<VariableName>>("disp_y") = {displacements[1]};
+      if (ndisp > 2)
+        var_params.set<std::vector<VariableName>>("disp_z") = {displacements[2]};
+
+      var_params.set<VariableName>("secondary_variable") = displacements[0];
+      var_params.set<bool>("use_displaced_mesh") = true;
+      var_params.set<std::vector<VariableName>>("lm_variable_normal") = {
+          normal_lagrange_multiplier_name};
+      var_params.set<std::vector<VariableName>>("lm_variable_tangential_one") = {
+          tangential_lagrange_multiplier_name};
+      if (ndisp > 2)
+        var_params.set<std::vector<VariableName>>("lm_variable_tangential_two") = {
+            tangential_lagrange_multiplier_3d_name};
+
+      _problem->addUserObject(
+          "LMWeightedVelocitiesUserObject", "lm_weightedvelocities_object_" + name(), var_params);
+    }
+
+    if (_model != ContactModel::COULOMB && _formulation == ContactFormulation::MORTAR_PENALTY)
+    {
+      auto var_params = _factory.getValidParams("PenaltyWeightedGapUserObject");
+
+      var_params.set<BoundaryName>("primary_boundary") = _boundary_pairs[0].first;
+      var_params.set<BoundaryName>("secondary_boundary") = _boundary_pairs[0].second;
+      var_params.set<SubdomainName>("primary_subdomain") = primary_subdomain_name;
+      var_params.set<SubdomainName>("secondary_subdomain") = secondary_subdomain_name;
+      var_params.set<std::vector<VariableName>>("disp_x") = {displacements[0]};
+      var_params.set<bool>("correct_edge_dropping") = getParam<bool>("correct_edge_dropping");
+      var_params.set<std::vector<VariableName>>("disp_y") = {displacements[1]};
+      var_params.set<Real>("penalty") = getParam<Real>("penalty");
+      if (ndisp > 2)
+        var_params.set<std::vector<VariableName>>("disp_z") = {displacements[2]};
+      var_params.set<bool>("use_displaced_mesh") = true;
+
+      _problem->addUserObject(
+          "PenaltyWeightedGapUserObject", "penalty_weightedgap_object_" + name(), var_params);
+      _problem->haveADObjects(true);
+    }
+    else if (_model == ContactModel::COULOMB && _formulation == ContactFormulation::MORTAR_PENALTY)
+    {
+      auto var_params = _factory.getValidParams("PenaltyFrictionUserObject");
+      var_params.set<BoundaryName>("primary_boundary") = _boundary_pairs[0].first;
+      var_params.set<BoundaryName>("secondary_boundary") = _boundary_pairs[0].second;
+      var_params.set<SubdomainName>("primary_subdomain") = primary_subdomain_name;
+      var_params.set<SubdomainName>("secondary_subdomain") = secondary_subdomain_name;
+      var_params.set<std::vector<VariableName>>("disp_x") = {displacements[0]};
+      var_params.set<bool>("correct_edge_dropping") = getParam<bool>("correct_edge_dropping");
+      var_params.set<std::vector<VariableName>>("disp_y") = {displacements[1]};
+      if (ndisp > 2)
+        var_params.set<std::vector<VariableName>>("disp_z") = {displacements[2]};
+
+      var_params.set<VariableName>("secondary_variable") = displacements[0];
+      var_params.set<bool>("use_displaced_mesh") = true;
+      var_params.set<Real>("friction_coefficient") = getParam<Real>("friction_coefficient");
+      var_params.set<Real>("penalty") = getParam<Real>("penalty");
+      var_params.set<Real>("penalty_friction") = getParam<Real>("penalty_friction");
+
+      _problem->addUserObject(
+          "PenaltyFrictionUserObject", "penalty_friction_object_" + name(), var_params);
+      _problem->haveADObjects(true);
+    }
+  }
+
   if (_current_task == "add_constraint")
   {
-    // Add the normal Lagrange multiplier constraint on the secondary boundary.
-
-    // If no friction, only weighted gap class
-    if (_model != ContactModel::COULOMB)
+    // Prepare problem for enforcement with Lagrange multipliers
+    if (_model != ContactModel::COULOMB && _formulation == ContactFormulation::MORTAR)
     {
-
       std::string mortar_constraint_name;
 
       if (!_mortar_dynamics)
@@ -617,15 +764,16 @@ ContactAction::addMortarContact()
         if (isParamValid("wear_depth"))
           params.set<CoupledName>("wear_depth") = getParam<CoupledName>("wear_depth");
       }
+      else // We need user objects for quasistatic constraints
+        params.set<UserObjectName>("weighted_gap_uo") = "lm_weightedgap_object_" + name();
 
-      params.set<bool>("correct_edge_dropping") = _correct_edge_dropping;
+      params.set<bool>("correct_edge_dropping") = getParam<bool>("correct_edge_dropping");
       params.set<BoundaryName>("primary_boundary") = _boundary_pairs[0].first;
       params.set<BoundaryName>("secondary_boundary") = _boundary_pairs[0].second;
       params.set<SubdomainName>("primary_subdomain") = primary_subdomain_name;
       params.set<SubdomainName>("secondary_subdomain") = secondary_subdomain_name;
       params.set<NonlinearVariableName>("variable") = normal_lagrange_multiplier_name;
       params.set<std::vector<VariableName>>("disp_x") = {displacements[0]};
-      params.set<bool>("interpolate_normals") = getParam<bool>("interpolate_normals");
       params.set<bool>("normalize_c") = getParam<bool>("normalize_c");
       params.set<Real>("c") = getParam<Real>("c_normal");
 
@@ -644,9 +792,8 @@ ContactAction::addMortarContact()
       _problem->haveADObjects(true);
     }
     // Add the tangential and normal Lagrange's multiplier constraints on the secondary boundary.
-    else if (_model == ContactModel::COULOMB)
+    else if (_model == ContactModel::COULOMB && _formulation == ContactFormulation::MORTAR)
     {
-
       std::string mortar_constraint_name;
 
       if (!_mortar_dynamics)
@@ -663,8 +810,14 @@ ContactAction::addMortarContact()
         if (isParamValid("wear_depth"))
           params.set<CoupledName>("wear_depth") = getParam<CoupledName>("wear_depth");
       }
-      params.set<bool>("correct_edge_dropping") = _correct_edge_dropping;
+      else
+      { // We need user objects for quasistatic constraints
+        params.set<UserObjectName>("weighted_gap_uo") = "lm_weightedvelocities_object_" + name();
+        params.set<UserObjectName>("weighted_velocities_uo") =
+            "lm_weightedvelocities_object_" + name();
+      }
 
+      params.set<bool>("correct_edge_dropping") = getParam<bool>("correct_edge_dropping");
       params.set<BoundaryName>("primary_boundary") = _boundary_pairs[0].first;
       params.set<BoundaryName>("secondary_boundary") = _boundary_pairs[0].second;
       params.set<SubdomainName>("primary_subdomain") = primary_subdomain_name;
@@ -672,7 +825,6 @@ ContactAction::addMortarContact()
       params.set<bool>("use_displaced_mesh") = true;
       params.set<Real>("c_t") = getParam<Real>("c_tangential");
       params.set<Real>("c") = getParam<Real>("c_normal");
-      params.set<bool>("interpolate_normals") = getParam<bool>("interpolate_normals");
       params.set<bool>("normalize_c") = getParam<bool>("normalize_c");
       params.set<bool>("compute_primal_residuals") = false;
 
@@ -698,25 +850,28 @@ ContactAction::addMortarContact()
       _problem->addConstraint(mortar_constraint_name, action_name + "_tangential_lm", params);
       _problem->haveADObjects(true);
     }
+
     const auto addMechanicalContactConstraints =
         [this, &primary_subdomain_name, &secondary_subdomain_name, &displacements](
             const std::string & variable_name,
             const std::string & constraint_prefix,
             const std::string & constraint_type,
-            const bool is_additional_frictional_constraint) //
+            const bool is_additional_frictional_constraint,
+            const bool is_normal_constraint)
     {
       InputParameters params = _factory.getValidParams(constraint_type);
 
-      params.set<bool>("correct_edge_dropping") = _correct_edge_dropping;
-
+      params.set<bool>("correct_edge_dropping") = getParam<bool>("correct_edge_dropping");
       params.set<BoundaryName>("primary_boundary") = _boundary_pairs[0].first;
       params.set<BoundaryName>("secondary_boundary") = _boundary_pairs[0].second;
       params.set<SubdomainName>("primary_subdomain") = primary_subdomain_name;
       params.set<SubdomainName>("secondary_subdomain") = secondary_subdomain_name;
-      params.set<NonlinearVariableName>("variable") = variable_name;
+
+      if (_formulation == ContactFormulation::MORTAR)
+        params.set<NonlinearVariableName>("variable") = variable_name;
+
       params.set<bool>("use_displaced_mesh") = true;
       params.set<bool>("compute_lm_residuals") = false;
-      params.set<bool>("interpolate_normals") = getParam<bool>("interpolate_normals");
 
       // Additional displacement residual for frictional problem
       // The second frictional LM acts on a perpendicular direction.
@@ -733,6 +888,25 @@ ContactAction::addMortarContact()
         params.set<VariableName>("secondary_variable") = displacements[i];
         params.set<MooseEnum>("component") = i;
 
+        if (is_normal_constraint && _model != ContactModel::COULOMB &&
+            _formulation == ContactFormulation::MORTAR)
+          params.set<UserObjectName>("weighted_gap_uo") = "lm_weightedgap_object_" + name();
+        else if (is_normal_constraint && _model == ContactModel::COULOMB &&
+                 _formulation == ContactFormulation::MORTAR)
+          params.set<UserObjectName>("weighted_gap_uo") = "lm_weightedvelocities_object_" + name();
+        else if (_formulation == ContactFormulation::MORTAR)
+          params.set<UserObjectName>("weighted_velocities_uo") =
+              "lm_weightedvelocities_object_" + name();
+        else if (is_normal_constraint && _model != ContactModel::COULOMB &&
+                 _formulation == ContactFormulation::MORTAR_PENALTY)
+          params.set<UserObjectName>("weighted_gap_uo") = "penalty_weightedgap_object_" + name();
+        else if (is_normal_constraint && _model == ContactModel::COULOMB &&
+                 _formulation == ContactFormulation::MORTAR_PENALTY)
+          params.set<UserObjectName>("weighted_gap_uo") = "penalty_friction_object_" + name();
+        else if (_formulation == ContactFormulation::MORTAR_PENALTY)
+          params.set<UserObjectName>("weighted_velocities_uo") =
+              "penalty_friction_object_" + name();
+
         _problem->addConstraint(constraint_type, constraint_name, params);
       }
       _problem->haveADObjects(true);
@@ -742,19 +916,22 @@ ContactAction::addMortarContact()
     addMechanicalContactConstraints(normal_lagrange_multiplier_name,
                                     action_name + "_normal_constraint_",
                                     "NormalMortarMechanicalContact",
-                                    false);
+                                    /* is_additional_frictional_constraint = */ false,
+                                    /* is_normal_constraint = */ true);
 
     if (_model == ContactModel::COULOMB)
     {
       addMechanicalContactConstraints(tangential_lagrange_multiplier_name,
                                       action_name + "_tangential_constraint_",
                                       "TangentialMortarMechanicalContact",
-                                      false);
+                                      /* is_additional_frictional_constraint = */ false,
+                                      /* is_normal_constraint = */ false);
       if (ndisp > 2)
         addMechanicalContactConstraints(tangential_lagrange_multiplier_3d_name,
                                         action_name + "_tangential_constraint_3d_",
                                         "TangentialMortarMechanicalContact",
-                                        true);
+                                        /* is_additional_frictional_constraint = */ true,
+                                        /* is_normal_constraint = */ false);
     }
   }
 }
@@ -837,8 +1014,9 @@ ContactAction::getModelEnum()
 MooseEnum
 ContactAction::getFormulationEnum()
 {
-  return MooseEnum("ranfs kinematic penalty augmented_lagrange tangential_penalty mortar",
-                   "kinematic");
+  return MooseEnum(
+      "ranfs kinematic penalty augmented_lagrange tangential_penalty mortar mortar_penalty",
+      "kinematic");
 }
 
 MooseEnum

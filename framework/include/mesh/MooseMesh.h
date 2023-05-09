@@ -158,7 +158,7 @@ public:
   virtual void buildMesh() = 0;
 
   /**
-   * Returns MeshBase::mesh_dimsension(), (not
+   * Returns MeshBase::mesh_dimension(), (not
    * MeshBase::spatial_dimension()!) of the underlying libMesh mesh
    * object.
    */
@@ -170,6 +170,11 @@ public:
    * mesh, respectively. Likewise a 2D mesh that has non-zero z coordinates is actually 3D mesh.
    */
   virtual unsigned int effectiveSpatialDimension() const;
+
+  /**
+   * Returns the maximum element dimension on the given blocks
+   */
+  unsigned int getBlocksMaxDimension(const std::vector<SubdomainName> & blocks) const;
 
   /**
    * Returns a vector of boundary IDs for the requested element on the
@@ -504,10 +509,11 @@ public:
 
   /**
    * Calls prepare_for_use() if the underlying MeshBase object isn't prepared, then communicates
-   * various boundary information on parallel meshes. Also calls update() internally. We maintain
-   * the boolean parameter in order to maintain backwards compatability but it doesn't do anything
+   * various boundary information on parallel meshes. Also calls update() internally
+   * @param force_mesh_prepare Whether to force a mesh preparation
+   * @return Whether the libMesh mesh was prepared
    */
-  void prepare(bool = false);
+  bool prepare(bool force_mesh_prepare = false);
 
   /**
    * Calls buildNodeListFromSideList(), buildNodeList(), and buildBndElemList().
@@ -615,7 +621,9 @@ public:
    * Accessor for the underlying libMesh Mesh object.
    */
   MeshBase & getMesh();
+  MeshBase & getMesh(const std::string & name);
   const MeshBase & getMesh() const;
+  const MeshBase & getMesh(const std::string & name) const;
   const MeshBase * getMeshPtr() const;
 
   /**
@@ -704,7 +712,7 @@ public:
    * Get the associated subdomainIDs for the subdomain names that are passed in.
    *
    * @param subdomain_name The names of the subdomains
-   * @return The subdomain ids from the passed subdomain name.
+   * @return The subdomain ids from the passed subdomain names.
    */
   std::vector<SubdomainID> getSubdomainIDs(const std::vector<SubdomainName> & subdomain_name) const;
 
@@ -722,7 +730,16 @@ public:
   /**
    * Return the name of a block given an id.
    */
-  const std::string & getSubdomainName(SubdomainID subdomain_id);
+  const std::string & getSubdomainName(SubdomainID subdomain_id) const;
+
+  /**
+   * Get the associated subdomainNames for the subdomain ids that are passed in.
+   *
+   * @param subdomain_ids The ids of the subdomains
+   * @return The subdomain names from the passed subdomain ids.
+   */
+  std::vector<SubdomainName>
+  getSubdomainNames(const std::vector<SubdomainID> & subdomain_ids) const;
 
   /**
    * This method sets the boundary name of the boundary based on the id parameter
@@ -1203,6 +1220,11 @@ public:
   const std::unordered_map<std::pair<const Elem *, unsigned short int>, const Elem *> &
   getLowerDElemMap() const;
 
+  /**
+   * @return Whether or not this mesh comes from a split mesh
+   */
+  bool isSplit() const { return _is_split; }
+
 protected:
   /// Deprecated (DO NOT USE)
   std::vector<std::unique_ptr<GhostingFunctor>> _ghosting_functors;
@@ -1373,6 +1395,9 @@ protected:
   /// A vector holding the paired boundaries for a regular orthogonal mesh
   std::vector<std::pair<BoundaryID, BoundaryID>> _paired_boundary;
 
+  /// Whether or not we are using a (pre-)split mesh (automatically DistributedMesh)
+  const bool _is_split;
+
   void cacheInfo();
   void freeBndNodes();
   void freeBndElems();
@@ -1509,6 +1534,12 @@ private:
    * transformation will be created if it hasn't been already
    */
   void updateCoordTransform();
+
+  /**
+   * Loop through all subdomain IDs and check if there is name duplication used for the subdomains
+   * with same ID. Throw out an error if any name duplication is found.
+   */
+  void checkDuplicateSubdomainNames();
 
   /// Holds mappings for volume to volume and parent side to child side
   std::map<std::pair<int, ElemType>, std::vector<std::vector<QpMap>>> _elem_type_to_refinement_map;

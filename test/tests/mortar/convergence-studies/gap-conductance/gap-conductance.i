@@ -196,8 +196,6 @@
   solve_type = NEWTON
   type = Steady
   petsc_options = '-snes_converged_reason'
-  # petsc_options_iname = '-pc_type -pc_factor_mat_solver_type'
-  # petsc_options_value = 'lu       superlu_dist'
   petsc_options_iname = '-pc_type -pc_hypre_type'
   petsc_options_value = 'hypre    boomeramg'
 []

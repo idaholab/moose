@@ -67,7 +67,7 @@ registerActions(Syntax & syntax)
     syntax.addDependency("THM:add_heat_structure_material", "add_function");
     syntax.addDependency("THM:output_vector_velocity", "setup_mesh");
     syntax.addDependency("THM:add_closures", "setup_mesh");
-    syntax.addDependency("THM:add_component", "THM:output_vector_velocity");
+    syntax.addDependency("THM:init_components", "THM:output_vector_velocity");
     syntax.addDependency("THM:debug_action", "setup_mesh");
     syntax.addDependency("THM:init_simulation", "THM:add_component");
     syntax.addDependency("add_mesh_generator", "THM:add_component");
@@ -96,6 +96,8 @@ registerActions(Syntax & syntax)
     syntax.addDependency("THM:print_component_loops", "THM:control_data_integrity_check");
     syntax.addDependency("THM:preconditioning_integrity_check", "check_integrity");
     syntax.addDependency("THM:add_relationship_managers", "add_geometric_rm");
+    syntax.addDependency("THM:add_relationship_managers", "THM:add_component");
+    syntax.addDependency("THM:init_simulation", "THM:add_relationship_managers");
     syntax.addDependency("THM:output_vector_velocity", "THM:add_relationship_managers");
     syntax.addDependency("THM:add_variables", "THM:integrity_check");
   }

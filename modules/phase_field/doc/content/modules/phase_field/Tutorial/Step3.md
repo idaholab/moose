@@ -12,13 +12,13 @@ We know that the initial conditions should be 46.774 mol% chromium with minor va
 
 ```yaml
 [ICs]
-  [./concentrationIC]   # 46.774 mol% Cr with variations
+  [concentrationIC]   # 46.774 mol% Cr with variations
     type = RandomIC
     min = 0.44774
     max = 0.48774
     seed = 210
     variable = c
-  [../]
+  []
 []
 ```
 
@@ -72,18 +72,18 @@ To add mesh adaptivity, we go back to the executioner block, add the adaptivity 
                          -sub_pc_type -pc_asm_overlap'
   petsc_options_value = 'asm      31                  preonly
                          ilu          1'
-  [./TimeStepper]
+  [TimeStepper]
     type = IterationAdaptiveDT
     dt = 10
     cutback_factor = 0.8
     growth_factor = 1.5
     optimal_iterations = 7
-  [../]
-  [./Adaptivity]
+  []
+  [Adaptivity]
     coarsen_fraction = 0.1
     refine_fraction = 0.7
     max_h_level = 2
-  [../]
+  []
 []
 ```
 
@@ -95,22 +95,22 @@ We are also interested in how the size of the time step changes throughout the s
 
 ```yaml
 [Postprocessors]
-  [./step_size]             # Size of the time step
+  [step_size]             # Size of the time step
     type = TimestepSize
-  [../]
-  [./iterations]            # Number of iterations needed to converge timestep
+  []
+  [iterations]            # Number of iterations needed to converge timestep
     type = NumNonlinearIterations
-  [../]
-  [./nodes]                 # Number of nodes in mesh
+  []
+  [nodes]                 # Number of nodes in mesh
     type = NumNodes
-  [../]
-  [./evaluations]           # Cumulative residual calculations for simulation
+  []
+  [evaluations]           # Cumulative residual calculations for simulation
     type = NumResidualEvaluations
-  [../]
-  [./active_time]           # Time computer spent on simulation
-    type = RunTime
-    time_type = active
-  [../]
+  []
+  [active_time]           # Time computer spent on simulation
+    type = PerformanceData
+    event =  ACTIVE
+  []
 []
 ```
 

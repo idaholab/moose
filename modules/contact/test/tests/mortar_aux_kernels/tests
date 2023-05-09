@@ -11,7 +11,6 @@
     min_parallel = 1
     max_parallel = 4
     min_ad_size = '50'
-    ad_indexing_type = 'global'
     requirement = 'The contact module shall be able to compute nodal weighted gap distance velocity values via a '
                   'mortar auxiliary kernel.'
   []
@@ -24,7 +23,6 @@
     min_parallel = 1
     max_parallel = 4
     min_ad_size = '50'
-    ad_indexing_type = 'global'
     valgrind = 'none'
     requirement = 'The contact module shall be able to compute nodal wear depth values in accordance with Archard '
                   'equation via a mortar auxiliary kernel.'
@@ -35,11 +33,10 @@
     exodiff = 'block-dynamics-aux-wear-vel_out.e'
     input = 'block-dynamics-aux-wear-vel.i'
     rel_err = 1.0e-3
-    abs_zero = 1.0e-4
+    abs_zero = 5.0e-3
     min_parallel = 1
     max_parallel = 4
     min_ad_size = '50'
-    ad_indexing_type = 'global'
     heavy = true
     method = 'opt'
     valgrind = 'none'
@@ -55,7 +52,6 @@
     rel_err = 1.0e-3
     abs_zero = 1.0e-4
     min_ad_size = '100'
-    ad_indexing_type = 'global'
     cli_args = 'AuxKernels/frictional_state/tangent_two=mortar_tangential_3d_lm'
     requirement = 'Contact module shall compute nodal frictional status of mortar surfaces for a '
                   'simple problem in which nodes are in stick and slip states.'
@@ -68,7 +64,6 @@
     min_parallel = 1
     max_parallel = 2
     min_ad_size = '100'
-    ad_indexing_type = 'global'
     requirement = 'The contact module shall be able to generate an informative error if the nodal frictional status '
                   'auxiliary kernel is not provided a second frictional Lagrange multiplier for a '
                   'three-dimensional problem.'
@@ -82,8 +77,7 @@
     min_parallel = 1
     max_parallel = 4
     min_ad_size = '50'
-    ad_indexing_type = 'global'
-    cli_args = 'Executioner/end_time=0.15 '
+    cli_args = 'Executioner/end_time=0.2 '
                'Outputs/file_base=block-dynamics-aux-fretting-wear-test-quick_out'
     requirement = 'The contact module shall be able to compute nodal wear depth values in accordance with Archard '
                   'equation and the mortar gap velocity via mortar auxiliary kernels while including '
@@ -95,17 +89,13 @@
     exodiff = 'block-dynamics-aux-fretting-wear-test-quick-multiple-projections_out.e'
     input = 'block-dynamics-aux-fretting-wear-test.i'
     rel_err = 1.0e-3
-    abs_zero = 1.0e-4
-    min_parallel = 1
-    max_parallel = 4
+    abs_zero = 2.0e-4
     min_ad_size = '50'
     map = False
     partial = True
-    ad_indexing_type = 'global'
     cli_args = 'Mesh/file=long-bottom-block-1elem-blocks-multiple-projections.e '
-               'Executioner/end_time=0.15 '
-               'Outputs/file_base=block-dynamics-aux-fretting-wear-test-quick-multiple-projections_ou'
-               't'
+               'Executioner/end_time=0.2 '
+               'Outputs/file_base=block-dynamics-aux-fretting-wear-test-quick-multiple-projections_out'
     requirement = 'The contact module shall be able to compute nodal wear depth values in accordance with Archard '
                   'equation and the mortar gap velocity via mortar auxiliary kernels while including '
                   'these computations in the definition of mortar normal contact constraints in an '
@@ -124,10 +114,10 @@
     min_ad_size = '50'
     map = False
     partial = True
-    ad_indexing_type = 'global'
     cli_args = 'Mesh/file=long-bottom-block-1elem-blocks-multiple-projections-lowerd.e '
-               'Executioner/end_time=0.15 Constraints/weighted_gap_lm/correct_edge_dropping=false '
+               'Executioner/end_time=0.2 Constraints/weighted_gap_lm/correct_edge_dropping=true '
                'Constraints/weighted_gap_lm/debug_mesh=true '
+               'UserObjects/weighted_vel_uo/correct_edge_dropping=false UserObjects/weighted_vel_uo/debug_mesh=true '
                'Constraints/normal_x/correct_edge_dropping=true Constraints/normal_x/debug_mesh=true '
                'Constraints/normal_y/correct_edge_dropping=true Constraints/normal_y/debug_mesh=true '
                'Constraints/tangential_x/correct_edge_dropping=true '
@@ -154,11 +144,10 @@
     exodiff = 'block-dynamics-aux-fretting-wear-test-action-quick_out.e'
     input = 'block-dynamics-aux-fretting-wear-test-action.i'
     rel_err = 1.0e-3
-    abs_zero = 1.0e-4
+    abs_zero = 5.0e-4
     min_parallel = 1
     max_parallel = 4
     min_ad_size = '50'
-    ad_indexing_type = 'global'
     map = False
     partial = True
     cli_args = 'Executioner/end_time=0.15 '
@@ -176,7 +165,6 @@
     abs_zero = 1.0e-4
     max_parallel = 1
     min_ad_size = '50'
-    ad_indexing_type = 'global'
     map = False
     partial = True
     requirement = 'The system shall allow for a user controllable input such that the mortar segment '
@@ -190,7 +178,6 @@
     csvdiff = 'pressure-aux-frictionless_out_normal_lm_0011.csv'
     abs_zero = 1.0e-4
     min_ad_size = '50'
-    ad_indexing_type = 'global'
     mesh_mode = 'REPLICATED'
     requirement = 'The system shall produce the correct normal contact pressure '
                   'value for frictionless mortar contact when using an auxiliary kernel.'
@@ -201,7 +188,6 @@
     csvdiff = 'pressure-aux-frictionless-3d_out_normal_lm_0003.csv'
     abs_zero = 1.0e-4
     min_ad_size = '100'
-    ad_indexing_type = 'global'
     mesh_mode = 'REPLICATED'
     requirement = 'The system shall be able to  produce the correct normal contact pressure '
                   'value in 3D for frictionless mortar contact when using an auxiliary kernel.'
@@ -212,7 +198,6 @@
     csvdiff = 'pressure-aux-friction_out_tangent_lm_0011.csv'
     abs_zero = 1.0e-4
     min_ad_size = '50'
-    ad_indexing_type = 'global'
     mesh_mode = 'REPLICATED'
     requirement = 'The system shall be able to produce the correct tangential contact pressure '
                   'value for frictional mortar contact when using an auxiliary kernel.'
@@ -223,7 +208,6 @@
     csvdiff = 'pressure-aux-friction-3d_out_tangent2_lm_0003.csv'
     abs_zero = 1.0e-4
     min_ad_size = '100'
-    ad_indexing_type = 'global'
     mesh_mode = 'REPLICATED'
     requirement = 'The system shall be able to produce the correct tangential contact pressure '
                   'value in 3D for frictional mortar contact when using an auxiliary kernel.'

@@ -17,6 +17,8 @@
 #include <map>
 #include <memory>
 
+#include "libmesh/utility.h"
+
 #define combineNames1(X, Y) X##Y
 #define combineNames(X, Y) combineNames1(X, Y)
 
@@ -165,6 +167,14 @@ public:
     copy._build_ptr = &build<T, MooseObject>;
     copy._params_ptr = &moose::internal::callValidParams<T>;
     addInner(copy);
+
+    std::string name = info._name;
+    if (name.empty())
+      name = info._alias;
+    if (name.empty())
+      name = info._classname;
+    getRegistry()._type_to_classname[typeid(T).name()] = name;
+
     return 0;
   }
 
@@ -178,7 +188,14 @@ public:
     copy._build_action_ptr = &build<T, Action>;
     copy._params_ptr = &moose::internal::callValidParams<T>;
     addActionInner(copy);
+    getRegistry()._type_to_classname[typeid(T).name()] = info._classname;
     return 0;
+  }
+
+  template <typename T>
+  static std::string getClassName()
+  {
+    return libmesh_map_find(getRegistry()._type_to_classname, typeid(T).name());
   }
 
   /// This registers all MooseObjects known to the registry that have the given label(s) with the
@@ -222,6 +239,14 @@ public:
     return getRegistry()._data_file_paths;
   }
 
+  ///@{ Don't allow creation through copy/move construction or assignment
+  Registry(Registry const &) = delete;
+  Registry & operator=(Registry const &) = delete;
+
+  Registry(Registry &&) = delete;
+  Registry & operator=(Registry &&) = delete;
+  ///@}
+
 private:
   Registry(){};
 
@@ -239,4 +264,5 @@ private:
   std::map<std::string, std::vector<RegistryEntry>> _per_label_actions;
   std::set<std::string> _known_labels;
   std::vector<std::string> _data_file_paths;
+  std::map<std::string, std::string> _type_to_classname;
 };

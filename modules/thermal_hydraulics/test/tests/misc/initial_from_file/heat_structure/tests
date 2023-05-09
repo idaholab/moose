@@ -4,7 +4,6 @@
     input = 'steady_state.i'
     exodiff = 'steady_state_out.e'
     recover = false
-    ad_indexing_type = 'global'
 
     requirement = 'The system shall be able to produce an exodus file for setting initial conditions in heat structures'
     design = 'heat_structure.md'
@@ -17,7 +16,6 @@
     exodiff = 'test_out.e'
     prereq = steady_state
     recover = false
-    ad_indexing_type = 'global'
 
     requirement = 'The system shall be able to use an exodus file for setting initial conditions in heat structures'
     design = 'heat_structure.md SolutionInitialCondition.md'

@@ -12,6 +12,7 @@
 #include "MooseVariableFV.h"
 #include "RelationshipManager.h"
 #include "NSFVUtils.h"
+#include "FVBoundaryScalarLagrangeMultiplierConstraint.h"
 
 InputParameters
 INSFVAdvectionKernel::validParams()
@@ -33,11 +34,6 @@ INSFVAdvectionKernel::INSFVAdvectionKernel(const InputParameters & params)
   : FVFluxKernel(params),
     _rc_vel_provider(getUserObject<INSFVRhieChowInterpolator>("rhie_chow_user_object"))
 {
-#ifndef MOOSE_GLOBAL_AD_INDEXING
-  mooseError("INSFV is not supported by local AD indexing. In order to use INSFV, please run the "
-             "configure script in the root MOOSE directory with the configure option "
-             "'--with-ad-indexing-type=global'");
-#endif
   const bool need_more_ghosting =
       Moose::FV::setInterpolationMethods(*this, _advected_interp_method, _velocity_interp_method);
   if (need_more_ghosting && _tid == 0)
@@ -84,9 +80,14 @@ INSFVAdvectionKernel::skipForBoundary(const FaceInfo & fi) const
       return false;
 
   // If we have flux bcs then we do skip
-  const auto & flux_pr = _var.getFluxBCs(fi);
-  if (flux_pr.first)
-    return true;
+  const auto & [have_flux_bcs, flux_bcs] = _var.getFluxBCs(fi);
+  libmesh_ignore(have_flux_bcs);
+  for (const auto * const flux_bc : flux_bcs)
+    // If we have something like an average-value pressure constraint on a flow boundary, then we
+    // still want to execute this advection kernel on the boundary to ensure we're enforcing local
+    // conservation (mass in this example)
+    if (!dynamic_cast<const FVBoundaryScalarLagrangeMultiplierConstraint *>(flux_bc))
+      return true;
 
   // If we have a flow boundary without a replacement flux BC, then we must not skip. Mass and
   // momentum are transported via advection across boundaries

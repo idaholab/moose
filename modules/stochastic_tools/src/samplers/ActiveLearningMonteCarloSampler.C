@@ -29,6 +29,11 @@ ActiveLearningMonteCarloSampler::validParams()
       "num_random_seeds",
       100000,
       "Initialize a certain number of random seeds. Change from the default only if you have to.");
+  params.addRequiredRangeCheckedParam<int>(
+      "num_samples",
+      "num_samples>0",
+      "Number of samples to use (the total number of steps taken will be equal to this number + "
+      "the number of re-training steps).");
   return params;
 }
 
@@ -38,7 +43,8 @@ ActiveLearningMonteCarloSampler::ActiveLearningMonteCarloSampler(const InputPara
     _flag_sample(getReporterValue<std::vector<bool>>("flag_sample")),
     _step(getCheckedPointerParam<FEProblemBase *>("_fe_problem_base")->timeStep()),
     _num_batch(getParam<dof_id_type>("num_batch")),
-    _check_step(std::numeric_limits<int>::min())
+    _check_step(std::numeric_limits<int>::min()),
+    _num_samples(getParam<int>("num_samples"))
 {
   for (const DistributionName & name : getParam<std::vector<DistributionName>>("distributions"))
     _distributions.push_back(&getDistributionByName(name));
@@ -55,11 +61,22 @@ ActiveLearningMonteCarloSampler::sampleSetUp(const Sampler::SampleMode /*mode*/)
   if (_check_step == _step)
     return;
 
+  if (_is_sampling_completed)
+    mooseError("Internal bug: the adaptive sampling is supposed to be completed but another sample "
+               "has been requested.");
+
   // Keep data where the GP failed
   if (_step > 0)
     for (dof_id_type i = 0; i < _num_batch; ++i)
       if (_flag_sample[i])
+      {
         _inputs_gp_fails.push_back(_inputs_sto[i]);
+
+        // When the GP fails, the current time step is 'wasted' and the retraining step doesn't
+        // happen until the next time step. Therefore, keep track of the number of retraining steps
+        // to increase the total number of steps taken.
+        ++_retraining_steps;
+      }
 
   // If we don't have enough failed inputs, generate new ones
   if (_inputs_gp_fails.size() < _num_batch)
@@ -76,6 +93,10 @@ ActiveLearningMonteCarloSampler::sampleSetUp(const Sampler::SampleMode /*mode*/)
   }
 
   _check_step = _step;
+
+  // check if we have finished the sampling
+  if (_step >= _num_samples + _retraining_steps)
+    _is_sampling_completed = true;
 }
 
 Real

@@ -1,0 +1,11 @@
+[Tests]
+  [find_hung_process]
+    requirement = "The find_hung_process.py script shall be able to correctly "
+                  "identify diverged stacks of a hung process."
+    type = RunApp
+    command = '../../framework/scripts/find_hung_process.py -f bad_mpi.4726853.cache'
+    expect_out = "^Count: 7$.*^Count: 1$"
+    issues = '#7507'
+    design = 'Debug/index.md'
+  []
+[]

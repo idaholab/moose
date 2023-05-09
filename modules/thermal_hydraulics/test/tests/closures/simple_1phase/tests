@@ -3,7 +3,6 @@
     type = 'RunException'
     input = 'err.missing_f_1phase.i'
     expect_err = "pipe: When using simple closures, the parameter 'f' must be provided."
-    ad_indexing_type = 'global'
   []
   [enumeration_option]
     type = RunException
@@ -11,6 +10,5 @@
     cli_args = "GlobalParams/closures=simple Components/pipe/f=0"
     allow_deprecated = False
     expect_err = 'The closures system now uses objects created in the input file'
-    ad_indexing_type = 'global'
   []
 []

@@ -1,11 +1,18 @@
 # Obtaining and Building MOOSE
 
-!include getting_started/installation/clone_moose.md
+!template load file=installation/clone_moose.md.template PATH=~/projects
 
-!include getting_started/installation/manual_petsc.md
+## Build PETSc and libMesh
 
-!include getting_started/installation/build_libmesh.md
+!template load file=installation/build_petsc_and_libmesh.md.template PATH=~/projects
 
-!include getting_started/installation/test_moose.md
+## Compile and Test MOOSE
 
-Head back over to the [getting_started/index.md] page to continue your tour of MOOSE.
+!template load file=installation/test_moose.md.template PATH=~/projects
+
+If the installation was successful you should see most of the tests passing (some tests will be
+skipped depending on your system environment), and no failures.
+
+
+Now that you have a working MOOSE, proceed to [New Users](getting_started/new_users.md). A
+primer which will walk you through creating your MOOSE based application.

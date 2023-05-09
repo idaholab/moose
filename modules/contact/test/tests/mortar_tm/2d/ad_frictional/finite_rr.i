@@ -96,10 +96,10 @@ name = 'finite_rr'
     secondary = block_left
     formulation = mortar
     model = coulomb
-    normalize_c = true
-    c_normal = 1e5
-    c_tangential = 1e5
+    c_normal = 1e3
+    c_tangential = 1e-6
     friction_coefficient = 0.1
+    tangential_lm_scaling = 1.0e-10
   []
 []
 

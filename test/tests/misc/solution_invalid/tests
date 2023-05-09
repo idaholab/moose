@@ -45,7 +45,7 @@
     recover = false
     type = JSONDiff
     input = solution_invalid.i
-    cli_args = "Executioner/type=Transient Executioner/num_steps=1 Executioner/error_on_dtmin=false Outputs/file_base='solution_invalid_transient' "
+    cli_args = "Executioner/type=Transient Executioner/num_steps=1 Executioner/dtmin=1e-13 Executioner/error_on_dtmin=false Outputs/file_base='solution_invalid_transient' "
     jsondiff = 'solution_invalid_transient.json'
     design = 'SolutionInvalidity.md'
     issues = '#22814'

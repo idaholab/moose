@@ -7,7 +7,6 @@
     exodiff = 3d-rc_out.e
     method = "!dbg"
     requirement = 'The system shall be able to solve for flow in a 3D channel while not caching cell gradients.'
-    ad_indexing_type = 'global'
     cli_args = 'pressure_cell_gradient_caching=false
                 velocity_cell_gradient_caching=false'
   []
@@ -17,6 +16,5 @@
     exodiff = 3d-rc_out.e
     method = "!dbg"
     requirement = 'The system shall be able to solve for flow in a 3D channel while caching cell gradients.'
-    ad_indexing_type = 'global'
   []
 []

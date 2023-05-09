@@ -10,15 +10,15 @@ We are going to make two more changes and our simulation will be complete. First
 
 ```yaml
 [Variables]
-  [./c]   # Mole fraction of Cr (unitless)
+  [c]   # Mole fraction of Cr (unitless)
     order = FIRST
     family = LAGRANGE
     scaling = 1e+04
-  [../]
-  [./w]   # Chemical potential (eV/mol)
+  []
+  [w]   # Chemical potential (eV/mol)
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 []
 ```
 
@@ -36,31 +36,31 @@ Energy comes from both the free energy density function term and the gradient en
 
 ```yaml
 [AuxVariables]
-  [./f_density]   # Local energy density (eV/mol)
+  [f_density]   # Local energy density (eV/mol)
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
 []
 
 [AuxKernels]
   # Calculates the energy density by combining the local and gradient energies
-  [./f_density]   # (eV/mol/nm^2)
+  [f_density]   # (eV/mol/nm^2)
     type = TotalFreeEnergy
     variable = f_density
     f_name = 'f_loc'
     kappa_names = 'kappa_c'
     interfacial_vars = c
-  [../]
+  []
 []
 ```
 
 The auxiliary variable `f_density` returns the total energy density at each point on the surface. In order to get the total free energy, we have to integrate the variable in a Postprocessor.
 
 ```yaml
-  [./total_energy]          # Total free energy at each timestep
+  [total_energy]          # Total free energy at each timestep
     type = ElementIntegralVariablePostprocessor
     variable = f_density
-  [../]
+  []
 ```
 
 If you wish you may remove any of the Postprocessors that you feel are unnecessary for the simulation at this point, or you may continue trying to optimize the simulation by changing values in the `Preconditioning` and `Executioner` blocks.

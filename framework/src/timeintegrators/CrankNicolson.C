@@ -67,13 +67,32 @@ CrankNicolson::init()
   //       to be added on top of itself prohibited by PETSc.
   //       Objects executed on initial have been executed by FEProblem,
   //       so we can and should directly call NonlinearSystem residual evaluation.
+  _fe_problem.setCurrentResidualVectorTags({_nl.nonTimeVectorTag()});
   _nl.computeResidualTag(_nl.RHS(), _nl.nonTimeVectorTag());
+  _fe_problem.clearCurrentResidualVectorTags();
   _residual_old = _nl.RHS();
 }
 
 void
 CrankNicolson::postResidual(NumericVector<Number> & residual)
 {
+  // PETSc 3.19 insists on having closed vectors when doing VecAXPY,
+  // and that's probably a good idea with earlier versions too, but
+  // we don't always get here with _Re_time closed.
+  std::vector<unsigned char> inputs_closed = {
+      _Re_time.closed(), _Re_non_time.closed(), _residual_old.closed()};
+
+  // We might have done work on one processor but not all processors,
+  // so we have to sync our closed() checks.  Congrats to the BISON
+  // folks for test coverage that caught that.
+  comm().min(inputs_closed);
+
+  if (!inputs_closed[0])
+    _Re_time.close();
+  if (!inputs_closed[1])
+    _Re_non_time.close();
+  if (!inputs_closed[2])
+    _residual_old.close();
   residual += _Re_time;
   residual += _Re_non_time;
   residual += _residual_old;

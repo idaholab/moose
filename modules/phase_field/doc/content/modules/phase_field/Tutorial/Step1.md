@@ -34,14 +34,14 @@ Because we are using the split form, two variables are defined, the mole fractio
 
 ```yaml
 [Variables]
-  [./c]   # Mole fraction of Cr (unitless)
+  [c]   # Mole fraction of Cr (unitless)
     order = FIRST
     family = LAGRANGE
-  [../]
-  [./w]   # Chemical potential (eV/mol)
+  []
+  [w]   # Chemical potential (eV/mol)
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 []
 ```
 
@@ -53,7 +53,7 @@ To start off we want to check our second expectation. That is, that the surface 
 [ICs]
   # Use a bounding box IC at equilibrium concentrations to make sure the
   # model behaves as expected.
-  [./testIC]
+  [testIC]
     type = BoundingBoxIC
     variable = c
     x1 = 5
@@ -62,7 +62,7 @@ To start off we want to check our second expectation. That is, that the surface 
     y2 = 20
     inside = 0.823
     outside = 0.236
-  [../]
+  []
 []
 ```
 
@@ -73,11 +73,11 @@ It is common in phase field simulations to use periodic boundary conditions.
 ```yaml
 [BCs]
   # periodic BC as is usually done on phase-field models
-  [./Periodic]
-    [./c_bcs]
+  [Periodic]
+    [c_bcs]
       auto_direction = 'x y'
-    [../]
-  [../]
+    []
+  []
 []
 ```
 
@@ -87,23 +87,23 @@ We will use the kernels specified for the split Cahn-Hilliard equation. Note tha
 
 ```yaml
 [Kernels]
-  [./w_dot]
+  [w_dot]
     variable = w
     v = c
     type = CoupledTimeDerivative
-  [../]
-  [./coupled_res]
+  []
+  [coupled_res]
     variable = w
     type = SplitCHWRes
     mob_name = M
-  [../]
-  [./coupled_parsed]
+  []
+  [coupled_parsed]
     variable = c
     type = SplitCHParsed
     f_name = f_loc
     kappa_name = kappa_c
     w = w
-  [../]
+  []
 []
 ```
 
@@ -118,7 +118,7 @@ In addition to the unit conversions, it was accidentally discovered that the con
   # d is a scaling factor that makes it easier for the solution to converge
   # without changing the results. It is defined in each of the materials and
   # must have the same value in each one.
-  [./constants]
+  [constants]
     # Define constant values kappa_c and M. Eventually M will be replaced with
     # an equation rather than a constant.
     type = GenericFunctionMaterial
@@ -128,8 +128,8 @@ In addition to the unit conversions, it was accidentally discovered that the con
                    2.2841e-26*1e+09^2/6.24150934e+18/1e-27'
                    # kappa_c*eV_J*nm_m^2*d
                    # M*nm_m^2/eV_J/d
-  [../]
-  [./local_energy]
+  []
+  [local_energy]
     # Defines the function for the local free energy density as given in the
     # problem, then converts units and adds scaling factor.
     type = DerivativeParsedMaterial
@@ -142,7 +142,7 @@ In addition to the unit conversions, it was accidentally discovered that the con
                             6.24150934e+18 1e-27'
     function = 'eV_J*d*(A*c+B*(1-c)+C*c*log(c)+D*(1-c)*log(1-c)+
                 E*c*(1-c)+F*c*(1-c)*(2*c-1)+G*c*(1-c)*(2*c-1)^2)'
-  [../]
+  []
 []
 ```
 
@@ -152,10 +152,10 @@ The split Cahn-Hilliard has the best convergence properties when we use the [New
 
 ```yaml
 [Preconditioning]
-  [./coupled]
+  [coupled]
     type = SMP
     full = true
-  [../]
+  []
 []
 ```
 

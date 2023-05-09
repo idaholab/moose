@@ -6,7 +6,6 @@
     expect_err = "variable1 does not exist on all the blocks specified by the subdomain1 parameter"
     cli_args = "FVInterfaceKernels/active='bad1'"
     design = 'FVInterfaceKernels/index.md'
-    ad_indexing_type = 'global'
     requirement = 'The system shall error if a user specified variable on the 1st side of an interface does not actually exist on the 1st side.'
   []
   [run_except2]
@@ -16,7 +15,6 @@
     cli_args = "FVInterfaceKernels/active='bad2'"
     design = 'FVInterfaceKernels/index.md'
     requirement = 'The system shall error if a user specified variable on the 2nd side of an interface does not actually exist on the 2nd side.'
-    ad_indexing_type = 'global'
   []
   [run_except3]
     type = RunException
@@ -26,7 +24,6 @@
                  "was implicitly used on subdomain2"
     cli_args = "FVInterfaceKernels/active='bad3'"
     design = 'FVInterfaceKernels/index.md'
-    ad_indexing_type = 'global'
     requirement = 'The system shall error if a user does not specify a variable on the 2nd side of an interface, leading the system to assume that the variable on the 1st side of the interface should be used on the 2nd side, and the variable on the 1st side does not exist on the 2nd side.'
   []
   [first_order_convergence]
@@ -37,7 +34,6 @@
       input = test.py
       test_case = TestFVOneVarDiffusionInterface
       detail = 'with an interfacing object'
-      ad_indexing_type = 'global'
       required_python_packages = 'pandas matplotlib'
     []
     [without-ik]
@@ -45,7 +41,6 @@
       input = test.py
       test_case = TestFVNoInterface
       detail = 'without an interfacing object'
-      ad_indexing_type = 'global'
       required_python_packages = 'pandas matplotlib'
     []
   []
@@ -57,7 +52,6 @@
     type = PythonUnitTest
     input = test.py
     test_case = TestFVOneVarDiffusionInterfaceHarmonic
-    ad_indexing_type = 'global'
     required_python_packages = 'pandas matplotlib'
   []
   [resid_and_jac]
@@ -66,7 +60,6 @@
     issues = '#19444'
     input = test.i
     exodiff = test_out.e
-    ad_indexing_type = 'global'
     type = Exodiff
   []
 []

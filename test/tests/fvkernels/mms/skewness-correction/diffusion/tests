@@ -7,7 +7,6 @@
     test_case = TestAverageStencil
     requirement = 'The system shall display first order convergence, when averaging face side neighbors to compute face midpoint values during gradient reconstruction.'
     method = '!dbg'
-    ad_indexing_type = 'global'
     required_python_packages = 'pandas matplotlib'
     valgrind = none
   []
@@ -17,7 +16,6 @@
     test_case = TestSkewnessCorrectedStencil
     requirement = 'The system shall display second order convergence, when skewness-corrected averaging to compute face midpoint values during gradient reconstruction.'
     method = '!dbg'
-    ad_indexing_type = 'global'
     required_python_packages = 'pandas matplotlib'
     valgrind = none
   []

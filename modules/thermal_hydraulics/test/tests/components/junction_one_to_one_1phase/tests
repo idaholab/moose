@@ -8,7 +8,6 @@
       Postprocessors/rhouA_right/boundary=right_channel:in
       Postprocessors/rhouA_right/execute_on='initial timestep_end'"
     csvdiff = 'junction_one_to_one_1phase_out.csv'
-    ad_indexing_type = 'global'
   []
 
   [phy:no_junction_equivalency_1phase_flipped]
@@ -37,7 +36,6 @@
     type = 'Exodiff'
     input = 'constriction_1phase.i'
     exodiff = 'constriction_1phase_out.e'
-    ad_indexing_type = 'global'
   []
 
   [phy:no_junction_1phase_check]
@@ -45,15 +43,5 @@
     input = 'no_junction_1phase.i'
     check_input = true
     recover = false
-  []
-
-  [err:not_parallel]
-    type = 'RunException'
-    input = 'junction_one_to_one_1phase.i'
-    cli_args = "
-      Components/right_channel/orientation='1 1 1'
-      Outputs/show=''"
-    expect_err = "The connected channels must be parallel at the junction"
-    ad_indexing_type = 'global'
   []
 []

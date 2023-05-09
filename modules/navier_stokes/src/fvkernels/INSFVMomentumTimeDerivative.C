@@ -32,7 +32,8 @@ void
 INSFVMomentumTimeDerivative::gatherRCData(const Elem & elem)
 {
   const auto e = makeElemArg(&elem);
-  const auto residual = _rho(e) * _var.dot(e) * _assembly.elementVolume(&elem);
+  const auto state = determineState();
+  const auto residual = _rho(e, state) * _var.dot(e, state) * _assembly.elementVolume(&elem);
   const auto dof_number = elem.dof_number(_sys.number(), _var.number(), 0);
   const Real a = residual.derivatives()[dof_number];
 

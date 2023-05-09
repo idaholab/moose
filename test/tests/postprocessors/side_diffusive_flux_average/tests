@@ -16,6 +16,5 @@
     design = 'SideDiffusiveFluxAverage.md'
     issues = '#2201 #16099'
     requirement = 'The system shall be capable of computing the average of the diffusive flux integral of a finite volume variable through a specified boundary on the mesh.'
-    ad_indexing_type = 'global'
   [../]
 []

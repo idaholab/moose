@@ -46,3 +46,10 @@
     assign_control_drum_id = true
   []
 []
+
+[Outputs]
+  [out]
+    type = Exodus
+    output_extra_element_ids = false
+  []
+[]

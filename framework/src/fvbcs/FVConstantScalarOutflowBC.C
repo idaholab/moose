@@ -33,12 +33,7 @@ FVConstantScalarOutflowBC::computeQpResidual()
               "This boundary condition is for outflow but the flow is in the opposite direction of "
               "the boundary normal");
 
-#ifdef MOOSE_GLOBAL_AD_INDEXING
   // This will either be second or first order accurate depending on whether the user has asked
   // for a two term expansion in their input file
-  return _normal * _velocity * _var.getBoundaryFaceValue(*_face_info);
-#else
-  // this simply returns a cell centroid value which will only result in first order accuracy
-  return _normal * _velocity * uOnUSub();
-#endif
+  return _normal * _velocity * _var.getBoundaryFaceValue(*_face_info, determineState());
 }

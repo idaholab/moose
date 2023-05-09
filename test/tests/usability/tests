@@ -51,7 +51,7 @@
   [diagnostic]
     type = RunException
     input = 'bad.i'
-    expect_err = "bad.i:13: missing closing '\[\]' for section"
+    expect_err = "(bad.i:41.1: syntax error, unexpected end of file)|(bad.i:13: missing closing '\[\]' for section)"
     max_parallel = 1
 
     requirement = "The system shall provide diagnostics when the input file fails to parse, or the format is incorrect."

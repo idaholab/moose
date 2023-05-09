@@ -1,0 +1,8 @@
+To test MOOSE, run the following commands:
+
+```bash
+cd {{PATH}}/moose/test
+./run_tests -j 6
+```
+
+!include faq/example_failing_test.md optional=true

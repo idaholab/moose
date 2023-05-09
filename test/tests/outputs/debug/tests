@@ -5,7 +5,7 @@
     input = 'show_var_residual_norms.i'
     expect_out = "\|residual\|_2 of individual variables:.*\|residual\|_2 of individual variables:.*\|residual\|_2 of individual variables:"
 
-    requirement = "The system shall be include the ability to display variable residual norms."
+    requirement = "The system shall include the ability to display variable residual norms."
     design = "VariableResidualNormsDebugOutput.md"
   []
 
@@ -23,69 +23,69 @@
     input = show_material_props.i
     expect_out = "Property Names:.*\"bnd_prop\""
 
-    requirement = "The system shall be include the ability to display material property information."
+    requirement = "The system shall include the ability to display material property information."
     design = "MaterialPropertyDebugOutput.md"
   []
 
   [show_material_props_block]
-     type = RunApp
-     input = show_material_props_debug.i
-     expect_out = "Property Names:.*\"bnd_prop\""
+    type = RunApp
+    input = show_material_props_debug.i
+    expect_out = "Property Names:.*\"bnd_prop\""
 
-     requirement = "The system shall include debug syntax that includes the ability to enable material property information output."
-     design = "MaterialPropertyDebugOutput.md Debug/index.md"
+    requirement = "The system shall include debug syntax that includes the ability to enable material property information output."
+    design = "MaterialPropertyDebugOutput.md Debug/index.md"
   []
 
   [show_top_residuals]
-     type = RunApp
-     input = show_top_residuals.i
-     expect_out = "\[DBG\]\[\d+\].*'u'.*at node"
-     max_parallel = 1
+    type = RunApp
+    input = show_top_residuals.i
+    expect_out = "\[DBG\]\[\d+\].*'u'.*at node"
+    max_parallel = 1
 
-     requirement = "The system shall be include the ability to display residual information for variables."
-     design = "TopResidualDebugOutput.md"
+    requirement = "The system shall include the ability to display residual information for variables."
+    design = "TopResidualDebugOutput.md"
   []
 
   [show_top_residuals_debug]
-     # Test that top residuals are displayed using DebugOutput object via Debug block
-     type = RunApp
-     input = show_top_residuals_debug.i
-     expect_out = "'u' in subdomain\(s\) {'block_one'}.*at node.*'v' in subdomain\(s\) {'block_one'}.*at element.*'w' \(SCALAR\)"
-     max_parallel = 1
+    # Test that top residuals are displayed using DebugOutput object via Debug block
+    type = RunApp
+    input = show_top_residuals_debug.i
+    expect_out = "'u' in subdomain\(s\) {'block_one'}.*at node.*'v' in subdomain\(s\) {'block_one'}.*at element.*'w' \(SCALAR\)"
+    max_parallel = 1
 
-     requirement = "The system shall include debug syntax that includes the ability to enable variable residual information."
-     design = "TopResidualDebugOutput.md Debug/index.md"
+    requirement = "The system shall include debug syntax that includes the ability to enable variable residual information."
+    design = "TopResidualDebugOutput.md Debug/index.md"
   []
 
   [show_top_residuals_nonlinear_only]
-     # Test that top residuals may be limited to nonlinear iterations only
-     type = RunApp
-     input = show_top_residuals_nonlinear_only.i
-     expect_out = "0 Linear[^\n]*\n[^\n]*1 Linear"
-     max_parallel = 1
+    # Test that top residuals may be limited to nonlinear iterations only
+    type = RunApp
+    input = show_top_residuals_nonlinear_only.i
+    expect_out = "0 Linear[^*\n]*\n[^*\n]*1 Linear"
+    max_parallel = 1
 
-     requirement = "The system shall be include the ability to display residual information for variables that is limited to non-linear iterations."
-     design = "TopResidualDebugOutput.md"
+    requirement = "The system shall include the ability to display residual information for variables that is limited to non-linear iterations."
+    design = "TopResidualDebugOutput.md"
   []
 
   [show_top_residuals_scalar]
-     # Test that top residuals of scalar variables are displayed using DebugOutput object via Outputs block
-     type = RunApp
-     input = show_top_residuals_scalar.i
-     expect_out = "\[DBG\]\[\d+\].*'lambda' \(SCALAR\)"
-     max_parallel = 1
+    # Test that top residuals of scalar variables are displayed using DebugOutput object via Outputs block
+    type = RunApp
+    input = show_top_residuals_scalar.i
+    expect_out = "\[DBG\]\[\d+\].*'lambda' \(SCALAR\)"
+    max_parallel = 1
 
-     requirement = "The system shall be include the ability to display residual information for scalar variables."
-     design = "TopResidualDebugOutput.md"
+    requirement = "The system shall include the ability to display residual information for scalar variables."
+    design = "TopResidualDebugOutput.md"
   []
 
   [show_material_properties_consumed]
-     type = RunApp
-     input = show_material_props_consumed.i
-     expect_out = "Object: Kernel::diff2\s+Properties: andrew"
+    type = RunApp
+    input = show_material_props_consumed.i
+    expect_out = "Object: Kernel::diff2\s+Properties: andrew"
 
-     requirement = "The system shall include debug syntax that includes material property consumption information."
-     design = "MaterialPropertyDebugOutput.md Debug/index.md"
+    requirement = "The system shall include debug syntax that includes material property consumption information."
+    design = "MaterialPropertyDebugOutput.md Debug/index.md"
   []
 
   [show_functors]
@@ -95,6 +95,214 @@
 
     requirement = 'The system shall be able to output debug information for functors and objects requesting functors'
     design = 'Debug/index.md'
-    ad_indexing_type = 'global'
+  []
+
+  [show_execution_order]
+    # These tests are designed to make sure the ordering of objects is always printed the same way
+    # They may diff if that ordering actually changes, in which case a regold may be necessary
+    # However, they do not test the explanation text also provided by these logs, as it is expected
+    # this text will change over time both as new objects/systems are added and as we refine the
+    # explanations to make them clearer
+    requirement = 'The system shall include the ability to output the execution order of'
+    design = 'Debug/index.md'
+    [regular_kernels]
+      type = RunApp
+      input = 'show_execution_kernels_bcs.i'
+      expect_out = '\[DBG\] diff1 test1 diff2 react forceu forcev'
+      detail = 'objects contributing to the residual and Jacobian, notably regular kernels,'
+      cli_args = '--color off'
+    []
+    [regular_bcs]
+      type = RunApp
+      input = 'show_execution_kernels_bcs.i'
+      expect_out = '\[DBG\] bc_u_tb bc_ul bc_ur bc_ut bc_ub'
+      detail = 'objects contributing to the residual and Jacobian, notably boundary conditions,'
+      cli_args = '--color off'
+    []
+    [elem_dampers]
+      type = RunApp
+      input = 'show_execution_kernels_bcs.i'
+      expect_out = '\[DBG\] limit_v limit_u'
+      detail = 'elemental dampers,'
+      cli_args = "--color off Dampers/active='limit_v limit_u'"
+    []
+    [interface_kernels]
+      type = RunApp
+      input = 'show_execution_kernels_bcs.i'
+      expect_out = '\[DBG\] diff_ik_2 diff_ik_1'
+      detail = 'interface kernels,'
+      cli_args = "--color off"
+      # no print if the interface is not on rank 0
+      max_parallel = 1
+    []
+    [dirac]
+      type = RunApp
+      input = 'show_execution_kernels_bcs.i'
+      expect_out = '\[DBG\] source_2 source_0'
+      detail = 'Dirac kernels,'
+      cli_args = "--color off"
+      # no print if the interface is not on rank 0
+      max_parallel = 1
+    []
+    [dgkernels]
+      type = RunApp
+      input = 'show_execution_kernels_bcs.i'
+      expect_out = '\[DBG\] diff_dg_2 diff_dg_1'
+      detail = 'discontinuous Galerkin kernels,'
+      cli_args = "--color off"
+    []
+
+    # Finite volume
+    [fv_flux_kernels_bcs]
+      type = RunApp
+      input = 'show_execution_fv_flux_objects.i'
+      cli_args = '--color off'
+      # FV flux kernels are not actually ordered
+      expect_out = '\[DBG\] (2_burger|1_burgers) (1_burgers|2_burger)'
+      detail = 'finite volume flux objects contributing to the residual and Jacobian, notably finite volume flux kernels and flux boundary conditions,'
+      # in parallel, no guarantee block 2 is present on rank 0
+      max_parallel = 1
+    []
+    [fv_elem_kernels]
+      type = RunApp
+      input = 'show_execution_fv_flux_objects.i'
+      cli_args = 'FVKernels/reac/type=FVReaction FVKernels/reac/variable=v --color off'
+      expect_out = '\[DBG\] time time_u reac'
+      detail = 'finite volume elemental kernels,'
+      # in parallel, no guarantee block 2 is present on rank 0
+      max_parallel = 1
+    []
+    [fv_interface_kernels]
+      type = RunApp
+      input = 'show_execution_fv_flux_objects.i'
+      cli_args = '--color off'
+      expect_out = '\[DBG\] diff_ik'
+      detail = 'finite volume interface kernels,'
+      # in parallel, no guarantee block 2 is present on rank 0
+      max_parallel = 1
+    []
+    [fv_elem_kernels_res_and_jac_combined]
+      type = RunApp
+      input = 'show_execution_fv_flux_objects.i'
+      cli_args = 'FVKernels/reac/type=FVReaction FVKernels/reac/variable=v Executioner/residual_and_jacobian_together=true --color off'
+      expect_out = '\[DBG\] time time_u reac'
+      detail = 'finite volume elemental kernels when combining both jacobian and residual computations,'
+      # in parallel, no guarantee block 2 is present on rank 0
+      max_parallel = 1
+    []
+    # Nodal loops
+    [nodal_kernel_bcs]
+      type = RunApp
+      input = 'show_execution_nodal_kernels_bcs.i'
+      expect_out = 'source bc_all'
+      detail = 'nodal objects contributing to the residual, notably nodal kernels and boundary conditions,'
+      cli_args = '--color off'
+    []
+    [nodal_dampers]
+      type = RunApp
+      input = 'show_execution_nodal_aux_bcs.i'
+      expect_out = '\[DBG\] limit_u'
+      detail = 'nodal dampers,'
+      cli_args = "--color off Dampers/inactive=''"
+    []
+    # User objects
+    # The three next tests make sure the targetting of a single execution flag works
+    [user_objects_initial]
+      type = RunApp
+      input = 'show_execution_userobjects.i'
+      cli_args = 'Debug/show_execution_order=INITIAL Postprocessors/dofs/execute_on=INITIAL UserObjects/find_node/execute_on=INITIAL UserObjects/side_int/execute_on=INITIAL UserObjects/values/execute_on=INITIAL --color off'
+      expect_out = '\[DBG\] side_int'
+      detail = 'user objects, including postprocessors, executed at the beginning of the simulation,'
+    []
+    [user_objects_timestep_begin_end]
+      type = RunApp
+      input = 'show_execution_userobjects.i'
+      cli_args = "Debug/show_execution_order='TIMESTEP_BEGIN TIMESTEP_END'"
+      expect_out = 'h L2u H1error H1Semierror L2v_elem f_integral (int_v int_v_elem |)elem_sample'
+      detail = 'user objects, including postprocessors, executed at the beginning and end of each time step,'
+    []
+    [nodal_user_objects]
+      type = RunApp
+      input = 'show_execution_userobjects.i'
+      cli_args = "Debug/show_execution_order='TIMESTEP_BEGIN TIMESTEP_END' --color off"
+      expect_out = '\[DBG\] find_node nodal_sampler_y nodal_sampler_x'
+      detail = 'nodal user objects,'
+    []
+    [domain_user_objects]
+      type = RunApp
+      input = 'show_execution_userobjects.i'
+      cli_args = "--color off"
+      # The full print corresponds to one print on the subdomain 0. It could be extended to checking
+      # the boundary and interface execution
+      # Sometimes, block 0 is not present on rank 0, hence the regex pattern
+      expect_out = '\[DBG\] (domain_2 |)domain_1'
+      detail = 'domain user objects,'
+    []
+    [general_user_objects]
+      type = RunApp
+      input = 'show_execution_userobjects.i'
+      cli_args = "--color off"
+      expect_out = "\[DBG\] Initializing, executing & finalizing general UO 'dofs' on TIMESTEP_END\n\[DBG\] Initializing, executing & finalizing general UO 'memory' on TIMESTEP_END\n\[DBG\] Initializing, executing & finalizing general UO 'line' on TIMESTEP_END"
+      detail = 'general user objects,'
+    []
+    [threaded_general_user_objects]
+      type = RunApp
+      input = 'show_execution_userobjects.i'
+      cli_args = "--color off UserObjects/inactive=''"
+      expect_out = '\[DBG\] Executing Threaded General User Object prime_2 on TIMESTEP_END'
+      detail = 'threaded general user objects,'
+      # The print is not thread-safe, because those objects don't know their thread id
+      max_threads = 1
+    []
+    # This is one way to understand conservative transfers are only conservative if the conserved quantity linearly depends on the transferred quantity
+    # The postprocessors are only executed once!
+    [user_objects_transfers]
+      type = RunApp
+      input = 'show_execution_userobjects.i'
+      cli_args = 'MultiApps/active=full_solve Transfers/active=conservative Debug/show_execution_order=TRANSFER'
+      expect_out = '\[DBG\] Computing elemental user objects on TRANSFER'
+      detail = 'user objects, including postprocessors, executed on transfers between applications,'
+    []
+    # This should be useful if an indicator is executed after a marker, by accident
+    [adaptivity_side_indicator]
+      type = RunApp
+      input = 'show_execution_adaptivity.i'
+      expect_out = '\[DBG\] indicator'
+      detail = 'each step of the adaptive refinement process, including side-based indicators,'
+      cli_args = '--color off'
+    []
+    [adaptivity_elem_indicator]
+      type = RunApp
+      input = 'show_execution_adaptivity.i'
+      expect_out = '\[DBG\] indicator_elem'
+      detail = 'each step of the adaptive refinement process, including element-based indicators,'
+      cli_args = '--color off Adaptivity/Markers/marker/indicator=indicator_elem Adaptivity/Indicators/indicator_elem/type=AnalyticalIndicator Adaptivity/Indicators/indicator_elem/variable=u Adaptivity/Indicators/indicator_elem/function=4'
+    []
+    # Initial conditions use dependency resolution at node/element scale to execute
+    [initial_conditions]
+      type = RunApp
+      input = 'show_execution_ics.i'
+      expect_out = '\[DBG\] a_ic u_ic v_ic b_ic ghost_ic test_var_ic power'
+      detail = 'initial conditions of variables,'
+      cli_args = '--color off'
+    []
+    # Auxiliary kernels could be misordered easily, it is one of the most important goals of this
+    # debug log to make sure chains of auxkernels are in the right order
+    [auxkernels]
+      type = RunApp
+      input = 'show_execution_auxkernels.i'
+      expect_out = '\[DBG\] b_saux c_saux'
+      detail = 'auxiliary kernels intermingled with initial conditions and user objects, and'
+      cli_args = '--color off'
+    []
+    [boundary_auxkernels]
+      type = RunApp
+      input = 'show_execution_auxkernels.i'
+      expect_out = '\[DBG\] Ordering on boundary [0-3]\n\[DBG\] real_property'
+      detail = 'boundary restricted auxiliary kernels.'
+      cli_args = '--color off'
+      # No guarantee to have a single boundary on rank 0 beyond one rank
+      max_parallel = 4
+    []
   []
 []

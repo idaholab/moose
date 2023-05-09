@@ -3,7 +3,6 @@
   issues = '#22042'
   [test]
     type = Exodiff
-    ad_indexing_type = 'global'
     requirement = 'The system shall be able to include scalar variables in automatic scaling grouping calculations.'
     input = test.i
     exodiff = test_out.e

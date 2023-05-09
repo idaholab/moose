@@ -22,18 +22,16 @@ INSFVScalarFieldAdvection::validParams()
 INSFVScalarFieldAdvection::INSFVScalarFieldAdvection(const InputParameters & params)
   : INSFVAdvectionKernel(params)
 {
-#ifndef MOOSE_GLOBAL_AD_INDEXING
-  mooseError("INSFV is not supported by local AD indexing. In order to use INSFV, please run the "
-             "configure script in the root MOOSE directory with the configure option "
-             "'--with-ad-indexing-type=global'");
-#endif
 }
 
 ADReal
 INSFVScalarFieldAdvection::computeQpResidual()
 {
-  const auto v = _rc_vel_provider.getVelocity(_velocity_interp_method, *_face_info, _tid);
-  const auto var_face = _var(makeFace(
-      *_face_info, limiterType(_advected_interp_method), MetaPhysicL::raw_value(v) * _normal > 0));
+  const auto state = determineState();
+  const auto v = _rc_vel_provider.getVelocity(_velocity_interp_method, *_face_info, state, _tid);
+  const auto var_face = _var(makeFace(*_face_info,
+                                      limiterType(_advected_interp_method),
+                                      MetaPhysicL::raw_value(v) * _normal > 0),
+                             state);
   return _normal * v * var_face;
 }

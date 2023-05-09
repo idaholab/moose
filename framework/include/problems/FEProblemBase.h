@@ -81,6 +81,7 @@ class AutomaticMortarGeneration;
 class VectorPostprocessor;
 class Function;
 class MooseAppCoordTransform;
+class MortarUserObject;
 
 // libMesh forward declarations
 namespace libMesh
@@ -235,6 +236,24 @@ public:
                             const PetscInt max_funcs,
                             const Real initial_residual_before_preset_bcs,
                             const Real div_threshold);
+
+  /// Perform steps required before checking nonlinear convergence
+  virtual void nonlinearConvergenceSetup() {}
+
+  /**
+   * Check the relative convergence of the nonlinear solution
+   * @param fnorm          Norm of the residual vector
+   * @param the_residual   The residual to check
+   * @param rtol           Relative tolerance
+   * @param abstol         Absolute tolerance
+   * @return               Bool signifying convergence
+   */
+  virtual bool checkRelativeConvergence(const PetscInt it,
+                                        const Real fnorm,
+                                        const Real the_residual,
+                                        const Real rtol,
+                                        const Real abstol,
+                                        std::ostringstream & oss);
 
   virtual bool hasVariable(const std::string & var_name) const override;
   using SubProblem::getVariable;
@@ -2025,6 +2044,48 @@ public:
    */
   bool failNextNonlinearConvergenceCheck() const { return _fail_next_nonlinear_convergence_check; }
 
+  /*
+   * Set the status of loop order of execution printing
+   * @param print_exec set of execution flags to print on
+   */
+  void setExecutionPrinting(const ExecFlagEnum & print_exec) { _print_execution_on = print_exec; };
+
+  /**
+   * Check whether the problem should output execution orders at this time
+   */
+  bool shouldPrintExecution(const THREAD_ID tid) const;
+  /**
+   * Call \p reinit on mortar user objects with matching primary boundary ID, secondary boundary ID,
+   * and displacement characteristics
+   */
+  void reinitMortarUserObjects(BoundaryID primary_boundary_id,
+                               BoundaryID secondary_boundary_id,
+                               bool displaced);
+
+  virtual const std::vector<VectorTag> & currentResidualVectorTags() const override;
+
+  /**
+   * Class that is used as a parameter to set/clearCurrentResidualVectorTags that allows only
+   * blessed classes to call said methods
+   */
+  class CurrentResidualVectorTagsKey
+  {
+    friend class CrankNicolson;
+    friend class FEProblemBase;
+    CurrentResidualVectorTagsKey() {}
+    CurrentResidualVectorTagsKey(const CurrentResidualVectorTagsKey &) {}
+  };
+
+  /**
+   * Set the current residual vector tag data structure based on the passed in tag IDs
+   */
+  void setCurrentResidualVectorTags(const std::set<TagID> & vector_tags);
+
+  /**
+   * Clear the current residual vector tag data structure
+   */
+  void clearCurrentResidualVectorTags();
+
 protected:
   /// Create extra tagged vectors and matrices
   void createTagVectors();
@@ -2353,9 +2414,42 @@ protected:
   bool _using_ad_mat_props;
 
 private:
+  /**
+   * Helper for getting mortar objects corresponding to primary boundary ID, secondary boundary ID,
+   * and displaced parameters, given some initial set
+   */
+  std::vector<MortarUserObject *>
+  getMortarUserObjects(BoundaryID primary_boundary_id,
+                       BoundaryID secondary_boundary_id,
+                       bool displaced,
+                       const std::vector<MortarUserObject *> & mortar_uo_superset);
+
+  /**
+   * Helper for getting mortar objects corresponding to primary boundary ID, secondary boundary ID,
+   * and displaced parameters from the entire active mortar user object set
+   */
+  std::vector<MortarUserObject *> getMortarUserObjects(BoundaryID primary_boundary_id,
+                                                       BoundaryID secondary_boundary_id,
+                                                       bool displaced);
+
+  /**
+   * Determine what nonlinear system the provided variable name lies in
+   * @param var_name The name of the variable we are doing nonlinear system lookups for
+   * @param error_if_not_found Whether to error if the variable name isn't found in any of the
+   * nonlinear systems
+   * @return A pair in which the first member indicates whether the variable was found in the
+   * nonlinear systems and the second member indicates the nonlinear system number in which the
+   * variable was found (or an invalid unsigned integer if not found)
+   */
   std::pair<bool, unsigned int>
   determineNonlinearSystem(const std::string & var_name,
                            bool error_if_not_found = false) const override;
+
+  /*
+   * Test if stateful property redistribution is expected to be
+   * necessary, and set it up if so.
+   */
+  void addAnyRedistributers();
 
   void updateMaxQps();
 
@@ -2418,6 +2512,14 @@ private:
 
   /// Flag used to indicate whether we are doing the uo/aux state check in execute
   bool _checking_uo_aux_state = false;
+
+  /// When to print the execution of loops
+  ExecFlagEnum _print_execution_on;
+
+  /// A data member to store the residual vector tag(s) passed into \p computeResidualTag(s). This
+  /// data member will be used when APIs like \p cacheResidual, \p addCachedResiduals, etc. are
+  /// called
+  std::vector<VectorTag> _current_residual_vector_tags;
 };
 
 using FVProblemBase = FEProblemBase;
@@ -2561,4 +2663,22 @@ FEProblemBase::fvBCsIntegrityCheck(const bool fv_bcs_integrity_check)
     return;
 
   _fv_bcs_integrity_check = fv_bcs_integrity_check;
+}
+
+inline const std::vector<VectorTag> &
+FEProblemBase::currentResidualVectorTags() const
+{
+  return _current_residual_vector_tags;
+}
+
+inline void
+FEProblemBase::setCurrentResidualVectorTags(const std::set<TagID> & vector_tags)
+{
+  _current_residual_vector_tags = getVectorTags(vector_tags);
+}
+
+inline void
+FEProblemBase::clearCurrentResidualVectorTags()
+{
+  _current_residual_vector_tags.clear();
 }

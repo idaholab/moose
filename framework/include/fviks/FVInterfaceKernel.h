@@ -135,12 +135,10 @@ protected:
    */
   void processResidual(Real resid, unsigned int var_num, bool neighbor);
 
-#ifdef MOOSE_GLOBAL_AD_INDEXING
   /**
    * Process the derivatives for the provided residual and dof index
    */
   void processJacobian(const ADReal & resid, dof_id_type dof_index);
-#endif
 
   /**
    * @return A structure that contains information about the face info element and skewness

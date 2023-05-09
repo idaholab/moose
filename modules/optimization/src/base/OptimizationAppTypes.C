@@ -15,4 +15,7 @@ namespace OptimizationAppTypes
 const ExecFlagType EXEC_FORWARD = registerDefaultExecFlag("FORWARD");
 const ExecFlagType EXEC_ADJOINT = registerDefaultExecFlag("ADJOINT");
 const ExecFlagType EXEC_HOMOGENEOUS_FORWARD = registerDefaultExecFlag("HOMOGENEOUS_FORWARD");
+
+const ExecFlagType EXEC_ADJOINT_TIMESTEP_BEGIN = registerDefaultExecFlag("ADJOINT_TIMESTEP_BEGIN");
+const ExecFlagType EXEC_ADJOINT_TIMESTEP_END = registerDefaultExecFlag("ADJOINT_TIMESTEP_END");
 }

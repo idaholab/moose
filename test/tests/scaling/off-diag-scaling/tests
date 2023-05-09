@@ -23,7 +23,6 @@
     type = Exodiff
     input = test.i
     exodiff = unscaled.e
-    ad_indexing_type = 'global'
     cli_args = 'Outputs/file_base=unscaled Executioner/automatic_scaling=false'
     requirement = 'The system shall be able to produce the same results without automatic scaling as with automatic scaling.'
   []

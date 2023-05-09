@@ -46,6 +46,19 @@ PorousFlowJoinerTempl<is_ad>::PorousFlowJoinerTempl(const InputParameters & para
         : !_nodal_material
             ? &getMaterialProperty<std::vector<Real>>("dPorousFlow_temperature_qp_dvar")
             : &getMaterialProperty<std::vector<Real>>("dPorousFlow_temperature_nodal_dvar")),
+    _has_mass_fraction(!_nodal_material
+                           ? hasGenericMaterialProperty<std::vector<std::vector<Real>>, is_ad>(
+                                 "PorousFlow_mass_frac_qp")
+                           : hasGenericMaterialProperty<std::vector<std::vector<Real>>, is_ad>(
+                                 "PorousFlow_mass_frac_nodal")),
+    _dmass_fraction_dvar(
+        is_ad ? nullptr
+        : _has_mass_fraction
+            ? (!_nodal_material ? &getMaterialProperty<std::vector<std::vector<std::vector<Real>>>>(
+                                      "dPorousFlow_mass_frac_qp_dvar")
+                                : &getMaterialProperty<std::vector<std::vector<std::vector<Real>>>>(
+                                      "dPorousFlow_mass_frac_nodal_dvar"))
+            : nullptr),
     _property(declareGenericProperty<std::vector<Real>, is_ad>(_pf_prop)),
     _dproperty_dvar(
         is_ad ? nullptr
@@ -58,6 +71,7 @@ PorousFlowJoinerTempl<is_ad>::PorousFlowJoinerTempl(const InputParameters & para
     _dphase_property_dp.resize(_num_phases);
     _dphase_property_ds.resize(_num_phases);
     _dphase_property_dt.resize(_num_phases);
+    _dphase_property_dX.resize(_num_phases);
   }
 
   for (unsigned int ph = 0; ph < _num_phases; ++ph)
@@ -73,6 +87,8 @@ PorousFlowJoinerTempl<is_ad>::PorousFlowJoinerTempl(const InputParameters & para
           &getMaterialPropertyDerivative<Real>(_pf_prop + phase, _saturation_variable_name);
       _dphase_property_dt[ph] =
           &getMaterialPropertyDerivative<Real>(_pf_prop + phase, _temperature_variable_name);
+      _dphase_property_dX[ph] =
+          &getMaterialPropertyDerivative<Real>(_pf_prop + phase, _mass_fraction_variable_name);
     }
   }
 }
@@ -116,6 +132,12 @@ PorousFlowJoinerTempl<is_ad>::computeQpProperties()
         if ((*_dphase_property_dt[ph]).size() > _qp)
           (*_dproperty_dvar)[_qp][ph][v] +=
               (*_dphase_property_dt[ph])[_qp] * (*_dtemperature_dvar)[_qp][v];
+
+        // Only add derivative wrt mass fraction if they exist
+        if (_has_mass_fraction)
+          if ((*_dphase_property_dX[ph]).size() > _qp)
+            (*_dproperty_dvar)[_qp][ph][v] +=
+                (*_dphase_property_dX[ph])[_qp] * (*_dmass_fraction_dvar)[_qp][ph][0][v];
       }
     }
   }

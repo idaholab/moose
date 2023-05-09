@@ -63,6 +63,7 @@ public:
    *    Call on boundary MaterialPropertyStorage and pass volume MaterialPropertyStorage for
    * parent_material_props
    *
+   * @param pid - processor id of children to prolong to
    * @param refinement_map - 2D array of QpMap objects
    * @param qrule The current quadrature rule
    * @param qrule_face The current face qrule
@@ -73,7 +74,8 @@ public:
    * @param input_child - the number of the child
    * @param input_child_side - the side on the child where material properties will be prolonged
    */
-  void prolongStatefulProps(const std::vector<std::vector<QpMap>> & refinement_map,
+  void prolongStatefulProps(processor_id_type pid,
+                            const std::vector<std::vector<QpMap>> & refinement_map,
                             const QBase & qrule,
                             const QBase & qrule_face,
                             MaterialPropertyStorage & parent_material_props,
@@ -190,47 +192,28 @@ public:
    */
   bool hasOlderProperties() const { return _has_older_prop; }
 
+  /**
+   * Accessible type of the stored material property data.
+   *
+   * This probably should have been returned as a proxy class; only
+   * access it via foo[elem][side] and maybe we'll be able to refactor
+   * it in the future without breaking your code.
+   */
+  typedef HashMap<const Elem *, HashMap<unsigned int, MaterialProperties>> PropsType;
+
   ///@{
   /**
-   * Access methods to the stored material property data
-   *
+   * Access methods to the stored material property data.
    */
-  HashMap<const Elem *, HashMap<unsigned int, MaterialProperties>> & props()
-  {
-    return *_props_elem;
-  }
-  HashMap<const Elem *, HashMap<unsigned int, MaterialProperties>> & propsOld()
-  {
-    return *_props_elem_old;
-  }
-  HashMap<const Elem *, HashMap<unsigned int, MaterialProperties>> & propsOlder()
-  {
-    return *_props_elem_older;
-  }
-  const HashMap<const Elem *, HashMap<unsigned int, MaterialProperties>> & props() const
-  {
-    return *_props_elem;
-  }
-  const HashMap<const Elem *, HashMap<unsigned int, MaterialProperties>> & propsOld() const
-  {
-    return *_props_elem_old;
-  }
-  const HashMap<const Elem *, HashMap<unsigned int, MaterialProperties>> & propsOlder() const
-  {
-    return *_props_elem_older;
-  }
-  MaterialProperties & props(const Elem * elem, unsigned int side)
-  {
-    return (*_props_elem)[elem][side];
-  }
-  MaterialProperties & propsOld(const Elem * elem, unsigned int side)
-  {
-    return (*_props_elem_old)[elem][side];
-  }
-  MaterialProperties & propsOlder(const Elem * elem, unsigned int side)
-  {
-    return (*_props_elem_older)[elem][side];
-  }
+  const PropsType & props() const { return *_props_elem; }
+  const PropsType & propsOld() const { return *_props_elem_old; }
+  const PropsType & propsOlder() const { return *_props_elem_older; }
+  const MaterialProperties & props(const Elem * elem, unsigned int side) const;
+  const MaterialProperties & propsOld(const Elem * elem, unsigned int side) const;
+  const MaterialProperties & propsOlder(const Elem * elem, unsigned int side) const;
+  MaterialProperties & setProps(const Elem * elem, unsigned int side);
+  MaterialProperties & setPropsOld(const Elem * elem, unsigned int side);
+  MaterialProperties & setPropsOlder(const Elem * elem, unsigned int side);
   ///@}
 
   bool hasProperty(const std::string & prop_name) const;
@@ -273,10 +256,9 @@ protected:
   void releasePropertyMap(HashMap<unsigned int, MaterialProperties> & inner_map);
 
   // indexing: [element][side]->material_properties
-  std::unique_ptr<HashMap<const Elem *, HashMap<unsigned int, MaterialProperties>>> _props_elem;
-  std::unique_ptr<HashMap<const Elem *, HashMap<unsigned int, MaterialProperties>>> _props_elem_old;
-  std::unique_ptr<HashMap<const Elem *, HashMap<unsigned int, MaterialProperties>>>
-      _props_elem_older;
+  std::unique_ptr<PropsType> _props_elem;
+  std::unique_ptr<PropsType> _props_elem_old;
+  std::unique_ptr<PropsType> _props_elem_older;
 
   /// mapping from property name to property ID
   /// NOTE: this is static so the property numbering is global within the simulation (not just FEProblemBase - should be useful when we will use material properties from
@@ -310,28 +292,104 @@ private:
                  unsigned int side,
                  unsigned int n_qpoints);
 
+  /// Initializes just one hashmap's entries
+  void initProps(MaterialData & material_data,
+                 PropsType & mat_props_map,
+                 const Elem * elem,
+                 unsigned int side,
+                 unsigned int n_qpoints);
+
+  // You'd think a private mutex would work here, so I'll leave this
+  // in the namespace for when that happens, but CI thinks that can
+  // make us crash, so I'll just initialize this to Threads::spin_mtx
+  libMesh::Threads::spin_mutex & _spin_mtx;
+
   // Need to be able to eraseProperty from here
   friend class ProjectMaterialProperties;
+
+  // Need to be able to initProps from here
+  friend class RedistributeProperties;
+
+  // Need non-const props from here
+  friend void dataLoad<MaterialPropertyStorage>(std::istream &, MaterialPropertyStorage &, void *);
+  friend void dataStore<MaterialPropertyStorage>(std::ostream &, MaterialPropertyStorage &, void *);
 };
+
+inline const MaterialProperties &
+MaterialPropertyStorage::props(const Elem * elem, unsigned int side) const
+{
+  mooseAssert(props().contains(elem), "Trying to read properties on an element that lacks them");
+  mooseAssert(props().find(elem)->second.contains(side),
+              "Trying to read properties on an element side that lacks them");
+  return props().find(elem)->second.find(side)->second;
+}
+
+inline const MaterialProperties &
+MaterialPropertyStorage::propsOld(const Elem * elem, unsigned int side) const
+{
+  mooseAssert(propsOld().contains(elem),
+              "Trying to read old properties on an element that lacks them");
+  mooseAssert(propsOld().find(elem)->second.contains(side),
+              "Trying to read old properties on an element side that lacks them");
+  return propsOld().find(elem)->second.find(side)->second;
+}
+
+inline const MaterialProperties &
+MaterialPropertyStorage::propsOlder(const Elem * elem, unsigned int side) const
+{
+  mooseAssert(propsOlder().contains(elem),
+              "Trying to read older properties on an element that lacks them");
+  mooseAssert(propsOlder().find(elem)->second.contains(side),
+              "Trying to read older properties on an element side that lacks them");
+  return propsOlder().find(elem)->second.find(side)->second;
+}
+
+inline MaterialProperties &
+MaterialPropertyStorage::setProps(const Elem * elem, unsigned int side)
+{
+  // Many problems rely on reinitMaterials also being the first
+  // init, and I'm not sure I can clean that up to reallow these
+  // assertions without also hurting performance on subsequent
+  // iterations.
+  // libmesh_assert(_props_elem->contains(elem));
+  // libmesh_assert((*_props_elem)[elem].contains(side));
+  return (*_props_elem)[elem][side];
+}
+
+inline MaterialProperties &
+MaterialPropertyStorage::setPropsOld(const Elem * elem, unsigned int side)
+{
+  // libmesh_assert(_props_elem_old->contains(elem));
+  // libmesh_assert((*_props_elem_old)[elem].contains(side));
+  return (*_props_elem_old)[elem][side];
+}
+
+inline MaterialProperties &
+MaterialPropertyStorage::setPropsOlder(const Elem * elem, unsigned int side)
+{
+  // libmesh_assert(_props_elem_older->contains(elem));
+  // libmesh_assert((*_props_elem_older)[elem].contains(side));
+  return (*_props_elem_older)[elem][side];
+}
 
 template <>
 inline void
 dataStore(std::ostream & stream, MaterialPropertyStorage & storage, void * context)
 {
-  dataStore(stream, storage.props(), context);
-  dataStore(stream, storage.propsOld(), context);
+  dataStore(stream, *storage._props_elem, context);
+  dataStore(stream, *storage._props_elem_old, context);
 
   if (storage.hasOlderProperties())
-    dataStore(stream, storage.propsOlder(), context);
+    dataStore(stream, *storage._props_elem_older, context);
 }
 
 template <>
 inline void
 dataLoad(std::istream & stream, MaterialPropertyStorage & storage, void * context)
 {
-  dataLoad(stream, storage.props(), context);
-  dataLoad(stream, storage.propsOld(), context);
+  dataLoad(stream, *storage._props_elem, context);
+  dataLoad(stream, *storage._props_elem_old, context);
 
   if (storage.hasOlderProperties())
-    dataLoad(stream, storage.propsOlder(), context);
+    dataLoad(stream, *storage._props_elem_older, context);
 }

@@ -11,7 +11,7 @@ Before we work on improving the accuracy of the model, it is a good idea to add 
 Parsed materials allow MOOSE to take the derivatives of the input functions automatically, rather than the user having to input the derivatives by hand. MOOSE will default to taking 3rd order derivatives, but in our problem we only need second order derivatives calculated. We can specify that MOOSE should only take second order derivatives and prevent it from taking unnecessary third derivatives.
 
 ```yaml
-[./local_energy]
+  [local_energy]
     # Defines the function for the local free energy density as given in the
     # problem, then converts units and adds scaling factor.
     type = DerivativeParsedMaterial
@@ -25,7 +25,7 @@ Parsed materials allow MOOSE to take the derivatives of the input functions auto
     function = 'eV_J*d*(A*c+B*(1-c)+C*c*log(c)+D*(1-c)*log(1-c)+
                 E*c*(1-c)+F*c*(1-c)*(2*c-1)+G*c*(1-c)*(2*c-1)^2)'
     derivative_order = 2
-  [../]
+  []
 ```
 
 ### Adaptive Time Stepping
@@ -44,14 +44,15 @@ Adaptive time stepping lets the simulation change the time step size depending o
                      # the model is working properly.
   petsc_options_iname = '-pc_type -ksp_gmres_restart -sub_ksp_type -sub_pc_type -pc_asm_overlap'
   petsc_options_value = 'asm      31                  preonly      ilu          1'
-  [./TimeStepper]
+
+  [TimeStepper]
     # Turn on time stepping
     type = IterationAdaptiveDT
     dt = 10
     cutback_factor = 0.8
     growth_factor = 1.5
     optimal_iterations = 7
-  [../]
+  []
 []
 ```
 
@@ -63,13 +64,13 @@ To do this, we add [Postprocessors](/syntax/Postprocessors/). Eventually we will
 
 ```yaml
 [Postprocessors]
-  [./evaluations]           # Cumulative residual calculations for simulation
+  [evaluations]           # Cumulative residual calculations for simulation
     type = NumResidualEvaluations
-  [../]
-  [./active_time]           # Time computer spent on simulation
-    type = RunTime
-    time_type = active
-  [../]
+  []
+  [active_time]           # Time computer spent on simulation
+    type = PerformanceData
+    event =  ACTIVE
+  []
 []
 ```
 
@@ -82,10 +83,11 @@ Now that we have Postprocessors, we need to output them. We modify the outputs b
   csv = true
   print_perf_log = true
   output_initial = true
-  [./console]
+
+  [console]
     type = Console
     max_rows = 10
-  [../]
+  []
 []
 ```
 

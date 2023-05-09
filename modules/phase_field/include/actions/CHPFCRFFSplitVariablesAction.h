@@ -12,8 +12,6 @@
 #include "InputParameters.h"
 #include "Action.h"
 
-// Forward Declarations
-
 /**
  * Automatically generates all the L variables for the RFF phase field crystal model.
  */

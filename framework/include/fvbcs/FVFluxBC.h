@@ -67,15 +67,4 @@ protected:
 
   /// The variable face type
   FaceInfo::VarFaceNeighbors _face_type;
-
-private:
-  /// Computes the Jacobian contribution for every coupled variable.
-  ///
-  /// @param type Either ElementElement, ElementNeighbor, NeighborElement, or NeighborNeighbor. As an
-  /// example ElementNeighbor means the derivatives of the elemental residual with respect to the
-  /// neighbor degrees of freedom
-  ///
-  /// @param residual The already computed residual (probably done with \p computeQpResidual) that
-  /// also holds derivative information for filling in the Jacobians
-  void computeJacobian(Moose::DGJacobianType type, const ADReal & residual);
 };

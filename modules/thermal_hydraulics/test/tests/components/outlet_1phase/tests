@@ -7,14 +7,12 @@
     group = 'solid_wall outlet pipe 1phase'
     # see #530 why
     max_threads = 1
-    ad_indexing_type = 'global'
   []
 
   [clg:ctrl_p_3eqn]
     type = 'CSVDiff'
     input = 'clg.ctrl_p_3eqn.i'
     csvdiff = 'clg.ctrl_p_3eqn_out.csv'
-    ad_indexing_type = 'global'
   []
 
   [jacobian]
@@ -24,6 +22,5 @@
     difference_tol = 15
     cli_args = 'Debug/check_jacobian=true'
     max_parallel = 1
-    ad_indexing_type = 'global'
   []
 []

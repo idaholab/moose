@@ -37,15 +37,10 @@ INSFVMomentumPressure::INSFVMomentumPressure(const InputParameters & params)
     _index(getParam<MooseEnum>("momentum_component")),
     _correct_skewness(getParam<bool>("correct_skewness"))
 {
-#ifndef MOOSE_GLOBAL_AD_INDEXING
-  mooseError("INSFV is not supported by local AD indexing. In order to use INSFV, please run the "
-             "configure script in the root MOOSE directory with the configure option "
-             "'--with-ad-indexing-type=global'");
-#endif
 }
 
 ADReal
 INSFVMomentumPressure::computeQpResidual()
 {
-  return _p.gradient(Moose::ElemArg{_current_elem, _correct_skewness})(_index);
+  return _p.gradient(Moose::ElemArg{_current_elem, _correct_skewness}, determineState())(_index);
 }

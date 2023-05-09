@@ -1,13 +1,50 @@
 [Tests]
+  issues = '#20695'
+  design = 'NSFVFrictionFlowDiodeMaterial.md'
+
   [friction_flow_diode]
     type = Exodiff
-    issues = '#20695'
-    design = 'NSFVFrictionFlowDiodeMaterial.md'
     requirement = 'The system shall be able to model a simple friction-based volumetric flow diode'
     input = 'friction.i'
     exodiff = friction_out.e
-    ad_indexing_type = 'global'
     # see #21185
     allow_warnings = true
+  []
+
+  [controlled]
+    requirement = 'The system shall be able to control a simple friction-based volumetric flow diode'
+    [time]
+      type = CSVDiff
+      input = 'transient_operation.i'
+      csvdiff = 'time_based.csv'
+      cli_args = 'Controls/active=time_based Outputs/file_base=time_based'
+      detail = 'with a simple time-based turn-on criterion,'
+      # see #21185
+      allow_warnings = true
+      valgrind = 'none' # too slow
+      method = 'opt'
+    []
+    [pdrop]
+      type = CSVDiff
+      input = 'transient_operation.i'
+      csvdiff = 'pdrop_based.csv'
+      cli_args = 'Controls/active=pdrop_based Outputs/file_base=pdrop_based'
+      detail = 'with a simple pressure-based turn-on criterion, and'
+      # see #21185
+      allow_warnings = true
+      valgrind = 'none' # too slow
+      method = 'opt'
+    []
+    [flow]
+      type = CSVDiff
+      input = 'transient_operation.i'
+      csvdiff = 'flow_based.csv'
+      cli_args = 'Controls/active=flow_based Outputs/file_base=flow_based'
+      detail = 'with a simple flow-based turn-on criterion.'
+      # see #21185
+      allow_warnings = true
+      valgrind = 'none' # too slow
+      method = 'opt'
+    []
   []
 []

@@ -33,7 +33,7 @@ pcre_LIB       :=  $(pcre_DIR)/libpcre-$(METHOD).la
 pcre_deps      := $(patsubst %.cc, %.$(obj-suffix).d, $(pcre_srcfiles)) \
 
 #
-# hit (new getpot parser)
+# hit
 #
 HIT_DIR ?= $(MOOSE_DIR)/framework/contrib/hit
 hit_CONTENT   := $(shell ls $(HIT_DIR) 2> /dev/null)
@@ -55,14 +55,35 @@ hit_CLI          := $(HIT_DIR)/hit
 pyhit_srcfiles  := $(HIT_DIR)/hit.cpp $(HIT_DIR)/lex.cc $(HIT_DIR)/parse.cc $(HIT_DIR)/braceexpr.cc
 
 #
+# Dynamic library suffix
+#
+lib_suffix := so
+ifeq ($(shell uname -s),Darwin)
+	lib_suffix := dylib
+endif
+
+#
+# wasp hit, which can override hit
+#
+WASP_DIR            ?= $(MOOSE_DIR)/framework/contrib/wasp/install
+ifeq ($(shell uname -s),Darwin)
+	wasp_LIBS         := $(shell find -E $(WASP_DIR)/lib -regex ".*/lib[a-z]+.$(lib_suffix)")
+else
+	wasp_LIBS         := $(wildcard $(WASP_DIR)/lib/libwasp*$(lib_suffix))
+endif
+ifneq ($(wasp_LIBS),)
+  wasp_LIBS         := $(notdir $(wasp_LIBS))
+  wasp_LIBS         := $(patsubst %.$(lib_suffix),%,$(wasp_LIBS))
+  wasp_LIBS         := $(patsubst lib%,-l%,$(wasp_LIBS))
+  libmesh_CXXFLAGS  += -DWASP_ENABLED -I$(WASP_DIR)/include
+  libmesh_LDFLAGS   += -Wl,-rpath,$(WASP_DIR)/lib -L$(WASP_DIR)/lib $(wasp_LIBS)
+endif
+
+#
 # Conditional parts if the user wants to compile MOOSE with torchlib
 #
 ifeq ($(ENABLE_LIBTORCH),true)
-  UNAME_S := $(shell uname -s)
-	LIBTORCH_LIB := libtorch.so
-  ifeq ($(UNAME_S),Darwin)
-    LIBTORCH_LIB := libtorch.dylib
-  endif
+	LIBTORCH_LIB := libtorch.$(lib_suffix)
 
   ifneq ($(wildcard $(LIBTORCH_DIR)/lib/$(LIBTORCH_LIB)),)
     # Enabling parts that have pytorch dependencies
@@ -195,6 +216,7 @@ moose_INC_DIRS := $(filter-out $(ignore_contrib_include), $(moose_INC_DIRS))
 
 moose_INC_DIRS += $(gtest_DIR)
 moose_INC_DIRS += $(HIT_DIR)
+moose_INC_DIRS += $(wasp_incfiles)
 moose_INCLUDE  := $(foreach i, $(moose_INC_DIRS), -I$(i))
 
 #libmesh_INCLUDE := $(moose_INCLUDE) $(libmesh_INCLUDE)
@@ -422,7 +444,7 @@ moose_share_dir = $(share_dir)/moose
 python_install_dir = $(moose_share_dir)/python
 bin_install_dir = $(PREFIX)/bin
 
-install: install_libs install_bin install_harness install_exodiff install_adreal_monolith install_hit install_data
+install: all install_libs install_bin install_harness install_exodiff install_adreal_monolith install_hit install_data
 
 install_data::
 	@mkdir -p $(moose_share_dir)
@@ -469,6 +491,7 @@ else
   patch_relink = :
   patch_rpath = patchelf --set-rpath '$$ORIGIN'/$(2):$$(patchelf --print-rpath $(1)) $(1)
 endif
+patch_la = $(FRAMEWORK_DIR)/scripts/patch_la.py $(1) $(2)
 
 libname_framework = $(shell grep "dlname='.*'" $(MOOSE_DIR)/framework/libmoose-$(METHOD).la 2>/dev/null | sed -E "s/dlname='(.*)'/\1/g")
 libpath_framework = $(MOOSE_DIR)/framework/$(libname_framework)

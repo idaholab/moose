@@ -5,6 +5,5 @@
     exodiff = 'phy.form_loss_1phase.parent_out_slave0.e'
     rel_err = 1e-10
     recover = false
-    ad_indexing_type = 'global'
   []
 []

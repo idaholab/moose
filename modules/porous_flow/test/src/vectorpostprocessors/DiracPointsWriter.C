@@ -9,6 +9,8 @@
 
 #include "DiracPointsWriter.h"
 
+#include "libmesh/parallel_algebra.h"
+
 registerMooseObject("PorousFlowTestApp", DiracPointsWriter);
 
 InputParameters
@@ -35,6 +37,10 @@ DiracPointsWriter::execute()
   for (auto & entry : _subproblem.diracKernelInfo().getPoints())
     if (entry.first->active())
       points.insert(entry.second.first.begin(), entry.second.first.end());
+
+  // Not every processor might know about every point
+  this->comm().set_union(points);
+
   for (auto & p : points)
   {
     _xs.push_back(p(0));

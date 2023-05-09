@@ -82,5 +82,6 @@ BoundingBoxNodeSetGenerator::generate()
 
   boundary_info.nodeset_name(boundary_ids[0]) = boundary_names[0];
 
+  mesh->set_isnt_prepared();
   return dynamic_pointer_cast<MeshBase>(mesh);
 }

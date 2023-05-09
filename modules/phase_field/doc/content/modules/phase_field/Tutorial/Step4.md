@@ -11,13 +11,13 @@ We are going to make two changes to our simulation. First, we will make the mobi
   # d is a scaling factor that makes it easier for the solution to converge
   # without changing the results. It is defined in each of the first three
   # materials and must have the same value in each one.
-  [./kappa]                  # Gradient energy coefficient (eV nm^2/mol)
+  [kappa]                  # Gradient energy coefficient (eV nm^2/mol)
     type = GenericFunctionMaterial
     prop_names = 'kappa_c'
     prop_values = '8.125e-16*6.24150934e+18*1e+09^2*1e-27'
                   # kappa_c*eV_J*nm_m^2*d
-  [../]
-  [./mobility]               # Mobility (nm^2 mol/eV/s)
+  []
+  [mobility]               # Mobility (nm^2 mol/eV/s)
     type = DerivativeParsedMaterial
     f_name = M
     args = c
@@ -39,8 +39,8 @@ We are going to make two changes to our simulation. First, we will make the mobi
                 Efe*c*(1-c)+Ffe*c*(1-c)*(2*c-1)+Gfe*c*(1-c)*(2*c-1)^2))'
     derivative_order = 1
     outputs = exodus
-  [../]
-  [./local_energy]           # Local free energy function (eV/mol)
+  []
+  [local_energy]           # Local free energy function (eV/mol)
     type = DerivativeParsedMaterial
     f_name = f_loc
     args = c
@@ -51,13 +51,13 @@ We are going to make two changes to our simulation. First, we will make the mobi
     function = 'eV_J*d*(A*c+B*(1-c)+C*c*log(c)+D*(1-c)*log(1-c)+
                 E*c*(1-c)+F*c*(1-c)*(2*c-1)+G*c*(1-c)*(2*c-1)^2)'
     derivative_order = 2
-  [../]
-  [./precipitate_indicator]  # Returns 1/625 if precipitate
-      type = ParsedMaterial
-      f_name = prec_indic
-      args = c
-      function = if(c>0.6,0.0016,0)
-    [../]
+  []
+  [precipitate_indicator]  # Returns 1/625 if precipitate
+    type = ParsedMaterial
+    f_name = prec_indic
+    args = c
+    function = if(c>0.6,0.0016,0)
+  []
 []
 ```
 
@@ -72,10 +72,10 @@ Note that the area of our surface is 625 $nm^2$, and $\frac {1} {625} = 0.0016$.
 The mobility equation is now ready to run. However, the chromium phase fraction will not be output. In order to output it we add a Postprocessor.
 
 ```yaml
-  [./precipitate_area]      # Fraction of surface devoted to precipitates
+  [precipitate_area]      # Fraction of surface devoted to precipitates
     type = ElementIntegralMaterialProperty
     mat_prop = prec_indic
-  [../]
+  []
 ```
 
 This brings the number of Postprocessors up to 6.

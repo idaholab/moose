@@ -50,12 +50,6 @@ INSFVMixingLengthReynoldsStress::INSFVMixingLengthReynoldsStress(const InputPara
     _rho(getFunctor<ADReal>(NS::density)),
     _mixing_len(getFunctor<ADReal>("mixing_length"))
 {
-#ifndef MOOSE_GLOBAL_AD_INDEXING
-  mooseError("INSFV is not supported by local AD indexing. In order to use INSFV, please run the "
-             "configure script in the root MOOSE directory with the configure option "
-             "'--with-ad-indexing-type=global'");
-#endif
-
   if (_dim >= 2 && !_v)
     mooseError(
         "In two or more dimensions, the v velocity must be supplied using the 'v' parameter");
@@ -66,12 +60,12 @@ INSFVMixingLengthReynoldsStress::INSFVMixingLengthReynoldsStress(const InputPara
 ADReal
 INSFVMixingLengthReynoldsStress::computeStrongResidual()
 {
-#ifdef MOOSE_GLOBAL_AD_INDEXING
   constexpr Real offset = 1e-15; // prevents explosion of sqrt(x) derivative to infinity
 
   const auto face = makeCDFace(*_face_info);
+  const auto state = determineState();
 
-  const auto grad_u = _u.gradient(face);
+  const auto grad_u = _u.gradient(face, state);
   // Compute the dot product of the strain rate tensor and the normal vector
   // aka (grad_v + grad_v^T) * n_hat
   ADReal norm_strain_rate = grad_u(_axis_index) * _normal(0);
@@ -79,11 +73,11 @@ INSFVMixingLengthReynoldsStress::computeStrongResidual()
   ADRealVectorValue grad_w;
   if (_dim >= 2)
   {
-    grad_v = _v->gradient(face);
+    grad_v = _v->gradient(face, state);
     norm_strain_rate += grad_v(_axis_index) * _normal(1);
     if (_dim >= 3)
     {
-      grad_w = _w->gradient(face);
+      grad_w = _w->gradient(face, state);
       norm_strain_rate += grad_w(_axis_index) * _normal(2);
     }
   }
@@ -104,12 +98,12 @@ INSFVMixingLengthReynoldsStress::computeStrongResidual()
   symmetric_strain_tensor_norm = std::sqrt(symmetric_strain_tensor_norm + offset);
 
   // Interpolate the mixing length to the face
-  const ADReal mixing_len = _mixing_len(face);
+  const ADReal mixing_len = _mixing_len(face, state);
 
   // Compute the eddy diffusivity
   ADReal eddy_diff = symmetric_strain_tensor_norm * mixing_len * mixing_len;
 
-  const ADReal rho = _rho(face);
+  const ADReal rho = _rho(face, state);
 
   if (_face_type == FaceInfo::VarFaceNeighbors::ELEM ||
       _face_type == FaceInfo::VarFaceNeighbors::BOTH)
@@ -130,11 +124,6 @@ INSFVMixingLengthReynoldsStress::computeStrongResidual()
 
   // Return the turbulent stress contribution to the momentum equation
   return -1 * rho * eddy_diff * norm_strain_rate;
-
-#else
-  return 0;
-
-#endif
 }
 
 void

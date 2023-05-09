@@ -257,10 +257,10 @@
                     true
                 ],
                 "gp_mean": [
-                    324.2152953797097
+                    324.21529537970974
                 ],
                 "gp_std": [
-                    10.39721128899595
+                    10.397211288995923
                 ],
                 "inputs": [
                     [
@@ -288,7 +288,7 @@
                     false
                 ],
                 "gp_mean": [
-                    344.48389605949575
+                    344.4838960594956
                 ],
                 "gp_std": [
                     0.40326476788817744
@@ -304,7 +304,7 @@
                     false
                 ],
                 "reporter_transfer:avg:value": [
-                    344.48389605949575
+                    344.4838960594956
                 ],
                 "reporter_transfer:converged": [
                     true
@@ -322,7 +322,7 @@
                     257.4765689936423
                 ],
                 "gp_std": [
-                    1.370120758664203
+                    1.3701207586638067
                 ],
                 "inputs": [
                     [
@@ -350,10 +350,10 @@
                     false
                 ],
                 "gp_mean": [
-                    314.87049306605024
+                    314.87049306604985
                 ],
                 "gp_std": [
-                    1.7644765504685223
+                    1.7644765504683169
                 ],
                 "inputs": [
                     [
@@ -366,7 +366,7 @@
                     false
                 ],
                 "reporter_transfer:avg:value": [
-                    314.87049306605024
+                    314.87049306604985
                 ],
                 "reporter_transfer:converged": [
                     true
@@ -381,10 +381,10 @@
                     false
                 ],
                 "gp_mean": [
-                    344.57122415334334
+                    344.5712241533437
                 ],
                 "gp_std": [
-                    4.2309502744963
+                    4.230950274496599
                 ],
                 "inputs": [
                     [
@@ -397,7 +397,7 @@
                     false
                 ],
                 "reporter_transfer:avg:value": [
-                    344.57122415334334
+                    344.5712241533437
                 ],
                 "reporter_transfer:converged": [
                     true
@@ -412,10 +412,10 @@
                     false
                 ],
                 "gp_mean": [
-                    336.50767728132655
+                    336.5076772813266
                 ],
                 "gp_std": [
-                    2.6720858074880818
+                    2.672085807488014
                 ],
                 "inputs": [
                     [
@@ -428,7 +428,7 @@
                     false
                 ],
                 "reporter_transfer:avg:value": [
-                    336.50767728132655
+                    336.5076772813266
                 ],
                 "reporter_transfer:converged": [
                     true
@@ -443,7 +443,7 @@
                     false
                 ],
                 "gp_mean": [
-                    313.8029429441108
+                    313.80294294411095
                 ],
                 "gp_std": [
                     0.9984952522231719
@@ -459,7 +459,7 @@
                     false
                 ],
                 "reporter_transfer:avg:value": [
-                    313.8029429441108
+                    313.80294294411095
                 ],
                 "reporter_transfer:converged": [
                     true
@@ -474,7 +474,7 @@
                     false
                 ],
                 "gp_mean": [
-                    316.57573768545114
+                    316.5757376854514
                 ],
                 "gp_std": [
                     1.6878738572090395
@@ -490,7 +490,7 @@
                     false
                 ],
                 "reporter_transfer:avg:value": [
-                    316.57573768545114
+                    316.5757376854514
                 ],
                 "reporter_transfer:converged": [
                     true
@@ -505,10 +505,10 @@
                     false
                 ],
                 "gp_mean": [
-                    336.770799593279
+                    336.7707995932794
                 ],
                 "gp_std": [
-                    2.882999064362458
+                    2.8829990643625836
                 ],
                 "inputs": [
                     [
@@ -521,7 +521,7 @@
                     false
                 ],
                 "reporter_transfer:avg:value": [
-                    336.770799593279
+                    336.7707995932794
                 ],
                 "reporter_transfer:converged": [
                     true
@@ -536,10 +536,10 @@
                     false
                 ],
                 "gp_mean": [
-                    307.9305314898561
+                    307.93053148985615
                 ],
                 "gp_std": [
-                    3.141267773685826
+                    3.141267773685653
                 ],
                 "inputs": [
                     [
@@ -552,7 +552,7 @@
                     false
                 ],
                 "reporter_transfer:avg:value": [
-                    307.9305314898561
+                    307.93053148985615
                 ],
                 "reporter_transfer:converged": [
                     true
@@ -567,10 +567,10 @@
                     false
                 ],
                 "gp_mean": [
-                    340.91786598291003
+                    340.9178659829098
                 ],
                 "gp_std": [
-                    2.604462921031292
+                    2.604462921031153
                 ],
                 "inputs": [
                     [
@@ -583,7 +583,7 @@
                     false
                 ],
                 "reporter_transfer:avg:value": [
-                    340.91786598291003
+                    340.9178659829098
                 ],
                 "reporter_transfer:converged": [
                     true
@@ -598,10 +598,10 @@
                     false
                 ],
                 "gp_mean": [
-                    341.5226615811914
+                    341.52266158119187
                 ],
                 "gp_std": [
-                    3.1113070282598723
+                    3.11130702825993
                 ],
                 "inputs": [
                     [
@@ -614,7 +614,7 @@
                     false
                 ],
                 "reporter_transfer:avg:value": [
-                    341.5226615811914
+                    341.52266158119187
                 ],
                 "reporter_transfer:converged": [
                     true
@@ -629,10 +629,10 @@
                     false
                 ],
                 "gp_mean": [
-                    343.26345590312764
+                    343.26345590312843
                 ],
                 "gp_std": [
-                    4.068743600588101
+                    4.068743600588946
                 ],
                 "inputs": [
                     [
@@ -645,7 +645,7 @@
                     false
                 ],
                 "reporter_transfer:avg:value": [
-                    343.26345590312764
+                    343.26345590312843
                 ],
                 "reporter_transfer:converged": [
                     true
@@ -684,6 +684,37 @@
             },
             "time": 20.0,
             "time_step": 20
+        },
+        {
+            "conditional": {
+                "flag_sample": [
+                    false
+                ],
+                "gp_mean": [
+                    268.94894538836184
+                ],
+                "gp_std": [
+                    1.0934225985877881
+                ],
+                "inputs": [
+                    [
+                        8.722904768738061,
+                        8765.89867421334,
+                        265.5148620275883
+                    ]
+                ],
+                "need_sample": [
+                    false
+                ],
+                "reporter_transfer:avg:value": [
+                    268.94894538836184
+                ],
+                "reporter_transfer:converged": [
+                    true
+                ]
+            },
+            "time": 21.0,
+            "time_step": 21
         }
     ]
 }

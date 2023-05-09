@@ -52,4 +52,108 @@
     requirement = 'The system shall support wildcards for choosing the variables to base convergence '
                   'on.'
   []
+  [abs_ref]
+    type = 'CSVDiff'
+    input = 'abs_ref.i'
+    csvdiff = 'abs_ref_out.csv'
+    requirement = 'The system shall have the ability to base convergence on the comparison of L2 normalization of the residual for '
+                  'individual variables to the sum of the L2 normalization of the absolute value of the residual contributions '
+                  'of those variables.'
+  []
+  [abs_ref_acceptable]
+    type = 'RunApp'
+    input = 'abs_ref_acceptable.i'
+    expect_out = 'Converged due to ACCEPTABLE tolerances'
+    requirement = 'The system shall have the ability to base convergence on the comparison of L2 normalization of the residual for '
+                  'individual variables to the sum of the L2 normalization of the absolute value of the residual contributions '
+                  'of those variables using an acceptable tolerance past a given number of nonlinear iterations.'
+  []
+  [local_normalization]
+    type = 'CSVDiff'
+    input = 'abs_ref.i'
+    csvdiff = 'abs_ref_local_out.csv'
+    cli_args = 'Problem/normalization_type=local_L2 Outputs/file_base=abs_ref_local_out'
+    requirement = 'The system shall have the ability to base convergence on the comparison of L2 normalization of the residual for '
+                  'individual variables locally divided by the absolute value of the residual contributions '
+                  'of those variables.'
+  []
+  [local_linf_normalization]
+    type = 'CSVDiff'
+    input = 'abs_ref.i'
+    csvdiff = 'abs_ref_local_Linf_out.csv'
+    cli_args = 'Problem/normalization_type=local_Linf Outputs/file_base=abs_ref_local_Linf_out'
+    requirement = 'The system shall have the ability to base convergence on the comparison of Linf normalization of the residual for '
+                  'individual variables locally divided by the absolute value of the residual contributions '
+                  'of those variables.'
+  []
+  [linf_normalization]
+    type = 'CSVDiff'
+    input = 'abs_ref.i'
+    csvdiff = 'abs_ref_Linf_out.csv'
+    cli_args = 'Problem/normalization_type=global_Linf Outputs/file_base=abs_ref_Linf_out'
+    requirement = 'The system shall have the ability to base convergence on the comparison of Linf normalization of the residual for '
+                  'individual variables to the sum of the Linf normalization of the absolute value of the residual contributions '
+                  'of those variables.'
+  []
+  [ad_abs_ref]
+    type = 'CSVDiff'
+    input = 'ad_abs_ref.i'
+    csvdiff = 'ad_abs_ref_out.csv'
+    requirement = 'The system shall have the ability to base convergence on the comparison of L2 normalization of the residual for '
+                  'individual variables to the sum of the L2 normalization of the absolute value of the residual contributions '
+                  'of those variables using AD.'
+  []
+  [no_ref]
+    type = 'CSVDiff'
+    input = 'no_ref.i'
+    csvdiff = 'no_ref_out.csv'
+    cli_args = 'Problem/extra_tag_vectors=absref'
+    requirement = 'The system shall have the ability to default to the traditional convergence checks if no '
+                  'reference vector is provided in ReferenceResidualProblem.'
+  []
+  [zero_tolerance_ref]
+    type = RunException
+    input = no_ref.i
+    expect_err = 'Solve failed'
+    cli_args = 'Problem/extra_tag_vectors=absref Problem/reference_vector=absref Problem/zero_reference_residual_treatment=zero_tolerance'
+    requirement = 'The system shall treat convergence with a zero reference residual value as requiring zero residual value for convergence.'
+  []
+  [zero_rel_tolerance_ref]
+    type = CSVDiff
+    input = no_ref.i
+    csvdiff = 'zero_rel_tolerance_ref_out.csv'
+    cli_args = 'Problem/extra_tag_vectors=absref Problem/reference_vector=absref Problem/zero_reference_residual_treatment=relative_tolerance Executioner/nl_rel_tol=1e-8 Outputs/file_base=zero_rel_tolerance_ref_out'
+    requirement = 'The system shall treat convergence with a zero reference residual value as converged if the residual is below the relative tolerance.'
+  []
+  [error]
+    requirement = 'When using ReferenceResidualProblem the system shall throw an error '
+    [wrong_vector_tag_type]
+      type = RunException
+      input = abs_ref.i
+      cli_args = "Problem/extra_tag_solutions='absref' Problem/extra_tag_vectors=''"
+      expect_err = "is not a residual vector tag"
+      detail = "if the reference tag is not a residual vector tag."
+    []
+    [no_tag]
+      type = RunException
+      input = abs_ref.i
+      cli_args = "Problem/extra_tag_vectors=''"
+      expect_err = "does not exist"
+      detail = "if the reference tag does not exist."
+    []
+    [no_reference_vector]
+      type = RunException
+      input = no_ref.i
+      cli_args = "Problem/normalization_type=local_L2 Problem/extra_tag_vectors=absref"
+      expect_err = "If local norm is used, a reference_vector must be provided"
+      detail = "if the reference vector is not provided when using local normalization."
+    []
+    [not_residual_tag]
+      type = RunException
+      input = no_ref.i
+      cli_args = "Problem/extra_tag_solutions=absref GlobalParams/absolute_value_vector_tags=absref"
+      expect_err = "is not a residual vector tag"
+      detail = "if the reference vector is provided is not a residual vector tag."
+    []
+  []
 []

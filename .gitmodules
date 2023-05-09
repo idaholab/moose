@@ -12,3 +12,6 @@
     path = modules/chemical_reactions/contrib/thermochimica
     url = https://github.com/ORNL-CEES/thermochimica.git
     update = none
+[submodule "framework/contrib/wasp"]
+	path = framework/contrib/wasp
+	url = https://code.ornl.gov/neams-workbench/wasp.git

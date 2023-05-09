@@ -23,26 +23,28 @@ TEST(Conversion, stringify)
   EXPECT_EQ(Moose::stringify(Real(1.23456)), "1.23456");
   EXPECT_EQ(Moose::stringify(libMesh::pi), "3.14159");
 
-  EXPECT_EQ(Moose::stringify(std::vector<Real>({4.567, 2.397, 3.2734})), "4.567,2.397,3.2734");
-  EXPECT_EQ(Moose::stringify(std::set<Real>({4.567, 2.397, 3.2734})), "2.397,3.2734,4.567");
+  EXPECT_EQ(Moose::stringify(std::vector<Real>({4.567, 2.397, 3.2734}), ","), "4.567,2.397,3.2734");
+  EXPECT_EQ(Moose::stringify(std::set<Real>({4.567, 2.397, 3.2734}), ","), "2.397,3.2734,4.567");
 
   EXPECT_EQ(Moose::stringify(std::vector<std::vector<Real>>(
                 {{1.1, 2.1, 3.1}, {3.2, 2.2, 1.2}, {1.3, 2.3, 3.3}})),
-            "1.1,2.1,3.1,3.2,2.2,1.2,1.3,2.3,3.3");
+            "1.1, 2.1, 3.1, 3.2, 2.2, 1.2, 1.3, 2.3, 3.3");
   EXPECT_EQ(Moose::stringify(
                 std::vector<std::set<Real>>({{1.1, 2.1, 3.1}, {3.2, 2.2, 1.2}, {1.3, 2.3, 3.3}})),
-            "1.1,2.1,3.1,1.2,2.2,3.2,1.3,2.3,3.3");
+            "1.1, 2.1, 3.1, 1.2, 2.2, 3.2, 1.3, 2.3, 3.3");
   EXPECT_EQ(Moose::stringify(
-                std::map<std::string, int>({{"nmax", 2345}, {"size", 17}, {"allocated", 23}})),
+                std::map<std::string, int>({{"nmax", 2345}, {"size", 17}, {"allocated", 23}}), ","),
             "allocated:23,nmax:2345,size:17");
   EXPECT_EQ(Moose::stringify(std::vector<std::vector<std::string>>(
                                  {{"Streets", "full", "of", "water"}, {"Please", "advise"}}),
                              "--STOP--"),
-            "Streets,full,of,water--STOP--Please,advise");
+            "Streets, full, of, water--STOP--Please, advise");
 
   EXPECT_EQ(
-      Moose::stringify(std::vector<Moose::SolveType>(
-          {Moose::ST_NEWTON, Moose::ST_JFNK, Moose::ST_PJFNK, Moose::ST_FD, Moose::ST_LINEAR})),
+      Moose::stringify(
+          std::vector<Moose::SolveType>(
+              {Moose::ST_NEWTON, Moose::ST_JFNK, Moose::ST_PJFNK, Moose::ST_FD, Moose::ST_LINEAR}),
+          ","),
       "NEWTON,JFNK,Preconditioned JFNK,FD,Linear");
 }
 

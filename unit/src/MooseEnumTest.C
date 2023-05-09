@@ -355,7 +355,7 @@ TEST(MooseEnum, operatorEqual)
   catch (const std::exception & e)
   {
     std::string msg(e.what());
-    ASSERT_NE(msg.find("Invalid id \"3\" in MooseEnum. Valid ids are \"1,2\"."), std::string::npos)
+    ASSERT_NE(msg.find("Invalid id \"3\" in MooseEnum. Valid ids are \"1, 2\"."), std::string::npos)
         << "failed with unexpected error: " << msg;
   }
 }

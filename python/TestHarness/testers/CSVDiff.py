@@ -21,6 +21,8 @@ class CSVDiff(FileTester):
         params.addParam('override_rel_err',   [], "A list of customized relative error tolerances.")
         params.addParam('override_abs_zero',   [], "A list of customized absolute zero tolerances.")
         params.addParam('comparison_file', "Use supplied custom comparison config file.")
+        params.addParam('ignore_columns', [], "A list of variables which will not be included in the comparison.")
+        params.addParam('custom_columns', [], "A list of select columns which will be included in the comparison.")
 
         return params
 
@@ -37,6 +39,14 @@ class CSVDiff(FileTester):
         or (len(self.specs['override_rel_err']) != len(self.specs['override_abs_zero']))):
            self.setStatus(self.fail, 'Override inputs not the same length')
            return False
+
+        if (any(x in self.specs['override_columns'] for x in self.specs['ignore_columns'])
+        or any(x in self.specs['ignore_columns'] for x in self.specs['override_columns'])
+        or any(x in self.specs['custom_columns'] for x in self.specs['ignore_columns'])
+        or any(x in self.specs['ignore_columns'] for x in self.specs['custom_columns'])):
+            self.setStatus(self.fail, 'Ignored columns can not be also be included in lists of columns on which csv comparisons will occur.')
+            return False
+
         return FileTester.checkRunnable(self, options)
 
     def processResultsCommand(self, moose_dir, options):
@@ -70,6 +80,10 @@ class CSVDiff(FileTester):
 
             if self.specs.isValid('override_abs_zero'):
                 csvdiff.append('--custom-abs-zero %s' % (' '.join(self.specs['override_abs_zero'])))
+
+            if self.specs.isValid('ignore_columns'):
+                csvdiff.append('--ignore-fields %s' % (' '.join(self.specs['ignore_columns'])))
+
 
             commands.append(' '.join(csvdiff))
 

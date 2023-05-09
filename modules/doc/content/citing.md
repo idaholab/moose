@@ -355,3 +355,18 @@ The following paper documents functionalities and demonstration of the MOOSE sto
   publisher={Elsevier}
 }
 ```
+
+### Phase Field Module
+
+```
+@article{schwen2023phasefield,
+  author = {D. Schwen and L.K. Aagesen and J.W. Peterson and M.R. Tonks}
+  title = {Rapid multiphase-field model development using a modular free energy based approach with automatic differentiation in MOOSE/MARMOT},
+  journal = {Computational Materials Science},
+  volume = {132},
+  pages = {36-45},
+  year = {2017},
+  doi = {https://doi.org/10.1016/j.commatsci.2017.02.017},
+  url = {https://www.sciencedirect.com/science/article/pii/S0927025617300885},
+}
+```

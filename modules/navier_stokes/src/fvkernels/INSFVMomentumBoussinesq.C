@@ -38,12 +38,6 @@ INSFVMomentumBoussinesq::INSFVMomentumBoussinesq(const InputParameters & params)
     _ref_temperature(getParam<Real>("ref_temperature")),
     _rho(getFunctor<ADReal>(NS::density))
 {
-#ifndef MOOSE_GLOBAL_AD_INDEXING
-  mooseError("INSFV is not supported by local AD indexing. In order to use INSFV, please run the "
-             "configure script in the root MOOSE directory with the configure option "
-             "'--with-ad-indexing-type=global'");
-#endif
-
   if (!_rho.isConstant())
     paramError(NS::density, "The density in the boussinesq term is not constant!");
 }
@@ -51,6 +45,8 @@ INSFVMomentumBoussinesq::INSFVMomentumBoussinesq(const InputParameters & params)
 ADReal
 INSFVMomentumBoussinesq::computeQpResidual()
 {
-  auto elem = makeElemArg(_current_elem);
-  return _alpha(elem) * _gravity(_index) * _rho(elem) * (_temperature(elem) - _ref_temperature);
+  const auto elem = makeElemArg(_current_elem);
+  const auto state = determineState();
+  return _alpha(elem, state) * _gravity(_index) * _rho(elem, state) *
+         (_temperature(elem, state) - _ref_temperature);
 }

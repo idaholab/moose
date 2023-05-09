@@ -27,7 +27,8 @@ enum class ContactFormulation
   PENALTY,
   AUGMENTED_LAGRANGE,
   TANGENTIAL_PENALTY,
-  MORTAR
+  MORTAR,
+  MORTAR_PENALTY
 };
 
 /**
@@ -78,7 +79,7 @@ public:
 
 protected:
   /// Primary/Secondary boundary name pairs for mechanical contact
-  const std::vector<std::pair<BoundaryName, BoundaryName>> _boundary_pairs;
+  std::vector<std::pair<BoundaryName, BoundaryName>> _boundary_pairs;
 
   /// Contact model type enum
   const ContactModel _model;
@@ -88,9 +89,6 @@ protected:
 
   /// Whether to use the dual Mortar approach
   bool _use_dual;
-
-  /// Whether to use correct edge dropping treatment
-  const bool _correct_edge_dropping;
 
   /// Whether to generate the mortar mesh (useful in a restart simulation e.g.).
   const bool _generate_mortar_mesh;
@@ -114,4 +112,8 @@ private:
    * Add single contact pressure auxiliary kernel for various contact action objects
    */
   void addContactPressureAuxKernel();
+  /**
+   * Remove repeated contact pairs in the input file.
+   */
+  void removeRepeatedPairs();
 };

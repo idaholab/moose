@@ -12,18 +12,33 @@
     requirement = 'A mesh can be split into a specified number of files using command line options.'
   []
   [use_split]
-    type = 'Exodiff'
-    input = 'simple_diffusion.i'
-    exodiff = 'simple_diffusion_out.e'
-    cli_args = '--use-split --split-file foo UserObjects/splittester/type=SplitTester'
-    prereq = 'make_split'
-    min_parallel = 3
-    max_parallel = 3
-
-    issues = '#10623'
-    design = 'Mesh/splitting.md'
     requirement = 'A mesh can be pre-split properly and used to generate equivalent results to '
-                  'running a simulation with the unsplit mesh.'
+                  'running a simulation with the unsplit mesh when'
+    issues = '#10623 #17318'
+    design = 'Mesh/splitting.md'
+
+    [from_cli]
+      type = 'Exodiff'
+      input = 'simple_diffusion.i'
+      exodiff = 'simple_diffusion_out.e'
+      cli_args = '--use-split --split-file foo UserObjects/splittester/type=SplitTester'
+      prereq = 'make_split'
+      min_parallel = 3
+      max_parallel = 3
+
+      detail = 'set by command line'
+    []
+    [from_input]
+      type = 'Exodiff'
+      input = 'simple_diffusion.i'
+      exodiff = 'simple_diffusion_out.e'
+      cli_args = 'Mesh/use_split=true Mesh/split_file=foo UserObjects/splittester/type=SplitTester'
+      prereq = 'use_split/from_cli'
+      min_parallel = 3
+      max_parallel = 3
+
+      detail = 'set by an input parameter'
+    []
   []
 
   [check]
@@ -145,7 +160,7 @@
 
     min_parallel = 3
     max_parallel = 3
-    prereq = 'use_split'
+    prereq = 'use_split/from_input'
 
     issues = '#18635'
     design = 'Mesh/splitting.md FileMeshGenerator.md'

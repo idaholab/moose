@@ -1,0 +1,86 @@
+[Tests]
+  issues = '#21903'
+  design = 'meshgenerators/TransfiniteMeshGenerator.md'
+
+  [generate]
+    requirement = 'The system shall support the ability to create a mesh element-wise by specifying '
+                  'corners, edge types, generating parameters and/or point distribution, '	
+
+    [quadrilater]
+      type = 'Exodiff'
+      input = 'quadrilater_generator.i'
+      cli_args = '--mesh-only'
+      exodiff = 'quadrilater_generator_in.e'
+      recover = false
+
+      detail = 'resulting in a quadrilateral mesh, or'
+
+    []
+
+    [arccircle]
+      type = 'Exodiff'
+      input = 'arccircle_generator.i'
+      cli_args = '--mesh-only'
+      exodiff = 'arccircle_generator_in.e'
+      recover = false
+
+      detail = 'resulting in a mesh with an arc circle side,'
+    []
+
+    [annular]
+      type = 'Exodiff'
+      input = 'annular_transf_generator.i'
+      cli_args = '--mesh-only'
+      exodiff = 'annular_transf_generator_in.e'
+      recover = false
+
+      detail = 'or a section of an annulus,'
+    []
+    [arccircle_midpoint]
+      type = 'Exodiff'
+      input = 'arccircle_midpoint_generator.i'
+      cli_args = '--mesh-only'
+      exodiff = 'arccircle_midpoint_generator_in.e'
+      recover = false
+
+      detail = 'which can also be prescribed by providing a midpoint.'
+    []
+
+    [discrete]
+      type = 'Exodiff'
+      input = 'discrete_generator.i'
+      cli_args = '--mesh-only'
+      exodiff = 'discrete_generator_in.e'
+      recover = false
+
+      detail = 'Sides can be provided as discrete points,'
+    []
+    [parsed]
+      type = 'Exodiff'
+      input = 'parsed_generator.i'
+      cli_args = '--mesh-only'
+      exodiff = 'parsed_generator_in.e'
+      recover = false
+
+      detail = 'or symbolic expressions.'
+    []
+    [parsed_annular]
+      type = 'Exodiff'
+      input = 'parsed_annular_generator.i'
+      cli_args = '--mesh-only'
+      exodiff = 'parsed_annular_generator_in.e'
+      recover = false
+
+      detail = 'Also, PARSED can be used for polar coordinates parametrizations, '
+    []
+    [parsed_biased_annular]
+      type = 'Exodiff'
+      input = 'parsed_biased_generator.i'
+      cli_args = '--mesh-only'
+      exodiff = 'parsed_biased_generator_in.e'
+      recover = false
+
+      detail = 'and all cases allow for non-equidistant point distributions. '
+    []
+  []
+[]

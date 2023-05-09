@@ -11,6 +11,59 @@
 """
 This script can be used to figure out if a job on a cluster is hung.
 If all goes well, it'll print the unique stack traces out.
+
+To use this script, you first need to submit a job on your cluster, where
+the binary you are probing doesn't have symbols stripped. If you are working
+with MOOSE many of the modes will work, the best two are METHOD=dbg or
+METHOD=devel. Make sure your job is running.
+
+GENERATE TRACES STAGE
+This script will run first run qstat -n <job number> to figure out which
+nodes your job is running on. If you need to modify that command for your
+cluster, you'll find it in "generate traces". Note: This script is currently
+only designed to work with PBS, but could be easily adapted to other queuing
+systems.
+
+Next, we use a RegEx to parse through the output of qstat to find the nodes
+where your job is running. Check the patterns below and make sure they work
+for your cluster (i.e. node_name_pattern).
+
+Once the script has all the node names down, it'll assemble a bunch of
+complex ssh commands to login and pull back the traces based on PID. It
+figures out the PIDs by grepping `ps -ef` for your application name so
+make sure you know how your application appears on one of the running
+nodes.
+
+Finally, double check the stack binary "PSTACK_BINARY" for your cluster.
+
+If all of this works, the script will use several threads to get stack
+traces from all of your ranks and dump them to a local cache file. It's
+just plan ASCII so you can "cat" it to look at the contents. You'll
+see the node names and a series of stacks for each rank in that file
+with handly line separators.
+
+PROCESS TRACES STAGE
+If all of the above works, you'll see the cache file, don't expect
+this stage to work if you don't have a valid cache file on your disk
+after running this script.
+
+THis stage starts by opening and reading the TRACES. It does splitting
+and pulling off the names off each stack (the node names where the stack
+trac was pulled). It then attempts to "bucket" the stacks into unique
+traces. If all the processors have the exact same stack trace (i.e.
+perfectly syncronized), You'll see only one stack trace with the total
+count of how many ranks reported _that_ trace. If however you have
+divergence, you may have two unique traces or perhaps even more. The
+script will attempt to find the first location of divergence, which
+if there is a logic bug should help you pin down the location of where
+to start searching for a problem.
+
+If for whatever reason, you want to override how many frames to analyze
+you can rerun the script passing in the name of the cache file and how many
+stack traces to look at during the "bucketing" process
+(e.g. find_hung_processes.py -f my_app.1234.cache -s 10).
+The command above will open the given cache file and only pay attention to
+the lowest 10 frames for bucketing purposes.
 """
 
 import sys
@@ -18,6 +71,7 @@ import os
 import re
 import subprocess
 import argparse
+import math
 from tempfile import TemporaryFile
 from time import sleep
 from multiprocessing.pool import ThreadPool
@@ -228,113 +282,230 @@ def generate_traces(job_num, application_name, num_hosts, num_threads):
     traces = []
     for stack in stack_list:
         output = os.linesep.join([s for s in stack.splitlines() if s])
-        traces.extend(split_traces(output))
+        traces.extend(ProcessTraces.split_traces(output))
     return traces
 
-def read_tracesfromfile(filename):
+
+class BinSearchIndices:
     """
-    Read tracefile, and return a list of traces
+    Utility to return indicies to check for a binary
+    search. The next value to try is returned each time
+    "next" is called.
     """
-    with open(filename, encoding='utf-8') as t_file:
-        data = t_file.read()
-        return split_traces(data)
+    def __init__(self, lower, upper):
+        self.lower = lower
+        self.upper = upper
 
-def split_traces(trace_string):
-    """
-    Return list of traces based on regular expression:
+    def next_index(self):
+        if self.upper < self.lower:
+            return -1
 
-    Only keep lines beginning with a #
-    throw_away = re.compile("^[^#].*", re.M)
-    traces = [throw_away.sub("", trace) for trace in traces]
-    """
-    trace_regex = re.compile(r'^\**\n', re.M)
-    traces = trace_regex.split(trace_string)
-    return traces
+        return (self.upper + self.lower) // 2
 
-def process_traces(traces, num_lines_to_keep):
-    """
-    Process the individual traces
-    """
-    unique_stack_traces = {}
-    last_lines_regex = re.compile(fr'(?:.*\n){{{num_lines_to_keep}}}\Z', re.M)
-    host_regex = re.compile('^(Host.*)', re.M)
-
-    for trace in traces:
-        if len(trace) == 0:
-            continue
-
-        # Grab the host and PID
-        tmp_trace = host_regex.search(trace)
-        if tmp_trace:
-            host_pid = tmp_trace.group(1)
-
-        # If the user requested to save only the last few lines, do that here
-        if num_lines_to_keep:
-            tmp_trace = last_lines_regex.search(trace)
-            if tmp_trace:
-                trace = tmp_trace.group(0)
-
-        unique = ''
-        for back_trace in unique_stack_traces:
-            if compare_traces(trace, back_trace):
-                unique = back_trace
-
-        if unique == '':
-            unique_stack_traces[trace] = [host_pid]
+    def set_direction(self, next_direction):
+        if next_direction >= 1:
+            self.lower = self.next_index() + 1
         else:
-            unique_stack_traces[unique].append(host_pid)
+            self.upper = self.next_index() - 1
+        return
 
-    return unique_stack_traces
+    def estimated_steps_remaining(self):
+        range = abs(self.upper - self.lower)
+        if range <= 1:
+            return range + 1
 
-def compare_traces(trace1, trace2):
+        return math.ceil(math.log2(self.upper - self.lower))
+
+class ProcessTraces:
     """
-    Return bool if trace1 = trace2
+    This class reads a series of stack traces from a file
+    and then processes them to determine if processes in an MPI parallel
+    job have diverged (having differing stack traces that are due to just
+    noise. Memory addresses are stripped.
     """
-    lines1 = trace1.split('\n')
-    lines2 = trace2.split('\n')
 
-    if len(lines1) != len(lines2):
-        return False
+    def __init__(self):
+        self.unique_stack_traces = {}
+        self.filename = None
+        self.traces = None
+        self.host_and_frames_re = re.compile('^(Host.*?)\n(.*)', re.M | re.S)
+        self.memory_re = re.compile(r'0x[0-9a-f]*')    # Pattern to match (and remove) memory addresses
+        self.frame_num_re = re.compile(r'^#\d.', re.M) # frame numbers IMPORTANT: Always match 2 characters due to fixed width formatting!
 
-    # Only compare the stack trace part - not the memory addresses
-    # Note this subroutine may need tweaking if the stack trace is different
-    # on the current machine
-    memory_re = re.compile('0x[0-9a-f]*')
-    for a_line in lines1:
-        line1 = a_line.split()[2:]
-        line2 = a_line.split()[2:]
-        # Let's strip out all the memory addresses too
-        line1 = [memory_re.sub('0x...', line) for line in line1]
-        line2 = [memory_re.sub('0x...', line) for line in line2]
-        if line1 != line2:
+    def read_tracesfromfile(self, filename):
+        """
+        Read tracefile, and return a list of traces
+        """
+        self.filename = filename
+        with open(filename, encoding='utf-8') as t_file:
+            data = t_file.read()
+            if data == '':
+                raise Exception("Cache file is empty - check your job number and application name")
+            self.traces = self.split_traces(data)
+        return
+
+    @staticmethod
+    def split_traces(trace_string):
+        """
+        Return list of traces based on regular expression:
+
+        Only keep lines beginning with a #
+        throw_away = re.compile("^[^#].*", re.M)
+        traces = [throw_away.sub("", trace) for trace in traces]
+        """
+        trace_regex = re.compile(r'^\**\n', re.M)
+        return trace_regex.split(trace_string)
+
+    def __longest_trace(self):
+        """
+        Returns the number of lines in the longest trace
+        """
+        return max(trace.count('\n') for trace in self.traces)
+
+    def process_traces(self, num_lines_to_keep):
+        """
+        Process the individual traces into buckets to determine whether processes have diverged from one and other.
+        """
+        unique_stack_traces = {}
+        bin_search_index = None
+        last_index = -1
+        if num_lines_to_keep == 0:
+            bin_search_index = BinSearchIndices(1, self.__longest_trace())
+        else:
+            # Set the start and end indices to the same to force a single pass
+            bin_search_index = BinSearchIndices(num_lines_to_keep, num_lines_to_keep)
+            last_index = num_lines_to_keep # Setting stopping criteria
+
+        last_diveged_index = -1
+        last_result_diverged = True
+        last_diverged_result = {}
+        while True:
+            num_lines_to_keep = bin_search_index.next_index()
+
+            last_lines_regex = re.compile(fr'(?:.*\n){{{num_lines_to_keep}}}\Z', re.M)
+            print(f"Comparing stacks through frame {num_lines_to_keep}. Estimated steps remaining: {bin_search_index.estimated_steps_remaining()}", end=" ")
+
+            self.unique_stack_traces.clear()
+            for trace in self.traces:
+                if len(trace) == 0:
+                    continue
+
+                # Grab the host and PID and strip
+                tmp_trace = self.host_and_frames_re.search(trace)
+                if tmp_trace:
+                    host_pid = tmp_trace.group(1)
+                    trace = tmp_trace.group(2)
+
+                # If the user requested to save only the last few lines, do that here
+                if num_lines_to_keep:
+                    tmp_trace = last_lines_regex.search(trace)
+                    if tmp_trace:
+                        trace = tmp_trace.group(0)
+
+                unique = ''
+                for back_trace in self.unique_stack_traces:
+                    if self.compare_traces(trace, back_trace):
+                        unique = back_trace
+
+                if unique == '':
+                    self.unique_stack_traces[trace] = [host_pid]
+                else:
+                    self.unique_stack_traces[unique].append(host_pid)
+
+            # Figure out if we need to search for divergence up or down from here
+            current_result_diverged = len(self.unique_stack_traces) > 1
+            if current_result_diverged:
+                bin_search_index.set_direction(-1)
+                print("- diverged...")
+            else:
+                bin_search_index.set_direction(1)
+                print("- converged...")
+
+            """
+            See if we've for sure narrowed in on the stack where the divergence first occurs.
+            We'll only know for sure if we are testing adjacent indicies. Once we are at
+            that step though, there are four possibilities:
+
+            Case 1: Current round is a divergence - return the current result
+
+            Case 2: Last iteration was a divergence, current round is a convergence - return the last result
+            Case 3: Both the current and last iteration are converged - No divergence at! (return the last result)
+
+            case 4: All passes are converged!
+            """
+            if (abs(num_lines_to_keep - last_index) <= 1):
+                # Case 1 & 4:
+                if current_result_diverged or last_diverged_result == {}:
+                    self.reportResults(self.unique_stack_traces, num_lines_to_keep)
+                # Cases 2 & 3:
+                else:
+                    self.reportResults(last_diverged_result, last_diverged_index)
+                return
+
+            last_index = num_lines_to_keep
+            if current_result_diverged:
+                last_diverged_index = num_lines_to_keep
+                last_diverged_result = self.unique_stack_traces.copy()
+
+        raise Exception("Something went wrong with the search")
+
+    def reportResults(self, results, diverged_stack_frame_num):
+        """
+        Reports the final results
+        """
+        print('\nUnique Stack Traces - frames_kept:', diverged_stack_frame_num)
+        for trace, count in results.items():
+            print(f'{"*"*80}\nCount: {len(count)}\n')
+            if len(count) < 10:
+                print("\n".join(count))
+            print(f'\n{trace}')
+
+    def compare_traces(self, trace1, trace2):
+        """
+        Return True if trace1 == trace2
+        """
+        # Drop Memory Addresses
+        trace1 = self.memory_re.sub('0x...', trace1)
+        trace2 = self.memory_re.sub('0x...', trace2)
+
+        # Drop Frame Numbers
+        trace1 = self.frame_num_re.sub('#00', trace1)
+        trace2 = self.frame_num_re.sub('#00', trace2)
+
+        if trace1 != trace2:
             return False
-    return True
+
+        return True
 
 def main():
     """
     Parse arguments, gather hosts and launch SSH commands
     """
-    parser = argparse.ArgumentParser(description='Usage: %prog [options] <PBS Job num> '
-                                                 '<Application>')
-    parser.add_argument('pbs_job_num', type=int)
-    parser.add_argument('application', type=str)
-    parser.add_argument('-s', '--stacks', metavar='int', action='store', type=int, default=0,
-                       help='The number of stack frames to keep and compare for '
-                       'uniqueness (Default: ALL)')
+    parser = argparse.ArgumentParser(description="Normally you will run this script with your PBS job number AND the name of your executable (e.g. find_hung_processes.py 1234 my_app-opt)."
+                                     "\nHowever, you can also pass in the name of the cache file containing traces from a previous run to process (e.g. find_hung_processes.py -f my_app-opt.1234.cache).")
+
+    if '-f' not in sys.argv and '--file' not in sys.argv:
+        parser.add_argument('pbs_job_num', type=int)
+        parser.add_argument('application', type=str)
+
     parser.add_argument('-n', '--hosts', metavar='int', action='store', type=int, default=0,
-                       help='The number of hosts to visit (Default: ALL)')
-    parser.add_argument('-f', '--force', action='store_true', default=False,
-                       help='Whether or not to force a regen if a cache file exists')
+                        help='The number of hosts to visit (Default: ALL)')
     parser.add_argument('-t', '--threads', metavar='int', type=int, default=12,
-                       help='Number of threads used when remoting around gathering data. '
-                       'Default: %(default)s')
+                        help='Number of threads used when remoting around gathering data. '
+                        'Default: %(default)s')
+
+    parser.add_argument('-f', '--file', metavar='str', action='store', type=str, default=None,
+                        help='The existing cache file to process')
+    parser.add_argument('-s', '--stacks', metavar='int', action='store', type=int, default=0,
+                        help='The number of stack frames to keep and compare for '
+                        'uniqueness (Default: ALL)')
     args = parser.parse_args()
 
-    # first see if there is a cache file available
-    cache_filename = f'{args.application}.{args.pbs_job_num}.cache'
+    cache_filename = None
+    if args.file == None:
+        # Autogenerate a filename based on application name and job number
+        cache_filename = f'{args.application}.{args.pbs_job_num}.cache'
 
-    traces = []
-    if not os.path.exists(cache_filename) or args.force:
         traces = generate_traces(args.pbs_job_num, args.application, args.hosts, args.threads)
 
         # Cache the restuls to a file
@@ -342,18 +513,17 @@ def main():
             for trace in traces:
                 cache_file.write(f'{trace}{"*"*80}\n')
                 cache_file.write('\n')
+    else:
+        cache_filename = args.file
+
+    # See if we can open either the passed in file or the one we just generated
+    if not os.path.exists(cache_filename):
+        raise Exception(f"Unable to open trace cache file: cache_filename")
 
     # Process the traces to collapse them into unique stacks
-    traces = read_tracesfromfile(cache_filename)
-    unique_stack_traces = process_traces(traces, args.stacks)
-
-    print('Unique Stack Traces')
-    for trace, count in unique_stack_traces.items():
-        print(f'{"*"*80}\nCount: {len(count)}\n')
-        if len(count) < 10:
-            print("\n".join(count))
-        print(f'\n{trace}')
-
+    pt = ProcessTraces()
+    pt.read_tracesfromfile(cache_filename)
+    pt.process_traces(args.stacks)
 
 if __name__ == '__main__':
     sys.exit(main())

@@ -58,7 +58,7 @@ MultiAuxVariablesAction::act()
   for (unsigned int val = 0; val < _num_var; ++val)
     for (unsigned int gr = 0; gr < _grain_num; ++gr)
     {
-      /// for exatrcting data from MaterialProperty<std::vector<Real> >
+      /// for extracting data from MaterialProperty<std::vector<Real> >
       if (_data_type[val] == "Real")
       {
         // Create variable names with variable name base followed by the order parameter it applies
@@ -67,7 +67,7 @@ MultiAuxVariablesAction::act()
 
         _problem->addAuxVariable(_type, var_name, _moose_object_pars);
       }
-      /// for exatrcting data from MaterialProperty<std::vector<RealGradient> >
+      /// for extracting data from MaterialProperty<std::vector<RealGradient> >
       if (_data_type[val] == "RealGradient")
         for (unsigned int x = 0; x < dim; ++x)
         {

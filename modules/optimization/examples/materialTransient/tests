@@ -1,0 +1,64 @@
+[Tests]
+  design = 'AdjointSolutionUserObject.md'
+  issues = '#22215'
+  [material_transient]
+    requirement = 'The system shall be able to perform inverse material optimization on a transient model by'
+    [forward]
+      type = CSVDiff
+      input = forward.i
+      cli_args = 'Outputs/execute_on=FINAL'
+      csvdiff = forward_out_data_0011.csv
+      recover = False
+      method = '!dbg'
+      valgrind = heavy
+      max_threads = 1 # Optimize executioner does not support multiple threads
+      detail = 'generating synthetic measurement data,'
+    []
+    [optimize_nograd]
+      type = Exodiff
+      input = optimize_nograd.i
+      exodiff = optimize_nograd_out_forward0.e
+      prereq = material_transient/forward
+      method = '!dbg'
+      valgrind = none
+      max_threads = 1 # Optimize executioner does not support multiple threads
+      detail = 'performing gradient-free optimization,'
+    []
+    [optimize_grad]
+      type = Exodiff
+      input = optimize_grad.i
+      exodiff = optimize_grad_out_forward0.e
+      prereq = material_transient/forward
+      method = '!dbg'
+      valgrind = heavy
+      max_threads = 1 # Optimize executioner does not support multiple threads
+      detail = 'performing gradient-based optimization, or'
+    []
+    [optimize_auto_adjoint]
+      type = Exodiff
+      input = optimize_auto_adjoint.i
+      cli_args = 'Outputs/file_base=optimize_grad_out'
+      exodiff = optimize_grad_out_forward0.e
+      prereq = material_transient/forward
+      method = '!dbg'
+      valgrind = heavy
+      max_threads = 1 # Optimize executioner does not support multiple threads
+      detail = 'performing gradient-based optimization with an automatically computed adjoint.'
+    []
+  []
+
+  [auto_adjoint_nondefualt_sys_name]
+      type = Exodiff
+      input = optimize_auto_adjoint.i
+      cli_args = 'Outputs/file_base=optimize_grad_out
+                  forward:Variables/u/nl_sys=forward
+                  forward:Executioner/forward_system=forward
+                  forward:Problem/nl_sys_names=\'forward adjoint\''
+      exodiff = optimize_grad_out_forward0.e
+      prereq = material_transient/forward
+      method = '!dbg'
+      valgrind = heavy
+      max_threads = 1 # Optimize executioner does not support multiple threads
+      requirement = 'The system shall be able to perform inverse material optimization on a transient model by performing gradient-based optimization with an automatically computed adjoint using non-default system names.'
+  []
+[]

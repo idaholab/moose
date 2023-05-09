@@ -35,6 +35,20 @@ void changeBoundaryId(MeshBase & mesh,
  */
 std::vector<BoundaryID> getBoundaryIDs(const libMesh::MeshBase & mesh,
                                        const std::vector<BoundaryName> & boundary_name,
+                                       bool generate_unknown,
+                                       const std::set<BoundaryID> & mesh_boundary_ids);
+
+/**
+ * Gets the boundary IDs with their names.
+ *
+ * The ordering of the returned boundary ID vector matches the vector of the boundary
+ * names in \p boundary_name.
+ * When a boundary name is not available in the mesh, if \p generate_unknown is true
+ * a non-existant boundary ID will be returned, otherwise a BoundaryInfo::invalid_id
+ * will be returned.
+ */
+std::vector<BoundaryID> getBoundaryIDs(const libMesh::MeshBase & mesh,
+                                       const std::vector<BoundaryName> & boundary_name,
                                        bool generate_unknown);
 
 /**
@@ -67,6 +81,25 @@ BoundaryID getBoundaryID(const BoundaryName & boundary_name, const MeshBase & me
  */
 SubdomainID getSubdomainID(const SubdomainName & subdomain_name, const MeshBase & mesh);
 
+/**
+ * Get the associated subdomainIDs for the subdomain names that are passed in.
+ *
+ * @param mesh The mesh
+ * @param subdomain_name The names of the subdomains
+ * @param mesh_subdomains All the subdomain IDs that exist on the mesh
+ * @return The subdomain ids from the passed subdomain names.
+ */
+std::vector<subdomain_id_type> getSubdomainIDs(const libMesh::MeshBase & mesh,
+                                               const std::vector<SubdomainName> & subdomain_name,
+                                               const std::set<SubdomainID> & mesh_subdomains);
+
+/**
+ * Get the associated subdomainIDs for the subdomain names that are passed in.
+ *
+ * @param mesh The mesh
+ * @param subdomain_name The names of the subdomains
+ * @return The subdomain ids from the passed subdomain names.
+ */
 std::vector<subdomain_id_type> getSubdomainIDs(const libMesh::MeshBase & mesh,
                                                const std::vector<SubdomainName> & subdomain_name);
 
@@ -207,4 +240,17 @@ bool hasBoundaryID(MeshBase & input_mesh, const BoundaryID & id);
  * @param boundary name
  */
 bool hasBoundaryName(MeshBase & input_mesh, const BoundaryName & name);
+
+/**
+ * Convert a list of sides in the form of a vector of pairs of node ids into a list of ordered nodes
+ * based on connectivity
+ * @param node_assm vector of pairs of node ids that represent the sides
+ * @param elem_id_list vector of element ids that represent the elements that contain the sides
+ * @param ordered_node_list vector of node ids that represent the ordered nodes
+ * @param ordered_elem_id_list vector of element corresponding to the ordered nodes
+ * */
+void makeOrderedNodeList(std::vector<std::pair<dof_id_type, dof_id_type>> & node_assm,
+                         std::vector<dof_id_type> & elem_id_list,
+                         std::vector<dof_id_type> & ordered_node_list,
+                         std::vector<dof_id_type> & ordered_elem_id_list);
 }

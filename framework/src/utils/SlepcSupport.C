@@ -514,6 +514,12 @@ mooseEPSFormMatrices(EigenProblem & eigen_problem, EPS eps, Vec x, void * ctx)
   if (eigen_problem.constantMatrices() && eigen_problem.wereMatricesFormed())
     PetscFunctionReturn(0);
 
+  if (eigen_problem.onLinearSolver())
+    // We reach here during linear iteration when solve type is PJFNKMO.
+    // We will use the matrices assembled at the beginning of this Newton
+    // iteration for the following residual evaluation.
+    PetscFunctionReturn(0);
+
   NonlinearEigenSystem & eigen_nl = eigen_problem.getCurrentNonlinearEigenSystem();
   SNES snes = eigen_nl.getSNES();
   // Rest ST state so that we can retrieve matrices

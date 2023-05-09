@@ -88,7 +88,7 @@ ComputeResidualAndJacobianThread::join(const ComputeResidualAndJacobianThread & 
 }
 
 void
-ComputeResidualAndJacobianThread::determineResidualObjects()
+ComputeResidualAndJacobianThread::determineObjectWarehouses()
 {
   if (_vector_tags.size() &&
       _vector_tags.size() != _fe_problem.numVectorTags(Moose::VECTOR_TAG_RESIDUAL))
@@ -109,6 +109,7 @@ ComputeResidualAndJacobianThread::determineResidualObjects()
     _fv_kernels.clear();
     _fe_problem.theWarehouse()
         .query()
+        .template condition<AttribSysNum>(_nl.number())
         .template condition<AttribSystem>("FVElementalKernel")
         .template condition<AttribSubdomains>(_subdomain)
         .template condition<AttribThread>(_tid)

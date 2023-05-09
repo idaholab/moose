@@ -55,6 +55,9 @@ protected:
   /// number of displacement components
   const unsigned int _ndisp;
 
+  /// whether to use AD kernels and materials
+  const bool _use_AD;
+
   /// Base name of the material system
   const std::string _base_name;
 

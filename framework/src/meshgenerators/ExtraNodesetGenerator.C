@@ -154,5 +154,8 @@ ExtraNodesetGenerator::generate()
   for (unsigned int i = 0; i < boundary_ids.size(); ++i)
     boundary_info.nodeset_name(boundary_ids[i]) = boundary_names[i];
 
+  // This is a terrible hack that we'll want to remove once BMBBG isn't terrible
+  if (!_app.getMeshGeneratorSystem().hasBreakMeshByBlockGenerator())
+    mesh->set_isnt_prepared();
   return dynamic_pointer_cast<MeshBase>(mesh);
 }

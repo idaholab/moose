@@ -6,8 +6,6 @@
     input = 'phy.T_wall_transfer_3eqn_x.i'
     exodiff = 'phy.T_wall_transfer_3eqn_x_out.e'
     recover = false
-    ad_indexing_type = 'global'
-    mesh_mode = 'replicated'
 
     requirement = "The system shall be able to couple a flow channel and heat structure aligned with the x-axis."
     issues = '#19754'
@@ -24,8 +22,6 @@
       Components/hs/axial_region_names='1 3 6'
       Outputs/file_base=phy.T_wall_transfer_3eqn_x_lengths"
     recover = false
-    ad_indexing_type = 'global'
-    mesh_mode = 'replicated'
 
     requirement = "The system shall be able to couple a flow channel and heat structure with non-uniform meshes and opposite directions."
     issues = '#19754'
@@ -35,8 +31,6 @@
     input = 'phy.T_wall_transfer_3eqn_y.i'
     exodiff = 'phy.T_wall_transfer_3eqn_y_out.e'
     recover = false
-    ad_indexing_type = 'global'
-    mesh_mode = 'replicated'
 
     requirement = "The system shall be able to couple a flow channel and heat structure aligned with the y-axis."
     issues = '#20747'
@@ -46,8 +40,6 @@
     input = 'phy.T_wall_transfer_3eqn_z.i'
     exodiff = 'phy.T_wall_transfer_3eqn_z_out.e'
     recover = false
-    ad_indexing_type = 'global'
-    mesh_mode = 'replicated'
 
     requirement = "The system shall be able to couple a flow channel and heat structure aligned with the z-axis."
     issues = '#19754'
@@ -66,8 +58,6 @@
       Outputs/file_base=phy.conservation_1phase_plate_rdg"
     # because of output has execute_on = 'initial final'
     recover = false
-    ad_indexing_type = 'global'
-    mesh_mode = 'replicated'
 
     requirement = "The system shall conserve energy when a flow channel is coupled to a plate heat structure."
     issues = '#19754'
@@ -89,8 +79,6 @@
       Outputs/file_base=phy.conservation_1phase_cylinder_rdg"
     # because of output has execute_on = 'initial final'
     recover = false
-    ad_indexing_type = 'global'
-    mesh_mode = 'replicated'
 
     requirement = "The system shall conserve energy when a flow channel is coupled to a cylindrical heat structure."
     issues = '#19754'
@@ -104,9 +92,7 @@
     abs_zero = 1e-5
     rel_err = 0
     max_time = 6000
-    ad_indexing_type = 'global'
     recover = false
-    mesh_mode = 'replicated'
 
     requirement = "The system shall conserve energy when a flow channel is coupled to several heat structures."
     issues = '#19754'
@@ -117,9 +103,7 @@
     input = 'phy.energy_heatstructure_ss_1phase.i'
     csvdiff = 'phy.energy_heatstructure_ss_1phase_out.csv'
     abs_zero = 5e-7
-    ad_indexing_type = 'global'
     recover = false
-    mesh_mode = 'replicated'
 
     requirement = "The system shall conserve energy after reaching steady-state when a flow channel is coupled to a heat structure."
     issues = '#19754'
@@ -132,7 +116,7 @@
     cli_args = "Components/hx/flow_channel=inlet Components/hx/Hw=300"
     expect_err = "hx: The component 'inlet' is not of type 'FlowChannelBase'"
 
-    requirement = "The system shall throw an error is the flow channel component is not of type 'FlowChannelBase'."
+    requirement = "The system shall throw an error if the flow channel component is not of type 'FlowChannelBase'."
     issues = '#19754'
   []
 
@@ -142,7 +126,7 @@
     cli_args = "Components/hx/hs=inlet Components/hx/Hw=300 "
     expect_err = "hx: The component 'inlet' is not of type 'HeatStructureBase'"
 
-    requirement = "The system shall throw an error is the heat structure component is not of type 'HeatStructureBase'."
+    requirement = "The system shall throw an error if the heat structure component is not of type 'HeatStructureBase'."
     issues = '#19754'
   []
 
@@ -150,9 +134,9 @@
     type = 'RunException'
     input = 'err.1phase.i'
     cli_args = "Components/hx/hs_side=asdf"
-    expect_err = "hx: Invalid option 'asdf' provided for 'hs_side' parameter. Valid options \(not case-sensitive\) are 'inner' and 'outer'."
+    expect_err = "hx: The parameter 'hs_side' was given an invalid value"
 
-    requirement = "The system shall throw an error is the provided heat structure side is invalid."
+    requirement = "The system shall throw an error if the provided heat structure side is invalid."
     issues = '#19754'
   []
 
@@ -161,9 +145,8 @@
     input = 'err.1phase.i'
     cli_args = "Components/pipe/n_elems=1 Components/hx/Hw=300"
     expect_err = "hx: The number of elements in component 'pipe' is 1, but the number of axial elements in component 'hs' is 2. They must be the same."
-    mesh_mode = 'replicated'
 
-    requirement = "The system shall throw an error is the heat structure and flow channel components don't have the same number of axial elements."
+    requirement = "The system shall throw an error if the heat structure and flow channel components don't have the same number of axial elements."
     issues = '#19754'
   []
 
@@ -172,9 +155,8 @@
     input = 'err.1phase.i'
     cli_args = "Components/pipe/length=3 Components/hx/Hw=300"
     expect_err = "hx: The length of component 'pipe' is 3, but the length of component 'hs' is 4. They must be the same."
-    mesh_mode = 'replicated'
 
-    requirement = "The system shall throw an error is the heat structure and flow channel components don't have the same length."
+    requirement = "The system shall throw an error if the heat structure and flow channel components don't have the same length."
     issues = '#19754'
   []
 
@@ -183,9 +165,8 @@
     input = 'err.1phase.i'
     cli_args = "Components/pipe/position='0 0.2 0.5' Components/hx/Hw=300 Components/pipe/n_elems=10 Components/hs/n_elems=10"
     expect_err = "hx: The centers of the elements of flow channel 'pipe' do not align with the centers of the specified heat structure side."
-    mesh_mode = 'replicated'
 
-    requirement = "The system shall throw an error is the center of the elements of the flow channel component don't align with the centers of the specified heat structure side."
+    requirement = "The system shall throw an error if the center of the elements of the flow channel component don't align with the centers of the specified heat structure side."
     issues = '#19754'
   []
 
@@ -194,9 +175,8 @@
     input = 'err.1phase.i'
     cli_args = "Components/pipe/orientation='0 1 0' Components/hx/Hw=300"
     expect_err = "hx: The centers of the elements of flow channel 'pipe' do not align with the centers of the specified heat structure side."
-    mesh_mode = 'replicated'
 
-    requirement = "The system shall throw an error is the coupled flow channel and heat structure components don't have the same orientation."
+    requirement = "The system shall throw an error if the coupled flow channel and heat structure components don't have the same orientation."
     issues = '#19754'
   []
 
@@ -205,9 +185,8 @@
     input = 'err.1phase.i'
     cli_args = "Components/pipe/position='0 0.1 0' Components/hx/hs_side=inner Components/hx/Hw=300"
     expect_err = "hx: 'hs_side' parameter is set to 'INNER', but this side of the heat structure 'hs' has radius of zero."
-    mesh_mode = 'replicated'
 
-    requirement = "The system shall throw an error is the flow channel is coupled to the inner side of a heat structure that has a zero inner radius."
+    requirement = "The system shall throw an error if the flow channel is coupled to the inner side of a heat structure that has a zero inner radius."
     issues = '#19754'
   []
 
@@ -215,9 +194,8 @@
     type = 'RunException'
     input = 'err.1phase.i'
     expect_err = "hx: The parameter 'Hw' must be provided when using simple closures."
-    mesh_mode = 'replicated'
 
-    requirement = "The system shall throw an error is the heat transfer coefficient is not specified with simple closures."
+    requirement = "The system shall throw an error if the heat transfer coefficient is not specified with simple closures."
     issues = '#19754'
   []
 
@@ -229,7 +207,6 @@
     difference_tol = 55
     cli_args = "Debug/check_jacobian=true Components/hs/type=HeatStructureCylindrical Components/hx/hs_side=outer"
     max_parallel = 1
-    ad_indexing_type = 'global'
 
     requirement = "The system shall compute jacobians when a flow channel is coupled to the outer side of a cylindrical heat structure."
     issues = '#19754'
@@ -242,7 +219,6 @@
     difference_tol = 55
     cli_args = "Debug/check_jacobian=true Components/pipe/position='0 0 0' Components/hs/inner_radius=0.1 Components/hs/offset_mesh_by_inner_radius=true Components/hs/type=HeatStructureCylindrical Components/hx/hs_side=inner"
     max_parallel = 1
-    ad_indexing_type = 'global'
 
     requirement = "The system shall compute jacobians when a flow channel is coupled to the inner side of a cylindrical heat structure."
     issues = '#19754'
@@ -255,7 +231,6 @@
     difference_tol = 55
     cli_args = "Debug/check_jacobian=true Components/hs/type=HeatStructurePlate Components/hs/depth=1 Components/hx/hs_side=outer"
     max_parallel = 1
-    ad_indexing_type = 'global'
 
     requirement = "The system shall compute jacobians when a flow channel is coupled to the outer side of a plate heat structure."
     issues = '#19754'
@@ -268,7 +243,6 @@
     difference_tol = 55
     cli_args = "Debug/check_jacobian=true Components/pipe/position='0 0 0' Components/hs/depth=1 Components/hs/type=HeatStructurePlate Components/hx/hs_side=inner"
     max_parallel = 1
-    ad_indexing_type = 'global'
 
     requirement = "The system shall compute jacobians when a flow channel is coupled to the inner side of a plate heat structure."
     issues = '#19754'

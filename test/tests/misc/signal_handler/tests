@@ -5,10 +5,11 @@
     type = SignalTester
     input = 'simple_transient_diffusion_scaled.i'
     requirement = 'The app should write out a checkpoint file at any time by sending a signal to it.'
+    # needs short enough that the simulation has not finished
     sleep_time = 1
-    method='opt'
-    recover=false
-    max_threads=1
+    method = 'opt'
+    recover = false
+    max_threads = 1
     max_parallel = 1
   []
   [test_signal_recover]
@@ -23,8 +24,8 @@
     #the checkpoint should write somewhere after the first step, and before the last step
     #to verify it is actually resuming from its autosave, we make sure it resumes one step before the last step
     expect_out = 'Time Step 49,'
-    method='opt'
-    max_threads=1
+    method = 'opt'
+    max_threads = 1
     max_parallel = 1
     prereq = 'test_signal'
     requirement = 'The app should be able to recover from the autosaved checkpoint created by a signal.'
@@ -37,9 +38,9 @@
     min_parallel = 3
     max_parallel = 3
     cli_args = 'Executioner/num_steps=70'
-    method='opt'
-    max_threads=1
-    recover=false
+    method = 'opt'
+    max_threads = 1
+    recover = false
   []
   [test_signal_parallel_recover]
     type = RunApp
@@ -53,13 +54,13 @@
     #the checkpoint should write somewhere after the first step, and before the last step
     #to verify it is actually resuming from its autosave, we make sure it resumes one step before the last step
     expect_out = 'Time Step 69,'
-    method='opt'
+    method = 'opt'
 
     min_parallel = 3
     max_parallel = 3
     prereq = 'test_signal_parallel'
     requirement = 'The app should be able to recover from a parallel autosaved checkpoint created by a signal.'
-    max_threads=1
+    max_threads = 1
   []
   [test_signal_debug]
     type = SignalTester
@@ -68,7 +69,7 @@
     requirement = 'The app should write out a checkpoint file at any time by sending a signal to it, in a debug build.'
     method = 'dbg'
     cli_args = 'Mesh/uniform_refine=0'
-    recover=false
+    recover = false
   []
   [test_signal_recover_debug]
     type = RunApp

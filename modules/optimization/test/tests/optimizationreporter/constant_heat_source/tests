@@ -5,7 +5,7 @@
     requirement = 'The system shall be able to optimize the magnitude of a source for a'
     [linear]
       type = CSVDiff
-      max_threads = 1
+      max_threads = 1 # Optimize executioner does not support multiple threads
       rel_err = 0.01
       input = main.i
       csvdiff = main_out_OptimizationReporter_0001.csv
@@ -15,7 +15,7 @@
     []
     [nonlinear]
       type = CSVDiff
-      max_threads = 1
+      max_threads = 1 # Optimize executioner does not support multiple threads
       rel_err = 0.1
       abs_zero = 0.5
       input = main_nonLinear.i

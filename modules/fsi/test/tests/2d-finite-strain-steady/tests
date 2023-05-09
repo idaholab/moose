@@ -6,7 +6,6 @@
     requirement = 'The system shall be able to model fluid channel compression and solid expansion with a finite strain material model, which requires being able to evaluate stateful material properties on interfaces.'
     input = thermal-me.i
     csvdiff = thermal-me.csv
-    ad_indexing_type = 'global'
     method = '!dbg'
     valgrind = 'none'
     rel_err = 1e-4

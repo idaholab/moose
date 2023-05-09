@@ -8,6 +8,7 @@
 #* https://www.gnu.org/licenses/lgpl-2.1.html
 import sys
 from TestHarness.JobDAG import JobDAG
+from TestHarness.StatusSystem import StatusSystem
 from FactorySystem.MooseObject import MooseObject
 import os, traceback
 from time import sleep
@@ -417,7 +418,16 @@ class Scheduler(MooseObject):
 
                 job.report_timer.start()
                 timeout_timer.start()
-                self.run(job) # Hand execution over to derived scheduler
+
+                # We have a try here because we want to explicitly catch things like
+                # python errors in _only_ the Job; exceptions that happen in the Tester
+                # from within the Job will get caught within the Tester
+                try:
+                    self.run(job) # Hand execution over to derived scheduler
+                except Exception:
+                    with j_lock:
+                        job.setStatus(StatusSystem().error, 'JOB EXCEPTION')
+                        job.setOutput('Encountered an exception while running Job: %s' % (traceback.format_exc()))
                 timeout_timer.cancel()
 
                 # Recover worker count before attempting to queue more jobs
@@ -429,7 +439,7 @@ class Scheduler(MooseObject):
 
                 # All done
                 with j_lock:
-                    job.setStatus(job.finished)
+                    job.setStatus(StatusSystem().finished)
 
                 with self.activity_lock:
                     self.__active_jobs.remove(job)

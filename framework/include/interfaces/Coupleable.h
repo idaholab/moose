@@ -19,7 +19,9 @@
 
 #define usingCoupleableMembers                                                                     \
   using Coupleable::_zero;                                                                         \
-  using Coupleable::_grad_zero
+  using Coupleable::_grad_zero;                                                                    \
+  using Coupleable::_ad_zero;                                                                      \
+  using Coupleable::_ad_grad_zero
 
 // Forward declarations
 class MooseVariableScalar;
@@ -412,7 +414,8 @@ protected:
    * @return Reference to a ArrayVariableValue for the coupled variable
    */
   const ArrayVariableValue & coupledVectorTagArrayDofValue(const std::string & var_name,
-                                                           const std::string & tag_name) const;
+                                                           const std::string & tag_name,
+                                                           unsigned int comp = 0) const;
 
   /**
    * Returns the dof values for all the coupled variables desired for a given tag

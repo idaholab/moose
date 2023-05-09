@@ -8,7 +8,6 @@
     cli_args = 'rayleigh=1e3 Outputs/file_base=1e3'
     requirement = 'The system shall be able to reproduce benchmark results for a Rayleigh number of 1e3 using a finite volume discretization.'
     valgrind = 'none'
-    ad_indexing_type = 'global'
   []
   [1e4]
     type = Exodiff
@@ -17,7 +16,6 @@
     cli_args = 'rayleigh=1e4 Outputs/file_base=1e4'
     requirement = 'The system shall be able to reproduce benchmark results for a Rayleigh number of 1e4 using a finite volume discretization.'
     valgrind = 'none'
-    ad_indexing_type = 'global'
   []
   [1e5]
     type = Exodiff
@@ -26,7 +24,6 @@
     cli_args = 'rayleigh=1e5 Outputs/file_base=1e5'
     requirement = 'The system shall be able to reproduce benchmark results for a Rayleigh number of 1e5 using a finite volume discretization.'
     valgrind = 'none'
-    ad_indexing_type = 'global'
   []
   [1e6]
     type = Exodiff
@@ -36,7 +33,6 @@
     requirement = 'The system shall be able to reproduce benchmark results for a Rayleigh number of 1e6 using a finite volume discretization.'
     abs_zero = 1e-9
     valgrind = 'none'
-    ad_indexing_type = 'global'
   []
   [1e6-action]
     type = Exodiff
@@ -45,7 +41,6 @@
     cli_args = 'rayleigh=1e6 Outputs/file_base=1e6-action'
     requirement = 'The system shall be able to reproduce benchmark results for a Rayleigh number of 1e6 using the INSFV actions.'
     valgrind = 'none'
-    ad_indexing_type = 'global'
     issues = '#19742'
   []
   [rho-error]
@@ -55,7 +50,6 @@
     expect_err = 'rho: The density in the boussinesq term is not constant!'
     requirement = 'The system should throw an error if the density is not a constant functor in case of Boussinesq treatment.'
     valgrind = 'none'
-    ad_indexing_type = 'global'
     issues = '#19742'
   []
   [wcnsfv]
@@ -63,7 +57,6 @@
     input = wcnsfv.i
     exodiff = wcnsfv_out.e
     requirement = 'The system shall be able to model natural convection using a weakly compressible implementation.'
-    ad_indexing_type = 'global'
     method = '!dbg'
     valgrind = 'none'
   []
@@ -72,7 +65,6 @@
     input = transient-wcnsfv.i
     exodiff = transient-wcnsfv_out.e
     requirement = 'The system shall be able to model transient natural convection with a low Rayleigh number using a weakly compressible implementation.'
-    ad_indexing_type = 'global'
     method = '!dbg'
     cli_args = "Outputs/out/execute_on='final'"
     recover = false # See https://github.com/idaholab/moose/issues/17906

@@ -37,5 +37,6 @@ FVFunctorNeumannBC::FVFunctorNeumannBC(const InputParameters & parameters)
 ADReal
 FVFunctorNeumannBC::computeQpResidual()
 {
-  return -_factor(singleSidedFaceArg()) * _functor(singleSidedFaceArg());
+  return -_factor(singleSidedFaceArg(), determineState()) *
+         _functor(singleSidedFaceArg(), determineState());
 }

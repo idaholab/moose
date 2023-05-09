@@ -10,6 +10,7 @@
       jsondiff = 'mesh_info_out.json mesh_info_out.json.1'
       min_parallel = 2
       max_parallel = 2
+      keep_reporter_types = true
 
       detail = "that outputs all information be default and"
     []
@@ -20,6 +21,7 @@
       jsondiff = limit_out.json
       cli_args = 'Reporters/mesh_info/items="num_dofs" Outputs/file_base=limit_out'
       skip_keys = 'part number_of_parts'
+      keep_reporter_types = true
 
       detail = "that outputs specific information."
     []

@@ -35,7 +35,8 @@ HHPFCRFFSplitVariablesAction::validParams()
   params.addRequiredParam<unsigned int>(
       "num_L", "specifies the number of complex L variables will be solved for");
   params.addRequiredParam<std::string>("L_name_base", "Base name for the complex L variables");
-
+  params.addParam<std::vector<SubdomainName>>("block",
+                                              "Block restriction for the variables and kernels");
   return params;
 }
 
@@ -66,8 +67,7 @@ HHPFCRFFSplitVariablesAction::act()
 
     const auto type = "MooseVariable";
     auto params = _factory.getValidParams(type);
-    params.set<MooseEnum>("order") = getParam<MooseEnum>("order");
-    params.set<MooseEnum>("family") = getParam<MooseEnum>("family");
+    params.applySpecificParameters(_pars, {"family", "order", "block"});
     params.set<std::vector<Real>>("scaling") = {getParam<Real>("scaling")};
 
     _problem->addVariable(type, real_name, params);

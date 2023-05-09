@@ -6,7 +6,6 @@
     input = 2d-average-no-slip.i
     exodiff = 2d-average-no-slip_out.e
     requirement = 'The system shall be able to solve incompressible Navier-Stokes channel flow with no-slip boundary conditions on the wall in an axisymmetric coordinate system using an average interpolation scheme for the velocity.'
-    ad_indexing_type = 'global'
   []
   [rc-rz-no-slip-mass-conservation]
     type = 'CSVDiff'
@@ -14,14 +13,12 @@
     cli_args = "velocity_interp_method='rc' Outputs/file_base=2d-rc-no-slip"
     csvdiff = 2d-rc-no-slip.csv
     requirement = 'The system shall be able to solve incompressible Navier-Stokes channel flow with no-slip boundary conditions on the wall in an axisymmetric coordinate system using a Rhie-Chow interpolation scheme for the velocity.'
-    ad_indexing_type = 'global'
   []
   [rc-free-slip]
     type = 'CSVDiff'
     input = 2d-rc-slip.i
     csvdiff = 2d-rc-slip_out.csv
     requirement = 'The system shall be able to solve incompressible Navier-Stokes channel flow with free-slip boundary conditions on the wall in an axisymmetric coordinate system using a Rhie-Chow interpolation scheme for the velocity.'
-    ad_indexing_type = 'global'
   []
   [rz-diverging-no-slip]
     type = 'CSVDiff'
@@ -29,7 +26,6 @@
     csvdiff = 'diverging-no-slip.csv'
     cli_args = "FVBCs/active='inlet-u inlet-v no-slip-wall-u no-slip-wall-v outlet-p axis-u axis-v' Outputs/file_base='diverging-no-slip' -pc_type lu -pc_factor_shift_type NONZERO"
     requirement = 'The system shall be able to solve a diverging channel problem in cylindrical coordinates with no slip boundary conditions.'
-    ad_indexing_type = 'global'
   []
   [rz-no-slip-tris]
     type = 'Exodiff'
@@ -37,7 +33,6 @@
     exodiff = 'no-slip-tris_out.e'
     cli_args = "FVBCs/active='inlet-u inlet-v no-slip-wall-u no-slip-wall-v outlet-p axis-u axis-v' -pc_type lu -pc_factor_shift_type NONZERO"
     requirement = 'The system shall be able to solve a straight channel problem in cylindrical coordinates using triangular elements with no slip boundary conditions.'
-    ad_indexing_type = 'global'
   []
   [rz-no-slip-tris-action]
     type = 'Exodiff'
@@ -45,7 +40,6 @@
     exodiff = 'no-slip-tris-action_out.e'
     cli_args = "-pc_type lu -pc_factor_shift_type NONZERO"
     requirement = 'The system shall be able to solve a straight channel problem in cylindrical coordinates using triangular elements with no slip boundary conditions and the NSFV action syntax.'
-    ad_indexing_type = 'global'
   []
   [rz-diverging-free-slip]
     type = 'Exodiff'
@@ -53,7 +47,6 @@
     exodiff = 'diverging-free-slip.e'
     cli_args = "FVBCs/active='inlet-u inlet-v free-slip-wall-u free-slip-wall-v outlet-p axis-u axis-v' Outputs/file_base='diverging-free-slip' -pc_type lu -pc_factor_shift_type NONZERO"
     requirement = 'The system shall be able to solve a diverging channel problem in cylindrical coordinates with free slip boundary conditions.'
-    ad_indexing_type = 'global'
     abs_zero = 1e-9
   []
   [rc-xyz-no-slip-mass-conservation]
@@ -62,6 +55,5 @@
     exodiff = '2d-rc-no-slip-xyz-mass-conservation.e'
     cli_args = "velocity_interp_method='rc' Outputs/file_base=2d-rc-no-slip-xyz-mass-conservation Problem/coord_type='XYZ'"
     requirement = 'The system shall conserve mass when solving a Cartesian channel flow problem with one symmetry boundary condition and one no-slip wall boundary condition.'
-    ad_indexing_type = 'global'
   []
 []

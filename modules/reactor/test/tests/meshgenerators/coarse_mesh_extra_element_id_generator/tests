@@ -26,6 +26,15 @@
     issues = '#19297'
     recover = false
   []
+  [coarse_element_restrict_subdomain]
+    type = Exodiff
+    input = coarse_elem_restrict_subdomain.i
+    exodiff = coarse_elem_restrict_subdomain_out.e
+    requirement = 'The system shall be able to assign extra element IDs based on a coarse mesh for subdomain-restricted elements of a fine mesh.'
+    design = 'meshgenerators/CoarseMeshExtraElementIDGenerator.md'
+    issues = '#23708'
+    recover = false
+  []
 
   [errors]
     design = 'meshgenerators/CoarseMeshExtraElementIDGenerator.md'
@@ -58,6 +67,13 @@
       cli_args = 'Mesh/gmg/xmax=8.1'
       expect_err = 'Could not find a coarse element containing a node of fine element'
       detail = 'any node of the fine mesh lies beyond the extent of the coarse mesh'
+    []
+    [subdomain_nonexist]
+      type = RunException
+      input = coarse_elem_restrict_subdomain.i
+      cli_args = 'Mesh/assign2/subdomains="1 2 foo"'
+      expect_err = 'The requested subdomains do not exist on the fine mesh: 2, foo'
+      detail = 'requested subdomain restriction does not exist on the fine mesh'
     []
   []
 []

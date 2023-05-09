@@ -123,7 +123,9 @@ MortarConsumerInterface::MortarConsumerInterface(const MooseObject * moose_objec
     _qrule_msm(_mci_assembly.qRuleMortar()),
     _qrule_face(_mci_assembly.qRuleFace()),
     _lower_secondary_elem(_mci_assembly.lowerDElem()),
-    _JxW_msm(_mci_assembly.jxWMortar())
+    _lower_primary_elem(_mci_assembly.neighborLowerDElem()),
+    _JxW_msm(_mci_assembly.jxWMortar()),
+    _msm_elem(_mci_assembly.msmElem())
 {
   const bool displaced = moose_object->isParamValid("use_displaced_mesh")
                              ? moose_object->getParam<bool>("use_displaced_mesh")
@@ -162,4 +164,29 @@ MortarConsumerInterface::setNormals()
     _normals = amg().getNormals(*_lower_secondary_elem, _qrule_face->get_points());
   else
     _normals = amg().getNodalNormals(*_lower_secondary_elem);
+}
+
+void
+MortarConsumerInterface::trimDerivative(const dof_id_type remove_derivative_index,
+                                        ADReal & dual_number)
+{
+  auto md_it = dual_number.derivatives().nude_data().begin();
+  auto mi_it = dual_number.derivatives().nude_indices().begin();
+
+  auto d_it = dual_number.derivatives().nude_data().begin();
+
+  for (auto i_it = dual_number.derivatives().nude_indices().begin();
+       i_it != dual_number.derivatives().nude_indices().end();
+       ++i_it, ++d_it)
+    if (*i_it != remove_derivative_index)
+    {
+      *mi_it = *i_it;
+      *md_it = *d_it;
+      ++mi_it;
+      ++md_it;
+    }
+
+  std::size_t n_indices = md_it - dual_number.derivatives().nude_data().begin();
+  dual_number.derivatives().nude_indices().resize(n_indices);
+  dual_number.derivatives().nude_data().resize(n_indices);
 }

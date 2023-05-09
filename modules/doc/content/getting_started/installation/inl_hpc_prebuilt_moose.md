@@ -1,17 +1,25 @@
 # INL HPC Pre-Built MOOSE
 
+!style! halign=left
 While operating on one of the [!ac](INL) [!ac](HPC) clusters, there exists the option of using
 pre-built versions of MOOSE. To request access to these clusters, please follow the instructions on
 [INL's Nuclear Computational Resource Center](https://inl.gov/ncrc/) website.
+!style-end!
 
 Once access has been granted, log into Sawtooth or Lemhi using either [inl/hpc_ondemand.md]
 Interactive Shell services, or directly by following our [SSH Primer](inl/hpc_remote.md).
 
-!include installation/clone_moose.md
+## Cloning Moose
+
+!style! halign=left
+!template load file=installation/clone_moose.md.template PATH=~/projects
+!style-end!
 
 ## Load Modules
 
+!style! halign=left
 Load the following modules:
+!style-end!
 
 ```bash
 module load use.moose moose-apps moose
@@ -26,8 +34,10 @@ simulations. Example input files are available within the MOOSE repository (next
 
 ## Run Example
 
+!style! halign=left
 To run `moose-opt` using an example input file from within the MOOSE repository, perform the
 following:
+!style-end!
 
 ```bash
 cd ~/projects/moose/examples/ex01_inputfile
@@ -43,10 +53,12 @@ ex01_out.e
 
 ## View Results
 
+!style! halign=left
 You can use HPC OnDemand to view the results file remotely. Head on over to
 [HPC OnDemand Dashboard](https://hpcondemand.inl.gov/pun/sys/dashboard), and select:
 `Interactive Apps` and then `Linux Desktop with Visualization`. Next, select your cluster (such as
 Sawtooth), the amount of time you believe you need, and then click `Launch`.
+!style-end!
 
 It may take some time before your 'Visualization Job' becomes available. When it does, simply click
 on it, and you will be presented a [!ac](GUI) desktop within your web browser. From here, you can

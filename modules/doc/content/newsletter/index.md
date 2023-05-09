@@ -1,12 +1,13 @@
 # MOOSE News
 
 MOOSE is a dynamic project with changes occurring daily. In order to help users stay current on the
-major changes to the project monthly highlights will be produced. These highlights will be emailed
-monthly to the [MOOSE users](contact_us.md) and [MOOSE announcement](contact_us.md) lists as well as
-provided below.
+major changes to the project monthly highlights will be produced. These highlights will be posted
+monthly to the [MOOSE discussion forum](contact_us.md) as well as provided below.
 
 ## 2023
 
+- [April, 2023](2023_04.md)
+- [March, 2023](2023_03.md)
 - [February, 2023](2023_02.md)
 - [January, 2023](2023_01.md)
 

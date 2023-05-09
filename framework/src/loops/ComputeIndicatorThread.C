@@ -189,3 +189,41 @@ void
 ComputeIndicatorThread::join(const ComputeIndicatorThread & /*y*/)
 {
 }
+
+void
+ComputeIndicatorThread::printGeneralExecutionInformation() const
+{
+  if (!_fe_problem.shouldPrintExecution(_tid))
+    return;
+
+  const auto & console = _fe_problem.console();
+  const auto & execute_on = _fe_problem.getCurrentExecuteOnFlag();
+  if (!_finalize)
+    console << "[DBG] Executing indicators on elements then on internal sides on " << execute_on
+            << std::endl;
+  else
+    console << "[DBG] Finalizing indicator loop" << std::endl;
+}
+
+void
+ComputeIndicatorThread::printBlockExecutionInformation() const
+{
+  if (!_fe_problem.shouldPrintExecution(_tid) || _blocks_exec_printed.count(_subdomain))
+    return;
+
+  const auto & console = _fe_problem.console();
+  if (_indicator_whs.hasActiveBlockObjects(_subdomain, _tid))
+  {
+    const auto & indicators = _indicator_whs.getActiveBlockObjects(_subdomain, _tid);
+    console << "[DBG] Ordering of element indicators on block " << _subdomain << std::endl;
+    printExecutionOrdering<Indicator>(indicators, false);
+  }
+  if (_internal_side_indicators.hasActiveBlockObjects(_subdomain, _tid))
+  {
+    const auto & indicators = _internal_side_indicators.getActiveBlockObjects(_subdomain, _tid);
+    console << "[DBG] Ordering of element internal sides indicators on block " << _subdomain
+            << std::endl;
+    printExecutionOrdering<InternalSideIndicator>(indicators, false);
+  }
+  _blocks_exec_printed.insert(_subdomain);
+}

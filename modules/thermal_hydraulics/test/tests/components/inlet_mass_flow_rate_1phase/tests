@@ -5,26 +5,22 @@
     exodiff = 'phy.massflowrate_3eqn.e'
     group = 'inlet_mass_flow_rate outlet pipe 1phase'
     max_time = 1000
-    ad_indexing_type = 'global'
   []
   [phy:reversed_flow]
     type = 'Exodiff'
     input = 'phy.reversed_flow.i'
     exodiff = 'phy.reversed_flow.e'
-    ad_indexing_type = 'global'
   []
 
   [clg:ctrl_m_dot_3eqn_rdg]
     type = 'CSVDiff'
     input = 'clg.ctrl_m_dot_3eqn_rdg.i'
     csvdiff = 'clg.ctrl_m_dot_3eqn_rdg_out.csv'
-    ad_indexing_type = 'global'
   []
   [clg:ctrl_T_3eqn_rdg]
     type = 'CSVDiff'
     input = 'clg.ctrl_T_3eqn_rdg.i'
     csvdiff = 'clg.ctrl_T_3eqn_rdg_out.csv'
-    ad_indexing_type = 'global'
   []
 
   [jacobian]
@@ -34,7 +30,6 @@
     difference_tol = 15
     cli_args = 'Debug/check_jacobian=true'
     max_parallel = 1
-    ad_indexing_type = 'global'
   []
   [jacobian-water97]
     type = PetscJacobianTester
@@ -43,6 +38,5 @@
     difference_tol = 1e6
     cli_args = 'Executioner/num_steps=3 Components/pipe/n_elems=3 -snes_test_err 1e-10'
     input = jac.massflowrate_3eqn_water97.i
-    ad_indexing_type = 'global'
   []
 []

@@ -1,0 +1,23 @@
+[Tests]
+  design = 'FlowComponentNS.md'
+  issues = '#23794'
+
+  [generate_mesh]
+    type = Exodiff
+    input = rectangle.i
+    exodiff = rectangle.e
+    recover = false # No transient, just mesh generation
+    cli_args = "--mesh-only rectangle.e"
+    requirement = 'The system shall generate a mesh for the FlowComponentNS tests.'
+  []
+  [pincns]
+    type = Exodiff
+    input = flow_component_ns_pinc.i
+    exodiff = flow_component_ns_pinc_out.e
+    abs_zero = 5e-6
+    prereq = 'generate_mesh'
+    method = "!dbg"
+    valgrind = HEAVY
+    requirement = 'The system shall model the porous, incompressible Navier-Stokes equations with a finite volume discretization, using a component.'
+  []
+[]

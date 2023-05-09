@@ -19,173 +19,89 @@
 #include "TimeDerivative.h"
 #include "FVElementalKernel.h"
 #include "MaterialBase.h"
+#include "ConsoleUtils.h"
 
 #include "libmesh/threads.h"
 
 ComputeJacobianThread::ComputeJacobianThread(FEProblemBase & fe_problem,
                                              const std::set<TagID> & tags)
-  : ThreadedElementLoop<ConstElemRange>(fe_problem),
-    _nl(fe_problem.currentNonlinearSystem()),
-    _num_cached(0),
-    _integrated_bcs(_nl.getIntegratedBCWarehouse()),
-    _dg_kernels(_nl.getDGKernelWarehouse()),
-    _interface_kernels(_nl.getInterfaceKernelWarehouse()),
-    _kernels(_nl.getKernelWarehouse()),
-    _tags(tags)
+  : NonlinearThread(fe_problem), _tags(tags)
 {
 }
 
 // Splitting Constructor
 ComputeJacobianThread::ComputeJacobianThread(ComputeJacobianThread & x, Threads::split split)
-  : ThreadedElementLoop<ConstElemRange>(x, split),
-    _nl(x._nl),
-    _num_cached(x._num_cached),
-    _integrated_bcs(x._integrated_bcs),
-    _dg_kernels(x._dg_kernels),
-    _interface_kernels(x._interface_kernels),
-    _kernels(x._kernels),
-    _warehouse(x._warehouse),
-    _tags(x._tags)
+  : NonlinearThread(x, split), _tags(x._tags)
 {
 }
 
 ComputeJacobianThread::~ComputeJacobianThread() {}
 
 void
-ComputeJacobianThread::computeJacobian()
+ComputeJacobianThread::compute(KernelBase & kernel)
 {
-  if (_warehouse->hasActiveBlockObjects(_subdomain, _tid))
+  if (kernel.isImplicit())
   {
-    auto & kernels = _warehouse->getActiveBlockObjects(_subdomain, _tid);
-    for (const auto & kernel : kernels)
-      if (kernel->isImplicit())
-      {
-        kernel->prepareShapes(kernel->variable().number());
-        kernel->computeJacobian();
-        if (_fe_problem.checkNonlocalCouplingRequirement() &&
-            !_fe_problem.computingScalingJacobian())
-          mooseError(
-              "Nonlocal kernels only supported for non-diagonal coupling. Please specify an SMP "
-              "preconditioner, with appropriate row-column coupling or specify full = true.");
-      }
-  }
-
-  if (_fe_problem.haveFV())
-  {
-    std::vector<FVElementalKernel *> kernels;
-    _fe_problem.theWarehouse()
-        .query()
-        .template condition<AttribSystem>("FVElementalKernel")
-        .template condition<AttribSubdomains>(_subdomain)
-        .template condition<AttribThread>(_tid)
-        .template condition<AttribMatrixTags>(_tags)
-        .queryInto(kernels);
-
-    for (auto kernel : kernels)
-      if (kernel->isImplicit())
-        kernel->computeJacobian();
+    kernel.prepareShapes(kernel.variable().number());
+    kernel.computeJacobian();
+    if (_fe_problem.checkNonlocalCouplingRequirement() && !_fe_problem.computingScalingJacobian())
+      mooseError("Nonlocal kernels only supported for non-diagonal coupling. Please specify an SMP "
+                 "preconditioner, with appropriate row-column coupling or specify full = true.");
   }
 }
 
 void
-ComputeJacobianThread::computeFaceJacobian(BoundaryID bnd_id, const Elem *)
+ComputeJacobianThread::compute(FVElementalKernel & fvkernel)
 {
-  const auto & bcs = _ibc_warehouse->getActiveBoundaryObjects(bnd_id, _tid);
-  for (const auto & bc : bcs)
-    if (bc->shouldApply() && bc->isImplicit())
-    {
-      bc->prepareShapes(bc->variable().number());
-      bc->computeJacobian();
-      if (_fe_problem.checkNonlocalCouplingRequirement() && !_fe_problem.computingScalingJacobian())
-        mooseError("Nonlocal boundary conditions only supported for non-diagonal coupling. Please "
-                   "specify an SMP preconditioner, with appropriate row-column coupling or specify "
-                   "full = true.");
-    }
+  if (fvkernel.isImplicit())
+    fvkernel.computeJacobian();
 }
 
 void
-ComputeJacobianThread::computeInternalFaceJacobian(const Elem * neighbor)
+ComputeJacobianThread::compute(IntegratedBCBase & bc)
 {
-  // No need to call hasActiveObjects, this is done in the calling method (see onInternalSide)
-  const auto & dgks = _dg_warehouse->getActiveBlockObjects(_subdomain, _tid);
-  for (const auto & dg : dgks)
-    if (dg->isImplicit())
-    {
-      dg->prepareShapes(dg->variable().number());
-      dg->prepareNeighborShapes(dg->variable().number());
-      if (dg->hasBlocks(neighbor->subdomain_id()))
-        dg->computeJacobian();
-    }
-}
-
-void
-ComputeJacobianThread::computeInternalInterFaceJacobian(BoundaryID bnd_id)
-{
-  // No need to call hasActiveObjects, this is done in the calling method (see onInterface)
-  const auto & intks = _ik_warehouse->getActiveBoundaryObjects(bnd_id, _tid);
-  for (const auto & intk : intks)
-    if (intk->isImplicit())
-    {
-      intk->prepareShapes(intk->variable().number());
-      intk->prepareNeighborShapes(intk->neighborVariable().number());
-      intk->computeJacobian();
-    }
-}
-
-void
-ComputeJacobianThread::subdomainChanged()
-{
-  _fe_problem.subdomainSetup(_subdomain, _tid);
-
-  // Update variable Dependencies
-  std::set<MooseVariableFEBase *> needed_moose_vars;
-  _kernels.updateBlockVariableDependency(_subdomain, needed_moose_vars, _tid);
-  _integrated_bcs.updateBoundaryVariableDependency(needed_moose_vars, _tid);
-  _dg_kernels.updateBlockVariableDependency(_subdomain, needed_moose_vars, _tid);
-  _interface_kernels.updateBoundaryVariableDependency(needed_moose_vars, _tid);
-
-  // Update FE variable coupleable vector tags
-  std::set<TagID> needed_fe_var_vector_tags;
-  _kernels.updateBlockFEVariableCoupledVectorTagDependency(
-      _subdomain, needed_fe_var_vector_tags, _tid);
-  _fe_problem.getMaterialWarehouse().updateBlockFEVariableCoupledVectorTagDependency(
-      _subdomain, needed_fe_var_vector_tags, _tid);
-
-  // Update material dependencies
-  std::set<unsigned int> needed_mat_props;
-  _kernels.updateBlockMatPropDependency(_subdomain, needed_mat_props, _tid);
-  _integrated_bcs.updateBoundaryMatPropDependency(needed_mat_props, _tid);
-  _dg_kernels.updateBlockMatPropDependency(_subdomain, needed_mat_props, _tid);
-  _interface_kernels.updateBoundaryMatPropDependency(needed_mat_props, _tid);
-
-  if (_fe_problem.haveFV())
+  if (bc.shouldApply() && bc.isImplicit())
   {
-    std::vector<FVElementalKernel *> fv_kernels;
-    _fe_problem.theWarehouse()
-        .query()
-        .template condition<AttribSystem>("FVElementalKernel")
-        .template condition<AttribSubdomains>(_subdomain)
-        .template condition<AttribThread>(_tid)
-        .queryInto(fv_kernels);
-    for (const auto fv_kernel : fv_kernels)
-    {
-      const auto & fv_mv_deps = fv_kernel->getMooseVariableDependencies();
-      needed_moose_vars.insert(fv_mv_deps.begin(), fv_mv_deps.end());
-      const auto & fv_mp_deps = fv_kernel->getMatPropDependencies();
-      needed_mat_props.insert(fv_mp_deps.begin(), fv_mp_deps.end());
-    }
+    bc.prepareShapes(bc.variable().number());
+    bc.computeJacobian();
+    if (_fe_problem.checkNonlocalCouplingRequirement() && !_fe_problem.computingScalingJacobian())
+      mooseError("Nonlocal boundary conditions only supported for non-diagonal coupling. Please "
+                 "specify an SMP preconditioner, with appropriate row-column coupling or specify "
+                 "full = true.");
   }
+}
 
-  _fe_problem.setActiveElementalMooseVariables(needed_moose_vars, _tid);
-  _fe_problem.setActiveMaterialProperties(needed_mat_props, _tid);
-  _fe_problem.setActiveFEVariableCoupleableVectorTags(needed_fe_var_vector_tags, _tid);
-  _fe_problem.prepareMaterials(_subdomain, _tid);
+void
+ComputeJacobianThread::compute(DGKernelBase & dg, const Elem * neighbor)
+{
+  if (dg.isImplicit())
+  {
+    dg.prepareShapes(dg.variable().number());
+    dg.prepareNeighborShapes(dg.variable().number());
+    if (dg.hasBlocks(neighbor->subdomain_id()))
+      dg.computeJacobian();
+  }
+}
 
+void
+ComputeJacobianThread::compute(InterfaceKernelBase & intk)
+{
+  if (intk.isImplicit())
+  {
+    intk.prepareShapes(intk.variable().number());
+    intk.prepareNeighborShapes(intk.neighborVariable().number());
+    intk.computeJacobian();
+  }
+}
+
+void
+ComputeJacobianThread::determineObjectWarehouses()
+{
   // If users pass a empty vector or a full size of vector,
   // we take all kernels
   if (!_tags.size() || _tags.size() == _fe_problem.numMatrixTags())
   {
-    _warehouse = &_kernels;
+    _tag_kernels = &_kernels;
     _dg_warehouse = &_dg_kernels;
     _ibc_warehouse = &_integrated_bcs;
     _ik_warehouse = &_interface_kernels;
@@ -194,7 +110,7 @@ ComputeJacobianThread::subdomainChanged()
   // We call tag based storage
   else if (_tags.size() == 1)
   {
-    _warehouse = &(_kernels.getMatrixTagObjectWarehouse(*(_tags.begin()), _tid));
+    _tag_kernels = &(_kernels.getMatrixTagObjectWarehouse(*(_tags.begin()), _tid));
     _dg_warehouse = &(_dg_kernels.getMatrixTagObjectWarehouse(*(_tags.begin()), _tid));
     _ibc_warehouse = &(_integrated_bcs.getMatrixTagObjectWarehouse(*(_tags.begin()), _tid));
     _ik_warehouse = &(_interface_kernels.getMatrixTagObjectWarehouse(*(_tags.begin()), _tid));
@@ -202,7 +118,7 @@ ComputeJacobianThread::subdomainChanged()
   // This one may be expensive, and hopefully we do not use it so often
   else
   {
-    _warehouse = &(_kernels.getMatrixTagsObjectWarehouse(_tags, _tid));
+    _tag_kernels = &(_kernels.getMatrixTagsObjectWarehouse(_tags, _tid));
     _dg_warehouse = &(_dg_kernels.getMatrixTagsObjectWarehouse(_tags, _tid));
     _ibc_warehouse = &(_integrated_bcs.getMatrixTagsObjectWarehouse(_tags, _tid));
     _ik_warehouse = &(_interface_kernels.getMatrixTagsObjectWarehouse(_tags, _tid));
@@ -210,117 +126,21 @@ ComputeJacobianThread::subdomainChanged()
 }
 
 void
-ComputeJacobianThread::onElement(const Elem * elem)
+ComputeJacobianThread::accumulateLower()
 {
-  _fe_problem.prepare(elem, _tid);
-
-  _fe_problem.reinitElem(elem, _tid);
-
-  // Set up Sentinel class so that, even if reinitMaterials() throws, we
-  // still remember to swap back during stack unwinding.
-  SwapBackSentinel sentinel(_fe_problem, &FEProblem::swapBackMaterials, _tid);
-  _fe_problem.reinitMaterials(_subdomain, _tid);
-
-  if (_nl.getScalarVariables(_tid).size() > 0)
-    _fe_problem.reinitOffDiagScalars(_tid);
-
-  computeJacobian();
+  _fe_problem.addJacobianLowerD(_tid);
 }
 
 void
-ComputeJacobianThread::onBoundary(const Elem * elem,
-                                  unsigned int side,
-                                  BoundaryID bnd_id,
-                                  const Elem * lower_d_elem /*=nullptr*/)
+ComputeJacobianThread::accumulateNeighborLower()
 {
-  if (_ibc_warehouse->hasActiveBoundaryObjects(bnd_id, _tid))
-  {
-    _fe_problem.reinitElemFace(elem, side, bnd_id, _tid);
-
-    // Reinitialize lower-dimensional variables for use in boundary Materials
-    if (lower_d_elem)
-      _fe_problem.reinitLowerDElem(lower_d_elem, _tid);
-
-    // Set up Sentinel class so that, even if reinitMaterials() throws, we
-    // still remember to swap back during stack unwinding.
-    SwapBackSentinel sentinel(_fe_problem, &FEProblem::swapBackMaterialsFace, _tid);
-
-    _fe_problem.reinitMaterialsFace(elem->subdomain_id(), _tid);
-    _fe_problem.reinitMaterialsBoundary(bnd_id, _tid);
-
-    computeFaceJacobian(bnd_id, lower_d_elem);
-
-    if (lower_d_elem)
-    {
-      Threads::spin_mutex::scoped_lock lock(Threads::spin_mtx);
-      _fe_problem.addJacobianLowerD(_tid);
-    }
-  }
+  _fe_problem.addJacobianNeighborLowerD(_tid);
 }
 
 void
-ComputeJacobianThread::onInternalSide(const Elem * elem, unsigned int side)
+ComputeJacobianThread::accumulateNeighbor()
 {
-  if (_dg_warehouse->hasActiveBlockObjects(_subdomain, _tid))
-  {
-    // Pointer to the neighbor we are currently working on.
-    const Elem * neighbor = elem->neighbor_ptr(side);
-
-    _fe_problem.reinitElemNeighborAndLowerD(elem, side, _tid);
-
-    // Set up Sentinels so that, even if one of the reinitMaterialsXXX() calls throws, we
-    // still remember to swap back during stack unwinding.
-    SwapBackSentinel face_sentinel(_fe_problem, &FEProblem::swapBackMaterialsFace, _tid);
-    _fe_problem.reinitMaterialsFace(elem->subdomain_id(), _tid);
-
-    SwapBackSentinel neighbor_sentinel(_fe_problem, &FEProblem::swapBackMaterialsNeighbor, _tid);
-    _fe_problem.reinitMaterialsNeighbor(neighbor->subdomain_id(), _tid);
-
-    computeInternalFaceJacobian(neighbor);
-
-    {
-      Threads::spin_mutex::scoped_lock lock(Threads::spin_mtx);
-      _fe_problem.addJacobianNeighborLowerD(_tid);
-    }
-  }
-}
-
-void
-ComputeJacobianThread::onInterface(const Elem * elem, unsigned int side, BoundaryID bnd_id)
-{
-  if (_ik_warehouse->hasActiveBoundaryObjects(bnd_id, _tid))
-  {
-    // Pointer to the neighbor we are currently working on.
-    const Elem * neighbor = elem->neighbor_ptr(side);
-
-    if (neighbor->active())
-    {
-      _fe_problem.reinitNeighbor(elem, side, _tid);
-
-      // Set up Sentinels so that, even if one of the reinitMaterialsXXX() calls throws, we
-      // still remember to swap back during stack unwinding. Note that face, boundary, and interface
-      // all operate with the same MaterialData object
-      SwapBackSentinel face_sentinel(_fe_problem, &FEProblem::swapBackMaterialsFace, _tid);
-      _fe_problem.reinitMaterialsFace(elem->subdomain_id(), _tid);
-      _fe_problem.reinitMaterialsBoundary(bnd_id, _tid);
-
-      SwapBackSentinel neighbor_sentinel(_fe_problem, &FEProblem::swapBackMaterialsNeighbor, _tid);
-      _fe_problem.reinitMaterialsNeighbor(neighbor->subdomain_id(), _tid);
-
-      // Has to happen after face and neighbor properties have been computed. Note that we don't use
-      // a sentinel here because FEProblem::swapBackMaterialsFace is going to handle face materials,
-      // boundary materials, and interface materials (e.g. it queries the boundary material data
-      // with the current element and side
-      _fe_problem.reinitMaterialsInterface(bnd_id, _tid);
-
-      computeInternalInterFaceJacobian(bnd_id);
-
-      {
-        Threads::spin_mutex::scoped_lock lock(Threads::spin_mtx);
-        _fe_problem.addJacobianNeighbor(_tid);
-      }
-    }
-  }
+  _fe_problem.addJacobianNeighbor(_tid);
 }
 
 void
@@ -334,13 +154,6 @@ ComputeJacobianThread::postElement(const Elem * /*elem*/)
     Threads::spin_mutex::scoped_lock lock(Threads::spin_mtx);
     _fe_problem.addCachedJacobian(_tid);
   }
-}
-
-void
-ComputeJacobianThread::post()
-{
-  _fe_problem.clearActiveElementalMooseVariables(_tid);
-  _fe_problem.clearActiveMaterialProperties(_tid);
 }
 
 void

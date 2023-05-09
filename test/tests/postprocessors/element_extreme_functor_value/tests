@@ -9,7 +9,6 @@
     cli_args = "Postprocessors/active='max_u min_w_f max_v_x min_v_y' Outputs/file_base=extreme_value"
 
     requirement = 'The system shall compute the extreme (min/max) values of a functor evaluated at each element over the domain.'
-    ad_indexing_type = 'global'
   []
 
   [proxy_elemental_extreme]
@@ -19,6 +18,5 @@
     cli_args = "Postprocessors/active='max_v_from_proxy_x max_v_from_proxy_y min_v_from_proxy_x min_v_from_proxy_y'"
 
     requirement = 'The system shall compute the value of a functor at the element where a proxy functor reaches the extreme (max/min) value over the domain.'
-    ad_indexing_type = 'global'
   []
 []

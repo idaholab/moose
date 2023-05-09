@@ -30,5 +30,6 @@ PropFromFunctorProp::PropFromFunctorProp(const InputParameters & params)
 void
 PropFromFunctorProp::computeQpProperties()
 {
-  _vector_prop[_qp] = _vector_functor(std::make_tuple(_current_elem, _qp, _qrule));
+  _vector_prop[_qp] =
+      _vector_functor(std::make_tuple(_current_elem, _qp, _qrule), Moose::currentState());
 }

@@ -1,0 +1,128 @@
+Host: r1i2n24 PID: 176658
+#0  0x00007fffec60adc0 in __poll_nocancel () from /lib64/libc.so.6
+#1  0x00007fffed362ef9 in MPID_nem_tcp_connpoll () from /apps/local/mpich/lib/libmpi.so.12
+#2  0x00007fffed351ba6 in MPIDI_CH3I_Progress () from /apps/local/mpich/lib/libmpi.so.12
+#3  0x00007fffed22d7bb in MPIR_Wait_impl () from /apps/local/mpich/lib/libmpi.so.12
+#4  0x00007fffed2a9663 in MPIC_Wait () from /apps/local/mpich/lib/libmpi.so.12
+#5  0x00007fffed2a9bf6 in MPIC_Recv () from /apps/local/mpich/lib/libmpi.so.12
+#6  0x00007fffed2637de in MPIR_Bcast_intra_binomial () from /apps/local/mpich/lib/libmpi.so.12
+#7  0x00007fffed1b9388 in MPIR_Bcast_intra_auto () from /apps/local/mpich/lib/libmpi.so.12
+#8  0x00007fffed1b9635 in MPIR_Bcast_impl () from /apps/local/mpich/lib/libmpi.so.12
+#9  0x00007fffed264fe7 in MPIR_Bcast_intra_smp () from /apps/local/mpich/lib/libmpi.so.12
+#10 0x00007fffed1b9213 in MPIR_Bcast_intra_auto () from /apps/local/mpich/lib/libmpi.so.12
+#11 0x00007fffed1b9635 in MPIR_Bcast_impl () from /apps/local/mpich/lib/libmpi.so.12
+#12 0x00007fffed1b9c6f in PMPI_Bcast () from /apps/local/mpich/lib/libmpi.so.12
+#13 0x0000000000400c3b in some_here(int) ()
+#14 0x0000000000400da7 in main ()
+****************************************************************************************************************************************************************
+
+Host: r1i2n24 PID: 176652
+#0  0x00007fffec60adc0 in __poll_nocancel () from /lib64/libc.so.6
+#1  0x00007fffed362ef9 in MPID_nem_tcp_connpoll () from /apps/local/mpich/lib/libmpi.so.12
+#2  0x00007fffed351ba6 in MPIDI_CH3I_Progress () from /apps/local/mpich/lib/libmpi.so.12
+#3  0x00007fffed22d7bb in MPIR_Wait_impl () from /apps/local/mpich/lib/libmpi.so.12
+#4  0x00007fffed2a9663 in MPIC_Wait () from /apps/local/mpich/lib/libmpi.so.12
+#5  0x00007fffed2a9bf6 in MPIC_Recv () from /apps/local/mpich/lib/libmpi.so.12
+#6  0x00007fffed2637de in MPIR_Bcast_intra_binomial () from /apps/local/mpich/lib/libmpi.so.12
+#7  0x00007fffed1b9388 in MPIR_Bcast_intra_auto () from /apps/local/mpich/lib/libmpi.so.12
+#8  0x00007fffed1b9635 in MPIR_Bcast_impl () from /apps/local/mpich/lib/libmpi.so.12
+#9  0x00007fffed264fe7 in MPIR_Bcast_intra_smp () from /apps/local/mpich/lib/libmpi.so.12
+#10 0x00007fffed1b9213 in MPIR_Bcast_intra_auto () from /apps/local/mpich/lib/libmpi.so.12
+#11 0x00007fffed1b9635 in MPIR_Bcast_impl () from /apps/local/mpich/lib/libmpi.so.12
+#12 0x00007fffed1b9c6f in PMPI_Bcast () from /apps/local/mpich/lib/libmpi.so.12
+#13 0x0000000000400c3b in some_here(int) ()
+#14 0x0000000000400da7 in main ()
+****************************************************************************************************************************************************************
+
+Host: r1i2n24 PID: 176653
+#0  0x00007fffed34e50f in poll_active_fboxes () from /apps/local/mpich/lib/libmpi.so.12
+#1  0x00007fffed35189c in MPIDI_CH3I_Progress () from /apps/local/mpich/lib/libmpi.so.12
+#2  0x00007fffed22d7bb in MPIR_Wait_impl () from /apps/local/mpich/lib/libmpi.so.12
+#3  0x00007fffed2a9663 in MPIC_Wait () from /apps/local/mpich/lib/libmpi.so.12
+#4  0x00007fffed2a9bf6 in MPIC_Recv () from /apps/local/mpich/lib/libmpi.so.12
+#5  0x00007fffed2637de in MPIR_Bcast_intra_binomial () from /apps/local/mpich/lib/libmpi.so.12
+#6  0x00007fffed1b9388 in MPIR_Bcast_intra_auto () from /apps/local/mpich/lib/libmpi.so.12
+#7  0x00007fffed1b9635 in MPIR_Bcast_impl () from /apps/local/mpich/lib/libmpi.so.12
+#8  0x00007fffed264fe7 in MPIR_Bcast_intra_smp () from /apps/local/mpich/lib/libmpi.so.12
+#9  0x00007fffed1b9213 in MPIR_Bcast_intra_auto () from /apps/local/mpich/lib/libmpi.so.12
+#10 0x00007fffed1b9635 in MPIR_Bcast_impl () from /apps/local/mpich/lib/libmpi.so.12
+#11 0x00007fffed1b9c6f in PMPI_Bcast () from /apps/local/mpich/lib/libmpi.so.12
+#12 0x0000000000400c3b in some_here(int) ()
+#13 0x0000000000400da7 in main ()
+****************************************************************************************************************************************************************
+
+Host: r1i2n24 PID: 176654
+#0  0x00007fffed35189c in MPIDI_CH3I_Progress () from /apps/local/mpich/lib/libmpi.so.12
+#1  0x00007fffed22d7bb in MPIR_Wait_impl () from /apps/local/mpich/lib/libmpi.so.12
+#2  0x00007fffed2a9663 in MPIC_Wait () from /apps/local/mpich/lib/libmpi.so.12
+#3  0x00007fffed2a9bf6 in MPIC_Recv () from /apps/local/mpich/lib/libmpi.so.12
+#4  0x00007fffed2637de in MPIR_Bcast_intra_binomial () from /apps/local/mpich/lib/libmpi.so.12
+#5  0x00007fffed1b9388 in MPIR_Bcast_intra_auto () from /apps/local/mpich/lib/libmpi.so.12
+#6  0x00007fffed1b9635 in MPIR_Bcast_impl () from /apps/local/mpich/lib/libmpi.so.12
+#7  0x00007fffed264fe7 in MPIR_Bcast_intra_smp () from /apps/local/mpich/lib/libmpi.so.12
+#8  0x00007fffed1b9213 in MPIR_Bcast_intra_auto () from /apps/local/mpich/lib/libmpi.so.12
+#9  0x00007fffed1b9635 in MPIR_Bcast_impl () from /apps/local/mpich/lib/libmpi.so.12
+#10 0x00007fffed1b9c6f in PMPI_Bcast () from /apps/local/mpich/lib/libmpi.so.12
+#11 0x0000000000400c3b in some_here(int) ()
+#12 0x0000000000400da7 in main ()
+****************************************************************************************************************************************************************
+
+Host: r1i2n24 PID: 176655
+#0  0x00007fffed362e7e in MPID_nem_tcp_connpoll () from /apps/local/mpich/lib/libmpi.so.12
+#1  0x00007fffed351ba6 in MPIDI_CH3I_Progress () from /apps/local/mpich/lib/libmpi.so.12
+#2  0x00007fffed22d7bb in MPIR_Wait_impl () from /apps/local/mpich/lib/libmpi.so.12
+#3  0x00007fffed2a9663 in MPIC_Wait () from /apps/local/mpich/lib/libmpi.so.12
+#4  0x00007fffed2a9bf6 in MPIC_Recv () from /apps/local/mpich/lib/libmpi.so.12
+#5  0x00007fffed2637de in MPIR_Bcast_intra_binomial () from /apps/local/mpich/lib/libmpi.so.12
+#6  0x00007fffed1b9388 in MPIR_Bcast_intra_auto () from /apps/local/mpich/lib/libmpi.so.12
+#7  0x00007fffed1b9635 in MPIR_Bcast_impl () from /apps/local/mpich/lib/libmpi.so.12
+#8  0x00007fffed264fe7 in MPIR_Bcast_intra_smp () from /apps/local/mpich/lib/libmpi.so.12
+#9  0x00007fffed1b9213 in MPIR_Bcast_intra_auto () from /apps/local/mpich/lib/libmpi.so.12
+#10 0x00007fffed1b9635 in MPIR_Bcast_impl () from /apps/local/mpich/lib/libmpi.so.12
+#11 0x00007fffed1b9c6f in PMPI_Bcast () from /apps/local/mpich/lib/libmpi.so.12
+#12 0x0000000000400c3b in some_here(int) ()
+#13 0x0000000000400da7 in main ()
+****************************************************************************************************************************************************************
+
+Host: r1i2n24 PID: 176651
+#0  0x00007fffed36300e in MPID_nem_tcp_connpoll () from /apps/local/mpich/lib/libmpi.so.12
+#1  0x00007fffed351ba6 in MPIDI_CH3I_Progress () from /apps/local/mpich/lib/libmpi.so.12
+#2  0x00007fffed2ee8bd in MPIDI_CH3U_VC_WaitForClose () from /apps/local/mpich/lib/libmpi.so.12
+#3  0x00007fffed33adb5 in MPID_Finalize () from /apps/local/mpich/lib/libmpi.so.12
+#4  0x00007fffed217e59 in PMPI_Finalize () from /apps/local/mpich/lib/libmpi.so.12
+#5  0x0000000000400db8 in main ()
+****************************************************************************************************************************************************************
+
+Host: r1i2n24 PID: 176656
+#0  0x00007fffed34e4b4 in poll_active_fboxes () from /apps/local/mpich/lib/libmpi.so.12
+#1  0x00007fffed35189c in MPIDI_CH3I_Progress () from /apps/local/mpich/lib/libmpi.so.12
+#2  0x00007fffed22d7bb in MPIR_Wait_impl () from /apps/local/mpich/lib/libmpi.so.12
+#3  0x00007fffed2a9663 in MPIC_Wait () from /apps/local/mpich/lib/libmpi.so.12
+#4  0x00007fffed2a9bf6 in MPIC_Recv () from /apps/local/mpich/lib/libmpi.so.12
+#5  0x00007fffed2637de in MPIR_Bcast_intra_binomial () from /apps/local/mpich/lib/libmpi.so.12
+#6  0x00007fffed1b9388 in MPIR_Bcast_intra_auto () from /apps/local/mpich/lib/libmpi.so.12
+#7  0x00007fffed1b9635 in MPIR_Bcast_impl () from /apps/local/mpich/lib/libmpi.so.12
+#8  0x00007fffed264fe7 in MPIR_Bcast_intra_smp () from /apps/local/mpich/lib/libmpi.so.12
+#9  0x00007fffed1b9213 in MPIR_Bcast_intra_auto () from /apps/local/mpich/lib/libmpi.so.12
+#10 0x00007fffed1b9635 in MPIR_Bcast_impl () from /apps/local/mpich/lib/libmpi.so.12
+#11 0x00007fffed1b9c6f in PMPI_Bcast () from /apps/local/mpich/lib/libmpi.so.12
+#12 0x0000000000400c3b in some_here(int) ()
+#13 0x0000000000400da7 in main ()
+****************************************************************************************************************************************************************
+
+Host: r1i2n24 PID: 176657
+#0  0x00007fffed351b8e in MPIDI_CH3I_Progress () from /apps/local/mpich/lib/libmpi.so.12
+#1  0x00007fffed22d7bb in MPIR_Wait_impl () from /apps/local/mpich/lib/libmpi.so.12
+#2  0x00007fffed2a9663 in MPIC_Wait () from /apps/local/mpich/lib/libmpi.so.12
+#3  0x00007fffed2a9bf6 in MPIC_Recv () from /apps/local/mpich/lib/libmpi.so.12
+#4  0x00007fffed2637de in MPIR_Bcast_intra_binomial () from /apps/local/mpich/lib/libmpi.so.12
+#5  0x00007fffed1b9388 in MPIR_Bcast_intra_auto () from /apps/local/mpich/lib/libmpi.so.12
+#6  0x00007fffed1b9635 in MPIR_Bcast_impl () from /apps/local/mpich/lib/libmpi.so.12
+#7  0x00007fffed264fe7 in MPIR_Bcast_intra_smp () from /apps/local/mpich/lib/libmpi.so.12
+#8  0x00007fffed1b9213 in MPIR_Bcast_intra_auto () from /apps/local/mpich/lib/libmpi.so.12
+#9  0x00007fffed1b9635 in MPIR_Bcast_impl () from /apps/local/mpich/lib/libmpi.so.12
+#10 0x00007fffed1b9c6f in PMPI_Bcast () from /apps/local/mpich/lib/libmpi.so.12
+#11 0x0000000000400c3b in some_here(int) ()
+#12 0x0000000000400da7 in main ()
+****************************************************************************************************************************************************************
+

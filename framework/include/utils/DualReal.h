@@ -38,8 +38,6 @@ using MetaPhysicL::NumberArray;
 using MetaPhysicL::NWrapper;
 using MetaPhysicL::SemiDynamicSparseNumberArray;
 
-#ifdef MOOSE_SPARSE_AD
-
 typedef SemiDynamicSparseNumberArray<Real,
                                      libMesh::dof_id_type,
                                      NWrapper<MOOSE_AD_MAX_DOFS_PER_ELEM>>
@@ -47,14 +45,5 @@ typedef SemiDynamicSparseNumberArray<Real,
 
 template <std::size_t N>
 using DNDerivativeSize = SemiDynamicSparseNumberArray<Real, libMesh::dof_id_type, NWrapper<N>>;
-
-#else
-
-typedef NumberArray<MOOSE_AD_MAX_DOFS_PER_ELEM, Real> DNDerivativeType;
-
-template <std::size_t N>
-using DNDerivativeSize = NumberArray<N, Real>;
-
-#endif // MOOSE_SPARSE_AD
 
 typedef DualNumber<Real, DNDerivativeType, /*allow_skiping_derivatives=*/true> DualReal;

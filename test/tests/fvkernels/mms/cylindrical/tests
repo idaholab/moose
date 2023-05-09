@@ -6,27 +6,23 @@
     input = diffusion.i
     exodiff = diffusion_out.e
     requirement = 'The system shall be able to solve the diffusion equation in 2D axisymmetric coordinates using the finite volume method, and display a second order convergence rate.'
-    ad_indexing_type = 'global'
   []
   [advection]
     type = Exodiff
     input = advection.i
     exodiff = advection_out.e
     requirement = 'The system shall be able to solve a pure advection problem in 1D cylindrical coordinates using the finite volume method, and display a second order convergence rate.'
-    ad_indexing_type = 'global'
   []
   [advection-reaction]
     type = Exodiff
     input = advection-reaction.i
     exodiff = advection-reaction_out.e
     requirement = 'The system shall be able to solve a advection-reaction problem in 2D axisymmetric coordinates using the finite volume method, and display a second order convergence rate.'
-    ad_indexing_type = 'global'
   []
   [advection-diffusion-reaction]
     type = Exodiff
     input = advection-diffusion-reaction.i
     exodiff = advection-diffusion-reaction_out.e
     requirement = 'The system shall be able to solve a advection-diffusion-reaction problem in 2D axisymmetric coordinates using the finite volume method, and display a second order convergence rate.'
-    ad_indexing_type = 'global'
   []
 []

@@ -19,6 +19,8 @@ public:
   CombinedTestApp(const InputParameters & parameters);
   virtual ~CombinedTestApp();
 
+  virtual std::string getInstallableInputs() const override final;
+
   static void registerApps();
   static void registerAll(Factory & f, ActionFactory & af, Syntax & s, bool use_test_objs = false);
   static void registerObjects(Factory & factory);

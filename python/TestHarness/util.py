@@ -18,22 +18,6 @@ TERM_COLS = int(os.getenv('MOOSE_TERM_COLS', '110'))
 TERM_FORMAT = os.getenv('MOOSE_TERM_FORMAT', 'njcst')
 
 MOOSE_OPTIONS = {
-    'ad_mode' :   { 're_option' : r'#define\s+MOOSE_SPARSE_AD\s+(\d+)',
-                    'default'   : 'NONSPARSE',
-                    'options'   :
-                    { 'SPARSE'    : '1',
-                      'NONSPARSE' : '0'
-                    }
-                  },
-
-    'ad_indexing_type' : { 're_option' : r'#define\s+MOOSE_GLOBAL_AD_INDEXING\s+(\d+)',
-                           'default'   : 'LOCAL',
-                           'options'   :
-                           { 'GLOBAL'  : '1',
-                             'LOCAL'   : '0'
-                           }
-    },
-
     'ad_size' : { 're_option' : r'#define\s+MOOSE_AD_MAX_DOFS_PER_ELEM\s+(\d+)',
                            'default'   : '50'
     },

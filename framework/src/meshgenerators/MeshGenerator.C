@@ -12,9 +12,9 @@
 #include "MooseApp.h"
 
 #include "Exodus.h"
+#include "Nemesis.h"
 
 #include "libmesh/exodusII_io.h"
-#include "libmesh/checkpoint_io.h"
 #include "libmesh/nemesis_io.h"
 
 InputParameters
@@ -26,6 +26,10 @@ MeshGenerator::validParams()
                         false,
                         "Whether or not to show mesh info after generating the mesh "
                         "(bounding box, element types, sidesets, nodesets, subdomains, etc)");
+  params.addParam<std::string>(
+      "save_with_name",
+      std::string(),
+      "Keep the mesh from this mesh generator in memory with the name specified");
 
   params.addParam<bool>(
       "output", false, "Whether or not to output the mesh file after generating the mesh");
@@ -33,14 +37,23 @@ MeshGenerator::validParams()
                         false,
                         "Whether or not to output the mesh file in the nemesis"
                         "format (only if output = true)");
+
+  params.addParamNamesToGroup("show_info output nemesis", "Debugging");
+  params.addParamNamesToGroup("save_with_name", "Advanced");
   params.registerBase("MeshGenerator");
 
   return params;
 }
 
 MeshGenerator::MeshGenerator(const InputParameters & parameters)
-  : MooseObject(parameters), MeshMetaDataInterface(this), _mesh(_app.actionWarehouse().mesh())
+  : MooseObject(parameters),
+    MeshMetaDataInterface(this),
+    _mesh(_app.actionWarehouse().mesh()),
+    _save_with_name(getParam<std::string>("save_with_name"))
 {
+  if (_save_with_name == _app.getMeshGeneratorSystem().mainMeshGeneratorName())
+    paramError(
+        "save_with_name", "The user-defined mesh name: '", _save_with_name, "' is a reserved name");
 }
 
 const MeshGeneratorName *
@@ -269,7 +282,8 @@ MeshGenerator::generateInternal()
       Nemesis_IO nemesis_io(*mesh);
 
       // Default to non-HDF5 output for wider compatibility
-      // nemesis_io.set_hdf5_writing(false);
+      nemesis_io.set_hdf5_writing(false);
+
       nemesis_io.write(name() + "_in.e");
     }
   }
@@ -313,12 +327,29 @@ MeshGenerator::addChildMeshGenerator(const MeshGenerator & mg, const AddParentCh
 }
 
 bool
-MeshGenerator::isParentMeshGenerator(const MeshGeneratorName & name) const
+MeshGenerator::isParentMeshGenerator(const MeshGeneratorName & name,
+                                     const bool direct /* = true */) const
 {
   return std::find_if(getParentMeshGenerators().begin(),
                       getParentMeshGenerators().end(),
-                      [&name](const auto & mg)
-                      { return mg->name() == name; }) != getParentMeshGenerators().end();
+                      [&name, &direct](const auto & mg)
+                      {
+                        return mg->name() == name ||
+                               (!direct && mg->isParentMeshGenerator(name, /* direct = */ false));
+                      }) != getParentMeshGenerators().end();
+}
+
+bool
+MeshGenerator::isChildMeshGenerator(const MeshGeneratorName & name,
+                                    const bool direct /* = true */) const
+{
+  return std::find_if(getChildMeshGenerators().begin(),
+                      getChildMeshGenerators().end(),
+                      [&name, &direct](const auto & mg)
+                      {
+                        return mg->name() == name ||
+                               (!direct && mg->isChildMeshGenerator(name, /* direct = */ false));
+                      }) != getChildMeshGenerators().end();
 }
 
 void
@@ -327,4 +358,16 @@ MeshGenerator::declareNullMeshName(const MeshGeneratorName & name)
   mooseAssert(_app.constructingMeshGenerators(), "Should only be called at construction");
   mooseAssert(!_null_mesh_names.count(name), "Already declared");
   _null_mesh_names.insert(name);
+}
+
+bool
+MeshGenerator::hasSaveMesh()
+{
+  return _save_with_name.size();
+}
+
+const std::string &
+MeshGenerator::getSavedMeshName() const
+{
+  return _save_with_name;
 }
