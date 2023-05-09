@@ -47,6 +47,12 @@ void
 RandomPartitioner::_do_partition(MeshBase & mesh, const unsigned int /*n*/)
 {
   // Random number is on [0, 1]: scale to number of procs and round down
-  for (auto & elem_ptr : mesh.active_element_ptr_range())
-    elem_ptr->processor_id() = std::floor(MooseRandom::rand() * _num_procs);
+  // We need to loop over all IDs on all procs so that this is parallel
+  // consistent in the case that the mesh isn't serial
+  for (const auto id : make_range(mesh.max_elem_id()))
+  {
+    const auto rand_num = MooseRandom::rand();
+    if (auto elem = mesh.query_elem_ptr(id))
+      elem->processor_id() = std::floor(rand_num * _num_procs);
+  }
 }
