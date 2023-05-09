@@ -57,7 +57,6 @@ MultiApp::validParams()
                         "in the case this is true but no "
                         "displacements are provided in the Mesh block "
                         "the undisplaced mesh will still be used.");
-  params.addParamNamesToGroup("use_displaced_mesh", "Advanced");
 
   std::ostringstream app_types_strings;
   registeredMooseAppIterator it = AppFactory::instance().registeredObjectsBegin();
@@ -120,6 +119,13 @@ MultiApp::validParams()
                                 1,
                                 "Minimum number of processors to give to each App in this "
                                 "MultiApp.  Useful for larger, distributed mesh solves.");
+  params.addParam<bool>(
+      "wait_for_first_app_init",
+      false,
+      "Create the first sub-application on rank 0, then MPI_Barrier before "
+      "creating the next N-1 apps (on all ranks). "
+      "This is only needed if your sub-application needs to perform some setup "
+      "actions in quiet, without other sub-applications working at the same time.");
 
   params.addParam<bool>(
       "output_in_position",
@@ -214,6 +220,7 @@ MultiApp::validParams()
   params.declareControllable("cli_args", {EXEC_PRE_MULTIAPP_SETUP});
   params.registerBase("MultiApp");
 
+  params.addParamNamesToGroup("use_displaced_mesh wait_for_first_app_init", "Advanced");
   params.addParamNamesToGroup("positions positions_file run_in_position output_in_position",
                               "Positions / transformations of the MultiApp frame of reference");
   params.addParamNamesToGroup("min_procs_per_app max_procs_per_app", "Parallelism");
@@ -238,6 +245,7 @@ MultiApp::MultiApp(const InputParameters & parameters)
                                        : _fe_problem.getMooseApp().type()),
     _use_positions(getParam<bool>("use_positions")),
     _input_files(getParam<std::vector<FileName>>("input_files")),
+    _wait_for_first_app_init(getParam<bool>("wait_for_first_app_init")),
     _total_num_apps(0),
     _my_num_apps(0),
     _first_local_app(0),
@@ -357,11 +365,33 @@ MultiApp::createApps()
                                 getParam<std::string>("library_name"),
                                 getParam<bool>("library_load_dependencies"));
 
+  bool rank_did_quiet_init = false;
+  unsigned int local_app = libMesh::invalid_uint;
+  if (_wait_for_first_app_init)
+  {
+    if (hasLocalApp(0))
+    {
+      rank_did_quiet_init = true;
+      local_app = globalAppToLocal(0);
+      createLocalApp(local_app);
+    }
+
+    MPI_Barrier(_orig_comm);
+  }
+
   for (unsigned int i = 0; i < _my_num_apps; i++)
   {
-    createApp(i, _global_time_offset);
-    _app.parser().hitCLIFilter(_apps[i]->name(), _app.commandLine()->getArguments());
+    if (rank_did_quiet_init && i == local_app)
+      continue;
+    createLocalApp(i);
   }
+}
+
+void
+MultiApp::createLocalApp(const unsigned int i)
+{
+  createApp(i, _global_time_offset);
+  _app.parser().hitCLIFilter(_apps[i]->name(), _app.commandLine()->getArguments());
 }
 
 void
