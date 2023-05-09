@@ -195,12 +195,15 @@ ElementSubdomainModifier::finalize()
                                         sync_displaced);
     if (_moving_boundary_specified)
       updateMovingBoundaryInfo(_displaced_problem->mesh(), _moved_displaced_elems);
-    if (_complement_moving_boundary_specified)
+    if (!_moved_displaced_elems.empty() && _complement_moving_boundary_specified)
       updateComplementBoundaryInfo(_displaced_problem->mesh(), _moved_displaced_elems);
   }
 
   // Synchronize boundary information after mesh update
   synchronizeBoundaryInfo(_mesh);
+
+  if (_displaced_problem)
+    synchronizeBoundaryInfo(_displaced_problem->mesh());
 
   // Reinit equation systems
   _fe_problem.meshChanged();
@@ -472,22 +475,20 @@ ElementSubdomainModifier::pushBoundarySideInfo(MooseMesh & moose_mesh)
   auto & mesh = moose_mesh.getMesh();
   auto elem_remove_functor =
       [&mesh, this](processor_id_type,
-                    const std::vector<std::pair<dof_id_type, unsigned short int>> & received_elem)
-  {
-    // remove the side
-    for (const auto & pr : received_elem)
-      mesh.get_boundary_info().remove_side(
-          mesh.elem_ptr(pr.first), pr.second, _complement_moving_boundary_id);
-  };
+                    const std::vector<std::pair<dof_id_type, unsigned short int>> & received_elem) {
+        // remove the side
+        for (const auto & pr : received_elem)
+          mesh.get_boundary_info().remove_side(
+              mesh.elem_ptr(pr.first), pr.second, _complement_moving_boundary_id);
+      };
   auto elem_add_functor =
       [&mesh, this](processor_id_type,
-                    const std::vector<std::pair<dof_id_type, unsigned short int>> & received_elem)
-  {
-    // add the side
-    for (const auto & pr : received_elem)
-      mesh.get_boundary_info().add_side(
-          mesh.elem_ptr(pr.first), pr.second, _complement_moving_boundary_id);
-  };
+                    const std::vector<std::pair<dof_id_type, unsigned short int>> & received_elem) {
+        // add the side
+        for (const auto & pr : received_elem)
+          mesh.get_boundary_info().add_side(
+              mesh.elem_ptr(pr.first), pr.second, _complement_moving_boundary_id);
+      };
 
   Parallel::push_parallel_vector_data(
       mesh.get_boundary_info().comm(), _ghost_sides_to_remove, elem_remove_functor);
@@ -500,9 +501,8 @@ void
 ElementSubdomainModifier::pushBoundaryNodeInfo(MooseMesh & moose_mesh)
 {
   auto & mesh = moose_mesh.getMesh();
-  auto node_remove_functor =
-      [&mesh, this](processor_id_type, const std::vector<dof_id_type> & received_nodes)
-  {
+  auto node_remove_functor = [&mesh, this](processor_id_type,
+                                           const std::vector<dof_id_type> & received_nodes) {
     for (const auto & pr : received_nodes)
     {
       if (_moving_boundary_specified)
