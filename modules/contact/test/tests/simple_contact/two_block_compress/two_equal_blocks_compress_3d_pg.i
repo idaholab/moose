@@ -1,66 +1,65 @@
 [GlobalParams]
-  displacements = 'disp_x disp_y'
+  displacements = 'disp_x disp_y disp_z'
   volumetric_locking_correction = true
 []
-
-theta = 45
-velocity = 0.1
 
 [Mesh]
   [left_block]
     type = GeneratedMeshGenerator
-    dim = 2
-    xmin = -0.35
-    xmax = -0.05
-    ymin = -1
-    ymax = 0
+    dim = 3
     nx = 1
-    ny = 3
-    elem_type = QUAD8
+    ny = 1
+    nz = 1
+    xmin = -1.0
+    xmax = 0.0
+    ymin = -0.5
+    ymax = 0.5
+    zmin = -0.5
+    zmax = 0.5
+    elem_type = HEX8
   []
   [left_block_sidesets]
     type = RenameBoundaryGenerator
     input = left_block
-    old_boundary = '0 1 2 3'
-    new_boundary = '10 11 12 13'
-  []
-  [left_block_sideset_names]
-    type = RenameBoundaryGenerator
-    input = left_block_sidesets
-    old_boundary = '10 11 12 13'
-    new_boundary = 'l_bottom l_right l_top l_left'
+    old_boundary = '0 1 2 3 4 5'
+    new_boundary = 'left_bottom left_back left_right left_front left_left left_top'
   []
   [left_block_id]
     type = SubdomainIDGenerator
-    input = left_block_sideset_names
+    input = left_block_sidesets
     subdomain_id = 1
   []
+
   [right_block]
     type = GeneratedMeshGenerator
-    dim = 2
-    xmin = 0
-    xmax = 0.3
-    ymin = -1
-    ymax = 0
-    nx = 1
+    dim = 3
+    nx = 2
     ny = 2
-    elem_type = QUAD8
+    nz = 2
+    xmin = 0.0
+    xmax = 1.0
+    ymin = -0.5
+    ymax = 0.5
+    zmin = -0.5
+    zmax = 0.5
+    elem_type = HEX8
   []
   [right_block_sidesets]
     type = RenameBoundaryGenerator
     input = right_block
-    old_boundary = '0 1 2 3'
-    new_boundary = '20 21 22 23'
+    old_boundary = '0 1 2 3 4 5'
+    # new_boundary = 'right_bottom right_back right_right right_front right_left right_top'
+    new_boundary = '100 101 102 103 104 105'
   []
-  [right_block_sideset_names]
+  [right_block_sidesets_rename]
     type = RenameBoundaryGenerator
     input = right_block_sidesets
-    old_boundary = '20 21 22 23'
-    new_boundary = 'r_bottom r_right r_top r_left'
+    old_boundary = '100 101 102 103 104 105'
+    new_boundary = 'right_bottom right_back right_right right_front right_left right_top'
   []
   [right_block_id]
     type = SubdomainIDGenerator
-    input = right_block_sideset_names
+    input = right_block_sidesets_rename
     subdomain_id = 2
   []
 
@@ -72,36 +71,30 @@ velocity = 0.1
   [left_lower]
     type = LowerDBlockFromSidesetGenerator
     input = combined_mesh
-    sidesets = '11'
+    sidesets = 'left_right'
     new_block_id = '10001'
     new_block_name = 'secondary_lower'
   []
   [right_lower]
     type = LowerDBlockFromSidesetGenerator
     input = left_lower
-    sidesets = '23'
+    sidesets = 'right_left'
     new_block_id = '10000'
     new_block_name = 'primary_lower'
-  []
-
-  [rotate_mesh]
-    type = TransformGenerator
-    input = right_lower
-    transform = ROTATE
-    vector_value = '0 0 ${theta}'
   []
 []
 
 [Variables]
-  [lm_x]
+  [normal_lm]
     block = 'secondary_lower'
-    order=SECOND
     use_dual = true
   []
-  [lm_y]
+[]
+
+[AuxVariables]
+  [aux_lm]
     block = 'secondary_lower'
-    order=SECOND
-    use_dual = true
+    use_dual = false
   []
 []
 
@@ -116,12 +109,14 @@ velocity = 0.1
 
 [Functions]
   [horizontal_movement]
-    type = ParsedFunction
-    expression = '${velocity} * t * cos(${theta}/180*pi)'
+    type = PiecewiseLinear
+    x = '0 0.5'
+    y = '0 0.2'
   []
   [vertical_movement]
-    type = ParsedFunction
-    expression = '${velocity} * t * sin(${theta}/180*pi)'
+    type = PiecewiseLinear
+    x = '0 1.0'
+    y = '0 0'
   []
 []
 
@@ -129,26 +124,38 @@ velocity = 0.1
   [push_left_x]
     type = FunctionDirichletBC
     variable = disp_x
-    boundary = 13
+    boundary = 'left_left'
     function = horizontal_movement
+  []
+  [push_left_y]
+    type = FunctionDirichletBC
+    variable = disp_y
+    boundary = 'left_left'
+    function = vertical_movement
+  []
+  [fix_left_z]
+    type = DirichletBC
+    variable = disp_z
+    boundary = 'left_left'
+    value = 0.0
   []
   [fix_right_x]
     type = DirichletBC
     variable = disp_x
-    boundary = 21
+    boundary = 'right_right'
     value = 0.0
   []
   [fix_right_y]
     type = DirichletBC
     variable = disp_y
-    boundary = 21
+    boundary = 'right_right'
     value = 0.0
   []
-  [push_left_y]
-    type = FunctionDirichletBC
-    variable = disp_y
-    boundary = 13
-    function = vertical_movement
+  [fix_right_z]
+    type = DirichletBC
+    variable = disp_z
+    boundary = 'right_right'
+    value = 0.0
   []
 []
 
@@ -176,52 +183,84 @@ velocity = 0.1
   []
 []
 
-[Constraints]
-  [weighted_gap_lm]
-    type = ComputeWeightedGapCartesianLMMechanicalContact
+[UserObjects]
+  [weighted_gap_uo]
+    type = LMWeightedGapUserObject
     primary_boundary = '23'
     secondary_boundary = '11'
     primary_subdomain = 'primary_lower'
     secondary_subdomain = 'secondary_lower'
-    lm_x = lm_x
-    lm_y = lm_y
-    variable = lm_x # This can be anything really
+    correct_edge_dropping = true
+    lm_variable = normal_lm
     disp_x = disp_x
     disp_y = disp_y
-    use_displaced_mesh = true
-    correct_edge_dropping = true
-    interpolate_normals = false
+    disp_z = disp_z
+    use_petrov_galerkin = true
+    aux_lm = aux_lm
   []
-  [normal_x]
-    type = CartesianMortarMechanicalContact
-    primary_boundary = '23'
-    secondary_boundary = '11'
+[]
+
+[Constraints]
+  [normal_lm]
+    type = ComputeWeightedGapLMMechanicalContact
+    primary_boundary = 'right_left'
+    secondary_boundary = 'left_right'
     primary_subdomain = 'primary_lower'
     secondary_subdomain = 'secondary_lower'
-    variable = lm_x
+    variable = normal_lm
+    disp_x = disp_x
+    disp_y = disp_y
+    disp_z = disp_z
+    use_displaced_mesh = true
+    correct_edge_dropping = true
+    weighted_gap_uo = weighted_gap_uo
+  []
+  [normal_x]
+    type = NormalMortarMechanicalContact
+    primary_boundary = 'right_left'
+    secondary_boundary = 'left_right'
+    primary_subdomain = 'primary_lower'
+    secondary_subdomain = 'secondary_lower'
+    variable = normal_lm
     secondary_variable = disp_x
     component = x
     use_displaced_mesh = true
     compute_lm_residuals = false
     correct_edge_dropping = true
+    weighted_gap_uo = weighted_gap_uo
   []
   [normal_y]
-    type = CartesianMortarMechanicalContact
-    primary_boundary = '23'
-    secondary_boundary = '11'
+    type = NormalMortarMechanicalContact
+    primary_boundary = 'right_left'
+    secondary_boundary = 'left_right'
     primary_subdomain = 'primary_lower'
     secondary_subdomain = 'secondary_lower'
-    variable = lm_y
+    variable = normal_lm
     secondary_variable = disp_y
     component = y
     use_displaced_mesh = true
     compute_lm_residuals = false
     correct_edge_dropping = true
+    weighted_gap_uo = weighted_gap_uo
+  []
+  [normal_z]
+    type = NormalMortarMechanicalContact
+    primary_boundary = 'right_left'
+    secondary_boundary = 'left_right'
+    primary_subdomain = 'primary_lower'
+    secondary_subdomain = 'secondary_lower'
+    variable = normal_lm
+    secondary_variable = disp_z
+    component = z
+    use_displaced_mesh = true
+    compute_lm_residuals = false
+    correct_edge_dropping = true
+    weighted_gap_uo = weighted_gap_uo
   []
 []
 
 [Preconditioning]
-  [smp]
+  [SMP]
     type = SMP
     full = true
   []
@@ -229,35 +268,42 @@ velocity = 0.1
 
 [Executioner]
   type = Transient
-  solve_type = 'NEWTON'
+  solve_type = 'PJFNK'
 
-  petsc_options_iname = '-pc_type -pc_factor_mat_solver_package -pc_factor_shift_type -pc_factor_shift_amount'
-  petsc_options_value = 'lu        superlu_dist                  NONZERO               1e-10'
+  petsc_options_iname = '-pc_type -pc_factor_mat_solver_type -pc_factor_shift_type '
+                        '-pc_factor_shift_amount'
+  petsc_options_value = 'lu    superlu_dist nonzero 1e-10'
 
-  line_search = none
+  line_search = 'none'
 
   dt = 0.1
-  dtmin = 0.1
-  end_time = 1.0
+  dtmin = 0.01
+  end_time = 0.4
 
-  l_max_its = 100
+  l_max_its = 20
 
   nl_max_its = 20
   nl_rel_tol = 1e-6
+  nl_abs_tol = 1e-8
   snesmf_reuse_base = false
 []
 
 [Outputs]
-  exodus = false
-  file_base = './output/2nd_order_${theta}_degree_QUAD8_out'
-  [comp]
-    type = CSV
-    show = 'tot_lin_it tot_nonlin_it'
-    execute_on = 'FINAL'
-  []
+  csv = true
+  execute_on = 'FINAL'
 []
 
 [Postprocessors]
+  [contact]
+    type = ContactDOFSetSize
+    variable = normal_lm
+    subdomain = 'secondary_lower'
+  []
+  [normal_lm]
+    type = ElementAverageValue
+    variable = normal_lm
+    block = 'secondary_lower'
+  []
   [avg_disp_x]
     type = ElementAverageValue
     variable = disp_x
@@ -289,19 +335,5 @@ velocity = 0.1
     variable = disp_y
     block = '1 2'
     value_type = min
-  []
-  [num_lin_it]
-    type = NumLinearIterations
-  []
-  [num_nonlin_it]
-    type = NumNonlinearIterations
-  []
-  [tot_lin_it]
-    type = CumulativeValuePostprocessor
-    postprocessor = num_lin_it
-  []
-  [tot_nonlin_it]
-    type = CumulativeValuePostprocessor
-    postprocessor = num_nonlin_it
   []
 []
