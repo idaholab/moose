@@ -69,6 +69,9 @@ the [MOOSE MultiApp system](MultiApps/index.md), and verification of calculated 
 - [Tutorial 3: Code Verification](tutorial03_verification/index.md) - Demonstrates the use of analytical
   solutions and the [!ac](MMS) for code verification.
 
+- [Tutorial 4: MOOSE Meshing](tutorial04_meshing/index.md) - Demonstrates MOOSE meshing with the
+  [Reactor](modules/reactor/index.md) module meshing tools.
+
 ## Physics Module Examples and Tutorials
 
 The [modules/index.md] provide models based on the MOOSE framework for a variety of physical phenomena.

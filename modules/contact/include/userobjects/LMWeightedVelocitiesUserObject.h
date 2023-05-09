@@ -39,4 +39,10 @@ protected:
   const MooseVariableFE<Real> * const _lm_normal_var;
   const MooseVariableFE<Real> * const _lm_variable_tangential_one;
   const MooseVariableFE<Real> * const _lm_variable_tangential_two;
+
+  /// Whether to use Petrov-Galerkin approach
+  const bool _use_petrov_galerkin;
+
+  /// The auxiliary Lagrange multiplier variable (used together whith the Petrov-Galerkin approach)
+  const MooseVariable * const _aux_lm_var;
 };

@@ -1,0 +1,65 @@
+Content:
+    tutorial04_meshing:
+        root_dir: ${MOOSE_DIR}/tutorials/tutorial04_meshing/doc/content
+    moose:
+        root_dir: ${MOOSE_DIR}/framework/doc/content
+        content:
+            - contrib/**
+            - css/**
+            - js/**
+    modules:
+        root_dir: ${MOOSE_DIR}/modules/doc/content
+        content:
+            - getting_started/examples_and_tutorials/tutorial04_meshing/references.bib
+    large_media:
+        root_dir: ${MOOSE_DIR}/large_media
+        content:
+            - tutorials/tutorial04_meshing/*
+
+Executioner:
+    type: MooseDocs.base.Serial
+
+Renderer:
+    type: MooseDocs.base.RevealRenderer
+    theme: simple
+
+Extensions:
+    disable_defaults: True
+    MooseDocs.extensions.comment: default
+    MooseDocs.extensions.common: default
+    MooseDocs.extensions.command: default
+    MooseDocs.extensions.core: default
+    MooseDocs.extensions.config: default
+    MooseDocs.extensions.media: default
+    MooseDocs.extensions.floats: default
+    MooseDocs.extensions.include: default
+    MooseDocs.extensions.bibtex:
+        duplicates: !include modules/doc/duplicate_bibs.yml # necessary when building with main site
+    MooseDocs.extensions.katex: default
+    MooseDocs.extensions.style: default
+    MooseDocs.extensions.autolink: default
+    MooseDocs.extensions.materialicon: default
+    MooseDocs.extensions.heading: default
+    MooseDocs.extensions.table: default
+    MooseDocs.extensions.content: default
+    MooseDocs.extensions.modal: default
+    MooseDocs.extensions.layout: default
+    MooseDocs.extensions.alert: default
+    MooseDocs.extensions.appsyntax: # WARNING: this must follow katex for doco pages to work
+        executable: ${MOOSE_DIR}/modules/combined
+        unregister:
+            framework: !include framework/doc/unregister.yml
+            thermal_hydraulics:
+                AddComponentAction: Components/*/*
+                Component: Components/*/*
+        remove:
+            framework: !include framework/doc/remove.yml
+            richards: !include modules/richards/doc/remove.yml
+            stochastic_tools: !include modules/stochastic_tools/doc/remove.yml
+    MooseDocs.extensions.acronym:
+        acronyms: !include framework/doc/acronyms.yml
+    MooseDocs.extensions.listing:
+        modal-link: False
+    MooseDocs.extensions.reveal:
+        translate: getting_started/examples_and_tutorials/tutorial04_meshing/presentation/index.md
+        background_image: DOE_NE_NEAMS_Light_Presentation_Background.png

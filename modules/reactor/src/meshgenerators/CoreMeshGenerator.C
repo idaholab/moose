@@ -315,7 +315,7 @@ CoreMeshGenerator::CoreMeshGenerator(const InputParameters & parameters)
           params.set<std::vector<unsigned int>>("num_sectors_per_side") =
               std::vector<unsigned int>(6, 2);
           params.set<std::vector<unsigned int>>("sides_to_adapt") = std::vector<unsigned int>{0};
-          params.set<std::vector<MeshGeneratorName>>("inputs") =
+          params.set<std::vector<MeshGeneratorName>>("meshes_to_adapt_to") =
               std::vector<MeshGeneratorName>{_inputs[0]};
           params.set<std::vector<subdomain_id_type>>("background_block_ids") =
               std::vector<subdomain_id_type>{UINT16_MAX - 1};
@@ -327,7 +327,7 @@ CoreMeshGenerator::CoreMeshGenerator(const InputParameters & parameters)
       }
     }
     {
-      auto params = _app.getFactory().getValidParams("HexIDPatternedMeshGenerator");
+      auto params = _app.getFactory().getValidParams("PatternedHexMeshGenerator");
 
       params.set<std::string>("id_name") = "assembly_id";
       params.set<MooseEnum>("assign_type") =
@@ -347,14 +347,14 @@ CoreMeshGenerator::CoreMeshGenerator(const InputParameters & parameters)
       params.set<boundary_id_type>("external_boundary_id") = radial_boundary;
       params.set<std::string>("external_boundary_name") = "outer_core";
 
-      addMeshSubgenerator("HexIDPatternedMeshGenerator", name() + "_pattern", params);
+      addMeshSubgenerator("PatternedHexMeshGenerator", name() + "_pattern", params);
     }
   }
   if (_empty_pos)
   {
     auto params = _app.getFactory().getValidParams("BlockDeletionGenerator");
 
-    params.set<SubdomainID>("block_id") = UINT16_MAX - 1;
+    params.set<std::vector<SubdomainName>>("block") = {std::to_string(UINT16_MAX - 1)};
     params.set<MeshGeneratorName>("input") = name() + "_pattern";
     params.set<BoundaryName>("new_boundary") = "outer_core";
 

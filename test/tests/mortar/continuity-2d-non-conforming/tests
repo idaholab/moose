@@ -35,6 +35,12 @@
     requirement = 'The Jacobian for the solution continuity test case shall be perfect'
     prereq = 'soln-continuity'
   []
+  [soln-continuity-pg]
+    type = 'Exodiff'
+    input = 'soln-continuity-pg.i'
+    exodiff = 'soln-continuity-pg_out.e'
+    requirement = 'We shall be able to produce the expected result for a solution continuity test case using the Petrov-Galerkin approach for mortar.'
+  []
   [sequencing-stateful-soln-continuity]
     type = 'Exodiff'
     input = 'sequencing-stateful-soln-continuity.i'

@@ -1,0 +1,9 @@
+Content:
+    tutorial04_meshing:
+        root_dir: !include tutorials/tutorial04_meshing/doc/config.yml Content tutorial04_meshing root_dir
+        content:
+            - getting_started/examples_and_tutorials/tutorial04_meshing/**
+
+Executioner: !include tutorials/tutorial04_meshing/doc/config.yml Executioner
+Renderer: !include tutorials/tutorial04_meshing/doc/config.yml Renderer
+Extensions: !include tutorials/tutorial04_meshing/doc/config.yml Extensions
