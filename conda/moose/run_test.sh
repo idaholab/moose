@@ -6,7 +6,7 @@ if [[ $(uname) == 'Darwin' ]] && [[ $(uname -m) == 'x86_64' ]]; then
 fi
 
 # A list of module(s)/directories that we do not want to include for testing
-NOT_RUNNABLE=(doc module_load combined geochemistry misc navier_stokes tensor_mechanics framework external_petsc_solver reactor_tutorial)
+NOT_RUNNABLE=(doc module_load combined geochemistry misc navier_stokes tensor_mechanics framework external_petsc_solver)
 
 # Support older bash (like Darwin Intel) to build a list of possible modules we want to test
 cd ${CONDA_PREFIX}/moose/share/combined
