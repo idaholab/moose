@@ -5,7 +5,7 @@
     requirement = "The system shall minimize a quadratic objective function from a test object "
     [taonm]
       type = CSVDiff
-      max_threads = 1
+      max_threads = 1 # Optimize executioner does not support multiple threads
       rel_err = 1.0e-4
       cli_args = "Executioner/tao_solver=TAONM"
       input = quadratic_minimize.i
@@ -15,7 +15,7 @@
     []
     [bncg]
       type = CSVDiff
-      max_threads = 1
+      max_threads = 1 # Optimize executioner does not support multiple threads
       rel_err = 1.0e-4
       cli_args = "Executioner/tao_solver=TAOBNCG Executioner/petsc_options_iname='-tao_gatol "
                  "-tao_cg_delta_max' Executioner/petsc_options_value='1e-4 1e-2'"
@@ -26,7 +26,7 @@
     []
     [taontr]
       type = CSVDiff
-      max_threads = 1
+      max_threads = 1 # Optimize executioner does not support multiple threads
       cli_args = "Executioner/tao_solver=TAONTR Executioner/petsc_options_iname='-tao_ntr_min_radius "
                  "-tao_ntr_max_radius -tao_ntr_init_type -tao_ntr_pc_type' "
                  "Executioner/petsc_options_value='0 1e16 constant none'"
@@ -39,7 +39,7 @@
     [multi_params]
       type = CSVDiff
       rel_err = 1.0e-4
-      max_threads = 1
+      max_threads = 1 # Optimize executioner does not support multiple threads
       input = qm_multi_param.i
       csvdiff = qm_multi_param_out_OptimizationReporter_0001.csv
       allow_test_objects = True
@@ -56,7 +56,7 @@
       cli_args = '-tao_ls_type unit'
       allow_test_objects = True
       expect_out = 'Solution converged'
-      max_threads = 1
+      max_threads = 1 # Optimize executioner does not support multiple threads
       detail = 'using finite-difference to compute the gradient;'
     []
     [grad_check]
@@ -65,7 +65,7 @@
       cli_args = '-tao_ls_type unit'
       allow_test_objects = True
       expect_out = 'Testing Gradient'
-      max_threads = 1
+      max_threads = 1 # Optimize executioner does not support multiple threads
       detail = 'testing hand-coded gradient;'
     []
     [failed_ls]
@@ -74,7 +74,7 @@
       cli_args = '-tao_fd_gradient true'
       allow_test_objects = True
       expect_out = 'Solver terminated: -6   Line Search Failure'
-      max_threads = 1
+      max_threads = 1 # Optimize executioner does not support multiple threads
       detail = 'indicating a failed line search;'
     []
     [failed_it]
@@ -83,7 +83,7 @@
       cli_args = '-tao_fd_gradient true -tao_ls_type unit -tao_max_it 1'
       allow_test_objects = True
       expect_out = 'Solver terminated: -2   Maximum Iterations'
-      max_threads = 1
+      max_threads = 1 # Optimize executioner does not support multiple threads
       detail = 'indicating maximum iteration reached;'
     []
   []

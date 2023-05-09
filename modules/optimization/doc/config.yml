@@ -37,3 +37,6 @@ Extensions:
       categories:
           framework: !include framework/doc/sqa_framework.yml
           optimization: !include modules/optimization/doc/sqa_optimization.yml
+
+  MooseDocs.extensions.algorithm:
+      active: True

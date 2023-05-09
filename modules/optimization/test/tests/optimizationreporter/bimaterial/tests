@@ -5,7 +5,7 @@
     requirement = 'The system shall be able to invert for the value of a material property in two separate regions using'
     [taoblmvm]
       type = CSVDiff
-      max_threads = 1
+      max_threads = 1 # Optimize executioner does not support multiple threads
       input = main.i
       abs_zero = 1e-2
       csvdiff = main_out_OptimizationReporter_0001.csv
@@ -17,7 +17,7 @@
       input = main_auto_adjoint.i
       cli_args = 'Outputs/file_base=main_out'
       csvdiff = main_out_OptimizationReporter_0001.csv
-      max_threads = 1
+      max_threads = 1 # Optimize executioner does not support multiple threads
       abs_zero = 1e-2
       recover = false
       detail = 'a gradient evaluated with an automatically computed adjoint.'

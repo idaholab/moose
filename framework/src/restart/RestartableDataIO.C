@@ -201,8 +201,10 @@ RestartableDataIO::serializeSystems(std::ostream & stream)
 {
   mooseAssert(_fe_problem_ptr, "The FEProblem pointer is nullptr in RestartableDataIO");
 
-  storeHelper(
-      stream, static_cast<SystemBase &>(_fe_problem_ptr->getNonlinearSystemBase()), nullptr);
+  for (const auto & nl_sys_num : make_range(_fe_problem_ptr->numNonlinearSystems()))
+    storeHelper(stream,
+                static_cast<SystemBase &>(_fe_problem_ptr->getNonlinearSystemBase(nl_sys_num)),
+                nullptr);
   storeHelper(stream, static_cast<SystemBase &>(_fe_problem_ptr->getAuxiliarySystem()), nullptr);
 }
 
@@ -211,7 +213,10 @@ RestartableDataIO::deserializeSystems(std::istream & stream)
 {
   mooseAssert(_fe_problem_ptr, "The FEProblem pointer is nullptr in RestartableDataIO");
 
-  loadHelper(stream, static_cast<SystemBase &>(_fe_problem_ptr->getNonlinearSystemBase()), nullptr);
+  for (const auto & nl_sys_num : make_range(_fe_problem_ptr->numNonlinearSystems()))
+    loadHelper(stream,
+               static_cast<SystemBase &>(_fe_problem_ptr->getNonlinearSystemBase(nl_sys_num)),
+               nullptr);
   loadHelper(stream, static_cast<SystemBase &>(_fe_problem_ptr->getAuxiliarySystem()), nullptr);
 }
 
@@ -420,7 +425,8 @@ RestartableDataIO::restartEquationSystemsObject()
   // it can break restarts when multiple nodes are at the same point
   _fe_problem_ptr->es().read(file_name, read_flags, renumber);
 
-  _fe_problem_ptr->getNonlinearSystemBase().update();
+  for (const auto & nl_sys_num : make_range(_fe_problem_ptr->numNonlinearSystems()))
+    _fe_problem_ptr->getNonlinearSystemBase(nl_sys_num).update();
 }
 
 void
