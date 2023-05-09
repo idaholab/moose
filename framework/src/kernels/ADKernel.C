@@ -160,23 +160,6 @@ ADKernelTempl<T>::computeResidualsForJacobian()
 
 template <typename T>
 void
-ADKernelTempl<T>::addJacobian(const MooseVariableFieldBase & jvariable)
-{
-  unsigned int jvar = jvariable.number();
-
-  auto ad_offset = Moose::adOffset(jvar, _sys.getMaxVarNDofsPerElem(), Moose::ElementType::Element);
-
-  prepareMatrixTag(_assembly, _var.number(), jvar);
-
-  for (_i = 0; _i < _test.size(); _i++)
-    for (_j = 0; _j < jvariable.phiSize(); _j++)
-      _local_ke(_i, _j) += _residuals[_i].derivatives()[ad_offset + _j];
-
-  accumulateTaggedLocalMatrix();
-}
-
-template <typename T>
-void
 ADKernelTempl<T>::computeJacobian()
 {
   computeADJacobian();

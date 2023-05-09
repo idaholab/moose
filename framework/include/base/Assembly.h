@@ -1703,14 +1703,6 @@ public:
   }
 
   /**
-   * This simply caches the derivative values for the corresponding column indices for the provided
-   * \p matrix_tags, without applying any scaling factors
-   */
-  void addJacobianNoScaling(const ADReal & residual,
-                                dof_id_type dof_index,
-                                const std::set<TagID> & matrix_tags);
-
-  /**
    * signals this object that a vector containing variable scaling factors should be used when
    * doing residual and matrix assembly
    */
@@ -1931,10 +1923,10 @@ private:
    * (P)JFNK. This method will call \p constrain_element_vector on the supplied residuals
    */
   template <typename Residuals, typename Indices>
-  void addResiduals(const Residuals & residuals,
-                        const Indices & row_indices,
-                        const std::set<TagID> & vector_tags,
-                        Real scaling_factor);
+  void cacheResiduals(const Residuals & residuals,
+                      const Indices & row_indices,
+                      const std::set<TagID> & vector_tags,
+                      Real scaling_factor);
 
   /**
    * Process the \p derivatives() data of a vector of \p ADReals. This
@@ -1942,10 +1934,10 @@ private:
    * provided \p matrix_tags. Note that this overload will call \p DofMap::constrain_element_matrix.
    */
   template <typename Residuals, typename Indices>
-  void addJacobian(const Residuals & residuals,
-                       const Indices & row_indices,
-                       const std::set<TagID> & matrix_tags,
-                       Real scaling_factor);
+  void cacheJacobian(const Residuals & residuals,
+                     const Indices & row_indices,
+                     const std::set<TagID> & matrix_tags,
+                     Real scaling_factor);
 
   /**
    * Process the supplied residual values. This is a mirror of of the non-templated version of \p
@@ -1956,10 +1948,10 @@ private:
    * (P)JFNK. This method will \emph not call \p constrain_element_vector on the supplied residuals
    */
   template <typename Residuals, typename Indices>
-  void addResidualsWithoutConstraints(const Residuals & residuals,
-                                          const Indices & row_indices,
-                                          const std::set<TagID> & vector_tags,
-                                          Real scaling_factor);
+  void cacheResidualsWithoutConstraints(const Residuals & residuals,
+                                        const Indices & row_indices,
+                                        const std::set<TagID> & vector_tags,
+                                        Real scaling_factor);
 
   /**
    * Process the \p derivatives() data of a vector of \p ADReals. This
@@ -1968,10 +1960,10 @@ private:
    * DofMap::constrain_element_matrix.
    */
   template <typename Residuals, typename Indices>
-  void addJacobianWithoutConstraints(const Residuals & residuals,
-                                         const Indices & row_indices,
-                                         const std::set<TagID> & matrix_tags,
-                                         Real scaling_factor);
+  void cacheJacobianWithoutConstraints(const Residuals & residuals,
+                                       const Indices & row_indices,
+                                       const std::set<TagID> & matrix_tags,
+                                       Real scaling_factor);
 
   /// Friend that can use our global processing routines
   friend class TaggingInterface;
@@ -2789,21 +2781,12 @@ Assembly::adGradPhi<RealVectorValue>(const MooseVariableFE<RealVectorValue> & v)
   return _ad_vector_grad_phi_data.at(v.feType());
 }
 
-inline void
-Assembly::addJacobianNoScaling(const ADReal & residual,
-                                   const dof_id_type dof_index,
-                                   const std::set<TagID> & matrix_tags)
-{
-  addJacobian(
-      std::array<ADReal, 1>{{residual}}, std::vector<dof_id_type>({dof_index}), matrix_tags, 1);
-}
-
 template <typename Residuals, typename Indices>
 void
-Assembly::addResiduals(const Residuals & residuals,
-                           const Indices & input_row_indices,
-                           const std::set<TagID> & vector_tags,
-                           const Real scaling_factor)
+Assembly::cacheResiduals(const Residuals & residuals,
+                         const Indices & input_row_indices,
+                         const std::set<TagID> & vector_tags,
+                         const Real scaling_factor)
 {
   mooseAssert(residuals.size() == input_row_indices.size(),
               "The number of residuals should match the number of dof indices");
@@ -2816,7 +2799,7 @@ Assembly::addResiduals(const Residuals & residuals,
   {
     // No constraining is required. (This is likely a finite volume computation if we only have a
     // single dof)
-    addResidualsWithoutConstraints(residuals, input_row_indices, vector_tags, scaling_factor);
+    cacheResidualsWithoutConstraints(residuals, input_row_indices, vector_tags, scaling_factor);
     return;
   }
 
@@ -2838,10 +2821,10 @@ Assembly::addResiduals(const Residuals & residuals,
 
 template <typename Residuals, typename Indices>
 void
-Assembly::addResidualsWithoutConstraints(const Residuals & residuals,
-                                             const Indices & row_indices,
-                                             const std::set<TagID> & vector_tags,
-                                             const Real scaling_factor)
+Assembly::cacheResidualsWithoutConstraints(const Residuals & residuals,
+                                           const Indices & row_indices,
+                                           const std::set<TagID> & vector_tags,
+                                           const Real scaling_factor)
 {
   mooseAssert(residuals.size() == row_indices.size(),
               "The number of residuals should match the number of dof indices");
@@ -2855,10 +2838,10 @@ Assembly::addResidualsWithoutConstraints(const Residuals & residuals,
 
 template <typename Residuals, typename Indices>
 void
-Assembly::addJacobian(const Residuals & residuals,
-                          const Indices & input_row_indices,
-                          const std::set<TagID> & matrix_tags,
-                          const Real scaling_factor)
+Assembly::cacheJacobian(const Residuals & residuals,
+                        const Indices & input_row_indices,
+                        const std::set<TagID> & matrix_tags,
+                        const Real scaling_factor)
 {
   if (!computingJacobian() || matrix_tags.empty())
     return;
@@ -2867,7 +2850,7 @@ Assembly::addJacobian(const Residuals & residuals,
   {
     // No constraining is required. (This is likely a finite volume computation if we only have a
     // single dof)
-    addJacobianWithoutConstraints(residuals, input_row_indices, matrix_tags, scaling_factor);
+    cacheJacobianWithoutConstraints(residuals, input_row_indices, matrix_tags, scaling_factor);
     return;
   }
 
@@ -2914,10 +2897,10 @@ Assembly::addJacobian(const Residuals & residuals,
 
 template <typename Residuals, typename Indices>
 void
-Assembly::addJacobianWithoutConstraints(const Residuals & residuals,
-                                            const Indices & row_indices,
-                                            const std::set<TagID> & matrix_tags,
-                                            const Real scaling_factor)
+Assembly::cacheJacobianWithoutConstraints(const Residuals & residuals,
+                                          const Indices & row_indices,
+                                          const std::set<TagID> & matrix_tags,
+                                          const Real scaling_factor)
 {
   mooseAssert(residuals.size() == row_indices.size(),
               "The number of residuals should match the number of dof indices");
