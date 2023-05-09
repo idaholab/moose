@@ -192,24 +192,19 @@ PenaltyFrictionUserObject::reinit()
     const auto & slip_vel_one = real_tangential_velocity[0];
     const auto & slip_vel_two = real_tangential_velocity[1];
 
-    // Get accumulated slip in both directions
-    ADReal slip_direction_one = 0.0;
-    ADReal slip_direction_two = 0.0;
+    // zero slip dummy
+    static const std::array<Real, 2> zero_old_accumulated_slip{0.0, 0.0};
 
-    if (!_dof_to_old_accumulated_slip.empty())
-    {
-      slip_direction_one = _dof_to_old_accumulated_slip[node][0];
-
-      if (_has_disp_z)
-        slip_direction_two = _dof_to_old_accumulated_slip[node][1];
-    }
+    const auto & old_accumulated_slip = _dof_to_old_accumulated_slip.empty()
+                                            ? zero_old_accumulated_slip
+                                            : _dof_to_old_accumulated_slip[node];
 
     // Get current accumulated slip in both directions
     if (normal_pressure > TOLERANCE * TOLERANCE)
     {
-      accumulated_slip[0] = slip_direction_one + std::abs(slip_vel_one) * _dt;
+      accumulated_slip[0] = old_accumulated_slip[0] + std::abs(slip_vel_one) * _dt;
       if (_has_disp_z)
-        accumulated_slip[1] = slip_direction_two + std::abs(slip_vel_two) * _dt;
+        accumulated_slip[1] = old_accumulated_slip[1] + std::abs(slip_vel_two) * _dt;
     }
     else
       accumulated_slip = {0.0, 0.0};
@@ -219,11 +214,11 @@ PenaltyFrictionUserObject::reinit()
     ADReal sign_one = 0.0;
     ADReal sign_two = 0.0;
 
-    if (std::abs(_dof_to_real_tangential_velocity[node][0]) > TOLERANCE * TOLERANCE)
-      sign_one = MathUtils::sign(_dof_to_real_tangential_velocity[node][0]);
+    if (std::abs(real_tangential_velocity[0]) > TOLERANCE * TOLERANCE)
+      sign_one = MathUtils::sign(real_tangential_velocity[0]);
 
-    if (_has_disp_z && std::abs(_dof_to_real_tangential_velocity[node][1]) > TOLERANCE * TOLERANCE)
-      sign_two = MathUtils::sign(_dof_to_real_tangential_velocity[node][1]);
+    if (_has_disp_z && std::abs(real_tangential_velocity[1]) > TOLERANCE * TOLERANCE)
+      sign_two = MathUtils::sign(real_tangential_velocity[1]);
 
     // if using frictional lagrange multipliers, fetch them
     static const std::pair<Real, Real> null_lm{0, 0};
@@ -350,26 +345,26 @@ PenaltyFrictionUserObject::updateAugmentedLagrangianMultipliers()
     const auto & slip_vel_one = real_tangential_velocity[0];
     const auto & slip_vel_two = real_tangential_velocity[1];
 
-    // Get accumulated slip in both directions
-    Real slip_direction_one = 0.0;
-    Real slip_direction_two = 0.0;
+    // zero slip dummy
+    static const std::array<Real, 2> zero_old_accumulated_slip{0.0, 0.0};
 
-    if (!_dof_to_old_accumulated_slip.empty())
-      std::tie(slip_direction_one, slip_direction_two) = _dof_to_old_accumulated_slip[node];
+    const auto & old_accumulated_slip = _dof_to_old_accumulated_slip.empty()
+                                            ? zero_old_accumulated_slip
+                                            : _dof_to_old_accumulated_slip[node];
 
-    accumulated_slip[0] = slip_direction_one + std::abs(slip_vel_one) * _dt;
+    accumulated_slip[0] = old_accumulated_slip[0] + std::abs(slip_vel_one) * _dt;
     if (_has_disp_z)
-      accumulated_slip[1] = slip_direction_two + std::abs(slip_vel_two) * _dt;
+      accumulated_slip[1] = old_accumulated_slip[1] + std::abs(slip_vel_two) * _dt;
 
     // Get sign of relative velocity for both directions
     ADReal sign_one = 0.0;
     ADReal sign_two = 0.0;
 
-    if (std::abs(_dof_to_real_tangential_velocity[node][0]) > TOLERANCE * TOLERANCE)
-      sign_one = MathUtils::sign(_dof_to_real_tangential_velocity[node][0]);
+    if (std::abs(real_tangential_velocity[0]) > TOLERANCE * TOLERANCE)
+      sign_one = MathUtils::sign(real_tangential_velocity[0]);
 
-    if (_has_disp_z && std::abs(_dof_to_real_tangential_velocity[node][1]) > TOLERANCE * TOLERANCE)
-      sign_two = MathUtils::sign(_dof_to_real_tangential_velocity[node][1]);
+    if (_has_disp_z && std::abs(real_tangential_velocity[1]) > TOLERANCE * TOLERANCE)
+      sign_two = MathUtils::sign(real_tangential_velocity[1]);
 
     // update LMs
     flm1 += _penalty_friction * MetaPhysicL::raw_value(accumulated_slip[0]);

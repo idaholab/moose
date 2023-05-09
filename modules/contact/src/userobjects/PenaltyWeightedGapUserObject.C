@@ -109,13 +109,17 @@ PenaltyWeightedGapUserObject::reinit()
   for (const auto i : make_range(_test->size()))
   {
     const Node * const node = _lower_secondary_elem->node_ptr(i);
-    const auto & weighted_gap = libmesh_map_find(_dof_to_weighted_gap, node).first;
+
+    // Simo's definition of the gap is positive during penetration
+    const auto & weighted_gap = -libmesh_map_find(_dof_to_weighted_gap, node).first;
     const auto lagrange_multiplier =
         _augmented_lagrange_problem ? _dof_to_lagrange_multiplier[node] : 0.0;
-    const auto weighted_gap_for_calc = weighted_gap < 0 ? -weighted_gap : ADReal(0);
     const auto & test_i = (*_test)[i];
 
-    const auto normal_pressure = _penalty * weighted_gap_for_calc + lagrange_multiplier;
+    // Simo et al. 2.14
+    auto normal_pressure = _penalty * weighted_gap + lagrange_multiplier;
+    normal_pressure = normal_pressure > 0.0 ? normal_pressure : 0.0;
+
     _dof_to_normal_pressure[node] = normal_pressure;
     for (const auto qp : make_range(_qrule_msm->n_points()))
       _contact_force[qp] += test_i[qp] * normal_pressure;
@@ -138,22 +142,6 @@ PenaltyWeightedGapUserObject::timestepSetup()
 bool
 PenaltyWeightedGapUserObject::isContactConverged()
 {
-  std::cout << "Gap: ";
-  for (const auto & [dof_object, gap] : _dof_to_weighted_gap)
-    std::cout << physicalGap(gap) << ' ';
-  std::cout << '\n';
-
-  // // release contact (this could introduce ping pong)
-  // bool converged = true;
-  // for (const auto & [dof_object, gap] : _dof_to_weighted_gap)
-  //   if (gap > _penetration_tolerance && _dof_to_lagrange_multiplier[dof_object] > 0)
-  //   {
-  //     _dof_to_lagrange_multiplier[dof_object] = 0.0;
-  //     converged = false;
-  //   }
-  // if (!converged)
-  //   return false;
-
   // check if penetration is below threshold
   for (const auto & [dof_object, gap] : _dof_to_weighted_gap)
     if (physicalGap(gap) < -_penetration_tolerance ||
@@ -176,8 +164,11 @@ PenaltyWeightedGapUserObject::updateAugmentedLagrangianMultipliers()
   for (auto & [dof_object, lagrange_multiplier] : _dof_to_lagrange_multiplier)
     if (auto it = _dof_to_weighted_gap.find(dof_object); it != _dof_to_weighted_gap.end())
     {
-      const auto & gap = MetaPhysicL::raw_value(it->second.first);
-      lagrange_multiplier += -gap * _penalty;
+      // Simo's definition of the gap is positive during penetration
+      const auto & gap = -MetaPhysicL::raw_value(it->second.first);
+
+      // Simo et al. 2.15
+      lagrange_multiplier += gap * _penalty;
       if (lagrange_multiplier < 0.0)
         lagrange_multiplier = 0.0;
     }
