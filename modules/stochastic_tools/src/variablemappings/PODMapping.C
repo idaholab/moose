@@ -50,21 +50,12 @@ PODMapping::PODMapping(const InputParameters & parameters)
     _num_modes(getParam<std::vector<dof_id_type>>("num_modes")),
     _energy_threshold(getParam<std::vector<Real>>("energy_threshold")),
     _left_basis_functions(
-        isParamValid("filename")
-            ? setModelData<std::map<VariableName, std::vector<DenseVector<Real>>>>(
-                  "left_basis_functions")
-            : declareModelData<std::map<VariableName, std::vector<DenseVector<Real>>>>(
+        declareModelData<std::map<VariableName, std::vector<DenseVector<Real>>>>(
                   "left_basis_functions")),
     _right_basis_functions(
-        isParamValid("filename")
-            ? setModelData<std::map<VariableName, std::vector<DenseVector<Real>>>>(
-                  "right_basis_functions")
-            : declareModelData<std::map<VariableName, std::vector<DenseVector<Real>>>>(
+            declareModelData<std::map<VariableName, std::vector<DenseVector<Real>>>>(
                   "right_basis_functions")),
-    _singular_values(
-        isParamValid("filename")
-            ? setModelData<std::map<VariableName, std::vector<Real>>>("singular_values")
-            : declareModelData<std::map<VariableName, std::vector<Real>>>("singular_values")),
+    _singular_values(declareModelData<std::map<VariableName, std::vector<Real>>>("singular_values")),
     _extra_slepc_options(getParam<std::string>("extra_slepc_options")),
     _parallel_storage(isParamValid("solution_storage")
                           ? &getUserObject<ParallelSolutionStorage>("solution_storage")

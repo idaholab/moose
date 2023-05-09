@@ -24,15 +24,12 @@ VariableMappingBase::validParams()
 
 VariableMappingBase::VariableMappingBase(const InputParameters & parameters)
   : MooseObject(parameters),
-    RestartableModelInterface(this, _type + "_" + name()),
+    RestartableModelInterface(*this, /*read_only=*/false, _type + "_" + name()),
     _variable_names(isParamValid("filename")
                         ? getModelData<std::vector<VariableName>>("variables")
                         : declareModelData<std::vector<VariableName>>(
                               "variables", getParam<std::vector<VariableName>>("variables"))),
-    _mapping_ready_to_use(
-        isParamValid("filename")
-            ? setModelData<std::map<VariableName, bool>>("mapping_ready_to_use")
-            : declareModelData<std::map<VariableName, bool>>("mapping_ready_to_use"))
+    _mapping_ready_to_use(declareModelData<std::map<VariableName, bool>>("mapping_ready_to_use"))
 
 {
 }

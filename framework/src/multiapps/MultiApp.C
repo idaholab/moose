@@ -127,14 +127,14 @@ MultiApp::validParams()
   params.set<ExecFlagEnum>("execute_on", true) = EXEC_TIMESTEP_BEGIN;
 
   params.addParam<processor_id_type>("max_procs_per_app",
-                                std::numeric_limits<processor_id_type>::max(),
-                                "Maximum number of processors to give to each App in this "
-                                "MultiApp.  Useful for restricting small solves to just a few "
-                                "procs so they don't get spread out");
+                                     std::numeric_limits<processor_id_type>::max(),
+                                     "Maximum number of processors to give to each App in this "
+                                     "MultiApp.  Useful for restricting small solves to just a few "
+                                     "procs so they don't get spread out");
   params.addParam<processor_id_type>("min_procs_per_app",
-                                1,
-                                "Minimum number of processors to give to each App in this "
-                                "MultiApp.  Useful for larger, distributed mesh solves.");
+                                     1,
+                                     "Minimum number of processors to give to each App in this "
+                                     "MultiApp.  Useful for larger, distributed mesh solves.");
   params.addParam<bool>(
       "wait_for_first_app_init",
       false,
