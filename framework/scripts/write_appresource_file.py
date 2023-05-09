@@ -43,8 +43,7 @@ def get_parts(parts_list):
                      'parse_keyvalues']
     growing = {}
     for method in parse_methods:
-        growing = {**growing | getattr(sys.modules[__name__],
-                                       method)(parts_list)}
+        growing.update(getattr(sys.modules[__name__], method)(parts_list))
     return growing
 
 def update_resource(full_path, parts_dict):
