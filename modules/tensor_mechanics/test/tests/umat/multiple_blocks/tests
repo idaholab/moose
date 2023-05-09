@@ -42,7 +42,7 @@
     # A demonstration test, no need run this through a debug executable, which is already tested
     method = opt
     requirement = 'The system shall be able to simulate a multiblock solid mechanics test in which '
-                  'the blocks are mesh contiguously using a solid mechanics material user interface.'
+                  'the blocks are meshed contiguously using the UMAT interface.'
   []
   [rve_multimaterial_moose]
     type = 'Exodiff'
@@ -55,6 +55,6 @@
     # A demonstration test, no need run this through a debug executable, which is already tested
     method = opt
     requirement = 'The system shall be able to simulate a multiblock solid mechanics test in which '
-                  'the blocks are mesh contiguously.'
+                  'the blocks are meshed contiguously.'
   []
 []
