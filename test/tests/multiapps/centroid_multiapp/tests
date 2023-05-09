@@ -1,5 +1,5 @@
 [Tests]
-  issues = '#10483'
+  issues = '#10483 #24264'
   design = 'CentroidMultiApp.md'
 
   [./test]
@@ -9,4 +9,14 @@
 
     requirement = "The system shall include the ability to execute a sub-application at the centroid of every element within the finite element mesh."
   [../]
+  [test_quiet]
+    type = Exodiff
+    input = centroid_multiapp.i
+    cli_args = 'MultiApps/sub/wait_for_first_app_init=true'
+    min_parallel = 2
+    recover = false
+    exodiff = 'centroid_multiapp_out.e centroid_multiapp_out_sub1.e centroid_multiapp_out_sub3.e centroid_multiapp_out_sub5.e centroid_multiapp_out_sub7.e centroid_multiapp_out_sub0.e centroid_multiapp_out_sub2.e centroid_multiapp_out_sub4.e centroid_multiapp_out_sub6.e centroid_multiapp_out_sub8.e'
+
+    requirement = "The system shall optionally allow the first sub-app to fully initialize before initializing all the remaining child apps in parallel."
+  []
 []
