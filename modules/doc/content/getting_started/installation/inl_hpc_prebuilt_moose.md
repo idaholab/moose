@@ -47,7 +47,7 @@ Not everything you find in this directory is a physics library. We are working o
 ask `moose` for all available solvers.
 !alert-end!
 
-For now, lets copy the reactor module into a safe location for editing:
+For now, lets copy the reactor module workshop into a safe location for editing:
 
 ```bash
 mkdir -p ~/projects/examples
@@ -76,11 +76,11 @@ Navigate to the following directory, and run the following input file:
 
 ```bash
 cd ~/projects/examples/combined/reactor_workshop/tests/reactor_examples/abtr/
-moose -i abtr.i --mesh-only --error-deprecated
+moose -i abtr.i --mesh-only
 ```
 
 You will see some information scroll by, and ultimately end back up at your prompt. If you perform a
-direcotry listing you should also see that an exodus file was generated in the process
+directory listing you should also see that an exodus file was generated in the process
 (`abtr_in.e`):
 
 ```bash

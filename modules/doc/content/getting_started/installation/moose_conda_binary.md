@@ -94,7 +94,7 @@ moose -i abtr.i --mesh-only --error-deprecated
 ```
 
 You will see some information scroll by, and ultimately end back up at your prompt. If you perform a
-direcotry listing you should also see that an exodus file was generated in the process
+directory listing you should also see that an exodus file was generated in the process
 (`abtr_in.e`):
 
 ```bash

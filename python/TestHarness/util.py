@@ -727,7 +727,7 @@ def getInitializedSubmodules(root_dir):
 
 def checkInstalled(executable, app_name):
     """
-    Read resource file and determin if binary was relocated
+    Read resource file and determine if binary was relocated
     """
     option_set = set(['ALL'])
     resource_content = readResourceFile(executable, app_name)
