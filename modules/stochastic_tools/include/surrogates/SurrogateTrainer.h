@@ -12,6 +12,7 @@
 #include "StochasticToolsApp.h"
 #include "GeneralUserObject.h"
 #include "LoadSurrogateDataAction.h"
+#include "RestartableModelInterface.h"
 
 #include "Sampler.h"
 #include "RestartableDataIO.h"
@@ -29,7 +30,7 @@ class TrainingData;
  * to perform its own loop through data, it is highly recommended to derive from
  * SurrogateTrainer.
  */
-class SurrogateTrainerBase : public GeneralUserObject
+class SurrogateTrainerBase : public GeneralUserObject, public RestartableModelInterface
 {
 public:
   static InputParameters validParams();
@@ -38,63 +39,7 @@ public:
   virtual void initialize() {}                         // not required, but available
   virtual void finalize() {}                           // not required, but available
   virtual void threadJoin(const UserObject &) final {} // GeneralUserObjects are not threaded
-
-  /**
-   * The name for training data stored within the MooseApp
-   */
-  const std::string & modelMetaDataName() const { return _model_meta_data_name; }
-
-  ///@{
-  /**
-   * Declare model data for loading from file as well as restart
-   */
-  // MOOSEDOCS_BEGIN
-  template <typename T>
-  T & declareModelData(const std::string & data_name);
-
-  template <typename T>
-  T & declareModelData(const std::string & data_name, const T & value);
-  // MOOSEDOCS_END
-  ///@}
-
-private:
-  /// Name for the meta data associated with training
-  const std::string _model_meta_data_name;
-
-  /**
-   * Internal function used by public declareModelData methods.
-   */
-  template <typename T>
-  RestartableData<T> & declareModelDataHelper(const std::string & data_name);
 };
-
-template <typename T>
-T &
-SurrogateTrainerBase::declareModelData(const std::string & data_name)
-{
-  RestartableData<T> & data_ref = declareModelDataHelper<T>(data_name);
-  return data_ref.set();
-}
-
-template <typename T>
-T &
-SurrogateTrainerBase::declareModelData(const std::string & data_name, const T & value)
-{
-  RestartableData<T> & data_ref = declareModelDataHelper<T>(data_name);
-  data_ref.set() = value;
-  return data_ref.set();
-}
-
-template <typename T>
-RestartableData<T> &
-SurrogateTrainerBase::declareModelDataHelper(const std::string & data_name)
-{
-  auto data_ptr = std::make_unique<RestartableData<T>>(data_name, nullptr);
-  RestartableDataValue & value =
-      _app.registerRestartableData(data_name, std::move(data_ptr), 0, false, _model_meta_data_name);
-  RestartableData<T> & data_ref = static_cast<RestartableData<T> &>(value);
-  return data_ref;
-}
 
 /**
  * This is the main trainer base class. The main purpose is to avoid a lot of code

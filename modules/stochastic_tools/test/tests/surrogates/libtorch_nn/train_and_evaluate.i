@@ -35,7 +35,7 @@
     num_batches = 10
     num_neurons_per_layer = '64 32'
     learning_rate = 0.001
-    filename = mynet_tne.pt
+    nn_filename = mynet_tne.pt
     read_from_file = false
     print_epoch_loss = 10
     max_processes = 1
