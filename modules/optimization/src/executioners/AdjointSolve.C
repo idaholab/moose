@@ -100,7 +100,7 @@ AdjointSolve::solve()
 
 void
 AdjointSolve::assembleAdjointSystem(SparseMatrix<Number> & matrix,
-                                    NumericVector<Number> & /*solution*/,
+                                    const NumericVector<Number> & /*solution*/,
                                     NumericVector<Number> & rhs)
 {
   _problem.computeJacobian(*_nl_forward.currentSolution(), matrix, _forward_sys_num);
@@ -112,7 +112,7 @@ AdjointSolve::assembleAdjointSystem(SparseMatrix<Number> & matrix,
 
 void
 AdjointSolve::applyNodalBCs(SparseMatrix<Number> & matrix,
-                            NumericVector<Number> & solution,
+                            const NumericVector<Number> & solution,
                             NumericVector<Number> & rhs)
 {
   std::vector<dof_id_type> nbc_dofs;
@@ -136,7 +136,7 @@ AdjointSolve::applyNodalBCs(SparseMatrix<Number> & matrix,
 
     // Petsc has a nice interface for zeroing rows and columns, so we'll use it
     auto petsc_matrix = dynamic_cast<PetscMatrix<Number> *>(&matrix);
-    auto petsc_solution = dynamic_cast<PetscVector<Number> *>(&solution);
+    auto petsc_solution = dynamic_cast<const PetscVector<Number> *>(&solution);
     auto petsc_rhs = dynamic_cast<PetscVector<Number> *>(&rhs);
     if (petsc_matrix && petsc_solution && petsc_rhs)
       MatZeroRowsColumns(petsc_matrix->mat(),

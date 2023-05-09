@@ -36,7 +36,7 @@
       input = optRep_fromCsv_mixBounds.i
       allow_test_objects = true
       cli_args = 'OptimizationReporter/upper_bounds=\'0\''
-      max_threads = 1
+      max_threads = 1 # Optimize executioner does not support multiple threads
       expect_err = 'There must be a vector of upper_bounds per parameter group\.  The upper_bounds input format is std::vector<std::vector<Real>> so each vector should be seperated by \";\" even if it is a single value per group for a constant upper_bounds\.'
       detail = 'parameters and error if parameters are provided but do not include a parameter for every group.'
     []
@@ -45,7 +45,7 @@
       input = optRep_fromCsv_mixBounds.i
       allow_test_objects = true
       cli_args = 'OptimizationReporter/upper_bounds=\'0;0;0 0\''
-      max_threads = 1
+      max_threads = 1 # Optimize executioner does not support multiple threads
       expect_err = 'When upper_bounds are given in input file, there must either be a single value per parameter group or a value for every parameter in the group\.'
       detail = 'parameters and error if an incorrect number of parameters are provided for a group.'
     []
