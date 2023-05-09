@@ -52,43 +52,49 @@ For now, lets copy the reactor module workshop into a safe location for editing:
 ```bash
 mkdir -p ~/projects/examples
 cd ~/projects/examples
-moose --copy-inputs reactor_workshop
+moose --copy-inputs reactor_tutorial
+  <output trimmed>
+Directory successfully copied into ./combined/reactor_tutorial/
 ```
 
 !alert! note
 Take note of the information being displayed in the output. `moose` is alerting to the directory
-structure it created. Which can sometimes not represent the exact wordage you provided as arguments.
+structure it created (`the last line`). Which can sometimes not represent the exact wordage you
+provided as arguments.
 !alert-end!
 
 With the reactor module's examples and inputs copied, move into the reactor workshop directory and
 instruct `moose` to run the tests:
 
 ```bash
-cd combined/reactor_workshop
+cd combined/reactor_tutorial
 moose --run -j 6
 ```
 
 Testing will commence and take a few moments to finish. There may be several skipped tests for one
-reason or another. This is normal. However no test should fail.
+reason or another. This is normal. However none of the tests should fail.
 
-Next, we will run a single test manually, to demonstrate how you will ultimately be using `moose`.
-Navigate to the following directory, and run the following input file:
+Next, we will run a single input file manually, to demonstrate how you will ultimately be using
+`moose`. Peruse the subdirectories and find an input file you wish to run:
 
-```bash
-cd ~/projects/examples/combined/reactor_workshop/tests/reactor_examples/abtr/
-moose -i abtr.i --mesh-only
-```
-
-You will see some information scroll by, and ultimately end back up at your prompt. If you perform a
-directory listing you should also see that an exodus file was generated in the process
-(`abtr_in.e`):
+!alert! tip
+You can list all available input files by running:
 
 ```bash
-ls
-abtr_griffin_snippet.i  abtr.i  abtr_in.e
+cd ~/projects/examples/combined/reactor_tutorial
+find . -name '*.i'
 ```
 
-You can follow the instructions in the next section to use Paraview, to view this result.
+!alert-end!
+
+```bash
+cd <desired directory where input file of your choice resides>
+moose -i <the input file you chose>.i --mesh-only
+```
+
+You will see some information scroll by, and ultimately end back at your prompt. If you perform a
+directory listing (`ls`) you should see an exodus file was generated in the process (a `_in.e`
+file).
 
 ## View Results
 
@@ -111,13 +117,8 @@ module load paraview
 paraview
 ```
 
-Paraview should open. From here, you can select `File`, `Open`, and navigate to
-
-```pre
-~/projects/examples/combined/reactor_workshop/tests/reactor_examples/abtr/
-```
-
-You should see the same `abtr_in.e` file. Double click on it, and Paraview should open it!
+Paraview should open. From here, you can select `File`, `Open`, and navigate to the directory
+containing your exodus file, and open it.
 
 In many cases it is more desirable to view results using your local machine. This is done by copying
 result files from the remote machine to your local machine using `scp` or `rsnyc`.
@@ -132,7 +133,7 @@ Downloads folder:
 
 ```bash
 cd ~/Downloads
-scp <your hpc user id>@hpclogin:~/projects/examples/combined/reactor_workshop/tests/reactor_examples/abtr/abtr_in.e .
+scp <your hpc user id>@hpclogin:<path to where your exodus file is> .
 ```
 
 !alert! note

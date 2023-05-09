@@ -26,11 +26,8 @@ mkdir -p "${PREFIX}/etc/conda/activate.d" "${PREFIX}/etc/conda/deactivate.d"
 cat <<EOF > "${PREFIX}/etc/conda/activate.d/activate_${PKG_NAME}.sh"
 export PATH=\${PATH}:${PREFIX}/moose/bin
 export MOOSE_BIN=${PREFIX}/moose/bin/moose
-# The following will be deprecated
-export MOOSE_OPT=${PREFIX}/moose/bin/moose-opt
-export COMBINED_OPT=${PREFIX}/moose/bin/combined-opt
 EOF
 cat <<EOF > "${PREFIX}/etc/conda/deactivate.d/deactivate_${PKG_NAME}.sh"
 export PATH=\${PATH%":${PREFIX}/moose/bin"}
-unset MOOSE_BIN MOOSE_OPT COMBINED_OPT
+unset MOOSE_BIN
 EOF
