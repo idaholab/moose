@@ -96,9 +96,7 @@ SetupMeshAction::validParams()
   params.addParam<bool>("skip_partitioning",
                         false,
                         "If true the mesh won't be partitioned. This may cause large load "
-                        "imbalanced but is currently required if you "
-                        "have a simulation containing uniform refinement, adaptivity and stateful "
-                        "material properties");
+                        "imbalances.");
 
   params.addParam<bool>(
       "use_split",

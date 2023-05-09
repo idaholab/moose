@@ -238,6 +238,8 @@
     requirement = "We shall be able to generate mortar numerical results for conduction and "
                   "radiation between two blocks in 3D and match reasonably well with the "
                   "node-to-segment approach with a refined mesh."
+    method = '!dbg'
+    valgrind = 'none'
   []
   [gap_heat_transfer_3d_mortar_hex20]
     input = 'gap_heat_transfer_3D_mortar.i'

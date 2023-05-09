@@ -509,10 +509,11 @@ public:
 
   /**
    * Calls prepare_for_use() if the underlying MeshBase object isn't prepared, then communicates
-   * various boundary information on parallel meshes. Also calls update() internally. We maintain
-   * the boolean parameter in order to maintain backwards compatability but it doesn't do anything
+   * various boundary information on parallel meshes. Also calls update() internally
+   * @param force_mesh_prepare Whether to force a mesh preparation
+   * @return Whether the libMesh mesh was prepared
    */
-  void prepare(bool = false);
+  bool prepare(bool force_mesh_prepare = false);
 
   /**
    * Calls buildNodeListFromSideList(), buildNodeList(), and buildBndElemList().

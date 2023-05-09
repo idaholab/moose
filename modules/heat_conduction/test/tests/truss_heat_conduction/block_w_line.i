@@ -152,8 +152,9 @@
   dt = 1
   end_time = 1
   solve_type = 'PJFNK'
-  petsc_options_iname = '-pc_type -pc_hypre_type'
-  petsc_options_value = 'hypre boomeramg'
+  petsc_options_iname = '-pc_type'
+  petsc_options_value = 'lu'
+  nl_rel_tol = 1e-12
 []
 
 [Outputs]

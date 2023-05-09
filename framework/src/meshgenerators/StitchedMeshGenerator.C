@@ -138,5 +138,6 @@ StitchedMeshGenerator::generate()
                         use_binary_search);
   }
 
+  mesh->set_isnt_prepared();
   return dynamic_pointer_cast<MeshBase>(mesh);
 }
