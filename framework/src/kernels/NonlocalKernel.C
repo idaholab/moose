@@ -35,7 +35,8 @@ NonlocalKernel::NonlocalKernel(const InputParameters & parameters) : Kernel(para
 void
 NonlocalKernel::computeJacobian()
 {
-  DenseMatrix<Number> & ke = _assembly.jacobianBlock(_var.number(), _var.number());
+  DenseMatrix<Number> & ke =
+      _assembly.jacobianBlock(_var.number(), _var.number(), Assembly::LocalDataKey{});
   _local_ke.resize(ke.m(), ke.n());
   _local_ke.zero();
 
@@ -73,7 +74,8 @@ NonlocalKernel::computeOffDiagJacobian(const unsigned int jvar_num)
   {
     const auto & jvar = getVariable(jvar_num);
 
-    DenseMatrix<Number> & ke = _assembly.jacobianBlock(_var.number(), jvar_num);
+    DenseMatrix<Number> & ke =
+        _assembly.jacobianBlock(_var.number(), jvar_num, Assembly::LocalDataKey{});
 
     // This (undisplaced) jvar could potentially yield the wrong phi size if this object is acting
     // on the displaced mesh
@@ -94,7 +96,8 @@ NonlocalKernel::computeOffDiagJacobian(const unsigned int jvar_num)
 void
 NonlocalKernel::computeNonlocalJacobian()
 {
-  DenseMatrix<Number> & keg = _assembly.jacobianBlockNonlocal(_var.number(), _var.number());
+  DenseMatrix<Number> & keg =
+      _assembly.jacobianBlockNonlocal(_var.number(), _var.number(), Assembly::LocalDataKey{});
   // compiling set of global IDs for the local DOFs on the element
   std::set<dof_id_type> local_dofindices(_var.dofIndices().begin(), _var.dofIndices().end());
   // storing the global IDs for all the DOFs of the variable
@@ -129,7 +132,8 @@ NonlocalKernel::computeNonlocalOffDiagJacobian(unsigned int jvar)
   else
   {
     MooseVariableFEBase & jv = _sys.getVariable(_tid, jvar);
-    DenseMatrix<Number> & keg = _assembly.jacobianBlockNonlocal(_var.number(), jvar);
+    DenseMatrix<Number> & keg =
+        _assembly.jacobianBlockNonlocal(_var.number(), jvar, Assembly::LocalDataKey{});
     // compiling set of global IDs for the local DOFs on the element
     std::set<dof_id_type> local_dofindices(jv.dofIndices().begin(), jv.dofIndices().end());
     // storing the global IDs for all the DOFs of the variable

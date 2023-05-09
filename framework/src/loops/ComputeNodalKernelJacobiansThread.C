@@ -127,8 +127,7 @@ ComputeNodalKernelJacobiansThread::onNode(ConstNodeRange::const_iterator & node_
         _num_cached = 0;
         // vectors are thread-safe, but matrices are not yet
         Threads::spin_mutex::scoped_lock lock(Threads::spin_mtx);
-        _fe_problem.assembly(_tid, _fe_problem.currentNonlinearSystem().number())
-            .addCachedJacobian();
+        _fe_problem.addCachedJacobian(_tid);
       }
     }
   }

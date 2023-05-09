@@ -134,8 +134,9 @@ NodeFaceConstraint::secondaryResidual() const
 void
 NodeFaceConstraint::computeResidual()
 {
-  DenseVector<Number> & re = _assembly.residualBlock(_var.number());
-  DenseVector<Number> & neighbor_re = _assembly.residualBlockNeighbor(_primary_var.number());
+  DenseVector<Number> & re = _assembly.residualBlock(_var.number(), Assembly::LocalDataKey{});
+  DenseVector<Number> & neighbor_re =
+      _assembly.residualBlockNeighbor(_primary_var.number(), Assembly::LocalDataKey{});
 
   _qp = 0;
 
@@ -154,12 +155,13 @@ NodeFaceConstraint::computeJacobian()
 
   // Just do a direct assignment here because the Jacobian coming from assembly has already been
   // properly sized according to the neighbor _var dof indices. It has also been zeroed
-  _Ken = _assembly.jacobianBlockNeighbor(Moose::ElementNeighbor, _var.number(), _var.number());
+  _Ken = _assembly.jacobianBlockNeighbor(
+      Moose::ElementNeighbor, _var.number(), _var.number(), Assembly::LocalDataKey{});
 
   //  DenseMatrix<Number> & Kne = _assembly.jacobianBlockNeighbor(Moose::NeighborElement,
   //  _var.number(), _var.number());
   DenseMatrix<Number> & Knn = _assembly.jacobianBlockNeighbor(
-      Moose::NeighborNeighbor, _primary_var.number(), _var.number());
+      Moose::NeighborNeighbor, _primary_var.number(), _var.number(), Assembly::LocalDataKey{});
 
   _Kee.resize(_test_secondary.size(), _connected_dof_indices.size());
   _Kne.resize(_test_primary.size(), _connected_dof_indices.size());
@@ -211,10 +213,11 @@ NodeFaceConstraint::computeOffDiagJacobian(const unsigned int jvar_num)
 
   // Just do a direct assignment here because the Jacobian coming from assembly has already been
   // properly sized according to the jvar neighbor dof indices. It has also been zeroed
-  _Ken = _assembly.jacobianBlockNeighbor(Moose::ElementNeighbor, _var.number(), jvar_num);
+  _Ken = _assembly.jacobianBlockNeighbor(
+      Moose::ElementNeighbor, _var.number(), jvar_num, Assembly::LocalDataKey{});
 
-  DenseMatrix<Number> & Knn =
-      _assembly.jacobianBlockNeighbor(Moose::NeighborNeighbor, _primary_var.number(), jvar_num);
+  DenseMatrix<Number> & Knn = _assembly.jacobianBlockNeighbor(
+      Moose::NeighborNeighbor, _primary_var.number(), jvar_num, Assembly::LocalDataKey{});
 
   _phi_secondary.resize(_connected_dof_indices.size());
 

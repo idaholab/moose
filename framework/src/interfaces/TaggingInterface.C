@@ -202,7 +202,7 @@ TaggingInterface::prepareVectorTagInternal(
         continue;
 
       const VectorTag & tag = _subproblem.getVectorTag(tag_id);
-      re_blocks.push_back(&assembly.residualBlock(ivar, tag._type_id));
+      re_blocks.push_back(&assembly.residualBlock(ivar, Assembly::LocalDataKey{}, tag._type_id));
     }
   };
 
@@ -221,7 +221,7 @@ TaggingInterface::prepareVectorTagNeighbor(Assembly & assembly, unsigned int iva
   for (MooseIndex(_vector_tags) i = 0; i < _vector_tags.size(); i++, ++vector_tag)
   {
     const VectorTag & tag = _subproblem.getVectorTag(*vector_tag);
-    _re_blocks[i] = &assembly.residualBlockNeighbor(ivar, tag._type_id);
+    _re_blocks[i] = &assembly.residualBlockNeighbor(ivar, Assembly::LocalDataKey{}, tag._type_id);
   }
   _local_re.resize(_re_blocks[0]->size());
 
@@ -230,7 +230,8 @@ TaggingInterface::prepareVectorTagNeighbor(Assembly & assembly, unsigned int iva
   for (MooseIndex(_abs_vector_tags) i = 0; i < _abs_vector_tags.size(); i++, ++vector_tag)
   {
     const VectorTag & tag = _subproblem.getVectorTag(*vector_tag);
-    _absre_blocks[i] = &assembly.residualBlockNeighbor(ivar, tag._type_id);
+    _absre_blocks[i] =
+        &assembly.residualBlockNeighbor(ivar, Assembly::LocalDataKey{}, tag._type_id);
   }
 }
 
@@ -243,7 +244,7 @@ TaggingInterface::prepareVectorTagLower(Assembly & assembly, unsigned int ivar)
   for (MooseIndex(_vector_tags) i = 0; i < _vector_tags.size(); i++, ++vector_tag)
   {
     const VectorTag & tag = _subproblem.getVectorTag(*vector_tag);
-    _re_blocks[i] = &assembly.residualBlockLower(ivar, tag._type_id);
+    _re_blocks[i] = &assembly.residualBlockLower(ivar, Assembly::LocalDataKey{}, tag._type_id);
   }
   _local_re.resize(_re_blocks[0]->size());
 
@@ -252,7 +253,7 @@ TaggingInterface::prepareVectorTagLower(Assembly & assembly, unsigned int ivar)
   for (MooseIndex(_abs_vector_tags) i = 0; i < _abs_vector_tags.size(); i++, ++vector_tag)
   {
     const VectorTag & tag = _subproblem.getVectorTag(*vector_tag);
-    _absre_blocks[i] = &assembly.residualBlockLower(ivar, tag._type_id);
+    _absre_blocks[i] = &assembly.residualBlockLower(ivar, Assembly::LocalDataKey{}, tag._type_id);
   }
 }
 
@@ -263,7 +264,7 @@ TaggingInterface::prepareMatrixTag(Assembly & assembly, unsigned int ivar, unsig
   mooseAssert(_matrix_tags.size() >= 1, "we need at least one active tag");
   auto mat_vector = _matrix_tags.begin();
   for (MooseIndex(_matrix_tags) i = 0; i < _matrix_tags.size(); i++, ++mat_vector)
-    _ke_blocks[i] = &assembly.jacobianBlock(ivar, jvar, *mat_vector);
+    _ke_blocks[i] = &assembly.jacobianBlock(ivar, jvar, Assembly::LocalDataKey{}, *mat_vector);
 
   _local_ke.resize(_ke_blocks[0]->m(), _ke_blocks[0]->n());
 }
@@ -278,7 +279,8 @@ TaggingInterface::prepareMatrixTagNeighbor(Assembly & assembly,
   mooseAssert(_matrix_tags.size() >= 1, "we need at least one active tag");
   auto mat_vector = _matrix_tags.begin();
   for (MooseIndex(_matrix_tags) i = 0; i < _matrix_tags.size(); i++, ++mat_vector)
-    _ke_blocks[i] = &assembly.jacobianBlockNeighbor(type, ivar, jvar, *mat_vector);
+    _ke_blocks[i] =
+        &assembly.jacobianBlockNeighbor(type, ivar, jvar, Assembly::LocalDataKey{}, *mat_vector);
 
   _local_ke.resize(_ke_blocks[0]->m(), _ke_blocks[0]->n());
 }
@@ -293,7 +295,8 @@ TaggingInterface::prepareMatrixTagLower(Assembly & assembly,
   mooseAssert(_matrix_tags.size() >= 1, "we need at least one active tag");
   auto mat_vector = _matrix_tags.begin();
   for (MooseIndex(_matrix_tags) i = 0; i < _matrix_tags.size(); i++, ++mat_vector)
-    _ke_blocks[i] = &assembly.jacobianBlockMortar(type, ivar, jvar, *mat_vector);
+    _ke_blocks[i] =
+        &assembly.jacobianBlockMortar(type, ivar, jvar, Assembly::LocalDataKey{}, *mat_vector);
 
   _local_ke.resize(_ke_blocks[0]->m(), _ke_blocks[0]->n());
 }

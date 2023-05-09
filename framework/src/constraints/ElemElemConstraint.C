@@ -91,8 +91,9 @@ ElemElemConstraint::computeElemNeighResidual(Moose::DGResidualType type)
     is_elem = false;
 
   const VariableTestValue & test_space = is_elem ? _test : _test_neighbor;
-  DenseVector<Number> & re = is_elem ? _assembly.residualBlock(_var.number())
-                                     : _assembly.residualBlockNeighbor(_var.number());
+  DenseVector<Number> & re =
+      is_elem ? _assembly.residualBlock(_var.number(), Assembly::LocalDataKey{})
+              : _assembly.residualBlockNeighbor(_var.number(), Assembly::LocalDataKey{});
   for (_qp = 0; _qp < _constraint_q_point.size(); _qp++)
     for (_i = 0; _i < test_space.size(); _i++)
       re(_i) += _constraint_weight[_qp] * computeQpResidual(type);
@@ -116,12 +117,16 @@ ElemElemConstraint::computeElemNeighJacobian(Moose::DGJacobianType type)
   const VariableTestValue & loc_phi =
       (type == Moose::ElementElement || type == Moose::NeighborElement) ? _phi : _phi_neighbor;
   DenseMatrix<Number> & Kxx =
-      type == Moose::ElementElement ? _assembly.jacobianBlock(_var.number(), _var.number())
+      type == Moose::ElementElement
+          ? _assembly.jacobianBlock(_var.number(), _var.number(), Assembly::LocalDataKey{})
       : type == Moose::ElementNeighbor
-          ? _assembly.jacobianBlockNeighbor(Moose::ElementNeighbor, _var.number(), _var.number())
+          ? _assembly.jacobianBlockNeighbor(
+                Moose::ElementNeighbor, _var.number(), _var.number(), Assembly::LocalDataKey{})
       : type == Moose::NeighborElement
-          ? _assembly.jacobianBlockNeighbor(Moose::NeighborElement, _var.number(), _var.number())
-          : _assembly.jacobianBlockNeighbor(Moose::NeighborNeighbor, _var.number(), _var.number());
+          ? _assembly.jacobianBlockNeighbor(
+                Moose::NeighborElement, _var.number(), _var.number(), Assembly::LocalDataKey{})
+          : _assembly.jacobianBlockNeighbor(
+                Moose::NeighborNeighbor, _var.number(), _var.number(), Assembly::LocalDataKey{});
 
   for (_qp = 0; _qp < _constraint_q_point.size(); _qp++)
     for (_i = 0; _i < test_space.size(); _i++)

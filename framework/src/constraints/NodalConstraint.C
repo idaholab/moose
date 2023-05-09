@@ -91,8 +91,8 @@ NodalConstraint::computeResidual(NumericVector<Number> & residual)
       }
     }
   }
-  _assembly.cacheResidualNodes(re, primarydof);
-  _assembly.cacheResidualNodes(neighbor_re, secondarydof);
+  _assembly.cacheResidualNodes(re, primarydof, Assembly::LocalDataKey{});
+  _assembly.cacheResidualNodes(neighbor_re, secondarydof, Assembly::LocalDataKey{});
 }
 
 void
@@ -133,9 +133,12 @@ NodalConstraint::computeJacobian(SparseMatrix<Number> & jacobian)
       }
     }
   }
-  _assembly.cacheJacobianBlock(Kee, primarydof, primarydof, _var.scalingFactor());
-  _assembly.cacheJacobianBlock(Ken, primarydof, secondarydof, _var.scalingFactor());
-  _assembly.cacheJacobianBlock(Kne, secondarydof, primarydof, _var_secondary.scalingFactor());
+  _assembly.cacheJacobianBlock(
+      Kee, primarydof, primarydof, _var.scalingFactor(), Assembly::LocalDataKey{});
+  _assembly.cacheJacobianBlock(
+      Ken, primarydof, secondarydof, _var.scalingFactor(), Assembly::LocalDataKey{});
+  _assembly.cacheJacobianBlock(
+      Kne, secondarydof, primarydof, _var_secondary.scalingFactor(), Assembly::LocalDataKey{});
 
   // Calculate and cache the diagonal secondary-secondary entries
   for (_i = 0; _i < secondarydof.size(); ++_i)
@@ -151,8 +154,10 @@ NodalConstraint::computeJacobian(SparseMatrix<Number> & jacobian)
                 computeQpJacobian(Moose::SecondarySecondary);
         break;
     }
-    _assembly.cacheJacobian(
-        secondarydof[_i], secondarydof[_i], value * _var_secondary.scalingFactor());
+    _assembly.cacheJacobian(secondarydof[_i],
+                            secondarydof[_i],
+                            value * _var_secondary.scalingFactor(),
+                            Assembly::LocalDataKey{});
   }
 }
 

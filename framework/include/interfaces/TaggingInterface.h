@@ -353,14 +353,19 @@ TaggingInterface::addResiduals(Assembly & assembly,
                                const Indices & dof_indices,
                                const Real scaling_factor)
 {
-  assembly.cacheResiduals(residuals, dof_indices, _vector_tags, scaling_factor);
+  assembly.cacheResiduals(
+      residuals, dof_indices, scaling_factor, Assembly::LocalDataKey{}, _vector_tags);
   if (!_abs_vector_tags.empty())
   {
     _absolute_residuals.resize(residuals.size());
     for (const auto i : index_range(residuals))
       _absolute_residuals[i] = std::abs(MetaPhysicL::raw_value(residuals[i]));
 
-    assembly.cacheResiduals(_absolute_residuals, dof_indices, _abs_vector_tags, scaling_factor);
+    assembly.cacheResiduals(_absolute_residuals,
+                            dof_indices,
+                            scaling_factor,
+                            Assembly::LocalDataKey{},
+                            _abs_vector_tags);
   }
 }
 
@@ -371,15 +376,19 @@ TaggingInterface::addResidualsWithoutConstraints(Assembly & assembly,
                                                  const Indices & dof_indices,
                                                  const Real scaling_factor)
 {
-  assembly.cacheResidualsWithoutConstraints(residuals, dof_indices, _vector_tags, scaling_factor);
+  assembly.cacheResidualsWithoutConstraints(
+      residuals, dof_indices, scaling_factor, Assembly::LocalDataKey{}, _vector_tags);
   if (!_abs_vector_tags.empty())
   {
     _absolute_residuals.resize(residuals.size());
     for (const auto i : index_range(residuals))
       _absolute_residuals[i] = std::abs(MetaPhysicL::raw_value(residuals[i]));
 
-    assembly.cacheResidualsWithoutConstraints(
-        _absolute_residuals, dof_indices, _abs_vector_tags, scaling_factor);
+    assembly.cacheResidualsWithoutConstraints(_absolute_residuals,
+                                              dof_indices,
+                                              scaling_factor,
+                                              Assembly::LocalDataKey{},
+                                              _abs_vector_tags);
   }
 }
 
@@ -401,7 +410,8 @@ TaggingInterface::addJacobian(Assembly & assembly,
                               const Indices & dof_indices,
                               Real scaling_factor)
 {
-  assembly.cacheJacobian(residuals, dof_indices, _matrix_tags, scaling_factor);
+  assembly.cacheJacobian(
+      residuals, dof_indices, scaling_factor, Assembly::LocalDataKey{}, _matrix_tags);
 }
 
 template <typename Residuals, typename Indices>
@@ -422,7 +432,8 @@ TaggingInterface::addJacobianWithoutConstraints(Assembly & assembly,
                                                 const Indices & dof_indices,
                                                 Real scaling_factor)
 {
-  assembly.cacheJacobianWithoutConstraints(residuals, dof_indices, _matrix_tags, scaling_factor);
+  assembly.cacheJacobianWithoutConstraints(
+      residuals, dof_indices, scaling_factor, Assembly::LocalDataKey{}, _matrix_tags);
 }
 
 inline void
@@ -432,7 +443,8 @@ TaggingInterface::addJacobianElement(Assembly & assembly,
                                      const dof_id_type column_index,
                                      const Real scaling_factor)
 {
-  assembly.cacheJacobian(row_index, column_index, value * scaling_factor, _matrix_tags);
+  assembly.cacheJacobian(
+      row_index, column_index, value * scaling_factor, Assembly::LocalDataKey{}, _matrix_tags);
 }
 
 inline void
@@ -443,7 +455,8 @@ TaggingInterface::addJacobian(Assembly & assembly,
                               const Real scaling_factor)
 {
   for (const auto matrix_tag : _matrix_tags)
-    assembly.cacheJacobianBlock(local_k, row_indices, column_indices, scaling_factor, matrix_tag);
+    assembly.cacheJacobianBlock(
+        local_k, row_indices, column_indices, scaling_factor, Assembly::LocalDataKey{}, matrix_tag);
 }
 
 template <typename T>

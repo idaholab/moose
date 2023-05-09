@@ -17,8 +17,13 @@ public:
   static InputParameters validParams();
 
   ScalarKernel(const InputParameters & parameters);
+  virtual void computeResidual() override;
+  virtual void computeJacobian() override;
 
 protected:
+  virtual Real computeQpResidual() = 0;
+  virtual Real computeQpJacobian() = 0;
+
   /// The current solution (old solution if explicit)
   const VariableValue & _u;
 };

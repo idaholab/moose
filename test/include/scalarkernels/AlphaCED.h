@@ -19,16 +19,12 @@ public:
   AlphaCED(const InputParameters & parameters);
 
   virtual void reinit() override;
-  virtual void computeResidual() override;
-  virtual void computeJacobian() override;
   virtual void computeOffDiagJacobianScalar(unsigned int jvar) override;
 
 protected:
-  virtual Real computeQpResidual();
-  virtual Real computeQpJacobian();
+  virtual Real computeQpResidual() override;
+  virtual Real computeQpJacobian() override;
   virtual Real computeQpOffDiagJacobianScalar(unsigned int jvar);
-
-  unsigned int _i;
 
   Real _value;
 };

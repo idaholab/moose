@@ -96,8 +96,10 @@ NodeElemConstraint::computeSecondaryValue(NumericVector<Number> & current_soluti
 void
 NodeElemConstraint::computeResidual()
 {
-  DenseVector<Number> & secondary_re = _assembly.residualBlock(_var.number());
-  DenseVector<Number> & primary_re = _assembly.residualBlockNeighbor(_primary_var.number());
+  DenseVector<Number> & secondary_re =
+      _assembly.residualBlock(_var.number(), Assembly::LocalDataKey{});
+  DenseVector<Number> & primary_re =
+      _assembly.residualBlockNeighbor(_primary_var.number(), Assembly::LocalDataKey{});
 
   _qp = 0;
 
@@ -113,30 +115,14 @@ NodeElemConstraint::computeJacobian()
 {
   getConnectedDofIndices(_var.number());
 
-  DenseMatrix<Number> & Ken =
-      _assembly.jacobianBlockNeighbor(Moose::ElementNeighbor, _var.number(), _var.number());
+  DenseMatrix<Number> & Ken = _assembly.jacobianBlockNeighbor(
+      Moose::ElementNeighbor, _var.number(), _var.number(), Assembly::LocalDataKey{});
 
   DenseMatrix<Number> & Knn = _assembly.jacobianBlockNeighbor(
-      Moose::NeighborNeighbor, _primary_var.number(), _var.number());
+      Moose::NeighborNeighbor, _primary_var.number(), _var.number(), Assembly::LocalDataKey{});
 
   _Kee.resize(_test_secondary.size(), _connected_dof_indices.size());
   _Kne.resize(_test_primary.size(), _connected_dof_indices.size());
-
-  _phi_secondary.resize(_connected_dof_indices.size());
-
-  _qp = 0;
-
-  // Fill up _phi_secondary so that it is 1 when j corresponds to this dof and 0 for every other dof
-  // This corresponds to evaluating all of the connected shape functions at _this_ node
-  for (unsigned int j = 0; j < _connected_dof_indices.size(); j++)
-  {
-    _phi_secondary[j].resize(1);
-
-    if (_connected_dof_indices[j] == _var.nodalDofIndex())
-      _phi_secondary[j][_qp] = 1.0;
-    else
-      _phi_secondary[j][_qp] = 0.0;
-  }
 
   for (_i = 0; _i < _test_secondary.size(); _i++)
     // Loop over the connected dof indices so we can get all the jacobian contributions
@@ -167,26 +153,10 @@ NodeElemConstraint::computeOffDiagJacobian(const unsigned int jvar_num)
   _Kee.resize(_test_secondary.size(), _connected_dof_indices.size());
   _Kne.resize(_test_primary.size(), _connected_dof_indices.size());
 
-  DenseMatrix<Number> & Ken =
-      _assembly.jacobianBlockNeighbor(Moose::ElementNeighbor, _var.number(), jvar_num);
-  DenseMatrix<Number> & Knn =
-      _assembly.jacobianBlockNeighbor(Moose::NeighborNeighbor, _primary_var.number(), jvar_num);
-
-  _phi_secondary.resize(_connected_dof_indices.size());
-
-  _qp = 0;
-
-  // Fill up _phi_secondary so that it is 1 when j corresponds to this dof and 0 for every other dof
-  // This corresponds to evaluating all of the connected shape functions at _this_ node
-  for (unsigned int j = 0; j < _connected_dof_indices.size(); j++)
-  {
-    _phi_secondary[j].resize(1);
-
-    if (_connected_dof_indices[j] == _var.nodalDofIndex())
-      _phi_secondary[j][_qp] = 1.0;
-    else
-      _phi_secondary[j][_qp] = 0.0;
-  }
+  DenseMatrix<Number> & Ken = _assembly.jacobianBlockNeighbor(
+      Moose::ElementNeighbor, _var.number(), jvar_num, Assembly::LocalDataKey{});
+  DenseMatrix<Number> & Knn = _assembly.jacobianBlockNeighbor(
+      Moose::NeighborNeighbor, _primary_var.number(), jvar_num, Assembly::LocalDataKey{});
 
   for (_i = 0; _i < _test_secondary.size(); _i++)
     // Loop over the connected dof indices so we can get all the jacobian contributions
@@ -233,6 +203,24 @@ NodeElemConstraint::getConnectedDofIndices(unsigned int var_num)
 
   for (const auto & dof : unique_dof_indices)
     _connected_dof_indices.push_back(dof);
+
+  _phi_secondary.resize(_connected_dof_indices.size());
+
+  const dof_id_type current_node_var_dof_index = _sys.getVariable(0, var_num).nodalDofIndex();
+
+  // Fill up _phi_secondary so that it is 1 when j corresponds to the dof associated with this node
+  // and 0 for every other dof
+  // This corresponds to evaluating all of the connected shape functions at _this_ node
+  _qp = 0;
+  for (unsigned int j = 0; j < _connected_dof_indices.size(); j++)
+  {
+    _phi_secondary[j].resize(1);
+
+    if (_connected_dof_indices[j] == current_node_var_dof_index)
+      _phi_secondary[j][_qp] = 1.0;
+    else
+      _phi_secondary[j][_qp] = 0.0;
+  }
 }
 
 bool

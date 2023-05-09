@@ -1898,7 +1898,7 @@ NonlinearSystemBase::computeNodalBCsResidualAndJacobian()
   PARALLEL_CATCH;
 
   // Set the cached NodalBCBase values in the Jacobian matrix
-  _fe_problem.assembly(0, number()).setCachedJacobian();
+  _fe_problem.assembly(0, number()).setCachedJacobian(Assembly::GlobalDataKey{});
 }
 
 void
@@ -2160,8 +2160,11 @@ NonlinearSystemBase::constraintJacobians(bool displaced)
 
                 // Cache the jacobian block for the secondary side
                 _fe_problem.assembly(0, number())
-                    .cacheJacobianBlock(
-                        nfc->_Kee, secondary_dofs, nfc->_connected_dof_indices, scaling_factor);
+                    .cacheJacobianBlock(nfc->_Kee,
+                                        secondary_dofs,
+                                        nfc->_connected_dof_indices,
+                                        scaling_factor,
+                                        Assembly::LocalDataKey{});
 
                 // Cache Ken, Kne, Knn
                 if (nfc->addCouplingEntriesToJacobian())
@@ -2172,14 +2175,16 @@ NonlinearSystemBase::constraintJacobians(bool displaced)
                       .cacheJacobianBlock(nfc->_Ken,
                                           secondary_dofs,
                                           nfc->primaryVariable().dofIndicesNeighbor(),
-                                          scaling_factor);
+                                          scaling_factor,
+                                          Assembly::LocalDataKey{});
 
                   // Use _connected_dof_indices to get all the correct columns
                   _fe_problem.assembly(0, number())
                       .cacheJacobianBlock(nfc->_Kne,
                                           nfc->primaryVariable().dofIndicesNeighbor(),
                                           nfc->_connected_dof_indices,
-                                          nfc->variable().scalingFactor());
+                                          nfc->variable().scalingFactor(),
+                                          Assembly::LocalDataKey{});
 
                   // We've handled Ken and Kne, finally handle Knn
                   _fe_problem.cacheJacobianNeighbor(0);
@@ -2209,8 +2214,11 @@ NonlinearSystemBase::constraintJacobians(bool displaced)
 
                   // Cache the jacobian block for the secondary side
                   _fe_problem.assembly(0, number())
-                      .cacheJacobianBlock(
-                          nfc->_Kee, secondary_dofs, nfc->_connected_dof_indices, scaling_factor);
+                      .cacheJacobianBlock(nfc->_Kee,
+                                          secondary_dofs,
+                                          nfc->_connected_dof_indices,
+                                          scaling_factor,
+                                          Assembly::LocalDataKey{});
 
                   // Cache Ken, Kne, Knn
                   if (nfc->addCouplingEntriesToJacobian())
@@ -2218,15 +2226,19 @@ NonlinearSystemBase::constraintJacobians(bool displaced)
                     // Make sure we use a proper scaling factor (e.g. don't use an interior scaling
                     // factor when we're overwriting secondary stuff)
                     _fe_problem.assembly(0, number())
-                        .cacheJacobianBlock(
-                            nfc->_Ken, secondary_dofs, jvar->dofIndicesNeighbor(), scaling_factor);
+                        .cacheJacobianBlock(nfc->_Ken,
+                                            secondary_dofs,
+                                            jvar->dofIndicesNeighbor(),
+                                            scaling_factor,
+                                            Assembly::LocalDataKey{});
 
                     // Use _connected_dof_indices to get all the correct columns
                     _fe_problem.assembly(0, number())
                         .cacheJacobianBlock(nfc->_Kne,
                                             nfc->variable().dofIndicesNeighbor(),
                                             nfc->_connected_dof_indices,
-                                            nfc->variable().scalingFactor());
+                                            nfc->variable().scalingFactor(),
+                                            Assembly::LocalDataKey{});
 
                     // We've handled Ken and Kne, finally handle Knn
                     _fe_problem.cacheJacobianNeighbor(0);
@@ -2384,14 +2396,16 @@ NonlinearSystemBase::constraintJacobians(bool displaced)
                     .cacheJacobianBlock(nec->_Kee,
                                         secondary_dofs,
                                         nec->_connected_dof_indices,
-                                        nec->variable().scalingFactor());
+                                        nec->variable().scalingFactor(),
+                                        Assembly::LocalDataKey{});
 
                 // Cache the jacobian block for the primary side
                 _fe_problem.assembly(0, number())
                     .cacheJacobianBlock(nec->_Kne,
                                         nec->primaryVariable().dofIndicesNeighbor(),
                                         nec->_connected_dof_indices,
-                                        nec->variable().scalingFactor());
+                                        nec->variable().scalingFactor(),
+                                        Assembly::LocalDataKey{});
 
                 _fe_problem.cacheJacobian(0);
                 _fe_problem.cacheJacobianNeighbor(0);
@@ -2423,14 +2437,16 @@ NonlinearSystemBase::constraintJacobians(bool displaced)
                       .cacheJacobianBlock(nec->_Kee,
                                           secondary_dofs,
                                           nec->_connected_dof_indices,
-                                          nec->variable().scalingFactor());
+                                          nec->variable().scalingFactor(),
+                                          Assembly::LocalDataKey{});
 
                   // Cache the jacobian block for the primary side
                   _fe_problem.assembly(0, number())
                       .cacheJacobianBlock(nec->_Kne,
                                           nec->variable().dofIndicesNeighbor(),
                                           nec->_connected_dof_indices,
-                                          nec->variable().scalingFactor());
+                                          nec->variable().scalingFactor(),
+                                          Assembly::LocalDataKey{});
 
                   _fe_problem.cacheJacobian(0);
                   _fe_problem.cacheJacobianNeighbor(0);
@@ -2598,7 +2614,7 @@ NonlinearSystemBase::computeJacobianInternal(const std::set<TagID> & tags)
       unsigned int n_threads = libMesh::n_threads();
       for (unsigned int i = 0; i < n_threads;
            i++) // Add any cached jacobians that might be hanging around
-        _fe_problem.assembly(i, number()).addCachedJacobian();
+        _fe_problem.assembly(i, number()).addCachedJacobian(Assembly::GlobalDataKey{});
     }
 
     if (_fe_problem.haveFV())
@@ -2657,7 +2673,7 @@ NonlinearSystemBase::computeJacobianInternal(const std::set<TagID> & tags)
           unsigned int n_threads = libMesh::n_threads();
           for (unsigned int i = 0; i < n_threads;
                i++) // Add any cached jacobians that might be hanging around
-            _fe_problem.assembly(i, number()).addCachedJacobian();
+            _fe_problem.assembly(i, number()).addCachedJacobian(Assembly::GlobalDataKey{});
         }
       }
       break;
@@ -2682,7 +2698,7 @@ NonlinearSystemBase::computeJacobianInternal(const std::set<TagID> & tags)
           unsigned int n_threads = libMesh::n_threads();
           for (unsigned int i = 0; i < n_threads;
                i++) // Add any cached jacobians that might be hanging around
-            _fe_problem.assembly(i, number()).addCachedJacobian();
+            _fe_problem.assembly(i, number()).addCachedJacobian(Assembly::GlobalDataKey{});
         }
       }
       break;
@@ -2837,7 +2853,7 @@ NonlinearSystemBase::computeJacobianInternal(const std::set<TagID> & tags)
       } // end loop over boundary nodes
 
       // Set the cached NodalBCBase values in the Jacobian matrix
-      _fe_problem.assembly(0, number()).setCachedJacobian();
+      _fe_problem.assembly(0, number()).setCachedJacobian(Assembly::GlobalDataKey{});
     }
   }
   PARALLEL_CATCH;

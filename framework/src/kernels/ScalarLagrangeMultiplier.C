@@ -55,18 +55,20 @@ ScalarLagrangeMultiplier::computeOffDiagJacobianScalar(unsigned int jvar)
   // the contribution is symmetric, so it can be computed once and used twice.
   //
   // [0]: https://github.com/idaholab/large_media/blob/master/framework/scalar_constraint_kernel.pdf
-  DenseMatrix<Number> & ken = _assembly.jacobianBlock(_var.number(), jvar);
-  DenseMatrix<Number> & kne = _assembly.jacobianBlock(jvar, _var.number());
+
   MooseVariableScalar & jv = _sys.getScalarVariable(_tid, jvar);
 
+  prepareMatrixTag(_assembly, _var.number(), jvar);
   for (_i = 0; _i < _test.size(); _i++)
     for (_j = 0; _j < jv.order(); _j++)
       for (_qp = 0; _qp < _qrule->n_points(); _qp++)
-      {
-        Real value = _JxW[_qp] * _coord[_qp] * computeQpOffDiagJacobianScalar(jvar);
-        ken(_i, _j) += value;
-        kne(_j, _i) += value;
-      }
+        _local_ke(_i, _j) += _JxW[_qp] * _coord[_qp] * computeQpOffDiagJacobianScalar(jvar);
+  accumulateTaggedLocalMatrix();
+
+  const auto ke_copy = _local_ke;
+  prepareMatrixTag(_assembly, jvar, _var.number());
+  ke_copy.get_transpose(_local_ke);
+  accumulateTaggedLocalMatrix();
 }
 
 Real

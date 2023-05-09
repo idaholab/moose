@@ -360,10 +360,6 @@ public:
   virtual void cacheJacobian(THREAD_ID tid) = 0;
   virtual void cacheJacobianNeighbor(THREAD_ID tid) = 0;
   virtual void addCachedJacobian(THREAD_ID tid) = 0;
-  /**
-   * Deprecated method. Use addCachedJacobian
-   */
-  virtual void addCachedJacobianContributions(THREAD_ID tid) = 0;
 
   virtual void prepare(const Elem * elem, THREAD_ID tid) = 0;
   virtual void prepareFace(const Elem * elem, THREAD_ID tid) = 0;

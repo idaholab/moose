@@ -897,37 +897,43 @@ DisplacedProblem::clearDiracInfo()
 void
 DisplacedProblem::addResidual(THREAD_ID tid)
 {
-  _assembly[tid][currentNlSysNum()]->addResidual(currentResidualVectorTags());
+  _assembly[tid][currentNlSysNum()]->addResidual(Assembly::GlobalDataKey{},
+                                                 currentResidualVectorTags());
 }
 
 void
 DisplacedProblem::addResidualNeighbor(THREAD_ID tid)
 {
-  _assembly[tid][currentNlSysNum()]->addResidualNeighbor(currentResidualVectorTags());
+  _assembly[tid][currentNlSysNum()]->addResidualNeighbor(Assembly::GlobalDataKey{},
+                                                         currentResidualVectorTags());
 }
 
 void
 DisplacedProblem::addResidualLower(THREAD_ID tid)
 {
-  _assembly[tid][currentNlSysNum()]->addResidualLower(currentResidualVectorTags());
+  _assembly[tid][currentNlSysNum()]->addResidualLower(Assembly::GlobalDataKey{},
+                                                      currentResidualVectorTags());
 }
 
 void
 DisplacedProblem::cacheResidual(THREAD_ID tid)
 {
-  _assembly[tid][currentNlSysNum()]->cacheResidual(currentResidualVectorTags());
+  _assembly[tid][currentNlSysNum()]->cacheResidual(Assembly::GlobalDataKey{},
+                                                   currentResidualVectorTags());
 }
 
 void
 DisplacedProblem::cacheResidualNeighbor(THREAD_ID tid)
 {
-  _assembly[tid][currentNlSysNum()]->cacheResidualNeighbor(currentResidualVectorTags());
+  _assembly[tid][currentNlSysNum()]->cacheResidualNeighbor(Assembly::GlobalDataKey{},
+                                                           currentResidualVectorTags());
 }
 
 void
 DisplacedProblem::addCachedResidual(THREAD_ID tid)
 {
-  _assembly[tid][currentNlSysNum()]->addCachedResiduals(currentResidualVectorTags());
+  _assembly[tid][currentNlSysNum()]->addCachedResiduals(Assembly::GlobalDataKey{},
+                                                        currentResidualVectorTags());
 }
 
 void
@@ -936,92 +942,92 @@ DisplacedProblem::addCachedResidualDirectly(NumericVector<Number> & residual, TH
   if (_displaced_nl[currentNlSysNum()]->hasVector(
           _displaced_nl[currentNlSysNum()]->timeVectorTag()))
     _assembly[tid][currentNlSysNum()]->addCachedResidualDirectly(
-        residual, getVectorTag(_displaced_nl[currentNlSysNum()]->timeVectorTag()));
+        residual,
+        Assembly::GlobalDataKey{},
+        getVectorTag(_displaced_nl[currentNlSysNum()]->timeVectorTag()));
 
   if (_displaced_nl[currentNlSysNum()]->hasVector(
           _displaced_nl[currentNlSysNum()]->nonTimeVectorTag()))
     _assembly[tid][currentNlSysNum()]->addCachedResidualDirectly(
-        residual, getVectorTag(_displaced_nl[currentNlSysNum()]->nonTimeVectorTag()));
+        residual,
+        Assembly::GlobalDataKey{},
+        getVectorTag(_displaced_nl[currentNlSysNum()]->nonTimeVectorTag()));
 
   // We do this because by adding the cached residual directly, we cannot ensure that all of the
   // cached residuals are emptied after only the two add calls above
-  _assembly[tid][currentNlSysNum()]->clearCachedResiduals();
+  _assembly[tid][currentNlSysNum()]->clearCachedResiduals(Assembly::GlobalDataKey{});
 }
 
 void
 DisplacedProblem::setResidual(NumericVector<Number> & residual, THREAD_ID tid)
 {
   _assembly[tid][currentNlSysNum()]->setResidual(
-      residual, getVectorTag(_displaced_nl[currentNlSysNum()]->residualVectorTag()));
+      residual,
+      Assembly::GlobalDataKey{},
+      getVectorTag(_displaced_nl[currentNlSysNum()]->residualVectorTag()));
 }
 
 void
 DisplacedProblem::setResidualNeighbor(NumericVector<Number> & residual, THREAD_ID tid)
 {
   _assembly[tid][currentNlSysNum()]->setResidualNeighbor(
-      residual, getVectorTag(_displaced_nl[currentNlSysNum()]->residualVectorTag()));
+      residual,
+      Assembly::GlobalDataKey{},
+      getVectorTag(_displaced_nl[currentNlSysNum()]->residualVectorTag()));
 }
 
 void
 DisplacedProblem::addJacobian(THREAD_ID tid)
 {
-  _assembly[tid][currentNlSysNum()]->addJacobian();
+  _assembly[tid][currentNlSysNum()]->addJacobian(Assembly::GlobalDataKey{});
 }
 
 void
 DisplacedProblem::addJacobianNonlocal(THREAD_ID tid)
 {
-  _assembly[tid][currentNlSysNum()]->addJacobianNonlocal();
+  _assembly[tid][currentNlSysNum()]->addJacobianNonlocal(Assembly::GlobalDataKey{});
 }
 
 void
 DisplacedProblem::addJacobianNeighbor(THREAD_ID tid)
 {
-  _assembly[tid][currentNlSysNum()]->addJacobianNeighbor();
+  _assembly[tid][currentNlSysNum()]->addJacobianNeighbor(Assembly::GlobalDataKey{});
 }
 
 void
 DisplacedProblem::addJacobianNeighborLowerD(THREAD_ID tid)
 {
-  _assembly[tid][currentNlSysNum()]->addJacobianNeighborLowerD();
+  _assembly[tid][currentNlSysNum()]->addJacobianNeighborLowerD(Assembly::GlobalDataKey{});
 }
 
 void
 DisplacedProblem::addJacobianLowerD(THREAD_ID tid)
 {
-  _assembly[tid][currentNlSysNum()]->addJacobianLowerD();
+  _assembly[tid][currentNlSysNum()]->addJacobianLowerD(Assembly::GlobalDataKey{});
 }
 
 void
 DisplacedProblem::cacheJacobian(THREAD_ID tid)
 {
-  _assembly[tid][currentNlSysNum()]->cacheJacobian();
+  _assembly[tid][currentNlSysNum()]->cacheJacobian(Assembly::GlobalDataKey{});
 }
 
 void
 DisplacedProblem::cacheJacobianNonlocal(THREAD_ID tid)
 {
-  _assembly[tid][currentNlSysNum()]->cacheJacobianNonlocal();
+  _assembly[tid][currentNlSysNum()]->cacheJacobianNonlocal(Assembly::GlobalDataKey{});
 }
 
 void
 DisplacedProblem::cacheJacobianNeighbor(THREAD_ID tid)
 {
-  _assembly[tid][currentNlSysNum()]->cacheJacobianNeighbor();
+  _assembly[tid][currentNlSysNum()]->cacheJacobianNeighbor(Assembly::GlobalDataKey{});
 }
 
 void
 DisplacedProblem::addCachedJacobian(THREAD_ID tid)
 {
-  _assembly[tid][currentNlSysNum()]->addCachedJacobian();
-}
-
-void
-DisplacedProblem::addCachedJacobianContributions(THREAD_ID tid)
-{
-  mooseDeprecated("please use addCachedJacobian");
-
-  addCachedJacobian(tid);
+  _assembly[tid][currentNlSysNum()]->addCachedJacobian(Assembly::GlobalDataKey{});
 }
 
 void
@@ -1032,7 +1038,8 @@ DisplacedProblem::addJacobianBlock(SparseMatrix<Number> & jacobian,
                                    std::vector<dof_id_type> & dof_indices,
                                    THREAD_ID tid)
 {
-  _assembly[tid][currentNlSysNum()]->addJacobianBlock(jacobian, ivar, jvar, dof_map, dof_indices);
+  _assembly[tid][currentNlSysNum()]->addJacobianBlock(
+      jacobian, ivar, jvar, dof_map, dof_indices, Assembly::GlobalDataKey{});
 }
 
 void
@@ -1045,7 +1052,7 @@ DisplacedProblem::addJacobianBlockTags(SparseMatrix<Number> & jacobian,
                                        THREAD_ID tid)
 {
   _assembly[tid][currentNlSysNum()]->addJacobianBlockTags(
-      jacobian, ivar, jvar, dof_map, dof_indices, tags);
+      jacobian, ivar, jvar, dof_map, dof_indices, Assembly::GlobalDataKey{}, tags);
 }
 
 void
@@ -1058,7 +1065,7 @@ DisplacedProblem::addJacobianBlockNonlocal(SparseMatrix<Number> & jacobian,
                                            THREAD_ID tid)
 {
   _assembly[tid][currentNlSysNum()]->addJacobianBlockNonlocal(
-      jacobian, ivar, jvar, dof_map, idof_indices, jdof_indices);
+      jacobian, ivar, jvar, dof_map, idof_indices, jdof_indices, Assembly::GlobalDataKey{});
 }
 
 void
@@ -1071,7 +1078,7 @@ DisplacedProblem::addJacobianNeighbor(SparseMatrix<Number> & jacobian,
                                       THREAD_ID tid)
 {
   _assembly[tid][currentNlSysNum()]->addJacobianNeighbor(
-      jacobian, ivar, jvar, dof_map, dof_indices, neighbor_dof_indices);
+      jacobian, ivar, jvar, dof_map, dof_indices, neighbor_dof_indices, Assembly::GlobalDataKey{});
 }
 
 void

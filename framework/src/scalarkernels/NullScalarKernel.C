@@ -36,18 +36,14 @@ NullScalarKernel::reinit()
 {
 }
 
-void
-NullScalarKernel::computeResidual()
+Real
+NullScalarKernel::computeQpResidual()
 {
-  DenseVector<Number> & re = _assembly.residualBlock(_var.number());
-  for (_i = 0; _i < re.size(); _i++)
-    re(_i) += 0.0;
+  return 0;
 }
 
-void
-NullScalarKernel::computeJacobian()
+Real
+NullScalarKernel::computeQpJacobian()
 {
-  DenseMatrix<Number> & ke = _assembly.jacobianBlock(_var.number(), _var.number());
-  for (_i = 0; _i < ke.m(); _i++)
-    ke(_i, _i) += _jacobian_fill;
+  return _jacobian_fill;
 }

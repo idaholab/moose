@@ -41,26 +41,10 @@ AverageValueConstraint::reinit()
 {
 }
 
-void
-AverageValueConstraint::computeResidual()
-{
-  DenseVector<Number> & re = _assembly.residualBlock(_var.number());
-  for (_i = 0; _i < re.size(); _i++)
-    re(_i) += computeQpResidual();
-}
-
 Real
 AverageValueConstraint::computeQpResidual()
 {
   return _pp_value - _value;
-}
-
-void
-AverageValueConstraint::computeJacobian()
-{
-  DenseMatrix<Number> & ke = _assembly.jacobianBlock(_var.number(), _var.number());
-  for (_i = 0; _i < ke.m(); _i++)
-    ke(_i, _i) += computeQpJacobian();
 }
 
 Real

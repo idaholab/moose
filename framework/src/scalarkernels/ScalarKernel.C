@@ -21,3 +21,25 @@ ScalarKernel::ScalarKernel(const InputParameters & parameters)
   : ScalarKernelBase(parameters), _u(_is_implicit ? _var.sln() : uOld())
 {
 }
+
+void
+ScalarKernel::computeResidual()
+{
+  prepareVectorTag(_assembly, _var.number());
+
+  for (_i = 0; _i < _var.order(); _i++)
+    _local_re(_i) += computeQpResidual();
+
+  accumulateTaggedLocalResidual();
+}
+
+void
+ScalarKernel::computeJacobian()
+{
+  prepareMatrixTag(_assembly, _var.number(), _var.number());
+
+  for (_i = 0; _i < _local_ke.m(); _i++)
+    _local_ke(_i, _i) += computeQpJacobian();
+
+  accumulateTaggedLocalMatrix();
+}
