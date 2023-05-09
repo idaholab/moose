@@ -63,22 +63,15 @@ PeridynamicsKernelBase::computeResidual()
 {
   prepare();
 
-  DenseVector<Number> & re = _assembly.residualBlock(_var.number());
-  mooseAssert(re.size() == _nnodes,
+  prepareVectorTag(_assembly, _var.number());
+  mooseAssert(_local_re.size() == _nnodes,
               "PeridynamicsKernelBase is designed to only work with EDGE2 elements");
-  _local_re.resize(re.size());
-  _local_re.zero();
-
   computeLocalResidual();
-
-  re += _local_re;
+  accumulateTaggedLocalResidual();
 
   if (_has_save_in)
-  {
-    Threads::spin_mutex::scoped_lock lock(Threads::spin_mtx);
     for (unsigned int i = 0; i < _save_in.size(); ++i)
       _save_in[i]->sys().solution().add_vector(_local_re, _save_in[i]->dofIndices());
-  }
 
   _local_re.zero();
 
@@ -90,22 +83,17 @@ PeridynamicsKernelBase::computeJacobian()
 {
   prepare();
 
-  DenseMatrix<Number> & ke = _assembly.jacobianBlock(_var.number(), _var.number());
-  _local_ke.resize(ke.m(), ke.n());
-  _local_ke.zero();
-
+  prepareMatrixTag(_assembly, _var.number(), _var.number());
   computeLocalJacobian();
-
-  ke += _local_ke;
+  accumulateTaggedLocalMatrix();
 
   if (_has_diag_save_in)
   {
-    unsigned int rows = ke.m();
+    unsigned int rows = _local_ke.m();
     DenseVector<Number> diag(rows);
     for (unsigned int i = 0; i < rows; ++i)
       diag(i) = _local_ke(i, i);
 
-    Threads::spin_mutex::scoped_lock lock(Threads::spin_mtx);
     for (unsigned int i = 0; i < _diag_save_in.size(); ++i)
       _diag_save_in[i]->sys().solution().add_vector(diag, _diag_save_in[i]->dofIndices());
   }

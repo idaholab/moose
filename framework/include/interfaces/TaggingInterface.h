@@ -123,6 +123,11 @@ protected:
    */
   void prepareMatrixTag(Assembly & assembly, unsigned int ivar, unsigned int jvar);
 
+  void prepareMatrixTag(Assembly & assembly,
+                        unsigned int ivar,
+                        unsigned int jvar,
+                        DenseMatrix<Number> & k) const;
+
   /**
    * Prepare data for computing element jacobian according to the ative tags
    * for DG and interface kernels.
@@ -134,6 +139,12 @@ protected:
                                 unsigned int ivar,
                                 unsigned int jvar,
                                 Moose::DGJacobianType type);
+
+  void prepareMatrixTagNeighbor(Assembly & assembly,
+                                unsigned int ivar,
+                                unsigned int jvar,
+                                Moose::DGJacobianType type,
+                                DenseMatrix<Number> & k) const;
 
   /**
    * Prepare data for computing the jacobian according to the ative tags for mortar.  Jacobian
@@ -163,6 +174,17 @@ protected:
    */
   void accumulateTaggedLocalMatrix();
 
+  void accumulateTaggedLocalMatrix(Assembly & assembly,
+                                   unsigned int ivar,
+                                   unsigned int jvar,
+                                   const DenseMatrix<Number> & k);
+
+  void accumulateTaggedLocalMatrix(Assembly & assembly,
+                                   unsigned int ivar,
+                                   unsigned int jvar,
+                                   Moose::DGJacobianType type,
+                                   const DenseMatrix<Number> & k);
+
   /**
    * Local Jacobian blocks will assigned as the current local kernel Jacobian.
    * It should be called after the local element matrix has been computed.
@@ -175,6 +197,15 @@ protected:
   template <typename Residuals, typename Indices>
   void addResiduals(Assembly & assembly,
                     const Residuals & residuals,
+                    const Indices & dof_indices,
+                    Real scaling_factor);
+
+  /**
+   * Process the provided incoming residuals corresponding to the provided dof indices
+   */
+  template <typename T, typename Indices>
+  void addResiduals(Assembly & assembly,
+                    const DenseVector<T> & residuals,
                     const Indices & dof_indices,
                     Real scaling_factor);
 
@@ -227,24 +258,6 @@ protected:
                                      const Residuals & residuals,
                                      const Indices & dof_indices,
                                      Real scaling_factor);
-
-  /**
-   * Process a single Jacobian element
-   */
-  void addJacobianElement(Assembly & assembly,
-                          dof_id_type row_index,
-                          dof_id_type column_index,
-                          Real value,
-                          Real scaling_factor) = delete;
-
-  /**
-   * Process a local Jacobian matrix
-   */
-  void addJacobian(Assembly & assembly,
-                   const std::vector<dof_id_type> & row_indices,
-                   const std::vector<dof_id_type> & column_indices,
-                   DenseMatrix<Real> & local_k,
-                   Real scaling_factor) = delete;
 
   /**
    * Process a single Jacobian element
@@ -367,6 +380,16 @@ TaggingInterface::addResiduals(Assembly & assembly,
                             Assembly::LocalDataKey{},
                             _abs_vector_tags);
   }
+}
+
+template <typename T, typename Indices>
+void
+TaggingInterface::addResiduals(Assembly & assembly,
+                               const DenseVector<T> & residuals,
+                               const Indices & dof_indices,
+                               const Real scaling_factor)
+{
+  addResiduals(assembly, residuals.get_values(), dof_indices, scaling_factor);
 }
 
 template <typename Residuals, typename Indices>

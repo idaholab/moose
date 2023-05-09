@@ -270,6 +270,18 @@ TaggingInterface::prepareMatrixTag(Assembly & assembly, unsigned int ivar, unsig
 }
 
 void
+TaggingInterface::prepareMatrixTag(Assembly & assembly,
+                                   unsigned int ivar,
+                                   unsigned int jvar,
+                                   DenseMatrix<Number> & k) const
+{
+  mooseAssert(!_matrix_tags.empty(), "No matrix tags exist");
+  const auto & ij_mat =
+      assembly.jacobianBlock(ivar, jvar, Assembly::LocalDataKey{}, *_matrix_tags.begin());
+  k.resize(ij_mat.m(), ij_mat.n());
+}
+
+void
 TaggingInterface::prepareMatrixTagNeighbor(Assembly & assembly,
                                            unsigned int ivar,
                                            unsigned int jvar,
@@ -283,6 +295,19 @@ TaggingInterface::prepareMatrixTagNeighbor(Assembly & assembly,
         &assembly.jacobianBlockNeighbor(type, ivar, jvar, Assembly::LocalDataKey{}, *mat_vector);
 
   _local_ke.resize(_ke_blocks[0]->m(), _ke_blocks[0]->n());
+}
+
+void
+TaggingInterface::prepareMatrixTagNeighbor(Assembly & assembly,
+                                           unsigned int ivar,
+                                           unsigned int jvar,
+                                           Moose::DGJacobianType type,
+                                           DenseMatrix<Number> & k) const
+{
+  mooseAssert(!_matrix_tags.empty(), "No matrix tags exist");
+  const auto & ij_mat = assembly.jacobianBlockNeighbor(
+      type, ivar, jvar, Assembly::LocalDataKey{}, *_matrix_tags.begin());
+  k.resize(ij_mat.m(), ij_mat.n());
 }
 
 void
@@ -326,6 +351,42 @@ TaggingInterface::accumulateTaggedLocalMatrix()
 {
   for (auto & ke : _ke_blocks)
     *ke += _local_ke;
+}
+
+void
+TaggingInterface::accumulateTaggedLocalMatrix(Assembly & assembly,
+                                              const unsigned int ivar,
+                                              const unsigned int jvar,
+                                              const DenseMatrix<Number> & k)
+{
+  _ke_blocks.resize(_matrix_tags.size());
+  mooseAssert(_matrix_tags.size() >= 1, "we need at least one active tag");
+  auto mat_vector = _matrix_tags.begin();
+  for (MooseIndex(_matrix_tags) i = 0; i < _matrix_tags.size(); i++, ++mat_vector)
+    _ke_blocks[i] = &assembly.jacobianBlock(ivar, jvar, Assembly::LocalDataKey{}, *mat_vector);
+  mooseAssert(_ke_blocks[0]->m() == k.m() && _ke_blocks[0]->n() == k.n(),
+              "Passed-in k must match the blocks we are about to sum into");
+  for (auto & ke : _ke_blocks)
+    *ke += k;
+}
+
+void
+TaggingInterface::accumulateTaggedLocalMatrix(Assembly & assembly,
+                                              const unsigned int ivar,
+                                              const unsigned int jvar,
+                                              const Moose::DGJacobianType type,
+                                              const DenseMatrix<Number> & k)
+{
+  _ke_blocks.resize(_matrix_tags.size());
+  mooseAssert(_matrix_tags.size() >= 1, "we need at least one active tag");
+  auto mat_vector = _matrix_tags.begin();
+  for (MooseIndex(_matrix_tags) i = 0; i < _matrix_tags.size(); i++, ++mat_vector)
+    _ke_blocks[i] =
+        &assembly.jacobianBlockNeighbor(type, ivar, jvar, Assembly::LocalDataKey{}, *mat_vector);
+  mooseAssert(_ke_blocks[0]->m() == k.m() && _ke_blocks[0]->n() == k.n(),
+              "Passed-in k must match the blocks we are about to sum into");
+  for (auto & ke : _ke_blocks)
+    *ke += k;
 }
 
 void

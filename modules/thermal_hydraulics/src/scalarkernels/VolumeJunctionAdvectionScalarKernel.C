@@ -62,5 +62,5 @@ VolumeJunctionAdvectionScalarKernel::computeJacobian()
   _volume_junction_uo.getScalarEquationJacobianData(
       _equation_index, jacobian_block, dofs_i, dofs_j);
 
-  _assembly.cacheJacobianBlock(jacobian_block, dofs_i, dofs_j, _var.scalingFactor());
+  addJacobian(_assembly, jacobian_block, dofs_i, dofs_j, _var.scalingFactor());
 }

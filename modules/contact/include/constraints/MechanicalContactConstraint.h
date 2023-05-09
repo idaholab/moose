@@ -149,4 +149,7 @@ protected:
   AugmentedLagrangianContactProblem * const _augmented_lagrange_problem;
   const static unsigned int _no_iterations;
   const unsigned int & _lagrangian_iteration_number;
+
+  DenseMatrix<Number> _Knn;
+  DenseMatrix<Number> _Ken;
 };

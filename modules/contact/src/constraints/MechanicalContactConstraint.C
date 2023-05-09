@@ -1745,8 +1745,8 @@ MechanicalContactConstraint::computeJacobian()
 {
   getConnectedDofIndices(_var.number());
 
-  DenseMatrix<Number> & Knn = _assembly.jacobianBlockNeighbor(
-      Moose::NeighborNeighbor, _primary_var.number(), _var.number());
+  prepareMatrixTagNeighbor(
+      _assembly, _primary_var.number(), _var.number(), Moose::NeighborNeighbor, _Knn);
 
   _Kee.resize(_test_secondary.size(), _connected_dof_indices.size());
 
@@ -1757,12 +1757,15 @@ MechanicalContactConstraint::computeJacobian()
 
   if (_primary_secondary_jacobian)
   {
-    DenseMatrix<Number> & Ken =
-        _assembly.jacobianBlockNeighbor(Moose::ElementNeighbor, _var.number(), _var.number());
-    if (Ken.m() && Ken.n())
+    prepareMatrixTagNeighbor(_assembly, _var.number(), _var.number(), Moose::ElementNeighbor, _Ken);
+    if (_Ken.m() && _Ken.n())
+    {
       for (_i = 0; _i < _test_secondary.size(); _i++)
         for (_j = 0; _j < _phi_primary.size(); _j++)
-          Ken(_i, _j) += computeQpJacobian(Moose::SecondaryPrimary);
+          _Ken(_i, _j) += computeQpJacobian(Moose::SecondaryPrimary);
+      accumulateTaggedLocalMatrix(
+          _assembly, _var.number(), _var.number(), Moose::ElementNeighbor, _Ken);
+    }
 
     _Kne.resize(_test_primary.size(), _connected_dof_indices.size());
     for (_i = 0; _i < _test_primary.size(); _i++)
@@ -1771,10 +1774,14 @@ MechanicalContactConstraint::computeJacobian()
         _Kne(_i, _j) += computeQpJacobian(Moose::PrimarySecondary);
   }
 
-  if (Knn.m() && Knn.n())
+  if (_Knn.m() && _Knn.n())
+  {
     for (_i = 0; _i < _test_primary.size(); _i++)
       for (_j = 0; _j < _phi_primary.size(); _j++)
-        Knn(_i, _j) += computeQpJacobian(Moose::PrimaryPrimary);
+        _Knn(_i, _j) += computeQpJacobian(Moose::PrimaryPrimary);
+    accumulateTaggedLocalMatrix(
+        _assembly, _primary_var.number(), _var.number(), Moose::NeighborNeighbor, _Knn);
+  }
 }
 
 void
@@ -1784,8 +1791,8 @@ MechanicalContactConstraint::computeOffDiagJacobian(const unsigned int jvar_num)
 
   _Kee.resize(_test_secondary.size(), _connected_dof_indices.size());
 
-  DenseMatrix<Number> & Knn =
-      _assembly.jacobianBlockNeighbor(Moose::NeighborNeighbor, _primary_var.number(), jvar_num);
+  prepareMatrixTagNeighbor(
+      _assembly, _primary_var.number(), jvar_num, Moose::NeighborNeighbor, _Knn);
 
   for (_i = 0; _i < _test_secondary.size(); _i++)
     // Loop over the connected dof indices so we can get all the jacobian contributions
@@ -1794,11 +1801,11 @@ MechanicalContactConstraint::computeOffDiagJacobian(const unsigned int jvar_num)
 
   if (_primary_secondary_jacobian)
   {
-    DenseMatrix<Number> & Ken =
-        _assembly.jacobianBlockNeighbor(Moose::ElementNeighbor, _var.number(), jvar_num);
+    prepareMatrixTagNeighbor(_assembly, _var.number(), jvar_num, Moose::ElementNeighbor, _Ken);
     for (_i = 0; _i < _test_secondary.size(); _i++)
       for (_j = 0; _j < _phi_primary.size(); _j++)
-        Ken(_i, _j) += computeQpOffDiagJacobian(Moose::SecondaryPrimary, jvar_num);
+        _Ken(_i, _j) += computeQpOffDiagJacobian(Moose::SecondaryPrimary, jvar_num);
+    accumulateTaggedLocalMatrix(_assembly, _var.number(), jvar_num, Moose::ElementNeighbor, _Ken);
 
     _Kne.resize(_test_primary.size(), _connected_dof_indices.size());
     if (_Kne.m() && _Kne.n())
@@ -1810,7 +1817,9 @@ MechanicalContactConstraint::computeOffDiagJacobian(const unsigned int jvar_num)
 
   for (_i = 0; _i < _test_primary.size(); _i++)
     for (_j = 0; _j < _phi_primary.size(); _j++)
-      Knn(_i, _j) += computeQpOffDiagJacobian(Moose::PrimaryPrimary, jvar_num);
+      _Knn(_i, _j) += computeQpOffDiagJacobian(Moose::PrimaryPrimary, jvar_num);
+  accumulateTaggedLocalMatrix(
+      _assembly, _primary_var.number(), jvar_num, Moose::NeighborNeighbor, _Knn);
 }
 
 void

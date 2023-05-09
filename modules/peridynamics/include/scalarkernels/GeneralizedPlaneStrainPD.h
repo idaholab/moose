@@ -29,6 +29,9 @@ public:
   virtual void computeJacobian() override;
 
 protected:
+  virtual Real computeQpResidual() override { mooseError("unused"); }
+  virtual Real computeQpJacobian() override { mooseError("unused"); }
+
   /// Userobject to calculate the residual and jacobian
   const GeneralizedPlaneStrainUserObjectBasePD & _gpsuo;
 };

@@ -223,8 +223,11 @@ GapHeatTransfer::computeJacobian()
              ++_secondary_j)
           K_secondary(_i, _secondary_j) += _JxW[_qp] * _coord[_qp] * computeSecondaryQpJacobian();
 
-      _subproblem.assembly(_tid).cacheJacobianBlock(
-          K_secondary, _var.dofIndices(), secondary_side_dof_indices, _var.scalingFactor());
+      addJacobian(_subproblem.assembly(_tid),
+                  K_secondary,
+                  _var.dofIndices(),
+                  secondary_side_dof_indices,
+                  _var.scalingFactor());
     }
   }
 
@@ -287,8 +290,11 @@ GapHeatTransfer::computeOffDiagJacobian(const unsigned int jvar_num)
           K_secondary(_i, _secondary_j) +=
               _JxW[_qp] * _coord[_qp] * computeSecondaryQpOffDiagJacobian(jvar_num);
 
-      _subproblem.assembly(_tid).cacheJacobianBlock(
-          K_secondary, _var.dofIndices(), secondary_side_dof_indices, _var.scalingFactor());
+      addJacobian(_subproblem.assembly(_tid),
+                  K_secondary,
+                  _var.dofIndices(),
+                  secondary_side_dof_indices,
+                  _var.scalingFactor());
     }
   }
 

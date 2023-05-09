@@ -91,7 +91,7 @@ HorizonStabilizedFormIIFiniteStrainMechanicsNOSPD::computeNonlocalResidual()
                          origin_vec_nb * node_vol_nb * _bond_status;
 
         // cache the residual contribution
-        _assembly.cacheResidualNodes(_local_re, ivardofs);
+        addResiduals(_assembly, _local_re, ivardofs, _var.scalingFactor());
 
         if (_has_save_in)
         {
@@ -152,7 +152,7 @@ HorizonStabilizedFormIIFiniteStrainMechanicsNOSPD::computeLocalJacobian()
                               (dPxdUx * _shape2[nd].inverse()).row(_component) * origin_vec_nb *
                               node_vol_nb * _bond_status;
 
-        _assembly.cacheJacobianBlock(_local_ke, ivardofs, ivardofs, _var.scalingFactor());
+        addJacobian(_assembly, _local_ke, ivardofs, ivardofs, _var.scalingFactor());
       }
   }
   _local_ke.zero();
@@ -241,7 +241,7 @@ HorizonStabilizedFormIIFiniteStrainMechanicsNOSPD::computeNonlocalJacobian()
                                   (dPxdUkx * _shape2[nd].inverse()).row(_component) *
                                   origin_vec_nb1 * node_vol_nb1 * _bond_status;
 
-            _assembly.cacheJacobianBlock(_local_ke, ivardofs, jvardofs, _var.scalingFactor());
+            addJacobian(_assembly, _local_ke, ivardofs, jvardofs, _var.scalingFactor());
 
             if (_has_diag_save_in)
             {
@@ -316,7 +316,7 @@ HorizonStabilizedFormIIFiniteStrainMechanicsNOSPD::computeLocalOffDiagJacobian(
                                 (dSdT[nd] * _shape2[nd].inverse()).row(_component) * origin_vec_nb *
                                 node_vol_nb * _bond_status;
 
-          _assembly.cacheJacobianBlock(_local_ke, ivardofs, jvardofs, _var.scalingFactor());
+          addJacobian(_assembly, _local_ke, ivardofs, jvardofs, _var.scalingFactor());
         }
     }
     _local_ke.zero();
@@ -370,7 +370,7 @@ HorizonStabilizedFormIIFiniteStrainMechanicsNOSPD::computeLocalOffDiagJacobian(
                                 (dSdE33[nd] * _shape2[nd].inverse()).row(_component) *
                                 origin_vec_nb * node_vol_nb * _bond_status;
 
-          _assembly.cacheJacobianBlock(_local_ke, ivardofs, jvardofs, _var.scalingFactor());
+          addJacobian(_assembly, _local_ke, ivardofs, jvardofs, _var.scalingFactor());
         }
     }
     _local_ke.zero();
@@ -417,7 +417,7 @@ HorizonStabilizedFormIIFiniteStrainMechanicsNOSPD::computeLocalOffDiagJacobian(
                                 (dPxdUy * _shape2[nd].inverse()).row(_component) * origin_vec_nb *
                                 node_vol_nb * _bond_status;
 
-          _assembly.cacheJacobianBlock(_local_ke, ivardofs, jvardofs, _var.scalingFactor());
+          addJacobian(_assembly, _local_ke, ivardofs, jvardofs, _var.scalingFactor());
         }
     }
     _local_ke.zero();
@@ -519,7 +519,7 @@ HorizonStabilizedFormIIFiniteStrainMechanicsNOSPD::computePDNonlocalOffDiagJacob
                                     (dPxdUky * _shape2[nd].inverse()).row(_component) *
                                     origin_vec_nb1 * node_vol_nb1 * _bond_status;
 
-              _assembly.cacheJacobianBlock(_local_ke, ivardofs, jvardofs, _var.scalingFactor());
+              addJacobian(_assembly, _local_ke, ivardofs, jvardofs, _var.scalingFactor());
             }
         }
     }
