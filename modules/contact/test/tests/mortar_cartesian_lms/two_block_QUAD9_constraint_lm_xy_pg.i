@@ -3,7 +3,7 @@
   volumetric_locking_correction = true
 []
 
-theta = 45
+theta = 0
 velocity = 0.1
 
 [Mesh]
@@ -16,7 +16,7 @@ velocity = 0.1
     ymax = 0
     nx = 1
     ny = 3
-    elem_type = QUAD8
+    elem_type = QUAD9
   []
   [left_block_sidesets]
     type = RenameBoundaryGenerator
@@ -44,7 +44,7 @@ velocity = 0.1
     ymax = 0
     nx = 1
     ny = 2
-    elem_type = QUAD8
+    elem_type = QUAD9
   []
   [right_block_sidesets]
     type = RenameBoundaryGenerator
@@ -102,6 +102,14 @@ velocity = 0.1
     block = 'secondary_lower'
     order=SECOND
     use_dual = true
+  []
+[]
+
+[AuxVariables]
+  [aux_lm]
+    block = 'secondary_lower'
+    order=SECOND
+    use_dual = false
   []
 []
 
@@ -190,7 +198,8 @@ velocity = 0.1
     disp_y = disp_y
     use_displaced_mesh = true
     correct_edge_dropping = true
-    interpolate_normals = false
+    use_petrov_galerkin = true
+    aux_lm = aux_lm
   []
   [normal_x]
     type = CartesianMortarMechanicalContact
@@ -249,7 +258,7 @@ velocity = 0.1
 
 [Outputs]
   exodus = false
-  file_base = './output/2nd_order_${theta}_degree_QUAD8_out'
+  file_base = './output/2nd_order_${theta}_degree_QUAD9_out'
   [comp]
     type = CSV
     show = 'tot_lin_it tot_nonlin_it'
