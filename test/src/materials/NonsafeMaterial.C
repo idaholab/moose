@@ -47,14 +47,14 @@ NonsafeMaterial::NonsafeMaterial(const InputParameters & parameters)
 void
 NonsafeMaterial::computeQpProperties()
 {
-  int x = _q_point[_qp](0);
-  //  Real y = _q_point[_qp](1);
+  Real _test_diffusivity = _input_diffusivity;
+  // int x = _q_point[_qp](0);
 
-  Real _test_diffusivity = 0;
-  if (x % 2 == 0)
-    _test_diffusivity = _input_diffusivity;
-  else
-    _test_diffusivity = 0.2;
+  // Real _test_diffusivity = 0;
+  // if (x % 2 == 0)
+  //   _test_diffusivity = _input_diffusivity;
+  // else
+  //   _test_diffusivity = 0.2;
 
   // Gradually modify diffusivity value to test solution invalid recover
   if (_fe_problem.dt() < 1 && _test_invalid_recover)
