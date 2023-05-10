@@ -24,8 +24,6 @@ public:
   virtual void addMooseObjects() override;
 
 protected:
-  virtual void check() const override;
-
   /// Temperature from external application
   const VariableName & _T_ext_var_name;
   /// Heat transfer coefficient from external application

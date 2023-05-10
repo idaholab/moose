@@ -22,8 +22,7 @@ HeatRateRadiation::validParams()
   params.addRequiredParam<Real>("emissivity", "Emissivity");
   params.addParam<FunctionName>("view_factor", "1", "View factor function");
   params.addParam<Real>("stefan_boltzmann_constant", 5.670367e-8, "Stefan-Boltzmann constant");
-  params.addParam<Real>(
-      "scale", 1.0, "Factor by which to scale integral, like when using a 2D domain");
+  params.addParam<FunctionName>("scale", 1.0, "Function by which to scale the heat flux");
 
   params.addClassDescription("Integrates a radiative heat flux over a boundary.");
 
@@ -38,7 +37,7 @@ HeatRateRadiation::HeatRateRadiation(const InputParameters & parameters)
     _emissivity(getParam<Real>("emissivity")),
     _view_factor_fn(getFunction("view_factor")),
     _sigma_stefan_boltzmann(getParam<Real>("stefan_boltzmann_constant")),
-    _scale(getParam<Real>("scale"))
+    _scale_fn(getFunction("scale"))
 {
 }
 
@@ -47,6 +46,6 @@ HeatRateRadiation::computeQpIntegral()
 {
   const Real T4 = MathUtils::pow(_T[_qp], 4);
   const Real T4inf = MathUtils::pow(_T_ambient.value(_t, _q_point[_qp]), 4);
-  return _scale * _sigma_stefan_boltzmann * _emissivity * _view_factor_fn.value(_t, _q_point[_qp]) *
-         (T4inf - T4);
+  return _scale_fn.value(_t, _q_point[_qp]) * _sigma_stefan_boltzmann * _emissivity *
+         _view_factor_fn.value(_t, _q_point[_qp]) * (T4inf - T4);
 }

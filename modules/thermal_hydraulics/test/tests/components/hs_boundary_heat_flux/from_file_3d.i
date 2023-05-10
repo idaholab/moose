@@ -44,16 +44,11 @@ E_change = ${fparse scale * heat_flux * A * t}
     boundary = 'hs:left'
     hs = hs
     q = q_fn
-    scale_pp = bc_scale_pp
+    scale = ${scale}
   []
 []
 
 [Postprocessors]
-  [bc_scale_pp]
-    type = FunctionValuePostprocessor
-    function = ${scale}
-    execute_on = 'INITIAL TIMESTEP_END'
-  []
   [E_hs]
     type = ADHeatStructureEnergy3D
     block = 'hs:brick'
