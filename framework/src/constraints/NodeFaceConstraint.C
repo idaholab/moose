@@ -134,17 +134,17 @@ NodeFaceConstraint::secondaryResidual() const
 void
 NodeFaceConstraint::computeResidual()
 {
-  DenseVector<Number> & re = _assembly.residualBlock(_var.number(), Assembly::LocalDataKey{});
-  DenseVector<Number> & neighbor_re =
-      _assembly.residualBlockNeighbor(_primary_var.number(), Assembly::LocalDataKey{});
-
   _qp = 0;
 
+  prepareVectorTagNeighbor(_assembly, _primary_var.number());
   for (_i = 0; _i < _test_primary.size(); _i++)
-    neighbor_re(_i) += computeQpResidual(Moose::Primary);
+    _local_re(_i) += computeQpResidual(Moose::Primary);
+  accumulateTaggedLocalResidual();
 
+  prepareVectorTag(_assembly, _var.number());
   _i = 0;
-  _secondary_residual = re(0) = computeQpResidual(Moose::Secondary);
+  _secondary_residual = _local_re(0) = computeQpResidual(Moose::Secondary);
+  assignTaggedLocalResidual();
   _secondary_residual_computed = true;
 }
 
