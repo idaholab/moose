@@ -212,8 +212,7 @@ ContactAction::ContactAction(const InputParameters & params)
     _model(getParam<MooseEnum>("model").getEnum<ContactModel>()),
     _formulation(getParam<MooseEnum>("formulation").getEnum<ContactFormulation>()),
     _generate_mortar_mesh(getParam<bool>("generate_mortar_mesh")),
-    _mortar_dynamics(getParam<bool>("mortar_dynamics")),
-    _mesh(nullptr)
+    _mortar_dynamics(getParam<bool>("mortar_dynamics"))
 {
   // Check for automatic selection of contact pairs.
   if (getParam<std::vector<BoundaryName>>("automatic_pairing_boundaries").size() > 1)
@@ -1082,8 +1081,6 @@ ContactAction::createSidesetPairsFromGeometry()
             "Periodically repeating geometry and mesh exists. Deviations from equal spacing or "
             "straight axis of extrusion (for 3D) may give rise to wrong contact pairing. The user "
             "is encouraged to check the screen output to confirm pairs were assigned correctly.");
-
-  _mesh = &_problem->mesh();
 
   if (!_mesh)
     mooseError("Failed to obtain mesh for automatically generating contact pairs.");

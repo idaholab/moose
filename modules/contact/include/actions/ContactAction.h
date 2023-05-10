@@ -102,9 +102,6 @@ protected:
   /// Type that we use in Actions for declaring coupling
   typedef std::vector<VariableName> CoupledName;
 
-  /// Pointer to mesh.
-  const MooseMesh * _mesh;
-
 private:
   /**
    * Generate mesh and other Moose objects for Mortar contact
