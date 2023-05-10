@@ -117,6 +117,7 @@ Extensions:
             outputs: syntax/Outputs/index.md
             parser: source/parser/Parser.md
             partitioner: syntax/Mesh/Partitioner/index.md
+            positions: syntax/Positions/index.md
             postprocessors: syntax/Postprocessors/index.md
             preconditioners: syntax/Preconditioning/index.md
             predictors: syntax/Executioner/Predictor/index.md
