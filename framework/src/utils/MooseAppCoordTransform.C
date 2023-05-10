@@ -528,6 +528,10 @@ MultiAppCoordTransform::setDestinationCoordTransform(
 {
   _destination_app_transform = &destination_app_transform;
 
+  // Assume user knows what they are doing if they have multiple coordinate systems
+  if (_skip_coordinate_collapsing)
+    return;
+
   if (_destination_app_transform->_has_different_coord_sys &&
       (_our_app_transform._has_different_coord_sys ||
        _our_app_transform._coord_type != Moose::COORD_RSPHERICAL))
