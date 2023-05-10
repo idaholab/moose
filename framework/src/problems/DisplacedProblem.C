@@ -1031,18 +1031,6 @@ DisplacedProblem::addCachedJacobian(THREAD_ID tid)
 }
 
 void
-DisplacedProblem::addJacobianBlock(SparseMatrix<Number> & jacobian,
-                                   unsigned int ivar,
-                                   unsigned int jvar,
-                                   const DofMap & dof_map,
-                                   std::vector<dof_id_type> & dof_indices,
-                                   THREAD_ID tid)
-{
-  _assembly[tid][currentNlSysNum()]->addJacobianBlock(
-      jacobian, ivar, jvar, dof_map, dof_indices, Assembly::GlobalDataKey{});
-}
-
-void
 DisplacedProblem::addJacobianBlockTags(SparseMatrix<Number> & jacobian,
                                        unsigned int ivar,
                                        unsigned int jvar,
@@ -1062,10 +1050,11 @@ DisplacedProblem::addJacobianBlockNonlocal(SparseMatrix<Number> & jacobian,
                                            const DofMap & dof_map,
                                            const std::vector<dof_id_type> & idof_indices,
                                            const std::vector<dof_id_type> & jdof_indices,
+                                           const std::set<TagID> & tags,
                                            THREAD_ID tid)
 {
-  _assembly[tid][currentNlSysNum()]->addJacobianBlockNonlocal(
-      jacobian, ivar, jvar, dof_map, idof_indices, jdof_indices, Assembly::GlobalDataKey{});
+  _assembly[tid][currentNlSysNum()]->addJacobianBlockNonlocalTags(
+      jacobian, ivar, jvar, dof_map, idof_indices, jdof_indices, Assembly::GlobalDataKey{}, tags);
 }
 
 void
@@ -1075,10 +1064,17 @@ DisplacedProblem::addJacobianNeighbor(SparseMatrix<Number> & jacobian,
                                       const DofMap & dof_map,
                                       std::vector<dof_id_type> & dof_indices,
                                       std::vector<dof_id_type> & neighbor_dof_indices,
+                                      const std::set<TagID> & tags,
                                       THREAD_ID tid)
 {
-  _assembly[tid][currentNlSysNum()]->addJacobianNeighbor(
-      jacobian, ivar, jvar, dof_map, dof_indices, neighbor_dof_indices, Assembly::GlobalDataKey{});
+  _assembly[tid][currentNlSysNum()]->addJacobianNeighborTags(jacobian,
+                                                             ivar,
+                                                             jvar,
+                                                             dof_map,
+                                                             dof_indices,
+                                                             neighbor_dof_indices,
+                                                             Assembly::GlobalDataKey{},
+                                                             tags);
 }
 
 void

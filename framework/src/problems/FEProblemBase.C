@@ -1783,43 +1783,6 @@ FEProblemBase::addCachedJacobian(THREAD_ID tid)
 }
 
 void
-FEProblemBase::addJacobianBlock(SparseMatrix<Number> & jacobian,
-                                unsigned int ivar,
-                                unsigned int jvar,
-                                const DofMap & dof_map,
-                                std::vector<dof_id_type> & dof_indices,
-                                THREAD_ID tid)
-{
-  _assembly[tid][_current_nl_sys->number()]->addJacobianBlock(
-      jacobian, ivar, jvar, dof_map, dof_indices, Assembly::GlobalDataKey{});
-  if (_has_nonlocal_coupling)
-    if (_nonlocal_cm[_current_nl_sys->number()](ivar, jvar) != 0)
-    {
-      MooseVariableFEBase & jv = _current_nl_sys->getVariable(tid, jvar);
-      _assembly[tid][_current_nl_sys->number()]->addJacobianBlockNonlocal(
-          jacobian,
-          ivar,
-          jvar,
-          dof_map,
-          dof_indices,
-          jv.allDofIndices(),
-          Assembly::GlobalDataKey{});
-    }
-
-  if (_displaced_problem)
-  {
-    _displaced_problem->addJacobianBlock(jacobian, ivar, jvar, dof_map, dof_indices, tid);
-    if (_has_nonlocal_coupling)
-      if (_nonlocal_cm[_current_nl_sys->number()](ivar, jvar) != 0)
-      {
-        MooseVariableFEBase & jv = _current_nl_sys->getVariable(tid, jvar);
-        _displaced_problem->addJacobianBlockNonlocal(
-            jacobian, ivar, jvar, dof_map, dof_indices, jv.allDofIndices(), tid);
-      }
-  }
-}
-
-void
 FEProblemBase::addJacobianBlockTags(SparseMatrix<Number> & jacobian,
                                     unsigned int ivar,
                                     unsigned int jvar,
@@ -1835,14 +1798,15 @@ FEProblemBase::addJacobianBlockTags(SparseMatrix<Number> & jacobian,
     if (_nonlocal_cm[_current_nl_sys->number()](ivar, jvar) != 0)
     {
       MooseVariableFEBase & jv = _current_nl_sys->getVariable(tid, jvar);
-      _assembly[tid][_current_nl_sys->number()]->addJacobianBlockNonlocal(
+      _assembly[tid][_current_nl_sys->number()]->addJacobianBlockNonlocalTags(
           jacobian,
           ivar,
           jvar,
           dof_map,
           dof_indices,
           jv.allDofIndices(),
-          Assembly::GlobalDataKey{});
+          Assembly::GlobalDataKey{},
+          tags);
     }
 
   if (_displaced_problem)
@@ -1853,7 +1817,7 @@ FEProblemBase::addJacobianBlockTags(SparseMatrix<Number> & jacobian,
       {
         MooseVariableFEBase & jv = _current_nl_sys->getVariable(tid, jvar);
         _displaced_problem->addJacobianBlockNonlocal(
-            jacobian, ivar, jvar, dof_map, dof_indices, jv.allDofIndices(), tid);
+            jacobian, ivar, jvar, dof_map, dof_indices, jv.allDofIndices(), tags, tid);
       }
   }
 }
@@ -1865,13 +1829,20 @@ FEProblemBase::addJacobianNeighbor(SparseMatrix<Number> & jacobian,
                                    const DofMap & dof_map,
                                    std::vector<dof_id_type> & dof_indices,
                                    std::vector<dof_id_type> & neighbor_dof_indices,
+                                   const std::set<TagID> & tags,
                                    THREAD_ID tid)
 {
-  _assembly[tid][_current_nl_sys->number()]->addJacobianNeighbor(
-      jacobian, ivar, jvar, dof_map, dof_indices, neighbor_dof_indices, Assembly::GlobalDataKey{});
+  _assembly[tid][_current_nl_sys->number()]->addJacobianNeighborTags(jacobian,
+                                                                     ivar,
+                                                                     jvar,
+                                                                     dof_map,
+                                                                     dof_indices,
+                                                                     neighbor_dof_indices,
+                                                                     Assembly::GlobalDataKey{},
+                                                                     tags);
   if (_displaced_problem)
     _displaced_problem->addJacobianNeighbor(
-        jacobian, ivar, jvar, dof_map, dof_indices, neighbor_dof_indices, tid);
+        jacobian, ivar, jvar, dof_map, dof_indices, neighbor_dof_indices, tags, tid);
 }
 
 void

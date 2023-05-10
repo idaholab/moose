@@ -4128,12 +4128,13 @@ Assembly::addJacobianBlock(SparseMatrix<Number> & jacobian,
 
 void
 Assembly::addJacobianBlockNonlocal(SparseMatrix<Number> & jacobian,
-                                   unsigned int ivar,
-                                   unsigned int jvar,
+                                   const unsigned int ivar,
+                                   const unsigned int jvar,
                                    const DofMap & dof_map,
                                    const std::vector<dof_id_type> & idof_indices,
                                    const std::vector<dof_id_type> & jdof_indices,
-                                   GlobalDataKey)
+                                   GlobalDataKey,
+                                   const TagID tag)
 {
   if (idof_indices.size() == 0 || jdof_indices.size() == 0)
     return;
@@ -4148,7 +4149,7 @@ Assembly::addJacobianBlockNonlocal(SparseMatrix<Number> & jacobian,
 
   const unsigned int ivn = iv.number();
   const unsigned int jvn = jv.number();
-  auto & keg = jacobianBlockNonlocal(ivn, jvn, LocalDataKey{});
+  auto & keg = jacobianBlockNonlocal(ivn, jvn, LocalDataKey{}, tag);
 
   // It is guaranteed by design iv.number <= ivar since iv is obtained
   // through SystemBase::getVariable with ivar.
@@ -4184,13 +4185,29 @@ Assembly::addJacobianBlockNonlocal(SparseMatrix<Number> & jacobian,
 }
 
 void
+Assembly::addJacobianBlockNonlocalTags(SparseMatrix<Number> & jacobian,
+                                       const unsigned int ivar,
+                                       const unsigned int jvar,
+                                       const DofMap & dof_map,
+                                       const std::vector<dof_id_type> & idof_indices,
+                                       const std::vector<dof_id_type> & jdof_indices,
+                                       GlobalDataKey,
+                                       const std::set<TagID> & tags)
+{
+  for (auto tag : tags)
+    addJacobianBlockNonlocal(
+        jacobian, ivar, jvar, dof_map, idof_indices, jdof_indices, GlobalDataKey{}, tag);
+}
+
+void
 Assembly::addJacobianNeighbor(SparseMatrix<Number> & jacobian,
-                              unsigned int ivar,
-                              unsigned int jvar,
+                              const unsigned int ivar,
+                              const unsigned int jvar,
                               const DofMap & dof_map,
                               std::vector<dof_id_type> & dof_indices,
                               std::vector<dof_id_type> & neighbor_dof_indices,
-                              GlobalDataKey)
+                              GlobalDataKey,
+                              const TagID tag)
 {
   if (dof_indices.size() == 0 && neighbor_dof_indices.size() == 0)
     return;
@@ -4203,9 +4220,9 @@ Assembly::addJacobianNeighbor(SparseMatrix<Number> & jacobian,
 
   const unsigned int ivn = iv.number();
   const unsigned int jvn = jv.number();
-  auto & ken = jacobianBlockNeighbor(Moose::ElementNeighbor, ivn, jvn, LocalDataKey{});
-  auto & kne = jacobianBlockNeighbor(Moose::NeighborElement, ivn, jvn, LocalDataKey{});
-  auto & knn = jacobianBlockNeighbor(Moose::NeighborNeighbor, ivn, jvn, LocalDataKey{});
+  auto & ken = jacobianBlockNeighbor(Moose::ElementNeighbor, ivn, jvn, LocalDataKey{}, tag);
+  auto & kne = jacobianBlockNeighbor(Moose::NeighborElement, ivn, jvn, LocalDataKey{}, tag);
+  auto & knn = jacobianBlockNeighbor(Moose::NeighborNeighbor, ivn, jvn, LocalDataKey{}, tag);
 
   // It is guaranteed by design iv.number <= ivar since iv is obtained
   // through SystemBase::getVariable with ivar.
@@ -4249,6 +4266,21 @@ Assembly::addJacobianNeighbor(SparseMatrix<Number> & jacobian,
   jacobian.add_matrix(suben, dc, dn);
   jacobian.add_matrix(subne, dn, dc);
   jacobian.add_matrix(subnn, dn, dn);
+}
+
+void
+Assembly::addJacobianNeighborTags(SparseMatrix<Number> & jacobian,
+                                  const unsigned int ivar,
+                                  const unsigned int jvar,
+                                  const DofMap & dof_map,
+                                  std::vector<dof_id_type> & dof_indices,
+                                  std::vector<dof_id_type> & neighbor_dof_indices,
+                                  GlobalDataKey,
+                                  const std::set<TagID> & tags)
+{
+  for (const auto tag : tags)
+    addJacobianNeighbor(
+        jacobian, ivar, jvar, dof_map, dof_indices, neighbor_dof_indices, GlobalDataKey{}, tag);
 }
 
 void Assembly::addJacobianScalar(GlobalDataKey)

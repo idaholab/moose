@@ -343,18 +343,13 @@ public:
   virtual void addJacobianNeighbor(THREAD_ID tid) = 0;
   virtual void addJacobianNeighborLowerD(THREAD_ID tid) = 0;
   virtual void addJacobianLowerD(THREAD_ID tid) = 0;
-  virtual void addJacobianBlock(SparseMatrix<Number> & jacobian,
-                                unsigned int ivar,
-                                unsigned int jvar,
-                                const DofMap & dof_map,
-                                std::vector<dof_id_type> & dof_indices,
-                                THREAD_ID tid) = 0;
   virtual void addJacobianNeighbor(SparseMatrix<Number> & jacobian,
                                    unsigned int ivar,
                                    unsigned int jvar,
                                    const DofMap & dof_map,
                                    std::vector<dof_id_type> & dof_indices,
                                    std::vector<dof_id_type> & neighbor_dof_indices,
+                                   const std::set<TagID> & tags,
                                    THREAD_ID tid) = 0;
 
   virtual void cacheJacobian(THREAD_ID tid) = 0;

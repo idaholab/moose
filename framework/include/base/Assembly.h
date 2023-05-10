@@ -910,7 +910,7 @@ public:
                         const DofMap & dof_map,
                         std::vector<dof_id_type> & dof_indices,
                         GlobalDataKey,
-                        TagID tag = 0);
+                        TagID tag);
 
   /**
    * Add element matrix for ivar rows and jvar columns to the global Jacobian matrix for given
@@ -933,7 +933,20 @@ public:
                                 const DofMap & dof_map,
                                 const std::vector<dof_id_type> & idof_indices,
                                 const std::vector<dof_id_type> & jdof_indices,
-                                GlobalDataKey);
+                                GlobalDataKey,
+                                TagID tag);
+
+  /**
+   * Adds non-local element matrix for ivar rows and jvar columns to the global Jacobian matrix.
+   */
+  void addJacobianBlockNonlocalTags(SparseMatrix<Number> & jacobian,
+                                    unsigned int ivar,
+                                    unsigned int jvar,
+                                    const DofMap & dof_map,
+                                    const std::vector<dof_id_type> & idof_indices,
+                                    const std::vector<dof_id_type> & jdof_indices,
+                                    GlobalDataKey,
+                                    const std::set<TagID> & tags);
 
   /**
    * Add *all* portions of the Jacobian except PrimaryPrimary, e.g. LowerLower, LowerSecondary,
@@ -972,7 +985,21 @@ public:
                            const DofMap & dof_map,
                            std::vector<dof_id_type> & dof_indices,
                            std::vector<dof_id_type> & neighbor_dof_indices,
-                           GlobalDataKey);
+                           GlobalDataKey,
+                           TagID tag);
+
+  /**
+   * Adds three neighboring element matrices for ivar rows and jvar columns to the global Jacobian
+   * matrix.
+   */
+  void addJacobianNeighborTags(SparseMatrix<Number> & jacobian,
+                               unsigned int ivar,
+                               unsigned int jvar,
+                               const DofMap & dof_map,
+                               std::vector<dof_id_type> & dof_indices,
+                               std::vector<dof_id_type> & neighbor_dof_indices,
+                               GlobalDataKey,
+                               const std::set<TagID> & tags);
 
   /**
    * Takes the values that are currently in _sub_Kee and appends them to the cached values.
@@ -1011,7 +1038,7 @@ public:
   /**
    * Get local residual block for a variable and a tag.
    */
-  DenseVector<Number> & residualBlock(unsigned int var_num, LocalDataKey, TagID tag_id = 0)
+  DenseVector<Number> & residualBlock(unsigned int var_num, LocalDataKey, TagID tag_id)
   {
     return _sub_Re[tag_id][var_num];
   }
@@ -1019,7 +1046,7 @@ public:
   /**
    * Get local neighbor residual block for a variable and a tag.
    */
-  DenseVector<Number> & residualBlockNeighbor(unsigned int var_num, LocalDataKey, TagID tag_id = 0)
+  DenseVector<Number> & residualBlockNeighbor(unsigned int var_num, LocalDataKey, TagID tag_id)
   {
     return _sub_Rn[tag_id][var_num];
   }
@@ -1027,7 +1054,7 @@ public:
   /**
    * Get residual block for lower.
    */
-  DenseVector<Number> & residualBlockLower(unsigned int var_num, LocalDataKey, TagID tag_id = 0)
+  DenseVector<Number> & residualBlockLower(unsigned int var_num, LocalDataKey, TagID tag_id)
   {
     return _sub_Rl[tag_id][var_num];
   }
@@ -1035,8 +1062,7 @@ public:
   /**
    * Get local Jacobian block for a pair of variables and a tag.
    */
-  DenseMatrix<Number> &
-  jacobianBlock(unsigned int ivar, unsigned int jvar, LocalDataKey, TagID tag = 0)
+  DenseMatrix<Number> & jacobianBlock(unsigned int ivar, unsigned int jvar, LocalDataKey, TagID tag)
   {
     jacobianBlockUsed(tag, ivar, jvar, true);
     return _sub_Kee[tag][ivar][_block_diagonal_matrix ? 0 : jvar];
@@ -1046,7 +1072,7 @@ public:
    * Get local Jacobian block from non-local contribution for a pair of variables and a tag.
    */
   DenseMatrix<Number> &
-  jacobianBlockNonlocal(unsigned int ivar, unsigned int jvar, LocalDataKey, TagID tag = 0)
+  jacobianBlockNonlocal(unsigned int ivar, unsigned int jvar, LocalDataKey, TagID tag)
   {
     jacobianBlockNonlocalUsed(tag, ivar, jvar, true);
     return _sub_Keg[tag][ivar][_block_diagonal_matrix ? 0 : jvar];
@@ -1055,11 +1081,8 @@ public:
   /**
    * Get local Jacobian block of a DG Jacobian type for a pair of variables and a tag.
    */
-  DenseMatrix<Number> & jacobianBlockNeighbor(Moose::DGJacobianType type,
-                                              unsigned int ivar,
-                                              unsigned int jvar,
-                                              LocalDataKey,
-                                              TagID tag = 0);
+  DenseMatrix<Number> & jacobianBlockNeighbor(
+      Moose::DGJacobianType type, unsigned int ivar, unsigned int jvar, LocalDataKey, TagID tag);
 
   /**
    * Returns the jacobian block for the given mortar Jacobian type. This jacobian block can involve
@@ -1079,7 +1102,7 @@ public:
   void cacheResidualNodes(const DenseVector<Number> & res,
                           const std::vector<dof_id_type> & dof_index,
                           LocalDataKey,
-                          TagID tag = 0);
+                          TagID tag);
 
   /**
    * Caches the Jacobian entry 'value', to eventually be
@@ -1089,8 +1112,8 @@ public:
    * dof_id_type) since that is what the SparseMatrix interface uses,
    * but at the time of this writing, those two types are equivalent.
    */
-  void cacheJacobian(
-      numeric_index_type i, numeric_index_type j, Real value, LocalDataKey, TagID tag = 0);
+  void
+  cacheJacobian(numeric_index_type i, numeric_index_type j, Real value, LocalDataKey, TagID tag);
 
   /**
    * Caches the Jacobian entry 'value', to eventually be
@@ -1111,7 +1134,7 @@ public:
                           const std::vector<dof_id_type> & jdof_indices,
                           Real scaling_factor,
                           LocalDataKey,
-                          TagID tag = 0);
+                          TagID tag);
 
   /**
    * Process the supplied residual values. This is a mirror of of the non-templated version of \p
@@ -1936,7 +1959,7 @@ private:
                           const MooseVariableBase & jvar,
                           const std::vector<dof_id_type> & idof_indices,
                           const std::vector<dof_id_type> & jdof_indices,
-                          TagID tag = 0);
+                          TagID tag);
 
   /**
    * Push non-zeros of a local Jacobian block with proper scaling into cache for a certain tag.
