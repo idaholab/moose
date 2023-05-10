@@ -12,7 +12,6 @@
 #include "SubProblem.h"
 #include "FEProblem.h"
 #include "MooseObject.h"
-#include "MooseApp.h"
 #include "MooseMesh.h"
 #include "MeshMetaDataInterface.h"
 
@@ -36,11 +35,14 @@ Restartable::Restartable(const MooseObject * moose_object,
 Restartable::Restartable(MooseApp & moose_app,
                          const std::string & name,
                          const std::string & system_name,
-                         THREAD_ID tid)
+                         THREAD_ID tid,
+                         const bool read_only,
+                         const RestartableDataMapName & metaname)
   : _restartable_app(moose_app),
     _restartable_system_name(system_name),
     _restartable_tid(tid),
-    _restartable_read_only(false),
+    _restartable_read_only(read_only),
+    _metaname(metaname),
     _restartable_name(name)
 {
 }
@@ -48,10 +50,10 @@ Restartable::Restartable(MooseApp & moose_app,
 RestartableDataValue &
 Restartable::registerRestartableDataOnApp(const std::string & name,
                                           std::unique_ptr<RestartableDataValue> data,
-                                          THREAD_ID tid)
+                                          THREAD_ID tid) const
 {
   return _restartable_app.registerRestartableData(
-      name, std::move(data), tid, _restartable_read_only);
+      name, std::move(data), tid, _restartable_read_only, _metaname);
 }
 
 void

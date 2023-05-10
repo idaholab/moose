@@ -54,7 +54,7 @@ private:
 
   /// Name of the pytorch output file. This is used for loading and storing
   /// already existing data.
-  const std::string _filename;
+  const std::string _nn_filename;
 
   /// Switch indicating if an already existing neural net should be read from a
   /// file or not. This can be used to load existing torch files (from previous

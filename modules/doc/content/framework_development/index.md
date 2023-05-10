@@ -10,6 +10,8 @@ For development of MOOSE-based applications see [Application Development](applic
 
 [Contributing](framework/contributing.md)
 
+[Reviewing](framework/reviewing.md)
+
 [How a patch becomes code](framework/patch_to_code.md)
 
 [Code Standards](sqa/framework_scs.md) - How to format any code that goes into the framework

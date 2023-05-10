@@ -39,7 +39,7 @@ LibtorchANNTrainer::validParams()
       "The type of activation functions to use. It is either one value "
       "or one value per hidden layer.");
   params.addParam<std::string>(
-      "filename", "net.pt", "Filename used to output the neural net parameters.");
+      "nn_filename", "net.pt", "Filename used to output the neural net parameters.");
   params.addParam<bool>("read_from_file",
                         false,
                         "Switch to allow reading old trained neural nets for further training.");
@@ -65,7 +65,7 @@ LibtorchANNTrainer::LibtorchANNTrainer(const InputParameters & parameters)
         "num_neurons_per_layer", getParam<std::vector<unsigned int>>("num_neurons_per_layer"))),
     _activation_function(declareModelData<std::vector<std::string>>(
         "activation_function", getParam<std::vector<std::string>>("activation_function"))),
-    _filename(getParam<std::string>("filename")),
+    _nn_filename(getParam<std::string>("nn_filename")),
     _read_from_file(getParam<bool>("read_from_file")),
     _nn(declareModelData<std::shared_ptr<Moose::LibtorchArtificialNeuralNet>>("nn"))
 {
@@ -114,12 +114,12 @@ LibtorchANNTrainer::postTrain()
 
   // We create a neural net (for the definition of the net see the header file)
   _nn = std::make_shared<Moose::LibtorchArtificialNeuralNet>(
-      _filename, num_inputs, 1, _num_neurons_per_layer, _activation_function);
+      _nn_filename, num_inputs, 1, _num_neurons_per_layer, _activation_function);
 
   if (_read_from_file)
     try
     {
-      torch::load(_nn, _filename);
+      torch::load(_nn, _nn_filename);
       _console << "Loaded requested .pt file." << std::endl;
     }
     catch (const c10::Error & e)
