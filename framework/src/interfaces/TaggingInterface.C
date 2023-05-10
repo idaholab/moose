@@ -282,6 +282,21 @@ TaggingInterface::prepareMatrixTag(Assembly & assembly,
 }
 
 void
+TaggingInterface::prepareMatrixTagNonlocal(Assembly & assembly,
+                                           unsigned int ivar,
+                                           unsigned int jvar)
+{
+  _ke_blocks.resize(_matrix_tags.size());
+  mooseAssert(_matrix_tags.size() >= 1, "we need at least one active tag");
+  auto mat_vector = _matrix_tags.begin();
+  for (MooseIndex(_matrix_tags) i = 0; i < _matrix_tags.size(); i++, ++mat_vector)
+    _ke_blocks[i] =
+        &assembly.jacobianBlockNonlocal(ivar, jvar, Assembly::LocalDataKey{}, *mat_vector);
+
+  _nonlocal_ke.resize(_ke_blocks[0]->m(), _ke_blocks[0]->n());
+}
+
+void
 TaggingInterface::prepareMatrixTagNeighbor(Assembly & assembly,
                                            unsigned int ivar,
                                            unsigned int jvar,
@@ -368,6 +383,13 @@ TaggingInterface::accumulateTaggedLocalMatrix(Assembly & assembly,
               "Passed-in k must match the blocks we are about to sum into");
   for (auto & ke : _ke_blocks)
     *ke += k;
+}
+
+void
+TaggingInterface::accumulateTaggedNonlocalMatrix()
+{
+  for (auto & ke : _ke_blocks)
+    *ke += _nonlocal_ke;
 }
 
 void

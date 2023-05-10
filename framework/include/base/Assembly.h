@@ -791,10 +791,7 @@ public:
     // Blessed classes
     friend class Assembly;
     friend class TaggingInterface;
-    // Classes that should be fixed to use TaggingInterface
-    friend class NonlocalIntegratedBC;
-    friend class NonlocalKernel;
-    // And by proxy
+    // Classes that should be fixed
     friend class NonlinearSystemBase;
     LocalDataKey() {}
     LocalDataKey(const LocalDataKey &) {}

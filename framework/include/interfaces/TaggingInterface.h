@@ -129,6 +129,14 @@ protected:
                         DenseMatrix<Number> & k) const;
 
   /**
+   * Prepare data for computing nonlocal element jacobian according to the ative tags.
+   * Jacobian blocks for different tags will be extracted from Assembly.
+   * A nonlocal Jacobian will be zeroed. It should be called
+   * right before the nonlocal element matrix is computed.
+   */
+  void prepareMatrixTagNonlocal(Assembly & assembly, unsigned int ivar, unsigned int jvar);
+
+  /**
    * Prepare data for computing element jacobian according to the ative tags
    * for DG and interface kernels.
    * Jacobian blocks for different tags will be extracted from Assembly.
@@ -178,6 +186,12 @@ protected:
                                    unsigned int ivar,
                                    unsigned int jvar,
                                    const DenseMatrix<Number> & k);
+
+  /**
+   * Nonlocal Jacobian blocks  will be appended by adding the current nonlocal kernel Jacobian.
+   * It should be called after the nonlocal element matrix has been computed.
+   */
+  void accumulateTaggedNonlocalMatrix();
 
   void accumulateTaggedLocalMatrix(Assembly & assembly,
                                    unsigned int ivar,
@@ -297,11 +311,14 @@ protected:
   /// SubProblem that contains tag info
   SubProblem & _subproblem;
 
-  /// Holds residual entries as they are accumulated by this Kernel
+  /// Holds local residual entries as they are accumulated by this Kernel
   DenseVector<Number> _local_re;
 
-  /// Holds residual entries as they are accumulated by this Kernel
+  /// Holds local Jacobian entries as they are accumulated by this Kernel
   DenseMatrix<Number> _local_ke;
+
+  /// Holds nonlocal Jacobian entries as they are accumulated by this Kernel
+  DenseMatrix<Number> _nonlocal_ke;
 
 private:
   /**
