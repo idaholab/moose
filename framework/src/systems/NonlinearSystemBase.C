@@ -2159,32 +2159,29 @@ NonlinearSystemBase::constraintJacobians(bool displaced)
                     nfc->overwriteSecondaryJacobian() ? 1. : nfc->variable().scalingFactor();
 
                 // Cache the jacobian block for the secondary side
-                _fe_problem.assembly(0, number())
-                    .cacheJacobianBlock(nfc->_Kee,
-                                        secondary_dofs,
-                                        nfc->_connected_dof_indices,
-                                        scaling_factor,
-                                        Assembly::LocalDataKey{});
+                nfc->addJacobian(_fe_problem.assembly(0, number()),
+                                 nfc->_Kee,
+                                 secondary_dofs,
+                                 nfc->_connected_dof_indices,
+                                 scaling_factor);
 
                 // Cache Ken, Kne, Knn
                 if (nfc->addCouplingEntriesToJacobian())
                 {
                   // Make sure we use a proper scaling factor (e.g. don't use an interior scaling
                   // factor when we're overwriting secondary stuff)
-                  _fe_problem.assembly(0, number())
-                      .cacheJacobianBlock(nfc->_Ken,
-                                          secondary_dofs,
-                                          nfc->primaryVariable().dofIndicesNeighbor(),
-                                          scaling_factor,
-                                          Assembly::LocalDataKey{});
+                  nfc->addJacobian(_fe_problem.assembly(0, number()),
+                                   nfc->_Ken,
+                                   secondary_dofs,
+                                   nfc->primaryVariable().dofIndicesNeighbor(),
+                                   scaling_factor);
 
                   // Use _connected_dof_indices to get all the correct columns
-                  _fe_problem.assembly(0, number())
-                      .cacheJacobianBlock(nfc->_Kne,
-                                          nfc->primaryVariable().dofIndicesNeighbor(),
-                                          nfc->_connected_dof_indices,
-                                          nfc->variable().scalingFactor(),
-                                          Assembly::LocalDataKey{});
+                  nfc->addJacobian(_fe_problem.assembly(0, number()),
+                                   nfc->_Kne,
+                                   nfc->primaryVariable().dofIndicesNeighbor(),
+                                   nfc->_connected_dof_indices,
+                                   nfc->variable().scalingFactor());
 
                   // We've handled Ken and Kne, finally handle Knn
                   _fe_problem.cacheJacobianNeighbor(0);
@@ -2213,32 +2210,29 @@ NonlinearSystemBase::constraintJacobians(bool displaced)
                   nfc->computeOffDiagJacobian(jvar->number());
 
                   // Cache the jacobian block for the secondary side
-                  _fe_problem.assembly(0, number())
-                      .cacheJacobianBlock(nfc->_Kee,
-                                          secondary_dofs,
-                                          nfc->_connected_dof_indices,
-                                          scaling_factor,
-                                          Assembly::LocalDataKey{});
+                  nfc->addJacobian(_fe_problem.assembly(0, number()),
+                                   nfc->_Kee,
+                                   secondary_dofs,
+                                   nfc->_connected_dof_indices,
+                                   scaling_factor);
 
                   // Cache Ken, Kne, Knn
                   if (nfc->addCouplingEntriesToJacobian())
                   {
                     // Make sure we use a proper scaling factor (e.g. don't use an interior scaling
                     // factor when we're overwriting secondary stuff)
-                    _fe_problem.assembly(0, number())
-                        .cacheJacobianBlock(nfc->_Ken,
-                                            secondary_dofs,
-                                            jvar->dofIndicesNeighbor(),
-                                            scaling_factor,
-                                            Assembly::LocalDataKey{});
+                    nfc->addJacobian(_fe_problem.assembly(0, number()),
+                                     nfc->_Ken,
+                                     secondary_dofs,
+                                     jvar->dofIndicesNeighbor(),
+                                     scaling_factor);
 
                     // Use _connected_dof_indices to get all the correct columns
-                    _fe_problem.assembly(0, number())
-                        .cacheJacobianBlock(nfc->_Kne,
-                                            nfc->variable().dofIndicesNeighbor(),
-                                            nfc->_connected_dof_indices,
-                                            nfc->variable().scalingFactor(),
-                                            Assembly::LocalDataKey{});
+                    nfc->addJacobian(_fe_problem.assembly(0, number()),
+                                     nfc->_Kne,
+                                     nfc->variable().dofIndicesNeighbor(),
+                                     nfc->_connected_dof_indices,
+                                     nfc->variable().scalingFactor());
 
                     // We've handled Ken and Kne, finally handle Knn
                     _fe_problem.cacheJacobianNeighbor(0);
@@ -2392,20 +2386,18 @@ NonlinearSystemBase::constraintJacobians(bool displaced)
                 std::vector<dof_id_type> secondary_dofs(1, nec->variable().nodalDofIndex());
 
                 // Cache the jacobian block for the secondary side
-                _fe_problem.assembly(0, number())
-                    .cacheJacobianBlock(nec->_Kee,
-                                        secondary_dofs,
-                                        nec->_connected_dof_indices,
-                                        nec->variable().scalingFactor(),
-                                        Assembly::LocalDataKey{});
+                nec->addJacobian(_fe_problem.assembly(0, number()),
+                                 nec->_Kee,
+                                 secondary_dofs,
+                                 nec->_connected_dof_indices,
+                                 nec->variable().scalingFactor());
 
                 // Cache the jacobian block for the primary side
-                _fe_problem.assembly(0, number())
-                    .cacheJacobianBlock(nec->_Kne,
-                                        nec->primaryVariable().dofIndicesNeighbor(),
-                                        nec->_connected_dof_indices,
-                                        nec->variable().scalingFactor(),
-                                        Assembly::LocalDataKey{});
+                nec->addJacobian(_fe_problem.assembly(0, number()),
+                                 nec->_Kne,
+                                 nec->primaryVariable().dofIndicesNeighbor(),
+                                 nec->_connected_dof_indices,
+                                 nec->variable().scalingFactor());
 
                 _fe_problem.cacheJacobian(0);
                 _fe_problem.cacheJacobianNeighbor(0);
@@ -2433,20 +2425,18 @@ NonlinearSystemBase::constraintJacobians(bool displaced)
                   nec->computeOffDiagJacobian(jvar->number());
 
                   // Cache the jacobian block for the secondary side
-                  _fe_problem.assembly(0, number())
-                      .cacheJacobianBlock(nec->_Kee,
-                                          secondary_dofs,
-                                          nec->_connected_dof_indices,
-                                          nec->variable().scalingFactor(),
-                                          Assembly::LocalDataKey{});
+                  nec->addJacobian(_fe_problem.assembly(0, number()),
+                                   nec->_Kee,
+                                   secondary_dofs,
+                                   nec->_connected_dof_indices,
+                                   nec->variable().scalingFactor());
 
                   // Cache the jacobian block for the primary side
-                  _fe_problem.assembly(0, number())
-                      .cacheJacobianBlock(nec->_Kne,
-                                          nec->variable().dofIndicesNeighbor(),
-                                          nec->_connected_dof_indices,
-                                          nec->variable().scalingFactor(),
-                                          Assembly::LocalDataKey{});
+                  nec->addJacobian(_fe_problem.assembly(0, number()),
+                                   nec->_Kne,
+                                   nec->variable().dofIndicesNeighbor(),
+                                   nec->_connected_dof_indices,
+                                   nec->variable().scalingFactor());
 
                   _fe_problem.cacheJacobian(0);
                   _fe_problem.cacheJacobianNeighbor(0);

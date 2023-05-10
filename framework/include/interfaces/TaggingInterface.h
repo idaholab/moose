@@ -13,7 +13,7 @@
 #include "MooseTypes.h"
 #include "MultiMooseEnum.h"
 #include "Assembly.h"
-#include "SystemBase.h"
+#include "NonlinearSystemBase.h"
 #include "MooseVariableFE.h"
 
 #include "libmesh/dense_vector.h"
@@ -361,6 +361,8 @@ private:
   /// A container to hold absolute values of residuals passed into \p addResiduals. We maintain
   /// this data member to avoid constant dynamic heap allocations
   std::vector<Real> _absolute_residuals;
+
+  friend void NonlinearSystemBase::constraintJacobians(bool);
 };
 
 #define usingTaggingInterfaceMembers                                                               \

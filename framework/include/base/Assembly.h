@@ -791,8 +791,6 @@ public:
     // Blessed classes
     friend class Assembly;
     friend class TaggingInterface;
-    // Classes that should be fixed
-    friend class NonlinearSystemBase;
     LocalDataKey() {}
     LocalDataKey(const LocalDataKey &) {}
   };
