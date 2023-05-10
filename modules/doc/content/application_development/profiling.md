@@ -7,6 +7,10 @@ installation process.  Although it works best on Linux platforms, it also
 works reasonably well on Mac OS.  Instruments also works well for profiling
 applications on Mac systems.
 
+!alert note
+For superficial profiling of a simulation, the [PerfGraph utility](content/source/outputs/PerfGraphOutput.md)
+can be leveraged directly from the input file.
+
 ## Install Google's gperftools
 
 If your environment package from the MOOSE installation process has included Google's gperftools,

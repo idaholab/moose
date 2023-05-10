@@ -20,6 +20,10 @@
 - [What is happening behind the scenes in my simulation?](Debug/index.md)
   - [During setup](Debug/index.md#debug-setup)
   - [During execution](Debug/index.md#debug-order)
+- Why is my solve/application slow?
+  - [As a developer of the application](content/application_development/profiling.md)
+  - [As a user](content/source/outputs/PerfGraphOutput.md)
+
 
 Numerous questions/answers can also be found in on the following resources.
 Please search whether your question has already been answered before posting,
