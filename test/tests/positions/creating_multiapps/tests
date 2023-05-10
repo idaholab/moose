@@ -1,0 +1,54 @@
+[Tests]
+  issues = '#23587'
+  design = 'syntax/Positions/index.md'
+
+  [test]
+    type = 'JSONDiff'
+    input = 'apps_from_positions.i'
+    jsondiff = 'apps_from_positions_out.json'
+
+    requirement = "The system shall be able to create multiapps from positions objects."
+  []
+  [initial_positions]
+    type = 'JSONDiff'
+    input = 'apps_from_positions.i'
+    jsondiff = 'initial_positions.json'
+    cli_args = "Outputs/file_base=initial_positions
+                Positions/file/initial_positions=input/positions_1d
+                Positions/input/initial_positions=file/positions_1d
+                Positions/input/positions='0 1 0 1 0 2 0 1 1 1 3 2'"
+    # must be the same size at least as the initial positions
+
+    # Expected behavior:
+    # - the reporter positions is not able to get the initial positions (input) from the FilePositions
+    # - the multiapps are created using the initial positions, however, when
+    # the positions are retrieved for output, the positions have been updated
+
+    requirement = "The system shall be able to create multiapps from positions objects using their "
+                  "initial positions."
+  []
+
+  [error]
+    requirement = "The system shall error if"
+
+    [not_init]
+      type = RunException
+      input = 'apps_from_positions.i'
+      cli_args = 'MultiApps/m1/positions_objects=results_m1'
+      detail = 'the positions objects to use for creating multiapps are not initialized, or'
+      expect_err = 'Positions vector has not been initialized.'
+    []
+    [size_changed]
+      type = RunException
+      input = 'apps_from_positions.i'
+      cli_args = "Outputs/file_base=initial_positions
+                  Positions/input/initial_positions=file/positions_1d
+                  Transfers/nn/type=MultiAppGeneralFieldNearestNodeTransfer
+                  Transfers/nn/from_multi_app=m1
+                  Transfers/nn/source_variable=u
+                  Transfers/nn/variable=u"
+      detail = 'the size of the current positions does not match the number of initial positions.'
+      expect_err = 'Initial positions and current positions array length do not match'
+    []
+  []
+[]

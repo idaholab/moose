@@ -11,7 +11,9 @@
 
 // MOOSE includes
 #include "Moose.h" // using namespace libMesh
+#include "DataIO.h"
 
+#include "json.h"
 #include "libmesh/point.h"
 
 // forward declarations
@@ -27,6 +29,7 @@ class Plane;
 class LineSegment
 {
 public:
+  LineSegment() = default;
   LineSegment(const Point & p0, const Point & p1);
 
   virtual ~LineSegment() = default;
@@ -65,6 +68,23 @@ public:
   const Point & end() const { return _p1; }
 
   /**
+   * Sets the beginning of the line segment.
+   */
+  void setStart(const Point & p0) { _p0 = p0; }
+
+  /**
+   * Sets the end of the line segment.
+   */
+  void setEnd(const Point & p1) { _p1 = p1; }
+
+  /**
+   * Sets the points on the line segment.
+   * @param p0 The start point of the line segment
+   * @param p1 The end point of the line segment
+   */
+  void set(const Point & p0, const Point & p1);
+
+  /**
    * Length of segment
    */
   Real length() const { return (_p0 - _p1).norm(); }
@@ -74,3 +94,8 @@ private:
 
   Point _p0, _p1;
 };
+
+void dataStore(std::ostream & stream, LineSegment & l, void * context);
+void dataLoad(std::istream & stream, LineSegment & l, void * context);
+
+void to_json(nlohmann::json & json, const LineSegment & l);

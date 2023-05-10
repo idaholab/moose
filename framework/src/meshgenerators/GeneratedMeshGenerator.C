@@ -77,8 +77,6 @@ GeneratedMeshGenerator::validParams()
   params.addParam<boundary_id_type>(
       "boundary_id_offset", 0, "This offset is added to the generated boundary IDs");
 
-  params.addParamNamesToGroup("dim", "Main");
-
   params.addParam<std::vector<ExtraElementIDName>>("extra_element_integers",
                                                    "Names of extra element integers");
 

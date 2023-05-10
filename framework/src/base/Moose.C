@@ -159,6 +159,7 @@ addActionTypes(Syntax & syntax)
   registerMooseObjectTask("add_postprocessor",            Postprocessor,          false);
   registerMooseObjectTask("add_vector_postprocessor",     VectorPostprocessor,    false);
   registerMooseObjectTask("add_reporter",                 Reporter,               false);
+  registerMooseObjectTask("add_positions",                Positions,              false);
 
   registerMooseObjectTask("add_indicator",                Indicator,              false);
   registerMooseObjectTask("add_marker",                   Marker,                 false);
@@ -309,6 +310,7 @@ addActionTypes(Syntax & syntax)
                            "(setup_dampers)"
                            "(setup_residual_debug)"
                            "(add_bounds_vectors)"
+                           "(add_positions)"
                            "(add_multi_app)"
                            "(add_transfer)"
                            "(copy_nodal_vars, copy_nodal_aux_vars)"
@@ -466,6 +468,9 @@ associateSyntaxInner(Syntax & syntax, ActionFactory & /*action_factory*/)
 
   registerSyntax("AddReporterAction", "Reporters/*");
   syntax.registerSyntaxType("Reporters/*", "ReporterName");
+
+  registerSyntax("AddPositionsAction", "Positions/*");
+  syntax.registerSyntaxType("Positions/*", "PositionsName");
 
   registerSyntax("AddDamperAction", "Dampers/*");
 

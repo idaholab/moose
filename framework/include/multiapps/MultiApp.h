@@ -27,6 +27,7 @@ class MooseApp;
 class Backup;
 class MultiAppTransfer;
 class MultiAppCoordTransform;
+class Positions;
 
 // libMesh forward declarations
 namespace libMesh
@@ -280,6 +281,11 @@ public:
   unsigned int firstLocalApp() { return _first_local_app; }
 
   /**
+   * @return Whether this rank is the first rank of the subapp(s) it's involved in
+   */
+  bool isFirstLocalRank() const;
+
+  /**
    * Whether or not this MultiApp has an app on this processor.
    */
   bool hasApp() { return _has_an_app; }
@@ -302,7 +308,7 @@ public:
    * @param app The global app number you want the position for.
    * @return the position
    */
-  const Point & position(unsigned int app) const { return _positions[app]; }
+  const Point & position(unsigned int app) const;
 
   /**
    * "Reset" the App corresponding to the global App number
@@ -467,10 +473,15 @@ protected:
   /// The type of application to build
   std::string _app_type;
 
-  /// The positions of all of the apps
+  /// The positions of all of the apps, using input constant vectors (to be deprecated)
   std::vector<Point> _positions;
+  /// The positions of all of the apps, using the Positions system
+  std::vector<const Positions *> _positions_objs;
+  /// The offsets, in case multiple Positions objects are specified
+  std::vector<unsigned int> _positions_index_offsets;
 
-  /// Toggle use of "positions"
+  /// Toggle use of "positions". Subapps are created at each different position.
+  /// List of positions can be created using the Positions system
   const bool _use_positions;
 
   /// The input file for each app's simulation

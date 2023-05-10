@@ -19,6 +19,7 @@
 #include "libmesh/fe.h"
 
 registerMooseObject("MooseApp", QuadraturePointMultiApp);
+// TODO: Deprecate and use Positions system
 
 InputParameters
 QuadraturePointMultiApp::validParams()
@@ -30,6 +31,7 @@ QuadraturePointMultiApp::validParams()
       "default quadrature, in the parent mesh.");
   params.suppressParameter<std::vector<Point>>("positions");
   params.suppressParameter<std::vector<FileName>>("positions_file");
+  params.suppressParameter<std::vector<PositionsName>>("positions_objects");
   return params;
 }
 

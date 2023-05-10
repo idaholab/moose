@@ -12,7 +12,17 @@
 #include "nlohmann/json.h"
 
 class MooseApp;
+namespace libMesh
+{
+class Point;
+}
 
-// Specializations for to_json, which _must_ be specialized in the namespace
-// in which the object is found
+// Overloads for to_json, which _must_ be overloaded in the namespace
+// in which the object is found in order to enable argument-dependent lookup.
+// See https://en.cppreference.com/w/cpp/language/adl for more information
 void to_json(nlohmann::json & json, const MooseApp & app); // MooseDocs:to_json
+
+namespace libMesh
+{
+void to_json(nlohmann::json & json, const Point & p);
+}

@@ -1019,6 +1019,9 @@ DerivativeStringClass(ExtraElementIDName);
 /// Name of a Reporter Value, second argument to ReporterName (see Reporter.h)
 DerivativeStringClass(ReporterValueName);
 
+/// Name of a Positions object
+DerivativeStringClass(PositionsName);
+
 /// Name of an Executor.  Used for inputs to Executors
 DerivativeStringClass(ExecutorName);
 

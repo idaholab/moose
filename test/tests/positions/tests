@@ -1,0 +1,54 @@
+[Tests]
+  issues = '#23587'
+  design = 'syntax/Positions/index.md'
+
+  [test]
+    requirement = "The system shall be able to load positions from"
+
+    [input]
+      type = 'JSONDiff'
+      input = 'input_positions.i'
+      jsondiff = 'input_positions_out.json'
+      detail = 'a parameter in the input file,'
+    []
+    [file]
+      type = 'JSONDiff'
+      input = 'file_positions.i'
+      jsondiff = 'file_positions_out.json'
+      detail = 'a text file,'
+    []
+    [mesh_elements]
+      type = 'JSONDiff'
+      input = 'element_centroid_positions.i'
+      jsondiff = 'element_centroid_positions_out.json'
+      detail = 'element centroids from a mesh, with or without block restriction,'
+    []
+    [blocks_and_extra_ids]
+      type = 'JSONDiff'
+      input = 'element_group_centroid_positions.i'
+      jsondiff = 'element_group_centroid_positions_out.json'
+      detail = 'centroids of groups of elements in the mesh,'
+      allow_warnings = true
+    []
+    [reporter]
+      type = 'JSONDiff'
+      input = 'reporter_positions.i'
+      jsondiff = 'reporter_positions_out.json'
+      detail = 'a reporter with data in the expected vector of points format,'
+    []
+    [multiapps]
+      type = 'JSONDiff'
+      input = 'multiapp_positions.i'
+      jsondiff = 'multiapp_positions_out.json'
+      detail = 'one or more multiapp positions,'
+    []
+    [multiapps_centroids]
+      type = 'JSONDiff'
+      input = 'multiapp_positions.i'
+      cli_args = 'Outputs/file_base=multiapp_centroids_out
+                  Positions/multiapp/use_apps_centroid=true'
+      jsondiff = 'multiapp_centroids_out.json'
+      detail = 'and one or more multiapp mesh centroids.'
+    []
+  []
+[]

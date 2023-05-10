@@ -39,7 +39,6 @@ CartesianMeshGenerator::validParams()
   params.addParam<std::vector<unsigned int>>(
       "iz", "Number of grids in all intervals in the Z direction (default to all one)");
   params.addParam<std::vector<unsigned int>>("subdomain_id", "Block IDs (default to all zero)");
-  params.addParamNamesToGroup("dim", "Main");
   params.addClassDescription("This CartesianMeshGenerator creates a non-uniform Cartesian mesh.");
   return params;
 }
