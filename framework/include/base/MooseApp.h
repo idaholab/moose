@@ -23,7 +23,6 @@
 #include "TheWarehouse.h"
 #include "RankMap.h"
 #include "MeshGeneratorSystem.h"
-#include "TimeStepperSystem.h"
 
 #include "libmesh/parallel_object.h"
 #include "libmesh/mesh_base.h"
@@ -829,11 +828,6 @@ public:
    */
   bool addRelationshipManager(std::shared_ptr<RelationshipManager> relationship_manager);
 
-  /**
-   * Gets the system that manages the TimeStepper
-   */
-  TimeStepperSystem & getTimeStepperSystem() { return _time_stepper_system; }
-
 private:
   /**
    * Purge this relationship manager from meshes and DofMaps and finally from us. This method is
@@ -1329,9 +1323,6 @@ private:
 
   /// The system that manages the MeshGenerators
   MeshGeneratorSystem _mesh_generator_system;
-
-  /// The system that manages the TimeSteppers
-  TimeStepperSystem _time_stepper_system;
 
   /// Cache for a Backup to use for restart / recovery
   std::shared_ptr<Backup> _cached_backup;

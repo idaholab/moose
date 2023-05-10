@@ -27,6 +27,13 @@
 class CompositionDT : public TimeStepper
 {
 public:
+  /**
+   * @returns The parameters that are unique to CompositionDT
+   *
+   * This is separate so that ComposeTimeStepperAction can also
+   * add these parameters.
+   */
+  static InputParameters compositionDTParams();
   static InputParameters validParams();
 
   CompositionDT(const InputParameters & parameters);
@@ -47,15 +54,20 @@ protected:
   virtual Real computeInitialDT() override;
 
 private:
+  /**
+   * Internal method for querying TheWarehouse for the currently active timesteppers.
+   */
+  std::vector<TimeStepper *> getTimeSteppers();
+
   // The time step size computed by the Composition TimeStepper
   Real _dt;
 
   // Whether or not has an initial time step size
-  bool _has_initial_dt;
+  const bool _has_initial_dt;
 
   // The initial time step size
-  Real _initial_dt;
+  const Real _initial_dt;
 
   // The time stepper(s) input as lower bound of the time stepper size
-  std::vector<std::string> _lower_bound;
+  const std::set<std::string> _lower_bound;
 };

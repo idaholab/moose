@@ -9,8 +9,11 @@
 
 #include "ComposeTimeStepperAction.h"
 #include "TimeStepper.h"
+#include "FEProblemBase.h"
+#include "CompositionDT.h"
 #include "Factory.h"
 #include "MooseApp.h"
+#include "Transient.h"
 
 registerMooseAction("MooseApp", ComposeTimeStepperAction, "compose_time_stepper");
 
@@ -19,21 +22,13 @@ ComposeTimeStepperAction::validParams()
 {
   InputParameters params = MooseObjectAction::validParams();
 
-  params.addParam<std::string>(
-      "type",
-      "ConstantDT",
-      "A string representing the Moose Object that will be built by this Action");
+  params.set<std::string>("type") = "CompositionDT";
 
-  params.addParam<Real>("dt", 1, "Size of the time step");
-
-  params.addParam<std::vector<std::string>>(
-      "lower_bound",
-      "The input TimeSteppers to compose the lower bound time "
-      "step size.  This can either be N timesteppers or one "
-      "timestepper.");
+  params += CompositionDT::compositionDTParams();
 
   params.addClassDescription(
       "Add the composition time stepper if multiple time steppers have been created.");
+
   return params;
 }
 
@@ -45,19 +40,34 @@ ComposeTimeStepperAction::ComposeTimeStepperAction(const InputParameters & param
 void
 ComposeTimeStepperAction::act()
 {
-  auto & time_stepper_system = _app.getTimeStepperSystem();
+  // Get all of the timesteppers that have been added so far
+  std::vector<const TimeStepper *> timesteppers;
+  _problem->theWarehouse().query().condition<AttribSystem>("TimeStepper").queryInto(timesteppers);
+
+  for (const auto ts : timesteppers)
+    if (dynamic_cast<const CompositionDT *>(ts))
+      ts->mooseError(
+          "You cannot construct a ", ts->type(), "; this object is for internal use only");
+
   // The user added multiple timesteppers in [TimeSteppers] block, so
   // create a composition timestepper to compute final time step size
-  if (!_awh.getActionListByName("add_time_steppers").empty())
+  if (timesteppers.size() > 1)
   {
-    if (time_stepper_system.getNumAddedTimeSteppers() > 1)
-    {
-      auto final_timestepper = "CompositionDT";
-      auto new_params = _factory.getValidParams("CompositionDT");
-      if (isParamValid("lower_bound"))
-        new_params.set<std::vector<std::string>>("lower_bound") =
-            getParam<std::vector<std::string>>("lower_bound");
-      time_stepper_system.addTimeStepper("CompositionDT", final_timestepper, new_params);
-    }
+    const auto final_timestepper = "CompositionDT";
+    auto new_params = _factory.getValidParams(final_timestepper);
+
+    // Apply all custom parameters to CompositionDT that are
+    // provided in Executioner/TimeSteppers/*
+    new_params.applyParameters(_moose_object_pars);
+    for (const auto & param_name_value : CompositionDT::compositionDTParams())
+      if (isParamValid(param_name_value.first))
+        new_params.applyParameter(_moose_object_pars, param_name_value.first);
+
+    Transient * transient = dynamic_cast<Transient *>(_app.getExecutioner());
+    mooseAssert(transient, "The transient executioner does not exist");
+    new_params.set<Transient *>("_executioner") = transient;
+
+    _problem->addObject<TimeStepper>(
+        final_timestepper, final_timestepper, new_params, /* threaded = */ false);
   }
 }

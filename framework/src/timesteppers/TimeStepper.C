@@ -27,6 +27,7 @@ TimeStepper::validParams()
   params.declareControllable("enable");
 
   params.registerBase("TimeStepper");
+  params.registerSystemAttributeName("TimeStepper");
 
   return params;
 }

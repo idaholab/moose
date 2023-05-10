@@ -9,7 +9,8 @@
 
 #include "AddTimeStepperAction.h"
 #include "TimeStepper.h"
-#include "MooseApp.h"
+#include "FEProblemBase.h"
+#include "Transient.h"
 
 registerMooseAction("MooseApp", AddTimeStepperAction, "add_time_stepper");
 registerMooseAction("MooseApp", AddTimeStepperAction, "add_time_steppers");
@@ -37,5 +38,15 @@ AddTimeStepperAction::act()
   // Task: add_time_steppers corresponding to [TimeSteppers] block
   else
     name = _name;
-  _app.getTimeStepperSystem().addTimeStepper(_type, name, _moose_object_pars);
+
+  Transient * transient = dynamic_cast<Transient *>(_app.getExecutioner());
+  if (!transient)
+    mooseError("Cannot add TimeSteppers without a Transient executioner");
+  _moose_object_pars.set<Transient *>("_executioner") = transient;
+
+  auto ts =
+      _problem->addObject<TimeStepper>(_type, name, _moose_object_pars, /* threaded = */ false)[0];
+
+  if (name == "TimeStepper" || name == "CompositionDT")
+    ts->mooseError("The user-defined time stepper name '", name, "' is a reserved name");
 }

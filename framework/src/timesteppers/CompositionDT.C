@@ -10,23 +10,31 @@
 #include "CompositionDT.h"
 #include "MooseApp.h"
 #include "Transient.h"
+#include "TimeSequenceStepperBase.h"
 
 #include <limits>
 
 registerMooseObject("MooseApp", CompositionDT);
 
 InputParameters
-CompositionDT::validParams()
+CompositionDT::compositionDTParams()
 {
-  InputParameters params = TimeStepper::validParams();
+  auto params = emptyInputParameters();
+
   params.addParam<Real>("initial_dt", "Initial value of dt");
   params.addParam<std::vector<std::string>>(
       "lower_bound",
       "The maximum of these TimeSteppers will form the lower bound on the time "
       "step size. A single or multiple time steppers may be specified.");
-  params.addClassDescription("The time stepper take all the other time steppers as input and "
-                             "return the minimum time step size.");
 
+  return params;
+}
+
+InputParameters
+CompositionDT::validParams()
+{
+  InputParameters params = TimeStepper::validParams();
+  params += CompositionDT::compositionDTParams();
   return params;
 }
 
@@ -34,8 +42,18 @@ CompositionDT::CompositionDT(const InputParameters & parameters)
   : TimeStepper(parameters),
     _has_initial_dt(isParamValid("initial_dt")),
     _initial_dt(_has_initial_dt ? getParam<Real>("initial_dt") : 0.),
-    _lower_bound(getParam<std::vector<std::string>>("lower_bound"))
+    _lower_bound(getParam<std::vector<std::string>>("lower_bound").begin(),
+                 getParam<std::vector<std::string>>("lower_bound").end())
 {
+  // Make sure the steppers in "lower_bound" exist
+  const auto time_steppers = getTimeSteppers();
+  for (const auto & time_stepper_name : _lower_bound)
+    if (std::find_if(time_steppers.begin(),
+                     time_steppers.end(),
+                     [&time_stepper_name](const auto & ts)
+                     { return ts->name() == time_stepper_name; }) == time_steppers.end())
+      paramError(
+          "lower_bound", "Failed to find a timestepper with the name '", time_stepper_name, "'");
 }
 
 Real
@@ -50,32 +68,24 @@ CompositionDT::computeInitialDT()
 Real
 CompositionDT::computeDT()
 {
-  auto time_steppers = _app.getTimeStepperSystem().getTimeSteppers();
+  const auto time_steppers = getTimeSteppers();
 
   if (time_steppers.empty())
-    return 0;
+    mooseError("No TimeStepper(s) are currently active to compute a timestep");
 
   std::set<Real> dts;
   std::set<Real> bound_dt;
 
-  std::set<std::string> lower_bound(_lower_bound.begin(), _lower_bound.end());
-
-  for (auto const & [name, ptr] : time_steppers)
-  {
-    if (name != _app.getTimeStepperSystem().getFinalTimeStepperName())
+  for (auto & ts : time_steppers)
+    if (ts != this && !dynamic_cast<TimeSequenceStepperBase *>(ts))
     {
-      mooseAssert(ptr, "Not exist");
-      if (ptr->enabled())
-      {
-        ptr->computeStep();
-        Real dt = ptr->getCurrentDT();
-        if (lower_bound.count(name))
-          bound_dt.emplace(dt);
-        else
-          dts.emplace(dt);
-      }
+      ts->computeStep();
+      const auto dt = ts->getCurrentDT();
+      if (_lower_bound.count(ts->name()))
+        bound_dt.emplace(dt);
+      else
+        dts.emplace(dt);
     }
-  }
 
   _dt = produceCompositionDT(std::as_const(dts), std::as_const(bound_dt));
 
@@ -85,18 +95,25 @@ CompositionDT::computeDT()
 Real
 CompositionDT::getSequenceSteppersNextTime()
 {
-  auto time_sequence_steppers = _app.getTimeStepperSystem().getTimeSequenceSteppers();
+  const auto time_steppers = getTimeSteppers();
+
+  std::vector<TimeSequenceStepperBase *> time_sequence_steppers;
+  for (auto & ts : time_steppers)
+    if (auto tss = dynamic_cast<TimeSequenceStepperBase *>(ts))
+      time_sequence_steppers.push_back(tss);
+
   if (time_sequence_steppers.empty())
     return 0;
+
   Real next_time_to_hit = std::numeric_limits<Real>::max();
-  for (auto const & entry : time_sequence_steppers)
+  for (auto & tss : time_sequence_steppers)
   {
-    entry.second->init();
-    Real ts_time_to_hit = entry.second->getNextTimeInSequence();
+    tss->init();
+    Real ts_time_to_hit = tss->getNextTimeInSequence();
     if (ts_time_to_hit - _time <= _dt_min)
     {
-      entry.second->increaseCurrentStep();
-      ts_time_to_hit = entry.second->getNextTimeInSequence();
+      tss->increaseCurrentStep();
+      ts_time_to_hit = tss->getNextTimeInSequence();
     }
     if (next_time_to_hit > ts_time_to_hit)
       next_time_to_hit = ts_time_to_hit;
@@ -119,4 +136,15 @@ CompositionDT::produceCompositionDT(const std::set<Real> & dts, const std::set<R
     return std::min((ts - _time), std::max(minDT, lower_bound));
   else
     return std::max(minDT, lower_bound);
+}
+
+std::vector<TimeStepper *>
+CompositionDT::getTimeSteppers()
+{
+  std::vector<TimeStepper *> time_steppers;
+  _fe_problem.theWarehouse()
+      .query()
+      .condition<AttribSystem>("TimeStepper")
+      .queryInto(time_steppers);
+  return time_steppers;
 }
