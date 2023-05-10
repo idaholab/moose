@@ -5,6 +5,9 @@ If you are not interested in developing your own MOOSE based application, and wi
 many available physics solvers, you can install the pre-built fully-featured MOOSE binary.
 !style-end!
 
+If you are operating on a Windows machine, please first follow
+[Windows Subsystem for Linux](installation/windows.md), and then come back to these instructions.
+
 ## Install Conda
 
 !style! halign=left
@@ -43,72 +46,7 @@ moose --help
 Should produce the help page. This simple command demonstrates that you have sucessfully installed
 the MOOSE Conda package.
 
-## Run an Example
-
-!style! halign=left
-A MOOSE installation binary comes with several examples you can run to make sure everything
-is sound, as well as moving some of the example inputs into a safe location you can play with.
-!style-end!
-
-There are examples for each physics solver available by name, in the following directory:
-
-```bash
-ls $CONDA_PREFIX/moose/share/combined
-```
-
-!alert! note
-Not everything you find in this directory is a physics library. We are working on an elegant way to
-ask `moose` for all available solvers.
-!alert-end!
-
-For now, lets copy the reactor module into a safe location for editing:
-
-```bash
-mkdir -p ~/projects/examples
-cd ~/projects/examples
-moose --copy-inputs reactor_tutorial
-  <output trimmed>
-Directory successfully copied into ./combined/reactor_tutorial/
-```
-
-!alert! note
-Take note of the information being displayed in the output. `moose` is alerting to the directory
-structure it created (`the last line`). Which can sometimes not represent the exact wordage you
-provided as arguments.
-!alert-end!
-
-With the reactor module's examples and inputs copied, move into the reactor workshop directory and
-instruct `moose` to run the tests:
-
-```bash
-cd combined/reactor_tutorial
-moose --run -j 6
-```
-
-Testing will commence and take a few moments to finish. There may be several skipped tests for one
-reason or another. This is normal. However none of the tests should fail.
-
-Next, we will run a single input file manually, to demonstrate how you will ultimately be using
-`moose`. Peruse the subdirectories and find an input file you wish to run:
-
-!alert! tip
-You can list all available input files by running:
-
-```bash
-cd ~/projects/examples/combined/reactor_tutorial
-find . -name '*.i'
-```
-
-!alert-end!
-
-```bash
-cd <desired directory where input file of your choice resides>
-moose -i <the input file you chose>.i --mesh-only
-```
-
-You will see some information scroll by, and ultimately end back at your prompt. If you perform a
-directory listing (`ls`) you should see an exodus file was generated in the process (a `_in.e`
-file).
+!template load file=getting_started/installation/workshop_tutorial.md.template MOOSE_SHARE=$CONDA_PREFIX/moose/share/moose TUTORIAL=reactor_tutorial
 
 ## Viewing Results
 

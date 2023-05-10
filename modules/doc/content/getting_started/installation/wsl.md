@@ -4,8 +4,10 @@ Begin by performing the following external instructions:
 
 ## Launch VcXsrv
 
+!style! halign=left
 Each time you reboot, or basically each time VcXsrv is *not* running, and you wish to use the graphical
 capabilities of MOOSE (Peacock), you should start VcXsrv before launching your WSL terminal.
+!style-end!
 
 When starting VcXsrv, options for the server can be adjusted. In general, the default options are
 adequate, except for the following:
@@ -53,8 +55,10 @@ The requested operation is successful. Changes will not be effective until the s
 
 ### Setup Linux and Enable GUI Dependencies
 
+!style! halign=left
 Once the restart is complete, a prompt will appear on next boot continuing the Ubuntu Linux
 installation and requesting a username for the new UNIX user account.
+!style-end!
 
 ```
 Installing, this may take a few minutes....
@@ -75,7 +79,9 @@ sudo apt install x11-apps libglu1-mesa
 
 ### Configure WSL to use VcXsrv
 
+!style! halign=left
 Modify the bash profile to allow WSL to connect to VcXsrv.
+!style-end!
 
 ```bash
 echo "export DISPLAY=$(cat /etc/resolv.conf | grep nameserver | awk '{print $2}'):0.0" >> ~/.bashrc
