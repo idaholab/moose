@@ -414,10 +414,7 @@ AttribName::isEqual(const Attribute & other) const
 void
 AttribSystem::initFrom(const MooseObject * obj)
 {
-  if (!obj->isParamValid("_moose_warehouse_system_name"))
-    mooseError("The base objects supplied to the TheWarehouse must call "
-               "'registerSystemAttributeName' method in the validParams function.");
-  _val = obj->getParam<std::string>("_moose_warehouse_system_name");
+  _val = obj->parameters().getSystemAttributeName();
 }
 
 bool

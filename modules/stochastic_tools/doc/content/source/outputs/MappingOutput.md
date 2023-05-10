@@ -6,7 +6,7 @@
 
 [Mapping objects](VariableMappings/index.md), once trained, can be output to a binary file for later
 use by using this object. All data within the model that was declared using
-`declareMappingData` is automatically stored in the generated file.
+`RestartableModelInterface::declareModelData()` is automatically stored in the generated file.
 
 ## Example Input File Syntax
 

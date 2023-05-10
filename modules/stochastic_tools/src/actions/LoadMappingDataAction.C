@@ -18,47 +18,13 @@ registerMooseAction("StochasticToolsApp", LoadMappingDataAction, "load_mapping_d
 InputParameters
 LoadMappingDataAction::validParams()
 {
-  InputParameters params = Action::validParams();
+  InputParameters params = LoadModelDataAction<VariableMappingBase>::validParams();
   params.addClassDescription(
-      "Load the model data for the objects defined in the [VariableMappings] block.");
+      "Load the model data for the objects defined in the `[VariableMappings]` block.");
   return params;
 }
 
-LoadMappingDataAction::LoadMappingDataAction(const InputParameters & params) : Action(params) {}
-
-void
-LoadMappingDataAction::act()
+LoadMappingDataAction::LoadMappingDataAction(const InputParameters & params)
+  : LoadModelDataAction<VariableMappingBase>(params)
 {
-  // We fetch the mapping objects and then load the necessary data
-  std::vector<VariableMappingBase *> objects;
-  _app.theWarehouse().query().condition<AttribSystem>("VariableMappingBase").queryInto(objects);
-  for (auto mapping_ptr : objects)
-  {
-    if (mapping_ptr && mapping_ptr->isParamValid("filename"))
-      load(*mapping_ptr);
-  }
-}
-
-void
-LoadMappingDataAction::load(const VariableMappingBase & mapping)
-{
-  // File to load
-  const FileName & filename = mapping.getParam<FileName>("filename");
-
-  // Create the object that will load in data
-  RestartableDataIO data_io(_app);
-  data_io.setErrorOnLoadWithDifferentNumberOfProcessors(false);
-  data_io.setErrorOnLoadWithDifferentNumberOfThreads(false);
-
-  // Read header
-  bool pass = data_io.readRestartableDataHeaderFromFile(filename, false);
-  if (!pass)
-    mapping.paramError("filename", "The supplied file '", filename, "' failed to load.");
-
-  // Get the data object that the loaded data will be applied
-  const RestartableDataMap & meta_data = _app.getRestartableDataMap(mapping.modelMetaDataName());
-
-  // Read the supplied file
-  std::unordered_set<std::string> filter_names;
-  data_io.readRestartableData(meta_data, filter_names);
 }

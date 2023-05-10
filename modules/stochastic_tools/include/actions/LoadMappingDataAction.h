@@ -10,22 +10,13 @@
 #pragma once
 
 #include "Action.h"
-class VariableMappingBase;
+#include "LoadModelDataAction.h"
+#include "VariableMappingBase.h"
 
-/**
- * Action for loading the model data for the mapping objects
- */
-class LoadMappingDataAction : public Action
+class LoadMappingDataAction : public LoadModelDataAction<VariableMappingBase>
 {
 public:
   static InputParameters validParams();
-  LoadMappingDataAction(const InputParameters & params);
-  virtual void act() override;
 
-private:
-  /**
-   * Load the necessary information for the given model
-   * @param mapping Reference to the Mapping object whose data shall be loaded
-   */
-  void load(const VariableMappingBase & mapping);
+  LoadMappingDataAction(const InputParameters & params);
 };

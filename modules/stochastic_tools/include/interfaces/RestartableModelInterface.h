@@ -46,9 +46,15 @@ public:
   /// Accessor for the name of the model meta data
   const std::string & modelMetaDataName() const { return _model_meta_data_name; }
 
+  /// Get the associated filename
+  const FileName & getModelDataFileName() const;
+
+  /// Check if we need to load model data (if the filename parameter is used)
+  bool hasModelData() const;
+
 private:
   /// Reference to the MooseObject that uses this interface
-  const MooseObject & _object;
+  const MooseObject & _model_object;
 
   /// The model meta data name. This is used to store the restartable data within the
   /// RestartableDataMap.
