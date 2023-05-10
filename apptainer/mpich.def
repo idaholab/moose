@@ -1,6 +1,6 @@
 BootStrap: oras
 # Any Rocky-8 image which supplies a development stack with MPI available
-From: mooseharbor.hpc.inl.gov/hpc-base/rocky8-x86_64-infiniband:10-19-2022
+From: harbor.hpc.inl.gov/hpcbase/mpi_03:1.1.0
 
 %environment
     # Set Environment for MPICH

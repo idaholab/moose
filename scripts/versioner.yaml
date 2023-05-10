@@ -12,6 +12,8 @@ packages:
   petsc:
     dependencies:
       - mpich
+    apptainer:
+      from: mpich
     influential:
       - petsc
       - apptainer/petsc.def
@@ -22,6 +24,8 @@ packages:
   libmesh:
     dependencies:
       - petsc
+    apptainer:
+      from: petsc
     influential:
       - libmesh
       - apptainer/libmesh.def
@@ -37,6 +41,11 @@ packages:
       - conda/wasp/meta.yaml
       - conda/wasp/conda_build_config.yaml
   moose:
+    dependencies:
+      - libmesh
+      - wasp
+    apptainer:
+      from: libmesh
     influential:
       - apptainer/moose.def
       - apptainer/remove_channels.def
@@ -44,10 +53,10 @@ packages:
       - conda/test-tools/conda_build_config.yaml
       - conda/tools/meta.yaml
       - conda/tools/conda_build_config.yaml
-    dependencies:
-      - libmesh
   app:
-    influential:
-      - apptainer/app.def
     dependencies:
       - moose
+    apptainer:
+      from: moose
+    influential:
+      - apptainer/app.def

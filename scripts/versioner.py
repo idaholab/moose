@@ -214,44 +214,48 @@ class Versioner:
             return True
         return False
 
-    def influential_list(self, packages_yaml, library=None, recursive_meta=None):
+    def influential_dict(self, packages_yaml, parent=None, library=None, recursive_meta=None):
         """ build and return influential dictionary """
-        # key descriptors to be treated as control identifiers. Anything else will
-        # be treated as trackable libraries.
-        key_descriptors = ['dependencies', 'influential']
+        # key descriptors to be treated as control identifiers
+        key_descriptors = ['dependencies', 'influential', 'apptainer', 'from']
         # key name for infuential file list value
         dep_key = 'influential'
-        # key name for dependency value
-        app_key = 'dependencies'
-
         if recursive_meta is None:
             recursive_meta = {}
-        for package, values in packages_yaml.items():
+        for descriptor, values in packages_yaml.items():
             # 'values' is a dictionary with more items to discover (recurse into)
             if isinstance(values, dict):
-                # 'package' is actually a library we wish to track
-                if package not in key_descriptors:
-                    recursive_meta[package] = {}
-                # recursive inspection of packages_yaml[library], preserve history (grow)
-                self.influential_list(packages_yaml[package],
-                                      library=package,
+                # 'descriptor' is actually a library we wish to track
+                if descriptor not in key_descriptors:
+                    recursive_meta[descriptor] = {}
+                # recursive inspection of descriptors_yaml[library], preserve history (grow)
+                self.influential_dict(packages_yaml[descriptor],
+                                      parent=library,
+                                      library=descriptor,
                                       recursive_meta=recursive_meta)
             # no more dictionaries to recurse into
             else:
-                # we are inside a library with dependency(s)
-                if package == 'dependencies':
-                    for dep in packages_yaml[package]:
-                        if dep in recursive_meta.keys():
-                            recursive_meta[library][dep_key] = recursive_meta[library].get(dep_key,
-                                                                                           [])
-                            recursive_meta[library][app_key] = recursive_meta[library].get(app_key,
-                                                                                           [])
-                            recursive_meta[library][dep_key].extend(recursive_meta[dep][dep_key])
-                            recursive_meta[library][app_key].append(dep)
-                # anything else (influential at time of writing)
+                # recursive descriptor dictionary (apptainer meta)
+                if parent is not None:
+                    _lib_dict = recursive_meta[parent]
                 else:
-                    recursive_meta[library][package] = recursive_meta[library].get(package, [])
-                    recursive_meta[library][package].extend(packages_yaml[package])
+                    _lib_dict = recursive_meta[library]
+                # we are inside a library with dependency(s)
+                if descriptor == 'dependencies':
+                    for dep in packages_yaml[descriptor]:
+                        if dep in recursive_meta.keys():
+                            _lib_dict[dep_key] = recursive_meta[library].get(dep_key, [])
+                            _lib_dict[descriptor] = recursive_meta[library].get(descriptor, [])
+                            _lib_dict[dep_key].extend(recursive_meta[dep][dep_key])
+                            _lib_dict[descriptor].append(dep)
+                # Apptainer only supports one dependency (no use of list type)
+                elif descriptor == 'from':
+                    _lib_dict[library] = recursive_meta[parent].get(library, {})
+                    _lib_dict[library][descriptor] = values
+                # anything else (influential files at time of writing)
+                else:
+                    _lib_dict[descriptor] = recursive_meta[library].get(descriptor, [])
+                    _lib_dict[descriptor].extend(packages_yaml[descriptor])
         return recursive_meta
 
     @staticmethod
@@ -262,7 +266,7 @@ class Versioner:
         child['hash_table'] = {}
         child['hash'] = None
         child['conda'] = {}
-        child['apptainer'] = {}
+        child['apptainer'] = child.get('apptainer', {})
         return child
 
     def version_meta(self, commit='HEAD'):
@@ -279,7 +283,7 @@ class Versioner:
 
         # Use dependencies listed in yaml file
         if sort_list:
-            influential_meta = self.influential_list(packages)
+            influential_meta = self.influential_dict(packages)
         # Use OrderedDict method
         else:
             influential_meta = OrderedDict()
@@ -315,9 +319,9 @@ class Versioner:
 
             package_hash = app_hash if is_app else self.get_hash(package_meta['hash_list'])
             package_meta['hash'] = package_hash
-            package_meta['apptainer'] = self.apptainer_meta(app_name if is_app else package,
-                                                            package_hash,
-                                                            is_app)
+            package_meta['apptainer'].update(self.apptainer_meta(app_name if is_app else package,
+                                                                package_hash,
+                                                                is_app))
         return influential_meta
 
     @staticmethod
