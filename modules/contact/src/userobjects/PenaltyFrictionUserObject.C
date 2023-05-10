@@ -53,8 +53,7 @@ PenaltyFrictionUserObject::PenaltyFrictionUserObject(const InputParameters & par
     _penalty(getParam<Real>("penalty")),
     _penalty_friction(isParamValid("penalty_friction") ? getParam<Real>("penalty_friction")
                                                        : getParam<Real>("penalty")),
-    _friction_coefficient(getParam<Real>("friction_coefficient")),
-    _dt(_fe_problem.dt())
+    _friction_coefficient(getParam<Real>("friction_coefficient"))
 {
   auto check_type = [this](const auto & var, const auto & var_name)
   {

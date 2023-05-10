@@ -27,6 +27,10 @@ PenaltyWeightedGapUserObject::validParams()
       1.0,
       "penalty_multiplier > 0",
       "The penalty growth factor between augmented Lagrange iterations");
+  params.addParam<Real>("augmented_lagrange_predictor_scale",
+                        0.0,
+                        "Perform a linear extrapolation from the last two augmented lagrange "
+                        "multipliers to the current timestep");
   params.addRangeCheckedParam<Real>(
       "penetration_tolerance",
       1e-9,
@@ -48,7 +52,8 @@ PenaltyWeightedGapUserObject::PenaltyWeightedGapUserObject(const InputParameters
     _lagrangian_iteration_number(_augmented_lagrange_problem
                                      ? _augmented_lagrange_problem->getLagrangianIterationNumber()
                                      : _no_iterations),
-    _new_time_step(true)
+    _predictor_scale(getParam<Real>("augmented_lagrange_predictor_scale")),
+    _dt(_fe_problem.dt())
 {
   auto check_type = [this](const auto & var, const auto & var_name)
   {
@@ -129,8 +134,30 @@ PenaltyWeightedGapUserObject::reinit()
 void
 PenaltyWeightedGapUserObject::selfTimestepSetup()
 {
-  // _dof_to_lagrange_multiplier.clear();
-  // _new_time_step = true;
+  // do not clear the LMs!
+
+  // predict next time step LM linearly
+  if (_predictor_scale != 0.0)
+    for (auto & [dof_object, lagrange_multiplier] : _dof_to_lagrange_multiplier)
+    {
+      // save off current LM
+      const auto current_lm = lagrange_multiplier;
+
+      // find old LM
+      const auto it = _dof_to_old_lagrange_multiplier.find(dof_object);
+      if (it != _dof_to_old_lagrange_multiplier.end())
+      {
+        // extrapolate LM (todo: _dt_old and _dt should be used here)
+        const auto old_lm = it->second;
+        lagrange_multiplier += (current_lm - old_lm) / _dt_old * _dt * _predictor_scale;
+      }
+
+      // save unupdated LM old LM storage
+      _dof_to_old_lagrange_multiplier[dof_object] = current_lm;
+    }
+
+  // save old timestep
+  _dt_old = _dt;
 }
 
 void

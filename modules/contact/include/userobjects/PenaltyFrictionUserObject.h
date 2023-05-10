@@ -76,7 +76,4 @@ protected:
   /// Map from degree of freedom to augmented lagrange multiplier
   std::unordered_map<const DofObject *, std::pair<Real, Real>>
       _dof_to_frictional_lagrange_multipliers;
-
-  /// Current delta t... or timestep size.
-  const Real & _dt;
 };

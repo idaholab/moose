@@ -69,6 +69,14 @@ protected:
 
   /// Map from degree of freedom to augmented lagrange multiplier
   std::unordered_map<const DofObject *, Real> _dof_to_lagrange_multiplier;
+  std::unordered_map<const DofObject *, Real> _dof_to_old_lagrange_multiplier;
 
-  bool _new_time_step;
+  /// scale factor for the linear prediction for the augmented lagrange multipliers
+  const Real _predictor_scale;
+
+  /// Current delta t... or timestep size.
+  const Real & _dt;
+
+  /// previous timestep size
+  Real _dt_old;
 };
