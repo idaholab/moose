@@ -37,6 +37,12 @@ private:
   const std::vector<Real> & _y_coord;
   ///z coordinate
   const std::vector<Real> & _z_coord;
+  const std::vector<Point> & _point;
   /// map to associate points with their index into the vpp value
   std::map<Point, size_t> _point_to_index;
+
+  /// Convenience vector to be able to initialize a reference to a vector if undefined
+  const std::vector<Real> _empty_vec = {};
+  /// Convenience vector of points to be able to initialize a reference to a vector if undefined
+  const std::vector<Point> _empty_points = {};
 };

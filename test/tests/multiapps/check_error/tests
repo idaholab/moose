@@ -52,7 +52,7 @@
   [./both_positions]
     type = 'RunException'
     input = 'check_error.i'
-    expect_err = 'Both \'positions\' and \'positions_file\' cannot be specified simultaneously in MultiApp'
+    expect_err = 'Only one \'positions\' parameter may be specified'
     cli_args = 'MultiApps/multi/input_files="sub1.i sub2.i" MultiApps/multi/positions="0 1 0" MultiApps/multi/positions_file="position1"'
 
     issues = "#1845 #3556 #5784"

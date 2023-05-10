@@ -57,6 +57,7 @@
 #include "SideVectorPostprocessor.h"
 #include "InternalSideVectorPostprocessor.h"
 #include "GeneralVectorPostprocessor.h"
+#include "Positions.h"
 #include "Indicator.h"
 #include "Marker.h"
 #include "MultiApp.h"
@@ -3745,6 +3746,21 @@ FEProblemBase::getUserObjectBase(const std::string & name, const THREAD_ID tid /
   if (objs.empty())
     mooseError("Unable to find user object with name '" + name + "'");
   mooseAssert(objs.size() == 1, "Should only find one UO");
+  return *(objs[0]);
+}
+
+const Positions &
+FEProblemBase::getPositionsObject(const std::string & name) const
+{
+  std::vector<Positions *> objs;
+  theWarehouse()
+      .query()
+      .condition<AttribSystem>("UserObject")
+      .condition<AttribName>(name)
+      .queryInto(objs);
+  if (objs.empty())
+    mooseError("Unable to find Positions object with name '" + name + "'");
+  mooseAssert(objs.size() == 1, "Should only find one Positions");
   return *(objs[0]);
 }
 

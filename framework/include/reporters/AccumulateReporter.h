@@ -27,7 +27,7 @@ public:
 
 protected:
   /**
-   * Helper for declaring an accumalative reporter value
+   * Helper for declaring an accumulative reporter value
    * This will fill in _accumulated_values if the reporter value is found
    */
   template <typename T>

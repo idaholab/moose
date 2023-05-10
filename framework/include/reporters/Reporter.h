@@ -75,7 +75,7 @@ protected:
    *             can be used as the default value (see ReporterContext.h).
    *
    * The 'mode' indicates how the value that is produced is represented in parallel. It is the
-   * reponsibility of the Reporter object to get it to that state. The ReporterContext objects
+   * responsibility of the Reporter object to get it to that state. The ReporterContext objects
    * are designed to help with this. The mode can be one of the following:
    *
    *     ReporterMode::ROOT Indicates that the value produced is complete/correct on the

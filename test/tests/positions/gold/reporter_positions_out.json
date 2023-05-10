@@ -1,0 +1,42 @@
+{
+    "reporters": {
+        "reporter": {
+            "type": "ReporterPositions",
+            "values": {
+                "positions_1d": {
+                    "type": "std::vector<libMesh::Point>"
+                }
+            }
+        }
+    },
+    "time_steps": [
+        {
+            "reporter": {
+                "positions_1d": [
+                    {
+                        "x": 0.0,
+                        "y": 0.0,
+                        "z": 1.0
+                    },
+                    {
+                        "x": 1.0,
+                        "y": 0.0,
+                        "z": 2.0
+                    },
+                    {
+                        "x": 0.1,
+                        "y": 0.1,
+                        "z": 1.0
+                    },
+                    {
+                        "x": 1.2,
+                        "y": 0.0,
+                        "z": 2.2
+                    }
+                ]
+            },
+            "time": 2.0,
+            "time_step": 2
+        }
+    ]
+}

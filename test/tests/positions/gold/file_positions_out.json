@@ -1,0 +1,42 @@
+{
+    "reporters": {
+        "file": {
+            "type": "FilePositions",
+            "values": {
+                "positions_1d": {
+                    "type": "std::vector<libMesh::Point>"
+                }
+            }
+        }
+    },
+    "time_steps": [
+        {
+            "file": {
+                "positions_1d": [
+                    {
+                        "x": 0.0,
+                        "y": 0.0,
+                        "z": 0.0
+                    },
+                    {
+                        "x": 0.5,
+                        "y": 0.5,
+                        "z": 0.0
+                    },
+                    {
+                        "x": 0.6,
+                        "y": 0.6,
+                        "z": 0.0
+                    },
+                    {
+                        "x": 0.7,
+                        "y": 0.7,
+                        "z": 0.0
+                    }
+                ]
+            },
+            "time": 2.0,
+            "time_step": 2
+        }
+    ]
+}

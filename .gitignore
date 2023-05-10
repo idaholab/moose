@@ -58,6 +58,7 @@ temp_print_trace.*
 *.poly
 *.mpx
 *.btr
+*.tex-e
 *.xml
 *.xml.*
 *.gmv

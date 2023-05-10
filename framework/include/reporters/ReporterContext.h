@@ -29,7 +29,7 @@ class ReporterData;
  *
  * @see Reporter, ReporterData, ReporterState
  *
- * This file contains several reporter context types with specific polymophism:
+ * This file contains several reporter context types with specific polymorphism:
  *
  * ReporterContextBase--->ReporterContext<T>
  *                        |        |
@@ -44,12 +44,12 @@ class ReporterData;
  * When creating a new context, it is generally advisable to derive from ReporterGeneralContext
  * (@see VectorPostprocessorContext). The reason for the split between ReporterGeneralContext
  * and ReporterVectorContext is due to the declareVectorClone and resize functionality. If we
- * were to declare a vector clone in ReporterContext there would be a infinite instatiation of
+ * were to declare a vector clone in ReporterContext there would be a infinite instantiation of
  * of vector contexts, which is why this declare is defined in ReporterGeneralContext and an
  * error is thrown in ReporterVectorContext. There is also no easy way to partially instantiate
  * a member function (you have to due it for the entire class), which is why the resize is
  * defined in ReporterVectorContext. That being said, we are always open for improvements,
- * especially for simplifying the polymophism of these contexts.
+ * especially for simplifying the polymorphism of these contexts.
  */
 class ReporterContextBase : public libMesh::ParallelObject
 {
@@ -85,6 +85,9 @@ public:
   /// and include all the data including the old values.
   ///
   /// This method only outputs the current value within the JSONOutput object.
+  /// NOTE: nlohmann qualification is needed for argument json because the std::vector overload is
+  ///       not in the std namespace, it's in the nlohmann namespace, and will come up in argument
+  ///       dependent lookup (ADL) only because of this qualification.
   ///
   /// @see JsonIO.h
   /// @see JSONOutput.h
