@@ -91,8 +91,11 @@ NodalConstraint::computeResidual(NumericVector<Number> & residual)
       }
     }
   }
-  _assembly.cacheResidualNodes(re, primarydof, Assembly::LocalDataKey{});
-  _assembly.cacheResidualNodes(neighbor_re, secondarydof, Assembly::LocalDataKey{});
+  // We've already applied scaling
+  if (!primarydof.empty())
+    addResiduals(_assembly, re, primarydof, /*scaling_factor=*/1);
+  if (!secondarydof.empty())
+    addResiduals(_assembly, neighbor_re, secondarydof, /*scaling_factor=*/1);
 }
 
 void
