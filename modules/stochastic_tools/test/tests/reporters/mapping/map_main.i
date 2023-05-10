@@ -39,7 +39,7 @@
     type = PODMapping
     solution_storage = parallel_storage
     variables = "u v"
-    num_modes = '5 5'
+    num_modes_to_compute = '5 5'
     extra_slepc_options = "-svd_monitor_all"
   []
 []

@@ -25,13 +25,14 @@ PODMapping::validParams()
                              "between full-order and reduced-order spaces.");
   params.addParam<UserObjectName>(
       "solution_storage", "The name of the storage reporter where the snapshots are located.");
-  params.addRequiredParam<std::vector<dof_id_type>>(
-      "num_modes",
-      "The number of modes requested for each variable. Modes with 0 eigenvalues are filtered out, "
-      "so the real number of modes might be lower than this. This is also used for setting the "
-      "subspace sizes for distributed singular value solves. By default the subspace used for the "
+  params.addParam<std::vector<dof_id_type>>(
+      "num_modes_to_compute",
+      "The number of modes that this object should compute. "
+      "Modes with 0 eigenvalues are filtered out, so the real number of modes "
+      "might be lower than this. This is also used for setting the "
+      "subspace sizes for distributed singular value solves. By default, the subspace used for the "
       "SVD is twice as big as the number of requested vectors. For more information see the SLEPc "
-      "manual.");
+      "manual. If not specified, only one mode is computed per variable.");
   params.addParam<std::vector<Real>>(
       "energy_threshold",
       std::vector<Real>(),
@@ -47,15 +48,16 @@ PODMapping::validParams()
 PODMapping::PODMapping(const InputParameters & parameters)
   : VariableMappingBase(parameters),
     UserObjectInterface(this),
-    _num_modes(getParam<std::vector<dof_id_type>>("num_modes")),
+    _num_modes(isParamValid("num_modes_to_compute")
+                   ? getParam<std::vector<dof_id_type>>("num_modes_to_compute")
+                   : std::vector<dof_id_type>(_variable_names.size(), 1)),
     _energy_threshold(getParam<std::vector<Real>>("energy_threshold")),
-    _left_basis_functions(
-        declareModelData<std::map<VariableName, std::vector<DenseVector<Real>>>>(
-                  "left_basis_functions")),
-    _right_basis_functions(
-            declareModelData<std::map<VariableName, std::vector<DenseVector<Real>>>>(
-                  "right_basis_functions")),
-    _singular_values(declareModelData<std::map<VariableName, std::vector<Real>>>("singular_values")),
+    _left_basis_functions(declareModelData<std::map<VariableName, std::vector<DenseVector<Real>>>>(
+        "left_basis_functions")),
+    _right_basis_functions(declareModelData<std::map<VariableName, std::vector<DenseVector<Real>>>>(
+        "right_basis_functions")),
+    _singular_values(
+        declareModelData<std::map<VariableName, std::vector<Real>>>("singular_values")),
     _extra_slepc_options(getParam<std::string>("extra_slepc_options")),
     _parallel_storage(isParamValid("solution_storage")
                           ? &getUserObject<ParallelSolutionStorage>("solution_storage")

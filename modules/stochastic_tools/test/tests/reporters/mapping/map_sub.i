@@ -80,7 +80,7 @@
   [pod]
     type = PODMapping
     filename = "map_training_data_pod_mapping.rd"
-    num_modes = '5 5'
+    num_modes_to_compute = '5 5'
   []
 []
 

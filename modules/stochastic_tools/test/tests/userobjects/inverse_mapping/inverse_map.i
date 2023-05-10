@@ -81,7 +81,7 @@
   [pod]
     type = PODMapping
     filename = "create_mapping_main_mapping_pod_mapping.rd"
-    num_modes = 2
+    num_modes_to_compute = 2
   []
 []
 

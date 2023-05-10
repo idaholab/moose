@@ -97,8 +97,8 @@ protected:
   dof_id_type determineNumberOfModes(const VariableName & vname,
                                      const std::vector<Real> & converged_evs);
 
-  /// The number of modes requested by the user
-  const std::vector<dof_id_type> & _num_modes;
+  /// The number of modes which need to be computed
+  const std::vector<dof_id_type> _num_modes;
 
   /// The energy thresholds for truncation of the number of modes, defined by the user
   const std::vector<Real> & _energy_threshold;
