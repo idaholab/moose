@@ -1,0 +1,13 @@
+[Tests]
+  design = 'HeatRateHeatFluxRZ.md'
+
+  [test]
+    type = 'CSVDiff'
+    input = 'heat_rate_heat_flux_rz.i'
+    csvdiff = 'heat_rate_heat_flux_rz_out.csv'
+    recover = false # no time steps
+
+    requirement = 'The system shall compute the heat rate for a user-provided heat flux function for a cylindrical boundary.'
+    issues = '#24261'
+  []
+[]

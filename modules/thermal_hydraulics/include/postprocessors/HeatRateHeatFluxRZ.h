@@ -9,22 +9,19 @@
 
 #pragma once
 
-#include "HSBoundary.h"
+#include "HeatRateHeatFlux.h"
+#include "RZSymmetry.h"
 
 /**
- * Applies a specified heat flux to a heat structure boundary
+ * Integrates a heat flux function over a cylindrical boundary in a XYZ coordinate system.
  */
-class HSBoundaryHeatFlux : public HSBoundary
+class HeatRateHeatFluxRZ : public HeatRateHeatFlux, public RZSymmetry
 {
 public:
-  HSBoundaryHeatFlux(const InputParameters & params);
+  static InputParameters validParams();
 
-  virtual void addMooseObjects() override;
+  HeatRateHeatFluxRZ(const InputParameters & parameters);
 
 protected:
-  /// Heat flux function name
-  const FunctionName & _q_fn_name;
-
-public:
-  static InputParameters validParams();
+  virtual Real computeQpIntegral() override;
 };

@@ -20,8 +20,7 @@ HeatRateConvection::validParams()
   params.addRequiredCoupledVar("T", "Temperature");
   params.addRequiredParam<FunctionName>("T_ambient", "Ambient temperature function");
   params.addRequiredParam<FunctionName>("htc", "Ambient heat transfer coefficient function");
-  params.addParam<Real>(
-      "scale", 1.0, "Factor by which to scale integral, like when using a 2D domain");
+  params.addParam<FunctionName>("scale", 1.0, "Function by which to scale the heat flux");
 
   params.addClassDescription("Integrates a convective heat flux over a boundary.");
 
@@ -34,13 +33,13 @@ HeatRateConvection::HeatRateConvection(const InputParameters & parameters)
     _T(coupledValue("T")),
     _T_ambient_fn(getFunction("T_ambient")),
     _htc_ambient_fn(getFunction("htc")),
-    _scale(getParam<Real>("scale"))
+    _scale_fn(getFunction("scale"))
 {
 }
 
 Real
 HeatRateConvection::computeQpIntegral()
 {
-  return _scale * _htc_ambient_fn.value(_t, _q_point[_qp]) *
+  return _scale_fn.value(_t, _q_point[_qp]) * _htc_ambient_fn.value(_t, _q_point[_qp]) *
          (_T_ambient_fn.value(_t, _q_point[_qp]) - _T[_qp]);
 }

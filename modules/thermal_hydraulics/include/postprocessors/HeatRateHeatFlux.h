@@ -9,28 +9,21 @@
 
 #pragma once
 
-#include "SideIntegralPostprocessor.h"
+#include "FunctionSideIntegral.h"
 
 /**
- * Integrates a convective heat flux over a boundary.
+ * Integrates a heat flux function over a boundary.
  */
-class HeatRateConvection : public SideIntegralPostprocessor
+class HeatRateHeatFlux : public FunctionSideIntegral
 {
 public:
-  HeatRateConvection(const InputParameters & parameters);
+  static InputParameters validParams();
+
+  HeatRateHeatFlux(const InputParameters & parameters);
 
 protected:
   virtual Real computeQpIntegral() override;
 
-  /// Temperature
-  const VariableValue & _T;
-  /// Ambient temperature function
-  const Function & _T_ambient_fn;
-  /// Ambient heat transfer coefficient function
-  const Function & _htc_ambient_fn;
   /// Function by which to scale the heat flux
   const Function & _scale_fn;
-
-public:
-  static InputParameters validParams();
 };

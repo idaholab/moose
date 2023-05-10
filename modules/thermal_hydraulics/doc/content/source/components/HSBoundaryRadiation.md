@@ -17,6 +17,10 @@ the name of a post-processor $f$ that can scale the boundary conditions.
 
 !syntax parameters /Components/HSBoundaryRadiation
 
+If this component is used with a cylindrical heat structure, the post-processor
+*name*`_integral` is added, which gives the heat rate found by integrating this
+heat flux over the boundary.
+
 ## Formulation
 
 !include heat_structure_formulation.md

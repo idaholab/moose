@@ -27,6 +27,8 @@ protected:
 
   /// Post-processor by which to scale boundary condition
   const PostprocessorValue & _scale_pp;
+  /// Function by which to scale the boundary condition
+  const Function & _scale_fn;
 
 public:
   static InputParameters validParams();
