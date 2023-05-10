@@ -12,7 +12,7 @@
 #
 # as well as follow the directions pertaining to modifying that file.
 {% set build = 0 %}
-{% set version = "2023.05.02" %}
+{% set version = "2023.05.10" %}
 
 package:
   name: moose-test-tools
