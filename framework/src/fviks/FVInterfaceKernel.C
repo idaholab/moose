@@ -171,7 +171,7 @@ FVInterfaceKernel::addJacobian(const ADReal & resid,
 {
   addJacobian(_assembly,
               std::array<ADReal, 1>{{resid}},
-              std::vector<dof_id_type>({dof_index}),
+              std::array<dof_id_type, 1>{{dof_index}},
               scaling_factor);
 }
 

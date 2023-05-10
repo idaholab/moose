@@ -31,6 +31,6 @@ INSFVTimeKernel::addResidualAndJacobian(const ADReal & residual, const dof_id_ty
 {
   addResidualsAndJacobian(_assembly,
                           std::array<ADReal, 1>{{residual}},
-                          std::vector<dof_id_type>({dof_index}),
+                          std::array<dof_id_type, 1>{{dof_index}},
                           _var.scalingFactor());
 }

@@ -189,6 +189,6 @@ ComputeWeightedGapLMMechanicalContact::enforceConstraintOnDof(const DofObject * 
 
   addResidualsAndJacobian(_assembly,
                           std::array<ADReal, 1>{{dof_residual}},
-                          std::vector<dof_id_type>({dof_index}),
+                          std::array<dof_id_type, 1>{{dof_index}},
                           _var->scalingFactor());
 }
