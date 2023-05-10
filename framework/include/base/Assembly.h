@@ -793,9 +793,6 @@ public:
     friend class TaggingInterface;
     // Classes that should be fixed to use TaggingInterface
     friend class NodalConstraint;
-    friend class ElemElemConstraint;
-    friend class NodeElemConstraint;
-    friend class NodalConstraint;
     friend class NodeFaceConstraint;
     friend class NonlocalIntegratedBC;
     friend class NonlocalKernel;

@@ -91,12 +91,14 @@ ElemElemConstraint::computeElemNeighResidual(Moose::DGResidualType type)
     is_elem = false;
 
   const VariableTestValue & test_space = is_elem ? _test : _test_neighbor;
-  DenseVector<Number> & re =
-      is_elem ? _assembly.residualBlock(_var.number(), Assembly::LocalDataKey{})
-              : _assembly.residualBlockNeighbor(_var.number(), Assembly::LocalDataKey{});
+  if (is_elem)
+    prepareVectorTag(_assembly, _var.number());
+  else
+    prepareVectorTagNeighbor(_assembly, _var.number());
   for (_qp = 0; _qp < _constraint_q_point.size(); _qp++)
     for (_i = 0; _i < test_space.size(); _i++)
-      re(_i) += _constraint_weight[_qp] * computeQpResidual(type);
+      _local_re(_i) += _constraint_weight[_qp] * computeQpResidual(type);
+  accumulateTaggedLocalResidual();
 }
 
 void
@@ -116,22 +118,14 @@ ElemElemConstraint::computeElemNeighJacobian(Moose::DGJacobianType type)
       (type == Moose::ElementElement || type == Moose::ElementNeighbor) ? _test : _test_neighbor;
   const VariableTestValue & loc_phi =
       (type == Moose::ElementElement || type == Moose::NeighborElement) ? _phi : _phi_neighbor;
-  DenseMatrix<Number> & Kxx =
-      type == Moose::ElementElement
-          ? _assembly.jacobianBlock(_var.number(), _var.number(), Assembly::LocalDataKey{})
-      : type == Moose::ElementNeighbor
-          ? _assembly.jacobianBlockNeighbor(
-                Moose::ElementNeighbor, _var.number(), _var.number(), Assembly::LocalDataKey{})
-      : type == Moose::NeighborElement
-          ? _assembly.jacobianBlockNeighbor(
-                Moose::NeighborElement, _var.number(), _var.number(), Assembly::LocalDataKey{})
-          : _assembly.jacobianBlockNeighbor(
-                Moose::NeighborNeighbor, _var.number(), _var.number(), Assembly::LocalDataKey{});
+  prepareMatrixTagNeighbor(_assembly, _var.number(), _var.number(), type);
 
   for (_qp = 0; _qp < _constraint_q_point.size(); _qp++)
     for (_i = 0; _i < test_space.size(); _i++)
       for (_j = 0; _j < loc_phi.size(); _j++)
-        Kxx(_i, _j) += _constraint_weight[_qp] * computeQpJacobian(type);
+        _local_ke(_i, _j) += _constraint_weight[_qp] * computeQpJacobian(type);
+
+  accumulateTaggedLocalMatrix();
 }
 
 void
