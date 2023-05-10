@@ -1,5 +1,9 @@
 # Troubleshooting Failed Solves
 
+!alert note
+Before troubleshooting, it is a good idea to make a copy of the input so you do not accidentally leave
+troubleshooting objects in the final working version of the input!
+
 If your solve does not converge, i.e. you exceed the maximum number of nonlinear iterations (`max_nl_its`), the time step gets cut.
 If this occurs repeatedly, you will eventually reach the minimum time step and the solve will fail:
 
@@ -8,14 +12,16 @@ Time Step  1, time = 100
                 dt = 2e-8
  0 Nonlinear |R| = 6.202666e+03
  1 Nonlinear |R| = 6.202666e+03
-... (until nl_max_its)
+... (until nl_max_its=10)
+10 Nonlinear |R| = 6.202666e+03
  Solve Did NOT Converge!
 
 Time Step  1, time = 100
                 dt = 1e-8
  0 Nonlinear |R| = 6.202666e+03
  1 Nonlinear |R| = 6.202666e+03
-...
+... (until nl_max_its=10)
+10 Nonlinear |R| = 6.202666e+03
  Solve Did NOT Converge!
 
 *** ERROR ***
@@ -23,24 +29,52 @@ Solve failed and timestep already at or below dtmin, cannot continue!
 ```
 
 Your solve may be failing for various reasons. First you should identify if it is the nonlinear or the (nested) linear solve that is
-failing.
+failing. Failed linear solves can make the nonlinear solver fail. Similarly, a failing nonlinear solve can take the current
+solution vectors in a domain where the linear solve is completely untractable. Therefore it is really important to
+identify the pathway to non-convergence using the [Debug](Debug/index.md) and [Outputs](Outputs/index.md) options.
 
+The following snippets show how to obtain detailed prints of the residual convergence during the linear and nonlinear solves.
+Nonlinear residual prints are turned on by default in most applications, but the syntax is similar if not.
 
-There are numerous reasons that can make both fail, and some that only make only one fail. We will first go over shared reasons, then
-focus on the linear solver, and finally the nonlinear solver.
+!listing input=tests/misc/save_in/block-restricted-save-in.i block=Outputs
+
+!listing input=tests/outputs/debug/show_var_residual_norms_debug.i block=Debug
+
+We will first go over shared reasons for lack of convergence,
+then focus on the linear solve, and finally on the nonlinear solve.
 
 ## Both or either nonlinear and linear solves fail
 
-### Poor initial condition
+### Poor initial condition label=ic
 
 For the nonlinear solve,
 Newton's method and Newton-Krylov methods in general are only guaranteed to converge when they are in the region of attraction
 of the solution. This means that the current numerical solution is close enough that the Jacobian or the approximation to
 the Jacobian, helps produce an update vector that gets the solver nearer to the solution.
 
-For the linear solve, a bad initialization, such as the default `null` initialization, can be
+For the linear solve, a bad initialization, such as the default `null` initialization, can make the problem ill-conditioned
+or even completely out of bounds for the material properties, especially correlation that were only tuned over a physically-reachable range.
 
-The easiest
+The easiest initialization is to add to the `Variables` block a reasonable default for each variable. Depending on the
+problem being solved and the numerical scheme, it may be necessary to initialize all the nonlinear `Variables`, and
+maybe only a few of the auxiliary `AuxVariables`. For example in this flow simulation:
+
+```
+[ICs]
+  [velocity_x]
+    type = ConstantIC
+    initial_condition = 0.01 # m/s
+  []
+  [pressure]
+    type = ConstantIC
+    initial_condition = 1e5  # 1 atmosphere in Pa
+  []
+  [temperature]
+    type = ConstantIC
+    initial_condition = 300  # K
+  []
+[]
+```
 
 However, if we **cannot** guess a better initialization for the solution, a sound approach to these problems is to relax
 or linearize the equations to obtain an initial condition,
@@ -86,7 +120,25 @@ This is similar to using smaller time steps at the beginning of the transient! F
 - diagonal damping
 
 We can adapt the line search in the Newton method to take slower updates if the nonlinear search.
-This can help stabilize a nonlinear solve.
+This can help stabilize a nonlinear solve. As mentioned in the relevant
+[PETSc documentation](https://petsc.org/release/manualpages/SNES/SNESLINESEARCHBASIC/), this can be achieved as follows:
+
+```
+[Executioner]
+  ... # other executioner settings
+  line_search = 'basic'
+  petsc_options_iname = '-snes_linesearch_damping'
+  petsc_options_value = '0.5'
+```
+
+- turning off **temporarily** some physics through the [Controls](syntax/Controls/index.md) system. Kernels can be
+  turned on/off over part of the simulation as needed. In the example below, we turn on the `Diff0` kernel from 0s to 0.49s
+  then turn it off and turn on the `Diff1` kernel.
+
+!listing tests/controls/time_periods/kernels/kernels.i block=Kernels Controls
+
+- MultiApps
+
 
 ## Bad mesh
 
@@ -110,35 +162,15 @@ Initial residual before setting preset BCs: 65444.1
       1 Linear |R| = 5.381557e+04
       2 Linear |R| = 5.381315e+04
       3 Linear |R| = 5.381315e+04
-      4 Linear |R| = 5.381315e+04
-      5 Linear |R| = 5.381315e+04
-      6 Linear |R| = 5.381315e+04
-      7 Linear |R| = 5.381315e+04
-      8 Linear |R| = 5.381315e+04
-      9 Linear |R| = 5.381315e+04
-     10 Linear |R| = 5.381315e+04
-     11 Linear |R| = 5.381315e+04
-     12 Linear |R| = 5.381315e+04
-     13 Linear |R| = 5.381315e+04
-     14 Linear |R| = 5.381315e+04
+... (until l_max_its=15)
      15 Linear |R| = 5.381315e+04
  1 Nonlinear |R| = 5.510740e+04
       0 Linear |R| = 5.510740e+04
       1 Linear |R| = 5.510740e+04
       2 Linear |R| = 5.510738e+04
       3 Linear |R| = 5.510737e+04
-      4 Linear |R| = 5.510735e+04
-      5 Linear |R| = 5.510734e+04
-      6 Linear |R| = 5.510732e+04
-      7 Linear |R| = 5.510730e+04
-      8 Linear |R| = 5.510729e+04
-      9 Linear |R| = 5.510727e+04
-     10 Linear |R| = 5.510726e+04
-     11 Linear |R| = 5.510724e+04
-     12 Linear |R| = 5.510722e+04
-     13 Linear |R| = 5.510721e+04
-     14 Linear |R| = 5.510719e+04
-     15 Linear |R| = 5.510718e+04
+... (until l_max_its=15)
+     15 Linear |R| = 5.381315e+04
  Solve Did NOT Converge!
 ```
 
@@ -158,9 +190,13 @@ SVD
 Eigenvalues
 
 
-## Parallelism issues label=parallel
+### Parallelism issues label=parallel
 
 If the linear solver converges without issue in serial, but fails in parallel
+
+
+### Solver reports the presence of a 'not a number' (NaN)
+
 
 
 ## Failing nonlinear solve
