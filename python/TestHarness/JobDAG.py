@@ -30,7 +30,7 @@ class JobDAG(object):
             # We only need a single tester so we know what spec file to load.
             # TODO: would be nice to have access to this without needing tester.specs
             tester = job[0].getTester()
-            root = pyhit.load(os.path.join(tester.specs['test_dir'], tester.specs['spec_file']))
+            root = pyhit.load(os.path.join(tester.specs['test_dir'], tester.specs['run_dir']))
             self.__parallel_scheduling = root.children[0].get('parallel_scheduling', False)
 
         return self.__parallel_scheduling

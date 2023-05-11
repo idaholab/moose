@@ -360,11 +360,11 @@ class TestHarness:
         if self.options.input_file_name != '':
             self._infiles = self.options.input_file_name.split(',')
 
-        if self.options.spec_file and os.path.isdir(self.options.spec_file):
-            search_dir = self.options.spec_file
-        elif self.options.spec_file and os.path.isfile(self.options.spec_file):
-            search_dir = os.path.dirname(self.options.spec_file)
-            self._infiles = [os.path.basename(self.options.spec_file)]
+        if self.options.run_dir and os.path.isdir(self.options.run_dir):
+            search_dir = self.options.run_dir
+        elif self.options.run_dir and os.path.isfile(self.options.run_dir):
+            search_dir = os.path.dirname(self.options.run_dir)
+            self._infiles = [os.path.basename(self.options.run_dir)]
         else:
             search_dir = os.getcwd()
 
@@ -409,7 +409,7 @@ class TestHarness:
                         if file in self._infiles \
                                and os.path.abspath(os.path.join(dirpath, file)) not in launched_tests:
 
-                            if self.notMySpecFile(dirpath, file):
+                            if self.notMyRunDir(dirpath, file):
                                 continue
 
                             saved_cwd = os.getcwd()
@@ -487,11 +487,11 @@ class TestHarness:
 
         return testers
 
-    def notMySpecFile(self, dirpath, filename):
-        """ true if dirpath/filename does not match supplied --spec-file """
-        if (self.options.spec_file
-            and os.path.isfile(self.options.spec_file)
-            and os.path.join(dirpath, filename) != self.options.spec_file):
+    def notMyRunDir(self, dirpath, filename):
+        """ true if dirpath/filename does not match supplied --run-dir """
+        if (self.options.run_dir
+            and os.path.isfile(self.options.run_dir)
+            and os.path.join(dirpath, filename) != self.options.run_dir):
             return True
 
     def augmentParameters(self, filename, tester, testroot_params={}):
@@ -513,7 +513,7 @@ class TestHarness:
         relative_hitpath = os.path.join(*params['hit_path'].split(os.sep)[2:])  # Trim root node "[Tests]"
         formatted_name = relative_path + '.' + relative_hitpath
 
-        params['spec_file'] = filename
+        params['run_dir'] = filename
         params['test_name'] = formatted_name
         params['test_dir'] = test_dir
         params['relative_path'] = relative_path
@@ -1025,8 +1025,7 @@ class TestHarness:
         parser.add_argument('--failed-tests', action='store_true', dest='failed_tests', help='Run tests that previously failed')
         parser.add_argument('--check-input', action='store_true', dest='check_input', help='Run check_input (syntax) tests only')
         parser.add_argument('--no-check-input', action='store_true', dest='no_check_input', help='Do not run check_input (syntax) tests')
-        parser.add_argument('--spec-file', action='store', type=str, dest='spec_file', help='Supply a path to the tests spec file to run the tests found therein. Or supply a path to a directory in which the TestHarness will search for tests. You can further alter which tests spec files are found through the use of -i and --re')
-        parser.add_argument('-C', '--test-root', nargs=1, metavar='dir', type=str, dest='spec_file', help='Tell the TestHarness to search for test spec files at this location.')
+        parser.add_argument('--run-dir', action='store', type=str, dest='run_dir', help='Supply a full or relative path to the tests spec file to run the tests found therein.')
         parser.add_argument('-d', '--pedantic-checks', action='store_true', dest='pedantic_checks', help="Run pedantic checks of the Testers' file writes looking for race conditions.")
 
         # Options that pass straight through to the executable
@@ -1104,8 +1103,8 @@ class TestHarness:
         if opts.check_input and opts.enable_recover:
             print('ERROR: --check-input and --recover cannot be used simultaneously')
             sys.exit(1)
-        if opts.spec_file and not os.path.exists(opts.spec_file):
-            print('ERROR: --spec-file supplied but path does not exist')
+        if opts.run_dir and not os.path.exists(opts.run_dir):
+            print('ERROR: --run-dir supplied but path does not exist')
             sys.exit(1)
         if opts.queue_cleanup and not opts.pbs:
             print('ERROR: --queue-cleanup cannot be used without additional queue options')

@@ -22,10 +22,10 @@ class QueueManager(Scheduler):
     pool once per group (see augmentJobs).
 
     Using this one unmodified job, the spec file involved is noted, and instructs the derived
-    scheduler how to launch this one single spec file (using --spec-file), along with any
+    scheduler how to launch this one single spec file (using --run-dir), along with any
     supplied/allowable command line arguments (--re, --cli-args, --ignore, etc).
 
-    The third-party queueing manager then executes `run_tests --spec-file /path/to/spec_file`.
+    The third-party queueing manager then executes `run_tests --run-dir /path/to/--run-dir`.
 
     It is the results of this additional ./run_tests run, that is captured and presented to the user as
     the finished result of the test.
@@ -162,7 +162,7 @@ class QueueManager(Scheduler):
                 current_args.extend(arg.split('='))
 
             # Note: we are removing cli-args/ignore because we need to re-encapsulate them below
-            bad_keyword_args.extend(['--spec-file', '-i', '--cli-args', '-j', '-l', '-o', '--output-dir', '--ignore', '--re'])
+            bad_keyword_args.extend(['--run-dir', '-i', '--cli-args', '-j', '-l', '-o', '--output-dir', '--ignore', '--re'])
 
             # remove the key=value pair argument
             for arg in bad_keyword_args:
@@ -197,8 +197,8 @@ class QueueManager(Scheduler):
         # get current sys.args we are allowed to include when we launch run_tests
         args = list(self.cleanAndModifyArgs())
 
-        # Build [<args>, '--spec-file' ,/path/to/tests', '-o', '/path/to', '--sep-files']
-        args.extend(['--spec-file',
+        # Build [<args>, '--run-dir' ,/path/to/tests', '-o', '/path/to', '--sep-files']
+        args.extend(['--run-dir',
                      os.path.join(job.getTestDir(),
                      self.options.input_file_name),
                      '-o', job.getTestDir(),
@@ -215,7 +215,7 @@ class QueueManager(Scheduler):
 
     def _isProcessReady(self, job_data):
         """
-        Return bool on `run_tests --spec_file` submission results being available. Due to the
+        Return bool on `run_tests --run-dir` submission results being available. Due to the
         way the TestHarness writes to this results file (when the TestHarness exits), this file,
         when available, means every test contained therein is finished in some form or another.
 
@@ -416,7 +416,7 @@ class QueueManager(Scheduler):
         plugin = self.harness.scheduler.__class__.__name__
 
         # Top Job (entire TestDir group) not originally part of what was launched
-        # (not launched due to: --re, -i --spec-file)
+        # (not launched due to: --re, -i --run-dir)
         if top_job_key not in self.options.results_storage.keys():
             return
         # All jobs ended up being skipped in this group
