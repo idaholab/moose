@@ -121,499 +121,27 @@ For both the SHRT-17 and SHRT-45R transients, the uniform power model overestima
 
 To run the steady state problem use the following input file:
 
-```bash
-# Following Benchmark Specifications and Data Requirements for EBR-II Shutdown Heat Removal Tests SHRT-17 and SHRT-45R
-# Available at: https://publications.anl.gov/anlpubs/2012/06/73647.pdf
-###################################################
-#Steady state subchannel calcultion
-# Thermal-hydraulics parameters
-###################################################
-T_in = 624.70556 #Kelvin
-Total_Surface_Area = 0.000854322 #m3
-mass_flux_in = ${fparse 2.45 / Total_Surface_Area} # ${fparse 2.6923 / Total_Surface_Area} #
-#P_out = 43850.66 # Pa plus 4.778 meters of Na to the free surface in pool or Plus 0.57 meters of Na to core outlet.
-P_out = 2.0e5
-Power_initial = 486200 #W (Page 26,35 of ANL document)
-# T_in = 616.4 #Kelvin
-# Total_Surface_Area = 0.000854322 #m3
-# mass_flux_in = ${fparse 2.667 / Total_Surface_Area} #${fparse 2.427 / Total_Surface_Area}
-# #P_out = 43850.66 # Pa plus 4.778 meters of Na to the free surface in pool or Plus 0.57 meters of Na to core outlet.
-# P_out = 2.0e5
-# Power_initial = 379800 #W (Page 26,35 of ANL document)
-###################################################
-# Geometric parameters
-###################################################
-scale_factor = 0.01
-fuel_pin_pitch = ${fparse 0.5664*scale_factor}
-fuel_pin_diameter = ${fparse 0.4419*scale_factor}
-wire_z_spacing = ${fparse 15.24*scale_factor}
-wire_diameter = ${fparse 0.1244*scale_factor}
-inner_duct_in = ${fparse 4.64*scale_factor}
-n_rings = 5
-heated_length = ${fparse 34.3*scale_factor}
-unheated_length_exit = ${fparse 26.9*scale_factor}
-###################################################
-
-[TriSubChannelMesh]
-  [subchannel]
-    type = TriSubChannelMeshGenerator
-    nrings = ${n_rings}
-    n_cells = 50
-    flat_to_flat = ${inner_duct_in}
-    unheated_length_exit = ${unheated_length_exit}
-    heated_length = ${heated_length}
-    rod_diameter = ${fuel_pin_diameter}
-    pitch = ${fuel_pin_pitch}
-    dwire = ${wire_diameter}
-    hwire = ${wire_z_spacing}
-    spacer_z = '0.0'
-    spacer_k = '0.0'
-  []
-
-  [fuel_pins]
-    type = TriPinMeshGenerator
-    input = subchannel
-    nrings = ${n_rings}
-    n_cells = 50
-    unheated_length_exit = ${unheated_length_exit}
-    heated_length = ${heated_length}
-    pitch = ${fuel_pin_pitch}
-  []
-
-  [duct]
-    type = TriDuctMeshGenerator
-    input = fuel_pins
-    nrings = ${n_rings}
-    n_cells = 50
-    flat_to_flat = ${inner_duct_in}
-    unheated_length_exit = ${unheated_length_exit}
-    heated_length = ${heated_length}
-    pitch = ${fuel_pin_pitch}
-  []
-[]
-
-[Functions]
-  [axial_heat_rate]
-    type = ParsedFunction
-    value = '(pi/2)*sin(pi*z/L)*exp(-alpha*z)/(1.0/alpha*(1.0 - exp(-alpha*L)))*L'
-    vars = 'L alpha'
-    vals = '${heated_length} 1.8012'
-  []
-[]
-
-[AuxVariables]
-  [mdot]
-    block = subchannel
-  []
-  [SumWij]
-    block = subchannel
-  []
-  [P]
-    block = subchannel
-  []
-  [DP]
-    block = subchannel
-  []
-  [h]
-    block = subchannel
-  []
-  [T]
-    block = subchannel
-  []
-  [rho]
-    block = subchannel
-  []
-  [S]
-    block = subchannel
-  []
-  [Sij]
-    block = subchannel
-  []
-  [w_perim]
-    block = subchannel
-  []
-  [mu]
-    block = subchannel
-  []
-  [q_prime]
-    block = fuel_pins
-  []
-  [Tpin]
-    block = fuel_pins
-  []
-  [q_prime_duct]
-    block = duct
-  []
-  [Tduct]
-    block = duct
-  []
-[]
-
-[FluidProperties]
-  [sodium]
-    type = PBSodiumFluidProperties
-  []
-[]
-
-[Problem]
-  type = LiquidMetalSubChannel1PhaseProblem
-  fp = sodium
-  n_blocks = 1
-  beta = 0.006
-  P_out = ${P_out}
-  CT = 2.6
-  compute_density = true
-  compute_viscosity = true
-  compute_power = true
-  P_tol = 1.0e-4
-  T_tol = 1.0e-5
-  implicit = true
-  segregated = false
-  interpolation_scheme = 'upwind'
-[]
-
-[ICs]
-  [S_IC]
-    type = TriFlowAreaIC
-    variable = S
-  []
-
-  [w_perim_IC]
-    type = TriWettedPerimIC
-    variable = w_perim
-  []
-
-  [q_prime_IC]
-    type = TriPowerIC
-    variable = q_prime
-    power = ${Power_initial}
-    filename = "pin_power_profile61.txt"
-    # axial_heat_rate = axial_heat_rate
-  []
-
-  [T_ic]
-    type = ConstantIC
-    variable = T
-    value = ${T_in}
-  []
-
-  [P_ic]
-    type = ConstantIC
-    variable = P
-    value = ${P_out}
-  []
-
-  [DP_ic]
-    type = ConstantIC
-    variable = DP
-    value = 0.0
-  []
-
-  [Viscosity_ic]
-    type = ViscosityIC
-    variable = mu
-    p = ${P_out}
-    T = T
-    fp = sodium
-  []
-
-  [rho_ic]
-    type = RhoFromPressureTemperatureIC
-    variable = rho
-    p = ${P_out}
-    T = T
-    fp = sodium
-  []
-
-  [h_ic]
-    type = SpecificEnthalpyFromPressureTemperatureIC
-    variable = h
-    p = ${P_out}
-    T = T
-    fp = sodium
-  []
-
-  [mdot_ic]
-    type = ConstantIC
-    variable = mdot
-    value = 0.0
-  []
-[]
-
-[AuxKernels]
-  [T_in_bc]
-    type = ConstantAux
-    variable = T
-    boundary = inlet
-    value = ${T_in}
-    execute_on = 'timestep_begin'
-    block = subchannel
-  []
-  [mdot_in_bc]
-    type = MassFlowRateAux
-    variable = mdot
-    boundary = inlet
-    area = S
-    mass_flux = ${mass_flux_in}
-    execute_on = 'timestep_begin'
-  []
-[]
-
-[Outputs]
-  exodus = true
-  csv = true
-[]
-
-[Postprocessors]
-  [TTC-27]
-    type = SubChannelPointValue
-    variable = T
-    index = 91
-    execute_on = 'TIMESTEP_END'
-    height = 0.322
-  []
-  [TTC-28]
-    type = SubChannelPointValue
-    variable = T
-    index = 50
-    execute_on = 'TIMESTEP_END'
-    height = 0.322
-  []
-  [TTC-29]
-    type = SubChannelPointValue
-    variable = T
-    index = 21
-    execute_on = 'TIMESTEP_END'
-    height = 0.322
-  []
-  [TTC-30]
-    type = SubChannelPointValue
-    variable = T
-    index = 4
-    execute_on = 'TIMESTEP_END'
-    height = 0.322
-  []
-  [TTC-31]
-    type = SubChannelPointValue
-    variable = T
-    index = 2
-    execute_on = 'TIMESTEP_END'
-    height = 0.322
-  []
-  [TTC-32]
-    type = SubChannelPointValue
-    variable = T
-    index = 16
-    execute_on = 'TIMESTEP_END'
-    height = 0.322
-  []
-  [TTC-33]
-    type = SubChannelPointValue
-    variable = T
-    index = 42
-    execute_on = 'TIMESTEP_END'
-    height = 0.322
-  []
-  [TTC-34]
-    type = SubChannelPointValue
-    variable = T
-    index = 80
-    execute_on = 'TIMESTEP_END'
-    height = 0.322
-  []
-  [TTC-35]
-    type = SubChannelPointValue
-    variable = T
-    index = 107
-    execute_on = 'TIMESTEP_END'
-    height = 0.322
-  []
-  # [MTC-20]
-  # type = SubChannelPointValue
-  # variable = T
-  # index = 33
-  # execute_on = 'TIMESTEP_END'
-  # height = 0.172
-  # []
-  # [MTC-22]
-  #   type = SubChannelPointValue
-  #   variable = T
-  #   index = 3
-  #   execute_on = 'TIMESTEP_END'
-  #   height = 0.172
-  # []
-  # [MTC-24]
-  #   type = SubChannelPointValue
-  #   variable = T
-  #   index = 28
-  #   execute_on = 'TIMESTEP_END'
-  #   height = 0.172
-  # []
-  # [MTC-25]
-  #   type = SubChannelPointValue
-  #   variable = T
-  #   index = 60
-  #   execute_on = 'TIMESTEP_END'
-  #   height = 0.172
-  # []
-  # [MTC-26]
-  #   type = SubChannelPointValue
-  #   variable = T
-  #   index = 106
-  #   execute_on = 'TIMESTEP_END'
-  #   height = 0.172
-  # []
-  # [14TC-37]
-  #   type = SubChannelPointValue
-  #   variable = T
-  #   index = 52
-  #   execute_on = 'TIMESTEP_END'
-  #   height = 0.480
-  # []
-  # [14TC-39]
-  #   type = SubChannelPointValue
-  #   variable = T
-  #   index = 6
-  #   execute_on = 'TIMESTEP_END'
-  #   height = 0.480
-  # []
-  # [14TC-41]
-  #   type = SubChannelPointValue
-  #   variable = T
-  #   index = 40
-  #   execute_on = 'TIMESTEP_END'
-  #   height = 0.480
-  # []
-  # [14TC-43]
-  #   type = SubChannelPointValue
-  #   variable = T
-  #   index = 105
-  #   execute_on = 'TIMESTEP_END'
-  #   height = 0.480
-  # []
-[]
-
-[Executioner]
-  type = Steady
-  nl_rel_tol = 0.9
-  l_tol = 0.9
-[]
-
-################################################################################
-# A multiapp that projects data to a detailed mesh
-################################################################################
-[MultiApps]
-  [viz]
-    type = FullSolveMultiApp
-    input_files = '3d_SC_ss.i'
-    execute_on = 'FINAL'
-  []
-[]
-
-[Transfers]
-  [subchannel_transfer]
-    type = MultiAppDetailedSolutionTransfer
-    to_multi_app = viz
-    variable = 'mdot SumWij P DP h T rho mu S'
-  []
-  [pin_transfer]
-    type = MultiAppDetailedPinSolutionTransfer
-    to_multi_app = viz
-    variable = 'Tpin q_prime'
-  []
-[]
-
-```
+!listing /Users/kyriv/moose_projects/subchannel/examples/EBR-II/XX09_SC_SS.i
 
 To run the transient problem use the following input file:
 
-```bash
-# Following Benchmark Specifications and Data Requirements for EBR-II Shutdown Heat Removal Tests SHRT-17 and SHRT-45R
-# Available at: https://publications.anl.gov/anlpubs/2012/06/73647.pdf
-# Transient Subchannel calculation
-###################################################
-# Thermal-hydraulics parameters
-###################################################
-T_in = 616.4 #Kelvin
-Total_Surface_Area = 0.000854322 #m3
-mass_flux_in = ${fparse 2.427 / Total_Surface_Area}
-P_out = 2.0e5
-Power_initial = 379800 #W (Page 26,35 of ANL document)
-###################################################
-# Geometric parameters
-###################################################
-scale_factor = 0.01
-fuel_pin_pitch = ${fparse 0.5664*scale_factor}
-fuel_pin_diameter = ${fparse 0.4419*scale_factor}
-wire_z_spacing = ${fparse 15.24*scale_factor}
-wire_diameter = ${fparse 0.1244*scale_factor}
-inner_duct_in = ${fparse 4.64*scale_factor}
-n_rings = 5
-heated_length = ${fparse 34.3*scale_factor}
-unheated_length_exit = ${fparse 26.9*scale_factor}
-###################################################
+!listing /Users/kyriv/moose_projects/subchannel/examples/EBR-II/XX09_SC_tr.i
 
-[TriSubChannelMesh]
-  [subchannel]
-    type = TriSubChannelMeshGenerator
-    nrings = ${n_rings}
-    n_cells = 50
-    flat_to_flat = ${inner_duct_in}
-    unheated_length_exit = ${unheated_length_exit}
-    heated_length = ${heated_length}
-    rod_diameter = ${fuel_pin_diameter}
-    pitch = ${fuel_pin_pitch}
-    dwire = ${wire_diameter}
-    hwire = ${wire_z_spacing}
-    spacer_z = '0.0'
-    spacer_k = '0.0'
-  []
+The corrected power profile is read by the following .txt file (pin_power_profile61.txt):
 
-  [fuel_pins]
-    type = TriPinMeshGenerator
-    input = subchannel
-    nrings = ${n_rings}
-    n_cells = 50
-    unheated_length_exit = ${unheated_length_exit}
-    heated_length = ${heated_length}
-    pitch = ${fuel_pin_pitch}
-  []
-[]
+!listing /Users/kyriv/moose_projects/subchannel/examples/EBR-II/pin_power_profile61.txt
 
-[AuxVariables]
-  [mdot]
-    block = subchannel
-  []
-  [SumWij]
-    block = subchannel
-  []
-  [P]
-    block = subchannel
-  []
-  [DP]
-    block = subchannel
-  []
-  [h]
-    block = subchannel
-  []
-  [T]
-    block = subchannel
-  []
-  [rho]
-    block = subchannel
-  []
-  [S]
-    block = subchannel
-  []
-  [Sij]
-    block = subchannel
-  []
-  [w_perim]
-    block = subchannel
-  []
-  [mu]
-    block = subchannel
-  []
+The Functions block defines the shape of axial power profile:
+
+!listing /Users/kyriv/moose_projects/subchannel/examples/EBR-II/XX09_SC_SS.i block=Functions language=cpp
+
+#### Transient BC's
+
+For the transient case the user needs to provide transient boundary conditions:
+
+- First define the initial power and the power history field along with the default variable q_prime, in the AuxVariables block
+
+```language=bash
   [q_prime_init]
     block = fuel_pins
   []
@@ -623,314 +151,67 @@ unheated_length_exit = ${fparse 26.9*scale_factor}
   [q_prime]
     block = fuel_pins
   []
-  [Tpin]
-    block = fuel_pins
-  []
-[]
-
-[FluidProperties]
-  [sodium]
-    type = PBSodiumFluidProperties
-  []
-[]
-
-[Problem]
-  type = LiquidMetalSubChannel1PhaseProblem
-  fp = sodium
-  n_blocks = 1
-  beta = 0.006
-  P_out = ${P_out}
-  CT = 2.6
-  compute_density = true
-  compute_viscosity = true
-  compute_power = true
-  P_tol = 1.0e-5
-  T_tol = 1.0e-5
-  implicit = true
-  segregated = false
-  interpolation_scheme = 'upwind'
-[]
-
-[ICs]
-  [S_IC]
-    type = TriFlowAreaIC
-    variable = S
-  []
-
-  [w_perim_IC]
-    type = TriWettedPerimIC
-    variable = w_perim
-  []
-
-  [q_prime_IC]
-    type = TriPowerIC
-    variable = q_prime_init
-    power = ${Power_initial}
-    filename = "pin_power_profile61_uniform.txt"
-  []
-
-  [T_ic]
-    type = ConstantIC
-    variable = T
-    value = ${T_in}
-  []
-
-  [P_ic]
-    type = ConstantIC
-    variable = P
-    value = ${P_out}
-  []
-
-  [DP_ic]
-    type = ConstantIC
-    variable = DP
-    value = 0.0
-  []
-
-  [Viscosity_ic]
-    type = ViscosityIC
-    variable = mu
-    p = ${P_out}
-    T = T
-    fp = sodium
-  []
-
-  [rho_ic]
-    type = RhoFromPressureTemperatureIC
-    variable = rho
-    p = P
-    T = T
-    fp = sodium
-  []
-
-  [h_ic]
-    type = SpecificEnthalpyFromPressureTemperatureIC
-    variable = h
-    p = P
-    T = T
-    fp = sodium
-  []
-
-  [mdot_ic]
-    type = ConstantIC
-    variable = mdot
-    value = 0.0
-  []
-[]
-
-[Functions]
-  [power_func]
-    type = PiecewiseLinear
-    data_file = 'power_history_SHRT45.csv'
-    format = "columns"
-    scale_factor = 1.0
-  []
-  [mass_flux_in]
-    type = PiecewiseLinear
-    data_file = 'massflow_SHRT45.csv'
-    format = "columns"
-    scale_factor = ${fparse mass_flux_in / 2.427}
-  []
-
-  [time_step_limiting]
-    type = PiecewiseLinear
-    xy_data = '0.1 0.1
-               10.0 10.0'
-  []
-
-  [axial_heat_rate]
-    type = ParsedFunction
-    value = '(pi/2)*sin(pi*z/L)*exp(-alpha*z)/(1.0/alpha*(1.0 - exp(-alpha*L)))*L'
-    vars = 'L alpha'
-    vals = '${heated_length} 1.8012'
-  []
-[]
-
-[Controls]
-  [mass_flux_ctrl]
-    type = RealFunctionControl
-    parameter = 'AuxKernels/mdot_in_bc/mass_flux'
-    function = 'mass_flux_in'
-    execute_on = 'initial timestep_begin'
-  []
-[]
-
-[AuxKernels]
-  [P_out_bc]
-    type = PostprocessorConstantAux
-    variable = P
-    boundary = outlet
-    postprocessor = report_pressure_outlet
-    execute_on = 'timestep_begin'
-    block = subchannel
-  []
-  [T_in_bc]
-    type = ConstantAux
-    variable = T
-    boundary = inlet
-    value = ${T_in}
-    execute_on = 'timestep_begin'
-    block = subchannel
-  []
-  [mdot_in_bc]
-    type = MassFlowRateAux
-    variable = mdot
-    boundary = inlet
-    area = S
-    mass_flux = 0.0
-    execute_on = 'timestep_begin'
-  []
-  [populate_power_history]
-    type = FunctionAux
-    variable = power_history_field
-    function = 'power_func'
-    execute_on = 'INITIAL TIMESTEP_BEGIN'
-  []
-  [change_q_prime]
-    type = ParsedAux
-    variable = q_prime
-    args = 'q_prime_init power_history_field'
-    function = 'q_prime_init*power_history_field'
-    execute_on = 'INITIAL TIMESTEP_BEGIN'
-  []
-[]
-
-[Outputs]
-  exodus = true
-  csv = true
-[]
-
-[Postprocessors]
-  [report_pressure_outlet]
-    type = Receiver
-    default = ${P_out}
-  []
-
-  [TTC-31]
-    type = SubChannelPointValue
-    variable = T
-    index = 0
-    execute_on = 'initial timestep_end'
-    height = 0.322
-  []
-
-  [post_func]
-    type = ElementIntegralVariablePostprocessor
-    block = fuel_pins
-    variable = q_prime
-    execute_on = 'INITIAL TIMESTEP_BEGIN'
-  []
-[]
-
-[Executioner]
-  type = Transient
-
-  start_time = -1.0
-  end_time = 900.0
-  [TimeStepper]
-    type = IterationAdaptiveDT
-     dt = 0.1
-     iteration_window = 5
-     optimal_iterations = 6
-     growth_factor = 1.2
-     cutback_factor = 0.8
-     timestep_limiting_function = 'time_step_limiting'
-   []
-   dtmax = 20
-  nl_rel_tol = 0.9
-  l_tol = 0.9
-[]
-
-################################################################################
-# A multiapp that projects data to a detailed mesh
-################################################################################
-[MultiApps]
-  [viz]
-    type = TransientMultiApp
-    input_files = '3d_SC_tr.i'
-    execute_on = 'INITIAL TIMESTEP_END'
-    catch_up = true
-  []
-[]
-
-[Transfers]
-  [subchannel_transfer]
-    type = MultiAppDetailedSolutionTransfer
-    to_multi_app = viz
-    variable = 'mdot SumWij P DP h T rho mu S'
-  []
-  [pin_transfer]
-    type = MultiAppDetailedPinSolutionTransfer
-    to_multi_app = viz
-    variable = 'Tpin q_prime'
-  []
-[]
 
 ```
 
-The corrected power profile is read by the following .txt file (pin_power_profile61.txt):
+- Then, define the transient evolution of the boundary conditions in the Functions block based on .csv files:
 
-```bash
-0.8477457157073588
-0.8438703828994463
-0.8645320077724137
-0.8753092523824995
-0.8645320077724137
-0.8438703828994463
-0.8339698482446043
-0.8369432200392273
-0.8566725635473428
-0.8786532264515594
-0.8892530859209314
-0.9013443399053171
-0.8892530859166047
-0.8786532264515594
-0.856672563539393
-0.8369432200392273
-0.8267424533965094
-0.8177938527394076
-0.8267424534001606
-0.8272594696733904
-0.8472934986320385
-0.8681632858448316
-0.8898769072293857
-0.9017653027695607
-0.9136133010186879
-0.9253977864165255
-0.9136133010118554
-0.9017653027628166
-0.8898769072293858
-0.8681632858325796
-0.8472934986203717
-0.8272594696733904
-0.8181228874882326
-0.8089377252083733
-0.7997220243775588
-0.8089377252136014
-0.8181228874935296
-1.1303279098639667
-1.1711970176131872
-1.212446682465516
-1.25429938376924
-1.2960890595043835
-1.3230893402868509
-1.3483812226578455
-1.3722914884147328
-1.3941161594994989
-1.3722914883971098
-1.3483812226390315
-1.3230893402669708
-1.2960890595043835
-1.2542993837371461
-1.2124466824337514
-1.1711970175818887
-1.1303279098639671
-1.1147644628376598
-1.097730853264873
-1.0797248303470215
-1.0605178830397783
-1.0797248303611697
-1.0977308532782715
-1.1147644628502191
+!listing /Users/kyriv/moose_projects/subchannel/examples/EBR-II/XX09_SC_tr.i block=Functions language=cpp
+
+- The functions defined above are given normalized and they need to multiply the initial steady state conditions:
+
+```language=bash
+    [Controls]
+        [mass_flux_ctrl]
+            type = RealFunctionControl
+            parameter = 'AuxKernels/mdot_in_bc/mass_flux'
+            function = 'mass_flux_in'
+            execute_on = 'initial timestep_begin'
+        []
+    []
+
+    [AuxKernels]
+        [P_out_bc]
+            type = PostprocessorConstantAux
+            variable = P
+            boundary = outlet
+            postprocessor = report_pressure_outlet
+            execute_on = 'timestep_begin'
+            block = subchannel
+        []
+        [T_in_bc]
+            type = ConstantAux
+            variable = T
+            boundary = inlet
+            value = ${T_in}
+            execute_on = 'timestep_begin'
+            block = subchannel
+        []
+        [mdot_in_bc]
+            type = MassFlowRateAux
+            variable = mdot
+            boundary = inlet
+            area = S
+            mass_flux = 0.0
+            execute_on = 'timestep_begin'
+        []
+        [populate_power_history]
+            type = FunctionAux
+            variable = power_history_field
+            function = 'power_func'
+            execute_on = 'INITIAL TIMESTEP_BEGIN'
+        []
+        [change_q_prime]
+            type = ParsedAux
+            variable = q_prime
+            args = 'q_prime_init power_history_field'
+            function = 'q_prime_init*power_history_field'
+            execute_on = 'INITIAL TIMESTEP_BEGIN'
+        []
+    []
 
 ```
+
+- Finally the Executioner block defines the time step with the TimeStepper:
+
+!listing /Users/kyriv/moose_projects/subchannel/examples/EBR-II/XX09_SC_tr.i block=Executioner language=cpp

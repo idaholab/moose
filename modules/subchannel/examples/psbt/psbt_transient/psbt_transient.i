@@ -18,11 +18,9 @@ P_out = 4.923e6 # Pa
   []
 []
 
-[Modules]
-  [FluidProperties]
-    [water]
-      type = Water97FluidProperties
-    []
+[FluidProperties]
+  [water]
+    type = Water97FluidProperties
   []
 []
 

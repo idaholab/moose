@@ -10,7 +10,9 @@ P_out = 155e+5 # Pa
     pitch = 0.0126
     rod_diameter = 0.00950
     gap = 0.00095 # the half gap between sub-channel assemblies
+    unheated_length_entry = 0.0
     heated_length = 10.0
+    unheated_length_exit = 0.0
     spacer_z = '0.0'
     spacer_k = '0.0'
   []
