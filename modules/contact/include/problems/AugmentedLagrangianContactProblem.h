@@ -65,13 +65,13 @@ public:
                             const Real ref_resid,
                             const Real div_threshold) override;
 
+  using AugmentedLagrangianContactProblemInterface::_lagrangian_iteration_number;
+  using AugmentedLagrangianContactProblemInterface::_maximum_number_lagrangian_iterations;
   using FEProblem::_console;
   using FEProblem::currentNonlinearSystem;
   using FEProblem::geomSearchData;
   using FEProblem::getDisplacedProblem;
   using FEProblem::theWarehouse;
-  using AugmentedLagrangianContactProblemInterface::_lagrangian_iteration_number;
-  using AugmentedLagrangianContactProblemInterface::_maximum_number_lagrangian_iterations;
 };
 
 typedef AugmentedLagrangianContactProblemTempl<ReferenceResidualProblem>

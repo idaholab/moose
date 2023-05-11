@@ -298,10 +298,6 @@
   show_var_residual_norms = true
 []
 
-[Problem]
-  type = AugmentedLagrangianContactFEProblem
-[]
-
 [UserObjects]
   [friction_uo]
     type = PenaltyFrictionUserObject

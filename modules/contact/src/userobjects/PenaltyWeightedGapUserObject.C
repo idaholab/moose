@@ -147,7 +147,7 @@ PenaltyWeightedGapUserObject::selfTimestepSetup()
       const auto it = _dof_to_old_lagrange_multiplier.find(dof_object);
       if (it != _dof_to_old_lagrange_multiplier.end())
       {
-        // extrapolate LM (todo: _dt_old and _dt should be used here)
+        // Linearly extrapolate LM
         const auto old_lm = it->second;
         lagrange_multiplier += (current_lm - old_lm) / _dt_old * _dt * _predictor_scale;
       }
@@ -181,13 +181,6 @@ PenaltyWeightedGapUserObject::isContactConverged()
 void
 PenaltyWeightedGapUserObject::updateAugmentedLagrangianMultipliers()
 {
-  std::cout << "old LMs: ";
-  for (const auto & [dof_object, lagrange_multiplier] : _dof_to_lagrange_multiplier)
-    std::cout << lagrange_multiplier << ' ';
-  std::cout << '\n';
-
-  // for (const auto & [dof_object, gap] : _dof_to_weighted_gap)
-
   for (auto & [dof_object, lagrange_multiplier] : _dof_to_lagrange_multiplier)
     if (auto it = _dof_to_weighted_gap.find(dof_object); it != _dof_to_weighted_gap.end())
     {
@@ -199,9 +192,4 @@ PenaltyWeightedGapUserObject::updateAugmentedLagrangianMultipliers()
       if (lagrange_multiplier < 0.0)
         lagrange_multiplier = 0.0;
     }
-
-  std::cout << "new LMs: ";
-  for (const auto & [dof_object, lagrange_multiplier] : _dof_to_lagrange_multiplier)
-    std::cout << lagrange_multiplier << ' ';
-  std::cout << '\n';
 }

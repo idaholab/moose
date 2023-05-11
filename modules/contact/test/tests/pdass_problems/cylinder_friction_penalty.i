@@ -256,10 +256,8 @@
   solve_type = 'PJFNK'
 
   petsc_options = '-snes_ksp_ew'
-  petsc_options_iname = '-pc_type -pc_factor_mat_solver_type -pc_factor_shift_type '
-                        '-pc_factor_shift_amount -mat_mffd_err'
-  petsc_options_value = 'lu       superlu_dist                  NONZERO               1e-15          '
-                        '         1e-5'
+  petsc_options_iname = '-pc_type -pc_factor_mat_solver_type -pc_factor_shift_type -pc_factor_shift_amount -mat_mffd_err'
+  petsc_options_value = 'lu       superlu_dist                  NONZERO               1e-15                   1e-5'
 
   line_search = 'none'
 
@@ -340,7 +338,7 @@
     friction_coefficient = 0.4 # with 2.0 works
     secondary_variable = disp_x
     penalty = 5e9
-    penalty_friction = 1e7
+    penalty_friction = 5e8 # 1e7
   []
 []
 

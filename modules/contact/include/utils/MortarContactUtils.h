@@ -45,7 +45,7 @@ namespace Contact
  */
 template <typename T>
 inline void
-communicateVelocities(std::unordered_map<const DofObject *, std::array<T, 2>> & dof_map,
+communicateVelocities(std::unordered_map<const DofObject *, T> & dof_map,
                       const MooseMesh & mesh,
                       const bool nodal,
                       const Parallel::Communicator & communicator,
@@ -54,8 +54,8 @@ communicateVelocities(std::unordered_map<const DofObject *, std::array<T, 2>> & 
   libmesh_parallel_only(communicator);
   const auto our_proc_id = communicator.rank();
 
-  // We may have weighted gap information that should go to other processes that own the dofs
-  using Datum = std::pair<dof_id_type, std::array<T, 2>>;
+  // We may have weighted velocity information that should go to other processes that own the dofs
+  using Datum = std::pair<dof_id_type, T>;
   std::unordered_map<processor_id_type, std::vector<Datum>> push_data;
 
   for (auto & pr : dof_map)
