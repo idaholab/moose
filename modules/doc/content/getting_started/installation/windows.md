@@ -17,7 +17,8 @@ Caveats:
 
 !style! halign=left
 With the above complete, close the WSL terminal and re-open it. Proceed to follow (or return to) any
-of the Linux instructions on our [Getting Started](getting_started/installation/index.md) page.
+of the Linux instructions on our
+[Getting Started](getting_started/installation/index.md optional=True) page.
 !style-end!
 
 ## Tips
