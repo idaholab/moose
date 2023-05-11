@@ -32,7 +32,7 @@
                  cp ../misc/version/tests ../../../share/moose_test/tests/version;
                  cp ../../testroot ../../../share/moose_test/tests/;
                  mkdir -p ../../../make_install_test'
-      installed = False
+      installation_type = IN_TREE
 
       detail = 'from a pre-determined user-readable location;'
     []
@@ -43,7 +43,7 @@
       working_directory = '../../../make_install_test'
       no_additional_cli_args = True
       expect_out = 'Directory successfully copied'
-      installed = False
+      installation_type = IN_TREE
       prereq = 'test_copy_install/setup_fake_test_structure'
 
       detail = 'copied using a MOOSE-based binary;'
@@ -55,7 +55,7 @@
       input = 'DUMMY'
       should_execute = False
       check_files = 'moose_test/tests/testroot moose_test/tests/version/tests'
-      installed = False
+      installation_type = IN_TREE
       prereq = 'test_copy_install/copy_tests'
 
       detail = 'verifying a successful copy operation;'
@@ -67,7 +67,7 @@
       cli_args = "--copy-inputs tests"
       no_additional_cli_args = True
       expect_err = 'The directory \S+ already exists.'
-      installed = False
+      installation_type = IN_TREE
       prereq = 'test_copy_install/check_files'
 
       detail = 'able to report an error if overwriting may occur using a MOOSE-based binary;'
@@ -80,7 +80,7 @@
                  ln -sf $bin .
                  done'
       working_directory = '../../../make_install_test/moose_test/tests'
-      installed = False
+      installation_type = IN_TREE
       prereq = 'test_copy_install/copy_warn_overwrite'
 
       detail = 'able to link a binary to an installed location;'
@@ -91,7 +91,7 @@
       cli_args = "--run"
       working_directory = "../../../make_install_test/moose_test/tests"
       no_additional_cli_args = True
-      installed = False
+      installation_type = IN_TREE
       prereq = 'test_copy_install/link_exec_installed'
 
       detail = 'able to successfully launch the TestHarness using a MOOSE-based binary;'
@@ -102,7 +102,7 @@
       command = 'rm -rf ../../../share/;
                  rm -rf ../../../make_install_test'
       prereq = 'test_copy_install/run'
-      installed = False
+      installation_type = IN_TREE
 
       detail = 'and cleaned up from a user-readable location.'
     []

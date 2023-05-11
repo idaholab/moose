@@ -67,7 +67,7 @@ as-needed.
 <!-- UPDATE=false to load false_update_moose.md page (hack needed for Offline installs) -->
 <!-- leave empty to load up normal update instructions -->
 
-!template load file=installation/{{UPDATE}}update_moose.md.template PATH={{PATH}}
+!template load file=installation/{{UPDATE}}update_moose.md.template PATH={{PATH}} CONDA_UPDATE={{CONDA_UPDATE}}
 
 ## Learn More
 
@@ -96,13 +96,6 @@ you to visualize and process the results of your simulations.
 
 ## Join the Community id=join
 
-- Join our mailing list for announcements:
-  [moose-announce@googlegroups.com](https://groups.google.com/forum/#!forum/moose-announce)
-
-  - Gmail users: Just click the "Join Group" button,
-  - otherwise, send an email to:\\
-    [mailto:moose-announce+subscribe@googlegroups.com](mailto:moose-announce+subscribe@googlegroups.com)
-
 - If you haven't already, please sign up for GitHub: [github.com/join](https://github.com/join).
 - Visit the [MOOSE Discussion forum](https://github.com/idaholab/moose/discussions) on GitHub for
   technical Q&A.
@@ -111,8 +104,8 @@ you to visualize and process the results of your simulations.
 
 !style! halign=left
 MOOSE can be customized by running a `configure` script in
-`$MOOSE_DIR`. Note that the `configure` script *must* be invoked from
-`$MOOSE_DIR`. Below we summarize the configuration options available:
+{{PATH}}/moose. Note that the `configure` script *must* be invoked from
+{{PATH}}/moose. Below we summarize the configuration options available:
 !style-end!
 
 ### Automatic Differentiation
@@ -129,5 +122,5 @@ MOOSE can be customized by running a `configure` script in
 !include installation/installation_troubleshooting.md
 
 !content pagination use_title=True
-                    previous=installation/{{PAGE_HEIR}}index.md
+                    previous=installation/{{BACK}}
                     next=examples_and_tutorials/{{PAGE_HEIR}}index.md

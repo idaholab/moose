@@ -13,7 +13,7 @@ application applicable to you.
 
 !style! halign=left
 While operating on one of our [!ac](INL) [!ac](HPC) clusters, you need only load a couple of
-modules to obtain a proper compiler environment:
+modules to obtain a proper developer environment:
 !style-end!
 
 - +[!ac](HPC) Sawtooth or Lemhi+ (required each time you log in):

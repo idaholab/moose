@@ -39,8 +39,7 @@ Extensions:
         repo: https://github.com/idaholab/moose
         google-cse: 000781241768298771085:pedtnlxdkx8
         menu:
-            Training:
-                MOOSE Framework (June): https://inlhrfedramp.gov1.qualtrics.com/jfe/form/SV_1RDZf244xsF1NK6
+            Training: training/index.md
             Getting Started:
                 Installing MOOSE: getting_started/installation/index.md
                 Creating an Application: getting_started/new_users.md

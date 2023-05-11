@@ -1,0 +1,33 @@
+{% set build = 0 %}
+{% set version = "2023.05.02" %}
+{% set strbuild = "build_" + build|string %}
+
+package:
+  name: moose-dev
+  version: {{ version }}
+
+source:
+  path: ../moose-dev
+
+build:
+  number: {{ build }}
+  string: {{ strbuild }}
+  skip: true  # [win]
+
+requirements:
+  run:
+    - {{ moose_tools }}
+    - {{ moose_libmesh }}
+    - {{ moose_wasp }}
+
+about:
+  home: https://mooseframework.org/
+  license: LGPL 2.1
+  summary: >
+    A simple package which installs all necessary Conda packages for MOOSE based development.
+
+extra:
+  recipe-maintainers:
+    - milljm
+    - cticenhour
+    - loganharbour

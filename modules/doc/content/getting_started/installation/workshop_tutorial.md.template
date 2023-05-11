@@ -1,0 +1,67 @@
+## Run an Example
+
+!style! halign=left
+A MOOSE installation binary comes with several examples you can run to make sure everything is
+sound, as well as moving some of the example inputs into a safe location you can play with.
+!style-end!
+
+There are examples for each physics solver available by name, in the following directory:
+
+```bash
+ls {{MOOSE_SHARE}}
+```
+
+!alert! note
+Not everything you find in this directory is a physics library. We are working on an elegant way to
+ask `moose` for all available solvers.
+!alert-end!
+
+For now, lets copy the `{{TUTORIAL}}` into a safe location for editing:
+
+```bash
+mkdir -p ~/projects/examples
+cd ~/projects/examples
+moose --copy-inputs {{TUTORIAL}}
+  <output trimmed>
+Directory successfully copied into ./combined/{{TUTORIAL}}/
+```
+
+!alert! note title=Directory successfully copied into...
+Take note of the information being displayed in the output. `moose` is alerting to the directory
+structure it created (`the last line`), and sometimes may not represent the exact wordage in the
+following instructions.
+!alert-end!
+
+With the {{TUTORIAL}}'s examples and inputs copied, move into the {{TUTORIAL}} directory and
+instruct `moose` to run the tests:
+
+```bash
+cd combined/{{TUTORIAL}}
+moose --run -j 6
+```
+
+Testing will commence and take a few moments to finish. There may be several skipped tests for one
+reason or another. This is normal. However none of the tests should fail.
+
+Next, we will run a single input file manually, to demonstrate how you will ultimately use `moose`.
+Peruse the subdirectories and find an input file you wish to run:
+
+!alert! tip
+You can list all available input files by running:
+
+```bash
+# be sure to be in the {{TUTORIAL}}'s directory
+find . -name '*.i'
+```
+
+!alert-end!
+
+```bash
+# cd into the directory containing the input file you wish to run
+moose -i <the input file you chose>.i --mesh-only
+```
+
+You will see some information scroll by, and ultimately end back at your prompt. If you perform a
+directory listing (`ls`) you should see an exodus file was generated in the process (a file with the
+same input filename but with `_in.e` suffix).
+

@@ -15,21 +15,24 @@ Caveats:
 
 ### Close the WSL terminal
 
-With the above complete, close the WSL terminal and re-open it. Then proceed to follow our
-[Conda Install Instructions](getting_started/installation/conda.md) (your platform is Linux).
-
-!alert! tip
-Your Download's folder, while using WSL, is located at: `/mnt/c/Users/<Your User Name>/Downloads`
-!alert-end!
+!style! halign=left
+With the above complete, close the WSL terminal and re-open it. Proceed to follow (or return to) any
+of the Linux instructions on our
+[Getting Started](getting_started/installation/index.md optional=True) page.
+!style-end!
 
 ## Tips
 
-Like WSL installation, the following sections require performing all commands in a PowerShell
-or Command Prompt in *administrator* mode!
+
+- Like WSL installation, the following sections require performing all commands in a PowerShell or
+  Command Prompt in *administrator* mode!
+- Your Download's folder while using WSL is located at: `/mnt/c/Users/<Your User Name>/Downloads`
 
 ### Updating the WSL Linux Kernel
 
+!style! halign=left
 The WSL linux kernel receives periodic updates. To perform these updates, one can run:
+!style-end!
 
 ```bash
 wsl --update
@@ -37,8 +40,10 @@ wsl --update
 
 ### Change WSL Version
 
+!style! halign=left
 In this instruction set, WSL version 2 is used (and is the default, recommended release). If WSL version
 1 is desired, this can be changed by performing the command:
+!style-end!
 
 ```bash
 wsl --set-version 1
@@ -54,7 +59,9 @@ where `n` can be replaced by either 1 or 2, depending on the version desired.
 
 ### Shutdown All WSL Instances
 
+!style! halign=left
 To shutdown all instances of WSL on the machine, perform the following:
+!style-end!
 
 ```bash
 wsl --shutdown

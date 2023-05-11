@@ -50,5 +50,6 @@
     type = RunApp
     input = 'quarter_circle_connect.i'
     cli_args= '--mesh-only --error-deprecated'
+    allow_warnings = true
   []
 []

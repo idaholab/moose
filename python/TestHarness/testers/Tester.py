@@ -83,7 +83,7 @@ class Tester(MooseObject):
         params.addParam('libpng',        ['ALL'], "A test that runs only if libpng is available ('ALL', 'TRUE', 'FALSE')")
         params.addParam('libtorch',      ['ALL'], "A test that runs only if libtorch is available ('ALL', 'TRUE', 'FALSE')")
         params.addParam('libtorch_version', ['ALL'], "A list of libtorch versions for which this test will run on, supports normal comparison operators ('<', '>', etc...)")
-        params.addParam('installed',     ['ALL'], "A test that runs only if it is installed ('ALL', 'TRUE', 'FALSE')")
+        params.addParam('installation_type',['ALL'], "A test that runs under certain executable installation configurations ('ALL', 'IN_TREE', 'RELOCATED')")
 
         params.addParam('depend_files',  [], "A test that only runs if all depend files exist (files listed are expected to be relative to the base directory, not the test directory")
         params.addParam('env_vars',      [], "A test that only runs if all the environment variables listed exist")
@@ -554,9 +554,11 @@ class Tester(MooseObject):
             reasons['libtorch_version'] = 'using libtorch ' + str(checks['libtorch_version']) + ' REQ: ' + libtorch_version
 
         # PETSc and SLEPc is being explicitly checked above
-        local_checks = ['platform', 'compiler', 'mesh_mode', 'method', 'library_mode', 'dtk', 'unique_ids', 'vtk', 'tecplot',
-                        'petsc_debug', 'curl', 'superlu', 'mumps', 'strumpack', 'cxx11', 'asio', 'unique_id', 'slepc', 'petsc_version_release', 'boost', 'fparser_jit',
-                        'parmetis', 'chaco', 'party', 'ptscotch', 'threading', 'libpng', 'libtorch', 'installed']
+        local_checks = ['platform', 'compiler', 'mesh_mode', 'method', 'library_mode', 'dtk',
+                        'unique_ids', 'vtk', 'tecplot', 'petsc_debug', 'curl', 'superlu', 'mumps',
+                        'strumpack', 'cxx11', 'asio', 'unique_id', 'slepc', 'petsc_version_release',
+                        'boost', 'fparser_jit', 'parmetis', 'chaco', 'party', 'ptscotch',
+                        'threading', 'libpng', 'libtorch']
 
         for check in local_checks:
             test_platforms = set()
@@ -579,6 +581,11 @@ class Tester(MooseObject):
             # or we did find the match when we wanted to exclude it
             if inverse_set == match_found:
                 reasons[check] = re.sub(r'\[|\]', '', check).upper() + operator_display + ', '.join(test_platforms)
+
+        # Check for binary location
+        if (self.specs['installation_type'] and
+            self.specs['installation_type'][0].upper() not in checks['installation_type']):
+            reasons['installation_type'] = f'test requires "{self.specs["installation_type"][0]}" binary'
 
         # Check for heavy tests
         if options.all_tests or options.heavy_tests:
@@ -609,11 +616,12 @@ class Tester(MooseObject):
 
         # We extract the registered apps only if we need them
         if self.specs["required_applications"] and checks["registered_apps"] is None:
-            checks["registered_apps"] = util.getExeRegisteredApps(self.specs["executable"])
+            checks["registered_apps"] = util.getRegisteredApps(self.specs["executable"],
+                                                               self.specs["app_name"])
 
         # Check to see if we have the required application names
         for var in self.specs['required_applications']:
-            if var not in checks["registered_apps"]:
+            if var.upper() not in checks["registered_apps"]:
                 reasons['required_applications'] = 'App %s not registered in executable' % var
                 break
 

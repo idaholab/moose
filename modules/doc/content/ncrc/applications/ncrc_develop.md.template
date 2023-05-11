@@ -22,7 +22,7 @@ operating on one of our [!ac](INL) [!ac](HPC) clusters, you need only load a cou
   instructions and then install our MOOSE Conda packages:
 
   ```bash
-  mamba create -n moose moose-tools moose-libmesh
+  mamba create -n moose moose-dev
   ```
 
 - If +[!ac](INL) [!ac](HPC) Sawtooth or Lemhi+ (required each time you log in):

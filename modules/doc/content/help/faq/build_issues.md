@@ -1,8 +1,11 @@
 ## Build Issues id=buildissues
 
-Build issues are normally caused by an invalid environment, or perhaps an update to your repository occurred, and you now have a mismatch between MOOSE and your application, or a combination of the two with the moose-libmesh Conda package being out of date.
+Build issues are normally caused by an invalid environment, or perhaps an update to your repository
+occurred, and you now have a mismatch between MOOSE and your application, or a combination of the
+two with the moose-libmesh Conda package being out of date.
 
-- Verify the Conda Environment is active and up to date, with the latest version of our moose packages:
+- Verify the Conda Environment is active and up to date, with the latest version of our moose
+  packages:
 
   ```bash
   mamba activate moose
@@ -12,7 +15,10 @@ Build issues are normally caused by an invalid environment, or perhaps an update
   if `mamba activate moose` failed, see [Conda Issues](troubleshooting.md#condaissues) above.
 
   !alert note
-  When ever an update is performed in Conda, it is a good idea to re-build MOOSE and your application. While specific updates to moose-libmesh and/or moose-petsc may not have occurred, there are several other libraries out of our control which may have been upgraded, requiring you to rebuild.
+  When ever an update is performed in Conda, it is a good idea to re-build MOOSE and your
+  application. While specific updates to `moose-dev` may not have occurred,
+  there are several other libraries out of our control which may have been upgraded, requiring you
+  to rebuild.
 
 - Verify the MOOSE repository is up to date, with the correct vetted version of libMesh:
 
@@ -42,13 +48,15 @@ Build issues are normally caused by an invalid environment, or perhaps an update
   The above should return nothing, or it should point to the correct moose repository.
 
   !alert note
-  Most users, do not use or set MOOSE_DIR. If the above command returns something, and you are not sure why, just unset it:
+  Most users, do not use or set MOOSE_DIR. If the above command returns something, and you are not
+  sure why, just unset it:
 
   ```bash
   unset MOOSE_DIR
   ```
 
-- Try building a simple hello world example (there is more text than what is visible, be sure to copy it all):
+- Try building a simple hello world example (there is more text than what is visible, be sure to
+  copy it all):
 
   ```bash
   cd /tmp
@@ -85,7 +93,9 @@ Build issues are normally caused by an invalid environment, or perhaps an update
   mpicxx -fopenmp hello.C
   ```
 
-  If the above build fails, and you have the correct Conda environment loaded (`mamba activate moose`), then something is failing beyond the scope of this document, and you should now contact us via the [disussion forum](faq/discussion_forum.md).
+  If the above build fails, and you have the correct Conda environment loaded
+  (`mamba activate moose`), then something is failing beyond the scope of this document, and you
+  should now contact us via the [disussion forum](faq/discussion_forum.md).
 
   If the build was successfull, attempt to execute the hello word example:
 
@@ -102,4 +112,6 @@ Build issues are normally caused by an invalid environment, or perhaps an update
   Hello world from processor my_hostname, rank 2 out of 4 processors
   ```
 
-- If all of the above has succeeded, you should attempt to rebuild MOOSE or your application again. If you've made it this far, and the above is working, but MOOSE fails to build, then it is time to ask us why on the [discussion forum](faq/discussion_forum.md).
+- If all of the above has succeeded, you should attempt to rebuild MOOSE or your application again.
+  If you've made it this far, and the above is working, but MOOSE fails to build, then it is time to
+  ask us why on the [discussion forum](faq/discussion_forum.md).

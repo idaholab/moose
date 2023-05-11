@@ -16,11 +16,13 @@ git fetch origin
 git rebase origin/master
 ```
 
+!template load file={{CONDA_UPDATE}}update_conda.md
+
 Then return to your application, re-compile, and test:
 
 ```bash
 cd {{PATH}}/YourAppName
 make clobberall
-make -j4
-./run_tests -j4
+make -j 6
+./run_tests -j 6
 ```

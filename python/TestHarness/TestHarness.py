@@ -251,7 +251,6 @@ class TestHarness:
         checks = {}
         checks['platform'] = util.getPlatforms()
         checks['submodules'] = util.getInitializedSubmodules(self.run_tests_dir)
-        checks['installed'] = util.checkInstalled(self.run_tests_dir)
         checks['exe_objects'] = None # This gets calculated on demand
         checks['registered_apps'] = None # This gets extracted on demand
 
@@ -340,6 +339,9 @@ class TestHarness:
         self.options._checks = checks
 
         self.initialize(argv, app_name)
+
+        # executable is available after initalize
+        checks['installation_type'] = util.checkInstalled(self.executable, app_name)
 
         os.chdir(self._orig_cwd)
 
@@ -516,6 +518,7 @@ class TestHarness:
         params['test_dir'] = test_dir
         params['relative_path'] = relative_path
         params['executable'] = testroot_params.get("executable", self.executable)
+        params['app_name'] = self.app_name
         params['hostname'] = self.host_name
         params['moose_dir'] = self.moose_dir
         params['moose_python_dir'] = self.moose_python_dir
@@ -922,6 +925,7 @@ class TestHarness:
         # Save executable-under-test name to self.executable
         exec_suffix = 'Windows' if platform.system() == 'Windows' else ''
         self.executable = app_name + '-' + self.options.method + exec_suffix
+        self.app_name = app_name
 
         # if the executable has a slash - assume it is a file path
         if '/' in app_name:
