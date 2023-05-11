@@ -29,7 +29,7 @@ Helpful information on debugging numerical convergence issues is provided in the
 
 ## Execution ordering output
 
-### Ordering of the problem set-up label=debug-setup
+### Ordering of the problem set-up id=debug-setup
 
 MOOSE parses the input file and executes numerous [Actions](actions/Action.md) which progressively
 load/build the mesh, create the variables, kernels, boundary conditions, output objects etc.
@@ -43,7 +43,7 @@ to perform automatic dependency resolution to correctly order them.
 For the automatic ordering of the mesh generators, please refer to the
 [mesh documentation page](syntax/Mesh/index.md).
 
-### Solve and execution ordering label=debug-order
+### Solve and execution ordering id=debug-order
 
 Nearly every solve in MOOSE consists of a succession of operations on nodes, quadrature points,
 elements and elements' faces. These operations may be for example to compute the contribution of a

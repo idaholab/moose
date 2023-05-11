@@ -45,7 +45,7 @@ then focus on the linear solve, and finally on the nonlinear solve.
 
 ## Both or either nonlinear and linear solves fail
 
-### Poor initial condition label=ic
+### Poor initial condition id=ic
 
 For the nonlinear solve,
 Newton's method and Newton-Krylov methods in general are only guaranteed to converge when they are in the region of attraction
@@ -99,23 +99,16 @@ we can simply add a strong diffusion term over the first few seconds of the tran
 
 - pseudo-transient relaxation
 
-For example, with a variable `u` causing convergence issues,
-we can simply limit the rate of change of `u` over the first few seconds of the transient problem.
+Certain classes of problems are easier to solve as transients than trying to compute a steady solve. Other transient
+problems are difficult to initialize. These problems can benefit from a customized pseudo-relaxation transient at initialization.
 
-```
-[Kernels]
-  ... # regular kernels for the physics of interest (except time derivative for u)
-  [initialization_slow_derivative]
-    type = FunctorTimeDerivative
-    variable = u
-    factor = '100 * exp(-10 * t) + 1'
-  []
-[]
-```
-
-This is similar to using smaller time steps at the beginning of the transient! For example with an [IteratiiveAdaptiveDT.md]:
+These transients usually benefit from a slow growth in the time steps. For example with an [IteratiiveAdaptiveDT.md],
+you can start with a small time step and let the time stepper grow the time step to reach steady state faster.
 
 !listing input=test/tests/time_steppers/iteration_adaptive/adapt_tstep_grow_init_dt.i block=TimeStepper
+
+For a customized relaxation for each variable, you may multiply the time derivatives of each variable
+by a different factor.
 
 - diagonal damping
 
@@ -131,29 +124,39 @@ This can help stabilize a nonlinear solve. As mentioned in the relevant
   petsc_options_value = '0.5'
 ```
 
-- turning off **temporarily** some physics through the [Controls](syntax/Controls/index.md) system. Kernels can be
+- turning off **temporarily** some physics through the [Controls](syntax/Controls/index.md) system. Some equations, such as
+  advection, can be singular, have a saddle point, ill-conditioned or simply not in the hyperbolic/elliptic regime that the solver
+  can handle with a poor initialization. The equations can be modified dynamically during the simulation. Kernels can be
   turned on/off over part of the simulation as needed. In the example below, we turn on the `Diff0` kernel from 0s to 0.49s
   then turn it off and turn on the `Diff1` kernel.
 
 !listing tests/controls/time_periods/kernels/kernels.i block=Kernels Controls
 
-- MultiApps
+- Use a separate simulation to initialize the problem, then leverage the [Restart system](restart_recover.md)
+  or a [SolutionUserObject.md] to load the initial solution into the problem of interest.
+
+- In the same vein, you may use a [MultiApp](syntax/MultiApps/index.md) to compute an initial solution then use
+  [Transfers](syntax/Transfers/index.md)
+  to move the fields from the initialization simulation to the main simulation. This is a straightforward setup, allowing
+  for completely different simulations to be used for initialization, with for example a different mesh, a different equation,
+  a different equation type (eigenvalue vs. transient for example). The `MultiApps` is then typically executed with
+  [!param](/MultiApps/TransientMultiApp/execute_on) set to `INITIAL`.
 
 
-## Bad mesh
+### Bad mesh
 
-MOOSE works best on well-meshed geometries.
+MOOSE works best on well-meshed geometries. If your mesh is bad, your results will be bad. It is the fundamental law of
+`garbage-in-garbage-out`.
 
 - If a working solver stops converging when you use it with a new mesh, you should consider that there may be issues with the mesh.
   A list of common issues and features in a mesh that are not supported may be found [here](syntax/Mesh/index.md#examining).
 - If you have never used the solver before, you should first try it first on a [MOOSE-generated mesh](syntax/Mesh/index.md).
-  If it does not converge there, using a simple mesh will simplify the troubleshooting steps you can find on this page.
+  If it does not converge there, it will not converge on a complex mesh and using a simple mesh will simplify the troubleshooting
+  steps you can find on this page.
 
 ## Failing linear solve
 
-### Bad linear convergence
-
-If for a specific time step your linear iterations are not dropping such that it takes many linear iterations to reach `l_tol` or you may never reach `l_tol` because you hit the `l_max_hit`, your preconditioner is not working for the problem.
+If for a specific time step your linear iterations are not dropping such that it takes many linear iterations to reach `l_tol` or you may never reach `l_tol` because you hit the `l_max_it`, your preconditioner is not working for the problem.
 
 ```
 Initial residual before setting preset BCs: 65444.1
@@ -174,29 +177,142 @@ Initial residual before setting preset BCs: 65444.1
  Solve Did NOT Converge!
 ```
 
-In this case you are likely to require many nonlinear iterations as well, but the reason is that your linear iterations don't drop. This could be due to missing terms or errors in your Jacobian or because the way you are applying your preconditioner in PETSc is not good for the problem. Make sure your Jacobian is correct and add off-diagonal terms for multivariable problems.
+In this case you are likely to require many nonlinear iterations as well, but the reason is that your linear iterations don't drop. This could be due to missing terms or errors in your Jacobian -- especially for Newton's method, but for PJFNK the Jacobian is often used for preconditioning still -- or because the way you are applying your preconditioner in PETSc is not good for the problem. First, let's make sure your Jacobian is correct and has off-diagonal terms for multivariable problems.
 
-!alert note title=To check that your Jacobian is correct
+!alert note
+Additional resources on linear solve issues may be found in the
+[PETSc manual FAQ](https://petsc.org/release/faq)
 
-AD & Jacobian
+### Incorrect Jacobian
 
+First, it is important to understand where the Jacobian may come into play because this sets the bar for how accurate the
+Jacobian needs to be.
+For Newton's method, the linear solve is essentially the inversion of the Jacobian (an explicit inverse is generally **NOT** formed)
+and its action on the residual vector. As such, we generally consider that it is **essential** that the Jacobian be accurate.
+A solve with a poor Jacobian is unlikely to converge.
+For PJFNK, the linear systems are formed by computing the action of the Jacobian rather than the Jacobian. But the preconditioning
+often relies on forming the Jacobian. By default, only the diagonal of the Jacobian is computed for preconditioning. To form
+the entire Jacobian, including the variable coupling terms on the off-diagonals, this syntax may be used:
+
+!listing input=tests/preconditioners/auto_smp/ad_coupled_convection.i block=Preconditioning
+
+A basic check on whether the Jacobian may be inaccurate is to simply replace it with a Jacobian formed using finite differencing,
+using the [Finite Difference Preconditioner](FDP.md). This replaces every call to `::computeJacobian` in the kernels and boundary
+conditions with finite differencing on the computation of the residual. If a case of poor convergence is fixed by this
+simple action, then the Jacobian was not good and it needs to be fixed.
+
+!listing input=tests/preconditioners/fdp/fdp_test.i block=Preconditioning
+
+A more advanced check, and part of the process to fix the Jacobian, is to use the
+[Jacobian analysis utilities](content/help/development/analyze_jacobian.md). These will point out inaccurate or missing terms
+in the Jacobian. They can diagnose missing variable coupling terms for example. Once the errors have been identified,
+it is time to find a pen and paper and re-derive the Jacobian from the weak form of the equations. Either that, or use
+[automatic differentiation (AD)](automatic_differentiation/index.md).
+
+!alert note
+If you are using code that relies on [automatic differentiation](automatic_differentiation/index.md) for forming
+the residual, the Jacobian would only be inexact due to a mistake in the code. It does not hurt to check though. Note
+that AD kernels can be mixed with regular kernels.
+
+### Ill-conditioned or ill-posed problem
 
 An additional possible reason for a poor linear solve is that your problem is very poorly
 conditioned. For diagnosing and combating ill-conditioned systems, please see
-[NonlinearSystemBase.md#scaling].
+[NonlinearSystemBase.md#scaling]. We explain here two simple techniques to diagnose these woes.
 
-SVD
+- If you can reduce the size of your problem below 10,000 nonlinear degrees of freedom (1,000 preferred), as reported in the
+  simulation log header, you can use a Singular Value Decomposition (SVD) to compute the number of singular values and the condition
+  number, the ratio of the largest to smallest singular value. To reduce the
+  size of the problem, you should consider using a MOOSE-generated [Cartesian mesh](CartesianMeshGenerator.md).
+  You will need to use these options:
 
-Eigenvalues
+```
+[Executioner]
+  ... (other executioner settings)
+  petsc_options = '-pc_svd_monitor'
+  petsc_options_iname = '-pc_type'
+  petsc_options_value = 'svd'
+[]
+```
 
+If the svd monitor reports **ANY** singular value, your problem is ill-posed. This usually means you forgot a boundary condition,
+a subdomain-restriction on a kernel, or that your current solution (or initialization) is at a saddle point.
+MOOSE can use PETSc to remove the nullspace and still output a solution, but this is generally not recommended. You need
+to work on making sure the Jacobian is correct and the numerical problem is well-posed.
 
-### Parallelism issues label=parallel
+If the svd monitor reports a large condition number, your problem is ill-conditioned. This usually means it will be difficult
+to solve numerically, and that the residuals will be hard to reduce evenly across variables and degrees of freedom.
+We usually first address this by [scaling equations](NonlinearSystemBase.md#scaling). Further effort on the numerical scheme
+and preconditioning will likely be necessary.
 
-If the linear solver converges without issue in serial, but fails in parallel
+- Alternatively, for larger problems, you may consider using eigenvalues instead of singular values to reach similar
+  conclusions. To obtain an approximation to the eigenvalues of your problem, you may use these petsc options:
 
+```
+-ksp_compute_eigenvalues -ksp_gmres_restart 1000 -pc_type none
+```
 
-### Solver reports the presence of a 'not a number' (NaN)
+Note that the larger the number of Krylov vectors before restarting, the more eigenvalues you will be able to compute.
+But the memory cost will increase linearly with that number.
+Any zero eigenvalue will pose the same problem as a zero singular value.
+The size and values of eigenvalues will help you understand which preconditioner are likely to work, based on whether
+the problem is elliptic, parabolic or hyperbolic.
 
+### Parallelism issues id=parallel
+
+If the linear solver converges without issue in serial, but fails in parallel, this is also likely due to insufficiencies with
+the preconditioning. Numerous preconditioners perform different operations when used in parallel. For example, the extent of the
+blocks in a Block-Jacobi (`pc_type bjacobi`) preconditioner is tied to the number of processes used. As a result, even if the
+solution to the problem is unique, the number of iterations and the convergence history is different.
+
+If your problem is small (<200k dofs for example), you could default to a direct solver, for example with `pc_type lu`,
+which generally achieve identical results both in serial and parallel.
+
+For larger problems, you need to carefully consider the preconditioning. Expert knowledge in numerical schemes for the
+equations you are trying to solve will facilitate crafting a new scheme to solve them.
+The larger the problem, the more you will need to
+consider the scalability of the methods under consideration.
+
+!alert note
+[Field split preconditioning](FSP.md) is one of the preferred methods of preconditioning multi-variable problems in MOOSE
+in a scalable manner.
+
+### Solver reports the presence of a 'not a number' (NaN) id=nan
+
+If the solver is faced with invalid floating point arithmetic, such as dividing by 0 or computing the derivative of a
+L2-norm at 0, it will generate a `NaN` in the solution vector. This is undesirable and will cause the solve to fail.
+MOOSE will report the nonlinear solve as having not converged with:
+
+```
+Nonlinear solve did not converge due to DIVERGED_FNORM_NAN.
+```
+
+99% of the time, this arises because a variable is not initialized and the material properties are being evaluated out
+of bounds. Initializing all the variables in the simulation will fix the problem.
+
+If not, you must find the source of the `NaN`. In most cases, you will be able to run your simulation again and
+pass the command line argument `--trap-fpe`. In some cases, this will not suffice and you will need to use a debugger.
+Detailed instructions on using the debugger with a MOOSE-based application can be found on this [page](debugging.md).
+Once you have started the debugger, you will need to set a breakpoint on floating point exceptions then generate a backtrace.
+
+```
+  break libmesh_handleFPE
+```
+
+In the backtrace generated, you will want to look for the object, or the routine within the object, involved.
+From there, you must find a way to avoid the floating point error. For example, in the parsed expression below, we
+avoid the division by 0 by setting a minimum denominator.
+
+```
+[Materials]
+  [my_prone_to_nan_material]
+    type = ParsedMaterial
+    property_name = 'le_ratio'
+    expression = '1 / min(u, 1e-8)'
+    coupled_variables = u
+  []
+[]
+```
 
 
 ## Failing nonlinear solve

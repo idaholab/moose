@@ -246,7 +246,7 @@ Mesh meta data can be useful for setting up specific postprocessors, kernels, et
 Mesh meta data are not possible or extremely hard to be derived directly from libMesh mesh object.
 A simple example of mesh meta data is the `num_elements_x` provided by [GeneratedMeshGenerator](GeneratedMeshGenerator.md), which can be used as an indicator for a mesh regular in x direction.
 
-## Debugging in-MOOSE mesh generation label=troubleshooting
+## Debugging in-MOOSE mesh generation id=troubleshooting
 
 !alert note
 The MOOSE mesh generation [tutorial]() is the most comprehensive learning resource on this topic. We summarize here
@@ -263,7 +263,7 @@ the creation of the mesh in many individual steps. The two main tools to debug t
   by default using the [Exodus.md] format with the name `<mesh_generator_name>_in.e`, so you may visualize it
   before it gets acted upon by the next mesh generator(s).
 
-## Examining meshes label=examination
+## Examining meshes id=examination
 
 The results of finite element/volume simulations are highly dependent on the quality of the mesh(es) used.
 It happens regularly that results are excellent and meeting all predictions using a regular Cartesian grid mesh,
