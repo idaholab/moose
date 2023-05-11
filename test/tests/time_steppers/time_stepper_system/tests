@@ -60,4 +60,24 @@
     []
   []
 
+  [error_message]
+    requirement = 'The system shall provide meaningful error message when: '
+    [lower_bound]
+      type = RunException
+      input = 'lower_bound.i'
+      cli_args = 'Executioner/TimeSteppers/lower_bound=FooDT'
+      expect_err = "lower_bound: Failed to find a timestepper with the name 'FooDT'"
+      detail ="time stepper name(s) provided for lower_bound dosen't not exist,"
+    []
+
+    [active_timesteppers]
+      type = RunException
+      input = 'active_timesteppers.i'
+      cli_args = "Controls/c1/disable_objects='TimeStepper::ConstDT2 TimeStepper::ConstDT1'"
+      expect_err = "The following error occurred in the object \"CompositionDT\", of type \"CompositionDT\".[.\n]\sNo TimeStepper\(s\) are currently active to compute a timestep"
+      detail ='no time steppers are active to compute a timestep.'
+    []
+
+  []
+
 []

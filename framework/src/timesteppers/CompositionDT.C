@@ -27,6 +27,9 @@ CompositionDT::compositionDTParams()
       "The maximum of these TimeSteppers will form the lower bound on the time "
       "step size. A single or multiple time steppers may be specified.");
 
+  params.addClassDescription("The time stepper take all the other time steppers as input and "
+                             "return the minimum time step size.");
+
   return params;
 }
 
@@ -70,7 +73,9 @@ CompositionDT::computeDT()
 {
   const auto time_steppers = getTimeSteppers();
 
-  if (time_steppers.empty())
+  // Note : compositionDT requires other active time steppers as input so no active time steppers
+  // or only compositionDT is active is not allowed
+  if (time_steppers.size() < 2 && time_steppers[0] == this)
     mooseError("No TimeStepper(s) are currently active to compute a timestep");
 
   std::set<Real> dts;

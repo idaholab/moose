@@ -62,8 +62,8 @@
     type = TimePeriod
     enable_objects = 'TimeStepper::ConstDT1'
     disable_objects = 'TimeStepper::ConstDT2'
-    start_time = '0'
-    end_time = '0.3'
+    start_time = '0.3'
+    end_time = '0.8'
   []
 []
 
