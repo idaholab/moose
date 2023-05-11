@@ -23,6 +23,8 @@ namespace libMesh
 class QBase;
 }
 
+// fixme lynn this needs to be removed from the globalname space in a seperate commit
+void addCrackFrontDefinitionParams(InputParameters & params);
 /**
  * Class used in fracture integrals to define geometric characteristics of the crack front
  */
@@ -30,7 +32,6 @@ class CrackFrontDefinition : public GeneralUserObject, public BoundaryRestrictab
 {
 public:
   static InputParameters validParams();
-  static void addCrackFrontDefinitionParams(InputParameters & params);
 
   CrackFrontDefinition(const InputParameters & parameters);
   virtual ~CrackFrontDefinition();
