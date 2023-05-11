@@ -32,6 +32,7 @@ protected:
   std::vector<Real> & _measurement_zcoord;
   std::vector<Real> & _measurement_time;
   std::vector<Real> & _measurement_values;
+  std::vector<std::vector<Real> *> _measurement_weights;
   ///@}
   /// simulated values at measurment xyzt
   std::vector<Real> & _simulation_values;
@@ -46,5 +47,7 @@ private:
   /// private method for testing optimizationData with test src
   void setSimulationValuesForTesting(std::vector<Real> & data);
   /// variable
-  const MooseVariableFieldBase * const _var;
+  std::vector<MooseVariableFieldBase *> _var_vec;
+  /// helper to error check data read in is correct size
+  void errorCheckDataSize();
 };

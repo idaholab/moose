@@ -28,6 +28,9 @@ OptimizationData::validParams()
                                       "Point locations corresponding to each measurement value");
   params.addParam<std::vector<Real>>("measurement_times",
                                      "Times corresponding to each measurement value");
+  params.addParam<std::vector<Real>>(
+      "measurement_variable_weights",
+      "Variable weights corresponding to each variables contribution to the measurement values");
 
   params.addParam<FileName>("measurement_file",
                             "CSV file with measurement value and coordinates (value, x, y, z).");
@@ -40,14 +43,20 @@ OptimizationData::validParams()
   params.addParam<std::string>("file_time", "time", "time column name from csv file being read in");
   params.addParam<std::string>(
       "file_value", "value", "measurement value column name from csv file being read in");
+  params.addParam<std::vector<std::string>>(
+      "file_variable_weights",
+      std::vector<std::string>{"weight"},
+      "variable weight column name from csv file being read in");
 
-  params.addParam<VariableName>("variable", "Variable to sample at measurement points.");
+  params.addParam<std::vector<VariableName>>(
+      "variable", "Vector of variable names to sample at measurement points.");
 
-  params.addParamNamesToGroup("measurement_points measurement_values measurement_times",
-                              "Input Measurement Data");
   params.addParamNamesToGroup(
-      "measurement_file file_xcoord file_ycoord file_zcoord file_time file_value",
-      "File Measurement Data");
+      "measurement_points measurement_values measurement_times measurement_variable_weights",
+      "Input Measurement Data");
+  params.addParamNamesToGroup("measurement_file file_xcoord file_ycoord file_zcoord file_time "
+                              "file_value file_variable_weights",
+                              "File Measurement Data");
   return params;
 }
 
@@ -65,15 +74,16 @@ OptimizationData::OptimizationData(const InputParameters & parameters)
         declareValueByName<std::vector<Real>>("measurement_values", REPORTER_MODE_REPLICATED)),
     _simulation_values(
         declareValueByName<std::vector<Real>>("simulation_values", REPORTER_MODE_REPLICATED)),
-    _misfit_values(
-        declareValueByName<std::vector<Real>>("misfit_values", REPORTER_MODE_REPLICATED)),
-    _var(isParamValid("variable")
-             ? &_fe_problem.getVariable(_tid,
-                                        getParam<VariableName>("variable"),
-                                        Moose::VarKindType::VAR_ANY,
-                                        Moose::VarFieldType::VAR_FIELD_STANDARD)
-             : nullptr)
+    _misfit_values(declareValueByName<std::vector<Real>>("misfit_values", REPORTER_MODE_REPLICATED))
 {
+  if (isParamValid("variable"))
+  {
+    std::vector<VariableName> var_names(getParam<std::vector<VariableName>>("variable"));
+    for (const auto & name : var_names)
+      _var_vec.push_back(&_fe_problem.getVariable(
+          _tid, name, Moose::VarKindType::VAR_ANY, Moose::VarFieldType::VAR_FIELD_STANDARD));
+  }
+
   if (isParamValid("measurement_file") && isParamValid("measurement_points"))
     mooseError("Input file can only define a single input for measurement data. Use only "
                "measurement_file or measurement_points, but never both");
@@ -88,7 +98,7 @@ OptimizationData::OptimizationData(const InputParameters & parameters)
 void
 OptimizationData::execute()
 {
-  if (!_var)
+  if (_var_vec.empty())
     return;
 
   // FIXME: This is basically copied from PointValue.
@@ -98,25 +108,10 @@ OptimizationData::execute()
   const std::size_t nvals = _measurement_values.size();
   _simulation_values.resize(nvals);
   _misfit_values.resize(nvals);
+  errorCheckDataSize();
 
-  std::string msg = "";
-  if (_measurement_xcoord.size() != nvals)
-    msg += "x-coordinate data (" + std::to_string(_measurement_xcoord.size()) + "), ";
-  if (_measurement_xcoord.size() != nvals)
-    msg += "y-coordinate data (" + std::to_string(_measurement_ycoord.size()) + "), ";
-  if (_measurement_zcoord.size() != nvals)
-    msg += "z-coordinate data (" + std::to_string(_measurement_zcoord.size()) + "), ";
-  if (_measurement_time.size() != nvals)
-    msg += "time data (" + std::to_string(_measurement_time.size()) + "), ";
-  if (!msg.empty())
-    mooseError("Number of entries in ",
-               std::string(msg.begin(), msg.end() - 2),
-               " does not match number of entries in value data (",
-               std::to_string(nvals),
-               ").");
-
-  const auto & sys = _var->sys().system();
-  const auto vnum = _var->number();
+  const auto & sys = _var_vec[0]->sys().system();
+  const auto vnum = _var_vec[0]->number();
 
   for (const auto & i : make_range(nvals))
     if (MooseUtils::absoluteFuzzyEqual(_t, _measurement_time[i]))
@@ -136,6 +131,12 @@ OptimizationData::readMeasurementsFromFile()
   std::string zName = getParam<std::string>("file_zcoord");
   std::string tName = getParam<std::string>("file_time");
   std::string valueName = getParam<std::string>("file_value");
+  std::vector<std::string> weightNames =
+      getParam<std::vector<std::string>>("file_variable_weights");
+
+  std::cout << "************* weightNames size " << weightNames.size() << std::endl;
+  for (auto & name : weightNames)
+    std::cout << name << " " << std::endl;
 
   bool found_x = false;
   bool found_y = false;
@@ -181,20 +182,38 @@ OptimizationData::readMeasurementsFromFile()
       _measurement_values = data[i];
       found_value = true;
     }
+    else if (std::find(weightNames.begin(), weightNames.end(), names[i]) != weightNames.end())
+    {
+      _measurement_weights.emplace_back(
+          &declareValueByName<std::vector<Real>>(names[i], REPORTER_MODE_REPLICATED));
+      _measurement_weights[i]->assign(data[i].begin(), data[i].end());
+    }
   }
 
   // check if all required columns were found
   if (!found_x)
     paramError("measurement_file", "Column with name '", xName, "' missing from measurement file");
-  else if (!found_y)
+  if (!found_y)
     paramError("measurement_file", "Column with name '", yName, "' missing from measurement file");
-  else if (!found_z)
+  if (!found_z)
     paramError("measurement_file", "Column with name '", zName, "' missing from measurement file");
-  else if (!found_t)
+  if (!found_t)
     _measurement_time.assign(rows, 0);
-  else if (!found_value)
+  if (!found_value)
     paramError(
         "measurement_file", "Column with name '", valueName, "' missing from measurement file");
+  if (_measurement_weights.size() != weightNames.size())
+  {
+    std::string out("\n   Measurement file column names: ");
+    for (const auto & name : names)
+      out += " " + name;
+    out += "\n   file_variable_weights names: ";
+    for (const auto & name : weightNames)
+      out += " " + name;
+    paramError("measurement_file",
+               "Not all of the file_variable_weight names were found in the measurement_file.",
+               out);
+  }
 }
 
 void
@@ -216,4 +235,25 @@ OptimizationData::readMeasurementsFromInput()
     _measurement_values = getParam<std::vector<Real>>("measurement_values");
   else
     paramError("measurement_values", "Input file must contain measurement points and values");
+}
+
+void
+OptimizationData::errorCheckDataSize()
+{
+  const std::size_t nvals = _measurement_values.size();
+  std::string msg = "";
+  if (_measurement_xcoord.size() != nvals)
+    msg += "x-coordinate data (" + std::to_string(_measurement_xcoord.size()) + "), ";
+  if (_measurement_ycoord.size() != nvals)
+    msg += "y-coordinate data (" + std::to_string(_measurement_ycoord.size()) + "), ";
+  if (_measurement_zcoord.size() != nvals)
+    msg += "z-coordinate data (" + std::to_string(_measurement_zcoord.size()) + "), ";
+  if (_measurement_time.size() != nvals)
+    msg += "time data (" + std::to_string(_measurement_time.size()) + "), ";
+  if (!msg.empty())
+    mooseError("Number of entries in ",
+               std::string(msg.begin(), msg.end() - 2),
+               " does not match number of entries in value data (",
+               std::to_string(nvals),
+               ").");
 }
