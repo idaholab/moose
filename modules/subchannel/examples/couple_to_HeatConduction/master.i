@@ -31,9 +31,9 @@ heated_length = 1.0 # m
 [Functions]
   [axial_heat_rate]
     type = ParsedFunction
-    value = '(pi/2)*sin(pi*z/L)'
+    expression = '(pi/2)*sin(pi*z/L)'
     vars = 'L'
-    vals = '${heated_length}'
+    symbol_values = '${heated_length}'
   []
 []
 

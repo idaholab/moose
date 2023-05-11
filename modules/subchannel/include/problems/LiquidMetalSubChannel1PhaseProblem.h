@@ -35,25 +35,9 @@ protected:
   virtual Real computeFrictionFactor(_friction_args_struct friction_args) override;
   /// Computes added heat for channel i_ch and cell iz
   virtual Real computeAddedHeatPin(unsigned int i_ch, unsigned int iz) override;
-  /// computeMassFlowForDPDZ(Real dpdz, int i_ch) and enforceUniformDPDZAtInlet()
-  /// are overriden to define the sodium friction factor
-  virtual Real computeMassFlowForDPDZ(Real dpdz, int i_ch);
-  /**
-   * solver with iterative option to enforce uniform inlet
-   * pressure distribution option
-   */
-  virtual void enforceUniformDPDZAtInlet();
   virtual void computeWijPrime(int iblock) override;
   virtual void computeh(int iblock) override;
-  /**
-   * computeInletMassFlowDist corrects the inlet mass flow rate distribution
-   * in order to satisfy the uniform inlet pressure condition, iteratively.
-   */
-  virtual void computeInletMassFlowDist();
-  /// average relative error in pressure drop of channels
-  Real _dpz_error;
   TriSubChannelMesh & _tri_sch_mesh;
-
   // Extra objects for heat conduction, which is important in sodium
   Mat _hc_axial_heat_conduction_mat;
   Vec _hc_axial_heat_conduction_rhs;

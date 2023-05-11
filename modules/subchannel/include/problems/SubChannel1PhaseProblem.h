@@ -28,7 +28,7 @@
 class SubChannel1PhaseProblem;
 
 /**
- * Base class for the 1-phase steady-state/transient sub channel solver.
+ * Base class for the 1-phase steady-state/transient subchannel solver.
  */
 class SubChannel1PhaseProblem : public ExternalProblem
 {
@@ -83,6 +83,18 @@ protected:
   virtual Real computeAddedHeatPin(unsigned int i_ch, unsigned int iz);
   /// Function that computes the heat flux added by the duct
   virtual Real computeAddedHeatDuct(unsigned int i_ch, unsigned int iz);
+  /// compute massflow that matches the given dp/dz.
+  virtual Real computeMassFlowForDPDZ(Real dpdz, int i_ch);
+  /*
+   * solver with iterative option to enforce uniform inlet
+   * pressure distribution option
+   */
+  virtual void enforceUniformDPDZAtInlet();
+  /*
+   * computeInletMassFlowDist corrects the inlet mass flow rate distribution
+   * in order to satisfy the uniform inlet pressure condition, iteratively.
+   */
+  virtual void computeInletMassFlowDist();
   /// Computes Residual per gap for block iblock
   virtual libMesh::DenseVector<Real> residualFunction(int iblock,
                                                       libMesh::DenseVector<Real> solution);
@@ -120,6 +132,8 @@ protected:
   unsigned int _n_channels;
   unsigned int _block_size;
   Real _outer_channels;
+  /// average relative error in pressure drop of channels
+  Real _dpz_error;
   /// axial location of nodes
   std::vector<Real> _z_grid;
   Real _one;
