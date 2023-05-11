@@ -81,7 +81,6 @@ From: {{ APPTAINER_FROM }}
 {%- if DEV_CONTAINER is defined %}
     # DEV_CONTAINER set
     METHODS="opt dbg oprof devel"
-    dnf --enablerepo=powertools install -y valgrind cppunit
 {%- else %}
     # DEV_CONTAINER not set
     METHODS="{{ METHODS or "opt" }}"
