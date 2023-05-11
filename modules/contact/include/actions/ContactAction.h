@@ -120,7 +120,8 @@ private:
    */
   void removeRepeatedPairs();
   /**
-   * Create contact pairs from wrap-around sidesets for axisymmetric bodies.
+   * Create contact pairs between all boundaries whose centroids are within a user-specified
+   * distance of each other.
    */
   void createSidesetPairsFromGeometry();
 };

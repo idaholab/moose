@@ -55,8 +55,8 @@
     exodiff = 'three_hexagons_coarse_automatic_pair_out.e'
     cli_args = "Contact/contact_pressure/automatic_pairing_boundaries='102 201 301' "
                "Postprocessors/active=''"
-    requirement = 'The system shall be able to, under conditions of contact sideset and solid '
-                  'axisymmetry, assign primary-secondary contact pairs automatically.'
+    requirement = 'The system shall be able to, if the user provides a reference distance, assign '
+                  'primary-secondary contact pairs automatically.'
     abs_zero = 1.0e-4
     rel_err = 1.0e-4
     allow_warnings = true
@@ -67,9 +67,9 @@
     input = 'four_hexagons_coarse_automatic_pair.i'
     expect_out = 'Excluding contact pair primary--secondary 102--401'
     cli_args = "Postprocessors/active=''"
-    requirement = 'The system shall be able to, under conditions of contact sideset and solid '
-                  'axisymmetry, assign primary-secondary contact pairs automatically excluding '
-                  'contact surfaces that cannot come into contact.'
+    requirement = 'The system shall be able to, if the user provides a reference distance, assign '
+                  'primary-secondary contact pairs automatically excluding contact surfaces that '
+                  'cannot come into contact.'
     allow_warnings = true
   []
   [three_hexagons_coarse_automatic_pair_error]
@@ -77,9 +77,8 @@
     issues = '#24122'
     input = 'three_hexagons_coarse_automatic_pair.i'
     expect_err = "'primary' and 'secondary' surfaces or a list of boundaries"
-    requirement = 'The system shall be able to error out from within the contact action with an '
-                  'appropriate error message if the user does not provide sufficient information '
-                  'regarding the generation of contact pairs.'
+    requirement = 'The system shall generate an error if insufficient information to automatically '
+                  'define contact surface pairs is provided.'
     allow_warnings = true
   []
   [three_hexagons_coarse_various_actions]

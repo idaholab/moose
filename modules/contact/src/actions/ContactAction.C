@@ -1076,11 +1076,8 @@ ContactAction::addNodeFaceContact()
 void
 ContactAction::createSidesetPairsFromGeometry()
 {
-  mooseInfo("The contact action is reading the list of boundaries and automatically matching them "
-            "assuming that: 1) Those boundaries wrap around the surfaces of the bodies, 2) "
-            "Periodically repeating geometry and mesh exists. Deviations from equal spacing or "
-            "straight axis of extrusion (for 3D) may give rise to wrong contact pairing. The user "
-            "is encouraged to check the screen output to confirm pairs were assigned correctly.");
+  mooseInfo("The contact action is reading the list of boundaries and automatically pairs them "
+            "if their centroids fall within a specified distance of each other.");
 
   if (!_mesh)
     mooseError("Failed to obtain mesh for automatically generating contact pairs.");
@@ -1174,6 +1171,17 @@ ContactAction::createSidesetPairsFromGeometry()
                         pair_distance.first.second,
                         ", with a relative distance of ",
                         pair_distance.second);
+    }
+    else if (pair_distance.second <= TOLERANCE)
+    {
+      lean_pairs_distances.emplace_back(pair_distance);
+      mooseInfoRepeated("Generating contact pair primary--secondary ",
+                        pair_distance.first.first,
+                        "--",
+                        pair_distance.first.second,
+                        ", with a relative distance of ",
+                        pair_distance.second);
+      mooseWarning("Distance between contact pairs is small");
     }
     else
       mooseInfoRepeated("Excluding contact pair primary--secondary ",
