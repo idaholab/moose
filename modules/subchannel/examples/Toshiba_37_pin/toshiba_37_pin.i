@@ -1,67 +1,94 @@
-T_in = 473.15 # K
-mass_flux_in = 3500 # kg /sec m2
-P_out = 155e+5 # Pa
-
-[QuadSubChannelMesh]
-  [sub_channel]
-    type = QuadSubChannelMeshGenerator
-    nx = 1
-    ny = 2
+T_in = 660
+# [1e+6 kg/m^2-hour] turns into kg/m^2-sec
+mass_flux_in = ${fparse 1e+6 * 37.00 / 36000.*0.5}
+P_out = 2.0e5 # Pa
+[TriSubChannelMesh]
+  [subchannel]
+    type = TriSubChannelMeshGenerator
+    nrings = 4
     n_cells = 100
-    pitch = 0.0126
-    rod_diameter = 0.00950
-    gap = 0.00095
-    heated_length = 10.0
-    spacer_z = '0.0'
-    spacer_k = '0.0'
+    flat_to_flat = 0.085
+    heated_length = 1.0
+    rod_diameter = 0.01
+    pitch = 0.012
+    dwire = 0.002
+    hwire = 0.0833
+    spacer_z = '0 0.2 0.4 0.6 0.8'
+    spacer_k = '0.1 0.1 0.1 0.1 0.10'
   []
 []
 
-[Functions]
-  [S_fn]
-    type = ParsedFunction
-    expression = if(y>0.0,0.002,0.001)
+[AuxVariables]
+  [mdot]
+  []
+  [SumWij]
+  []
+  [P]
+  []
+  [DP]
+  []
+  [h]
+  []
+  [T]
+  []
+  [rho]
+  []
+  [S]
+  []
+  [Sij]
+  []
+  [w_perim]
+  []
+  [q_prime]
+  []
+  [mu]
   []
 []
 
-[FluidProperties]
-  [water]
-    type = Water97FluidProperties
+[Modules]
+  [FluidProperties]
+    [sodium]
+       type = PBSodiumFluidProperties
+    []
   []
 []
 
-[SubChannel]
-  type = LiquidWaterSubChannel1PhaseProblem
-  fp = water
+[Problem]
+  type = LiquidMetalSubChannel1PhaseProblem
+  fp = sodium
   n_blocks = 1
-  beta = 0.006
-  CT = 0.0
-  P_tol = 1e-6
-  T_tol = 1e-6
-  implicit = false
+  beta = 0.1
+  P_out = 2.0e5
+  CT = 1.0
   compute_density = true
   compute_viscosity = true
   compute_power = true
-  P_out = ${P_out}
+  P_tol = 1.0e-6
+  T_tol = 1.0e-3
+  implicit = true
+  segregated = false
+  staggered_pressure = false
+  monolithic_thermal = false
+  verbose_multiapps = true
+  verbose_subchannel = false
 []
 
 [ICs]
-  [S_ic]
-    type = FunctionIC
+  [S_IC]
+    type = TriFlowAreaIC
     variable = S
-    function = S_fn
   []
 
   [w_perim_IC]
-    type = ConstantIC
+    type = TriWettedPerimIC
     variable = w_perim
-    value = 0.34188034
   []
 
-  [q_prime_IC]
-    type = ConstantIC
+   [q_prime_IC]
+    type = TriPowerIC
     variable = q_prime
-    value = 0.0
+    power = 1.000e5 # W
+    filename = "pin_power_profile_37.txt"
   []
 
   [T_ic]
@@ -73,7 +100,7 @@ P_out = 155e+5 # Pa
   [P_ic]
     type = ConstantIC
     variable = P
-    value = 0.0
+    value = ${P_out}
   []
 
   [DP_ic]
@@ -81,29 +108,29 @@ P_out = 155e+5 # Pa
     variable = DP
     value = 0.0
   []
-
-  [Viscosity_ic]
+    [Viscosity_ic]
     type = ViscosityIC
     variable = mu
     p = ${P_out}
     T = T
-    fp = water
+    fp = sodium
   []
+
 
   [rho_ic]
     type = RhoFromPressureTemperatureIC
     variable = rho
-    p = ${P_out}
+    p = P
     T = T
-    fp = water
+    fp = sodium
   []
 
   [h_ic]
     type = SpecificEnthalpyFromPressureTemperatureIC
     variable = h
-    p = ${P_out}
+    p = P
     T = T
-    fp = water
+    fp = sodium
   []
 
   [mdot_ic]
@@ -114,6 +141,13 @@ P_out = 155e+5 # Pa
 []
 
 [AuxKernels]
+  [P_out_bc]
+    type = ConstantAux
+    variable = P
+    boundary = outlet
+    value = ${P_out}
+    execute_on = 'timestep_begin'
+  []
   [T_in_bc]
     type = ConstantAux
     variable = T
@@ -133,33 +167,10 @@ P_out = 155e+5 # Pa
 
 [Outputs]
   exodus = true
-  [Temp_Out_MATRIX]
-    type = QuadSubChannelNormalSliceValues
-    variable = T
-    execute_on = final
-    file_base = "Temp_Out.txt"
-    height = 10.0
-  []
-  [mdot_Out_MATRIX]
-    type = QuadSubChannelNormalSliceValues
-    variable = mdot
-    execute_on = final
-    file_base = "mdot_Out.txt"
-    height = 10.0
-  []
-  [mdot_In_MATRIX]
-    type = QuadSubChannelNormalSliceValues
-    variable = mdot
-    execute_on = final
-    file_base = "mdot_In.txt"
-    height = 0.0
-  []
 []
 
 [Executioner]
   type = Steady
-  nl_rel_tol = 0.9
-  l_tol = 0.9
 []
 
 ################################################################################
@@ -169,7 +180,7 @@ P_out = 155e+5 # Pa
 [MultiApps]
   [viz]
     type = FullSolveMultiApp
-    input_files = "3d.i"
+    input_files = "toshiba_39_pin_viz.i"
     execute_on = "timestep_end"
   []
 []
