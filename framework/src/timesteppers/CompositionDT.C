@@ -27,9 +27,6 @@ CompositionDT::compositionDTParams()
       "The maximum of these TimeSteppers will form the lower bound on the time "
       "step size. A single or multiple time steppers may be specified.");
 
-  params.addClassDescription("The time stepper take all the other time steppers as input and "
-                             "return the minimum time step size.");
-
   return params;
 }
 
@@ -38,6 +35,10 @@ CompositionDT::validParams()
 {
   InputParameters params = TimeStepper::validParams();
   params += CompositionDT::compositionDTParams();
+
+  params.addClassDescription("The time stepper take all the other time steppers as input and "
+                             "return the minimum time step size.");
+
   return params;
 }
 
