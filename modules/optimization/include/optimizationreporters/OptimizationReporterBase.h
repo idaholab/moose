@@ -11,10 +11,6 @@
 
 #include "OptimizationData.h"
 
-// friends
-#include "OptimizeSolve.h"
-#include "OptimizationReporterTest.h"
-
 namespace libMesh
 {
 template <typename Number>

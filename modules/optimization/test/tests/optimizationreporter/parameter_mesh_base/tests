@@ -1,0 +1,192 @@
+[Tests]
+  issues = '#24034'
+  design = 'ParameterMeshOptimization.md'
+  [oneParameterGroup]
+    requirement = "The system shall correctly read in one parameter group defined on the mesh "
+    [mesh]
+      type = CheckFiles
+      input = parameter_mesh_boundsIC.i
+      check_files = parameter_mesh_boundsIC_out.e
+      recover = False
+      detail = 'by first creating the parameter mesh containing the data;'
+    []
+    [allMeshParams]
+      type = JSONDiff
+      input = paramMeshOptRep.i
+      cli_args = 'OptimizationReporter/initial_condition_mesh_variable=initialConditions
+                  OptimizationReporter/lower_bound_mesh_variable=lowerBounds
+                  OptimizationReporter/upper_bound_mesh_variable=upperBounds
+                  OptimizationReporter/num_parameter_times=3
+                  OptimizationReporter/exodus_timesteps_for_parameter_mesh_variable=\'2 3 4\''
+      jsondiff = paramMeshOptRep_outjson.json
+      allow_test_objects = true
+      prereq = 'oneParameterGroup/mesh'
+      detail = "with initial conditions, upper and lower bounds defined on the mesh for all "
+               "timesteps; "
+    []
+    [allInputParams]
+      type = RunApp
+      input = paramMeshOptRep.i
+      cli_args = 'OptimizationReporter/constant_group_initial_condition=6
+                  OptimizationReporter/constant_group_lower_bounds=5
+                  OptimizationReporter/constant_group_upper_bounds=7
+                  OptimizationReporter/num_parameter_times=1
+                  UserObjects/optReporterTester/values_to_set_parameters_to=\'10 20 30 40 50 60\'
+                  UserObjects/optReporterTester/expected_lower_bounds=\'5 5 5 5 5 5\'
+                  UserObjects/optReporterTester/expected_upper_bounds=\'7 7 7 7 7 7\''
+      allow_test_objects = true
+      prereq = 'oneParameterGroup/mesh'
+      detail = "with initial conditions, upper and lower bounds defined in input file; "
+    []
+    [mixedParams]
+      type = RunApp
+      input = paramMeshOptRep.i
+      cli_args = 'OptimizationReporter/initial_condition_mesh_variable=initialConditions
+                  OptimizationReporter/constant_group_lower_bounds=5
+                  OptimizationReporter/upper_bound_mesh_variable=upperBounds
+                  OptimizationReporter/num_parameter_times=1
+                  UserObjects/optReporterTester/values_to_set_parameters_to=\'10 20 30 40 50 60\'
+                  UserObjects/optReporterTester/expected_lower_bounds=\'5 5 5 5 5 5\'
+                  UserObjects/optReporterTester/expected_upper_bounds=\'2 3.5 3.5 2 5 5\''
+      allow_test_objects = true
+      prereq = 'oneParameterGroup/mesh'
+      detail = "with initial conditions and lower bound read from input file and upper bound read "
+               "from the last timestep in the mesh."
+    []
+  []
+  [twoParameterGroup]
+    requirement = "The system shall correctly read in two groups of parameter data defined on the "
+                  "mesh "
+    [allMeshTwoParams]
+      type = JSONDiff
+      input = twoParamMeshOptRep.i
+      cli_args = 'OptimizationReporter/initial_condition_mesh_variable=\'initialConditions elemInitialConditions\'
+                  OptimizationReporter/lower_bound_mesh_variable=\'lowerBounds elemLowerBounds\'
+                  OptimizationReporter/upper_bound_mesh_variable=\'upperBounds elemUpperBounds\'
+                  OptimizationReporter/num_parameter_times=3
+                  OptimizationReporter/exodus_timesteps_for_parameter_mesh_variable=\'2 3 4\''
+      jsondiff = twoParamMeshOptRep_outjson.json
+      allow_test_objects = true
+      prereq = 'oneParameterGroup/mesh'
+      detail = "for initial conditions, upper and lower bounds defined on the mesh for all "
+               "timesteps; "
+    []
+    [allInputTwoParams]
+      type = RunApp
+      input = twoParamMeshOptRep.i
+      cli_args = 'OptimizationReporter/constant_group_initial_condition=\'6 7\'
+                  OptimizationReporter/constant_group_lower_bounds=\'5 4\'
+                  OptimizationReporter/constant_group_upper_bounds=\'8 9\'
+                  OptimizationReporter/num_parameter_times=1
+                  UserObjects/optReporterTester/values_to_set_parameters_to=\'10 20 30 40 50 60 0 0\'
+                  UserObjects/optReporterTester/expected_lower_bounds=\'5 5 5 5 5 5 4 4\'
+                  UserObjects/optReporterTester/expected_upper_bounds=\'8 8 8 8 8 8 9 9\''
+      allow_test_objects = true
+      prereq = 'oneParameterGroup/mesh'
+      detail = "for initial conditions, upper and lower bounds defined in input file; "
+    []
+    [mixedTwoParams]
+      type = RunApp
+      input = twoParamMeshOptRep.i
+      cli_args = 'OptimizationReporter/initial_condition_mesh_variable=\'initialConditions elemInitialConditions\'
+                  OptimizationReporter/constant_group_lower_bounds=\'5 8\'
+                  OptimizationReporter/upper_bound_mesh_variable=\'upperBounds elemUpperBounds\'
+                  OptimizationReporter/num_parameter_times=1
+                  UserObjects/optReporterTester/values_to_set_parameters_to=\'10 20 30 40 50 60 0 0\'
+                  UserObjects/optReporterTester/expected_lower_bounds=\'5 5 5 5 5 5 8 8\'
+                  UserObjects/optReporterTester/expected_upper_bounds=\'2 3.5 3.5 2 5 5 2.75 4.25\''
+      allow_test_objects = true
+      prereq = 'oneParameterGroup/mesh'
+      detail = "for initial conditions and lower bound read from input file and upper bound read "
+               "from the last timestep in the mesh; "
+    []
+    [twoParamsHO]
+      type = RunApp
+      input = twoParamMeshOptRep.i
+      cli_args = 'OptimizationReporter/initial_condition_mesh_variable=\'initialConditions initialConditionsSecond\'
+                  OptimizationReporter/lower_bound_mesh_variable=\'lowerBounds lowerBoundsSecond\'
+                  OptimizationReporter/upper_bound_mesh_variable=\'upperBounds upperBoundsSecond\'
+                  OptimizationReporter/parameter_families=\'LAGRANGE LAGRANGE\'
+                  OptimizationReporter/parameter_orders=\'FIRST SECOND\'
+                  OptimizationReporter/num_parameter_times=1
+                  UserObjects/optReporterTester/values_to_set_parameters_to=\'10 20 30 40 50 60 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0\'
+                  UserObjects/optReporterTester/expected_lower_bounds=\'0 1.5 1.5 0 3 3 0 0 3 3 0 1.5 3 1.5 1.5 0 3 0 1.5 3 1.5\'
+                  UserObjects/optReporterTester/expected_upper_bounds=\'2 3.5 3.5 2 5 5 2 2 5 5 2 3.5 5 3.5 3.5 2 5 2 3.5 5 3.50\''
+      allow_test_objects = true
+      prereq = 'oneParameterGroup/mesh'
+      detail = "for the first group being first order Lagrange and second group being second order "
+               "Lagrange nodal variables."
+    []
+  []
+  [errors]
+    requirement = "The system shall throw an error when parameter data is incorrectly defined "
+    [errorMixedParams]
+      type = RunException
+      input = paramMeshOptRep.i
+      cli_args = 'OptimizationReporter/constant_group_initial_condition=6
+                  OptimizationReporter/lower_bound_mesh_variable=lowerBounds
+                  OptimizationReporter/constant_group_lower_bounds=5
+                  OptimizationReporter/upper_bound_mesh_variable=upperBounds
+                  OptimizationReporter/num_parameter_times=1'
+      allow_test_objects = true
+      expect_err = 'Lower bounds for all parameter groups can only be defined by lower_bound_mesh_variable or constant_group_lower_bounds but not both.'
+      detail = "by having input and mesh parameters for the same bound; "
+    []
+    [errorMissingMeshParam]
+      type = RunException
+      input = paramMeshOptRep.i
+      cli_args = 'OptimizationReporter/lower_bound_mesh_variable=notOnMesh'
+      allow_test_objects = true
+      expect_err = 'Exodus file did not contain all of the parameter names being intitialized.'
+      detail = "by having a parameter not on the exodus mesh; "
+    []
+    [errorMixedParameterTypes]
+      type = RunException
+      input = paramMeshOptRep.i
+      cli_args = 'OptimizationReporter/initial_condition_mesh_variable=initialConditions
+                  OptimizationReporter/lower_bound_mesh_variable=lowerBounds
+                  OptimizationReporter/upper_bound_mesh_variable=elemUpperBounds'
+      allow_test_objects = true
+      expect_err = 'Parameter group contains nodal and elemental variables, this is not allowed.'
+      detail = "by using nodal and elemental exodus variables to define parameter data in the same "
+               "parameter group; "
+    []
+    [errorMismatchSteps]
+      type = RunException
+      input = paramMeshOptRep.i
+      cli_args = 'OptimizationReporter/lower_bound_mesh_variable=lowerBounds
+                  OptimizationReporter/num_parameter_times=2
+                  OptimizationReporter/exodus_timesteps_for_parameter_mesh_variable=\'2 3 4\''
+      allow_test_objects = true
+      expect_err = 'Number of timesteps to read mesh data specified by \"exodus_timesteps_for_parameter_mesh_variable\" incorrect.'
+      detail = "by not having the same number of optimization timesteps and timesteps for reading "
+               "parameter data from the mesh; "
+    []
+    [errorNoSteps]
+      type = RunException
+      input = paramMeshOptRep.i
+      cli_args = 'OptimizationReporter/constant_group_lower_bounds=5
+                  OptimizationReporter/num_parameter_times=3
+                  OptimizationReporter/exodus_timesteps_for_parameter_mesh_variable=\'2 3 4\''
+      allow_test_objects = true
+      expect_err = '\"exodus_timesteps_for_parameter_mesh_variable\" should only be specified if reading values from a mesh.'
+      detail = "by specifying a timestep for reading parameter data from the exodus file but not "
+               "parameter data is being read from the mesh because it is all specified in the input "
+               "file; "
+    []
+    [errorBadStep]
+      type = RunException
+      input = paramMeshOptRep.i
+      cli_args = 'OptimizationReporter/lower_bound_mesh_variable=lowerBounds
+      OptimizationReporter/upper_bound_mesh_variable=upperBounds
+      UserObjects/optReporterTester/expected_lower_bounds=\'5 5 5 5 5 5\'
+      UserObjects/optReporterTester/expected_upper_bounds=\'2 3.5 3.5 2 5 5\'
+                  OptimizationReporter/num_parameter_times=3
+                  OptimizationReporter/exodus_timesteps_for_parameter_mesh_variable=\'2 3 8\''
+      allow_test_objects = true
+      expect_err = 'Invalid value passed as "time_step". Expected a valid integer less than 4, received 8'
+      detail = "by specifying a timestep that is bigger than the timestpes on the exodus the exodus "
+               "mesh."
+    []
+  []
+[]

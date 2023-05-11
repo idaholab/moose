@@ -4,10 +4,11 @@
 [OptimizationReporter]
   type = ParameterMeshOptimization
   parameter_names = 'source'
-  parameter_meshes = 'parameter_mesh_in.e'
-  parameter_families = MONOMIAL
-  parameter_orders = CONSTANT
-
+  parameter_meshes = 'parameter_mesh_restart_out.e'
+  exodus_timesteps_for_parameter_mesh_variable = 2
+  initial_condition_mesh_variable = restart_source
+  constant_group_lower_bounds = -1
+  constant_group_upper_bounds = 5
   # Random points
   measurement_points = '0.78193073 0.39115321 0
                         0.72531893 0.14319403 0
@@ -22,11 +23,12 @@
   # sin(x*pi/2)*sin(y*pi/2)
   measurement_values = '0.54299466 0.20259611 0.21438235 0.44418597 0.02613676
                         0.00241892 0.72014019 0.42096307 0.06108895 0.07385256'
+  outputs = none
 []
 
 [Executioner]
   type = Optimize
-  tao_solver = taolmvm
+  tao_solver = taoblmvm
   petsc_options_iname = '-tao_gatol'
   petsc_options_value = '1e-4'
   verbose = true
@@ -90,4 +92,15 @@
     from_reporters = 'gradient_vpp/inner_product'
     to_reporters = 'OptimizationReporter/grad_source'
   []
+[]
+
+[Reporters]
+  [optInfo]
+    type = OptimizationInfo
+    items = 'current_iterate function_value gnorm'
+  []
+[]
+
+[Outputs]
+  csv = true
 []
