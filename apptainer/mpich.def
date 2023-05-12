@@ -7,6 +7,8 @@
 BootStrap: oras
 {%- if ALTERNATE_FROM == "rocky9" %}
 From: mooseharbor.hpc.inl.gov/moose-hpcbase/mpi_03-rocky9-{{ ARCH }}:9.0-0
+{%- elif ALTERNATE_FROM == "clang" %}
+From: mooseharbor.hpc.inl.gov/moose-base/rocky8-clang:8.7-0
 {%- else %}
 From: harbor.hpc.inl.gov/hpcbase/mpi_03:1.1.0
 {%- endif %}
@@ -31,6 +33,7 @@ From: harbor.hpc.inl.gov/hpcbase/mpi_03:1.1.0
     mkdir ${TEMP_LOC}
 
     # Enable power tools
+    dnf install -y dnf-plugins-core
     if [[ $RHEL_VERSION = 9* ]]; then
         dnf config-manager --enable crb
     else
