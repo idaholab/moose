@@ -13,7 +13,7 @@
     input = circle_rotate_supg.i
     cli_args = Executioner/num_steps=2
     method = opt # Can be slow in debug and this is simply to make sure input file remains working
-    requirement = "The level set module shall include an example solution of a rotating circle problem with SUPG stabilization."
+    requirement = "The system shall include an example solution of a level set rotating circle problem with SUPG stabilization."
   []
   [level_set_reinit]
     type = RunApp
