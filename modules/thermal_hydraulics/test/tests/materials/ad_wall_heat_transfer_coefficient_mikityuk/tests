@@ -1,0 +1,33 @@
+[Tests]
+  design = 'ADWallHeatTransferCoefficientMikityukMaterial.md'
+  issues = '#24340'
+  [normal_operation]
+    requirement = "The system shall compute the the heat transfer coefficient using the Mikityuk "
+                  "correlation for the Nusselt number."
+    type = 'CSVDiff'
+    input = 'mikityuk_test.i'
+    csvdiff = 'mikityuk_test_out.csv'
+  []
+  [abnormal_operation]
+    requirement = "The system shall return a warning message when the Mikityuk correlation is used "
+                  "with: "
+    [out_of_range_warning_1]
+      type = 'RunException'
+      input = 'mikityuk_test.i'
+      cli_args = "PoD=1.05"
+      expect_err = "Mikityuk's correlation is valid when Pe is between 30 and 5000, and P/D is "
+                   "between 1.1 and 1.5. Be aware that using values out of this range may lead to "
+                   "significant errors in your results!"
+      detail = 'pitch-to-diameter ratioout of bonds,  or'
+    []
+    [out_of_range_warning_2]
+      type = 'RunException'
+      input = 'mikityuk_test.i'
+      cli_args = "vel=10"
+      expect_err = "Mikityuk's correlation is valid when Pe is between 30 and 5000, and P/D is "
+                   "between 1.1 and 1.5. Be aware that using values out of this range may lead to "
+                   "significant errors in your results!"
+      detail = 'Peclet number out of bonds.'
+    []
+  []
+[]
