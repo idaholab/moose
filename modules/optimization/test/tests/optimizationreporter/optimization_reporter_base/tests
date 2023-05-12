@@ -1,35 +1,35 @@
 [Tests]
   issues = '#22212 #23867'
   design = 'OptimizationReporter/index.md'
-  [read_data]
-    requirement = "The system shall correctly read in "
+  [optimizationReporter]
+    requirement = "The system shall correctly read in parameter data defined in the input file "
     [input]
       type = JSONDiff
       input = optRep_fromInput.i
       jsondiff = optRep_fromInput_out.json
       allow_test_objects = true
-      detail = "parameter data from the input file and measurement data from the input file."
+      detail = "measurement data from the input file; "
     []
     [csv_paramBounds]
       type = JSONDiff
       input = optRep_fromCsv_paramBounds.i
       jsondiff = optRep_fromCsv_paramBounds_out.json
       allow_test_objects = true
-      detail = "parameter data from input file with lower bounds, upper bounds and initial conditions provided for every parameter and measurement data from a CSV file."
+      detail = "with lower bounds, upper bounds and initial conditions provided for every parameter and measurement data from a CSV file; "
     []
     [csv_groupBounds]
       type = JSONDiff
       input = optRep_fromCsv_groupBounds.i
       jsondiff = optRep_fromCsv_groupBounds_out.json
       allow_test_objects = true
-      detail = "parameter data from input file with lower bounds, upper bounds and initial conditions constant for each group and measurement data from a CSV file."
+      detail = "with lower bounds, upper bounds and initial conditions constant for each group and measurement data from a CSV file; "
     []
     [csv_mixBounds]
       type = JSONDiff
       input = optRep_fromCsv_mixBounds.i
       jsondiff = optRep_fromCsv_mixBounds_out.json
       allow_test_objects = true
-      detail = "parameter data from input file with lower bounds, upper bounds and initial conditions are a mix of constant per group and every parameter in a group and measurement data from a CSV file."
+      detail = "with lower bounds, upper bounds and initial conditions are a mix of constant per group and every parameter in a group and measurement data from a CSV file; "
     []
     [missing_group_params]
       type = RunException
@@ -38,7 +38,7 @@
       cli_args = 'OptimizationReporter/upper_bounds=\'0\''
       max_threads = 1 # Optimize executioner does not support multiple threads
       expect_err = 'There must be a vector of upper_bounds per parameter group\.  The upper_bounds input format is std::vector<std::vector<Real>> so each vector should be seperated by \";\" even if it is a single value per group for a constant upper_bounds\.'
-      detail = 'parameters and error if parameters are provided but do not include a parameter for every group.'
+      detail = ' and error if parameters are provided but do not include a parameter for every group; '
     []
     [too_many_params]
       type = RunException
@@ -47,7 +47,7 @@
       cli_args = 'OptimizationReporter/upper_bounds=\'0;0;0 0\''
       max_threads = 1 # Optimize executioner does not support multiple threads
       expect_err = 'When upper_bounds are given in input file, there must either be a single value per parameter group or a value for every parameter in the group\.'
-      detail = 'parameters and error if an incorrect number of parameters are provided for a group.'
+      detail = ' and error if an incorrect number of parameters are provided for a group; '
     []
   []
 []

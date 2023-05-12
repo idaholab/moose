@@ -4,8 +4,7 @@
 [OptimizationReporter]
   type = ParameterMeshOptimization
   parameter_names = 'source'
-  parameter_meshes = 'parameter_mesh_in.e'
-
+  parameter_meshes ='parameter_mesh_in.e'
   # Random points
   measurement_points = '0.78193073 0.39115321 0
                         0.72531893 0.14319403 0
