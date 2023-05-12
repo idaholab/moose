@@ -11,7 +11,7 @@ Renderer:
 Extensions:
     MooseDocs.extensions.navigation:
         name: SubChannel
-        repo: https://hpcgitlab.hpc.inl.gov/idaholab/subchannel
+        repo: https://github.inl.gov/ncrc/subchannel
         menu:
             Getting Started:
                 Installation: getting_started/installation.md
