@@ -13,8 +13,8 @@
 #include "TimeSequenceStepperBase.h"
 
 /**
- * A TimeStepper takes time steppers as input and compute the minimum time step size among all
- * time steppers as output. If any time sequence stepper(s) is supplied for input, CompositionDT
+ * A TimeStepper that takes time steppers as inputs and computes the minimum time step size among
+ * all time steppers as output. If any time sequence stepper(s) is supplied for input, CompositionDT
  * will compare the computed minimum time step size with the one needs to hit the time point, then
  * select the smaller value as output. An optional parameter lower_bound is provided
  * to set a lower bound for the computed time step size.

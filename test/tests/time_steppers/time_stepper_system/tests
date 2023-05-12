@@ -4,7 +4,7 @@
   'ComposeTimeStepperAction.md'
 
  [time_stepper_system]
-  requirement = 'The system shall support the ability to use multiple time steppers/timesequences'
+  requirement = 'The system shall support the ability to use multiple time steppers'
     [multiple_time_steppers]
       type = CSVDiff
       input = 'multiple_timesteppers.i'
@@ -67,7 +67,7 @@
       input = 'lower_bound.i'
       cli_args = 'Executioner/TimeSteppers/lower_bound=FooDT'
       expect_err = "lower_bound: Failed to find a timestepper with the name 'FooDT'"
-      detail ="time stepper name(s) provided for lower_bound dosen't not exist,"
+      detail ="time stepper name(s) provided for lower_bound dosen't exist,"
     []
 
     [active_timesteppers]

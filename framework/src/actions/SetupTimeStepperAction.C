@@ -90,11 +90,11 @@ SetupTimeStepperAction::act()
       if (!no_time_stepper && no_time_steppers)
         mooseDeprecated(
             "The [TimeStepper] block is deprecated. Please use [TimeSteppers] instead.");
-      // The user use both [TimeStepper] and [TimeSteppers] for time stepper setup, use input in
-      // [TimeSteppers] block and give a warning message
+      // The user used both [TimeStepper] and [TimeSteppers] for time stepper setup, use input in
+      // [TimeSteppers] block and give an error message
       if (!no_time_stepper && !no_time_steppers)
         mooseError("Both [TimeStepper] and [TimeSteppers] are used to setup the time stepper. The "
-                   "[TimeStepper] Block will be ignored. Note [TimeStepper] will be deprecated "
+                   "[TimeStepper] block will be ignored. Note [TimeStepper] will be deprecated "
                    "soon. Please consider [TimeSteppers] for future use.");
     }
   }
