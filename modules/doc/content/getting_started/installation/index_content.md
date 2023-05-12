@@ -4,9 +4,10 @@ To begin, click a link corresponding to your operating system or another install
 choice:
 
 - [Linux and MacOS](installation/conda.md)
+- [Pre-Built MOOSE](installation/moose_conda_binary.md) (Excellent for Training)
 - [Docker](installation/docker.md)
 - [Windows Subsystem for Linux](installation/windows.md)
-- [INL's HPC Pre-Built MOOSE](installation/inl_hpc_prebuilt_moose.md)
+- [INL's HPC Pre-Built MOOSE](installation/inl_hpc_prebuilt_moose.md) (Excellent for Training)
 - Optional packages:
 
   - [installation/install_libtorch.md]
@@ -19,8 +20,3 @@ When the above does not quite fit your needs, the following instructions are ava
 - [From Source (GCC)](installation/manual_installation_gcc.md)
 - [From Source (LLVM/Clang)](installation/manual_installation_llvm.md)
 - [installation/manual_installation_linux_lldb.md]
-
-!style! style=margin-top:50px
-Once an installation method above has been completed, follow the +New Users+ button below to
-continue your tour of MOOSE!
-!style-end!

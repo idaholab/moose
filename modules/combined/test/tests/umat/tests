@@ -8,6 +8,7 @@
     exodiff = 'gap_heat_transfer_umat_out.e'
     library_mode = 'DYNAMIC'
     valgrind = 'NONE'
+    installation_type = IN_TREE
     requirement = 'The system shall contain an Abaqus UMAT interface that produces the same results (stress, strain, '
                   'displacements, and temperature) as the built-in MOOSE capabilities for a '
                   'thermomechanical problem where temperature is a variable and affects material '
@@ -19,6 +20,7 @@
     cli_args = "Materials/active='elasticity_tensor temp_dependent_elasticity_tensor stress "
                "prefactor_material_block heat density'"
     exodiff = 'gap_heat_transfer_umat_out.e'
+    installation_type = IN_TREE
     requirement = 'The system shall avoid regression in a simple thermomechanical problem where '
                   'temperature is a variable, which is used as a reference for verification of the '
                   'UMAT interface'

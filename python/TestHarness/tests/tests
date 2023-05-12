@@ -275,4 +275,10 @@
     requirement = "The system shall test for a valid json output dump"
     issues = '#21967'
   []
+  [test_install_type]
+    type = PythonUnitTest
+    input = test_InstallType.py
+    requirement = "The system shall skip tests not capable of being run depending on binary installation type"
+    issues = '#24195'
+  []
 []

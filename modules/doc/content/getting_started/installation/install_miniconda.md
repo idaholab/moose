@@ -1,5 +1,5 @@
 
-Follow the steps below depending on your platform to install mambaforge. If you run into issues
+Follow the steps below depending on your platform to install Mambaforge. If you run into issues
 during these steps, please visit our [Conda Troubleshooting](help/faq/conda_issues.md optional=True)
 guide. This installation guide relies on the utilization of `mamba`, an optimized package manager
 for Conda.
