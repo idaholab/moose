@@ -8,7 +8,10 @@ import argparse
 import socket
 import subprocess
 import shutil
+from datetime import datetime, timezone
+
 import jinja2
+from jinja2 import meta
 
 from versioner import Versioner
 
@@ -188,6 +191,12 @@ class ApptainerGenerator:
         ApptainerGenerator.print(content, prefix_color='red', file=sys.stderr)
         sys.exit(1)
 
+    @staticmethod
+    def git_repo_sha(dir):
+        """ gets sha of the given repo """
+        command = ['git', 'rev-parse', 'HEAD']
+        return subprocess.check_output(command, cwd=dir, encoding='utf-8').strip()
+
     def run(self, command):
         """
         Prints a command to screen and then runs it
@@ -353,6 +362,31 @@ class ApptainerGenerator:
         self.print(f'Using remote dependency for {name} from {uri}')
         return 'oras', uri.replace('oras://', '')
 
+    def _definition_header(self, jinja_data):
+        """
+        Adds a useful header to generated definitions
+        """
+        definition = open(self.def_path, 'r').read()
+        jinja_env = jinja2.Environment()
+        jinja_vars = meta.find_undeclared_variables(jinja_env.parse(definition))
+
+        arguments = ' '.join(sys.argv[1:])
+
+        header = '#\n'
+        header += '# Generated via MOOSE ApptainerGenerator (scripts/apptainer_generator.py)\n'
+        header += '#\n'
+        header += f'#   Arguments: {arguments}\n'
+        header += f'#   Template:  {os.path.relpath(self.def_path, MOOSE_DIR)}\n'
+        header += '#\n'
+        header += '# Consumed jinja variables\n'
+        header += '#\n'
+        for var in sorted(jinja_vars):
+            header += f'#   {var}="{jinja_data.get(var, "")}"\n'
+        header += '#\n'
+        header += '\n'
+
+        return header
+
     def _add_definition_labels(self, definition):
         """
         Adds common labels to the given definition content
@@ -361,13 +395,15 @@ class ApptainerGenerator:
         name = self.name
         if hasattr(self.args, 'modify') and self.args.modify is not None:
             name += '.modified'
-        definition += f'    {name}.buildhost {socket.gethostname()}\n'
+        definition += f'    {name}.host.hostname {socket.gethostname()}\n'
+        definition += f'    {name}.host.user {os.getlogin()}\n'
+        definition += f'    {name}.moose.sha {self.git_repo_sha(MOOSE_DIR)}\n'
         definition += f'    {name}.version {self.tag}\n'
         # If we have CIVET info, add the url
         if 'CIVET_SERVER' in os.environ and 'CIVET_JOB_ID' in os.environ:
             civet_server = os.environ.get('CIVET_SERVER')
             civet_job_id = os.environ.get('CIVET_JOB_ID')
-            definition += f'    {name}.job {civet_server}/job/{civet_job_id}\n'
+            definition += f'    {name}.civet.job {civet_server}/job/{civet_job_id}\n'
         return definition
 
     @staticmethod
@@ -467,7 +503,6 @@ class ApptainerGenerator:
                 jinja_var = f'vtk_{var}'
                 jinja_data[jinja_var] = meta['source'][var]
 
-
     def _action_exists(self):
         """
         Performs the "exists" action
@@ -540,6 +575,9 @@ class ApptainerGenerator:
         jinja_env.trim_blocks = True
         jinja_env.lstrip_blocks = True
         new_definition = definition_template.render(**jinja_data)
+
+        # Add a header
+        new_definition = self._definition_header(jinja_data) + new_definition
 
         # Add in a few labels
         new_definition = self._add_definition_labels(new_definition)
