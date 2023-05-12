@@ -2,7 +2,7 @@
 
 !template! item key=system-scope
 !! system-scope-begin
-The [!ac](MOOSE) Level Set module provides capabilities for solving a set of level set equations. The level set method is commonly used for front tracking problems. The advection of the level set equation is solved using the Galerkin finite element method, and is stabilized with streamline Upwind/Petrov-Galerkin method. To preserve the smooth profile of the regularized level set variable, a re--initialization step can be used through the [!ac](MOOSE) multi-app system. The solutions are verified against classical benchmark problems.
+The [!ac](MOOSE) Level Set module provides capabilities for solving a set of level set equations. The level set method is commonly used for front tracking problems. The advection of the level set equation is solved using the Galerkin finite element method, and is stabilized with streamline Upwind/Petrov-Galerkin method. To preserve the smooth profile of the regularized level set variable, a re-initialization step can be used through the [!ac](MOOSE) multi-app system. The solutions are verified against classical benchmark problems.
 !! system-scope-finish
 !template-end!
 
