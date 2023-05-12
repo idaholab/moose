@@ -8,6 +8,8 @@
 #* Licensed under LGPL 2.1, please see LICENSE for details
 #* https://www.gnu.org/licenses/lgpl-2.1.html
 
+# Dummy change to mark an ancestor
+
 """
 Generate hash based on vetted versions of libraries as listed in
 module_hash.yaml's (zip_keys)
