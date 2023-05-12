@@ -8,7 +8,6 @@
     method = opt # Can be slow in debug and this is simply to make sure input file remains working
     requirement = "The level set module shall include an example solution of a rotating circle problem."
   []
-  []
   [level_set_supg]
     type = RunApp
     input = circle_rotate_supg.i
