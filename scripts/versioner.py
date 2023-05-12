@@ -289,7 +289,10 @@ class Versioner:
             influential_meta = OrderedDict()
             file_list = []
             for package, influential in packages.items():
-                file_list.extend(influential)
+                if isinstance(influential, dict):
+                    file_list.extend(influential['influential'])
+                else:
+                    file_list.extend(influential)
                 influential_meta[package] = {'influential' : file_list.copy()}
 
         for package in self.entities:
