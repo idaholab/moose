@@ -36,9 +36,9 @@ identify the pathway to non-convergence using the [Debug](Debug/index.md) and [O
 The following snippets show how to obtain detailed prints of the residual convergence during the linear and nonlinear solves.
 Nonlinear residual prints are turned on by default in most applications, but the syntax is similar if not.
 
-!listing input=test/tests/misc/save_in/block-restricted-save-in.i block=Outputs
+!listing test/tests/misc/save_in/block-restricted-save-in.i block=Outputs
 
-!listing input=test/tests/outputs/debug/show_var_residual_norms_debug.i block=Debug
+!listing test/tests/outputs/debug/show_var_residual_norms_debug.i block=Debug
 
 We will first go over shared reasons for lack of convergence,
 then focus on the linear solve, and finally on the nonlinear solve.
@@ -105,7 +105,7 @@ problems are difficult to initialize. These problems can benefit from a customiz
 These transients usually benefit from a slow growth in the time steps. For example with an [IterationAdaptiveDT.md],
 you can start with a small time step and let the time stepper grow the time step to reach steady state faster.
 
-!listing input=test/tests/time_steppers/iteration_adaptive/adapt_tstep_grow_init_dt.i block=TimeStepper
+!listing test/tests/time_steppers/iteration_adaptive/adapt_tstep_grow_init_dt.i block=TimeStepper
 
 For a customized relaxation for each variable, you may multiply the time derivatives of each variable
 by a different factor.
@@ -194,14 +194,14 @@ For PJFNK, the linear systems are formed by computing the action of the Jacobian
 often relies on forming the Jacobian. By default, only the diagonal of the Jacobian is computed for preconditioning. To form
 the entire Jacobian, including the variable coupling terms on the off-diagonals, this syntax may be used:
 
-!listing input=test/tests/preconditioners/auto_smp/ad_coupled_convection.i block=Preconditioning
+!listing test/tests/preconditioners/auto_smp/ad_coupled_convection.i block=Preconditioning
 
 A basic check on whether the Jacobian may be inaccurate is to simply replace it with a Jacobian formed using finite differencing,
 using the [Finite Difference Preconditioner](FiniteDifferencePreconditioner.md). This replaces every call to `::computeJacobian` in the kernels and boundary
 conditions with finite differencing on the computation of the residual. If a case of poor convergence is fixed by this
 simple action, then the Jacobian was not good and it needs to be fixed.
 
-!listing input=test/tests/preconditioners/fdp/fdp_test.i block=Preconditioning
+!listing test/tests/preconditioners/fdp/fdp_test.i block=Preconditioning
 
 A more advanced check, and part of the process to fix the Jacobian, is to use the
 [Jacobian analysis utilities](development/analyze_jacobian.md). These will point out inaccurate or missing terms
@@ -352,7 +352,7 @@ problem, and it is regularly necessary to turn the line search off as shown in t
 
 ### Bad nonlinear convergence
 
-If your linear iterations are dropping fine but it takes lots of nonlinear iterations, then your problem is very nonlinear and it is just hard to solve. In this case, you should decrease the time step. However, if you have a multivariable problem, the two residuals may have very different magnitudes, which will make the system hard to solve. Print the nonlinear residuals using the [!param](Debug/show_var_residual_norms) parameter to check their relative magnitudes at the end of a solve. If they are more than an order of magnitude off, then use the `scaling` parameter in the variables block to scale the smaller variable up.
+If your linear iterations are dropping fine but it takes lots of nonlinear iterations, then your problem is very nonlinear and it is just hard to solve. In this case, you should decrease the time step. However, if you have a multivariable problem, the two residuals may have very different magnitudes, which will make the system hard to solve. Print the nonlinear residuals using the [!param](/Debug/SetupDebugAction/show_var_residual_norms) parameter to check their relative magnitudes at the end of a solve. If they are more than an order of magnitude off, then use the `scaling` parameter in the variables block to scale the smaller variable up.
 
 !alert note
 Automatic scaling, offered through the [!param](/Executioner/Steady/automatic_scaling) parameter, will often suffice to

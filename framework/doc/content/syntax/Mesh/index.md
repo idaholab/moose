@@ -249,7 +249,7 @@ A simple example of mesh meta data is the `num_elements_x` provided by [Generate
 ## Debugging in-MOOSE mesh generation id=troubleshooting
 
 !alert note
-The MOOSE mesh generation [tutorial](tutorial04_meshing/index.md) is the most comprehensive learning resource on meshing in MOOSE. We summarize here
+The MOOSE mesh generation [tutorial](tutorial04_meshing/index.md optional=true) is the most comprehensive learning resource on meshing in MOOSE. We summarize here
 only a few techniques.
 
 Mesh generation in MOOSE is a sequential tree-based process. Mesh generators are executed sorted by dependencies,

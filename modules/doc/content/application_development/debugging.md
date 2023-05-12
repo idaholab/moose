@@ -1,7 +1,7 @@
 # Debugging
 
 !alert note title=It's not always due to a bug!
-Troubleshooting documentation may be found on [this page for convergence issues](failed_solved.md) and
+Troubleshooting documentation may be found on [this page for convergence issues](failed_solves.md) and
 [this page for simulation workflow / other resources](/Debug/index.md). User troubleshooting
 is more appropriate than debugging in most cases, especially if the 'bug' is in the input file!
 

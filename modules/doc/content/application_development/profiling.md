@@ -8,8 +8,9 @@ works reasonably well on Mac OS.  Instruments also works well for profiling
 applications on Mac systems.
 
 !alert note
-For superficial profiling of a simulation, the [PerfGraph utility](content/source/outputs/PerfGraphOutput.md)
-can be leveraged directly from the input file.
+For superficial profiling of a simulation, the [PerfGraph utility](outputs/PerfGraphOutput.md)
+can be leveraged directly from the input file. Only sections of the code that have been already explicitly
+timed will be reported.
 
 ## Install Google's gperftools
 
