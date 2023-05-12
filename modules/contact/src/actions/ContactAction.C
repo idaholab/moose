@@ -63,18 +63,15 @@ ContactAction::validParams()
       "secondary", "The list of boundary IDs referring to secondary sidesets");
   params.addParam<std::vector<BoundaryName>>(
       "automatic_pairing_boundaries",
-      "The list of boundary IDs referring to sidesets which will define solid centers of gravity. "
-      "These, in turn, will generate unique primary-secondary pairs with no consideration for the "
-      "selection of side within the pair. This capability is intended for use when many "
-      "bodies with straight extrusion axis (or a 2D tiled pattern) can be in contact with "
-      "neighbors. If this input is chosen to describe "
-      "contacting surfaces, separate 'primary' and 'secondary' inputs cannot be utilized. ");
+      "List of boundary IDs for sidesets that are automatically paired with any other boundary in "
+      "this list having a centroid-to-centroid distance less than the value specified in the "
+      "'automatic_pairing_distance' parameter. ");
   params.addRangeCheckedParam<Real>(
       "automatic_pairing_distance",
       "automatic_pairing_distance>=0",
-      "The maximum distance the center of gravity of the boundaries provided in the "
+      "The maximum distance the centroids of the boundaries provided in the "
       "'automatic_pairing_boundaries' parameter can be to generate a contact pair automatically. "
-      "Due to numerical error in the determination of the center of gravity, it is encouraged that "
+      "Due to numerical error in the determination of the centroids, it is encouraged that "
       "the user adds a tolerance to this distance (e.g. extra 10%) to make sure no suitable "
       "contact pair is missed.");
   params.addDeprecatedParam<MeshGeneratorName>(
@@ -1130,7 +1127,7 @@ ContactAction::createSidesetPairsFromGeometry()
       accumulated_sideset_area += side_area;
     }
 
-    // Average each element's center of gravity with its area
+    // Average each element's center of gravity (centroid) with its area
     center_of_gravity /= accumulated_sideset_area;
 
     // Add sideset-cog pair to vector
@@ -1158,11 +1155,10 @@ ContactAction::createSidesetPairsFromGeometry()
 
   const auto automatic_pairing_distance = getParam<Real>("automatic_pairing_distance");
 
-  // Loop over all pairs and add those whose distance isn't trivial
-  // and less than the threshold distance
+  // Loop over all pairs
   std::vector<std::pair<std::pair<BoundaryName, BoundaryName>, Real>> lean_pairs_distances;
   for (const auto & pair_distance : pairs_distances)
-    if (pair_distance.second > TOLERANCE && pair_distance.second <= automatic_pairing_distance)
+    if (pair_distance.second <= automatic_pairing_distance)
     {
       lean_pairs_distances.emplace_back(pair_distance);
       mooseInfoRepeated("Generating contact pair primary--secondary ",
@@ -1172,24 +1168,6 @@ ContactAction::createSidesetPairsFromGeometry()
                         ", with a relative distance of ",
                         pair_distance.second);
     }
-    else if (pair_distance.second <= TOLERANCE)
-    {
-      lean_pairs_distances.emplace_back(pair_distance);
-      mooseInfoRepeated("Generating contact pair primary--secondary ",
-                        pair_distance.first.first,
-                        "--",
-                        pair_distance.first.second,
-                        ", with a relative distance of ",
-                        pair_distance.second);
-      mooseWarning("Distance between contact pairs is small");
-    }
-    else
-      mooseInfoRepeated("Excluding contact pair primary--secondary ",
-                        pair_distance.first.first,
-                        "--",
-                        pair_distance.first.second,
-                        ", with a relative distance of ",
-                        pair_distance.second);
 
   // Create the boundary pairs (possibly with repeated pairs depending on user input)
   for (const auto & lean_pairs_distance : lean_pairs_distances)
