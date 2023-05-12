@@ -9,6 +9,7 @@ packages:
       - apptainer/mpich.def
       - conda/mpich/meta.yaml
       - conda/mpich/conda_build_config.yaml
+    apptainer:
   petsc:
     dependencies:
       - mpich

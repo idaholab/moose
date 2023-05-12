@@ -391,7 +391,12 @@ class Versioner:
             name_base = f'moose-{name_base}'
         name_suffix = platform.machine()
         name = f'{name_base}-{name_suffix}'
-        meta = package_apptainer_entry.copy()
+
+        meta = {}
+
+        if package_apptainer_entry is not None:
+            meta.update(package_apptainer_entry)
+
         meta.update({'name': name,
                      'name_base': name_base,
                      'name_suffix': name_suffix,

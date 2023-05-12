@@ -114,7 +114,7 @@ class Test(unittest.TestCase):
             is_app = package != 'libmesh'
             def_package = 'app' if is_app else package
             name_prefix = '' if is_app else 'moose-'
-            meta = Versioner.apptainer_meta(package, package_hash, is_app)
+            meta = Versioner.apptainer_meta(package, {'from': 'some_package'}, package_hash, is_app)
             if is_app:
                 package = package.lower()
             self.assertEqual(meta['name'], f'{name_prefix}{package}-{platform.machine()}')
@@ -123,6 +123,7 @@ class Test(unittest.TestCase):
             self.assertEqual(meta['tag'], package_hash)
             self.assertEqual(meta['uri'], f'{name_prefix}{package}-{platform.machine()}:{package_hash}')
             self.assertEqual(meta['def'], os.path.realpath(os.path.join(MOOSE_DIR, f'apptainer/{def_package}.def')))
+            self.assertEqual(meta['from'], 'some_package')
 
 if __name__ == '__main__':
     unittest.main(verbosity=2, buffer=True)
