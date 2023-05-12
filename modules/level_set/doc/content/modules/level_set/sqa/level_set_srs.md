@@ -8,7 +8,7 @@ The [!ac](MOOSE) Level Set module provides capabilities for solving a set of lev
 
 !template! item key=system-purpose
 !! system-purpose-begin
-The purpose of the [!ac](MOOSE) Level Set module is to provides basic functionality to solve the level set equation. The level set module can be very easily coupled with other physics modules in [!ac](MOOSE).  The level set method has become popular in many disciplines, such as image processing, computer graphics, computational geometry, optimization, computational fluid dynamics, and computational biology.
+The purpose of the [!ac](MOOSE) Level Set module is to provides basic functionality to solve the level set equation. The Level Set module can be very easily coupled with other physics modules in [!ac](MOOSE).  The level set method has become popular in many disciplines, such as image processing, computer graphics, computational geometry, optimization, computational fluid dynamics, and computational biology.
 !! system-purpose-finish
 !template-end!
 
