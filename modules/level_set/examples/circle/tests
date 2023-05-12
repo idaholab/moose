@@ -1,7 +1,11 @@
 [Tests]
-  [./circle]
+  [circle]
     type = RunApp
     input = circle_16.i
     method = opt # Can be slow in debug and this is simply to make sure input file remains working
-  [../]
+    requirement = "The system shall include an example solution of a level set moving circle "
+                  "problem."
+    issues = '#8465'
+    design = 'modules/level_set/index.md'
+  []
 []

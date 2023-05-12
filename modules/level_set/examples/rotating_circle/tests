@@ -1,21 +1,26 @@
 [Tests]
-  [./level_set_only]
+  issues = '#8465'
+  design = 'modules/level_set/index.md'
+  [level_set_only]
     type = RunApp
     input = circle_rotate.i
     cli_args = Executioner/num_steps=2
     method = opt # Can be slow in debug and this is simply to make sure input file remains working
-  [../]
-  [./level_set_supg]
+    requirement = "The system shall include an example solution of a level set rotating circle problem."
+  []
+  [level_set_supg]
     type = RunApp
     input = circle_rotate_supg.i
     cli_args = Executioner/num_steps=2
     method = opt # Can be slow in debug and this is simply to make sure input file remains working
-
-  [../]
-  [./level_set_reinit]
+    requirement = "The system shall include an example solution of a level set rotating circle problem with SUPG stabilization."
+  []
+  [level_set_reinit]
     type = RunApp
     input = circle_rotate_parent.i
     cli_args = Executioner/num_steps=2
     method = opt # Can be slow in debug and this is simply to make sure input file remains working
-  [../]
+    requirement = "The system shall include an example solution of a level set rotating circle problem with reinitialization."
+
+  []
 []
