@@ -6,7 +6,7 @@
     input = circle_rotate.i
     cli_args = Executioner/num_steps=2
     method = opt # Can be slow in debug and this is simply to make sure input file remains working
-    requirement = "The level set module shall include an example solution of a rotating circle problem."
+    requirement = "The system shall include an example solution of a level set rotating circle problem."
   []
   [level_set_supg]
     type = RunApp
