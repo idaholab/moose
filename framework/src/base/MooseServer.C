@@ -16,51 +16,32 @@
 #include "pcrecpp.h"
 #include <sstream>
 
-bool
-MooseServer::setup(MooseApp * moose_app)
+MooseServer::MooseServer(MooseApp & moose_app)
+  : _moose_app(moose_app), _connection(std::make_shared<wasp::lsp::IOStreamConnection>(this))
 {
-  // cache a pointer to the application that set up this server instance
+  // set server capabilities to receive full input text when changed
 
-  _moose_app = moose_app;
-
-  _is_setup = true;
-
-  return true;
+  server_capabilities[wasp::lsp::m_text_doc_sync] = wasp::DataObject();
+  server_capabilities[wasp::lsp::m_text_doc_sync][wasp::lsp::m_open_close] = true;
+  server_capabilities[wasp::lsp::m_text_doc_sync][wasp::lsp::m_change] = wasp::lsp::m_change_full;
 }
 
 bool
 MooseServer::parseDocumentForDiagnostics(wasp::DataArray & diagnosticsList)
 {
-  if (!_is_setup)
-  {
-    errors << wasp::lsp::m_error_prefix << "Server needs to be setup" << std::endl;
+  if (!checkIntegrity())
     return false;
-  }
-
-  if (!is_initialized)
-  {
-    errors << wasp::lsp::m_error_prefix << "Server needs to be initialized" << std::endl;
-    return false;
-  }
-
-  if (!is_document_open)
-  {
-    errors << wasp::lsp::m_error_prefix << "Server has no open document" << std::endl;
-    return false;
-  }
 
   // strip prefix from document uri if it exists to get parse file path
 
   std::string parse_file_path = document_path;
 
   if (parse_file_path.rfind(wasp::lsp::m_uri_prefix, 0) == 0)
-  {
     parse_file_path.erase(0, std::string(wasp::lsp::m_uri_prefix).size());
-  }
 
   // copy parent application parameters and modify to set up input check
 
-  InputParameters app_params = _moose_app->parameters();
+  InputParameters app_params = _moose_app.parameters();
 
   app_params.set<std::vector<std::string>>("input_file") = {parse_file_path};
   app_params.set<std::string>("_input_text") = document_text;
@@ -74,7 +55,7 @@ MooseServer::parseDocumentForDiagnostics(wasp::DataArray & diagnosticsList)
   // create new application with parameters modified for input check run
 
   _check_app = AppFactory::instance().createShared(
-      _moose_app->type(), _moose_app->name(), app_params, _moose_app->getCommunicator()->get());
+      _moose_app.type(), _moose_app.name(), app_params, _moose_app.getCommunicator()->get());
 
   // disable logs and enable error exceptions with initial values cached
 
@@ -182,23 +163,8 @@ MooseServer::updateDocumentTextChanges(const std::string & replacement_text,
                                        int end_character,
                                        int range_length)
 {
-  if (!_is_setup)
-  {
-    errors << wasp::lsp::m_error_prefix << "Server needs to be setup" << std::endl;
+  if (!checkIntegrity())
     return false;
-  }
-
-  if (!is_initialized)
-  {
-    errors << wasp::lsp::m_error_prefix << "Server needs to be initialized" << std::endl;
-    return false;
-  }
-
-  if (!is_document_open)
-  {
-    errors << wasp::lsp::m_error_prefix << "Server has no open document" << std::endl;
-    return false;
-  }
 
   // these are the expected values to indicate full document replacement
 
@@ -220,24 +186,8 @@ MooseServer::gatherDocumentCompletionItems(wasp::DataArray & /* completionItems 
                                            int /* line */,
                                            int /* character */)
 {
-
-  if (!_is_setup)
-  {
-    errors << wasp::lsp::m_error_prefix << "Server needs to be setup" << std::endl;
+  if (!checkIntegrity())
     return false;
-  }
-
-  if (!is_initialized)
-  {
-    errors << wasp::lsp::m_error_prefix << "Server needs to be initialized" << std::endl;
-    return false;
-  }
-
-  if (!is_document_open)
-  {
-    errors << wasp::lsp::m_error_prefix << "Server has no open document" << std::endl;
-    return false;
-  }
 
   bool pass = true;
 
@@ -251,23 +201,8 @@ MooseServer::gatherDocumentDefinitionLocations(wasp::DataArray & /* definitionLo
                                                int /* line */,
                                                int /* character */)
 {
-  if (!_is_setup)
-  {
-    errors << wasp::lsp::m_error_prefix << "Server needs to be setup" << std::endl;
+  if (!checkIntegrity())
     return false;
-  }
-
-  if (!is_initialized)
-  {
-    errors << wasp::lsp::m_error_prefix << "Server needs to be initialized" << std::endl;
-    return false;
-  }
-
-  if (!is_document_open)
-  {
-    errors << wasp::lsp::m_error_prefix << "Server has no open document" << std::endl;
-    return false;
-  }
 
   bool pass = true;
 
@@ -282,23 +217,8 @@ MooseServer::gatherDocumentReferencesLocations(wasp::DataArray & /* referencesLo
                                                int /* character */,
                                                bool /* include_declaration */)
 {
-  if (!_is_setup)
-  {
-    errors << wasp::lsp::m_error_prefix << "Server needs to be setup" << std::endl;
+  if (!checkIntegrity())
     return false;
-  }
-
-  if (!is_initialized)
-  {
-    errors << wasp::lsp::m_error_prefix << "Server needs to be initialized" << std::endl;
-    return false;
-  }
-
-  if (!is_document_open)
-  {
-    errors << wasp::lsp::m_error_prefix << "Server has no open document" << std::endl;
-    return false;
-  }
 
   bool pass = true;
 
@@ -316,23 +236,8 @@ MooseServer::gatherDocumentFormattingTextEdits(wasp::DataArray & /* formattingTe
                                                int /* tab_size */,
                                                bool /* insert_spaces */)
 {
-  if (!_is_setup)
-  {
-    errors << wasp::lsp::m_error_prefix << "Server needs to be setup" << std::endl;
+  if (!checkIntegrity())
     return false;
-  }
-
-  if (!is_initialized)
-  {
-    errors << wasp::lsp::m_error_prefix << "Server needs to be initialized" << std::endl;
-    return false;
-  }
-
-  if (!is_document_open)
-  {
-    errors << wasp::lsp::m_error_prefix << "Server has no open document" << std::endl;
-    return false;
-  }
 
   bool pass = true;
 
@@ -344,28 +249,11 @@ MooseServer::gatherDocumentFormattingTextEdits(wasp::DataArray & /* formattingTe
 bool
 MooseServer::gatherDocumentSymbols(wasp::DataArray & documentSymbols)
 {
-  if (!_is_setup)
-  {
-    errors << wasp::lsp::m_error_prefix << "Server needs to be setup" << std::endl;
+  if (!checkIntegrity())
     return false;
-  }
-
-  if (!is_initialized)
-  {
-    errors << wasp::lsp::m_error_prefix << "Server needs to be initialized" << std::endl;
-    return false;
-  }
-
-  if (!is_document_open)
-  {
-    errors << wasp::lsp::m_error_prefix << "Server has no open document" << std::endl;
-    return false;
-  }
 
   if (!_check_app || !_check_app->parser()._root)
-  {
     return true;
-  }
 
   bool pass = true;
 
@@ -479,6 +367,22 @@ MooseServer::traverseParseTreeAndFillSymbols(wasp::HITNodeView view_parent,
   }
 
   return pass;
+}
+
+bool
+MooseServer::checkIntegrity()
+{
+  if (!is_initialized)
+  {
+    errors << wasp::lsp::m_error_prefix << "Server needs to be initialized" << std::endl;
+    return false;
+  }
+  if (!is_document_open)
+  {
+    errors << wasp::lsp::m_error_prefix << "Server has no open document" << std::endl;
+    return false;
+  }
+  return true;
 }
 
 #endif

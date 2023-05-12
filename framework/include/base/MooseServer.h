@@ -24,29 +24,12 @@
 class MooseServer : public wasp::lsp::ServerImpl
 {
 public:
-  MooseServer() : _is_setup(false)
-  {
-    // set server connection to new iostream connection shared pointer
-
-    _connection = std::make_shared<wasp::lsp::IOStreamConnection>(this);
-
-    // set server capabilities to receive full input text when changed
-
-    server_capabilities[wasp::lsp::m_text_doc_sync] = wasp::DataObject();
-    server_capabilities[wasp::lsp::m_text_doc_sync][wasp::lsp::m_open_close] = true;
-    server_capabilities[wasp::lsp::m_text_doc_sync][wasp::lsp::m_change] = wasp::lsp::m_change_full;
-  }
+  MooseServer(MooseApp & moose_app);
 
   /** get read / write connection - specific to this server implemention
    * @return - shared pointer to the server's read / write connection
    */
   std::shared_ptr<wasp::lsp::Connection> getConnection() { return _connection; }
-
-  /** setup server for input validation and template based autocompletion
-   * @param moose_app - pointer to moose app calling this set up method
-   * @return - true if server setup was successful and everything was set
-   */
-  bool setup(MooseApp * moose_app);
 
 private:
   /** parse document for diagnostics - specific to this server implemention
@@ -128,13 +111,18 @@ private:
    */
   bool gatherDocumentSymbols(wasp::DataArray & documentSymbols);
 
-  // /** recursively fill document symbols from the given node
-  //  * @param view_parent - nodeview used in recursive tree traversal
-  //  * @param data_parent - data object with array of symbol children
-  //  * @return - true if no problems with this level of the resursion
-  //  */
+  /** recursively fill document symbols from the given node
+   * @param view_parent - nodeview used in recursive tree traversal
+   * @param data_parent - data object with array of symbol children
+   * @return - true if no problems with this level of the resursion
+   */
   bool traverseParseTreeAndFillSymbols(wasp::HITNodeView view_parent,
                                        wasp::DataObject & data_parent);
+
+  /** error check that server is initialized and document is currently open
+   * @return - true if this server was initialized and has an open document
+   */
+  bool checkIntegrity();
 
   /** read from connection into object - specific to this server's connection
    * @param object - reference to object to be read into
@@ -149,14 +137,9 @@ private:
   bool connectionWrite(wasp::DataObject & object) { return _connection->write(object, errors); }
 
   /**
-   * @brief _is_setup - has the required server specific setup taken place
+   * @brief _moose_app - reference to parent application that owns this server
    */
-  bool _is_setup;
-
-  /**
-   * @brief _moose_app - pointer to moose app that owns this server instance
-   */
-  MooseApp * _moose_app;
+  MooseApp & _moose_app;
 
   /**
    * @brief _check_app - application created to check input and access parser

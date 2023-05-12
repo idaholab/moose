@@ -335,7 +335,7 @@ MooseApp::validParams()
   params.addPrivateParam<unsigned int>("_multiapp_number");
   params.addPrivateParam<const MooseMesh *>("_master_mesh");
   params.addPrivateParam<const MooseMesh *>("_master_displaced_mesh");
-  params.addPrivateParam<std::string>("_input_text", "");
+  params.addPrivateParam<std::string>("_input_text", ""); // input string passed by language server
 
   params.addParam<bool>(
       "use_legacy_material_output",
@@ -495,9 +495,7 @@ MooseApp::MooseApp(InputParameters parameters)
 
   // If this will be a language server then turn off output until that starts
   if (isParamValid("language_server"))
-  {
     _output_buffer_cache = Moose::out.rdbuf(nullptr);
-  }
 
   Registry::addKnownLabel(_type);
   Moose::registerAll(_factory, _action_factory, _syntax);
@@ -962,9 +960,7 @@ MooseApp::setupOptions()
 
     // Reset output to the buffer what was cached before it was turned it off
     if (!Moose::out.rdbuf() && _output_buffer_cache)
-    {
       Moose::out.rdbuf(_output_buffer_cache);
-    }
 
     if (isParamValid("recover"))
     {
@@ -1045,14 +1041,10 @@ MooseApp::setupOptions()
 
     // Reset output to the buffer what was cached before it was turned it off
     if (!Moose::out.rdbuf() && _output_buffer_cache)
-    {
       Moose::out.rdbuf(_output_buffer_cache);
-    }
 
     // Start a language server that communicates using an iostream connection
-    MooseServer moose_server;
-
-    moose_server.setup(this);
+    MooseServer moose_server(*this);
 
     moose_server.run();
 
