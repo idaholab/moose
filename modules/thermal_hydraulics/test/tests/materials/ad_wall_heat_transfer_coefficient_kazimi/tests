@@ -1,0 +1,34 @@
+[Tests]
+  design = 'ADWallHeatTransferCoefficientKazimiMaterial.md'
+  issues = '#24340'
+  [normal_operation]
+    requirement = "The system shall compute the heat transfer coefficient using the Kazime-Carelli "
+                  "correlation for the Nusselt number"
+    type = 'CSVDiff'
+    input = 'kazimi_test.i'
+    csvdiff = 'kazimi_test_out.csv'
+  []
+  [abnormal_operation]
+    requirement = "The system shall return a warning message when the Kazimi-Carelli correlation is "
+                  "used with: "
+    [out_of_range_warning_1]
+      type = 'RunException'
+      input = 'kazimi_test.i'
+      cli_args = "PoD=1.05"
+      expect_err = "The Kazimi-Carelli correlation is valid when Pe is between 10 and 5000, and P/D "
+                   "is between 1.1 and 1.4. Be aware that using values out of this range may lead to "
+                   "significant errors in your results!"
+      detail = 'pitch-to-diameter out of bonds, or'
+    []
+    [out_of_range_warning_2]
+      type = 'RunException'
+      input = 'kazimi_test.i'
+      cli_args = "PoD=0.0065"
+      expect_err = "The Kazimi-Carelli correlation is valid when Pe is between 10 and 5000, and P/D "
+                   "is between 1.1 and 1.4. Be aware that using values out of this range may lead to "
+                   "significant errors in your results!"
+      detail = 'Peclet out of bonds.'
+    []
+  []
+[]
+

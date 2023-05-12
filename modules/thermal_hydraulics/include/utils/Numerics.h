@@ -123,6 +123,24 @@ Real Prandtl(Real cp, Real mu, Real k);
 ADReal Prandtl(ADReal cp, ADReal mu, ADReal k);
 
 /**
+ * Compute Peclet number
+ *
+ * @param volume_fraction The volume fraction of the phase
+ * @param rho The density of the phase
+ * @param vel The velocity of the phase
+ * @param D_h The hydraulic diameter
+<<<<<<< HEAD
+=======
+ * @param k Thermal conductivity
+>>>>>>> 1ef221942a (fixup! Add the Kazimi correlation for the Nusselt number)
+ * @param cp Specific heat
+ *
+ * @return Peclet number
+ */
+Real Peclet(Real volume_fraction, Real cp, Real rho, Real vel, Real D_h, Real k);
+ADReal Peclet(ADReal volume_fraction, ADReal cp, ADReal rho, ADReal vel, ADReal D_h, ADReal k);
+
+/**
  * Compute Grashof number
  *
  * @param beta Thermal expansion coefficient
