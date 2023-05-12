@@ -1,3 +1,9 @@
+# Making a Change to this package?
+# REMEMBER TO UPDATE the .yaml files for the following packages:
+#   template/ (must contain any python major.minor version this
+#              package supports. Usually the latest version.)
+#   moose/
+#   moose-dev/
 {% set build = 0 %}
 {% set strbuild = "build_" + build|string %}
 {% set version = "2023.05.01" %}

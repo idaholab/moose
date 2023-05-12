@@ -8,8 +8,6 @@
 #* Licensed under LGPL 2.1, please see LICENSE for details
 #* https://www.gnu.org/licenses/lgpl-2.1.html
 
-# Dummy change to mark an ancestor
-
 """
 Generate hash based on vetted versions of libraries as listed in
 module_hash.yaml's (zip_keys)
@@ -22,42 +20,94 @@ import hashlib
 import re
 import subprocess
 import platform
-import tempfile
 import json
 from collections import OrderedDict
 import yaml
-from jinja2 import Environment, DictLoader
+import jinja2
 
 MOOSE_DIR = os.environ.get('MOOSE_DIR',
                            os.path.abspath(os.path.join(os.path.dirname(
                                os.path.realpath(__file__)), '..')))
 
+### Tracking Libraries
+# note: Order is important only for historical lookups; git_ancestor(commit) == True
+TRACKING_LIBRARIES = ['mpich', 'petsc', 'libmesh', 'wasp', 'moose', 'app']
+
+### Beautify the output of jinja2 rendered content that may only exists in conda-build scenarios
+# pylint: disable=unused-argument
+def undefined(arg, *args, **kwargs):
+    """
+    Handle any number of passed arguments.
+    The *, ** args is needed by pin_subpackage.
+    """
+    return arg
+
+# Add your undefined template variables to call 'undefined' method above
+JINJA_CONFIG = {'pin_subpackage'        : undefined,
+                'compiler'              : undefined,
+                'base_mpich'            : undefined('mpich'),
+                'base_mpicc'            : undefined('mpicc'),
+                'base_mpicxx'           : undefined('mpicxx'),
+                'base_mpifort'          : undefined('mpifort'),
+                'moose_libgfortran'     : undefined('libgfortran'),
+                'moose_libgfortran5'    : undefined('libgfortran5'),
+                'moose_hdf5'            : undefined('hdf5'),
+                'moose_ld64'            : undefined('ld64'),
+                'moose_libxt'           : undefined('ld64'),
+                'moose_libsm'           : undefined('ld64'),
+                'moose_libx11'          : undefined('libx11'),
+                'moose_libice'          : undefined('libice'),
+                'moose_libxext'         : undefined('libxext'),
+                'moose_mesa_libgl'      : undefined('mesa_libgl'),
+                'moose_xorg_x11'        : undefined('xorg_x11'),
+                'moose_libglu'          : undefined('libglu'),
+                'moose_mesalib'         : undefined('mesalib'),
+                'moose_mpich'           : undefined('moose-mpich'),
+                'moose_petsc'           : undefined('moose-petsc'),
+                'moose_libmesh_vtk'     : undefined('moose-libmesh-vtk'),
+                'moose_libmesh'         : undefined('moose-libmesh'),
+                }
+### End Beautify global
+
 class Versioner:
     """ generates reproducible versions (hashes) for moose apps and moose dependencies """
     def __init__(self):
-        self.yaml_file = os.path.abspath(os.path.join(MOOSE_DIR, "scripts", "versioner.yaml"))
-        try:
-            with open(f'{self.yaml_file}', 'r', encoding='utf-8') as rc_file:
-                self.entities = list(yaml.safe_load(rc_file)['packages'].keys())
-        except FileNotFoundError:
-            print(f'fatal: {self.yaml_file} not found')
-            sys.exit(1)
-        except yaml.scanner.ScannerError:
-            print(f'fatal: {self.yaml_file} parsing error')
-            sys.exit(1)
+        self.entities = TRACKING_LIBRARIES
+        self.yaml_file = None
 
     def output_cli(self, args):
         """ performs command line actions """
         args = self.parse_args(args, self.entities)
         self.check_args(args)
 
-        meta = self.meta(args.commit)[args.library]
+        meta = self.version_meta(args.commit)[args.library]
         if args.json:
             return json.dumps(meta)
         if args.yaml:
             return yaml.dump(meta, default_flow_style=False)
 
         return meta['hash']
+
+    def get_yamlcontents(self, commit):
+        """ load yaml file contents at time of suppllied commit """
+        # Load the yaml file at the given commit; the location changed
+        # from module_hash.yaml -> versioner.yaml at changed_commit
+        changed_commit = '2bd844dc5d4de47238eab94a3a718e9714592de1'
+        if self.git_ancestor(changed_commit, commit) and commit != changed_commit:
+            _file = 'versioner.yaml'
+        else:
+            _file = 'module_hash.yaml'
+        yaml_file = os.path.abspath(os.path.join(MOOSE_DIR, "scripts", _file))
+        try:
+            yaml_contents = yaml.safe_load(self.git_file(yaml_file, commit))
+            self.entities = yaml_contents['packages'].keys()
+            return yaml_contents
+        except FileNotFoundError:
+            print(f'fatal: {yaml_file} not found')
+            sys.exit(1)
+        except yaml.scanner.ScannerError:
+            print(f'fatal: {yaml_file} parsing error')
+            sys.exit(1)
 
     @staticmethod
     def parse_args(argv, entities):
@@ -108,6 +158,7 @@ class Versioner:
         out = subprocess.check_output(command, cwd=repo_dir).decode('utf-8').split()
         if len(out) == 4:
             return out[2]
+        # pylint: disable=broad-exception-raised
         raise Exception(f'Failed to obtain git hash for {file} in {repo_dir} at {commit}')
 
     @staticmethod
@@ -129,7 +180,6 @@ class Versioner:
         """ gets the contents of a file at a given git commit """
         file = file.replace(repo_dir, '.')
         command = ['git', 'show', f'{commit}:{file}']
-
         process = subprocess.run(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
                                  cwd=repo_dir, check=False)
         if process.returncode != 0:
@@ -141,7 +191,7 @@ class Versioner:
                 for allowed in missing_errors:
                     if allowed in error:
                         return None
-
+            # pylint: disable=broad-exception-raised
             raise Exception(f'Failed to load {file} in {repo_dir} at {commit}')
 
         return process.stdout.decode('utf-8')
@@ -149,39 +199,94 @@ class Versioner:
     @staticmethod
     def parse_jinja(jinja_template):
         """ read jinja_template and return proper yaml (harmless if not jinja) """
-        # Handle pin_subpackage specific to 'conda-build' templates
         # pylint: disable=unused-argument
-        def pin_subpackage(package, max_pin):
-            return
-        config = {'pin_subpackage' : pin_subpackage }
-        env = Environment(loader = DictLoader({'' : jinja_template }),
-                                            trim_blocks=True,
-                                            lstrip_blocks=True)
+        env = jinja2.Environment(loader = jinja2.DictLoader({'' : jinja_template }),
+                                 trim_blocks=True,
+                                 lstrip_blocks=True)
         meta_template = env.get_template('')
-        meta_render = meta_template.render(config)
+        meta_render = meta_template.render(JINJA_CONFIG)
         return meta_render
 
-    def meta(self, commit='HEAD'):
+    def do_sortlist(self, commit):
+        """ determine if we need to sort the infuential file list """
+        changed_commit = '0e0785ee8a25742715b49bc26871117b788e7190'
+        if self.git_ancestor(changed_commit, commit) and commit != changed_commit:
+            return True
+        return False
+
+    def influential_list(self, packages_yaml, library=None, recursive_meta=None):
+        """ build and return influential dictionary """
+        # Key disctriptors that should be consider control identifiers. Anything else
+        # will be treated as trackable libraries.
+        not_libraries = ['dependencies', 'influential']
+        # key name for infuential file list value
+        dep_key = 'influential'
+        # key name for dependency value
+        app_key = 'dependencies'
+
+        if recursive_meta is None:
+            recursive_meta = {}
+        for package, values in packages_yaml.items():
+            # 'values' is a dictionary with more items to discover (recurse into)
+            if isinstance(values, dict):
+                # 'package' is actually a library we wish to track
+                if package not in not_libraries:
+                    recursive_meta[package] = {}
+                # recursive inspection of packages_yaml[library], preserve history (grow)
+                self.influential_list(packages_yaml[package],
+                                      library=package,
+                                      recursive_meta=recursive_meta)
+            # no more dictionaries to recurse into
+            else:
+                # we are inside a library with dependency(s)
+                if package == 'dependencies':
+                    for dep in packages_yaml[package]:
+                        if dep in recursive_meta.keys():
+                            recursive_meta[library][dep_key] = recursive_meta[library].get(dep_key,
+                                                                                           [])
+                            recursive_meta[library][app_key] = recursive_meta[library].get(app_key,
+                                                                                           [])
+                            recursive_meta[library][dep_key].extend(recursive_meta[dep][dep_key])
+                            recursive_meta[library][app_key].append(dep)
+                # anything else (influential at time of writing)
+                else:
+                    recursive_meta[library][package] = recursive_meta[library].get(package, [])
+                    recursive_meta[library][package].extend(packages_yaml[package])
+        return recursive_meta
+
+    @staticmethod
+    def augment_dictionaries(base_meta, library):
+        """ tack on emtpy child key=values to suppied dictionary key """
+        child = base_meta[library]
+        child['hash_list'] = []
+        child['hash_table'] = {}
+        child['hash'] = None
+        child['conda'] = {}
+        child['apptainer'] = {}
+        return child
+
+    def version_meta(self, commit='HEAD'):
         """ populate and return dictionary making up the contents involved
         with generating hashes """
         # pylint: disable=too-many-locals
         if not self.is_git_object(commit):
+            # pylint: disable=broad-exception-raised
             raise Exception(f'{commit} is not a commit in {MOOSE_DIR}')
 
-        # Load the yaml file at the given commit; the location changed
-        # from module_hash.yaml -> versioner.yaml at changed_commit
-        changed_commit = 'bd99d2074e06b720bdc8cd3017f4597a36fd36de'
-        if self.git_ancestor(changed_commit, commit) and commit != changed_commit:
-            yaml_file = self.yaml_file
+        # load versioner.yaml contents
+        packages = self.get_yamlcontents(commit)['packages']
+        sort_list = self.do_sortlist(commit)
+
+        # Use dependencies listed in yaml file
+        if sort_list:
+            influential_meta = self.influential_list(packages)
+        # Use OrderedDict method
         else:
-            yaml_file = 'scripts/module_hash.yaml'
-
-        yaml_contents = self.git_file(yaml_file, commit)
-        packages = yaml.safe_load(yaml_contents)['packages']
-
-        meta = OrderedDict()
-        hash_list = []
-        influential_list = []
+            influential_meta = OrderedDict()
+            file_list = []
+            for package, influential in packages.items():
+                file_list.extend(influential)
+                influential_meta[package] = {'influential' : file_list.copy()}
 
         for package in self.entities:
             is_app = package == 'app'
@@ -192,24 +297,28 @@ class Versioner:
             if package not in packages:
                 continue
 
-            meta[package] = {}
-            entry = meta[package]
+            package_meta = self.augment_dictionaries(influential_meta, package)
+            influential_files = package_meta['influential']
 
-            package_influential = packages[package]
-            influential_list.extend(package_influential)
-            entry['influential'] = list(influential_list)
-            for package_entry in package_influential:
-                entry_hash = self.git_hash(package_entry, commit)
-                hash_list.append(entry_hash)
+            if sort_list:
+                # remove duplicates and then sort
+                influential_files = list(set(influential_files))
+                influential_files.sort()
 
-            package_hash = app_hash if is_app else self.get_hash(hash_list)
-            entry['hash'] = package_hash
-            entry['conda'] = self.conda_meta(package, package_influential, commit)
-            entry['apptainer'] = self.apptainer_meta(app_name if is_app else package,
-                                                     package_hash,
-                                                     is_app)
+            for influential_file in influential_files:
+                _my_hash = self.git_hash(influential_file, commit)
+                package_meta['hash_table'][influential_file] = _my_hash
+                package_meta['hash_list'].append(_my_hash)
+                # If this is the package/meta.yaml file, render the jinja template
+                if influential_file.find(f'{package}{os.path.sep}meta.yaml') != -1:
+                    package_meta['conda'] = self.conda_meta(package, influential_file, commit)
 
-        return meta
+            package_hash = app_hash if is_app else self.get_hash(package_meta['hash_list'])
+            package_meta['hash'] = package_hash
+            package_meta['apptainer'] = self.apptainer_meta(app_name if is_app else package,
+                                                            package_hash,
+                                                            is_app)
+        return influential_meta
 
     @staticmethod
     def get_app():
@@ -248,26 +357,21 @@ class Versioner:
     @staticmethod
     def conda_meta(package, influential, commit):
         """ produces the conda meta entry """
-        for entry in influential:
-            if 'meta.yaml' not in entry or package == 'moose':
-                continue
+        # Read the conda-build jinja2 styled template
+        contents = Versioner.git_file(influential, commit)
+        name, version, build, meta = Versioner.conda_meta_jinja(contents)
 
-            # Read the conda-build jinja2 styled template
-            contents = Versioner.git_file(entry, commit)
-            name, version, build, meta = Versioner.conda_meta_jinja(contents)
+        # Make sure the string is build_<NUMBER>
+        build_re = re.search(r'^build\_([0-9]+)$', build)
+        if not build_re:
+            print(f'fatal: {package} conda build string not understood')
+            sys.exit(1)
 
-            # Make sure the string is build_<NUMBER>
-            build_re = re.search(r'^build\_([0-9]+)$', build)
-            if not build_re:
-                print(f'fatal: {package} conda build string not understood')
-                sys.exit(1)
-
-            return {'name': name,
-                    'version': version,
-                    'build': int(build_re.group(1)),
-                    'install': f'{name}={version}={build}',
-                    'meta': meta}
-        return None
+        return {'name': name,
+                'version': version,
+                'build': int(build_re.group(1)),
+                'install': f'{name}={version}={build}',
+                'meta': meta}
 
     @staticmethod
     def apptainer_meta(package, package_hash, is_app):
@@ -278,7 +382,7 @@ class Versioner:
         def_package = 'app' if is_app else package
 
         name_base = package
-        if package in ['mpich', 'petsc', 'libmesh']:
+        if package in ['mpich', 'petsc', 'libmesh', 'wasp']:
             name_base = f'moose-{name_base}'
         name_suffix = platform.machine()
         name = f'{name_base}-{name_suffix}'

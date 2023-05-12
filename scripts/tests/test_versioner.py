@@ -30,18 +30,18 @@ class Test(unittest.TestCase):
     def testOldHashes(self):
         versioner = Versioner()
         for hash, packages in OLD_HASHES.items():
-            meta = versioner.meta(hash)
+            meta = versioner.version_meta(hash)
             for package, package_hash in packages.items():
-                self.assertEqual(package_hash, meta[package]['hash'])
+                self.assertEqual(str(package_hash), str(meta[package]['hash']))
 
     def testBadCommit(self):
         with self.assertRaises(Exception) as e:
-            Versioner().meta('foobar')
+            Versioner().version_meta('foobar')
         self.assertIn('foobar is not a commit', str(e.exception))
 
     def testCLI(self):
         versioner = Versioner()
-        meta = versioner.meta()
+        meta = versioner.version_meta()
 
         for hash in [None, 'HEAD']:
             for package in versioner.entities:

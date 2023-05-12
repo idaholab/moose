@@ -1,7 +1,16 @@
 # Making a Change to this package?
 # REMEMBER TO UPDATE the .yaml files for the following packages:
 #   template/ (must contain any python major.minor version this
-#              package is building. Usually the latest version.)
+#              package supports. Usually the latest version.)
+#   moose-dev/
+#
+# If adding a new Python version, you will need to update
+# version in mpich/meta.yaml:
+#
+# run_constrains:
+#     - python <{{version}}
+#
+# as well as follow the directions pertaining to modifying that file.
 {% set build = 0 %}
 {% set version = "2023.05.02" %}
 

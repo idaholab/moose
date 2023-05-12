@@ -7,7 +7,7 @@ import sys
 import argparse
 import socket
 import subprocess
-
+import shutil
 import jinja2
 
 from versioner import Versioner
@@ -22,8 +22,9 @@ class ApptainerGenerator:
     MOOSE and MOOSE-based applications.
     """
     def __init__(self):
-        self.meta = Versioner().meta()
+        self.meta = Versioner().version_meta()
         self.args = self.parse_args(list(self.meta.keys()))
+        self.args = self.verify_args(self.args)
 
         library_meta = self.meta[self.args.library]['apptainer'].copy()
         self.project = library_meta['name_base']
@@ -48,6 +49,24 @@ class ApptainerGenerator:
                 self.error(f'Generation path {self.dir} does not exist')
         else:
             self.dir = None
+
+    @staticmethod
+    def verify_args(args):
+        """
+        Verify arguments are sane.
+        TODO: for now, this only checks for the presence of required executables
+        """
+        error_list = []
+        # [(binary name, check for existence)] list of tuples
+        requirements = [('oras', args.action=='def' and not args.local),
+                        ('apptainer', args.action!='def')]
+        for (requirement, check) in requirements:
+            if check and shutil.which(requirement) is None:
+                error_list.append(f'{requirement} executable not found')
+        if error_list:
+            print('/n'.join(error_list))
+            sys.exit(1)
+        return args
 
     @staticmethod
     def parse_args(entities):
@@ -277,10 +296,12 @@ class ApptainerGenerator:
         """
         Find the dependency meta for the given library (if any)
         """
-        all_libraries = list(self.meta.keys())
-        for i in range(1, len(all_libraries)):
-            if all_libraries[i] == library:
-                return self.meta[all_libraries[i - 1]]['apptainer']
+        if len(self.meta[library]['dependencies']) > 1:
+            raise Exception('apptainer_generator does not yet support multiple dependencies')
+
+        dependency = self.meta[library].get('dependencies', None)
+        if dependency:
+            return self.meta[dependency[0]]['apptainer']
         return None
 
     def _dependency_from(self, meta):

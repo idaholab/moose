@@ -5,7 +5,10 @@
 #   libmesh/
 #   template/
 #   moose/
-{% set build = 7 %}
+#   moose-dev/
+#
+# ALSO: Follow the directions in scripts/tests/versioner_hashes.yaml
+{% set build = 8 %}
 {% set strbuild = "build_" + build|string %}
 {% set version = "4.0.2" %}
 
@@ -65,6 +68,9 @@ requirements:
     - {{ moose_libglu }}        # [linux]
     - {{ moose_mesalib }}       # [linux]
     - mpi 1.0 mpich
+  # Python min/max constraints
+  run_constrained:
+    - python <{{3.11}}
 
 test:
   commands:
