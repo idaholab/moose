@@ -194,7 +194,8 @@ ContactAction::ContactAction(const InputParameters & params)
     _mortar_dynamics(getParam<bool>("mortar_dynamics"))
 {
 
-  if (_boundary_pairs.size() != 1 && _formulation == ContactFormulation::MORTAR)
+  if (_boundary_pairs.size() != 1 && (_formulation == ContactFormulation::MORTAR ||
+                                      _formulation == ContactFormulation::MORTAR_PENALTY))
     paramError("formulation", "When using mortar, a vector of contact pairs cannot be used");
 
   if (_formulation == ContactFormulation::TANGENTIAL_PENALTY && _model != ContactModel::COULOMB)
@@ -234,11 +235,11 @@ ContactAction::ContactAction(const InputParameters & params)
   }
   else
   {
-    if (params.isParamSetByUser("correct_edge_dropping"))
-      paramError(
-          "correct_edge_dropping",
-          "The 'correct_edge_dropping' option can only be used with the 'mortar' formulation "
-          "(weighted)");
+    if (params.isParamSetByUser("correct_edge_dropping") &&
+        _formulation != ContactFormulation::MORTAR_PENALTY)
+      paramError("correct_edge_dropping",
+                 "The 'correct_edge_dropping' option can only be used with the 'mortar' or "
+                 "'mortar_penalty' formulations.");
     else if (params.isParamSetByUser("use_dual"))
       paramError("use_dual",
                  "The 'use_dual' option can only be used with the 'mortar' formulation");
