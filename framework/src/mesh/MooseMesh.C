@@ -236,6 +236,7 @@ MooseMesh::MooseMesh(const MooseMesh & other_mesh)
   : MooseObject(other_mesh._pars),
     Restartable(this, "Mesh"),
     PerfGraphInterface(this, "CopiedMesh"),
+    _built_from_other_mesh(true),
     _parallel_type(other_mesh._parallel_type),
     _use_distributed_mesh(other_mesh._use_distributed_mesh),
     _distribution_overridden(other_mesh._distribution_overridden),
@@ -400,14 +401,17 @@ MooseMesh::prepare(const bool force_mesh_prepare)
     _communicator.set_union(_mesh_sideset_ids);
   }
 
-  if (!_coord_system_set)
-    setCoordSystem(_provided_coord_blocks, getParam<MultiMooseEnum>("coord_type"));
-  else if (_pars.isParamSetByUser("coord_type"))
-    mooseError(
-        "Trying to set coordinate system type information based on the user input file, but "
-        "the coordinate system type information has already been set programmatically! "
-        "Either remove your coordinate system type information from the input file, or contact "
-        "your application developer");
+  if (!_built_from_other_mesh)
+  {
+    if (!_coord_system_set)
+      setCoordSystem(_provided_coord_blocks, getParam<MultiMooseEnum>("coord_type"));
+    else if (_pars.isParamSetByUser("coord_type"))
+      mooseError(
+          "Trying to set coordinate system type information based on the user input file, but "
+          "the coordinate system type information has already been set programmatically! "
+          "Either remove your coordinate system type information from the input file, or contact "
+          "your application developer");
+  }
 
   detectOrthogonalDimRanges();
 
