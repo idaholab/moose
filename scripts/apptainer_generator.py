@@ -476,6 +476,8 @@ class ApptainerGenerator:
         """
         Adds conditional apptainer definition vars to jinja data
         """
+        jinja_data['ARCH'] = platform.machine()
+
         # Set application-related variables
         if self.args.library == 'app':
             app_name, app_root, _ = Versioner.get_app()

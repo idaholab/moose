@@ -1,6 +1,15 @@
+{#- Required jinja arguments                                                                  -#}
+{#- ARCH: The machine arch                                                                    -#}
+
+{#- Optional jinja arguments                                                                  -#}
+{#- ALTERNATE_FROM: Set an alternate from (currently supported: rocky9)                       -#}
+
 BootStrap: oras
-# Any Rocky-8 image which supplies a development stack with MPI available
+{%- if ALTERNATE_FROM == "rocky9" %}
+From: mooseharbor.hpc.inl.gov/moose-hpcbase/mpi_03-rocky9-{{ ARCH }}:9.0-0
+{%- else %}
 From: harbor.hpc.inl.gov/hpcbase/mpi_03:1.1.0
+{%- endif %}
 
 %environment
     # Set Environment for MPICH
