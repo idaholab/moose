@@ -8,6 +8,7 @@ import argparse
 import socket
 import subprocess
 import shutil
+import platform
 from datetime import datetime, timezone
 
 import jinja2
