@@ -27,7 +27,14 @@ class ApptainerGenerator:
     """
     def __init__(self):
         self.meta = Versioner().version_meta()
-        self.args = self.parse_args(list(self.meta.keys()))
+
+        # Get the packages that have an 'apptainer' key in versioner.yaml
+        apptainer_packages = []
+        for library, values in self.meta.items():
+            if 'apptainer' in values:
+                apptainer_packages.append(library)
+
+        self.args = self.parse_args(apptainer_packages)
         self.args = self.verify_args(self.args)
 
         library_meta = self.meta[self.args.library]['apptainer'].copy()
@@ -306,12 +313,9 @@ class ApptainerGenerator:
         """
         Find the dependency meta for the given library (if any)
         """
-        if len(self.meta[library].get('dependencies', [])) > 1:
-            raise Exception('apptainer_generator does not yet support multiple dependencies')
-
-        dependency = self.meta[library].get('dependencies', None)
-        if dependency:
-            return self.meta[dependency[0]]['apptainer']
+        apptainer_meta = self.meta[library]['apptainer']
+        if 'from' in apptainer_meta:
+            return self.meta[apptainer_meta['from']]['apptainer']
         return None
 
     def _dependency_from(self, meta):

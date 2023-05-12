@@ -217,7 +217,7 @@ class Versioner:
     def influential_dict(self, packages_yaml, parent=None, library=None, recursive_meta=None):
         """ build and return influential dictionary """
         # key descriptors to be treated as control identifiers
-        key_descriptors = ['dependencies', 'influential', 'apptainer', 'from']
+        key_descriptors = ['dependencies', 'influential']
         # key name for infuential file list value
         dep_key = 'influential'
         if recursive_meta is None:
@@ -234,7 +234,7 @@ class Versioner:
                                       library=descriptor,
                                       recursive_meta=recursive_meta)
             # no more dictionaries to recurse into
-            else:
+            elif descriptor in key_descriptors:
                 # recursive descriptor dictionary (apptainer meta)
                 if parent is not None:
                     _lib_dict = recursive_meta[parent]
@@ -248,10 +248,6 @@ class Versioner:
                             _lib_dict[descriptor] = recursive_meta[library].get(descriptor, [])
                             _lib_dict[dep_key].extend(recursive_meta[dep][dep_key])
                             _lib_dict[descriptor].append(dep)
-                # Apptainer only supports one dependency (no use of list type)
-                elif descriptor == 'from':
-                    _lib_dict[library] = recursive_meta[parent].get(library, {})
-                    _lib_dict[library][descriptor] = values
                 # anything else (influential files at time of writing)
                 else:
                     _lib_dict[descriptor] = recursive_meta[library].get(descriptor, [])
@@ -266,7 +262,6 @@ class Versioner:
         child['hash_table'] = {}
         child['hash'] = None
         child['conda'] = {}
-        child['apptainer'] = child.get('apptainer', {})
         return child
 
     def version_meta(self, commit='HEAD'):
@@ -322,9 +317,12 @@ class Versioner:
 
             package_hash = app_hash if is_app else self.get_hash(package_meta['hash_list'])
             package_meta['hash'] = package_hash
-            package_meta['apptainer'].update(self.apptainer_meta(app_name if is_app else package,
+
+            if 'apptainer' in packages[package]:
+                package_meta['apptainer'] = self.apptainer_meta(app_name if is_app else package,
+                                                                packages[package]['apptainer'],
                                                                 package_hash,
-                                                                is_app))
+                                                                is_app)
         return influential_meta
 
     @staticmethod
@@ -381,7 +379,7 @@ class Versioner:
                 'meta': meta}
 
     @staticmethod
-    def apptainer_meta(package, package_hash, is_app):
+    def apptainer_meta(package, package_apptainer_entry, package_hash, is_app):
         """ produces the apptainer meta entry """
         # Clean up the app name if it's an app
         package = package.rstrip().lower() if is_app else package
@@ -393,12 +391,14 @@ class Versioner:
             name_base = f'moose-{name_base}'
         name_suffix = platform.machine()
         name = f'{name_base}-{name_suffix}'
-        return {'name': name,
-                'name_base': name_base,
-                'name_suffix': name_suffix,
-                'tag': package_hash,
-                'uri': f'{name}:{package_hash}',
-                'def': os.path.realpath(os.path.join(MOOSE_DIR, f'apptainer/{def_package}.def'))}
+        meta = package_apptainer_entry.copy()
+        meta.update({'name': name,
+                     'name_base': name_base,
+                     'name_suffix': name_suffix,
+                     'tag': package_hash,
+                     'uri': f'{name}:{package_hash}',
+                     'def': os.path.realpath(os.path.join(MOOSE_DIR, f'apptainer/{def_package}.def'))})
+        return meta
 
     @staticmethod
     def get_hash(hash_list):
