@@ -129,11 +129,9 @@ ADReal Prandtl(ADReal cp, ADReal mu, ADReal k);
  * @param rho The density of the phase
  * @param vel The velocity of the phase
  * @param D_h The hydraulic diameter
-<<<<<<< HEAD
-=======
  * @param k Thermal conductivity
->>>>>>> 1ef221942a (fixup! Add the Kazimi correlation for the Nusselt number)
  * @param cp Specific heat
+ * @param k Thermal conductivity
  *
  * @return Peclet number
  */
