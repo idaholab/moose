@@ -36,9 +36,9 @@ identify the pathway to non-convergence using the [Debug](Debug/index.md) and [O
 The following snippets show how to obtain detailed prints of the residual convergence during the linear and nonlinear solves.
 Nonlinear residual prints are turned on by default in most applications, but the syntax is similar if not.
 
-!listing input=tests/misc/save_in/block-restricted-save-in.i block=Outputs
+!listing input=test/tests/misc/save_in/block-restricted-save-in.i block=Outputs
 
-!listing input=tests/outputs/debug/show_var_residual_norms_debug.i block=Debug
+!listing input=test/tests/outputs/debug/show_var_residual_norms_debug.i block=Debug
 
 We will first go over shared reasons for lack of convergence,
 then focus on the linear solve, and finally on the nonlinear solve.
@@ -102,7 +102,7 @@ we can simply add a strong diffusion term over the first few seconds of the tran
 Certain classes of problems are easier to solve as transients than trying to compute a steady solve. Other transient
 problems are difficult to initialize. These problems can benefit from a customized pseudo-relaxation transient at initialization.
 
-These transients usually benefit from a slow growth in the time steps. For example with an [IteratiiveAdaptiveDT.md],
+These transients usually benefit from a slow growth in the time steps. For example with an [IterationAdaptiveDT.md],
 you can start with a small time step and let the time stepper grow the time step to reach steady state faster.
 
 !listing input=test/tests/time_steppers/iteration_adaptive/adapt_tstep_grow_init_dt.i block=TimeStepper
@@ -130,7 +130,7 @@ This can help stabilize a nonlinear solve. As mentioned in the relevant
   turned on/off over part of the simulation as needed. In the example below, we turn on the `Diff0` kernel from 0s to 0.49s
   then turn it off and turn on the `Diff1` kernel.
 
-!listing tests/controls/time_periods/kernels/kernels.i block=Kernels Controls
+!listing test/tests/controls/time_periods/kernels/kernels.i block=Kernels Controls
 
 - Use a separate simulation to initialize the problem, then leverage the [Restart system](restart_recover.md)
   or a [SolutionUserObject.md] to load the initial solution into the problem of interest.
@@ -194,17 +194,17 @@ For PJFNK, the linear systems are formed by computing the action of the Jacobian
 often relies on forming the Jacobian. By default, only the diagonal of the Jacobian is computed for preconditioning. To form
 the entire Jacobian, including the variable coupling terms on the off-diagonals, this syntax may be used:
 
-!listing input=tests/preconditioners/auto_smp/ad_coupled_convection.i block=Preconditioning
+!listing input=test/tests/preconditioners/auto_smp/ad_coupled_convection.i block=Preconditioning
 
 A basic check on whether the Jacobian may be inaccurate is to simply replace it with a Jacobian formed using finite differencing,
-using the [Finite Difference Preconditioner](FDP.md). This replaces every call to `::computeJacobian` in the kernels and boundary
+using the [Finite Difference Preconditioner](FiniteDifferencePreconditioner.md). This replaces every call to `::computeJacobian` in the kernels and boundary
 conditions with finite differencing on the computation of the residual. If a case of poor convergence is fixed by this
 simple action, then the Jacobian was not good and it needs to be fixed.
 
-!listing input=tests/preconditioners/fdp/fdp_test.i block=Preconditioning
+!listing input=test/tests/preconditioners/fdp/fdp_test.i block=Preconditioning
 
 A more advanced check, and part of the process to fix the Jacobian, is to use the
-[Jacobian analysis utilities](content/help/development/analyze_jacobian.md). These will point out inaccurate or missing terms
+[Jacobian analysis utilities](development/analyze_jacobian.md). These will point out inaccurate or missing terms
 in the Jacobian. They can diagnose missing variable coupling terms for example. Once the errors have been identified,
 it is time to find a pen and paper and re-derive the Jacobian from the weak form of the equations. Either that, or use
 [automatic differentiation (AD)](automatic_differentiation/index.md).
@@ -274,7 +274,7 @@ The larger the problem, the more you will need to
 consider the scalability of the methods under consideration.
 
 !alert note
-[Field split preconditioning](FSP.md) is one of the preferred methods of preconditioning multi-variable problems in MOOSE
+[Field split preconditioning](FieldSplitPreconditioner.md) is one of the preferred methods of preconditioning multi-variable problems in MOOSE
 in a scalable manner.
 
 ### Solver reports the presence of a 'not a number' (NaN) id=nan
@@ -292,7 +292,7 @@ of bounds. Initializing all the variables in the simulation will fix the problem
 
 If not, you must find the source of the `NaN`. In most cases, you will be able to run your simulation again and
 pass the command line argument `--trap-fpe`. In some cases, this will not suffice and you will need to use a debugger.
-Detailed instructions on using the debugger with a MOOSE-based application can be found on this [page](debugging.md).
+Detailed instructions on using the debugger with a MOOSE-based application can be found on this [page](application_development/debugging.md).
 Once you have started the debugger, you will need to set a breakpoint on floating point exceptions then generate a backtrace.
 
 ```
@@ -339,7 +339,7 @@ This will normalize the convergence criteria.
 ### Line search did not converge
 
 Line searches attempt to compute optimal updates in Newton-Krylov solves. MOOSE gives access to several PETSc line searches using
-the [!param](/Executioner/steady/line_search) parameter. Unfortunately, the default used in MOOSE does not converge for every
+the [!param](/Executioner/Steady/line_search) parameter. Unfortunately, the default used in MOOSE does not converge for every
 problem, and it is regularly necessary to turn the line search off as shown in the example below.
 
 ```

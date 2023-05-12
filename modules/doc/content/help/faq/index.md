@@ -16,13 +16,13 @@
 - [Where is the stiffness matrix?](help/faq/what_is_fem.md)
 - [How do I execute MOOSE in parallel?](getting_started/examples_and_tutorials/tutorial01_app_development/step07_parallel.md optional=True)
 - [Why is my solve not converging?](failed_solves.md)
-- [It solves fine in serial/with threads, but as soon as I use MPI it does not converge](failed_solved.md#parallel)
+- [It solves fine in serial/with threads, but as soon as I use MPI it does not converge](failed_solves.md#parallel)
 - [What is happening behind the scenes in my simulation?](Debug/index.md)
   - [During setup](Debug/index.md#debug-setup)
   - [During execution](Debug/index.md#debug-order)
 - Why is my solve/application slow?
-  - [As a developer of the application](content/application_development/profiling.md)
-  - [As a user](content/source/outputs/PerfGraphOutput.md)
+  - [As a developer of the application](application_development/profiling.md)
+  - [As a user](source/outputs/PerfGraphOutput.md)
 
 
 Numerous questions/answers can also be found in on the following resources.
