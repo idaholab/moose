@@ -26,6 +26,8 @@
 
 !row-end!
 
++Hands-on package MOOSE input file+: `combined/reactor_workshop/tests/reactor_examples/hpmr/hpmr.i`
+
 !---
 
 ## Create Pin Unit Cell

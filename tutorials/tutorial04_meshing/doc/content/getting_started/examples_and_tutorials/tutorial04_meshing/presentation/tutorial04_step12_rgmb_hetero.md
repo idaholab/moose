@@ -7,7 +7,9 @@
 This example illustrates the use of RGMB mesh generators to define a 3D pin-heterogeneous hexagonal assembly with duct. The geometry is based on an early prototype of a lead-cooled fast reactor (LFR) assembly designed by Westinghouse Electric Company (WEC) ([!cite](grasso2019lfr)).
 
 !media tutorial04_meshing/rgmb_lfr_stepbystep.png
-       style=width:40%;display:block;margin-left:auto;margin-right:auto;
+       style=width:100%;display:block;margin-left:auto;margin-right:auto;
+
++Hands-on package MOOSE input file+: `combined/reactor_workshop/tests/reactor_examples/rgmb_lfr/rgmb_lfr_assembly.i`
 
 !---
 
