@@ -7,9 +7,9 @@
 This example illustrates the use of RGMB mesh generators to define a 3D hexagonal geometry core with homogeneous assemblies (ABTR ([!cite](shemon2015abtr)), constructed earlier in this tutorial using base mesh generators).
 
 !media tutorial04_meshing/rgmb_abtr_stepbystep.png
-       id=tutorial04-rgmb_abtr_stepbystep
-       caption=Visualization of meshing steps to build the 3D ABTR core with RGMB mesh generators.
-       style=width:40%;display:block;margin-left:auto;margin-right:auto;
+       style=width:70%;display:block;margin-left:auto;margin-right:auto;
+
++Hands-on package MOOSE input file+: `combined/reactor_workshop/tests/reactor_examples/rgmb_abtr/rgmb_abtr.i`
 
 !---
 

@@ -77,6 +77,8 @@ This tutorial covers the generation of mostly standard geometries, but many reac
 
 - [FillBetweenPointVectorsGenerator.md] generates pebble bed streamlines
 - [CartesianMeshGenerator.md] and [FillBetweenSidesetsGenerator.md] generates rectangular meshes and trapezoid meshes
+- [StitchedMeshGenerator.md] merges core components
+- [CombinerGenerator.md] combines outer walls of core barrel and RPV
 
 !col small=12 medium=6 large=4
 

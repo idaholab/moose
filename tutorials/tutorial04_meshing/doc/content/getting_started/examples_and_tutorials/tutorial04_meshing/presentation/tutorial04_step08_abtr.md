@@ -24,6 +24,8 @@
 
 !row-end!
 
++Hands-on package MOOSE input file+: `combined/reactor_workshop/tests/reactor_examples/abtr/abtr.i`
+
 !---
 
 ## Define Homogeneous Hexagonal Assemblies
@@ -201,7 +203,7 @@
 
 ## Use of ABTR Mesh in Downstream Physics Code (Griffin)
 
-The Reactor Module creates meshes containing blocks of elements (identified by block ID), groups of elements with similar extra element integers (identified by different extra element IDs such as `pin_id`, `assembly_id`, `depletion_id`), and groups of curves (2D meshes) or faces (3D meshes) called sidesets (identified by sideset ID). In particular, the blocks and sidesets are used in downstream physics codes to assign materials to mesh elements and to assign boundary conditions.
+The Reactor Module creates meshes containing blocks of elements (identified by block ID), groups of elements with similar reporting IDs (identified by different reporting IDs such as `pin_id`, `assembly_id`, `depletion_id`), and groups of curves (2D meshes) or faces (3D meshes) called sidesets (identified by sideset ID). In particular, the blocks and sidesets are used in downstream physics codes to assign materials to mesh elements and to assign boundary conditions.
 
 These assignments are discussed here for [Griffin](https://inl.gov/ncrc/code-descriptions/), a MOOSE-based reactor physics code developed under the DOE Nuclear Energy Advanced Modeling and Simulation Program.
 

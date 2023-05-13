@@ -5,7 +5,7 @@ This example illustrates the use of RGMB mesh generators to define a 3D pin-hete
 !media tutorial04_meshing/rgmb_lfr_stepbystep.png
        id=tutorial04-rgmb_lfr_stepbystep
        caption=Visualization of meshing steps to build the 3D LFR assembly with RGMB mesh generators.
-       style=width:75%;display:block;margin-left:auto;margin-right:auto;
+       style=width:100%;display:block;margin-left:auto;margin-right:auto;
 
 ## ReactorMeshParams
 

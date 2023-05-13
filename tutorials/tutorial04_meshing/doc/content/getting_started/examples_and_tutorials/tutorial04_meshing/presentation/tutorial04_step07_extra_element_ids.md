@@ -4,6 +4,9 @@
 
 ## Why do we need Reporting IDs?
 
+!row!
+!col small=12 medium=6 large=8
+
 - In reactor simulations, we want to bookkeep the individual elements belonging to each geometric component
 
   - Assign material properties to the mesh in different regions
@@ -13,6 +16,13 @@
   - Using excessive blocks can cause performance degradation in MOOSE
   - Multiple hierarchical levels in geometries (e.g., pin, assembly) cannot be represented with blocks
 - Reporting IDs were introduced as a practical solution to this bookkeeping issue
+
+!col small=12 medium=6 large=4
+
+!media tutorial04_meshing/block_vs_reporting_id.png
+       style=width:100%;display:block;margin-left:auto;margin-right:auto;
+
+!row-end!
 
 !---
 
