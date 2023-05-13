@@ -69,11 +69,9 @@ MultiAppGeneralFieldNearestNodeTransfer::prepareEvaluationOfInterpValues(
 void
 MultiAppGeneralFieldNearestNodeTransfer::buildKDTrees(const unsigned int var_index)
 {
-  unsigned int num_sources;
-  if (!_nearest_positions_obj)
-    num_sources = _from_problems.size();
-  else
-    num_sources = _nearest_positions_obj->getPositions(/*initial=*/false).size();
+  const unsigned int num_sources =
+      _nearest_positions_obj ? _nearest_positions_obj->getPositions(/*initial=*/false).size()
+                             : _from_problems.size();
 
   _local_kdtrees.resize(num_sources);
   _local_points.resize(num_sources);
@@ -84,14 +82,11 @@ MultiAppGeneralFieldNearestNodeTransfer::buildKDTrees(const unsigned int var_ind
   for (unsigned int i_source = 0; i_source < num_sources; ++i_source)
   {
     // Nest a loop on apps only for the Positions case. Regular case only looks at one app
-    unsigned int num_apps_to_consider = _nearest_positions_obj ? _from_problems.size() : 1;
+    const unsigned int num_apps_to_consider = _nearest_positions_obj ? _from_problems.size() : 1;
     for (unsigned int app_index = 0; app_index < num_apps_to_consider; app_index++)
     {
-      unsigned int i_from;
-      if (!_nearest_positions_obj)
-        i_from = i_source;
-      else
-        i_from = app_index;
+      const unsigned int i_from = !_nearest_positions_obj ? i_source : app_index;
+
       // NOTE: If we decide we do not want to mix apps when using the nearest-positions
       // we could continue here when the positions is not the nearest to the app
 
@@ -183,11 +178,9 @@ MultiAppGeneralFieldNearestNodeTransfer::evaluateInterpValuesNearestNode(
     outgoing_vals[i_pt].second = std::numeric_limits<Real>::max();
     bool point_found = false;
 
-    unsigned int num_sources;
-    if (!_nearest_positions_obj)
-      num_sources = _from_problems.size();
-    else
-      num_sources = _nearest_positions_obj->getPositions(/*initial=*/false).size();
+    const unsigned int num_sources =
+        !_nearest_positions_obj ? _from_problems.size()
+                                : _nearest_positions_obj->getPositions(/*initial=*/false).size();
 
     // Loop on all sources
     for (unsigned int i_from = 0; i_from < num_sources; ++i_from)
