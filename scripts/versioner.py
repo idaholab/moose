@@ -290,6 +290,11 @@ class Versioner:
                     file_list.extend(influential)
                 influential_meta[package] = {'influential' : file_list.copy()}
 
+        # Cache the git hashes for influential files; we could
+        # check the same file multiple times, which is surprisingly
+        # not cheap
+        git_hash_cache = {}
+
         for package in self.entities:
             is_app = package == 'app'
             if is_app:
@@ -308,9 +313,12 @@ class Versioner:
                 influential_files.sort()
 
             for influential_file in influential_files:
-                _my_hash = self.git_hash(influential_file, commit)
-                package_meta['hash_table'][influential_file] = _my_hash
-                package_meta['hash_list'].append(_my_hash)
+                if influential_file not in git_hash_cache:
+                    git_hash_cache[influential_file] = self.git_hash(influential_file, commit)
+
+                file_hash = git_hash_cache[influential_file]
+                package_meta['hash_table'][influential_file] = file_hash
+                package_meta['hash_list'].append(file_hash)
                 # If this is the package/meta.yaml file, render the jinja template
                 if influential_file.find(f'{package}{os.path.sep}meta.yaml') != -1:
                     package_meta['conda'] = self.conda_meta(package, influential_file, commit)
