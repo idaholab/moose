@@ -392,7 +392,6 @@ FEProblemBase::FEProblemBase(const InputParameters & parameters)
     _u_dotdot_old_requested(false),
     _has_mortar(false),
     _num_grid_steps(0),
-    _displaced_neighbor_ref_pts("invert_elem_phys use_undisplaced_ref unset", "unset"),
     _print_execution_on()
 {
   //  Initialize static do_derivatives member. We initialize this to true so that all the default AD
@@ -2133,14 +2132,13 @@ FEProblemBase::reinitNeighbor(const Elem * elem, unsigned int side, THREAD_ID ti
   {
     // There are cases like for cohesive zone modeling without significant sliding where we cannot
     // use FEInterface::inverse_map in Assembly::reinitElemAndNeighbor in the displaced problem
-    // because the physical points coming from the element don't actually lie on the neighbor. In
-    // that case we instead pass over the reference points from the undisplaced calculation
-    const std::vector<Point> * displaced_ref_pts = nullptr;
-    if (_displaced_neighbor_ref_pts == "use_undisplaced_ref")
-      displaced_ref_pts = &_assembly[tid][0]->qRuleNeighbor()->get_points();
+    // because the physical points coming from the element don't actually lie on the neighbor.
+    // Moreover, what's the point of doing another physical point inversion in other cases? We only
+    // care about the reference points which we can just take from the undisplaced computation
+    const auto & displaced_ref_pts = _assembly[tid][0]->qRuleNeighbor()->get_points();
 
     _displaced_problem->reinitNeighbor(
-        _displaced_mesh->elemPtr(elem->id()), side, tid, displaced_ref_pts);
+        _displaced_mesh->elemPtr(elem->id()), side, tid, &displaced_ref_pts);
   }
 }
 
@@ -2919,7 +2917,6 @@ FEProblemBase::addDGKernel(const std::string & dg_kernel_name,
                            const std::string & name,
                            InputParameters & parameters)
 {
-  bool use_undisplaced_reference_points = parameters.get<bool>("_use_undisplaced_reference_points");
   const auto nl_sys_num =
       determineNonlinearSystem(parameters.varName("variable", name), true).second;
 
@@ -2928,31 +2925,6 @@ FEProblemBase::addDGKernel(const std::string & dg_kernel_name,
     parameters.set<SubProblem *>("_subproblem") = _displaced_problem.get();
     parameters.set<SystemBase *>("_sys") = &_displaced_problem->nlSys(nl_sys_num);
     _reinit_displaced_neighbor = true;
-
-    if (use_undisplaced_reference_points)
-    {
-      if (_displaced_neighbor_ref_pts == "invert_elem_phys")
-        mooseError(
-            "Cannot use elem-neighbor objects which rely on 1) undisplaced reference points and 2) "
-            "inversion of primary elem physical points in the same simulation");
-      else if (_displaced_neighbor_ref_pts == "unset")
-        _displaced_neighbor_ref_pts = "use_undisplaced_ref";
-      else if (_displaced_neighbor_ref_pts != "use_undisplaced_ref")
-        mooseError("_displaced_neighbor_ref_pts has an invalid state ",
-                   std::string(_displaced_neighbor_ref_pts));
-    }
-    else
-    {
-      if (_displaced_neighbor_ref_pts == "use_undisplaced_ref")
-        mooseError(
-            "Cannot use elem-neighbor objects which rely on 1) undisplaced reference points and 2) "
-            "inversion of primary elem physical points in the same simulation");
-      else if (_displaced_neighbor_ref_pts == "unset")
-        _displaced_neighbor_ref_pts = "invert_elem_phys";
-      else if (_displaced_neighbor_ref_pts != "invert_elem_phys")
-        mooseError("_displaced_neighbor_ref_pts has an invalid state ",
-                   std::string(_displaced_neighbor_ref_pts));
-    }
   }
   else
   {
@@ -3006,7 +2978,6 @@ FEProblemBase::addInterfaceKernel(const std::string & interface_kernel_name,
                                   const std::string & name,
                                   InputParameters & parameters)
 {
-  bool use_undisplaced_reference_points = parameters.get<bool>("_use_undisplaced_reference_points");
   const auto nl_sys_num =
       determineNonlinearSystem(parameters.varName("variable", name), true).second;
 
@@ -3015,31 +2986,6 @@ FEProblemBase::addInterfaceKernel(const std::string & interface_kernel_name,
     parameters.set<SubProblem *>("_subproblem") = _displaced_problem.get();
     parameters.set<SystemBase *>("_sys") = &_displaced_problem->nlSys(nl_sys_num);
     _reinit_displaced_neighbor = true;
-
-    if (use_undisplaced_reference_points)
-    {
-      if (_displaced_neighbor_ref_pts == "invert_elem_phys")
-        mooseError(
-            "Cannot use elem-neighbor objects which rely on 1) undisplaced reference points and 2) "
-            "inversion of primary elem physical points in the same simulation");
-      else if (_displaced_neighbor_ref_pts == "unset")
-        _displaced_neighbor_ref_pts = "use_undisplaced_ref";
-      else if (_displaced_neighbor_ref_pts != "use_undisplaced_ref")
-        mooseError("_displaced_neighbor_ref_pts has an invalid state ",
-                   std::string(_displaced_neighbor_ref_pts));
-    }
-    else
-    {
-      if (_displaced_neighbor_ref_pts == "use_undisplaced_ref")
-        mooseError(
-            "Cannot use elem-neighbor objects which rely on 1) undisplaced reference points and 2) "
-            "inversion of primary elem physical points in the same simulation");
-      else if (_displaced_neighbor_ref_pts == "unset")
-        _displaced_neighbor_ref_pts = "invert_elem_phys";
-      else if (_displaced_neighbor_ref_pts != "invert_elem_phys")
-        mooseError("_displaced_neighbor_ref_pts has an invalid state ",
-                   std::string(_displaced_neighbor_ref_pts));
-    }
   }
   else
   {

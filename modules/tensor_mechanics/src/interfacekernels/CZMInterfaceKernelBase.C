@@ -19,7 +19,6 @@ CZMInterfaceKernelBase::validParams()
                                         " component == 0, ==> X"
                                         " component == 1, ==> Y"
                                         " component == 2, ==> Z");
-  params.set<bool>("_use_undisplaced_reference_points") = true;
   params.suppressParameter<bool>("use_displaced_mesh");
   params.addRequiredCoupledVar("displacements", "the string containing displacement variables");
   params.addParam<std::string>("base_name", "Material property base name");
