@@ -1128,7 +1128,7 @@ MultiAppGeneralFieldTransfer::closestToPosition(unsigned int pos_index, const Po
   mooseAssert(_nearest_positions_obj, "Should not be here without a positions object");
   bool initial = _fe_problem.getCurrentExecuteOnFlag() == EXEC_INITIAL;
   return _nearest_positions_obj->getPosition(pos_index, initial) ==
-         _nearest_positions_obj->getNearestPosition(pt);
+         _nearest_positions_obj->getNearestPosition(pt, initial);
 }
 
 Real

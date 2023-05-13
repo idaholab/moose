@@ -83,7 +83,7 @@ MultiAppGeneralFieldNearestNodeTransfer::buildKDTrees(const unsigned int var_ind
   {
     // Nest a loop on apps only for the Positions case. Regular case only looks at one app
     const unsigned int num_apps_to_consider = _nearest_positions_obj ? _from_problems.size() : 1;
-    for (unsigned int app_index = 0; app_index < num_apps_to_consider; app_index++)
+    for (const auto app_index : make_range(num_apps_to_consider))
     {
       const unsigned int i_from = !_nearest_positions_obj ? i_source : app_index;
 
@@ -99,10 +99,10 @@ MultiAppGeneralFieldNearestNodeTransfer::buildKDTrees(const unsigned int var_ind
                                    Moose::VarFieldType::VAR_FIELD_ANY);
 
       System & from_sys = from_var.sys().system();
-      unsigned int from_var_num = from_sys.variable_number(getFromVarName(var_index));
+      const unsigned int from_var_num = from_sys.variable_number(getFromVarName(var_index));
       // FEM type info
-      auto & fe_type = from_sys.variable_type(from_var.number());
-      bool is_nodal = fe_type.family == LAGRANGE;
+      const auto & fe_type = from_sys.variable_type(from_var.number());
+      const bool is_nodal = fe_type.family == LAGRANGE;
 
       if (is_nodal)
       {
@@ -121,7 +121,7 @@ MultiAppGeneralFieldNearestNodeTransfer::buildKDTrees(const unsigned int var_ind
               !closestToPosition(i_source, *node + _from_positions[i_from]))
             continue;
 
-          auto dof = node->dof_number(from_sys.number(), from_var_num, 0);
+          const auto dof = node->dof_number(from_sys.number(), from_var_num, 0);
           _local_points[i_source].push_back(*node + _from_positions[i_from]);
           _local_values[i_source].push_back((*from_sys.solution)(dof));
         }
@@ -144,7 +144,7 @@ MultiAppGeneralFieldNearestNodeTransfer::buildKDTrees(const unsigned int var_ind
               !closestToPosition(i_source, elem->vertex_average() + _from_positions[i_from]))
             continue;
 
-          auto dof = elem->dof_number(from_sys.number(), from_var_num, 0);
+          const auto dof = elem->dof_number(from_sys.number(), from_var_num, 0);
           _local_points[i_source].push_back(elem->vertex_average() + _from_positions[i_from]);
           _local_values[i_source].push_back((*from_sys.solution)(dof));
         }
@@ -183,7 +183,7 @@ MultiAppGeneralFieldNearestNodeTransfer::evaluateInterpValuesNearestNode(
                                 : _nearest_positions_obj->getPositions(/*initial=*/false).size();
 
     // Loop on all sources
-    for (unsigned int i_from = 0; i_from < num_sources; ++i_from)
+    for (const auto i_from : make_range(num_sources))
     {
       // Only use the KDTree from the closest position if in "nearest-position" mode
       if (_nearest_positions_obj && !closestToPosition(i_from, pt))
@@ -226,7 +226,7 @@ MultiAppGeneralFieldNearestNodeTransfer::evaluateInterpValuesNearestNode(
       //   point as the num_nearest_points + 1'th closest node
       unsigned int num_equidistant_problems = 0;
 
-      for (unsigned int i_from = 0; i_from < num_sources; ++i_from)
+      for (const auto i_from : make_range(num_sources))
       {
         // Only use the KDTree from the closest position if in "nearest-position" mode
         if (_nearest_positions_obj && !closestToPosition(i_from, pt))

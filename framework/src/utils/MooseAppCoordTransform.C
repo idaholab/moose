@@ -528,7 +528,8 @@ MultiAppCoordTransform::setDestinationCoordTransform(
 {
   _destination_app_transform = &destination_app_transform;
 
-  // Assume user knows what they are doing if they have multiple coordinate systems
+  // Don't error check mismatching coordinate system types if we've been asked to skip coordinate
+  // collapsing since in that case the mismatch doesn't matter
   if (_skip_coordinate_collapsing)
     return;
 

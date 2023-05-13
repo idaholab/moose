@@ -91,13 +91,13 @@ parameters are taken into account.
 In addition to block and boundary restriction, the [Positions system](syntax/Positions/index.md) may
 be used to match origin and target points. When specified with the
 [!param](/Transfers/MultiAppGeneralFieldNearestNodeTransfer/use_nearest_position) parameter, each target
-point of a transfer will only be matched with source entities that are closest to the same `Position` as the
-target point. The source entities are applications for:
+point of a transfer will only be matched with sources that are closest to the same `Position` as the
+target point. The sources are simply the applications for:
 
 - [MultiAppGeneralFieldUserObjectTransfer.md]
 - [MultiAppGeneralFieldShapeEvaluationTransfer.md]
 
-and nodes and centroids for:
+and nodes or centroids for:
 
 - [MultiAppGeneralFieldNearestNodeTransfer.md]
 

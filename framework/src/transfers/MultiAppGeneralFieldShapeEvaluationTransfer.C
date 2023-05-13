@@ -131,9 +131,10 @@ MultiAppGeneralFieldShapeEvaluationTransfer::evaluateInterpValuesWithMeshFunctio
         Point nearest_position_source;
         if (_nearest_positions_obj)
         {
-          Point nearest_position = _nearest_positions_obj->getNearestPosition(pt);
+          const bool initial = _fe_problem.getCurrentExecuteOnFlag() == EXEC_INITIAL;
+          const Point nearest_position = _nearest_positions_obj->getNearestPosition(pt, initial);
           nearest_position_source =
-              _nearest_positions_obj->getNearestPosition(_from_positions[i_from]);
+              _nearest_positions_obj->getNearestPosition(_from_positions[i_from], initial);
 
           // Source (often app position) is not closest to the same positions as the
           // target, dont send values

@@ -3,7 +3,7 @@
   design = 'transfers/MultiAppGeneralFieldUserObjectTransfer.md'
 
   [2d_overlay]
-    requirement = "The system shall be able to transfer spatial field using a nearest-node (source) "
+    requirement = "The system shall be able to transfer a spatial field using a nearest-node (source) "
                   "algorithm combined with a nearest-positions heuristic to limit the source of the "
                   "origin values "
     [nearest_position]
@@ -11,7 +11,7 @@
       input = 'main.i'
       cli_args = 'Transfers/from_sub/use_nearest_position=input Transfers/from_sub_elem/use_nearest_position=input'
       exodiff = 'main_out.e main_out_sub0_out.e main_out_sub1_out.e'
-      detail = "for a 2D case with multiple subapps"
+      detail = "for a 2D case with multiple subapps."
     []
   []
 
@@ -30,7 +30,7 @@
       input = 'main.i'
       cli_args = 'Transfers/from_sub/from_app_must_contain_point=true Transfers/from_sub_elem/from_app_must_contain_point=true'
       expect_err = 'We do not support using both nearest positions matching and checking if target'
-      detail = 'both nearest positions algorithm and asking for origin points to be contained within an app domain are requested as this is not supported'
+      detail = 'both nearest positions algorithm and asking for origin points to be contained within an app domain are requested as this is not supported.'
     []
   []
 []
