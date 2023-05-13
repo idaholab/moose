@@ -41,12 +41,12 @@ BoundaryPreservedMarker::BoundaryPreservedMarker(const InputParameters & paramet
 }
 
 bool
-BoundaryPreservedMarker::preserveBoundary(const Elem * const & _current_elem)
+BoundaryPreservedMarker::preserveBoundary(const Elem * const & current_elem)
 {
   auto & elem_side_bnd_ids = _mesh.getMesh().get_boundary_info().get_sideset_map();
 
   // Do not coarsen the elements when they are connected to the preserved boundary
-  for (const auto & pr : as_range(elem_side_bnd_ids.equal_range(_current_elem)))
+  for (const auto & pr : as_range(elem_side_bnd_ids.equal_range(current_elem)))
     if (pr.second.second == _preserved_boundary)
       return true;
 
