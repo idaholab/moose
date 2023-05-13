@@ -102,5 +102,5 @@ TEST(Positions, getters)
   // Test getters
   EXPECT_EQ(positions.getPositions(false)[0], Point(1, 0, 0));
   EXPECT_EQ(positions.getPosition(0, false), Point(1, 0, 0));
-  EXPECT_EQ(positions.getNearestPosition(Point(0.8, 0, 0)), Point(1, 0, 0));
+  EXPECT_EQ(positions.getNearestPosition(Point(0.8, 0, 0), false), Point(1, 0, 0));
 }

@@ -147,7 +147,6 @@
       expect_err = "(Search for nearest position found several matches|multiple valid values from "
                    "equidistant points were )"
       detail = "when using the closest app rather than the first valid value to chose a value"
-      method = !opt
     []
   []
 []

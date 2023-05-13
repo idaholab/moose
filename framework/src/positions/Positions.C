@@ -84,23 +84,19 @@ Positions::getNearestPosition(const Point & target, const bool initial) const
   for (const auto i : index_range(_positions))
   {
     const auto & pt = _positions[i];
-    if ((pt - target).norm_sq() < nearest_distance_sq)
+    if (MooseUtils::absoluteFuzzyLessThan((pt - target).norm_sq(), nearest_distance_sq))
     {
       nearest_index = i;
       nearest_distance_sq = (pt - target).norm_sq();
     }
-  }
-
-#ifndef NDEBUG
-  // Check that no two positions are equidistant to the target
-  for (const auto i : index_range(_positions))
-    if (MooseUtils::absoluteFuzzyEqual((_positions[i] - target).norm_sq(), nearest_distance_sq) &&
-        (nearest_index != i))
+    // Check that no two positions are equidistant to the target
+    else if (MooseUtils::absoluteFuzzyEqual((_positions[i] - target).norm_sq(),
+                                            nearest_distance_sq))
       mooseWarning(
           "Search for nearest position found several matches: " + Moose::stringify(_positions[i]) +
               " and " + Moose::stringify(_positions[nearest_index]),
           " at a distance of " + std::to_string(std::sqrt(nearest_distance_sq)));
-#endif
+  }
 
   return positions[nearest_index];
 }
