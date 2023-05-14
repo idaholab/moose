@@ -283,12 +283,14 @@ open Launch_mooseapp-oprof[0-9]+.trace
 
 The Instruments application will open in a new window with the profile.
 The performance profile can be converted to [pprof](https://github.com/google/pprof)
-using [InstrumentsToPprof](https://github.com/google/instrumentsToPprof). To do this, open the trace in Instruments
-and select the processes you want to be converted, then copy the data using _Deep Copy_ in the _Edit_ menu. The copied
+using [instrumentsToPprof](https://github.com/google/instrumentsToPprof). To do this, open the trace in Instruments
+and select the processes you want to be converted, then copy the data using *Deep Copy* in the *Edit* menu. The copied
 data can be piped to `instrumentsToPprof` as
+
 ```
 pbpaste | instrumentsToPprof
 ```
+
 which will produce a `profile.pb.gz` which can be analyzed using `pprof` following the same instructions as above.
 
 ### MacOS (Mojave / Catalina):
