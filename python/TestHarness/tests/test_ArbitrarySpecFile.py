@@ -12,19 +12,19 @@ from TestHarnessTestCase import TestHarnessTestCase
 class TestHarnessTester(TestHarnessTestCase):
     def testArbitrarySpecFile(self):
         """
-        Verify an arbitrary test will run when we use the --spec-file argument
+        Verify an arbitrary test will run when we use the '--run-dir' argument
         """
         # Test that we do not recursively find additional tests
-        output = self.runTests('--spec-file', 'tests/test_harness/arbitrary_test').decode('utf-8')
+        output = self.runTests('--run-dir', 'tests/test_harness/arbitrary_test').decode('utf-8')
         self.assertIn('tests/test_harness.always_ok', output)
         self.assertNotIn('tests/test_harness/arbitrary_directory.always_ok', output)
 
         # Test that we do find additional tests with recursion
-        output = self.runTests('--spec-file', 'tests/test_harness', '-i', 'arbitrary_test').decode('utf-8')
+        output = self.runTests('--run-dir', 'tests/test_harness', '-i', 'arbitrary_test').decode('utf-8')
         self.assertIn('tests/test_harness.always_ok', output)
         self.assertIn('tests/test_harness/arbitrary_directory.always_ok', output)
 
         # Test that we are not recursively finding our way backwards
-        output = self.runTests('--spec-file', 'tests/test_harness/arbitrary_directory', '-i', 'arbitrary_test').decode('utf-8')
+        output = self.runTests('--run-dir', 'tests/test_harness/arbitrary_directory', '-i', 'arbitrary_test').decode('utf-8')
         self.assertIn('tests/test_harness/arbitrary_directory.always_ok', output)
         self.assertNotIn('tests/test_harness.always_ok', output)

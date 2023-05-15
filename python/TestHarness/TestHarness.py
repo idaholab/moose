@@ -357,16 +357,32 @@ class TestHarness:
         self.preRun()
         self.start_time = clock()
         launched_tests = []
+
+        #used for -i
         if self.options.input_file_name != '':
+
             self._infiles = self.options.input_file_name.split(',')
 
+            if(os.path.dirname(self._infiles[0]) !=''):
+                print('ERROR entered a path, -i can only accept a file name or directory name.')
+                sys.exit(1)
+
+        #used for --run-dir
         if self.options.run_dir and os.path.isdir(self.options.run_dir):
             search_dir = self.options.run_dir
+
+        #used only when --run-dir <path> is used
         elif self.options.run_dir and os.path.isfile(self.options.run_dir):
-            search_dir = os.path.dirname(self.options.run_dir)
-            self._infiles = [os.path.basename(self.options.run_dir)]
+
+            if(os.path.basename(self.options.run_dir[0]) !=''):
+                print('ERROR entered a filename at end of path, please specify the filename separately with the argument -i file_name.')
+                sys.exit(1)
+            else:
+                search_dir = os.path.dirname(self.options.run_dir)
+                self._infiles = [os.path.basename(self.options.run_dir)]
+
         else:
-            search_dir = os.getcwd()
+            search_dir = os.getcwd()#returns a string of the current working directory
 
         try:
             testroot_params = {}
@@ -1025,7 +1041,7 @@ class TestHarness:
         parser.add_argument('--failed-tests', action='store_true', dest='failed_tests', help='Run tests that previously failed')
         parser.add_argument('--check-input', action='store_true', dest='check_input', help='Run check_input (syntax) tests only')
         parser.add_argument('--no-check-input', action='store_true', dest='no_check_input', help='Do not run check_input (syntax) tests')
-        parser.add_argument('--run-dir', action='store', type=str, dest='run_dir', help='Supply a full or relative path to the tests spec file to run the tests found therein.')
+        parser.add_argument('-C', '--run-dir', action='store', type=str, dest='run_dir', help='Supply a full or relative directory to the tests spec file to run the tests found therein.')
         parser.add_argument('-d', '--pedantic-checks', action='store_true', dest='pedantic_checks', help="Run pedantic checks of the Testers' file writes looking for race conditions.")
 
         # Options that pass straight through to the executable
@@ -1104,7 +1120,7 @@ class TestHarness:
             print('ERROR: --check-input and --recover cannot be used simultaneously')
             sys.exit(1)
         if opts.run_dir and not os.path.exists(opts.run_dir):
-            print('ERROR: --run-dir supplied but path does not exist')
+            print('ERROR: --run-dir does not accept a file name, please enter a directory instead')
             sys.exit(1)
         if opts.queue_cleanup and not opts.pbs:
             print('ERROR: --queue-cleanup cannot be used without additional queue options')
