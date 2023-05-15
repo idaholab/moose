@@ -12,8 +12,7 @@
 #include "PenaltyWeightedGapUserObject.h"
 #include "WeightedVelocitiesUserObject.h"
 #include "PenaltyMortarAugmentedLagrangeInterface.h"
-
-#include <Eigen/Dense>
+#include "TwoVector.h"
 
 /**
  * User object that computes tangential pressures due to friction using a penalty approach

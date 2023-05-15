@@ -196,8 +196,7 @@ PenaltyFrictionUserObject::reinit()
 
       const auto & real_tangential_velocity =
           libmesh_map_find(_dof_to_real_tangential_velocity, node);
-      const auto slip_velocity =
-          Eigen::Map<const ADTwoVector>(real_tangential_velocity.data(), 2, 1);
+      const ADTwoVector slip_velocity = {real_tangential_velocity[0], real_tangential_velocity[1]};
 
       // tangential trial traction (Simo 3.12)
       ADTwoVector tangential_trial_traction =
@@ -223,7 +222,11 @@ PenaltyFrictionUserObject::reinit()
           old_accumulated_slip + MetaPhysicL::raw_value(slip_velocity).cwiseAbs() * _dt;
     }
     else
+    {
+      // reset slip and clear traction
+      accumulated_slip.setZero();
       tangential_traction.setZero();
+    }
 
     // Now that we have consistent nodal frictional values, create an interpolated frictional
     // pressure variable.
@@ -240,11 +243,6 @@ void
 PenaltyFrictionUserObject::finalize()
 {
   WeightedVelocitiesUserObject::finalize();
-
-  // TODO: figure out if anything needs to be communicated
-
-  // Moose::Mortar::Contact::communicateVelocities(
-  //     _dof_to_accumulated_slip, _subproblem.mesh(), _nodal, _communicator, send_data_back);
 }
 
 bool
@@ -261,48 +259,4 @@ void
 PenaltyFrictionUserObject::updateAugmentedLagrangianMultipliers()
 {
   PenaltyWeightedGapUserObject::updateAugmentedLagrangianMultipliers();
-
-  // for (auto & [node, lagrange_multipliers] : _dof_to_frictional_lagrange_multipliers)
-  // {
-  //   const auto & normal_pressure = _dof_to_normal_pressure[node];
-
-  //   // Get current accumulated slip in both directions
-  //   if (normal_pressure <= TOLERANCE * TOLERANCE)
-  //     continue;
-
-  //   auto & [flm1, flm2] = lagrange_multipliers;
-
-  //   auto & accumulated_slip = _dof_to_accumulated_slip[node];
-
-  //   const auto & real_tangential_velocity =
-  //       libmesh_map_find(_dof_to_real_tangential_velocity, node);
-  //   const auto & slip_vel_one = real_tangential_velocity[0];
-  //   const auto & slip_vel_two = real_tangential_velocity[1];
-
-  //   // zero slip dummy
-  //   static const std::array<Real, 2> zero_old_accumulated_slip{0.0, 0.0};
-
-  //   const auto & old_accumulated_slip = _dof_to_old_accumulated_slip.empty()
-  //                                           ? zero_old_accumulated_slip
-  //                                           : _dof_to_old_accumulated_slip[node];
-
-  //   accumulated_slip[0] = old_accumulated_slip[0] + std::abs(slip_vel_one) * _dt;
-  //   if (_has_disp_z)
-  //     accumulated_slip[1] = old_accumulated_slip[1] + std::abs(slip_vel_two) * _dt;
-
-  //   // Get sign of relative velocity for both directions
-  //   ADReal sign_one = 0.0;
-  //   ADReal sign_two = 0.0;
-
-  //   if (std::abs(real_tangential_velocity[0]) > TOLERANCE * TOLERANCE)
-  //     sign_one = MathUtils::sign(real_tangential_velocity[0]);
-
-  //   if (_has_disp_z && std::abs(real_tangential_velocity[1]) > TOLERANCE * TOLERANCE)
-  //     sign_two = MathUtils::sign(real_tangential_velocity[1]);
-
-  //   // update LMs
-  //   flm1 += _penalty_friction * MetaPhysicL::raw_value(accumulated_slip[0]);
-  //   if (_has_disp_z)
-  //     flm2 += _penalty_friction * MetaPhysicL::raw_value(accumulated_slip[1]);
-  // }
 }

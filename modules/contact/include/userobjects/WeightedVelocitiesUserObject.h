@@ -10,7 +10,6 @@
 #pragma once
 
 #include "WeightedGapUserObject.h"
-#include <Eigen/Dense>
 
 /**
  * Creates dof object to weighted tangential velocities map
@@ -18,9 +17,6 @@
 class WeightedVelocitiesUserObject : virtual public WeightedGapUserObject
 {
 public:
-  using TwoVector = Eigen::Matrix<Real, 2, 1>;
-  using ADTwoVector = Eigen::Matrix<ADReal, 2, 1>;
-
   static InputParameters validParams();
 
   WeightedVelocitiesUserObject(const InputParameters & parameters);
