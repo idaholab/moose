@@ -12,10 +12,10 @@ To demonstrate how to perform a parameter study the transient heat equation will
 !equation id=diffusion-strong
 \frac{\partial T}{\partial t} - \nabla\cdot\gamma\nabla T + s = 0,
 
-where $T$ is temperature, $t$ is time, $\gamma$ is diffusivity, and $s$ is a heat source term. For
-this example this problem is shall be solved on a 2D unit square domain. The left side is subjected
+where $T$ is temperature, $t$ is time, $\gamma$ is diffusivity, and $s$ is a heat source term.
+This problem shall be solved on a 2D unit square domain. The left side is subjected
 to a Dirichlet condition $T=T_0$. The right side of the domain is subject to a Neumann condition
-$\gamma\nabla T \cdot \hat{n} = q_0$, where $\hat{n}$ is the outward facing normal vector from the
+$-\gamma\nabla T \cdot \hat{n} = q_0$, where $\hat{n}$ is the outward facing normal vector from the
 boundary.
 
 The boundary conditions $T_0$ and $q_0$ as well as the diffusivity ($\gamma$) and the source
@@ -26,14 +26,14 @@ $q_{left} = q(t=1,x=0)$.
 
 ## Heat Equation Problem
 
-The first step in performing a parameter study is to create an input file that solves your problems
+The first step in performing a parameter study is to create an input file that solves your problem
 without uncertain parameters. For the example problem this will be done assuming $\gamma=1$,
 $s=100$, $T_0=300$, and $q_0=-100$.
 
 The complete input file for this problem is provided in [diffusion]. The only item
 that is atypical from a MOOSE simulation input file is the existence of the `Controls` block, which
 here simply creates a [SamplerReceiver.md] object. This block is required for the parameter study,
-but shall be discussed in [parameter_study.md#transfers] section.
+but shall be discussed in the [parameter_study.md#transfers] section.
 
 !listing parameter_study/diffusion.i id=diffusion
          caption=Complete input file for example heat equation problem to be used in parameter study.
@@ -64,7 +64,7 @@ The specific parameter study performed in this tutorial can also done using the 
 
 The [StochasticTools](syntax/StochasticTools/index.md) block sets up the main file to be a
 driver for stochastic simulations but itself is not performing any sort of simulation. Setting up
-a main without a simulation itself is the default behavior for this block, as such it
+a main application without a simulation itself is the default behavior for this block, as such it
 is empty in this example.
 
 !listing examples/parameter_study/main.i block=StochasticTools
@@ -123,14 +123,14 @@ for 5000 samples.
 
 The [Transfers](syntax/Transfers/index.md) block serves two purposes. First, the "parameters"
 sub-block instantiates a [SamplerParameterTransfer.md] object that transfers each row of data from
-the Sampler object to a sub-application simulation. Within the sub-application the parameters listed
-in the in this sub-block replace the values in the sub-application. This substitution occurs using
+the Sampler object to a sub-application simulation. Within the sub-application the `parameters` listed
+in this sub-block replace the values in the sub-application. This substitution occurs using
 the aforementioned SamplerReciever object that exists in the Controls block of the sub-application
 input file. The receiver on the sub-application accepts the parameter names and values from the
 SamplerParameterTransfer object on the main application.
 
-The results sub-blocks, serves the second purpose by transferring the quantities of interest back to
-the main application. In this cases those quantities are postprocessors on the sub-application that
+The "results" sub-block serves the second purpose by transferring the quantities of interest back to
+the main application. In this case those quantities are postprocessors on the sub-application that
 compute $T_{avg}$ and $q_{left}$. These computed results are transferred from the sub-application to
 a [StochasticReporter.md] object (as discussed next).
 
@@ -143,7 +143,7 @@ is used to collect the stochastic results. The "results" sub-block instantiates 
 [StochasticReporter.md] object, which is designed for this purpose. The resulting object will
 contain a vector for each of the quantities of interest: $T_{avg}$ and $q_{left}$.
 
-This Statistics object is designed to compute multiple statistics and confidence intervals for each
+The [StatisticsReporter.md] object is designed to compute multiple statistics and confidence intervals for each
 of the input vectors. In this case it computes the mean and standard deviation for $T_{avg}$ and $q_{left}$ vectors
 in the "results" object as well as the 5% and 95% confidence level intervals. Please
 refer to the documentation for the [StatisticsReporter.md] object for further
@@ -184,10 +184,12 @@ python ../../python/make_histogram.py main_out.json* -v results:q_left:value --x
 !media stochastic_tools/parameter_study/tavg_hist.png
        id=results_T_avg
        caption=Resulting distribution of quantity of interest: $T_{avg}$.
+       style=width:50%;margin-left:auto;margin-right:auto;halign:center
 
 !media stochastic_tools/parameter_study/flux_hist.png
        id=results_q_left
        caption=Resulting distribution of quantity of interest: $q_{left}$.
+       style=width:50%;margin-left:auto;margin-right:auto;halign:center
 
 ### Statistics
 
@@ -233,8 +235,9 @@ that computes the spatial distribution of the temperature.
 
 The two significant modifications to the main input is the change to a [SamplerTransientMultiApp.md] and
 the addition of the [Executioner](syntax/Executioner/index.md) block. The combination of these two blocks
-will run the sampled sub-applications in tandem with the time-step defined in the main input. You will
-notice that the main input Executioner block is identical to the sub-app's.
+will run the sampled sub-applications in tandem with the time-step defined in the main input. The main
+application in this case will "drive" the overall simulation (and does support sub-cycling). Here, we
+use the same time stepping as in the sub-application.
 
 !listing examples/parameter_study/main_time.i block=MultiApps Executioner
 
@@ -290,9 +293,9 @@ python ../../python/visualize_statistics.py main_time_out.json --line-plot \
 
 You might find that using [SamplerTransientMultiApp.md], like in the previous sections, is a bit
 restrictive. For instance, the time steps in the sub-app input must be defined by the steps in the main input.
-This restricts the use of[TimeSteppers](syntax/Executioner/TimeStepper/index.md) like [IterationAdaptiveDT.md]
+This restricts the use of [TimeSteppers](syntax/Executioner/TimeStepper/index.md) like [IterationAdaptiveDT.md]
 and sub-cycling sub-sub-apps becomes difficult. Also, [SamplerTransientMultiApp.md] does not support
-`batch-reset` mode, so there isn't an memory-efficient way of sampling with [MultiAppSamplerControl.md].
+`batch-reset` mode, so there isn't a memory-efficient way of sampling with [MultiAppSamplerControl.md].
 
 An alternative to using [SamplerTransientMultiApp.md] is to leverage [AccumulateReporter.md], which accumulates
 postprocessors/vector-postprocessor/reporters into vector where each element is the value at a certain

@@ -50,7 +50,6 @@
 
 [Executioner]
   type = Transient
-  solve_type = NEWTON
   num_steps = 4
   dt = 0.25
 []

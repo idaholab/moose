@@ -54,8 +54,7 @@ creates and runs a sub-application for each sample provided by the sampler objec
 
 Finally, the [SamplerParameterTransfer](/SamplerParameterTransfer.md) is utilized to communicate the
 sampler data to the sub-application. The 'parameters' input lists the parameters on the
-sub-applications to perturb and the 'to_control' specifies the
-[SamplerReceiver](/SamplerReceiver.md) object in the sub-application.
+sub-applications to perturb.
 
 !listing modules/stochastic_tools/test/tests/transfers/monte_carlo/monte_carlo.i block=Transfers
 
