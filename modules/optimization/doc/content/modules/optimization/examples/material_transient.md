@@ -22,7 +22,7 @@ problem that requires an appropriate initial guess and parameter bounds to obtai
 
 The problem analyzed here is a two-dimensional diffusion example with square geometry. The right
 and top boundaries are subjected to zero Dirichlet boundary conditions. The spatial distribution of
-the material parameter $D$ if given in [diff_parameter]. While this material parameter is known in the forward
+the material parameter $D$ is given in [diff_parameter]. While this material parameter is known in the forward
 problem, its distribution to minimize the solution misfit is optimized in the adjoint pass.
 
 
@@ -61,7 +61,7 @@ implication in the overall convergence of the adjoint problem.
 
 This example makes use of the [TransientAndAdjoint](TransientAndAdjoint.md) executioner, which coordinates
 the execution of the forward and adjoint problem, freeing the user of the need to set up a multi-app problem
-with two sub applications corresponding to the forward and adjoint problems (see [Multi-app executioner](materialInv_ConstK.md#sec:MultiAppExecutioner) for an example set up with multi apps).
+with two child applications corresponding to the forward and adjoint problems (see [Multi-app executioner](materialInv_ConstK.md#sec:MultiAppExecutioner) for an example set up with multi apps).
 
 The entire inverse optimization strategy is governed by the [OptimizationReporter](OptimizationReporter.md) object.
 The forward and adjoint problems are set up in an input file that is solved as a `FullSolveMultiApp` type of
