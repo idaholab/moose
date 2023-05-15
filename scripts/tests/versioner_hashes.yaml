@@ -99,3 +99,9 @@ c830925a44bb3fddd7cded575c53e3f8d29e7c97: # 23944 second go
   libmesh: 98b1946
   moose: 968f795
   wasp: df5c734
+328456953d917d1ac4cc70f6d665c7cc5770326b: # 23944 third go
+  mpich: a4d40a7
+  petsc: 211095f
+  libmesh: 125b416
+  moose: c6fbb0d
+  wasp: df5c734
