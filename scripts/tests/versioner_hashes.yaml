@@ -87,25 +87,7 @@ d8b61c7117f9eb62d2ffed085d132ca38da30f77: # 24092
   petsc: 64a9a7e
   libmesh: e3dc480
   moose: 2ca6f07
-9f5f312ae894252bd8358666a9111b05b31d902d: # 23944 0
-  mpich: b80964e
-  petsc: c2996d5
-  libmesh: e0c71dd
-  moose: 7ed26d4
-  wasp: df5c734
-c830925a44bb3fddd7cded575c53e3f8d29e7c97: # 23944 1
-  mpich: 156fd3f
-  petsc: 2245139
-  libmesh: 98b1946
-  moose: 968f795
-  wasp: df5c734
-328456953d917d1ac4cc70f6d665c7cc5770326b: # 23944 2
-  mpich: a4d40a7
-  petsc: 211095f
-  libmesh: 125b416
-  moose: c6fbb0d
-  wasp: df5c734
-dcff67179e8368f95d2898e9127a26c38b15f861: # 23944 3
+dcff67179e8368f95d2898e9127a26c38b15f861: # 23944
   mpich: c796d60
   petsc: 186119d
   libmesh: 2f0ea15
