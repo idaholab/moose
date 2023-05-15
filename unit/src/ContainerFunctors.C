@@ -61,7 +61,7 @@ TEST(ContainerFunctors, Test)
     mesh->setMeshBase(std::move(lm_mesh));
   }
 
-  mesh->prepare();
+  mesh->prepare(false);
   mesh->setCoordSystem({}, coord_type_enum);
   mooseAssert(mesh->getAxisymmetricRadialCoord() == 0,
               "This should be 0 because we haven't set anything.");

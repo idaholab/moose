@@ -61,7 +61,7 @@ TEST(FaceCenteredMapFunctorTest, testArgs)
     mesh->setMeshBase(std::move(lm_mesh));
   }
 
-  mesh->prepare();
+  mesh->prepare(false);
   MultiMooseEnum coord_type_enum("XYZ RZ RSPHERICAL", "XYZ");
   mesh->setCoordSystem({}, coord_type_enum);
   const auto & all_fi = mesh->allFaceInfo();

@@ -272,7 +272,7 @@ TEST(MooseFunctorTest, testArgs)
     mesh->setMeshBase(std::move(lm_mesh));
   }
 
-  mesh->prepare();
+  mesh->prepare(false);
   mesh->setCoordSystem({}, coord_type_enum);
   // Build the face info
   const auto & all_fi = mesh->allFaceInfo();
