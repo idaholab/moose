@@ -114,6 +114,7 @@ MultiAppGeneralFieldUserObjectTransfer::evaluateInterpValuesWithUserObjects(
         auto val = user_object.spatialValue(pt - _from_positions[i_from]);
 
         // Get nearest position (often a subapp position) for the target point
+        // We want values from the child app that is closest to the same position as the target
         Point nearest_position_source;
         if (_nearest_positions_obj)
         {

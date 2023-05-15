@@ -117,6 +117,9 @@ MultiAppGeneralFieldNearestNodeTransfer::buildKDTrees(const unsigned int var_ind
           if (!_from_boundaries.empty() && !onBoundaries(_from_boundaries, from_mesh, node))
             continue;
 
+          // Only add to the KDTree nodes that are closest to the 'position'
+          // When querying values at a target point, the KDTree associated to the closest
+          // position to the target point is queried
           if (_nearest_positions_obj &&
               !closestToPosition(i_source, *node + _from_positions[i_from]))
             continue;
