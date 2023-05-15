@@ -28,6 +28,6 @@ AddBoundsVectorsAction::AddBoundsVectorsAction(const InputParameters & params) :
 void
 AddBoundsVectorsAction::act()
 {
-  _problem->getNonlinearSystemBase().addVector("lower_bound", false, GHOSTED);
-  _problem->getNonlinearSystemBase().addVector("upper_bound", false, GHOSTED);
+  _problem->getNonlinearSystemBase(/*nl_sys=*/0).addVector("lower_bound", false, GHOSTED);
+  _problem->getNonlinearSystemBase(/*nl_sys=*/0).addVector("upper_bound", false, GHOSTED);
 }

@@ -72,7 +72,7 @@ Adaptivity::init(unsigned int steps, unsigned int initial_steps)
   _mesh_refinement_on = true;
 
   _mesh_refinement->set_periodic_boundaries_ptr(
-      _fe_problem.getNonlinearSystemBase().dofMap().get_periodic_boundaries());
+      _fe_problem.getNonlinearSystemBase(/*nl_sys=*/0).dofMap().get_periodic_boundaries());
 
   // displaced problem
   if (_displaced_problem != nullptr)
@@ -88,7 +88,7 @@ Adaptivity::init(unsigned int steps, unsigned int initial_steps)
     // i.e. neighbors across periodic boundaries, for the purposes of
     // refinement.
     _displaced_mesh_refinement->set_periodic_boundaries_ptr(
-        _fe_problem.getNonlinearSystemBase().dofMap().get_periodic_boundaries());
+        _fe_problem.getNonlinearSystemBase(/*nl_sys=*/0).dofMap().get_periodic_boundaries());
 
     // TODO: This is currently an empty function on the DisplacedProblem... could it be removed?
     _displaced_problem->initAdaptivity();
@@ -195,7 +195,8 @@ Adaptivity::adaptMesh(std::string marker_name /*=std::string()*/)
   else
   {
     // Compute the error for each active element
-    _error_estimator->estimate_error(_fe_problem.getNonlinearSystemBase().system(), *_error);
+    _error_estimator->estimate_error(_fe_problem.getNonlinearSystemBase(/*nl_sys=*/0).system(),
+                                     *_error);
 
     // Flag elements to be refined and coarsened
     _mesh_refinement->flag_elements_by_error_fraction(*_error);

@@ -34,6 +34,9 @@ protected:
   unsigned int & _num_nonlinear;
   unsigned int & _num_fixed_point;
 
+  /// The nonlinear system that this should report iteration info for
+  const unsigned int _nl_sys_num;
+
   // Used to allow for optional declare
   Real _dummy_real = 0;
   unsigned int _dummy_unsigned_int = 0;

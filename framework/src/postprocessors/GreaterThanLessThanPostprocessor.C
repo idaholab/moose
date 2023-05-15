@@ -80,7 +80,7 @@ GreaterThanLessThanPostprocessor::execute()
     Threads::parallel_reduce(range, aldit);
   }
 
-  auto && solution = _fe_problem.getNonlinearSystemBase().solution();
+  const auto & solution = _fe_problem.getNonlinearSystemBase(_sys.number()).solution();
 
   if (_comparator == "greater")
   {

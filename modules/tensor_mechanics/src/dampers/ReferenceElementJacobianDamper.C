@@ -36,7 +36,7 @@ ReferenceElementJacobianDamper::ReferenceElementJacobianDamper(const InputParame
     _max_jacobian_diff(getParam<Real>("max_increment")),
     _tid(getParam<THREAD_ID>("_tid")),
     _mesh(_subproblem.mesh()),
-    _assembly(_subproblem.assembly(_tid)),
+    _assembly(_subproblem.assembly(_tid, _sys.number())),
     _qrule(_assembly.qRule()),
     _ndisp(coupledComponents("displacements")),
     _disp_num(coupledIndices("displacements"))

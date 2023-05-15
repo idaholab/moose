@@ -701,14 +701,15 @@ FEProblemBase::initialSetup()
 
   // Setup the solution states (current, old, etc) in each system based on
   // its default and the states requested of each of its variables
-  for (auto & nl : _nl)
-    nl->initSolutionState();
+  for (const auto i : index_range(_nl))
+  {
+    _nl[i]->initSolutionState();
+    if (getDisplacedProblem())
+      getDisplacedProblem()->nlSys(i).initSolutionState();
+  }
   _aux->initSolutionState();
   if (getDisplacedProblem())
-  {
-    getDisplacedProblem()->nlSys().initSolutionState();
     getDisplacedProblem()->auxSys().initSolutionState();
-  }
 
   // always execute to get the max number of DoF per element and node needed to initialize phi_zero
   // variables
@@ -4241,7 +4242,7 @@ FEProblemBase::computeUserObjectsInternal(const ExecFlagType & type,
       // non-nodal user objects have to be run separately before the nodal user objects run
       // because some nodal user objects (NodalNormal related) depend on elemental user objects
       // :-(
-      ComputeUserObjectsThread cppt(*this, getNonlinearSystemBase(), query);
+      ComputeUserObjectsThread cppt(*this, query);
       Threads::parallel_reduce(*_mesh.getActiveLocalElementRange(), cppt);
 
       // There is one instance in rattlesnake where an elemental user object's finalize depends
@@ -5755,7 +5756,7 @@ FEProblemBase::checkExceptionAndStopSolve(bool print_message)
 }
 
 bool
-FEProblemBase::nlConverged(const unsigned int nl_sys_num)
+FEProblemBase::converged(const unsigned int nl_sys_num)
 {
   if (_solve)
     return _nl[nl_sys_num]->converged();
@@ -5982,7 +5983,7 @@ FEProblemBase::computeResidualL2Norm()
                "performing fixed point iterations in multi-app contexts");
 
   _current_nl_sys = _nl[0].get();
-  computeResidual(*_nl[0]->currentSolution(), _nl[0]->RHS());
+  computeResidual(*_nl[0]->currentSolution(), _nl[0]->RHS(), /*nl_sys=*/0);
 
   return _nl[0]->RHS().l2_norm();
 }
@@ -6585,7 +6586,9 @@ FEProblemBase::computeJacobianBlock(SparseMatrix<Number> & jacobian,
 {
   JacobianBlock jac_block(precond_system, jacobian, ivar, jvar);
   std::vector<JacobianBlock *> blocks = {&jac_block};
-  computeJacobianBlocks(blocks);
+  mooseAssert(_current_nl_sys, "This should be non-null");
+  mooseAssert(&_current_nl_sys->system() == &precond_system, "libMesh systems should match");
+  computeJacobianBlocks(blocks, _current_nl_sys->number());
 }
 
 void

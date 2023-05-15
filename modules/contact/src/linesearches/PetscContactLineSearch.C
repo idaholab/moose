@@ -26,7 +26,7 @@ PetscContactLineSearch::PetscContactLineSearch(const InputParameters & parameter
   : ContactLineSearchBase(parameters)
 {
   _solver = dynamic_cast<PetscNonlinearSolver<Real> *>(
-      _fe_problem.getNonlinearSystem().nonlinearSolver());
+      _fe_problem.getNonlinearSystem(/*nl_sys_num=*/0).nonlinearSolver());
   if (!_solver)
     mooseError(
         "This line search operates only with Petsc, so Petsc must be your nonlinear solver.");

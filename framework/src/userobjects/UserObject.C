@@ -10,6 +10,7 @@
 #include "UserObject.h"
 #include "SubProblem.h"
 #include "Assembly.h"
+#include "NonlinearSystemBase.h"
 
 #include "libmesh/sparse_matrix.h"
 
@@ -77,6 +78,7 @@ UserObject::UserObject(const InputParameters & parameters)
     PerfGraphInterface(this),
     _subproblem(*getCheckedPointerParam<SubProblem *>("_subproblem")),
     _fe_problem(*getCheckedPointerParam<FEProblemBase *>("_fe_problem_base")),
+    _sys(*getCheckedPointerParam<SystemBase *>("_sys")),
     _tid(parameters.get<THREAD_ID>("_tid")),
     _assembly(_subproblem.assembly(_tid, 0)),
     _coord_sys(_assembly.coordSystem()),
@@ -87,6 +89,9 @@ UserObject::UserObject(const InputParameters & parameters)
     paramError("force_preaux",
                "A user object may be specified as executing before or after "
                "AuxKernels, not both.");
+
+  mooseAssert(_sys.varKind() == Moose::VAR_NONLINEAR,
+              "We expect the system to conceptually be nonlinear");
 
   _supplied_uo.insert(name());
 }
@@ -144,4 +149,10 @@ UserObject::setPrimaryThreadCopy(UserObject * primary)
 {
   if (!_primary_thread_copy && primary != this)
     _primary_thread_copy = primary;
+}
+
+unsigned int
+UserObject::systemNumber() const
+{
+  return _sys.number();
 }

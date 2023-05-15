@@ -27,10 +27,8 @@
 #include "libmesh/numeric_vector.h"
 
 ComputeUserObjectsThread::ComputeUserObjectsThread(FEProblemBase & problem,
-                                                   SystemBase & sys,
                                                    const TheWarehouse::Query & query)
   : ThreadedElementLoop<ConstElemRange>(problem),
-    _soln(*sys.currentSolution()),
     _query(query),
     _query_subdomain(_query),
     _query_boundary(_query),
@@ -41,7 +39,6 @@ ComputeUserObjectsThread::ComputeUserObjectsThread(FEProblemBase & problem,
 // Splitting Constructor
 ComputeUserObjectsThread::ComputeUserObjectsThread(ComputeUserObjectsThread & x, Threads::split)
   : ThreadedElementLoop<ConstElemRange>(x._fe_problem),
-    _soln(x._soln),
     _query(x._query),
     _query_subdomain(x._query_subdomain),
     _query_boundary(x._query_boundary),

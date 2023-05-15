@@ -22,7 +22,7 @@ TestCopyInitialSolution::validParams()
 TestCopyInitialSolution::TestCopyInitialSolution(const InputParameters & parameters)
   : GeneralPostprocessor(parameters)
 {
-  _fe_problem.getNonlinearSystemBase().needSolutionState(2);
+  _fe_problem.getNonlinearSystemBase(_sys.number()).needSolutionState(2);
 }
 
 TestCopyInitialSolution::~TestCopyInitialSolution() {}
@@ -36,7 +36,7 @@ void
 TestCopyInitialSolution::execute()
 {
   // Get References to the solution
-  NonlinearSystemBase & nl = _fe_problem.getNonlinearSystemBase();
+  NonlinearSystemBase & nl = _fe_problem.getNonlinearSystemBase(_sys.number());
   NumericVector<Number> & soln = nl.solution();
   NumericVector<Number> & soln_old = nl.solutionOld();
   NumericVector<Number> & soln_older = nl.solutionOlder();

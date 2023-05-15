@@ -170,17 +170,17 @@ public:
    * @param cm coupling matrix to be set
    * @param i which nonlinear system we are setting the coupling matrix for
    */
-  void setCouplingMatrix(std::unique_ptr<CouplingMatrix> cm, unsigned int nl_sys = 0);
+  void setCouplingMatrix(std::unique_ptr<CouplingMatrix> cm, unsigned int nl_sys);
 
   // DEPRECATED METHOD
-  void setCouplingMatrix(CouplingMatrix * cm, unsigned int nl_sys = 0);
+  void setCouplingMatrix(CouplingMatrix * cm, unsigned int nl_sys);
 
-  const CouplingMatrix * couplingMatrix(unsigned int nl_sys = 0) const override;
+  const CouplingMatrix * couplingMatrix(unsigned int nl_sys) const override;
 
   /// Set custom coupling matrix for variables requiring nonlocal contribution
   void setNonlocalCouplingMatrix();
 
-  bool areCoupled(unsigned int ivar, unsigned int jvar, unsigned int nl_sys = 0) const;
+  bool areCoupled(unsigned int ivar, unsigned int jvar, unsigned int nl_sys) const;
 
   /**
    * Whether or not MOOSE will perform a user object/auxiliary kernel state check
@@ -203,9 +203,9 @@ public:
   void trustUserCouplingMatrix();
 
   std::vector<std::pair<MooseVariableFEBase *, MooseVariableFEBase *>> &
-  couplingEntries(THREAD_ID tid, unsigned int nl_sys = 0);
+  couplingEntries(THREAD_ID tid, unsigned int nl_sys);
   std::vector<std::pair<MooseVariableFEBase *, MooseVariableFEBase *>> &
-  nonlocalCouplingEntries(THREAD_ID tid, unsigned int nl_sys = 0);
+  nonlocalCouplingEntries(THREAD_ID tid, unsigned int nl_sys);
 
   /**
    * Check for convergence of the nonlinear solution
@@ -357,8 +357,8 @@ public:
     return _uo_jacobian_moose_vars[tid];
   }
 
-  Assembly & assembly(THREAD_ID tid, unsigned int nl_sys_num = 0) override;
-  const Assembly & assembly(THREAD_ID tid, unsigned int nl_sys_num = 0) const override;
+  Assembly & assembly(THREAD_ID tid, unsigned int nl_sys_num) override;
+  const Assembly & assembly(THREAD_ID tid, unsigned int nl_sys_num) const override;
 
   /**
    * Returns a list of all the variables in the problem (both from the NL and Aux systems.
@@ -431,7 +431,7 @@ public:
                                     std::vector<std::shared_ptr<NonlinearSystemBase>> & nl);
 
   virtual void init() override;
-  virtual void solve(unsigned int nl_sys_num = 0);
+  virtual void solve(unsigned int nl_sys_num);
 
   ///@{
   /**
@@ -479,11 +479,11 @@ public:
    */
   virtual void checkExceptionAndStopSolve(bool print_message = true);
 
-  virtual bool nlConverged(unsigned int nl_sys_num) override;
-  virtual unsigned int nNonlinearIterations(unsigned int nl_sys_num = 0) const override;
-  virtual unsigned int nLinearIterations(unsigned int nl_sys_num = 0) const override;
-  virtual Real finalNonlinearResidual(unsigned int nl_sys_num = 0) const override;
-  virtual bool computingInitialResidual(unsigned int nl_sys_num = 0) const override;
+  virtual bool converged(unsigned int nl_sys_num) override;
+  virtual unsigned int nNonlinearIterations(unsigned int nl_sys_num) const override;
+  virtual unsigned int nLinearIterations(unsigned int nl_sys_num) const override;
+  virtual Real finalNonlinearResidual(unsigned int nl_sys_num) const override;
+  virtual bool computingInitialResidual(unsigned int nl_sys_num) const override;
 
   /**
    * Return solver type as a human readable string
@@ -621,19 +621,19 @@ public:
   virtual Sampler & getSampler(const std::string & name, THREAD_ID tid = 0);
 
   // NL /////
-  NonlinearSystemBase & getNonlinearSystemBase(unsigned int sys_num = 0);
-  const NonlinearSystemBase & getNonlinearSystemBase(unsigned int sys_num = 0) const;
+  NonlinearSystemBase & getNonlinearSystemBase(unsigned int sys_num);
+  const NonlinearSystemBase & getNonlinearSystemBase(unsigned int sys_num) const;
   void setCurrentNonlinearSystem(unsigned int nl_sys_num);
   NonlinearSystemBase & currentNonlinearSystem();
   const NonlinearSystemBase & currentNonlinearSystem() const;
 
-  virtual const SystemBase & systemBaseNonlinear(unsigned int sys_num = 0) const override;
-  virtual SystemBase & systemBaseNonlinear(unsigned int sys_num = 0) override;
+  virtual const SystemBase & systemBaseNonlinear(unsigned int sys_num) const override;
+  virtual SystemBase & systemBaseNonlinear(unsigned int sys_num) override;
 
   virtual const SystemBase & systemBaseAuxiliary() const override;
   virtual SystemBase & systemBaseAuxiliary() override;
 
-  virtual NonlinearSystem & getNonlinearSystem(unsigned int sys_num = 0);
+  virtual NonlinearSystem & getNonlinearSystem(unsigned int sys_num);
 
   /**
    * Canonical method for adding a non-linear variable
@@ -1188,7 +1188,7 @@ public:
    */
   virtual void computeResidual(const NumericVector<Number> & soln,
                                NumericVector<Number> & residual,
-                               unsigned int nl_sys_num = 0);
+                               unsigned int nl_sys_num);
 
   /**
    * Form a residual and Jacobian with default tags
@@ -1233,7 +1233,7 @@ public:
    */
   virtual void computeJacobian(const NumericVector<Number> & soln,
                                SparseMatrix<Number> & jacobian,
-                               unsigned int nl_sys_num = 0);
+                               unsigned int nl_sys_num);
 
   /**
    * Form a Jacobian matrix for a given tag.
@@ -1263,7 +1263,7 @@ public:
    * @param blocks The blocks to fill in (JacobianBlock is defined in ComputeJacobianBlocksThread)
    */
   virtual void computeJacobianBlocks(std::vector<JacobianBlock *> & blocks,
-                                     unsigned int nl_sys_num = 0);
+                                     unsigned int nl_sys_num);
 
   /**
    * Really not a good idea to use this.
@@ -2032,13 +2032,9 @@ public:
    */
   MooseAppCoordTransform & coordTransform();
 
-  std::size_t numNonlinearSystems() const override { return _num_nl_sys; }
-  unsigned int currentNlSysNum() const override;
-
-  /**
-   * @return the nonlinear system number corresponding to the provided \p nl_sys_name
-   */
-  unsigned int nlSysNum(const NonlinearSystemName & nl_sys_name) const;
+  virtual std::size_t numNonlinearSystems() const override { return _num_nl_sys; }
+  virtual unsigned int currentNlSysNum() const override;
+  virtual unsigned int nlSysNum(const NonlinearSystemName & nl_sys_name) const override;
 
   /**
    * Whether it will skip further residual evaluations and fail the next nonlinear convergence check

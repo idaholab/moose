@@ -32,7 +32,7 @@ HeatStructure2DCouplerBCBase::HeatStructure2DCouplerBCBase(const InputParameters
             .number()),
     _mesh_alignment(*getParam<MeshAlignment *>("_mesh_alignment")),
 
-    _nl_sys(_subproblem.systemBaseNonlinear()),
+    _nl_sys(_subproblem.systemBaseNonlinear(_sys.number())),
     _serialized_solution(_nl_sys.currentSolution())
 {
 }

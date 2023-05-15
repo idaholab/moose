@@ -62,8 +62,10 @@ PorousFlowAddBCAction::setupPorousFlowEnthalpySink()
   const UserObjectName & dictator_name = obj_pars.get<UserObjectName>("PorousFlowDictator");
   const FunctionName & flux_fn_name = obj_pars.get<FunctionName>("flux_function");
 
-  const MooseVariableFEBase & p_m_var = _problem->getNonlinearSystemBase().getVariable(tid, 0);
-  const MooseVariableFEBase & T_m_var = _problem->getNonlinearSystemBase().getVariable(tid, 1);
+  const MooseVariableFEBase & p_m_var =
+      _problem->getNonlinearSystemBase(/*nl_sys_num=*/0).getVariable(tid, 0);
+  const MooseVariableFEBase & T_m_var =
+      _problem->getNonlinearSystemBase(/*nl_sys_num=*/0).getVariable(tid, 1);
 
   bool has_fluid_phase = obj_pars.isParamValid("fluid_phase");
   {

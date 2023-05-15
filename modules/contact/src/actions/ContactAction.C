@@ -472,7 +472,7 @@ ContactAction::act()
 
         std::vector<VariableName> displacements =
             getParam<std::vector<VariableName>>("displacements");
-        const auto order = _problem->systemBaseNonlinear()
+        const auto order = _problem->systemBaseNonlinear(/*nl_sys_num=*/0)
                                .system()
                                .variable_type(displacements[0])
                                .order.get_order();
@@ -542,8 +542,10 @@ ContactAction::act()
   if (_current_task == "add_contact_aux_variable")
   {
     std::vector<VariableName> displacements = getParam<std::vector<VariableName>>("displacements");
-    const auto order =
-        _problem->systemBaseNonlinear().system().variable_type(displacements[0]).order.get_order();
+    const auto order = _problem->systemBaseNonlinear(/*nl_sys_num=*/0)
+                           .system()
+                           .variable_type(displacements[0])
+                           .order.get_order();
     // Add ContactPenetrationVarAction
     {
       auto var_params = _factory.getValidParams("MooseVariable");
@@ -642,8 +644,10 @@ ContactAction::addContactPressureAuxKernel()
     params.applyParameters(parameters(), {"order"});
 
     std::vector<VariableName> displacements = getParam<std::vector<VariableName>>("displacements");
-    const auto order =
-        _problem->systemBaseNonlinear().system().variable_type(displacements[0]).order.get_order();
+    const auto order = _problem->systemBaseNonlinear(/*nl_sys_num=*/0)
+                           .system()
+                           .variable_type(displacements[0])
+                           .order.get_order();
 
     params.set<MooseEnum>("order") = Utility::enum_to_string<Order>(OrderWrapper{order});
     params.set<std::vector<BoundaryName>>("boundary") = boundary_vector;
@@ -736,10 +740,10 @@ ContactAction::addMortarContact()
     if (!add_aux_lm || penalty_traction)
       params.set<bool>("use_dual") = _use_dual;
 
-    mooseAssert(_problem->systemBaseNonlinear().hasVariable(displacements[0]),
+    mooseAssert(_problem->systemBaseNonlinear(/*nl_sys_num=*/0).hasVariable(displacements[0]),
                 "Displacement variable is missing");
     const auto primal_type =
-        _problem->systemBaseNonlinear().system().variable_type(displacements[0]);
+        _problem->systemBaseNonlinear(/*nl_sys_num=*/0).system().variable_type(displacements[0]);
 
     const int lm_order = primal_type.order.get_order();
 
@@ -1167,8 +1171,10 @@ ContactAction::addNodeFaceContact()
                           "primary",
                           "secondary"});
 
-  const auto order =
-      _problem->systemBaseNonlinear().system().variable_type(displacements[0]).order.get_order();
+  const auto order = _problem->systemBaseNonlinear(/*nl_sys_num=*/0)
+                         .system()
+                         .variable_type(displacements[0])
+                         .order.get_order();
 
   params.set<std::vector<VariableName>>("displacements") = displacements;
   params.set<bool>("use_displaced_mesh") = true;

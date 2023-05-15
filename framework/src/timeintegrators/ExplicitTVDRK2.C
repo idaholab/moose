@@ -88,12 +88,12 @@ ExplicitTVDRK2::solve()
   _stage = 2;
   _fe_problem.timeOld() = time_old;
   _fe_problem.time() = time_stage2;
-  _fe_problem.getNonlinearSystemBase().system().solve();
+  _nl.system().solve();
   _n_nonlinear_iterations += getNumNonlinearIterationsLastSolve();
   _n_linear_iterations += getNumLinearIterationsLastSolve();
 
   // Abort time step immediately on stage failure - see TimeIntegrator doc page
-  if (!_fe_problem.converged())
+  if (!_fe_problem.converged(_nl.number()))
     return;
 
   // Advance solutions old->older, current->old.  Also moves Material
@@ -107,7 +107,7 @@ ExplicitTVDRK2::solve()
   _stage = 3;
   _fe_problem.timeOld() = time_stage2;
   _fe_problem.time() = time_new;
-  _fe_problem.getNonlinearSystemBase().system().solve();
+  _nl.system().solve();
   _n_nonlinear_iterations += getNumNonlinearIterationsLastSolve();
   _n_linear_iterations += getNumLinearIterationsLastSolve();
 

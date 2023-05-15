@@ -53,12 +53,11 @@ ComputeCrackTipEnrichmentSmallStrain::ComputeCrackTipEnrichmentSmallStrain(
   else if (_ndisp == 3 && nl_vnames.size() != 12)
     mooseError("The number of enrichment displacements should be total 12 for 3D.");
 
-  NonlinearSystem & nl = _fe_problem.getNonlinearSystem();
-  _nl = &(_fe_problem.getNonlinearSystem());
+  _nl = &(_fe_problem.getNonlinearSystem(/*nl_sys_num=*/0));
 
   for (unsigned int j = 0; j < _ndisp; ++j)
     for (unsigned int i = 0; i < 4; ++i)
-      _enrich_variable[i][j] = &(nl.getVariable(0, nl_vnames[j * 4 + i]));
+      _enrich_variable[i][j] = &(_nl->getVariable(0, nl_vnames[j * 4 + i]));
 
   if (_ndisp == 2)
     _BI.resize(4); // QUAD4

@@ -88,7 +88,7 @@ PolycrystalVariablesAction::act()
 
       if (_current_task == "copy_nodal_vars")
       {
-        auto * system = &_problem->getNonlinearSystemBase();
+        auto * system = &_problem->getNonlinearSystemBase(/*nl_sys_num=*/0);
         system->addVariableToCopy(var_name, var_name, "LATEST");
       }
     }

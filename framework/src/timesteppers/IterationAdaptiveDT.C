@@ -560,8 +560,8 @@ IterationAdaptiveDT::acceptStep()
     _tfunc_times.erase(_tfunc_times.begin());
   }
 
-  _nl_its = _fe_problem.getNonlinearSystemBase().nNonlinearIterations();
-  _l_its = _fe_problem.getNonlinearSystemBase().nLinearIterations();
+  _nl_its = _fe_problem.getNonlinearSystemBase(/*nl_sys=*/0).nNonlinearIterations();
+  _l_its = _fe_problem.getNonlinearSystemBase(/*nl_sys=*/0).nLinearIterations();
 
   if ((_at_function_point || _executioner.atSyncPoint()) &&
       _dt + _timestep_tolerance < _executioner.unconstrainedDT())

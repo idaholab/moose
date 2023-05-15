@@ -76,7 +76,8 @@ TestShapeElementUserObject::finalize()
   // it's a test object.
   const FEProblemBase & prob = _ti_feproblem;
 
-  const dof_id_type n_local_dfs = prob.getNonlinearSystemBase().system().n_local_dofs();
+  const dof_id_type n_local_dfs =
+      prob.getNonlinearSystemBase(_sys.number()).system().n_local_dofs();
 
   // check if executeJacobian was called for each variable on each MPI
   // process that owns any degrees of freedom.

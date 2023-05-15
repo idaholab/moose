@@ -44,7 +44,8 @@ GenericReal<is_ad>
 PowerLawCreepTestTempl<is_ad>::computeResidual(const GenericReal<is_ad> & effective_trial_stress,
                                                const GenericReal<is_ad> & scalar)
 {
-  if (_fe_problem.getNonlinearSystemBase().getCurrentNonlinearIterationNumber() == 1 &&
+  if (_fe_problem.getNonlinearSystemBase(/*nl_sys_num=*/0).getCurrentNonlinearIterationNumber() ==
+          1 &&
       _t_step == _failure_step && _dt == 1.0)
     return 1.0;
 
@@ -56,7 +57,8 @@ GenericReal<is_ad>
 PowerLawCreepTestTempl<is_ad>::computeDerivative(const GenericReal<is_ad> & effective_trial_stress,
                                                  const GenericReal<is_ad> & scalar)
 {
-  if (_fe_problem.getNonlinearSystemBase().getCurrentNonlinearIterationNumber() == 1 &&
+  if (_fe_problem.getNonlinearSystemBase(/*nl_sys_num=*/0).getCurrentNonlinearIterationNumber() ==
+          1 &&
       _t_step == _failure_step && _dt == 1.0)
     return 1.0;
 

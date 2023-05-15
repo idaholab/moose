@@ -95,7 +95,7 @@ SteadySolve2::execute()
 
       if (_problem.shouldSolve())
       {
-        if (_problem.nlConverged(sys_num))
+        if (_problem.converged(sys_num))
           _console << COLOR_GREEN << " Nonlinear system " << sys_num << " solve converged!"
                    << COLOR_DEFAULT << std::endl;
         else
@@ -109,7 +109,7 @@ SteadySolve2::execute()
         _console << COLOR_GREEN << " Nonlinear system " << sys_num << " solve skipped!"
                  << COLOR_DEFAULT << std::endl;
 
-      return _problem.nlConverged(sys_num);
+      return _problem.converged(sys_num);
     };
 
     bool converged = true;

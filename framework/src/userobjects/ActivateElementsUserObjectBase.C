@@ -408,17 +408,17 @@ ActivateElementsUserObjectBase::initSolutions(ConstElemRange & elem_range,
   // project initial condition to the current solution
   _fe_problem.projectInitialConditionOnCustomRange(elem_range, bnd_node_range);
 
-  NumericVector<Number> & current_solution =
-      *_fe_problem.getNonlinearSystemBase().system().current_local_solution;
-  NumericVector<Number> & old_solution = _fe_problem.getNonlinearSystemBase().solutionOld();
-  NumericVector<Number> & older_solution = _fe_problem.getNonlinearSystemBase().solutionOlder();
+  auto & nl = _fe_problem.getNonlinearSystemBase(_sys.number());
+  NumericVector<Number> & current_solution = *nl.system().current_local_solution;
+  NumericVector<Number> & old_solution = nl.solutionOld();
+  NumericVector<Number> & older_solution = nl.solutionOlder();
 
   NumericVector<Number> & current_aux_solution =
       *_fe_problem.getAuxiliarySystem().system().current_local_solution;
   NumericVector<Number> & old_aux_solution = _fe_problem.getAuxiliarySystem().solutionOld();
   NumericVector<Number> & older_aux_solution = _fe_problem.getAuxiliarySystem().solutionOlder();
 
-  DofMap & dof_map = _fe_problem.getNonlinearSystemBase().dofMap();
+  DofMap & dof_map = nl.dofMap();
   DofMap & dof_map_aux = _fe_problem.getAuxiliarySystem().dofMap();
 
   std::set<dof_id_type> dofs, dofs_aux;

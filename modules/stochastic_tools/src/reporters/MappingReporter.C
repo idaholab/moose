@@ -177,7 +177,7 @@ MappingReporter::mapParallelStorageData()
 void
 MappingReporter::mapVariableData()
 {
-  NonlinearSystemBase & nl = _fe_problem.getNonlinearSystemBase();
+  NonlinearSystemBase & nl = _fe_problem.getNonlinearSystemBase(/*nl_sys_num=*/0);
 
   for (unsigned int var_i = 0; var_i < _variable_names.size(); ++var_i)
   {

@@ -1127,9 +1127,9 @@ DisplacedProblem::refMesh()
 }
 
 bool
-DisplacedProblem::nlConverged(const unsigned int nl_sys_num)
+DisplacedProblem::converged(const unsigned int nl_sys_num)
 {
-  return _mproblem.nlConverged(nl_sys_num);
+  return _mproblem.converged(nl_sys_num);
 }
 
 bool
@@ -1332,4 +1332,10 @@ bool
 DisplacedProblem::hasNonlocalCoupling() const
 {
   return _mproblem.hasNonlocalCoupling();
+}
+
+unsigned int
+DisplacedProblem::nlSysNum(const NonlinearSystemName & nl_sys_name) const
+{
+  return _mproblem.nlSysNum(nl_sys_name);
 }

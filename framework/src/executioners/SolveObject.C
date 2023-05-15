@@ -23,7 +23,7 @@ SolveObject::SolveObject(Executioner & ex)
     _displaced_problem(_problem.getDisplacedProblem()),
     _mesh(_problem.mesh()),
     _displaced_mesh(_displaced_problem ? &_displaced_problem->mesh() : nullptr),
-    _nl(_problem.getNonlinearSystemBase()),
+    _nl(_problem.getNonlinearSystemBase(/*nl_sys=*/0)),
     _aux(_problem.getAuxiliarySystem()),
     _inner_solve(nullptr)
 {

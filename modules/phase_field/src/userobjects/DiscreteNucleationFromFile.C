@@ -9,6 +9,7 @@
 
 #include "DiscreteNucleationFromFile.h"
 #include "MooseMesh.h"
+#include "SystemBase.h"
 
 #include <algorithm>
 
@@ -121,7 +122,7 @@ DiscreteNucleationFromFile::initialize()
   _changes_made = {0, 0};
 
   // expire entries from the local nucleus list (if the current time step converged)
-  if (_fe_problem.converged())
+  if (_fe_problem.converged(_sys.number()))
   {
     unsigned int i = 0;
     while (i < _global_nucleus_list.size())

@@ -982,14 +982,14 @@ SubProblem::addAlgebraicGhostingFunctor(GhostingFunctor & algebraic_gf, bool to_
 void
 SubProblem::cloneCouplingGhostingFunctor(GhostingFunctor & coupling_gf, bool to_mesh)
 {
-  const auto num_nl_sys = numNonlinearSystems();
+  const std::size_t num_nl_sys = numNonlinearSystems();
 
   auto pr = _root_coupling_gf_to_sys_clones.emplace(
       &coupling_gf, std::vector<std::shared_ptr<GhostingFunctor>>(num_nl_sys - 1));
   mooseAssert(pr.second, "We are adding a duplicate coupling functor");
   auto & clones_vec = pr.first->second;
 
-  for (MooseIndex(num_nl_sys) i = 1; i < num_nl_sys; ++i)
+  for (const auto i : make_range(std::size_t(1), num_nl_sys))
   {
     DofMap & dof_map = systemBaseNonlinear(i).system().get_dof_map();
     std::shared_ptr<GhostingFunctor> clone_coupling_gf = coupling_gf.clone();
@@ -1008,9 +1008,6 @@ SubProblem::addCouplingGhostingFunctor(GhostingFunctor & coupling_gf, bool to_me
     return;
 
   systemBaseNonlinear(0).system().get_dof_map().add_coupling_functor(coupling_gf, to_mesh);
-  if (num_nl_sys == 1)
-    return;
-
   cloneCouplingGhostingFunctor(coupling_gf, to_mesh);
 }
 
@@ -1042,11 +1039,58 @@ SubProblem::removeAlgebraicGhostingFunctor(GhostingFunctor & algebraic_gf)
   auto & clones_vec = it->second;
   mooseAssert((n_sys - 1) == clones_vec.size(),
               "The size of the gf clones vector doesn't match the number of systems minus one");
+  if (clones_vec.empty())
+  {
+    mooseAssert(n_sys == 1, "The clones vector should only be empty if there is only one system");
+    return;
+  }
 
   for (const auto i : make_range(n_sys))
     eq.get_system(i + 1).get_dof_map().remove_algebraic_ghosting_functor(*clones_vec[i]);
 
   _root_alg_gf_to_sys_clones.erase(it->first);
+}
+
+void
+SubProblem::removeCouplingGhostingFunctor(GhostingFunctor & coupling_gf)
+{
+  EquationSystems & eq = es();
+  const auto num_nl_sys = numNonlinearSystems();
+  if (!num_nl_sys)
+    return;
+
+#ifndef NDEBUG
+  const DofMap & nl_dof_map = eq.get_system(0).get_dof_map();
+  const bool found_in_root_sys = std::find(nl_dof_map.coupling_functors_begin(),
+                                           nl_dof_map.coupling_functors_end(),
+                                           &coupling_gf) != nl_dof_map.coupling_functors_end();
+  const bool found_in_our_map =
+      _root_coupling_gf_to_sys_clones.find(&coupling_gf) != _root_coupling_gf_to_sys_clones.end();
+  mooseAssert(found_in_root_sys == found_in_our_map,
+              "If the ghosting functor exists in the root DofMap, then we need to have a key for "
+              "it in our gf to clones map");
+#endif
+
+  eq.get_system(0).get_dof_map().remove_coupling_functor(coupling_gf);
+
+  auto it = _root_coupling_gf_to_sys_clones.find(&coupling_gf);
+  if (it == _root_coupling_gf_to_sys_clones.end())
+    return;
+
+  auto & clones_vec = it->second;
+  mooseAssert((num_nl_sys - 1) == clones_vec.size(),
+              "The size of the gf clones vector doesn't match the number of systems minus one");
+  if (clones_vec.empty())
+  {
+    mooseAssert(num_nl_sys == 1,
+                "The clones vector should only be empty if there is only one nonlinear system");
+    return;
+  }
+
+  for (const auto i : make_range(num_nl_sys))
+    eq.get_system(i + 1).get_dof_map().remove_coupling_functor(*clones_vec[i]);
+
+  _root_coupling_gf_to_sys_clones.erase(it->first);
 }
 
 void

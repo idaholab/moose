@@ -43,7 +43,7 @@ SingleMatrixPreconditioner::validParams()
 SingleMatrixPreconditioner::SingleMatrixPreconditioner(const InputParameters & params)
   : MoosePreconditioner(params)
 {
-  NonlinearSystemBase & nl = _fe_problem.getNonlinearSystemBase();
+  NonlinearSystemBase & nl = _fe_problem.getNonlinearSystemBase(_nl_sys_num);
   unsigned int n_vars = nl.nVariables();
   const auto & libmesh_system = nl.system();
   auto cm = std::make_unique<CouplingMatrix>(n_vars);

@@ -31,7 +31,7 @@ SwitchingFunctionPenalty::SwitchingFunctionPenalty(const InputParameters & param
     _h(_num_h),
     _dh(_num_h),
     _penalty(getParam<Real>("penalty")),
-    _number_of_nl_variables(_fe_problem.getNonlinearSystemBase().nVariables()),
+    _number_of_nl_variables(_sys.nVariables()),
     _j_eta(_number_of_nl_variables, -1),
     _a(-1)
 {

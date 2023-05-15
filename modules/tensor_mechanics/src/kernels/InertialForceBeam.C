@@ -172,7 +172,7 @@ InertialForceBeam::computeResidual()
       node.push_back(_current_elem->node_ptr(i));
 
     // Fetch the solution for the two end nodes at time t
-    NonlinearSystemBase & nonlinear_sys = _fe_problem.getNonlinearSystemBase();
+    NonlinearSystemBase & nonlinear_sys = _fe_problem.getNonlinearSystemBase(_sys.number());
 
     if (_has_beta)
     {

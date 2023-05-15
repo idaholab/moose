@@ -42,7 +42,7 @@ SlowProblem::SlowProblem(const InputParameters & params)
 }
 
 void
-SlowProblem::solve(unsigned int)
+SlowProblem::solve(unsigned int nl_sys_num)
 {
   {
     const Real delay = getDelay();
@@ -66,7 +66,7 @@ SlowProblem::solve(unsigned int)
     }
   }
 
-  FEProblem::solve();
+  FEProblem::solve(nl_sys_num);
 }
 
 void

@@ -35,7 +35,7 @@ ElementJacobianDamper::validParams()
 ElementJacobianDamper::ElementJacobianDamper(const InputParameters & parameters)
   : GeneralDamper(parameters),
     _tid(parameters.get<THREAD_ID>("_tid")),
-    _assembly(_subproblem.assembly(_tid)),
+    _assembly(_subproblem.assembly(_tid, _sys.number())),
     _qrule(_assembly.qRule()),
     _JxW(_assembly.JxW()),
     _fe_problem(*parameters.getCheckedPointerParam<FEProblemBase *>("_fe_problem_base")),

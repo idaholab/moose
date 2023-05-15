@@ -53,11 +53,11 @@ public:
   }
   MooseMesh & refMesh();
 
-  DisplacedSystem & nlSys(unsigned int sys_num = 0);
+  DisplacedSystem & nlSys(unsigned int sys_num);
   DisplacedSystem & auxSys() { return *_displaced_aux; }
 
-  virtual const SystemBase & systemBaseNonlinear(unsigned int sys_num = 0) const override;
-  virtual SystemBase & systemBaseNonlinear(unsigned int sys_num = 0) override;
+  virtual const SystemBase & systemBaseNonlinear(unsigned int sys_num) const override;
+  virtual SystemBase & systemBaseNonlinear(unsigned int sys_num) override;
 
   virtual const SystemBase & systemBaseAuxiliary() const override { return *_displaced_aux; }
   virtual SystemBase & systemBaseAuxiliary() override { return *_displaced_aux; }
@@ -76,7 +76,8 @@ public:
   void bumpAllQRuleOrder(Order order, SubdomainID block);
 
   virtual void init() override;
-  virtual bool nlConverged(unsigned int nl_sys_num) override;
+  virtual bool converged(unsigned int nl_sys_num) override;
+  virtual unsigned int nlSysNum(const NonlinearSystemName & nl_sys_name) const override;
 
   /**
    * Allocate vectors and save old solutions into them.
@@ -285,15 +286,15 @@ public:
   virtual void prepareFaceShapes(unsigned int var, THREAD_ID tid) override;
   virtual void prepareNeighborShapes(unsigned int var, THREAD_ID tid) override;
 
-  Assembly & assembly(THREAD_ID tid, unsigned int nl_sys_num = 0) override;
-  const Assembly & assembly(THREAD_ID tid, unsigned int nl_sys_num = 0) const override;
+  Assembly & assembly(THREAD_ID tid, unsigned int nl_sys_num) override;
+  const Assembly & assembly(THREAD_ID tid, unsigned int nl_sys_num) const override;
 
   // Geom Search /////
   virtual void updateGeomSearch(
       GeometricSearchData::GeometricSearchType type = GeometricSearchData::ALL) override;
   virtual GeometricSearchData & geomSearchData() override { return _geometric_search_data; }
 
-  virtual bool computingInitialResidual(unsigned int nl_sys_num = 0) const override;
+  virtual bool computingInitialResidual(unsigned int nl_sys_num) const override;
 
   virtual void onTimestepBegin() override;
   virtual void onTimestepEnd() override;
@@ -328,7 +329,7 @@ public:
 
   LineSearch * getLineSearch() override;
 
-  const CouplingMatrix * couplingMatrix(unsigned int nl_sys_num = 0) const override;
+  const CouplingMatrix * couplingMatrix(unsigned int nl_sys_num) const override;
 
   bool haveDisplaced() const override final { return true; }
 

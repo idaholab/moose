@@ -114,7 +114,7 @@ GeneralizedPlaneStrainAction::act()
       auto temp = getParam<std::vector<VariableName>>("temperature");
       if (temp.size() > 1)
         mooseError("Only one variable may be specified in 'temperature'");
-      if (_problem->getNonlinearSystemBase().hasVariable(temp[0]))
+      if (_problem->getNonlinearSystemBase(/*nl_sys_num=*/0).hasVariable(temp[0]))
       {
         std::string k_name = _name + "_GeneralizedPlaneStrainOffDiag_temp";
         params.set<NonlinearVariableName>("variable") = temp[0];

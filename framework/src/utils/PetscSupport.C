@@ -454,19 +454,24 @@ getPetscKSPNormType(Moose::MooseKSPNormType kspnorm)
 void
 petscSetDefaultKSPNormType(FEProblemBase & problem, KSP ksp)
 {
-  NonlinearSystemBase & nl = problem.getNonlinearSystemBase();
-
-  KSPSetNormType(ksp, getPetscKSPNormType(nl.getMooseKSPNormType()));
+  for (const auto i : make_range(problem.numNonlinearSystems()))
+  {
+    NonlinearSystemBase & nl = problem.getNonlinearSystemBase(i);
+    KSPSetNormType(ksp, getPetscKSPNormType(nl.getMooseKSPNormType()));
+  }
 }
 
 void
 petscSetDefaultPCSide(FEProblemBase & problem, KSP ksp)
 {
-  NonlinearSystemBase & nl = problem.getNonlinearSystemBase();
+  for (const auto i : make_range(problem.numNonlinearSystems()))
+  {
+    NonlinearSystemBase & nl = problem.getNonlinearSystemBase(i);
 
-  // PETSc 3.2.x+
-  if (nl.getPCSide() != Moose::PCS_DEFAULT)
-    KSPSetPCSide(ksp, getPetscPCSide(nl.getPCSide()));
+    // PETSc 3.2.x+
+    if (nl.getPCSide() != Moose::PCS_DEFAULT)
+      KSPSetPCSide(ksp, getPetscPCSide(nl.getPCSide()));
+  }
 }
 
 void

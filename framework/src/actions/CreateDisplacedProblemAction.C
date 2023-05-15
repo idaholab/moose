@@ -139,12 +139,19 @@ CreateDisplacedProblemAction::act()
       if (!_displaced_mesh)
         mooseError("We should have created a displaced mesh by now");
 
-      auto & undisplaced_nl = _problem->getNonlinearSystemBase();
-      auto & undisplaced_aux = _problem->getAuxiliarySystem();
-
       auto displaced_problem_ptr = _problem->getDisplacedProblem();
 
-      auto & displaced_nl = displaced_problem_ptr->nlSys();
+      for (const auto i : make_range(_problem->numNonlinearSystems()))
+      {
+        auto & undisplaced_nl = _problem->getNonlinearSystemBase(i);
+        auto & displaced_nl = displaced_problem_ptr->nlSys(i);
+        // Note the "to" system doesn't actually matter much - the GF will
+        // get added to both systems on the receiving side
+        addProxyAlgebraicRelationshipManagers(undisplaced_nl, displaced_nl);
+        addProxyAlgebraicRelationshipManagers(displaced_nl, undisplaced_nl);
+      }
+
+      auto & undisplaced_aux = _problem->getAuxiliarySystem();
       auto & displaced_aux = displaced_problem_ptr->auxSys();
 
       // Note that there is no reason to copy coupling factors back and forth because the displaced
@@ -153,13 +160,13 @@ CreateDisplacedProblemAction::act()
 
       // Note the "to" system doesn't actually matter much - the GF will
       // get added to both systems on the receiving side
-      addProxyAlgebraicRelationshipManagers(undisplaced_nl, displaced_nl);
-      addProxyAlgebraicRelationshipManagers(displaced_nl, undisplaced_nl);
       addProxyAlgebraicRelationshipManagers(undisplaced_aux, displaced_aux);
       addProxyAlgebraicRelationshipManagers(displaced_aux, undisplaced_aux);
 
-      addProxyGeometricRelationshipManagers(undisplaced_nl, displaced_nl);
-      addProxyGeometricRelationshipManagers(displaced_nl, undisplaced_nl);
+      // Add geoemtric ghosting (which only acts through the mesh) through the single auxiliary
+      // system as opposed to duplicating the effort through potentially multiple nonlinear systems
+      addProxyGeometricRelationshipManagers(undisplaced_aux, displaced_aux);
+      addProxyGeometricRelationshipManagers(displaced_aux, undisplaced_aux);
 
       // When adding the geometric relationship mangers we told the mesh not to allow remote element
       // removal during the initial MeshBase::prepare_for_use call. Verify that we did indeed tell

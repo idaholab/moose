@@ -539,57 +539,60 @@ Console::writeVariableNorms()
   // String stream for variable norm information
   std::ostringstream oss;
 
-  // Get a references to the NonlinearSystem and libMesh system
-  NonlinearSystemBase & nl = _problem_ptr->getNonlinearSystemBase();
-  System & sys = nl.system();
-
-  // Storage for norm outputs
-  std::map<std::string, Real> other;
-  std::map<std::string, Real> outlier;
-
-  // Average norm
-  unsigned int n_vars = sys.n_vars();
-  Real avg_norm = (nl.nonlinearNorm() * nl.nonlinearNorm()) / n_vars;
-
-  // Compute the norms for each of the variables
-  for (unsigned int i = 0; i < n_vars; i++)
+  for (const auto i : make_range(_problem_ptr->numNonlinearSystems()))
   {
-    // Compute the norm and extract the variable name
-    Real var_norm = sys.calculate_norm(nl.RHS(), i, DISCRETE_L2);
-    var_norm *= var_norm; // use the norm squared
-    std::string var_name = sys.variable_name(i);
+    // Get a references to the NonlinearSystem and libMesh system
+    NonlinearSystemBase & nl = _problem_ptr->getNonlinearSystemBase(i);
+    System & sys = nl.system();
 
-    // Outlier if the variable norm is greater than twice (default) of the average norm
-    if (_outlier_variable_norms && (var_norm > _outlier_multiplier[1] * avg_norm))
+    // Storage for norm outputs
+    std::map<std::string, Real> other;
+    std::map<std::string, Real> outlier;
+
+    // Average norm
+    unsigned int n_vars = sys.n_vars();
+    Real avg_norm = (nl.nonlinearNorm() * nl.nonlinearNorm()) / n_vars;
+
+    // Compute the norms for each of the variables
+    for (unsigned int i = 0; i < n_vars; i++)
     {
-      // Print the header
-      if (!header)
+      // Compute the norm and extract the variable name
+      Real var_norm = sys.calculate_norm(nl.RHS(), i, DISCRETE_L2);
+      var_norm *= var_norm; // use the norm squared
+      std::string var_name = sys.variable_name(i);
+
+      // Outlier if the variable norm is greater than twice (default) of the average norm
+      if (_outlier_variable_norms && (var_norm > _outlier_multiplier[1] * avg_norm))
       {
-        oss << "\nOutlier Variable Residual Norms:\n";
-        header = true;
+        // Print the header
+        if (!header)
+        {
+          oss << "\nOutlier Variable Residual Norms:\n";
+          header = true;
+        }
+
+        // Set the color, RED if the variable norm is 0.8 (default) of the total norm
+        std::string color = COLOR_YELLOW;
+        if (_outlier_variable_norms && (var_norm > _outlier_multiplier[0] * avg_norm * n_vars))
+          color = COLOR_RED;
+
+        // Display the residual
+        oss << "  " << var_name << ": " << std::scientific << color << std::sqrt(var_norm)
+            << COLOR_DEFAULT << '\n';
       }
 
-      // Set the color, RED if the variable norm is 0.8 (default) of the total norm
-      std::string color = COLOR_YELLOW;
-      if (_outlier_variable_norms && (var_norm > _outlier_multiplier[0] * avg_norm * n_vars))
-        color = COLOR_RED;
-
-      // Display the residual
-      oss << "  " << var_name << ": " << std::scientific << color << std::sqrt(var_norm)
-          << COLOR_DEFAULT << '\n';
-    }
-
-    // GREEN
-    else if (_all_variable_norms)
-    {
-      // Print the header if it doesn't already exist
-      if (!header)
+      // GREEN
+      else if (_all_variable_norms)
       {
-        oss << "\nVariable Residual Norms:\n";
-        header = true;
+        // Print the header if it doesn't already exist
+        if (!header)
+        {
+          oss << "\nVariable Residual Norms:\n";
+          header = true;
+        }
+        oss << "  " << var_name << ": " << std::scientific << COLOR_GREEN << std::sqrt(var_norm)
+            << COLOR_DEFAULT << '\n';
       }
-      oss << "  " << var_name << ": " << std::scientific << COLOR_GREEN << std::sqrt(var_norm)
-          << COLOR_DEFAULT << '\n';
     }
   }
 
@@ -693,9 +696,15 @@ Console::outputSystemInformation()
 
   if (_system_info_flags.contains("nonlinear"))
   {
-    std::string output = ConsoleUtils::outputNonlinearSystemInformation(*_problem_ptr);
-    if (!output.empty())
-      _console << "Nonlinear System:\n" << output;
+    for (const auto i : make_range(_problem_ptr->numNonlinearSystems()))
+    {
+      std::string output = ConsoleUtils::outputNonlinearSystemInformation(*_problem_ptr, i);
+      if (!output.empty())
+        _console << "Nonlinear System" +
+                        (_problem_ptr->numNonlinearSystems() > 1 ? (" " + std::to_string(i)) : "") +
+                        ":\n"
+                 << output;
+    }
   }
 
   if (_system_info_flags.contains("aux"))
@@ -731,9 +740,16 @@ Console::meshChanged()
   {
     _console << ConsoleUtils::outputMeshInformation(*_problem_ptr, /*verbose = */ false);
 
-    std::string output = ConsoleUtils::outputNonlinearSystemInformation(*_problem_ptr);
-    if (!output.empty())
-      _console << "Nonlinear System:\n" << output;
+    std::string output;
+    for (const auto i : make_range(_problem_ptr->numNonlinearSystems()))
+    {
+      output = ConsoleUtils::outputNonlinearSystemInformation(*_problem_ptr, i);
+      if (!output.empty())
+        _console << "Nonlinear System" +
+                        (_problem_ptr->numNonlinearSystems() > 1 ? (" " + std::to_string(i)) : "") +
+                        ":\n"
+                 << output;
+    }
 
     output = ConsoleUtils::outputAuxiliarySystemInformation(*_problem_ptr);
     if (!output.empty())

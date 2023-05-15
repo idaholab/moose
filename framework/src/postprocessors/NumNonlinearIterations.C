@@ -11,6 +11,7 @@
 
 #include "FEProblem.h"
 #include "SubProblem.h"
+#include "SystemBase.h"
 
 registerMooseObject("MooseApp", NumNonlinearIterations);
 
@@ -51,9 +52,9 @@ void
 NumNonlinearIterations::finalize()
 {
   if (_accumulate_over_step)
-    _num_iters += _subproblem.nNonlinearIterations();
+    _num_iters += _subproblem.nNonlinearIterations(_sys.number());
   else
-    _num_iters = _subproblem.nNonlinearIterations();
+    _num_iters = _subproblem.nNonlinearIterations(_sys.number());
 }
 
 Real

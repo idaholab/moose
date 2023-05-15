@@ -80,7 +80,7 @@ Split::Split(const InputParameters & parameters)
 }
 
 void
-Split::setup(const std::string & prefix)
+Split::setup(NonlinearSystemBase & nl, const std::string & prefix)
 {
   // The Split::setup() implementation does not actually depend on any
   // specific version of PETSc, so there's no need to wrap the entire
@@ -146,9 +146,9 @@ Split::setup(const std::string & prefix)
     // Finally, recursively configure the splits contained within this split.
     for (const auto & split_name : _splitting)
     {
-      std::shared_ptr<Split> split = _fe_problem.getNonlinearSystemBase().getSplit(split_name);
+      std::shared_ptr<Split> split = nl.getSplit(split_name);
       std::string sprefix = prefix + "fieldsplit_" + split_name + "_";
-      split->setup(sprefix);
+      split->setup(nl, sprefix);
     }
   }
 

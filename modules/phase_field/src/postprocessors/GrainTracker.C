@@ -93,7 +93,7 @@ GrainTracker::GrainTracker(const InputParameters & parameters)
     _bound_value(getParam<Real>("bound_value")),
     _remap(getParam<bool>("remap_grains")),
     _tolerate_failure(getParam<bool>("tolerate_failure")),
-    _nl(_fe_problem.getNonlinearSystemBase()),
+    _nl(_fe_problem.getNonlinearSystemBase(_sys.number())),
     _poly_ic_uo(parameters.isParamValid("polycrystal_ic_uo")
                     ? &getUserObject<PolycrystalUserObjectBase>("polycrystal_ic_uo")
                     : nullptr),
@@ -1167,7 +1167,7 @@ GrainTracker::remapGrains()
     _nl.solutionOld().close();
     _nl.solutionOlder().close();
 
-    _fe_problem.getNonlinearSystemBase().system().update();
+    _nl.system().update();
 
     if (_verbosity_level > 1)
       _console << "Swaps complete" << std::endl;

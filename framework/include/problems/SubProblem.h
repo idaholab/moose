@@ -90,7 +90,7 @@ public:
   /**
    * @return whether the given \p nl_sys_num is converged
    */
-  virtual bool nlConverged(unsigned int nl_sys_num) = 0;
+  virtual bool nlConverged(unsigned int) { return converged(/*nl_sys_num=*/0); }
 
   /**
    * Eventually we want to convert this virtual over to taking a nonlinear system number argument.
@@ -98,7 +98,12 @@ public:
    * change this signature. Then we can go through the apps again and convert back to this changed
    * API
    */
-  virtual bool converged() { return nlConverged(0); }
+  virtual bool converged(unsigned int nl_sys_num) { return nlConverged(nl_sys_num); }
+
+  /**
+   * @return the nonlinear system number corresponding to the provided \p nl_sys_name
+   */
+  virtual unsigned int nlSysNum(const NonlinearSystemName & nl_sys_name) const = 0;
 
   virtual void onTimestepBegin() = 0;
   virtual void onTimestepEnd() = 0;
@@ -298,14 +303,14 @@ public:
    */
   virtual void clearActiveElementalMooseVariables(THREAD_ID tid);
 
-  virtual Assembly & assembly(THREAD_ID tid, unsigned int nl_sys_num = 0) = 0;
-  virtual const Assembly & assembly(THREAD_ID tid, unsigned int nl_sys_num = 0) const = 0;
+  virtual Assembly & assembly(THREAD_ID tid, unsigned int nl_sys_num) = 0;
+  virtual const Assembly & assembly(THREAD_ID tid, unsigned int nl_sys_num) const = 0;
 
   /**
    * Return the nonlinear system object as a base class reference given the system number
    */
-  virtual const SystemBase & systemBaseNonlinear(unsigned int sys_num = 0) const = 0;
-  virtual SystemBase & systemBaseNonlinear(unsigned int sys_num = 0) = 0;
+  virtual const SystemBase & systemBaseNonlinear(unsigned int sys_num) const = 0;
+  virtual SystemBase & systemBaseNonlinear(unsigned int sys_num) = 0;
   /**
    * Return the auxiliary system object as a base class reference
    */
@@ -324,9 +329,9 @@ public:
   unsigned int getAxisymmetricRadialCoord() const;
 
   virtual DiracKernelInfo & diracKernelInfo();
-  virtual Real finalNonlinearResidual(unsigned int nl_sys_num = 0) const;
-  virtual unsigned int nNonlinearIterations(unsigned int nl_sys_num = 0) const;
-  virtual unsigned int nLinearIterations(unsigned int nl_sys_num = 0) const;
+  virtual Real finalNonlinearResidual(unsigned int nl_sys_num) const;
+  virtual unsigned int nNonlinearIterations(unsigned int nl_sys_num) const;
+  virtual unsigned int nLinearIterations(unsigned int nl_sys_num) const;
 
   virtual void addResidual(THREAD_ID tid) = 0;
   virtual void addResidualNeighbor(THREAD_ID tid) = 0;
@@ -606,7 +611,7 @@ public:
    * Returns true if the problem is in the process of computing it's initial residual.
    * @return Whether or not the problem is currently computing the initial residual.
    */
-  virtual bool computingInitialResidual(unsigned int nl_sys_num = 0) const = 0;
+  virtual bool computingInitialResidual(unsigned int nl_sys_num) const = 0;
 
   /**
    * Return the list of elements that should have their DoFs ghosted to this processor.
@@ -714,7 +719,7 @@ public:
   /**
    * The coupling matrix defining what blocks exist in the preconditioning matrix
    */
-  virtual const CouplingMatrix * couplingMatrix(unsigned int nl_sys_num = 0) const = 0;
+  virtual const CouplingMatrix * couplingMatrix(unsigned int nl_sys_num) const = 0;
 
 private:
   /**
@@ -754,6 +759,11 @@ public:
    * Remove an algebraic ghosting functor from this problem's DofMaps
    */
   void removeAlgebraicGhostingFunctor(GhostingFunctor & algebraic_gf);
+
+  /**
+   * Remove a coupling ghosting functor from this problem's DofMaps
+   */
+  void removeCouplingGhostingFunctor(GhostingFunctor & coupling_gf);
 
   /**
    * Automatic scaling setter

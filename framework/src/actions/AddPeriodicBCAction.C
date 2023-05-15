@@ -60,7 +60,7 @@ void
 AddPeriodicBCAction::setPeriodicVars(PeriodicBoundaryBase & p,
                                      const std::vector<VariableName> & var_names)
 {
-  NonlinearSystemBase & nl = _problem->getNonlinearSystemBase();
+  NonlinearSystemBase & nl = _problem->getNonlinearSystemBase(/*nl_sys_num=*/0);
   const std::vector<VariableName> * var_names_ptr;
 
   // If var_names is empty - then apply this periodic condition to all variables in the system
@@ -188,7 +188,7 @@ AddPeriodicBCAction::act()
 
   if (_current_task == "add_periodic_bc")
   {
-    auto & nl = _problem->getNonlinearSystemBase();
+    auto & nl = _problem->getNonlinearSystemBase(/*nl_sys_num=*/0);
     _mesh = &_problem->mesh();
     auto displaced_problem = _problem->getDisplacedProblem();
 
@@ -261,6 +261,6 @@ AddPeriodicBCAction::act()
         nl.dofMap().get_periodic_boundaries());
     if (displaced_problem)
       displaced_problem->mesh().getMesh().default_ghosting().set_periodic_boundaries(
-          displaced_problem->nlSys().dofMap().get_periodic_boundaries());
+          displaced_problem->nlSys(/*nl_sys_num=*/0).dofMap().get_periodic_boundaries());
   }
 }

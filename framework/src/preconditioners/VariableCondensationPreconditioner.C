@@ -79,7 +79,7 @@ VariableCondensationPreconditioner::VariableCondensationPreconditioner(
     const InputParameters & params)
   : MoosePreconditioner(params),
     Preconditioner<Number>(MoosePreconditioner::_communicator),
-    _nl(_fe_problem.getNonlinearSystemBase()),
+    _nl(_fe_problem.getNonlinearSystemBase(_nl_sys_num)),
     _mesh(_fe_problem.mesh()),
     _dofmap(_nl.system().get_dof_map()),
     _is_lm_coupling_diagonal(getParam<bool>("is_lm_coupling_diagonal")),

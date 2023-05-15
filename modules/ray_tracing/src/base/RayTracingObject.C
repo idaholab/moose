@@ -49,7 +49,7 @@ RayTracingObject::RayTracingObject(const InputParameters & params)
     _fe_problem(*params.getCheckedPointerParam<FEProblemBase *>("_fe_problem_base")),
     _study(*params.getCheckedPointerParam<RayTracingStudy *>("_ray_tracing_study")),
     _trace_ray(const_cast<const RayTracingStudy &>(_study).traceRay(_tid)),
-    _nl(_fe_problem.getNonlinearSystemBase()),
+    _nl(_fe_problem.getNonlinearSystemBase(_study.systemNumber())),
     _aux(_fe_problem.getAuxiliarySystem()),
     _mesh(_fe_problem.mesh()),
     _current_elem(_trace_ray.currentElem()),
