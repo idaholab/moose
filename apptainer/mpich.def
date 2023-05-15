@@ -16,18 +16,13 @@ From: harbor.hpc.inl.gov/hpcbase/mpi_03:1.1.0
 {%- endif %}
 
 %environment
-    MOOSE_MPI_DIR=${MOOSE_MPI_DIR:-/opt/mpi/mpich-3.4.3}
-
-    # Set Environment for MPI
-    export LD_LIBRARY_PATH=${MOOSE_MPI_DIR}/lib:${LD_LIBRARY_PATH}
-    export MANPATH=${MOOSE_MPI_DIR}/share/man:${MANPATH}
-    export PATH=${MOOSE_MPI_DIR}/bin:${PATH}
-    export CC=mpicc CXX=mpicxx FC=mpif90 F90=mpif90 F77=mpif77
-
     # Fix locale warnings
     export LC_ALL=C
 
 %post
+    export MOOSE_MPICH_DIR=${MOOSE_MPICH_DIR:-"/opt/mpi/mpich-3.4.3"}
+    export MOOSE_OPENMPI_DIR=${MOOSE_OPENMPI_DIR:-"/opt/mpi/openmpi-4.1.5"}
+
     # Get the RHEL version
     RHEL_VERSION=$(awk -F'=' '/VERSION_ID/{ gsub(/"/,""); print $2}' /etc/os-release)
 
@@ -99,6 +94,26 @@ EOF
     tar -xf git-lfs-linux-amd64-v3.2.0.tar.gz
     cd git-lfs-3.2.0
     ./install.sh
+
+    # Basic script for setting mpich environment
+    USE_MPI_SCRIPT='export LD_LIBRARY_PATH=${MOOSE_MPI_DIR}/lib:${LD_LIBRARY_PATH}
+export MANPATH=${MOOSE_MPI_DIR}/share/man:${MANPATH}
+export PATH=${MOOSE_MPI_DIR}/bin:${PATH}
+export CC=mpicc CXX=mpicxx FC=mpif90 F90=mpif90 F77=mpif77'
+
+    # Add script for loading mpich environment
+    cat << EOF > /opt/mpi/use-mpich
+#!/bin/bash
+export MOOSE_MPI_DIR=${MOOSE_MPICH_DIR}
+${USE_MPI_SCRIPT}
+EOF
+
+    # Add script for loading openmpi environment
+    cat << EOF > /opt/mpi/use-mpich
+#!/bin/bash
+export MOOSE_MPI_DIR=${MOOSE_OPENMPI_DIR}
+${USE_MPI_SCRIPT}
+EOF
 
     # Clean Up
     rm -rf ${TEMP_LOC}
