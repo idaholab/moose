@@ -19,39 +19,39 @@
 []
 
 [Variables]
-  [./u]
-  [../]
+  [u]
+  []
 []
 
 [AuxVariables]
-  [./from_sub]
-  [../]
-  [./elemental_from_sub]
+  [from_sub]
+  []
+  [elemental_from_sub]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
 []
 
 [Kernels]
-  [./diff]
+  [diff]
     type = Diffusion
     variable = u
-  [../]
+  []
 []
 
 [BCs]
-  [./left]
+  [left]
     type = DirichletBC
     variable = u
     boundary = left
     value = 0
-  [../]
-  [./right]
+  []
+  [right]
     type = DirichletBC
     variable = u
     boundary = right
     value = 1
-  [../]
+  []
 []
 
 [Executioner]
@@ -70,7 +70,7 @@
 []
 
 [MultiApps]
-  [./sub]
+  [sub]
     # Note, in case you want to modify this test.  It is important that there are
     # an odd number of apps because this way we will catch errors caused by load
     # imbalances with our -p 2 tests.
@@ -85,32 +85,38 @@
     input_files = two_way_many_apps_sub.i
     execute_on = timestep_end
     output_in_position = true
-  [../]
+  []
 []
 
 [Transfers]
-  [./from_sub]
+  [from_sub]
     type = MultiAppGeneralFieldNearestNodeTransfer
     from_multi_app = sub
     source_variable = u
     variable = from_sub
-  [../]
-  [./elemental_from_sub]
+    # Transfer relies on two nodes that are equidistant to the target point
+    search_value_conflicts = false
+  []
+  [elemental_from_sub]
     type = MultiAppGeneralFieldNearestNodeTransfer
     from_multi_app = sub
     source_variable = u_elem
     variable = elemental_from_sub
-  [../]
-  [./to_sub]
+  []
+  [to_sub]
     type = MultiAppGeneralFieldNearestNodeTransfer
     to_multi_app = sub
     source_variable = u
     variable = from_parent
-  [../]
-  [./elemental_to_sub]
+    # Transfer relies on two nodes that are equidistant to the target point
+    search_value_conflicts = false
+  []
+  [elemental_to_sub]
     type = MultiAppGeneralFieldNearestNodeTransfer
     to_multi_app = sub
     source_variable = u
     variable = elemental_from_parent
-  [../]
+    # Transfer relies on two nodes that are equidistant to the target point
+    search_value_conflicts = false
+  []
 []

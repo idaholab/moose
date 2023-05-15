@@ -72,6 +72,8 @@
     source_variable = u
     to_boundaries = 'left bottom'
     variable = from_parent
+    # Transfer relies on two nodes that are equidistant to the target point
+    search_value_conflicts = false
   []
   [from_sub]
     type = MultiAppGeneralFieldNearestNodeTransfer
@@ -79,5 +81,7 @@
     source_variable = v
     to_boundaries = 'right top'
     variable = from_sub
+    # Transfer relies on two nodes that are equidistant to the target point
+    search_value_conflicts = false
   []
 []

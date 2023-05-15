@@ -77,6 +77,9 @@
     to_multi_app = sub
     source_variable = to_sub
     variable = from_main
+    # Transfer relies on two nodes that are equidistant to the target point
+    search_value_conflicts = false
+    greedy_search = true
   []
 
   [to_sub_elem]
