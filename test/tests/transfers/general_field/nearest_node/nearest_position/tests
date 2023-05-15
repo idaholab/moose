@@ -3,15 +3,22 @@
   design = 'transfers/MultiAppGeneralFieldUserObjectTransfer.md'
 
   [2d_overlay]
-    requirement = "The system shall be able to transfer a spatial field using a nearest-node (source) "
-                  "algorithm combined with a nearest-positions heuristic to limit the source of the "
-                  "origin values "
+    requirement = "The system shall be able to transfer a spatial field using a nearest-node "
+                  "(source) algorithm combined with a nearest-positions heuristic to limit the "
+                  "source of the origin values "
     [nearest_position]
       type = 'Exodiff'
       input = 'main.i'
       cli_args = 'Transfers/from_sub/use_nearest_position=input Transfers/from_sub_elem/use_nearest_position=input'
       exodiff = 'main_out.e main_out_sub0_out.e main_out_sub1_out.e'
-      detail = "for a 2D case with multiple subapps."
+      detail = "for a 2D case with multiple subapps,"
+    []
+    [child_app_split]
+      type = 'Exodiff'
+      input = 'main_single_sub.i'
+      exodiff = 'main_single_sub_out.e'
+      detail = "for a 2D case with a single child app split using the positions in multiple regions "
+               "to transfer data from."
     []
   []
 
