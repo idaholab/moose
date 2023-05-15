@@ -62,7 +62,6 @@
 
 [MultiApps]
   [sub]
-    # 1 on corner, one in the center and one close to a corner
     type = FullSolveMultiApp
     positions_objects = input
     app_type = MooseTestApp

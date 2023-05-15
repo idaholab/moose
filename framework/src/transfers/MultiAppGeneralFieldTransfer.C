@@ -801,7 +801,7 @@ MultiAppGeneralFieldTransfer::outputValueConflicts(
       const Point p = std::get<2>(conflict);
 
       std::string origin_domain_message;
-      if (hasFromMultiApp())
+      if (hasFromMultiApp() && !_nearest_positions_obj)
       {
         // NOTES:
         // - The origin app for a conflict may not be unique.
@@ -810,6 +810,10 @@ MultiAppGeneralFieldTransfer::outputValueConflicts(
         const auto app_id = _from_local2global_map[problem_id];
         origin_domain_message = "In source child app " + std::to_string(app_id) + " mesh,";
       }
+      // We can't locate the source app when considering nearest positions, we return the conflict
+      // location in the target app (parent or sibling) instead
+      else if (hasFromMultiApp() && _nearest_positions_obj)
+        origin_domain_message = "In target app mesh,";
       else
         origin_domain_message = "In source parent app mesh,";
 

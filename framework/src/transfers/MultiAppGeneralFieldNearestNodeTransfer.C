@@ -244,8 +244,12 @@ MultiAppGeneralFieldNearestNodeTransfer::evaluateInterpValuesNearestNode(
           _local_kdtrees[i_from]->neighborSearch(pt, num_search, return_index, return_dist_sqr);
           auto num_found = return_dist_sqr.size();
 
+          // Local coordinates only accessible when not using nearest-position
+          Point local_pt = pt;
+          if (!_nearest_positions_obj)
+            local_pt -= _from_positions[i_from];
+
           // Look for too many equidistant nodes within a problem. First zip then sort by distance
-          auto local_pt = pt - _from_positions[i_from];
           std::vector<std::pair<Real, std::size_t>> zipped_nearest_points;
           for (auto i : make_range(num_found))
             zipped_nearest_points.push_back(std::make_pair(return_dist_sqr[i], return_index[i]));
