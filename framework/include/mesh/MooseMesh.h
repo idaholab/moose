@@ -1232,6 +1232,9 @@ protected:
   /// The list of active geometric relationship managers (bound to the underlying MeshBase object).
   std::vector<std::shared_ptr<RelationshipManager>> _relationship_managers;
 
+  /// Whether or not this mesh was built from another mesh
+  bool _built_from_other_mesh = false;
+
   /// Can be set to DISTRIBUTED, REPLICATED, or DEFAULT.  Determines whether
   /// the underlying libMesh mesh is a ReplicatedMesh or DistributedMesh.
   ParallelType _parallel_type;
