@@ -1,0 +1,25 @@
+[Tests]
+  design = 'MultiApps/index.md'
+  issues = '#24345'
+
+  [clone]
+    requirement = 'The system shall be able to clone the mesh created in parent application into its sub-application(s) for geometries in'
+    [XY]
+      type = RunApp
+      input = main.i
+      detail = 'XY-cartesian coordinates,'
+    []
+    [RZ]
+      type = RunApp
+      input = main.i
+      cli_args = 'Mesh/coord_type=RZ Outputs/file_base=main_rz'
+      detail = 'RZ-cylindrical coordinates, and'
+    []
+    [RSpherical]
+      type = RunApp
+      input = main.i
+      cli_args = 'Mesh/coord_type=RSPHERICAL Mesh/gmg/dim=1 BCs/dirichlet/boundary=right sub:BCs/dirichlet/boundary=right Outputs/file_base=main_rs'
+      detail = 'R-spherical coordinates.'
+    []
+  []
+[]

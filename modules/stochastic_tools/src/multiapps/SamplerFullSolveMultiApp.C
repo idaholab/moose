@@ -39,7 +39,11 @@ SamplerFullSolveMultiApp::validParams()
       "mode",
       modes,
       "The operation mode, 'normal' creates one sub-application for each row in the Sampler and "
-      "'batch' creates one sub-application for each processor and re-executes for each row.");
+      "'batch-reset' and 'batch-restore' creates N sub-applications, where N is the minimum of "
+      "'num_rows' in the Sampler and floor(number of processes / min_procs_per_app). To run "
+      "the rows in the Sampler, 'batch-reset' will destroy and re-create sub-apps as needed, "
+      "whereas the 'batch-restore' will backup and restore sub-apps to the initial state prior "
+      "to execution, without destruction.");
   params.addParam<ReporterName>(
       "should_run_reporter",
       "Vector reporter value determining whether a certain multiapp should be run with this "

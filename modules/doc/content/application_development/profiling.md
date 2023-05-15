@@ -268,7 +268,32 @@ Follow the steps below to get profiling information for your application:
 - Compile MOOSE and your application in `oprof` mode.
 - Run your application through the profiler:
 
-### Newer versions of MacOS (Mojave):
+### MacOS (Big Sur / Monterey / Ventura) with xCode 13 (and later):
+
+```
+xctrace record --template 'Time Profiler' --target-stdout - --launch -- mooseapp-oprof -i input.i
+```
+
+This will create a directory `Launch_mooseapp-oprof[0-9]+.trace`, where `[0-9]+`
+denotes a number, which you can open using
+
+```
+open Launch_mooseapp-oprof[0-9]+.trace
+```
+
+The Instruments application will open in a new window with the profile.
+The performance profile can be converted to [pprof](https://github.com/google/pprof)
+using [instrumentsToPprof](https://github.com/google/instrumentsToPprof). To do this, open the trace in Instruments
+and select the processes you want to be converted, then copy the data using *Deep Copy* in the *Edit* menu. The copied
+data can be piped to `instrumentsToPprof` as
+
+```
+pbpaste | instrumentsToPprof
+```
+
+which will produce a `profile.pb.gz` which can be analyzed using `pprof` following the same instructions as above.
+
+### MacOS (Mojave / Catalina):
 
 ```
 instruments -t Time\ Profiler ./mooseapp-oprof -i input.i

@@ -1,21 +1,44 @@
 # Stochastic Tools Batch Mode
 
 The [SamplerFullSolveMultiApp.md] and [SamplerTransientMultiApp.md] are capable of running sub-applications
-in "batch" mode. In normal operation these to object create one sub-application for every row
-of data in the supplied Sampler object. In batch mode one sub-application is created per
-processor and re-used to solve for each row of data. In general, there are three modes of
-operation for the stochastic tools MultiApp objects.
+in one of three different modes:
 
-1. +normal+: One sub-application is created for each row of data supplied by the Sampler object.
-1. +batch-reset+: One sub-application is created for each processor, this sub-application is
-                  destroyed and re-created for each row of data supplied by the Sampler object.
-1. +batch-restore+: One sub-application is created for each processor, this sub-application is
+1. +normal+: One sub-application is created for each row of data (`num_rows`) supplied by the Sampler object.
+1. +batch-reset+: $N$ sub-applications are created, where the sub-applications are
+                  destroyed and re-created (on the same existing MPI communicator)
+                  for each row of data supplied by the Sampler object.
+1. +batch-restore+: $N$ sub-applications are created, where the sub-application is
                     backed up after initialization. Then for each row of data supplied by the
                     Sampler object the sub-application is restored to the initial state prior to
                     execution.
 
+For the two "batch" options, $N$ indicates the number of applications created, which in the
+most general expression is given by
+
+\begin{equation}
+N=\text{min}(n_{rows}, \text{floor}\left(\frac{n_{proc}}{n_{min}}\right))
+\end{equation}
+
+where $n_{rows}$ is the `num_rows` parameter on the Sampler object, $n_{proc}$ is the number
+of processors (launched to the `mpiexec` command), and $n_{min}$ is the `min_procs_per_app`,
+or the minimum number of processors which should be used to run each sub-application. If you
+launch your Stochastic Tools main application with fewer than `min_procs_per_app`, the simulation
+will still proceed, but will just use the maximum number of ranks you have provided as the
+"effective" `min_procs_per_app`. We can
+also illustrate this with an example.
+[batch_n_table] shows the number of applications created ($N$)
+for two different choices of `num_rows`, `min_procs_per_app`, and number of processors.
+
+!table id=batch_n_table caption=Number of sub-apps launched for the "batch" modes for different example choices of `num_rows` and `min_procs_per_app`
+| `num_rows` | `min_procs_per_app` | Processors | Number of Sub-Apps |
+| :- | :- | :- | :- |
+| 4 | 2 | 9 | 4 |
+| 20 | 2 | 9 | 4 |
+| 4 | 2 | 3 | 1 |
+| 4 | 2 | 1 | 1 |
+
 All three modes are available when using SamplerFullSolveMultiApp, the "batch-reset" mode is not
-available for SamplerTransientMultiApp because the sub-application have state that must be
+available for SamplerTransientMultiApp because the sub-application has state that must be
 maintained as simulation time progresses.
 
 The primary benefit to using a batch mode is to improve performance of a simulation by reducing the
@@ -35,13 +58,13 @@ is given in [steady-sub].
          for steady-state diffusion problem.
 
 The master application does not perform a solve, it performs a stochastic analysis using the
-MonteCarlo object to perturb the values of the two Dirichlet conditions on the sub-applications
+[MonteCarlo](source/samplers/MonteCarloSampler.md) object to perturb the values of the two Dirichlet conditions on the sub-applications
 to vary with a uniform distribution. The complete input file for the master application is given
 in [steady-sub].
 
 !listing stochastic_tools/examples/batch/full_solve.i id=steady-master caption=Complete input file
          for master application that performs stochastic simulations of the
-         steady-state diffusion problem in [steady-sub] using Monte Carol sampling.
+         steady-state diffusion problem in [steady-sub] using Monte Carlo sampling.
 
 The example is executed to demonstrate memory performance of the various modes of operation:
 "normal", "batch-reset", and "batch-restore". Each mode is executed with increasing
