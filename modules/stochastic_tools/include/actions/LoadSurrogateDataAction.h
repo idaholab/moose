@@ -13,6 +13,10 @@
 #include "LoadModelDataAction.h"
 #include "SurrogateModel.h"
 
+/**
+ * Action which is responsible for loading essential data for surrogates from
+ * separate binary files.
+ */
 class LoadSurrogateDataAction : public LoadModelDataAction<SurrogateModel>
 {
 public:

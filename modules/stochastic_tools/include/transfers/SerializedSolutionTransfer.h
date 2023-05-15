@@ -59,9 +59,9 @@ protected:
 
 private:
   /// Serialize on the root processor of the subapplication and transfer the result to the main application
-  void transferToRoot(NonlinearSystemBase & app_nl_system,
-                      SolutionContainer & solution_container,
-                      const dof_id_type global_i);
+  void transferToSubAppRoot(NonlinearSystemBase & app_nl_system,
+                            SolutionContainer & solution_container,
+                            const dof_id_type global_i);
 
   /**
    * Serialize on methodically determined rank of the subapp and transfer to the main application.
@@ -87,7 +87,7 @@ private:
   /// wasteful if the execution of the subapps is very fast (usually not the case).
   void initializeInBatchMode();
 
-  /// User determined switch that determines if we want to serialize on root only or distribute the
-  /// solutions between all the ranks of the subapp
+  /// User-selected switch that determines if we want to serialize on root only or distribute the
+  /// solutions between all the ranks of the subapp.
   const bool _serialize_on_root;
 };

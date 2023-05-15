@@ -33,8 +33,8 @@ InverseMapping::validParams()
       "reconstructed results.");
   params.addRequiredParam<std::vector<VariableName>>(
       "variable_to_reconstruct",
-      "The names of the variables in the nonlinear system which we would like to approximate. this "
-      "is important for DoF informations.");
+      "The names of the variables in the nonlinear system which we would like to approximate. This "
+      "is important for DoF information.");
   params.addRequiredParam<std::vector<Real>>(
       "parameters",
       "The input parameters for the surrogate. If no surrogate is supplied these are assumed to be "
@@ -110,7 +110,6 @@ InverseMapping::initialSetup()
 void
 InverseMapping::execute()
 {
-
   NonlinearSystemBase & nl = _fe_problem.getNonlinearSystemBase();
 
   // We create a temporary solution vector that will store the reconstructed solution.
@@ -190,7 +189,7 @@ InverseMapping::execute()
     if (!_variable_to_reconstruct[var_i]->isNodal())
       for (auto & elem : as_range(to_mesh.local_elements_begin(), to_mesh.local_elements_end()))
       {
-        // Check how many dofs we have on the currant element, if none we have nothing to do
+        // Check how many dofs we have on the current element, if none we have nothing to do
         const auto n_dofs = elem->n_dofs(to_sys_num, to_var_num);
         if (n_dofs < 1)
           continue;

@@ -33,12 +33,12 @@ The process for building the mapping is the following:
    where $\boldsymbol{U}$ and $\boldsymbol{V}$ are the unitary left and right singular vector matrices, respectively.
    Matrix $\boldsymbol{\Sigma}$ contains the singular values on its diagonal. Given that the size of the snapshot matrix
    is high, we use the parallel SVD solver available in SLEPc with a Lánczos method to solve the underlying
-   eigenvalue problem and get only the requested number of singular values. Additional parameters for SLEPc to fine tune the
+   eigenvalue problem and get only the requested number of singular values. Additional parameters for SLEPc to fine tune
    the solution algorithm can be supplied using input parameter [!param](/VariableMappings/PODMapping/extra_slepc_options).
 
    The number of needed singular triplets
    ($\boldsymbol{u}_{v,i}, \sigma_{v,i}, \boldsymbol{v}_{v,i}$) for each variable can be prescribed using
-   the [!param](/VariableMappings/PODMapping/num_modes) parameter. The algorithm will select the minimum of these numbers and the
+   the [!param](/VariableMappings/PODMapping/num_modes_to_compute) parameter. The algorithm will select the minimum of these numbers and the
    number of converged singular triplets. Let's denote these numbers by $r_v$.
 
    For this mapping object the transition from high-dimensional to low-dimensional and back is determined by the left

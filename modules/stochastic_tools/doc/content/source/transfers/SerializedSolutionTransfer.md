@@ -11,7 +11,7 @@ parameters. The solutions in [SolutionContainer.md] are distributed vectors
 using the communicator of the sub-application. Based on the value of the [!param](/Transfers/SerializedSolutionTransfer/serialize_on_root) parameter, this object transfers these solution fields in the following ways:
 
 - +If `serialize_on_root` is disabled+: It distributes the samples between every rank of the sub-application
-  and serializes the solution vector on the rank which is supposed to own the sample. this approach results in more balanced
+  and serializes the solution vector on the rank which is supposed to own the sample. This approach results in more balanced
   workloads but requires additional effort due to misalignment with the design of Sampler-based reporters. This might result in significantly increased communication costs.
 
 - +If `serialize_on_root` is enabled+: The solution vectors are serialized and stored on the rank which

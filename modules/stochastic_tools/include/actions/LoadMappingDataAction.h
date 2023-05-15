@@ -13,6 +13,10 @@
 #include "LoadModelDataAction.h"
 #include "VariableMappingBase.h"
 
+/**
+ * Action which is responsible for loading essential data for variable mapping
+ * objects from separate binary files.
+ */
 class LoadMappingDataAction : public LoadModelDataAction<VariableMappingBase>
 {
 public:

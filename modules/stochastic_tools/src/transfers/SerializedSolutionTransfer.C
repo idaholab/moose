@@ -27,10 +27,10 @@ SerializedSolutionTransfer::validParams()
   params.addRequiredParam<std::vector<VariableName>>(
       "variables",
       "The names of the variables which should be serialized and transferred to this application.");
-  params.addParam<bool>(
-      "serialize_on_root",
-      false,
-      "If we only want to gather the solution fields on the root processors of the subapps.");
+  params.addParam<bool>("serialize_on_root",
+                        false,
+                        "If we want to gather the solution fields only on the root processors of "
+                        "the subapps before transfering to the main app.");
   return params;
 }
 
@@ -101,7 +101,7 @@ SerializedSolutionTransfer::execute()
       // need to participate in the transfer or if we would like to distribute the
       // data among every processor of the subapplication
       if (_serialize_on_root)
-        transferToRoot(nl, *_solution_container[local_i], i);
+        transferToSubAppRoot(nl, *_solution_container[local_i], i);
       else
         transferInParallel(nl, *_solution_container[local_i], i);
     }
@@ -122,7 +122,7 @@ SerializedSolutionTransfer::executeFromMultiapp()
     // need to participate in the transfer or if we would like to distribute the
     // data among every processor of the subapplication
     if (_serialize_on_root)
-      transferToRoot(nl, *_solution_container[0], _global_index);
+      transferToSubAppRoot(nl, *_solution_container[0], _global_index);
     else
       transferInParallel(nl, *_solution_container[0], _global_index);
   }
@@ -184,9 +184,9 @@ SerializedSolutionTransfer::transferInParallel(NonlinearSystemBase & app_nl_syst
 }
 
 void
-SerializedSolutionTransfer::transferToRoot(NonlinearSystemBase & app_nl_system,
-                                           SolutionContainer & solution_container,
-                                           const dof_id_type global_i)
+SerializedSolutionTransfer::transferToSubAppRoot(NonlinearSystemBase & app_nl_system,
+                                                 SolutionContainer & solution_container,
+                                                 const dof_id_type global_i)
 {
   // Looping over the variables to extract the corresponding solution values
   for (unsigned int var_i = 0; var_i < _variable_names.size(); ++var_i)

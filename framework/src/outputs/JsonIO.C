@@ -41,13 +41,6 @@ to_json(nlohmann::json & json, const MooseApp & app)
 }
 // MooseDocs:to_json_end
 
-void
-to_json(nlohmann::json & json, const VariableName & var_name)
-{
-  const auto & name = static_cast<const std::string &>(var_name);
-  nlohmann::to_json(json, name);
-}
-
 namespace libMesh
 {
 void

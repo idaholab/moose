@@ -31,23 +31,35 @@ public:
 
   virtual void buildMapping(const VariableName & vname) override;
 
-  ///@{
   /**
-   * Methods used for mapping full-order solutions for a given variable
+   * Method used for mapping full-order solutions for a given variable
    * onto a latent space
+   * @param vname The name of the variable
+   * @param full_order_vector Serialized vector of the solution field for the given variable
+   * @param reduced_order_vector Storage space for the coordinates in the latent space
    */
   void map(const VariableName & vname,
            const DenseVector<Real> & full_order_vector,
            std::vector<Real> & reduced_order_vector) const override;
 
+  /**
+   * Method used for mapping full-order solutions for a given variable
+   * onto a latent space
+   * @param vname The name of the variable
+   * @param global_sample_i The global index of the sample whose solution should be mapped
+   *                        into the latent space
+   * @param reduced_order_vector Storage space for the coordinates in the latent space
+   */
   void map(const VariableName & vname,
            const unsigned int global_sample_i,
            std::vector<Real> & reduced_order_vector) const override;
-  ///@}
 
   /**
    * Method used for mapping reduced-order solutions for a given variable
    * onto the full-order space
+   * @param vname The name of the variable
+   * @param reduced_order_vector The coordinates in the latent space
+   * @param full_order_vector Storage for the reconstructed solution for the given variable
    */
   void inverse_map(const VariableName & vname,
                    const std::vector<Real> & reduced_order_vector,

@@ -16,6 +16,8 @@
 
 /**
  * Action for loading the model data for the mapping objects
+ * @tparam The type of the object which needs to be loaded. This needs to be
+ *         a derived class of `RestartableModelInterface` at the moment.
  */
 template <typename T>
 class LoadModelDataAction : public Action
@@ -46,7 +48,6 @@ template <typename T>
 void
 LoadModelDataAction<T>::act()
 {
-  //
   static_assert(std::is_base_of<RestartableModelInterface, T>::value,
                 "You must derive from RestartableModelInterface to use this action");
 

@@ -3,7 +3,7 @@
   design = 'SerializedSolutionTransfer.md'
 
   [transfer_on_roots]
-    requirement = 'The system shall be able to distribute the solution samples among the processors of each subapplication, serialize and transfer them to a parallel storage on the corresponding ranks in '
+    requirement = 'The system shall be able to serialize solution samples on the root process of each subapplication and transfer results to a parallel storage in '
     [batch_restore]
       detail = "batch-restore mode,"
       type = JSONDiff
@@ -33,7 +33,7 @@
     []
   []
   [transfer_fully_distributed]
-    requirement = 'The system shall be able to serialize solution samples on the root process of each subapplication and transfer results to a parallel storage in '
+    requirement = 'The system shall be able to distribute the solution samples among the processors of each subapplication, serialize and transfer them to a parallel storage on the corresponding ranks in '
     [batch_restore]
       detail = "batch-restore mode,"
       type = JSONDiff

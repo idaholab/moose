@@ -23,7 +23,6 @@ class VariableName;
 // in which the object is found in order to enable argument-dependent lookup.
 // See https://en.cppreference.com/w/cpp/language/adl for more information
 void to_json(nlohmann::json & json, const MooseApp & app); // MooseDocs:to_json
-void to_json(nlohmann::json & json, const VariableName & var_name);
 
 namespace libMesh
 {

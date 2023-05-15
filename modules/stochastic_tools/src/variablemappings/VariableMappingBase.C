@@ -30,6 +30,5 @@ VariableMappingBase::VariableMappingBase(const InputParameters & parameters)
                         : declareModelData<std::vector<VariableName>>(
                               "variables", getParam<std::vector<VariableName>>("variables"))),
     _mapping_ready_to_use(declareModelData<std::map<VariableName, bool>>("mapping_ready_to_use"))
-
 {
 }

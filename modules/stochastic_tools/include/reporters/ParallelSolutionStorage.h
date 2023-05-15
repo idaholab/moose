@@ -46,19 +46,11 @@ public:
   ///@}
 
   /// Get the whole solution container
-  ///@{
   std::map<VariableName, std::unordered_map<unsigned int, std::vector<DenseVector<Real>>>> &
-  getStorage()
-  {
-    return _distributed_solutions;
-  }
-
-  const std::map<VariableName, std::unordered_map<unsigned int, std::vector<DenseVector<Real>>>> &
   getStorage() const
   {
     return _distributed_solutions;
   }
-  ///@}
 
   /**
    * Determine if we have the solution vector with a given global sample index for a given
