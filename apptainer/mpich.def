@@ -16,11 +16,12 @@ From: harbor.hpc.inl.gov/hpcbase/mpi_03:1.1.0
 {%- endif %}
 
 %environment
-    # Set Environment for MPICH
-    export MPICH_DIR=/opt/mpi/mpich-3.4.3
-    export LD_LIBRARY_PATH=${MPICH_DIR}/lib:${LD_LIBRARY_PATH}
-    export MANPATH=${MPICH_DIR}/share/man:${MANPATH}
-    export PATH=${MPICH_DIR}/bin:${PATH}
+    MOOSE_MPI_DIR=${MOOSE_MPI_DIR:-/opt/mpi/mpich-3.4.3}
+
+    # Set Environment for MPI
+    export LD_LIBRARY_PATH=${MOOSE_MPI_DIR}/lib:${LD_LIBRARY_PATH}
+    export MANPATH=${MOOSE_MPI_DIR}/share/man:${MANPATH}
+    export PATH=${MOOSE_MPI_DIR}/bin:${PATH}
     export CC=mpicc CXX=mpicxx FC=mpif90 F90=mpif90 F77=mpif77
 
     # Fix locale warnings
