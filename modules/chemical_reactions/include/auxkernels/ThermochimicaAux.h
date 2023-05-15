@@ -30,17 +30,12 @@ protected:
   const std::size_t _n_phases;
   /// Writable phase amount variables
   std::vector<VariableValue *> _ph;
-  /// Phase names
-  std::vector<std::string> _ph_name;
 
   /// Total number of species to output
   const std::size_t _n_species;
   /// Writable species amount variables
   std::vector<VariableValue *> _sp;
-  /// Corresponding phase names
-  std::vector<std::string> _sp_phase_name;
-  /// Corresponding species names
-  std::vector<std::string> _sp_species_name;
+
   /// Total number of vapor species
   const std::size_t _n_vapor_species;
   /// Writable vapour pressures for each element
