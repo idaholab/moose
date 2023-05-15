@@ -68,7 +68,7 @@
     exodiff = 'to_multiple_boundaries_parent_out.e to_multiple_boundaries_parent_out_sub0.e'
     issues = '#18467'
     requirement = "The system shall be able to transfer values to multiple target boundaries in both "
-                  "the Master and Sub App."
+                  "the parent and child app."
     # KNN search fails
     max_parallel = 7
   []

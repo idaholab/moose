@@ -1,4 +1,4 @@
-# Master mesh and sub mesh are same with 4x4 quad8 elements.
+# Parent mesh and sub mesh are same with 4x4 quad8 elements.
 # parent mesh has top boundary fixed at u=2 and bottom fixed at u=-1
 # sub mesh has top boundary fixed at v=2 and bottom fixed at v=1
 # The u variable is transferred to the left and bottom boundaries of the sub,
