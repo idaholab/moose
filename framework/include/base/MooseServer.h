@@ -26,6 +26,8 @@ class MooseServer : public wasp::lsp::ServerImpl
 public:
   MooseServer(MooseApp & moose_app);
 
+  virtual ~MooseServer() = default;
+
   /** get read / write connection - specific to this server implemention
    * @return - shared pointer to the server's read / write connection
    */
