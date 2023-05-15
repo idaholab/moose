@@ -12,13 +12,13 @@
     [RZ]
       type = RunApp
       input = main.i
-      cli_args = 'Mesh/coord_type=RZ'
+      cli_args = 'Mesh/coord_type=RZ Outputs/file_base=main_rz'
       detail = 'RZ-cylindrical coordinates, and'
     []
     [RSpherical]
       type = RunApp
       input = main.i
-      cli_args = 'Mesh/coord_type=RSPHERICAL Mesh/gmg/dim=1 BCs/dirichlet/boundary=right sub:BCs/dirichlet/boundary=right'
+      cli_args = 'Mesh/coord_type=RSPHERICAL Mesh/gmg/dim=1 BCs/dirichlet/boundary=right sub:BCs/dirichlet/boundary=right Outputs/file_base=main_rs'
       detail = 'R-spherical coordinates.'
     []
   []
