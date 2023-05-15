@@ -31,6 +31,7 @@ ThermochimicaAux::validParams()
   params.addCoupledVar("output_species", "Amounts of species to be output");
   params.addRequiredParam<UserObjectName>("thermo_nodal_data_uo", "Name of the user object");
   params.addCoupledVar("element_potentials", "Chemical potentials of elements");
+  params.addCoupledVar("output_vapor_pressures", "Vapour pressures of species to be output");
 
   ThermochimicaUtils::addClassDescription(
       params,
@@ -49,6 +50,8 @@ ThermochimicaAux::ThermochimicaAux(const InputParameters & parameters)
     _sp(_n_species),
     _sp_phase_name(_n_species),
     _sp_species_name(_n_species),
+    _n_vapor_species(coupledComponents("output_vapor_pressures")),
+    _vapor_pressures(_n_vapor_species),
     _n_elements(coupledComponents("element_potentials")),
     _el_pot(_n_elements)
 #ifdef THERMOCHIMICA_ENABLED
@@ -79,6 +82,9 @@ ThermochimicaAux::ThermochimicaAux(const InputParameters & parameters)
     _sp_species_name[i] = species_var_name.substr(semicolon + 1);
   }
 
+  for (const auto i : make_range(_n_vapor_species))
+    _vapor_pressures[i] = &writableCoupledValue("output_vapor_pressures", i);
+
   for (const auto i : make_range(_n_elements))
     _el_pot[i] = &writableCoupledValue("element_potentials", i);
 }
@@ -106,8 +112,15 @@ ThermochimicaAux::computeValue()
   for (unsigned int i = 0; i < _n_species; i++)
     (*_sp[i])[_qp] = data._species_fractions[i];
 
+  // Save requested vapor pressures into coupled aux variables
+  mooseAssert(_vapor_pressures.size() == data._vapor_pressures.size(),
+              "Output vapor pressures: Inconsistent sizes.");
+  for (const auto i : make_range(_n_vapor_species))
+    (*_vapor_pressures[i])[_qp] = data._vapor_pressures[i];
+
   // Save requested element potentials into coupled aux variables
-  mooseAssert(_el_pot.size() == data._element_potential.size(), "Inconsistent sizes.");
+  mooseAssert(_el_pot.size() == data._element_potential_for_output.size(),
+              "Output element potentials: Inconsistent sizes.");
   for (const auto i : make_range(_n_elements))
     (*_el_pot[i])[_qp] = data._element_potential_for_output[i];
 #endif

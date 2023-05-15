@@ -49,4 +49,7 @@ protected:
 
   /// List of element chemical potentials to be extracted from Thermochimica
   std::vector<std::string> _element_potentials;
+
+  /// List of gas phase species to extract vapor pressures from Thermochimica
+  std::vector<std::string> _vapor_pressures;
 };

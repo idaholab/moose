@@ -41,6 +41,10 @@ protected:
   std::vector<std::string> _sp_phase_name;
   /// Corresponding species names
   std::vector<std::string> _sp_species_name;
+  /// Total number of vapor species
+  const std::size_t _n_vapor_species;
+  /// Writable vapour pressures for each element
+  std::vector<VariableValue *> _vapor_pressures;
 
   /// Total number of elements to output
   const std::size_t _n_elements;

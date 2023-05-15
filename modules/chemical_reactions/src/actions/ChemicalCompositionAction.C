@@ -54,6 +54,9 @@ ChemicalCompositionAction::validParams()
   params.addParam<std::vector<std::string>>(
       "element_potentials",
       "List of chemical elements for which chemical potentials are requested");
+  params.addParam<std::vector<std::string>>(
+      "output_vapor_pressures",
+      "List of gas phase species for which vapor pressures are requested");
   return params;
 }
 
@@ -65,7 +68,8 @@ ChemicalCompositionAction::ChemicalCompositionAction(const InputParameters & par
     _munit(getParam<MooseEnum>("munit")),
     _phases(getParam<std::vector<std::string>>("output_phases")),
     _species(getParam<std::vector<std::string>>("output_species")),
-    _element_potentials(getParam<std::vector<std::string>>("element_potentials"))
+    _element_potentials(getParam<std::vector<std::string>>("element_potentials")),
+    _vapor_pressures(getParam<std::vector<std::string>>("output_vapor_pressures"))
 {
   ThermochimicaUtils::checkLibraryAvailability(*this);
 
@@ -98,6 +102,9 @@ ChemicalCompositionAction::act()
 
     for (const auto i : index_range(_element_potentials))
       _problem->addAuxVariable(aux_var_type, _element_potentials[i], params);
+
+    for (const auto i : index_range(_vapor_pressures))
+      _problem->addAuxVariable(aux_var_type, _vapor_pressures[i], params);
   }
 
   //
@@ -176,6 +183,13 @@ ChemicalCompositionAction::act()
     for (const auto i : index_range(_element_potentials))
     {
       const std::string ker_name = _element_potentials[i];
+      params.set<AuxVariableName>("variable") = ker_name;
+      _problem->addAuxKernel("SelfAux", ker_name, params);
+    }
+
+    for (const auto i : index_range(_vapor_pressures))
+    {
+      const std::string ker_name = _vapor_pressures[i];
       params.set<AuxVariableName>("variable") = ker_name;
       _problem->addAuxKernel("SelfAux", ker_name, params);
     }

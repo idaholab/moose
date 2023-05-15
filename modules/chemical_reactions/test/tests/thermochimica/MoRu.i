@@ -12,6 +12,7 @@
   output_phases = 'BCCN HCPN'
   output_species = 'BCCN:Mo HCPN:Mo BCCN:Ru HCPN:Ru'
   element_potentials = 'cp:Mo cp:Ru'
+  output_vapor_pressures = 'gas_ideal:Mo'
 []
 
 [ChemicalComposition]
@@ -76,5 +77,4 @@
 
 [Outputs]
   exodus = true
-  csv = true
 []
