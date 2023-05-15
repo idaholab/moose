@@ -109,7 +109,7 @@ ${USE_MPI_SCRIPT}
 EOF
 
     # Add script for loading openmpi environment
-    cat << EOF > /opt/mpi/use-mpich
+    cat << EOF > /opt/mpi/use-openmpi
 #!/bin/bash
 export MOOSE_MPI_DIR=${MOOSE_OPENMPI_DIR}
 ${USE_MPI_SCRIPT}
