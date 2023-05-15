@@ -21,18 +21,6 @@ Interface kernels can be used to provide any general flux condition at an interf
 - `neighbor_var`: The "secondary" variable. This could be $c_1$ from our example above.
 - `boundary`: The interfacial boundary between the subdomains. Note that this must be a sideset and again must exist on the same subdomain as the primary variable. The fact that this boundary is a sideset allows access to variable gradients.
 
-An important private parameter relevant to displaced mesh calculations is
-`_use_undisplaced_reference_points`. If an interface kernel developer sets this
-parameter to `true` in the `validParams` of their derived class, then the
-displaced problem will use the neighbor reference points computed by the
-undisplaced problem as the neighbor reference points for the displaced
-problem. If this parameter is `false` (the default), then the neighbor reference
-points on the displaced problem will be computed in the traditional way: by
-doing an inverse map of the physical locations of the displaced +element+
-reference points. Here, reference refers to the reference coordinates
-(e.g. $\xi$ and $\eta$) of the quadrature points and physical refers to the
-physical coordinates (e.g. $x$ and $y$) of the quadrature points.
-
 For additional information about the interface kernel system, don't hesitate to contact the [MOOSE Discussion forum](https://github.com/idaholab/moose/discussions).
 
 !syntax list /InterfaceKernels objects=True actions=False subsystems=False

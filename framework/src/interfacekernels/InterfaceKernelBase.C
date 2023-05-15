@@ -30,7 +30,6 @@ InterfaceKernelBase::validParams()
                         "the case this is true but no displacements "
                         "are provided in the Mesh block the "
                         "undisplaced mesh will still be used.");
-  params.addPrivateParam<bool>("_use_undisplaced_reference_points", false);
   params.addParamNamesToGroup("use_displaced_mesh", "Advanced");
 
   params.declareControllable("enable");

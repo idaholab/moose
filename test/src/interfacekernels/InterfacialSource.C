@@ -28,7 +28,6 @@ InterfacialSource::validParams()
   params.addParam<FunctionName>("function", "1", "A function that describes the body force");
   params.addParam<PostprocessorName>(
       "postprocessor", 1, "A postprocessor whose value is multiplied by the body force");
-  params.set<bool>("_use_undisplaced_reference_points") = true;
   params.declareControllable("value");
   return params;
 }
