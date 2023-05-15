@@ -278,6 +278,7 @@ ThermochimicaNodalData::execute()
       for (const auto i : make_range(_n_vapor_species))
       {
         auto [fraction, moles, idbg] = Thermochimica::getOutputMolSpecies(_vapor_species_name[i]);
+        libmesh_ignore(moles);
 
         if (idbg == 0)
           d._vapor_pressures[i] = fraction * pressure;
