@@ -311,8 +311,10 @@ MultiApp::MultiApp(const InputParameters & parameters)
   auto inputs = getParam<std::vector<FileName>>("input_files");
   for (const auto & i : inputs)
     if (i == my_file)
-      paramError("input_files", "'input_files' cannot contain this App's input file (" + my_file + ") "
-        "as a sub-application, or else you will have an infinite loop");
+      paramError("input_files",
+                 "'input_files' cannot contain this App's input file (" + my_file +
+                     ") "
+                     "as a sub-application, or else you will have an infinite loop");
 }
 
 void
