@@ -306,6 +306,13 @@ MultiApp::MultiApp(const InputParameters & parameters)
   std::sort(sorted_times.begin(), sorted_times.end());
   if (_reset_times.size() && _reset_times != sorted_times)
     paramError("reset_time", "List of reset times must be sorted in increasing order");
+
+  auto my_file = _app.getInputFileName();
+  auto inputs = getParam<std::vector<FileName>>("input_files");
+  for (const auto & i : inputs)
+    if (i == my_file)
+      paramError("input_files", "'input_files' cannot contain this App's input file (" + my_file + ") "
+        "as a sub-application, or else you will have an infinite loop");
 }
 
 void

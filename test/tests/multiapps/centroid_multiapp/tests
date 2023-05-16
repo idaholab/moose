@@ -19,4 +19,11 @@
 
     requirement = "The system shall optionally allow the first sub-app to fully initialize before initializing all the remaining child apps in parallel."
   []
+  [test_recursive]
+    type = RunException
+    input = recursive.i
+    expect_err = "'input_files' cannot contain this App's input file"
+    issues = '#24371'
+    requirement = "The system shall error if recursively initializing the same app in an infinite loop"
+  []
 []
