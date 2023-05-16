@@ -482,27 +482,30 @@ FlowModelSinglePhase::addRDGMooseObjects()
     _sim.addMaterial(class_name, genName(_comp_name, "rdg_3egn_mat"), params);
   }
 
-  // advection
-  {
-    // mass
-    const std::string class_name = "ADNumericalFlux3EqnDGKernel";
-    InputParameters params = _factory.getValidParams(class_name);
-    params.set<NonlinearVariableName>("variable") = RHOA;
-    params.set<std::vector<SubdomainName>>("block") = _flow_channel.getSubdomainNames();
-    params.set<std::vector<VariableName>>("A_linear") = {AREA_LINEAR};
-    params.set<std::vector<VariableName>>("rhoA") = {RHOA};
-    params.set<std::vector<VariableName>>("rhouA") = {RHOUA};
-    params.set<std::vector<VariableName>>("rhoEA") = {RHOEA};
-    params.set<UserObjectName>("numerical_flux") = _numerical_flux_name;
-    params.set<bool>("implicit") = _sim.getImplicitTimeIntegrationFlag();
-    _sim.addDGKernel(class_name, genName(_comp_name, "mass_advection"), params);
+  addRDGAdvectionDGKernels();
+}
 
-    // momentum
-    params.set<NonlinearVariableName>("variable") = RHOUA;
-    _sim.addDGKernel(class_name, genName(_comp_name, "momentum_advection"), params);
+void
+FlowModelSinglePhase::addRDGAdvectionDGKernels()
+{
+  // mass
+  const std::string class_name = "ADNumericalFlux3EqnDGKernel";
+  InputParameters params = _factory.getValidParams(class_name);
+  params.set<NonlinearVariableName>("variable") = RHOA;
+  params.set<std::vector<SubdomainName>>("block") = _flow_channel.getSubdomainNames();
+  params.set<std::vector<VariableName>>("A_linear") = {AREA_LINEAR};
+  params.set<std::vector<VariableName>>("rhoA") = {RHOA};
+  params.set<std::vector<VariableName>>("rhouA") = {RHOUA};
+  params.set<std::vector<VariableName>>("rhoEA") = {RHOEA};
+  params.set<UserObjectName>("numerical_flux") = _numerical_flux_name;
+  params.set<bool>("implicit") = _sim.getImplicitTimeIntegrationFlag();
+  _sim.addDGKernel(class_name, genName(_comp_name, "mass_advection"), params);
 
-    // energy
-    params.set<NonlinearVariableName>("variable") = RHOEA;
-    _sim.addDGKernel(class_name, genName(_comp_name, "energy_advection"), params);
-  }
+  // momentum
+  params.set<NonlinearVariableName>("variable") = RHOUA;
+  _sim.addDGKernel(class_name, genName(_comp_name, "momentum_advection"), params);
+
+  // energy
+  params.set<NonlinearVariableName>("variable") = RHOEA;
+  _sim.addDGKernel(class_name, genName(_comp_name, "energy_advection"), params);
 }

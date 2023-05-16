@@ -26,6 +26,7 @@ public:
 
 protected:
   virtual void addNumericalFluxUserObject();
+  virtual void addRDGAdvectionDGKernels();
   void addRDGMooseObjects();
 
   /// Slope reconstruction type for rDG
