@@ -1,7 +1,7 @@
-# Subchannel-only Input File Syntax
+# Pronghorn-SC-only Input File Syntax
 
-Listed below are all the reference pages for Subchannel specific code that
-can be used in the Subchannel input file.
+Listed below are all the reference pages for Pronghorn-SC specific code that
+can be used in the Pronghorn-SC input file.
 
 Click the blue links in the class names shown below to view the detailed
 description, the class purpose, theoretical models, input file examples, and
