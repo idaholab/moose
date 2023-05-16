@@ -19,7 +19,7 @@ The parameters $\mu$ and $\sigma$ are the mean and standard deviation of the gen
 
 ## Example Input Syntax
 
-The following input file defines a normal distribution with a mean of 0 and a standard deviation of 1 and truncation range (-10,10).
+The following input file defines a normal distribution with a mean of 100, a standard deviation of 25, and truncation range (50,150).
 
 !listing modules/stochastic_tools/test/tests/distributions/truncated_normal.i block=Distributions
 
