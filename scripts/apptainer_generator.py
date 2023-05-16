@@ -7,8 +7,12 @@ import sys
 import argparse
 import socket
 import subprocess
+import shutil
+import platform
+from datetime import datetime, timezone
 
 import jinja2
+from jinja2 import meta
 
 from versioner import Versioner
 
@@ -22,8 +26,16 @@ class ApptainerGenerator:
     MOOSE and MOOSE-based applications.
     """
     def __init__(self):
-        self.meta = Versioner().meta()
-        self.args = self.parse_args(list(self.meta.keys()))
+        self.meta = Versioner().version_meta()
+
+        # Get the packages that have an 'apptainer' key in versioner.yaml
+        apptainer_packages = []
+        for library, values in self.meta.items():
+            if 'apptainer' in values:
+                apptainer_packages.append(library)
+
+        self.args = self.parse_args(apptainer_packages)
+        self.args = self.verify_args(self.args)
 
         library_meta = self.meta[self.args.library]['apptainer'].copy()
         self.project = library_meta['name_base']
@@ -48,6 +60,24 @@ class ApptainerGenerator:
                 self.error(f'Generation path {self.dir} does not exist')
         else:
             self.dir = None
+
+    @staticmethod
+    def verify_args(args):
+        """
+        Verify arguments are sane.
+        TODO: for now, this only checks for the presence of required executables
+        """
+        error_list = []
+        # [(binary name, check for existence)] list of tuples
+        requirements = [('oras', args.action=='def' and not args.local),
+                        ('apptainer', args.action!='def')]
+        for (requirement, check) in requirements:
+            if check and shutil.which(requirement) is None:
+                error_list.append(f'{requirement} executable not found')
+        if error_list:
+            print('/n'.join(error_list))
+            sys.exit(1)
+        return args
 
     @staticmethod
     def parse_args(entities):
@@ -169,6 +199,12 @@ class ApptainerGenerator:
         ApptainerGenerator.print(content, prefix_color='red', file=sys.stderr)
         sys.exit(1)
 
+    @staticmethod
+    def git_repo_sha(dir):
+        """ gets sha of the given repo """
+        command = ['git', 'rev-parse', 'HEAD']
+        return subprocess.check_output(command, cwd=dir, encoding='utf-8').strip()
+
     def run(self, command):
         """
         Prints a command to screen and then runs it
@@ -277,10 +313,9 @@ class ApptainerGenerator:
         """
         Find the dependency meta for the given library (if any)
         """
-        all_libraries = list(self.meta.keys())
-        for i in range(1, len(all_libraries)):
-            if all_libraries[i] == library:
-                return self.meta[all_libraries[i - 1]]['apptainer']
+        apptainer_meta = self.meta[library]['apptainer']
+        if 'from' in apptainer_meta:
+            return self.meta[apptainer_meta['from']]['apptainer']
         return None
 
     def _dependency_from(self, meta):
@@ -332,6 +367,31 @@ class ApptainerGenerator:
         self.print(f'Using remote dependency for {name} from {uri}')
         return 'oras', uri.replace('oras://', '')
 
+    def _definition_header(self, jinja_data):
+        """
+        Adds a useful header to generated definitions
+        """
+        definition = open(self.def_path, 'r').read()
+        jinja_env = jinja2.Environment()
+        jinja_vars = meta.find_undeclared_variables(jinja_env.parse(definition))
+
+        arguments = ' '.join(sys.argv[1:])
+
+        header = '#\n'
+        header += '# Generated via MOOSE ApptainerGenerator (scripts/apptainer_generator.py)\n'
+        header += '#\n'
+        header += f'#   Arguments: {arguments}\n'
+        header += f'#   Template:  {os.path.relpath(self.def_path, MOOSE_DIR)}\n'
+        header += '#\n'
+        header += '# Consumed jinja variables\n'
+        header += '#\n'
+        for var in sorted(jinja_vars):
+            header += f'#   {var}="{jinja_data.get(var, "")}"\n'
+        header += '#\n'
+        header += '\n'
+
+        return header
+
     def _add_definition_labels(self, definition):
         """
         Adds common labels to the given definition content
@@ -340,13 +400,15 @@ class ApptainerGenerator:
         name = self.name
         if hasattr(self.args, 'modify') and self.args.modify is not None:
             name += '.modified'
-        definition += f'    {name}.buildhost {socket.gethostname()}\n'
+        definition += f'    {name}.host.hostname {socket.gethostname()}\n'
+        definition += f'    {name}.host.user {os.getlogin()}\n'
+        definition += f'    {name}.moose.sha {self.git_repo_sha(MOOSE_DIR)}\n'
         definition += f'    {name}.version {self.tag}\n'
         # If we have CIVET info, add the url
         if 'CIVET_SERVER' in os.environ and 'CIVET_JOB_ID' in os.environ:
             civet_server = os.environ.get('CIVET_SERVER')
             civet_job_id = os.environ.get('CIVET_JOB_ID')
-            definition += f'    {name}.job {civet_server}/job/{civet_job_id}\n'
+            definition += f'    {name}.civet.job {civet_server}/job/{civet_job_id}\n'
         return definition
 
     @staticmethod
@@ -419,6 +481,8 @@ class ApptainerGenerator:
         """
         Adds conditional apptainer definition vars to jinja data
         """
+        jinja_data['ARCH'] = platform.machine()
+
         # Set application-related variables
         if self.args.library == 'app':
             app_name, app_root, _ = Versioner.get_app()
@@ -445,7 +509,6 @@ class ApptainerGenerator:
             for var in ['url', 'sha256', 'vtk_friendly_version']:
                 jinja_var = f'vtk_{var}'
                 jinja_data[jinja_var] = meta['source'][var]
-
 
     def _action_exists(self):
         """
@@ -519,6 +582,9 @@ class ApptainerGenerator:
         jinja_env.trim_blocks = True
         jinja_env.lstrip_blocks = True
         new_definition = definition_template.render(**jinja_data)
+
+        # Add a header
+        new_definition = self._definition_header(jinja_data) + new_definition
 
         # Add in a few labels
         new_definition = self._add_definition_labels(new_definition)

@@ -1,5 +1,5 @@
 moose_mpich:
-  - moose-mpich 4.0.2 build_7
+  - moose-mpich 4.0.2 build_8
 
 #### Darwin SDK SYSROOT
 CONDA_BUILD_SYSROOT:                                        # [osx]

@@ -154,7 +154,7 @@ HillElastoPlasticityStressUpdateTempl<is_ad>::computeElasticityTensorEigenDecomp
 
   const unsigned int dimension = _anisotropic_elastic_tensor.n();
 
-  AnisotropyMatrixReal A;
+  AnisotropyMatrixReal A = AnisotropyMatrixReal::Zero();
   for (unsigned int index_i = 0; index_i < dimension; index_i++)
     for (unsigned int index_j = 0; index_j < dimension; index_j++)
       A(index_i, index_j) = MetaPhysicL::raw_value(_anisotropic_elastic_tensor(index_i, index_j));
@@ -190,7 +190,7 @@ HillElastoPlasticityStressUpdateTempl<is_ad>::computeElasticityTensorEigenDecomp
   b_matrix.left_multiply(eigenvectors_elasticity_transpose);
   b_matrix.left_multiply(sqrt_Delta);
 
-  AnisotropyMatrixReal B_eigen;
+  AnisotropyMatrixReal B_eigen = AnisotropyMatrixReal::Zero();
   for (unsigned int index_i = 0; index_i < dimension; index_i++)
     for (unsigned int index_j = 0; index_j < dimension; index_j++)
       B_eigen(index_i, index_j) = MetaPhysicL::raw_value(b_matrix(index_i, index_j));

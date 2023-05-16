@@ -1,31 +1,63 @@
-# Add paths relative to repository root that should be taken into account when generating a hash
+# Add additional libraries and their influential files, along with any dependencies which
+# shall be included when creating a HASH for said library. Order is not important.
+#
+# If adding a new control key, a change to versioner.py:influential_list will be required
+# (add that control key to 'not_libraries').
 packages:
   mpich:
-    - apptainer/mpich.def
-    - conda/mpich/meta.yaml
-    - conda/mpich/conda_build_config.yaml
+    influential:
+      - apptainer/mpich.def
+      - conda/mpich/meta.yaml
+      - conda/mpich/conda_build_config.yaml
+    apptainer:
   petsc:
-    - petsc
-    - apptainer/petsc.def
-    - conda/petsc/meta.yaml
-    - conda/petsc/conda_build_config.yaml
-    - scripts/configure_petsc.sh
-    - scripts/update_and_rebuild_petsc.sh
+    dependencies:
+      - mpich
+    apptainer:
+      from: mpich
+    influential:
+      - petsc
+      - apptainer/petsc.def
+      - conda/petsc/meta.yaml
+      - conda/petsc/conda_build_config.yaml
+      - scripts/configure_petsc.sh
+      - scripts/update_and_rebuild_petsc.sh
   libmesh:
-    - libmesh
-    - apptainer/libmesh.def
-    - conda/libmesh/meta.yaml
-    - conda/libmesh/conda_build_config.yaml
-    - scripts/configure_libmesh.sh
-    - scripts/update_and_rebuild_libmesh.sh
-    - conda/libmesh-vtk/meta.yaml
-    - conda/libmesh-vtk/conda_build_config.yaml
+    dependencies:
+      - petsc
+    apptainer:
+      from: petsc
+    influential:
+      - libmesh
+      - apptainer/libmesh.def
+      - conda/libmesh/meta.yaml
+      - conda/libmesh/conda_build_config.yaml
+      - scripts/configure_libmesh.sh
+      - scripts/update_and_rebuild_libmesh.sh
+      - conda/libmesh-vtk/meta.yaml
+      - conda/libmesh-vtk/conda_build_config.yaml
+  wasp:
+    influential:
+      - framework/contrib/wasp
+      - conda/wasp/meta.yaml
+      - conda/wasp/conda_build_config.yaml
   moose:
-    - apptainer/moose.def
-    - apptainer/remove_channels.def
-    - conda/test-tools/meta.yaml
-    - conda/test-tools/conda_build_config.yaml
-    - conda/tools/meta.yaml
-    - conda/tools/conda_build_config.yaml
+    dependencies:
+      - libmesh
+      - wasp
+    apptainer:
+      from: libmesh
+    influential:
+      - apptainer/moose.def
+      - apptainer/remove_channels.def
+      - conda/test-tools/meta.yaml
+      - conda/test-tools/conda_build_config.yaml
+      - conda/tools/meta.yaml
+      - conda/tools/conda_build_config.yaml
   app:
-    - apptainer/app.def
+    dependencies:
+      - moose
+    apptainer:
+      from: moose
+    influential:
+      - apptainer/app.def

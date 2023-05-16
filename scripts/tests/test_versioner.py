@@ -30,18 +30,18 @@ class Test(unittest.TestCase):
     def testOldHashes(self):
         versioner = Versioner()
         for hash, packages in OLD_HASHES.items():
-            meta = versioner.meta(hash)
+            meta = versioner.version_meta(hash)
             for package, package_hash in packages.items():
-                self.assertEqual(package_hash, meta[package]['hash'])
+                self.assertEqual(str(package_hash), str(meta[package]['hash']))
 
     def testBadCommit(self):
         with self.assertRaises(Exception) as e:
-            Versioner().meta('foobar')
+            Versioner().version_meta('foobar')
         self.assertIn('foobar is not a commit', str(e.exception))
 
     def testCLI(self):
         versioner = Versioner()
-        meta = versioner.meta()
+        meta = versioner.version_meta()
 
         for hash in [None, 'HEAD']:
             for package in versioner.entities:
@@ -114,7 +114,7 @@ class Test(unittest.TestCase):
             is_app = package != 'libmesh'
             def_package = 'app' if is_app else package
             name_prefix = '' if is_app else 'moose-'
-            meta = Versioner.apptainer_meta(package, package_hash, is_app)
+            meta = Versioner.apptainer_meta(package, {'from': 'some_package'}, package_hash, is_app)
             if is_app:
                 package = package.lower()
             self.assertEqual(meta['name'], f'{name_prefix}{package}-{platform.machine()}')
@@ -123,6 +123,7 @@ class Test(unittest.TestCase):
             self.assertEqual(meta['tag'], package_hash)
             self.assertEqual(meta['uri'], f'{name_prefix}{package}-{platform.machine()}:{package_hash}')
             self.assertEqual(meta['def'], os.path.realpath(os.path.join(MOOSE_DIR, f'apptainer/{def_package}.def')))
+            self.assertEqual(meta['from'], 'some_package')
 
 if __name__ == '__main__':
     unittest.main(verbosity=2, buffer=True)

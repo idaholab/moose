@@ -7,12 +7,17 @@
 {#- PETSC_ALT: Set to anything to use the alternate version of PETSc                          -#}
 {#- PETSC_OPTIONS: Options to pass to the PETSc build script                                  -#}
 {#- MOOSE_JOBS: Number of jobs to pass to the PETSc build script                              -#}
+{#- MPI_FLAVOUR: The flavour of MPI to use (options: mpich, openmpi; default: mpich)          -#}
 
 {#- The within-container build directory to use                                               -#}
 {%- set ROOT_BUILD_DIR = '/root/build' -%}
 
 {#- The installation location for PETSc                                                       -#}
 {%- set PETSC_DIR = '/opt/petsc' -%}
+
+{%- if MPI_FLAVOUR is not defined %}
+{%- set MPI_FLAVOUR = 'mpich' -%}
+{%- endif %}
 
 BootStrap: {{ APPTAINER_BOOTSTRAP }}
 From: {{ APPTAINER_FROM }}
@@ -27,10 +32,24 @@ From: {{ APPTAINER_FROM }}
     git submodule update --init petsc
 
 %environment
+    # Set the MPI environment
+{%- if MPI_FLAVOUR == "mpich" %}
+    source /opt/mpi/use-mpich
+{%- elif MPI_FLAVOUR == "openmpi" %}
+    source /opt/mpi/use-openmpi
+{%- endif %}
+
     # From moose-petsc
     export PETSC_DIR={{ PETSC_DIR }}
 
 %post
+    # Set the MPI environment
+{%- if MPI_FLAVOUR == "mpich" %}
+    source /opt/mpi/use-mpich
+{%- elif MPI_FLAVOUR == "openmpi" %}
+    source /opt/mpi/use-openmpi
+{%- endif %}
+
     # Load jinja vars
     ROOT_BUILD_DIR={{ ROOT_BUILD_DIR }}
     PETSC_DIR={{ PETSC_DIR }}
