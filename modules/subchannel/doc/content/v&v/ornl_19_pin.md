@@ -16,7 +16,7 @@ In contrast, the distribution of temperatures at the exit of the fuel assembly i
 Therefore, we have focused our validation work in predicting the distribution of temperatures at the exit of the fuel assembly.
 
 !media figures/ORNL_19_configuration.png
-       style=width:80%
+       style=width:80%;margin-bottom:2%;margin:auto;
        id=configuration
        caption=Left: heating rod positions for the experiment. Right: subchannel positions in the experiement.
 
@@ -153,7 +153,7 @@ However, as mass flow decreases, heat conduction in the sodium coolant starts do
 In summary, the temperature distribution measured at the outlet of the assembly can be regulated by the balance between convection and conduction, which is experimentally regulated by changing the axial mass flux and the power at the rod bundles.
 
 !media figures/ORNL_19_results_3D.png
-       style=width:80%
+       style=width:60%;margin-bottom:2%;margin:auto;
        id=3dres
        caption=Example of simulation results for the high-flow test case in the ORNL-19 benchmark. (a) Distribution of axial mass flow. (b) Distribution of lateral mass flow. (c) Distribution of temperature. (d) Distribution of dynamic viscosity due to heating.
 
@@ -161,6 +161,6 @@ The results obtained are compared against the experimental values and the SUBAC 
 It is observed, that for every single case our code predicts temperature distribution values that matches more closely the experimental results.
 
 !media figures/ORNL_19_results_plots.png
-       style=width:55%
+       style=width:60%;margin-bottom:2%;margin:auto;
        id=plots
        caption=Comparison of results obtained for ORNL-19 pin case between experimental measurements, the SUBAC code, the MATRA-LMR code, and the current code. (a) High mass flow case. (b) Medium mass flow case. (c) Low mass flow case

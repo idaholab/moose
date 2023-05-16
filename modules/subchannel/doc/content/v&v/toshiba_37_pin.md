@@ -13,8 +13,8 @@ are described. The analyzed quantity of interest is the temperature distribution
 south-to-north line in the fuel assembly. This one involves, in south to north ordering, subchannels
 72, 49, 32, 20, 10, 4, 3, 2, 1, 7, 14, 26, 39, and 58.
 
-!media subchannel/toshiba_37_config.png
-       style=width:80%
+!media figures/toshiba_37_config.png
+       style=width:80%;margin-bottom:2%;margin:auto;
        id=configuration
        caption= Rod and subchannel positions and numbering adopted for the Toshiba 37-pin benchmark. (a) Position and numbering of the heated rods with the subchannel center indicated with red dots. (b) Center position and numbering of the suchannels.
 
@@ -143,7 +143,7 @@ If the assumption of uniform inlet flow rates turns out to be incorrect, a small
 However, we observe that the flow rates fully develop before the outlet of the assembly, which suggests that this initial condition will have little effect over the analyzed temperature distribution at the outlet of the fuel assembly.
 
 !media figures/toshiba_37_results_3D.png
-       style=width:80%
+       style=width:60%;margin-bottom:2%;margin:auto;
        id=3Dres
        caption=  Example of simulation results for the high-flow test case in the Toshiba 37-pin benchmark. (a) Distribution of axial mass flow. (b) Distribution of lateral mass flow. (c) Distribution of temperature. (d) Distribution of dynamic viscosity due to heating.
 
@@ -152,7 +152,7 @@ We compare the results obtained with the present code with the ones obtained in 
 We have selected SUBAC for the code-to-code comparison since it is to our knowledge the subchannel code for wire-wrapped SFRs, with openly available results, that presented the best agreements between the code predictions and the experiment measurements for the current benchmark.
 
 !media figures/toshiba_37_results_plots.png
-       style=width:50%
+       style=width:60%;margin-bottom:2%;margin:auto;
        id=plots
        caption=  Comparison of results obtained for Toshiba 37-pin case between experimental measurements, the SUBAC code, and the current code. (a) High mass flow case. (b) Medium mass flow case. (c) Low mass flow case.
 
