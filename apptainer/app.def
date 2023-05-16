@@ -15,7 +15,7 @@
 {#- EXTRA_MAMBA_PACKAGES: Extra mamba packages to install                                     -#}
 
 {#- Civet Specific jinja arguments                                                            -#}
-{#- allowed_to_fail: BOOL, specific to Civet. Only available in %post, %test section          -#}
+{#- CIVET_STEP_ALLOWED_TO_FAIL: BOOL, specific to Civet. Available in %post, %test section    -#}
 
 {#- Optional Application specific jinja arguments                                             -#}
 {#- SECTION_ENVIRONMENT: Adds additional environment variables set upon entering container    -#}
@@ -119,7 +119,7 @@ From: {{ APPTAINER_FROM }}
     MOOSE_PREFIX=/opt/${BINARY_NAME}
 {%- endif %}
     cd ${MOOSE_DIR}
-{%- if allowed_to_fail is defined %}
+{%- if CIVET_STEP_ALLOWED_TO_FAIL == 'True' %}
     # CIVET allowed_to_fail is True
     set +e
 {%- endif %}
@@ -150,7 +150,7 @@ From: {{ APPTAINER_FROM }}
 {%- if SECTION_POST_POST_MAKEINSTALL is defined %}
     {{ SECTION_POST_POST_MAKEINSTALL }}
 {%- endif %}
-{%- if allowed_to_fail is defined %}
+{%- if CIVET_STEP_ALLOWED_TO_FAIL == 'True' %}
     # CIVET allowed_to_fail not allowed for remainder steps
 {%- endif %}
     # force error shell behavior for remainder steps
@@ -203,12 +203,12 @@ From: {{ APPTAINER_FROM }}
         cd $TEMP_LOC
         ${BINARY_NAME}-${METHOD} --copy-inputs $TEST_DIR
         cd ${BINARY_NAME}/${TEST_DIR}
-{%- if allowed_to_fail is defined %}
+{%- if CIVET_STEP_ALLOWED_TO_FAIL == 'True' %}
         # CIVET allowed_to_fail is True
         set +e
 {%- endif %}
         ${BINARY_NAME}-${METHOD} --run -j ${MOOSE_JOBS:-1} -t
-{%- if allowed_to_fail is defined %}
+{%- if CIVET_STEP_ALLOWED_TO_FAIL == 'True' %}
         # CIVET allowed_to_fail not allowed for remainder steps
 {%- endif %}
         # force error shell behavior for remainder steps
