@@ -41,7 +41,8 @@ OptimizationData::validParams()
   params.addParam<std::string>(
       "file_value", "value", "measurement value column name from csv file being read in");
 
-  params.addParam<VariableName>("variable", "Variable to sample at measurement points.");
+  params.addParam<std::vector<VariableName>>(
+      "variable", "Vector of variable names to sample at measurement points.");
 
   params.addParamNamesToGroup("measurement_points measurement_values measurement_times",
                               "Input Measurement Data");
@@ -65,15 +66,16 @@ OptimizationData::OptimizationData(const InputParameters & parameters)
         declareValueByName<std::vector<Real>>("measurement_values", REPORTER_MODE_REPLICATED)),
     _simulation_values(
         declareValueByName<std::vector<Real>>("simulation_values", REPORTER_MODE_REPLICATED)),
-    _misfit_values(
-        declareValueByName<std::vector<Real>>("misfit_values", REPORTER_MODE_REPLICATED)),
-    _var(isParamValid("variable")
-             ? &_fe_problem.getVariable(_tid,
-                                        getParam<VariableName>("variable"),
-                                        Moose::VarKindType::VAR_ANY,
-                                        Moose::VarFieldType::VAR_FIELD_STANDARD)
-             : nullptr)
+    _misfit_values(declareValueByName<std::vector<Real>>("misfit_values", REPORTER_MODE_REPLICATED))
 {
+  if (isParamValid("variable"))
+  {
+    std::vector<VariableName> var_names(getParam<std::vector<VariableName>>("variable"));
+    for (const auto & name : var_names)
+      _var_vec.push_back(&_fe_problem.getVariable(
+          _tid, name, Moose::VarKindType::VAR_ANY, Moose::VarFieldType::VAR_FIELD_STANDARD));
+  }
+
   if (isParamValid("measurement_file") && isParamValid("measurement_points"))
     mooseError("Input file can only define a single input for measurement data. Use only "
                "measurement_file or measurement_points, but never both");
@@ -88,7 +90,7 @@ OptimizationData::OptimizationData(const InputParameters & parameters)
 void
 OptimizationData::execute()
 {
-  if (!_var)
+  if (_var_vec.empty())
     return;
 
   // FIXME: This is basically copied from PointValue.
@@ -99,24 +101,10 @@ OptimizationData::execute()
   _simulation_values.resize(nvals);
   _misfit_values.resize(nvals);
 
-  std::string msg = "";
-  if (_measurement_xcoord.size() != nvals)
-    msg += "x-coordinate data (" + std::to_string(_measurement_xcoord.size()) + "), ";
-  if (_measurement_xcoord.size() != nvals)
-    msg += "y-coordinate data (" + std::to_string(_measurement_ycoord.size()) + "), ";
-  if (_measurement_zcoord.size() != nvals)
-    msg += "z-coordinate data (" + std::to_string(_measurement_zcoord.size()) + "), ";
-  if (_measurement_time.size() != nvals)
-    msg += "time data (" + std::to_string(_measurement_time.size()) + "), ";
-  if (!msg.empty())
-    mooseError("Number of entries in ",
-               std::string(msg.begin(), msg.end() - 2),
-               " does not match number of entries in value data (",
-               std::to_string(nvals),
-               ").");
+  errorCheckDataSize();
 
-  const auto & sys = _var->sys().system();
-  const auto vnum = _var->number();
+  const auto & sys = _var_vec[0]->sys().system();
+  const auto vnum = _var_vec[0]->number();
 
   for (const auto & i : make_range(nvals))
     if (MooseUtils::absoluteFuzzyEqual(_t, _measurement_time[i]))
@@ -216,4 +204,25 @@ OptimizationData::readMeasurementsFromInput()
     _measurement_values = getParam<std::vector<Real>>("measurement_values");
   else
     paramError("measurement_values", "Input file must contain measurement points and values");
+}
+
+void
+OptimizationData::errorCheckDataSize()
+{
+  const std::size_t nvals = _measurement_values.size();
+  std::string msg = "";
+  if (_measurement_xcoord.size() != nvals)
+    msg += "x-coordinate data (" + std::to_string(_measurement_xcoord.size()) + "), ";
+  if (_measurement_ycoord.size() != nvals)
+    msg += "y-coordinate data (" + std::to_string(_measurement_ycoord.size()) + "), ";
+  if (_measurement_zcoord.size() != nvals)
+    msg += "z-coordinate data (" + std::to_string(_measurement_zcoord.size()) + "), ";
+  if (_measurement_time.size() != nvals)
+    msg += "time data (" + std::to_string(_measurement_time.size()) + "), ";
+  if (!msg.empty())
+    mooseError("Number of entries in ",
+               std::string(msg.begin(), msg.end() - 2),
+               " does not match number of entries in value data (",
+               std::to_string(nvals),
+               ").");
 }

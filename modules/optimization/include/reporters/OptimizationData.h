@@ -46,5 +46,7 @@ private:
   /// private method for testing optimizationData with test src
   void setSimulationValuesForTesting(std::vector<Real> & data);
   /// variable
-  const MooseVariableFieldBase * const _var;
+  std::vector<MooseVariableFieldBase *> _var_vec;
+  /// helper to check data sizes
+  void errorCheckDataSize();
 };
