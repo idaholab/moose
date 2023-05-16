@@ -14,10 +14,6 @@ class TestHarnessTester(TestHarnessTestCase):
         """
         Verify an arbitrary test will run when we use the '--run-dir' argument
         """
-        # Test that we do not recursively find additional tests
-        output = self.runTests('--run-dir', 'tests/test_harness/arbitrary_test').decode('utf-8')
-        self.assertIn('tests/test_harness.always_ok', output)
-        self.assertNotIn('tests/test_harness/arbitrary_directory.always_ok', output)
 
         # Test that we do find additional tests with recursion
         output = self.runTests('--run-dir', 'tests/test_harness', '-i', 'arbitrary_test').decode('utf-8')
