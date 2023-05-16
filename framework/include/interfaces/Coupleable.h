@@ -193,11 +193,18 @@ protected:
                                              unsigned int comp = 0) const;
 
   /**
-   * Returns the values for all of a coupled variable's components
+   * Returns the values for all of a coupled variable components
    * @param var_name Name of coupled variable
    * @return Vector of VariableValue pointers for each component of \p var_name
    */
   std::vector<const VariableValue *> coupledValues(const std::string & var_name) const;
+
+  /**
+   * Returns the values for all of a coupled vector variable's components
+   * @param var_name Name of coupled variable
+   * @return Vector of VectorVariableValue pointers for each component of \p var_name
+   */
+  std::vector<const VectorVariableValue *> coupledVectorValues(const std::string & var_name) const;
 
   /**
    * Returns value of a coupled variable for use in templated automatic differentiation classes
@@ -1552,6 +1559,14 @@ protected:
    * @return Pointer to the desired variable
    */
   const ArrayMooseVariable * getArrayVar(const std::string & var_name, unsigned int comp) const;
+
+  /**
+   * Extract pointer to a base class for a coupled variable of any type
+   * @param var_name Name of parameter desired
+   * @param comp Component number of multiple coupled variables
+   * @return Pointer to the desired variable
+   */
+  const MooseVariableFieldBase * getAnyVar(const std::string & var_name, unsigned int comp) const;
 
   /**
    * Checks to make sure that the current Executioner has set "_is_transient" when old/older values
