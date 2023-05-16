@@ -27,7 +27,7 @@ The corresponding weak form is (using inner-product notation):
 
 !equation id=weak-form
 \begin{aligned}
-  (\nabla w, D \nabla u)_\Omega + \langle \llbracket w \rrbracket,\tau \llbracket u \rrbracket \rangle _{\Gamma^+} - \langle \llbracket w \rrbracket,\tau \vec{\epsilon} \cdot \llbracket \vec{x} \rrbracket \rangle _{\Gamma^+} = 0\\
+  (\nabla \psi, D \nabla u)_\Omega + \langle \llbracket \psi \rrbracket,\tau \llbracket u \rrbracket \rangle _{\Gamma^+} - \langle \llbracket \psi \rrbracket,\tau \vec{\epsilon} \cdot \llbracket \vec{x} \rrbracket \rangle _{\Gamma^+} = 0\\
   -\langle \vec{\kappa} \cdot \llbracket \vec{x} \rrbracket, \tau \llbracket u \rrbracket \rangle _{\Gamma^+} +\langle \vec{\kappa} \cdot \llbracket \vec{x} \rrbracket, \tau \vec{\epsilon} \cdot \llbracket \vec{x} \rrbracket \rangle _{\Gamma^+} = \langle \vec{\kappa} \cdot \llbracket \vec{x} \rrbracket, \vec{\sigma} \cdot \hat{n} \rangle _{\Gamma^+}
 \end{aligned}
 
