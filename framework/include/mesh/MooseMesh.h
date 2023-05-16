@@ -513,7 +513,7 @@ public:
    * @param force_mesh_prepare Whether to force a mesh preparation
    * @return Whether the libMesh mesh was prepared
    */
-  bool prepare(bool force_mesh_prepare = false);
+  bool prepare(bool force_mesh_prepare);
 
   /**
    * Calls buildNodeListFromSideList(), buildNodeList(), and buildBndElemList().

@@ -272,7 +272,7 @@ OversampleOutput::cloneMesh()
     _cloned_mesh_ptr = std::make_unique<FileMesh>(mesh_params);
     _cloned_mesh_ptr->allowRecovery(false); // We actually want to reread the initial mesh
     _cloned_mesh_ptr->init();
-    _cloned_mesh_ptr->prepare();
+    _cloned_mesh_ptr->prepare(/*force_mesh_prepare=*/false);
     _cloned_mesh_ptr->meshChanged();
   }
 
