@@ -1,8 +1,8 @@
-# Complete SubChannel Input File Syntax
+# Complete Pronghorn-SC Input File Syntax
 
-Listed below are all the reference pages for both SubChannel specific code and the
-MOOSE code that can be used in the SubChannel input file. To limit this output to
-only available SubChannel objects, please see [this page](subchannel_only.md).
+Listed below are all the reference pages for both Pronghorn-SC specific code and the
+MOOSE code that can be used in the Pronghorn-SC input file. To limit this output to
+only available Pronghorn-SC objects, please see [this page](subchannel_only.md).
 
 Click the blue links in the class names shown below to view the detailed
 description, the class purpose, theoretical models, input file examples, and

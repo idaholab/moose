@@ -1,11 +1,11 @@
-# SubChannel Tutorial
+# Pronghorn-SC Tutorial
 
-!style halign=center fontsize=120% 
+!style halign=center fontsize=120%
 !datetime today format=%B %Y
 
 !---
 
-# Outline 
+## Outline
 
 - Introduction to MOOSE
 
@@ -14,7 +14,7 @@
   - Applications
   - Solving specific physics
 
-- SubChannel Introduction
+- Pronghorn-SC Introduction
 
   - Motivation
   - Overview
