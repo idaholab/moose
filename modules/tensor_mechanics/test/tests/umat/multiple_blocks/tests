@@ -31,5 +31,30 @@
                   'constitutive models, with the ability to provide different parameters for '
                   'different blocks using distinct interface plug-ins in multi processor runs.'
   []
-
+  [rve_multimaterial_umat]
+    type = 'Exodiff'
+    input = 'rve_multimaterial.i'
+    exodiff = 'rve_multimaterial_umat_out.e'
+    cli_args = "Materials/active='umat_1 umat_2' "
+               "Outputs/file_base=rve_multimaterial_umat_out"
+    library_mode = 'DYNAMIC'
+    valgrind = 'NONE'
+    # A demonstration test, no need run this through a debug executable, which is already tested
+    method = opt
+    requirement = 'The system shall be able to simulate a multiblock solid mechanics test in which '
+                  'the blocks are meshed contiguously using the UMAT interface.'
+  []
+  [rve_multimaterial_moose]
+    type = 'Exodiff'
+    input = 'rve_multimaterial.i'
+    exodiff = 'rve_multimaterial_moose_out.e'
+    cli_args = "Materials/active='stress elastic_1 elastic_2' "
+               "Outputs/file_base=rve_multimaterial_moose_out"
+    library_mode = 'DYNAMIC'
+    valgrind = 'NONE'
+    # A demonstration test, no need run this through a debug executable, which is already tested
+    method = opt
+    requirement = 'The system shall be able to simulate a multiblock solid mechanics test in which '
+                  'the blocks are meshed contiguously.'
+  []
 []
