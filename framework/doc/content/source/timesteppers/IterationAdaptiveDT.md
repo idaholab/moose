@@ -1,6 +1,6 @@
 # IterationAdaptiveDT
 
-!syntax description /Executioner/TimeStepper/IterationAdaptiveDT
+!syntax description /Executioner/TimeSteppers/IterationAdaptiveDT
 
 ## Description
 
@@ -61,8 +61,8 @@ purpose, the iteration related parameters are not required.
 
 !listing test/tests/time_steppers/iteration_adaptive/adapt_tstep_shrink_init_dt.i block=Executioner
 
-!syntax parameters /Executioner/TimeStepper/IterationAdaptiveDT
+!syntax parameters /Executioner/TimeSteppers/IterationAdaptiveDT
 
-!syntax inputs /Executioner/TimeStepper/IterationAdaptiveDT
+!syntax inputs /Executioner/TimeSteppers/IterationAdaptiveDT
 
-!syntax children /Executioner/TimeStepper/IterationAdaptiveDT
+!syntax children /Executioner/TimeSteppers/IterationAdaptiveDT

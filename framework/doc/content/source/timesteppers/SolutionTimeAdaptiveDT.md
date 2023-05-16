@@ -1,6 +1,6 @@
 # SolutionTimeAdaptiveDT
 
-!syntax description /Executioner/TimeStepper/SolutionTimeAdaptiveDT
+!syntax description /Executioner/TimeSteppers/SolutionTimeAdaptiveDT
 
 The idea is to find the simulation time step such as the computational cost of a step is the lowest.
 The computational cost of a time step solve depends on many factors, this time stepper studies the
@@ -24,8 +24,8 @@ The sign of the update is chosen as explained above.
 
 !listing test/tests/executioners/executioner/sln-time-adapt.i block=Executioner
 
-!syntax parameters /Executioner/TimeStepper/SolutionTimeAdaptiveDT
+!syntax parameters /Executioner/TimeSteppers/SolutionTimeAdaptiveDT
 
-!syntax inputs /Executioner/TimeStepper/SolutionTimeAdaptiveDT
+!syntax inputs /Executioner/TimeSteppers/SolutionTimeAdaptiveDT
 
-!syntax children /Executioner/TimeStepper/SolutionTimeAdaptiveDT
+!syntax children /Executioner/TimeSteppers/SolutionTimeAdaptiveDT

@@ -9,37 +9,93 @@
 
 #include "SetupTimeStepperAction.h"
 #include "Transient.h"
+#include "MooseApp.h"
 #include "Factory.h"
 #include "TimeStepper.h"
+#include "AddTimeStepperAction.h"
+#include "FEProblemBase.h"
+#include "CompositionDT.h"
 
-registerMooseAction("MooseApp", SetupTimeStepperAction, "setup_time_stepper");
+registerMooseAction("MooseApp", SetupTimeStepperAction, "setup_time_steppers");
 
 InputParameters
 SetupTimeStepperAction::validParams()
 {
-  InputParameters params = MooseObjectAction::validParams();
-  params.addClassDescription("Add and initialize a TimeStepper object to the simulation.");
+  InputParameters params = Action::validParams();
+  params.addClassDescription("Set up the final time stepper.");
   return params;
 }
 
 SetupTimeStepperAction::SetupTimeStepperAction(const InputParameters & parameters)
-  : MooseObjectAction(parameters)
+  : Action(parameters)
 {
 }
 
 void
 SetupTimeStepperAction::act()
 {
-  if (_problem->isTransient())
+  if (Transient * transient = dynamic_cast<Transient *>(_app.getExecutioner()))
   {
-    Transient * transient = dynamic_cast<Transient *>(_app.getExecutioner());
-    if (!transient)
-      mooseError("You can setup time stepper only with executioners of transient type.");
+    std::vector<TimeStepper *> timesteppers;
+    _problem->theWarehouse().query().condition<AttribSystem>("TimeStepper").queryInto(timesteppers);
 
-    _moose_object_pars.set<SubProblem *>("_subproblem") = _problem.get();
-    _moose_object_pars.set<Transient *>("_executioner") = transient;
-    std::shared_ptr<TimeStepper> ts =
-        _factory.create<TimeStepper>(_type, "TimeStepper", _moose_object_pars);
-    transient->setTimeStepper(ts);
+    // No timestepper(s) were added by the user, so add a default one
+    if (timesteppers.empty())
+    {
+      const auto ts_name = "ConstantDT";
+      auto params = _factory.getValidParams(ts_name);
+      params.set<Transient *>("_executioner") = transient;
+
+      if (!transient->parameters().isParamSetByAddParam("end_time") &&
+          !transient->parameters().isParamSetByAddParam("num_steps") &&
+          transient->parameters().isParamSetByAddParam("dt"))
+        params.set<Real>("dt") =
+            (transient->getParam<Real>("end_time") - transient->getParam<Real>("start_time")) /
+            static_cast<Real>(transient->getParam<unsigned int>("num_steps"));
+      else
+        params.set<Real>("dt") = transient->getParam<Real>("dt");
+
+      params.set<bool>("reset_dt") = transient->getParam<bool>("reset_dt");
+
+      auto ts =
+          _problem->addObject<TimeStepper>(ts_name, ts_name, params, /* threaded = */ false)[0];
+      transient->setTimeStepper(*ts);
+    }
+    // TimeStepper(s) were added by the user
+    else
+    {
+      // The user add a time stepper with [TimeStepper] or [TimeSteppers], create one for them
+      auto no_time_stepper = _awh.getActionListByName("add_time_stepper").empty();
+      auto no_time_steppers = _awh.getActionListByName("add_time_steppers").empty();
+      if (!no_time_stepper || !no_time_steppers)
+      {
+        std::vector<TimeStepper *> timesteppers;
+        _problem->theWarehouse()
+            .query()
+            .condition<AttribSystem>("TimeStepper")
+            .queryInto(timesteppers);
+
+        mooseAssert(timesteppers.size(), "Timesteppers not found");
+
+        if (timesteppers.size() == 1)
+          transient->setTimeStepper(*timesteppers[0]);
+        else
+          for (auto ts : timesteppers)
+            if (dynamic_cast<CompositionDT *>(ts))
+              transient->setTimeStepper(*ts);
+
+        mooseAssert(transient->getTimeStepper(), "Not set");
+      }
+      // The user used [TimeStepper] for time stepper setup, give a deprecation message
+      if (!no_time_stepper && no_time_steppers)
+        mooseDeprecated(
+            "The [TimeStepper] block is deprecated. Please use [TimeSteppers] instead.");
+      // The user used both [TimeStepper] and [TimeSteppers] for time stepper setup, use input in
+      // [TimeSteppers] block and give an error message
+      if (!no_time_stepper && !no_time_steppers)
+        mooseError("Both [TimeStepper] and [TimeSteppers] are used to setup the time stepper. The "
+                   "[TimeStepper] block will be ignored. Note [TimeStepper] will be deprecated "
+                   "soon. Please consider [TimeSteppers] for future use.");
+    }
   }
 }

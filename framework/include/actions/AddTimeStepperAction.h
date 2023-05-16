@@ -9,17 +9,17 @@
 
 #pragma once
 
-#include "Action.h"
+#include "MooseObjectAction.h"
 
 /**
- * Set up the final time stepper for the simulation
+ * Add all timestepper(s) info from input
  */
-class SetupTimeStepperAction : public Action
+class AddTimeStepperAction : public MooseObjectAction
 {
 public:
   static InputParameters validParams();
 
-  SetupTimeStepperAction(const InputParameters & parameters);
+  AddTimeStepperAction(const InputParameters & params);
 
   virtual void act() override;
 };

@@ -23,8 +23,11 @@ TimeStepper::validParams()
       0.5,
       "cutback_factor_at_failure>0 & cutback_factor_at_failure<1",
       "Factor to apply to timestep if a time step fails to converge.");
+  params.addParam<bool>("enable", true, "whether or not to enable the time stepper");
+  params.declareControllable("enable");
 
   params.registerBase("TimeStepper");
+  params.registerSystemAttributeName("TimeStepper");
 
   return params;
 }
