@@ -33,7 +33,7 @@ exhibited in [fig:profile], while the code results for both values of $β$ are s
 
 !media figures/01-5237.png
     style=width:50%;margin-bottom:2%;margin:auto;
-    id=fig:Power
+    id=fig:profile
     caption=Exit temperature distribution for case 01-5237
 
 The reason for the additional mixing effect is thought to be the special mixing vanes that the NUPEC facility incorporates in its design. Specifically, the temperature gradient appearing in the experimental data was attributed to the thermal mixing in the diagonal direction of the test bundle, which may be caused by the alignment of mixing vanes mounted in the spacer grids [!cite](hwang2012accuracy). This is the physical reason behind the need to use an increased value of $\beta = 0.08$.
