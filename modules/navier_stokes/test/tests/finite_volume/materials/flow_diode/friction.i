@@ -64,6 +64,9 @@ rho = 10
     # friction_coeffs = 'Darcy Forchheimer; Darcy Forchheimer'
     # Combined with diode
     friction_coeffs = 'combined_linear combined_quadratic; combined_linear combined_quadratic'
+
+    mass_advection_interpolation = 'average'
+    momentum_advection_interpolation = 'average'
   []
 []
 

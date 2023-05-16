@@ -37,6 +37,9 @@ rho = 1
 
     momentum_two_term_bc_expansion = true
     pressure_two_term_bc_expansion = true
+
+    mass_advection_interpolation = 'average'
+    momentum_advection_interpolation = 'average'
   []
 []
 

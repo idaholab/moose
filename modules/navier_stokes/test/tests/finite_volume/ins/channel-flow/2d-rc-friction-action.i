@@ -35,6 +35,9 @@ rho = 1.1
 
     friction_types = 'darcy'
     friction_coeffs = '25'
+
+    mass_advection_interpolation = 'average'
+    momentum_advection_interpolation = 'average'
   []
 []
 

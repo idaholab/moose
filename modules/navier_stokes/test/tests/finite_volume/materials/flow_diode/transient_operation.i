@@ -130,6 +130,9 @@ ny = 5
 
     # Option 2: bernouilli jump
     # porosity_interface_pressure_treatment = bernoulli
+
+    mass_advection_interpolation = 'average'
+    momentum_advection_interpolation = 'average'
   []
 []
 

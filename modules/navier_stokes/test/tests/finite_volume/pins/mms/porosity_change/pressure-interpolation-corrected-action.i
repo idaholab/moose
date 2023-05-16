@@ -57,6 +57,9 @@ forch=1.1
     outlet_boundaries = 'right'
     momentum_outlet_types = 'fixed-pressure'
     pressure_function = 'exact_p'
+
+    mass_advection_interpolation = 'average'
+    momentum_advection_interpolation = 'average'
   []
 []
 

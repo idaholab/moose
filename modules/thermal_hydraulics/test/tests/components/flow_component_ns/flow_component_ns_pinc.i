@@ -66,6 +66,9 @@ p_outlet = 0
     outlet_boundaries = 'comp2:right'
     momentum_outlet_types = 'fixed-pressure'
     pressure_function = '${p_outlet}'
+
+    mass_advection_interpolation = 'average'
+    momentum_advection_interpolation = 'average'
   []
 []
 
