@@ -23,7 +23,7 @@ TriPowerIC::validParams()
 {
   InputParameters params = TriSubChannelBaseIC::validParams();
   params.addClassDescription(
-      "Computes axial power rate [W/m] that goes into the subchannel cells "
+      "Computes axial power rate (W/m) that goes into the subchannel cells "
       "or is assigned to the fuel pins, in a triangular lattice arrangement");
   params.addRequiredParam<Real>("power", "[W]");
   params.addRequiredParam<std::string>(

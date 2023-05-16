@@ -121,21 +121,21 @@ For both the SHRT-17 and SHRT-45R transients, the uniform power model overestima
 
 To run the steady state problem use the following input file:
 
-!listing /Users/kyriv/moose_projects/subchannel/examples/EBR-II/XX09_SC_SS.i
+!listing /examples/EBR-II/XX09_SC_SS.i
 
 To run the transient problem use the following input file:
 
-!listing /Users/kyriv/moose_projects/subchannel/examples/EBR-II/XX09_SC_tr.i
+!listing /examples/EBR-II/XX09_SC_tr.i
 
 The corrected power profile is read by the following .txt file (pin_power_profile61.txt):
 
-!listing /Users/kyriv/moose_projects/subchannel/examples/EBR-II/pin_power_profile61.txt
+!listing /examples/EBR-II/pin_power_profile61.txt
 
 The Functions block defines the shape of axial power profile:
 
-!listing /Users/kyriv/moose_projects/subchannel/examples/EBR-II/XX09_SC_SS.i block=Functions language=cpp
+!listing /examples/EBR-II/XX09_SC_SS.i block=Functions language=cpp
 
-#### Transient BC's
+### Transient BC's
 
 For the transient case the user needs to provide transient boundary conditions:
 
@@ -156,7 +156,7 @@ For the transient case the user needs to provide transient boundary conditions:
 
 - Then, define the transient evolution of the boundary conditions in the Functions block based on .csv files:
 
-!listing /Users/kyriv/moose_projects/subchannel/examples/EBR-II/XX09_SC_tr.i block=Functions language=cpp
+!listing /examples/EBR-II/XX09_SC_tr.i block=Functions language=cpp
 
 - The functions defined above are given normalized and they need to multiply the initial steady state conditions:
 
@@ -214,4 +214,4 @@ For the transient case the user needs to provide transient boundary conditions:
 
 - Finally the Executioner block defines the time step with the TimeStepper:
 
-!listing /Users/kyriv/moose_projects/subchannel/examples/EBR-II/XX09_SC_tr.i block=Executioner language=cpp
+!listing /examples/EBR-II/XX09_SC_tr.i block=Executioner language=cpp
