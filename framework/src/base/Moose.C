@@ -191,6 +191,7 @@ addActionTypes(Syntax & syntax)
   registerTask("prepare_mesh", false);
   registerTask("delete_remote_elements_after_late_geometric_ghosting", false);
   registerTask("setup_mesh_complete", true); // calls prepare
+  registerTask("post_mesh_prepared", false);
   registerTask("add_geometric_rm", false);
   registerTask("attach_geometric_rm", true);
   registerTask("attach_geometric_rm_final", true);
@@ -276,6 +277,7 @@ addActionTypes(Syntax & syntax)
                            "(add_mortar_interface)"
                            "(uniform_refine_mesh)"
                            "(setup_mesh_complete)"
+                           "(post_mesh_prepared)"
                            "(determine_system_type)"
                            "(create_problem)"
                            "(create_problem_custom)"

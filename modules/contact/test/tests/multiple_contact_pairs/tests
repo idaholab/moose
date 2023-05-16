@@ -57,6 +57,43 @@
     rel_err = 1.0e-4
     allow_warnings = true
   []
+  [three_hexagons_coarse_automatic_pair_reference]
+    type = 'Exodiff'
+    issues = '#24122'
+    input = 'three_hexagons_coarse.i'
+    exodiff = 'three_hexagons_coarse_automatic_pair_reference_out.e'
+    cli_args = "Postprocessors/active='' Contact/contact_pressure/secondary='102 102 201' "
+               "Contact/contact_pressure/primary='201 301 301' "
+               "Outputs/file_base=three_hexagons_coarse_automatic_pair_reference_out"
+    requirement = 'The system shall assign and accumulate a single contact pressure auxiliary '
+                  'variable for all contact pairs supplied to a single contact action object with a '
+                  'different combination of primary-secondary pairs.'
+    abs_zero = 1.0e-4
+    rel_err = 1.0e-4
+    allow_warnings = true
+  []
+  [three_hexagons_coarse_automatic_pair]
+    type = 'Exodiff'
+    issues = '#24122'
+    input = 'three_hexagons_coarse_automatic_pair.i'
+    exodiff = 'three_hexagons_coarse_automatic_pair_out.e'
+    cli_args = "Contact/contact_pressure/automatic_pairing_boundaries='102 201 301' "
+               "Postprocessors/active=''"
+    requirement = 'The system shall be able to, if the user provides a reference distance, assign '
+                  'primary-secondary contact pairs automatically.'
+    abs_zero = 1.0e-4
+    rel_err = 1.0e-4
+    allow_warnings = true
+  []
+  [three_hexagons_coarse_automatic_pair_error]
+    type = 'RunException'
+    issues = '#24122'
+    input = 'three_hexagons_coarse_automatic_pair.i'
+    expect_err = "'primary' and 'secondary' surfaces or a list of boundaries"
+    requirement = 'The system shall generate an error if insufficient information to automatically '
+                  'define contact surface pairs is provided.'
+    allow_warnings = true
+  []
   [three_hexagons_coarse_various_actions]
     type = 'Exodiff'
     input = 'three_hexagons_coarse_various_actions.i'
