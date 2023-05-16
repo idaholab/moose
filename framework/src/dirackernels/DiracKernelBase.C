@@ -44,6 +44,11 @@ DiracKernelBase::validParams()
       "specified subdomains. If this option is set to ERROR, this situation will result in an "
       "error. If this option is set to WARNING, then a warning will be issued.");
 
+  params.addParam<bool>("allow_moving_sources",
+                        false,
+                        "If true, allow Dirac sources to move, even if the mesh does not move, "
+                        "during the simulation.");
+
   params.addParamNamesToGroup("use_displaced_mesh drop_duplicate_points", "Advanced");
   params.declareControllable("enable");
   return params;
@@ -64,7 +69,8 @@ DiracKernelBase::DiracKernelBase(const InputParameters & parameters)
     _JxW(_assembly.JxW()),
     _drop_duplicate_points(parameters.get<bool>("drop_duplicate_points")),
     _point_not_found_behavior(
-        parameters.get<MooseEnum>("point_not_found_behavior").getEnum<PointNotFoundBehavior>())
+        parameters.get<MooseEnum>("point_not_found_behavior").getEnum<PointNotFoundBehavior>()),
+    _allow_moving_sources(getParam<bool>("allow_moving_sources"))
 {
   // Stateful material properties are not allowed on DiracKernels
   statefulPropertiesAllowed(false);
@@ -279,7 +285,8 @@ DiracKernelBase::addPointWithValidId(Point p, unsigned id)
                  " already exists with ID: ",
                  id,
                  " and does not match point ",
-                 p);
+                 p,
+                 "If Dirac sources are moving, please set 'allow_moving_sources' to true");
 
     // We only want one iteration of this while loop at maximum.
     i_found_it = false;
@@ -321,10 +328,14 @@ void
 DiracKernelBase::clearPoints()
 {
   _local_dirac_kernel_info.clearPoints();
+
+  // If points can move, we can't trust caches
+  if (_allow_moving_sources)
+    clearPointsCaches();
 }
 
 void
-DiracKernelBase::meshChanged()
+DiracKernelBase::clearPointsCaches()
 {
   _point_cache.clear();
   _reverse_point_cache.clear();
