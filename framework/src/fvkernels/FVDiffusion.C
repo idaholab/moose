@@ -49,12 +49,16 @@ FVDiffusion::computeQpResidual()
 
   // If we are on internal faces, we interpolate the diffusivity as usual
   if (_var.isInternalFace(*_face_info))
-    interpolate(_coeff_interp_method,
-                coeff,
-                _coeff(elemArg(), state),
-                _coeff(neighborArg(), state),
-                *_face_info,
-                true);
+  {
+    const ADReal coeff_elem = _coeff(elemArg(), state);
+    const ADReal coeff_neighbor = _coeff(neighborArg(), state);
+    // If the diffusion coefficients are zero, then we can early return 0 (and avoid warnings if we
+    // have a harmonic interpolation)
+    if (!coeff_elem.value() && !coeff_neighbor.value())
+      return 0;
+
+    interpolate(_coeff_interp_method, coeff, coeff_elem, coeff_neighbor, *_face_info, true);
+  }
   // Else we just use the boundary values (which depend on how the diffusion
   // coefficient is constructed)
   else
