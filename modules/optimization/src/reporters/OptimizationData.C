@@ -34,21 +34,24 @@ OptimizationData::validParams()
   params.addParam<std::string>(
       "file_xcoord", "x", "x coordinate column name from measurement_file csv being read in.");
   params.addParam<std::string>(
-      "file_ycoord", "y", "y coordinate column name from csv file being read in");
+      "file_ycoord", "y", "y coordinate column name from csv file being read in.");
   params.addParam<std::string>(
-      "file_zcoord", "z", "z coordinate column name from csv file being read in");
-  params.addParam<std::string>("file_time", "time", "time column name from csv file being read in");
+      "file_zcoord", "z", "z coordinate column name from csv file being read in.");
   params.addParam<std::string>(
-      "file_value", "value", "measurement value column name from csv file being read in");
+      "file_time", "time", "time column name from csv file being read in.");
+  params.addParam<std::vector<std::string>>(
+      "file_variable_weights", "variable weight column names from csv file being read in.");
+  params.addParam<std::string>(
+      "file_value", "value", "measurement value column name from csv file being read in.");
 
   params.addParam<std::vector<VariableName>>(
       "variable", "Vector of variable names to sample at measurement points.");
 
   params.addParamNamesToGroup("measurement_points measurement_values measurement_times",
                               "Input Measurement Data");
-  params.addParamNamesToGroup(
-      "measurement_file file_xcoord file_ycoord file_zcoord file_time file_value",
-      "File Measurement Data");
+  params.addParamNamesToGroup("measurement_file file_xcoord file_ycoord file_zcoord file_time "
+                              "file_value file_variable_weights",
+                              "File Measurement Data");
   return params;
 }
 
@@ -124,6 +127,8 @@ OptimizationData::readMeasurementsFromFile()
   std::string zName = getParam<std::string>("file_zcoord");
   std::string tName = getParam<std::string>("file_time");
   std::string valueName = getParam<std::string>("file_value");
+  std::vector<std::string> weightNames =
+      getParam<std::vector<std::string>>("file_variable_weights");
 
   bool found_x = false;
   bool found_y = false;
@@ -169,25 +174,48 @@ OptimizationData::readMeasurementsFromFile()
       _measurement_values = data[i];
       found_value = true;
     }
+    else if (std::find(weightNames.begin(), weightNames.end(), names[i]) != weightNames.end())
+    {
+      _weight_names_weights_map.emplace(
+          names[i], &declareValueByName<std::vector<Real>>(names[i], REPORTER_MODE_REPLICATED));
+      _weight_names_weights_map[names[i]]->assign(data[i].begin(), data[i].end());
+    }
   }
 
   // check if all required columns were found
   if (!found_x)
     paramError("measurement_file", "Column with name '", xName, "' missing from measurement file");
-  else if (!found_y)
+  if (!found_y)
     paramError("measurement_file", "Column with name '", yName, "' missing from measurement file");
-  else if (!found_z)
+  if (!found_z)
     paramError("measurement_file", "Column with name '", zName, "' missing from measurement file");
-  else if (!found_t)
+  if (!found_t)
     _measurement_time.assign(rows, 0);
-  else if (!found_value)
+  if (!found_value)
     paramError(
         "measurement_file", "Column with name '", valueName, "' missing from measurement file");
+  if (_weight_names_weights_map.size() != weightNames.size())
+  {
+    std::string out("\n   Measurement file column names: ");
+    for (const auto & name : names)
+      out += " " + name;
+    out += "\n   file_variable_weights names: ";
+    for (const auto & name : weightNames)
+      out += " " + name;
+    paramError("measurement_file",
+               "Not all of the file_variable_weights names were found in the measurement_file.",
+               out);
+  }
 }
 
 void
 OptimizationData::readMeasurementsFromInput()
 {
+  if (isParamValid("file_variable_weights"))
+    paramError("measurement_values",
+               "file_variable_weights cannot be used with measurement data read from the input "
+               "file, use measure_file input instead.");
+
   for (const auto & p : getParam<std::vector<Point>>("measurement_points"))
   {
     _measurement_xcoord.push_back(p(0));

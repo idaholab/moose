@@ -1,0 +1,7 @@
+measurement_time,measurement_values,measurement_xcoord,measurement_ycoord,measurement_zcoord,misfit_values,simulation_values,v_weight,weight_u
+0,1,0.2,0,0,-0.6,0.4,1,1
+0,1,0.8,0,0,0.6,1.6,0.5,0.5
+0,1,0,0.2,0,-1,0,1,1
+0,1,0.5,0.5,0,0,1,1,1
+0,1,0.5,0.5,0,0,1,1,1
+0,1,0.5,0.5,0,0,1,1,0.5

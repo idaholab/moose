@@ -37,6 +37,8 @@ protected:
   std::vector<Real> & _simulation_values;
   /// difference between simulation and measurment values at measurment xyzt
   std::vector<Real> & _misfit_values;
+  /// Weight names to reporter values map
+  std::map<std::string, std::vector<Real> *> _weight_names_weights_map;
 
 private:
   /// parse measurement data from csv file
