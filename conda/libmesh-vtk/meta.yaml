@@ -3,7 +3,9 @@
 #   libmesh/
 #   template/
 #   moose/
-{% set build = 0 %}
+#   moose-dev/
+# ALSO: Follow the directions in scripts/tests/versioner_hashes.yaml
+{% set build = 1 %}
 {% set vtk_version = "9.2.6" %}
 {% set vtk_friendly_version = "9.2" %}
 {% set sha256 = "06fc8d49c4e56f498c40fcb38a563ed8d4ec31358d0101e8988f0bb4d539dd12" %}

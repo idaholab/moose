@@ -3,7 +3,9 @@
 #   libmesh/
 #   template/
 #   moose/
-{% set build = 6 %}
+#   moose-dev/
+# ALSO: Follow the directions in scripts/tests/versioner_hashes.yaml
+{% set build = 8 %}
 {% set strbuild = "build_" + build|string %}
 {% set version = "3.16.6" %}
 {% set sha256 = "d676eb67e79314d6cca6422d7c477d2b192c830b89d5edc6b46934f7453bcfc0" %}

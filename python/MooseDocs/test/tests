@@ -12,21 +12,21 @@
 
       [serial]
         type = RunCommand
-        command = 'python moosedocs.py verify --form html --executioner MooseDocs.base.Serial'
+        command = 'python3 moosedocs.py verify --form html --executioner MooseDocs.base.Serial'
       []
       [queue]
         type = RunCommand
-        command = 'python moosedocs.py verify --form html --executioner MooseDocs.base.ParallelQueue'
+        command = 'python3 moosedocs.py verify --form html --executioner MooseDocs.base.ParallelQueue'
         prereq = verify/html/serial
       []
       [barrier]
         type = RunCommand
-        command = 'python moosedocs.py verify --form html --executioner MooseDocs.base.ParallelBarrier'
+        command = 'python3 moosedocs.py verify --form html --executioner MooseDocs.base.ParallelBarrier'
         prereq = verify/html/queue
       []
       [pipe]
         type = RunCommand
-        command = 'python moosedocs.py verify --form html --executioner MooseDocs.base.ParallelPipe'
+        command = 'python3 moosedocs.py verify --form html --executioner MooseDocs.base.ParallelPipe'
         prereq = verify/html/barrier
       []
     []
@@ -35,21 +35,21 @@
 
       [serial]
         type = RunCommand
-        command = 'python moosedocs.py verify --form materialize --executioner MooseDocs.base.Serial'
+        command = 'python3 moosedocs.py verify --form materialize --executioner MooseDocs.base.Serial'
       []
       [queue]
         type = RunCommand
-        command = 'python moosedocs.py verify --form materialize --executioner MooseDocs.base.ParallelQueue'
+        command = 'python3 moosedocs.py verify --form materialize --executioner MooseDocs.base.ParallelQueue'
         prereq = verify/materialize/serial
       []
       [barrier]
         type = RunCommand
-        command = 'python moosedocs.py verify --form materialize --executioner MooseDocs.base.ParallelBarrier'
+        command = 'python3 moosedocs.py verify --form materialize --executioner MooseDocs.base.ParallelBarrier'
         prereq = verify/materialize/queue
       []
       [pipe]
         type = RunCommand
-        command = 'python moosedocs.py verify --form materialize --executioner MooseDocs.base.ParallelPipe'
+        command = 'python3 moosedocs.py verify --form materialize --executioner MooseDocs.base.ParallelPipe'
         prereq = verify/materialize/barrier
       []
     []
@@ -58,21 +58,21 @@
 
       [serial]
         type = RunCommand
-        command = 'python moosedocs.py verify --form latex --executioner MooseDocs.base.Serial'
+        command = 'python3 moosedocs.py verify --form latex --executioner MooseDocs.base.Serial'
       []
       [queue]
         type = RunCommand
-        command = 'python moosedocs.py verify --form latex --executioner MooseDocs.base.ParallelQueue'
+        command = 'python3 moosedocs.py verify --form latex --executioner MooseDocs.base.ParallelQueue'
         prereq = verify/latex/serial
       []
       [barrier]
         type = RunCommand
-        command = 'python moosedocs.py verify --form latex --executioner MooseDocs.base.ParallelBarrier'
+        command = 'python3 moosedocs.py verify --form latex --executioner MooseDocs.base.ParallelBarrier'
         prereq = verify/latex/queue
       []
       [pipe]
         type = RunCommand
-        command = 'python moosedocs.py verify --form latex --executioner MooseDocs.base.ParallelPipe'
+        command = 'python3 moosedocs.py verify --form latex --executioner MooseDocs.base.ParallelPipe'
         prereq = verify/latex/barrier
       []
     []
@@ -85,12 +85,12 @@
 
     [site_subsite]
       type = RunCommand
-      command = 'python moosedocs.py build --config config.yml subsite_config.yml'
+      command = 'python3 moosedocs.py build --config config.yml subsite_config.yml'
       detail = "the build routines for the main test site precede those of the subsite, as well as"
     []
     [subsite_site]
       type = RunCommand
-      command = 'python moosedocs.py build --fast --config subsite_config.yml config.yml'
+      command = 'python3 moosedocs.py build --fast --config subsite_config.yml config.yml'
       prereq = multiconfig_build/site_subsite
       detail = "in the reverse order but with the `--fast` option added for testing efficiency."
     []

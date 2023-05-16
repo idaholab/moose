@@ -44,6 +44,6 @@ class PythonUnitTest(RunApp):
         if self.specs["separate"]:
             cmd = os.path.join(self.specs['moose_dir'], 'scripts', 'separate_unittests.py') + ' -f ' + test_case + use_buffer
         else:
-            cmd = "python -m unittest" + use_buffer + "-v " + test_case
+            cmd = "python3 -m unittest" + use_buffer + "-v " + test_case
 
         return cmd  + ' '.join(self.specs['cli_args'])

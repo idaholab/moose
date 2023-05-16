@@ -101,7 +101,7 @@ function configure_petsc()
   fi
 
   cd $PETSC_DIR
-  python ./configure --download-hypre=1 \
+  python3 ./configure --download-hypre=1 \
       --with-shared-libraries=1 \
       "$HDF5_STR" \
       "$HDF5_FORTRAN_STR" \

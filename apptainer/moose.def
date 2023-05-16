@@ -83,12 +83,8 @@ From: {{ APPTAINER_FROM }}
 
     {% if DEV_CONTAINER is defined -%}
     # Other Development container installs
-    dnf --enablerepo=powertools install -y lcov doxygen
     pip3 --no-cache install lcov-cobertura
     {%- endif %}
-
-    # Few packages needed by apps
-    dnf install -y fftw-devel gsl-devel
 
     # Build and install wasp
     # This is redundant; hopefully we can use the one from conda in the future
