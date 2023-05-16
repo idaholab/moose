@@ -1,0 +1,11 @@
+[Tests]
+  [test]
+    type = CSVDiff
+    input = 'test.i'
+    csvdiff = 'test_out.csv'
+    requirement = "The system shall provide the ability to use functors for solid material "
+                  "properties."
+    design = 'ThermalSolidPropertiesFunctorMaterial.md'
+    issues = '#21978'
+  []
+[]
