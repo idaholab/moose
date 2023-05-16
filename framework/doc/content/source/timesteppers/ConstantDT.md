@@ -1,6 +1,6 @@
 # ConstantDT
 
-!syntax description /Executioner/TimeStepper/ConstantDT
+!syntax description /Executioner/TimeSteppers/ConstantDT
 
 ## Description
 
@@ -25,8 +25,8 @@ remainder of the the analysis.
 
 !listing test/tests/misc/check_error/wrong_displacement_order.i block=Executioner
 
-!syntax parameters /Executioner/TimeStepper/ConstantDT
+!syntax parameters /Executioner/TimeSteppers/ConstantDT
 
-!syntax inputs /Executioner/TimeStepper/ConstantDT
+!syntax inputs /Executioner/TimeSteppers/ConstantDT
 
-!syntax children /Executioner/TimeStepper/ConstantDT
+!syntax children /Executioner/TimeSteppers/ConstantDT

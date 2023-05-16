@@ -1,6 +1,6 @@
 # TimeSequenceStepper
 
-!syntax description /Executioner/TimeStepper/TimeSequenceStepper
+!syntax description /Executioner/TimeSteppers/TimeSequenceStepper
 
 If the solver fails to obtain a converged solution for a given
 step, the executioner cuts back the step size and attempts to advance the time
@@ -15,8 +15,8 @@ a `TimeSequenceStepper`.
 
 !listing test/tests/time_steppers/timesequence_stepper/timesequence.i block=Executioner
 
-!syntax parameters /Executioner/TimeStepper/TimeSequenceStepper
+!syntax parameters /Executioner/TimeSteppers/TimeSequenceStepper
 
-!syntax inputs /Executioner/TimeStepper/TimeSequenceStepper
+!syntax inputs /Executioner/TimeSteppers/TimeSequenceStepper
 
-!syntax children /Executioner/TimeStepper/TimeSequenceStepper
+!syntax children /Executioner/TimeSteppers/TimeSequenceStepper

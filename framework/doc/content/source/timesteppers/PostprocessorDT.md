@@ -1,6 +1,6 @@
 # PostprocessorDT
 
-!syntax description /Executioner/TimeStepper/PostprocessorDT
+!syntax description /Executioner/TimeSteppers/PostprocessorDT
 
 The postprocessor can be computing a global metric, like the Courant Friedrich Levy criterion
 with the [CFLTimeStepSize](CFLTimeStepSize.md optional=True) or the
@@ -19,8 +19,8 @@ a fluid flow simulation in a shock tube.
 
 !listing modules/navier_stokes/test/tests/finite_volume/cns/shock_tube_2D_cavity/hllc_sod_shocktube_2D.i block=TimeStepper Postprocessors
 
-!syntax parameters /Executioner/TimeStepper/PostprocessorDT
+!syntax parameters /Executioner/TimeSteppers/PostprocessorDT
 
-!syntax inputs /Executioner/TimeStepper/PostprocessorDT
+!syntax inputs /Executioner/TimeSteppers/PostprocessorDT
 
-!syntax children /Executioner/TimeStepper/PostprocessorDT
+!syntax children /Executioner/TimeSteppers/PostprocessorDT

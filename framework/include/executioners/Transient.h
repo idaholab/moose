@@ -119,14 +119,14 @@ public:
    * Pointer to the TimeStepper
    * @return Pointer to the time stepper for this Executioner
    */
-  TimeStepper * getTimeStepper() { return _time_stepper.get(); }
+  TimeStepper * getTimeStepper() { return _time_stepper; }
 
   /**
    * Set the timestepper to use.
    *
    * @param ts The TimeStepper to use
    */
-  void setTimeStepper(std::shared_ptr<TimeStepper> ts) { _time_stepper = ts; }
+  void setTimeStepper(TimeStepper & ts);
 
   /**
    * Get the name of the timestepper.
@@ -232,7 +232,7 @@ protected:
   const bool _check_aux;
 
   Moose::TimeIntegratorType _time_scheme;
-  std::shared_ptr<TimeStepper> _time_stepper;
+  TimeStepper * _time_stepper;
 
   /// Current timestep.
   int & _t_step;
