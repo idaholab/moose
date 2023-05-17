@@ -39,18 +39,18 @@ ReporterPointSource::validParams()
 ReporterPointSource::ReporterPointSource(const InputParameters & parameters)
   : DiracKernel(parameters),
     ReporterInterface(this),
-    _values(getReporterValue<std::vector<Real>>("value_name", REPORTER_MODE_REPLICATED)),
+    _values(getReporterValue<std::vector<Real>>("value_name", REPORTER_MODE_DISTRIBUTED)),
     _x_coord(isParamValid("x_coord_name")
-                 ? getReporterValue<std::vector<Real>>("x_coord_name", REPORTER_MODE_REPLICATED)
+                 ? getReporterValue<std::vector<Real>>("x_coord_name", REPORTER_MODE_DISTRIBUTED)
                  : _empty_vec),
     _y_coord(isParamValid("y_coord_name")
-                 ? getReporterValue<std::vector<Real>>("y_coord_name", REPORTER_MODE_REPLICATED)
+                 ? getReporterValue<std::vector<Real>>("y_coord_name", REPORTER_MODE_DISTRIBUTED)
                  : _empty_vec),
     _z_coord(isParamValid("z_coord_name")
-                 ? getReporterValue<std::vector<Real>>("z_coord_name", REPORTER_MODE_REPLICATED)
+                 ? getReporterValue<std::vector<Real>>("z_coord_name", REPORTER_MODE_DISTRIBUTED)
                  : _empty_vec),
     _point(isParamValid("point_name")
-               ? getReporterValue<std::vector<Point>>("point_name", REPORTER_MODE_REPLICATED)
+               ? getReporterValue<std::vector<Point>>("point_name", REPORTER_MODE_DISTRIBUTED)
                : _empty_points)
 {
   if (isParamValid("point_name") == (isParamValid("x_coord_name") && isParamValid("y_coord_name") &&

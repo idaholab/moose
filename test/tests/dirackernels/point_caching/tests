@@ -16,8 +16,7 @@
     [uniform_refinement]
       type = 'Exodiff'
       input = 'point_caching_uniform_refinement.i'
-      exodiff = 'point_caching_uniform_refinement_out.e-s002 '
-                'point_caching_uniform_refinement_out.e-s003'
+      exodiff = 'point_caching_uniform_refinement_out.e-s002 point_caching_uniform_refinement_out.e-s003'
 
       detail = 'with uniform mesh refinement,'
     []
@@ -27,7 +26,15 @@
       input = 'point_caching_adaptive_refinement.i'
       exodiff = 'point_caching_adaptive_refinement_out.e-s004'
 
-      detail = 'with adaptive mesh refinement, and'
+      detail = 'with adaptive mesh refinement,'
+    []
+
+    [moving_source]
+      type = 'Exodiff'
+      input = 'point_caching_moving_source.i'
+      exodiff = 'point_caching_moving_mesh_source.e'
+
+      detail = 'with displacing sources, and'
     []
 
     [moving_mesh]
