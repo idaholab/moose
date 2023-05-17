@@ -73,6 +73,11 @@ cp = 1
     outlet_boundaries = 'right'
     momentum_outlet_types = 'fixed-pressure'
     pressure_function = '0'
+
+    mass_advection_interpolation = 'average'
+    momentum_advection_interpolation = 'average'
+    energy_advection_interpolation = 'average'
+    passive_scalar_advection_interpolation = 'average'
   []
 []
 

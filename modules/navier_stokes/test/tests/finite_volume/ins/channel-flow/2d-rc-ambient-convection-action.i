@@ -56,6 +56,10 @@ alpha = 1
     # Ambient convection volumetric heat source
     ambient_convection_alpha = 'alpha'
     ambient_temperature = '100'
+
+    mass_advection_interpolation = 'average'
+    momentum_advection_interpolation = 'average'
+    energy_advection_interpolation = 'average'
   []
 []
 

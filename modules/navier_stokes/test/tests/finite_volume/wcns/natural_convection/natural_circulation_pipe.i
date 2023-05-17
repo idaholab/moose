@@ -77,6 +77,7 @@ gamma = 1.4
     friction_coeffs = 'Darcy_coef'
     porous_medium_treatment = true
     porosity = porosity
+    energy_advection_interpolation = 'average'
   []
 []
 

@@ -13,6 +13,7 @@
 #include "FEProblem.h"
 #include "NonlinearSystemBase.h"
 #include "AuxiliarySystem.h"
+#include "NSFVUtils.h"
 
 /**
  * Base class for setting up Navier-Stokes finite volume simulations
@@ -746,7 +747,7 @@ NSFVBase<BaseType>::validParams()
    * Navier-Stokes + energy equations.
    */
 
-  MooseEnum adv_interpol_types("average upwind skewness-corrected min_mod vanLeer", "average");
+  MooseEnum adv_interpol_types(Moose::FV::interpolationMethods());
   params.addParam<MooseEnum>("mass_advection_interpolation",
                              adv_interpol_types,
                              "The numerical scheme to use for interpolating density, "
