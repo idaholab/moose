@@ -119,15 +119,15 @@ def _doc_import(root_dir, content=None):
 
     return sorted(output)
 
-def create_file_page(name, filename, in_ext):
+def create_file_page(name, filename, in_ext, key):
     """
     Create the correct node object for the given extension.
     """
     _, ext = os.path.splitext(filename)
     if ext in in_ext:
-        return pages.Source(name, source=filename)
+        return pages.Source(name, source=filename, key=key)
     else:
-        return pages.File(name, source=filename)
+        return pages.File(name, source=filename, key=key)
 
 def get_files(items, in_ext):
     """
@@ -145,24 +145,38 @@ def get_files(items, in_ext):
             root = os.path.join(MooseDocs.ROOT_DIR, root)
 
         for fname in _doc_import(root, content=value.get('content', None)):
-            filenames.append((root, fname, value.get('external', False)))
+            filenames.append((root, fname, value.get('external', False), value.get('key', None)))
 
     return filenames
 
 def get_items(options):
     """Helper for building content, see load_config.py"""
     items = []
+
+    def parse_entry(key, value):
+        content = value.get('content', None)
+        external = value.get('external', False)
+        return dict(root_dir=value['root_dir'], content=content,
+                    external=external, key=key)
+
     if isinstance(options, list):
         for value in options:
             if isinstance(value, dict):
-                items.append(dict(value[list(value.keys())[0]]))
+                for dict_key, dict_value in value.items():
+                    items.append(parse_entry(dict_key, dict_value))
             else:
-                items.append(dict(root_dir=value, content=None, external=False))
+                items.append(dict(root_dir=value, content=None, external=False, key=None))
     elif isinstance(options, dict):
-        for _, value in options.items():
-            content = value.get('content', None)
-            external = value.get('external', False)
-            items.append(dict(root_dir=value['root_dir'], content=content, external=external))
+        for key, value in options.items():
+            items.append(parse_entry(key, value))
+
+    all_keys = set()
+    for item in items:
+        key = item['key']
+        if key in all_keys:
+            LOG.error(f'The Content key "{key}" is defined multiple times.')
+            return None
+        all_keys.add(key)
 
     return items
 
@@ -183,7 +197,7 @@ def get_content(items, in_ext):
 
     roots = set()
     nodes = dict()
-    for root, filename, external in get_files(items, in_ext):
+    for root, filename, external, config_key in get_files(items, in_ext):
         roots.add(root)
         key = filename.replace(root, '').strip('/')
         parts = key.split('/')
@@ -193,12 +207,13 @@ def get_content(items, in_ext):
             dir_key = os.path.join(*parts[:i])
             if dir_key not in nodes:
                 nodes[dir_key] = pages.Directory(dir_key, external=external,
-                                                 source=os.path.join(root, dir_key))
+                                                 source=os.path.join(root, dir_key),
+                                                 key=config_key)
 
         # Create the file node, if it doesn't already exist. This enforces that the first
         # item in the supplied content lists is the page that is rendered.
         if key not in nodes:
-            nodes[key] = create_file_page(key, filename, in_ext)
+            nodes[key] = create_file_page(key, filename, in_ext, config_key)
 
         nodes[key].external = external
 

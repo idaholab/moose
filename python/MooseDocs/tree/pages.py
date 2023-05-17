@@ -24,6 +24,7 @@ class Page(object):
         self.source = kwargs.pop('source') # supplied source file/directory
         self.external = kwargs.pop('external', False) # set by get_content.py used by appsyntax.py
         self.translator = kwargs.pop('translator', None) # set by Translator.init() or addPage()
+        self.key = kwargs.pop('key', None) # set by get_content.py
         self.attributes = kwargs
         self._fullname = fullname            # local path of the node
         self._name = fullname.split('/')[-1] # folder/file name
@@ -84,8 +85,8 @@ class Page(object):
 
     def __str__(self):
         """Define the screen output."""
-        return '{}: {}, {}'.format(mooseutils.colorText(self.__class__.__name__, self.COLOR),
-                                   self.local, self.source)
+        return '{} ({}): {}, {}'.format(mooseutils.colorText(self.__class__.__name__, self.COLOR),
+                                        self.key, self.local, self.source)
 
 class Text(Page):
     """Text only Page node for unit testing."""

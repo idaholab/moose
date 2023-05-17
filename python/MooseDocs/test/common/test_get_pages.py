@@ -147,20 +147,37 @@ class TestDocImport(unittest.TestCase):
 
 class TestDocTree(unittest.TestCase):
     def testBasic(self):
+        from_dir = 'framework/doc/content'
 
-        items = [dict(root_dir=os.path.join(ROOT_DIR, 'framework/doc/content'),
-                      content=['getting_started/**']),
-                 dict(root_dir=os.path.join(ROOT_DIR, 'framework/doc/content'),
-                      content=['documentation/systems/Adaptivity/framework/**'])]
+        # If you come across this in the future with this failing... you need to
+        # specify a few directories in from_dir/* and
+        # list all of the files in said folder(s)
+        framework_dirs = {'framework': ['contributing.md', 'documenting.md', 'patch_to_code.md', 'reviewing.md'],
+                          'finite_volumes': ['fv_design.md', 'index.md']}
+
+        items = []
+        for dir in framework_dirs:
+            items.append(dict(root_dir=os.path.join(ROOT_DIR, from_dir),
+                         content=['{}/**'.format(dir)], key=dir))
 
         nodes = get_content(items, '.md')
 
+        num_nodes = len(framework_dirs)
+        for files in framework_dirs.values():
+            num_nodes = num_nodes + len(files)
+        self.assertEqual(num_nodes, len(nodes))
+
         for p in nodes:
-            if p.name == 'getting_started':
+            self.assertIn(p.key, framework_dirs)
+            if p.local in framework_dirs:
                 self.assertIsInstance(p, pages.Directory)
-                self.assertEqual(p.local, 'getting_started')
-                self.assertEqual(p.source,
-                                 os.path.join(ROOT_DIR, 'framework/doc/content/getting_started'))
+            else:
+                if p.local.endswith('.md'):
+                    self.assertIsInstance(p, pages.Source)
+                else:
+                    self.assertIsInstance(p, pages.File)
+            self.assertEqual(p.source,
+                             os.path.join(ROOT_DIR, from_dir, p.local))
 
 if __name__ == '__main__':
     import logging
