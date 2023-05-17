@@ -171,7 +171,7 @@ class TestAutoLinkRender(MooseDocsTestCase):
     EXTENSIONS = [core, floats, heading, autolink, modal]
 
     def setupContent(self):
-        config = [dict(root_dir='python/MooseDocs/test/content', content=['extensions/core.md'])]
+        config = [dict(key='test_content', root_dir='python/MooseDocs/test/content', content=['extensions/core.md'])]
         return common.get_content(config, '.md')
 
     def _assertHTML(self, a):
@@ -234,6 +234,15 @@ class TestAutoLinkRender(MooseDocsTestCase):
 
     def testMinimal(self):
         link = autolink.AutoLink(None, page='core.md')
+
+        self._testLinkHelper(link)
+
+        res = self.render(link, renderer=base.LatexRenderer())
+        self.assertSize(res, 1)
+        self._assertLatex(res(0))
+
+    def testKey(self):
+        link = autolink.AutoLink(None, page='core.md', key='test_content')
 
         self._testLinkHelper(link)
 

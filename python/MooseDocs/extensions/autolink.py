@@ -209,7 +209,8 @@ class RenderAutoLink(RenderLinkBase):
         exact = token['exact']
         try:
             desired = self.translator.findPage(token['page'], exact=exact,
-                                               throw_on_zero=not optional and alternative is None)
+                                               throw_on_zero=not optional and alternative is None,
+                                               key=token['key'])
         except MooseDocs.common.exceptions.MooseDocsException:
             html.String(parent, content=token['page'], class_='moose_error')
             raise
@@ -242,7 +243,8 @@ class RenderAutoLink(RenderLinkBase):
 
     def createLatex(self, parent, token, page):
         throw = not token['optional'] and token['alternative'] is None
-        desired = self.translator.findPage(token['page'], exact=token['exact'], throw_on_zero=throw)
+        desired = self.translator.findPage(token['page'], exact=token['exact'], throw_on_zero=throw,
+                                           key=token['key'])
 
         # The 'alternative' token is not supported here as it doesn't seem appropriate [crswong888]
         if desired is None and token['alternative'] is not None:
