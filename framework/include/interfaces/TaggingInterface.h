@@ -94,6 +94,14 @@ protected:
    */
   void prepareVectorTag(Assembly & assembly, unsigned int ivar);
 
+  /**
+   * Prepare vector tags in a reference residual problem context
+   * @param Assembly The assembly object that we obtain the local residual blocks from
+   * @param ivar The variable which we are retrieving the local residual blocks for
+   * @param ref_problem A pointer to a reference residual problem. This can be a nullptr
+   * @param prepare_non_ref_tags Whether to prepare all tags other than reference residual problem
+   * tags. If false, then we will prepare the reference residual tag
+   */
   void prepareVectorTag(Assembly & assembly,
                         unsigned int ivar,
                         const ReferenceResidualProblem * ref_problem,
