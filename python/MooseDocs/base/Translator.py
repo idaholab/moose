@@ -148,7 +148,19 @@ class Translator(mixins.ConfigObject):
             kwargs['destination'] = mooseutils.eval_path(dest)
         mixins.ConfigObject.update(self, **kwargs)
 
-    def findPages(self, arg, exact=False):
+    def hasPageKey(self, key):
+        """
+        Checks whether or not Page(s) are registered with the given key.
+
+        Inputs:
+            key[str]: The key
+        """
+        for page in self.__executioner.getPages():
+            if page.key == key:
+                return True
+        return False
+
+    def findPages(self, arg, exact=False, key=None):
         """
         Locate all Page objects that operates on a string or uses a filter.
 
@@ -164,8 +176,8 @@ class Translator(mixins.ConfigObject):
         if isinstance(arg, str):
             items = self.__page_cache.get(arg, None) if not exact else None
             if items is None:
-                func = lambda p: (p.local == arg) or \
-                                 (not exact and p.local.endswith(os.sep + arg.lstrip(os.sep)))
+                func = lambda p: (key is None or p.key == key) and ((p.local == arg) or \
+                                 (not exact and p.local.endswith(os.sep + arg.lstrip(os.sep))))
                 items = [page for page in self.__executioner.getPages() if func(page)]
 
                 # if pages matched string 'arg', cache them so we don't have to repeat this search
@@ -177,14 +189,14 @@ class Translator(mixins.ConfigObject):
 
         return items
 
-    def findPage(self, arg, throw_on_zero=True, exact=False, warn_on_zero=False):
+    def findPage(self, arg, throw_on_zero=True, exact=False, warn_on_zero=False, key=None):
         """
         Locate a single Page object that has a local name ending with the supplied name.
 
         Inputs:
             see findPages
         """
-        nodes = self.findPages(arg, exact)
+        nodes = self.findPages(arg, exact=exact, key=key)
         if len(nodes) == 0:
             if throw_on_zero or warn_on_zero:
                 msg = "Unable to locate a page that ends with the name '{}'.".format(arg)
@@ -192,6 +204,19 @@ class Translator(mixins.ConfigObject):
                 if num:
                     if self.__markdown_file_list is None:
                         self.__buildMarkdownFileCache()
+
+                    if key is not None:
+                        if not self.hasPageKey(key):
+                            msg = f'The Content key "{key}" is not registered'
+                            raise exceptions.MooseDocsException(msg)
+
+                        all_nodes = self.findPages(arg, exact=exact)
+                        if len(all_nodes):
+                            msg = f'Unable to locate a page with Content key "{key}"'
+                            msg += ', but it was found with other keys:'
+                            for node in all_nodes:
+                                msg += f'\n  {node.key}: {node.local}'
+                            raise exceptions.MooseDocsException(msg)
 
                     dist = self.__levenshtein_cache.get(arg, None)
                     if dist is None:

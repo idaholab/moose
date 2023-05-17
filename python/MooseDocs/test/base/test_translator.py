@@ -31,9 +31,23 @@ class TestTranslator(unittest.TestCase):
         self.assertEqual(page.local, 'extensions/core.md')
 
     def testFindPageError(self):
-        with self.assertRaises(exceptions.MooseDocsException) as cm:
-            page = self.translator.findPage('wrong.md')
-            self.assertIn('Did you mean', ex.exception.message)
+        expect_err = 'Did you mean'
+        with self.assertRaisesRegex(exceptions.MooseDocsException, expect_err) as cm:
+            self.translator.findPage('wrong.md')
+
+    def testFindPageKeyed(self):
+        page = self.translator.findPage('core.md', key='test')
+        self.assertEqual(page.local, 'extensions/core.md')
+
+    def testFindPageKeyedAlternate(self):
+        expect_err = 'test: extensions/core.md'
+        with self.assertRaisesRegex(exceptions.MooseDocsException, expect_err) as cm:
+            self.translator.findPage('core.md', key='framework')
+
+    def testFindPageMissingKey(self):
+        expect_err = 'The Content key "foobar" is not registered'
+        with self.assertRaisesRegex(exceptions.MooseDocsException, expect_err) as cm:
+            self.translator.findPage('core.md', key='foobar')
 
 if __name__ == '__main__':
     unittest.main(verbosity=2)
