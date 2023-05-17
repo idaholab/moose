@@ -15,6 +15,7 @@
 #include "MooseTypes.h"
 #include "MooseVariableFE.h"
 #include "SystemBase.h"
+#include "Positions.h"
 
 #include "libmesh/system.h"
 
@@ -34,7 +35,6 @@ MultiAppGeneralFieldNearestNodeTransfer::validParams()
                                 "selected from the same origin mesh!");
 
   // Nearest node is historically more an extrapolation transfer
-  params.set<bool>("from_app_must_contain_point") = false;
   params.set<Real>("extrapolation_constant") = GeneralFieldTransfer::BetterOutOfMeshValue;
   params.suppressParameter<Real>("extrapolation_constant");
   // We dont keep track of both point distance to app and to nearest node
@@ -49,6 +49,11 @@ MultiAppGeneralFieldNearestNodeTransfer::MultiAppGeneralFieldNearestNodeTransfer
   : MultiAppGeneralFieldTransfer(parameters),
     _num_nearest_points(getParam<unsigned int>("num_nearest_points"))
 {
+  if (_source_app_must_contain_point && _nearest_positions_obj)
+    paramError("use_nearest_position",
+               "We do not support using both nearest positions matching and checking if target "
+               "points are within an app domain because the KDTrees for nearest-positions matching "
+               "are (currently) built with data from multiple applications.");
 }
 
 void
@@ -58,79 +63,103 @@ MultiAppGeneralFieldNearestNodeTransfer::prepareEvaluationOfInterpValues(
   _local_kdtrees.clear();
   _local_points.clear();
   _local_values.clear();
-  buildKDTrees(var_index, _local_kdtrees, _local_points, _local_values);
+  buildKDTrees(var_index);
 }
 
 void
-MultiAppGeneralFieldNearestNodeTransfer::buildKDTrees(
-    const unsigned int var_index,
-    std::vector<std::shared_ptr<KDTree>> & kdtrees,
-    std::vector<std::vector<Point>> & points,
-    std::vector<std::vector<Real>> & local_values)
+MultiAppGeneralFieldNearestNodeTransfer::buildKDTrees(const unsigned int var_index)
 {
-  kdtrees.resize(_from_problems.size());
-  points.resize(_from_problems.size());
-  local_values.resize(_from_problems.size());
+  const unsigned int num_sources =
+      _nearest_positions_obj ? _nearest_positions_obj->getPositions(/*initial=*/false).size()
+                             : _from_problems.size();
 
-  // Construct a local mesh for each problem
-  for (unsigned int i_from = 0; i_from < _from_problems.size(); ++i_from)
+  _local_kdtrees.resize(num_sources);
+  _local_points.resize(num_sources);
+  _local_values.resize(num_sources);
+  unsigned int max_leaf_size = 0;
+
+  // Construct a local KDTree for each source (subapp or positions)
+  for (unsigned int i_source = 0; i_source < num_sources; ++i_source)
   {
-    FEProblemBase & from_problem = *_from_problems[i_from];
-    auto & from_mesh = from_problem.mesh(_displaced_source_mesh);
-    MooseVariableFieldBase & from_var =
-        from_problem.getVariable(0,
-                                 _from_var_names[var_index],
-                                 Moose::VarKindType::VAR_ANY,
-                                 Moose::VarFieldType::VAR_FIELD_ANY);
-
-    System & from_sys = from_var.sys().system();
-    unsigned int from_var_num = from_sys.variable_number(getFromVarName(var_index));
-    // FEM type info
-    auto & fe_type = from_sys.variable_type(from_var.number());
-    bool is_nodal = fe_type.family == LAGRANGE;
-
-    if (is_nodal)
+    // Nest a loop on apps only for the Positions case. Regular case only looks at one app
+    const unsigned int num_apps_to_consider = _nearest_positions_obj ? _from_problems.size() : 1;
+    for (const auto app_index : make_range(num_apps_to_consider))
     {
-      for (const auto & node : from_mesh.getMesh().local_node_ptr_range())
+      const unsigned int i_from = !_nearest_positions_obj ? i_source : app_index;
+
+      // NOTE: If we decide we do not want to mix apps when using the nearest-positions
+      // we could continue here when the positions is not the nearest to the app
+
+      FEProblemBase & from_problem = *_from_problems[i_from];
+      auto & from_mesh = from_problem.mesh(_displaced_source_mesh);
+      MooseVariableFieldBase & from_var =
+          from_problem.getVariable(0,
+                                   _from_var_names[var_index],
+                                   Moose::VarKindType::VAR_ANY,
+                                   Moose::VarFieldType::VAR_FIELD_ANY);
+
+      System & from_sys = from_var.sys().system();
+      const unsigned int from_var_num = from_sys.variable_number(getFromVarName(var_index));
+      // FEM type info
+      const auto & fe_type = from_sys.variable_type(from_var.number());
+      const bool is_nodal = fe_type.family == LAGRANGE;
+
+      if (is_nodal)
       {
-        if (node->n_dofs(from_sys.number(), from_var_num) < 1)
-          continue;
+        for (const auto & node : from_mesh.getMesh().local_node_ptr_range())
+        {
+          if (node->n_dofs(from_sys.number(), from_var_num) < 1)
+            continue;
 
-        if (!_from_blocks.empty() && !inBlocks(_from_blocks, from_mesh, node))
-          continue;
+          if (!_from_blocks.empty() && !inBlocks(_from_blocks, from_mesh, node))
+            continue;
 
-        if (!_from_boundaries.empty() && !onBoundaries(_from_boundaries, from_mesh, node))
-          continue;
+          if (!_from_boundaries.empty() && !onBoundaries(_from_boundaries, from_mesh, node))
+            continue;
 
-        points[i_from].push_back(*node + _from_positions[i_from]);
-        auto dof = node->dof_number(from_sys.number(), from_var_num, 0);
+          // Only add to the KDTree nodes that are closest to the 'position'
+          // When querying values at a target point, the KDTree associated to the closest
+          // position to the target point is queried
+          if (_nearest_positions_obj &&
+              !closestToPosition(i_source, *node + _from_positions[i_from]))
+            continue;
 
-        local_values[i_from].push_back((*from_sys.solution)(dof));
+          const auto dof = node->dof_number(from_sys.number(), from_var_num, 0);
+          _local_points[i_source].push_back(*node + _from_positions[i_from]);
+          _local_values[i_source].push_back((*from_sys.solution)(dof));
+        }
       }
-    }
-    else
-    {
-      for (auto & elem : as_range(from_mesh.getMesh().local_elements_begin(),
-                                  from_mesh.getMesh().local_elements_end()))
+      else
       {
-        if (elem->n_dofs(from_sys.number(), from_var_num) < 1)
-          continue;
+        for (auto & elem : as_range(from_mesh.getMesh().local_elements_begin(),
+                                    from_mesh.getMesh().local_elements_end()))
+        {
+          if (elem->n_dofs(from_sys.number(), from_var_num) < 1)
+            continue;
 
-        if (!_from_blocks.empty() && !inBlocks(_from_blocks, elem))
-          continue;
+          if (!_from_blocks.empty() && !inBlocks(_from_blocks, elem))
+            continue;
 
-        if (!_from_boundaries.empty() && !onBoundaries(_from_boundaries, from_mesh, elem))
-          continue;
+          if (!_from_boundaries.empty() && !onBoundaries(_from_boundaries, from_mesh, elem))
+            continue;
 
-        auto dof = elem->dof_number(from_sys.number(), from_var_num, 0);
-        points[i_from].push_back(elem->vertex_average() + _from_positions[i_from]);
-        local_values[i_from].push_back((*from_sys.solution)(dof));
+          if (_nearest_positions_obj &&
+              !closestToPosition(i_source, elem->vertex_average() + _from_positions[i_from]))
+            continue;
+
+          const auto dof = elem->dof_number(from_sys.number(), from_var_num, 0);
+          _local_points[i_source].push_back(elem->vertex_average() + _from_positions[i_from]);
+          _local_values[i_source].push_back((*from_sys.solution)(dof));
+        }
       }
+      max_leaf_size = std::max(max_leaf_size, from_mesh.getMaxLeafSize());
     }
 
+    // Make a KDTree, from a single app in regular case, from all points from all apps nearest
+    // a position in the nearest_position case
     std::shared_ptr<KDTree> _kd_tree =
-        std::make_shared<KDTree>(points[i_from], from_mesh.getMaxLeafSize());
-    kdtrees[i_from] = _kd_tree;
+        std::make_shared<KDTree>(_local_points[i_source], max_leaf_size);
+    _local_kdtrees[i_source] = _kd_tree;
   }
 }
 
@@ -138,17 +167,12 @@ void
 MultiAppGeneralFieldNearestNodeTransfer::evaluateInterpValues(
     const std::vector<Point> & incoming_points, std::vector<std::pair<Real, Real>> & outgoing_vals)
 {
-  evaluateInterpValuesNearestNode(
-      _local_kdtrees, _local_points, _local_values, incoming_points, outgoing_vals);
+  evaluateInterpValuesNearestNode(incoming_points, outgoing_vals);
 }
 
 void
 MultiAppGeneralFieldNearestNodeTransfer::evaluateInterpValuesNearestNode(
-    const std::vector<std::shared_ptr<KDTree>> & local_kdtrees,
-    const std::vector<std::vector<Point>> & local_points,
-    const std::vector<std::vector<Real>> & local_values,
-    const std::vector<Point> & incoming_points,
-    std::vector<std::pair<Real, Real>> & outgoing_vals)
+    const std::vector<Point> & incoming_points, std::vector<std::pair<Real, Real>> & outgoing_vals)
 {
   dof_id_type i_pt = 0;
   for (auto & pt : incoming_points)
@@ -157,9 +181,17 @@ MultiAppGeneralFieldNearestNodeTransfer::evaluateInterpValuesNearestNode(
     outgoing_vals[i_pt].second = std::numeric_limits<Real>::max();
     bool point_found = false;
 
-    // Loop on all source problems
-    for (MooseIndex(_from_problems.size()) i_from = 0; i_from < _from_problems.size(); ++i_from)
+    const unsigned int num_sources =
+        !_nearest_positions_obj ? _from_problems.size()
+                                : _nearest_positions_obj->getPositions(/*initial=*/false).size();
+
+    // Loop on all sources
+    for (const auto i_from : make_range(num_sources))
     {
+      // Only use the KDTree from the closest position if in "nearest-position" mode
+      if (_nearest_positions_obj && !closestToPosition(i_from, pt))
+        continue;
+
       std::vector<std::size_t> return_index(_num_nearest_points);
       std::vector<Real> return_dist_sqr(_num_nearest_points);
 
@@ -168,16 +200,16 @@ MultiAppGeneralFieldNearestNodeTransfer::evaluateInterpValuesNearestNode(
         continue;
 
       // KD Tree can be empty if no points are within block/boundary/bounding box restrictions
-      if (local_kdtrees[i_from]->numberCandidatePoints())
+      if (_local_kdtrees[i_from]->numberCandidatePoints())
       {
         point_found = true;
-        local_kdtrees[i_from]->neighborSearch(
+        _local_kdtrees[i_from]->neighborSearch(
             pt, _num_nearest_points, return_index, return_dist_sqr);
         Real val_sum = 0, dist_sum = 0;
         for (auto index : return_index)
         {
-          val_sum += local_values[i_from][index];
-          dist_sum += (local_points[i_from][index] - pt).norm();
+          val_sum += _local_values[i_from][index];
+          dist_sum += (_local_points[i_from][index] - pt).norm();
         }
         // Pick the closest
         if (dist_sum / return_dist_sqr.size() < outgoing_vals[i_pt].second)
@@ -193,23 +225,31 @@ MultiAppGeneralFieldNearestNodeTransfer::evaluateInterpValuesNearestNode(
     {
       // Local source meshes conflicts can happen two ways:
       // - two (or more) problems' nearest nodes are equidistant to the target point
-      // - within a problem, the num_nearest_points'th closest node is as close to the target point
-      //   as the num_nearest_points + 1'th closest node
+      // - within a problem, the num_nearest_points'th closest node is as close to the target
+      //   point as the num_nearest_points + 1'th closest node
       unsigned int num_equidistant_problems = 0;
 
-      for (MooseIndex(_from_problems.size()) i_from = 0; i_from < _from_problems.size(); ++i_from)
+      for (const auto i_from : make_range(num_sources))
       {
+        // Only use the KDTree from the closest position if in "nearest-position" mode
+        if (_nearest_positions_obj && !closestToPosition(i_from, pt))
+          continue;
+
         unsigned int num_search = _num_nearest_points + 1;
         std::vector<std::size_t> return_index(num_search);
         std::vector<Real> return_dist_sqr(num_search);
 
-        if (local_kdtrees[i_from]->numberCandidatePoints())
+        if (_local_kdtrees[i_from]->numberCandidatePoints())
         {
-          local_kdtrees[i_from]->neighborSearch(pt, num_search, return_index, return_dist_sqr);
+          _local_kdtrees[i_from]->neighborSearch(pt, num_search, return_index, return_dist_sqr);
           auto num_found = return_dist_sqr.size();
 
+          // Local coordinates only accessible when not using nearest-position
+          Point local_pt = pt;
+          if (!_nearest_positions_obj)
+            local_pt -= _from_positions[i_from];
+
           // Look for too many equidistant nodes within a problem. First zip then sort by distance
-          auto local_pt = pt - _from_positions[i_from];
           std::vector<std::pair<Real, std::size_t>> zipped_nearest_points;
           for (auto i : make_range(num_found))
             zipped_nearest_points.push_back(std::make_pair(return_dist_sqr[i], return_index[i]));
@@ -225,8 +265,8 @@ MultiAppGeneralFieldNearestNodeTransfer::evaluateInterpValuesNearestNode(
           for (auto i : make_range(num_search - 1))
           {
             auto index = zipped_nearest_points[i].second;
-            val_sum += local_values[i_from][index];
-            dist_sum += (local_points[i_from][index] - pt).norm();
+            val_sum += _local_values[i_from][index];
+            dist_sum += (_local_points[i_from][index] - pt).norm();
           }
           // Compare to the selected value found after looking at all the problems
           if (MooseUtils::absoluteFuzzyEqual(dist_sum / return_dist_sqr.size(),

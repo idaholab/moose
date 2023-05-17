@@ -19,6 +19,8 @@
 #include "libmesh/mesh_function.h"
 #include "libmesh/parallel_algebra.h" // for communicator send and receive stuff
 
+class Positions;
+
 /**
  * It is a general field transfer. It will do the following things
  * 1) From part of source domain to part of domain. Support subdomains/boundaries to
@@ -137,6 +139,14 @@ protected:
                     const PointLocatorBase * const pl,
                     const Point & pt) const;
 
+  /**
+   * Whether a point is closest to a position at the index specified than any other position
+   * @param pos_index the index of the position to consider in the positions vector
+   * @param pt the point
+   * @return whether the point is closest to this position than any other in the positions vector
+   */
+  bool closestToPosition(unsigned int pos_index, const Point & pt) const;
+
   /// Origin array/vector variable components
   const std::vector<unsigned int> _from_var_components;
 
@@ -151,6 +161,10 @@ protected:
   //       If both apps are the same rank, the closest app is used, the point has an invalid value
   //       If each app are on a different rank, the second closest return a valid value, it gets
   //       used
+
+  // Positions object to use to match target points and origin points as closest to the same
+  // Position
+  const Positions * _nearest_positions_obj;
 
   /// Whether the source app mesh must actually contain the points for them to be considered or whether
   /// the bounding box is enough. If false, we can interpolate between apps

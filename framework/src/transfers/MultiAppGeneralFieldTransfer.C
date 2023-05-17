@@ -15,6 +15,8 @@
 #include "MooseMesh.h"
 #include "MooseTypes.h"
 #include "MooseVariableFE.h"
+#include "Positions.h"
+#include "MultiAppPositions.h" // remove after use_nearest_app deprecation
 
 // libmesh includes
 #include "libmesh/point_locator_base.h"
@@ -92,8 +94,13 @@ MultiAppGeneralFieldTransfer::validParams()
   params.addParam<bool>(
       "use_nearest_app",
       false,
-      "When True, transfers from a child application will work by finding the nearest "
-      "(using the `location`) sub-app and query that app for the value to transfer.");
+      "When True, transfers from a child application will work by finding the nearest (using "
+      "the `position` + mesh centroid) sub-app and query that app for the value to transfer.");
+  params.addParam<PositionsName>(
+      "use_nearest_position",
+      "Name of the the Positions object (in main app) such that transfers to/from a child "
+      "application will work by finding the nearest position to a target and query only the "
+      "app / points closer to this position than any other position for the value to transfer.");
   params.addParam<bool>(
       "from_app_must_contain_point",
       false,
@@ -108,7 +115,8 @@ MultiAppGeneralFieldTransfer::validParams()
   params.addParamNamesToGroup(
       "to_blocks from_blocks to_boundaries from_boundaries elemental_boundary_restriction",
       "Transfer spatial restriction");
-  params.addParamNamesToGroup("greedy_search use_nearest_app search_value_conflicts",
+  params.addParamNamesToGroup("greedy_search use_nearest_app use_nearest_position "
+                              "search_value_conflicts",
                               "Search algorithm");
   params.addParamNamesToGroup("error_on_miss from_app_must_contain_point extrapolation_constant",
                               "Extrapolation behavior");
@@ -121,6 +129,10 @@ MultiAppGeneralFieldTransfer::MultiAppGeneralFieldTransfer(const InputParameters
     _from_var_components(getParam<std::vector<unsigned int>>("source_variable_components")),
     _to_var_components(getParam<std::vector<unsigned int>>("target_variable_components")),
     _use_nearest_app(getParam<bool>("use_nearest_app")),
+    _nearest_positions_obj(
+        isParamValid("use_nearest_position")
+            ? &_fe_problem.getPositionsObject(getParam<PositionsName>("use_nearest_position"))
+            : nullptr),
     _source_app_must_contain_point(getParam<bool>("from_app_must_contain_point")),
     _elemental_boundary_restriction_on_sides(
         getParam<MooseEnum>("elemental_boundary_restriction") == "sides"),
@@ -144,6 +156,29 @@ MultiAppGeneralFieldTransfer::MultiAppGeneralFieldTransfer(const InputParameters
   if (_to_var_names.size() != _to_var_components.size() && _to_var_components.size() > 0)
     paramError("target_variable_components",
                "This parameter must be equal to the number of target variables");
+
+  // Make simple 'use_nearest_app' parameter rely on Positions
+  if (_use_nearest_app)
+  {
+    if (_nearest_positions_obj)
+      paramError("use_nearest_app", "Cannot use nearest-app and nearest-position together");
+    if (!hasFromMultiApp())
+      mooseError("Should have a source multiapp when using the nearest-app informed search");
+    auto pos_params = MultiAppPositions::validParams();
+    pos_params.set<std::vector<MultiAppName>>("multiapps") = {getMultiApp()->name()};
+    pos_params.set<MooseApp *>("_moose_app") =
+        parameters.getCheckedPointerParam<MooseApp *>("_moose_app");
+    _fe_problem.addReporter("MultiAppPositions", "_created_for_" + name(), pos_params);
+    _nearest_positions_obj = &_fe_problem.getPositionsObject("_created_for_" + name());
+  }
+
+  // Dont let users get wrecked by bounding boxes if it looks like they are trying to extrapolate
+  if (!_source_app_must_contain_point &&
+      (_nearest_positions_obj || isParamSetByUser("from_app_must_contain_point")))
+    if (!isParamSetByUser("bbox_factor") && !isParamSetByUser("fixed_bounding_box_size"))
+      mooseWarning(
+          "Extrapolation (nearest-source options, outside-app source) parameters have been passed, "
+          "but no subapp bounding box expansion parameters have been passed.");
 }
 
 void
@@ -766,7 +801,7 @@ MultiAppGeneralFieldTransfer::outputValueConflicts(
       const Point p = std::get<2>(conflict);
 
       std::string origin_domain_message;
-      if (hasFromMultiApp())
+      if (hasFromMultiApp() && !_nearest_positions_obj)
       {
         // NOTES:
         // - The origin app for a conflict may not be unique.
@@ -775,6 +810,10 @@ MultiAppGeneralFieldTransfer::outputValueConflicts(
         const auto app_id = _from_local2global_map[problem_id];
         origin_domain_message = "In source child app " + std::to_string(app_id) + " mesh,";
       }
+      // We can't locate the source app when considering nearest positions, we return the conflict
+      // location in the target app (parent or sibling) instead
+      else if (hasFromMultiApp() && _nearest_positions_obj)
+        origin_domain_message = "In target app mesh,";
       else
         origin_domain_message = "In source parent app mesh,";
 
@@ -1085,6 +1124,15 @@ MultiAppGeneralFieldTransfer::onBoundaries(const std::set<BoundaryID> & boundari
   if (!elem)
     return false;
   return onBoundaries(boundaries, mesh, elem);
+}
+
+bool
+MultiAppGeneralFieldTransfer::closestToPosition(unsigned int pos_index, const Point & pt) const
+{
+  mooseAssert(_nearest_positions_obj, "Should not be here without a positions object");
+  bool initial = _fe_problem.getCurrentExecuteOnFlag() == EXEC_INITIAL;
+  return _nearest_positions_obj->getPosition(pos_index, initial) ==
+         _nearest_positions_obj->getNearestPosition(pt, initial);
 }
 
 Real

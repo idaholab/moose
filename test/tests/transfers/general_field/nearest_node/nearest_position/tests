@@ -1,0 +1,54 @@
+[Tests]
+  issues = '#23587'
+  design = 'transfers/MultiAppGeneralFieldUserObjectTransfer.md'
+
+  [2d_overlay]
+    requirement = "The system shall be able to transfer a spatial field using a nearest-node "
+                  "(source) algorithm combined with a nearest-positions heuristic to limit the "
+                  "source of the origin values "
+    [nearest_position]
+      type = 'Exodiff'
+      input = 'main.i'
+      cli_args = 'Transfers/from_sub/use_nearest_position=input Transfers/from_sub_elem/use_nearest_position=input'
+      exodiff = 'main_out.e main_out_sub0_out.e main_out_sub1_out.e'
+      detail = "for a 2D case with multiple subapps,"
+    []
+    [child_app_split]
+      type = 'Exodiff'
+      input = 'main_single_sub.i'
+      exodiff = 'main_single_sub_out.e'
+      detail = "for a 2D case with a single child app split using the positions in multiple regions "
+               "to transfer data from."
+    []
+  []
+
+  [multiple_subapps]
+    type = 'Exodiff'
+    input = 'main_between_multiapp.i'
+    exodiff = 'main_between_multiapp_out_ma10.e main_between_multiapp_out_ma11.e
+               main_between_multiapp_out_ma20.e main_between_multiapp_out_ma21.e'
+    requirement = 'The system shall be able to send data in a subapp to another subapp using a nearest-node algorithm nested within a nearest-positions algorithm.'
+  []
+
+  [errors]
+    requirement = 'The system shall error if'
+    [from_main_app]
+      type = 'RunException'
+      input = 'main.i'
+      cli_args = 'Transfers/from_sub/from_app_must_contain_point=true Transfers/from_sub_elem/from_app_must_contain_point=true'
+      expect_err = 'We do not support using both nearest positions matching and checking if target'
+      detail = 'both nearest positions algorithm and asking for origin points to be contained within an app domain are requested as this is not supported.'
+    []
+  []
+
+  [overlap_nearest_position]
+    type = RunException
+    input = main_single_sub.i
+    cli_args = "Transfers/active='from_sub' Transfers/from_sub/search_value_conflicts=true "
+               "Positions/single/positions='0 0 0'"
+    expect_err = "multiple valid values from equidistant points were "
+    requirement = "The system shall be able to detect indetermination in a transfer due to floating "
+                  "point decisions on which node is the nearest, even when using the nearest "
+                  "position option."
+  []
+[]

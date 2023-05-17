@@ -3,7 +3,8 @@
   design = 'transfers/MultiAppGeneralFieldShapeEvaluationTransfer.md'
 
   [2d_overlay]
-    requirement = "The system shall be able to transfer variables by evaluating shape functions in the origin problem"
+    requirement = "The system shall be able to transfer variables by evaluating shape functions in "
+                  "the origin problem"
     [same_var_type]
       type = 'Exodiff'
       input = 'main.i'
@@ -59,6 +60,7 @@
       # Only makes sense for receiving from multiple subapps, other transfers are inactive
       cli_args = "Outputs/file_base=nearest_subapp Transfers/active='from_sub from_sub_elem'
           Transfers/from_sub/use_nearest_app=true Transfers/from_sub_elem/use_nearest_app=true
+          Transfers/from_sub/bbox_factor=1.00000001 Transfers/from_sub_elem/bbox_factor=1.00000001
           MultiApps/sub/positions='0.000001 0.0001 0 0.4111111 0.41120101 0 0.699932 0.099993 0'
           MultiApps/sub/cli_args='Mesh/xmax=0.8;Mesh/ymax=0.7'"
       detail = "when using the closest app rather than the first valid value to chose a value"
@@ -111,7 +113,8 @@
       type = RunException
       input = main.i
       # We offset them a little, because overlaps when the transferred value is the same are not counted as overlaps
-      cli_args = "Transfers/active='from_sub' Transfers/from_sub/search_value_conflicts=true MultiApps/sub/positions='0 0 0 0.0001 0 0'"
+      cli_args = "Transfers/active='from_sub' Transfers/from_sub/search_value_conflicts=true "
+                 "MultiApps/sub/positions='0 0 0 0.0001 0 0'"
       expect_err = "multiple valid values from equidistant points were "
       detail = 'overlapping origin child application, causing multiple shape evaluations to be valid'
       # Both apps need to be on the same process
@@ -122,7 +125,8 @@
       type = RunException
       input = main.i
       # The child apps overlap and send multiple valid points for each target point on the destination app (parent)
-      cli_args = "Transfers/active='from_sub' Transfers/from_sub/search_value_conflicts=true MultiApps/sub/positions='0 0 0 0.01 0 0'"
+      cli_args = "Transfers/active='from_sub' Transfers/from_sub/search_value_conflicts=true "
+                 "MultiApps/sub/positions='0 0 0 0.01 0 0'"
       expect_err = "multiple valid values from equidistant points were received"
       detail = 'multiple source problems sending valid values for a given target point'
       # One app per process
@@ -136,11 +140,14 @@
       # and equidistant from 0 0 0 and 0.1 0 0, the subapp positions
       cli_args = "Outputs/file_base=nearest_subapp Transfers/active='from_sub from_sub_elem'
           Transfers/from_sub/use_nearest_app=true Transfers/from_sub_elem/use_nearest_app=true
+          Transfers/from_sub/bbox_factor=1 Transfers/from_sub_elem/bbox_factor=1
           MultiApps/sub/positions='0 0 0 0.1 0 0'
           Transfers/from_sub/search_value_conflicts=true Transfers/from_sub_elem/search_value_conflicts=true
           MultiApps/sub/cli_args='Mesh/xmin=-0.4;Mesh/xmax=0.8;Mesh/ymax=0.7'"
-      expect_err = "multiple valid values from equidistant points were "
+      expect_err = "(Search for nearest position found several matches|multiple valid values from "
+                   "equidistant points were )"
       detail = "when using the closest app rather than the first valid value to chose a value"
     []
   []
 []
+

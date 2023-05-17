@@ -15,6 +15,7 @@
 #include "MooseMesh.h"
 #include "MooseTypes.h"
 #include "MooseVariableFE.h"
+#include "Positions.h"
 
 #include "libmesh/system.h"
 #include "libmesh/mesh_function.h"
@@ -42,6 +43,10 @@ MultiAppGeneralFieldShapeEvaluationTransfer::MultiAppGeneralFieldShapeEvaluation
     const InputParameters & parameters)
   : MultiAppGeneralFieldTransfer(parameters)
 {
+  // Nearest point isn't well defined for sending app-based data from main app to a multiapp
+  if (_nearest_positions_obj && isParamValid("to_multi_app") && !isParamValid("from_multi_app"))
+    paramError("use_nearest_position",
+               "Cannot use nearest-position algorithm when sending from the main application");
 }
 
 void
@@ -102,7 +107,7 @@ MultiAppGeneralFieldShapeEvaluationTransfer::evaluateInterpValuesWithMeshFunctio
   for (auto & pt : incoming_points)
   {
     bool point_found = false;
-    if (_use_nearest_app)
+    if (_nearest_positions_obj)
       outgoing_vals[i_pt].second = GeneralFieldTransfer::BetterOutOfMeshValue;
 
     // Loop on all local origin problems until:
@@ -111,7 +116,7 @@ MultiAppGeneralFieldShapeEvaluationTransfer::evaluateInterpValuesWithMeshFunctio
     // - or if looking for the nearest app, we also check them all
     for (MooseIndex(_from_problems.size()) i_from = 0;
          i_from < _from_problems.size() &&
-         (!point_found || _search_value_conflicts || _use_nearest_app);
+         (!point_found || _search_value_conflicts || _nearest_positions_obj);
          ++i_from)
     {
       // Check spatial restrictions
@@ -122,13 +127,29 @@ MultiAppGeneralFieldShapeEvaluationTransfer::evaluateInterpValuesWithMeshFunctio
         // Use mesh function to compute interpolation values
         auto val = (local_meshfuns[i_from])(pt - _from_positions[i_from]);
 
+        // Get nearest position (often a subapp position) for the target point
+        // We want values from the child app that is closest to the same position as the target
+        Point nearest_position_source;
+        if (_nearest_positions_obj)
+        {
+          const bool initial = _fe_problem.getCurrentExecuteOnFlag() == EXEC_INITIAL;
+          const Point nearest_position = _nearest_positions_obj->getNearestPosition(pt, initial);
+          nearest_position_source =
+              _nearest_positions_obj->getNearestPosition(_from_positions[i_from], initial);
+
+          // Source (often app position) is not closest to the same positions as the
+          // target, dont send values
+          if (nearest_position != nearest_position_source)
+            continue;
+        }
+
         // Look for overlaps. The check is not active outside of overlap search because in that
         // case we accept the first value from the lowest ranked process
         // NOTE: There is no guarantee this will be the final value used among all problems
         //       but for shape evaluation we really do expect only one value to even be valid
         if (detectConflict(val,
                            outgoing_vals[i_pt].first,
-                           _use_nearest_app ? (pt - _from_positions[i_from]).norm() : 1,
+                           _nearest_positions_obj ? (pt - nearest_position_source).norm() : 1,
                            outgoing_vals[i_pt].second))
           registerConflict(i_from, 0, pt - _from_positions[i_from], 1, true);
 
@@ -139,15 +160,15 @@ MultiAppGeneralFieldShapeEvaluationTransfer::evaluateInterpValuesWithMeshFunctio
           point_found = true;
 
         // Assign value
-        if (!_use_nearest_app)
+        if (!_nearest_positions_obj)
         {
           outgoing_vals[i_pt].first = val;
           outgoing_vals[i_pt].second = 1;
         }
-        else if ((pt - _from_positions[i_from]).norm() < outgoing_vals[i_pt].second)
+        else if ((pt - nearest_position_source).norm() < outgoing_vals[i_pt].second)
         {
           outgoing_vals[i_pt].first = val;
-          outgoing_vals[i_pt].second = (pt - _from_positions[i_from]).norm();
+          outgoing_vals[i_pt].second = (pt - nearest_position_source).norm();
         }
       }
     }
