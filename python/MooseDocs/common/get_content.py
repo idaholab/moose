@@ -173,7 +173,8 @@ def get_items(options):
     all_keys = set()
     for item in items:
         key = item['key']
-        if key in all_keys:
+        # The "if key" check should be removed with #24406
+        if key and key in all_keys:
             LOG.error(f'The Content key "{key}" is defined multiple times.')
             return None
         all_keys.add(key)
