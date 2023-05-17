@@ -12,7 +12,7 @@ import logging
 
 import MooseDocs
 from .. import common
-from ..base import components, Extension
+from ..base import components, Extension, Translator
 from ..tree import tokens, latex, html
 from . import core, floats, heading, modal
 
@@ -37,6 +37,7 @@ class AutoLinkExtension(Extension):
     @staticmethod
     def defaultConfig():
         config = Extension.defaultConfig()
+        config['warn_implicit'] = (True, "Set to true to warn of implicit links that should be explicit")
         return config
 
     def extend(self, reader, renderer):
@@ -200,17 +201,46 @@ class RenderLocalLink(RenderLinkBase):
         return self.createLatexHelper(parent, token, page, page)
 
 class RenderAutoLink(RenderLinkBase):
+    def findPageArgs(self, token, page):
+        """
+        Helper for creating arguments to pass to Translator.findPage
+        """
+        args = [token['page']]
+        kwargs = {'exact': token['exact'],
+                  'key': token['key'],
+                  'throw_other_key': False}
+
+        if self.extension.get('warn_implicit'):
+            if token['key'] is None and page.key is not None:
+                kwargs['key'] = page.key
+            kwargs['throw_other_key'] = True
+
+        return args, kwargs
+
     """
     Create link to another page and extract the heading for the text, if no children provided.
     """
     def createHTML(self, parent, token, page):
         alternative = token['alternative']
         optional = token['optional']
-        exact = token['exact']
+        find_args, find_kwargs = self.findPageArgs(token, page)
         try:
-            desired = self.translator.findPage(token['page'], exact=exact,
-                                               throw_on_zero=not optional and alternative is None,
-                                               key=token['key'])
+            desired = self.translator.findPage(*find_args, **find_kwargs,
+                                               throw_on_zero=not optional and alternative is None)
+        except Translator.FindPageOtherKeyException as ex:
+            token_page = token['page']
+            src = token.info[0] if token.info else token.text()
+            line = token.info.line if token.info else None
+
+            msg = f"The link should be explicitly defined with the Content key '{ex.page.key}', as:\n"
+            replace = f'{ex.page.key}:{token_page}'
+            if token_page in src:
+                msg += '  ' + src.replace(token_page, replace) + '\n'
+            else:
+                msg += '  ' + replace + '\n'
+            LOG.warning(common.report_error(msg, page.source, line=line,
+                                            src=src, prefix='WARNING'))
+            desired = ex.page
         except MooseDocs.common.exceptions.MooseDocsException:
             html.String(parent, content=token['page'], class_='moose_error')
             raise
@@ -237,14 +267,14 @@ class RenderAutoLink(RenderLinkBase):
                                                   token.info.line if token.info else None,
                                                   token.info[0] if token.info else token.text()))
                     return None
-            desired = self.translator.findPage(token['page'], exact=exact, throw_on_zero=not optional)
+            desired = self.translator.findPage(token['page'], exact=token['exact'], throw_on_zero=not optional)
 
         return self.createHTMLHelper(parent, token, page, desired)
 
     def createLatex(self, parent, token, page):
         throw = not token['optional'] and token['alternative'] is None
-        desired = self.translator.findPage(token['page'], exact=token['exact'], throw_on_zero=throw,
-                                           key=token['key'])
+        find_args, find_kwargs = self.findPageArgs(token, page)
+        desired = self.translator.findPage(*find_args, **find_kwargs, throw_on_zero=throw)
 
         # The 'alternative' token is not supported here as it doesn't seem appropriate [crswong888]
         if desired is None and token['alternative'] is not None:
