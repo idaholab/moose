@@ -154,6 +154,10 @@ def get_items(options):
     items = []
 
     def parse_entry(key, value):
+        if 'root_dir' not in value:
+            LOG.error('The Content entry "{key}" is missing a "root_dir" entry')
+            return None
+
         content = value.get('content', None)
         external = value.get('external', False)
         return dict(root_dir=value['root_dir'], content=content,
@@ -175,7 +179,7 @@ def get_items(options):
         key = item['key']
         # The "if key" check should be removed with #24406
         if key and key in all_keys:
-            LOG.error(f'The Content key "{key}" is defined multiple times.')
+            LOG.error(f'The Content entry "{key}" is defined multiple times.')
             return None
         all_keys.add(key)
 
