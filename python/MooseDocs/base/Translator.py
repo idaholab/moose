@@ -229,14 +229,15 @@ class Translator(mixins.ConfigObject):
                             raise exceptions.MooseDocsException(msg)
 
                         all_nodes = self.findPages(arg, exact=exact)
-                        if len(all_nodes):
-                            # Should be removed with #24406
-                            if len(all_nodes) == 1 and throw_other_key:
-                                raise Translator.FindPageOtherKeyException(all_nodes[0])
+                        # Filter should be removed with #24406
+                        keyed_nodes = list(filter(lambda p: (p.key is not None), all_nodes))
+                        if len(keyed_nodes) > 0:
+                            if len(keyed_nodes) == 1 and throw_other_key and keyed_nodes[0].key is not None:
+                                raise Translator.FindPageOtherKeyException(keyed_nodes[0])
 
                             msg = f'Unable to locate a page with Content key "{key}"'
                             msg += ', but it was found with other keys:'
-                            for node in all_nodes:
+                            for node in keyed_nodes:
                                 msg += f'\n  {node.key}: {node.local}'
                             raise exceptions.MooseDocsException(msg)
 
