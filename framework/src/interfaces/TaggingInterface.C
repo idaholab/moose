@@ -170,16 +170,29 @@ TaggingInterface::prepareVectorTag(Assembly & assembly,
                                    const bool prepare_non_ref_tags)
 {
   mooseAssert(_vector_tags.size() >= 1, "we need at least one active tag");
-
-  const auto ref_tags =
+  const auto reference_tag =
       ref_problem ? std::set<TagID>({ref_problem->referenceVectorTagID({})}) : std::set<TagID>({});
-  const auto abs_ref_tags = _abs_vector_tags.empty() ? std::set<TagID>({}) : ref_tags;
 
   if (prepare_non_ref_tags)
     prepareVectorTagInternal(
-        assembly, ivar, _vector_tags, _abs_vector_tags, ref_tags, abs_ref_tags);
+        assembly, ivar, _vector_tags, _abs_vector_tags, reference_tag, reference_tag);
   else
-    prepareVectorTagInternal(assembly, ivar, ref_tags, abs_ref_tags, {}, {});
+  {
+    std::set<TagID> vector_tags_that_are_ref_tags, absolute_value_vector_tags_that_are_ref_tags;
+    for (const auto tag : reference_tag)
+    {
+      if (_vector_tags.count(tag))
+        vector_tags_that_are_ref_tags.insert(tag);
+      if (_abs_vector_tags.count(tag))
+        absolute_value_vector_tags_that_are_ref_tags.insert(tag);
+    }
+    prepareVectorTagInternal(assembly,
+                             ivar,
+                             vector_tags_that_are_ref_tags,
+                             absolute_value_vector_tags_that_are_ref_tags,
+                             {},
+                             {});
+  }
 }
 
 void
@@ -209,7 +222,9 @@ TaggingInterface::prepareVectorTagInternal(
   prepare(_re_blocks, vector_tags, vector_tags_to_skip);
   prepare(_absre_blocks, absolute_value_vector_tags, absolute_value_vector_tags_to_skip);
 
-  _local_re.resize(_re_blocks.empty() ? std::size_t(0) : _re_blocks[0]->size());
+  _local_re.resize(_re_blocks.empty()
+                       ? (_absre_blocks.empty() ? std::size_t(0) : _absre_blocks[0]->size())
+                       : _re_blocks[0]->size());
 }
 
 void
