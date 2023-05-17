@@ -33,6 +33,12 @@ PenaltyFrictionUserObject::validParams()
                         "penalty factor is also used for the frictional problem.");
   params.addRequiredParam<Real>("friction_coefficient",
                                 "The friction coefficient ruling Coulomb friction equations.");
+  params.addRangeCheckedParam<Real>(
+      "slip_tolerance",
+      1e-5,
+      "slip_tolerance > 0",
+      "Acceptable slip distance at which augmented Lagrange iterations can be stopped");
+
   return params;
 }
 
@@ -56,6 +62,7 @@ PenaltyFrictionUserObject::PenaltyFrictionUserObject(const InputParameters & par
     _penalty(getParam<Real>("penalty")),
     _penalty_friction(isParamValid("penalty_friction") ? getParam<Real>("penalty_friction")
                                                        : getParam<Real>("penalty")),
+    _slip_tolerance(getParam<Real>("slip_tolerance")),
     _friction_coefficient(getParam<Real>("friction_coefficient"))
 {
   auto check_type = [this](const auto & var, const auto & var_name)
@@ -113,6 +120,10 @@ PenaltyFrictionUserObject::timestepSetup()
     old_tangential_traction = {MetaPhysicL::raw_value(tangential_traction(0)),
                                MetaPhysicL::raw_value(tangential_traction(1))};
   }
+
+  // TODO call it delta_tangential_lm
+  for (auto & [dof_object, tangential_lm] : _dof_to_frictional_lagrange_multipliers)
+    tangential_lm.setZero();
 }
 
 void
@@ -177,6 +188,9 @@ PenaltyFrictionUserObject::reinit()
     _frictional_contact_force_two[qp] = 0.0;
   }
 
+  // zero vector
+  const static TwoVector zero{0.0, 0.0};
+
   // iterate over nodes
   for (const auto i : make_range(_test->size()))
   {
@@ -198,9 +212,13 @@ PenaltyFrictionUserObject::reinit()
           libmesh_map_find(_dof_to_real_tangential_velocity, node);
       const ADTwoVector slip_velocity = {real_tangential_velocity[0], real_tangential_velocity[1]};
 
+      // frictional lagrange multiplier (delta lambda^(k)_T)
+      const auto & tangential_lm =
+          _augmented_lagrange_problem ? _dof_to_frictional_lagrange_multipliers[node] : zero;
+
       // tangential trial traction (Simo 3.12)
       ADTwoVector tangential_trial_traction =
-          old_tangential_traction + _penalty_friction * slip_velocity * _dt;
+          old_tangential_traction + tangential_lm + _penalty_friction * slip_velocity * _dt;
 
       ADReal tangential_trial_traction_norm = tangential_trial_traction.norm();
 
@@ -250,7 +268,48 @@ PenaltyFrictionUserObject::isContactConverged()
 {
   // check normal contact convergence first
   if (!PenaltyWeightedGapUserObject::isContactConverged())
+  {
+    mooseInfoRepeated("Penetration tolerance fail");
     return false;
+  }
+
+  for (const auto & [dof_object, traction_pair] : _dof_to_tangential_traction)
+  {
+    const auto it = _dof_to_real_tangential_velocity.find(dof_object);
+    TwoVector slip_velocity;
+    if (it != _dof_to_real_tangential_velocity.end())
+      slip_velocity = {MetaPhysicL::raw_value(it->second[0]),
+                       MetaPhysicL::raw_value(it->second[1])};
+
+    // check slip/stick
+    _console << "Cond1: " << (slip_velocity.norm() * _dt) << " < " << _slip_tolerance << '\n';
+    if ((slip_velocity.norm() * _dt) < _slip_tolerance)
+    {
+      _console << "MET!\n";
+      const auto & tangential_traction = traction_pair.first;
+
+      const auto it = _dof_to_weighted_gap.find(dof_object);
+      if (it == _dof_to_weighted_gap.end())
+      {
+        _console << "no gap found " << _dof_to_weighted_gap.size() << '\n';
+        continue;
+      }
+      const auto & weighted_gap = -it->second.first;
+      const auto normal_lm = _dof_to_lagrange_multiplier[dof_object];
+
+      auto normal_pressure = _penalty * weighted_gap + normal_lm;
+      normal_pressure = normal_pressure > 0.0 ? normal_pressure : 0.0;
+
+      // check coulomb condition
+      _console << "Cond2: " << _friction_coefficient * normal_pressure << " < "
+               << tangential_traction.norm() << '\n';
+      if (_friction_coefficient * normal_pressure < tangential_traction.norm())
+      {
+        return false;
+        mooseInfoRepeated("Stick tolerance fail");
+      }
+    }
+  }
 
   return true;
 }
@@ -259,4 +318,30 @@ void
 PenaltyFrictionUserObject::updateAugmentedLagrangianMultipliers()
 {
   PenaltyWeightedGapUserObject::updateAugmentedLagrangianMultipliers();
+
+  for (auto & [dof_object, tangential_lm] : _dof_to_frictional_lagrange_multipliers)
+  {
+    // normal quantities
+    const auto & normal_lm = libmesh_map_find(_dof_to_lagrange_multiplier, dof_object);
+
+    // tangential quantities
+    const auto & real_tangential_velocity =
+        libmesh_map_find(_dof_to_real_tangential_velocity, dof_object);
+    const TwoVector slip_velocity = {MetaPhysicL::raw_value(real_tangential_velocity[0]),
+                                     MetaPhysicL::raw_value(real_tangential_velocity[1])};
+    const auto & tangential_traction =
+        MetaPhysicL::raw_value(_dof_to_tangential_traction[dof_object].first);
+    const TwoVector tangential_trial_traction =
+        tangential_traction + tangential_lm + _penalty_friction * slip_velocity * _dt;
+    const Real tangential_trial_traction_norm = tangential_trial_traction.norm();
+
+    // Augment
+    if (tangential_trial_traction_norm <= _friction_coefficient * normal_lm)
+      tangential_lm += _penalty_friction * slip_velocity * _dt;
+    else
+      tangential_lm = tangential_trial_traction / tangential_trial_traction_norm *
+                          _penalty_friction * normal_lm -
+                      tangential_traction;
+    _console << "delta_tangential_lm = " << tangential_lm << '\n';
+  }
 }

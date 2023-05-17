@@ -53,6 +53,9 @@ protected:
   /// The penalty factor for the frictional constraints
   const Real _penalty_friction;
 
+  /// Acceptable slip distance for augmented Lagrange convergence
+  const Real _slip_tolerance;
+
   /// The friction coefficient
   const Real _friction_coefficient;
 

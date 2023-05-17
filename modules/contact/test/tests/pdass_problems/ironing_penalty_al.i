@@ -276,8 +276,8 @@
   nl_rel_tol = 1e-7
   l_tol = 1e-6
 
-  l_max_its = 50
-  nl_max_its = 30
+  l_max_its = 7
+  nl_max_its = 300
 
   start_time = 0.0
   end_time = 6.5 # 6.5
@@ -318,6 +318,10 @@
   show_var_residual_norms = true
 []
 
+[Problem]
+  type = AugmentedLagrangianContactFEProblem
+[]
+
 [UserObjects]
   [friction_uo]
     type = PenaltyFrictionUserObject
@@ -331,6 +335,9 @@
     secondary_variable = disp_x
     penalty = 5e5
     penalty_friction = 1e4
+
+    slip_tolerance = 1e-05
+    penetration_tolerance = 1e-05
   []
 []
 

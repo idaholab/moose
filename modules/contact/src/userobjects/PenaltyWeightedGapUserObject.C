@@ -33,7 +33,7 @@ PenaltyWeightedGapUserObject::validParams()
                         "multipliers to the current timestep");
   params.addRangeCheckedParam<Real>(
       "penetration_tolerance",
-      1e-9,
+      1e-5,
       "penetration_tolerance > 0",
       "Acceptable penetration distance at which augmented Lagrange iterations can be stopped");
 

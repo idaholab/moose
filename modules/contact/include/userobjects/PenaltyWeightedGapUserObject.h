@@ -61,7 +61,7 @@ protected:
   /// Map from degree of freedom to normal pressure for reporting
   std::unordered_map<const DofObject *, ADReal> _dof_to_normal_pressure;
 
-  ///@{ augmented Lagrange probmen and iteration number
+  ///@{ augmented Lagrange problem and iteration number
   AugmentedLagrangianContactProblemInterface * const _augmented_lagrange_problem;
   const static unsigned int _no_iterations;
   const unsigned int & _lagrangian_iteration_number;
