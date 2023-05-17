@@ -96,8 +96,9 @@ Split::setup(const std::string & prefix)
   {
     po.pairs.emplace_back(dmprefix + "vars", Moose::stringify(_vars, ","));
 
+    // check that variables are either field or scalars
     for (const auto & var : _vars)
-      if (!_fe_problem.hasVariable(var))
+      if (!_fe_problem.hasVariable(var) && !_fe_problem.hasScalarVariable(var))
         mooseError("Variable '", var, "' specified in split '", name(), "' does not exist");
   }
 
