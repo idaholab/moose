@@ -20,11 +20,12 @@ def make_extension(**kwargs):
     return AutoLinkExtension(**kwargs)
 
 PAGE_LINK_RE = re.compile(r'(?P<filename>^(?!http).*?\.md)?(?P<bookmark>#.*)?', flags=re.UNICODE)
+PAGE_LINK_KEY_RE = re.compile(r'(?P<key>[\s\S]*):(?P<file>[\s\S]*)')
 LOG = logging.getLogger(__name__)
 
 LocalLink = tokens.newToken('LocalLink', bookmark=None)
 AutoLink = tokens.newToken('AutoLink', page='', bookmark=None, alternative=None, optional=False,
-                           exact=False)
+                           exact=False, key=None)
 
 class AutoLinkExtension(Extension):
     """
@@ -59,8 +60,16 @@ def createTokenHelper(key, parent, info, page, settings):
     if (filename is None) and (bookmark is not None):
         return LocalLink(parent, bookmark=bookmark)
     elif (filename is not None):
+        link_key = None
+
+        # Search for [key:filename]
+        match = PAGE_LINK_KEY_RE.search(filename)
+        if match:
+            filename = match.group('file')
+            link_key = match.group('key')
+
         return AutoLink(parent, page=filename, bookmark=bookmark, optional=settings['optional'],
-                        exact=settings['exact'], alternative=settings['alternative'])
+                        exact=settings['exact'], alternative=settings['alternative'], key=link_key)
     elif common.project_find(info[key]):
         return modal.ModalSourceLink(parent, src=common.check_filenames(info[key]),
                                      language=settings['language'])
