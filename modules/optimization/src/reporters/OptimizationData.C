@@ -44,6 +44,10 @@ OptimizationData::validParams()
   params.addParam<std::string>(
       "file_value", "value", "measurement value column name from csv file being read in.");
 
+  params.addParam<std::vector<std::string>>(
+      "variable_weight_names",
+      "Vector of weight reporter names that will create a reporter to transfer weights into.  The "
+      "ordering of these weight reporter names corresponds to the ordering used in variable.");
   params.addParam<std::vector<VariableName>>(
       "variable", "Vector of variable names to sample at measurement points.");
 
@@ -71,14 +75,7 @@ OptimizationData::OptimizationData(const InputParameters & parameters)
         declareValueByName<std::vector<Real>>("simulation_values", REPORTER_MODE_REPLICATED)),
     _misfit_values(declareValueByName<std::vector<Real>>("misfit_values", REPORTER_MODE_REPLICATED))
 {
-  if (isParamValid("variable"))
-  {
-    std::vector<VariableName> var_names(getParam<std::vector<VariableName>>("variable"));
-    for (const auto & name : var_names)
-      _var_vec.push_back(&_fe_problem.getVariable(
-          _tid, name, Moose::VarKindType::VAR_ANY, Moose::VarFieldType::VAR_FIELD_STANDARD));
-  }
-
+  // read in data
   if (isParamValid("measurement_file") && isParamValid("measurement_points"))
     mooseError("Input file can only define a single input for measurement data. Use only "
                "measurement_file or measurement_points, but never both");
@@ -88,6 +85,37 @@ OptimizationData::OptimizationData(const InputParameters & parameters)
     readMeasurementsFromInput();
 
   _misfit_values.resize(_measurement_values.size());
+
+  if (isParamValid("variable"))
+  {
+    std::vector<VariableName> var_names(getParam<std::vector<VariableName>>("variable"));
+    for (const auto & name : var_names)
+      _var_vec.push_back(&_fe_problem.getVariable(
+          _tid, name, Moose::VarKindType::VAR_ANY, Moose::VarFieldType::VAR_FIELD_STANDARD));
+  }
+  if (isParamValid("variable_weight_names"))
+  {
+    std::vector<std::string> weight_names(
+        getParam<std::vector<std::string>>("variable_weight_names"));
+    for (const auto & name : weight_names)
+    {
+      if (_weight_names_weights_map.count(name) == 1)
+      {
+        mooseAssert(hasReporterValueByName(name),
+                    "file_variable_weights should have created a reporter with the name " << name);
+        _variable_weights.push_back(_weight_names_weights_map[name]);
+      }
+      else
+        _variable_weights.push_back(
+            &declareValueByName<std::vector<Real>>(name, REPORTER_MODE_REPLICATED));
+    }
+  }
+  if (isParamValid("variable") && isParamValid("variable_weight_names") &&
+      _variable_weights.size() != _var_vec.size())
+  {
+    paramError("variable_weight_names",
+               "The same number of names must be in both 'variable_weight_names' and 'variable'.");
+  }
 }
 
 void
@@ -101,22 +129,29 @@ OptimizationData::execute()
   // but this will require changes in MOOSE to work for reporters.
 
   const std::size_t nvals = _measurement_values.size();
-  _simulation_values.resize(nvals);
+  _simulation_values.resize(nvals, 0.0);
   _misfit_values.resize(nvals);
 
   errorCheckDataSize();
-
-  const auto & sys = _var_vec[0]->sys().system();
-  const auto vnum = _var_vec[0]->number();
-
-  for (const auto & i : make_range(nvals))
-    if (MooseUtils::absoluteFuzzyEqual(_t, _measurement_time[i]))
+  for (const auto var_index : make_range(_var_vec.size()))
+  {
+    const auto & sys = _var_vec[var_index]->sys().system();
+    const auto vnum = _var_vec[var_index]->number();
+    std::vector<Real> weights(_variable_weights.empty()
+                                  ? std::vector<Real>(_measurement_xcoord.size(), 1)
+                                  : (*_variable_weights[var_index]));
+    for (const auto & i : make_range(nvals))
     {
-      const Point point(_measurement_xcoord[i], _measurement_ycoord[i], _measurement_zcoord[i]);
-      const Real val = sys.point_value(vnum, point, false);
-      _simulation_values[i] = val;
-      _misfit_values[i] = val - _measurement_values[i];
+      if (MooseUtils::absoluteFuzzyEqual(_t, _measurement_time[i]))
+      {
+        const Point point(_measurement_xcoord[i], _measurement_ycoord[i], _measurement_zcoord[i]);
+        const Real val = sys.point_value(vnum, point, false);
+
+        _simulation_values[i] += weights[i] * val;
+        _misfit_values[i] = _simulation_values[i] - _measurement_values[i];
+      }
     }
+  }
 }
 
 void
@@ -177,7 +212,7 @@ OptimizationData::readMeasurementsFromFile()
     else if (std::find(weightNames.begin(), weightNames.end(), names[i]) != weightNames.end())
     {
       _weight_names_weights_map.emplace(
-          names[i], &declareValueByName<std::vector<Real>>(names[i], REPORTER_MODE_REPLICATED));
+          names[i], &(declareValueByName<std::vector<Real>>(names[i], REPORTER_MODE_REPLICATED)));
       _weight_names_weights_map[names[i]]->assign(data[i].begin(), data[i].end());
     }
   }

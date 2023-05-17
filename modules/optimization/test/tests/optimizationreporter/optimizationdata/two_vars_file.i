@@ -13,10 +13,14 @@
 
 [AuxVariables]
   [disp_x]
-    order = FIRST
-    family = LAGRANGE
+    order = CONSTANT
+    family = MONOMIAL
   []
   [disp_y]
+    order = CONSTANT
+    family = MONOMIAL
+  []
+  [T]
     order = FIRST
     family = LAGRANGE
   []
@@ -27,13 +31,19 @@
     type = ParsedAux
     variable = disp_x
     use_xyzt = true
-    expression = '2*x'
+    expression = 'if(x<0.5,2,4)'
   []
   [aux_disp_y]
     type = ParsedAux
     variable = disp_y
     use_xyzt = true
-    expression = 'y'
+    expression = 'if(y<0.5,10,50)'
+  []
+  [aux_T]
+    type = ParsedAux
+    variable = T
+    use_xyzt = true
+    expression = 'x'
   []
 []
 
@@ -43,8 +53,9 @@
     type = OptimizationData
     measurement_file = 'measurementData.csv'
     file_value = 'measured_value'
-    variable = 'disp_x disp_y'
-    file_variable_weights = 'weight_u v_weight'
+    variable = 'disp_x disp_y T'
+    file_variable_weights = 'weight_u v_weight wT'
+    variable_weight_names = 'weight_u v_weight wT'
   []
 []
 
@@ -57,6 +68,7 @@
 
 [Outputs]
   csv = true
+  exodus=true
 []
 [Debug]
   show_reporters = false
