@@ -39,51 +39,51 @@ public:
 
   static InputParameters validParams();
 
-  void useVectorTag(const TagName & tag_name);
-
-  void useMatrixTag(const TagName & tag_name);
-
-  void useVectorTag(TagID tag_id);
-
-  void useMatrixTag(TagID tag_id);
-
-  bool isVectorTagged() { return _vector_tags.size() > 0; }
-
-  bool isMatrixTagged() { return _matrix_tags.size() > 0; }
-
   /**
    * Class that is used as a parameter to getVectorTags() that allows only
    * AttribVectorTags methods to call it
    */
-  class GetVectorTagsKey
+  class VectorTagsKey
   {
     friend class AttribVectorTags;
     friend class NonlinearEigenSystem;
     template <typename>
     friend class MooseObjectTagWarehouse;
 
-    GetVectorTagsKey() {}
-    GetVectorTagsKey(const GetVectorTagsKey &) {}
+    VectorTagsKey() {}
+    VectorTagsKey(const VectorTagsKey &) {}
   };
-
-  const std::set<TagID> & getVectorTags(GetVectorTagsKey) const { return _vector_tags; }
 
   /**
    * Class that is used as a parameter to getMatrixTags() that allows only
    * AttribMatrixTags methods to call it
    */
-  class GetMatrixTagsKey
+  class MatrixTagsKey
   {
     friend class AttribMatrixTags;
     friend class NonlinearEigenSystem;
     template <typename>
     friend class MooseObjectTagWarehouse;
 
-    GetMatrixTagsKey() {}
-    GetMatrixTagsKey(const GetMatrixTagsKey &) {}
+    MatrixTagsKey() {}
+    MatrixTagsKey(const MatrixTagsKey &) {}
   };
 
-  const std::set<TagID> & getMatrixTags(GetMatrixTagsKey) const { return _matrix_tags; }
+  void useVectorTag(const TagName & tag_name, VectorTagsKey);
+
+  void useMatrixTag(const TagName & tag_name, MatrixTagsKey);
+
+  void useVectorTag(TagID tag_id, VectorTagsKey);
+
+  void useMatrixTag(TagID tag_id, MatrixTagsKey);
+
+  bool isVectorTagged() { return _vector_tags.size() > 0; }
+
+  bool isMatrixTagged() { return _matrix_tags.size() > 0; }
+
+  const std::set<TagID> & getVectorTags(VectorTagsKey) const { return _vector_tags; }
+
+  const std::set<TagID> & getMatrixTags(MatrixTagsKey) const { return _matrix_tags; }
 
 protected:
   /**

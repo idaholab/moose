@@ -122,7 +122,7 @@ TaggingInterface::TaggingInterface(const MooseObject * moose_object)
 }
 
 void
-TaggingInterface::useVectorTag(const TagName & tag_name)
+TaggingInterface::useVectorTag(const TagName & tag_name, VectorTagsKey)
 {
   if (!_subproblem.vectorTagExists(tag_name))
     mooseError("Vector tag ", tag_name, " does not exist in system");
@@ -131,7 +131,7 @@ TaggingInterface::useVectorTag(const TagName & tag_name)
 }
 
 void
-TaggingInterface::useMatrixTag(const TagName & tag_name)
+TaggingInterface::useMatrixTag(const TagName & tag_name, MatrixTagsKey)
 {
   if (!_subproblem.matrixTagExists(tag_name))
     mooseError("Matrix tag ", tag_name, " does not exist in system");
@@ -140,7 +140,7 @@ TaggingInterface::useMatrixTag(const TagName & tag_name)
 }
 
 void
-TaggingInterface::useVectorTag(TagID tag_id)
+TaggingInterface::useVectorTag(TagID tag_id, VectorTagsKey)
 {
   if (!_subproblem.vectorTagExists(tag_id))
     mooseError("Vector tag ", tag_id, " does not exist in system");
@@ -149,7 +149,7 @@ TaggingInterface::useVectorTag(TagID tag_id)
 }
 
 void
-TaggingInterface::useMatrixTag(TagID tag_id)
+TaggingInterface::useMatrixTag(TagID tag_id, MatrixTagsKey)
 {
   if (!_subproblem.matrixTagExists(tag_id))
     mooseError("Matrix tag ", tag_id, " does not exist in system");
