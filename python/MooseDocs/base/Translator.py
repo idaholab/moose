@@ -244,7 +244,10 @@ class Translator(mixins.ConfigObject):
                 return nodes[0]
             msg = "Multiple pages with a name that ends with '{}' were found:".format(arg)
             for node in nodes:
-                msg += '\n  {}'.format(node.local)
+                msg += '\n  '
+                if node.key is not None: # remove if statement with #24406
+                    msg += f'{node.key}: '
+                msg += f'{node.local}'
             raise exceptions.MooseDocsException(msg)
 
         return nodes[0]
