@@ -325,37 +325,6 @@ Coupleable::getArrayVar(const std::string & var_name, unsigned int comp) const
   return getVarHelper<ArrayMooseVariable>(var_name, comp);
 }
 
-const MooseVariableFieldBase *
-Coupleable::getAnyVar(const std::string & var_name_in, unsigned int comp) const
-{
-  const auto var_name = _c_parameters.checkForRename(var_name_in);
-  auto name_to_use = var_name;
-
-  // First check for supplied name
-  if (!checkVar(var_name, comp, 0))
-  {
-    // See if there is an associated deprecated name that the user may have used instead
-    auto it = _new_to_deprecated_coupled_vars.find(var_name);
-    if (it == _new_to_deprecated_coupled_vars.end())
-      return nullptr;
-    else
-    {
-      auto deprecated_name = it->second;
-      if (checkVar(deprecated_name, comp, 0))
-        name_to_use = deprecated_name;
-      else
-        return nullptr;
-    }
-  }
-
-  auto coupled_vars_it = _coupled_vars.find(name_to_use);
-
-  mooseAssert(coupled_vars_it != _coupled_vars.end(),
-              "Trying to get a coupled var " << name_to_use << " that doesn't exist");
-
-  return coupled_vars_it->second[comp];
-}
-
 const VariableValue *
 Coupleable::getDefaultValue(const std::string & var_name, unsigned int comp) const
 {
@@ -2341,8 +2310,8 @@ Coupleable::coupledIndices(const std::string & var_name) const
 VariableName
 Coupleable::coupledName(const std::string & var_name, unsigned int comp) const
 {
-  if (getAnyVar(var_name, comp))
-    return getAnyVar(var_name, comp)->name();
+  if (getFieldVar(var_name, comp))
+    return getFieldVar(var_name, comp)->name();
   // Detect if we are in the case where a constant was passed in lieu of a variable
   else if (isCoupledConstant(var_name))
     mooseError(_c_name,

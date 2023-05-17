@@ -5,8 +5,8 @@
     input = 'parsed_aux_test.i'
     exodiff = 'out.e'
     issues = '#4807'
-    requirement = "The system shall be able to compute vector values for vector from a functional "
-                  "expression."
+    requirement = "The system shall be able to compute a vector of values from a vector of functional "
+                  "expressions."
     # Test combines coupling of regular variable, vector variables and xyz
   []
 []

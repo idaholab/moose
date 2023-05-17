@@ -28,10 +28,11 @@ ParsedVectorAux::validParams()
                                          "0",
                                          "FunctionExpression",
                                          "Parsed function expression to compute the y component");
-  params.addCustomTypeParam<std::string>("expression_z",
-                                         "0",
-                                         "FunctionExpression",
-                                         "Parsed function expression to compute the z component");
+  if constexpr (LIBMESH_DIM >= 3)
+    params.addCustomTypeParam<std::string>("expression_z",
+                                           "0",
+                                           "FunctionExpression",
+                                           "Parsed function expression to compute the z component");
   params.addCoupledVar("coupled_variables", "Vector of coupled variable names");
   params.addCoupledVar("coupled_vector_variables", "Vector of coupled variable names");
 
@@ -70,17 +71,17 @@ ParsedVectorAux::ParsedVectorAux(const InputParameters & parameters)
       getParam<std::vector<std::vector<std::string>>>("constant_expressions").size())
     paramError("constant_names", "Must be same length as constant_expressions");
 
-  for (unsigned int i = 0; i < LIBMESH_DIM; ++i)
+  for (const auto i : make_range(Moose::dim))
   {
     // build variables argument
     std::string variables;
 
     // coupled regular field variables
-    for (std::size_t i = 0; i < _nargs; ++i)
+    for (const auto i : make_range(_nargs))
       variables += (i == 0 ? "" : ",") + getFieldVar("coupled_variables", i)->name();
 
     // coupled vector field variables
-    for (std::size_t i = 0; i < _n_vector_args; ++i)
+    for (const auto i : make_range(_n_vector_args))
       variables +=
           (variables.empty() ? "" : ",") + getFieldVar("coupled_vector_variables", i)->name();
 
@@ -142,17 +143,17 @@ RealVectorValue
 ParsedVectorAux::computeValue()
 {
   RealVectorValue value;
-  for (unsigned int i = 0; i < LIBMESH_DIM; ++i)
+  for (const auto i : make_range(Moose::dim))
   {
-    for (std::size_t j = 0; j < _nargs; ++j)
+    for (const auto j : make_range(_nargs))
       _func_params[j] = (*_args[j])[_qp];
 
-    for (std::size_t j = 0; j < _n_vector_args; ++j)
+    for (const auto j : make_range(_n_vector_args))
       _func_params[_nargs + j] = (*_vector_args[j])[_qp](i);
 
     if (_use_xyzt)
     {
-      for (std::size_t j = 0; j < LIBMESH_DIM; ++j)
+      for (const auto j : make_range(Moose::dim))
         _func_params[_nargs + _n_vector_args + j] =
             isNodal() ? (*_current_node)(j) : _q_point[_qp](j);
       _func_params[_nargs + _n_vector_args + 3] = _t;

@@ -1561,14 +1561,6 @@ protected:
   const ArrayMooseVariable * getArrayVar(const std::string & var_name, unsigned int comp) const;
 
   /**
-   * Extract pointer to a base class for a coupled variable of any type
-   * @param var_name Name of parameter desired
-   * @param comp Component number of multiple coupled variables
-   * @return Pointer to the desired variable
-   */
-  const MooseVariableFieldBase * getAnyVar(const std::string & var_name, unsigned int comp) const;
-
-  /**
    * Checks to make sure that the current Executioner has set "_is_transient" when old/older values
    * are coupled in.
    * @param name the name of the variable
