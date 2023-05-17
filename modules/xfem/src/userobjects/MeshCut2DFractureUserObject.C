@@ -24,8 +24,8 @@ InputParameters
 MeshCut2DFractureUserObject::validParams()
 {
   InputParameters params = MeshCut2DUserObjectBase::validParams();
-  params.addClassDescription("Creates a UserObject for a mesh cutter in 2D problems that will use "
-                             "fracture integrals to determine growth");
+  params.addClassDescription("XFEM mesh cutter for 2D models that defines cuts with a"
+                             "mesh and uses fracture integrals to determine growth");
   params.addRequiredParam<Real>("k_critical", "Critical fracture toughness.");
   params.addRequiredParam<Real>("growth_increment", "Length to grow crack if k>k_critical");
   return params;

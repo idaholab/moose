@@ -101,7 +101,7 @@
     expect_err = 'timestep size must be greater than 1e-06, for crack to grow. dt=1e-07'
     # XFEM requires --enable-unique-ids in libmesh
     unique_id = true
-    requirement = 'The XFEM module MeshCut2DFunctionUserObject will error if the crack growth rate timestep falls below 1e-6s'
+    requirement = 'The XFEM module MeshCut2DFunctionUserObject shall generate an error if the crack growth rate timestep falls below 1e-6s'
     design = 'MeshCut2DFunctionUserObject.md'
   [../]
   [./edge_crack_2d_propagation_mhs]

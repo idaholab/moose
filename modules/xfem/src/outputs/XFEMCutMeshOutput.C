@@ -35,7 +35,7 @@ XFEMCutMeshOutput::XFEMCutMeshOutput(const InputParameters & params)
 std::string
 XFEMCutMeshOutput::filename()
 {
-  // Append the .e extension on the base file name
+  // Append the .e extension to the base file name
   std::ostringstream output;
   output << _file_base << ".e";
 

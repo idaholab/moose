@@ -41,7 +41,7 @@ public:
   MeshBase & getCutterMesh() const;
 
 protected:
-  /// The structural mesh
+  /// The FE solution mesh
   MooseMesh & _mesh;
 
   /// The cutter mesh
@@ -57,7 +57,7 @@ protected:
    */
   std::vector<std::pair<dof_id_type, dof_id_type>> _original_and_current_front_node_ids;
 
-  /// contains the active nodeids and their growth vector
+  /// contains the active node ids and their growth vectors
   std::vector<std::pair<dof_id_type, Point>> _active_front_node_growth_vectors;
 
   /**

@@ -58,7 +58,7 @@ protected:
 
   /// Whether to treat a 3D model as 2D for computation of fracture integrals
   bool _treat_as_2d;
-  /// Whether to crack is defined by an xfem cutter mesh
+  /// Whether the crack is defined by an XFEM cutter mesh
   bool _using_mesh_cutter;
   /// Vector of all coupled variables
   std::vector<MooseVariableFEBase *> _fe_vars;

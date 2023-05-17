@@ -89,7 +89,7 @@ protected:
   const CrackFrontDefinition * const _crack_front_definition;
   /// Whether to treat a model as 2D for computation of fracture integrals
   bool _treat_as_2d;
-  /// Is the crack is defined by an xfem cutter mesh
+  /// Is the crack defined by an XFEM cutter mesh
   bool _using_mesh_cutter;
   /// Reference to the stress tensor computed by the material models
   const GenericMaterialProperty<RankTwoTensor, is_ad> & _stress;

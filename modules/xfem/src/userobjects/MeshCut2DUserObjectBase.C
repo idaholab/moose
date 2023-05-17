@@ -40,7 +40,7 @@ MeshCut2DUserObjectBase::MeshCut2DUserObjectBase(const InputParameters & paramet
     if (cut_elem->n_nodes() != 2)
       mooseError("The input cut mesh should include EDGE2 elements only!");
     if (cut_elem->dim() != 1)
-      mooseError("The input cut mesh should have 2D elements only!");
+      mooseError("The input cut mesh should have 1D elements (in a 2D space) only!");
   }
 
   // find node fronts of the original cutmesh.  This is used to order everything

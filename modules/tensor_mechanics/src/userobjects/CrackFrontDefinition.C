@@ -352,7 +352,7 @@ void
 CrackFrontDefinition::initialize()
 {
   // Update the crack front for fracture integral calculations
-  // This is only useful for 1D and 3D growing cracks which are currently described by the mesh
+  // This is only useful for growing cracks which are currently described by the mesh
   // cutter
   if (_use_mesh_cutter && _is_cutter_modified)
   {

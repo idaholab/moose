@@ -14,7 +14,8 @@
 class Function;
 
 /**
- * MeshCut2DFunctionUserObject: (1) reads in a mesh describing the crack surface,
+ * MeshCut2DFunctionUserObject: 
+ * (1) reads in a mesh describing the crack surface,
  * (2) uses the mesh to do initial cutting of 2D elements, and
  * (3) grows the mesh based on prescribed growth functions.
  */

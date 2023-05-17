@@ -15,8 +15,9 @@ class CrackFrontDefinition;
 
 /**
  * MeshCut2DFractureUserObject:
- * (1) uses the mesh to do initial cutting of 2D elements, and
- * (2) grows the mesh by a fixed growth rate.
+ * (1) reads in a mesh describing the crack surface
+ * (2) uses the mesh to do initial cutting of 2D elements, and
+ * (3) grows the mesh by a fixed growth rate when a fracture-integral-based growth criterion is met.
  */
 
 class MeshCut2DFractureUserObject : public MeshCut2DUserObjectBase
