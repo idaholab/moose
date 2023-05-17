@@ -1,0 +1,12 @@
+[Tests]
+  design = 'source/auxkernels/ParsedAux.md'
+  [test]
+    type = 'Exodiff'
+    input = 'parsed_aux_test.i'
+    exodiff = 'out.e'
+    issues = '#4807'
+    requirement = "The system shall be able to compute a vector of values from a vector of functional "
+                  "expressions."
+    # Test combines coupling of regular variable, vector variables and xyz
+  []
+[]
