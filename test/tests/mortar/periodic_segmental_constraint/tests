@@ -34,6 +34,13 @@
     requirement = "The system shall assemble lower variable mortar constraints coupled to scalar variables in a three dimensional problem."
     min_ad_size = 100
   []
+  [penalty_periodic_split]
+    type = 'CSVDiff'
+    input = 'penalty_periodic_split.i'
+    csvdiff = 'penalty_periodic_split_out.csv'
+    requirement = "The system shall allow field split preconditioning with scalar variables and produce the same results as a non-split linear solve."
+    min_ad_size = 100
+  []
   [periodic_aux2d]
     type = 'CSVDiff'
     input = 'periodic_aux2d.i'
