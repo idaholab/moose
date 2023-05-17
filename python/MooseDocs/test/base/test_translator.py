@@ -48,11 +48,11 @@ class TestTranslator(unittest.TestCase):
         with self.assertRaisesRegex(exceptions.MooseDocsException, expect_err) as cm:
             self.translator.findPage('core.md', key='foobar')
 
-class TestTranslatorWithDuplicates(unittest.TestCase):
+class TestTranslatorWithDuplicate(unittest.TestCase):
     def setUp(self):
         command.CommandExtension.EXTENSION_COMMANDS.clear()
         config = os.path.join('..', 'config.yml')
-        duplicate_entry = {'duplicate': {'root_dir': 'python/MooseDocs/test/content_duplicate'}}
+        duplicate_entry = {'duplicate': {'root_dir': 'python/MooseDocs/test/content_other', 'content': ['extensions_duplicate/autolink.md']}}
         self.translator, _ = common.load_config(config, Content=duplicate_entry)
         self.translator.init()
 
@@ -72,6 +72,21 @@ class TestTranslatorWithDuplicates(unittest.TestCase):
         page = self.translator.findPage('autolink.md', key='duplicate')
         self.assertEqual(page.key, 'duplicate')
         self.assertEqual(page.local, 'extensions_duplicate/autolink.md')
+
+class TestTranslatorWithOther(unittest.TestCase):
+    def setUp(self):
+        command.CommandExtension.EXTENSION_COMMANDS.clear()
+        config = os.path.join('..', 'config.yml')
+        duplicate_entry = {'other': {'root_dir': 'python/MooseDocs/test/content_other', 'content': ['wrong_key.md']}}
+        self.translator, _ = common.load_config(config, Content=duplicate_entry)
+        self.translator.init()
+
+    def testFindPageThrowOtherKey(self):
+        with self.assertRaises(self.translator.FindPageOtherKeyException) as cm:
+            self.translator.findPage('wrong_key.md', key='test', throw_other_key=True)
+        self.assertEqual(cm.exception.page.key, 'other')
+        page = self.translator.findPage('wrong_key.md', throw_other_key=True)
+        self.assertEqual(page, cm.exception.page)
 
 if __name__ == '__main__':
     unittest.main(verbosity=2)

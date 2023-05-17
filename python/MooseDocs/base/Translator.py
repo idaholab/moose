@@ -84,6 +84,24 @@ class Translator(mixins.ConfigObject):
         self.__markdown_file_list = None
         self.__levenshtein_cache = dict()
 
+    class FindPageOtherKeyException(Exception):
+        """
+        Exception that is thrown when findPage is called and a single Page
+        is found with a different key.
+
+        This enables warnings in things like AutoLinkExtension when something
+        is not defined explicitly but should be.
+
+        # Should be removed with #24406
+        """
+        def __init__(self, page):
+            self.__page = page
+            super().__init__(f'The key used should be {self.page.key}')
+
+        @property
+        def page(self):
+            return self.__page
+
     @property
     def extensions(self):
         """Return list of loaded Extension objects."""
@@ -189,7 +207,7 @@ class Translator(mixins.ConfigObject):
 
         return items
 
-    def findPage(self, arg, throw_on_zero=True, exact=False, warn_on_zero=False, key=None):
+    def findPage(self, arg, throw_on_zero=True, exact=False, warn_on_zero=False, key=None, throw_other_key=False):
         """
         Locate a single Page object that has a local name ending with the supplied name.
 
@@ -212,6 +230,10 @@ class Translator(mixins.ConfigObject):
 
                         all_nodes = self.findPages(arg, exact=exact)
                         if len(all_nodes):
+                            # Should be removed with #24406
+                            if len(all_nodes) == 1 and throw_other_key:
+                                raise Translator.FindPageOtherKeyException(all_nodes[0])
+
                             msg = f'Unable to locate a page with Content key "{key}"'
                             msg += ', but it was found with other keys:'
                             for node in all_nodes:
