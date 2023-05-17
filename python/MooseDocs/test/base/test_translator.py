@@ -19,7 +19,6 @@ from MooseDocs.common import exceptions
 from MooseDocs.extensions import command
 
 class TestTranslator(unittest.TestCase):
-
     def setUp(self):
         command.CommandExtension.EXTENSION_COMMANDS.clear()
         config = os.path.join('..', 'config.yml')
@@ -48,6 +47,31 @@ class TestTranslator(unittest.TestCase):
         expect_err = 'The Content key "foobar" is not registered'
         with self.assertRaisesRegex(exceptions.MooseDocsException, expect_err) as cm:
             self.translator.findPage('core.md', key='foobar')
+
+class TestTranslatorWithDuplicates(unittest.TestCase):
+    def setUp(self):
+        command.CommandExtension.EXTENSION_COMMANDS.clear()
+        config = os.path.join('..', 'config.yml')
+        duplicate_entry = {'duplicate': {'root_dir': 'python/MooseDocs/test/content_duplicate'}}
+        self.translator, _ = common.load_config(config, Content=duplicate_entry)
+        self.translator.init()
+
+    def testFindPageImplicit(self):
+        page = self.translator.findPage('core.md')
+        self.assertEqual(page.key, 'test')
+        self.assertEqual(page.local, 'extensions/core.md')
+
+    def testFindPageImplicitError(self):
+        with self.assertRaises(exceptions.MooseDocsException) as cm:
+            self.translator.findPage('autolink.md')
+        self.assertIn("Multiple pages with a name that ends with 'autolink.md' were found", cm.exception.message)
+        self.assertIn("test: extensions/autolink.md", cm.exception.message)
+        self.assertIn("duplicate: extensions_duplicate/autolink.md", cm.exception.message)
+
+    def testFindPageExplicit(self):
+        page = self.translator.findPage('autolink.md', key='duplicate')
+        self.assertEqual(page.key, 'duplicate')
+        self.assertEqual(page.local, 'extensions_duplicate/autolink.md')
 
 if __name__ == '__main__':
     unittest.main(verbosity=2)
