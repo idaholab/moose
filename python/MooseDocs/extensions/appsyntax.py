@@ -608,7 +608,7 @@ class SyntaxCompleteCommand(SyntaxListCommand):
             if (groups is None) or (cgs.intersection(groups)):
                 url = os.path.join('syntax', child.markdown)
                 h = core.Heading(parent, level=level, id_=h_id)
-                autolink.AutoLink(h, page=url, string=str(child.fullpath().strip('/')))
+                autolink.AutoLink(h, page=url, string=str(child.fullpath().strip('/')), key=page.key)
 
             SyntaxListCommand.createTokenFromSyntax(self, parent, info, page, child, settings)
 
