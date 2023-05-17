@@ -85,7 +85,7 @@ class Page(object):
 
     def __str__(self):
         """Define the screen output."""
-        return '{} ({}): {}, {}'.format(mooseutils.colorText(self.__class__.__name__, self.COLOR),
+        return '{} (key={}): {}, {}'.format(mooseutils.colorText(self.__class__.__name__, self.COLOR),
                                         self.key, self.local, self.source)
 
 class Text(Page):
