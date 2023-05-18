@@ -769,7 +769,9 @@ public:
   void copyNeighborShapes(unsigned int var);
 
   /**
-   * Key structure for APIs manipulating global vectors/matrices
+   * Key structure for APIs manipulating global vectors/matrices. Developers in blessed classes may
+   * create keys using simple curly braces \p {} or may be more explicit and use \p
+   * Assembly::GlobalDataKey{}
    */
   class GlobalDataKey
   {
@@ -784,7 +786,9 @@ public:
   };
 
   /**
-   * Key structure for APIs adding/caching local element residuals/Jacobians
+   * Key structure for APIs adding/caching local element residuals/Jacobians. Developers in blessed
+   * classes may create keys using simple curly braces \p {} or may be more explicit and use \p
+   * Assembly::LocalDataKey{}
    */
   class LocalDataKey
   {
@@ -1036,7 +1040,8 @@ public:
   void zeroCachedJacobian(GlobalDataKey);
 
   /**
-   * Get local residual block for a variable and a tag.
+   * Get local residual block for a variable and a tag. Only blessed framework classes may call this
+   * API by creating the requisiste \p LocalDataKey class
    */
   DenseVector<Number> & residualBlock(unsigned int var_num, LocalDataKey, TagID tag_id)
   {
@@ -1044,7 +1049,8 @@ public:
   }
 
   /**
-   * Get local neighbor residual block for a variable and a tag.
+   * Get local neighbor residual block for a variable and a tag. Only blessed framework classes may
+   * call this API by creating the requisiste \p LocalDataKey class
    */
   DenseVector<Number> & residualBlockNeighbor(unsigned int var_num, LocalDataKey, TagID tag_id)
   {
@@ -1052,7 +1058,8 @@ public:
   }
 
   /**
-   * Get residual block for lower.
+   * Get residual block for lower. Only blessed framework classes may call this API by creating the
+   * requisiste \p LocalDataKey class
    */
   DenseVector<Number> & residualBlockLower(unsigned int var_num, LocalDataKey, TagID tag_id)
   {
@@ -1060,7 +1067,8 @@ public:
   }
 
   /**
-   * Get local Jacobian block for a pair of variables and a tag.
+   * Get local Jacobian block for a pair of variables and a tag. Only blessed framework classes may
+   * call this API by creating the requisiste \p LocalDataKey class
    */
   DenseMatrix<Number> & jacobianBlock(unsigned int ivar, unsigned int jvar, LocalDataKey, TagID tag)
   {
@@ -1069,7 +1077,8 @@ public:
   }
 
   /**
-   * Get local Jacobian block from non-local contribution for a pair of variables and a tag.
+   * Get local Jacobian block from non-local contribution for a pair of variables and a tag. Only
+   * blessed framework classes may call this API by creating the requisiste \p LocalDataKey class
    */
   DenseMatrix<Number> &
   jacobianBlockNonlocal(unsigned int ivar, unsigned int jvar, LocalDataKey, TagID tag)
@@ -1079,7 +1088,8 @@ public:
   }
 
   /**
-   * Get local Jacobian block of a DG Jacobian type for a pair of variables and a tag.
+   * Get local Jacobian block of a DG Jacobian type for a pair of variables and a tag. Only blessed
+   * framework classes may call this API by creating the requisiste \p LocalDataKey class
    */
   DenseMatrix<Number> & jacobianBlockNeighbor(
       Moose::DGJacobianType type, unsigned int ivar, unsigned int jvar, LocalDataKey, TagID tag);
@@ -1088,7 +1098,8 @@ public:
    * Returns the jacobian block for the given mortar Jacobian type. This jacobian block can involve
    * degrees of freedom from the secondary side interior parent, the primary side
    * interior parent, or the lower-dimensional element (located on the secondary
-   * side)
+   * side). Only blessed framework classes may call this API by creating the requisiste \p
+   * LocalDataKey class
    */
   DenseMatrix<Number> & jacobianBlockMortar(Moose::ConstraintJacobianType type,
                                             unsigned int ivar,
@@ -1097,7 +1108,8 @@ public:
                                             TagID tag);
 
   /**
-   * Lets an external class cache residual at a set of nodes
+   * Lets an external class cache residual at a set of nodes. Only blessed framework classes may
+   * call this API by creating the requisiste \p LocalDataKey class
    */
   void cacheResidualNodes(const DenseVector<Number> & res,
                           const std::vector<dof_id_type> & dof_index,
@@ -1111,6 +1123,9 @@ public:
    * We use numeric_index_type for the index arrays (rather than
    * dof_id_type) since that is what the SparseMatrix interface uses,
    * but at the time of this writing, those two types are equivalent.
+   *
+   * Only blessed framework classes may call this API by creating the requisiste \p LocalDataKey
+   * class
    */
   void
   cacheJacobian(numeric_index_type i, numeric_index_type j, Real value, LocalDataKey, TagID tag);
@@ -1122,6 +1137,9 @@ public:
    * We use numeric_index_type for the index arrays (rather than
    * dof_id_type) since that is what the SparseMatrix interface uses,
    * but at the time of this writing, those two types are equivalent.
+   *
+   * Only blessed framework classes may call this API by creating the requisiste \p LocalDataKey
+   * class
    */
   void cacheJacobian(numeric_index_type i,
                      numeric_index_type j,
@@ -1129,6 +1147,12 @@ public:
                      LocalDataKey,
                      const std::set<TagID> & tags);
 
+  /**
+   * Cache a local Jacobian block with the provided rows (\p idof_indices) and columns (\p
+   * jdof_indices) for eventual accumulation into the global matrix specified by \p tag. The \p
+   * scaling_factor will be applied before caching. Only blessed framework classes may call this API
+   * by creating the requisiste \p LocalDataKey class
+   */
   void cacheJacobianBlock(DenseMatrix<Number> & jac_block,
                           const std::vector<dof_id_type> & idof_indices,
                           const std::vector<dof_id_type> & jdof_indices,
@@ -1141,8 +1165,9 @@ public:
    * addResiduals except that it's meant for \emph only processing residuals (and not their
    * derivatives/Jacobian). We supply this API such that residual objects that leverage the AD
    * version of this method when computing the Jacobian (or residual + Jacobian) can mirror the same
-   * behavior when doing pure residual evaluations, such as when evaluting linear residuals during
-   * (P)JFNK. This method will call \p constrain_element_vector on the supplied residuals
+   * behavior when doing pure residual evaluations, such as when evaluating linear residuals during
+   * (P)JFNK. This method will call \p constrain_element_vector on the supplied residuals. Only
+   * blessed framework classes may call this API by creating the requisiste \p LocalDataKey class
    */
   template <typename Residuals, typename Indices>
   void cacheResiduals(const Residuals & residuals,
@@ -1155,6 +1180,8 @@ public:
    * Process the \p derivatives() data of a vector of \p ADReals. This
    * method simply caches the derivative values for the corresponding column indices for the
    * provided \p matrix_tags. Note that this overload will call \p DofMap::constrain_element_matrix.
+   * Only blessed framework classes may call this API by creating the requisiste \p LocalDataKey
+   * class
    */
   template <typename Residuals, typename Indices>
   void cacheJacobian(const Residuals & residuals,
@@ -1168,8 +1195,10 @@ public:
    * addResiduals except that it's meant for \emph only processing residuals (and not their
    * derivatives/Jacobian). We supply this API such that residual objects that leverage the AD
    * version of this method when computing the Jacobian (or residual + Jacobian) can mirror the same
-   * behavior when doing pure residual evaluations, such as when evaluting linear residuals during
-   * (P)JFNK. This method will \emph not call \p constrain_element_vector on the supplied residuals
+   * behavior when doing pure residual evaluations, such as when evaluating linear residuals during
+   * (P)JFNK. This method will \emph not call \p constrain_element_vector on the supplied residuals.
+   * Only blessed framework classes may call this API by creating the requisiste \p LocalDataKey
+   * class
    */
   template <typename Residuals, typename Indices>
   void cacheResidualsWithoutConstraints(const Residuals & residuals,
@@ -1182,7 +1211,8 @@ public:
    * Process the \p derivatives() data of a vector of \p ADReals. This
    * method simply caches the derivative values for the corresponding column indices for the
    * provided \p matrix_tags. Note that this overload will \emph not call \p
-   * DofMap::constrain_element_matrix.
+   * DofMap::constrain_element_matrix. Only blessed framework classes may call this API by creating
+   * the requisiste \p LocalDataKey class
    */
   template <typename Residuals, typename Indices>
   void cacheJacobianWithoutConstraints(const Residuals & residuals,
@@ -1871,7 +1901,8 @@ private:
    */
   void addResidualNeighbor(const VectorTag & vector_tag);
   /**
-   * Add local neighbor residuals of all field variables for a tag onto the tag's residual vector
+   * Add local lower-dimensional block residuals of all field variables for a tag onto the tag's
+   * residual vector
    */
   void addResidualLower(const VectorTag & vector_tag);
   /**
@@ -1880,7 +1911,7 @@ private:
   void addResidualScalar(const VectorTag & vector_tag);
 
   /**
-   * Clears all of the residuals for a specific vector tag
+   * Clears all of the cached residuals for a specific vector tag
    */
   void clearCachedResiduals(const VectorTag & vector_tag);
 
@@ -1890,7 +1921,7 @@ private:
    *
    * @param dof The degree of freedom to add the residual contribution to
    * @param value The value of the residual contribution.
-   * @param TagID  the contribution should go to the tagged residual
+   * @param TagID  the contribution should go to this tagged residual
    */
   void cacheResidual(dof_id_type dof, Real value, TagID tag_id);
 
@@ -1900,7 +1931,7 @@ private:
    *
    * @param dof The degree of freedom to add the residual contribution to
    * @param value The value of the residual contribution.
-   * @param tags the contribution should go to all tags
+   * @param tags the contribution should go to all these tags
    */
   void cacheResidual(dof_id_type dof, Real value, const std::set<TagID> & tags);
 

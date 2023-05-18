@@ -142,7 +142,7 @@ protected:
   /// Container for convergence treatment when the reference residual is zero
   const enum class ZeroReferenceType { ZERO_TOLERANCE, RELATIVE_TOLERANCE } _zero_ref_type;
 
-  /// The referene vector tag id
+  /// The reference vector tag id
   TagID _reference_vector_tag_id;
 };
 
