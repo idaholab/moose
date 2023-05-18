@@ -608,7 +608,9 @@ class SyntaxCompleteCommand(SyntaxListCommand):
             if (groups is None) or (cgs.intersection(groups)):
                 url = os.path.join('syntax', child.markdown)
                 h = core.Heading(parent, level=level, id_=h_id)
-                autolink.AutoLink(h, page=url, string=str(child.fullpath().strip('/')), key=page.key)
+                # We need this to be implicit... because at the current time we do not have a
+                # mapping from content directories to apps, and the syntax is tied to an app
+                autolink.AutoLink(h, page=url, string=str(child.fullpath().strip('/')), allow_implicit=True)
 
             SyntaxListCommand.createTokenFromSyntax(self, parent, info, page, child, settings)
 

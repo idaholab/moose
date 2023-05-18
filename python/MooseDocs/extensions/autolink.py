@@ -25,7 +25,7 @@ LOG = logging.getLogger(__name__)
 
 LocalLink = tokens.newToken('LocalLink', bookmark=None)
 AutoLink = tokens.newToken('AutoLink', page='', bookmark=None, alternative=None, optional=False,
-                           exact=False, key=None)
+                           exact=False, key=None, allow_implicit=False)
 
 class AutoLinkExtension(Extension):
     """
@@ -210,7 +210,11 @@ class RenderAutoLink(RenderLinkBase):
                   'key': token['key'],
                   'throw_other_key': False}
 
-        if self.extension.get('warn_implicit'):
+        # Some extensions (see appsyntax) require some searching and implicit-ness
+        # due to config limitations (see SyntaxCompleteCommand._addList)
+        if token['allow_implicit']:
+            kwargs['key'] = None
+        elif self.extension.get('warn_implicit'):
             if token['key'] is None and page.key is not None:
                 kwargs['key'] = page.key
             kwargs['throw_other_key'] = True
