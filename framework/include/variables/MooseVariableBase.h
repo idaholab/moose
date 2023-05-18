@@ -112,7 +112,7 @@ public:
    * Is this variable nodal
    * @return true if it nodal, otherwise false
    */
-  virtual bool isNodal() const { return true; }
+  virtual bool isNodal() const { mooseError("Base class cannot determine this"); }
 
   /**
    * Does this variable have DoFs on nodes

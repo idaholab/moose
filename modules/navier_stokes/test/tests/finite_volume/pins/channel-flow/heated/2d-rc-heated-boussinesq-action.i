@@ -66,6 +66,10 @@ T_inlet = 200
 
     ambient_convection_alpha = 1e-3
     ambient_temperature = 'T_solid'
+
+    mass_advection_interpolation = 'average'
+    momentum_advection_interpolation = 'average'
+    energy_advection_interpolation = 'average'
   []
 []
 

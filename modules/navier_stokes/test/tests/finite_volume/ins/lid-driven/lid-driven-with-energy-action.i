@@ -43,6 +43,10 @@ cp = 1
     pin_pressure = true
     pinned_pressure_type = average
     pinned_pressure_value = 0
+
+    mass_advection_interpolation = 'average'
+    momentum_advection_interpolation = 'average'
+    energy_advection_interpolation = 'average'
   []
 []
 

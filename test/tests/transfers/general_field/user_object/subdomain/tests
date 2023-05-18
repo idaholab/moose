@@ -3,7 +3,8 @@
   design = 'transfers/MultiAppGeneralFieldUserObjectTransfer.md'
 
   [2d_overlay]
-    requirement = "The system shall be able to transfer user-defined spatial data on the origin mesh, limiting the transfer to a few subdomains,"
+    requirement = "The system shall be able to transfer user-defined spatial data on the origin "
+                  "mesh, limiting the transfer to a few subdomains,"
     [same_var_type]
       type = 'Exodiff'
       input = 'main.i'
@@ -51,7 +52,8 @@
       input = 'main.i'
       cli_args = "Transfers/from_sub_v2/type=MultiAppGeneralFieldUserObjectTransfer Transfers/from_sub_v2/from_multi_app=sub
                   Transfers/from_sub_v2/source_user_object=to_main Transfers/from_sub_v2/variable=from_sub
-                  Transfers/from_sub_v2/from_blocks='0 1' Transfers/from_sub_v2/from_app_must_contain_point=false"
+                  Transfers/from_sub_v2/from_blocks='0 1' Transfers/from_sub_v2/from_app_must_contain_point=false
+                  Transfers/from_sub_v2/bbox_factor=1.0000001"
       expect_err = 'Source block restriction cannot be used at the same type as allowing extrapolation'
       detail = 'source block restriction is used at the same time as an extrapolation option, without explicitly specifying an extrapolation constant, as both are semantically incompatible so the user must explicitly request it to allow it.'
     []

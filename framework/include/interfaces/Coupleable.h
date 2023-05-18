@@ -193,11 +193,18 @@ protected:
                                              unsigned int comp = 0) const;
 
   /**
-   * Returns the values for all of a coupled variable's components
+   * Returns the values for all of a coupled variable components
    * @param var_name Name of coupled variable
    * @return Vector of VariableValue pointers for each component of \p var_name
    */
   std::vector<const VariableValue *> coupledValues(const std::string & var_name) const;
+
+  /**
+   * Returns the values for all of a coupled vector variable's components
+   * @param var_name Name of coupled variable
+   * @return Vector of VectorVariableValue pointers for each component of \p var_name
+   */
+  std::vector<const VectorVariableValue *> coupledVectorValues(const std::string & var_name) const;
 
   /**
    * Returns value of a coupled variable for use in templated automatic differentiation classes

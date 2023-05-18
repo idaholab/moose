@@ -1,0 +1,75 @@
+[Tests]
+  issues = '#23587'
+  design = 'transfers/MultiAppGeneralFieldUserObjectTransfer.md'
+
+  [2d_overlay]
+    requirement = "The system shall be able to transfer user-defined spatial data on the origin "
+                  "problem"
+    [nearest_app]
+      type = 'Exodiff'
+      input = 'main.i'
+      exodiff = 'main_out.e'
+      detail = "and restrict the origin of the data using a nearest-app algorithm,"
+    []
+    [nearest_position]
+      type = 'Exodiff'
+      input = 'main.i'
+      cli_args = 'Transfers/from_sub/use_nearest_app=false Transfers/from_sub/use_nearest_position=input
+                  Transfers/from_sub_elem/use_nearest_app=false Transfers/from_sub_elem/use_nearest_position=input'
+      exodiff = 'main_out.e'
+      detail = "and restrict the origin of the data using a nearest-position algorithm."
+    []
+  []
+
+  [multiple_subapps]
+    type = 'Exodiff'
+    input = 'main_between_multiapp.i'
+    exodiff = 'main_between_multiapp_out_ma10.e main_between_multiapp_out_ma11.e
+               main_between_multiapp_out_ma20.e main_between_multiapp_out_ma21.e'
+    requirement = 'The system shall be able to send data from a user object in a subapp to another subapp while following a nearest-positions algorithm'
+    # Explanation of the results:
+    # - in ma10, the '-1' band is because the 'positions' of the apps are used to find who's nearest, and in the vertical
+    #   band, the app on the right is nearest but the band is outside of its bounding box, so the value is invalid
+    # - in ma11, the band on the left is for a similar reason. The right subapp position is closer to all points in ma11
+    #   but it does not extend over that band
+    # - in ma20, the only point that is closer to ma10's position is in the bottom left corner, everything else is closer to ma11
+    # - all of ma21 is closer to ma11's position, no value is selected from ma10
+  []
+
+  [warnings]
+    requirement = "The system shall emit a warning if"
+    [nearest_app]
+      type = 'RunException'
+      input = 'main.i'
+      cli_args = 'Transfers/from_sub_v2/type=MultiAppGeneralFieldUserObjectTransfer
+                  Transfers/from_sub_v2/from_multi_app=sub
+                  Transfers/from_sub_v2/source_user_object=to_main
+                  Transfers/from_sub_v2/variable=from_sub
+                  Transfers/from_sub_v2/use_nearest_app=true'
+      expect_err = 'no subapp bounding box expansion parameters'
+      detail = "parameters meant for extrapolation of transfers are passed with no expansion of the "
+               "bounding box, as this is likely unintended."
+    []
+  []
+
+  [errors]
+    requirement = 'The system shall error if'
+    [from_main_app]
+      type = 'RunException'
+      input = 'main.i'
+      cli_args = 'Transfers/to_sub_elem/use_nearest_app=true'
+      allow_warnings = true
+      expect_err = '(Cannot use nearest-position algorithm when sending from the main application|Should have a source multiapp when using the nearest-app informed search)'
+      detail = "a nearest-point algorithm is used for sending app-based data from a main app to "
+               "multi-apps as the data naturally lives near only one of the positions,"
+    []
+    [nearest_position_and_app]
+      type = 'RunException'
+      input = 'main.i'
+      cli_args = 'Transfers/from_sub/use_nearest_app=true Transfers/from_sub/use_nearest_position=input'
+      expect_err = 'Cannot use nearest-app and nearest-position together'
+      detail = "a nearest-point algorithm is requested for use at the same time as nearest-app "
+               "algorithm."
+    []
+  []
+[]

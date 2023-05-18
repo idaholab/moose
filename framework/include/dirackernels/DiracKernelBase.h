@@ -61,15 +61,21 @@ public:
 
   /**
    * Remove all of the current points and elements.
+   * NOTE: The points are still cached by id to find them fast
    */
   void clearPoints();
+
+  /**
+   * Clear the cache of points because the points may have moved
+   */
+  void clearPointsCaches();
 
   /**
    * Clear point cache when the mesh changes, so that element
    * coarsening, element deletion, and distributed mesh repartitioning
    * don't leave this with an invalid cache.
    */
-  virtual void meshChanged() override;
+  virtual void meshChanged() override { clearPointsCaches(); };
 
 protected:
   /**
@@ -136,6 +142,9 @@ protected:
   };
   const PointNotFoundBehavior _point_not_found_behavior;
   // @}
+
+  /// Whether Dirac sources can move during the simulation
+  const bool _allow_moving_sources;
 
   /// Data structure for caching user-defined IDs which can be mapped to
   /// specific std::pair<const Elem*, Point> and avoid the PointLocator Elem lookup.

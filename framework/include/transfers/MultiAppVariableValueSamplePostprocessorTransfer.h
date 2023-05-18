@@ -43,6 +43,17 @@ protected:
    */
   void cacheElemToPostprocessorData();
 
+  /**
+   * Maps the child application index to the parent application variable component
+   *
+   * @param index Child application index
+   * @return unsigned int Parent application variable component
+   */
+  unsigned int getVariableComponent(unsigned int index) const
+  {
+    return _map_comp_to_child ? index / _apps_per_component : _comp;
+  }
+
   /// the name of the postprocessor on the sub-applications
   PostprocessorName _postprocessor_name;
   /// the name of the variable on the main-application
@@ -51,7 +62,13 @@ protected:
   unsigned int _comp;
   /// the moose variable
   MooseVariableFieldBase & _var;
-  // sub-application ids of all local active element of the main-application
+  /// Whether or not to map groups of child applications to each component of an array variable
+  const bool _map_comp_to_child;
+  /// The number of applications associated with a component of the variable when doing array variable sampling
+  unsigned int _apps_per_component;
+  /// Sub-application ids of all local active elements in the main-application
+  /// When _map_comp_to_child == true, this vector has an entry for each component of the array variable:
+  ///  sub_app_index = _cached_multiapp_pos_ids[elem_id * n_comp + comp]
   std::vector<unsigned int> _cached_multiapp_pos_ids;
 
   /// Entries in this vector correspond to the processor ID that owns the application/postprocessor

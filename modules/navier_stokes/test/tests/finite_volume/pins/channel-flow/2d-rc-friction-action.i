@@ -36,6 +36,9 @@ rho = 1
 
     friction_types = 'darcy forchheimer'
     friction_coeffs = 'Darcy_coefficient Forchheimer_coefficient'
+
+    mass_advection_interpolation = 'average'
+    momentum_advection_interpolation = 'average'
   []
 []
 

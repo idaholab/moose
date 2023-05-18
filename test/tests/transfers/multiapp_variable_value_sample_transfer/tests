@@ -21,6 +21,46 @@
                   "point to post processing variable on the sub-application."
   []
 
+  [array_sample_test]
+    requirement = 'The system shall include the ability to transfer all components of an array field variable sampled at groups of points to post-processor values on various sub-applications define by'
+    [input_positions]
+      type = Exodiff
+      input = parent_array_sample.i
+      exodiff = parent_array_sample_out.e
+      detail = 'user input or'
+    []
+    [centroid]
+      type = Exodiff
+      input = parent_array_centroid.i
+      exodiff = parent_array_centroid_out.e
+      detail = 'element centroids.'
+    []
+  []
+  [array_sample_errors]
+    requirement = 'The system shall throw an error when attempting to transfer all components of an array field variable sampled groups of points to sub-application post-processor values if'
+    [not_array]
+      type = RunException
+      input = parent_array_sample.i
+      cli_args = 'AuxVariables/u_sub/components=1'
+      expect_err = '\'source_variable\' must be an array variable when mapping array variable components to child applications.'
+      detail = 'the source variable is not an array variable,'
+    []
+    [component_specified]
+      type = RunException
+      input = parent_array_sample.i
+      cli_args = 'Transfers/to_transfer/source_variable_component=1'
+      expect_err = '\'source_variable_component\' is invalid when mapping array variable components to child applications.'
+      detail = 'an array variable component is specified, and'
+    []
+    [wrong_size]
+      type = RunException
+      input = parent_array_sample.i
+      cli_args = 'AuxVariables/u_sub/components=3'
+      expect_err = 'The number of sub-applications \(\d\) is not divisible by the number of components in \'\w+\' \(\d+\).'
+      detail = 'the number of sub-applications is not divisible by the number array variable components.'
+    []
+  []
+
   [pp]
     requirement = "The system shall include the ability to transfer a field variable sampled at a "
                   "point to post processing variable on the sub-application"
