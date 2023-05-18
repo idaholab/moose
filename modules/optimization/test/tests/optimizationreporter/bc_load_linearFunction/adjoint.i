@@ -22,12 +22,14 @@
     y_coord_name = misfit/measurement_ycoord
     z_coord_name = misfit/measurement_zcoord
     value_name = misfit/misfit_values
+    weight_name = misfit/weight
   []
 []
 
 [Reporters]
   [misfit]
     type = OptimizationData
+    variable_weight_names = 'weight'
   []
   [params_left]
     type = ConstantReporter
