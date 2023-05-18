@@ -32,7 +32,17 @@
       method = '!dbg'
       valgrind = heavy
       max_threads = 1 # Optimize executioner does not support multiple threads
-      detail = 'performing gradient-based optimization, or'
+      detail = 'performing gradient-based optimization, '
+    []
+    [optimize_grad_batch]
+      type = Exodiff
+      input = optimize_grad_batch.i
+      exodiff = optimize_grad_batch_out_forward0.e
+      prereq = material_transient/optimize_grad
+      method = '!dbg'
+      valgrind = heavy
+      max_threads = 1 # Optimize executioner does not support multiple threads
+      detail = 'performing gradient-based optimization with batch materials, or'
     []
     [optimize_auto_adjoint]
       type = Exodiff
