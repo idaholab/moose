@@ -130,6 +130,7 @@
                       OptimizationReporter/measurement_zcoord
                       OptimizationReporter/measurement_time
                       OptimizationReporter/measurement_values
+                      OptimizationReporter/weight
                       OptimizationReporter/left
                       OptimizationReporter/right'
     to_reporters = 'measure_data/measurement_xcoord
@@ -137,6 +138,7 @@
                     measure_data/measurement_zcoord
                     measure_data/measurement_time
                     measure_data/measurement_values
+                    measure_data/weightForTemperature
                     params_left/vals
                     params_right/vals'
   []

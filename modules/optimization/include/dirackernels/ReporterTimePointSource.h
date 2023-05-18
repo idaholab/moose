@@ -26,7 +26,6 @@ protected:
   const std::vector<Real> & _coordt;
 
 private:
-
   /// The final time when we want to reverse the time index in function evaluation
   const Real & _reverse_time_end;
 
