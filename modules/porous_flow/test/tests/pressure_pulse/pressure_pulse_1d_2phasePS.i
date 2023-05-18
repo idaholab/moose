@@ -24,9 +24,13 @@
 
 [AuxVariables]
   [massfrac_ph0_sp0]
+    family = MONOMIAL
+    order = FIRST
     initial_condition = 1
   []
   [massfrac_ph1_sp0]
+    family = MONOMIAL
+    order = FIRST
     initial_condition = 0
   []
   [ppgas]

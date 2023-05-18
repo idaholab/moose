@@ -68,9 +68,14 @@ PorousFlowMassFractionTempl<is_ad>::PorousFlowMassFractionTempl(const InputParam
   _grad_mf_vars.resize(_num_passed_mf_vars);
   for (unsigned i = 0; i < _num_passed_mf_vars; ++i)
   {
+    // If mass_fraction_vars are elemental AuxVariables, we want to use coupledGenericValue()
+    // rather than coupledGenericDofValue()
+    const bool is_nodal = getVar("mass_fraction_vars", i)->isNodal();
+
     _mf_vars_num[i] = coupled("mass_fraction_vars", i);
-    _mf_vars[i] = (_nodal_material ? &coupledGenericDofValue<is_ad>("mass_fraction_vars", i)
-                                   : &coupledGenericValue<is_ad>("mass_fraction_vars", i));
+    _mf_vars[i] =
+        (_nodal_material && is_nodal ? &coupledGenericDofValue<is_ad>("mass_fraction_vars", i)
+                                     : &coupledGenericValue<is_ad>("mass_fraction_vars", i));
     _grad_mf_vars[i] = &coupledGradient("mass_fraction_vars", i);
   }
 }

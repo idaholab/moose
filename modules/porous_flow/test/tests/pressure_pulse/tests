@@ -66,12 +66,22 @@
     type = 'CSVDiff'
     input = 'pressure_pulse_1d_2phase.i'
     csvdiff = 'pressure_pulse_1d_2phase.csv'
-    #skip = 'Must skip until YaqiHack (Issue #6774)'
     rel_err = 1.0E-5
     threading = '!pthreads'
     issues = '#6845'
     design = 'porous_flow/tests/pressure_pulse/pressure_pulse_tests.md'
     requirement = 'The porous flow module shall correctly simulate the transient evolution of a pressure pulse in 1D when using 2 fluid phases, with 2 immiscible components, when one phase has zero saturation.'
+  []
+  [pressure_pulse_1d_2phase_monomial]
+    type = 'CSVDiff'
+    input = 'pressure_pulse_1d_2phase_monomial.i'
+    csvdiff = 'pressure_pulse_1d_2phase.csv'
+    rel_err = 1.0E-5
+    threading = '!pthreads'
+    prereq = 'pressure_pulse_1d_2phase'
+    issues = '#6845 #24381'
+    design = 'porous_flow/tests/pressure_pulse/pressure_pulse_tests.md'
+    requirement = 'The porous flow module shall correctly simulate the transient evolution of a pressure pulse in 1D when using 2 fluid phases, with 2 immiscible components specified using CONSTANT MONOMIAL AuxVariables, when one phase has zero saturation.'
   []
   [pressure_pulse_1d_2phasePS]
     type = 'CSVDiff'
