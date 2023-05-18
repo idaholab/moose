@@ -97,7 +97,7 @@ Extensions:
             News: newsletter/index.md
             Citing: citing.md
     MooseDocs.extensions.autolink:
-        ignore_keys: False
+        explicit: True
     MooseDocs.extensions.bibtex:
         duplicates: !include modules/doc/duplicate_bibs.yml
     MooseDocs.extensions.katex:

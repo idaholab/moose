@@ -81,12 +81,12 @@ class TestTranslatorWithOther(unittest.TestCase):
         self.translator, _ = common.load_config(config, Content=duplicate_entry)
         self.translator.init()
 
-    def testFindPageThrowOtherKey(self):
-        with self.assertRaises(self.translator.FindPageOtherKeyException) as cm:
-            self.translator.findPage('wrong_key.md', key='test', throw_other_key=True)
-        self.assertEqual(cm.exception.page.key, 'other')
-        page = self.translator.findPage('wrong_key.md', throw_other_key=True)
-        self.assertEqual(page, cm.exception.page)
+    def testFindPageOtherKeysException(self):
+        with self.assertRaises(self.translator.FindPageOtherKeysException) as cm:
+            self.translator.findPage('wrong_key.md', key='test')
+        self.assertEqual(cm.exception.pages[0].key, 'other')
+        page = self.translator.findPage('wrong_key.md')
+        self.assertEqual(page, cm.exception.pages[0])
 
 if __name__ == '__main__':
     unittest.main(verbosity=2)

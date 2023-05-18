@@ -84,23 +84,18 @@ class Translator(mixins.ConfigObject):
         self.__markdown_file_list = None
         self.__levenshtein_cache = dict()
 
-    class FindPageOtherKeyException(Exception):
+    class FindPageOtherKeysException(exceptions.MooseDocsException):
         """
-        Exception that is thrown when findPage is called and a single Page
-        is found with a different key.
-
-        This enables warnings in things like AutoLinkExtension when something
-        is not defined explicitly but should be.
-
-        # Should be removed with #24406
+        Exception that is thrown when findPage is called and Page(s)
+        are found with a different key/different keys.
         """
-        def __init__(self, page):
-            self.__page = page
-            super().__init__(f'The key used should be {self.page.key}')
+        def __init__(self, message, pages):
+            self.__pages = pages
+            super().__init__(message)
 
         @property
-        def page(self):
-            return self.__page
+        def pages(self):
+            return self.__pages
 
     @property
     def extensions(self):
@@ -207,7 +202,7 @@ class Translator(mixins.ConfigObject):
 
         return items
 
-    def findPage(self, arg, throw_on_zero=True, exact=False, warn_on_zero=False, key=None, throw_other_key=False):
+    def findPage(self, arg, throw_on_zero=True, exact=False, warn_on_zero=False, key=None):
         """
         Locate a single Page object that has a local name ending with the supplied name.
 
@@ -232,14 +227,11 @@ class Translator(mixins.ConfigObject):
                         # Filter should be removed with #24406
                         keyed_nodes = list(filter(lambda p: (p.key is not None), all_nodes))
                         if len(keyed_nodes) > 0:
-                            if len(keyed_nodes) == 1 and throw_other_key and keyed_nodes[0].key is not None:
-                                raise Translator.FindPageOtherKeyException(keyed_nodes[0])
-
-                            msg = f'Unable to locate a page with Content key "{key}"'
-                            msg += ', but it was found with other keys:'
+                            msg = f"Unable to locate a page '{arg}' with content key '{key}',"
+                            msg += ' but the page was found with other content key(s):'
                             for node in keyed_nodes:
-                                msg += f'\n  {node.key}: {node.local}'
-                            raise exceptions.MooseDocsException(msg)
+                                msg += f'\n     {node.key}: {node.local}'
+                            raise Translator.FindPageOtherKeysException(msg, keyed_nodes)
 
                     dist = self.__levenshtein_cache.get(arg, None)
                     if dist is None:

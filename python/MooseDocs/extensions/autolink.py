@@ -37,8 +37,12 @@ class AutoLinkExtension(Extension):
     @staticmethod
     def defaultConfig():
         config = Extension.defaultConfig()
-        config['warn_implicit'] = (True, "Set to true to warn of implicit links that should be explicit")
-        config['ignore_keys'] = (True, "Set to true to ignore keys; used in explicit transition")
+
+        # None of these should be required after #24406, because we should always be explicit
+        config['explicit'] = (False, "Set to true to require explicit links")
+        config['warn_implicit'] = (True, "Set to true to warn of implicit links that should be explicit; overriden by 'explicit'")
+        config['ignore_keys'] = (True, "Set to true to ignore keys; used in explicit transition; overriden by 'explicit'")
+
         return config
 
     def extend(self, reader, renderer):
@@ -208,8 +212,11 @@ class RenderAutoLink(RenderLinkBase):
         """
         args = [token['page']]
         kwargs = {'exact': token['exact'],
-                  'key': token['key'],
-                  'throw_other_key': False}
+                  'key': token['key']}
+
+        ignore_keys = self.extension.get('ignore_keys')
+        warn_implicit = self.extension.get('warn_implicit')
+        explicit = self.extension.get('explicit')
 
         # Some extensions (see appsyntax) require some searching and implicit-ness
         # due to config limitations (see SyntaxCompleteCommand._addList)
@@ -218,14 +225,21 @@ class RenderAutoLink(RenderLinkBase):
         # Needed to support the app transition to explicit-ness; while MOOSE has
         # key:path/to/file.md everywhere, the apps will not initially have said
         # keys in their respective config.yml
-        elif self.extension.get('ignore_keys'):
+        elif ignore_keys and not explicit:
             kwargs['key'] = None
-        elif self.extension.get('warn_implicit'):
-            if token['key'] is None and page.key is not None:
-                kwargs['key'] = page.key
-            kwargs['throw_other_key'] = True
+        # Lastly, explicitly set a key if the user did not set it
+        # The second check (page having a key) should be removed with #24406
+        elif (explicit or warn_implicit) and (token['key'] is None and page.key is not None):
+            kwargs['key'] = page.key
 
         return args, kwargs
+
+    def warnOnOtherKey(self):
+        """
+        Whether or not to only warn (not raise) if we find exactly one other page
+        with a different key (based on whether or not warn_implicit is set)
+        """
+        return self.extension.get('warn_implicit') and not self.extension.get('explicit') and not self.extension.get('ignore_keys')
 
     """
     Create link to another page and extract the heading for the text, if no children provided.
@@ -237,20 +251,35 @@ class RenderAutoLink(RenderLinkBase):
         try:
             desired = self.translator.findPage(*find_args, **find_kwargs,
                                                throw_on_zero=not optional and alternative is None)
-        except Translator.FindPageOtherKeyException as ex:
+        # Page wasn't found with the given key but was found with another key
+        except Translator.FindPageOtherKeysException as ex:
             token_page = token['page']
             src = token.info[0] if token.info else token.text()
-            line = token.info.line if token.info else None
 
-            msg = f"The link should be explicitly defined with the Content key '{ex.page.key}', as:\n"
-            replace = f'{ex.page.key}:{token_page}'
-            if token_page in src:
-                msg += '  ' + src.replace(token_page, replace) + '\n'
+            # Try to come up with some useful replacement suggestions
+            replacements = []
+            for page in ex.pages:
+                replacement = f'{page.key}:{token_page}'
+                if token_page in src:
+                    replacements.append(src.replace(token_page, replacement))
+                else:
+                    replacements.append(replacement)
+
+            # We set warn_implicit, one other page was found and we can set it for them
+            if self.warnOnOtherKey() and len(ex.pages) == 1:
+                msg = f"The page '{token_page}' should be explicitly linked with the content key '{ex.pages[0].key}:':\n"
+                msg += f'     {replacements[0]}\n'
+                line = token.info.line if token.info else None
+                LOG.warning(common.report_error(msg, page.source, line=line, src=src, prefix='WARNING'))
+                desired = ex.pages[0]
+            # warn_implicit not set or it is and we found multiple alternatives
             else:
-                msg += '  ' + replace + '\n'
-            LOG.warning(common.report_error(msg, page.source, line=line,
-                                            src=src, prefix='WARNING'))
-            desired = ex.page
+                msg = ex.message
+                msg += "\n\nYou can explicitly link to one of the page(s) above by prefixing your link with '<content key>:', as:\n"
+                for replacement in replacements:
+                    msg += f"     {replacement}\n"
+                raise common.exceptions.MooseDocsException(msg)
+
         except MooseDocs.common.exceptions.MooseDocsException:
             html.String(parent, content=token['page'], class_='moose_error')
             raise
