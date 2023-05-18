@@ -2666,6 +2666,21 @@ protected:
   ElemSideBuilder _compute_face_map_side_elem_builder;
 
   const Elem * _msm_elem = nullptr;
+
+  /// A working vector to avoid repeated heap allocations when caching residuals that must have
+  /// libMesh-level constraints (hanging nodes, periodic bcs) applied to them. This stores local
+  /// residual values
+  DenseVector<Number> _element_vector;
+
+  /// A working matrix to avoid repeated heap allocations when caching Jacobians that must have
+  /// libMesh-level constraints (hanging nodes, periodic bcs) applied to them. This stores local
+  /// Jacobian values
+  DenseMatrix<Number> _element_matrix;
+
+  /// Working vectors to avoid repeated heap allocations when caching residuals/Jacobians that must
+  /// have libMesh-level constraints (hanging nodes, periodic bcs) applied to them. These are for
+  /// storing the dof indices
+  std::vector<dof_id_type> _row_indices, _column_indices;
 };
 
 template <typename OutputType>
@@ -2826,19 +2841,19 @@ Assembly::cacheResiduals(const Residuals & residuals,
   }
 
   // Need to make a copy because we might modify this in constrain_element_vector
-  std::vector<dof_id_type> row_indices(input_row_indices.begin(), input_row_indices.end());
+  _row_indices.assign(input_row_indices.begin(), input_row_indices.end());
 
-  DenseVector<Number> element_vector(row_indices.size());
-  for (const auto i : index_range(row_indices))
-    element_vector(i) = MetaPhysicL::raw_value(residuals[i]) * scaling_factor;
+  _element_vector.resize(_row_indices.size());
+  for (const auto i : index_range(_row_indices))
+    _element_vector(i) = MetaPhysicL::raw_value(residuals[i]) * scaling_factor;
 
   // At time of writing, this method doesn't do anything with the asymmetric_constraint_rows
   // argument, but we set it to false to be consistent with processLocalResidual
   _dof_map.constrain_element_vector(
-      element_vector, row_indices, /*asymmetric_constraint_rows=*/false);
+      _element_vector, _row_indices, /*asymmetric_constraint_rows=*/false);
 
-  for (const auto i : index_range(row_indices))
-    cacheResidual(row_indices[i], element_vector(i), vector_tags);
+  for (const auto i : index_range(_row_indices))
+    cacheResidual(_row_indices[i], _element_vector(i), vector_tags);
 }
 
 template <typename Residuals, typename Indices>
@@ -2894,30 +2909,30 @@ Assembly::cacheJacobian(const Residuals & residuals,
                 "will not work.");
   }
 #endif
-  auto column_indices = std::vector<dof_id_type>(compare_dofs.begin(), compare_dofs.end());
+  _column_indices.assign(compare_dofs.begin(), compare_dofs.end());
 
   // If there's no derivatives then there is nothing to do. Moreover, if we pass zero size column
   // indices to constrain_element_matrix then we will potentially get errors out of BLAS
-  if (!column_indices.size())
+  if (!_column_indices.size())
     return;
 
   // Need to make a copy because we might modify this in constrain_element_matrix
-  std::vector<dof_id_type> row_indices(input_row_indices.begin(), input_row_indices.end());
+  _row_indices.assign(input_row_indices.begin(), input_row_indices.end());
 
-  DenseMatrix<Number> element_matrix(row_indices.size(), column_indices.size());
-  for (const auto i : index_range(row_indices))
+  _element_matrix.resize(_row_indices.size(), _column_indices.size());
+  for (const auto i : index_range(_row_indices))
   {
     const auto & sparse_derivatives = residuals[i].derivatives();
 
-    for (const auto j : index_range(column_indices))
-      element_matrix(i, j) = sparse_derivatives[column_indices[j]] * scaling_factor;
+    for (const auto j : index_range(_column_indices))
+      _element_matrix(i, j) = sparse_derivatives[_column_indices[j]] * scaling_factor;
   }
 
-  _dof_map.constrain_element_matrix(element_matrix, row_indices, column_indices);
+  _dof_map.constrain_element_matrix(_element_matrix, _row_indices, _column_indices);
 
-  for (const auto i : index_range(row_indices))
-    for (const auto j : index_range(column_indices))
-      cacheJacobian(row_indices[i], column_indices[j], element_matrix(i, j), {}, matrix_tags);
+  for (const auto i : index_range(_row_indices))
+    for (const auto j : index_range(_column_indices))
+      cacheJacobian(_row_indices[i], _column_indices[j], _element_matrix(i, j), {}, matrix_tags);
 }
 
 template <typename Residuals, typename Indices>

@@ -58,4 +58,7 @@ protected:
 
   /// The direction of the out-of-plane strain
   unsigned int _scalar_out_of_plane_strain_direction;
+
+  /// Member variable to avoid constant dense matrix heap allocations
+  DenseMatrix<Number> _ke_copy;
 };

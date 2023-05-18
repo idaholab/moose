@@ -138,10 +138,10 @@ GeneralizedPlaneStrainOffDiag::computeDispOffDiagJacobianScalar(unsigned int com
                                                    component) *
                                _grad_test[_i][_qp](component);
     accumulateTaggedLocalMatrix();
-    const auto ke_copy = _local_ke;
+    _ke_copy = _local_ke;
 
     prepareMatrixTag(_assembly, jvar, _var.number());
-    ke_copy.get_transpose(_local_ke);
+    _ke_copy.get_transpose(_local_ke);
     accumulateTaggedLocalMatrix();
   }
 }
