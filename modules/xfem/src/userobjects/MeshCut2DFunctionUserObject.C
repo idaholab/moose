@@ -26,34 +26,31 @@ MeshCut2DFunctionUserObject::validParams()
   InputParameters params = MeshCut2DUserObjectBase::validParams();
   params.addClassDescription("Creates a UserObject for a mesh cutter in 2D problems where crack "
                              "growth is specified by functions.");
-  params.addRequiredParam<FunctionName>("function_x", "Growth function for x direction");
-  params.addRequiredParam<FunctionName>("function_y", "Growth function for y direction");
-  params.addRequiredParam<FunctionName>("function_v", "Growth speed function");
+  params.addRequiredParam<FunctionName>("growth_direction_x",
+                                        "Function defining x-component of crack growth direction.");
+  params.addRequiredParam<FunctionName>("growth_direction_y",
+                                        "Function defining y-component of crack growth direction.");
+  params.addRequiredParam<FunctionName>("growth_rate", "Function defining crack growth rate.");
   return params;
 }
 
 MeshCut2DFunctionUserObject::MeshCut2DFunctionUserObject(const InputParameters & parameters)
   : MeshCut2DUserObjectBase(parameters),
-    _func_x(&getFunction("function_x")),
-    _func_y(&getFunction("function_y")),
-    _func_v(&getFunction("function_v"))
+    _func_x(&getFunction("growth_direction_x")),
+    _func_y(&getFunction("growth_direction_y")),
+    _growth_function(&getFunction("growth_rate"))
 {
 }
 
 void
 MeshCut2DFunctionUserObject::initialize()
 {
-  // following logic only calls crack growth function if time changed.
-  // This deals with max_xfem_update > 1.  Error if the timestep drops below this
-  if ((_t - _time_of_previous_call_to_UO) > libMesh::TOLERANCE)
+  // Only call crack growth function if time changed.
+  if (_t > _time_of_previous_call_to_UO)
   {
     findActiveBoundaryGrowth();
     growFront();
   }
-  else if (_dt < libMesh::TOLERANCE && _t_step != 0)
-    mooseError("timestep size must be greater than " + Moose::stringify(libMesh::TOLERANCE) +
-               ", for crack to grow. dt=" + Moose::stringify(_dt));
-
   _time_of_previous_call_to_UO = _t;
 }
 
@@ -74,7 +71,7 @@ MeshCut2DFunctionUserObject::findActiveBoundaryGrowth()
 
     // compute growth amount/velocity
     Point nodal_offset;
-    Real velo = _func_v->value(_t, Point(0, 0, 0));
+    Real velo = _growth_function->value(_t, Point(0, 0, 0));
     nodal_offset = dir * velo * _dt;
 
     _active_front_node_growth_vectors.push_back(

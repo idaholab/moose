@@ -33,7 +33,7 @@ MeshCut2DFractureUserObject::validParams()
 
 MeshCut2DFractureUserObject::MeshCut2DFractureUserObject(const InputParameters & parameters)
   : MeshCut2DUserObjectBase(parameters),
-    _k_critical_squared((getParam<Real>("k_critical")) * (getParam<Real>("k_critical"))),
+    _k_critical(getParam<Real>("k_critical")),
     _growth_increment(getParam<Real>("growth_increment"))
 {
 }
@@ -72,7 +72,7 @@ MeshCut2DFractureUserObject::findActiveBoundaryGrowth()
   _active_front_node_growth_vectors.clear();
   for (unsigned int i = 0; i < _original_and_current_front_node_ids.size(); ++i)
   {
-    if (k_squared[i] > _k_critical_squared && k1[i] > 0)
+    if (k_squared[i] > (_k_critical * _k_critical) && k1[i] > 0)
     {
       // growth direction in crack front coord (cfc) system based on the  max hoop stress
       // criterion

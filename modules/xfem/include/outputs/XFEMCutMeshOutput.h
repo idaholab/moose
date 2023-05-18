@@ -19,7 +19,8 @@
 class MeshCut2DUserObjectBase;
 
 /**
- * Outputs the cutting mesh used by XFEM to an Exodus file.  The output file contains only the mesh, and no solution results.
+ * Outputs the cutting mesh used by XFEM to an Exodus file.  The output file contains only the mesh,
+ * and no solution results.
  */
 class XFEMCutMeshOutput : public FileOutput, public UserObjectInterface
 {

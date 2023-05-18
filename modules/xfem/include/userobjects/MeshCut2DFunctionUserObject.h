@@ -14,7 +14,7 @@
 class Function;
 
 /**
- * MeshCut2DFunctionUserObject: 
+ * MeshCut2DFunctionUserObject:
  * (1) reads in a mesh describing the crack surface,
  * (2) uses the mesh to do initial cutting of 2D elements, and
  * (3) grows the mesh based on prescribed growth functions.
@@ -38,7 +38,7 @@ private:
    */
   const Function * _func_x;
   const Function * _func_y;
-  const Function * _func_v;
+  const Function * _growth_function;
 
   /// Gets the time of the previous call to this user object.
   /// This is used to determine if certain things should be executed or not

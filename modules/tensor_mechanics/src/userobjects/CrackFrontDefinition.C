@@ -291,6 +291,7 @@ CrackFrontDefinition::execute()
 {
   // Because J-Integral is based on original geometry, the crack front geometry
   // is never updated, so everything that needs to happen is done in initialSetup()
+  // fixme Lynn Help with this Benjamin Spencer.  Not suer if this is true after this commit
   if (_t_stress == true && _treat_as_2d == false)
     calculateTangentialStrainAlongFront();
 }
@@ -300,8 +301,9 @@ CrackFrontDefinition::initialSetup()
 {
   if (_crack_front_points_provider != nullptr)
   {
-    // should call something to get an number of crack front points from the
-    // _crack_front_points_provider IF its initialSetup has been called
+    // TODO: For crack nucleation, should call a new method on the _crack_front_points_provider to
+    // get the number of crack front points IF the crack_front_points_provider's initialSetup has
+    // been called
     _crack_front_points =
         _crack_front_points_provider->getCrackFrontPoints(_num_points_from_provider);
     if (_use_mesh_cutter)
@@ -356,8 +358,9 @@ CrackFrontDefinition::initialize()
   // cutter
   if (_use_mesh_cutter && _is_cutter_modified)
   {
-    // should call something to get an updated number of crack front points from the
-    // _crack_front_points_provider
+    // TODO: For crack nucleation, should call a new method on the _crack_front_points_provider to
+    // get the number of crack front points IF the crack_front_points_provider's initialSetup has
+    // been called.  This also needs to be address in line 304
     _crack_front_points =
         _crack_front_points_provider->getCrackFrontPoints(_num_points_from_provider);
     _crack_plane_normals =
@@ -793,16 +796,13 @@ CrackFrontDefinition::updateCrackFrontGeometry()
   updateDataForCrackDirection();
 
   _segment_lengths.clear();
+  _tangent_directions.clear();
+  _crack_directions.clear();
+  _overall_length = 0.0;
+  _rot_matrix.clear();
   _distances_along_front.clear();
   _angles_along_front.clear();
-  _tangent_directions.clear();
-  _crack_plane_normals.clear();
-  _crack_directions.clear();
-  _rot_matrix.clear();
   _strain_along_front.clear();
-
-  // _crack_plane_normal = {0, 0, 0};   //This should be ok to do but it causes
-  // test:j_integral_vtest.j_ellip and test:j_integral_vtest.j_ellip_cfp to fail
 
   if (_treat_as_2d)
   {
@@ -810,7 +810,6 @@ CrackFrontDefinition::updateCrackFrontGeometry()
     _segment_lengths.reserve(num_crack_front_points);
     _tangent_directions.reserve(num_crack_front_points);
     _crack_directions.reserve(num_crack_front_points);
-    _overall_length = 0.0;
 
     for (std::size_t i = 0; i < getNumCrackFrontPoints(); ++i)
     {
@@ -828,6 +827,7 @@ CrackFrontDefinition::updateCrackFrontGeometry()
       rot_mat(2, _axis_2d) = 1.0;
       if (_use_mesh_cutter)
       {
+        mooseAssert(!_crack_plane_normals.empty(), "_crack_plane_normals is empty.");
         rot_mat.fillRow(1, _crack_plane_normals[i]);
       }
       else
@@ -848,7 +848,6 @@ CrackFrontDefinition::updateCrackFrontGeometry()
     _segment_lengths.reserve(num_crack_front_points);
     _tangent_directions.reserve(num_crack_front_points);
     _crack_directions.reserve(num_crack_front_points);
-    _overall_length = 0.0;
 
     RealVectorValue back_segment;
     Real back_segment_len = 0.0;

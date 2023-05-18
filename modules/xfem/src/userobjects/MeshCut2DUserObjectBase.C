@@ -181,8 +181,6 @@ MeshCut2DUserObjectBase::getCrackFrontPoints(unsigned int number_crack_front_poi
   return crack_front_points;
 }
 
-// CrackFrontDefinition wants the normal so this gives it the normal for a line element with an
-// assumed tangent direction in the [001] direction.
 const std::vector<RealVectorValue>
 MeshCut2DUserObjectBase::getCrackPlaneNormals(unsigned int number_crack_front_points) const
 {
@@ -217,7 +215,6 @@ MeshCut2DUserObjectBase::getCrackPlaneNormals(unsigned int number_crack_front_po
     {
 
       Point end_pt, connecting_pt;
-      // make sure normal crossed with the crack face points in the [0,0,1] direction
       if (found_it0)
       {
         end_pt = elem->node_ref(0);
@@ -232,10 +229,9 @@ MeshCut2DUserObjectBase::getCrackPlaneNormals(unsigned int number_crack_front_po
       }
 
       Point fracture_dir = end_pt - connecting_pt;
-      // crack normal is fracture direction cross tangent direction
-      // In 2D, tangent_direction is always [001] in CrackFrontDefinition.C so
-      // need to make sure [001] x normal_direction gives fracture_dir
-      // SO... fracture_dir x [001] gives the correct normal_direction
+      // The crack normal is orthogonal to the crack extension direction (fracture_dir),
+      // and is defined in this implementation as the cross product of the direction of crack
+      // extension with the tangent direction, which is always (0, 0, 1) in 2D.
       RealVectorValue normal_dir{fracture_dir(1), -fracture_dir(0), 0};
       normal_dir /= normal_dir.norm();
       crack_plane_normals.push_back(std::make_pair(id, normal_dir));
@@ -261,30 +257,28 @@ MeshCut2DUserObjectBase::getCrackPlaneNormals(unsigned int number_crack_front_po
 void
 MeshCut2DUserObjectBase::findOriginalCrackFrontNodes()
 {
-  if (_original_and_current_front_node_ids.empty())
+  std::unique_ptr<PointLocatorBase> pl = _mesh.getPointLocator();
+  pl->enable_out_of_mesh_mode();
+  std::unordered_set boundary_nodes = MeshTools::find_boundary_nodes(*_cutter_mesh);
+  for (const auto & node : boundary_nodes)
   {
-    std::unique_ptr<PointLocatorBase> pl = _mesh.getPointLocator();
-    pl->enable_out_of_mesh_mode();
-    std::unordered_set boundary_nodes = MeshTools::find_boundary_nodes(*_cutter_mesh);
-    for (const auto & node : boundary_nodes)
-    {
-      auto node_id = node;
-      Node * this_node = _cutter_mesh->node_ptr(node_id);
-      mooseAssert(this_node, "Node is NULL");
-      Point & this_point = *this_node;
+    auto node_id = node;
+    Node * this_node = _cutter_mesh->node_ptr(node_id);
+    mooseAssert(this_node, "Node is NULL");
+    Point & this_point = *this_node;
 
-      const Elem * elem = (*pl)(this_point);
-      if (elem != NULL)
-        _original_and_current_front_node_ids.push_back(std::make_pair(node, node));
-    }
-    std::sort(_original_and_current_front_node_ids.begin(),
-              _original_and_current_front_node_ids.end());
+    const Elem * elem = (*pl)(this_point);
+    if (elem != NULL)
+      _original_and_current_front_node_ids.push_back(std::make_pair(node, node));
   }
-  else
-    mooseError("MeshCut2DFractureUserObject::findOriginalCrackFrontNodes() should never be called "
-               "more than once.  This fills the _original_and_current_front_node_ids data "
-               "structure and the order in this data structure must match the node order used to "
-               "set-up the CrackFrontDefinition.");
+  std::sort(_original_and_current_front_node_ids.begin(),
+            _original_and_current_front_node_ids.end());
+
+  mooseAssert(!_original_and_current_front_node_ids.empty(),
+              "MeshCut2DFractureUserObject::findOriginalCrackFrontNodes() should never be called "
+              "more than once.  This fills the _original_and_current_front_node_ids data "
+              "structure and the order in this data structure must match the node order used to "
+              "set-up the CrackFrontDefinition.");
 }
 
 void

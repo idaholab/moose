@@ -31,7 +31,7 @@
     growth_dir_method = MAX_HOOP_STRESS
     size_control = 1
     n_step_growth = 1
-    function_v = growth_func_v
+    growth_rate = growth_func_v
     crack_front_nodes = '7 6 5 4'
   [../]
 []

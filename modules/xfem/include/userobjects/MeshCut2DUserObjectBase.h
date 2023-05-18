@@ -35,6 +35,13 @@ public:
                                      std::vector<Xfem::CutFace> & cut_faces) const override;
   virtual const std::vector<Point>
   getCrackFrontPoints(unsigned int num_crack_front_points) const override;
+
+  /** get a set of normal vectors along a crack front from a XFEM GeometricCutUserObject
+   * CrackFrontDefinition wants the normal so this implementation of getCrackPlaneNormals
+   * gives the CrackFrontDefinition a normal for a line element with a tangent direction
+   * in the [001] direction.
+   * @return A vector which contains all crack front normals
+   */
   virtual const std::vector<RealVectorValue>
   getCrackPlaneNormals(unsigned int num_crack_front_points) const override;
 
@@ -66,7 +73,7 @@ protected:
   virtual void findActiveBoundaryGrowth() = 0;
 
   /**
-    Find the original crack front nodes in the cutter mesh and fill pair.first in
+    Find the original crack front nodes in the cutter mesh and use to populate
     _original_and_current_front_node_ids.
    */
   void findOriginalCrackFrontNodes();

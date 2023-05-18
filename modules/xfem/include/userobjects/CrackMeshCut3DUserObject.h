@@ -104,14 +104,14 @@ protected:
   /// The direction method for growing mesh at the front
   const GrowthDirectionEnum _growth_dir_method;
 
-  /// Enum to for crack growth speed
-  enum class GrowthSpeedEnum
+  /// Enum to for crack growth rate
+  enum class GrowthRateEnum
   {
     FATIGUE,
     FUNCTION
   };
-  /// The speed method for growing mesh at the front
-  const GrowthSpeedEnum _growth_speed_method;
+  /// The rate method for growing mesh at the front
+  const GrowthRateEnum _growth_rate_method;
 
   /// The structural mesh must be 3D only
   const unsigned int _elem_dim = 3;
