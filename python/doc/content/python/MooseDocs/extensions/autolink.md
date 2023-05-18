@@ -24,6 +24,13 @@ The syntax also supports HTML bookmark style links, as demonstrated in [link-boo
                        bookmark.
 [Core](core.md#shortcut-link)
 
+<!--TODO: This should be reworded once explicit linking is the default in #24406-->
+
+By default, implicit linking to other content that is outside of the root directory of the content in which the link is found
+is allowed. This default is slated to change in the future and is controlled by the `explicit` config option in this extension.
+Explicit linking across content root directories is achieved by appending `key:` as a prefix to the link, where said key is the
+key used in the `Content` entry in the configuration.
+
 Optional key-value pairs used to define the settings for automatic links can be specified like `[text](link key=value)`. A complete list of the available settings is given in [link-settings]. The `alternative` setting is particularly powerful and serves as a substitute for the originally linked file should it fail to be found. The input for this setting may be an HTML bookmark, a URL, or a markdown file plus bookmark combination (or just a file) as demonstrated in [alternative-link-example].
 
 !devel! example id=alternative-link-example
