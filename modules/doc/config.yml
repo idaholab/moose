@@ -96,6 +96,8 @@ Extensions:
             Gallery: /gallery.md
             News: newsletter/index.md
             Citing: citing.md
+    MooseDocs.extensions.autolink:
+        ignore_keys: False
     MooseDocs.extensions.bibtex:
         duplicates: !include modules/doc/duplicate_bibs.yml
     MooseDocs.extensions.katex:

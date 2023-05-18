@@ -38,6 +38,7 @@ class AutoLinkExtension(Extension):
     def defaultConfig():
         config = Extension.defaultConfig()
         config['warn_implicit'] = (True, "Set to true to warn of implicit links that should be explicit")
+        config['ignore_keys'] = (True, "Set to true to ignore keys; used in explicit transition")
         return config
 
     def extend(self, reader, renderer):
@@ -213,6 +214,11 @@ class RenderAutoLink(RenderLinkBase):
         # Some extensions (see appsyntax) require some searching and implicit-ness
         # due to config limitations (see SyntaxCompleteCommand._addList)
         if token['allow_implicit']:
+            kwargs['key'] = None
+        # Needed to support the app transition to explicit-ness; while MOOSE has
+        # key:path/to/file.md everywhere, the apps will not initially have said
+        # keys in their respective config.yml
+        elif self.extension.get('ignore_keys'):
             kwargs['key'] = None
         elif self.extension.get('warn_implicit'):
             if token['key'] is None and page.key is not None:
