@@ -47,6 +47,18 @@ struct GatherVariable
   }
 };
 
+struct GatherVariableGradient
+{
+  typedef RealVectorValue type;
+  typedef const VariableGradient gather_type;
+
+  template <typename C>
+  static gather_type * getPointer(const C & coupleable, const VariableName & name)
+  {
+    return &coupleable.coupledGradient(name);
+  }
+};
+
 // tuple wrappers
 struct TupleStd
 {
@@ -172,6 +184,7 @@ public:
   std::map<dof_id_type, std::size_t> _index_map;
 
   friend struct BatchMaterialUtils::GatherVariable;
+  friend struct BatchMaterialUtils::GatherVariableGradient;
 
 private:
   /// flag that indicates if _output_data has been fully computed
