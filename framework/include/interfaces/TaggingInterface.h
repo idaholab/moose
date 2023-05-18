@@ -40,8 +40,8 @@ public:
   static InputParameters validParams();
 
   /**
-   * Class that is used as a parameter to getVectorTags() that allows only
-   * AttribVectorTags methods to call it
+   * Class that is used as a parameter to some of our vector tag APIs that allows only
+   * blessed framework classes to call them
    */
   class VectorTagsKey
   {
@@ -55,8 +55,8 @@ public:
   };
 
   /**
-   * Class that is used as a parameter to getMatrixTags() that allows only
-   * AttribMatrixTags methods to call it
+   * Class that is used as a parameter to some of our matrix tag APIs that allows only
+   * blessed framework classes to call them
    */
   class MatrixTagsKey
   {
@@ -124,7 +124,7 @@ protected:
   void prepareVectorTagLower(Assembly & assembly, unsigned int ivar);
 
   /**
-   * Prepare data for computing element jacobian according to the ative tags.
+   * Prepare data for computing element jacobian according to the active tags.
    * Jacobian blocks for different tags will be extracted from Assembly.
    * A local Jacobian will be zeroed. It should be called
    * right before the local element matrix is computed.
@@ -137,7 +137,7 @@ protected:
                         DenseMatrix<Number> & k) const;
 
   /**
-   * Prepare data for computing nonlocal element jacobian according to the ative tags.
+   * Prepare data for computing nonlocal element jacobian according to the active tags.
    * Jacobian blocks for different tags will be extracted from Assembly.
    * A nonlocal Jacobian will be zeroed. It should be called
    * right before the nonlocal element matrix is computed.
@@ -145,7 +145,7 @@ protected:
   void prepareMatrixTagNonlocal(Assembly & assembly, unsigned int ivar, unsigned int jvar);
 
   /**
-   * Prepare data for computing element jacobian according to the ative tags
+   * Prepare data for computing element jacobian according to the active tags
    * for DG and interface kernels.
    * Jacobian blocks for different tags will be extracted from Assembly.
    * A local Jacobian will be zeroed. It should be called
@@ -163,7 +163,7 @@ protected:
                                 DenseMatrix<Number> & k) const;
 
   /**
-   * Prepare data for computing the jacobian according to the ative tags for mortar.  Jacobian
+   * Prepare data for computing the jacobian according to the active tags for mortar.  Jacobian
    * blocks for different tags will be extracted from Assembly.  A local Jacobian will be zeroed. It
    * should be called right before the local element matrix is computed.
    */
@@ -214,7 +214,7 @@ protected:
   void assignTaggedLocalMatrix();
 
   /**
-   * Process the provided incoming residuals corresponding to the provided dof indices
+   * Add the provided incoming residuals corresponding to the provided dof indices
    */
   template <typename Residuals, typename Indices>
   void addResiduals(Assembly & assembly,
@@ -223,7 +223,7 @@ protected:
                     Real scaling_factor);
 
   /**
-   * Process the provided incoming residuals corresponding to the provided dof indices
+   * Add the provided incoming residuals corresponding to the provided dof indices
    */
   template <typename T, typename Indices>
   void addResiduals(Assembly & assembly,
@@ -232,7 +232,7 @@ protected:
                     Real scaling_factor);
 
   /**
-   * Process the provided incoming residuals and derivatives for the Jacobian, corresponding to the
+   * Add the provided incoming residuals and derivatives for the Jacobian, corresponding to the
    * provided dof indices
    */
   template <typename Residuals, typename Indices>
@@ -242,8 +242,7 @@ protected:
                                Real scaling_factor);
 
   /**
-   * Process the provided incoming residualsderivatives for the Jacobian, corresponding to the
-   * provided dof indices
+   * Add the provided residual derivatives into the Jacobian for the provided dof indices
    */
   template <typename Residuals, typename Indices>
   void addJacobian(Assembly & assembly,
@@ -252,8 +251,9 @@ protected:
                    Real scaling_factor);
 
   /**
-   * Process the provided incoming residuals corresponding to the provided dof indices without
-   * constraints
+   * Add the provided incoming residuals corresponding to the provided dof indices. This API should
+   * only be used if the caller knows that no libMesh-level constraints (hanging nodes or periodic
+   * boundary conditions) apply to the provided dof indices
    */
   template <typename Residuals, typename Indices>
   void addResidualsWithoutConstraints(Assembly & assembly,
@@ -262,8 +262,9 @@ protected:
                                       Real scaling_factor);
 
   /**
-   * Process the provided incoming residuals and derivatives for the Jacobian, corresponding to the
-   * provided dof indices without constraints
+   * Add the provided incoming residuals and derivatives for the Jacobian, corresponding to the
+   * provided dof indices.  This API should only be used if the caller knows that no libMesh-level
+   * constraints (hanging nodes or periodic boundary conditions) apply to the provided dof indices
    */
   template <typename Residuals, typename Indices>
   void addResidualsAndJacobianWithoutConstraints(Assembly & assembly,
@@ -272,8 +273,9 @@ protected:
                                                  Real scaling_factor);
 
   /**
-   * Process the provided incoming residualsderivatives for the Jacobian, corresponding to the
-   * provided dof indices without constraints
+   * Add the provided residual derivatives into the Jacobian for the provided dof indices. This API
+   * should only be used if the caller knows that no libMesh-level constraints (hanging nodes or
+   * periodic boundary conditions) apply to the provided dof indices
    */
   template <typename Residuals, typename Indices>
   void addJacobianWithoutConstraints(Assembly & assembly,
@@ -282,7 +284,7 @@ protected:
                                      Real scaling_factor);
 
   /**
-   * Process a single Jacobian element
+   * Add into a single Jacobian element
    */
   void addJacobianElement(Assembly & assembly,
                           Real value,
@@ -291,7 +293,7 @@ protected:
                           Real scaling_factor);
 
   /**
-   * Process a local Jacobian matrix
+   * Add a local Jacobian matrix
    */
   void addJacobian(Assembly & assembly,
                    DenseMatrix<Real> & local_k,
