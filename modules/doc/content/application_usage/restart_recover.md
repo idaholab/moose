@@ -94,7 +94,7 @@ Note that while this command is called `kill`, it does not actually terminate th
 ## Reloading Data
 
 - It is possible to load and project data onto a different mesh from a solution file usually as an initial condition in a new simulation.
-- MOOSE fully supports this through the use of [SolutionUserObject](SolutionUserObject.md).
+- MOOSE fully supports this through the use of [SolutionUserObject](framework:SolutionUserObject.md).
 
 ## Recover
 
@@ -104,7 +104,7 @@ Note that while this command is called `kill`, it does not actually terminate th
 ## MultiApp Restart
 
 When running a multiapp simulation you do +not+ need to enable checkpoint output in each sub app input file. The master app stores the restart data for all sub apps in its file.
-More information about MultiApp restart/recover can be found at [MultiApps](syntax/MultiApps/index.md).
+More information about MultiApp restart/recover can be found at [MultiApps](framework:syntax/MultiApps/index.md).
 
 ## Time Control on Restart
 

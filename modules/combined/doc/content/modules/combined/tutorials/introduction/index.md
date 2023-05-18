@@ -2,9 +2,9 @@
 
 This tutorial provides an introduction to setting up models that combine models
 of heat transfer and mechanical deformation, including contact. This builds on the material in the 
-[Introduction to Heat Conduction](heat_conduction/tutorials/introduction/index.md),
-[Introduction to Tensor Mechanics](tensor_mechanics/tutorials/introduction/index.md), and
-[Introduction to Contact](contact/tutorials/introduction/index.md)
+[Introduction to Heat Conduction](heat_conduction:heat_conduction/tutorials/introduction/index.md),
+[Introduction to Tensor Mechanics](tensor_mechanics:tensor_mechanics/tutorials/introduction/index.md), and
+[Introduction to Contact](contact:contact/tutorials/introduction/index.md)
 tutorials, the completion of which is recommended prior to this tutorial.
 
 There are three parts to this tutorial, which build in complexity.

@@ -19,8 +19,8 @@ this default could currently be provided by
 specific problems related to semiconductors.
 
 This class inherits from the [HeatSource](HeatSource.md) class via
-[DerivativeMaterialInterface](DerivativeMaterialInterface.md) and
-[JvarMapInterface](JvarMapInterface.md).
+[DerivativeMaterialInterface](framework:DerivativeMaterialInterface.md) and
+[JvarMapInterface](framework:JvarMapInterface.md).
 
 ## Example Input File Syntax
 

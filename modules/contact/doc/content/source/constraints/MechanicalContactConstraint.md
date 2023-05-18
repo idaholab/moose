@@ -27,7 +27,7 @@ where $\mu$ is the friction coefficient.
 ### Contact Formulations
 
 To enforce the contact constraints, three types of formulations are available. These are `kinematic`, `penalty`, and `mortar`.
-The `kinematic` and `penalty` formulations have been developed for some time and turn out to be robust for many mechanical contact problems. Recent efforts have been put in developing a mortar-based contact formulation. In this documentation, however,  we focus on `kinematic` and `penalty` formulations. For readers who are interested in mortar-based mechanical contact, please go to [mortar constraint system](Constraints/index.md) for more information.
+The `kinematic` and `penalty` formulations have been developed for some time and turn out to be robust for many mechanical contact problems. Recent efforts have been put in developing a mortar-based contact formulation. In this documentation, however,  we focus on `kinematic` and `penalty` formulations. For readers who are interested in mortar-based mechanical contact, please go to [mortar constraint system](framework:Constraints/index.md) for more information.
 
 The overall workflow of imposing a mechanical constraint is as follows: 1) Determine whether penetration occurs. If so, constrain displacement; 2) In the normal direction, eliminate the penetration; 3) In the tangential direction, slip must satisfy friction model, no slip is allowed for the `glued` model, no constraint is applied for the `frictionless` model, Kuhn-Tucker conditions must be satisfied in the tangential direction for the `coulomb` model. The mechanical contact enforcement steps for the `glued` and `frictionless` models are summarized below:
 

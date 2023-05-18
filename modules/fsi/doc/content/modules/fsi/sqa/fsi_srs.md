@@ -21,8 +21,8 @@ mechanics module may be used for the solid domain.
 !template! item key=assumptions-and-dependencies
 The {{module}} module is designed with the fewest possible constraints on hardware and software.
 For more context on this point, the {{module}} module SRS defers to the framework
-[framework_srs.md#assumptions-and-dependencies] and [Navier-Stokes](navier_stokes_srs.md#assumptions-and-dependencies)
-and [tensor mechanics](tensor_mechanics_srs.md#assumptions-and-dependencies) module assumptions and
+[framework_srs.md#assumptions-and-dependencies] and [Navier-Stokes](navier_stokes:navier_stokes_srs.md#assumptions-and-dependencies)
+and [tensor mechanics](tensor_mechanics:tensor_mechanics_srs.md#assumptions-and-dependencies) module assumptions and
 dependencies. Any physics-based assumptions in this module's objects are highlighted in their respective
 documentation pages.
 !template-end!

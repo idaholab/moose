@@ -13,7 +13,7 @@ The `TensorMechanics` system provides a cohesive zone modeling capability that c
 5. `CZMInterfaceKernel`
 
 
-The [BreakMeshByBlockGenerator](BreakMeshByBlockGenerator.md) is utilized to create the cohesive zone interface  by splitting a monolithic mesh into blocks by adding the required nodes and boundaries between each block pair. The split mesh allows to compute a displacement jump $\llbracket u \rrbracket$ at each quadrature point on the interface. The schematic below is an example of using `BreakMeshByBlockGenerator` on a 3-blocks, 2-dimensional mesh. The generated interfaces are highlighted in yellow.
+The [BreakMeshByBlockGenerator](framework:BreakMeshByBlockGenerator.md) is utilized to create the cohesive zone interface  by splitting a monolithic mesh into blocks by adding the required nodes and boundaries between each block pair. The split mesh allows to compute a displacement jump $\llbracket u \rrbracket$ at each quadrature point on the interface. The schematic below is an example of using `BreakMeshByBlockGenerator` on a 3-blocks, 2-dimensional mesh. The generated interfaces are highlighted in yellow.
 
 !media media/tensor_mechanics/BreakMeshByBlock.png style=width:100%;
 

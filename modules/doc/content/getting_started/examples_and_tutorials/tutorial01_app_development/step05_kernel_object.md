@@ -8,7 +8,7 @@ In this step, the basic components of [#kernels] will be presented. To demonstra
 
 ## Kernel Objects id=kernels
 
-The [syntax/Kernels/index.md] in MOOSE is one for computing the residual contribution from a volumetric term within a [!ac](PDE) using the Galerkin [!ac](FEM). One way to identify kernels is to check which term(s) in a weak form expression are multiplied by the gradient of the test function $\nabla \psi$, or to check those which represent an integral over the whole domain $\Omega$.
+The [framework:syntax/Kernels/index.md] in MOOSE is one for computing the residual contribution from a volumetric term within a [!ac](PDE) using the Galerkin [!ac](FEM). One way to identify kernels is to check which term(s) in a weak form expression are multiplied by the gradient of the test function $\nabla \psi$, or to check those which represent an integral over the whole domain $\Omega$.
 
 In [kernel-inheritance], notice that the `ADDiffusion` object is declared as one that *inherits* from the `ADKernelGrad` base class, which, in turn, inherits from the `ADKernel` base class. This means that `ADDiffusion` is a unique object that builds upon what the MOOSE Kernels system is designed to do.
 

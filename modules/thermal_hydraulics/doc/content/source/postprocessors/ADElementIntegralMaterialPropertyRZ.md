@@ -1,7 +1,7 @@
 # ADElementIntegralMaterialPropertyRZ
 
 This post-processor integrates a material property over a 2D RZ domain. This
-class derives from [ADElementIntegralMaterialProperty](ElementIntegralMaterialProperty.md)
+class derives from [ADElementIntegralMaterialProperty](framework:ElementIntegralMaterialProperty.md)
 and [RZSymmetry.md] and multiplies `ADElementIntegralMaterialProperty::computeQpIntegral()`
 by the local circumference to achieve the desired RZ integral.
 

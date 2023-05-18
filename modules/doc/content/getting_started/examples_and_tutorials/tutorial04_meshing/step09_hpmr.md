@@ -19,11 +19,11 @@ This section covers the creation of a detailed 1/6 core [Heat-Pipe Micro Reactor
 
 ## Create Pin Unit Cell
 
-The pin cell represents the most basic element in the hierarchical structure of a reactor core. In the case of a heat-pipe micro reactor, typical pin cells include fuel, heat pipe, and moderator. These components are all generated using the [PolygonConcentricCircleMeshGenerator.md]. Every pin cell mesh property (e.g., ring radii and intervals) can be tailored to specific needs. The following example shows construction of the moderator pin cell. The heat pipe and fuel pin cells are constructed similarly.
+The pin cell represents the most basic element in the hierarchical structure of a reactor core. In the case of a heat-pipe micro reactor, typical pin cells include fuel, heat pipe, and moderator. These components are all generated using the [reactor:PolygonConcentricCircleMeshGenerator.md]. Every pin cell mesh property (e.g., ring radii and intervals) can be tailored to specific needs. The following example shows construction of the moderator pin cell. The heat pipe and fuel pin cells are constructed similarly.
 
 ### Object
 
-- [PolygonConcentricCircleMeshGenerator.md]
+- [reactor:PolygonConcentricCircleMeshGenerator.md]
 
 ### Geometry Features
 
@@ -65,11 +65,11 @@ The pin cell represents the most basic element in the hierarchical structure of 
 
 ## Create Patterned Hexagonal Fuel Assembly
 
-Generated pin cell meshes (fuel, heat pipe, and moderator) are stitched into a fuel assembly using [PatternedHexMeshGenerator.md].
+Generated pin cell meshes (fuel, heat pipe, and moderator) are stitched into a fuel assembly using [reactor:PatternedHexMeshGenerator.md].
 
 ### Object
 
-- [PatternedHexMeshGenerator.md]
+- [reactor:PatternedHexMeshGenerator.md]
 
 ### Geometry Features
 
@@ -111,7 +111,7 @@ The HP-MR utilizes several different assembly types, but as simplified example, 
 
 ### Object
 
-- [PatternedHexMeshGenerator.md]
+- [reactor:PatternedHexMeshGenerator.md]
 
 ### Geometry Features
 
@@ -136,13 +136,13 @@ The HP-MR utilizes several different assembly types, but as simplified example, 
 
 Control drums are a type of control device used in some small reactor systems to regulate the reactor's power output and maintain a stable operating condition. The generation of control drum mesh involves two steps:
 
-1. Define control drum mesh with [HexagonConcentricCircleAdaptiveBoundaryMeshGenerator.md]
-2. Split outer ring into 2 separate block IDs using [AzimuthalBlockSplitGenerator.md] to account for control material zone.
+1. Define control drum mesh with [reactor:HexagonConcentricCircleAdaptiveBoundaryMeshGenerator.md]
+2. Split outer ring into 2 separate block IDs using [reactor:AzimuthalBlockSplitGenerator.md] to account for control material zone.
 
 ### Object
 
-- [HexagonConcentricCircleAdaptiveBoundaryMeshGenerator.md]
-- [AzimuthalBlockSplitGenerator.md]
+- [reactor:HexagonConcentricCircleAdaptiveBoundaryMeshGenerator.md]
+- [reactor:AzimuthalBlockSplitGenerator.md]
 
 ### Geometry Features
 
@@ -155,7 +155,7 @@ Control drums are a type of control device used in some small reactor systems to
 
   - 13.25 unit radius
   - 1 radial interval
-  - Outer ring block ID from 45&deg; to 135&deg; is changed to a different ID for this case using [AzimuthalBlockSplitGenerator.md] in a second step
+  - Outer ring block ID from 45&deg; to 135&deg; is changed to a different ID for this case using [reactor:AzimuthalBlockSplitGenerator.md] in a second step
 
 - Hexagonal background
 
@@ -167,7 +167,7 @@ Control drums are a type of control device used in some small reactor systems to
 
 - Circular volumes preserved regardless of meshing fidelity ([!param](/Mesh/PolygonConcentricCircleMeshGenerator/preserve_volumes)=`true`)
 - Side node adaptation performed for instances with neighboring fuel assemblies. The reference side number (sides_to_adapt) and assembly neighbor meshes (inputs) are taken as input so that the nodes can be placed correctly on the control drum mesh to match the neighbor meshes.
-- [HexagonConcentricCircleAdaptiveBoundaryMeshGenerator.md] is used in this case to create a "single pin" hexagonal assembly with sides matching another mesh. For example, in cases where the node counts on the edges of the control drum and fuel assembly differ, the [HexagonConcentricCircleAdaptiveBoundaryMeshGenerator.md] can automatically adjust the mesh density along the control drum's boundary to ensure compatibility.
+- [reactor:HexagonConcentricCircleAdaptiveBoundaryMeshGenerator.md] is used in this case to create a "single pin" hexagonal assembly with sides matching another mesh. For example, in cases where the node counts on the edges of the control drum and fuel assembly differ, the [reactor:HexagonConcentricCircleAdaptiveBoundaryMeshGenerator.md] can automatically adjust the mesh density along the control drum's boundary to ensure compatibility.
 - This meshing method is intended for analyzing a static control drum position. For transient control drum rotation (and control rod insertion), this azimuthal block split is not needed as Griffin uses special material definitions to define the absorber location as a function of time.
 
 ### Example (Step 1 - Generate Control Drum)
@@ -196,11 +196,11 @@ Control drums are a type of control device used in some small reactor systems to
 
 ## Create Additional Assemblies (Reflector, Air, Dummy)
 
-Other components of the reactor, such as reflectors and air holes, can also be created using the [HexagonConcentricCircleAdaptiveBoundaryMeshGenerator.md]. Additionally, to achieve the necessary hexagonal shape for the [PatternedHexMeshGenerator.md], dummy blocks are required. These dummy blocks will be eliminated once the reactor core is constructed.
+Other components of the reactor, such as reflectors and air holes, can also be created using the [reactor:HexagonConcentricCircleAdaptiveBoundaryMeshGenerator.md]. Additionally, to achieve the necessary hexagonal shape for the [reactor:PatternedHexMeshGenerator.md], dummy blocks are required. These dummy blocks will be eliminated once the reactor core is constructed.
 
 ### Object
 
-- [HexagonConcentricCircleAdaptiveBoundaryMeshGenerator.md]
+- [reactor:HexagonConcentricCircleAdaptiveBoundaryMeshGenerator.md]
 
 ### Geometry Features
 
@@ -245,11 +245,11 @@ Other components of the reactor, such as reflectors and air holes, can also be c
 
 ## Create Patterned Full Core
 
-Generated reactor component meshes (fuel assembly, control drum, reflector, air hole and dummy) are stitched into a 2D hexagonal lattice (reactor core) using [PatternedHexMeshGenerator.md].
+Generated reactor component meshes (fuel assembly, control drum, reflector, air hole and dummy) are stitched into a 2D hexagonal lattice (reactor core) using [reactor:PatternedHexMeshGenerator.md].
 
 ### Object
 
-- [PatternedHexMeshGenerator.md]
+- [reactor:PatternedHexMeshGenerator.md]
 
 ### Geometry Features
 
@@ -265,7 +265,7 @@ Generated reactor component meshes (fuel assembly, control drum, reflector, air 
 
 ### Notes
 
-- [PatternedHexMeshGenerator.md] requires a "perfect" hex pattern. "Empty" spots should be defined with dummy assemblies and later deleted.
+- [reactor:PatternedHexMeshGenerator.md] requires a "perfect" hex pattern. "Empty" spots should be defined with dummy assemblies and later deleted.
 
 ### Example
 
@@ -285,7 +285,7 @@ Dummy blocks were used in the previous step to facilitate the core pattern but a
 
 ### Object
 
-- [BlockDeletionGenerator.md]
+- [framework:BlockDeletionGenerator.md]
 
 ### Geometry Features
 
@@ -310,11 +310,11 @@ Dummy blocks were used in the previous step to facilitate the core pattern but a
 
 ## Add Core Periphery
 
-A peripheral ring (shield) can be incorporated into the 2D reactor core using either the [PeripheralRingMeshGenerator.md] or the [PeripheralTriangleMeshGenerator.md]. The former generates a quad mesh, while the latter generates a tri mesh. These two mesh generators also allow the user to control mesh density. Using the quadrilateral mesh option permits easier symmetry trimming options down the line.
+A peripheral ring (shield) can be incorporated into the 2D reactor core using either the [reactor:PeripheralRingMeshGenerator.md] or the [reactor:PeripheralTriangleMeshGenerator.md]. The former generates a quad mesh, while the latter generates a tri mesh. These two mesh generators also allow the user to control mesh density. Using the quadrilateral mesh option permits easier symmetry trimming options down the line.
 
 ### Object
 
-- [PeripheralRingMeshGenerator.md]
+- [reactor:PeripheralRingMeshGenerator.md]
 
 ### Geometry Features
 
@@ -340,11 +340,11 @@ A peripheral ring (shield) can be incorporated into the 2D reactor core using ei
 
 ## Slice to 1/6 Core
 
-To conserve computational resources, users may create a half core or 1/6 symmetric reactor core. The [PlaneDeletionGenerator.md] can be employed to trim the 2D full core mesh into the desired symmetrical configuration in this case because the desired cuts lie along existing element boundaries. Alternatively, [HexagonMeshTrimmer.md] could be used to perform this trimming.
+To conserve computational resources, users may create a half core or 1/6 symmetric reactor core. The [framework:PlaneDeletionGenerator.md] can be employed to trim the 2D full core mesh into the desired symmetrical configuration in this case because the desired cuts lie along existing element boundaries. Alternatively, [reactor:HexagonMeshTrimmer.md] could be used to perform this trimming.
 
 ### Object
 
-- [PlaneDeletionGenerator.md]
+- [framework:PlaneDeletionGenerator.md]
 
 ### Geometry Features
 
@@ -361,7 +361,7 @@ To conserve computational resources, users may create a half core or 1/6 symmetr
 
 ### Notes
 
-- Advanced trimming options are available (see [HexagonMeshTrimmer.md]). Trimming should only be performed along lines of symmetry.
+- Advanced trimming options are available (see [reactor:HexagonMeshTrimmer.md]). Trimming should only be performed along lines of symmetry.
 
 ### Example
 
@@ -382,11 +382,11 @@ To conserve computational resources, users may create a half core or 1/6 symmetr
 
 ## Extrude to 3D
 
-The [AdvancedExtruderGenerator.md] performs 2D to 3D extrusion, and allows users to control elevations through variable extrusion (axial) lengths.  This mesh generator also has features like assigning new subdomain IDs at different axial layers.
+The [framework:AdvancedExtruderGenerator.md] performs 2D to 3D extrusion, and allows users to control elevations through variable extrusion (axial) lengths.  This mesh generator also has features like assigning new subdomain IDs at different axial layers.
 
 ### Object
 
-- [AdvancedExtruderGenerator.md]
+- [framework:AdvancedExtruderGenerator.md]
 
 ### Geometry Features
 
@@ -401,7 +401,7 @@ Extrude the 2D $(x,y)$ mesh in +$z$ direction $(0, 0, 1)$
 
 ### Notes
 
-Here we explain the concept of subdomain swaps. By default, when 2D elements are extruded to 3D using [AdvancedExtruderGenerator.md], they retain the same subdomain IDs as their original 2D elements. In the 3D HPMR, distinct subdomain IDs are required for the upper and lower reflector regions, as well as for the core center region. This can be achieved using the subdomain swap function in the [AdvancedExtruderGenerator.md] through the [!param](/Mesh/AdvancedExtruderGenerator/subdomain_swaps) parameter. Each element of the [!param](/Mesh/AdvancedExtruderGenerator/subdomain_swaps) vector contains subdomain remapping information for a specific elevation, with the first element representing the initial extruded elevation. For instance, a 2D moderator mesh with block ID `100` can be extruded to 3D using the following [!param](/Mesh/AdvancedExtruderGenerator/subdomain_swaps): `'100 1000; 100 100; 100 1000'`, where `1000` is the block ID of the reflector. The generated mesh will be defined to be three layers with the upper and bottom meshes of block ID `1000` and the center region maintain the block ID of `100`. The resulting mesh will have three layers, with the top and bottom layers having a block ID of `1000` (reflector), while the central region retains the block ID of `100` (moderator).
+Here we explain the concept of subdomain swaps. By default, when 2D elements are extruded to 3D using [framework:AdvancedExtruderGenerator.md], they retain the same subdomain IDs as their original 2D elements. In the 3D HPMR, distinct subdomain IDs are required for the upper and lower reflector regions, as well as for the core center region. This can be achieved using the subdomain swap function in the [framework:AdvancedExtruderGenerator.md] through the [!param](/Mesh/AdvancedExtruderGenerator/subdomain_swaps) parameter. Each element of the [!param](/Mesh/AdvancedExtruderGenerator/subdomain_swaps) vector contains subdomain remapping information for a specific elevation, with the first element representing the initial extruded elevation. For instance, a 2D moderator mesh with block ID `100` can be extruded to 3D using the following [!param](/Mesh/AdvancedExtruderGenerator/subdomain_swaps): `'100 1000; 100 100; 100 1000'`, where `1000` is the block ID of the reflector. The generated mesh will be defined to be three layers with the upper and bottom meshes of block ID `1000` and the center region maintain the block ID of `100`. The resulting mesh will have three layers, with the top and bottom layers having a block ID of `1000` (reflector), while the central region retains the block ID of `100` (moderator).
 
 ### Example
 

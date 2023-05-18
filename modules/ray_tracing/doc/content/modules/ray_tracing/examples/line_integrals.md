@@ -1,7 +1,7 @@
 # Computing Line Integrals
 
-The [ray_tracing/index.md] can be utilized to integrate fields along a line throughout the domain. Example fields include [Variables](Variables/index.md), [AuxVariables](AuxVariables/index.md),
-[Material properties](Materials/index.md), and [Functions](Functions/index.md).
+The [ray_tracing/index.md] can be utilized to integrate fields along a line throughout the domain. Example fields include [Variables](framework:Variables/index.md), [AuxVariables](framework:AuxVariables/index.md),
+[Material properties](framework:Materials/index.md), and [Functions](framework:Functions/index.md).
 
 The discussion that follows will describe how to integrate a variable across a line in a simple diffusion problem. To integrate other fields, the process remains the same except for the definition of the RayKernel.
 
@@ -57,7 +57,7 @@ Other commonly used [IntegralRayKernels](IntegralRayKernel.md) are the [Function
 
 ## Integral Output
 
-Lastly, we need to obtain the accumulated integrals from the `study`. We will utilize a [RayIntegralValue.md] [Postprocessor](Postprocessors/index.md) to achieve this:
+Lastly, we need to obtain the accumulated integrals from the `study`. We will utilize a [RayIntegralValue.md] [Postprocessor](framework:Postprocessors/index.md) to achieve this:
 
 !listing modules/ray_tracing/test/tests/raykernels/variable_integral_ray_kernel/simple_diffusion_line_integral.i start=Postprocessors
 

@@ -11,7 +11,7 @@ for the strong form
 -\nabla^2c.
 \end{equation}
 
-Used together with a [`Reaction`](/Reaction.md) kernel $u$ this allows the construction
+Used together with a [`Reaction`](framework:/Reaction.md) kernel $u$ this allows the construction
 of split formulations,
 \begin{equation}
 u=\nabla^2c,

@@ -1,3 +1,3 @@
 # Relationship Managers
 
-[/RelationshipManager.md]
+[framework:/RelationshipManager.md]

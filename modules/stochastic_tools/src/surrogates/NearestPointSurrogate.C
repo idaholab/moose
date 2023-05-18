@@ -16,7 +16,7 @@ NearestPointSurrogate::validParams()
 {
   InputParameters params = SurrogateModel::validParams();
   params.addClassDescription("Surrogate that evaluates the value from the nearest point from data "
-                             "in [NearestPointTrainer.md]");
+                             "in NearestPointTrainer.");
   return params;
 }
 

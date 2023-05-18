@@ -1,6 +1,6 @@
 # Interfaces
 
-- [DerivativeMaterialInterface](materials/DerivativeMaterialInterface.md)
-- [Coupleable](interfaces/Coupleable.md)
-- [SetupInterface (execute_on)](interfaces/SetupInterface.md)
-- [TaggingInterface](interfaces/TaggingInterface.md)
+- [DerivativeMaterialInterface](framework:materials/DerivativeMaterialInterface.md)
+- [Coupleable](framework:interfaces/Coupleable.md)
+- [SetupInterface (execute_on)](framework:interfaces/SetupInterface.md)
+- [TaggingInterface](framework:interfaces/TaggingInterface.md)

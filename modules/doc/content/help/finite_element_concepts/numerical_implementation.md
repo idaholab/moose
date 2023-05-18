@@ -1,10 +1,10 @@
 # Numerical Integration
 
-[FEProblemBase.md#numerical_integration]
+[framework:FEProblemBase.md#numerical_integration]
 
 # Newton's Method
 
-[NonlinearSystem.md#newtons_method]
+[framework:NonlinearSystem.md#newtons_method]
 
 # Newton for a Simple Equation
 

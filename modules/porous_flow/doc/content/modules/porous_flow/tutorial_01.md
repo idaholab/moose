@@ -59,7 +59,7 @@ $\dot{\epsilon}_{v}$ and $\dot{T}$ in Eq. [eq:basicthm] are ignored (set to zero
 
 !listing modules/porous_flow/examples/tutorial/01.i start=[GlobalParams] end=[Variables]
 
-Most PorousFlow simulations require fluid properties to be supplied.  In this instance, the [`SimpleFluidProperties`](SimpleFluidProperties.md) are used, which assume a constant fluid bulk modulus and viscosity:
+Most PorousFlow simulations require fluid properties to be supplied.  In this instance, the [`SimpleFluidProperties`](fluid_properties:SimpleFluidProperties.md) are used, which assume a constant fluid bulk modulus and viscosity:
 
 !listing modules/porous_flow/examples/tutorial/01.i start=[Modules] end=[Materials]
 

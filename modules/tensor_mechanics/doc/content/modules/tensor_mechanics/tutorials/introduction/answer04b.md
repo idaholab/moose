@@ -4,7 +4,7 @@
 > as it bends right in the positive x direction, while the right cantilever has
 > negative displacements as it bends left in the negative x direction). So we
 > need a postprocessor object that gives us an extreme value of a given
-> variable. Take a look at [NodalExtremeValue](NodalExtremeValue.md) and try to
+> variable. Take a look at [NodalExtremeValue](framework:NodalExtremeValue.md) and try to
 > set it up to output the maximum positive x deflection.
 
 Add the following top level block to the input

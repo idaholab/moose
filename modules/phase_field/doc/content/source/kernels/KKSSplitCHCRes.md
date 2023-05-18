@@ -5,7 +5,7 @@
 [`KKSSplitCHCRes`](/KKSSplitCHCRes.md) is the split version. In this kernel, we calculate the chemical
 potential $\mu$ from $\frac{\partial F}{\partial c}$. The non-linear variable for this Kernel
 is the concentration $c$. To calculate $\frac{\partial c}{\partial t}$ and
-$\nabla \cdot M(c) \nabla \mu$, we use the [`CoupledTimeDerivative`](/CoupledTimeDerivative.md) and
+$\nabla \cdot M(c) \nabla \mu$, we use the [`CoupledTimeDerivative`](framework:/CoupledTimeDerivative.md) and
 [`SplitCHWRes`](/SplitCHWRes.md) kernels, respectively, as described
 [here](phase_field/Phase_Field_Equations.md).
 

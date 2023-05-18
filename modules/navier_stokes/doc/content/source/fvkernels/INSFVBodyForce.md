@@ -1,6 +1,6 @@
 # INSFVBodyForce
 
-This object implements both the functionalities as [FVBodyForce.md] and [FVCoupledForce.md] but it's
+This object implements both the functionalities as [framework:FVBodyForce.md] and [framework:FVCoupledForce.md] but it's
 dedicated to use in the Navier-Stokes momentum equation.
 
 A body force in the momentum equation can be a momentum source,

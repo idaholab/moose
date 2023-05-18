@@ -22,12 +22,12 @@ collaborators throughout the world.
 Members of the [!ac](CCB) of MOOSE or MOOSE-based application must complete [!ac](INL) training course
 RDHERD01.
 
-- [Introduction to MOOSE and MOOSE-based Application development processes (RDHERD01)](sqa/training/ccb/index.md)
+- [Introduction to MOOSE and MOOSE-based Application development processes (RDHERD01)](ccb:sqa/training/ccb/index.md)
 
 The project lead and software quality lead for MOOSE or MOOSE-based application(s) must complete [!ac](INL) training
 course 0INL1862.
 
-- [MOOSE and MOOSE-Based Applications Project Lead and SQA Lead Training (0INL1862)](sqa/training/lead/index.md)
+- [MOOSE and MOOSE-Based Applications Project Lead and SQA Lead Training (0INL1862)](ccb:sqa/training/lead/index.md)
 
 ## Test Results and Releases
 
@@ -44,7 +44,7 @@ The documentation for the SQA releases can be found using the following links:
 
 ## Github Backups
 
-[Information on Github Backups for MOOSE, Mastodon, TMAP8, and blackbear](sqa/github_backup.md)
+[Information on Github Backups for MOOSE, Mastodon, TMAP8, and blackbear](framework:sqa/github_backup.md)
 
 !sqa report
 

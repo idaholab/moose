@@ -44,7 +44,7 @@ the vectors supplied.
 
 ## Results
 
-If [JSONOutput.md] output is enabled, the [SobolReporter.md] object will write a file that contains
+If [framework:JSONOutput.md] output is enabled, the [SobolReporter.md] object will write a file that contains
 columns of data. Each column comprises of the computed indices for the quantities of
 interest. For example, [sobol_out] is and example output from the [SobolReporter.md] object
 for this example problem.

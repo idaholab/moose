@@ -14,7 +14,7 @@ is the chemical potential variable, and $\kappa$ is the gradient energy
 coefficient.
 
 It is used together with [`SplitCHWRes`](/SplitCHWRes.md) and
-[`CoupledTimeDerivative`](/CoupledTimeDerivative.md) to set up a system of two
+[`CoupledTimeDerivative`](framework:/CoupledTimeDerivative.md) to set up a system of two
 first order PDEs using a concentration order parameter and a chemical potential
 variable.
 

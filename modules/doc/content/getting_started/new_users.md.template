@@ -90,7 +90,7 @@ specifically for MOOSE: [VSCode MOOSE](VSCode.md).
 
 A graphical post-processor, particularly one that can read
 [ExodusII](https://prod-ng.sandia.gov/techlib-noauth/access-control.cgi/1992/922137.pdf) files, is
-also necessary. [!ac](MOOSE) includes a [!ac](GUI): [PEACOCK](python/peacock.md). Another popular
+also necessary. [!ac](MOOSE) includes a [!ac](GUI): [PEACOCK](python:python/peacock.md). Another popular
 tool is [ParaView](https://www.paraview.org/). Both of these applications are free and will allow
 you to visualize and process the results of your simulations.
 
@@ -113,7 +113,7 @@ MOOSE can be customized by running a `configure` script in
 - `--with-derivative-type`: Specify the derivative storage type to use for MOOSE's `DualReal`
   object. Options are `sparse` and `nonsparse`. `sparse` selects `SemiDynamicSparseNumberArray` as
   the derivative storage type; `nonsparse` selects `NumberArray`. A more detailed overview of these
-  storage types can be found in the [`DualReal` documentation](/DualReal.md).
+  storage types can be found in the [`DualReal` documentation](framework:DualReal.md).
 - `--with-derivative-size=<n>`: Specify the length of the underlying derivative storage array. The
   default is 50. A smaller number may be chosen for increased speed; a larger number may be required
   for 3D problems or problems with coupling between many variables.

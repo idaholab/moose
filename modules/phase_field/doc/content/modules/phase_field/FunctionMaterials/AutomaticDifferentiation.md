@@ -102,7 +102,7 @@ functions.
 
 JIT (Just In Time) compilation is available for parsed functions. The JIT system is utilized by
 adding the `enable_jit = true` (default) option in the
-[`DerivativeParsedMaterial`](/DerivativeParsedMaterial.md) block. MOOSE will then attempt to compile
+[`DerivativeParsedMaterial`](framework:/DerivativeParsedMaterial.md) block. MOOSE will then attempt to compile
 the functions and its derivatives into machine code and use it for the residual and Jacobian
 calculations. This almost fully recovers the performance of hand coded free energies while retaining
 the flexibility of automatic differentiation.

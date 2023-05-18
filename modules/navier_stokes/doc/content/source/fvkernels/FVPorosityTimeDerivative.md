@@ -4,7 +4,7 @@
 
 ## Overview
 
-This object simply multiplies the residual of [FVTimeKernel.md] by the
+This object simply multiplies the residual of [framework:FVTimeKernel.md] by the
 porosity. In other words this object computes:
 
 \begin{equation}

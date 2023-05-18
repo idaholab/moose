@@ -15,7 +15,7 @@ This example illustrates the use of RGMB mesh generators to define a 3D hexagona
 
 ## ReactorMeshParams
 
-[ReactorMeshParams.md] contains global mesh/geometry parameters including whether the final mesh is 2D or 3D, Cartesian or hexagonal, assembly pitch, and the axial discretization for the final extruded geometry. This information will be accessible to the other RGMB mesh generators and consistently used.
+[reactor:ReactorMeshParams.md] contains global mesh/geometry parameters including whether the final mesh is 2D or 3D, Cartesian or hexagonal, assembly pitch, and the axial discretization for the final extruded geometry. This information will be accessible to the other RGMB mesh generators and consistently used.
 
 !listing reactor_examples/rgmb_abtr/rgmb_abtr.i
          block=Mesh/rmp
@@ -25,11 +25,11 @@ This example illustrates the use of RGMB mesh generators to define a 3D hexagona
 
 ## PinMeshGenerator
 
-- This example does not have any pin-level geometry as the assemblies are homogenized. However, we still start with [PinMeshGenerator.md].
-- +To define single assemblies directly with PinMeshGenerators for stitching with [CoreMeshGenerator.md]+, [PinMeshGenerator.md] is used with [!param](/Mesh/PinMeshGenerator/use_as_assembly) set to `true`.
+- This example does not have any pin-level geometry as the assemblies are homogenized. However, we still start with [reactor:PinMeshGenerator.md].
+- +To define single assemblies directly with PinMeshGenerators for stitching with [reactor:CoreMeshGenerator.md+, [reactor:PinMeshGenerator.md] is used with [!param](/Mesh/PinMeshGenerator/use_as_assembly) set to `true`.
 - In addition, [!param](/Mesh/PinMeshGenerator/homogenized) = `true` is used to indicate that this region is homogenized and [SimpleHexagonGenerator.md] should be called to discretize the assembly instead of [PolygonConcentricCircleMeshGenerator.md].
 
-[PinMeshGenerator.md] is called multiple times to define the various homogeneous assemblies. Dummy assemblies are not required when building a core using RGMB, so they are not defined in this input.
+[reactor:PinMeshGenerator.md] is called multiple times to define the various homogeneous assemblies. Dummy assemblies are not required when building a core using RGMB, so they are not defined in this input.
 
 !listing reactor_examples/rgmb_abtr/rgmb_abtr.i
          block=Mesh/control
@@ -39,7 +39,7 @@ This example illustrates the use of RGMB mesh generators to define a 3D hexagona
 
 ## CoreMeshGenerator
 
-- [CoreMeshGenerator.md] has some additional intelligence to automatically handle dummy assembly creation and deletion
+- [reactor:CoreMeshGenerator.md has some additional intelligence to automatically handle dummy assembly creation and deletion
 
 !row!
 !col small=12 medium=6 large=8
@@ -62,7 +62,7 @@ This example illustrates the use of RGMB mesh generators to define a 3D hexagona
 
 ## Use of RGMB Mesh with Griffin
 
-Griffin recognizes material ID assignments through the `material_id` tag. Therefore, the `region_id` tags need to be renamed to `material_id`. This is done using [ExtraElementIDCopyGenerator.md].
+Griffin recognizes material ID assignments through the `material_id` tag. Therefore, the `region_id` tags need to be renamed to `material_id`. This is done using [reactor:ExtraElementIDCopyGenerator.md].
 
 !listing reactor_examples/rgmb_abtr/rgmb_abtr.i
          block=Mesh/abtr_mesh

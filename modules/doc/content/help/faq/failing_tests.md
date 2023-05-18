@@ -50,7 +50,7 @@ If the test did fail, chances are your test and our test is failing for the same
     failing, please see [Build Issues](help/troubleshooting.md#buildissues) above.
 
   - Perhaps you have specified invalid arguments to run_tests? See
-    [TestHarness More Options](TestHarness.md#moreoptions). Specifically for help with:
+    [TestHarness More Options](python:TestHarness.md#moreoptions). Specifically for help with:
 
     - `--opt`
     - `--dbg`

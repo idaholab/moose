@@ -28,7 +28,7 @@ is the same as the property parameter `gb_tensor_prop_name` argument as shown
 !listing modules/combined/test/tests/DiffuseCreep/variable_base_eigen_strain.i block=Materials/aniso_tensor
 
 and the argument for the `prefactor` parameter in the eigenstrain material matches
-the function name (`f_name` parameter) in the [DerivativeParsedMaterial](/DerivativeParsedMaterial.md)
+the function name (`f_name` parameter) in the [DerivativeParsedMaterial](framework:/DerivativeParsedMaterial.md)
 
 !listing modules/combined/test/tests/DiffuseCreep/variable_base_eigen_strain.i block=Materials/eigenstrain_prefactor
 

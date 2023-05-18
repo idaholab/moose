@@ -17,7 +17,7 @@ IDs.
 
 #### `DirichletBC`
 
-The two [`DirichletBC`](DirichletBC.md) boundary conditions are both set on the
+The two [`DirichletBC`](framework:DirichletBC.md) boundary conditions are both set on the
 *bottom* surface of the simulation domain. This fixes the `disp_x` and `disp_y`
 variables to 0 respectively. Check the
 [list of available boundary conditions](tutorials/introduction/supplemental02.md).
@@ -34,8 +34,8 @@ displacement variable. We will see other examples of *actions* later on.
 Using the [!param](/BCs/Pressure/PressureAction/function) parameter we supply a
 time dependent applied pressure. We are taking advantage of a MOOSE shorthand
 again here. Any time a `FunctionName` type parameter is requested the user can
-instead supply a [parsed function expression](MooseParsedFunction.md) directly.
-If you need to specify a different type of [function](Functions/index.md) or
+instead supply a [parsed function expression](framework:MooseParsedFunction.md) directly.
+If you need to specify a different type of [function](framework:Functions/index.md) or
 need to reuse a single function multiple times in the input file, you should
 explicitly add a function object under the `[Functions]` top level block. This
 pressure action could have instead been written as
@@ -61,9 +61,9 @@ pressure action could have instead been written as
 
 ### `Preconditioning`
 
-The [`[Preconditioning]`](syntax/Preconditioning/index.md) block lets the user
+The [`[Preconditioning]`](framework:syntax/Preconditioning/index.md) block lets the user
 specify the which parts of the Jacobian matrix are built. Here we're selecting
-the [single matrix preconditioner](SingleMatrixPreconditioner.md) with the
+the [single matrix preconditioner](framework:SingleMatrixPreconditioner.md) with the
 [!param](/Preconditioning/SMP/full) option set to `true` to build a fully
 coupled Jacobian matrix. This helps the solver to better take the cross coupling
 between displacement variables into account and will lead to improved
@@ -107,7 +107,7 @@ is not always feasible, and it is not exact under every circumstance.
 >
 > - [!param](/Modules/TensorMechanics/Master/TensorMechanicsAction/use_automatic_differentiation) in the tensor mechanics master action
 > - [!param](/BCs/Pressure/PressureAction/use_automatic_differentiation) in the Pressure BC action
-> - [ADDirichletBC](ADDirichletBC.md)
+> - [ADDirichletBC](framework:ADDirichletBC.md)
 > - [ADComputeIsotropicElasticityTensor](ComputeIsotropicElasticityTensor.md)
 > - [ADComputeFiniteStrainElasticStress](ADComputeFiniteStrainElasticStress.md)
 

@@ -1,7 +1,7 @@
 # NSFunctionInitialCondition
 
 `NSFunctionInitialCondition` can be used to initialize variables by evaluating fluid properties,
-using [functions](syntax/Functions/index.md) for the pressure, temperature and velocity.
+using [functions](framework:syntax/Functions/index.md) for the pressure, temperature and velocity.
 
 ## Example input file syntax
 

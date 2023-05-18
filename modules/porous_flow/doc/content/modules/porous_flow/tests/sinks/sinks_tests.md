@@ -399,7 +399,7 @@ A [PorousFlowPointSourceFromPostprocessor](PorousFlowPointSourceFromPostprocesso
 
 !listing sinks/s14.i block=BCs
 
-The outflow at each node is recorded into the `nodal_outflow` AuxVariable, and the total outflow is recorded using a [NodalSum](NodalSum.md) postprocessor:
+The outflow at each node is recorded into the `nodal_outflow` AuxVariable, and the total outflow is recorded using a [NodalSum](framework:NodalSum.md) postprocessor:
 
 !listing sinks/s14.i block=Postprocessors
 
@@ -421,7 +421,7 @@ A [PorousFlowPointSourceFromPostprocessor](PorousFlowPointSourceFromPostprocesso
 
 !listing sinks/s15.i block=BCs
 
-The outflow at each node is recorded into the `nodal_outflow` AuxVariable, and the total outflow is recorded using a [NodalSum](NodalSum.md) postprocessor:
+The outflow at each node is recorded into the `nodal_outflow` AuxVariable, and the total outflow is recorded using a [NodalSum](framework:NodalSum.md) postprocessor:
 
 !listing sinks/s15.i block=Postprocessors
 

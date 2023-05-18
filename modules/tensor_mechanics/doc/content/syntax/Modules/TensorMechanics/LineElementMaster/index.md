@@ -18,7 +18,7 @@ A truss element is chosen by setting +`truss = true`+ in the input block.
 | Functionality     | Replaced Classes   | Associated Parameters   |
 |-------------------|--------------------|-------------------------|
 | Create truss elements | (*none*) | `truss = true` |
-| Add the displacement variables | [Variables](syntax/Variables/index.md) | `add_variables`: boolean |
+| Add the displacement variables | [Variables](framework:syntax/Variables/index.md) | `add_variables`: boolean |
 | Calculation of stress divergence for a +Truss+ element | [StressDivergenceTensorsTruss](/StressDivergenceTensorsTruss.md) | `displacements` : a string of the displacement variables |
 
 ## Example Input Syntax (Truss Elements)
@@ -32,7 +32,7 @@ By default, the `LineElement` Action sets up the kernels, strain materials, disp
 !table id=lineElement_Beam_action_table caption=Correspondence Among Action Functionality and MooseObjects for the `LineElement` Action used in a +Beam Elements+ Simulation
 | Functionality     | Replaced Classes   | Associated Parameters   |
 |-------------------|--------------------|-------------------------|
-| Add the displacement and rotation variables | [Variables](syntax/Variables/index.md) | `add_variables`: boolean
+| Add the displacement and rotation variables | [Variables](framework:syntax/Variables/index.md) | `add_variables`: boolean
 | Calculation of stress divergence for a +Beam+ element | [StressDivergenceBeam](/StressDivergenceBeam.md) | `displacements` : a string of the displacement variables |
 | | | `rotations`: a string of the rotation variables |
 | Calculation of strain | [ComputeIncrementalBeamStrain](/ComputeIncrementalBeamStrain.md) or [ComputeFiniteBeamStrain](/ComputeFiniteBeamStrain.md) | `strain_type`: small or large strain formulation |

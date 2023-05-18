@@ -8,7 +8,7 @@
 
 ## Principles
 
-A control drum is a common reactivity control approach. It usually has a cylindrical geometry with an outer ring containing both absorber (yellow) and reflector (blue) sections (see [Figure 1](#control_drum)). Using this `MultiControlDrumFunction` object, the rotation of the absorber section can be simulated. The entire ring needs to be a single block, while this Function object creates a time and space dependent function to represent the volume percentage of the absorber in this ring block. The function is supposed to work with either [`FunctionAux`](/FunctionAux.md) to assign value to an elemental auxiliary variable, or [`GenericFunctionMaterial`](/GenericFunctionMaterial.md) to assign value to a material property. There are three possible scenarios:
+A control drum is a common reactivity control approach. It usually has a cylindrical geometry with an outer ring containing both absorber (yellow) and reflector (blue) sections (see [Figure 1](#control_drum)). Using this `MultiControlDrumFunction` object, the rotation of the absorber section can be simulated. The entire ring needs to be a single block, while this Function object creates a time and space dependent function to represent the volume percentage of the absorber in this ring block. The function is supposed to work with either [`FunctionAux`](framework:/FunctionAux.md) to assign value to an elemental auxiliary variable, or [`GenericFunctionMaterial`](framework:/GenericFunctionMaterial.md) to assign value to a material property. There are three possible scenarios:
 
 - If the entire mesh element is within the absorber section, the function value is 100 (percent absorber);
 - If the entire mesh element is within the reflector section, the function value is 0 (percent absorber);

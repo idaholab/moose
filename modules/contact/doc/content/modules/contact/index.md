@@ -32,7 +32,7 @@ Contact constraints can be enforced through the use of node/face constraints in 
 ## Mortar-Based Mechanical Contact
 
 Models specific for mechanical contact enforcement have been developed based on the MOOSE
-[mortar constraint system](Constraints/index.md), and provide an alternative
+[mortar constraint system](framework:Constraints/index.md), and provide an alternative
 discretization technique for solving mechanical contact. Results of performance studies
 using this approach are summarized in [MortarPerformance](modules/contact/MortarPerformance.md).
 

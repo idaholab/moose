@@ -231,7 +231,7 @@ The stress equilibrium and damage evolution equations are also modified to accou
 
 ## PETSc SNES variational inequalities solver option
 
-Alternatively, the damage irreversibility condition can be enforced by using PETSc's SNES variational inequalities (VI) solver. In order to use PETSc's VI solver, upper and lower bounds for damage variable should be provided. Specifically, [`ConstantBoundsAux`](/ConstantBoundsAux.md) can be used to set the upper bound to be 1. [`VariableOldValueBoundsAux`](/VariableOldValueBoundsAux.md) can be used to set the lower bound to be the old value. Note that in order for these bounds to have an effect, the user has to specify the
+Alternatively, the damage irreversibility condition can be enforced by using PETSc's SNES variational inequalities (VI) solver. In order to use PETSc's VI solver, upper and lower bounds for damage variable should be provided. Specifically, [`ConstantBoundsAux`](framework:/ConstantBoundsAux.md) can be used to set the upper bound to be 1. [`VariableOldValueBoundsAux`](framework:/VariableOldValueBoundsAux.md) can be used to set the lower bound to be the old value. Note that in order for these bounds to have an effect, the user has to specify the
 PETSc options `-snes_type vinewtonssls` or `-snes_type vinewtonrsls`.
 
 ## Example Input File

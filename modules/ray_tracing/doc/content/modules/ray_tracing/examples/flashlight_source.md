@@ -6,9 +6,9 @@ The [ray_tracing/index.md] is utilized for this example to discretize the angula
 
 ## Example
 
-Consider a problem on a two-dimensional mesh in the physical domain $D \in [0, 5] \times [0, 5]$. It will contain a reaction term formed by the [Reaction.md] kernel and a diffusion term formed by the [Diffusion.md] kernel. The anisotropic point source located at $(1, 1.5)$ emits a source in a cone $2.5 \degree$ about  $\hat{\Omega} = (2 / \sqrt{5}, 1 / \sqrt{5})$. The right boundary will specularly reflect the point source.
+Consider a problem on a two-dimensional mesh in the physical domain $D \in [0, 5] \times [0, 5]$. It will contain a reaction term formed by the [framework:Reaction.md] kernel and a diffusion term formed by the [framework:Diffusion.md] kernel. The anisotropic point source located at $(1, 1.5)$ emits a source in a cone $2.5 \degree$ about  $\hat{\Omega} = (2 / \sqrt{5}, 1 / \sqrt{5})$. The right boundary will specularly reflect the point source.
 
-The input begins with the basic definition (the mesh, the [Reaction.md] and [Diffusion.md] kernels, and an [Executioner/index.md]) as:
+The input begins with the basic definition (the mesh, the [framework:Reaction.md] and [framework:Diffusion.md] kernels, and an [framework:Executioner/index.md]) as:
 
 !listing modules/ray_tracing/test/tests/userobjects/cone_ray_study/cone_ray_study.i start=Mesh end=UserObjects
 
@@ -62,7 +62,7 @@ and the result (in `cone_ray_study_out.e`) is pictured below in [result].
 
 ### Refined Result
 
-Admittedly, the result in [result] is not particularly satisfying in a visual sense. We need more elements! Let's take advantage of the [syntax/Adaptivity/index.md]. With this, take note of the Adaptivity block:
+Admittedly, the result in [result] is not particularly satisfying in a visual sense. We need more elements! Let's take advantage of the [framework:syntax/Adaptivity/index.md]. With this, take note of the Adaptivity block:
 
 !listing modules/ray_tracing/test/tests/userobjects/cone_ray_study/cone_ray_study.i start=Adaptivity
 

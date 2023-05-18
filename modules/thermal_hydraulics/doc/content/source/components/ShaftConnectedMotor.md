@@ -10,7 +10,7 @@ applying negative torque.
 
 The parameters [!param](/Components/ShaftConnectedMotor/torque) and
 [!param](/Components/ShaftConnectedMotor/inertia) take the names of
-[Functions](Functions/index.md). The shaft speed $\omega$ is used in place of
+[Functions](framework:Functions/index.md). The shaft speed $\omega$ is used in place of
 the time variable $t$ in these functions (and the space variables are
 discarded); therefore, the user is actually specifying the functions
 $\tau(\omega)$ and $I(\omega)$, not $\tau(t,x,y,z)$ and $I(t,x,y,z)$.

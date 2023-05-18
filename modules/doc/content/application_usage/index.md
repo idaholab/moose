@@ -8,7 +8,7 @@ These documentation pages aid in running MOOSE-based applications.  For developm
 
 [Input File Syntax](input_syntax.md)
 
-[Peacock](python/peacock.md) - Graphical user interface and results visualization
+[Peacock](python:python/peacock.md) - Graphical user interface and results visualization
 
 [Tracked Apps](tracked_apps.md) - A list of applications being developed
 

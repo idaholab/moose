@@ -2,7 +2,7 @@
 
 !syntax description /Kernels/ADCoefCoupledTimeDerivative
 
-[`ADCoupledTimeDerivative`](/ADCoupledTimeDerivative.md) with a scalar prefactor $\lambda$ (`coef`)
+[`ADCoupledTimeDerivative`](framework:/ADCoupledTimeDerivative.md) with a scalar prefactor $\lambda$ (`coef`)
 \begin{equation}
 \left(\lambda\frac{\partial v}{\partial t},\psi\right),
 \end{equation}

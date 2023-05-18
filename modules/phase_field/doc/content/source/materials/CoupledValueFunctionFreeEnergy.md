@@ -13,7 +13,7 @@ computed automatically using the `gradient` and `timeDerivative` methods of the
 `MooseFunction` class.
 
 One example application is the use of
-[`PiecewiseMultilinear`](PiecewiseMultilinear.md) functions with data files
+[`PiecewiseMultilinear`](framework:PiecewiseMultilinear.md) functions with data files
 containing pretabulations of Gibbs energy and chemical potentials as a function
 of up to four primary variable values.
 

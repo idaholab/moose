@@ -14,7 +14,7 @@ This example makes use of `SurrogateTrainer` input parameters, API functions, an
 
 ### validParams
 
-The trainer requires the input of a sampler, so that it understands how many data points are included and how they are distributed across processors. The trainer also needs the predictor and response values from the full-order model which are stored in a [vector postprocessor](VectorPostprocessors/index.md) or [reporter](Reporters/index.md).
+The trainer requires the input of a sampler, so that it understands how many data points are included and how they are distributed across processors. The trainer also needs the predictor and response values from the full-order model which are stored in a [vector postprocessor](framework:VectorPostprocessors/index.md) or [reporter](framework:Reporters/index.md).
 
 !listing SurrogateTrainer.C re=InputParameters\sSurrogateTrainer::validParams.*?^}
 

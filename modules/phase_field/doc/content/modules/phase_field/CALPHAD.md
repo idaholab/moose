@@ -13,7 +13,7 @@ The `free_energy.py` tool allows users to extract free energy expressions from
 `*.tdb` thermodynamic database files (ThermoCalc format). The tool exports a
 list of MOOSE Material blocks for each phase (or a user specified subset of
 phases). The CALPHAD functional expressions are implemented using the
-[`DerivativeParsedMaterial`](/DerivativeParsedMaterial.md) class.
+[`DerivativeParsedMaterial`](framework:/DerivativeParsedMaterial.md) class.
 
 It is up to the user to construct a full MOOSE input file around these material
 blocks and to rename the variables used in the exported form to more suitable

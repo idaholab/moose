@@ -61,7 +61,7 @@ The general procedure for expressing the weak form of a [!ac](PDE) is as follows
 
 ## The Galerkin Finite Element Method id=galerkin
 
-In general, the [!ac](FEM) assumes that solutions to [!ac](PDEs) take on simple analytical forms called [shape functions](source/problems/FEProblemBase.md#shape_functions), e.g., a polynomial. This assumption enables difficult analytical derivative expressions to be directly integrated in a piecewise-continuous fashion. +The Galerkin [!ac](FEM) is one that uses the same functions to approximate the solution of a [!ac](PDE) as those used for test functions $\boldsymbol{\psi}$.+ There are many approaches to achieve solutions using the [!ac](FEM), but the Galerkin approach is particularly useful for multiphysics applications, because it is a purely numerical one whose effectiveness is independent of the underlying physics.
+In general, the [!ac](FEM) assumes that solutions to [!ac](PDEs) take on simple analytical forms called [shape functions](framework:source/problems/FEProblemBase.md#shape_functions), e.g., a polynomial. This assumption enables difficult analytical derivative expressions to be directly integrated in a piecewise-continuous fashion. +The Galerkin [!ac](FEM) is one that uses the same functions to approximate the solution of a [!ac](PDE) as those used for test functions $\boldsymbol{\psi}$.+ There are many approaches to achieve solutions using the [!ac](FEM), but the Galerkin approach is particularly useful for multiphysics applications, because it is a purely numerical one whose effectiveness is independent of the underlying physics.
 
 ## Demonstration id=demo
 

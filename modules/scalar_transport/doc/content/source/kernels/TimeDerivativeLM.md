@@ -4,7 +4,7 @@
 
 ## Overview
 
-This object is equivalent to [TimeDerivative.md] except it adds its residual both to
+This object is equivalent to [framework:TimeDerivative.md] except it adds its residual both to
 the primal equation containing the time derivative and to a Lagrange
 Multiplier (LM) equation when an LM is present. We can use an LM for enforcing
 non-negative concentrations, but its introduction generally leads to creation of

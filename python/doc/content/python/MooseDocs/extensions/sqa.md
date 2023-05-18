@@ -67,7 +67,7 @@ then the "app_stp.md.template" file should be loaded in a file named "bull_frog_
 The following is a list of templates that should be included within a MOOSE module to complete the
 SQA documentation. Similar naming conventions that applied to [#moose-based-application-templates]
 apply to MOOSE module templates. There are no [!ac](CCI) or [!ac](SCS) templates for modules because
-they follow the framework versions of the [framework_cci.md] and [framework_scs.md] documents.
+they follow the framework versions of the [framework:framework_cci.md] and [framework:framework_scs.md] documents.
 
 - +module_stp.md.template+\\
   This will comprise the module Software Test Plan.
@@ -223,7 +223,7 @@ gathered from the specifications are considered to be functional requirements by
 ### +`append_run_exception_to_failure_analysis`+
 
 A boolean that when true (the default) adds the "FAILURE_ANALYSIS" collection (see [#requirements-list])
-to all [RunException](framework_stp.md#approval-requirements) tests.
+to all [RunException](framework:framework_stp.md#approval-requirements) tests.
 
 ## Requirements List
 

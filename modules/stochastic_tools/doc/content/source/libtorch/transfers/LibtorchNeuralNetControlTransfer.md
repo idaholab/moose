@@ -5,8 +5,8 @@
 
 ## Overview
 
-Transfer which copies a [LibtorchArtificialNeuralNet.md] from a neural net control trainer object
-(say [LibtorchDRLControlTrainer.md]) on the main app to a [LibtorchNeuralNetControl](source/libtorch/controls/LibtorchNeuralNetControl.md) object on the sub app.
+Transfer which copies a [framework:LibtorchArtificialNeuralNet.md] from a neural net control trainer object
+(say [LibtorchDRLControlTrainer.md]) on the main app to a [LibtorchNeuralNetControl](framework:source/libtorch/controls/LibtorchNeuralNetControl.md) object on the sub app.
 
 !if! function=hasLibtorch()
 

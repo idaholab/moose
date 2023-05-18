@@ -7,7 +7,7 @@ sub-application has a Problem type of [LevelSetReinitializationProblem](#)
 
 ## Example Syntax
 
-The [LevelSetReinitializationProblem](#) is invoked by setting the "type" parameter within the [Problem](Problem/index.md) of the
+The [LevelSetReinitializationProblem](#) is invoked by setting the "type" parameter within the [Problem](framework:Problem/index.md) of the
 input file.
 
 !listing modules/level_set/test/tests/transfers/markers/single_level/sub.i block=Problem

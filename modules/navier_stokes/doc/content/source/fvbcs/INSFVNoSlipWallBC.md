@@ -1,6 +1,6 @@
 # INSFVNoSlipWallBC
 
-This object simply wraps [`FVFunctionDirichletBC`](FVFunctionDirichletBC.md). So
+This object simply wraps [`FVFunctionDirichletBC`](framework:FVFunctionDirichletBC.md). So
 the required parameter is `function` describing the boundary wall velocity for
 the velocity component specified with `variable`. If applying
 `INSFVNoSlipWallBC` for any velocity component on a given `boundary`, then an

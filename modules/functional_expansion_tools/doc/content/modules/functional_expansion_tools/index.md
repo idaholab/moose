@@ -66,9 +66,9 @@ Although there are no kernels directly provided by this module (yet), these thre
 
 | Name | Description |
 | - | - |
-| [`BodyForce`](/BodyForce.md) | May be used to couple a `FunctionSeries` object directly to a solution, instead of using `FunctionSeriesToAux` and `CoupledForce`. If the `BodyForce` approach is used it is highly recommended to set `enable_cache = true` for the associated `FunctionSeries` object. |
-| [`CoupledForce`](/CoupledForce.md) | Couples an +AuxVariable+ or +Variable+ to the solution of another +Variable+. Useful in conjunction with `FunctionSeriesToAux`.
-| [`NullKernel`](/NullKernel.md) | May be required for use in situation where no +Variables+ or +Kernels+ are needed. This may occur, for example, in an app that uses only the recommended `FunctionSeriesToAux`+`CoupledForce` approach. |
+| [`BodyForce`](framework:/BodyForce.md) | May be used to couple a `FunctionSeries` object directly to a solution, instead of using `FunctionSeriesToAux` and `CoupledForce`. If the `BodyForce` approach is used it is highly recommended to set `enable_cache = true` for the associated `FunctionSeries` object. |
+| [`CoupledForce`](framework:/CoupledForce.md) | Couples an +AuxVariable+ or +Variable+ to the solution of another +Variable+. Useful in conjunction with `FunctionSeriesToAux`.
+| [`NullKernel`](framework:/NullKernel.md) | May be required for use in situation where no +Variables+ or +Kernels+ are needed. This may occur, for example, in an app that uses only the recommended `FunctionSeriesToAux`+`CoupledForce` approach. |
 
 
 ### Transfers

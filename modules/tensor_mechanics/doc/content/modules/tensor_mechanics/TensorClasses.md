@@ -63,4 +63,4 @@ c = b(0,0,0,0);
 
 See the list of available operators and matrix operations for the RankTwoTensor,
 RankThreeTensor, and RankFourTensor in the description of the MOOSE
-[Utility Classes](utils/MooseUtils.md).
+[Utility Classes](framework:utils/MooseUtils.md).

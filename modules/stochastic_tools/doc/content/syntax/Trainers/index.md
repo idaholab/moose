@@ -8,15 +8,15 @@ are designed for creating training data for use with a model (see [Surrogates/in
 ## Creating a SurrogateTrainer
 
 To create a trainer the new object should inherit from `SurrogateTrainer`, which is derived
-from [GeneralUserObject.md]. `SurrogateTrainer` overrides the `execute()` function to loop
-through the rows of a given [sampler](Samplers/index.md), specified by the
+from [framework:GeneralUserObject.md]. `SurrogateTrainer` overrides the `execute()` function to loop
+through the rows of a given [sampler](framework:Samplers/index.md), specified by the
 [!param](/Trainers/NearestPointTrainer/sampler) parameter:
 
 !listing SurrogateTrainer.C re=void\sSurrogateTrainer::execute.*?^}
 
 !listing SurrogateTrainer.C re=void\sSurrogateTrainer::executeTraining.*?^}
 
-The method will execute once per execution flag (see [SetupInterface.md]) on each processor.
+The method will execute once per execution flag (see [framework:SetupInterface.md]) on each processor.
 There are three virtual functions that derived class can and should override:
 
 !listing SurrogateTrainer.h start=protected: end=postTrain include-start=False include-end=True
@@ -79,7 +79,7 @@ data initialization.
 
 !listing PolynomialChaosTrainer.C line=_order(declare
 
-The training data system leverages the [restart/Restartable.md] within MOOSE. As such, the data
+The training data system leverages the [framework:restart/Restartable.md] within MOOSE. As such, the data
 store can be of an arbitrary type and is automatically used for restarting simulations.
 
 ## Enabling Cross Validation

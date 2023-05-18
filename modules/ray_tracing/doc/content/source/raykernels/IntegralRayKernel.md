@@ -14,9 +14,9 @@ where $f(r)$ is integrated from $\vec{r}_1$ to $\vec{r}_2$.
 
 For examples, see:
 
-- [VariableIntegralRayKernel.md] for integrating a [Variable](Variables/index.md) or an [AuxVariable](AuxVariables/index.md)
-- [MaterialIntegralRayKernel.md] for integrating a [Material](Materials/index.md)
-- [FunctionIntegralRayKernel.md] for integrating a [Function](Functions/index.md)
+- [VariableIntegralRayKernel.md] for integrating a [Variable](framework:Variables/index.md) or an [AuxVariable](framework:AuxVariables/index.md)
+- [MaterialIntegralRayKernel.md] for integrating a [Material](framework:Materials/index.md)
+- [FunctionIntegralRayKernel.md] for integrating a [Function](framework:Functions/index.md)
 
 To integrate along a desired quantity, inherit from IntegralRayKernel and override the `computeQpIntegral()` method in which `_qp` is the current quadrature point index. For example:
 

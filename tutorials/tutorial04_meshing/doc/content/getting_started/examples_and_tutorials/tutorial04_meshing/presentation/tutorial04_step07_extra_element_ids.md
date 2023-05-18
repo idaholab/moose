@@ -44,14 +44,14 @@
 
 - Reporting IDs can be used to assign material properties
 - Reporting IDs can be used to create additional unique zones (e.g. depletion zones)
-- Reporting IDs can be leveraged to post-process solution data into tables by using the [ExtraIDIntegralVectorPostprocessor.md]. This postprocessor integrates the solution based on reporting IDs. Component-wise values such as pin-by-pin power distribution can be easily yielded by specifying integration over pin and assembly reporting IDs to this postprocessor.
+- Reporting IDs can be leveraged to post-process solution data into tables by using the [framework:ExtraIDIntegralVectorPostprocessor.md]. This postprocessor integrates the solution based on reporting IDs. Component-wise values such as pin-by-pin power distribution can be easily yielded by specifying integration over pin and assembly reporting IDs to this postprocessor.
 
 !---
 
 ## Applying Reporting IDs for Cartesian and Hexagonal Lattices
 
-- [PatternedCartesianMeshGenerator.md] (Cartesian)
-- [PatternedHexMeshGenerator.md] (Hexagonal)
+- [reactor:PatternedCartesianMeshGenerator.md] (Cartesian)
+- [reactor:PatternedHexMeshGenerator.md] (Hexagonal)
 
 - Assign reporting IDs for input geometric components (pins or assemblies) during lattice mesh generations.
 - Supports the following numbering schemes (set with [!param](/Mesh/PatternedHexMeshGenerator/assign_type)):
@@ -111,7 +111,7 @@
 !row!
 !col small=12 medium=6 large=8
 
-- [PlaneIDMeshGenerator.md]
+- [framework:PlaneIDMeshGenerator.md]
 
 - Apply reporting IDs between axial planes in an already extruded mesh
 
@@ -137,13 +137,13 @@
 !row!
 !col small=12 medium=6 large=8
 
-- [DepletionIDGenerator.md]
+- [reactor:DepletionIDGenerator.md]
 
 - Automatically assign depletion zones based on existing unique combination of reporting IDs and material ID
 - Easily control the fidelity of depletion zones based on the other reporting IDs already in the mesh (including block and material IDs)
 
 - For a pin-level depletion case, the depletion IDs for the entire domain can be specified by finding unique combinations of assembly, pin, and material IDs
-- By additionally including ring and sector IDs accessible through [PolygonConcentricCircleMeshGenerator.md], depletion zones can be defined within the pin itself
+- By additionally including ring and sector IDs accessible through [reactor:PolygonConcentricCircleMeshGenerator.md], depletion zones can be defined within the pin itself
 
 !col small=12 medium=6 large=4
 
@@ -163,13 +163,13 @@
 !row!
 !col small=12 medium=6 large=8
 
-- [ExtraIDIntegralVectorPostprocessor.md]
-- [ExtraIDIntegralReporter.md]
+- [framework:ExtraIDIntegralVectorPostprocessor.md]
+- [framework:ExtraIDIntegralReporter.md]
 
 - Integrates solution variables over zones identified by combinations of reporting IDs
 
-- [ExtraIDIntegralVectorPostprocessor.md] exports the post-processed results in CSV file format
-- [ExtraIDIntegralReporter.md], based on the MOOSE reporting system, can output in JSON file format
+- [framework:ExtraIDIntegralVectorPostprocessor.md] exports the post-processed results in CSV file format
+- [framework:ExtraIDIntegralReporter.md], based on the MOOSE reporting system, can output in JSON file format
 
 !col small=12 medium=6 large=4
 

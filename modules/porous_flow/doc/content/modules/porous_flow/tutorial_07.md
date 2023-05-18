@@ -19,7 +19,7 @@ The input file of [Page 06](porous_flow/tutorial_06.md) is modified to include c
 
 !listing modules/porous_flow/examples/tutorial/07.i start=[PorousFlowFullySaturated] end=[AuxVariables]
 
-Setting the `temperature` here allows control of the chemical reaction rate (which is temperature dependent: see [chemical reactions](/chemical_reactions/index.md)).
+Setting the `temperature` here allows control of the chemical reaction rate (which is temperature dependent: see [chemical reactions](chemical_reactions:/chemical_reactions/index.md)).
 
 As precipitation or dissolution occurs via [eq:predis],
 the tracer concentration gets decreased or increased.  Thus, a new `Kernel` must be added, which is a [`PorousFlowPreDis`](PorousFlowPreDis.md) Kernel:
@@ -30,7 +30,7 @@ The chemical reaction rate is computed by a [`PorousFlowAqueousPreDisChemistry`]
 
 !listing modules/porous_flow/examples/tutorial/07.i start=[precipitation_dissolution_mat] end=[mineral_concentration]
 
-All the parameters are fully explained in the [chemical reactions](/chemical_reactions/index.md) module.  Briefly, in this case, because the `reference_temperature` equals the `temperature` specified in the `PorousflowFullySaturated`, there is no temperature dependence of the reaction rate, so it is just the product of the `kinetic_rate_constant` ($10^{-8}\,$mol.m$^{-2}$.s$^{-1}$), the `specific_reactive_surface_area` (1$\,$m$^{2}$.L$^{-1}$), the molar volume (1$\,$L.mol$^{-1}$) and $1 - \chi/K$, where $K$ is the equilibrium constant (0.1):
+All the parameters are fully explained in the [chemical reactions](chemical_reactions:/chemical_reactions/index.md) module.  Briefly, in this case, because the `reference_temperature` equals the `temperature` specified in the `PorousflowFullySaturated`, there is no temperature dependence of the reaction rate, so it is just the product of the `kinetic_rate_constant` ($10^{-8}\,$mol.m$^{-2}$.s$^{-1}$), the `specific_reactive_surface_area` (1$\,$m$^{2}$.L$^{-1}$), the molar volume (1$\,$L.mol$^{-1}$) and $1 - \chi/K$, where $K$ is the equilibrium constant (0.1):
 \begin{equation}
 \mathrm{reaction rate} = 10^{-8}(1 - 10\chi) \ \mathrm{L(precipitate)/L(solution)/s} \ .
 \end{equation}

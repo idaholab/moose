@@ -4,18 +4,18 @@ When using an unstructured finite element mesh format for reactor analysis, it c
 
 The automatic assignment of reporting IDs to elements in a mesh is provided through several mesh generators, as described in the following sections. Collections of elements forming pins and assemblies are identifiable without providing information about their physical location since the mesh generators themselves understand the concept of pins and assemblies.
 
-Reporting IDs can be leveraged to post-process solution data into tables by using the [ExtraIDIntegralVectorPostprocessor.md]. This postprocessor integrates the solution based on reporting IDs. Component-wise values such as pin-by-pin power distribution can be easily yielded by specifying integration over pin and assembly reporting IDs to this postprocessor.
+Reporting IDs can be leveraged to post-process solution data into tables by using the [framework:ExtraIDIntegralVectorPostprocessor.md]. This postprocessor integrates the solution based on reporting IDs. Component-wise values such as pin-by-pin power distribution can be easily yielded by specifying integration over pin and assembly reporting IDs to this postprocessor.
 
 ## Applying Reporting IDs for Cartesian and Hexagonal Lattices
 
-In addition to being used to stitch together Cartesian and hexagonal grids from smaller unit meshes, [PatternedCartesianMeshGenerator.md] and [PatternedHexMeshGenerator.md] can also assign reporting IDs to the mesh during the stitching process. When using these mesh generators to stitch pins into an assembly, a pin reporting ID (e.g., `pin_id`) is relevant.  When stitching assemblies into a core, an assembly reporting ID (e.g., `assembly_id`) is relevant.
+In addition to being used to stitch together Cartesian and hexagonal grids from smaller unit meshes, [reactor:PatternedCartesianMeshGenerator.md] and [reactor:PatternedHexMeshGenerator.md] can also assign reporting IDs to the mesh during the stitching process. When using these mesh generators to stitch pins into an assembly, a pin reporting ID (e.g., `pin_id`) is relevant.  When stitching assemblies into a core, an assembly reporting ID (e.g., `assembly_id`) is relevant.
 
 Since the mesh generators understand the pin or assembly pattern, IDs can be applied in one of several ways: `cell` (default), `pattern`, or `manual`. In the `cell` numbering pattern, each cell is given a unique ID starting with 0 in the upper left-hand corner of the hexagon grid, increasing monotonically from left to right, top to bottom up until N-1 for the final pin location. Duct regions are assigned reporting IDs starting with the next available integer following pin region assignment. Certain regions can be excluded from being labeled with an ID, for example dummy regions that will later be deleted. This can be accommodated by listing mesh objects in the [!param](/Mesh/PatternedHexMeshGenerator/exclude_id) parameter. Usage of this parameter is helpful to retain sequential numbering when dummy regions are later deleted.
 
 ### Object
 
-- [PatternedCartesianMeshGenerator.md] (Cartesian)
-- [PatternedHexMeshGenerator.md] (Hexagonal)
+- [reactor:PatternedCartesianMeshGenerator.md] (Cartesian)
+- [reactor:PatternedHexMeshGenerator.md] (Hexagonal)
 
 ### Features
 
@@ -67,11 +67,11 @@ Supports other numbering schemes:
 
 ## Applying Reporting IDs for Axial Plane
 
-Users often wish to postprocess solutions along the axial dimension. The [PlaneIDMeshGenerator.md] applies reporting IDs to axial planes in an already extruded mesh. To be clear, this mesh generator does +NOT+ extrude the mesh: an extruded mesh must be provided as input.
+Users often wish to postprocess solutions along the axial dimension. The [framework:PlaneIDMeshGenerator.md] applies reporting IDs to axial planes in an already extruded mesh. To be clear, this mesh generator does +NOT+ extrude the mesh: an extruded mesh must be provided as input.
 
 ### Object
 
-- [PlaneIDMeshGenerator.md]
+- [framework:PlaneIDMeshGenerator.md]
 
 ### Features
 
@@ -97,11 +97,11 @@ Users often wish to postprocess solutions along the axial dimension. The [PlaneI
 
 ## Applying Depletion IDs
 
-The [DepletionIDGenerator.md] is useful for defining neutronics depletion zones. The fidelity of the depletion zones (pin-level, assembly-level, or even intra-pin zones) can be handled.
+The [reactor:DepletionIDGenerator.md] is useful for defining neutronics depletion zones. The fidelity of the depletion zones (pin-level, assembly-level, or even intra-pin zones) can be handled.
 
 ### Object
 
-- [DepletionIDGenerator.md]
+- [reactor:DepletionIDGenerator.md]
 
 ### Features
 
@@ -111,7 +111,7 @@ The [DepletionIDGenerator.md] is useful for defining neutronics depletion zones.
 ### Notes
 
 - For a pin-level depletion case, the depletion IDs for the entire domain can be specified by finding unique combinations of assembly, pin, and material IDs
-- By additionally including ring and sector IDs accessible through [PolygonConcentricCircleMeshGenerator.md], depletion zones can be defined within the pin itself
+- By additionally including ring and sector IDs accessible through [reactor:PolygonConcentricCircleMeshGenerator.md], depletion zones can be defined within the pin itself
 
 ### Example
 
@@ -127,12 +127,12 @@ The [DepletionIDGenerator.md] is useful for defining neutronics depletion zones.
 
 ## Querying Output Data using Reporting IDs
 
-After performing a physics simulation using a mesh with reporting IDs, the solution variables may be post-processed into useful integrals using the reporting IDs. [ExtraIDIntegralVectorPostprocessor.md] and [ExtraIDIntegralReporter.md] both integrate solution variables over zones identified by unique combinations of reporting IDs (controlled by the user). The user can easily retrieve quantities from an unstructured mesh such as "pin power of pin 6 in assembly 2 on axial layer 3" by using the `pin_id`, `assembly_id`, and `plane_id` as the integration criteria.
+After performing a physics simulation using a mesh with reporting IDs, the solution variables may be post-processed into useful integrals using the reporting IDs. [framework:ExtraIDIntegralVectorPostprocessor.md] and [framework:ExtraIDIntegralReporter.md] both integrate solution variables over zones identified by unique combinations of reporting IDs (controlled by the user). The user can easily retrieve quantities from an unstructured mesh such as "pin power of pin 6 in assembly 2 on axial layer 3" by using the `pin_id`, `assembly_id`, and `plane_id` as the integration criteria.
 
 ### Objects
 
-- [ExtraIDIntegralVectorPostprocessor.md]
-- [ExtraIDIntegralReporter.md]
+- [framework:ExtraIDIntegralVectorPostprocessor.md]
+- [framework:ExtraIDIntegralReporter.md]
 
 ### Features
 
@@ -140,8 +140,8 @@ After performing a physics simulation using a mesh with reporting IDs, the solut
 
 ### Notes
 
-- [ExtraIDIntegralVectorPostprocessor.md] exports the post-processed results in CSV file format
-- [ExtraIDIntegralReporter.md], based on the MOOSE reporting system, can output in JSON file format
+- [framework:ExtraIDIntegralVectorPostprocessor.md] exports the post-processed results in CSV file format
+- [framework:ExtraIDIntegralReporter.md], based on the MOOSE reporting system, can output in JSON file format
 
 ### Example
 

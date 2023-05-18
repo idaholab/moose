@@ -27,7 +27,7 @@ The following options are specific to MOOSE JSON output:
 
 ## Example test configuration in the MOOSE test suite
 
-In this example, the mesh output by a [RenameBlockGenerator.md] is being checked using a
+In this example, the mesh output by a [framework:RenameBlockGenerator.md] is being checked using a
 `MeshInfo` reporter, which outputs a `JSON` file. This `JSON` file is compared to a reference to
 make sure the mesh block names are properly changed.
 

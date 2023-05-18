@@ -4,7 +4,7 @@
 
 ## Overview
 
-`ParameterStudy` is meant to be a simplified syntax for running common parameter studies like the one described in [examples/parameter_study.md]. The idea with this syntax is users do not need to understand or go through the modular design of the stochastic tools module to run a basic parameter study. The [ParameterStudyAction.md] builds the necessary objects programmatically, objects including [distributions](Distributions/index.md), [samplers](Samplers/index.md), [multi-apps](MultiApps/index.md), and [transfers](Transfers/index.md). The following sections desribe in detail the capabilities of this system, but the basic functionalities include:
+`ParameterStudy` is meant to be a simplified syntax for running common parameter studies like the one described in [examples/parameter_study.md]. The idea with this syntax is users do not need to understand or go through the modular design of the stochastic tools module to run a basic parameter study. The [ParameterStudyAction.md] builds the necessary objects programmatically, objects including [distributions](framework:Distributions/index.md), [samplers](framework:Samplers/index.md), [multi-apps](framework:MultiApps/index.md), and [transfers](framework:Transfers/index.md). The following sections desribe in detail the capabilities of this system, but the basic functionalities include:
 
 1. Defining parameters and quantities of interest (QoIs) within the given physics input.
 1. Perturbing the parameters using the specified sampling method.
@@ -17,9 +17,9 @@
 
 The problem containing the physics is defined via another input file and specified using the [!param](/ParameterStudy/input) parameter. The idea is that this input defines the "nominal" case of the problem; as such, it should be able to run independently (without the `ParameterStudy` block).
 
-The parameters being perturbed in the study are specified using the [!param](/ParameterStudy/parameters) parameter. This is a list of parameters in the physics input that use [CommandLine.md] syntax.
+The parameters being perturbed in the study are specified using the [!param](/ParameterStudy/parameters) parameter. This is a list of parameters in the physics input that use [framework:CommandLine.md] syntax.
 
-The QoIs for the study are specified using the [!param](/ParameterStudy/quantities_of_interest) parameter. This is a list of [reporter](Reporters/index.md) values with `<object_name>/<value_name>` syntax. [Postprocessor](Postprocessors/index.md) values use `<pp_name>/value` syntax. [Vector-postprocessor](VectorPostprocessors/index.md) values use `<vpp_name>/<vector_name>` syntax. This parameter is optional as users may want to do their own analysis using outputs, such as CSV or Exodus, generated from the physics input.
+The QoIs for the study are specified using the [!param](/ParameterStudy/quantities_of_interest) parameter. This is a list of [reporter](framework:Reporters/index.md) values with `<object_name>/<value_name>` syntax. [Postprocessor](framework:Postprocessors/index.md) values use `<pp_name>/value` syntax. [Vector-postprocessor](framework:VectorPostprocessors/index.md) values use `<vpp_name>/<vector_name>` syntax. This parameter is optional as users may want to do their own analysis using outputs, such as CSV or Exodus, generated from the physics input.
 
 Whether or not to computate statistics on the QoIs is defined by the [!param](/ParameterStudy/compute_statistics) parameter. The default for this parameter is `true`, so statistics will be computed by default if QoIs are specified with the [!param](/ParameterStudy/quantities_of_interest) parameter. A [StatisticsReporter.md] object is created, which by default computes the mean and standard deviation of the QoIs with 90%, 95%, and 99% confidence intervals. The type of statistics can be specified with [!param](/ParameterStudy/statistics) and the confidence interval computation can specified with [!param](/ParameterStudy/ci_levels) and [!param](/ParameterStudy/ci_replicates), see [StatisticsReporter.md] for more details on confidence interval computation.
 
@@ -101,11 +101,11 @@ The `batch-keep-solution` option for [!param](/ParameterStudy/multiapp_mode) run
 
 ### Batch-Restore Mode -- No Restore
 
-The `batch-no-restore` option for [!param](/ParameterStudy/multiapp_mode) runs the study in "batch-restore" mode, except the sub-application is not restored. Instead, the sub-application's solve is simply repeated with the newly perturbed parameters. This mode provides another efficiency by skipping this restoration step. This mode +only+ works with steady-state problems like those run with the [Steady.md] and [Eigenvalue.md] executioners, as transient problems need to be restored to the original time step.
+The `batch-no-restore` option for [!param](/ParameterStudy/multiapp_mode) runs the study in "batch-restore" mode, except the sub-application is not restored. Instead, the sub-application's solve is simply repeated with the newly perturbed parameters. This mode provides another efficiency by skipping this restoration step. This mode +only+ works with steady-state problems like those run with the [framework:Steady.md] and [framework:Eigenvalue.md] executioners, as transient problems need to be restored to the original time step.
 
 ### Automatic Mode Detection
 
-While the execution mode can be explicitly specifyied using the [!param](/ParameterStudy/multiapp_mode) parameter, if this parameter is unspecified, the action will attempt to run in the most efficient mode by reading the physics input file. First, it will determine if the perturbed [!param](/ParameterStudy/parameters) are all controllable. If not all the parameter are controllable, the action will use `batch-reset` mode. This detection is a bit rudimentary, so it might not detect all controllable parameters. Next, it will determine what type of execution is being performed. If the `Executioner/type` is [Steady.md] or [Eigenvalue.md], then it will use `batch-no-restore` mode. If the executioner is [Transient.md] with `steady_state_detection = true`, then it will assume the simulation is pseudo-transient and use `batch-keep-solution`. All other cases with controllable parameters will use `batch-restore`. This automatic detection is not meant to be exhaustive, so it is recommended that users fully understand the problem and use the [!param](/ParameterStudy/multiapp_mode) parameter.
+While the execution mode can be explicitly specifyied using the [!param](/ParameterStudy/multiapp_mode) parameter, if this parameter is unspecified, the action will attempt to run in the most efficient mode by reading the physics input file. First, it will determine if the perturbed [!param](/ParameterStudy/parameters) are all controllable. If not all the parameter are controllable, the action will use `batch-reset` mode. This detection is a bit rudimentary, so it might not detect all controllable parameters. Next, it will determine what type of execution is being performed. If the `Executioner/type` is [framework:Steady.md] or [framework:Eigenvalue.md], then it will use `batch-no-restore` mode. If the executioner is [framework:Transient.md] with `steady_state_detection = true`, then it will assume the simulation is pseudo-transient and use `batch-keep-solution`. All other cases with controllable parameters will use `batch-restore`. This automatic detection is not meant to be exhaustive, so it is recommended that users fully understand the problem and use the [!param](/ParameterStudy/multiapp_mode) parameter.
 
 ## Outputs
 
@@ -124,13 +124,13 @@ All the objects built with [ParameterStudyAction.md] can be shown on console usi
 | [Distribution](Distributions/index.md) | See [#sec:random] | `study_distribution_<i>`$^a$ |
 | [Sampler](Samplers/index.md) | See [#sec:sampling] | `study_sampler` |
 | [MultiApp](MultiApps/index.md) | [SamplerFullSolveMultiApp.md] | `study_app` |
-| [Control](Controls/index.md) | [MultiAppSamplerControl.md] | `study_multiapp_control`$^b$ |
+| [Control](framework:Controls/index.md) | [MultiAppSamplerControl.md] | `study_multiapp_control`$^b$ |
 | [Transfer](Transfers/index.md) | [SamplerParameterTransfer.md] | `study_parameter_transfer`$^c$ |
 | [Transfer](Transfers/index.md) | [SamplerReporterTransfer.md] | `study_qoi_transfer`$^d$ |
 | [Reporter](Reporters/index.md) | [StochasticMatrix.md] | `study_results`|
 | [Reporter](Reporters/index.md) | [StatisticsReporter.md] | `study_statistics`$^{d,e}$ |
-| [Output](syntax/Outputs/index.md) | [CSV.md] | `csv`$^f$ |
-| [Output](syntax/Outputs/index.md) | [JSONOutput.md] | `json`$^g$ |
+| [Output](framework:syntax/Outputs/index.md) | [framework:CSV.md] | `csv`$^f$ |
+| [Output](framework:syntax/Outputs/index.md) | [framework:JSONOutput.md] | `json`$^g$ |
 
 !style fontsize=small
 $^a$ `<i>` corresponds to the index of the distribution in [!param](/ParameterStudy/distributions);\\

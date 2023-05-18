@@ -33,7 +33,7 @@ or
       \hat{F}_{iJ}-\delta_{iJ}=\frac{1}{V}\int_{V}\left(F_{iJ}-\delta_{iJ}\right)dV.
 \end{equation}
 The "hat" quantities are targets set by the user with a MOOSE
-[Function](syntax/Functions/index.md).
+[Function](framework:syntax/Functions/index.md).
 These targets control the cell-average stress or strain.
 For large deformations the system imposes the constraints
 on the 1st Piola-Kirchhoff stress or the displacement gradient.
@@ -77,7 +77,7 @@ measures and calculating the resulting stress.
 \begin{equation}
       F_{iJ}=\delta_{iJ}+u_{i,J}^{\mu}+u_{i,J}^{M}=\delta_{iJ}+u_{i,J}^{\mu}+G_{iJ}.
 \end{equation}
-The framework represents the constant field $G_{iJ}$ with a MOOSE [scalar variable](ScalarVariable.md).
+The framework represents the constant field $G_{iJ}$ with a MOOSE [scalar variable](framework:ScalarVariable.md).
 
 The system implements the constrains by imposing a scalar residual equation for each specificed constraint:
 \begin{equation}
@@ -85,7 +85,7 @@ The system implements the constrains by imposing a scalar residual equation for 
 \end{equation}
 where $X$ represents a stress or deformation constrain, as appropriate.
 This constraint is implemented as a `ScalarKernel`. 
-using a [UserObject](UserObject.md) to visit each element and compute the volume integral.
+using a [UserObject](framework:UserObject.md) to visit each element and compute the volume integral.
 
 ## Example Simulation
 
@@ -131,7 +131,7 @@ subclass as it implements the correct off-diagonal Jacobian entries.
 The basic requirements the user must setup before imposing the homogenization constraints are:
 
 1. Setup the unconstrained problem up to the specification of boundary conditions.
-2. Impose periodic boundary conditions on the simulation domain in all directions, using the [AddPeriodicBCAction](source/actions/AddPeriodicBCAction.md).
+2. Impose periodic boundary conditions on the simulation domain in all directions, using the [AddPeriodicBCAction](framework:source/actions/AddPeriodicBCAction.md).
 3. Add Dirichlet boundary conditions to constrain the rigid body modes.  How to do this will be problem dependent, however
    a typical method is to constrain 1 (1D), 2 (2D) or 3 (3D) individual nodes with enough Dirichlet conditions to remove the rigid
    translation and rotation modes.

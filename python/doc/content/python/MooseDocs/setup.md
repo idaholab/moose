@@ -29,7 +29,7 @@ The configuration file contains information on how to build the website, additio
 this file may be found at [MooseDocs/config.md].
 
 Once you have a basic website running the next step is to document your code, it is best to refer to
-the MOOSE instructions for documentation (see [framework/documenting.md]). In general, applications
+the MOOSE instructions for documentation (see [framework:framework/documenting.md]). In general, applications
 mimic the MOOSE process.
 
 ## Dependencies

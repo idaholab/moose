@@ -33,7 +33,7 @@ Our preliminary numerical tests indicate that the original re-initialization for
 ## Example Syntax
 
 The LevelSetOlssonReinitialization kernel is typically employed in a reinitialization sub-app (see
-the MOOSE [MultiApp](/MultiApps/index.md) system), within this context this Kernel is invoked with
+the MOOSE [MultiApp](framework:/MultiApps/index.md) system), within this context this Kernel is invoked with
 the `[Kernels]` as follows.
 
 !listing modules/level_set/test/tests/reinitialization/reinit.i block=Kernels

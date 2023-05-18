@@ -12,7 +12,7 @@ the pressure term:
     \frac{1}{c_o^2} \frac{\partial^2 p}{\partial t^2}
 \end{equation}
 
-This kernel is similar to the [InertialForce](/InertialForce.md) kernel. Also, this kernel is part of the fluid-structure interaction codes. Please refer to [fluid-structure interaction using acoustics](/fsi_acoustics.md) for the theoretical details.
+This kernel is similar to the [InertialForce](tensor_mechanics:/InertialForce.md) kernel. Also, this kernel is part of the fluid-structure interaction codes. Please refer to [fluid-structure interaction using acoustics](/fsi_acoustics.md) for the theoretical details.
 
 !alert note title=Units for defining the mass and weight quantities
 In [eqn:sample], the inverse of square of the fluid speed of sound is taken.

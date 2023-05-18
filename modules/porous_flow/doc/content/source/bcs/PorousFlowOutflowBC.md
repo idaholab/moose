@@ -60,12 +60,12 @@ The most basic usage of [PorousFlowOutflowBC](PorousFlowOutflowBC.md) is illustr
 
 !listing modules/porous_flow/test/tests/sinks/s14.i start=[BCs] end=[Preconditioning]
 
-In this input-file, all boundaries are of the "outflow" type, and the total flow rate (kg.s$^{-1}$) is recorded into the `outflow_kg_per_s` using a [NodalSum](NodalSum.md) postprocessor.
+In this input-file, all boundaries are of the "outflow" type, and the total flow rate (kg.s$^{-1}$) is recorded into the `outflow_kg_per_s` using a [NodalSum](framework:NodalSum.md) postprocessor.
 
 
 ### Example: heat flow through a boundary
 
-A [PorousFlowOutflowBC](PorousFlowOutflowBC.md) with `flux_type = heat` will allow heat to flow through a boundary.  To record the total heat-energy flowing through the boundary a [NodalSum](NodalSum.md) postprocessor should be used:
+A [PorousFlowOutflowBC](PorousFlowOutflowBC.md) with `flux_type = heat` will allow heat to flow through a boundary.  To record the total heat-energy flowing through the boundary a [NodalSum](framework:NodalSum.md) postprocessor should be used:
 
 !listing modules/porous_flow/test/tests/sinks/s15.i start=[BCs] end=[Preconditioning]
 
@@ -101,7 +101,7 @@ while the fluid component $0$ (the `frac` variable) is allowed to freely exit th
 - The zeroth mass fraction is held at `frac = 1` at $x=0$.
 - The zeroth mass fraction is allowed to freely exit the model at $x=1$.
 
-The former 3 are implemented using [DirichletBC](DirichletBC.md), while the latter is the `PorousFlowOutflowBC`.  It acts on `mass_fraction_component = 0` because that is the mass-fraction associated to the `frac` variable by the [PorousFlowFullySaturated Action](PorousFlowFullySaturated.md):
+The former 3 are implemented using [DirichletBC](framework:DirichletBC.md), while the latter is the `PorousFlowOutflowBC`.  It acts on `mass_fraction_component = 0` because that is the mass-fraction associated to the `frac` variable by the [PorousFlowFullySaturated Action](PorousFlowFullySaturated.md):
 
 !listing sinks/s13.i block=BCs
 

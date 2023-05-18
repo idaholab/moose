@@ -1,6 +1,6 @@
 # Step 1 - First Thermal Mortar Contact
 
-Continuing from the [final step](contact/tutorials/introduction/step02.md) in
+Continuing from the [final step](contact:contact/tutorials/introduction/step02.md) in
 the mechanical contact tutorial, for the first time we incorporate thermal contact,
 staying within the mortar method.
 
@@ -33,7 +33,7 @@ omitted. Lagrange shape functions are purely nodal interpolary shape functions.
 
 ### `Constraints`
 
-The [`GapConductanceConstraint`](GapConductanceConstraint.md) is the bare bones
+The [`GapConductanceConstraint`](heat_conduction:GapConductanceConstraint.md) is the bare bones
 gap conductance constraint object available in MOOSE. It could serve as a
 starting point for the development of more complex gap conductance models
 (taking into account surface roughness and contact pressure for example).
@@ -59,7 +59,7 @@ Then we set the primary and secondary boundaries and subdomains. Again for the
 subdomains we choose the lower dimensional meshes that the mechanical contact
 action set up for us. If you have a purely thermal contact problem you will need
 to create those lower dimensional subdomains manually using the
-[`LowerDBlockFromSidesetGenerator`](LowerDBlockFromSidesetGenerator.md) mesh
+[`LowerDBlockFromSidesetGenerator`](framework:LowerDBlockFromSidesetGenerator.md) mesh
 generator.
 
 ### `BCs`
@@ -72,13 +72,13 @@ difference and a resulting heat flux between the two cantilevers.
 ### `Materials`
 
 We need to add two material blocks for thermal properties.
-[`HeatConductionMaterial`](HeatConductionMaterial.md) provides thermal
-conductivity and specific heat. And the [`Density`](Density.md) material
+[`HeatConductionMaterial`](heat_conduction:HeatConductionMaterial.md) provides thermal
+conductivity and specific heat. And the [`Density`](misc:Density.md) material
 computes an updated material density on the displaced mesh, taking volumetric
 deformation into account. The `specific_heat` and `density` properties are used
-by the [`HeatConductionTimeDerivative`](HeatConductionTimeDerivative.md) kernel,
+by the [`HeatConductionTimeDerivative`](heat_conduction:HeatConductionTimeDerivative.md) kernel,
 and the `thermal_conductivity` property is used by the
-[`HeatConduction`](HeatConduction.md) kernel.
+[`HeatConduction`](heat_conduction:HeatConduction.md) kernel.
 
 ### `Executioner`
 

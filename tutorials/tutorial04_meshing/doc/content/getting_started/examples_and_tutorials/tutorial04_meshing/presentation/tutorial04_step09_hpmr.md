@@ -32,7 +32,7 @@
 
 ## Create Pin Unit Cell
 
-- [PolygonConcentricCircleMeshGenerator.md]
+- [reactor:PolygonConcentricCircleMeshGenerator.md]
 
 - Center, outer ring, background region
 - Volumes preserved ([!param](/Mesh/PolygonConcentricCircleMeshGenerator/preserve_volumes)=`True`)
@@ -60,7 +60,7 @@
 
 ## Create Patterned Hexagonal Fuel Assembly
 
-- [PatternedHexMeshGenerator.md]
+- [reactor:PatternedHexMeshGenerator.md]
 
 - Hexagonal grid (13.376 units apothem )
 - 3 input pin types (fuel, heatpipe, moderator)
@@ -85,7 +85,7 @@
 
 ## Fuel-Only Core
 
-- [PatternedHexMeshGenerator.md]
+- [reactor:PatternedHexMeshGenerator.md]
 
 - 61 assembly core
 - Whole core rotated 60 degrees
@@ -108,19 +108,19 @@
 
 ## Control Drum Assembly
 
-1. Define control drum mesh with [HexagonConcentricCircleAdaptiveBoundaryMeshGenerator.md]
-2. Split outer ring into 2 separate block IDs using [AzimuthalBlockSplitGenerator.md] to account for control material zone
+1. Define control drum mesh with [reactor:HexagonConcentricCircleAdaptiveBoundaryMeshGenerator.md]
+2. Split outer ring into 2 separate block IDs using [reactor:AzimuthalBlockSplitGenerator.md] to account for control material zone
 
 Setup
 
-- [HexagonConcentricCircleAdaptiveBoundaryMeshGenerator.md]
-- [AzimuthalBlockSplitGenerator.md]
+- reactor:HexagonConcentricCircleAdaptiveBoundaryMeshGenerator.md]
+- [reactor:AzimuthalBlockSplitGenerator.md]
 
 - 3 regions (Center region, Absorber Ring, Hexagonal background)
 
 - Circular volumes preserved regardless of meshing fidelity ([!param](/Mesh/PolygonConcentricCircleMeshGenerator/preserve_volumes)=`true`)
 - Side node adaptation performed for instances with neighboring fuel assemblies
-- [HexagonConcentricCircleAdaptiveBoundaryMeshGenerator.md] is used in this case to create a "single pin" hexagonal assembly with sides matching another mesh
+- [reactor:HexagonConcentricCircleAdaptiveBoundaryMeshGenerator.md] is used in this case to create a "single pin" hexagonal assembly with sides matching another mesh
 
 !---
 
@@ -158,7 +158,7 @@ Setup
 
 ## Create Additional Assemblies (Reflector, Air, Dummy)
 
-- [HexagonConcentricCircleAdaptiveBoundaryMeshGenerator.md]
+- [reactor:HexagonConcentricCircleAdaptiveBoundaryMeshGenerator.md]
 
 - Same size as fuel assemblies
 - Side node adaptation for case with neighboring fuel assemblies
@@ -187,7 +187,7 @@ Setup
 
 ## Create Patterned Full Core
 
-- [PatternedHexMeshGenerator.md]
+- [reactor:PatternedHexMeshGenerator.md]
 
 - Whole core rotated 60 degrees
 - 5 Input geometry types
@@ -219,7 +219,7 @@ Setup
 !row!
 !col small=12 medium=6 large=8
 
-- [BlockDeletionGenerator.md]
+- [framework:BlockDeletionGenerator.md]
 
 - Remove "dummy" assemblies which were added only for core hex patterning
 
@@ -241,7 +241,7 @@ Setup
 
 ## Add Core Periphery
 
-- [PeripheralRingMeshGenerator.md]
+- [reactor:PeripheralRingMeshGenerator.md]
 
 - 115.0 units vessel radius
 
@@ -268,7 +268,7 @@ Setup
 !row!
 !col small=12 medium=6 large=8
 
-- [PlaneDeletionGenerator.md]
+- [framework:PlaneDeletionGenerator.md]
 
 - Trimming plane defined by a point and a normal vector
 - Elements whose centroids lie "above" (in the direction of the normal vector) the plane will be deleted
@@ -281,7 +281,7 @@ Setup
 
   - +Point+ = $(0, 0, 0)$, +normal+ = $(10, -17.32, 0)$
 
-- Advanced trimming options are available (see [HexagonMeshTrimmer.md]). Trimming should only be performed along lines of symmetry.
+- Advanced trimming options are available (see [reactor:HexagonMeshTrimmer.md]). Trimming should only be performed along lines of symmetry.
 
 !col small=12 medium=6 large=4
 
@@ -312,7 +312,7 @@ Setup
 !row!
 !col small=12 medium=6 large=8
 
-- [AdvancedExtruderGenerator.md]
+- [framework:AdvancedExtruderGenerator.md]
 
 - Extrude the 2D $(x,y)$ mesh in +$z$ direction $(0, 0, 1)$
 

@@ -77,7 +77,7 @@ A `MooseObject` that was capable of solving the Laplace equation was required fo
          link=False
 
 Here, the $\nabla \psi$ term in [!eqref](weak),
-is automatically handled by the `precomputeQpResidual()` method of the [`ADKernelGrad`](source/kernels/ADKernelGrad.md) base class, so there was no need to include this term manually.
+is automatically handled by the `precomputeQpResidual()` method of the [`ADKernelGrad`](framework:source/kernels/ADKernelGrad.md) base class, so there was no need to include this term manually.
 
 !alert tip title=MOOSE does a lot already.
 Before developing a new `MooseObject` in an application, confirm that something like it does not already exist. All MOOSE applications posses the full capability of the framework and physics modules (more on this later), in addition to their own capabilities.

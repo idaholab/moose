@@ -4,7 +4,7 @@
 
 ## ParsedCurveGenerator
 
-The [ParsedCurveGenerator.md] object generates a 3D curve mesh composed of EDGE2 elements which connect the series of points given by $x(t)$, $y(t)$, $z(t)$. This is useful when the user wants to construct a non-standard boundary and mesh inside of it.
+The [framework:ParsedCurveGenerator.md] object generates a 3D curve mesh composed of EDGE2 elements which connect the series of points given by $x(t)$, $y(t)$, $z(t)$. This is useful when the user wants to construct a non-standard boundary and mesh inside of it.
 
 !row!
 !col small=12 medium=6 large=8
@@ -24,7 +24,7 @@ The [ParsedCurveGenerator.md] object generates a 3D curve mesh composed of EDGE2
 
 ## FillBetweenCurvesGenerator, FillBetweenPointVectorsGenerator, and FillBetweenSidesetsGenerator
 
-Several mesh generators are available to the user to generate a "transition layer" between two curves using linear triangle elements (TRI3). Behind the scenes, these mesh generators use MOOSE's [FillBetweenPointVectorsTools](FillBetweenPointVectorsTools.md) capability to generate a "transition layer" between two given curves (in the form of two vectors of points).
+Several mesh generators are available to the user to generate a "transition layer" between two curves using linear triangle elements (TRI3). Behind the scenes, these mesh generators use MOOSE's [FillBetweenPointVectorsTools](framework:FillBetweenPointVectorsTools.md) capability to generate a "transition layer" between two given curves (in the form of two vectors of points).
 
 !media framework/utils/transition_layer.png
        style=width:60%;display:block;margin-left:auto;margin-right:auto;
@@ -33,7 +33,7 @@ Several mesh generators are available to the user to generate a "transition laye
 
 ### FillBetweenCurvesGenerator
 
-The [FillBetweenCurvesGenerator.md] object is designed to generate a transition layer to connect two boundaries of two input meshes. The user provides two 1D meshes (curves) which should be connected to each other with transition layers.
+The [framework:FillBetweenCurvesGenerator.md] object is designed to generate a transition layer to connect two boundaries of two input meshes. The user provides two 1D meshes (curves) which should be connected to each other with transition layers.
 
 !media reactor/meshgenerators/fill_between_curves.png
        style=width:50%;display:block;margin-left:auto;margin-right:auto;
@@ -42,7 +42,7 @@ The [FillBetweenCurvesGenerator.md] object is designed to generate a transition 
 
 ### FillBetweenSidesetsGenerator
 
-The [FillBetweenSidesetsGenerator.md] object is designed to generate a transition layer to connect two boundaries of two input meshes. The user provides two 2D input meshes with sidesets. These sidesets specify which boundaries of each mesh should be connected to the other mesh with a transitional layer.
+The [framework:FillBetweenSidesetsGenerator.md] object is designed to generate a transition layer to connect two boundaries of two input meshes. The user provides two 2D input meshes with sidesets. These sidesets specify which boundaries of each mesh should be connected to the other mesh with a transitional layer.
 
 !media framework/meshgenerators/transition_layer_stitched.png
        style=width:60%;display:block;margin-left:auto;margin-right:auto;
@@ -51,7 +51,7 @@ The [FillBetweenSidesetsGenerator.md] object is designed to generate a transitio
 
 ### FillBetweenPointVectorsGenerator
 
-This [FillBetweenPointVectorsGenerator.md] object generates a transition layer between two point vectors with different numbers of nodes. The user should provide two vectors of points as well as the number of layers of elements to create between the two vectors.
+This [framework:FillBetweenPointVectorsGenerator.md] object generates a transition layer between two point vectors with different numbers of nodes. The user should provide two vectors of points as well as the number of layers of elements to create between the two vectors.
 
 !media framework/meshgenerators/transition_layer_examples.png
        style=width:40%;display:block;margin-left:auto;margin-right:auto;
@@ -60,9 +60,9 @@ This [FillBetweenPointVectorsGenerator.md] object generates a transition layer b
 
 ## XYDelaunayGenerator
 
-[XYDelaunayGenerator.md] creates an unstructured mesh consisting of TRI3 elements based on a given external boundary and, optionally, a series of internal hole meshes.
+[framework:XYDelaunayGenerator.md] creates an unstructured mesh consisting of TRI3 elements based on a given external boundary and, optionally, a series of internal hole meshes.
 
-[XYDelaunayGenerator.md] is extremely powerful when combined with [ParsedCurveGenerator.md] and other Reactor module objects already described, as it can mesh very irregularly shaped regions.
+[framework:XYDelaunayGenerator.md] is extremely powerful when combined with [framework:ParsedCurveGenerator.md] and other Reactor module objects already described, as it can mesh very irregularly shaped regions.
 
 !row!
 !col small=12 medium=6 large=8

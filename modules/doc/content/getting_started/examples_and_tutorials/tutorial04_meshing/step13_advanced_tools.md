@@ -4,11 +4,11 @@ This section covers advanced meshing tools which are very useful for meshing geo
 
 ## ParsedCurveGenerator
 
-The [ParsedCurveGenerator.md] object generates a 3D curve mesh composed of EDGE2 elements which connect the series of points given by $x(t)$, $y(t)$, $z(t)$. This is useful when the user wants to construct a non-standard boundary and mesh inside of it.
+The [framework:ParsedCurveGenerator.md] object generates a 3D curve mesh composed of EDGE2 elements which connect the series of points given by $x(t)$, $y(t)$, $z(t)$. This is useful when the user wants to construct a non-standard boundary and mesh inside of it.
 
 !media reactor/meshgenerators/xyz_curve.png
        id=tutorial04-adv_parsedcurve
-       caption=A 3D curve mesh connecting a series of points using [ParsedCurveGenerator.md].
+       caption=A 3D curve mesh connecting a series of points using [framework:ParsedCurveGenerator.md].
        style=width:50%;display:block;margin-left:auto;margin-right:auto;
 
 !listing test/tests/meshgenerators/parsed_curve_generator/parsed_curve_3d.i
@@ -18,7 +18,7 @@ The [ParsedCurveGenerator.md] object generates a 3D curve mesh composed of EDGE2
 
 ## FillBetweenCurvesGenerator, FillBetweenPointVectorsGenerator, and FillBetweenSidesetsGenerator
 
-Several mesh generators are available to the user to generate a "transition layer" between two curves using linear triangle elements (TRI3). Behind the scenes, these mesh generators use MOOSE's [FillBetweenPointVectorsTools](FillBetweenPointVectorsTools.md) capability to generate a "transition layer" between two given curves (in the form of two vectors of points).
+Several mesh generators are available to the user to generate a "transition layer" between two curves using linear triangle elements (TRI3). Behind the scenes, these mesh generators use MOOSE's [FillBetweenPointVectorsTools](framework:FillBetweenPointVectorsTools.md) capability to generate a "transition layer" between two given curves (in the form of two vectors of points).
 
 !media framework/utils/transition_layer.png
        id=tutorial04-adv_fbpvt
@@ -27,46 +27,46 @@ Several mesh generators are available to the user to generate a "transition laye
 
 ### FillBetweenCurvesGenerator
 
-The [FillBetweenCurvesGenerator.md] object is designed to generate a transition layer to connect two boundaries of two input meshes. The user provides two 1D meshes (curves) which should be connected to each other with transition layers.
+The [framework:FillBetweenCurvesGenerator.md] object is designed to generate a transition layer to connect two boundaries of two input meshes. The user provides two 1D meshes (curves) which should be connected to each other with transition layers.
 
 !media reactor/meshgenerators/fill_between_curves.png
        id=tutorial04-adv_fillbetweencurves
-       caption=[FillBetweenCurvesGenerator.md] connects a logarithmic curve (top left) and circular curve (bottom right) with a transition layer.
+       caption=[framework:FillBetweenCurvesGenerator.md] connects a logarithmic curve (top left) and circular curve (bottom right) with a transition layer.
        style=width:50%;display:block;margin-left:auto;margin-right:auto;
 
 ### FillBetweenSidesetsGenerator
 
-The [FillBetweenSidesetsGenerator.md] object is designed to generate a transition layer to connect two boundaries of two input meshes. The user provides two 2D input meshes with sidesets. These sidesets specify which boundaries of each mesh should be connected to the other mesh with a transitional layer.
+The [framework:FillBetweenSidesetsGenerator.md] object is designed to generate a transition layer to connect two boundaries of two input meshes. The user provides two 2D input meshes with sidesets. These sidesets specify which boundaries of each mesh should be connected to the other mesh with a transitional layer.
 
 !media framework/meshgenerators/transition_layer_stitched.png
        id=tutorial04-adv_fillbetweensidesets
-       caption=An illustration of [FillBetweenSidesetsGenerator.md] to connect two square meshes together by meshing the area between them.
+       caption=An illustration of [framework:FillBetweenSidesetsGenerator.md] to connect two square meshes together by meshing the area between them.
        style=width:50%;display:block;margin-left:auto;margin-right:auto;
 
 ### FillBetweenPointVectorsGenerator
 
-This [FillBetweenPointVectorsGenerator.md] object generates a transition layer between two point vectors with different numbers of nodes. The user should provide two vectors of points as well as the number of layers of elements to create between the two vectors.
+This [framework:FillBetweenPointVectorsGenerator.md] object generates a transition layer between two point vectors with different numbers of nodes. The user should provide two vectors of points as well as the number of layers of elements to create between the two vectors.
 
 !media framework/meshgenerators/transition_layer_examples.png
        id=tutorial04-adv_fillbetweenpointvectors
-       caption=An illustration of different transition layer meshes that can be generated between two arc boundaries using [FillBetweenPointVectorsGenerator.md].
+       caption=An illustration of different transition layer meshes that can be generated between two arc boundaries using [framework:FillBetweenPointVectorsGenerator.md].
        style=width:50%;display:block;margin-left:auto;margin-right:auto;
 
 ## XYDelaunayGenerator
 
-[XYDelaunayGenerator.md] creates an unstructured mesh consisting of TRI3 elements based on a given external boundary and, optionally, a series of internal hole meshes.
+[framework:XYDelaunayGenerator.md] creates an unstructured mesh consisting of TRI3 elements based on a given external boundary and, optionally, a series of internal hole meshes.
 
 !media framework/meshgenerators/poly2tri_with_holes.png
        id=tutorial04-adv_xydg
-       caption=An example mesh generated by [XYDelaunayGenerator.md] using a quadrilateral external boundary and two square holes.
+       caption=An example mesh generated by [framework:XYDelaunayGenerator.md] using a quadrilateral external boundary and two square holes.
        style=width:50%;display:block;margin-left:auto;margin-right:auto;
 
 !listing test/tests/meshgenerators/xy_delaunay_generator/xydelaunay_with_holes.i
          id=tutorial04-xydelaunay_with_holes
-         caption=Example of [XYDelaunayGenerator.md] with holes.
+         caption=Example of [framework:XYDelaunayGenerator.md] with holes.
          block=Mesh
 
-[XYDelaunayGenerator.md] is extremely powerful when combined with [ParsedCurveGenerator.md] and other Reactor module objects already described, as it can mesh very irregularly shaped regions.
+[framework:XYDelaunayGenerator.md] is extremely powerful when combined with [ParsedCurveGenerator.md] and other Reactor module objects already described, as it can mesh very irregularly shaped regions.
 
 !content pagination previous=tutorial04_meshing/step12_rgmb_hetero.md
                     next=tutorial04_meshing/step14_advanced_examples.md

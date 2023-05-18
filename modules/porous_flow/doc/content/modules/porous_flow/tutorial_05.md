@@ -4,7 +4,7 @@
 
 # Porous Flow Tutorial Page 05.  Using a realistic equation of state for the fluid
 
-It is trivial to add a realistic equation of state to any PorousFlow simulation.  For instance, the high-precision [`Water97`](Water97FluidProperties.md) equation of state may be used:
+It is trivial to add a realistic equation of state to any PorousFlow simulation.  For instance, the high-precision [`Water97`](fluid_properties:Water97FluidProperties.md) equation of state may be used:
 
 !listing modules/porous_flow/examples/tutorial/05.i start=[Modules] end=[Materials]
 
@@ -18,7 +18,7 @@ and
 
 !listing modules/porous_flow/examples/tutorial/05.i start=[BCs] end=[Modules]
 
-Using realistic high-precision equations of state can cause PorousFlow to run quite slowly, because the equations of state are so complicated to evaluate.  It is always recommended to use [`TabulatedFluidProperties`](TabulatedFluidProperties.md) in the following way:
+Using realistic high-precision equations of state can cause PorousFlow to run quite slowly, because the equations of state are so complicated to evaluate.  It is always recommended to use [`TabulatedFluidProperties`](fluid_properties:TabulatedFluidProperties.md) in the following way:
 
 !listing modules/porous_flow/examples/tutorial/05_tabulated.i start=[Modules] end=[Materials]
 

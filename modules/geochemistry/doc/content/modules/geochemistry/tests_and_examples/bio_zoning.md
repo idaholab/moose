@@ -106,7 +106,7 @@ The remainder of the geochemistry is standard, except for the `source_species_ra
 
 ## Flow
 
-The operator-split method is used to couple the flow with the biogeochemistry, as discussed in the [theory](theory/index.md) page.  Since porosity does not change in this simulation, and the groundwater velocity is specified, only the groundwater (not the surrounding rock) is considered.  The flow is implemented using [GeochemistryTimeDerivative](GeochemistryTimeDerivative.md) and [ConservativeAdvection](ConservativeAdvection.md) Kernels, acting on the mole number per litre of groundwater of each of the chemical components that flow through the aquifer:
+The operator-split method is used to couple the flow with the biogeochemistry, as discussed in the [theory](theory/index.md) page.  Since porosity does not change in this simulation, and the groundwater velocity is specified, only the groundwater (not the surrounding rock) is considered.  The flow is implemented using [GeochemistryTimeDerivative](GeochemistryTimeDerivative.md) and [ConservativeAdvection](framework:ConservativeAdvection.md) Kernels, acting on the mole number per litre of groundwater of each of the chemical components that flow through the aquifer:
 
 !listing modules/geochemistry/test/tests/kinetics/bio_zoning_flow.i block=Kernels
 

@@ -15,7 +15,7 @@ This example illustrates the use of RGMB mesh generators to define a 3D pin-hete
 
 ## ReactorMeshParams
 
-[ReactorMeshParams.md] contains global mesh/geometry parameters including the dimension (3D), type (hexagonal) and the axial discretization for the final geometry.
+[reactor:ReactorMeshParams.md] contains global mesh/geometry parameters including the dimension (3D), type (hexagonal) and the axial discretization for the final geometry.
 
 !listing reactor_examples/rgmb_lfr/rgmb_lfr_assembly.i
          block=Mesh/rmp
@@ -45,7 +45,7 @@ The pitch of the pin is specified with pitch, and the number of azimuthal sector
 
 ## AssemblyMeshGenerator
 
-[AssemblyMeshGenerator.md] takes the pin types previously defined and places them into a regular hexagonal grid. Additionally, coolant and duct regions need to be added around the pins in order to create the assembly geometry.
+[reactor:AssemblyMeshGenerator.md] takes the pin types previously defined and places them into a regular hexagonal grid. Additionally, coolant and duct regions need to be added around the pins in order to create the assembly geometry.
 
 Extrusion is performed by using the [!param](/Mesh/AssemblyMeshGenerator/extrude)=`true` option and is performed after the 2D assembly geometry has been completed.
 

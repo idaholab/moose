@@ -2,7 +2,7 @@
 
 !template! item key=introduction
 The [!ac](MOOSE) {{module}} module is based on the MOOSE framework and thus inherits
-the unique features and base characteristics of the framework, as outlined in the [framework_sdd.md].
+the unique features and base characteristics of the framework, as outlined in the [framework:framework_sdd.md].
 Specific details unique to the module are outlined in this document.
 !template-end!
 
@@ -28,10 +28,10 @@ section.
 Most of these inherited systems are utilized to build physics models for which stochastic analysis
 is being performed. Other than these, the inherited core capabilities define the order and
 frequency of object execution. Furthermore, the [MultiApps](MultiApps/index.md),
-[Transfers](Transfers/index.md), [Controls](Controls/index.md), and [Reporters](Reporters/index.md) systems
+[Transfers](framework:Transfers/index.md), [Controls](framework:Controls/index.md), and [Reporters](framework:Reporters/index.md) systems
 in the framework are utilized to partition the stochastic simulations and manipulate distributed data.
 The {{module}} implements several other pluggable systems, including: 
-[Distributions](Distributions/index.md), [Samplers](Samplers/index.md), [Trainers](Trainers/index.md),
+[Distributions](framework:Distributions/index.md), [Samplers](framework:Samplers/index.md), [Trainers](Trainers/index.md),
 and [Surrogates](Surrogates/index.md). Distributions and Samplers define the parameter space of the stochastic
 analysis and Trainers and Surrogates build and utilize the data from the analysis to build
 reduced-order models. Dependent applications can inherit from these systems to define new methods.

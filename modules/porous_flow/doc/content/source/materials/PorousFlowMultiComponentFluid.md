@@ -13,7 +13,7 @@ Most of MOOSE is independent of the choice of units, but the units must be kept 
 !alert note
 PorousFlow does not check the consistency of units in the input file.
 
-However, the [FluidProperties module](fluid_properties/index.md) assumes that the pressure units are Pascals, the time units are seconds, temperature is measured in Kelvin, distance is measured in metres, mass in kilograms and energy in Joules.  Therefore, when using this module, users are ordinarily restricted to using these standard SI units.  Almost all PorousFlow input files use the FluidProperties module.  Therefore it is recommended to use these standard SI units everywhere in your input file.
+However, the [FluidProperties module](fluid_properties:fluid_properties/index.md) assumes that the pressure units are Pascals, the time units are seconds, temperature is measured in Kelvin, distance is measured in metres, mass in kilograms and energy in Joules.  Therefore, when using this module, users are ordinarily restricted to using these standard SI units.  Almost all PorousFlow input files use the FluidProperties module.  Therefore it is recommended to use these standard SI units everywhere in your input file.
 
 ## Alternate unit choices
 

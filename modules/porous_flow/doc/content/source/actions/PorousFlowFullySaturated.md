@@ -132,7 +132,7 @@ Various important `Materials` are not added by this Action, so must be added by 
 - One of the [PorousFlowPermeability](permeability.md) options
 - [PorousFlowMatrixInternalEnergy](PorousFlowMatrixInternalEnergy.md)
 - Thermal conductivity, such as [PorousFlowThermalConductivityIdeal](PorousFlowThermalConductivityIdeal.md)
-- A definition of the elasticity tensor (eg [ComputeIsotropicElasticityTensor](/ComputeIsotropicElasticityTensor.md)) a strain calculator (eg [ComputeSmallStrain](/ComputeSmallStrain.md)) a thermal expansion eigenstrain calculator, (eg [ComputeThermalExpansionEigenstrain](/ComputeThermalExpansionEigenstrain.md)) and a stress calculator (eg [ComputeLinearElasticStress](/ComputeLinearElasticStress.md))
+- A definition of the elasticity tensor (eg [ComputeIsotropicElasticityTensor](tensor_mechanics:/ComputeIsotropicElasticityTensor.md)) a strain calculator (eg [ComputeSmallStrain](tensor_mechanics:/ComputeSmallStrain.md)) a thermal expansion eigenstrain calculator, (eg [ComputeThermalExpansionEigenstrain](tensor_mechanics:/ComputeThermalExpansionEigenstrain.md)) and a stress calculator (eg [ComputeLinearElasticStress](tensor_mechanics:/ComputeLinearElasticStress.md))
 - Materials associated with chemistry, such as [PorousFlowAqueousPreDisChemistry](PorousFlowAqueousPreDisChemistry.md) and [PorousFlowAqueousPreDisMineral](PorousFlowAqueousPreDisMineral.md): see [tutorial 07](tutorial_07.md) for a worked example.
 
 ## AuxVariables

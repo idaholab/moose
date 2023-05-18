@@ -2,7 +2,7 @@
 
 !template! item key=pre-intro
 !alert! note
-This document serves as an addendum to [framework_srs.md] and captures information for
+This document serves as an addendum to [framework:framework_srs.md] and captures information for
 [!ac](SRS) specific to the {{module}} module.
 
 !sqa dependencies suffix=srs category={{category}}
@@ -118,7 +118,7 @@ no elevated privileges required nor recommended.
 The core framework and all modules in their entirety will be made publicly available on an appropriate
 repository hosting site. Day-to-day backups and security services will be provided by the hosting service.
 More information about MOOSE backups of the public repository on [!ac](INL)-hosted services can be found
-on the following page: [sqa/github_backup.md]
+on the following page: [framework:sqa/github_backup.md]
 !template-end!
 
 !template! item key=policies-and-regulations

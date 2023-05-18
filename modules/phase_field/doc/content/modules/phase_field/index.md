@@ -57,7 +57,7 @@ MOOSE provides capabilities that enable the easy development of multiphase field
 
 - [phase_field/Initial_Conditions.md]: Basic phase field initial conditions
 - [phase_field/ICs/PolycrystalICs.md]: Creating polycrystalline structures using a variety of methods
-- [Image Reader](/ImageFunction.md): Reconstructing initial conditions from images (SEM, optical, etc.)
+- [Image Reader](framework:/ImageFunction.md): Reconstructing initial conditions from images (SEM, optical, etc.)
 - [EBSD Reader](phase_field/ICs/EBSD.md): Reconstructing initial conditions from EBSD and EDS data
 
 # Tutorials

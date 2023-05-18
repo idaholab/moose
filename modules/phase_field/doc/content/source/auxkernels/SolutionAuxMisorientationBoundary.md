@@ -13,7 +13,7 @@ of coupled order parameters, and $s$ is defined as
 s = |t_\text{specific}-t_\text{imported}|
 \end{equation}
 
-where $t_\text{imported}$ is the GB type imported from a [SolutionUserObject](/SolutionUserObject.md) and the $t_\text{specific}$ is the specific GB type to calculate the `bnds` parameter. When used with order parameters of the polycrystalline grain growth model, the resulting field for $\chi$ is $<1$ in grain boundaries with specific GB type and $1$ in grain interiors and other grain boundaries.
+where $t_\text{imported}$ is the GB type imported from a [SolutionUserObject](framework:/SolutionUserObject.md) and the $t_\text{specific}$ is the specific GB type to calculate the `bnds` parameter. When used with order parameters of the polycrystalline grain growth model, the resulting field for $\chi$ is $<1$ in grain boundaries with specific GB type and $1$ in grain interiors and other grain boundaries.
 
 !syntax parameters /AuxKernels/SolutionAuxMisorientationBoundary
 

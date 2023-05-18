@@ -30,4 +30,4 @@ To couple the phase field equations with mechanics a contribution of the deforma
 
 - Define the *chemical* free energy using a [Function Material](/phase_field/FunctionMaterials.md).
 - The [`ElasticEnergyMaterial`](/ElasticEnergyMaterial.md) will automatically compute the free energy density contribution using the local stresses and strains.
-- Use the [`DerivativeSumMaterial`](/DerivativeSumMaterial.md) to sum the *chemical* and *elastic* free energy contributions to a total free energy (which is then passed to the kernels).
+- Use the [`DerivativeSumMaterial`](framework:/DerivativeSumMaterial.md) to sum the *chemical* and *elastic* free energy contributions to a total free energy (which is then passed to the kernels).

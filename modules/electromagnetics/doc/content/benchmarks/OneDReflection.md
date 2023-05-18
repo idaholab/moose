@@ -48,7 +48,7 @@ The boundary condition on the conducting backing plane is given by
 !equation id=dirichlet-bc
 E_z (0, y) = 0
 
-which is implemented in code by [DirichletBC.md] and the boundary condition just
+which is implemented in code by [framework:DirichletBC.md] and the boundary condition just
 inside the slab interface with free space is given by
 
 !equation

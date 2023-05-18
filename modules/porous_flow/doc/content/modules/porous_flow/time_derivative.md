@@ -43,7 +43,7 @@ To make the connection with PorousFlow clearer, assume that there is a displacem
 \end{equation}
 PorousFlow implements this as follows.
 
-- The term $(1 + \nabla \cdot u_{\mathrm{old}})\dot{M}$ is [PorousFlowMassTimeDerivative](PorousFlowMassTimeDerivative.md) or [PorousFlowEnergyTimeDerivative](PorousFlowEnergyTimeDerivative.md).  Note that $(1 + \nabla\cdot u_{\mathrm{old}})$ is implemented in the code as $(1 + \epsilon_{ii}^{\mathrm{old}})$ which involves the total volumetric strain, $\epsilon_{ii}$ as calculated by a TensorMechanics strain calculator, for instance [ComputeSmallStrain](ComputeSmallStrain.md).  It is integrated over the undeformed mesh so should employ `use_displaced_mesh = false`.
+- The term $(1 + \nabla \cdot u_{\mathrm{old}})\dot{M}$ is [PorousFlowMassTimeDerivative](PorousFlowMassTimeDerivative.md) or [PorousFlowEnergyTimeDerivative](PorousFlowEnergyTimeDerivative.md).  Note that $(1 + \nabla\cdot u_{\mathrm{old}})$ is implemented in the code as $(1 + \epsilon_{ii}^{\mathrm{old}})$ which involves the total volumetric strain, $\epsilon_{ii}$ as calculated by a TensorMechanics strain calculator, for instance [ComputeSmallStrain](tensor_mechanics:ComputeSmallStrain.md).  It is integrated over the undeformed mesh so should employ `use_displaced_mesh = false`.
 - The term $M_{\mathrm{new}}\nabla\cdot\dot{u}$ is [PorousFlowMassVolumetricExpansion](PorousFlowMassVolumetricExpansion.md) or [PorousFlowHeatVolumetricExpansion](PorousFlowHeatVolumetricExpansion.md).  The $\nabla\cdot\dot{u}$ is implemented as $\dot{\epsilon}_{ii}$, which is the time-derivative of the total volumetric strain as calculated by a TensorMechanics strain calculator, and fed into the [PorousFlowVolumetricStrain](PorousFlowVolumetricStrain.md) Material.  It also should employ `use_displaced_mesh = false`.
 
 ## Mass and energy conservation
@@ -52,7 +52,7 @@ The [PorousFlowFluidMass](PorousFlowFluidMass.md) and [PorousFlowHeatEnergy](Por
 
 ## Use of total strain
 
-The PorousFlow implementation of $\Omega(t)$ is to use the `total_strain` as calculated by the TensorMechanics strain calculator, which in almost all PorousFlow models is [ComputeSmallStrain](ComputeSmallStrain.md).  Since the TensorMechanics strain calculators have a `base_name` input, users should take care to choose the appropriate `base_name` (without any typos) since PorousFlow cannot detect errors in this input.  PorousFlow simply checks whether a Material property called `base_name_total_strain` exists, and if so PorousFlow uses it, otherwise it continues without any total-strain contributions (corresponding to no mechanical coupling).
+The PorousFlow implementation of $\Omega(t)$ is to use the `total_strain` as calculated by the TensorMechanics strain calculator, which in almost all PorousFlow models is [ComputeSmallStrain](tensor_mechanics:ComputeSmallStrain.md).  Since the TensorMechanics strain calculators have a `base_name` input, users should take care to choose the appropriate `base_name` (without any typos) since PorousFlow cannot detect errors in this input.  PorousFlow simply checks whether a Material property called `base_name_total_strain` exists, and if so PorousFlow uses it, otherwise it continues without any total-strain contributions (corresponding to no mechanical coupling).
 
 *By far the most common case is where `base_name` is not defined in the TensorMechanics strain calculator, so also does not need to be defined in PorousFlow.*  However, in more complicated situations, some potential use-cases and errors are:
 

@@ -3,7 +3,7 @@
 >
 > - [!param](/Modules/TensorMechanics/Master/TensorMechanicsAction/use_automatic_differentiation) in the tensor mechanics master action
 > - [!param](/BCs/Pressure/PressureAction/use_automatic_differentiation) in the Pressure BC action
-> - [ADDirichletBC](ADDirichletBC.md)
+> - [ADDirichletBC](framework:ADDirichletBC.md)
 > - [ADComputeIsotropicElasticityTensor](ComputeIsotropicElasticityTensor.md)
 > - [ADComputeFiniteStrainElasticStress](ADComputeFiniteStrainElasticStress.md)
 

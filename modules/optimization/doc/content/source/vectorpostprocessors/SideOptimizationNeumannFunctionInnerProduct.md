@@ -13,7 +13,7 @@ which uses a quadrature rule to perform the integration. $u$ is the variable spe
 
 ## Example Input File Syntax
 
-This function is primarily used for computing the gradient in an optimization routine where the value of a [Neumman boundary condtion](FunctionNeumannBC.md) is being optimized. See [bc_load_linearFunction/adjoint.i] as an example.
+This function is primarily used for computing the gradient in an optimization routine where the value of a [Neumman boundary condtion](framework:FunctionNeumannBC.md) is being optimized. See [bc_load_linearFunction/adjoint.i] as an example.
 
 !syntax parameters /VectorPostprocessors/SideOptimizationNeumannFunctionInnerProduct
 

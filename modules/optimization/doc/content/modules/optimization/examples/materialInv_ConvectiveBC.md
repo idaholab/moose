@@ -29,6 +29,6 @@ The forward input file containing the solution to the PDE of interest is shown i
 
 ## Adjoint Problem Sub-App
 
-The adjoint input file shown in [adjoint] computes the adjoint of the forward PDE.  The adjoint problem uses a `Controls` block to allow the main app to transfer the material property used in the forward problem to the adjoint problem.  The temperature field computed in the forward problem was transferred back to the main app and is finally transferred from the main app into the adjoint problem using a `MultiAppCopyTransfer`.  The gradient given by [!eqref](theory/InvOptTheory.md#eq:convectiveBC) is computed on the left boundary using the  [SideIntegralVariablePostprocessor.md] postprocessor.
+The adjoint input file shown in [adjoint] computes the adjoint of the forward PDE.  The adjoint problem uses a `Controls` block to allow the main app to transfer the material property used in the forward problem to the adjoint problem.  The temperature field computed in the forward problem was transferred back to the main app and is finally transferred from the main app into the adjoint problem using a `MultiAppCopyTransfer`.  The gradient given by [!eqref](theory/InvOptTheory.md#eq:convectiveBC) is computed on the left boundary using the  [framework:SideIntegralVariablePostprocessor.md] postprocessor.
 
 !listing modules/combined/test/tests/invOpt_bc_convective/adjoint.i id=adjoint

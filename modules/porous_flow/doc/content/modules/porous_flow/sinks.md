@@ -87,11 +87,11 @@ The reporter format for point data supplies the same coordinate and weighting da
 
 !listing modules/porous_flow/test/tests/dirackernels/pls02reporter.i start=weight_reporter end=piecewise-linear
 
-where the polyline coordinates and weighting are defined in the following [ConstantReporter](/ConstantReporter.md):
+where the polyline coordinates and weighting are defined in the following [ConstantReporter](framework:/ConstantReporter.md):
 
 !listing modules/porous_flow/test/tests/dirackernels/pls02reporter.i block=Reporters
 
-Reporter input provides an easy way to control polyline sink point locations from a [Sampler](Samplers/index.md) multi-app.  
+Reporter input provides an easy way to control polyline sink point locations from a [Sampler](framework:Samplers/index.md) multi-app.  
 It is an error to supply both plaint text file and reporter input for the point data.
 
 Rather than manually specifying each point via the separate points file or reporter, the second input format allows the

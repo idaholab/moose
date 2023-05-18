@@ -1,7 +1,7 @@
 # AnalyzeJacobian
 
 The `AnalyzeJacobian` tester uses the
-[analyze_jacobian.py Jacobian debugger](help/development/analyze_jacobian.md)
+[analyze_jacobian.py Jacobian debugger](modules:help/development/analyze_jacobian.md)
 in MOOSE to evaluate the quality of the Jacobians in the specified tests.
 
 ## Options

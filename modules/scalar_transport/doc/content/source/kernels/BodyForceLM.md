@@ -4,7 +4,7 @@
 
 ## Overview
 
-This object is equivalent to [BodyForce.md] except it adds its residual both to
+This object is equivalent to [framework:BodyForce.md] except it adds its residual both to
 the primal equation on which the body force is being applied and to a Lagrange
 Multiplier (LM) equation when an LM is present. We can use an LM for enforcing
 non-negative concentrations, but its introduction generally leads to creation of

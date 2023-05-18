@@ -33,7 +33,7 @@
 !row!
 !col small=12 medium=6 large=8
 
-- [SimpleHexagonGenerator.md]
+- [reactor:SimpleHexagonGenerator.md]
 
 - Hexagonal assembly
 - Size of 7.3425 (apothem style, center to wall distance, or half-pitch).
@@ -61,7 +61,7 @@
 !row!
 !col small=12 medium=6 large=8
 
-- [SimpleHexagonGenerator.md]
+- [reactor:SimpleHexagonGenerator.md]
 
 - Hexagonal assembly
 - 7.3425 cm half-pitch
@@ -84,7 +84,7 @@
 
 ## Assemble Core Lattice
 
-- [PatternedHexMeshGenerator.md]
+- [reactor:PatternedHexMeshGenerator.md]
 
 - Uses all generated real assemblies and dummy assembly as input
 
@@ -111,7 +111,7 @@
 !row!
 !col small=12 medium=6 large=8
 
-- [BlockDeletionGenerator.md]
+- [framework:BlockDeletionGenerator.md]
 
 - Remove "dummy" assemblies added for core hex patterning
 
@@ -132,7 +132,7 @@
 
 ## Extrude 2D core to 3D
 
-- [AdvancedExtruderGenerator.md]
+- [framework:AdvancedExtruderGenerator.md]
 
 - Extrude 2D mesh to 3D (in +$z$ direction $(0, 0, 1)$)
 
@@ -162,9 +162,9 @@
 !row!
 !col small=12 medium=6 large=8
 
-- [PlaneIDMeshGenerator.md]
+- [reactor:PlaneIDMeshGenerator.md]
 
-- Assign coordinates demarking axial levels in plane_coordinates. These levels should be consistent with how axial levels were defined in [AdvancedExtruderGenerator.md].
+- Assign coordinates demarking axial levels in plane_coordinates. These levels should be consistent with how axial levels were defined in [reactor:AdvancedExtruderGenerator.md].
 
 !col small=12 medium=6 large=4
 
@@ -184,7 +184,7 @@
 !row!
 !col small=12 medium=6 large=8
 
-- [RenameBoundaryGenerator.md]
+- [framework:RenameBoundaryGenerator.md]
 
 - Griffin requires the outer boundary sidesets to be defined to apply boundary conditions such as vacuum or reflective boundary conditions
 
@@ -245,9 +245,9 @@ This ABTR example uses option 1, where the CMFD acceleration uses the same mesh 
 
 ### Output Postprocessing
 
-- [ExtraIDIntegralVectorPostprocessor.md]
+- [framework:ExtraIDIntegralVectorPostprocessor.md]
 
-- For each [ExtraIDIntegralVectorPostprocessor.md], a separate CSV file is generated to describe the integral variable quantity as a function of each combination of input reporting ID provided. Alternatively, [ExtraIDIntegralReporter.md] can output in JSON file format, which is more suitable for additional data parsing using script languages.
+- For each [framework:ExtraIDIntegralVectorPostprocessor.md], a separate CSV file is generated to describe the integral variable quantity as a function of each combination of input reporting ID provided. Alternatively, [framework:ExtraIDIntegralReporter.md] can output in JSON file format, which is more suitable for additional data parsing using script languages.
 
 !listing reactor_examples/abtr/abtr_griffin_snippet.i
          block=PowerDensity VectorPostprocessors
@@ -257,9 +257,9 @@ This ABTR example uses option 1, where the CMFD acceleration uses the same mesh 
 
 ### Output Postprocessing
 
-- [ExtraIDIntegralVectorPostprocessor.md]
+- [framework:ExtraIDIntegralVectorPostprocessor.md]
 
-- For each [ExtraIDIntegralVectorPostprocessor.md], a separate CSV file is generated to describe the integral variable quantity as a function of each combination of input reporting ID provided. Alternatively, [ExtraIDIntegralReporter.md] can output in JSON file format, which is more suitable for additional data parsing using script languages.
+- For each [framework:ExtraIDIntegralVectorPostprocessor.md], a separate CSV file is generated to describe the integral variable quantity as a function of each combination of input reporting ID provided. Alternatively, [framework:ExtraIDIntegralReporter.md] can output in JSON file format, which is more suitable for additional data parsing using script languages.
 
 !row!
 !col small=12 medium=6 large=8

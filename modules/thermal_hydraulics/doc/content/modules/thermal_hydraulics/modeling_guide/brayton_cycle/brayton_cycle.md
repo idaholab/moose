@@ -61,7 +61,7 @@ The function chosen here is a linear ramp up from zero and back down to zero,
   0 & t > t_2\\
   \end{array}\right. \eqp
 
-This is accomplished with a [PiecewiseLinear.md] function:
+This is accomplished with a [framework:PiecewiseLinear.md] function:
 
 !listing thermal_hydraulics/test/tests/problems/brayton_cycle/open_brayton_cycle.i
          block=Functions/motor_torque_fn

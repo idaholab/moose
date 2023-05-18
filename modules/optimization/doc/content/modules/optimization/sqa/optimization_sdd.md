@@ -2,7 +2,7 @@
 
 !template! item key=introduction
 The [!ac](MOOSE) {{module}} module is based on the MOOSE framework and thus inherits
-the unique features and base characteristics of the framework, as outlined in the [framework_sdd.md].
+the unique features and base characteristics of the framework, as outlined in the [framework:framework_sdd.md].
 Specific details unique to the module are outlined in this document.
 !template-end!
 
@@ -26,8 +26,8 @@ The {{module}} module inherits the wide range of pluggable systems from MOOSE.
 More information regarding MOOSE system design can be found in the framework
 [framework_sdd.md#system-design] section. Most of these inherited systems are
 utilized to build physics models for which optimization is being
-performed. Other than these, the [MultiApps](MultiApps/index.md),
-[Transfers](Transfers/index.md), and [Reporters](Reporters/index.md) systems
+performed. Other than these, the [MultiApps](framework:MultiApps/index.md),
+[Transfers](framework:Transfers/index.md), and [Reporters](framework:Reporters/index.md) systems
 in the framework are utilized to execute the physical model, manipulate
 optimization data, and define the optimization objective and gradient.
 Documentation for each object, data structure, and process specific to the

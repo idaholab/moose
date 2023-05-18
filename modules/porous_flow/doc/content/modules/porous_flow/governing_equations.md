@@ -245,7 +245,7 @@ $\mathbf{F}_{\beta}$ is the advective Darcy flux.
 ## Solid mechanics
 
 Most of the solid mechanics used by the Porous Flow module is handled by the
-[Tensor Mechanics](/tensor_mechanics/index.md) module.  This section provides a
+[Tensor Mechanics](tensor_mechanics:/tensor_mechanics/index.md) module.  This section provides a
 brief overview, concentrating on the aspects that differ from pure solid
 mechanics.
 
@@ -331,7 +331,7 @@ one must subtract $\alpha_{B}\nabla_{j} P_{f}$ from MOOSE's stress.
 
 ### Aqueous chemistry
 
-Aqueous equilibrium chemistry and precipitation/dissolution kinetic chemistry have been implemented in the same way as the [chemical reactions module](/chemical_reactions/index.md).
+Aqueous equilibrium chemistry and precipitation/dissolution kinetic chemistry have been implemented in the same way as the [chemical reactions module](chemical_reactions:/chemical_reactions/index.md).
 
 ### Adsorption and desorption
 

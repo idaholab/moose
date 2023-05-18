@@ -17,7 +17,7 @@ values (in millidarcys):
 
 !listing modules/porous_flow/examples/reservoir_model/spe10_case1.data
 
-A [PiecewiseMultilinear](PiecewiseMultilinear.md) function is used to interpolate the permeability to the
+A [PiecewiseMultilinear](framework:PiecewiseMultilinear.md) function is used to interpolate the permeability to the
 mesh.
 
 !listing modules/porous_flow/examples/reservoir_model/regular_grid.i block=Functions
@@ -26,7 +26,7 @@ Constant Monomial AuxVariables are used to store the permeability read from the 
 
 !listing modules/porous_flow/examples/reservoir_model/regular_grid.i block=AuxVariables
 
-A [FunctionAux](FunctionAux.md) AuxKernel is used to populate the AuxVariables.
+A [FunctionAux](framework:FunctionAux.md) AuxKernel is used to populate the AuxVariables.
 
 In this example, the permeability in the data file is in millidarcys. As PorousFlow expects permeability
 in SI units of m$^2$, we multiply each permeability value by $9.869233 \times 10^{-16}$ and save these
@@ -88,7 +88,7 @@ so represent the initial heterogeneity of the model.
 
 !listing modules/porous_flow/examples/reservoir_model/field_model.i block=AuxVariables
 
-Like the previous example, the permeability can be converted to SI units using a [ParsedAux](ParsedAux.md)
+Like the previous example, the permeability can be converted to SI units using a [ParsedAux](framework:ParsedAux.md)
 AuxKernel for each component.
 
 !listing modules/porous_flow/examples/reservoir_model/field_model.i block=AuxKernels

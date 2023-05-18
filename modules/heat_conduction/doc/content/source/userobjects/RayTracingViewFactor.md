@@ -51,7 +51,7 @@ then `(e1, s1)` should be used to construct the sideset. The reason is that inte
 heat conduction problems on the block just outside the cavity and boundary conditions for the temperature defined on this
 block must be imposed on the heat conduction/cavity interface.
 
-The [SideSetsBetweenSubdomainsGenerator.md] mesh generator can be used for setting up
+The [framework:SideSetsBetweenSubdomainsGenerator.md] mesh generator can be used for setting up
 cavity boundaries. In this mesh generator, the sidesets will belong to the "primary" side. Returning to the example,
 if [!param](/Mesh/SideSetsBetweenSubdomainsGenerator/primary_block) is `b1` and [!param](/Mesh/SideSetsBetweenSubdomainsGenerator/paired_block) is `b2`, then `(e1,s1)` will be the element faces used in the new sideset.
 Specifically, the [!param](/Mesh/SideSetsBetweenSubdomainsGenerator/primary_block) are the blocks around the cavity, while [!param](/Mesh/SideSetsBetweenSubdomainsGenerator/paired_block) are the blocks inside the cavity.

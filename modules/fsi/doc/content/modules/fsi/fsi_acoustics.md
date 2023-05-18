@@ -77,7 +77,7 @@ Using the Green's theorem, the weak form is given by:
 
 ### Kernels and boundary conditions
 
-The first term on the left hand side of [eqn:Fluid_5] is similar to an inertia term. The [AcousticInertia](/AcousticInertia.md) kernel models this term. Second term on the left hand side of [eqn:Fluid_5] is a diffusion term, and the [Diffusion](/Diffusion.md) kernel models this. The right hand side represents the boundary condition. Either a [Dirichlet](/DirichletBC.md) condition or a [Neumann](/NeumannBC.md) condition can be used for the boundary condition.
+The first term on the left hand side of [eqn:Fluid_5] is similar to an inertia term. The [AcousticInertia](/AcousticInertia.md) kernel models this term. Second term on the left hand side of [eqn:Fluid_5] is a diffusion term, and the [Diffusion](framework:/Diffusion.md) kernel models this. The right hand side represents the boundary condition. Either a [Dirichlet](framework:/DirichletBC.md) condition or a [Neumann](framework:/NeumannBC.md) condition can be used for the boundary condition.
 
 ## Free surface condition for the fluid domain
 

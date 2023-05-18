@@ -11,7 +11,7 @@ initial stress is entered as a vector of 9 Functions, which may be optionally mu
 This allows a user to enter an insitu stress in rock-mechanics problems, for instance, by specifying
 the $zz$ component to be a function of depth into the ground, and the $xx$, $xy$, $yx$ and $yy$
 components of the initial stress to be related to the maximum and minimum principal horizontal
-tectonic stresses.  A general anisotropic initial stress is allowed.  Using AuxVariables to set the initial stress may be advantageous when reading from a solution file using a [SolutionAux](/SolutionAux.md).
+tectonic stresses.  A general anisotropic initial stress is allowed.  Using AuxVariables to set the initial stress may be advantageous when reading from a solution file using a [SolutionAux](framework:/SolutionAux.md).
 
 The eigenstrain thus computed is added to the mechanical strain on the first time step, and is
 unchanged in subsequent timesteps.  The eigenstrain thus computed is given a name that is specified

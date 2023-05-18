@@ -9,7 +9,7 @@ This example illustrates the use of RGMB mesh generators to define a 3D hexagona
 
 ## ReactorMeshParams
 
-[ReactorMeshParams.md] contains global mesh/geometry parameters including whether the final mesh is 2D or 3D, Cartesian or hexagonal, assembly pitch, and the axial discretization for the final extruded geometry. This information will be accessible to the other RGMB mesh generators and consistently used.
+[reactor:ReactorMeshParams.md] contains global mesh/geometry parameters including whether the final mesh is 2D or 3D, Cartesian or hexagonal, assembly pitch, and the axial discretization for the final extruded geometry. This information will be accessible to the other RGMB mesh generators and consistently used.
 
 !listing reactor_examples/rgmb_abtr/rgmb_abtr.i
          id=tutorial04-rgmb_abtr-rmp
@@ -18,9 +18,9 @@ This example illustrates the use of RGMB mesh generators to define a 3D hexagona
 
 ## PinMeshGenerator
 
-This example does not have any pin-level geometry as the assemblies are homogenized. However, we still start with [PinMeshGenerator.md]. +To define single assemblies directly with PinMeshGenerators for stitching with [CoreMeshGenerator.md]+, [PinMeshGenerator.md] is used with [!param](/Mesh/PinMeshGenerator/use_as_assembly) set to `true`. This tells [CoreMeshGenerator.md] to treat this object as an assembly for stitching into the core lattice. In addition, [!param](/Mesh/PinMeshGenerator/homogenized) = `true` is used to indicate that this region is homogenized and [SimpleHexagonGenerator.md] should be called to discretize the assembly instead of [PolygonConcentricCircleMeshGenerator.md].
+This example does not have any pin-level geometry as the assemblies are homogenized. However, we still start with [reactor:PinMeshGenerator.md]. +To define single assemblies directly with PinMeshGenerators for stitching with [reactor:CoreMeshGenerator.md]+, [reactor:PinMeshGenerator.md] is used with [!param](/Mesh/PinMeshGenerator/use_as_assembly) set to `true`. This tells [reactor:CoreMeshGenerator.md] to treat this object as an assembly for stitching into the core lattice. In addition, [!param](/Mesh/PinMeshGenerator/homogenized) = `true` is used to indicate that this region is homogenized and [reactor:SimpleHexagonGenerator.md] should be called to discretize the assembly instead of [reactor:PolygonConcentricCircleMeshGenerator.md].
 
-[PinMeshGenerator.md] is called multiple times to define the various homogeneous assemblies. Dummy assemblies are not required when building a core using RGMB, so they are not defined in this input.
+[reactor:PinMeshGenerator.md] is called multiple times to define the various homogeneous assemblies. Dummy assemblies are not required when building a core using RGMB, so they are not defined in this input.
 
 !listing reactor_examples/rgmb_abtr/rgmb_abtr.i
          id=tutorial04-rgmb_abtr-assembly
@@ -29,15 +29,15 @@ This example does not have any pin-level geometry as the assemblies are homogeni
 
 Tips
 
-- Use a unique [PinMeshGenerator.md] block for each assembly with a unique geometrical configuration and/or region ID composition
+- Use a unique [reactor:PinMeshGenerator.md] block for each assembly with a unique geometrical configuration and/or region ID composition
 - region_ids is a 2-dimensional array containing region IDs (essentially materials). The first row of the array represents the 2D radial regions (from center of the pin to outermost region) for the bottom layer of the pin. Each subsequent row assigns IDs on another axial level, from bottom to top. In this case, each assembly has only 1 radial region, this array is a column pertaining to each axial level of the homogenized assembly.
 - While the mesh is still 2D during this step, the axially dependent region IDs are stored for later use during the extrusion step.
 
 ## CoreMeshGenerator
 
-Now that the assemblies have been defined, they are placed into a lattice using [CoreMeshGenerator.md]. While [CoreMeshGenerator.md] still requires a perfect hexagonal pattern like [PatternedHexMeshGenerator.md], it automatically handles dummy assembly creation and deletion. The user need only provide a fake mesh input reference `dummy` (this object has not been actually created) and tell [CoreMeshGenerator.md] through the [!param](/Mesh/CoreMeshGenerator/dummy_assembly_name) parameter that the mesh input called `dummy` is a dummy assembly (empty space). The dummy assemblies will be created and deleted behind the scenes with no effort from the user.
+Now that the assemblies have been defined, they are placed into a lattice using [reactor:CoreMeshGenerator.md]. While [reactor:CoreMeshGenerator.md] still requires a perfect hexagonal pattern like [reactor:PatternedHexMeshGenerator.md], it automatically handles dummy assembly creation and deletion. The user need only provide a fake mesh input reference `dummy` (this object has not been actually created) and tell [reactor:CoreMeshGenerator.md] through the [!param](/Mesh/CoreMeshGenerator/dummy_assembly_name) parameter that the mesh input called `dummy` is a dummy assembly (empty space). The dummy assemblies will be created and deleted behind the scenes with no effort from the user.
 
-Since we want to extrude the 2D core, we use the [!param](/Mesh/CoreMeshGenerator/extrude)=`true` parameter within [CoreMeshGenerator.md]. The step simultaneously extrudes the geometry and applies the regions IDs to all axial layers as defined in the [PinMeshGenerator.md] objects.
+Since we want to extrude the 2D core, we use the [!param](/Mesh/CoreMeshGenerator/extrude)=`true` parameter within [reactor:CoreMeshGenerator.md]. The step simultaneously extrudes the geometry and applies the regions IDs to all axial layers as defined in the [reactor:PinMeshGenerator.md] objects.
 
 Behind the scenes, extra element IDs `assembly_id` and `plane_id` are automatically applied.
 
@@ -61,7 +61,7 @@ Behind the scenes, extra element IDs `assembly_id` and `plane_id` are automatica
 
 ## Use of RGMB Mesh with Griffin
 
-Griffin recognizes material ID assignments through the `material_id` tag. Therefore, the `region_id` tags need to be renamed to `material_id`. This is done using [ExtraElementIDCopyGenerator.md].
+Griffin recognizes material ID assignments through the `material_id` tag. Therefore, the `region_id` tags need to be renamed to `material_id`. This is done using [reactor:ExtraElementIDCopyGenerator.md].
 
 !listing reactor_examples/rgmb_abtr/rgmb_abtr.i
          id=tutorial04-rgmb_abtr-mesh

@@ -2,7 +2,7 @@
 
 !template! item key=pre-intro
 !alert! note
-This document serves as an addendum to [framework_srs.md] and captures information for
+This document serves as an addendum to [framework:framework_srs.md] and captures information for
 [!ac](SRS) specific to the {{app}} application.
 
 !sqa dependencies suffix=srs category={{category}}

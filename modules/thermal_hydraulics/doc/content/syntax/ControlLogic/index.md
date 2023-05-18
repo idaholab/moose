@@ -1,6 +1,6 @@
 # ControlLogic System
 
-The `ControlLogic` system is an extension of MOOSE's [Controls system](syntax/Controls/index.md).
+The `ControlLogic` system is an extension of MOOSE's [Controls system](framework:syntax/Controls/index.md).
 Standard MOOSE `Control`s can be created within a `[ControlLogic]` block or a
 `[Controls]` block. `THMControl`s, however, which have additional functionality,
 can only be created within a `[ControlLogic]` block.

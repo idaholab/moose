@@ -8,13 +8,13 @@ For development of MOOSE-based applications see [Application Development](applic
 
 ## Overview on contributing
 
-[Contributing](framework/contributing.md)
+[Contributing](framework:framework/contributing.md)
 
-[Reviewing](framework/reviewing.md)
+[Reviewing](framework:framework/reviewing.md)
 
-[How a patch becomes code](framework/patch_to_code.md)
+[How a patch becomes code](framework:framework/patch_to_code.md)
 
-[Code Standards](sqa/framework_scs.md) - How to format any code that goes into the framework
+[Code Standards](framework:sqa/framework_scs.md) - How to format any code that goes into the framework
 
 [Git](git.md) - The revision control system we use
 
@@ -30,7 +30,7 @@ For development of MOOSE-based applications see [Application Development](applic
 
 [TIMPI Doxygen](https://mooseframework.org/docs/doxygen/timpi/classes.html)
 
-[Source Code Documentation](source/index.md exact=True)
+[Source Code Documentation](framework:source/index.md exact=True)
 
 [Syntax Documentation](syntax/index.md)
 
@@ -50,9 +50,9 @@ For development of MOOSE-based applications see [Application Development](applic
 
 ## Utilities
 
-[/PerfGraph.md] - How to time sections of code in MOOSE
+[framework:/PerfGraph.md] - How to time sections of code in MOOSE
 
-[MooseUtils Namespace](MooseUtils.md) - Basic utilities used throughout the framework
+[MooseUtils Namespace](framework:MooseUtils.md) - Basic utilities used throughout the framework
 
 [Utils](utils/index.md) - Basic utilities used throughout the framework
 
@@ -60,7 +60,7 @@ For development of MOOSE-based applications see [Application Development](applic
 
 ## MOOSE Internal Systems
 
-[Actions](source/actions/Action.md) - Objects used to execute various tasks
+[Actions](framework:source/actions/Action.md) - Objects used to execute various tasks
 
 [Interfaces](framework_development/interfaces/index.md) - Base-classes that allow cross-cutting data retrieval
 
@@ -78,4 +78,4 @@ For development of MOOSE-based applications see [Application Development](applic
 
 ## Third Party Libraries
 
-[Third Party Library List](sqa/library_requirements.md)
+[Third Party Library List](framework:sqa/library_requirements.md)

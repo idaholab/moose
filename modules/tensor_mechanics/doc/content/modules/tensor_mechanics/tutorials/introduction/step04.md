@@ -18,7 +18,7 @@ to assign block and boundary IDs and names to your meshes so you can apply
 material models and boundary conditions.
 
 Here we are using the familiar
-[`GeneratedMeshGenerator`](GeneratedMeshGenerator.md), but with a few more
+[`GeneratedMeshGenerator`](framework:GeneratedMeshGenerator.md), but with a few more
 options than last time. Note how we're specifying the extent of the mesh with
 the [!param](/Mesh/GeneratedMeshGenerator/xmin) and
 [!param](/Mesh/GeneratedMeshGenerator/xmax) parameters (we keep the default
@@ -42,7 +42,7 @@ the IDs of pillar1).
 When modeling the deformation/bending of walls with solid elements make sure to
 mesh at least about *five* elements through the wall thickness!
 
-The [`MeshCollectionGenerator`](MeshCollectionGenerator.md) then combines the
+The [`MeshCollectionGenerator`](framework:MeshCollectionGenerator.md) then combines the
 two separate pillar mesh objects into a single mesh object that contains all
 elements from both meshes. Note that this does **not** mean the two meshes are
 glued together or connected in any way! Also, in contrast to the previous step
@@ -112,7 +112,7 @@ library.
 
 ### Postprocessing results
 
-MOOSE has a system of so called [Postprocessors](Postprocessors/index.md) that
+MOOSE has a system of so called [Postprocessors](framework:Postprocessors/index.md) that
 can extract scalar quantities for a simulation while it runs. These quantities
 can be printed on the screen in real time or written to files for later analysis.
 You add postprocessors under the `[Postprocessors]` top level block.
@@ -126,7 +126,7 @@ the `[Outputs]` block.
 > as it bends right in the positive x direction, while the right cantilever has
 > negative displacements as it bends left in the negative x direction). So we
 > need a postprocessor object that gives us an extreme value of a given
-> variable. Take a look at [NodalExtremeValue](NodalExtremeValue.md) and try to
+> variable. Take a look at [NodalExtremeValue](framework:NodalExtremeValue.md) and try to
 > set it up to output the maximum positive x deflection.
 
 [Click here for the answer.](tensor_mechanics/tutorials/introduction/answer04b.md)

@@ -1,5 +1,5 @@
 > Look at the
-> [`NodalValueSampler`](NodalValueSampler.md)[vectorpostprocessor](VectorPostprocessors/index.md)
+> [`NodalValueSampler`](framework:NodalValueSampler.md)[vectorpostprocessor](framework:VectorPostprocessors/index.md)
 > and see if you can use its
 > [!param](/VectorPostprocessors/NodalValueSampler/block) parameter to output the
 > `pillars_normal_lm` variable on the `pillars_secondary_subdomain` subdomain.

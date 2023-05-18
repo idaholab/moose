@@ -74,21 +74,21 @@ file is arbitrary, but it is assumed that the content below will be in a file na
 `~/projects/problems/verification/1d_analytical.i`. This file can be created and edited
 using any text editor program.
 
-Within this file, the domain of the problem is defined using the [Mesh System](syntax/Mesh/index.md)
+Within this file, the domain of the problem is defined using the [Mesh System](framework:syntax/Mesh/index.md)
 using the `[Mesh]` block of the input file, as follows, which creates a one-dimensional mesh in the
 $x$-direction from 0 to 0.03 $m$ using 200 elements.
 
 !listing tutorial03_verification/app/test/tests/step03_analytical/1d_analytical.i link=False block=Mesh
 
 There is a single unknown, temperature ($T$), to compute. This unknown is declared using the
-[Variables System](syntax/Variables/index.md) in the `[Variables]` block and used the default
+[Variables System](framework:syntax/Variables/index.md) in the `[Variables]` block and used the default
 configuration of a first-order Lagrange finite element variable. Note, within this block the name of
 the variable is arbitrary; "T" was selected here to match the equation.
 
 !listing tutorial03_verification/app/test/tests/step03_analytical/1d_analytical.i link=False block=Variables
 
 The "volumetric" portions of the weak form are defined using the
-[Kernel System](syntax/Kernels/index.md) in the `[Kernels]` block, for this example this
+[Kernel System](framework:syntax/Kernels/index.md) in the `[Kernels]` block, for this example this
 can be done with the use of two `Kernel` objects as follows.
 
 !listing tutorial03_verification/app/test/tests/step03_analytical/1d_analytical.i link=False block=Kernels
@@ -100,7 +100,7 @@ is set equal to "T". The remaining parameters define the values for $k$, $\rho$,
 constant values defined in [tutorial03-analytical-values].
 
 The boundary portions of the weak form are defined using the
-[Boundary Condition System](syntax/BCs/index.md) in the `[BCs]` block. At $x=0$ a
+[Boundary Condition System](framework:syntax/BCs/index.md) in the `[BCs]` block. At $x=0$ a
 Neumann condition is applied with a value of 7E5. The generated mesh, by default, labels the
 boundary at $x=0$ as "left".
 
@@ -111,12 +111,12 @@ applied naturally based on the weak form derivation.
 
 The problem is solved using Newton's method with a second-order backward difference formula (BDF2)
 with a timestep of 0.01 seconds up to a simulation time of one second. These settings are applied
-within the `[Executioner]` block using the [Executioner System](syntax/Executioner/index.md).
+within the `[Executioner]` block using the [Executioner System](framework:syntax/Executioner/index.md).
 
 !listing tutorial03_verification/app/test/tests/step03_analytical/1d_analytical.i link=False block=Executioner
 
 Finally, the output method is defined. In this case the ExodusII and CSV format are enabled within the
-`[Outputs]` block using the [Outputs System](syntax/Outputs/index.md).
+`[Outputs]` block using the [Outputs System](framework:syntax/Outputs/index.md).
 
 !listing tutorial03_verification/app/test/tests/step03_analytical/1d_analytical.i link=False block=Outputs
 
@@ -131,13 +131,13 @@ cd ~/projects/problems/verification
 ```
 
 When complete an output file will be produced with the name "1d_analytical_out.e", this file
-can be viewed using [Paraview](https://www.paraview.org/) or [python/peacock.md].
+can be viewed using [Paraview](https://www.paraview.org/) or [python:python/peacock.md].
 
 
 ## Compute Error
 
 To be able to compute the error with respect to the known solution, [tutorial03-analytical-solution]
-must be added to the input file. This is accomplished via a [functions/MooseParsedFunction.md] object
+must be added to the input file. This is accomplished via a [framework:functions/MooseParsedFunction.md] object
 that is added in the `[Functions]` block.
 
 !listing tutorial03_verification/app/test/tests/step03_analytical/1d_analytical.i link=False block=Functions
@@ -146,7 +146,7 @@ The "vars" and "vals" have a one-to-one relationship, e.g., $k=80.2$. If defined
 then the names in "vars" can be used in the definition of the equation in the "value" parameter.
 
 The error is a single value for each time step. Since the exact solution is known the $L_2$-norm
-can be computed using the [postprocessors/NodalL2Error.md] object within the `[Postprocessors]` block,
+can be computed using the [framework:postprocessors/NodalL2Error.md] object within the `[Postprocessors]` block,
 which computes the error of the given variable (e.g., "T") and the known solution defined in the
 "T_exact" function.
 
@@ -182,7 +182,7 @@ with the finite element implementation. However, if the error is reduced at the 
 with decreasing mesh size and timestep size then it is reasonable that the finite element
 formulation and temporal numerical integration are implemented correctly.
 
-[!ac](MOOSE) includes a python package---the `mms` package---for performing convergence studies, which will be used here. For details regarding the package, please refer to the [python/mms.md] documentation.
+[!ac](MOOSE) includes a python package---the `mms` package---for performing convergence studies, which will be used here. For details regarding the package, please refer to the [python:python/mms.md] documentation.
 
 ### Spatial Convergence
 

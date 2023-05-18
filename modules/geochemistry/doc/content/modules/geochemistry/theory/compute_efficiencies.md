@@ -68,7 +68,7 @@ The geochemistry-only part of the [FORGE geothermal simulation](forge.md) (`aqui
 
 ## Relative compute-time spent in transport and reactions
 
-It is common that the "reaction" part of reactive-transport simulations proceeds quickly compared with the transport part.  This is because the `geochemistry` module bypasses a lot of MOOSE overhead and because there are no spatial derivatives that require the use of PETSc.  [table:rel_time] quantifies this for the [FORGE example](forge.md) and an example from the `geochemistry` test suite.  Although this is just one example, the large cost of a full PorousFlow solve is evident.  If possible, compute time will be reduced by pre-computing the Darcy velocity and time-dependent temperature field and using these in the [GeochemistryTimeDerivative](GeochemistryTimeDerivative.md) and [ConservativeAdvection](ConservativeAdvection.md) Kernels, as in the `advection_1.i` input file.
+It is common that the "reaction" part of reactive-transport simulations proceeds quickly compared with the transport part.  This is because the `geochemistry` module bypasses a lot of MOOSE overhead and because there are no spatial derivatives that require the use of PETSc.  [table:rel_time] quantifies this for the [FORGE example](forge.md) and an example from the `geochemistry` test suite.  Although this is just one example, the large cost of a full PorousFlow solve is evident.  If possible, compute time will be reduced by pre-computing the Darcy velocity and time-dependent temperature field and using these in the [GeochemistryTimeDerivative](GeochemistryTimeDerivative.md) and [ConservativeAdvection](framework:ConservativeAdvection.md) Kernels, as in the `advection_1.i` input file.
 
 !table id=table:rel_time caption=Compute time (s) for various parts of a typical reactive-transport simulation.  The mesh in each case has 1886 nodes, and 20 time steps are run using a single processor.
 | Simulation | Time required (s) | Notes |
@@ -81,7 +81,7 @@ It is common that the "reaction" part of reactive-transport simulations proceeds
 
 ## Solver choices for simulations coupled with PorousFlow
 
-Geochemistry simulations are often coupled with PorousFlow in order to simulate reactive transport.  The previous section demonstrated that the "transport" part of such simulations is likely to be much more expensive than the "reactive" part.  Hence, it is useful to explore ways of improving its efficiency.  One way is to pre-compute the Darcy velocity and temperature field, and use the  [GeochemistryTimeDerivative](GeochemistryTimeDerivative.md) and [ConservativeAdvection](ConservativeAdvection.md) Kernels.  However, this is often not possible.  Therefore, this section quantifies the compute time required for a typical PorousFlow simulation.
+Geochemistry simulations are often coupled with PorousFlow in order to simulate reactive transport.  The previous section demonstrated that the "transport" part of such simulations is likely to be much more expensive than the "reactive" part.  Hence, it is useful to explore ways of improving its efficiency.  One way is to pre-compute the Darcy velocity and temperature field, and use the  [GeochemistryTimeDerivative](GeochemistryTimeDerivative.md) and [ConservativeAdvection](framework:ConservativeAdvection.md) Kernels.  However, this is often not possible.  Therefore, this section quantifies the compute time required for a typical PorousFlow simulation.
 
 ### A 2D example
 

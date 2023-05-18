@@ -17,8 +17,8 @@ where $h$ is the element length.
 
 ## Example Syntax
 
-The LevelSetForcingFunctionSUPG [Kernel](syntax/Kernels/index.md) should be used in conjunction with a forcing term. For
-example, if a [BodyForce](/BodyForce.md) is defined as follows in the `[Kernels]` block.
+The LevelSetForcingFunctionSUPG [Kernel](framework:syntax/Kernels/index.md) should be used in conjunction with a forcing term. For
+example, if a [BodyForce](framework:/BodyForce.md) is defined as follows in the `[Kernels]` block.
 
 !listing modules/level_set/test/tests/verification/1d_level_set_supg_mms/1d_level_set_supg_mms.i block=phi_forcing
 

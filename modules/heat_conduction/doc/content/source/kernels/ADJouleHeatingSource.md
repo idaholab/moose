@@ -19,7 +19,7 @@ electrical conductivity of the material. $\sigma_{elec}$ is defined as an
 `ADMaterialProperty`. Within the heat conduction module, this property could
 currently be provided by [ADElectricalConductivity](ADElectricalConductivity.md).
 
-This class inherits from the [ADKernelValue](Kernel.md) class.
+This class inherits from the [ADKernelValue](framework:Kernel.md) class.
 
 ## Example Input File Syntax
 

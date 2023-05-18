@@ -50,7 +50,7 @@ Table definitions:
 - data: includes both the advector, velocity, and the advected quantities
 - limited: different limiters can be applied when interpolating cell-centered
   data to faces. A summary of limiter options can be found in
-  [Limiters/index.md]
+  [framework:Limiters/index.md]
 
 Note that the INS and INSFE kernel sets are redundant in terms of targeted
 functionality. Historically, the INS kernel set was developed in this module and

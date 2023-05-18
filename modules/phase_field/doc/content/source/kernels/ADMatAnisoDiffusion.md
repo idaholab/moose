@@ -2,7 +2,7 @@
 
 !syntax description /Kernels/ADMatAnisoDiffusion
 
-This is anisotropic version of [`ADMatDiffusion`](/ADMatDiffusion.md), which
+This is anisotropic version of [`ADMatDiffusion`](framework:/ADMatDiffusion.md), which
 expects a tensor valued diffusion coefficient $D$ (`diffusivity`).
 
 !syntax parameters /Kernels/ADMatAnisoDiffusion

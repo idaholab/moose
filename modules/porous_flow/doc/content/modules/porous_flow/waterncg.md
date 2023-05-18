@@ -4,7 +4,7 @@ A miscible water and non-condensable gas (NCG) model is available in PorousFlow 
 
 ## Available NCG's
 
-Any of the gaseous fluids provided in the [Fluid Properties](/fluid_properties/index.md) module
+Any of the gaseous fluids provided in the [Fluid Properties](fluid_properties:/fluid_properties/index.md) module
 can be used in this equation of state.
 
 ## Phase composition

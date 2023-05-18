@@ -25,7 +25,7 @@ the user-specified variable.
 
 The contributions of the eigenstrain to the first and second elastic strain
 derivatives are calculated with use of the MOOSE
-[DerivativeMaterialInterface](materials/DerivativeMaterialInterface.md)
+[DerivativeMaterialInterface](framework:materials/DerivativeMaterialInterface.md)
 applied to the prefactor variables.
 \begin{equation}
   \label{eqn:derivatives}
@@ -52,7 +52,7 @@ of the coupled variable, here shown as an auxvariable
 !listing modules/combined/test/tests/multiphase_mechanics/simpleeigenstrain.i block=AuxVariables/c
 
 and the argument for the `prefactor` parameter in the eigenstrain material matches
-the function name (`f_name` parameter) in the [DerivativeParsedMaterial](/DerivativeParsedMaterial.md)
+the function name (`f_name` parameter) in the [DerivativeParsedMaterial](framework:/DerivativeParsedMaterial.md)
 
 !listing modules/combined/test/tests/multiphase_mechanics/simpleeigenstrain.i block=Materials/prefactor
 

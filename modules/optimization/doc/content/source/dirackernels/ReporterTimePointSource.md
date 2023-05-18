@@ -4,7 +4,7 @@
 
 ## Overview
 
-A `ReporterTimePointSource` reads in multiple point sources from a [Reporter](Reporters/index.md) or [VectorPostprocessor](VectorPostprocessors/index.md).  The point source values and coordinates are updated as the values are changed.
+A `ReporterTimePointSource` reads in multiple point sources from a [Reporter](framework:Reporters/index.md) or [VectorPostprocessor](framework:VectorPostprocessors/index.md).  The point source values and coordinates are updated as the values are changed.
 
 For exposition, the data determining the coordinates and values can be represented as a five-column matrix:
 
@@ -26,7 +26,7 @@ x_i & y_i & z_i & s_i\delta_{t_i, t_{\mathrm{sim}}}
 \end{bmatrix},\quad
 i=1,...,N.
 
-For maximum flexibility, the coordinates and values can change during the simulation based on the evaluation of these vectors in the [Reporter](Reporters/index.md) or [VectorPostprocessor](VectorPostprocessors/index.md). As such, $\mathbf{S}$ can depend on time ($\mathbf{S}(t)$). So [!eqref](eq:coord_value) can be representated as:
+For maximum flexibility, the coordinates and values can change during the simulation based on the evaluation of these vectors in the [Reporter](framework:Reporters/index.md) or [VectorPostprocessor](framework:VectorPostprocessors/index.md). As such, $\mathbf{S}$ can depend on time ($\mathbf{S}(t)$). So [!eqref](eq:coord_value) can be representated as:
 
 !equation
 \vec{S}_i(t_{\mathrm{sim}}) = 
@@ -36,11 +36,11 @@ x_i(t_{\mathrm{sim}}) & y_i(t_{\mathrm{sim}}) & z_i(t_{\mathrm{sim}}) & s_i(t_{\
 i=1,...,N(t_{\mathrm{sim}}).
 
 !alert note
-It is important for the `ReporterTimePointSource` to never use a [VectorPostprocessor](VectorPostprocessors/index.md) with [!param](/VectorPostprocessors/PointValueSampler/contains_complete_history)` = true`, as this can modify the ordering of the coordinates and points.
+It is important for the `ReporterTimePointSource` to never use a [VectorPostprocessor](framework:VectorPostprocessors/index.md) with [!param](/VectorPostprocessors/PointValueSampler/contains_complete_history)` = true`, as this can modify the ordering of the coordinates and points.
 
 ## Example Input Syntax
 
-An example of a `ReporterTimePointSource` using a [ConstantReporter](/ConstantReporter.md):
+An example of a `ReporterTimePointSource` using a [ConstantReporter](framework:/ConstantReporter.md):
 
 !listing reporter_time_point_source.i block=DiracKernels Reporters
 

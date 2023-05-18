@@ -4,8 +4,8 @@
 
 ## Overview
 
-This object is designed to transfer data from a [Postprocessor](/Postprocessors/index.md)
-to a [VectorPostprocessor](/VectorPostprocessors/index.md) on the parent application. This
+This object is designed to transfer data from a [Postprocessor](framework:/Postprocessors/index.md)
+to a [VectorPostprocessor](framework:/VectorPostprocessors/index.md) on the parent application. This
 object +must+ transfer data to a [StochasticResults](/StochasticResults.md)
 object.
 

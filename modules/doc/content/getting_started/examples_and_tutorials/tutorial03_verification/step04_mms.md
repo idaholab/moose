@@ -56,24 +56,24 @@ be assumed that the input file is named `~/projects/problems/verification/2d_mai
 This file can be created and edited using any text editor program.
 
 The problem requires a two-dimensional rectangular domain, which can be defined using
-the [Mesh System](syntax/Mesh/index.md) as defined in the `[Mesh]` block  of the input.
+the [Mesh System](framework:syntax/Mesh/index.md) as defined in the `[Mesh]` block  of the input.
 The number of elements ("nx" and "ny") are defined to result in square elements.
 
 !listing tutorial03_verification/app/test/tests/step04_mms/2d_main.i link=False block=Mesh
 
 There is a single unknown, temperature ($T$), to compute. This unknown is declared using the
-[Variables System](syntax/Variables/index.md) in the `[Variables]` block and used the default
+[Variables System](framework:syntax/Variables/index.md) in the `[Variables]` block and used the default
 configuration of a first-order Lagrange finite element variable.
 
 !listing tutorial03_verification/app/test/tests/step04_mms/2d_main.i link=False block=Variables
 
-The initial condition ($T_0$) is applied using the [Initial Condition System](syntax/ICs/index.md)
+The initial condition ($T_0$) is applied using the [Initial Condition System](framework:syntax/ICs/index.md)
 in the `[ICs]` block. In this case a constant value throughout the domain is provided.
 
 !listing tutorial03_verification/app/test/tests/step04_mms/2d_main.i link=False block=ICs
 
 The volumetric heat source, $\dot{q}$, is defined using the
-[Function System](syntax/Functions/index.md) using the `[Functions]` block. The function, as defined
+[Function System](framework:syntax/Functions/index.md) using the `[Functions]` block. The function, as defined
 in [tutorial03_heat_source] can be defined directly in the input file using the parsed function
 capability. The "vars" and "vals" parameters are used to define named constants within the
 equation. The variables "x", "y", "z", and "t" are always available and represent the
@@ -82,7 +82,7 @@ corresponding spatial location and time.
 !listing tutorial03_verification/app/test/tests/step04_mms/2d_main.i link=False block=Functions
 
 The "volumetric" portion of the weak form are defined using the
-[Kernel System](syntax/Kernels/index.md) in the `[Kernels]` block, for this example this
+[Kernel System](framework:syntax/Kernels/index.md) in the `[Kernels]` block, for this example this
 can be done with the use of three `Kernel` objects as follows.
 
 !listing tutorial03_verification/app/test/tests/step04_mms/2d_main.i link=False block=Kernels
@@ -95,7 +95,7 @@ is set equal to "T". The remaining parameters define the values for $k$, $\rho$,
 constant values defined in [tutorial03-snow-values].
 
 The boundary portions of the weak form are defined using the
-[Boundary Condition System](syntax/BCs/index.md) in the `[BCs]` block. At top of the domain ($y=0$) a
+[Boundary Condition System](framework:syntax/BCs/index.md) in the `[BCs]` block. At top of the domain ($y=0$) a
 Neumann condition is applied with a constant outward flux. On the button of the domain
 ($y=-0.2 \textrm{m}$) a constant temperature is defined.
 
@@ -107,12 +107,12 @@ applied naturally based on the weak form derivation.
 
 The problem is solved using Newton's method with a first-order backward Euler method with a timestep
 of 600 seconds (10 min.) up to a simulation time of nine hours. These settings are applied within the
-`[Executioner]` block using the [Executioner System](syntax/Executioner/index.md).
+`[Executioner]` block using the [Executioner System](framework:syntax/Executioner/index.md).
 
 !listing tutorial03_verification/app/test/tests/step04_mms/2d_main.i link=False block=Executioner
 
 Finally, the output method is defined. In this case the ExodusII format is enabled within the
-`[Outputs]` block using the [Outputs System](syntax/Outputs/index.md).
+`[Outputs]` block using the [Outputs System](framework:syntax/Outputs/index.md).
 
 !listing tutorial03_verification/app/test/tests/step04_mms/2d_main.i link=False block=Outputs
 
@@ -127,7 +127,7 @@ cd ~/projects/problems/verification
 ```
 
 When complete an output file will be produced with the name "2d_main_out.e", this file
-can be viewed using [Paraview](https://www.paraview.org/) or [python/peacock.md].
+can be viewed using [Paraview](https://www.paraview.org/) or [python:python/peacock.md].
 [tutorial03-snow-results] show the change in temperature across the domain with time. A key
 feature is that the surface remains cool as the heat source warms the snow internally, creating large
 temperature gradient at the surface.
@@ -140,7 +140,7 @@ temperature gradient at the surface.
 
 The [!ac](MMS) is a method of manufacturing a known solution for a [!ac](PDE), in this
 case the transient heat equation. The method is explained in detail in the context of the
-`mms` python package included with [!ac](MOOSE): [python/mms.md]. A brief overview shall be
+`mms` python package included with [!ac](MOOSE): [python:python/mms.md]. A brief overview shall be
 provided here, but the reader is referred to the package documentation for a more detailed
 description.
 

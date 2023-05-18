@@ -7,7 +7,7 @@ that is performing level set reinitialization steps.
 
 ## Example Syntax
 
-The [LevelSetProblem](#) is invoked by setting the "type" parameter within the [Problem](Problem/index.md) of the
+The [LevelSetProblem](#) is invoked by setting the "type" parameter within the [Problem](framework:Problem/index.md) of the
 input file.
 
 !listing modules/level_set/test/tests/transfers/markers/multi_level/parent.i start=[Problem] end=[Executioner]

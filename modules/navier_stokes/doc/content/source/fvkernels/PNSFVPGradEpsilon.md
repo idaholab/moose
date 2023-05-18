@@ -15,7 +15,7 @@ term has been integrated by parts as is done by the [PCNSFVKT.md] and
 [PCNSFVHLLC.md] objects.
 
 This object only accepts porosity as a function. If the porosity profile is
-complicated, a [SolutionFunction](SolutionFunction.md) may be used to represent
+complicated, a [SolutionFunction](framework:SolutionFunction.md) may be used to represent
 it.
 
 !alert note

@@ -14,7 +14,7 @@ introducing below.
 
 The `block1` and `block2` subblocks are part of a chain of mesh generators,
 linked by their `input` parameters. Each of the
-[`SubdomainBoundingBoxGenerator`](SubdomainBoundingBoxGenerator.md) adds a
+[`SubdomainBoundingBoxGenerator`](framework:SubdomainBoundingBoxGenerator.md) adds a
 subdomain definition to the current mesh. Here we define two subdomains, one for
 the left half of the domain and one for the right.
 
@@ -30,7 +30,7 @@ Note how the stiffness of the right hand side is only half that of the left hand
 
 We make a few changes in the Executioner block here, and you should try playing with some of the settings later on.
 
-- We select NEWTON as our [!param](/Executioner/Transient/solve_type). This is a good (fast) option whenever we have a complete Jacobian for the system. It should give us 1-2 linear iterations for every non-linear iteration. Note that for NEWTON solves MOOSE automatically sets up an [`SMP`](SingleMatrixPreconditioner.md) with the [!param](/Preconditioning/SMP/full) option set to `true` (this can be disabled by setting [!param](/Executioner/auto_preconditioning) to `false`).
+- We select NEWTON as our [!param](/Executioner/Transient/solve_type). This is a good (fast) option whenever we have a complete Jacobian for the system. It should give us 1-2 linear iterations for every non-linear iteration. Note that for NEWTON solves MOOSE automatically sets up an [`SMP`](framework:SingleMatrixPreconditioner.md) with the [!param](/Preconditioning/SMP/full) option set to `true` (this can be disabled by setting [!param](/Executioner/auto_preconditioning) to `false`).
 - We use LU decomposition to solve the linear problem, this preconditioner is very effective on a small problem like this. (For a more scalable preconditioner for large problems take a look at [HYPRE](application_development/hypre.md optional=true).)
 
 ## Questions

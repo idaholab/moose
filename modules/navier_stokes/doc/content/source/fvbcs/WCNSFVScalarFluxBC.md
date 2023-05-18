@@ -24,7 +24,7 @@ There are three options for specifying the scalar flux:
 
 This boundary condition works with postprocessors, which may be replaced by constant
 values in the input. The intended use case for this boundary condition is to be receiving its value from
-a coupled application, using a [Receiver.md] postprocessor.
+a coupled application, using a [framework:Receiver.md] postprocessor.
 
 ## Example input syntax
 

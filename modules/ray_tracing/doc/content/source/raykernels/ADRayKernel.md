@@ -2,9 +2,9 @@
 
 ## Description
 
-`ADRayKernel` is the base class for the objects that calculate residual vector contributions of non-linear scalar field variables that use [automatic_differentiation/index.md] along a [Ray.md]. See also [RayKernel.md] for the non-AD version of this object.
+`ADRayKernel` is the base class for the objects that calculate residual vector contributions of non-linear scalar field variables that use [framework:automatic_differentiation/index.md] along a [Ray.md]. See also [RayKernel.md] for the non-AD version of this object.
 
-The use of a `ADRayKernel` is the same of a standard [Kernel](Kernels/index.md). In an `ADRayKernel` subclass the `computeQpResidual()` function must be overridden. This is where you implement your PDE weak form terms.
+The use of a `ADRayKernel` is the same of a standard [Kernel](framework:Kernels/index.md). In an `ADRayKernel` subclass the `computeQpResidual()` function must be overridden. This is where you implement your PDE weak form terms.
 
 Inside your `ADRayKernel` class, you have access to several member variables for computing the residual:
 

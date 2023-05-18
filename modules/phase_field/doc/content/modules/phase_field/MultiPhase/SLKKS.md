@@ -94,7 +94,7 @@ each operating on the variable $c_i$. We use the
 [!param](/Kernels/MatDiffusion/v) parameter to  specify $c_{ijk}$ as the
 variable to take the gradient of (rather than $c_i$). The effective diffusivity
 $D'_i$ passed into the kernel is $D\cdot h_j \cdot a_{jk}$, which can be provided
-by a [`DerivativeParsedMaterial`](DerivativeParsedMaterial.md)
+by a [`DerivativeParsedMaterial`](framework:DerivativeParsedMaterial.md)
 
 ```style=background-color:gray
 [D'i]
@@ -118,7 +118,7 @@ The derivation should be check to see if a phase dependent concentration $D_{ij}
 An open TDB file for the Fe-Cr system was graciously provided by Aurélie Jacob
 at TU Wien, based on the work in [!cite](jacob2018revised).
 
-The TDB file can be converted into MOOSE [`DerivativeParsedMaterial`](DerivativeParsedMaterial.md)
+The TDB file can be converted into MOOSE [`DerivativeParsedMaterial`](framework:DerivativeParsedMaterial.md)
 syntax using the [`free_energy.py` script](/CALPHAD.md).
 
 ```

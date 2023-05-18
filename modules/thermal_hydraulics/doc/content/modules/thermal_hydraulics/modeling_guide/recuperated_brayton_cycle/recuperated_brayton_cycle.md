@@ -172,7 +172,7 @@ If `logic` determines to send the PID signal to the motor, then [SetComponentRea
 ## Motor Shutdown
 
 Should the turbine provide more torque than the motor, the logic activates a
-[MooseParsedFunction.md], `motor_torque_fn_shutdown`, to ramp down the motor
+[framework:MooseParsedFunction.md], `motor_torque_fn_shutdown`, to ramp down the motor
 allowing for a graceful transition of the system from the motor to the turbine.
 
 !listing thermal_hydraulics/test/tests/problems/brayton_cycle/recuperated_brayton_cycle.i
@@ -245,7 +245,7 @@ Multiple variables and functions have been discussed which are now used by
 `AuxScalarKernels` which then apply the desired values to the previously
 mentioned `AuxVariables`.
 
-`PID_trip_status` is a [ConditionalFunctionEnableControl.md] within the
+`PID_trip_status` is a [framework:ConditionalFunctionEnableControl.md] within the
 `Controls` block. When the function `is_tripped_fn` becomes true,
 `PID_trip_status` activates the `AuxScalarKernel` `set_PID_tripped`.
 
@@ -253,7 +253,7 @@ mentioned `AuxVariables`.
        block=Controls/PID_trip_status
        link=False
 
-`time_PID` is also a [ConditionalFunctionEnableControl.md] which activates when
+`time_PID` is also a [framework:ConditionalFunctionEnableControl.md] which activates when
 `PID_trip_status` activates. This control then disables the `AuxScalarKernel`
 `set_time_PID` which was recording the time up until the point of the PID trip.
 

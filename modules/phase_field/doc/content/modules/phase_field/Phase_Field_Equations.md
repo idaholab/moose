@@ -167,7 +167,7 @@ It is divided into three pieces, each implemented in their own kernel, as shown 
 
 | Residual term | Variable | Parameters | Energy derivative | Kernel |
 | - | - | - | - | - |
-$\left(  \frac{\partial \eta_j}{\partial t}, \psi_m \right)$ | $\eta_j$ | - | - | [`TimeDerivative`](/TimeDerivative.md) |
+$\left(  \frac{\partial \eta_j}{\partial t}, \psi_m \right)$ | $\eta_j$ | - | - | [`TimeDerivative`](framework:/TimeDerivative.md) |
 $\left( \nabla(\kappa_j\eta_j), \nabla (L\psi_m) \right)$ | $\eta_j$ | $\kappa_j,\ L$ | - | [`ACInterface`](/ACInterface.md) |
 $L \left( \frac{\partial f_{loc}}{\partial \eta_j} + \frac{\partial E_d}{\partial \eta_j}, \psi_m \right)$ | $\eta_j$ | $L$ | $\frac{\partial f_{loc} }{\partial \eta_j}, \frac{\partial E_d }{\partial \eta_j}$ | [`AllenCahn`](/AllenCahn.md) |
 
@@ -179,7 +179,7 @@ The residual for the direct solution of the Cahn-Hilliard equation (without boun
 
 | Residual term | Variable | Parameters | Energy derivative | Kernel |
 | - | - | - | - | - |
-$\left(  \frac{\partial c_i}{\partial t}, \psi_m \right)$ | $c_i$ | - | - | [`TimeDerivative`](/TimeDerivative.md) |
+$\left(  \frac{\partial c_i}{\partial t}, \psi_m \right)$ | $c_i$ | - | - | [`TimeDerivative`](framework:/TimeDerivative.md) |
 $\left( \kappa_i \nabla^2 c_i, \nabla \cdot (M_i \nabla \psi_m ) \right)$ | $c_i$ | $\kappa_i$, $M_i$, $\nabla M_i$ | - | [`CHInterface`](/CHInterface.md) |
 $\left(M_i \left( \nabla \frac{\partial f_{loc} }{\partial c_i} + \nabla  \frac{\partial E_d}{\partial c_i} \right),\nabla \psi \right)$ | $c_i$ | $M_i$ | $\frac{\partial^2 f_{loc} }{\partial c_i^2}$, $\frac{\partial^2 E_d }{\partial c_i^2}$ | [`CahnHilliard`](/CahnHilliard.md) |
 
@@ -193,7 +193,7 @@ In the split form of the Cahn-Hilliard solution, the two residual equations are
 
 | Residual term | Variable | Parameters | Energy derivative | Kernel |
 | - | - | - | - | - |
-$\left(  \frac{\partial c_i}{\partial t}, \psi_m \right)$ | $\mu$ | - | - | [`CoupledTimeDerivative`](/CoupledTimeDerivative.md) |
+$\left(  \frac{\partial c_i}{\partial t}, \psi_m \right)$ | $\mu$ | - | - | [`CoupledTimeDerivative`](framework:/CoupledTimeDerivative.md) |
 $\left( M_i  \nabla \mu, \nabla \psi_m \right)$ | $\mu$ | $M_i$ | - | [`SplitCHWRes`](/SplitCHWRes.md) |
 $\left( -\kappa_i \nabla^2 c_i +  \frac{\partial f_{loc}}{\partial c_i} + \frac{\partial E_d}{\partial c_i} - \mu_i \right)$ | $c$ | $\kappa_i$ | $\frac{\partial f_{loc} }{\partial c_i}$, $\frac{\partial E_d }{\partial c_i}$ | [`SplitCHParsed`](/SplitCHParsed.md) |
 

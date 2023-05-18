@@ -1,7 +1,7 @@
 # LevelSetReinitializationMultiApp
 
 The LevelSetReinitializationMultiApp, as the name suggests, is for executing the reinitialization
-equation for the level set solution. This [MultiApp](/MultiApps/index.md) object requires that the
+equation for the level set solution. This [MultiApp](framework:/MultiApps/index.md) object requires that the
 sub-application be using the [LevelSetReinitializationProblem](/LevelSetReinitializationProblem.md),
 which allows for the proper resetting of the pseudo reinitialization time.
 

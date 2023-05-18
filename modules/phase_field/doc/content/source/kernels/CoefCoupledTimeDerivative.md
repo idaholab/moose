@@ -2,7 +2,7 @@
 
 !syntax description /Kernels/CoefCoupledTimeDerivative
 
-[`CoupledTimeDerivative`](/CoupledTimeDerivative.md) with a scalar prefactor $\lambda$ (`coef`)
+[`CoupledTimeDerivative`](framework:/CoupledTimeDerivative.md) with a scalar prefactor $\lambda$ (`coef`)
 \begin{equation}
 \left(\lambda\frac{\partial v}{\partial t},\psi\right),
 \end{equation}

@@ -8,7 +8,7 @@ These documentation pages are meant to be used by developers who are developing 
 
 [Syntax](syntax/index.md) - MOOSE syntax documentation
 
-[Source Code](source/index.md exact=True) - MOOSE source documentation
+[Source Code](framework:source/index.md exact=True) - MOOSE source documentation
 
 [MOOSE Doxygen](https://mooseframework.org/docs/doxygen/moose/classes.html) - MOOSE Doxygen
 
@@ -36,13 +36,13 @@ These documentation pages are meant to be used by developers who are developing 
 
 [Development Tools](help/development/index.md) - Tools that can be helpful for development, like IDEs with MOOSE support
 
-[Code Standards](sqa/framework_scs.md) - How we expect code to be formatted
+[Code Standards](framework:sqa/framework_scs.md) - How we expect code to be formatted
 
 [Debugging](application_development/debugging.md) - Tips on how to debug MOOSE-based applications
 
 ## MOOSE Systems
 
-[Actions](source/actions/Action.md) - Objects used to execute various tasks
+[Actions](framework:source/actions/Action.md) - Objects used to execute various tasks
 
 [Interfaces](framework_development/interfaces/index.md) - Base-classes that allow cross-cutting data retrieval
 

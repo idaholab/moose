@@ -95,7 +95,7 @@ Again: you *MUST* turn on `checkpoint = true` in the `Outputs` block of your inp
 
 ### Mesh Splitting Options
 
-For more information see [the Splitting documentation under the Mesh System](/splitting.md)
+For more information see [the Splitting documentation under the Mesh System](framework:/splitting.md)
 
 ## Command-Line Input File Overrides
 

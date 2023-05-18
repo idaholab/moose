@@ -29,7 +29,7 @@ Mortar enforcement is only available for two-dimensional contact.
 
 ### Other input
 
-The problem is axisymmetric [ComputeAxisymmetricRZFiniteStrain.md] and symmetric boundary conditions are used. 
+The problem is axisymmetric [tensor_mechanics:ComputeAxisymmetricRZFiniteStrain.md] and symmetric boundary conditions are used. 
 
 ### Numerical results
 

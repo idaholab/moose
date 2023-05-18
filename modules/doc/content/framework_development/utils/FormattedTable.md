@@ -1,7 +1,7 @@
 # FormattedTable
 
 The FormattedTable object is a general purpose utility for holding table data. Typically it's used for holding [PostProcessor](syntax/Postprocessors/index.md)
-values or scalar variables produced by [ScalarKernels](/ScalarKernels/index.md). It provides several useful utilities for displaying data and efficiently
+values or scalar variables produced by [ScalarKernels](framework:/ScalarKernels/index.md). It provides several useful utilities for displaying data and efficiently
 outputting the data.
 
 Example of output:
@@ -65,7 +65,7 @@ when using MOOSE's restart system.
 
 ### Normal use within MOOSE
 
-Several instances of FormattedTable exist inside of the [TableOutput](/TableOutput.md) object. Each of these are declared
+Several instances of FormattedTable exist inside of the [TableOutput](framework:/TableOutput.md) object. Each of these are declared
 as "restartable data" meaning that they will append to existing files when MOOSE is run in `--recover` mode.
 
 There are two main interfaces that one can use when interacting with the FormattedTable object. The simple interface is to call

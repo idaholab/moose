@@ -49,7 +49,7 @@ where $\varepsilon_{ij}$ is the strain calculated from the displacement gradient
 This method then stabilizes the problem by replacing the linear-varying dilitational strain with 
 a constant dilitational strain over each element.
 Notionally, in MOOSE the $\bar{F}$ only alters the material model, though in fact it also changes the
-definition of the Jacobian (but not the residual) in the [Kernel](Kernel.md).
+definition of the Jacobian (but not the residual) in the [Kernel](framework:Kernel.md).
 
 $\bar{B}$ makes this modification to the strain but then also modifies the definition of
 the residual, replacing the [original](LagrangianKernelTheory.md) small deformation stress equilibrium weak form

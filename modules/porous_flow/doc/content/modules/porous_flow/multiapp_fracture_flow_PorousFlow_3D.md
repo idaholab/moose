@@ -116,7 +116,7 @@ Economically-viable flow rates are usually greater than about 10$\,$kg.s$^{-1}$,
 
 PorousFlow has many different types of [sinks](porous_flow/sinks.md) and [boundary conditions](porous_flow/boundaries.md) that can be used to model injection and production wells.  To most accurately represent the physics around these points, appropriate boundary conditions should be chosen that closely match the operating parameters of the pump infrastructure employed.  However, before obsessing over such details, it is worth noting that the fundamental assumption underpinning the PorousFlow module --- that the flow is slow --- is likely to be violated close to the wells.  For instance, if 10$\,$kg.s$^{-1}$ (approximately $10^{-2}\,$m$^{3}$.s$^{-1}$) is injected into a fracture of aperture 2$\,$mm through a borehole of diameter 15$\,$cm, the fluid velocity is approximately $10^{-2}/0.002/(\pi\times 0.15) \approx 11\,$m.s$^{-1}$, which is certainly turbulent and not laminar Darcy flow.  This also means that the injection and production pressures predicted by the PorousFlow model are likely to be inaccurate (the true injection pressure is likely to be higher).
 
-For this reason, the current model implements the injection and production rather simply.  The injection is implemented using a [DirichletBC](DirichletBC.md) for the temperature at the injection node:
+For this reason, the current model implements the injection and production rather simply.  The injection is implemented using a [DirichletBC](framework:DirichletBC.md) for the temperature at the injection node:
 
 !listing 3dFracture/fracture_only_aperture_changing.i block=BCs
 
@@ -195,7 +195,7 @@ Most of the matrix input file is standard by now.  The physics is governed by [P
 
 !listing 3dFracture/matrix_app.i block=PorousFlowFullySaturated
 
-along with the familiar [ReporterPointSource](ReporterPointSource.md):
+along with the familiar [ReporterPointSource](framework:ReporterPointSource.md):
 
 !listing 3dFracture/matrix_app.i block=DiracKernels
 
@@ -246,7 +246,7 @@ The simulation's coupling involves the following steps (see also the [page on tr
 
 !listing 3dFracture/fracture_only_aperture_changing.i block=normal_dirn_x_auxk
 
-2. Each matrix element must retrieve the fracture-normal information from the nearest fracture element, which is implemented using a [MultiAppNearestNodeTransfer](MultiAppNearestNodeTransfer.md) Transfer.
+2. Each matrix element must retrieve the fracture-normal information from the nearest fracture element, which is implemented using a [MultiAppNearestNodeTransfer](framework:MultiAppNearestNodeTransfer.md) Transfer.
 
 !listing 3dFracture/matrix_app.i block=normal_x_from_fracture
 
@@ -258,7 +258,7 @@ The simulation's coupling involves the following steps (see also the [page on tr
 
 !listing 3dFracture/matrix_app.i block=normal_thermal_conductivity_auxk
 
-5. Each fracture element must retrieve $L$ and $\lambda_{\mathrm{m}}^{nn}$ from its nearest matrix element using a [MultiAppNearestNodeTransfer](MultiAppNearestNodeTransfer.md), with blocks such as
+5. Each fracture element must retrieve $L$ and $\lambda_{\mathrm{m}}^{nn}$ from its nearest matrix element using a [MultiAppNearestNodeTransfer](framework:MultiAppNearestNodeTransfer.md), with blocks such as
 
 !listing 3dFracture/matrix_app.i block=element_normal_length_to_fracture
 
@@ -268,9 +268,9 @@ The simulation's coupling involves the following steps (see also the [page on tr
 
 These steps could be performed during the simulation initialization, however, it is more convenient to perform them at each time-step.  When these steps have been accomplished, each time-step involves the following (which is also used in the sections above).
 
-1. The matrix temperature, `matrix_T`, is sent to the fracture nodes using a [MultiAppGeometricInterpolationTransfer](MultiAppGeometricInterpolationTransfer.md) Transfer.
+1. The matrix temperature, `matrix_T`, is sent to the fracture nodes using a [MultiAppGeometricInterpolationTransfer](framework:MultiAppGeometricInterpolationTransfer.md) Transfer.
 2. The fracture physics is solved.
-3. The heat flowing between the fracture and matrix is transferred using a [MultiAppReporterTransfer](MultiAppReporterTransfer.md) Transfer.
+3. The heat flowing between the fracture and matrix is transferred using a [MultiAppReporterTransfer](framework:MultiAppReporterTransfer.md) Transfer.
 4. The matrix physics is solved.
 
 The `Transfers` described above are:

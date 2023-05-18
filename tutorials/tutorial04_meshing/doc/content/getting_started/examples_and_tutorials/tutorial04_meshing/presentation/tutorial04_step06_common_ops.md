@@ -7,10 +7,10 @@
 !row!
 !col small=12 medium=6 large=8
 
-- [HexagonMeshTrimmer.md]
-- (Cartesian sibling -- [CartesianMeshTrimmer.md])
+- [reactor:HexagonMeshTrimmer.md]
+- (Cartesian sibling -- [reactor:CartesianMeshTrimmer.md])
 
-- Two types of trimming can be performed by [HexagonMeshTrimmer.md]: Peripheral Trimming and Through-the-Center Trimming.
+- Two types of trimming can be performed by [reactor:HexagonMeshTrimmer.md]: Peripheral Trimming and Through-the-Center Trimming.
 
 - Peripheral trimming can be performed on six possible lines, each of which is parallel to a side of the hexagon and crosses the center of the pins laid out in that direction
 - Peripheral trimming can only be used for assembly meshes
@@ -62,8 +62,8 @@
 !row!
 !col small=12 medium=6 large=8
 
-- [PatternedHexPeripheralModifier.md]
-- (Cartesian sibling -- [PatternedCartesianPeripheralModifier.md])
+- [reactor:PatternedHexPeripheralModifier.md]
+- (Cartesian sibling -- [reactor:PatternedCartesianPeripheralModifier.md])
 
 - Modify the peripheral region of an assembly mesh to enforce a given number of nodes uniformly distributed on the external boundary to facilitate the stitching of different assembly meshes.
 
@@ -87,7 +87,7 @@
 !row!
 !col small=12 medium=6 large=8
 
-- [AdvancedExtruderGenerator.md]
+- [framework:AdvancedExtruderGenerator.md]
 - Extrudes a 1D mesh into 2D, or 2D into 3D
 - Variable height / # of layers in each elevation
 - Variable growth factors of axial element sizes within each elevation

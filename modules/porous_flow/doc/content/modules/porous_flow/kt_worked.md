@@ -21,7 +21,7 @@ The key differences between this input file and any other that simulated advecti
 
 The above input file sets the `flux_limiter_type = superbee`, but different types, such as `none`, `vanleer`, `minmod` or `mc` may be chosen.  As explained in detail below, these add antidiffusion to counteract the artificial numerical diffusion added to stabilize the problem (except for the `none` choice that adds no antidiffusion).
 
-KT work with a lumped mass matrix (see discussion at the start of KT Section 5, Eqn (25)), so the input file uses the [MassLumpedTimeDerivative](MassLumpedTimeDerivative.md) Kernel.
+KT work with a lumped mass matrix (see discussion at the start of KT Section 5, Eqn (25)), so the input file uses the [MassLumpedTimeDerivative](framework:MassLumpedTimeDerivative.md) Kernel.
 
 
 ## No stabilization

@@ -14,7 +14,7 @@ reaction rate (m$^{3}$(precipitate)/m$^{3}$(solution).s$^{-1}$) which is compute
 [PorousFlowAqueousPreDisChemistry](PorousFlowAqueousPreDisChemistry.md).
 
 Details concerning precipitation-dissolution kinetic chemistry may be found in the
-[`chemical reactions`](/chemical_reactions/index.md) module.
+[`chemical reactions`](chemical_reactions:/chemical_reactions/index.md) module.
 
 !alert warning
 The numerical implementation of the chemical-reactions part of `PorousFlow` is quite simplistic, with

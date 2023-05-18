@@ -6,7 +6,7 @@ every quadrature point. Kernels, Postprocessors, and other objects all have conv
 these properties.  This example demonstrates a convection-diffusion problem with kernels that
 utilize custom non-linear material properties.
 
-Refer to the [Materials/index.md] documentation for more information about the material system.
+Refer to the [framework:Materials/index.md] documentation for more information about the material system.
 
 ## Problem Statement
 

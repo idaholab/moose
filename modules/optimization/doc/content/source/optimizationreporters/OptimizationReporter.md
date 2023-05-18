@@ -25,7 +25,7 @@ Additionally, locations and values can be specified at input using [!param](/Opt
 
 ## Declared Data
 
-`OptimizationReporter` declares a number of vector reporter values that can be read by other objects and/or transferred to sub-applications with [MultiAppReporterTransfer.md]. [tab:or_vectors] lists each of these vectors. These vectors can be supplied or transferred by specifying `OptimizationReporter/<Vector Name>` at input.
+`OptimizationReporter` declares a number of vector reporter values that can be read by other objects and/or transferred to sub-applications with [framework:MultiAppReporterTransfer.md]. [tab:or_vectors] lists each of these vectors. These vectors can be supplied or transferred by specifying `OptimizationReporter/<Vector Name>` at input.
 
 !table id=tab:or_vectors caption=List of vectors declared by OptimizationReporter. $N$ is the number of measurement points.
 | Description | Vector Name | Size |

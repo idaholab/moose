@@ -63,7 +63,7 @@ example.
 !listing mms/test/mms_exact.py end=ft
 
 The "mms.print_fparser" function will output the forcing function as needed for
-use with a [MooseParsedFunction.md] object within a MOOSE input file. The calls to the
+use with a [framework:MooseParsedFunction.md] object within a MOOSE input file. The calls to the
 "mms.print_hit" function output, in MOOSE input file format (hit), the forcing function and the
 exact solution. The complete output for this function is given below.
 
@@ -95,7 +95,7 @@ The following table lists the additional arguments that may be passed to the "ev
 | `vectors` | `list` | A list of constant +vector+ variables included in the solution or PDE |
 | `functions` | `list` | A list of arbitrary functions of 'x', 'y', 'z', and 't' in the solution or PDE |
 | `vectorfunctions` | `list` | A list of arbitrary vector functions of 'x', 'y', 'z', and 't' in the solution or PDE |
-| `negative` | `bool` | `False` | Flag for returning the negative of the evaluated function, by default this is false thus the function returned is correct for placing in the [BodyForce](BodyForce.md) Kernel object. |
+| `negative` | `bool` | `False` | Flag for returning the negative of the evaluated function, by default this is false thus the function returned is correct for placing in the [BodyForce](framework:BodyForce.md) Kernel object. |
 | `**kwargs` | `dict` | All additional key, value pairs supplied are evaluated as additional functions that may include the 'x', 'y', 'z', and 't' or any other variables defined in the previous arguments. If 'e_i', 'e_j', 'e_k' are supplied the supplied function components (e.g., '_x', '_y', and '_z') are automatically defined. |
 
 When arbitrary vectors are supplied, the output will include the components named using the
@@ -121,13 +121,13 @@ solve.
                  of manufactured solutions for a spatial convergence study.
 
 It is important that the boundary conditions are satisfied exactly, often the easiest
-method to achieve this is to use a [FunctionDirichletBC.md] using the exact solution, which is
+method to achieve this is to use a [framework:FunctionDirichletBC.md] using the exact solution, which is
 what was done for the current problem.
 
-For this problem the error is computed using the [ElementL2Error.md] postprocessor and the
-element size is computed using the [AverageElementSize.md] postprocessor. If the mesh is not
+For this problem the error is computed using the [framework:ElementL2Error.md] postprocessor and the
+element size is computed using the [framework:AverageElementSize.md] postprocessor. If the mesh is not
 uniform it may be more applicable to use the number of degrees of freedom as a proxy for element
-size, which can be computed using the [NumDOFs.md] postprocessor.
+size, which can be computed using the [framework:NumDOFs.md] postprocessor.
 
 To perform a convergence study this problem must be solved with increasing levels of refinement.
 There are many ways to accomplish this, including using the automated tools included in the "mms"

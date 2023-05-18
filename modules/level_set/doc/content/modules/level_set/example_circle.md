@@ -12,7 +12,7 @@ file that is used initially is [circle_16.i].
 
 ### Mesh
 
-First, the [Mesh](/Mesh/index.md) must be defined, which for this simple problem is a rectangular
+First, the [Mesh](framework:/Mesh/index.md) must be defined, which for this simple problem is a rectangular
 two-dimensional domain ranging from 0 to 1 in the x and y directions.
 
 !listing modules/level_set/examples/circle/circle_16.i block=Mesh
@@ -45,7 +45,7 @@ easily accomplished within MOOSE.
 ### Kernels
 
 The level set equation (see [Theory](/level_set/theory.md)) may be defined in MOOSE using two
-[Kernel](syntax/Kernels/index.md) objects: [TimeDerivative](/TimeDerivative.md) and
+[Kernel](framework:syntax/Kernels/index.md) objects: [TimeDerivative](framework:/TimeDerivative.md) and
 [LevelSetAdvection](/LevelSetAdvection.md).
 
 Notice, that the [LevelSetAdvection](/LevelSetAdvection.md) requires that the unknown to be solved
@@ -56,7 +56,7 @@ for ("phi") to be assigned in the "variable" parameters as well as the two veloc
 
 ### Postprocessors
 
-In this example a single [Postprocessors](/Postprocessors/index.md) is defined. The
+In this example a single [Postprocessors](framework:/Postprocessors/index.md) is defined. The
 [LevelSetCFLCondition](/LevelSetCFLCondition.md) is used to define the minimum timestep that should
 be used when executing the solve of this equation, as discussed in the following section.
 
@@ -64,9 +64,9 @@ be used when executing the solve of this equation, as discussed in the following
 
 ### Execution
 
-This example is a transient problem, hence the [Transient](/Transient.md) execution is used. The
-other important aspect to illustrate in the [Executioner](/Executioner/index.md) block is the use of
-the [PostprocessorDT](/PostprocessorDT.md) time stepper, which allows for the
+This example is a transient problem, hence the [Transient](framework:/Transient.md) execution is used. The
+other important aspect to illustrate in the [Executioner](framework:/Executioner/index.md) block is the use of
+the [PostprocessorDT](framework:/PostprocessorDT.md) time stepper, which allows for the
 [LevelSetCFLCondition](/LevelSetCFLCondition.md) postprocessor to govern the timestepping for this
 problem.
 
@@ -74,7 +74,7 @@ problem.
 
 ### Output
 
-Finally, the [Outputs](syntax/Outputs/index.md) defines a single types of output. The exodus output
+Finally, the [Outputs](framework:syntax/Outputs/index.md) defines a single types of output. The exodus output
 contains the mesh and field data for the simulation.
 
 !listing modules/level_set/examples/circle/circle_16.i block=Outputs

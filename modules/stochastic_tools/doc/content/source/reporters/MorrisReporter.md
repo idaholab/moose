@@ -91,7 +91,7 @@ The following example computes the elementary effect statistics along with 10% a
 
 !listing reporters/morris/morris_main.i block=Reporters
 
-The resulting output is a [json file](JSONOutput.md) with the statistics and their confidence intervals:
+The resulting output is a [json file](framework:JSONOutput.md) with the statistics and their confidence intervals:
 
 !listing reporters/morris/gold/morris_main_out.json language=json
 

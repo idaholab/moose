@@ -13,7 +13,7 @@ cantilever.
 Note the xmin and xmax upper *and* lower x-dimension extents are supplied here.
 The origin will lie in the center of the bottom boundary of this generated mesh.
 
-New is the [`ExtraNodesetGenerator`](ExtraNodesetGenerator.md) which we append
+New is the [`ExtraNodesetGenerator`](framework:ExtraNodesetGenerator.md) which we append
 to the existing chain of mesh generators. This generator allows us to create a
 new nodeset containing all nodes located at the coordinates the user specified in
 [!param](/Mesh/ExtraNodesetGenerator/coord). Here we create a nodeset containing
@@ -33,7 +33,7 @@ development.
 
 ### `AuxKernels`
 
-The [`FunctionAux`](FunctionAux.md) AuxKernel can set an AuxVariable to a
+The [`FunctionAux`](framework:FunctionAux.md) AuxKernel can set an AuxVariable to a
 function of space and time. Note the
 [!param](/AuxKernels/FunctionAux/execute_on) parameter that is available in many
 MOOSE systems. Here we skip execution during LINEAR and NON_LINEAR iterations

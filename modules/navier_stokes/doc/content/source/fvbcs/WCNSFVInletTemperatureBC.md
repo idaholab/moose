@@ -19,7 +19,7 @@ There are three options for specifying the inlet temperature of the system:
 
 This boundary condition works with postprocessors, which may be replaced by constant
 values in the input. The intended use case for this boundary condition is to be receiving its value from
-a coupled application, using a [Receiver.md] postprocessor.
+a coupled application, using a [framework:Receiver.md] postprocessor.
 
 !alert note
 Specifying the inlet temperature using a `WCNSFVInletTemperatureBC` will not preserve

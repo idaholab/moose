@@ -18,12 +18,12 @@ and the temperature at 45$^{\circ}$C:
 
 !listing modules/porous_flow/examples/lava_lamp/2phase_convection.i start=[temperature] end=[brineco2]
 
-The porepressure is initialised to approximate hydrostatic conditions, and the total mass fraction of CO$_{2}$ is zero except towards the top of the model domain where it is 0.2.  This corresponds to a gas saturation of 0.29 (the gas is almost all CO$_{2}$ and only about 0.2% brine) and the mass-fraction of CO$_{2}$ in the liquid phase is 0.048.  The porosity is slightly randomised by sampling from a uniform distribution between the minimum and maximum values specified in the [RandomIC](RandomIC.md) initial condition, and this promotes initiation of the beautiful "fingers" of CO$_{2}$-rich brine seen in the results. The random field seed can be changed in the input file, or on the command line using [command line overriding](command_line_usage.md optional=True). The porosity field is output in the Exodus file that is created, so
+The porepressure is initialised to approximate hydrostatic conditions, and the total mass fraction of CO$_{2}$ is zero except towards the top of the model domain where it is 0.2.  This corresponds to a gas saturation of 0.29 (the gas is almost all CO$_{2}$ and only about 0.2% brine) and the mass-fraction of CO$_{2}$ in the liquid phase is 0.048.  The porosity is slightly randomised by sampling from a uniform distribution between the minimum and maximum values specified in the [RandomIC](framework:RandomIC.md) initial condition, and this promotes initiation of the beautiful "fingers" of CO$_{2}$-rich brine seen in the results. The random field seed can be changed in the input file, or on the command line using [command line overriding](command_line_usage.md optional=True). The porosity field is output in the Exodus file that is created, so
 can be visualized in the MOOSE GUI [peacock](python/peacock.md optional=True) or in an external visualization package.
 
 !listing modules/porous_flow/examples/lava_lamp/2phase_convection.i block=ICs
 
-The equations of state for the liquid brine, the CO$_{2}$ and the liquid brine-CO$_{2}$ mixture are the high-precision versions supplied by the [fluid_properties module](fluid_properties/index.md):
+The equations of state for the liquid brine, the CO$_{2}$ and the liquid brine-CO$_{2}$ mixture are the high-precision versions supplied by the [fluid_properties module](fluid_properties:fluid_properties/index.md):
 
 !listing modules/porous_flow/examples/lava_lamp/2phase_convection.i block=FluidProperties
 

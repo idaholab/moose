@@ -193,7 +193,7 @@ material model formulation. Each inelastic material model is responsible for
 calculating the maximum time step allowable for that material model.
 The [MaterialTimeStepPostprocessor](/MaterialTimeStepPostprocessor.md)
 finds the minumum time step size limits from the entire simulation domain. The
-postprocessor then interfaces with the [IterationAdaptiveDT](/IterationAdaptiveDT.md)
+postprocessor then interfaces with the [IterationAdaptiveDT](framework:/IterationAdaptiveDT.md)
 to restrict the time step size based on the limit calculated in the previous
 time step.
 

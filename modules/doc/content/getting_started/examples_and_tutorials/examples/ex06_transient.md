@@ -14,7 +14,7 @@ test functions and $u_h$ is the finite element solution.
 ## Constructing the Problem
 
 First, we need a transient term to for our residual.  We can create a time-dependent residual term
-by inheriting from the [`TimeDerivative`](/TimeDerivative.md) class.  For this example, we create
+by inheriting from the [`TimeDerivative`](framework:/TimeDerivative.md) class.  For this example, we create
 a constant-scalable time-dependent residual along the lines of kernels created in the earlier
 examples:
 
@@ -29,11 +29,11 @@ And finally, we need to specify some transient related parameters:
 
 !listing examples/ex06_transient/ex06.i block=Executioner
 
-There are many more options available that are described in the [Transient Executioner documentation](/executioners/Transient.md).
+There are many more options available that are described in the [Transient Executioner documentation](framework:/executioners/Transient.md).
 It is also common to use more sophisticated ways for
 time-stepping through simulations. [Example 16](examples/ex16_timestepper.md) goes over some of
 this and details about specific time stepping schemes are provided in the
-[Timestepper System documentation](syntax/Executioner/TimeSteppers/index.md).
+[Timestepper System documentation](framework:syntax/Executioner/TimeSteppers/index.md).
 
 ## Outputs
 

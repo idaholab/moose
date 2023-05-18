@@ -16,16 +16,16 @@ To demonstrate this format, consider a C++ class designed to model the diffusion
          block=Kernels
          link=False
 
-The syntax `type = Diffusion` denotes the C++ class that is named [`Diffusion`](source/kernels/Diffusion.md) and is capable of solving the Laplace operator, also commonly referred to as the diffusion term.
+The syntax `type = Diffusion` denotes the C++ class that is named [`Diffusion`](framework:source/kernels/Diffusion.md) and is capable of solving the Laplace operator, also commonly referred to as the diffusion term.
 
 Within each sub-block, any number of name/value pairs are provided, and these correspond to the parameters required for the given class. Although there are usually several input parameters required, `Diffusion` does not need any except the variable for which to operate on. Variables also have their own block in input files. At the very least, a MOOSE input file requires the following six block types:
 
-- [`[Mesh]`](syntax/Mesh/index.md): Define the geometry of the domain
-- [`[Variables]`](syntax/Variables/index.md): Define the unknown(s) of the problem
-- [`[Kernels]`](syntax/Kernels/index.md): Define the equation(s) to solve
-- [`[BCs]`](syntax/BCs/index.md): Define the boundary condition(s) of the problem
-- [`[Executioner]`](syntax/Executioner/index.md): Define how the problem will solve
-- [`[Outputs]`](syntax/Outputs/index.md): Define how the solution will be written
+- [`[Mesh]`](framework:syntax/Mesh/index.md): Define the geometry of the domain
+- [`[Variables]`](framework:syntax/Variables/index.md): Define the unknown(s) of the problem
+- [`[Kernels]`](framework:syntax/Kernels/index.md): Define the equation(s) to solve
+- [`[BCs]`](framework:syntax/BCs/index.md): Define the boundary condition(s) of the problem
+- [`[Executioner]`](framework:syntax/Executioner/index.md): Define how the problem will solve
+- [`[Outputs]`](framework:syntax/Outputs/index.md): Define how the solution will be written
 
 It should be obvious that a basic [!ac](FE) analysis problem requires a mesh, variables, equations, and boundary conditions. Also, methods to handle the numerical solve and record its results are necessary, so the `[Executioner]` and `[Outputs]` blocks are required for these purposes.
 
@@ -70,7 +70,7 @@ This will open the Peacock window and display the mesh used for the [simple diff
 Peacock is a python application. As such, during the initial execution binary files are cached, which often takes a few minutes. Subsequent executions of Peacock should be quicker.
 
 !alert note title=Bash alias for Peacock
-The command-line syntax for running Peacock can be simplified by creating a bash alias for it. Be sure to visit the [python/peacock.md] page to learn how to do this.
+The command-line syntax for running Peacock can be simplified by creating a bash alias for it. Be sure to visit the [python:python/peacock.md] page to learn how to do this.
 
 ## Demonstration id=demo
 
@@ -93,7 +93,7 @@ Next, use a [text editor](getting_started/new_users.md#helpful-software) to crea
 !alert note title=Block order doesn't matter.
 The blocks need not be listed in any particular order within the input file.
 
-Recall that six basic blocks---those which were mentioned in the [#inputs] section---are required. For the `[Mesh]` block, the geometry of the pipe, whose dimensions were provided on the [tutorial01_app_development/problem_statement.md] page, shall be defined using the MOOSE standard rectilinear mesh generator object, [`GeneratedMesh`](source/mesh/GeneratedMesh.md):
+Recall that six basic blocks---those which were mentioned in the [#inputs] section---are required. For the `[Mesh]` block, the geometry of the pipe, whose dimensions were provided on the [tutorial01_app_development/problem_statement.md] page, shall be defined using the MOOSE standard rectilinear mesh generator object, [`GeneratedMesh`](framework:source/mesh/GeneratedMesh.md):
 
 !listing tutorials/tutorial01_app_development/step02_input_file/problems/pressure_diffusion.i
          block=Mesh
@@ -103,7 +103,7 @@ Recall that six basic blocks---those which were mentioned in the [#inputs] secti
 TODO: Maintain whitespace when using block= in the listing command
 !!!
 
-This creates a planar mesh with a height equal to the pipe radius. Thus, this problem shall be solved using cylindrical coordinates. To do this, a [`[Problem]`](syntax/Problem/index.md) block shall be included in addition to the basic six blocks:
+This creates a planar mesh with a height equal to the pipe radius. Thus, this problem shall be solved using cylindrical coordinates. To do this, a [`[Problem]`](framework:syntax/Problem/index.md) block shall be included in addition to the basic six blocks:
 
 !listing tutorials/tutorial01_app_development/step02_input_file/problems/pressure_diffusion.i
          block=Problem
@@ -117,13 +117,13 @@ The pressure variable $u$ shall be added to the `[Variables]` block with an unam
          block=Variables
          link=False
 
-The variables listed here are the variables to be solved for using the [!ac](FEM). Next, the `[Kernels]` block, whose syntax was demonstrated earlier, shall be included. Here, the [`ADDiffusion`](source/kernels/ADDiffusion.md) class will be used to solve [!eqref](laplace) and the `pressure` variable will be operated on:
+The variables listed here are the variables to be solved for using the [!ac](FEM). Next, the `[Kernels]` block, whose syntax was demonstrated earlier, shall be included. Here, the [`ADDiffusion`](framework:source/kernels/ADDiffusion.md) class will be used to solve [!eqref](laplace) and the `pressure` variable will be operated on:
 
 !listing tutorials/tutorial01_app_development/step02_input_file/problems/pressure_diffusion.i
          block=Kernels
          link=False
 
-Now that the domain $\Omega$, the primary variable $u$, and the [!ac](PDE) have been specified, the [!ac](BVP) must be enforced. The [`ADDirichletBC`](source/bcs/ADDirichletBC.md) class enforces a Dirichlet (essential) boundary condition, e.g., the pressures prescribed at the pipe inlet and outlet. For this problem, two separate `ADDirichletBC` objects are setup under the `[BCs]` block---one for each end of the pipe:
+Now that the domain $\Omega$, the primary variable $u$, and the [!ac](PDE) have been specified, the [!ac](BVP) must be enforced. The [`ADDirichletBC`](framework:source/bcs/ADDirichletBC.md) class enforces a Dirichlet (essential) boundary condition, e.g., the pressures prescribed at the pipe inlet and outlet. For this problem, two separate `ADDirichletBC` objects are setup under the `[BCs]` block---one for each end of the pipe:
 
 !listing tutorials/tutorial01_app_development/step02_input_file/problems/pressure_diffusion.i
          block=BCs
@@ -131,7 +131,7 @@ Now that the domain $\Omega$, the primary variable $u$, and the [!ac](PDE) have 
 
 It is not necessary to enforce the Neumann (natural) boundary conditions, $\nabla u \cdot \hat{n}$, since they are zero-valued fluxes.
 
-The problem being solved does not have a time component, so a steady-state executioner object, [`Steady`](source/executioners/Steady.md), is invoked to solve the resulting equation:
+The problem being solved does not have a time component, so a steady-state executioner object, [`Steady`](framework:source/executioners/Steady.md), is invoked to solve the resulting equation:
 
 !listing tutorials/tutorial01_app_development/step02_input_file/problems/pressure_diffusion.i
          block=Executioner
@@ -143,7 +143,7 @@ Finally, the computed [!ac](FE) solution shall be output in ExodusII format by a
          block=Outputs
          link=False
 
-There are a lot of ways to control the solution when using the `Steady` class (or the [`Transient`](source/executioners/Transient.md) class for time-dependent simulations). For instance, the parameters which set the PETSc solver options can be very influential on the convergence rate of the `NEWTON` solve. Throughout this tutorial, the reader is encouraged to test different combinations of input parameters, especially for `Executioner` objects. After running the input file, as it was given here, the reader may remove the PETSc options parameters, run it again, and observe the difference in the convergence rate.
+There are a lot of ways to control the solution when using the `Steady` class (or the [`Transient`](framework:source/executioners/Transient.md) class for time-dependent simulations). For instance, the parameters which set the PETSc solver options can be very influential on the convergence rate of the `NEWTON` solve. Throughout this tutorial, the reader is encouraged to test different combinations of input parameters, especially for `Executioner` objects. After running the input file, as it was given here, the reader may remove the PETSc options parameters, run it again, and observe the difference in the convergence rate.
 
 ### Results id=result-demo
 

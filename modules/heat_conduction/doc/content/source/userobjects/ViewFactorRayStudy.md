@@ -76,7 +76,7 @@ The selected angular quadrature is a half-range Gauss-Legendre-Chebyshev quadrat
 Symmetry surfaces require special treatment. The difference between surfaces that participate in the radiative transfer and symmetry surfaces is that
 view factors are not computed for symmetry surfaces (i.e. if either surface $i$ or $j$ in $F_{i,j}$ is a symmetry surface, the view factor is not computed).
 Rays neither start nor end on symmetry surfaces. Instead, rays are specularly reflected off of symmetry surfaces. This is facilitated by the ray tracing
-module by using the [ReflectRayBC.md].
+module by using the [ray_tracing:ReflectRayBC.md].
 
 ## Example Input syntax
 

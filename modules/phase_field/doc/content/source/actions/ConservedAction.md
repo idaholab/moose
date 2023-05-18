@@ -29,14 +29,14 @@ The kernels that are added depend on the solution approach:
 
 ### `direct`
 
-- [TimeDerivative](/TimeDerivative.md)
+- [TimeDerivative](framework:/TimeDerivative.md)
 - [CahnHilliard](/CahnHilliard.md)
 - [CHInterface](/CHInterface.md)
 
 ### `reverse_split`
 
 *Conserved variable*
-- [CoupledTimeDerivative](/CoupledTimeDerivative.md)
+- [CoupledTimeDerivative](framework:/CoupledTimeDerivative.md)
 
 *Coupled variable*
 - [SplitCHWRes](/SplitCHWRes)
@@ -45,12 +45,12 @@ The kernels that are added depend on the solution approach:
 ### `forward_split`
 
 *Conserved variable*
-- [TimeDerivative](/TimeDerivative.md)
-- [MatDiffusion](/MatDiffusion.md)
+- [TimeDerivative](framework:/TimeDerivative.md)
+- [MatDiffusion](framework:/MatDiffusion.md)
 
 *Coupled variable*
-- [MatDiffusion](/MatDiffusion.md)
+- [MatDiffusion](framework:/MatDiffusion.md)
 - [CoupledMaterialDerivative](/CoupledMaterialDerivative.md)
-- [CoefReaction](/CoefReaction.md)
+- [CoefReaction](framework:/CoefReaction.md)
 
 !syntax parameters /Modules/PhaseField/Conserved/ConservedAction

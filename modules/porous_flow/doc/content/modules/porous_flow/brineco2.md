@@ -68,13 +68,13 @@ The density of the aqueous phase with the contribution of dissolved CO$_2$ is ca
 \frac{1}{\rho} = \frac{1 - X_{CO2}}{\rho_b} + \frac{X_{CO2}}{\rho_{CO2}},
 \end{equation}
 where $\rho_b$ is the density of brine (supplied using a
-[`BrineFluidProperties`](/BrineFluidProperties.md) UserObject), $X_{CO2}$ is the
+[`BrineFluidProperties`](fluid_properties:/BrineFluidProperties.md) UserObject), $X_{CO2}$ is the
 mass fraction of CO$_2$ dissolved in the aqueous phase, and $\rho_{CO2}$ is the partial
 density of dissolved CO$_2$ [!citep](garcia2001).
 
 As water vapor is only ever a small component of the gas phase in the temperature and pressure ranges
 that this class is valid for, the density of the gas phase is assumed to be simply the density of CO$_2$
-at the given pressure and temperature, calculated using a [`CO2FluidProperties`](/CO2FluidProperties.md)
+at the given pressure and temperature, calculated using a [`CO2FluidProperties`](fluid_properties:/CO2FluidProperties.md)
 UserObject.
 
 ### Viscosity
@@ -109,7 +109,7 @@ h_{dis}(T) = \frac{-58353.3 + 134.519 T}{M_{CO2}}.
 
 The calculation of brine and CO$_2$ fluid properties can take a significant proportion of each simulation,
 so it is suggested that tabulated versions of both CO$_2$ and brine proeprties are used using
-[TabulatedFluidProperties](/TabulatedFluidProperties.md).
+[TabulatedFluidProperties](fluid_properties:/TabulatedFluidProperties.md).
 
 ## Implementation
 

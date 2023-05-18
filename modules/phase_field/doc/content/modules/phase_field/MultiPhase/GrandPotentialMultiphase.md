@@ -115,7 +115,7 @@ For an interface between grain $i$ of phase $\alpha$ and grain $j$ of phase $\be
 \begin{equation}
 m = \frac{6 \sigma_{\alpha i \beta j}} {l_{\alpha i \beta j}}
 \end{equation}
-A convenient strategy for parameterization is to pick $\gamma_{\alpha i \beta j} = 1.5$ for one of the interfaces, preferably the one with the median interfacial energy of all the types of interface. The analytical relationships above can be used to calculate $\kappa$ and $m$. Once calculated, $\kappa$, $m$, and $\gamma_{\alpha i \beta j} = 1.5$ can be set, normally using a [`GenericConstantMaterial`](/GenericConstantMaterial.md). Once $\kappa$ and $m$ are set, the interfacial energy for other types of interface can be set using the other $\gamma_{\alpha i \beta j}$ parameters:
+A convenient strategy for parameterization is to pick $\gamma_{\alpha i \beta j} = 1.5$ for one of the interfaces, preferably the one with the median interfacial energy of all the types of interface. The analytical relationships above can be used to calculate $\kappa$ and $m$. Once calculated, $\kappa$, $m$, and $\gamma_{\alpha i \beta j} = 1.5$ can be set, normally using a [`GenericConstantMaterial`](framework:/GenericConstantMaterial.md). Once $\kappa$ and $m$ are set, the interfacial energy for other types of interface can be set using the other $\gamma_{\alpha i \beta j}$ parameters:
 \begin{equation}
 \sigma_{\alpha i \beta j} = g(\gamma_{\alpha i \beta j}) \sqrt{m \kappa}
 \end{equation}
@@ -123,7 +123,7 @@ where $g$ is  a dimensionless function of $\gamma_{\alpha i \beta j}$ for the ot
 \begin{equation}
 \gamma_{\alpha i \beta j} = \left( -5.288 g^8 -0.09364 g^6 + 9.965 g^4 -8.183 g^2 + 2.007 \right)^{-1}
 \end{equation}
-The values for $\gamma_{\alpha i \beta j}$ for the other interfaces can be specified using a [`GenericConstantMaterial`](/GenericConstantMaterial.md). Alternatively, rather than calculating and specifying these values by hand, the material [`GrandPotentialInterface`](/GrandPotentialInterface.md) can be used.
+The values for $\gamma_{\alpha i \beta j}$ for the other interfaces can be specified using a [`GenericConstantMaterial`](framework:/GenericConstantMaterial.md). Alternatively, rather than calculating and specifying these values by hand, the material [`GrandPotentialInterface`](/GrandPotentialInterface.md) can be used.
 
 ## Example input file
 

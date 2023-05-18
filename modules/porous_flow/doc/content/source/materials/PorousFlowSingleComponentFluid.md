@@ -13,7 +13,7 @@ Most of MOOSE is independent of the choice of units, but the units must be kept 
 !alert note
 PorousFlow does not check the consistency of units in the input file.
 
-However, the [FluidProperties module](fluid_properties/index.md) assumes that the pressure units are Pascals, the time units are seconds, temperature is measured in Kelvin, distance is measured in metres, mass in kilograms and energy in Joules.  Therefore, when using this module, users are ordinarily restricted to using these standard SI units.  Almost all PorousFlow input files use the FluidProperties module.  Therefore it is recommended to use these standard SI units everywhere in your input file.
+However, the [FluidProperties module](fluid_properties:fluid_properties/index.md) assumes that the pressure units are Pascals, the time units are seconds, temperature is measured in Kelvin, distance is measured in metres, mass in kilograms and energy in Joules.  Therefore, when using this module, users are ordinarily restricted to using these standard SI units.  Almost all PorousFlow input files use the FluidProperties module.  Therefore it is recommended to use these standard SI units everywhere in your input file.
 
 ## Alternate unit choices
 
@@ -116,7 +116,7 @@ Choosing the temperature unit to be Celcius means that 273.15 is added to all Po
 
 Other input-file objects that may need to be specified in Celsius are boundary conditions, initial conditions, [PorousFlowSinks](PorousFlowSink.md), etc.
 
-All objects in the input file need to be specified in Celsius, except the FluidProperties objects.  For example, if using the [SimpleFluidProperties](SimpleFluidProperties.md), then you must remember the $T$ seen by SimpleFluidProperties will be measured in Kelvin.
+All objects in the input file need to be specified in Celsius, except the FluidProperties objects.  For example, if using the [SimpleFluidProperties](fluid_properties:SimpleFluidProperties.md), then you must remember the $T$ seen by SimpleFluidProperties will be measured in Kelvin.
 
 ### Pressure (and stress) in MPa
 
@@ -124,7 +124,7 @@ Choosing the pressure unit to be MPa means that the PorousFlow pressures are mul
 
 In addition, you must remember that solid mechanical stresses should be measured in MPa, so moduli and strengths need to be specified in MPa.  Similarly, boundary tractions or pressures need to be specified in MPa.
 
-Remember that the FluidProperties module always uses Pa, m, s and J.  Therefore, when using [SimpleFluidProperties](SimpleFluidProperties.md) you must specify the bulk modulus and viscosity in these units, not using MPa.
+Remember that the FluidProperties module always uses Pa, m, s and J.  Therefore, when using [SimpleFluidProperties](fluid_properties:SimpleFluidProperties.md) you must specify the bulk modulus and viscosity in these units, not using MPa.
 
 ### Alternate time units
 
@@ -132,7 +132,7 @@ Choosing the time unit to be hours means no change is made to the inputs to the 
 
 You must remember that fluid and heat sources must be measured in kg.m$^{-3}$.time$^{-1}$ and J.m$^{-3}$.time$^{-1}$, respectively (where "time" is "hours", "days" or "years" depending on your specific choice).  Remember too that the thermal conductivity of the solid skeleton must be measured in J.m$^{-1}$.K$^{-1}$.time$^{-1}$.  Velocities, radioactive decay rates, chemical precipitation and reaction rates, dispersion tensors and diffusion coefficients are similarly impacted.
 
-Remember that the FluidProperties module always uses Pa, m, s and J.  Therefore, when using [SimpleFluidProperties](SimpleFluidProperties.md) you must specify the fluid thermal conductivity and viscosity in these units, not using hours, days or years.
+Remember that the FluidProperties module always uses Pa, m, s and J.  Therefore, when using [SimpleFluidProperties](fluid_properties:SimpleFluidProperties.md) you must specify the fluid thermal conductivity and viscosity in these units, not using hours, days or years.
 
 #### Hours
 

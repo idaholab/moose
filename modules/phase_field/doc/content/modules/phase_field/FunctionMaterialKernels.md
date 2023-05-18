@@ -7,7 +7,7 @@ the Cahn-Hilliard and Allen-Cahn equations using  free energies provided by
 materials with free energy expressions supplied in the configuration files and all
 necessary derivatives to build the +Residuals+ and +Jacobian+ elements computed
 automatically using automatic differentiation
-([`DerivativeParsedMaterial`](/DerivativeParsedMaterial.md)).
+([`DerivativeParsedMaterial`](framework:/DerivativeParsedMaterial.md)).
 
 This enables rapid implementation of new Phase Field models without writing custom kernels and
 recompiling the code.

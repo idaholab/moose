@@ -15,7 +15,7 @@ RGMB consists of a few specific mesh generators which are to be called in order 
 
 ## ReactorMeshParams
 
-[ReactorMeshParams.md] acts as a container for storing global data about the reactor geometry that needs to be retrieved at different stages of the RGMB mesh generation workflow. In particular, the union axial grid for the extruded geometry is defined here and propagated to the entire mesh upon the extrusion step.
+[reactor:ReactorMeshParams.md] acts as a container for storing global data about the reactor geometry that needs to be retrieved at different stages of the RGMB mesh generation workflow. In particular, the union axial grid for the extruded geometry is defined here and propagated to the entire mesh upon the extrusion step.
 
 !listing rgmb_mesh_generators/rgmb_core_cartesian.i
          id=tutorial04-rgmb_core_cartesian-rmp
@@ -24,7 +24,7 @@ RGMB consists of a few specific mesh generators which are to be called in order 
 
 ## PinMeshGenerator
 
-[PinMeshGenerator.md] calls [PolygonConcentricCircleMeshGenerator.md] to generate a Cartesian or hexagonal pin-like structure (pin, background, and duct)
+[reactor:PinMeshGenerator.md] calls [reactor:PolygonConcentricCircleMeshGenerator.md] to generate a Cartesian or hexagonal pin-like structure (pin, background, and duct)
 
 !listing rgmb_mesh_generators/rgmb_core_cartesian.i
          id=tutorial04-rgmb_core_cartesian-pin1
@@ -57,7 +57,7 @@ The final mesh will contain one block (subdomain) for quadrilateral elements and
 
 ## AssemblyMeshGenerator
 
-[AssemblyMeshGenerator.md] calls [PatternedHexMeshGenerator.md] or [PatternedMeshGenerator.md] to generate a Cartesian or hexagonal lattice of pin-like structures. Cartesian and hexagonal examples follow.
+[reactor:AssemblyMeshGenerator.md] calls [reactor:PatternedHexMeshGenerator.md] or [framework:PatternedMeshGenerator.md] to generate a Cartesian or hexagonal lattice of pin-like structures. Cartesian and hexagonal examples follow.
 
 ### RGMB Cartesian Assembly Example
 
@@ -78,12 +78,12 @@ The final mesh will contain one block (subdomain) for quadrilateral elements and
 
 ### RGMB Hexagonal Assembly Example
 
-[AssemblyMeshGenerator.md] calls [PatternedHexMeshGenerator.md] or [PatternedMeshGenerator.md] to generate a Cartesian or hexagonal lattice of pin-like structures.
+[reactor:AssemblyMeshGenerator.md] calls [reactor:PatternedHexMeshGenerator.md] or [framework:PatternedMeshGenerator.md] to generate a Cartesian or hexagonal lattice of pin-like structures.
 
 - Tips:
 
   - Hexagonal ducts and background coolant region can be added to hexagonal assemblies. The region IDs for the duct and background regions are set by the `duct_region_ids` and `background_region_id` parameters.
-  - Don't want explicitly defined pins in your assembly? See [step11_rgmb_homo.md] for how to define homogenized assemblies with [AssemblyMeshGenerator.md].
+  - Don't want explicitly defined pins in your assembly? See [step11_rgmb_homo.md] for how to define homogenized assemblies with [reactor:AssemblyMeshGenerator.md].
 
 !media tutorial04_meshing/rgmb_assemblymesh_hex.png
        id=tutorial04-rgmb_assemblymesh_hex
@@ -97,7 +97,7 @@ The final mesh will contain one block (subdomain) for quadrilateral elements and
 
 ## CoreMeshGenerator
 
-[CoreMeshGenerator.md] calls [PatternedHexMeshGenerator.md] or [PatternedMeshGenerator.md] to generate a Cartesian or hexagonal lattice of assembly-like structures.
+[reactor:CoreMeshGenerator.md] calls [reactor:PatternedHexMeshGenerator.md] or [framework:PatternedMeshGenerator.md] to generate a Cartesian or hexagonal lattice of assembly-like structures.
 
 Defining [!param](/Mesh/CoreMeshGenerator/dummy_assembly_name) and using it in inputs defines a dummy assembly in the core.
 
@@ -127,7 +127,7 @@ Defining [!param](/Mesh/CoreMeshGenerator/dummy_assembly_name) and using it in i
 
 ## CoreMeshGenerator with Peripheral Ring
 
-A core periphery region can be added utilizing either the [PeripheralRingMeshGenerator.md] or the [PeripheralTriangleMeshGenerator.md].
+A core periphery region can be added utilizing either the [reactor:PeripheralRingMeshGenerator.md] or the [reactor:PeripheralTriangleMeshGenerator.md].
 
 !media tutorial04_meshing/rgmb_periphery.png
        id=tutorial04-rgmb_periphery

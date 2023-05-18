@@ -19,13 +19,13 @@ In this example the friction flow diode is added to a porous media simulation.
 The `combined_linear/quadratic` friction coefficients contain both the diode
 friction coefficients and the base porous media friction.
 
-The friction coefficients are then combined using a [PiecewiseByBlockVectorFunctorMaterial.md] to have a uniform name over the whole domain for friction coefficients.
+The friction coefficients are then combined using a [framework:PiecewiseByBlockVectorFunctorMaterial.md] to have a uniform name over the whole domain for friction coefficients.
 
 !listing test/tests/finite_volume/materials/flow_diode/friction.i block=Materials
 
 ### Dynamic operation of a diode
 
-In this example, we show three [Control](syntax/Controls/index.md) strategies for the diode.
+In this example, we show three [Control](framework:syntax/Controls/index.md) strategies for the diode.
 The idea of these controls is to detect a condition in which the flow should be blocked, because it's going
 in the way opposite the direction of the diode, or because it meets a criterion that is outlined in the postprocessors
 and functions involved to describe it.

@@ -6,8 +6,8 @@ These objects are documented here.
 
 [FormattedTable.md]
 
-[InputParameters.md]
+[framework:InputParameters.md]
 
-[MathUtils.md]
+[framework:MathUtils.md]
 
-[MooseUtils namespace](/MooseUtils.md)
+[MooseUtils namespace](framework:/MooseUtils.md)

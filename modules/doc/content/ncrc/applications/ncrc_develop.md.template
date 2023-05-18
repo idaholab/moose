@@ -10,7 +10,7 @@ continuing. Please see MOOSE's
 information on how to reach us in the event troubleshooting fails.
 
 If you need to update {{ApplicationName}}, know that by following through the
-'[Building {{ApplicationName}}](ncrc_develop_{{ApplicationLower}}.md#build)' steps again,
+'[Building {{ApplicationName}}](modules:ncrc_develop_{{ApplicationLower}}.md#build)' steps again,
 effectively performs an update each time.
 
 ## Environment
@@ -18,7 +18,7 @@ effectively performs an update each time.
 If you plan on using your personal machine we recommend using our Conda packages. If you are instead
 operating on one of our [!ac](INL) [!ac](HPC) clusters, you need only load a couple of modules.
 
-- If +Personal Machine+: Follow the [Conda Installation](ncrc/applications/ncrc_install_conda.md)
+- If +Personal Machine+: Follow the [Conda Installation](modules:ncrc/applications/ncrc_install_conda.md)
   instructions and then install our MOOSE Conda packages:
 
   ```bash
@@ -33,7 +33,7 @@ operating on one of our [!ac](INL) [!ac](HPC) clusters, you need only load a cou
 
 For those operating on other [!ac](HPC) clusters, you should contact that system's administrator,
 and use their recommended compiler stack. It will need to satisfy to our
-[minimum requirements](sqa/minimum_requirements.md).
+[minimum requirements](framework:sqa/minimum_requirements.md).
 
 !alert warning title=Conda packages may be suboptimal on HPC machines
 Conda packages have the advantage of being able to work on most machines, but on [!ac](HPC)
@@ -43,7 +43,7 @@ clusters, this flexibility potentially comes at the cost of the optimizations de
 ## Cloning {{ApplicationName}} id=cloning
 
 Instructions for obtaining a proper clone of {{ApplicationName}} can be found at
-[NCRC/{{ApplicationName}}](ncrc/applications/ncrc_level4_{{ApplicationLower}}.md).
+[NCRC/{{ApplicationName}}](modules:ncrc/applications/ncrc_level4_{{ApplicationLower}}.md).
 
 ## Building {{ApplicationName}} id=build
 
@@ -136,7 +136,7 @@ either a Conda update, or rebuild PETSc/libMesh:
   ```
 
   For more information on the `METHODS` variable (and other influential environment variables) check out:
-  [MOOSE Build System](application_development/build_system.md). `MOOSE_JOBS` controls how many cores
+  [MOOSE Build System](modules:application_development/build_system.md). `MOOSE_JOBS` controls how many cores
   to use during the use of our scripts.
 
 ### Running Make

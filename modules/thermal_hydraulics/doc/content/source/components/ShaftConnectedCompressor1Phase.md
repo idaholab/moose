@@ -34,7 +34,7 @@ The parameter `speeds` is a list of relative corrected speeds $\alpha$ (see
 [speed_rel_corr]) in increasing order. The parameters parameters `Rp_functions`
 and `eff_functions` define curves for the pressure ratio $r_p$ (see [Rp]) and
 isentropic efficiency $\eta$ (see [eff]), respectively, as
-[Functions](Functions/index.md) for each entry in `speeds`, where the time value
+[Functions](framework:Functions/index.md) for each entry in `speeds`, where the time value
 in the function corresponds to the relative corrected mass flow rate $\nu$ (see
 [flow_rel_corr]). Further discussion on these equations and the input data used
 in them is found in [#perfdata].

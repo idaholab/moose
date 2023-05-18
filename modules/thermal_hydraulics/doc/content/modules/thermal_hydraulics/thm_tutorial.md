@@ -17,11 +17,11 @@ To run with multiple threads, use the `--n-threads` argument:
 /path/to/executable -i my_input_file.i --n-threads=4
 ```
 
-See [command line usage](/command_line_usage.md) for more information.
+See [command line usage](modules:/command_line_usage.md) for more information.
 
 # Output
 
-Output can be in a number of different formats (see [/Outputs/index.md]), but
+Output can be in a number of different formats (see [framework:/Outputs/index.md]), but
 the most common is the Exodus II format. This can be viewed by a number of
 different applications, including VisIt and Paraview. A basics tutorial for
 Paraview can found [here](paraview_basics.md).

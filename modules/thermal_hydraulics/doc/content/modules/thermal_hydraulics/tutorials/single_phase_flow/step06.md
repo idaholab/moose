@@ -15,7 +15,7 @@ concept of closure correlations).
 
 +Custom closure correlations+ are provided via [MOOSE material system](/syntax/Materials/).
 Users can use any pre-built material objects that come with MOOSE and provide the required value.
-The most notable and useful material is [ADParsedMaterial](ParsedMaterial.md) which allows users to
+The most notable and useful material is [ADParsedMaterial](framework:ParsedMaterial.md) which allows users to
 provide the closure formula on the input file level.
 
 !alert note

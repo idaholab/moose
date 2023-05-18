@@ -7,11 +7,11 @@ options that we have found to work well for phase field modeling are provided he
 
 ## Solution Methods
 
-Three solve methods are available in MOOSE, which are set in the [Executioner](Executioner/index.md)
+Three solve methods are available in MOOSE, which are set in the [Executioner](framework:Executioner/index.md)
 block using the +solve_type+ parameter, where the three possible options are:
 
 - `NEWTON` - Direct solution of the system of equations using Newton's method.
-  The full and accurate Jacobian is required. Thus, the [Preconditioner](Preconditioning/index.md)
+  The full and accurate Jacobian is required. Thus, the [Preconditioner](framework:Preconditioning/index.md)
   block must be employed for systems with multiple nonlinear variables.
 - `JFNK` - The system is solved using Jacobian Free Newton Krylov (JFNK), so no
   Jacobian terms are needed. However, JFNK often does not perform well without

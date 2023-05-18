@@ -1,3 +1,3 @@
 # Moose variable system
 
-[Documentation](MooseVariableBase.md)
+[Documentation](framework:MooseVariableBase.md)

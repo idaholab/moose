@@ -23,7 +23,7 @@ The use of friction introduces complexity in the states of the nodes in contact.
 
 ### Other input
 
-The problem is axisymmetric [ComputeAxisymmetricRZFiniteStrain.md] and symmetric boundary conditions are used. 
+The problem is axisymmetric [tensor_mechanics:ComputeAxisymmetricRZFiniteStrain.md] and symmetric boundary conditions are used. 
 
 ### Numerical results
 

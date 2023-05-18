@@ -8,7 +8,7 @@ A complete charge-discharge cycle of a 3D full solid-state battery. The results 
 !card-end!
 
 !card! gallery/streamlines_rock.mp4 title=Flow Streamlines in Digital Rock
-Flow streamlines computed with the [Navier-Stokes](modules/navier_stokes/index.md) module, through a digital rock reconstructed with the [Image Reader](source/functions/ImageFunction.md) from a stack of microCT scans (postprocessing done in [Paraview](https://www.paraview.org/)). The framework is described in [Lesueur et al. (2017)](http://doi.org/10.1016/j.gete.2017.08.001).
+Flow streamlines computed with the [Navier-Stokes](navier_stokes:modules/navier_stokes/index.md) module, through a digital rock reconstructed with the [Image Reader](framework:source/functions/ImageFunction.md) from a stack of microCT scans (postprocessing done in [Paraview](https://www.paraview.org/)). The framework is described in [Lesueur et al. (2017)](http://doi.org/10.1016/j.gete.2017.08.001).
 
 !style fontsize=90% fontweight=100
 *Credit:*  Martin Lesueur, [Multiphysics Geomechanics Lab](https://mglab.pratt.duke.edu/)
@@ -16,7 +16,7 @@ Flow streamlines computed with the [Navier-Stokes](modules/navier_stokes/index.m
 
 !card! gallery/twist_gallery.mp4 title=Wire Twist
 Mechanical modeling of two copper wires being twisted together to create a twisted pair
-using the [Tensor Mechanics](modules/tensor_mechanics/index.md) and [Contact](modules/contact/index.md) modules.
+using the [Tensor Mechanics](tensor_mechanics:modules/tensor_mechanics/index.md) and [Contact](contact:modules/contact/index.md) modules.
 
 !style fontsize=90% fontweight=100
 *Credit:*  [Materials Science and Scientific Computing Department at UKAEA](https://ccfe.ukaea.uk/research/)
@@ -35,7 +35,7 @@ Cacace M., Jacquey, A.B. (2017): [Flexible parallel implicit modeling of coupled
 Using an arbitrary Lagrangian-Eulerian (ALE) formulation a laser is rotated around the surface of a stainless
 steel block. The steel first melts and then begins to evaporate. The recoil force from evaporation
 deforms the surface of the melt pool which in turn drives flow in the melt pool interior. Melt flow
-is determined using the incompressible [Navier-Stokes](modules/navier_stokes/index.md) equations
+is determined using the incompressible [Navier-Stokes](navier_stokes:modules/navier_stokes/index.md) equations
 while mesh deformation is determined using a linear elasticity equation.
 !card-end!
 
@@ -53,7 +53,7 @@ Density driven, porous flow simulation of the Elder problem using [Falcon](https
 
 !card! gallery/step10_result.mp4 title=Multi-scale Simulation
 Engineering scale porous flow, modeled using Darcy's equation within a cylinder assuming a porous
-media of closely packed steel spheres, see [MultiApps/index.md].
+media of closely packed steel spheres, see [framework:MultiApps/index.md].
 !card-end!
 
 !card! gallery/densification.mp4 title=3D Densification of Snow
@@ -71,16 +71,16 @@ Shanghai Jiao Tong University, Shanghai.
 
 !card! gallery/ch_40.mp4 title=3D Spinodal Decomposition
 A 3D spinodal decomposition modeled with Cahn-Hilliard equations using third-order Hermite elements with
-the [phase field module](modules/phase_field/index.md).
+the [phase field module](phase_field:modules/phase_field/index.md).
 !card-end!
 
 !card! gallery/dipole_antenna.mp4 title=2D Half-Wave Dipole Antenna
 The 2D electric field radiation pattern of a broadcasting half-wave dipole antenna, modeled using
-the [modules/electromagnetics/index.md] with first-order Nedelec elements.
+the [electromagnetics:modules/electromagnetics/index.md] with first-order Nedelec elements.
 !card-end!
 
 !card! gallery/grain_tracker.mp4 title=3D Grain Tracking
-The [GrainTracker](GrainTracker.md) is a utility that dramatically reduces the number of order
+The [GrainTracker](phase_field:GrainTracker.md) is a utility that dramatically reduces the number of order
 parameters needed to model a large polycrystal system with the phase-field module. This video shows
 the dynamic remapping that occurs as "reused" order parameters get too close to one and other as the
 simulation evolves.
@@ -88,7 +88,7 @@ simulation evolves.
 
 !card! level_set/vortex_out.mp4 title=Vortex Benchmark
 The level set equation is commonly used to for interface tracking, especially when the interface
-velocity is known. MOOSE contains a level set module, for more information see [level_set/index.md].
+velocity is known. MOOSE contains a level set module, for more information see [level_set:level_set/index.md].
 !card-end!
 
 !card! gallery/soil.mp4 title=Soil Desiccation Simulation
@@ -101,11 +101,11 @@ A 3D soil desiccation simulation using phase-field for cohesive fracture model, 
 
 !card! contact/2d_indenter.mp4 title=Axisymmetric Spherical Indenter
 An elastic spherical indenter penetrates into a base material modeled with tensor-mechanics crystal plasticity.
-[contact/index.md].
+[contact:contact/index.md].
 !card-end!
 
 !card! contact/ironing_gallery.mp4 title=Frictional Ironing Problem with Mortar Contact
 A deformable semi-circular tool pushes into highly deformable material generating tangential deformation.
-[contact/index.md].
+[contact:contact/index.md].
 !card-end!
 !gallery-end!

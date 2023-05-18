@@ -55,7 +55,7 @@ files. A guide explaining what each example demonstrates and how to use it is pr
 ## Guided Framework Tutorials
 
 Beyond individual examples, there are also general, guided tutorials that showcase application development,
-the [MOOSE MultiApp system](MultiApps/index.md), and verification of calculated solutions.
+the [MOOSE MultiApp system](framework:MultiApps/index.md), and verification of calculated solutions.
 
 - [Tutorial 1: Application Development](tutorial01_app_development/index.md) - Learn how to develop
   a MOOSE-based application to solve coupled systems of differential equations in a multiphysics
@@ -63,14 +63,14 @@ the [MOOSE MultiApp system](MultiApps/index.md), and verification of calculated 
   these objects, and how to process and visualize the results of your simulations.
 
 - [Tutorial 2: MultiApp Demonstration](tutorial02_multiapps/index.md) - Learn how to use the
-  [Multiapp](MultiApps/index.md) and [Transfer](Transfers/index.md) systems to couple many multiphysics
+  [Multiapp](MultiApps/index.md) and [Transfer](framework:Transfers/index.md) systems to couple many multiphysics
   applications together across differing time or length scales.
 
 - [Tutorial 3: Code Verification](tutorial03_verification/index.md) - Demonstrates the use of analytical
   solutions and the [!ac](MMS) for code verification.
 
 - [Tutorial 4: MOOSE Meshing](tutorial04_meshing/index.md) - Demonstrates MOOSE meshing with the
-  [Reactor](modules/reactor/index.md) module meshing tools.
+  [Reactor](reactor:modules/reactor/index.md) module meshing tools.
 
 ## Physics Module Examples and Tutorials
 
@@ -79,15 +79,15 @@ These modules provide capabilities that can either be used by themselves, or ser
 application-specific models tailored to specific problems. Example problems and tutorials are available
 for some of the individual physics modules as listed below.
 
-- [Combined](modules/combined/tutorials/index.md) (coupling models from multiple modules)
-- [Contact](modules/contact/tutorials/index.md)
-- [Geochemistry](modules/geochemistry/tests_and_examples/index.md)
-- [Heat Conduction](modules/heat_conduction/tutorials/introduction/index.md)
-- [Level Set](modules/level_set/level_set_examples.md)
-- [Porous Flow](modules/porous_flow/porous_flow_examples.md)
-- [Reconstructed Dicontinuous Galerkin](modules/rdg/index.md#example)
-- [Stochastic Tools](modules/stochastic_tools/examples/index.md)
-- [Tensor Mechanics](modules/tensor_mechanics/examples_index.md)
+- [Combined](combined:modules/combined/tutorials/index.md) (coupling models from multiple modules)
+- [Contact](contact:modules/contact/tutorials/index.md)
+- [Geochemistry](geochemistry:modules/geochemistry/tests_and_examples/index.md)
+- [Heat Conduction](heat_conduction:modules/heat_conduction/tutorials/introduction/index.md)
+- [Level Set](level_set:modules/level_set/level_set_examples.md)
+- [Porous Flow](porous_flow:modules/porous_flow/porous_flow_examples.md)
+- [Reconstructed Dicontinuous Galerkin](rdg:modules/rdg/index.md#example)
+- [Stochastic Tools](stochastic_tools:modules/stochastic_tools/examples/index.md)
+- [Tensor Mechanics](tensor_mechanics:modules/tensor_mechanics/examples_index.md)
 
 ## C++ Programming References id=programming
 

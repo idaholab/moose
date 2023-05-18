@@ -3,7 +3,7 @@
 !syntax description /Kernels/HeatCapacityConductionTimeDerivative
 
 !alert note
-This kernel uses the [DerivativeMaterialInterface](/DerivativeMaterialInterface.md) and accesses
+This kernel uses the [DerivativeMaterialInterface](framework:/DerivativeMaterialInterface.md) and accesses
 derivatives of the heat capacity to build the Jacobian.
 
 See also [/SpecificHeatConductionTimeDerivative.md]

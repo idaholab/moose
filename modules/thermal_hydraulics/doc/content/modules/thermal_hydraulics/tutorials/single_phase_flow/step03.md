@@ -78,7 +78,7 @@ Using a simplified secondary side is a good first step when building a heat exch
 
 ## Postprocessors
 
-The [postprocessor system](syntax/Postprocessors/index.md) comes from the MOOSE framework.
+The [postprocessor system](framework:syntax/Postprocessors/index.md) comes from the MOOSE framework.
 Postprocessors are single `Real` values computed at different locations like blocks, sides, etc.,
 or at different mesh entities like nodes or elements.
 There can also be postprocessors that are not associated with any mesh entities (like a

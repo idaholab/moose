@@ -66,7 +66,7 @@ in a so-called "consistent" manner.  That is, if the true solution $u$ satisfies
 [eqn:pure_advection], it is easy to see, by inspection, that it will also satisfy [eqn:supg], since
 the strong form of the residual appears in the first ``slot'' of the inner product.  The
 stabilization terms are implemented in the code as two additional
-[kernels](syntax/Kernels/index.md): [LevelSetTimeDerivativeSUPG](/LevelSetTimeDerivativeSUPG.md) and
+[kernels](framework:syntax/Kernels/index.md): [LevelSetTimeDerivativeSUPG](/LevelSetTimeDerivativeSUPG.md) and
 [LevelSetAdvectionSUPG](/LevelSetAdvectionSUPG.md).
 
 ## Reinitialization

@@ -24,7 +24,7 @@ in stochastic analysis.
 
 !template! item key=system-scope
 !! system-scope-begin
-The MOOSE Stochastic Tools module builds on the existing framework [MultiApps](MultiApps/index.md)
+The MOOSE Stochastic Tools module builds on the existing framework [MultiApps](framework:MultiApps/index.md)
 system and provides several additional systems to address its purpose. To
 address the efficient evaluation of multiphysics models, the MultiApps system
 is extended to include a "batch" mode of execution. This mode provides a memory
@@ -32,8 +32,8 @@ efficient way of building MooseApp instances and reusing them for different
 perturbations of input parameters. This is useful for stochastic simulations
 with many, many samples to be run without holding them in memory or
 re-initializing potentially costly data allocation. The additional systems that
-the Stochastic Tools module provides include: [Distributions](Distributions/index.md),
-[Samplers](Samplers/index.md), [Trainers](Trainers/index.md), and [Surrogates](Surrogates/index.md).
+the Stochastic Tools module provides include: [Distributions](framework:Distributions/index.md),
+[Samplers](framework:Samplers/index.md), [Trainers](Trainers/index.md), and [Surrogates](Surrogates/index.md).
 Distributions are functions defining the uncertainty of input
 parameters and provides an interface for computing probability density,
 cumulative probability, and quantiles. Samplers define the sampling scheme of

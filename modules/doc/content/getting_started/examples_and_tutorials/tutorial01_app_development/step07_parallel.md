@@ -48,15 +48,15 @@ In the "Execute" tab of Peacock, the `mpiexec` and `--n-threads` options can be 
 
 The [Mesh] System in MOOSE provides several strategies for configuring a [!ac](FE) model to be solved in parallel. Most end-users won't have to alter the default settings. Even application developers need not worry about writing parallel code, since this is handled by the core systems of MOOSE, [libMesh], and [PETSc]. However, advanced users are likely to encounter situations in which the default parallelization techniques are not suitable for the problem they are solving. Such situations are beyond the scope of this tutorial and interested readers may refer to the following for more information:
 
-- [syntax/Mesh/Partitioner/index.md]
-- [syntax/Mesh/index.md#replicated-and-distributed-mesh]
-- [syntax/Mesh/splitting.md]
-- [source/partitioner/PetscExternalPartitioner.md]
+- [framework:syntax/Mesh/Partitioner/index.md]
+- [framework:syntax/Mesh/index.md#replicated-and-distributed-mesh]
+- [framework:syntax/Mesh/splitting.md]
+- [framework:source/partitioner/PetscExternalPartitioner.md]
 
 
 ### Evaluating and Enhancing Performance
 
-MOOSE includes a tool for evaluating performance: [PerfGraphOutput.md]. This enables a report to be printed to the terminal that details the amount of time spent processing different parts of the program as well as the total execution time. By evaluating performance reports, the ideal [parallel type](#commands) and [model setup](#model-setup) can be found. This feature can be enabled from the command-line with `--timing` or from within the input file, e.g.,
+MOOSE includes a tool for evaluating performance: [framework:PerfGraphOutput.md]. This enables a report to be printed to the terminal that details the amount of time spent processing different parts of the program as well as the total execution time. By evaluating performance reports, the ideal [parallel type](#commands) and [model setup](#model-setup) can be found. This feature can be enabled from the command-line with `--timing` or from within the input file, e.g.,
 
 ```
 [Outputs]

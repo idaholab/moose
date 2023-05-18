@@ -28,12 +28,12 @@ using other MeshGenerators, or boundaries can be defined with an external meshin
 tool.
 
 In this case, the temperature on the left boundary is fixed to a constant value
-of 300 using the [`DirichletBC`](DirichletBC.md) 
+of 300 using the [`DirichletBC`](framework:DirichletBC.md) 
 
 #### `FunctionDirichletBC`
 
 The temperature on the right boundary is defined using a time-dependent function
-using the [`FunctionDirichletBC`](FunctionDirichletBC.md). As its name implies,
+using the [`FunctionDirichletBC`](framework:FunctionDirichletBC.md). As its name implies,
 this is a Dirichlet boundary condition that is defined using a function rather
 than a constant value. In this case, an expression for an analytic function is
 provided for the `function` parameter. Alternatively, the name of a separately

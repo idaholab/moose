@@ -60,7 +60,7 @@ $\alpha$ and $\omega$. $\omega$ is given by
 \end{cases}
 \end{equation}
 
-Interpolation of $\bm{\Psi}_{f\pm}$ is described in [Limiters/index.md].
+Interpolation of $\bm{\Psi}_{f\pm}$ is described in [framework:Limiters/index.md].
 
 !syntax parameters /FVKernels/PCNSFVKT
 

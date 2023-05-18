@@ -4,7 +4,7 @@
 
 To begin this tutorial an overview of the transient heat equation is presented, as it will be
 used as the basis of the tutorial throughout the various steps. This equation has already been
-implemented and is provided in the [heat conduction module](modules/heat_conduction/index.md). For
+implemented and is provided in the [heat conduction module](heat_conduction:modules/heat_conduction/index.md). For
 a complete description please refer to the module specific documentation.
 
 ## Transient Heat Equation

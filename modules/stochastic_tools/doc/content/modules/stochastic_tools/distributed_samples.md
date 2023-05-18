@@ -3,7 +3,7 @@
 Stochastic simulations often require the use of a large number random numbers to compute the
 desired calculation. As such it is important to be mindfull of how these numbers are generated
 in parallel. Within the stochastic tools module it is possible to generate the sample data in
-thre modes: replicated, distributed, or iterative. Each [Sampler](samplers/Sampler.md)-based object
+thre modes: replicated, distributed, or iterative. Each [Sampler](framework:samplers/Sampler.md)-based object
 has three methods: `getSamples`, `getLocalSamples`, and `getNextLocalRow`. The first will compute
 a complete dense matrix, the second will only compute the portion of the matrix assigned to the
 current processor, and the last will compute a single row of data within an iterative loop. Sample

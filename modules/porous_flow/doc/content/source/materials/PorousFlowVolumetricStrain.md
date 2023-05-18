@@ -1,6 +1,6 @@
 # PorousFlowVolumetricStrain
 
-This Material computes volumetric strain and volumetric strain rate.  It requires a TensorMechanics strain calculator, which will usually be [ComputeSmallStrain](ComputeSmallStrain.md), to compute the Material property `total_strain`.  It then calculates
+This Material computes volumetric strain and volumetric strain rate.  It requires a TensorMechanics strain calculator, which will usually be [ComputeSmallStrain](tensor_mechanics:ComputeSmallStrain.md), to compute the Material property `total_strain`.  It then calculates
 
 - `PorousFlow_total_volumetric_strain_qp` which is $\sum_{i}\epsilon_{ii}$, where $\epsilon$ is `total_strain`
 - `PorousFlow_volumetric_strain_rate_qp` which is $\sum_{i}(\epsilon_{ii} - \epsilon_{ii}^{\mathrm{old}})/\mathrm{d}t$.

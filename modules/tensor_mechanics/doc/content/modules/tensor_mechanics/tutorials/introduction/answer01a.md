@@ -21,6 +21,6 @@ seconds.
 
 !alert note
 MOOSE provides a system to convert quanities between units right in the input
-file. A list of supported units can be found [here](utils/Units.md). Try using
+file. A list of supported units can be found [here](framework:utils/Units.md). Try using
 `youngs_modulus = ${units 145037.74 lbs/in^2 -> Pa}` in the input file, for an
 explicit conversion from pounds per square inch to Pascal.

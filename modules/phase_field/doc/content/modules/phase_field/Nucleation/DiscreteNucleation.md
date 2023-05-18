@@ -27,14 +27,14 @@ adaptivity, postprocessors, and an auxkernel:
   that triggers refinement at the point of nucleus insertion.
 - [`DiscreteNucleationTimeStep`](postprocessors/DiscreteNucleationTimeStep.md) - a
   postprocessor to provide a time step limit for new nuclei to use with
-  [IterationAdaptiveDT](/IterationAdaptiveDT.md).
+  [IterationAdaptiveDT](framework:/IterationAdaptiveDT.md).
 - [`DiscreteNucleationData`](postprocessors/DiscreteNucleationData.md) - a
   postprocessor to provide diagnostic data on nucleation events.
 - [DiscreteNucleationAux](/DiscreteNucleationAux.md) - an auxkernel to map the
   [`DiscreteNucleationMap`](/DiscreteNucleationMap.md) to an auxvariable field.
 - [DiscreteNucleationForce](/DiscreteNucleationForce.md) - a kernel to map the
   [`DiscreteNucleationMap`](/DiscreteNucleationMap.md) to a variable field in
-  combination with a [Reaction](/Reaction.md) kernel.
+  combination with a [Reaction](framework:/Reaction.md) kernel.
 
 ## Nucleation approaches
 
@@ -63,13 +63,13 @@ following the example set in this material.
 
 #### Conserved order parameters
 
-Use a [`DerivativeSumMaterial`](/DerivativeSumMaterial.md) to add the nucleation
+Use a [`DerivativeSumMaterial`](framework:/DerivativeSumMaterial.md) to add the nucleation
 free energy penalty to the physical free energy contributions of the system
 (which is utilized by a Cahn-Hilliard kernel).
 
 #### Non-Conserved order parameters
 
-Use either a [`DerivativeSumMaterial`](/DerivativeSumMaterial.md) to add the
+Use either a [`DerivativeSumMaterial`](framework:/DerivativeSumMaterial.md) to add the
 nucleation free energy penalty to the physical free energy contributions of the
 system, or add an additional [`AllenCahn`](/AllenCahn.md) kernel using only the
 nucleation penalty energy to the variable influenced by the nucleation process.
@@ -89,7 +89,7 @@ never uses as a target for remapping) in which new grain nuclei can be inserted 
 successively get picked up and remapped onto the evolving order parameters.
 
 Apply both a [DiscreteNucleationForce](/DiscreteNucleationForce.md) and a
-[Reaction](/Reaction.md) kernel to a reserved order parameter and set the
+[Reaction](framework:/Reaction.md) kernel to a reserved order parameter and set the
 `hold_time` in the inserter to `0`. This will cause the modification of the
 reserved OP during only a single timestep, which will be enough for the
 GrainTracker to pick up and remap the new nucleus.

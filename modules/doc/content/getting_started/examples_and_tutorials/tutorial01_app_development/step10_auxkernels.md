@@ -4,18 +4,18 @@
 
 # Step 10: Develop an AuxKernel Object
 
-This step introduces the auxiliary system in MOOSE, which is based on the `AuxKernel` class and operates on `AuxVariables`. These two components are analogous to `Kernel` objects operating on `Variables`, e.g., a `DarcyPressure` object operating on a pressure variable. However, `AuxVariables` do not directly affect the [source/systems/NonlinearSystem.md]---the various methods that contribute to solving
+This step introduces the auxiliary system in MOOSE, which is based on the `AuxKernel` class and operates on `AuxVariables`. These two components are analogous to `Kernel` objects operating on `Variables`, e.g., a `DarcyPressure` object operating on a pressure variable. However, `AuxVariables` do not directly affect the [framework:source/systems/NonlinearSystem.md]---the various methods that contribute to solving
 [!ac](PDEs) by the Galerkin [!ac](FEM).
 
 To demonstrate the basic use of this system, a new `VectorAuxKernel` object that computes the volumetric flux (velocity) associated with a given pressure gradient will be developed in accordance with Darcy's Law. A simple regression test for this new class will be created. It will also be implemented in the pressure vessel model of `pressure_diffusion.i`.
 
 ## Auxiliary Variables
 
-In [Step 5](tutorial01_app_development/step05_kernel_object.md#kernels), it was mentioned that kernels compute residual contributions from the volumetric terms in a [!ac](PDE). The weak form of these terms exposes the primary dependent variable of a given problem, i.e., that which is multiplied by the test function gradient $\nabla \psi$, and which can only be determined by enforcing Dirichlet boundary conditions and solving the resulting system of equations. For example, the primary variable of Darcy's equation is pressure. In the case of solid mechanics (referred to as [Tensor Mechanics](modules/tensor_mechanics/index.md) in MOOSE), it is displacement. In MOOSE lingo, these types of variables are referred to as *nonlinear variables*.
+In [Step 5](tutorial01_app_development/step05_kernel_object.md#kernels), it was mentioned that kernels compute residual contributions from the volumetric terms in a [!ac](PDE). The weak form of these terms exposes the primary dependent variable of a given problem, i.e., that which is multiplied by the test function gradient $\nabla \psi$, and which can only be determined by enforcing Dirichlet boundary conditions and solving the resulting system of equations. For example, the primary variable of Darcy's equation is pressure. In the case of solid mechanics (referred to as [Tensor Mechanics](tensor_mechanics:modules/tensor_mechanics/index.md) in MOOSE), it is displacement. In MOOSE lingo, these types of variables are referred to as *nonlinear variables*.
 
 In contrast to nonlinear variables, *auxiliary variables* are never the primary dependent. These variables can always be computed explicitly based on given information during any part of a solve procedure. But, similar to nonlinear variables, they are continuous and possibly differentiable over individual finite elements and vary based on an assumed shape function. Often, they depend on nonlinear variables and/or vice versa. For example, one auxiliary variable in Darcy's equation is the volumetric flux, which depends on the gradient of a scalar pressure field. In the case of solid mechanics, stress and strain, which both depend on the gradient of a displacement field, are considered as auxiliary variables. In structural dynamics, acceleration and velocity are considered to be auxiliary, but the displacement at any given moment depends on their values. In other cases still, auxiliary variables may have no relation to the nonlinear ones.
 
-Auxiliary variables are declared in the [`[AuxVariables]`](syntax/AuxVariables/index.md) block and have access to the same parameters that their nonlinear counterparts do, e.g., `"order"` and `"family"`. They are designated as one of the following two types depending on their input for the `"family"` parameter:
+Auxiliary variables are declared in the [`[AuxVariables]`](framework:syntax/AuxVariables/index.md) block and have access to the same parameters that their nonlinear counterparts do, e.g., `"order"` and `"family"`. They are designated as one of the following two types depending on their input for the `"family"` parameter:
 
 - Elemental (`family = MONOMIAL` or `family = MONOMIAL_VEC`)
 - Nodal (`family = LAGRANGE` or `family = LAGRANGE_VEC`)
@@ -27,7 +27,7 @@ Elemental variables can couple to any other type of variable, including nonlinea
 
 ## Auxiliary Kernel Objects
 
-The [syntax/AuxKernels/index.md] in MOOSE is one for computing and setting the explicitly known values of auxiliary variables. The main advantage of [`AuxKernel`](src/auxkernels/AuxKernel.C) (or `VectorAuxKernel`) objects is that the variables they operate on are treated like any other MOOSE variable and can be used to decouple systems of equations or for various postprocessing tasks. These objects have access to the following variable members:
+The [framework:syntax/AuxKernels/index.md] in MOOSE is one for computing and setting the explicitly known values of auxiliary variables. The main advantage of [`AuxKernel`](src/auxkernels/AuxKernel.C) (or `VectorAuxKernel`) objects is that the variables they operate on are treated like any other MOOSE variable and can be used to decouple systems of equations or for various postprocessing tasks. These objects have access to the following variable members:
 
 - `_u`, `_grad_u`\\
   Value and gradient of the variable being operated on.
@@ -183,7 +183,7 @@ Next, rerun `peacock -r` on the new results and observe the uniformity in the co
 !alert! tip title=Be aware of the many different types of controllable tolerances.
 There is usually a variety of parameters available to `Executioner` objects that are used to set solver tolerances. Sometimes, even slight changes to them can have profound numerical effects, and certain types of tolerances supersede others. For example, the same desired effect of constantness (up to 16 decimal digits---the available precision for [IEEE 754 decimal64](https://en.wikipedia.org/wiki/Decimal64_floating-point_format) formatted floats (referred to as *double precision* in C++)) can be achieved by setting `nl_rel_tol = 1e-12`, but more nonlinear iterations are required in this case.
 
-*For more information about common solver parameters, please see the [source/executioners/Steady.md] or [source/executioners/Transient.md] page.*
+*For more information about common solver parameters, please see the [framework:source/executioners/Steady.md] or [framework:source/executioners/Transient.md] page.*
 !alert-end!
 
 Now, use PEACOCK to inspect the results of the `DarcyVelocity` test:

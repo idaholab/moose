@@ -47,8 +47,8 @@ where the final term is only used if coupling with mechanics is also desired.  T
 
 For simulations that couple fluid flow to mechanics, the equations are already written in [governing equations](/porous_flow/governing_equations.md), and `PorousFlowBasicTHM` implements these by using the following kernels:
 
-- [StressDivergenceTensors](/StressDivergenceTensors.md)
-- [Gravity](/Gravity.md)
+- [StressDivergenceTensors](tensor_mechanics:/StressDivergenceTensors.md)
+- [Gravity](tensor_mechanics:/Gravity.md)
 - [PorousFlowEffectiveStressCoupling](/PorousFlowEffectiveStressCoupling.md)
 
 ## Required Materials
@@ -61,10 +61,10 @@ For simulations that couple fluid flow to mechanics, the equations are already w
 - [PorousFlowPorosity](/PorousFlowPorosity.md)
 - [PorousFlowMatrixInternalEnergy](/PorousFlowMatrixInternalEnergy.md)
 - A thermal conductivity calculator, eg [PorousFlowThermalConductivityIdeal](/PorousFlowThermalConductivityIdeal.md)
-- An elasticity tensor, eg, [ComputeIsotropicElasticityTensor](/ComputeIsotropicElasticityTensor.md)
-- A strain calculator, eg, [ComputeSmallStrain](/ComputeSmallStrain.md)
-- A thermal expansion eigenstrain calculator, eg, [ComputeThermalExpansionEigenstrain](/ComputeThermalExpansionEigenstrain.md)
-- A stress calculator, eg [ComputeLinearElasticStress](/ComputeLinearElasticStress.md)
+- An elasticity tensor, eg, [ComputeIsotropicElasticityTensor](tensor_mechanics:/ComputeIsotropicElasticityTensor.md)
+- A strain calculator, eg, [ComputeSmallStrain](tensor_mechanics:/ComputeSmallStrain.md)
+- A thermal expansion eigenstrain calculator, eg, [ComputeThermalExpansionEigenstrain](tensor_mechanics:/ComputeThermalExpansionEigenstrain.md)
+- A stress calculator, eg [ComputeLinearElasticStress](tensor_mechanics:/ComputeLinearElasticStress.md)
 
 !alert note
 Before choosing non-standard `pressure_unit` or `time_unit`, you should read the essay on these non-standard choices [here](PorousFlowSingleComponentFluid.md)

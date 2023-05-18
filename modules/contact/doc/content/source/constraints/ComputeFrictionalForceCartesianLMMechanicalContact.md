@@ -35,7 +35,7 @@ contact constraint, which, in general, will be a function of all (two or three) 
 The other degree(s) of freedom are constrained by
 enforcing that tangential tractions follow Coulomb constraints within a semi-smooth Newton approach. Usage of
 Cartesian Lagrange multipliers is recommended when condensing Lagrange multipliers via the variable condensation preconditioner
-(VCP) [VariableCondensationPreconditioner](/VariableCondensationPreconditioner.md).
+(VCP) [VariableCondensationPreconditioner](framework:/VariableCondensationPreconditioner.md).
 
 
 !syntax parameters /Constraints/ComputeFrictionalForceCartesianLMMechanicalContact

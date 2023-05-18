@@ -75,13 +75,13 @@ These values in the `sub.i` file are arbitrary since the stochastic master app w
 
 ## Training
 
-This section describes how to set up an input file to train a surrogate and output the training data. This file will act as the master app and use the [MultiApps](MultiApps/index.md) and [Transfers](Transfers/index.md) systems to communicate and run the [sub app](examples/surrogates/sub.i).
+This section describes how to set up an input file to train a surrogate and output the training data. This file will act as the master app and use the [MultiApps](framework:MultiApps/index.md) and [Transfers](framework:Transfers/index.md) systems to communicate and run the [sub app](examples/surrogates/sub.i).
 
 !! omitting_solve_begin
 
 ### Omitting Solve
 
-Any input file in [MOOSE] needs to include a [Mesh](Mesh/index.md), [Variables](syntax/Variables/index.md), and [Executioner](Executioner/index.md) block. However, the stochastic master app does not actually create or solve a system. So the [StochasticToolsAction](StochasticTools/index.md) builds a minimal model to satisfy these requirements:
+Any input file in [MOOSE] needs to include a [Mesh](framework:Mesh/index.md), [Variables](framework:syntax/Variables/index.md), and [Executioner](framework:Executioner/index.md) block. However, the stochastic master app does not actually create or solve a system. So the [StochasticToolsAction](StochasticTools/index.md) builds a minimal model to satisfy these requirements:
 
 !listing examples/surrogates/nearest_point_training.i block=StochasticTools
 
@@ -97,7 +97,7 @@ The [!param](/Samplers/CartesianProduct/linear_space_items) parameter defines a 
 
 ### MultiApp and Control
 
-[SamplerFullSolveMultiApp.md] is used to setup the communication between the master and sub app with the ability to loop over samples. [MultiAppSamplerControl.md] defines which parameters to perturb, which =must= correspond with the dimensionality defined in the [Sampler](Samplers/index.md).
+[SamplerFullSolveMultiApp.md] is used to setup the communication between the master and sub app with the ability to loop over samples. [MultiAppSamplerControl.md] defines which parameters to perturb, which =must= correspond with the dimensionality defined in the [Sampler](framework:Samplers/index.md).
 
 !listing examples/surrogates/nearest_point_training.i block=MultiApps Controls
 

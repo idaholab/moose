@@ -8,7 +8,7 @@ variable values `v` as its input parameters. The coupled variable values are
 substituted for the `x`,`y`,`z`, and `t` function variables in that order.
 
 One example application is the use of a
-[`PiecewiseMultilinear`](PiecewiseMultilinear.md) function with a data file
+[`PiecewiseMultilinear`](framework:PiecewiseMultilinear.md) function with a data file
 containing a pretabulation of dependent variable values as a function of up to
 four primary variable values.
 

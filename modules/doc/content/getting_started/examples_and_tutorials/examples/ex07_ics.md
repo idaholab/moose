@@ -4,7 +4,7 @@ MOOSE provides several ways to specify initial conditions (ICs) for transient pr
 functionality can be used to specify initial guesses for steady-state problems.  Custom methods
 can be created in addition to using any of many built-in methods for specifying initial
 conditions.  Detailed information for all the built-in initial conditions available can be found
-on the [Initial Condition System Documentation](syntax/ICs/index.md)
+on the [Initial Condition System Documentation](framework:syntax/ICs/index.md)
 
 This example demonstrates creating and using a custom class+object for setting the following
 initial condition:

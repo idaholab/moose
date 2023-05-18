@@ -1,6 +1,6 @@
 # {{ApplicationName}} Binary Access with INL-HPC
 
-Familiarize yourself with [inl/hpc_ondemand.md], and return here with an interactive shell for the
+Familiarize yourself with [modules:inl/hpc_ondemand.md], and return here with an interactive shell for the
 machine you wish to run your application on. NCRC Application binaries are only available on
 Sawtooth and Lemhi.
 
@@ -43,7 +43,7 @@ it to the remote by running `scp` or `rsync` commands.
 
 !alert note title=Copying files from your local machine
 Copying files from your local machine to an HPC cluster first requires that you follow the
-instructions: [inl/hpc_remote.md]. This workflow is for advanced users, comfortable with modifying
+instructions: [modules:inl/hpc_remote.md]. This workflow is for advanced users, comfortable with modifying
 their SSH settings, and familiar with their terminal in general.
 
 Example commands you would use with a terminal opened on your machine to copy files to HPC:
@@ -99,7 +99,7 @@ Next, execute the application with the `-i` argument followed by the input filen
 
 !alert note title=Permission Denied?
 The available applications such as {{ApplicationName}} will depend on being granted access to the
-specific application. Please refer to [inl/index.md] for information about requesting access and the
+specific application. Please refer to [modules:inl/index.md] for information about requesting access and the
 different levels available.
 
 ### (3) Viewing Results id=viewing-results
@@ -129,7 +129,7 @@ by copying the results file from the remote machine to your local machine using 
 
 !alert note title=Copying files from remote HPC machine to your machine
 Copying files from an HPC cluster to your machine first requires that you follow the instructions:
-[inl/hpc_remote.md]. This workflow is for advanced users, comfortable with modifying their SSH
+[modules:inl/hpc_remote.md]. This workflow is for advanced users, comfortable with modifying their SSH
 settings, and familiar with their terminal in general.
 
 Example commands you would use with a terminal opened on your machine to copy files from HPC:
@@ -198,7 +198,7 @@ input file to simulate. The example file is very simple, so we are passing a ref
 ### (2) Submit Script
 
 Submitting the job to the scheduler is trivial. First, be sure to log in to one the desired machines
-login nodes (e.g., using [inl/hpc_ondemand.md] to aquire an Interactive Shell). Change directories
+login nodes (e.g., using [modules:inl/hpc_ondemand.md] to aquire an Interactive Shell). Change directories
 to the location of the script and associated input files and then use the "qsub" command.
 
 ```bash

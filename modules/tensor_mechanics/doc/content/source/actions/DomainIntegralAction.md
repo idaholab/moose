@@ -23,9 +23,9 @@ Details on the theory behind the computation of the various fracture integrals a
 | [InteractionIntegral](InteractionIntegral.md)    | VectorPostprocessor | Computes $K_I$, $K_{II}$, $K_{III}$, or $T$ stress using interaction integral at all points on crack front for a given integration ring |
 | [MixedModeEquivalentK](MixedModeEquivalentK.md)  | VectorPostprocessor | Computes an exquivalent stress intensity factor from $K_I$, $K_{II}$, and $K_{III}$ |
 | [CrackFrontDefinition](CrackFrontDefinition.md)  | UserObject | Defines crack front and provides geometry-related functions used by [JIntegral](JIntegral.md) and [InteractionIntegral](InteractionIntegral.md) |
-| [VectorPostprocessorComponent](VectorPostprocessorComponent.md) | Postprocessor | Reports individual quantities computed by VectorPostprocessors at a specific point on the crack front |
+| [VectorPostprocessorComponent](framework:VectorPostprocessorComponent.md) | Postprocessor | Reports individual quantities computed by VectorPostprocessors at a specific point on the crack front |
 | [CrackFrontData](CrackFrontData.md) | Postprocessor | Reports values of requested variables at crack front points |
-| [VectorOfPostprocessors](VectorOfPostprocessors.md) | VectorPostprocessor | Assembles CrackFrontData values into a vector for output |
+| [VectorOfPostprocessors](framework:VectorOfPostprocessors.md) | VectorPostprocessor | Assembles CrackFrontData values into a vector for output |
 | [ThermalFractureIntegral](ThermalFractureIntegral.md) | Material | Computes derivative of all eigenstrains with respect to temperature for use in fracture integrals |
 | [StrainEnergyDensity](StrainEnergyDensity.md) | Material | Computes strain energy density for use in fracture integrals |
 | [DomainIntegralQFunction](DomainIntegralQFunction.md) | AuxKernel | Optionally populates AuxVariables with values of the geometry-based q function when `output_q=true` |

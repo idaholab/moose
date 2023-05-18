@@ -6,7 +6,7 @@
 
 Adaptive Monte Carlo algorithms, generally speaking, work by proposing the next set
 of input parameters, performing a model evaluation, and deciding whether or not to
-accept the proposed input parameters. Classes derived from the [Sampler](Sampler.md)
+accept the proposed input parameters. Classes derived from the [Sampler](framework:Sampler.md)
 class help propose the next set of input parameters and classes derived from the
 MultiApp system to evaluate the model. However, an additional
 class is needed to make the decision on whether or not to accept the next input parameters

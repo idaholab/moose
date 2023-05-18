@@ -20,6 +20,6 @@ Other test commands & restrictions may be found in the [TestHarness documentatio
 ## Example test configuration in MOOSE test suite
 
 In this example, `RunCommand` tests are ran after `RunApp` tests to run a custom Python script
-to postprocess the output of the [PerfGraphReporter.md].
+to postprocess the output of the [framework:PerfGraphReporter.md].
 
 !listing test/tests/reporters/perf_graph_reporter/tests

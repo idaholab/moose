@@ -22,10 +22,10 @@ phase $k$, and $\kappa_k$ is the wall contact fraction of phase $k$.
 
 The action creates the following MOOSE objects:
 
-- A [/CoupledConvectiveHeatFluxBC.md] on the boundaries provided in the
+- A [heat_conduction:/CoupledConvectiveHeatFluxBC.md] on the boundaries provided in the
   [!param](/CoupledHeatTransfers/CoupledHeatTransferAction/boundary) parameter,
   which implements the heat flux boundary condition described by [solid_side_heat_flux].
-- A [/NearestPointLayeredSideAverage.md] user object to compute the average of
+- A [framework:/NearestPointLayeredSideAverage.md] user object to compute the average of
   the solid-side temperature variable (specified by the
   [!param](/CoupledHeatTransfers/CoupledHeatTransferAction/T) parameter) for
   each axial layer, corresponding to each of the elements in the flow channel.
@@ -37,20 +37,20 @@ The action creates the following MOOSE objects:
   [!param](/CoupledHeatTransfers/CoupledHeatTransferAction/n_elems),
   which correspond to the parameters of the same names in the coupled flow
   channel. These parameters should be copied from the sub input file.
-- A [/MultiAppUserObjectTransfer.md] to transfer the solid-side temperature
+- A [framework:/MultiAppUserObjectTransfer.md] to transfer the solid-side temperature
   layer averages into the sub-app variable provided via the
   [!param](/CoupledHeatTransfers/CoupledHeatTransferAction/T_wall) parameter.
-- A [/MultiAppUserObjectTransfer.md] to transfer each of the phase temperature
+- A [framework:/MultiAppUserObjectTransfer.md] to transfer each of the phase temperature
   layer averages, provided by the user object(s) specified in the
   [!param](/CoupledHeatTransfers/CoupledHeatTransferAction/T_fluid_user_objects)
   parameter, into the master-app variables specified by the
   [!param](/CoupledHeatTransfers/CoupledHeatTransferAction/T_fluid) parameter.
-- A [/MultiAppUserObjectTransfer.md] to transfer each of the phase heat transfer coefficient
+- A [framework:/MultiAppUserObjectTransfer.md] to transfer each of the phase heat transfer coefficient
   layer averages, provided by the user object(s) specified in the
   [!param](/CoupledHeatTransfers/CoupledHeatTransferAction/htc_user_objects)
   parameter, into the master-app variables specified by the
   [!param](/CoupledHeatTransfers/CoupledHeatTransferAction/htc) parameter.
-- If multi-phase, a [/MultiAppUserObjectTransfer.md] to transfer each of the phase wall contact fraction
+- If multi-phase, a [framework:/MultiAppUserObjectTransfer.md] to transfer each of the phase wall contact fraction
   layer averages, provided by the user object(s) specified in the
   [!param](/CoupledHeatTransfers/CoupledHeatTransferAction/kappa_user_objects)
   parameter, into the master-app variables specified by the
@@ -83,7 +83,7 @@ The following must be defined in the sub-app input file:
 - `AuxVariables` for the fluid temperature(s), heat transfer coefficient(s), and
   wall contact fractions (if multi-phase). For example, for THM's single-phase
   flow model, the fluid temperature is already available as an aux variable, but
-  the wall heat transfer coefficient is an AD material property. Thus a [/MaterialRealAux.md]
+  the wall heat transfer coefficient is an AD material property. Thus a [framework:/MaterialRealAux.md]
   must be created:
 
   !listing thermal_hydraulics/test/tests/actions/coupled_heat_transfer_action/sub.i
@@ -94,7 +94,7 @@ The following must be defined in the sub-app input file:
            block=AuxKernels
            link=False
 
-- [/LayeredAverage.md] user objects for the fluid temperature(s), heat transfer coefficient(s),
+- [framework:/LayeredAverage.md] user objects for the fluid temperature(s), heat transfer coefficient(s),
   and wall contact fractions (if multi-phase). For example,
 
   !listing thermal_hydraulics/test/tests/actions/coupled_heat_transfer_action/sub.i

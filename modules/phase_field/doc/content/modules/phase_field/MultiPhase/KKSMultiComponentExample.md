@@ -8,7 +8,7 @@ Cahn-Hilliard equations are required). Each additional Cahn-Hilliard equation
 requires the kernels:
 
 - [`KKSSplitCHCRes`](/KKSSplitCHCRes.md)
-- [`CoupledTimeDerivative`](/CoupledTimeDerivative.md)
+- [`CoupledTimeDerivative`](framework:/CoupledTimeDerivative.md)
 - [`SplitCHWRes`](/SplitCHWRes.md)
 
 To enforce the composition and chemical potential constraints, each additional component also requires the kernels

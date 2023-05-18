@@ -6,7 +6,7 @@ The Stochastic Tools module contains a system for training and running surrogate
 objects inherit from the `SurrogateModel` class and are added to a simulation using the
 `[Surrogates]` block in the input file. `SurrogateModel` objects are standalone utilities designed to
 be directly called by other objects in similar fashion to MOOSE
-[Function objects](Functions/index.md), refer to [#using-model] for more information.
+[Function objects](framework:Functions/index.md), refer to [#using-model] for more information.
 
 ## Creating a SurrogateModel
 

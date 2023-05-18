@@ -4,7 +4,7 @@
 
 ## Install MOOSE
 
-To use the Reactor Module you must first [Install MOOSE](getting_started/installation/index.md).
+To use the Reactor Module you must first [Install MOOSE](modules:getting_started/installation/index.md).
 
 In this tutorial, `$MOOSE_DIR` is defined as the MOOSE installation directory. This can be set in a Bash shell like this (assuming you installed in `~/projects/moose`):
 

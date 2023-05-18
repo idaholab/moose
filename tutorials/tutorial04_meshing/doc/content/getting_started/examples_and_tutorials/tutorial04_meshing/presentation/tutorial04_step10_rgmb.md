@@ -19,7 +19,7 @@ The RGMB system is useful for regular 2D or extruded 3D Cartesian or hexagonal g
 
 ## ReactorMeshParams
 
-[ReactorMeshParams.md] acts as a container for storing global data about the reactor geometry that needs to be retrieved at different stages of the RGMB mesh generation workflow. In particular, the union axial grid for the extruded geometry is defined here and propagated to the entire mesh upon the extrusion step.
+[reactor:ReactorMeshParams.md] acts as a container for storing global data about the reactor geometry that needs to be retrieved at different stages of the RGMB mesh generation workflow. In particular, the union axial grid for the extruded geometry is defined here and propagated to the entire mesh upon the extrusion step.
 
 !listing rgmb_mesh_generators/rgmb_core_cartesian.i
          block=Mesh/rmp
@@ -29,7 +29,7 @@ The RGMB system is useful for regular 2D or extruded 3D Cartesian or hexagonal g
 
 ## PinMeshGenerator
 
-[PinMeshGenerator.md] calls [PolygonConcentricCircleMeshGenerator.md] to generate a Cartesian or hexagonal pin-like structure (pin, background, and duct) (mesh colored by `subdomain_id` (left) and `region_id` (right))
+[reactor:PinMeshGenerator.md] calls [PolygonConcentricCircleMeshGenerator.md] to generate a Cartesian or hexagonal pin-like structure (pin, background, and duct) (mesh colored by `subdomain_id` (left) and `region_id` (right))
 
 !row!
 !col small=12 medium=6 large=8
@@ -63,7 +63,7 @@ The RGMB system is useful for regular 2D or extruded 3D Cartesian or hexagonal g
 
 ## AssemblyMeshGenerator
 
-[AssemblyMeshGenerator.md] calls [PatternedHexMeshGenerator.md] or [PatternedMeshGenerator.md] to generate a Cartesian or hexagonal lattice of pin-like structures. (assembly colored by `subdomain_id` (left), `region_id` (middle), and `pin_id` (right))
+[reactor:AssemblyMeshGenerator.md] calls [PatternedHexMeshGenerator.md] or [framework:PatternedMeshGenerator.md] to generate a Cartesian or hexagonal lattice of pin-like structures. (assembly colored by `subdomain_id` (left), `region_id` (middle), and `pin_id` (right))
 
 !row!
 !col small=12 medium=6 large=8
@@ -97,7 +97,7 @@ The RGMB system is useful for regular 2D or extruded 3D Cartesian or hexagonal g
 
 ## CoreMeshGenerator
 
-[CoreMeshGenerator.md] calls [PatternedHexMeshGenerator.md] or [PatternedMeshGenerator.md] to generate a Cartesian or hexagonal lattice of assembly-like structures. (core colored by `subdomain_id` (left), `region_id` (middle), and `assembly_id` (right))
+[reactor:CoreMeshGenerator.md calls [PatternedHexMeshGenerator.md] or [framework:PatternedMeshGenerator.md] to generate a Cartesian or hexagonal lattice of assembly-like structures. (core colored by `subdomain_id` (left), `region_id` (middle), and `assembly_id` (right))
 
 !row!
 !col small=12 medium=6 large=8

@@ -8,24 +8,24 @@ An alternative type of symmetry occurs in certain "unit cells" which contain hal
 
 ### Object
 
-- [HexagonMeshTrimmer.md]
-- (Cartesian sibling -- [CartesianMeshTrimmer.md])
+- [reactor:HexagonMeshTrimmer.md]
+- (Cartesian sibling -- [reactor:CartesianMeshTrimmer.md])
 
 ### Geometry Features
 
-- Two types of trimming can be performed by [HexagonMeshTrimmer.md]: Peripheral Trimming and Through-the-Center Trimming.
+- Two types of trimming can be performed by [reactor:HexagonMeshTrimmer.md]: Peripheral Trimming and Through-the-Center Trimming.
 
 ### Notes
 
 - Peripheral trimming can be performed on six possible lines, each of which is parallel to a side of the hexagon and crosses the center of the pins laid out in that direction. Whether or not to trim a particular side of the hexagon is denoted by `1` (trim) or `0` (do not trim) in the 6-dimensional array [!param](/Mesh/HexagonMeshTrimmer/trim_peripheral_region).
 - Peripheral trimming can only be used for assembly meshes
 - Through-the-center trimming can be used for both assembly and core meshes. This mesh trimmer object RETAINS any sectors which are included between the trimming line defined by [!param](/Mesh/HexagonMeshTrimmer/center_trim_starting_index) to the trimming line defined by [!param](/Mesh/HexagonMeshTrimmer/center_trim_ending_index) swept out in a counterclockwise direction. Other sectors are discarded.
-- When trimming along a line that lies exactly on element boundaries and does not cross any element interiors, an alternative mesh generator called [PlaneDeletionGenerator.md] can perform equivalent functionality
-- When trimming along a line which crosses element interiors, [PlaneDeletionGenerator.md] leaves behind a zig-zag boundary, whereas these mesh generators smooth the trimmed boundary by moving nearby nodes to the trimmed line as needed. This may result in the creation of new triangular element blocks to avoid degenerate quadrilateral elements.
+- When trimming along a line that lies exactly on element boundaries and does not cross any element interiors, an alternative mesh generator called [framework:PlaneDeletionGenerator.md] can perform equivalent functionality
+- When trimming along a line which crosses element interiors, [framework:PlaneDeletionGenerator.md] leaves behind a zig-zag boundary, whereas these mesh generators smooth the trimmed boundary by moving nearby nodes to the trimmed line as needed. This may result in the creation of new triangular element blocks to avoid degenerate quadrilateral elements.
 
 !media tutorial04_meshing/base_ex_hmt.png
        id=tutorial04-base_ex_hmt
-       caption=Possible trimming lines of [HexagonMeshTrimmer.md].
+       caption=Possible trimming lines of [reactor:HexagonMeshTrimmer.md].
        style=width:50%;display:block;margin-left:auto;margin-right:auto;
 
 ### Peripheral Trimming Example
@@ -54,12 +54,12 @@ An alternative type of symmetry occurs in certain "unit cells" which contain hal
 
 ## Assembly Periphery Modification
 
-Assemblies with identical pin numbers and discretizations can be easily stitched together using [PatternedHexMeshGenerator.md]. However, real reactor cores often contain assemblies of various types which have different numbers of pins (e.g., control assembly and fuel assembly). When the number of pins in neighboring assemblies does not match, the outer boundaries of these neighboring assemblies will in general not match each other unless the user increases the azimuthal discretization of each mesh until the two edges have the same node count. This procedure is undesirable as it can excessively refine the mesh beyond what is needed. [PatternedHexPeripheralModifier.md] is available to modify the boundary nodes of an existing assembly mesh to enforce a specific number of nodes (uniformly distributed) to facilitate stitching to neighboring assemblies. The mesh generator does this by changing the outermost layer of elements into a transition layer which either increases or decreases the number of nodes on the outer boundary.
+Assemblies with identical pin numbers and discretizations can be easily stitched together using [reactor:PatternedHexMeshGenerator.md]. However, real reactor cores often contain assemblies of various types which have different numbers of pins (e.g., control assembly and fuel assembly). When the number of pins in neighboring assemblies does not match, the outer boundaries of these neighboring assemblies will in general not match each other unless the user increases the azimuthal discretization of each mesh until the two edges have the same node count. This procedure is undesirable as it can excessively refine the mesh beyond what is needed. [reactor:PatternedHexPeripheralModifier.md] is available to modify the boundary nodes of an existing assembly mesh to enforce a specific number of nodes (uniformly distributed) to facilitate stitching to neighboring assemblies. The mesh generator does this by changing the outermost layer of elements into a transition layer which either increases or decreases the number of nodes on the outer boundary.
 
 ### Object
 
-- [PatternedHexPeripheralModifier.md]
-- (Cartesian sibling -- [PatternedCartesianPeripheralModifier.md])
+- [reactor:PatternedHexPeripheralModifier.md]
+- (Cartesian sibling -- [reactor:PatternedCartesianPeripheralModifier.md])
 
 ### Geometry Features
 
@@ -73,7 +73,7 @@ Assemblies with identical pin numbers and discretizations can be easily stitched
 
 !media tutorial04_meshing/base_ex_phpm.png
        id=tutorial04-base_ex_phpm
-       caption=An example assembly mesh with its peripheral region modified by [PatternedHexPeripheralModifier.md].
+       caption=An example assembly mesh with its peripheral region modified by [reactor:PatternedHexPeripheralModifier.md].
        style=width:50%;display:block;margin-left:auto;margin-right:auto;
 
 !listing base_mesh_generators/common_geo.i
@@ -83,11 +83,11 @@ Assemblies with identical pin numbers and discretizations can be easily stitched
 
 ## Extrusion to 3D
 
-Many reactor geometries can be accurately described with extruded geometry in the axial direction. Extrusion from a 2D mesh to 3D is a very common mesh operation handled by [AdvancedExtruderGenerator.md]. The height of each layer, meshing control, subdomain IDs, and extra element integers can be specified by the user in this mesh generator to effectively generate a 3D mesh from a 2D one.
+Many reactor geometries can be accurately described with extruded geometry in the axial direction. Extrusion from a 2D mesh to 3D is a very common mesh operation handled by [framework:AdvancedExtruderGenerator.md]. The height of each layer, meshing control, subdomain IDs, and extra element integers can be specified by the user in this mesh generator to effectively generate a 3D mesh from a 2D one.
 
 ### Object
 
-- [AdvancedExtruderGenerator.md]
+- [framework:AdvancedExtruderGenerator.md]
 
 ### Geometry Features
 
@@ -105,7 +105,7 @@ Many reactor geometries can be accurately described with extruded geometry in th
 
 !media tutorial04_meshing/base_ex_aeg.png
        id=tutorial04-base_ex_aeg
-       caption=An example extruded mesh generated by [AdvancedExtruderGenerator.md] with subdomains swapped.
+       caption=An example extruded mesh generated by [framework:AdvancedExtruderGenerator.md] with subdomains swapped.
        style=width:50%;display:block;margin-left:auto;margin-right:auto;
 
 !listing base_mesh_generators/common_geo.i

@@ -70,7 +70,7 @@ The boundary conditions corresponding to production are a withdrawal of fluid ma
 
 !listing modules/porous_flow/examples/ates/ates.i start=[produce_heat] end=[Controls]
 
-These are controlled using similar `Controls` as the injection phase.  Notice the `save_in` for the heat withdrawal.  This records the rate of heat leaving each node.  To find the total rate of heat loss (with units J.day$^{-1}$), a [NodalSum](NodalSum.md) is used:
+These are controlled using similar `Controls` as the injection phase.  Notice the `save_in` for the heat withdrawal.  This records the rate of heat leaving each node.  To find the total rate of heat loss (with units J.day$^{-1}$), a [NodalSum](framework:NodalSum.md) is used:
 
 !listing modules/porous_flow/examples/ates/ates.i start=[heat_out_fromBC] end=[heat_out_per_timestep]
 

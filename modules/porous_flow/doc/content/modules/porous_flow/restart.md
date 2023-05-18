@@ -79,10 +79,10 @@ Due to the large density contrast between the injection methane (with a density 
 
 ## Flexible restart using a SolutionUserObject
 
-In the above example, the mesh used in the gas injection problem is initially identical to the mesh used in the gravity equilibrium run. MOOSE provides a more flexible restart capability where the mesh used in the subsequent simulation does not have to be identical to the mesh used in the initial simulation. Instead, the variable values from the initial simulation can be projected onto a new mesh in a subsequent simulation using a [SolutionUserObject](/SolutionUserObject.md) and
-[SolutionFunction](/SolutionFunction.md).
+In the above example, the mesh used in the gas injection problem is initially identical to the mesh used in the gravity equilibrium run. MOOSE provides a more flexible restart capability where the mesh used in the subsequent simulation does not have to be identical to the mesh used in the initial simulation. Instead, the variable values from the initial simulation can be projected onto a new mesh in a subsequent simulation using a [SolutionUserObject](framework:/SolutionUserObject.md) and
+[SolutionFunction](framework:/SolutionFunction.md).
 
-It is clear from the results shown above that the methane is expected near the upper left of the model (near the top of the injection well). We could refine the original mesh in that region using  mesh adaptivity, but we instead construct a new mesh that is refined in that region and use a [SolutionUserObject](/SolutionUserObject.md) and [SolutionFunction](/SolutionFunction.md) to project the initial value for liquid porepressure from the coarse gravity equilibrium mesh to the new mesh.
+It is clear from the results shown above that the methane is expected near the upper left of the model (near the top of the injection well). We could refine the original mesh in that region using  mesh adaptivity, but we instead construct a new mesh that is refined in that region and use a [SolutionUserObject](framework:/SolutionUserObject.md) and [SolutionFunction](framework:/SolutionFunction.md) to project the initial value for liquid porepressure from the coarse gravity equilibrium mesh to the new mesh.
 
 The input file for this example is
 
@@ -100,7 +100,7 @@ A SolutionFunction is used to spatially interpolate these values
 
 !listing modules/porous_flow/examples/restart/gas_injection_new_mesh.i block=Functions/ppliq_ic
 
-and finally a [FunctionIC](/FunctionIC.md) is used to set the initial condition of the liquid porepressure
+and finally a [FunctionIC](framework:/FunctionIC.md) is used to set the initial condition of the liquid porepressure
 
 !listing modules/porous_flow/examples/restart/gas_injection_new_mesh.i block=ICs
 

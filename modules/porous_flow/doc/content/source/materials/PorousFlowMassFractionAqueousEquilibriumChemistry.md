@@ -14,7 +14,7 @@ process that MOOSE uses to find the solution.  Therefore, care must be taken to 
 reactions so that the primary species concentrations remain small, but nonzero.
 
 Details concerning aqueous equilibrium chemistry may be found in the
-[`chemical reactions`](/chemical_reactions/index.md) module.  The
+[`chemical reactions`](chemical_reactions:/chemical_reactions/index.md) module.  The
 `PorousFlowMassFractionAqueousEquilibriumChemistry` computes the secondary concentrations, and adds
 them appropriately to the primary concentrations to form the mass-fractions.  There are two main
 differences between the `chemical reactions` module and `PorousFlow`.  These are:

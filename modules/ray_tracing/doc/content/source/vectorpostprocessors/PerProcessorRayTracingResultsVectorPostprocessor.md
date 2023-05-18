@@ -3,7 +3,7 @@
 !syntax description /VectorPostprocessors/PerProcessorRayTracingResultsVectorPostprocessor
 
 This object is particularly useful for quantifying load balance between processors when
-using the [ray_tracing/index.md]. It pairs well with a [VectorPostprocessorVisualizationAux.md]
+using the [ray_tracing/index.md]. It pairs well with a [framework:VectorPostprocessorVisualizationAux.md]
 for visualization.
 
 The non-advanced results that are available are as follows:

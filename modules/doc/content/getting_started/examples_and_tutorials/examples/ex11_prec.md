@@ -1,6 +1,6 @@
 # Example 11 : Preconditioning
 
-For a detailed discussion on preconditioning in MOOSE, see [syntax/Preconditioning/index.md].
+For a detailed discussion on preconditioning in MOOSE, see [framework:syntax/Preconditioning/index.md].
 
 To summarize, an accurate and complete preconditioning matrix can be important for an efficient Preconditioned Jacobian-Free Newton-Krylove (PJFNK) solve. It's absolutely essential for `solve_type = NEWTON`. MOOSE has ultiple options for buiding the preconditioning matrix :
 

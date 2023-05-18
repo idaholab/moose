@@ -28,7 +28,7 @@ more concise. The following table details the types of classes created by utiliz
 !table id=incr_crack_xfem_action_table caption=Correspondence Among Action Functionality and MooseObjects for `XFEMAction` when `output_cut_plane` = `true`.
 | Functionality     | Replaced Classes   | Associated Parameters   |
 |-------------------|--------------------|-------------------------|
-| Add `AuxVariables` for various cut parameters and volume fraction calculations | [AuxVariables](/AuxVariables/index.md) |   |
+| Add `AuxVariables` for various cut parameters and volume fraction calculations | [AuxVariables](framework:/AuxVariables/index.md) |   |
 | Add `AuxKernels` for various cut parameters and volume fraction calculations | [XFEMVolFracAux](/XFEMVolFracAux.md) [XFEMCutPlaneAux](/XFEMCutPlaneAux.md) |   |
 
 Several objects are instantiated when using the `output_cut_plane` option. These `AuxVariables` and
@@ -43,7 +43,7 @@ Next, the class types created when using crack tip enrichment are detailed:
 !table id=near_tip_xfem_action_table caption=Correspondence Among Action Functionality and MooseObjects for `XFEMAction` when `use_crack_tip_enrichment` = `true`.
 | Functionality     | Replaced Classes   | Associated Parameters   |
 |-------------------|--------------------|-------------------------|
-| Add enrichment displacement variables | [Variables](syntax/Variables/index.md) | `enrichment_displacements`: vector of enrichment displacement names |
+| Add enrichment displacement variables | [Variables](framework:syntax/Variables/index.md) | `enrichment_displacements`: vector of enrichment displacement names |
 | Add stress divergence tensor kernels for crack tip enrichment | [CrackTipEnrichmentStressDivergenceTensors](/CrackTipEnrichmentStressDivergenceTensors.md) | `crack_front_definition`, `enrichment_displacements`, `displacements` |
 | Add crack tip enrichment boundary conditions | [CrackTipEnrichmentCutOffBC](/CrackTipEnrichmentCutOffBC.md) | `cut_off_boundary`, `cut_off_radius`, `crack_front_definition` |
 

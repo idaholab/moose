@@ -31,7 +31,7 @@ Multiphysics Object-Oriented Simulation Environment
 - Simple [installation](getting_started/installation/index.md)
 - Extensive [tutorials](getting_started/examples_and_tutorials/index.md)
 - Built-in [physics modules](modules/index.md)
-- Natural [multi-scale capability](syntax/MultiApps/index.md)
+- Natural [multi-scale capability](framework:syntax/MultiApps/index.md)
 
 !col-end!
 

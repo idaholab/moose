@@ -16,4 +16,4 @@ MOOSE uses tests to do both continuous integration (CI) and continuous deploymen
 
 ## TestHarness
 
-The `TestHarness` is a piece of Python software that is responsible for finding and running tests.  You can read more about it on the [TestHarness](TestHarness.md) page.
+The `TestHarness` is a piece of Python software that is responsible for finding and running tests.  You can read more about it on the [TestHarness](python:TestHarness.md) page.

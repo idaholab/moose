@@ -1,6 +1,6 @@
 # INSFVOutletPressureBC
 
-This object simply wraps [`FVFunctionDirichletBC`](FVFunctionDirichletBC.md), so
+This object simply wraps [`FVFunctionDirichletBC`](framework:FVFunctionDirichletBC.md), so
 a required parameter is `function` describing the pressure along an outlet
 boundary. The `variable` parameter should correspond to the pressure
 variable. `INSFVOutletPressureBC` also inherits from `INSFVFullyDevelopedBC`

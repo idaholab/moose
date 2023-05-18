@@ -5,9 +5,9 @@
 
 ## Overview
 
-This trainer is dedicated to train a [utils/LibtorchArtificialNeuralNet.md]. For
+This trainer is dedicated to train a [framework:utils/LibtorchArtificialNeuralNet.md]. For
 a detailed description of the neural network trained by this object, visit
-[utils/LibtorchArtificialNeuralNet.md]. The user can customize the neural network in the
+[framework:utils/LibtorchArtificialNeuralNet.md]. The user can customize the neural network in the
 trainer, however the optimization algorithm is hardcoded to be Adam.
 
 ## Example Input File Syntax

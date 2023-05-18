@@ -4,7 +4,7 @@ MOOSE is able to output vector postprocessor comma separated value (CSV) files.
 Also, other generated CSV files for input and output from MOOSE are created.
 Combine CSV is a simple tool to combine CSV files into one file.
 Combine CSV is able to output the combine CSV file in a bilinear format that
-may be directly used by MOOSE (e.g., [PiecewiseBilinear.md]).
+may be directly used by MOOSE (e.g., [framework:PiecewiseBilinear.md]).
 
 Input files require a specific format for names. The basename is followed by
 a four digit code representing the timestep number and then ".csv" extension.

@@ -8,7 +8,7 @@ A summary of the objects that should be derived based on desired operation on se
 
 - [RayKernel.md]: Segments contribute to residuals and Jacobians (example: line sources, see [LineSourceRayKernel.md])
 - [ADRayKernel.md]: Segments contribute to residuals and use automatic-differentiation to compute the Jacobian
-- [GenericRayKernel.md]: Templated object that enables segment contribution to residuals and Jacobians with and without automatic differentiation (serves a similar purpose as [GenericKernel.md])
+- [GenericRayKernel.md]: Templated object that enables segment contribution to residuals and Jacobians with and without automatic differentiation (serves a similar purpose as [framework:GenericKernel.md])
 - [IntegralRayKernel.md]: Performs an integral on each segment and accumulates the integrated result into the [Ray.md] (example: integral of a variable along a line, see [VariableIntegralRayKernel.md])
 - [AuxRayKernel.md]: Segments contribute to an AuxVariable in a user-defined manner (example: segment distances are accumulated into an AuxVariable, see [RayDistanceAux.md])
 - [GeneralRayKernel.md]: General purpose object that can be adapted to operate on segments in a manner that is not covered by the classes listed above

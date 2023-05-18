@@ -29,7 +29,7 @@ input.
 ### Test Input Parameter Errors
 
 Test specification files used to control [!ac](MOOSE) Tool testing, as in [!ac](MOOSE) itself, uses
-the standard HIT syntax that MOOSE [uses](application_usage/input_syntax.md). File parsing automatically
+the standard HIT syntax that MOOSE [uses](modules:application_usage/input_syntax.md). File parsing automatically
 handles syntax mistakes and reports them as errors. For example, consider the following test specification
 file that contains a duplicate parameter:
 

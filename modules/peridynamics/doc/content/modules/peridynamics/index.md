@@ -29,9 +29,9 @@ The MOOSE peridynamic module is a library for solving classical solid mechanics 
 
 In peridynamic correspondence material model, concepts such as strain and stress tensors from classical Continuum Mechanics still apply, i.e., given the nonlocal deformation gradient calculated in peridynamics, calculations based on nonlocal deformation gradient to establish the constitutive relationship between stress and strain follows the same methodology as in local continuum theory. Strain and stress tensors from Continuum Mechanics reside at each discrete material point rather than quadrature point in peridynamic correspondence material model. Plasticity and creep material models from tensor mechanics can be directly used in peridynamics for nonlinear deformation modeling.
 
-- [Strains](tensor_mechanics/Strains.md)
+- [Strains](tensor_mechanics:tensor_mechanics/Strains.md)
 
-- [Stresses](tensor_mechanics/Stresses.md)
+- [Stresses](tensor_mechanics:tensor_mechanics/Stresses.md)
 
 ## Spatial Discretization
 

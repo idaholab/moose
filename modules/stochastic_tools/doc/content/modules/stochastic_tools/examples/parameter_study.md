@@ -71,14 +71,14 @@ is empty in this example.
 
 ### Distributions and Samplers Blocks
 
-The [Distributions](syntax/Distributions/index.md) block defines the statistical distribution
+The [Distributions](framework:syntax/Distributions/index.md) block defines the statistical distribution
 for each of the uncertain parameters ($T_0$, $q_0$, $\gamma$, and $s$) to be defined. For this
 example, the diffusivity ($\gamma$) is defined by a uniform distribution, the flux ($q_0$) by
 a three-parameter Weibull, and $T_0$ and $s$ a normal distribution.
 
 !listing examples/parameter_study/main.i block=Distributions
 
-The [Samplers](syntax/Samplers/index.md) block defines how the distributions shall be sampled for the
+The [Samplers](framework:syntax/Samplers/index.md) block defines how the distributions shall be sampled for the
 parameter study. In this case a Latin hypercube sampling strategy is employed. A total of 5000 samples
 are being used.
 
@@ -121,7 +121,7 @@ for 5000 samples.
 
 ### Transfers Block id=transfers
 
-The [Transfers](syntax/Transfers/index.md) block serves two purposes. First, the "parameters"
+The [Transfers](framework:syntax/Transfers/index.md) block serves two purposes. First, the "parameters"
 sub-block instantiates a [SamplerParameterTransfer.md] object that transfers each row of data from
 the Sampler object to a sub-application simulation. Within the sub-application the `parameters` listed
 in this sub-block replace the values in the sub-application. This substitution occurs using
@@ -138,7 +138,7 @@ a [StochasticReporter.md] object (as discussed next).
 
 ### Reporters Block
 
-The [Reporters](syntax/Reporters/index.md) block, as mentioned above,
+The [Reporters](framework:syntax/Reporters/index.md) block, as mentioned above,
 is used to collect the stochastic results. The "results" sub-block instantiates a
 [StochasticReporter.md] object, which is designed for this purpose. The resulting object will
 contain a vector for each of the quantities of interest: $T_{avg}$ and $q_{left}$.
@@ -153,8 +153,8 @@ documentation and capabilities for this object.
 
 ### Outputs Block
 
-The [Outputs](syntax/Outputs/index.md) block enables the output of the Reporter data
-using JSON files, see [JSONOutput.md] for more details.
+The [Outputs](framework:syntax/Outputs/index.md) block enables the output of the Reporter data
+using JSON files, see [framework:JSONOutput.md] for more details.
 
 !listing examples/parameter_study/main.i block=Outputs
 
@@ -226,7 +226,7 @@ will show how to modify the previous inputs for quantities that are time-depende
 
 ### Sub-application Input Modifications
 
-The only change to the sub-app input is the addition of a [LineValueSampler.md] vector-postprocessor
+The only change to the sub-app input is the addition of a [framework:LineValueSampler.md] vector-postprocessor
 that computes the spatial distribution of the temperature.
 
 !listing examples/parameter_study/diffusion_time.i block=VectorPostprocessors
@@ -234,16 +234,16 @@ that computes the spatial distribution of the temperature.
 ### Main Input Modifications
 
 The two significant modifications to the main input is the change to a [SamplerTransientMultiApp.md] and
-the addition of the [Executioner](syntax/Executioner/index.md) block. The combination of these two blocks
+the addition of the [Executioner](framework:syntax/Executioner/index.md) block. The combination of these two blocks
 will run the sampled sub-applications in tandem with the time-step defined in the main input. The main
 application in this case will "drive" the overall simulation (and does support sub-cycling). Here, we
 use the same time stepping as in the sub-application.
 
 !listing examples/parameter_study/main_time.i block=MultiApps Executioner
 
-We will also add the transfer for the [LineValueSampler.md] included in the sub input, while also computing
-statistics and transferring the x-coord values. Note that the [ConstantReporter.md] is just a place holder
-for the [MultiAppReporterTransfer.md] to transfer the x-coord data into.
+We will also add the transfer for the [framework:LineValueSampler.md] included in the sub input, while also computing
+statistics and transferring the x-coord values. Note that the [framework:ConstantReporter.md] is just a place holder
+for the [framework:MultiAppReporterTransfer.md] to transfer the x-coord data into.
 
 !listing examples/parameter_study/main_time.i block=Transfers Reporters
 
@@ -293,11 +293,11 @@ python ../../python/visualize_statistics.py main_time_out.json --line-plot \
 
 You might find that using [SamplerTransientMultiApp.md], like in the previous sections, is a bit
 restrictive. For instance, the time steps in the sub-app input must be defined by the steps in the main input.
-This restricts the use of [TimeSteppers](syntax/Executioner/TimeStepper/index.md) like [IterationAdaptiveDT.md]
+This restricts the use of [TimeSteppers](framework:syntax/Executioner/TimeStepper/index.md) like [framework:IterationAdaptiveDT.md]
 and sub-cycling sub-sub-apps becomes difficult. Also, [SamplerTransientMultiApp.md] does not support
 `batch-reset` mode, so there isn't a memory-efficient way of sampling with [MultiAppSamplerControl.md].
 
-An alternative to using [SamplerTransientMultiApp.md] is to leverage [AccumulateReporter.md], which accumulates
+An alternative to using [SamplerTransientMultiApp.md] is to leverage [framework:AccumulateReporter.md], which accumulates
 postprocessors/vector-postprocessor/reporters into vector where each element is the value at a certain
 time-step.
 

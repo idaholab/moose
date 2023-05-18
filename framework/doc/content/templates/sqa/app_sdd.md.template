@@ -2,7 +2,7 @@
 
 !template! item key=pre-intro
 !alert! note
-This document serves as an addendum to [framework_sdd.md] and captures information for
+This document serves as an addendum to [framework:framework_sdd.md] and captures information for
 [!ac](SDD) specific to the {{app}} application.
 
 !sqa dependencies suffix=sdd category={{category}}
@@ -17,7 +17,7 @@ piece of end-user (developer) code that goes into the system follows a well-defi
 interface for the underlying systems that those object plug into. These descriptions are
 provided through developer-supplied "markdown" files that are required for all new
 objects that are developed as part of {{app}}. More information about the design
-documentation for MOOSE-based applications like {{app}} can be found in [framework/documenting.md].
+documentation for MOOSE-based applications like {{app}} can be found in [framework:framework/documenting.md].
 !template-end!
 
 !template item key=definitions

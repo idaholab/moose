@@ -61,4 +61,4 @@ on the [help/contact_us.md optional=True] page.
 
 All users of PorousFlow are encouraged to assist in the development of this module. There are
 a large number of possible enhancements that can be implemented, and better documentation that could
-be contributed, so consider becoming a developer yourself. Follow the MOOSE standards for [contributing code](framework/contributing.md).
+be contributed, so consider becoming a developer yourself. Follow the MOOSE standards for [contributing code](framework:framework/contributing.md).

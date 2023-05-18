@@ -335,7 +335,7 @@ To perform reactive-transport simulations, coupling with the `PorousFlow` module
 - sophisticated numerical stabilization
 
 Nevertheless, rudimentary transport is available as part of the `geochemistry` module.
-The relevant Kernels are [GeochemistryTimeDerivative](GeochemistryTimeDerivative.md), [ConservativeAdvection](ConservativeAdvection.md) (preferably with `upwinding_type = full`) and [GeochemistryDispersion](GeochemistryDispersion.md).  The following material describes reactive transport in MOOSE, independently of whether the `PorousFlow` or `geochemistry` module is being used to facilitate the transport.
+The relevant Kernels are [GeochemistryTimeDerivative](GeochemistryTimeDerivative.md), [ConservativeAdvection](framework:ConservativeAdvection.md) (preferably with `upwinding_type = full`) and [GeochemistryDispersion](GeochemistryDispersion.md).  The following material describes reactive transport in MOOSE, independently of whether the `PorousFlow` or `geochemistry` module is being used to facilitate the transport.
 
 ### Volumes, concentrations and mass conservation
 

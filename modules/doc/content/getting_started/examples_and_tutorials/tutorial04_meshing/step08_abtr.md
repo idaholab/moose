@@ -19,11 +19,11 @@ The step-by-step instructions to build the mesh are followed by notes on how to 
 
 ## Define Homogeneous Hexagonal Assemblies
 
-The first step is to define unique mesh objects for each different assembly type (fuel, control, shield, reflector, dummy). Since this is a homogenized model, we use [SimpleHexagonGenerator.md] to create each assembly mesh.
+The first step is to define unique mesh objects for each different assembly type (fuel, control, shield, reflector, dummy). Since this is a homogenized model, we use [reactor:SimpleHexagonGenerator.md] to create each assembly mesh.
 
 ### Object
 
-- [SimpleHexagonGenerator.md]
+- [reactor:SimpleHexagonGenerator.md]
 
 ### Geometry Features
 
@@ -55,7 +55,7 @@ When we later stitch assemblies into a hexagonal core, the stitcher requires a "
 
 ### Object
 
-- [SimpleHexagonGenerator.md]
+- [reactor:SimpleHexagonGenerator.md]
 
 ### Geometry Features
 
@@ -80,7 +80,7 @@ Now that assemblies have been defined, we stitch the assemblies into a perfect h
 
 ### Object
 
-- [PatternedHexMeshGenerator.md]
+- [reactor:PatternedHexMeshGenerator.md]
 
 ### Geometry Features
 
@@ -108,7 +108,7 @@ Dummy assemblies were only included to facilitate the core pattern generation an
 
 ### Object
 
-- [BlockDeletionGenerator.md]
+- [framework:BlockDeletionGenerator.md]
 
 ### Geometry Features
 
@@ -132,11 +132,11 @@ Dummy assemblies were only included to facilitate the core pattern generation an
 
 ## Extrude 2D core to 3D
 
-The [AdvancedExtruderGenerator.md] can be used to perform 2D-to-3D extrusion, allowing users to control elevations through variable extrusion (axial) lengths, axial elements, separate subdomains, additional element integers, and boundaries defined at various elevations.
+The [framework:AdvancedExtruderGenerator.md] can be used to perform 2D-to-3D extrusion, allowing users to control elevations through variable extrusion (axial) lengths, axial elements, separate subdomains, additional element integers, and boundaries defined at various elevations.
 
 ### Object
 
-- [AdvancedExtruderGenerator.md]
+- [framework:AdvancedExtruderGenerator.md]
 
 ### Geometry Features
 
@@ -170,11 +170,11 @@ In order to facilitate output processing, we assign `plane_id` reporting IDs to 
 
 ### Object
 
-- [PlaneIDMeshGenerator.md]
+- [framework:PlaneIDMeshGenerator.md]
 
 ### Geometry Features
 
-- Assign coordinates demarking axial levels in plane_coordinates. These levels should be consistent with how axial levels were defined in [AdvancedExtruderGenerator.md].
+- Assign coordinates demarking axial levels in plane_coordinates. These levels should be consistent with how axial levels were defined in [framework:AdvancedExtruderGenerator.md].
 
 ### Example
 
@@ -190,11 +190,11 @@ In order to facilitate output processing, we assign `plane_id` reporting IDs to 
 
 ## (Optional) Rename Outer Boundary Sidesets
 
-Since [AdvancedExtruderGenerator.md] requires top and bottom boundary sidesets be defined using numeric IDs, we can assign a name (string) such as `'top'` and `'bottom'` to these sidesets for easier reference in physics applications.
+Since [framework:AdvancedExtruderGenerator.md] requires top and bottom boundary sidesets be defined using numeric IDs, we can assign a name (string) such as `'top'` and `'bottom'` to these sidesets for easier reference in physics applications.
 
 ### Object
 
-- [RenameBoundaryGenerator.md]
+- [framework:RenameBoundaryGenerator.md]
 
 ### Notes
 
@@ -254,11 +254,11 @@ MOOSE provides various ways to post-process mesh-based data. The reporting IDs a
 
 ### Object
 
-- [ExtraIDIntegralVectorPostprocessor.md]
+- [framework:ExtraIDIntegralVectorPostprocessor.md]
 
 ### Notes
 
-- For each [ExtraIDIntegralVectorPostprocessor.md], a separate CSV file is generated to describe the integral variable quantity as a function of each combination of input reporting ID provided. Alternatively, [ExtraIDIntegralReporter.md] can output in JSON file format, which is more suitable for additional data parsing using script languages.
+- For each [framework:ExtraIDIntegralVectorPostprocessor.md], a separate CSV file is generated to describe the integral variable quantity as a function of each combination of input reporting ID provided. Alternatively, [framework:ExtraIDIntegralReporter.md] can output in JSON file format, which is more suitable for additional data parsing using script languages.
 
 ### Example
 

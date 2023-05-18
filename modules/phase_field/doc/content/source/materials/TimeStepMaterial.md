@@ -4,7 +4,7 @@
 
 The material sets up material properties for the current time step size `dt`,
 the current time `t`, and the current time step number `time_step`. These
-material properties can for example be used in [parsed materials](/ParsedMaterial.md).
+material properties can for example be used in [parsed materials](framework:/ParsedMaterial.md).
 
 !syntax parameters /Materials/TimeStepMaterial
 

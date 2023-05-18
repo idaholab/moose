@@ -49,7 +49,7 @@ implicit application of the zero normal-gradient condition, is typically identic
 applying a corresponding `FVFluxBC` because the latter only has access to the
 cell center value adjacent to the boundary. By directly using a cell-center value
 in a `FVFluxBC` (see for example
-[`FVConstantScalarOutflowBC`](/FVConstantScalarOutflowBC.md)), you are implicitly applying
+[`FVConstantScalarOutflowBC`](framework:/FVConstantScalarOutflowBC.md)), you are implicitly applying
 the same zero normal-gradient condition. In the future (see
 [MOOSE issue #16169](https://github.com/idaholab/moose/issues/16169)), we hope to be able to apply
 more appropriate outflow conditions.

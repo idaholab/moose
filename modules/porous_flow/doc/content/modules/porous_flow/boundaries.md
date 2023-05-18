@@ -4,7 +4,7 @@ MOOSE's Dirichlet and Neumann boundary conditions enable simulation of simple sc
 The Porous Flow module includes flexible boundary conditions that allow many different
 scenarios to be modelled. There are two classes of boundary conditions:
 
-1. Those based on [PorousFlowSink](PorousFlowSink.md).  These are typically used to add or remove fluid or heat-energy through the boundary.  The basic sink adds/removes a fixed flux, but more elaborate sources/sinks add time-dependent fluxes, or fluxes dependent on fluid pressure or temperature, fluid mobility, enthalpy, etc.  These boundary conditions may also be used to control porepressure, temperature, or mass fractions on the boundary by adding/removing fluid or heat through interaction with an external environment.  It is often physically more correct and numerically advantageous to use these boundary conditions instead of [DirichletBC](DirichletBC.md).
+1. Those based on [PorousFlowSink](PorousFlowSink.md).  These are typically used to add or remove fluid or heat-energy through the boundary.  The basic sink adds/removes a fixed flux, but more elaborate sources/sinks add time-dependent fluxes, or fluxes dependent on fluid pressure or temperature, fluid mobility, enthalpy, etc.  These boundary conditions may also be used to control porepressure, temperature, or mass fractions on the boundary by adding/removing fluid or heat through interaction with an external environment.  It is often physically more correct and numerically advantageous to use these boundary conditions instead of [DirichletBC](framework:DirichletBC.md).
 2. Those based on [PorousFlowOutflowBC](PorousFlowOutflowBC.md), which is an "outflow" boundary condition that removes fluid components or heat energy as they flow to the boundary.  This models a "free" boundary that is "invisible" to the simulation.  Please see below for more description and warnings.
 
 This page may be read in conjuction with the [description of some of the tests of the PorousFlow sinks](tests/sinks/sinks_tests.md).
@@ -32,7 +32,7 @@ AuxVariable will be the flux (kg.s$^{-1}$ or J.s$^{-1}$) from each
 node on the boundary, which is the product of $s$ and the area
 attributed to that node.  If the total flux (kg.s$^{-1}$ or
 J.s$^{-1}$) through the boundary is required, integrate the
-AuxVariable over the boundary using a [`NodalSum`](NodalSum.md)
+AuxVariable over the boundary using a [`NodalSum`](framework:NodalSum.md)
 Postprocessor.
 
 This basic sink boundary condition is implemented in [`PorousFlowSink`](PorousFlowSink.md).
@@ -246,7 +246,7 @@ follows the streamlines of ${\mathbf{V}}$.  The weak form of this equation reads
 0 = \int_{\Omega}\psi \frac{\partial u}{\partial t} - \int_{\Omega}\nabla\psi\cdot\mathbf{V}u + \int_{\partial\Omega}\psi \mathbf{n}\cdot\mathbf{V}u \ .
 \end{equation}
 In a MOOSE input file, the second term is typically represented by a
-[`ConservativeAdvection`](ConservativeAdvection.md) `Kernel`, while
+[`ConservativeAdvection`](framework:ConservativeAdvection.md) `Kernel`, while
 the final term is the flux out through the surface $\partial\Omega$
 and can be represented by an `Outflow` or `Inflow` `BC`.
 
@@ -280,7 +280,7 @@ with weak form
 \label{eq:diff_eqn_weak}
 0 = \int_{\Omega}\psi \dot{u} + \int_{\Omega}\nabla\psi\cdot D\nabla u - \int_{\partial\Omega}\psi \mathbf{n}\cdot D\nabla u \ .
 \end{equation}
-The second is typically represented in MOOSE using the [`Diffusion`](source/kernels/Diffusion.md) Kernel, while the last term is the [`DiffusionFluxBC`](DiffusionFluxBC.md) BC (assuming $D=I$).  This last term is the flux out (kg.s$^{-1}$, or
+The second is typically represented in MOOSE using the [`Diffusion`](framework:source/kernels/Diffusion.md) Kernel, while the last term is the [`DiffusionFluxBC`](framework:DiffusionFluxBC.md) BC (assuming $D=I$).  This last term is the flux out (kg.s$^{-1}$, or
 J.s$^{-1}$, or whatever are appropriate units associated with $u$) through an area $\partial\Omega$.
 
 The flux out through an arbitrary area $A$ is
@@ -291,13 +291,13 @@ Here $\mathbf{n}$ is the outward normal to $A$.  If $A$ is an arbitrary internal
 
 Inclusion of a BC for $u$ in a MOOSE input file will specify something about the flux from the boundary.  Some examples are:
 
-- A [`NeumannBC`](source/bcs/NeumannBC.md) simply adds a constant value (kg.s$^{-1}$.m$^{-2}$) to the Residual and integrates it over the boundary.  Adding this constant value corresponds to adding a constant flux of fluid and MOOSE will find the solution that has ${\mathbf{n}}\cdot D\nabla u = h$.  The value is the flux into the domain (negative of the out-going flux mentioned above).
+- A [`NeumannBC`](framework:source/bcs/NeumannBC.md) simply adds a constant value (kg.s$^{-1}$.m$^{-2}$) to the Residual and integrates it over the boundary.  Adding this constant value corresponds to adding a constant flux of fluid and MOOSE will find the solution that has ${\mathbf{n}}\cdot D\nabla u = h$.  The value is the flux into the domain (negative of the out-going flux mentioned above).
 
 - Using no BC at all on $\partial\Omega$ means that there is no boundary term in [eq:diff_eqn_weak] so no fluid gets removed from this boundary: it is impermeable.  MOOSE will find the solution that has ${\mathbf{n}}\cdot D\nabla u = 0$.
 
-- Using a [`DirichletBC`](source/bcs/DirichletBC.md) fixes $u$ on the boundary.  The physical interpretation is that an external source or sink is providing or removing fluid at the correct rate so that $u$ remains fixed.
+- Using a [`DirichletBC`](framework:source/bcs/DirichletBC.md) fixes $u$ on the boundary.  The physical interpretation is that an external source or sink is providing or removing fluid at the correct rate so that $u$ remains fixed.
 
-- Using a [`DiffusionFluxBC`](DiffusionFluxBC.md) will remove fluid at exactly the rate specified by the diffusion equation (assuming $D=I$: otherwise an extension to the DiffusionFluxBC class needs to be encoded into MOOSE).  This boundary condition is a "free" boundary that is "invisible" to the simulation.
+- Using a [`DiffusionFluxBC`](framework:DiffusionFluxBC.md) will remove fluid at exactly the rate specified by the diffusion equation (assuming $D=I$: otherwise an extension to the DiffusionFluxBC class needs to be encoded into MOOSE).  This boundary condition is a "free" boundary that is "invisible" to the simulation.
 
 
 ### The advection-diffusion equation
@@ -325,9 +325,9 @@ Inclusion of a BC for $u$ in a MOOSE input file will specify something about the
 
 - Using no BCs means the final term [eq:diff_adv_eqn_weak] is missing from the system of equations that MOOSE solves.  This means that no fluid is entering or exiting the domain from this boundary: the boundary is "impermeable".  The fluid will "pile up" at the boundary, if ${\mathbf{V}}$ is such that it is attempting to "blow" fluid out of the boundary (${\mathbf{n}}\cdot{\mathbf{V}}>0$).  Conversely, the fluid will deplete at the boundary, if ${\mathbf{V}}$ is attempting to "blow" fluid from the boundary into the model domain (${\mathbf{n}}\cdot{\mathbf{V}}<0$).
 
-- A [`NeumannBC`](source/bcs/NeumannBC.md) adds a constant value (kg.s$^{-1}$.m$^{-2}$) to the Residual and integrates it over the boundary.  Adding this constant value corresponds to adding a constant flux of fluid and MOOSE will find the solution that has ${\mathbf{n}}\cdot (D\nabla u - \mathbf{V}u) = h$.  The value of $h$ is the flux into the domain (negative of the out-going flux mentioned above).
+- A [`NeumannBC`](framework:source/bcs/NeumannBC.md) adds a constant value (kg.s$^{-1}$.m$^{-2}$) to the Residual and integrates it over the boundary.  Adding this constant value corresponds to adding a constant flux of fluid and MOOSE will find the solution that has ${\mathbf{n}}\cdot (D\nabla u - \mathbf{V}u) = h$.  The value of $h$ is the flux into the domain (negative of the out-going flux mentioned above).
 
-- Using an `OutflowBC` together with a [`DiffusionFluxBC`](DiffusionFluxBC.md) removes fluid through $\partial\Omega$ at exactly the rate specified by the advection-diffusion equation, so this is a "free" boundary that is "invisible" to the simulation.
+- Using an `OutflowBC` together with a [`DiffusionFluxBC`](framework:DiffusionFluxBC.md) removes fluid through $\partial\Omega$ at exactly the rate specified by the advection-diffusion equation, so this is a "free" boundary that is "invisible" to the simulation.
 
 ### The PorousFlow mass flux
 
@@ -351,11 +351,11 @@ Inclusion of a BC for porepressure or mass fraction in a MOOSE input file will s
 
 - Using no BCs means the final term [eqn.pf.mass.flux.weak] is missing from the system of equations that MOOSE solves, in other words, it is zero.  Hence, no fluid is entering or exiting the domain from this boundary: the boundary is "impermeable", and MOOSE will find the solution $\mathbf{n}\cdot\mathbf{F}^{\kappa} = 0$.
 
-- A [`NeumannBC`](source/bcs/NeumannBC.md) adds a constant value, $h$, (kg.s$^{-1}$.m$^{-2}$) to the Residual and integrates it over the boundary.  Adding this constant value corresponds to adding a constant flux of fluid species, and MOOSE will find the solution that has ${\mathbf{n}}\cdot \mathbf{F}^{\kappa} = -h$.  The value of $h$ is the flux into the domain (negative of the out-going flux mentioned above).
+- A [`NeumannBC`](framework:source/bcs/NeumannBC.md) adds a constant value, $h$, (kg.s$^{-1}$.m$^{-2}$) to the Residual and integrates it over the boundary.  Adding this constant value corresponds to adding a constant flux of fluid species, and MOOSE will find the solution that has ${\mathbf{n}}\cdot \mathbf{F}^{\kappa} = -h$.  The value of $h$ is the flux into the domain (negative of the out-going flux mentioned above).
 
-- Any of the [PorousFlowSink](PorousFlowSink.md) variants mentioned above act in the same way as the [NeumannBC](NeumannBC.md) by adding a value to the Residual and integrating it over the boundary, thereby allowing flux through the boundary to be specified.  However, the [PorousflowSink](PorousFlowSink.md) variants are much more flexible than any of the NeumannBC variants that are coded into the MOOSE framework, so should be preferred in PorousFlow simulations.
+- Any of the [PorousFlowSink](PorousFlowSink.md) variants mentioned above act in the same way as the [NeumannBC](framework:NeumannBC.md) by adding a value to the Residual and integrating it over the boundary, thereby allowing flux through the boundary to be specified.  However, the [PorousflowSink](PorousFlowSink.md) variants are much more flexible than any of the NeumannBC variants that are coded into the MOOSE framework, so should be preferred in PorousFlow simulations.
 
-- Fixing the porepressure or mass fraction with a [DirichletBC](DirichletBC.md) is also possible.  This corresponds to adding/removing fluid species to keep the porepressure or mass fraction fixed, which can lead to severe numerical problems (for instance, trying to remove a fluid species that has zero mass fraction) so DirichletBC should be used with caution in PorousFlow simulations.  Instead, one of the PorousFlowSink variants should usually be used, as described in detail above.
+- Fixing the porepressure or mass fraction with a [DirichletBC](framework:DirichletBC.md) is also possible.  This corresponds to adding/removing fluid species to keep the porepressure or mass fraction fixed, which can lead to severe numerical problems (for instance, trying to remove a fluid species that has zero mass fraction) so DirichletBC should be used with caution in PorousFlow simulations.  Instead, one of the PorousFlowSink variants should usually be used, as described in detail above.
 
 - Using a [PorousFlowOutflowBC](PorousFlowOutflowBC.md) removes fluid species through $\partial\Omega$ at exactly the rate specified by the Darcy equation [eqn.pf.mass.flux.weak], so this is a "free" boundary that is "invisible" to the simulation.   More details are given below.
 

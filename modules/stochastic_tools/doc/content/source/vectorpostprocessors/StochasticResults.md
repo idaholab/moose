@@ -1,8 +1,8 @@
 # StochasticResults
 
 This object is designed to work with the [SamplerPostprocessorTransfer](/SamplerPostprocessorTransfer.md) object for
-transferring data from a [Postprocessor](/Postprocessors/index.md) to a
-[VectorPostprocessor](/VectorPostprocessors/index.md) on the parent application.
+transferring data from a [Postprocessor](framework:/Postprocessors/index.md) to a
+[VectorPostprocessor](framework:/VectorPostprocessors/index.md) on the parent application.
 
 ## Example Syntax
 

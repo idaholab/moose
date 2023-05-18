@@ -41,11 +41,11 @@ in [fig:area-compare].
 ## Level Set Equation with Reinitialization
 
 Adding reinitializtion, in this case the scheme proposed by [!cite](olsson2007conservative), requires
-the use of the MOOSE [MultiApp](/MultiApps/index.md). The enable reinitialization two input files are
+the use of the MOOSE [MultiApp](framework:/MultiApps/index.md). The enable reinitialization two input files are
 required: a parent and sub-application.
 
 The parent input file must add the necessary [MultiApps](/MultiApps/index.md) and
-[Transfers](/Transfers/index.md) blocks. For the problem at hand ([circle_rotate_parent.i]) this
+[Transfers](framework:/Transfers/index.md) blocks. For the problem at hand ([circle_rotate_parent.i]) this
 easily accomplished by adding the following to the input file from the first step (i.e., do not
 include the SUPG kernels).
 
@@ -55,11 +55,11 @@ include the SUPG kernels).
 
 Next, the sub-application input file must be created, which is shown below. This input file mimics
 the parent input file closely, with three notable exceptions. First, the
-[Kernels](syntax/Kernels/index.md) block utilize the time derivative and a new object,
+[Kernels](framework:syntax/Kernels/index.md) block utilize the time derivative and a new object,
 [LevelSetOlssonReinitialization](/LevelSetOlssonReinitialization.md), that implements the
-reinitialization scheme of [!cite](olsson2007conservative). Second, the [Problem](/Problem/index.md) is
+reinitialization scheme of [!cite](olsson2007conservative). Second, the [Problem](framework:/Problem/index.md) is
 set to use the [LevelSetReinitializationProblem](/LevelSetReinitializationProblem.md). Finally, the
-[UserObjects](/UserObjects/index.md) block includes a terminator,
+[UserObjects](framework:/UserObjects/index.md) block includes a terminator,
 [LevelSetOlssonTerminator](/LevelSetOlssonTerminator.md), which is responsible for stopping the
 reinitialization solve when steady-state is achieved according to the criteria defined by
 [!cite](olsson2007conservative).

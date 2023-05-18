@@ -1,6 +1,6 @@
 # INSFVInletVelocityBC
 
-This object simply wraps [`FVFunctionDirichletBC`](FVFunctionDirichletBC.md), so a
+This object simply wraps [`FVFunctionDirichletBC`](framework:FVFunctionDirichletBC.md), so a
 required parameter is `function` describing the velocity along an inlet
 boundary. The `variable` parameter should correspond to a velocity component
 variables. If applying `INSFVInletVelocity` for any velocity component on a given

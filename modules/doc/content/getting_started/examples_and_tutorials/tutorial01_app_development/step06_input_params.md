@@ -53,7 +53,7 @@ The basic method for retrieving a user-defined input is the template `getParam()
 
 The `getParam()` method can be called from within any member---not just the constructor. Although, this is typically only necessary for special cases and should be avoided as much as possible, since accessing invariant input parameters during each invocation of a function tends to be unnecessarily expensive. In most cases, parameters should be accessed from the constructor to initialize class member variables.
 
-*For more information about Input Parameters, please visit the [source/utils/InputParameters.md] page.*
+*For more information about Input Parameters, please visit the [framework:source/utils/InputParameters.md] page.*
 
 ## Demonstration id=demo
 
@@ -116,7 +116,7 @@ Run the following commands to visualize the solution with PEACOCK:
          replace=['<d>', 'problems',
                   '<e>', 'pressure_diffusion_out']
 
-Since no numerical changes were made here, the results should be identical to the [previous step](tutorial01_app_development/step05_kernel_object.md#result-demo). Note that the above command uses the `peacock` alias so you'll need to set the `$PATH` environment variable in your bash profile (see the [python/peacock.md] page). This syntax shall henceforth be used exclusively whenever executing PEACOCK.
+Since no numerical changes were made here, the results should be identical to the [previous step](tutorial01_app_development/step05_kernel_object.md#result-demo). Note that the above command uses the `peacock` alias so you'll need to set the `$PATH` environment variable in your bash profile (see the [python:python/peacock.md] page). This syntax shall henceforth be used exclusively whenever executing PEACOCK.
 
 ### Commit id=commit-demo
 

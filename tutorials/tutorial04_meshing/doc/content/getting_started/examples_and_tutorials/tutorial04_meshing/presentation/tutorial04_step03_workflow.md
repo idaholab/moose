@@ -36,7 +36,7 @@ Executables of any MOOSE applications that contain the Reactor module in their `
 
 ## Visualization with ParaView
 
-The [Exodus](outputs/Exodus.md) output format is the preferred way to write out simulation results from MOOSE simulations. This format is supported by [ParaView](https://www.paraview.org/), [VisIt](https://visit-dav.github.io/visit-website/), and other postprocessing applications. ParaView is most commonly used, but the visualization procedure is similar for other programs.
+The [Exodus](framework:outputs/Exodus.md) output format is the preferred way to write out simulation results from MOOSE simulations. This format is supported by [ParaView](https://www.paraview.org/), [VisIt](https://visit-dav.github.io/visit-website/), and other postprocessing applications. ParaView is most commonly used, but the visualization procedure is similar for other programs.
 
 To save a lot of clicks, the following settings are recommended (in `Edit`->`Settings`):
 

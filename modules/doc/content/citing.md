@@ -67,7 +67,7 @@ If your application uses automatic differentiation, please also cite the followi
 
 ## Testing and Documentation
 
-If you are utilizing [!ac](CIVET) for testing or [MooseDocs](python/MooseDocs/index.md) for
+If you are utilizing [!ac](CIVET) for testing or [MooseDocs](python:python/MooseDocs/index.md) for
 documentation, please also cite the following.
 
 ```

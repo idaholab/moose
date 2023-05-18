@@ -5,12 +5,12 @@
 ## Overview
 
 The `CartesianIDPatternedMeshGenerator` object generates a 2D Cartesian lattice mesh with `reporting ID` assignments.
-This object inherits the functionality of the lattice mesh generator named [`PatternedMeshGenerator`](PatternedMeshGenerator.md) that stitches together Cartesian cells, and adds additional functionality to assign reporting IDs to lattice cells.
+This object inherits the functionality of the lattice mesh generator named [`PatternedMeshGenerator`](framework:PatternedMeshGenerator.md) that stitches together Cartesian cells, and adds additional functionality to assign reporting IDs to lattice cells.
 The object can be used successively on its own output mesh to add IDs on the pin and assembly levels, for example.
 
 ## Reporting ID Information
 
-The `CartesianIDPatternedMeshGenerator` object adopts the existing input structures of [`PatternedMeshGenerator`](PatternedMeshGenerator.md) for geometry building and uses additional keywords to control the reporting ID assignment.
+The `CartesianIDPatternedMeshGenerator` object adopts the existing input structures of [`PatternedMeshGenerator`](framework:PatternedMeshGenerator.md) for geometry building and uses additional keywords to control the reporting ID assignment.
 
 A user can select an ID assignment scheme using [!param](/Mesh/CartesianIDPatternedMeshGenerator/assign_type), and the following schemes are currently available:
 

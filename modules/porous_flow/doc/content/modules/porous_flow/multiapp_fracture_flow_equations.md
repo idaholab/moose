@@ -39,7 +39,7 @@ This equation (multiplied by the test functions) gets integrated over the elemen
 where $a$ is the fracture thickness (aperture), and $\tilde{\nabla}$ are derivatives transverse to the fracture.  This equation is integrated (by MOOSE) over the fracture-element 2D area in the finite-element method.
 
 !alert note
-The preceeding equation implies all the Kernels for heat and mass flow in the fracture system must be multiplied by the fracture aperture $a$.   That is, in the MOOSE input file governing the 2D physics, the coefficient of the [CoefTimeDerivative](CoefTimeDerivative.md) Kernel is $ac$, and the coefficient of the [AnisotropicDiffusion](AnisotropicDiffusion.md) is $a\lambda$.   If tensorial quantities such as $\lambda$ or the permeability tensor are anisotropic, they need to be expressed in 3D space.
+The preceeding equation implies all the Kernels for heat and mass flow in the fracture system must be multiplied by the fracture aperture $a$.   That is, in the MOOSE input file governing the 2D physics, the coefficient of the [CoefTimeDerivative](framework:CoefTimeDerivative.md) Kernel is $ac$, and the coefficient of the [AnisotropicDiffusion](framework:AnisotropicDiffusion.md) is $a\lambda$.   If tensorial quantities such as $\lambda$ or the permeability tensor are anisotropic, they need to be expressed in 3D space.
 
 ### Coupling
 

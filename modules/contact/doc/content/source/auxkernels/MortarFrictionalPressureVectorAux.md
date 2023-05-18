@@ -11,7 +11,7 @@ The computation of the frictional pressure vector can be expressed as:
   \boldsymbol{p}_{\mu} = \lambda_{fx} \cdot \boldsymbol{t}_{x} + \lambda_{fy} \cdot \boldsymbol{t}_{y},
 \end{equation*}
 
-where $\boldsymbol{p}_{\mu}$ denotes the frictional pressure vector, $\lambda_{fx}$ and $\lambda_{fx}$ are two frictional Lagrange's multipliers, and $\boldsymbol{t}_{x}$ and $\boldsymbol{t}_{y}$ are two mutually perpendicular tangent vectors. Note that the directions $x$ and $y$ need not be aligned with global axes. This object is an [AuxKernel](AuxKernels/index.md), and is used only for the purpose of output. Note that the [Contact](Contact/index.md) action sets this object up automatically, so it is typically not necessary to include this in an input file.
+where $\boldsymbol{p}_{\mu}$ denotes the frictional pressure vector, $\lambda_{fx}$ and $\lambda_{fx}$ are two frictional Lagrange's multipliers, and $\boldsymbol{t}_{x}$ and $\boldsymbol{t}_{y}$ are two mutually perpendicular tangent vectors. Note that the directions $x$ and $y$ need not be aligned with global axes. This object is an [AuxKernel](framework:AuxKernels/index.md), and is used only for the purpose of output. Note that the [Contact](Contact/index.md) action sets this object up automatically, so it is typically not necessary to include this in an input file.
 
 ## Input example
 

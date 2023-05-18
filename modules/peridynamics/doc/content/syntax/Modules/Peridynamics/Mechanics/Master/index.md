@@ -12,8 +12,8 @@ mechanics system setup. It sets up force density integral Kernels for all displa
 |-------------------|--------------------|-------------------------|
 | Mechanics equilibrium conditions | [Bond-based Small Strain Models](/kernels/MechanicsBPD.md) or [Ordinary State-based Small Strain Models](/kernels/MechanicsOSPD.md) or [Force-stabilized Non-ordinary State-based Small Strain Model](/kernels/ForceStabilizedSmallStrainMechanicsNOSPD.md) or Horizon-stabilized Non-ordinary State-based Small Strain Models: [Form I]](/kernels/HorizonStabilizedFormISmallStrainMechanicsNOSPD.md); [Form II]](/kernels/HorizonStabilizedFormIISmallStrainMechanicsNOSPD.md) or Horizon-stabilized Non-ordinary State-based Finite Strain Models: [Form I](/kernels/HorizonStabilizedFormIFiniteStrainMechanicsNOSPD.md); [Form II](/kernels/HorizonStabilizedFormIIFiniteStrainMechanicsNOSPD.md) | `displacements` : a string of the displacement field variables; `temperature`: a string of the temperature field variable |
 | Ghost bonds for nonlocal computation | [Ghost Element UserObject](/GhostElemPD.md) | None |
-| Setup quadrature rule | [Variables](syntax/Variables/index.md) | `type`: GAUSS_LOBATTO; `order`: FIRST |
-| Add AuxVariable for bond status | [AuxVariables](/AuxVariables/index.md) | `initial_condition` is set to 1 |
+| Setup quadrature rule | [Variables](framework:syntax/Variables/index.md) | `type`: GAUSS_LOBATTO; `order`: FIRST |
+| Add AuxVariable for bond status | [AuxVariables](framework:/AuxVariables/index.md) | `initial_condition` is set to 1 |
 
 
 ## Example Input Syntax

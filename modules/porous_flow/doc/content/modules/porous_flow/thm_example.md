@@ -492,7 +492,7 @@ This is implemented in a slightly convoluted way in the MOOSE input file.  First
 
 !listing modules/porous_flow/examples/thm_example/2D.i block=Postprocessors
 
-Then a [PressureBC](bcs/Pressure.md) applies this *total* stress (physically, a mechanical pushing force) at the borehole wall:
+Then a [PressureBC](tensor_mechanics:bcs/Pressure.md) applies this *total* stress (physically, a mechanical pushing force) at the borehole wall:
 
 !listing modules/porous_flow/examples/thm_example/2D.i start=[cavity_pressure_x] end=[]
 

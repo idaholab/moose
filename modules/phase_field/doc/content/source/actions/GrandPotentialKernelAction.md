@@ -11,12 +11,12 @@ For more information on the multi-phase, multi-order parameter grand potential m
 In this action, the following kernels are generated for each chemical potential variable:
 
 - [`SusceptibilityTimeDerivative`](/SusceptibilityTimeDerivative.md)
-- [`MatDiffusion`](/MatDiffusion.md) or [`MatAnisoDiffusion`](/MatAnisoDiffusion.md)
+- [`MatDiffusion`](framework:/MatDiffusion.md) or [`MatAnisoDiffusion`](/MatAnisoDiffusion.md)
 - [`CoupledSwitchingTimeDerivative`](/CoupledSwitchingTimeDerivative.md) (multiple kernels: one that corresponds with each order parameter)
 
 The following kernels are generated for each order parameter:
 
-- [`TimeDerivative`](/TimeDerivative.md)
+- [`TimeDerivative`](framework:/TimeDerivative.md)
 - [`ACInterface`](/ACInterface.md)
 - [`ACSwitching`](/ACSwitching.md)
 - [`ACGrGrMulti`](/ACGrGrMulti.md)
@@ -83,14 +83,14 @@ and coupled it with chemical potential from the Grand Potential model.
 
 The following kernels are generated for each concentration variables:
 
-- [`TimeDerivative`](/TimeDerivative.md)
-- [`MatDiffusion`](/MatDiffusion.md) or [`MatAnisoDiffusion`](/MatAnisoDiffusion.md)
+- [`TimeDerivative`](framework:/TimeDerivative.md)
+- [`MatDiffusion`](framework:/MatDiffusion.md) or [`MatAnisoDiffusion`](/MatAnisoDiffusion.md)
 
 The coupling between concentration and chemical potential is generated using the following kernel:
 
-- [`MatReaction`](/MatReaction.md) 
-- [`MatReaction`](/MatReaction.md) (multiple kernels: one that corresponds with each order parameter)
-- ['BodyForce'](/BodyForce.md) (multiple kernels: one that corresponds with each order parameter)
+- [`MatReaction`](framework:/MatReaction.md) 
+- [`MatReaction`](framework:/MatReaction.md) (multiple kernels: one that corresponds with each order parameter)
+- ['BodyForce'](framework:/BodyForce.md) (multiple kernels: one that corresponds with each order parameter)
 
 The materials associated with strict mass conservation can be created automatically using GrandPotentialSinteringMaterial (/GrandPotentialSinteringMaterial.md)
 

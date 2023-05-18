@@ -52,7 +52,7 @@ The transfer of parameters is the same as in other inverse optimization problems
 
 ## Example Input File Syntax For Restarting An Optimization Simulation
 
-A good guess for the initial parameter values will help with the convergence of the optimization problem.  In this example, initial conditions for the controllable parameters are given on an exodus mesh.  The parameter values on the exodus mesh are the optimized parameter values found in the previous example.  The parameter values from the above optimization problem are output by its forward problem onto the 10x10 mesh used by the FEM simulation.  The forward problem parameter field is then projected onto a coarser two-by-two parameter mesh as a first order Lagrange nodal AuxVariable called `restart_source` using [SolutionUserObject.md] and [SolutionAux.md] in the following input file
+A good guess for the initial parameter values will help with the convergence of the optimization problem.  In this example, initial conditions for the controllable parameters are given on an exodus mesh.  The parameter values on the exodus mesh are the optimized parameter values found in the previous example.  The parameter values from the above optimization problem are output by its forward problem onto the 10x10 mesh used by the FEM simulation.  The forward problem parameter field is then projected onto a coarser two-by-two parameter mesh as a first order Lagrange nodal AuxVariable called `restart_source` using [framework:SolutionUserObject.md] and [framework:SolutionAux.md] in the following input file
 
 !listing mesh_source/parameter_mesh_restart.i
 

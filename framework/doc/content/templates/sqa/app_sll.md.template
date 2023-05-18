@@ -18,7 +18,7 @@ the [!ac](VVR) for {{app}} is dependent upon the following documents.
 !if! function=hasSubmodule('moose')
 ## MOOSE
 
-{{app}} is a MOOSE-based application, [mooseframework.org](https://mooseframework), which is
+{{app}} is a MOOSE-based application, [mooseframework.org](https://mooseframework.org), which is
 summarized in the follwoing abstract [!cite](permann2020moose).
 
 > Harnessing modern parallel computing resources to achieve complex multiphysics simulations is a

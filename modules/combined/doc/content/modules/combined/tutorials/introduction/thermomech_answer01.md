@@ -13,7 +13,7 @@ is a solution variable. This results in coupling between the thermal and
 mechanical solutions. Note that this specified variable can be either a variable
 that is part of the solution, as is the case here, or an auxiliary variable,
 which might be prescribed using a function, as was the case in the mechanics-only
-[model](tensor_mechanics/tutorials/introduction/step03a.md) that this case builds
+[model](tensor_mechanics:tensor_mechanics/tutorials/introduction/step03a.md) that this case builds
 upon.
 
 In addition to the dependency of the eigenstrain on the temperature solution,

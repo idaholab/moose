@@ -16,7 +16,7 @@ with MOOSE and [python/source/index.md] links to the source code documentation.
 | [pyhit](pyhit/index.md) | Tool for reading, writing, and manipulating MOOSE input files. |
 | [combine_csv.md] | Tool for combining CSV files together. |
 | [moosesqa/index.md] | Tools for managing SQA documentation. |
-| [ReporterReader.md] | Tool for reading [JSON](JSONOutput.md) output of [Reporter](Reporters/index.md) data |
+| [ReporterReader.md] | Tool for reading [JSON](framework:JSONOutput.md) output of [Reporter](framework:Reporters/index.md) data |
 | [module_hash.md] | Tool for generating a hash suffix for our contribution modules. |
 | [MooseDocs/index.md] | Tool for creating documentation. |
 

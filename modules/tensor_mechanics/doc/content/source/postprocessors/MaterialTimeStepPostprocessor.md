@@ -31,14 +31,14 @@ is the current scalar effective inelastic strain increment.
 The `MaterialTimeStepPostprocessor` collects the time step limitations from all
 of the quadrature points in the simulation mesh and stores the minimum value.
 This minimum allowable time step size value is then used by the
-[IterationAdaptiveDT](/IterationAdaptiveDT.md)
+[IterationAdaptiveDT](framework:/IterationAdaptiveDT.md)
 to restrict the time step size based on the limit calculated in the previous
 time step.
 
-Note that the [IterationAdaptiveDT](/IterationAdaptiveDT.md)
+Note that the [IterationAdaptiveDT](framework:/IterationAdaptiveDT.md)
 will apply the limiting time step size value from the `MaterialTimeStepPostprocessor`
 only if that value is less than maximum time step size value calculated by the
-internal [IterationAdaptiveDT](/IterationAdaptiveDT.md)
+internal [IterationAdaptiveDT](framework:/IterationAdaptiveDT.md)
 adaptive time step size algorithm.
 
 !alert note title=Time Step Limiter Lags Calculation

@@ -13,7 +13,7 @@ where $u$ ist the variable the kernel is acting on, $M$ is the
 function. The map values $M(r)$ range from 0..1 and are remapped using the $v_0$
 (`no_nucleus_value`) and $v_1$ (`nucleus_value`) parameters.
 
-This kernel can be used together with the [Reaction](/Reaction.md) kernel to set
+This kernel can be used together with the [Reaction](framework:/Reaction.md) kernel to set
 a non-linear variable field to an affine transformation of the discrete
 nucleation map data.
 

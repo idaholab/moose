@@ -2,7 +2,7 @@
 
 !template! item key=introduction
 The [!ac](MOOSE) Electromagnetics module is based on the [!ac](MOOSE) framework, thus it inherits
-the unique features and base characteristics of the framework, as outlined in the [framework_sdd.md].
+the unique features and base characteristics of the framework, as outlined in the [framework:framework_sdd.md].
 Specific details unique to the module are outlined in this document.
 !template-end!
 

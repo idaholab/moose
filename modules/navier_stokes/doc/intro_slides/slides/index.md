@@ -263,7 +263,7 @@ $\Large\xrightarrow[\mathrm{Rhie-Chow~Interpolation}]{\vec{u}_{RC,f} = \vec{u}_{
 style=font-size:26pt
 
 A simplified syntax has been developed, it relies on the `Action` system in MOOSE.
-For the documentation of the corresponding action, click [here](NSFVAction.md)!
+For the documentation of the corresponding action, click [here](navier_stokes:NSFVAction.md)!
 
 !listing modules/navier_stokes/test/tests/finite_volume/ins/channel-flow/2d-rc-no-slip-action.i
 

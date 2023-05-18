@@ -18,7 +18,7 @@ automatically, which is the recommended way to set up homogenization constraints
 
 This example manually specifies the parameters required to initialize the object for a
 large deformation, 3D example.
-The `targets` parameters are the [Functions](syntax/Functions/index.md) specifying the constrained
+The `targets` parameters are the [Functions](framework:syntax/Functions/index.md) specifying the constrained
 cell-average values as a function of time.
 The `constraint_types` parameters controls the type of constraint (deformation or stress) for each input.
 The [homogenization system](Homogenization.md) documentation lists the order of these inputs

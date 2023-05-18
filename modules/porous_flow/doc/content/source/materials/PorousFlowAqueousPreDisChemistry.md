@@ -13,7 +13,7 @@ reactions so that the primary species concentrations remain small, but nonzero, 
 mineralisation doesn't cause porosity to become negative or exceed unity.
 
 Details concerning precipitation-dissolution kinetic chemistry may be found in the
-[`chemical reactions`](/chemical_reactions/index.md) module.  There are two main differences
+[`chemical reactions`](chemical_reactions:/chemical_reactions/index.md) module.  There are two main differences
 between the `chemical reactions` module and `PorousFlow`.  These are:
 
 - The molar volumes must be specified in `PorousFlow`.  This is so that the concentrations may be

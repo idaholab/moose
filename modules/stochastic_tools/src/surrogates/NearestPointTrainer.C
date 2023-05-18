@@ -16,8 +16,7 @@ InputParameters
 NearestPointTrainer::validParams()
 {
   InputParameters params = SurrogateTrainer::validParams();
-  params.addClassDescription("Loops over and saves sample values for [NearestPointSurrogate.md].");
-
+  params.addClassDescription("Loops over and saves sample values for NearestPointSurrogate");
   return params;
 }
 

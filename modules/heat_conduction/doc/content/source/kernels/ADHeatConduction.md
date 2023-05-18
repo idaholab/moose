@@ -9,7 +9,7 @@ The `ADHeatConduction` kernel implements the heat equation given by Fourier's La
 \end{equation}
 where $k$ denotes the thermal conductivity of the material. $k$ can either be an `ADMaterial` or traditional `Material`.
 
-This class inherits from the [ADDiffusion](/ADDiffusion.md) class.
+This class inherits from the [ADDiffusion](framework:/ADDiffusion.md) class.
 
 !syntax description /Kernels/ADHeatConduction
 

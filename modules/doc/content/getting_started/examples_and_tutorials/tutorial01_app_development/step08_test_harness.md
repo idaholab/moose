@@ -26,7 +26,7 @@ Test specification files are [!ac](HIT) formatted ones that define the tests to 
          link=False
          remove=Tests/issues Tests/design Tests/test/requirement
 
-The `type` parameter specifies one of the available test methods. In the above case, the `Exodiff` object is used, which requires an input file be specified with the `input` parameter and an ExodusII formatted gold file be specified with the `exodiff` parameter. The [#demo] section will show how to use the `Exodiff` and `RunException` testers on the `DarcyPressure` class. For a complete list of test objects, please see the discussion about [testers](TestHarness.md#testers).
+The `type` parameter specifies one of the available test methods. In the above case, the `Exodiff` object is used, which requires an input file be specified with the `input` parameter and an ExodusII formatted gold file be specified with the `exodiff` parameter. The [#demo] section will show how to use the `Exodiff` and `RunException` testers on the `DarcyPressure` class. For a complete list of test objects, please see the discussion about [testers](python:TestHarness.md#testers).
 
 !alert tip title=Tests should be simple and cheap.
 Although it is important that regression tests be comprehensive, ideally, they should also be as simple as possible and not have to process any unnecessary source code. The input file should create as few objects as possible beyond one for the class being tested. MOOSE developers abide by the "2 second rule," i.e., a test should complete in no more than two seconds.

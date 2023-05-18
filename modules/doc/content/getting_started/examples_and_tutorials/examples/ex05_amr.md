@@ -8,9 +8,9 @@ file:
 
 !listing examples/ex05_amr/ex05.i block=Adaptivity
 
-More details about this functionality are provided on the [Adaptivity](syntax/Adaptivity/index.md)
-page.  MOOSE includes multiple [Indicators](Indicators/index.md) you can use to compute different
-error estimates in addition to a few [Markers](Markers/index.md).
+More details about this functionality are provided on the [Adaptivity](framework:syntax/Adaptivity/index.md)
+page.  MOOSE includes multiple [Indicators](framework:Indicators/index.md) you can use to compute different
+error estimates in addition to a few [Markers](framework:Markers/index.md).
 
 ## Results
 

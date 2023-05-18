@@ -11,7 +11,7 @@ where $c$ is the concentration variable the kernel is operating on. The minima
 of this free energy density lie at $c=1$ and $c=-1$.
 
 It is used together with [`SplitCHWRes`](/SplitCHWRes.md) and
-[`CoupledTimeDerivative`](/CoupledTimeDerivative.md) to set up a system of two
+[`CoupledTimeDerivative`](framework:/CoupledTimeDerivative.md) to set up a system of two
 first order PDEs using a concentration order parameter and a chemical potential
 variable.
 

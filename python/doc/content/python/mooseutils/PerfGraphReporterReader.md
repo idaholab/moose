@@ -1,10 +1,10 @@
 # PerfGraphReporterReader
 
-A python utility that provides an interface for reading [PerfGraphReporter.md] output. It rebuilds the graph for easy traversal via the `PerfGraphNode` and `PerfGraphSection` objects.
+A python utility that provides an interface for reading [framework:PerfGraphReporter.md] output. It rebuilds the graph for easy traversal via the `PerfGraphNode` and `PerfGraphSection` objects.
 
 ## Example usage
 
-Take the following simple diffusion problem, which has a [PerfGraphReporter.md] set to output on final:
+Take the following simple diffusion problem, which has a [framework:PerfGraphReporter.md] set to output on final:
 
 !listing test/tests/reporters/perf_graph_reporter/perf_graph_reporter.i
 

@@ -8,7 +8,7 @@ focused, and consistent documentation for the MOOSE and MOOSE module codes.
 Developers submitting new classes to the MOOSE repository should also create a new markdown
 documentation files with the same names as the created classes.  A template documentation stub file
 is provided as a starting place for new markdown documentation pages created as detailed in
-[framework/documenting.md].
+[framework:framework/documenting.md].
 
 ### End-User Focused
 

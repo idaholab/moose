@@ -9,7 +9,7 @@ To ameliorate this problem, a single-source documentation system was developed b
 customizable markdown syntax---[Moose Style Markdown](MooseDocs/specification.md)---that includes
 features tailored to documenting MOOSE code:
 
-- C++ [`MooseObject`](MooseObject.md) descriptions and input parameters tables may be automatically generated from
+- C++ [`MooseObject`](framework:MooseObject.md) descriptions and input parameters tables may be automatically generated from
   applications (see [/appsyntax.md]).
 - Cross-referencing links to examples and source code may be created (see [/autolink.md]).
 - Dynamic source code listings allow source to displayed without duplication and update
@@ -22,7 +22,7 @@ created so it is possible to develop syntax to meet the needs of any project.
 The following links provide additional details on the MOOSE documentation system:
 
 - [MooseDocs/specification.md]
-- [framework/documenting.md]
+- [framework:framework/documenting.md]
 - [MooseDocs/standards.md]
 
 If you are creating a website for your own application the following page may be of use:

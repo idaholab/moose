@@ -50,7 +50,7 @@ In addition to the Constraint class, several other objects are created, as shown
 | Constructed Object | Purpose |
 |--------------------|--------------------|
 | [ContactPressureAux](/auxkernels/ContactPressureAux.md) | Compute contact pressure and store in an AuxVariable |
-| [Penetration](/auxkernels/PenetrationAux.md) | Compute contact penetration and store in an AuxVariable |
+| [Penetration](framework:/auxkernels/PenetrationAux.md) | Compute contact penetration and store in an AuxVariable |
 | [NodalArea](/userobjects/NodalArea.md) | Compute nodal area and store in an AuxVariable |
 
 ## Notes on Node/Face Contact Enforcement
@@ -64,7 +64,7 @@ The contact enforcement system relies on MOOSE's geometric search system to
 provide the candidate set of faces that can interact with a secondary node at a
 given time. The set of candidate faces is controlled by the `patch_size`
 parameter and the `patch_update_strategy` options in the
-[Mesh](/mesh/MooseMesh.md) block. The patch size must be large enough to
+[Mesh](framework:/mesh/MooseMesh.md) block. The patch size must be large enough to
 accommodate the sliding that occurs during a time step. It is generally
 recommended that the `patch_update_strategy=auto` be used.
 

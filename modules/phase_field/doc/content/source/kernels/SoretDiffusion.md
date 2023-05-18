@@ -12,7 +12,7 @@ of transport, and $D$ the diffusivity.
 
 It is used together with [`SplitCHWRes`](/SplitCHWRes.md),
 [`SplitCHParsed`](/SplitCHParsed.md), and
-[`CoupledTimeDerivative`](/CoupledTimeDerivative.md) to set up a system of two
+[`CoupledTimeDerivative`](framework:/CoupledTimeDerivative.md) to set up a system of two
 first order PDEs using a concentration order parameter and a chemical potential
 variable.
 

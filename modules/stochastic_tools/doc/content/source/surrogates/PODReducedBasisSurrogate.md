@@ -71,7 +71,7 @@ To create a POD reduced basis surrogate model, one can use the following syntax:
 It is visible that the reduced operators and basis vectors from [PODReducedBasisTrainer.md]
 have been saved to `trainer_out_pod_rb.rd` and the surrogate model is constructed by
 loading the necessary information from it. For the sampling
-of the uncertain parameters, the same objects can be used in the [Samplers](Samplers/index.md) block:
+of the uncertain parameters, the same objects can be used in the [Samplers](framework:Samplers/index.md) block:
 
 !listing pod_rb/internal/surr.i block=Samplers
 

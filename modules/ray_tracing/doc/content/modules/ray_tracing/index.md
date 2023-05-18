@@ -31,6 +31,6 @@ The ray tracing module traces rays through the finite element mesh. Notable feat
 ## Object Overview
 
 - [Ray.md] - Basic data structure that represents a single ray that traverses the mesh
-- [RayTracingStudy.md] - [UserObject](UserObjects/index.md) that generates and executes the [Rays](Ray.md)
+- [RayTracingStudy.md] - [UserObject](framework:UserObjects/index.md) that generates and executes the [Rays](Ray.md)
 - [RayBCs/index.md] - Manipulates [Rays](Ray.md) on boundaries, both internal and external
 - [RayKernels/index.md] - Manipulates [Rays](Ray.md) on segments within an element along a [Ray.md] trajectory

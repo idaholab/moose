@@ -9,7 +9,7 @@ each region. Each entry in this parameter corresponds to the entries in the para
 [!param](/Components/{{name}}/names), [!param](/Components/{{name}}/widths),
 and [!param](/Components/{{name}}/n_part_elems).
 Note that this parameter is optional; if omitted, the user must
-create [Materials](Materials/index.md) supplying the following material properties
+create [Materials](framework:Materials/index.md) supplying the following material properties
 on all blocks (see [#mesh_blocks]) of the heat structure mesh:
 
 | Material Property | Symbol | Description |
