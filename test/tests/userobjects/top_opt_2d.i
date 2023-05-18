@@ -59,11 +59,6 @@ power = 3
     order = CONSTANT
     initial_condition = 0.0
   []
-  [phys_mat_den]
-    family = MONOMIAL
-    order = CONSTANT
-    initial_condition = ${vol_frac}
-  []
   [mat_den]
     family = MONOMIAL
     order = CONSTANT
@@ -108,14 +103,14 @@ power = 3
     type = ComputeVariableIsotropicElasticityTensor
     youngs_modulus = E_phys
     poissons_ratio = poissons_ratio
-    args = 'Emin phys_mat_den power E0'
+    args = 'Emin mat_den power E0'
   []
   [E_phys]
     type = CoupledValueFunctionMaterial
     # Emin + (density^penal) * (E0 - Emin)
     function = 'x + (y ^ z) * (t-x)'
     prop_name = E_phys
-    v = 'Emin phys_mat_den power E0'
+    v = 'Emin mat_den power E0'
   []
   [poissons_ratio]
     type = GenericConstantMaterial
@@ -128,7 +123,6 @@ power = 3
   [dc]
     # need to creat new material that is the derivatve
     type = ComplianceSensitivity
-    filtered_design_density = phys_mat_den
     design_density = mat_den
     E = ${E0}
     Emin = ${Emin}
@@ -155,7 +149,6 @@ power = 3
   [update]
     type = DensityUpdate
     density_sensitivity = Dc
-    filtered_design_density = phys_mat_den
     design_density = mat_den
     power = ${power}
     volume_fraction = ${vol_frac}
