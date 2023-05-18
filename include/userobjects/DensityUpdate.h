@@ -13,17 +13,17 @@ public:
   virtual void initialize() override{};
   virtual void timestepSetup() override;
   virtual void execute() override;
-  virtual void finalize() override;
+  virtual void finalize() override{};
   virtual void threadJoin(const UserObject &) override{};
 
 protected:
   MooseMesh & _mesh;
   const VariableName _design_density_name;
-  const VariableName _filtered_design_density_name;
   const VariableName _density_sensitivity_name;
+
   MooseVariable & _design_density;
-  MooseVariable & _filtered_design_density;
   const MooseVariable & _density_sensitivity;
+
   const Real _volume_fraction;
 
 private:
