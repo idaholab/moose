@@ -175,8 +175,9 @@ MultiApp::validParams()
   params.addParam<std::vector<Point>>("move_positions",
                                       "The positions corresponding to each move_app.");
 
-  params.addParam<std::string>(
+  params.addParam<std::vector<CLIArgString>>(
       "cli_args",
+      std::vector<CLIArgString>(),
       "Additional command line arguments to pass to the sub apps. If one set is provided the "
       "arguments are applied to all, otherwise there must be a set for each sub app.");
 
@@ -304,32 +305,6 @@ MultiApp::MultiApp(const InputParameters & parameters)
   std::sort(sorted_times.begin(), sorted_times.end());
   if (_reset_times.size() && _reset_times != sorted_times)
     paramError("reset_time", "List of reset times must be sorted in increasing order");
-
-  if (isParamValid("cli_args"))
-    _cli_args = parseCliArgs(getParam<std::string>("cli_args"));
-  else
-    _cli_args = std::vector<std::string>();
-}
-
-std::vector<std::string>
-MultiApp::parseCliArgs(const std::string & cli_arg) const
-{
-  std::string local_cli_arg = cli_arg;
-  bool last_char_space = false;
-  unsigned int n_quote = 0;
-  const std::string sq = "\'";
-  const std::string dq = "\"";
-  for (unsigned int j = 0; j < cli_arg.size(); ++j)
-  {
-    if (cli_arg[j] == sq[0] || cli_arg[j] == dq[0])
-      n_quote += 1;
-    bool is_char_space = std::isspace(static_cast<unsigned char>(cli_arg[j]));
-    // Replace single spaces by commas, only if outside quotes
-    if (is_char_space && !last_char_space && n_quote % 2 == 0)
-      local_cli_arg.replace(j, 1, ",");
-    last_char_space = is_char_space;
-  }
-  return MooseUtils::split(local_cli_arg, ",");
 }
 
 void
@@ -360,7 +335,7 @@ MultiApp::init(unsigned int num_apps, const LocalRankConfig & config)
 
   // if cliArgs() != _cli_args, then cliArgs() was overridden and we need to check it
   auto cla = cliArgs();
-  if (cla != _cli_args)
+  if (cla != std::vector<std::string>(_cli_args.begin(), _cli_args.end()))
   {
     if ((cla.size() > 1) && (_total_num_apps != cla.size()))
       mooseError("The number of items supplied as command line argument to subapps must be 1 or "

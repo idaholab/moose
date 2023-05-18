@@ -1026,6 +1026,9 @@ DerivativeStringClass(ParsedFunctionExpression);
 /// System name support of multiple nonlinear systems on the same mesh
 DerivativeStringClass(NonlinearSystemName);
 
+/// Command line argument, specialized to handle quotes in vector arguments
+DerivativeStringClass(CLIArgString);
+
 namespace Moose
 {
 extern const TagName SOLUTION_TAG;
