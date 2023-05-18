@@ -20,9 +20,41 @@
   [common_vector]
     type = Exodiff
     input = parent_common_vector.i
-    exodiff = 'parent_common_vector_out_sub0.e parent_common_vector_out_sub1.e'
-    requirement = "The MultiApp system shall include the ability to set common command line vector "
-                  "parameters for all sub applications from the input file."
+    exodiff = 'parent_common_vector_out_sub_10.e parent_common_vector_out_sub_11.e'
+    requirement = "The MultiApp system shall include the ability to set common command line vector, "
+                  "using double quotes, parameters for all sub applications from the input file."
+  []
+
+  [common_vector_single]
+    type = Exodiff
+    input = parent_common_vector.i
+    cli_args = 'MultiApps/active=sub_2'
+    exodiff = 'parent_common_vector_out_sub_20.e parent_common_vector_out_sub_21.e'
+    requirement = "The MultiApp system shall include the ability to set common command line vector, "
+                  "using single quotes, parameters for all sub applications from the input file."
+    prereq = 'common_vector'
+  []
+
+  [split_with_vector_single]
+    type = Exodiff
+    input = parent_common_vector.i
+    cli_args = 'MultiApps/active=sub_1_split'
+    exodiff = 'parent_common_vector_out_sub_1_split0.e parent_common_vector_out_sub_1_split1.e'
+    requirement = "The MultiApp system shall include the ability to set command line vector, using "
+                  "double quotes, parameters distributed among all sub applications from the input "
+                  "file."
+    prereq = 'common_vector_single'
+  []
+
+  [split_with_vector_double]
+    type = Exodiff
+    input = parent_common_vector.i
+    cli_args = 'MultiApps/active=sub_2_split'
+    exodiff = 'parent_common_vector_out_sub_2_split0.e parent_common_vector_out_sub_2_split1.e'
+    requirement = "The MultiApp system shall include the ability to set command line vector, using "
+                  "single quotes, parameters distributed among all sub applications from the input "
+                  "file."
+    prereq = 'split_with_vector_single'
   []
 
   [wrong_size]
