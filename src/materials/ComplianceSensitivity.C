@@ -40,5 +40,5 @@ ComplianceSensitivity::computeQpProperties()
 
   // Compute the sensitivity as the derivative divided by the volume of the current element
   // This makes the sensitivity mesh size independent
-  _sensitivity[_qp] = derivative / _current_elem->volume();
+  _sensitivity[_qp] = derivative;
 }

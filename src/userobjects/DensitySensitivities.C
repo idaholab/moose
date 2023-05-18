@@ -47,12 +47,11 @@ DensitySensitivities::execute()
   {
     den_sense_val += qp_vals[qp] * _JxW[qp];
   }
-
+  den_sense_val /= _current_elem_volume;
   // Normalize the total elemental sensitivity value by the design density and the volume of the
-  // current element This makes the sensitivity mesh size independent A small value (1e-3) is used
-  // to avoid division by zero
-  den_sense_val /=
-      std::max(1e-3, _design_density.getElementalValue(_current_elem) / _current_elem_volume);
+  // current element This makes the sensitivity mesh size independent A small value (1e-3) is
+  // used to avoid division by zero
+  den_sense_val /= std::max(1e-3, _design_density.getElementalValue(_current_elem));
 
   // Set the nodal value of the density sensitivity
   _density_sensitivity.setNodalValue(den_sense_val);
