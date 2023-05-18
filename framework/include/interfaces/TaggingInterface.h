@@ -69,6 +69,15 @@ public:
     MatrixTagsKey(const MatrixTagsKey &) {}
   };
 
+  /**
+   * Enumerate whether a (residual) vector tag is to be of a non-reference or reference tag type
+   */
+  enum class ResidualTagType
+  {
+    NonReference,
+    Reference
+  };
+
   void useVectorTag(const TagName & tag_name, VectorTagsKey);
 
   void useMatrixTag(const TagName & tag_name, MatrixTagsKey);
@@ -99,13 +108,9 @@ protected:
    * @param Assembly The assembly object that we obtain the local residual blocks from
    * @param ivar The variable which we are retrieving the local residual blocks for
    * @param ref_problem A pointer to a reference residual problem. This can be a nullptr
-   * @param prepare_non_ref_tags Whether to prepare all tags other than reference residual problem
-   * tags. If false, then we will prepare the reference residual tag
+   * @param tag_type What type of tags to prepare
    */
-  void prepareVectorTag(Assembly & assembly,
-                        unsigned int ivar,
-                        const ReferenceResidualProblem * ref_problem,
-                        bool prepare_non_ref_tags);
+  void prepareVectorTag(Assembly & assembly, unsigned int ivar, ResidualTagType tag_type);
 
   /**
    * Prepare data for computing element residual the according to active tags
@@ -340,9 +345,7 @@ private:
   void prepareVectorTagInternal(Assembly & assembly,
                                 unsigned int ivar,
                                 const std::set<TagID> & vector_tags,
-                                const std::set<TagID> & absolute_value_vector_tags,
-                                const std::set<TagID> & vector_tags_to_skip,
-                                const std::set<TagID> & absolute_value_vector_tags_to_skip);
+                                const std::set<TagID> & absolute_value_vector_tags);
 
   /// The residual tag ids this Kernel will contribute to
   std::set<TagID> _vector_tags;
@@ -352,6 +355,24 @@ private:
 
   /// The matrices this Kernel will contribute to
   std::set<TagID> _matrix_tags;
+
+  /// A set to hold vector tags excluding the reference residual tag. If there is no reference
+  /// residual problem, this container is the same as \p _vector_tags;
+  std::set<TagID> _non_ref_vector_tags;
+
+  /// A set to hold absolute value vector tags excluding the reference residual tag. If there is no
+  /// reference residual problem, this container is the same as \p _abs_vector_tags;
+  std::set<TagID> _non_ref_abs_vector_tags;
+
+  /// A set of either size 1 or 0. If we have a reference residual problem and \p _vector_tags holds
+  /// the reference vector tag, then this set holds the reference vector tags, otherwise it holds
+  /// nothing
+  std::set<TagID> _ref_vector_tags;
+
+  /// A set of either size 1 or 0. If we have a reference residual problem and \p _abs_vector_tags
+  /// holds the reference vector tag, then this set holds the reference vector tags, otherwise it
+  /// holds nothing
+  std::set<TagID> _ref_abs_vector_tags;
 
   /// Moose objct this tag works on
   const MooseObject & _moose_object;

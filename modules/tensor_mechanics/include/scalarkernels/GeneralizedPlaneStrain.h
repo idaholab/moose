@@ -33,7 +33,4 @@ protected:
 
   const GeneralizedPlaneStrainUOInterface & _gps;
   const unsigned int _scalar_var_id;
-  /// A pointer to the reference residual problem. This will be a nullptr if the problem type is not
-  /// \p ReferenceResidualProblem
-  const ReferenceResidualProblem * const _reference_residual_problem;
 };

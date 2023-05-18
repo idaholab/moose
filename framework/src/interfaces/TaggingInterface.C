@@ -119,6 +119,29 @@ TaggingInterface::TaggingInterface(const MooseObject * moose_object)
   _re_blocks.resize(_vector_tags.size());
   _absre_blocks.resize(_abs_vector_tags.size());
   _ke_blocks.resize(_matrix_tags.size());
+
+  const auto * const fe_problem =
+      moose_object->parameters().getCheckedPointerParam<FEProblemBase *>("_fe_problem_base");
+  if (const auto * const ref_problem = dynamic_cast<const ReferenceResidualProblem *>(fe_problem))
+  {
+    const auto reference_tag = ref_problem->referenceVectorTagID({});
+    auto create_tags_split =
+        [reference_tag](const auto & tags, auto & non_ref_tags, auto & ref_tags)
+    {
+      for (const auto tag : tags)
+        if (tag == reference_tag)
+          ref_tags.insert(tag);
+        else
+          non_ref_tags.insert(tag);
+    };
+    create_tags_split(_vector_tags, _non_ref_vector_tags, _ref_vector_tags);
+    create_tags_split(_abs_vector_tags, _non_ref_abs_vector_tags, _ref_abs_vector_tags);
+  }
+  else
+  {
+    _non_ref_vector_tags = _vector_tags;
+    _non_ref_abs_vector_tags = _abs_vector_tags;
+  }
 }
 
 void
@@ -160,67 +183,39 @@ TaggingInterface::useMatrixTag(TagID tag_id, MatrixTagsKey)
 void
 TaggingInterface::prepareVectorTag(Assembly & assembly, const unsigned int ivar)
 {
-  prepareVectorTagInternal(assembly, ivar, _vector_tags, _abs_vector_tags, {}, {});
+  prepareVectorTagInternal(assembly, ivar, _vector_tags, _abs_vector_tags);
 }
 
 void
 TaggingInterface::prepareVectorTag(Assembly & assembly,
                                    const unsigned int ivar,
-                                   const ReferenceResidualProblem * const ref_problem,
-                                   const bool prepare_non_ref_tags)
+                                   const ResidualTagType tag_type)
 {
-  mooseAssert(_vector_tags.size() >= 1, "we need at least one active tag");
-  const auto reference_tag =
-      ref_problem ? std::set<TagID>({ref_problem->referenceVectorTagID({})}) : std::set<TagID>({});
-
-  if (prepare_non_ref_tags)
-    prepareVectorTagInternal(
-        assembly, ivar, _vector_tags, _abs_vector_tags, reference_tag, reference_tag);
+  if (tag_type == ResidualTagType::NonReference)
+    prepareVectorTagInternal(assembly, ivar, _non_ref_vector_tags, _non_ref_abs_vector_tags);
   else
-  {
-    std::set<TagID> vector_tags_that_are_ref_tags, absolute_value_vector_tags_that_are_ref_tags;
-    for (const auto tag : reference_tag)
-    {
-      if (_vector_tags.count(tag))
-        vector_tags_that_are_ref_tags.insert(tag);
-      if (_abs_vector_tags.count(tag))
-        absolute_value_vector_tags_that_are_ref_tags.insert(tag);
-    }
-    prepareVectorTagInternal(assembly,
-                             ivar,
-                             vector_tags_that_are_ref_tags,
-                             absolute_value_vector_tags_that_are_ref_tags,
-                             {},
-                             {});
-  }
+    prepareVectorTagInternal(assembly, ivar, _ref_vector_tags, _ref_abs_vector_tags);
 }
 
 void
-TaggingInterface::prepareVectorTagInternal(
-    Assembly & assembly,
-    const unsigned int ivar,
-    const std::set<TagID> & vector_tags,
-    const std::set<TagID> & absolute_value_vector_tags,
-    const std::set<TagID> & vector_tags_to_skip,
-    const std::set<TagID> & absolute_value_vector_tags_to_skip)
+TaggingInterface::prepareVectorTagInternal(Assembly & assembly,
+                                           const unsigned int ivar,
+                                           const std::set<TagID> & vector_tags,
+                                           const std::set<TagID> & absolute_value_vector_tags)
 {
-  auto prepare =
-      [this, ivar, &assembly](auto & re_blocks, const auto & tags, const auto & tags_to_skip)
+  auto prepare = [this, ivar, &assembly](auto & re_blocks, const auto & tags)
   {
     re_blocks.clear();
     re_blocks.reserve(tags.size());
     for (const auto tag_id : tags)
     {
-      if (tags_to_skip.count(tag_id))
-        continue;
-
-      const VectorTag & tag = _subproblem.getVectorTag(tag_id);
+      const auto & tag = _subproblem.getVectorTag(tag_id);
       re_blocks.push_back(&assembly.residualBlock(ivar, Assembly::LocalDataKey{}, tag._type_id));
     }
   };
 
-  prepare(_re_blocks, vector_tags, vector_tags_to_skip);
-  prepare(_absre_blocks, absolute_value_vector_tags, absolute_value_vector_tags_to_skip);
+  prepare(_re_blocks, vector_tags);
+  prepare(_absre_blocks, absolute_value_vector_tags);
 
   _local_re.resize(_re_blocks.empty()
                        ? (_absre_blocks.empty() ? std::size_t(0) : _absre_blocks[0]->size())

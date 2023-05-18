@@ -40,23 +40,19 @@ GeneralizedPlaneStrain::GeneralizedPlaneStrain(const InputParameters & parameter
     _gps(getUserObject<GeneralizedPlaneStrainUOInterface>("generalized_plane_strain")),
     _scalar_var_id(isParamValid("scalar_out_of_plane_strain_index")
                        ? getParam<unsigned int>("scalar_out_of_plane_strain_index")
-                       : 0),
-    _reference_residual_problem(dynamic_cast<ReferenceResidualProblem *>(
-        getCheckedPointerParam<FEProblemBase *>("_fe_problem_base")))
+                       : 0)
 {
 }
 
 void
 GeneralizedPlaneStrain::computeResidual()
 {
-  prepareVectorTag(
-      _assembly, _var.number(), _reference_residual_problem, /*prepare_non_ref_tags=*/true);
+  prepareVectorTag(_assembly, _var.number(), TaggingInterface::ResidualTagType::NonReference);
   for (_i = 0; _i < _local_re.size(); ++_i)
     _local_re(_i) += _gps.returnResidual(_scalar_var_id);
   accumulateTaggedLocalResidual();
 
-  prepareVectorTag(
-      _assembly, _var.number(), _reference_residual_problem, /*prepare_non_ref_tags=*/false);
+  prepareVectorTag(_assembly, _var.number(), TaggingInterface::ResidualTagType::Reference);
   for (_i = 0; _i < _local_re.size(); ++_i)
     _local_re(_i) += _gps.returnReferenceResidual(_scalar_var_id);
   accumulateTaggedLocalResidual();
