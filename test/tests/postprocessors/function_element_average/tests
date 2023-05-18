@@ -1,0 +1,12 @@
+[Tests]
+  [test]
+    type = CSVDiff
+    input = 'function_element_average.i'
+    csvdiff = 'function_element_average_out.csv'
+    rel_err = 0
+
+    requirement = "The system shall be able to average functions over volume."
+    design = 'FunctionElementAverage.md'
+    issues = '#24411'
+  []
+[]
