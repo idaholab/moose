@@ -5,7 +5,7 @@
     csvdiff = 'function_side_average_out.csv'
     rel_err = 0
 
-    requirement = "The system shall average functions over a boundary."
+    requirement = "The system shall be able to average functions over a boundary."
     design = 'FunctionSideAverage.md'
     issues = '#24411'
   []
