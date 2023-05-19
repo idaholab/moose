@@ -19,6 +19,40 @@ This example shows the use of multiple time steppers to compose a final time ste
 
 This example shows the control feature of the time stepper system. The [TimePeriod.md] control is used to specify a time period for only `ConstDT1` to be active.
 
+!alert warning
+The `[TimeSteppers]` block require one hierarchy of block for input time stepper(s).
+
+## Example of comparison between `[TimeSteppers]`and `[TimeStepper]` input
+
+Below are two examples shows the difference hierarchy between `[TimeSteppers]` and `[TimeStepper]`:
+
+`[TimeStepper]` input:
+```
+[Executioner]
+  type = Transient   # Here we use the Transient Executioner
+  [TimeStepper]
+     type = TimeSequenceStepper
+     time_sequence  = '0 43200 86400 172800 432000 864000'
+  []
+  start_time = 0.0
+  end_time = 864000
+[]
+```
+`[TimeSteppers]` input:
+```
+[Executioner]
+  type = Transient   # Here we use the Transient Executioner
+  [TimeSteppers]
+    [my_timestepper]
+     type = TimeSequenceStepper
+     time_sequence  = '0 43200 86400 172800 432000 864000'
+    []
+  []
+  start_time = 0.0
+  end_time = 864000
+[]
+```
+
 !listing test/tests/time_steppers/time_stepper_system/active_timesteppers.i  block=Executioner Controls
 
 !syntax list /Executioner/TimeSteppers objects=True actions=False subsystems=False
