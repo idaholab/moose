@@ -1,17 +1,33 @@
-# Verification of Benchmark Problem TPV205-2D from the SCEC Dynamic Rupture Validation exercises #
+# Verification of Benchmark Problem TPV205-3D from the SCEC Dynamic Rupture Validation exercises #
 # Reference: #
 # Harris, R. M.-P.-A. (2009). The SCEC/USGS Dynamic Earthquake Rupture Code Verification Exercise. Seismological Research Letters, vol. 80, no. 1, pages 119-126. #
 
 [Mesh]
+    # [./msh]
+    #   type = GeneratedMeshGenerator
+    #   dim = 3
+    #   nx = 150
+    #   ny = 150
+    #   nz = 150
+    #   xmin = -15000
+    #   xmax = 15000
+    #   ymin = -15000
+    #   ymax = 15000
+    #   zmin = -15000
+    #   zmax = 15000
+    # []
     [./msh]
       type = GeneratedMeshGenerator
-      dim = 2
-      nx = 1000
-      ny = 1000
-      xmin = -50000
-      xmax = 50000
-      ymin = -50000
-      ymax = 50000
+      dim = 3
+      nx = 15
+      ny = 15
+      nz = 15
+      xmin = -1500
+      xmax = 1500
+      ymin = -1500
+      ymax = 1500
+      zmin = -1500
+      zmax = 1500
     []
     [./new_block]
       type = ParsedSubdomainMeshGenerator
@@ -25,28 +41,34 @@
       split_interface = true
     []
   []
-
+    
   [GlobalParams]
     #primary variables
-    displacements = 'disp_x disp_y'
+    displacements = 'disp_x disp_y disp_z'
     #damping ratio
     q = 0.1
     #characteristic length (m)
     Dc = 0.4
     #initial normal stress (Pa)
     T2_o = 120e6
+    #initial shear stress along dip direction (Pa)
+    T3_o = 0.0
     #dynamic friction coefficient
     mu_d = 0.525
     #element edge length (m)
-    len = 100
+    len = 200
   []
-
+  
   [AuxVariables]
     [./resid_x]
-      order = FIRST
-      family = LAGRANGE
+        order = FIRST
+        family = LAGRANGE
     [../]
     [./resid_y]
+        order = FIRST
+        family = LAGRANGE
+    []
+    [./resid_z]
         order = FIRST
         family = LAGRANGE
     []
@@ -58,6 +80,10 @@
         order = FIRST
         family = LAGRANGE
     [../]
+    [./resid_slipweakening_z]
+        order = FIRST
+        family = LAGRANGE
+    [../]
     [./disp_slipweakening_x]
         order = FIRST
         family = LAGRANGE
@@ -66,11 +92,19 @@
         order = FIRST
         family = LAGRANGE
     []
+    [./disp_slipweakening_z]
+        order = FIRST
+        family = LAGRANGE
+    []
     [./vel_slipweakening_x]
         order = FIRST
         family = LAGRANGE
     []
     [./vel_slipweakening_y]
+        order = FIRST
+        family = LAGRANGE
+    []
+    [./vel_slipweakening_z]
         order = FIRST
         family = LAGRANGE
     []
@@ -83,24 +117,21 @@
         family = MONOMIAL
     []
   []
-
+  
   [Modules/TensorMechanics/CohesiveZoneMaster]
     [./czm_ik]
       boundary = 'Block0_Block1'
       strain = SMALL
-      generate_output='traction_x traction_y jump_x jump_y normal_traction tangent_traction normal_jump tangent_jump'
     [../]
   []
-
-
+    
+    
   [Modules]
     [./TensorMechanics]
       [./Master]
         [./all]
           strain = SMALL
           add_variables = true
-          planar_formulation = PLANE_STRAIN
-          generate_output = 'stress_xx stress_yy stress_xy'
           extra_vector_tags = 'restore_tag'
         [../]
       [../]
@@ -110,7 +141,7 @@
   [Problem]
     extra_tag_vectors = 'restore_tag'
   []
-
+  
   [AuxKernels]
     [Vel_x]
       type = ComputeValueRate
@@ -122,6 +153,12 @@
       type = ComputeValueRate
       variable = vel_slipweakening_y
       coupled = disp_y
+      execute_on = 'TIMESTEP_BEGIN'
+    []
+    [Vel_z]
+      type = ComputeValueRate
+      variable = vel_slipweakening_z
+      coupled = disp_z
       execute_on = 'TIMESTEP_BEGIN'
     []
     [Displacment_x]
@@ -136,6 +173,12 @@
       coupled = disp_y
       execute_on = 'TIMESTEP_BEGIN'
     []
+    [Displacement_z]
+      type = CopyValueAux
+      variable = disp_slipweakening_z
+      coupled = disp_z
+      execute_on = 'TIMESTEP_BEGIN'
+    []
     [Residual_x]
       type = CopyValueAux
       variable = resid_slipweakening_x
@@ -146,6 +189,12 @@
       type = CopyValueAux
       variable = resid_slipweakening_y
       coupled = resid_y
+      execute_on = 'TIMESTEP_BEGIN'
+    []
+    [Residual_z]
+      type = CopyValueAux
+      variable = resid_slipweakening_z
+      coupled = resid_z
       execute_on = 'TIMESTEP_BEGIN'
     []
     [restore_x]
@@ -162,6 +211,13 @@
       variable = 'resid_y'
       execute_on = 'TIMESTEP_END'
     []
+    [restore_z]
+      type = TagVectorAux
+      vector_tag = 'restore_tag'
+      v = 'disp_z'
+      variable = 'resid_z'
+      execute_on = 'TIMESTEP_END'
+    []
     [StaticFricCoeff]
       type = FunctionAux
       variable = mu_s
@@ -175,7 +231,7 @@
       execute_on = 'LINEAR TIMESTEP_BEGIN'
     []
   []
-
+  
   [Kernels]
     [./inertia_x]
       type = InertialForce
@@ -187,6 +243,11 @@
       use_displaced_mesh = false
       variable = disp_y
     []
+    [./inertia_z]
+      type = InertialForce
+      use_displaced_mesh = false
+      variable = disp_z
+    []
     [./Reactionx]
       type = StiffPropDamping
       variable = 'disp_x'
@@ -197,8 +258,13 @@
       variable = 'disp_y'
       component = '1'
     []
+    [./Reactionz]
+      type = StiffPropDamping
+      variable = 'disp_z'
+      component = '2'
+    []
   []
-
+  
   [Materials]
     [elasticity]
         type = ComputeIsotropicElasticityTensor
@@ -215,11 +281,13 @@
         prop_values = 2670
     []
     [./czm_mat]
-        type = SlipWeakeningFriction2d
+        type = SlipWeakeningFriction3d
         disp_slipweakening_x     = disp_slipweakening_x
         disp_slipweakening_y     = disp_slipweakening_y
+        disp_slipweakening_z     = disp_slipweakening_z
         reaction_slipweakening_x = resid_slipweakening_x
         reaction_slipweakening_y = resid_slipweakening_y
+        reaction_slipweakening_z = resid_slipweakening_z
         mu_s = mu_s
         ini_shear_sts = ini_shear_stress
         boundary = 'Block0_Block1'
@@ -234,7 +302,7 @@
       type = InitialStrikeShearStress
     []
   []
-
+  
   [UserObjects]
     [recompute_residual_tag]
         type = ResidualEvaluationUserObject
@@ -243,17 +311,17 @@
         execute_on = 'TIMESTEP_END'
     []
   []
-
+  
   [Executioner]
     type = Transient
-    dt = 0.0025
-    end_time = 12.0
+    dt = 0.005
+    end_time = 0.01
     [TimeIntegrator]
       type = CentralDifference
       solve_type = lumped
     []
   []
-
+  
   [Outputs]
     exodus = true
     interval = 20
