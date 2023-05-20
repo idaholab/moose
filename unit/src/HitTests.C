@@ -14,6 +14,9 @@
 
 #include <iostream>
 #include <vector>
+#include <sstream>
+#include <fstream>
+#include <cstdio>
 
 // TODO:
 //
@@ -769,4 +772,203 @@ TEST(HitTests, vector_unsigned_int)
   {
     EXPECT_EQ("negative value read from file 'TESTCASE' on line 1", std::string(err.what()));
   }
+}
+
+// helper for recursively capturing each path and leaf value in a parse tree
+void
+tree_list(hit::Node * node, std::ostringstream & tree_stream)
+{
+  // capture node path and value of the parameter if current node is a field
+  if (node->type() == hit::NodeType::Field)
+  {
+    tree_stream << "/" << node->fullpath() << " (" << static_cast<hit::Field *>(node)->val() << ")"
+                << " - fname: " << std::setw(31) << std::left << node->filename()
+                << " line: " << std::setw(2) << std::right << node->line()
+                << " column: " << std::setw(2) << std::right << node->column() << "\n";
+  }
+
+  // capture node path and recurse the children if current node is a section
+  else if (node->type() == hit::NodeType::Section)
+  {
+    tree_stream << "/" << std::setw(27) << std::left << node->fullpath()
+                << " - fname: " << std::setw(31) << std::left << node->filename()
+                << " line: " << std::setw(2) << std::right << node->line()
+                << " column: " << std::setw(2) << std::right << node->column() << "\n";
+
+    for (auto child : node->children())
+    {
+      tree_list(child, tree_stream);
+    }
+  }
+}
+
+// test ability to include external file content from various input contexts
+TEST(HitTests, FileIncludeSuccess)
+{
+  // base input file string includes a file within a block and at root level
+  std::string basefile = R"INPUT(
+[Block01]
+  param01a = value01a
+  !include include_param_from_basefile.i
+  param01c = value01c
+[]
+!include include_block_from_basefile.i
+[Block03]
+  param03a = value03a
+  param03b = value03b
+  param03c = value03c
+[]
+)INPUT";
+
+  // write param input to file on disk that is included from base input file
+  std::ofstream include_param_from_basefile("include_param_from_basefile.i");
+  include_param_from_basefile << R"INPUT(
+  param01b = value01b
+)INPUT";
+  include_param_from_basefile.close();
+
+  // write block input to file on disk that is included from base input file
+  std::ofstream include_block_from_basefile("include_block_from_basefile.i");
+  include_block_from_basefile << R"INPUT(
+[Block02]
+  param02a = value02a
+  !include include_param_from_included.i
+  param02c = value02c
+[]
+)INPUT";
+  include_block_from_basefile.close();
+
+  // write param input to file on disk that is included from an include file
+  std::ofstream include_param_from_included("include_param_from_included.i");
+  include_param_from_included << R"INPUT(
+  param02b = value02b
+)INPUT";
+  include_param_from_included.close();
+
+  // parse the base input string to consume all contents from included files
+  auto root = hit::parse("BASE-STRING", basefile);
+
+  // delete the three files that were put on disk to be parsed from includes
+  std::remove("include_block_from_basefile.i");
+  std::remove("include_param_from_basefile.i");
+  std::remove("include_param_from_included.i");
+
+  // expected content from all include files when the parse tree is rendered
+  std::string render_expect = R"INPUT(
+[Block01]
+  param01a = value01a
+  param01b = value01b
+  param01c = value01c
+[]
+[Block02]
+  param02a = value02a
+  param02b = value02b
+  param02c = value02c
+[]
+[Block03]
+  param03a = value03a
+  param03b = value03b
+  param03c = value03c
+[]
+)INPUT";
+
+  // check that all file content is included when the parse tree is rendered
+  EXPECT_EQ(render_expect, "\n" + root->render() + "\n");
+
+  // expected content from all include files when the parse paths are listed
+  std::string tree_expect = R"INPUT(
+/                            - fname: BASE-STRING                     line:  2 column:  1
+/Block01                     - fname: BASE-STRING                     line:  2 column:  1
+/Block01/param01a (value01a) - fname: BASE-STRING                     line:  3 column:  3
+/Block01/param01b (value01b) - fname: ./include_param_from_basefile.i line:  2 column:  3
+/Block01/param01c (value01c) - fname: BASE-STRING                     line:  5 column:  3
+/Block02                     - fname: ./include_block_from_basefile.i line:  2 column:  1
+/Block02/param02a (value02a) - fname: ./include_block_from_basefile.i line:  3 column:  3
+/Block02/param02b (value02b) - fname: ./include_param_from_included.i line:  2 column:  3
+/Block02/param02c (value02c) - fname: ./include_block_from_basefile.i line:  5 column:  3
+/Block03                     - fname: BASE-STRING                     line:  8 column:  1
+/Block03/param03a (value03a) - fname: BASE-STRING                     line:  9 column:  3
+/Block03/param03b (value03b) - fname: BASE-STRING                     line: 10 column:  3
+/Block03/param03c (value03c) - fname: BASE-STRING                     line: 11 column:  3
+)INPUT";
+
+  // traverse the parse tree recursively capturing paths and terminal values
+  std::ostringstream tree_actual;
+  tree_list(root, tree_actual);
+
+  // check that all file content is included when the parse paths are listed
+  EXPECT_EQ(tree_expect, "\n" + tree_actual.str());
+}
+
+// test error check for external file include that has nonexistent file path
+TEST(HitTests, FileIncludeMissing)
+{
+  // base input file string includes a file using a path that does not exist
+  std::string basefile = R"INPUT(
+[Block01]
+  param01a = value01a
+  !include missing_file.i
+  param01c = value01c
+[]
+)INPUT";
+
+  // check parsing base input fails with error of including nonexistent file
+  try
+  {
+    hit::parse("TESTCASE", basefile);
+    FAIL() << "Exception was not thrown";
+  }
+  catch (std::exception & err)
+  {
+    EXPECT_EQ("TESTCASE line:4 column:3 : could not find 'missing_file.i'\n",
+              std::string(err.what()));
+  }
+}
+
+// test error check for external file include that causes circular reference
+TEST(HitTests, FileIncludeCircular)
+{
+  // base input file string includes existing include file 01 within a block
+  std::string basefile = R"INPUT(
+[Block01]
+  param01a = value01a
+  !include include_file_01.i
+  param01c = value01c
+[]
+)INPUT";
+
+  // write include file 01 to disk which includes include file 02 downstream
+  std::ofstream include_file_01("include_file_01.i");
+  include_file_01 << R"INPUT(
+[Block02]
+  !include include_file_02.i
+[]
+)INPUT";
+  include_file_01.close();
+
+  // write include file 02 to disk which includes include file 01 circularly
+  std::ofstream include_file_02("include_file_02.i");
+  include_file_02 << R"INPUT(
+[Block03]
+  !include include_file_01.i
+[]
+)INPUT";
+  include_file_02.close();
+
+  // check parsing base input fails with error of creating circular includes
+  try
+  {
+    hit::parse("TESTCASE", basefile);
+    FAIL() << "Exception was not thrown";
+  }
+  catch (std::exception & err)
+  {
+    EXPECT_EQ("./include_file_02.i line:3 column:3 : file include would create circular reference "
+              "'include_file_01.i'\n",
+              std::string(err.what()));
+  }
+
+  // delete two extra files that were put on disk to be parsed from includes
+  std::remove("include_file_01.i");
+  std::remove("include_file_02.i");
 }
