@@ -29,7 +29,7 @@ Below are two examples shows the difference hierarchy between `[TimeSteppers]` a
 `[TimeStepper]` input:
 ```
 [Executioner]
-  type = Transient   # Here we use the Transient Executioner
+  type = Transient
   [TimeStepper]
      type = TimeSequenceStepper
      time_sequence  = '0 43200 86400 172800 432000 864000'
@@ -41,7 +41,7 @@ Below are two examples shows the difference hierarchy between `[TimeSteppers]` a
 `[TimeSteppers]` input:
 ```
 [Executioner]
-  type = Transient   # Here we use the Transient Executioner
+  type = Transient
   [TimeSteppers]
     [my_timestepper]
      type = TimeSequenceStepper

@@ -82,7 +82,7 @@
       type = RunException
       input = 'timestepper_input_error.i'
       expect_err = "unused parameter 'Executioner/TimeSteppers/time_sequence'"
-      detail ='input time stepper(s) is not used.'
+      detail = 'the syntax for multiple time steppers is used without an additional nested block for the time stepper'
     []
 
   []
