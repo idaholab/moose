@@ -22,12 +22,12 @@ collaborators throughout the world.
 Members of the [!ac](CCB) of MOOSE or MOOSE-based application must complete [!ac](INL) training course
 RDHERD01.
 
-- [Introduction to MOOSE and MOOSE-based Application development processes (RDHERD01)](ccb:sqa/training/ccb/index.md)
+- [Introduction to MOOSE and MOOSE-based Application development processes (RDHERD01)](modules_training:sqa/training/ccb/index.md)
 
 The project lead and software quality lead for MOOSE or MOOSE-based application(s) must complete [!ac](INL) training
 course 0INL1862.
 
-- [MOOSE and MOOSE-Based Applications Project Lead and SQA Lead Training (0INL1862)](ccb:sqa/training/lead/index.md)
+- [MOOSE and MOOSE-Based Applications Project Lead and SQA Lead Training (0INL1862)](modules_training:sqa/training/lead/index.md)
 
 ## Test Results and Releases
 
