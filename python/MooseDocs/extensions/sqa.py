@@ -287,6 +287,14 @@ class SQAExtension(command.CommandExtension):
             renderer.addCSS('sqa_moose', "css/sqa_moose.css")
             renderer.addJavaScript('sqa_moose', "js/sqa_moose.js")
 
+    def buildAutoLink(self, p, val, **kwargs):
+        """
+        Helper for creating an AutoLink token.
+
+        Useful because it parses a key from a filename if provided
+        """
+        key, filename = self.translator.parseFilename(val)
+        autolink.AutoLink(p, page=filename, key=key, **kwargs)
 
 class SQARequirementsCommand(command.CommandComponent):
     COMMAND = 'sqa'
@@ -423,14 +431,14 @@ class SQARequirementsCommand(command.CommandComponent):
                 p = core.Paragraph(item)
                 tokens.String(p, content='Verification: ')
                 for filename in req.verification:
-                    autolink.AutoLink(p, page=str(filename))
+                    self.extension.buildAutoLink(p, filename)
                     core.Space(p)
 
             if settings.get('link-validation', False) and req.validation:
                 p = core.Paragraph(item)
                 tokens.String(p, content='Validation: ')
                 for filename in req.validation:
-                    autolink.AutoLink(p, page=str(filename))
+                    self.extension.buildAutoLink(p, filename)
                     core.Space(p)
 
 class SQACrossReferenceCommand(SQARequirementsCommand):
@@ -453,8 +461,9 @@ class SQACrossReferenceCommand(SQARequirementsCommand):
                 if req.design is None:
                     continue
                 for d in req.design:
+                    key, filename = self.translator.parseFilename(d)
                     try:
-                        node = self.translator.findPage(d)
+                        node = self.translator.findPage(filename, key=key)
                         design[node].append(req)
                     except exceptions.MooseDocsException:
                         msg = "Failed to locate the design page '{}'".format(d)
@@ -468,7 +477,7 @@ class SQACrossReferenceCommand(SQARequirementsCommand):
         for node, requirements in design.items():
             matrix = SQARequirementMatrix(parent)
             heading = SQARequirementMatrixHeading(matrix, category=category)
-            autolink.AutoLink(heading, page=str(node.local))
+            autolink.AutoLink(heading, page=str(node.local), key=node.key)
             for req in requirements:
                 self._addRequirement(matrix, info, page, req, requirements, category, settings)
 
@@ -525,6 +534,7 @@ class SQADependenciesCommand(command.CommandComponent):
         for dep in depends:
             if dep != category:
                 fname = '{}_{}.md'.format(dep, suffix)
+                # This might require allow_implicit=True
                 autolink.AutoLink(core.ListItem(ul), page='sqa/{}'.format(fname),
                                   optional=True, warning=True, class_='moose-sqa-dependency')
         return parent
@@ -546,6 +556,7 @@ class SQADocumentCommand(command.CommandComponent):
             return parent
 
         suffix = settings.get('suffix')
+        # This might require allow_implicit=True
         return autolink.AutoLink(parent, page='sqa/{}_{}.md'.format(category, suffix),
                                  optional=True, warning=True)
 
@@ -639,14 +650,14 @@ class SQAReportCommand(command.CommandComponent):
                 p = core.Paragraph(item)
                 tokens.String(p, content='Verification: ')
                 for filename in req.verification:
-                    autolink.AutoLink(p, page=str(filename))
+                    self.extension.buildAutoLink(p, filename)
                     core.Space(p)
 
             if token['link_validation'] and req.validation:
                 p = core.Paragraph(item)
                 tokens.String(p, content='Validation: ')
                 for filename in req.validation:
-                    autolink.AutoLink(p, page=str(filename))
+                    self.extension.buildAutoLink(p, filename)
                     core.Space(p)
 
 class SQARecordCommand(command.CommandComponent):
@@ -672,7 +683,7 @@ class SQARecordCommand(command.CommandComponent):
                         split_name = document.filename.split('#', maxsplit=1)
                         fname = split_name[0]
                         bookmark = split_name[1] if len(split_name) > 1 else None
-                        autolink.AutoLink(li, page=fname, bookmark=bookmark, string=document.title)
+                        self.extension.buildAutoLink(li, fname, bookmark=bookmark, string=document.title)
                     else:
                         tokens.String(li, content=document.title)
         return parent
@@ -771,7 +782,8 @@ class RenderSQARequirementText(components.RenderComponent):
 class RenderSQARequirementDesign(autolink.RenderLinkBase):
 
     def findDesign(self, filename, design, line):
-        node = self.translator.findPage(design, throw_on_zero=False)
+        design_key, design_filename = self.translator.parseFilename(design)
+        node = self.translator.findPage(design_filename, key=design_key, throw_on_zero=False)
         if node is None:
             msg = "Unable to locate the design page: {}\n    {}:{}"
             raise exceptions.MooseDocsException(msg, design, filename, line)
