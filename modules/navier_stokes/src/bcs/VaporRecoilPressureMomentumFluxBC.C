@@ -1,15 +1,15 @@
-/****************************************************************************/
-/*                        DO NOT MODIFY THIS HEADER                         */
-/*                                                                          */
-/* MALAMUTE: MOOSE Application Library for Advanced Manufacturing UTilitiEs */
-/*                                                                          */
-/*           Copyright 2021 - 2023, Battelle Energy Alliance, LLC           */
-/*                           ALL RIGHTS RESERVED                            */
-/****************************************************************************/
+//* This file is part of the MOOSE framework
+//* https://www.mooseframework.org
+//*
+//* All rights reserved, see COPYRIGHT for full restrictions
+//* https://github.com/idaholab/moose/blob/master/COPYRIGHT
+//*
+//* Licensed under LGPL 2.1, please see LICENSE for details
+//* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "VaporRecoilPressureMomentumFluxBC.h"
 
-registerMooseObject("MalamuteApp", VaporRecoilPressureMomentumFluxBC);
+registerMooseObject("NavierStokesApp", VaporRecoilPressureMomentumFluxBC);
 
 InputParameters
 VaporRecoilPressureMomentumFluxBC::validParams()
@@ -30,8 +30,5 @@ VaporRecoilPressureMomentumFluxBC::VaporRecoilPressureMomentumFluxBC(
 ADReal
 VaporRecoilPressureMomentumFluxBC::computeQpResidual()
 {
-  return _test[_i][_qp] *
-         ADRealVectorValue(
-             std::abs(_normals[_qp](0)), std::abs(_normals[_qp](1)), std::abs(_normals[_qp](2))) *
-         _rc_pressure[_qp];
+  return _test[_i][_qp] * _normals[_qp] * _rc_pressure[_qp];
 }

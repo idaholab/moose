@@ -1,11 +1,11 @@
-/****************************************************************************/
-/*                        DO NOT MODIFY THIS HEADER                         */
-/*                                                                          */
-/* MALAMUTE: MOOSE Application Library for Advanced Manufacturing UTilitiEs */
-/*                                                                          */
-/*           Copyright 2021 - 2023, Battelle Energy Alliance, LLC           */
-/*                           ALL RIGHTS RESERVED                            */
-/****************************************************************************/
+//* This file is part of the MOOSE framework
+//* https://www.mooseframework.org
+//*
+//* All rights reserved, see COPYRIGHT for full restrictions
+//* https://github.com/idaholab/moose/blob/master/COPYRIGHT
+//*
+//* Licensed under LGPL 2.1, please see LICENSE for details
+//* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #pragma once
 
@@ -47,8 +47,6 @@ protected:
   ADMaterialProperty<Real> & _surface_tension;
   ADMaterialProperty<RealVectorValue> & _grad_surface_tension;
   const MooseArray<ADPoint> & _ad_normals;
-  const MooseArray<ADReal> & _ad_curvatures;
-  ADMaterialProperty<RealVectorValue> & _surface_term_curvature;
   ADMaterialProperty<RealVectorValue> & _surface_term_gradient1;
   ADMaterialProperty<RealVectorValue> & _surface_term_gradient2;
 

@@ -88,11 +88,10 @@ INSADMaterial::subdomainSetup()
     // safe for dependencies
     _boussinesq_alpha = &_material_data.getProperty<Real, true>(
         _object_tracker->get<MaterialPropertyName>("alpha", _current_subdomain_id), 0, *this);
-    _temperature =
-        &_subproblem
-             .getStandardVariable(
-                 _tid, _object_tracker->get<std::string>("temperature", _current_subdomain_id))
-             .adSln();
+    auto & temp_var = _subproblem.getStandardVariable(
+        _tid, _object_tracker->get<std::string>("temperature", _current_subdomain_id));
+    addMooseVariableDependency(&temp_var);
+    _temperature = &temp_var.adSln();
     _ref_temp = &_material_data.getProperty<Real, false>(
         _object_tracker->get<MaterialPropertyName>("ref_temp", _current_subdomain_id), 0, *this);
   }
@@ -114,6 +113,7 @@ INSADMaterial::subdomainSetup()
   {
     auto & disp_x = _subproblem.getStandardVariable(
         _tid, _object_tracker->get<VariableName>("disp_x", _current_subdomain_id));
+    addMooseVariableDependency(&disp_x);
     _disp_x_dot = &disp_x.adUDot();
     _disp_x_sys_num = disp_x.sys().number();
     _disp_x_num =
@@ -125,6 +125,7 @@ INSADMaterial::subdomainSetup()
     {
       auto & disp_y = _subproblem.getStandardVariable(
           _tid, _object_tracker->get<VariableName>("disp_y", _current_subdomain_id));
+      addMooseVariableDependency(&disp_y);
       _disp_y_dot = &disp_y.adUDot();
       _disp_y_sys_num = disp_y.sys().number();
       _disp_y_num =
@@ -143,6 +144,7 @@ INSADMaterial::subdomainSetup()
     {
       auto & disp_z = _subproblem.getStandardVariable(
           _tid, _object_tracker->get<VariableName>("disp_z", _current_subdomain_id));
+      addMooseVariableDependency(&disp_z);
       _disp_z_dot = &disp_z.adUDot();
       _disp_z_sys_num = disp_z.sys().number();
       _disp_z_num =

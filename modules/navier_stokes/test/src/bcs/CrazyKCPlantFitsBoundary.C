@@ -1,16 +1,16 @@
-/****************************************************************************/
-/*                        DO NOT MODIFY THIS HEADER                         */
-/*                                                                          */
-/* MALAMUTE: MOOSE Application Library for Advanced Manufacturing UTilitiEs */
-/*                                                                          */
-/*           Copyright 2021 - 2023, Battelle Energy Alliance, LLC           */
-/*                           ALL RIGHTS RESERVED                            */
-/****************************************************************************/
+//* This file is part of the MOOSE framework
+//* https://www.mooseframework.org
+//*
+//* All rights reserved, see COPYRIGHT for full restrictions
+//* https://github.com/idaholab/moose/blob/master/COPYRIGHT
+//*
+//* Licensed under LGPL 2.1, please see LICENSE for details
+//* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "CrazyKCPlantFitsBoundary.h"
 #include "Assembly.h"
 
-registerMooseObject("MalamuteApp", CrazyKCPlantFitsBoundary);
+registerMooseObject("NavierStokesTestApp", CrazyKCPlantFitsBoundary);
 
 InputParameters
 CrazyKCPlantFitsBoundary::validParams()
@@ -82,8 +82,6 @@ CrazyKCPlantFitsBoundary::CrazyKCPlantFitsBoundary(const InputParameters & param
     _grad_surface_tension(declareADProperty<RealVectorValue>(
         getParam<MaterialPropertyName>("grad_surface_tension_name"))),
     _ad_normals(_assembly.adNormals()),
-    _ad_curvatures(_assembly.adCurvatures()),
-    _surface_term_curvature(declareADProperty<RealVectorValue>("surface_term_curvature")),
     _surface_term_gradient1(declareADProperty<RealVectorValue>("surface_term_gradient1")),
     _surface_term_gradient2(declareADProperty<RealVectorValue>("surface_term_gradient2")),
     _length_units_per_meter(1. / std::pow(10, getParam<int>("length_unit_exponent"))),
@@ -117,8 +115,6 @@ CrazyKCPlantFitsBoundary::computeQpProperties()
   _grad_surface_tension[_qp] = _alpha * _mass_units_per_kilogram /
                                (_time_units_per_second * _time_units_per_second) /
                                _temperature_units_per_kelvin * _grad_temperature[_qp];
-  _surface_term_curvature[_qp] =
-      -2. * _ad_curvatures[_qp] * _surface_tension[_qp] * _ad_normals[_qp];
   _surface_term_gradient1[_qp] = -_grad_surface_tension[_qp];
   _surface_term_gradient2[_qp] = _ad_normals[_qp] * (_ad_normals[_qp] * _grad_surface_tension[_qp]);
 }

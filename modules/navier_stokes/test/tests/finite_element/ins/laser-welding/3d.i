@@ -1,16 +1,9 @@
 period=1.25e-3
-endtime=2.5e-3
+endtime=${period}
 timestep=1.25e-5
 surfacetemp=300
 
 [GlobalParams]
-  gravity = '0 0 0'
-  pspg = true
-  # supg = true
-  laplace = true
-  integrate_p_by_parts = true
-  convective_term = true
-  transient_term = true
   temperature = T
 []
 
@@ -23,242 +16,155 @@ surfacetemp=300
   ymax = .35e-3
   zmin = -.7e-3
   zmax = 0
-  nx = 4
-  ny = 4
-  nz = 4
+  nx = 2
+  ny = 2
+  nz = 2
   displacements = 'disp_x disp_y disp_z'
   uniform_refine = 2
 []
 
 [Variables]
-  [./vel_x]
-    [./InitialCondition]
-      type = ConstantIC
-      value = 1e-15
-    [../]
-  [../]
+  [vel]
+    family = LAGRANGE_VEC
+  []
+  [T]
+  []
+  [p]
+  []
+  [disp_x]
+  []
+  [disp_y]
+  []
+  [disp_z]
+  []
+[]
 
-  [./vel_y]
-    [./InitialCondition]
-      type = ConstantIC
-      value = 1e-15
-    [../]
-  [../]
-
-  [./vel_z]
-    [./InitialCondition]
-      type = ConstantIC
-      value = 1e-15
-    [../]
-  [../]
-
-  [./T]
-  [../]
-
-  [./p]
-  [../]
-  [./disp_x]
-  [../]
-  [./disp_y]
-  [../]
-  [./disp_z]
-  [../]
+[Problem]
+  error_on_jacobian_nonzero_reallocation = false
 []
 
 [ICs]
-  [./T]
+  [T]
     type = FunctionIC
     variable = T
     function = '(${surfacetemp} - 300) / .7e-3 * z + ${surfacetemp}'
-  [../]
+  []
 []
 
 [Kernels]
-  [./disp_x]
+  [disp_x]
     type = Diffusion
     variable = disp_x
-  [../]
-  [./disp_y]
+  []
+  [disp_y]
     type = Diffusion
     variable = disp_y
-  [../]
-  [./disp_z]
+  []
+  [disp_z]
     type = Diffusion
     variable = disp_z
-  [../]
-[]
-
-[ADKernels]
-  [./mesh_x]
-    type = INSConvectedMesh
-    variable = vel_x
-    disp_x = disp_x
-    disp_y = disp_y
-    disp_z = disp_z
-    use_displaced_mesh = true
-  [../]
-  [./mesh_y]
-    type = INSConvectedMesh
-    variable = vel_y
-    disp_x = disp_x
-    disp_y = disp_y
-    disp_z = disp_z
-    use_displaced_mesh = true
-  [../]
-  [./mesh_z]
-    type = INSConvectedMesh
-    variable = vel_z
-    disp_x = disp_x
-    disp_y = disp_y
-    disp_z = disp_z
-    use_displaced_mesh = true
-  [../]
-
-  # mass
-  [./mass]
+  []
+  [mass]
     type = INSADMass
     variable = p
-    u = vel_x
-    v = vel_y
-    w = vel_z
-    p = p
     use_displaced_mesh = true
-  [../]
-
-  # x-momentum, time
-  [./x_momentum_time]
+  []
+  [mass_pspg]
+    type = INSADMassPSPG
+    variable = p
+    use_displaced_mesh = true
+  []
+  [momentum_time]
     type = INSADMomentumTimeDerivative
-    variable = vel_x
+    variable = vel
     use_displaced_mesh = true
-  [../]
-
-  # x-momentum, space
-  [./x_momentum_space]
-    type = INSADMomentumBase
-    variable = vel_x
-    u = vel_x
-    v = vel_y
-    w = vel_z
-    p = p
-    component = 0
+  []
+  [mesh]
+    type = INSADConvectedMesh
+    variable = vel
+    disp_x = disp_x
+    disp_y = disp_y
+    disp_z = disp_z
     use_displaced_mesh = true
-  [../]
-
-  # y-momentum, time
-  [./y_momentum_time]
-    type = INSADMomentumTimeDerivative
-    variable = vel_y
+  []
+  [momentum_convection]
+    type = INSADMomentumAdvection
+    variable = vel
     use_displaced_mesh = true
-  [../]
-
-  # y-momentum, space
-  [./y_momentum_space]
-    type = INSADMomentumBase
-    variable = vel_y
-    u = vel_x
-    v = vel_y
-    w = vel_z
-    p = p
-    component = 1
+  []
+  [momentum_viscous]
+    type = INSADMomentumViscous
+    variable = vel
     use_displaced_mesh = true
-  [../]
-
-  # z-momentum, time
-  [./z_momentum_time]
-    type = INSADMomentumTimeDerivative
-    variable = vel_z
+  []
+  [momentum_pressure]
+    type = INSADMomentumPressure
+    variable = vel
+    pressure = p
+    integrate_p_by_parts = true
     use_displaced_mesh = true
-  [../]
-
-  # z-momentum, space
-  [./z_momentum_space]
-    type = INSADMomentumBase
-    variable = vel_z
-    u = vel_x
-    v = vel_y
-    w = vel_z
-    p = p
-    component = 2
+  []
+  [momentum_supg]
+    type = INSADMomentumSUPG
+    variable = vel
+    velocity = vel
     use_displaced_mesh = true
-  [../]
-
- # temperature
- [./temperature_time]
-   type = INSADTemperatureTimeDerivative
-   variable = T
-   use_displaced_mesh = true
- [../]
-
- [./temperature_space]
-   type = INSADTemperature
-   variable = T
-   u = vel_x
-   v = vel_y
-   w = vel_z
-   p = p
-   use_displaced_mesh = true
- [../]
- [mesh_T]
-   type = INSTemperatureConvectedMesh
-   variable = T
-   disp_x = disp_x
-   disp_y = disp_y
-   disp_z = disp_z
-   use_displaced_mesh = true
- []
+  []
+  [temperature_advection]
+    type = INSADEnergyAdvection
+    variable = T
+    use_displaced_mesh = true
+  []
+  [temperature_time]
+    type = INSADHeatConductionTimeDerivative
+    variable = T
+    use_displaced_mesh = true
+  []
+  [temperature_conduction]
+    type = ADHeatConduction
+    variable = T
+    thermal_conductivity = 'k'
+    use_displaced_mesh = true
+  []
+  [temperature_supg]
+    type = INSADEnergySUPG
+    variable = T
+    velocity = vel
+    use_displaced_mesh = true
+  []
 []
 
 [BCs]
-  [./x_no_disp]
+  [x_no_disp]
     type = DirichletBC
     variable = disp_x
     boundary = 'back'
     value = 0
-  [../]
-  [./y_no_disp]
+  []
+  [y_no_disp]
     type = DirichletBC
     variable = disp_y
     boundary = 'back'
     value = 0
-  [../]
-  [./z_no_disp]
+  []
+  [z_no_disp]
     type = DirichletBC
     variable = disp_z
     boundary = 'back'
     value = 0
-  [../]
-
-  [./x_no_slip]
-    type = DirichletBC
-    variable = vel_x
+  []
+  [no_slip]
+    type = ADVectorFunctionDirichletBC
+    variable = vel
     boundary = 'bottom right left top back'
-    value = 0.0
-  [../]
-
-  [./y_no_slip]
-    type = DirichletBC
-    variable = vel_y
-    boundary = 'bottom right left top back'
-    value = 0.0
-  [../]
-
-  [./z_no_slip]
-    type = DirichletBC
-    variable = vel_z
-    boundary = 'bottom right left top back'
-    value = 0.0
-  [../]
-
-  [./T_cold]
+  []
+  [T_cold]
     type = DirichletBC
     variable = T
     boundary = 'back'
     value = 300
-  [../]
-[]
-
-[ADBCs]
-  [./radiation_flux]
+  []
+  [radiation_flux]
     type = RadiationEnergyFluxBC
     variable = T
     boundary = 'front'
@@ -266,9 +172,8 @@ surfacetemp=300
     sb_constant = 'sb_constant'
     absorptivity = 'abs'
     use_displaced_mesh = true
-  [../]
-
-  [./weld_flux]
+  []
+  [weld_flux]
     type = GaussianWeldEnergyFluxBC
     variable = T
     boundary = 'front'
@@ -279,79 +184,71 @@ surfacetemp=300
     y_beam_coord = '2e-4 * sin(t * 2 * pi / ${period})'
     z_beam_coord = 0
     use_displaced_mesh = true
-  [../]
-
-  [./vapor_recoil_x]
+  []
+  [vapor_recoil]
     type = VaporRecoilPressureMomentumFluxBC
-    variable = vel_x
+    variable = vel
     boundary = 'front'
-    component = 0
     use_displaced_mesh = true
-  [../]
-
-  [./vapor_recoil_y]
-    type = VaporRecoilPressureMomentumFluxBC
-    variable = vel_y
-    boundary = 'front'
-    component = 1
-    use_displaced_mesh = true
-  [../]
-
-  [./vapor_recoil_z]
-    type = VaporRecoilPressureMomentumFluxBC
-    variable = vel_z
-    boundary = 'front'
-    component = 2
-    use_displaced_mesh = true
-  [../]
-
-[./displace_x_top]
+  []
+  [displace_x_top]
     type = DisplaceBoundaryBC
     boundary = 'front'
     variable = 'disp_x'
-    velocity = 'vel_x'
-  [../]
-  [./displace_y_top]
+    velocity = 'vel'
+    component = 0
+  []
+  [displace_y_top]
     type = DisplaceBoundaryBC
     boundary = 'front'
     variable = 'disp_y'
-    velocity = 'vel_y'
-  [../]
-  [./displace_z_top]
+    velocity = 'vel'
+    component = 1
+  []
+  [displace_z_top]
     type = DisplaceBoundaryBC
     boundary = 'front'
     variable = 'disp_z'
-    velocity = 'vel_z'
-  [../]
-[]
-
-[ADMaterials]
-  [./kc_fits]
-    type = CrazyKCPlantFits
-    temperature = T
-    beta = 1e7
-  [../]
-  [./boundary]
-    type = CrazyKCPlantFitsBoundary
-    boundary = 'front'
-    temperature = T
-  [../]
+    velocity = 'vel'
+    component = 2
+  []
 []
 
 [Materials]
-  [./const]
+  [ins_mat]
+    type = INSADStabilized3Eqn
+    velocity = vel
+    pressure = p
+    temperature = T
+    use_displaced_mesh = true
+  []
+  [kc_fits]
+    type = CrazyKCPlantFits
+    temperature = T
+    beta = 1e7
+  []
+  [boundary]
+    type = CrazyKCPlantFitsBoundary
+    boundary = 'front'
+    temperature = T
+  []
+[]
+
+[Materials]
+  [const]
     type = GenericConstantMaterial
     prop_names = 'abs sb_constant'
     prop_values = '1 5.67e-8'
-  [../]
+  []
 []
 
 [Preconditioning]
-  [./SMP]
+  [SMP]
     type = SMP
     full = true
-    solve_type = 'NEWTON'
-  [../]
+    petsc_options_iname = '-pc_type -pc_factor_shift_type -pc_factor_mat_solver_type'
+    petsc_options_value = 'lu       NONZERO               strumpack'
+  []
 []
 
 [Executioner]
@@ -359,34 +256,28 @@ surfacetemp=300
   end_time = ${endtime}
   dtmin = 1e-8
   dtmax = ${timestep}
-  petsc_options = '-snes_converged_reason -ksp_converged_reason -options_left -ksp_monitor_singular_value'
-  petsc_options_iname = '-ksp_gmres_restart -pc_type'
-  petsc_options_value = '100        asm'
-
+  petsc_options = '-snes_converged_reason -ksp_converged_reason -options_left'
+  solve_type = 'NEWTON'
   line_search = 'none'
   nl_max_its = 12
   l_max_its = 100
-  [./TimeStepper]
+  [TimeStepper]
     type = IterationAdaptiveDT
     optimal_iterations = 7
     dt = ${timestep}
     linear_iteration_ratio = 1e6
     growth_factor = 1.5
-  [../]
+  []
 []
 
 [Outputs]
-  print_linear_residuals = false
-  [./exodus]
+  [exodus]
     type = Exodus
     output_material_properties = true
     show_material_properties = 'mu'
-  [../]
-  [./dofmap]
-    type = DOFMap
-    execute_on = 'initial'
-  [../]
+  []
   checkpoint = true
+  perf_graph = true
 []
 
 [Debug]
@@ -398,114 +289,114 @@ surfacetemp=300
   marker = combo
   max_h_level = 4
 
-  [./Indicators]
-    # [./error_x]
+  [Indicators]
+    # [error_x]
     #   type = GradientJumpIndicator
     #   variable = vel_x
-    # [../]
-    # [./error_y]
+    # []
+    # [error_y]
     #   type = GradientJumpIndicator
     #   variable = vel_y
-    # [../]
-    # [./error_z]
+    # []
+    # [error_z]
     #   type = GradientJumpIndicator
     #   variable = vel_z
-    # [../]
-    # [./error_p]
+    # []
+    # [error_p]
     #   type = GradientJumpIndicator
     #   variable = p
-    # [../]
-    [./error_T]
+    # []
+    [error_T]
       type = GradientJumpIndicator
       variable = T
-    [../]
-    # [./error_dispx]
+    []
+    # [error_dispx]
     #   type = GradientJumpIndicator
     #   variable = disp_x
-    # [../]
-    # [./error_dispy]
+    # []
+    # [error_dispy]
     #   type = GradientJumpIndicator
     #   variable = disp_y
-    # [../]
-    [./error_dispz]
+    # []
+    [error_dispz]
       type = GradientJumpIndicator
       variable = disp_z
-    [../]
-  [../]
+    []
+  []
 
-  [./Markers]
-    # [./errorfrac_x]
+  [Markers]
+    # [errorfrac_x]
     #   type = ErrorFractionMarker
     #   refine = 0.7
     #   coarsen = 0.3
     #   indicator = error_x
-    # [../]
-    # [./errorfrac_y]
+    # []
+    # [errorfrac_y]
     #   type = ErrorFractionMarker
     #   refine = 0.7
     #   coarsen = 0.3
     #   indicator = error_y
-    # [../]
-    # [./errorfrac_z]
+    # []
+    # [errorfrac_z]
     #   type = ErrorFractionMarker
     #   refine = 0.7
     #   coarsen = 0.3
     #   indicator = error_z
-    # [../]
-    # [./errorfrac_p]
+    # []
+    # [errorfrac_p]
     #   type = ErrorFractionMarker
     #   refine = 0.7
     #   coarsen = 0.3
     #   indicator = error_p
-    # [../]
-    [./errorfrac_T]
+    # []
+    [errorfrac_T]
       type = ErrorFractionMarker
       refine = 0.4
       coarsen = 0.2
       indicator = error_T
-    [../]
-    # [./errorfrac_dispx]
+    []
+    # [errorfrac_dispx]
     #   type = ErrorFractionMarker
     #   refine = 0.7
     #   coarsen = 0.3
     #   indicator = error_dispx
-    # [../]
-    # [./errorfrac_dispy]
+    # []
+    # [errorfrac_dispy]
     #   type = ErrorFractionMarker
     #   refine = 0.7
     #   coarsen = 0.3
     #   indicator = error_dispy
-    # [../]
-    [./errorfrac_dispz]
+    # []
+    [errorfrac_dispz]
       type = ErrorFractionMarker
       refine = 0.4
       coarsen = 0.2
       indicator = error_dispz
-    [../]
-    [./combo]
+    []
+    [combo]
       type = ComboMarker
       markers = 'errorfrac_T errorfrac_dispz'
-    [../]
-  [../]
+    []
+  []
 []
 
 [Postprocessors]
-  [./num_dofs]
+  [num_dofs]
     type = NumDOFs
     system = 'NL'
-  [../]
-  [./nl]
+  []
+  [nl]
     type = NumNonlinearIterations
-  [../]
-  [./tot_nl]
+  []
+  [tot_nl]
     type = CumulativeValuePostprocessor
     postprocessor = 'nl'
-  [../]
-  [./linear]
+  []
+  [linear]
     type = NumLinearIterations
-  [../]
-  [./tot_linear]
+  []
+  [tot_linear]
     type = CumulativeValuePostprocessor
     postprocessor = 'linear'
-  [../]
+  []
 []
