@@ -69,6 +69,9 @@ public:
   virtual const std::vector<VariableName> & getVariableNames() { return _variable_names; }
 
 protected:
+  /// Check if we have a mapping for the variable and if it is ready to be used
+  void checkIfReadyToUse(const VariableName & libmesh_dbg_var(vname)) const;
+
   /// Storage for the names of the variables this mapping can handle
   const std::vector<VariableName> & _variable_names;
 

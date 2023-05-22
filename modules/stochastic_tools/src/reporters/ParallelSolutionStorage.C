@@ -37,10 +37,8 @@ ParallelSolutionStorage::ParallelSolutionStorage(const InputParameters & paramet
     _variable_names(getParam<std::vector<VariableName>>("variables"))
 {
   for (const auto & vname : _variable_names)
-  {
     _distributed_solutions.emplace(
         vname, std::unordered_map<unsigned int, std::vector<DenseVector<Real>>>());
-  }
 }
 
 void
@@ -70,11 +68,12 @@ ParallelSolutionStorage::totalNumberOfStoredSolutions(const VariableName & vname
 {
   const auto & samples = libmesh_map_find(_distributed_solutions, vname);
 
-  unsigned int count = 0;
-  for (const auto & sample : samples)
-    count += sample.second.size();
-
-  return count;
+  return std::accumulate(
+      samples.begin(),
+      samples.end(),
+      0,
+      [](unsigned int count, const std::pair<unsigned int, std::vector<DenseVector<Real>>> & sample)
+      { return std::move(count) + sample.second.size(); });
 }
 
 bool

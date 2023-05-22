@@ -306,9 +306,7 @@ PODMapping::map(const VariableName & vname,
   mooseAssert(_parallel_storage, "We need the parallel solution storage for this operation.");
   mooseAssert(_left_basis_functions.find(vname) != _left_basis_functions.end(),
               "The bases for the requested variable are not available!");
-  mooseAssert(_mapping_ready_to_use.find(vname) != _mapping_ready_to_use.end() &&
-                  _mapping_ready_to_use[vname],
-              "The mapping for variable " + vname + "is not ready to use!");
+  checkIfReadyToUse(vname);
 
   // This takes the 0th snapshot because we only support steady-state simulations
   // at the moment.
@@ -327,9 +325,7 @@ PODMapping::map(const VariableName & vname,
                 const DenseVector<Real> & full_order_vector,
                 std::vector<Real> & reduced_order_vector) const
 {
-  mooseAssert(_mapping_ready_to_use.find(vname) != _mapping_ready_to_use.end() &&
-                  _mapping_ready_to_use[vname],
-              "The mapping for variable " + vname + "is not ready to use!");
+  checkIfReadyToUse(vname);
 
   mooseAssert(_left_basis_functions.find(vname) != _left_basis_functions.end(),
               "The bases for the requested variable are not available!");
@@ -351,9 +347,7 @@ PODMapping::inverse_map(const VariableName & vname,
                   _variable_names.end(),
               "Variable " + vname + " is not in PODMapping!");
 
-  mooseAssert(_mapping_ready_to_use.find(vname) != _mapping_ready_to_use.end() &&
-                  _mapping_ready_to_use[vname],
-              "The mapping for variable " + vname + "is not ready to use!");
+  checkIfReadyToUse(vname);
 
   if (reduced_order_vector.size() != _left_basis_functions[vname].size())
     mooseError("The number of supplied reduced-order coefficients (",
@@ -379,9 +373,7 @@ PODMapping::leftBasisFunction(const VariableName & vname, const unsigned int bas
                   _variable_names.end(),
               "Variable " + vname + " is not in PODMapping!");
 
-  mooseAssert(_mapping_ready_to_use.find(vname) != _mapping_ready_to_use.end() &&
-                  _mapping_ready_to_use[vname],
-              "The mapping for variable " + vname + "is not ready to use!");
+  checkIfReadyToUse(vname);
 
   mooseAssert(base_i < _left_basis_functions[vname].size(),
               "The POD for " + vname + " only has " +
@@ -397,9 +389,7 @@ PODMapping::rightBasisFunction(const VariableName & vname, const unsigned int ba
                   _variable_names.end(),
               "Variable " + vname + " is not in PODMapping!");
 
-  mooseAssert(_mapping_ready_to_use.find(vname) != _mapping_ready_to_use.end() &&
-                  _mapping_ready_to_use[vname],
-              "The mapping for variable " + vname + "is not ready to use!");
+  checkIfReadyToUse(vname);
 
   mooseAssert(base_i < _right_basis_functions[vname].size(),
               "The POD for " + vname + " only has " +
@@ -411,10 +401,7 @@ PODMapping::rightBasisFunction(const VariableName & vname, const unsigned int ba
 const std::vector<DenseVector<Real>> &
 PODMapping::leftBasis(const VariableName & vname)
 {
-  mooseAssert(_mapping_ready_to_use.find(vname) != _mapping_ready_to_use.end() &&
-                  _mapping_ready_to_use[vname],
-              "The mapping for variable " + vname + "is not ready to use!");
-
+  checkIfReadyToUse(vname);
   if (_left_basis_functions.find(vname) == _left_basis_functions.end())
     mooseError("We are trying to access container for variable '",
                vname,
@@ -425,10 +412,7 @@ PODMapping::leftBasis(const VariableName & vname)
 const std::vector<DenseVector<Real>> &
 PODMapping::rightBasis(const VariableName & vname)
 {
-  mooseAssert(_mapping_ready_to_use.find(vname) != _mapping_ready_to_use.end() &&
-                  _mapping_ready_to_use[vname],
-              "The mapping for variable " + vname + "is not ready to use!");
-
+  checkIfReadyToUse(vname);
   if (_right_basis_functions.find(vname) == _right_basis_functions.end())
     mooseError("We are trying to access container for variable '",
                vname,
@@ -439,10 +423,7 @@ PODMapping::rightBasis(const VariableName & vname)
 const std::vector<Real> &
 PODMapping::singularValues(const VariableName & vname)
 {
-  mooseAssert(_mapping_ready_to_use.find(vname) != _mapping_ready_to_use.end() &&
-                  _mapping_ready_to_use[vname],
-              "The mapping for variable " + vname + "is not ready to use!");
-
+  checkIfReadyToUse(vname);
   if (_singular_values.find(vname) == _singular_values.end())
     mooseError("We are trying to access container for variable '",
                vname,

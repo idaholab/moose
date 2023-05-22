@@ -38,11 +38,11 @@ protected:
 
   /// If we already have solution fields stored from previous runs, we can use their
   /// ParallelStorageObject to obtain the corresponding coefficients
-  const ParallelSolutionStorage * _parallel_storage;
+  const ParallelSolutionStorage * const _parallel_storage;
 
   /// We only need the sampler to check which coefficients would go to which processor
   /// in case a ParallelSolutionStorage is used
-  Sampler * _sampler;
+  Sampler * const _sampler;
 
   /// The name of the mapping object we would like to use
   const UserObjectName & _mapping_name;

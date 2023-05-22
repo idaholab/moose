@@ -167,9 +167,7 @@ MappingReporter::mapParallelStorageData()
   {
     // We unpack the tuples and insert the values into the reporter
     for (const auto & [var_i, sample_i, vector] : vectors)
-    {
       (*_vector_real_values_parallel_storage[var_i])[sample_i] = std::move(vector);
-    }
   };
 
   // We send the results from the non-root processors to the root processors

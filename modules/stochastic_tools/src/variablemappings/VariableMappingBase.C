@@ -32,3 +32,11 @@ VariableMappingBase::VariableMappingBase(const InputParameters & parameters)
     _mapping_ready_to_use(declareModelData<std::map<VariableName, bool>>("mapping_ready_to_use"))
 {
 }
+
+void
+VariableMappingBase::checkIfReadyToUse(const VariableName & libmesh_dbg_var(vname)) const
+{
+  mooseAssert(_mapping_ready_to_use.find(vname) != _mapping_ready_to_use.end() &&
+                  _mapping_ready_to_use[vname],
+              "The mapping for variable " + vname + "is not ready to use!");
+}

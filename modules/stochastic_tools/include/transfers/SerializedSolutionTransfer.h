@@ -87,7 +87,7 @@ private:
   /// wasteful if the execution of the subapps is very fast (usually not the case).
   void initializeInBatchMode();
 
-  /// User-selected switch that determines if we want to serialize on root only or distribute the
-  /// solutions between all the ranks of the subapp.
+  /// User-selected switch that determines if we want to serialize on the root of the subapp
+  /// only or distribute the solutions between all the ranks of the subapp.
   const bool _serialize_on_root;
 };
