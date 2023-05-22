@@ -1,6 +1,6 @@
 # FormattedTable
 
-The FormattedTable object is a general purpose utility for holding table data. Typically it's used for holding [PostProcessor](syntax/Postprocessors/index.md)
+The FormattedTable object is a general purpose utility for holding table data. Typically it's used for holding [PostProcessor](framework:syntax/Postprocessors/index.md)
 values or scalar variables produced by [ScalarKernels](framework:/ScalarKernels/index.md). It provides several useful utilities for displaying data and efficiently
 outputting the data.
 
