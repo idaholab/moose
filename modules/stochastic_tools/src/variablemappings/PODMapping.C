@@ -227,8 +227,7 @@ PODMapping::buildMapping(const VariableName &
     MatAssemblyBegin(mat, MAT_FINAL_ASSEMBLY);
     MatAssemblyEnd(mat, MAT_FINAL_ASSEMBLY);
 
-    // Now we generate our SVD objects
-    SVDCreate(_communicator.get(), &_svds[vname]);
+    // Now we set the operators for our SVD objects
     SVDSetOperators(_svds[vname], mat, NULL);
 
     // We want the Lanczos method, might give the choice to the user
@@ -293,6 +292,7 @@ PODMapping::buildMapping(const VariableName &
     _mapping_ready_to_use[vname] = true;
 
     MatDestroy(&mat);
+    SVDDestroy(&_svds[vname]);
   }
 
 #endif

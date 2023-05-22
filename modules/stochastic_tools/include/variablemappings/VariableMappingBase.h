@@ -26,6 +26,8 @@ public:
   static InputParameters validParams();
   VariableMappingBase(const InputParameters & parameters);
 
+  virtual ~VariableMappingBase() {}
+
   /**
    * Abstract function for building mapping for a given variable.
    * @param vname The name of the variable
