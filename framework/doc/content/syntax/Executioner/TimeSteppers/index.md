@@ -9,6 +9,7 @@ When more than one time steppers are provided, the time stepper system will add 
 
 The time stepper system is controllable via [Controls](syntax/Controls/index.md) block. The user can turn on/off the time steppers to control the usage of time steppers like make time stepper(s) only active [at certain time period](TimePeriod.md).
 
+
 ## Example input syntax
 
 Below are two examples for multiple time steppers input and the control feature of time stepper system:
@@ -19,14 +20,17 @@ This example shows the use of multiple time steppers to compose a final time ste
 
 This example shows the control feature of the time stepper system. The [TimePeriod.md] control is used to specify a time period for only `ConstDT1` to be active.
 
+!listing test/tests/time_steppers/time_stepper_system/active_timesteppers.i  block=Executioner Controls
+
+## The difference between `[TimeSteppers]`and `[TimeStepper]` input file
+
 !alert warning
-The `[TimeSteppers]` block require one hierarchy of block for input time stepper(s).
+The `[TimeSteppers]` block requires one hierarchy of block for input time stepper(s).
 
-## Example of comparison between `[TimeSteppers]`and `[TimeStepper]` input
+Below are two examples show the differences in the block hierarchy between `[TimeSteppers]` and `[TimeStepper]`:
 
-Below are two examples shows the difference hierarchy between `[TimeSteppers]` and `[TimeStepper]`:
+An input with `[TimeStepper]` block:
 
-`[TimeStepper]` input:
 ```
 [Executioner]
   type = Transient
@@ -38,7 +42,9 @@ Below are two examples shows the difference hierarchy between `[TimeSteppers]` a
   end_time = 864000
 []
 ```
-`[TimeSteppers]` input:
+
+An input with `[TimeSteppers]` block:
+
 ```
 [Executioner]
   type = Transient
@@ -53,7 +59,7 @@ Below are two examples shows the difference hierarchy between `[TimeSteppers]` a
 []
 ```
 
-!listing test/tests/time_steppers/time_stepper_system/active_timesteppers.i  block=Executioner Controls
+
 
 !syntax list /Executioner/TimeSteppers objects=True actions=False subsystems=False
 
