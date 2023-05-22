@@ -59,6 +59,23 @@ public:
    */
   const Function & getFunctionByName(const FunctionName & name) const;
 
+  /**
+   * Determine if the function exists
+   *
+   * @param param_name The name of the function parameter
+   * @param index The index of the function
+   * @return True if the function exists
+   */
+  bool hasFunction(const std::string & param_name) const;
+
+  /**
+   * Determine if the function exists
+   *
+   * @param name The name of the function
+   * @return True if the function exists
+   */
+  bool hasFunctionByName(const FunctionName & name) const;
+
 private:
   /// Parameters of the object with this interface
   const InputParameters & _fni_params;

@@ -20,6 +20,8 @@ Extensions:
         includes:
             - framework/include
             - modules/stochastic_tools/include
+        markdown:
+            SurrogateModelArrayAuxKernel : SurrogateModelArrayAuxKernel.md
     MooseDocs.extensions.common:
         shortcuts:
             framework: !include framework/doc/globals.yml
