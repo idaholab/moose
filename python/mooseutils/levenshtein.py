@@ -7,20 +7,23 @@
 #* Licensed under LGPL 2.1, please see LICENSE for details
 #* https://www.gnu.org/licenses/lgpl-2.1.html
 
-def levenshteinDistance(s1, possible, number=None):
+def levenshteinDistance(s1, possible, number=None, splice=None):
     """
     Return the sorted Levenstein distance of s1 against many strings.
 
     Input:
         s1: The string of interest
-        possible: Possible string matches
+        possible: Possible matches
         number: (Optional) The number of entries to return
+        splice: Lambda to splice a value if 'possible' entries are not just strings
     """
     results = []
     minimum = 1e9
-    for i, s2 in enumerate(possible):
-        d = levenshtein(s1, s2)
-        results.append((s2, d))
+    if splice is None:
+        splice = lambda val : val
+    for i, s in enumerate(possible):
+        d = levenshtein(s1, splice(s))
+        results.append((s, d))
 
     results = [r for r, _ in sorted(results, key=lambda x: x[1])]
     if number is not None:

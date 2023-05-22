@@ -212,12 +212,8 @@ class Translator(mixins.ConfigObject):
         nodes = self.findPages(arg, exact=exact, key=key)
         if len(nodes) == 0:
             if throw_on_zero or warn_on_zero:
-                msg = "Unable to locate a page that ends with the name '{}'.".format(arg)
                 num = self.get('number_of_suggestions', 0)
                 if num:
-                    if self.__markdown_file_list is None:
-                        self.__buildMarkdownFileCache()
-
                     if key is not None:
                         if not self.hasPageKey(key):
                             msg = f'The Content key "{key}" is not registered'
@@ -233,14 +229,24 @@ class Translator(mixins.ConfigObject):
                                 msg += f'\n     {node.key}: {node.local}'
                             raise Translator.FindPageOtherKeysException(msg, keyed_nodes)
 
+                    if self.__markdown_file_list is None:
+                        self.__buildMarkdownFileCache()
+
                     dist = self.__levenshtein_cache.get(arg, None)
                     if dist is None:
+                        splice = lambda path_key : path_key[1]
                         dist = mooseutils.levenshteinDistance(arg, self.__markdown_file_list,
-                                                              number=num)
+                                                              number=num, splice=splice)
                         self.__levenshtein_cache[arg] = dist
+
+                    msg = "Unable to locate a page that ends with the name '{}'.".format(arg)
                     msg += " Did you mean one of the following:\n"
-                    for d in dist:
-                        msg += "     {}\n".format(d)
+                    for key, dir in dist:
+                        msg += "     "
+                        # If statement should be removed with #24406
+                        if key is not None:
+                            msg += f"{key}:"
+                        msg += f"{dir}\n"
 
                 if warn_on_zero:
                     LOG.warning(msg)
@@ -352,12 +358,12 @@ class Translator(mixins.ConfigObject):
     def __buildMarkdownFileCache(self):
         """Builds a list of markdown files, including the short-hand version for error reports."""
         self.__markdown_file_list = set()
-        for local in [page.local for page in self.__executioner.getPages() if isinstance(page, pages.Source)]:
-            self.__markdown_file_list.add(local)
-            parts = local.split(os.path.sep)
+        for page in [page for page in self.__executioner.getPages() if isinstance(page, pages.Source)]:
+            self.__markdown_file_list.add((page.key, page.local))
+            parts = page.local.split(os.path.sep)
             n = len(parts)
             for i in range(n, 0, -1):
-                self.__markdown_file_list.add(os.path.join(*parts[n-i:n]))
+                self.__markdown_file_list.add((page.key, os.path.join(*parts[n-i:n])))
 
     def executePageMethod(self, method, page, args=None):
         """Helper for calling per Page object methods."""
