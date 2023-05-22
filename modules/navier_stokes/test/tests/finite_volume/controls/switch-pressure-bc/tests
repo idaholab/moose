@@ -1,0 +1,10 @@
+[Tests]
+  design = 'ConditionalFunctionEnableControl.md'
+  issues = '#24259'
+  [test]
+    type = CSVDiff
+    input = test.i
+    csvdiff = test_out.csv
+    requirement = 'The system shall be able to switch Dirichlet boundary conditions on and off over the course of a transient in finite volume contexts.'
+  []
+[]

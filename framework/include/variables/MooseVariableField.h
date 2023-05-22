@@ -345,9 +345,10 @@ public:
   virtual const DoFValue & nodalVectorTagValue(TagID tag) const = 0;
   virtual const DoFValue & vectorTagDofValue(TagID tag) const = 0;
 
-  void meshChanged() override;
-  void residualSetup() override;
-  void jacobianSetup() override;
+  virtual void meshChanged() override;
+  virtual void residualSetup() override;
+  virtual void jacobianSetup() override;
+  virtual void timestepSetup() override;
 
   using MooseVariableFieldBase::hasBlocks;
   /*

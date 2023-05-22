@@ -378,6 +378,14 @@ MooseVariableField<OutputType>::jacobianSetup()
   FunctorBase<typename Moose::ADType<OutputType>::type>::jacobianSetup();
 }
 
+template <typename OutputType>
+void
+MooseVariableField<OutputType>::timestepSetup()
+{
+  MooseVariableFieldBase::timestepSetup();
+  FunctorBase<typename Moose::ADType<OutputType>::type>::timestepSetup();
+}
+
 template class MooseVariableField<Real>;
 template class MooseVariableField<RealVectorValue>;
 template class MooseVariableField<RealEigenVector>;
