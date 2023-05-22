@@ -420,19 +420,18 @@ class Translator(mixins.ConfigObject):
                 msg += mooseutils.colorText(traceback.format_exc(), 'GREY')
                 LOG.critical(msg)
 
-    def parseFilename(self, val):
+    @staticmethod
+    def parseFilename(val):
         """
         Parses a filename with a possible content key.
 
             - 'key:/path/to/file' -> ('key', '/path/to/file')
             - '/path/to/file' -> (None, '/path/to/file')
 
-        Ignores the key if ignore_content_key == True.
-
         Input:
             val (str): The value to parse
         """
         match = PARSE_KEY_FILENAME_RE.search(val)
-        if match and not self.get('ignore_content_key'):
+        if match:
             return match.group('key'), match.group('file')
         return None, str(val)
