@@ -452,7 +452,7 @@ Parser::walkRaw(std::string /*fullpath*/, std::string /*nodepath*/, hit::Node * 
   bool is_parent;
   std::string registered_identifier = _syntax.isAssociated(section_name, &is_parent);
 
-  // Make sure at least one action is assicoated with the current identifier
+  // Make sure at least one action is associated with the current identifier
   if (const auto [begin, end] = _syntax.getActions(registered_identifier); begin == end)
   {
     _errmsg += hit::errormsg(n,

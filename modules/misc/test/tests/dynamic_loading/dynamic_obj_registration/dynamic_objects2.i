@@ -1,4 +1,4 @@
-# This input file contains objects only available in phase_field
+# This input file contains some objects only available through heat_conduction
 [Mesh]
   type = GeneratedMesh
   dim = 2
@@ -69,12 +69,7 @@
   dt = 1.0
 []
 
-[Outputs]
-  exodus = true
-[]
-
 [Problem]
-  # type = FEProblem
   register_objects_from = 'HeatConductionApp'
   library_path = '../../../../../heat_conduction/lib'
 []
