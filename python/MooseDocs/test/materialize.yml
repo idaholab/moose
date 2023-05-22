@@ -25,10 +25,6 @@ Content:
 Renderer:
     type: MooseDocs.base.MaterializeRenderer
 
-Translator:
-    # remove with #24406
-    ignore_content_key: False
-
 Extensions:
     disable_defaults: True
     MooseDocs.extensions.config: default
@@ -136,3 +132,5 @@ Extensions:
 Translator:
     type: MooseDocs.base.Translator
     destination: ${MOOSE_DIR}/python/MooseDocs/test/output/materialize
+    # remove with #24406
+    ignore_content_key: False

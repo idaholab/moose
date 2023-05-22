@@ -35,8 +35,9 @@ class TestTranslator(unittest.TestCase):
             self.translator.findPage('wrong.md')
 
     def testFindPageKeyed(self):
-        page = self.translator.findPage('core.md', key='test')
+        page = self.translator.findPage('core.md', key='python_test')
         self.assertEqual(page.local, 'extensions/core.md')
+        self.assertEqual(page.key, 'python_test')
 
     def testFindPageKeyedAlternate(self):
         expect_err = 'test: extensions/core.md'
@@ -58,7 +59,7 @@ class TestTranslatorWithDuplicate(unittest.TestCase):
 
     def testFindPageImplicit(self):
         page = self.translator.findPage('core.md')
-        self.assertEqual(page.key, 'test')
+        self.assertEqual(page.key, 'python_test')
         self.assertEqual(page.local, 'extensions/core.md')
 
     def testFindPageImplicitError(self):
@@ -83,7 +84,7 @@ class TestTranslatorWithOther(unittest.TestCase):
 
     def testFindPageOtherKeysException(self):
         with self.assertRaises(self.translator.FindPageOtherKeysException) as cm:
-            self.translator.findPage('wrong_key.md', key='test')
+            self.translator.findPage('wrong_key.md', key='python_test')
         self.assertEqual(cm.exception.pages[0].key, 'other')
         page = self.translator.findPage('wrong_key.md')
         self.assertEqual(page, cm.exception.pages[0])
