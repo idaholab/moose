@@ -19,6 +19,7 @@ import multiprocessing
 import types
 import traceback
 import time
+import re
 
 import mooseutils
 
@@ -29,6 +30,7 @@ from .readers import Reader
 from .renderers import Renderer
 from .executioners import ParallelBarrier
 
+PARSE_KEY_FILENAME_RE = re.compile(r'(?P<key>[\s\S]*):(?P<file>[\s\S]*)')
 LOG = logging.getLogger('MooseDocs.Translator')
 
 class Translator(mixins.ConfigObject):
@@ -57,6 +59,7 @@ class Translator(mixins.ConfigObject):
                                  "The output directory.")
         config['number_of_suggestions'] = (5, "The number of page names to suggest when a file " \
                                               "cannot be found.")
+        config['ignore_content_key'] = (True, "Set to ignore content keys; used in explicit transition")
         return config
 
     def __init__(self, content, reader, renderer, extensions, executioner=None, **kwargs):
@@ -209,6 +212,12 @@ class Translator(mixins.ConfigObject):
         Inputs:
             see findPages
         """
+        # Needed to support the app transition to explicit-ness; while MOOSE has
+        # key:path/to/file.md everywhere, the apps will not initially have said
+        # keys in their respective config.yml
+        if self.get('ignore_content_key'):
+            key = None
+
         nodes = self.findPages(arg, exact=exact, key=key)
         if len(nodes) == 0:
             if throw_on_zero or warn_on_zero:
@@ -410,3 +419,20 @@ class Translator(mixins.ConfigObject):
                       .format(name, obj.__class__.__name__)
                 msg += mooseutils.colorText(traceback.format_exc(), 'GREY')
                 LOG.critical(msg)
+
+    def parseFilename(self, val):
+        """
+        Parses a filename with a possible content key.
+
+            - 'key:/path/to/file' -> ('key', '/path/to/file')
+            - '/path/to/file' -> (None, '/path/to/file')
+
+        Ignores the key if ignore_content_key == True.
+
+        Input:
+            val (str): The value to parse
+        """
+        match = PARSE_KEY_FILENAME_RE.search(val)
+        if match and not self.get('ignore_content_key'):
+            return match.group('key'), match.group('file')
+        return None, str(val)

@@ -20,7 +20,6 @@ def make_extension(**kwargs):
     return AutoLinkExtension(**kwargs)
 
 PAGE_LINK_RE = re.compile(r'(?P<filename>^(?!http).*?\.md)?(?P<bookmark>#.*)?', flags=re.UNICODE)
-PAGE_LINK_KEY_RE = re.compile(r'(?P<key>[\s\S]*):(?P<file>[\s\S]*)')
 LOG = logging.getLogger(__name__)
 
 LocalLink = tokens.newToken('LocalLink', bookmark=None)
@@ -41,7 +40,6 @@ class AutoLinkExtension(Extension):
         # None of these should be required after #24406, because we should always be explicit
         config['explicit'] = (False, "Set to true to require explicit links")
         config['warn_implicit'] = (True, "Set to true to warn of implicit links that should be explicit; overriden by 'explicit'")
-        config['ignore_keys'] = (True, "Set to true to ignore keys; used in explicit transition; overriden by 'explicit'")
 
         return config
 
@@ -56,30 +54,23 @@ class AutoLinkExtension(Extension):
         renderer.add('LocalLink', RenderLocalLink())
         renderer.add('AutoLink', RenderAutoLink())
 
-def createTokenHelper(key, parent, info, page, settings):
-    match = PAGE_LINK_RE.search(info[key])
-    bookmark = match.group('bookmark')[1:] if match.group('bookmark') else None
-    filename = match.group('filename')
+    def createTokenHelper(self, key, parent, info, page, settings):
+        match = PAGE_LINK_RE.search(info[key])
+        bookmark = match.group('bookmark')[1:] if match.group('bookmark') else None
+        filename = match.group('filename')
 
-    # The link is local (i.e., [#foo]), the heading will be gathered on render because it
-    # could be after the current position.
-    if (filename is None) and (bookmark is not None):
-        return LocalLink(parent, bookmark=bookmark)
-    elif (filename is not None):
-        link_key = None
-
-        # Search for [key:filename]
-        match = PAGE_LINK_KEY_RE.search(filename)
-        if match:
-            filename = match.group('file')
-            link_key = match.group('key')
-
-        return AutoLink(parent, page=filename, bookmark=bookmark, optional=settings['optional'],
-                        exact=settings['exact'], alternative=settings['alternative'], key=link_key)
-    elif common.project_find(info[key]):
-        return modal.ModalSourceLink(parent, src=common.check_filenames(info[key]),
-                                     language=settings['language'])
-    return None
+        # The link is local (i.e., [#foo]), the heading will be gathered on render because it
+        # could be after the current position.
+        if (filename is None) and (bookmark is not None):
+            return LocalLink(parent, bookmark=bookmark)
+        elif (filename is not None):
+            link_key, filename = self.translator.parseFilename(filename)
+            return AutoLink(parent, page=filename, bookmark=bookmark, optional=settings['optional'],
+                            exact=settings['exact'], alternative=settings['alternative'], key=link_key)
+        elif common.project_find(info[key]):
+            return modal.ModalSourceLink(parent, src=common.check_filenames(info[key]),
+                                        language=settings['language'])
+        return None
 
 class PageShortcutLinkComponent(core.ShortcutLinkInline):
     """
@@ -97,7 +88,7 @@ class PageShortcutLinkComponent(core.ShortcutLinkInline):
         return settings
 
     def createToken(self, parent, info, page, settings):
-        token = createTokenHelper('key', parent, info, page, settings)
+        token = self.extension.createTokenHelper('key', parent, info, page, settings)
         return token or core.ShortcutLinkInline.createToken(self, parent, info, page, settings)
 
 class PageLinkComponent(core.LinkInline):
@@ -116,7 +107,7 @@ class PageLinkComponent(core.LinkInline):
         return settings
 
     def createToken(self, parent, info, page, settings):
-        token = createTokenHelper('url', parent, info, page, settings)
+        token = self.extension.createTokenHelper('url', parent, info, page, settings)
         return token or core.LinkInline.createToken(self, parent, info, page, settings)
 
 class RenderLinkBase(components.RenderComponent):
@@ -214,18 +205,12 @@ class RenderAutoLink(RenderLinkBase):
         kwargs = {'exact': token['exact'],
                   'key': token['key']}
 
-        ignore_keys = self.extension.get('ignore_keys')
         warn_implicit = self.extension.get('warn_implicit')
         explicit = self.extension.get('explicit')
 
         # Some extensions (see appsyntax) require some searching and implicit-ness
         # due to config limitations (see SyntaxCompleteCommand._addList)
         if token['allow_implicit']:
-            kwargs['key'] = None
-        # Needed to support the app transition to explicit-ness; while MOOSE has
-        # key:path/to/file.md everywhere, the apps will not initially have said
-        # keys in their respective config.yml
-        elif ignore_keys and not explicit:
             kwargs['key'] = None
         # Lastly, explicitly set a key if the user did not set it
         # The second check (page having a key) should be removed with #24406
@@ -239,7 +224,7 @@ class RenderAutoLink(RenderLinkBase):
         Whether or not to only warn (not raise) if we find exactly one other page
         with a different key (based on whether or not warn_implicit is set)
         """
-        return self.extension.get('warn_implicit') and not self.extension.get('explicit') and not self.extension.get('ignore_keys')
+        return self.extension.get('warn_implicit') and not self.extension.get('explicit')
 
     """
     Create link to another page and extract the heading for the text, if no children provided.
