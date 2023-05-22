@@ -11,12 +11,12 @@ Content:
             - contrib/**
             - css/*
             - js/*
-    test:
+    python_test:
         root_dir: python/MooseDocs/test/content
         content:
             - "**"
             - ~/extensions/external.md
-    external:
+    python_test_external:
         root_dir: python/MooseDocs/test/content
         external: True
         content:
@@ -24,6 +24,10 @@ Content:
 
 Renderer:
     type: MooseDocs.base.MaterializeRenderer
+
+Translator:
+    # remove with #24406
+    ignore_content_key: False
 
 Extensions:
     disable_defaults: True
@@ -36,7 +40,9 @@ Extensions:
     MooseDocs.extensions.include: default
     MooseDocs.extensions.media: default
     MooseDocs.extensions.listing: default
-    MooseDocs.extensions.autolink: default
+    MooseDocs.extensions.autolink:
+        # remove with #24406
+        explicit: True
     MooseDocs.extensions.table: default
     MooseDocs.extensions.devel: default
     MooseDocs.extensions.package: default

@@ -1,15 +1,25 @@
 Content:
-    - framework/doc/content
-    - modules/thermal_hydraulics/doc/content
-    - modules/thermal_hydraulics/test/doc/content
-    - modules/fluid_properties/doc/content
-    - modules/heat_conduction/doc/content
-    - modules/misc/doc/content
-    - modules/navier_stokes/doc/content
-    - modules/ray_tracing/doc/content
-    - modules/rdg/doc/content
-    - modules/solid_properties/doc/content
-    - infrastructure:
+    framework:
+        root_dir: framework/doc/content
+    thermal_hydraulics:
+        root_dir: modules/thermal_hydraulics/doc/content
+    thermal_hydraulics_test:
+        root_dir: modules/thermal_hydraulics/test/doc/content
+    fluid_properties:
+        root_dir: modules/fluid_properties/doc/content
+    heat_conduction:
+        root_dir: modules/heat_conduction/doc/content
+    misc:
+        root_dir: modules/misc/doc/content
+    navier_stokes:
+        root_dir: modules/navier_stokes/doc/content
+    ray_tracing:
+        root_dir: modules/ray_tracing/doc/content
+    rdg:
+        root_dir: modules/rdg/doc/content
+    solid_properties:
+        root_dir: modules/solid_properties/doc/content
+    modules:
         root_dir: modules/doc/content
         content:
           - application_usage/command_line_usage.md
@@ -19,7 +29,14 @@ Renderer:
     extra-css:
         - modules/thermal_hydraulics/doc/content/css/thm.css
 
+Translator:
+    # remove with #24406
+    ignore_content_key: False
+
 Extensions:
+    MooseDocs.extensions.autolink:
+        # remove with #24406
+        explicit: True
     MooseDocs.extensions.navigation:
         name: Moose Thermal Hydraulics Module
         repo: https://github.com/idaholab/moose

@@ -1,11 +1,12 @@
 Content:
-    - python/MooseDocs/test/subconfig/content
-    - framework:
-          root_dir: framework/doc/content
-          content:
-              - contrib/**
-              - css/*
-              - js/*
+    subconfig:
+        root_dir: python/MooseDocs/test/subconfig/content
+    framework:
+        root_dir: framework/doc/content
+        content:
+            - contrib/**
+            - css/*
+            - js/*
 
 Renderer:
     type: MooseDocs.base.MaterializeRenderer

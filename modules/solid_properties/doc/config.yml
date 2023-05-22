@@ -1,8 +1,12 @@
 Content:
-    - framework/doc/content
-    - modules/solid_properties/doc/content
-    - modules/heat_conduction/doc/content
-    - modules/ray_tracing/doc/content
+    framework:
+        root_dir: framework/doc/content
+    solid_properties:
+        root_dir: modules/solid_properties/doc/content
+    heat_conduction:
+        root_dir: modules/heat_conduction/doc/content
+    ray_tracing:
+        root_dir: modules/ray_tracing/doc/content
 
 Renderer:
     type: MooseDocs.base.MaterializeRenderer

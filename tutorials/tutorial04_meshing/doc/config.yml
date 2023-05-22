@@ -1,7 +1,7 @@
 Content:
     tutorial04_meshing:
         root_dir: ${MOOSE_DIR}/tutorials/tutorial04_meshing/doc/content
-    moose:
+    framework:
         root_dir: ${MOOSE_DIR}/framework/doc/content
         content:
             - contrib/**
@@ -23,6 +23,10 @@ Renderer:
     type: MooseDocs.base.RevealRenderer
     theme: simple
 
+Translator:
+    # remove with #24406
+    ignore_content_key: False
+
 Extensions:
     disable_defaults: True
     MooseDocs.extensions.comment: default
@@ -37,7 +41,9 @@ Extensions:
         duplicates: !include modules/doc/duplicate_bibs.yml # necessary when building with main site
     MooseDocs.extensions.katex: default
     MooseDocs.extensions.style: default
-    MooseDocs.extensions.autolink: default
+    MooseDocs.extensions.autolink:
+        # remove with #24406
+        explicit: True
     MooseDocs.extensions.materialicon: default
     MooseDocs.extensions.heading: default
     MooseDocs.extensions.table: default

@@ -9,15 +9,19 @@ Content:
             - contrib/**
             - css/*
             - js/*
-    test:
+    python_test:
         root_dir: python/MooseDocs/test/content
-    external:
+    python_test_external:
         root_dir: python/MooseDocs/test/content
         external: True
         content:
             - extensions/external.md
 Renderer:
     type: MooseDocs.base.LatexRenderer
+
+Translator:
+    # remove with #24406
+    ignore_content_key: False
 
 Extensions:
     MooseDocs.extensions.pdf: default
@@ -28,7 +32,9 @@ Extensions:
     MooseDocs.extensions.include: default
     MooseDocs.extensions.media: default
     MooseDocs.extensions.listing: default
-    MooseDocs.extensions.autolink: default
+    MooseDocs.extensions.autolink:
+        # remove with #24406
+        explicit: True
     MooseDocs.extensions.table: default
     MooseDocs.extensions.devel: default
     MooseDocs.extensions.package: default

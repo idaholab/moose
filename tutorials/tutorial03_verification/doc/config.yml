@@ -5,7 +5,7 @@ Content:
         root_dir: ${MOOSE_DIR}/tutorials/darcy_thermo_mech/doc/content
         content:
             - workshop/intro/**
-    moose:
+    framework:
         root_dir: ${MOOSE_DIR}/framework/doc/content
         content:
             - contrib/**
@@ -26,6 +26,10 @@ Content:
 Executioner:
     type: MooseDocs.base.Serial
 
+Translator:
+    # remove with #24406
+    ignore_content_key: False
+
 Renderer:
     type: MooseDocs.base.RevealRenderer
     theme: simple
@@ -43,7 +47,9 @@ Extensions:
         duplicates: !include modules/doc/duplicate_bibs.yml # necessary when building with main site
     MooseDocs.extensions.katex: default
     MooseDocs.extensions.style: default
-    MooseDocs.extensions.autolink: default
+    MooseDocs.extensions.autolink:
+        # remove with #24406
+        explicit: True
     MooseDocs.extensions.materialicon: default
     MooseDocs.extensions.heading: default
     MooseDocs.extensions.table: default

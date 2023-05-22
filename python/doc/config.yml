@@ -1,9 +1,15 @@
 Content:
-    - framework/doc/content
-    - python/doc/content
+    framework:
+        root_dir: framework/doc/content
+    python:
+        root_dir: python/doc/content
 
 Renderer:
     type: MooseDocs.base.MaterializeRenderer
+
+Translator:
+    # remove with #24406
+    ignore_content_key: False
 
 Extensions:
     MooseDocs.extensions.appsyntax: disable
@@ -23,3 +29,6 @@ Extensions:
         categories:
             framework: !include framework/doc/sqa_framework.yml
             python: !include python/doc/sqa_python.yml
+    MooseDocs.extensions.autolink:
+        # remove with #24406
+        explicit: True

@@ -1,12 +1,12 @@
 Content:
-    ccb:
+    modules_training:
         root_dir: ${MOOSE_DIR}/modules/doc/training/content/sqa/training/ccb
         content:
             - index.md
             - nqa-1.md
             - pln-4005.md
 
-    moose:
+    framework:
         root_dir: ${MOOSE_DIR}/framework/doc/content
         content:
             - contrib/**
@@ -21,6 +21,10 @@ Content:
 
 Executioner:
     type: MooseDocs.base.Serial
+
+Translator:
+    # remove with #24406
+    ignore_content_key: False
 
 Renderer:
     type: MooseDocs.base.RevealRenderer
@@ -38,7 +42,9 @@ Extensions:
     MooseDocs.extensions.bibtex: default
     MooseDocs.extensions.katex: default
     MooseDocs.extensions.style: default
-    MooseDocs.extensions.autolink: default
+    MooseDocs.extensions.autolink:
+        # remove with #24406
+        explicit: True
     MooseDocs.extensions.materialicon: default
     MooseDocs.extensions.heading: default
     MooseDocs.extensions.table: default

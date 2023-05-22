@@ -1,7 +1,7 @@
 Content:
     tutorial02_multiapps:
         root_dir: ${MOOSE_DIR}/tutorials/tutorial02_multiapps/doc/content
-    moose:
+    framework:
         root_dir: ${MOOSE_DIR}/framework/doc/content
         content:
             - large_media/testing/*
@@ -14,6 +14,10 @@ Content:
 
 Executioner:
     type: MooseDocs.base.Serial
+
+Translator:
+    # remove with #24406
+    ignore_content_key: False
 
 Renderer:
     type: MooseDocs.base.RevealRenderer
@@ -34,7 +38,9 @@ Extensions:
             \vec: "\\bar" # TODO: \vec doesn't render
             \pf: "\\frac{\\partial #1}{\\partial #2}"
     MooseDocs.extensions.style: default
-    MooseDocs.extensions.autolink: default
+    MooseDocs.extensions.autolink:
+        # remove with #24406
+        explicit: True
     MooseDocs.extensions.materialicon: default
     MooseDocs.extensions.heading: default
     MooseDocs.extensions.shortcut: default

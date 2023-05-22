@@ -1,12 +1,21 @@
 Content:
-    - framework/doc/content
-    - modules/navier_stokes/doc/content
-    - modules/fluid_properties/doc/content
-    - modules/heat_conduction/doc/content
-    - modules/ray_tracing/doc/content
+    framework:
+        root_dir: framework/doc/content
+    navier_stokes:
+        root_dir: modules/navier_stokes/doc/content
+    fluid_properties:
+        root_dir: modules/fluid_properties/doc/content
+    heat_conduction:
+        root_dir: modules/heat_conduction/doc/content
+    ray_tracing:
+        root_dir: modules/ray_tracing/doc/content
 
 Renderer:
     type: MooseDocs.base.MaterializeRenderer
+
+Translator:
+    # remove with #24406
+    ignore_content_key: False
 
 Extensions:
     MooseDocs.extensions.navigation:
@@ -35,3 +44,6 @@ Extensions:
         categories:
             framework: !include framework/doc/sqa_framework.yml
             navier_stokes: !include modules/navier_stokes/doc/sqa_navier_stokes.yml
+    MooseDocs.extensions.autolink:
+        # remove with #24406
+        explicit: True

@@ -1,7 +1,7 @@
 Content:
-    Babbler:
+    babbler:
         root_dir: ${ROOT_DIR}/doc/content
-    moose:
+    framework:
         root_dir: ${MOOSE_DIR}/framework/doc/content
         content:
             - js/*
@@ -12,6 +12,10 @@ Content:
 Renderer:
     type: MooseDocs.base.MaterializeRenderer
 
+Translator:
+    # remove with #24406
+    ignore_content_key: False
+
 Extensions:
     MooseDocs.extensions.navigation:
         name: Babbler
@@ -20,3 +24,7 @@ Extensions:
         remove: !include ${MOOSE_DIR}/framework/doc/remove.yml
         includes:
             - include
+    MooseDocs.extensions.core: default
+    MooseDocs.extensions.autolink:
+        # remove with #24406
+        explicit: True

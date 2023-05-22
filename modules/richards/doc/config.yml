@@ -12,6 +12,10 @@ Content:
 Renderer:
     type: MooseDocs.base.MaterializeRenderer
 
+Translator:
+    # remove with #24406
+    ignore_content_key: False
+
 Extensions:
     MooseDocs.extensions.navigation:
         name: MOOSE Richards Module
@@ -19,3 +23,6 @@ Extensions:
         home: /modules/richards/index.md
     MooseDocs.extensions.appsyntax:
         active: False
+    MooseDocs.extensions.autolink:
+        # remove with #24406
+        explicit: True

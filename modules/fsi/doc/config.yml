@@ -1,14 +1,26 @@
 Content:
-    - framework/doc/content
-    - modules/fsi/doc/content
-    - modules/tensor_mechanics/doc/content
-    - modules/fluid_properties/doc/content
-    - modules/navier_stokes/doc/content
-    - modules/heat_conduction/doc/content
-    - modules/ray_tracing/doc/content
+    framework:
+        root_dir: framework/doc/content
+    fsi:
+        root_dir: modules/fsi/doc/content
+    tensor_mechanics:
+        root_dir: modules/tensor_mechanics/doc/content
+    fluid_properties:
+        root_dir: modules/fluid_properties/doc/content
+    navier_stokes:
+        root_dir: modules/navier_stokes/doc/content
+    heat_conduction:
+        root_dir: modules/heat_conduction/doc/content
+    ray_tracing:
+        root_dir: modules/ray_tracing/doc/content
 
 Renderer:
     type: MooseDocs.base.MaterializeRenderer
+
+Translator:
+    # remove with #24406
+    ignore_content_key: False
+
 Extensions:
     MooseDocs.extensions.navigation:
         name: fsi
@@ -39,3 +51,6 @@ Extensions:
             navier_stokes: !include modules/navier_stokes/doc/sqa_navier_stokes.yml
             heat_conduction: !include modules/heat_conduction/doc/sqa_heat_conduction.yml
             ray_tracing: !include modules/ray_tracing/doc/sqa_ray_tracing.yml
+    MooseDocs.extensions.autolink:
+        # remove with #24406
+        explicit: True

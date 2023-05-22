@@ -1,9 +1,15 @@
 Content:
-    - framework/doc/content
-    - modules/stochastic_tools/doc/content
+    framework:
+        root_dir: framework/doc/content
+    stochastic_tools:
+        root_dir: modules/stochastic_tools/doc/content
 
 Renderer:
     type: MooseDocs.base.MaterializeRenderer
+
+Translator:
+    # remove with #24406
+    ignore_content_key: False
 
 Extensions:
     MooseDocs.extensions.navigation:
@@ -32,3 +38,6 @@ Extensions:
         categories:
             framework: !include framework/doc/sqa_framework.yml
             stochastic_tools: !include modules/stochastic_tools/doc/sqa_stochastic_tools.yml
+    MooseDocs.extensions.autolink:
+        # remove with #24406
+        explicit: True

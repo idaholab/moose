@@ -1,15 +1,21 @@
 Content:
-    ExternalPetscSolver:
-        root_dir: ${MOOSE_DIR}/modules/external_petsc_solver/doc/content
-    moose:
+    framework:
         root_dir: ${MOOSE_DIR}/framework/doc/content
         content:
             - js/*
             - css/*
             - contrib/**
             - media/**
+    external_petsc_solver:
+        root_dir: ${MOOSE_DIR}/modules/external_petsc_solver/doc/content
+
 Renderer:
     type: MooseDocs.base.MaterializeRenderer
+
+Translator:
+    # remove with #24406
+    ignore_content_key: False
+
 Extensions:
     MooseDocs.extensions.navigation:
         name: ExternalPetscSolver
@@ -29,3 +35,6 @@ Extensions:
     MooseDocs.extensions.acronym:
         acronyms: !include framework/doc/acronyms.yml
     MooseDocs.extensions.sqa: disable
+    MooseDocs.extensions.autolink:
+        # remove with #24406
+        explicit: True

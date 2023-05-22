@@ -1,9 +1,15 @@
 Content:
-    - framework/doc/content
-    - modules/level_set/doc/content
+    framework:
+        root_dir: framework/doc/content
+    level_set:
+        root_dir: modules/level_set/doc/content
 
 Renderer:
     type: MooseDocs.base.MaterializeRenderer
+
+Translator:
+    # remove with #24406
+    ignore_content_key: False
 
 Extensions:
     MooseDocs.extensions.navigation:
@@ -29,3 +35,6 @@ Extensions:
         categories:
             framework: !include framework/doc/sqa_framework.yml
             level_set: !include modules/level_set/doc/sqa_level_set.yml
+    MooseDocs.extensions.autolink:
+        # remove with #24406
+        explicit: True

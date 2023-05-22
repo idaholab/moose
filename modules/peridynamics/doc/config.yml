@@ -1,10 +1,17 @@
 Content:
-    - framework/doc/content
-    - modules/tensor_mechanics/doc/content
-    - modules/peridynamics/doc/content
+    framework:
+        root_dir: framework/doc/content
+    tensor_mechanics:
+        root_dir: modules/tensor_mechanics/doc/content
+    peridynamics:
+        root_dir: modules/peridynamics/doc/content
 
 Renderer:
     type: MooseDocs.base.MaterializeRenderer
+
+Translator:
+    # remove with #24406
+    ignore_content_key: False
 
 Extensions:
     MooseDocs.extensions.navigation:
@@ -25,3 +32,6 @@ Extensions:
         shortcuts: !include framework/doc/globals.yml
     MooseDocs.extensions.acronym:
         acronyms: !include framework/doc/acronyms.yml
+    MooseDocs.extensions.autolink:
+        # remove with #24406
+        explicit: True

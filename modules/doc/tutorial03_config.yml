@@ -7,3 +7,7 @@ Content:
 Executioner: !include tutorials/tutorial03_verification/doc/config.yml Executioner
 Renderer: !include tutorials/tutorial03_verification/doc/config.yml Renderer
 Extensions: !include tutorials/tutorial03_verification/doc/config.yml Extensions
+
+Translator:
+    # remove with #24406
+    ignore_content_key: False

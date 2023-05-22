@@ -1,9 +1,13 @@
 Content:
-    workshop:
-        root_dir: !include tutorials/darcy_thermo_mech/doc/config.yml Content workshop root_dir
+    darcy_thermo_mech:
+        root_dir: !include tutorials/darcy_thermo_mech/doc/config.yml Content darcy_thermo_mech root_dir
         content:
             - workshop/**
 
 Executioner: !include tutorials/darcy_thermo_mech/doc/config.yml Executioner
 Renderer: !include tutorials/darcy_thermo_mech/doc/config.yml Renderer
 Extensions: !include tutorials/darcy_thermo_mech/doc/config.yml Extensions
+
+Translator:
+    # remove with #24406
+    ignore_content_key: False

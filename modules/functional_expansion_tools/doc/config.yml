@@ -1,9 +1,16 @@
 Content:
-    - framework/doc/content
-    - modules/functional_expansion_tools/doc/content
+    framework:
+        root_dir: framework/doc/content
+    functional_expansion_tools:
+        root_dir: modules/functional_expansion_tools/doc/content
 
 Renderer:
     type: MooseDocs.base.MaterializeRenderer
+
+Translator:
+    # remove with #24406
+    ignore_content_key: False
+
 Extensions:
     MooseDocs.extensions.navigation:
         name: MOOSE Functional Expansion Tools Module
@@ -23,3 +30,7 @@ Extensions:
     MooseDocs.extensions.acronym:
         acronyms: !include framework/doc/acronyms.yml
     MooseDocs.extensions.sqa: disable
+    MooseDocs.extensions.core: default
+    MooseDocs.extensions.autolink:
+        # remove with #24406
+        explicit: True

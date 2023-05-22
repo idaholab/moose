@@ -1,9 +1,15 @@
 Content:
-    - framework/doc/content
-    - modules/rdg/doc/content
+    framework:
+        root_dir: framework/doc/content
+    rdg:
+        root_dir: modules/rdg/doc/content
 
 Renderer:
     type: MooseDocs.base.MaterializeRenderer
+
+Translator:
+    # remove with #24406
+    ignore_content_key: False
 
 Extensions:
     MooseDocs.extensions.navigation:
@@ -31,3 +37,6 @@ Extensions:
         categories:
             framework: !include framework/doc/sqa_framework.yml
             rdg: !include modules/rdg/doc/sqa_rdg.yml
+    MooseDocs.extensions.autolink:
+        # remove with #24406
+        explicit: True

@@ -1,13 +1,20 @@
 Content:
-    - framework/doc/content
-    - modules/contact/doc/content
-    - modules/tensor_mechanics/doc/content
-    - utility:
+    framework:
+        root_dir: framework/doc/content
+    contact:
+        root_dir: modules/contact/doc/content
+    tensor_mechanics:
+        root_dir: modules/tensor_mechanics/doc/content
+    modules:
         root_dir: ${MOOSE_DIR}/modules/doc/content
         content:
-            - help/finite_element_concepts/nodal_patch_recovery.md            
+            - help/finite_element_concepts/nodal_patch_recovery.md
 Renderer:
     type: MooseDocs.base.MaterializeRenderer
+
+Translator:
+    # remove with #24406
+    ignore_content_key: False
 
 Extensions:
     MooseDocs.extensions.navigation:
@@ -37,3 +44,6 @@ Extensions:
             framework: !include framework/doc/sqa_framework.yml
             contact: !include modules/contact/doc/sqa_contact.yml
             tensor_mechanics: !include modules/tensor_mechanics/doc/sqa_tensor_mechanics.yml
+    MooseDocs.extensions.autolink:
+        # remove with #24406
+        explicit: True

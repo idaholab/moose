@@ -1,13 +1,19 @@
 Content:
-  - framework/doc/content
-  - modules/optimization/doc/content
-  - utility:
+  framework:
+    root_dir: framework/doc/content
+  optimization:
+    root_dir: modules/optimization/doc/content
+  modules:
       root_dir: modules/doc/content
       content:
           - help/development/analyze_jacobian.md
 
 Renderer:
   type: MooseDocs.base.MaterializeRenderer
+
+Translator:
+    # remove with #24406
+    ignore_content_key: False
 
 Extensions:
   MooseDocs.extensions.navigation:
@@ -40,3 +46,6 @@ Extensions:
 
   MooseDocs.extensions.algorithm:
       active: True
+  MooseDocs.extensions.autolink:
+      # remove with #24406
+      explicit: True

@@ -1,12 +1,19 @@
 Content:
-    - ${ROOT_DIR}/framework/doc/content
-    - ${ROOT_DIR}/test/doc/content
-    - modules:
+    framework:
+        root_dir: ${ROOT_DIR}/framework/doc/content
+    test:
+        root_dir: ${ROOT_DIR}/test/doc/content
+    modules:
         root_dir: ${ROOT_DIR}/modules/doc/content
         content:
             - application_usage/restart_recover.md
+
 Renderer:
     type: MooseDocs.base.MaterializeRenderer
+
+Translator:
+    # remove with #24406
+    ignore_content_key: False
 
 Extensions:
     MooseDocs.extensions.navigation:
@@ -38,3 +45,6 @@ Extensions:
         requirement-groups:
             dgkernels: DGKernel Objects
             interfacekernels: InterfaceKernel Objects
+    MooseDocs.extensions.autolink:
+        # remove with #24406
+        explicit: True

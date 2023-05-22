@@ -1,5 +1,5 @@
 Content:
-    intro_slides:
+    navier_stokes_intro_slides:
         root_dir: modules/navier_stokes/doc/intro_slides
 
 Executioner:
@@ -8,6 +8,10 @@ Executioner:
 Renderer:
     type: MooseDocs.base.RevealRenderer
     theme: simple
+
+Translator:
+    # remove with #24406
+    ignore_content_key: False
 
 Extensions:
     disable_defaults: True
@@ -25,7 +29,9 @@ Extensions:
             \vec: "\\bar" # TODO: \vec doesn't render
             \pf: "\\frac{\\partial #1}{\\partial #2}"
     MooseDocs.extensions.style: default
-    MooseDocs.extensions.autolink: default
+    MooseDocs.extensions.autolink:
+        # remove with #24406
+        explicit: True
     MooseDocs.extensions.materialicon: default
     MooseDocs.extensions.heading: default
     MooseDocs.extensions.shortcut: default

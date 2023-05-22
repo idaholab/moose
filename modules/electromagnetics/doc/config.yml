@@ -1,9 +1,16 @@
 Content:
-    - framework/doc/content
-    - modules/electromagnetics/doc/content
+    framework:
+        root_dir: framework/doc/content
+    electromagnetics:
+        root_dir: modules/electromagnetics/doc/content
 
 Renderer:
     type: MooseDocs.base.MaterializeRenderer
+
+Translator:
+    # remove with #24406
+    ignore_content_key: False
+
 Extensions:
     MooseDocs.extensions.navigation:
         name: MOOSE Electromagnetics Module
@@ -20,3 +27,6 @@ Extensions:
     MooseDocs.extensions.acronym:
         acronyms: !include framework/doc/acronyms.yml
     MooseDocs.extensions.sqa: disable
+    MooseDocs.extensions.autolink:
+        # remove with #24406
+        explicit: True

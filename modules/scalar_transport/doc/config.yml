@@ -1,21 +1,38 @@
 Content:
-    - framework/doc/content
-    - modules/scalar_transport/doc/content
-    - modules/chemical_reactions/doc/content
-    - modules/navier_stokes/doc/content
-    - modules/thermal_hydraulics/doc/content
-    - modules/fluid_properties/doc/content
-    - modules/heat_conduction/doc/content
-    - modules/rdg/doc/content
-    - modules/ray_tracing/doc/content
-    - modules/solid_properties/doc/content
-    - modules/misc/doc/content
-    - infrastructure:
+    framework:
+        root_dir: framework/doc/content
+    scalar_transport:
+        root_dir: modules/scalar_transport/doc/content
+    chemical_reactions:
+        root_dir: modules/chemical_reactions/doc/content
+    navier_stokes:
+        root_dir: modules/navier_stokes/doc/content
+    thermal_hydraulics:
+        root_dir: modules/thermal_hydraulics/doc/content
+    fluid_properties:
+        root_dir: modules/fluid_properties/doc/content
+    heat_conduction:
+        root_dir: modules/heat_conduction/doc/content
+    rdg:
+        root_dir: modules/rdg/doc/content
+    ray_tracing:
+        root_dir: modules/ray_tracing/doc/content
+    solid_properties:
+        root_dir: modules/solid_properties/doc/content
+    misc:
+        root_dir: modules/misc/doc/content
+    modules:
         root_dir: modules/doc/content
         content:
-          - application_usage/command_line_usage.md
+            - application_usage/command_line_usage.md
+
 Renderer:
     type: MooseDocs.base.MaterializeRenderer
+
+Translator:
+    # remove with #24406
+    ignore_content_key: False
+
 Extensions:
     MooseDocs.extensions.navigation:
         name: scalar_transport
@@ -39,3 +56,6 @@ Extensions:
         reports: !include ${ROOT_DIR}/modules/scalar_transport/doc/sqa_reports.yml
     MooseDocs.extensions.template:
         active: true
+    MooseDocs.extensions.autolink:
+        # remove with #24406
+        explicit: True

@@ -8,9 +8,16 @@ Content:
     combined:
         root_dir: modules/combined/doc/content
 
+Translator:
+    # remove with #24406
+    ignore_content_key: False
+
 Renderer:
     type: MooseDocs.base.MaterializeRenderer
 
 Extensions:
     disable_defaults: True
     MooseDocs.extensions.core: default
+    MooseDocs.extensions.autolink:
+        # remove with #24406
+        explicit: True
