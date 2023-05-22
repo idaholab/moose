@@ -4233,7 +4233,7 @@ FEProblemBase::computeUserObjectsInternal(const ExecFlagType & type,
         obj->initialize();
       if (!mortar.empty())
       {
-        auto create_and_run_mortar_functors = [this, &mortar](const bool displaced)
+        auto create_and_run_mortar_functors = [this, type, &mortar](const bool displaced)
         {
           // go over mortar interfaces and construct functors
           const auto & mortar_interfaces = getMortarInterfaces(displaced);
@@ -4256,7 +4256,37 @@ FEProblemBase::computeUserObjectsInternal(const ExecFlagType & type,
                                         *this,
                                         displaced,
                                         subproblem->assembly(0, 0));
-            muot();
+
+            auto process_possibly_handleable_exception = [this, type](auto & exception)
+            {
+              // When executing on linear we can turn exceptions into residual domain errors, stop
+              // the solve, and cut the timestep
+              if (type == EXEC_LINEAR)
+                setException(exception.what());
+              else
+                // Otherwise we don't know what to do
+                mooseError(
+                    "We caught an exception during computation of mortar user objects outside of "
+                    "residual evaluation. Unfortunately we don't know how to handle this case, so "
+                    "we will abort.");
+            };
+            try
+            {
+              muot();
+            }
+            catch (MooseException & e)
+            {
+              process_possibly_handleable_exception(e);
+            }
+            catch (libMesh::LogicError & e)
+            {
+              process_possibly_handleable_exception(e);
+            }
+            catch (MetaPhysicL::LogicError & e)
+            {
+              moose::translateMetaPhysicLError(e);
+            }
+            checkExceptionAndStopSolve();
           }
         };
 
@@ -5551,8 +5581,8 @@ FEProblemBase::solve(const unsigned int nl_sys_num)
 
   setCurrentNonlinearSystem(nl_sys_num);
 
-  // This prevents stale dof indices from lingering around and possibly leading to invalid reads and
-  // writes. Dof indices may be made stale through operations like mesh adaptivity
+  // This prevents stale dof indices from lingering around and possibly leading to invalid reads
+  // and writes. Dof indices may be made stale through operations like mesh adaptivity
   clearAllDofIndices();
   if (_displaced_problem)
     _displaced_problem->clearAllDofIndices();
@@ -7038,8 +7068,8 @@ FEProblemBase::meshChangedHelper(bool intermediate_change)
       Threads::parallel_reduce(range, pmp);
 
       // Concurrent erasure from the shared hash map is not safe while we are reading from it in
-      // ProjectMaterialProperties, so we handle erasure here. Moreover, erasure based on key is not
-      // thread safe in and of itself because it is a read-write operation
+      // ProjectMaterialProperties, so we handle erasure here. Moreover, erasure based on key is
+      // not thread safe in and of itself because it is a read-write operation
       for (const auto & elem : range)
       {
         _material_props.eraseProperty(elem);
