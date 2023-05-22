@@ -1,6 +1,6 @@
 Content:
     subsite:
-        root_dir: !include python/MooseDocs/test/subconfig/config.yml Content 0
+        root_dir: !include python/MooseDocs/test/subconfig/config.yml Content subconfig root_dir
         content:
             - subsite/*
 
