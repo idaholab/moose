@@ -9,12 +9,12 @@
 
 #pragma once
 
-#include "MooseObjectAction.h"
+#include "Action.h"
 
 /**
  * Add the composition time stepper as final time stepper
  */
-class ComposeTimeStepperAction : public MooseObjectAction
+class ComposeTimeStepperAction : public Action
 {
 public:
   static InputParameters validParams();

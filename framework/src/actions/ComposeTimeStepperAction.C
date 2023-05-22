@@ -20,9 +20,7 @@ registerMooseAction("MooseApp", ComposeTimeStepperAction, "compose_time_stepper"
 InputParameters
 ComposeTimeStepperAction::validParams()
 {
-  InputParameters params = MooseObjectAction::validParams();
-
-  params.set<std::string>("type") = "CompositionDT";
+  InputParameters params = Action::validParams();
 
   params += CompositionDT::compositionDTParams();
 
@@ -32,8 +30,7 @@ ComposeTimeStepperAction::validParams()
   return params;
 }
 
-ComposeTimeStepperAction::ComposeTimeStepperAction(const InputParameters & params)
-  : MooseObjectAction(params)
+ComposeTimeStepperAction::ComposeTimeStepperAction(const InputParameters & params) : Action(params)
 {
 }
 
@@ -58,10 +55,9 @@ ComposeTimeStepperAction::act()
 
     // Apply all custom parameters to CompositionDT that are
     // provided in Executioner/TimeSteppers/*
-    new_params.applyParameters(_moose_object_pars);
     for (const auto & param_name_value : CompositionDT::compositionDTParams())
       if (isParamValid(param_name_value.first))
-        new_params.applyParameter(_moose_object_pars, param_name_value.first);
+        new_params.applyParameter(_pars, param_name_value.first);
 
     Transient * transient = dynamic_cast<Transient *>(_app.getExecutioner());
     mooseAssert(transient, "The transient executioner does not exist");
