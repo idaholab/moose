@@ -290,22 +290,22 @@ Applications:
             - framework/doc/remove.yml
 
 Documents:
-    software_quality_plan: sqa/inl_records.md#software_quality_plan
-    enterprise_architecture_entry: sqa/inl_records.md#enterprise_architecture_entry
-    safety_software_determination: sqa/inl_records.md#safety_software_determination
-    quality_level_determination: sqa/inl_records.md#quality_level_determination
-    configuration_management_plan: sqa/inl_records.md#configuration_management_plan
-    asset_management_plan: sqa/inl_records.md#asset_management_plan
-    verification_validation_plan: sqa/inl_records.md#verification_and_validation_plan
-    software_requirements_specification: sqa/moose_srs.md
-    software_design_description: sqa/moose_sdd.md
-    software_test_plan: sqa/moose_stp.md
-    requirements_traceablity_matrix: sqa/moose_rtm.md
-    verification_validation_report: sqa/moose_vvr.md
-    failure_analysis_report: sqa/moose_far.md
-    software_library_list: sqa/moose_sll.md
-    communication_and_contact_information: sqa/framework_cci.md
-    software_coding_standards: sqa/framework_scs.md
+    software_quality_plan: framework:sqa/inl_records.md#software_quality_plan
+    enterprise_architecture_entry: framework:sqa/inl_records.md#enterprise_architecture_entry
+    safety_software_determination: framework:sqa/inl_records.md#safety_software_determination
+    quality_level_determination: framework:sqa/inl_records.md#quality_level_determination
+    configuration_management_plan: framework:sqa/inl_records.md#configuration_management_plan
+    asset_management_plan: framework:sqa/inl_records.md#asset_management_plan
+    verification_validation_plan: framework:sqa/inl_records.md#verification_and_validation_plan
+    software_requirements_specification: modules:sqa/moose_srs.md
+    software_design_description: modules:sqa/moose_sdd.md
+    software_test_plan: modules:sqa/moose_stp.md
+    requirements_traceablity_matrix: modules:sqa/moose_rtm.md
+    verification_validation_report: modules:sqa/moose_vvr.md
+    failure_analysis_report: modules:sqa/moose_far.md
+    software_library_list: modules:sqa/moose_sll.md
+    communication_and_contact_information: framework:sqa/framework_cci.md
+    software_coding_standards: framework:sqa/framework_scs.md
     log_user_manual: WARNING
     log_theory_manual: WARNING
     show_warning: false
