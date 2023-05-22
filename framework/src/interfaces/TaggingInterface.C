@@ -11,6 +11,7 @@
 #include "Conversion.h"
 #include "FEProblem.h"
 #include "Assembly.h"
+#include "ReferenceResidualProblem.h"
 
 #include "libmesh/dense_vector.h"
 
@@ -49,9 +50,9 @@ TaggingInterface::validParams()
 }
 
 TaggingInterface::TaggingInterface(const MooseObject * moose_object)
-  : _moose_object(*moose_object),
-    _tag_params(_moose_object.parameters()),
-    _subproblem(*_tag_params.getCheckedPointerParam<SubProblem *>("_subproblem"))
+  : _subproblem(*moose_object->parameters().getCheckedPointerParam<SubProblem *>("_subproblem")),
+    _moose_object(*moose_object),
+    _tag_params(_moose_object.parameters())
 {
   auto & vector_tag_names = _tag_params.get<MultiMooseEnum>("vector_tags");
 
@@ -118,10 +119,33 @@ TaggingInterface::TaggingInterface(const MooseObject * moose_object)
   _re_blocks.resize(_vector_tags.size());
   _absre_blocks.resize(_abs_vector_tags.size());
   _ke_blocks.resize(_matrix_tags.size());
+
+  const auto * const fe_problem =
+      moose_object->parameters().getCheckedPointerParam<FEProblemBase *>("_fe_problem_base");
+  if (const auto * const ref_problem = dynamic_cast<const ReferenceResidualProblem *>(fe_problem))
+  {
+    const auto reference_tag = ref_problem->referenceVectorTagID({});
+    auto create_tags_split =
+        [reference_tag](const auto & tags, auto & non_ref_tags, auto & ref_tags)
+    {
+      for (const auto tag : tags)
+        if (tag == reference_tag)
+          ref_tags.insert(tag);
+        else
+          non_ref_tags.insert(tag);
+    };
+    create_tags_split(_vector_tags, _non_ref_vector_tags, _ref_vector_tags);
+    create_tags_split(_abs_vector_tags, _non_ref_abs_vector_tags, _ref_abs_vector_tags);
+  }
+  else
+  {
+    _non_ref_vector_tags = _vector_tags;
+    _non_ref_abs_vector_tags = _abs_vector_tags;
+  }
 }
 
 void
-TaggingInterface::useVectorTag(const TagName & tag_name)
+TaggingInterface::useVectorTag(const TagName & tag_name, VectorTagsKey)
 {
   if (!_subproblem.vectorTagExists(tag_name))
     mooseError("Vector tag ", tag_name, " does not exist in system");
@@ -130,7 +154,7 @@ TaggingInterface::useVectorTag(const TagName & tag_name)
 }
 
 void
-TaggingInterface::useMatrixTag(const TagName & tag_name)
+TaggingInterface::useMatrixTag(const TagName & tag_name, MatrixTagsKey)
 {
   if (!_subproblem.matrixTagExists(tag_name))
     mooseError("Matrix tag ", tag_name, " does not exist in system");
@@ -139,7 +163,7 @@ TaggingInterface::useMatrixTag(const TagName & tag_name)
 }
 
 void
-TaggingInterface::useVectorTag(TagID tag_id)
+TaggingInterface::useVectorTag(TagID tag_id, VectorTagsKey)
 {
   if (!_subproblem.vectorTagExists(tag_id))
     mooseError("Vector tag ", tag_id, " does not exist in system");
@@ -148,7 +172,7 @@ TaggingInterface::useVectorTag(TagID tag_id)
 }
 
 void
-TaggingInterface::useMatrixTag(TagID tag_id)
+TaggingInterface::useMatrixTag(TagID tag_id, MatrixTagsKey)
 {
   if (!_subproblem.matrixTagExists(tag_id))
     mooseError("Matrix tag ", tag_id, " does not exist in system");
@@ -157,26 +181,45 @@ TaggingInterface::useMatrixTag(TagID tag_id)
 }
 
 void
-TaggingInterface::prepareVectorTag(Assembly & assembly, unsigned int ivar)
+TaggingInterface::prepareVectorTag(Assembly & assembly, const unsigned int ivar)
 {
-  _re_blocks.resize(_vector_tags.size());
-  mooseAssert(_vector_tags.size() >= 1, "we need at least one active tag");
-  auto vector_tag = _vector_tags.begin();
-  for (MooseIndex(_vector_tags) i = 0; i < _vector_tags.size(); i++, ++vector_tag)
-  {
-    const VectorTag & tag = _subproblem.getVectorTag(*vector_tag);
-    _re_blocks[i] = &assembly.residualBlock(ivar, tag._type_id);
-  }
+  prepareVectorTagInternal(assembly, ivar, _vector_tags, _abs_vector_tags);
+}
 
-  _local_re.resize(_re_blocks[0]->size());
+void
+TaggingInterface::prepareVectorTag(Assembly & assembly,
+                                   const unsigned int ivar,
+                                   const ResidualTagType tag_type)
+{
+  if (tag_type == ResidualTagType::NonReference)
+    prepareVectorTagInternal(assembly, ivar, _non_ref_vector_tags, _non_ref_abs_vector_tags);
+  else
+    prepareVectorTagInternal(assembly, ivar, _ref_vector_tags, _ref_abs_vector_tags);
+}
 
-  _absre_blocks.resize(_abs_vector_tags.size());
-  vector_tag = _abs_vector_tags.begin();
-  for (MooseIndex(_abs_vector_tags) i = 0; i < _abs_vector_tags.size(); i++, ++vector_tag)
+void
+TaggingInterface::prepareVectorTagInternal(Assembly & assembly,
+                                           const unsigned int ivar,
+                                           const std::set<TagID> & vector_tags,
+                                           const std::set<TagID> & absolute_value_vector_tags)
+{
+  auto prepare = [this, ivar, &assembly](auto & re_blocks, const auto & tags)
   {
-    const VectorTag & tag = _subproblem.getVectorTag(*vector_tag);
-    _absre_blocks[i] = &assembly.residualBlock(ivar, tag._type_id);
-  }
+    re_blocks.clear();
+    re_blocks.reserve(tags.size());
+    for (const auto tag_id : tags)
+    {
+      const auto & tag = _subproblem.getVectorTag(tag_id);
+      re_blocks.push_back(&assembly.residualBlock(ivar, Assembly::LocalDataKey{}, tag._type_id));
+    }
+  };
+
+  prepare(_re_blocks, vector_tags);
+  prepare(_absre_blocks, absolute_value_vector_tags);
+
+  _local_re.resize(_re_blocks.empty()
+                       ? (_absre_blocks.empty() ? std::size_t(0) : _absre_blocks[0]->size())
+                       : _re_blocks[0]->size());
 }
 
 void
@@ -188,7 +231,7 @@ TaggingInterface::prepareVectorTagNeighbor(Assembly & assembly, unsigned int iva
   for (MooseIndex(_vector_tags) i = 0; i < _vector_tags.size(); i++, ++vector_tag)
   {
     const VectorTag & tag = _subproblem.getVectorTag(*vector_tag);
-    _re_blocks[i] = &assembly.residualBlockNeighbor(ivar, tag._type_id);
+    _re_blocks[i] = &assembly.residualBlockNeighbor(ivar, Assembly::LocalDataKey{}, tag._type_id);
   }
   _local_re.resize(_re_blocks[0]->size());
 
@@ -197,7 +240,8 @@ TaggingInterface::prepareVectorTagNeighbor(Assembly & assembly, unsigned int iva
   for (MooseIndex(_abs_vector_tags) i = 0; i < _abs_vector_tags.size(); i++, ++vector_tag)
   {
     const VectorTag & tag = _subproblem.getVectorTag(*vector_tag);
-    _absre_blocks[i] = &assembly.residualBlockNeighbor(ivar, tag._type_id);
+    _absre_blocks[i] =
+        &assembly.residualBlockNeighbor(ivar, Assembly::LocalDataKey{}, tag._type_id);
   }
 }
 
@@ -210,7 +254,7 @@ TaggingInterface::prepareVectorTagLower(Assembly & assembly, unsigned int ivar)
   for (MooseIndex(_vector_tags) i = 0; i < _vector_tags.size(); i++, ++vector_tag)
   {
     const VectorTag & tag = _subproblem.getVectorTag(*vector_tag);
-    _re_blocks[i] = &assembly.residualBlockLower(ivar, tag._type_id);
+    _re_blocks[i] = &assembly.residualBlockLower(ivar, Assembly::LocalDataKey{}, tag._type_id);
   }
   _local_re.resize(_re_blocks[0]->size());
 
@@ -219,7 +263,7 @@ TaggingInterface::prepareVectorTagLower(Assembly & assembly, unsigned int ivar)
   for (MooseIndex(_abs_vector_tags) i = 0; i < _abs_vector_tags.size(); i++, ++vector_tag)
   {
     const VectorTag & tag = _subproblem.getVectorTag(*vector_tag);
-    _absre_blocks[i] = &assembly.residualBlockLower(ivar, tag._type_id);
+    _absre_blocks[i] = &assembly.residualBlockLower(ivar, Assembly::LocalDataKey{}, tag._type_id);
   }
 }
 
@@ -230,9 +274,36 @@ TaggingInterface::prepareMatrixTag(Assembly & assembly, unsigned int ivar, unsig
   mooseAssert(_matrix_tags.size() >= 1, "we need at least one active tag");
   auto mat_vector = _matrix_tags.begin();
   for (MooseIndex(_matrix_tags) i = 0; i < _matrix_tags.size(); i++, ++mat_vector)
-    _ke_blocks[i] = &assembly.jacobianBlock(ivar, jvar, *mat_vector);
+    _ke_blocks[i] = &assembly.jacobianBlock(ivar, jvar, Assembly::LocalDataKey{}, *mat_vector);
 
   _local_ke.resize(_ke_blocks[0]->m(), _ke_blocks[0]->n());
+}
+
+void
+TaggingInterface::prepareMatrixTag(Assembly & assembly,
+                                   unsigned int ivar,
+                                   unsigned int jvar,
+                                   DenseMatrix<Number> & k) const
+{
+  mooseAssert(!_matrix_tags.empty(), "No matrix tags exist");
+  const auto & ij_mat =
+      assembly.jacobianBlock(ivar, jvar, Assembly::LocalDataKey{}, *_matrix_tags.begin());
+  k.resize(ij_mat.m(), ij_mat.n());
+}
+
+void
+TaggingInterface::prepareMatrixTagNonlocal(Assembly & assembly,
+                                           unsigned int ivar,
+                                           unsigned int jvar)
+{
+  _ke_blocks.resize(_matrix_tags.size());
+  mooseAssert(_matrix_tags.size() >= 1, "we need at least one active tag");
+  auto mat_vector = _matrix_tags.begin();
+  for (MooseIndex(_matrix_tags) i = 0; i < _matrix_tags.size(); i++, ++mat_vector)
+    _ke_blocks[i] =
+        &assembly.jacobianBlockNonlocal(ivar, jvar, Assembly::LocalDataKey{}, *mat_vector);
+
+  _nonlocal_ke.resize(_ke_blocks[0]->m(), _ke_blocks[0]->n());
 }
 
 void
@@ -245,9 +316,23 @@ TaggingInterface::prepareMatrixTagNeighbor(Assembly & assembly,
   mooseAssert(_matrix_tags.size() >= 1, "we need at least one active tag");
   auto mat_vector = _matrix_tags.begin();
   for (MooseIndex(_matrix_tags) i = 0; i < _matrix_tags.size(); i++, ++mat_vector)
-    _ke_blocks[i] = &assembly.jacobianBlockNeighbor(type, ivar, jvar, *mat_vector);
+    _ke_blocks[i] =
+        &assembly.jacobianBlockNeighbor(type, ivar, jvar, Assembly::LocalDataKey{}, *mat_vector);
 
   _local_ke.resize(_ke_blocks[0]->m(), _ke_blocks[0]->n());
+}
+
+void
+TaggingInterface::prepareMatrixTagNeighbor(Assembly & assembly,
+                                           unsigned int ivar,
+                                           unsigned int jvar,
+                                           Moose::DGJacobianType type,
+                                           DenseMatrix<Number> & k) const
+{
+  mooseAssert(!_matrix_tags.empty(), "No matrix tags exist");
+  const auto & ij_mat = assembly.jacobianBlockNeighbor(
+      type, ivar, jvar, Assembly::LocalDataKey{}, *_matrix_tags.begin());
+  k.resize(ij_mat.m(), ij_mat.n());
 }
 
 void
@@ -260,7 +345,8 @@ TaggingInterface::prepareMatrixTagLower(Assembly & assembly,
   mooseAssert(_matrix_tags.size() >= 1, "we need at least one active tag");
   auto mat_vector = _matrix_tags.begin();
   for (MooseIndex(_matrix_tags) i = 0; i < _matrix_tags.size(); i++, ++mat_vector)
-    _ke_blocks[i] = &assembly.jacobianBlockMortar(type, ivar, jvar, *mat_vector);
+    _ke_blocks[i] =
+        &assembly.jacobianBlockMortar(type, ivar, jvar, Assembly::LocalDataKey{}, *mat_vector);
 
   _local_ke.resize(_ke_blocks[0]->m(), _ke_blocks[0]->n());
 }
@@ -290,6 +376,49 @@ TaggingInterface::accumulateTaggedLocalMatrix()
 {
   for (auto & ke : _ke_blocks)
     *ke += _local_ke;
+}
+
+void
+TaggingInterface::accumulateTaggedLocalMatrix(Assembly & assembly,
+                                              const unsigned int ivar,
+                                              const unsigned int jvar,
+                                              const DenseMatrix<Number> & k)
+{
+  _ke_blocks.resize(_matrix_tags.size());
+  mooseAssert(_matrix_tags.size() >= 1, "we need at least one active tag");
+  auto mat_vector = _matrix_tags.begin();
+  for (MooseIndex(_matrix_tags) i = 0; i < _matrix_tags.size(); i++, ++mat_vector)
+    _ke_blocks[i] = &assembly.jacobianBlock(ivar, jvar, Assembly::LocalDataKey{}, *mat_vector);
+  mooseAssert(_ke_blocks[0]->m() == k.m() && _ke_blocks[0]->n() == k.n(),
+              "Passed-in k must match the blocks we are about to sum into");
+  for (auto & ke : _ke_blocks)
+    *ke += k;
+}
+
+void
+TaggingInterface::accumulateTaggedNonlocalMatrix()
+{
+  for (auto & ke : _ke_blocks)
+    *ke += _nonlocal_ke;
+}
+
+void
+TaggingInterface::accumulateTaggedLocalMatrix(Assembly & assembly,
+                                              const unsigned int ivar,
+                                              const unsigned int jvar,
+                                              const Moose::DGJacobianType type,
+                                              const DenseMatrix<Number> & k)
+{
+  _ke_blocks.resize(_matrix_tags.size());
+  mooseAssert(_matrix_tags.size() >= 1, "we need at least one active tag");
+  auto mat_vector = _matrix_tags.begin();
+  for (MooseIndex(_matrix_tags) i = 0; i < _matrix_tags.size(); i++, ++mat_vector)
+    _ke_blocks[i] =
+        &assembly.jacobianBlockNeighbor(type, ivar, jvar, Assembly::LocalDataKey{}, *mat_vector);
+  mooseAssert(_ke_blocks[0]->m() == k.m() && _ke_blocks[0]->n() == k.n(),
+              "Passed-in k must match the blocks we are about to sum into");
+  for (auto & ke : _ke_blocks)
+    *ke += k;
 }
 
 void

@@ -143,6 +143,5 @@ GapHeatConductanceTest::computeJacobian(MortarType mortar_type)
     trimInteriorNodeDerivatives(secondary_ip_lowerd_map, secondary_side_var_array, residuals, true);
   if (_primary_var.feType().family == LAGRANGE)
     trimInteriorNodeDerivatives(primary_ip_lowerd_map, primary_side_var_array, residuals, false);
-  _assembly.processUnconstrainedResidualsAndJacobian(
-      residuals, dof_indices, _vector_tags, _matrix_tags, scaling_factor);
+  addResidualsAndJacobianWithoutConstraints(_assembly, residuals, dof_indices, scaling_factor);
 }

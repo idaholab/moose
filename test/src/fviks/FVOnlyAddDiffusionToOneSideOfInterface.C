@@ -40,9 +40,9 @@ FVOnlyAddDiffusionToOneSideOfInterface::computeResidual(const FaceInfo & fi)
   const auto r = MetaPhysicL::raw_value(fi.faceArea() * fi.faceCoord() * computeQpResidual());
 
   if (_elem_is_one)
-    processResidual(r, var_elem_num, false);
+    addResidual(r, var_elem_num, false);
   else
-    processResidual(-r, var_neigh_num, true);
+    addResidual(-r, var_neigh_num, true);
 }
 
 void
@@ -59,15 +59,20 @@ FVOnlyAddDiffusionToOneSideOfInterface::computeJacobian(const FaceInfo & fi)
   const auto & elem_dof_indices = _elem_is_one ? var1().dofIndices() : var2().dofIndices();
   const auto & neigh_dof_indices =
       _elem_is_one ? var2().dofIndicesNeighbor() : var1().dofIndicesNeighbor();
+  const auto elem_scaling_factor = _elem_is_one ? var1().scalingFactor() : var2().scalingFactor();
+  const auto neighbor_scaling_factor =
+      _elem_is_one ? var2().scalingFactor() : var1().scalingFactor();
   mooseAssert((elem_dof_indices.size() == 1) && (neigh_dof_indices.size() == 1),
               "We're currently built to use CONSTANT MONOMIALS");
 
   const auto r = fi.faceArea() * fi.faceCoord() * computeQpResidual();
 
   if (_elem_is_one)
-    _assembly.processResidualAndJacobian(r, elem_dof_indices[0], _vector_tags, _matrix_tags);
+    addResidualsAndJacobian(
+        _assembly, std::array<ADReal, 1>{{r}}, elem_dof_indices, elem_scaling_factor);
   else
-    _assembly.processResidualAndJacobian(-r, neigh_dof_indices[0], _vector_tags, _matrix_tags);
+    addResidualsAndJacobian(
+        _assembly, std::array<ADReal, 1>{{-r}}, neigh_dof_indices, neighbor_scaling_factor);
 }
 
 ADReal

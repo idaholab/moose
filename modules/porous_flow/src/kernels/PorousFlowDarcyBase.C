@@ -158,11 +158,11 @@ PorousFlowDarcyBase::computeResidualAndJacobian(JacRes res_or_jac, unsigned int 
   const unsigned int pvar =
       ((res_or_jac == JacRes::CALCULATE_JACOBIAN) ? _dictator.porousFlowVariableNum(jvar) : 0);
 
-  DenseMatrix<Number> & ke = _assembly.jacobianBlock(_var.number(), jvar);
-  if ((ke.n() == 0) && (res_or_jac == JacRes::CALCULATE_JACOBIAN)) // this removes a problem
-                                                                   // encountered in the initial
-                                                                   // timestep when
-                                                                   // use_displaced_mesh=true
+  prepareMatrixTag(_assembly, _var.number(), jvar);
+  if ((_local_ke.n() == 0) && (res_or_jac == JacRes::CALCULATE_JACOBIAN)) // this removes a problem
+                                                                          // encountered in the
+                                                                          // initial timestep when
+                                                                          // use_displaced_mesh=true
     return;
 
   // The number of nodes in the element
@@ -223,10 +223,10 @@ PorousFlowDarcyBase::computeResidualAndJacobian(JacRes res_or_jac, unsigned int 
   {
     for (unsigned ph = 0; ph < _num_phases; ++ph)
     {
-      _jacobian[ph].resize(ke.m());
+      _jacobian[ph].resize(_local_ke.m());
       for (_i = 0; _i < _test.size(); _i++)
       {
-        _jacobian[ph][_i].assign(ke.n(), 0.0);
+        _jacobian[ph][_i].assign(_local_ke.n(), 0.0);
         for (_j = 0; _j < _phi.size(); _j++)
           for (_qp = 0; _qp < _qrule->n_points(); _qp++)
             _jacobian[ph][_i][_j] += _JxW[_qp] * _coord[_qp] * darcyQpJacobian(jvar, ph);
@@ -258,44 +258,33 @@ PorousFlowDarcyBase::computeResidualAndJacobian(JacRes res_or_jac, unsigned int 
   // Add results to the Residual or Jacobian
   if (res_or_jac == JacRes::CALCULATE_RESIDUAL)
   {
-    DenseVector<Number> & re = _assembly.residualBlock(_var.number());
-
-    _local_re.resize(re.size());
-    _local_re.zero();
+    prepareVectorTag(_assembly, _var.number());
     for (_i = 0; _i < _test.size(); _i++)
       for (unsigned int ph = 0; ph < _num_phases; ++ph)
         _local_re(_i) += _proto_flux[ph][_i];
-
-    re += _local_re;
+    accumulateTaggedLocalResidual();
 
     if (_has_save_in)
-    {
-      Threads::spin_mutex::scoped_lock lock(Threads::spin_mtx);
       for (unsigned int i = 0; i < _save_in.size(); i++)
         _save_in[i]->sys().solution().add_vector(_local_re, _save_in[i]->dofIndices());
-    }
   }
 
   if (res_or_jac == JacRes::CALCULATE_JACOBIAN)
   {
-    _local_ke.resize(ke.m(), ke.n());
-    _local_ke.zero();
-
     for (_i = 0; _i < _test.size(); _i++)
       for (_j = 0; _j < _phi.size(); _j++)
         for (unsigned int ph = 0; ph < _num_phases; ++ph)
           _local_ke(_i, _j) += _jacobian[ph][_i][_j];
 
-    ke += _local_ke;
+    accumulateTaggedLocalMatrix();
 
     if (_has_diag_save_in && jvar == _var.number())
     {
-      unsigned int rows = ke.m();
+      unsigned int rows = _local_ke.m();
       DenseVector<Number> diag(rows);
       for (unsigned int i = 0; i < rows; i++)
         diag(i) = _local_ke(i, i);
 
-      Threads::spin_mutex::scoped_lock lock(Threads::spin_mtx);
       for (unsigned int i = 0; i < _diag_save_in.size(); i++)
         _diag_save_in[i]->sys().solution().add_vector(diag, _diag_save_in[i]->dofIndices());
     }

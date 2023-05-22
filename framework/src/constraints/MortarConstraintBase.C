@@ -228,12 +228,17 @@ MortarConstraintBase::zeroInactiveLMDofs(const std::unordered_set<const Node *> 
         continue;
 
       const auto dof_index = node->dof_number(sn, vn, 0);
+      // No scaling; this is not physics
       if (_assembly.computingJacobian())
-        _assembly.cacheJacobian(dof_index, dof_index, 1., _matrix_tags);
+        addJacobianElement(
+            _assembly, /*element_value=*/1, dof_index, dof_index, /*scaling_factor=*/1);
       if (_assembly.computingResidual())
       {
-        Real lm_value = _var->getNodalValue(*node);
-        _assembly.cacheResidual(dof_index, lm_value, _vector_tags);
+        const Real lm_value = _var->getNodalValue(*node);
+        addResiduals(_assembly,
+                     std::array<Real, 1>{{lm_value}},
+                     std::array<dof_id_type, 1>{{dof_index}},
+                     /*scaling_factor=*/1);
       }
     }
   }
@@ -247,12 +252,17 @@ MortarConstraintBase::zeroInactiveLMDofs(const std::unordered_set<const Node *> 
       for (const auto comp : make_range(n_comp))
       {
         const auto dof_index = el->dof_number(sn, vn, comp);
+        // No scaling; this is not physics
         if (_assembly.computingJacobian())
-          _assembly.cacheJacobian(dof_index, dof_index, 1., _matrix_tags);
+          addJacobianElement(
+              _assembly, /*element_value=*/1, dof_index, dof_index, /*scaling_factor=*/1);
         if (_assembly.computingResidual())
         {
           const Real lm_value = _var->getElementalValue(el, comp);
-          _assembly.cacheResidual(dof_index, lm_value, _vector_tags);
+          addResiduals(_assembly,
+                       std::array<Real, 1>{{lm_value}},
+                       std::array<dof_id_type, 1>{{dof_index}},
+                       /*scaling_factor=*/1);
         }
       }
     }

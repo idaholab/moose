@@ -82,6 +82,6 @@ ShaftTimeDerivativeScalarKernel::computeJacobian()
     std::vector<dof_id_type> dofs_j;
     _shaft_connected_uos[i]->getMomentOfInertiaJacobianData(jacobian_block, dofs_j);
     jacobian_block.scale(_u_dot[0]);
-    _assembly.cacheJacobianBlock(jacobian_block, _var.dofIndices(), dofs_j, _var.scalingFactor());
+    addJacobian(_assembly, jacobian_block, _var.dofIndices(), dofs_j, _var.scalingFactor());
   }
 }

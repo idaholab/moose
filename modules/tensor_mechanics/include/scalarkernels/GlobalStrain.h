@@ -30,6 +30,8 @@ public:
 
 protected:
   virtual void assignComponentIndices(Order var_order);
+  virtual Real computeQpResidual() override { mooseError("unused"); }
+  virtual Real computeQpJacobian() override { mooseError("unused"); }
 
   const GlobalStrainUserObjectInterface & _pst;
   const RankTwoTensor & _pst_residual;

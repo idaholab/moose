@@ -51,25 +51,27 @@ GlobalStrain::GlobalStrain(const InputParameters & parameters)
 void
 GlobalStrain::computeResidual()
 {
-  DenseVector<Number> & re = _assembly.residualBlock(_var.number());
-  for (_i = 0; _i < re.size(); ++_i)
+  prepareVectorTag(_assembly, _var.number());
+  for (_i = 0; _i < _local_re.size(); ++_i)
   {
     if (_periodic_dir(_components[_i].first) || _periodic_dir(_components[_i].second))
-      re(_i) += _pst_residual(_components[_i].first, _components[_i].second);
+      _local_re(_i) += _pst_residual(_components[_i].first, _components[_i].second);
   }
+  accumulateTaggedLocalResidual();
 }
 
 void
 GlobalStrain::computeJacobian()
 {
-  DenseMatrix<Number> & ke = _assembly.jacobianBlock(_var.number(), _var.number());
-  for (_i = 0; _i < ke.m(); ++_i)
-    for (_j = 0; _j < ke.m(); ++_j)
+  prepareMatrixTag(_assembly, _var.number(), _var.number());
+  for (_i = 0; _i < _local_ke.m(); ++_i)
+    for (_j = 0; _j < _local_ke.m(); ++_j)
       // periodic direction check is not done for jacobian calculations to avoid zero pivot error
-      ke(_i, _j) += _pst_jacobian(_components[_i].first,
-                                  _components[_i].second,
-                                  _components[_j].first,
-                                  _components[_j].second);
+      _local_ke(_i, _j) += _pst_jacobian(_components[_i].first,
+                                         _components[_i].second,
+                                         _components[_j].first,
+                                         _components[_j].second);
+  accumulateTaggedLocalMatrix();
 }
 
 void

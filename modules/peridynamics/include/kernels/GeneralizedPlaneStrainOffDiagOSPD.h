@@ -59,4 +59,7 @@ protected:
 
   /// The variable number of the scalar out-of-plane strain variable
   const unsigned int _scalar_out_of_plane_strain_var_num;
+
+  DenseMatrix<Number> _ken;
+  DenseMatrix<Number> _kne;
 };

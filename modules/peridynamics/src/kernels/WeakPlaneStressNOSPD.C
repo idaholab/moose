@@ -126,7 +126,7 @@ WeakPlaneStressNOSPD::computePDNonlocalOffDiagJacobian(unsigned int jvar_num,
           _local_ke.zero();
           _local_ke(nd, 1) = dPdUk(2, 2) * _dg_vol_frac[nd] * _node_vol[nd] * _bond_status;
 
-          _assembly.cacheJacobianBlock(_local_ke, _ivardofs, jvardofs, _var.scalingFactor());
+          addJacobian(_assembly, _local_ke, _ivardofs, jvardofs, _var.scalingFactor());
         }
     }
   }

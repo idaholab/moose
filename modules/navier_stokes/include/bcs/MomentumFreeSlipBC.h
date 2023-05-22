@@ -23,9 +23,10 @@ public:
   virtual ~MomentumFreeSlipBC();
 
   virtual bool shouldApply() override;
+  virtual void computeResidual() override;
 
 protected:
-  virtual Real computeQpResidual() override;
+  Real computeQpResidual() override { mooseError("Function unused"); }
 
   /// The dimension of the mesh
   const unsigned int _mesh_dimension;
@@ -36,4 +37,11 @@ protected:
   const VariableValue & _rho_v;
   /// Momentum in z-direction
   const VariableValue & _rho_w;
+
+  /// x-velocity variable
+  const MooseVariable * const _rho_u_var;
+  /// y-velocity variable
+  const MooseVariable * const _rho_v_var;
+  /// z-velocity variable
+  const MooseVariable * const _rho_w_var;
 };

@@ -27,6 +27,9 @@ public:
   virtual void computeJacobian() override;
 
 protected:
+  virtual Real computeQpResidual() override { mooseError("unused"); }
+  virtual Real computeQpJacobian() override { mooseError("unused"); }
+
   /// Index within local system of the equation upon which this object acts
   const unsigned int _equation_index;
 

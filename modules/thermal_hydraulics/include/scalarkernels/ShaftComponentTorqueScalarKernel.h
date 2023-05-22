@@ -26,6 +26,9 @@ public:
   virtual void computeJacobian() override;
 
 protected:
+  virtual Real computeQpResidual() override { mooseError("unused"); }
+  virtual Real computeQpJacobian() override { mooseError("unused"); }
+
   /// Shaft connected component user object
   const ShaftConnectableUserObjectInterface & _shaft_connected_component_uo;
 

@@ -1599,7 +1599,8 @@ FEProblemBase::prepareAssembly(THREAD_ID tid)
 void
 FEProblemBase::addResidual(THREAD_ID tid)
 {
-  _assembly[tid][_current_nl_sys->number()]->addResidual(currentResidualVectorTags());
+  _assembly[tid][_current_nl_sys->number()]->addResidual(Assembly::GlobalDataKey{},
+                                                         currentResidualVectorTags());
 
   if (_displaced_problem)
     _displaced_problem->addResidual(tid);
@@ -1608,7 +1609,8 @@ FEProblemBase::addResidual(THREAD_ID tid)
 void
 FEProblemBase::addResidualNeighbor(THREAD_ID tid)
 {
-  _assembly[tid][_current_nl_sys->number()]->addResidualNeighbor(currentResidualVectorTags());
+  _assembly[tid][_current_nl_sys->number()]->addResidualNeighbor(Assembly::GlobalDataKey{},
+                                                                 currentResidualVectorTags());
 
   if (_displaced_problem)
     _displaced_problem->addResidualNeighbor(tid);
@@ -1617,7 +1619,8 @@ FEProblemBase::addResidualNeighbor(THREAD_ID tid)
 void
 FEProblemBase::addResidualLower(THREAD_ID tid)
 {
-  _assembly[tid][_current_nl_sys->number()]->addResidualLower(currentResidualVectorTags());
+  _assembly[tid][_current_nl_sys->number()]->addResidualLower(Assembly::GlobalDataKey{},
+                                                              currentResidualVectorTags());
 
   if (_displaced_problem)
     _displaced_problem->addResidualLower(tid);
@@ -1626,13 +1629,15 @@ FEProblemBase::addResidualLower(THREAD_ID tid)
 void
 FEProblemBase::addResidualScalar(THREAD_ID tid /* = 0*/)
 {
-  _assembly[tid][_current_nl_sys->number()]->addResidualScalar(currentResidualVectorTags());
+  _assembly[tid][_current_nl_sys->number()]->addResidualScalar(Assembly::GlobalDataKey{},
+                                                               currentResidualVectorTags());
 }
 
 void
 FEProblemBase::cacheResidual(THREAD_ID tid)
 {
-  _assembly[tid][_current_nl_sys->number()]->cacheResidual(currentResidualVectorTags());
+  _assembly[tid][_current_nl_sys->number()]->cacheResidual(Assembly::GlobalDataKey{},
+                                                           currentResidualVectorTags());
   if (_displaced_problem)
     _displaced_problem->cacheResidual(tid);
 }
@@ -1640,7 +1645,8 @@ FEProblemBase::cacheResidual(THREAD_ID tid)
 void
 FEProblemBase::cacheResidualNeighbor(THREAD_ID tid)
 {
-  _assembly[tid][_current_nl_sys->number()]->cacheResidualNeighbor(currentResidualVectorTags());
+  _assembly[tid][_current_nl_sys->number()]->cacheResidualNeighbor(Assembly::GlobalDataKey{},
+                                                                   currentResidualVectorTags());
   if (_displaced_problem)
     _displaced_problem->cacheResidualNeighbor(tid);
 }
@@ -1648,7 +1654,8 @@ FEProblemBase::cacheResidualNeighbor(THREAD_ID tid)
 void
 FEProblemBase::addCachedResidual(THREAD_ID tid)
 {
-  _assembly[tid][_current_nl_sys->number()]->addCachedResiduals(currentResidualVectorTags());
+  _assembly[tid][_current_nl_sys->number()]->addCachedResiduals(Assembly::GlobalDataKey{},
+                                                                currentResidualVectorTags());
 
   if (_displaced_problem)
     _displaced_problem->addCachedResidual(tid);
@@ -1659,15 +1666,15 @@ FEProblemBase::addCachedResidualDirectly(NumericVector<Number> & residual, THREA
 {
   if (_current_nl_sys->hasVector(_current_nl_sys->timeVectorTag()))
     _assembly[tid][_current_nl_sys->number()]->addCachedResidualDirectly(
-        residual, getVectorTag(_current_nl_sys->timeVectorTag()));
+        residual, Assembly::GlobalDataKey{}, getVectorTag(_current_nl_sys->timeVectorTag()));
 
   if (_current_nl_sys->hasVector(_current_nl_sys->nonTimeVectorTag()))
     _assembly[tid][_current_nl_sys->number()]->addCachedResidualDirectly(
-        residual, getVectorTag(_current_nl_sys->nonTimeVectorTag()));
+        residual, Assembly::GlobalDataKey{}, getVectorTag(_current_nl_sys->nonTimeVectorTag()));
 
   // We do this because by adding the cached residual directly, we cannot ensure that all of the
   // cached residuals are emptied after only the two add calls above
-  _assembly[tid][_current_nl_sys->number()]->clearCachedResiduals();
+  _assembly[tid][_current_nl_sys->number()]->clearCachedResiduals(Assembly::GlobalDataKey{});
 
   if (_displaced_problem)
     _displaced_problem->addCachedResidualDirectly(residual, tid);
@@ -1677,7 +1684,9 @@ void
 FEProblemBase::setResidual(NumericVector<Number> & residual, THREAD_ID tid)
 {
   _assembly[tid][_current_nl_sys->number()]->setResidual(
-      residual, getVectorTag(_nl[_current_nl_sys->number()]->residualVectorTag()));
+      residual,
+      Assembly::GlobalDataKey{},
+      getVectorTag(_nl[_current_nl_sys->number()]->residualVectorTag()));
   if (_displaced_problem)
     _displaced_problem->setResidual(residual, tid);
 }
@@ -1686,7 +1695,7 @@ void
 FEProblemBase::setResidualNeighbor(NumericVector<Number> & residual, THREAD_ID tid)
 {
   _assembly[tid][_current_nl_sys->number()]->setResidualNeighbor(
-      residual, getVectorTag(_current_nl_sys->residualVectorTag()));
+      residual, Assembly::GlobalDataKey{}, getVectorTag(_current_nl_sys->residualVectorTag()));
   if (_displaced_problem)
     _displaced_problem->setResidualNeighbor(residual, tid);
 }
@@ -1694,9 +1703,9 @@ FEProblemBase::setResidualNeighbor(NumericVector<Number> & residual, THREAD_ID t
 void
 FEProblemBase::addJacobian(THREAD_ID tid)
 {
-  _assembly[tid][_current_nl_sys->number()]->addJacobian();
+  _assembly[tid][_current_nl_sys->number()]->addJacobian(Assembly::GlobalDataKey{});
   if (_has_nonlocal_coupling)
-    _assembly[tid][_current_nl_sys->number()]->addJacobianNonlocal();
+    _assembly[tid][_current_nl_sys->number()]->addJacobianNonlocal(Assembly::GlobalDataKey{});
   if (_displaced_problem)
   {
     _displaced_problem->addJacobian(tid);
@@ -1708,7 +1717,7 @@ FEProblemBase::addJacobian(THREAD_ID tid)
 void
 FEProblemBase::addJacobianNeighbor(THREAD_ID tid)
 {
-  _assembly[tid][_current_nl_sys->number()]->addJacobianNeighbor();
+  _assembly[tid][_current_nl_sys->number()]->addJacobianNeighbor(Assembly::GlobalDataKey{});
   if (_displaced_problem)
     _displaced_problem->addJacobianNeighbor(tid);
 }
@@ -1716,7 +1725,7 @@ FEProblemBase::addJacobianNeighbor(THREAD_ID tid)
 void
 FEProblemBase::addJacobianNeighborLowerD(THREAD_ID tid)
 {
-  _assembly[tid][_current_nl_sys->number()]->addJacobianNeighborLowerD();
+  _assembly[tid][_current_nl_sys->number()]->addJacobianNeighborLowerD(Assembly::GlobalDataKey{});
   if (_displaced_problem)
     _displaced_problem->addJacobianNeighborLowerD(tid);
 }
@@ -1724,7 +1733,7 @@ FEProblemBase::addJacobianNeighborLowerD(THREAD_ID tid)
 void
 FEProblemBase::addJacobianLowerD(THREAD_ID tid)
 {
-  _assembly[tid][_current_nl_sys->number()]->addJacobianLowerD();
+  _assembly[tid][_current_nl_sys->number()]->addJacobianLowerD(Assembly::GlobalDataKey{});
   if (_displaced_problem)
     _displaced_problem->addJacobianLowerD(tid);
 }
@@ -1732,21 +1741,22 @@ FEProblemBase::addJacobianLowerD(THREAD_ID tid)
 void
 FEProblemBase::addJacobianScalar(THREAD_ID tid /* = 0*/)
 {
-  _assembly[tid][_current_nl_sys->number()]->addJacobianScalar();
+  _assembly[tid][_current_nl_sys->number()]->addJacobianScalar(Assembly::GlobalDataKey{});
 }
 
 void
 FEProblemBase::addJacobianOffDiagScalar(unsigned int ivar, THREAD_ID tid /* = 0*/)
 {
-  _assembly[tid][_current_nl_sys->number()]->addJacobianOffDiagScalar(ivar);
+  _assembly[tid][_current_nl_sys->number()]->addJacobianOffDiagScalar(ivar,
+                                                                      Assembly::GlobalDataKey{});
 }
 
 void
 FEProblemBase::cacheJacobian(THREAD_ID tid)
 {
-  _assembly[tid][_current_nl_sys->number()]->cacheJacobian();
+  _assembly[tid][_current_nl_sys->number()]->cacheJacobian(Assembly::GlobalDataKey{});
   if (_has_nonlocal_coupling)
-    _assembly[tid][_current_nl_sys->number()]->cacheJacobianNonlocal();
+    _assembly[tid][_current_nl_sys->number()]->cacheJacobianNonlocal(Assembly::GlobalDataKey{});
   if (_displaced_problem)
   {
     _displaced_problem->cacheJacobian(tid);
@@ -1758,7 +1768,7 @@ FEProblemBase::cacheJacobian(THREAD_ID tid)
 void
 FEProblemBase::cacheJacobianNeighbor(THREAD_ID tid)
 {
-  _assembly[tid][_current_nl_sys->number()]->cacheJacobianNeighbor();
+  _assembly[tid][_current_nl_sys->number()]->cacheJacobianNeighbor(Assembly::GlobalDataKey{});
   if (_displaced_problem)
     _displaced_problem->cacheJacobianNeighbor(tid);
 }
@@ -1766,48 +1776,9 @@ FEProblemBase::cacheJacobianNeighbor(THREAD_ID tid)
 void
 FEProblemBase::addCachedJacobian(THREAD_ID tid)
 {
-  _assembly[tid][_current_nl_sys->number()]->addCachedJacobian();
+  _assembly[tid][_current_nl_sys->number()]->addCachedJacobian(Assembly::GlobalDataKey{});
   if (_displaced_problem)
     _displaced_problem->addCachedJacobian(tid);
-}
-
-void
-FEProblemBase::addCachedJacobianContributions(THREAD_ID tid)
-{
-  mooseDeprecated("please use addCachedJacobian");
-
-  addCachedJacobian(tid);
-}
-
-void
-FEProblemBase::addJacobianBlock(SparseMatrix<Number> & jacobian,
-                                unsigned int ivar,
-                                unsigned int jvar,
-                                const DofMap & dof_map,
-                                std::vector<dof_id_type> & dof_indices,
-                                THREAD_ID tid)
-{
-  _assembly[tid][_current_nl_sys->number()]->addJacobianBlock(
-      jacobian, ivar, jvar, dof_map, dof_indices);
-  if (_has_nonlocal_coupling)
-    if (_nonlocal_cm[_current_nl_sys->number()](ivar, jvar) != 0)
-    {
-      MooseVariableFEBase & jv = _current_nl_sys->getVariable(tid, jvar);
-      _assembly[tid][_current_nl_sys->number()]->addJacobianBlockNonlocal(
-          jacobian, ivar, jvar, dof_map, dof_indices, jv.allDofIndices());
-    }
-
-  if (_displaced_problem)
-  {
-    _displaced_problem->addJacobianBlock(jacobian, ivar, jvar, dof_map, dof_indices, tid);
-    if (_has_nonlocal_coupling)
-      if (_nonlocal_cm[_current_nl_sys->number()](ivar, jvar) != 0)
-      {
-        MooseVariableFEBase & jv = _current_nl_sys->getVariable(tid, jvar);
-        _displaced_problem->addJacobianBlockNonlocal(
-            jacobian, ivar, jvar, dof_map, dof_indices, jv.allDofIndices(), tid);
-      }
-  }
 }
 
 void
@@ -1820,14 +1791,21 @@ FEProblemBase::addJacobianBlockTags(SparseMatrix<Number> & jacobian,
                                     THREAD_ID tid)
 {
   _assembly[tid][_current_nl_sys->number()]->addJacobianBlockTags(
-      jacobian, ivar, jvar, dof_map, dof_indices, tags);
+      jacobian, ivar, jvar, dof_map, dof_indices, Assembly::GlobalDataKey{}, tags);
 
   if (_has_nonlocal_coupling)
     if (_nonlocal_cm[_current_nl_sys->number()](ivar, jvar) != 0)
     {
       MooseVariableFEBase & jv = _current_nl_sys->getVariable(tid, jvar);
-      _assembly[tid][_current_nl_sys->number()]->addJacobianBlockNonlocal(
-          jacobian, ivar, jvar, dof_map, dof_indices, jv.allDofIndices());
+      _assembly[tid][_current_nl_sys->number()]->addJacobianBlockNonlocalTags(
+          jacobian,
+          ivar,
+          jvar,
+          dof_map,
+          dof_indices,
+          jv.allDofIndices(),
+          Assembly::GlobalDataKey{},
+          tags);
     }
 
   if (_displaced_problem)
@@ -1838,7 +1816,7 @@ FEProblemBase::addJacobianBlockTags(SparseMatrix<Number> & jacobian,
       {
         MooseVariableFEBase & jv = _current_nl_sys->getVariable(tid, jvar);
         _displaced_problem->addJacobianBlockNonlocal(
-            jacobian, ivar, jvar, dof_map, dof_indices, jv.allDofIndices(), tid);
+            jacobian, ivar, jvar, dof_map, dof_indices, jv.allDofIndices(), tags, tid);
       }
   }
 }
@@ -1850,13 +1828,20 @@ FEProblemBase::addJacobianNeighbor(SparseMatrix<Number> & jacobian,
                                    const DofMap & dof_map,
                                    std::vector<dof_id_type> & dof_indices,
                                    std::vector<dof_id_type> & neighbor_dof_indices,
+                                   const std::set<TagID> & tags,
                                    THREAD_ID tid)
 {
-  _assembly[tid][_current_nl_sys->number()]->addJacobianNeighbor(
-      jacobian, ivar, jvar, dof_map, dof_indices, neighbor_dof_indices);
+  _assembly[tid][_current_nl_sys->number()]->addJacobianNeighborTags(jacobian,
+                                                                     ivar,
+                                                                     jvar,
+                                                                     dof_map,
+                                                                     dof_indices,
+                                                                     neighbor_dof_indices,
+                                                                     Assembly::GlobalDataKey{},
+                                                                     tags);
   if (_displaced_problem)
     _displaced_problem->addJacobianNeighbor(
-        jacobian, ivar, jvar, dof_map, dof_indices, neighbor_dof_indices, tid);
+        jacobian, ivar, jvar, dof_map, dof_indices, neighbor_dof_indices, tags, tid);
 }
 
 void

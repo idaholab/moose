@@ -157,9 +157,7 @@ FVInterfaceKernel::setupData(const FaceInfo & fi)
 }
 
 void
-FVInterfaceKernel::processResidual(const Real resid,
-                                   const unsigned int var_num,
-                                   const bool neighbor)
+FVInterfaceKernel::addResidual(const Real resid, const unsigned int var_num, const bool neighbor)
 {
   neighbor ? prepareVectorTagNeighbor(_assembly, var_num) : prepareVectorTag(_assembly, var_num);
   _local_re(0) = resid;
@@ -167,9 +165,14 @@ FVInterfaceKernel::processResidual(const Real resid,
 }
 
 void
-FVInterfaceKernel::processJacobian(const ADReal & resid, const dof_id_type dof_index)
+FVInterfaceKernel::addJacobian(const ADReal & resid,
+                               const dof_id_type dof_index,
+                               const Real scaling_factor)
 {
-  _assembly.processJacobian(resid, dof_index, _matrix_tags);
+  addJacobian(_assembly,
+              std::array<ADReal, 1>{{resid}},
+              std::array<dof_id_type, 1>{{dof_index}},
+              scaling_factor);
 }
 
 void
@@ -182,8 +185,8 @@ FVInterfaceKernel::computeResidual(const FaceInfo & fi)
 
   const auto r = MetaPhysicL::raw_value(fi.faceArea() * fi.faceCoord() * computeQpResidual());
 
-  processResidual(r, var_elem_num, false);
-  processResidual(-r, var_neigh_num, true);
+  addResidual(r, var_elem_num, false);
+  addResidual(-r, var_neigh_num, true);
 }
 
 void
@@ -202,11 +205,15 @@ FVInterfaceKernel::computeJacobian(const FaceInfo & fi)
       _elem_is_one ? _var2.dofIndicesNeighbor() : _var1.dofIndicesNeighbor();
   mooseAssert((elem_dof_indices.size() == 1) && (neigh_dof_indices.size() == 1),
               "We're currently built to use CONSTANT MONOMIALS");
+  const auto elem_scaling_factor = _elem_is_one ? _var1.scalingFactor() : _var2.scalingFactor();
+  const auto neigh_scaling_factor = _elem_is_one ? _var2.scalingFactor() : _var1.scalingFactor();
 
   const auto r = fi.faceArea() * fi.faceCoord() * computeQpResidual();
 
-  _assembly.processResidualAndJacobian(r, elem_dof_indices[0], _vector_tags, _matrix_tags);
-  _assembly.processResidualAndJacobian(-r, neigh_dof_indices[0], _vector_tags, _matrix_tags);
+  addResidualsAndJacobian(
+      _assembly, std::array<ADReal, 1>{{r}}, elem_dof_indices, elem_scaling_factor);
+  addResidualsAndJacobian(
+      _assembly, std::array<ADReal, 1>{{-r}}, neigh_dof_indices, neigh_scaling_factor);
 }
 
 Moose::ElemArg

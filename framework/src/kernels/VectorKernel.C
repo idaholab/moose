@@ -46,10 +46,7 @@ VectorKernel::VectorKernel(const InputParameters & parameters)
 void
 VectorKernel::computeResidual()
 {
-  DenseVector<Number> & re = _assembly.residualBlock(_var.number());
-  _local_re.resize(re.size());
-  _local_re.zero();
-
+  prepareVectorTag(_assembly, _var.number());
   precalculateResidual();
   for (_i = 0; _i < _test.size(); _i++)
     for (_qp = 0; _qp < _qrule->n_points(); _qp++)
@@ -57,40 +54,31 @@ VectorKernel::computeResidual()
       Real residual = _JxW[_qp] * _coord[_qp] * computeQpResidual();
       _local_re(_i) += residual;
     }
-
-  re += _local_re;
+  accumulateTaggedLocalResidual();
 
   if (_has_save_in)
-  {
-    Threads::spin_mutex::scoped_lock lock(Threads::spin_mtx);
     for (const auto & var : _save_in)
       var->sys().solution().add_vector(_local_re, var->dofIndices());
-  }
 }
 
 void
 VectorKernel::computeJacobian()
 {
-  DenseMatrix<Number> & ke = _assembly.jacobianBlock(_var.number(), _var.number());
-  _local_ke.resize(ke.m(), ke.n());
-  _local_ke.zero();
-
+  prepareMatrixTag(_assembly, _var.number(), _var.number());
   precalculateJacobian();
   for (_i = 0; _i < _test.size(); _i++)
     for (_j = 0; _j < _phi.size(); _j++)
       for (_qp = 0; _qp < _qrule->n_points(); _qp++)
         _local_ke(_i, _j) += _JxW[_qp] * _coord[_qp] * computeQpJacobian();
-
-  ke += _local_ke;
+  accumulateTaggedLocalMatrix();
 
   if (_has_diag_save_in && !_sys.computingScalingJacobian())
   {
-    unsigned int rows = ke.m();
+    unsigned int rows = _local_ke.m();
     DenseVector<Number> diag(rows);
     for (unsigned int i = 0; i < rows; i++)
       diag(i) = _local_ke(i, i);
 
-    Threads::spin_mutex::scoped_lock lock(Threads::spin_mtx);
     for (const auto & var : _diag_save_in)
       var->sys().solution().add_vector(diag, var->dofIndices());
   }
@@ -105,7 +93,7 @@ VectorKernel::computeOffDiagJacobian(const unsigned int jvar_num)
   {
     const auto & jvar = getVariable(jvar_num);
 
-    DenseMatrix<Number> & ke = _assembly.jacobianBlock(_var.number(), jvar_num);
+    prepareMatrixTag(_assembly, _var.number(), jvar_num);
 
     // This (undisplaced) jvar could potentially yield the wrong phi size if this object is acting
     // on the displaced mesh
@@ -115,18 +103,21 @@ VectorKernel::computeOffDiagJacobian(const unsigned int jvar_num)
     for (_i = 0; _i < _test.size(); _i++)
       for (_j = 0; _j < phi_size; _j++)
         for (_qp = 0; _qp < _qrule->n_points(); _qp++)
-          ke(_i, _j) += _JxW[_qp] * _coord[_qp] * computeQpOffDiagJacobian(jvar_num);
+          _local_ke(_i, _j) += _JxW[_qp] * _coord[_qp] * computeQpOffDiagJacobian(jvar_num);
+
+    accumulateTaggedLocalMatrix();
   }
 }
 
 void
 VectorKernel::computeOffDiagJacobianScalar(unsigned int jvar)
 {
-  DenseMatrix<Number> & ke = _assembly.jacobianBlock(_var.number(), jvar);
+  prepareMatrixTag(_assembly, _var.number(), jvar);
   MooseVariableScalar & jv = _sys.getScalarVariable(_tid, jvar);
 
   for (_i = 0; _i < _test.size(); _i++)
     for (_j = 0; _j < jv.order(); _j++)
       for (_qp = 0; _qp < _qrule->n_points(); _qp++)
-        ke(_i, _j) += _JxW[_qp] * _coord[_qp] * computeQpOffDiagJacobianScalar(jvar);
+        _local_ke(_i, _j) += _JxW[_qp] * _coord[_qp] * computeQpOffDiagJacobianScalar(jvar);
+  accumulateTaggedLocalMatrix();
 }

@@ -90,7 +90,8 @@ ReferenceResidualProblem::ReferenceResidualProblem(const InputParameters & param
     _reference_vector(nullptr),
     _converge_on(getParam<std::vector<NonlinearVariableName>>("converge_on")),
     _zero_ref_type(
-        params.get<MooseEnum>("zero_reference_residual_treatment").getEnum<ZeroReferenceType>())
+        params.get<MooseEnum>("zero_reference_residual_treatment").getEnum<ZeroReferenceType>()),
+    _reference_vector_tag_id(Moose::INVALID_TAG_ID)
 {
   if (params.isParamValid("solution_variables"))
   {
@@ -130,8 +131,8 @@ ReferenceResidualProblem::ReferenceResidualProblem(const InputParameters & param
       paramError(
           "nl_sys_names",
           "reference residual problem does not currently support multiple nonlinear systems");
-    _reference_vector =
-        &getNonlinearSystemBase(0).getVector(getVectorTagID(getParam<TagName>("reference_vector")));
+    _reference_vector_tag_id = getVectorTagID(getParam<TagName>("reference_vector"));
+    _reference_vector = &getNonlinearSystemBase(0).getVector(_reference_vector_tag_id);
   }
   else
     mooseInfo("Neither the `reference_residual_variables` nor `reference_vector` parameter is "

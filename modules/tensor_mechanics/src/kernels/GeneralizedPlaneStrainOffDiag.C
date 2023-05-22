@@ -118,8 +118,7 @@ GeneralizedPlaneStrainOffDiag::computeDispOffDiagJacobianScalar(unsigned int com
 {
   if (jvar == _scalar_out_of_plane_strain_var)
   {
-    DenseMatrix<Number> & ken = _assembly.jacobianBlock(_var.number(), jvar);
-    DenseMatrix<Number> & kne = _assembly.jacobianBlock(jvar, _var.number());
+    prepareMatrixTag(_assembly, _var.number(), jvar);
     MooseVariableScalar & jv = _sys.getScalarVariable(_tid, jvar);
 
     // Set appropriate components for scalar kernels, including in the cases where a planar model is
@@ -132,20 +131,18 @@ GeneralizedPlaneStrainOffDiag::computeDispOffDiagJacobianScalar(unsigned int com
     for (_i = 0; _i < _test.size(); ++_i)
       for (_j = 0; _j < jv.order(); ++_j)
         for (_qp = 0; _qp < _qrule->n_points(); ++_qp)
-        {
-          ken(_i, _j) += _JxW[_qp] * _coord[_qp] *
-                         _Jacobian_mult[_qp](_scalar_out_of_plane_strain_direction,
-                                             _scalar_out_of_plane_strain_direction,
-                                             component,
-                                             component) *
-                         _grad_test[_i][_qp](component);
-          kne(_j, _i) += _JxW[_qp] * _coord[_qp] *
-                         _Jacobian_mult[_qp](_scalar_out_of_plane_strain_direction,
-                                             _scalar_out_of_plane_strain_direction,
-                                             component,
-                                             component) *
-                         _grad_test[_i][_qp](component);
-        }
+          _local_ke(_i, _j) += _JxW[_qp] * _coord[_qp] *
+                               _Jacobian_mult[_qp](_scalar_out_of_plane_strain_direction,
+                                                   _scalar_out_of_plane_strain_direction,
+                                                   component,
+                                                   component) *
+                               _grad_test[_i][_qp](component);
+    accumulateTaggedLocalMatrix();
+    _ke_copy = _local_ke;
+
+    prepareMatrixTag(_assembly, jvar, _var.number());
+    _ke_copy.get_transpose(_local_ke);
+    accumulateTaggedLocalMatrix();
   }
 }
 
@@ -154,7 +151,7 @@ GeneralizedPlaneStrainOffDiag::computeTempOffDiagJacobianScalar(unsigned int jva
 {
   if (jvar == _scalar_out_of_plane_strain_var)
   {
-    DenseMatrix<Number> & kne = _assembly.jacobianBlock(jvar, _var.number());
+    prepareMatrixTag(_assembly, _var.number(), jvar);
     MooseVariableScalar & jv = _sys.getScalarVariable(_tid, jvar);
     unsigned int n_eigenstrains = _deigenstrain_dT.size();
 
@@ -162,10 +159,11 @@ GeneralizedPlaneStrainOffDiag::computeTempOffDiagJacobianScalar(unsigned int jva
       for (_j = 0; _j < jv.order(); ++_j)
         for (_qp = 0; _qp < _qrule->n_points(); ++_qp)
           for (unsigned int ies = 0; ies < n_eigenstrains; ++ies)
-            kne(_j, _i) +=
+            _local_ke(_i, _j) +=
                 _JxW[_qp] * _coord[_qp] *
                 (_Jacobian_mult[_qp] * (*_deigenstrain_dT[ies])[_qp])(
                     _scalar_out_of_plane_strain_direction, _scalar_out_of_plane_strain_direction) *
                 _test[_i][_qp];
+    accumulateTaggedLocalMatrix();
   }
 }

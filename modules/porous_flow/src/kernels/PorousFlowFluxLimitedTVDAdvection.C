@@ -111,7 +111,7 @@ PorousFlowFluxLimitedTVDAdvection::computeJacobian()
         j++;
       }
       // Add the result to the system's Jacobian matrix
-      _assembly.cacheJacobianBlock(deriv_matrix, idof_indices, jdof_indices, _var.scalingFactor());
+      addJacobian(_assembly, deriv_matrix, idof_indices, jdof_indices, _var.scalingFactor());
     }
   }
 }

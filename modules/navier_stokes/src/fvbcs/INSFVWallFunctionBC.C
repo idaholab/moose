@@ -95,5 +95,5 @@ INSFVWallFunctionBC::gatherRCData(const FaceInfo & fi)
                 _index,
                 _a * (fi.faceArea() * fi.faceCoord()));
 
-  processResidualAndJacobian(strong_resid * (fi.faceArea() * fi.faceCoord()));
+  addResidualAndJacobian(strong_resid * (fi.faceArea() * fi.faceCoord()));
 }

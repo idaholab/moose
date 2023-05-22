@@ -215,23 +215,20 @@ void
 NodalFrictionalConstraint::computeResidual(NumericVector<Number> &
                                            /*residual*/)
 {
-  std::vector<dof_id_type> primarydof = _var.dofIndices();
-  std::vector<dof_id_type> secondarydof = _var.dofIndicesNeighbor();
-  DenseVector<Number> re(primarydof.size());
-  DenseVector<Number> neighbor_re(secondarydof.size());
-
-  re.zero();
-  neighbor_re.zero();
+  const auto & primarydof = _var.dofIndices();
+  const auto & secondarydof = _var.dofIndicesNeighbor();
+  std::vector<Number> re(primarydof.size());
+  std::vector<Number> neighbor_re(secondarydof.size());
 
   for (_i = 0; _i < secondarydof.size(); ++_i)
   {
     _j = _primary_conn[_i];
-    re(_j) += computeQpResidual(Moose::Primary);
-    neighbor_re(_i) += computeQpResidual(Moose::Secondary);
+    re[_j] += computeQpResidual(Moose::Primary);
+    neighbor_re[_i] += computeQpResidual(Moose::Secondary);
     break;
   }
-  _assembly.cacheResidualNodes(re, primarydof);
-  _assembly.cacheResidualNodes(neighbor_re, secondarydof);
+  addResiduals(_assembly, re, primarydof, _var.scalingFactor());
+  addResiduals(_assembly, neighbor_re, secondarydof, _var.scalingFactor());
 }
 
 Real
@@ -286,10 +283,10 @@ NodalFrictionalConstraint::computeJacobian(SparseMatrix<Number> & /*jacobian*/)
     Kne(_i, _j) += computeQpJacobian(Moose::SecondaryPrimary);
     Knn(_i, _i) += computeQpJacobian(Moose::SecondarySecondary);
   }
-  _assembly.cacheJacobianBlock(Kee, primarydof, primarydof, _var.scalingFactor());
-  _assembly.cacheJacobianBlock(Ken, primarydof, secondarydof, _var.scalingFactor());
-  _assembly.cacheJacobianBlock(Kne, secondarydof, primarydof, _var.scalingFactor());
-  _assembly.cacheJacobianBlock(Knn, secondarydof, secondarydof, _var.scalingFactor());
+  addJacobian(_assembly, Kee, primarydof, primarydof, _var.scalingFactor());
+  addJacobian(_assembly, Ken, primarydof, secondarydof, _var.scalingFactor());
+  addJacobian(_assembly, Kne, secondarydof, primarydof, _var.scalingFactor());
+  addJacobian(_assembly, Knn, secondarydof, secondarydof, _var.scalingFactor());
 }
 
 Real

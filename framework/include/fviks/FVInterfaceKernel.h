@@ -133,12 +133,13 @@ protected:
   /**
    * Process the provided residual given \p var_num and whether this is on the neighbor side
    */
-  void processResidual(Real resid, unsigned int var_num, bool neighbor);
+  void addResidual(Real resid, unsigned int var_num, bool neighbor);
 
+  using TaggingInterface::addJacobian;
   /**
    * Process the derivatives for the provided residual and dof index
    */
-  void processJacobian(const ADReal & resid, dof_id_type dof_index);
+  void addJacobian(const ADReal & resid, dof_id_type dof_index, Real scaling_factor);
 
   /**
    * @return A structure that contains information about the face info element and skewness

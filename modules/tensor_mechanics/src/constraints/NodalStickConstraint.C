@@ -227,10 +227,10 @@ NodalStickConstraint::computeJacobian(SparseMatrix<Number> & jacobian)
         break;
     }
   }
-  _assembly.cacheJacobianBlock(Kee, primarydof, primarydof, _var.scalingFactor());
-  _assembly.cacheJacobianBlock(Ken, primarydof, secondarydof, _var.scalingFactor());
-  _assembly.cacheJacobianBlock(Kne, secondarydof, primarydof, _var.scalingFactor());
-  _assembly.cacheJacobianBlock(Knn, secondarydof, secondarydof, _var.scalingFactor());
+  addJacobian(_assembly, Kee, primarydof, primarydof, _var.scalingFactor());
+  addJacobian(_assembly, Ken, primarydof, secondarydof, _var.scalingFactor());
+  addJacobian(_assembly, Kne, secondarydof, primarydof, _var.scalingFactor());
+  addJacobian(_assembly, Knn, secondarydof, secondarydof, _var.scalingFactor());
 }
 
 void
@@ -260,8 +260,9 @@ NodalStickConstraint::computeResidual(NumericVector<Number> & residual)
         break;
     }
   }
-  _assembly.cacheResidualNodes(re, primarydof);
-  _assembly.cacheResidualNodes(neighbor_re, secondarydof);
+  // We've already applied scaling
+  addResiduals(_assembly, re, primarydof, /*scaling_factor=*/1);
+  addResiduals(_assembly, neighbor_re, secondarydof, /*scaling_fator=*/1);
 }
 
 Real

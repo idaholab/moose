@@ -78,5 +78,5 @@ INSFVSymmetryVelocityBC::gatherRCData(const FaceInfo & fi)
                 _index,
                 a * (fi.faceArea() * fi.faceCoord()));
 
-  processResidualAndJacobian(strong_resid * (fi.faceArea() * fi.faceCoord()));
+  addResidualAndJacobian(strong_resid * (fi.faceArea() * fi.faceCoord()));
 }

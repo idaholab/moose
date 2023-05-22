@@ -32,7 +32,6 @@ protected:
   /// Homogenization constraint diagonal term
   virtual void computeOffDiagJacobianScalar(unsigned int jvar) override;
 
-protected:
   /// The scalar variable used to enforce the homogenization constraints
   const unsigned int _macro_gradient_num;
 
@@ -41,4 +40,9 @@ protected:
 
   /// The constraint map
   const Homogenization::ConstraintMap & _cmap;
+
+  /// Derivatives of ivar with respect to jvar
+  DenseMatrix<Number> _ken;
+  /// Derivatives of jvar with respect to ivar
+  DenseMatrix<Number> _kne;
 };

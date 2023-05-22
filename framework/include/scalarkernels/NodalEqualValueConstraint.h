@@ -30,6 +30,8 @@ public:
   virtual void computeJacobian() override;
 
 protected:
+  virtual Real computeQpResidual() override { mooseError("Unused"); }
+  virtual Real computeQpJacobian() override { mooseError("Unused"); }
   const std::vector<unsigned int> _val_number;
   const std::vector<const VariableValue *> _value;
 };

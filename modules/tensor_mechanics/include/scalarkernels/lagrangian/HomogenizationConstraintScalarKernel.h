@@ -47,6 +47,10 @@ public:
   virtual void computeJacobian();
 
 protected:
+  virtual Real computeQpResidual() { mooseError("not used"); }
+  /// Copies the on-diagonal Jacobian from the user object
+  virtual Real computeQpJacobian() { mooseError("not used"); }
+
   /// The user object that does the actual volume integral
   const HomogenizationConstraint & _constraint;
 

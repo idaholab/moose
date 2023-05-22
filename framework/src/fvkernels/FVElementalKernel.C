@@ -62,9 +62,8 @@ void
 FVElementalKernel::computeResidualAndJacobian()
 {
   const auto r = computeQpResidual() * _assembly.elemVolume();
-  const auto dof_index = _var.dofIndices()[0];
-  _assembly.processJacobian(r, dof_index, _matrix_tags);
-  _assembly.processResidual(r.value(), dof_index, _vector_tags);
+  addResidualsAndJacobian(
+      _assembly, std::array<ADReal, 1>{{r}}, _var.dofIndices(), _var.scalingFactor());
 }
 
 void
@@ -74,17 +73,13 @@ FVElementalKernel::computeJacobian()
 
   mooseAssert(_var.dofIndices().size() == 1, "We're currently built to use CONSTANT MONOMIALS");
 
-  _assembly.processJacobian(r, _var.dofIndices()[0], _matrix_tags);
+  addJacobian(_assembly, std::array<ADReal, 1>{{r}}, _var.dofIndices(), _var.scalingFactor());
 }
 
 void
 FVElementalKernel::computeOffDiagJacobian()
 {
-  const auto r = computeQpResidual() * _assembly.elemVolume();
-
-  mooseAssert(_var.dofIndices().size() == 1, "We're currently built to use CONSTANT MONOMIALS");
-
-  _assembly.processJacobian(r, _var.dofIndices()[0], _matrix_tags);
+  computeJacobian();
 }
 
 void

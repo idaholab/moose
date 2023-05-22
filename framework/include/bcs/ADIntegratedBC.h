@@ -40,7 +40,7 @@ protected:
    * up-front when doing loal derivative indexing because we can use those residuals to fill \p
    * _local_ke for every associated jvariable. We do not want to re-do these calculations for every
    * jvariable and corresponding \p _local_ke. For global indexing we will simply pass the computed
-   * \p _residuals directly to \p Assembly::processJacobian
+   * \p _residuals directly to \p Assembly::addJacobian
    */
   virtual void computeResidualsForJacobian();
 
@@ -88,11 +88,6 @@ protected:
   std::vector<ADReal> _residuals_and_jacobians;
 
 private:
-  /**
-   * Add the Jacobian contribution for the provided variable
-   */
-  void addJacobian(const MooseVariableFieldBase & jvar);
-
   /**
    * compute all the Jacobian entries
    */

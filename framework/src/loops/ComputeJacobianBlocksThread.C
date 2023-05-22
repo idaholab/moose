@@ -80,6 +80,7 @@ ComputeJacobianBlocksThread::postInternalSide(const Elem * elem, unsigned int si
                                         dof_map,
                                         _dof_indices,
                                         _dof_neighbor_indices,
+                                        _tags,
                                         _tid);
       }
   }

@@ -65,6 +65,4 @@ protected:
   using ADKernelTempl<T>::_has_diag_save_in;
   using ADKernelTempl<T>::prepareMatrixTag;
   using ADKernelTempl<T>::_residuals;
-  using ADKernelTempl<T>::_vector_tags;
-  using ADKernelTempl<T>::_matrix_tags;
 };

@@ -139,20 +139,15 @@ Q2PSaturationFlux::upwind(bool compute_res, bool compute_jac, unsigned int jvar)
   // compute the residual without the mobility terms
   // Even if we are computing the jacobian we still need this
   // in order to see which nodes are upwind and which are downwind
-  DenseVector<Number> & re = _assembly.residualBlock(_var.number());
-  _local_re.resize(re.size());
-  _local_re.zero();
+  prepareVectorTag(_assembly, _var.number());
 
   for (_i = 0; _i < _test.size(); _i++)
     for (_qp = 0; _qp < _qrule->n_points(); _qp++)
       _local_re(_i) += _JxW[_qp] * _coord[_qp] * computeQpResidual();
 
-  DenseMatrix<Number> & ke = _assembly.jacobianBlock(_var.number(), jvar);
   if (compute_jac)
   {
-    _local_ke.resize(ke.m(), ke.n());
-    _local_ke.zero();
-
+    prepareMatrixTag(_assembly, _var.number(), jvar);
     for (_i = 0; _i < _test.size(); _i++)
       for (_j = 0; _j < _phi.size(); _j++)
         for (_qp = 0; _qp < _qrule->n_points(); _qp++)
@@ -265,28 +260,23 @@ Q2PSaturationFlux::upwind(bool compute_res, bool compute_jac, unsigned int jvar)
   // ADD RESULTS TO RESIDUAL OR JACOBIAN
   if (compute_res)
   {
-    re += _local_re;
+    accumulateTaggedLocalResidual();
 
     if (_has_save_in)
-    {
-      Threads::spin_mutex::scoped_lock lock(Threads::spin_mtx);
       for (unsigned int i = 0; i < _save_in.size(); i++)
         _save_in[i]->sys().solution().add_vector(_local_re, _save_in[i]->dofIndices());
-    }
   }
 
   if (compute_jac)
   {
-    ke += _local_ke;
-
+    accumulateTaggedLocalMatrix();
     if (_has_diag_save_in && jvar == _var.number())
     {
-      const unsigned int rows = ke.m();
+      const unsigned int rows = _local_ke.m();
       DenseVector<Number> diag(rows);
       for (unsigned int i = 0; i < rows; i++)
         diag(i) = _local_ke(i, i);
 
-      Threads::spin_mutex::scoped_lock lock(Threads::spin_mtx);
       for (unsigned int i = 0; i < _diag_save_in.size(); i++)
         _diag_save_in[i]->sys().solution().add_vector(diag, _diag_save_in[i]->dofIndices());
     }

@@ -60,5 +60,5 @@ PINSFVMomentumFriction::gatherRCData(const Elem & elem)
   _rc_uo.addToA(&elem, _index, coefficient);
 
   const auto dof_number = elem.dof_number(_sys.number(), _var.number(), 0);
-  processResidualAndJacobian(coefficient * _u_functor(elem_arg, state), dof_number);
+  addResidualAndJacobian(coefficient * _u_functor(elem_arg, state), dof_number);
 }

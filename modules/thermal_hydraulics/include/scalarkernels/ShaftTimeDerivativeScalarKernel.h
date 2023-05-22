@@ -26,6 +26,9 @@ public:
   virtual void computeJacobian() override;
 
 protected:
+  virtual Real computeQpResidual() override { mooseError("unused"); }
+  virtual Real computeQpJacobian() override { mooseError("unused"); }
+
   /// Time derivative of u
   const VariableValue & _u_dot;
   /// Derivative of u_dot wrt u

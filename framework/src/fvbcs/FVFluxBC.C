@@ -112,7 +112,7 @@ FVFluxBC::computeJacobian(const FaceInfo & fi)
 
   mooseAssert(dof_indices.size() == 1, "We're currently built to use CONSTANT MONOMIALS");
 
-  _assembly.processResidualAndJacobian(r, dof_indices[0], _vector_tags, _matrix_tags);
+  addResidualsAndJacobian(_assembly, std::array<ADReal, 1>{{r}}, dof_indices, _var.scalingFactor());
 }
 
 const ADReal &

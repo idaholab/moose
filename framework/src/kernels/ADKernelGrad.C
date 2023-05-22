@@ -54,7 +54,7 @@ ADKernelGradTempl<T>::computeResidual()
         residuals[_i] += raw_value(MathUtils::dotProduct(value, _regular_grad_test[_i][_qp]));
     }
 
-  _assembly.processResiduals(residuals, _var.dofIndices(), _vector_tags, _var.scalingFactor());
+  this->addResiduals(_assembly, residuals, _var.dofIndices(), _var.scalingFactor());
 
   if (_has_save_in)
     for (unsigned int i = 0; i < _save_in.size(); i++)
@@ -92,8 +92,7 @@ void
 ADKernelGradTempl<T>::computeResidualAndJacobian()
 {
   computeResidualsForJacobian();
-  _assembly.processResidualsAndJacobian(
-      _residuals, _var.dofIndices(), _vector_tags, _matrix_tags, _var.scalingFactor());
+  this->addResidualsAndJacobian(_assembly, _residuals, _var.dofIndices(), _var.scalingFactor());
 }
 
 template <typename T>

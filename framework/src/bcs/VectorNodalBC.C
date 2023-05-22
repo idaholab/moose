@@ -44,13 +44,10 @@ VectorNodalBC::computeResidual()
   if (dof_indices.empty())
     return;
 
-  RealVectorValue res(0, 0, 0);
-  res = computeQpResidual();
+  const RealVectorValue res = computeQpResidual();
 
-  for (auto tag_id : _vector_tags)
-    if (_sys.hasVector(tag_id))
-      for (std::size_t i = 0; i < dof_indices.size(); ++i)
-        _sys.getVector(tag_id).set(dof_indices[i], res(i));
+  for (const auto i : index_range(dof_indices))
+    setResidual(_sys, res(i), dof_indices[i]);
 }
 
 void
@@ -60,14 +57,15 @@ VectorNodalBC::computeJacobian()
   if (cached_rows.empty())
     return;
 
-  RealVectorValue cached_val = computeQpJacobian();
+  const RealVectorValue cached_val = computeQpJacobian();
 
   // Cache the user's computeQpJacobian() value for later use.
-  for (auto tag : _matrix_tags)
-    if (_sys.hasMatrix(tag))
-      for (std::size_t i = 0; i < cached_rows.size(); ++i)
-        _fe_problem.assembly(0, _sys.number())
-            .cacheJacobian(cached_rows[i], cached_rows[i], cached_val(i), tag);
+  for (const auto i : index_range(cached_rows))
+    addJacobianElement(_fe_problem.assembly(0, _sys.number()),
+                       cached_val(i),
+                       cached_rows[i],
+                       cached_rows[i],
+                       /*scaling_factor=*/1);
 }
 
 void
@@ -81,16 +79,17 @@ VectorNodalBC::computeOffDiagJacobian(const unsigned int jvar_num)
     if (cached_rows.empty())
       return;
 
-    Real cached_val = computeQpOffDiagJacobian(jvar_num);
+    const Real cached_val = computeQpOffDiagJacobian(jvar_num);
     // Note: this only works for Lagrange variables...
-    dof_id_type cached_col = _current_node->dof_number(_sys.number(), jvar_num, 0);
+    const dof_id_type cached_col = _current_node->dof_number(_sys.number(), jvar_num, 0);
 
     // Cache the user's computeQpJacobian() value for later use.
-    for (auto tag : _matrix_tags)
-      if (_sys.hasMatrix(tag))
-        for (std::size_t i = 0; i < cached_rows.size(); ++i)
-          _fe_problem.assembly(0, _sys.number())
-              .cacheJacobian(cached_rows[i], cached_col, cached_val, tag);
+    for (const auto i : index_range(cached_rows))
+      addJacobianElement(_fe_problem.assembly(0, _sys.number()),
+                         cached_val,
+                         cached_rows[i],
+                         cached_col,
+                         /*scaling_factor=*/1);
   }
 }
 

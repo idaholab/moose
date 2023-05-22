@@ -56,13 +56,14 @@ private:
    * process the residual into the global data structures
    */
   template <typename ADResidual>
-  void processResidual(const ADResidual & residual, const std::vector<dof_id_type> & dof_indices);
+  void addResidual(const ADResidual & residual, const std::vector<dof_id_type> & dof_indices);
 
+  using NodalBCBase::addJacobian;
   /**
    * process the Jacobian into the global data structures
    */
   template <typename ADResidual>
-  void processJacobian(const ADResidual & residual, const std::vector<dof_id_type> & dof_indices);
+  void addJacobian(const ADResidual & residual, const std::vector<dof_id_type> & dof_indices);
 
   /// A reference to the undisplaced assembly in order to ensure data gets correctly incorporated
   /// into the global residual/Jacobian

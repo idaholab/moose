@@ -37,15 +37,17 @@ GeneralizedPlaneStrainPD::GeneralizedPlaneStrainPD(const InputParameters & param
 void
 GeneralizedPlaneStrainPD::computeResidual()
 {
-  DenseVector<Number> & re = _assembly.residualBlock(_var.number());
-  for (unsigned int i = 0; i < re.size(); ++i)
-    re(i) += _gpsuo.returnResidual();
+  prepareVectorTag(_assembly, _var.number());
+  for (unsigned int i = 0; i < _local_re.size(); ++i)
+    _local_re(i) += _gpsuo.returnResidual();
+  accumulateTaggedLocalResidual();
 }
 
 void
 GeneralizedPlaneStrainPD::computeJacobian()
 {
-  DenseMatrix<Number> & ke = _assembly.jacobianBlock(_var.number(), _var.number());
-  for (unsigned int i = 0; i < ke.m(); ++i)
-    ke(i, i) += _gpsuo.returnJacobian();
+  prepareMatrixTag(_assembly, _var.number(), _var.number());
+  for (unsigned int i = 0; i < _local_ke.m(); ++i)
+    _local_ke(i, i) += _gpsuo.returnJacobian();
+  accumulateTaggedLocalMatrix();
 }

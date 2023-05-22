@@ -78,18 +78,12 @@ NodalBC::computeResidual()
 {
   if (_var.isNodalDefined())
   {
-    Real res = computeQpResidual();
-
-    for (auto tag_id : _vector_tags)
-      if (_sys.hasVector(tag_id))
-        _var.insertNodalValue(_sys.getVector(tag_id), res);
+    const Real res = computeQpResidual();
+    setResidual(_sys, res, _var);
 
     if (_has_save_in)
-    {
-      Threads::spin_mutex::scoped_lock lock(Threads::spin_mtx);
       for (unsigned int i = 0; i < _save_in.size(); i++)
         _save_in[i]->sys().solution().set(_save_in[i]->nodalDofIndex(), res);
-    }
   }
 }
 
@@ -102,23 +96,19 @@ NodalBC::computeJacobian()
   // all the assembly is done.
   if (_var.isNodalDefined())
   {
-    Real cached_val = 0.;
-    cached_val = computeQpJacobian();
-
-    dof_id_type cached_row = _var.nodalDofIndex();
+    const Real cached_val = computeQpJacobian();
+    const dof_id_type cached_row = _var.nodalDofIndex();
 
     // Cache the user's computeQpJacobian() value for later use.
-    for (auto tag : _matrix_tags)
-      if (_sys.hasMatrix(tag))
-        _fe_problem.assembly(0, _sys.number())
-            .cacheJacobian(cached_row, cached_row, cached_val, tag);
+    addJacobianElement(_fe_problem.assembly(0, _sys.number()),
+                       cached_val,
+                       cached_row,
+                       cached_row,
+                       /*scaling_factor=*/1);
 
     if (_has_diag_save_in)
-    {
-      Threads::spin_mutex::scoped_lock lock(Threads::spin_mtx);
       for (unsigned int i = 0; i < _diag_save_in.size(); i++)
         _diag_save_in[i]->sys().solution().set(_diag_save_in[i]->nodalDofIndex(), cached_val);
-    }
   }
 }
 
@@ -132,23 +122,23 @@ NodalBC::computeOffDiagJacobian(const unsigned int jvar_num)
     if (!_var.isNodalDefined())
       return;
 
-    Real cached_val = 0.0;
-    cached_val = computeQpOffDiagJacobian(jvar_num);
+    const Real cached_val = computeQpOffDiagJacobian(jvar_num);
 
     if (cached_val == 0.)
       // there's no reason to cache this if it's zero, and it can even lead to new nonzero
       // allocations
       return;
 
-    dof_id_type cached_row = _var.nodalDofIndex();
+    const dof_id_type cached_row = _var.nodalDofIndex();
     // Note: this only works for Lagrange variables...
-    dof_id_type cached_col = _current_node->dof_number(_sys.number(), jvar_num, 0);
+    const dof_id_type cached_col = _current_node->dof_number(_sys.number(), jvar_num, 0);
 
     // Cache the user's computeQpJacobian() value for later use.
-    for (auto tag : _matrix_tags)
-      if (_sys.hasMatrix(tag))
-        _fe_problem.assembly(0, _sys.number())
-            .cacheJacobian(cached_row, cached_col, cached_val, tag);
+    addJacobianElement(_fe_problem.assembly(0, _sys.number()),
+                       cached_val,
+                       cached_row,
+                       cached_col,
+                       /*scaling_factor=*/1);
   }
 }
 

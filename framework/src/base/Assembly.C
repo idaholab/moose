@@ -2543,7 +2543,7 @@ Assembly::prepareJacobianBlock()
 
     for (MooseIndex(_jacobian_block_used) tag = 0; tag < _jacobian_block_used.size(); tag++)
     {
-      jacobianBlock(vi, vj, tag)
+      jacobianBlock(vi, vj, LocalDataKey{}, tag)
           .resize(ivar.dofIndices().size() * ivar.count(), jvar.dofIndices().size() * jcount);
       jacobianBlockUsed(tag, vi, vj, false);
     }
@@ -2583,7 +2583,7 @@ Assembly::prepareNonlocal()
          tag < _jacobian_block_nonlocal_used.size();
          tag++)
     {
-      jacobianBlockNonlocal(vi, vj, tag)
+      jacobianBlockNonlocal(vi, vj, LocalDataKey{}, tag)
           .resize(ivar.dofIndices().size() * ivar.count(), jvar.allDofIndices().size() * jcount);
       jacobianBlockNonlocalUsed(tag, vi, vj, false);
     }
@@ -2607,7 +2607,7 @@ Assembly::prepareVariable(MooseVariableFEBase * var)
     {
       for (MooseIndex(_jacobian_block_used) tag = 0; tag < _jacobian_block_used.size(); tag++)
       {
-        jacobianBlock(vi, vj, tag)
+        jacobianBlock(vi, vj, LocalDataKey{}, tag)
             .resize(ivar.dofIndices().size() * ivar.count(), jvar.dofIndices().size() * jcount);
         jacobianBlockUsed(tag, vi, vj, false);
       }
@@ -2637,7 +2637,7 @@ Assembly::prepareVariableNonlocal(MooseVariableFEBase * var)
            tag < _jacobian_block_nonlocal_used.size();
            tag++)
       {
-        jacobianBlockNonlocal(vi, vj, tag)
+        jacobianBlockNonlocal(vi, vj, LocalDataKey{}, tag)
             .resize(ivar.dofIndices().size() * ivar.count(), jvar.allDofIndices().size() * jcount);
         jacobianBlockNonlocalUsed(tag, vi, vj);
       }
@@ -2662,15 +2662,15 @@ Assembly::prepareNeighbor()
          tag < _jacobian_block_neighbor_used.size();
          tag++)
     {
-      jacobianBlockNeighbor(Moose::ElementNeighbor, vi, vj, tag)
+      jacobianBlockNeighbor(Moose::ElementNeighbor, vi, vj, LocalDataKey{}, tag)
           .resize(ivar.dofIndices().size() * ivar.count(),
                   jvar.dofIndicesNeighbor().size() * jcount);
 
-      jacobianBlockNeighbor(Moose::NeighborElement, vi, vj, tag)
+      jacobianBlockNeighbor(Moose::NeighborElement, vi, vj, LocalDataKey{}, tag)
           .resize(ivar.dofIndicesNeighbor().size() * ivar.count(),
                   jvar.dofIndices().size() * jcount);
 
-      jacobianBlockNeighbor(Moose::NeighborNeighbor, vi, vj, tag)
+      jacobianBlockNeighbor(Moose::NeighborNeighbor, vi, vj, LocalDataKey{}, tag)
           .resize(ivar.dofIndicesNeighbor().size() * ivar.count(),
                   jvar.dofIndicesNeighbor().size() * jcount);
 
@@ -2707,25 +2707,25 @@ Assembly::prepareLowerD()
       // (NeighborNeighbor). With these covered we only need to prepare the 5 remaining below
 
       // derivatives w.r.t. lower dimensional residuals
-      jacobianBlockMortar(Moose::LowerLower, vi, vj, tag)
+      jacobianBlockMortar(Moose::LowerLower, vi, vj, LocalDataKey{}, tag)
           .resize(ivar.dofIndicesLower().size() * ivar.count(),
                   jvar.dofIndicesLower().size() * jcount);
 
-      jacobianBlockMortar(Moose::LowerSecondary, vi, vj, tag)
+      jacobianBlockMortar(Moose::LowerSecondary, vi, vj, LocalDataKey{}, tag)
           .resize(ivar.dofIndicesLower().size() * ivar.count(),
                   jvar.dofIndices().size() * jvar.count());
 
-      jacobianBlockMortar(Moose::LowerPrimary, vi, vj, tag)
+      jacobianBlockMortar(Moose::LowerPrimary, vi, vj, LocalDataKey{}, tag)
           .resize(ivar.dofIndicesLower().size() * ivar.count(),
                   jvar.dofIndicesNeighbor().size() * jvar.count());
 
       // derivatives w.r.t. interior secondary residuals
-      jacobianBlockMortar(Moose::SecondaryLower, vi, vj, tag)
+      jacobianBlockMortar(Moose::SecondaryLower, vi, vj, LocalDataKey{}, tag)
           .resize(ivar.dofIndices().size() * ivar.count(),
                   jvar.dofIndicesLower().size() * jvar.count());
 
       // derivatives w.r.t. interior primary residuals
-      jacobianBlockMortar(Moose::PrimaryLower, vi, vj, tag)
+      jacobianBlockMortar(Moose::PrimaryLower, vi, vj, LocalDataKey{}, tag)
           .resize(ivar.dofIndicesNeighbor().size() * ivar.count(),
                   jvar.dofIndicesLower().size() * jvar.count());
 
@@ -2755,7 +2755,8 @@ Assembly::prepareBlock(unsigned int ivar,
 
   for (MooseIndex(_jacobian_block_used) tag = 0; tag < _jacobian_block_used.size(); tag++)
   {
-    jacobianBlock(ivn, jvn, tag).resize(dof_indices.size() * icount, dof_indices.size() * jcount);
+    jacobianBlock(ivn, jvn, LocalDataKey{}, tag)
+        .resize(dof_indices.size() * icount, dof_indices.size() * jcount);
     jacobianBlockUsed(tag, ivn, jvn, false);
   }
 
@@ -2782,7 +2783,7 @@ Assembly::prepareBlockNonlocal(unsigned int ivar,
        tag < _jacobian_block_nonlocal_used.size();
        tag++)
   {
-    jacobianBlockNonlocal(ivn, jvn, tag)
+    jacobianBlockNonlocal(ivn, jvn, LocalDataKey{}, tag)
         .resize(idof_indices.size() * icount, jdof_indices.size() * jcount);
 
     jacobianBlockNonlocalUsed(tag, ivn, jvn, false);
@@ -2806,7 +2807,7 @@ Assembly::prepareScalar()
 
       for (MooseIndex(_jacobian_block_used) tag = 0; tag < _jacobian_block_used.size(); tag++)
       {
-        jacobianBlock(ivar->number(), jvar->number(), tag).resize(idofs, jdofs);
+        jacobianBlock(ivar->number(), jvar->number(), LocalDataKey{}, tag).resize(idofs, jdofs);
         jacobianBlockUsed(tag, ivar->number(), jvar->number(), false);
       }
     }
@@ -2828,10 +2829,10 @@ Assembly::prepareOffDiagScalar()
       auto jdofs = jvar->dofIndices().size() * jvar->count();
       for (MooseIndex(_jacobian_block_used) tag = 0; tag < _jacobian_block_used.size(); tag++)
       {
-        jacobianBlock(ivar->number(), jvar->number(), tag).resize(idofs, jdofs);
+        jacobianBlock(ivar->number(), jvar->number(), LocalDataKey{}, tag).resize(idofs, jdofs);
         jacobianBlockUsed(tag, ivar->number(), jvar->number(), false);
 
-        jacobianBlock(jvar->number(), ivar->number(), tag).resize(jdofs, idofs);
+        jacobianBlock(jvar->number(), ivar->number(), LocalDataKey{}, tag).resize(jdofs, idofs);
         jacobianBlockUsed(tag, jvar->number(), ivar->number(), false);
       }
     }
@@ -2953,10 +2954,8 @@ Assembly::copyNeighborShapes(unsigned int var)
 }
 
 DenseMatrix<Number> &
-Assembly::jacobianBlockNeighbor(Moose::DGJacobianType type,
-                                unsigned int ivar,
-                                unsigned int jvar,
-                                TagID tag)
+Assembly::jacobianBlockNeighbor(
+    Moose::DGJacobianType type, unsigned int ivar, unsigned int jvar, LocalDataKey, TagID tag)
 {
   if (type == Moose::ElementElement)
     jacobianBlockUsed(tag, ivar, jvar, true);
@@ -2999,6 +2998,7 @@ DenseMatrix<Number> &
 Assembly::jacobianBlockMortar(Moose::ConstraintJacobianType type,
                               unsigned int ivar,
                               unsigned int jvar,
+                              LocalDataKey,
                               TagID tag)
 {
   jacobianBlockLowerUsed(tag, ivar, jvar, true);
@@ -3164,7 +3164,7 @@ Assembly::addResidual(const VectorTag & vector_tag)
 }
 
 void
-Assembly::addResidual(const std::vector<VectorTag> & vector_tags)
+Assembly::addResidual(GlobalDataKey, const std::vector<VectorTag> & vector_tags)
 {
   for (const auto & vector_tag : vector_tags)
     if (_sys.hasVector(vector_tag._id))
@@ -3189,7 +3189,7 @@ Assembly::addResidualNeighbor(const VectorTag & vector_tag)
 }
 
 void
-Assembly::addResidualNeighbor(const std::vector<VectorTag> & vector_tags)
+Assembly::addResidualNeighbor(GlobalDataKey, const std::vector<VectorTag> & vector_tags)
 {
   for (const auto & vector_tag : vector_tags)
     if (_sys.hasVector(vector_tag._id))
@@ -3214,13 +3214,14 @@ Assembly::addResidualLower(const VectorTag & vector_tag)
 }
 
 void
-Assembly::addResidualLower(const std::vector<VectorTag> & vector_tags)
+Assembly::addResidualLower(GlobalDataKey, const std::vector<VectorTag> & vector_tags)
 {
   for (const auto & vector_tag : vector_tags)
     if (_sys.hasVector(vector_tag._id))
       addResidualLower(vector_tag);
 }
 
+// private method, so no key required
 void
 Assembly::addResidualScalar(const VectorTag & vector_tag)
 {
@@ -3237,7 +3238,7 @@ Assembly::addResidualScalar(const VectorTag & vector_tag)
 }
 
 void
-Assembly::addResidualScalar(const std::vector<VectorTag> & vector_tags)
+Assembly::addResidualScalar(GlobalDataKey, const std::vector<VectorTag> & vector_tags)
 {
   for (const auto & vector_tag : vector_tags)
     if (_sys.hasVector(vector_tag._id))
@@ -3245,7 +3246,7 @@ Assembly::addResidualScalar(const std::vector<VectorTag> & vector_tags)
 }
 
 void
-Assembly::cacheResidual(const std::vector<VectorTag> & tags)
+Assembly::cacheResidual(GlobalDataKey, const std::vector<VectorTag> & tags)
 {
   const std::vector<MooseVariableFEBase *> & vars = _sys.getVariables(_tid);
   for (const auto & var : vars)
@@ -3259,6 +3260,7 @@ Assembly::cacheResidual(const std::vector<VectorTag> & tags)
                            var->isNodal());
 }
 
+// private method, so no key required
 void
 Assembly::cacheResidual(dof_id_type dof, Real value, TagID tag_id)
 {
@@ -3268,6 +3270,7 @@ Assembly::cacheResidual(dof_id_type dof, Real value, TagID tag_id)
   _cached_residual_rows[tag._type_id].push_back(dof);
 }
 
+// private method, so no key required
 void
 Assembly::cacheResidual(dof_id_type dof, Real value, const std::set<TagID> & tags)
 {
@@ -3275,55 +3278,10 @@ Assembly::cacheResidual(dof_id_type dof, Real value, const std::set<TagID> & tag
     cacheResidual(dof, value, tag);
 }
 
-// swapped argument order from above methods to be consistent with argument order for
-// Assembly::processJacobian
-void
-Assembly::processResidual(Real value, const dof_id_type dof, const std::set<TagID> & tags)
-{
-  const Real scalar = _scaling_vector ? (*_scaling_vector)(dof) : 1.;
-  value *= scalar;
-
-  for (const auto tag_id : tags)
-  {
-    const VectorTag & tag = _subproblem.getVectorTag(tag_id);
-
-    _cached_residual_values[tag._type_id].push_back(value);
-    _cached_residual_rows[tag._type_id].push_back(dof);
-  }
-}
-
-void
-Assembly::processResidualAndJacobian(const ADReal & residual,
-                                     const dof_id_type row_index,
-                                     const std::set<TagID> & vector_tags,
-                                     const std::set<TagID> & matrix_tags)
-{
-  if (computingResidual())
-    processResidual(MetaPhysicL::raw_value(residual), row_index, vector_tags);
-
-  if (computingJacobian())
-    processJacobian(residual, row_index, matrix_tags);
-}
-
-void
-Assembly::cacheResidualContribution(dof_id_type dof, Real value, TagID tag_id)
-{
-  mooseDeprecated("please use cacheResidual");
-
-  cacheResidual(dof, value, tag_id);
-}
-
-void
-Assembly::cacheResidualContribution(dof_id_type dof, Real value, const std::set<TagID> & tags)
-{
-  mooseDeprecated("please use cacheResidual");
-
-  cacheResidual(dof, value, tags);
-}
-
 void
 Assembly::cacheResidualNodes(const DenseVector<Number> & res,
                              const std::vector<dof_id_type> & dof_index,
+                             LocalDataKey,
                              TagID tag)
 {
   // Add the residual value and dof_index to cached_residual_values and cached_residual_rows
@@ -3339,7 +3297,7 @@ Assembly::cacheResidualNodes(const DenseVector<Number> & res,
 }
 
 void
-Assembly::cacheResidualNeighbor(const std::vector<VectorTag> & tags)
+Assembly::cacheResidualNeighbor(GlobalDataKey, const std::vector<VectorTag> & tags)
 {
   const std::vector<MooseVariableFEBase *> & vars = _sys.getVariables(_tid);
   for (const auto & var : vars)
@@ -3354,7 +3312,7 @@ Assembly::cacheResidualNeighbor(const std::vector<VectorTag> & tags)
 }
 
 void
-Assembly::cacheResidualLower(const std::vector<VectorTag> & tags)
+Assembly::cacheResidualLower(GlobalDataKey, const std::vector<VectorTag> & tags)
 {
   const std::vector<MooseVariableFEBase *> & vars = _sys.getVariables(_tid);
   for (const auto & var : vars)
@@ -3369,7 +3327,7 @@ Assembly::cacheResidualLower(const std::vector<VectorTag> & tags)
 }
 
 void
-Assembly::addCachedResiduals(const std::vector<VectorTag> & tags)
+Assembly::addCachedResiduals(GlobalDataKey, const std::vector<VectorTag> & tags)
 {
   for (const auto & vector_tag : tags)
   {
@@ -3379,17 +3337,17 @@ Assembly::addCachedResiduals(const std::vector<VectorTag> & tags)
       _cached_residual_rows[vector_tag._type_id].clear();
       continue;
     }
-    addCachedResidualDirectly(_sys.getVector(vector_tag._id), vector_tag);
+    addCachedResidualDirectly(_sys.getVector(vector_tag._id), GlobalDataKey{}, vector_tag);
   }
 }
 
-void
-Assembly::clearCachedResiduals()
+void Assembly::clearCachedResiduals(GlobalDataKey)
 {
   for (const auto & vector_tag : _residual_vector_tags)
     clearCachedResiduals(vector_tag);
 }
 
+// private method, so no key required
 void
 Assembly::clearCachedResiduals(const VectorTag & vector_tag)
 {
@@ -3413,7 +3371,9 @@ Assembly::clearCachedResiduals(const VectorTag & vector_tag)
 }
 
 void
-Assembly::addCachedResidualDirectly(NumericVector<Number> & residual, const VectorTag & vector_tag)
+Assembly::addCachedResidualDirectly(NumericVector<Number> & residual,
+                                    GlobalDataKey,
+                                    const VectorTag & vector_tag)
 {
   const auto & values = _cached_residual_values[vector_tag._type_id];
   const auto & rows = _cached_residual_rows[vector_tag._type_id];
@@ -3429,7 +3389,7 @@ Assembly::addCachedResidualDirectly(NumericVector<Number> & residual, const Vect
 }
 
 void
-Assembly::setResidual(NumericVector<Number> & residual, const VectorTag & vector_tag)
+Assembly::setResidual(NumericVector<Number> & residual, GlobalDataKey, const VectorTag & vector_tag)
 {
   auto & tag_Re = _sub_Re[vector_tag._type_id];
   const std::vector<MooseVariableFEBase *> & vars = _sys.getVariables(_tid);
@@ -3442,7 +3402,9 @@ Assembly::setResidual(NumericVector<Number> & residual, const VectorTag & vector
 }
 
 void
-Assembly::setResidualNeighbor(NumericVector<Number> & residual, const VectorTag & vector_tag)
+Assembly::setResidualNeighbor(NumericVector<Number> & residual,
+                              GlobalDataKey,
+                              const VectorTag & vector_tag)
 {
   auto & tag_Rn = _sub_Rn[vector_tag._type_id];
   const std::vector<MooseVariableFEBase *> & vars = _sys.getVariables(_tid);
@@ -3454,6 +3416,7 @@ Assembly::setResidualNeighbor(NumericVector<Number> & residual, const VectorTag 
                      var->isNodal());
 }
 
+// private method, so no key required
 void
 Assembly::addJacobianBlock(SparseMatrix<Number> & jacobian,
                            DenseMatrix<Number> & jac_block,
@@ -3504,6 +3467,7 @@ Assembly::addJacobianBlock(SparseMatrix<Number> & jacobian,
   }
 }
 
+// private method, so no key required
 void
 Assembly::cacheJacobianBlock(DenseMatrix<Number> & jac_block,
                              const MooseVariableBase & ivar,
@@ -3564,6 +3528,7 @@ Assembly::cacheJacobianBlock(DenseMatrix<Number> & jac_block,
   jac_block.zero();
 }
 
+// private method, so no key required
 void
 Assembly::cacheJacobianBlockNonzero(DenseMatrix<Number> & jac_block,
                                     const MooseVariableBase & ivar,
@@ -3627,6 +3592,7 @@ Assembly::cacheJacobianBlock(DenseMatrix<Number> & jac_block,
                              const std::vector<dof_id_type> & idof_indices,
                              const std::vector<dof_id_type> & jdof_indices,
                              Real scaling_factor,
+                             LocalDataKey,
                              TagID tag)
 {
   // Only cache data when the matrix exists
@@ -3654,14 +3620,6 @@ Assembly::cacheJacobianBlock(DenseMatrix<Number> & jac_block,
       }
   }
   jac_block.zero();
-}
-
-void
-Assembly::addCachedJacobian(SparseMatrix<Number> & /*jacobian*/)
-{
-  mooseDeprecated(" Please use addCachedJacobian() ");
-
-  addCachedJacobian();
 }
 
 Real
@@ -3697,8 +3655,7 @@ Assembly::elementVolume(const Elem * elem) const
   return vol;
 }
 
-void
-Assembly::addCachedJacobian()
+void Assembly::addCachedJacobian(GlobalDataKey)
 {
   if (!_subproblem.checkNonlocalCouplingRequirement())
   {
@@ -3745,15 +3702,14 @@ Assembly::addJacobianCoupledVarPair(const MooseVariableBase & ivar, const MooseV
   for (MooseIndex(_jacobian_block_used) tag = 0; tag < _jacobian_block_used.size(); tag++)
     if (jacobianBlockUsed(tag, i, j) && _sys.hasMatrix(tag))
       addJacobianBlock(_sys.getMatrix(tag),
-                       jacobianBlock(i, j, tag),
+                       jacobianBlock(i, j, LocalDataKey{}, tag),
                        ivar,
                        jvar,
                        ivar.dofIndices(),
                        jvar.dofIndices());
 }
 
-void
-Assembly::addJacobian()
+void Assembly::addJacobian(GlobalDataKey)
 {
   for (const auto & it : _cm_ff_entry)
     addJacobianCoupledVarPair(*it.first, *it.second);
@@ -3765,8 +3721,7 @@ Assembly::addJacobian()
     addJacobianCoupledVarPair(*it.first, *it.second);
 }
 
-void
-Assembly::addJacobianNonlocal()
+void Assembly::addJacobianNonlocal(GlobalDataKey)
 {
   for (const auto & it : _cm_nonlocal_entry)
   {
@@ -3779,7 +3734,7 @@ Assembly::addJacobianNonlocal()
          tag++)
       if (jacobianBlockNonlocalUsed(tag, i, j) && _sys.hasMatrix(tag))
         addJacobianBlock(_sys.getMatrix(tag),
-                         jacobianBlockNonlocal(i, j, tag),
+                         jacobianBlockNonlocal(i, j, LocalDataKey{}, tag),
                          *ivar,
                          *jvar,
                          ivar->dofIndices(),
@@ -3787,8 +3742,7 @@ Assembly::addJacobianNonlocal()
   }
 }
 
-void
-Assembly::addJacobianNeighbor()
+void Assembly::addJacobianNeighbor(GlobalDataKey)
 {
   for (const auto & it : _cm_ff_entry)
   {
@@ -3802,21 +3756,21 @@ Assembly::addJacobianNeighbor()
       if (jacobianBlockNeighborUsed(tag, i, j) && _sys.hasMatrix(tag))
       {
         addJacobianBlock(_sys.getMatrix(tag),
-                         jacobianBlockNeighbor(Moose::ElementNeighbor, i, j, tag),
+                         jacobianBlockNeighbor(Moose::ElementNeighbor, i, j, LocalDataKey{}, tag),
                          *ivar,
                          *jvar,
                          ivar->dofIndices(),
                          jvar->dofIndicesNeighbor());
 
         addJacobianBlock(_sys.getMatrix(tag),
-                         jacobianBlockNeighbor(Moose::NeighborElement, i, j, tag),
+                         jacobianBlockNeighbor(Moose::NeighborElement, i, j, LocalDataKey{}, tag),
                          *ivar,
                          *jvar,
                          ivar->dofIndicesNeighbor(),
                          jvar->dofIndices());
 
         addJacobianBlock(_sys.getMatrix(tag),
-                         jacobianBlockNeighbor(Moose::NeighborNeighbor, i, j, tag),
+                         jacobianBlockNeighbor(Moose::NeighborNeighbor, i, j, LocalDataKey{}, tag),
                          *ivar,
                          *jvar,
                          ivar->dofIndicesNeighbor(),
@@ -3825,8 +3779,7 @@ Assembly::addJacobianNeighbor()
   }
 }
 
-void
-Assembly::addJacobianNeighborLowerD()
+void Assembly::addJacobianNeighborLowerD(GlobalDataKey)
 {
   for (const auto & it : _cm_ff_entry)
   {
@@ -3839,35 +3792,35 @@ Assembly::addJacobianNeighborLowerD()
       if (jacobianBlockLowerUsed(tag, i, j) && _sys.hasMatrix(tag))
       {
         addJacobianBlock(_sys.getMatrix(tag),
-                         jacobianBlockMortar(Moose::LowerLower, i, j, tag),
+                         jacobianBlockMortar(Moose::LowerLower, i, j, LocalDataKey{}, tag),
                          *ivar,
                          *jvar,
                          ivar->dofIndicesLower(),
                          jvar->dofIndicesLower());
 
         addJacobianBlock(_sys.getMatrix(tag),
-                         jacobianBlockMortar(Moose::LowerSecondary, i, j, tag),
+                         jacobianBlockMortar(Moose::LowerSecondary, i, j, LocalDataKey{}, tag),
                          *ivar,
                          *jvar,
                          ivar->dofIndicesLower(),
                          jvar->dofIndicesNeighbor());
 
         addJacobianBlock(_sys.getMatrix(tag),
-                         jacobianBlockMortar(Moose::LowerPrimary, i, j, tag),
+                         jacobianBlockMortar(Moose::LowerPrimary, i, j, LocalDataKey{}, tag),
                          *ivar,
                          *jvar,
                          ivar->dofIndicesLower(),
                          jvar->dofIndices());
 
         addJacobianBlock(_sys.getMatrix(tag),
-                         jacobianBlockMortar(Moose::SecondaryLower, i, j, tag),
+                         jacobianBlockMortar(Moose::SecondaryLower, i, j, LocalDataKey{}, tag),
                          *ivar,
                          *jvar,
                          ivar->dofIndicesNeighbor(),
                          jvar->dofIndicesLower());
 
         addJacobianBlock(_sys.getMatrix(tag),
-                         jacobianBlockMortar(Moose::PrimaryLower, i, j, tag),
+                         jacobianBlockMortar(Moose::PrimaryLower, i, j, LocalDataKey{}, tag),
                          *ivar,
                          *jvar,
                          ivar->dofIndices(),
@@ -3880,21 +3833,21 @@ Assembly::addJacobianNeighborLowerD()
       if (jacobianBlockNeighborUsed(tag, i, j) && _sys.hasMatrix(tag))
       {
         addJacobianBlock(_sys.getMatrix(tag),
-                         jacobianBlockNeighbor(Moose::ElementNeighbor, i, j, tag),
+                         jacobianBlockNeighbor(Moose::ElementNeighbor, i, j, LocalDataKey{}, tag),
                          *ivar,
                          *jvar,
                          ivar->dofIndices(),
                          jvar->dofIndicesNeighbor());
 
         addJacobianBlock(_sys.getMatrix(tag),
-                         jacobianBlockNeighbor(Moose::NeighborElement, i, j, tag),
+                         jacobianBlockNeighbor(Moose::NeighborElement, i, j, LocalDataKey{}, tag),
                          *ivar,
                          *jvar,
                          ivar->dofIndicesNeighbor(),
                          jvar->dofIndices());
 
         addJacobianBlock(_sys.getMatrix(tag),
-                         jacobianBlockNeighbor(Moose::NeighborNeighbor, i, j, tag),
+                         jacobianBlockNeighbor(Moose::NeighborNeighbor, i, j, LocalDataKey{}, tag),
                          *ivar,
                          *jvar,
                          ivar->dofIndicesNeighbor(),
@@ -3903,8 +3856,7 @@ Assembly::addJacobianNeighborLowerD()
   }
 }
 
-void
-Assembly::addJacobianLowerD()
+void Assembly::addJacobianLowerD(GlobalDataKey)
 {
   for (const auto & it : _cm_ff_entry)
   {
@@ -3917,21 +3869,21 @@ Assembly::addJacobianLowerD()
       if (jacobianBlockLowerUsed(tag, i, j) && _sys.hasMatrix(tag))
       {
         addJacobianBlock(_sys.getMatrix(tag),
-                         jacobianBlockMortar(Moose::LowerLower, i, j, tag),
+                         jacobianBlockMortar(Moose::LowerLower, i, j, LocalDataKey{}, tag),
                          *ivar,
                          *jvar,
                          ivar->dofIndicesLower(),
                          jvar->dofIndicesLower());
 
         addJacobianBlock(_sys.getMatrix(tag),
-                         jacobianBlockMortar(Moose::LowerSecondary, i, j, tag),
+                         jacobianBlockMortar(Moose::LowerSecondary, i, j, LocalDataKey{}, tag),
                          *ivar,
                          *jvar,
                          ivar->dofIndicesLower(),
                          jvar->dofIndices());
 
         addJacobianBlock(_sys.getMatrix(tag),
-                         jacobianBlockMortar(Moose::SecondaryLower, i, j, tag),
+                         jacobianBlockMortar(Moose::SecondaryLower, i, j, LocalDataKey{}, tag),
                          *ivar,
                          *jvar,
                          ivar->dofIndices(),
@@ -3940,8 +3892,7 @@ Assembly::addJacobianLowerD()
   }
 }
 
-void
-Assembly::cacheJacobian()
+void Assembly::cacheJacobian(GlobalDataKey)
 {
   for (const auto & it : _cm_ff_entry)
     cacheJacobianCoupledVarPair(*it.first, *it.second);
@@ -3953,7 +3904,8 @@ Assembly::cacheJacobian()
     cacheJacobianCoupledVarPair(*it.first, *it.second);
 }
 
-inline void
+// private method, so no key required
+void
 Assembly::cacheJacobianCoupledVarPair(const MooseVariableBase & ivar,
                                       const MooseVariableBase & jvar)
 {
@@ -3961,12 +3913,15 @@ Assembly::cacheJacobianCoupledVarPair(const MooseVariableBase & ivar,
   auto j = jvar.number();
   for (MooseIndex(_jacobian_block_used) tag = 0; tag < _jacobian_block_used.size(); tag++)
     if (jacobianBlockUsed(tag, i, j) && _sys.hasMatrix(tag))
-      cacheJacobianBlock(
-          jacobianBlock(i, j, tag), ivar, jvar, ivar.dofIndices(), jvar.dofIndices(), tag);
+      cacheJacobianBlock(jacobianBlock(i, j, LocalDataKey{}, tag),
+                         ivar,
+                         jvar,
+                         ivar.dofIndices(),
+                         jvar.dofIndices(),
+                         tag);
 }
 
-void
-Assembly::cacheJacobianNonlocal()
+void Assembly::cacheJacobianNonlocal(GlobalDataKey)
 {
   for (const auto & it : _cm_nonlocal_entry)
   {
@@ -3978,7 +3933,7 @@ Assembly::cacheJacobianNonlocal()
          tag < _jacobian_block_nonlocal_used.size();
          tag++)
       if (jacobianBlockNonlocalUsed(tag, i, j) && _sys.hasMatrix(tag))
-        cacheJacobianBlockNonzero(jacobianBlockNonlocal(i, j, tag),
+        cacheJacobianBlockNonzero(jacobianBlockNonlocal(i, j, LocalDataKey{}, tag),
                                   *ivar,
                                   *jvar,
                                   ivar->dofIndices(),
@@ -3987,8 +3942,7 @@ Assembly::cacheJacobianNonlocal()
   }
 }
 
-void
-Assembly::cacheJacobianNeighbor()
+void Assembly::cacheJacobianNeighbor(GlobalDataKey)
 {
   for (const auto & it : _cm_ff_entry)
   {
@@ -4002,30 +3956,30 @@ Assembly::cacheJacobianNeighbor()
          tag++)
       if (jacobianBlockNeighborUsed(tag, i, j) && _sys.hasMatrix(tag))
       {
-        cacheJacobianBlock(jacobianBlockNeighbor(Moose::ElementNeighbor, i, j, tag),
+        cacheJacobianBlock(jacobianBlockNeighbor(Moose::ElementNeighbor, i, j, LocalDataKey{}, tag),
                            *ivar,
                            *jvar,
                            ivar->dofIndices(),
                            jvar->dofIndicesNeighbor(),
                            tag);
-        cacheJacobianBlock(jacobianBlockNeighbor(Moose::NeighborElement, i, j, tag),
+        cacheJacobianBlock(jacobianBlockNeighbor(Moose::NeighborElement, i, j, LocalDataKey{}, tag),
                            *ivar,
                            *jvar,
                            ivar->dofIndicesNeighbor(),
                            jvar->dofIndices(),
                            tag);
-        cacheJacobianBlock(jacobianBlockNeighbor(Moose::NeighborNeighbor, i, j, tag),
-                           *ivar,
-                           *jvar,
-                           ivar->dofIndicesNeighbor(),
-                           jvar->dofIndicesNeighbor(),
-                           tag);
+        cacheJacobianBlock(
+            jacobianBlockNeighbor(Moose::NeighborNeighbor, i, j, LocalDataKey{}, tag),
+            *ivar,
+            *jvar,
+            ivar->dofIndicesNeighbor(),
+            jvar->dofIndicesNeighbor(),
+            tag);
       }
   }
 }
 
-void
-Assembly::cacheJacobianMortar()
+void Assembly::cacheJacobianMortar(GlobalDataKey)
 {
   for (const auto & it : _cm_ff_entry)
   {
@@ -4037,63 +3991,64 @@ Assembly::cacheJacobianMortar()
          tag++)
       if (jacobianBlockLowerUsed(tag, i, j) && _sys.hasMatrix(tag))
       {
-        cacheJacobianBlock(jacobianBlockMortar(Moose::LowerLower, i, j, tag),
+        cacheJacobianBlock(jacobianBlockMortar(Moose::LowerLower, i, j, LocalDataKey{}, tag),
                            *ivar,
                            *jvar,
                            ivar->dofIndicesLower(),
                            jvar->dofIndicesLower(),
                            tag);
 
-        cacheJacobianBlock(jacobianBlockMortar(Moose::LowerSecondary, i, j, tag),
+        cacheJacobianBlock(jacobianBlockMortar(Moose::LowerSecondary, i, j, LocalDataKey{}, tag),
                            *ivar,
                            *jvar,
                            ivar->dofIndicesLower(),
                            jvar->dofIndices(),
                            tag);
 
-        cacheJacobianBlock(jacobianBlockMortar(Moose::LowerPrimary, i, j, tag),
+        cacheJacobianBlock(jacobianBlockMortar(Moose::LowerPrimary, i, j, LocalDataKey{}, tag),
                            *ivar,
                            *jvar,
                            ivar->dofIndicesLower(),
                            jvar->dofIndicesNeighbor(),
                            tag);
 
-        cacheJacobianBlock(jacobianBlockMortar(Moose::SecondaryLower, i, j, tag),
+        cacheJacobianBlock(jacobianBlockMortar(Moose::SecondaryLower, i, j, LocalDataKey{}, tag),
                            *ivar,
                            *jvar,
                            ivar->dofIndices(),
                            jvar->dofIndicesLower(),
                            tag);
 
-        cacheJacobianBlock(jacobianBlockMortar(Moose::SecondarySecondary, i, j, tag),
-                           *ivar,
-                           *jvar,
-                           ivar->dofIndices(),
-                           jvar->dofIndices(),
-                           tag);
+        cacheJacobianBlock(
+            jacobianBlockMortar(Moose::SecondarySecondary, i, j, LocalDataKey{}, tag),
+            *ivar,
+            *jvar,
+            ivar->dofIndices(),
+            jvar->dofIndices(),
+            tag);
 
-        cacheJacobianBlock(jacobianBlockMortar(Moose::SecondaryPrimary, i, j, tag),
+        cacheJacobianBlock(jacobianBlockMortar(Moose::SecondaryPrimary, i, j, LocalDataKey{}, tag),
                            *ivar,
                            *jvar,
                            ivar->dofIndices(),
                            jvar->dofIndicesNeighbor(),
                            tag);
 
-        cacheJacobianBlock(jacobianBlockMortar(Moose::PrimaryLower, i, j, tag),
+        cacheJacobianBlock(jacobianBlockMortar(Moose::PrimaryLower, i, j, LocalDataKey{}, tag),
                            *ivar,
                            *jvar,
                            ivar->dofIndicesNeighbor(),
                            jvar->dofIndicesLower(),
                            tag);
 
-        cacheJacobianBlock(jacobianBlockMortar(Moose::PrimarySecondary, i, j, tag),
+        cacheJacobianBlock(jacobianBlockMortar(Moose::PrimarySecondary, i, j, LocalDataKey{}, tag),
                            *ivar,
                            *jvar,
                            ivar->dofIndicesNeighbor(),
                            jvar->dofIndices(),
                            tag);
 
-        cacheJacobianBlock(jacobianBlockMortar(Moose::PrimaryPrimary, i, j, tag),
+        cacheJacobianBlock(jacobianBlockMortar(Moose::PrimaryPrimary, i, j, LocalDataKey{}, tag),
                            *ivar,
                            *jvar,
                            ivar->dofIndicesNeighbor(),
@@ -4109,10 +4064,11 @@ Assembly::addJacobianBlockTags(SparseMatrix<Number> & jacobian,
                                unsigned int jvar,
                                const DofMap & dof_map,
                                std::vector<dof_id_type> & dof_indices,
+                               GlobalDataKey,
                                const std::set<TagID> & tags)
 {
   for (auto tag : tags)
-    addJacobianBlock(jacobian, ivar, jvar, dof_map, dof_indices, tag);
+    addJacobianBlock(jacobian, ivar, jvar, dof_map, dof_indices, GlobalDataKey{}, tag);
 }
 
 void
@@ -4121,6 +4077,7 @@ Assembly::addJacobianBlock(SparseMatrix<Number> & jacobian,
                            unsigned int jvar,
                            const DofMap & dof_map,
                            std::vector<dof_id_type> & dof_indices,
+                           GlobalDataKey,
                            TagID tag)
 {
   if (dof_indices.size() == 0)
@@ -4134,7 +4091,7 @@ Assembly::addJacobianBlock(SparseMatrix<Number> & jacobian,
 
   const unsigned int ivn = iv.number();
   const unsigned int jvn = jv.number();
-  auto & ke = jacobianBlock(ivn, jvn, tag);
+  auto & ke = jacobianBlock(ivn, jvn, LocalDataKey{}, tag);
 
   // It is guaranteed by design iv.number <= ivar since iv is obtained
   // through SystemBase::getVariable with ivar.
@@ -4171,11 +4128,13 @@ Assembly::addJacobianBlock(SparseMatrix<Number> & jacobian,
 
 void
 Assembly::addJacobianBlockNonlocal(SparseMatrix<Number> & jacobian,
-                                   unsigned int ivar,
-                                   unsigned int jvar,
+                                   const unsigned int ivar,
+                                   const unsigned int jvar,
                                    const DofMap & dof_map,
                                    const std::vector<dof_id_type> & idof_indices,
-                                   const std::vector<dof_id_type> & jdof_indices)
+                                   const std::vector<dof_id_type> & jdof_indices,
+                                   GlobalDataKey,
+                                   const TagID tag)
 {
   if (idof_indices.size() == 0 || jdof_indices.size() == 0)
     return;
@@ -4190,7 +4149,7 @@ Assembly::addJacobianBlockNonlocal(SparseMatrix<Number> & jacobian,
 
   const unsigned int ivn = iv.number();
   const unsigned int jvn = jv.number();
-  auto & keg = jacobianBlockNonlocal(ivn, jvn);
+  auto & keg = jacobianBlockNonlocal(ivn, jvn, LocalDataKey{}, tag);
 
   // It is guaranteed by design iv.number <= ivar since iv is obtained
   // through SystemBase::getVariable with ivar.
@@ -4226,12 +4185,29 @@ Assembly::addJacobianBlockNonlocal(SparseMatrix<Number> & jacobian,
 }
 
 void
+Assembly::addJacobianBlockNonlocalTags(SparseMatrix<Number> & jacobian,
+                                       const unsigned int ivar,
+                                       const unsigned int jvar,
+                                       const DofMap & dof_map,
+                                       const std::vector<dof_id_type> & idof_indices,
+                                       const std::vector<dof_id_type> & jdof_indices,
+                                       GlobalDataKey,
+                                       const std::set<TagID> & tags)
+{
+  for (auto tag : tags)
+    addJacobianBlockNonlocal(
+        jacobian, ivar, jvar, dof_map, idof_indices, jdof_indices, GlobalDataKey{}, tag);
+}
+
+void
 Assembly::addJacobianNeighbor(SparseMatrix<Number> & jacobian,
-                              unsigned int ivar,
-                              unsigned int jvar,
+                              const unsigned int ivar,
+                              const unsigned int jvar,
                               const DofMap & dof_map,
                               std::vector<dof_id_type> & dof_indices,
-                              std::vector<dof_id_type> & neighbor_dof_indices)
+                              std::vector<dof_id_type> & neighbor_dof_indices,
+                              GlobalDataKey,
+                              const TagID tag)
 {
   if (dof_indices.size() == 0 && neighbor_dof_indices.size() == 0)
     return;
@@ -4244,9 +4220,9 @@ Assembly::addJacobianNeighbor(SparseMatrix<Number> & jacobian,
 
   const unsigned int ivn = iv.number();
   const unsigned int jvn = jv.number();
-  auto & ken = jacobianBlockNeighbor(Moose::ElementNeighbor, ivn, jvn);
-  auto & kne = jacobianBlockNeighbor(Moose::NeighborElement, ivn, jvn);
-  auto & knn = jacobianBlockNeighbor(Moose::NeighborNeighbor, ivn, jvn);
+  auto & ken = jacobianBlockNeighbor(Moose::ElementNeighbor, ivn, jvn, LocalDataKey{}, tag);
+  auto & kne = jacobianBlockNeighbor(Moose::NeighborElement, ivn, jvn, LocalDataKey{}, tag);
+  auto & knn = jacobianBlockNeighbor(Moose::NeighborNeighbor, ivn, jvn, LocalDataKey{}, tag);
 
   // It is guaranteed by design iv.number <= ivar since iv is obtained
   // through SystemBase::getVariable with ivar.
@@ -4293,14 +4269,28 @@ Assembly::addJacobianNeighbor(SparseMatrix<Number> & jacobian,
 }
 
 void
-Assembly::addJacobianScalar()
+Assembly::addJacobianNeighborTags(SparseMatrix<Number> & jacobian,
+                                  const unsigned int ivar,
+                                  const unsigned int jvar,
+                                  const DofMap & dof_map,
+                                  std::vector<dof_id_type> & dof_indices,
+                                  std::vector<dof_id_type> & neighbor_dof_indices,
+                                  GlobalDataKey,
+                                  const std::set<TagID> & tags)
+{
+  for (const auto tag : tags)
+    addJacobianNeighbor(
+        jacobian, ivar, jvar, dof_map, dof_indices, neighbor_dof_indices, GlobalDataKey{}, tag);
+}
+
+void Assembly::addJacobianScalar(GlobalDataKey)
 {
   for (const auto & it : _cm_ss_entry)
     addJacobianCoupledVarPair(*it.first, *it.second);
 }
 
 void
-Assembly::addJacobianOffDiagScalar(unsigned int ivar)
+Assembly::addJacobianOffDiagScalar(unsigned int ivar, GlobalDataKey)
 {
   const std::vector<MooseVariableFEBase *> & vars = _sys.getVariables(_tid);
   MooseVariableScalar & var_i = _sys.getScalarVariable(_tid, ivar);
@@ -4309,7 +4299,8 @@ Assembly::addJacobianOffDiagScalar(unsigned int ivar)
 }
 
 void
-Assembly::cacheJacobian(numeric_index_type i, numeric_index_type j, Real value, TagID tag)
+Assembly::cacheJacobian(
+    numeric_index_type i, numeric_index_type j, Real value, LocalDataKey, TagID tag)
 {
   _cached_jacobian_rows[tag].push_back(i);
   _cached_jacobian_cols[tag].push_back(j);
@@ -4320,37 +4311,15 @@ void
 Assembly::cacheJacobian(numeric_index_type i,
                         numeric_index_type j,
                         Real value,
+                        LocalDataKey,
                         const std::set<TagID> & tags)
 {
   for (auto tag : tags)
     if (_sys.hasMatrix(tag))
-      cacheJacobian(i, j, value, tag);
+      cacheJacobian(i, j, value, LocalDataKey{}, tag);
 }
 
-void
-Assembly::cacheJacobianContribution(numeric_index_type i,
-                                    numeric_index_type j,
-                                    Real value,
-                                    TagID tag)
-{
-  mooseDeprecated("please use the corresponding cacheJacobian method instead.");
-
-  cacheJacobian(i, j, value, tag);
-}
-
-void
-Assembly::cacheJacobianContribution(numeric_index_type i,
-                                    numeric_index_type j,
-                                    Real value,
-                                    const std::set<TagID> & tags)
-{
-  mooseDeprecated("please use the corresponding cacheJacobian method instead.");
-
-  cacheJacobian(i, j, value, tags);
-}
-
-void
-Assembly::setCachedJacobian()
+void Assembly::setCachedJacobian(GlobalDataKey)
 {
   for (MooseIndex(_cached_jacobian_rows) tag = 0; tag < _cached_jacobian_rows.size(); tag++)
     if (_sys.hasMatrix(tag))
@@ -4369,38 +4338,13 @@ Assembly::setCachedJacobian()
   clearCachedJacobian();
 }
 
-void
-Assembly::setCachedJacobianContributions()
-{
-  mooseDeprecated("please use setCachedJacobian instead");
-
-  setCachedJacobian();
-}
-
-void
-Assembly::zeroCachedJacobian()
+void Assembly::zeroCachedJacobian(GlobalDataKey)
 {
   for (MooseIndex(_cached_jacobian_rows) tag = 0; tag < _cached_jacobian_rows.size(); tag++)
     if (_sys.hasMatrix(tag))
       _sys.getMatrix(tag).zero_rows(_cached_jacobian_rows[tag], 0.0);
 
   clearCachedJacobian();
-}
-
-void
-Assembly::zeroCachedJacobianContributions()
-{
-  mooseDeprecated("please use zeroCachedJacobian instead");
-
-  zeroCachedJacobian();
-}
-
-void
-Assembly::addCachedJacobianContributions()
-{
-  mooseDeprecated("please use addCachedJacobian instead");
-
-  addCachedJacobian();
 }
 
 void
@@ -4412,14 +4356,6 @@ Assembly::clearCachedJacobian()
     _cached_jacobian_cols[tag].clear();
     _cached_jacobian_values[tag].clear();
   }
-}
-
-void
-Assembly::clearCachedJacobianContributions()
-{
-  mooseDeprecated("please use clearCachedJacobian instead");
-
-  clearCachedJacobian();
 }
 
 void
@@ -4477,37 +4413,6 @@ Assembly::modifyArbitraryWeights(const std::vector<Real> & weights)
 
   for (MooseIndex(weights.size()) i = 0; i < weights.size(); ++i)
     _current_JxW[i] = weights[i];
-}
-
-void
-Assembly::processUnconstrainedResidualsAndJacobian(const std::vector<ADReal> & residuals,
-                                                   const std::vector<dof_id_type> & row_indices,
-                                                   const std::set<TagID> & vector_tags,
-                                                   const std::set<TagID> & matrix_tags,
-                                                   const Real scaling_factor)
-{
-  mooseAssert(residuals.size() == row_indices.size(),
-              "The number of residuals should match the number of dof indices");
-  mooseAssert(residuals.size() >= 1, "Why you calling me with no residuals?");
-
-  // First handle the residuals
-  if (computingResidual() && !vector_tags.empty())
-    for (const auto i : index_range(row_indices))
-      cacheResidual(row_indices[i], residuals[i].value() * scaling_factor, vector_tags);
-
-  if (computingJacobian() && !matrix_tags.empty())
-    for (const auto i : index_range(row_indices))
-    {
-      const auto row_index = row_indices[i];
-
-      const auto & sparse_derivatives = residuals[i].derivatives();
-      const auto & column_indices = sparse_derivatives.nude_indices();
-      const auto & raw_derivatives = sparse_derivatives.nude_data();
-
-      for (std::size_t j = 0; j < column_indices.size(); ++j)
-        cacheJacobian(
-            row_index, column_indices[j], raw_derivatives[j] * scaling_factor, matrix_tags);
-    }
 }
 
 template <>
@@ -4676,64 +4581,6 @@ Assembly::feCurlPhiFaceNeighbor<VectorValue<Real>>(FEType type) const
   _need_curl[type] = true;
   buildVectorFaceNeighborFE(type);
   return _vector_fe_shape_data_face_neighbor[type]->_curl_phi;
-}
-
-void
-Assembly::processResidualsAndJacobian(const std::vector<ADReal> & residuals,
-                                      const std::vector<dof_id_type> & input_row_indices,
-                                      const std::set<TagID> & vector_tags,
-                                      const std::set<TagID> & matrix_tags,
-                                      const Real scaling_factor)
-{
-  // First handle the residuals
-  processResiduals(residuals, input_row_indices, vector_tags, scaling_factor);
-
-  //
-  // Now the Jacobian
-  //
-
-  if (!computingJacobian() || matrix_tags.empty())
-    return;
-
-  const auto & compare_dofs = residuals[0].derivatives().nude_indices();
-#ifndef NDEBUG
-  auto compare_dofs_set = std::set<dof_id_type>(compare_dofs.begin(), compare_dofs.end());
-
-  for (auto resid_it = residuals.begin() + 1; resid_it != residuals.end(); ++resid_it)
-  {
-    auto current_dofs_set = std::set<dof_id_type>(resid_it->derivatives().nude_indices().begin(),
-                                                  resid_it->derivatives().nude_indices().end());
-    mooseAssert(compare_dofs_set == current_dofs_set,
-                "We're going to see whether the dof sets are the same. IIRC the degree of freedom "
-                "dependence (as indicated by the dof index set held by the ADReal) has to be the "
-                "same for every residual passed to this method otherwise constrain_element_matrix "
-                "will not work.");
-  }
-#endif
-  auto column_indices = std::vector<dof_id_type>(compare_dofs.begin(), compare_dofs.end());
-
-  // If there's no derivatives then there is nothing to do. Moreover, if we pass zero size column
-  // indices to constrain_element_matrix then we will potentially get errors out of BLAS
-  if (!column_indices.size())
-    return;
-
-  // Need to make a copy because we might modify this in constrain_element_matrix
-  std::vector<dof_id_type> row_indices = input_row_indices;
-
-  DenseMatrix<Number> element_matrix(row_indices.size(), column_indices.size());
-  for (const auto i : index_range(row_indices))
-  {
-    const auto & sparse_derivatives = residuals[i].derivatives();
-
-    for (const auto j : index_range(column_indices))
-      element_matrix(i, j) = sparse_derivatives[column_indices[j]] * scaling_factor;
-  }
-
-  _dof_map.constrain_element_matrix(element_matrix, row_indices, column_indices);
-
-  for (const auto i : index_range(row_indices))
-    for (const auto j : index_range(column_indices))
-      cacheJacobian(row_indices[i], column_indices[j], element_matrix(i, j), matrix_tags);
 }
 
 template void coordTransformFactor<Point, Real>(const SubProblem & s,

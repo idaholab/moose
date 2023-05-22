@@ -27,7 +27,10 @@ INSFVTimeKernel::INSFVTimeKernel(const InputParameters & params)
 }
 
 void
-INSFVTimeKernel::processResidualAndJacobian(const ADReal & residual, const dof_id_type dof_index)
+INSFVTimeKernel::addResidualAndJacobian(const ADReal & residual, const dof_id_type dof_index)
 {
-  _assembly.processResidualAndJacobian(residual, dof_index, _vector_tags, _matrix_tags);
+  addResidualsAndJacobian(_assembly,
+                          std::array<ADReal, 1>{{residual}},
+                          std::array<dof_id_type, 1>{{dof_index}},
+                          _var.scalingFactor());
 }

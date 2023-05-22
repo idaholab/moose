@@ -27,9 +27,6 @@ public:
   virtual void jacobianSetup() override{};
   virtual void residualEnd() override{};
 
-  virtual void computeJacobian() override;
-  virtual void computeOffDiagJacobian(unsigned int jvar) override;
-
   virtual bool addCouplingEntriesToJacobian() override { return true; }
 
   bool shouldApply() override;
@@ -47,7 +44,6 @@ protected:
   virtual Real computeQpJacobian(Moose::ConstraintJacobianType type) override;
   virtual Real computeQpOffDiagJacobian(Moose::ConstraintJacobianType type,
                                         unsigned int jvar) override;
-  virtual void getConnectedDofIndices(unsigned int var_num) override;
 
   MooseSharedPointer<DisplacedProblem> _displaced_problem;
   FEProblem & _fe_problem;

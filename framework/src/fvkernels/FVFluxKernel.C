@@ -163,57 +163,6 @@ FVFluxKernel::computeResidual(const FaceInfo & fi)
 }
 
 void
-FVFluxKernel::computeJacobianType(Moose::DGJacobianType type, const ADReal & residual)
-{
-  auto & ce = _assembly.couplingEntries();
-  for (const auto & it : ce)
-  {
-    MooseVariableFieldBase & ivariable = *(it.first);
-    MooseVariableFieldBase & jvariable = *(it.second);
-
-    // We currently only support coupling to other FV variables
-    // Remove this when we enable support for it.
-    if (!jvariable.isFV())
-      continue;
-
-    if ((type == Moose::ElementElement || type == Moose::NeighborElement) &&
-        !jvariable.activeOnSubdomain(_face_info->elemSubdomainID()))
-      continue;
-    else if ((type == Moose::ElementNeighbor || type == Moose::NeighborNeighbor) &&
-             !jvariable.activeOnSubdomain(_face_info->neighborSubdomainID()))
-      continue;
-
-    unsigned int ivar = ivariable.number();
-    unsigned int jvar = jvariable.number();
-
-    if (ivar != _var.number())
-      continue;
-
-    auto dofs_per_elem = _sys.getMaxVarNDofsPerElem();
-
-    auto ad_offset = Moose::adOffset(jvar, dofs_per_elem, type, _sys.system().n_vars());
-
-    prepareMatrixTagNeighbor(_assembly, ivar, jvar, type);
-
-    mooseAssert(
-        _local_ke.m() == 1,
-        "We are currently only supporting constant monomials for finite volume calculations");
-    mooseAssert(
-        _local_ke.n() == 1,
-        "We are currently only supporting constant monomials for finite volume calculations");
-    mooseAssert((type == Moose::ElementElement || type == Moose::NeighborElement)
-                    ? jvariable.dofIndices().size() == 1
-                    : jvariable.dofIndicesNeighbor().size() == 1,
-                "The AD derivative indexing below only makes sense for constant monomials, e.g. "
-                "for a number of dof indices equal to  1");
-
-    _local_ke(0, 0) = residual.derivatives()[ad_offset];
-
-    accumulateTaggedLocalMatrix();
-  }
-}
-
-void
 FVFluxKernel::computeJacobian(const FaceInfo & fi)
 {
   if (skipForBoundary(fi))
@@ -238,7 +187,8 @@ FVFluxKernel::computeJacobian(const FaceInfo & fi)
   {
     mooseAssert(_var.dofIndices().size() == 1, "We're currently built to use CONSTANT MONOMIALS");
 
-    _assembly.processResidualAndJacobian(r, _var.dofIndices()[0], _vector_tags, _matrix_tags);
+    addResidualsAndJacobian(
+        _assembly, std::array<ADReal, 1>{{r}}, _var.dofIndices(), _var.scalingFactor());
   }
 
   if (_face_type == FaceInfo::VarFaceNeighbors::NEIGHBOR ||
@@ -257,8 +207,10 @@ FVFluxKernel::computeJacobian(const FaceInfo & fi)
     mooseAssert(_var.dofIndicesNeighbor().size() == 1,
                 "We're currently built to use CONSTANT MONOMIALS");
 
-    _assembly.processResidualAndJacobian(
-        neighbor_r, _var.dofIndicesNeighbor()[0], _vector_tags, _matrix_tags);
+    addResidualsAndJacobian(_assembly,
+                            std::array<ADReal, 1>{{neighbor_r}},
+                            _var.dofIndicesNeighbor(),
+                            _var.scalingFactor());
   }
 }
 

@@ -61,7 +61,10 @@ FVBoundaryScalarLagrangeMultiplierConstraint::computeResidual(const FaceInfo & f
   // LM
   const auto lm_r = MetaPhysicL::raw_value(computeQpResidual()) * fi.faceArea() * fi.faceCoord();
   mooseAssert(_lambda_var.dofIndices().size() == 1, "We should only have a single dof");
-  _assembly.processResidual(lm_r, _lambda_var.dofIndices()[0], _vector_tags);
+  addResiduals(_assembly,
+               std::array<Real, 1>{{lm_r}},
+               _lambda_var.dofIndices(),
+               _lambda_var.scalingFactor());
 }
 
 void
@@ -91,11 +94,14 @@ FVBoundaryScalarLagrangeMultiplierConstraint::computeJacobian(const FaceInfo & f
   mooseAssert(_lambda.size() == 1 && _lambda_var.order() == 1,
               "The lambda variable should be first order");
   const auto primal_r = _lambda[0] * (fi.faceArea() * fi.faceCoord());
-  _assembly.processResidualAndJacobian(primal_r, dof_indices[0], _vector_tags, _matrix_tags);
+  addResidualsAndJacobian(
+      _assembly, std::array<ADReal, 1>{{primal_r}}, dof_indices, _var.scalingFactor());
 
   // LM
   const auto lm_r = computeQpResidual() * (fi.faceArea() * fi.faceCoord());
   mooseAssert(_lambda_var.dofIndices().size() == 1, "We should only have one dof");
-  _assembly.processResidualAndJacobian(
-      lm_r, _lambda_var.dofIndices()[0], _vector_tags, _matrix_tags);
+  addResidualsAndJacobian(_assembly,
+                          std::array<ADReal, 1>{{lm_r}},
+                          _lambda_var.dofIndices(),
+                          _lambda_var.scalingFactor());
 }
