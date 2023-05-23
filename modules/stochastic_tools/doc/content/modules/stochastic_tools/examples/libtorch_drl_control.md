@@ -62,7 +62,7 @@ beginning of the time step, while we would like to compute the reward for the tr
 using the temperature at the end of the time step. Furthermore, the trainer needs the environment temperature
 and the reward values as well. Additionally, we save the action (`top_flux`) of the neural net together with its
 logarithmic probability (`log_prob_top_flux`). Our control object will be responsible to populate these two postprocessors.
-Finally, we create an [AccumulateReporter.md] to store every data point throughout the simulation:
+Finally, we create an [framework:AccumulateReporter.md] to store every data point throughout the simulation:
 
 !listing examples/libtorch_drl_control/libtorch_drl_control_sub.i block=Reporters
 
@@ -76,10 +76,10 @@ Lastly we define the scaling of the input (responses) and the output
 of the neural net. These must be consistent with the values of the [LibtorchDRLControlTrainer.md]
 object in the main application.
 The containers for the control signal and its logarithmic probability are defined in the `Postprocessors` block
-using [LibtorchControlValuePostprocessor](source/libtorch/postprocessors/LibtorchControlValuePostprocessor.md) and
+using [LibtorchControlValuePostprocessor](framework:source/libtorch/postprocessors/LibtorchControlValuePostprocessor.md) and
 [LibtorchDRLLogProbabilityPostprocessor](source/libtorch/postprocessors/LibtorchDRLLogProbabilityPostprocessor.md) as
 shown above.
-Furthermore, the additional [LibtorchNeuralNetControl](LibtorchNeuralNetControl.md) (`src_control_final`)
+Furthermore, the additional [LibtorchNeuralNetControl](framework:LibtorchNeuralNetControl.md) (`src_control_final`)
 can be used to evaluate the neural network without the additional random
 sampling process needed for the training process. In other words, this object will evaluate the
 final product of this training process.
@@ -100,7 +100,7 @@ Following this, a [MultiApp](SamplerFullSolveMultiApp.md) is created to run the 
 !listing examples/libtorch_drl_control/libtorch_drl_control_trainer.i block=MultiApps
 
 We also require transfers between the applications. We pull the data of the
-simulations from the `MultiApp` using [MultiAppReporterTransfer.md].
+simulations from the `MultiApp` using [framework:MultiAppReporterTransfer.md].
 
 !listing examples/libtorch_drl_control/libtorch_drl_control_trainer.i block=Transfers
 
@@ -158,7 +158,7 @@ to balance these two factors by tuning the parameters in the `Trainer` and `Cont
           'yaxis':{'type':'linear','title':'Average Episodic Reward'}}
 
 Following the training procedure, we can replace the [LibtorchDRLControl.md] object with
-[LibtorchNeuralNetControl](source/libtorch/controls/LibtorchNeuralNetControl.md)
+[LibtorchNeuralNetControl](framework:source/libtorch/controls/LibtorchNeuralNetControl.md)
 to evaluate the final version of the neural network
 without the additional randomization. By doing this, the following results are obtained:
 
