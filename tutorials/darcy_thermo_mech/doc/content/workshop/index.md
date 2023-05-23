@@ -4,7 +4,7 @@
 !datetime today format=%B %Y
 
 !style halign=center
-[www.mooseframework.org](darcy_thermo_mech:index.md exact=True)
+[www.mooseframework.org](www.mooseframework.org)
 
 !---
 

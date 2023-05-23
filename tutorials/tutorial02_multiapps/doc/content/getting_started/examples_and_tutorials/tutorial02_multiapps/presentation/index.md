@@ -1,7 +1,7 @@
 # MOOSE MultiApps
 
 !style halign=center
-[www.mooseframework.org](tutorial02_multiapps:index.md exact=True)
+[www.mooseframework.org](www.mooseframwork.org)
 
 !---
 
