@@ -53,7 +53,7 @@ ExposedSideAverageValue::volume()
   Real curr_exposed_side_volume = 0.0;
   const SelfShadowSideUserObject::SideIDType id(_current_elem->id(), _current_side);
   const int illumination = _self_shadow.illumination(id);
-  for (unsigned int qp = 0; qp < _qrule->n_points(); qp++)
+  for (const unsigned int qp : make_range(_qrule->n_points()))
   {
     // tests if the bit at position _qp is set
     if (illumination & (1 << qp))

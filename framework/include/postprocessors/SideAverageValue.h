@@ -36,6 +36,7 @@ protected:
    * @return volume of the current face
    */
   virtual Real volume();
+
   /// Volume of the entire surface to average over
   Real _volume;
 };

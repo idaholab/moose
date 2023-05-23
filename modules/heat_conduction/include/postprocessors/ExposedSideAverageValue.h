@@ -32,6 +32,7 @@ protected:
    * @return exposed face volume
    */
   virtual Real volume() override;
+
   /// Reference to SelfShadowSideUserObject, which does the determination of which
   /// QPs are exposed.
   const SelfShadowSideUserObject & _self_shadow;
