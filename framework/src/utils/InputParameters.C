@@ -451,6 +451,15 @@ InputParameters::registerSystemAttributeName(const std::string & value)
   _params["_moose_warehouse_system_name"]._is_private = true;
 }
 
+const std::string &
+InputParameters::getSystemAttributeName() const
+{
+  mooseAssert(have_parameter<std::string>("_moose_warehouse_system_name"),
+              "SystemAttributeName is not available! Call 'registerSystemAttributeName' (usually "
+              "in the validParams function) before you try accessing it!");
+  return Parameters::get<std::string>("_moose_warehouse_system_name");
+}
+
 void
 InputParameters::registerBuildableTypes(const std::string & names)
 {

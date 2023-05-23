@@ -343,6 +343,8 @@ void dataStore(std::ostream & stream, Real & v, void * context);
 template <>
 void dataStore(std::ostream & stream, std::string & v, void * context);
 template <>
+void dataStore(std::ostream & stream, VariableName & v, void * context);
+template <>
 void dataStore(std::ostream & stream, bool & v, void * context);
 // Vectors of bools are special
 // https://en.wikipedia.org/w/index.php?title=Sequence_container_(C%2B%2B)&oldid=767869909#Specialization_for_bool
@@ -636,6 +638,8 @@ template <>
 void dataLoad(std::istream & stream, Real & v, void * /*context*/);
 template <>
 void dataLoad(std::istream & stream, std::string & v, void * /*context*/);
+template <>
+void dataLoad(std::istream & stream, VariableName & v, void * /*context*/);
 template <>
 void dataLoad(std::istream & stream, bool & v, void * /*context*/);
 // Vectors of bools are special

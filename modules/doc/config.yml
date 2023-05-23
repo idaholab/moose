@@ -138,6 +138,7 @@ Extensions:
             userobject: syntax/UserObjects/index.md
             userobjects: syntax/UserObjects/index.md
             utils: framework_development/utils/index.md
+            variablemappings: syntax/VariableMappings/index.md
             variables: syntax/Variables/index.md
             vectorpostprocessors: syntax/VectorPostprocessors/index.md
     MooseDocs.extensions.civet:

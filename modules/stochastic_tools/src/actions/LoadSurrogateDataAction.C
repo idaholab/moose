@@ -18,46 +18,13 @@ registerMooseAction("StochasticToolsApp", LoadSurrogateDataAction, "load_surroga
 InputParameters
 LoadSurrogateDataAction::validParams()
 {
-  InputParameters params = Action::validParams();
+  InputParameters params = LoadModelDataAction<SurrogateModel>::validParams();
   params.addClassDescription("Calls load method on SurrogateModel objects contained within the "
                              "`[Surrogates]` input block, if a filename is given.");
   return params;
 }
 
-LoadSurrogateDataAction::LoadSurrogateDataAction(const InputParameters & params) : Action(params) {}
-
-void
-LoadSurrogateDataAction::act()
+LoadSurrogateDataAction::LoadSurrogateDataAction(const InputParameters & params)
+  : LoadModelDataAction<SurrogateModel>(params)
 {
-  std::vector<SurrogateModel *> objects;
-  _app.theWarehouse().query().condition<AttribSystem>("SurrogateModel").queryInto(objects);
-  for (auto model_ptr : objects)
-  {
-    if (model_ptr && model_ptr->isParamValid("filename"))
-      load(*model_ptr);
-  }
-}
-
-void
-LoadSurrogateDataAction::load(const SurrogateModel & model)
-{
-  // File to load
-  const FileName & filename = model.getParam<FileName>("filename");
-
-  // Create the object that will load in data
-  RestartableDataIO data_io(_app);
-  data_io.setErrorOnLoadWithDifferentNumberOfProcessors(false);
-  data_io.setErrorOnLoadWithDifferentNumberOfThreads(false);
-
-  // Read header
-  bool pass = data_io.readRestartableDataHeaderFromFile(filename, false);
-  if (!pass)
-    paramError("filename", "The supplied file '", filename, "' failed to load.");
-
-  // Get the data object that the loaded data will be applied
-  const RestartableDataMap & meta_data = _app.getRestartableDataMap(model.modelMetaDataName());
-
-  // Read the supplied file
-  std::unordered_set<std::string> filter_names;
-  data_io.readRestartableData(meta_data, filter_names);
 }

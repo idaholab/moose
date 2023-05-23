@@ -1,0 +1,40 @@
+[Tests]
+  issues = '#23619'
+  design = 'InverseMapping.md'
+
+  [create_surrogate]
+    requirement = 'The system shall be able to create a surrogate model for the solution coordinates in the latent space.'
+    type = CheckFiles
+    input = create_mapping_main.i
+    check_files = 'create_mapping_main_rom_polyreg.rd create_mapping_main_mapping_pod_mapping.rd'
+    min_parallel = 2
+    max_parallel = 2
+    petsc_version = ">=3.14"
+  []
+  [inverse_map]
+    requirement = 'The system should be able to reconstruct a full solution field for a given variable based on '
+    [with_surrogate]
+      # Note: the reconstructed solution with 2 POD modes and a linear regression should be exact.
+      detail = 'coordinates determined by a surrogate model.'
+      type = Exodiff
+      input = inverse_map.i
+      cli_args = "Outputs/file_base='with_surrogate'"
+      exodiff = 'with_surrogate.e'
+      min_parallel=2
+      max_parallel=2
+      prereq = create_surrogate
+      petsc_version = ">=3.14"
+    []
+    [with_manual_input]
+      detail = 'manually specified coordinates.'
+      type = Exodiff
+      input = inverse_map.i
+      cli_args = "Outputs/file_base='with_manual' UserObjects/im/surrogate=''"
+      exodiff = 'with_manual.e'
+      min_parallel=2
+      max_parallel=2
+      prereq = create_surrogate
+      petsc_version = ">=3.14"
+    []
+  []
+[]

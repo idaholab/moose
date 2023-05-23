@@ -494,6 +494,12 @@ public:
   void registerSystemAttributeName(const std::string & value);
 
   /**
+   * Get the system attribute name if it was registered. Otherwise throw an error.
+   * See the AttribSystem object for use Attribute.h/C.
+   */
+  const std::string & getSystemAttributeName() const;
+
+  /**
    * This method is here to indicate which Moose types a particular Action may build. It takes a
    * space delimited list of registered MooseObjects.  TODO: For now we aren't actually checking
    * this list when we build objects. Since individual actions can do whatever they want it's not

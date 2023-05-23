@@ -50,4 +50,10 @@ to_json(nlohmann::json & json, const libMesh::Point & p)
   json["y"] = p(1);
   json["z"] = p(2);
 }
+
+void
+to_json(nlohmann::json & json, const DenseVector<Real> & vector)
+{
+  nlohmann::to_json(json, vector.get_values());
+}
 }

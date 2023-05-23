@@ -63,16 +63,6 @@ public:
   ///@}
 
 private:
-  /// Name used for model data. If a SurrogateTrainer object is supplied it's name is used. This
-  /// results in the SurrogateModel having a reference to the training data so it is always current
-  const std::string _model_meta_data_name;
-
-  /**
-   * Internal function used by public declareModelData methods.
-   */
-  template <typename T>
-  RestartableData<T> & getModelDataHelper(const std::string & data_name) const;
-
   template <typename P, typename R>
   void evaluateError(P x, R y, bool with_std = false) const;
 };

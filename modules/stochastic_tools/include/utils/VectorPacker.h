@@ -51,5 +51,6 @@ public:
   static std::tuple<unsigned int, unsigned int, std::shared_ptr<DenseVector<Real>>>
   unpack(BufferIter in, Context *);
 };
+
 } // namespace Parallel
 } // namespace libMesh

@@ -1,0 +1,27 @@
+[Tests]
+  issues = '#23619'
+  design = 'MappingReporter.md'
+
+  [from_parallelstorage]
+    type = JSONDiff
+    requirement = 'The system should be able to map the solutions in a snapshot container into a latent space.'
+    input = map_main.i
+    jsondiff = 'map_training_data.json'
+    min_parallel=2
+    max_parallel=2
+    petsc_version = ">=3.14"
+  []
+  [from_solutions]
+    # Note: this test should result in the same reporter values as the one above. Due to reporter naming difference, we
+    # needed two different gold files. If something causes mismatch between the values in the two gold files, look for bugs.
+    type = JSONDiff
+    requirement = 'The system should be able to extract and map variables in nonlinear system into a latent (low-dimensional) space.'
+    input = load_main.i
+    cli_args = "worker:VariableMappings/inactive='' worker:Reporters/inactive=''"
+    jsondiff = 'map_variable.json'
+    min_parallel=2
+    max_parallel=2
+    prereq = from_parallelstorage
+    petsc_version = ">=3.14"
+  []
+[]
