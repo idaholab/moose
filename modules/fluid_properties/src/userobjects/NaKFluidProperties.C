@@ -16,8 +16,9 @@ NaKFluidProperties::validParams()
 {
   InputParameters params = SinglePhaseFluidProperties::validParams();
   params.addClassDescription("Fluid properties for NaK");
-  params.addRequiredParam<Real>("weight_fraction_K",
-                                "Weight fraction of potassium in NaK. Defaults to eutectic");
+  params.addRequiredParam<Real>(
+      "weight_fraction_K",
+      "Weight fraction of potassium in NaK. Only eutectic is implemented (X_K = 0.778)");
   return params;
 }
 
@@ -34,7 +35,6 @@ NaKFluidProperties::NaKFluidProperties(const InputParameters & parameters)
   const Real AwK = 39.102;
   const Real AwNa = 22.9898;
   _Nk = Xk / AwK / (Xk / AwK + (1 - Xk) / AwNa);
-  std::cout << _Nk << " 67 ???" << std::endl;
 }
 
 NaKFluidProperties::~NaKFluidProperties() {}
@@ -52,46 +52,46 @@ NaKFluidProperties::molarMass() const
 }
 
 Real
-NaKFluidProperties::T_from_p_h(Real p, Real h) const
+NaKFluidProperties::T_from_p_h(Real pressure, Real enthalpy) const
 {
   auto lambda = [&](Real p, Real current_T, Real & new_h, Real & dh_dp, Real & dh_dT)
   { h_from_p_T(p, current_T, new_h, dh_dp, dh_dT); };
   Real T = FluidPropertiesUtils::NewtonSolve(
-               p, h, _T_initial_guess, _tolerance, lambda, name() + "::T_from_p_h")
+               pressure, enthalpy, _T_initial_guess, _tolerance, lambda, name() + "::T_from_p_h")
                .first;
   // check for nans
   if (std::isnan(T))
     mooseError("Conversion from pressure (p = ",
-               p,
+               pressure,
                ") and enthalpy (h = ",
-               h,
+               enthalpy,
                ") to temperature failed to converge.");
   return T;
 }
 
 Real
-NaKFluidProperties::T_from_p_rho(Real /* pressure */, Real temperature) const
+NaKFluidProperties::T_from_p_rho(Real pressure, Real density) const
 {
   // NOTE we could also invert analytically the third degree polynomial, see Cardan's method
   auto lambda = [&](Real p, Real current_T, Real & new_rho, Real & drho_dp, Real & drho_dT)
   { rho_from_p_T(p, current_T, new_rho, drho_dp, drho_dT); };
   Real T = FluidPropertiesUtils::NewtonSolve(
-               p, rho, _T_initial_guess, _tolerance, lambda, name() + "::T_from_p_rho")
+               pressure, density, _T_initial_guess, _tolerance, lambda, name() + "::T_from_p_rho")
                .first;
   // check for nans
   if (std::isnan(T))
     mooseError("Conversion from pressure (p = ",
-               p,
+               pressure,
                ") and density (rho = ",
-               rho,
+               density,
                ") to temperature failed to converge.");
   return T;
 }
 
 Real
-NaKFluidProperties::rho_from_p_T(Real pressure, Real temperature) const
+NaKFluidProperties::rho_from_p_T(Real /*pressure*/, Real temperature) const
 {
-  const Real Tc = temperature - _T_k2c;
+  const Real Tc = temperature - _T_c2k;
   // Range from liquid Na and K density correlation ranges
   if (Tc < 210 || Tc > 1110)
     flagInvalidSolution(
@@ -101,12 +101,11 @@ NaKFluidProperties::rho_from_p_T(Real pressure, Real temperature) const
         "NaK density evaluated outside of K density temperature range [63, 1250] C");
 
   // Eq. 1.8 page 18 of NaK handbook
-  const Real v_k = 0.8415 - 2.172e-3 * Tc - 2.7e-8 * Tc * Tc + 4.77e-12 * Tc * Tc * Tc;
+  const Real v_k = 1. / (0.8415 - 2.172e-4 * Tc - 2.7e-8 * Tc * Tc + 4.77e-12 * Tc * Tc * Tc);
   // Eq. 1.5 page 15 of NaK handbook
-  const Real v_Na = 0.9453 - 2.2473e-4 * Tc;
+  const Real v_Na = 1. / (0.9453 - 2.2473e-4 * Tc);
   // Eq. 1.9 page 15 of NaK handbook
-  std::cout << "Density = " << 1 / (_Nk * v_k + (1 - _Nk) * v_Na) << std::endl;
-  return 1 / (_Nk * v_k + (1 - _Nk) * v_Na);
+  return 1000 / (_Nk * v_k + (1 - _Nk) * v_Na);
 }
 
 void
@@ -116,13 +115,15 @@ NaKFluidProperties::rho_from_p_T(
   rho = this->rho_from_p_T(pressure, temperature);
   drho_dp = 0;
 
-  const Real Tc = temperature - _T_k2c;
+  const Real Tc = temperature - _T_c2k;
   // Eq. 1.8 page 18 of NaK handbook
-  const Real v_k = 0.8415 - 2.172e-3 * Tc - 2.7e-8 * Tc * Tc + 4.77e-12 * Tc * Tc * Tc;
+  const Real v_k = 1. / (0.8415 - 2.172e-4 * Tc - 2.7e-8 * Tc * Tc + 4.77e-12 * Tc * Tc * Tc);
   // Eq. 1.5 page 15 of NaK handbook
-  const Real v_Na = 0.9453 - 2.2473e-4 * Tc;
+  const Real v_Na = 1. / (0.9453 - 2.2473e-4 * Tc);
   drho_dT =
-      -(_Nk * (-2.172e-3 - 2 * 2.7e-8 * Tc + 3 * 4.77e-12 * Tc * Tc) + (1 - _Nk) * -2.2473e-4) /
+      1000 *
+      -(_Nk * -(-2.172e-4 - 2 * 2.7e-8 * Tc + 3 * 4.77e-12 * Tc * Tc) * MathUtils::pow(v_k, 2) +
+        (1 - _Nk) * 2.2473e-4 * MathUtils::pow(v_Na, 2)) /
       MathUtils::pow(_Nk * v_k + (1 - _Nk) * v_Na, 2);
 }
 
@@ -133,9 +134,9 @@ NaKFluidProperties::e_from_p_T(Real pressure, Real temperature) const
 }
 
 Real
-NaKFluidProperties::e_from_p_rho(Real pressure, Real temperature) const
+NaKFluidProperties::e_from_p_rho(Real pressure, Real density) const
 {
-  Real temperature = T_from_p_rho(pressure, rho);
+  Real temperature = T_from_p_rho(pressure, density);
   return e_from_p_T(pressure, temperature);
 }
 
@@ -154,12 +155,24 @@ NaKFluidProperties::e_from_p_T(
 }
 
 Real
-NaKFluidProperties::cp_from_p_T(Real pressure, Real temperature) const
+NaKFluidProperties::cp_from_p_T(Real /*pressure*/, Real temperature) const
 {
-  const Real Tc = temperature - _T_k2c;
+  const Real Tc = temperature - _T_c2k;
   // Eq. 1.59 page 53 of the NaK handbook
   // converted from cal/g/C
   return (0.232 - 8.82e-5 * Tc + 8.2e-8 * Tc * Tc) * 4200;
+}
+
+void
+NaKFluidProperties::cp_from_p_T(
+    Real /*pressure*/, Real temperature, Real & cp, Real & dcp_dp, Real & dcp_dT) const
+{
+  const Real Tc = temperature - _T_c2k;
+  // Eq. 1.59 page 53 of the NaK handbook
+  // converted from cal/g/C
+  cp = cp_from_p_T(-1, temperature);
+  dcp_dp = 0;
+  dcp_dT = (-8.82e-5 + 2 * 8.2e-8 * Tc) * 4200;
 }
 
 Real
@@ -176,56 +189,82 @@ NaKFluidProperties::mu_from_p_T(Real /*pressure*/, Real temperature) const
   /* eq. 1.18-19 page 24 of NaK handbook */
   // No range given
   // Converted from centipoise
-  const Real rho = rho_from_p_T(-1, temperature);
-  if (temperature < _T_k2c + 400)
-    return 0.001 * 0.116 * std::pow(rho, 1 / 3) * exp(688 * rho / T);
+  const Real rho = rho_from_p_T(-1, temperature) / 1000;
+  if (temperature < _T_c2k + 400)
+    return 0.001 * 0.116 * std::pow(rho, 1 / 3.) * exp(688 * rho / temperature);
   else
-    return 0.001 * 0.082 * std::pow(rho, 1 / 3) * exp(979 * rho / T);
+    return 0.001 * 0.082 * std::pow(rho, 1 / 3.) * exp(979 * rho / temperature);
+}
+
+void
+NaKFluidProperties::mu_from_p_T(
+    Real /*pressure*/, Real temperature, Real & mu, Real & dmu_dp, Real & dmu_dT) const
+{
+  /* eq. 1.18-19 page 24 of NaK handbook */
+  // No range given
+  // Converted from centipoise
+  Real rho, drho_dp, drho_dT;
+  rho_from_p_T(-1, temperature, rho, drho_dp, drho_dT);
+  rho /= 1000;
+  drho_dT /= 1000;
+  if (temperature < _T_c2k + 400)
+  {
+    mu = 0.001 * 0.116 * std::pow(rho, 1 / 3.) * exp(688 * rho / temperature);
+    dmu_dp = 0;
+    dmu_dT =
+        0.001 * 0.116 * exp(688 * rho / temperature) *
+        (1 / 3. * drho_dT * std::pow(rho, -2 / 3.) +
+         std::pow(rho, 1 / 3.) * 688 * (drho_dT * temperature - rho) / temperature / temperature);
+  }
+  else
+  {
+    mu = 0.001 * 0.082 * std::pow(rho, 1 / 3.) * exp(979 * rho / temperature);
+    dmu_dp = 0;
+    dmu_dT =
+        0.001 * 0.082 * exp(979 * rho / temperature) *
+        (1 / 3. * drho_dT * std::pow(rho, -2 / 3.) +
+         std::pow(rho, 1 / 3.) * 979 * (drho_dT * temperature - rho) / temperature / temperature);
+  }
 }
 
 Real
 NaKFluidProperties::k_from_p_T(Real /*pressure*/, Real temperature) const
 {
-  const Real Tc = temperature - _T_k2c;
+  const Real Tc = temperature - _T_c2k;
   /* eq. 1.53 page 46 handbook */
   // Note: reported as very sensitive to the composition
   // Range: 150 - 680 C
+  // Converted from (W/cm-C)
   if (Tc < 150 || Tc > 680)
     flagInvalidSolution(
         "NaK thermal diffusivity evaluated outside of temperature range [150, 680] C");
-  return 0.214 + 2.07e-4 * Tc - 2.2e-7 * Tc * Tc;
+  return 100 * (0.214 + 2.07e-4 * Tc - 2.2e-7 * Tc * Tc);
 }
 
 void
 NaKFluidProperties::k_from_p_T(
     Real /*pressure*/, Real temperature, Real & k, Real & dk_dp, Real & dk_dT) const
 {
-  const Real Tc = temperature - _T_k2c;
+  const Real Tc = temperature - _T_c2k;
   k = k_from_p_T(0, temperature);
   dk_dp = 0.0;
-  dk_dT = 2.07e-4 - 2 * 2.2e-7 * Tc;
+  dk_dT = 100 * (2.07e-4 - 2 * 2.2e-7 * Tc);
 }
 
 Real
-NaKFluidProperties::h_from_p_T(Real pressure, Real temperature) const
+NaKFluidProperties::h_from_p_T(Real /*pressure*/, Real temperature) const
 {
-  // Integration of cv from T_ref = T_fusion
-  const Real T_ref = -12.6; // celsius
-  const Real Tc = temperature - _T_k2c;
-  return (0.232 * (Tc - T_ref) - 8.82e-5 / 2 * (Tc - T_ref) * (Tc - T_ref) +
-          8.2e-8 / 3 * (Tc - T_ref) * (Tc - T_ref) * (Tc - T_ref)) *
-         4200;
+  // Integration of cv
+  const Real Tc = temperature - _T_c2k;
+  return (0.232 * Tc - 8.82e-5 / 2 * Tc * Tc + 8.2e-8 / 3 * Tc * Tc * Tc) * 4200;
 }
 
 void
 NaKFluidProperties::h_from_p_T(
     Real pressure, Real temperature, Real & h, Real & dh_dp, Real & dh_dT) const
 {
-  const Real T_ref = -12.6; // celsius
-  const Real Tc = temperature - _T_k2c;
-  h = (0.232 * (Tc - T_ref) - 8.82e-5 / 2 * (Tc - T_ref) * (Tc - T_ref) +
-       8.2e-8 / 3 * (Tc - T_ref) * (Tc - T_ref) * (Tc - T_ref)) *
-      4200;
+  const Real Tc = temperature - _T_c2k;
+  h = (0.232 * Tc - 8.82e-5 / 2 * Tc * Tc + 8.2e-8 / 3 * Tc * Tc * Tc) * 4200;
   dh_dp = 0;
   dh_dT = cp_from_p_T(pressure, temperature);
 }

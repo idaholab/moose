@@ -17,12 +17,9 @@
 /**
  * NaK fluid properties as a function of pressure (Pa) and temperature (K).
  *
- * //TODO: make full list
- * - density
- * - thermal diffusivity
- * - dynamic viscosity
- * - specific heat capacity
- * These properties are from:
+ * Origin of fluid properties:
+ * 1) density; thermal diffusivity; dynamic viscosity; specific heat capacity
+ *
  * SODIUM-NaK ENGINEERING HANDBOOK Volume I
  * Sodium Chemistry and Physical Properties
  * O. J. FOUST, Editor
@@ -42,7 +39,7 @@ public:
 
   virtual Real T_from_p_h(Real pressure, Real enthalpy) const override;
 
-  virtual Real T_from_p_rho(Real pressure, Real density) const override;
+  Real T_from_p_rho(Real pressure, Real density) const;
 
   virtual Real rho_from_p_T(Real pressure, Real temperature) const override;
 
@@ -58,9 +55,15 @@ public:
 
   virtual Real cp_from_p_T(Real pressure, Real temperature) const override;
 
-  using SinglePhaseFluidProperties::cp_from_p_T;
+  virtual void cp_from_p_T(
+      Real pressure, Real temperature, Real & cp, Real & dcp_dp, Real & dcp_dT) const override;
 
   virtual Real cv_from_p_T(Real pressure, Real temperature) const override;
+
+  virtual Real mu_from_p_T(Real p, Real T) const override;
+
+  virtual void mu_from_p_T(
+      Real pressure, Real temperature, Real & mu, Real & dmu_dp, Real & dmu_dT) const override;
 
   virtual Real k_from_p_T(Real pressure, Real temperature) const override;
 
@@ -77,7 +80,7 @@ protected:
   const Real _MNaK;
 
   /// K molar fraction
-  const Real _Nk;
+  Real _Nk;
 };
 
 #pragma GCC diagnostic pop
