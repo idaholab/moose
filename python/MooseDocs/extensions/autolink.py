@@ -42,6 +42,10 @@ class AutoLinkExtension(Extension):
 
         return config
 
+    def preExecute(self):
+        if self.get('explicit') and self.translator.get('ignore_content_key'):
+            LOG.warning("Config option 'explicit' has no use with Translator/ignore_content_key=True")
+
     def extend(self, reader, renderer):
         """Replace default core link components on reader and provide auto link rendering."""
 
