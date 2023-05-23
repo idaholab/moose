@@ -321,7 +321,7 @@ class ProcessTraces:
     This class reads a series of stack traces from a file
     and then processes them to determine if processes in an MPI parallel
     job have diverged (having differing stack traces that are due to just
-    noise. Memory addresses are stripped.
+    noise). Memory addresses are stripped.
     """
 
     def __init__(self):
