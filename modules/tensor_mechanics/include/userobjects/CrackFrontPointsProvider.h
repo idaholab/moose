@@ -32,4 +32,14 @@ public:
    */
   virtual const std::vector<RealVectorValue>
   getCrackPlaneNormals(unsigned int /*num_crack_front_points*/) const = 0;
+
+  /**
+   * Getter for if a cutter mesh is used in a derived class.
+   * @return getter indicating if a cutter mesh is used in the derived class
+   */
+  bool usesMesh() const { return _uses_mesh; }
+
+protected:
+  /// bool to set if CrackFronPointsProvider derived objects use a cutter mesh
+  bool _uses_mesh;
 };

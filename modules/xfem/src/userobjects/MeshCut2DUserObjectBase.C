@@ -30,6 +30,7 @@ MeshCut2DUserObjectBase::validParams()
 MeshCut2DUserObjectBase::MeshCut2DUserObjectBase(const InputParameters & parameters)
   : GeometricCutUserObject(parameters), _mesh(_subproblem.mesh())
 {
+  _uses_mesh = true;
   // only the Exodus type is currently supported
   MeshFileName cutterMeshFileName = getParam<MeshFileName>("mesh_file");
   _cutter_mesh = std::make_unique<ReplicatedMesh>(_communicator);
@@ -104,15 +105,10 @@ bool
 MeshCut2DUserObjectBase::cutElementByGeometry(const Elem * /*elem*/,
                                               std::vector<Xfem::CutFace> & /*cut_faces*/) const
 {
-  mooseError("Invalid method for 2D mesh cutting, must use "
-             "vector of element edges for 2D mesh cutting");
+  mooseError("Invalid method for 2D mesh cutting.");
   return false;
 }
 
-// fixme lynn
-// sort of cut and paste from GeometricCut2DUserObject::cutFragmentByGeometry
-// I get the exact same results whether this is called or not.  I don't konw what it does
-// but if it is here, it definately returns true and pushback lots of cut_edges.
 bool
 MeshCut2DUserObjectBase::cutFragmentByGeometry(std::vector<std::vector<Point>> & frag_edges,
                                                std::vector<Xfem::CutEdge> & cut_edges) const
@@ -146,8 +142,7 @@ bool
 MeshCut2DUserObjectBase::cutFragmentByGeometry(std::vector<std::vector<Point>> & /*frag_faces*/,
                                                std::vector<Xfem::CutFace> & /*cut_faces*/) const
 {
-  mooseError("Invalid method for 2D mesh fragment cutting, must use "
-             "vector of element edges for 2D mesh fragment cutting");
+  mooseError("Invalid method for 2D mesh fragment cutting.");
   return false;
 }
 

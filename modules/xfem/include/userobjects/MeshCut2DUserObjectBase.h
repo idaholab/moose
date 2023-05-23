@@ -51,16 +51,19 @@ protected:
   /// The FE solution mesh
   MooseMesh & _mesh;
 
-  /// The cutter mesh
+  /// The xfem cutter mesh
   std::unique_ptr<MeshBase> _cutter_mesh;
 
   /// bool to specify if _cutter_mesh has been modified by crack growth
   bool wasCutterMeshModified() const { return !_active_front_node_growth_vectors.empty(); }
 
   /**
-   * Contains the original crack front node ids in pair.first and the
-   * assosciated current crack front node id in pair.second.  This vector is sorted on pair.first
-   * which makes the ordering of this vector the same as that used in the CrackFrontDefinition
+   * This vector of pairs orders crack tips to make the order used in this class the same as those
+   * for the fracture integrals vectorpostProcessorsin created by CrackFrontDefinition.
+   * The original crack front node ids found in the cutter mesh are put in pair.first and the
+   * assosciated current crack front node id that grew from teh original crack front node id is in
+   * pair.second.  This vector is sorted on pair.first which makes the ordering of this vector the
+   * same as that used in the CrackFrontDefinition
    */
   std::vector<std::pair<dof_id_type, dof_id_type>> _original_and_current_front_node_ids;
 

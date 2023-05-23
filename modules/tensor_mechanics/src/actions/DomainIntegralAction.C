@@ -340,7 +340,11 @@ DomainIntegralAction::act()
     const std::string uo_type_name("CrackFrontDefinition");
 
     InputParameters params = _factory.getValidParams(uo_type_name);
-    params.set<ExecFlagEnum>("execute_on") = {EXEC_INITIAL, EXEC_TIMESTEP_END, EXEC_NONLINEAR};
+    if (_use_crack_front_points_provider)
+      params.set<ExecFlagEnum>("execute_on") = {EXEC_INITIAL, EXEC_TIMESTEP_END, EXEC_NONLINEAR};
+    else
+      params.set<ExecFlagEnum>("execute_on") = {EXEC_INITIAL, EXEC_TIMESTEP_END};
+
     params.set<MooseEnum>("crack_direction_method") = _direction_method_moose_enum;
     params.set<MooseEnum>("crack_end_direction_method") = _end_direction_method_moose_enum;
     if (_have_crack_direction_vector)

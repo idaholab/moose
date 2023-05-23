@@ -69,6 +69,7 @@ CrackMeshCut3DUserObject::CrackMeshCut3DUserObject(const InputParameters & param
                                                           : NULL),
     _func_v(parameters.isParamValid("growth_rate") ? &getFunction("growth_rate") : NULL)
 {
+  _uses_mesh = true;
   _grow = (_n_step_growth == 0 ? 0 : 1);
 
   if (_grow)
@@ -767,14 +768,14 @@ CrackMeshCut3DUserObject::findActiveBoundaryDirection()
       for (unsigned int j = i1; j < i2; ++j)
       {
         int ind = index[j];
-        Real theta =
-            2 * atan((k1[ind] - sqrt(k1[ind] * k1[ind] + k2[ind] * k2[ind])) / (4 * k2[ind]));
+        Real theta = 2 * std::atan((k1[ind] - std::sqrt(k1[ind] * k1[ind] + k2[ind] * k2[ind])) /
+                                   (4 * k2[ind]));
         RealVectorValue dir_cfc; // growth direction in crack front coord (cfc) system based on the
                                  // max hoop stress criterion
         RealVectorValue
             dir; // growth direction in global coord system based on the max hoop stress criterion
-        dir_cfc(0) = cos(theta);
-        dir_cfc(1) = sin(theta);
+        dir_cfc(0) = std::cos(theta);
+        dir_cfc(1) = std::sin(theta);
         dir_cfc(2) = 0;
         dir = _crack_front_definition->rotateFromCrackFrontCoordsToGlobal(dir_cfc, ind);
 

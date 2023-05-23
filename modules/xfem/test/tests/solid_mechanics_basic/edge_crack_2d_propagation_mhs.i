@@ -4,7 +4,7 @@
 []
 
 [XFEM]
-  geometric_cut_userobjects = 'cut_mesh'
+  geometric_cut_userobjects = 'cut_mesh2'
   qrule = volfrac
   output_cut_plane = true
 []
@@ -31,7 +31,7 @@
 []
 
 [UserObjects]
-  [cut_mesh]
+  [cut_mesh2]
     type = MeshCut2DFractureUserObject
     mesh_file = make_edge_crack_in.e
     k_critical=80
@@ -42,7 +42,7 @@
 [DomainIntegral]
   integrals = 'Jintegral InteractionIntegralKI InteractionIntegralKII'
   displacements = 'disp_x disp_y'
-  crack_front_points_provider = cut_mesh
+  crack_front_points_provider = cut_mesh2
   2d=true
   number_points_from_provider = 2
   crack_direction_method = CurvedCrackFront
@@ -132,7 +132,7 @@
   execute_on = TIMESTEP_END
   [xfemcutter]
     type=XFEMCutMeshOutput
-    xfem_cutter_uo=cut_mesh
+    xfem_cutter_uo=cut_mesh2
   []
   # console = false
   [./console]

@@ -100,6 +100,7 @@ addCrackFrontDefinitionParams(InputParameters & params)
   params.addParam<UserObjectName>(
       "crack_front_points_provider",
       "The UserObject provides the crack front points from XFEM GeometricCutObject");
+
   params.addParam<unsigned int>(
       "number_points_from_provider",
       "The number of crack front points, only needed if crack_front_points_provider is used.");
@@ -159,18 +160,17 @@ CrackFrontDefinition::CrackFrontDefinition(const InputParameters & parameters)
         getParam<UserObjectName>("crack_front_points_provider"));
     _num_points_from_provider = getParam<unsigned int>("number_points_from_provider");
     _geom_definition_method = CRACK_GEOM_DEFINITION::CRACK_FRONT_POINTS;
-
-    if (getParam<UserObjectName>("crack_front_points_provider") == "cut_mesh")
+    if (_crack_front_points_provider->usesMesh())
     {
       _use_mesh_cutter = true;
       if (_direction_method != DIRECTION_METHOD::CURVED_CRACK_FRONT)
         paramError("crack_direction_method",
-                   "Using 'crack_front_points_provider = cut_mesh' requires also setting "
-                   "'crack_direction_method = CurvedCrackFront'");
+                   "Using a `crack_front_points_provider` that uses an XFEM cutter mesh also "
+                   "requires setting 'crack_direction_method = CurvedCrackFront'");
       if (isParamValid("crack_mouth_boundary"))
         paramError("crack_mouth_boundary",
-                   "'crack_mouth_boundary' cannot be set when using 'crack_front_points_provider = "
-                   "cut_mesh'");
+                   "'crack_mouth_boundary' cannot be set when using a "
+                   "'crack_front_points_provider' that uses an XFEM cutter mesh");
     }
   }
   else if (isParamValid("number_points_from_provider"))
@@ -803,6 +803,7 @@ CrackFrontDefinition::updateCrackFrontGeometry()
   _distances_along_front.clear();
   _angles_along_front.clear();
   _strain_along_front.clear();
+  _crack_plane_normals.clear();
 
   if (_treat_as_2d)
   {
@@ -827,6 +828,8 @@ CrackFrontDefinition::updateCrackFrontGeometry()
       rot_mat(2, _axis_2d) = 1.0;
       if (_use_mesh_cutter)
       {
+        _crack_plane_normals =
+            _crack_front_points_provider->getCrackPlaneNormals(num_crack_front_points);
         mooseAssert(!_crack_plane_normals.empty(), "_crack_plane_normals is empty.");
         rot_mat.fillRow(1, _crack_plane_normals[i]);
       }

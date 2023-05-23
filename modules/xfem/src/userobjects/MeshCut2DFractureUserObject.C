@@ -28,13 +28,15 @@ MeshCut2DFractureUserObject::validParams()
                              "mesh and uses fracture integrals to determine growth");
   params.addRequiredParam<Real>("k_critical", "Critical fracture toughness.");
   params.addRequiredParam<Real>("growth_increment", "Length to grow crack if k>k_critical");
+  params.addParam<unsigned int>("ring_number", 1, "Fracture integral ring number");
   return params;
 }
 
 MeshCut2DFractureUserObject::MeshCut2DFractureUserObject(const InputParameters & parameters)
   : MeshCut2DUserObjectBase(parameters),
     _k_critical(getParam<Real>("k_critical")),
-    _growth_increment(getParam<Real>("growth_increment"))
+    _growth_increment(getParam<Real>("growth_increment")),
+    _ring_number_string(std::to_string(getParam<unsigned int>("ring_number")))
 {
 }
 
@@ -56,8 +58,10 @@ MeshCut2DFractureUserObject::initialize()
 void
 MeshCut2DFractureUserObject::findActiveBoundaryGrowth()
 {
-  const VectorPostprocessorValue & k1 = getVectorPostprocessorValueByName("II_KI_1", "II_KI_1");
-  const VectorPostprocessorValue & k2 = getVectorPostprocessorValueByName("II_KII_1", "II_KII_1");
+  const VectorPostprocessorValue & k1 = getVectorPostprocessorValueByName(
+      "II_KI_" + _ring_number_string, "II_KI_" + _ring_number_string);
+  const VectorPostprocessorValue & k2 = getVectorPostprocessorValueByName(
+      "II_KII_" + _ring_number_string, "II_KII_" + _ring_number_string);
 
   // k1 is empty on the very first time step because this UO is called before the
   // InteractionIntegral vpp
@@ -76,10 +80,10 @@ MeshCut2DFractureUserObject::findActiveBoundaryGrowth()
     {
       // growth direction in crack front coord (cfc) system based on the  max hoop stress
       // criterion
-      Real theta = 2 * atan((k1[i] - sqrt(k1[i] * k1[i] + k2[i] * k2[i])) / (4 * k2[i]));
+      Real theta = 2 * std::atan((k1[i] - std::sqrt(k1[i] * k1[i] + k2[i] * k2[i])) / (4 * k2[i]));
       RealVectorValue dir_cfc;
-      dir_cfc(0) = cos(theta);
-      dir_cfc(1) = sin(theta);
+      dir_cfc(0) = std::cos(theta);
+      dir_cfc(1) = std::sin(theta);
       dir_cfc(2) = 0;
 
       // growth direction in global coord system based on the max hoop stress criterion

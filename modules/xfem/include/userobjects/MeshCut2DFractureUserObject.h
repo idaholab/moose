@@ -39,6 +39,8 @@ private:
   /// amount to grow crack by for each xfem update step
   const Real & _growth_increment;
 
+  const std::string _ring_number_string;
+
   CrackFrontDefinition * _crack_front_definition;
   /**
    * Compute all of the maximum hoop stress fracture integrals for all crack trips from the fracture
