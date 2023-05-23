@@ -52,7 +52,6 @@ PINSFVMomentumFrictionCorrection::PINSFVMomentumFrictionCorrection(const InputPa
 ADReal
 PINSFVMomentumFrictionCorrection::computeQpResidual()
 {
-#ifdef MOOSE_GLOBAL_AD_INDEXING
   using namespace Moose::FV;
 
   const auto elem_face = elemArg();
@@ -120,9 +119,6 @@ PINSFVMomentumFrictionCorrection::computeQpResidual()
   auto dudn = _var.gradient(makeCDFace(*_face_info), state) * _face_info->normal();
 
   return -diff_face * dudn;
-#else
-  return 0;
-#endif
 }
 
 void
@@ -135,7 +131,6 @@ PINSFVMomentumFrictionCorrection::gatherRCData(const FaceInfo & fi)
   _normal = fi.normal();
   _face_type = fi.faceType(_var.name());
 
-#ifdef MOOSE_GLOBAL_AD_INDEXING
   using namespace Moose::FV;
 
   // Compute face superficial velocity gradient
@@ -158,7 +153,5 @@ PINSFVMomentumFrictionCorrection::gatherRCData(const FaceInfo & fi)
     _rc_uo.addToA(fi.neighborPtr(), _index, an * (fi.faceArea() * fi.faceCoord()));
   }
 
-  const auto strong_resid = -diff_face * dudn;
-
-  addResidualAndJacobian(strong_resid * (fi.faceArea() * fi.faceCoord()));
+  addResidualAndJacobian(strong_residual * (fi.faceArea() * fi.faceCoord()));
 }

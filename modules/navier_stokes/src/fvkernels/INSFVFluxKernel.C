@@ -26,6 +26,7 @@ INSFVFluxKernel::INSFVFluxKernel(const InputParameters & params)
 {
 }
 
+void
 INSFVFluxKernel::computeResidual(const FaceInfo & fi)
 {
   if (_rc_uo.segregated())
