@@ -1,7 +1,7 @@
 Content:
     framework:
         root_dir: ${ROOT_DIR}/framework/doc/content
-    test:
+    framework_test:
         root_dir: ${ROOT_DIR}/test/doc/content
     modules:
         root_dir: ${ROOT_DIR}/modules/doc/content
