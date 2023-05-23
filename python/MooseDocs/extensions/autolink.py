@@ -244,11 +244,16 @@ class RenderAutoLink(RenderLinkBase):
             # Try to come up with some useful replacement suggestions
             replacements = []
             for page in ex.pages:
+                # Default replacement suggestion
                 replacement = f'{page.key}:{token_page}'
-                if token_page in src:
-                    replacements.append(src.replace(token_page, replacement))
-                else:
-                    replacements.append(replacement)
+                # Key provided; swap it
+                find_key = find_kwargs.get('key', None)
+                if find_key is not None and f'{find_key}:' in src:
+                    replacement = src.replace(f'{find_key}:', f'{page.key}:')
+                # No key, try to replace the whole page
+                elif token_page in src:
+                    replacement = src.replace(token_page, replacement)
+                replacements.append(replacement)
 
             # We set warn_implicit, one other page was found and we can set it for them
             if self.warnOnOtherKey() and len(ex.pages) == 1:
