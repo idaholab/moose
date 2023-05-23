@@ -85,7 +85,7 @@ MechanicsOSPD::computeNonlocalResidual()
 
         // cache the residual contribution to node_i and its neighbor nb using their global dof
         // indices
-        _assembly.cacheResidualNodes(_local_re, ivardofs);
+        addResiduals(_assembly, _local_re, ivardofs, _var.scalingFactor());
 
         // save in the displacement residuals
         if (_has_save_in)
@@ -183,7 +183,7 @@ MechanicsOSPD::computeNonlocalJacobian()
             _local_ke(i, j) +=
                 (i == j ? 1 : -1) * val / origin_vec_nb.norm() * vol_nb * _bond_status;
 
-        _assembly.cacheJacobianBlock(_local_ke, ivardofs, _ivardofs, _var.scalingFactor());
+        addJacobian(_assembly, _local_ke, ivardofs, _ivardofs, _var.scalingFactor());
 
         if (_has_diag_save_in)
         {
@@ -218,7 +218,7 @@ MechanicsOSPD::computeNonlocalJacobian()
             _local_ke(i, j) +=
                 (i == j ? 1 : -1) * val2 / origin_vec_nb.norm() * vol_nb * _bond_status;
 
-        _assembly.cacheJacobianBlock(_local_ke, ivardofs, ivardofs, _var.scalingFactor());
+        addJacobian(_assembly, _local_ke, ivardofs, ivardofs, _var.scalingFactor());
 
         if (_has_diag_save_in)
         {
@@ -302,7 +302,7 @@ MechanicsOSPD::computePDNonlocalOffDiagJacobian(unsigned int jvar_num,
               _local_ke(i, j) += (i == j ? 1 : -1) * val * _bond_status;
         }
 
-        _assembly.cacheJacobianBlock(_local_ke, ivardofs, jvardofs_ij, _var.scalingFactor());
+        addJacobian(_assembly, _local_ke, ivardofs, jvardofs_ij, _var.scalingFactor());
       }
   }
 }

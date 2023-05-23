@@ -127,7 +127,7 @@ ADKernelTempl<T>::computeResidual()
       for (_i = 0; _i < _test.size(); _i++)
         residuals[_i] += raw_value(_JxW[_qp] * _coord[_qp] * computeQpResidual());
 
-  _assembly.processResiduals(residuals, _var.dofIndices(), _vector_tags, _var.scalingFactor());
+  addResiduals(_assembly, residuals, _var.dofIndices(), _var.scalingFactor());
 
   if (_has_save_in)
     for (unsigned int i = 0; i < _save_in.size(); i++)
@@ -160,23 +160,6 @@ ADKernelTempl<T>::computeResidualsForJacobian()
 
 template <typename T>
 void
-ADKernelTempl<T>::addJacobian(const MooseVariableFieldBase & jvariable)
-{
-  unsigned int jvar = jvariable.number();
-
-  auto ad_offset = Moose::adOffset(jvar, _sys.getMaxVarNDofsPerElem(), Moose::ElementType::Element);
-
-  prepareMatrixTag(_assembly, _var.number(), jvar);
-
-  for (_i = 0; _i < _test.size(); _i++)
-    for (_j = 0; _j < jvariable.phiSize(); _j++)
-      _local_ke(_i, _j) += _residuals[_i].derivatives()[ad_offset + _j];
-
-  accumulateTaggedLocalMatrix();
-}
-
-template <typename T>
-void
 ADKernelTempl<T>::computeJacobian()
 {
   computeADJacobian();
@@ -191,8 +174,7 @@ void
 ADKernelTempl<T>::computeADJacobian()
 {
   computeResidualsForJacobian();
-
-  _assembly.processJacobian(_residuals, dofIndices(), _matrix_tags, _var.scalingFactor());
+  addJacobian(_assembly, _residuals, dofIndices(), _var.scalingFactor());
 }
 
 template <typename T>
@@ -224,8 +206,7 @@ void
 ADKernelTempl<T>::computeResidualAndJacobian()
 {
   computeResidualsForJacobian();
-  _assembly.processResidualsAndJacobian(
-      _residuals, _var.dofIndices(), _vector_tags, _matrix_tags, _var.scalingFactor());
+  addResidualsAndJacobian(_assembly, _residuals, _var.dofIndices(), _var.scalingFactor());
 }
 
 template class ADKernelTempl<Real>;

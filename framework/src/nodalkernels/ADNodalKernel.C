@@ -42,7 +42,10 @@ ADNodalKernel::computeResidual()
     const auto dof_idx = _var.nodalDofIndex();
     _qp = 0;
     auto res = MetaPhysicL::raw_value(computeQpResidual());
-    _assembly.processResidual(res, dof_idx, _vector_tags);
+    addResiduals(_assembly,
+                 std::array<Real, 1>{{res}},
+                 std::array<dof_id_type, 1>{{dof_idx}},
+                 _var.scalingFactor());
   }
 }
 
@@ -54,7 +57,10 @@ ADNodalKernel::computeJacobian()
     const auto dof_idx = _var.nodalDofIndex();
     _qp = 0;
     const auto res = computeQpResidual();
-    _assembly.processJacobian(res, dof_idx, _matrix_tags);
+    addJacobian(_assembly,
+                std::array<ADReal, 1>{{res}},
+                std::array<dof_id_type, 1>{{dof_idx}},
+                _var.scalingFactor());
   }
 }
 

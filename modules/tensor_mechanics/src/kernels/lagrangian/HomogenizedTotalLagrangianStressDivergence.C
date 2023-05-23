@@ -38,8 +38,8 @@ HomogenizedTotalLagrangianStressDivergence::computeOffDiagJacobianScalar(unsigne
 {
   if (jvar == _macro_gradient_num)
   {
-    DenseMatrix<Number> & ken = _assembly.jacobianBlock(_var.number(), jvar);
-    DenseMatrix<Number> & kne = _assembly.jacobianBlock(jvar, _var.number());
+    prepareMatrixTag(_assembly, _var.number(), jvar, _ken);
+    prepareMatrixTag(_assembly, jvar, _var.number(), _kne);
 
     for (_qp = 0; _qp < _qrule->n_points(); _qp++)
     {
@@ -55,24 +55,26 @@ HomogenizedTotalLagrangianStressDivergence::computeOffDiagJacobianScalar(unsigne
           _j = _i;
 
           // Base Jacobian
-          ken(_i, h) += _dpk1[_qp].contractionKl(i, j, gradTest(_alpha)) * dV;
+          _ken(_i, h) += _dpk1[_qp].contractionKl(i, j, gradTest(_alpha)) * dV;
 
           // Constraint Jacobian
           if (ctype == Homogenization::ConstraintType::Stress)
-            kne(h, _i) += _dpk1[_qp].contractionIj(i, j, gradTrial(_alpha)) * dV;
+            _kne(h, _i) += _dpk1[_qp].contractionIj(i, j, gradTrial(_alpha)) * dV;
           else if (ctype == Homogenization::ConstraintType::Strain)
             if (_large_kinematics)
-              kne(h, _i) += Real(i == _alpha) * gradTrial(_alpha)(i, j) * dV;
+              _kne(h, _i) += Real(i == _alpha) * gradTrial(_alpha)(i, j) * dV;
             else
-              kne(h, _i) += 0.5 *
-                            (Real(i == _alpha) * gradTrial(_alpha)(i, j) +
-                             Real(j == _alpha) * gradTrial(_alpha)(j, i)) *
-                            dV;
+              _kne(h, _i) += 0.5 *
+                             (Real(i == _alpha) * gradTrial(_alpha)(i, j) +
+                              Real(j == _alpha) * gradTrial(_alpha)(j, i)) *
+                             dV;
           else
             mooseError("Unknown constraint type in kernel calculation!");
         }
         h++;
       }
     }
+    accumulateTaggedLocalMatrix(_assembly, _var.number(), jvar, _ken);
+    accumulateTaggedLocalMatrix(_assembly, jvar, _var.number(), _kne);
   }
 }

@@ -63,10 +63,8 @@ KernelScalarBase::computeScalarResidual()
       scalar_residuals[_h] += _JxW[_qp] * _coord[_qp] * computeScalarQpResidual();
   }
 
-  _assembly.processResiduals(scalar_residuals,
-                             _kappa_var_ptr->dofIndices(),
-                             _vector_tags,
-                             _kappa_var_ptr->scalingFactor());
+  addResiduals(
+      _assembly, scalar_residuals, _kappa_var_ptr->dofIndices(), _kappa_var_ptr->scalingFactor());
 }
 
 void
@@ -92,12 +90,11 @@ KernelScalarBase::computeScalarJacobian()
         _local_ke(_h, _l) += _JxW[_qp] * _coord[_qp] * computeScalarQpJacobian();
   }
 
-  for (const auto & matrix_tag : _matrix_tags)
-    _assembly.cacheJacobianBlock(_local_ke,
-                                 _kappa_var_ptr->dofIndices(),
-                                 _kappa_var_ptr->dofIndices(),
-                                 _kappa_var_ptr->scalingFactor(),
-                                 matrix_tag);
+  addJacobian(_assembly,
+              _local_ke,
+              _kappa_var_ptr->dofIndices(),
+              _kappa_var_ptr->dofIndices(),
+              _kappa_var_ptr->scalingFactor());
 }
 
 void
@@ -163,12 +160,11 @@ KernelScalarBase::computeScalarOffDiagJacobian(const unsigned int jvar_num)
   else
     mooseError("Vector variable cannot be coupled into Kernel Scalar currently");
 
-  for (const auto & matrix_tag : _matrix_tags)
-    _assembly.cacheJacobianBlock(_local_ke,
-                                 _kappa_var_ptr->dofIndices(),
-                                 jvar.dofIndices(),
-                                 _kappa_var_ptr->scalingFactor(),
-                                 matrix_tag);
+  addJacobian(_assembly,
+              _local_ke,
+              _kappa_var_ptr->dofIndices(),
+              jvar.dofIndices(),
+              _kappa_var_ptr->scalingFactor());
 }
 
 void
@@ -187,9 +183,7 @@ KernelScalarBase::computeOffDiagJacobianScalarLocal(const unsigned int svar_num)
         _local_ke(_i, _l) += _JxW[_qp] * _coord[_qp] * computeQpOffDiagJacobianScalar(svar_num);
   }
 
-  for (const auto & matrix_tag : _matrix_tags)
-    _assembly.cacheJacobianBlock(
-        _local_ke, _var.dofIndices(), svar.dofIndices(), _var.scalingFactor(), matrix_tag);
+  addJacobian(_assembly, _local_ke, _var.dofIndices(), svar.dofIndices(), _var.scalingFactor());
 }
 
 void
@@ -243,10 +237,9 @@ KernelScalarBase::computeScalarOffDiagJacobianScalar(const unsigned int svar_num
             _JxW[_qp] * _coord[_qp] * computeScalarQpOffDiagJacobianScalar(svar_num);
   }
 
-  for (const auto & matrix_tag : _matrix_tags)
-    _assembly.cacheJacobianBlock(_local_ke,
-                                 _kappa_var_ptr->dofIndices(),
-                                 svar.dofIndices(),
-                                 _kappa_var_ptr->scalingFactor(),
-                                 matrix_tag);
+  addJacobian(_assembly,
+              _local_ke,
+              _kappa_var_ptr->dofIndices(),
+              svar.dofIndices(),
+              _kappa_var_ptr->scalingFactor());
 }

@@ -205,6 +205,9 @@ ComputeFrictionalForceCartesianLMMechanicalContact::enforceConstraintOnDof(
 
   const auto dof_index_x = dof->dof_number(_sys.number(), _lm_vars[0]->number(), 0);
   const auto dof_index_y = dof->dof_number(_sys.number(), _lm_vars[1]->number(), 0);
+  const Real scaling_factor_x = _lm_vars[0]->scalingFactor();
+  const Real scaling_factor_y = _lm_vars[1]->scalingFactor();
+  Real scaling_factor_z = 1;
 
   ADReal lm_x = (*_sys.currentSolution())(dof_index_x);
   ADReal lm_y = (*_sys.currentSolution())(dof_index_y);
@@ -219,6 +222,7 @@ ComputeFrictionalForceCartesianLMMechanicalContact::enforceConstraintOnDof(
     dof_index_z = dof->dof_number(_sys.number(), _lm_vars[2]->number(), 0);
     lm_z = (*_sys.currentSolution())(dof_index_z);
     Moose::derivInsert(lm_z.derivatives(), dof_index_z, 1.);
+    scaling_factor_z = _lm_vars[2]->scalingFactor();
   }
 
   ADReal normal_pressure_value =
@@ -327,24 +331,27 @@ ComputeFrictionalForceCartesianLMMechanicalContact::enforceConstraintOnDof(
   else if (std::abs(nz) > threshold_for_Jacobian)
     component_normal = 2;
 
-  libmesh_ignore(component_normal);
+  addResidualsAndJacobian(
+      _assembly,
+      std::array<ADReal, 1>{{normal_dof_residual}},
+      std::array<dof_id_type, 1>{{component_normal == 0
+                                      ? dof_index_x
+                                      : (component_normal == 1 ? dof_index_y : dof_index_z)}},
+      component_normal == 0 ? scaling_factor_x
+                            : (component_normal == 1 ? scaling_factor_y : scaling_factor_z));
 
-  _assembly.processResidualAndJacobian(
-      normal_dof_residual,
-      component_normal == 0 ? dof_index_x : (component_normal == 1 ? dof_index_y : dof_index_z),
-      _vector_tags,
-      _matrix_tags);
-
-  _assembly.processResidualAndJacobian(
-      tangential_dof_residual,
-      (component_normal == 0 || component_normal == 2) ? dof_index_y : dof_index_x,
-      _vector_tags,
-      _matrix_tags);
+  addResidualsAndJacobian(
+      _assembly,
+      std::array<ADReal, 1>{{tangential_dof_residual}},
+      std::array<dof_id_type, 1>{
+          {(component_normal == 0 || component_normal == 2) ? dof_index_y : dof_index_x}},
+      (component_normal == 0 || component_normal == 2) ? scaling_factor_y : scaling_factor_x);
 
   if (_has_disp_z)
-    _assembly.processResidualAndJacobian(
-        tangential_dof_residual_dir,
-        (component_normal == 0 || component_normal == 1) ? dof_index_z : dof_index_x,
-        _vector_tags,
-        _matrix_tags);
+    addResidualsAndJacobian(
+        _assembly,
+        std::array<ADReal, 1>{{tangential_dof_residual_dir}},
+        std::array<dof_id_type, 1>{
+            {(component_normal == 0 || component_normal == 1) ? dof_index_z : dof_index_x}},
+        (component_normal == 0 || component_normal == 1) ? scaling_factor_z : scaling_factor_x);
 }

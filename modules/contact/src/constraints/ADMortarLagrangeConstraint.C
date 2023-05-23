@@ -189,5 +189,5 @@ ADMortarLagrangeConstraint::computeJacobian(Moose::MortarType mortar_type)
     }
   }
 
-  _assembly.processJacobian(residuals_lower, dof_indices_lower, _matrix_tags, scaling_factor);
+  addJacobian(_assembly, residuals_lower, dof_indices_lower, scaling_factor);
 }

@@ -106,7 +106,7 @@ ADRayKernelTempl<T>::computeJacobian()
     for (_i = 0; _i < _test.size(); _i++)
       _residuals[_i] += _JxW[_qp] * computeQpResidual();
 
-  _assembly.processJacobian(_residuals, _var.dofIndices(), _matrix_tags, _var.scalingFactor());
+  addJacobian(_assembly, _residuals, _var.dofIndices(), _var.scalingFactor());
 }
 
 template class ADRayKernelTempl<Real>;

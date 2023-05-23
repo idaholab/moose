@@ -47,9 +47,7 @@ ArrayNodalBC::computeResidual()
     mooseAssert(_work_vector.size() == _count,
                 "Size of local residual is not equal to the number of array variable components");
 
-    for (auto tag_id : _vector_tags)
-      if (_sys.hasVector(tag_id))
-        _var.insertNodalValue(_sys.getVector(tag_id), _work_vector);
+    setResidual(_sys, _work_vector, _var);
   }
 }
 
@@ -58,16 +56,15 @@ ArrayNodalBC::computeJacobian()
 {
   if (_var.isNodalDefined())
   {
-    RealEigenVector cached_val = computeQpJacobian();
+    const RealEigenVector cached_val = computeQpJacobian();
+    const dof_id_type cached_row = _var.nodalDofIndex();
 
-    dof_id_type cached_row = _var.nodalDofIndex();
-
-    // Cache the user's computeQpJacobian() value for later use.
-    for (auto tag : _matrix_tags)
-      if (_sys.hasMatrix(tag))
-        for (unsigned int i = 0; i < _var.count(); ++i)
-          _fe_problem.assembly(0, _sys.number())
-              .cacheJacobian(cached_row + i, cached_row + i, cached_val(i), tag);
+    for (const auto i : make_range(_var.count()))
+      addJacobianElement(_fe_problem.assembly(0, _sys.number()),
+                         cached_val(i),
+                         cached_row + i,
+                         cached_row + i,
+                         /*scaling_factor=*/1);
   }
 }
 
@@ -79,19 +76,20 @@ ArrayNodalBC::computeOffDiagJacobian(const unsigned int jvar_num)
 
   const auto & jvar = getVariable(jvar_num);
 
-  RealEigenMatrix cached_val = computeQpOffDiagJacobian(const_cast<MooseVariableFieldBase &>(jvar));
-
-  dof_id_type cached_row = _var.nodalDofIndex();
+  const RealEigenMatrix cached_val =
+      computeQpOffDiagJacobian(const_cast<MooseVariableFieldBase &>(jvar));
+  const dof_id_type cached_row = _var.nodalDofIndex();
   // Note: this only works for Lagrange variables...
-  dof_id_type cached_col = _current_node->dof_number(_sys.number(), jvar_num, 0);
+  const dof_id_type cached_col = _current_node->dof_number(_sys.number(), jvar_num, 0);
 
   // Cache the user's computeQpJacobian() value for later use.
-  for (auto tag : _matrix_tags)
-    if (_sys.hasMatrix(tag))
-      for (unsigned int i = 0; i < _var.count(); ++i)
-        for (unsigned int j = 0; j < jvar.count(); ++j)
-          _fe_problem.assembly(0, _sys.number())
-              .cacheJacobian(cached_row + i, cached_col + j, cached_val(i, j), tag);
+  for (const auto i : make_range(_var.count()))
+    for (const auto j : make_range(jvar.count()))
+      addJacobianElement(_fe_problem.assembly(0, _sys.number()),
+                         cached_val(i, j),
+                         cached_row + i,
+                         cached_col + j,
+                         /*scaling_factor=*/1);
 }
 
 RealEigenVector

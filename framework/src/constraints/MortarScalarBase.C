@@ -52,10 +52,8 @@ MortarScalarBase::computeResidual()
       scalar_residuals[_h] += _JxW_msm[_qp] * _coord[_qp] * computeScalarQpResidual();
   }
 
-  _assembly.processResiduals(scalar_residuals,
-                             _kappa_var_ptr->dofIndices(),
-                             _vector_tags,
-                             _kappa_var_ptr->scalingFactor());
+  addResiduals(
+      _assembly, scalar_residuals, _kappa_var_ptr->dofIndices(), _kappa_var_ptr->scalingFactor());
 }
 
 void
@@ -122,12 +120,11 @@ MortarScalarBase::computeScalarJacobian()
         _local_ke(_h, _l) += _JxW_msm[_qp] * _coord[_qp] * computeScalarQpJacobian();
   }
 
-  for (const auto & matrix_tag : _matrix_tags)
-    _assembly.cacheJacobianBlock(_local_ke,
-                                 _kappa_var_ptr->dofIndices(),
-                                 _kappa_var_ptr->dofIndices(),
-                                 _kappa_var_ptr->scalingFactor(),
-                                 matrix_tag);
+  addJacobian(_assembly,
+              _local_ke,
+              _kappa_var_ptr->dofIndices(),
+              _kappa_var_ptr->dofIndices(),
+              _kappa_var_ptr->scalingFactor());
 }
 
 void
@@ -219,12 +216,11 @@ MortarScalarBase::computeScalarOffDiagJacobian()
         }
       }
 
-      for (const auto & matrix_tag : _matrix_tags)
-        _assembly.cacheJacobianBlock(_local_ke,
-                                     _kappa_var_ptr->dofIndices(),
-                                     dof_indices,
-                                     _kappa_var_ptr->scalingFactor(),
-                                     matrix_tag);
+      addJacobian(_assembly,
+                  _local_ke,
+                  _kappa_var_ptr->dofIndices(),
+                  dof_indices,
+                  _kappa_var_ptr->scalingFactor());
     }
   }
 }
@@ -276,9 +272,7 @@ MortarScalarBase::computeOffDiagJacobianScalar(Moose::MortarType mortar_type, un
       }
   }
 
-  for (const auto & matrix_tag : _matrix_tags)
-    _assembly.cacheJacobianBlock(
-        _local_ke, dof_indices, svar.dofIndices(), scaling_factor, matrix_tag);
+  addJacobian(_assembly, _local_ke, dof_indices, svar.dofIndices(), scaling_factor);
 }
 
 void
@@ -298,10 +292,9 @@ MortarScalarBase::computeScalarOffDiagJacobianScalar(const unsigned int svar_num
             _JxW_msm[_qp] * _coord[_qp] * computeScalarQpOffDiagJacobianScalar(svar_num);
   }
 
-  for (const auto & matrix_tag : _matrix_tags)
-    _assembly.cacheJacobianBlock(_local_ke,
-                                 _kappa_var_ptr->dofIndices(),
-                                 svar.dofIndices(),
-                                 _kappa_var_ptr->scalingFactor(),
-                                 matrix_tag);
+  addJacobian(_assembly,
+              _local_ke,
+              _kappa_var_ptr->dofIndices(),
+              svar.dofIndices(),
+              _kappa_var_ptr->scalingFactor());
 }

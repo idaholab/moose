@@ -78,24 +78,22 @@ conversionHelper(const libMesh::VectorValue<ADReal> & value, const unsigned int 
 template <typename T>
 template <typename ADResidual>
 void
-ADNodalBCTempl<T>::processResidual(const ADResidual & residual,
-                                   const std::vector<dof_id_type> & dof_indices)
+ADNodalBCTempl<T>::addResidual(const ADResidual & residual,
+                               const std::vector<dof_id_type> & dof_indices)
 {
   mooseAssert(dof_indices.size() <= _set_components.size(),
               "The number of dof indices must be less than the number of settable components");
 
-  for (auto tag_id : _vector_tags)
-    if (_sys.hasVector(tag_id))
-      for (const auto i : index_range(dof_indices))
-        if (_set_components[i])
-          _sys.getVector(tag_id).set(dof_indices[i], raw_value(conversionHelper(residual, i)));
+  for (const auto i : index_range(dof_indices))
+    if (_set_components[i])
+      setResidual(_sys, raw_value(conversionHelper(residual, i)), dof_indices[i]);
 }
 
 template <typename T>
 template <typename ADResidual>
 void
-ADNodalBCTempl<T>::processJacobian(const ADResidual & residual,
-                                   const std::vector<dof_id_type> & dof_indices)
+ADNodalBCTempl<T>::addJacobian(const ADResidual & residual,
+                               const std::vector<dof_id_type> & dof_indices)
 {
   mooseAssert(dof_indices.size() <= _set_components.size(),
               "The number of dof indices must be less than the number of settable components");
@@ -104,8 +102,10 @@ ADNodalBCTempl<T>::processJacobian(const ADResidual & residual,
     if (_set_components[i])
       // If we store into the displaced assembly for nodal bc objects the data never actually makes
       // it into the global Jacobian
-      _undisplaced_assembly.processJacobianNoScaling(
-          conversionHelper(residual, i), dof_indices[i], _matrix_tags);
+      addJacobian(_undisplaced_assembly,
+                  std::array<ADReal, 1>{{conversionHelper(residual, i)}},
+                  std::array<dof_id_type, 1>{{dof_indices[i]}},
+                  /*scaling_factor=*/1);
 }
 
 template <typename T>
@@ -118,7 +118,7 @@ ADNodalBCTempl<T>::computeResidual()
 
   const auto residual = computeQpResidual();
 
-  processResidual(residual, dof_indices);
+  addResidual(residual, dof_indices);
 }
 
 template <typename T>
@@ -131,7 +131,7 @@ ADNodalBCTempl<T>::computeJacobian()
 
   const auto residual = computeQpResidual();
 
-  processJacobian(residual, dof_indices);
+  addJacobian(residual, dof_indices);
 }
 
 template <typename T>
@@ -144,8 +144,8 @@ ADNodalBCTempl<T>::computeResidualAndJacobian()
 
   const auto residual = computeQpResidual();
 
-  processResidual(residual, dof_indices);
-  processJacobian(residual, dof_indices);
+  addResidual(residual, dof_indices);
+  addJacobian(residual, dof_indices);
 }
 
 template <typename T>

@@ -136,7 +136,7 @@ INSFVMixingLengthReynoldsStress::gatherRCData(const FaceInfo & fi)
   _normal = fi.normal();
   _face_type = fi.faceType(_var.name());
 
-  processResidualAndJacobian(computeStrongResidual() * (fi.faceArea() * fi.faceCoord()));
+  addResidualAndJacobian(computeStrongResidual() * (fi.faceArea() * fi.faceCoord()));
 
   if (_face_type == FaceInfo::VarFaceNeighbors::ELEM ||
       _face_type == FaceInfo::VarFaceNeighbors::BOTH)

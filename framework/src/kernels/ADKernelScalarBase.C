@@ -57,10 +57,8 @@ ADKernelScalarBase::computeResidual()
       for (_h = 0; _h < _k_order; _h++)
         scalar_residuals[_h] += _JxW[_qp] * _coord[_qp] * raw_value(computeScalarQpResidual());
     }
-    _assembly.processResiduals(scalar_residuals,
-                               _kappa_var_ptr->dofIndices(),
-                               _vector_tags,
-                               _kappa_var_ptr->scalingFactor());
+    addResiduals(
+        _assembly, scalar_residuals, _kappa_var_ptr->dofIndices(), _kappa_var_ptr->scalingFactor());
   }
 }
 
@@ -73,11 +71,10 @@ ADKernelScalarBase::computeJacobian()
   if (_compute_scalar_residuals)
   {
     computeScalarResidualsForJacobian();
-    _assembly.processResidualsAndJacobian(_scalar_residuals,
-                                          _kappa_var_ptr->dofIndices(),
-                                          _vector_tags,
-                                          _matrix_tags,
-                                          _kappa_var_ptr->scalingFactor());
+    addResidualsAndJacobian(_assembly,
+                            _scalar_residuals,
+                            _kappa_var_ptr->dofIndices(),
+                            _kappa_var_ptr->scalingFactor());
   }
 }
 
@@ -103,11 +100,10 @@ ADKernelScalarBase::computeResidualAndJacobian()
   if (_compute_scalar_residuals)
   {
     computeScalarResidualsForJacobian();
-    _assembly.processResidualsAndJacobian(_scalar_residuals,
-                                          _kappa_var_ptr->dofIndices(),
-                                          _vector_tags,
-                                          _matrix_tags,
-                                          _kappa_var_ptr->scalingFactor());
+    addResidualsAndJacobian(_assembly,
+                            _scalar_residuals,
+                            _kappa_var_ptr->dofIndices(),
+                            _kappa_var_ptr->scalingFactor());
   }
 }
 

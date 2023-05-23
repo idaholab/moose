@@ -42,13 +42,16 @@ FVScalarLagrangeMultiplierInterface::computeResidual(const FaceInfo & fi)
       MetaPhysicL::raw_value(_lambda[0]) * fi.faceArea() * fi.faceCoord() * (2 * _elem_is_one - 1);
 
   // Primal residual
-  processResidual(r, var_elem_num, false);
-  processResidual(-r, var_neigh_num, true);
+  addResidual(r, var_elem_num, false);
+  addResidual(-r, var_neigh_num, true);
 
   // LM residual. We may not have any actual ScalarKernels in our simulation so we need to manually
   // make sure the scalar residuals get cached for later addition
   const auto lm_r = MetaPhysicL::raw_value(computeQpResidual()) * fi.faceArea() * fi.faceCoord();
-  _assembly.processResidual(lm_r, _lambda_var.dofIndices()[0], _vector_tags);
+  addResiduals(_assembly,
+               std::array<Real, 1>{{lm_r}},
+               _lambda_var.dofIndices(),
+               _lambda_var.scalingFactor());
 }
 
 void
@@ -61,15 +64,21 @@ FVScalarLagrangeMultiplierInterface::computeJacobian(const FaceInfo & fi)
       _elem_is_one ? var2().dofIndicesNeighbor() : var1().dofIndicesNeighbor();
   mooseAssert((elem_dof_indices.size() == 1) && (neigh_dof_indices.size() == 1),
               "We're currently built to use CONSTANT MONOMIALS");
+  const auto elem_scaling_factor = _elem_is_one ? var1().scalingFactor() : var2().scalingFactor();
+  const auto neigh_scaling_factor = _elem_is_one ? var2().scalingFactor() : var1().scalingFactor();
 
   // Primal
   const auto primal_r = _lambda[0] * fi.faceArea() * fi.faceCoord() * (2 * _elem_is_one - 1);
-  _assembly.processResidualAndJacobian(primal_r, elem_dof_indices[0], _vector_tags, _matrix_tags);
-  _assembly.processResidualAndJacobian(-primal_r, neigh_dof_indices[0], _vector_tags, _matrix_tags);
+  addResidualsAndJacobian(
+      _assembly, std::array<ADReal, 1>{{primal_r}}, elem_dof_indices, elem_scaling_factor);
+  addResidualsAndJacobian(
+      _assembly, std::array<ADReal, 1>{{-primal_r}}, neigh_dof_indices, neigh_scaling_factor);
 
   // LM
   const auto lm_r = computeQpResidual() * fi.faceArea() * fi.faceCoord();
   mooseAssert(_lambda_var.dofIndices().size() == 1, "We should only have one dof");
-  _assembly.processResidualAndJacobian(
-      lm_r, _lambda_var.dofIndices()[0], _vector_tags, _matrix_tags);
+  addResidualsAndJacobian(_assembly,
+                          std::array<ADReal, 1>{{lm_r}},
+                          _lambda_var.dofIndices(),
+                          _lambda_var.scalingFactor());
 }

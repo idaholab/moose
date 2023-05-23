@@ -82,7 +82,7 @@ HeatFluxBaseBC::computeOffDiagJacobian(const unsigned int jvar_num)
           for (_j = 0; _j < jvar.phiNeighborSize(); _j++)
             Ke(_i, _j) += _JxW[_qp] * _coord[_qp] * computeQpOffDiagJacobianNeighbor(jvar_num);
 
-      _assembly.cacheJacobianBlock(Ke, idofs, jdofs, _var.scalingFactor());
+      addJacobian(_assembly, Ke, idofs, jdofs, _var.scalingFactor());
     }
   }
 }

@@ -45,7 +45,7 @@ protected:
    * indices. For example a user could have something like an \p LMKernel which sums computed
    * strong residuals into both primal and LM residuals. That user needs to be
    * able to feed dof indices from both the primal and LM variable into
-   * \p Assembly::processJacobian
+   * \p Assembly::addJacobian
    */
   virtual const std::vector<dof_id_type> & dofIndices() const { return _var.dofIndices(); }
 
@@ -58,7 +58,7 @@ protected:
    * up-front when doing loal derivative indexing because we can use those residuals to fill \p
    * _local_ke for every associated jvariable. We do not want to re-do these calculations for every
    * jvariable and corresponding \p _local_ke. For global indexing we will simply pass the computed
-   * \p _residuals directly to \p Assembly::processJacobian
+   * \p _residuals directly to \p Assembly::addJacobian
    */
   virtual void computeResidualsForJacobian();
 
@@ -116,11 +116,6 @@ protected:
   const typename OutputTools<T>::VariablePhiGradient & _regular_grad_phi;
 
 private:
-  /**
-   * Add the Jacobian contribution for the provided variable
-   */
-  void addJacobian(const MooseVariableFieldBase & jvariable);
-
   /**
    * compute all the Jacobian entries
    */

@@ -91,13 +91,9 @@ MechanicsBasePD::computeOffDiagJacobian(const unsigned int jvar_num)
 
     if (active)
     {
-      DenseMatrix<Number> & ke = _assembly.jacobianBlock(_var.number(), jvar_num);
-      _local_ke.resize(ke.m(), ke.n());
-      _local_ke.zero();
-
+      prepareMatrixTag(_assembly, _var.number(), jvar_num);
       computeLocalOffDiagJacobian(jvar_num, coupled_component);
-
-      ke += _local_ke;
+      accumulateTaggedLocalMatrix();
 
       if (_use_full_jacobian)
         computePDNonlocalOffDiagJacobian(jvar_num, coupled_component);

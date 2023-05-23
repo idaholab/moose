@@ -149,7 +149,7 @@ addActionTypes(Syntax & syntax)
   registerMooseObjectTask("setup_predictor",              Predictor,              false);
   registerMooseObjectTask("add_time_steppers",            TimeStepper,            false);
   registerMooseObjectTask("add_time_stepper",             TimeStepper,            false);
-  registerMooseObjectTask("compose_time_stepper",         TimeStepper,            false);
+  registerTask           ("compose_time_stepper",                                 true);
   registerMooseObjectTask("setup_time_integrator",        TimeIntegrator,         false);
 
   registerMooseObjectTask("add_preconditioning",          MoosePreconditioner,    false);

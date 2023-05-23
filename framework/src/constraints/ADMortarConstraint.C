@@ -103,8 +103,7 @@ ADMortarConstraint::computeJacobian(Moose::MortarType mortar_type)
     for (_i = 0; _i < test_space_size; _i++)
       residuals[_i] += _JxW_msm[_qp] * _coord[_qp] * computeQpResidual(mortar_type);
 
-  _assembly.processUnconstrainedResidualsAndJacobian(
-      residuals, dof_indices, _vector_tags, _matrix_tags, scaling_factor);
+  addResidualsAndJacobianWithoutConstraints(_assembly, residuals, dof_indices, scaling_factor);
 }
 
 void

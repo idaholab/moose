@@ -96,16 +96,17 @@ NodeElemConstraint::computeSecondaryValue(NumericVector<Number> & current_soluti
 void
 NodeElemConstraint::computeResidual()
 {
-  DenseVector<Number> & secondary_re = _assembly.residualBlock(_var.number());
-  DenseVector<Number> & primary_re = _assembly.residualBlockNeighbor(_primary_var.number());
-
   _qp = 0;
 
+  prepareVectorTagNeighbor(_assembly, _var.number());
   for (_i = 0; _i < _test_primary.size(); _i++)
-    primary_re(_i) += computeQpResidual(Moose::Primary);
+    _local_re(_i) += computeQpResidual(Moose::Primary);
+  accumulateTaggedLocalResidual();
 
+  prepareVectorTag(_assembly, _var.number());
   for (_i = 0; _i < _test_secondary.size(); _i++)
-    secondary_re(_i) += computeQpResidual(Moose::Secondary);
+    _local_re(_i) += computeQpResidual(Moose::Secondary);
+  accumulateTaggedLocalResidual();
 }
 
 void
@@ -113,50 +114,33 @@ NodeElemConstraint::computeJacobian()
 {
   getConnectedDofIndices(_var.number());
 
-  DenseMatrix<Number> & Ken =
-      _assembly.jacobianBlockNeighbor(Moose::ElementNeighbor, _var.number(), _var.number());
-
-  DenseMatrix<Number> & Knn = _assembly.jacobianBlockNeighbor(
-      Moose::NeighborNeighbor, _primary_var.number(), _var.number());
-
   _Kee.resize(_test_secondary.size(), _connected_dof_indices.size());
   _Kne.resize(_test_primary.size(), _connected_dof_indices.size());
-
-  _phi_secondary.resize(_connected_dof_indices.size());
-
-  _qp = 0;
-
-  // Fill up _phi_secondary so that it is 1 when j corresponds to this dof and 0 for every other dof
-  // This corresponds to evaluating all of the connected shape functions at _this_ node
-  for (unsigned int j = 0; j < _connected_dof_indices.size(); j++)
-  {
-    _phi_secondary[j].resize(1);
-
-    if (_connected_dof_indices[j] == _var.nodalDofIndex())
-      _phi_secondary[j][_qp] = 1.0;
-    else
-      _phi_secondary[j][_qp] = 0.0;
-  }
 
   for (_i = 0; _i < _test_secondary.size(); _i++)
     // Loop over the connected dof indices so we can get all the jacobian contributions
     for (_j = 0; _j < _connected_dof_indices.size(); _j++)
       _Kee(_i, _j) += computeQpJacobian(Moose::SecondarySecondary);
 
-  if (Ken.m() && Ken.n())
+  prepareMatrixTagNeighbor(_assembly, _var.number(), _var.number(), Moose::ElementNeighbor);
+  if (_local_ke.m() && _local_ke.n())
     for (_i = 0; _i < _test_secondary.size(); _i++)
       for (_j = 0; _j < _phi_primary.size(); _j++)
-        Ken(_i, _j) += computeQpJacobian(Moose::SecondaryPrimary);
+        _local_ke(_i, _j) += computeQpJacobian(Moose::SecondaryPrimary);
+  accumulateTaggedLocalMatrix();
 
   for (_i = 0; _i < _test_primary.size(); _i++)
     // Loop over the connected dof indices so we can get all the jacobian contributions
     for (_j = 0; _j < _connected_dof_indices.size(); _j++)
       _Kne(_i, _j) += computeQpJacobian(Moose::PrimarySecondary);
 
-  if (Knn.m() && Knn.n())
+  prepareMatrixTagNeighbor(
+      _assembly, _primary_var.number(), _var.number(), Moose::NeighborNeighbor);
+  if (_local_ke.m() && _local_ke.n())
     for (_i = 0; _i < _test_primary.size(); _i++)
       for (_j = 0; _j < _phi_primary.size(); _j++)
-        Knn(_i, _j) += computeQpJacobian(Moose::PrimaryPrimary);
+        _local_ke(_i, _j) += computeQpJacobian(Moose::PrimaryPrimary);
+  accumulateTaggedLocalMatrix();
 }
 
 void
@@ -167,35 +151,16 @@ NodeElemConstraint::computeOffDiagJacobian(const unsigned int jvar_num)
   _Kee.resize(_test_secondary.size(), _connected_dof_indices.size());
   _Kne.resize(_test_primary.size(), _connected_dof_indices.size());
 
-  DenseMatrix<Number> & Ken =
-      _assembly.jacobianBlockNeighbor(Moose::ElementNeighbor, _var.number(), jvar_num);
-  DenseMatrix<Number> & Knn =
-      _assembly.jacobianBlockNeighbor(Moose::NeighborNeighbor, _primary_var.number(), jvar_num);
-
-  _phi_secondary.resize(_connected_dof_indices.size());
-
-  _qp = 0;
-
-  // Fill up _phi_secondary so that it is 1 when j corresponds to this dof and 0 for every other dof
-  // This corresponds to evaluating all of the connected shape functions at _this_ node
-  for (unsigned int j = 0; j < _connected_dof_indices.size(); j++)
-  {
-    _phi_secondary[j].resize(1);
-
-    if (_connected_dof_indices[j] == _var.nodalDofIndex())
-      _phi_secondary[j][_qp] = 1.0;
-    else
-      _phi_secondary[j][_qp] = 0.0;
-  }
-
   for (_i = 0; _i < _test_secondary.size(); _i++)
     // Loop over the connected dof indices so we can get all the jacobian contributions
     for (_j = 0; _j < _connected_dof_indices.size(); _j++)
       _Kee(_i, _j) += computeQpOffDiagJacobian(Moose::SecondarySecondary, jvar_num);
 
+  prepareMatrixTagNeighbor(_assembly, _var.number(), jvar_num, Moose::ElementNeighbor);
   for (_i = 0; _i < _test_secondary.size(); _i++)
     for (_j = 0; _j < _phi_primary.size(); _j++)
-      Ken(_i, _j) += computeQpOffDiagJacobian(Moose::SecondaryPrimary, jvar_num);
+      _local_ke(_i, _j) += computeQpOffDiagJacobian(Moose::SecondaryPrimary, jvar_num);
+  accumulateTaggedLocalMatrix();
 
   if (_Kne.m() && _Kne.n())
     for (_i = 0; _i < _test_primary.size(); _i++)
@@ -203,9 +168,11 @@ NodeElemConstraint::computeOffDiagJacobian(const unsigned int jvar_num)
       for (_j = 0; _j < _connected_dof_indices.size(); _j++)
         _Kne(_i, _j) += computeQpOffDiagJacobian(Moose::PrimarySecondary, jvar_num);
 
+  prepareMatrixTagNeighbor(_assembly, _primary_var.number(), jvar_num, Moose::NeighborNeighbor);
   for (_i = 0; _i < _test_primary.size(); _i++)
     for (_j = 0; _j < _phi_primary.size(); _j++)
-      Knn(_i, _j) += computeQpOffDiagJacobian(Moose::PrimaryPrimary, jvar_num);
+      _local_ke(_i, _j) += computeQpOffDiagJacobian(Moose::PrimaryPrimary, jvar_num);
+  accumulateTaggedLocalMatrix();
 }
 
 void
@@ -233,6 +200,24 @@ NodeElemConstraint::getConnectedDofIndices(unsigned int var_num)
 
   for (const auto & dof : unique_dof_indices)
     _connected_dof_indices.push_back(dof);
+
+  _phi_secondary.resize(_connected_dof_indices.size());
+
+  const dof_id_type current_node_var_dof_index = _sys.getVariable(0, var_num).nodalDofIndex();
+
+  // Fill up _phi_secondary so that it is 1 when j corresponds to the dof associated with this node
+  // and 0 for every other dof
+  // This corresponds to evaluating all of the connected shape functions at _this_ node
+  _qp = 0;
+  for (unsigned int j = 0; j < _connected_dof_indices.size(); j++)
+  {
+    _phi_secondary[j].resize(1);
+
+    if (_connected_dof_indices[j] == current_node_var_dof_index)
+      _phi_secondary[j][_qp] = 1.0;
+    else
+      _phi_secondary[j][_qp] = 0.0;
+  }
 }
 
 bool

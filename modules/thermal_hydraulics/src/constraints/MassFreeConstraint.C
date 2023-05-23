@@ -38,14 +38,13 @@ MassFreeConstraint::MassFreeConstraint(const InputParameters & parameters)
 void
 MassFreeConstraint::computeResidual(NumericVector<Number> & /*residual*/)
 {
-  auto && dofs = _var.dofIndices();
-  DenseVector<Number> re(dofs.size());
+  const auto & dofs = _var.dofIndices();
+  std::vector<Number> re(dofs.size());
 
-  re.zero();
   for (unsigned int i = 0; i < dofs.size(); i++)
-    re(i) = _rhouA[i] * _normals[i];
-  re *= _var.scalingFactor();
-  _assembly.cacheResidualNodes(re, dofs);
+    re[i] = _rhouA[i] * _normals[i];
+
+  addResiduals(_assembly, re, dofs, _var.scalingFactor());
 }
 
 Real MassFreeConstraint::computeQpResidual(Moose::ConstraintType /*type*/) { return 0; }
@@ -53,13 +52,7 @@ Real MassFreeConstraint::computeQpResidual(Moose::ConstraintType /*type*/) { ret
 void
 MassFreeConstraint::computeJacobian(SparseMatrix<Number> & /*jacobian*/)
 {
-  auto && dofs = _var.dofIndices();
-
-  {
-    DenseMatrix<Number> Kee(dofs.size(), dofs.size());
-    Kee.zero();
-    _assembly.cacheJacobianBlock(Kee, dofs, dofs, _var.scalingFactor());
-  }
+  const auto & dofs = _var.dofIndices();
 
   // off-diag
   {
@@ -70,7 +63,7 @@ MassFreeConstraint::computeJacobian(SparseMatrix<Number> & /*jacobian*/)
     Kee.zero();
     for (unsigned int i = 0; i < dofs.size(); i++)
       Kee(i, i) = _normals[i];
-    _assembly.cacheJacobianBlock(Kee, dofs, dofs_rhouA, _var.scalingFactor());
+    addJacobian(_assembly, Kee, dofs, dofs_rhouA, _var.scalingFactor());
   }
 }
 

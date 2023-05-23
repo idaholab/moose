@@ -75,7 +75,14 @@
       input = 'active_timesteppers.i'
       cli_args = "Controls/c1/disable_objects='TimeStepper::ConstDT2 TimeStepper::ConstDT1'"
       expect_err = "The following error occurred in the object \"CompositionDT\", of type \"CompositionDT\".[.\n]\sNo TimeStepper\(s\) are currently active to compute a timestep"
-      detail ='no time steppers are active to compute a timestep.'
+      detail ='no time steppers are active to compute a timestep,'
+    []
+
+    [input_hierarchy]
+      type = RunException
+      input = 'timestepper_input_error.i'
+      expect_err = "unused parameter 'Executioner/TimeSteppers/time_sequence'"
+      detail = 'the syntax for multiple time steppers is used without an additional nested block for the time stepper'
     []
 
   []

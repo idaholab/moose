@@ -67,8 +67,8 @@ GeneralizedPlaneStrainOffDiagNOSPD::computeDispPartialOffDiagJacobianScalar(unsi
   // off-diagonal jacobian entries on the column and row corresponding to
   // scalar_out_of_plane_strain for coupling with displacements
 
-  DenseMatrix<Number> & ken = _assembly.jacobianBlock(_var.number(), jvar_num);
-  DenseMatrix<Number> & kne = _assembly.jacobianBlock(jvar_num, _var.number());
+  prepareMatrixTag(_assembly, _var.number(), jvar_num, _ken);
+  prepareMatrixTag(_assembly, jvar_num, _var.number(), _kne);
   MooseVariableScalar & jvar = _sys.getScalarVariable(_tid, jvar_num);
 
   // fill in the column corresponding to the scalar variable
@@ -80,15 +80,17 @@ GeneralizedPlaneStrainOffDiagNOSPD::computeDispPartialOffDiagJacobianScalar(unsi
 
   for (unsigned int i = 0; i < _nnodes; ++i)
     for (unsigned int j = 0; j < jvar.order(); ++j)
-      ken(i, j) += (i == j ? -1 : 1) *
-                   (_multi[0] * (dSdE33[0] * _shape2[0].inverse()).row(component) +
-                    _multi[1] * (dSdE33[1] * _shape2[1].inverse()).row(component)) *
-                   _origin_vec * _bond_status;
+      _ken(i, j) += (i == j ? -1 : 1) *
+                    (_multi[0] * (dSdE33[0] * _shape2[0].inverse()).row(component) +
+                     _multi[1] * (dSdE33[1] * _shape2[1].inverse()).row(component)) *
+                    _origin_vec * _bond_status;
 
-  kne(0, 0) +=
+  _kne(0, 0) +=
       computeDSDU(component, 0)(2, 2) * _node_vol[0] * _dg_vol_frac[0] * _bond_status; // node i
-  kne(0, 1) +=
+  _kne(0, 1) +=
       computeDSDU(component, 1)(2, 2) * _node_vol[1] * _dg_vol_frac[1] * _bond_status; // node j
+  accumulateTaggedLocalMatrix(_assembly, _var.number(), jvar_num, _ken);
+  accumulateTaggedLocalMatrix(_assembly, jvar_num, _var.number(), _kne);
 }
 
 void
@@ -99,8 +101,8 @@ GeneralizedPlaneStrainOffDiagNOSPD::computeDispFullOffDiagJacobianScalar(unsigne
 
   // off-diagonal jacobian entries on the column and row corresponding to
   // scalar_out_of_plane_strain for coupling with displacements
-  DenseMatrix<Number> & ken = _assembly.jacobianBlock(_var.number(), jvar_num);
-  DenseMatrix<Number> & kne = _assembly.jacobianBlock(jvar_num, _var.number());
+  prepareMatrixTag(_assembly, _var.number(), jvar_num, _ken);
+  prepareMatrixTag(_assembly, jvar_num, _var.number(), _kne);
   MooseVariableScalar & jvar = _sys.getScalarVariable(_tid, jvar_num);
 
   // fill in the column corresponding to the scalar variable
@@ -112,16 +114,19 @@ GeneralizedPlaneStrainOffDiagNOSPD::computeDispFullOffDiagJacobianScalar(unsigne
 
   for (unsigned int i = 0; i < _nnodes; ++i)
     for (unsigned int j = 0; j < jvar.order(); ++j)
-      ken(i, j) += (i == j ? -1 : 1) *
-                   (_multi[0] * (dSdE33[0] * _shape2[0].inverse()).row(component) +
-                    _multi[1] * (dSdE33[1] * _shape2[1].inverse()).row(component)) *
-                   _origin_vec * _bond_status;
+      _ken(i, j) += (i == j ? -1 : 1) *
+                    (_multi[0] * (dSdE33[0] * _shape2[0].inverse()).row(component) +
+                     _multi[1] * (dSdE33[1] * _shape2[1].inverse()).row(component)) *
+                    _origin_vec * _bond_status;
 
   // fill in the row corresponding to the scalar variable
-  kne(0, 0) +=
+  _kne(0, 0) +=
       computeDSDU(component, 0)(2, 2) * _node_vol[0] * _dg_vol_frac[0] * _bond_status; // node i
-  kne(0, 1) +=
+  _kne(0, 1) +=
       computeDSDU(component, 1)(2, 2) * _node_vol[1] * _dg_vol_frac[1] * _bond_status; // node j
+
+  accumulateTaggedLocalMatrix(_assembly, _var.number(), jvar_num, _ken);
+  accumulateTaggedLocalMatrix(_assembly, jvar_num, _var.number(), _kne);
 
   // NONLOCAL contribution
 
@@ -163,11 +168,11 @@ GeneralizedPlaneStrainOffDiagNOSPD::computeDispFullOffDiagJacobianScalar(unsigne
         dFdUk *= _shape2[nd].inverse();
         dPdUk = _Jacobian_mult[nd] * 0.5 * (dFdUk.transpose() + dFdUk);
 
-        _local_ke.resize(ken.n(), ken.m());
+        _local_ke.resize(_ken.n(), _ken.m());
         _local_ke.zero();
         _local_ke(0, 1) = dPdUk(2, 2) * _dg_vol_frac[nd] * _node_vol[nd] * _bond_status;
 
-        _assembly.cacheJacobianBlock(_local_ke, jvar.dofIndices(), ivardofs, _var.scalingFactor());
+        addJacobian(_assembly, _local_ke, jvar.dofIndices(), ivardofs, _var.scalingFactor());
       }
   }
 }
@@ -177,7 +182,7 @@ GeneralizedPlaneStrainOffDiagNOSPD::computeTempOffDiagJacobianScalar(unsigned in
 {
   // off-diagonal jacobian entries on the row corresponding to scalar_out_of_plane_strain for
   // coupling with temperature
-  DenseMatrix<Number> & kne = _assembly.jacobianBlock(jvar_num, _var.number());
+  prepareMatrixTag(_assembly, jvar_num, _var.number(), _kne);
 
   // one-way coupling between the scalar_out_of_plane_strain and temperature. fill in the row
   // corresponding to the scalar_out_of_plane_strain
@@ -186,6 +191,7 @@ GeneralizedPlaneStrainOffDiagNOSPD::computeTempOffDiagJacobianScalar(unsigned in
     for (unsigned int es = 0; es < _deigenstrain_dT.size(); ++es)
       dSdT[nd] = -_Jacobian_mult[nd] * (*_deigenstrain_dT[es])[nd];
 
-  kne(0, 0) += dSdT[0](2, 2) * _dg_vol_frac[0] * _node_vol[0] * _bond_status; // node i
-  kne(0, 1) += dSdT[1](2, 2) * _dg_vol_frac[1] * _node_vol[1] * _bond_status; // node j
+  _kne(0, 0) += dSdT[0](2, 2) * _dg_vol_frac[0] * _node_vol[0] * _bond_status; // node i
+  _kne(0, 1) += dSdT[1](2, 2) * _dg_vol_frac[1] * _node_vol[1] * _bond_status; // node j
+  accumulateTaggedLocalMatrix(_assembly, jvar_num, _var.number(), _kne);
 }

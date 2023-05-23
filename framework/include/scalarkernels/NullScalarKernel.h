@@ -22,10 +22,11 @@ public:
   NullScalarKernel(const InputParameters & parameters);
 
   virtual void reinit() override;
-  virtual void computeResidual() override;
-  virtual void computeJacobian() override;
 
 protected:
+  virtual Real computeQpResidual() override;
+  virtual Real computeQpJacobian() override;
+
   /// filler value to put on the on-diagonal Jacobian
   const Real _jacobian_fill;
 

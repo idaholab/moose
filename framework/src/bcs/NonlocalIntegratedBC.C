@@ -36,10 +36,7 @@ NonlocalIntegratedBC::NonlocalIntegratedBC(const InputParameters & parameters)
 void
 NonlocalIntegratedBC::computeJacobian()
 {
-  DenseMatrix<Number> & ke = _assembly.jacobianBlock(_var.number(), _var.number());
-  _local_ke.resize(ke.m(), ke.n());
-  _local_ke.zero();
-
+  prepareMatrixTag(_assembly, _var.number(), _var.number());
   for (_j = 0; _j < _phi.size();
        _j++) // looping order for _i & _j are reversed for performance improvement
   {
@@ -48,17 +45,15 @@ NonlocalIntegratedBC::computeJacobian()
       for (_qp = 0; _qp < _qrule->n_points(); _qp++)
         _local_ke(_i, _j) += _JxW[_qp] * _coord[_qp] * computeQpJacobian();
   }
-
-  ke += _local_ke;
+  accumulateTaggedLocalMatrix();
 
   if (_has_diag_save_in)
   {
-    unsigned int rows = ke.m();
+    unsigned int rows = _local_ke.m();
     DenseVector<Number> diag(rows);
     for (unsigned int i = 0; i < rows; i++)
       diag(i) = _local_ke(i, i);
 
-    Threads::spin_mutex::scoped_lock lock(Threads::spin_mtx);
     for (const auto & var : _diag_save_in)
       var->sys().solution().add_vector(diag, var->dofIndices());
   }
@@ -72,7 +67,7 @@ NonlocalIntegratedBC::computeOffDiagJacobian(const unsigned int jvar_num)
   else
   {
     const auto & jvar = getVariable(jvar_num);
-    DenseMatrix<Number> & ke = _assembly.jacobianBlock(_var.number(), jvar_num);
+    prepareMatrixTag(_assembly, _var.number(), jvar_num);
 
     // This (undisplaced) jvar could potentially yield the wrong phi size if this object is acting
     // on the displaced mesh
@@ -84,15 +79,16 @@ NonlocalIntegratedBC::computeOffDiagJacobian(const unsigned int jvar_num)
       getUserObjectJacobian(jvar_num, jvar.dofIndices()[_j]);
       for (_i = 0; _i < _test.size(); _i++)
         for (_qp = 0; _qp < _qrule->n_points(); _qp++)
-          ke(_i, _j) += _JxW[_qp] * _coord[_qp] * computeQpOffDiagJacobian(jvar.number());
+          _local_ke(_i, _j) += _JxW[_qp] * _coord[_qp] * computeQpOffDiagJacobian(jvar.number());
     }
+    accumulateTaggedLocalMatrix();
   }
 }
 
 void
 NonlocalIntegratedBC::computeNonlocalJacobian()
 {
-  DenseMatrix<Number> & keg = _assembly.jacobianBlockNonlocal(_var.number(), _var.number());
+  prepareMatrixTagNonlocal(_assembly, _var.number(), _var.number());
   // compiling set of global IDs for the local DOFs on the element
   std::set<dof_id_type> local_dofindices(_var.dofIndices().begin(), _var.dofIndices().end());
   // storing the global IDs for all the DOFs of the variable
@@ -113,9 +109,11 @@ NonlocalIntegratedBC::computeNonlocalJacobian()
 
       for (_i = 0; _i < _test.size(); _i++)
         for (_qp = 0; _qp < _qrule->n_points(); _qp++)
-          keg(_i, _k) += _JxW[_qp] * _coord[_qp] * computeQpNonlocalJacobian(var_alldofindices[_k]);
+          _nonlocal_ke(_i, _k) +=
+              _JxW[_qp] * _coord[_qp] * computeQpNonlocalJacobian(var_alldofindices[_k]);
     }
   }
+  accumulateTaggedNonlocalMatrix();
 }
 
 void
@@ -126,7 +124,7 @@ NonlocalIntegratedBC::computeNonlocalOffDiagJacobian(unsigned int jvar)
   else
   {
     MooseVariableFEBase & jv = _sys.getVariable(_tid, jvar);
-    DenseMatrix<Number> & keg = _assembly.jacobianBlockNonlocal(_var.number(), jvar);
+    prepareMatrixTagNonlocal(_assembly, _var.number(), jvar);
     // compiling set of global IDs for the local DOFs on the element
     std::set<dof_id_type> local_dofindices(jv.dofIndices().begin(), jv.dofIndices().end());
     // storing the global IDs for all the DOFs of the variable
@@ -147,9 +145,10 @@ NonlocalIntegratedBC::computeNonlocalOffDiagJacobian(unsigned int jvar)
 
         for (_i = 0; _i < _test.size(); _i++)
           for (_qp = 0; _qp < _qrule->n_points(); _qp++)
-            keg(_i, _k) += _JxW[_qp] * _coord[_qp] *
-                           computeQpNonlocalOffDiagJacobian(jvar, jv_alldofindices[_k]);
+            _nonlocal_ke(_i, _k) += _JxW[_qp] * _coord[_qp] *
+                                    computeQpNonlocalOffDiagJacobian(jvar, jv_alldofindices[_k]);
       }
     }
+    accumulateTaggedNonlocalMatrix();
   }
 }

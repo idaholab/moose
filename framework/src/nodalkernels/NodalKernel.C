@@ -72,16 +72,15 @@ NodalKernel::computeResidual()
   {
     const dof_id_type & dof_idx = _var.nodalDofIndex();
     _qp = 0;
-    Real res = computeQpResidual();
-    res *= _var.scalingFactor();
-    _assembly.cacheResidual(dof_idx, res, _vector_tags);
+    const Real res = computeQpResidual();
+    addResiduals(_assembly,
+                 std::array<Real, 1>{{res}},
+                 std::array<dof_id_type, 1>{{dof_idx}},
+                 _var.scalingFactor());
 
     if (_has_save_in)
-    {
-      Threads::spin_mutex::scoped_lock lock(Threads::spin_mtx);
       for (const auto & var : _save_in)
         var->sys().solution().add(var->nodalDofIndex(), res);
-    }
   }
 }
 
@@ -91,12 +90,10 @@ NodalKernel::computeJacobian()
   if (_var.isNodalDefined())
   {
     _qp = 0;
-    Real cached_val = computeQpJacobian();
-    dof_id_type cached_row = _var.nodalDofIndex();
+    const Real cached_val = computeQpJacobian();
+    const dof_id_type cached_row = _var.nodalDofIndex();
 
-    cached_val *= _var.scalingFactor();
-
-    _assembly.cacheJacobian(cached_row, cached_row, cached_val, _matrix_tags);
+    addJacobianElement(_assembly, cached_val, cached_row, cached_row, _var.scalingFactor());
 
     if (_has_diag_save_in)
     {
@@ -119,15 +116,13 @@ NodalKernel::computeOffDiagJacobian(const unsigned int jvar_num)
     else
     {
       _qp = 0;
-      Real cached_val = computeQpOffDiagJacobian(jvar.number());
-      dof_id_type cached_row = _var.nodalDofIndex();
+      const Real cached_val = computeQpOffDiagJacobian(jvar.number());
+      const dof_id_type cached_row = _var.nodalDofIndex();
 
       // Note: this only works for equal order Lagrange variables...
-      dof_id_type cached_col = _current_node->dof_number(_sys.number(), jvar.number(), 0);
+      const dof_id_type cached_col = _current_node->dof_number(_sys.number(), jvar.number(), 0);
 
-      cached_val *= _var.scalingFactor();
-
-      _assembly.cacheJacobian(cached_row, cached_col, cached_val, _matrix_tags);
+      addJacobianElement(_assembly, cached_val, cached_row, cached_col, _var.scalingFactor());
     }
   }
 }

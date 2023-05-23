@@ -9,31 +9,16 @@
 
 #pragma once
 
-#include "NodalNormalBC.h"
+#include "MomentumFreeSlipBC.h"
 
 /**
- * Boundary condition for free slip wall boundary
- * This implementation follows the MomentumFreeSlipBC of the Navier-Stokes module,
- * which acts on conservative variables such as rhou and rhov, while this class acts on
- * primitive variables such as u and v.
+ * Boundary condition for free slip wall boundary specifically applied to privitive velocity
+ * variables
  */
-class INSFEMomentumFreeSlipBC : public NodalNormalBC
+class INSFEMomentumFreeSlipBC : public MomentumFreeSlipBC
 {
 public:
   static InputParameters validParams();
 
   INSFEMomentumFreeSlipBC(const InputParameters & parameters);
-  virtual ~INSFEMomentumFreeSlipBC();
-
-  virtual bool shouldApply() override;
-
-protected:
-  virtual Real computeQpResidual() override;
-
-  /// The dimension of the mesh
-  const unsigned int _mesh_dimension;
-
-  const VariableValue & _u_vel;
-  const VariableValue & _v_vel;
-  const VariableValue & _w_vel;
 };

@@ -30,28 +30,28 @@
 
 [Kernels]
   [u_dt]
-    type = TimeDerivative
+    type = ADTimeDerivative
     variable = u
   []
   [u_coupled_rx]
-    type = CoupledForce
+    type = ADCoupledForce
     variable = u
     v = v
     coef = 1
   []
 
   [v_dt]
-    type = TimeDerivative
+    type = ADTimeDerivative
     variable = v
   []
   [v_neg_force]
-    type = BodyForce
+    type = ADBodyForce
     variable = v
     value = ${fparse -1 / 2}
     function = ramp
   []
   [v_force]
-    type = BodyForce
+    type = ADBodyForce
     variable = v
     value = 1
     function = ramp
@@ -111,5 +111,4 @@
 
 [Outputs]
   csv = true
-  perf_graph = true
 []

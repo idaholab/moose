@@ -55,19 +55,20 @@ HomogenizationConstraintScalarKernel::reinit()
 void
 HomogenizationConstraintScalarKernel::computeResidual()
 {
-  DenseVector<Number> & re = _assembly.residualBlock(_var.number());
+  prepareVectorTag(_assembly, _var.number());
   _i = 0;
   for (auto && indices : _cmap)
   {
     auto && [i, j] = indices.first;
-    re(_i++) += _residual(i, j);
+    _local_re(_i++) += _residual(i, j);
   }
+  accumulateTaggedLocalResidual();
 }
 
 void
 HomogenizationConstraintScalarKernel::computeJacobian()
 {
-  DenseMatrix<Number> & ke = _assembly.jacobianBlock(_var.number(), _var.number());
+  prepareMatrixTag(_assembly, _var.number(), _var.number());
   _i = 0;
   for (auto && indices1 : _cmap)
   {
@@ -76,8 +77,9 @@ HomogenizationConstraintScalarKernel::computeJacobian()
     for (auto && indices2 : _cmap)
     {
       auto && [a, b] = indices2.first;
-      ke(_i, _j++) += _jacobian(i, j, a, b);
+      _local_ke(_i, _j++) += _jacobian(i, j, a, b);
     }
     _i++;
   }
+  accumulateTaggedLocalMatrix();
 }
