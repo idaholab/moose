@@ -44,7 +44,7 @@ Use the modeling guide to explore how to piece your models together:
 
 - [Modeling Guide](modeling_guide/index.md) -- learn how to build your models.
 - [Verification and Validation](v_and_v/index.md) -- verification and validation tests performed to date.
-- [Syntax Index](syntax/index.md) -- complete syntax listing.
+- [Syntax Index](framework:syntax/index.md) -- complete syntax listing.
 
 !col-end!
 
