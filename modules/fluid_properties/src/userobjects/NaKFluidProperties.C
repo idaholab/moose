@@ -22,14 +22,13 @@ NaKFluidProperties::validParams()
 }
 
 NaKFluidProperties::NaKFluidProperties(const InputParameters & parameters)
-  : SinglePhaseFluidProperties(parameters),
-    // TODO: adapt
-    _MNaK(10000)
+  : SinglePhaseFluidProperties(parameters), _MNaK((39.102 + 22.9898) / 1000)
 {
   // We did not implement other weight fractions
   const Real Xk = getParam<Real>("weight_fraction_K");
-  if (Xk != 0.78)
-    paramError("weight_fraction_K", "Only 0.78 weight percent potassium (eutectic) is implemented");
+  if (Xk != 0.778)
+    paramError("weight_fraction_K",
+               "Only 0.778 weight percent potassium (eutectic) is implemented");
 
   // Compute mole fractions from mass fractions
   const Real AwK = 39.102;
@@ -56,8 +55,15 @@ Real
 NaKFluidProperties::rho_from_p_T(Real pressure, Real temperature) const
 {
   const Real Tc = temperature - _T_k2c;
+  // Range from liquid Na and K density correlation ranges
+  if (Tc < 210 || Tc > 1110)
+    flagInvalidSolution(
+        "NaK density evaluated outside of Na density temperature range [210, 1110] C");
+  if (Tc < 63.2 || Tc > 1250)
+    flagInvalidSolution(
+        "NaK density evaluated outside of K density temperature range [63, 1250] C");
+
   // Eq. 1.8 page 18 of NaK handbook
-  // TODO add range: up to 1250 C
   const Real v_k = 0.8415 - 2.172e-3 * Tc - 2.7e-8 * Tc * Tc + 4.77e-12 * Tc * Tc * Tc;
   // Eq. 1.5 page 15 of NaK handbook
   const Real v_Na = 0.9453 - 2.2473e-4 * Tc;
@@ -140,6 +146,9 @@ NaKFluidProperties::k_from_p_T(Real /*pressure*/, Real temperature) const
   /* eq. 1.53 page 46 handbook */
   // Note: reported as very sensitive to the composition
   // Range: 150 - 680 C
+  if (Tc < 150 || Tc > 680)
+    flagInvalidSolution(
+        "NaK thermal diffusivity evaluated outside of temperature range [150, 680] C");
   return 0.214 + 2.07e-4 * Tc - 2.2e-7 * Tc * Tc;
 }
 
