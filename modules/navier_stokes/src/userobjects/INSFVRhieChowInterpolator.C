@@ -117,7 +117,8 @@ INSFVRhieChowInterpolator::INSFVRhieChowInterpolator(const InputParameters & par
     _nl_sys_number(_fe_problem.nlSysNum(getParam<NonlinearSystemName>("mass_momentum_system"))),
     _sys(*getCheckedPointerParam<SystemBase *>("_sys")),
     _example(0),
-    _a_data_provided(false)
+    _a_data_provided(false),
+    _pull_all_nonlocal(false)
 {
   if (!_p)
     paramError(NS::pressure, "the pressure must be a INSFVPressureVariable.");
@@ -439,14 +440,28 @@ INSFVRhieChowInterpolator::finalize()
   std::unordered_map<processor_id_type, std::vector<dof_id_type>> pull_requests;
   static const VectorValue<ADReal> example;
 
-  for (auto * const elem : _elements_to_push_pull)
+  // Create push data
+  for (const auto * const elem : _elements_to_push_pull)
   {
     const auto id = elem->id();
     const auto pid = elem->processor_id();
     auto it = _a.find(id);
     mooseAssert(it != _a.end(), "We definitely should have found something");
     push_data[pid].push_back(std::make_pair(id, it->second));
-    pull_requests[pid].push_back(id);
+  }
+
+  // Create pull data
+  if (_pull_all_nonlocal)
+  {
+    for (const auto * const elem :
+         as_range(_mesh.active_not_local_elements_begin(), _mesh.active_not_local_elements_end()))
+      if (_sub_ids.count(elem->subdomain_id()))
+        pull_requests[elem->processor_id()].push_back(elem->id());
+  }
+  else
+  {
+    for (const auto * const elem : _elements_to_push_pull)
+      pull_requests[elem->processor_id()].push_back(elem->id());
   }
 
   // First push
@@ -485,12 +500,7 @@ INSFVRhieChowInterpolator::finalize()
       mooseAssert(pid != this->processor_id(), "The request filler shouldn't have been ourselves");
       mooseAssert(elem_ids.size() == filled_data.size(), "I think these should be the same size");
       for (const auto i : index_range(elem_ids))
-      {
-        const auto id = elem_ids[i];
-        auto it = _a.find(id);
-        mooseAssert(it != _a.end(), "We requested this so we must have it in the map");
-        it->second = filled_data[i];
-      }
+        _a[elem_ids[i]] = filled_data[i];
     };
     TIMPI::pull_parallel_vector_data(
         _communicator, pull_requests, gather_functor, action_functor, &example);
