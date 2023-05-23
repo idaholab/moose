@@ -39,7 +39,6 @@ class AutoLinkExtension(Extension):
 
         # None of these should be required after #24406, because we should always be explicit
         config['explicit'] = (False, "Set to true to require explicit links")
-        config['warn_implicit'] = (True, "Set to true to warn of implicit links that should be explicit; overriden by 'explicit'")
 
         return config
 
@@ -205,26 +204,17 @@ class RenderAutoLink(RenderLinkBase):
         kwargs = {'exact': token['exact'],
                   'key': token['key']}
 
-        warn_implicit = self.extension.get('warn_implicit')
-        explicit = self.extension.get('explicit')
-
         # Some extensions (see appsyntax) require some searching and implicit-ness
         # due to config limitations (see SyntaxCompleteCommand._addList)
         if token['allow_implicit']:
             kwargs['key'] = None
         # Lastly, explicitly set a key if the user did not set it
-        # The second check (page having a key) should be removed with #24406
-        elif (explicit or warn_implicit) and (token['key'] is None and page.key is not None):
+        # The last check (page having a key) should be removed with #24406
+        elif (self.extension.get('explicit') or not self.translator.get('ignore_content_key')) and \
+            (token['key'] is None) and (page.key is not None):
             kwargs['key'] = page.key
 
         return args, kwargs
-
-    def warnOnOtherKey(self):
-        """
-        Whether or not to only warn (not raise) if we find exactly one other page
-        with a different key (based on whether or not warn_implicit is set)
-        """
-        return self.extension.get('warn_implicit') and not self.extension.get('explicit')
 
     """
     Create link to another page and extract the heading for the text, if no children provided.
@@ -255,8 +245,8 @@ class RenderAutoLink(RenderLinkBase):
                     replacement = src.replace(token_page, replacement)
                 replacements.append(replacement)
 
-            # We set warn_implicit, one other page was found and we can set it for them
-            if self.warnOnOtherKey() and len(ex.pages) == 1:
+            # If not explicit, one other page was found and we can set it for them
+            if not self.extension.get('explicit') and len(ex.pages) == 1:
                 msg = f"The page '{token_page}' should be explicitly linked with the content key '{ex.pages[0].key}:':\n"
                 msg += f'     {replacements[0]}\n'
                 line = token.info.line if token.info else None
