@@ -27,6 +27,7 @@ FluidProperties::validParams()
 
 FluidProperties::FluidProperties(const InputParameters & parameters)
   : ThreadedGeneralUserObject(parameters),
+    SolutionInvalidInterface(this),
     _T_c2k(273.15),
     _allow_imperfect_jacobians(getParam<bool>("allow_imperfect_jacobians"))
 {

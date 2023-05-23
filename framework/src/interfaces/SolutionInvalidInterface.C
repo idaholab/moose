@@ -23,7 +23,7 @@ SolutionInvalidInterface::SolutionInvalidInterface(MooseObject * const moose_obj
 
 /// Set solution invalid mark for the given solution ID
 void
-SolutionInvalidInterface::flagInvalidSolutionInternal(InvalidSolutionID _invalid_solution_id)
+SolutionInvalidInterface::flagInvalidSolutionInternal(InvalidSolutionID _invalid_solution_id) const
 {
   auto & solution_invalidity = _si_moose_object.getMooseApp().solutionInvalidity();
   if (_si_problem.immediatelyPrintInvalidSolution())
