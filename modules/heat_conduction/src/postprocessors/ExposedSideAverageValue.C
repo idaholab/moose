@@ -30,16 +30,16 @@ ExposedSideAverageValue::ExposedSideAverageValue(const InputParameters & paramet
     _self_shadow(getUserObject<SelfShadowSideUserObject>("self_shadow_uo"))
 {
   if (_self_shadow.useDisplacedMesh() != getParam<bool>("use_displaced_mesh"))
-    paramWarning("use_displaced_mesh",
-                 "The SelfShadowSideUserObject should operate on the same mesh (displaced or "
-                 "undisplaced) as this PostProcessor.");
+    paramError("use_displaced_mesh",
+               "The SelfShadowSideUserObject should operate on the same mesh (displaced or "
+               "undisplaced) as this PostProcessor.");
 }
 
 Real
 ExposedSideAverageValue::computeQpIntegral()
 {
   const SelfShadowSideUserObject::SideIDType id(_current_elem->id(), _current_side);
-  const int illumination = _self_shadow.illumination(id);
+  const unsigned int illumination = _self_shadow.illumination(id);
   // tests if the bit at position _qp is set
   if (illumination & (1 << _qp))
     return SideAverageValue::computeQpIntegral();
@@ -52,7 +52,7 @@ ExposedSideAverageValue::volume()
 {
   Real curr_exposed_side_volume = 0.0;
   const SelfShadowSideUserObject::SideIDType id(_current_elem->id(), _current_side);
-  const int illumination = _self_shadow.illumination(id);
+  const unsigned int illumination = _self_shadow.illumination(id);
   for (const unsigned int qp : make_range(_qrule->n_points()))
   {
     // tests if the bit at position _qp is set

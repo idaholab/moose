@@ -43,6 +43,15 @@ SideAverageValue::execute()
 Real
 SideAverageValue::getValue()
 {
+  if (MooseUtils::absoluteFuzzyEqual(_volume, 0.0))
+  {
+    if (_coord_sys == Moose::COORD_RZ)
+      mooseError("The total area of the boundary is zero. This could be due to "
+                 "using a boundary on the centerline of an axisymmetric model.");
+    else
+      mooseError("The total area of the boundary is zero.");
+  }
+
   return _integral_value / _volume;
 }
 
