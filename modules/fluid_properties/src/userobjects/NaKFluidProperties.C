@@ -52,6 +52,43 @@ NaKFluidProperties::molarMass() const
 }
 
 Real
+NaKFluidProperties::T_from_p_h(Real p, Real h) const
+{
+  auto lambda = [&](Real p, Real current_T, Real & new_h, Real & dh_dp, Real & dh_dT)
+  { h_from_p_T(p, current_T, new_h, dh_dp, dh_dT); };
+  Real T = FluidPropertiesUtils::NewtonSolve(
+               p, h, _T_initial_guess, _tolerance, lambda, name() + "::T_from_p_h")
+               .first;
+  // check for nans
+  if (std::isnan(T))
+    mooseError("Conversion from pressure (p = ",
+               p,
+               ") and enthalpy (h = ",
+               h,
+               ") to temperature failed to converge.");
+  return T;
+}
+
+Real
+NaKFluidProperties::T_from_p_rho(Real /* pressure */, Real temperature) const
+{
+  // NOTE we could also invert analytically the third degree polynomial, see Cardan's method
+  auto lambda = [&](Real p, Real current_T, Real & new_rho, Real & drho_dp, Real & drho_dT)
+  { rho_from_p_T(p, current_T, new_rho, drho_dp, drho_dT); };
+  Real T = FluidPropertiesUtils::NewtonSolve(
+               p, rho, _T_initial_guess, _tolerance, lambda, name() + "::T_from_p_rho")
+               .first;
+  // check for nans
+  if (std::isnan(T))
+    mooseError("Conversion from pressure (p = ",
+               p,
+               ") and density (rho = ",
+               rho,
+               ") to temperature failed to converge.");
+  return T;
+}
+
+Real
 NaKFluidProperties::rho_from_p_T(Real pressure, Real temperature) const
 {
   const Real Tc = temperature - _T_k2c;
@@ -93,6 +130,13 @@ Real
 NaKFluidProperties::e_from_p_T(Real pressure, Real temperature) const
 {
   return h_from_p_T(pressure, temperature) - pressure / rho_from_p_T(pressure, temperature);
+}
+
+Real
+NaKFluidProperties::e_from_p_rho(Real pressure, Real temperature) const
+{
+  Real temperature = T_from_p_rho(pressure, rho);
+  return e_from_p_T(pressure, temperature);
 }
 
 void

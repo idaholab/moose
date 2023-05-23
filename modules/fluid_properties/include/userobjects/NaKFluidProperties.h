@@ -40,12 +40,18 @@ public:
 
   virtual Real molarMass() const override;
 
+  virtual Real T_from_p_h(Real pressure, Real enthalpy) const override;
+
+  virtual Real T_from_p_rho(Real pressure, Real density) const override;
+
   virtual Real rho_from_p_T(Real pressure, Real temperature) const override;
 
   virtual void rho_from_p_T(
       Real pressure, Real temperature, Real & rho, Real & drho_dp, Real & drho_dT) const override;
 
   virtual Real e_from_p_T(Real pressure, Real temperature) const override;
+
+  virtual Real e_from_p_rho(Real pressure, Real density) const override;
 
   virtual void
   e_from_p_T(Real pressure, Real temperature, Real & e, Real & de_dp, Real & de_dT) const override;
