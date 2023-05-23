@@ -11,7 +11,7 @@ The fluid properties are summarized in Table [tab:NaK], which reports the formul
 | :----------------------------- | :------------- | :------------- |
 | Density liquid Na, $\rho_{Na}$ (kg/m^3)       | $0.9453 - 2.2473e-4 * T_c$ ($T_c$ in C) | Equation 1.5 |
 | Density liquid K, $\rho_K$ (kg/m^3)       | $0.8415 - 2.172e-4 * T_c - 2.7e-8 * T_c^2 + 4.77e-12 * T_c^3$ ($T_c$ in C) | Equation 1.8  |
-| Density liquid NaK, $\rho$ (kg/m^3)       | 1 / (N_K / \rho_K + N_{Na} / \rho_{Na}) | Equation 1.9 |
+| Density liquid NaK, $\rho$ (kg/m^3)       | $1 / (N_K / \rho_K + N_{Na} / \rho_{Na})$ | Equation 1.9 |
 | Viscosity, $\mu$ (Pa-s)        | See handbook | Equation 1.18 - 1.19  |
 | Thermal Conductivity, $k$ (W/m-K)        | $0.214 + 2.07e-4 * T_c - 2.2e-7 * T_c^2$ ($T_c$ in C) | Equation 1.53  |
 | Isobaric Specific Heat, $cp$ (J/kg-K)    | $0.2320 - 8.82e-5 * T_c + 8.23-8 * T_c^2$ ($T_c$ in C) | Equation 1.59 |
