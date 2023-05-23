@@ -17,8 +17,8 @@ Documents:
     verification_validation_plan: sqa/rdg_vvr.md
     failure_analysis_report: sqa/rdg_far.md
     software_library_list: sqa/rdg_sll.md
-    communication_and_contact_information: sqa/framework_cci.md
-    software_coding_standards: sqa/framework_scs.md
+    communication_and_contact_information: framework:sqa/framework_cci.md
+    software_coding_standards: framework:sqa/framework_scs.md
     log_default: WARNING
     show_warning: false
 

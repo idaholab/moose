@@ -156,13 +156,13 @@ Documents:
     requirements_traceablity_matrix: sqa/blackbear_rtm.md
     verification_validation_report: sqa/blackbear_vvr.md
     failure_analysis_report: sqa/blackbear_far.md
-    safety_software_determination: sqa/inl_records.md#safety_software_determination
-    quality_level_determination: sqa/inl_records.md#quality_level_determination
-    enterprise_architecture_entry: sqa/inl_records.md#enterprise_architecture_entry
-    software_quality_plan: sqa/inl_records.md#software_quality_plan
-    configuration_management_plan: sqa/inl_records.md#configuration_management_plan
-    asset_management_plan: sqa/inl_records.md#asset_management_plan
-    verification_validation_plan: sqa/inl_records.md#verification_and_validation_plan
+    safety_software_determination: framework:sqa/inl_records.md#safety_software_determination
+    quality_level_determination: framework:sqa/inl_records.md#quality_level_determination
+    enterprise_architecture_entry: framework:sqa/inl_records.md#enterprise_architecture_entry
+    software_quality_plan: framework:sqa/inl_records.md#software_quality_plan
+    configuration_management_plan: framework:sqa/inl_records.md#configuration_management_plan
+    asset_management_plan: framework:sqa/inl_records.md#asset_management_plan
+    verification_validation_plan: framework:sqa/inl_records.md#verification_and_validation_plan
     software_library_list: sqa/blackbear_sll.md
     communication_and_contact_information: sqa/blackbear_cci.md
     software_coding_standards: sqa/blackbear_scs.md
