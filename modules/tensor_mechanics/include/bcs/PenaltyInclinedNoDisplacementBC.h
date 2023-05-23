@@ -40,4 +40,7 @@ protected:
 
 private:
   Real _penalty;
+
+  /// Whether to normalize the user-supplied penalty factor with a representative area
+  const bool _normalize_penalty;
 };

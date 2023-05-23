@@ -1,26 +1,23 @@
 [GlobalParams]
-  displacements = 'disp_x disp_y disp_z'
+  displacements = 'disp_x disp_y'
 []
 
 [Mesh]
   [generated_mesh]
     type = GeneratedMeshGenerator
-    dim = 3
-    nx = 2
-    ny = 4
-    nz = 2
+    dim = 2
+    nx = 4
+    ny = 8
     xmin = 0.0
-    xmax = 1.0
+    xmax = 1.0e-4
     ymin = 0.0
-    ymax = 2.0
-    zmin = 0.0
-    zmax = 1.0
-    elem_type = HEX8
+    ymax = 2.0e-4
+    elem_type = QUAD4
   []
   [rotate]
     type = TransformGenerator
     transform = ROTATE
-    vector_value = '0 -20 -60'
+    vector_value = '0 0 -60'
     input = generated_mesh
   []
 []
@@ -31,40 +28,37 @@
 []
 
 [BCs]
-  [./Pressure]
-    [./top]
+  [Pressure]
+    [top]
       boundary = top
-      function = '-1000*t'
-    [../]
-  [../]
-  [./InclinedNoDisplacementBC]
-    [./right]
+      function = '-1.0*t'
+    []
+  []
+  [InclinedNoDisplacementBC]
+    [right]
       boundary = right
       penalty = 1.0e8
-      displacements = 'disp_x disp_y disp_z'
-    [../]
-    [./bottom]
+      normalize_penalty = true
+      displacements = 'disp_x disp_y'
+    []
+    [bottom]
       boundary = bottom
       penalty = 1.0e8
-      displacements = 'disp_x disp_y disp_z'
-    [../]
-    [./back]
-      boundary = back
-      penalty = 1.0e8
-      displacements = 'disp_x disp_y disp_z'
-    [../]
-  [../]
+      normalize_penalty = true
+      displacements = 'disp_x disp_y'
+    []
+  []
 []
 
 [Materials]
-  [./elasticity_tensor]
+  [elasticity_tensor]
     type = ComputeIsotropicElasticityTensor
     youngs_modulus = 1e6
     poissons_ratio = 0.3
-  [../]
-  [./stress]
+  []
+  [stress]
     type = ComputeFiniteStrainElasticStress
-  [../]
+  []
 []
 
 [Executioner]
@@ -81,7 +75,7 @@
 
   # controls for nonlinear iterations
   nl_max_its = 100
-  nl_rel_tol = 1e-12
+  nl_rel_tol = 1e-8
   nl_abs_tol = 1e-12
 
   # time control
@@ -91,13 +85,12 @@
 []
 
 [Preconditioning]
-  [./smp]
+  [smp]
     type = SMP
     full = true
-  [../]
+  []
 []
 
 [Outputs]
-  file_base = 'inclined_bc_3d_out'
   exodus = true
 []

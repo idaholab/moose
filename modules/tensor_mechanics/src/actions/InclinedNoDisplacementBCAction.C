@@ -19,15 +19,16 @@ InclinedNoDisplacementBCAction::validParams()
 {
   InputParameters params = Action::validParams();
   params.addClassDescription("Set up inclined no displacement boundary conditions");
-
   params.addRequiredParam<std::vector<BoundaryName>>(
       "boundary", "The list of boundary IDs from the mesh where the pressure will be applied");
-
   params.addParam<std::vector<VariableName>>(
       "displacements",
       "The displacements appropriate for the simulation geometry and coordinate system");
   params.addParam<std::vector<AuxVariableName>>("save_in", "The displacement residuals");
-
+  params.addParam<bool>(
+      "normalize_penalty",
+      false,
+      "Whether to normalize the penalty factor of this constraint with the element side area.");
   params.addRequiredParam<Real>("penalty", "Penalty parameter");
   return params;
 }
@@ -62,6 +63,7 @@ InclinedNoDisplacementBCAction::act()
     params.set<bool>("use_displaced_mesh") = false;
     params.set<unsigned int>("component") = i;
     params.set<NonlinearVariableName>("variable") = _displacements[i];
+    params.set<bool>("normalize_penalty") = getParam<bool>("normalize_penalty");
 
     if (_save_in.size() == _ndisp)
       params.set<std::vector<AuxVariableName>>("save_in") = {_save_in[i]};

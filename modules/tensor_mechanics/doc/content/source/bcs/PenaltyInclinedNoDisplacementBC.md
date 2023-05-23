@@ -9,3 +9,13 @@
 \mathcal{R}_i = \alpha(\mathbf{u}\cdot \mathbf{normal})\mathbf{normal}(\text{component})\psi_i
 \end{equation}
 where $\alpha$ is the penalty parameter and `component` corresponds to the direction in which to apply the residual. The normal directly comes from the surface normal defined in a mesh.
+
+The input parameter `normalize_penalty` normalizes the penalty factor by dividing it by the side
+element area. Usage of this option is useful to avoid having to tune the penalty parameter when
+the element side area is far from one. Therefore, if `normalize_penalty = true`, the penalty factor
+can be directly compare with material stiffness.
+
+!syntax parameters /BCs/PenaltyInclinedNoDisplacementBC
+
+!syntax inputs /BCs/PenaltyInclinedNoDisplacementBC
+

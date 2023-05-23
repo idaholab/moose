@@ -1,20 +1,31 @@
 [Tests]
-  [./2D]
+  [2D]
     type = Exodiff
     input = 'inclined_bc_2d.i'
     exodiff = 'inclined_bc_2d_out.e'
-    superlu = true
     issues = '#13128'
     design = 'PenaltyInclinedNoDisplacementBC.md InclinedNoDisplacementBCAction.md'
-    requirement = 'The TensorMechanics module shall have the capabilty to enforce inclined boundary conditions on a 2D model using a penalty method.'
-  [../]
-  [./3D]
+    requirement = 'The TensorMechanics module shall have the capabilty to enforce inclined boundary '
+                  'conditions on a 2D model using a penalty method.'
+  []
+  [2D_normalize]
+    type = Exodiff
+    input = 'inclined_bc_2d_normalize.i'
+    exodiff = 'inclined_bc_2d_normalize_out.e'
+    issues = '#24477'
+    design = 'PenaltyInclinedNoDisplacementBC.md InclinedNoDisplacementBCAction.md'
+    requirement = 'The TensorMechanics module shall have the capabilty to enforce inclined boundary '
+                  'conditions on a 2D model using a penalty method normalizing the penalty factor '
+                  'with the element side area to allow the user to more easily select reasonable '
+                  'penalty factors.'
+  []
+  [3D]
     type = Exodiff
     input = 'inclined_bc_3d.i'
     exodiff = 'inclined_bc_3d_out.e'
-    superlu = true
     issues = '#13128'
     design = 'PenaltyInclinedNoDisplacementBC.md InclinedNoDisplacementBCAction.md'
-    requirement = 'The TensorMechanics module shall have the capabilty to enforce inclined boundary conditions on a 3D model using a penalty method.'
-  [../]
+    requirement = 'The TensorMechanics module shall have the capabilty to enforce inclined boundary '
+                  'conditions on a 3D model using a penalty method.'
+  []
 []

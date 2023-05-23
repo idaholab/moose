@@ -19,9 +19,14 @@ PenaltyInclinedNoDisplacementBC::validParams()
   params.addRequiredParam<Real>("penalty", "Penalty parameter");
   params.addRequiredParam<unsigned int>(
       "component", "An integer corresponding to the direction (0 for x, 1 for y, 2 for z)");
+  params.addParam<bool>(
+      "normalize_penalty",
+      false,
+      "Whether to normalize the penalty factor of this constraint with the element side area.");
   params.addRequiredCoupledVar("displacements",
                                "The string of displacements suitable for the problem statement");
-  params.addClassDescription("Penalty Enforcement of an inclined boundary condition");
+  params.addClassDescription("Penalty enforcement of an inclined boundary condition");
+
   return params;
 }
 
@@ -31,7 +36,8 @@ PenaltyInclinedNoDisplacementBC::PenaltyInclinedNoDisplacementBC(const InputPara
     _ndisp(coupledComponents("displacements")),
     _disp(coupledValues("displacements")),
     _disp_var(coupledIndices("displacements")),
-    _penalty(getParam<Real>("penalty"))
+    _penalty(getParam<Real>("penalty")),
+    _normalize_penalty(getParam<bool>("normalize_penalty"))
 {
 }
 
@@ -42,23 +48,38 @@ PenaltyInclinedNoDisplacementBC::computeQpResidual()
   for (unsigned int i = 0; i < _ndisp; ++i)
     v += (*_disp[i])[_qp] * _normals[_qp](i);
 
-  return _penalty * _test[_i][_qp] * v * _normals[_qp](_component);
+  auto penalty = _penalty;
+
+  if (_normalize_penalty)
+    penalty /= _current_side_volume;
+
+  return penalty * _test[_i][_qp] * v * _normals[_qp](_component);
 }
 
 Real
 PenaltyInclinedNoDisplacementBC::computeQpJacobian()
 {
-  return _penalty * _phi[_j][_qp] * _normals[_qp](_component) * _normals[_qp](_component) *
+  auto penalty = _penalty;
+
+  if (_normalize_penalty)
+    penalty /= _current_side_volume;
+
+  return penalty * _phi[_j][_qp] * _normals[_qp](_component) * _normals[_qp](_component) *
          _test[_i][_qp];
 }
 
 Real
 PenaltyInclinedNoDisplacementBC::computeQpOffDiagJacobian(unsigned int jvar)
 {
+  auto penalty = _penalty;
+
+  if (_normalize_penalty)
+    penalty /= _current_side_volume;
+
   for (unsigned int coupled_component = 0; coupled_component < _ndisp; ++coupled_component)
     if (jvar == _disp_var[coupled_component])
     {
-      return _penalty * _phi[_j][_qp] * _normals[_qp](coupled_component) *
+      return penalty * _phi[_j][_qp] * _normals[_qp](coupled_component) *
              _normals[_qp](_component) * _test[_i][_qp];
     }
 
