@@ -12,6 +12,10 @@
 #include "Executioner.h"
 #include "INSFVRhieChowInterpolatorSegregated.h"
 
+#include "libmesh/petsc_vector.h"
+#include "libmesh/petsc_matrix.h"
+#include "libmesh/equation_systems.h"
+
 // Forward declarations
 class InputParameters;
 class FEProblemBase;
@@ -30,12 +34,19 @@ public:
   void execute() override;
   bool lastSolveConverged() const override { return _last_solve_converged; }
 
-  static PetscErrorCode relaxation_stuff(KSP ksp, Vec rhs, Vec x, void * ctx);
-
   NonlinearSystemBase & getMomentumSystem() { return _momentum_sys; }
   Real getMomentumRelaxation() { return _momentum_variable_relaxation; }
 
+  const INSFVRhieChowInterpolatorSegregated & getRCUserObject() { return *_rc_uo; }
+
 protected:
+  void relaxEquation(SparseMatrix<Number> & matrix_in,
+                     NumericVector<Number> & rhs_in,
+                     NumericVector<Number> & solution_in,
+                     const Real relaxation_parameter);
+
+  Real solveMomentumPredictor(NonlinearImplicitSystem & momentum_system);
+
   FEProblemBase & _problem;
 
   FEProblemSolve _feproblem_solve;
@@ -67,4 +78,5 @@ private:
   const Real _pressure_absolute_tolerance;
 
   const unsigned int _num_iterations;
+  const bool _print_fields;
 };

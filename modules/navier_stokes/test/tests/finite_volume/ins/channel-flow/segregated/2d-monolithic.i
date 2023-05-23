@@ -4,14 +4,9 @@ advected_interp_method = 'average'
 velocity_interp_method = 'rc'
 
 [Mesh]
-  [mesh]
-    type = CartesianMeshGenerator
-    dim = 2
-    dx = '0.2 0.2'
-    dy = '0.2'
-    ix = '2 2'
-    iy = '4'
-    subdomain_id = '1 1'
+  [read]
+    type = FileMeshGenerator
+    file = 2d-segregated_in.e
   []
 []
 
@@ -144,6 +139,8 @@ velocity_interp_method = 'rc'
   petsc_options_iname = '-pc_type -pc_factor_shift_type'
   petsc_options_value = 'lu NONZERO'
   line_search = 'none'
+  nl_abs_tol = 1e-8
+  nl_rel_tol = 1e-8
 []
 
 [Postprocessors]

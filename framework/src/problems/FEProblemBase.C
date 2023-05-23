@@ -6049,12 +6049,19 @@ FEProblemBase::computeResidualAndJacobian(const NumericVector<Number> & soln,
 {
   // vector tags
   {
+    _current_nl_sys->associateVectorToTag(residual, _current_nl_sys->residualVectorTag());
     const auto & residual_vector_tags = getVectorTags(Moose::VECTOR_TAG_RESIDUAL);
 
     _fe_vector_tags.clear();
 
     for (const auto & residual_vector_tag : residual_vector_tags)
-      _fe_vector_tags.insert(residual_vector_tag._id);
+    {
+      // We filter out tags which do not have associated vectors in the current nonlinear
+      // system. This is essential to be able to use system-dependent residual tags.
+      if (_current_nl_sys->hasVector(residual_vector_tag._id) ||
+          _current_nl_sys->system().have_vector(residual_vector_tag._name))
+        _fe_vector_tags.insert(residual_vector_tag._id);
+    }
 
     setCurrentResidualVectorTags(_fe_vector_tags);
   }
@@ -6748,8 +6755,8 @@ FEProblemBase::computePostCheck(NonlinearImplicitSystem & sys,
 
   if (vectorTagExists(Moose::PREVIOUS_NL_SOLUTION_TAG))
   {
-    std::cout << " Updating previous NL" << std::endl;
-    old_soln.print();
+    // std::cout << " Updating previous NL" << std::endl;
+    // old_soln.print();
     _current_nl_sys->setPreviousNewtonSolution(old_soln);
     _aux->setPreviousNewtonSolution();
   }
@@ -7593,7 +7600,7 @@ FEProblemBase::checkNonlinearConvergence(std::string & msg,
 
   nonlinearConvergenceSetup();
 
-  std::cout << "Here Pre " << _current_nl_sys->name() << std::endl;
+  // std::cout << "Here Pre " << _current_nl_sys->name() << std::endl;
 
   if (_fail_next_nonlinear_convergence_check)
   {
@@ -7601,7 +7608,7 @@ FEProblemBase::checkNonlinearConvergence(std::string & msg,
     return MooseNonlinearConvergenceReason::DIVERGED_FNORM_NAN;
   }
 
-  std::cout << "Here" << _current_nl_sys->name() << std::endl;
+  // std::cout << "Here" << _current_nl_sys->name() << std::endl;
 
   NonlinearSystemBase & system = *_current_nl_sys;
   MooseNonlinearConvergenceReason reason = MooseNonlinearConvergenceReason::ITERATING;

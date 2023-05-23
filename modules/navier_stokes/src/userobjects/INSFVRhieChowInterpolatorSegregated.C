@@ -301,20 +301,21 @@ INSFVRhieChowInterpolatorSegregated::populateHbyA(NonlinearImplicitSystem & mome
 }
 
 void
-INSFVRhieChowInterpolatorSegregated::computeHbyA(const Real & momentum_relaxation)
+INSFVRhieChowInterpolatorSegregated::computeHbyA(const Real & momentum_relaxation,
+                                                 const bool verbose)
 {
   mooseAssert(_momentum_sys, "The momentum system shall be linked before calling this function!");
 
   NonlinearImplicitSystem & momentum_system =
       dynamic_cast<NonlinearImplicitSystem &>(_momentum_sys->system());
 
-  PetscMatrix<Number> * pmat = dynamic_cast<PetscMatrix<Number> *>(momentum_system.matrix);
+  PetscMatrix<Number> * mmat = dynamic_cast<PetscMatrix<Number> *>(momentum_system.matrix);
+  PetscVector<Number> * mrhs = dynamic_cast<PetscVector<Number> *>(momentum_system.rhs);
   PetscVector<Number> * solution =
       dynamic_cast<PetscVector<Number> *>(momentum_system.current_local_solution.get());
 
   std::unique_ptr<NumericVector<Number>> Ainv = solution->zero_clone();
   std::unique_ptr<NumericVector<Number>> HbyA = solution->zero_clone();
-  std::unique_ptr<NumericVector<Number>> dummy = solution->zero_clone();
   std::unique_ptr<NumericVector<Number>> working_vector = solution->zero_clone();
 
   // Wpuld be cool to add asserts here
@@ -330,7 +331,6 @@ INSFVRhieChowInterpolatorSegregated::computeHbyA(const Real & momentum_relaxatio
   // We compute the right hand side with a zero vector for starters. This is the right
   // hand side of the linearized system and will be the basis of the HbyA vector.
   _fe_problem.computeResidualTag(*working_vector.get(), *HbyA.get(), _momentum_tag);
-  _fe_problem.computeResidualTag(*working_vector.get(), *dummy.get(), 0);
   _momentum_sys->associateVectorToTag(
       momentum_system.system().get_vector(_fe_problem.vectorTagName(0)), 0);
 
@@ -344,8 +344,11 @@ INSFVRhieChowInterpolatorSegregated::computeHbyA(const Real & momentum_relaxatio
 
   _momentum_sys->setSolution(*solution);
 
-  std::cout << "Velocity solution" << std::endl;
-  solution->print();
+  if (verbose)
+  {
+    std::cout << "Velocity solution" << std::endl;
+    solution->print();
+  }
 
   // if (pmat->closed())
   // {
@@ -378,28 +381,33 @@ INSFVRhieChowInterpolatorSegregated::computeHbyA(const Real & momentum_relaxatio
   // Libmesh version
   // **************************************************************************
 
-  std::cout << "Matrix" << std::endl;
-  pmat->print();
-  pmat->get_diagonal(*Ainv_petsc);
+  if (verbose)
+  {
+    std::cout << "Matrix" << std::endl;
+    mmat->print();
+  }
+  mmat->get_diagonal(*Ainv_petsc);
 
-  std::cout << "A" << std::endl;
-  Ainv_petsc->print();
-  MatDiagonalSet(pmat->mat(), working_vector_petsc->vec(), INSERT_VALUES);
-  // Ainv_petsc->scale(0.8);
+  if (verbose)
+  {
+    std::cout << "A" << std::endl;
+    Ainv_petsc->print();
+  }
+  MatDiagonalSet(mmat->mat(), working_vector_petsc->vec(), INSERT_VALUES);
 
-  *working_vector_petsc = 0.0;
+  if (verbose)
+  {
+    std::cout << "total RHS" << std::endl;
+    mrhs->print();
+  }
 
-  // working_vector_petsc->add(1.0 - momentum_relaxation, *solution);
-  working_vector_petsc->add(-1.0 + momentum_relaxation, *old_solution);
-  *working_vector_petsc *= *Ainv_petsc;
-  // working_vector_petsc->scale((1 - 0.9));
+  HbyA->add(-1.0, *mrhs);
 
-  dummy->add(1.0, *working_vector_petsc);
-  std::cout << "total RHS" << std::endl;
-  dummy->print();
-
-  std::cout << "H RHS" << std::endl;
-  HbyA->print();
+  if (verbose)
+  {
+    std::cout << "H RHS" << std::endl;
+    HbyA->print();
+  }
 
   // solution->scale(relax);
   // solution->add(1 - relax, *old_solution);
@@ -407,40 +415,45 @@ INSFVRhieChowInterpolatorSegregated::computeHbyA(const Real & momentum_relaxatio
   // solution->print();
   // solution->close();
 
-  std::cout << "H" << std::endl;
-  pmat->print();
+  if (verbose)
+  {
+    std::cout << "H" << std::endl;
+    mmat->print();
+  }
 
-  pmat->vector_mult(*working_vector_petsc, *solution);
+  mmat->vector_mult(*working_vector_petsc, *solution);
 
-  std::cout << " H(u)" << std::endl;
-  working_vector_petsc->print();
-
-  HbyA_petsc->add(*working_vector_petsc);
-  std::cout << " H(u)-rhs" << std::endl;
-  HbyA->print();
-
-  *working_vector_petsc = 0.0;
-
-  // working_vector_petsc->add(1.0 - momentum_relaxation, *solution);
-  working_vector_petsc->add(-1.0 + momentum_relaxation, *old_solution);
-  // working_vector_petsc->scale((1 - 0.9));
-
-  *working_vector_petsc *= *Ainv_petsc;
-
-  std::cout << "Relaxation source " << std::endl;
-  working_vector_petsc->print();
+  if (verbose)
+  {
+    std::cout << " H(u)" << std::endl;
+    working_vector_petsc->print();
+  }
 
   HbyA_petsc->add(*working_vector_petsc);
 
-  std::cout << " H(u)-rhs-relaxation_source" << std::endl;
-  HbyA_petsc->print();
+  if (verbose)
+  {
+    std::cout << " H(u)-rhs" << std::endl;
+    HbyA->print();
+  }
+
+  // HbyA_petsc->add(*working_vector_petsc);
+
+  if (verbose)
+  {
+    std::cout << " H(u)-rhs-relaxation_source" << std::endl;
+    HbyA_petsc->print();
+  }
 
   *working_vector_petsc = 1.0;
   VecPointwiseDivide(Ainv_petsc->vec(), working_vector_petsc->vec(), Ainv_petsc->vec());
   HbyA_petsc->pointwise_mult(*HbyA_petsc, *Ainv_petsc);
 
-  std::cout << " (H(u)-rhs)/A" << std::endl;
-  HbyA_petsc->print();
+  if (verbose)
+  {
+    std::cout << " (H(u)-rhs)/A" << std::endl;
+    HbyA_petsc->print();
+  }
 
   // **************************************************************************
   // Populating the

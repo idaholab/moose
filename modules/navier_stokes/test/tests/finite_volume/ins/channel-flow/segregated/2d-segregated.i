@@ -3,7 +3,7 @@ rho = 1.0
 advected_interp_method = 'average'
 velocity_interp_method = 'rc'
 
-momentum_tag = "non_pressure"
+pressure_tag = "pressure_grad"
 
 [Mesh]
   [mesh]
@@ -11,10 +11,14 @@ momentum_tag = "non_pressure"
     dim = 2
     dx = '0.3'
     dy = '0.3'
-    ix = '6'
-    iy = '6'
+    ix = '3'
+    iy = '3'
     subdomain_id = '1'
   []
+  # [read]
+  #   type = FileMeshGenerator
+  #   file = 2d-segregated_in.e
+  # []
 []
 
 [GlobalParams]
@@ -66,20 +70,19 @@ momentum_tag = "non_pressure"
     rho = ${rho}
     momentum_component = 'x'
     linearize = true
-    extra_vector_tags = ${momentum_tag}
   []
   [u_viscosity]
     type = INSFVMomentumDiffusion
     variable = u
     mu = ${mu}
     momentum_component = 'x'
-    extra_vector_tags = ${momentum_tag}
   []
   [u_pressure]
     type = INSFVMomentumPressure
     variable = u
     momentum_component = 'x'
     pressure = pressure
+    extra_vector_tags = ${pressure_tag}
   []
   [v_advection]
     type = INSFVMomentumAdvection
@@ -89,20 +92,19 @@ momentum_tag = "non_pressure"
     rho = ${rho}
     momentum_component = 'y'
     linearize = true
-    extra_vector_tags = ${momentum_tag}
   []
   [v_viscosity]
     type = INSFVMomentumDiffusion
     variable = v
     mu = ${mu}
     momentum_component = 'y'
-    extra_vector_tags = ${momentum_tag}
   []
   [v_pressure]
     type = INSFVMomentumPressure
     variable = v
     momentum_component = 'y'
     pressure = pressure
+    extra_vector_tags = ${pressure_tag}
   []
   [p_diffusion]
     type = FVAnisotropicDiffusion
@@ -165,33 +167,33 @@ momentum_tag = "non_pressure"
   petsc_options = '-ksp_monitor'
   nl_max_its = 1
   l_max_its = 400
-  l_abs_tol = 1e-10
-  l_tol = 1e-10
+  l_abs_tol = 1e-8
+  l_tol = 1e-8
   line_search = 'none'
   rhie_chow_user_object = 'rc'
   momentum_system = 'momentum_system'
   pressure_system = 'pressure_system'
-  momentum_tag = ${momentum_tag}
-  momentum_variable_relaxation = 1.0
+  momentum_tag = ${pressure_tag}
+  momentum_variable_relaxation = 0.80
   pressure_variable_relaxation = 0.3
-  num_iterations = 3
-  pressure_absolute_tolerance = 1e-8
+  num_iterations = 100
+  pressure_absolute_tolerance = 1e-9
   momentum_absolute_tolerance = 1e-5
 
 []
 
-[Postprocessors]
-  [inlet_p]
-    type = SideAverageValue
-    variable = 'pressure'
-    boundary = 'left'
-  []
-  [outlet-u]
-    type = SideIntegralVariablePostprocessor
-    variable = u
-    boundary = 'right'
-  []
-[]
+# [Postprocessors]
+#   [inlet_p]
+#     type = SideAverageValue
+#     variable = 'pressure'
+#     boundary = 'left'
+#   []
+#   [outlet-u]
+#     type = SideIntegralVariablePostprocessor
+#     variable = u
+#     boundary = 'right'
+#   []
+# []
 
 [Outputs]
   exodus = false

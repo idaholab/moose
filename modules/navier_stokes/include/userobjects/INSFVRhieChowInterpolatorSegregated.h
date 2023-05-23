@@ -68,7 +68,7 @@ public:
    * pressure equation plus Rhie-Chow interpolation. This should nly be used with segregated
    * solvers.
    */
-  void computeHbyA(const Real & momentum_relaxation);
+  void computeHbyA(const Real & momentum_relaxation, const bool verbose);
 
   void populateHbyA(NonlinearImplicitSystem & momentum_system,
                     const NumericVector<Number> & raw_hbya,

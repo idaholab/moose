@@ -16,9 +16,6 @@
 #include "KernelBase.h"
 #include "INSFVMomentumPressure.h"
 
-#include "libmesh/equation_systems.h"
-#include "libmesh/petsc_vector.h"
-#include "libmesh/petsc_matrix.h"
 #include "libmesh/petsc_nonlinear_solver.h"
 #include <petscerror.h>
 #include <petscsys.h>
@@ -64,6 +61,7 @@ SIMPLE::validParams()
                                             1000,
                                             "0<num_iterations",
                                             "The number of momentum-pressure iterations needed.");
+  params.addParam<bool>("print_fields", false, "ASD");
 
   return params;
 }
@@ -84,7 +82,8 @@ SIMPLE::SIMPLE(const InputParameters & parameters)
     _pressure_variable_relaxation(getParam<Real>("pressure_variable_relaxation")),
     _momentum_absolute_tolerance(getParam<Real>("momentum_absolute_tolerance")),
     _pressure_absolute_tolerance(getParam<Real>("pressure_absolute_tolerance")),
-    _num_iterations(getParam<unsigned int>("num_iterations"))
+    _num_iterations(getParam<unsigned int>("num_iterations")),
+    _print_fields(getParam<bool>("print_fields"))
 {
   _fixed_point_solve->setInnerSolve(_feproblem_solve);
 
@@ -103,56 +102,81 @@ SIMPLE::init()
   _rc_uo->initFaceVelocities();
 }
 
-PetscErrorCode
-SIMPLE::relaxation_stuff(KSP ksp, Vec rhs, Vec x, void * ctx)
+void
+SIMPLE::relaxEquation(SparseMatrix<Number> & matrix_in,
+                      NumericVector<Number> & rhs_in,
+                      NumericVector<Number> & solution_in,
+                      const Real relaxation_parameter)
 {
-  SIMPLE * executioner = static_cast<SIMPLE *>(ctx);
+  PetscVector<Number> * solution = cast_ptr<PetscVector<Number> *>(&solution_in);
+  PetscVector<Number> * rhs = cast_ptr<PetscVector<Number> *>(&rhs_in);
+  PetscMatrix<Number> * matrix = cast_ptr<PetscMatrix<Number> *>(&matrix_in);
 
-  NonlinearImplicitSystem & momentum_system =
-      dynamic_cast<NonlinearImplicitSystem &>(executioner->getMomentumSystem().system());
-
-  PetscMatrix<Number> * pmat = dynamic_cast<PetscMatrix<Number> *>(momentum_system.matrix);
-
-  PetscVector<Number> * sys_rhs = dynamic_cast<PetscVector<Number> *>(momentum_system.rhs);
-
-  PetscVector<Number> * solution =
-      dynamic_cast<PetscVector<Number> *>(momentum_system.solution.get());
-
-  PetscVector<Number> * old_solution = dynamic_cast<PetscVector<Number> *>(
-      &executioner->getMomentumSystem().getVector(Moose::PREVIOUS_NL_SOLUTION_TAG));
-
-  std::cout << " IN KSP PRESOLVE: " << std::endl;
-  std::cout << " Old " << std::endl;
-  old_solution->print();
-  std::cout << " New " << std::endl;
-  solution->print();
-
-
-  std::unique_ptr<NumericVector<Number>> working_vector = old_solution->zero_clone();
+  std::unique_ptr<NumericVector<Number>> working_vector = solution->zero_clone();
   PetscVector<Number> * working_vector_petsc =
       dynamic_cast<PetscVector<Number> *>(working_vector.get());
 
-  std::unique_ptr<NumericVector<Number>> diff_vector = solution->clone();
-  PetscVector<Number> * diff_vector_petsc = dynamic_cast<PetscVector<Number> *>(diff_vector.get());
+  matrix->get_diagonal(*working_vector_petsc);
 
-  pmat->get_diagonal(*working_vector_petsc);
+  std::unique_ptr<NumericVector<Number>> original_diagonal = working_vector_petsc->clone();
+  PetscVector<Number> * original_diagonal_petsc =
+      dynamic_cast<PetscVector<Number> *>(original_diagonal.get());
 
-  working_vector_petsc->scale(1.0 / executioner->getMomentumRelaxation());
-
-  for (auto row_i = pmat->row_start(); row_i < pmat->row_stop(); row_i++)
+  const Real inverse_relaxation = 1 / relaxation_parameter;
+  for (auto row_i = matrix->row_start(); row_i < matrix->row_stop(); row_i++)
   {
-    pmat->set(row_i, row_i, (*working_vector_petsc)(row_i));
+    std::vector<numeric_index_type> indices;
+    std::vector<Real> values;
+    matrix->get_row(row_i, indices, values);
+    Real abs_sum = std::transform_reduce(
+        values.cbegin(), values.cend(), 0.0, std::plus{}, [](auto val) { return std::abs(val); });
+    Real abs_diagonal = std::abs((*working_vector_petsc)(row_i));
+    Real new_diagonal = inverse_relaxation * std::max(abs_sum - abs_diagonal, abs_diagonal);
+    working_vector_petsc->set(row_i, new_diagonal);
   }
-  pmat->close();
 
-//   diff_vector_petsc->add(-1.0, *old_solution);
-//   diff_vector_petsc->pointwise_mult(*diff_vector_petsc, *working_vector_petsc);
-//   diff_vector_petsc->scale(executioner->getMomentumRelaxation() - 1);
+  for (auto row_i = matrix->row_start(); row_i < matrix->row_stop(); row_i++)
+  {
+    matrix->set(row_i, row_i, (*working_vector_petsc)(row_i));
+  }
+  matrix->close();
 
-//   sys_rhs->add(-1.0, *diff_vector_petsc);
-//   sys_rhs->close();
+  working_vector_petsc->add(-1.0, *original_diagonal_petsc);
+  working_vector_petsc->pointwise_mult(*solution, *working_vector_petsc);
 
-  return 0;
+  rhs->add(*working_vector_petsc);
+  rhs->close();
+}
+
+Real
+SIMPLE::solveMomentumPredictor(NonlinearImplicitSystem & momentum_system)
+{
+  _problem.setCurrentNonlinearSystem(_momentum_sys_number);
+  PetscLinearSolver<Real> & momentum_solver =
+      dynamic_cast<PetscLinearSolver<Real> &>(*momentum_system.get_linear_solver());
+
+  // KSP momentum_solve.ksp();
+
+  auto zero_solution = momentum_system.current_local_solution->zero_clone();
+  PetscMatrix<Number> * mmat = dynamic_cast<PetscMatrix<Number> *>(momentum_system.matrix);
+
+  _problem.computeResidualAndJacobian(*zero_solution, *momentum_system.rhs, *mmat);
+
+  momentum_system.rhs->scale(-1.0);
+
+  relaxEquation(*mmat,
+                *momentum_system.rhs,
+                *momentum_system.current_local_solution,
+                getMomentumRelaxation());
+
+  momentum_solver.solve(
+      *mmat, *mmat, *momentum_system.current_local_solution, *momentum_system.rhs, 1e-8, 100);
+
+  std::vector<Real> res_history;
+  momentum_solver.get_residual_history(res_history);
+  if (_print_fields)
+    std::cout << Moose::stringify(res_history) << std::endl;
+  return res_history[0];
 }
 
 void
@@ -169,93 +193,62 @@ SIMPLE::execute()
 
   NonlinearImplicitSystem & momentum_system =
       dynamic_cast<NonlinearImplicitSystem &>(_momentum_sys.system());
-  PetscLinearSolver<Real> & momentum_solver =
-      dynamic_cast<PetscLinearSolver<Real> &>(*momentum_system.get_linear_solver());
   NonlinearImplicitSystem & pressure_system =
       dynamic_cast<NonlinearImplicitSystem &>(_pressure_sys.system());
-  PetscLinearSolver<Real> & pressure_solver =
-      dynamic_cast<PetscLinearSolver<Real> &>(*pressure_system.get_linear_solver());
-
-  unsigned int iteration_counter = 0;
-  _problem.computeResidualSys(
-      momentum_system, *_momentum_sys.currentSolution(), *momentum_system.rhs);
-  Real momentum_residual = 1.0;
-  Real pressure_residual = 1.0;
-
-  PetscNonlinearSolver<Real> * solver =
-      static_cast<PetscNonlinearSolver<Real> *>(momentum_system.nonlinear_solver.get());
 
   PetscErrorCode ierr;
 
   PetscVector<Number> * pressure_solution =
-        dynamic_cast<PetscVector<Number> *>(pressure_system.solution.get());
+      dynamic_cast<PetscVector<Number> *>(pressure_system.solution.get());
 
-  PetscVector<Number> * pressure_solution_old = dynamic_cast<PetscVector<Number> *>(
-        _pressure_sys.solutionPreviousNewton());
-
+  PetscVector<Number> * pressure_solution_old =
+      dynamic_cast<PetscVector<Number> *>(_pressure_sys.solutionPreviousNewton());
   PetscMatrix<Number> * pmat = dynamic_cast<PetscMatrix<Number> *>(pressure_system.matrix);
+  PetscMatrix<Number> * mmat = dynamic_cast<PetscMatrix<Number> *>(momentum_system.matrix);
 
-
+  unsigned int iteration_counter = 0;
+  Real momentum_residual = 1.0;
+  Real pressure_residual = 1.0;
   while (iteration_counter < _num_iterations && (momentum_residual > _momentum_absolute_tolerance &&
                                                  pressure_residual > _pressure_absolute_tolerance))
   {
-    KSP linear_system;
-    ierr = SNESGetKSP(solver->snes(), &linear_system);
-    LIBMESH_CHKERR(ierr);
-
+    Moose::PetscSupport::petscSetOptions(_problem);
+    Moose::setSolverDefaults(_problem);
     _momentum_sys.residualSetup();
     _pressure_sys.residualSetup();
 
-    ierr = KSPSetPreSolve(linear_system, this->relaxation_stuff, this);
-    LIBMESH_CHKERR(ierr);
     iteration_counter++;
-    // if (iteration_counter)
+
+    momentum_residual = solveMomentumPredictor(momentum_system);
+
+    // _problem.solve(_momentum_sys_number);
+
+    // momentum_residual = _momentum_sys._initial_residual_after_preset_bcs;
+
+    _rc_uo->computeHbyA(_momentum_variable_relaxation, _print_fields);
+
+    // // for (unsigned int j = 0; j < po.pairs.size(); j++)
+    // //   if (po.pairs[j].first == MooseUtils::toUpper("-snes_linesearch_damping"))
+    // //     po.pairs[j].second = std::to_string(1.0);
+
+    // // _problem.computeResidualSys(
+    // //     pressure_system, *_pressure_sys.currentSolution(), *pressure_system.rhs);
+    // // pressure_residual = pressure_system.rhs->l2_norm();
+
+    // auto vw = pressure_system.current_local_solution->zero_clone();
+    // PetscVector<Number> * vw_petsc = dynamic_cast<PetscVector<Number> *>(vw.get());
+
+    // _problem.computeResidualSys(pressure_system, *vw, *pressure_system.rhs);
+
+    // if (_print_fields)
     // {
-    //   _problem.computeResidualSys(
-    //       momentum_system, *_momentum_sys.currentSolution(), *momentum_system.rhs);
-    //   momentum_residual = momentum_system.rhs->l2_norm();
+    //   std::cout << "Pressure RHS" << std::endl;
+    //   pressure_system.rhs->print();
     // }
 
-    // bool found = false;
-    // for (unsigned int j = 0; j < po.pairs.size(); j++)
-    //   if (po.pairs[j].first == MooseUtils::toUpper("-snes_linesearch_damping"))
-    //   {
-    //     po.pairs[j].second = std::to_string(_momentum_variable_relaxation);
-    //     found = true;
-    //     break;
-    //   }
+    // // pressure_residual = pressure_system.rhs->l2_norm();
 
-    // if (!found)
-    //   po.pairs.emplace_back(std::make_pair(MooseUtils::toUpper("-snes_linesearch_damping"),
-    //                                        std::to_string(_momentum_variable_relaxation)));
-
-    // Moose::PetscSupport::petscSetOptions(_problem);
-
-    _problem.solve(_momentum_sys_number);
-
-    momentum_residual = _momentum_sys._initial_residual_after_preset_bcs;
-
-    _rc_uo->computeHbyA(_momentum_variable_relaxation);
-
-    // for (unsigned int j = 0; j < po.pairs.size(); j++)
-    //   if (po.pairs[j].first == MooseUtils::toUpper("-snes_linesearch_damping"))
-    //     po.pairs[j].second = std::to_string(1.0);
-
-    // _problem.computeResidualSys(
-    //     pressure_system, *_pressure_sys.currentSolution(), *pressure_system.rhs);
-    // pressure_residual = pressure_system.rhs->l2_norm();
-
-    auto vw = pressure_system.current_local_solution->zero_clone();
-    PetscVector<Number> * vw_petsc = dynamic_cast<PetscVector<Number> *>(vw.get());
-
-    _problem.computeResidualSys(pressure_system, *vw, *pressure_system.rhs);
-
-    std::cout << "Pressure RHS" << std::endl;
-    pressure_system.rhs->print();
-
-    // pressure_residual = pressure_system.rhs->l2_norm();
-
-    // Moose::PetscSupport::petscSetOptions(_problem);
+    // // Moose::PetscSupport::petscSetOptions(_problem);
 
     // std::cout << "old pressure" << std::endl;
     // pressure_solution_old->print();
@@ -267,31 +260,32 @@ SIMPLE::execute()
 
     pressure_residual = _pressure_sys._initial_residual_after_preset_bcs;
 
-    PetscMatrix<Number> * pmat = dynamic_cast<PetscMatrix<Number> *>(pressure_system.matrix);
-
-    std::cout << "Pressure matrix" << std::endl;
-    pmat->print();
+    if (_print_fields)
+    {
+      std::cout << "Pressure matrix" << std::endl;
+      pmat->print();
+    }
 
     _rc_uo->computeVelocity(_momentum_variable_relaxation);
 
-    // PetscNonlinearSolver<Real> * solver =
-    //     static_cast<PetscNonlinearSolver<Real> *>(pressure_system.nonlinear_solver.get());
+    // // PetscNonlinearSolver<Real> * solver =
+    // //     static_cast<PetscNonlinearSolver<Real> *>(pressure_system.nonlinear_solver.get());
 
-    // PetscErrorCode ierr;
-    // KSP linear_system;
-    // ierr = SNESGetKSP(solver->snes(), &linear_system);
-    // LIBMESH_CHKERR(ierr);
+    // // PetscErrorCode ierr;
+    // // KSP linear_system;
+    // // ierr = SNESGetKSP(solver->snes(), &linear_system);
+    // // LIBMESH_CHKERR(ierr);
 
-    // // Wpuld be cool to add asserts here
-    // PetscVector<Number> * correction_petsc = dynamic_cast<PetscVector<Number>
-    // *>(correction.get()); Vec v = correction_petsc->vec();
+    // // // Wpuld be cool to add asserts here
+    // // PetscVector<Number> * correction_petsc = dynamic_cast<PetscVector<Number>
+    // // *>(correction.get()); Vec v = correction_petsc->vec();
 
-    // ierr = KSPGetSolution(linear_system, &v);
-    // LIBMESH_CHKERR(ierr);
+    // // ierr = KSPGetSolution(linear_system, &v);
+    // // LIBMESH_CHKERR(ierr);
 
-    // ierr = VecView(v, PETSC_VIEWER_STDOUT_SELF);
+    // // ierr = VecView(v, PETSC_VIEWER_STDOUT_SELF);
 
-    // correction->print();
+    // // correction->print();
 
     PetscScalar relax = _pressure_variable_relaxation;
 
@@ -306,16 +300,19 @@ SIMPLE::execute()
     // solution->print();
     pressure_solution->close();
 
-    std::cout << "Pressure solution" << std::endl;
-    pressure_solution->print();
+    if (_print_fields)
+    {
+      std::cout << "Pressure solution" << std::endl;
+      pressure_solution->print();
+    }
 
     *pressure_solution_old = *pressure_solution;
     _pressure_sys.setSolution(*pressure_solution);
 
-    // std::cout << "old pressure" << std::endl;
-    // pressure_solution_old->print();
+    // // std::cout << "old pressure" << std::endl;
+    // // pressure_solution_old->print();
 
-    // ierr = VecAYPX(solution->vec(), relax, vvv);
+    // // ierr = VecAYPX(solution->vec(), relax, vvv);
 
     _console << "Iteration " << iteration_counter << " Initial residual norms:\n"
              << " Momentum equation: " << COLOR_GREEN << momentum_residual << COLOR_DEFAULT << "\n"
