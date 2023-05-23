@@ -282,7 +282,7 @@ PODMapping::buildMapping(const VariableName &
     // on every processor so all of them have access to every mode.
     _left_basis_functions[vname].resize(num_requested_modes);
     _right_basis_functions[vname].resize(num_requested_modes);
-    for (PetscInt j = 0; j < num_requested_modes; ++j)
+    for (PetscInt j = 0; j < cast_int<PetscInt>(num_requested_modes); ++j)
     {
       SVDGetSingularTriplet(_svds[vname], j, NULL, v.vec(), u.vec());
       u.localize(_left_basis_functions[vname][j].get_values());
