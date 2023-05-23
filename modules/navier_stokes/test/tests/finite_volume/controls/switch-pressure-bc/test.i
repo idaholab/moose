@@ -162,13 +162,6 @@ inlet_v = 1
   []
 []
 
-[UserObjects]
-  [reinit]
-    type = ReinitSparsityUserObject
-    reinit_time = '2'
-  []
-[]
-
 [Controls]
   [p_threshold]
     type = ConditionalFunctionEnableControl
