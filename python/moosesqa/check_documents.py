@@ -55,6 +55,10 @@ def _check_document(name, filename, file_list, logger):
             logger.log(log_key, msg)
 
     else:
+        # Temp fix for having content keys in SQA docs and ignoring them
+        if ':' in filename:
+            filename = filename.split(':')[1]
+
         found = list()
         for fname in file_list:
             if fname.endswith(filename.split('#')[0]):
