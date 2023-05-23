@@ -1,7 +1,7 @@
 # Code Verification with MOOSE\\ (a practical guide) id=title
 
 !style halign=center
-[www.mooseframework.org](modules:index.md exact=True)
+[www.mooseframework.org](tutorial03_verification:index.md exact=True)
 
 !--
 
