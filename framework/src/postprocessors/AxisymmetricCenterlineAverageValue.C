@@ -25,7 +25,7 @@ AxisymmetricCenterlineAverageValue::validParams()
 
 AxisymmetricCenterlineAverageValue::AxisymmetricCenterlineAverageValue(
     const InputParameters & parameters)
-  : SideAverageValue(parameters), _volume(0)
+  : SideAverageValue(parameters)
 {
 }
 

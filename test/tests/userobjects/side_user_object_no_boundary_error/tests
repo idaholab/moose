@@ -26,4 +26,13 @@
     expect_err="'avg' of type 'SideAverageValue' depends on variable\(s\) 'lambda'."
     requirement = "The system shall error if the lower-d variable is not properly defined on a boundary."
   []
+
+  [rz_centerline_side]
+    type = RunException
+    input = side_no_boundary.i
+    cli_args = "Postprocessors/avg/boundary='left' Mesh/coord_type=RZ"
+    mesh_mode = replicated
+    expect_err = "The total area of the boundary is zero. This could be due to using a boundary on the centerline of an axisymmetric model."
+    requirement = "The system shall error if the side average value of a variable is requested on a boundary that is the centerline of an axisymmetric model."
+  []
 []

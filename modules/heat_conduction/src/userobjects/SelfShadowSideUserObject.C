@@ -91,7 +91,7 @@ SelfShadowSideUserObject::threadJoin(const UserObject & y)
   _local_qps.insert(_local_qps.end(), uo._local_qps.begin(), uo._local_qps.end());
 }
 
-int
+unsigned int
 SelfShadowSideUserObject::illumination(const SideIDType & id) const
 {
   const auto it = _illumination_status.find(id);
