@@ -7,17 +7,16 @@
 #* Licensed under LGPL 2.1, please see LICENSE for details
 #* https://www.gnu.org/licenses/lgpl-2.1.html
 
-from RunApp import RunApp
+from FileTester import FileTester
 from TestHarness import util
 import os
 
-class SchemaDiff(RunApp):
+class SchemaDiff(FileTester):
     @staticmethod
 
     def validParams():
-        params = RunApp.validParams()
+        params = FileTester.validParams()
         params.addParam('schemadiff',   [], "A list of XML or JSON files to compare.")
-        params.addParam('gold_dir',      'gold', "The directory where the \"gold standard\" files (the expected output to compare against) reside relative to the TEST_DIR: (default: ./gold/). This only needs to be set if the gold file is in a non-standard location.")
         params.addParam('gold_file',      None, "Specify the file in the gold_dir that the output should be compared against. This only needs to be set if the gold file uses a different file name than the output file.")
         params.addParam('ignored_items',  [], "Items in the schema that the differ will ignore. These can be keys or values, i.e. for \"foo\": \"bar\", either foo or bar can be chosen to be selected. Note that entering a value located inside a list will skip the whole list.")
         params.addParam('rel_err',       5.5e-6, "Relative error value allowed in comparisons. If rel_err value is set to 0, it will work on the absolute difference between the values.")
@@ -28,7 +27,7 @@ class SchemaDiff(RunApp):
         #convert test specs entering the constraints as as string, i.e. rel_err = '1.1e-2' instead of rel_err = 1.1e-2
         params['rel_err'] = float(params['rel_err'])
         params['abs_zero'] = float(params['abs_zero'])
-        RunApp.__init__(self, name, params)
+        FileTester.__init__(self, name, params)
         if self.specs['required_python_packages'] is None:
             self.specs['required_python_packages'] = 'deepdiff'
         elif 'deepdiff' not in self.specs['required_python_packages']:
@@ -37,9 +36,8 @@ class SchemaDiff(RunApp):
         # So that derived classes can internally pass skip regex paths
         self.exclude_regex_paths = []
 
-    def prepare(self, options):
-        if self.specs['delete_output_before_running'] == True:
-            util.deleteFilesAndFolders(self.getTestDir(), self.specs['schemadiff'])
+    def getOutputDirs(self, options):
+        return self.specs['schemadiff']
 
     def processResults(self, moose_dir, options, output):
         output += self.testFileOutput(moose_dir, options, output)
@@ -92,7 +90,7 @@ class SchemaDiff(RunApp):
                 # Perform the diff.
                 diff = self.do_deepdiff(gold_dict, test_dict, specs['rel_err'], specs['abs_zero'], specs['ignored_items'])
                 if diff:
-                    output += "Schema difference detected.\nFile 1: " + gold + "\nFile 2: " + test + "\nErrors:\n"
+                    output += "Difference detected.\nFile 1: " + gold + "\nFile 2: " + test + "\nErrors:\n"
                     output += diff
                     self.setStatus(self.diff, 'SCHEMADIFF')
                     break

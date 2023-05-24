@@ -27,6 +27,9 @@ class CSVDiff(SchemaDiff):
         params['schemadiff'] = params['csvdiff']
         SchemaDiff.__init__(self, name, params)
 
+    def getOutputFiles(self):
+        return self.specs['csvdiff']
+
     def load_file(self, path1):
         try:
             output_dict = {}
@@ -46,7 +49,9 @@ class CSVDiff(SchemaDiff):
             return e
 
     def processResults(self, moose_dir, options, output):
-        return SchemaDiff.processResults(self, moose_dir, options, output)
+        output = SchemaDiff.processResults(self, moose_dir, options, output)
+        self.setStatus(self.diff, 'CSVDIFF')
+        return output
 
     def do_deepdiff(self,orig, comp, rel_err, abs_zero, exclude_values:list=None):
         diff = ""
