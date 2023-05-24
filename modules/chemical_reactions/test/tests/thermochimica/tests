@@ -76,25 +76,78 @@
     required_submodule = 'contrib/thermochimica'
   []
 
-  [wrong_element1]
+  [wrong_species1]
     type = RunException
     input = MoRu.i
-    expect_err = "Element 'Xe' was not found in the simulation."
+    expect_err = "Species 'Xe' was not found in the simulation."
     cli_args = "GlobalParams/output_species='BCCN:Mo HCPN:Xe BCCN:Ru HCPN:Ru'"
-    issues = '#23865'
-    requirement = 'The system shall throw an error if an element absent from the simulation is specified for species output'
+    issues = '#23865 #24269'
+    requirement = 'The system shall throw an error if a species absent from the database is specified for species output'
     design = ThermochimicaNodalData.md
 
     max_threads = 1
     required_submodule = 'contrib/thermochimica'
   []
-  [wrong_element2]
+  [wrong_species2]
+    type = RunException
+    input = MoRu.i
+    expect_err = "Phase name 'HCCN' of output species 'HCCN:Mo' was not found in the simulation."
+    cli_args = "GlobalParams/output_species='BCCN:Mo HCCN:Mo BCCN:Ru HCPN:Ru'"
+    issues = '#23865 #24269'
+    requirement = 'The system shall throw an error if a wrong phase name of a species is specified for species output'
+    design = ThermochimicaNodalData.md
+
+    max_threads = 1
+    required_submodule = 'contrib/thermochimica'
+  []
+
+
+  [wrong_element1]
     type = RunException
     input = MoRu.i
     expect_err = "Element 'W' was not found in the simulation."
     cli_args = "GlobalParams/element_potentials='cp:Mo cp:W'"
     issues = '#23865'
     requirement = 'The system shall throw an error if an element absent from the simulation is specified for chemical potential output'
+    design = ThermochimicaNodalData.md
+
+    max_threads = 1
+    required_submodule = 'contrib/thermochimica'
+  []
+
+  [wrong_phase]
+    type = RunException
+    input = MoRu.i
+    expect_err = "Phase 'RandomPhase' was not found in the simulation."
+    cli_args = "GlobalParams/output_phases='BCCN HCPN RandomPhase' UserObjects/data/output_phases='BCCN HCPN RandomPhase'"
+    issues = '#24269'
+    requirement = 'The system shall throw an error if a phase absent from the simulation is specified for phase output'
+    design = ThermochimicaNodalData.md
+
+    max_threads = 1
+    required_submodule = 'contrib/thermochimica'
+  []
+
+  [wrong_vapor_pressure1]
+    type = RunException
+    input = MoRu.i
+    expect_err = "Phase 'HCPN' of vapor species 'HCPN:Mo' is not a gas phase. Cannot calculate vapor pressure."
+    cli_args = "GlobalParams/output_vapor_pressures='HCPN:Mo'"
+    issues = '#24269'
+    requirement = 'The system shall throw an error if a species in a phase other than the gas phase is specified for vapor pressure output'
+    design = ThermochimicaNodalData.md
+
+    max_threads = 1
+    required_submodule = 'contrib/thermochimica'
+  []
+
+  [wrong_vapor_pressure2]
+    type = RunException
+    input = MoRu.i
+    expect_err = "Species 'Xe' was not found in the gas phase."
+    cli_args = "GlobalParams/output_vapor_pressures='gas_ideal:Xe'"
+    issues = '#24269'
+    requirement = 'The system shall throw an error if a species not present in gas phase is specified for vapor pressure output'
     design = ThermochimicaNodalData.md
 
     max_threads = 1

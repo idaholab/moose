@@ -40,14 +40,13 @@ ChemicalCompositionAction::validParams()
   params.addParam<FileName>("initial_values", "The CSV file name with initial conditions.");
   params.addParam<FileName>("thermofile", "Thermodynamics model file");
 
-  MooseEnum tUnit("K C F R", "K");
-  params.addParam<MooseEnum>("tunit", tUnit, "Temperature Unit");
-  MooseEnum pUnit("atm psi bar Pa kPa", "atm");
-  params.addParam<MooseEnum>("punit", pUnit, "Pressure Unit");
+  MooseEnum tUnit("K C F R");
+  params.addRequiredParam<MooseEnum>("tunit", tUnit, "Temperature Unit");
+  MooseEnum pUnit("atm psi bar Pa kPa");
+  params.addRequiredParam<MooseEnum>("punit", pUnit, "Pressure Unit");
   MooseEnum mUnit(
-      "mole_fraction atom_fraction atoms moles gram-atoms mass_fraction kilograms grams pounds",
-      "moles");
-  params.addParam<MooseEnum>("munit", mUnit, "Mass Unit");
+      "mole_fraction atom_fraction atoms moles gram-atoms mass_fraction kilograms grams pounds");
+  params.addRequiredParam<MooseEnum>("munit", mUnit, "Mass Unit");
 
   params.addParam<std::vector<std::string>>("output_phases", "List of phases to be output");
   params.addParam<std::vector<std::string>>(
@@ -55,6 +54,9 @@ ChemicalCompositionAction::validParams()
   params.addParam<std::vector<std::string>>(
       "element_potentials",
       "List of chemical elements for which chemical potentials are requested");
+  params.addParam<std::vector<std::string>>(
+      "output_vapor_pressures",
+      "List of gas phase species for which vapor pressures are requested");
   return params;
 }
 
@@ -66,7 +68,8 @@ ChemicalCompositionAction::ChemicalCompositionAction(const InputParameters & par
     _munit(getParam<MooseEnum>("munit")),
     _phases(getParam<std::vector<std::string>>("output_phases")),
     _species(getParam<std::vector<std::string>>("output_species")),
-    _element_potentials(getParam<std::vector<std::string>>("element_potentials"))
+    _element_potentials(getParam<std::vector<std::string>>("element_potentials")),
+    _vapor_pressures(getParam<std::vector<std::string>>("output_vapor_pressures"))
 {
   ThermochimicaUtils::checkLibraryAvailability(*this);
 
@@ -99,6 +102,9 @@ ChemicalCompositionAction::act()
 
     for (const auto i : index_range(_element_potentials))
       _problem->addAuxVariable(aux_var_type, _element_potentials[i], params);
+
+    for (const auto i : index_range(_vapor_pressures))
+      _problem->addAuxVariable(aux_var_type, _vapor_pressures[i], params);
   }
 
   //
@@ -177,6 +183,13 @@ ChemicalCompositionAction::act()
     for (const auto i : index_range(_element_potentials))
     {
       const std::string ker_name = _element_potentials[i];
+      params.set<AuxVariableName>("variable") = ker_name;
+      _problem->addAuxKernel("SelfAux", ker_name, params);
+    }
+
+    for (const auto i : index_range(_vapor_pressures))
+    {
+      const std::string ker_name = _vapor_pressures[i];
       params.set<AuxVariableName>("variable") = ker_name;
       _problem->addAuxKernel("SelfAux", ker_name, params);
     }

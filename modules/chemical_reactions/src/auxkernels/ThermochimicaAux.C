@@ -31,6 +31,7 @@ ThermochimicaAux::validParams()
   params.addCoupledVar("output_species", "Amounts of species to be output");
   params.addRequiredParam<UserObjectName>("thermo_nodal_data_uo", "Name of the user object");
   params.addCoupledVar("element_potentials", "Chemical potentials of elements");
+  params.addCoupledVar("output_vapor_pressures", "Vapour pressures of species to be output");
 
   ThermochimicaUtils::addClassDescription(
       params,
@@ -44,11 +45,10 @@ ThermochimicaAux::ThermochimicaAux(const InputParameters & parameters)
   : AuxKernel(parameters),
     _n_phases(coupledComponents("output_phases")),
     _ph(_n_phases),
-    _ph_name(_n_phases),
     _n_species(coupledComponents("output_species")),
     _sp(_n_species),
-    _sp_phase_name(_n_species),
-    _sp_species_name(_n_species),
+    _n_vapor_species(coupledComponents("output_vapor_pressures")),
+    _vapor_pressures(_n_vapor_species),
     _n_elements(coupledComponents("element_potentials")),
     _el_pot(_n_elements)
 #ifdef THERMOCHIMICA_ENABLED
@@ -65,22 +65,16 @@ ThermochimicaAux::ThermochimicaAux(const InputParameters & parameters)
       mooseError("All variables coupled in ThermochimicaAux must be of first order Lagrange type.");
 
   for (const auto i : make_range(_n_phases))
-  {
-    _ph[i] = &writableCoupledValue("output_phases", i);
-    _ph_name[i] = getVar("output_phases", i)->name();
-  }
+    _ph[i] = &writableVariable("output_phases", i);
 
   for (const auto i : make_range(_n_species))
-  {
-    _sp[i] = &writableCoupledValue("output_species", i);
-    auto species_var_name = getVar("output_species", i)->name();
-    int semicolon = species_var_name.find(";");
-    _sp_phase_name[i] = species_var_name.substr(0, semicolon);
-    _sp_species_name[i] = species_var_name.substr(semicolon + 1);
-  }
+    _sp[i] = &writableVariable("output_species", i);
+
+  for (const auto i : make_range(_n_vapor_species))
+    _vapor_pressures[i] = &writableVariable("output_vapor_pressures", i);
 
   for (const auto i : make_range(_n_elements))
-    _el_pot[i] = &writableCoupledValue("element_potentials", i);
+    _el_pot[i] = &writableVariable("element_potentials", i);
 }
 
 Real
@@ -95,21 +89,28 @@ ThermochimicaAux::computeValue()
   // Save requested phase data into coupled aux variables
   for (const auto i : make_range(_n_phases))
     if (data._phase_indices[i] < 0)
-      (*_ph[i])[_qp] = 0;
+      _ph[i]->setNodalValue(0, _qp);
     else
     {
-      (*_ph[i])[_qp] = data._moles_phase[data._phase_indices[i]];
+      _ph[i]->setNodalValue(data._moles_phase[data._phase_indices[i]], _qp);
       n_active_phases += 1.0;
     }
 
   // Save requested species data into coupled aux variables
   for (unsigned int i = 0; i < _n_species; i++)
-    (*_sp[i])[_qp] = data._species_fractions[i];
+    _sp[i]->setNodalValue(data._species_fractions[i], _qp);
+
+  // Save requested vapor pressures into coupled aux variables
+  mooseAssert(_vapor_pressures.size() == data._vapor_pressures.size(),
+              "Output vapor pressures: Inconsistent sizes.");
+  for (const auto i : make_range(_n_vapor_species))
+    _vapor_pressures[i]->setNodalValue(data._vapor_pressures[i], _qp);
 
   // Save requested element potentials into coupled aux variables
-  mooseAssert(_el_pot.size() == data._element_potential.size(), "Inconsistent sizes.");
+  mooseAssert(_el_pot.size() == data._element_potential_for_output.size(),
+              "Output element potentials: Inconsistent sizes.");
   for (const auto i : make_range(_n_elements))
-    (*_el_pot[i])[_qp] = data._element_potential[i];
+    _el_pot[i]->setNodalValue(data._element_potential_for_output[i], _qp);
 #endif
 
   return n_active_phases;

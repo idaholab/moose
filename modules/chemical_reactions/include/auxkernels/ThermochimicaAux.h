@@ -29,23 +29,22 @@ protected:
   /// Total number of phases to output
   const std::size_t _n_phases;
   /// Writable phase amount variables
-  std::vector<VariableValue *> _ph;
-  /// Phase names
-  std::vector<std::string> _ph_name;
+  std::vector<MooseVariable *> _ph;
 
   /// Total number of species to output
   const std::size_t _n_species;
   /// Writable species amount variables
-  std::vector<VariableValue *> _sp;
-  /// Corresponding phase names
-  std::vector<std::string> _sp_phase_name;
-  /// Corresponding species names
-  std::vector<std::string> _sp_species_name;
+  std::vector<MooseVariable *> _sp;
+
+  /// Total number of vapor species
+  const std::size_t _n_vapor_species;
+  /// Writable vapour pressures for each element
+  std::vector<MooseVariable *> _vapor_pressures;
 
   /// Total number of elements to output
   const std::size_t _n_elements;
   /// Writable chemical potential variables for each element
-  std::vector<VariableValue *> _el_pot;
+  std::vector<MooseVariable *> _el_pot;
 
 private:
 #ifdef THERMOCHIMICA_ENABLED
