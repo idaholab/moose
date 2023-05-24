@@ -1720,7 +1720,7 @@ ac_config_commands="$ac_config_commands framework/include/base/MooseConfig.h"
 if test "${with_derivative_size+set}" = set; then :
   withval=$with_derivative_size; derivative_size="$withval"
 else
-  derivative_size=53
+  derivative_size=64
 fi
 
 
