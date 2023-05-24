@@ -29,7 +29,7 @@
     input = 'generalized_plane_strain_ref_resid.i'
     exodiff = 'generalized_plane_strain_ref_resid_out.e'
     custom_cmp = 'generalized.exodiff'
-    requirement = 'The system shall support a generalized plane strain mechanics solution using the reference residual approach to check solution convergence of the field and scalar variables when the reference vector is constructed using absolute value vector tags'
+    requirement = 'The system shall support a generalized plane strain mechanics solution using the reference residual approach to check solution convergence of the field and scalar variables when the reference vector is constructed using absolute value vector tags.'
     design = 'ComputePlaneSmallStrain.md'
   [../]
   [./generalized_plane_strain_ref_resid_extra_vector_tags]
@@ -39,7 +39,7 @@
     cli_args = "Modules/TensorMechanics/Master/all/absolute_value_vector_tags='' Modules/TensorMechanics/Master/all/extra_vector_tags='ref' Outputs/file_base=generalized_plane_strain_ref_resid_extra_vector_tags_out"
     exodiff = 'generalized_plane_strain_ref_resid_extra_vector_tags_out.e'
     custom_cmp = 'generalized.exodiff'
-    requirement = 'The system shall support a generalized plane strain mechanics solution using the reference residual approach to check solution convergence of the field and scalar variables when the reference vector is constructed using unbalanced kernel contributions'
+    requirement = 'The system shall support a generalized plane strain mechanics solution using the reference residual approach to check solution convergence of the field and scalar variables when the reference vector is constructed using unbalanced kernel contributions.'
     design = 'ComputePlaneSmallStrain.md'
   [../]
   [./generalized_plane_strain_increment]

@@ -366,7 +366,6 @@ TensorMechanicsAction::act()
       if (isParamValid("absolute_value_vector_tags"))
         action_params.set<std::vector<TagName>>("absolute_value_vector_tags") =
             getParam<std::vector<TagName>>("absolute_value_vector_tags");
-      // action_params.set<std::vector<TagName>>("extra_vector_tags") =
     }
   }
 
