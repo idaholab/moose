@@ -442,8 +442,10 @@ public:
 
   std::pair<bool, std::vector<const FVFluxBC *>> getFluxBCs(const FaceInfo & fi) const;
 
-  void residualSetup() override;
-  void jacobianSetup() override;
+  virtual void residualSetup() override;
+  virtual void jacobianSetup() override;
+  virtual void timestepSetup() override;
+  virtual void meshChanged() override;
 
   /**
    * Get the solution value for the provided element and seed the derivative for the corresponding
@@ -460,9 +462,6 @@ public:
   using typename Moose::FunctorBase<FunctorArg>::GradientType;
 
   void setActiveTags(const std::set<TagID> & vtags) override;
-
-  void meshChanged() override;
-  void initialSetup() override;
 
   /**
    * Request that quadrature point data be (pre)computed. Quadrature point data is (pre)computed by
@@ -567,6 +566,9 @@ private:
    * Setup the boundary to Dirichlet BC map
    */
   void determineBoundaryToDirichletBCMap();
+
+  /// Whether the boundary to Dirichlet cache map has been setup yet
+  bool _dirichlet_map_setup = false;
 
 public:
   const MooseArray<OutputType> & nodalValueArray() const override
@@ -757,8 +759,16 @@ void
 MooseVariableFV<OutputType>::meshChanged()
 {
   _prev_elem = nullptr;
-  determineBoundaryToDirichletBCMap();
+  _dirichlet_map_setup = false;
   MooseVariableField<OutputType>::meshChanged();
+}
+
+template <typename OutputType>
+void
+MooseVariableFV<OutputType>::timestepSetup()
+{
+  _dirichlet_map_setup = false;
+  MooseVariableField<OutputType>::timestepSetup();
 }
 
 template <typename OutputType>
