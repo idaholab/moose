@@ -21,7 +21,7 @@
                 UserObjects/other_study/names=ray
                 UserObjects/other_study/ray_kernel_coverage_check=false"
     requirement = 'The system shall provide a method for determining the equality of rays'
-    expect_out = 'Ray equality test passed 22440 checks'
+    expect_out = 'Ray equality test: same_passes = 408, duplicate_passes = 7344'
   []
 
   [errors]
