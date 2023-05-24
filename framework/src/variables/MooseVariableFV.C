@@ -408,6 +408,9 @@ template <typename OutputType>
 std::pair<bool, const FVDirichletBCBase *>
 MooseVariableFV<OutputType>::getDirichletBC(const FaceInfo & fi) const
 {
+  if (!_dirichlet_map_setup)
+    const_cast<MooseVariableFV<OutputType> *>(this)->determineBoundaryToDirichletBCMap();
+
   for (const auto bnd_id : fi.boundaryIDs())
     if (auto it = _boundary_id_to_dirichlet_bc.find(bnd_id);
         it != _boundary_id_to_dirichlet_bc.end())
@@ -838,14 +841,8 @@ MooseVariableFV<OutputType>::determineBoundaryToDirichletBCMap()
     if (!bcs.empty())
       _boundary_id_to_dirichlet_bc.emplace(bnd_id, bcs[0]);
   }
-}
 
-template <typename OutputType>
-void
-MooseVariableFV<OutputType>::initialSetup()
-{
-  determineBoundaryToDirichletBCMap();
-  MooseVariableField<OutputType>::initialSetup();
+  _dirichlet_map_setup = true;
 }
 
 template class MooseVariableFV<Real>;
