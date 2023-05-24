@@ -97,6 +97,12 @@ public:
    */
   const INSFVPressureVariable & pressure(THREAD_ID tid) const;
 
+  /**
+   * Whether to pull all 'a' coefficient data from the owning process for all nonlocal elements we
+   * have access to (e.g. all of our nonlocal elements we have pointers to)
+   */
+  void pullAllNonlocal() { _pull_all_nonlocal = true; }
+
 protected:
   /**
    * A virtual method that allows us to only implement getVelocity once for free and porous flows
@@ -217,6 +223,9 @@ private:
   /// application solving precursor advection, and another application has computed the fluid flow
   /// field
   bool _a_data_provided;
+
+  /// Whether we want to pull all nonlocal 'a' coefficient data
+  bool _pull_all_nonlocal;
 };
 
 inline const Moose::FunctorBase<ADReal> & INSFVRhieChowInterpolator::epsilon(THREAD_ID) const

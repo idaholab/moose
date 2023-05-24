@@ -86,10 +86,14 @@ loopOverElemFaceInfo(const Elem & elem,
       mooseAssert(fi, "We should have found a FaceInfo");
       mooseAssert(elem_has_info ? &elem == &fi->elem() : &elem == fi->neighborPtr(),
                   "Doesn't seem like we understand how this FaceInfo thing is working");
-      mooseAssert(neighbor
-                      ? (elem_has_info ? neighbor == fi->neighborPtr() : neighbor == &fi->elem())
-                      : true,
-                  "Doesn't seem like we understand how this FaceInfo thing is working");
+      if (neighbor)
+      {
+        mooseAssert(neighbor != libMesh::remote_elem,
+                    "Remote element detected. This indicates that you have insufficient geometric "
+                    "ghosting. Please contact your application developers.");
+        mooseAssert(elem_has_info ? neighbor == fi->neighborPtr() : neighbor == &fi->elem(),
+                    "Doesn't seem like we understand how this FaceInfo thing is working");
+      }
 
       const Point elem_normal = elem_has_info ? fi->normal() : Point(-fi->normal());
 
