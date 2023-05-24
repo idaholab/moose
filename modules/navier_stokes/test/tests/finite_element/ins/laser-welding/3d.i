@@ -307,34 +307,10 @@ surfacetemp=300
   max_h_level = 4
 
   [Indicators]
-    # [error_x]
-    #   type = GradientJumpIndicator
-    #   variable = vel_x
-    # []
-    # [error_y]
-    #   type = GradientJumpIndicator
-    #   variable = vel_y
-    # []
-    # [error_z]
-    #   type = GradientJumpIndicator
-    #   variable = vel_z
-    # []
-    # [error_p]
-    #   type = GradientJumpIndicator
-    #   variable = p
-    # []
     [error_T]
       type = GradientJumpIndicator
       variable = T
     []
-    # [error_dispx]
-    #   type = GradientJumpIndicator
-    #   variable = disp_x
-    # []
-    # [error_dispy]
-    #   type = GradientJumpIndicator
-    #   variable = disp_y
-    # []
     [error_dispz]
       type = GradientJumpIndicator
       variable = disp_z
@@ -342,48 +318,12 @@ surfacetemp=300
   []
 
   [Markers]
-    # [errorfrac_x]
-    #   type = ErrorFractionMarker
-    #   refine = 0.7
-    #   coarsen = 0.3
-    #   indicator = error_x
-    # []
-    # [errorfrac_y]
-    #   type = ErrorFractionMarker
-    #   refine = 0.7
-    #   coarsen = 0.3
-    #   indicator = error_y
-    # []
-    # [errorfrac_z]
-    #   type = ErrorFractionMarker
-    #   refine = 0.7
-    #   coarsen = 0.3
-    #   indicator = error_z
-    # []
-    # [errorfrac_p]
-    #   type = ErrorFractionMarker
-    #   refine = 0.7
-    #   coarsen = 0.3
-    #   indicator = error_p
-    # []
     [errorfrac_T]
       type = ErrorFractionMarker
       refine = 0.4
       coarsen = 0.2
       indicator = error_T
     []
-    # [errorfrac_dispx]
-    #   type = ErrorFractionMarker
-    #   refine = 0.7
-    #   coarsen = 0.3
-    #   indicator = error_dispx
-    # []
-    # [errorfrac_dispy]
-    #   type = ErrorFractionMarker
-    #   refine = 0.7
-    #   coarsen = 0.3
-    #   indicator = error_dispy
-    # []
     [errorfrac_dispz]
       type = ErrorFractionMarker
       refine = 0.4
@@ -408,12 +348,5 @@ surfacetemp=300
   [tot_nl]
     type = CumulativeValuePostprocessor
     postprocessor = 'nl'
-  []
-  [linear]
-    type = NumLinearIterations
-  []
-  [tot_linear]
-    type = CumulativeValuePostprocessor
-    postprocessor = 'linear'
   []
 []
