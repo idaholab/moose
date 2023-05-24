@@ -39,10 +39,6 @@ surfacetemp=300
   []
 []
 
-[Problem]
-  error_on_jacobian_nonzero_reallocation = false
-[]
-
 [ICs]
   [T]
     type = FunctionIC
@@ -207,6 +203,27 @@ surfacetemp=300
   []
   [displace_z_top]
     type = DisplaceBoundaryBC
+    boundary = 'front'
+    variable = 'disp_z'
+    velocity = 'vel'
+    component = 2
+  []
+  [displace_x_top_dummy]
+    type = DummyDisplacedBoundaryIntegratedBC
+    boundary = 'front'
+    variable = 'disp_x'
+    velocity = 'vel'
+    component = 0
+  []
+  [displace_y_top_dummy]
+    type = DummyDisplacedBoundaryIntegratedBC
+    boundary = 'front'
+    variable = 'disp_y'
+    velocity = 'vel'
+    component = 1
+  []
+  [displace_z_top_dummy]
+    type = DummyDisplacedBoundaryIntegratedBC
     boundary = 'front'
     variable = 'disp_z'
     velocity = 'vel'
