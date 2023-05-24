@@ -25,6 +25,7 @@
       required_python_packages = 'pandas matplotlib'
       method = '!dbg'
       detail = 'a min-mod advection interpolation scheme.'
+      min_parallel = 2 # Test geometric and algebraic ghosting
     []
   []
   [extrapolate]

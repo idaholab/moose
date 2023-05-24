@@ -21,11 +21,14 @@ class TestOutflow(unittest.TestCase):
 
 class TestOutflowMinMod(unittest.TestCase):
     def test(self):
-        df1 = mms.run_spatial('advection-outflow.i', 7, "GlobalParams/advected_interp_method='min_mod'",
+        df1 = mms.run_spatial('advection-outflow.i', 7,
+                              "GlobalParams/advected_interp_method='min_mod'",
                               "--error-unused",
                               "--error",
                               "--error-deprecated",
-                              y_pp=['L2u', 'L2v'])
+                              "--distributed-mesh",
+                              y_pp=['L2u', 'L2v'],
+                              mpi=2)
         fig = mms.ConvergencePlot(xlabel='Element Size ($h$)', ylabel='$L_2$ Error')
         fig.plot(df1,
                  label=['L2u', 'L2v'],
