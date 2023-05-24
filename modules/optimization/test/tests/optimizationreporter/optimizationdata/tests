@@ -1,6 +1,6 @@
 [Tests]
   issues = '#24333'
-  design = 'OptimizeData.md'
+  design = 'OptimizationData.md'
   [readData]
     type = CSVDiff
     max_threads = 1 # Optimize executioner does not support multiple threads
