@@ -1,8 +1,5 @@
 [GlobalParams]
-  order = FIRST
-  family = LAGRANGE
   displacements = 'disp_x disp_y'
-  block = 0
 []
 
 [Problem]
