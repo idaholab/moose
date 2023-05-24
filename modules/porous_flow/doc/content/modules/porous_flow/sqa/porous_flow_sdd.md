@@ -14,7 +14,7 @@ Specific details unique to the module are outlined in this document.
 The {{module}} module inherits the [software dependencies and limitations of the MOOSE framework](framework_sdd.md#dependencies-and-limitations).
 It depends on the [Fluid Properties](fluid_properties/index.md) module for all fluid property calculations,
 the [Tensor Mechanics](tensor_mechanics/index.md) module for the mechanical aspects of coupled flow
-and geomechanics models, and the [Geochemistry](geochemistry/index.md) module for coupled flow and
+and geomechanics models, and the [Geochemistry](geochemistry/index.md optional=True) module for coupled flow and
 geochemical reactions. The {{module}} module currently has the following limitations in functionality:
 
 - As it depends on other physics modules for fluid properties, mechanics and geochemistry calculations,
