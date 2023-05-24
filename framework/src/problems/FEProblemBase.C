@@ -3780,6 +3780,11 @@ FEProblemBase::computeIndicators()
   {
     TIME_SECTION("computeIndicators", 1, "Computing Indicators");
 
+    // Internal side indicators may lead to creating a much larger sparsity pattern than dictated by
+    // the actual finite element scheme (e.g. CFEM)
+    const auto old_do_derivatives = ADReal::do_derivatives;
+    ADReal::do_derivatives = false;
+
     std::vector<std::string> fields;
 
     // Indicator Fields
@@ -3804,6 +3809,8 @@ FEProblemBase::computeIndicators()
     Threads::parallel_reduce(*_mesh.getActiveLocalElementRange(), finalize_cit);
     _aux->solution().close();
     _aux->update();
+
+    ADReal::do_derivatives = old_do_derivatives;
   }
 }
 
