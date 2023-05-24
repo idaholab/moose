@@ -508,6 +508,11 @@ install_lib_%: %
 	@$(call patch_rpath,$(libdst),../$(lib_install_suffix/.))
 	@$(call patch_relink,$(libdst),$(libpath_pcre),$(libname_pcre))
 	@$(call patch_relink,$(libdst),$(libpath_framework),$(libname_framework))
+# These lines are critical in that they are a catch-all for nested applications. (e.g. These will properly remap MOOSE and the modules
+# in an application library to the installed locations) - DO NOT REMOVE! Yes, this can probably be done better
+	@$(eval libnames := $(foreach lib,$(applibs),$(shell grep "dlname='.*'" $(lib) 2>/dev/null | sed -E "s/dlname='(.*)'/\1/g")))
+	@$(eval libpaths := $(foreach lib,$(applibs),$(dir $(lib))$(shell grep "dlname='.*'" $(lib) 2>/dev/null | sed -E "s/dlname='(.*)'/\1/g")))
+	@for lib in $(libpaths); do $(call patch_relink,$(libdst),$$lib,$$(basename $$lib)); done
 
 $(binlink): $(copy_input_targets)
 	ln -sf ../../bin/$(notdir $(app_EXEC)) $@
