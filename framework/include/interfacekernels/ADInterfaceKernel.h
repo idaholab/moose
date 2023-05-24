@@ -95,10 +95,10 @@ protected:
   const MooseArray<ADPoint> & _ad_q_point;
 
   /// shape function
-  const ADTemplateVariablePhiValue<T> & _phi;
+  const typename OutputTools<T>::VariablePhiValue & _phi;
 
   /// Side shape function.
-  const ADTemplateVariableTestValue<T> & _test;
+  const typename OutputTools<T>::VariableTestValue & _test;
 
   /// Gradient of side shape function
   const ADTemplateVariableTestGradient<T> & _grad_test;
@@ -113,13 +113,14 @@ protected:
   const ADTemplateVariableGradient<T> & _grad_neighbor_value;
 
   /// Side neighbor shape function.
-  const ADTemplateVariablePhiValue<T> & _phi_neighbor;
+  const typename OutputTools<T>::VariablePhiValue & _phi_neighbor;
 
   /// Side neighbor test function
-  const ADTemplateVariableTestValue<T> & _test_neighbor;
+  const typename OutputTools<T>::VariableTestValue & _test_neighbor;
 
-  /// Gradient of side neighbor shape function
-  const ADTemplateVariableTestGradient<T> & _grad_test_neighbor;
+  /// Gradient of side neighbor shape function. No AD because we have not implemented support for
+  /// neighbor AD FE data in Assembly
+  const typename OutputTools<T>::VariableTestGradient & _grad_test_neighbor;
 
   /// Holds residual entries as they are accumulated by this InterfaceKernel
   /// This variable is temporarily reserved for RattleSnake

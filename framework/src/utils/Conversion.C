@@ -502,6 +502,22 @@ stringify(SolutionIterationType t)
 }
 
 std::string
+stringify(ElementType t)
+{
+  switch (t)
+  {
+    case ElementType::Element:
+      return "ELEMENT";
+    case ElementType::Neighbor:
+      return "NEIGHBOR";
+    case ElementType::Lower:
+      return "LOWER";
+    default:
+      mooseError("unrecognized type");
+  }
+}
+
+std::string
 stringify(const std::string & s)
 {
   return s;
