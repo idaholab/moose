@@ -63,7 +63,7 @@ During the SHRT transients, the mass flow rate and power vary. The normalized po
 
 ### Improvements
 
-The subchannel code (Pronghorn-SC) was improved by two successive corrections. The first correction involved calculating a more realistic radial and axial pin power profile, using a Serpent-2 simulation of the EBR-II core. The second correction involved calculating the heat flux from the edge subchannels to the inner duct of the thimble, using a Pronghorn-FV simulation and applying this heat flux in the Pronghorn-SC simulations. The scope of these improvements is beyond the stand-alone subchannel capabilities so they are not going to be expanded upon here.
+The subchannel code (Pronghorn-SC) was improved by two successive corrections. The first correction involved calculating a more realistic radial and axial pin power profile, using a Serpent-2 simulation of the EBR-II core. The second correction involved calculating the heat flux from the edge subchannels to the inner duct of the thimble, using a Pronghorn-FV simulation and applying this heat flux in the Pronghorn-SC simulations.
 
 ## Steady State Results
 
@@ -121,15 +121,15 @@ For both the SHRT-17 and SHRT-45R transients, the uniform power model overestima
 
 To run the steady state problem use the following input file:
 
-!listing /examples/EBR-II/XX09_SC_SS.i
+!listing /examples/EBR-II/XX09_SC_SS.i language=cpp
 
 To run the transient problem use the following input file:
 
-!listing /examples/EBR-II/XX09_SC_tr.i
+!listing /examples/EBR-II/XX09_SC_tr.i language=cpp
 
 The corrected power profile is read by the following .txt file (pin_power_profile61.txt):
 
-!listing /examples/EBR-II/pin_power_profile61.txt
+!listing /examples/EBR-II/pin_power_profile61.txt language=cpp
 
 The Functions block defines the shape of axial power profile:
 
@@ -160,7 +160,7 @@ For the transient case the user needs to provide transient boundary conditions:
 
 - The functions defined above are given normalized and they need to multiply the initial steady state conditions:
 
-```language=bash
+```language=cpp
     [Controls]
         [mass_flux_ctrl]
             type = RealFunctionControl
@@ -215,3 +215,24 @@ For the transient case the user needs to provide transient boundary conditions:
 - Finally the Executioner block defines the time step with the TimeStepper:
 
 !listing /examples/EBR-II/XX09_SC_tr.i block=Executioner language=cpp
+
+### Coupling to Pronghorn
+
+A porous media Pronghorn-FV simulation is performed to calculate the inter-assembly heat transfer at the inner duct of the XX09 sub-assembly. Pronghorn-FV uses a full porous media model of the XX09 and the neighboring sub-assemblies. The computed heat flux at the inner wall of the inner duct of sub-assembly XX09 is then transferred from Pronghorn-FV to Pronghorn-SC, via the [MutliApp](https://mooseframework.inl.gov/syntax/MultiApps/) fuctionality in [MOOSE](https://mooseframework.inl.gov). Running the Pronghorn-SC simulation with the heat-flux information further improves the fidelity of the results.
+
+The Pronghorn-FV model for SHRT-17 is depicted in [fig:coupling] along with the subchannel pin mesh (Pronghorn-SC model). The sub-assembly XX09 is modeled along with its six neighboring sub-assemblies. The model includes the thimble region of XX09, inter-wrapper, and duct walls. In counter-clockwise order, the six neighboring sub-assemblies include two driver sub-assemblies (D1 and D2). Next in order is the steel sub-assembly (KO11). Next, experimental sub-assembly (X402). Next, High-Flow Driver sub-assembly (HFD) and last a 1/2 driver sub-assembly (P).
+
+!media figures/coupling.png
+    style=width:50%;margin-bottom:2%;margin:auto;
+    id=fig:coupling
+    caption=Test SHRT-17, Pronghorn-FV and Pronghorn-SC models (domain overllaping).
+
+The porosity of each sub-assembly can be calculated using the dimensions provided [!cite](summer2012benchmark) and it is defined as the volume of the flow region over the total flow of the sub-assembly (flow region plus solid structures). For SHRT-17, XX09 has a porosity of $0.45847$, K011 $0.15663$ and the rest $0.44785$. Pronghorn-FV calculates the heat conduction in the solid region (duct walls) and the porous flow in the fluid regions (sub-assemblies, inter-assembly region, and thimble) and couples both solution fields, using conjugate heat-transfer models. However, the main purpose of the Pronghorn-FV simulation is to calculate the linear heat-flux $W/m$ on the interface between XX09 and the inner duct of the thimble. This information is passed on to the subchannel calculation via the `MultiApp` functionality of `MOOSE`. This constitutes a one-way coupling between Pronghorn-FV and Pronghorn-SC.
+
+- The input file that produces the Pronghorn-FV mesh is:
+
+!listing /examples/EBR-II/EBR-II_7assemblies.i language=cpp
+
+- The input file for the coupled simulation is:
+
+!listing /examples/EBR-II/Pr_SC_ss.i language=cpp
