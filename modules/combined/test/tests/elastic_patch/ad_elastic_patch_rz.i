@@ -14,18 +14,15 @@
   temperature = temp
 []
 
-[Problem]
+[Mesh]
+  file = elastic_patch_rz.e
   coord_type = RZ
 []
 
-[Mesh]
-  file = elastic_patch_rz.e
-[]
-
 [Variables]
-  [./temp]
+  [temp]
     initial_condition = 117.56
-  [../]
+  []
 []
 
 [Modules/TensorMechanics/Master/All]
@@ -36,51 +33,51 @@
 []
 
 [Kernels]
-  [./body]
+  [body]
     type = BodyForce
     variable = disp_y
     value = 1
     function = '-400/x'
-  [../]
+  []
 
-  [./heat]
+  [heat]
     type = TimeDerivative
     variable = temp
-  [../]
+  []
 []
 
 [BCs]
-  [./ur]
+  [ur]
     type = FunctionDirichletBC
     variable = disp_x
     boundary = 10
     function = '1e-3*x'
-  [../]
-  [./uz]
+  []
+  [uz]
     type = FunctionDirichletBC
     variable = disp_y
     boundary = 10
     function = '1e-3*(x+y)'
-  [../]
+  []
 []
 
 [Materials]
-  [./elasticity_tensor]
+  [elasticity_tensor]
     type = ComputeIsotropicElasticityTensor
     youngs_modulus = 1e6
     poissons_ratio = 0.25
-  [../]
-  [./stress]
+  []
+  [stress]
     type = ComputeStrainIncrementBasedStress
-  [../]
+  []
 []
 
 [Materials]
-  [./density]
+  [density]
     type = ADDensity
     density = 0.283
     outputs = all
-  [../]
+  []
 []
 
 [Executioner]
@@ -91,8 +88,8 @@
 []
 
 [Outputs]
-  [./out]
+  [out]
     type = Exodus
     elemental_as_nodal = true
-  [../]
+  []
 []

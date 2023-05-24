@@ -15,21 +15,18 @@
   temperature = temp
 []
 
-[Problem]
+[Mesh]
+  file = elastic_patch_rspherical.e
   coord_type = RSPHERICAL
 []
 
-[Mesh]
-  file = elastic_patch_rspherical.e
-[]
-
 [Variables]
-  [./disp_x]
-  [../]
+  [disp_x]
+  []
 
-  [./temp]
+  [temp]
     initial_condition = 117.56
-  [../]
+  []
 []
 
 [Modules/TensorMechanics/Master/All]
@@ -40,38 +37,38 @@
 []
 
 [Kernels]
-  [./heat]
+  [heat]
     type = TimeDerivative
     variable = temp
-  [../]
+  []
 []
 
 [BCs]
-  [./ur]
+  [ur]
     type = FunctionDirichletBC
     variable = disp_x
     boundary = '1 2'
     function = '3e-3*x'
-  [../]
+  []
 []
 
 [Materials]
-  [./elasticity_tensor]
+  [elasticity_tensor]
     type = ComputeIsotropicElasticityTensor
     youngs_modulus = 1e6
     poissons_ratio = 0.25
-  [../]
-  [./stress]
+  []
+  [stress]
     type = ComputeStrainIncrementBasedStress
-  [../]
+  []
 []
 
 [Materials]
-  [./density]
+  [density]
     type = ADDensity
     density = 0.283
     outputs = all
-  [../]
+  []
 []
 
 [Executioner]
