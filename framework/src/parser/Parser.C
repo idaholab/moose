@@ -452,9 +452,8 @@ Parser::walkRaw(std::string /*fullpath*/, std::string /*nodepath*/, hit::Node * 
   bool is_parent;
   std::string registered_identifier = _syntax.isAssociated(section_name, &is_parent);
 
-  // We need to retrieve a list of Actions associated with the current identifier
-  auto iters = _syntax.getActions(registered_identifier);
-  if (iters.first == iters.second)
+  // Make sure at least one action is associated with the current identifier
+  if (const auto [begin, end] = _syntax.getActions(registered_identifier); begin == end)
   {
     _errmsg += hit::errormsg(n,
                              "section '[",
@@ -466,8 +465,24 @@ Parser::walkRaw(std::string /*fullpath*/, std::string /*nodepath*/, hit::Node * 
     return;
   }
 
-  for (auto it = iters.first; it != iters.second; ++it)
+  // The DynamicObjecRegistrationAction changes the action multimap and would invalidate the
+  // iterators returned by _syntax.getActions, that's why we have to loop in this awkward way.
+  std::set<const Syntax::ActionInfo *> processed_actions;
+  while (true)
   {
+    // search for an unprocessed action
+    auto [begin, end] = _syntax.getActions(registered_identifier);
+    auto it = begin;
+    for (; it != end && processed_actions.count(&it->second); ++it)
+      ;
+
+    // no more unprocessed actions
+    if (it == end)
+      break;
+
+    // mark action as processed
+    processed_actions.insert(&it->second);
+
     if (is_parent)
       continue;
     if (_syntax.isDeprecatedSyntax(registered_identifier))

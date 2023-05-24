@@ -1,5 +1,7 @@
 [Tests]
-  [./dynamic_object_loading]
+  design = DynamicObjectRegistrationAction.md
+
+  [dynamic_object_loading]
     type = 'Exodiff'
     input = 'dynamic_objects.i'
     exodiff = 'dynamic_objects_out.e'
@@ -8,9 +10,26 @@
     # Test must be run with the misc app to test dynamic loading
     executable_pattern = 'misc-\w+$'
     allow_warnings = true
-  [../]
+    issues = '#4712'
+    requirement = "Any MOOSE application shall be able to dynamically load a module or application "
+                  "and use objects registered therein, with the library name inferred from the "
+                  "module or application name."
+  []
 
-  [./dynamic_object_loading_w_name]
+  [dynamic_object_loading2]
+    type = 'RunApp'
+    input = 'dynamic_objects2.i'
+    library_mode = 'DYNAMIC'
+
+    # Test must be run with the misc app to test dynamic loading
+    executable_pattern = 'misc-\w+$'
+    allow_warnings = true
+    issues = '#24299'
+    requirement = "Any MOOSE application shall be able to dynamically load a module or application "
+                  "and properly register the provided objects."
+  []
+
+  [dynamic_object_loading_w_name]
     type = 'Exodiff'
     input = 'dynamic_objects.i'
     exodiff = 'dynamic_objects_out.e'
@@ -22,9 +41,12 @@
     # Test must be run with the misc app to test dynamic loading
     executable_pattern = 'misc-\w+$'
     allow_warnings = true
-  [../]
+    issues = '#10911'
+    requirement = "Any MOOSE application shall be able to dynamically load a module or application "
+                  "and use objects registered therein, with the library specified."
+  []
 
-  [./dynamic_object_loading_syntax]
+  [dynamic_object_loading_syntax]
     type = 'Exodiff'
     input = 'dynamic_syntax.i'
     exodiff = 'dynamic_syntax_out.e'
@@ -33,9 +55,13 @@
     # Test must be run with the misc app to test dynamic loading
     executable_pattern = 'misc-\w+$'
     allow_warnings = true
-  [../]
+    issues = '#4712'
+    requirement = "Any MOOSE application shall be able to dynamically load a module or application "
+                  "and properly register module or application specific syntax, with the library "
+                  "name inferred from the module or application name."
+  []
 
-  [./dynamic_object_loading_syntax_w_name]
+  [dynamic_object_loading_syntax_w_name]
     type = 'Exodiff'
     input = 'dynamic_syntax.i'
     exodiff = 'dynamic_syntax_out.e'
@@ -47,9 +73,13 @@
     # Test must be run with the misc app to test dynamic loading
     executable_pattern = 'misc-\w+$'
     allow_warnings = true
-  [../]
+    issues = '#10911'
+    requirement = "Any MOOSE application shall be able to dynamically load a module or application "
+                  "and properly register module or application specific syntax, with the library "
+                  "specified."
+  []
 
-  [./dynamic_object_restrict]
+  [dynamic_object_restrict]
     type = 'Exodiff'
     input = 'dynamic_objects.i'
     exodiff = 'dynamic_objects_out.e'
@@ -61,9 +91,12 @@
     # Test must be run with the misc app to test dynamic loading
     executable_pattern = 'misc-\w+$'
     allow_warnings = true
-  [../]
+    issues = '#4712'
+    requirement = "Any MOOSE application shall be able to dynamically load a module or application "
+                  "and register only select objects form the module or application."
+  []
 
-  [./dynamic_object_restrict_bad]
+  [dynamic_object_restrict_bad]
     type = 'RunException'
     input = 'dynamic_objects.i'
     expect_err = "A '\w+' is not a registered object"
@@ -75,9 +108,13 @@
     # Test must be run with the misc app to test dynamic loading
     executable_pattern = 'misc-\w+$'
     allow_warnings = true
-  [../]
+    issues = '#4712'
+    requirement = "Any MOOSE application shall be able to dynamically load a module or application "
+                  "and throw an error if an object is used that is not among selected objects for "
+                  "registration."
+  []
 
-  [./dynamic_object_loading_wrong_app]
+  [dynamic_object_loading_wrong_app]
     type = 'RunException'
     input = 'dynamic_wrong_lib.i'
     expect_err = 'We loaded objects from the following libraries.*\n\tlibtensor_mechanics'
@@ -85,9 +122,13 @@
 
     # Test must be run with the misc app to test dynamic loading
     executable_pattern = 'misc-\w+$'
-  [../]
+    issues = '#4712'
+    requirement = "Any MOOSE application shall be able to dynamically load a module or application "
+                  "and throw an error if an object is used that is not provided by the module or "
+                  "application."
+  []
 
-  [./dynamic_object_loading_bogus_app]
+  [dynamic_object_loading_bogus_app]
     type = 'RunException'
     input = 'dynamic_wrong_lib.i'
     expect_err = 'Unable to open library file'
@@ -97,5 +138,8 @@
 
     # Test must be run with the misc app to test dynamic loading
     executable_pattern = 'misc-\w+$'
-  [../]
+    issues = '#4712'
+    requirement = "The system shall throw an error when trying to dynamically load a module or "
+                  "application that does not exist."
+  []
 []
