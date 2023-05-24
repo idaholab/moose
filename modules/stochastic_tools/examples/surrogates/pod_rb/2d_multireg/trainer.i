@@ -57,6 +57,7 @@
                      src_dist src_dist src_dist'
     num_rows = 100
     execute_on = PRE_MULTIAPP_SETUP
+    max_procs_per_row = 1
   []
 []
 
@@ -67,6 +68,7 @@
     sampler = sample
     trainer_name = 'pod_rb'
     execute_on = 'timestep_begin final'
+    max_procs_per_app = 1
   []
 []
 
