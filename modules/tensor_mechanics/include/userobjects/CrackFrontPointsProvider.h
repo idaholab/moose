@@ -35,11 +35,11 @@ public:
 
   /**
    * Getter for if a cutter mesh is used in a derived class.
-   * @return getter indicating if a cutter mesh is used in the derived class
+   * @return bool indicating if a cutter mesh is used in the derived class
    */
   bool usesMesh() const { return _uses_mesh; }
 
 protected:
-  /// bool to set if CrackFronPointsProvider derived objects use a cutter mesh
+  /// bool to set if CrackFrontPointsProvider derived objects use a cutter mesh
   bool _uses_mesh;
 };
