@@ -26,11 +26,11 @@ Velocity data were recorded at selected points along the central subchannel axia
 
 The input file for the steady case 9 is:
 
-!listing /examples/buoyancy/steady_state/2X6_ss.i
+!listing /examples/buoyancy/steady_state/2X6_ss.i language=cpp
 
 The input file decribing the radial pin power profile is:
 
-!listing /examples/buoyancy/steady_state/power_profile.txt
+!listing /examples/buoyancy/steady_state/power_profile.txt language=cpp
 
 For case 13 the input file and power profile file, need to be adapted according to the respective operational parameters.
 
@@ -38,7 +38,7 @@ For case 13 the input file and power profile file, need to be adapted according 
 
 The input file for the steady case 5 is:
 
-!listing /examples/buoyancy/transient/2X6_transient.i
+!listing /examples/buoyancy/transient/2X6_transient.i language=cpp
 
 ## Results
 
