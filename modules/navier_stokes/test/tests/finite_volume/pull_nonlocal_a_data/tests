@@ -1,0 +1,10 @@
+[Tests]
+  issues = '#24453'
+  design = 'INSFVRhieChowInterpolator.md'
+  [test]
+    type = RunApp
+    input = test.i
+    requirement = 'The system shall be able to pull all nonlocal Rhie-Chow coefficient data from the owning process to a given process such that user code may access Rhie-Chow data at arbitrary locations.'
+    allow_test_objects = true
+  []
+[]
