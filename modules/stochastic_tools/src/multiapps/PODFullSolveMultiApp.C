@@ -43,6 +43,14 @@ PODFullSolveMultiApp::PODFullSolveMultiApp(const InputParameters & parameters)
     init(n_processors());
   else
     init(_sampler.getNumberOfRows());
+
+  if (numGlobalApps() != n_processors())
+    mooseError(type(),
+               " does not support more than one processors per subapp. (",
+               numGlobalApps(),
+               ") subapps were detected for (",
+               n_processors(),
+               ") ranks.");
 }
 
 void
