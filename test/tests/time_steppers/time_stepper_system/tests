@@ -9,7 +9,6 @@
       type = CSVDiff
       input = 'multiple_timesteppers.i'
       csvdiff = 'multiple_timesteppers.csv'
-      cli_args = "Outputs/file_base='multiple_timesteppers'"
       detail = 'using the minimum time step size of input time steppers,'
     []
 
@@ -18,8 +17,14 @@
       recover = false
       input = 'multiple_timesequences.i'
       csvdiff = 'multiple_timesequences.csv'
-      cli_args = "Outputs/file_base='multiple_timesequences'"
       detail = 'with specific times to hit and still hit all of them,'
+    []
+
+    [AB2PredictorCorrector]
+      type = CSVDiff
+      input = 'AB2PredictorCorrector.i'
+      csvdiff = 'AB2PredictorCorrector.csv'
+      detail = 'AB2PredictorCorrector as one of the input time steppers,'
     []
 
     [lower_bound]
@@ -35,7 +40,6 @@
       csvdiff = 'active_timesteppers.csv'
       detail = 'and allow the user to activate/deactivate timesteppers using control block,'
     []
-
   []
 
   [restart]

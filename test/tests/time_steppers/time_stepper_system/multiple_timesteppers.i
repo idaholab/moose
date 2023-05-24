@@ -22,6 +22,14 @@
   []
 []
 
+[Functions]
+  [dts]
+    type = PiecewiseLinear
+    x = '0   0.85 2'
+    y = '0.2 0.15  0.2'
+  []
+[]
+
 [BCs]
   [left]
     type = DirichletBC
@@ -50,9 +58,9 @@
       dt = 0.2
     []
 
-    [ConstDT2]
-      type = ConstantDT
-      dt = 0.1
+    [FunctionDT]
+      type = FunctionDT
+      function = dts
     []
 
     [LogConstDT]
@@ -61,9 +69,25 @@
       first_dt = 0.1
     []
 
+    [SolutionAdapDT]
+      type = SolutionTimeAdaptiveDT
+      dt = 0.5
+    []
+
+    [IterationAdapDT]
+      type = IterationAdaptiveDT
+      dt = 0.5
+    []
+
     [Timesequence]
       type = TimeSequenceStepper
       time_sequence  = '0  0.25 0.3 0.5 0.8'
+    []
+
+    [PPDT]
+      type = PostprocessorDT
+      postprocessor = PostDT
+      dt = 0.1
     []
   []
 []
@@ -73,9 +97,15 @@
     type = TimePostprocessor
     execute_on = 'timestep_end'
   []
+
+  [PostDT]
+    type = ElementAverageValue
+    variable = u
+    execute_on = 'initial timestep_end'
+  []
 []
 
 [Outputs]
   csv = true
-  file_base='multiple_timesequence'
+  file_base='multiple_timesteppers'
 []

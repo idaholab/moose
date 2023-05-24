@@ -67,8 +67,14 @@
     []
 
     [Timesequence2]
-      type = TimeSequenceStepper
-      time_sequence  = '0  0.45 0.65'
+      type = CSVTimeSequenceStepper
+      file_name = timesequence.csv
+      column_name = time
+    []
+
+    [Timesequence3]
+      type = ExodusTimeSequenceStepper
+      mesh = timesequence.e
     []
   []
 []
@@ -82,5 +88,5 @@
 
 [Outputs]
   csv = true
-  file_base='multiple_timesequence'
+  file_base='multiple_timesequences'
 []

@@ -49,6 +49,55 @@ public:
   // Find the time point to hit at current time step
   Real getSequenceSteppersNextTime();
 
+  /**
+   * Initialize all the input time stepper(s). Called at the very beginning of Executioner::execute()
+   */
+  virtual void init() override;
+  virtual void preExecute() override;
+  virtual void preSolve() override;
+  virtual void postSolve() override;
+  virtual void postExecute() override;
+  virtual void preStep() override;
+  virtual void postStep() override;
+  virtual bool constrainStep(Real & dt) override;
+
+  /**
+   * Functions called after the current DT is computed
+   */
+
+  /**
+   * Take a time step with _last_time_stepper step() function
+   */
+  virtual void step() override;
+
+  /**
+   * This gets called when time step is accepted for all input time steppers
+   */
+  virtual void acceptStep() override;
+
+  /**
+   * This gets called when time step is rejected for all input time steppers
+   */
+  virtual void rejectStep() override;
+
+  /**
+   * The _last_time_stepper is used to check whether the
+   * time stepper is converged
+   */
+  virtual bool converged() const override;
+
+  /**
+   * Set time step size for all input time steppers
+   * @param dt time step size
+   */
+  virtual void forceTimeStep(Real dt) override;
+
+  /**
+   * Set the number of time steps for all input time steppers
+   * @param num_steps number of time steps
+   */
+  virtual void forceNumSteps(const unsigned int num_steps) override;
+
 protected:
   virtual Real computeDT() override;
   virtual Real computeInitialDT() override;
@@ -57,7 +106,7 @@ private:
   /**
    * Internal method for querying TheWarehouse for the currently active timesteppers.
    */
-  std::vector<TimeStepper *> getTimeSteppers();
+  std::vector<TimeStepper *> getTimeSteppers() const;
 
   // The time step size computed by the Composition TimeStepper
   Real _dt;
@@ -70,4 +119,13 @@ private:
 
   // The time stepper(s) input as lower bound of the time stepper size
   const std::set<std::string> _lower_bound;
+
+  // The time stepper selected to use based on minimum time step size
+  TimeStepper * _last_time_stepper;
+
+  // The time stepper selected as the lower bound
+  TimeStepper * _bound_last_time_stepper;
+
+  // The time stepper selected as the time sequence stepper
+  TimeSequenceStepperBase * _last_time_sequence_stepper;
 };
