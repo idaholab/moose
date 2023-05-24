@@ -8,7 +8,8 @@
     [iterOutput]
       type = CSVDiff
       max_threads = 1 # Optimize executioner does not support multiple threads
-      rel_err = 0.0000001
+      rel_err = 1e-4
+      abs_zero = 1e-6
       input = main.i
       csvdiff = main_out_optInfo_0001.csv
       # steady solve

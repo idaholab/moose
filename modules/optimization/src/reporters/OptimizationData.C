@@ -101,13 +101,16 @@ OptimizationData::OptimizationData(const InputParameters & parameters)
     {
       if (_weight_names_weights_map.count(name) == 1)
       {
-        mooseAssert(hasReporterValueByName(name),
-                    "file_variable_weights should have created a reporter with the name " << name);
         _variable_weights.push_back(_weight_names_weights_map[name]);
       }
       else
+      {
+        // default is to create a new weight reporter and fill it with 1's
+        // these will be overwritten by a reporter transfer.
         _variable_weights.push_back(
             &declareValueByName<std::vector<Real>>(name, REPORTER_MODE_REPLICATED));
+        _variable_weights.back()->assign(_measurement_xcoord.size(), 1);
+      }
     }
   }
   if (isParamValid("variable") && isParamValid("variable_weight_names") &&
@@ -137,6 +140,8 @@ OptimizationData::execute()
   {
     const auto & sys = _var_vec[var_index]->sys().system();
     const auto vnum = _var_vec[var_index]->number();
+    // A weight reporter is not automatically created and for those cases, we
+    // set the weight to 1.
     std::vector<Real> weights(_variable_weights.empty()
                                   ? std::vector<Real>(_measurement_xcoord.size(), 1)
                                   : (*_variable_weights[var_index]));
