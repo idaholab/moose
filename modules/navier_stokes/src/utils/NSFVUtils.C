@@ -17,12 +17,6 @@ namespace Moose
 {
 namespace FV
 {
-MooseEnum
-interpolationMethods()
-{
-  return MooseEnum("average upwind sou min_mod vanLeer quick skewness-corrected", "upwind");
-}
-
 bool
 setInterpolationMethods(const MooseObject & obj,
                         Moose::FV::InterpMethod & advected_interp_method,
@@ -43,49 +37,10 @@ setInterpolationMethods(const MooseObject & obj,
   return need_more_ghosting;
 }
 
-bool
-setInterpolationMethod(const MooseObject & obj,
-                       Moose::FV::InterpMethod & interp_method,
-                       const std::string & param_name)
-{
-  bool need_more_ghosting = false;
-
-  const auto & interp_method_in = obj.getParam<MooseEnum>(param_name);
-  if (interp_method_in == "average")
-    interp_method = InterpMethod::Average;
-  else if (interp_method_in == "skewness-corrected")
-    interp_method = Moose::FV::InterpMethod::SkewCorrectedAverage;
-  else if (interp_method_in == "upwind")
-    interp_method = InterpMethod::Upwind;
-  else
-  {
-    if (interp_method_in == "sou")
-      interp_method = InterpMethod::SOU;
-    else if (interp_method_in == "min_mod")
-      interp_method = InterpMethod::MinMod;
-    else if (interp_method_in == "vanLeer")
-      interp_method = InterpMethod::VanLeer;
-    else if (interp_method_in == "quick")
-      interp_method = InterpMethod::QUICK;
-    else
-      obj.mooseError("Unrecognized interpolation type ",
-                     static_cast<std::string>(interp_method_in));
-
-    need_more_ghosting = true;
-  }
-  return need_more_ghosting;
-}
-
 InputParameters
 interpolationParameters()
 {
-  auto params = emptyInputParameters();
-  params.addParam<MooseEnum>(
-      "advected_interp_method",
-      interpolationMethods(),
-      "The interpolation to use for the advected quantity. Options are "
-      "'upwind', 'average', 'sou' (for second-order upwind), 'min_mod', 'vanLeer', 'quick', and "
-      "'skewness-corrected' with the default being 'upwind'.");
+  auto params = advectedInterpolationParameter();
   MooseEnum velocity_interp_method("average rc", "rc");
   params.addParam<MooseEnum>(
       "velocity_interp_method",

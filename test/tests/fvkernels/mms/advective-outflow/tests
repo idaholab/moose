@@ -1,25 +1,38 @@
 [Tests]
   design = 'fv_design.md'
-  issues = '#14549'
   [test]
     type = Exodiff
     input = advection-diffusion.i
     exodiff = advection-diffusion_out.e
     requirement = 'The system shall be able to to solve an advection-diffusion equation with a dirichlet condition on the left boundary and a zero gradient condition on the right boundary and display second order convergence with the finite volume method.'
+    issues = '#14549'
   []
   [outflow]
-    type = PythonUnitTest
-    input = test.py
-    test_case = TestOutflow
-    requirement = 'The system shall, while using an advective outflow boundary condition, demonstrate second order convergence if a two term Taylor series is used to approximate the face value and first order convergence if a one term Taylor series is used.'
-    required_python_packages = 'pandas matplotlib'
-    method = '!dbg'
+    requirement = 'The system shall, while using an advective outflow boundary condition, demonstrate second order convergence if a two term Taylor series is used to approximate boundary face values and reduced order convergence if a one term Taylor series is used. These converges rates shall be observed with'
+    issues = '#14549 #24466'
+    [average]
+      type = PythonUnitTest
+      input = test.py
+      test_case = TestOutflow
+      required_python_packages = 'pandas matplotlib'
+      method = '!dbg'
+      detail = 'a weighted averaging advection interpolation, and'
+    []
+    [minmod]
+      type = PythonUnitTest
+      input = test.py
+      test_case = TestOutflowMinMod
+      required_python_packages = 'pandas matplotlib'
+      method = '!dbg'
+      detail = 'a min-mod advection interpolation scheme.'
+      min_parallel = 2 # Test geometric and algebraic ghosting
+    []
   []
   [extrapolate]
     type = PythonUnitTest
     input = test.py
     test_case = TestExtrapolation
-    issues = '#16169'
+    issues = '#16169 #14549'
     requirement = 'The system shall be able to do one-term and two-term Taylor expansions for extrapolating finite volume solutions to boundary faces, and these extrapolations should be usable by flux kernels at inflow/outflow boundaries to produce first and second order accurate solutions respectively as measured by an L2 norm.'
     required_python_packages = 'pandas matplotlib'
     method = '!dbg'
@@ -31,6 +44,7 @@
     required_python_packages = 'pandas matplotlib'
     requirement = 'The system shall display first order convergence with an upwind limiter.'
     method = '!dbg'
+    issues = '#14549'
   []
   [CentralDifferenceLimiter]
     type = PythonUnitTest
@@ -39,6 +53,7 @@
     required_python_packages = 'pandas matplotlib'
     requirement = 'The system shall display second order convergence with a central-differencing limiter.'
     method = '!dbg'
+    issues = '#14549'
   []
   [VanLeerLimiter]
     type = PythonUnitTest
@@ -47,6 +62,7 @@
     required_python_packages = 'pandas matplotlib'
     requirement = 'The system shall display second order convergence with a Van-Leer limiter.'
     method = '!dbg'
+    issues = '#14549'
   []
   [MinModLimiter]
     type = PythonUnitTest
@@ -55,6 +71,7 @@
     required_python_packages = 'pandas matplotlib'
     requirement = 'The system shall display second order convergence with a min-mod limiter.'
     method = '!dbg'
+    issues = '#14549'
   []
   [SOULimiter]
     type = PythonUnitTest
@@ -63,6 +80,7 @@
     required_python_packages = 'pandas matplotlib'
     requirement = 'The system shall display second order convergence with a second-order-upwind limiter.'
     method = '!dbg'
+    issues = '#14549'
   []
   [QUICKLimiter]
     type = PythonUnitTest
@@ -71,9 +89,11 @@
     required_python_packages = 'pandas matplotlib'
     requirement = 'The system shall display second order convergence with a QUICK limiter.'
     heavy = true
+    issues = '#14549'
   []
   [kt]
     requirement = 'The system shall provide a Kurganov-Tadmor scheme for evaluating convective intercell fluxes'
+    issues = '#14549'
     [KTLimitedCD]
       type = PythonUnitTest
       input = test.py

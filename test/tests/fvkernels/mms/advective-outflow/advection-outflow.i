@@ -95,6 +95,8 @@ a=1.1
 [Executioner]
   type = Steady
   solve_type = 'NEWTON'
+  petsc_options_iname = '-pc_type -pc_factor_shift_type -pc_factor_mat_solver_type'
+  petsc_options_value = 'lu       NONZERO               mumps'
 []
 
 [Outputs]
