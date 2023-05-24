@@ -21,9 +21,22 @@ RestartableModelInterface::validParams()
 RestartableModelInterface::RestartableModelInterface(const MooseObject & object,
                                                      const bool read_only,
                                                      const std::string & meta_data_name)
-  : _object(object),
+  : _model_object(object),
     _model_meta_data_name(meta_data_name),
-    _model_restartable(_object.getMooseApp(), "", "", 0, read_only, meta_data_name)
+    _model_restartable(_model_object.getMooseApp(), "", "", 0, read_only, meta_data_name)
 {
-  _object.getMooseApp().registerRestartableDataMapName(_model_meta_data_name, _object.name());
+  _model_object.getMooseApp().registerRestartableDataMapName(_model_meta_data_name,
+                                                             _model_object.name());
+}
+
+const FileName &
+RestartableModelInterface::getModelDataFileName() const
+{
+  return _model_object.getParam<FileName>("filename");
+}
+
+bool
+RestartableModelInterface::hasModelData() const
+{
+  return _model_object.isParamValid("filename");
 }

@@ -1,0 +1,68 @@
+[Tests]
+  issues = '#23619'
+  design = 'SerializedSolutionTransfer.md'
+
+  [transfer_on_roots]
+    requirement = 'The system shall be able to serialize solution samples on the root process of each subapplication and transfer results to a parallel storage in '
+    [batch_restore]
+      detail = "batch-restore mode,"
+      type = JSONDiff
+      input = sst_main.i
+      jsondiff = 'serialization_batch_restore.json serialization_batch_restore.json.1 serialization_batch_restore.json.2 serialization_batch_restore.json.3'
+      cli_args = "Outputs/file_base=serialization_batch_restore Transfers/solution_transfer/serialize_on_root=true MultiApps/worker/mode=batch-restore"
+      min_parallel = 4
+      max_parallel = 4
+    []
+    [batch_reset]
+      detail = "batch-reset mode, and"
+      type = JSONDiff
+      input = sst_main.i
+      jsondiff = 'serialization_batch_reset.json serialization_batch_reset.json.1 serialization_batch_reset.json.2 serialization_batch_reset.json.3'
+      cli_args = "Outputs/file_base=serialization_batch_reset Transfers/solution_transfer/serialize_on_root=true MultiApps/worker/mode=batch-reset"
+      min_parallel = 4
+      max_parallel = 4
+    []
+    [normal]
+      detail = "normal mode."
+      type = JSONDiff
+      input = sst_main.i
+      jsondiff = 'serialization_normal.json serialization_normal.json.1 serialization_normal.json.2 serialization_normal.json.3'
+      cli_args = "Outputs/file_base=serialization_normal Transfers/solution_transfer/serialize_on_root=true MultiApps/worker/mode=normal"
+      min_parallel = 4
+      max_parallel = 4
+    []
+  []
+  [transfer_fully_distributed]
+    requirement = 'The system shall be able to distribute the solution samples among the processors of each subapplication, serialize and transfer them to a parallel storage on the corresponding ranks in '
+    [batch_restore]
+      detail = "batch-restore mode,"
+      type = JSONDiff
+      input = sst_main.i
+      jsondiff = 'no_serialization_batch_restore.json no_serialization_batch_restore.json.1 no_serialization_batch_restore.json.2 no_serialization_batch_restore.json.3'
+      cli_args = "Outputs/file_base=no_serialization_batch_restore Transfers/solution_transfer/serialize_on_root=false MultiApps/worker/mode=batch-restore "
+                 "Transfers/solution_transfer/variables='u' Reporters/parallel_storage/variables='u'"
+      min_parallel = 4
+      max_parallel = 4
+    []
+    [batch_reset]
+      detail = "batch-reset mode, and"
+      type = JSONDiff
+      input = sst_main.i
+      jsondiff = 'no_serialization_batch_reset.json no_serialization_batch_reset.json.1 no_serialization_batch_reset.json.2 no_serialization_batch_reset.json.3'
+      cli_args = "Outputs/file_base=no_serialization_batch_reset Transfers/solution_transfer/serialize_on_root=false MultiApps/worker/mode=batch-reset "
+                 "Transfers/solution_transfer/variables='u' Reporters/parallel_storage/variables='u'"
+      min_parallel = 4
+      max_parallel = 4
+    []
+    [normal]
+      detail = "normal mode."
+      type = JSONDiff
+      input = sst_main.i
+      jsondiff = 'no_serialization_normal.json no_serialization_normal.json.1 no_serialization_normal.json.2 no_serialization_normal.json.3'
+      cli_args = "Outputs/file_base=no_serialization_normal Transfers/solution_transfer/serialize_on_root=false MultiApps/worker/mode=normal "
+                 "Transfers/solution_transfer/variables='u' Reporters/parallel_storage/variables='u'"
+      min_parallel = 4
+      max_parallel = 4
+    []
+  []
+[]

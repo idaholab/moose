@@ -1,0 +1,37 @@
+{
+    "number_of_parts": 4,
+    "part": 1,
+    "reporters": {
+        "parallel_storage": {
+            "type": "ParallelSolutionStorage",
+            "values": {
+                "parallel_solution_storage": {
+                    "type": "std::map<VariableName, std::unordered_map<unsigned int, std::vector<libMesh::DenseVector<double>>, std::hash<unsigned int>, std::equal_to<unsigned int>, std::allocator<std::pair<unsigned int const, std::vector<libMesh::DenseVector<double>> > > >, std::less<VariableName>, std::allocator<std::pair<VariableName const, std::unordered_map<unsigned int, std::vector<libMesh::DenseVector<double>>, std::hash<unsigned int>, std::equal_to<unsigned int>, std::allocator<std::pair<unsigned int const, std::vector<libMesh::DenseVector<double>> > > > > > >"
+                }
+            }
+        }
+    },
+    "time_steps": [
+        {
+            "parallel_storage": {
+                "parallel_solution_storage": {
+                    "u": {
+                        "1": [
+                            [
+                                0.0,
+                                4.884840824098017,
+                                7.815745318556828,
+                                8.792713483376431,
+                                7.815745318556828,
+                                4.884840824098017,
+                                0.0
+                            ]
+                        ]
+                    }
+                }
+            },
+            "time": 2.0,
+            "time_step": 2
+        }
+    ]
+}

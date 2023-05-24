@@ -45,7 +45,7 @@ Packing<std::tuple<unsigned int, unsigned int, std::shared_ptr<DenseVector<Real>
   // Adding spaces for the vector size, global sample index and variable index.
   total_size += 3;
 
-  // Adding spaces for the element of the vector The size of the vector.
+  // Adding spaces for the elements of the vector.
   total_size += vector_size;
 
   return total_size;
@@ -77,7 +77,7 @@ std::tuple<unsigned int, unsigned int, std::shared_ptr<DenseVector<Real>>>
 Packing<std::tuple<unsigned int, unsigned int, std::shared_ptr<DenseVector<Real>>>>::unpack(
     std::vector<Real>::const_iterator in, void *)
 {
-  // Decoding the vector lenght
+  // Decoding the vector length
   const std::size_t data_size = *in++;
   std::tuple<unsigned int, unsigned int, std::shared_ptr<DenseVector<Real>>> object;
 

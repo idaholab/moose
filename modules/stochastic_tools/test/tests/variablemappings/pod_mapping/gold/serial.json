@@ -1,0 +1,72 @@
+{
+    "reporters": {
+        "svd_output": {
+            "type": "SingularTripletReporter",
+            "values": {
+                "left_singular_vectors": {
+                    "type": "std::map<VariableName, std::vector<libMesh::DenseVector<double>>, std::less<VariableName>, std::allocator<std::pair<VariableName const, std::vector<libMesh::DenseVector<double>> > > >"
+                },
+                "right_singular_vectors": {
+                    "type": "std::map<VariableName, std::vector<libMesh::DenseVector<double>>, std::less<VariableName>, std::allocator<std::pair<VariableName const, std::vector<libMesh::DenseVector<double>> > > >"
+                },
+                "singular_values": {
+                    "type": "std::map<VariableName, std::vector<double>, std::less<VariableName>, std::allocator<std::pair<VariableName const, std::vector<double> > > >"
+                }
+            }
+        }
+    },
+    "time_steps": [
+        {
+            "svd_output": {
+                "left_singular_vectors": {
+                    "v": [
+                        [
+                            0.0,
+                            0.25246409099484185,
+                            0.42110059129374816,
+                            0.505909500896719,
+                            0.5068908198037545,
+                            0.42404454801485464,
+                            0.2573706855300193
+                        ],
+                        [
+                            0.0,
+                            -0.23359249599830847,
+                            -0.3188920650547971,
+                            -0.2558987071694659,
+                            -0.04461242234231544,
+                            0.3149667894266551,
+                            0.8228389281374451
+                        ]
+                    ]
+                },
+                "right_singular_vectors": {
+                    "v": [
+                        [
+                            0.40408549768716767,
+                            0.5517499875801842,
+                            0.5550279722781194,
+                            0.4735301592855725
+                        ],
+                        [
+                            -0.4758261683274037,
+                            0.062184307058523125,
+                            0.7165326576000163,
+                            -0.5062642788931196
+                        ]
+                    ]
+                },
+                "singular_values": {
+                    "v": [
+                        36.87117662600449,
+                        6.9503784178064985,
+                        2.0026697888735803e-15,
+                        8.881171036338511e-16
+                    ]
+                }
+            },
+            "time": 2.0,
+            "time_step": 2
+        }
+    ]
+}

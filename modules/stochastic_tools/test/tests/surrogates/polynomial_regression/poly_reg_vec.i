@@ -20,6 +20,7 @@
     num_rows = 10
     distributions = 'k_dist L_dist'
     execute_on = PRE_MULTIAPP_SETUP
+    min_procs_per_row = 2
   []
 []
 
@@ -33,6 +34,7 @@
     input_files = sub_vector.i
     mode = batch-reset
     execute_on = initial
+    min_procs_per_app = 2
   []
 []
 

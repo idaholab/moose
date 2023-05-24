@@ -69,6 +69,9 @@ struct LocalRankConfig
   /// only transfer data to a given subapp once even though it may be running on
   /// multiple procs/ranks.
   bool is_first_local_rank;
+  /// For every rank working on a subapp, we store the first rank on each
+  /// process to make the communication to root simpler on the main app
+  processor_id_type my_first_rank;
 };
 
 /// Returns app partitioning information relevant to the given rank for a
@@ -82,11 +85,11 @@ struct LocalRankConfig
 /// Each proc calls this function in order to determine which (sub)apps among
 /// the global list of all subapps for a multiapp should be run by the given
 /// rank.
-LocalRankConfig rankConfig(dof_id_type rank,
-                           dof_id_type nprocs,
+LocalRankConfig rankConfig(processor_id_type rank,
+                           processor_id_type nprocs,
                            dof_id_type napps,
-                           dof_id_type min_app_procs,
-                           dof_id_type max_app_procs,
+                           processor_id_type min_app_procs,
+                           processor_id_type max_app_procs,
                            bool batch_mode = false);
 
 /**
@@ -542,10 +545,10 @@ protected:
   Point _bounding_box_padding;
 
   /// Maximum number of processors to give to each app
-  unsigned int _max_procs_per_app;
+  processor_id_type _max_procs_per_app;
 
   /// Minimum number of processors to give to each app
-  unsigned int _min_procs_per_app;
+  processor_id_type _min_procs_per_app;
 
   /// Whether or not to move the output of the MultiApp into position
   bool _output_in_position;
