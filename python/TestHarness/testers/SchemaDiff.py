@@ -25,6 +25,9 @@ class SchemaDiff(RunApp):
         return params
 
     def __init__(self, name, params):
+        #convert test specs entering the constraints as as string, i.e. rel_err = '1.1e-2' instead of rel_err = 1.1e-2
+        params['rel_err'] = float(params['rel_err'])
+        params['abs_zero'] = float(params['abs_zero'])
         RunApp.__init__(self, name, params)
         if self.specs['required_python_packages'] is None:
             self.specs['required_python_packages'] = 'deepdiff'
@@ -53,6 +56,7 @@ class SchemaDiff(RunApp):
         # Loop over every file
         for file in specs['schemadiff']:
             gold_file = specs['gold_file'] if specs['gold_file'] else file
+
             if not os.path.exists(os.path.join(self.getTestDir(), specs['gold_dir'], gold_file)):
                 output += "File Not Found: " + os.path.join(self.getTestDir(), specs['gold_dir'], file)
                 self.setStatus(self.fail, 'MISSING GOLD FILE')
@@ -62,6 +66,7 @@ class SchemaDiff(RunApp):
             else:
                 gold = os.path.join(self.getTestDir(), specs['gold_dir'], gold_file)
                 test = os.path.join(self.getTestDir(), file)
+
                 # We always ignore the header_type attribute, since it was
                 # introduced in VTK 7 and doesn't seem to be important as
                 # far as Paraview is concerned.
@@ -121,7 +126,7 @@ class SchemaDiff(RunApp):
 
                 #Often in XML data is not stored correctly as a list/array, and are instead big strings. This should be fixed with "fix_XML_arrays",
                 #but here we do the logic to diff the long string in case it sneaks in, or if for some reason, someone made a JSON like this.
-                except ValueError:
+                except (ValueError, TypeError):
                     try:
                         split1 = level.t1.split(" ")
                         split2 = level.t2.split(" ")
