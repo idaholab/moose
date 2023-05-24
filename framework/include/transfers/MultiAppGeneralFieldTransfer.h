@@ -325,7 +325,7 @@ private:
       const VariableName var_name,
       const DofobjectToInterpValVec & dofobject_to_valsvec,
       const InterpCaches & distance_caches,
-      std::vector<std::tuple<unsigned int, dof_id_type, Point, Real>> conflicts_vec);
+      std::vector<std::tuple<unsigned int, dof_id_type, Point, Real>> & conflicts_vec);
 
   /// Report on conflicts between overlapping child apps, equidistant origin points etc
   void outputValueConflicts(const VariableName var_name,

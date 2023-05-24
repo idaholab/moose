@@ -732,7 +732,7 @@ MultiAppGeneralFieldTransfer::examineValueConflicts(
     const VariableName var_name,
     const DofobjectToInterpValVec & dofobject_to_valsvec,
     const InterpCaches & distance_caches,
-    std::vector<std::tuple<unsigned int, dof_id_type, Point, Real>> conflicts_vec)
+    std::vector<std::tuple<unsigned int, dof_id_type, Point, Real>> & conflicts_vec)
 {
   // We must check a posteriori because we could have two
   // equidistant points with different values from two different problems, but a third point from
@@ -763,7 +763,6 @@ MultiAppGeneralFieldTransfer::examineValueConflicts(
       auto cached_distance = distance_caches[problem_id].find(p);
       if (cached_distance == distance_caches[problem_id].end())
         mooseError("Conflict point was not found in the map of all origin-target distances");
-
       // Distance is still the distance when we detected a potential overlap
       if (MooseUtils::absoluteFuzzyEqual(cached_distance->second, distance))
         overlap_found = true;
