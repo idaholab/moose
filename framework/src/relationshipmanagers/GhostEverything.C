@@ -18,7 +18,7 @@
 #include "libmesh/mesh_base.h"
 #include "libmesh/boundary_info.h"
 
-registerMooseObject("MooseTestApp", GhostEverything);
+registerMooseObject("MooseApp", GhostEverything);
 
 using namespace libMesh;
 
