@@ -133,7 +133,16 @@ Terminator::execute()
     if (_fail_mode == FailMode::HARD)
       _fe_problem.terminateSolve();
     else
-      getMooseApp().getExecutioner()->fixedPointSolve().failStep();
+    {
+      std::cout << " Executing on " << _fe_problem.getCurrentExecuteOnFlag() << std::endl;
+      // Within a nonlinear solve, trigger a solve fail
+      if (_fe_problem.getCurrentExecuteOnFlag() == EXEC_LINEAR ||
+          _fe_problem.getCurrentExecuteOnFlag() == EXEC_NONLINEAR)
+        _fe_problem.failNextNonlinearConvergenceCheck();
+      // Outside of a solve, trigger a time step fail
+      else
+        getMooseApp().getExecutioner()->fixedPointSolve().failStep();
+    }
   }
 }
 
