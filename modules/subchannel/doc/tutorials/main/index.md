@@ -19,6 +19,14 @@
   - Motivation
   - Overview
   - SubChannel Model
+  - Subchannel Model Governing Equations
+  - Subchannel Model Closure Models
+  - Subchannel Model Algorithm
+
+- Examples
+
+  - Square lattice geometry
+  - Hexagonal lattice geometry
 
 !---
 
@@ -29,3 +37,5 @@
 !include subchannel_intro.md
 
 !---
+
+!include examples.md

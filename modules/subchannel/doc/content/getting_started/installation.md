@@ -21,7 +21,7 @@ please see [the MOOSE troubleshooting guide for Conda](https://mooseframework.in
 ## Step Two: Clone Pronghorn-SC
 
 !style halign=left
-Pronghorn-SC is hosted on [GitHub](https://github.com/idaholab/SubChannel), and should be
+Pronghorn-SC is hosted on [GitHub](https://github.inl.gov/ncrc/subchannel), and should be
 cloned directly from there using [git](https://git-scm.com/). As in the MOOSE
 directions, it is recommended that users create a directory named "projects" to
 put all of your MOOSE-related work.
@@ -31,7 +31,7 @@ To clone Pronghorn-SC, run the following commands in Terminal:
 ```bash
 mkdir ~/projects
 cd ~/projects
-git clone https://github.com/idaholab/SubChannel.git
+git clone https://github.inl.gov/ncrc/subchannel.git
 cd SubChannel
 git checkout main
 ```

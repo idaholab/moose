@@ -110,7 +110,7 @@
 
 !---
 
-## Subchannel Model
+## Subchannel Model 2
 
 !row!
 
@@ -159,11 +159,7 @@ Friction_i + Drag_{ij} - g  \rho_i  S_i \Delta Z
 
 \begin{equation}
 \label{lateral-momentum}
-\frac{dw_{ij}}{dt} L_{ij} + \frac{L_{ij}}{\Delta Z} \Delta (w_{ij} \bar{U}) =
-
-- S_{ij}  \Delta P_{ij}
-
-+ Friction_{ij}
+\frac{dw_{ij}}{dt} L_{ij} + \frac{L_{ij}}{\Delta Z} \Delta (w_{ij} \bar{U}) = - S_{ij}  \Delta P_{ij} + Friction_{ij}
 \end{equation}
 
 ### Enthalpy conservation equation
@@ -181,7 +177,7 @@ Friction_i + Drag_{ij} - g  \rho_i  S_i \Delta Z
 
 !col! width=50%
 
-#### Axial direction friction term
+### Axial direction friction term
 
 \begin{equation}
 \small
@@ -192,7 +188,7 @@ Friction_i + Drag_{ij} - g  \rho_i  S_i \Delta Z
 
 !col! width=50%
 
-#### Lateral direction friction term
+### Lateral direction friction term
 
 \begin{equation}
 \small
@@ -207,7 +203,7 @@ Friction_i + Drag_{ij} - g  \rho_i  S_i \Delta Z
 
 !col! width=50%
 
-#### Friction factor
+### Friction factor
 
 \begin{equation}
 \small
@@ -224,7 +220,7 @@ Friction_i + Drag_{ij} - g  \rho_i  S_i \Delta Z
 
 !col! width=50%
 
-#### Turbulent momentum diffusion
+### Turbulent momentum diffusion
 
 \begin{equation}
 \small
@@ -235,14 +231,14 @@ Friction_i + Drag_{ij} - g  \rho_i  S_i \Delta Z
 
 !row-end!
 
-#### Turbulent enthalpy diffussion
+### Turbulent enthalpy diffussion
 
 \begin{equation}
 \small
     h'_{ij} = \sum_{j} w'_{ij}\Delta h_{ij} = \sum_{j} w'_{ij}\big[ h_i - h_j  \big]
 \end{equation}
 
-#### Turbulent crossflow
+### Turbulent crossflow
 
 \begin{equation}
 w'_{ij} = \beta S_{ij} \bar{G}, ~\frac{dw'_{ij}}{dz} = \frac{w'_{ij}}{\Delta Z}=\beta g_{ij} \bar{G}.
@@ -270,3 +266,43 @@ w'_{ij} = \beta S_{ij} \bar{G}, ~\frac{dw'_{ij}}{dz} = \frac{w'_{ij}}{\Delta Z}=
 
 !col-end!
 !row-end!
+
+!---
+
+## Subchannel Model Algorithm 2
+
+There are three variations of the algorithm: explicit (default), implicit segregated and implicit monolithic.
+
+### Explicit
+
+This is the default algorithm, where the unknown flow variables are calculated in an explicit manner through their governing equations.
+
+### Implicit segregated
+
+In this case, the governing equations are recast in matrix form and the flow variables are calculated by solving the corresponding system. Otherwise, the solution algorithm is the same as in the default method.
+
+### Implicit monolithic
+
+In this case, the conservation equations are recast in matrix form and combined  into a single system. The solution algorithm is the same as in the default method, but the solver used in this version is a fixed point iteration instead of a Newton method. The system looks like this:
+
+\begin{equation}
+\begin{bmatrix}
+\boldsymbol{M_{mm}} & 0 & \boldsymbol{M_{mw}} & 0\\
+\boldsymbol{M_{pm}} & \boldsymbol{M_{pp}} & 0 & 0 \\
+0 & \boldsymbol{M_{wp}} & \boldsymbol{M_{ww}} & 0 \\
+0 & 0 & 0 & \boldsymbol{M_{hh}}
+\end{bmatrix}
+\times
+\begin{bmatrix}
+\vec{\dot{m}} \\
+\vec{P} \\
+\vec{w}\\
+\vec{h}
+\end{bmatrix} =
+\begin{bmatrix}
+\vec{b_m}\\
+\vec{b_p} \\
+\vec{b_w} \\
+\vec{b_h}
+\end{bmatrix}
+\end{equation}

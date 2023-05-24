@@ -78,7 +78,7 @@ ramp_time = 1.0
 [Mesh]
   [fmesh]
     type = FileMeshGenerator
-    file = 'EBRT-ii_7assemblies_in.e'
+    file = 'EBR-II_7assemblies_in.e'
   []
 []
 
