@@ -321,7 +321,7 @@ class ProcessTraces:
     This class reads a series of stack traces from a file
     and then processes them to determine if processes in an MPI parallel
     job have diverged (having differing stack traces that are due to just
-    noise. Memory addresses are stripped.
+    noise). Memory addresses are stripped.
     """
 
     def __init__(self):
@@ -423,8 +423,10 @@ class ProcessTraces:
 
             """
             See if we've for sure narrowed in on the stack where the divergence first occurs.
-            We'll only know for sure if we are testing adjacent indicies. Once we are at
-            that step though, there are four possibilities:
+            We'll only know for sure if we are testing adjacent indicies (e.g. frames 7 and 8) or
+            we happen to be in the first frame (main). This can happen if the logic error really
+            is in main and line numbers are embedded in the binary. Once we are at this condition,
+            there are four possibilities:
 
             Case 1: Current round is a divergence - return the current result
 
@@ -433,7 +435,7 @@ class ProcessTraces:
 
             case 4: All passes are converged!
             """
-            if (abs(num_lines_to_keep - last_index) <= 1):
+            if abs(num_lines_to_keep - last_index) <= 1 or num_lines_to_keep == 1:
                 # Case 1 & 4:
                 if current_result_diverged or last_diverged_result == {}:
                     self.reportResults(self.unique_stack_traces, num_lines_to_keep)

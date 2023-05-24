@@ -1,11 +1,24 @@
 [Tests]
   [find_hung_process]
     requirement = "The find_hung_process.py script shall be able to correctly "
-                  "identify diverged stacks of a hung process."
-    type = RunApp
-    command = '../../framework/scripts/find_hung_process.py -f bad_mpi.4726853.cache'
-    expect_out = "^Count: 7$.*^Count: 1$"
-    issues = '#7507'
+                  "identify diverged stacks of a hung process, where"
     design = 'Debug/index.md'
+    issues = '#7507 #24420'
+
+    [main]
+      type = RunApp
+      command = '../../framework/scripts/find_hung_process.py -f bad_mpi.4726853.cache'
+      expect_out = "^Count: 7$.*^Count: 1$"
+
+      detail = "divergence occurs in the main stack frame (frame 1),"
+    []
+
+    [below_main]
+      type = RunApp
+      command = '../../framework/scripts/find_hung_process.py -f bad_mpi.4928892.cache'
+      expect_out = "^Comparing stacks through frame 1.*?diverged.*Count: 1$.*^Count: 7$"
+
+      detail = "or divergence occurs at any frame below main."
+    []
   []
 []

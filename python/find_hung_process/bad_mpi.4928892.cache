@@ -1,0 +1,219 @@
+Host: r3i1n25 PID: 142402
+Thread 2 (Thread 0x2aaab0100700 (LWP 142458)):
+#0  0x00002aaaac213b5d in read () from /lib64/libc.so.6
+#1  0x00002aaaad4d6906 in ibv_get_async_event () from /lib64/libibverbs.so.1
+#2  0x00002aaaab4e62e2 in async_thread () at ../src/mpid/ch3/channels/mrail/src/gen2/ibv_channel_manager.c:1284
+#3  0x00002aaaad8f0ea5 in start_thread () from /lib64/libpthread.so.0
+#4  0x00002aaaac222b0d in clone () from /lib64/libc.so.6
+Thread 1 (Thread 0x2aaaaaafac00 (LWP 142402)):
+#0  0x00002aaaaf74c06f in mlx5_poll_cq_1 () from /lib64/libmlx5-rdmav2.so
+#1  0x00002aaaab4e3cc7 in ibv_poll_cq (wc=0x2aaaab857040 <wc>, num_entries=<optimized out>, cq=<optimized out>) at /usr/include/infiniband/verbs.h:1462
+#2  MPIDI_CH3I_MRAILI_Cq_poll_ib (vbuf_handle=vbuf_handle@entry=0x7fffffffb988, vc_req=vc_req@entry=0x0, receiving=receiving@entry=0, is_blocking=is_blocking@entry=1) at ../src/mpid/ch3/channels/mrail/src/gen2/ibv_channel_manager.c:1216
+#3  0x00002aaaab4a6117 in MPIDI_CH3I_read_progress (vc_pptr=vc_pptr@entry=0x7fffffffb980, v_ptr=v_ptr@entry=0x7fffffffb988, rdmafp_found=rdmafp_found@entry=0x7fffffffb978, is_blocking=is_blocking@entry=1) at ../src/mpid/ch3/channels/mrail/src/rdma/ch3_read_progress.c:101
+#4  0x00002aaaab4a5b58 in MPIDI_CH3I_Progress (is_blocking=is_blocking@entry=1, state=state@entry=0x7fffffffba04) at ../src/mpid/ch3/channels/mrail/src/rdma/ch3_progress.c:252
+#5  0x00002aaaaaff888d in MPIC_Wait (errflag=0x7fffffffbb1c, request_ptr=0x2aaaab853ff8 <MPID_Request_direct+1432>) at ../src/mpi/coll/helper_fns.h:297
+#6  MPIC_Sendrecv (sendbuf=0x0, sendcount=0, sendtype=1275068685, sendtag=<optimized out>, recvbuf=0x0, recvcount=0, recvtype=1275068685, recvtag=1, status=<synthetic pointer>, errflag=0x7fffffffbb1c, comm_ptr=0x2aaaab82fa20 <MPID_Comm_builtin>, source=1, dest=1) at ../src/mpi/coll/helper_fns.h:559
+#7  MPIR_Pairwise_Barrier_MV2 (comm_ptr=comm_ptr@entry=0x2aaaab82fa20 <MPID_Comm_builtin>, errflag=errflag@entry=0x7fffffffbb1c) at ../src/mpi/coll/barrier_osu.c:86
+#8  0x00002aaaaaff922a in MPIR_Barrier_intra_MV2 (comm_ptr=<optimized out>, errflag=0x7fffffffbb1c) at ../src/mpi/coll/barrier_osu.c:446
+#9  0x00002aaaaaff9c69 in MPIR_Barrier_MV2 (comm_ptr=<optimized out>, errflag=<optimized out>) at ../src/mpi/coll/barrier_osu.c:470
+#10 0x00002aaaaaf70f83 in MPIR_Barrier_impl (comm_ptr=<optimized out>, errflag=errflag@entry=0x7fffffffbb1c) at ../src/mpi/coll/barrier.c:329
+#11 0x00002aaaab3e215d in PMPI_Finalize () at ../src/mpi/init/finalize.c:273
+#12 0x0000000000400ff0 in main (argc=<optimized out>, argv=<optimized out>) at ./bad_mpi.C:52
+****************************************************************************************************************************************************************
+
+Host: r3i1n25 PID: 142409
+Thread 2 (Thread 0x2aaab0100700 (LWP 142457)):
+#0  0x00002aaaac213b5d in read () from /lib64/libc.so.6
+#1  0x00002aaaad4d6906 in ibv_get_async_event () from /lib64/libibverbs.so.1
+#2  0x00002aaaab4e62e2 in async_thread () at ../src/mpid/ch3/channels/mrail/src/gen2/ibv_channel_manager.c:1284
+#3  0x00002aaaad8f0ea5 in start_thread () from /lib64/libpthread.so.0
+#4  0x00002aaaac222b0d in clone () from /lib64/libc.so.6
+Thread 1 (Thread 0x2aaaaaafac00 (LWP 142409)):
+#0  0x00002aaaab4e3d4d in MPIDI_CH3I_MRAILI_Cq_poll_ib (vbuf_handle=vbuf_handle@entry=0x7fffffffb618, vc_req=vc_req@entry=0x0, receiving=receiving@entry=0, is_blocking=is_blocking@entry=1) at ../src/mpid/ch3/channels/mrail/src/gen2/ibv_channel_manager.c:1196
+#1  0x00002aaaab4a6117 in MPIDI_CH3I_read_progress (vc_pptr=vc_pptr@entry=0x7fffffffb610, v_ptr=v_ptr@entry=0x7fffffffb618, rdmafp_found=rdmafp_found@entry=0x7fffffffb608, is_blocking=is_blocking@entry=1) at ../src/mpid/ch3/channels/mrail/src/rdma/ch3_read_progress.c:101
+#2  0x00002aaaab4a5b58 in MPIDI_CH3I_Progress (is_blocking=is_blocking@entry=1, state=state@entry=0x7fffffffb6dc) at ../src/mpid/ch3/channels/mrail/src/rdma/ch3_progress.c:252
+#3  0x00002aaaaaf7578d in MPIC_Wait (errflag=0x7fffffffbaec, request_ptr=0x2aaaab853ff8 <MPID_Request_direct+1432>) at ../src/mpi/coll/helper_fns.h:297
+#4  MPIC_Recv (tag=2, errflag=0x7fffffffbaec, status=0x7fffffffb6f0, comm_ptr=0x2aaaab82e660 <MPID_Comm_direct>, source=<optimized out>, datatype=1275069445, count=1, buf=0x7fffffffbb3c) at ../src/mpi/coll/helper_fns.h:427
+#5  MPIR_Bcast_binomial (buffer=0x7fffffffbb3c, count=count@entry=1, datatype=datatype@entry=1275069445, root=root@entry=0, comm_ptr=comm_ptr@entry=0x2aaaab82e660 <MPID_Comm_direct>, errflag=errflag@entry=0x7fffffffbaec) at ../src/mpi/coll/bcast.c:247
+#6  0x00002aaaaaf75da6 in MPIR_Bcast_intra (buffer=buffer@entry=0x7fffffffbb3c, count=count@entry=1, datatype=datatype@entry=1275069445, root=root@entry=0, comm_ptr=0x2aaaab82e660 <MPID_Comm_direct>, errflag=errflag@entry=0x7fffffffbaec) at ../src/mpi/coll/bcast.c:1291
+#7  0x00002aaaab003854 in MPIR_Bcast_index_tuned_intra_MV2 (buffer=0x7fffffffbb3c, count=1, datatype=1275069445, root=0, comm_ptr=comm_ptr@entry=0x2aaaab82e660 <MPID_Comm_direct>, errflag=0x7fffffffbaec) at ../src/mpi/coll/bcast_osu.c:2763
+#8  0x00002aaaab0005a9 in MPIR_Bcast_MV2 (buf=<optimized out>, count=<optimized out>, datatype=<optimized out>, root=<optimized out>, comm_ptr=0x2aaaab82e660 <MPID_Comm_direct>, errflag=<optimized out>) at ../src/mpi/coll/bcast_osu.c:3184
+#9  0x00002aaaaaf760a4 in MPIR_SMP_Bcast (errflag=0x160000, comm_ptr=<optimized out>, root=10922, datatype=0, count=1, buffer=<optimized out>) at ../src/mpi/coll/bcast.c:1097
+#10 MPIR_Bcast_intra (buffer=buffer@entry=0x7fffffffbb3c, count=count@entry=1, datatype=datatype@entry=1275069445, root=root@entry=0, comm_ptr=<optimized out>, errflag=errflag@entry=0x7fffffffbaec) at ../src/mpi/coll/bcast.c:1253
+#11 0x00002aaaab003854 in MPIR_Bcast_index_tuned_intra_MV2 (buffer=0x7fffffffbb3c, count=1, datatype=1275069445, root=0, comm_ptr=comm_ptr@entry=0x2aaaab82fa20 <MPID_Comm_builtin>, errflag=0x7fffffffbaec) at ../src/mpi/coll/bcast_osu.c:2763
+#12 0x00002aaaab0005a9 in MPIR_Bcast_MV2 (buf=<optimized out>, count=<optimized out>, datatype=<optimized out>, root=<optimized out>, comm_ptr=0x2aaaab82fa20 <MPID_Comm_builtin>, errflag=<optimized out>) at ../src/mpi/coll/bcast_osu.c:3184
+#13 0x00002aaaaaf7768b in MPIR_Bcast_impl (buffer=buffer@entry=0x7fffffffbb3c, count=count@entry=1, datatype=datatype@entry=1275069445, root=root@entry=0, comm_ptr=comm_ptr@entry=0x2aaaab82fa20 <MPID_Comm_builtin>, errflag=errflag@entry=0x7fffffffbaec) at ../src/mpi/coll/bcast.c:1449
+#14 0x00002aaaaaf77c91 in PMPI_Bcast () at ../src/mpi/coll/bcast.c:1590
+#15 0x0000000000400da9 in some_here (rank=7) at ./bad_mpi.C:13
+#16 0x0000000000400feb in main (argc=<optimized out>, argv=<optimized out>) at ./bad_mpi.C:46
+****************************************************************************************************************************************************************
+
+Host: r3i1n25 PID: 142403
+Thread 2 (Thread 0x2aaab0100700 (LWP 142451)):
+#0  0x00002aaaac213b5d in read () from /lib64/libc.so.6
+#1  0x00002aaaad4d6906 in ibv_get_async_event () from /lib64/libibverbs.so.1
+#2  0x00002aaaab4e62e2 in async_thread () at ../src/mpid/ch3/channels/mrail/src/gen2/ibv_channel_manager.c:1284
+#3  0x00002aaaad8f0ea5 in start_thread () from /lib64/libpthread.so.0
+#4  0x00002aaaac222b0d in clone () from /lib64/libc.so.6
+Thread 1 (Thread 0x2aaaaaafac00 (LWP 142403)):
+#0  0x00002aaaab4e3d29 in MPIDI_CH3I_MRAILI_Cq_poll_ib (vbuf_handle=vbuf_handle@entry=0x7fffffffb618, vc_req=vc_req@entry=0x0, receiving=receiving@entry=0, is_blocking=is_blocking@entry=1) at ../src/mpid/ch3/channels/mrail/src/gen2/ibv_channel_manager.c:1250
+#1  0x00002aaaab4a6117 in MPIDI_CH3I_read_progress (vc_pptr=vc_pptr@entry=0x7fffffffb610, v_ptr=v_ptr@entry=0x7fffffffb618, rdmafp_found=rdmafp_found@entry=0x7fffffffb608, is_blocking=is_blocking@entry=1) at ../src/mpid/ch3/channels/mrail/src/rdma/ch3_read_progress.c:101
+#2  0x00002aaaab4a5b58 in MPIDI_CH3I_Progress (is_blocking=is_blocking@entry=1, state=state@entry=0x7fffffffb6dc) at ../src/mpid/ch3/channels/mrail/src/rdma/ch3_progress.c:252
+#3  0x00002aaaaaf7578d in MPIC_Wait (errflag=0x7fffffffbaec, request_ptr=0x2aaaab853ff8 <MPID_Request_direct+1432>) at ../src/mpi/coll/helper_fns.h:297
+#4  MPIC_Recv (tag=2, errflag=0x7fffffffbaec, status=0x7fffffffb6f0, comm_ptr=0x2aaaab82e660 <MPID_Comm_direct>, source=<optimized out>, datatype=1275069445, count=1, buf=0x7fffffffbb3c) at ../src/mpi/coll/helper_fns.h:427
+#5  MPIR_Bcast_binomial (buffer=0x7fffffffbb3c, count=count@entry=1, datatype=datatype@entry=1275069445, root=root@entry=0, comm_ptr=comm_ptr@entry=0x2aaaab82e660 <MPID_Comm_direct>, errflag=errflag@entry=0x7fffffffbaec) at ../src/mpi/coll/bcast.c:247
+#6  0x00002aaaaaf75da6 in MPIR_Bcast_intra (buffer=buffer@entry=0x7fffffffbb3c, count=count@entry=1, datatype=datatype@entry=1275069445, root=root@entry=0, comm_ptr=0x2aaaab82e660 <MPID_Comm_direct>, errflag=errflag@entry=0x7fffffffbaec) at ../src/mpi/coll/bcast.c:1291
+#7  0x00002aaaab003854 in MPIR_Bcast_index_tuned_intra_MV2 (buffer=0x7fffffffbb3c, count=1, datatype=1275069445, root=0, comm_ptr=comm_ptr@entry=0x2aaaab82e660 <MPID_Comm_direct>, errflag=0x7fffffffbaec) at ../src/mpi/coll/bcast_osu.c:2763
+#8  0x00002aaaab0005a9 in MPIR_Bcast_MV2 (buf=<optimized out>, count=<optimized out>, datatype=<optimized out>, root=<optimized out>, comm_ptr=0x2aaaab82e660 <MPID_Comm_direct>, errflag=<optimized out>) at ../src/mpi/coll/bcast_osu.c:3184
+#9  0x00002aaaaaf760a4 in MPIR_SMP_Bcast (errflag=0x160000, comm_ptr=<optimized out>, root=10922, datatype=0, count=1, buffer=<optimized out>) at ../src/mpi/coll/bcast.c:1097
+#10 MPIR_Bcast_intra (buffer=buffer@entry=0x7fffffffbb3c, count=count@entry=1, datatype=datatype@entry=1275069445, root=root@entry=0, comm_ptr=<optimized out>, errflag=errflag@entry=0x7fffffffbaec) at ../src/mpi/coll/bcast.c:1253
+#11 0x00002aaaab003854 in MPIR_Bcast_index_tuned_intra_MV2 (buffer=0x7fffffffbb3c, count=1, datatype=1275069445, root=0, comm_ptr=comm_ptr@entry=0x2aaaab82fa20 <MPID_Comm_builtin>, errflag=0x7fffffffbaec) at ../src/mpi/coll/bcast_osu.c:2763
+#12 0x00002aaaab0005a9 in MPIR_Bcast_MV2 (buf=<optimized out>, count=<optimized out>, datatype=<optimized out>, root=<optimized out>, comm_ptr=0x2aaaab82fa20 <MPID_Comm_builtin>, errflag=<optimized out>) at ../src/mpi/coll/bcast_osu.c:3184
+#13 0x00002aaaaaf7768b in MPIR_Bcast_impl (buffer=buffer@entry=0x7fffffffbb3c, count=count@entry=1, datatype=datatype@entry=1275069445, root=root@entry=0, comm_ptr=comm_ptr@entry=0x2aaaab82fa20 <MPID_Comm_builtin>, errflag=errflag@entry=0x7fffffffbaec) at ../src/mpi/coll/bcast.c:1449
+#14 0x00002aaaaaf77c91 in PMPI_Bcast () at ../src/mpi/coll/bcast.c:1590
+#15 0x0000000000400da9 in some_here (rank=1) at ./bad_mpi.C:13
+#16 0x0000000000400feb in main (argc=<optimized out>, argv=<optimized out>) at ./bad_mpi.C:46
+****************************************************************************************************************************************************************
+
+Host: r3i1n25 PID: 142404
+Thread 2 (Thread 0x2aaab0100700 (LWP 142452)):
+#0  0x00002aaaac213b5d in read () from /lib64/libc.so.6
+#1  0x00002aaaad4d6906 in ibv_get_async_event () from /lib64/libibverbs.so.1
+#2  0x00002aaaab4e62e2 in async_thread () at ../src/mpid/ch3/channels/mrail/src/gen2/ibv_channel_manager.c:1284
+#3  0x00002aaaad8f0ea5 in start_thread () from /lib64/libpthread.so.0
+#4  0x00002aaaac222b0d in clone () from /lib64/libc.so.6
+Thread 1 (Thread 0x2aaaaaafac00 (LWP 142404)):
+#0  0x00002aaaaf74c058 in mlx5_poll_cq_1 () from /lib64/libmlx5-rdmav2.so
+#1  0x00002aaaab4e3cc7 in ibv_poll_cq (wc=0x2aaaab857040 <wc>, num_entries=<optimized out>, cq=<optimized out>) at /usr/include/infiniband/verbs.h:1462
+#2  MPIDI_CH3I_MRAILI_Cq_poll_ib (vbuf_handle=vbuf_handle@entry=0x7fffffffb618, vc_req=vc_req@entry=0x0, receiving=receiving@entry=0, is_blocking=is_blocking@entry=1) at ../src/mpid/ch3/channels/mrail/src/gen2/ibv_channel_manager.c:1216
+#3  0x00002aaaab4a6117 in MPIDI_CH3I_read_progress (vc_pptr=vc_pptr@entry=0x7fffffffb610, v_ptr=v_ptr@entry=0x7fffffffb618, rdmafp_found=rdmafp_found@entry=0x7fffffffb608, is_blocking=is_blocking@entry=1) at ../src/mpid/ch3/channels/mrail/src/rdma/ch3_read_progress.c:101
+#4  0x00002aaaab4a5b58 in MPIDI_CH3I_Progress (is_blocking=is_blocking@entry=1, state=state@entry=0x7fffffffb6dc) at ../src/mpid/ch3/channels/mrail/src/rdma/ch3_progress.c:252
+#5  0x00002aaaaaf7578d in MPIC_Wait (errflag=0x7fffffffbaec, request_ptr=0x2aaaab853ff8 <MPID_Request_direct+1432>) at ../src/mpi/coll/helper_fns.h:297
+#6  MPIC_Recv (tag=2, errflag=0x7fffffffbaec, status=0x7fffffffb6f0, comm_ptr=0x2aaaab82e660 <MPID_Comm_direct>, source=<optimized out>, datatype=1275069445, count=1, buf=0x7fffffffbb3c) at ../src/mpi/coll/helper_fns.h:427
+#7  MPIR_Bcast_binomial (buffer=0x7fffffffbb3c, count=count@entry=1, datatype=datatype@entry=1275069445, root=root@entry=0, comm_ptr=comm_ptr@entry=0x2aaaab82e660 <MPID_Comm_direct>, errflag=errflag@entry=0x7fffffffbaec) at ../src/mpi/coll/bcast.c:247
+#8  0x00002aaaaaf75da6 in MPIR_Bcast_intra (buffer=buffer@entry=0x7fffffffbb3c, count=count@entry=1, datatype=datatype@entry=1275069445, root=root@entry=0, comm_ptr=0x2aaaab82e660 <MPID_Comm_direct>, errflag=errflag@entry=0x7fffffffbaec) at ../src/mpi/coll/bcast.c:1291
+#9  0x00002aaaab003854 in MPIR_Bcast_index_tuned_intra_MV2 (buffer=0x7fffffffbb3c, count=1, datatype=1275069445, root=0, comm_ptr=comm_ptr@entry=0x2aaaab82e660 <MPID_Comm_direct>, errflag=0x7fffffffbaec) at ../src/mpi/coll/bcast_osu.c:2763
+#10 0x00002aaaab0005a9 in MPIR_Bcast_MV2 (buf=<optimized out>, count=<optimized out>, datatype=<optimized out>, root=<optimized out>, comm_ptr=0x2aaaab82e660 <MPID_Comm_direct>, errflag=<optimized out>) at ../src/mpi/coll/bcast_osu.c:3184
+#11 0x00002aaaaaf760a4 in MPIR_SMP_Bcast (errflag=0x160000, comm_ptr=<optimized out>, root=10922, datatype=0, count=1, buffer=<optimized out>) at ../src/mpi/coll/bcast.c:1097
+#12 MPIR_Bcast_intra (buffer=buffer@entry=0x7fffffffbb3c, count=count@entry=1, datatype=datatype@entry=1275069445, root=root@entry=0, comm_ptr=<optimized out>, errflag=errflag@entry=0x7fffffffbaec) at ../src/mpi/coll/bcast.c:1253
+#13 0x00002aaaab003854 in MPIR_Bcast_index_tuned_intra_MV2 (buffer=0x7fffffffbb3c, count=1, datatype=1275069445, root=0, comm_ptr=comm_ptr@entry=0x2aaaab82fa20 <MPID_Comm_builtin>, errflag=0x7fffffffbaec) at ../src/mpi/coll/bcast_osu.c:2763
+#14 0x00002aaaab0005a9 in MPIR_Bcast_MV2 (buf=<optimized out>, count=<optimized out>, datatype=<optimized out>, root=<optimized out>, comm_ptr=0x2aaaab82fa20 <MPID_Comm_builtin>, errflag=<optimized out>) at ../src/mpi/coll/bcast_osu.c:3184
+#15 0x00002aaaaaf7768b in MPIR_Bcast_impl (buffer=buffer@entry=0x7fffffffbb3c, count=count@entry=1, datatype=datatype@entry=1275069445, root=root@entry=0, comm_ptr=comm_ptr@entry=0x2aaaab82fa20 <MPID_Comm_builtin>, errflag=errflag@entry=0x7fffffffbaec) at ../src/mpi/coll/bcast.c:1449
+#16 0x00002aaaaaf77c91 in PMPI_Bcast () at ../src/mpi/coll/bcast.c:1590
+#17 0x0000000000400da9 in some_here (rank=2) at ./bad_mpi.C:13
+#18 0x0000000000400feb in main (argc=<optimized out>, argv=<optimized out>) at ./bad_mpi.C:46
+****************************************************************************************************************************************************************
+
+Host: r3i1n25 PID: 142405
+Thread 2 (Thread 0x2aaab0100700 (LWP 142453)):
+#0  0x00002aaaac213b5d in read () from /lib64/libc.so.6
+#1  0x00002aaaad4d6906 in ibv_get_async_event () from /lib64/libibverbs.so.1
+#2  0x00002aaaab4e62e2 in async_thread () at ../src/mpid/ch3/channels/mrail/src/gen2/ibv_channel_manager.c:1284
+#3  0x00002aaaad8f0ea5 in start_thread () from /lib64/libpthread.so.0
+#4  0x00002aaaac222b0d in clone () from /lib64/libc.so.6
+Thread 1 (Thread 0x2aaaaaafac00 (LWP 142405)):
+#0  0x00002aaaaf74bfc0 in mlx5_poll_cq_1 () from /lib64/libmlx5-rdmav2.so
+#1  0x00002aaaab4e3cc7 in ibv_poll_cq (wc=0x2aaaab857040 <wc>, num_entries=<optimized out>, cq=<optimized out>) at /usr/include/infiniband/verbs.h:1462
+#2  MPIDI_CH3I_MRAILI_Cq_poll_ib (vbuf_handle=vbuf_handle@entry=0x7fffffffb618, vc_req=vc_req@entry=0x0, receiving=receiving@entry=0, is_blocking=is_blocking@entry=1) at ../src/mpid/ch3/channels/mrail/src/gen2/ibv_channel_manager.c:1216
+#3  0x00002aaaab4a6117 in MPIDI_CH3I_read_progress (vc_pptr=vc_pptr@entry=0x7fffffffb610, v_ptr=v_ptr@entry=0x7fffffffb618, rdmafp_found=rdmafp_found@entry=0x7fffffffb608, is_blocking=is_blocking@entry=1) at ../src/mpid/ch3/channels/mrail/src/rdma/ch3_read_progress.c:101
+#4  0x00002aaaab4a5b58 in MPIDI_CH3I_Progress (is_blocking=is_blocking@entry=1, state=state@entry=0x7fffffffb6dc) at ../src/mpid/ch3/channels/mrail/src/rdma/ch3_progress.c:252
+#5  0x00002aaaaaf7578d in MPIC_Wait (errflag=0x7fffffffbaec, request_ptr=0x2aaaab853ff8 <MPID_Request_direct+1432>) at ../src/mpi/coll/helper_fns.h:297
+#6  MPIC_Recv (tag=2, errflag=0x7fffffffbaec, status=0x7fffffffb6f0, comm_ptr=0x2aaaab82e660 <MPID_Comm_direct>, source=<optimized out>, datatype=1275069445, count=1, buf=0x7fffffffbb3c) at ../src/mpi/coll/helper_fns.h:427
+#7  MPIR_Bcast_binomial (buffer=0x7fffffffbb3c, count=count@entry=1, datatype=datatype@entry=1275069445, root=root@entry=0, comm_ptr=comm_ptr@entry=0x2aaaab82e660 <MPID_Comm_direct>, errflag=errflag@entry=0x7fffffffbaec) at ../src/mpi/coll/bcast.c:247
+#8  0x00002aaaaaf75da6 in MPIR_Bcast_intra (buffer=buffer@entry=0x7fffffffbb3c, count=count@entry=1, datatype=datatype@entry=1275069445, root=root@entry=0, comm_ptr=0x2aaaab82e660 <MPID_Comm_direct>, errflag=errflag@entry=0x7fffffffbaec) at ../src/mpi/coll/bcast.c:1291
+#9  0x00002aaaab003854 in MPIR_Bcast_index_tuned_intra_MV2 (buffer=0x7fffffffbb3c, count=1, datatype=1275069445, root=0, comm_ptr=comm_ptr@entry=0x2aaaab82e660 <MPID_Comm_direct>, errflag=0x7fffffffbaec) at ../src/mpi/coll/bcast_osu.c:2763
+#10 0x00002aaaab0005a9 in MPIR_Bcast_MV2 (buf=<optimized out>, count=<optimized out>, datatype=<optimized out>, root=<optimized out>, comm_ptr=0x2aaaab82e660 <MPID_Comm_direct>, errflag=<optimized out>) at ../src/mpi/coll/bcast_osu.c:3184
+#11 0x00002aaaaaf760a4 in MPIR_SMP_Bcast (errflag=0x160000, comm_ptr=<optimized out>, root=10922, datatype=0, count=1, buffer=<optimized out>) at ../src/mpi/coll/bcast.c:1097
+#12 MPIR_Bcast_intra (buffer=buffer@entry=0x7fffffffbb3c, count=count@entry=1, datatype=datatype@entry=1275069445, root=root@entry=0, comm_ptr=<optimized out>, errflag=errflag@entry=0x7fffffffbaec) at ../src/mpi/coll/bcast.c:1253
+#13 0x00002aaaab003854 in MPIR_Bcast_index_tuned_intra_MV2 (buffer=0x7fffffffbb3c, count=1, datatype=1275069445, root=0, comm_ptr=comm_ptr@entry=0x2aaaab82fa20 <MPID_Comm_builtin>, errflag=0x7fffffffbaec) at ../src/mpi/coll/bcast_osu.c:2763
+#14 0x00002aaaab0005a9 in MPIR_Bcast_MV2 (buf=<optimized out>, count=<optimized out>, datatype=<optimized out>, root=<optimized out>, comm_ptr=0x2aaaab82fa20 <MPID_Comm_builtin>, errflag=<optimized out>) at ../src/mpi/coll/bcast_osu.c:3184
+#15 0x00002aaaaaf7768b in MPIR_Bcast_impl (buffer=buffer@entry=0x7fffffffbb3c, count=count@entry=1, datatype=datatype@entry=1275069445, root=root@entry=0, comm_ptr=comm_ptr@entry=0x2aaaab82fa20 <MPID_Comm_builtin>, errflag=errflag@entry=0x7fffffffbaec) at ../src/mpi/coll/bcast.c:1449
+#16 0x00002aaaaaf77c91 in PMPI_Bcast () at ../src/mpi/coll/bcast.c:1590
+#17 0x0000000000400da9 in some_here (rank=3) at ./bad_mpi.C:13
+#18 0x0000000000400feb in main (argc=<optimized out>, argv=<optimized out>) at ./bad_mpi.C:46
+****************************************************************************************************************************************************************
+
+Host: r3i1n25 PID: 142406
+Thread 2 (Thread 0x2aaab0100700 (LWP 142454)):
+#0  0x00002aaaac213b5d in read () from /lib64/libc.so.6
+#1  0x00002aaaad4d6906 in ibv_get_async_event () from /lib64/libibverbs.so.1
+#2  0x00002aaaab4e62e2 in async_thread () at ../src/mpid/ch3/channels/mrail/src/gen2/ibv_channel_manager.c:1284
+#3  0x00002aaaad8f0ea5 in start_thread () from /lib64/libpthread.so.0
+#4  0x00002aaaac222b0d in clone () from /lib64/libc.so.6
+Thread 1 (Thread 0x2aaaaaafac00 (LWP 142406)):
+#0  0x00002aaaaf74c5ab in mlx5_poll_cq_1 () from /lib64/libmlx5-rdmav2.so
+#1  0x00002aaaab4e3cc7 in ibv_poll_cq (wc=0x2aaaab857040 <wc>, num_entries=<optimized out>, cq=<optimized out>) at /usr/include/infiniband/verbs.h:1462
+#2  MPIDI_CH3I_MRAILI_Cq_poll_ib (vbuf_handle=vbuf_handle@entry=0x7fffffffb618, vc_req=vc_req@entry=0x0, receiving=receiving@entry=0, is_blocking=is_blocking@entry=1) at ../src/mpid/ch3/channels/mrail/src/gen2/ibv_channel_manager.c:1216
+#3  0x00002aaaab4a6117 in MPIDI_CH3I_read_progress (vc_pptr=vc_pptr@entry=0x7fffffffb610, v_ptr=v_ptr@entry=0x7fffffffb618, rdmafp_found=rdmafp_found@entry=0x7fffffffb608, is_blocking=is_blocking@entry=1) at ../src/mpid/ch3/channels/mrail/src/rdma/ch3_read_progress.c:101
+#4  0x00002aaaab4a5b58 in MPIDI_CH3I_Progress (is_blocking=is_blocking@entry=1, state=state@entry=0x7fffffffb6dc) at ../src/mpid/ch3/channels/mrail/src/rdma/ch3_progress.c:252
+#5  0x00002aaaaaf7578d in MPIC_Wait (errflag=0x7fffffffbaec, request_ptr=0x2aaaab853ff8 <MPID_Request_direct+1432>) at ../src/mpi/coll/helper_fns.h:297
+#6  MPIC_Recv (tag=2, errflag=0x7fffffffbaec, status=0x7fffffffb6f0, comm_ptr=0x2aaaab82e660 <MPID_Comm_direct>, source=<optimized out>, datatype=1275069445, count=1, buf=0x7fffffffbb3c) at ../src/mpi/coll/helper_fns.h:427
+#7  MPIR_Bcast_binomial (buffer=0x7fffffffbb3c, count=count@entry=1, datatype=datatype@entry=1275069445, root=root@entry=0, comm_ptr=comm_ptr@entry=0x2aaaab82e660 <MPID_Comm_direct>, errflag=errflag@entry=0x7fffffffbaec) at ../src/mpi/coll/bcast.c:247
+#8  0x00002aaaaaf75da6 in MPIR_Bcast_intra (buffer=buffer@entry=0x7fffffffbb3c, count=count@entry=1, datatype=datatype@entry=1275069445, root=root@entry=0, comm_ptr=0x2aaaab82e660 <MPID_Comm_direct>, errflag=errflag@entry=0x7fffffffbaec) at ../src/mpi/coll/bcast.c:1291
+#9  0x00002aaaab003854 in MPIR_Bcast_index_tuned_intra_MV2 (buffer=0x7fffffffbb3c, count=1, datatype=1275069445, root=0, comm_ptr=comm_ptr@entry=0x2aaaab82e660 <MPID_Comm_direct>, errflag=0x7fffffffbaec) at ../src/mpi/coll/bcast_osu.c:2763
+#10 0x00002aaaab0005a9 in MPIR_Bcast_MV2 (buf=<optimized out>, count=<optimized out>, datatype=<optimized out>, root=<optimized out>, comm_ptr=0x2aaaab82e660 <MPID_Comm_direct>, errflag=<optimized out>) at ../src/mpi/coll/bcast_osu.c:3184
+#11 0x00002aaaaaf760a4 in MPIR_SMP_Bcast (errflag=0x160000, comm_ptr=<optimized out>, root=10922, datatype=0, count=1, buffer=<optimized out>) at ../src/mpi/coll/bcast.c:1097
+#12 MPIR_Bcast_intra (buffer=buffer@entry=0x7fffffffbb3c, count=count@entry=1, datatype=datatype@entry=1275069445, root=root@entry=0, comm_ptr=<optimized out>, errflag=errflag@entry=0x7fffffffbaec) at ../src/mpi/coll/bcast.c:1253
+#13 0x00002aaaab003854 in MPIR_Bcast_index_tuned_intra_MV2 (buffer=0x7fffffffbb3c, count=1, datatype=1275069445, root=0, comm_ptr=comm_ptr@entry=0x2aaaab82fa20 <MPID_Comm_builtin>, errflag=0x7fffffffbaec) at ../src/mpi/coll/bcast_osu.c:2763
+#14 0x00002aaaab0005a9 in MPIR_Bcast_MV2 (buf=<optimized out>, count=<optimized out>, datatype=<optimized out>, root=<optimized out>, comm_ptr=0x2aaaab82fa20 <MPID_Comm_builtin>, errflag=<optimized out>) at ../src/mpi/coll/bcast_osu.c:3184
+#15 0x00002aaaaaf7768b in MPIR_Bcast_impl (buffer=buffer@entry=0x7fffffffbb3c, count=count@entry=1, datatype=datatype@entry=1275069445, root=root@entry=0, comm_ptr=comm_ptr@entry=0x2aaaab82fa20 <MPID_Comm_builtin>, errflag=errflag@entry=0x7fffffffbaec) at ../src/mpi/coll/bcast.c:1449
+#16 0x00002aaaaaf77c91 in PMPI_Bcast () at ../src/mpi/coll/bcast.c:1590
+#17 0x0000000000400da9 in some_here (rank=4) at ./bad_mpi.C:13
+#18 0x0000000000400feb in main (argc=<optimized out>, argv=<optimized out>) at ./bad_mpi.C:46
+****************************************************************************************************************************************************************
+
+Host: r3i1n25 PID: 142407
+Thread 2 (Thread 0x2aaab0100700 (LWP 142455)):
+#0  0x00002aaaac213b5d in read () from /lib64/libc.so.6
+#1  0x00002aaaad4d6906 in ibv_get_async_event () from /lib64/libibverbs.so.1
+#2  0x00002aaaab4e62e2 in async_thread () at ../src/mpid/ch3/channels/mrail/src/gen2/ibv_channel_manager.c:1284
+#3  0x00002aaaad8f0ea5 in start_thread () from /lib64/libpthread.so.0
+#4  0x00002aaaac222b0d in clone () from /lib64/libc.so.6
+Thread 1 (Thread 0x2aaaaaafac00 (LWP 142407)):
+#0  0x00002aaaaf74c011 in mlx5_poll_cq_1 () from /lib64/libmlx5-rdmav2.so
+#1  0x00002aaaab4e3cc7 in ibv_poll_cq (wc=0x2aaaab857040 <wc>, num_entries=<optimized out>, cq=<optimized out>) at /usr/include/infiniband/verbs.h:1462
+#2  MPIDI_CH3I_MRAILI_Cq_poll_ib (vbuf_handle=vbuf_handle@entry=0x7fffffffb618, vc_req=vc_req@entry=0x0, receiving=receiving@entry=0, is_blocking=is_blocking@entry=1) at ../src/mpid/ch3/channels/mrail/src/gen2/ibv_channel_manager.c:1216
+#3  0x00002aaaab4a6117 in MPIDI_CH3I_read_progress (vc_pptr=vc_pptr@entry=0x7fffffffb610, v_ptr=v_ptr@entry=0x7fffffffb618, rdmafp_found=rdmafp_found@entry=0x7fffffffb608, is_blocking=is_blocking@entry=1) at ../src/mpid/ch3/channels/mrail/src/rdma/ch3_read_progress.c:101
+#4  0x00002aaaab4a5b58 in MPIDI_CH3I_Progress (is_blocking=is_blocking@entry=1, state=state@entry=0x7fffffffb6dc) at ../src/mpid/ch3/channels/mrail/src/rdma/ch3_progress.c:252
+#5  0x00002aaaaaf7578d in MPIC_Wait (errflag=0x7fffffffbaec, request_ptr=0x2aaaab853ff8 <MPID_Request_direct+1432>) at ../src/mpi/coll/helper_fns.h:297
+#6  MPIC_Recv (tag=2, errflag=0x7fffffffbaec, status=0x7fffffffb6f0, comm_ptr=0x2aaaab82e660 <MPID_Comm_direct>, source=<optimized out>, datatype=1275069445, count=1, buf=0x7fffffffbb3c) at ../src/mpi/coll/helper_fns.h:427
+#7  MPIR_Bcast_binomial (buffer=0x7fffffffbb3c, count=count@entry=1, datatype=datatype@entry=1275069445, root=root@entry=0, comm_ptr=comm_ptr@entry=0x2aaaab82e660 <MPID_Comm_direct>, errflag=errflag@entry=0x7fffffffbaec) at ../src/mpi/coll/bcast.c:247
+#8  0x00002aaaaaf75da6 in MPIR_Bcast_intra (buffer=buffer@entry=0x7fffffffbb3c, count=count@entry=1, datatype=datatype@entry=1275069445, root=root@entry=0, comm_ptr=0x2aaaab82e660 <MPID_Comm_direct>, errflag=errflag@entry=0x7fffffffbaec) at ../src/mpi/coll/bcast.c:1291
+#9  0x00002aaaab003854 in MPIR_Bcast_index_tuned_intra_MV2 (buffer=0x7fffffffbb3c, count=1, datatype=1275069445, root=0, comm_ptr=comm_ptr@entry=0x2aaaab82e660 <MPID_Comm_direct>, errflag=0x7fffffffbaec) at ../src/mpi/coll/bcast_osu.c:2763
+#10 0x00002aaaab0005a9 in MPIR_Bcast_MV2 (buf=<optimized out>, count=<optimized out>, datatype=<optimized out>, root=<optimized out>, comm_ptr=0x2aaaab82e660 <MPID_Comm_direct>, errflag=<optimized out>) at ../src/mpi/coll/bcast_osu.c:3184
+#11 0x00002aaaaaf760a4 in MPIR_SMP_Bcast (errflag=0x160000, comm_ptr=<optimized out>, root=10922, datatype=0, count=1, buffer=<optimized out>) at ../src/mpi/coll/bcast.c:1097
+#12 MPIR_Bcast_intra (buffer=buffer@entry=0x7fffffffbb3c, count=count@entry=1, datatype=datatype@entry=1275069445, root=root@entry=0, comm_ptr=<optimized out>, errflag=errflag@entry=0x7fffffffbaec) at ../src/mpi/coll/bcast.c:1253
+#13 0x00002aaaab003854 in MPIR_Bcast_index_tuned_intra_MV2 (buffer=0x7fffffffbb3c, count=1, datatype=1275069445, root=0, comm_ptr=comm_ptr@entry=0x2aaaab82fa20 <MPID_Comm_builtin>, errflag=0x7fffffffbaec) at ../src/mpi/coll/bcast_osu.c:2763
+#14 0x00002aaaab0005a9 in MPIR_Bcast_MV2 (buf=<optimized out>, count=<optimized out>, datatype=<optimized out>, root=<optimized out>, comm_ptr=0x2aaaab82fa20 <MPID_Comm_builtin>, errflag=<optimized out>) at ../src/mpi/coll/bcast_osu.c:3184
+#15 0x00002aaaaaf7768b in MPIR_Bcast_impl (buffer=buffer@entry=0x7fffffffbb3c, count=count@entry=1, datatype=datatype@entry=1275069445, root=root@entry=0, comm_ptr=comm_ptr@entry=0x2aaaab82fa20 <MPID_Comm_builtin>, errflag=errflag@entry=0x7fffffffbaec) at ../src/mpi/coll/bcast.c:1449
+#16 0x00002aaaaaf77c91 in PMPI_Bcast () at ../src/mpi/coll/bcast.c:1590
+#17 0x0000000000400da9 in some_here (rank=5) at ./bad_mpi.C:13
+#18 0x0000000000400feb in main (argc=<optimized out>, argv=<optimized out>) at ./bad_mpi.C:46
+****************************************************************************************************************************************************************
+
+Host: r3i1n25 PID: 142408
+Thread 2 (Thread 0x2aaab0100700 (LWP 142456)):
+#0  0x00002aaaac213b5d in read () from /lib64/libc.so.6
+#1  0x00002aaaad4d6906 in ibv_get_async_event () from /lib64/libibverbs.so.1
+#2  0x00002aaaab4e62e2 in async_thread () at ../src/mpid/ch3/channels/mrail/src/gen2/ibv_channel_manager.c:1284
+#3  0x00002aaaad8f0ea5 in start_thread () from /lib64/libpthread.so.0
+#4  0x00002aaaac222b0d in clone () from /lib64/libc.so.6
+Thread 1 (Thread 0x2aaaaaafac00 (LWP 142408)):
+#0  0x00002aaaab4a613d in MPIDI_CH3I_read_progress (vc_pptr=vc_pptr@entry=0x7fffffffb610, v_ptr=v_ptr@entry=0x7fffffffb618, rdmafp_found=rdmafp_found@entry=0x7fffffffb608, is_blocking=is_blocking@entry=1) at ../src/mpid/ch3/channels/mrail/src/rdma/ch3_read_progress.c:143
+#1  0x00002aaaab4a5b58 in MPIDI_CH3I_Progress (is_blocking=is_blocking@entry=1, state=state@entry=0x7fffffffb6dc) at ../src/mpid/ch3/channels/mrail/src/rdma/ch3_progress.c:252
+#2  0x00002aaaaaf7578d in MPIC_Wait (errflag=0x7fffffffbaec, request_ptr=0x2aaaab853ff8 <MPID_Request_direct+1432>) at ../src/mpi/coll/helper_fns.h:297
+#3  MPIC_Recv (tag=2, errflag=0x7fffffffbaec, status=0x7fffffffb6f0, comm_ptr=0x2aaaab82e660 <MPID_Comm_direct>, source=<optimized out>, datatype=1275069445, count=1, buf=0x7fffffffbb3c) at ../src/mpi/coll/helper_fns.h:427
+#4  MPIR_Bcast_binomial (buffer=0x7fffffffbb3c, count=count@entry=1, datatype=datatype@entry=1275069445, root=root@entry=0, comm_ptr=comm_ptr@entry=0x2aaaab82e660 <MPID_Comm_direct>, errflag=errflag@entry=0x7fffffffbaec) at ../src/mpi/coll/bcast.c:247
+#5  0x00002aaaaaf75da6 in MPIR_Bcast_intra (buffer=buffer@entry=0x7fffffffbb3c, count=count@entry=1, datatype=datatype@entry=1275069445, root=root@entry=0, comm_ptr=0x2aaaab82e660 <MPID_Comm_direct>, errflag=errflag@entry=0x7fffffffbaec) at ../src/mpi/coll/bcast.c:1291
+#6  0x00002aaaab003854 in MPIR_Bcast_index_tuned_intra_MV2 (buffer=0x7fffffffbb3c, count=1, datatype=1275069445, root=0, comm_ptr=comm_ptr@entry=0x2aaaab82e660 <MPID_Comm_direct>, errflag=0x7fffffffbaec) at ../src/mpi/coll/bcast_osu.c:2763
+#7  0x00002aaaab0005a9 in MPIR_Bcast_MV2 (buf=<optimized out>, count=<optimized out>, datatype=<optimized out>, root=<optimized out>, comm_ptr=0x2aaaab82e660 <MPID_Comm_direct>, errflag=<optimized out>) at ../src/mpi/coll/bcast_osu.c:3184
+#8  0x00002aaaaaf760a4 in MPIR_SMP_Bcast (errflag=0x160000, comm_ptr=<optimized out>, root=10922, datatype=0, count=1, buffer=<optimized out>) at ../src/mpi/coll/bcast.c:1097
+#9  MPIR_Bcast_intra (buffer=buffer@entry=0x7fffffffbb3c, count=count@entry=1, datatype=datatype@entry=1275069445, root=root@entry=0, comm_ptr=<optimized out>, errflag=errflag@entry=0x7fffffffbaec) at ../src/mpi/coll/bcast.c:1253
+#10 0x00002aaaab003854 in MPIR_Bcast_index_tuned_intra_MV2 (buffer=0x7fffffffbb3c, count=1, datatype=1275069445, root=0, comm_ptr=comm_ptr@entry=0x2aaaab82fa20 <MPID_Comm_builtin>, errflag=0x7fffffffbaec) at ../src/mpi/coll/bcast_osu.c:2763
+#11 0x00002aaaab0005a9 in MPIR_Bcast_MV2 (buf=<optimized out>, count=<optimized out>, datatype=<optimized out>, root=<optimized out>, comm_ptr=0x2aaaab82fa20 <MPID_Comm_builtin>, errflag=<optimized out>) at ../src/mpi/coll/bcast_osu.c:3184
+#12 0x00002aaaaaf7768b in MPIR_Bcast_impl (buffer=buffer@entry=0x7fffffffbb3c, count=count@entry=1, datatype=datatype@entry=1275069445, root=root@entry=0, comm_ptr=comm_ptr@entry=0x2aaaab82fa20 <MPID_Comm_builtin>, errflag=errflag@entry=0x7fffffffbaec) at ../src/mpi/coll/bcast.c:1449
+#13 0x00002aaaaaf77c91 in PMPI_Bcast () at ../src/mpi/coll/bcast.c:1590
+#14 0x0000000000400da9 in some_here (rank=6) at ./bad_mpi.C:13
+#15 0x0000000000400feb in main (argc=<optimized out>, argv=<optimized out>) at ./bad_mpi.C:46
+****************************************************************************************************************************************************************
+
