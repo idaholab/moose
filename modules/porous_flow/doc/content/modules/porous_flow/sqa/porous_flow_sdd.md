@@ -11,9 +11,22 @@ Specific details unique to the module are outlined in this document.
 !template-end!
 
 !template! item key=dependencies-and-limitations
-The {{module}} module inherits the
-[software dependencies and limitations of the MOOSE framework](framework_sdd.md#dependencies-and-limitations).
-The {{module}} module currently has the following limitations in functionality...
+The {{module}} module inherits the [software dependencies and limitations of the MOOSE framework](framework_sdd.md#dependencies-and-limitations).
+It depends on the [Fluid Properties](fluid_properties/index.md) module for all fluid property calculations,
+the [Tensor Mechanics](tensor_mechanics/index.md) module for the mechanical aspects of coupled flow
+and geomechanics models, and the [Geochemistry](geochemistry/index.md) module for coupled flow and
+geochemical reactions. The {{module}} module currently has the following limitations in functionality:
+
+- As it depends on other physics modules for fluid properties, mechanics and geochemistry calculations,
+  the {{module}} module is limited to the capability of each of the physics modules listed above. For
+  example, the only fluids that can be used are those that are made available in the [Fluid Properties](fluid_properties/index.md)
+  module.
+- Only a small selection of constitutive models for properties like relative permeability or
+  porosity-permeability relationships are available to the user. If a user requires some other
+  constitutive model, they must develop that functionality themselves.
+- The {{module}} module was developed before the inclusion of Automatic Differentiation (AD) capability
+  in MOOSE, and the physics kernels are not currently designed for AD materials, meaning that new
+  functionality currently requires hand-coded Jacobian entries.
 !template-end!
 
 !template! item key=design-stakeholders
@@ -31,7 +44,23 @@ under the subsection "Module overview". Numerical implementation details for the
 on the same page, under the subsection "Implementation details". A requirement of each {{module}}
 simulation is the [`PorousFlowDictator`](porous_flow/dictator.md) object, which holds information about
 the nonlinear solution variables within the module, as well as the number of fluid phases and fluid
-components in each simulation.
+components in each simulation. This object ensures that all of the required derivative terms are
+included in the Jacobian to aid solver convergence.
+
+Kernels for a wide range of transport physics, such as advection, diffusion, hydrodynamic dispersion,
+and heat conduction are provided, as well as Kernels that couple fluid and heat flow to geomechanics
+and geochemistry. These are listed in the [governing equations](porous_flow/governing_equations.md)
+alongside the terms of the governing equations that each kernel represents.
+
+Various [boundary conditions](porous_flow/boundaries.md) are provided to represent common cases, such
+as boundaries to represent large aquifers, or boundaries to model evapotranspiration at a surface.
+Similarly, a number of [Dirac kernels](porous_flow/sinks.md) objects are provided, from simple point
+sources to [wellbores](dirackernels/PorousFlowPeacemanBorehole.md).
+
+The {{module}} module also provides several choices of [constitutive equations](porous_flow/material_laws.md)
+for relative permeability, capillary pressure, porosity, and permeability etc. Saturation history
+dependent [hysteresis](porous_flow/hysteresis.md) in capillary pressure and relative permeability is
+also included.
 
 Documentation for each object, data structure, and process specific to the
 module are kept up-to-date alongside the MOOSE documentation. Expected failure
