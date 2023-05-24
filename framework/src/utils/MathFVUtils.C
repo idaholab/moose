@@ -57,31 +57,67 @@ onBoundary(const std::set<SubdomainID> & subs, const FaceInfo & fi)
   }
 }
 
+MooseEnum
+interpolationMethods()
+{
+  return MooseEnum("average upwind sou min_mod vanLeer quick skewness-corrected", "upwind");
+}
+
+InputParameters
+advectedInterpolationParameter()
+{
+  auto params = emptyInputParameters();
+  params.addParam<MooseEnum>(
+      "advected_interp_method",
+      interpolationMethods(),
+      "The interpolation to use for the advected quantity. Options are "
+      "'upwind', 'average', 'sou' (for second-order upwind), 'min_mod', 'vanLeer', 'quick', and "
+      "'skewness-corrected' with the default being 'upwind'.");
+  return params;
+}
+
 InterpMethod
 selectInterpolationMethod(const std::string & interp_method)
 {
   if (interp_method == "average")
-    return Moose::FV::InterpMethod::Average;
+    return InterpMethod::Average;
   else if (interp_method == "harmonic")
-    return Moose::FV::InterpMethod::HarmonicAverage;
+    return InterpMethod::HarmonicAverage;
   else if (interp_method == "skewness-corrected")
-    return Moose::FV::InterpMethod::SkewCorrectedAverage;
+    return InterpMethod::SkewCorrectedAverage;
   else if (interp_method == "upwind")
-    return Moose::FV::InterpMethod::Upwind;
+    return InterpMethod::Upwind;
   else if (interp_method == "rc")
-    return Moose::FV::InterpMethod::RhieChow;
+    return InterpMethod::RhieChow;
   else if (interp_method == "vanLeer")
-    return Moose::FV::InterpMethod::VanLeer;
+    return InterpMethod::VanLeer;
   else if (interp_method == "min_mod")
-    return Moose::FV::InterpMethod::MinMod;
+    return InterpMethod::MinMod;
   else if (interp_method == "sou")
-    return Moose::FV::InterpMethod::SOU;
+    return InterpMethod::SOU;
   else if (interp_method == "quick")
-    return Moose::FV::InterpMethod::QUICK;
+    return InterpMethod::QUICK;
   else
     mooseError("Interpolation method ",
                interp_method,
                " is not currently an option in Moose::FV::selectInterpolationMethod");
+}
+
+bool
+setInterpolationMethod(const MooseObject & obj,
+                       Moose::FV::InterpMethod & interp_method,
+                       const std::string & param_name)
+{
+  bool need_more_ghosting = false;
+
+  const auto & interp_method_in = obj.getParam<MooseEnum>(param_name);
+  interp_method = selectInterpolationMethod(interp_method_in);
+
+  if (interp_method == InterpMethod::SOU || interp_method == InterpMethod::MinMod ||
+      interp_method == InterpMethod::VanLeer || interp_method == InterpMethod::QUICK)
+    need_more_ghosting = true;
+
+  return need_more_ghosting;
 }
 }
 }
