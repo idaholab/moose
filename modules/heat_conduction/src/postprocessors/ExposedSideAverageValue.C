@@ -10,7 +10,7 @@
 #include "ExposedSideAverageValue.h"
 #include "SelfShadowSideUserObject.h"
 
-registerMooseObject("MooseApp", ExposedSideAverageValue);
+registerMooseObject("HeatConductionApp", ExposedSideAverageValue);
 
 InputParameters
 ExposedSideAverageValue::validParams()
@@ -19,9 +19,9 @@ ExposedSideAverageValue::validParams()
   params.addClassDescription("Computes the average value of a variable on the "
                              "exposed portion of a sideset. Note that this cannot be used on the "
                              "centerline of an axisymmetric model.");
-  params.addRequiredParam<UserObjectName>(
-      "self_shadow_uo",
-      "SelfShadowSideUserObject that calculates the illumination state of a side set");
+  params.addRequiredParam<UserObjectName>("self_shadow_uo",
+                                          "SelfShadowSideUserObject that calculates the "
+                                          "illumination state of element sides in a side set");
   return params;
 }
 
