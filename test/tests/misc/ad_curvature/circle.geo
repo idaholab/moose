@@ -1,0 +1,16 @@
+Mesh.ElementOrder = 2;
+radius = 1;
+element_dim = 1;
+Point(1) = {radius, 0, 0, element_dim} ;
+Point(2) = {0, radius, 0, element_dim} ;
+Point(3) = {0, 0, 0, element_dim};
+Point(4) = {-radius, 0, 0, element_dim};
+Point(5) = {0, -radius, 0, element_dim} ;
+Circle(1) = {1,3,2};
+Circle(2) = {2,3,4};
+Circle(3) = {4,3,5};
+Circle(4) = {5,3,1};
+Curve Loop(1) = {1,2,3,4};
+Plane Surface(1) = {1};
+Physical Surface("domain") = {1};
+Physical Line("outer") = {1};
