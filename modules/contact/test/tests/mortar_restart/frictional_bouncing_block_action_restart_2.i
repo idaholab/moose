@@ -8,7 +8,7 @@ offset = 1e-2
 [Mesh]
   [file]
     type = FileMeshGenerator
-    file = frictional_bouncing_block_action_restart_1_checkpoint_cp/0021_mesh.cpr
+    file = frictional_bouncing_block_action_restart_1_checkpoint_cp/0021-mesh.cpr
     skip_partitioning = true
     allow_renumbering = false
   []

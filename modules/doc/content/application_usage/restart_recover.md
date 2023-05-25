@@ -80,7 +80,7 @@ Note that while this command is called `kill`, it does not actually terminate th
 ```puppet
 [Mesh]
   #Serial number should match corresponding Executioner parameter
-  file = out_cp/0010_mesh.cpr
+  file = out_cp/0010-mesh.cpr
   #This method of restart is only supported on serial meshes
   distribution = serial
 []
