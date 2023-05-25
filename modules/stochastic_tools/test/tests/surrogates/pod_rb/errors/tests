@@ -10,6 +10,24 @@
       cli_args = 'MultiApps/sub/trainer_name="doesnt_exist"'
       detail = 'the trainer object cannot be found.'
       expect_err = "Unable to find user object with name 'doesnt_exist'"
+      max_parallel = 3
+    []
+    [max_procs_per_app]
+      type = RunException
+      input = trainer.i
+      allow_test_objects = true
+      cli_args = 'MultiApps/sub/max_procs_per_app=2 Samplers/sample/max_procs_per_row=2'
+      detail = 'the trainer is run with more than one processors per subapp.'
+      expect_err = "does not support more than one processors per subapp"
+    []
+    [more_procs_than_samples]
+      type = RunException
+      input = trainer.i
+      allow_test_objects = true
+      detail = 'the number of samples is lower than the number of processors.'
+      expect_err = "PODFullSolveMultiApp needs to be run with fewer processors \(detected (\d+)\) "
+                   "than samples \(detected 3\)"
+      min_parallel = 4
     []
   []
   [solution_transfer]
@@ -22,6 +40,7 @@
       cli_args = 'Transfers/snapshot/trainer_name="doesnt_exist"'
       detail = 'the trainer object cannot be found.'
       expect_err = "Unable to find user object with name 'doesnt_exist'"
+      max_parallel = 3
     []
   []
   [trainer]
@@ -34,6 +53,7 @@
       cli_args = "Trainers/pod_rb/var_names='doesnt_exist'"
       detail = 'the variable names cannot be found on sub-applications, '
       expect_err = "Variable 'doesnt_exist' not found on sub-application [0-9]+!"
+      max_parallel = 3
     []
     [en_limits]
       type = RunException
@@ -42,6 +62,7 @@
       cli_args = "Trainers/pod_rb/error_res='1e-2 1e-3'"
       detail = 'the number of energy limits and variable names do not match, '
       expect_err = "The number of elements is not equal to the number of elements in 'var_names'!"
+      max_parallel = 3
     []
     [tag_types]
       type = RunException
@@ -50,6 +71,7 @@
       cli_args = 'Trainers/pod_rb/tag_types="op"'
       detail = 'the number of tag names and tag types do not match, '
       expect_err = "The number of elements is not equal to the number of elements in 'tag_names'!"
+      max_parallel = 3
     []
     [dir_tag_names]
       type = RunException
@@ -57,7 +79,9 @@
       allow_test_objects = true
       cli_args = 'Trainers/pod_rb/tag_types="doesnt_exist doesnt_exist doesnt_exist"'
       detail = "the Dirichlet tag types do not exist, "
-      expect_err = "Tag type 'doesnt_exist' is not valid, available names are: op, op_dir, src, src_dir"
+      expect_err = "Tag type 'doesnt_exist' is not valid, available names are: op, op_dir, src, "
+                   "src_dir"
+      max_parallel = 3
     []
     [wrong_res_transfer]
       type = RunException
@@ -65,8 +89,12 @@
       allow_test_objects = true
       cli_args = 'Trainers/pod_rb/execute_on="final"'
       detail = 'and the residual generation is called before having the basis vectors.'
-      expect_err = "There are no basis vectors available for residual generation. This indicates that the bases have not been created yet. The most common cause of this error is the wrong setting of the 'execute_on' flags in the PODFullSolveMultiApp and/or PODReducedBasisTrainer."
+      expect_err = "There are no basis vectors available for residual generation. This indicates "
+                   "that the bases have not been created yet. The most common cause of this error is "
+                   "the wrong setting of the 'execute_on' flags in the PODFullSolveMultiApp and/or "
+                   "PODReducedBasisTrainer."
       match_literal = true
+      max_parallel = 3
     []
   []
   [surrogate]

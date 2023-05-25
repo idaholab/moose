@@ -37,12 +37,16 @@ PODFullSolveMultiApp::PODFullSolveMultiApp(const InputParameters & parameters)
     _trainer(getSurrogateTrainer<PODReducedBasisTrainer>("trainer_name")),
     _snapshot_generation(true)
 {
-  // Initializing the subapps
-  if (_mode == StochasticTools::MultiAppMode::BATCH_RESET ||
-      _mode == StochasticTools::MultiAppMode::BATCH_RESTORE)
-    init(n_processors());
-  else
-    init(_sampler.getNumberOfRows());
+  if (getParam<unsigned int>("max_procs_per_app") != 1)
+    paramError("max_procs_per_app", " does not support more than one processors per subapp!");
+
+  if (n_processors() > _sampler.getNumberOfRows())
+    mooseError(type(),
+               " needs to be run with fewer processors (detected ",
+               n_processors(),
+               ") than samples (detected ",
+               _sampler.getNumberOfRows(),
+               ")!");
 }
 
 void
@@ -59,11 +63,9 @@ PODFullSolveMultiApp::preTransfer(Real dt, Real target_time)
           " The most common cause of this error is the wrong setting"
           " of the 'execute_on' flags in the PODFullSolveMultiApp and/or PODReducedBasisTrainer.");
 
-    if (_mode == StochasticTools::MultiAppMode::BATCH_RESET ||
-        _mode == StochasticTools::MultiAppMode::BATCH_RESTORE)
-      init(n_processors());
-    else
-      init(base_size);
+    init(base_size,
+         _sampler.getRankConfig(_mode == StochasticTools::MultiAppMode::BATCH_RESET ||
+                                _mode == StochasticTools::MultiAppMode::BATCH_RESTORE));
 
     initialSetup();
   }
