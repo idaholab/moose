@@ -121,7 +121,7 @@ private:
   /**
    * Internal method for querying TheWarehouse for the currently active timesteppers.
    */
-  std::vector< TimeStepper *> getTimeSteppers();
+  std::vector<TimeStepper *> getTimeSteppers();
 
   // The time step size computed by the Composition TimeStepper
   Real _dt;
