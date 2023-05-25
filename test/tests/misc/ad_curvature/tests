@@ -1,0 +1,10 @@
+[Tests]
+  issues = '#12839'
+  design = 'SphereMeshGenerator.md'
+  [sphere_hex27]
+    type = CSVDiff
+    input = test.i
+    csvdiff = test_out.csv
+    requirement = 'The system shall compute a curvature close to unity for a unit sphere.'
+  []
+[]
