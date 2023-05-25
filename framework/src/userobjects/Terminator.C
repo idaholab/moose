@@ -86,6 +86,24 @@ Terminator::Terminator(const InputParameters & parameters)
 }
 
 void
+Terminator::initialize()
+{
+  // Check execution schedule of the postprocessors
+  if (_fail_mode == FailMode::SOFT)
+    for (unsigned int i = 0; i < _pp_num; i++)
+    // Make sure the postprocessor is executed at least as often
+    {
+      const auto & pp_exec = _fe_problem.getUserObjectBase(_pp_names[i], _tid).getExecuteOnEnum();
+      for (const auto & flag : getExecuteOnEnum())
+        if (!pp_exec.contains(flag) && flag != EXEC_FINAL)
+          paramWarning("expression",
+                       "Postprocessor '" + _pp_names[i] + "' is not executed on " + flag.name() +
+                           ", which it really should be to serve in the criterion "
+                           "expression for throwing.");
+    }
+}
+
+void
 Terminator::handleMessage()
 {
   std::string message;
