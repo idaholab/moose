@@ -21,8 +21,10 @@
     type = 'CSVDiff'
     input = 'terminator_soft.i'
     csvdiff = 'terminator_soft_solve_out.csv'
-    issues = '#16452'
-    cli_args = 'Outputs/file_base=terminator_soft_solve_out UserObjects/arnold/execute_on=LINEAR'
+    issues = '#16452 #24479'
+    cli_args = "Outputs/file_base=terminator_soft_solve_out
+                Postprocessors/dt/execute_on=LINEAR
+                UserObjects/arnold/execute_on=LINEAR"
     requirement = "The system shall abort the current solve in a solve based on post-processing "
                   "calculations performed within the simulation to cut the timestep."
   []
@@ -60,5 +62,15 @@
     requirement = "The system shall check a criterion for early termination of the run, but continue "
                   "with the regular simulation when that criterion is not met."
     recover = false # changes the time steps
+  []
+
+  [check_execution]
+    type = RunException
+    input = 'terminator_soft.i'
+    expect_err = "Postprocessor 'dt' is not executed on the same schedule"
+    issues = '#24479'
+    requirement = "The system shall check that postprocessors providing data for a terminator "
+                  "failing a nonlinear or linear solve are executed often enough to be able to "
+                  "update the criterion."
   []
 []
