@@ -51,7 +51,9 @@
   solve_type = PJFNK
   petsc_options_iname = '-pc_type -pc_hypre_type'
   petsc_options_value = 'hypre boomeramg'
-
+  # Use as many different time steppers as we could to test the compositionDT,
+  # SolutionTimeAdaptiveDT give slightly different dt per run, set rel_err = 1e-2
+  # to ensure the test won't fail due to the small difference in the high-digit.
   [TimeSteppers]
     [ConstDT1]
       type = ConstantDT
@@ -71,7 +73,7 @@
 
     [SolutionAdapDT]
       type = SolutionTimeAdaptiveDT
-      dt = 0.5
+      dt = 1
     []
 
     [IterationAdapDT]

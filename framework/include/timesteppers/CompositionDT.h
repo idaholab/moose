@@ -44,10 +44,24 @@ public:
    * @param dts stores time step size(s) from input time stepper(s)
    * @param bound_dts stores time step size(s) from input lower bound time stepper(s)
    */
-  Real produceCompositionDT(const std::set<Real> & dts, const std::set<Real> & bound_dts);
+
+  struct CompareFirst
+  {
+    bool operator()(const std::pair<Real, TimeStepper *> & a,
+                    const std::pair<Real, TimeStepper *> & b) const
+    {
+      return a.first < b.first;
+    }
+  };
+
+  Real produceCompositionDT(std::set<std::pair<Real, TimeStepper *>, CompareFirst> & dts,
+                            std::set<std::pair<Real, TimeStepper *>, CompareFirst> & bound_dts);
 
   // Find the time point to hit at current time step
   Real getSequenceSteppersNextTime();
+
+  template <typename Lambda>
+  void actOnTimeSteppers(Lambda && act);
 
   /**
    * Initialize all the input time stepper(s). Called at the very beginning of
@@ -107,7 +121,7 @@ private:
   /**
    * Internal method for querying TheWarehouse for the currently active timesteppers.
    */
-  std::vector<TimeStepper *> getTimeSteppers() const;
+  std::vector< TimeStepper *> getTimeSteppers();
 
   // The time step size computed by the Composition TimeStepper
   Real _dt;

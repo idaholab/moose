@@ -58,12 +58,13 @@
 [Executioner]
   type = Transient
   scheme = 'BDF2'
-  #scheme = 'crank-nicolson'
   start_time = 0
   num_steps = 4
   nl_abs_tol = 1e-15
   petsc_options = '-snes_converged_reason'
   abort_on_solve_fail = true
+  # Use the same test case as AB2PredictorCorrector test, add one more time stepper
+  # to test if AB2PredictorCorrector works correctly with time stepper composition
  [TimeSteppers]
     [AB2]
       type = AB2PredictorCorrector

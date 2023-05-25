@@ -43,7 +43,7 @@
   solve_type = PJFNK
   petsc_options_iname = '-pc_type -pc_hypre_type'
   petsc_options_value = 'hypre boomeramg'
-
+  # Use as many different time sequence steppers as we could to test the compositionDT
   [TimeSteppers]
     [ConstDT1]
       type = ConstantDT

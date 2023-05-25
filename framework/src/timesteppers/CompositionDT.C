@@ -64,66 +64,54 @@ CompositionDT::CompositionDT(const InputParameters & parameters)
           "lower_bound", "Failed to find a timestepper with the name '", time_stepper_name, "'");
 }
 
+template <typename Lambda>
+void
+CompositionDT::actOnTimeSteppers(Lambda && act)
+{
+  for (auto & ts : getTimeSteppers())
+    act(*ts);
+}
+
 void
 CompositionDT::init()
 {
-  const auto time_steppers = getTimeSteppers();
-  for (auto & ts : time_steppers)
-    if (ts != this)
-      ts->init();
+  actOnTimeSteppers([](auto & ts) { ts.init(); });
 }
+
 void
 CompositionDT::preExecute()
 {
-  const auto time_steppers = getTimeSteppers();
-  for (auto & ts : time_steppers)
-    if (ts != this)
-      ts->preExecute();
+  actOnTimeSteppers([](auto & ts) { ts.preExecute(); });
 }
 
 void
 CompositionDT::preSolve()
 {
-  const auto time_steppers = getTimeSteppers();
-  for (auto & ts : time_steppers)
-    if (ts != this)
-      ts->preSolve();
+  actOnTimeSteppers([](auto & ts) { ts.preSolve(); });
 }
 
 void
 CompositionDT::postSolve()
 {
-  const auto time_steppers = getTimeSteppers();
-  for (auto & ts : time_steppers)
-    if (ts != this)
-      ts->postSolve();
+  actOnTimeSteppers([](auto & ts) { ts.postSolve(); });
 }
 
 void
 CompositionDT::postExecute()
 {
-  const auto time_steppers = getTimeSteppers();
-  for (auto & ts : time_steppers)
-    if (ts != this)
-      ts->postExecute();
+  actOnTimeSteppers([](auto & ts) { ts.postExecute(); });
 }
 
 void
 CompositionDT::preStep()
 {
-  const auto time_steppers = getTimeSteppers();
-  for (auto & ts : time_steppers)
-    if (ts != this)
-      ts->preStep();
+  actOnTimeSteppers([](auto & ts) { ts.preStep(); });
 }
 
 void
 CompositionDT::postStep()
 {
-  const auto time_steppers = getTimeSteppers();
-  for (auto & ts : time_steppers)
-    if (ts != this)
-      ts->postStep();
+  actOnTimeSteppers([](auto & ts) { ts.postStep(); });
 }
 
 bool
@@ -140,10 +128,7 @@ CompositionDT::constrainStep(Real & dt)
 Real
 CompositionDT::computeInitialDT()
 {
-  if (_has_initial_dt)
-    return _initial_dt;
-  else
-    return computeDT();
+  return _has_initial_dt ? _initial_dt : computeDT();
 }
 
 Real
@@ -152,33 +137,27 @@ CompositionDT::computeDT()
   const auto time_steppers = getTimeSteppers();
   // Note : compositionDT requires other active time steppers as input so no active time steppers
   // or only compositionDT is active is not allowed
-  if (time_steppers.size() < 2 && time_steppers[0] == this)
+  if (time_steppers.size() < 1)
     mooseError("No TimeStepper(s) are currently active to compute a timestep");
 
-  std::set<Real> dts;
-  std::set<Real> bound_dt;
+  std::set<std::pair<Real, TimeStepper *>, CompareFirst> dts, bound_dt;
 
   for (auto & ts : time_steppers)
-    if (ts != this && !dynamic_cast<TimeSequenceStepperBase *>(ts))
+    if (!dynamic_cast<TimeSequenceStepperBase *>(ts))
     {
       ts->computeStep();
       const auto dt = ts->getCurrentDT();
 
       if (_lower_bound.count(ts->name()))
-      {
-        bound_dt.emplace(dt);
-        if (bound_dt.find(dt) == (--bound_dt.end()))
-          _bound_last_time_stepper = ts;
-      }
+        bound_dt.emplace(dt, ts);
       else
-      {
-        dts.emplace(dt);
-        if (dts.find(dt) == dts.begin())
-          _last_time_stepper = ts;
-      }
+        dts.emplace(dt, ts);
     }
 
-  _dt = produceCompositionDT(std::as_const(dts), std::as_const(bound_dt));
+  _last_time_stepper = dts.size() ? dts.begin()->second : nullptr;
+  _bound_last_time_stepper = bound_dt.size() ? (--bound_dt.end())->second : nullptr;
+
+  _dt = produceCompositionDT(dts, bound_dt);
 
   return _dt;
 }
@@ -215,14 +194,16 @@ CompositionDT::getSequenceSteppersNextTime()
 }
 
 Real
-CompositionDT::produceCompositionDT(const std::set<Real> & dts, const std::set<Real> & bound_dts)
+CompositionDT::produceCompositionDT(
+    std::set<std::pair<Real, TimeStepper *>, CompareFirst> & dts,
+    std::set<std::pair<Real, TimeStepper *>, CompareFirst> & bound_dts)
 {
   Real minDT, lower_bound, dt;
   minDT = lower_bound = dt = 0.0;
   if (!dts.empty())
-    minDT = *dts.begin();
+    minDT = dts.begin()->first;
   if (!bound_dts.empty())
-    lower_bound = *bound_dts.rbegin();
+    lower_bound = bound_dts.rbegin()->first;
 
   if (minDT > lower_bound)
     dt = minDT;
@@ -237,7 +218,6 @@ CompositionDT::produceCompositionDT(const std::set<Real> & dts, const std::set<R
   if (ts != 0 && (ts - _time) < dt)
   {
     _last_time_stepper = _last_time_sequence_stepper;
-
     return std::min((ts - _time), dt);
   }
   else
@@ -245,13 +225,16 @@ CompositionDT::produceCompositionDT(const std::set<Real> & dts, const std::set<R
 }
 
 std::vector<TimeStepper *>
-CompositionDT::getTimeSteppers() const
+CompositionDT::getTimeSteppers()
 {
   std::vector<TimeStepper *> time_steppers;
   _fe_problem.theWarehouse()
       .query()
       .condition<AttribSystem>("TimeStepper")
       .queryInto(time_steppers);
+
+  time_steppers.erase(std::remove(time_steppers.begin(), time_steppers.end(), this),
+                      time_steppers.end());
   return time_steppers;
 }
 
@@ -267,43 +250,29 @@ CompositionDT::step()
 void
 CompositionDT::acceptStep()
 {
-  const auto time_steppers = getTimeSteppers();
-  for (auto & ts : time_steppers)
-    if (ts != this)
-      ts->acceptStep();
+  actOnTimeSteppers([](auto & ts) { ts.acceptStep(); });
 }
 
 void
 CompositionDT::rejectStep()
 {
-  const auto time_steppers = getTimeSteppers();
-  for (auto & ts : time_steppers)
-    if (ts != this)
-      ts->rejectStep();
+  actOnTimeSteppers([](auto & ts) { ts.rejectStep(); });
 }
 
 bool
 CompositionDT::converged() const
 {
-  if (_last_time_stepper)
-    return _last_time_stepper->converged();
-  return TimeStepper::converged();
+  return _last_time_stepper ? _last_time_stepper->converged() : TimeStepper::converged();
 }
 
 void
 CompositionDT::forceTimeStep(Real dt)
 {
-  const auto time_steppers = getTimeSteppers();
-  for (auto & ts : time_steppers)
-    if (ts != this)
-      ts->forceTimeStep(dt);
+  actOnTimeSteppers([dt](auto & ts) { ts.forceTimeStep(dt); });
 }
 
 void
 CompositionDT::forceNumSteps(const unsigned int num_steps)
 {
-  const auto time_steppers = getTimeSteppers();
-  for (auto & ts : time_steppers)
-    if (ts != this)
-      ts->forceNumSteps(num_steps);
+  actOnTimeSteppers([num_steps](auto & ts) { ts.forceNumSteps(num_steps); });
 }

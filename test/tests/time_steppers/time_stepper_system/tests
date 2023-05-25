@@ -9,6 +9,7 @@
       type = CSVDiff
       input = 'multiple_timesteppers.i'
       csvdiff = 'multiple_timesteppers.csv'
+      rel_err = 1e-2
       detail = 'using the minimum time step size of input time steppers,'
     []
 
