@@ -1,0 +1,10 @@
+[Tests]
+  issues = '#24246'
+  [free_expansion_abs_ref]
+    type = 'Exodiff'
+    input = 'free_expansion_abs_ref.i'
+    exodiff = 'free_expansion_abs_ref_out.e'
+    requirement = 'The tensor mechanics action shall set up the mechanics kernels with the appropriate options to accumulate absolute values of the residual to a tag vector usable for relative convergence checks.'
+    design = 'Modules/TensorMechanics/Master/index.md ReferenceResidualProblem.md'
+  []
+[]

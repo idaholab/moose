@@ -1,54 +1,66 @@
 [Tests]
   issues = '#5042'
-  [./plane_strain]
+  [plane_strain]
     type = 'Exodiff'
     input = 'plane_strain.i'
     exodiff = 'plane_strain_out.e'
     custom_cmp = 'plane_strain.exodiff'
     requirement = 'The system shall support a traditional plane strain mechanics solution'
     design = 'ComputePlaneSmallStrain.md'
-  [../]
-  [./plane_strain_prescribed]
+  []
+  [plane_strain_prescribed]
     type = 'Exodiff'
     input = 'plane_strain_prescribed.i'
     exodiff = 'plane_strain_prescribed_out.e'
     custom_cmp = 'plane_strain.exodiff'
     requirement = 'The system shall support a traditional plane strain mechanics solution where the out-of-plane strain is prescribed'
     design = 'ComputePlaneSmallStrain.md'
-  [../]
-  [./generalized_plane_strain_small]
+  []
+  [generalized_plane_strain_small]
     type = 'Exodiff'
     input = 'generalized_plane_strain_small.i'
     exodiff = 'generalized_plane_strain_small_out.e'
     custom_cmp = 'generalized.exodiff'
     requirement = 'The system shall support a generalized plane strain mechanics solution'
     design = 'ComputePlaneSmallStrain.md'
-  [../]
-  [./generalized_plane_strain_ref_resid]
+  []
+  [generalized_plane_strain_ref_resid_absolute_value_vector_tags]
     type = 'Exodiff'
     input = 'generalized_plane_strain_ref_resid.i'
     exodiff = 'generalized_plane_strain_ref_resid_out.e'
     custom_cmp = 'generalized.exodiff'
-    requirement = 'The system shall support a generalized plane strain mechanics solution using the reference residual approach to check solution convergence of the field and scalar variables'
+    requirement = 'The system shall support a generalized plane strain mechanics solution using the reference residual approach to check solution convergence of the field and scalar variables when the reference vector is constructed using absolute value vector tags.'
     design = 'ComputePlaneSmallStrain.md'
-  [../]
-  [./generalized_plane_strain_increment]
+  []
+  [generalized_plane_strain_ref_resid_extra_vector_tags]
+    prereq = generalized_plane_strain_ref_resid_absolute_value_vector_tags
+    type = 'Exodiff'
+    input = 'generalized_plane_strain_ref_resid.i'
+    cli_args = "Modules/TensorMechanics/Master/all/absolute_value_vector_tags='' "
+               "Modules/TensorMechanics/Master/all/extra_vector_tags='ref' "
+               "Outputs/file_base=generalized_plane_strain_ref_resid_extra_vector_tags_out"
+    exodiff = 'generalized_plane_strain_ref_resid_extra_vector_tags_out.e'
+    custom_cmp = 'generalized.exodiff'
+    requirement = 'The system shall support a generalized plane strain mechanics solution using the reference residual approach to check solution convergence of the field and scalar variables when the reference vector is constructed using unbalanced kernel contributions.'
+    design = 'ComputePlaneSmallStrain.md'
+  []
+  [generalized_plane_strain_increment]
     type = 'Exodiff'
     input = 'generalized_plane_strain_increment.i'
     exodiff = 'generalized_plane_strain_increment_out.e'
     custom_cmp = 'generalized.exodiff'
     requirement = 'The system shall support a generalized plane strain mechanics solution with incremental strain'
     design = 'ComputePlaneIncrementalStrain.md'
-  [../]
-  [./generalized_plane_strain_finite]
+  []
+  [generalized_plane_strain_finite]
     type = 'Exodiff'
     input = 'generalized_plane_strain_finite.i'
     exodiff = 'generalized_plane_strain_finite_out.e'
     custom_cmp = 'generalized.exodiff'
     requirement = 'The system shall support a generalized plane strain mechanics solution with finite strain'
     design = 'ComputePlaneFiniteStrain.md'
-  [../]
-  [./generalized_plane_strain_squares]
+  []
+  [generalized_plane_strain_squares]
     type = 'Exodiff'
     input = 'generalized_plane_strain_squares.i'
     exodiff = 'generalized_plane_strain_squares_out.e'
@@ -56,8 +68,8 @@
     requirement = 'The system shall support setting up a generalized plane strain problem through an action'
     design = 'GeneralizedPlaneStrainAction.md'
     issues = '#7840'
-  [../]
-  [./out_of_plane_pressure_function]
+  []
+  [out_of_plane_pressure_function]
     type = 'Exodiff'
     input = 'out_of_plane_pressure.i'
     exodiff = 'out_of_plane_pressure_out.e'
@@ -65,19 +77,19 @@
     requirement = 'The system shall support setting the out-of-plane pressure using a function for generalized plane strain problems'
     design = 'GeneralizedPlaneStrainAction.md'
     issues = '#7840'
-  [../]
-  [./out_of_plane_pressure_material]
+  []
+  [out_of_plane_pressure_material]
     type = 'Exodiff'
     input = 'out_of_plane_pressure.i'
     exodiff = 'out_of_plane_pressure_out.e'
-    cli_args = 'Modules/TensorMechanics/GeneralizedPlaneStrain/gps/out_of_plane_pressure_function=0 Modules/TensorMechanics/GeneralizedPlaneStrain/gps/out_of_plane_pressure_material=traction_material' 
+    cli_args = 'Modules/TensorMechanics/GeneralizedPlaneStrain/gps/out_of_plane_pressure_function=0 Modules/TensorMechanics/GeneralizedPlaneStrain/gps/out_of_plane_pressure_material=traction_material'
     abs_zero = 1e-9
     requirement = 'The system shall support setting the out-of-plane pressure using a material property for generalized plane strain problems'
     design = 'GeneralizedPlaneStrainAction.md'
     issues = '#17250'
-#    prereq = out_of_plane_pressure_function
-  [../]
-  [./generalized_plane_strain_scalar_vector]
+    #    prereq = out_of_plane_pressure_function
+  []
+  [generalized_plane_strain_scalar_vector]
     type = 'Exodiff'
     input = 'generalized_plane_strain_scalar_vector.i'
     exodiff = 'generalized_plane_strain_scalar_vector_out.e'
@@ -87,5 +99,5 @@
     requirement = 'The system shall support listing all of the out-of-plane strain variables in the strain calculator'
     design = 'GeneralizedPlaneStrainAction.md'
     issues = '#7840'
-  [../]
+  []
 []
