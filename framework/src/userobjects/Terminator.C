@@ -134,11 +134,10 @@ Terminator::execute()
       _fe_problem.terminateSolve();
     else
     {
-      std::cout << " Executing on " << _fe_problem.getCurrentExecuteOnFlag() << std::endl;
       // Within a nonlinear solve, trigger a solve fail
       if (_fe_problem.getCurrentExecuteOnFlag() == EXEC_LINEAR ||
           _fe_problem.getCurrentExecuteOnFlag() == EXEC_NONLINEAR)
-        _fe_problem.failNextNonlinearConvergenceCheck();
+        _fe_problem.setFailNextNonlinearConvergenceCheck(true);
       // Outside of a solve, trigger a time step fail
       else
         getMooseApp().getExecutioner()->fixedPointSolve().failStep();
