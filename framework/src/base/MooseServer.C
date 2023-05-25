@@ -29,9 +29,6 @@ MooseServer::MooseServer(MooseApp & moose_app)
 bool
 MooseServer::parseDocumentForDiagnostics(wasp::DataArray & diagnosticsList)
 {
-  if (!checkIntegrity())
-    return false;
-
   // strip prefix from document uri if it exists to get parse file path
 
   std::string parse_file_path = document_path;
@@ -86,9 +83,9 @@ MooseServer::parseDocumentForDiagnostics(wasp::DataArray & diagnosticsList)
 
     for (std::string error_line; std::getline(caught_msg, error_line);)
     {
-      // skip over lines that are blank or contain only the error prefix
+      // skip over lines that are blank or consist totally of whitespace
 
-      if (error_line.empty() || error_line == "*** ERROR ***")
+      if (error_line.find_first_not_of(" \t") == std::string::npos)
         continue;
 
       // check if this error line already has the input file path prefix
@@ -157,23 +154,13 @@ MooseServer::parseDocumentForDiagnostics(wasp::DataArray & diagnosticsList)
 
 bool
 MooseServer::updateDocumentTextChanges(const std::string & replacement_text,
-                                       int start_line,
-                                       int start_character,
-                                       int end_line,
-                                       int end_character,
-                                       int range_length)
+                                       int /* start_line */,
+                                       int /* start_character */,
+                                       int /* end_line */,
+                                       int /* end_character*/,
+                                       int /* range_length*/)
 {
-  if (!checkIntegrity())
-    return false;
-
-  // these are the expected values to indicate full document replacement
-
-  if (!(start_line == -1 && start_character == -1 && end_line == -1 && end_character == -1 &&
-        range_length == -1))
-  {
-    errors << wasp::lsp::m_error_prefix << "Server needs full text when changed" << std::endl;
-    return false;
-  }
+  // replacement text swaps full document as indicated in server capabilities
 
   document_text = replacement_text;
 
@@ -186,9 +173,6 @@ MooseServer::gatherDocumentCompletionItems(wasp::DataArray & /* completionItems 
                                            int /* line */,
                                            int /* character */)
 {
-  if (!checkIntegrity())
-    return false;
-
   bool pass = true;
 
   // TODO - hook up this capability by adding server specific logic here
@@ -201,9 +185,6 @@ MooseServer::gatherDocumentDefinitionLocations(wasp::DataArray & /* definitionLo
                                                int /* line */,
                                                int /* character */)
 {
-  if (!checkIntegrity())
-    return false;
-
   bool pass = true;
 
   // TODO - hook up this capability by adding server specific logic here
@@ -217,9 +198,6 @@ MooseServer::gatherDocumentReferencesLocations(wasp::DataArray & /* referencesLo
                                                int /* character */,
                                                bool /* include_declaration */)
 {
-  if (!checkIntegrity())
-    return false;
-
   bool pass = true;
 
   // TODO - hook up this capability by adding server specific logic here
@@ -236,9 +214,6 @@ MooseServer::gatherDocumentFormattingTextEdits(wasp::DataArray & /* formattingTe
                                                int /* tab_size */,
                                                bool /* insert_spaces */)
 {
-  if (!checkIntegrity())
-    return false;
-
   bool pass = true;
 
   // TODO - hook up this capability by adding server specific logic here
@@ -249,9 +224,6 @@ MooseServer::gatherDocumentFormattingTextEdits(wasp::DataArray & /* formattingTe
 bool
 MooseServer::gatherDocumentSymbols(wasp::DataArray & documentSymbols)
 {
-  if (!checkIntegrity())
-    return false;
-
   if (!_check_app || !_check_app->parser()._root)
     return true;
 
@@ -259,9 +231,9 @@ MooseServer::gatherDocumentSymbols(wasp::DataArray & documentSymbols)
 
   wasp::HITNodeView view_root = _check_app->parser()._root->getNodeView();
 
-  for (const auto i : make_range(view_root.child_count()))
+  for (auto itr = view_root.begin(); itr != view_root.end(); itr.next())
   {
-    wasp::HITNodeView view_child = view_root.child_at(i);
+    wasp::HITNodeView view_child = itr.get();
 
     // get child name / detail / line / column / last_line / last_column
 
@@ -318,9 +290,9 @@ MooseServer::traverseParseTreeAndFillSymbols(wasp::HITNodeView view_parent,
 {
   bool pass = true;
 
-  for (const auto i : make_range(view_parent.child_count()))
+  for (auto itr = view_parent.begin(); itr != view_parent.end(); itr.next())
   {
-    wasp::HITNodeView view_child = view_parent.child_at(i);
+    wasp::HITNodeView view_child = itr.get();
 
     // get child name / detail / line / column / last_line / last_column
 
@@ -367,22 +339,6 @@ MooseServer::traverseParseTreeAndFillSymbols(wasp::HITNodeView view_parent,
   }
 
   return pass;
-}
-
-bool
-MooseServer::checkIntegrity()
-{
-  if (!is_initialized)
-  {
-    errors << wasp::lsp::m_error_prefix << "Server needs to be initialized" << std::endl;
-    return false;
-  }
-  if (!is_document_open)
-  {
-    errors << wasp::lsp::m_error_prefix << "Server has no open document" << std::endl;
-    return false;
-  }
-  return true;
 }
 
 #endif

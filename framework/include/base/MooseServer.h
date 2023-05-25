@@ -121,11 +121,6 @@ private:
   bool traverseParseTreeAndFillSymbols(wasp::HITNodeView view_parent,
                                        wasp::DataObject & data_parent);
 
-  /** error check that server is initialized and document is currently open
-   * @return - true if this server was initialized and has an open document
-   */
-  bool checkIntegrity();
-
   /** read from connection into object - specific to this server's connection
    * @param object - reference to object to be read into
    * @return - true if the read from the connection completed successfully
