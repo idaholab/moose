@@ -25,8 +25,9 @@
     cli_args = "Outputs/file_base=terminator_soft_solve_out
                 Postprocessors/dt/execute_on=LINEAR
                 UserObjects/arnold/execute_on=LINEAR"
-    requirement = "The system shall abort the current solve in a solve based on post-processing "
-                  "calculations performed within the simulation to cut the timestep."
+    requirement = "The system shall abort the current nonlinear or linear solve in a simulation "
+                  "based on post-processing calculations performed within the simulation to cut the "
+                  "timestep."
   []
   [terminator_message_1]
     type = 'RunException'
@@ -67,10 +68,11 @@
   [check_execution]
     type = RunException
     input = 'terminator_soft.i'
-    expect_err = "Postprocessor 'dt' is not executed on the same schedule"
+    expect_err = "Postprocessor 'dt' is not executed on LINEAR"
     issues = '#24479'
-    requirement = "The system shall check that postprocessors providing data for a terminator "
-                  "failing a nonlinear or linear solve are executed often enough to be able to "
-                  "update the criterion."
+    cli_args = 'UserObjects/arnold/execute_on=LINEAR'
+    requirement = "The system shall check that postprocessors providing data for a terminator meant "
+                  "to force a failure in a solve or a time step are executed often enough to be able "
+                  "to update the criterion."
   []
 []

@@ -2058,10 +2058,7 @@ public:
   /**
    * Skip further residual evaluations and fail the next nonlinear convergence check
    */
-  void setFailNextNonlinearConvergenceCheck(bool fail)
-  {
-    _fail_next_nonlinear_convergence_check = fail;
-  }
+  void setFailNextNonlinearConvergenceCheck() { _fail_next_nonlinear_convergence_check = true; }
 
   /*
    * Set the status of loop order of execution printing

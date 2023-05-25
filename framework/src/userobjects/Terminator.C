@@ -86,11 +86,11 @@ Terminator::Terminator(const InputParameters & parameters)
 }
 
 void
-Terminator::initialize()
+Terminator::initialSetup()
 {
   // Check execution schedule of the postprocessors
   if (_fail_mode == FailMode::SOFT)
-    for (unsigned int i = 0; i < _pp_num; i++)
+    for (const auto i : make_range(_pp_num))
     // Make sure the postprocessor is executed at least as often
     {
       const auto & pp_exec = _fe_problem.getUserObjectBase(_pp_names[i], _tid).getExecuteOnEnum();
@@ -155,7 +155,7 @@ Terminator::execute()
       // Within a nonlinear solve, trigger a solve fail
       if (_fe_problem.getCurrentExecuteOnFlag() == EXEC_LINEAR ||
           _fe_problem.getCurrentExecuteOnFlag() == EXEC_NONLINEAR)
-        _fe_problem.setFailNextNonlinearConvergenceCheck(true);
+        _fe_problem.setFailNextNonlinearConvergenceCheck();
       // Outside of a solve, trigger a time step fail
       else
         getMooseApp().getExecutioner()->fixedPointSolve().failStep();
