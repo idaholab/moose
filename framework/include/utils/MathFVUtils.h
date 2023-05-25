@@ -50,6 +50,19 @@ enum class InterpMethod
   QUICK
 };
 
+/**
+ * Returns an enum with all the currently supported interpolation methods and the current default
+ * for FV: first-order upwind
+ * @return MooseEnum with all the face interpolation methods supported
+ */
+MooseEnum interpolationMethods();
+
+/**
+ * @return An input parameters object that contains the \p advected_interp_method parameter, e.g.
+ * the interpolation method to use for an advected quantity
+ */
+InputParameters advectedInterpolationParameter();
+
 /*
  * Converts from the interpolation method to the interpolation enum.
  * This routine is here in lieu of using a MooseEnum for InterpMethod
@@ -57,6 +70,18 @@ enum class InterpMethod
  * @return the interpolation method
  */
 InterpMethod selectInterpolationMethod(const std::string & interp_method);
+
+/**
+ * Sets one interpolation method
+ * @param obj The \p MooseObject with input parameters to query
+ * @param interp_method The interpolation method we will set
+ * @param param_name The name of the parameter setting this interpolation method
+ * @return Whether the interpolation method has indicated that we will need more than the
+ * default level of ghosting
+ */
+bool setInterpolationMethod(const MooseObject & obj,
+                            Moose::FV::InterpMethod & interp_method,
+                            const std::string & param_name);
 
 /**
  * Produce the interpolation coefficients in the equation:

@@ -51,6 +51,7 @@ public:
     std::vector<double> _chemical_potential;
     std::vector<double> _mol_fraction;
     std::vector<Real> _species_fractions;
+    std::vector<Real> _vapor_pressures;
     std::vector<int> _phase_indices;
     std::vector<double> _element_potential_for_output;
   };
@@ -58,7 +59,7 @@ public:
   const Data & getNodalData(dof_id_type node_id) const;
 
 protected:
-  Real _pressure;
+  const VariableValue & _pressure;
   const VariableValue & _temperature;
 
   // re-initialization data
@@ -67,19 +68,28 @@ protected:
   const std::size_t _n_phases;
   const std::size_t _n_species;
   const std::size_t _n_elements;
+  const std::size_t _n_vapor_species;
 
   std::vector<const VariableValue *> _el;
   std::vector<std::string> _el_name;
+  std::vector<unsigned int> _el_id;
+
+  std::pair<int, int> _db_num_phases;
+  std::vector<std::string> _db_phase_names;
+  std::vector<std::vector<std::string>> _db_species_names;
 
   std::vector<std::string> _ph_name;
   std::vector<std::string> _sp_phase_name;
   std::vector<std::string> _sp_species_name;
+  std::vector<std::string> _vapor_phase_name;
+  std::vector<std::string> _vapor_species_name;
 
   /// Nodal data (TODO: investigate writing directly to AuxVariables)
   std::unordered_map<dof_id_type, Data> _data;
 
   ///@{ Element chemical potential output
   const bool _output_element_potential;
+  const bool _output_vapor_pressures;
   std::vector<std::string> _element_potentials;
   ///@}
 };

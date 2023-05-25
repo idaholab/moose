@@ -69,6 +69,20 @@
   []
 []
 
+[Postprocessors]
+  [ave_v_all]
+    type = SideAverageValue
+    variable = v
+    boundary = outer
+  []
+  [ave_v_exposed]
+    type = ExposedSideAverageValue
+    variable = v
+    boundary = outer
+    self_shadow_uo = shadow
+  []
+[]
+
 [UserObjects]
   [shadow]
     type = SelfShadowSideUserObject

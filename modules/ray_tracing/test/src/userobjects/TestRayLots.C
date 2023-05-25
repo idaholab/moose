@@ -37,7 +37,7 @@ TestRayLots::postExecuteStudy()
 
   if (getParam<bool>("equality"))
   {
-    std::size_t passes = 0;
+    std::size_t same_passes = 0, duplicate_passes = 0;
 
     std::vector<UserObject *> uos;
     _fe_problem.theWarehouse().query().condition<AttribSystem>("UserObject").queryInto(uos);
@@ -55,7 +55,8 @@ TestRayLots::postExecuteStudy()
     {
       std::vector<std::shared_ptr<Ray>> duplicate_rays;
 
-      auto duplicate_ray = [&ray, &duplicate_rays](RayTracingStudy * study = nullptr) {
+      auto duplicate_ray = [&ray, &duplicate_rays](RayTracingStudy * study = nullptr)
+      {
         auto duplicate = std::make_shared<Ray>(study != nullptr ? study : &ray->_study,
                                                ray->id(),
                                                ray->data().size(),
@@ -85,17 +86,21 @@ TestRayLots::postExecuteStudy()
       if (*ray != *ray || !(*ray == *ray))
         mooseError("Same ray equality failed");
       else
-        ++passes;
+        ++same_passes;
 
       ++duplicate_ray()->_id;
       duplicate_ray()->_current_point = RayTracingCommon::invalid_point;
       duplicate_ray()->_direction = RayTracingCommon::invalid_point;
+      bool found_other_elem = false;
       for (const auto & elem : meshBase().active_local_element_ptr_range())
         if (elem != ray->currentElem())
         {
+          found_other_elem = true;
           duplicate_ray()->_current_elem = elem;
           break;
         }
+      if (!found_other_elem) // might not have another elem with high proc counts
+        ++duplicate_passes;
       if (ray->invalidCurrentIncomingSide())
         duplicate_ray()->_current_incoming_side = 0;
       else
@@ -119,24 +124,22 @@ TestRayLots::postExecuteStudy()
         const auto equal = *duplicate == *ray;
         if (equal)
           mooseError("Unequal rays are equal");
-        else
-          ++passes;
 
         const auto inequal = *duplicate != *ray;
         if (!inequal)
           mooseError("Unequal rays are not unequal");
-        else
-          ++passes;
 
         if (equal != !inequal)
           mooseError("Ray Equality != !inequality");
-        else
-          ++passes;
+
+        ++duplicate_passes;
       }
     }
 
-    comm().sum(passes);
+    comm().sum(same_passes);
+    comm().sum(duplicate_passes);
     if (processor_id() == 0)
-      libMesh::err << "Ray equality test passed " << passes << " checks" << std::endl;
+      _console << "Ray equality test: same_passes = " << same_passes
+               << ", duplicate_passes = " << duplicate_passes << std::endl;
   }
 }

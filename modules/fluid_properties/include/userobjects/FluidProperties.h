@@ -10,6 +10,7 @@
 #pragma once
 
 #include "ThreadedGeneralUserObject.h"
+#include "SolutionInvalidInterface.h"
 
 // Forward Declarations
 
@@ -21,7 +22,7 @@
 // rather than hand-coding them in derived classes.
 typedef DualNumber<Real, DNDerivativeSize<5>> FPDualReal;
 
-class FluidProperties : public ThreadedGeneralUserObject
+class FluidProperties : public ThreadedGeneralUserObject, public SolutionInvalidInterface
 {
 public:
   static InputParameters validParams();

@@ -21,6 +21,23 @@ following activities
 \bm{v}_f = \overline{\bm{v}_f} - \overline{\bm{D}_f}\left(\nabla p_f - \overline{\nabla p_f}\right)
 \end{equation}
 
+### Accessing 'a' coefficient data in nonstandard locations
+
+If you ever come across an error like
+
+```
+Attempted access into CellCenteredMapFunctor 'a' with a key that does not yet
+exist in the map. Make sure to fill your CellCenteredMapFunctor for all elements
+you will attempt to access later.
+```
+
+then it means an object you're using in your input file is attempting to access
+Rhie-Chow data in unexpected locations. This can potentially be remedied by
+setting the parameter `pull_all_nonlocal_a = true`. This will tell all processes
+to pull 'a' coefficient data for all elements they have access to (which may not
+be all the elements in the mesh if the mesh is distributed) from the processes
+that own the 'a' coefficient data.
+
 !syntax parameters /UserObjects/INSFVRhieChowInterpolator
 
 !syntax inputs /UserObjects/INSFVRhieChowInterpolator

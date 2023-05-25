@@ -18,31 +18,25 @@ FVAdvection::validParams()
   params.addClassDescription(
       "Residual contribution from advection operator for finite volume method.");
   params.addRequiredParam<RealVectorValue>("velocity", "Constant advection velocity");
-  MooseEnum advected_interp_method("average upwind skewness-corrected", "upwind");
-
-  params.addParam<MooseEnum>(
-      "advected_interp_method",
-      advected_interp_method,
-      "The interpolation to use for the advected quantity. Options are "
-      "'upwind', 'average' and 'skewness-corrected', with the default being 'upwind'.");
+  params += Moose::FV::advectedInterpolationParameter();
   return params;
 }
 
 FVAdvection::FVAdvection(const InputParameters & params)
   : FVFluxKernel(params), _velocity(getParam<RealVectorValue>("velocity"))
 {
-  using namespace Moose::FV;
+  const bool need_more_ghosting =
+      Moose::FV::setInterpolationMethod(*this, _advected_interp_method, "advected_interp_method");
+  if (need_more_ghosting && _tid == 0)
+  {
+    adjustRMGhostLayers(std::max((unsigned short)(2), _pars.get<unsigned short>("ghost_layers")));
 
-  const auto & advected_interp_method = getParam<MooseEnum>("advected_interp_method");
-  if (advected_interp_method == "average")
-    _advected_interp_method = InterpMethod::Average;
-  else if (advected_interp_method == "upwind")
-    _advected_interp_method = InterpMethod::Upwind;
-  else if (advected_interp_method == "skewness-corrected")
-    _advected_interp_method = InterpMethod::SkewCorrectedAverage;
-  else
-    mooseError("Unrecognized interpolation type ",
-               static_cast<std::string>(advected_interp_method));
+    // If we need more ghosting, then we are a second-order nonlinear limiting scheme whose stencil
+    // is liable to change upon wind-direction change. Consequently we need to tell our problem that
+    // it's ok to have new nonzeros which may crop-up after PETSc has shrunk the matrix memory
+    getCheckedPointerParam<FEProblemBase *>("_fe_problem_base")
+        ->setErrorOnJacobianNonzeroReallocation(false);
+  }
 }
 
 ADReal

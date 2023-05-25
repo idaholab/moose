@@ -17,6 +17,9 @@
 [ChemicalComposition]
   thermofile = Kaye_NobleMetals.dat
   initial_values = ic.csv
+  tunit = K
+  punit = atm
+  munit = moles
 []
 
 [UserObjects]

@@ -25,5 +25,4 @@ public:
 protected:
   virtual Real computeIntegral() override;
   virtual Real volume() override;
-  Real _volume;
 };

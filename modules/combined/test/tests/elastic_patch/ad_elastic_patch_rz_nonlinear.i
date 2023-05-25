@@ -35,9 +35,9 @@
 []
 
 [Variables]
-  [./temp]
+  [temp]
     initial_condition = 117.56
-  [../]
+  []
 []
 
 [Modules/TensorMechanics/Master/All]
@@ -48,51 +48,51 @@
 []
 
 [Kernels]
-  [./heat]
+  [heat]
     type = TimeDerivative
     variable = temp
-  [../]
+  []
 []
 
 [BCs]
-  [./ur]
+  [ur]
     type = FunctionDirichletBC
     variable = disp_x
     preset = false
     boundary = 10
     function = '1e-2*x'
-  [../]
-  [./uz]
+  []
+  [uz]
     type = FunctionDirichletBC
     variable = disp_y
     preset = false
     boundary = 10
     function = '1e-2*y'
-  [../]
+  []
 []
 
 [Materials]
-  [./elasticity_tensor]
+  [elasticity_tensor]
     type = ComputeIsotropicElasticityTensor
     youngs_modulus = 1e6
     poissons_ratio = 0.25
-  [../]
-  [./stress]
+  []
+  [stress]
     type = ComputeFiniteStrainElasticStress
-  [../]
+  []
 []
 
 [Materials]
-  [./density]
+  [density]
     type = ADDensity
     density = 0.283
     outputs = all
-  [../]
+  []
 []
 
 [Executioner]
   type = Transient
-  solve_type = 'PJFNK'
+  solve_type = Newton
 
   end_time = 1.0
 []

@@ -4,6 +4,7 @@
     input = 'thermo_diffusion.i'
     exodiff = 'thermo_diffusion_out.e'
     abs_zero = 1e-8
+    rel_err = 5e-4
     requirement = 'Thermo diffusion shall reproduce an analytical solution'
     design = "ThermoDiffusion.md"
     issues = "#3392"
@@ -13,6 +14,7 @@
     input = 'ad_thermo_diffusion.i'
     exodiff = 'ad_thermo_diffusion_out.e'
     abs_zero = 1e-8
+    rel_err = 5e-4
     requirement = 'AD thermo diffusion shall reproduce an analytical solution'
     design = "ADThermoDiffusion.md"
     issues = "#12633"

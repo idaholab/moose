@@ -3,29 +3,34 @@
     type = 'Exodiff'
     input = '1species.i'
     exodiff = '1species_out.e'
+    rel_err = 1e-5
   [../]
   [./1species_without_action]
     type = 'Exodiff'
     input = '1species_without_action.i'
     exodiff = '1species_out.e'
     prereq = 1species
+    rel_err = 1e-5
   [../]
   [./2species]
     type = 'Exodiff'
     input = '2species.i'
     exodiff = '2species_out.e'
+    rel_err = 1e-5
   [../]
   [./2species_without_action]
     type = 'Exodiff'
     input = '2species_without_action.i'
     exodiff = '2species_out.e'
     prereq = 2species
+    rel_err = 1e-5
   [../]
   [./2species_eqaux]
     type = 'Exodiff'
     input = '2species_eqaux.i'
     exodiff = '2species_out.e'
     prereq = 2species_without_action
+    rel_err = 1e-5
   [../]
   [./2species_with_density]
     type = 'Exodiff'

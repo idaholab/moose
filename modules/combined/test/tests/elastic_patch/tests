@@ -1,70 +1,71 @@
 [Tests]
-  [./plane_strain]
+  parallel_scheduling = true
+  [plane_strain]
     type = Exodiff
     input = 'elastic_patch_plane_strain.i'
     exodiff = 'elastic_patch_plane_strain_out.e'
     scale_refine = 1
     requirement = 'The tensor mechanics formulation of elastic plane strain solution and density shall match the analytical expression'
     issues = "#8642"
-    design = "/generalized_plane_strain.md"
-  [../]
-  [./ad_plane_strain]
+    design = "generalized_plane_strain.md"
+  []
+  [ad_plane_strain]
     type = Exodiff
     input = 'ad_elastic_patch_plane_strain.i'
     exodiff = 'ad_elastic_patch_plane_strain_out.e'
     scale_refine = 1
     requirement = 'AD density shall calculate the density due to changes in strain in the plane strain formulation'
-    design = "/ADDensity.md"
+    design = "ADDensity.md"
     issues = "#12633"
-  [../]
-  [./rz]
+  []
+  [rz]
     type = Exodiff
     input = 'elastic_patch_rz.i'
     exodiff = 'elastic_patch_rz_out.e'
     scale_refine = 1
     requirement = 'The tensor mechanics formulation of elastic 2DRZ solution and density shall match the analytical expression'
     issues = "#8642"
-    design = "/StressDivergenceRZTensors.md"
-  [../]
-  [./ad_rz]
+    design = "StressDivergenceRZTensors.md"
+  []
+  [ad_rz]
     type = Exodiff
     input = 'ad_elastic_patch_rz.i'
     exodiff = 'ad_elastic_patch_rz_out.e'
     scale_refine = 1
     requirement = 'AD density shall calculate the density due to changes in strain in the 2DRZ formulation'
-    design = "/ADDensity.md"
+    design = "ADDensity.md"
     issues = "#12633"
-  [../]
-  [./rz_nonlinear]
+  []
+  [rz_nonlinear]
     type = Exodiff
     input = 'elastic_patch_rz_nonlinear.i'
     exodiff = 'elastic_patch_rz_nonlinear_out.e'
     requirement = 'The tensor mechanics formulation of elastic 2DRZ eigenstrain solution and density shall match the analytical expression'
     issues = "#8642"
-    design = "/StressDivergenceRZTensors.md"
-  [../]
-  [./ad_rz_nonlinear]
+    design = "StressDivergenceRZTensors.md"
+  []
+  [ad_rz_nonlinear]
     type = Exodiff
     input = 'ad_elastic_patch_rz_nonlinear.i'
     exodiff = 'ad_elastic_patch_rz_nonlinear_out.e'
     requirement = 'AD density shall calculate the density due to changes in strain in the 2DRZ eigenstrain formulation'
-    design = "/ADDensity.md"
+    design = "ADDensity.md"
     issues = "#12633"
-  [../]
-  [./rspherical]
+  []
+  [rspherical]
     type = Exodiff
     input = 'elastic_patch_rspherical.i'
     exodiff = 'elastic_patch_rspherical_out.e'
     requirement = 'The tensor mechanics formulation of elastic spherical solution and density shall match the analytical expression'
     issues = "#8642"
-    design = "/StressDivergenceRSphericalTensors.md"
-  [../]
-  [./ad_rspherical]
+    design = "StressDivergenceRSphericalTensors.md"
+  []
+  [ad_rspherical]
     type = Exodiff
     input = 'ad_elastic_patch_rspherical.i'
     exodiff = 'ad_elastic_patch_rspherical_out.e'
     requirement = 'AD density shall calculate the density due to changes in strain in the spherical formulation'
-    design = "/ADDensity.md"
+    design = "ADDensity.md"
     issues = "#12633"
-  [../]
+  []
 []
