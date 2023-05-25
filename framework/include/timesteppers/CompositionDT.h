@@ -50,7 +50,8 @@ public:
   Real getSequenceSteppersNextTime();
 
   /**
-   * Initialize all the input time stepper(s). Called at the very beginning of Executioner::execute()
+   * Initialize all the input time stepper(s). Called at the very beginning of
+   * Executioner::execute()
    */
   virtual void init() override;
   virtual void preExecute() override;
