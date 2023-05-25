@@ -1,0 +1,10 @@
+[Tests]
+  design = 'FunctionRadiativeBC.md GaussianWeldEnergyFluxBC.md'
+  issues = '#24462'
+  [test]
+    type = Exodiff
+    input = test.i
+    exodiff = test_out.e
+    requirement = 'The system shall be able to model an equilibrium between an incoming heat flux from a laser, which is described by a Guassian shape, and outgoing heat flux due to radiative losses.'
+  []
+[]
