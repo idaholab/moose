@@ -30,15 +30,6 @@
 []
 []
 
-[UserObjects]
-  [cut_mesh2]
-    type = MeshCut2DFractureUserObject
-    mesh_file = make_edge_crack_in.e
-    k_critical=80
-    growth_increment = 0.1
-  []
-[]
-
 [DomainIntegral]
   integrals = 'Jintegral InteractionIntegralKI InteractionIntegralKII'
   displacements = 'disp_x disp_y'
@@ -52,6 +43,16 @@
   youngs_modulus = 207000
   block = 0
   incremental = true
+  used_by_xfem_to_grow_crack = true
+[]
+
+[UserObjects]
+  [cut_mesh2]
+    type = MeshCut2DFractureUserObject
+    mesh_file = make_edge_crack_in.e
+    k_critical=80
+    growth_increment = 0.1
+  []
 []
 
 [Modules/TensorMechanics/Master]

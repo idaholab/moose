@@ -55,7 +55,7 @@ CrackMeshCut3DUserObject::validParams()
 // This code does not allow predefined crack growth as a function of time
 // all inital cracks are defined at t_start = t_end = 0
 CrackMeshCut3DUserObject::CrackMeshCut3DUserObject(const InputParameters & parameters)
-  : GeometricCutUserObject(parameters),
+  : GeometricCutUserObject(parameters, true),
     _mesh(_subproblem.mesh()),
     _growth_dir_method(getParam<MooseEnum>("growth_dir_method").getEnum<GrowthDirectionEnum>()),
     _growth_rate_method(getParam<MooseEnum>("growth_rate_method").getEnum<GrowthRateEnum>()),
@@ -69,7 +69,6 @@ CrackMeshCut3DUserObject::CrackMeshCut3DUserObject(const InputParameters & param
                                                           : NULL),
     _func_v(parameters.isParamValid("growth_rate") ? &getFunction("growth_rate") : NULL)
 {
-  _uses_mesh = true;
   _grow = (_n_step_growth == 0 ? 0 : 1);
 
   if (_grow)

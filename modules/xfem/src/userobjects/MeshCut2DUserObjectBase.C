@@ -28,9 +28,8 @@ MeshCut2DUserObjectBase::validParams()
 }
 
 MeshCut2DUserObjectBase::MeshCut2DUserObjectBase(const InputParameters & parameters)
-  : GeometricCutUserObject(parameters), _mesh(_subproblem.mesh())
+  : GeometricCutUserObject(parameters, true), _mesh(_subproblem.mesh())
 {
-  _uses_mesh = true;
   // only the Exodus type is currently supported
   MeshFileName cutterMeshFileName = getParam<MeshFileName>("mesh_file");
   _cutter_mesh = std::make_unique<ReplicatedMesh>(_communicator);

@@ -108,6 +108,13 @@ DomainIntegralAction::validParams()
   params.addParam<bool>("use_automatic_differentiation",
                         false,
                         "Flag to use automatic differentiation (AD) objects when possible");
+  params.addParam<bool>(
+      "used_by_xfem_to_grow_crack",
+      false,
+      "Flag to trigger domainIntregal vector postprocessors to be executed on nonlinear.  This "
+      "updates the values in the vector postprocessor which will allow the crack to grow in XFEM "
+      "cutter objects that use the domainIntegral vector postprocssor values as a growth "
+      "criterion.");
   return params;
 }
 
@@ -144,7 +151,8 @@ DomainIntegralAction::DomainIntegralAction(const InputParameters & params)
     _incremental(getParam<bool>("incremental")),
     _convert_J_to_K(isParamValid("convert_J_to_K") ? getParam<bool>("convert_J_to_K") : false),
     _fgm_crack(false),
-    _use_ad(getParam<bool>("use_automatic_differentiation"))
+    _use_ad(getParam<bool>("use_automatic_differentiation")),
+    _used_by_xfem_to_grow_crack(getParam<bool>("used_by_xfem_to_grow_crack"))
 {
 
   if (isParamValid("functionally_graded_youngs_modulus_crack_dir_gradient") !=
@@ -340,7 +348,7 @@ DomainIntegralAction::act()
     const std::string uo_type_name("CrackFrontDefinition");
 
     InputParameters params = _factory.getValidParams(uo_type_name);
-    if (_use_crack_front_points_provider && _crack_front_points_provider.usesMesh())
+    if (_use_crack_front_points_provider && _used_by_xfem_to_grow_crack)
       params.set<ExecFlagEnum>("execute_on") = {EXEC_INITIAL, EXEC_TIMESTEP_END, EXEC_NONLINEAR};
     else
       params.set<ExecFlagEnum>("execute_on") = {EXEC_INITIAL, EXEC_TIMESTEP_END};
@@ -695,10 +703,11 @@ DomainIntegralAction::act()
       std::string vpp_type_name(ad_prepend + "InteractionIntegral");
 
       InputParameters params = _factory.getValidParams(vpp_type_name);
-    if (_use_crack_front_points_provider && _crack_front_points_provider.usesMesh())
-      params.set<ExecFlagEnum>("execute_on") = {EXEC_TIMESTEP_END, EXEC_NONLINEAR};
-    else
-      params.set<ExecFlagEnum>("execute_on") = {EXEC_TIMESTEP_END};
+      if (_use_crack_front_points_provider && _used_by_xfem_to_grow_crack)
+        params.set<ExecFlagEnum>("execute_on") = {EXEC_TIMESTEP_END, EXEC_NONLINEAR};
+      else
+        params.set<ExecFlagEnum>("execute_on") = {EXEC_TIMESTEP_END};
+
       params.set<UserObjectName>("crack_front_definition") = uo_name;
       params.set<bool>("use_displaced_mesh") = _use_displaced_mesh;
       params.set<std::vector<SubdomainName>>("block") = {_blocks};
