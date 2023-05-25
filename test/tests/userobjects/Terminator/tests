@@ -6,14 +6,28 @@
     input = 'terminator.i'
     exodiff = 'terminator_out.e'
     issues = '#3735'
-    requirement = "The system shall terminate the execution of a solve based on post-processing calculations performed within the simulation."
+    requirement = "The system shall terminate the execution of a solve based on post-processing "
+                  "calculations performed within the simulation."
   []
-  [terminator_soft]
+  [terminator_soft_step_fail]
     type = 'CSVDiff'
     input = 'terminator_soft.i'
     csvdiff = 'terminator_soft_out.csv'
     issues = '#16452'
-    requirement = "The system shall abort the current step in a solve based on post-processing calculations performed within the simulation to cut the timestep."
+    requirement = "The system shall abort the current step in a solve based on post-processing "
+                  "calculations performed within the simulation to cut the timestep."
+  []
+  [terminator_soft_solve_fail]
+    type = 'CSVDiff'
+    input = 'terminator_soft.i'
+    csvdiff = 'terminator_soft_solve_out.csv'
+    issues = '#16452 #24479'
+    cli_args = "Outputs/file_base=terminator_soft_solve_out
+                Postprocessors/dt/execute_on=LINEAR
+                UserObjects/arnold/execute_on=LINEAR"
+    requirement = "The system shall abort the current nonlinear or linear solve in a simulation "
+                  "based on post-processing calculations performed within the simulation to cut the "
+                  "timestep."
   []
   [terminator_message_1]
     type = 'RunException'
@@ -25,7 +39,8 @@
   []
   [terminator_message_2]
     type = 'RunException'
-    expect_err = "Setting the error level to ERROR always causes a hard failure, which is incompatible with `fail_mode=SOFT`."
+    expect_err = "Setting the error level to ERROR always causes a hard failure, which is "
+                 "incompatible with `fail_mode=SOFT`."
     input = 'terminator_soft.i'
     cli_args = 'UserObjects/arnold/error_level=ERROR'
     issues = '#17000'
@@ -37,14 +52,27 @@
     input = 'terminator_soft.i'
     cli_args = 'UserObjects/arnold/error_level=NONE UserObjects/arnold/message=dummy'
     issues = '#17000'
-    requirement = "The terminator system shall check that if a message is supplied, an appropriate error level for reporting that message is also used."
+    requirement = "The terminator system shall check that if a message is supplied, an appropriate "
+                  "error level for reporting that message is also used."
   []
   [terminator_pass]
     type = 'CSVDiff'
     input = 'terminator_pass.i'
     csvdiff = 'terminator_pass_out.csv'
     issues = '#16452'
-    requirement = "The system shall check a criterion for early termination of the run, but continue with the regular simulation when that criterion is not met."
+    requirement = "The system shall check a criterion for early termination of the run, but continue "
+                  "with the regular simulation when that criterion is not met."
     recover = false # changes the time steps
+  []
+
+  [check_execution]
+    type = RunException
+    input = 'terminator_soft.i'
+    expect_err = "Postprocessor 'dt' is not executed on LINEAR"
+    issues = '#24479'
+    cli_args = 'UserObjects/arnold/execute_on=LINEAR'
+    requirement = "The system shall check that postprocessors providing data for a terminator meant "
+                  "to force a failure in a solve or a time step are executed often enough to be able "
+                  "to update the criterion."
   []
 []
