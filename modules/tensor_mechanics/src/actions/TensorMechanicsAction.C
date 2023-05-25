@@ -82,6 +82,9 @@ TensorMechanicsAction::validParams()
   params.addParam<std::vector<TagName>>(
       "extra_vector_tags",
       "The tag names for extra vectors that residual data should be saved into");
+  params.addParam<std::vector<TagName>>("absolute_value_vector_tags",
+                                        "The tag names for extra vectors that the absolute value "
+                                        "of the residual should be accumulated into");
   params.addParam<Real>("scaling", "The scaling to apply to the displacement variables");
   params.addParam<Point>(
       "cylindrical_axis_point1",
@@ -360,6 +363,9 @@ TensorMechanicsAction::act()
       if (isParamValid("extra_vector_tags"))
         action_params.set<std::vector<TagName>>("extra_vector_tags") =
             getParam<std::vector<TagName>>("extra_vector_tags");
+      if (isParamValid("absolute_value_vector_tags"))
+        action_params.set<std::vector<TagName>>("absolute_value_vector_tags") =
+            getParam<std::vector<TagName>>("absolute_value_vector_tags");
     }
   }
 
