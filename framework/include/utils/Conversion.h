@@ -115,6 +115,9 @@ std::string stringify(FEFamily f);
 /// Convert SolutionIterationType into string
 std::string stringify(SolutionIterationType t);
 
+/// Convert ElementType into string
+std::string stringify(ElementType t);
+
 /// Add pair stringify to support maps
 template <typename T, typename U>
 std::string
