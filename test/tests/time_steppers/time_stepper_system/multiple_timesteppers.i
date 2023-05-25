@@ -71,11 +71,6 @@
       first_dt = 0.1
     []
 
-    [SolutionAdapDT]
-      type = SolutionTimeAdaptiveDT
-      dt = 1
-    []
-
     [IterationAdapDT]
       type = IterationAdaptiveDT
       dt = 0.5
