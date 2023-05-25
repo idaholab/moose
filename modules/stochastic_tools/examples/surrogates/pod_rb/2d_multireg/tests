@@ -10,6 +10,7 @@
     cli_args = "Samplers/sample/num_rows=2
                 sub:halfa=1
                 sub:fulla=2"
+    max_parallel = 2
   []
   [evaluate]
     requirement = "The sytem shall evaluate a POD surrogate model for the POD-RB example."

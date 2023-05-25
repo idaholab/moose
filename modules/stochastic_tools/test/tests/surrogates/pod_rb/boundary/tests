@@ -1,6 +1,7 @@
 [Tests]
   issues = "#15538"
-  design = "PODReducedBasisTrainer.md PODReducedBasisSurrogate.md PODFullSolveMultiApp.md PODSamplerSolutionTransfer.md PODResidualTransfer.md"
+  design = "PODReducedBasisTrainer.md PODReducedBasisSurrogate.md PODFullSolveMultiApp.md "
+           "PODSamplerSolutionTransfer.md PODResidualTransfer.md"
 
   [pod_boundary]
     requirement = 'The system shall demonstrate a POD-RB surrogate (with Dirichlet BC) by '
@@ -10,6 +11,7 @@
       check_files = 'trainer_out_pod_rb.rd'
       allow_test_objects = true
       detail = 'training using known 4D data '
+      max_parallel = 5 # We need fewer processors than samples
     []
     [load]
       type = CSVDiff

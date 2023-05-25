@@ -15,8 +15,7 @@ The purpose of the [!ac](MOOSE) Level Set module is to provides basic functional
 !template! item key=assumptions-and-dependencies
 The {{module}} module is designed with the fewest possible constraints on hardware and software.
 For more context on this point, the {{module}} module SRS defers to the framework
-[framework_srs.md#assumptions-and-dependencies] assumptions and
-dependencies.
+[framework_srs.md#assumptions-and-dependencies].
 !template-end!
 
 !template! item key=reliability

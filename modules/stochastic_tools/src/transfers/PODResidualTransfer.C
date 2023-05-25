@@ -81,7 +81,7 @@ PODResidualTransfer::transferResidual(dof_id_type base_i, dof_id_type multi_app_
       const std::vector<dof_id_type> & var_dofs = nl.getVariableGlobalDoFs();
 
       // Extracting the corresponding part of the residual vector.
-      full_residual.get(var_dofs, split_residual[var_i].get_values());
+      full_residual.localize(split_residual[var_i].get_values(), var_dofs);
     }
 
     // Inserting the contribution of this residual into the reduced operator in
