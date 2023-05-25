@@ -121,6 +121,7 @@ AssemblyMeshGenerator::AssemblyMeshGenerator(const InputParameters & parameters)
   _mesh_dimensions = getReactorParam<int>("mesh_dimensions");
   declareMeshProperty("assembly_type", _assembly_type);
   declareMeshProperty("homogenized_assembly", false);
+  declareMeshProperty("pin_as_assembly", false);
 
   if (_extrude && _mesh_dimensions != 3)
     paramError("extrude",

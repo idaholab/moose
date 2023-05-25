@@ -166,6 +166,7 @@ CoreMeshGenerator::CoreMeshGenerator(const InputParameters & parameters)
   MeshGeneratorName reactor_params =
       MeshGeneratorName(getMeshProperty<std::string>("reactor_params_name", _inputs[0]));
   const auto assembly_homogenization = getMeshProperty<bool>("homogenized_assembly", _inputs[0]);
+  const auto pin_as_assembly = getMeshProperty<bool>("pin_as_assembly", _inputs[0]);
   // Check that MG name for reactor params and assembly homogenization schemes are
   // consistent across all assemblies
   for (unsigned int i = 1; i < _inputs.size(); i++)
@@ -179,6 +180,9 @@ CoreMeshGenerator::CoreMeshGenerator(const InputParameters & parameters)
     if (getMeshProperty<bool>("homogenized_assembly", _inputs[i]) != assembly_homogenization)
       mooseError(
           "All assemblies in the core must be homogenized if assembly homogenization is used\n");
+    if (getMeshProperty<bool>("pin_as_assembly", _inputs[i]) != pin_as_assembly)
+      mooseError(
+        "All assemblies in the core must be defined as a single pin if `PinMeshGenerator/use_as_assembly` is set to true\n");
   }
 
   // Initialize ReactorMeshParams object stored in pin input
@@ -335,7 +339,7 @@ CoreMeshGenerator::CoreMeshGenerator(const InputParameters & parameters)
       params.set<std::vector<MeshGeneratorName>>("inputs") = _inputs;
       params.set<std::vector<std::vector<unsigned int>>>("pattern") = _pattern;
       params.set<MooseEnum>("pattern_boundary") = "none";
-      params.set<bool>("generate_core_metadata") = !assembly_homogenization;
+      params.set<bool>("generate_core_metadata") = !pin_as_assembly;
       params.set<bool>("create_outward_interface_boundaries") = false;
       if (make_empty)
       {
