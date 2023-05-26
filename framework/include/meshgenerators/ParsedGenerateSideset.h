@@ -37,6 +37,9 @@ protected:
   /// name of the new sideset
   BoundaryName _sideset_name;
 
+  /// whether to check boundary ids when adding sides or not
+  bool _check_boundaries;
+
   /// whether to check subdomain ids when adding sides or not
   bool _check_subdomains;
 
