@@ -223,7 +223,6 @@ std::string
 Checkpoint::meshSuffix()
 {
   return "-mesh.cpr";
-
 }
 
 std::string
