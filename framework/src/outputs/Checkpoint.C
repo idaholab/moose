@@ -202,22 +202,15 @@ Checkpoint::updateCheckpointFiles(CheckpointFileNames file_struct)
     {
       // Delete meta data files
       for (const auto & file_name : delete_files.restart_meta_data)
-      {
-        std::cout << "Deleting: " << file_name.c_str() << std::endl;
         remove(file_name.c_str());
-      }
 
       // This file may not exist so don't worry about checking for success
-
-      std::cout << "Deleting Checkpoint: " << delete_files.checkpoint << std::endl;
       CheckpointIO::cleanup(delete_files.checkpoint,
                             _problem_ptr->mesh().isDistributedMesh() ? comm().size() : 1);
     }
 
     // Delete restartable data
     {
-      std::cout << "Deleting Restartable Data: " << delete_files.restart << std::endl;
-
       int ret = remove(delete_files.restart.c_str());
       if (ret != 0)
         mooseWarning(

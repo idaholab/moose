@@ -1210,8 +1210,6 @@ MooseApp::restore(std::shared_ptr<Backup> backup, bool for_restart)
 
   RestartableDataIO rdio(fe_problem);
 
-  std::cout << "Restoring backup! " << for_restart << std::endl;
-
   rdio.restoreBackup(backup, for_restart);
 }
 

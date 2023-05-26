@@ -32,9 +32,6 @@ SetupRecoverFileBaseAction::SetupRecoverFileBaseAction(const InputParameters & p
 void
 SetupRecoverFileBaseAction::act()
 {
-  std::cout << "0 - In SetupRecoverFileBaseAction " << _app.getRestartRecoverFileBase() << " | "
-            << std::endl;
-
   // Even during a normal run, we still need to check integrity of the data store to make
   // sure that all requested properties have been declared.
   if (_current_task == "recover_meta_data")
@@ -49,8 +46,6 @@ SetupRecoverFileBaseAction::act()
   {
     _app.setRestartRecoverFileBase(
         MooseUtils::convertLatestCheckpoint(_app.getRestartRecoverFileBase()));
-
-    std::cout << "In SetupRecoverFileBaseAction " << _app.getRestartRecoverFileBase() << std::endl;
 
     // Set the recover file base in the App
     mooseInfo("Using ", _app.getRestartRecoverFileBase(), " for recovery.");

@@ -398,8 +398,6 @@ dataStore(std::ostream & stream, NumericVector<T> & v, void * context)
 
   numeric_index_type size = v.local_size();
 
-  std::cout << "Storing NumericVector!" << std::endl;
-
   for (numeric_index_type i = v.first_local_index(); i < v.first_local_index() + size; i++)
   {
     T r = v(i);
@@ -694,8 +692,6 @@ template <typename T>
 void
 dataLoad(std::istream & stream, NumericVector<T> & v, void * context)
 {
-  std::cout << "Loading NumericVector!" << std::endl;
-
   numeric_index_type size = v.local_size();
   for (numeric_index_type i = v.first_local_index(); i < v.first_local_index() + size; i++)
   {

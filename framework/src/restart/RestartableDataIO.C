@@ -161,8 +161,6 @@ RestartableDataIO::deserializeRestartableData(const RestartableDataMap & restart
                                               std::istream & stream,
                                               const DataNames & filter_names)
 {
-  std::cout << "Here deserializeRestartableData" << std::endl;
-
   // header
   char id[2];
   stream.read(id, 2);
@@ -199,8 +197,6 @@ RestartableDataIO::deserializeRestartableData(const RestartableDataMap & restart
 
   bool recovering = _moose_app.isRecovering();
 
-  std::cout << "Is recovering: " << recovering << std::endl;
-
   std::vector<std::string> ignored_data;
 
   // number of data
@@ -209,8 +205,6 @@ RestartableDataIO::deserializeRestartableData(const RestartableDataMap & restart
 
   // data names
   std::vector<std::string> data_names(n_data);
-
-  std::cout << "n_data: " << n_data << std::endl;
 
   for (unsigned int i = 0; i < n_data; i++)
   {
@@ -230,8 +224,6 @@ RestartableDataIO::deserializeRestartableData(const RestartableDataMap & restart
     unsigned int data_size = 0;
     stream.read((char *)&data_size, sizeof(data_size));
 
-    std::cout << "Checking to see if we should load: " << current_name << std::endl;
-
     // Determine if the current name is in the filter set
     bool is_data_restartable = restartable_data.find(current_name) != restartable_data.end();
     bool is_data_in_filter = filter_names.find(current_name) != filter_names.end();
@@ -242,9 +234,6 @@ RestartableDataIO::deserializeRestartableData(const RestartableDataMap & restart
       auto current_pair = restartable_data.find(current_name);
       if (current_pair == restartable_data.end())
         mooseError("restartable_data missing ", current_name, "\n");
-
-      std::cout << "Loading " << current_name << std::endl;
-
       current_pair->second->load(stream);
     }
     else
