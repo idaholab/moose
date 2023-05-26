@@ -47,7 +47,10 @@
       type = 'Exodiff'
       input = 'checkpoint_interval.i'
       exodiff = 'checkpoint_interval_out.e'
+      delete_output_before_running = false
       prereq = 'interval/test_files'
+      cli_args = '--recover'
+      expect_out = 'Using checkpoint_interval_out_cp/0009 for recovery'
       recover = false
       max_parallel = 1
       max_threads = 1
@@ -100,6 +103,8 @@
       max_threads = 1
       prereq = 'default/recover_half_transient'
       delete_output_before_running = false
+      cli_args = '--recover'
+      expect_out = 'Using checkpoint_out_cp/0005 for recovery'
       detail = "be capable of restarting a simulation from the output data."
     []
   []
@@ -138,8 +143,6 @@
       # The suffixes of these files change when running in parallel or with threads
       max_parallel = 1
       max_threads = 1
-
-
     []
     [recover_with_checkpoint_block]
       # Gold for this test was created using checkpoint_block.i without any recover options
@@ -152,6 +155,7 @@
       max_threads = 1
       delete_output_before_running = false
       prereq = 'block/recover_with_checkpoint_block_half_transient'
+      expect_out = 'Using checkpoint_block_out_cp/0005 for recovery'
       detail = "be capable of restarting a simulation from the output data."
     []
   []
