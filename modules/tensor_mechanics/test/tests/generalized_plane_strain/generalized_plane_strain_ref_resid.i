@@ -152,6 +152,8 @@
 
   solve_type = PJFNK
   line_search = none
+  petsc_options_iname = '-pc_type -pc_factor_mat_solver_package -ksp_gmres_restart'
+  petsc_options_value = 'lu       superlu_dist                  51'
 
   # controls for linear iterations
   l_max_its = 100
@@ -159,8 +161,8 @@
 
   # controls for nonlinear iterations
   nl_max_its = 15
-  nl_rel_tol = 1e-10
-  nl_abs_tol = 1e-5
+  nl_rel_tol = 1e-12
+  nl_abs_tol = 1e-8
 
   # time control
   start_time = 0.0
