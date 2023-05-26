@@ -1,5 +1,5 @@
 [GlobalParams]
-  displacements = 'disp_x disp_y disp_z'
+  displacements = 'disp_x disp_y'
   volumetric_locking_correction = true
 []
 
@@ -10,80 +10,62 @@
 []
 
 [Mesh]
-  type = GeneratedMesh
-  dim = 3
+[block]
+  type = GeneratedMeshGenerator
+  dim = 2
   nx = 5
   ny = 5
-  nz = 2
   xmin = 0.0
   xmax = 1.0
   ymin = 0.0
   ymax = 1.0
-  zmin = 0.0
-  zmax = 0.2
-  elem_type = HEX8
+  elem_type = QUAD4
+[]
 []
 
 [UserObjects]
   [./cut_mesh]
-    type = CrackMeshCut3DUserObject
-    mesh_file = mesh_edge_crack.xda
-    growth_dir_method = MAX_HOOP_STRESS
-    size_control = 1
-    n_step_growth = 1
+    type = MeshCut2DFunctionUserObject
+    mesh_file = 2D_edge_crack.e
+    growth_direction_x = growth_func_x
+    growth_direction_y = growth_func_y
     growth_rate = growth_func_v
-    crack_front_nodes = '7 6 5 4'
   [../]
 []
 
 [Functions]
+  [./growth_func_x]
+    type = ParsedFunction
+    expression = 0.4*t
+  [../]
+  [./growth_func_y]
+    type = ParsedFunction
+    expression = 1.8*(t-1)
+  [../]
   [./growth_func_v]
     type = ParsedFunction
-    expression = 0.15
+    expression = 0.1*t
   [../]
-[]
-
-[DomainIntegral]
-  integrals = 'Jintegral InteractionIntegralKI InteractionIntegralKII'
-  displacements = 'disp_x disp_y disp_z'
-  crack_front_points_provider = cut_mesh
-  number_points_from_provider = 4
-  crack_direction_method = CurvedCrackFront
-  radius_inner = '0.15'
-  radius_outer = '0.45'
-  poissons_ratio = 0.3
-  youngs_modulus = 207000
-  block = 0
-  incremental = true
 []
 
 [Modules/TensorMechanics/Master]
   [./all]
     strain = FINITE
+    planar_formulation = plane_strain
     add_variables = true
-    generate_output = 'stress_xx stress_yy stress_zz vonmises_stress'
+    generate_output = 'stress_xx stress_yy vonmises_stress'
   [../]
 []
 
 [Functions]
-  [./top_trac_x]
-    type = ConstantFunction
-    value = 100
-  [../]
   [./top_trac_y]
     type = ConstantFunction
-    value = 0
+    value = 10
   [../]
 []
 
 
 [BCs]
-  [./top_x]
-    type = FunctionNeumannBC
-    boundary = top
-    variable = disp_x
-    function = top_trac_x
-  [../]
   [./top_y]
     type = FunctionNeumannBC
     boundary = top
@@ -100,12 +82,6 @@
     type = DirichletBC
     boundary = bottom
     variable = disp_y
-    value = 0.0
-  [../]
-  [./bottom_z]
-    type = DirichletBC
-    boundary = bottom
-    variable = disp_z
     value = 0.0
   [../]
 []
@@ -149,14 +125,18 @@
 # time control
   start_time = 0.0
   dt = 1.0
-  end_time = 4.0
-  max_xfem_update = 1
+  end_time = 2.0
+  max_xfem_update = 2
 []
 
 [Outputs]
-  file_base = edge_crack_3d_mhs_out
-  execute_on = 'timestep_end'
   exodus = true
+  execute_on = TIMESTEP_END
+  [xfemcutter]
+    type=XFEMCutMeshOutput
+    xfem_cutter_uo=cut_mesh
+
+  []
   [./console]
     type = Console
     output_linear = true

@@ -19,7 +19,8 @@ CrackFrontPointsProvider::validParams()
   return params;
 }
 
-CrackFrontPointsProvider::CrackFrontPointsProvider(const InputParameters & parameters)
-  : ElementUserObject(parameters)
+CrackFrontPointsProvider::CrackFrontPointsProvider(const InputParameters & parameters,
+                                                   const bool uses_mesh)
+  : ElementUserObject(parameters), _uses_mesh(uses_mesh)
 {
 }

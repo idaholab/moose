@@ -16,9 +16,6 @@
 #include "Function.h"
 #include "libmesh/enum_to_string.h"
 #include "XFEMFuncs.h"
-#include "libmesh/exodusII_io.h"
-#include "libmesh/explicit_system.h"
-#include "libmesh/equation_systems.h"
 
 /**
  * InterfaceMeshCutUserObjectBase:

@@ -45,8 +45,8 @@ void
 DomainIntegralQFunction::initialSetup()
 {
   _treat_as_2d = _crack_front_definition->treatAs2D();
-
-  if (_treat_as_2d)
+  bool using_mesh_cutter = _crack_front_definition->usingMeshCutter();
+  if (_treat_as_2d && using_mesh_cutter == false)
   {
     if (_has_crack_front_point_index)
     {

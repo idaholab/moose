@@ -19,7 +19,7 @@ class CrackFrontPointsProvider : public ElementUserObject
 public:
   static InputParameters validParams();
 
-  CrackFrontPointsProvider(const InputParameters & parameters);
+  CrackFrontPointsProvider(const InputParameters & parameters, const bool uses_mesh = false);
 
   /** get a set of points along a crack front from a XFEM GeometricCutUserObject
    * @return A vector which contains all crack front points
@@ -32,4 +32,14 @@ public:
    */
   virtual const std::vector<RealVectorValue>
   getCrackPlaneNormals(unsigned int /*num_crack_front_points*/) const = 0;
+
+  /**
+   * Getter for if a cutter mesh is used in a derived class.
+   * @return bool indicating if a cutter mesh is used in the derived class
+   */
+  bool usesMesh() const { return _uses_mesh; }
+
+protected:
+  /// bool to set if CrackFrontPointsProvider derived objects use a cutter mesh
+  const bool _uses_mesh;
 };

@@ -13,7 +13,7 @@
 #include "libmesh/string_to_enum.h"
 #include "libmesh/quadrature.h"
 #include "libmesh/utility.h"
-
+#include "CrackFrontDefinition.h"
 registerMooseObject("TensorMechanicsApp", JIntegral);
 
 InputParameters
@@ -92,6 +92,7 @@ void
 JIntegral::initialSetup()
 {
   _treat_as_2d = _crack_front_definition->treatAs2D();
+  _using_mesh_cutter = _crack_front_definition->usingMeshCutter();
   if (_integral == IntegralType::KFromJIntegral &&
       (!isParamValid("youngs_modulus") || !isParamValid("poissons_ratio")))
     mooseError("youngs_modulus and poissons_ratio must be specified if integrals = KFromJIntegral");
@@ -101,7 +102,7 @@ void
 JIntegral::initialize()
 {
   std::size_t num_pts;
-  if (_treat_as_2d)
+  if (_treat_as_2d && _using_mesh_cutter == false)
     num_pts = 1;
   else
     num_pts = _crack_front_definition->getNumCrackFrontPoints();
