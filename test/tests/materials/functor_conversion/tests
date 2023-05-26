@@ -1,0 +1,11 @@
+[Tests]
+  design = 'Materials/MaterialFunctorConverter.md'
+  [scalar]
+    type = 'Exodiff'
+    input = 'conversion.i'
+    exodiff = 'conversion_out.e'
+    requirement = "The system shall be able to convert functors to regular (using automatic "
+                  "differentiation or not) material properties."
+    issues = "#19420"
+  []
+[]
