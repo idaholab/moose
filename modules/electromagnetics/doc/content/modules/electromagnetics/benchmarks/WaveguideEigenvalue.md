@@ -84,7 +84,7 @@ gmsh -2 circle.geo -clscale 0.5 -order 1 -algo del2d
 
 The `.geo` file for this geometry is shown below:
 
-!listing circle.geo
+!listing modules/electromagnetics/test/tests/benchmarks/eigenvalue_problems/circle.geo
 
 and this generates the following mesh:
 
