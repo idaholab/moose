@@ -14,6 +14,7 @@
 #include "MooseUtils.h"
 
 // C++ includes
+#include <memory>
 #include <vector>
 #include <unordered_set>
 #include <unordered_map>
@@ -94,19 +95,25 @@ public:
    */
   template <typename... Params>
   RestartableData(const std::string & name, void * const context, Params &&... args)
-    : RestartableDataValue(name, context), _value(std::forward<Params>(args)...)
+    : RestartableDataValue(name, context),
+      _value(std::make_unique<T>(std::forward<Params>(args)...))
   {
   }
 
   /**
    * @returns a read-only reference to the parameter value.
    */
-  const T & get() const { return _value; }
+  const T & get() const;
 
   /**
    * @returns a writable reference to the parameter value.
    */
-  T & set() { return _value; }
+  T & set();
+
+  /**
+   * Resets (destructs) the underlying data.
+   */
+  void reset();
 
   /**
    * String identifying the type of parameter stored.
@@ -125,11 +132,35 @@ public:
 
 private:
   /// Stored value.
-  T _value;
+  std::unique_ptr<T> _value;
 };
 
 // ------------------------------------------------------------
 // RestartableData<> class inline methods
+template <typename T>
+inline const T &
+RestartableData<T>::get() const
+{
+  mooseAssert(_value, "Not valid");
+  return *_value;
+}
+
+template <typename T>
+inline T &
+RestartableData<T>::set()
+{
+  mooseAssert(_value, "Not valid");
+  return *_value;
+}
+
+template <typename T>
+inline void
+RestartableData<T>::reset()
+{
+  mooseAssert(_value, "Not valid"); // shouldn't really call this twice
+  _value.reset();
+}
+
 template <typename T>
 inline std::string
 RestartableData<T>::type() const

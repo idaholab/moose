@@ -29,6 +29,42 @@ class Restartable
 {
 public:
   /**
+   * Wrapper class for restartable data that is "managed.'
+   *
+   * Managed here means that the destruction of the data
+   * is managed by the reciever and not the app.
+   *
+   * When this wrapper is destructed, the underlying
+   * restartable data is also destructed. This allows for
+   * proper construction ordered destruction.
+   */
+  template <typename T>
+  class ManagedValue
+  {
+  public:
+    ManagedValue<T>(RestartableData<T> & value) : _value(value) {}
+
+    /**
+     * Destructor.
+     *
+     * Destructs the managed restartable data.
+     */
+    ~ManagedValue<T>() { _value.reset(); }
+
+    /**
+     * Get the restartable value.
+     */
+    ///@{
+    const T & get() const { return _value.get(); }
+    T & set() { return _value.set(); }
+    ///@}
+
+  private:
+    /// The underlying data
+    RestartableData<T> & _value;
+  };
+
+  /**
    * Class constructor
    *
    * @param moose_object The MooseObject that this interface is being implemented on.
@@ -82,6 +118,25 @@ protected:
    */
   template <typename T, typename... Args>
   T & declareRestartableData(const std::string & data_name, Args &&... args);
+
+  /**
+   * Declares a piece of "managed" restartable data and initialize it.
+   *
+   * Here, "managed" restartable data means that the caller can destruct this data
+   * upon destruction of the return value of this method. Therefore, this
+   * ManagedValue<T> wrapper should survive after the final calls to dataStore()
+   * for it. That is... at the very end.
+   *
+   * This is needed for objects whose destruction ordering is important, and
+   * enables natrual c++ destruction in reverse construction order of the object
+   * that declares it.
+   *
+   * See delcareRestartableData and declareRestartableDataWithContext for more information.
+   */
+  template <typename T, typename... Args>
+  ManagedValue<T> declareManagedRestartableDataWithContext(const std::string & data_name,
+                                                           void * context,
+                                                           Args &&... args);
 
   /**
    * Declare a piece of data as "restartable" and initialize it
@@ -215,6 +270,17 @@ T &
 Restartable::declareRestartableData(const std::string & data_name, Args &&... args)
 {
   return declareRestartableDataWithContext<T>(data_name, nullptr, std::forward<Args>(args)...);
+}
+
+template <typename T, typename... Args>
+Restartable::ManagedValue<T>
+Restartable::declareManagedRestartableDataWithContext(const std::string & data_name,
+                                                      void * context,
+                                                      Args &&... args)
+{
+  auto & data_ptr =
+      declareRestartableDataHelper<T>(data_name, context, std::forward<Args>(args)...);
+  return Restartable::ManagedValue<T>(data_ptr);
 }
 
 template <typename T, typename... Args>
