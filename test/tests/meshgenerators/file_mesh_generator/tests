@@ -94,7 +94,7 @@
     type = 'Exodiff'
     input = '2d_diffusion_test.i'
     exodiff = '2d_diffusion_test_out.e'
-    cli_args = 'Mesh/inactive=square Mesh/fmg/type=FileMeshGenerator Mesh/fmg/file=2d_diffusion_test_out_cp/0001_mesh.cpr'
+    cli_args = 'Mesh/inactive=square Mesh/fmg/type=FileMeshGenerator Mesh/fmg/file=2d_diffusion_test_out_cp/0001-mesh.cpr'
     recover = false
     prereq = pre_checkpoint_load_test
     requirement = 'The system shall have the ability to load the mesh from checkpoint files.'
