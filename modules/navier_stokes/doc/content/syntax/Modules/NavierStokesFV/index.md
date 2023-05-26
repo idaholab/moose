@@ -42,7 +42,23 @@ commonly used in the action syntax is presented below:
 
   !listing include/base/NS.h line=std::string T_fluid
 
-For the default names of other variables used in this action, visit [this site](include/base/NS.h).  
+For the default names of other variables used in this action, visit [this site](include/base/NS.h).
+
+
+## Bernoulli pressure jump treatment
+
+In certain cases multiple porosity jump faces may be connected by several cells in a
+chain. For example at corners or when porous medium zones are one-cell wide. In such
+scenarios, the two-term expansion in the downstream cell for the determination of the
+face pressure can lead to a very long chain of calls, which can potentially lead to
+attempts of attempts of accessing cell values which are neither owned
+nor ghosted on the given rank. For this reason, the default value of
+[!param](/Modules/NavierStokesFV/pressure_allow_expansion_on_bernoulli_faces)
+is `false`. If the user wants to enable two-term expansion for the pressure
+computation on the porosity ump faces, special attention should be paid to
+moving the porosity jump faces sufficiently far from each other or adding
+additional layers of ghosted elements (which can potentially increase communication costs)
+using [!param](/Modules/NavierStokesFV/ghost_layers) parameter.
 
 ## Examples
 
@@ -142,7 +158,6 @@ We note that the weakly-compressible handling can be enabled by setting
 As shown in the example, an arbitrary
 energy source function can also be supplied to the incorporated
 energy equation using the [!param](/Modules/NavierStokesFV/external_heat_source) parameter.
-
 
 
 !syntax list /Modules/NavierStokesFV objects=True actions=False subsystems=False
