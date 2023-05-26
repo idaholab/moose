@@ -101,18 +101,6 @@ public:
    */
   virtual bool converged() const override;
 
-  /**
-   * Set time step size for all input time steppers
-   * @param dt time step size
-   */
-  virtual void forceTimeStep(Real dt) override;
-
-  /**
-   * Set the number of time steps for all input time steppers
-   * @param num_steps number of time steps
-   */
-  virtual void forceNumSteps(const unsigned int num_steps) override;
-
 protected:
   virtual Real computeDT() override;
   virtual Real computeInitialDT() override;

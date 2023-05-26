@@ -264,15 +264,3 @@ CompositionDT::converged() const
 {
   return _last_time_stepper ? _last_time_stepper->converged() : TimeStepper::converged();
 }
-
-void
-CompositionDT::forceTimeStep(Real dt)
-{
-  actOnTimeSteppers([dt](auto & ts) { ts.forceTimeStep(dt); });
-}
-
-void
-CompositionDT::forceNumSteps(const unsigned int num_steps)
-{
-  actOnTimeSteppers([num_steps](auto & ts) { ts.forceNumSteps(num_steps); });
-}

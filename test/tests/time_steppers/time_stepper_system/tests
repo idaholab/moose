@@ -89,6 +89,13 @@
       detail = 'the syntax for multiple time steppers is used without an additional nested block for the time stepper'
     []
 
+    [rejectStep]
+      type = RunException
+      input = 'testRejectStep.i'
+      allow_test_objects = True
+      expect_err = "The following warning occurred in the object \"(.*?)\", of type \"(.*?)\".\n\nrejectStep\(\) calls from TestSourceStepper"
+      detail = 'the corresponding rejectStep() function is called when solve fails'
+    []
   []
 
 []
