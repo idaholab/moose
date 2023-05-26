@@ -455,7 +455,6 @@ FEProblemBase::FEProblemBase(const InputParameters & parameters)
     std::string restart_file_base = getParam<FileNameNoExtension>("restart_file_base");
     restart_file_base = MooseUtils::convertLatestCheckpoint(restart_file_base);
     setRestartFile(restart_file_base);
-    std::cout << "restart_file_base: " << restart_file_base << std::endl;
   }
 
   // // Generally speaking, the mesh is prepared for use, and consequently remote elements are deleted

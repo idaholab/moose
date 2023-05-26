@@ -323,8 +323,6 @@ template <>
 void
 dataStore(std::ostream & stream, libMesh::EquationSystems & es, void * /* problem */)
 {
-  std::cerr << "storing EquationSystems" << std::endl;
-
   Xdr io(stream), local_io(stream);
   es.write(io,
            EquationSystems::WRITE_DATA | EquationSystems::WRITE_ADDITIONAL_DATA |

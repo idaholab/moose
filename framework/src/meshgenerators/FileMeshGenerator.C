@@ -109,8 +109,6 @@ FileMeshGenerator::generate()
       mooseError("\"use_for_exodus_restart\" should be given only for Exodus mesh files");
 
     // to support LATEST word for loading checkpoint files
-    std::cerr << _file_name << " exists = " <<  MooseUtils::pathExists(_file_name) << std::endl;
-
     const std::string file_name =
         MooseUtils::pathExists(_file_name)
             ? std::string(_file_name)
