@@ -2039,9 +2039,17 @@ public:
   unsigned int nlSysNum(const NonlinearSystemName & nl_sys_name) const;
 
   /**
+   * Whether it will skip further residual evaluations and fail the next nonlinear convergence check
+   */
+  bool getFailNextNonlinearConvergenceCheck() const
+  {
+    return _fail_next_nonlinear_convergence_check;
+  }
+
+  /**
    * Skip further residual evaluations and fail the next nonlinear convergence check
    */
-  bool failNextNonlinearConvergenceCheck() const { return _fail_next_nonlinear_convergence_check; }
+  void setFailNextNonlinearConvergenceCheck() { _fail_next_nonlinear_convergence_check = true; }
 
   /*
    * Set the status of loop order of execution printing

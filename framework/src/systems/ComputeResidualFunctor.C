@@ -21,7 +21,7 @@ ComputeResidualFunctor::residual(const NumericVector<Number> & soln,
 {
   libmesh_parallel_only(soln.comm());
 
-  if (!_fe_problem.failNextNonlinearConvergenceCheck())
+  if (!_fe_problem.getFailNextNonlinearConvergenceCheck())
   {
     _fe_problem.computingNonlinearResid(true);
     _fe_problem.computeResidualSys(sys, soln, residual);
