@@ -34,7 +34,7 @@
       input = conversion.i
       cli_args = "Materials/convert_to_reg/reg_props_out='m1 m2 m3'"
       expect_err = 'The number of output properties must match the number of input functors'
-      detail = 'if the user inputs a different number of functors and material properties, as the conversion match one to one, and'
+      detail = 'if the user inputs a different number of functors and material properties, as the conversion match one to one.'
     []
   []
 []

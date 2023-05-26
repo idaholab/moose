@@ -29,7 +29,7 @@ protected:
   /// Number of material properties to create
   const std::size_t _num_functors_to_convert;
 
-  /// Incoming functors to convert
+  /// Incoming functors to convert. We up-convert non-AD functors to AD functors to ease implementation
   std::vector<const Moose::Functor<Moose::GenericType<T, true>> *> _functors_in;
   /// Regular material properties to create
   std::vector<MaterialProperty<T> *> _reg_props_out;

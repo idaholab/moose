@@ -19,7 +19,7 @@ InputParameters
 MaterialFunctorConverterTempl<T>::validParams()
 {
   InputParameters params = Material::validParams();
-  params.addClassDescription("Converts functor to nonAD and AD regular material properties");
+  params.addClassDescription("Converts functor to non-AD and AD regular material properties");
   params.addParam<std::vector<MooseFunctorName>>(
       "functors_in", "The names of the functors to convert to AD properties");
   params.addParam<std::vector<MaterialPropertyName>>("ad_props_out",
@@ -34,9 +34,9 @@ MaterialFunctorConverterTempl<T>::MaterialFunctorConverterTempl(const InputParam
   : Material(parameters),
     _num_functors_to_convert(getParam<std::vector<MooseFunctorName>>("functors_in").size())
 {
-  auto functors_in = getParam<std::vector<MooseFunctorName>>("functors_in");
-  auto reg_props_out = getParam<std::vector<MaterialPropertyName>>("reg_props_out");
-  auto ad_props_out = getParam<std::vector<MaterialPropertyName>>("ad_props_out");
+  const auto & functors_in = getParam<std::vector<MooseFunctorName>>("functors_in");
+  const auto & reg_props_out = getParam<std::vector<MaterialPropertyName>>("reg_props_out");
+  const auto & ad_props_out = getParam<std::vector<MaterialPropertyName>>("ad_props_out");
 
   if (isParamValid("reg_props_out") && isParamValid("ad_props_out"))
     paramError("reg_props_out",

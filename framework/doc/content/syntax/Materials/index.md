@@ -222,7 +222,7 @@ error.
 
 ## Functor Material Properties id=functor-props
 
-Functor materials are special kind of materials used for on-the-fly material property evaluation.
+Functor materials are a special kind of materials used for on-the-fly material property evaluation.
 Please refer to the [syntax page for FunctorMaterials](FunctorMaterials/index.md) for more information.
 
 ## Advanced Topics
