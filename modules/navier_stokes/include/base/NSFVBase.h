@@ -377,6 +377,8 @@ protected:
   /// If a two-term Taylor expansion is needed for the determination of the boundary values
   /// of the pressure
   const bool _pressure_two_term_bc_expansion;
+  /// Switch to enable the two-term extrapolation on porosity jump faces.
+  const bool _pressure_allow_expansion_on_bernoulli_faces;
   /// If a two-term Taylor expansion is needed for the determination of the boundary values
   /// of the velocity/momentum
   const bool _momentum_two_term_bc_expansion;
@@ -797,6 +799,13 @@ NSFVBase<BaseType>::validParams()
       "If a two-term Taylor expansion is needed for the determination of the boundary values"
       "of the pressure.");
   params.addParam<bool>(
+      "pressure_allow_expansion_on_bernoulli_faces",
+      false,
+      "Switch to enable the two-term extrapolation on porosity jump faces. "
+      "WARNING: This might lead to crushes in parallel runs if porosity jump faces are connected "
+      "with one cell (usually corners) due to the insufficient number of ghosted "
+      "layers.");
+  params.addParam<bool>(
       "momentum_two_term_bc_expansion",
       true,
       "If a two-term Taylor expansion is needed for the determination of the boundary values"
@@ -841,11 +850,22 @@ NSFVBase<BaseType>::validParams()
       "pressure_face_interpolation momentum_two_term_bc_expansion "
       "energy_two_term_bc_expansion passive_scalar_two_term_bc_expansion "
       "mixing_length_two_term_bc_expansion pressure_two_term_bc_expansion "
-      "velocity_interpolation",
+      "pressure_allow_expansion_on_bernoulli_faces velocity_interpolation",
       "Numerical scheme");
 
   params.addParamNamesToGroup("momentum_scaling energy_scaling mass_scaling passive_scalar_scaling",
                               "Scaling");
+
+  /**
+   * Parameters controlling the ghosting/parallel execution
+   */
+  params.addRangeCheckedParam<unsigned short>(
+      "ghost_layers",
+      2,
+      "ghost_layers > 0",
+      "The number of geometric/algebraic/coupling layers to ghost.");
+
+  params.addParamNamesToGroup("ghost_layers", "Parallel Execution");
 
   /**
    * Parameter controlling the turbulence handling used for the equations.
@@ -1003,6 +1023,8 @@ NSFVBase<BaseType>::NSFVBase(const InputParameters & parameters)
         parameters.get<MooseEnum>("passive_scalar_face_interpolation")),
     _velocity_interpolation(parameters.get<MooseEnum>("velocity_interpolation")),
     _pressure_two_term_bc_expansion(parameters.get<bool>("pressure_two_term_bc_expansion")),
+    _pressure_allow_expansion_on_bernoulli_faces(
+        parameters.get<bool>("pressure_allow_expansion_on_bernoulli_faces")),
     _momentum_two_term_bc_expansion(parameters.get<bool>("momentum_two_term_bc_expansion")),
     _energy_two_term_bc_expansion(parameters.get<bool>("energy_two_term_bc_expansion")),
     _passive_scalar_two_term_bc_expansion(
@@ -1287,6 +1309,8 @@ NSFVBase<BaseType>::addINSVariables()
         params.template set<MooseFunctorName>("w") = _velocity_name[2];
       params.template set<MooseFunctorName>(NS::porosity) = _porosity_name;
       params.template set<MooseFunctorName>(NS::density) = _density_name;
+      params.template set<bool>("allow_two_term_expansion_on_bernoulli_faces") =
+          _pressure_allow_expansion_on_bernoulli_faces;
     }
 
     addNSNonlinearVariable(pressure_type, _pressure_name, params);
@@ -2804,14 +2828,14 @@ template <class BaseType>
 InputParameters
 NSFVBase<BaseType>::getGhostParametersForRM()
 {
-  unsigned short necessary_layers = 2;
+  unsigned short necessary_layers = parameters().template get<unsigned short>("ghost_layers");
   if (_momentum_face_interpolation == "skewness-corrected" ||
       _energy_face_interpolation == "skewness-corrected" ||
       _pressure_face_interpolation == "skewness-corrected" ||
       _turbulence_handling == "mixing-length" ||
       (_porous_medium_treatment && parameters().template get<MooseEnum>(
                                        "porosity_interface_pressure_treatment") != "automatic"))
-    necessary_layers = 3;
+    necessary_layers = std::max(necessary_layers, (unsigned short)3);
 
   if (_porous_medium_treatment && parameters().isParamValid("porosity_smoothing_layers"))
     necessary_layers = std::max(
@@ -3055,6 +3079,10 @@ NSFVBase<BaseType>::checkGeneralControlErrors()
                                   "passive_scalar_coupled_source_coeff",
                                   "passive_scalar_two_term_bc_expansion",
                                   "passive_scalar_advection_interpolation"});
+
+  if (parameters().template get<MooseEnum>("porosity_interface_pressure_treatment") != "bernoulli")
+    checkDependentParameterError("porosity_interface_pressure_treatment",
+                                 {"ghost_layers", "pressure_allow_expansion_on_bernoulli_faces"});
 }
 
 template <class BaseType>
