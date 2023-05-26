@@ -1,6 +1,6 @@
 # GenericFunctorMaterial
 
-!syntax description /Materials/GenericFunctorMaterial
+!syntax description /FunctorMaterials/GenericFunctorMaterial
 
 ## Overview
 
@@ -34,8 +34,8 @@ then obtain the diffusion coefficient directly on the faces when evaluating the 
 
 !listing test/tests/materials/boundary_material/fv_material_quadrature.i block=Materials/k1
 
-!syntax parameters /Materials/GenericFunctorMaterial
+!syntax parameters /FunctorMaterials/GenericFunctorMaterial
 
-!syntax inputs /Materials/GenericFunctorMaterial
+!syntax inputs /FunctorMaterials/GenericFunctorMaterial
 
-!syntax children /Materials/GenericFunctorMaterial
+!syntax children /FunctorMaterials/GenericFunctorMaterial

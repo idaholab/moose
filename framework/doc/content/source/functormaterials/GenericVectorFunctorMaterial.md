@@ -1,6 +1,6 @@
 # GenericVectorFunctorMaterial
 
-!syntax description /Materials/GenericVectorFunctorMaterial
+!syntax description /FunctorMaterials/GenericVectorFunctorMaterial
 
 The functor system allows for using different functor types, functions, variables and
 material properties for example, for each component X, Y and Z of the vector functor
@@ -36,8 +36,8 @@ for declaring two material properties and their values in the same material.
 
 !listing modules/navier_stokes/test/tests/finite_volume/pins/channel-flow/2d-rc-friction.i block=Materials/darcy
 
-!syntax parameters /Materials/GenericVectorFunctorMaterial
+!syntax parameters /FunctorMaterials/GenericVectorFunctorMaterial
 
-!syntax inputs /Materials/GenericVectorFunctorMaterial
+!syntax inputs /FunctorMaterials/GenericVectorFunctorMaterial
 
-!syntax children /Materials/GenericVectorFunctorMaterial
+!syntax children /FunctorMaterials/GenericVectorFunctorMaterial
