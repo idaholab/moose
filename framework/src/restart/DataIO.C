@@ -11,11 +11,14 @@
 #include "MooseConfig.h"
 #include "DataIO.h"
 #include "MooseMesh.h"
+#include "FEProblemBase.h"
 
 #include "libmesh/vector_value.h"
 #include "libmesh/tensor_value.h"
 #include "libmesh/numeric_vector.h"
 #include "libmesh/elem.h"
+#include "libmesh/equation_systems.h"
+#include "libmesh/xdr_cxx.h"
 
 #include "DualRealOps.h"
 
@@ -314,6 +317,20 @@ dataStore(std::ostream & stream, libMesh::Parameters & p, void * context)
 
 #undef storescalar
   }
+}
+
+template <>
+void
+dataStore(std::ostream & stream, libMesh::EquationSystems & es, void * /* problem */)
+{
+  std::cerr << "storing EquationSystems" << std::endl;
+
+  Xdr io(stream), local_io(stream);
+  es.write(io,
+           EquationSystems::WRITE_DATA | EquationSystems::WRITE_ADDITIONAL_DATA |
+               EquationSystems::WRITE_PARALLEL_FILES,
+           false,
+           &local_io);
 }
 
 // global load functions
@@ -621,6 +638,24 @@ dataLoad(std::istream & stream, libMesh::Parameters & p, void * context)
 
 #undef loadscalar
   }
+}
+
+template <>
+void
+dataLoad(std::istream & stream, libMesh::EquationSystems & es, void * context)
+{
+  mooseAssert(context, "Context not set");
+  const FEProblemBase & problem = *static_cast<FEProblemBase *>(context);
+
+  unsigned int read_flags = EquationSystems::READ_DATA;
+  if (!problem.skipAdditionalRestartData())
+    read_flags |= EquationSystems::READ_ADDITIONAL_DATA;
+
+  Xdr io(stream);
+  std::function<std::unique_ptr<Xdr>()> local_io_functor;
+  local_io_functor = [&stream]() { return std::make_unique<Xdr>(stream); };
+
+  es.read(io, local_io_functor, read_flags, false);
 }
 
 template <>

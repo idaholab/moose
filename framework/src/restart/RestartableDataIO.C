@@ -10,11 +10,9 @@
 // MOOSE includes
 #include "RestartableDataIO.h"
 
-#include "AuxiliarySystem.h"
 #include "FEProblem.h"
 #include "MooseApp.h"
 #include "MooseUtils.h"
-#include "NonlinearSystem.h"
 
 #include <stdio.h>
 #include <fstream>
@@ -36,8 +34,6 @@ RestartableDataIO::createBackup()
 {
   std::shared_ptr<Backup> backup = std::make_shared<Backup>();
 
-  serializeSystems(backup->_system_data);
-
   const auto & restartable_data_maps = _moose_app.getRestartableData();
 
   unsigned int n_threads = libMesh::n_threads();
@@ -56,11 +52,8 @@ RestartableDataIO::restoreBackup(std::shared_ptr<Backup> backup, bool for_restar
   unsigned int n_threads = libMesh::n_threads();
 
   // Make sure we read from the beginning
-  backup->_system_data.seekg(0);
   for (unsigned int tid = 0; tid < n_threads; tid++)
     backup->_restartable_data[tid]->seekg(0);
-
-  deserializeSystems(backup->_system_data);
 
   const auto & restartable_data_maps = _moose_app.getRestartableData();
 
@@ -252,7 +245,7 @@ RestartableDataIO::deserializeRestartableData(const RestartableDataMap & restart
 
       std::cout << "Loading " << current_name << std::endl;
 
-      current_pair->second.value->load(stream);
+      current_pair->second->load(stream);
     }
     else
     {
@@ -278,26 +271,3 @@ RestartableDataIO::deserializeRestartableData(const RestartableDataMap & restart
   }
 }
 
-void
-RestartableDataIO::serializeSystems(std::ostream & stream)
-{
-  mooseAssert(_fe_problem_ptr, "The FEProblem pointer is nullptr in RestartableDataIO");
-
-  for (const auto & nl_sys_num : make_range(_fe_problem_ptr->numNonlinearSystems()))
-    storeHelper(stream,
-                static_cast<SystemBase &>(_fe_problem_ptr->getNonlinearSystemBase(nl_sys_num)),
-                nullptr);
-  storeHelper(stream, static_cast<SystemBase &>(_fe_problem_ptr->getAuxiliarySystem()), nullptr);
-}
-
-void
-RestartableDataIO::deserializeSystems(std::istream & stream)
-{
-  mooseAssert(_fe_problem_ptr, "The FEProblem pointer is nullptr in RestartableDataIO");
-
-  for (const auto & nl_sys_num : make_range(_fe_problem_ptr->numNonlinearSystems()))
-    loadHelper(stream,
-               static_cast<SystemBase &>(_fe_problem_ptr->getNonlinearSystemBase(nl_sys_num)),
-               nullptr);
-  loadHelper(stream, static_cast<SystemBase &>(_fe_problem_ptr->getAuxiliarySystem()), nullptr);
-}

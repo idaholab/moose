@@ -148,7 +148,7 @@ public:
   FEProblemBase(const InputParameters & parameters);
   virtual ~FEProblemBase();
 
-  virtual EquationSystems & es() override { return _eq; }
+  virtual EquationSystems & es() override { return _eq.set(); }
   virtual MooseMesh & mesh() override { return _mesh; }
   virtual const MooseMesh & mesh() const override { return _mesh; }
   const MooseMesh & mesh(bool use_displaced) const override;
@@ -2114,7 +2114,11 @@ protected:
   void createTagSolutions();
 
   MooseMesh & _mesh;
-  EquationSystems _eq;
+
+private:
+  Restartable::ManagedValue<EquationSystems> _eq;
+
+protected:
   bool _initialized;
 
   std::set<TagID> _fe_vector_tags;

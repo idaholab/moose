@@ -305,7 +305,7 @@ FEProblemBase::FEProblemBase(const InputParameters & parameters)
   : SubProblem(parameters),
     Restartable(this, "FEProblemBase"),
     _mesh(*getCheckedPointerParam<MooseMesh *>("mesh")),
-    _eq(_mesh),
+    _eq(declareManagedRestartableDataWithContext<EquationSystems>("equation_systems", this, _mesh)),
     _initialized(false),
     _solve(getParam<bool>("solve")),
     _transient(false),
@@ -441,7 +441,7 @@ FEProblemBase::FEProblemBase(const InputParameters & parameters)
 
   _restart_io = std::make_unique<RestartableDataIO>(*this);
 
-  _eq.parameters.set<FEProblemBase *>("_fe_problem_base") = this;
+  es().parameters.set<FEProblemBase *>("_fe_problem_base") = this;
 
   if (parameters.isParamSetByUser("coord_type"))
     setCoordSystem(getParam<std::vector<SubdomainName>>("block"),
@@ -644,10 +644,10 @@ FEProblemBase::getEvaluableElementRange()
 {
   if (!_evaluable_local_elem_range)
   {
-    std::vector<const DofMap *> dof_maps(_eq.n_systems());
-    for (const auto i : make_range(_eq.n_systems()))
+    std::vector<const DofMap *> dof_maps(es().n_systems());
+    for (const auto i : make_range(es().n_systems()))
     {
-      const auto & sys = _eq.get_system(i);
+      const auto & sys = es().get_system(i);
       dof_maps[i] = &sys.get_dof_map();
     }
     _evaluable_local_elem_range =
@@ -1311,7 +1311,7 @@ FEProblemBase::timestepSetup()
 
     // u4) Now that all the geometric searches have been done (both undisplaced and displaced),
     //     we're ready to update the sparsity pattern
-    _eq.reinit_systems();
+    es().reinit_systems();
   }
 
   if (_line_search)
@@ -4528,7 +4528,7 @@ FEProblemBase::reinitBecauseOfGhostingOrNewGeomObjects(const bool mortar_changed
   if (needs_reinit)
   {
     // Call reinit to get the ghosted vectors correct now that some geometric search has been done
-    _eq.reinit();
+    es().reinit();
 
     if (_displaced_mesh)
       _displaced_problem->es().reinit();
@@ -5635,7 +5635,7 @@ FEProblemBase::init()
 
   {
     TIME_SECTION("EquationSystems::Init", 2, "Initializing Equation Systems");
-    _eq.init();
+    es().init();
   }
 
   for (auto & nl : _nl)
@@ -7048,7 +7048,7 @@ FEProblemBase::adaptMesh()
   // We're done with all intermediate changes; now get systems ready
   // for real if necessary.
   if (mesh_changed)
-    _eq.reinit_systems();
+    es().reinit_systems();
 
   return mesh_changed;
 }
@@ -7134,9 +7134,9 @@ FEProblemBase::meshChangedHelper(bool intermediate_change)
   // If we're just going to alter the mesh again, all we need to
   // handle here is AMR and projections, not full system reinit
   if (intermediate_change)
-    _eq.reinit_solutions();
+    es().reinit_solutions();
   else
-    _eq.reinit();
+    es().reinit();
 
   // Updating MooseMesh first breaks other adaptivity code, unless we
   // then *again* update the MooseMesh caches.  E.g. the definition of

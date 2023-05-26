@@ -38,6 +38,7 @@
 
 namespace libMesh
 {
+class EquationSystems;
 template <typename T>
 class NumericVector;
 template <typename T>
@@ -370,6 +371,8 @@ template <>
 void dataStore(std::ostream & stream, RealEigenMatrix & v, void * context);
 template <>
 void dataStore(std::ostream & stream, libMesh::Parameters & p, void * context);
+template <>
+void dataStore(std::ostream & stream, libMesh::EquationSystems & es, void * context);
 
 template <std::size_t N>
 inline void
@@ -668,6 +671,8 @@ template <>
 void dataLoad(std::istream & stream, RealEigenMatrix & v, void * context);
 template <>
 void dataLoad(std::istream & stream, libMesh::Parameters & p, void * context);
+template <>
+void dataLoad(std::istream & stream, libMesh::EquationSystems & es, void * context);
 
 template <std::size_t N>
 inline void
@@ -903,8 +908,6 @@ template <>
 inline void
 dataStore(std::ostream & stream, Backup *& backup, void * context)
 {
-  dataStore(stream, backup->_system_data, context);
-
   for (unsigned int i = 0; i < backup->_restartable_data.size(); i++)
     dataStore(stream, backup->_restartable_data[i], context);
 }
@@ -913,8 +916,6 @@ template <>
 inline void
 dataLoad(std::istream & stream, Backup *& backup, void * context)
 {
-  dataLoad(stream, backup->_system_data, context);
-
   for (unsigned int i = 0; i < backup->_restartable_data.size(); i++)
     dataLoad(stream, backup->_restartable_data[i], context);
 }

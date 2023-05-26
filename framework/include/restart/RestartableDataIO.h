@@ -105,16 +105,6 @@ private:
                                   std::istream & stream,
                                   const DataNames & filter_names);
 
-  /**
-   * Serializes the data for the Systems in FEProblemBase
-   */
-  void serializeSystems(std::ostream & stream);
-
-  /**
-   * Deserializes the data for the Systems in FEProblemBase
-   */
-  void deserializeSystems(std::istream & stream);
-
   /// A reference to the MooseApp object for retrieving restartable data stores and filters
   MooseApp & _moose_app;
 
