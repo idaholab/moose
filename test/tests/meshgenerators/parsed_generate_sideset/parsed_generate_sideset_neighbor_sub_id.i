@@ -1,11 +1,11 @@
 [Mesh]
-  [./cmg]
+  [cmg]
     type = CartesianMeshGenerator
     dim = 2
     dx = '1 1'
     dy = '2 2'
     subdomain_id = '0 1 0 0'
-  [../]
+  []
 
   [sideset]
     type = ParsedGenerateSideset
