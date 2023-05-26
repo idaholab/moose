@@ -56,7 +56,7 @@ ADInterfaceKernelTempl<T>::ADInterfaceKernelTempl(const InputParameters & parame
     _grad_neighbor_value(_neighbor_var.adGradSlnNeighbor()),
     _phi_neighbor(_assembly.phiFaceNeighbor(_neighbor_var)),
     _test_neighbor(_neighbor_var.phiFaceNeighbor()),
-    _grad_test_neighbor(_neighbor_var.adGradPhiFaceNeighbor())
+    _grad_test_neighbor(_neighbor_var.gradPhiFaceNeighbor())
 
 {
   _subproblem.haveADObjects(true);

@@ -12,6 +12,7 @@
 #include "MooseArray.h"
 #include "MooseTypes.h"
 #include "MooseVariableDataBase.h"
+#include "Conversion.h"
 
 #include "libmesh/tensor_tools.h"
 #include "libmesh/vector_value.h"
@@ -192,15 +193,12 @@ public:
   /**
    * ad_grad_phi getter
    */
-  const ADTemplateVariablePhiGradient<OutputShape> & adGradPhi() const { return *_ad_grad_phi; }
+  const ADTemplateVariablePhiGradient<OutputShape> & adGradPhi() const;
 
   /**
    * ad_grad_phi_face getter
    */
-  const ADTemplateVariablePhiGradient<OutputShape> & adGradPhiFace() const
-  {
-    return *_ad_grad_phi_face;
-  }
+  const ADTemplateVariablePhiGradient<OutputShape> & adGradPhiFace() const;
 
   /**
    * Return phi size
@@ -724,4 +722,24 @@ MooseVariableData<OutputType>::adUDotDot() const
     _need_u_dotdot = true;
 
   return _ad_u_dotdot;
+}
+
+template <typename OutputType>
+const ADTemplateVariablePhiGradient<typename MooseVariableData<OutputType>::OutputShape> &
+MooseVariableData<OutputType>::adGradPhi() const
+{
+  if (_element_type == Moose::ElementType::Neighbor || _element_type == Moose::ElementType::Lower)
+    mooseError("Unsupported element type: ", Moose::stringify(_element_type));
+  mooseAssert(_ad_grad_phi, "this should be non-null");
+  return *_ad_grad_phi;
+}
+
+template <typename OutputType>
+const ADTemplateVariablePhiGradient<typename MooseVariableData<OutputType>::OutputShape> &
+MooseVariableData<OutputType>::adGradPhiFace() const
+{
+  if (_element_type == Moose::ElementType::Neighbor || _element_type == Moose::ElementType::Lower)
+    mooseError("Unsupported element type: ", Moose::stringify(_element_type));
+  mooseAssert(_ad_grad_phi_face, "this should be non-null");
+  return *_ad_grad_phi_face;
 }
