@@ -60,7 +60,7 @@
       min_parallel = 1
       max_parallel = 1
       prereq = parallel_error/error1
-      expect_err = 'Cannot restart using a different number of processors'
+      expect_err = 'Mismatching number of MPI ranks in backup file! Current run: 1 In file: 2'
       detail = "restarted with a different number processors."
     []
   []
