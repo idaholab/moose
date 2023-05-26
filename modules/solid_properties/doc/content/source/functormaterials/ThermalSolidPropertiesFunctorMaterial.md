@@ -14,8 +14,8 @@ a constant density, specified independently using a [GenericFunctorMaterial.md] 
 For the density parameter of `ThermalSolidPropertiesFunctorMaterial` you may then use a
 placeholder dummy name.
 
-!syntax parameters /Materials/ThermalSolidPropertiesFunctorMaterial
+!syntax parameters /FunctorMaterials/ThermalSolidPropertiesFunctorMaterial
 
-!syntax inputs /Materials/ThermalSolidPropertiesFunctorMaterial
+!syntax inputs /FunctorMaterials/ThermalSolidPropertiesFunctorMaterial
 
-!syntax children /Materials/ThermalSolidPropertiesFunctorMaterial
+!syntax children /FunctorMaterials/ThermalSolidPropertiesFunctorMaterial
