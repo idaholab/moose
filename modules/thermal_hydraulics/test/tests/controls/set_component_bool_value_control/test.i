@@ -124,7 +124,7 @@
   dt = 0.1
   abort_on_solve_fail = true
 
-  solve_type = 'newton'
+  solve_type = NEWTON
   line_search = 'basic'
   nl_rel_tol = 1e-6
   nl_abs_tol = 1e-5
@@ -132,6 +132,9 @@
 
   l_tol = 1e-3
   l_max_its = 5
+
+  petsc_options_iname = '-pc_type'
+  petsc_options_value = 'lu'
 
   start_time = 0.0
   end_time = 1

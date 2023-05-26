@@ -173,14 +173,16 @@ dt = 1.e-3
   dt = ${dt}
   num_steps = 6
 
-  solve_type = 'PJFNK'
-  line_search = 'basic'
+  solve_type = NEWTON
   nl_rel_tol = 1e-8
   nl_abs_tol = 1e-6
   nl_max_its = 15
 
   l_tol = 1e-4
   l_max_its = 10
+
+  petsc_options_iname = '-pc_type'
+  petsc_options_value = 'lu'
 
   [Quadrature]
     type = GAUSS

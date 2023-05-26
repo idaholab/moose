@@ -87,6 +87,9 @@
 
   l_tol = 1e-2
   l_max_its = 20
+
+  petsc_options_iname = '-pc_type'
+  petsc_options_value = 'lu'
 []
 
 [Postprocessors]
