@@ -82,6 +82,19 @@ public:
   /// Sets the autosave flag manually if the object has already been initialized.
   void setAutosaveFlag(AutosaveType flag) { _is_autosave = flag; }
 
+  /// The file suffix for the checkpoint mesh
+  static std::string meshSuffix();
+  /// The file suffix for meta data
+  static std::string metaDataSuffix(const std::string & suffix);
+  /// The full (includes meshSuffix()) file suffix for meta data
+  static std::string fullMetaDataSuffix(const std::string & suffix);
+  /// The file suffix for the mesh meta data
+  static std::string meshMetadataSuffix();
+  /// The full (includes meshSuffix()) file suffix for mesh meta data
+  static std::string fullMeshMetadataSuffix();
+  /// The file suffix for restartable data for the given process
+  static std::string restartSuffix(const processor_id_type pid);
+
 protected:
   /**
    * Outputs a checkpoint file.

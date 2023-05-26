@@ -107,6 +107,7 @@
 #include "MortarUserObject.h"
 #include "MortarUserObjectThread.h"
 #include "RedistributeProperties.h"
+#include "Checkpoint.h"
 
 #include "libmesh/exodusII_io.h"
 #include "libmesh/quadrature.h"
@@ -768,24 +769,23 @@ FEProblemBase::initialSetup()
       // _restart_io->readRestartableData(_app.getRestartableData(), _app.getRecoverableData());
 
       // Read the backup from file
-      std::stringstream backup_file_name;
-      backup_file_name << _app.getRestartRecoverFileBase() << "-restart-" << processor_id()
-                       << ".rd";
+      std::string backup_file_name =
+          _app.getRestartRecoverFileBase() + Checkpoint::restartSuffix(processor_id());
 
-      std::cout << "opening backup file: " << backup_file_name.str() << std::endl;
+      std::cout << "opening backup file: " << backup_file_name << std::endl;
 
       auto backup = std::make_shared<Backup>();
 
       try
       {
         std::ifstream backup_file;
-        backup_file.open(backup_file_name.str(), std::ios::in | std::ios::binary);
+        backup_file.open(backup_file_name, std::ios::in | std::ios::binary);
         dataLoad(backup_file, backup, nullptr);
         backup_file.close();
       }
       catch (...)
       {
-        mooseError("Error opening backup file: ", backup_file_name.str());
+        mooseError("Error opening backup file: ", backup_file_name);
       }
 
       //      _app.setBackupObject(backup);
@@ -1032,7 +1032,6 @@ FEProblemBase::initialSetup()
     }
   }
 
-  // Restore for MultiApps (this app is a sub-app and has been given a Backup
   // from the primary app)
   //
   // We would prefer that this is further up where the main app restore is, but
@@ -1046,7 +1045,6 @@ FEProblemBase::initialSetup()
   if ((_app.isRestarting() || _app.isRecovering()) && _app.hasCachedBackup())
   {
     _app.restoreCachedBackup();
-
     // We may have just clobbered initial conditions that were explicitly set
     // In a _restart_ scenario it is completely valid to specify new initial conditions
     // for some of the variables which should override what's coming from the restart file
@@ -1055,8 +1053,6 @@ FEProblemBase::initialSetup()
     // call is much further up and happens before ICs
     if (!_app.isRecovering())
     {
-      std::cout << "Reprojecting ICs" << std::endl;
-
       TIME_SECTION("reprojectInitialConditions", 3, "Reprojecting Initial Conditions");
 
       for (THREAD_ID tid = 0; tid < n_threads; tid++)

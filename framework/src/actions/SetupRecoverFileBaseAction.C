@@ -66,7 +66,7 @@ SetupRecoverFileBaseAction::act()
     {
       RestartableDataMap & meta_data = map_iter->second.first;
       const std::string & suffix = map_iter->second.second;
-      std::string meta_suffix = "-mesh.cpr/meta_data" + suffix;
+      std::string meta_suffix = Checkpoint::fullMetaDataSuffix(suffix);
       if (MooseUtils::checkFileReadable(meta_suffix, false, false, false))
         restartable.readRestartableData(meta_suffix, meta_data, DataNames());
     }

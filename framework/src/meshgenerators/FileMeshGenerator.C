@@ -10,6 +10,7 @@
 #include "FileMeshGenerator.h"
 #include "CastUniquePointer.h"
 #include "RestartableDataIO.h"
+#include "Checkpoint.h"
 
 #include "libmesh/replicated_mesh.h"
 #include "libmesh/face_quad4.h"
@@ -108,7 +109,12 @@ FileMeshGenerator::generate()
       mooseError("\"use_for_exodus_restart\" should be given only for Exodus mesh files");
 
     // to support LATEST word for loading checkpoint files
-    std::string file_name = MooseUtils::convertLatestCheckpoint(_file_name);
+    std::cerr << _file_name << " exists = " <<  MooseUtils::pathExists(_file_name) << std::endl;
+
+    const std::string file_name =
+        MooseUtils::pathExists(_file_name)
+            ? std::string(_file_name)
+            : (MooseUtils::convertLatestCheckpoint(_file_name) + Checkpoint::meshSuffix());
 
     mesh->skip_partitioning(_skip_partitioning);
     mesh->allow_renumbering(_allow_renumbering);
@@ -116,14 +122,14 @@ FileMeshGenerator::generate()
 
     // we also read declared mesh meta data here if there is meta data file
     RestartableDataIO restartable(_app);
-    std::string fname = file_name + "/meta_data_mesh.rd";
-    if (MooseUtils::pathExists(fname))
+    std::string metadata_file_name = file_name + Checkpoint::meshMetadataSuffix();
+    if (MooseUtils::pathExists(metadata_file_name))
     {
       restartable.setErrorOnLoadWithDifferentNumberOfProcessors(false);
       // get reference to mesh meta data (created by MooseApp)
       auto & meta_data = _app.getRestartableDataMap(MooseApp::MESH_META_DATA);
-      if (MooseUtils::checkFileReadable(fname, false, false, false))
-        restartable.readRestartableData(fname, meta_data, DataNames());
+      if (MooseUtils::checkFileReadable(metadata_file_name, false, false, false))
+        restartable.readRestartableData(metadata_file_name, meta_data, DataNames());
     }
   }
 

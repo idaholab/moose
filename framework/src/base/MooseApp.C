@@ -597,7 +597,7 @@ MooseApp::MooseApp(InputParameters parameters)
   // file early during the simulation setup so that they are available to Actions and other objects
   // that need them during the setup process. Most of the restartable data isn't made available
   // until all objects have been created and all Actions have been executed (i.e. initialSetup).
-  registerRestartableDataMapName(MooseApp::MESH_META_DATA, "mesh");
+  registerRestartableDataMapName(MooseApp::MESH_META_DATA, MooseApp::MESH_META_DATA_SUFFIX);
 
   if (parameters.have_parameter<bool>("use_legacy_dirichlet_bc"))
     mooseDeprecated("The parameter 'use_legacy_dirichlet_bc' is no longer valid.\n\n",
@@ -1742,7 +1742,7 @@ MooseApp::hasRestartableMetaData(const std::string & name,
 RestartableDataValue &
 MooseApp::getRestartableMetaData(const std::string & name,
                                  const RestartableDataMapName & metaname,
-                                 THREAD_ID tid) const
+                                 THREAD_ID tid)
 {
   if (tid != 0)
     mooseError(
@@ -2587,6 +2587,7 @@ MooseApp::checkMetaDataIntegrity() const
 }
 
 const RestartableDataMapName MooseApp::MESH_META_DATA = "MeshMetaData";
+const RestartableDataMapName MooseApp::MESH_META_DATA_SUFFIX = "mesh";
 
 RestartableDataMap &
 MooseApp::getRestartableDataMap(const RestartableDataMapName & name)

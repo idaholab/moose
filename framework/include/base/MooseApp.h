@@ -84,6 +84,7 @@ public:
   };
 
   static const RestartableDataMapName MESH_META_DATA;
+  static const std::string MESH_META_DATA_SUFFIX;
 
   static InputParameters validParams();
 
@@ -629,7 +630,7 @@ public:
    */
   RestartableDataValue & getRestartableMetaData(const std::string & name,
                                                 const RestartableDataMapName & metaname,
-                                                THREAD_ID tid) const;
+                                                THREAD_ID tid);
 
   /**
    * Return reference to the restartable data object

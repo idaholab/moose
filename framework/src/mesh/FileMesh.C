@@ -13,6 +13,7 @@
 #include "Moose.h"
 #include "MooseApp.h"
 #include "RestartableDataIO.h"
+#include "Checkpoint.h"
 
 #include "libmesh/exodusII_io.h"
 #include "libmesh/mesh_tools.h"
@@ -98,11 +99,16 @@ FileMesh::buildMesh()
     }
     else
     {
+      // to support LATEST word for loading checkpoint files
+      _file_name =
+          MooseUtils::pathExists(_file_name)
+              ? std::string(_file_name)
+              : (MooseUtils::convertLatestCheckpoint(_file_name) + Checkpoint::meshSuffix());
+
       // If we are reading a mesh while restarting, then we might have
       // a solution file that relies on that mesh partitioning and/or
       // numbering.  In that case, we need to turn off repartitioning
       // and renumbering, at least at first.
-      _file_name = MooseUtils::convertLatestCheckpoint(_file_name);
       bool restarting = _file_name.rfind(".cpr") < _file_name.size();
 
       const bool skip_partitioning_later = restarting && getMesh().skip_partitioning();
@@ -120,16 +126,15 @@ FileMesh::buildMesh()
       if (getParam<bool>("clear_spline_nodes"))
         MeshTools::clear_spline_nodes(getMesh());
 
-      // we also read declared mesh meta data here if there is meta data file
       RestartableDataIO restartable(_app);
-      std::string fname = _file_name + "/meta_data_mesh.rd";
-      if (MooseUtils::pathExists(fname))
+      const auto metadata_file_name = _file_name + Checkpoint::meshMetadataSuffix();
+      if (MooseUtils::pathExists(metadata_file_name))
       {
         restartable.setErrorOnLoadWithDifferentNumberOfProcessors(false);
         // get reference to mesh meta data (created by MooseApp)
         auto & meta_data = _app.getRestartableDataMap(MooseApp::MESH_META_DATA);
-        if (MooseUtils::checkFileReadable(fname, false, false, false))
-          restartable.readRestartableData(fname, meta_data, DataNames());
+        if (MooseUtils::checkFileReadable(metadata_file_name, false, false, false))
+          restartable.readRestartableData(metadata_file_name, meta_data, DataNames());
       }
 
       if (restarting)

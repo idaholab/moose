@@ -146,16 +146,13 @@ Checkpoint::output()
   // Create checkpoint file structure
   CheckpointFileNames curr_file_struct;
 
-  std::ostringstream proc_id_string;
-  proc_id_string << processor_id();
-
-  curr_file_struct.checkpoint = current_file + "-mesh.cpr";
-  curr_file_struct.restart = current_file + "-restart-" + proc_id_string.str() + ".rd";
+  curr_file_struct.checkpoint = current_file + meshSuffix();
+  curr_file_struct.restart = current_file + restartSuffix(processor_id());
 
   // Write the checkpoint file
   io.write(curr_file_struct.checkpoint);
 
-  // Write out the restartable mesh meta data if there is any (only on processor zero)
+  // Write out meta data if there is any (only on processor zero)
   if (processor_id() == 0)
   {
     for (auto & map_pair :
@@ -163,7 +160,7 @@ Checkpoint::output()
     {
       const RestartableDataMap & meta_data = map_pair.second.first;
       const std::string & suffix = map_pair.second.second;
-      const std::string filename(curr_file_struct.checkpoint + "/meta_data" + suffix + ".rd");
+      const std::string filename(current_file + fullMetaDataSuffix(suffix));
 
       curr_file_struct.restart_meta_data.emplace(filename);
       _restartable_data_io.writeRestartableData(filename, meta_data);
@@ -227,4 +224,41 @@ Checkpoint::updateCheckpointFiles(CheckpointFileNames file_struct)
             "Error during the deletion of file '", delete_files.restart, "': ", std::strerror(ret));
     }
   }
+}
+
+std::string
+Checkpoint::meshSuffix()
+{
+  return "-mesh.cpr";
+
+}
+
+std::string
+Checkpoint::metaDataSuffix(const std::string & suffix)
+{
+  return "/meta_data" + suffix + ".rd";
+}
+
+std::string
+Checkpoint::fullMetaDataSuffix(const std::string & suffix)
+{
+  return meshSuffix() + "/meta_data" + suffix + ".rd";
+}
+
+std::string
+Checkpoint::meshMetadataSuffix()
+{
+  return metaDataSuffix("_" + MooseApp::MESH_META_DATA_SUFFIX);
+}
+
+std::string
+Checkpoint::fullMeshMetadataSuffix()
+{
+  return fullMetaDataSuffix("_" + MooseApp::MESH_META_DATA_SUFFIX);
+}
+
+std::string
+Checkpoint::restartSuffix(const processor_id_type pid)
+{
+  return "-restart-" + std::to_string(pid) + ".rd";
 }
