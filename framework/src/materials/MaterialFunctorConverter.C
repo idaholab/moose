@@ -1,0 +1,91 @@
+//* This file is part of the MOOSE framework
+//* https://www.mooseframework.org
+//*
+//* All rights reserved, see COPYRIGHT for full restrictions
+//* https://github.com/idaholab/moose/blob/master/COPYRIGHT
+//*
+//* Licensed under LGPL 2.1, please see LICENSE for details
+//* https://www.gnu.org/licenses/lgpl-2.1.html
+
+#include "MaterialFunctorConverter.h"
+
+#include "metaphysicl/raw_type.h"
+
+registerMooseObject("MooseApp", MaterialFunctorConverter);
+registerMooseObject("MooseApp", VectorMaterialFunctorConverter);
+
+template <typename T>
+InputParameters
+MaterialFunctorConverterTempl<T>::validParams()
+{
+  InputParameters params = Material::validParams();
+  params.addClassDescription("Converts functor to nonAD and AD regular material properties");
+  params.addParam<std::vector<MooseFunctorName>>(
+      "functors_in", "The names of the functors to convert to AD properties");
+  params.addParam<std::vector<MaterialPropertyName>>("ad_props_out",
+                                                     "The names of the output AD properties");
+  params.addParam<std::vector<MaterialPropertyName>>("reg_props_out",
+                                                     "The names of the output regular properties");
+  return params;
+}
+
+template <typename T>
+MaterialFunctorConverterTempl<T>::MaterialFunctorConverterTempl(const InputParameters & parameters)
+  : Material(parameters),
+    _num_functors_to_convert(getParam<std::vector<MooseFunctorName>>("functors_in").size())
+{
+  auto functors_in = getParam<std::vector<MooseFunctorName>>("functors_in");
+  auto reg_props_out = getParam<std::vector<MaterialPropertyName>>("reg_props_out");
+  auto ad_props_out = getParam<std::vector<MaterialPropertyName>>("ad_props_out");
+
+  if (isParamValid("reg_props_out") && isParamValid("ad_props_out"))
+    paramError("reg_props_out",
+               "We dont support converting functors to both AD and regular material properties. "
+               "Please use another " +
+                   type() + " to convert to both types.");
+
+  if (functors_in.size() != reg_props_out.size() && functors_in.size() != ad_props_out.size())
+    paramError(
+        "functors_in",
+        "The number of output properties must match the number of input functors, which is " +
+            std::to_string(functors_in.size()));
+
+  _functors_in.resize(_num_functors_to_convert);
+  _ad_props_out.resize(ad_props_out.size());
+  _reg_props_out.resize(reg_props_out.size());
+
+  for (const auto i : make_range(_num_functors_to_convert))
+    _functors_in[i] = &getFunctor<Moose::GenericType<T, true>>(functors_in[i]);
+
+  for (const auto i : index_range(ad_props_out))
+    _ad_props_out[i] = &declareADProperty<T>(ad_props_out[i]);
+
+  for (const auto i : index_range(reg_props_out))
+    _reg_props_out[i] = &declareProperty<T>(reg_props_out[i]);
+}
+
+template <typename T>
+void
+MaterialFunctorConverterTempl<T>::initQpStatefulProperties()
+{
+  computeQpProperties();
+}
+
+template <typename T>
+void
+MaterialFunctorConverterTempl<T>::computeQpProperties()
+{
+  // TODO: do we know when we are on a face or an element?
+  const Moose::ElemQpArg arg = {_current_elem, _qp, _qrule};
+  mooseAssert(_current_elem, "We must know where we are");
+  mooseAssert(_qrule, "We must know the quadrature");
+  const auto state = Moose::currentState();
+  for (const auto i : index_range(_ad_props_out))
+    (*_ad_props_out[i])[_qp] = (*_functors_in[i])(arg, state);
+
+  for (const auto i : index_range(_reg_props_out))
+    (*_reg_props_out[i])[_qp] = MetaPhysicL::raw_value((*_functors_in[i])(arg, state));
+}
+
+template class MaterialFunctorConverterTempl<Real>;
+template class MaterialFunctorConverterTempl<RealVectorValue>;
