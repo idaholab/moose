@@ -618,6 +618,10 @@ Parser::hitCLIFilter(std::string appname, const std::vector<std::string> & argv)
 void
 Parser::parse(const std::vector<std::string> & input_filenames, const std::string & input_text)
 {
+  // Check that if the input_text string is provided, then there is only one filename to match
+  if (!input_text.empty() && input_filenames.size() != 1)
+    mooseError("If 'input_text' is provided, then 'input_filenames' must hold only one filename");
+
   // Save the filename
   _input_filenames = input_filenames;
   if (_input_filenames.empty())
