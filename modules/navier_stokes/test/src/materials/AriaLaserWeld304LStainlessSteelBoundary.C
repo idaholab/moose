@@ -7,15 +7,15 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "CrazyKCPlantFitsBoundary.h"
+#include "AriaLaserWeld304LStainlessSteelBoundary.h"
 #include "Assembly.h"
 
-registerMooseObject("NavierStokesTestApp", CrazyKCPlantFitsBoundary);
+registerMooseObject("NavierStokesTestApp", AriaLaserWeld304LStainlessSteelBoundary);
 
 InputParameters
-CrazyKCPlantFitsBoundary::validParams()
+AriaLaserWeld304LStainlessSteelBoundary::validParams()
 {
-  InputParameters params = ADMaterial::validParams();
+  InputParameters params = Material::validParams();
   params.addParam<Real>("c_mu0", 0.15616, "mu0 coefficient");
   params.addParam<Real>("ap0", 0, "");
   params.addParam<Real>("ap1", 1.851502e1, "");
@@ -58,8 +58,9 @@ CrazyKCPlantFitsBoundary::validParams()
   return params;
 }
 
-CrazyKCPlantFitsBoundary::CrazyKCPlantFitsBoundary(const InputParameters & parameters)
-  : ADMaterial(parameters),
+AriaLaserWeld304LStainlessSteelBoundary::AriaLaserWeld304LStainlessSteelBoundary(
+    const InputParameters & parameters)
+  : Material(parameters),
     _ap0(getParam<Real>("ap0")),
     _ap1(getParam<Real>("ap1")),
     _ap2(getParam<Real>("ap2")),
@@ -92,7 +93,7 @@ CrazyKCPlantFitsBoundary::CrazyKCPlantFitsBoundary(const InputParameters & param
 }
 
 void
-CrazyKCPlantFitsBoundary::computeQpProperties()
+AriaLaserWeld304LStainlessSteelBoundary::computeQpProperties()
 {
   auto && theta = _temperature[_qp] / _temperature_units_per_kelvin - _Tb;
   if (theta < _Tbound1)

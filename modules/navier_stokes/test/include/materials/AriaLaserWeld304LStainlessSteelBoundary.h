@@ -9,17 +9,24 @@
 
 #pragma once
 
-#include "ADMaterial.h"
+#include "Material.h"
 
 /**
- * A material that couples a material property
+ * A material that computes 304L surface stainless steel properties relevant to doing laser
+ * welding modeling. The functional form of these properties come from:
+ *
+ * techreport{noble2007use,
+ *   title={Use of Aria to simulate laser weld pool dynamics for neutron generator production.},
+ *   author={Noble, David R and Notz, Patrick K and Martinez, Mario J and Kraynik, Andrew Michael},
+ *   year={2007},
+ *   institution={Sandia National Laboratories (SNL), Albuquerque, NM, and Livermore, CA}}
  */
-class CrazyKCPlantFitsBoundary : public ADMaterial
+class AriaLaserWeld304LStainlessSteelBoundary : public Material
 {
 public:
   static InputParameters validParams();
 
-  CrazyKCPlantFitsBoundary(const InputParameters & parameters);
+  AriaLaserWeld304LStainlessSteelBoundary(const InputParameters & parameters);
 
 protected:
   virtual void computeQpProperties();

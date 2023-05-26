@@ -239,19 +239,16 @@ surfacetemp=300
     temperature = T
     use_displaced_mesh = true
   []
-  [kc_fits]
-    type = CrazyKCPlantFits
+  [steel]
+    type = AriaLaserWeld304LStainlessSteel
     temperature = T
     beta = 1e7
   []
-  [boundary]
-    type = CrazyKCPlantFitsBoundary
+  [steel_boundary]
+    type = AriaLaserWeld304LStainlessSteelBoundary
     boundary = 'front'
     temperature = T
   []
-[]
-
-[Materials]
   [const]
     type = GenericConstantMaterial
     prop_names = 'abs sb_constant'

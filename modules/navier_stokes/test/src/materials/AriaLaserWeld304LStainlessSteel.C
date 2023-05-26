@@ -7,14 +7,14 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "CrazyKCPlantFits.h"
+#include "AriaLaserWeld304LStainlessSteel.h"
 
-registerMooseObject("NavierStokesTestApp", CrazyKCPlantFits);
+registerMooseObject("NavierStokesTestApp", AriaLaserWeld304LStainlessSteel);
 
 InputParameters
-CrazyKCPlantFits::validParams()
+AriaLaserWeld304LStainlessSteel::validParams()
 {
-  InputParameters params = ADMaterial::validParams();
+  InputParameters params = Material::validParams();
   params.addParam<Real>("c_mu0", 0.15616, "mu0 coefficient");
   params.addParam<Real>("c_mu1", -3.3696e-5, "mu1 coefficient");
   params.addParam<Real>("c_mu2", 1.0191e-8, "mu2 coefficient");
@@ -55,8 +55,8 @@ CrazyKCPlantFits::validParams()
   return params;
 }
 
-CrazyKCPlantFits::CrazyKCPlantFits(const InputParameters & parameters)
-  : ADMaterial(parameters),
+AriaLaserWeld304LStainlessSteel::AriaLaserWeld304LStainlessSteel(const InputParameters & parameters)
+  : Material(parameters),
     _c_mu0(getParam<Real>("c_mu0")),
     _c_mu1(getParam<Real>("c_mu1")),
     _c_mu2(getParam<Real>("c_mu2")),
@@ -85,7 +85,7 @@ CrazyKCPlantFits::CrazyKCPlantFits(const InputParameters & parameters)
 }
 
 void
-CrazyKCPlantFits::computeQpProperties()
+AriaLaserWeld304LStainlessSteel::computeQpProperties()
 {
   if (_temperature[_qp] < _Tl * _temperature_units_per_kelvin)
     _mu[_qp] = _mass_units_per_kilogram / (_length_units_per_meter * _time_units_per_second) *
