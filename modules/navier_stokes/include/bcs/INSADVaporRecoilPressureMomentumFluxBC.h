@@ -9,21 +9,18 @@
 
 #pragma once
 
-#include "ADIntegratedBC.h"
+#include "ADVectorIntegratedBC.h"
 
-class DummyDisplacedBoundaryIntegratedBC : public ADIntegratedBC
+class INSADVaporRecoilPressureMomentumFluxBC : public ADVectorIntegratedBC
 {
 public:
   static InputParameters validParams();
 
-  DummyDisplacedBoundaryIntegratedBC(const InputParameters & parameters);
+  INSADVaporRecoilPressureMomentumFluxBC(const InputParameters & parameters);
 
 protected:
   virtual ADReal computeQpResidual() override;
 
-  /// The velocity vector
-  const ADVectorVariableValue & _velocity;
-
-  /// What component of velocity/displacement this object is acting on
-  const unsigned short _component;
+  /// The recoil pressure
+  const ADMaterialProperty<Real> & _rc_pressure;
 };

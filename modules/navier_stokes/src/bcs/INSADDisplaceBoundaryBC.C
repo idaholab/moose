@@ -7,12 +7,12 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "DisplaceBoundaryBC.h"
+#include "INSADDisplaceBoundaryBC.h"
 
-registerMooseObject("NavierStokesApp", DisplaceBoundaryBC);
+registerMooseObject("NavierStokesApp", INSADDisplaceBoundaryBC);
 
 InputParameters
-DisplaceBoundaryBC::validParams()
+INSADDisplaceBoundaryBC::validParams()
 {
   InputParameters params = ADNodalBC::validParams();
   params.addClassDescription("For displacing a boundary");
@@ -22,7 +22,7 @@ DisplaceBoundaryBC::validParams()
   return params;
 }
 
-DisplaceBoundaryBC::DisplaceBoundaryBC(const InputParameters & parameters)
+INSADDisplaceBoundaryBC::INSADDisplaceBoundaryBC(const InputParameters & parameters)
   : ADNodalBC(parameters),
     _velocity(adCoupledNodalValue<RealVectorValue>("velocity")),
     _u_old(_var.nodalValueOld()),
@@ -31,7 +31,7 @@ DisplaceBoundaryBC::DisplaceBoundaryBC(const InputParameters & parameters)
 }
 
 ADReal
-DisplaceBoundaryBC::computeQpResidual()
+INSADDisplaceBoundaryBC::computeQpResidual()
 {
   return _u - (_u_old + this->_dt * _velocity(_component));
 }

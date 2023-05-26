@@ -7,12 +7,12 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "VaporRecoilPressureMomentumFluxBC.h"
+#include "INSADVaporRecoilPressureMomentumFluxBC.h"
 
-registerMooseObject("NavierStokesApp", VaporRecoilPressureMomentumFluxBC);
+registerMooseObject("NavierStokesApp", INSADVaporRecoilPressureMomentumFluxBC);
 
 InputParameters
-VaporRecoilPressureMomentumFluxBC::validParams()
+INSADVaporRecoilPressureMomentumFluxBC::validParams()
 {
   InputParameters params = ADVectorIntegratedBC::validParams();
   params.addClassDescription("Vapor recoil pressure momentum flux");
@@ -21,14 +21,14 @@ VaporRecoilPressureMomentumFluxBC::validParams()
   return params;
 }
 
-VaporRecoilPressureMomentumFluxBC::VaporRecoilPressureMomentumFluxBC(
+INSADVaporRecoilPressureMomentumFluxBC::INSADVaporRecoilPressureMomentumFluxBC(
     const InputParameters & parameters)
   : ADVectorIntegratedBC(parameters), _rc_pressure(getADMaterialProperty<Real>("rc_pressure_name"))
 {
 }
 
 ADReal
-VaporRecoilPressureMomentumFluxBC::computeQpResidual()
+INSADVaporRecoilPressureMomentumFluxBC::computeQpResidual()
 {
   return _test[_i][_qp] * _normals[_qp] * _rc_pressure[_qp];
 }

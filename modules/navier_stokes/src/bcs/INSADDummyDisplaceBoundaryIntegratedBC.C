@@ -7,12 +7,12 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "DummyDisplacedBoundaryIntegratedBC.h"
+#include "INSADDummyDisplaceBoundaryIntegratedBC.h"
 
-registerMooseObject("NavierStokesApp", DummyDisplacedBoundaryIntegratedBC);
+registerMooseObject("NavierStokesApp", INSADDummyDisplaceBoundaryIntegratedBC);
 
 InputParameters
-DummyDisplacedBoundaryIntegratedBC::validParams()
+INSADDummyDisplaceBoundaryIntegratedBC::validParams()
 {
   InputParameters params = ADIntegratedBC::validParams();
   params.addClassDescription(
@@ -23,7 +23,7 @@ DummyDisplacedBoundaryIntegratedBC::validParams()
   return params;
 }
 
-DummyDisplacedBoundaryIntegratedBC::DummyDisplacedBoundaryIntegratedBC(
+INSADDummyDisplaceBoundaryIntegratedBC::INSADDummyDisplaceBoundaryIntegratedBC(
     const InputParameters & parameters)
   : ADIntegratedBC(parameters),
     _velocity(adCoupledVectorValue("velocity")),
@@ -32,7 +32,7 @@ DummyDisplacedBoundaryIntegratedBC::DummyDisplacedBoundaryIntegratedBC(
 }
 
 ADReal
-DummyDisplacedBoundaryIntegratedBC::computeQpResidual()
+INSADDummyDisplaceBoundaryIntegratedBC::computeQpResidual()
 {
   return 0 * _velocity[_qp](_component);
 }

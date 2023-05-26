@@ -9,18 +9,24 @@
 
 #pragma once
 
-#include "ADVectorIntegratedBC.h"
+#include "ADNodalBC.h"
 
-class VaporRecoilPressureMomentumFluxBC : public ADVectorIntegratedBC
+class INSADDisplaceBoundaryBC : public ADNodalBC
 {
 public:
   static InputParameters validParams();
 
-  VaporRecoilPressureMomentumFluxBC(const InputParameters & parameters);
+  INSADDisplaceBoundaryBC(const InputParameters & parameters);
 
 protected:
   virtual ADReal computeQpResidual() override;
 
-  /// The recoil pressure
-  const ADMaterialProperty<Real> & _rc_pressure;
+  /// The velocity vector at the node
+  const ADRealVectorValue & _velocity;
+
+  /// The previous timestep value of the displacement
+  const Real & _u_old;
+
+  /// What component of velocity/displacement this object is acting on
+  const unsigned short _component;
 };

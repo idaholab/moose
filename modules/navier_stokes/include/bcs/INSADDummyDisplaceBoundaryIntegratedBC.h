@@ -9,23 +9,20 @@
 
 #pragma once
 
-#include "ADNodalBC.h"
+#include "ADIntegratedBC.h"
 
-class DisplaceBoundaryBC : public ADNodalBC
+class INSADDummyDisplaceBoundaryIntegratedBC : public ADIntegratedBC
 {
 public:
   static InputParameters validParams();
 
-  DisplaceBoundaryBC(const InputParameters & parameters);
+  INSADDummyDisplaceBoundaryIntegratedBC(const InputParameters & parameters);
 
 protected:
   virtual ADReal computeQpResidual() override;
 
-  /// The velocity vector at the node
-  const ADRealVectorValue & _velocity;
-
-  /// The previous timestep value of the displacement
-  const Real & _u_old;
+  /// The velocity vector
+  const ADVectorVariableValue & _velocity;
 
   /// What component of velocity/displacement this object is acting on
   const unsigned short _component;

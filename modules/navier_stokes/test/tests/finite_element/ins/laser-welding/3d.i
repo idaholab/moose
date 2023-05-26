@@ -182,48 +182,48 @@ surfacetemp=300
     use_displaced_mesh = true
   []
   [vapor_recoil]
-    type = VaporRecoilPressureMomentumFluxBC
+    type = INSADVaporRecoilPressureMomentumFluxBC
     variable = vel
     boundary = 'front'
     use_displaced_mesh = true
   []
   [displace_x_top]
-    type = DisplaceBoundaryBC
+    type = INSADDisplaceBoundaryBC
     boundary = 'front'
     variable = 'disp_x'
     velocity = 'vel'
     component = 0
   []
   [displace_y_top]
-    type = DisplaceBoundaryBC
+    type = INSADDisplaceBoundaryBC
     boundary = 'front'
     variable = 'disp_y'
     velocity = 'vel'
     component = 1
   []
   [displace_z_top]
-    type = DisplaceBoundaryBC
+    type = INSADDisplaceBoundaryBC
     boundary = 'front'
     variable = 'disp_z'
     velocity = 'vel'
     component = 2
   []
   [displace_x_top_dummy]
-    type = DummyDisplacedBoundaryIntegratedBC
+    type = INSADDummyDisplaceBoundaryIntegratedBC
     boundary = 'front'
     variable = 'disp_x'
     velocity = 'vel'
     component = 0
   []
   [displace_y_top_dummy]
-    type = DummyDisplacedBoundaryIntegratedBC
+    type = INSADDummyDisplaceBoundaryIntegratedBC
     boundary = 'front'
     variable = 'disp_y'
     velocity = 'vel'
     component = 1
   []
   [displace_z_top_dummy]
-    type = DummyDisplacedBoundaryIntegratedBC
+    type = INSADDummyDisplaceBoundaryIntegratedBC
     boundary = 'front'
     variable = 'disp_z'
     velocity = 'vel'
