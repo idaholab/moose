@@ -9,7 +9,6 @@
 
 #include "MeshCut2DFunctionUserObject.h"
 
-#include "MooseError.h"
 #include "libmesh/string_to_enum.h"
 #include "MooseMesh.h"
 #include "MooseEnum.h"
@@ -38,7 +37,8 @@ MeshCut2DFunctionUserObject::MeshCut2DFunctionUserObject(const InputParameters &
   : MeshCut2DUserObjectBase(parameters),
     _func_x(&getFunction("growth_direction_x")),
     _func_y(&getFunction("growth_direction_y")),
-    _growth_function(&getFunction("growth_rate"))
+    _growth_function(&getFunction("growth_rate")),
+    _time_of_previous_call_to_UO(std::numeric_limits<Real>::lowest())
 {
 }
 
@@ -58,6 +58,7 @@ void
 MeshCut2DFunctionUserObject::findActiveBoundaryGrowth()
 {
   _active_front_node_growth_vectors.clear();
+  Point zero; // Used for checking whether direction is zero
   for (unsigned int i = 0; i < _original_and_current_front_node_ids.size(); ++i)
   {
     // compute growth direction
@@ -73,8 +74,9 @@ MeshCut2DFunctionUserObject::findActiveBoundaryGrowth()
     Point nodal_offset;
     Real velo = _growth_function->value(_t, Point(0, 0, 0));
     nodal_offset = dir * velo * _dt;
-
-    _active_front_node_growth_vectors.push_back(
-        std::make_pair(_original_and_current_front_node_ids[i].second, nodal_offset));
+    // only increment the crack if the growth is positive
+    if (!nodal_offset.absolute_fuzzy_equals(zero))
+      _active_front_node_growth_vectors.push_back(
+          std::make_pair(_original_and_current_front_node_ids[i].second, nodal_offset));
   }
 }
