@@ -1,58 +1,30 @@
 [Mesh]
   type = GeneratedMesh
-  dim = 2
-  nx = 10
-  ny = 10
+  dim = 1
 []
 
 [Variables]
   [u]
+    order = CONSTANT
+    family = MONOMIAL
   []
 []
 
-[Kernels]
-  [diff]
-    type = CoefDiffusion
-    variable = u
-    coef = 0.1
-  []
-  [time]
-    type = TimeDerivative
-    variable = u
-  []
-[]
-
-[BCs]
-  [left]
-    type = DirichletBC
-    variable = u
-    boundary = left
-    value = 0
-  []
-  [right]
-    type = DirichletBC
-    variable = u
-    boundary = right
-    value = 1
-  []
+[Problem]
+   type = SlowProblem
+   seconds_to_sleep = '0.0 0.0 0.1 0.1 0.5 0.2 0.2 0.1 0.1 0.1'
+   kernel_coverage_check = false
 []
 
 [Executioner]
   type = Transient
-  end_time = 0.8
-  solve_type = PJFNK
-  petsc_options_iname = '-pc_type -pc_hypre_type'
-  petsc_options_value = 'hypre boomeramg'
+  solve_type = NEWTON
+  num_steps = 5
 
   [TimeSteppers]
-    [ConstDT1]
-      type = ConstantDT
-      dt = 0.2
-    []
-
-    [ConstDT2]
-      type = ConstantDT
-      dt = 0.3
+    [SolutionTimeAdaptiveDT]
+      type = SolutionTimeAdaptiveDT
+      dt = 0.5
     []
 
     [LogConstDT]
@@ -63,15 +35,21 @@
 
     [Timesequence]
       type = TimeSequenceStepper
-      time_sequence  = '0  0.5 0.8 1 1.2'
+      time_sequence  = '0  0.12 0.2 0.5 0.6'
     []
+  []
+[]
+
+[Postprocessors]
+  [dt]
+    type = TimestepSize
   []
 []
 
 [Outputs]
   [checkpoint]
     type = Checkpoint
-    num_files = 4
+    num_files = 5
   []
   file_base='restart_test'
 []

@@ -27,18 +27,6 @@
       detail = 'AB2PredictorCorrector as one of the input time steppers,'
     []
 
-    [SolutionTimeAdaptiveDT]
-      type = CSVDiff
-      input = 'SolutionTimeAdaptiveDT.i'
-      csvdiff = 'SolutionTimeAdaptiveDT.csv'
-      detail = 'SolutionTimeAdaptiveDT as one of the input time steppers,'
-
-      # The tested object relies on walltime elapsed for each step. Under valgrind
-      # the execution slows down so much that the set delays in SlowProblem become
-      # small compared to the overall execution overhead and the test fails.
-      valgrind = NONE
-    []
-
     [lower_bound]
       type = CSVDiff
       input = 'lower_bound.i'
