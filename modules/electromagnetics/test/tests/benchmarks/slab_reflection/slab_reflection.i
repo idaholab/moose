@@ -180,6 +180,8 @@ theta = 0 # wave incidence angle, in degrees
 [Executioner]
   type = Steady
   solve_type = NEWTON
+  petsc_options_iname = '-pc_type'
+  petsc_options_value = 'lu'
 []
 
 [Outputs]
