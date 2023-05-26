@@ -217,7 +217,12 @@ ParsedGenerateSideset::generate()
       _func_params[1] = curr_side->vertex_average()(1);
       _func_params[2] = curr_side->vertex_average()(2);
       if (evaluate(_func_F))
+      {
         boundary_info.add_side(elem, side, boundary_ids[0]);
+        // Create nodeset by default
+        for (auto & node : curr_side->node_ref_range())
+          boundary_info.add_node(&node, boundary_ids[0]);
+      }
     }
   }
   finalize();
