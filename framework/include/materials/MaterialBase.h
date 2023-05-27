@@ -327,7 +327,7 @@ protected:
   /// Small helper function to call store{Subdomain,Boundary}MatPropName
   void registerPropName(std::string prop_name, bool is_get, MaterialPropState state);
 
-  /// Check and throw an error if the execution has progerssed past the construction stage
+  /// Check and throw an error if the execution has progressed past the construction stage
   void checkExecutionStage();
 
   std::vector<unsigned int> _displacements;

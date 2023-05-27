@@ -75,16 +75,31 @@ template <typename T>
 void
 MaterialFunctorConverterTempl<T>::computeQpProperties()
 {
-  // TODO: do we know when we are on a face or an element?
-  const Moose::ElemQpArg arg = {_current_elem, _qp, _qrule};
-  mooseAssert(_current_elem, "We must know where we are");
-  mooseAssert(_qrule, "We must know the quadrature");
-  const auto state = Moose::currentState();
-  for (const auto i : index_range(_ad_props_out))
-    (*_ad_props_out[i])[_qp] = (*_functors_in[i])(arg, state);
+  // Using Qp 0 can leverage the functor caching
+  // TODO: Find a way to effectively use subdomain-constant-ness
+  unsigned int qp_used = (_constant_option == ConstantTypeEnum::NONE) ? _qp : 0;
 
-  for (const auto i : index_range(_reg_props_out))
-    (*_reg_props_out[i])[_qp] = MetaPhysicL::raw_value((*_functors_in[i])(arg, state));
+  const auto state = Moose::currentState();
+  if (_bnd)
+  {
+    const Moose::ElemSideQpArg side_arg = {_current_elem, _current_side, qp_used, _qrule};
+    for (const auto i : index_range(_ad_props_out))
+      (*_ad_props_out[i])[_qp] = (*_functors_in[i])(side_arg, state);
+
+    for (const auto i : index_range(_reg_props_out))
+      (*_reg_props_out[i])[_qp] = MetaPhysicL::raw_value((*_functors_in[i])(side_arg, state));
+  }
+  else
+  {
+    const Elem * elem = _neighbor ? _current_elem->neighbor_ptr(_current_side) : _current_elem;
+    mooseAssert(elem, "We should have an element");
+    const Moose::ElemQpArg elem_arg = {elem, qp_used, _qrule};
+    for (const auto i : index_range(_ad_props_out))
+      (*_ad_props_out[i])[_qp] = (*_functors_in[i])(elem_arg, state);
+
+    for (const auto i : index_range(_reg_props_out))
+      (*_reg_props_out[i])[_qp] = MetaPhysicL::raw_value((*_functors_in[i])(elem_arg, state));
+  }
 }
 
 template class MaterialFunctorConverterTempl<Real>;
