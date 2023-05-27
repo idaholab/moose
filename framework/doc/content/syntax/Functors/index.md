@@ -21,7 +21,22 @@ or value before that previous one.
 If a Functor is reported as missing by the simulation, you may use the [!param](/Debug/SetupDebugAction/show_functors)
 to get more information about which functors were created and requested.
 
-## Spatial arguments to functors id=spatial-overloads
+## Developing with functors
+
+Functors are evaluated on-the-fly. E.g. they can be viewed as functions of the current location in
+space (and time). Functors provide several overloads of the
+`operator()` method for different "geometric quantities". One example of a
+"geometric quantity" is based around an element, e.g. for an `FVElementalKernel`, the
+value of a functor material property in a cell-averaged sense can be obtained by
+the syntax
+
+- `_foo(makeElemArg(_current_elem), determineState())`
+
+where here `_foo` is a functor data member of the kernel, `makeElemArg` is a helper routine for creating a
+functor element-based spatial argument, and `determineState()` is a helper routine for determining the correct
+time state to evaluate at, e.g. the current time for an implicit kernel and the old time for an explicit kernel.
+
+### Spatial arguments to functors id=spatial-overloads
 
 In the following subsections, we describe the various spatial arguments that functors can be evaluated at.
 Almost no functor developers should have to concern
@@ -35,7 +50,7 @@ Any call to a functor looks like the following
 `_foo(const SpatialArg & r, const TemporalArg & t)`. Below are the possible type overloads of
 `SpatialArg`.
 
-### FaceArg
+#### FaceArg
 
 A typedef defining a "face" evaluation calling argument. This is composed of
 
@@ -43,13 +58,23 @@ A typedef defining a "face" evaluation calling argument. This is composed of
 - a limiter which defines how the functor evaluated on either side of the face should be
   interpolated to the face
 - a boolean which states whether the face information element is upwind of the face
+- a boolean to indicate whether to correct for element skewness
 - a pair of subdomain IDs. These do not always correspond to the face info element subdomain
   ID and face info neighbor subdomain ID. For instance if a flux kernel is operating at a
   subdomain boundary on which the kernel is defined on one side but not the other, the
   passed-in subdomain IDs will both correspond to the subdomain ID that the flux kernel is
   defined on
 
-### ElemQpArg
+#### ElemArg
+
+Argument for requesting functor evaluation at an element. This is often used to evaluate
+constant monomial or finite volume variables.
+Data in the argument:
+
+- The element of interest
+- Whether to correct for element skewness
+
+#### ElemQpArg
 
 Argument for requesting functor evaluation at a quadrature point location in an element. Data
 in the argument:
@@ -62,7 +87,7 @@ in the argument:
 If functors are functions of nonlinear degrees of freedom, evaluation with this
 argument will likely result in calls to libMesh `FE::reinit`.
 
-### ElemSideQpArg
+#### ElemSideQpArg
 
 Argument for requesting functor evaluation at quadrature point locations on an element side.
 Data in the argument:
@@ -76,12 +101,27 @@ Data in the argument:
 If functors are functions of nonlinear degrees of freedom, evaluation with this
 argument will likely result in calls to libMesh `FE::reinit`.
 
+#### ElemPointArg
+
+Argument for requesting functor evaluation at a point located inside an element.
+Data in the argument:
+
+- The element containing the point
+- The point to evaluate the functor at
+- Whether to correct for element skewness
+
+#### Nodes
+
+There is currently no nodal argument to functors.
+Please contact a MOOSE developer if you need this.
+
 ### Functor caching
 
 By default, functors are always (re-)evaluated every time they are called with
 `operator()`. However, the base class `Moose::Functor` has a
 `setCacheClearanceSchedule(const std::set<ExecFlagType> & clearance_schedule)` API that allows
-control of evaluations. Supported values for the `clearance_schedule` are any combination of
+control of evaluations (in addition to the `clearance_schedule` argument to `addFunctorProperty` introduced above).
+Supported values for the `clearance_schedule` are any combination of
 `EXEC_ALWAYS`, `EXEC_TIMESTEP_BEGIN`, `EXEC_LINEAR`, and `EXEC_NONLINEAR`. These will cause cached
 evaluations of functors to be cleared always (in fact not surprisingly in this
 case we never fill the cache), on `timestepSetup`, on `residualSetup`, and on `jacobianSetup`

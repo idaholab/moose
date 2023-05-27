@@ -22,7 +22,7 @@ in lieu of functor material properties. Functor material properties can only be 
 [MaterialFunctorConverter.md] to process them.
 
 Functor materials can be created within the `[FunctorMaterials]` block, and currently the `[Materials]` block as well,
-but that syntax is considered for deprecation.
+but that syntax will be deprecated.
 
 !alert note
 If a Functor is reported as missing by the simulation, and it was supposed to be created by a `FunctorMaterial`,
