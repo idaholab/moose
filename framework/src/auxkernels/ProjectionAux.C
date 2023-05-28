@@ -10,7 +10,6 @@
 #include "ProjectionAux.h"
 #include "SystemBase.h"
 
-registerMooseObjectRenamed("MooseApp", SelfAux, "01/30/2024 24:00", ProjectionAux);
 registerMooseObject("MooseApp", ProjectionAux);
 
 InputParameters

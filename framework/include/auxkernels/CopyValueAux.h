@@ -12,18 +12,21 @@
 #include "AuxKernel.h"
 
 /**
- *
+ * Copies one variable onto an auxiliary variable
  */
 class CopyValueAux : public AuxKernel
 {
 public:
+  static InputParameters validParams();
+
   CopyValueAux(const InputParameters & parameters);
 
 protected:
-  virtual Real computeValue();
+  virtual Real computeValue() override;
 
-  const VariableValue & _source_var;
+  /// The variable to project from
+  const VariableValue & _v;
 
-public:
-  static InputParameters validParams();
+  /// A reference to the variable to project from
+  const MooseVariable & _source_variable;
 };
