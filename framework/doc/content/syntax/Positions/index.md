@@ -21,3 +21,9 @@ of the subapps will be updated with the `Positions`.
 
 !alert warning
 The number of `Positions` should currently stay constant during the simulation.
+
+!syntax list /Positions objects=True actions=False subsystems=False
+
+!syntax list /Positions objects=False actions=False subsystems=True
+
+!syntax list /Positions objects=False actions=True subsystems=False
