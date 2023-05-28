@@ -3,31 +3,18 @@
 # Harris, R. M.-P.-A. (2009). The SCEC/USGS Dynamic Earthquake Rupture Code Verification Exercise. Seismological Research Letters, vol. 80, no. 1, pages 119-126. #
 
 [Mesh]
-    # [./msh]
-    #   type = GeneratedMeshGenerator
-    #   dim = 3
-    #   nx = 150
-    #   ny = 150
-    #   nz = 150
-    #   xmin = -15000
-    #   xmax = 15000
-    #   ymin = -15000
-    #   ymax = 15000
-    #   zmin = -15000
-    #   zmax = 15000
-    # []
     [./msh]
       type = GeneratedMeshGenerator
       dim = 3
-      nx = 15
-      ny = 15
-      nz = 15
-      xmin = -1500
-      xmax = 1500
-      ymin = -1500
-      ymax = 1500
-      zmin = -1500
-      zmax = 1500
+      nx = 150
+      ny = 150
+      nz = 150
+      xmin = -15000
+      xmax = 15000
+      ymin = -15000
+      ymax = 15000
+      zmin = -15000
+      zmax = 15000
     []
     [./new_block]
       type = ParsedSubdomainMeshGenerator
@@ -315,7 +302,7 @@
   [Executioner]
     type = Transient
     dt = 0.005
-    end_time = 0.01
+    end_time = 3.0
     [TimeIntegrator]
       type = CentralDifference
       solve_type = lumped
@@ -324,5 +311,5 @@
   
   [Outputs]
     exodus = true
-    interval = 20
+    interval = 10
   []

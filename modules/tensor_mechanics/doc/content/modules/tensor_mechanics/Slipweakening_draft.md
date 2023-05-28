@@ -17,7 +17,7 @@ An overview of the methodology is given below, followed by a verification case o
 
 The mesh generation is handled by MOOSE built-in mesh generator using functionalities from Cohesive Zone Model. Specifically, an initial mesh is generated using ```GeneratedMeshGenerator``` as a first step. Two subdomains, upper and lower blocks associated with planar fault are identified by calling ```ParsedSubdomainMeshGenerator```. Using the function ```BreakMeshByBlockGenerator```, an interface between the two blocks (fault surfaces) is created and the added nodes and boundaries between block pairs are taken care of.
 
-<img src="../../media/tensor_mechanics/slipweakening_draft/image1.png" style="width:4.20084in;height:2.86519in"
+<img src="../../../../../../large_media/slipweakening_draft/image1.png" style="width:4.20084in;height:2.86519in"
 alt="Shape Description automatically generated with medium confidence" />
 
 *Figure 1 Example 3D Mesh Configuration with QUAD4 Element (0 - upper block, 1 – lower block)*
@@ -1051,7 +1051,7 @@ All the previous steps are gathered and summarized below:
 2.  ```(Aux Variable Calculation)``` Update/store the displacement,
     reaction, velocity at current time step
 
-3.  ```(Material Object Calculation)``` Using current quantities to
+3.  ```(Material Object Evaluation)``` Using current quantities to
     enforce fault tractions
 
 5.  ```(Residual Computation)``` Use Central difference computing residual
@@ -1079,6 +1079,11 @@ Inside ```(Material Object Calculation)```, do the following:
 5.  Compute $T_{v}$ using equation $(13)$ and enforce as interface
     traction boundary condition
 
+A flow chart summarizing the solving procedure is given as follows;
+
+<img src="../../../../../../large_media/slipweakening_draft/image29.png" style="width:4.20084in;height:2.86519in"
+alt="Shape Description automatically generated with medium confidence" />
+
 ### Verification Case: TPV205-2D
 
 #### Mesh:
@@ -1086,7 +1091,7 @@ Inside ```(Material Object Calculation)```, do the following:
 A square mesh with uniform **QUAD4** element and mesh size **100m** is created using MOOSE built-in mesh generator, following the descriptions in the previous section, the fault is represented as an interface using
 **Cohesive Zone Model**.
 
-<img src="../../media/tensor_mechanics/slipweakening_draft/image30.png" style="width:4.64in;height:3.06805in"
+<img src="../../../../../../large_media/slipweakening_draft/image30.png" style="width:4.64in;height:3.06805in"
 alt="Treemap chart Description automatically generated" />
 
 *Figure 25 Example 2D Mesh Configuration with QUAD4 Element (0 - lower block, 1 - upper block)*
@@ -1103,7 +1108,7 @@ We use the benchmark problem TPV205-2D from the SCEC Dynamic Rupture Validation 
 
 The rupture is nucleated using a 3-km wide overstressed region located at the center of the fault. The normal stress is uniform along the entire fault length while initial shear stress is nonuniform. Two strength barriers with length $L_{s}$, are located at the left and right edges of the fault. The barriers provide enough static frictional strength to stop the rupture propagation.
 
-<img src="../../media/tensor_mechanics/slipweakening_draft/image31.png" style="width:6.5in;height:2.10347in"
+<img src="../../../../../../large_media/slipweakening_draft/image31.png" style="width:6.5in;height:2.10347in"
 alt="Chart, box and whisker chart Description automatically generated" />
 
 *Figure 26 TPV205 Problem Description (Problem Setup, Initial Shear Stress Distribution, Linear Slip Weakening Friction Law)*
@@ -1128,12 +1133,12 @@ The parameter table used for this validation is summarized in Table 1.
 The simulation runs up to *12s*. The results here compare the current implementation (Moose) and reported benchmark data with mesh size 50m,
 100m (FEM 50m, FEM 100m) for the time history of slip and slip rate observed in several site locations $x = - 4.5km,\ \ x = 0km,\ \ x = 4.5m.$ There is an excellent match between the current Moose implementation and benchmark problem published results.
 
-<img src="../../media/tensor_mechanics/slipweakening_draft/image32.png" style="width:4.08295in;height:4.95276in"
+<img src="../../../../../../large_media/slipweakening_draft/image32.png" style="width:4.08295in;height:4.95276in"
 alt="Chart Description automatically generated with low confidence" />
 
 *Figure 27 Time History of Slip (FE - 50m, FE - 100m, Moose) at locations 0 km, 4.5 km, -4.5 km*
 
-<img src="../../media/tensor_mechanics/slipweakening_draft/image33.png" style="width:3.95276in;height:4.33621in"
+<img src="../../../../../../large_media/slipweakening_draft/image33.png" style="width:3.95276in;height:4.33621in"
 alt="Diagram Description automatically generated" />
 
 *Figure 28 Time History of Slip rate (FE - 50m, FE - 100m, Moose) at locations 0 km, 4.5 km, -4.5 km*
@@ -1141,7 +1146,7 @@ alt="Diagram Description automatically generated" />
 The L2 error norm is measured with FE – 100m for full time history of
 slip, which gives error within 5%:
 
-<img src="../../media/tensor_mechanics/slipweakening_draft/image34.png" style="width:5.04667in;height:1.34686in"
+<img src="../../../../../../large_media/slipweakening_draft/image34.png" style="width:5.04667in;height:1.34686in"
 alt="Table Description automatically generated" />
 
 *Figure 29 TPV205-2D L2 Error Norm of Slip (FE-100m, MOOSE) at locations (0m, 4.5km, -4.5km)*
@@ -1155,7 +1160,7 @@ element and mesh size 200m is created using MOOSE built-in mesh
 generator, following the descriptions in the previous section, the fault
 is represented as an x-z plane surface using **Cohesive Zone Model**.
 
-<img src="../../media/tensor_mechanics/slipweakening_draft/image35.png" style="width:4.30667in;height:3.64548in"
+<img src="../../../../../../large_media/slipweakening_draft/image35.png" style="width:4.30667in;height:3.64548in"
 alt="A picture containing shape Description automatically generated" />
 
 *Figure 30 Example 3D Mesh Configuration with QUAD4 Element (0 - lower block, 1 - upper block)*
@@ -1170,7 +1175,7 @@ We use the benchmark problem TPV205-3D from the SCEC Dynamic Rupture Validation 
 
 The rupture is nucleated within a (3km $\times$ 3km) overstressed region which the nucleation center is located at strike(x) 0m, dip(z) 7.5km. The normal stress is uniform along the entire fault length while initial shear stress $\tau_{xy}$ (along strike direction) is nonuniform, while initial shear stress $\tau_{zy}$ (along dip direction) is kept zero. Two strength barriers (3km $\times$ 3km) with the centers located at the strike -7.5km, dip 7.5km on the left and the strike 7.5km, dip 7.5km on the right of the overstressed region on the fault. The barriers (dip \> 15km) provide enough static frictional strength to stop the rupture propagation along dip direction.
 
-<img src="../../media/tensor_mechanics/slipweakening_draft/image36.png" style="width:6.5in;height:4.37431in"
+<img src="../../../../../../large_media/slipweakening_draft/image36.png" style="width:6.5in;height:4.37431in"
 alt="Graphical user interface Description automatically generated" />
 
 *Figure 31 Fault Surface Background Shear Stress Distribution*
@@ -1261,12 +1266,12 @@ class="math display"><strong>Δ</strong><strong>x</strong></span></td>
 The simulation runs up to *3s*. The results here compare the current implementation (Moose) and reported benchmark data with mesh size 100m, 200m (FEM 100m, FEM 200m) for the time history of slip and slip rate observed in several site locations
 $x = - 4.5km,\ \ x = 0km,\ \ x = 4.5m.$ with same dip distance 7.5km.
 
-<img src="../../media/tensor_mechanics/slipweakening_draft/image37.png" style="width:4.41732in;height:4.94164in"
+<img src="../../../../../../large_media/slipweakening_draft/image37.png" style="width:4.41732in;height:4.94164in"
 alt="Diagram Description automatically generated" />
 
 *Figure 32 Time History of Slip (Reference FE - 200m, FE – 100m, Moose) at locations 0 km, 4.5 km, -4.5 km*
 
-<img src="../../media/tensor_mechanics/slipweakening_draft/image38.png" style="width:4.09449in;height:4.88233in"
+<img src="../../../../../../large_media/slipweakening_draft/image38.png" style="width:4.09449in;height:4.88233in"
 alt="Graphical user interface Description automatically generated with medium confidence" />
 
 *Figure 33 Time History of Slip Rate (Reference FE - 200m, FE – 100m, Moose) at locations 0 km, 4.5 km, -4.5 km*
@@ -1275,7 +1280,7 @@ Good agreements can be observed especially compared with FE-100m results. With t
 
 The L2 error norm between (FE-100m and MOOSE-200m) is documented in the following chart with the error within 5%:
 
-<img src="../../media/tensor_mechanics/slipweakening_draft/image39.png" style="width:5.15333in;height:1.46066in"
+<img src="../../../../../../large_media/slipweakening_draft/image39.png" style="width:5.15333in;height:1.46066in"
 alt="Table Description automatically generated" />
 
 *Figure 34 TPV-3D L2 Error Norm of Slip (FE-100m, MOOSE-200m) at locations (0m, 4.5km, -4.5km)*
