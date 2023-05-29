@@ -2380,8 +2380,8 @@ FEProblemBase::getDistribution(const std::string & name)
 
 void
 FEProblemBase::addLikelihood(const std::string & type,
-                               const std::string & name,
-                               InputParameters & parameters)
+                             const std::string & name,
+                             InputParameters & parameters)
 {
   parameters.set<std::string>("type") = type;
   addObject<Likelihood>(type, name, parameters, /* threaded = */ false);
