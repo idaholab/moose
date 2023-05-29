@@ -119,7 +119,7 @@ Real
 DensityUpdate::computeUpdatedDensity(Real current_density, Real dc, Real lmid)
 {
   // Define the maximum allowable change in density
-  Real move = 0.9;
+  Real move = 0.5;
   // Compute the updated density based on the current density, the sensitivity, and the midpoint
   // value
   Real updated_density = std::max(

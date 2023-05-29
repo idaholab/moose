@@ -38,7 +38,6 @@ ComplianceSensitivity::computeQpProperties()
   Real derivative =
       -_power * (_E - _Emin) * MathUtils::pow(_design_density[_qp], _power - 1) * compliance;
 
-  // Compute the sensitivity as the derivative divided by the volume of the current element
   // This makes the sensitivity mesh size independent
   _sensitivity[_qp] = derivative;
 }
