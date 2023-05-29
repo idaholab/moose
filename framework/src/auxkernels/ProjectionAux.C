@@ -26,28 +26,29 @@ ProjectionAux::validParams()
 
   // We need some ghosting for all elemental to nodal projections
   params.addParam<unsigned short>("ghost_layers", 1, "The number of layers of elements to ghost.");
-  params.addRelationshipManager(
-      "ElementPointNeighborLayers",
-      Moose::RelationshipManagerType::GEOMETRIC | Moose::RelationshipManagerType::ALGEBRAIC,
-      [](const InputParameters & obj_params, InputParameters & rm_params)
-      {
-        rm_params.set<unsigned short>("layers") = obj_params.get<unsigned short>("ghost_layers");
-        rm_params.set<bool>("use_displaced_mesh") = obj_params.get<bool>("use_displaced_mesh");
-      });
+  params.addRelationshipManager("ElementPointNeighborLayers",
+                                Moose::RelationshipManagerType::ALGEBRAIC,
+                                [](const InputParameters & obj_params, InputParameters & rm_params)
+                                {
+                                  rm_params.set<unsigned short>("layers") =
+                                      obj_params.get<unsigned short>("ghost_layers");
+                                  rm_params.set<bool>("use_displaced_mesh") =
+                                      obj_params.get<bool>("use_displaced_mesh");
+                                });
   return params;
 }
 
 ProjectionAux::ProjectionAux(const InputParameters & parameters)
   : AuxKernel(parameters),
     _v(coupledValue("v")),
-    _source_variable(getVar("v", 0)),
-    _source_sys(_source_variable->sys())
+    _source_variable(*getVar("v", 0)),
+    _source_sys(_source_variable.sys())
 {
   // Output some messages to user
-  if (isNodal() && _source_variable->isNodal() && _source_variable->order() < _var.order())
+  if (isNodal() && _source_variable.isNodal() && _source_variable.order() < _var.order())
     mooseInfo(
         "Target nodal variable is higher order than source, using volume-weighted projection");
-  else if (_source_variable->order() > _var.order())
+  else if (_source_variable.order() > _var.order())
     mooseInfo("Projection lowers order, please expect a loss of accuracy");
   else if (_var.feType().family == SIDE_HIERARCHIC)
     paramError("variable", "SIDE_HIERARCHIC is not supported");
@@ -56,13 +57,13 @@ ProjectionAux::ProjectionAux(const InputParameters & parameters)
 Real
 ProjectionAux::computeValue()
 {
-  if (!isNodal() || (_source_variable->isNodal() && _source_variable->order() >= _var.order()))
+  if (!isNodal() || (_source_variable.isNodal() && _source_variable.order() >= _var.order()))
     return _v[_qp];
   // projecting continuous elemental variable onto a node
-  else if (!_source_variable->isNodal() && _source_variable->getContinuity() != DISCONTINUOUS &&
-           _source_variable->getContinuity() != SIDE_DISCONTINUOUS)
+  else if (!_source_variable.isNodal() && _source_variable.getContinuity() != DISCONTINUOUS &&
+           _source_variable.getContinuity() != SIDE_DISCONTINUOUS)
     return _source_sys.system().point_value(
-        _source_variable->number(), *_current_node, elemOnNodeVariableIsDefinedOn());
+        _source_variable.number(), *_current_node, elemOnNodeVariableIsDefinedOn());
   // Handle discontinuous elemental variable projection into a nodal variable
   // AND nodal low order -> nodal higher order
   else
@@ -74,28 +75,19 @@ ProjectionAux::computeValue()
                 "Should have found an element around node " + std::to_string(_current_node->id()));
 
     // Get the neighbor element centroid values & element volumes
-    std::vector<Real> elem_values(elem_ids->second.size(), 0);
-    std::vector<Real> elem_volumes(elem_ids->second.size(), 0);
-    auto index = 0;
+    Real sum_weighted_values = 0;
+    Real sum_volumes = 0;
     for (auto & id : elem_ids->second)
     {
       const auto & elem = _mesh.elemPtr(id);
-      if (_source_variable->hasBlocks(elem->subdomain_id()))
+      if (_source_variable.hasBlocks(elem->subdomain_id()))
       {
-        elem_values[index] = _source_sys.system().point_value(
-            _source_variable->number(), elem->true_centroid(), elem);
-        elem_volumes[index] = elem->volume();
+        const auto elem_volume = elem->volume();
+        sum_weighted_values += _source_sys.system().point_value(
+                                   _source_variable.number(), elem->true_centroid(), elem) *
+                               elem_volume;
+        sum_volumes += elem_volume;
       }
-      index++;
-    }
-
-    // Average with volume weighting
-    Real sum_weighted_values = 0;
-    Real sum_volumes = 0;
-    for (unsigned int i = 0; i < elem_values.size(); i++)
-    {
-      sum_weighted_values += elem_values[i] * elem_volumes[i];
-      sum_volumes += elem_volumes[i];
     }
 
     return sum_weighted_values / sum_volumes;
@@ -106,7 +98,7 @@ const Elem *
 ProjectionAux::elemOnNodeVariableIsDefinedOn() const
 {
   for (const auto & elem_id : _mesh.nodeToElemMap().find(_current_node->id())->second)
-    if (_source_variable->hasBlocks(_mesh.elemPtr(elem_id)->subdomain_id()))
+    if (_source_variable.hasBlocks(_mesh.elemPtr(elem_id)->subdomain_id()))
       return _mesh.elemPtr(elem_id);
   mooseError("Source variable is not defined everywhere the target variable is");
 }
