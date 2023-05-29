@@ -22,12 +22,7 @@ public:
 
   Likelihood(const InputParameters & parameters);
   /**
-   * Compute the probability density function at vector x (continuous case)
+   * Compute the probability density or mass function at vector x
    */
-  virtual Real densityFunction() const = 0;
-
-  /**
-   * Compute the probability mass function at vector x (discrete case)
-   */
-  virtual Real massFunction() const = 0;
+  virtual Real function(const std::vector<Real> & x) const = 0;
 };

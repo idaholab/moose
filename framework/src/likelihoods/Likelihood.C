@@ -14,7 +14,8 @@ InputParameters
 Likelihood::validParams()
 {
   InputParameters params = MooseObject::validParams();
-  params.addRequiredParam<std::string>("type", "class/type name identifying the likelihood function");
+  params.addRequiredParam<std::string>("type",
+                                       "class/type name identifying the likelihood function");
   params.registerBase("Likelihood");
   params.registerSystemAttributeName("Likelihood");
   return params;
