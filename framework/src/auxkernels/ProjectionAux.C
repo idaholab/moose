@@ -45,13 +45,8 @@ ProjectionAux::ProjectionAux(const InputParameters & parameters)
     _source_sys(_source_variable.sys())
 {
   // Output some messages to user
-  if (isNodal() && _source_variable.isNodal() && _source_variable.order() < _var.order())
-    mooseInfo(
-        "Target nodal variable is higher order than source, using volume-weighted projection");
-  else if (_source_variable.order() > _var.order())
+  if (_source_variable.order() > _var.order())
     mooseInfo("Projection lowers order, please expect a loss of accuracy");
-  else if (_var.feType().family == SIDE_HIERARCHIC)
-    paramError("variable", "SIDE_HIERARCHIC is not supported");
 }
 
 Real
@@ -60,12 +55,12 @@ ProjectionAux::computeValue()
   if (!isNodal() || (_source_variable.isNodal() && _source_variable.order() >= _var.order()))
     return _v[_qp];
   // projecting continuous elemental variable onto a node
-  else if (!_source_variable.isNodal() && _source_variable.getContinuity() != DISCONTINUOUS &&
+  // AND nodal low order -> nodal higher order
+  else if (_source_variable.getContinuity() != DISCONTINUOUS &&
            _source_variable.getContinuity() != SIDE_DISCONTINUOUS)
     return _source_sys.system().point_value(
         _source_variable.number(), *_current_node, elemOnNodeVariableIsDefinedOn());
   // Handle discontinuous elemental variable projection into a nodal variable
-  // AND nodal low order -> nodal higher order
   else
   {
     // Custom projection rule : use neighbor element centroid values weighted by element volumes
