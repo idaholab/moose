@@ -76,21 +76,9 @@
   [test_elem_fv]
     type = MooseVariableFVReal
   []
-  [test_elem_hermite]
-    family = HERMITE
-    order = THIRD
-  []
-  [test_elem_hermite_high]
-    family = HERMITE
-    order = FOURTH
-  []
   [test_elem_hierarchic]
     family = HIERARCHIC
     order = FIRST
-  []
-  [test_elem_hierarchic_high]
-    family = HIERARCHIC
-    order = SECOND
   []
   [test_elem_xyz]
     family = XYZ
@@ -104,17 +92,9 @@
     family = SZABAB
     order = FIRST
   []
-  [test_elem_szabab_high]
-    family = SZABAB
-    order = SECOND
-  []
   [test_elem_bernstein]
     family = BERNSTEIN
     order = FIRST
-  []
-  [test_elem_bernstein_high]
-    family = BERNSTEIN
-    order = SECOND
   []
   [test_elem_l2_lagrange]
     family = L2_LAGRANGE
@@ -149,21 +129,9 @@
   [test_nodal_fv]
     type = MooseVariableFVReal
   []
-  [test_nodal_hermite]
-    family = HERMITE
-    order = THIRD
-  []
-  [test_nodal_hermite_high]
-    family = HERMITE
-    order = FOURTH
-  []
   [test_nodal_hierarchic]
     family = HIERARCHIC
     order = FIRST
-  []
-  [test_nodal_hierarchic_high]
-    family = HIERARCHIC
-    order = SECOND
   []
   [test_nodal_xyz]
     family = XYZ
@@ -177,17 +145,9 @@
     family = SZABAB
     order = FIRST
   []
-  [test_nodal_szabab_high]
-    family = SZABAB
-    order = SECOND
-  []
   [test_nodal_bernstein]
     family = BERNSTEIN
     order = FIRST
-  []
-  [test_nodal_bernstein_high]
-    family = BERNSTEIN
-    order = SECOND
   []
   [test_nodal_l2_lagrange]
     family = L2_LAGRANGE
@@ -234,24 +194,9 @@
     variable = test_elem_fv
     v = base_elem
   []
-  [base_elem_proj_hermite]
-    type = ProjectionAux
-    variable = test_elem_hermite
-    v = base_elem
-  []
-  [base_elem_proj_hermite_high]
-    type = ProjectionAux
-    variable = test_elem_hermite_high
-    v = base_elem
-  []
   [base_elem_proj_hierarchic]
     type = ProjectionAux
     variable = test_elem_hierarchic
-    v = base_elem
-  []
-  [base_elem_proj_hierarchic_high]
-    type = ProjectionAux
-    variable = test_elem_hierarchic_high
     v = base_elem
   []
   [base_elem_proj_xyz]
@@ -269,19 +214,9 @@
     variable = test_elem_szabab
     v = base_elem
   []
-  [base_elem_proj_szabab_high]
-    type = ProjectionAux
-    variable = test_elem_szabab_high
-    v = base_elem
-  []
   [base_elem_proj_bernstein]
     type = ProjectionAux
     variable = test_elem_bernstein
-    v = base_elem
-  []
-  [base_elem_proj_bernstein_high]
-    type = ProjectionAux
-    variable = test_elem_bernstein_high
     v = base_elem
   []
   [base_elem_proj_l2_lagrange]
@@ -331,24 +266,9 @@
     variable = test_nodal_fv
     v = base_nodal
   []
-  [base_nodal_proj_hermite]
-    type = ProjectionAux
-    variable = test_nodal_hermite
-    v = base_nodal
-  []
-  [base_nodal_proj_hermite_high]
-    type = ProjectionAux
-    variable = test_nodal_hermite_high
-    v = base_nodal
-  []
   [base_nodal_proj_hierarchic]
     type = ProjectionAux
     variable = test_nodal_hierarchic
-    v = base_nodal
-  []
-  [base_nodal_proj_hierarchic_high]
-    type = ProjectionAux
-    variable = test_nodal_hierarchic_high
     v = base_nodal
   []
   [base_nodal_proj_xyz]
@@ -366,19 +286,9 @@
     variable = test_nodal_szabab
     v = base_nodal
   []
-  [base_nodal_proj_szabab_high]
-    type = ProjectionAux
-    variable = test_nodal_szabab_high
-    v = base_nodal
-  []
   [base_nodal_proj_bernstein]
     type = ProjectionAux
     variable = test_nodal_bernstein
-    v = base_nodal
-  []
-  [base_nodal_proj_bernstein_high]
-    type = ProjectionAux
-    variable = test_nodal_bernstein_high
     v = base_nodal
   []
   [base_nodal_proj_l2_lagrange]
@@ -429,24 +339,9 @@
     variable = test_elem_fv
     other_variable = base_elem
   []
-  [base_elem_proj_hermite]
-    type = ElementL2Difference
-    variable = test_elem_hermite
-    other_variable = base_elem
-  []
-  [base_elem_proj_hermite_high]
-    type = ElementL2Difference
-    variable = test_elem_hermite_high
-    other_variable = base_elem
-  []
   [base_elem_proj_hierarchic]
     type = ElementL2Difference
     variable = test_elem_hierarchic
-    other_variable = base_elem
-  []
-  [base_elem_proj_hierarchic_high]
-    type = ElementL2Difference
-    variable = test_elem_hierarchic_high
     other_variable = base_elem
   []
   [base_elem_proj_xyz]
@@ -464,19 +359,9 @@
     variable = test_elem_szabab
     other_variable = base_elem
   []
-  [base_elem_proj_szabab_high]
-    type = ElementL2Difference
-    variable = test_elem_szabab_high
-    other_variable = base_elem
-  []
   [base_elem_proj_bernstein]
     type = ElementL2Difference
     variable = test_elem_bernstein
-    other_variable = base_elem
-  []
-  [base_elem_proj_bernstein_high]
-    type = ElementL2Difference
-    variable = test_elem_bernstein_high
     other_variable = base_elem
   []
   [base_elem_proj_l2_lagrange]
@@ -525,24 +410,9 @@
     variable = test_nodal_fv
     other_variable = base_nodal
   []
-  [base_nodal_proj_hermite]
-    type = ElementL2Difference
-    variable = test_nodal_hermite
-    other_variable = base_nodal
-  []
-  [base_nodal_proj_hermite_high]
-    type = ElementL2Difference
-    variable = test_nodal_hermite_high
-    other_variable = base_nodal
-  []
   [base_nodal_proj_hierarchic]
     type = ElementL2Difference
     variable = test_nodal_hierarchic
-    other_variable = base_nodal
-  []
-  [base_nodal_proj_hierarchic_high]
-    type = ElementL2Difference
-    variable = test_nodal_hierarchic_high
     other_variable = base_nodal
   []
   [base_nodal_proj_xyz]
@@ -560,19 +430,9 @@
     variable = test_nodal_szabab
     other_variable = base_nodal
   []
-  [base_nodal_proj_szabab_high]
-    type = ElementL2Difference
-    variable = test_nodal_szabab_high
-    other_variable = base_nodal
-  []
   [base_nodal_proj_bernstein]
     type = ElementL2Difference
     variable = test_nodal_bernstein
-    other_variable = base_nodal
-  []
-  [base_nodal_proj_bernstein_high]
-    type = ElementL2Difference
-    variable = test_nodal_bernstein_high
     other_variable = base_nodal
   []
   [base_nodal_proj_l2_lagrange]

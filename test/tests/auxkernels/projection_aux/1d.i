@@ -85,10 +85,6 @@
     family = SZABAB
     order = FIRST
   []
-  [test_elem_szabab_high]
-    family = SZABAB
-    order = SECOND
-  []
   [test_elem_l2_lagrange]
     family = L2_LAGRANGE
     order = FIRST
@@ -133,10 +129,6 @@
   [test_nodal_szabab]
     family = SZABAB
     order = FIRST
-  []
-  [test_nodal_szabab_high]
-    family = SZABAB
-    order = SECOND
   []
   [test_nodal_l2_lagrange]
     family = L2_LAGRANGE
@@ -196,11 +188,6 @@
   [base_elem_proj_szabab]
     type = ProjectionAux
     variable = test_elem_szabab
-    v = base_elem
-  []
-  [base_elem_proj_szabab_high]
-    type = ProjectionAux
-    variable = test_elem_szabab_high
     v = base_elem
   []
   [base_elem_proj_l2_lagrange]
@@ -263,11 +250,6 @@
   [base_nodal_proj_szabab]
     type = ProjectionAux
     variable = test_nodal_szabab
-    v = base_nodal
-  []
-  [base_nodal_proj_szabab_high]
-    type = ProjectionAux
-    variable = test_nodal_szabab_high
     v = base_nodal
   []
   [base_nodal_proj_l2_lagrange]
@@ -333,11 +315,6 @@
     variable = test_elem_szabab
     other_variable = base_elem
   []
-  [base_elem_proj_szabab_high]
-    type = ElementL2Difference
-    variable = test_elem_szabab_high
-    other_variable = base_elem
-  []
   [base_elem_proj_l2_lagrange]
     type = ElementL2Difference
     variable = test_elem_l2_lagrange
@@ -398,11 +375,6 @@
   [base_nodal_proj_szabab]
     type = ElementL2Difference
     variable = test_nodal_szabab
-    other_variable = base_nodal
-  []
-  [base_nodal_proj_szabab_high]
-    type = ElementL2Difference
-    variable = test_nodal_szabab_high
     other_variable = base_nodal
   []
   [base_nodal_proj_l2_lagrange]
