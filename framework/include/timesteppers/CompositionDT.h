@@ -79,7 +79,7 @@ public:
    */
 
   /**
-   * Take a time step with _last_time_stepper step() function
+   * Take a time step with _current_time_stepper step() function
    */
   virtual void step() override;
 
@@ -94,8 +94,7 @@ public:
   virtual void rejectStep() override;
 
   /**
-   * The _last_time_stepper is used to check whether the
-   * time stepper is converged
+   * The _current_time_stepper is used to check whether convergence was reached on the time step
    */
   virtual bool converged() const override;
 
@@ -121,12 +120,12 @@ private:
   // The time stepper(s) input as lower bound of the time stepper size
   const std::set<std::string> _lower_bound;
 
-  // The time stepper selected to use based on minimum time step size
-  TimeStepper * _last_time_stepper;
+  // The time stepper selected for use every time step, based on minimum time step size
+  TimeStepper * _current_time_stepper;
 
-  // The time stepper selected as the lower bound
-  TimeStepper * _bound_last_time_stepper;
+  // The time stepper selected every time step as providing the lower bound
+  TimeStepper * _largest_bound_time_stepper;
 
-  // The time stepper selected as the time sequence stepper
-  TimeSequenceStepperBase * _last_time_sequence_stepper;
+  // The time sequence stepper selected every time step as the one with the closest time to hit
+  TimeSequenceStepperBase * _closest_time_sequence_stepper;
 };

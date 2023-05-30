@@ -49,9 +49,9 @@ CompositionDT::CompositionDT(const InputParameters & parameters)
     _initial_dt(_has_initial_dt ? getParam<Real>("initial_dt") : 0.),
     _lower_bound(getParam<std::vector<std::string>>("lower_bound").begin(),
                  getParam<std::vector<std::string>>("lower_bound").end()),
-    _last_time_stepper(nullptr),
-    _bound_last_time_stepper(nullptr),
-    _last_time_sequence_stepper(nullptr)
+    _current_time_stepper(nullptr),
+    _largest_bound_time_stepper(nullptr),
+    _closest_time_sequence_stepper(nullptr)
 {
   // Make sure the steppers in "lower_bound" exist
   const auto time_steppers = getTimeSteppers();
@@ -154,8 +154,8 @@ CompositionDT::computeDT()
         dts.emplace(dt, ts);
     }
 
-  _last_time_stepper = dts.size() ? dts.begin()->second : nullptr;
-  _bound_last_time_stepper = bound_dt.size() ? (--bound_dt.end())->second : nullptr;
+  _current_time_stepper = dts.size() ? dts.begin()->second : nullptr;
+  _largest_bound_time_stepper = bound_dt.size() ? (--bound_dt.end())->second : nullptr;
 
   _dt = produceCompositionDT(dts, bound_dt);
 
@@ -186,7 +186,7 @@ CompositionDT::getSequenceSteppersNextTime()
     }
     if (next_time_to_hit > ts_time_to_hit)
     {
-      _last_time_sequence_stepper = tss;
+      _closest_time_sequence_stepper = tss;
       next_time_to_hit = ts_time_to_hit;
     }
   }
@@ -210,14 +210,14 @@ CompositionDT::produceCompositionDT(
   else
   {
     dt = lower_bound;
-    _last_time_stepper = _bound_last_time_stepper;
+    _current_time_stepper = _largest_bound_time_stepper;
   }
 
   auto ts = getSequenceSteppersNextTime();
 
   if (ts != 0 && (ts - _time) < dt)
   {
-    _last_time_stepper = _last_time_sequence_stepper;
+    _current_time_stepper = _closest_time_sequence_stepper;
     return std::min((ts - _time), dt);
   }
   else
@@ -241,8 +241,8 @@ CompositionDT::getTimeSteppers()
 void
 CompositionDT::step()
 {
-  if (_last_time_stepper)
-    _last_time_stepper->step();
+  if (_current_time_stepper)
+    _current_time_stepper->step();
   else
     TimeStepper::step();
 }
@@ -262,5 +262,5 @@ CompositionDT::rejectStep()
 bool
 CompositionDT::converged() const
 {
-  return _last_time_stepper ? _last_time_stepper->converged() : TimeStepper::converged();
+  return _current_time_stepper ? _current_time_stepper->converged() : TimeStepper::converged();
 }
