@@ -21,7 +21,7 @@ MaterialFunctorConverterTempl<T>::validParams()
   InputParameters params = Material::validParams();
   params.addClassDescription("Converts functor to non-AD and AD regular material properties");
   params.addParam<std::vector<MooseFunctorName>>(
-      "functors_in", "The names of the functors to convert to AD properties");
+      "functors_in", "The names of the functors to convert to regular material properties");
   params.addParam<std::vector<MaterialPropertyName>>("ad_props_out",
                                                      "The names of the output AD properties");
   params.addParam<std::vector<MaterialPropertyName>>("reg_props_out",
@@ -40,9 +40,10 @@ MaterialFunctorConverterTempl<T>::MaterialFunctorConverterTempl(const InputParam
 
   if (isParamValid("reg_props_out") && isParamValid("ad_props_out"))
     paramError("reg_props_out",
-               "We dont support converting functors to both AD and regular material properties. "
-               "Please use another " +
-                   type() + " to convert to both types.");
+               "We dont support converting functors to both regular and AD material properties in "
+               "a single instance of '",
+               type(),
+               "'. Please create two instances, one for regular and one for AD.");
 
   if (functors_in.size() != reg_props_out.size() && functors_in.size() != ad_props_out.size())
     paramError(

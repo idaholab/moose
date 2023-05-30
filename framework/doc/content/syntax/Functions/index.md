@@ -43,7 +43,7 @@ Functions are [Functors](syntax/Functors/index.md). Functors are an abstraction,
 objects that can compute values at a location in space and time.
 
 As `Functors`, they may be specified to objects such as the
-[FunctorElementalAux.md] in their functor argument. This vastly expands the number
+[FunctorElementalAux.md] in their [!param](/AuxKernels/FunctorElementalAux/functor) parameter. This vastly expands the number
 of objects that can use `Functions` to compute spatial quantities.
 
 !alert note

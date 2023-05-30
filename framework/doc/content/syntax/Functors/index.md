@@ -12,8 +12,8 @@ For example, instead of having a kernel for each type of coupled forcing term, l
 [CoupledForce.md], [BodyForce.md], [MatCoupledForce.md], [ADMatCoupledForce.md], we could just have a single object
 `FunctorForce` and have the force term be a functor.
 
-`Functions` provide a good analogy to `Functors`. `Functions` are evaluated on-the-fly at a location in space and time.
-`Functors` are evaluated on-the-fly with a space and a time argument. The space arguments can be an element, a point in an element,
+`Functions` provide a good analogy to `Functors`. Both `Functions` and `Functors` are evaluated on-the-fly at a location in space and time,
+but for `Functors`, the space arguments can be an element, a point in an element,
 a face of an element, and so on. The time arguments represent the state of the functor : current, previous value (whether in time or iteration),
 or value before that previous one.
 
@@ -22,6 +22,40 @@ If a Functor is reported as missing by the simulation, you may use the [!param](
 to get more information about which functors were created and requested.
 
 ## Developing with functors
+
+Functors are stored on the `SubProblem`, a derived class of [Problems](syntax/Problem/index.md) that is
+used for solving nonlinear systems. As such, classes do not need to have memory ownership of functors,
+they may simply store a reference or a pointer.
+
+In the header of a class using a `Functor` `_functor` you will have:
+
+```
+const Moose::Functor<T> & _functor
+```
+
+to store a reference to `_functor`. `T` is the return type of the functor. For a variable, it should be `ADReal`.
+For a vector variable, it would be `ADRealVectorValue`. If the object using the functor is not leveraging AD,
+it may be `Real` or `RealVectorValue`.
+
+!alert note
+With regards to [automatic differentiation](automatic_differentiation/index.md), `Functors` are automatically
+converted between `AD` and `non-AD` types when retrieved. When you retrieve a `Functor`, you must only think about whether
+you need `AD` in the consuming object. When you create a `Functor` (for example, a
+[functor material property](syntax/FunctorMaterials/index.md)) it's best practice to always use the `AD`
+return type so as to never discard some derivatives.
+
+In the constructor of the same class, you will have:
+```
+CLASSNAME::CLASSNAME(const InputParameters & parameters) :
+  ...
+  _functor(getFunctor<T>("<functor_parameter_name>")),
+  ...
+```
+
+where `CLASSNAME` is the name of the class, `T` is still the required return type of the functor, and `<functor_parameter_name>` is
+the name of the parameter used for providing the functor in the input.
+
+### Evaluating functors id=using-functors
 
 Functors are evaluated on-the-fly. E.g. they can be viewed as functions of the current location in
 space (and time). Functors provide several overloads of the
@@ -52,18 +86,16 @@ Any call to a functor looks like the following
 
 #### FaceArg
 
-A typedef defining a "face" evaluation calling argument. This is composed of
+A `struct` defining a "face" evaluation calling argument. This is composed of
 
 - a face information object which defines our location in space
 - a limiter which defines how the functor evaluated on either side of the face should be
   interpolated to the face
 - a boolean which states whether the face information element is upwind of the face
 - a boolean to indicate whether to correct for element skewness
-- a pair of subdomain IDs. These do not always correspond to the face info element subdomain
-  ID and face info neighbor subdomain ID. For instance if a flux kernel is operating at a
-  subdomain boundary on which the kernel is defined on one side but not the other, the
-  passed-in subdomain IDs will both correspond to the subdomain ID that the flux kernel is
-  defined on
+- a pointer to an element indicating if there is sidedness to the face, and if so, the side of the face.
+  If null, the evaluation should use information from both sides of the face, if the functor is defined on both sides.
+  If not null, the evaluation should ignore information from the other element.
 
 #### ElemArg
 

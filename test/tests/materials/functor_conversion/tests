@@ -37,7 +37,7 @@
       type = RunException
       input = conversion.i
       cli_args = "Materials/convert_to_reg/ad_props_out='m1 m2 m3 m4'"
-      expect_err = 'We dont support converting functors to both AD and regular material properties'
+      expect_err = 'We dont support converting functors to both regular and AD material properties'
       detail = 'if the user requests conversions to both AD and regular material properties, as this is not supported,'
     []
     [wrong_size]

@@ -1,12 +1,12 @@
 # FunctorMaterials
 
+Much like regular materials declare regular material properties, functor materials declare functor material properties.
 Functor material properties are properties that are evaluated on-the-fly.
 Along with multiple other classes of MOOSE objects, they are [Functors](syntax/Functors/index.md). This allows
 for the creation of objects with considerable inter-operability between systems.
 
 ## Using functor materials
 
-Much like regular materials declare regular material properties, functor materials declare functor material properties.
 Following a producer/consumer model, `FunctorMaterials` produce functor material properties, which kernels, boundary conditions, other
 functor materials, etc, may consume.
 Both regular and functor material properties support a wide array of data types (scalar, vector, tensors,
@@ -14,36 +14,29 @@ Both regular and functor material properties support a wide array of data types 
 and call other functors on-the-fly as well, do not require dependency ordering.
 
 All functor materials support caching in some capacity. This can avoid expensive material property computations, but is
-disabled by default due to the potential memory cost. The reader is referred to the [Functors caching documentation](syntax/Functors/index.md#caching)
+disabled by default due to the potential memory cost. The reader is referred to the [Functors caching documentation](syntax/Functors/index.md#caching).
 
 !alert warning
-Functor materials are generally **NOT** compatible with regular materials, as regular material properties **CANNOT** be used
-in lieu of functor material properties. Functor material properties can only be used as regular material properties using a
+Functor material properties and regular material properties are generally **NOT** compatible with each other. Functor material properties can only be used as regular material properties using a
 [MaterialFunctorConverter.md] to process them.
 
-Functor materials can be created within the `[FunctorMaterials]` block, and currently the `[Materials]` block as well,
-but that syntax will be deprecated.
+Functor materials are created within the `[FunctorMaterials]` block.
 
 !alert note
 If a Functor is reported as missing by the simulation, and it was supposed to be created by a `FunctorMaterial`,
-you may use the [!param](/Debug/SetupDebugAction/show_functors) to get more information about what functors were
+you may use the [!param](/Debug/SetupDebugAction/show_functors) parameter to get more information about what functors were
 created and requested.
 
 ## Developing with functor materials
 
-Functor material properties are properties that are evaluated
-on-the-fly. E.g. they can be viewed as functions of the current location in
-space (and time). Functor material properties provide several overloads of the
-`operator()` method for different "geometric quantities". One example of a
-"geometric quantity" is based around an element, e.g. for an `FVElementalKernel`, the
-value of a functor material property in a cell-averaged sense can be obtained by
-the syntax
+### Evaluating functors
 
-- `_foo(makeElemArg(_current_elem), determineState())`
+See the [Functor system documentation](syntax/Functors/index.md#using-functors) for information on
+how to retrieve a functor material property value in a kernel, boundary condition, ... even another functor
+material property.
 
-where here `_foo` is a functor data member of the kernel, `makeElemArg` is a helper routine for creating a
-functor element-based spatial argument, and `determineState()` is a helper routine for determining the correct
-time state to evaluate at, e.g. the current time for an implicit kernel and the old time for an explicit kernel.
+### Creating functor material properties
+
 The functor material property system introduces APIs slightly different from the traditional
 material property system for declaring/adding and getting properties. To add a
 functor property:
@@ -59,7 +52,7 @@ It's worth noting that whereas the traditional regular material property system
 has different methods to declare/get non-AD and AD properties, the new functor
 system has single APIs for both non-AD and AD property types.
 
-Currently, functor material property evaluations are defined using the API:
+Functor material property evaluations are defined using the API:
 
 ```c++
 template <typename T, typename PolymorphicLambda>
