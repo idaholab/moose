@@ -14,6 +14,8 @@
     type = StitchedMeshGenerator
     inputs = 'gmg mirror'
     stitch_boundaries_pairs = 'bottom bottom'
+    # This test was golded before the id overlap prevention was added
+    prevent_boundary_ids_overlap = false
   []
   [feg]
     type = AdvancedExtruderGenerator
