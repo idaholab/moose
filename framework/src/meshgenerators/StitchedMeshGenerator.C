@@ -144,7 +144,7 @@ StitchedMeshGenerator::generate()
       // Check for an overlap
       bool overlap_found = false;
       for (const auto & bid : stitched_mesh_bids)
-        if (base_mesh_bids.find(bid) != base_mesh_bids.end())
+        if (base_mesh_bids.count(bid))
           overlap_found = true;
 
       if (overlap_found)
@@ -153,9 +153,10 @@ StitchedMeshGenerator::generate()
         int new_index = 0;
         for (const auto bid : stitched_mesh_bids)
         {
-          meshes[i]->get_boundary_info().renumber_id(bid, max_boundary_id + (new_index++));
+          const auto new_bid = max_boundary_id + (new_index++);
+          meshes[i]->get_boundary_info().renumber_id(bid, new_bid);
           if (bid == second)
-            second = max_boundary_id + new_index - 1;
+            second = new_bid;
         }
       }
     }
