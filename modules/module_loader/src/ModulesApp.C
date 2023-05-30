@@ -385,8 +385,8 @@ void
 ModulesApp::registerAll(Factory & f, ActionFactory & af, Syntax & s)
 {
   mooseDeprecated(
-      "\"registerAll\" in Modules is deprecated. Please update your *App.C file to call the new "
-      "templated \"registerAllObjects\" method (e.g. ModulesApp::registerAllobject<MyApp>(...))");
+      "\"registerAll\" in Modules is deprecated. Please update your *App.C file(s) to call the new "
+      "templated \"registerAllObjects\" method (e.g. ModulesApp::registerAllObjects<MyApp>(...))");
 
 #ifdef CHEMICAL_REACTIONS_ENABLED
   ChemicalReactionsApp::registerAll(f, af, s);
