@@ -38,13 +38,6 @@ public:
 
   CompositionDT(const InputParameters & parameters);
 
-  /**
-   * Find the composed time step size by selecting the minimum value and compare it
-   * with the lower bound if provided
-   * @param dts stores time step size(s) from input time stepper(s)
-   * @param bound_dts stores time step size(s) from input lower bound time stepper(s)
-   */
-
   struct CompareFirst
   {
     bool operator()(const std::pair<Real, TimeStepper *> & a,
@@ -53,7 +46,12 @@ public:
       return a.first < b.first;
     }
   };
-
+  /**
+   * Find the composed time step size by selecting the minimum value and compare it
+   * with the lower bound if provided
+   * @param dts stores time step size(s) from input time stepper(s)
+   * @param bound_dts stores time step size(s) from input lower bound time stepper(s)
+   */
   Real produceCompositionDT(std::set<std::pair<Real, TimeStepper *>, CompareFirst> & dts,
                             std::set<std::pair<Real, TimeStepper *>, CompareFirst> & bound_dts);
 

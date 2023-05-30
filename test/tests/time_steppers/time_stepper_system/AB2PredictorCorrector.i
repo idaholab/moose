@@ -74,19 +74,12 @@
     []
     [IterationAdapDT]
       type = IterationAdaptiveDT
-      dt = 0.5
+      dt = 100
     []
   []
 []
 
-[Postprocessors]
-  [timestep]
-    type = TimePostprocessor
-    execute_on = 'timestep_end'
-  []
-[]
-
 [Outputs]
-  csv = true
-  file_base='AB2PredictorCorrector'
+  exodus = true
+  file_base='aee_out'
 []

@@ -86,10 +86,6 @@ SetupTimeStepperAction::act()
 
         mooseAssert(transient->getTimeStepper(), "Not set");
       }
-      // The user used [TimeStepper] for time stepper setup, give a deprecation message
-      if (!no_time_stepper && no_time_steppers)
-        mooseDeprecated(
-            "The [TimeStepper] block is deprecated. Please use [TimeSteppers] instead.");
       // The user used both [TimeStepper] and [TimeSteppers] for time stepper setup, use input in
       // [TimeSteppers] block and give an error message
       if (!no_time_stepper && !no_time_steppers)

@@ -21,9 +21,10 @@
     []
 
     [AB2PredictorCorrector]
-      type = CSVDiff
+      type = Exodiff
       input = 'AB2PredictorCorrector.i'
-      csvdiff = 'AB2PredictorCorrector.csv'
+      exodiff = 'aee_out.e'
+      rel_err = 0.003
       detail = 'AB2PredictorCorrector as one of the input time steppers,'
     []
 

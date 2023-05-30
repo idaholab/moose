@@ -120,8 +120,8 @@ CompositionDT::constrainStep(Real & dt)
   bool at_sync_point = TimeStepper::constrainStep(dt);
   const auto time_steppers = getTimeSteppers();
   for (auto & ts : time_steppers)
-    if (!ts->constrainStep(dt))
-      return false;
+    if (ts->constrainStep(dt))
+      return true;
   return at_sync_point;
 }
 
