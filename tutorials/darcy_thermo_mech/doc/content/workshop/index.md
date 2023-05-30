@@ -198,6 +198,8 @@
 
 !include workshop/problem/step08.md end=end-intro
 
+All MOOSE Postprocessors are based on the UserObject System, so we will begin with an introduction there.
+
 !---
 
 !include workshop/systems/userobjects.md
