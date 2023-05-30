@@ -17,6 +17,7 @@
     exodiff = 'gate_valve_1phase_light.e'
     rel_err = 1e-5
     abs_zero = 1e-8
+    max_parallel = 8 # https://github.com/idaholab/moose/issues/24537
   []
 
   [1phase_light_flipped]
@@ -32,6 +33,7 @@
     exodiff = 'gate_valve_1phase_light_flipped.e'
     rel_err = 1e-5
     abs_zero = 1e-8
+    max_parallel = 8 # https://github.com/idaholab/moose/issues/24537
   []
 
   [err:not_2_connections]

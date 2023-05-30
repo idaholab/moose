@@ -58,6 +58,7 @@
       Outputs/file_base=phy.conservation_1phase_plate_rdg"
     # because of output has execute_on = 'initial final'
     recover = false
+    max_parallel = 5 # https://github.com/idaholab/moose/issues/24537
 
     requirement = "The system shall conserve energy when a flow channel is coupled to a plate heat structure."
     issues = '#19754'
