@@ -168,6 +168,17 @@ AuxKernelTempl<ComputeValueType>::AuxKernelTempl(const InputParameters & paramet
       }
     }
   }
+
+  // Check for supported variable types
+  // Any 'nodal' family that actually has DoFs outside of nodes, or gradient dofs at nodes is
+  // not properly set by AuxKernelTempl::compute
+  // NOTE: We could add a few exceptions, lower order from certain unsupported families and on
+  //       certain element types only have value-DoFs on nodes
+  const auto type = _var.feType();
+  if (_var.isNodal() && !((type.family == LAGRANGE) || (type.order <= FIRST)))
+    paramError("variable",
+               "Variable family " + Moose::stringify(type.family) + " is not supported at order " +
+                   Moose::stringify(type.order) + " by the AuxKernel system.");
 }
 
 template <typename ComputeValueType>
