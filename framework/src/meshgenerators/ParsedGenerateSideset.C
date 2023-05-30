@@ -219,9 +219,6 @@ ParsedGenerateSideset::generate()
       if (evaluate(_func_F))
       {
         boundary_info.add_side(elem, side, boundary_ids[0]);
-        // Create nodeset by default
-        for (auto & node : curr_side->node_ref_range())
-          boundary_info.add_node(&node, boundary_ids[0]);
       }
     }
   }
