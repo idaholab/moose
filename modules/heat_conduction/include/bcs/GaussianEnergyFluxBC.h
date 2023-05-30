@@ -11,12 +11,12 @@
 
 #include "ADIntegratedBC.h"
 
-class GaussianWeldEnergyFluxBC : public ADIntegratedBC
+class GaussianEnergyFluxBC : public ADIntegratedBC
 {
 public:
   static InputParameters validParams();
 
-  GaussianWeldEnergyFluxBC(const InputParameters & params);
+  GaussianEnergyFluxBC(const InputParameters & params);
 
 protected:
   virtual ADReal computeQpResidual() override;

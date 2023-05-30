@@ -1,6 +1,6 @@
-# GaussianWeldEnergyFluxBC
+# GaussianEnergyFluxBC
 
-!syntax description /BCs/GaussianWeldEnergyFluxBC
+!syntax description /BCs/GaussianEnergyFluxBC
 
 This boundary condition computes an influx of energy from a laser spot with a
 Gaussian spatial profile. The flux is given by
@@ -16,8 +16,8 @@ centerpoint of the laser. This functional form of the laser flux is taken from
 [!cite](noble2007use). The negative sign on the flux indicates that the flux is
 incoming.
 
-!syntax parameters /BCs/GaussianWeldEnergyFluxBC
+!syntax parameters /BCs/GaussianEnergyFluxBC
 
-!syntax inputs /BCs/GaussianWeldEnergyFluxBC
+!syntax inputs /BCs/GaussianEnergyFluxBC
 
-!syntax children /BCs/GaussianWeldEnergyFluxBC
+!syntax children /BCs/GaussianEnergyFluxBC

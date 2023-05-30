@@ -7,13 +7,13 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "GaussianWeldEnergyFluxBC.h"
+#include "GaussianEnergyFluxBC.h"
 #include "Function.h"
 
-registerMooseObject("HeatConductionApp", GaussianWeldEnergyFluxBC);
+registerMooseObject("HeatConductionApp", GaussianEnergyFluxBC);
 
 InputParameters
-GaussianWeldEnergyFluxBC::validParams()
+GaussianEnergyFluxBC::validParams()
 {
   InputParameters params = ADIntegratedBC::validParams();
   params.addRequiredParam<Real>("reff",
@@ -27,7 +27,7 @@ GaussianWeldEnergyFluxBC::validParams()
   return params;
 }
 
-GaussianWeldEnergyFluxBC::GaussianWeldEnergyFluxBC(const InputParameters & params)
+GaussianEnergyFluxBC::GaussianEnergyFluxBC(const InputParameters & params)
   : ADIntegratedBC(params),
     _reff(getParam<Real>("reff")),
     _F0(getParam<Real>("F0")),
@@ -39,7 +39,7 @@ GaussianWeldEnergyFluxBC::GaussianWeldEnergyFluxBC(const InputParameters & param
 }
 
 ADReal
-GaussianWeldEnergyFluxBC::computeQpResidual()
+GaussianEnergyFluxBC::computeQpResidual()
 {
   RealVectorValue beam_coords{_x_beam_coord.value(_t, _q_point[_qp]),
                               _y_beam_coord.value(_t, _q_point[_qp]),

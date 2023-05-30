@@ -32,7 +32,7 @@
     stefan_boltzmann_constant = 1
   []
   [weld_flux]
-    type = GaussianWeldEnergyFluxBC
+    type = GaussianEnergyFluxBC
     variable = temperature
     boundary = 'top'
     reff = 0.6

@@ -1,5 +1,5 @@
 [Tests]
-  design = 'FunctionRadiativeBC.md GaussianWeldEnergyFluxBC.md'
+  design = 'FunctionRadiativeBC.md GaussianEnergyFluxBC.md'
   issues = '#24462'
   [test]
     type = Exodiff
