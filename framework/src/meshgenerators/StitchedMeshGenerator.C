@@ -34,6 +34,10 @@ StitchedMeshGenerator::validParams()
       "algorithm",
       algorithm,
       "Control the use of binary search for the nodes of the stitched surfaces.");
+  params.addParam<bool>("prevent_boundary_ids_overlap",
+                        true,
+                        "Whether to re-number boundaries in stitched meshes to prevent merging of "
+                        "unrelated boundaries");
   params.addClassDescription(
       "Allows multiple mesh files to be stitched together to form a single mesh.");
 
@@ -47,7 +51,8 @@ StitchedMeshGenerator::StitchedMeshGenerator(const InputParameters & parameters)
     _clear_stitched_boundary_ids(getParam<bool>("clear_stitched_boundary_ids")),
     _stitch_boundaries_pairs(
         getParam<std::vector<std::vector<std::string>>>("stitch_boundaries_pairs")),
-    _algorithm(parameters.get<MooseEnum>("algorithm"))
+    _algorithm(parameters.get<MooseEnum>("algorithm")),
+    _prevent_boundary_ids_overlap(getParam<bool>("prevent_boundary_ids_overlap"))
 {
 }
 
@@ -128,6 +133,32 @@ StitchedMeshGenerator::generate()
     }
 
     const bool use_binary_search = (_algorithm == "BINARY");
+
+    // Avoid chaotic boundary merging due to overlapping ids in meshes by simply renumbering the
+    // boundaries in the meshes we are going to stitch onto the base mesh
+    // This is only done if there is an overlap
+    if (_prevent_boundary_ids_overlap)
+    {
+      const auto & base_mesh_bids = mesh->get_boundary_info().get_boundary_ids();
+      const auto stitched_mesh_bids = meshes[i]->get_boundary_info().get_boundary_ids();
+      // Check for an overlap
+      bool overlap_found = false;
+      for (const auto & bid : stitched_mesh_bids)
+        if (base_mesh_bids.find(bid) != base_mesh_bids.end())
+          overlap_found = true;
+
+      if (overlap_found)
+      {
+        const auto max_boundary_id = *base_mesh_bids.rbegin();
+        int new_index = 0;
+        for (const auto bid : stitched_mesh_bids)
+        {
+          meshes[i]->get_boundary_info().renumber_id(bid, max_boundary_id + (new_index++));
+          if (bid == second)
+            second = max_boundary_id + new_index - 1;
+        }
+      }
+    }
 
     mesh->stitch_meshes(*meshes[i],
                         first,
