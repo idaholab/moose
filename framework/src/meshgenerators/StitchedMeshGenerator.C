@@ -139,8 +139,8 @@ StitchedMeshGenerator::generate()
     // This is only done if there is an overlap
     if (_prevent_boundary_ids_overlap)
     {
-      const auto & base_mesh_bids = mesh->get_boundary_info().get_boundary_ids();
-      const auto stitched_mesh_bids = meshes[i]->get_boundary_info().get_boundary_ids();
+      const auto & base_mesh_bids = mesh->get_boundary_info().get_global_boundary_ids();
+      const auto stitched_mesh_bids = meshes[i]->get_boundary_info().get_global_boundary_ids();
       // Check for an overlap
       bool overlap_found = false;
       for (const auto & bid : stitched_mesh_bids)
