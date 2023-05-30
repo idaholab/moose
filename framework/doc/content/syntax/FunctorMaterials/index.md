@@ -24,7 +24,7 @@ Functor materials are created within the `[FunctorMaterials]` block.
 
 !alert note
 If a Functor is reported as missing by the simulation, and it was supposed to be created by a `FunctorMaterial`,
-you may use the [!param](/Debug/SetupDebugAction/show_functors) parameter to get more information about what functors were
+you may use the `Debug/`[!param](/Debug/SetupDebugAction/show_functors) parameter to get more information about what functors were
 created and requested.
 
 ## Developing with functor materials

@@ -18,8 +18,8 @@ a face of an element, and so on. The time arguments represent the state of the f
 or value before that previous one.
 
 !alert note
-If a Functor is reported as missing by the simulation, you may use the [!param](/Debug/SetupDebugAction/show_functors)
-to get more information about which functors were created and requested.
+If a Functor is reported as missing by the simulation, you may use the `Debug/`[!param](/Debug/SetupDebugAction/show_functors)
+parameter to get more information about which functors were created and requested.
 
 ## Developing with functors
 
