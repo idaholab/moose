@@ -139,6 +139,13 @@ StitchedMeshGenerator::generate()
     // This is only done if there is an overlap
     if (_prevent_boundary_ids_overlap)
     {
+      // Meshes must be prepared to get the global boundary ids and global boundary ids
+      // must be used in parallel to be sure to renumber boundaries consistently across processes
+      if (!mesh->is_prepared())
+        mesh->prepare_for_use();
+      if (!meshes[i]->is_prepared())
+        meshes[i]->prepare_for_use();
+
       const auto & base_mesh_bids = mesh->get_boundary_info().get_global_boundary_ids();
       const auto stitched_mesh_bids = meshes[i]->get_boundary_info().get_global_boundary_ids();
       // Check for an overlap
@@ -150,7 +157,7 @@ StitchedMeshGenerator::generate()
       if (overlap_found)
       {
         const auto max_boundary_id = *base_mesh_bids.rbegin();
-        int new_index = 0;
+        BoundaryID new_index = 0;
         for (const auto bid : stitched_mesh_bids)
         {
           const auto new_bid = max_boundary_id + (new_index++);
