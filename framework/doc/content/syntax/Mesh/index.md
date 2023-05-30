@@ -74,7 +74,7 @@ mesh file with `_in.e` (the opposite of the `_out.e` that is appended from the o
 appended to the input file name.  You can also optionally provide a mesh filename to
 write out using `--mesh-only output_file.e`. When using the `--mesh-only` option, by default any extra element integers
 defined on the mesh will also be outputted to the output Exodus file. To prevent extra element ids from being
-outputted, the parameter `output_extra_element_ids` should be set to `false` in the `[Outputs]` block of the
+output, the parameter `output_extra_element_ids` should be set to `false` in the `[Outputs]` block of the
 input file as shown below:
 
 ```
@@ -249,16 +249,16 @@ A simple example of mesh meta data is the `num_elements_x` provided by [Generate
 ## Debugging in-MOOSE mesh generation id=troubleshooting
 
 !alert note
-The MOOSE mesh generation [tutorial](tutorial04_meshing/index.md optional=true) is the most comprehensive learning resource on meshing in MOOSE. We summarize here
+The MOOSE mesh generation [tutorial](tutorial04_meshing/index.md optional=true) is the most comprehensive resource on learning how to mesh within MOOSE. We summarize here
 only a few techniques.
 
 Mesh generation in MOOSE is a sequential tree-based process. Mesh generators are executed sorted by dependencies,
 and the output of each generator may be fed to multiple other generators. To succeed in this process, you must decompose
-the creation of the mesh in many individual steps. The two main tools to debug this process are:
+the creation of the mesh into many individual steps. To debug this process, one can:
 
-- use the `show_info(=true)` input parameter on each mesh generator. This will output numerous metadata about the mesh
+- use the `show_info(=true)` input parameter on each mesh generator. This will output numerous pieces of metadata about the mesh
   at each stage of the generation process. You can check there if all the subdomains that you expected at this stage
-  are present in the mesh, and if they are of the expected size in terms of number of elements but also bounding box.
+  are present in the mesh and if they are of the expected size, both in terms of number of elements but also bounding box.
 - use the `output` input parameter on the mesh generator right before the problematic stage. This will output the mesh,
   by default using the [Exodus.md] format with the name `<mesh_generator_name>_in.e`, so you may visualize it
   before it gets acted upon by the next mesh generator(s).
@@ -269,10 +269,10 @@ The results of finite element/volume simulations are highly dependent on the qua
 It happens regularly that results are excellent and meeting all predictions using a regular Cartesian grid mesh,
 but significantly deteriorate or do not converge on the real system mesh, often created outside MOOSE.
 
-We point out in this section a few  to look for.
-- sidesets in MOOSE are oriented. If you place a Neumann/flux boundary condition on a sideset, the direction of
+We point out in this section a few things to look for.
+- Sidesets in MOOSE are oriented. If you place a Neumann/flux boundary condition on a sideset, the direction of
   the flux will depend on the orientation of the sideset.
-- MOOSE generally does not support non-conformal meshes for regular kernels, except arising from online mesh refinement.
+- MOOSE generally does not support non-conformal meshes for regular kernels, except when they arise from online mesh refinement.
   When inspecting your mesh, you should not see any hanging nodes or surfaces not exactly touching. If you are using such
   a mesh, you **MUST** use interface kernels, mortar or other advanced numerical treatments.
 - Many physics will give better results with high element quality and smooth distributions of element volumes.

@@ -41,7 +41,7 @@ With our MOOSE package on Mac OSX you actually need to run lldb using `sudo` so 
 sudo lldb -- ./yourapp-dbg -i inputfile.i
 ```
 
-The `--` tells lldb that any command-line options after that point need to be passed to the executable you are running.  `sudo` will ask you for your password so that it can elevate the privileges of `lldb`.  You can also look below to see how to allow `lldb` to run with sudo without using a password.
+The `--` tells `lldb` that any command-line options after that point need to be passed to the executable you are running.  `sudo` will ask you for your password so that it can elevate the privileges of `lldb`.  You can also look below to see how to allow `lldb` to run with sudo without using a password.
 
 `gdb` can be run with a similar command:
 

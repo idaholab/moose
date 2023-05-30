@@ -71,8 +71,8 @@ these other helpful resources below:
   They are summarized on this [page about debugging numerical issues](application_usage/failed_solves.md optional=True) and in
   the [PETSc manual](https://www.mcs.anl.gov/petsc/petsc-current/docs/manualpages/).
 
-- to debug [Mesh](syntax/Mesh/index.md) related issue, please see this [page](syntax/Mesh/index.md#troubleshooting)
-  for in-MOOSE generation issues and this [page](syntax/Mesh/index.md#issues) if you suspect issues from an external mesh.
+- to debug a [Mesh](syntax/Mesh/index.md) related issue, please see [this page](syntax/Mesh/index.md#troubleshooting)
+  for built-in MOOSE mesh generation issues and [this page](syntax/Mesh/index.md#issues) for possible issues from an external mesh.
 
 
 !alert note
