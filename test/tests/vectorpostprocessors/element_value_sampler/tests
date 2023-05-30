@@ -3,8 +3,7 @@
   design = 'ElementValueSampler.md'
 
   [element_value_sampler]
-    requirement = 'The system shall support sampling of a field variable at the centroid of every '
-                  'element in the domain'
+    requirement = 'The system shall support sampling of a field variable at the centroid of every element in the domain'
     [monomial]
       type = 'CSVDiff'
       input = 'element_value_sampler.i'
@@ -21,6 +20,14 @@
       prereq = 'element_value_sampler/monomial'
 
       detail = 'for FV variables,'
+    []
+    [mixed_fe_fv]
+      type = 'CSVDiff'
+      input = 'mixed_fe_fv_sampler.i'
+      csvdiff = 'mixed_fe_fv_sampler_out_element_value_sampler_0001.csv'
+      mesh_mode = REPLICATED
+
+      detail = 'for finite volume variables mixed with finite element variables,'
     []
     [lagrange]
       type = 'RunException'
