@@ -54,16 +54,17 @@ ProjectionAux::computeValue()
 {
   if (!isNodal() || (_source_variable.isNodal() && _source_variable.order() >= _var.order()))
     return _v[_qp];
-  // projecting continuous elemental variable onto a node
+  // projecting continuous elemental variable onto a nodal one
   // AND nodal low order -> nodal higher order
-  else if (_source_variable.getContinuity() != DISCONTINUOUS &&
+  else if (isNodal() && _source_variable.getContinuity() != DISCONTINUOUS &&
            _source_variable.getContinuity() != SIDE_DISCONTINUOUS)
     return _source_sys.system().point_value(
         _source_variable.number(), *_current_node, elemOnNodeVariableIsDefinedOn());
   // Handle discontinuous elemental variable projection into a nodal variable
   else
   {
-    // Custom projection rule : use neighbor element centroid values weighted by element volumes
+    // Custom projection rule : use nodal values, if discontinuous the one coming from each element,
+    // weighted by element volumes
     // First, find all the elements that this node is part of
     auto elem_ids = _mesh.nodeToElemMap().find(_current_node->id());
     mooseAssert(elem_ids != _mesh.nodeToElemMap().end(),
@@ -78,13 +79,12 @@ ProjectionAux::computeValue()
       if (_source_variable.hasBlocks(elem->subdomain_id()))
       {
         const auto elem_volume = elem->volume();
-        sum_weighted_values += _source_sys.system().point_value(
-                                   _source_variable.number(), elem->true_centroid(), elem) *
-                               elem_volume;
+        sum_weighted_values +=
+            _source_sys.system().point_value(_source_variable.number(), *_current_node, elem) *
+            elem_volume;
         sum_volumes += elem_volume;
       }
     }
-
     return sum_weighted_values / sum_volumes;
   }
 }
