@@ -134,18 +134,11 @@
     cli_args = "Modules/NavierStokesFV/porosity_smoothing_layers=4"
     expect_err = "This parameter should not be defined if the porous medium treatment is disabled!"
   []
-  [no-bernoulli-ghost-layer-error]
-    type = 'RunException'
-    input = 2d-rc-error-action.i
-    requirement = 'The system shall throw an error if the user tries to adjust the ghosting layers without using a Bernoulli porosity jump treatment.'
-    cli_args = "Modules/NavierStokesFV/pressure_allow_expansion_on_bernoulli_faces=true"
-    expect_err = "This parameter should not be given by the user with the corresponding porosity_interface_pressure_treatment setting!"
-  []
   [no-bernoulli-two-term-error]
     type = 'RunException'
     input = 2d-rc-error-action.i
     requirement = 'The system shall throw an error if two-term extrapolation is elected for prosity jump faces without enabling the Bernoulli treatment.'
-    cli_args = "Modules/NavierStokesFV/ghost_layers=4"
+    cli_args = "Modules/NavierStokesFV/pressure_allow_expansion_on_bernoulli_faces=true"
     expect_err = "This parameter should not be given by the user with the corresponding porosity_interface_pressure_treatment setting!"
   []
   [passive-scalar-diffusivity-error]

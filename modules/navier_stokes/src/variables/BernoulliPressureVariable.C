@@ -143,27 +143,14 @@ BernoulliPressureVariable::getDirichletBoundaryFaceValue(const FaceInfo & fi,
   const auto & downwind_face = fi_elem_is_upwind ? face_neighbor : face_elem;
 
   /*
-  There are two issues to consider here:
-  1, If a weakly compressible material is used where the density slightly
+     If a weakly compressible material is used where the density slightly
      depends on pressure. Given that the two-term expansion on Bernoulli faces is
-     enabled, we take use the downwind face assuming the continuity (minimal jump]) of the
+     enabled, we take use the downwind face assuming the continuity (minimal jump) of the
      density. This protects against an infinite recursion between pressure and
      density.
-  2, If the two term expansion is disabled, we need to take the value of density in both cells
-     and use them as approximations of the face values from both sides of the face.
   */
-  ADReal rho_elem;
-  ADReal rho_neighbor;
-  if (_allow_two_term_expansion_on_bernoulli_faces)
-  {
-    rho_elem = (*_rho)(downwind_face, time);
-    rho_neighbor = rho_elem;
-  }
-  else
-  {
-    rho_elem = (*_rho)(makeElemArg(fi.elemPtr()), time);
-    rho_neighbor = (*_rho)(makeElemArg(fi.neighborPtr()), time);
-  }
+  ADReal rho_elem = (*_rho)(makeElemArg(fi.elemPtr()), time);
+  ADReal rho_neighbor = (*_rho)(makeElemArg(fi.neighborPtr()), time);
 
   const VectorValue<ADReal> interstitial_vel_elem = vel_elem * (1 / eps_elem);
   const VectorValue<ADReal> interstitial_vel_neighbor = vel_neighbor * (1 / eps_neighbor);

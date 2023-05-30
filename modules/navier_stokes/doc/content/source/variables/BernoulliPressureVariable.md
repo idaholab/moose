@@ -36,17 +36,18 @@ discontinuities.
 
 !alert! note title=Behavior with parallel execution
 
-In certain cases multiple porosity jump faces may be connected by several cells in a
+In certain cases multiple porosity jump faces may be connected by single cells in a
 chain. For example at corners or when porous medium zones are one-cell wide. In such
-scenarios, the two-term expansion in the downstream cell for the determination of the
-face pressure can lead to a very long chain of calls, which can potentially lead to
-attempts of attempts of accessing cell values which are neither owned
-nor ghosted on the given rank. For this reason, the default value of
+scenarios, the two-term expansion for the determination of the
+face pressure on the downstream side requires a considerably extended stencil which may not be accommodated by the
+number of ghosting layers set in the kernels. For this reason, the default value of
 [!param](/Variables/BernoulliPressureVariable/allow_two_term_expansion_on_bernoulli_faces)
 is `false`. If the user wants to enable two-term expansion for the pressure
-computation on the porosity ump faces, special attention should be paid to
-moving the porosity jump faces sufficiently far from each other or adding
-additional layers of ghosted elements (which can potentially increase communication costs).
+computation on the porosity jump faces, special attention should be paid to
+moving the porosity jump faces sufficiently far from each other (at least two layers
+if skewness correction is disabled and three if it is enabled) or adding
+additional layers of ghosted elements (which can potentially increase local computational and memory costs)
+using the following FVKernel parameter [!param](/FVKernels/FVDiffusion/ghost_layers).
 
 !alert-end!
 

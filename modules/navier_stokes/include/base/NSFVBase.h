@@ -802,9 +802,11 @@ NSFVBase<BaseType>::validParams()
       "pressure_allow_expansion_on_bernoulli_faces",
       false,
       "Switch to enable the two-term extrapolation on porosity jump faces. "
-      "WARNING: This might lead to crushes in parallel runs if porosity jump faces are connected "
-      "with one cell (usually corners) due to the insufficient number of ghosted "
-      "layers.");
+      "WARNING: Depending on the mesh, enabling this treatment parameter may lead to "
+      "termination in parallel runs due to insufficient ghosting between "
+      "processors. An example can be the presence of multiple porosity jumps connected with only "
+      "one cell while using the Bernoulli pressure treatment. In such cases adjust the "
+      "`ghost_layers` parameter. ");
   params.addParam<bool>(
       "momentum_two_term_bc_expansion",
       true,
@@ -865,7 +867,7 @@ NSFVBase<BaseType>::validParams()
       "ghost_layers > 0",
       "The number of geometric/algebraic/coupling layers to ghost.");
 
-  params.addParamNamesToGroup("ghost_layers", "Parallel Execution");
+  params.addParamNamesToGroup("ghost_layers", "Parallel Execution Tuning");
 
   /**
    * Parameter controlling the turbulence handling used for the equations.
@@ -3082,7 +3084,7 @@ NSFVBase<BaseType>::checkGeneralControlErrors()
 
   if (parameters().template get<MooseEnum>("porosity_interface_pressure_treatment") != "bernoulli")
     checkDependentParameterError("porosity_interface_pressure_treatment",
-                                 {"ghost_layers", "pressure_allow_expansion_on_bernoulli_faces"});
+                                 {"pressure_allow_expansion_on_bernoulli_faces"});
 }
 
 template <class BaseType>
