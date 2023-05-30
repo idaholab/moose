@@ -6,15 +6,16 @@ This boundary condition computes an influx of energy from a beam (e.g. laser) wi
 Gaussian spatial profile. The flux is given by
 
 \begin{equation}
--2r_{eff}F_0\exp{-r_{eff}r_p^2/R^2}
+-\frac{2P_0}{\pi R^2}\exp{\frac{-2r_p^2}{R^2}}
 \end{equation}
 
-where $r_eff$ is an effective radius used to specify the radial distribution of
-beam energy, $F_0$ is the average heat flux of the beam, $R$ is the beam radius,
-and $r_p$ is the normed distance from the point at which we're evaluating the
-flux to the centerpoint of the beam. This functional form of the beam flux is
-taken from [!cite](noble2007use). The negative sign on the flux indicates that
-the flux is incoming.
+where $P_0$ is the total power of the beam, $R$ is the radius at which the
+intensity falls to $1/\exp{2}$ of its axial value, and $r_p$ is the normed
+distance from the point at which we're evaluating the flux to the centerpoint of
+the beam. This functional form of the beam flux is taken from
+[Wikipedia](https://en.wikipedia.org/wiki/Gaussian_beam). The negative sign on
+the flux indicates that the flux is incoming. This class assumes that the beam
+impinges perpendicular to the surface.
 
 !syntax parameters /BCs/GaussianEnergyFluxBC
 

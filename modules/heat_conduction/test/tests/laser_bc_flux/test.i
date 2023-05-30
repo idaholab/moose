@@ -35,8 +35,7 @@
     type = GaussianEnergyFluxBC
     variable = temperature
     boundary = 'top'
-    reff = 0.6
-    F0 = 1
+    P0 = 1
     R = 0.1
     x_beam_coord = 0.5
     y_beam_coord = 0.5
