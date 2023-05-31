@@ -43,6 +43,7 @@ protected:
 
   /// Total number of elements to output
   const std::size_t _n_elements;
+
   /// Writable chemical potential variables for each element
   std::vector<MooseVariable *> _el_pot;
 

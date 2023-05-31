@@ -30,7 +30,7 @@ ThermochimicaAux::validParams()
   params.addCoupledVar("output_phases", "Amounts of phases to be output");
   params.addCoupledVar("output_species", "Amounts of species to be output");
   params.addRequiredParam<UserObjectName>("thermo_nodal_data_uo", "Name of the user object");
-  params.addCoupledVar("element_potentials", "Chemical potentials of elements");
+  params.addCoupledVar("output_element_potentials", "Chemical potentials of elements");
   params.addCoupledVar("output_vapor_pressures", "Vapour pressures of species to be output");
 
   ThermochimicaUtils::addClassDescription(
@@ -49,7 +49,7 @@ ThermochimicaAux::ThermochimicaAux(const InputParameters & parameters)
     _sp(_n_species),
     _n_vapor_species(coupledComponents("output_vapor_pressures")),
     _vapor_pressures(_n_vapor_species),
-    _n_elements(coupledComponents("element_potentials")),
+    _n_elements(coupledComponents("output_element_potentials")),
     _el_pot(_n_elements)
 #ifdef THERMOCHIMICA_ENABLED
     ,
@@ -74,7 +74,7 @@ ThermochimicaAux::ThermochimicaAux(const InputParameters & parameters)
     _vapor_pressures[i] = &writableVariable("output_vapor_pressures", i);
 
   for (const auto i : make_range(_n_elements))
-    _el_pot[i] = &writableVariable("element_potentials", i);
+    _el_pot[i] = &writableVariable("output_element_potentials", i);
 }
 
 Real

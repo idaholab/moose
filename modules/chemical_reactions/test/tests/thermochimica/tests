@@ -53,8 +53,8 @@
   [separator_error2]
     type = RunException
     input = MoRu.i
-    expect_err = "No ':' separator found in variable 'cp_Ru'"
-    cli_args = "GlobalParams/element_potentials='cp:Mo cp_Ru'"
+    expect_err = "No ':' separator found in variable 'mu_Ru'"
+    cli_args = "GlobalParams/output_element_potentials='mu:Mo mu_Ru'"
     issues = '#23865'
     requirement = 'The system shall throw an error if an invalid element potential format is detected'
     design = ThermochimicaNodalData.md
@@ -66,8 +66,8 @@
   [invalid_element]
     type = RunException
     input = MoRu.i
-    expect_err = "atomicNumber: unknown chemical element Xxx requested\. Typo\?"
-    cli_args = "GlobalParams/elements='Xxx Mo Ru' GlobalParams/element_potentials='cp:Mo cp:Ru cp:Xxx'"
+    expect_err = "Element 'Xxx' was not found in the database."
+    cli_args = "GlobalParams/elements='Xxx Mo Ru'"
     issues = '#23865'
     requirement = 'The system shall throw an error if an invalid element is specified'
     design = ThermochimicaNodalData.md
@@ -106,7 +106,7 @@
     type = RunException
     input = MoRu.i
     expect_err = "Element 'W' was not found in the simulation."
-    cli_args = "GlobalParams/element_potentials='cp:Mo cp:W'"
+    cli_args = "GlobalParams/output_element_potentials='mu:Mo mu:W'"
     issues = '#23865'
     requirement = 'The system shall throw an error if an element absent from the simulation is specified for chemical potential output'
     design = ThermochimicaNodalData.md
@@ -153,4 +153,9 @@
     max_threads = 1
     required_submodule = 'contrib/thermochimica'
   []
+
+  # [all_elements]
+  #   type =
+  # []
+
 []

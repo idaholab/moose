@@ -52,4 +52,7 @@ protected:
 
   /// List of gas phase species to extract vapor pressures from Thermochimica
   std::vector<std::string> _vapor_pressures;
+
+  /// List of elements in specific phases to extract the molar amount of the element in that phase
+  std::vector<std::string> _element_phases;
 };
