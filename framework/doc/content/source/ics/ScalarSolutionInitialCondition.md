@@ -1,0 +1,13 @@
+# ScalarSolutionInitialCondition
+
+!syntax description /ICs/ScalarSolutionInitialCondition
+
+!alert note
+Because they are stored the same way in [Exodus.md] files, a postprocessor saved in the file
+can also be used to restart a scalar variable.
+
+!syntax parameters /ICs/ScalarSolutionInitialCondition
+
+!syntax inputs /ICs/ScalarSolutionInitialCondition
+
+!syntax children /ICs/ScalarSolutionInitialCondition

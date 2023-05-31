@@ -11,7 +11,7 @@
 #include "SolutionUserObject.h"
 #include "MooseMesh.h"
 
-registerMooseObject("ThermalHydraulicsApp", SolutionInitialCondition);
+registerMooseObject("MooseApp", SolutionInitialCondition);
 
 InputParameters
 SolutionInitialCondition::validParams()
@@ -21,6 +21,9 @@ SolutionInitialCondition::validParams()
                                           "The SolutionUserObject to extract data from.");
   params.addRequiredParam<VariableName>(
       "from_variable", "The name of the variable in the file that is to be extracted");
+  params.addClassDescription(
+      "Sets the initial condition from a field variable stored in an Exodus file, "
+      "retrieve by a SolutionUserObject");
   return params;
 }
 
