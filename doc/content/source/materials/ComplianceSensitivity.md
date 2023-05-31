@@ -4,7 +4,7 @@
 
 ## Description
 
-The `ComplianceSensitivity` material class extends the `StrainEnergyDensity` class to compute the compliance sensitivity in a material. This class is particularly useful in topology optimization problems, where the sensitivity of the compliance to design variables is required. The class takes into account the design density and filtered design density variables, as well as the penalty power for the SIMP method, and Young's modulus values for the material.
+The `ComplianceSensitivity` material class extends the `StrainEnergyDensity` class to compute the compliance sensitivity in a material. This class is particularly useful in topology optimization problems, where the sensitivity of the compliance to design variables is required. The class takes into account the design density, the penalty power for the SIMP method, and Young's modulus values for the material.
 
 ## Example Input File
 
