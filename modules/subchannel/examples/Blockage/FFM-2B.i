@@ -181,7 +181,7 @@ P_out = 2.0e5 # Pa
 
 # [Postprocessors]
 #   [T]
-#     type = TriSubChannelPointValue
+#     type = SubChannelPointValue
 #     variable = T
 #     index = 0
 #     execute_on = 'initial timestep_end'

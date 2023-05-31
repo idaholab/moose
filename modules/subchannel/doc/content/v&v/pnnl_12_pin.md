@@ -7,7 +7,7 @@ The PNNL 2$\times$6 benchmark [!cite](BATES1980) was performed at Pacific Northw
 Local fluid velocity and temperature measurements in the mixed (combined free and forced) convection regime were obtained. This benchmark aims to validate the subchannel code in natural convection conditions. For each of the  test conditions of this study, fluid axial velocity and temperature (both local and bulk average inlet and outlet) were measured within the heated length of the rod bundle.  For the steady state cases studied, velocity measurements were made along the X axis at Y = 0.0 which is along the centerline of the central subchannels (subchannels 1-7). The cross section of the rod bundle is presented in Figure [2x6].
 
 !media figures/2x6.png
-    style=width:80%;margin-bottom:2%;margin:auto;
+    style=width:60%;margin-bottom:2%;margin:auto;
     id=2x6
     caption=  Bundle Cross-Section with Subchannel Numbering Scheme and Bundle Dimensions (in.)
 
@@ -16,9 +16,9 @@ Velocity data were recorded at selected points along the central subchannel axia
 !table id=parameters caption=Operational parameters for PNNL 2X6-pin benchmark.
 | Case number | Initial Flow $[GPM]$  | Final Flow $[GPM]$ | time $[sec]$ |Power Gradient| $Q_H [kW/rod]$| $Q_L [kW/rod]$ | Re {initial/final} |
 | :- | :- | :- | :- | :- | :- | :- | :- | :- |
-| 5 | 3.08 | 1.08 | 150 | 0:0 | 0.0 | 0.0 | 1200/420 |
-| 9 | 3.08 | 3.08 | S.S | 1:0 | 0.91 | 0.0 | 1290/1290 |
-| 13 | 3.08 | 3.08 | S.S | 2:1 | 0.91 | 0.455 | 1340/1340 |
+| $5$ | $3.08$ | $1.08$ | $150$ | $0:0$ | $0.0$ | $0.0$ | $1200/420$ |
+| $9$ | $3.08$ | $3.08$ | S.S | $1:0$ | $0.91$ | $0.0$ | $1290/1290$ |
+| $13$ | $3.08$ | $3.08$ | S.S | $2:1$ | $0.91$ | $0.455$ | $1340/1340$ |
 
 ## Subchannel Input
 

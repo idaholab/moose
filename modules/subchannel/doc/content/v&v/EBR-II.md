@@ -14,7 +14,7 @@
 Argonne National Laboratory’s (ANL) Experimental Breeder Reactor II (EBR-II) was a liquid metal reactor with a sodium-bonded metallic fuel core. EBR-II was rated for a thermal power of 62.5 MW with an electric output of approximately 20 MW. A schematic of the reactor and the primary sodium flow paths are shown in [fig:schematic]. All major primary system components were submerged in the primary tank, which contained approximately $340 m^3$ of liquid sodium at $371^o C$. Two primary pumps inside this pool provided sodium to the two inlet plena of the core. Sub-assemblies in the inner core received sodium from the high-pressure inlet plenum, accounting for approximately $85\%$ of the total primary flow. The blanket and reflector sub-assemblies in the outer blanket region received sodium from the low-pressure inlet plenum. Hot sodium exited the sub-assemblies into a common upper plenum, where it mixed before passing into the intermediate heat exchanger (IHX).
 
 !media figures/EBR-II_primary_tank.png
-    style=width:50%;margin-bottom:2%;margin:auto;
+    style=width:60%;margin-bottom:2%;margin:auto;
     id=fig:schematic
     caption=Schematic of the EBR-II reactor [!cite](osti_801571)
 
@@ -31,12 +31,12 @@ Both tests run for $900$ seconds.
 This work utilizes data measured by the instrumented sub-assembly XX09. XX09 was a fueled sub-assembly specifically designed with a variety of instrumentation to provide data for benchmark validation purposes. The standard-type fueled sub-assembly contains 91 fuel pins, whereas in XX09 the outer row of fuel pins was removed and a guide thimble was inserted instead, as shown in [fig:XX09], [fig:XX09_3].
 
 !media figures/XX09.png
-    style=width:50%;margin-bottom:2%;margin:auto;
+    style=width:60%;margin-bottom:2%;margin:auto;
     id=fig:XX09
     caption=XX09 Instrumented sub-assembly axial-section [!cite](summer2012benchmark)
 
 !media figures/XX09_3.png
-    style=width:50%;margin-bottom:2%;margin:auto;
+    style=width:60%;margin-bottom:2%;margin:auto;
     id=fig:XX09_3
     caption=XX09 Instrumented sub-assembly cross-section [!cite](summer2012benchmark)
 
@@ -57,7 +57,7 @@ The values for the inlet mass flow rate, power, and inlet coolant temperature ar
 During the SHRT transients, the mass flow rate and power vary. The normalized power and mass flow rate during the transients have been adapted from [!cite](mochizuki2014benchmark) , [!cite](mochizuki2018benchmark) and are presented in [fig:Norm_TR]. This information is used as input for the subchannel code transient calculations. The work in the cited sources utilizes a NETFLOW++ [!cite](mochizuki2010development) simulation to inform a COBRA-IV-I [!cite](wheeler1976cobra) model of the instrumented sub-assembly XX09. It should be noted that for SHRT-17, the power generation throughout the transient is solely due to decay heat because the protection system shuts down the reactor. For the SHRT-45R test, fission power continues into the transient for some time until the reactivity feedback mechanisms ultimately shut down the reactor.
 
 !media figures/Normalized_Transients.png
-    style=width:50%;margin-bottom:2%;margin:auto;
+    style=width:60%;margin-bottom:2%;margin:auto;
     id=fig:Norm_TR
     caption=Transient boundary conditions
 
@@ -84,12 +84,12 @@ In the Pronghorn-SC standalone simulation with uniform power, without coupling t
 For SHRT-17, in the constant pin power case, both Pronghorn-SC and DASSH exhibit similar behavior. Since DASSH does not resolve the crossflows (contrary to Pronghorn-SC), similar results indicate that crossflows might not be instrumental, in determining the temperature profile for this case. Additionally, DASSH predicts a slightly less skewed distribution than Pronghorn-SC, which is closer to the experimental results. This means that the crossflows may be underestimated by the lateral momentum balance equation solved by Pronghorn-SC, or that the thimble model incorporated in DASSH is more accurate than the simplified, mass-flow adaptation applied to Pronghorn-SC. Nonetheless, both the Pronghorn-SC and DASSH calculations, are close enough to suggest that those differences in modeling approach, do not produce large discrepancies in the results.
 
 !media figures/res_17_TTC.png
-    style=width:50%;margin-bottom:2%;margin:auto;
+    style=width:60%;margin-bottom:2%;margin:auto;
     id=fig:TTC17
     caption=Test SHRT-17
 
 !media figures/res_45_TTC.png
-    style=width:50%;margin-bottom:2%;margin:auto;
+    style=width:60%;margin-bottom:2%;margin:auto;
     id=fig:TTC45
     caption=Test SHRT-45R
 
@@ -102,12 +102,12 @@ Then for both tests, the flow rate gradually decreases due to the pump trip and 
 For SHRT-17, the stand-alone Pronghorn-SC calculated transient, overestimates the measured result of the peak temperature, by approximately $20\mathrm{K}$, for the uniform power model and underestimates the peak temperature by approximately $5\mathrm{K}$ for the non-uniform power model. For the SHRT-45R transient, the uniform power model over-predicts the peak temperature by approximately $20\mathrm{K}$, while the non-uniform power model under-predicts the temperature, by approximately $2\mathrm{K}$. The thermal inertia of the solid structures play an important role in determining the temperature field transient, towards the establishment of natural convection. As these structures are not modeled in the Pronghorn-SC simulations, a more rapid decrease in the temperature field is observed in all cases. Nonetheless, the thermal inertia of these structures does not play a fundamental role once natural convection is established, as the system is in thermal equilibrium. Hence, better agreement is obtained for this part of the transient. In general, good results are obtained for both transients, with the non-uniform power simulations yielding better agreement with the experimental measurements.
 
 !media figures/res_17_transient.png
-    style=width:50%;margin-bottom:2%;margin:auto;
+    style=width:60%;margin-bottom:2%;margin:auto;
     id=fig:transient1
     caption=Test SHRT-17
 
 !media figures/res_45_transient.png
-    style=width:50%;margin-bottom:2%;margin:auto;
+    style=width:60%;margin-bottom:2%;margin:auto;
     id=fig:transient2
     caption=Test SHRT-45R
 
@@ -223,7 +223,7 @@ A porous media Pronghorn-FV simulation is performed to calculate the inter-assem
 The Pronghorn-FV model for SHRT-17 is depicted in [fig:coupling] along with the subchannel pin mesh (Pronghorn-SC model). The sub-assembly XX09 is modeled along with its six neighboring sub-assemblies. The model includes the thimble region of XX09, inter-wrapper, and duct walls. In counter-clockwise order, the six neighboring sub-assemblies include two driver sub-assemblies (D1 and D2). Next in order is the steel sub-assembly (KO11). Next, experimental sub-assembly (X402). Next, High-Flow Driver sub-assembly (HFD) and last a 1/2 driver sub-assembly (P).
 
 !media figures/coupling.png
-    style=width:50%;margin-bottom:2%;margin:auto;
+    style=width:60%;margin-bottom:2%;margin:auto;
     id=fig:coupling
     caption=Test SHRT-17, Pronghorn-FV and Pronghorn-SC models (domain overllaping).
 
