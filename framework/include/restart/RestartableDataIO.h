@@ -40,6 +40,8 @@ public:
    */
   std::shared_ptr<Backup> createBackup();
 
+  std::string getRestartableDataExt() const { return RESTARTABLE_DATA_EXT; }
+
   /**
    * Restore a Backup for the current system.
    */
