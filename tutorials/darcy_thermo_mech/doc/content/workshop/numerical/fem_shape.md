@@ -99,26 +99,17 @@ $\psi_8$ is associated to the "center" node, it is symmetric and $\geq 0$ on the
 
 !row!
 !col! width=33%
-!media darcy_thermo_mech/fem_quad9_phi0.png style=width:100%
-
-!style halign=center
-$\psi_0$
+!media darcy_thermo_mech/fem_quad9_phi0.png style=width:100% caption=$\psi_4$ prefix=''
 !col-end!
 
 !col! width=33%
 !col width=33%
-!media darcy_thermo_mech/fem_quad9_phi4.png style=width:100%;
-
-!style halign=center
-$\psi_4$
+!media darcy_thermo_mech/fem_quad9_phi4.png style=width:100%; caption=$\psi_4$ prefix=''
 !col-end!
 
 !col! width=33%
 !col width=33%
-!media darcy_thermo_mech/fem_quad9_phi8.png style=width:100%;
-
-!style halign=center
-$\psi_8$
+!media darcy_thermo_mech/fem_quad9_phi8.png style=width:100%; caption=$\psi_8$ prefix=''
 !col-end!
 
 !row-end!
