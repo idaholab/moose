@@ -11,7 +11,7 @@ equations are run on the displaced mesh such that a mesh convection term (see
 velocity. Both SUPG and PSPG stabilizations are used in this input.
 
 This simulation is driven by the rotating laser spot, whose effect is introduced
-via the [GaussianWeldEnergyFluxBC.md] object. In addition to this incoming heat
+via the [GaussianEnergyFluxBC.md] object. In addition to this incoming heat
 flux, an outgoing radiative heat flux is modeled using [FunctionRadiativeBC.md].
 Evaporation of material from the liquefied material surface helps
 drive momentum changes at the surface of the condensed phase; this effect is incorporated via the

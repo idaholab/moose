@@ -2,6 +2,7 @@ period=1.25e-3
 endtime=${period}
 timestep=1.25e-5
 surfacetemp=300
+sb=5.67e-8
 
 [GlobalParams]
   temperature = T
@@ -161,21 +162,20 @@ surfacetemp=300
     value = 300
   []
   [radiation_flux]
-    type = RadiationEnergyFluxBC
+    type = FunctionRadiativeBC
     variable = T
     boundary = 'front'
-    ff_temp = 300
-    sb_constant = 'sb_constant'
-    absorptivity = 'abs'
+    emissivity_function = '1'
+    Tinfinity = 300
+    stefan_boltzmann_constant = ${sb}
     use_displaced_mesh = true
   []
   [weld_flux]
-    type = GaussianWeldEnergyFluxBC
+    type = GaussianEnergyFluxBC
     variable = T
     boundary = 'front'
-    reff = 0.6
-    F0 = 2.546e9
-    R = 1e-4
+    P0 = 159.96989792079225
+    R = 1.8257418583505537e-4
     x_beam_coord = '2e-4 * cos(t * 2 * pi / ${period})'
     y_beam_coord = '2e-4 * sin(t * 2 * pi / ${period})'
     z_beam_coord = 0
@@ -252,7 +252,7 @@ surfacetemp=300
   [const]
     type = GenericConstantMaterial
     prop_names = 'abs sb_constant'
-    prop_values = '1 5.67e-8'
+    prop_values = '1 ${sb}'
   []
 []
 
