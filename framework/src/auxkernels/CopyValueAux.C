@@ -11,7 +11,6 @@
 #include "SystemBase.h"
 
 registerMooseObject("MooseApp", CopyValueAux);
-registerMooseObjectRenamed("MooseApp", SelfAux, "01/30/2024 24:00", CopyValueAux);
 
 InputParameters
 CopyValueAux::validParams()

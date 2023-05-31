@@ -194,7 +194,8 @@ ChemicalCompositionAction::act()
     {
       const std::string ker_name = _vapor_pressures[i];
       params.set<AuxVariableName>("variable") = ker_name;
-      _problem->addAuxKernel("SelfAux", ker_name, params);
+      params.set<std::vector<VariableName>>("v") = {ker_name};
+      _problem->addAuxKernel("ProjectionAux", ker_name, params);
     }
   }
 
