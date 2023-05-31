@@ -11,6 +11,7 @@
 #include "MooseApp.h"
 #include "Transient.h"
 #include "TimeSequenceStepperBase.h"
+#include "IterationAdaptiveDT.h"
 
 #include <limits>
 
@@ -47,7 +48,10 @@ CompositionDT::CompositionDT(const InputParameters & parameters)
     _has_initial_dt(isParamValid("initial_dt")),
     _initial_dt(_has_initial_dt ? getParam<Real>("initial_dt") : 0.),
     _lower_bound(getParam<std::vector<std::string>>("lower_bound").begin(),
-                 getParam<std::vector<std::string>>("lower_bound").end())
+                 getParam<std::vector<std::string>>("lower_bound").end()),
+    _current_time_stepper(nullptr),
+    _largest_bound_time_stepper(nullptr),
+    _closest_time_sequence_stepper(nullptr)
 {
   // Make sure the steppers in "lower_bound" exist
   const auto time_steppers = getTimeSteppers();
@@ -60,40 +64,100 @@ CompositionDT::CompositionDT(const InputParameters & parameters)
           "lower_bound", "Failed to find a timestepper with the name '", time_stepper_name, "'");
 }
 
+template <typename Lambda>
+void
+CompositionDT::actOnTimeSteppers(Lambda && act)
+{
+  for (auto & ts : getTimeSteppers())
+    act(*ts);
+}
+
+void
+CompositionDT::init()
+{
+  actOnTimeSteppers([](auto & ts) { ts.init(); });
+}
+
+void
+CompositionDT::preExecute()
+{
+  actOnTimeSteppers([](auto & ts) { ts.preExecute(); });
+}
+
+void
+CompositionDT::preSolve()
+{
+  actOnTimeSteppers([](auto & ts) { ts.preSolve(); });
+}
+
+void
+CompositionDT::postSolve()
+{
+  actOnTimeSteppers([](auto & ts) { ts.postSolve(); });
+}
+
+void
+CompositionDT::postExecute()
+{
+  actOnTimeSteppers([](auto & ts) { ts.postExecute(); });
+}
+
+void
+CompositionDT::preStep()
+{
+  actOnTimeSteppers([](auto & ts) { ts.preStep(); });
+}
+
+void
+CompositionDT::postStep()
+{
+  actOnTimeSteppers([](auto & ts) { ts.postStep(); });
+}
+
+bool
+CompositionDT::constrainStep(Real & dt)
+{
+  bool at_sync_point = TimeStepper::constrainStep(dt);
+  const auto time_steppers = getTimeSteppers();
+  for (auto & ts : time_steppers)
+    if (ts->constrainStep(dt))
+      return true;
+  return at_sync_point;
+}
+
 Real
 CompositionDT::computeInitialDT()
 {
-  if (_has_initial_dt)
-    return _initial_dt;
-  else
-    return computeDT();
+  return _has_initial_dt ? _initial_dt : computeDT();
 }
 
 Real
 CompositionDT::computeDT()
 {
   const auto time_steppers = getTimeSteppers();
-
   // Note : compositionDT requires other active time steppers as input so no active time steppers
   // or only compositionDT is active is not allowed
-  if (time_steppers.size() < 2 && time_steppers[0] == this)
+  if (time_steppers.size() < 1)
     mooseError("No TimeStepper(s) are currently active to compute a timestep");
 
-  std::set<Real> dts;
-  std::set<Real> bound_dt;
+  std::set<std::pair<Real, TimeStepper *>, CompareFirst> dts, bound_dt;
 
   for (auto & ts : time_steppers)
-    if (ts != this && !dynamic_cast<TimeSequenceStepperBase *>(ts))
+    if (!dynamic_cast<TimeSequenceStepperBase *>(ts))
     {
       ts->computeStep();
       const auto dt = ts->getCurrentDT();
+
       if (_lower_bound.count(ts->name()))
-        bound_dt.emplace(dt);
+        bound_dt.emplace(dt, ts);
       else
-        dts.emplace(dt);
+        dts.emplace(dt, ts);
     }
 
-  _dt = produceCompositionDT(std::as_const(dts), std::as_const(bound_dt));
+  _current_time_stepper = dts.size() ? dts.begin()->second : nullptr;
+  _largest_bound_time_stepper = bound_dt.size() ? (--bound_dt.end())->second : nullptr;
+
+  _dt = produceCompositionDT(dts, bound_dt);
 
   return _dt;
 }
@@ -114,7 +178,6 @@ CompositionDT::getSequenceSteppersNextTime()
   Real next_time_to_hit = std::numeric_limits<Real>::max();
   for (auto & tss : time_sequence_steppers)
   {
-    tss->init();
     Real ts_time_to_hit = tss->getNextTimeInSequence();
     if (ts_time_to_hit - _time <= _dt_min)
     {
@@ -122,26 +185,43 @@ CompositionDT::getSequenceSteppersNextTime()
       ts_time_to_hit = tss->getNextTimeInSequence();
     }
     if (next_time_to_hit > ts_time_to_hit)
+    {
+      _closest_time_sequence_stepper = tss;
       next_time_to_hit = ts_time_to_hit;
+    }
   }
   return next_time_to_hit;
 }
 
 Real
-CompositionDT::produceCompositionDT(const std::set<Real> & dts, const std::set<Real> & bound_dts)
+CompositionDT::produceCompositionDT(
+    std::set<std::pair<Real, TimeStepper *>, CompareFirst> & dts,
+    std::set<std::pair<Real, TimeStepper *>, CompareFirst> & bound_dts)
 {
-  Real minDT, lower_bound = 0;
+  Real minDT, lower_bound, dt;
+  minDT = lower_bound = dt = 0.0;
   if (!dts.empty())
-    minDT = *dts.begin();
+    minDT = dts.begin()->first;
   if (!bound_dts.empty())
-    lower_bound = *bound_dts.rbegin();
+    lower_bound = bound_dts.rbegin()->first;
+
+  if (minDT > lower_bound)
+    dt = minDT;
+  else
+  {
+    dt = lower_bound;
+    _current_time_stepper = _largest_bound_time_stepper;
+  }
 
   auto ts = getSequenceSteppersNextTime();
 
-  if (ts != 0)
-    return std::min((ts - _time), std::max(minDT, lower_bound));
+  if (ts != 0 && (ts - _time) < dt)
+  {
+    _current_time_stepper = _closest_time_sequence_stepper;
+    return std::min((ts - _time), dt);
+  }
   else
-    return std::max(minDT, lower_bound);
+    return dt;
 }
 
 std::vector<TimeStepper *>
@@ -152,5 +232,36 @@ CompositionDT::getTimeSteppers()
       .query()
       .condition<AttribSystem>("TimeStepper")
       .queryInto(time_steppers);
+
+  // Remove CompositionDT from time_steppers vector to avoid recursive call
+  time_steppers.erase(std::remove(time_steppers.begin(), time_steppers.end(), this),
+                      time_steppers.end());
   return time_steppers;
+}
+
+void
+CompositionDT::step()
+{
+  if (_current_time_stepper)
+    _current_time_stepper->step();
+  else
+    TimeStepper::step();
+}
+
+void
+CompositionDT::acceptStep()
+{
+  actOnTimeSteppers([](auto & ts) { ts.acceptStep(); });
+}
+
+void
+CompositionDT::rejectStep()
+{
+  actOnTimeSteppers([](auto & ts) { ts.rejectStep(); });
+}
+
+bool
+CompositionDT::converged() const
+{
+  return _current_time_stepper ? _current_time_stepper->converged() : TimeStepper::converged();
 }

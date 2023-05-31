@@ -37,46 +37,34 @@
   []
 []
 
+
 [Executioner]
   type = Transient
-  end_time = 0.8
+  num_steps = 10
   solve_type = PJFNK
   petsc_options_iname = '-pc_type -pc_hypre_type'
   petsc_options_value = 'hypre boomeramg'
-
+  dtmin = 5
   [TimeSteppers]
-    [ConstDT1]
-      type = ConstantDT
-      dt = 0.2
+    [TestStepper]
+      type = TestSourceStepper
+      dt = 10
     []
 
-    [ConstDT2]
-      type = ConstantDT
-      dt = 0.1
+    [SolutionTimeAdaptiveDT]
+      type = SolutionTimeAdaptiveDT
+      dt = 5
     []
   []
 []
 
-[Controls]
-  [c1]
-    type = TimePeriod
-    enable_objects = 'TimeStepper::ConstDT1'
-    disable_objects = 'TimeStepper::ConstDT2'
-    start_time = '0.3'
-    end_time = '0.8'
-  []
-[]
 
 [Postprocessors]
-  [timestep]
-    type = TimePostprocessor
-    execute_on = 'timestep_end'
+  [dt]
+    type = TimestepSize
   []
 []
 
 [Outputs]
   csv = true
-  file_base='active_timesteppers'
 []
-
-
