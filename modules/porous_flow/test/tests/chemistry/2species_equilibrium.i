@@ -226,4 +226,5 @@
   print_linear_residuals = true
   exodus = true
   perf_graph = true
+  hide = eqm_k0
 []
