@@ -158,6 +158,43 @@
     exodiff = 'core_metadata_transfer.e'
     recover = false
   []
+  [hex_metadata_transfer_mesh_only]
+    requirement = 'The system shall generate a 2D hexagonal core mesh that transfers metadata correctly across RGMB mesh generators in mesh only with extra element ids that have been defined with default values for certain id names'
+    type = 'Exodiff'
+    input = 'core.i'
+    cli_args = "Mesh/inactive='pin2 pin3 amg2'
+                Mesh/rmp/dim=2
+                Mesh/rmp/geom=Hex
+                Mesh/rmp/assembly_pitch=3.7884
+                Mesh/rmp/radial_boundary_id=200
+                Mesh/pin1/pitch=1.3425
+                Mesh/pin1/num_sectors=2
+                Mesh/pin1/ring_radii=0.5404
+                Mesh/pin1/mesh_intervals='1 1'
+                Mesh/pin1/region_ids='1 2'
+                Mesh/pin1/quad_center_elements=false
+                Mesh/amg1/inputs=pin1
+                Mesh/amg1/pattern='0 0; 0 0 0; 0 0'
+                Mesh/amg1/background_intervals=1
+                Mesh/amg1/background_region_id=3
+                Mesh/amg1/duct_halfpitch=1.7703
+                Mesh/amg1/duct_intervals=1
+                Mesh/amg1/duct_region_ids=4
+                Mesh/cmg/inputs='amg1'
+                Mesh/cmg/pattern='0 0; 0 0 0; 0 0'
+                Mesh/cmg/mesh_periphery=true
+                Mesh/cmg/periphery_generator=quad_ring
+                Mesh/cmg/periphery_region_id=5
+                Mesh/cmg/outer_circle_radius=7
+                Mesh/cmg/periphery_num_layers=1
+                Mesh/cmg/desired_area=5.0
+                Mesh/cmg/extrude=false
+                Outputs/out/extra_element_ids_to_output='assembly_id assembly_type_id pin_id pin_type_id region_id'
+                Outputs/file_base=core_metadata_transfer
+                --mesh-only core_metadata_transfer.e"
+    exodiff = 'core_metadata_transfer.e'
+    recover = false
+  []
   [ptmg_periphery]
     requirement = 'The system shall generate a 2D hex core mesh with a reactor periphery meshed using a triangular mesh.'
     type = 'CSVDiff'
