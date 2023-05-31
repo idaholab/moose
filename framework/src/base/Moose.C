@@ -119,6 +119,7 @@ addActionTypes(Syntax & syntax)
 
   registerMooseObjectTask("add_nodal_kernel",             NodalKernel,            false);
 
+  registerMooseObjectTask("add_functor_material",         MaterialBase,           false);
   registerMooseObjectTask("add_material",                 MaterialBase,           false);
   registerMooseObjectTask("add_bc",                       BoundaryCondition,      false);
 
@@ -323,6 +324,7 @@ addActionTypes(Syntax & syntax)
                            "(copy_nodal_vars, copy_nodal_aux_vars)"
                            "(add_material)"
                            "(add_master_action_material)"
+                           "(add_functor_material)"
                            "(add_output_aux_variables)"
                            "(add_output)"
                            "(auto_checkpoint_action)"
@@ -465,6 +467,9 @@ associateSyntaxInner(Syntax & syntax, ActionFactory & /*action_factory*/)
 
   registerSyntax("AddMaterialAction", "Materials/*");
   syntax.registerSyntaxType("Materials/*", "MaterialName");
+
+  registerSyntax("AddFunctorMaterialAction", "FunctorMaterials/*");
+  syntax.registerSyntaxType("FunctorMaterials/*", "MaterialName");
 
   registerSyntax("AddPostprocessorAction", "Postprocessors/*");
   syntax.registerSyntaxType("Postprocessors/*", "PostprocessorName");

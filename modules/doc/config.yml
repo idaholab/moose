@@ -89,6 +89,7 @@ Extensions:
             action: source/actions/Action.md
             actions: source/actions/Action.md
             auxkernels: AuxKernels/index.md
+            auxscalarkernels: AuxScalarKernels/index.md
             bcs: syntax/BCs/index.md
             constraints: syntax/Constraints/index.md
             controls: syntax/Controls/index.md
@@ -97,7 +98,9 @@ Extensions:
             dirackernels: syntax/DiracKernels/index.md
             distributions: syntax/Distributions/index.md
             executioners: syntax/Executioner/index.md
+            executors: syntax/Executors/index.md
             functions: syntax/Functions/index.md
+            functormaterials: syntax/FunctorMaterials/index.md
             fvbcs: syntax/FVBCs/index.md
             fviks: syntax/FVInterfaceKernels/index.md
             fvkernels: syntax/FVKernels/index.md

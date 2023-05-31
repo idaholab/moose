@@ -1,6 +1,6 @@
 # GenericFunctorGradientMaterial
 
-!syntax description /Materials/GenericFunctorGradientMaterial
+!syntax description /FunctorMaterials/GenericFunctorGradientMaterial
 
 ## Overview
 
@@ -21,8 +21,8 @@ flux. This flux is computed at the element centroids, not one the element faces.
 
 !listing test/tests/materials/functor_properties/gradients/functor-gradients.i block=Materials AuxKernels
 
-!syntax parameters /Materials/GenericFunctorGradientMaterial
+!syntax parameters /FunctorMaterials/GenericFunctorGradientMaterial
 
-!syntax inputs /Materials/GenericFunctorGradientMaterial
+!syntax inputs /FunctorMaterials/GenericFunctorGradientMaterial
 
-!syntax children /Materials/GenericFunctorGradientMaterial
+!syntax children /FunctorMaterials/GenericFunctorGradientMaterial
