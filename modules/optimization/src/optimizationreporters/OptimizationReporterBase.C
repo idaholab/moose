@@ -19,6 +19,7 @@ OptimizationReporterBase::validParams()
   params.addRequiredParam<std::vector<ReporterValueName>>(
       "parameter_names", "List of parameter names, one for each group of parameters.");
   params.suppressParameter<std::vector<VariableName>>("variable");
+  params.suppressParameter<std::vector<std::string>>("variable_weight_names");
   params.registerBase("OptimizationReporterBase");
   return params;
 }

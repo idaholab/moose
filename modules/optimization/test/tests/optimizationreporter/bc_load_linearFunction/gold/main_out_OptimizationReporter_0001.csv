@@ -1,0 +1,5 @@
+grad_left,grad_right,left,measurement_time,measurement_values,measurement_xcoord,measurement_ycoord,measurement_zcoord,misfit_values,right,simulation_values,weight
+0,0,96,0,207,0.2,0.2,0,0,100,207,1
+0,0,309,0,2040,0.8,0.6,0,0,0,2040,10
+0,0,0,0,18.5,0.2,1.4,0,0,0,18.5,0.1
+0,0,0,0,250,0.8,1.8,0,0,0,250,2

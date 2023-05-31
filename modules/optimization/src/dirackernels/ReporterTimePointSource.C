@@ -58,10 +58,20 @@ ReporterTimePointSource::addPoints()
       MooseUtils::absoluteFuzzyEqual(_reverse_time_end, 0.0) ? _t : _reverse_time_end - _t + _dt;
   unsigned int id = 0;
   for (const auto & i : make_range(nval))
+  {
     if (_coordt.empty() || MooseUtils::absoluteFuzzyEqual(at, _coordt[i]))
     {
-      Point pt(_coordx[i], _coordy[i], _coordz[i]);
-      _point_to_index[pt] = i;
-      addPoint(pt, id++);
+      if (isParamValid("point_name"))
+      {
+        _point_to_index[_point[i]] = i;
+        addPoint(_point[i], id++);
+      }
+      else
+      {
+        Point pt(_coordx[i], _coordy[i], _coordz[i]);
+        _point_to_index[pt] = i;
+        addPoint(pt, id++);
+      }
     }
+  }
 }

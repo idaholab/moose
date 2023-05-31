@@ -3,13 +3,9 @@
   design = 'OptimizationData.md'
   [readData]
     type = CSVDiff
-    max_threads = 1 # Optimize executioner does not support multiple threads
-    rel_err = 0.00001
     input = two_vars_file.i
     csvdiff = two_vars_file_out_measure_data_0001.csv
-    # steady solve
-    recover = false
-    requirement = "The system shall be able to weight read variable weights and use "
-                  "the weight to scale the misfit."
+    requirement = "The system shall be able to read variable weights and use "
+                  "them to scale the misfit."
   []
 []
