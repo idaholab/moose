@@ -1,20 +1,15 @@
 # SpecificTotalEnthalpyIC
 
-!alert construction title=Undocumented Class
-The SpecificTotalEnthalpyIC has not been documented. The content listed below should be used as a starting point for
-documenting the class, which includes the typical automatic documentation associated with a
-MooseObject; however, what is contained is ultimately determined by what is necessary to make the
-documentation clear for users.
-
 !syntax description /ICs/SpecificTotalEnthalpyIC
 
-## Overview
+The cross-sectional area variable, [!param](/ICs/SpecificTotalEnthalpyIC/A),
+is usually set by the [Component](syntax/Components/index.md).
+For single-phase single-fluid thermal-hydraulics, the volume fraction,
+[!param](/ICs/SpecificTotalEnthalpyIC/alpha), should remain
+equal to one.
 
-!! Replace these lines with information regarding the SpecificTotalEnthalpyIC object.
-
-## Example Input File Syntax
-
-!! Describe and include an example of how to use the SpecificTotalEnthalpyIC object.
+!alert note
+This initial condition is typically already provided by the [flow model setup](syntax/FlowModelSetup/index.md).
 
 !syntax parameters /ICs/SpecificTotalEnthalpyIC
 
