@@ -42,7 +42,9 @@ public:
 
   void initFaceVelocities();
 
-  void computeVelocity(const Real & momentum_relaxation);
+  void computeFaceVelocity();
+
+  void computeCellVelocity();
 
   void addToA(const libMesh::Elem * /*elem*/,
               unsigned int /*component*/,
@@ -82,6 +84,7 @@ protected:
    * linearized momentum predictor stem.
    */
   FaceCenteredMapFunctor<RealVectorValue, std::unordered_map<dof_id_type, RealVectorValue>> _HbyA;
+  std::unique_ptr<NumericVector<Number>> _HbyA_raw;
 
   /**
    * A map from element IDs to $1/A_ij$. ADD MORE

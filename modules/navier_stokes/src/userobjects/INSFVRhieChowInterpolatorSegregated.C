@@ -154,27 +154,11 @@ INSFVRhieChowInterpolatorSegregated::getVelocity(const FaceInfo & fi,
                                                  THREAD_ID /*tid*/,
                                                  Moose::FV::InterpMethod /*m*/) const
 {
-  // // const bool correct_skewness =
-  // //     (_u->faceInterpolationMethod() == Moose::FV::InterpMethod::SkewCorrectedAverage);
-
-  // // if (Moose::FV::onBoundary(*this, fi))
-  // // {
-  // //   const Elem * const boundary_elem =
-  // //       hasBlocks(fi.elemPtr()->subdomain_id()) ? fi.elemPtr() : fi.neighborPtr();
-
-  // //   const Moose::FaceArg boundary_face{
-  // //       &fi, Moose::FV::LimiterType::CentralDifference, true, correct_skewness, boundary_elem};
-
-  // //   _console << "returning: " << (*_vel)(boundary_face)(0) << std::endl;
-  // //   return (*_vel)(boundary_face);
-  // // }
-
-  // _console << "returning: " << raw_value(_face_velocity.evaluate(&fi)) << std::endl;
   return _face_velocity.evaluate(&fi);
 }
 
 void
-INSFVRhieChowInterpolatorSegregated::computeVelocity(const Real & momentum_relaxation)
+INSFVRhieChowInterpolatorSegregated::computeFaceVelocity()
 {
   NonlinearImplicitSystem & momentum_system =
       dynamic_cast<NonlinearImplicitSystem &>(_momentum_sys->system());
@@ -182,6 +166,7 @@ INSFVRhieChowInterpolatorSegregated::computeVelocity(const Real & momentum_relax
   PetscMatrix<Number> * pmat = dynamic_cast<PetscMatrix<Number> *>(momentum_system.matrix);
   PetscVector<Number> * solution =
       dynamic_cast<PetscVector<Number> *>(momentum_system.current_local_solution.get());
+  const auto time_arg = Moose::currentState();
 
   for (auto & fi : _fe_problem.mesh().faceInfo())
   {
@@ -191,12 +176,12 @@ INSFVRhieChowInterpolatorSegregated::computeVelocity(const Real & momentum_relax
           fi, Moose::FV::LimiterType::CentralDifference, true, false, nullptr};
 
       RealVectorValue Ainv; //  = raw_value(_Ainv(face));
-      RealVectorValue HbyA = raw_value(_HbyA(face, Moose::currentState()));
+      RealVectorValue HbyA = raw_value(_HbyA(face, time_arg));
 
       interpolate(Moose::FV::InterpMethod::Average,
                   Ainv,
-                  _Ainv(makeElemArg(fi->elemPtr()), Moose::currentState()),
-                  _Ainv(makeElemArg(fi->neighborPtr()), Moose::currentState()),
+                  _Ainv(makeElemArg(fi->elemPtr()), time_arg),
+                  _Ainv(makeElemArg(fi->neighborPtr()), time_arg),
                   *fi,
                   true);
 
@@ -207,7 +192,7 @@ INSFVRhieChowInterpolatorSegregated::computeVelocity(const Real & momentum_relax
       //             *fi,
       //             true);
 
-      RealVectorValue grad_p = raw_value(_p->gradient(face, Moose::currentState()));
+      RealVectorValue grad_p = raw_value(_p->gradient(face, time_arg));
       for (const auto comp_index : make_range(_dim))
       {
         _face_velocity[fi->id()](comp_index) =
@@ -223,17 +208,17 @@ INSFVRhieChowInterpolatorSegregated::computeVelocity(const Real & momentum_relax
       const Moose::FaceArg boundary_face{
           fi, Moose::FV::LimiterType::CentralDifference, true, false, boundary_elem};
 
-      if (_u->isDirichletBoundaryFace(*fi, boundary_elem, Moose::currentState()))
+      if (_u->isDirichletBoundaryFace(*fi, boundary_elem, time_arg))
       {
-        _face_velocity[fi->id()] = -raw_value(
-            _HbyA(boundary_face, Moose::currentState())); // raw_value((*_vel)(boundary_face));
+        _face_velocity[fi->id()] =
+            -raw_value(_HbyA(boundary_face, time_arg)); // raw_value((*_vel)(boundary_face));
         // _console << "ID " << fi->id() << raw_value(_face_velocity(boundary_face)) << std::endl;
       }
       else
       {
-        RealVectorValue Ainv = raw_value(_Ainv(boundary_face, Moose::currentState()));
-        RealVectorValue HbyA = raw_value(_HbyA(boundary_face, Moose::currentState()));
-        RealVectorValue grad_p = raw_value(_p->gradient(boundary_face, Moose::currentState()));
+        const RealVectorValue & Ainv = raw_value(_Ainv(boundary_face, time_arg));
+        const RealVectorValue & HbyA = raw_value(_HbyA(boundary_face, time_arg));
+        const RealVectorValue & grad_p = raw_value(_p->gradient(boundary_face, time_arg));
         for (const auto comp_index : make_range(_dim))
         {
           _face_velocity[fi->id()](comp_index) =
@@ -243,6 +228,41 @@ INSFVRhieChowInterpolatorSegregated::computeVelocity(const Real & momentum_relax
       }
     }
   }
+}
+
+void
+INSFVRhieChowInterpolatorSegregated::computeCellVelocity()
+{
+  NonlinearImplicitSystem & momentum_system =
+      dynamic_cast<NonlinearImplicitSystem &>(_momentum_sys->system());
+  const auto time_arg = Moose::currentState();
+
+  std::vector<unsigned int> var_nums = {momentum_system.variable_number(_u->name())};
+  if (_v)
+    var_nums.push_back(momentum_system.variable_number(_v->name()));
+  if (_w)
+    var_nums.push_back(momentum_system.variable_number(_w->name()));
+
+  for (auto & elem :
+       as_range(_mesh.active_local_elements_begin(), _mesh.active_local_elements_end()))
+  {
+    // Check how many dofs we have on the current element, if none we have nothing to do
+    const auto elem_arg = makeElemArg(elem);
+    const RealVectorValue & Ainv = _Ainv(elem_arg, time_arg);
+    const RealVectorValue & HbyA = _HbyA(elem_arg, time_arg);
+    const RealVectorValue & grad_p = raw_value(_p->gradient(elem_arg, time_arg));
+
+    for (auto comp_index : make_range(_dim))
+    {
+      const auto index = elem->dof_number(momentum_system.number(), var_nums[comp_index], 0);
+      momentum_system.current_local_solution->set(
+          index, -(*_HbyA_raw)(index)-Ainv(comp_index) * grad_p(comp_index));
+    }
+  }
+  _momentum_sys->setSolution(*momentum_system.current_local_solution);
+
+  // std::cout << "After correction" << std::endl;
+  // momentum_system.current_local_solution->print();
 }
 
 void
@@ -315,7 +335,8 @@ INSFVRhieChowInterpolatorSegregated::computeHbyA(const Real & momentum_relaxatio
       dynamic_cast<PetscVector<Number> *>(momentum_system.current_local_solution.get());
 
   std::unique_ptr<NumericVector<Number>> Ainv = solution->zero_clone();
-  std::unique_ptr<NumericVector<Number>> HbyA = solution->zero_clone();
+  _HbyA_raw = solution->zero_clone();
+  auto & HbyA = _HbyA_raw;
   std::unique_ptr<NumericVector<Number>> working_vector = solution->zero_clone();
 
   // Wpuld be cool to add asserts here
@@ -350,33 +371,6 @@ INSFVRhieChowInterpolatorSegregated::computeHbyA(const Real & momentum_relaxatio
     solution->print();
   }
 
-  // if (pmat->closed())
-  // {
-  //   // We compute the right hand side with a zero vector for starters
-  //   _fe_problem.computeResidualSys(momentum_system, *working_vector, *HbyA);
-
-  //   pmat->print_personal();
-
-  //   VecScale(HbyA_petsc->vec(), -1.0);
-
-  //   MatGetDiagonal(pmat->mat(), Ainv_petsc->vec());
-
-  //   // Now the hard part, let's get H*u and add it to the rhs
-  //   MatMult(pmat->mat(), solution->vec(), working_vector_petsc->vec());
-  //   VecAXPY(HbyA_petsc->vec(), 1.0, working_vector_petsc->vec());
-
-  //   // We subtract the diagonal component because we didn't want to modify the matrix
-  //   VecPointwiseMult(working_vector_petsc->vec(), Ainv_petsc->vec(), solution->vec());
-  //   VecAXPY(HbyA_petsc->vec(), -1.0, working_vector_petsc->vec());
-
-  //   // Now we invert the diagonal
-  //   VecSet(working_vector_petsc->vec(), 1.0);
-  //   VecPointwiseDivide(Ainv_petsc->vec(), working_vector_petsc->vec(), Ainv_petsc->vec());
-
-  //   // And divide H by the diagonal
-  //   VecPointwiseMult(HbyA_petsc->vec(), HbyA_petsc->vec(), Ainv_petsc->vec());
-  // }
-
   // **************************************************************************
   // Libmesh version
   // **************************************************************************
@@ -401,6 +395,7 @@ INSFVRhieChowInterpolatorSegregated::computeHbyA(const Real & momentum_relaxatio
     mrhs->print();
   }
 
+  HbyA->scale(-1.0);
   HbyA->add(-1.0, *mrhs);
 
   if (verbose)
@@ -408,12 +403,6 @@ INSFVRhieChowInterpolatorSegregated::computeHbyA(const Real & momentum_relaxatio
     std::cout << "H RHS" << std::endl;
     HbyA->print();
   }
-
-  // solution->scale(relax);
-  // solution->add(1 - relax, *old_solution);
-
-  // solution->print();
-  // solution->close();
 
   if (verbose)
   {
@@ -436,8 +425,6 @@ INSFVRhieChowInterpolatorSegregated::computeHbyA(const Real & momentum_relaxatio
     std::cout << " H(u)-rhs" << std::endl;
     HbyA->print();
   }
-
-  // HbyA_petsc->add(*working_vector_petsc);
 
   if (verbose)
   {
@@ -487,19 +474,4 @@ INSFVRhieChowInterpolatorSegregated::computeHbyA(const Real & momentum_relaxatio
   // **************************************************************************
   // END
   // **************************************************************************
-
-  // auto evaluable_begin = _mesh.evaluable_elements_begin(sys.dofMap());
-  // auto evaluable_end = _mesh.evaluable_elements_end(sys.dofMap());
-
-  // for (auto it = evaluable_begin; it != evaluable_end; ++it)
-  // {
-  //   const Elem * elem = *it;
-
-  //   for (unsigned int var_index = 0; var_index < _var_numbers.size(); var_index++)
-  //   {
-  //     dof_id_type dof_index = elem->dof_number(sys.number(), _var_numbers[var_index], 0);
-  //     _HbyA[elem->id()](var_index) = HbyA_petsc->el(dof_index);
-  //     _Ainv[elem->id()](var_index) = Ainv_petsc->el(dof_index);
-  //   }
-  // }
 }

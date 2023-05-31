@@ -174,12 +174,12 @@ pressure_tag = "pressure_grad"
   momentum_system = 'momentum_system'
   pressure_system = 'pressure_system'
   momentum_tag = ${pressure_tag}
-  momentum_variable_relaxation = 0.80
+  momentum_equation_relaxation = 0.8
   pressure_variable_relaxation = 0.3
-  num_iterations = 100
+  num_iterations = 1
   pressure_absolute_tolerance = 1e-9
-  momentum_absolute_tolerance = 1e-5
-
+  momentum_absolute_tolerance = 1e-9
+  print_fields = false
 []
 
 # [Postprocessors]

@@ -35,7 +35,7 @@ public:
   bool lastSolveConverged() const override { return _last_solve_converged; }
 
   NonlinearSystemBase & getMomentumSystem() { return _momentum_sys; }
-  Real getMomentumRelaxation() { return _momentum_variable_relaxation; }
+  Real getMomentumRelaxation() { return _momentum_equation_relaxation; }
 
   const INSFVRhieChowInterpolatorSegregated & getRCUserObject() { return *_rc_uo; }
 
@@ -46,6 +46,8 @@ protected:
                      const Real relaxation_parameter);
 
   Real solveMomentumPredictor(NonlinearImplicitSystem & momentum_system);
+  Real solvePressureCorrector(NonlinearImplicitSystem & pressure_system);
+  void relaxPressureUpdate(NonlinearImplicitSystem & pressure_system);
 
   FEProblemBase & _problem;
 
@@ -71,7 +73,7 @@ private:
   const std::string _momentum_tag_name;
   const TagID _momentum_tag_id;
 
-  const Real _momentum_variable_relaxation;
+  const Real _momentum_equation_relaxation;
   const Real _pressure_variable_relaxation;
 
   const Real _momentum_absolute_tolerance;

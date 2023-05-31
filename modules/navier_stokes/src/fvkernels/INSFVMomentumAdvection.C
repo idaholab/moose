@@ -93,6 +93,8 @@ INSFVMomentumAdvection::computeResidualsAndAData(const FaceInfo & fi)
   const auto v_face = _rc_vel_provider.getVelocity(_velocity_interp_method, fi, state, _tid);
   const auto vdotn = _normal * v_face;
 
+  // std::cout << _normal * v_face << std::endl;
+
   if (onBoundary(fi))
   {
     const auto ssf = singleSidedFaceArg();
