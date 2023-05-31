@@ -78,7 +78,7 @@ INSFVMomentumDiffusion::INSFVMomentumDiffusion(const InputParameters & params)
 ADReal
 INSFVMomentumDiffusion::computeStrongResidual(const bool populate_a_coeffs)
 {
-  const auto state = determineState();
+  const Moose::StateArg state = determineState();
   const auto dudn = gradUDotNormal(state);
   ADReal face_mu;
 
@@ -116,8 +116,8 @@ INSFVMomentumDiffusion::computeStrongResidual(const bool populate_a_coeffs)
   if (_complete_expansion)
   {
     // Computing the gradient from coupled variables
-    // Normally, we can do this with `_var.gradient(face)` but we will need the transpose gradient
-    // So, we compute all at once
+    // Normally, we can do this with `_var.gradient(face, state)` but we will need the transpose
+    // gradient So, we compute all at once
     Moose::FaceArg face;
     const bool skewness_correction =
         (_var.faceInterpolationMethod() == Moose::FV::InterpMethod::SkewCorrectedAverage);
@@ -130,15 +130,15 @@ INSFVMomentumDiffusion::computeStrongResidual(const bool populate_a_coeffs)
     if (_dim == 1)
     {
       // const auto & grad_u = _u_var->adGradSln(face_info, skewness_correction);
-      const auto & grad_u = _u_var->gradient(face);
+      const auto & grad_u = _u_var->gradient(face, state);
       gradient = ADRealTensorValue(grad_u, ADRealVectorValue(0, 0, 0), ADRealVectorValue(0, 0, 0));
     }
     else if (_dim == 2)
     {
       // const auto & grad_u = _u_var->adGradSln(face_info, skewness_correction);
       // const auto & grad_v = _v_var->adGradSln(face_info, skewness_correction);
-      const auto & grad_u = _u_var->gradient(face);
-      const auto & grad_v = _v_var->gradient(face);
+      const auto & grad_u = _u_var->gradient(face, state);
+      const auto & grad_v = _v_var->gradient(face, state);
       gradient = ADRealTensorValue(grad_u, grad_v, ADRealVectorValue(0, 0, 0));
     }
     else // if (_dim == 3)
@@ -146,9 +146,9 @@ INSFVMomentumDiffusion::computeStrongResidual(const bool populate_a_coeffs)
       // const auto & grad_u = _u_var->adGradSln(face_info, skewness_correction);
       // const auto & grad_v = _v_var->adGradSln(face_info, skewness_correction);
       // const auto & grad_w = _w_var->adGradSln(face_info, skewness_correction);
-      const auto & grad_u = _u_var->gradient(face);
-      const auto & grad_v = _v_var->gradient(face);
-      const auto & grad_w = _w_var->gradient(face);
+      const auto & grad_u = _u_var->gradient(face, state);
+      const auto & grad_v = _v_var->gradient(face, state);
+      const auto & grad_w = _w_var->gradient(face, state);
       gradient = ADRealTensorValue(grad_u, grad_v, grad_w);
     }
 

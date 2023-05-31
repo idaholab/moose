@@ -47,14 +47,15 @@ ADReal
 INSFVInletIntensityTKEBC::boundaryValue(const FaceInfo & fi) const
 {
   const auto boundary_face = singleSidedFaceArg(&fi);
+  const auto state = determineState();
 
-  ADRealVectorValue velocity(_u(boundary_face));
+  ADRealVectorValue velocity(_u(boundary_face, state));
   if (_v)
-    velocity(1) = (*_v)(boundary_face);
+    velocity(1) = (*_v)(boundary_face, state);
   if (_w)
-    velocity(2) = (*_w)(boundary_face);
+    velocity(2) = (*_w)(boundary_face, state);
 
   auto velocity_normal = fi.normal() * velocity;
 
-  return 1.5 * Utility::pow<2>(_intensity(boundary_face) * velocity_normal);
+  return 1.5 * Utility::pow<2>(_intensity(boundary_face, state) * velocity_normal);
 }

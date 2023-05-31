@@ -59,6 +59,7 @@ INSFVTKEDWallFunction::boundaryValue(const FaceInfo & fi) const
 {
   Real dist = std::abs((fi.elemCentroid() - fi.faceCentroid()) * fi.normal());
   const Elem & _current_elem = fi.elem();
+  const auto state = determineState();
 
   // Assign boundary weights to element
   Real weight = 0.0;
@@ -69,11 +70,11 @@ INSFVTKEDWallFunction::boundaryValue(const FaceInfo & fi) const
   //_console << "Weight: " << weight << std::endl;
 
   // Get the velocity vector
-  ADRealVectorValue velocity(_u_var(makeElemArg(&_current_elem)));
+  ADRealVectorValue velocity(_u_var(makeElemArg(&_current_elem), state));
   if (_v_var)
-    velocity(1) = (*_v_var)(makeElemArg(&_current_elem));
+    velocity(1) = (*_v_var)(makeElemArg(&_current_elem), state);
   if (_w_var)
-    velocity(2) = (*_w_var)(makeElemArg(&_current_elem));
+    velocity(2) = (*_w_var)(makeElemArg(&_current_elem), state);
 
   // Compute the velocity and direction of the velocity component that is parallel to the wall
   ADReal parallel_speed = (velocity - velocity * (fi.normal()) * (fi.normal())).norm();
@@ -85,53 +86,55 @@ INSFVTKEDWallFunction::boundaryValue(const FaceInfo & fi) const
     constexpr Real E = 9.793;
     const ADReal a_c = 1 / karman_cte;
     const ADReal b_c =
-        1 / karman_cte * (std::log(E * dist / _mu(makeElemArg(&_current_elem))) + 1.0);
+        1 / karman_cte * (std::log(E * dist / _mu(makeElemArg(&_current_elem), state)) + 1.0);
     const ADReal c_c = parallel_speed;
     u_star = (-b_c + std::sqrt(std::pow(b_c, 2) + 4.0 * a_c * c_c)) / (2.0 * a_c);
   }
   else
-    u_star = NS::findUStar(
-        _mu(makeElemArg(&_current_elem)), _rho(makeElemArg(&_current_elem)), parallel_speed, dist);
+    u_star = NS::findUStar(_mu(makeElemArg(&_current_elem), state),
+                           _rho(makeElemArg(&_current_elem), state),
+                           parallel_speed,
+                           dist);
 
-  ADReal y_plus =
-      dist * u_star * _rho(makeElemArg(&_current_elem)) / _mu(makeElemArg(&_current_elem));
+  ADReal y_plus = dist * u_star * _rho(makeElemArg(&_current_elem), state) /
+                  _mu(makeElemArg(&_current_elem), state);
 
-  // _console << "Mu: " << _mu(makeElemArg(&_current_elem)) << std::endl;
+  // _console << "Mu: " << _mu(makeElemArg(&_current_elem), state) << std::endl;
   // _console << "Dist: " << dist << std::endl;
   // _console << "Weight: " << weight << std::endl;
 
-  // auto TKE = std::max(_k(makeElemArg(&_current_elem)),
-  //                    std::pow(_mu_t(makeElemArg(&_current_elem))
-  //                             / _rho(makeElemArg(&_current_elem))
-  //                             / _C_mu(makeElemArg(&_current_elem))
-  //                             * std::abs(_var(makeElemArg(&_current_elem))), 0.5));
+  // auto TKE = std::max(_k(makeElemArg(&_current_elem), state),
+  //                    std::pow(_mu_t(makeElemArg(&_current_elem), state)
+  //                             / _rho(makeElemArg(&_current_elem), state)
+  //                             / _C_mu(makeElemArg(&_current_elem), state)
+  //                             * std::abs(_var(makeElemArg(&_current_elem), state)), 0.5));
 
-  auto TKE = _k(makeElemArg(&_current_elem));
+  auto TKE = _k(makeElemArg(&_current_elem), state);
   // _console << _current_elem.vertex_average() << std::endl;
   // _console << "TKE: " << TKE << std::endl;
 
   if (y_plus <= 5.0) // sub-laminar layer
   {
     const auto laminar_value =
-        2.0 * weight * TKE * _mu(makeElemArg(&_current_elem)) / std::pow(dist, 2);
+        2.0 * weight * TKE * _mu(makeElemArg(&_current_elem), state) / std::pow(dist, 2);
     // _console << "Epsilon function: " << laminar_value << std::endl;
     return laminar_value.value();
   }
   else if (y_plus >=
            30.0) // log-layer (actaully potential layer regarding modern research - change later)
   {
-    const auto turbulent_value = weight * _C_mu(makeElemArg(&_current_elem)) *
+    const auto turbulent_value = weight * _C_mu(makeElemArg(&_current_elem), state) *
                                  std::pow(std::abs(TKE), 1.5) /
-                                 (_mu_t(makeElemArg(&_current_elem)) * dist);
+                                 (_mu_t(makeElemArg(&_current_elem), state) * dist);
     return turbulent_value.value();
   }
   else // my experimental blending function
   {
     const auto laminar_value =
-        2.0 * weight * TKE * _mu(makeElemArg(&_current_elem)) / std::pow(dist, 2);
-    const auto turbulent_value = weight * _C_mu(makeElemArg(&_current_elem)) *
+        2.0 * weight * TKE * _mu(makeElemArg(&_current_elem), state) / std::pow(dist, 2);
+    const auto turbulent_value = weight * _C_mu(makeElemArg(&_current_elem), state) *
                                  std::pow(std::abs(TKE), 1.5) /
-                                 (_mu_t(makeElemArg(&_current_elem)) * dist);
+                                 (_mu_t(makeElemArg(&_current_elem), state) * dist);
     const auto interpolation_coef = (y_plus - 5.0) / 25.0;
     return (interpolation_coef * (turbulent_value - laminar_value) + laminar_value).value();
   }

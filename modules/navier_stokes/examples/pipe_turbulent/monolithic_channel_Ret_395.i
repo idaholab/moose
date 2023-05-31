@@ -1,58 +1,40 @@
 von_karman_const = 0.41
 
-Re = 5100
+H = 1 #halfwidth of the channel
+L = 150
 
-rho = 1.0
-bulk_u = 1.0
-h = 1.0
-mu = '${fparse rho * bulk_u * h/ Re}'
+Re = 13700
+
+rho = 1
+bulk_u = 1
+mu = '${fparse rho * bulk_u * 2 * H / Re}'
 
 advected_interp_method = 'upwind'
-velocity_interp_method = 'average'
+velocity_interp_method = 'rc'
 
 [Mesh]
   [gen]
     type = CartesianMeshGenerator
     dim = 2
-    dx = '${fparse 10.0*h} ${fparse 20.0*h}'
-    dy = '${h} ${fparse 5*h}'
-    ix = '40 80'
-    iy = '8  32'
-    subdomain_id = '
-                    2 1
-                    1 1
-                  '
+    dx = '${L}'
+    dy = '0.667 0.333'
+    ix = '200'
+    iy = '10  4'
   []
-  [corner_walls]
-    type = SideSetsBetweenSubdomainsGenerator
-    input = gen
-    primary_block = '1'
-    paired_block = '2'
-    new_boundary = 'wall-side'
-  []
-  [delete_bottom]
-    type = BlockDeletionGenerator
-    input = corner_walls
-    block = '2'
-  []
-  # [fmg]
-  #   type = FileMeshGenerator
-  #   file = backward_facing_step_in.e
-  # []
 []
 
 # Crafted wall function
 f = '${fparse 0.316 * Re^(-0.25)}'
-ref_delta_P = '${fparse f * (30*h) / (5*h) * rho * bulk_u^2 / 2}'
-tau_wall = '${fparse ref_delta_P / (pi * (5*h) * (30*h))}'
+ref_delta_P = '${fparse f * L / (2*H) * rho * bulk_u^2 / 2}'
+tau_wall = '${fparse ref_delta_P / (pi * (2*H) * L)}'
 u_tau = '${fparse sqrt(tau_wall / rho)}'
-y_dist_wall = '${fparse (5*h)/11/2}'
+y_dist_wall = '${fparse (2*H)/11/2}'
 mu_wall = '${fparse rho * pow(u_tau,2) * y_dist_wall / bulk_u}'
 
 # Crafted bulk viscosity
-turbulent_intensity = 0.05 #'${fparse 0.16 * pow(Re, -1.0/8.0)}'
+turbulent_intensity = 0.01 #'${fparse 0.16 * pow(Re, -1.0/8.0)}'
 C_mu = 0.09
-mixing_length = '${fparse (5*h) * 0.07}'
+mixing_length = '${fparse (2*H) * 0.07}'
 k_bulk = '${fparse 3/2 * pow(bulk_u*turbulent_intensity, 2)}'
 eps_bulk = '${fparse pow(C_mu, 0.75) * pow(k_bulk, 1.5) / mixing_length}'
 mu_bulk = '${fparse rho * C_mu * pow(k_bulk, 2) / eps_bulk}'
@@ -162,14 +144,14 @@ diff = 10.0
     type = INSFVTurbulentAdvection
     variable = TKE
     rho = ${rho}
-    walls = 'bottom wall-side'
+    walls = 'top'
   []
   [TKE_diffusion]
     type = INSFVTurbulentDiffusion
     variable = TKE
     coeff = 'mu_t'
     scaling_coef = ${sigma_k}
-    walls = 'bottom wall-side'
+    walls = 'top'
   []
   [TKE_source_sink]
     type = INSFVTKESourceSink
@@ -181,25 +163,27 @@ diff = 10.0
     mu = ${mu}
     mu_t = 'mu_t'
     linearized_model = true
-    rf = 0.5
-    walls = 'bottom wall-side'
+    rf = 0.7
+    walls = 'top'
     non_equilibrium_treatement = false
-    n_iters_activate = 2
-    relaxation_method = "nl"
+    iters_to_activate = 5
+    relaxation_method = 'nl'
+    top_production_bound = 5
+    top_destruction_bound = 5
   []
 
   [TKED_advection]
     type = INSFVTurbulentAdvection
     variable = TKED
     rho = ${rho}
-    walls = 'bottom wall-side'
+    walls = 'top'
   []
   [TKED_diffusion]
     type = INSFVTurbulentDiffusion
     variable = TKED
     coeff = 'mu_t'
     scaling_coef = ${sigma_eps}
-    walls = 'bottom wall-side'
+    walls = 'top'
   []
   [TKED_source_sink]
     type = INSFVTKEDSourceSink
@@ -212,10 +196,13 @@ diff = 10.0
     mu_t = 'mu_t'
     C1_eps = ${C1_eps}
     C2_eps = ${C2_eps}
-    rf = 0.5
-    walls = 'bottom wall-side'
+    rf = 0.7
+    walls = 'top'
     # non_equilibrium_treatement = false
-    n_iters_activate = 2
+    iters_to_activate = 10
+    relaxation_method = 'nl'
+    top_production_bound = 5
+    top_destruction_bound = 5
   []
 []
 
@@ -249,12 +236,13 @@ diff = 10.0
     u = vel_x
     v = vel_y
     wall_treatement = false
-    walls = 'bottom wall-side'
+    walls = 'top'
     non_equilibrium_treatement = false
-    rf = 0.1
-    execute_on = 'LINEAR'
-    n_iters_activate = 3
-    # mu_t_inital = 0.1
+    rf = 1e-2
+    execute_on = 'NONLINEAR'
+    relaxation_method = 'nl'
+    iters_to_activate = 20
+    mu_t_inital = 0.1
   []
 []
 
@@ -268,7 +256,7 @@ diff = 10.0
     type = ADParsedFunction
     expression = 'if((abs(y) > (D)*(11/2 -1)/(11/2)), mu_wall, mu_bulk)'
     symbol_names = 'D mu_wall mu_bulk'
-    symbol_values = '${fparse 5*h} ${mu_wall} ${mu_bulk}'
+    symbol_values = '${fparse 2*H} ${mu_wall} ${mu_bulk}'
   []
 []
 
@@ -295,19 +283,13 @@ diff = 10.0
   []
   [walls-u]
     type = FVDirichletBC
-    boundary = 'bottom wall-side'
+    boundary = 'top'
     variable = vel_x
     value = 0
   []
-  [walls-u-top]
-    type = INSFVNaturalFreeSlipBC
-    boundary = 'top'
-    variable = vel_x
-    momentum_component = 'x'
-  []
   [walls-v]
     type = FVDirichletBC
-    boundary = 'top bottom wall-side'
+    boundary = 'top'
     variable = vel_y
     value = 0
   []
@@ -330,11 +312,11 @@ diff = 10.0
     boundary = 'left'
     variable = TKED
     k = TKE
-    characteristic_length = '${fparse 5*h}'
+    characteristic_length = '${fparse 2*H}'
   []
   [walls_mu_t]
     type = INSFVTurbulentViscosityWallFunction
-    boundary = 'bottom wall-side'
+    boundary = 'top'
     variable = mu_t
     u = vel_x
     v = vel_y
@@ -342,6 +324,39 @@ diff = 10.0
     mu = ${mu}
     mu_t = mu_t
     k = TKE
+  []
+  [sym-u]
+    type = INSFVSymmetryVelocityBC
+    boundary = 'bottom'
+    variable = vel_x
+    u = vel_x
+    v = vel_y
+    mu = 'mu_t'
+    momentum_component = x
+  []
+  [sym-v]
+    type = INSFVSymmetryVelocityBC
+    boundary = 'bottom'
+    variable = vel_y
+    u = vel_x
+    v = vel_y
+    mu = 'mu_t'
+    momentum_component = y
+  []
+  [symmetry_pressure]
+    type = INSFVSymmetryPressureBC
+    boundary = 'bottom'
+    variable = pressure
+  []
+  [symmetry_TKE]
+    type = INSFVSymmetryScalarBC
+    boundary = 'bottom'
+    variable = TKE
+  []
+  [symmetry_TKED]
+    type = INSFVSymmetryScalarBC
+    boundary = 'bottom'
+    variable = TKED
   []
 []
 
@@ -365,10 +380,10 @@ diff = 10.0
   steady_state_tolerance = 1e-6
   solve_type = 'NEWTON'
   petsc_options_iname = '-pc_type -pc_factor_shift_type -snes_linesearch_damping'
-  petsc_options_value = 'lu        NONZERO               0.7'
+  petsc_options_value = 'lu        NONZERO               0.5'
   nl_abs_tol = 1e-8
-  nl_rel_tol = 1e-4
-  nl_max_its = 50
+  nl_rel_tol = 1e-8
+  nl_max_its = 2000
   line_search = none
 []
 

@@ -53,20 +53,25 @@ ADReal
 INSFVTurbulentDiffusion::computeQpResidual()
 {
   using namespace Moose::FV;
+  const auto state = determineState();
 
-  auto dudn = gradUDotNormal();
+  auto dudn = gradUDotNormal(state);
   ADReal coeff;
   ADReal scaling_coef;
 
   // If we are on internal faces, we interpolate the diffusivity as usual
   if (_var.isInternalFace(*_face_info))
   {
-    interpolate(
-        _coeff_interp_method, coeff, _coeff(elemArg()), _coeff(neighborArg()), *_face_info, true);
+    interpolate(_coeff_interp_method,
+                coeff,
+                _coeff(elemArg(), state),
+                _coeff(neighborArg(), state),
+                *_face_info,
+                true);
     interpolate(_coeff_interp_method,
                 scaling_coef,
-                _scaling_coef(elemArg()),
-                _scaling_coef(neighborArg()),
+                _scaling_coef(elemArg(), state),
+                _scaling_coef(neighborArg(), state),
                 *_face_info,
                 true);
   }
@@ -75,8 +80,8 @@ INSFVTurbulentDiffusion::computeQpResidual()
   else
   {
     const auto face = singleSidedFaceArg();
-    coeff = _coeff(face);
-    scaling_coef = _scaling_coef(face);
+    coeff = _coeff(face, state);
+    scaling_coef = _scaling_coef(face, state);
   }
 
   return -1 * coeff / scaling_coef * dudn;

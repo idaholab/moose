@@ -18,8 +18,8 @@ velocity_interp_method = 'rc'
     dim = 2
     dx = '${L}'
     dy = '0.667 0.333'
-    ix = '200'
-    iy = '10  1'
+    ix = '50'
+    iy = '10  3'
   []
 []
 
@@ -32,7 +32,7 @@ y_dist_wall = '${fparse (2*H)/11/2}'
 mu_wall = '${fparse rho * pow(u_tau,2) * y_dist_wall / bulk_u}'
 
 # Crafted bulk viscosity
-turbulent_intensity = 0.01 #'${fparse 0.16 * pow(Re, -1.0/8.0)}'
+turbulent_intensity = '${fparse 0.16 * pow(Re, -1.0/8.0)}'
 C_mu = 0.09
 mixing_length = '${fparse (2*H) * 0.07}'
 k_bulk = '${fparse 3/2 * pow(bulk_u*turbulent_intensity, 2)}'
@@ -59,86 +59,27 @@ diff = 10.0
     u = vel_x
     v = vel_y
     pressure = pressure
+    a_u = ax
+    a_v = ay
   []
 []
 
 [Variables]
-  [vel_x]
-    type = INSFVVelocityVariable
-    initial_condition = ${bulk_u}
-  []
-  [vel_y]
-    type = INSFVVelocityVariable
-    initial_condition = 0
-  []
-  [pressure]
-    type = INSFVPressureVariable
-  []
   [TKE]
     type = INSFVEnergyVariable
-    initial_condition = 1e-10
-    #initial_condition = ${k_bulk}
+    # initial_condition = 1e-10
+    initial_condition = ${k_bulk}
     #scaling = '${fparse 1/k_bulk}'
   []
   [TKED]
     type = INSFVEnergyVariable
-    initial_condition = 1e-10
-    #initial_condition = ${eps_bulk}
+    # initial_condition = 1e-10
+    initial_condition = ${eps_bulk}
     #scaling = '${fparse 1/eps_bulk}'
   []
 []
 
 [FVKernels]
-
-  [mass]
-    type = INSFVMassAdvection
-    variable = pressure
-    rho = ${rho}
-  []
-
-  [u_advection]
-    type = INSFVMomentumAdvection
-    variable = vel_x
-    rho = ${rho}
-    momentum_component = 'x'
-  []
-  [u_viscosity]
-    type = INSFVMomentumDiffusion
-    variable = vel_x
-    mu = 'mu_t'
-    momentum_component = 'x'
-    complete_expansion = true
-    u = vel_x
-    v = vel_y
-  []
-  [u_pressure]
-    type = INSFVMomentumPressure
-    variable = vel_x
-    momentum_component = 'x'
-    pressure = pressure
-  []
-
-  [v_advection]
-    type = INSFVMomentumAdvection
-    variable = vel_y
-    rho = ${rho}
-    momentum_component = 'y'
-  []
-  [v_viscosity]
-    type = INSFVMomentumDiffusion
-    variable = vel_y
-    mu = 'mu_t'
-    momentum_component = 'y'
-    complete_expansion = true
-    u = vel_x
-    v = vel_y
-  []
-  [v_pressure]
-    type = INSFVMomentumPressure
-    variable = vel_y
-    momentum_component = 'y'
-    pressure = pressure
-  []
 
   [TKE_advection]
     type = INSFVTurbulentAdvection
@@ -166,6 +107,8 @@ diff = 10.0
     rf = 1.0
     walls = 'top'
     non_equilibrium_treatement = false
+    relaxation_method = 'time'
+    iters_to_activate = 0
   []
 
   [TKED_advection]
@@ -194,29 +137,37 @@ diff = 10.0
     C2_eps = ${C2_eps}
     rf = 1.0
     walls = 'top'
-    # non_equilibrium_treatement = false
+    non_equilibrium_treatement = false
+    relaxation_method = 'time'
+    iters_to_activate = 0
   []
 []
 
 [AuxVariables]
-  [U]
-    order = CONSTANT
-    family = MONOMIAL
-    fv = true
-  []
   [mu_t]
     type = MooseVariableFVReal
-    initial_condition = '${fparse mu_bulk}'
+    initial_condition = 10.0
+  []
+  [vel_x]
+    type = INSFVVelocityVariable
+    initial_condition = ${bulk_u}
+  []
+  [vel_y]
+    type = INSFVVelocityVariable
+    initial_condition = 0
+  []
+  [pressure]
+    type = INSFVPressureVariable
+  []
+  [ax]
+    type = MooseVariableFVReal
+  []
+  [ay]
+    type = MooseVariableFVReal
   []
 []
 
 [AuxKernels]
-  [mag]
-    type = VectorMagnitudeAux
-    variable = U
-    x = vel_x
-    y = vel_y
-  []
   [compute_mu_t]
     type = kEpsilonViscosityAux
     variable = mu_t
@@ -231,7 +182,11 @@ diff = 10.0
     walls = 'top'
     non_equilibrium_treatement = false
     rf = 1.0
-    execute_on = 'TIMESTEP_END'
+    mu_t_inital = '${fparse C_mu * k_bulk * k_bulk / eps_bulk}'
+    execute_on = 'NONLINEAR'
+    relaxation_method = 'nl'
+    iters_to_activate = 0
+    damper = 1.0
   []
 []
 
@@ -239,55 +194,7 @@ diff = 10.0
   previous_nl_solution_required = true
 []
 
-[Functions]
-  # Not working
-  [viscous_jump]
-    type = ADParsedFunction
-    expression = 'if((abs(y) > (D)*(11/2 -1)/(11/2)), mu_wall, mu_bulk)'
-    symbol_names = 'D mu_wall mu_bulk'
-    symbol_values = '${fparse 2*H} ${mu_wall} ${mu_bulk}'
-  []
-[]
-
-[Materials]
-  [viscosity]
-    type = ADGenericFunctorMaterial
-    prop_names = 'mu_t_imposed'
-    prop_values = 'viscous_jump'
-  []
-[]
-
 [FVBCs]
-  [inlet-u]
-    type = INSFVInletVelocityBC
-    boundary = 'left'
-    variable = vel_x
-    function = '${bulk_u}'
-  []
-  [inlet-v]
-    type = INSFVInletVelocityBC
-    boundary = 'left'
-    variable = vel_y
-    function = 0
-  []
-  [walls-u]
-    type = FVDirichletBC
-    boundary = 'top'
-    variable = vel_x
-    value = 0
-  []
-  [walls-v]
-    type = FVDirichletBC
-    boundary = 'top'
-    variable = vel_y
-    value = 0
-  []
-  [outlet_p]
-    type = INSFVOutletPressureBC
-    boundary = 'right'
-    variable = pressure
-    function = 0
-  []
   [inlet_TKE]
     type = INSFVInletIntensityTKEBC
     boundary = 'left'
@@ -314,29 +221,6 @@ diff = 10.0
     mu_t = mu_t
     k = TKE
   []
-  [sym-u]
-    type = INSFVSymmetryVelocityBC
-    boundary = 'bottom'
-    variable = vel_x
-    u = vel_x
-    v = vel_y
-    mu = 'mu_t'
-    momentum_component = x
-  []
-  [sym-v]
-    type = INSFVSymmetryVelocityBC
-    boundary = 'bottom'
-    variable = vel_y
-    u = vel_x
-    v = vel_y
-    mu = 'mu_t'
-    momentum_component = y
-  []
-  [symmetry_pressure]
-    type = INSFVSymmetryPressureBC
-    boundary = 'bottom'
-    variable = pressure
-  []
   [symmetry_TKE]
     type = INSFVSymmetryScalarBC
     boundary = 'bottom'
@@ -347,6 +231,12 @@ diff = 10.0
     boundary = 'bottom'
     variable = TKED
   []
+  [outlet_p]
+    type = INSFVOutletPressureBC
+    boundary = 'right'
+    variable = pressure
+    function = 0
+  []
 []
 
 [Debug]
@@ -354,25 +244,14 @@ diff = 10.0
 []
 
 [Executioner]
-  type = Transient
-  end_time = 100
-  dt = 1
-  # [TimeStepper]
-  #   type = IterationAdaptiveDT
-  #   dt = 0.001
-  #   iteration_window = 2
-  #   optimal_iterations = 10
-  #   growth_factor = 1.2
-  #   cutback_factor = 0.8
-  # []
-  steady_state_detection = true
-  steady_state_tolerance = 1e-6
+  type = Steady
   solve_type = 'NEWTON'
   petsc_options_iname = '-pc_type -pc_factor_shift_type -snes_linesearch_damping'
   petsc_options_value = 'lu        NONZERO               0.7'
   nl_abs_tol = 1e-8
   nl_rel_tol = 1e-2
   nl_max_its = 2000
+  # nl_forced_its = 3
   line_search = none
 []
 

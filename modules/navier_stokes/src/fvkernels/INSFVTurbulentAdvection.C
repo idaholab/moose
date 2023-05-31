@@ -56,11 +56,16 @@ INSFVTurbulentAdvection::INSFVTurbulentAdvection(const InputParameters & params)
 ADReal
 INSFVTurbulentAdvection::computeQpResidual()
 {
-  const auto v = _rc_vel_provider.getVelocity(_velocity_interp_method, *_face_info, _tid);
-  const auto var_face = _var(makeFace(
-      *_face_info, limiterType(_advected_interp_method), MetaPhysicL::raw_value(v) * _normal > 0));
-  const auto rho_face = _rho(makeFace(
-      *_face_info, limiterType(_advected_interp_method), MetaPhysicL::raw_value(v) * _normal > 0));
+  const auto v =
+      _rc_vel_provider.getVelocity(_velocity_interp_method, *_face_info, determineState(), _tid);
+  const auto var_face = _var(makeFace(*_face_info,
+                                      limiterType(_advected_interp_method),
+                                      MetaPhysicL::raw_value(v) * _normal > 0),
+                             determineState());
+  const auto rho_face = _rho(makeFace(*_face_info,
+                                      limiterType(_advected_interp_method),
+                                      MetaPhysicL::raw_value(v) * _normal > 0),
+                             determineState());
   return _normal * MetaPhysicL::raw_value(v) * rho_face * var_face;
 }
 

@@ -102,4 +102,14 @@ protected:
 
   /// -- Time storing
   Real _stored_time;
+
+  /// -- Relaxation method for production and destruction
+  const MooseEnum _relaxation_method;
+
+  /// -- Number of iterations needed to activate the source in the turbulent kinetic energy dissipation rate
+  unsigned int _iters_to_activate;
+
+  /// -- Top bounds for turbulent production and destruction
+  Real _top_production_bound;
+  Real _top_destruction_bound;
 };

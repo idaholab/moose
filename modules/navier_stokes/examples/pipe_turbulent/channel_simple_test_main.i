@@ -18,8 +18,8 @@ velocity_interp_method = 'rc'
     dim = 2
     dx = '${L}'
     dy = '0.667 0.333'
-    ix = '200'
-    iy = '10  1'
+    ix = '50'
+    iy = '10  3'
   []
 []
 
@@ -74,18 +74,6 @@ diff = 10.0
   [pressure]
     type = INSFVPressureVariable
   []
-  [TKE]
-    type = INSFVEnergyVariable
-    initial_condition = 1e-10
-    #initial_condition = ${k_bulk}
-    #scaling = '${fparse 1/k_bulk}'
-  []
-  [TKED]
-    type = INSFVEnergyVariable
-    initial_condition = 1e-10
-    #initial_condition = ${eps_bulk}
-    #scaling = '${fparse 1/eps_bulk}'
-  []
 []
 
 [FVKernels]
@@ -139,63 +127,6 @@ diff = 10.0
     momentum_component = 'y'
     pressure = pressure
   []
-
-  [TKE_advection]
-    type = INSFVTurbulentAdvection
-    variable = TKE
-    rho = ${rho}
-    walls = 'top'
-  []
-  [TKE_diffusion]
-    type = INSFVTurbulentDiffusion
-    variable = TKE
-    coeff = 'mu_t'
-    scaling_coef = ${sigma_k}
-    walls = 'top'
-  []
-  [TKE_source_sink]
-    type = INSFVTKESourceSink
-    variable = TKE
-    u = vel_x
-    v = vel_y
-    epsilon = TKED
-    rho = ${rho}
-    mu = ${mu}
-    mu_t = 'mu_t'
-    linearized_model = true
-    rf = 1.0
-    walls = 'top'
-    non_equilibrium_treatement = false
-  []
-
-  [TKED_advection]
-    type = INSFVTurbulentAdvection
-    variable = TKED
-    rho = ${rho}
-    walls = 'top'
-  []
-  [TKED_diffusion]
-    type = INSFVTurbulentDiffusion
-    variable = TKED
-    coeff = 'mu_t'
-    scaling_coef = ${sigma_eps}
-    walls = 'top'
-  []
-  [TKED_source_sink]
-    type = INSFVTKEDSourceSink
-    variable = TKED
-    u = vel_x
-    v = vel_y
-    k = TKE
-    rho = ${rho}
-    mu = ${mu}
-    mu_t = 'mu_t'
-    C1_eps = ${C1_eps}
-    C2_eps = ${C2_eps}
-    rf = 1.0
-    walls = 'top'
-    # non_equilibrium_treatement = false
-  []
 []
 
 [AuxVariables]
@@ -206,7 +137,13 @@ diff = 10.0
   []
   [mu_t]
     type = MooseVariableFVReal
-    initial_condition = '${fparse mu_bulk}'
+    initial_condition = '10.0'
+  []
+  [ax_out]
+    type = MooseVariableFVReal
+  []
+  [ay_out]
+    type = MooseVariableFVReal
   []
 []
 
@@ -217,44 +154,22 @@ diff = 10.0
     x = vel_x
     y = vel_y
   []
-  [compute_mu_t]
-    type = kEpsilonViscosityAux
-    variable = mu_t
-    C_mu = ${C_mu}
-    k = TKE
-    epsilon = TKED
-    mu = ${mu}
-    rho = ${rho}
-    u = vel_x
-    v = vel_y
-    wall_treatement = false
-    walls = 'top'
-    non_equilibrium_treatement = false
-    rf = 1.0
-    execute_on = 'TIMESTEP_END'
+  [ax_out]
+    type = ADFunctorElementalAux
+    functor = ax
+    variable = ax_out
+    execute_on = timestep_end
+  []
+  [ay_out]
+    type = ADFunctorElementalAux
+    functor = ay
+    variable = ay_out
+    execute_on = timestep_end
   []
 []
 
 [Problem]
   previous_nl_solution_required = true
-[]
-
-[Functions]
-  # Not working
-  [viscous_jump]
-    type = ADParsedFunction
-    expression = 'if((abs(y) > (D)*(11/2 -1)/(11/2)), mu_wall, mu_bulk)'
-    symbol_names = 'D mu_wall mu_bulk'
-    symbol_values = '${fparse 2*H} ${mu_wall} ${mu_bulk}'
-  []
-[]
-
-[Materials]
-  [viscosity]
-    type = ADGenericFunctorMaterial
-    prop_names = 'mu_t_imposed'
-    prop_values = 'viscous_jump'
-  []
 []
 
 [FVBCs]
@@ -288,32 +203,6 @@ diff = 10.0
     variable = pressure
     function = 0
   []
-  [inlet_TKE]
-    type = INSFVInletIntensityTKEBC
-    boundary = 'left'
-    variable = TKE
-    u = vel_x
-    v = vel_y
-    intensity = ${turbulent_intensity}
-  []
-  [inlet_TKED]
-    type = INSFVMixingLengthTKEDBC
-    boundary = 'left'
-    variable = TKED
-    k = TKE
-    characteristic_length = '${fparse 2*H}'
-  []
-  [walls_mu_t]
-    type = INSFVTurbulentViscosityWallFunction
-    boundary = 'top'
-    variable = mu_t
-    u = vel_x
-    v = vel_y
-    rho = ${rho}
-    mu = ${mu}
-    mu_t = mu_t
-    k = TKE
-  []
   [sym-u]
     type = INSFVSymmetryVelocityBC
     boundary = 'bottom'
@@ -337,16 +226,6 @@ diff = 10.0
     boundary = 'bottom'
     variable = pressure
   []
-  [symmetry_TKE]
-    type = INSFVSymmetryScalarBC
-    boundary = 'bottom'
-    variable = TKE
-  []
-  [symmetry_TKED]
-    type = INSFVSymmetryScalarBC
-    boundary = 'bottom'
-    variable = TKED
-  []
 []
 
 [Debug]
@@ -354,8 +233,8 @@ diff = 10.0
 []
 
 [Executioner]
-  type = Transient
-  end_time = 100
+  type = Steady
+  end_time = 4
   dt = 1
   # [TimeStepper]
   #   type = IterationAdaptiveDT
@@ -374,8 +253,81 @@ diff = 10.0
   nl_rel_tol = 1e-2
   nl_max_its = 2000
   line_search = none
+
+  # Fixed point iteration parameters
+  fixed_point_max_its = 30
+  accept_on_max_fixed_point_iteration = true
+  fixed_point_abs_tol = 1e-8
+  relaxation_factor = 1.0
 []
 
 [Outputs]
   exodus = true
+[]
+
+[MultiApps]
+  [turb]
+    type = FullSolveMultiApp
+    input_files = 'channel_simple_test_turb.i'
+    execute_on = TIMESTEP_END
+  []
+[]
+
+[Transfers]
+  [u_to_turb]
+    type = MultiAppCopyTransfer
+    to_multi_app = 'turb'
+    source_variable = 'vel_x'
+    variable = 'vel_x'
+  []
+  [v_to_turb]
+    type = MultiAppCopyTransfer
+    to_multi_app = 'turb'
+    source_variable = 'vel_y'
+    variable = 'vel_y'
+  []
+  [p_to_turb]
+    type = MultiAppCopyTransfer
+    to_multi_app = 'turb'
+    source_variable = 'pressure'
+    variable = 'pressure'
+  []
+  [ax]
+    type = MultiAppCopyTransfer
+    to_multi_app = 'turb'
+    source_variable = ax_out
+    variable = ax
+    execute_on = 'timestep_end'
+  []
+  [ay]
+    type = MultiAppCopyTransfer
+    to_multi_app = 'turb'
+    source_variable = ay_out
+    variable = ay
+    execute_on = 'timestep_end'
+  []
+  [mu_t_to_main]
+    type = MultiAppCopyTransfer
+    from_multi_app = 'turb'
+    source_variable = 'mu_t'
+    variable = 'mu_t'
+  []
+  [u_from_turb]
+    type = MultiAppCopyTransfer
+    from_multi_app = 'turb'
+    source_variable = 'vel_x'
+    variable = 'vel_x'
+  []
+  [v_from_turb]
+    type = MultiAppCopyTransfer
+    from_multi_app = 'turb'
+    source_variable = 'vel_y'
+    variable = 'vel_y'
+  []
+  [p_from_turb]
+    type = MultiAppCopyTransfer
+    from_multi_app = 'turb'
+    source_variable = 'pressure'
+    variable = 'pressure'
+  []
 []

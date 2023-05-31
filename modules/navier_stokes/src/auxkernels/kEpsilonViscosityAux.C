@@ -9,6 +9,8 @@
 
 #include "kEpsilonViscosityAux.h"
 #include "NavierStokesMethods.h"
+#include "NonlinearSystemBase.h"
+#include "libmesh/nonlinear_solver.h"
 
 registerMooseObject("NavierStokesApp", kEpsilonViscosityAux);
 
@@ -48,6 +50,18 @@ kEpsilonViscosityAux::validParams()
       false,
       "Use non-equilibrium wall treatement (faster than standard wall treatement)");
   params.addParam<Real>("rf", 1.0, "Relaxation factor.");
+  params.addParam<unsigned int>(
+      "iters_to_activate",
+      0,
+      "number of iterations needed to activate the source in the turbulent kinetic energy.");
+  params.addParam<Real>("mu_t_inital", 10.0, "Initial value for the turbulent viscosity.");
+  MooseEnum relaxation_method("time nl", "nl");
+  params.addParam<MooseEnum>(
+      "relaxation_method",
+      relaxation_method,
+      "The method used for relaxing the turbulent kinetic energy production. "
+      "'nl' = previous nonlinear iteration and 'time' = previous timestep.");
+  params.addParam<Real>("damper", 0.0, "Damping factor for nonlienar iterations.");
   return params;
 }
 
@@ -73,7 +87,11 @@ kEpsilonViscosityAux::kEpsilonViscosityAux(const InputParameters & params)
     _max_mixing_length(getParam<Real>("max_mixing_length")),
     _wall_treatement(getParam<bool>("wall_treatement")),
     _non_equilibrium_treatement(getParam<bool>("non_equilibrium_treatement")),
-    _rf(getParam<Real>("rf"))
+    _rf(getParam<Real>("rf")),
+    _iters_to_activate(getParam<unsigned int>("iters_to_activate")),
+    _mu_t_inital(getParam<Real>("mu_t_inital")),
+    _relaxation_method(getParam<MooseEnum>("relaxation_method")),
+    _damper(getParam<Real>("damper"))
 {
   _max_viscosity_value = 0.0;
 }
@@ -83,12 +101,18 @@ kEpsilonViscosityAux::initialSetup()
 {
   // Setting up limiter for turbulent viscosity
   auto current_argument = makeElemArg(_current_elem);
-  Real mu_t = _rho(current_argument).value() * _C_mu(current_argument).value() *
-              std::pow(_k(current_argument).value(), 2) /
-              (_epsilon(current_argument).value() + 1e-10);
+  const auto state = determineState();
+  Real mu_t = _rho(current_argument, state).value() * _C_mu(current_argument, state).value() *
+              std::pow(_k(current_argument, state).value(), 2) /
+              (_epsilon(current_argument, state).value() + 1e-10);
 
   if (mu_t > _max_viscosity_value)
     _max_viscosity_value = std::max(mu_t, 1e3);
+
+  for (const auto & elem : _c_fe_problem.mesh().getMesh().element_ptr_range())
+  {
+    _nl_damping_map[elem] = 0.0;
+  }
 }
 
 ADReal
@@ -96,8 +120,9 @@ kEpsilonViscosityAux::findUStarLocalMethod(const ADReal & u, const Real & dist)
 {
 
   /// Setting up parameters
-  auto rho = _rho(makeElemArg(_current_elem));
-  auto mu = _mu(makeElemArg(_current_elem));
+  const auto state = determineState();
+  auto rho = _rho(makeElemArg(_current_elem), state);
+  auto mu = _mu(makeElemArg(_current_elem), state);
   auto nu = mu / rho;
 
   const ADReal a_c = 1 / _von_karman;
@@ -151,6 +176,11 @@ kEpsilonViscosityAux::computeValue()
   // Boundary value
   const Elem & elem = *_current_elem;
   auto current_argument = makeElemArg(_current_elem);
+  unsigned int loc_state = 0;
+  const Moose::StateArg state(loc_state);
+  unsigned int current_nl_iteration = static_cast<NonlinearSystemBase &>(_nl_sys)
+                                          .nonlinearSolver()
+                                          ->get_current_nonlinear_iteration_number();
 
   bool wall_bounded = false;
   Real min_wall_dist = 0.0;
@@ -158,7 +188,7 @@ kEpsilonViscosityAux::computeValue()
 
   // if (_n_kernel_iters < (_n_iters_activate + 0)) //+2 since we need to consider assembly passes
   //   return 100.0 +
-  //          _mu(current_argument)
+  //          _mu(current_argument, state)
   //              .value(); /// TODO: need to compute this value dynamically based in the condition
   //              number of the problem
 
@@ -188,30 +218,27 @@ kEpsilonViscosityAux::computeValue()
     }
   }
 
-  auto time_scale = _k(current_argument) / _epsilon(current_argument);
+  auto time_scale = _k(current_argument, state) / _epsilon(current_argument, state);
 
   // auto min_constraint_time_scale =
-  //     0.6 * std::sqrt(_mu(current_argument) / _rho(current_argument) /
-  //     _epsilon(current_argument));
+  //     0.6 * std::sqrt(_mu(current_argument, state) / _rho(current_argument, state) /
+  //     _epsilon(current_argument, state));
 
   // auto constraint_time_scale = std::max(min_constraint_time_scale.value(), time_scale.value());
 
-  Real mu_t = _rho(current_argument).value() * _C_mu(current_argument).value() *
-              _k(current_argument).value() * time_scale.value();
-
-  auto mu_t_old = _var(current_argument).value();
-  mu_t = _rf * mu_t + (1.0 - _rf) * mu_t_old;
+  Real mu_t = _rho(current_argument, state).value() * _C_mu(current_argument, state).value() *
+              _k(current_argument, state).value() * time_scale.value();
 
   Real mu_t_wall = mu_t;
   if (wall_bounded && _wall_treatement)
   {
 
     // Getting y_plus
-    ADRealVectorValue velocity(_u_var->getElemValue(&elem));
+    ADRealVectorValue velocity(_u_var->getElemValue(&elem, state));
     if (_v_var)
-      velocity(1) = _v_var->getElemValue(&elem);
+      velocity(1) = _v_var->getElemValue(&elem, state);
     if (_w_var)
-      velocity(2) = _w_var->getElemValue(&elem);
+      velocity(2) = _w_var->getElemValue(&elem, state);
 
     // Compute the velocity and direction of the velocity component that is parallel to the wall
     ADReal parallel_speed = (velocity - velocity * loc_normal * loc_normal).norm();
@@ -219,39 +246,62 @@ kEpsilonViscosityAux::computeValue()
     ADReal y_plus, u_tau;
     if (_non_equilibrium_treatement)
     {
-      y_plus = _rho(current_argument) * std::pow(_C_mu(current_argument), 0.25) *
-               std::pow(_k(current_argument), 0.5) * min_wall_dist / _mu(current_argument);
+      y_plus = _rho(current_argument, state) * std::pow(_C_mu(current_argument, state), 0.25) *
+               std::pow(_k(current_argument, state), 0.5) * min_wall_dist /
+               _mu(current_argument, state);
       auto von_karman_value = (1 / _von_karman + std::log(_E * y_plus));
-      u_tau = std::sqrt(std::pow(_C_mu(current_argument), 0.25) *
-                        std::pow(_k(current_argument), 0.5) * parallel_speed / von_karman_value);
+      u_tau =
+          std::sqrt(std::pow(_C_mu(current_argument, state), 0.25) *
+                    std::pow(_k(current_argument, state), 0.5) * parallel_speed / von_karman_value);
     }
     else
     {
       u_tau = this->findUStarLocalMethod(parallel_speed, min_wall_dist);
-      y_plus = min_wall_dist * u_tau * _rho(current_argument) / _mu(current_argument);
+      y_plus = min_wall_dist * u_tau * _rho(current_argument, state) / _mu(current_argument, state);
     }
 
     if (y_plus <= 5.0) // sub-laminar layer
     {
-      mu_t_wall = _mu(current_argument).value();
+      mu_t_wall = _mu(current_argument, state).value();
     }
     else if (y_plus >= 30.0)
     {
       auto wall_val =
-          Utility::pow<2>(u_tau) * _rho(current_argument) * min_wall_dist / parallel_speed;
+          Utility::pow<2>(u_tau) * _rho(current_argument, state) * min_wall_dist / parallel_speed;
       mu_t_wall = wall_val.value();
     }
     else
     {
       auto wall_val_log =
-          Utility::pow<2>(u_tau) * _rho(current_argument) * min_wall_dist / parallel_speed;
+          Utility::pow<2>(u_tau) * _rho(current_argument, state) * min_wall_dist / parallel_speed;
       auto blending_function = (y_plus - 5.0) / 25.0;
       auto wall_val = blending_function * wall_val_log +
-                      (1.0 - blending_function) * _mu(current_argument).value();
+                      (1.0 - blending_function) * _mu(current_argument, state).value();
       mu_t_wall = wall_val.value();
     }
     mu_t = mu_t_wall;
   }
 
-  return std::abs(mu_t);
+  unsigned int old_state = 2;
+  Moose::SolutionIterationType type = Moose::SolutionIterationType::Time;
+  if (_relaxation_method == "nl")
+    type = Moose::SolutionIterationType::Nonlinear;
+  const Moose::StateArg old_state_arg(old_state, type);
+
+  auto mu_t_old = _var(current_argument, old_state_arg).value();
+  mu_t = _rf * mu_t + (1.0 - _rf) * mu_t_old;
+
+  if (current_nl_iteration == _iters_to_activate)
+    _nl_damping_map[_current_elem] += 1.0;
+
+  Real return_value;
+  if ((current_nl_iteration < _iters_to_activate)) // && (!_c_fe_problem.isTransient()))
+    return_value = _mu_t_inital;
+  else
+    return_value = std::abs(mu_t);
+
+  if ((_relaxation_method == "nl") && (_damper > 1e-10))
+    return_value += _mu_t_inital * std::exp(-_nl_damping_map[_current_elem] / _damper);
+
+  return return_value;
 }

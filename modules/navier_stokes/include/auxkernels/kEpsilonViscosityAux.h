@@ -94,4 +94,19 @@ protected:
 
   /// Viscosity limiter - maximum viscosity must be at the wall
   Real _max_viscosity_value;
+
+  /// -- Number of iterations needed to activate the computation of mu_t
+  unsigned int _iters_to_activate;
+
+  /// -- Initial value for mu_t
+  Real _mu_t_inital;
+
+  /// -- Relaxation method for production and destruction
+  const MooseEnum _relaxation_method;
+
+  /// -- Element Localized Damping
+  std::map<const Elem *, Real> _nl_damping_map;
+
+  /// -- Damping values for nonlinear iterations
+  Real _damper;
 };
