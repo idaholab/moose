@@ -50,7 +50,7 @@ class Adaptivity : public ConsoleStreamInterface,
                    public libMesh::ParallelObject
 {
 public:
-  Adaptivity(FEProblemBase & subproblem);
+  Adaptivity(FEProblemBase & fe_problem);
   virtual ~Adaptivity();
 
   /**
@@ -250,7 +250,7 @@ public:
   bool isAdaptivityDue();
 
 protected:
-  FEProblemBase & _subproblem;
+  FEProblemBase & _fe_problem;
   MooseMesh & _mesh;
 
   /// on/off flag reporting if the adaptivity is being used
