@@ -14,7 +14,7 @@ south-to-north line in the fuel assembly. This one involves, in south to north o
 72, 49, 32, 20, 10, 4, 3, 2, 1, 7, 14, 26, 39, and 58.
 
 !media figures/toshiba_37_config.png
-       style=width:80%;margin-bottom:2%;margin:auto;
+       style=width:60%;margin-bottom:2%;margin:auto;
        id=configuration
        caption= Rod and subchannel positions and numbering adopted for the Toshiba 37-pin benchmark. (a) Position and numbering of the heated rods with the subchannel center indicated with red dots. (b) Center position and numbering of the suchannels.
 
@@ -23,27 +23,27 @@ The characteristics of Toshiba's benchmark are provided in [parameters].
 !table id=parameters caption=Design and operational parameters for Toshiba's 37-pin benchmark.
 | Experiment Parameter (unit) | Value  |
 | :- | :- |
-| Number of pins (-) | 37 |
-| Rod Pitch (cm) | 0.787 |
-| Rod Diameter (cm) | 0.650 |
-| Wire wrap diameter (cm) | 0.132 |
-| Wire wrap axial pitch (cm) | 30.70 |
-| Flat-to-flat duct distance (cm) | 5.04 |
+| Number of pins (-) | $37$ |
+| Rod Pitch (cm) | $0.787$ |
+| Rod Diameter (cm) | $0.650$ |
+| Wire wrap diameter (cm) | $0.132$ |
+| Wire wrap axial pitch (cm) | $30.70$ |
+| Flat-to-flat duct distance (cm) | $5.04$ |
 | Inlet length (cm) | - |
-| Heated length (cm) | 93.00 |
+| Heated length (cm) | $93.0$ |
 | Outlet length (cm) | - |
-| Outlet pressure (Pa) | 1.01E5 |
+| Outlet pressure (Pa) | $1.01*10^5$ |
 | Inlet Temperature (K) | Experiment dependent |
-| Power profile (-) | Chopped cosine (peaking factor 1.21) |
+| Power profile (-) | Chopped cosine (peaking factor $1.21$) |
 
 Three flow configurations with reducing axial mass flow rate are selected for the validation exercise. These configurations are presented in [cases].
 
 !table id=cases caption=Validation cases selected in the Toshiba benchmark
 | Naming | Run ID | Rod Power (W/cm) | Inlet temperature ($K$) | Flow rate (m$^3$/s) | Reynolds number |
 | :- | :- | :- | :- | :- | :- |
-| High flow rate | B37P02 | 15.57 | 484.3 | 1.48E-03 | 1.12E4 |
-| Medium flow rate | 0C37P06 | 11.92 | 476.5 | 3.34E-04 | 2.81E3 |
-| Low flow rate | E37P13 | 3.89 | 479.4 | 1.07E-04 | 7.39E2 |
+| High flow rate | $B37P02$ | $15.57$ | $484.3$ | $1.48*10^{-3}$ | $1.12*10^4$ |
+| Medium flow rate | $0C37P06$ | $11.92$ | $476.5$ | $3.34*10^{-4}$ | $2.81*10^3$ |
+| Low flow rate | $E37P13$ | $3.89$ | $479.4$ | $1.07*10^{-4}$ | $7.39*10^2$ |
 
 ## Subchannel Input
 
