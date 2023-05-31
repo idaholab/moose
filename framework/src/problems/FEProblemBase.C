@@ -440,7 +440,7 @@ FEProblemBase::FEProblemBase(const InputParameters & parameters)
   _bnd_mat_side_cache.resize(n_threads);
   _interface_mat_side_cache.resize(n_threads);
 
-  _restart_io = std::make_unique<RestartableDataIO>(*this);
+  _restart_io = std::make_unique<RestartableDataIO>(_app);
 
   es().parameters.set<FEProblemBase *>("_fe_problem_base") = this;
 

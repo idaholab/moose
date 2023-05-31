@@ -17,15 +17,9 @@
 #include <stdio.h>
 #include <fstream>
 
-RestartableDataIO::RestartableDataIO(FEProblemBase & fe_problem)
-  : RestartableDataIO(fe_problem.getMooseApp(), &fe_problem)
-{
-}
-
-RestartableDataIO::RestartableDataIO(MooseApp & moose_app, FEProblemBase * fe_problem_ptr)
+RestartableDataIO::RestartableDataIO(MooseApp & moose_app)
   : PerfGraphInterface(moose_app.perfGraph(), "RestartableDataIO"),
-    _moose_app(moose_app),
-    _fe_problem_ptr(fe_problem_ptr)
+    _moose_app(moose_app)
 {
 }
 

@@ -54,7 +54,7 @@ Checkpoint::Checkpoint(const InputParameters & parameters)
     _num_files(getParam<unsigned int>("num_files")),
     _suffix(getParam<std::string>("suffix")),
     _restartable_data(_app.getRestartableData()),
-    _restartable_data_io(RestartableDataIO(*_problem_ptr))
+    _restartable_data_io(_app)
 {
 }
 

@@ -31,9 +31,7 @@ class FEProblemBase;
 class RestartableDataIO : public PerfGraphInterface
 {
 public:
-  RestartableDataIO(FEProblemBase & fe_problem);
-
-  RestartableDataIO(MooseApp & moose_app, FEProblemBase * fe_problem_ptr = nullptr);
+  RestartableDataIO(MooseApp & moose_app);
 
   virtual ~RestartableDataIO() = default;
 
@@ -107,9 +105,6 @@ private:
 
   /// A reference to the MooseApp object for retrieving restartable data stores and filters
   MooseApp & _moose_app;
-
-  /// Pointer to the FEProblemBase when serializing/deserializing system data
-  FEProblemBase * _fe_problem_ptr;
 
   static constexpr auto RESTARTABLE_DATA_EXT = ".rd";
   static constexpr auto CURRENT_BACKUP_FILE_VERSION = 3;

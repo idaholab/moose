@@ -1194,9 +1194,8 @@ MooseApp::backup()
   TIME_SECTION("backup", 2, "Backing Up Application");
 
   mooseAssert(_executioner, "Executioner is nullptr");
-  FEProblemBase & fe_problem = feProblem();
 
-  RestartableDataIO rdio(fe_problem);
+  RestartableDataIO rdio(*this);
   return rdio.createBackup();
 }
 
@@ -1206,9 +1205,8 @@ MooseApp::restore(std::shared_ptr<Backup> backup, bool for_restart)
   TIME_SECTION("restore", 2, "Restoring Application");
 
   mooseAssert(_executioner, "Executioner is nullptr");
-  FEProblemBase & fe_problem = feProblem();
 
-  RestartableDataIO rdio(fe_problem);
+  RestartableDataIO rdio(*this);
 
   rdio.restoreBackup(backup, for_restart);
 }
