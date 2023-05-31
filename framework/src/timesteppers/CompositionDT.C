@@ -233,6 +233,7 @@ CompositionDT::getTimeSteppers()
       .condition<AttribSystem>("TimeStepper")
       .queryInto(time_steppers);
 
+  // Remove CompositionDT from time_steppers vector to avoid recursive call
   time_steppers.erase(std::remove(time_steppers.begin(), time_steppers.end(), this),
                       time_steppers.end());
   return time_steppers;

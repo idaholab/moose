@@ -38,6 +38,10 @@ public:
 
   CompositionDT(const InputParameters & parameters);
 
+  /**
+   * Comparator for sorting by the value of dt for the TimeStepper sets which stored the pairs of
+   * the dt and TimeStepper
+   */
   struct CompareFirst
   {
     bool operator()(const std::pair<Real, TimeStepper *> & a,
@@ -58,21 +62,18 @@ public:
   // Find the time point to hit at current time step
   Real getSequenceSteppersNextTime();
 
-  template <typename Lambda>
-  void actOnTimeSteppers(Lambda && act);
-
   /**
    * Initialize all the input time stepper(s). Called at the very beginning of
    * Executioner::execute()
    */
-  virtual void init() override;
-  virtual void preExecute() override;
-  virtual void preSolve() override;
-  virtual void postSolve() override;
-  virtual void postExecute() override;
-  virtual void preStep() override;
-  virtual void postStep() override;
-  virtual bool constrainStep(Real & dt) override;
+  virtual void init() override final;
+  virtual void preExecute() override final;
+  virtual void preSolve() override final;
+  virtual void postSolve() override final;
+  virtual void postExecute() override final;
+  virtual void preStep() override final;
+  virtual void postStep() override final;
+  virtual bool constrainStep(Real & dt) override final;
 
   /**
    * Functions called after the current DT is computed
@@ -81,28 +82,31 @@ public:
   /**
    * Take a time step with _current_time_stepper step() function
    */
-  virtual void step() override;
+  virtual void step() override final;
 
   /**
    * This gets called when time step is accepted for all input time steppers
    */
-  virtual void acceptStep() override;
+  virtual void acceptStep() override final;
 
   /**
    * This gets called when time step is rejected for all input time steppers
    */
-  virtual void rejectStep() override;
+  virtual void rejectStep() override final;
 
   /**
    * The _current_time_stepper is used to check whether convergence was reached on the time step
    */
-  virtual bool converged() const override;
+  virtual bool converged() const override final;
 
 protected:
-  virtual Real computeDT() override;
-  virtual Real computeInitialDT() override;
+  virtual Real computeDT() override final;
+  virtual Real computeInitialDT() override final;
 
 private:
+  template <typename Lambda>
+  void actOnTimeSteppers(Lambda && act);
+
   /**
    * Internal method for querying TheWarehouse for the currently active timesteppers.
    */
