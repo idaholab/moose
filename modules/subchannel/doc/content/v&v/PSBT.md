@@ -24,7 +24,7 @@ The PSBT 5x5 benchmark is an international benchmark developed by the Organisati
 The rod bundle has a radial power profile in which the right side of the assembly is under-heated. The radial power profile is shown in [fig:Power]. The rods on the left side transfer 100% of available rod power to the fluid, while the rods on the right transfer 25%. This causes an uneven temperature distribution at the exit of the assembly.
 
 !media figures/Radial_Power.png
-    style=width:50%;margin-bottom:2%;margin:auto;
+    style=width:60%;margin-bottom:2%;margin:auto;
     id=fig:Power
     caption=Radial pin power profile
 
@@ -32,7 +32,7 @@ Note that the turbulent mixing parameter used for all the cases was: $β = 0.08$
 exhibited in [fig:profile], while the code results for both values of $β$ are symmetric as expected. The experimental results exhibit a non symmetric distribution that we cannot capture with a constant value of beta. There is a temperature gradient towards the corner due to an additional mixing effect, which may reduce the exit temperature differences between the two regions (hot/cold, left/right) and finally increase the optimum $β$ in comparison with the case of no temperature gradient in each region.
 
 !media figures/01-5237.png
-    style=width:50%;margin-bottom:2%;margin:auto;
+    style=width:60%;margin-bottom:2%;margin:auto;
     id=fig:profile
     caption=Exit temperature distribution for case 01-5237
 
@@ -41,7 +41,7 @@ The reason for the additional mixing effect is thought to be the special mixing 
 This illustrates the fact that modeling parameters like $\beta$ should ideally be calibrated for specific geometries and in no way can they be applied generally without proper justification. Nevertheless our results show that, provided we choose the optimum parameters adjusted for the specific geometries, we can accurately predict the exit temperatures. Figure [fig:MixingError] presents the cumulative mean absolute error in the exit temperature in comparison with other subchannel codes [!cite](PSBT3). We note that for the temperature mixing test, our code performs adequately in comparison to the other codes. Our mean absolute error is calculated to be $Error = 2.176$ which places us in 5th place out of the nine codes.
 
 !media figures/psbt-results.png
-    style=width:70%;margin-bottom:2%;margin:auto;
+    style=width:60%;margin-bottom:2%;margin:auto;
     id=fig:MixingError
     caption=Mean absolute error in predicted exit temperature
 

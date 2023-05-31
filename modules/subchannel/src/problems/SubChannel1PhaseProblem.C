@@ -65,7 +65,8 @@ SubChannel1PhaseProblem::validParams()
   InputParameters params = ExternalProblem::validParams();
   params.addRequiredParam<unsigned int>("n_blocks", "The number of blocks in the axial direction");
   params.addRequiredParam<Real>("beta",
-                                "Thermal diffusion coefficient used in turbulent crossflow");
+                                "Thermal diffusion coefficient used in turbulent crossflow. This "
+                                "parameter in not user defined in triangular subchannels");
   params.addRequiredParam<Real>("CT", "Turbulent modeling parameter");
   params.addParam<Real>("P_tol", 1e-6, "Pressure tolerance");
   params.addParam<Real>("T_tol", 1e-6, "Temperature tolerance");

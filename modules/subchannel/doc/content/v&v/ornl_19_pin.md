@@ -16,7 +16,7 @@ In contrast, the distribution of temperatures at the exit of the fuel assembly i
 Therefore, we have focused our validation work in predicting the distribution of temperatures at the exit of the fuel assembly.
 
 !media figures/ORNL_19_configuration.png
-       style=width:80%;margin-bottom:2%;margin:auto;
+       style=width:60%;margin-bottom:2%;margin:auto;
        id=configuration
        caption=Left: heating rod positions for the experiment. Right: subchannel positions in the experiement.
 
@@ -28,17 +28,17 @@ A nonzero linear heat rate is only assigned to the heated part of the rod, while
 !table id=parameters caption=Design and operational parameters for ORNL's 19-pin benchmark.
 | Experiment Parameter (unit) | Value  |
 | :- | :- |
-| Number of pins (-) | 19 |
-| Rod Pitch (cm) | 0.726 |
-| Rod Diameter (cm) | 0.584 |
-| Wire wrap diameter (cm) | 0.142 |
-| Wire wrap axial pitch (cm) | 30.48 |
-| Flat-to-flat duct distance (cm) | 3.41 |
-| Inlet length (cm) | 40.64 |
-| Heated length (cm) | 53.34 |
-| Outlet length (cm) | 7.62 |
-| Outlet pressure (Pa) | 1.01E5 |
-| Inlet Temperature (K) | 588.5 |
+| Number of pins (-) | $19$ |
+| Rod Pitch (cm) | $0.726$ |
+| Rod Diameter (cm) | $0.584$ |
+| Wire wrap diameter (cm) | $0.142$ |
+| Wire wrap axial pitch (cm) | $30.48$ |
+| Flat-to-flat duct distance (cm) | $3.41$ |
+| Inlet length (cm) | $40.64$ |
+| Heated length (cm) | $53.34$ |
+| Outlet length (cm) | $7.62$ |
+| Outlet pressure (Pa) | $1.01 * 10^5$ |
+| Inlet Temperature (K) | $588.5$ |
 | Power profile (-) | Uniform |
 
 Due to hexagonal symmetry in the experiment, the temperature distribution has been measured over the subchannels that approximately lie on a the diagonal line that connects the opposed vertices in the duct.
@@ -51,9 +51,9 @@ These configurations are summarized in [cases].
 !table id=cases caption=Validation cases selected in the ORNL benchmark
 | Naming | Run ID | Rod Power (W/cm) | Flow rate (m$^3$/s) | Reynolds number |
 | :- | :- | :- | :- | :- |
-| High flow rate | 022472-hf | 318.2 | 3.47E-03 | 6.72E4 |
-| Medium flow rate | 020372 | 30.8 | 3.15E-04 | 7.35E3 |
-| Low flow rate | 022472-lf | 4.9  | 4.67E-05 | 9.05E2 |
+| High flow rate | $022472-hf$ | $318.2$ | $3.47*10^{-3}$ | $6.72*10^4$ |
+| Medium flow rate | $020372$ | $30.8$ | $3.15*10^{-4}$ | $7.35*10^3$ |
+| Low flow rate | $022472-lf$ | $4.9$  | $4.67*10^{-5}$ | $9.05*10^2$ |
 
 ## Subchannel input
 
