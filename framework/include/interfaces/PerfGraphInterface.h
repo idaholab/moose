@@ -28,17 +28,17 @@
 #endif
 
 #define TIME_SECTION2(section_name, level)                                                         \
-  static const PerfID __perf_id = this->registerTimedSection(section_name, level);                 \
+  const PerfID __perf_id = this->registerTimedSection(section_name, level);                        \
   CHECK_TIME_SECTION(__perf_id, section_name);                                                     \
   TIME_SECTION1(__perf_id);
 
 #define TIME_SECTION3(section_name, level, live_message)                                           \
-  static const PerfID __perf_id = this->registerTimedSection(section_name, level, live_message);   \
+  const PerfID __perf_id = this->registerTimedSection(section_name, level, live_message);          \
   CHECK_TIME_SECTION(__perf_id, section_name);                                                     \
   TIME_SECTION1(__perf_id);
 
 #define TIME_SECTION4(section_name, level, live_message, print_dots)                               \
-  static const PerfID __perf_id =                                                                  \
+  const PerfID __perf_id =                                                                         \
       this->registerTimedSection(section_name, level, live_message, print_dots);                   \
   CHECK_TIME_SECTION(__perf_id, section_name);                                                     \
   TIME_SECTION1(__perf_id);
