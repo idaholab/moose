@@ -29,6 +29,9 @@ protected:
   /// Number of PorousFlow variables
   const unsigned int _num_pf_vars;
 
+  /// Flag for nodal temperature
+  const bool _is_temp_nodal;
+
   /// Variable value of temperature at quadpoints or nodes
   const GenericVariableValue<is_ad> & _temperature_var;
 
