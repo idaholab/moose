@@ -18,8 +18,7 @@
 #include <fstream>
 
 RestartableDataIO::RestartableDataIO(MooseApp & moose_app)
-  : PerfGraphInterface(moose_app.perfGraph(), "RestartableDataIO"),
-    _moose_app(moose_app)
+  : PerfGraphInterface(moose_app.perfGraph(), "RestartableDataIO"), _moose_app(moose_app)
 {
 }
 
