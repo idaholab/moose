@@ -7,13 +7,16 @@ that results in one or many vectors of values.
 
 ## Types of VectorPostprocessors
 
-ElementVectorPostprocessor: operate on each element
+The operation defined in the `::compute...` routine is applied at various locations
+depending on the VectorPostprocessor type.
 
-NodalVectorPostprocessor: operate on each node
+ElementVectorPostprocessor: operates on each element
 
-SideVectorPostprocessor: operate on boundaries
+NodalVectorPostprocessor: operates on each node
 
-InternalSideVectorPostprocessor: operate on internal element sides
+SideVectorPostprocessor: operates on each element side on a boundary
+
+InternalSideVectorPostprocessor: operates on internal element sides
 
 GeneralVectorPostprocessor: operates once per execution
 
