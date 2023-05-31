@@ -73,15 +73,17 @@ LoadModelDataAction<T>::load(const T & object)
   data_io.setErrorOnLoadWithDifferentNumberOfProcessors(false);
   data_io.setErrorOnLoadWithDifferentNumberOfThreads(false);
 
-  // Read header
-  bool pass = data_io.readRestartableDataHeaderFromFile(filename, false);
-  if (!pass)
-    object.paramError("filename", "The supplied file '", filename, "' failed to load.");
-
   // Get the data object that the loaded data will be applied
-  const RestartableDataMap & meta_data = _app.getRestartableDataMap(object.modelMetaDataName());
+  RestartableDataMap & meta_data = _app.getRestartableDataMap(object.modelMetaDataName());
 
   // Read the supplied file
-  std::unordered_set<std::string> filter_names;
-  data_io.readRestartableData(meta_data, filter_names);
+  try
+  {
+    std::unordered_set<std::string> filter_names;
+    data_io.readRestartableData(filename, meta_data, filter_names);
+  }
+  catch (...)
+  {
+    paramError("filename", "The supplied file '", filename, "' failed to load.");
+  }
 }
