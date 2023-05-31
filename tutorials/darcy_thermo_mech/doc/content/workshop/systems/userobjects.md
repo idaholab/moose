@@ -86,7 +86,7 @@ the calculation.
 
 Any MOOSE object can retrieve a `UserObject` in a manner similar to retrieving a `Function`.
 
-Generally, it is a good idea to take the name of the `UserObject` to from the input file:
+Generally, it is a good idea to take the name of the `UserObject` from the input file:
 
 ```cpp
 InputParameters

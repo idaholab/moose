@@ -21,7 +21,7 @@ GeneralVectorPostprocessor: operates once per execution
 
 ## VectorPostprocessor Anatomy
 
-`Postprocessor` is a UserObject, so `initialize`, `execute`, `threadJoin`, and `finalize` methods
+`VectorPostprocessor` is a UserObject, so `initialize`, `execute`, `threadJoin`, and `finalize` methods
 are used for implementing the aggregation operation.
 
 `virtual VectorPostprocessorValue & getVector (const std::string &vector_name)`
@@ -32,7 +32,7 @@ postprocessor.
 !---
 
 VectorPostprocessor objects operate a bit like Material objects, each vector is declared and then
-within the "initialize", "execute", "threadJoin", and "finalize" methods the vectors are updated
+within the `initialize`, `execute`, `threadJoin`, and `finalize` methods the vectors are updated
 with the desired data.
 
 Create a member variable, as a reference, for the vector data
