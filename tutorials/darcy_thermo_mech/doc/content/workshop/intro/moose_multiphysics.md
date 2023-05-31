@@ -109,16 +109,18 @@ VectorPostprocessors\\
 
 !---
 
-## MOOSE Physics Modules
+## MOOSE Modules
 
-!style halign=center
+
+!style! halign=center
+!row!
+!col! small=12 medium=6 large=3 style=margin-left:auto;margin-right:20px;
+**Physics**\\
 Chemical Reactions\\
 Contact\\
 Electromagnetics\\
-External PETSc Solver\\
 Fluid Properties\\
 Fluid Structure Interaction (FSI)\\
-Function Expansion Tools\\
 Geochemistry\\
 Heat Conduction\\
 Level Set\\
@@ -126,13 +128,20 @@ Navier Stokes\\
 Peridynamics\\
 Phase Field\\
 Porous Flow\\
-Ray Tracing\\
-rDG\\
 Reactor\\
-Stochastic Tools\\
 Tensor (solid) Mechanics\\
 Thermal Hydraulics\\
 XFEM
+!col-end!
+
+!col! small=12 medium=6 large=3 style=margin-right:2%;
+**Numerics**\\
+External PETSc Solver\\
+Function Expansion Tools\\
+Ray Tracing\\
+rDG\\
+Stochastic Tools\\
+!col-end!
 
 !---
 
