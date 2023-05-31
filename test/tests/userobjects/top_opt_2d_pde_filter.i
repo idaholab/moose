@@ -1,31 +1,27 @@
-vol_frac = 0.5
+vol_frac = 0.4
 E0 = 1e5
-Emin = 1e-2
+Emin = 1e-4
 power = 3
-
 [GlobalParams]
-  displacements = 'disp_x disp_y disp_z'
+  displacements = 'disp_x disp_y'
 []
 
 [Mesh]
   [MeshGenerator]
     type = GeneratedMeshGenerator
-    dim = 3
-    nx = 24
-    ny = 12
-    nz = 12
+    dim = 2
+    nx = 40
+    ny = 20
     xmin = 0
     xmax = 20
     ymin = 0
     ymax = 10
-    zmin = 0
-    zmax = 10
   []
-  [middle_bottom_left_edge]
+  [node]
     type = ExtraNodesetGenerator
     input = MeshGenerator
     new_boundary = pull
-    coord = '0 0 5'
+    nodes = 0
   []
 []
 
@@ -34,12 +30,23 @@ power = 3
   []
   [disp_y]
   []
-  [disp_z]
+  [Dc]
+    initial_condition = -1.0
   []
 []
 
 [AuxVariables]
-
+    [sensitivity]
+        family = MONOMIAL
+        order = FIRST
+        initial_condition = -1.0
+        [AuxKernel]
+          type = MaterialRealAux
+          variable = sensitivity
+          property = sensitivity
+          execute_on = LINEAR
+        []
+      []
   [Emin]
     family = MONOMIAL
     order = CONSTANT
@@ -60,15 +67,22 @@ power = 3
     family = MONOMIAL
     order = CONSTANT
   []
-  [Dc]
-    family = MONOMIAL
-    order = CONSTANT
-    initial_condition = -1.0
-  []
+
   [mat_den]
     family = MONOMIAL
     order = CONSTANT
     initial_condition = ${vol_frac}
+  []
+  [Dc_elem]
+    family = MONOMIAL
+    order = CONSTANT
+    initial_condition = -1.0
+    [AuxKernel]
+      type = SelfAux
+      variable = Dc_elem
+      v = Dc
+      execute_on = 'TIMESTEP_END'
+    []
   []
 []
 
@@ -77,6 +91,23 @@ power = 3
     strain = SMALL
     add_variables = true
     incremental = false
+  []
+[]
+
+[Kernels]
+  [diffusion]
+    type = FunctionDiffusion
+    variable = Dc
+    function = 0.05
+  []
+  [potential]
+    type = Reaction
+    variable = Dc
+  []
+  [source]
+    type = CoupledForce
+    variable = Dc
+    v = sensitivity
   []
 []
 
@@ -93,11 +124,11 @@ power = 3
     boundary = right
     value = 0.0
   []
-  [no_z]
-    type = DirichletBC
-    variable = disp_z
-    boundary = right
-    value = 0.0
+  [boundary_penalty]
+    type = ADRobinBC
+    variable = Dc
+    boundary = 'left top'
+    coef = 10
   []
 []
 [NodalKernels]
@@ -132,7 +163,6 @@ power = 3
     type = ComputeLinearElasticStress
   []
   [dc]
-    # need to creat new material that is the derivatve
     type = ComplianceSensitivity
     design_density = mat_den
     E = ${E0}
@@ -148,29 +178,15 @@ power = 3
     full = true
   []
 []
+
 [UserObjects]
-  [rad_avg]
-    type = RadialAverage
-    radius = 0.5
-    weights = constant
-    prop_name = sensitivity
-    execute_on = TIMESTEP_END
-    force_preaux = true
-  []
   [update]
     type = DensityUpdate
-    density_sensitivity = Dc
+    density_sensitivity = Dc_elem
     design_density = mat_den
     power = ${power}
     volume_fraction = ${vol_frac}
     execute_on = TIMESTEP_BEGIN
-  []
-  [calc_sense]
-    type = SensitivityFilter
-    density_sensitivity = Dc
-    design_density = mat_den
-    filter_UO = rad_avg
-    execute_on = TIMESTEP_END
     force_postaux = true
   []
 []
@@ -178,14 +194,12 @@ power = 3
 [Executioner]
   type = Transient
   solve_type = NEWTON
-  petsc_options_iname = '-pc_type'
-  petsc_options_value = 'lu '
+  petsc_options_iname = '-pc_type '
+  petsc_options_value = 'lu'
   nl_abs_tol = 1e-10
-  l_max_its = 200
-  start_time = 0.0
+  line_search = none
   dt = 1.0
-  num_steps = 10
-
+  num_steps = 30
 []
 
 [Outputs]
@@ -194,6 +208,4 @@ power = 3
     interval = 10
   []
 []
-
-
 

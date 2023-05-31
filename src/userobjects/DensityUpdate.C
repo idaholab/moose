@@ -1,3 +1,12 @@
+//* This file is part of the MOOSE framework
+//* https://www.mooseframework.org
+//*
+//* All rights reserved, see COPYRIGHT for full restrictions
+//* https://github.com/idaholab/moose/blob/master/COPYRIGHT
+//*
+//* Licensed under LGPL 2.1, please see LICENSE for details
+//* https://www.gnu.org/licenses/lgpl-2.1.html
+
 #include "DensityUpdate.h"
 #include <algorithm>
 
@@ -7,7 +16,9 @@ InputParameters
 DensityUpdate::validParams()
 {
   InputParameters params = ElementUserObject::validParams();
-  params.addClassDescription("Compute updated densities based on sensitivities.");
+  params.addClassDescription(
+      "Compute updated densities based on sensitivities using an optimality criteria method to "
+      "keep the volume constraint satisified.");
   params.addRequiredParam<Real>("power", "Penalty power for SIMP method.");
   params.addRequiredCoupledVar("design_density", "Design density variable name.");
   params.addRequiredParam<VariableName>("density_sensitivity",

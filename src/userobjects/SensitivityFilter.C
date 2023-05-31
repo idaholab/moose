@@ -1,13 +1,24 @@
-#include "DensitySensitivities.h"
+//* This file is part of the MOOSE framework
+//* https://www.mooseframework.org
+//*
+//* All rights reserved, see COPYRIGHT for full restrictions
+//* https://github.com/idaholab/moose/blob/master/COPYRIGHT
+//*
+//* Licensed under LGPL 2.1, please see LICENSE for details
+//* https://www.gnu.org/licenses/lgpl-2.1.html
+
+#include "SensitivityFilter.h"
 #include "MooseError.h"
 #include <algorithm>
 
-registerMooseObject("troutApp", DensitySensitivities);
+registerMooseObject("troutApp", SensitivityFilter);
 
 InputParameters
-DensitySensitivities::validParams()
+SensitivityFilter::validParams()
 {
   InputParameters params = ElementUserObject::validParams();
+  params.addClassDescription(
+      "Computes the filtered sensitivity using a radial average user object.");
   params.addRequiredParam<UserObjectName>("filter_UO", "Radial Average user object");
   params.addRequiredCoupledVar("density_sensitivity", "Name of the density_sensitivity variable.");
   params.addRequiredParam<VariableName>("design_density", "Design density variable name.");
@@ -15,7 +26,7 @@ DensitySensitivities::validParams()
   return params;
 }
 
-DensitySensitivities::DensitySensitivities(const InputParameters & parameters)
+SensitivityFilter::SensitivityFilter(const InputParameters & parameters)
   : ElementUserObject(parameters),
     _filter(getUserObject<RadialAverage>("filter_UO").getAverage()),
     _density_sensitivity(writableVariable("density_sensitivity")),
@@ -25,7 +36,7 @@ DensitySensitivities::DensitySensitivities(const InputParameters & parameters)
 }
 
 void
-DensitySensitivities::execute()
+SensitivityFilter::execute()
 {
   // Find the current element in the filter
   auto filter_iter = _filter.find(_current_elem->id());

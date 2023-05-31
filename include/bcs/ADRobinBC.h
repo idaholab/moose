@@ -9,22 +9,20 @@
 
 #pragma once
 
-#include "StrainEnergyDensity.h"
-#include "MathUtils.h"
+#include "ADIntegratedBC.h"
 
-class ComplianceSensitivity : public StrainEnergyDensity
+class ADRobinBC;
+
+/**
+ *
+ */
+class ADRobinBC : public ADIntegratedBC
 {
 public:
   static InputParameters validParams();
-
-  ComplianceSensitivity(const InputParameters & parameters);
-
-  virtual void computeQpProperties() override;
+  ADRobinBC(const InputParameters & parameters);
 
 protected:
-  MaterialProperty<Real> & _sensitivity;
-  const VariableValue & _design_density;
-  const int _power;
-  const Real _E;
-  const Real _Emin;
+  virtual ADReal computeQpResidual();
+  const Real _coef;
 };

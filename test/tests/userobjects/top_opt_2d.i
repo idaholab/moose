@@ -33,7 +33,17 @@ power = 3
 []
 
 [AuxVariables]
-
+  [sensitivity]
+    family = MONOMIAL
+    order = FIRST
+    initial_condition = -1.0
+    [AuxKernel]
+      type = MaterialRealAux
+      variable = sensitivity
+      property = sensitivity
+      execute_on = LINEAR
+    []
+  []
   [Emin]
     family = MONOMIAL
     order = CONSTANT
@@ -57,7 +67,7 @@ power = 3
   [Dc]
     family = MONOMIAL
     order = CONSTANT
-    initial_condition = 0.0
+    initial_condition = -1.0
   []
   [mat_den]
     family = MONOMIAL
@@ -155,7 +165,7 @@ power = 3
     execute_on = TIMESTEP_BEGIN
   []
   [calc_sense]
-    type = DensitySensitivities
+    type = SensitivityFilter
     density_sensitivity = Dc
     design_density = mat_den
     filter_UO = rad_avg
@@ -167,14 +177,13 @@ power = 3
 [Executioner]
   type = Transient
   solve_type = NEWTON
-  petsc_options_iname = '-pc_type -pc_factor_mat_solver_package'
-  petsc_options_value = 'lu superlu_dist'
+  petsc_options_iname = '-pc_type '
+  petsc_options_value = 'lu'
   nl_abs_tol = 1e-10
-  l_max_its = 200
+
   start_time = 0.0
   dt = 1.0
   num_steps = 100
-  # end_time = 2.0
 []
 
 [Outputs]

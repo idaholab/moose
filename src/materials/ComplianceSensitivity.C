@@ -1,3 +1,12 @@
+//* This file is part of the MOOSE framework
+//* https://www.mooseframework.org
+//*
+//* All rights reserved, see COPYRIGHT for full restrictions
+//* https://github.com/idaholab/moose/blob/master/COPYRIGHT
+//*
+//* Licensed under LGPL 2.1, please see LICENSE for details
+//* https://www.gnu.org/licenses/lgpl-2.1.html
+
 #include "ComplianceSensitivity.h"
 
 registerMooseObject("troutApp", ComplianceSensitivity);
@@ -6,7 +15,7 @@ InputParameters
 ComplianceSensitivity::validParams()
 {
   InputParameters params = StrainEnergyDensity::validParams();
-  params.addClassDescription("Computes compliance sensitivity.");
+  params.addClassDescription("Computes compliance sensitivity needed for SIMP method.");
   params.addRequiredCoupledVar("design_density", "Design density variable name.");
   params.addRequiredParam<int>("power", "Penalty power for SIMP method.");
   params.addRequiredParam<Real>("E", "Young's modulus for the material.");
@@ -36,7 +45,7 @@ ComplianceSensitivity::computeQpProperties()
 
   // Compute the derivative of the compliance with respect to the design density
   Real derivative =
-      -_power * (_E - _Emin) * MathUtils::pow(_design_density[_qp], _power - 1) * compliance;
+      -_power * (_E - _Emin) * MathUtils::pow(_design_density[_qp], _power - 2) * compliance;
 
   // This makes the sensitivity mesh size independent
   _sensitivity[_qp] = derivative;
