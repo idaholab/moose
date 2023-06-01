@@ -23,7 +23,7 @@ ScalarSolutionInitialCondition::validParams()
       "from_variable", "The name of the variable in the file that is to be extracted");
   params.addClassDescription(
       "Sets the initial condition from a scalar variable stored in an Exodus file, "
-      "retrieve by a SolutionUserObject");
+      "retrieved by a SolutionUserObject");
 
   return params;
 }
