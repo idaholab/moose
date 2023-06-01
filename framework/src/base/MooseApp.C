@@ -1698,27 +1698,24 @@ MooseApp::registerRestartableData(const std::string & name,
     mooseError(
         "The meta data storage for '", metaname, "' is not threaded, so the tid must be zero.");
 
+  mooseAssert(name == data->name(), "Inconsistent name");
+
   mooseAssert(metaname.empty() ||
                   _restartable_meta_data.find(metaname) != _restartable_meta_data.end(),
               "The desired meta data name does not exist: " + metaname);
 
   // Select the data store for saving this piece of restartable data (mesh or everything else)
-  auto & data_ref =
+  auto & data_map =
       metaname.empty() ? _restartable_data[tid] : _restartable_meta_data[metaname].first;
 
-  auto data_it = data_ref.find(name);
-  if (data_it == data_ref.end())
-  {
-    auto insert_pair = data_ref.emplace(name, std::move(data));
-    mooseAssert(insert_pair.second, "Insert didn't happen");
-    data_it = insert_pair.first;
-  }
+  RestartableDataValue * stored_data = data_map.findData(name);
+  if (!stored_data)
+    stored_data = &data_map.addData(std::move(data));
 
-  auto & value = *data_it->second;
   if (!read_only)
-    value.setDeclared();
+    stored_data->setDeclared();
 
-  return value;
+  return *stored_data;
 }
 
 bool
@@ -1728,11 +1725,7 @@ MooseApp::hasRestartableMetaData(const std::string & name,
   auto it = _restartable_meta_data.find(metaname);
   if (it == _restartable_meta_data.end())
     return false;
-  else
-  {
-    auto & m = it->second.first;
-    return m.find(name) != m.end();
-  }
+  return it->second.first.hasData(name);
 }
 
 RestartableDataValue &
@@ -1746,12 +1739,12 @@ MooseApp::getRestartableMetaData(const std::string & name,
 
   // Get metadata reference from RestartableDataMap and return a (non-const) reference to its value
   auto & restartable_data_map = getRestartableDataMap(metaname);
-  auto iter = restartable_data_map.find(name);
-  if (iter == restartable_data_map.end())
+  RestartableDataValue * data = restartable_data_map.findData(name);
+  if (!data)
     mooseError("Unable to find RestartableDataValue object with name " + name +
                " in RestartableDataMap");
 
-  return *iter->second;
+  return *data;
 }
 
 void
@@ -2564,9 +2557,9 @@ MooseApp::checkMetaDataIntegrity() const
 
     std::vector<std::string> not_declared;
 
-    for (const auto & pair : meta_data)
-      if (!pair.second->declared())
-        not_declared.push_back(pair.first);
+    for (const auto & data : meta_data)
+      if (!data->declared())
+        not_declared.push_back(data->name());
 
     if (!not_declared.empty())
     {

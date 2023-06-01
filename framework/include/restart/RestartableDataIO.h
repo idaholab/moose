@@ -101,7 +101,7 @@ private:
   /**
    * Deserializes the data from the stream object.
    */
-  void deserializeRestartableData(const RestartableDataMap & restartable_data,
+  void deserializeRestartableData(RestartableDataMap & restartable_data,
                                   std::istream & stream,
                                   const DataNames & filter_names);
 

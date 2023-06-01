@@ -182,7 +182,4 @@ RestartableData<T>::load(std::istream & stream)
   loadHelper(stream, set(), _context);
 }
 
-using RestartableDataMap = std::unordered_map<std::string, std::unique_ptr<RestartableDataValue>>;
-using RestartableDataMaps = std::vector<RestartableDataMap>;
-
 using DataNames = std::unordered_set<std::string>;

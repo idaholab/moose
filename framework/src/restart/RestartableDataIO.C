@@ -48,7 +48,7 @@ RestartableDataIO::restoreBackup(std::shared_ptr<Backup> backup, bool for_restar
   for (unsigned int tid = 0; tid < n_threads; tid++)
     backup->_restartable_data[tid]->seekg(0);
 
-  const auto & restartable_data_maps = _moose_app.getRestartableData();
+  auto & restartable_data_maps = _moose_app.getRestartableData();
 
   for (unsigned int tid = 0; tid < n_threads; tid++)
   {
@@ -120,24 +120,21 @@ RestartableDataIO::serializeRestartableData(const RestartableDataMap & restartab
     stream.write((const char *)&n_data, sizeof(n_data));
 
     // data names
-    for (const auto & it : restartable_data)
-    {
-      std::string name = it.first;
-      stream.write(name.c_str(), name.length() + 1); // trailing 0!
-    }
+    for (const auto & data : restartable_data)
+      stream.write(data->name().c_str(), data->name().length() + 1); // trailing 0!
   }
   {
     std::ostringstream data_blk;
 
-    for (const auto & it : restartable_data)
+    for (const auto & data : restartable_data)
     {
-      std::ostringstream data;
-      it.second->store(data);
+      std::ostringstream data_stream;
+      data->store(data_stream);
 
       // Store the size of the data then the data
-      unsigned int data_size = static_cast<unsigned int>(data.tellp());
+      unsigned int data_size = static_cast<unsigned int>(data_stream.tellp());
       data_blk.write((const char *)&data_size, sizeof(data_size));
-      data_blk << data.str();
+      data_blk << data_stream.str();
     }
 
     // Write out this proc's block size
@@ -150,7 +147,7 @@ RestartableDataIO::serializeRestartableData(const RestartableDataMap & restartab
 }
 
 void
-RestartableDataIO::deserializeRestartableData(const RestartableDataMap & restartable_data,
+RestartableDataIO::deserializeRestartableData(RestartableDataMap & restartable_data,
                                               std::istream & stream,
                                               const DataNames & filter_names)
 {
@@ -218,17 +215,15 @@ RestartableDataIO::deserializeRestartableData(const RestartableDataMap & restart
     stream.read((char *)&data_size, sizeof(data_size));
 
     // Determine if the current name is in the filter set
-    bool is_data_restartable = restartable_data.find(current_name) != restartable_data.end();
-    bool is_data_in_filter = filter_names.find(current_name) != filter_names.end();
-    if (is_data_restartable      // Only restore values if they're currently being used and
+    RestartableDataValue * current_data = restartable_data.findData(current_name);
+    const auto is_data_in_filter = filter_names.find(current_name) != filter_names.end();
+    if (current_data             // Only restore values if they're currently being used and
         && (recovering ||        // Only read this value if we're either recovering or
             !is_data_in_filter)) // the data isn't specifically filtered out
     {
-      auto current_pair = restartable_data.find(current_name);
-      if (current_pair == restartable_data.end())
-        mooseError("restartable_data missing ", current_name, "\n");
-      current_pair->second->load(stream);
+      current_data->load(stream);
     }
+    // Skip this piece of data and do not report if restarting and recoverable data is not used
     else
     {
       // Skip this piece of data and do not report if restarting and recoverable data is not used
@@ -252,4 +247,3 @@ RestartableDataIO::deserializeRestartableData(const RestartableDataMap & restart
                  names.str());
   }
 }
-

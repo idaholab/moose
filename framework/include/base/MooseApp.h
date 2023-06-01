@@ -17,6 +17,7 @@
 #include "ActionFactory.h"
 #include "OutputWarehouse.h"
 #include "RestartableData.h"
+#include "RestartableDataMap.h"
 #include "ConsoleStreamInterface.h"
 #include "PerfGraph.h"
 #include "PerfGraphInterface.h"
@@ -634,9 +635,12 @@ public:
 
   /**
    * Return reference to the restartable data object
-   * @return A const reference to the restartable data object
+   * @return A reference to the restartable data object
    */
-  const RestartableDataMaps & getRestartableData() const { return _restartable_data; }
+  ///@{
+  const std::vector<RestartableDataMap> & getRestartableData() const { return _restartable_data; }
+  std::vector<RestartableDataMap> & getRestartableData() { return _restartable_data; }
+  ///@}
 
   /**
    * Return a reference to restartable data for the specific type flag.
@@ -1050,7 +1054,7 @@ protected:
   Parser _parser;
 
   /// Where the restartable data is held (indexed on tid)
-  RestartableDataMaps _restartable_data;
+  std::vector<RestartableDataMap> _restartable_data;
 
   /**
    * Data names that will only be read from the restart file during RECOVERY.

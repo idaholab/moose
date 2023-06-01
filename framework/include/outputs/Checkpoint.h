@@ -117,9 +117,6 @@ private:
   /// Directory suffix
   const std::string _suffix;
 
-  /// Reference to the restartable data
-  const RestartableDataMaps & _restartable_data;
-
   /// RestrableData input/output interface
   RestartableDataIO _restartable_data_io;
 
