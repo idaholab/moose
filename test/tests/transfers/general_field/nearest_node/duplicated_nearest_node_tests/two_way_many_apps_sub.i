@@ -33,7 +33,7 @@
 [AuxKernels]
   # this is done to avoid floating point precision on sending u, with two equidistant points
   [copy_over]
-    type = SelfAux
+    type = ProjectionAux
     v = u
     variable = u_elem
   []

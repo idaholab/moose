@@ -163,35 +163,39 @@ ChemicalCompositionAction::act()
   //
   if (_current_task == "add_aux_kernel")
   {
-    auto params = _factory.getValidParams("SelfAux");
+    auto params = _factory.getValidParams("ProjectionAux");
     params.set<ExecFlagEnum>("execute_on") = {EXEC_INITIAL, EXEC_TIMESTEP_END};
 
     for (const auto i : index_range(_phases))
     {
       const std::string ker_name = _phases[i];
       params.set<AuxVariableName>("variable") = ker_name;
-      _problem->addAuxKernel("SelfAux", ker_name, params);
+      params.set<std::vector<VariableName>>("v") = {ker_name};
+      _problem->addAuxKernel("ProjectionAux", ker_name, params);
     }
 
     for (const auto i : index_range(_species))
     {
       const std::string ker_name = _species[i];
       params.set<AuxVariableName>("variable") = ker_name;
-      _problem->addAuxKernel("SelfAux", ker_name, params);
+      params.set<std::vector<VariableName>>("v") = {ker_name};
+      _problem->addAuxKernel("ProjectionAux", ker_name, params);
     }
 
     for (const auto i : index_range(_element_potentials))
     {
       const std::string ker_name = _element_potentials[i];
       params.set<AuxVariableName>("variable") = ker_name;
-      _problem->addAuxKernel("SelfAux", ker_name, params);
+      params.set<std::vector<VariableName>>("v") = {ker_name};
+      _problem->addAuxKernel("ProjectionAux", ker_name, params);
     }
 
     for (const auto i : index_range(_vapor_pressures))
     {
       const std::string ker_name = _vapor_pressures[i];
       params.set<AuxVariableName>("variable") = ker_name;
-      _problem->addAuxKernel("SelfAux", ker_name, params);
+      params.set<std::vector<VariableName>>("v") = {ker_name};
+      _problem->addAuxKernel("ProjectionAux", ker_name, params);
     }
   }
 

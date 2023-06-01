@@ -159,4 +159,4 @@ variable in the system may at most be written to by a single object on any given
 
 The user object and aux kernel thread loops check if an executed object has any writable variable references, and
 if so, will insert those variables into the aux solution vector. This obviates the need for using the
-[`SelfAux`](SelfAux.md) kernel.
+[`ProjectionAux`](ProjectionAux.md) kernel.

@@ -1,0 +1,91 @@
+[Tests]
+  design = 'ProjectionAux.md'
+  issues = '#22373'
+  [project]
+    requirement = "The system shall be able to project"
+    [1d_constant]
+      type = 'CSVDiff'
+      input = '1d.i'
+      csvdiff = '1d_constant.csv'
+      cli_args = 'Outputs/file_base=1d_constant'
+      detail = "a constant to all variable families supported in 1d at various orders,"
+    []
+    [1d_linear]
+      type = 'CSVDiff'
+      input = '1d.i'
+      csvdiff = '1d_linear.csv'
+      cli_args = "Outputs/file_base=1d_linear
+                  AuxVariables/base_elem/order=FIRST
+                  ICs/active='linear_elem linear_nodal'"
+      detail = "a linear variation to all variable families supported in 1d at various orders,"
+    []
+    [1d_quadratic]
+      type = 'CSVDiff'
+      input = '1d.i'
+      csvdiff = '1d_quadratic.csv'
+      cli_args = "Outputs/file_base=1d_quadratic
+                  AuxVariables/base_elem/order=SECOND
+                  AuxVariables/base_nodal/order=SECOND
+                  ICs/active='quadratic_elem quadratic_nodal'"
+      detail = "a quadratic variation to all variable families supported in 1d at various orders,"
+    []
+    [2d_constant]
+      type = 'CSVDiff'
+      input = '2d.i'
+      csvdiff = '2d_constant.csv'
+      cli_args = 'Outputs/file_base=2d_constant'
+      detail = "a constant to all variable families supported in 2d at various orders,"
+    []
+    [2d_linear]
+      type = 'CSVDiff'
+      input = '2d.i'
+      csvdiff = '2d_linear.csv'
+      cli_args = "Outputs/file_base=2d_linear
+                  AuxVariables/base_elem/order=FIRST
+                  ICs/active='linear_elem linear_nodal'"
+      detail = "a linear variation to all variable families supported in 2d at various orders,"
+    []
+    [2d_quadratic]
+      type = 'CSVDiff'
+      input = '2d.i'
+      csvdiff = '2d_quadratic.csv'
+      cli_args = "Outputs/file_base=2d_quadratic
+                  AuxVariables/base_elem/order=SECOND
+                  AuxVariables/base_nodal/order=SECOND
+                  ICs/active='quadratic_elem quadratic_nodal'"
+      detail = "a quadratic variation to all variable families supported in 2d at various orders,"
+    []
+    [2d_constant_tri]
+      type = 'CSVDiff'
+      input = '2d.i'
+      csvdiff = '2d_constant_tri.csv'
+      cli_args = "Outputs/file_base=2d_constant_tri
+                  Mesh/elem_type=TRI6"
+      detail = "a constant to all variable families supported in 2d at various orders on a triangle "
+               "mesh,"
+    []
+    [2d_linear_tri]
+      type = 'CSVDiff'
+      input = '2d.i'
+      csvdiff = '2d_linear_tri.csv'
+      cli_args = "Outputs/file_base=2d_linear_tri
+                  Mesh/elem_type=TRI6
+                  AuxVariables/base_elem/order=FIRST
+                  ICs/active='linear_elem linear_nodal'"
+      detail = "a linear variation to all variable families supported in 2d at various orders on a "
+               "triangle mesh,"
+    []
+    [2d_quadratic_tri]
+      type = 'CSVDiff'
+      input = '2d.i'
+      csvdiff = '2d_quadratic_tri.csv'
+      cli_args = "Outputs/file_base=2d_quadratic_tri
+                  Mesh/elem_type=TRI6
+                  AuxVariables/base_elem/order=SECOND
+                  AuxVariables/base_nodal/order=SECOND
+                  ICs/active='quadratic_elem quadratic_nodal'"
+      detail = "a quadratic variation to all variable families supported in 2d at various orders on "
+               "a triangle mesh,"
+    []
+  []
+[]

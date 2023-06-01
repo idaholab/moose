@@ -28,7 +28,7 @@
 
 [AuxKernels]
   [v_elem]
-    type = SelfAux
+    type = ProjectionAux
     v = v
     variable = v_elem
   []

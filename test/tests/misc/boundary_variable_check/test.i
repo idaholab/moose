@@ -42,13 +42,13 @@
 [AuxKernels]
   active = 'bad'
   [bad]
-    type = SelfAux
+    type = ProjectionAux
     variable = dummy
     v = v
     boundary = 'left'
   []
   [bad_elemental]
-    type = SelfAux
+    type = ProjectionAux
     variable = dummy3
     v = dummy2
     boundary = 'left'

@@ -10,76 +10,78 @@
 []
 
 [Variables]
-  [./u]
+  [u]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 []
 
 [AuxVariables]
-  [./tt]
+  [tt]
     order = FIRST
     family = LAGRANGE
     initial_condition = 0
-  [../]
+  []
 
-  [./ten]
+  [ten]
     order = FIRST
     family = LAGRANGE
     initial_condition = 1
-  [../]
+  []
 
-  [./2k]
+  [2k]
     order = FIRST
     family = LAGRANGE
     initial_condition = 2
-  [../]
+  []
 []
 
 [Kernels]
-  [./diff]
+  [diff]
     type = Diffusion
     variable = u
-  [../]
+  []
 []
 
 [AuxKernels]
-  [./do-no-1]
+  [do-no-1]
     variable = ten
-    type = SelfAux
-  [../]
+    type = ProjectionAux
+    v = ten
+  []
 
-  [./do-no-2]
+  [do-no-2]
     variable = 2k
-    type = SelfAux
-  [../]
+    type = ProjectionAux
+    v = ten
+  []
 
-  [./all]
+  [all]
     variable = tt
     type = MultipleUpdateAux
     use_deprecated_api = true
     u = u
     var1 = ten
     var2 = 2k
-  [../]
+  []
 []
 
 [BCs]
   active = 'left right'
 
-  [./left]
+  [left]
     type = DirichletBC
     variable = u
     boundary = 1
     value = 0
-  [../]
+  []
 
-  [./right]
+  [right]
     type = DirichletBC
     variable = u
     boundary = 3
     value = 1
-  [../]
+  []
 []
 
 [Executioner]

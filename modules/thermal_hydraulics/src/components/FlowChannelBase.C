@@ -248,11 +248,11 @@ FlowChannelBase::addCommonObjects()
       makeFunctionControllableIfConstant(_area_function, "Area");
     }
     {
-      const std::string class_name = "CopyValueAux";
+      const std::string class_name = "ProjectionAux";
       InputParameters params = _factory.getValidParams(class_name);
       params.set<AuxVariableName>("variable") = FlowModel::AREA;
       params.set<std::vector<SubdomainName>>("block") = getSubdomainNames();
-      params.set<std::vector<VariableName>>("source") = {FlowModel::AREA_LINEAR};
+      params.set<std::vector<VariableName>>("v") = {FlowModel::AREA_LINEAR};
       params.set<ExecFlagEnum>("execute_on") = ts_execute_on;
       const std::string aux_kernel_name = genName(name(), "area_aux");
       getTHMProblem().addAuxKernel(class_name, aux_kernel_name, params);
