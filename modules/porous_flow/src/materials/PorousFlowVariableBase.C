@@ -37,9 +37,9 @@ PorousFlowVariableBaseTempl<is_ad>::PorousFlowVariableBaseTempl(const InputParam
                                                 "dPorousFlow_porepressure_nodal_dvar")
                                           : &declareProperty<std::vector<std::vector<Real>>>(
                                                 "dPorousFlow_porepressure_qp_dvar")),
-    _gradp_qp((_nodal_material || is_ad)
-                  ? nullptr
-                  : &declareProperty<std::vector<RealGradient>>("PorousFlow_grad_porepressure_qp")),
+    _gradp_qp((_nodal_material) ? nullptr
+                                : &declareGenericProperty<std::vector<RealGradient>, is_ad>(
+                                      "PorousFlow_grad_porepressure_qp")),
     _dgradp_qp_dgradv((_nodal_material || is_ad)
                           ? nullptr
                           : &declareProperty<std::vector<std::vector<Real>>>(
@@ -58,9 +58,9 @@ PorousFlowVariableBaseTempl<is_ad>::PorousFlowVariableBaseTempl(const InputParam
         : _nodal_material
             ? &declareProperty<std::vector<std::vector<Real>>>("dPorousFlow_saturation_nodal_dvar")
             : &declareProperty<std::vector<std::vector<Real>>>("dPorousFlow_saturation_qp_dvar")),
-    _grads_qp((_nodal_material || is_ad)
-                  ? nullptr
-                  : &declareProperty<std::vector<RealGradient>>("PorousFlow_grad_saturation_qp")),
+    _grads_qp((_nodal_material) ? nullptr
+                                : &declareGenericProperty<std::vector<RealGradient>, is_ad>(
+                                      "PorousFlow_grad_saturation_qp")),
     _dgrads_qp_dgradv((_nodal_material || is_ad) ? nullptr
                                                  : &declareProperty<std::vector<std::vector<Real>>>(
                                                        "dPorousFlow_grad_saturation_qp_dgradvar")),
@@ -92,19 +92,25 @@ PorousFlowVariableBaseTempl<is_ad>::computeQpProperties()
   {
     (*_dporepressure_dvar)[_qp].resize(_num_phases);
     (*_dsaturation_dvar)[_qp].resize(_num_phases);
+  }
 
-    if (!_nodal_material)
+  if (!_nodal_material)
+  {
+    (*_gradp_qp)[_qp].resize(_num_phases);
+    (*_grads_qp)[_qp].resize(_num_phases);
+
+    if (!is_ad)
     {
-      (*_gradp_qp)[_qp].resize(_num_phases);
       (*_dgradp_qp_dgradv)[_qp].resize(_num_phases);
       (*_dgradp_qp_dv)[_qp].resize(_num_phases);
 
-      (*_grads_qp)[_qp].resize(_num_phases);
       (*_dgrads_qp_dgradv)[_qp].resize(_num_phases);
       (*_dgrads_qp_dv)[_qp].resize(_num_phases);
     }
+  }
 
-    // Prepare the derivative matrices with zeroes
+  // Prepare the derivative matrices with zeroes
+  if (!is_ad)
     for (unsigned phase = 0; phase < _num_phases; ++phase)
     {
 
@@ -118,7 +124,6 @@ PorousFlowVariableBaseTempl<is_ad>::computeQpProperties()
         (*_dgrads_qp_dv)[_qp][phase].assign(_num_pf_vars, RealGradient());
       }
     }
-  }
 }
 
 template class PorousFlowVariableBaseTempl<false>;

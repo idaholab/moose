@@ -14,7 +14,7 @@
 class PorousFlowCapillaryPressure;
 
 /**
- * Base material designed to calculate fluid phase porepressure and saturation
+ * Material designed to calculate fluid phase porepressure and saturation
  * for the single-phase situation assuming constant effective saturation and
  * porepressure as the nonlinear variable
  */
@@ -38,7 +38,7 @@ protected:
   /// Nodal or quadpoint value of porepressure of the fluid phase
   const GenericVariableValue<is_ad> & _porepressure_var;
   /// Gradient(_porepressure at quadpoints)
-  const VariableGradient & _gradp_qp_var;
+  const GenericVariableGradient<is_ad> & _gradp_qp_var;
   /// Moose variable number of the porepressure
   const unsigned int _porepressure_varnum;
   /// The PorousFlow variable number of the porepressure
@@ -46,21 +46,7 @@ protected:
   /// Capillary pressure UserObject
   const PorousFlowCapillaryPressure & _pc_uo;
 
-  using PorousFlowVariableBaseTempl<is_ad>::_dictator;
-  using PorousFlowVariableBaseTempl<is_ad>::_porepressure;
-  using PorousFlowVariableBaseTempl<is_ad>::_saturation;
-  using PorousFlowVariableBaseTempl<is_ad>::_dporepressure_dvar;
-  using PorousFlowVariableBaseTempl<is_ad>::_dsaturation_dvar;
-  using PorousFlowVariableBaseTempl<is_ad>::_qp;
-  using PorousFlowVariableBaseTempl<is_ad>::_num_phases;
-  using PorousFlowVariableBaseTempl<is_ad>::_gradp_qp;
-  using PorousFlowVariableBaseTempl<is_ad>::_grads_qp;
-  using PorousFlowVariableBaseTempl<is_ad>::_dgradp_qp_dgradv;
-  using PorousFlowVariableBaseTempl<is_ad>::_dgrads_qp_dgradv;
-  using PorousFlowVariableBaseTempl<is_ad>::_dgrads_qp_dv;
-  using PorousFlowVariableBaseTempl<is_ad>::_nodal_material;
-  using Coupleable::coupled;
-  using Coupleable::coupledGradient;
+  usingPorousFlowVariableBaseMembers;
 };
 
 typedef PorousFlow1PhasePTempl<false> PorousFlow1PhaseP;
