@@ -29,10 +29,10 @@ GeneralPostprocessor: operates once per execution
 `Postprocessor` is a UserObject, so `initialize`, `execute`, `threadJoin`, and `finalize` methods
 can be defined.
 
-`initialize()`
+`initialize()`\\
 This is called once before every execution. Useful to reset accumulated quantities
 
-`execute()`
+`execute()`\\
 This defines the operation performed on a per element/side/node/mesh (depending on type) basis.
 The quadrature integration is often defined there, and users generally do not need to define this.
 
