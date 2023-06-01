@@ -68,6 +68,18 @@ PorousFlowCapillaryPressure::capillaryPressure(Real saturation, unsigned qp) con
     return capillaryPressureCurve(saturation, qp);
 }
 
+DualReal
+PorousFlowCapillaryPressure::capillaryPressure(const DualReal & saturation, unsigned qp) const
+{
+  const Real Pc = capillaryPressure(saturation.value(), qp);
+  const Real dPc_ds = dCapillaryPressure(saturation.value(), qp);
+
+  DualReal result = Pc;
+  result.derivatives() = saturation.derivatives() * dPc_ds;
+
+  return result;
+}
+
 Real
 PorousFlowCapillaryPressure::dCapillaryPressure(Real saturation, unsigned qp) const
 {
@@ -75,6 +87,18 @@ PorousFlowCapillaryPressure::dCapillaryPressure(Real saturation, unsigned qp) co
     return dCapillaryPressureLogExt(saturation);
   else
     return dCapillaryPressureCurve(saturation, qp);
+}
+
+DualReal
+PorousFlowCapillaryPressure::dCapillaryPressure(const DualReal & saturation, unsigned qp) const
+{
+  const Real dPc = dCapillaryPressure(saturation.value(), qp);
+  const Real d2Pc_ds2 = d2CapillaryPressure(saturation.value(), qp);
+
+  DualReal result = dPc;
+  result.derivatives() = saturation.derivatives() * d2Pc_ds2;
+
+  return result;
 }
 
 Real
@@ -114,6 +138,18 @@ Real
 PorousFlowCapillaryPressure::dSaturation(Real pc, unsigned qp) const
 {
   return dEffectiveSaturation(pc, qp) * (1.0 - _sat_lr);
+}
+
+DualReal
+PorousFlowCapillaryPressure::dSaturation(const DualReal & pc, unsigned qp) const
+{
+  const Real ds = dEffectiveSaturation(pc.value(), qp) * (1.0 - _sat_lr);
+  const Real d2s_dpc2 = d2EffectiveSaturation(pc.value(), qp) * (1.0 - _sat_lr);
+
+  DualReal result = ds;
+  result.derivatives() = pc.derivatives() * d2s_dpc2;
+
+  return result;
 }
 
 Real
@@ -182,16 +218,4 @@ PorousFlowCapillaryPressure::interceptFunctionDeriv(Real saturation) const
   Real d2pc = d2CapillaryPressureCurve(saturation);
 
   return saturation * (dpc * dpc / pc - d2pc) / (_log10 * pc);
-}
-
-DualReal
-PorousFlowCapillaryPressure::capillaryPressure(const DualReal & saturation, unsigned qp) const
-{
-  const Real Pc = capillaryPressure(saturation.value(), qp);
-  const Real dPc_ds = dCapillaryPressure(saturation.value(), qp);
-
-  DualReal result = Pc;
-  result.derivatives() = saturation.derivatives() * dPc_ds;
-
-  return result;
 }
