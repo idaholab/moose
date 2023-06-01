@@ -15,7 +15,6 @@ C\left( \frac{\partial T}{\partial t} + \underbrace{\epsilon \vec{u}\cdot\nabla 
 - A more sophisticated `Material` object will be created that includes temperature dependence
 
 !---
-
 ## DarcyAdvection.h
 
 !listing step06_coupled_darcy_heat_conduction/include/kernels/DarcyAdvection.h
@@ -58,18 +57,21 @@ C\left( \frac{\partial T}{\partial t} + \underbrace{\epsilon \vec{u}\cdot\nabla 
 
 !---
 
-## Auto Variable Scaling
+## Variable Scaling
 
-To obtain an optimum numerical solution, the non-linear variables should be on the same
-scale.
+To make sure the convergence criterion is fairly applied to all equations, the non-linear variables
+should be on the same scale.
 
-MOOSE includes the ability to automatically scale non-linear variables
+Making equations non-dimensional is a common technique to achieve this. But this is not typically
+done in MOOSE, where modelers have direct access to dimensionalized quantities.
+
+MOOSE includes the ability to either manually or automatically scale non-linear variables
 
 !---
 
 ### Condition Number +without+ Scaling
 
-The condition number can be used to determine if variable scaling is required.
+The condition number of the Jacobian can be used to determine if variable scaling is required.
 
 ```bash
 cd ~/projects/moose/tutorials/darcy-thermo_mech/step06_coupled_darcy_heat_conduction
