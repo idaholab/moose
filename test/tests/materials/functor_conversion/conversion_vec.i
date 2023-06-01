@@ -25,7 +25,7 @@
   [u]
     order = FIRST
     family = LAGRANGE_VEC
-    initial_condition = 2
+    initial_condition = '2 2 2'
   []
 []
 
@@ -33,7 +33,7 @@
   [v]
     order = FIRST
     family = MONOMIAL_VEC
-    initial_condition = 3
+    initial_condition = '3 3 3'
   []
 []
 
