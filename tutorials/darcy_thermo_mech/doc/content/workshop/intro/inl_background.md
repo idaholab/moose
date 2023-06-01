@@ -48,9 +48,9 @@ High-intensity (+20 GW+), short-duration (+80 ms+) neutron pulses for severe acc
 
 NRIC is composed of two physical test beds to build prototypes of advanced nuclear reactors
 
-- DOME in the historic EBR-II facility
+- DOME (Demonstration of Microreactor Experiments) in the historic EBR-II facility
 
-- LOTUS in the historic ZPPR Cell
+- LOTUS (Laboratory for Operation and Testing in the U.S.) in the historic Zero Power Physics Reactor (ZPPR) Cell
 
 And an open-source [online virtual test bed](https://mooseframework.inl.gov/virtual_test_bed)
-to demonstrate advanced reactors through modeling and simulation.
+to demonstrate advanced reactors through modeling and simulation. More information about NRIC can be found at [https://nric.inl.gov](https://nric.inl.gov).
