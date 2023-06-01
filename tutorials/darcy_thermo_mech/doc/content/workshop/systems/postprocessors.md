@@ -30,7 +30,7 @@ GeneralPostprocessor: operates once per execution
 can be defined.
 
 `initialize()`
-This is called once before every execution. Useful to reset accumulated quantities, initialize in general!
+This is called once before every execution. Useful to reset accumulated quantities
 
 `execute()`
 This defines the operation performed on a per element/side/node/mesh (depending on type) basis.
