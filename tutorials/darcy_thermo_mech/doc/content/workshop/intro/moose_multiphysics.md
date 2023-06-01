@@ -80,6 +80,7 @@ NodalKernels\\
 Outputs\\
 Parser\\
 Partitioner\\
+Positions\\
 Postprocessors\\
 Preconditioners\\
 Predictors\\
@@ -87,6 +88,7 @@ Predictors\\
 
 !col! small=12 medium=6 large=3 style=margin-right:10%;
 Problems\\
+Reporters\\
 RelationshipManagers\\
 Samplers\\
 Splits\\
@@ -112,10 +114,8 @@ VectorPostprocessors\\
 ## MOOSE Modules
 
 
-!style! halign=center
-!row!
-!col! small=12 medium=6 large=3 style=margin-left:auto;margin-right:20px;
-**Physics**\\
+!col! small=12 medium=6 large=3 style=margin-right:2%;
++Physics\\
 Chemical Reactions\\
 Contact\\
 Electromagnetics\\
@@ -131,11 +131,11 @@ Porous Flow\\
 Reactor\\
 Tensor (solid) Mechanics\\
 Thermal Hydraulics\\
-XFEM
+XFEM\\
 !col-end!
 
 !col! small=12 medium=6 large=3 style=margin-right:2%;
-**Numerics**\\
++Numerics\\
 External PETSc Solver\\
 Function Expansion Tools\\
 Ray Tracing\\

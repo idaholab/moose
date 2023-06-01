@@ -48,7 +48,7 @@ inserted and the step is resolved.
 
 ## Composing TimeSteppers
 
-**New Feature:** Time steppers can now be composed to follow complex time histories.
++New Feature: Time steppers can now be composed to follow complex time histories.
 By default, the minimum of all the time steps computed by all the time steppers is used!
 
 What steps will be taken, starting at time = 0s?

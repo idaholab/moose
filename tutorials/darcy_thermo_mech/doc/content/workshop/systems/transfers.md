@@ -2,7 +2,7 @@
 
 A system to move data to and from the "parent application" and "sub-applications" of a MultiApp.
 
-**New Feature:** Transfers can now send data between sub-applications. We refer to this capability as 'siblings' transfer.
++New Feature: Transfers can now send data between sub-applications. We refer to this capability as 'siblings' transfer.
 
 !---
 

@@ -45,4 +45,4 @@ corresponding to this exact solution.
 
 !---
 
-!media darcy_thermo_mech/time_convergence_implicit.png
+!media darcy_thermo_mech/time_convergence_implicit.png style=width:90%

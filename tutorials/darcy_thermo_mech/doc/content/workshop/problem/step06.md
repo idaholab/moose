@@ -15,6 +15,7 @@ C\left( \frac{\partial T}{\partial t} + \underbrace{\epsilon \vec{u}\cdot\nabla 
 - A more sophisticated `Material` object will be created that includes temperature dependence
 
 !---
+
 ## DarcyAdvection.h
 
 !listing step06_coupled_darcy_heat_conduction/include/kernels/DarcyAdvection.h
