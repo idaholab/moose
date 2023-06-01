@@ -1,4 +1,4 @@
-# Function System
+# [Function System](syntax/Functions/index.md)
 
 A system for defining analytic expressions based on the spatial location ($x$, $y$, $z$) and
 time, $t$.

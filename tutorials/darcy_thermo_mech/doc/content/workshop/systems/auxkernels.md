@@ -1,4 +1,4 @@
-# Auxiliary System
+# [Auxiliary System](syntax/AuxVariables/index.md)
 
 A system for direct calculation of field variables ("AuxVariables") that is designed for
 postprocessing, coupling, and proxy calculations.

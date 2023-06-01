@@ -26,6 +26,10 @@
 
 !---
 
+!include debug.md end=!---
+
+!---
+
 !include dgkernels.md end=!---
 
 !---
@@ -47,6 +51,18 @@
 !---
 
 !include functions.md end=!---
+
+!---
+
+!include fvbcs.md end=!---
+
+!---
+
+!include fviks.md end=!---
+
+!---
+
+!include fvkernels.md end=!---
 
 !---
 

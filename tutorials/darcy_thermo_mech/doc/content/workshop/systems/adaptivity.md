@@ -1,4 +1,4 @@
-# Adaptivity System
+# [Adaptivity System](syntax/Adaptivity/index.md)
 
 !---
 

@@ -1,4 +1,4 @@
-# Boundary Condition System
+# [Boundary Condition System](syntax/BCs/index.md)
 
 System for computing residual contributions from boundary terms of a [!ac](PDE).
 
