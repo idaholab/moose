@@ -12,6 +12,7 @@
 #include "DataIO.h"
 #include "MooseMesh.h"
 #include "FEProblemBase.h"
+#include "NonlinearSystemBase.h"
 
 #include "libmesh/vector_value.h"
 #include "libmesh/tensor_value.h"
@@ -642,8 +643,10 @@ template <>
 void
 dataLoad(std::istream & stream, libMesh::EquationSystems & es, void * context)
 {
+  // In the future, we should pass a more general context so that this
+  // isn't constrained to FEProblemBase
   mooseAssert(context, "Context not set");
-  const FEProblemBase & problem = *static_cast<FEProblemBase *>(context);
+  FEProblemBase & problem = *static_cast<FEProblemBase *>(context);
 
   unsigned int read_flags = EquationSystems::READ_DATA;
   if (!problem.skipAdditionalRestartData())
@@ -654,6 +657,9 @@ dataLoad(std::istream & stream, libMesh::EquationSystems & es, void * context)
   local_io_functor = [&stream]() { return std::make_unique<Xdr>(stream); };
 
   es.read(io, local_io_functor, read_flags, false);
+
+  for (const auto & nl_sys_num : make_range(problem.numNonlinearSystems()))
+    problem.getNonlinearSystemBase(nl_sys_num).update();
 }
 
 template <>
