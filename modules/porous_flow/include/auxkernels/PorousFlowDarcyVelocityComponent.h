@@ -22,30 +22,31 @@
  * and w_j is the fluid weight
  * This is measured in m^3 . s^-1 . m^-2
  */
-class PorousFlowDarcyVelocityComponent : public AuxKernel
+template <bool is_ad>
+class PorousFlowDarcyVelocityComponentTempl : public AuxKernel
 {
 public:
   static InputParameters validParams();
 
-  PorousFlowDarcyVelocityComponent(const InputParameters & parameters);
+  PorousFlowDarcyVelocityComponentTempl(const InputParameters & parameters);
 
 protected:
   virtual Real computeValue();
 
   /// Relative permeability of each phase
-  const MaterialProperty<std::vector<Real>> & _relative_permeability;
+  const GenericMaterialProperty<std::vector<Real>, is_ad> & _relative_permeability;
 
   /// Viscosity of each component in each phase
-  const MaterialProperty<std::vector<Real>> & _fluid_viscosity;
+  const GenericMaterialProperty<std::vector<Real>, is_ad> & _fluid_viscosity;
 
   /// Permeability of porous material
-  const MaterialProperty<RealTensorValue> & _permeability;
+  const GenericMaterialProperty<RealTensorValue, is_ad> & _permeability;
 
   /// Gradient of the pore pressure in each phase
-  const MaterialProperty<std::vector<RealGradient>> & _grad_p;
+  const GenericMaterialProperty<std::vector<RealGradient>, is_ad> & _grad_p;
 
   /// Fluid density for each phase (at the qp)
-  const MaterialProperty<std::vector<Real>> & _fluid_density_qp;
+  const GenericMaterialProperty<std::vector<Real>, is_ad> & _fluid_density_qp;
 
   /// PorousFlowDicatator UserObject
   const PorousFlowDictator & _dictator;
@@ -59,3 +60,6 @@ protected:
   /// Gravitational acceleration
   const RealVectorValue _gravity;
 };
+
+typedef PorousFlowDarcyVelocityComponentTempl<false> PorousFlowDarcyVelocityComponent;
+typedef PorousFlowDarcyVelocityComponentTempl<true> ADPorousFlowDarcyVelocityComponent;

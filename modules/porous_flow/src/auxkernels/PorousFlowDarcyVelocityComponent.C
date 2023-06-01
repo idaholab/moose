@@ -10,9 +10,11 @@
 #include "PorousFlowDarcyVelocityComponent.h"
 
 registerMooseObject("PorousFlowApp", PorousFlowDarcyVelocityComponent);
+registerMooseObject("PorousFlowApp", ADPorousFlowDarcyVelocityComponent);
 
+template <bool is_ad>
 InputParameters
-PorousFlowDarcyVelocityComponent::validParams()
+PorousFlowDarcyVelocityComponentTempl<is_ad>::validParams()
 {
   InputParameters params = AuxKernel::validParams();
   params.addRequiredParam<RealVectorValue>("gravity",
@@ -30,15 +32,19 @@ PorousFlowDarcyVelocityComponent::validParams()
   return params;
 }
 
-PorousFlowDarcyVelocityComponent::PorousFlowDarcyVelocityComponent(
+template <bool is_ad>
+PorousFlowDarcyVelocityComponentTempl<is_ad>::PorousFlowDarcyVelocityComponentTempl(
     const InputParameters & parameters)
   : AuxKernel(parameters),
-    _relative_permeability(
-        getMaterialProperty<std::vector<Real>>("PorousFlow_relative_permeability_qp")),
-    _fluid_viscosity(getMaterialProperty<std::vector<Real>>("PorousFlow_viscosity_qp")),
-    _permeability(getMaterialProperty<RealTensorValue>("PorousFlow_permeability_qp")),
-    _grad_p(getMaterialProperty<std::vector<RealGradient>>("PorousFlow_grad_porepressure_qp")),
-    _fluid_density_qp(getMaterialProperty<std::vector<Real>>("PorousFlow_fluid_phase_density_qp")),
+    _relative_permeability(getGenericMaterialProperty<std::vector<Real>, is_ad>(
+        "PorousFlow_relative_permeability_qp")),
+    _fluid_viscosity(
+        getGenericMaterialProperty<std::vector<Real>, is_ad>("PorousFlow_viscosity_qp")),
+    _permeability(getGenericMaterialProperty<RealTensorValue, is_ad>("PorousFlow_permeability_qp")),
+    _grad_p(getGenericMaterialProperty<std::vector<RealGradient>, is_ad>(
+        "PorousFlow_grad_porepressure_qp")),
+    _fluid_density_qp(
+        getGenericMaterialProperty<std::vector<Real>, is_ad>("PorousFlow_fluid_phase_density_qp")),
     _dictator(getUserObject<PorousFlowDictator>("PorousFlowDictator")),
     _ph(getParam<unsigned int>("fluid_phase")),
     _component(getParam<MooseEnum>("component")),
@@ -54,9 +60,14 @@ PorousFlowDarcyVelocityComponent::PorousFlowDarcyVelocityComponent(
                "ensure your wellbeing.");
 }
 
+template <bool is_ad>
 Real
-PorousFlowDarcyVelocityComponent::computeValue()
+PorousFlowDarcyVelocityComponentTempl<is_ad>::computeValue()
 {
-  return -(_permeability[_qp] * (_grad_p[_qp][_ph] - _fluid_density_qp[_qp][_ph] * _gravity) *
-           _relative_permeability[_qp][_ph] / _fluid_viscosity[_qp][_ph])(_component);
+  return -MetaPhysicL::raw_value(
+      (_permeability[_qp] * (_grad_p[_qp][_ph] - _fluid_density_qp[_qp][_ph] * _gravity) *
+       _relative_permeability[_qp][_ph] / _fluid_viscosity[_qp][_ph])(_component));
 }
+
+template class PorousFlowDarcyVelocityComponentTempl<false>;
+template class PorousFlowDarcyVelocityComponentTempl<true>;
