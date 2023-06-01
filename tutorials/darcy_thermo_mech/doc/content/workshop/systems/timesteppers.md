@@ -43,3 +43,24 @@ Only time points satisfying $t_{start} < t <t_{end}$ are considered.
 
 If a solve fails at step $n$ an additional time point $t_{new} = \frac{1}{2}(t_{n+1}+t_n)$ is
 inserted and the step is resolved.
+
+!---
+
+## Composing TimeSteppers
+
+**New Feature:** Time steppers can now be composed to follow complex time histories.
+By default, the minimum of all the time steps computed by all the time steppers is used!
+
+What steps will be taken, starting at time = 0s?
+```
+[TimeSteppers]
+  [constant]
+    type = ConstantDT
+    dt = 0.2
+  []
+  [hit_these_times]
+    type = TimeSequenceStepper
+    time_sequence = '0.5 1 1.5 2.1'
+  []
+[]
+```
