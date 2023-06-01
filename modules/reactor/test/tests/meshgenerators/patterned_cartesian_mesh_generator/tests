@@ -167,7 +167,16 @@
     cli_args = 'Mesh/pattern/pattern_boundary=expanded
                   --mesh-only "patterned_err.e"'
     expect_err = 'This parameter must be provided when pattern_boundary is expanded.'
-    requirement = 'The system shall throw an error if no square size is provided when pattern_boundary is expanded.'
+    requirement = 'The system shall throw an error if no square size is provided when pattern boundary style is expanded.'
+  []
+  [err_redundant_square_size]
+    type = 'RunException'
+    input = 'patterned_2d.i'
+    cli_args = 'Mesh/pattern/pattern_boundary=none
+                Mesh/pattern/square_size=40
+                  --mesh-only "patterned_err.e"'
+    expect_err = 'This parameter must not be provided when pattern_boundary is none.'
+    requirement = 'The system shall throw an error if square size is provided when pattern boundary style is none.'
   []
   [err_missing_input_meshes_in_pattern]
     type = 'RunException'
