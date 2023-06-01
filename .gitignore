@@ -321,3 +321,4 @@ share/
 /modules/reactor/unit/reactor-unit.yaml
 /modules/rdg/unit/rdg-unit.yaml
 /modules/fsi/unit/fsi-unit.yaml
+/tutorials/tutorial01_app_development/**/babbler.yaml
