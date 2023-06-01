@@ -15,7 +15,7 @@ parameters to be manipulated and re-used during object creation.
 
 ## Action Object
 
-An action design to build specific objects, such as the case in [#step09] for tensor mechanics.
+An action designed to build specific objects, such as the case in [#step09] for tensor mechanics.
 
 !listing problems/step9.i block=Modules/TensorMechanics/Master
 
