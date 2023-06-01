@@ -1,83 +1,93 @@
 [Tests]
-  [./GrandPotentialPFM]
+  [GrandPotentialPFM]
     type = 'Exodiff'
     input = 'GrandPotentialPFM.i'
     exodiff = 'GrandPotentialPFM_out.e'
     issues = '#6977'
     design = '/GrandPotentialKernelAction.md'
-    requirement = 'The system shall provide classes to implement a Grand Potential phase field formulation'
-  [../]
-  [./GrandPotentialMultiphase]
+    requirement = 'The system shall provide classes to implement a Grand Potential phase field '
+                  'formulation'
+  []
+  [GrandPotentialMultiphase]
     type = 'Exodiff'
     input = 'GrandPotentialMultiphase.i'
     exodiff = 'GrandPotentialMultiphase_out.e'
     issues = '#8213'
     design = '/ACSwitching.md'
     requirement = 'The system shall provide a Grand Potential based multiphase model'
-  [../]
-  [./GrandPotentialAnisotropy]
+  []
+  [GrandPotentialAnisotropy]
     type = 'Exodiff'
     input = 'GrandPotentialAnisotropy.i'
     exodiff = 'GrandPotentialAnisotropy_out.e'
     abs_zero = 1e-8
     issues = '#11802 #12554'
-    design = '/ACInterface2DMultiPhase1.md /ACInterface2DMultiPhase2.md /InterfaceOrientationMultiphaseMaterial.md'
-    requirement = 'The system shall provide a Grand Potential based dendritic solidification capability in 2D'
-  [../]
-  [./GrandPotentialStrictMassConservation]
+    design = '/ACInterface2DMultiPhase1.md /ACInterface2DMultiPhase2.md '
+             '/InterfaceOrientationMultiphaseMaterial.md'
+    requirement = 'The system shall provide a Grand Potential based dendritic solidification '
+                  'capability in 2D'
+  []
+  [GrandPotentialStrictMassConservation]
     type = 'Exodiff'
     input = 'GrandPotentialStrictMassConservation.i'
     exodiff = 'GrandPotentialStrictMassConservation_out.e'
     issues = '#23329'
     design = '/GrandPotentialKernelAction.md'
-    requirement = 'The system shall provide classes to implement a Grand Potential phase field formulation with strict mass conservation'
-  [../]
-  [./GrandPotentialInterface]
+    requirement = 'The system shall provide classes to implement a Grand Potential phase field '
+                  'formulation with strict mass conservation'
+    method = '!dbg'
+  []
+  [GrandPotentialInterface]
     type = 'CSVDiff'
     input = 'GrandPotentialInterface.i'
     csvdiff = 'GrandPotentialInterface_out_mat_0001.csv'
     issues = '#12147'
     design = '/GrandPotentialInterface.md'
-    requirement = 'The system shall provide a material to automatically compute grand potential model interface parameters based on provided interfacial free energies and widths'
-  [../]
-  [./GrandPotentialAnisotropyAntitrap]
+    requirement = 'The system shall provide a material to automatically compute grand potential '
+                  'model interface parameters based on provided interfacial free energies and widths'
+  []
+  [GrandPotentialAnisotropyAntitrap]
     type = 'Exodiff'
     input = 'GrandPotentialAnisotropyAntitrap.i'
     exodiff = 'GrandPotentialAnisotropyAntitrap_out.e'
     issues = '#13373'
     design = '/AntitrappingCurrent.md'
-    requirement = 'The system shall provide a Grand Potential based dendritic solidification capability for alloy with antitrapping current'
-  [../]
-  [./SinteringBase]
+    requirement = 'The system shall provide a Grand Potential based dendritic solidification '
+                  'capability for alloy with antitrapping current'
+  []
+  [SinteringBase]
     type = 'Exodiff'
     input = 'SinteringBase.i'
     exodiff = 'SinteringBase_out.e'
     issues = '#18420'
     design = '/GrandPotentialSinteringMaterial.md'
     requirement = 'The system shall provide a Grand Potential based sintering model'
-  [../]
-  [./SinteringParabolic]
+  []
+  [SinteringParabolic]
     type = 'Exodiff'
     input = 'SinteringParabolic.i'
     exodiff = 'SinteringParabolic_out.e'
     issues = '#18420'
     design = '/GrandPotentialSinteringMaterial.md'
-    requirement = 'The system shall provide a Grand Potential based sintering model with parabolic defect free energies'
-  [../]
-  [./SinteringDilute]
+    requirement = 'The system shall provide a Grand Potential based sintering model with parabolic '
+                  'defect free energies'
+  []
+  [SinteringDilute]
     type = 'Exodiff'
     input = 'SinteringDilute.i'
     exodiff = 'SinteringDilute_out.e'
     issues = '#18420'
     design = '/GrandPotentialSinteringMaterial.md'
-    requirement = 'The system shall provide a Grand Potential based sintering model with dilute solution defect free energies'
-  [../]
-  [./SinteringIdeal]
+    requirement = 'The system shall provide a Grand Potential based sintering model with dilute '
+                  'solution defect free energies'
+  []
+  [SinteringIdeal]
     type = 'Exodiff'
     input = 'SinteringIdeal.i'
     exodiff = 'SinteringIdeal_out.e'
     issues = '#18420'
     design = '/GrandPotentialSinteringMaterial.md'
-    requirement = 'The system shall provide a Grand Potential based sintering model with ideal solution defect free energies'
-  [../]
+    requirement = 'The system shall provide a Grand Potential based sintering model with ideal '
+                  'solution defect free energies'
+  []
 []

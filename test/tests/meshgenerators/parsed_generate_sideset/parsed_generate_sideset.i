@@ -1,5 +1,5 @@
 [Mesh]
-  [./gmg]
+  [gmg]
     type = GeneratedMeshGenerator
     dim = 3
     nx = 3
@@ -10,14 +10,14 @@
     zmax = 3
   []
 
-  [./subdomains]
+  [subdomains]
     type = ParsedSubdomainMeshGenerator
     input = gmg
     combinatorial_geometry = 'x < 1 & y > 1 & y < 2'
     block_id = 1
   []
 
-  [./sideset]
+  [sideset]
     type = ParsedGenerateSideset
     input = subdomains
     combinatorial_geometry = 'z < 1'

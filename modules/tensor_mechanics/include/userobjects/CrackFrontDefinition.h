@@ -23,8 +23,8 @@ namespace libMesh
 class QBase;
 }
 
+// fixme lynn this needs to be removed from the globalname space in a seperate commit
 void addCrackFrontDefinitionParams(InputParameters & params);
-
 /**
  * Class used in fracture integrals to define geometric characteristics of the crack front
  */
@@ -118,10 +118,16 @@ public:
   std::size_t getNumCrackFrontPoints() const;
 
   /**
-   * Whether the fracture computations are treated as 2D for a 3D model
+   * Whether the fracture computations are treated as 2D for the model
    * @return true if treated as 2D
    */
   bool treatAs2D() const { return _treat_as_2d; }
+
+  /**
+   * Is the crack defined by a mesh cutter object
+   * @return true if using a mesh cutter
+   */
+  bool usingMeshCutter() const { return _use_mesh_cutter; }
 
   /**
    * Rotate a vector in the global coordinate coordinate system to the crack
@@ -328,9 +334,9 @@ protected:
   RealVectorValue _crack_plane_normal;
   /// Vector normals to a nonplanar crack described by the cutter mesh when _use_mesh_cutter = true
   std::vector<RealVectorValue> _crack_plane_normals;
-  /// Whether to treat a 3D model as 2D for computation of fracture integrals
+  /// Whether to treat the model as 2D for computation of fracture integrals
   bool _treat_as_2d;
-  /// Whether to describe the 3D crack as a mesh cutter
+  /// Whether to describe the crack as a mesh cutter
   bool _use_mesh_cutter;
   /// Indicator that shows if the cutter mesh is modified or not in the calculation step
   bool _is_cutter_modified;

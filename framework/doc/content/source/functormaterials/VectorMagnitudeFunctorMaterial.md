@@ -1,6 +1,6 @@
 # VectorMagnitudeFunctorMaterial
 
-!syntax description /Materials/VectorMagnitudeFunctorMaterial
+!syntax description /FunctorMaterials/VectorMagnitudeFunctorMaterial
 
 ## Overview
 
@@ -33,8 +33,8 @@ this simulation.
 
 !listing test/tests/materials/functor_properties/vector-magnitude/vector-test.i block=Materials/functor
 
-!syntax parameters /Materials/VectorMagnitudeFunctorMaterial
+!syntax parameters /FunctorMaterials/VectorMagnitudeFunctorMaterial
 
-!syntax inputs /Materials/VectorMagnitudeFunctorMaterial
+!syntax inputs /FunctorMaterials/VectorMagnitudeFunctorMaterial
 
-!syntax children /Materials/VectorMagnitudeFunctorMaterial
+!syntax children /FunctorMaterials/VectorMagnitudeFunctorMaterial

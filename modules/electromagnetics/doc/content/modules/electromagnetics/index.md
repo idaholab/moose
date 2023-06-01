@@ -43,3 +43,18 @@ electromagnetic simulations to other physical domains. Features include:
 - [Electrostatic Contact, Three Blocks](verification/electrostatic_contact_three_block.md) - Verification
   of electrostatic contact with a floating block sandwiched between a driven/powered block and a grounded
   block
+
+## Citing
+
+The following PhD dissertation documents the initial development, function, verification, and validation
+of the electromagnetics module and should be used as the current citation.
+
+```
+@phdthesis{icenhour2023electromagnetics,
+  author = {Icenhour, Casey T.},
+  title = {Development and Validation of Open Source Software for Electromagnetics Simulation and Multiphysics Coupling},
+  school = {North Carolina State University},
+  year = {2023},
+  url = {https://www.lib.ncsu.edu/resolver/1840.20/40985}
+}
+```

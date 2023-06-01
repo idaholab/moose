@@ -31,6 +31,9 @@ ParsedGenerateSideset::validParams()
   params.addRequiredParam<std::string>("combinatorial_geometry",
                                        "Function expression encoding a combinatorial geometry");
   params.addRequiredParam<BoundaryName>("new_sideset_name", "The name of the new sideset");
+  params.addParam<std::vector<BoundaryName>>(
+      "included_boundaries",
+      "A set of boundary names or ids whose sides will be included in the new sidesets");
   params.addParam<std::vector<SubdomainName>>(
       "included_subdomains",
       "A set of subdomain names or ids whose sides will be included in the new sidesets");
@@ -70,6 +73,7 @@ ParsedGenerateSideset::ParsedGenerateSideset(const InputParameters & parameters)
     _input(getMesh("input")),
     _function(parameters.get<std::string>("combinatorial_geometry")),
     _sideset_name(getParam<BoundaryName>("new_sideset_name")),
+    _check_boundaries(isParamValid("included_boundaries")),
     _check_subdomains(isParamValid("included_subdomain_ids") ||
                       isParamValid("included_subdomains")),
     _check_neighbor_subdomains(isParamValid("included_neighbor_ids") ||
@@ -151,6 +155,11 @@ ParsedGenerateSideset::generate()
     _included_neighbor_ids = MooseMeshUtils::getSubdomainIDs(*mesh, subdomains);
   }
 
+  std::vector<boundary_id_type> restricted_boundary_ids;
+  if (_check_boundaries)
+    restricted_boundary_ids = MooseMeshUtils::getBoundaryIDs(
+        *mesh, getParam<std::vector<BoundaryName>>("included_boundaries"), true);
+
   // Get the BoundaryIDs from the mesh
   std::vector<boundary_id_type> boundary_ids =
       MooseMeshUtils::getBoundaryIDs(*mesh, {_sideset_name}, true);
@@ -191,13 +200,26 @@ ParsedGenerateSideset::generate()
       if (_check_normal && std::abs(1.0 - _normal * normals[0]) > _variance)
         continue;
 
+      // check that boundary is within the list of included boundaries
+      if (_check_boundaries)
+      {
+        bool in_included_boundaries = false;
+        for (auto bid : restricted_boundary_ids)
+          if (boundary_info.has_boundary_id(elem, side, bid))
+            in_included_boundaries = true;
+        if (!in_included_boundaries)
+          continue;
+      }
+
       // check expression
       std::unique_ptr<Elem> curr_side = elem->side_ptr(side);
       _func_params[0] = curr_side->vertex_average()(0);
       _func_params[1] = curr_side->vertex_average()(1);
       _func_params[2] = curr_side->vertex_average()(2);
       if (evaluate(_func_F))
+      {
         boundary_info.add_side(elem, side, boundary_ids[0]);
+      }
     }
   }
   finalize();

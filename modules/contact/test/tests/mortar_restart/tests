@@ -10,6 +10,7 @@
     requirement = 'The system shall be able to run a two-dimensional frictional model using the '
                   'contact action for mortar applications'
     valgrind = 'heavy'
+    method = '!dbg'
   []
   [frictional_bouncing_block_action_restart_2]
     type = 'Exodiff'
@@ -23,5 +24,6 @@
                   'be unused'
     prereq = 'frictional_bouncing_block_action_restart_1'
     valgrind = 'heavy'
+    method = '!dbg'
   []
 []

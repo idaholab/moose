@@ -1,18 +1,25 @@
 [Tests]
   issues = '#17472'
   design = 'source/kernels/lagrangian/UpdatedLagrangianStressDivergence.md'
-  [./L-large]
+  [L-large]
     type = CSVDiff
     input = 'large.i'
     csvdiff = 'large_out.csv'
-    requirement = "Quadratic convergence in 3D for PresetBCs on a complicated geometry for small deformations, SMP matches FDP."
+    requirement = "The system shall achieve quadratic convergence in 3D with preset Dirichlet "
+                  "displacement boundary conditions on a complicated geometry for small deformation, "
+                  "and the preconditioning for a single matrix shall match finite-difference "
+                  "preconditioning results."
     valgrind = HEAVY
-  [../]
-  [./L-small]
+    # For CI timing requirements
+    method = '!dbg'
+  []
+  [L-small]
     type = CSVDiff
     input = 'small.i'
     csvdiff = 'small_out.csv'
-    requirement = "Quadratic convergence in 3D for PresetBCs on a complicated geometry for large deformations, SMP matches FDP."
+    requirement = "The system shall achieve quadratic convergence in 3D with preset Dirichlet "
+                  "displacement boundary conditions for large deformation, and the preconditioning "
+                  "for a single matrix shall match finite-difference preconditioning results."
     valgrind = HEAVY
-  [../]
+  []
 []

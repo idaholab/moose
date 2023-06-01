@@ -117,9 +117,9 @@ void
 LeastSquaresFit::execute()
 {
   if (_x_values.size() != _y_values.size())
-    mooseError("In LeastSquresFit size of data in x_values and y_values must be equal");
+    mooseError("Size of data in x_values and y_values must be equal");
   if (_x_values.size() == 0)
-    mooseError("In LeastSquresFit size of data in x_values and y_values must be > 0");
+    mooseError("Size of data in x_values and y_values must be > 0");
 
   // Create a copy of _x_values that we can modify.
   std::vector<Real> x_values(_x_values.begin(), _x_values.end());

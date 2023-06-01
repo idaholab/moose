@@ -31,7 +31,7 @@ StorkTestApp::~StorkTestApp() {}
 void
 StorkTestApp::registerAll(Factory & f, ActionFactory & af, Syntax & s, bool use_test_objs)
 {
-  StorkApp::registerAll(f, af, s);
+  ModulesApp::registerAllObjects<StorkApp>(f, af, s);
   if (use_test_objs)
   {
     Registry::registerObjectsTo(f, {"StorkTestApp"});

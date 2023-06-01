@@ -95,11 +95,23 @@ protected:
   /// limitation: this approach does not currently support the growth of one crack front into two
   std::vector<dof_id_type> _crack_front_points;
 
+  /// Enum to for crack growth direction
+  enum class GrowthDirectionEnum
+  {
+    MAX_HOOP_STRESS,
+    FUNCTION
+  };
   /// The direction method for growing mesh at the front
-  std::string _growth_dir_method;
+  const GrowthDirectionEnum _growth_dir_method;
 
-  /// The speed method for growing mesh at the front
-  std::string _growth_speed_method;
+  /// Enum to for crack growth rate
+  enum class GrowthRateEnum
+  {
+    FATIGUE,
+    FUNCTION
+  };
+  /// The rate method for growing mesh at the front
+  const GrowthRateEnum _growth_rate_method;
 
   /// The structural mesh must be 3D only
   const unsigned int _elem_dim = 3;

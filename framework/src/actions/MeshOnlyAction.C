@@ -110,7 +110,26 @@ MeshOnlyAction::act()
           // be outputted to Exodus
           restrict_element_id_names = params.isParamValid("extra_element_ids_to_output");
           if (restrict_element_id_names)
+          {
             element_id_names = params.get<std::vector<std::string>>("extra_element_ids_to_output");
+            // Check which element id names actually are defined on the mesh, remove from
+            // element_id_names if they don't belong
+            for (auto it = element_id_names.begin(); it != element_id_names.end();)
+            {
+              // Erase contents of iterator and return iterator if element integer does not exist
+              if (!output_mesh.has_elem_integer(*it))
+              {
+                it = element_id_names.erase(it);
+                mooseWarning("Extra element id ",
+                             *it,
+                             " defined in Outputs/extra_element_ids_to_output "
+                             "is not defined on the mesh and will be ignored.");
+              }
+              // Increment iterator if element integer exists
+              else
+                ++it;
+            }
+          }
         }
         break;
       }
@@ -118,18 +137,11 @@ MeshOnlyAction::act()
 
     if (output_extra_ids)
     {
-      // Invoke ExodusII_IO_Helper to output extra element ids to Exodus file
-      auto & exio_helper = exio.get_exio_helper();
-
-      // Output empty timestep to Exodus file
-      int empty_timestep = 1;
-      Real default_time = 1.0;
-      exio_helper.write_timestep(empty_timestep, default_time);
-
       // Retrieve extra element id names and associated data
       const auto n_elem = output_mesh.n_elem();
       std::vector<std::string> eeid_vars;
-      std::vector<Number> eeid_soln(n_elem * n_eeid);
+      const auto n_eeid_to_output = restrict_element_id_names ? element_id_names.size() : n_eeid;
+      std::vector<Number> eeid_soln(n_elem * n_eeid_to_output);
       unsigned int soln_index = 0;
       for (unsigned int i = 0; i < n_eeid; i++)
       {
@@ -144,7 +156,7 @@ MeshOnlyAction::act()
           eeid_vars.push_back(output_mesh.get_elem_integer_name(i));
           for (const auto & elem : output_mesh.element_ptr_range())
           {
-            eeid_soln[soln_index] = elem->get_extra_integer(i);
+            eeid_soln[soln_index] = (int)elem->get_extra_integer(i);
             ++soln_index;
           }
         }
@@ -154,9 +166,17 @@ MeshOnlyAction::act()
       // `Outpus/extra_element_ids_to_output` are specified on the actual mesh
       if (eeid_vars.size() > 0)
       {
+        // Invoke ExodusII_IO_Helper to output extra element ids to Exodus file
+        auto & exio_helper = exio.get_exio_helper();
+
+        // Output empty timestep to Exodus file
+        int empty_timestep = 1;
+        Real default_time = 1.0;
+        exio_helper.write_timestep(empty_timestep, default_time);
+
         // Write extra element id data to Exodus file
         std::vector<std::set<subdomain_id_type>> vars_active_subdomains;
-        vars_active_subdomains.resize(n_eeid);
+        vars_active_subdomains.resize(n_eeid_to_output);
         exio_helper.initialize_element_variables(eeid_vars, vars_active_subdomains);
         exio_helper.write_element_values(
             output_mesh, eeid_soln, empty_timestep, vars_active_subdomains);

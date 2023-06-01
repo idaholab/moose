@@ -1,6 +1,6 @@
 # FunctorADConverter
 
-!syntax description /Materials/FunctorADConverter
+!syntax description /FunctorMaterials/FunctorADConverter
 
 Converting from AD to regular functors or vice versa can both lead to irremediable loss of
 derivative information when using the [automatic differentiation system](systems/NonlinearSystem.md#AD).
@@ -21,8 +21,8 @@ that only the conversion to an AD functor from a regular functor (from a regular
 
 !listing test/tests/materials/functor_properties/ad_conversion/1d_dirichlet.i block=Materials
 
-!syntax parameters /Materials/FunctorADConverter
+!syntax parameters /FunctorMaterials/FunctorADConverter
 
-!syntax inputs /Materials/FunctorADConverter
+!syntax inputs /FunctorMaterials/FunctorADConverter
 
-!syntax children /Materials/FunctorADConverter
+!syntax children /FunctorMaterials/FunctorADConverter

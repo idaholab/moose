@@ -1,5 +1,5 @@
 [Tests]
-  [./parsed_generate_sideset_test]
+  [parsed_generate_sideset_test]
     type = 'Exodiff'
     input = 'parsed_generate_sideset.i'
     cli_args = '--mesh-only'
@@ -10,9 +10,9 @@
     requirement = 'The system shall have the ability to assign mesh side sets based on parsed spatial functions.'
     design = 'meshgenerators/ParsedGenerateSideset.md'
     issues = '#11640'
-  [../]
+  []
 
-  [./parsed_generate_sideset_neighbor_sub_id_test]
+  [parsed_generate_sideset_neighbor_sub_id_test]
     type = 'Exodiff'
     input = 'parsed_generate_sideset_neighbor_sub_id.i'
     cli_args = '--mesh-only'
@@ -23,7 +23,19 @@
     requirement = 'The system shall have the ability to filter by neighboring subdomain id in ParsedGenerateSideset.'
     design = 'meshgenerators/ParsedGenerateSideset.md'
     issues = '#15651'
-  [../]
+  []
+
+  [limit_to_one_bid]
+    type = 'Exodiff'
+    input = 'parsed_generate_sideset_boundary_limited.i'
+    cli_args = '--mesh-only'
+    exodiff = 'parsed_generate_sideset_boundary_limited_in.e'
+    mesh_mode = 'REPLICATED'
+    recover = false
+    requirement = 'The system shall have the ability to assign mesh side sets based on parsed spatial functions, with a restriction on sides that are also part of another sideset.'
+    design = 'meshgenerators/ParsedGenerateSideset.md'
+    issues = '#24354'
+  []
 
   [invalid_included_subdomains]
     type = RunException

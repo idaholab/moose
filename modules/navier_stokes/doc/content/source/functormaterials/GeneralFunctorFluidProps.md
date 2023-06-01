@@ -1,6 +1,6 @@
 # GeneralFunctorFluidProps
 
-!syntax description /Materials/GeneralFunctorFluidProps
+!syntax description /FunctorMaterials/GeneralFunctorFluidProps
 
 ## Overview
 
@@ -31,8 +31,8 @@ and the pressure and temperature derivatives of the:
 - Prandtl number, $\text{Pr}$
 - pore Reynolds number $\text{Re}$
 
-!syntax parameters /Materials/GeneralFunctorFluidProps
+!syntax parameters /FunctorMaterials/GeneralFunctorFluidProps
 
-!syntax inputs /Materials/GeneralFunctorFluidProps
+!syntax inputs /FunctorMaterials/GeneralFunctorFluidProps
 
-!syntax children /Materials/GeneralFunctorFluidProps
+!syntax children /FunctorMaterials/GeneralFunctorFluidProps

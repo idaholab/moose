@@ -88,3 +88,6 @@ StrainEnergyDensityTempl<is_ad>::computeQpProperties()
             .doubleContraction((MetaPhysicL::raw_value(_mechanical_strain[_qp]))) /
         2.0;
 }
+
+template class StrainEnergyDensityTempl<false>;
+template class StrainEnergyDensityTempl<true>;

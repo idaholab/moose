@@ -1,6 +1,6 @@
 # ThermalDiffusivityFunctorMaterial
 
-!syntax description /Materials/ThermalDiffusivityFunctorMaterial
+!syntax description /FunctorMaterials/ThermalDiffusivityFunctorMaterial
 
 ## Overview
 
@@ -17,8 +17,8 @@ viscosity in momentum transport and the diffusion coefficient in species/mass
 transport. This object takes $k$, $\rho$, and $c_p$ as input functors and
 produces $\alpha$ as an output functor which will be evaluated on-demand.
 
-!syntax parameters /Materials/ThermalDiffusivityFunctorMaterial
+!syntax parameters /FunctorMaterials/ThermalDiffusivityFunctorMaterial
 
-!syntax inputs /Materials/ThermalDiffusivityFunctorMaterial
+!syntax inputs /FunctorMaterials/ThermalDiffusivityFunctorMaterial
 
-!syntax children /Materials/ThermalDiffusivityFunctorMaterial
+!syntax children /FunctorMaterials/ThermalDiffusivityFunctorMaterial

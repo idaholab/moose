@@ -82,7 +82,7 @@
     type = 'RunException'
     input = 'mesh_only_with_elem_ids.i'
     cli_args = '--mesh-only mesh_only_without_elem_ids_in.e Outputs/out/output_extra_element_ids=true Outputs/out/extra_element_ids_to_output="assembly_id"'
-    expect_err = "set to true but no extra element ids are being outputted."
+    expect_err = "assembly_id defined in Outputs/extra_element_ids_to_output is not defined on the mesh and will be ignored."
     recover = false
     method = '!dbg'
     issues = '#23386'

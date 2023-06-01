@@ -10,9 +10,9 @@
 #pragma once
 
 #include "ElementVectorPostprocessor.h"
-#include "CrackFrontDefinition.h"
 
 // Forward Declarations
+class CrackFrontDefinition;
 
 /**
  * This vectorpostprocessor computes the Interaction Integral, which is
@@ -87,8 +87,10 @@ protected:
   std::size_t _ndisp;
   /// Pointer to the crack front definition object
   const CrackFrontDefinition * const _crack_front_definition;
-  /// Whether to treat a 3D model as 2D for computation of fracture integrals
+  /// Whether to treat a model as 2D for computation of fracture integrals
   bool _treat_as_2d;
+  /// Is the crack defined by an XFEM cutter mesh
+  bool _using_mesh_cutter;
   /// Reference to the stress tensor computed by the material models
   const GenericMaterialProperty<RankTwoTensor, is_ad> & _stress;
   /// Reference to the strain tensor computed by the material models

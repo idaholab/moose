@@ -1,0 +1,51 @@
+[Tests]
+  design = 'MaterialFunctorConverter.md'
+  [scalar]
+    type = 'Exodiff'
+    input = 'conversion.i'
+    exodiff = 'conversion_exo.e'
+    requirement = "The system shall be able to convert functors to regular (using automatic "
+                  "differentiation or not) material properties."
+    issues = "#19420"
+  []
+  [face]
+    type = 'Exodiff'
+    input = 'conversion.i'
+    exodiff = 'conversion_face_exo.e'
+    cli_args = "Materials/convert_to_reg/boundary='primary0_interface left right' "
+               "Materials/convert_to_ad/boundary='primary0_interface left right' "
+               "Outputs/file_base=conversion_face_exo"
+    requirement = "The system shall be able to convert functors to regular (using automatic "
+                  "differentiation or not) boundary material properties."
+    issues = "#19420"
+  []
+  # Note: Functions are declared as real functors, even functions that return a vector.
+  # They are excluded from the conversions for now until we find a solution #24502
+  [vector]
+    type = 'Exodiff'
+    input = 'conversion_vec.i'
+    exodiff = 'conversion_vec_exo.e'
+    requirement = "The system shall be able to convert vector functors to regular vector material "
+                  "properties."
+    issues = "#19420"
+  []
+
+  [exception_checks]
+    requirement = 'The system shall error'
+    issues = '#19420'
+    [ad_and_regular]
+      type = RunException
+      input = conversion.i
+      cli_args = "Materials/convert_to_reg/ad_props_out='m1 m2 m3 m4'"
+      expect_err = 'We dont support converting functors to both regular and AD material properties'
+      detail = 'if the user requests conversions to both AD and regular material properties, as this is not supported,'
+    []
+    [wrong_size]
+      type = RunException
+      input = conversion.i
+      cli_args = "Materials/convert_to_reg/reg_props_out='m1 m2 m3'"
+      expect_err = 'The number of output properties must match the number of input functors'
+      detail = 'if the user inputs a different number of functors and material properties, as the conversion match one to one.'
+    []
+  []
+[]

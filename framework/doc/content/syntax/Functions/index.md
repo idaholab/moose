@@ -37,6 +37,20 @@ Check out `PiecewiseBilinear` to see how to update a function to support AD by
 using a templated `valueInternal()` function with virtual `value()` forwarders.
 
 
+### Functions as Functors
+
+Functions are [Functors](syntax/Functors/index.md). Functors are an abstraction, a base class, for
+objects that can compute values at a location in space and time.
+
+As `Functors`, they may be specified to objects such as the
+[FunctorElementalAux.md] in their [!param](/AuxKernels/FunctorElementalAux/functor) parameter. This vastly expands the number
+of objects that can use `Functions` to compute spatial quantities.
+
+!alert note
+When making a new object using `Functions` to contribute back to MOOSE,
+we ask that you consider using [Functors](syntax/Functors/index.md) instead
+to naturally enable its use with variables and functor material properties.
+
 !syntax list /Functions objects=True actions=False subsystems=False
 
 !syntax list /Functions objects=False actions=False subsystems=True
