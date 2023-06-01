@@ -102,7 +102,7 @@
     execute_on = 'INITIAL TIMESTEP_END'
   []
   [average_porosity]
-    type = ElementAverageMaterialProperty
+    type = ADElementAverageMaterialProperty
     mat_prop = porosity
     execute_on = 'INITIAL TIMESTEP_END'
   []

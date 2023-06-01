@@ -183,4 +183,6 @@ cd problems
 
 ## Decoupling Heat Equation
 
+Pressure is changed to a constant linearly varying auxiliary variable. We only solve for velocity
+
 !listing step06_coupled_darcy_heat_conduction/problems/step6c_decoupled.i

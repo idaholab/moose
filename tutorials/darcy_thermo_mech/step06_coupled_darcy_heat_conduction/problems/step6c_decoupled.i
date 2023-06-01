@@ -26,7 +26,7 @@
   [pressure]
     type = FunctionAux
     variable = pressure
-    function = 't*x*x*y'
+    function = '4000 - 3000 * x - 3000 * t*x*x*y'
     execute_on = timestep_end
   []
 []
