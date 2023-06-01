@@ -11,7 +11,7 @@ MOOSE_SUBMODULE    := $(CURDIR)/moose
 ifneq ($(wildcard $(MOOSE_SUBMODULE)/framework/Makefile),)
   MOOSE_DIR        ?= $(MOOSE_SUBMODULE)
 else
-  MOOSE_DIR        ?= $(shell dirname `pwd`)/moose
+  MOOSE_DIR        ?= $(shell dirname `pwd`)/../..
 endif
 
 # framework
