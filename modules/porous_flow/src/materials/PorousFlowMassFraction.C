@@ -38,9 +38,10 @@ PorousFlowMassFractionTempl<is_ad>::PorousFlowMassFractionTempl(const InputParam
                                      "PorousFlow_mass_frac_nodal")
                                : declareGenericProperty<std::vector<std::vector<Real>>, is_ad>(
                                      "PorousFlow_mass_frac_qp")),
-    _grad_mass_frac(_nodal_material ? nullptr
-                                    : &declareProperty<std::vector<std::vector<RealGradient>>>(
-                                          "PorousFlow_grad_mass_frac_qp")),
+    _grad_mass_frac(_nodal_material
+                        ? nullptr
+                        : &declareGenericProperty<std::vector<std::vector<RealGradient>>, is_ad>(
+                              "PorousFlow_grad_mass_frac_qp")),
     _dmass_frac_dvar(_nodal_material
                          ? &declareProperty<std::vector<std::vector<std::vector<Real>>>>(
                                "dPorousFlow_mass_frac_nodal_dvar")
@@ -77,7 +78,7 @@ PorousFlowMassFractionTempl<is_ad>::PorousFlowMassFractionTempl(const InputParam
     _mf_vars[i] =
         (_nodal_material && is_nodal ? &coupledGenericDofValue<is_ad>("mass_fraction_vars", i)
                                      : &coupledGenericValue<is_ad>("mass_fraction_vars", i));
-    _grad_mf_vars[i] = &coupledGradient("mass_fraction_vars", i);
+    _grad_mf_vars[i] = &coupledGenericGradient<is_ad>("mass_fraction_vars", i);
   }
 }
 
@@ -96,15 +97,24 @@ PorousFlowMassFractionTempl<is_ad>::computeQpProperties()
 {
   // size all properties correctly
   _mass_frac[_qp].resize(_num_phases);
-  (*_dmass_frac_dvar)[_qp].resize(_num_phases);
+
+  if (!is_ad)
+    (*_dmass_frac_dvar)[_qp].resize(_num_phases);
+
   if (!_nodal_material)
     (*_grad_mass_frac)[_qp].resize(_num_phases);
+
   for (unsigned int ph = 0; ph < _num_phases; ++ph)
   {
     _mass_frac[_qp][ph].resize(_num_components);
-    (*_dmass_frac_dvar)[_qp][ph].resize(_num_components);
-    for (unsigned int comp = 0; comp < _num_components; ++comp)
-      (*_dmass_frac_dvar)[_qp][ph][comp].assign(_num_var, 0.0);
+
+    if (!is_ad)
+    {
+      (*_dmass_frac_dvar)[_qp][ph].resize(_num_components);
+      for (unsigned int comp = 0; comp < _num_components; ++comp)
+        (*_dmass_frac_dvar)[_qp][ph][comp].assign(_num_var, 0.0);
+    }
+
     if (!_nodal_material)
       (*_grad_mass_frac)[_qp][ph].resize(_num_components);
   }
@@ -114,18 +124,22 @@ PorousFlowMassFractionTempl<is_ad>::computeQpProperties()
   for (unsigned int ph = 0; ph < _num_phases; ++ph)
   {
     GenericReal<is_ad> total_mass_frac = 0;
+
     if (!_nodal_material)
       (*_grad_mass_frac)[_qp][ph][_num_components - 1] = 0.0;
+
     for (unsigned int comp = 0; comp < _num_components - 1; ++comp)
     {
       _mass_frac[_qp][ph][comp] = (*_mf_vars[i])[_qp];
       total_mass_frac += _mass_frac[_qp][ph][comp];
+
       if (!_nodal_material)
       {
         (*_grad_mass_frac)[_qp][ph][comp] = (*_grad_mf_vars[i])[_qp];
         (*_grad_mass_frac)[_qp][ph][_num_components - 1] -= (*_grad_mf_vars[i])[_qp];
       }
-      if (_dictator.isPorousFlowVariable(_mf_vars_num[i]))
+
+      if (!is_ad && _dictator.isPorousFlowVariable(_mf_vars_num[i]))
       {
         // _mf_vars[i] is a PorousFlow variable
         const unsigned int pf_var_num = _dictator.porousFlowVariableNum(_mf_vars_num[i]);
@@ -134,6 +148,7 @@ PorousFlowMassFractionTempl<is_ad>::computeQpProperties()
       }
       i++;
     }
+
     _mass_frac[_qp][ph][_num_components - 1] = 1.0 - total_mass_frac;
   }
 }
