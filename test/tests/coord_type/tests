@@ -32,4 +32,12 @@
     cli_args = 'Problem/rz_coord_axis=X Outputs/file_base=coord_type_rz_integrated_x_rotation_out'
     requirement = "The system shall support cylindrical coordinates with the radial direction in the 'y' direction with discontinous Galkerin and integrated boundary conditions."
   [../]
+  [rz_general]
+    type = Exodiff
+    input = coord_type_rz_general.i
+    exodiff = coord_type_rz_general.e
+    requirement = "The system shall support cylindrical coordinates with a general axis."
+    design = 'Mesh/index.md'
+    issues = '#24339'
+  []
 []
