@@ -19,7 +19,7 @@ The structure is very similar to Kernels: objects must override `computeQpResidu
 
 !---
 
-## ADIntegrtedBC Object Members
+## ADIntegratedBC Object Members
 
 `_u`, `_grad_u`\\
 Value and gradient of the variable this Kernel is operating on

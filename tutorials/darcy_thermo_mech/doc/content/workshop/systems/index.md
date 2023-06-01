@@ -42,6 +42,10 @@
 
 !---
 
+!include executors.md end=!--
+
+!---
+
 !include functions.md end=!---
 
 !---
@@ -110,6 +114,10 @@
 
 !---
 
+!include positions.md end=!--
+
+!---
+
 !include postprocessors.md end=!--
 
 !---
@@ -127,6 +135,10 @@
 !---
 
 !include relationshipmanagers.md end=!---
+
+!---
+
+!include reporters.md end=!--
 
 !---
 

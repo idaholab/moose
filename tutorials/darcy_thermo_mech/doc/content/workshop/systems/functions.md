@@ -11,6 +11,8 @@ A `Function` object is created by inheriting from `Function` and overriding the 
 Functions can be accessed in most MOOSE objects by calling `getFunction("name")`,
 where "name" matches a name from the input file.
 
+A `Function` can depend an other functions, but not on material properties or variables.
+
 !---
 
 ## Function Use

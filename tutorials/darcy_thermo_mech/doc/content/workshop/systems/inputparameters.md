@@ -10,7 +10,10 @@ which every class contains.
 
 ## `validParams` Declaration
 
+In the class declaration,
 ```cpp
+public:
+...
 static InputParameters Convection::validParams();
 ```
 
@@ -54,7 +57,7 @@ Adds an input file parameter, of type `int`, that includes a default value of 19
 params.addParam<int>("year", 1980, "Provide the year you were born.");
 ```
 
-
+Here the default is overriden by a user-provided value
 ```text
 [UserObjects]
   [date_object]
@@ -91,8 +94,8 @@ Various types of objects in MOOSE support variable coupling, this is done using 
 `addCoupledVar` method.
 
 ```cpp
-params.addCoupledVar("temperature", "The temperature (C) of interest.");
-params.addCoupledVar("pressure", 101.325, "The pressure (kPa) of the atomsphere.");
+params.addRequiredCoupledVar("temperature", "The temperature (C) of interest.");
+params.addCoupledVar("pressure", 101.325, "The pressure (kPa) of the atmosphere.");
 ```
 
 ```text
@@ -103,7 +106,7 @@ params.addCoupledVar("pressure", 101.325, "The pressure (kPa) of the atomsphere.
 
 [UserObjects]
   [temp_pressure_check]
-    type = CheckTemperatureAndPressue
+    type = CheckTemperatureAndPressure
     temperature = T
     pressure = P # if not provided a value of 101.325 would be used
   []
