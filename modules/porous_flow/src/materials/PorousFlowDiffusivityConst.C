@@ -10,11 +10,13 @@
 #include "PorousFlowDiffusivityConst.h"
 
 registerMooseObject("PorousFlowApp", PorousFlowDiffusivityConst);
+registerMooseObject("PorousFlowApp", ADPorousFlowDiffusivityConst);
 
+template <bool is_ad>
 InputParameters
-PorousFlowDiffusivityConst::validParams()
+PorousFlowDiffusivityConstTempl<is_ad>::validParams()
 {
-  InputParameters params = PorousFlowDiffusivityBase::validParams();
+  InputParameters params = PorousFlowDiffusivityBaseTempl<is_ad>::validParams();
   params.addRequiredParam<std::vector<Real>>(
       "tortuosity", "List of tortuosities. Order is i) phase 0; ii) phase 1; etc");
   params.addClassDescription(
@@ -22,29 +24,38 @@ PorousFlowDiffusivityConst::validParams()
   return params;
 }
 
-PorousFlowDiffusivityConst::PorousFlowDiffusivityConst(const InputParameters & parameters)
-  : PorousFlowDiffusivityBase(parameters),
-    _input_tortuosity(getParam<std::vector<Real>>("tortuosity"))
+template <bool is_ad>
+PorousFlowDiffusivityConstTempl<is_ad>::PorousFlowDiffusivityConstTempl(
+    const InputParameters & parameters)
+  : PorousFlowDiffusivityBaseTempl<is_ad>(parameters),
+    _input_tortuosity(this->template getParam<std::vector<Real>>("tortuosity"))
 {
   // Check that the number of tortuosities entered is equal to the number of phases
   if (_input_tortuosity.size() != _num_phases)
-    paramError("tortuosity",
-               "The number of tortuosity values entered is not equal to the number of phases "
-               "specified in the Dictator");
+    this->template paramError(
+        "tortuosity",
+        "The number of tortuosity values entered is not equal to the number of phases "
+        "specified in the Dictator");
 
   // Check that all tortuosities are (0, 1]
   for (unsigned int i = 0; i < _num_phases; ++i)
     if (_input_tortuosity[i] <= 0.0 || _input_tortuosity[i] > 1)
-      paramError("tortuosity",
-                 "All tortuosities must be greater than zero and less than (or equal to) one"
-                 ".\nNote: the definition of tortuosity used is l/le, where l is the straight line "
-                 "length and le is the effective flow length");
+      this->template paramError(
+          "tortuosity",
+          "All tortuosities must be greater than zero and less than (or equal to) one"
+          ".\nNote: the definition of tortuosity used is l/le, where l is the straight line "
+          "length and le is the effective flow length");
 }
 
+template <bool is_ad>
 void
-PorousFlowDiffusivityConst::computeQpProperties()
+PorousFlowDiffusivityConstTempl<is_ad>::computeQpProperties()
 {
-  PorousFlowDiffusivityBase::computeQpProperties();
+  PorousFlowDiffusivityBaseTempl<is_ad>::computeQpProperties();
 
-  _tortuosity[_qp] = _input_tortuosity;
+  for (unsigned int ph = 0; ph < _num_phases; ++ph)
+    _tortuosity[_qp][ph] = _input_tortuosity[ph];
 }
+
+template class PorousFlowDiffusivityConstTempl<false>;
+template class PorousFlowDiffusivityConstTempl<true>;

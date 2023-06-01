@@ -12,16 +12,22 @@
 #include "PorousFlowDiffusivityBase.h"
 
 /// Material designed to provide constant tortuosity and diffusion coefficents
-class PorousFlowDiffusivityConst : public PorousFlowDiffusivityBase
+template <bool is_ad>
+class PorousFlowDiffusivityConstTempl : public PorousFlowDiffusivityBaseTempl<is_ad>
 {
 public:
   static InputParameters validParams();
 
-  PorousFlowDiffusivityConst(const InputParameters & parameters);
+  PorousFlowDiffusivityConstTempl(const InputParameters & parameters);
 
 protected:
   virtual void computeQpProperties() override;
 
   /// Input tortuosity
   const std::vector<Real> _input_tortuosity;
+
+  usingPorousFlowDiffusivityBaseMembers;
 };
+
+typedef PorousFlowDiffusivityConstTempl<false> PorousFlowDiffusivityConst;
+typedef PorousFlowDiffusivityConstTempl<true> ADPorousFlowDiffusivityConst;
