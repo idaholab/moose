@@ -40,7 +40,6 @@ The quadrature integration is often defined there, and users generally do not ne
 This is called internally within MOOSE to retrieve the final scalar value, the value returned by
 this function is referenced by all other objects that are using the postprocessor.
 
-!alert note
 Most Postprocessor base classes will already define these routines for you!
 
 !---

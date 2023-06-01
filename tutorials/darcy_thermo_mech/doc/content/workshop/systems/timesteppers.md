@@ -1,4 +1,4 @@
-#  [Time Stepper System](Executioners/TimeSteppers/index.md)
+#  [Time Stepper System](Executioner/TimeSteppers/index.md)
 
 A system for suggesting time steps for transient executioners.
 
@@ -52,7 +52,8 @@ inserted and the step is resolved.
 By default, the minimum of all the time steps computed by all the time steppers is used!
 
 What steps will be taken, starting at time = 0s?
-```
+
+```bash
 [TimeSteppers]
   [constant]
     type = ConstantDT

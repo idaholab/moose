@@ -52,7 +52,7 @@ MOOSE supports reading and writing a large number of formats and could be extend
 
 ## Generating Meshes in MOOSE
 
-Built-in mesh generation is implemented for lines, rectangles,  rectangular prisms or [extruded reactor geometries](modules/reactor/doc/content/modules/reactor/index.md).
+Built-in mesh generation is implemented for lines, rectangles,  rectangular prisms or [extruded reactor geometries](modules/reactor/doc/content/index.md).
 
 !listing initial_adaptivity_test.i block=Mesh
 
