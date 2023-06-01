@@ -13,7 +13,19 @@
       mesh_mode = 'REPLICATED'
       recover = false
 
-      detail = "by 'stitching' them together and"
+      detail = "by 'stitching' them together,"
+    []
+
+    [overlapping_bids]
+      type = 'Exodiff'
+      input = 'stitched_mesh_generator.i'
+      cli_args = '--mesh-only stitched_no_merging_ids.e'
+      exodiff = 'stitched_no_merging_ids.e'
+      exodiff_opts = '-pedantic'
+      mesh_mode = 'REPLICATED'
+      recover = false
+
+      detail = "by preventing boundary merging based on ids during stitching and"
     []
 
     [simulation]

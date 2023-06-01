@@ -29,6 +29,7 @@
     type = StitchedMeshGenerator
     inputs = 'copper_id brass_id'
     stitch_boundaries_pairs = 'front back'
+    prevent_boundary_ids_overlap = false
   []
 []
 
@@ -88,12 +89,12 @@
 
 [AuxKernels]
   [pk2]
-   type = RankTwoAux
-   variable = pk2
-   rank_two_tensor = second_piola_kirchhoff_stress
-   index_j = 2
-   index_i = 2
-   execute_on = timestep_end
+    type = RankTwoAux
+    variable = pk2
+    rank_two_tensor = second_piola_kirchhoff_stress
+    index_j = 2
+    index_i = 2
+    execute_on = timestep_end
   []
   [fp_zz]
     type = RankTwoAux
@@ -112,36 +113,36 @@
     execute_on = timestep_end
   []
   [gss_copper]
-   type = MaterialStdVectorAux
-   variable = copper_gss
-   property = copper_slip_resistance
-   index = 0
-   block = 0
-   execute_on = timestep_end
+    type = MaterialStdVectorAux
+    variable = copper_gss
+    property = copper_slip_resistance
+    index = 0
+    block = 0
+    execute_on = timestep_end
   []
   [slip_inc_copper]
-   type = MaterialStdVectorAux
-   variable = copper_slip_increment
-   property = copper_slip_increment
-   index = 0
-   block = 0
-   execute_on = timestep_end
+    type = MaterialStdVectorAux
+    variable = copper_slip_increment
+    property = copper_slip_increment
+    index = 0
+    block = 0
+    execute_on = timestep_end
   []
   [gss_brass]
-   type = MaterialStdVectorAux
-   variable = brass_gss
-   property = brass_slip_resistance
-   index = 0
-   block = 1
-   execute_on = timestep_end
+    type = MaterialStdVectorAux
+    variable = brass_gss
+    property = brass_slip_resistance
+    index = 0
+    block = 1
+    execute_on = timestep_end
   []
   [slip_inc_brass]
-   type = MaterialStdVectorAux
-   variable = brass_slip_increment
-   property = brass_slip_increment
-   index = 0
-   block = 1
-   execute_on = timestep_end
+    type = MaterialStdVectorAux
+    variable = brass_slip_increment
+    property = brass_slip_increment
+    index = 0
+    block = 1
+    execute_on = timestep_end
   []
 []
 
@@ -198,9 +199,9 @@
     type = ComputeElasticityTensorCP
     C_ijkl = '1.684e5 1.214e5 1.214e5 1.684e5 1.214e5 1.684e5 0.754e5 0.754e5 0.754e5'
     fill_method = symmetric9
-    euler_angle_1 =  0.0
+    euler_angle_1 = 0.0
     euler_angle_2 = 45.0
-    euler_angle_3 =  0.9
+    euler_angle_3 = 0.9
     base_name = brass
     block = 1
   []
@@ -232,8 +233,8 @@
     block = 1
   []
   [pk2]
-   type = ElementAverageValue
-   variable = pk2
+    type = ElementAverageValue
+    variable = pk2
   []
   [fp_zz]
     type = ElementAverageValue
@@ -249,9 +250,9 @@
     block = 0
   []
   [copper_slip_increment]
-   type = ElementAverageValue
-   variable = copper_slip_increment
-   block = 0
+    type = ElementAverageValue
+    variable = copper_slip_increment
+    block = 0
   []
   [brass_gss]
     type = ElementAverageValue
@@ -259,9 +260,9 @@
     block = 1
   []
   [brass_slip_increment]
-   type = ElementAverageValue
-   variable = brass_slip_increment
-   block = 1
+    type = ElementAverageValue
+    variable = brass_slip_increment
+    block = 1
   []
 []
 
