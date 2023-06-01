@@ -8095,3 +8095,14 @@ FEProblemBase::reinitMortarUserObjects(const BoundaryID primary_boundary_id,
     mortar_uo->reinit();
   }
 }
+
+void
+FEProblemBase::havePRefinement()
+{
+  for (auto & assembly_vecs : _assembly)
+    for (auto & assembly : assembly_vecs)
+      assembly->havePRefinement();
+
+  if (_displaced_problem)
+    _displaced_problem->havePRefinement();
+}

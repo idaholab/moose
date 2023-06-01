@@ -389,6 +389,7 @@ void
 Adaptivity::switchHToPRefinement()
 {
   _p_refinement_flag = true;
+  _fe_problem.havePRefinement();
 }
 
 #endif // LIBMESH_ENABLE_AMR

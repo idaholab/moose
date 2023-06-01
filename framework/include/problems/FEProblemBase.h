@@ -2102,6 +2102,11 @@ public:
    */
   void clearCurrentResidualVectorTags();
 
+  /**
+   * Indicate that we have p-refinement
+   */
+  void havePRefinement();
+
 protected:
   /// Create extra tagged vectors and matrices
   void createTagVectors();
