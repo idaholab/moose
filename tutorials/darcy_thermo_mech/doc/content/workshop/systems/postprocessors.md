@@ -1,4 +1,4 @@
-# Postprocessor System
+# [Postprocessor System](syntax/Postprocessors/index.md)
 
 A system for computing a "reduction" or "aggregation" calculation based on the solution variables
 that results in a +single+ scalar value.

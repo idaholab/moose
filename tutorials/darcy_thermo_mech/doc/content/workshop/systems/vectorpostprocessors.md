@@ -1,4 +1,4 @@
-# VectorPostprocessor System
+# [VectorPostprocessor System](syntax/VectorPostprocessors/index.md)
 
 A system for "reduction" or "aggregation" calculations based on the solution variables
 that results in one or many vectors of values.

@@ -17,7 +17,6 @@ Other mesh generators can work as long as they output a file format that libMesh
 
 Meshes in MOOSE are built or loaded using [MeshGenerators](syntax/Mesh/index.md).
 
-!alert note
 To only generate the mesh without running the simulation, you can pass `--mesh-only` on the command line.
 
 !---

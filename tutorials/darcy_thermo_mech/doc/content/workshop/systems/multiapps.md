@@ -1,4 +1,4 @@
-# MultiApp System
+# [MultiApp System](syntax/MultiApps/index.md)
 
 A system for performing multiple simulations within a main simulation.
 

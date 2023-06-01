@@ -1,4 +1,4 @@
-# Reporter System
+# [Reporter System](syntax/Reporters/index.md)
 
 An advanced system for postprocessing. It is based on a producer/consumer paradigm. Objects
 may produce reporters, which they declare to the Problem, and other objects may retrieve them from the Problem.

@@ -1,4 +1,4 @@
-# UserObject System
+# [UserObject System](syntax/UserObjects/index.md)
 
 A system for defining an arbitrary interface between MOOSE objects.
 
