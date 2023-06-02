@@ -9,6 +9,7 @@ import socket
 import subprocess
 import shutil
 import platform
+import getpass
 from datetime import datetime, timezone
 
 import jinja2
@@ -401,7 +402,7 @@ class ApptainerGenerator:
         if hasattr(self.args, 'modify') and self.args.modify is not None:
             name += '.modified'
         definition += f'    {name}.host.hostname {socket.gethostname()}\n'
-        definition += f'    {name}.host.user {os.getlogin()}\n'
+        definition += f'    {name}.host.user {getpass.getuser()}\n'
         definition += f'    {name}.moose.sha {self.git_repo_sha(MOOSE_DIR)}\n'
         definition += f'    {name}.version {self.tag}\n'
         # If we have CIVET info, add the url
