@@ -196,7 +196,7 @@ dataStore(std::ostream & stream, std::vector<T> & v, void * context)
 {
   // First store the size of the vector
   unsigned int size = v.size();
-  stream.write((char *)&size, sizeof(size));
+  dataStore(stream, size, nullptr);
 
   for (unsigned int i = 0; i < size; i++)
     storeHelper(stream, v[i], context);
@@ -226,7 +226,7 @@ dataStore(std::ostream & stream, std::set<T> & s, void * context)
 {
   // First store the size of the set
   unsigned int size = s.size();
-  stream.write((char *)&size, sizeof(size));
+  dataStore(stream, size, nullptr);
 
   typename std::set<T>::iterator it = s.begin();
   typename std::set<T>::iterator end = s.end();
@@ -244,7 +244,7 @@ dataStore(std::ostream & stream, std::list<T> & l, void * context)
 {
   // First store the size of the set
   unsigned int size = l.size();
-  stream.write((char *)&size, sizeof(size));
+  dataStore(stream, size, nullptr);
 
   typename std::list<T>::iterator it = l.begin();
   typename std::list<T>::iterator end = l.end();
@@ -262,7 +262,7 @@ dataStore(std::ostream & stream, std::deque<T> & l, void * context)
 {
   // First store the size of the container
   unsigned int size = l.size();
-  stream.write((char *)&size, sizeof(size));
+  dataStore(stream, size, nullptr);
 
   typename std::deque<T>::iterator it = l.begin();
   typename std::deque<T>::iterator end = l.end();
@@ -280,7 +280,7 @@ dataStore(std::ostream & stream, std::map<T, U> & m, void * context)
 {
   // First store the size of the map
   unsigned int size = m.size();
-  stream.write((char *)&size, sizeof(size));
+  dataStore(stream, size, nullptr);
 
   typename std::map<T, U>::iterator it = m.begin();
   typename std::map<T, U>::iterator end = m.end();
@@ -301,7 +301,7 @@ dataStore(std::ostream & stream, std::unordered_map<T, U> & m, void * context)
 {
   // First store the size of the map
   unsigned int size = m.size();
-  stream.write((char *)&size, sizeof(size));
+  dataStore(stream, size, nullptr);
 
   typename std::unordered_map<T, U>::iterator it = m.begin();
   typename std::unordered_map<T, U>::iterator end = m.end();
@@ -322,7 +322,7 @@ dataStore(std::ostream & stream, HashMap<T, U> & m, void * context)
 {
   // First store the size of the map
   unsigned int size = m.size();
-  stream.write((char *)&size, sizeof(size));
+  dataStore(stream, size, nullptr);
 
   typename HashMap<T, U>::iterator it = m.begin();
   typename HashMap<T, U>::iterator end = m.end();
@@ -412,7 +412,7 @@ void
 dataStore(std::ostream & stream, DenseVector<T> & v, void * context)
 {
   unsigned int m = v.size();
-  stream.write((char *)&m, sizeof(m));
+  dataStore(stream, m, nullptr);
   for (unsigned int i = 0; i < v.size(); i++)
   {
     T r = v(i);
@@ -478,6 +478,8 @@ inline void
 dataLoad(std::istream & stream, T & v, void * /*context*/)
 {
   stream.read((char *)&v, sizeof(v));
+  if (stream.tellg() == -1)
+    mooseError("dataLoad() failed to load");
 }
 
 template <typename T>
@@ -503,7 +505,7 @@ dataLoad(std::istream & stream, std::vector<T> & v, void * context)
 {
   // First read the size of the vector
   unsigned int size = 0;
-  stream.read((char *)&size, sizeof(size));
+  dataLoad(stream, size, nullptr);
 
   v.resize(size);
 
@@ -535,7 +537,7 @@ dataLoad(std::istream & stream, std::set<T> & s, void * context)
 {
   // First read the size of the set
   unsigned int size = 0;
-  stream.read((char *)&size, sizeof(size));
+  dataLoad(stream, size, nullptr);
 
   for (unsigned int i = 0; i < size; i++)
   {
@@ -551,7 +553,7 @@ dataLoad(std::istream & stream, std::list<T> & l, void * context)
 {
   // First read the size of the set
   unsigned int size = 0;
-  stream.read((char *)&size, sizeof(size));
+  dataLoad(stream, size, nullptr);
 
   for (unsigned int i = 0; i < size; i++)
   {
@@ -567,7 +569,7 @@ dataLoad(std::istream & stream, std::deque<T> & l, void * context)
 {
   // First read the size of the container
   unsigned int size = 0;
-  stream.read((char *)&size, sizeof(size));
+  dataLoad(stream, size, nullptr);
 
   for (unsigned int i = 0; i < size; i++)
   {
@@ -585,7 +587,7 @@ dataLoad(std::istream & stream, std::map<T, U> & m, void * context)
 
   // First read the size of the map
   unsigned int size = 0;
-  stream.read((char *)&size, sizeof(size));
+  dataLoad(stream, size, nullptr);
 
   for (unsigned int i = 0; i < size; i++)
   {
@@ -605,7 +607,7 @@ dataLoad(std::istream & stream, std::unordered_map<T, U> & m, void * context)
 
   // First read the size of the map
   unsigned int size = 0;
-  stream.read((char *)&size, sizeof(size));
+  dataLoad(stream, size, nullptr);
 
   for (unsigned int i = 0; i < size; i++)
   {
@@ -623,7 +625,7 @@ dataLoad(std::istream & stream, HashMap<T, U> & m, void * context)
 {
   // First read the size of the map
   unsigned int size = 0;
-  stream.read((char *)&size, sizeof(size));
+  dataLoad(stream, size, nullptr);
 
   for (unsigned int i = 0; i < size; i++)
   {
@@ -709,7 +711,7 @@ void
 dataLoad(std::istream & stream, DenseVector<T> & v, void * context)
 {
   unsigned int n = 0;
-  stream.read((char *)&n, sizeof(n));
+  dataLoad(stream, n, nullptr);
   v.resize(n);
   for (unsigned int i = 0; i < n; i++)
   {
