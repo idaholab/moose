@@ -1365,3 +1365,27 @@ MultiApp::position(unsigned int app) const
     // Find which Positions object is specifying it, and query a potentially updated value
     return _positions_objs[app]->getPosition(app - _positions_index_offsets[app], false);
 }
+
+void
+dataStore(std::ostream & stream, SubAppBackups & backups, void * context)
+{
+  MultiApp * multi_app = static_cast<MultiApp *>(context);
+  mooseAssert(multi_app, "Not set");
+
+  multi_app->backup();
+
+  for (const auto i : index_range(backups))
+    dataStore(stream, backups[i], context);
+}
+
+void
+dataLoad(std::istream & stream, SubAppBackups & backups, void * context)
+{
+  MultiApp * multi_app = static_cast<MultiApp *>(context);
+  mooseAssert(multi_app, "Not set");
+
+  for (const auto i : index_range(backups))
+    dataLoad(stream, backups[i], context);
+
+  multi_app->restore();
+}

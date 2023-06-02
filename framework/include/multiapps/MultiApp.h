@@ -612,32 +612,5 @@ protected:
   const PerfID _reset_timer;
 };
 
-template <>
-inline void
-dataStore(std::ostream & stream, SubAppBackups & backups, void * context)
-{
-  MultiApp * multi_app = static_cast<MultiApp *>(context);
-
-  multi_app->backup();
-
-  if (!multi_app)
-    mooseError("Error storing std::vector<Backup*>");
-
-  for (unsigned int i = 0; i < backups.size(); i++)
-    dataStore(stream, backups[i], context);
-}
-
-template <>
-inline void
-dataLoad(std::istream & stream, SubAppBackups & backups, void * context)
-{
-  MultiApp * multi_app = static_cast<MultiApp *>(context);
-
-  if (!multi_app)
-    mooseError("Error loading std::vector<Backup*>");
-
-  for (unsigned int i = 0; i < backups.size(); i++)
-    dataLoad(stream, backups[i], context);
-
-  multi_app->restore();
-}
+void dataStore(std::ostream & stream, SubAppBackups & backups, void * context);
+void dataLoad(std::istream & stream, SubAppBackups & backups, void * context);
