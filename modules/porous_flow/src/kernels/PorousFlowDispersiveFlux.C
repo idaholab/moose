@@ -85,7 +85,7 @@ PorousFlowDispersiveFlux::PorousFlowDispersiveFlux(const InputParameters & param
 
   if (_disp_trans.size() != _num_phases)
     paramError("disp_trans",
-               "The number of transverse dispersion coefficients disp_trans in is not equal to the "
+               "The number of transverse dispersion coefficients disp_trans is not equal to the "
                "number of phases");
 }
 
