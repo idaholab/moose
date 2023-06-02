@@ -258,6 +258,7 @@ RestartableDataIO::serializeRestartableData(const RestartableDataMap & restartab
     // Store the data separately, to be added later
     std::ostringstream data_stream;
     data->store(data_stream);
+    data_stream.seekp(0, std::ios::end);
 
     // Append data to the full block
     data_blk << data_stream.str();
@@ -298,6 +299,9 @@ RestartableDataIO::deserializeRestartableDataValue(RestartableDataValue & value,
 
   stream.seekg(data_entry.position);
   value.load(stream);
+
+  if (stream.tellg() == -1)
+    mooseError("Failed to load RestartableData '", value.name(), "' of type '", value.type(), "'");
 
   if ((data_entry.position + (std::streampos)data_entry.size) != stream.tellg())
     mooseError("Size mismatch for loading RestartableData '",
