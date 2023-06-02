@@ -19,7 +19,7 @@ Backup::Backup(const std::string & filename /* = "" */)
 std::stringstream &
 Backup::data(const THREAD_ID tid, const WriteKey)
 {
-  // Writing to _restartable_data invalidates this map
+  // Writing to _data invalidates this map
   _data_info_map[tid].clear();
   return _data[tid];
 }
