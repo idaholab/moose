@@ -1690,8 +1690,7 @@ MooseApp::libNameToAppName(const std::string & library_name) const
 }
 
 RestartableDataValue &
-MooseApp::registerRestartableData(const std::string & name,
-                                  std::unique_ptr<RestartableDataValue> data,
+MooseApp::registerRestartableData(std::unique_ptr<RestartableDataValue> data,
                                   THREAD_ID tid,
                                   bool read_only,
                                   const RestartableDataMapName & metaname)
@@ -1699,8 +1698,6 @@ MooseApp::registerRestartableData(const std::string & name,
   if (!metaname.empty() && tid != 0)
     mooseError(
         "The meta data storage for '", metaname, "' is not threaded, so the tid must be zero.");
-
-  mooseAssert(name == data->name(), "Inconsistent name");
 
   mooseAssert(metaname.empty() ||
                   _restartable_meta_data.find(metaname) != _restartable_meta_data.end(),
@@ -1710,7 +1707,7 @@ MooseApp::registerRestartableData(const std::string & name,
   auto & data_map =
       metaname.empty() ? _restartable_data[tid] : _restartable_meta_data[metaname].first;
 
-  RestartableDataValue * stored_data = data_map.findData(name);
+  RestartableDataValue * stored_data = data_map.findData(data->name());
   if (!stored_data)
     stored_data = &data_map.addData(std::move(data));
 
@@ -2616,7 +2613,7 @@ MooseApp::createRecoverablePerfGraph()
                                                    !getParam<bool>("disable_perf_graph_live"));
 
   return dynamic_cast<RestartableData<PerfGraph> &>(
-             registerRestartableData("perf_graph", std::move(perf_graph), 0, false))
+             registerRestartableData(std::move(perf_graph), 0, false))
       .set();
 }
 
@@ -2629,8 +2626,7 @@ MooseApp::createRecoverableSolutionInvalidity()
       std::make_unique<RestartableData<SolutionInvalidity>>("solution_invalidity", nullptr, *this);
 
   return dynamic_cast<RestartableData<SolutionInvalidity> &>(
-             registerRestartableData(
-                 "solution_invalidity", std::move(solution_invalidity), 0, false))
+             registerRestartableData(std::move(solution_invalidity), 0, false))
       .set();
 }
 

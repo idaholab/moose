@@ -602,14 +602,12 @@ public:
    * Register a piece of restartable data.  This is data that will get
    * written / read to / from a restart file.
    *
-   * @param name The full (unique) name.
    * @param data The actual data object.
    * @param tid The thread id of the object.  Use 0 if the object is not threaded.
    * @param read_only Restrict the data for read-only
    * @param metaname (optional) register the data to the meta data storage (tid must be 0)
    */
-  RestartableDataValue & registerRestartableData(const std::string & name,
-                                                 std::unique_ptr<RestartableDataValue> data,
+  RestartableDataValue & registerRestartableData(std::unique_ptr<RestartableDataValue> data,
                                                  THREAD_ID tid,
                                                  bool read_only,
                                                  const RestartableDataMapName & metaname = "");

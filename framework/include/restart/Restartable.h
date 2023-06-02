@@ -243,8 +243,7 @@ private:
   std::string _restartable_name;
 
   /// Helper function for actually registering the restartable data.
-  RestartableDataValue & registerRestartableDataOnApp(const std::string & name,
-                                                      std::unique_ptr<RestartableDataValue> data,
+  RestartableDataValue & registerRestartableDataOnApp(std::unique_ptr<RestartableDataValue> data,
                                                       THREAD_ID tid) const;
 
   /// Helper function for actually registering the restartable data.
@@ -314,7 +313,7 @@ Restartable::declareRestartableDataHelper(const std::string & data_name,
   auto data_ptr =
       std::make_unique<RestartableData<T>>(full_name, context, std::forward<Args>(args)...);
   auto & restartable_data_ref = static_cast<RestartableData<T> &>(
-      registerRestartableDataOnApp(full_name, std::move(data_ptr), _restartable_tid));
+      registerRestartableDataOnApp(std::move(data_ptr), _restartable_tid));
 
   return restartable_data_ref;
 }
