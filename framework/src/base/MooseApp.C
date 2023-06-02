@@ -1708,7 +1708,17 @@ MooseApp::registerRestartableData(std::unique_ptr<RestartableDataValue> data,
       metaname.empty() ? _restartable_data[tid] : _restartable_meta_data[metaname].first;
 
   RestartableDataValue * stored_data = data_map.findData(data->name());
-  if (!stored_data)
+  if (stored_data)
+  {
+    if (data->typeId() != stored_data->typeId())
+      mooseError("Type mismatch found in RestartableData registration of '",
+                 data->name(),
+                 "'\n\n  Stored type: ",
+                 stored_data->type(),
+                 "\n  New type: ",
+                 data->type());
+  }
+  else
     stored_data = &data_map.addData(std::move(data));
 
   if (!read_only)
