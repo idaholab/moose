@@ -170,6 +170,11 @@ public:
   virtual ~Node();
   void remove();
 
+#ifdef WASP_ENABLED
+  /// getNodeView returns a copy of the underlying wasp::HITNodeView wrapped by this Node
+  wasp::HITNodeView getNodeView();
+#endif
+
   /// type returns the type of the node (e.g. one of Field, Section, Comment, etc.)
   NodeType type();
   /// path returns this node's local/direct contribution its full hit path.  For section nodes, this
@@ -188,6 +193,8 @@ public:
   /// line returns the line number of the original parsed input (file) that contained the start of
   /// the content that this node was built from.
   int line();
+  /// column returns the starting column number of this node in the original parsed input
+  int column();
   /// name returns the file name of the original parsed input (file) that contained the start of
   /// the content that this node was built from.
   const std::string & filename();

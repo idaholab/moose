@@ -235,6 +235,14 @@ Node::remove()
   delete this;
 }
 
+#ifdef WASP_ENABLED
+wasp::HITNodeView
+Node::getNodeView()
+{
+  return _hnv;
+}
+#endif
+
 const std::string &
 Node::filename()
 {
@@ -256,6 +264,18 @@ Node::line()
 #else
   if (_toks.size() > 0)
     return _toks[0].line;
+  return 0;
+#endif
+}
+
+int
+Node::column()
+{
+#ifdef WASP_ENABLED
+  return _hnv.column();
+#else
+  if (_toks.size() > 0)
+    return _toks[0].column;
   return 0;
 #endif
 }
