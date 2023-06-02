@@ -22,7 +22,7 @@
 #include <typeinfo>
 
 // Forward declarations
-class FEProblemBase;
+class RestartableDataMap;
 
 /**
  * Class for doing restart.

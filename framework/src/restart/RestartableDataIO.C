@@ -7,13 +7,10 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-// MOOSE includes
 #include "RestartableDataIO.h"
 
-#include "Backup.h"
-#include "FEProblem.h"
+#include "RestartableDataMap.h"
 #include "MooseApp.h"
-#include "MooseUtils.h"
 #include "DataIO.h"
 
 #include <stdio.h>
