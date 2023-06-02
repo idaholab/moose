@@ -205,7 +205,7 @@ simple action, then the Jacobian was not good and it needs to be fixed.
 
 A more advanced check, and part of the process to fix the Jacobian, is to use the
 [Jacobian analysis utilities](development/analyze_jacobian.md). These will point out inaccurate or missing terms
-in the Jacobian. They can diagnose missing variable coupling terms for example. Once the errors have been identified,
+in the Jacobian. They can diagnose missing variable coupling terms for example. Jacobian deficiencies for small problems may also be investigated from the command line using the PETSc options `-snes_test_jacobian -snes_test_jacobian_view`. Combined with [DOFMapOutput.md] output, this can be similarly used to diagnose problematic areas of the Jacobian. Once the errors have been identified,
 it is time to find a pen and paper and re-derive the Jacobian from the weak form of the equations. Either that, or use
 [automatic differentiation (AD)](automatic_differentiation/index.md).
 
@@ -257,6 +257,10 @@ But the memory cost will increase linearly with that number.
 Any zero eigenvalue will pose the same problem as a zero singular value.
 The size and values of eigenvalues will help you understand which preconditioner are likely to work, based on whether
 the problem is elliptic, parabolic or hyperbolic.
+
+### Inaccurate Jacobian action
+
+When using PJFNK with a noisy residual function, the Jacobian action computed via finite differencing of the residuals may be inaccurate. One may use the PETSc command line option `-ksp_monitor_true_residual` to see whether the true residual measured via Ax - b is decreasing (as opposed to the residual generated during GMRES iterations). If the GMRES residual is dropping but the true residual is not, then variables may need to be better scaled. Additionally the user may experiment with the `-mat_mffd_err` parameter. The default value is around 1e-8; however, values nearer 1e-6 or 1e-5 may be better for noisy functions in which a larger differencing may be necessary to cut through the noise.
 
 ### Parallelism issues id=parallel
 
