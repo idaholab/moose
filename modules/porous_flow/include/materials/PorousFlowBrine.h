@@ -45,6 +45,9 @@ protected:
   /// Water fluid properties UserObject
   const SinglePhaseFluidProperties * _water_fp;
 
+  /// Flag for nodal NaCl mass fraction
+  const bool _is_xnacl_nodal;
+
   /// NaCl mass fraction at the qps or nodes
   const VariableValue & _xnacl;
 };

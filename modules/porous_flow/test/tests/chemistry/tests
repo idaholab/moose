@@ -1,183 +1,305 @@
 [Tests]
-  [./except1]
+  [except1]
     type = RunException
     input = except1.i
     expect_err = 'PorousFlowMassFractionAqueousEquilibriumChemistry: The number of secondary activity coefficients is 1 which must be equal to the number of secondary species \(2\)'
     threading = '!pthreads'
-  [../]
-  [./except2]
+    requirement = "The system shall produce an error if the number of secondary activity coefficients is not equal to the number of secondary species."
+    issues = "#10847"
+    design = 'PorousFlowMassFractionAqueousEquilibriumChemistry.md'
+  []
+  [except2]
     type = RunException
     input = except2.i
     expect_err = 'The Dictator proclaims that the number of phases is 2 whereas PorousFlow1PhaseFullySaturated can only be used for 1-phase simulations. Be aware that the Dictator has noted your mistake.'
     threading = '!pthreads'
-  [../]
-  [./except3]
+    requirement = "The system shall produce an error if more than one phase is supplied to for a saturated geochemistry system."
+    issues = "#10847"
+    design = 'PorousFlowMassFractionAqueousEquilibriumChemistry.md'
+  []
+  [except3]
     type = RunException
     input = except3.i
     expect_err = 'This value must be equal to the Dictator\'s num_phases \(1\) multiplied by num_components-1 \(1\)'
     threading = '!pthreads'
-  [../]
-  [./except5]
+    requirement = "The system shall produce an error if the number of mass fractions supplied is not correct."
+    issues = "#10847"
+    design = 'PorousFlowMassFractionAqueousEquilibriumChemistry.md'
+  []
+  [except5]
     type = RunException
     input = except5.i
     expect_err = 'PorousFlowMassFractionAqueousEquilibriumChemistry: The number of equilibrium constants is 1 which must be equal to the number of reactions \(2\)'
     threading = '!pthreads'
-  [../]
-  [./except6]
+    requirement = "The system shall produce an error if the number of equilibrium constants is not equal to the number of reactions."
+    issues = "#10847"
+    design = 'PorousFlowMassFractionAqueousEquilibriumChemistry.md'
+  []
+  [except6]
     type = RunException
     input = except6.i
     expect_err = 'PorousFlowMassFractionAqueousEquilibriumChemistry: The number of primary activity coefficients is 1 which must be equal to the number of primary species \(2\)'
     threading = '!pthreads'
-  [../]
-  [./except7]
+    requirement = "The system shall produce an error if the number of activity coefficients is not equal to the number of primary species."
+    issues = "#10847"
+    design = 'PorousFlowMassFractionAqueousEquilibriumChemistry.md'
+  []
+  [except7]
     type = RunException
     input = except7.i
     expect_err = 'PorousFlowMassFractionAqueousEquilibriumChemistry: The number of stoichiometric coefficients specified in \'reactions\' \(2\) must be equal to the number of reactions \(2\) multiplied by the number of primary species \(2\)'
     threading = '!pthreads'
-  [../]
-  [./except8]
+    requirement = "The system shall produce an error if the number of stoichiometric coefficients is not equal to the product of the number of reactions and number of primary species."
+    issues = "#10847"
+    design = 'PorousFlowMassFractionAqueousEquilibriumChemistry.md'
+  []
+  [except8]
     type = RunException
     input = except8.i
     expect_err = 'PorousFlowAqueousPreDisChemistry: The number of specific reactive surface areas provided is 2 which must be equal to the number of reactions \(1\)'
     threading = '!pthreads'
-  [../]
-  [./except9]
+    requirement = "The system shall produce an error if the number of reactive surface areas is not equal to the number of reactions."
+    issues = "#10847"
+    design = 'PorousFlowAqueousPreDisChemistry.md'
+  []
+  [except9]
     type = RunException
     input = except9.i
     expect_err = 'PorousFlowAqueousPreDisChemistry: The number of kinetic rate constants is 2 which must be equal to the number of reactions \(1\)'
     threading = '!pthreads'
-  [../]
-  [./except10]
+    requirement = "The system shall produce an error if the number of kinetic rate constants is not equal to the number of reactions."
+    issues = "#10847"
+    design = 'PorousFlowAqueousPreDisChemistry.md'
+  []
+  [except10]
     type = RunException
     input = except10.i
     expect_err = 'PorousFlowAqueousPreDisChemistry: The number of activation energies is 2 which must be equal to the number of reactions \(1\)'
     threading = '!pthreads'
-  [../]
-  [./except11]
+    requirement = "The system shall produce an error if the number of activation energies is not equal to the number of reactions."
+    issues = "#10847"
+    design = 'PorousFlowAqueousPreDisChemistry.md'
+  []
+  [except11]
     type = RunException
     input = except11.i
     expect_err = 'PorousFlowAqueousPreDisChemistry: The number of molar volumes is 2 which must be equal to the number of reactions \(1\)'
     threading = '!pthreads'
-  [../]
-  [./except12]
+    requirement = "The system shall produce an error if the number of molar volumes is not equal to the number of reactions."
+    issues = "#10847"
+    design = 'PorousFlowAqueousPreDisChemistry.md'
+  []
+  [except12]
     type = RunException
     input = except12.i
     expect_err = 'PorousFlowAqueousPreDisChemistry: The number of theta exponents is 2 which must be equal to the number of reactions \(1\)'
     threading = '!pthreads'
-  [../]
-  [./except13]
+    requirement = "The system shall produce an error if the number of theta exponents is not equal to the number of reactions."
+    issues = "#10847"
+    design = 'PorousFlowAqueousPreDisChemistry.md'
+  []
+  [except13]
     type = RunException
     input = except13.i
     expect_err = 'PorousFlowAqueousPreDisChemistry: The number of eta exponents is 2 which must be equal to the number of reactions \(1\)'
     threading = '!pthreads'
-  [../]
-  [./except14]
+    requirement = "The system shall produce an error if the number of eta exponents is not equal to the number of reactions."
+    issues = "#10847"
+    design = 'PorousFlowAqueousPreDisChemistry.md'
+  []
+  [except14]
     type = RunException
     input = except14.i
     expect_err = 'PorousFlowAqueousPreDisMineral: The number of initial concentrations is 2 but the Dictator knows that the number of aqueous kinetic \(precipitation-dissolution\) reactions is 1'
     threading = '!pthreads'
-  [../]
-  [./except15]
+    requirement = "The system shall produce an error if the number of initial concentrations is not equal to the number of kinetic reactions."
+    issues = "#10847"
+    design = 'PorousFlowAqueousPreDisMineral.md'
+  []
+  [except15]
     type = RunException
     input = except15.i
     expect_err = 'The Dictator proclaims that the number of precipitation-dissolution secondary species in this simulation is 1 whereas you have provided 2. The Dictator does not take such mistakes lightly'
     threading = '!pthreads'
-  [../]
-  [./except16]
+    requirement = "The system shall produce an error if the number of mineral secondary species is not equal to the number of kinetic reactions."
+    issues = "#10847"
+    design = 'PorousFlowPreDis.md'
+  []
+  [except16]
     type = RunException
     input = except16.i
     expect_err = 'The Dictator proclaims that the number of precipitation-dissolution secondary species in this simulation is 1 whereas you have provided 2. The Dictator does not take such mistakes lightly'
     threading = '!pthreads'
-  [../]
-  [./except17]
+    requirement = "The system shall produce an error if the number of stoichiometric coefficients is not equal to the number of kinetic reactions."
+    issues = "#10847"
+    design = 'PorousFlowPreDis.md'
+  []
+  [except17]
     type = RunException
     input = except17.i
     expect_err = 'PorousFlowMassFractionAqueousEquilibriumChemistry: You have specified the number of reactions to be 2 but the Dictator knows that the number of aqueous equilibrium reactions is 0'
     threading = '!pthreads'
-  [../]
-  [./except18]
+    requirement = "The system shall produce an error if the number of equilibrium reactions specified is not equal to the actual number of reactions in the system."
+    issues = "#10847"
+    design = 'PorousFlowMassFractionAqueousEquilibriumChemistry.md'
+  []
+  [except18]
     type = RunException
     input = except18.i
     expect_err = 'PorousFlowAqueousPreDisChemistry: You have specified the number of reactions to be 1 but the Dictator knows that the number of aqueous kinetic \(precipitation-dissolution\) reactions is 0'
     threading = '!pthreads'
-  [../]
-  [./except19]
+    requirement = "The system shall produce an error if the number of kinetic reactions specified is not equal to the actual number of reactions in the system."
+    issues = "#10847"
+    design = 'PorousFlowAqueousPreDisChemistry.md'
+  []
+  [except19]
     type = RunException
     input = except19.i
     expect_err = 'PorousFlowPorosity: When chemical=true you must provide the initial_mineral_concentrations.  The Dictator proclaims there should be 1 of these'
     threading = '!pthreads'
-  [../]
-  [./except20]
+    requirement = "The system shall produce an error if no initial mineral concentration is supplied when porosity depends on chemistry."
+    issues = "#10847 #11049"
+    design = 'PorousFlowPorosity.md'
+  []
+  [except20]
     type = RunException
     input = except20.i
     expect_err = 'PorousFlowPorosity: When chemical=true you must provide the reference_chemistry values.  The Dictator proclaims there should be 1 of these'
     threading = '!pthreads'
-  [../]
-  [./except21]
+    requirement = "The system shall produce an error if no reference chemical values are supplied when porosity depends on chemistry."
+    issues = "#10847 #11049"
+    design = 'PorousFlowPorosity.md'
+  []
+  [except21]
     type = RunException
     input = except21.i
     expect_err = 'PorousflowDictator: The aqueous phase number must be less than the number of fluid phases.  The Dictator does not appreciate jokes.'
     threading = '!pthreads'
-  [../]
-  [./except22]
+    requirement = "The system shall produce an error if the aqueous phase number is not less than the number of phases."
+    issues = "#10847"
+    design = 'PorousFlowDictator.md'
+  []
+  [except22]
     type = RunException
     input = except22.i
     expect_err = 'PorousFlowAqueousPreDisChemistry: The number of fluid phases must not be zero'
     threading = '!pthreads'
-  [../]
-
-  [./precipitation]
+    requirement = "The system shall produce an error if no fluid phases are present."
+    issues = "#10847"
+    design = 'PorousFlowAqueousPreDisChemistry.md'
+  []
+  [precipitation]
     type = CSVDiff
     input = precipitation.i
     csvdiff = precipitation_out.csv
     threading = '!pthreads'
-  [../]
-  [./precipitation_porosity_change]
+    requirement = "The system shall be able to calculate mineral precipitation using a kinetic reaction."
+    issues = "#10847"
+    design = 'PorousFlowAqueousPreDisMineral.md'
+  []
+  [precipitation_porosity_change]
     type = CSVDiff
     input = precipitation_porosity_change.i
     csvdiff = precipitation_porosity_change_out.csv
     threading = '!pthreads'
-  [../]
-  [./dissolution]
+    requirement = "The system shall be able to calculate the porosity change due to mineral precipitation using a kinetic reaction."
+    issues = "#10847"
+    design = 'PorousFlowAqueousPreDisMineral.md PorousFlowPorosity.md'
+  []
+  [dissolution]
     type = CSVDiff
     input = dissolution.i
     csvdiff = dissolution_out.csv
     threading = '!pthreads'
-  [../]
-  [./dissolution_limited]
+    requirement = "The system shall be able to calculate mineral dissolution using a kinetic reaction."
+    issues = "#10847"
+    design = 'PorousFlowAqueousPreDisMineral.md'
+  []
+  [dissolution_monomial]
+    type = CSVDiff
+    input = dissolution.i
+    csvdiff = dissolution_out.csv
+    threading = '!pthreads'
+    prereq = 'dissolution'
+    cli_args = 'AuxVariables/ini_mineral_conc/family=MONOMIAL AuxVariables/ini_mineral_conc/order=CONSTANT'
+    requirement = "The system shall be able to calculate mineral dissolution using a kinetic reaction when the initial mineral concentration is an elemental AuxVariable."
+    issues = "#10847 #24381"
+    design = 'PorousFlowAqueousPreDisMineral.md'
+  []
+  [dissolution_limited]
     type = CSVDiff
     input = dissolution_limited.i
     csvdiff = dissolution_limited_out.csv
     threading = '!pthreads'
-  [../]
-  [./2species_equilibrium]
+    requirement = "The system shall be able to calculate mineral dissolution using a kinetic reaction when the initial mineral concentration is limited."
+    issues = "#10847"
+    design = 'PorousFlowAqueousPreDisMineral.md'
+  []
+  [2species_equilibrium]
     type = Exodiff
     input = 2species_equilibrium.i
     exodiff = 2species_equilibrium_out.e
     threading = '!pthreads'
-  [../]
-  [./2species_predis]
+    requirement = "The system shall be able to calculate the equilibrium reaction of multiple species."
+    issues = "#10847"
+    design = 'PorousFlowMassFractionAqueousEquilibriumChemistry.md'
+  []
+  [2species_equilibrium_monomial]
+    type = Exodiff
+    input = 2species_equilibrium.i
+    prereq = 2species_equilibrium
+    cli_args = 'AuxVariables/eqm_k0/family=MONOMIAL AuxVariables/eqm_k0/order=CONSTANT'
+    exodiff = 2species_equilibrium_out.e
+    threading = '!pthreads'
+    requirement = "The system shall be able to calculate the equilibrium reaction of multiple species when the equilibrium constant is a monomial AuxVariable."
+    issues = "#10847 #24381"
+    design = 'PorousFlowMassFractionAqueousEquilibriumChemistry.md'
+  []
+  [2species_predis]
     type = Exodiff
     input = 2species_predis.i
     exodiff = 2species_predis_out.e
     threading = '!pthreads'
-  [../]
-  [./precipitation_2phase]
+    requirement = "The system shall be able to calculate mineral precipitation using a kinetic reaction."
+    issues = "#10847"
+    design = 'PorousFlowAqueousPreDisChemistry.md'
+  []
+  [2species_predis_monomial]
+    type = Exodiff
+    input = 2species_predis.i
+    cli_args = 'AuxVariables/eqm_k/family=MONOMIAL AuxVariables/eqm_k/order=CONSTANT'
+    exodiff = 2species_predis_out.e
+    threading = '!pthreads'
+    prereq = '2species_predis'
+    requirement = "The system shall be able to calculate mineral precipitation using a kinetic reaction when the equilibrium constant is a monomial AuxVariable."
+    issues = "#10847 #24381"
+    design = 'PorousFlowAqueousPreDisChemistry.md'
+  []
+  [precipitation_2phase]
     type = CSVDiff
     input = precipitation_2phase.i
     csvdiff = precipitation_2phase_out.csv
     threading = '!pthreads'
-  [../]
-  [./dissolution_limited_2phase]
+    requirement = "The system shall be able to calculate mineral precipitation using a kinetic reaction for a two-phase system."
+    issues = "#10847"
+    design = 'PorousFlowAqueousPreDisChemistry.md'
+  []
+  [dissolution_limited_2phase]
     type = CSVDiff
     input = dissolution_limited_2phase.i
     csvdiff = dissolution_limited_2phase_out.csv
     threading = '!pthreads'
-  [../]
-  [./2species_equilibrium_2phase]
+    requirement = "The system shall be able to calculate mineral dissolution using a kinetic reaction for a two-phase system when the amount of mineral is limited."
+    issues = "#10847"
+    design = 'PorousFlowAqueousPreDisChemistry.md'
+  []
+  [2species_equilibrium_2phase]
     type = Exodiff
     input = 2species_equilibrium_2phase.i
     exodiff = 2species_equilibrium_2phase_out.e
     threading = '!pthreads'
-  [../]
+    requirement = "The system shall be able to calculate the equilibrium reaction of multiple species for a two-phase system."
+    issues = "#10847"
+    design = 'PorousFlowMassFractionAqueousEquilibriumChemistry.md'
+  []
 []

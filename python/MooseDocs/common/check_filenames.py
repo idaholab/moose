@@ -17,6 +17,8 @@ def check_filenames(filename):
     Inputs:
         filename[str]: The filename to search.
     """
+    if filename == '':
+        raise exceptions.MooseDocsException("Empty file name")
     filenames = project_find(filename)
     if len(filenames) == 0:
         msg = "{} does not exist in the repository. The command 'git ls-files' is used for " \
@@ -25,8 +27,12 @@ def check_filenames(filename):
         raise exceptions.MooseDocsException(msg, filename)
     elif len(filenames) > 1:
         msg = "Multiple files located with matching name '{}':\n".format(filename)
-        for f in filenames:
-            msg += '    {}\n'.format(f)
+        for i, f in enumerate(filenames):
+            if (i < 20):
+                msg += '    {}\n'.format(f)
+            else:
+                msg += 'Truncated\n'
+                break
         raise exceptions.MooseDocsException(msg)
     else:
         filename = filenames[0]

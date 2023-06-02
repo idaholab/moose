@@ -217,8 +217,16 @@ PorousFlowAqueousPreDisChemistry::PorousFlowAqueousPreDisChemistry(
   }
 
   for (unsigned i = 0; i < _num_equilibrium_constants; ++i)
-    _equilibrium_constants[i] = (_nodal_material ? &coupledDofValues("equilibrium_constants", i)
-                                                 : &coupledValue("equilibrium_constants", i));
+  {
+    // If equilibrium_constants are elemental AuxVariables (or constants), we want to use
+    // coupledGenericValue() rather than coupledGenericDofValue()
+    const bool is_nodal =
+        isCoupled("equilibrium_constants") ? getVar("equilibrium_constants", i)->isNodal() : false;
+
+    _equilibrium_constants[i] =
+        (_nodal_material && is_nodal ? &coupledDofValues("equilibrium_constants", i)
+                                     : &coupledValue("equilibrium_constants", i));
+  }
 }
 
 void

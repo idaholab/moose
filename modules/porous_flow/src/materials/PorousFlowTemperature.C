@@ -32,8 +32,10 @@ PorousFlowTemperatureTempl<is_ad>::PorousFlowTemperatureTempl(const InputParamet
   : PorousFlowMaterial(parameters),
 
     _num_pf_vars(_dictator.numVariables()),
-    _temperature_var(_nodal_material ? coupledGenericDofValue<is_ad>("temperature")
-                                     : coupledGenericValue<is_ad>("temperature")),
+    _is_temp_nodal(isCoupled("temperature") ? getVar("temperature", 0)->isNodal() : false),
+    _temperature_var(_nodal_material && _is_temp_nodal
+                         ? coupledGenericDofValue<is_ad>("temperature")
+                         : coupledGenericValue<is_ad>("temperature")),
     _grad_temperature_var(_nodal_material ? nullptr : &coupledGradient("temperature")),
     _temperature_is_PF(_dictator.isPorousFlowVariable(coupled("temperature"))),
     _t_var_num(_temperature_is_PF ? _dictator.porousFlowVariableNum(coupled("temperature")) : 0),

@@ -58,8 +58,8 @@ PorousFlowBrine::PorousFlowBrine(const InputParameters & parameters)
                                                "PorousFlow_fluid_phase_enthalpy_qp" + _phase,
                                                _mass_fraction_variable_name))
                       : nullptr),
-
-    _xnacl(_nodal_material ? coupledDofValues("xnacl") : coupledValue("xnacl"))
+    _is_xnacl_nodal(isCoupled("xnacl") ? getVar("xnacl", 0)->isNodal() : false),
+    _xnacl(_nodal_material && _is_xnacl_nodal ? coupledDofValues("xnacl") : coupledValue("xnacl"))
 {
   if (parameters.isParamSetByUser("water_fp"))
   {

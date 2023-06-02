@@ -45,6 +45,9 @@ protected:
   /// Multicomponent fluid properties UserObject
   const MultiComponentFluidProperties & _fp;
 
+  /// Flag for nodal mass fraction
+  const bool _is_X_nodal;
+
   /// Mass fraction variable
   const GenericVariableValue<is_ad> & _X;
 

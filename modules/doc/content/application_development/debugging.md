@@ -1,5 +1,10 @@
 # Debugging
 
+!alert note title=It's not always due to a bug!
+Troubleshooting documentation may be found on [this page for convergence issues](failed_solves.md) and
+[this page for simulation workflow / other resources](/Debug/index.md). User troubleshooting
+is more appropriate than debugging in most cases, especially if the 'bug' is in the input file!
+
 At some point while developing a MOOSE-based application you will probably need to use a debugger.  A debugger will allow you to stop your program at certain points (or if things happen such as a memory segfault).  Once stopped you can then carefully step through the program, inspecting variable values as you go in order to find the source of the problem.
 
 In particular, if you ever see a "Segfault" or a "Signal 11" that means it's time to pull out the debugger.  Any debugger will automatically stop once a segfault is reached, showing you exactly where the invalid memory access occurred.
@@ -36,7 +41,7 @@ With our MOOSE package on Mac OSX you actually need to run lldb using `sudo` so 
 sudo lldb -- ./yourapp-dbg -i inputfile.i
 ```
 
-The `--` tells lldb that any command-line options after that point need to be passed to the executable you are running.  `sudo` will ask you for your password so that it can elevate the priveleges of `lldb`.  You can also look below to see how to allow `lldb` to run with sudo without using a password.
+The `--` tells `lldb` that any command-line options after that point need to be passed to the executable you are running.  `sudo` will ask you for your password so that it can elevate the privileges of `lldb`.  You can also look below to see how to allow `lldb` to run with sudo without using a password.
 
 `gdb` can be run with a similar command:
 

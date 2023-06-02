@@ -81,6 +81,8 @@ protected:
   std::vector<unsigned int> _Zvar;
   /// Number of coupled total mass fractions. Should be _num_phases - 1
   const unsigned int _num_Z_vars;
+  /// Flag for nodal NaCl mass fraction
+  const bool _is_Xnacl_nodal;
   /// Salt mass fraction (kg/kg)
   const VariableValue & _Xnacl;
   /// Gradient of salt mass fraction (only defined at the qps)

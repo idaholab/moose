@@ -29,7 +29,7 @@ Helpful information on debugging numerical convergence issues is provided in the
 
 ## Execution ordering output
 
-### Ordering of the problem set-up
+### Ordering of the problem set-up id=debug-setup
 
 MOOSE parses the input file and executes numerous [Actions](actions/Action.md) which progressively
 load/build the mesh, create the variables, kernels, boundary conditions, output objects etc.
@@ -43,7 +43,7 @@ to perform automatic dependency resolution to correctly order them.
 For the automatic ordering of the mesh generators, please refer to the
 [mesh documentation page](syntax/Mesh/index.md).
 
-### Solve and execution ordering
+### Solve and execution ordering id=debug-order
 
 Nearly every solve in MOOSE consists of a succession of operations on nodes, quadrature points,
 elements and elements' faces. These operations may be for example to compute the contribution of a
@@ -70,6 +70,9 @@ these other helpful resources below:
 - to debug linear system convergence issues, numerous parameters may be passed to PETSc to make it more verbose.
   They are summarized on this [page about debugging numerical issues](application_usage/failed_solves.md optional=True) and in
   the [PETSc manual](https://www.mcs.anl.gov/petsc/petsc-current/docs/manualpages/).
+
+- to debug a [Mesh](syntax/Mesh/index.md) related issue, please see [this page](syntax/Mesh/index.md#troubleshooting)
+  for built-in MOOSE mesh generation issues and [this page](syntax/Mesh/index.md#issues) for possible issues from an external mesh.
 
 
 !alert note
