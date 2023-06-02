@@ -57,58 +57,68 @@ RestartableDataIO::readBackup(const THREAD_ID tid)
     mooseError("RestartableDataIO::readBackup(): Backup not set");
 
   std::istream stream(_backup->data(tid).rdbuf());
-  _backup->dataInfo(tid, {}) = readRestartableData(stream);
+  _backup->dataInfo(tid, {}) = readRestartableData(stream, _backup->filename());
 }
 
 std::unordered_map<std::string, Backup::DataInfo>
-RestartableDataIO::readRestartableData(std::istream & stream) const
+RestartableDataIO::readRestartableData(std::istream & stream,
+                                       const std::string & filename /* = "" */) const
 {
+  auto error = [this, &filename](const std::string & prefix, const std::string & suffix = "")
+  {
+    std::stringstream err;
+    err << prefix;
+    if (filename.size())
+      err << " in file '" << filename << "'";
+    if (suffix.size())
+      err << "\n\n" << suffix;
+    mooseError(err.str());
+  };
+
   std::unordered_map<std::string, Backup::DataInfo> data_map;
 
   // rewind to the beginning
   stream.seekg(0);
 
-  // header
-  char id[2];
-  stream.read(id, 2);
+  // ID
+  char this_id[2];
+  stream.read(this_id, 2);
+  if (this_id[0] != 'R' || this_id[1] != 'D')
+    error("Loaded backup is invalid or corrupted (unexpected header)");
 
+  // Version
   unsigned int this_file_version;
   stream.read((char *)&this_file_version, sizeof(this_file_version));
-
   if (this_file_version != CURRENT_BACKUP_FILE_VERSION)
-    mooseError("Mismatching backup file version! ",
-               "Current version: ",
-               CURRENT_BACKUP_FILE_VERSION,
-               " Version in file: ",
-               this_file_version);
+    error("Loaded mismatching backup version",
+          "  Current version: " + std::to_string(CURRENT_BACKUP_FILE_VERSION) +
+              "\n  Loaded version: " + std::to_string(this_file_version));
 
+  // Num MPI ranks
   processor_id_type this_n_procs = 0;
-  unsigned int this_n_threads = 0;
-
-  stream.read((char *)&this_n_procs, sizeof(this_n_procs));
-  stream.read((char *)&this_n_threads, sizeof(this_n_threads));
-
+  dataLoad(stream, this_n_procs, nullptr);
   if (_error_on_different_number_of_processors && this_n_procs != _moose_app.n_processors())
-    mooseError("Mismatching number of MPI ranks in backup file! ",
-               "Current run: ",
-               _moose_app.n_processors(),
-               " In file: ",
-               this_n_procs);
+    error("Mismatching number of MPI ranks in backup",
+          "  Current ranks: " + std::to_string(_moose_app.n_processors()) +
+              "\n  Loaded ranks: " + std::to_string(this_n_procs));
 
+  // Num threads
+  unsigned int this_n_threads = 0;
+  dataLoad(stream, this_n_threads, nullptr);
   if (_error_on_different_number_of_threads && this_n_threads != libMesh::n_threads())
-    mooseError("Mismatching number of threads in backup file! ",
-               "Current run: ",
-               libMesh::n_threads(),
-               " In file: ",
-               this_n_threads);
+    error("Mismatching number of threads in backup",
+          "  Current threads: " + std::to_string(libMesh::n_threads()) +
+              "\n  Loaded threads: " + std::to_string(this_n_threads));
 
   // Number of data
   std::size_t n_data = 0;
-  stream.read((char *)&n_data, sizeof(n_data));
+  dataLoad(stream, n_data, nullptr);
+
   // Data header block size; we store/load this so that we know the positions
   // of the data at the time of the loop below
   std::size_t n_header_data = 0;
-  stream.read((char *)&n_header_data, sizeof(n_header_data));
+  dataLoad(stream, n_header_data, nullptr);
+
   // Data header
   auto current_data_position = stream.tellg();
   current_data_position += n_header_data;
@@ -216,7 +226,7 @@ RestartableDataIO::readRestartableData(const std::string & file_name,
   if (in.fail())
     mooseError("Unable to open file ", file_name);
 
-  auto data_map = readRestartableData(in);
+  auto data_map = readRestartableData(in, file_name);
   deserializeRestartableData(restartable_data, in, data_map, filter_names);
 
   in.close();
@@ -227,21 +237,25 @@ RestartableDataIO::serializeRestartableData(const RestartableDataMap & restartab
                                             std::ostream & stream)
 
 {
-  unsigned int n_threads = libMesh::n_threads();
-  processor_id_type n_procs = _moose_app.n_processors();
-
-  const unsigned int file_version = CURRENT_BACKUP_FILE_VERSION;
-
-  // Write out header
+  // Header
   char id[] = {'R', 'D'};
   stream.write(id, 2);
-  stream.write((const char *)&file_version, sizeof(file_version));
-  stream.write((const char *)&n_procs, sizeof(n_procs));
-  stream.write((const char *)&n_threads, sizeof(n_threads));
 
-  // number of RestartableData
+  // File version
+  unsigned int file_version = CURRENT_BACKUP_FILE_VERSION;
+  stream.write((const char *)&file_version, sizeof(file_version));
+
+  // Number of procs
+  processor_id_type n_procs = _moose_app.n_processors();
+  dataStore(stream, n_procs, nullptr);
+
+  // Number of threads
+  unsigned int n_threads = libMesh::n_threads();
+  dataStore(stream, n_threads, nullptr);
+
+  // Number of RestartableData
   std::size_t n_data = restartable_data.size();
-  stream.write((const char *)&n_data, sizeof(n_data));
+  dataStore(stream, n_data, nullptr);
 
   // Write out the RestartableData header, and store the actual data separately
   std::ostringstream data_header_blk;
@@ -265,8 +279,8 @@ RestartableDataIO::serializeRestartableData(const RestartableDataMap & restartab
   }
 
   // size of data header block
-  auto data_header_size = static_cast<std::size_t>(data_header_blk.tellp());
-  stream.write((const char *)&data_header_size, sizeof(data_header_size));
+  std::size_t data_header_size = static_cast<std::size_t>(data_header_blk.tellp());
+  dataStore(stream, data_header_size, nullptr);
 
   // Write data header and then the data
   stream << data_header_blk.str();

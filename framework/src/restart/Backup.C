@@ -11,7 +11,10 @@
 
 #include "DataIO.h"
 
-Backup::Backup() : _data(libMesh::n_threads()), _data_info_map(libMesh::n_threads()) {}
+Backup::Backup(const std::string & filename /* = "" */)
+  : _data(libMesh::n_threads()), _data_info_map(libMesh::n_threads()), _filename(filename)
+{
+}
 
 std::stringstream &
 Backup::data(const THREAD_ID tid, const WriteKey)

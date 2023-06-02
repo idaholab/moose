@@ -767,9 +767,9 @@ FEProblemBase::initialSetup()
       TIME_SECTION("readRestartData", 3, "Reading Restart Data");
 
       // Read the backup from file
-      std::string backup_file_name =
+      const std::string backup_file_name =
           _app.getRestartRecoverFileBase() + Checkpoint::restartSuffix(processor_id());
-      auto backup = std::make_shared<Backup>();
+      auto backup = std::make_shared<Backup>(backup_file_name);
       try
       {
         std::ifstream backup_file;

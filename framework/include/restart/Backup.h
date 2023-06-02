@@ -23,7 +23,12 @@ class RestartableDataIO;
 class Backup
 {
 public:
-  Backup();
+  /**
+   * Constructor.
+   *
+   * The filename is optional and is only used for error reporting.
+   */
+  Backup(const std::string & filename = "");
 
   /**
    * Class used as a key to protect write operations to this object
@@ -78,11 +83,18 @@ public:
     return _data_info_map[tid];
   }
 
+  /**
+   * @returns The filename associated with this backup (if any)
+   */
+  const std::string & filename() const { return _filename; }
+
 private:
   /// Vector of streams for holding individual thread data for the simulation
   std::vector<std::stringstream> _data;
   /// Data mapping; stores metadata info for each data entry
   std::vector<std::unordered_map<std::string, DataInfo>> _data_info_map;
+  /// The filename used to produce this backup (if any); used for error context
+  const std::string _filename;
 };
 
 void dataStore(std::ostream & stream, Backup *& backup, void * context);

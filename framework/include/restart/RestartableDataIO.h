@@ -124,7 +124,7 @@ private:
    * @returns The restartable data headers from the stream \p stream.
    */
   std::unordered_map<std::string, Backup::DataInfo>
-  readRestartableData(std::istream & stream) const;
+  readRestartableData(std::istream & stream, const std::string & filename = "") const;
 
   /**
    * Serializes the data into the stream object.
