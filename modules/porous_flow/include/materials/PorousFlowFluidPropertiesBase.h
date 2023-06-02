@@ -124,7 +124,9 @@ protected:
   using PorousFlowFluidPropertiesBaseTempl<is_ad>::_dinternal_energy_dT;                           \
   using PorousFlowFluidPropertiesBaseTempl<is_ad>::_enthalpy;                                      \
   using PorousFlowFluidPropertiesBaseTempl<is_ad>::_denthalpy_dp;                                  \
-  using PorousFlowFluidPropertiesBaseTempl<is_ad>::_denthalpy_dT
+  using PorousFlowFluidPropertiesBaseTempl<is_ad>::_denthalpy_dT;                                  \
+  using Coupleable::getVar;                                                                        \
+  using Coupleable::isCoupled
 
 typedef PorousFlowFluidPropertiesBaseTempl<false> PorousFlowFluidPropertiesBase;
 typedef PorousFlowFluidPropertiesBaseTempl<true> ADPorousFlowFluidPropertiesBase;

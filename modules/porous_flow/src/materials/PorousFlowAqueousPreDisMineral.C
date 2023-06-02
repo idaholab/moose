@@ -66,8 +66,17 @@ PorousFlowAqueousPreDisMineral::PorousFlowAqueousPreDisMineral(const InputParame
   _initial_conc.resize(_num_initial_conc);
   if (_initial_conc_supplied)
     for (unsigned r = 0; r < _num_reactions; ++r)
-      _initial_conc[r] = (_nodal_material ? &coupledDofValues("initial_concentrations", r)
-                                          : &coupledValue("initial_concentrations", r));
+    {
+      // If initial_concentrations are elemental AuxVariables (or constants), we want to use
+      // coupledGenericValue() rather than coupledGenericDofValue()
+      const bool is_nodal = isCoupled("initial_concentrations")
+                                ? getVar("initial_concentrations", r)->isNodal()
+                                : false;
+
+      _initial_conc[r] =
+          (_nodal_material && is_nodal ? &coupledDofValues("initial_concentrations", r)
+                                       : &coupledValue("initial_concentrations", r));
+    }
 }
 
 void

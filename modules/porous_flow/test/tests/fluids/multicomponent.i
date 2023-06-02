@@ -62,7 +62,7 @@
   [brine]
     type = PorousFlowMultiComponentFluid
     temperature_unit = Celsius
-    x = 0.1047
+    x = xnacl
     phase = 0
     fp = brine
   []
