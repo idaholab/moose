@@ -9,10 +9,13 @@
 
 #pragma once
 
-// C++ includes
+#include "MooseTypes.h"
+
 #include <sstream>
 #include <vector>
-#include <memory>
+#include <unordered_map>
+
+class RestartableDataIO;
 
 /**
  * Helper class to hold streams for Backup and Restore operations.
@@ -23,9 +26,68 @@ public:
   Backup();
 
   /**
-   * Vector of streams for holding individual thread data for the simulation.
+   * Class used as a key to protect write operations to this object.
    */
-  std::vector<std::unique_ptr<std::stringstream>> _restartable_data;
+  class WriteKey
+  {
+    friend class RestartableDataIO;
+    friend void dataStore(std::ostream & stream, Backup *& backup, void * context);
+    friend void dataLoad(std::istream & stream, Backup *& backup, void * context);
+    WriteKey() {}
+    WriteKey(const WriteKey &) {}
+  };
+
+  /**
+   * Helper struct for a restartable data entry.
+   */
+  struct DataEntry
+  {
+    /// The position in the stream at which this data is
+    std::streampos position;
+    /// The size of this data
+    std::size_t size;
+    /// The hash code for this data (typeid(T).hash_code())
+    std::size_t type_hash_code;
+    /// Whether or not this data has been loaded yet
+    bool loaded = false;
+  };
+
+  /**
+   * @returns Read-only access to the binary restartable data for thread \p tid
+   */
+  const std::stringstream & restartableData(const THREAD_ID tid) const
+  {
+    return _restartable_data[tid];
+  }
+  /**
+   * @returns Read-only access to the restartable data mapping for thread \p tid
+   */
+  const std::unordered_map<std::string, DataEntry> & restartableDataMap(const THREAD_ID tid) const
+  {
+    return _restartable_data_map[tid];
+  }
+
+  /**
+   * @returns Write access to the binary restartable data for thread \p tid
+   *
+   * This invalidates the map in _restartable_data_map
+   */
+  std::stringstream & restartableData(const THREAD_ID tid, const WriteKey);
+  /**
+   * @returns Write-only access to the restartable data mapping for thread \p tid
+   */
+  std::unordered_map<std::string, DataEntry> & restartableDataMap(const THREAD_ID tid,
+                                                                  const WriteKey)
+  {
+    return _restartable_data_map[tid];
+  }
+
+private:
+  /// Vector of streams for holding individual thread data for the simulation.
+  std::vector<std::stringstream> _restartable_data;
+  /// Restarable data mapping; stores metadata for each data entry
+  std::vector<std::unordered_map<std::string, DataEntry>> _restartable_data_map;
 };
 
-// Specializations for dataLoad and dataStore appear in DataIO.C
+void dataStore(std::ostream & stream, Backup *& backup, void * context);
+void dataLoad(std::istream & stream, Backup *& backup, void * context);

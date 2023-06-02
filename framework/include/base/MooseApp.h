@@ -24,6 +24,7 @@
 #include "TheWarehouse.h"
 #include "RankMap.h"
 #include "MeshGeneratorSystem.h"
+#include "RestartableDataIO.h"
 
 #include "libmesh/parallel_object.h"
 #include "libmesh/mesh_base.h"
@@ -685,13 +686,13 @@ public:
   /**
    * Restore a Backup. This sets the App's state.
    *
-   * @param backup The Backup holding the data for the app
    * @param for_restart Whether this restoration is explicitly for the first restoration of restart
    * data.
+   * @param clear Whether or not to clear the data after restoring
    *
    * This method should be overridden in external or MOOSE-wrapped applications.
    */
-  virtual void restore(std::shared_ptr<Backup> backup, bool for_restart = false);
+  virtual void restore(bool for_restart = false, bool clear = false);
 
   /**
    * Returns a string to be printed at the beginning of a simulation
@@ -879,7 +880,7 @@ public:
   /**
    * Method for setting the backup object to be restored at a later time. This method is called
    * during simulation restart or recover before the application is completely setup. The backup
-   * object set here, will be restored when needed by a call to restoreCachedBackup().
+   * object set here, will be restored when needed by a call to restore().
    *
    * @param backup The Backup holding the data for the app.
    */
@@ -926,6 +927,13 @@ public:
   ///@}
 
   /**
+   * @returns The RestartableDataIO object used for backing up and restoring/restarting
+   *
+   * TODO: Try to remove not expose this
+   */
+  RestartableDataIO & restartableDataIO() { return _rdio; }
+
+  /**
    * Whether this application should by default error on Jacobian nonzero reallocations. The
    * application level setting can always be overridden by setting the \p
    * error_on_jacobian_nonzero_reallocation parameter in the \p Problem block of the input file
@@ -954,12 +962,7 @@ protected:
   /**
    * Whether or not this MooseApp has cached a Backup to use for restart / recovery
    */
-  bool hasCachedBackup() const { return _cached_backup.get(); }
-
-  /**
-   * Restore from a cached backup
-   */
-  void restoreCachedBackup();
+  bool hasCachedBackup() const { return _rdio.hasBackup(); }
 
   /**
    * Helper method for dynamic loading of objects
@@ -1325,8 +1328,7 @@ private:
   /// The system that manages the MeshGenerators
   MeshGeneratorSystem _mesh_generator_system;
 
-  /// Cache for a Backup to use for restart / recovery
-  std::shared_ptr<Backup> _cached_backup;
+  RestartableDataIO _rdio;
 
   /**
    * Execution flags for this App. Note: These are copied on purpose instead of maintaining a

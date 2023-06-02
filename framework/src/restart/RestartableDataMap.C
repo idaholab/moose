@@ -41,7 +41,7 @@ RestartableDataMap::findData(const std::string & name) const
   }
 
   const auto index = find_index->second;
-  mooseAssert(index == std::distance(_data.begin(), find_it), "Inconsistent map");
+  mooseAssert(index == (std::size_t)std::distance(_data.begin(), find_it), "Inconsistent map");
   mooseAssert(_data.size() > index, "Invalid index");
 
   auto & data_unique_ptr = _data.at(index);

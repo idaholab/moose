@@ -44,6 +44,11 @@ public:
   virtual std::string type() const = 0;
 
   /**
+   * The type ID of the underlying data.
+   */
+  virtual const std::type_info & typeId() const = 0;
+
+  /**
    * The full (unique) name of this particular piece of data.
    */
   const std::string & name() const { return _name; }
@@ -119,6 +124,8 @@ public:
    * String identifying the type of parameter stored.
    */
   virtual std::string type() const override final;
+
+  virtual const std::type_info & typeId() const override final { return typeid(T); }
 
   /**
    * Store the RestartableData into a binary stream

@@ -396,6 +396,7 @@ MooseApp::MooseApp(InputParameters parameters)
                                ? parameters.get<const MooseMesh *>("_master_displaced_mesh")
                                : nullptr),
     _mesh_generator_system(*this),
+    _rdio(*this),
     _execute_flags(moose::internal::ExecFlagRegistry::getExecFlagRegistry().getFlags()),
     _output_buffer_cache(nullptr),
     _automatic_automatic_scaling(getParam<bool>("automatic_automatic_scaling"))
@@ -1200,15 +1201,16 @@ MooseApp::backup()
 }
 
 void
-MooseApp::restore(std::shared_ptr<Backup> backup, bool for_restart)
+MooseApp::restore(const bool for_restart, const bool clear)
 {
   TIME_SECTION("restore", 2, "Restoring Application");
 
   mooseAssert(_executioner, "Executioner is nullptr");
 
-  RestartableDataIO rdio(*this);
+  _rdio.restoreBackup(for_restart);
 
-  rdio.restoreBackup(backup, for_restart);
+  if (clear)
+    _rdio.clearBackup();
 }
 
 void
@@ -2057,21 +2059,7 @@ MooseApp::setRecover(bool value)
 void
 MooseApp::setBackupObject(std::shared_ptr<Backup> backup)
 {
-  _cached_backup = backup;
-}
-
-void
-MooseApp::restoreCachedBackup()
-{
-  if (!_cached_backup.get())
-    mooseError("No cached Backup to restore!");
-
-  TIME_SECTION("restoreCachedBackup", 2, "Restoring Cached Backup");
-
-  restore(_cached_backup, isRestarting());
-
-  // Release our hold on this Backup
-  _cached_backup.reset();
+  _rdio.setBackup(backup);
 }
 
 void

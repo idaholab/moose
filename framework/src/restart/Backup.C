@@ -7,15 +7,33 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-// MOOSE includes
 #include "Backup.h"
-#include "RestartableData.h"
 
-#include "libmesh/parallel.h"
+#include "DataIO.h"
 
-// Backup Definitions
-Backup::Backup() : _restartable_data(libMesh::n_threads())
+Backup::Backup()
+  : _restartable_data(libMesh::n_threads()), _restartable_data_map(libMesh::n_threads())
 {
-  for (auto & data_ptr : _restartable_data)
-    data_ptr = std::make_unique<std::stringstream>();
+}
+
+std::stringstream &
+Backup::restartableData(const THREAD_ID tid, const WriteKey)
+{
+  // Writing to _restartable_data invalidates this map
+  _restartable_data_map[tid].clear();
+  return _restartable_data[tid];
+}
+
+void
+dataStore(std::ostream & stream, Backup *& backup, void * context)
+{
+  for (const auto tid : make_range(libMesh::n_threads()))
+    dataStore(stream, backup->restartableData(tid, {}), context);
+}
+
+void
+dataLoad(std::istream & stream, Backup *& backup, void * context)
+{
+  for (const auto tid : make_range(libMesh::n_threads()))
+    dataLoad(stream, backup->restartableData(tid, {}), context);
 }

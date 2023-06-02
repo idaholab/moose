@@ -14,7 +14,6 @@
 #include "MooseTypes.h"
 #include "HashMap.h"
 #include "MooseError.h"
-#include "Backup.h"
 #include "RankTwoTensor.h"
 #include "RankThreeTensor.h"
 #include "RankFourTensor.h"
@@ -897,23 +896,6 @@ inline void
 loadHelper(std::istream & stream, HashMap<P, Q> & data, void * context)
 {
   dataLoad(stream, data, context);
-}
-
-// Specializations for Backup type
-template <>
-inline void
-dataStore(std::ostream & stream, Backup *& backup, void * context)
-{
-  for (unsigned int i = 0; i < backup->_restartable_data.size(); i++)
-    dataStore(stream, backup->_restartable_data[i], context);
-}
-
-template <>
-inline void
-dataLoad(std::istream & stream, Backup *& backup, void * context)
-{
-  for (unsigned int i = 0; i < backup->_restartable_data.size(); i++)
-    dataLoad(stream, backup->_restartable_data[i], context);
 }
 
 void dataLoad(std::istream & stream, Point & p, void * context);

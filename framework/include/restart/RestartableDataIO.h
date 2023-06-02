@@ -13,14 +13,15 @@
 #include "DataIO.h"
 #include "RestartableData.h"
 #include "PerfGraphInterface.h"
+#include "Backup.h"
 
 // C++ includes
 #include <sstream>
 #include <string>
 #include <list>
+#include <typeinfo>
 
 // Forward declarations
-class Backup;
 class FEProblemBase;
 
 /**
@@ -33,7 +34,18 @@ class RestartableDataIO : public PerfGraphInterface
 public:
   RestartableDataIO(MooseApp & moose_app);
 
-  virtual ~RestartableDataIO() = default;
+  /**
+   * Sets the backup for use in restoreBackup and restoreData.
+   */
+  void setBackup(std::shared_ptr<Backup> backup);
+  /**
+   * @returns Whether or not a backup has been set via setBackup.
+   */
+  bool hasBackup() const { return _backup != nullptr; }
+  /**
+   * Clears the backup that has been set by setBackup.
+   */
+  void clearBackup();
 
   /**
    * Create a Backup for the current system.
@@ -44,8 +56,17 @@ public:
 
   /**
    * Restore a Backup for the current system.
+   *
+   * Requires that a backup has been set via setBackup.
    */
-  void restoreBackup(std::shared_ptr<Backup> backup, bool for_restart = false);
+  void restoreBackup(bool for_restart = false);
+
+  /**
+   * Restores the data with the name \p name.
+   *
+   * Requires that a backup has been set via setBackup.
+   */
+  void restoreData(const std::string & name);
 
   /**
    * Writes restartable data into a binary file.
@@ -94,6 +115,18 @@ public:
 
 private:
   /**
+   * Reads the backup headers for the Backup on thread \p tid, and
+   * stores them into the data maps within the Backup for future use.
+   */
+  void readBackup(const THREAD_ID tid);
+
+  /**
+   * @returns The restartable data headers from the stream \p stream.
+   */
+  std::unordered_map<std::string, Backup::DataEntry>
+  readRestartableData(std::istream & stream) const;
+
+  /**
    * Serializes the data into the stream object.
    */
   void serializeRestartableData(const RestartableDataMap & restartable_data, std::ostream & stream);
@@ -103,10 +136,17 @@ private:
    */
   void deserializeRestartableData(RestartableDataMap & restartable_data,
                                   std::istream & stream,
+                                  std::unordered_map<std::string, Backup::DataEntry> & data_map,
                                   const DataNames & filter_names);
+  void deserializeRestartableDataValue(RestartableDataValue & value,
+                                       Backup::DataEntry & data_entry,
+                                       std::istream & stream);
 
   /// A reference to the MooseApp object for retrieving restartable data stores and filters
   MooseApp & _moose_app;
+
+  /// The Backup object for use in restoration
+  std::shared_ptr<Backup> _backup;
 
   static constexpr auto RESTARTABLE_DATA_EXT = ".rd";
   static constexpr auto CURRENT_BACKUP_FILE_VERSION = 3;

@@ -787,7 +787,7 @@ FEProblemBase::initialSetup()
 
     {
       TIME_SECTION("restoreRestartData", 3, "Restoring Restart Data");
-      _app.restoreCachedBackup();
+      _app.restore(_app.isRestarting(), /* clear = */ true);
     }
 
     if (_material_props.hasStatefulProperties() || _bnd_material_props.hasStatefulProperties() ||

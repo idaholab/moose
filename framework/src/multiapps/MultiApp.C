@@ -726,7 +726,10 @@ MultiApp::backup()
     _console << "Backed up MultiApp ... ";
 
   for (unsigned int i = 0; i < _my_num_apps; i++)
+  {
     _backups[i] = _apps[i]->backup();
+    _apps[i]->setBackupObject(_backups[i]);
+  }
 
   if (_fe_problem.verboseMultiApps())
     _console << name() << std::endl;
@@ -768,7 +771,7 @@ MultiApp::restore(bool force)
       _console << "Restoring MultiApp ... ";
 
     for (unsigned int i = 0; i < _my_num_apps; i++)
-      _apps[i]->restore(_backups[i]);
+      _apps[i]->restore();
 
     if (_fe_problem.verboseMultiApps())
       _console << name() << std::endl;

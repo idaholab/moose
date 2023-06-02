@@ -10,12 +10,15 @@
 // MOOSE includes
 #include "RestartableDataIO.h"
 
+#include "Backup.h"
 #include "FEProblem.h"
 #include "MooseApp.h"
 #include "MooseUtils.h"
+#include "DataIO.h"
 
 #include <stdio.h>
 #include <fstream>
+#include <sstream>
 
 RestartableDataIO::RestartableDataIO(MooseApp & moose_app)
   : PerfGraphInterface(moose_app.perfGraph(), "RestartableDataIO"), _moose_app(moose_app)
@@ -29,128 +32,42 @@ RestartableDataIO::createBackup()
 
   const auto & restartable_data_maps = _moose_app.getRestartableData();
 
-  unsigned int n_threads = libMesh::n_threads();
-
-  backup->_restartable_data.resize(n_threads);
-
-  for (unsigned int tid = 0; tid < n_threads; tid++)
-    serializeRestartableData(restartable_data_maps[tid], *backup->_restartable_data[tid]);
+  for (const auto tid : make_range(libMesh::n_threads()))
+    serializeRestartableData(restartable_data_maps[tid], backup->restartableData(tid, {}));
 
   return backup;
 }
 
 void
-RestartableDataIO::restoreBackup(std::shared_ptr<Backup> backup, bool for_restart)
+RestartableDataIO::setBackup(std::shared_ptr<Backup> backup)
 {
-  unsigned int n_threads = libMesh::n_threads();
-
-  // Make sure we read from the beginning
-  for (unsigned int tid = 0; tid < n_threads; tid++)
-    backup->_restartable_data[tid]->seekg(0);
-
-  auto & restartable_data_maps = _moose_app.getRestartableData();
-
-  for (unsigned int tid = 0; tid < n_threads; tid++)
-  {
-    const auto & recoverable_data_names = _moose_app.getRecoverableData();
-
-    if (for_restart) // When doing restart - make sure we don't read data that is only for recovery
-      deserializeRestartableData(
-          restartable_data_maps[tid], *backup->_restartable_data[tid], recoverable_data_names);
-    else
-      deserializeRestartableData(
-          restartable_data_maps[tid], *backup->_restartable_data[tid], DataNames());
-  }
+  _backup = backup;
 }
 
 void
-RestartableDataIO::writeRestartableData(const std::string & file_name,
-                                        const RestartableDataMap & restartable_data)
-
+RestartableDataIO::clearBackup()
 {
-  std::ofstream out;
-
-  out.open(file_name.c_str(), std::ios::out | std::ios::binary);
-  if (out.fail())
-    mooseError("Unable to open file ", file_name);
-
-  serializeRestartableData(restartable_data, out);
-
-  out.close();
+  _backup.reset();
 }
 
 void
-RestartableDataIO::readRestartableData(const std::string & file_name,
-                                       RestartableDataMap & restartable_data,
-                                       const DataNames & filter_names)
-
+RestartableDataIO::readBackup(const THREAD_ID tid)
 {
-  std::ifstream in;
+  if (!_backup)
+    mooseError("RestartableDataIO::readBackup(): Backup not set");
 
-  in.open(file_name.c_str(), std::ios::in | std::ios::binary);
-  if (in.fail())
-    mooseError("Unable to open file ", file_name);
-
-  deserializeRestartableData(restartable_data, in, filter_names);
-
-  in.close();
+  std::istream stream(_backup->restartableData(tid).rdbuf());
+  _backup->restartableDataMap(tid, {}) = readRestartableData(stream);
 }
 
-void
-RestartableDataIO::serializeRestartableData(const RestartableDataMap & restartable_data,
-                                            std::ostream & stream)
-
+std::unordered_map<std::string, Backup::DataEntry>
+RestartableDataIO::readRestartableData(std::istream & stream) const
 {
-  unsigned int n_threads = libMesh::n_threads();
-  processor_id_type n_procs = _moose_app.n_processors();
+  std::unordered_map<std::string, Backup::DataEntry> data_map;
 
-  const unsigned int file_version = CURRENT_BACKUP_FILE_VERSION;
+  // rewind to the beginning
+  stream.seekg(0);
 
-  { // Write out header
-    char id[] = {'R', 'D'};
-
-    stream.write(id, 2);
-    stream.write((const char *)&file_version, sizeof(file_version));
-
-    stream.write((const char *)&n_procs, sizeof(n_procs));
-    stream.write((const char *)&n_threads, sizeof(n_threads));
-
-    // number of RestartableData
-    unsigned int n_data = restartable_data.size();
-    stream.write((const char *)&n_data, sizeof(n_data));
-
-    // data names
-    for (const auto & data : restartable_data)
-      stream.write(data->name().c_str(), data->name().length() + 1); // trailing 0!
-  }
-  {
-    std::ostringstream data_blk;
-
-    for (const auto & data : restartable_data)
-    {
-      std::ostringstream data_stream;
-      data->store(data_stream);
-
-      // Store the size of the data then the data
-      unsigned int data_size = static_cast<unsigned int>(data_stream.tellp());
-      data_blk.write((const char *)&data_size, sizeof(data_size));
-      data_blk << data_stream.str();
-    }
-
-    // Write out this proc's block size
-    unsigned int data_blk_size = static_cast<unsigned int>(data_blk.tellp());
-    stream.write((const char *)&data_blk_size, sizeof(data_blk_size));
-
-    // Write out the values
-    stream << data_blk.str();
-  }
-}
-
-void
-RestartableDataIO::deserializeRestartableData(RestartableDataMap & restartable_data,
-                                              std::istream & stream,
-                                              const DataNames & filter_names)
-{
   // header
   char id[2];
   stream.read(id, 2);
@@ -185,51 +102,243 @@ RestartableDataIO::deserializeRestartableData(RestartableDataMap & restartable_d
                " In file: ",
                this_n_threads);
 
-  bool recovering = _moose_app.isRecovering();
-
-  std::vector<std::string> ignored_data;
-
-  // number of data
-  unsigned int n_data = 0;
+  // Number of data
+  std::size_t n_data = 0;
   stream.read((char *)&n_data, sizeof(n_data));
-
-  // data names
-  std::vector<std::string> data_names(n_data);
-
-  for (unsigned int i = 0; i < n_data; i++)
+  // Data header block size; we store/load this so that we know the positions
+  // of the data at the time of the loop below
+  std::size_t n_header_data = 0;
+  stream.read((char *)&n_header_data, sizeof(n_header_data));
+  // Data header
+  auto current_data_position = stream.tellg();
+  current_data_position += n_header_data;
+  for (const auto i : make_range(n_data))
   {
-    std::getline(stream, data_names[i], '\0');
-    if (!stream)
-      mooseError("Error while reading stream");
+    std::ignore = i;
+
+    std::string name;
+    dataLoad(stream, name, nullptr);
+
+    mooseAssert(!data_map.count(name), "Already inserted");
+    auto & entry = data_map[name];
+
+    dataLoad(stream, entry.size, nullptr);
+    dataLoad(stream, entry.type_hash_code, nullptr);
+    entry.position = current_data_position;
+
+    current_data_position += entry.size;
   }
 
-  // Grab this processor's block size
-  unsigned int data_blk_size = 0;
-  stream.read((char *)&data_blk_size, sizeof(data_blk_size));
+  return data_map;
+}
 
-  for (unsigned int i = 0; i < n_data; i++)
+void
+RestartableDataIO::restoreBackup(bool for_restart)
+{
+  auto & restartable_data_maps = _moose_app.getRestartableData();
+
+  for (const auto tid : make_range(libMesh::n_threads()))
   {
-    std::string current_name = data_names[i];
+    auto & data_map = _backup->restartableDataMap(0, {});
+    if (data_map.empty())
+      readBackup(tid);
 
-    unsigned int data_size = 0;
-    stream.read((char *)&data_size, sizeof(data_size));
+    std::istream stream(_backup->restartableData(tid).rdbuf());
 
-    // Determine if the current name is in the filter set
-    RestartableDataValue * current_data = restartable_data.findData(current_name);
-    const auto is_data_in_filter = filter_names.find(current_name) != filter_names.end();
-    if (current_data             // Only restore values if they're currently being used and
-        && (recovering ||        // Only read this value if we're either recovering or
-            !is_data_in_filter)) // the data isn't specifically filtered out
+    // When doing restart - make sure we don't read data that is only for recovery
+    if (for_restart)
+      deserializeRestartableData(
+          restartable_data_maps[tid], stream, data_map, _moose_app.getRecoverableData());
+    else
+      deserializeRestartableData(restartable_data_maps[tid], stream, data_map, DataNames());
+
+    // Now that we've loaded everything, clear the load list
+    // TODO: move this somewhere else!
+    for (auto & entry : data_map)
+      entry.second.loaded = false;
+  }
+}
+
+void
+RestartableDataIO::restoreData(const std::string & name)
+{
+  auto & restartable_data_maps = _moose_app.getRestartableData();
+
+  for (const auto tid : make_range(libMesh::n_threads()))
+  {
+    auto & data_map = _backup->restartableDataMap(0, {});
+    if (data_map.empty())
+      readBackup(tid);
+
+    RestartableDataValue * value = restartable_data_maps[tid].findData(name);
+    if (value == nullptr)
+      mooseError("RestartableDataIO::restoreData(): RestartableData with name '",
+                 name,
+                 "' was not declared");
+
+    auto find_data = data_map.find(name);
+    if (find_data == data_map.end())
+      mooseError("RestartableDataIO::restoreData(): RestartableData with name '",
+                 name,
+                 "' was not stored");
+
+    std::istream stream(_backup->restartableData(tid).rdbuf());
+    auto & data_entry = find_data->second;
+    deserializeRestartableDataValue(*value, data_entry, stream);
+  }
+}
+
+void
+RestartableDataIO::writeRestartableData(const std::string & file_name,
+                                        const RestartableDataMap & restartable_data)
+
+{
+  std::ofstream out;
+
+  out.open(file_name.c_str(), std::ios::out | std::ios::binary);
+  if (out.fail())
+    mooseError("Unable to open file ", file_name);
+
+  serializeRestartableData(restartable_data, out);
+
+  out.close();
+}
+
+void
+RestartableDataIO::readRestartableData(const std::string & file_name,
+                                       RestartableDataMap & restartable_data,
+                                       const DataNames & filter_names)
+
+{
+  std::ifstream in;
+
+  in.open(file_name.c_str(), std::ios::in | std::ios::binary);
+  if (in.fail())
+    mooseError("Unable to open file ", file_name);
+
+  auto data_map = readRestartableData(in);
+  deserializeRestartableData(restartable_data, in, data_map, filter_names);
+
+  in.close();
+}
+
+void
+RestartableDataIO::serializeRestartableData(const RestartableDataMap & restartable_data,
+                                            std::ostream & stream)
+
+{
+  unsigned int n_threads = libMesh::n_threads();
+  processor_id_type n_procs = _moose_app.n_processors();
+
+  const unsigned int file_version = CURRENT_BACKUP_FILE_VERSION;
+
+  // Write out header
+  char id[] = {'R', 'D'};
+  stream.write(id, 2);
+  stream.write((const char *)&file_version, sizeof(file_version));
+  stream.write((const char *)&n_procs, sizeof(n_procs));
+  stream.write((const char *)&n_threads, sizeof(n_threads));
+
+  // number of RestartableData
+  std::size_t n_data = restartable_data.size();
+  stream.write((const char *)&n_data, sizeof(n_data));
+
+  // Write out the RestartableData header, and store the actual data separately
+  std::ostringstream data_header_blk;
+  std::ostringstream data_blk;
+  for (const auto & data : restartable_data)
+  {
+    // Store the data separately, to be added later
+    std::ostringstream data_stream;
+    data->store(data_stream);
+
+    // Append data to the full block
+    data_blk << data_stream.str();
+
+    // Store name, size, type hash, and type in the header
+    auto name = data->name();
+    auto data_size = static_cast<std::size_t>(data_stream.tellp());
+    auto hash_code = data->typeId().hash_code();
+    dataStore(data_header_blk, name, nullptr);
+    dataStore(data_header_blk, data_size, nullptr);
+    dataStore(data_header_blk, hash_code, nullptr);
+  }
+
+  // size of data header block
+  auto data_header_size = static_cast<std::size_t>(data_header_blk.tellp());
+  stream.write((const char *)&data_header_size, sizeof(data_header_size));
+
+  // Write data header and then the data
+  stream << data_header_blk.str();
+  stream << data_blk.str();
+}
+
+void
+RestartableDataIO::deserializeRestartableDataValue(RestartableDataValue & value,
+                                                   Backup::DataEntry & data_entry,
+                                                   std::istream & stream)
+{
+  // Sanity check on types
+  if (data_entry.type_hash_code != value.typeId().hash_code())
+    mooseError("Type mismatch for loading RestartableData '",
+               value.name(),
+               "'\n\n  Declared type: ",
+               value.type());
+
+  // We loaded this earlier
+  if (data_entry.loaded)
+    return;
+
+  stream.seekg(data_entry.position);
+  value.load(stream);
+
+  if ((data_entry.position + (std::streampos)data_entry.size) != stream.tellg())
+    mooseError("Size mismatch for loading RestartableData '",
+               value.name(),
+               "' of type '",
+               value.type(),
+               "'\n\n  Stored size: ",
+               data_entry.size,
+               "\n  Loaded size: ",
+               stream.tellg() - data_entry.position);
+
+  data_entry.loaded = true;
+}
+
+void
+RestartableDataIO::deserializeRestartableData(
+    RestartableDataMap & restartable_data,
+    std::istream & stream,
+    std::unordered_map<std::string, Backup::DataEntry> & data_map,
+    const DataNames & filter_names)
+{
+  const auto recovering = _moose_app.isRecovering();
+
+  std::vector<std::string> missing_data;
+  std::vector<std::string> ignored_data;
+
+  // Load the data in the order that it was requested
+  for (auto & data : restartable_data)
+  {
+    const auto & name = data->name();
+
+    auto find_data = data_map.find(name);
+    if (find_data == data_map.end())
     {
-      current_data->load(stream);
+      missing_data.push_back(name);
+      continue;
     }
+    auto & data_entry = find_data->second;
+
+    // Only restore values if we're either recovering or the data isn't filtered out
+    const auto is_data_in_filter = filter_names.find(name) != filter_names.end();
+    if (recovering || !is_data_in_filter)
+      deserializeRestartableDataValue(*data, data_entry, stream);
     // Skip this piece of data and do not report if restarting and recoverable data is not used
     else
     {
-      // Skip this piece of data and do not report if restarting and recoverable data is not used
-      stream.seekg(data_size, std::ios_base::cur);
       if (recovering && !is_data_in_filter)
-        ignored_data.push_back(current_name);
+        ignored_data.push_back(name);
     }
   }
 
