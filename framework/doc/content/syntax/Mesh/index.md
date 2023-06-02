@@ -74,7 +74,7 @@ mesh file with `_in.e` (the opposite of the `_out.e` that is appended from the o
 appended to the input file name.  You can also optionally provide a mesh filename to
 write out using `--mesh-only output_file.e`. When using the `--mesh-only` option, by default any extra element integers
 defined on the mesh will also be outputted to the output Exodus file. To prevent extra element ids from being
-outputted, the parameter `output_extra_element_ids` should be set to `false` in the `[Ouputs]` block of the
+output, the parameter `output_extra_element_ids` should be set to `false` in the `[Outputs]` block of the
 input file as shown below:
 
 ```
@@ -148,7 +148,7 @@ the mesh to the first rank for output. In the largest case this may cause your s
 out of memory, in smaller cases, it may just cause unnecessary communication to serialize your
 parallel data structure. The solution is to use "nemesis" output.
 
-Nemesis creates separate Exodus files that are automatically read by paraview and displayed as
+Nemesis creates separate Exodus files that are automatically read by Paraview and displayed as
 if a normal Exodus mesh had been output. The output files have the following naming convention:
 
 ```
@@ -245,3 +245,36 @@ Mesh meta data can only be declared in the constructors of mesh generators so th
 Mesh meta data can be useful for setting up specific postprocessors, kernels, etc. that require certain geometry information.
 Mesh meta data are not possible or extremely hard to be derived directly from libMesh mesh object.
 A simple example of mesh meta data is the `num_elements_x` provided by [GeneratedMeshGenerator](GeneratedMeshGenerator.md), which can be used as an indicator for a mesh regular in x direction.
+
+## Debugging in-MOOSE mesh generation id=troubleshooting
+
+!alert note
+The MOOSE mesh generation [tutorial](tutorial04_meshing/index.md optional=true) is the most comprehensive resource on learning how to mesh within MOOSE. We summarize here
+only a few techniques.
+
+Mesh generation in MOOSE is a sequential tree-based process. Mesh generators are executed sorted by dependencies,
+and the output of each generator may be fed to multiple other generators. To succeed in this process, you must decompose
+the creation of the mesh into many individual steps. To debug this process, one can:
+
+- use the `show_info(=true)` input parameter on each mesh generator. This will output numerous pieces of metadata about the mesh
+  at each stage of the generation process. You can check there if all the subdomains that you expected at this stage
+  are present in the mesh and if they are of the expected size, both in terms of number of elements but also bounding box.
+- use the `output` input parameter on the mesh generator right before the problematic stage. This will output the mesh,
+  by default using the [Exodus.md] format with the name `<mesh_generator_name>_in.e`, so you may visualize it
+  before it gets acted upon by the next mesh generator(s).
+
+## Examining meshes id=examination
+
+The results of finite element/volume simulations are highly dependent on the quality of the mesh(es) used.
+It happens regularly that results are excellent and meeting all predictions using a regular Cartesian grid mesh,
+but significantly deteriorate or do not converge on the real system mesh, often created outside MOOSE.
+
+We point out in this section a few things to look for.
+- Sidesets in MOOSE are oriented. If you place a Neumann/flux boundary condition on a sideset, the direction of
+  the flux will depend on the orientation of the sideset.
+- MOOSE generally does not support non-conformal meshes for regular kernels, except when they arise from online mesh refinement.
+  When inspecting your mesh, you should not see any hanging nodes or surfaces not exactly touching. If you are using such
+  a mesh, you **MUST** use interface kernels, mortar or other advanced numerical treatments.
+- Many physics will give better results with high element quality and smooth distributions of element volumes.
+  You may examine the spatial distribution of these quantities using the [ElementQualityAux.md] and [VolumeAux.md]
+  respectively.
