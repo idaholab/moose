@@ -125,6 +125,20 @@ relativePermeability(Real seff, Real m)
   return std::sqrt(seff) * Utility::pow<2>(b);
 }
 
+DualReal
+relativePermeability(const DualReal & seff, Real m)
+{
+  if (MetaPhysicL::raw_value(seff) <= 0.0)
+    return 0.0;
+  else if (MetaPhysicL::raw_value(seff) >= 1.0)
+    return 1.0;
+
+  const DualReal a = 1.0 - std::pow(seff, 1.0 / m);
+  const DualReal b = 1.0 - std::pow(a, m);
+
+  return std::sqrt(seff) * Utility::pow<2>(b);
+}
+
 Real
 dRelativePermeability(Real seff, Real m)
 {
@@ -168,6 +182,20 @@ relativePermeabilityNW(Real seff, Real m)
 
   const Real a = std::pow(1.0 - seff, 1.0 / m);
   const Real b = std::pow(1.0 - a, 2.0 * m);
+
+  return std::sqrt(seff) * b;
+}
+
+DualReal
+relativePermeabilityNW(const DualReal & seff, Real m)
+{
+  if (MetaPhysicL::raw_value(seff) <= 0.0)
+    return 0.0;
+  else if (MetaPhysicL::raw_value(seff) >= 1.0)
+    return 1.0;
+
+  const DualReal a = std::pow(1.0 - seff, 1.0 / m);
+  const DualReal b = std::pow(1.0 - a, 2.0 * m);
 
   return std::sqrt(seff) * b;
 }

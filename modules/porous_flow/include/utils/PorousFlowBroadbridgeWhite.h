@@ -75,6 +75,7 @@ Real d2EffectiveSaturation(Real pc, Real c, Real sn, Real ss, Real las);
  * @return relative permeability
  */
 Real relativePermeability(Real s, Real c, Real sn, Real ss, Real kn, Real ks);
+DualReal relativePermeability(const DualReal & s, Real c, Real sn, Real ss, Real kn, Real ks);
 
 /**
  * Derivative of relative permeability with respect to saturation

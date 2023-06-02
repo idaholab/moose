@@ -10,31 +10,40 @@
 #include "PorousFlowRelativePermeabilityCorey.h"
 
 registerMooseObject("PorousFlowApp", PorousFlowRelativePermeabilityCorey);
+registerMooseObject("PorousFlowApp", ADPorousFlowRelativePermeabilityCorey);
 
+template <bool is_ad>
 InputParameters
-PorousFlowRelativePermeabilityCorey::validParams()
+PorousFlowRelativePermeabilityCoreyTempl<is_ad>::validParams()
 {
-  InputParameters params = PorousFlowRelativePermeabilityBase::validParams();
+  InputParameters params = PorousFlowRelativePermeabilityBaseTempl<is_ad>::validParams();
   params.addRequiredParam<Real>("n", "The Corey exponent of the phase.");
   params.addClassDescription("This Material calculates relative permeability of the fluid phase, "
                              "using the simple Corey model ((S-S_res)/(1-sum(S_res)))^n");
   return params;
 }
 
-PorousFlowRelativePermeabilityCorey::PorousFlowRelativePermeabilityCorey(
+template <bool is_ad>
+PorousFlowRelativePermeabilityCoreyTempl<is_ad>::PorousFlowRelativePermeabilityCoreyTempl(
     const InputParameters & parameters)
-  : PorousFlowRelativePermeabilityBase(parameters), _n(getParam<Real>("n"))
+  : PorousFlowRelativePermeabilityBaseTempl<is_ad>(parameters),
+    _n(this->template getParam<Real>("n"))
 {
 }
 
-Real
-PorousFlowRelativePermeabilityCorey::relativePermeability(Real seff) const
+template <bool is_ad>
+GenericReal<is_ad>
+PorousFlowRelativePermeabilityCoreyTempl<is_ad>::relativePermeability(GenericReal<is_ad> seff) const
 {
   return std::pow(seff, _n);
 }
 
+template <bool is_ad>
 Real
-PorousFlowRelativePermeabilityCorey::dRelativePermeability(Real seff) const
+PorousFlowRelativePermeabilityCoreyTempl<is_ad>::dRelativePermeability(Real seff) const
 {
   return _n * std::pow(seff, _n - 1.0);
 }
+
+template class PorousFlowRelativePermeabilityCoreyTempl<false>;
+template class PorousFlowRelativePermeabilityCoreyTempl<true>;

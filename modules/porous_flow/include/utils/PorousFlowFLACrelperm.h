@@ -24,6 +24,7 @@ namespace PorousFlowFLACrelperm
  * @return relative permeability
  */
 Real relativePermeability(Real seff, Real m);
+DualReal relativePermeability(const DualReal & seff, Real m);
 
 /**
  * Derivative of relative permeability with respect to effective saturation

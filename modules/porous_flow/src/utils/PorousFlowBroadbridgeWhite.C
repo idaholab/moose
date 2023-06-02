@@ -136,6 +136,21 @@ relativePermeability(Real s, Real c, Real sn, Real ss, Real kn, Real ks)
   return krel;
 }
 
+DualReal
+relativePermeability(const DualReal & s, Real c, Real sn, Real ss, Real kn, Real ks)
+{
+  if (MetaPhysicL::raw_value(s) <= sn)
+    return kn;
+
+  if (MetaPhysicL::raw_value(s) >= ss)
+    return ks;
+
+  const Real coef = (ks - kn) * (c - 1.0);
+  const DualReal th = (s - sn) / (ss - sn);
+  const DualReal krel = kn + coef * Utility::pow<2>(th) / (c - th);
+  return krel;
+}
+
 Real
 dRelativePermeability(Real s, Real c, Real sn, Real ss, Real kn, Real ks)
 {

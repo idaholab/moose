@@ -17,17 +17,22 @@
  * formula used in FLAC:
  * relperm = (1 + m) seff^m - m seff^(m + 1)
  */
-class PorousFlowRelativePermeabilityFLAC : public PorousFlowRelativePermeabilityBase
+template <bool is_ad>
+class PorousFlowRelativePermeabilityFLACTempl
+  : public PorousFlowRelativePermeabilityBaseTempl<is_ad>
 {
 public:
   static InputParameters validParams();
 
-  PorousFlowRelativePermeabilityFLAC(const InputParameters & parameters);
+  PorousFlowRelativePermeabilityFLACTempl(const InputParameters & parameters);
 
 protected:
-  virtual Real relativePermeability(Real seff) const override;
+  virtual GenericReal<is_ad> relativePermeability(GenericReal<is_ad> seff) const override;
   virtual Real dRelativePermeability(Real seff) const override;
 
   /// Exponent m for the specified phase
   const Real _m;
 };
+
+typedef PorousFlowRelativePermeabilityFLACTempl<false> PorousFlowRelativePermeabilityFLAC;
+typedef PorousFlowRelativePermeabilityFLACTempl<true> ADPorousFlowRelativePermeabilityFLAC;

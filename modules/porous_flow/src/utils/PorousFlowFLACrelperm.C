@@ -21,6 +21,16 @@ relativePermeability(Real seff, Real m)
   return (1.0 + m) * std::pow(seff, m) - m * std::pow(seff, m + 1.0);
 }
 
+DualReal
+relativePermeability(const DualReal & seff, Real m)
+{
+  if (MetaPhysicL::raw_value(seff) <= 0.0)
+    return 0.0;
+  else if (MetaPhysicL::raw_value(seff) >= 1.0)
+    return 1.0;
+  return (1.0 + m) * std::pow(seff, m) - m * std::pow(seff, m + 1.0);
+}
+
 Real
 dRelativePermeability(Real seff, Real m)
 {

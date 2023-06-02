@@ -94,6 +94,7 @@ Real d2CapillaryPressure(Real seff, Real pe, Real lambda, Real pc_max);
  * @return relative permeability
  */
 Real relativePermeabilityW(Real seff, Real lambda);
+DualReal relativePermeabilityW(const DualReal & seff, Real lambda);
 
 /**
  * Derivative of relative permeability of the wetting phase wrt to effective saturation
@@ -110,6 +111,7 @@ Real dRelativePermeabilityW(Real seff, Real lambda);
  * @return relative permeability
  */
 Real relativePermeabilityNW(Real seff, Real lambda);
+DualReal relativePermeabilityNW(const DualReal & seff, Real lambda);
 
 /**
  * Derivative of relative permeability of the non-wetting phase wrt to effective saturation
