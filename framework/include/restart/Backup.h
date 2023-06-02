@@ -26,7 +26,7 @@ public:
   Backup();
 
   /**
-   * Class used as a key to protect write operations to this object.
+   * Class used as a key to protect write operations to this object
    */
   class WriteKey
   {
@@ -38,9 +38,9 @@ public:
   };
 
   /**
-   * Helper struct for a restartable data entry.
+   * Struct that describes data in a stream
    */
-  struct DataEntry
+  struct DataInfo
   {
     /// The position in the stream at which this data is
     std::streampos position;
@@ -53,40 +53,36 @@ public:
   };
 
   /**
-   * @returns Read-only access to the binary restartable data for thread \p tid
+   * @returns Read-only access to the binary data for thread \p tid
    */
-  const std::stringstream & restartableData(const THREAD_ID tid) const
-  {
-    return _restartable_data[tid];
-  }
+  const std::stringstream & data(const THREAD_ID tid) const { return _data[tid]; }
   /**
-   * @returns Read-only access to the restartable data mapping for thread \p tid
+   * @returns Read-only access to the data info mapping for thread \p tid
    */
-  const std::unordered_map<std::string, DataEntry> & restartableDataMap(const THREAD_ID tid) const
+  const std::unordered_map<std::string, DataInfo> & dataInfo(const THREAD_ID tid) const
   {
-    return _restartable_data_map[tid];
+    return _data_info_map[tid];
   }
 
   /**
-   * @returns Write access to the binary restartable data for thread \p tid
+   * @returns Write access to the binary data for thread \p tid
    *
-   * This invalidates the map in _restartable_data_map
+   * This invalidates _data_info_map
    */
-  std::stringstream & restartableData(const THREAD_ID tid, const WriteKey);
+  std::stringstream & data(const THREAD_ID tid, const WriteKey);
   /**
-   * @returns Write-only access to the restartable data mapping for thread \p tid
+   * @returns Write-only access to the data info mapping for thread \p tid
    */
-  std::unordered_map<std::string, DataEntry> & restartableDataMap(const THREAD_ID tid,
-                                                                  const WriteKey)
+  std::unordered_map<std::string, DataInfo> & dataInfo(const THREAD_ID tid, const WriteKey)
   {
-    return _restartable_data_map[tid];
+    return _data_info_map[tid];
   }
 
 private:
-  /// Vector of streams for holding individual thread data for the simulation.
-  std::vector<std::stringstream> _restartable_data;
-  /// Restarable data mapping; stores metadata for each data entry
-  std::vector<std::unordered_map<std::string, DataEntry>> _restartable_data_map;
+  /// Vector of streams for holding individual thread data for the simulation
+  std::vector<std::stringstream> _data;
+  /// Data mapping; stores metadata info for each data entry
+  std::vector<std::unordered_map<std::string, DataInfo>> _data_info_map;
 };
 
 void dataStore(std::ostream & stream, Backup *& backup, void * context);

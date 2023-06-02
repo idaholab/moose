@@ -123,7 +123,7 @@ private:
   /**
    * @returns The restartable data headers from the stream \p stream.
    */
-  std::unordered_map<std::string, Backup::DataEntry>
+  std::unordered_map<std::string, Backup::DataInfo>
   readRestartableData(std::istream & stream) const;
 
   /**
@@ -136,10 +136,10 @@ private:
    */
   void deserializeRestartableData(RestartableDataMap & restartable_data,
                                   std::istream & stream,
-                                  std::unordered_map<std::string, Backup::DataEntry> & data_map,
+                                  std::unordered_map<std::string, Backup::DataInfo> & data_map,
                                   const DataNames & filter_names);
   void deserializeRestartableDataValue(RestartableDataValue & value,
-                                       Backup::DataEntry & data_entry,
+                                       Backup::DataInfo & data_entry,
                                        std::istream & stream);
 
   /// A reference to the MooseApp object for retrieving restartable data stores and filters

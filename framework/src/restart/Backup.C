@@ -11,29 +11,26 @@
 
 #include "DataIO.h"
 
-Backup::Backup()
-  : _restartable_data(libMesh::n_threads()), _restartable_data_map(libMesh::n_threads())
-{
-}
+Backup::Backup() : _data(libMesh::n_threads()), _data_info_map(libMesh::n_threads()) {}
 
 std::stringstream &
-Backup::restartableData(const THREAD_ID tid, const WriteKey)
+Backup::data(const THREAD_ID tid, const WriteKey)
 {
   // Writing to _restartable_data invalidates this map
-  _restartable_data_map[tid].clear();
-  return _restartable_data[tid];
+  _data_info_map[tid].clear();
+  return _data[tid];
 }
 
 void
 dataStore(std::ostream & stream, Backup *& backup, void * context)
 {
   for (const auto tid : make_range(libMesh::n_threads()))
-    dataStore(stream, backup->restartableData(tid, {}), context);
+    dataStore(stream, backup->data(tid, {}), context);
 }
 
 void
 dataLoad(std::istream & stream, Backup *& backup, void * context)
 {
   for (const auto tid : make_range(libMesh::n_threads()))
-    dataLoad(stream, backup->restartableData(tid, {}), context);
+    dataLoad(stream, backup->data(tid, {}), context);
 }

@@ -33,7 +33,7 @@ RestartableDataIO::createBackup()
   const auto & restartable_data_maps = _moose_app.getRestartableData();
 
   for (const auto tid : make_range(libMesh::n_threads()))
-    serializeRestartableData(restartable_data_maps[tid], backup->restartableData(tid, {}));
+    serializeRestartableData(restartable_data_maps[tid], backup->data(tid, {}));
 
   return backup;
 }
@@ -56,14 +56,14 @@ RestartableDataIO::readBackup(const THREAD_ID tid)
   if (!_backup)
     mooseError("RestartableDataIO::readBackup(): Backup not set");
 
-  std::istream stream(_backup->restartableData(tid).rdbuf());
-  _backup->restartableDataMap(tid, {}) = readRestartableData(stream);
+  std::istream stream(_backup->data(tid).rdbuf());
+  _backup->dataInfo(tid, {}) = readRestartableData(stream);
 }
 
-std::unordered_map<std::string, Backup::DataEntry>
+std::unordered_map<std::string, Backup::DataInfo>
 RestartableDataIO::readRestartableData(std::istream & stream) const
 {
-  std::unordered_map<std::string, Backup::DataEntry> data_map;
+  std::unordered_map<std::string, Backup::DataInfo> data_map;
 
   // rewind to the beginning
   stream.seekg(0);
@@ -139,22 +139,22 @@ RestartableDataIO::restoreBackup(bool for_restart)
 
   for (const auto tid : make_range(libMesh::n_threads()))
   {
-    auto & data_map = _backup->restartableDataMap(0, {});
-    if (data_map.empty())
+    auto & data_info = _backup->dataInfo(0, {});
+    if (data_info.empty())
       readBackup(tid);
 
-    std::istream stream(_backup->restartableData(tid).rdbuf());
+    std::istream stream(_backup->data(tid).rdbuf());
 
     // When doing restart - make sure we don't read data that is only for recovery
     if (for_restart)
       deserializeRestartableData(
-          restartable_data_maps[tid], stream, data_map, _moose_app.getRecoverableData());
+          restartable_data_maps[tid], stream, data_info, _moose_app.getRecoverableData());
     else
-      deserializeRestartableData(restartable_data_maps[tid], stream, data_map, DataNames());
+      deserializeRestartableData(restartable_data_maps[tid], stream, data_info, DataNames());
 
     // Now that we've loaded everything, clear the load list
     // TODO: move this somewhere else!
-    for (auto & entry : data_map)
+    for (auto & entry : data_info)
       entry.second.loaded = false;
   }
 }
@@ -166,8 +166,8 @@ RestartableDataIO::restoreData(const std::string & name)
 
   for (const auto tid : make_range(libMesh::n_threads()))
   {
-    auto & data_map = _backup->restartableDataMap(0, {});
-    if (data_map.empty())
+    auto & data_info = _backup->dataInfo(0, {});
+    if (data_info.empty())
       readBackup(tid);
 
     RestartableDataValue * value = restartable_data_maps[tid].findData(name);
@@ -176,13 +176,13 @@ RestartableDataIO::restoreData(const std::string & name)
                  name,
                  "' was not declared");
 
-    auto find_data = data_map.find(name);
-    if (find_data == data_map.end())
+    auto find_data = data_info.find(name);
+    if (find_data == data_info.end())
       mooseError("RestartableDataIO::restoreData(): RestartableData with name '",
                  name,
                  "' was not stored");
 
-    std::istream stream(_backup->restartableData(tid).rdbuf());
+    std::istream stream(_backup->data(tid).rdbuf());
     auto & data_entry = find_data->second;
     deserializeRestartableDataValue(*value, data_entry, stream);
   }
@@ -275,7 +275,7 @@ RestartableDataIO::serializeRestartableData(const RestartableDataMap & restartab
 
 void
 RestartableDataIO::deserializeRestartableDataValue(RestartableDataValue & value,
-                                                   Backup::DataEntry & data_entry,
+                                                   Backup::DataInfo & data_entry,
                                                    std::istream & stream)
 {
   // Sanity check on types
@@ -309,7 +309,7 @@ void
 RestartableDataIO::deserializeRestartableData(
     RestartableDataMap & restartable_data,
     std::istream & stream,
-    std::unordered_map<std::string, Backup::DataEntry> & data_map,
+    std::unordered_map<std::string, Backup::DataInfo> & data_map,
     const DataNames & filter_names)
 {
   const auto recovering = _moose_app.isRecovering();
