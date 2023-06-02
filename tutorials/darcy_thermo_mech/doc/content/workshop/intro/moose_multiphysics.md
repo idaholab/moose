@@ -113,9 +113,10 @@ VectorPostprocessors\\
 
 ## MOOSE Modules
 
-
+!style! halign=center
+!row!
 !col! small=12 medium=6 large=3 style=margin-right:2%;
-+Physics\\
++Physics+\\
 Chemical Reactions\\
 Contact\\
 Electromagnetics\\
@@ -135,13 +136,15 @@ XFEM\\
 !col-end!
 
 !col! small=12 medium=6 large=3 style=margin-right:2%;
-+Numerics\\
++Numerics+\\
 External PETSc Solver\\
 Function Expansion Tools\\
 Ray Tracing\\
 rDG\\
 Stochastic Tools\\
 !col-end!
+!row-end!
+!style-end!
 
 !---
 
