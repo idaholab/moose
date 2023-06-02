@@ -10,12 +10,10 @@
 #include "SolutionIC.h"
 #include "SolutionUserObject.h"
 #include "MooseMesh.h"
+#include "SystemBase.h"
 
 registerMooseObject("MooseApp", SolutionIC);
-registerMooseObjectRenamed("MooseApp",
-                    SolutionInitialCondition,
-                    "06/30/2024 24:00",
-                    SolutionIC);
+registerMooseObjectRenamed("MooseApp", SolutionInitialCondition, "06/30/2024 24:00", SolutionIC);
 
 InputParameters
 SolutionIC::validParams()
@@ -41,20 +39,40 @@ SolutionIC::SolutionIC(const InputParameters & parameters)
 void
 SolutionIC::initialSetup()
 {
-  // remap block names this IC is defined on into the ExodusII file block IDs
-  const std::map<SubdomainName, SubdomainID> & block_names_to_ids_from =
-      _solution_object.getBlockNamesToIds();
-  for (auto & blk_name : blocks())
+  // can only check blocks when the solution UO uses Exodus
+  if (_solution_object.getSolutionFileType() == 1)
   {
-    auto jt = block_names_to_ids_from.find(blk_name);
-    if (jt != block_names_to_ids_from.end())
-      _exo_block_ids.insert(jt->second);
-    else
-      mooseError("Block '",
-                 blk_name,
-                 "' does not exist in the file '",
-                 _solution_object.getMeshFileName(),
-                 "'.");
+    // remap block names this IC is defined on into the ExodusII file block IDs
+    const std::map<SubdomainName, SubdomainID> & block_names_to_ids_from =
+        _solution_object.getBlockNamesToIds();
+
+    const std::vector<SubdomainID> all_block_ids(meshBlockIDs().begin(), meshBlockIDs().end());
+    const auto blocks_to_check =
+        blockRestricted() ? blocks() : _sys.mesh().getSubdomainNames(all_block_ids);
+
+    for (auto & blk_name : blocks_to_check)
+    {
+      auto jt = block_names_to_ids_from.find(blk_name);
+      if (jt != block_names_to_ids_from.end())
+        _exo_block_ids.insert(jt->second);
+      else
+      {
+        auto blk_id = _sys.mesh().getSubdomainID(blk_name);
+        // use the ids, it may be that the source file does not have block names
+        // and that we are using the id as the block name (block = 0 for example)
+        const std::map<SubdomainID, SubdomainName> & block_ids_to_names_from =
+            _solution_object.getBlockIdsToNames();
+        if (block_ids_to_names_from.find(blk_id) != block_ids_to_names_from.end() &&
+            block_ids_to_names_from.find(blk_id)->second == "")
+          _exo_block_ids.insert(jt->second);
+        else
+          mooseError("Block '",
+                     blk_name,
+                     "' does not exist in the file '",
+                     _solution_object.getMeshFileName(),
+                     "'.");
+      }
+    }
   }
 }
 

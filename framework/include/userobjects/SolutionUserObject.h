@@ -271,14 +271,30 @@ public:
   const std::string getMeshFileName() const { return _mesh_file; }
 
   /**
-   * Get the map from block ID to block name. Only works for ExodsuII files.
+   * Get the map from block name to block ID. Only works for ExodusII files.
    *
-   * @return Map from block ID to block name
+   * @return Map from block name to block ID
    */
   const std::map<SubdomainName, SubdomainID> & getBlockNamesToIds() const
   {
     return _block_name_to_id;
   }
+
+  /**
+   * Get the map from block id to block name. Only works for ExodusII files.
+   *
+   * @return Map from block ID to block name
+   */
+  const std::map<SubdomainID, SubdomainName> & getBlockIdsToNames() const
+  {
+    return _block_id_to_name;
+  }
+
+  /**
+   * Get the type of file that was read
+   * @return Returns a MooseEnum that specifies the type of file read
+   */
+  MooseEnum getSolutionFileType() const;
 
 protected:
   /**
@@ -302,12 +318,6 @@ protected:
    * @return The solution at the given DOF
    */
   virtual Real directValue(dof_id_type dof_index) const;
-
-  /**
-   * Get the type of file that was read
-   * @return Returns a MooseEnum that specifies the type of file read
-   */
-  MooseEnum getSolutionFileType();
 
   /**
    * Updates the times for interpolating ExodusII data
@@ -493,6 +503,9 @@ protected:
 
   /// Map from block ID to block names. Read from the ExodusII file
   std::map<SubdomainName, SubdomainID> _block_name_to_id;
+
+  /// Map from block names to block IDs. Read from the ExodusII file
+  std::map<SubdomainID, SubdomainName> _block_id_to_name;
 
 private:
   static Threads::spin_mutex _solution_user_object_mutex;
