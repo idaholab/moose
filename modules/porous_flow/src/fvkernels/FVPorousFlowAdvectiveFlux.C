@@ -49,6 +49,7 @@ FVPorousFlowAdvectiveFlux::FVPorousFlowAdvectiveFlux(const InputParameters & par
     _pressure(getADMaterialProperty<std::vector<Real>>("PorousFlow_porepressure_qp")),
     _pressure_neighbor(
         getNeighborADMaterialProperty<std::vector<Real>>("PorousFlow_porepressure_qp")),
+    _grad_p(getADMaterialProperty<std::vector<RealGradient>>("PorousFlow_grad_porepressure_qp")),
     _gravity(getParam<RealVectorValue>("gravity"))
 {
 }
@@ -57,35 +58,47 @@ ADReal
 FVPorousFlowAdvectiveFlux::computeQpResidual()
 {
   ADReal flux = 0.0;
+  ADRealGradient pressure_grad;
+  ADRealTensorValue mobility;
 
   for (unsigned int p = 0; p < _num_phases; ++p)
   {
-    ADReal p_elem = _pressure[_qp][p];
-    ADReal p_neighbor = _pressure_neighbor[_qp][p];
+    // If we are on a boundary face, use the reconstructed gradient computed in _grad_p
+    if (onBoundary(*_face_info))
+    {
+      const auto gradp = -_grad_p[_qp][p];
+      pressure_grad = gradp + _density[_qp][p] * _gravity;
 
-    const ADRealVectorValue gradp =
-        (p_elem - p_neighbor) * _face_info->eCN() / _face_info->dCNMag();
+      mobility = _mass_fractions[_qp][p][_fluid_component] * _relperm[_qp][p] * _permeability[_qp] *
+                 _density[_qp][p] / _viscosity[_qp][p];
+    }
+    else
+    {
+      // If we are on an internal face, calculate the gradient explicitly
+      const auto p_elem = _pressure[_qp][p];
+      const auto p_neighbor = _pressure_neighbor[_qp][p];
 
-    const ADRealTensorValue mobility_element = _mass_fractions[_qp][p][_fluid_component] *
-                                               _relperm[_qp][p] * _permeability[_qp] *
-                                               _density[_qp][p] / _viscosity[_qp][p];
+      const auto gradp = (p_elem - p_neighbor) * _face_info->eCN() / _face_info->dCNMag();
 
-    const ADRealTensorValue mobility_neighbor =
-        _mass_fractions_neighbor[_qp][p][_fluid_component] * _relperm_neighbor[_qp][p] *
-        _permeability_neighbor[_qp] * _density_neighbor[_qp][p] / _viscosity_neighbor[_qp][p];
+      const auto mobility_element = _mass_fractions[_qp][p][_fluid_component] * _relperm[_qp][p] *
+                                    _permeability[_qp] * _density[_qp][p] / _viscosity[_qp][p];
 
-    const auto pressure_grad = gradp + _density[_qp][p] * _gravity;
+      const auto mobility_neighbor = _mass_fractions_neighbor[_qp][p][_fluid_component] *
+                                     _relperm_neighbor[_qp][p] * _permeability_neighbor[_qp] *
+                                     _density_neighbor[_qp][p] / _viscosity_neighbor[_qp][p];
 
-    ADRealTensorValue mobility_upwind;
-    interpolate(Moose::FV::InterpMethod::Upwind,
-                mobility_upwind,
-                mobility_element,
-                mobility_neighbor,
-                pressure_grad,
-                *_face_info,
-                true);
+      pressure_grad = gradp + _density[_qp][p] * _gravity;
 
-    flux += mobility_upwind * pressure_grad * _normal;
+      interpolate(Moose::FV::InterpMethod::Upwind,
+                  mobility,
+                  mobility_element,
+                  mobility_neighbor,
+                  pressure_grad,
+                  *_face_info,
+                  true);
+    }
+
+    flux += mobility * pressure_grad * _normal;
   }
 
   return flux;
