@@ -61,7 +61,7 @@ std::unordered_map<std::string, Backup::DataInfo>
 RestartableDataIO::readRestartableData(std::istream & stream,
                                        const std::string & filename /* = "" */) const
 {
-  auto error = [this, &filename](const std::string & prefix, const std::string & suffix = "")
+  auto error = [&filename](const std::string & prefix, const std::string & suffix = "")
   {
     std::stringstream err;
     err << prefix;
