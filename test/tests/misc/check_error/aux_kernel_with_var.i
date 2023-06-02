@@ -6,49 +6,50 @@
 []
 
 [Variables]
-  [./u]
+  [u]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 []
 
 [AuxVariables]
-  [./v]
-  [../]
+  [v]
+  []
 []
 
 [Kernels]
-  [./diff]
+  [diff]
     type = Diffusion
     variable = u
-  [../]
-  [./rea]
+  []
+  [rea]
     type = Reaction
     variable = u
-  [../]
+  []
 []
 
 [AuxKernels]
-  [./nope]
-    type = SelfAux
+  [nope]
+    type = ParsedAux
     variable = u
-  [../]
+    expression = '1'
+  []
 []
 
 [BCs]
-  [./left]
+  [left]
     type = DirichletBC
     variable = u
     boundary = 1
     value = 0
-  [../]
+  []
 
-  [./right]
+  [right]
     type = DirichletBC
     variable = u
     boundary = 2
     value = 1
-  [../]
+  []
 []
 
 [Executioner]

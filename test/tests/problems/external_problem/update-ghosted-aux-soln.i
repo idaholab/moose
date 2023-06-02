@@ -22,7 +22,7 @@
 
 [AuxKernels]
   [copy]
-    type = SelfAux
+    type = ProjectionAux
     variable = copy
     v = heat_source
   []

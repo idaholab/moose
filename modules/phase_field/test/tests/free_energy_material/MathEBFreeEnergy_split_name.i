@@ -31,7 +31,7 @@
 
 [AuxKernels]
   [c]
-    type = SelfAux
+    type = ProjectionAux
     variable = c
     v = d
     execute_on = 'INITIAL TIMESTEP_END FINAL'

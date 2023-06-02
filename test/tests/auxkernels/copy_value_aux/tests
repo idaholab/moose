@@ -1,0 +1,11 @@
+[Tests]
+  issues = '#22373'
+  design = 'CopyValueAux.md'
+  [copy]
+    type = CSVDiff
+    input = copy_aux.i
+    csvdiff = copy_aux_out_results_0001.csv
+    requirement = "The system shall be able to copy from a variable to another of the same finite "
+                  "element family and order.  "
+  []
+[]

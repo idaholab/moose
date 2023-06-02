@@ -12,21 +12,21 @@
 #include "AuxKernel.h"
 
 /**
- * Self auxiliary value
+ * Copies one variable onto an auxiliary variable
  */
-class SelfAux : public AuxKernel
+class CopyValueAux : public AuxKernel
 {
 public:
   static InputParameters validParams();
 
-  /**
-   * Factory constructor, takes parameters so that all derived classes can be built using the same
-   * constructor.
-   */
-  SelfAux(const InputParameters & parameters);
+  CopyValueAux(const InputParameters & parameters);
 
 protected:
   virtual Real computeValue() override;
 
+  /// The variable to project from
   const VariableValue & _v;
+
+  /// A reference to the variable to project from
+  const MooseVariable & _source_variable;
 };

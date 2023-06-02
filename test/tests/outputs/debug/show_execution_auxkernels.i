@@ -82,7 +82,7 @@
   []
   # setting b requires a
   [b_saux]
-    type = SelfAux
+    type = ProjectionAux
     variable = b
     v = a
     execute_on = 'linear timestep_end'
@@ -99,7 +99,7 @@
   []
   # setting b requires a
   [b_saux_elem]
-    type = SelfAux
+    type = ProjectionAux
     variable = b_elem
     v = a_elem
     execute_on = 'linear timestep_end'

@@ -343,7 +343,7 @@ MooseMesh::freeBndElems()
 }
 
 bool
-MooseMesh::prepare(const bool force_mesh_prepare)
+MooseMesh::prepare(const MeshBase * const mesh_to_clone)
 {
   TIME_SECTION("prepare", 2, "Preparing Mesh", true);
 
@@ -355,7 +355,14 @@ MooseMesh::prepare(const bool force_mesh_prepare)
     // For whatever reason we do not want to allow renumbering here nor ever in the future?
     getMesh().allow_renumbering(false);
 
-  if (!_mesh->is_prepared() || force_mesh_prepare)
+  if (mesh_to_clone)
+  {
+    mooseAssert(mesh_to_clone->is_prepared(),
+                "The mesh we wish to clone from must already be prepared");
+    _mesh = mesh_to_clone->clone();
+    _moose_mesh_prepared = false;
+  }
+  else if (!_mesh->is_prepared())
   {
     _mesh->prepare_for_use();
     _moose_mesh_prepared = false;
