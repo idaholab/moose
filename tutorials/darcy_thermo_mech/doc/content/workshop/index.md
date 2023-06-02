@@ -20,6 +20,10 @@
 
 !---
 
+!include workshop/intro/getting_started.md
+
+!---
+
 !include workshop/problem/overview.md
 
 !---
@@ -177,6 +181,10 @@
 !---
 
 !include workshop/problem/step06.md
+
+!---
+
+!include workshop/infrastructure/troubleshooting.md
 
 !---
 
