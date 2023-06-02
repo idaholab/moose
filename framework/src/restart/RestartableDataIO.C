@@ -146,7 +146,7 @@ RestartableDataIO::restoreBackup(bool for_restart)
 
   for (const auto tid : make_range(libMesh::n_threads()))
   {
-    auto & data_info = _backup->dataInfo(0, {});
+    auto & data_info = _backup->dataInfo(tid, {});
     if (data_info.empty())
       readBackup(tid);
 
