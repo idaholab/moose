@@ -18,7 +18,7 @@
     recover = false
 
     requirement = 'The system shall be able to use an exodus file for setting initial conditions in volume junctions'
-    design = 'HeatTransferFromHeatStructure1Phase.md SolutionInitialCondition.md'
+    design = 'HeatTransferFromHeatStructure1Phase.md SolutionIC.md'
     issues = '#20553'
   []
 []

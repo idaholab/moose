@@ -7,14 +7,18 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "ScalarSolutionInitialCondition.h"
+#include "ScalarSolutionIC.h"
 #include "SolutionUserObject.h"
 #include "MooseMesh.h"
 
-registerMooseObject("MooseApp", ScalarSolutionInitialCondition);
+registerMooseObject("MooseApp", ScalarSolutionIC);
+registerMooseObjectRenamed("MooseApp",
+                           ScalarSolutionInitialCondition,
+                           "06/30/2024 24:00",
+                           ScalarSolutionIC);
 
 InputParameters
-ScalarSolutionInitialCondition::validParams()
+ScalarSolutionIC::validParams()
 {
   InputParameters params = ScalarInitialCondition::validParams();
   params.addRequiredParam<UserObjectName>("solution_uo",
@@ -28,7 +32,7 @@ ScalarSolutionInitialCondition::validParams()
   return params;
 }
 
-ScalarSolutionInitialCondition::ScalarSolutionInitialCondition(const InputParameters & parameters)
+ScalarSolutionIC::ScalarSolutionIC(const InputParameters & parameters)
   : ScalarInitialCondition(parameters),
     _solution_object(getUserObject<SolutionUserObject>("solution_uo")),
     _solution_object_var_name(getParam<VariableName>("from_variable"))
@@ -36,7 +40,7 @@ ScalarSolutionInitialCondition::ScalarSolutionInitialCondition(const InputParame
 }
 
 Real
-ScalarSolutionInitialCondition::value()
+ScalarSolutionIC::value()
 {
   return _solution_object.scalarValue(0., _solution_object_var_name);
 }

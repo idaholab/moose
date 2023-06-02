@@ -7,14 +7,18 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "SolutionInitialCondition.h"
+#include "SolutionIC.h"
 #include "SolutionUserObject.h"
 #include "MooseMesh.h"
 
-registerMooseObject("MooseApp", SolutionInitialCondition);
+registerMooseObject("MooseApp", SolutionIC);
+registerMooseObjectRenamed("MooseApp",
+                    SolutionInitialCondition,
+                    "06/30/2024 24:00",
+                    SolutionIC);
 
 InputParameters
-SolutionInitialCondition::validParams()
+SolutionIC::validParams()
 {
   InputParameters params = InitialCondition::validParams();
   params.addRequiredParam<UserObjectName>("solution_uo",
@@ -27,7 +31,7 @@ SolutionInitialCondition::validParams()
   return params;
 }
 
-SolutionInitialCondition::SolutionInitialCondition(const InputParameters & parameters)
+SolutionIC::SolutionIC(const InputParameters & parameters)
   : InitialCondition(parameters),
     _solution_object(getUserObject<SolutionUserObject>("solution_uo")),
     _solution_object_var_name(getParam<VariableName>("from_variable"))
@@ -35,7 +39,7 @@ SolutionInitialCondition::SolutionInitialCondition(const InputParameters & param
 }
 
 void
-SolutionInitialCondition::initialSetup()
+SolutionIC::initialSetup()
 {
   // remap block names this IC is defined on into the ExodusII file block IDs
   const std::map<SubdomainName, SubdomainID> & block_names_to_ids_from =
@@ -55,7 +59,7 @@ SolutionInitialCondition::initialSetup()
 }
 
 Real
-SolutionInitialCondition::value(const Point & p)
+SolutionIC::value(const Point & p)
 {
   return _solution_object.pointValue(0., p, _solution_object_var_name, &_exo_block_ids);
 }
