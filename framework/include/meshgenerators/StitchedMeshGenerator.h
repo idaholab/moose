@@ -40,4 +40,8 @@ protected:
 
   /// Type of algorithm used to find matching nodes (binary or exhaustive)
   MooseEnum _algorithm;
+
+  /// Whether to renumber all boundaries in stitched meshes to prevent accidental merging
+  /// of sidesets with the same id
+  const bool _prevent_boundary_ids_overlap;
 };
