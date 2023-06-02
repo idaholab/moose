@@ -51,8 +51,8 @@ public:
   ///@{
   auto begin() { return _data.begin(); }
   auto end() { return _data.end(); }
-  const auto begin() const { return _data.begin(); }
-  const auto end() const { return _data.end(); }
+  auto begin() const { return _data.begin(); }
+  auto end() const { return _data.end(); }
   ///@}
 
   /**
