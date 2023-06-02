@@ -107,7 +107,7 @@ XYDelaunayGenerator::XYDelaunayGenerator(const InputParameters & parameters)
     paramError("stitch_holes", "Need one stitch_holes entry per hole, if specified.");
 
   for (auto hole_i : index_range(_stitch_holes))
-    if (hole_i < _refine_holes.size() && _refine_holes[hole_i])
+    if (_stitch_holes[hole_i] && (hole_i >= _refine_holes.size() || _refine_holes[hole_i]))
       paramError("refine_holes", "Disable auto refine of any hole boundary to be stitched.");
 }
 
