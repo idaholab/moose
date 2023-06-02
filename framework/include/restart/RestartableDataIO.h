@@ -62,11 +62,11 @@ public:
   void restoreBackup(bool for_restart = false);
 
   /**
-   * Restores the data with the name \p name.
+   * Restores the data with the name \p name on thread \p tid.
    *
    * Requires that a backup has been set via setBackup.
    */
-  void restoreData(const std::string & name);
+  void restoreData(const std::string & name, const THREAD_ID tid);
 
   /**
    * Writes restartable data into a binary file.

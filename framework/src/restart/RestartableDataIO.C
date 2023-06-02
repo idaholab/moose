@@ -167,32 +167,28 @@ RestartableDataIO::restoreBackup(bool for_restart)
 }
 
 void
-RestartableDataIO::restoreData(const std::string & name)
+RestartableDataIO::restoreData(const std::string & name, const THREAD_ID tid)
 {
   auto & restartable_data_maps = _moose_app.getRestartableData();
 
-  for (const auto tid : make_range(libMesh::n_threads()))
-  {
-    auto & data_info = _backup->dataInfo(0, {});
-    if (data_info.empty())
-      readBackup(tid);
+  auto & data_info = _backup->dataInfo(tid, {});
+  if (data_info.empty())
+    readBackup(tid);
 
-    RestartableDataValue * value = restartable_data_maps[tid].findData(name);
-    if (value == nullptr)
-      mooseError("RestartableDataIO::restoreData(): RestartableData with name '",
-                 name,
-                 "' was not declared");
+  RestartableDataValue * value = restartable_data_maps[tid].findData(name);
+  if (!value)
+    mooseError("RestartableDataIO::restoreData(): RestartableData with name '",
+               name,
+               "' was not declared");
 
-    auto find_data = data_info.find(name);
-    if (find_data == data_info.end())
-      mooseError("RestartableDataIO::restoreData(): RestartableData with name '",
-                 name,
-                 "' was not stored");
+  auto find_data = data_info.find(name);
+  if (find_data == data_info.end())
+    mooseError(
+        "RestartableDataIO::restoreData(): RestartableData with name '", name, "' was not stored");
 
-    std::istream stream(_backup->data(tid).rdbuf());
-    auto & data_entry = find_data->second;
-    deserializeRestartableDataValue(*value, data_entry, stream);
-  }
+  std::istream stream(_backup->data(tid).rdbuf());
+  auto & data_entry = find_data->second;
+  deserializeRestartableDataValue(*value, data_entry, stream);
 }
 
 void
