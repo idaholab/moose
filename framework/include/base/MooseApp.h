@@ -1340,6 +1340,9 @@ private:
    */
   const ExecFlagEnum _execute_flags;
 
+  /// Cache output buffer so the language server can turn it off then back on
+  std::streambuf * _output_buffer_cache;
+
   /// Whether to turn on automatic scaling by default
   const bool _automatic_automatic_scaling;
 
