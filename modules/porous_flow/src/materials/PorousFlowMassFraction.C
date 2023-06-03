@@ -42,7 +42,7 @@ PorousFlowMassFractionTempl<is_ad>::PorousFlowMassFractionTempl(const InputParam
                         ? nullptr
                         : &declareGenericProperty<std::vector<std::vector<RealGradient>>, is_ad>(
                               "PorousFlow_grad_mass_frac_qp")),
-    _dmass_frac_dvar(_nodal_material
+    _dmass_frac_dvar(_nodal_material || is_ad
                          ? &declareProperty<std::vector<std::vector<std::vector<Real>>>>(
                                "dPorousFlow_mass_frac_nodal_dvar")
                          : &declareProperty<std::vector<std::vector<std::vector<Real>>>>(
