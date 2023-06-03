@@ -20,7 +20,7 @@ power = 3
   [node]
     type = ExtraNodesetGenerator
     input = MeshGenerator
-    new_boundary = pull
+    new_boundary = hold
     nodes = 0
   []
   [push]
@@ -29,7 +29,6 @@ power = 3
     new_boundary = push
     coord = '30 10 0'
   []
-
 []
 
 [Variables]
@@ -80,7 +79,7 @@ power = 3
   [no_x]
     type = DirichletBC
     variable = disp_y
-    boundary = pull
+    boundary = hold
     value = 0.0
   []
   [no_y]
@@ -92,7 +91,7 @@ power = 3
 
 []
 [NodalKernels]
-  [pull]
+  [push]
     type = NodalGravity
     variable = disp_y
     boundary = push
