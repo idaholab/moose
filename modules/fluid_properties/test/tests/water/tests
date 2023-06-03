@@ -1,8 +1,11 @@
 [Tests]
-  [./water]
+  design = 'Water97FluidProperties.md'
+  issues = '#6972 #8849 #10234'
+  [water]
     type = CSVDiff
     input = 'water.i'
     csvdiff = 'water_out.csv'
     threading = '!pthreads'
-  [../]
+    requirement = 'The system shall be able to compute the fluid properties of water and steam following the IAPWS-IF97 formulations.'
+  []
 []

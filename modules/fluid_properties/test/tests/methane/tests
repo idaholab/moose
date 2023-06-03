@@ -1,8 +1,11 @@
 [Tests]
-  [./methane]
+  design = 'MethaneFluidProperties.md'
+  issues = '#6972 #12445'
+  [methane]
     type = Exodiff
     input = 'methane.i'
     exodiff = 'methane_out.e'
     threading = '!pthreads'
-  [../]
+    requirement = 'The system shall be able to compute fluid properties for methane in a gaseous phase.'
+  []
 []
