@@ -70,7 +70,7 @@ PorousFlowAqueousPreDisMineral::PorousFlowAqueousPreDisMineral(const InputParame
       // If initial_concentrations are elemental AuxVariables (or constants), we want to use
       // coupledGenericValue() rather than coupledGenericDofValue()
       const bool is_nodal = isCoupled("initial_concentrations")
-                                ? getVar("initial_concentrations", r)->isNodal()
+                                ? getFieldVar("initial_concentrations", r)->isNodal()
                                 : false;
 
       _initial_conc[r] =

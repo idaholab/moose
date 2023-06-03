@@ -42,7 +42,8 @@ PorousFlowMassFractionTempl<is_ad>::PorousFlowMassFractionTempl(const InputParam
                         ? nullptr
                         : &declareGenericProperty<std::vector<std::vector<RealGradient>>, is_ad>(
                               "PorousFlow_grad_mass_frac_qp")),
-    _dmass_frac_dvar(_nodal_material || is_ad
+    _dmass_frac_dvar(is_ad ? nullptr
+                     : _nodal_material
                          ? &declareProperty<std::vector<std::vector<std::vector<Real>>>>(
                                "dPorousFlow_mass_frac_nodal_dvar")
                          : &declareProperty<std::vector<std::vector<std::vector<Real>>>>(
@@ -72,7 +73,7 @@ PorousFlowMassFractionTempl<is_ad>::PorousFlowMassFractionTempl(const InputParam
     // If mass_fraction_vars are elemental AuxVariables (or constants), we want to use
     // coupledGenericValue() rather than coupledGenericDofValue()
     const bool is_nodal =
-        isCoupled("mass_fraction_vars") ? getVar("mass_fraction_vars", i)->isNodal() : false;
+        isCoupled("mass_fraction_vars") ? getFieldVar("mass_fraction_vars", i)->isNodal() : false;
 
     _mf_vars_num[i] = coupled("mass_fraction_vars", i);
     _mf_vars[i] =

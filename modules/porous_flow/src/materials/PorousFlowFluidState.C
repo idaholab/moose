@@ -46,7 +46,7 @@ PorousFlowFluidState::PorousFlowFluidState(const InputParameters & parameters)
               : 0),
 
     _num_Z_vars(coupledComponents("z")),
-    _is_Xnacl_nodal(isCoupled("xnacl") ? getVar("xnacl", 0)->isNodal() : false),
+    _is_Xnacl_nodal(isCoupled("xnacl") ? getFieldVar("xnacl", 0)->isNodal() : false),
     _Xnacl(_nodal_material && _is_Xnacl_nodal ? coupledDofValues("xnacl") : coupledValue("xnacl")),
     _grad_Xnacl_qp(coupledGradient("xnacl")),
     _Xnacl_varnum(coupled("xnacl")),
