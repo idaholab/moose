@@ -11,7 +11,8 @@ ComputeValueRate::validParams()
 {
   InputParameters params = AuxKernel::validParams();
 
-  params.addRequiredCoupledVar("coupled","Nonlinear Variable that needed to be taken time derivative of");
+  params.addRequiredCoupledVar("coupled",
+                               "Nonlinear Variable that needed to be taken time derivative of");
 
   return params;
 }
@@ -19,8 +20,8 @@ ComputeValueRate::validParams()
 ComputeValueRate::ComputeValueRate(const InputParameters & parameters)
   : AuxKernel(parameters),
 
-  //Compute the time derivative of the given variable using "coupledDot"
-  _coupled_val(coupledDot("coupled"))
+    // Compute the time derivative of the given variable using "coupledDot"
+    _coupled_val(coupledDot("coupled"))
 
 {
 }

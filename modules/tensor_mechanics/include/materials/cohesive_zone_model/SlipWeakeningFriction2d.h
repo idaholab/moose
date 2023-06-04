@@ -42,5 +42,4 @@ protected:
 
   const VariableValue & _mu_s;
   const VariableValue & _ini_shear_sts;
-
 };

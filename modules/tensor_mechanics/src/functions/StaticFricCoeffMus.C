@@ -14,10 +14,7 @@ StaticFricCoeffMus::validParams()
   return params;
 }
 
-StaticFricCoeffMus::StaticFricCoeffMus(const InputParameters & parameters)
-  : Function(parameters)
-{
-}
+StaticFricCoeffMus::StaticFricCoeffMus(const InputParameters & parameters) : Function(parameters) {}
 
 Real
 StaticFricCoeffMus::value(Real /*t*/, const Point & p) const
@@ -26,7 +23,7 @@ StaticFricCoeffMus::value(Real /*t*/, const Point & p) const
   Real x_coord = p(0);
 
   double mu_s = 0.0;
-  if (x_coord>=-15.0e3 && x_coord<=15.0e3)
+  if (x_coord >= -15.0e3 && x_coord <= 15.0e3)
   {
     mu_s = 0.677;
   }
@@ -35,5 +32,4 @@ StaticFricCoeffMus::value(Real /*t*/, const Point & p) const
     mu_s = 10000.0;
   }
   return mu_s;
-
 }

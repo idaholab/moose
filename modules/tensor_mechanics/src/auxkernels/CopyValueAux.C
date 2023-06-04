@@ -11,7 +11,7 @@ CopyValueAux::validParams()
 {
   InputParameters params = AuxKernel::validParams();
 
-  params.addRequiredCoupledVar("coupled","Nonlinear Variable that needed to be passed");
+  params.addRequiredCoupledVar("coupled", "Nonlinear Variable that needed to be passed");
 
   return params;
 }
@@ -19,7 +19,7 @@ CopyValueAux::validParams()
 CopyValueAux::CopyValueAux(const InputParameters & parameters)
   : AuxKernel(parameters),
 
-  _coupled_val(coupledValue("coupled"))
+    _coupled_val(coupledValue("coupled"))
 
 {
 }

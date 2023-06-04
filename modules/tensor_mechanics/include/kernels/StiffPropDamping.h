@@ -19,5 +19,4 @@ protected:
   const MaterialProperty<RankTwoTensor> & _stress_older;
   const MaterialProperty<RankTwoTensor> & _stress;
   Real _q;
-
 };

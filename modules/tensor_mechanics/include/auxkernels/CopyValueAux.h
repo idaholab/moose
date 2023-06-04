@@ -8,18 +8,12 @@ AuxKernel of Passing Variable
 
 class CopyValueAux : public AuxKernel
 {
-    public:
+public:
+  static InputParameters validParams();
+  CopyValueAux(const InputParameters & parameters);
 
-    static InputParameters validParams();
-    CopyValueAux(const InputParameters & parameters);
+protected:
+  virtual Real computeValue() override;
 
-    protected:
-
-    virtual Real computeValue() override;
-
-    const VariableValue & _coupled_val;
-
+  const VariableValue & _coupled_val;
 };
-
-
-
