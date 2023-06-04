@@ -99,6 +99,7 @@ Extensions:
             distributions: syntax/Distributions/index.md
             executioners: syntax/Executioner/index.md
             executors: syntax/Executors/index.md
+            fluidproperties: syntax/FluidProperties/index.md
             functions: syntax/Functions/index.md
             functormaterials: syntax/FunctorMaterials/index.md
             fvbcs: syntax/FVBCs/index.md
