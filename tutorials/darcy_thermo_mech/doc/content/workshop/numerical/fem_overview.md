@@ -211,3 +211,52 @@ Write in inner product notation. Each term of the equation will inherit from an 
 \underbrace{\langle\psi, k\nabla u\cdot \hat{n} \rangle}_{BoundaryCondition} +
 \underbrace{\left(\psi, \vec{\beta} \cdot \nabla u\right)}_{Kernel} -
 \underbrace{\left(\psi, f\right)}_{Kernel} = 0
+
+!---
+
+## Corresponding MOOSE input file blocks
+
+!style! fontsize=140%
+
+!equation
+\underbrace{\left(\nabla\psi, k\nabla u \right)}_{Kernel} -
+\underbrace{\langle\psi, k\nabla u\cdot \hat{n} \rangle}_{BoundaryCondition} +
+\underbrace{\left(\psi, \vec{\beta} \cdot \nabla u\right)}_{Kernel} -
+\underbrace{\left(\psi, f\right)}_{Kernel} = 0
+
+!style-end!
+
+!style! fontsize=60%
+
+!row!
+!col! width=20%
+!listing test/tests/kernels/2d_diffusion/2d_diffusion_neumannbc_test.i block=Kernels remove=Kernels/active
+!col-end!
+
+!col! width=1%
+$\quad$
+!col-end!
+
+!col! width=20%
+!listing test/tests/kernels/2d_diffusion/2d_diffusion_neumannbc_test.i block=BCs remove=BCs/active BCs/left
+!col-end!
+
+!col! width=1%
+$\quad$
+!col-end!
+
+!col! width=20%
+!listing test/tests/dgkernels/1d_advection_dg/1d_advection_dg.i block=Kernels remove=Kernels/time_u
+!col-end!
+
+!col! width=1%
+$\quad$
+!col-end!
+
+!col! width=20%
+!listing test/tests/bcs/nodal_normals/circle_tris.i block=Kernels remove=Kernels/diff
+!col-end!
+
+!row-end!
+
+!style-end!
