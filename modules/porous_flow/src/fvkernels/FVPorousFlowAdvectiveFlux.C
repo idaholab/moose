@@ -21,6 +21,7 @@ FVPorousFlowAdvectiveFlux::validParams()
   params.addRequiredParam<UserObjectName>("PorousFlowDictator",
                                           "The PorousFlowDictator UserObject");
   params.addParam<unsigned int>("fluid_component", 0, "The fluid component for this kernel");
+  params.set<unsigned short>("ghost_layers") = 2;
   params.addClassDescription("Advective Darcy flux");
   return params;
 }

@@ -9,6 +9,7 @@
 
 #include "FVPorousFlowDispersiveFlux.h"
 #include "PorousFlowDictator.h"
+#include "MooseUtils.h"
 
 registerADMooseObject("PorousFlowApp", FVPorousFlowDispersiveFlux);
 
@@ -27,6 +28,7 @@ FVPorousFlowDispersiveFlux::validParams()
       "disp_trans", "Vector of transverse dispersion coefficients for each phase");
   params.addClassDescription(
       "Dispersive and diffusive flux of the component given by fluid_component in all phases");
+  params.set<unsigned short>("ghost_layers") = 2;
   params.addClassDescription("Advective Darcy flux");
   return params;
 }
@@ -157,9 +159,9 @@ FVPorousFlowDispersiveFlux::computeQpResidual()
     }
 
     const auto velocity = mobility * gradp;
-    const auto velocity_abs = std::sqrt(velocity * velocity);
+    const auto velocity_abs = MetaPhysicL::raw_value(velocity).norm();
 
-    if (MetaPhysicL::raw_value(velocity_abs) > 0.0)
+    if (!MooseUtils::isZero(velocity_abs))
     {
       const auto v2 = ADRankTwoTensor::selfOuterProduct(velocity);
 
