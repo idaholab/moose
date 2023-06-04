@@ -25,6 +25,8 @@ LinearFluidProperties::validParams()
   params.addParam<Real>("mu", 0, "Dynamic viscosity, Pa.s");
   params.addParam<Real>("k", 0, "Thermal conductivity, W/(m-K)");
   params.addParam<Real>("Pr", 0, "Prandtl Number, [-]");
+  params.addClassDescription(
+      "Fluid properties for a fluid with density linearly dependent on temperature and pressure");
   return params;
 }
 

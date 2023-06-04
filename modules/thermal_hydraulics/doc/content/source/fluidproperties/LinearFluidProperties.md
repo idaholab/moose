@@ -1,20 +1,19 @@
 # LinearFluidProperties
 
-!alert construction title=Undocumented Class
-The LinearFluidProperties has not been documented. The content listed below should be used as a starting point for
-documenting the class, which includes the typical automatic documentation associated with a
-MooseObject; however, what is contained is ultimately determined by what is necessary to make the
-documentation clear for users.
-
 !syntax description /Modules/FluidProperties/LinearFluidProperties
 
-## Overview
+All other fluid properties are either constant, such as:
 
-!! Replace these lines with information regarding the LinearFluidProperties object.
+- dynamic viscosity
+- thermal conductivity
+- specific heat
+- speed of sound
+- Prandtl number
 
-## Example Input File Syntax
+or dependent on pressure and temperature through density's dependence:
 
-!! Describe and include an example of how to use the LinearFluidProperties object.
+- specific energy
+- specific enthalpy
 
 !syntax parameters /Modules/FluidProperties/LinearFluidProperties
 
