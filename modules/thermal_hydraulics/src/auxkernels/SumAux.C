@@ -16,7 +16,7 @@ SumAux::validParams()
 {
   InputParameters params = AuxKernel::validParams();
 
-  params.addClassDescription("Sum of aux variables");
+  params.addClassDescription("Sum of nonlinear or auxiliary variables");
 
   params.addRequiredCoupledVar("values", "Vector of values to sum");
 

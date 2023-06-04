@@ -16,8 +16,7 @@ WeightedAverageAux::validParams()
 {
   InputParameters params = AuxKernel::validParams();
 
-  params.addClassDescription(
-      "Weighted average of aux variables using other aux variables as weights");
+  params.addClassDescription("Weighted average of variables using other variables as weights");
 
   params.addRequiredCoupledVar("values", "Vector of values to average");
   params.addRequiredCoupledVar("weights", "Vector of weights for each value");

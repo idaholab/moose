@@ -39,5 +39,6 @@ VectorVelocityComponentAux::VectorVelocityComponentAux(const InputParameters & p
 Real
 VectorVelocityComponentAux::computeValue()
 {
+  mooseAssert(_arhoA[_qp] != 0, "alpha*rho*A is 0, unable to compute velocity");
   return _dir[_qp](_component) * _arhouA[_qp] / _arhoA[_qp];
 }
