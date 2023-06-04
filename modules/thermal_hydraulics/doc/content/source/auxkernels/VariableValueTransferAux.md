@@ -1,20 +1,16 @@
 # VariableValueTransferAux
 
-!alert construction title=Undocumented Class
-The VariableValueTransferAux has not been documented. The content listed below should be used as a starting point for
-documenting the class, which includes the typical automatic documentation associated with a
-MooseObject; however, what is contained is ultimately determined by what is necessary to make the
-documentation clear for users.
-
 !syntax description /AuxKernels/VariableValueTransferAux
 
-## Overview
+The variable values can only be set on one boundary at a time and may only
+be received from a single boundary as well.
 
-!! Replace these lines with information regarding the VariableValueTransferAux object.
+!alert note
+This class assumes a first order mesh.
 
-## Example Input File Syntax
-
-!! Describe and include an example of how to use the VariableValueTransferAux object.
+!alert note
+The source variable must be a nonlinear variable and must have its degrees of freedom on nodes, as
+do Lagrange variables.
 
 !syntax parameters /AuxKernels/VariableValueTransferAux
 

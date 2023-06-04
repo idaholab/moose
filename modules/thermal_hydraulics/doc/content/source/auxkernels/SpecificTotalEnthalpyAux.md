@@ -1,20 +1,17 @@
 # SpecificTotalEnthalpyAux
 
-!alert construction title=Undocumented Class
-The SpecificTotalEnthalpyAux has not been documented. The content listed below should be used as a starting point for
-documenting the class, which includes the typical automatic documentation associated with a
-MooseObject; however, what is contained is ultimately determined by what is necessary to make the
-documentation clear for users.
-
 !syntax description /AuxKernels/SpecificTotalEnthalpyAux
 
-## Overview
+The specific total enthalpy $h$ is computed as
 
-!! Replace these lines with information regarding the SpecificTotalEnthalpyAux object.
+!equation
+h = \dfrac{ \rho E A + \alpha P A }{\rho A}
 
-## Example Input File Syntax
+where $\rho$ the fluid density, $A$ the local component area, $P$ the pressure and
+$\rho E A$ the product of the internal energy by the density by the local component area.
 
-!! Describe and include an example of how to use the SpecificTotalEnthalpyAux object.
+!alert note
+$\rho E A$, $\rho A$ and $\rho$ are variables usually defined by the [Components](syntax/Components/index.md).
 
 !syntax parameters /AuxKernels/SpecificTotalEnthalpyAux
 
