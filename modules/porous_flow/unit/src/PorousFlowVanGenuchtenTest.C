@@ -54,7 +54,7 @@ const PorousFlowVanGenuchten::HighCapillaryPressureExtension
                    high_ext_Pc,
                    high_ext_dPc);
 
-TEST(PorousFlowVanGenuchten, sat)
+TEST(PorousFlowVanGenuchtenTest, sat)
 {
   EXPECT_NEAR(1.0, PorousFlowVanGenuchten::effectiveSaturation(1.0E30, 0.7, 0.5), 1.0E-5);
   EXPECT_NEAR(1.0, PorousFlowVanGenuchten::effectiveSaturation(1.0, 0.7, 0.5), 1.0E-5);
@@ -65,7 +65,7 @@ TEST(PorousFlowVanGenuchten, sat)
   EXPECT_NEAR(0.0, PorousFlowVanGenuchten::effectiveSaturation(-1.0E30, 0.7, 0.5), 1.0E-5);
 }
 
-TEST(PorousFlowVanGenuchten, dsat)
+TEST(PorousFlowVanGenuchtenTest, dsat)
 {
   Real fd;
   EXPECT_NEAR(0.0, PorousFlowVanGenuchten::dEffectiveSaturation(1.0E30, 0.7, 0.5), 1.0E-5);
@@ -83,7 +83,7 @@ TEST(PorousFlowVanGenuchten, dsat)
   EXPECT_NEAR(0.0, PorousFlowVanGenuchten::dEffectiveSaturation(-1.0E30, 0.7, 0.5), 1.0E-5);
 }
 
-TEST(PorousFlowVanGenuchten, d2sat)
+TEST(PorousFlowVanGenuchtenTest, d2sat)
 {
   Real fd;
   EXPECT_NEAR(0.0, PorousFlowVanGenuchten::d2EffectiveSaturation(1.0E30, 0.7, 0.5), 1.0E-5);
@@ -101,7 +101,7 @@ TEST(PorousFlowVanGenuchten, d2sat)
   EXPECT_NEAR(0.0, PorousFlowVanGenuchten::d2EffectiveSaturation(-1.0E30, 0.7, 0.5), 1.0E-5);
 }
 
-TEST(PorousFlowVanGenuchten, cap)
+TEST(PorousFlowVanGenuchtenTest, cap)
 {
   EXPECT_NEAR(0.0, PorousFlowVanGenuchten::capillaryPressure(1.1, 1.0, 0.55, 1.0E30), 1.0E-5);
   EXPECT_NEAR(4.06172392297447,
@@ -111,7 +111,7 @@ TEST(PorousFlowVanGenuchten, cap)
   EXPECT_NEAR(1000.0, PorousFlowVanGenuchten::capillaryPressure(0.0, 0.625, 0.55, 1000.0), 1.0E-5);
 }
 
-TEST(PorousFlowVanGenuchten, dcap)
+TEST(PorousFlowVanGenuchtenTest, dcap)
 {
   Real fd;
   EXPECT_NEAR(0.0, PorousFlowVanGenuchten::dCapillaryPressure(0.0, 1.0, 0.55, 1.0E30), 1.0E-5);
@@ -122,7 +122,7 @@ TEST(PorousFlowVanGenuchten, dcap)
   EXPECT_NEAR(0.0, PorousFlowVanGenuchten::dCapillaryPressure(1.0, 1.0, 0.55, 1.0E30), 1.0E-5);
 }
 
-TEST(PorousFlowVanGenuchten, d2cap)
+TEST(PorousFlowVanGenuchtenTest, d2cap)
 {
   Real fd;
   EXPECT_NEAR(0.0, PorousFlowVanGenuchten::d2CapillaryPressure(0.0, 1.0, 0.55, 1.0E30), 1.0E-5);
@@ -133,14 +133,14 @@ TEST(PorousFlowVanGenuchten, d2cap)
   EXPECT_NEAR(0.0, PorousFlowVanGenuchten::d2CapillaryPressure(1.0, 0.625, 0.55, 1.0E30), 1.0E-5);
 }
 
-TEST(PorousFlowVanGenuchten, relperm)
+TEST(PorousFlowVanGenuchtenTest, relperm)
 {
   EXPECT_NEAR(1.0, PorousFlowVanGenuchten::relativePermeability(1.0E30, 0.7), 1.0E-5);
   EXPECT_NEAR(0.0, PorousFlowVanGenuchten::relativePermeability(-1.0, 0.7), 1.0E-5);
   EXPECT_NEAR(0.0091160727, PorousFlowVanGenuchten::relativePermeability(0.3, 0.7), 1.0E-5);
 }
 
-TEST(PorousFlowVanGenuchten, drelperm)
+TEST(PorousFlowVanGenuchtenTest, drelperm)
 {
   Real fd;
   EXPECT_NEAR(0.0, PorousFlowVanGenuchten::dRelativePermeability(1.0E30, 0.7), 1.0E-5);
@@ -155,7 +155,7 @@ TEST(PorousFlowVanGenuchten, drelperm)
   EXPECT_NEAR(fd, PorousFlowVanGenuchten::dRelativePermeability(0.8, 0.65), 1.0E-5);
 }
 
-TEST(PorousFlowVanGenuchten, d2relperm)
+TEST(PorousFlowVanGenuchtenTest, d2relperm)
 {
   Real fd;
   EXPECT_NEAR(0.0, PorousFlowVanGenuchten::d2RelativePermeability(1.0E30, 0.7), 1.0E-5);
@@ -170,7 +170,21 @@ TEST(PorousFlowVanGenuchten, d2relperm)
   EXPECT_NEAR(fd, PorousFlowVanGenuchten::d2RelativePermeability(0.8, 0.65), 1.0E-5);
 }
 
-TEST(PorousFlowVanGenuchten, relpermNW)
+TEST(PorousFlowVanGenuchtenTest, adrelperm)
+{
+  DualReal sat = 0.3;
+  Moose::derivInsert(sat.derivatives(), 0, 1.0);
+
+  const auto adrelperm = PorousFlowVanGenuchten::relativePermeability(sat, 0.7);
+
+  const auto relperm = PorousFlowVanGenuchten::relativePermeability(sat.value(), 0.7);
+  const auto drelperm = PorousFlowVanGenuchten::dRelativePermeability(sat.value(), 0.7);
+
+  EXPECT_NEAR(adrelperm.value(), relperm, 1.0E-5);
+  EXPECT_NEAR(adrelperm.derivatives()[0], drelperm, 1.0E-5);
+}
+
+TEST(PorousFlowVanGenuchtenTest, relpermNW)
 {
   EXPECT_NEAR(1.0, PorousFlowVanGenuchten::relativePermeabilityNW(1.0E30, 0.7), 1.0E-5);
   EXPECT_NEAR(0.0, PorousFlowVanGenuchten::relativePermeabilityNW(-1.0, 0.7), 1.0E-5);
@@ -178,7 +192,7 @@ TEST(PorousFlowVanGenuchten, relpermNW)
   EXPECT_NEAR(0.559879012, PorousFlowVanGenuchten::relativePermeabilityNW(0.7, 0.8), 1.0E-5);
 }
 
-TEST(PorousFlowVanGenuchten, drelpermNW)
+TEST(PorousFlowVanGenuchtenTest, drelpermNW)
 {
   Real fd;
   EXPECT_NEAR(0.0, PorousFlowVanGenuchten::dRelativePermeabilityNW(1.0E30, 0.7), 1.0E-5);
@@ -193,7 +207,7 @@ TEST(PorousFlowVanGenuchten, drelpermNW)
   EXPECT_NEAR(fd, PorousFlowVanGenuchten::dRelativePermeabilityNW(0.8, 0.65), 1.0E-5);
 }
 
-TEST(PorousFlowVanGenuchten, d2relpermNW)
+TEST(PorousFlowVanGenuchtenTest, d2relpermNW)
 {
   Real fd;
   EXPECT_NEAR(0.0, PorousFlowVanGenuchten::d2RelativePermeabilityNW(1.0E30, 0.7), 1.0E-5);
@@ -208,8 +222,22 @@ TEST(PorousFlowVanGenuchten, d2relpermNW)
   EXPECT_NEAR(fd, PorousFlowVanGenuchten::d2RelativePermeabilityNW(0.8, 0.65), 1.0E-5);
 }
 
+TEST(PorousFlowVanGenuchtenTest, adrelpermnw)
+{
+  DualReal sat = 0.3;
+  Moose::derivInsert(sat.derivatives(), 0, 1.0);
+
+  const auto adrelperm = PorousFlowVanGenuchten::relativePermeabilityNW(sat, 0.7);
+
+  const auto relperm = PorousFlowVanGenuchten::relativePermeabilityNW(sat.value(), 0.7);
+  const auto drelperm = PorousFlowVanGenuchten::dRelativePermeabilityNW(sat.value(), 0.7);
+
+  EXPECT_NEAR(adrelperm.value(), relperm, 1.0E-5);
+  EXPECT_NEAR(adrelperm.derivatives()[0], drelperm, 1.0E-5);
+}
+
 /// Test the hysteretic capillary pressure
-TEST(PorousFlowVanGenuchten, caphys)
+TEST(PorousFlowVanGenuchtenTest, caphys)
 {
   // first define some extensions that do not actually induce any extension, so the non-extended Pc
   // can be checked
@@ -309,7 +337,7 @@ TEST(PorousFlowVanGenuchten, caphys)
 }
 
 /// Test the hysteretic saturation
-TEST(PorousFlowVanGenuchten, sathys)
+TEST(PorousFlowVanGenuchtenTest, sathys)
 {
   // first define some extensions that do not actually induce any extension, so the non-extended Pc
   // can be checked
@@ -396,7 +424,7 @@ TEST(PorousFlowVanGenuchten, sathys)
 }
 
 /// Test the first derivative of the hysteretic capillary pressure
-TEST(PorousFlowVanGenuchten, dcaphys)
+TEST(PorousFlowVanGenuchtenTest, dcaphys)
 {
   const Real eps = 1.0E-9;
 
@@ -493,7 +521,7 @@ TEST(PorousFlowVanGenuchten, dcaphys)
 }
 
 /// Test the second derivative of the hysteretic capillary pressure
-TEST(PorousFlowVanGenuchten, d2caphys)
+TEST(PorousFlowVanGenuchtenTest, d2caphys)
 {
   const Real eps = 1.0E-9;
 
@@ -615,7 +643,7 @@ TEST(PorousFlowVanGenuchten, d2caphys)
 }
 
 /// Test the derivative of the hysteretic saturation
-TEST(PorousFlowVanGenuchten, dsathys)
+TEST(PorousFlowVanGenuchtenTest, dsathys)
 {
   const Real eps = 1E-9;
 
@@ -725,7 +753,7 @@ TEST(PorousFlowVanGenuchten, dsathys)
 }
 
 /// Test the second derivative of the hysteretic saturation
-TEST(PorousFlowVanGenuchten, d2sathys)
+TEST(PorousFlowVanGenuchtenTest, d2sathys)
 {
   const Real eps = 1E-9;
 
@@ -835,7 +863,7 @@ TEST(PorousFlowVanGenuchten, d2sathys)
 }
 
 /// Test relativePermeabilityHys
-TEST(PorousFlowVanGenuchten, relativePermeabilityHys)
+TEST(PorousFlowVanGenuchtenTest, relativePermeabilityHys)
 {
   // Tests for sldel = 0.5 >= slr = 0.2
   EXPECT_NEAR(0.0,
@@ -907,7 +935,7 @@ TEST(PorousFlowVanGenuchten, relativePermeabilityHys)
 }
 
 /// Test drelativePermeabilityHys
-TEST(PorousFlowVanGenuchten, drelativePermeabilityHys)
+TEST(PorousFlowVanGenuchtenTest, drelativePermeabilityHys)
 {
   // essentially follow the testing strategy in the relativePermeabilityHys Test, but do not test
   // the derivative at the points where it is discontinuous
@@ -1011,7 +1039,7 @@ TEST(PorousFlowVanGenuchten, drelativePermeabilityHys)
 }
 
 /// Test relativePermeabilityNWHys
-TEST(PorousFlowVanGenuchten, relativePermeabilityNWHys)
+TEST(PorousFlowVanGenuchtenTest, relativePermeabilityNWHys)
 {
   // Tests for sldel = 0.5 >= slr = 0.2
   EXPECT_NEAR(0.91875,
@@ -1087,7 +1115,7 @@ TEST(PorousFlowVanGenuchten, relativePermeabilityNWHys)
 }
 
 /// Test drelativePermeabilityNWHys
-TEST(PorousFlowVanGenuchten, drelativePermeabilityNWHys)
+TEST(PorousFlowVanGenuchtenTest, drelativePermeabilityNWHys)
 {
   // Testing strategy follows the relativePermeabilityNWHys strategy, except the points at which the
   // derivative is not defined are not tested
