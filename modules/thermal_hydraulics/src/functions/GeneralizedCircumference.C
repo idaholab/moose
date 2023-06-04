@@ -16,6 +16,8 @@ GeneralizedCircumference::validParams()
 {
   InputParameters params = Function::validParams();
   params.addRequiredParam<FunctionName>("area_function", "function to compute the cross section");
+  params.addClassDescription("Computes a generalized circumference from a function "
+                             "providing the area.");
   return params;
 }
 
