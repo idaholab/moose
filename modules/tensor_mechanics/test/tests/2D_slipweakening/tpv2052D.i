@@ -6,12 +6,12 @@
     [./msh]
       type = GeneratedMeshGenerator
       dim = 2
-      nx = 1000
-      ny = 1000
-      xmin = -50000
-      xmax = 50000
-      ymin = -50000
-      ymax = 50000
+      nx = 100
+      ny = 100
+      xmin = -5000
+      xmax = 5000
+      ymin = -5000
+      ymax = 5000
     []
     [./new_block]
       type = ParsedSubdomainMeshGenerator
@@ -125,27 +125,27 @@
       execute_on = 'TIMESTEP_BEGIN'
     []
     [Displacment_x]
-      type = CopyValueAux
+      type = ProjectionAux
       variable = disp_slipweakening_x
-      coupled = disp_x
+      v = disp_x
       execute_on = 'TIMESTEP_BEGIN'
     []
     [Displacement_y]
-      type = CopyValueAux
+      type = ProjectionAux
       variable = disp_slipweakening_y
-      coupled = disp_y
+      v = disp_y
       execute_on = 'TIMESTEP_BEGIN'
     []
     [Residual_x]
-      type = CopyValueAux
+      type = ProjectionAux
       variable = resid_slipweakening_x
-      coupled = resid_x
+      v = resid_x
       execute_on = 'TIMESTEP_BEGIN'
     []
     [Residual_y]
-      type = CopyValueAux
+      type = ProjectionAux
       variable = resid_slipweakening_y
-      coupled = resid_y
+      v = resid_y
       execute_on = 'TIMESTEP_BEGIN'
     []
     [restore_x]

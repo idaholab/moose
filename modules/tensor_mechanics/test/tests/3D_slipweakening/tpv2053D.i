@@ -149,39 +149,39 @@
       execute_on = 'TIMESTEP_BEGIN'
     []
     [Displacment_x]
-      type = CopyValueAux
+      type = ProjectionAux
       variable = disp_slipweakening_x
-      coupled = disp_x
+      v = disp_x
       execute_on = 'TIMESTEP_BEGIN'
     []
     [Displacement_y]
-      type = CopyValueAux
+      type = ProjectionAux
       variable = disp_slipweakening_y
-      coupled = disp_y
+      v = disp_y
       execute_on = 'TIMESTEP_BEGIN'
     []
     [Displacement_z]
-      type = CopyValueAux
+      type = ProjectionAux
       variable = disp_slipweakening_z
-      coupled = disp_z
+      v = disp_z
       execute_on = 'TIMESTEP_BEGIN'
     []
     [Residual_x]
-      type = CopyValueAux
+      type = ProjectionAux
       variable = resid_slipweakening_x
-      coupled = resid_x
+      v = resid_x
       execute_on = 'TIMESTEP_BEGIN'
     []
     [Residual_y]
-      type = CopyValueAux
+      type = ProjectionAux
       variable = resid_slipweakening_y
-      coupled = resid_y
+      v = resid_y
       execute_on = 'TIMESTEP_BEGIN'
     []
     [Residual_z]
-      type = CopyValueAux
+      type = ProjectionAux
       variable = resid_slipweakening_z
-      coupled = resid_z
+      v = resid_z
       execute_on = 'TIMESTEP_BEGIN'
     []
     [restore_x]
