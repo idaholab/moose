@@ -84,3 +84,6 @@ PorousFlowDiffusivityBaseTempl<is_ad>::computeQpProperties()
     }
   }
 }
+
+template class PorousFlowDiffusivityBaseTempl<false>;
+template class PorousFlowDiffusivityBaseTempl<true>;
