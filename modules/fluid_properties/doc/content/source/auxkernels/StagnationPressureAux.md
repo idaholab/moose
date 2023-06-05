@@ -2,7 +2,7 @@
 
 !syntax description /AuxKernels/StagnationPressureAux
 
-Stagnation pressure is the pressure the fluid would obtain if brought to rest without loss of mechanical energy. It is
+Stagnation pressure, or *total* pressure, is the pressure the fluid would obtain if brought to rest isentropically. It is
 the sum of static and dynamic pressure. Stagnation pressure is best used to describe reservoirs, pools, and other stagnation
 points.
 
