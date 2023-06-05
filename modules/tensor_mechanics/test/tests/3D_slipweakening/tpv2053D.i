@@ -130,24 +130,6 @@
   []
 
   [AuxKernels]
-    [Vel_x]
-      type = ComputeValueRate
-      variable = vel_slipweakening_x
-      coupled = disp_x
-      execute_on = 'TIMESTEP_BEGIN'
-    []
-    [Vel_y]
-      type = ComputeValueRate
-      variable = vel_slipweakening_y
-      coupled = disp_y
-      execute_on = 'TIMESTEP_BEGIN'
-    []
-    [Vel_z]
-      type = ComputeValueRate
-      variable = vel_slipweakening_z
-      coupled = disp_z
-      execute_on = 'TIMESTEP_BEGIN'
-    []
     [Displacment_x]
       type = ProjectionAux
       variable = disp_slipweakening_x
