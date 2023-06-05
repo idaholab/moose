@@ -164,3 +164,64 @@ TEST(CompileTimeDerivativesTest, vector_reference)
   EXPECT_EQ(result.D<dX>()(), 24.0);
   EXPECT_EQ(result.D<dX>().D<dX>()(), 6.0);
 }
+
+TEST(CompileTimeDerivativesTest, print)
+{
+  std::vector<double> _prop{1, 2, 3, 4};
+  std::size_t _qp = 2;
+  const auto prop = makeRef(_prop, _qp);
+  const auto result1 = 3.0 * prop * prop;
+  EXPECT_EQ(result1.print(), "3*[a[2]]*[a[2]]");
+
+  Real v = 0.0;
+  const auto x = makeRef(v);
+  const auto result2 = x * (1.0 - x) - (x * log(x) + (1.0 - x) * log(1.0 - x));
+  EXPECT_EQ(result2.print(), "[v]*(1-[v])-([v]*log([v])+(1-[v])*log(1-[v]))");
+}
+
+TEST(CompileTimeDerivativesTest, makeRefs)
+{
+  Real va, vb, vc;
+  const auto [a, b, c] = makeRefs<30>(va, vb, vc);
+
+  // matching order
+  EXPECT_EQ(&va, &a());
+  EXPECT_EQ(&vb, &b());
+  EXPECT_EQ(&vc, &c());
+
+  // correct tags
+  EXPECT_EQ(a.D<30>()(), 1);
+  EXPECT_EQ(a.D<31>()(), 0);
+  EXPECT_EQ(a.D<32>()(), 0);
+
+  EXPECT_EQ(b.D<30>()(), 0);
+  EXPECT_EQ(b.D<31>()(), 1);
+  EXPECT_EQ(b.D<32>()(), 0);
+
+  EXPECT_EQ(c.D<30>()(), 0);
+  EXPECT_EQ(c.D<31>()(), 0);
+  EXPECT_EQ(c.D<32>()(), 1);
+}
+
+TEST(CompileTimeDerivativesTest, makeStandardDeviation)
+{
+  const Real va = 1, vb = 2, vc = 1.5;
+  const int params = 30;
+  const auto [a, b, c] = makeRefs<params>(va, vb, vc);
+
+  const Real vx = 0.5;
+  const auto x = makeRef(vx);
+
+  const auto f = a + b * x + c * x * x;
+
+  Eigen::Matrix<Real, 3, 3> covariance;
+  // clang-format off
+  covariance << 0.2,  0.01, 0.07,
+                0.01, 0.4,  0.05,
+                0.07, 0.05, 0.3;
+  // clang-format on
+
+  const auto std_dev = makeStandardDeviation<params>(f, covariance);
+
+  EXPECT_NEAR(std_dev(), 0.6133922073192649, 1e-15);
+}
