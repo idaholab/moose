@@ -28,13 +28,19 @@ DarcyThermoMechApp::validParams()
 
 DarcyThermoMechApp::DarcyThermoMechApp(InputParameters parameters) : MooseApp(parameters)
 {
-  ModulesApp::registerAllObjects<DarcyThermoMechApp>(_factory, _action_factory, _syntax);
-  Registry::registerObjectsTo(_factory, {"DarcyThermoMechApp"});
-  Registry::registerActionsTo(_action_factory, {"DarcyThermoMechApp"});
+  DarcyThermoMechApp::registerAll(_factory, _action_factory, _syntax);
 }
 
 void
 DarcyThermoMechApp::registerApps()
 {
   registerApp(DarcyThermoMechApp);
+}
+
+void
+DarcyThermoMechApp::registerAll(Factory & factory, ActionFactory & action_factory, Syntax & syntax)
+{
+  Registry::registerObjectsTo(factory, {"DarcyThermoMechApp"});
+  Registry::registerActionsTo(action_factory, {"DarcyThermoMechApp"});
+  ModulesApp::registerAllObjects<DarcyThermoMechApp>(factory, action_factory, syntax);
 }
