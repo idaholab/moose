@@ -11,44 +11,53 @@ The MOOSE optimization module provides a flexible framework for solving inverse 
 - [Example 3: Transient Solve with Automatic Adjoint](material_transient.md)
 - [debuggingHelp.md]
 
-# Example: Transient Solve with automatic adjoing problem id=sec:TransientSolveAutomaticAdjoint
+# Example: Transient Solve with automatic adjoint problem id=sec:TransientSolveAutomaticAdjoint
 
-In this example, material parameters are optimized within a transient solve setting. This is accomplished
+In this example, the spatially varying thermal conductivity shown in [diff_parameter] is optimized
+to fit time dependent temperature measurements at the points shown by the yellow "x"'s in
+[solution]. This is accomplished
 by leveraging inverse optimization theory, see [section](theory/InvOptTheory.md#sec:material_inversion). As
 with [material inversion with constant conductivity](materialInv_ConstK.md), this is a nonlinear optimization
 problem that requires an appropriate initial guess and parameter bounds to obtain convergence.
 
 ## Transient Problem Definition
 
-The problem analyzed here is a two-dimensional diffusion example with square geometry. The right
-and top boundaries are subjected to zero Dirichlet boundary conditions. The spatial distribution of
-the material parameter $D$ is given in [diff_parameter]. While this material parameter is known in the forward
-problem, its distribution to minimize the solution misfit is optimized in the adjoint pass.
-
+The thermal problem analyzed here is a two-dimensional example with square geometry. The right
+and top boundaries are subjected to zero temperature Dirichlet boundary conditions. The thermal
+conductivity given by the parameter $D$ is being optimized in the four regions shown in
+[diff_parameter].  The actual thermal conductivity distribution shown in [diff_parameter] is being
+used with the forward problem to produce synthetic measurement points that will be matched.  In the
+actual optimization problem, it is this distribution that we are trying to reproduce.
 
 !media large_media/optimization/material_transient_diff.png
        style=width:40%;margin:auto;padding-top:2.5%;background-color: white;color: black;
        id=diff_parameter
-       caption=Spatial parameterization of the diffusivity parameter for the transient problem.
+       caption=Actual spatially varying thermal conductivity used to produce synthetic temperature
+       data. The optimization simulation is attempting to reproduce this thermal conductivity
+       distribution.
 
 As this is a transient or non-steady problem, the solution at each time step depends on the solution
 at previous steps. The forward problem is solved as usual in MOOSE, using implicit Euler time stepping.
-The solution to the diffusion problem is obtained for ten steps with a time step of 0.1 seconds. The
-solution to the diffused variable at time $t=0.6$ s, together with the measurement points provided for
-material inversion optimization, is shown in [solution].
+The solution to the thermal problem is obtained for ten steps with a time step of 0.1 seconds. The
+solution for the temperature field at time $t=0.6$ s, together with the points where the measured temperatures are taken, is shown in [solution].
 
 !media large_media/optimization/material_transient_solution.png
        style=width:40%;margin:auto;padding-top:2.5%;background-color: white;color: black;
        id=solution
-       caption=Snaphot of the forward simulation at the end of the sixth time step (0.6 s). The yellow
-       marking points to the measurement points provided in the procedure for obtaining
-       the optimal diffusivity parameters of the material at the end of the adjoint problem.
+       caption=Snaphot of the forward simulation at the end of the sixth time step (0.6 s). The
+       spatially varying thermal conductivity in [diff_parameter] is optimized to minimize the
+       difference between the measured and simulated temperature values at the locations shown by
+       the yellow x's.
 
-The solution to the adjoint problem requires an initial solution vector with estimates of the material
-property values. In addition to that, bounds for those parameter need to be provided. In [sensitivity],
-we plot the objective function as we vary the initial estimate for the diffusion parameter at the location
-(0.75, 0.75). The slope of the objective function with respect to variations in the parameter can have
-implication in the overall convergence of the adjoint problem.
+The optimization module will initialize the parameters being optimized to zero or the lower_bound
+for the first optimization iteration. For this problem, an initial thermal conductivity
+distribution of zero will not be able to find a thermal conductivity distribution that minimizes the
+temperature misfit. To help the optimization algorithm out, we provide an initial guess for the
+spatially varying thermal conductivity. In [sensitivity],
+we plot the objective function as we vary the thermal conductivity at the
+location
+(0.75, 0.75). The slope of the objective function with respect to variations in the parameter can
+have implication in the overall convergence of the optimization problem.
 
 !media large_media/optimization/material_transient_of.png
        style=width:40%;margin:auto;padding-top:2.5%;background-color: white;color: black;
@@ -59,21 +68,18 @@ implication in the overall convergence of the adjoint problem.
 
 ## Problem Input File Setup
 
-This example makes use of the [TransientAndAdjoint](TransientAndAdjoint.md) executioner, which coordinates
-the execution of the forward and adjoint problem, freeing the user of the need to set up a multi-app problem
-with two child applications corresponding to the forward and adjoint problems (see [Multi-app executioner](materialInv_ConstK.md#sec:MultiAppExecutioner) for an example set up with multi apps).
+This example makes use of the [TransientAndAdjoint](TransientAndAdjoint.md) executioner, which automatically computes the adjoint by transposing the forward problem's Jacobian.  This frees the user from having to derive and implement and an adjoint input file based on the forward problem kernels.  This also solves the forward and adjoint problems in a single sub-application.  An alternative method with two child applications corresponding to the forward and adjoint problems is given in [Multi-app executioner](materialInv_ConstK.md#sec:MultiAppExecutioner).
 
 The entire inverse optimization strategy is governed by the [OptimizationReporter](OptimizationReporter.md) object.
-The forward and adjoint problems are set up in an input file that is solved as a `FullSolveMultiApp` type of
-`MultiApps` problem. `MultiAppReporterTransfer` objects to move the measurement and simulation data throughout
-space and time from and to the forward problem are also set up in the driver input file.
+The forward and adjoint problems are set up in the main application input file to be solved as a `FullSolveMultiApp` type of
+`MultiApps` problem.  Controllable parameter data is transferred to the `to_forward` sub-app using the `MultiAppReporterTransfer` objects.  Objective and gradient information is then passed back to the optimization main application using another `MultiAppReporterTransfer`.
 
 !listing examples/materialTransient/optimize_auto_adjoint.i
 
-One single input file is used to simulation the physics for the optimization problem. The core of the input
+A single input file is used to simulate the physics for the optimization problem. The core of the input
 file contains the definition of the physics that the user wants to model, as with most of MOOSE's
 simulations.
-In this case, a diffusion problem with Dirichlet boundary conditions is built. The forward and adjoint problems are run in two separate [nonlinear systems](NonlinearSystem.md), one for the forward problem and another one for the adjoint problem.
+In this case, a heat diffusion problem with Dirichlet boundary conditions is built. The forward and adjoint problems are run in two separate [nonlinear systems](NonlinearSystem.md), one for the forward problem and another one for the adjoint problem.
 These nonlinear systems are inputs to an executioner that drives the simulation of both problems, i.e. the [TransientAndAdjoint](TransientAndAdjoint.md) MOOSE object.
 
 !listing examples/materialTransient/forward_and_adjoint.i block=Problem
@@ -81,7 +87,7 @@ These nonlinear systems are inputs to an executioner that drives the simulation 
 !listing examples/materialTransient/forward_and_adjoint.i block=Variables
 
 For material inversion, the derivative of the objective function with respect to the material
-parameters needs to be computed. This quantity is problem-dependent. For this diffusion case,
+parameters needs to be computed. This quantity is problem-dependent. For this thermal problem,
 the vector posprocessor `ElementOptimizationDiffusionCoefFunctionInnerProduct` computes the inner
 product between the gradient of the adjoint variable and the gradient of the primal variables.
 
