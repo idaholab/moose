@@ -1,6 +1,7 @@
 #include "StorkApp.h"
 #include "Moose.h"
 #include "AppFactory.h"
+#include "ModulesApp.h"
 #include "MooseSyntax.h"
 
 InputParameters
@@ -19,8 +20,9 @@ StorkApp::StorkApp(InputParameters parameters) : MooseApp(parameters)
 StorkApp::~StorkApp() {}
 
 void 
-StorkApp::registerAll(Factory & f, ActionFactory & af, Syntax & /*s*/)
+StorkApp::registerAll(Factory & f, ActionFactory & af, Syntax & s)
 {
+  ModulesApp::registerAllObjects<StorkApp>(f, af, s);
   Registry::registerObjectsTo(f, {"StorkApp"});
   Registry::registerActionsTo(af, {"StorkApp"});
 
