@@ -13,6 +13,7 @@
 #include "MooseTypes.h"
 #include "MeshChangedInterface.h"
 #include "MooseVariableDataBase.h"
+#include "TheWarehouse.h"
 
 #include "libmesh/tensor_tools.h"
 #include "libmesh/vector_value.h"
@@ -383,6 +384,11 @@ private:
 
   /// A dummy ADReal variable
   ADReal _ad_real_dummy = 0;
+
+  /// Cached warehouse query for FVElementalKernels
+  TheWarehouse::QueryCache<> _fv_elemental_kernel_query_cache;
+  /// Cached warehouse query for FVFluxKernels
+  TheWarehouse::QueryCache<> _fv_flux_kernel_query_cache;
 
   using MooseVariableDataBase<OutputType>::_var;
   using MooseVariableDataBase<OutputType>::_sys;
