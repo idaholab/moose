@@ -6,6 +6,10 @@ The cross-sectional area variable, [!param](/ICs/SpecificVolumeIC/A), is usually
 For single-phase single-fluid thermal-hydraulics, the volume fraction, [!param](/ICs/SpecificVolumeIC/alpha), should remain
 equal to one.
 
+!alert note
+This initial condition is usually added to the `Simulation` by the `flow model`, depending on the parameters
+passed to each [Component](syntax/Components/index.md).
+
 !syntax parameters /ICs/SpecificVolumeIC
 
 !syntax inputs /ICs/SpecificVolumeIC
