@@ -1,23 +1,31 @@
 #include "StorkApp.h"
 #include "Moose.h"
 #include "AppFactory.h"
-#include "ModulesApp.h"
 #include "MooseSyntax.h"
 
 InputParameters
 StorkApp::validParams()
 {
   InputParameters params = MooseApp::validParams();
-
+  params.set<bool>("use_legacy_material_output") = false;
   return params;
 }
 
 StorkApp::StorkApp(InputParameters parameters) : MooseApp(parameters)
 {
-  ModulesApp::registerAllObjects<StorkApp>(_factory, _action_factory, _syntax);
+  StorkApp::registerAll(_factory, _action_factory, _syntax);
 }
 
 StorkApp::~StorkApp() {}
+
+void 
+StorkApp::registerAll(Factory & f, ActionFactory & af, Syntax & /*s*/)
+{
+  Registry::registerObjectsTo(f, {"StorkApp"});
+  Registry::registerActionsTo(af, {"StorkApp"});
+
+  /* register custom execute flags, action syntax, etc. here */
+}
 
 void
 StorkApp::registerApps()
@@ -31,7 +39,7 @@ StorkApp::registerApps()
 extern "C" void
 StorkApp__registerAll(Factory & f, ActionFactory & af, Syntax & s)
 {
-  ModulesApp::registerAllObjects<StorkApp>(f, af, s);
+  StorkApp::registerAll(f, af, s);
 }
 extern "C" void
 StorkApp__registerApps()

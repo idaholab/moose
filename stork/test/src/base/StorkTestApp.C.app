@@ -11,12 +11,12 @@
 #include "Moose.h"
 #include "AppFactory.h"
 #include "MooseSyntax.h"
-#include "ModulesApp.h"
 
 InputParameters
 StorkTestApp::validParams()
 {
   InputParameters params = StorkApp::validParams();
+  params.set<bool>("use_legacy_material_output") = false;
   return params;
 }
 
@@ -31,7 +31,7 @@ StorkTestApp::~StorkTestApp() {}
 void
 StorkTestApp::registerAll(Factory & f, ActionFactory & af, Syntax & s, bool use_test_objs)
 {
-  ModulesApp::registerAllObjects<StorkApp>(f, af, s);
+  StorkApp::registerAll(f, af, s);
   if (use_test_objs)
   {
     Registry::registerObjectsTo(f, {"StorkTestApp"});
