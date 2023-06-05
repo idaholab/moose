@@ -1,20 +1,22 @@
 # TerminateControl
 
-!alert construction title=Undocumented Class
-The TerminateControl has not been documented. The content listed below should be used as a starting point for
-documenting the class, which includes the typical automatic documentation associated with a
-MooseObject; however, what is contained is ultimately determined by what is necessary to make the
-documentation clear for users.
-
 !syntax description /Controls/TerminateControl
 
-## Overview
+The boolean that determines when to terminate is a `ControlData`. This is only used in the
+THM control logic to keep track of states of control objects.
 
-!! Replace these lines with information regarding the TerminateControl object.
+The boolean can be examined in the console using a [BoolControlDataValuePostprocessor.md].
 
-## Example Input File Syntax
+!alert note
+Another way to control when to terminate a simulation is to use the [Terminator.md] user object.
+The [Terminator.md] works with postprocessors for the criterion instead of a controlled boolean.
 
-!! Describe and include an example of how to use the TerminateControl object.
+## Example input
+
+In this example, the `TerminateControl` examines the state of the `UnitTripControl`. Once its state is nonzero, it
+stop the simulation and prints `Threshold exceeded`.
+
+!listing test/tests/controls/terminate/terminate.i block=Postprocessors ControlLogic
 
 !syntax parameters /Controls/TerminateControl
 

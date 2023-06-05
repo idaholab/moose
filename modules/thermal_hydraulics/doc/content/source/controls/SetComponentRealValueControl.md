@@ -1,20 +1,16 @@
 # SetComponentRealValueControl
 
-!alert construction title=Undocumented Class
-The SetComponentRealValueControl has not been documented. The content listed below should be used as a starting point for
-documenting the class, which includes the typical automatic documentation associated with a
-MooseObject; however, what is contained is ultimately determined by what is necessary to make the
-documentation clear for users.
-
 !syntax description /Controls/SetComponentRealValueControl
 
-## Overview
+!alert note
+Control data is only defined by the thermal hydraulics module control logic.
 
-!! Replace these lines with information regarding the SetComponentRealValueControl object.
+## Example input syntax
 
-## Example Input File Syntax
+In this example, the `T0` parameter of the `inlet` component
+using the `value` control data of the `T_inlet_fn` ControlLogic.
 
-!! Describe and include an example of how to use the SetComponentRealValueControl object.
+!listing test/tests/controls/set_component_real_value_control/test.i block=Components ControlLogic
 
 !syntax parameters /Controls/SetComponentRealValueControl
 

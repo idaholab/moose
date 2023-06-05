@@ -1,20 +1,18 @@
 # UnitTripControl
 
-!alert construction title=Undocumented Class
-The UnitTripControl has not been documented. The content listed below should be used as a starting point for
-documenting the class, which includes the typical automatic documentation associated with a
-MooseObject; however, what is contained is ultimately determined by what is necessary to make the
-documentation clear for users.
-
 !syntax description /Controls/UnitTripControl
 
-## Overview
+This object defines a control logic boolean `state` that is set to true if the
+condition is true, and false if the condition is false.
+Using the [!param](/Controls/UnitTripControl/latch) parameter, the `state` can always remain true
+after a trip, or go back to false if the expression no longer evaluates to true.
 
-!! Replace these lines with information regarding the UnitTripControl object.
+## Example input syntax
 
-## Example Input File Syntax
+In this example, the value of the postprocessor `a` controls the trip of the ControlLogic `trip_ctrl`,
+when its value becomes larger than 0.6.
 
-!! Describe and include an example of how to use the UnitTripControl object.
+!listing test/tests/controls/unit_trip_control/test.i block=Postprocessors ControlLogic
 
 !syntax parameters /Controls/UnitTripControl
 

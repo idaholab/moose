@@ -1,20 +1,16 @@
 # SetBoolValueControl
 
-!alert construction title=Undocumented Class
-The SetBoolValueControl has not been documented. The content listed below should be used as a starting point for
-documenting the class, which includes the typical automatic documentation associated with a
-MooseObject; however, what is contained is ultimately determined by what is necessary to make the
-documentation clear for users.
-
 !syntax description /Controls/SetBoolValueControl
 
-## Overview
+!alert note
+Control data is only defined by the thermal hydraulics module control logic.
 
-!! Replace these lines with information regarding the SetBoolValueControl object.
+## Example input syntax
 
-## Example Input File Syntax
+In this example, the `value` parameter of the `AuxKernel` called `aux_kernel`
+using the `state` control data of the `threshold_ctrl` ControlLogic.
 
-!! Describe and include an example of how to use the SetBoolValueControl object.
+!listing test/tests/controls/set_bool_value_control/test.i block=ControlLogic
 
 !syntax parameters /Controls/SetBoolValueControl
 

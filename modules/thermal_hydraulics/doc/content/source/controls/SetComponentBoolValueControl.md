@@ -1,20 +1,16 @@
 # SetComponentBoolValueControl
 
-!alert construction title=Undocumented Class
-The SetComponentBoolValueControl has not been documented. The content listed below should be used as a starting point for
-documenting the class, which includes the typical automatic documentation associated with a
-MooseObject; however, what is contained is ultimately determined by what is necessary to make the
-documentation clear for users.
-
 !syntax description /Controls/SetComponentBoolValueControl
 
-## Overview
+!alert note
+Control data is only defined by the thermal hydraulics module control logic.
 
-!! Replace these lines with information regarding the SetComponentBoolValueControl object.
+## Example input syntax
 
-## Example Input File Syntax
+In this example, the `on` parameter of the `turbine` component
+using the `state` control data of the `trip_ctrl` ControlLogic.
 
-!! Describe and include an example of how to use the SetComponentBoolValueControl object.
+!listing test/tests/controls/set_component_bool_value_control/test.i block=Components ControlLogic
 
 !syntax parameters /Controls/SetComponentBoolValueControl
 

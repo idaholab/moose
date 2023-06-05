@@ -1,20 +1,10 @@
 # GetFunctionValueControl
 
-!alert construction title=Undocumented Class
-The GetFunctionValueControl has not been documented. The content listed below should be used as a starting point for
-documenting the class, which includes the typical automatic documentation associated with a
-MooseObject; however, what is contained is ultimately determined by what is necessary to make the
-documentation clear for users.
-
 !syntax description /Controls/GetFunctionValueControl
 
-## Overview
-
-!! Replace these lines with information regarding the GetFunctionValueControl object.
-
-## Example Input File Syntax
-
-!! Describe and include an example of how to use the GetFunctionValueControl object.
+This is useful for the numerous `ControlLogic` objects that rely on control data. Using this
+object, we can forward the value of the function so it can be used by these objects.
+The function is evaluated at the current simulation time and at the (0,0,0) point.
 
 !syntax parameters /Controls/GetFunctionValueControl
 

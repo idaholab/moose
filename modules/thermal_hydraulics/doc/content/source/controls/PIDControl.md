@@ -1,20 +1,19 @@
 # PIDControl
 
-!alert construction title=Undocumented Class
-The PIDControl has not been documented. The content listed below should be used as a starting point for
-documenting the class, which includes the typical automatic documentation associated with a
-MooseObject; however, what is contained is ultimately determined by what is necessary to make the
-documentation clear for users.
-
 !syntax description /Controls/PIDControl
 
-## Overview
+The reference or target value is set by the [!param](/Controls/PIDControl/set_point) parameter control data.
+The value of the `output` data is set by:
 
-!! Replace these lines with information regarding the PIDControl object.
+!equation
+\text{error} = \text{set point} - \text{value} \\
+\text{output} = K_p * \text{error} + \text{error integral} + K_d * \dfrac{\text{error} - \text{error}_{old}}{dt};
 
-## Example Input File Syntax
+where $K_p$ and $K_d$ are constant parameters of the PID logic, the `set point` and the `value` are input control data
+and the error integral is computed using from the error using a simple rectangle integration.
 
-!! Describe and include an example of how to use the PIDControl object.
+!alert note
+To control a controllable value directly instead of a control data, use the [PIDTransientControl.md]
 
 !syntax parameters /Controls/PIDControl
 
