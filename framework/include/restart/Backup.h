@@ -53,6 +53,8 @@ public:
     std::size_t size;
     /// The hash code for this data (typeid(T).hash_code())
     std::size_t type_hash_code;
+    /// The type for this data
+    std::string type;
     /// Whether or not this data has been loaded yet
     bool loaded = false;
   };

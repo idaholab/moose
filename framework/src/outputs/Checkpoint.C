@@ -15,7 +15,7 @@
 #include "FEProblem.h"
 #include "MooseApp.h"
 #include "MaterialPropertyStorage.h"
-#include "RestartableData.h"
+#include "RestartableDataIO.h"
 #include "MooseMesh.h"
 #include "MeshMetaDataInterface.h"
 
@@ -227,13 +227,13 @@ Checkpoint::meshSuffix()
 std::string
 Checkpoint::metaDataSuffix(const std::string & suffix)
 {
-  return "/meta_data" + suffix + ".rd";
+  return "/meta_data" + suffix + RestartableDataIO::getRestartableDataExt();
 }
 
 std::string
 Checkpoint::fullMetaDataSuffix(const std::string & suffix)
 {
-  return meshSuffix() + "/meta_data" + suffix + ".rd";
+  return meshSuffix() + "/meta_data" + suffix + RestartableDataIO::getRestartableDataExt();
 }
 
 std::string
@@ -251,5 +251,5 @@ Checkpoint::fullMeshMetadataSuffix()
 std::string
 Checkpoint::restartSuffix(const processor_id_type pid)
 {
-  return "-restart-" + std::to_string(pid) + ".rd";
+  return "-restart-" + std::to_string(pid) + RestartableDataIO::getRestartableDataExt();
 }

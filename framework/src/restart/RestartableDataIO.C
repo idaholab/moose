@@ -12,10 +12,15 @@
 #include "RestartableDataMap.h"
 #include "MooseApp.h"
 #include "DataIO.h"
+#include "MooseUtils.h"
 
 #include <stdio.h>
 #include <fstream>
 #include <sstream>
+#include <typeinfo>
+
+const std::string RestartableDataIO::RESTARTABLE_DATA_EXT = ".rd";
+const unsigned int RestartableDataIO::CURRENT_BACKUP_FILE_VERSION = 3;
 
 RestartableDataIO::RestartableDataIO(MooseApp & moose_app)
   : PerfGraphInterface(moose_app.perfGraph(), "RestartableDataIO"), _moose_app(moose_app)
@@ -83,15 +88,25 @@ RestartableDataIO::readRestartableData(std::istream & stream,
   if (this_id[0] != 'R' || this_id[1] != 'D')
     error("Loaded backup is invalid or corrupted (unexpected header)");
 
-  // Version
-  unsigned int this_file_version;
-  stream.read((char *)&this_file_version, sizeof(this_file_version));
+  // File version
+  std::remove_const<decltype(CURRENT_BACKUP_FILE_VERSION)>::type this_file_version;
+  dataLoad(stream, this_file_version, nullptr);
   if (this_file_version != CURRENT_BACKUP_FILE_VERSION)
     error("Loaded mismatching backup version",
           "  Current version: " + std::to_string(CURRENT_BACKUP_FILE_VERSION) +
               "\n  Loaded version: " + std::to_string(this_file_version));
 
-  // Num MPI ranks
+  // Type id for a basic type
+  std::size_t this_compare_hash_code;
+  dataLoad(stream, this_compare_hash_code, nullptr);
+  if (this_compare_hash_code != typeid(COMPARE_HASH_CODE_TYPE).hash_code())
+    error("Loaded backup is not compatible",
+          "The hash code check for a basic type (" +
+              MooseUtils::prettyCppType<COMPARE_HASH_CODE_TYPE>() +
+              ") failed; it is likely that this backup was stored with a different architecture or "
+              "operating system");
+
+  // Number of procs
   processor_id_type this_n_procs = 0;
   dataLoad(stream, this_n_procs, nullptr);
   if (_error_on_different_number_of_processors && this_n_procs != _moose_app.n_processors())
@@ -99,7 +114,7 @@ RestartableDataIO::readRestartableData(std::istream & stream,
           "  Current ranks: " + std::to_string(_moose_app.n_processors()) +
               "\n  Loaded ranks: " + std::to_string(this_n_procs));
 
-  // Num threads
+  // Number of threads
   unsigned int this_n_threads = 0;
   dataLoad(stream, this_n_threads, nullptr);
   if (_error_on_different_number_of_threads && this_n_threads != libMesh::n_threads())
@@ -107,7 +122,7 @@ RestartableDataIO::readRestartableData(std::istream & stream,
           "  Current threads: " + std::to_string(libMesh::n_threads()) +
               "\n  Loaded threads: " + std::to_string(this_n_threads));
 
-  // Number of data
+  // Number of RestartableData
   std::size_t n_data = 0;
   dataLoad(stream, n_data, nullptr);
 
@@ -125,12 +140,14 @@ RestartableDataIO::readRestartableData(std::istream & stream,
 
     std::string name;
     dataLoad(stream, name, nullptr);
+    mooseAssert(name.size(), "Empty name");
 
-    mooseAssert(!data_map.count(name), "Already inserted");
+    mooseAssert(!data_map.count(name), "Data '" + name + "' is already inserted");
     auto & entry = data_map[name];
 
     dataLoad(stream, entry.size, nullptr);
     dataLoad(stream, entry.type_hash_code, nullptr);
+    dataLoad(stream, entry.type, nullptr);
     entry.position = current_data_position;
 
     current_data_position += entry.size;
@@ -235,8 +252,12 @@ RestartableDataIO::serializeRestartableData(const RestartableDataMap & restartab
   stream.write(id, 2);
 
   // File version
-  unsigned int file_version = CURRENT_BACKUP_FILE_VERSION;
-  stream.write((const char *)&file_version, sizeof(file_version));
+  auto file_version = CURRENT_BACKUP_FILE_VERSION;
+  dataStore(stream, file_version, nullptr);
+
+  // Type hash for basic hash
+  std::size_t compare_hash_code = typeid(COMPARE_HASH_CODE_TYPE).hash_code();
+  dataStore(stream, compare_hash_code, nullptr);
 
   // Number of procs
   processor_id_type n_procs = _moose_app.n_processors();
@@ -264,12 +285,15 @@ RestartableDataIO::serializeRestartableData(const RestartableDataMap & restartab
     data_blk << data_stream.str();
 
     // Store name, size, type hash, and type in the header
-    auto name = data->name();
-    auto data_size = static_cast<std::size_t>(data_stream.tellp());
-    auto hash_code = data->typeId().hash_code();
+    mooseAssert(data->name().size(), "Empty name");
+    std::string name = data->name();
+    std::size_t data_size = static_cast<std::size_t>(data_stream.tellp());
+    std::string type = data->typeId().name();
+    std::size_t type_hash_code = data->typeId().hash_code();
     dataStore(data_header_blk, name, nullptr);
     dataStore(data_header_blk, data_size, nullptr);
-    dataStore(data_header_blk, hash_code, nullptr);
+    dataStore(data_header_blk, type_hash_code, nullptr);
+    dataStore(data_header_blk, type, nullptr);
   }
 
   // size of data header block
@@ -286,12 +310,18 @@ RestartableDataIO::deserializeRestartableDataValue(RestartableDataValue & value,
                                                    Backup::DataInfo & data_entry,
                                                    std::istream & stream)
 {
-  // Sanity check on types
-  if (data_entry.type_hash_code != value.typeId().hash_code())
+  if (data_entry.type_hash_code != value.typeId().hash_code() &&
+      data_entry.type != value.typeId().name())
     mooseError("Type mismatch for loading RestartableData '",
                value.name(),
-               "'\n\n  Declared type: ",
-               value.type());
+               "\n\n  Stored type: ",
+               data_entry.type,
+               "\n  Declared type: ",
+               value.typeId().name(),
+               "\n  Stored type hash code: ",
+               data_entry.type_hash_code,
+               "\n  Declared type hash code: ",
+               value.typeId().hash_code());
 
   // We loaded this earlier
   if (data_entry.loaded)

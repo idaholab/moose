@@ -52,7 +52,7 @@ public:
    */
   std::shared_ptr<Backup> createBackup();
 
-  std::string getRestartableDataExt() const { return RESTARTABLE_DATA_EXT; }
+  static const std::string & getRestartableDataExt() { return RESTARTABLE_DATA_EXT; }
 
   /**
    * Restore a Backup for the current system.
@@ -148,8 +148,9 @@ private:
   /// The Backup object for use in restoration
   std::shared_ptr<Backup> _backup;
 
-  static constexpr auto RESTARTABLE_DATA_EXT = ".rd";
-  static constexpr auto CURRENT_BACKUP_FILE_VERSION = 3;
+  static const std::string RESTARTABLE_DATA_EXT;
+  static const unsigned int CURRENT_BACKUP_FILE_VERSION;
+  typedef int COMPARE_HASH_CODE_TYPE;
 
   /// Error check controls
   bool _error_on_different_number_of_processors = true;
