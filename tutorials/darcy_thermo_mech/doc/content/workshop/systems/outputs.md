@@ -38,7 +38,7 @@ The following two methods for creating an Output object are equivalent within th
 
 ## Customizing Output
 
-The content of each `Output` can customized, see for example for an [Exodus.md] output:
+The content of each `Output` can customized, see for example for an [Exodus](Exodus.md) output:
 
 ```
 [Outputs]

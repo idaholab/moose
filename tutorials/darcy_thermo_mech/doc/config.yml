@@ -15,7 +15,21 @@ Content:
             - css/**
             - js/**
             - bib/**
-            - syntax/Outputs/output_types.md
+            - syntax/**
+            - source/base/MooseObject.md
+            - source/utils/InputParameters.md
+            - source/parser/Parser.md
+            - source/geomsearch/GeometricSearchData.md
+            - source/actions/Action.md
+            - source/relationshipmanagers/RelationshipManager.md
+            - source/outputs/Exodus.md
+            - source/meshgenerators/FileMeshGenerator.md
+    modules:
+        root_dir: ${MOOSE_DIR}/modules/doc/content
+        content:
+            - application_usage/failed_solves.md
+            - getting_started/installation/index.md
+            - help/development/VSCode.md
     chemical_reactions:
         root_dir: ${MOOSE_DIR}/modules/chemical_reactions/doc/content
         content:
@@ -24,6 +38,10 @@ Content:
         root_dir: ${MOOSE_DIR}/modules/functional_expansion_tools/doc/content
         content:
             - bib/**
+    reactor:
+        root_dir: ${MOOSE_DIR}/modules/reactor/doc/content
+        content:
+            - modules/reactor/index.md
 
 Executioner:
     type: MooseDocs.base.Serial

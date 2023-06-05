@@ -101,7 +101,7 @@ Equation scaling issues have been covered earlier. Let's explore two other commo
 !---
 
 Make sure to initialize every nonlinear variable using the `[ICs]` block.
-To check initialization, use the [Exodus.md] output:
+To check initialization, use the [Exodus](Exodus.md) output:
 
 ```bash
 [Outputs]
@@ -115,7 +115,7 @@ To check initialization, use the [Exodus.md] output:
 Meshing is hard. We have some tools to help in the [MeshGenerator system](syntax/Mesh/index.md) but generally you should:
 
 - visually inspect your mesh. Look for unsupported features: non-conformality (except from libmesh refinement), overlapping cells, mixed element types within a subdomain (within a mesh is OK)
-- use `show_info = true` in the [FileMeshGenerator.md] and verify that the output is as expected
+- use `show_info = true` in the [FileMeshGenerator](FileMeshGenerator.md) and verify that the output is as expected
 - replace your mesh with a simple MOOSE-generated rectangular mesh to check if the mesh is at fault
 
 !---
