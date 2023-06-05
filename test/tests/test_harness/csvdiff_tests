@@ -95,4 +95,11 @@
     override_rel_err = 5.5e-06
     requirement = 'spec file shall control a specific fields absolute zero tolerance'
   []
+  [test_csvdiff_comparison_custom_column]
+    type = CSVDiff
+    input = csvdiff_comparison_custom_column.i
+    csvdiff = csvdiff_comparison_custom_column_out.csv
+    custom_columns = time
+    requirement = 'CSVDiff shall compare only a specific column'
+  []
 []
