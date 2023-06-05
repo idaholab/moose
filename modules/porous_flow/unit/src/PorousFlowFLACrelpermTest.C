@@ -13,7 +13,7 @@
 
 const double eps = 1.0E-8;
 
-TEST(PorousFlowFLACTest, relperm)
+TEST(PorousFlowFLACrelpermTest, relperm)
 {
   EXPECT_NEAR(1.0, PorousFlowFLACrelperm::relativePermeability(1.0E30, 2.7), 1.0E-5);
   EXPECT_NEAR(0.0, PorousFlowFLACrelperm::relativePermeability(-1.0, 2.7), 1.0E-5);
