@@ -9,7 +9,7 @@ Otherwise, the solve is performed.
 In this example, the problem is only solved between time 0.4 and 0.6s, when the value of
 the postprocessor in non-zero.
 
-!listing test/tests/controls/thm_solve_postprocessor_control/test.i block=Functions Postprocessors Controls
+!listing test/tests/controls/thm_solve_postprocessor_control/test.i block=Functions Postprocessors ControlLogic
 
 !syntax parameters /ControlLogic/THMSolvePostprocessorControl
 

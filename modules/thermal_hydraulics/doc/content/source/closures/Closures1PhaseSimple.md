@@ -10,7 +10,7 @@ The closures added are:
 
 Additionally, this object defines:
 
-- a wall temperature material, to be able to retrieve the wall temperature as a material property, using either [ADAverageWallTemperature3EqnMaterial.md], [ADCoupledVariableValueMaterial.md] or [ADTemperatureWall3EqnMaterial.md] depending on the temperature mode of the flow channel (deriving from [FlowChannel1Phase.md])
+- a wall temperature material, to be able to retrieve the wall temperature as a material property, using either [ADAverageWallTemperature3EqnMaterial.md], AD[CoupledVariableValueMaterial.md] or [ADTemperatureWall3EqnMaterial.md] depending on the temperature mode of the flow channel (deriving from [FlowChannel1Phase.md])
 
 
 !syntax parameters /Closures/Closures1PhaseSimple

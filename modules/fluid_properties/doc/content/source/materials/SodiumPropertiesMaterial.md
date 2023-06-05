@@ -2,7 +2,7 @@
 
 !syntax description /Materials/SodiumPropertiesMaterial
 
-`SodiumPropertiesMaterial` samples the functions available in [SodiumProperties](SodiumProperties.md)
+`SodiumPropertiesMaterial` samples the functions available in [SodiumProperties](fluidproperties/SodiumProperties.md)
 and provides them as material properties.
 
 The following material properties created for liquid sodium are:
