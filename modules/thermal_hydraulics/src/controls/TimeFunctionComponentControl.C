@@ -22,6 +22,7 @@ TimeFunctionComponentControl::validParams()
       "parameter", "The name of the parameter in the component we will be controlling");
   params.addRequiredParam<FunctionName>("function",
                                         "The name of the function prescribing the value.");
+  params.addClassDescription("Controls a parameter in a Component using a function");
   return params;
 }
 
