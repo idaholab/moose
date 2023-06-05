@@ -36,7 +36,7 @@ The basic capabilities include:
 Get started running your own THM simulations by exploring the introductory tutorial.
 Use the modeling guide to explore how to piece your models together:
 
-- [Getting Started](getting_started.md) -- how to install the code.
+- [Getting Started](modules/thermal_hydraulics/getting_started.md) -- how to install the code.
 - Tutorials
 
   - [Basics](tutorials/basics/index.md) -- learn the basics.

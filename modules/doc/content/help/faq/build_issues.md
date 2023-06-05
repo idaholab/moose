@@ -12,7 +12,7 @@ two with the moose-libmesh Conda package being out of date.
   mamba update --all
   ```
 
-  if `mamba activate moose` failed, see [Conda Issues](troubleshooting.md#condaissues) above.
+  if `mamba activate moose` failed, see [Conda Issues](help/troubleshooting.md#condaissues) above.
 
   !alert note
   When ever an update is performed in Conda, it is a good idea to re-build MOOSE and your
