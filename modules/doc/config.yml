@@ -92,6 +92,7 @@ Extensions:
             auxscalarkernels: AuxScalarKernels/index.md
             bcs: syntax/BCs/index.md
             constraints: syntax/Constraints/index.md
+            controllogic: syntax/ControlLogic/index.md
             controls: syntax/Controls/index.md
             dampers: syntax/Dampers/index.md
             dgkernels: syntax/DGKernels/index.md
