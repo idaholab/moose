@@ -46,7 +46,7 @@
       cli_args = '--mesh-only'
       exodiff = 'preserve_exteriors_in.e'
       recover = false
-      detail = 'blocks and retaining lower dimensional elements with a deleted interior parent if requested.'
+      detail = 'blocks and retaining lower dimensional elements with a deleted interior parent if requested,'
     []
     [missing_block]
       type = RunException

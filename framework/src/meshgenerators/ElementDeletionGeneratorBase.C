@@ -156,7 +156,7 @@ ElementDeletionGeneratorBase::generate()
         if (elem->neighbor_ptr(n) == remote_elem)
           queries[pid].push_back(std::make_pair(elem->id(), n));
 
-      // Use an OOB side index to encode "interior_parent"
+      // Use an OOB side index to encode "interior_parent". We will use this OOB index later
       if (elem->interior_parent() == remote_elem)
         queries[pid].push_back(std::make_pair(elem->id(), n_sides));
     }
@@ -196,7 +196,7 @@ ElementDeletionGeneratorBase::generate()
         const Elem * elem = mesh->elem_ptr(q.first);
         const unsigned int side = q.second;
         const Elem * target =
-            (side > elem->n_sides()) ? elem->interior_parent() : elem->neighbor_ptr(side);
+            (side >= elem->n_sides()) ? elem->interior_parent() : elem->neighbor_ptr(side);
 
         if (target == nullptr) // linked element was deleted!
           responses[p - 1].push_back(std::make_pair(elem->id(), side));
