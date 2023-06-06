@@ -94,7 +94,7 @@
     exodiff = 'three_hexagons_coarse_automatic_pair_node_proximity_out.e'
     cli_args = "Contact/contact_pressure/automatic_pairing_boundaries='102 201 301' "
                "Contact/contact_pressure/automatic_pairing_node_proximity=true "
-               "Contact/contact_pressure/automatic_pairing_distance=0.004 "
+               "Contact/contact_pressure/automatic_pairing_distance=0.002001 "
                "Outputs/file_base=three_hexagons_coarse_automatic_pair_node_proximity_out "
                "Outputs/hide=penetration"
     requirement = 'The system shall be able to, if the user provides a reference distance, assign '
@@ -111,7 +111,7 @@
     exodiff = 'three_hexagons_coarse_automatic_pair_node_proximity_small_distance_out.e'
     cli_args = "Contact/contact_pressure/automatic_pairing_boundaries='102 201 301' "
                "Contact/contact_pressure/automatic_pairing_node_proximity=true "
-               "Contact/contact_pressure/automatic_pairing_distance=0.001 "
+               "Contact/contact_pressure/automatic_pairing_distance=0.0013 "
                "Outputs/file_base=three_hexagons_coarse_automatic_pair_node_proximity_small_distance_out "
                "Outputs/hide=penetration"
     requirement = 'The system shall be able to, if the user provides a too small reference distance, avoid assigning '
