@@ -354,7 +354,6 @@ heat_flux = ${fparse power / (perimeter * length)}
 
 [Executioner]
   type = Transient
-
   scheme = bdf2
   dt = 1.0
   num_steps = 10

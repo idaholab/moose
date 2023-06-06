@@ -1655,7 +1655,7 @@ private:
   unsigned int _rz_coord_axis;
 
   /// Map of subdomain ID to general axisymmetric axis
-  std::map<SubdomainID, std::pair<Point, RealVectorValue>> _subdomain_id_to_rz_coord_axis;
+  std::unordered_map<SubdomainID, std::pair<Point, RealVectorValue>> _subdomain_id_to_rz_coord_axis;
 
   /// A coordinate transformation object that describes how to transform this problem's coordinate
   /// system into the canonical/reference coordinate system

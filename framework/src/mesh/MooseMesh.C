@@ -3688,7 +3688,7 @@ MooseMesh::setGeneralAxisymmetricCoordAxes(
 {
   // Set the axes for the given blocks
   mooseAssert(blocks.size() == axes.size(), "Blocks and axes vectors must be the same length.");
-  for (unsigned int i = 0; i < blocks.size(); ++i)
+  for (const auto i : index_range(blocks))
   {
     const auto subdomain_id = getSubdomainID(blocks[i]);
     const auto it = _coord_sys.find(subdomain_id);
@@ -3718,7 +3718,7 @@ MooseMesh::setGeneralAxisymmetricCoordAxes(
 
   // Make sure there are no RZ blocks that still do not have axes
   const auto all_subdomain_ids = meshSubdomains();
-  for (const auto & subdomain_id : all_subdomain_ids)
+  for (const auto subdomain_id : all_subdomain_ids)
     if (getCoordSystem(subdomain_id) == Moose::COORD_RZ &&
         !_subdomain_id_to_rz_coord_axis.count(subdomain_id))
       mooseError("The block '",

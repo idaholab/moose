@@ -67,10 +67,8 @@ coordTransformFactor(const MooseMesh & mesh,
       MooseMeshUtils::coordTransformFactorRZGeneral(point, axis, factor);
     }
     else
-    {
       MooseMeshUtils::coordTransformFactor(
           point, factor, coord_type, mesh.getAxisymmetricRadialCoord());
-    }
   }
   else
     MooseMeshUtils::coordTransformFactor(point, factor, coord_type, libMesh::invalid_uint);
