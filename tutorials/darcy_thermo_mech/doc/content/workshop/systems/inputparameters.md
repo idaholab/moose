@@ -58,6 +58,7 @@ params.addParam<int>("year", 1980, "Provide the year you were born.");
 ```
 
 Here the default is overriden by a user-provided value
+
 ```text
 [UserObjects]
   [date_object]
