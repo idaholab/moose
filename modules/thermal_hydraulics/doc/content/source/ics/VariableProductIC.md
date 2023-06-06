@@ -9,7 +9,7 @@ This is typically used to set the initial condition for `rho*A`, the specific de
 momentum.
 
 !alert note
-For `rho*A` or `rho*u*A`, this initial condition is usually added to the `Simulation` by the `flow model`, depending on the parameters
+For `rho*A` or `rho*u*A`, this initial condition is usually added to the `Simulation` by the `FlowModel`, depending on the parameters
 passed to each [Component](syntax/Components/index.md).
 
 !syntax parameters /ICs/VariableProductIC

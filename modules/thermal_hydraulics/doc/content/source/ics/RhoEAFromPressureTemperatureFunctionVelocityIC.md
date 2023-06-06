@@ -8,7 +8,7 @@ The function is evaluated at the `start_time` of the simulation, set in the
 [Executioner](syntax/Executioner/index.md) or [Executor](syntax/Executors/index.md).
 
 !alert note
-This initial condition is usually added to the `Simulation` by the `flow model`, based on the parameters
+This initial condition is usually added to the `Simulation` by the `FlowModel`, based on the parameters
 passed to each [Component](syntax/Components/index.md).
 
 !syntax parameters /ICs/RhoEAFromPressureTemperatureFunctionVelocityIC

@@ -37,6 +37,7 @@
     solution_uo = exo_soln
     variable = u
     from_variable = 'u'
+    block = 0
   []
   [initial_cond_nl_elem]
     type = SolutionIC

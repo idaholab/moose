@@ -21,7 +21,7 @@
       input = 'solution_ic.i'
       cli_args = "Mesh/gmg/subdomain_ids='0 0 0 2' ICs/initial_cond_nl/block=2"
       expect_err = "Block '2' does not exist in the file"
-      detail = "a solution is to be loaded at a block that does not exist in the source file"
+      detail = "a solution is to be loaded at a block that does not exist in the source file."
     []
   []
 []
