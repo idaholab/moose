@@ -17,13 +17,17 @@ Evaporation of material from the liquefied material surface helps
 drive momentum changes at the surface of the condensed phase; this effect is incorporated via the
 [INSADVaporRecoilPressureMomentumFluxBC.md] object. These surface momentum and velocity
 changes are then translated into mesh displacement
-through the [INSADDisplaceBoundaryBC.md] object. We also introduce
+through the [INSADDisplaceBoundaryBC.md] object.
+
+We also introduce
 [INSADDummyDisplaceBoundaryIntegratedBC.md] objects in order to fill the
 sparsity dependence of the surface displacement degrees of freedom on the
 surface velocity degrees of freedom before the Jacobian matrix is assembled
 prior to executing nodal boundary conditions. This sparsity filling is necessary
 in order to prevent new nonzero allocations from occurring when the
-`INSADDisplaceBoundaryBC` nodal boundary conditions are executed. No-slip
+`INSADDisplaceBoundaryBC` nodal boundary conditions are executed.
+
+No-slip
 boundary conditions are applied at all surfaces other than at the `front`
 surface where the laser spot is applied. The `back` surface is held at a
 constant temperature of 300 Kelvin. Zero displacements are applied at the `back`

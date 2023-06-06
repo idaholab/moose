@@ -75,7 +75,7 @@ protected:
   /// The velocity variable
   const VectorMooseVariable * const _velocity_var;
 
-  /// A scalar Lagrange FE data member for using to compute the velocity second derivatives since
+  /// A scalar Lagrange FE data member to compute the velocity second derivatives since
   /// they're currently not supported for vector FE types
   const FEBase * const & _scalar_lagrange_fe;
 

@@ -15,7 +15,7 @@ InputParameters
 INSADDisplaceBoundaryBC::validParams()
 {
   InputParameters params = ADNodalBC::validParams();
-  params.addClassDescription("For displacing a boundary");
+  params.addClassDescription("Boundary condition for displacing a boundary");
   params.addRequiredCoupledVar("velocity", "The velocity at which to displace");
   params.addRequiredParam<unsigned short>(
       "component", "What component of velocity/displacement this object is acting on.");

@@ -25,7 +25,7 @@ AriaLaserWeld304LStainlessSteel::validParams()
       "T90", 1528, "The T90 temperature (I don't know what this means physically)");
   params.addParam<Real>("beta", 1e11, "beta coefficient");
   params.addParam<Real>("c_k0", 10.7143, "k0 coefficient");
-  params.addParam<Real>("c_k1", 14.2857e-3, "k0 coefficient");
+  params.addParam<Real>("c_k1", 14.2857e-3, "k1 coefficient");
   params.addParam<Real>("c_cp0", 425.75, "cp0 coefficient");
   params.addParam<Real>("c_cp1", 170.833e-3, "cp1 coefficient");
   params.addParam<Real>("c_rho0", 7.9e3, "The constant density");
@@ -37,16 +37,16 @@ AriaLaserWeld304LStainlessSteel::validParams()
   params.addParam<MaterialPropertyName>("rho_name", "rho", "The name of the thermal conductivity");
   params.addParam<int>("length_unit_exponent",
                        0,
-                       "The exponent of the length unit. If working in milimeters for example, "
+                       "The exponent of the length unit. If working in millimeters for example, "
                        "this number should be -3");
   params.addParam<int>(
       "temperature_unit_exponent",
       0,
-      "The exponent of the temperature unit. If working in kili-Kelvin for example, "
+      "The exponent of the temperature unit. If working in kilo-Kelvin for example, "
       "this number should be 3");
   params.addParam<int>("mass_unit_exponent",
                        0,
-                       "The exponent of the mass unit. If working in miligrams for example, "
+                       "The exponent of the mass unit. If working in milligrams for example, "
                        "this number should be -9");
   params.addParam<int>("time_unit_exponent",
                        0,
