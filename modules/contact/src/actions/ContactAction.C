@@ -988,12 +988,13 @@ ContactAction::addMortarContact()
 void
 ContactAction::addNodeFaceContact()
 {
-  if (_current_task == "post_mesh_prepared" && _automatic_pairing_boundaries.size() > 0 &&
-      !getParam<bool>("automatic_pairing_node_proximity"))
-    createSidesetPairsFromGeometry();
-  else if (_current_task == "post_mesh_prepared" && _automatic_pairing_boundaries.size() > 0 &&
-           getParam<bool>("automatic_pairing_node_proximity"))
-    createSidesetsFromNodeProximity();
+  if (_current_task == "post_mesh_prepared" && _automatic_pairing_boundaries.size() > 0)
+  {
+    if (getParam<bool>("automatic_pairing_node_proximity"))
+      createSidesetsFromNodeProximity();
+    else
+      createSidesetPairsFromGeometry();
+  }
 
   if (_current_task != "add_constraint")
     return;
@@ -1074,7 +1075,7 @@ void
 ContactAction::createSidesetsFromNodeProximity()
 {
   mooseInfo("The contact action is reading the list of boundaries and automatically pairs them "
-            "if distance among nodes is less than a specified distance.");
+            "if the distance between nodes is less than a specified distance.");
 
   if (!_mesh)
     mooseError("Failed to obtain mesh for automatically generating contact pairs.");
@@ -1109,11 +1110,11 @@ ContactAction::createSidesetsFromNodeProximity()
       node_boundary_id_vector.emplace_back(node_ptr, boundary_id);
   }
 
-  // sort by boundary id
+  // sort by increasing boundary id
   std::sort(node_boundary_id_vector.begin(),
             node_boundary_id_vector.end(),
             [](const NodeBoundaryIDInfo & first_pair, const NodeBoundaryIDInfo & second_pair)
-            { return first_pair.second > second_pair.second; });
+            { return first_pair.second < second_pair.second; });
 
   // build kd-tree
   using KDTreeType = nanoflann::KDTreeSingleIndexAdaptor<
@@ -1140,6 +1141,8 @@ ContactAction::createSidesetsFromNodeProximity()
   nanoflann::SearchParams search_params;
   std::vector<std::pair<std::size_t, Real>> ret_matches;
 
+  const auto radius_for_search = getParam<Real>("automatic_pairing_distance");
+
   // For all nodes
   for (const auto & pair : node_boundary_id_vector)
   {
@@ -1148,7 +1151,6 @@ ContactAction::createSidesetsFromNodeProximity()
 
     // position where we expect a periodic partner for the current node and boundary
     const Point search_point = *pair.first;
-    const auto radius_for_search = getParam<Real>("automatic_pairing_distance");
 
     // search at the expected point
     kd_tree->radiusSearch(
@@ -1157,7 +1159,10 @@ ContactAction::createSidesetsFromNodeProximity()
     for (auto & match_pair : ret_matches)
     {
       const auto & match = node_boundary_id_vector[match_pair.first];
+
+      //
       // If the proximity node identified belongs to a boundary in the input, add boundary pair
+      //
 
       // Make sure node is on a boundary chosen for contact mechanics
       auto it = std::find(_automatic_pairing_boundaries_id.begin(),
@@ -1173,16 +1178,16 @@ ContactAction::createSidesetsFromNodeProximity()
       // parameter.
       if (it != _automatic_pairing_boundaries_id.end())
       {
-        const int index_one = it - _automatic_pairing_boundaries_id.begin();
+        const auto index_one = cast_int<int>(it - _automatic_pairing_boundaries_id.begin());
         auto it_other = std::find(_automatic_pairing_boundaries_id.begin(),
                                   _automatic_pairing_boundaries_id.end(),
                                   pair.second);
 
-        if (it_other == _automatic_pairing_boundaries_id.end())
-          mooseError("Error in contact action. Unable to find boundary ID for node proximity "
-                     "automatic pairing.");
+        mooseAssert(it_other != _automatic_pairing_boundaries_id.end(),
+                    "Error in contact action. Unable to find boundary ID for node proximity "
+                    "automatic pairing.");
 
-        const int index_two = it_other - _automatic_pairing_boundaries_id.begin();
+        const auto index_two = cast_int<int>(it_other - _automatic_pairing_boundaries_id.begin());
 
         if (pair.second > match.second)
           _boundary_pairs.push_back(
