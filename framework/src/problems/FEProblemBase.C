@@ -5902,11 +5902,7 @@ FEProblemBase::computeResidualSys(NonlinearImplicitSystem & sys,
 
   TIME_SECTION("computeResidualSys", 5);
 
-  ADReal::do_derivatives = false;
-
   computeResidual(soln, residual, sys.number());
-
-  ADReal::do_derivatives = true;
 }
 
 void
@@ -6224,6 +6220,8 @@ FEProblemBase::computeResidualTags(const std::set<TagID> & tags)
 
   TIME_SECTION("computeResidualTags", 5, "Computing Residual");
 
+  ADReal::do_derivatives = false;
+
   setCurrentResidualVectorTags(tags);
 
   _aux->zeroVariablesForResidual();
@@ -6317,6 +6315,7 @@ FEProblemBase::computeResidualTags(const std::set<TagID> & tags)
   _current_nl_sys->computeResidualTags(tags);
 
   _safe_access_tagged_vectors = true;
+  ADReal::do_derivatives = true;
 
   // Reset execution flag as after this point we are no longer on LINEAR
   _current_execute_on_flag = EXEC_NONE;
