@@ -17,6 +17,9 @@
 #include "NonlinearSystemBase.h"
 #include "Parser.h"
 
+#include "NanoflannMeshAdaptor.h"
+#include "PointListAdaptor.h"
+
 #include <set>
 #include <algorithm>
 #include <unordered_map>
@@ -24,6 +27,8 @@
 
 #include "libmesh/petsc_nonlinear_solver.h"
 #include "libmesh/string_to_enum.h"
+
+using NodeBoundaryIDInfo = std::pair<const Node *, BoundaryID>;
 
 // Counter for naming mortar auxiliary kernels
 static unsigned int contact_mortar_auxkernel_counter = 0;
@@ -180,6 +185,9 @@ ContactAction::validParams()
       true,
       "Whether to generate the mortar mesh from the action. Typically this will be the case, but "
       "one may also want to reuse an existing lower-dimensional mesh prior to a restart.");
+  params.addParam<bool>("automatic_pairing_node_proximity",
+                        false,
+                        "Whether to generate automatic pairing using nodal proximity.");
   params.addParam<bool>(
       "mortar_dynamics",
       false,
@@ -978,8 +986,12 @@ ContactAction::addMortarContact()
 void
 ContactAction::addNodeFaceContact()
 {
-  if (_current_task == "post_mesh_prepared" && _automatic_pairing_boundaries.size() > 0)
+  if (_current_task == "post_mesh_prepared" && _automatic_pairing_boundaries.size() > 0 &&
+      !getParam<bool>("automatic_pairing_node_proximity"))
     createSidesetPairsFromGeometry();
+  else if (_current_task == "post_mesh_prepared" && _automatic_pairing_boundaries.size() > 0 &&
+           getParam<bool>("automatic_pairing_node_proximity"))
+    createSidesetsFromNodeProximity();
 
   if (_current_task != "add_constraint")
     return;
@@ -1045,6 +1057,137 @@ ContactAction::addNodeFaceContact()
       _problem->addConstraint(constraint_type, name, params);
     }
   }
+}
+
+// Specialization for PointListAdaptor<MooseMesh::PeriodicNodeInfo>
+// Return node location from NodeBoundaryIDInfo pairs
+template <>
+inline const Point &
+PointListAdaptor<NodeBoundaryIDInfo>::getPoint(const NodeBoundaryIDInfo & item) const
+{
+  return *(item.first);
+}
+
+void
+ContactAction::createSidesetsFromNodeProximity()
+{
+  // Create automatic_pairing_boundaries_id
+  std::vector<BoundaryID> _automatic_pairing_boundaries_id;
+  for (const auto & sideset_name : _automatic_pairing_boundaries)
+    _automatic_pairing_boundaries_id.emplace_back(_mesh->getBoundaryID(sideset_name));
+
+  // get periodic nodes
+  std::vector<NodeBoundaryIDInfo> node_boundary_id_vector;
+
+  // Data structures to hold the boundary nodes
+  ConstBndNodeRange & bnd_nodes = *_mesh->getBoundaryNodeRange();
+
+  for (const auto & bnode : bnd_nodes)
+  {
+    BoundaryID boundary_id = bnode->_bnd_id;
+    const Node * node_ptr = bnode->_node;
+
+    // Make sure node is on a boundary chosen for contact mechanics
+    auto it = std::find(_automatic_pairing_boundaries_id.begin(),
+                        _automatic_pairing_boundaries_id.end(),
+                        boundary_id);
+
+    if (it != _automatic_pairing_boundaries_id.end())
+      node_boundary_id_vector.emplace_back(node_ptr, boundary_id);
+  }
+
+  // sort by boundary id
+  std::sort(node_boundary_id_vector.begin(),
+            node_boundary_id_vector.end(),
+            [](const NodeBoundaryIDInfo & first_pair, const NodeBoundaryIDInfo & second_pair)
+            { return first_pair.second > second_pair.second; });
+
+  // build kd-tree
+  using KDTreeType = nanoflann::KDTreeSingleIndexAdaptor<
+      nanoflann::L2_Simple_Adaptor<Real, PointListAdaptor<NodeBoundaryIDInfo>, Real, std::size_t>,
+      PointListAdaptor<NodeBoundaryIDInfo>,
+      LIBMESH_DIM,
+      std::size_t>;
+
+  // This parameter can be tuned. Others use '10'
+  const unsigned int max_leaf_size = 20;
+
+  // Build point list adaptor with all nodes-sidesets pairs for possible mechanical contact
+  auto point_list = PointListAdaptor<NodeBoundaryIDInfo>(node_boundary_id_vector.begin(),
+                                                         node_boundary_id_vector.end());
+  auto kd_tree = std::make_unique<KDTreeType>(
+      LIBMESH_DIM, point_list, nanoflann::KDTreeSingleIndexAdaptorParams(max_leaf_size));
+
+  if (kd_tree == nullptr)
+    mooseError("KDTree was not properly initialized in the contact action.");
+
+  kd_tree->buildIndex();
+
+  // data structures for kd-tree search
+  nanoflann::SearchParams search_params;
+  std::vector<std::pair<std::size_t, Real>> ret_matches;
+
+  // For all nodes
+  for (const auto & pair : node_boundary_id_vector)
+  {
+    // clear result buffer
+    ret_matches.clear();
+
+    // position where we expect a periodic partner for the current node and boundary
+    Point search_point = *pair.first;
+    const auto radius_for_search = getParam<Real>("automatic_pairing_distance");
+
+    // search at the expected point
+    kd_tree->radiusSearch(
+        &(search_point)(0), radius_for_search * radius_for_search, ret_matches, search_params);
+
+    for (auto & match_pair : ret_matches)
+    {
+      const auto & match = node_boundary_id_vector[match_pair.first];
+      // If the proximity node identified belongs to a boundary in the input, add boundary pair
+
+      // Make sure node is on a boundary chosen for contact mechanics
+      auto it = std::find(_automatic_pairing_boundaries_id.begin(),
+                          _automatic_pairing_boundaries_id.end(),
+                          match.second);
+
+      if (match.second == pair.second)
+        continue;
+
+      // At this point we will likely create many repeated pairs because many nodal pairs may
+      // fulfill the distance condition imposed by the automatic_pairing_distance user input
+      // parameter.
+      if (it != _automatic_pairing_boundaries_id.end())
+      {
+        const int index_one = it - _automatic_pairing_boundaries_id.begin();
+        auto it_other = std::find(_automatic_pairing_boundaries_id.begin(),
+                                  _automatic_pairing_boundaries_id.end(),
+                                  pair.second);
+
+        if (it_other == _automatic_pairing_boundaries_id.end())
+          mooseError("Error in contact action. Unable to find boundary ID for node proximity "
+                     "automatic pairing.");
+
+        const int index_two = it_other - _automatic_pairing_boundaries_id.begin();
+
+        if (pair.second > match.second)
+          _boundary_pairs.push_back(
+              {_automatic_pairing_boundaries[index_two], _automatic_pairing_boundaries[index_one]});
+        else
+          _boundary_pairs.push_back(
+              {_automatic_pairing_boundaries[index_one], _automatic_pairing_boundaries[index_two]});
+      }
+    }
+  }
+
+  // Let's remove likely repeated pairs
+  removeRepeatedPairs();
+
+  mooseInfo(
+      "The following boundary pairs were created by the contact action using nodal proximity: ");
+  for (const auto & [primary, secondary] : _boundary_pairs)
+    mooseInfoRepeated(
+        "Primary boundary ID: ", primary, " and secondary boundary ID: ", secondary, ".");
 }
 
 void

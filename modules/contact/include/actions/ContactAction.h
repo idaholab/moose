@@ -124,4 +124,8 @@ private:
    * distance of each other.
    */
   void createSidesetPairsFromGeometry();
+  /**
+   * Create contact pairs between all boundaries by determining that _nodes_ on both boundaries are close enough.
+   */
+  void createSidesetsFromNodeProximity();
 };

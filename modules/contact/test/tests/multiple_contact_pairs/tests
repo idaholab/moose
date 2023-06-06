@@ -32,8 +32,8 @@
     cli_args = "Postprocessors/active=''"
     map = False
     partial = True
-    requirement = 'The system shall set up mortar interactions between multiple surface pairs '
-                  'using the Contact action with distinct input blocks.'
+    requirement = 'The system shall set up mortar interactions between multiple surface pairs using '
+                  'the Contact action with distinct input blocks.'
   []
   [multiple_pairs_mortar_friction]
     type = Exodiff
@@ -44,8 +44,8 @@
     cli_args = "Postprocessors/active=''"
     map = False
     partial = True
-    requirement = 'The system shall set up frictional mortar interactions between multiple surface pairs '
-                  'using the Contact action with distinct input blocks.'
+    requirement = 'The system shall set up frictional mortar interactions between multiple surface '
+                  'pairs using the Contact action with distinct input blocks.'
   []
   [three_hexagons_coarse]
     type = 'Exodiff'
@@ -64,6 +64,7 @@
     exodiff = 'three_hexagons_coarse_automatic_pair_reference_out.e'
     cli_args = "Postprocessors/active='' Contact/contact_pressure/secondary='102 102 201' "
                "Contact/contact_pressure/primary='201 301 301' "
+               "Outputs/hide=penetration "
                "Outputs/file_base=three_hexagons_coarse_automatic_pair_reference_out"
     requirement = 'The system shall assign and accumulate a single contact pressure auxiliary '
                   'variable for all contact pairs supplied to a single contact action object with a '
@@ -78,9 +79,27 @@
     input = 'three_hexagons_coarse_automatic_pair.i'
     exodiff = 'three_hexagons_coarse_automatic_pair_out.e'
     cli_args = "Contact/contact_pressure/automatic_pairing_boundaries='102 201 301' "
+               "Outputs/hide=penetration "
                "Postprocessors/active=''"
     requirement = 'The system shall be able to, if the user provides a reference distance, assign '
                   'primary-secondary contact pairs automatically.'
+    abs_zero = 1.0e-4
+    rel_err = 1.0e-4
+    allow_warnings = true
+  []
+  [three_hexagons_coarse_automatic_pair_node_proximity]
+    type = 'Exodiff'
+    issues = '#24122'
+    input = 'three_hexagons_coarse_automatic_pair.i'
+    exodiff = 'three_hexagons_coarse_automatic_pair_node_proximity_out.e'
+    cli_args = "Contact/contact_pressure/automatic_pairing_boundaries='102 201 301' "
+               "Contact/contact_pressure/automatic_pairing_node_proximity=true "
+               "Contact/contact_pressure/automatic_pairing_distance=0.004 "
+               "Outputs/file_base=three_hexagons_coarse_automatic_pair_node_proximity_out "
+               "Outputs/hide=penetration"
+    requirement = 'The system shall be able to, if the user provides a reference distance, assign '
+                  'primary-secondary contact pairs automatically using proximity between nodes that '
+                  'belong to arbitrary boundaries.'
     abs_zero = 1.0e-4
     rel_err = 1.0e-4
     allow_warnings = true
