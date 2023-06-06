@@ -70,8 +70,16 @@ shape functions).
 
 Typical shape function families: Lagrange, Hermite, Hierarchic, Monomial, Clough-Toucher
 
-Lagrange shape functions are the most common, which are interpolary at the nodes, i.e., the
+Lagrange shape functions are the most common, which are interpolatory at the nodes, i.e., the
 coefficients correspond to the values of the functions at the nodes.
+
+!---
+
+## Setting Shape Functions in a MOOSE input file
+
+Shape functions can be set for each variable in the `Variables` block:
+
+!listing test/tests/variables/second_derivative/interface_kernels.i block=Variables
 
 !---
 
@@ -99,26 +107,17 @@ $\psi_8$ is associated to the "center" node, it is symmetric and $\geq 0$ on the
 
 !row!
 !col! width=33%
-!media darcy_thermo_mech/fem_quad9_phi0.png style=width:100%
-
-!style halign=center
-$\psi_0$
+!media darcy_thermo_mech/fem_quad9_phi0.png style=width:100% caption=    $\psi_0$ prefix=''
 !col-end!
 
 !col! width=33%
 !col width=33%
-!media darcy_thermo_mech/fem_quad9_phi4.png style=width:100%;
-
-!style halign=center
-$\psi_4$
+!media darcy_thermo_mech/fem_quad9_phi4.png style=width:100%; caption=    $\psi_4$ prefix=''
 !col-end!
 
 !col! width=33%
 !col width=33%
-!media darcy_thermo_mech/fem_quad9_phi8.png style=width:100%;
-
-!style halign=center
-$\psi_8$
+!media darcy_thermo_mech/fem_quad9_phi8.png style=width:100%; caption=    $\psi_8$ prefix=''
 !col-end!
 
 !row-end!

@@ -1,4 +1,4 @@
-# Postprocessor System
+# [Postprocessor System](syntax/Postprocessors/index.md)
 
 A system for computing a "reduction" or "aggregation" calculation based on the solution variables
 that results in a +single+ scalar value.
@@ -7,15 +7,18 @@ that results in a +single+ scalar value.
 
 ## Types of Postprocessors
 
-ElementPostprocessor: operate on each element
+The operation defined in the `::compute...` routine is applied at various locations
+depending on the Postprocessor type.
 
-NodalPostprocessor: operate on each node
+ElementPostprocessor: operates on each element
 
-SidePostprocessor: operate on boundaries
+NodalPostprocessor: operates on each node
 
-InternalSidePostprocessor: operate on internal element sides
+SidePostprocessor: operates on each element side on a boundary
 
-InterfacePostprocessor: operator on subdomain interfaces
+InternalSidePostprocessor: operates on internal element sides
+
+InterfacePostprocessor: operates on each element side on subdomain interfaces
 
 GeneralPostprocessor: operates once per execution
 
@@ -24,11 +27,20 @@ GeneralPostprocessor: operates once per execution
 ## Postprocessor Anatomy
 
 `Postprocessor` is a UserObject, so `initialize`, `execute`, `threadJoin`, and `finalize` methods
-are used for implementing the aggregation operation.
+can be defined.
+
+`initialize()`\\
+This is called once before every execution. Useful to reset accumulated quantities
+
+`execute()`\\
+This defines the operation performed on a per element/side/node/mesh (depending on type) basis.
+The quadrature integration is often defined there, and users generally do not need to define this.
 
 `Real getValue()`\\
 This is called internally within MOOSE to retrieve the final scalar value, the value returned by
 this function is referenced by all other objects that are using the postprocessor.
+
+Most Postprocessor base classes will already define these routines for you!
 
 !---
 
@@ -64,9 +76,13 @@ the `[Outputs]` block be stored in CSV file.
 ## Using a Postprocessor
 
 Postprocessor values are used within an object by creating a `const` reference to a
-`PostprocessorValue` and initializing the reference in the initialization list.
+`PostprocessorValue` and initializing the reference in the initialization list of the object constructor.
+
+In the header, we declare a reference,
 
 !listing PostprocessorDT.h line=PostprocessorValue
+
+In the source, we retrieve a reference to the value of the Postprocessor,
 
 !listing PostprocessorDT.C line=getPostprocessorValue
 
@@ -75,7 +91,7 @@ Postprocessor values are used within an object by creating a `const` reference t
 ## Default Postprocessor Values
 
 It is possible to set default values for `Postprocessors` to allow an object to operate without
-creating `Postprocessor` object.
+creating or specifying a `Postprocessor` object.
 
 ```cpp
 params.addParam<PostprocessorName>("postprocessor", 1.2345, "Doc String");

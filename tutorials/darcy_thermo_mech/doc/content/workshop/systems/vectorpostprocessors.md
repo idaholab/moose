@@ -1,4 +1,4 @@
-# VectorPostprocessor System
+# [VectorPostprocessor System](syntax/VectorPostprocessors/index.md)
 
 A system for "reduction" or "aggregation" calculations based on the solution variables
 that results in one or many vectors of values.
@@ -7,13 +7,16 @@ that results in one or many vectors of values.
 
 ## Types of VectorPostprocessors
 
-ElementVectorPostprocessor: operate on each element
+The operation defined in the `::compute...` routine is applied at various locations
+depending on the VectorPostprocessor type.
 
-NodalVectorPostprocessor: operate on each node
+ElementVectorPostprocessor: operates on each element
 
-SideVectorPostprocessor: operate on boundaries
+NodalVectorPostprocessor: operates on each node
 
-InternalSideVectorPostprocessor: operate on internal element sides
+SideVectorPostprocessor: operates on each element side on a boundary
+
+InternalSideVectorPostprocessor: operates on internal element sides
 
 GeneralVectorPostprocessor: operates once per execution
 
@@ -21,7 +24,7 @@ GeneralVectorPostprocessor: operates once per execution
 
 ## VectorPostprocessor Anatomy
 
-`Postprocessor` is a UserObject, so `initialize`, `execute`, `threadJoin`, and `finalize` methods
+`VectorPostprocessor` is a UserObject, so `initialize`, `execute`, `threadJoin`, and `finalize` methods
 are used for implementing the aggregation operation.
 
 `virtual VectorPostprocessorValue & getVector (const std::string &vector_name)`
@@ -32,7 +35,7 @@ postprocessor.
 !---
 
 VectorPostprocessor objects operate a bit like Material objects, each vector is declared and then
-within the "initialize", "execute", "threadJoin", and "finalize" methods the vectors are updated
+within the `initialize`, `execute`, `threadJoin`, and `finalize` methods the vectors are updated
 with the desired data.
 
 Create a member variable, as a reference, for the vector data

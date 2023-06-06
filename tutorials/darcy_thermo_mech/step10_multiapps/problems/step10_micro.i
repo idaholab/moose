@@ -42,10 +42,6 @@
 [AuxVariables]
   [phi]
   []
-  [por_var]
-    family = MONOMIAL
-    order = CONSTANT
-  []
 []
 
 [AuxKernels]
@@ -54,12 +50,6 @@
     variable = phi
     reference_temperature = 300
     temperature = temperature_in
-    execute_on = 'INITIAL TIMESTEP_END'
-  []
-  [por_var]
-    type = ADMaterialRealAux
-    variable = por_var
-    property = porosity
     execute_on = 'INITIAL TIMESTEP_END'
   []
 []
@@ -111,9 +101,9 @@
     k0 = 12.05
     execute_on = 'INITIAL TIMESTEP_END'
   []
-  [por_var]
-    type = ElementAverageValue
-    variable = por_var
+  [average_porosity]
+    type = ADElementAverageMaterialProperty
+    mat_prop = porosity
     execute_on = 'INITIAL TIMESTEP_END'
   []
   [t_right]
@@ -144,9 +134,9 @@
 [ICs]
   [close_pack]
     radius = 0.01 # meter
-    outvalue = 0  # water
+    outvalue = 0 # water
     variable = phi
-    invalue = 1   # steel
+    invalue = 1 # steel
     type = ClosePackIC
   []
 []

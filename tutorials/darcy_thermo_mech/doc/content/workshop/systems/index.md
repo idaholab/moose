@@ -26,6 +26,10 @@
 
 !---
 
+!include debug.md end=!---
+
+!---
+
 !include dgkernels.md end=!---
 
 !---
@@ -42,7 +46,23 @@
 
 !---
 
+!include executors.md end=!--
+
+!---
+
 !include functions.md end=!---
+
+!---
+
+!include fvbcs.md end=!---
+
+!---
+
+!include fviks.md end=!---
+
+!---
+
+!include fvkernels.md end=!---
 
 !---
 
@@ -86,10 +106,6 @@
 
 !---
 
-!include meshmodifiers.md end=!---
-
-!---
-
 !include multiapps.md end=!---
 
 !---
@@ -110,6 +126,10 @@
 
 !---
 
+!include positions.md end=!--
+
+!---
+
 !include postprocessors.md end=!--
 
 !---
@@ -127,6 +147,10 @@
 !---
 
 !include relationshipmanagers.md end=!---
+
+!---
+
+!include reporters.md end=!--
 
 !---
 

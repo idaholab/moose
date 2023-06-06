@@ -1,4 +1,4 @@
-# MultiApp System
+# [MultiApp System](syntax/MultiApps/index.md)
 
 A system for performing multiple simulations within a main simulation.
 
@@ -20,8 +20,8 @@ The MultiApp system creates simulations of loosely-coupled systems of fully-coup
 Each "app" is considered to be a solve that is independent, and there is always a "main" that is
 driving the simulation
 
-- The "main" app can have any number of `MultiApp` objects
-- Each `MultiApp` can represent many sub-applications ("sub-apps")
+- The "main" (or "parent") app can have any number of `MultiApp` objects
+- Each `MultiApp` can represent many sub-applications ("sub-apps" or "child" apps)
 
 Each sub-app can solve for different physics from the main application
 

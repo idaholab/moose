@@ -1,4 +1,4 @@
-# Material System
+# [Material System](syntax/Materials/index.md)
 
 A system for defining material properties to be used by multiple systems and allow for variable
 coupling.
@@ -71,7 +71,7 @@ addParam<MaterialPropertyName>("combination_property_name", 12345,
 Only scalar (`Real`) values may have defaults.
 
 When `getMaterialProperty<Real>("combination_property_name")` is called, the default will be returned
-if the value has not been computed via a `delcareProperty` call within a `Material` object.
+if the value has not been computed via a `declareProperty` call within a `Material` object.
 
 !---
 

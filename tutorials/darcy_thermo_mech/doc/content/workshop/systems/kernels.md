@@ -1,4 +1,4 @@
-# Kernel System
+# [Kernel System](syntax/Kernels/index.md)
 
 A system for computing the residual contribution from a volumetric term within a [!ac](PDE) using
 the Galerkin finite element method.
