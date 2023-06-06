@@ -92,6 +92,8 @@ f'(x_n) \delta x_{n+1} &= -f(x_n) \\
 x_{n+1} &= x_n + \delta x_{n+1}
 \end{aligned}
 
+!media darcy_thermo_mech/newtons_method.png style=width:50%;margin-left:auto;margin-right:auto;display:block;
+
 !---
 
 ## Newton's Method in MOOSE
@@ -138,6 +140,20 @@ Available options include:
 
 ## +JFNK+
 
+Uses a Krylov subspace-based linear solver
+
+!equation id=krylov-space
+\begin{aligned}
+K_j = \{\mathbf{r}, \mathbf{J}\mathbf{r},\mathbf{J}^2\mathbf{r},...,\mathbf{J}^{j-1}\mathbf{r}\}
+\end{aligned}
+
+The action of the Jacobian is approximated by:
+
+!equation id=jfnk
+\begin{aligned}
+\mathbf{J}\mathbf{v} \approx \frac{\mathbf{R}(\mathbf{u}+\epsilon \mathbf{v})-\mathbf{R}(\mathbf{u})}{\epsilon}
+\end{aligned}
+
 The `Kernel` method `computeQpResidual` is called to compute
 $\vec{R}(\vec{u}_n)$ during the nonlinear step ([newton]).
 
@@ -148,12 +164,20 @@ to approximate the action of the Jacobian on the Krylov vector.
 
 ## +PJFNK+
 
+The action of the preconditioned Jacobian is approximated by:
+
+!equation id=pjfnk
+\begin{aligned}
+\mathbf{JP}^{-1}\mathbf{v} \approx \frac{\mathbf{R}(\mathbf{u}+\epsilon \mathbf{P}^{-1}\mathbf{v})-\mathbf{R}(\mathbf{u})}{\epsilon}
+\end{aligned}
+
 The `Kernel` method `computeQpResidual` is called to compute
 $\vec{R}(\vec{u}_n)$ during the nonlinear step ([newton]).
 
 During each linear step of PJFNK, the `computeQpResidual` method is called to approximate the action
 of the Jacobian on the Krylov vector. The `computeQpJacobian` and `computeQpOffDiagJacobian` methods
 are used to compute values for the preconditioning matrix.
+
 
 !---
 
