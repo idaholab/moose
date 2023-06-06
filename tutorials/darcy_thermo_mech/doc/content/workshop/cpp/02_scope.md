@@ -18,30 +18,6 @@ Dynamically-allocated (via new) memory *is not* automatically freed at the end o
 
 !---
 
-## "Named" Scopes
-
-class scope
-
-```cpp
-class MyObject
-{
-public:
-  void myMethod();
-};
-```
-
-namespace scope
-
-```cpp
-namespace MyNamespace
-{
-  float a;
-  void myMethod();
-}
-```
-
-!---
-
 ## Scope Resolution Operator
 
 "double colon" :: is used to refer to members inside of a named scope
