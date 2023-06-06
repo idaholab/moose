@@ -181,7 +181,7 @@ TEST(CompileTimeDerivativesTest, print)
 
 TEST(CompileTimeDerivativesTest, makeRefs)
 {
-  Real va, vb, vc;
+  const Real va = 1, vb = 2, vc = 1.5;
   const auto [a, b, c] = makeRefs<30>(va, vb, vc);
 
   // matching order
@@ -205,22 +205,29 @@ TEST(CompileTimeDerivativesTest, makeRefs)
 
 TEST(CompileTimeDerivativesTest, makeStandardDeviation)
 {
-  const Real va = 1, vb = 2, vc = 1.5;
+  // start tag for the fitting parameters
   const int params = 30;
+
+  // fitting parameter data and corresponding CTD objects
+  const Real va = 1, vb = 2, vc = 1.5;
   const auto [a, b, c] = makeRefs<params>(va, vb, vc);
 
+  // function variable (omit tag, since we dont need to derive w.r.t. x)
   const Real vx = 0.5;
   const auto x = makeRef(vx);
 
+  // function expression
   const auto f = a + b * x + c * x * x;
 
-  Eigen::Matrix<Real, 3, 3> covariance;
+  // covariance matrix for the a,b,c parameters
   // clang-format off
-  covariance << 0.2,  0.01, 0.07,
-                0.01, 0.4,  0.05,
-                0.07, 0.05, 0.3;
+  CTMatrix<Real, 3, 3> covariance(
+    0.2,  0.01, 0.07,
+    0.01, 0.4,  0.05,
+    0.07, 0.05, 0.3);
   // clang-format on
 
+  // Object that calculates the standard deviation of f
   const auto std_dev = makeStandardDeviation<params>(f, covariance);
 
   EXPECT_NEAR(std_dev(), 0.6133922073192649, 1e-15);

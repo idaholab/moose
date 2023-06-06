@@ -10,8 +10,8 @@
 #pragma once
 
 #include "libmesh/utility.h"
+#include "libmesh/compare_types.h"
 #include "Conversion.h"
-#include <Eigen/Dense>
 #include <limits>
 
 namespace CompileTimeDerivatives
@@ -35,10 +35,25 @@ class CTOneBase : public CTBase
 {
 };
 
-template <typename T1, typename T2>
-struct CTSuperType
+template <typename T>
+using CTCleanType = typename std::remove_const<typename std::remove_reference<T>::type>::type;
+
+template <typename... Ts>
+struct CTSuperType;
+
+template <typename T>
+struct CTSuperType<T>
 {
-  typedef double type;
+  typedef T type;
+};
+
+template <typename T1, typename T2, typename... Ts>
+struct CTSuperType<T1, T2, Ts...>
+{
+  typedef typename std::conditional<
+      (sizeof...(Ts) > 0),
+      typename CTSuperType<typename libMesh::CompareTypes<T1, T2>::supertype, Ts...>::type,
+      typename libMesh::CompareTypes<T1, T2>::supertype>::type type;
 };
 
 /**
@@ -87,7 +102,7 @@ public:
     return CTNull<O>();
   }
 
-  typedef T O;
+  typedef CTCleanType<T> O;
 };
 
 /**
@@ -108,7 +123,7 @@ public:
     return CTNull<O>();
   }
 
-  typedef T O;
+  typedef CTCleanType<T> O;
 };
 
 /**
@@ -135,7 +150,7 @@ class CTBinary : public CTBase
 public:
   CTBinary(L left, R right) : _left(left), _right(right) {}
 
-  typedef typename CTSuperType<typename L::O, typename R::O>::type O;
+  typedef typename libMesh::CompareTypes<typename L::O, typename R::O>::supertype O;
 
   template <typename Self>
   std::string printParens(const Self * self) const
@@ -206,7 +221,7 @@ public:
       return CTNull<O>();
   }
 
-  typedef T O;
+  typedef CTCleanType<T> O;
 
 protected:
   const T & _ref;
@@ -606,33 +621,52 @@ makeRefs(const Ts &... refs)
                                    std::make_integer_sequence<CTTag, sizeof...(refs)>{});
 }
 
+template <typename T, int N, int M>
+class CTMatrix
+{
+public:
+  template <typename... Ts>
+  CTMatrix(Ts... a) : _data({a...})
+  {
+    static_assert(sizeof...(a) == N * M, "Invalid number of matrix entries");
+  }
+  T & operator()(std::size_t n, std::size_t m) { return _data[M * n + m]; }
+  const T & operator()(std::size_t n, std::size_t m) const { return _data[M * n + m]; }
+
+protected:
+  std::array<T, N * M> _data;
+};
+
 template <typename... Ds>
-class CTStandardDeviation
+class CTStandardDeviation : public CTBase
 {
   static constexpr auto N = sizeof...(Ds);
 
 public:
-  CTStandardDeviation(std::tuple<Ds...> derivatives, Eigen::Matrix<Real, N, N> covariance)
+  CTStandardDeviation(std::tuple<Ds...> derivatives, CTMatrix<Real, N, N> covariance)
     : _derivatives(derivatives), _covariance(covariance)
   {
   }
   auto operator()() const { return std::sqrt(evalHelper(std::make_index_sequence<N>{})); }
 
-protected:
-  template <std::size_t... Is>
-  auto evalHelper(std::index_sequence<Is...>) const
-  {
-    Eigen::Matrix<Real, N, 1> d;
-    ((d[Is] = std::get<Is>(_derivatives)()), ...);
-    // std::cout << d << '\n';
-    // std::cout << d.transpose() << '\n';
-    // std::cout << _covariance << '\n';
+  typedef typename CTSuperType<typename Ds::O...>::type O;
 
-    return d.transpose() * _covariance * d;
+protected:
+  template <int R, std::size_t... Is>
+  O rowMul(std::index_sequence<Is...>, const std::array<O, N> & d) const
+  {
+    return ((_covariance(R, Is) * d[Is]) + ...);
+  }
+
+  template <std::size_t... Is>
+  auto evalHelper(const std::index_sequence<Is...> & is) const
+  {
+    const std::array<O, N> d{std::get<Is>(_derivatives)()...};
+    return ((rowMul<Is>(is, d) * d[Is]) + ...);
   }
 
   const std::tuple<Ds...> _derivatives;
-  const Eigen::Matrix<Real, N, N> _covariance;
+  const CTMatrix<Real, N, N> _covariance;
 };
 
 template <CTTag start_tag, typename T, CTTag... Tags>
@@ -648,7 +682,7 @@ makeStandardDeviationHelper(const T & f, std::integer_sequence<CTTag, Tags...>)
  */
 template <CTTag start_tag = 0, typename T, int N>
 auto
-makeStandardDeviation(const T & f, const Eigen::Matrix<Real, N, N> covariance)
+makeStandardDeviation(const T & f, const CTMatrix<Real, N, N> covariance)
 {
   return CTStandardDeviation(
       makeStandardDeviationHelper<start_tag>(f, std::make_integer_sequence<CTTag, N>{}),
