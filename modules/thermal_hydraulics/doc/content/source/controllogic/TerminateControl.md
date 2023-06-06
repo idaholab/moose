@@ -2,7 +2,7 @@
 
 !syntax description /Controls/TerminateControl
 
-The boolean that determines when to terminate is a `ControlData`. This is only used in the
+The boolean that determines when to terminate is a [ControlData.md]. This is only used in the
 THM control logic to keep track of states of control objects.
 
 The boolean can be examined in the console using a [BoolControlDataValuePostprocessor.md].
