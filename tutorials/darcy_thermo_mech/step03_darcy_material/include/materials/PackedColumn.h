@@ -11,9 +11,6 @@
 
 #include "Material.h"
 
-// A helper class from MOOSE that linear interpolates x,y data
-#include "LinearInterpolation.h"
-
 /**
  * Material objects inherit from Material and override computeQpProperties.
  *
@@ -37,10 +34,7 @@ protected:
   /// Value of viscosity from the input file
   const Real & _input_viscosity;
 
-  /// Compute permeability based on the radius (mm)
-  LinearInterpolation _permeability_interpolation;
-
-  /// The permeability (K)
+  /// The permeability (K) computed based on the radius (mm)
   ADMaterialProperty<Real> & _permeability;
 
   /// The viscosity of the fluid (mu)
