@@ -26,8 +26,8 @@ Multi-physics Object Oriented Simulation Environment
 
 ## MOOSE By The Numbers
 
-- 145 contributors
-- 40,000 commits
+- 202 contributors
+- 44,000 commits
 - 5000 unique visitors per month
 - ~6 new Discussion participants per week
 - 1240 citations for the MOOSE papers
@@ -36,13 +36,6 @@ Multi-physics Object Oriented Simulation Environment
   - More than 500 publications using MOOSE
 
 - 30M tests per week
-
-
-!---
-
-## MOOSE Team
-
-!media darcy_thermo_mech/moose_team.png style=width:85%;margin-left:auto;margin-right:auto;display:block;
 
 !---
 
@@ -54,7 +47,7 @@ Multi-physics Object Oriented Simulation Environment
 
 - Continuous and Discontinuous Galerkin FEM
 - Finite Volume
-- Fully coupled, fully implicit (and explicit)
+- Supports fully coupled or segregated systems, fully implicit and explicit time integration
 - Automatic differentiation (AD)
 - Unstructured mesh with FEM shapes
 - Higher order geometry

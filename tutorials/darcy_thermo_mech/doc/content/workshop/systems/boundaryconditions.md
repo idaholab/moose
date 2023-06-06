@@ -1,4 +1,4 @@
-# Boundary Condition System
+# [Boundary Condition System](syntax/BCs/index.md)
 
 System for computing residual contributions from boundary terms of a [!ac](PDE).
 
@@ -19,7 +19,7 @@ The structure is very similar to Kernels: objects must override `computeQpResidu
 
 !---
 
-## ADIntegrtedBC Object Members
+## ADIntegratedBC Object Members
 
 `_u`, `_grad_u`\\
 Value and gradient of the variable this Kernel is operating on

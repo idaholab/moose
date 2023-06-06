@@ -2,7 +2,7 @@
 
 !---
 
-Add custom syntax to build objects that are common to all Darcy thermal mecahnical problems:
+Add custom syntax to build objects that are common to all Darcy thermal mechanical problems:
 
 - Velocity auxiliary variables and kernels
 - Pressure kernel

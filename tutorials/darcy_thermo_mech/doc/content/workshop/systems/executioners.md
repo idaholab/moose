@@ -1,4 +1,4 @@
-# Executioner System
+# [Executioner System](syntax/Executioner/index.md)
 
 A system for dictating the simulation solving strategy.
 

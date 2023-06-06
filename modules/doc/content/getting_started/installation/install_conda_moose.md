@@ -16,7 +16,7 @@ mamba activate moose
 ```
 
 If you are running into errors, please see our
-[troubleshooting guide for Conda](troubleshooting.md#condaissues optional=True).
+[troubleshooting guide for Conda](help/troubleshooting.md#condaissues optional=True).
 
 !alert note
 Know that you will need to `mamba activate moose` for +each terminal window you open, and each time

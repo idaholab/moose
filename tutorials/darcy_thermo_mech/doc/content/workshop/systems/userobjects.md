@@ -1,4 +1,4 @@
-# UserObject System
+# [UserObject System](syntax/UserObjects/index.md)
 
 A system for defining an arbitrary interface between MOOSE objects.
 
@@ -19,7 +19,7 @@ UserObjects are computed at specified "times" by the execute_on option in the in
 `execute_on = 'initial timestep_end'`\\
 `execute_on = linear`\\
 `execute_on = nonlinear`\\
-`execute_on = 'timestep_begin final failed'`\\
+`execute_on = 'timestep_begin final failed'`
 
 They can be restricted to specific blocks, sidesets, and nodesets
 
@@ -29,12 +29,12 @@ They can be restricted to specific blocks, sidesets, and nodesets
 
 There are various types of UserObjects:
 
-- +ElementUserObject+: execute on elements
-- +NodalUserObject+: execute on nodes
-- +SideUserObject+: execute on boundaries
-- +InternalSideUserObject+: execute on internal sides
-- +InterfaceUserObject+: execute on interfaces
-- +GeneralUserObject+: execute once
+- +ElementUserObject+: executes on elements
+- +NodalUserObject+: executes on nodes
+- +SideUserObject+: executes on sides on boundaries
+- +InternalSideUserObject+: executes on internal sides
+- +InterfaceUserObject+: executes on sides on interfaces
+- +GeneralUserObject+: executes once
 
 !---
 
@@ -86,7 +86,7 @@ the calculation.
 
 Any MOOSE object can retrieve a `UserObject` in a manner similar to retrieving a `Function`.
 
-Generally, it is a good idea to take the name of the `UserObject` to from the input file:
+Generally, it is a good idea to take the name of the `UserObject` from the input file:
 
 ```cpp
 InputParameters

@@ -1,4 +1,4 @@
-# Input Parameters
+# [Input Parameters](source/utils/InputParameters.md)
 
 Every `MooseObject` includes a set of custom parameters within the `InputParameters` object that
 is used to construct the object.
@@ -10,7 +10,10 @@ which every class contains.
 
 ## `validParams` Declaration
 
+In the class declaration,
 ```cpp
+public:
+...
 static InputParameters Convection::validParams();
 ```
 
@@ -54,7 +57,7 @@ Adds an input file parameter, of type `int`, that includes a default value of 19
 params.addParam<int>("year", 1980, "Provide the year you were born.");
 ```
 
-
+Here the default is overriden by a user-provided value
 ```text
 [UserObjects]
   [date_object]
@@ -91,8 +94,8 @@ Various types of objects in MOOSE support variable coupling, this is done using 
 `addCoupledVar` method.
 
 ```cpp
-params.addCoupledVar("temperature", "The temperature (C) of interest.");
-params.addCoupledVar("pressure", 101.325, "The pressure (kPa) of the atomsphere.");
+params.addRequiredCoupledVar("temperature", "The temperature (C) of interest.");
+params.addCoupledVar("pressure", 101.325, "The pressure (kPa) of the atmosphere.");
 ```
 
 ```text
@@ -103,7 +106,7 @@ params.addCoupledVar("pressure", 101.325, "The pressure (kPa) of the atomsphere.
 
 [UserObjects]
   [temp_pressure_check]
-    type = CheckTemperatureAndPressue
+    type = CheckTemperatureAndPressure
     temperature = T
     pressure = P # if not provided a value of 101.325 would be used
   []
@@ -112,21 +115,20 @@ params.addCoupledVar("pressure", 101.325, "The pressure (kPa) of the atomsphere.
 
 !---
 
-Within the input file it is possible to used a variable name, a constant value, a function, or a
-postprocessor name as a the right-hand side.
+Within the input file it is possible to used a variable name or a constant value for a `coupledVar`
+parameter.
 
 ```text
 pressure = P
 pressure = 42
-pressure = 3*x     # more about this later
-pressure = pp_name # more about this later
 ```
 
 !---
 
 ### Range Checked Parameters
 
-Input variables may be restricted to a range of values directly in the `validParams` function.
+Input constant values may be restricted to a range of values directly in the `validParams` function.
+This can also be used for vectors of constants parameters!
 
 !listing timesteppers/ConstantDT.C start=params.addRangeCheckedParam end=params.addClassDescription
 
@@ -138,7 +140,7 @@ Syntax: [warp.povusers.org/FunctionParser/fparser.html](http://warp.povusers.org
 
 ## Documentation
 
-Each application  is capable of generating documentation from the `validParams` functions.
+Each application is capable of generating documentation from the `validParams` functions.
 
 +Option 1+: Command line `--dump`
 
@@ -157,7 +159,7 @@ Each application  is capable of generating documentation from the `validParams` 
 Built-in types and std::vector are supported via template methods:
 
 - `addParam<Real>("year", 1980, "The year you were born.");`
-- `addParam<int>("count", 1, "doc");
+- `addParam<int>("count", 1, "doc");`
 - `addParam<unsigned int>("another_num", "doc");`
 - `addParam<std::vector<int> >("vec", "doc");`
 
@@ -167,7 +169,7 @@ Other supported parameter types include:
 - `RealVectorValue`
 - `RealTensorValue`
 - `SubdomainID`
-- `BoundaryID`
+- `std::map<std::string, Real>`
 
 !---
 
@@ -187,7 +189,7 @@ functions.
 - NonlinearVariableName
 - AuxVariableName
 
-A complete list, see the instantiations at the bottom of framework/include/utils/MooseTypes.h.
+For a complete list, see the instantiations at the bottom of framework/include/utils/MooseTypes.h.
 
 !---
 

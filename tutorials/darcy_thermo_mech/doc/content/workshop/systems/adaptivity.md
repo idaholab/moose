@@ -1,4 +1,4 @@
-# Adaptivity System
+# [Adaptivity System](syntax/Adaptivity/index.md)
 
 !---
 
@@ -69,9 +69,6 @@ Refine if error is greater than a specified value and coarsen if it is less.
 
 `ValueThresholdMarker`\\
 Refine if variable value is greater than a specific value and coarsen if it is less.
-
-`UniformMarker`\\
-Refine or coarsen all elements.
 
 `BoxMarker`\\
 Refine or coarsen inside or outside a given box.

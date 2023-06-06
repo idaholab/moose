@@ -20,6 +20,10 @@
 
 !---
 
+!include workshop/intro/getting_started.md
+
+!---
+
 !include workshop/problem/overview.md
 
 !---
@@ -180,6 +184,10 @@
 
 !---
 
+!include workshop/infrastructure/troubleshooting.md
+
+!---
+
 !include workshop/problem/step07.md end=end-intro
 
 !---
@@ -197,6 +205,8 @@
 !---
 
 !include workshop/problem/step08.md end=end-intro
+
+All MOOSE Postprocessors are based on the UserObject System, so we will begin with an introduction there.
 
 !---
 

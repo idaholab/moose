@@ -1,4 +1,4 @@
-# MooseObject
+# [MooseObject](source/base/MooseObject.md)
 
 All user-facing objects in MOOSE derive from `MooseObject`, this allows for a common structure
 for all applications and is the basis for the modular design of MOOSE.

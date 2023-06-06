@@ -1,4 +1,4 @@
-# Auxiliary System
+# [Auxiliary System](syntax/AuxVariables/index.md)
 
 A system for direct calculation of field variables ("AuxVariables") that is designed for
 postprocessing, coupling, and proxy calculations.
@@ -23,16 +23,18 @@ and can serve as a proxy for nonlinear variables
 
 Auxiliary variables currently come in two flavors:
 
-- Element (constant or higher order monomials)
-- Nodal (linear Lagrange)
+- Element (e.g. constant or higher order monomials)
+- Nodal (e.g. linear Lagrange)
 
-Auxiliary variables have "old" and "older" states just like nonlinear variables
+Auxiliary variables have "old" and "older" states, from previous time steps, just like nonlinear variables
 
 !---
 
 ### Elemental Auxiliary Variables
 
-Element auxiliary variables compute average values per element (constant)
+Element auxiliary variables can compute:
+- average values per element, if stored in a constant monomial variable
+- spatial profiles using higher order variables
 
 AuxKernel objects computing elemental values can couple to nonlinear variables and both element and
 nodal auxiliary variables
@@ -52,7 +54,7 @@ nodal auxiliary variables
 
 Element auxiliary variables are computed at each node and are stored as linear Lagrange variables
 
-AuxKernel objects computing nodal values can +only+ couple to nonlinear variables and
+AuxKernel objects computing nodal values can +only+ couple to nodal nonlinear variables and
 other nodal auxiliary variables
 
 ```text
@@ -86,7 +88,7 @@ Coordinates of the current q-point that is only valid for elemental AuxKernels, 
 should be used for nodal variables
 
 `_qp`\\
-Current quadrature point, this is used for both nodal and elemental variables for consistency
+Current quadrature point, this indexing is used for both nodal (`_qp=0` at the node) and elemental variables for consistency
 
 `_current_elem`\\
 Pointer to the current element that is being operated on (elemental only)
@@ -98,14 +100,25 @@ Pointer to the current node that is being operated on (nodal only)
 
 ## VectorAuxKernel Objects
 
-Directly compute a vector AuxVariable values by overriding `computeValue()`, with the difference
-being the return value of a `RealVectorValue` instead of Real.
+Directly compute a vector AuxVariable values by:
+- inheriting from the `VectorAuxKernel` class
+- overriding `computeValue()`, with the difference being the return value of a `RealVectorValue` instead of Real.
+
+The auxiliary variable will have to be one of the vector types (LAGRANCE_VEC, MONOMIAL_VEC or NEDELEC_VEC).
 
 ```text
 [AuxVariables]
   [aux]
     order = FIRST
     family = LAGRANGE_VEC
+  []
+[]
+[AuxKernels]
+  [parsed]
+    type = ParsedVectorAux
+    variable = aux
+    expression_x = 'x + y'
+    expression_y = 'x - y'
   []
 []
 ```

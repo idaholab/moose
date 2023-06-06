@@ -42,5 +42,5 @@ DarcyThermoMechApp::registerAll(Factory & factory, ActionFactory & action_factor
 {
   Registry::registerObjectsTo(factory, {"DarcyThermoMechApp"});
   Registry::registerActionsTo(action_factory, {"DarcyThermoMechApp"});
-  ModulesApp::registerAll(factory, action_factory, syntax);
+  ModulesApp::registerAllObjects<DarcyThermoMechApp>(factory, action_factory, syntax);
 }
