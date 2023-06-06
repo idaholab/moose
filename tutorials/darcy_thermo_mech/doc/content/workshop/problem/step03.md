@@ -24,8 +24,8 @@ viscosity.
 
 Both shall be computed with a single `Material` object: `PackedColumn`.
 
-As in the reference article, permeability varies with the size of the steel spheres, so linear
-interpolation will be used for defining this property.
+As in the reference article, permeability varies with the size of the steel spheres, so we'll
+perform an interpolation calculation for it over the range of valid values.
 
 !---
 

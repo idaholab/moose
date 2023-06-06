@@ -8,11 +8,11 @@ they are coupled together.
 !equation
 -\nabla \cdot \frac{\mathbf{K}}{\mu} \nabla p  = 0
 \\
-C\left( \frac{\partial T}{\partial t} + \underbrace{\epsilon \vec{u}\cdot\nabla T}_{\textrm{DarcyAdvection}} \right) - \nabla \cdot k \nabla T = 0
+C\left( \frac{\partial T}{\partial t} + \underbrace{\epsilon \vec{u}\cdot\nabla p}_{\textrm{DarcyAdvection}} \right) - \nabla \cdot k \nabla T = 0
 
-- Objects have been created for everything except the $\vec{u}\cdot\nabla T$ term; a `Kernel`,
+- Objects have been created for everything except the $\vec{u}\cdot\nabla p$ term; a `Kernel`,
   `DarcyAdvection`, will be developed for this term.
-- A more sophisticated `Material` object will be created that includes temperature dependence
+- A more sophisticated `Material` object will be created that includes temperature dependence.
 
 !---
 
@@ -25,6 +25,46 @@ C\left( \frac{\partial T}{\partial t} + \underbrace{\epsilon \vec{u}\cdot\nabla 
 ## DarcyAdvection.C
 
 !listing step06_coupled_darcy_heat_conduction/src/kernels/DarcyAdvection.C
+
+!---
+
+## LinearInterpolation
+
+MOOSE contains several utilities and classes to assist in performing calculations. One of these is
+the `LinearInterpolation` class.
+
+This class allows the construction of a linear interpolation of input data, and the sampling of that
+interpolation (values, derivatives, integral, etc.) within a MOOSE object. Linear extrapolation beyond
+the bounds of the interpolated function is also possible.
+
+This feature is used in this step to improve the manual interpolation performed previously.
+
+!---
+
+## LinearInterpolation
+
+This utility allows the manual permeability interpolation in `PackedColumn.C`:
+
+```c++
+  _permeability[_qp] =
+      (permeability[0] * (sphere_sizes[1] - value) + permeability[1] * (value - sphere_sizes[0])) /
+      (sphere_sizes[1] - sphere_sizes[0]);
+```
+
+to be performed automatically, being initialized once in the constructor:
+
+```c++
+  _permeability_interpolation.setData(sphere_sizes, permeability);
+```
+
+with sampling as necessary in `PackedColumn::computeQpProperties`:
+
+```c++
+  _permeability[_qp] = _permeability_interpolation.sample(value);
+```
+
+`LinearInterpolation` can be used extensively to interpolate manually entered data, as well as
+when using imported input data.
 
 !---
 
@@ -66,7 +106,7 @@ should be on the same scale.
 Making equations non-dimensional is a common technique to achieve this. But this is not typically
 done in MOOSE, where modelers have direct access to dimensionalized quantities.
 
-MOOSE includes the ability to either manually or automatically scale non-linear variables
+MOOSE includes the ability to either manually or automatically scale non-linear variables.
 
 !---
 
