@@ -31,11 +31,6 @@ public:
   const std::vector<ADReal> & getTfluid(dof_id_type element_id) const;
 
 protected:
-  /**
-   * Parallel gather of all local contributions into one global map
-   */
-  void allGatherMap(std::map<dof_id_type, std::vector<ADReal>> & data);
-
   /// Mesh alignment object
   MeshAlignment1D3D & _mesh_alignment;
   /// Coupled heated perimeter variable

@@ -9,9 +9,7 @@
 
 #include "ADHeatTransferFromHeatStructure3D1PhaseUserObject.h"
 #include "THMIndices3Eqn.h"
-#include "metaphysicl/parallel_dualnumber.h"
-#include "metaphysicl/parallel_numberarray.h"
-#include "metaphysicl/parallel_semidynamicsparsenumberarray.h"
+#include "THMUtils.h"
 
 registerMooseObject("ThermalHydraulicsApp", ADHeatTransferFromHeatStructure3D1PhaseUserObject);
 
@@ -77,9 +75,9 @@ ADHeatTransferFromHeatStructure3D1PhaseUserObject::execute()
 void
 ADHeatTransferFromHeatStructure3D1PhaseUserObject::finalize()
 {
-  allGatherMap(_heated_perimeter);
-  allGatherMap(_T_fluid);
-  allGatherMap(_htc);
+  THM::allGatherADVectorMap(comm(), _heated_perimeter);
+  THM::allGatherADVectorMap(comm(), _T_fluid);
+  THM::allGatherADVectorMap(comm(), _htc);
 }
 
 void
@@ -132,15 +130,4 @@ ADHeatTransferFromHeatStructure3D1PhaseUserObject::getTfluid(dof_id_type element
   else
     mooseError(
         name(), ": Requested fluid temperature for element ", element_id, " was not computed.");
-}
-
-void
-ADHeatTransferFromHeatStructure3D1PhaseUserObject::allGatherMap(
-    std::map<dof_id_type, std::vector<ADReal>> & data)
-{
-  std::vector<std::map<dof_id_type, std::vector<ADReal>>> all;
-  comm().allgather(data, all);
-  for (auto & hfs : all)
-    for (auto & it : hfs)
-      data[it.first] = it.second;
 }

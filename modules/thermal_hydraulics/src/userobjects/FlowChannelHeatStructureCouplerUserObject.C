@@ -8,9 +8,7 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "FlowChannelHeatStructureCouplerUserObject.h"
-#include "metaphysicl/parallel_dualnumber.h"
-#include "metaphysicl/parallel_numberarray.h"
-#include "metaphysicl/parallel_semidynamicsparsenumberarray.h"
+#include "THMUtils.h"
 
 InputParameters
 FlowChannelHeatStructureCouplerUserObject::validParams()
@@ -82,7 +80,7 @@ FlowChannelHeatStructureCouplerUserObject::finalize()
 {
   const auto map_ptrs = getCachedQuantityMaps();
   for (const auto map_ptr : map_ptrs)
-    allGatherMap(*map_ptr);
+    THM::allGatherADVectorMap(comm(), *map_ptr);
 }
 
 const std::vector<ADReal> &
@@ -103,15 +101,4 @@ FlowChannelHeatStructureCouplerUserObject::getCachedQuantity(
                " for element ",
                elem_id,
                " was requested but not computed.");
-}
-
-void
-FlowChannelHeatStructureCouplerUserObject::allGatherMap(
-    std::map<dof_id_type, std::vector<ADReal>> & data)
-{
-  std::vector<std::map<dof_id_type, std::vector<ADReal>>> all;
-  comm().allgather(data, all);
-  for (auto & hfs : all)
-    for (auto & it : hfs)
-      data[it.first] = it.second;
 }
