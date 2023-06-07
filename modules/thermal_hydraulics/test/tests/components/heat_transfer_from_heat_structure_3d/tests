@@ -69,7 +69,7 @@
     type = 'RunException'
     input = 'phy.conservation.i'
     cli_args = "Components/ht/boundary=asdf"
-    expect_err = "ht: The boundary 'asdf' \(.+\) was not found."
+    expect_err = "ht: The boundary 'asdf' does not exist on the component 'blk'."
 
     requirement = "The system shall throw an error if the heat structure boundary connected to a HeatTransferFromHeatStructure3D1Phase component doesn't exist."
   []
