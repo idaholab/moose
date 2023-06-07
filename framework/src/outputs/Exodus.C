@@ -83,7 +83,7 @@ Exodus::validParams()
   params.addParam<bool>("write_hdf5", false, "Enables HDF5 output format for Exodus files.");
 
   // Need a layer of geometric ghosting for mesh serialization
-  params.addRelationshipManager("MooseGhostPointNeighbors",
+  params.addRelationshipManager("ElementPointNeighborLayers",
                                 Moose::RelationshipManagerType::GEOMETRIC);
 
   // Return the InputParameters
