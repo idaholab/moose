@@ -71,11 +71,6 @@ public:
   bool meshesAreCoincident() const { return _meshes_are_coincident; }
 
   /**
-   * Returns true if the primary and secondary meshes are aligned
-   */
-  bool meshesAreAligned() const { return _meshes_are_aligned; }
-
-  /**
    * Returns true if the element ID has a coupled element ID
    *
    * @param[in] elem_id Element ID for which to find the coupled element ID
@@ -141,6 +136,4 @@ protected:
 
   /// Flag that meshes are coincident
   bool _meshes_are_coincident;
-  /// Flag that meshes are aligned
-  bool _meshes_are_aligned;
 };

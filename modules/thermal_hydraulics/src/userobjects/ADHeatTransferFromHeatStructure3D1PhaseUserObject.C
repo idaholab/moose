@@ -53,8 +53,7 @@ ADHeatTransferFromHeatStructure3D1PhaseUserObject::execute()
   const auto & secondary_elem_ids = _mesh_alignment.getCoupledSecondaryElemIDs(primary_elem_id);
   for (const auto & secondary_elem_id : secondary_elem_ids)
   {
-    const auto secondary_n_qps =
-        _mesh_alignment.getSecondaryNumberOfQuadraturePoints(secondary_elem_id);
+    const auto secondary_n_qps = _mesh_alignment.getSecondaryNumberOfQuadraturePoints();
 
     _T_fluid[secondary_elem_id].resize(secondary_n_qps);
     _htc[secondary_elem_id].resize(secondary_n_qps);
