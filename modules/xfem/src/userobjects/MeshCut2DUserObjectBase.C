@@ -8,6 +8,7 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "MeshCut2DUserObjectBase.h"
+#include "MeshCutNucleationBase.h"
 
 #include "XFEMFuncs.h"
 #include "MooseError.h"
@@ -23,12 +24,18 @@ MeshCut2DUserObjectBase::validParams()
   params.addRequiredParam<MeshFileName>(
       "mesh_file",
       "Mesh file for the XFEM geometric cut; currently only the Exodus type is supported");
+  params.addParam<UserObjectName>("nucleate_uo", "The MeshCutNucleation UO for nucleating cracks.");
   params.addClassDescription("Creates a UserObject base class for a mesh cutter in 2D problems");
   return params;
 }
 
 MeshCut2DUserObjectBase::MeshCut2DUserObjectBase(const InputParameters & parameters)
-  : GeometricCutUserObject(parameters, true), _mesh(_subproblem.mesh())
+  : GeometricCutUserObject(parameters, true),
+    _mesh(_subproblem.mesh()),
+    _nucleate_uo(isParamValid("nucleate_uo") ? &getUserObject<MeshCutNucleationBase>("nucleate_uo")
+                                             : nullptr),
+
+    _is_mesh_modified(false)
 {
   // only the Exodus type is currently supported
   MeshFileName cutterMeshFileName = getParam<MeshFileName>("mesh_file");
@@ -314,9 +321,56 @@ MeshCut2DUserObjectBase::growFront()
         new_elem->set_node(i) = _cutter_mesh->node_ptr(elem[i]);
       }
       _cutter_mesh->add_elem(new_elem);
-      // now update active boundary to new front node ids
+      // now push to the end of _original_and_current_front_node_ids for tracking and fracture
+      // integrals
       _original_and_current_front_node_ids[i].second = new_front_node_id;
+      _is_mesh_modified = true;
     }
   }
   _cutter_mesh->prepare_for_use();
+}
+
+void
+MeshCut2DUserObjectBase::addNucleatedCracksToMesh()
+{
+  if (_nucleate_uo)
+  {
+    std::unique_ptr<PointLocatorBase> pl = _mesh.getPointLocator();
+    pl->enable_out_of_mesh_mode();
+    const std::map<unsigned int, std::pair<RealVectorValue, RealVectorValue>> &
+        nucleated_elems_map = _nucleate_uo->getNucleatedElemsMap();
+    for (const auto & elem_nodes : nucleated_elems_map)
+    {
+      std::pair<RealVectorValue, RealVectorValue> nodes = elem_nodes.second;
+      // add nucleated nodes
+      Node * node_0 = Node::build(nodes.first, _cutter_mesh->n_nodes()).release();
+      _cutter_mesh->add_node(node_0);
+      dof_id_type node_id_0 = _cutter_mesh->n_nodes() - 1;
+      Node * node_1 = Node::build(nodes.second, _cutter_mesh->n_nodes()).release();
+      _cutter_mesh->add_node(node_1);
+      dof_id_type node_id_1 = _cutter_mesh->n_nodes() - 1;
+      // add nucleated element
+      std::vector<dof_id_type> elem;
+      elem.push_back(node_id_0);
+      elem.push_back(node_id_1);
+      Elem * new_elem = Elem::build(EDGE2).release();
+      for (unsigned int i = 0; i < new_elem->n_nodes(); ++i)
+      {
+        mooseAssert(_cutter_mesh->node_ptr(elem[i]) != nullptr, "Node is NULL");
+        new_elem->set_node(i) = _cutter_mesh->node_ptr(elem[i]);
+      }
+      _cutter_mesh->add_elem(new_elem);
+      // now add the nucleated nodes to the crack id data struct
+      Point & point_0 = *node_0;
+      const Elem * crack_front_elem_0 = (*pl)(point_0);
+      if (crack_front_elem_0 != NULL)
+        _original_and_current_front_node_ids.push_back(std::make_pair(node_id_0, node_id_0));
+      Point & point_1 = *node_1;
+      const Elem * crack_front_elem_1 = (*pl)(point_1);
+      if (crack_front_elem_1 != NULL)
+        _original_and_current_front_node_ids.push_back(std::make_pair(node_id_1, node_id_1));
+      _is_mesh_modified = true;
+    }
+    _cutter_mesh->prepare_for_use();
+  }
 }

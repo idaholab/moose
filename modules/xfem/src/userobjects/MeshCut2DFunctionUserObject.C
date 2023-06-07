@@ -48,6 +48,7 @@ MeshCut2DFunctionUserObject::initialize()
   // Only call crack growth function if time changed.
   if (_t > _time_of_previous_call_to_UO)
   {
+    addNucleatedCracksToMesh();
     findActiveBoundaryGrowth();
     growFront();
   }

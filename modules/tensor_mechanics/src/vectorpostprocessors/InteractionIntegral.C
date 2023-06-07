@@ -200,7 +200,9 @@ InteractionIntegralTempl<is_ad>::initialize()
   if (_treat_as_2d && _using_mesh_cutter == false)
     num_pts = 1;
   else
+  {
     num_pts = _crack_front_definition->getNumCrackFrontPoints();
+  }
 
   _x.assign(num_pts, 0.0);
   _y.assign(num_pts, 0.0);

@@ -10,7 +10,7 @@
 #pragma once
 
 #include "GeometricCutUserObject.h"
-
+class MeshCutNucleationBase;
 /**
  * MeshCut2DUserObjectBase: (1) reads in a mesh describing the crack surface,
  * (2) Fills xfem cut element ojbects.
@@ -54,8 +54,11 @@ protected:
   /// The xfem cutter mesh
   std::unique_ptr<MeshBase> _cutter_mesh;
 
-  /// bool to specify if _cutter_mesh has been modified by crack growth
-  bool wasCutterMeshModified() const { return !_active_front_node_growth_vectors.empty(); }
+  /// UO for nucleating cracks
+  const MeshCutNucleationBase * _nucleate_uo;
+
+  /// Indicator that shows if the cutting mesh is modified or not in this calculation step
+  bool _is_mesh_modified;
 
   /**
    * This vector of pairs orders crack tips to make the order used in this class the same as those
@@ -76,11 +79,16 @@ protected:
   virtual void findActiveBoundaryGrowth() = 0;
 
   /**
-    Find the original crack front nodes in the cutter mesh and use to populate
-    _original_and_current_front_node_ids.
+   * Find the original crack front nodes in the cutter mesh and use to populate
+   * _original_and_current_front_node_ids.
    */
   void findOriginalCrackFrontNodes();
 
   /// grow the cutter mesh
   void growFront();
+
+  /**
+   * Calls into MeshCutNucleation UO to add cracks.
+   */
+  void addNucleatedCracksToMesh();
 };
