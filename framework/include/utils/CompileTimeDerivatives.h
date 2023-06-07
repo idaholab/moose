@@ -62,13 +62,13 @@ struct CTSuperType<T1, T2, Ts...>
  * supplied as a template argument. int does the trick.
  */
 using CTTag = int;
-constexpr CTTag CTIllegalTag = std::numeric_limits<CTTag>::max();
+constexpr CTTag CTNoTag = std::numeric_limits<CTTag>::max();
 
 template <CTTag tag>
 std::string
 printTag()
 {
-  if constexpr (tag == CTIllegalTag)
+  if constexpr (tag == CTNoTag)
     return "";
   else
     return Moose::stringify(tag);
@@ -180,7 +180,7 @@ protected:
 /**
  * Constant value
  */
-template <typename T>
+template <CTTag tag, typename T>
 class CTValue : public CTBase
 {
 public:
@@ -504,12 +504,12 @@ public:
   template <typename L, class = std::enable_if_t<std::is_base_of<CTBase, L>::value>>               \
   auto operator op(const L & left, const ot & right)                                               \
   {                                                                                                \
-    return OP(left, CTValue<ot>(right));                                                           \
+    return OP(left, CTValue<CTNoTag, ot>(right));                                                  \
   }                                                                                                \
   template <typename R, class = std::enable_if_t<std::is_base_of<CTBase, R>::value>>               \
   auto operator op(const ot & left, const R & right)                                               \
   {                                                                                                \
-    return OP(CTValue<ot>(left), right);                                                           \
+    return OP(CTValue<CTNoTag, ot>(left), right);                                                  \
   }
 
 CT_OPERATOR_BINARY(+, CTAdd)
@@ -584,9 +584,40 @@ pow(const B & base)
 }
 
 /**
+ * Helper function to build a (potentially tagged) value
+ */
+template <CTTag tag = CTNoTag, typename T>
+auto
+makeValue(T value)
+{
+  return CTValue<tag, T>(value);
+}
+
+template <CTTag start_tag, typename... Values, CTTag... Tags>
+auto
+makeValuesHelper(const std::tuple<Values...> & values, std::integer_sequence<CTTag, Tags...>)
+{
+  if constexpr (start_tag == CTNoTag)
+    return std::make_tuple(CTValue<CTNoTag, Values>(std::get<Tags>(values))...);
+  else
+    return std::make_tuple(CTValue<Tags + start_tag, Values>(std::get<Tags>(values))...);
+}
+
+/**
+ * Helper function to build a list of (potentially tagged) values
+ */
+template <CTTag start_tag = CTNoTag, typename... Ts>
+auto
+makeValues(Ts... values)
+{
+  return makeValuesHelper<start_tag>(std::tuple(values...),
+                                     std::make_integer_sequence<CTTag, sizeof...(values)>{});
+}
+
+/**
  * Helper function to build a tagged reference to a variable
  */
-template <CTTag tag = CTIllegalTag, typename T>
+template <CTTag tag = CTNoTag, typename T>
 auto
 makeRef(const T & ref)
 {
@@ -596,7 +627,7 @@ makeRef(const T & ref)
 /**
  * Helper function to build a tagged reference to a vector/array entry
  */
-template <CTTag tag = CTIllegalTag, typename T, typename I>
+template <CTTag tag = CTNoTag, typename T, typename I>
 auto
 makeRef(const T & ref, const I & idx)
 {
@@ -607,13 +638,16 @@ template <CTTag start_tag, typename... Refs, CTTag... Tags>
 auto
 makeRefsHelper(const std::tuple<Refs...> & refs, std::integer_sequence<CTTag, Tags...>)
 {
-  return std::make_tuple(CTRef<Tags + start_tag, Refs>(std::get<Tags>(refs))...);
+  if constexpr (start_tag == CTNoTag)
+    return std::make_tuple(CTRef<CTNoTag, Refs>(std::get<Tags>(refs))...);
+  else
+    return std::make_tuple(CTRef<Tags + start_tag, Refs>(std::get<Tags>(refs))...);
 }
 
 /**
  * Helper function to build a list of tagged references to variables
  */
-template <CTTag start_tag = 0, typename... Ts>
+template <CTTag start_tag = CTNoTag, typename... Ts>
 auto
 makeRefs(const Ts &... refs)
 {
@@ -640,9 +674,9 @@ protected:
 template <typename... Ds>
 class CTStandardDeviation : public CTBase
 {
+public:
   static constexpr auto N = sizeof...(Ds);
 
-public:
   CTStandardDeviation(std::tuple<Ds...> derivatives, CTMatrix<Real, N, N> covariance)
     : _derivatives(derivatives), _covariance(covariance)
   {
@@ -680,7 +714,7 @@ makeStandardDeviationHelper(const T & f, std::integer_sequence<CTTag, Tags...>)
  * Helper function to build a standard deviation object for a function with N parameters with
  * consecutive tags starting at start_tag, and an NxN covariance matrix for said parameters.
  */
-template <CTTag start_tag = 0, typename T, int N>
+template <CTTag start_tag, typename T, int N>
 auto
 makeStandardDeviation(const T & f, const CTMatrix<Real, N, N> covariance)
 {
