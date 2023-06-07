@@ -33,6 +33,7 @@ Auxiliary variables have "old" and "older" states, from previous time steps, jus
 ### Elemental Auxiliary Variables
 
 Element auxiliary variables can compute:
+
 - average values per element, if stored in a constant monomial variable
 - spatial profiles using higher order variables
 
