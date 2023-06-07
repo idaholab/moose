@@ -65,6 +65,12 @@ MooseVariableDataFV<OutputType>::MooseVariableDataFV(const MooseVariableFV<Outpu
     _displaced(dynamic_cast<const DisplacedSystem *>(&_sys) ? true : false),
     _qrule(nullptr)
 {
+  _fv_elemental_kernel_query_cache =
+      _subproblem.getMooseApp().theWarehouse().query().template condition<AttribSystem>(
+          "FVElementalKernel");
+  _fv_flux_kernel_query_cache =
+      _subproblem.getMooseApp().theWarehouse().query().template condition<AttribSystem>(
+          "FVFluxKernel");
 }
 
 template <typename OutputType>
@@ -504,20 +510,14 @@ MooseVariableDataFV<OutputType>::computeAD(const unsigned int num_dofs, const un
   // AD stuff.  So we just skip all this when that is the case.  Maybe there
   // is a better way to do this - like just checking if getMaxVarNDofsPerElem
   // returns zero?
-  std::vector<FVKernel *> ks1;
-  std::vector<FVKernel *> ks2;
-  _subproblem.getMooseApp()
-      .theWarehouse()
-      .query()
-      .template condition<AttribSystem>("FVElementalKernel")
-      .queryInto(ks1);
-  _subproblem.getMooseApp()
-      .theWarehouse()
-      .query()
-      .template condition<AttribSystem>("FVFluxKernel")
-      .queryInto(ks2);
-  if (ks1.size() == 0 && ks2.size() == 0)
-    return;
+  std::vector<FVKernel *> ks;
+  _fv_elemental_kernel_query_cache.queryInto(ks);
+  if (ks.size() == 0)
+  {
+    _fv_flux_kernel_query_cache.queryInto(ks);
+    if (ks.size() == 0)
+      return;
+  }
 
   _ad_dof_values.resize(num_dofs);
   if (_need_ad_u)
