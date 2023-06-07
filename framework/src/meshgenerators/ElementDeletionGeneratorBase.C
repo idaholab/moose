@@ -19,6 +19,9 @@ ElementDeletionGeneratorBase::validParams()
   InputParameters params = MeshGenerator::validParams();
 
   params.addRequiredParam<MeshGeneratorName>("input", "The mesh we want to modify");
+  params.addParam<bool>("delete_exteriors",
+                        true,
+                        "Whether to delete lower-d elements whose interior parents are deleted");
   params.addParam<BoundaryName>("new_boundary",
                                 "optional boundary name to assign to the cut surface");
 
@@ -29,6 +32,7 @@ ElementDeletionGeneratorBase::ElementDeletionGeneratorBase(const InputParameters
   : MeshGenerator(parameters),
     _input(getMesh("input")),
     _assign_boundary(isParamValid("new_boundary")),
+    _delete_exteriors(getParam<bool>("delete_exteriors")),
     _boundary_name(_assign_boundary ? getParam<BoundaryName>("new_boundary") : "")
 {
 }
@@ -54,13 +58,18 @@ ElementDeletionGeneratorBase::generate()
 
   // check for dangling interior parents
   for (auto & elem : mesh->element_ptr_range())
-    if (elem->dim() == mesh->mesh_dimension() - 1 &&
-        deleteable_elems.count(elem->interior_parent()) > 0)
-      deleteable_elems.insert(elem);
-      /**
-       * If we are in parallel we'd better have a consistent idea of what
-       * should be deleted.  This can't be checked cheaply.
-       */
+    if (elem->dim() < mesh->mesh_dimension() && deleteable_elems.count(elem->interior_parent()) > 0)
+    {
+      if (_delete_exteriors)
+        deleteable_elems.insert(elem);
+      else
+        elem->set_interior_parent(nullptr);
+    }
+
+    /**
+     * If we are in parallel we'd better have a consistent idea of what
+     * should be deleted.  This can't be checked cheaply.
+     */
 #ifdef DEBUG
   dof_id_type pmax_elem_id = mesh->max_elem_id();
   mesh->comm().max(pmax_elem_id);
@@ -120,9 +129,9 @@ ElementDeletionGeneratorBase::generate()
 
   /**
    * If we are on a distributed mesh, we may have deleted elements
-   * which are remote_elem neighbors on other processors, and we need
-   * to make those neighbor links into NULL pointers (i.e. domain
-   * boundaries) instead.
+   * which are remote_elem links on other processors, and we need
+   * to make neighbor and interior parent links into NULL pointers
+   * (i.e. domain boundaries in the former case) instead.
    */
   if (!mesh->is_serial())
   {
@@ -131,7 +140,8 @@ ElementDeletionGeneratorBase::generate()
     typedef std::vector<std::pair<dof_id_type, unsigned int>> vec_type;
     std::vector<vec_type> queries(my_n_proc);
 
-    // Loop over the elements looking for those with remote neighbors.
+    // Loop over the elements looking for those with remote neighbors
+    // or interior parents.
     // The ghost_elements iterators in libMesh need to be updated
     // before we can use them safely here, so we'll test for
     // ghost-vs-local manually.
@@ -145,6 +155,10 @@ ElementDeletionGeneratorBase::generate()
       for (unsigned int n = 0; n != n_sides; ++n)
         if (elem->neighbor_ptr(n) == remote_elem)
           queries[pid].push_back(std::make_pair(elem->id(), n));
+
+      // Use an OOB side index to encode "interior_parent". We will use this OOB index later
+      if (elem->interior_parent() == remote_elem)
+        queries[pid].push_back(std::make_pair(elem->id(), n_sides));
     }
 
     const auto queries_tag = mesh->comm().get_unique_tag(),
@@ -181,9 +195,10 @@ ElementDeletionGeneratorBase::generate()
       {
         const Elem * elem = mesh->elem_ptr(q.first);
         const unsigned int side = q.second;
-        const Elem * neighbor = elem->neighbor_ptr(side);
+        const Elem * target =
+            (side >= elem->n_sides()) ? elem->interior_parent() : elem->neighbor_ptr(side);
 
-        if (neighbor == nullptr) // neighboring element was deleted!
+        if (target == nullptr) // linked element was deleted!
           responses[p - 1].push_back(std::make_pair(elem->id(), side));
       }
 
@@ -205,13 +220,23 @@ ElementDeletionGeneratorBase::generate()
         Elem * elem = mesh->elem_ptr(r.first);
         const unsigned int side = r.second;
 
-        mooseAssert(elem->neighbor_ptr(side) == remote_elem, "element neighbor != remote_elem");
+        if (side < elem->n_sides())
+        {
+          mooseAssert(elem->neighbor_ptr(side) == remote_elem, "element neighbor != remote_elem");
 
-        elem->set_neighbor(side, nullptr);
+          elem->set_neighbor(side, nullptr);
 
-        // assign cut surface boundary
-        if (_assign_boundary)
-          boundary_info.add_side(elem, side, boundary_id);
+          // assign cut surface boundary
+          if (_assign_boundary)
+            boundary_info.add_side(elem, side, boundary_id);
+        }
+        else
+        {
+          mooseAssert(side == elem->n_sides(), "internal communication error");
+          mooseAssert(elem->interior_parent() == remote_elem, "interior parent != remote_elem");
+
+          elem->set_interior_parent(nullptr);
+        }
       }
     }
 

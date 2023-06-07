@@ -39,6 +39,9 @@ protected:
   ///  Assign a boundary name to the cut surface?
   const bool _assign_boundary;
 
+  ///  Delete elements whose interior parents are slated for deletion?
+  const bool _delete_exteriors;
+
   /// Name of the boundary name to assign to the cut surface
   const BoundaryName _boundary_name;
 };

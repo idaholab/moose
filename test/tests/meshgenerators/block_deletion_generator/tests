@@ -40,6 +40,14 @@
       recover = false
       detail = 'blocks and properly removing lower dimensional elements with a deleted element as their interior parent.'
     []
+    [preserve_exteriors]
+      type = 'Exodiff'
+      input = 'preserve_exteriors.i'
+      cli_args = '--mesh-only'
+      exodiff = 'preserve_exteriors_in.e'
+      recover = false
+      detail = 'blocks and retaining lower dimensional elements with a deleted interior parent if requested,'
+    []
     [missing_block]
       type = RunException
       input = block_deletion_test1.i
