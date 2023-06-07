@@ -22,6 +22,7 @@
 #include "libmesh/distributed_mesh.h"
 #include "libmesh/elem.h"
 #include "libmesh/fe_base.h"
+#include "libmesh/mesh_tools.h"
 
 #include <typeinfo>
 
@@ -72,27 +73,58 @@ SideSetsFromPointsGenerator::generate()
 
   for (unsigned int i = 0; i < boundary_ids.size(); ++i)
   {
-    const Elem * elem = (*pl)(_points[i]);
+    std::set<const Elem *> candidate_elements;
+    (*pl)(_points[i], candidate_elements);
 
-    for (unsigned int side = 0; side < elem->n_sides(); ++side)
-    {
-      if (elem->neighbor_ptr(side))
-        continue;
+    const Elem * elem_to_flood = nullptr;
+    Point normal_to_flood;
 
-      // See if this point is on this side
-      std::unique_ptr<const Elem> elem_side = elem->side_ptr(side);
-
-      if (elem_side->contains_point(_points[i]))
+    for (const Elem * elem : candidate_elements)
+      for (unsigned int side = 0; side < elem->n_sides(); ++side)
       {
-        // This is the side that we want to paint our sideset with
-        // First get the normal
-        const std::vector<Point> & normals = _fe_face->get_normals();
-        _fe_face->reinit(elem, side);
+        if (elem->neighbor_ptr(side))
+          continue;
 
-        flood(elem, normals[0], boundary_ids[i], *mesh);
+        // See if this point is on this side
+        std::unique_ptr<const Elem> elem_side = elem->side_ptr(side);
+
+        if (elem_side->contains_point(_points[i]))
+        {
+          // This is a good side to paint our sideset with.
+          // Get the normal.
+          const std::vector<Point> & normals = _fe_face->get_normals();
+          _fe_face->reinit(elem, side);
+
+          // If we *already* found a good but different side to paint
+          // our sideset with, we've got an ambiguity here.
+          if (elem_to_flood && (std::abs(1.0 - normal_to_flood * normals[0]) > _variance ||
+                                elem_to_flood->which_neighbor_am_i(elem) == libMesh::invalid_uint))
+            mooseError("Two ambiguous potential sideset sources found for boundary `",
+                       _boundary_names[i],
+                       "' at ",
+                       _points[i],
+                       ":\nElement ",
+                       elem_to_flood->id(),
+                       " normal ",
+                       normal_to_flood,
+                       " and\n",
+                       ":\nElement ",
+                       elem->id(),
+                       " normal ",
+                       normals[0]);
+
+          elem_to_flood = elem;
+          normal_to_flood = normals[0];
+          // Don't just flood here; keep looking for possible ambiguity
+        }
       }
-    }
+
+    flood(elem_to_flood, normal_to_flood, boundary_ids[i], *mesh);
   }
+
+#ifdef DEBUG
+  MeshTools::libmesh_assert_valid_boundary_ids(*mesh);
+#endif
 
   finalize();
 
