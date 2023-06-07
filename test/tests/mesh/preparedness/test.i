@@ -1,3 +1,7 @@
+[GlobalParams]
+  prevent_boundary_ids_overlap = false
+[]
+
 [Mesh]
   [region_2_gen]
       type = CartesianMeshGenerator
@@ -341,6 +345,7 @@
 []
 
 [Outputs]
+  exodus = true
   print_linear_residuals = false
   print_linear_converged_reason = false
   print_nonlinear_converged_reason = false
