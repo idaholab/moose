@@ -1,20 +1,12 @@
 # VariableFunctionProductIC
 
-!alert construction title=Undocumented Class
-The VariableFunctionProductIC has not been documented. The content listed below should be used as a starting point for
-documenting the class, which includes the typical automatic documentation associated with a
-MooseObject; however, what is contained is ultimately determined by what is necessary to make the
-documentation clear for users.
-
 !syntax description /ICs/VariableFunctionProductIC
 
-## Overview
+The value of the variable in the product is naturally equal to its initial condition,
+as initial conditions are only run once at the beginning of the simulation.
 
-!! Replace these lines with information regarding the VariableFunctionProductIC object.
-
-## Example Input File Syntax
-
-!! Describe and include an example of how to use the VariableFunctionProductIC object.
+The function is evaluated at the `start_time` of the simulation, set in the
+[Executioner](syntax/Executioner/index.md) or [Executor](syntax/Executors/index.md).
 
 !syntax parameters /ICs/VariableFunctionProductIC
 

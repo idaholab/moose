@@ -19,6 +19,7 @@ THMSpecificVolumeAux::validParams()
                                "Density of the phase (conserved), \alpha \rho A for 2-phase model");
   params.addRequiredCoupledVar("A", "Cross-sectional area");
   params.addCoupledVar("alpha", 1., "Volume fraction");
+  params.addClassDescription("Computes the specific volume for the phase.");
 
   return params;
 }

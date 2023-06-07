@@ -2,10 +2,10 @@
   design = 'Mesh/index.md'
   issues = '#14329'
   [test]
-    type = RunApp
+    type = Exodiff
     requirement = 'The system shall ensure that the mesh is prepared at the time users execute their simulation.'
     input = 'test.i'
-    absent_out = '[nN][oO][tT] [cC]onverge'
+    exodiff = 'test_out.e'
     mesh_mode = 'replicated' # for stitched meshes
   []
 []

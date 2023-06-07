@@ -1,20 +1,14 @@
 # GeneralizedCircumference
 
-!alert construction title=Undocumented Class
-The GeneralizedCircumference has not been documented. The content listed below should be used as a starting point for
-documenting the class, which includes the typical automatic documentation associated with a
-MooseObject; however, what is contained is ultimately determined by what is necessary to make the
-documentation clear for users.
-
 !syntax description /Functions/GeneralizedCircumference
 
-## Overview
+The expression for the generalized circumference is:
 
-!! Replace these lines with information regarding the GeneralizedCircumference object.
+!equation
+circumference = \sqrt{4 \pi area + (\dfrac{dA}{dx})^2}
 
-## Example Input File Syntax
-
-!! Describe and include an example of how to use the GeneralizedCircumference object.
+!alert note
+The function providing the area must have the gradient routine implemented.
 
 !syntax parameters /Functions/GeneralizedCircumference
 

@@ -61,7 +61,7 @@ SolutionAux::initialSetup()
 
     // If there are more than one, throw an error
     if (vars.size() > 1)
-      mooseError("The SolutionUserObject contains multiple variables, please specifiy the desired "
+      mooseError("The SolutionUserObject contains multiple variables, please specify the desired "
                  "variables in the input file with 'from_variable' parameter.");
 
     // Define the variable

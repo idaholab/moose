@@ -1,20 +1,16 @@
 # VariableProductIC
 
-!alert construction title=Undocumented Class
-The VariableProductIC has not been documented. The content listed below should be used as a starting point for
-documenting the class, which includes the typical automatic documentation associated with a
-MooseObject; however, what is contained is ultimately determined by what is necessary to make the
-documentation clear for users.
-
 !syntax description /ICs/VariableProductIC
 
-## Overview
+The value of the other variables in the product is naturally equal to their initial conditions,
+as initial conditions are only run once at the beginning of the simulation.
 
-!! Replace these lines with information regarding the VariableProductIC object.
+This is typically used to set the initial condition for `rho*A`, the specific density and `rho*u*A`, the specific
+momentum.
 
-## Example Input File Syntax
-
-!! Describe and include an example of how to use the VariableProductIC object.
+!alert note
+For `rho*A` or `rho*u*A`, this initial condition is usually added to the `Simulation` by the `FlowModel`, depending on the parameters
+passed to each [Component](syntax/Components/index.md).
 
 !syntax parameters /ICs/VariableProductIC
 

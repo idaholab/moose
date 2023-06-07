@@ -18,7 +18,7 @@
     recover = false
 
     requirement = 'The system shall be able to use an exodus file for setting initial conditions in flow channels'
-    design = 'FlowChannel1Phase.md SolutionInitialCondition.md'
+    design = 'FlowChannel1Phase.md SolutionIC.md'
     issues = '#20553'
   []
 
@@ -30,7 +30,7 @@
     expect_err = "Block 'asdf' does not exist in the file '.+'"
 
     requirement = 'The system shall report an error when a block is non found in the restart ExodusII file'
-    design = 'SolutionInitialCondition.md'
+    design = 'SolutionIC.md'
     issues = '#20526'
   []
 []

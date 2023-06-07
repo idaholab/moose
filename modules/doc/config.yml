@@ -91,6 +91,8 @@ Extensions:
             auxkernels: AuxKernels/index.md
             auxscalarkernels: AuxScalarKernels/index.md
             bcs: syntax/BCs/index.md
+            closures: syntax/Closures/index.md
+            components: syntax/Components/index.md
             constraints: syntax/Constraints/index.md
             controls: syntax/Controls/index.md
             dampers: syntax/Dampers/index.md

@@ -18,6 +18,7 @@ THMSpecificInternalEnergyAux::validParams()
   params.addRequiredCoupledVar("rhoA", "Conserved density");
   params.addRequiredCoupledVar("rhouA", "Conserved momentum");
   params.addRequiredCoupledVar("rhoEA", "Conserved total energy");
+  params.addClassDescription("Computed the specific internal energy.");
   return params;
 }
 

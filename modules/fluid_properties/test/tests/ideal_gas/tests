@@ -1,14 +1,18 @@
 [Tests]
-  [./test]
+  design = 'IdealGasFluidProperties.md'
+  issues = '#10964 #12815 #12970'
+  [conservative]
     type = Exodiff
     input = 'test.i'
     exodiff = 'test_out.e'
     threading = '!pthreads'
-  [../]
-  [./test2]
+    requirement = 'The system shall be able to compute the fluid properties of an ideal gas with the specific energy and volume variables.'
+  []
+  [primitive]
     type = Exodiff
     input = 'test2.i'
     exodiff = 'test2_out.e'
     threading = '!pthreads'
-  [../]
+    requirement = 'The system shall be able to compute the fluid properties of an ideal gas with the pressure and temperature variables.'
+  []
 []

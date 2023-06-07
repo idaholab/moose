@@ -1,20 +1,17 @@
 # THMSpecificInternalEnergyAux
 
-!alert construction title=Undocumented Class
-The THMSpecificInternalEnergyAux has not been documented. The content listed below should be used as a starting point for
-documenting the class, which includes the typical automatic documentation associated with a
-MooseObject; however, what is contained is ultimately determined by what is necessary to make the
-documentation clear for users.
-
 !syntax description /AuxKernels/THMSpecificInternalEnergyAux
 
-## Overview
+The specific internal energy $e$ is computed as
 
-!! Replace these lines with information regarding the THMSpecificInternalEnergyAux object.
+!equation
+e = \dfrac{ \rho E - 0.5 * \rho u * \rho u}{\rho \rho}
 
-## Example Input File Syntax
+where $\rho$ the fluid density, $\rho u$ the momentum and
+$\rho E$ the product of the internal energy by the density.
 
-!! Describe and include an example of how to use the THMSpecificInternalEnergyAux object.
+!alert note
+$\rho E$, $\rho u$ and $\rho$ are variables usually defined by the [Components](syntax/Components/index.md).
 
 !syntax parameters /AuxKernels/THMSpecificInternalEnergyAux
 

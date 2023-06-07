@@ -1,4 +1,6 @@
 [Tests]
+  design = 'TwoPhaseFluidPropertiesIndependent.md'
+  issues = '#11641'
   [test]
     type = CSVDiff
     input = 'test.i'
@@ -6,6 +8,7 @@
     rel_err = 1e-8
     allow_test_objects = true
     threading = '!pthreads'
+    requirement = 'The system shall be able to mix two independent single-phase fluid properties to form a basic two-phase model.'
   []
   [no_error_on_unimplemented]
     type = RunApp
@@ -24,6 +27,7 @@
     threading = '!pthreads'
     # this test modifies the checkpoint file causing recovery of 'test' to fail
     prereq = test
+    requirement = 'The system shall be able to not error on unimplemented two-phase fluid properties routines if the user requested so.'
   []
   [error:error_on_unimplemented]
     type = 'RunException'
@@ -39,5 +43,6 @@
     expect_err = "The 2-phase fluid properties class 'TwoPhaseFluidPropertiesIndependent' does not allow calling any 2-phase property interfaces"
     allow_test_objects = true
     threading = '!pthreads'
+    requirement = 'The system shall report an error if 2-phase property interfaces are called on a class designed to handle two single-phase fluid properties.'
   []
 []

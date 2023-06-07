@@ -20,6 +20,7 @@ SpecificTotalEnthalpyAux::validParams()
   params.addRequiredCoupledVar("p", "Pressure");
   params.addRequiredCoupledVar("A", "Cross-sectional area");
   params.addCoupledVar("alpha", 1., "Volume fraction");
+  params.addClassDescription("Compute the specific total enthalpy");
 
   return params;
 }

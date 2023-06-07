@@ -18,7 +18,7 @@
     recover = false
 
     requirement = 'The system shall be able to use an exodus file for setting initial conditions in 3D heat structures'
-    design = 'HeatStructureFromFile3D.md SolutionInitialCondition.md'
+    design = 'HeatStructureFromFile3D.md SolutionIC.md'
     issues = '#20553'
   []
 []

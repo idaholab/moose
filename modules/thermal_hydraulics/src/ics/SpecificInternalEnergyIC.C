@@ -18,6 +18,8 @@ SpecificInternalEnergyIC::validParams()
   params.addRequiredCoupledVar("rhoA", "Conserved density");
   params.addRequiredCoupledVar("rhouA", "Conserved momentum");
   params.addRequiredCoupledVar("rhoEA", "Conserved total energy");
+  params.addClassDescription(
+      "Sets the initial condition for the specific internal energy of a phase");
   return params;
 }
 
