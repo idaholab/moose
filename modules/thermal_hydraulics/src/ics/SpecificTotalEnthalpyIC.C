@@ -20,6 +20,8 @@ SpecificTotalEnthalpyIC::validParams()
   params.addRequiredCoupledVar("p", "Pressure");
   params.addRequiredCoupledVar("A", "Cross-sectional area");
   params.addCoupledVar("alpha", 1., "Volume fraction");
+  params.addClassDescription(
+      "Sets the initial condition for the special total enthalpy of a phase");
 
   return params;
 }

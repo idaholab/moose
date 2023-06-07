@@ -633,7 +633,7 @@ Simulation::setupInitialConditionsFromFile()
 
     if (vi._var_type == "MooseVariableScalar")
     {
-      std::string class_name = "ScalarSolutionInitialCondition";
+      std::string class_name = "ScalarSolutionIC";
       InputParameters params = _thm_factory.getValidParams(class_name);
       params.set<VariableName>("variable") = var_name;
       params.set<VariableName>("from_variable") = var_name;
@@ -642,7 +642,7 @@ Simulation::setupInitialConditionsFromFile()
     }
     else
     {
-      std::string class_name = "SolutionInitialCondition";
+      std::string class_name = "SolutionIC";
       InputParameters params = _thm_factory.getValidParams(class_name);
       params.set<VariableName>("variable") = var_name;
       params.set<VariableName>("from_variable") = var_name;

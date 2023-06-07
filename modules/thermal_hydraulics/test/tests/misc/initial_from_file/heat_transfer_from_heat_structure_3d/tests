@@ -20,7 +20,7 @@
     mesh_mode = 'replicated'
 
     requirement = 'The system shall be able to use an exodus file for setting initial conditions in heat transfer from 3D heat structures'
-    design = 'HeatTransferFromHeatStructure3D1Phase.md SolutionInitialCondition.md'
+    design = 'HeatTransferFromHeatStructure3D1Phase.md SolutionIC.md'
     issues = '#20553'
   []
 []

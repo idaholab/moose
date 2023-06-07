@@ -1,0 +1,27 @@
+[Tests]
+  issues = '#24581'
+  design = 'source/ics/SolutionIC.md source/userobjects/SolutionUserObject.md'
+  [exodus]
+    type = 'Exodiff'
+    input = 'solution_ic.i'
+    exodiff = 'solution_ic_out.e'
+    requirement = "The system shall be able to initialize a variable from an ExodusII file."
+  []
+  [exodus_scalar]
+    type = 'CSVDiff'
+    input = 'solution_scalar_ic.i'
+    csvdiff = 'solution_scalar_ic_out.csv'
+    requirement = "The system shall be able to initialize a scalar variable from an ExodusII file."
+  []
+
+  [errors]
+    requirement = "The system shall error if"
+    [missing_block]
+      type = RunException
+      input = 'solution_ic.i'
+      cli_args = "Mesh/gmg/subdomain_ids='0 0 0 2' ICs/initial_cond_nl/block=2"
+      expect_err = "Block '2' does not exist in the file"
+      detail = "a solution is to be loaded at a block that does not exist in the source file."
+    []
+  []
+[]

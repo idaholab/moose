@@ -18,7 +18,7 @@
     recover = false
 
     requirement = 'The system shall be able to use an exodus file for setting initial conditions in volume junctions'
-    design = 'flow_junction.md ScalarSolutionInitialCondition.md'
+    design = 'flow_junction.md ScalarSolutionIC.md'
     issues = '#20553'
   []
 []

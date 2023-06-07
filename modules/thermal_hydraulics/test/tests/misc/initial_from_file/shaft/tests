@@ -18,7 +18,7 @@
     recover = false
 
     requirement = 'The system shall be able to use an exodus file for setting initial conditions in shaft'
-    design = 'Shaft.md ScalarSolutionInitialCondition.md'
+    design = 'Shaft.md ScalarSolutionIC.md'
     issues = '#20553'
   []
 []

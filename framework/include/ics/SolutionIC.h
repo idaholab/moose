@@ -9,19 +9,21 @@
 
 #pragma once
 
-#include "ScalarInitialCondition.h"
+#include "InitialCondition.h"
 
 class SolutionUserObject;
 
 /**
  * Class for reading an initial condition from a solution user object
  */
-class ScalarSolutionInitialCondition : public ScalarInitialCondition
+class SolutionIC : public InitialCondition
 {
 public:
-  ScalarSolutionInitialCondition(const InputParameters & parameters);
+  SolutionIC(const InputParameters & parameters);
 
-  virtual Real value() override;
+  virtual void initialSetup() override;
+
+  virtual Real value(const Point & p) override;
 
 protected:
   /// SolutionUserObject containing the solution of interest
@@ -29,6 +31,9 @@ protected:
 
   /// The variable name extracted from the SolutionUserObject
   const VariableName & _solution_object_var_name;
+
+  /// Remapped IDs from the current mesh to the ExodusII mesh
+  std::set<SubdomainID> _exo_block_ids;
 
 public:
   static InputParameters validParams();

@@ -22,6 +22,8 @@ RhoEAFromPressureTemperatureFunctionVelocityIC::validParams()
   params.addRequiredCoupledVar("T", "The temperature");
   params.addRequiredParam<FunctionName>("vel", "The velocity");
   params.addRequiredCoupledVar("A", "Cross-sectional area");
+  params.addClassDescription("Set the initial condition for rho*E*A from pressure and temperature "
+                             "variables and a velocity scalar function");
   return params;
 }
 

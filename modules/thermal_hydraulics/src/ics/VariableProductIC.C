@@ -15,6 +15,7 @@ InputParameters
 VariableProductIC::validParams()
 {
   InputParameters params = InitialCondition::validParams();
+  params.addClassDescription("Sets the initial condition as the product of several variables");
   params.addRequiredCoupledVar("values", "The values being multiplied");
   return params;
 }

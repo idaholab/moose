@@ -18,7 +18,8 @@ VariableFunctionProductIC::validParams()
   InputParameters params = InitialCondition::validParams();
   params.addRequiredCoupledVar("var", "Coupled variable");
   params.addRequiredParam<FunctionName>("fn", "User function");
-  params.addClassDescription("Computes product of a variable and a function");
+  params.addClassDescription(
+      "Sets the initial condition as the product of a variable and a function");
   return params;
 }
 
