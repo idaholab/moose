@@ -19,6 +19,7 @@ SoundSpeedAux::validParams()
   params.addRequiredCoupledVar("v", "specific volume");
   params.addRequiredCoupledVar("e", "specific internal energy");
   params.addRequiredParam<UserObjectName>("fp", "The name of fluid properties object to use.");
+  params.addClassDescription("Computes the speed of sound.");
 
   return params;
 }

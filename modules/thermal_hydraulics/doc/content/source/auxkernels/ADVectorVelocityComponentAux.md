@@ -1,20 +1,22 @@
 # ADVectorVelocityComponentAux
 
-!alert construction title=Undocumented Class
-The ADVectorVelocityComponentAux has not been documented. The content listed below should be used as a starting point for
-documenting the class, which includes the typical automatic documentation associated with a
-MooseObject; however, what is contained is ultimately determined by what is necessary to make the
-documentation clear for users.
-
 !syntax description /AuxKernels/ADVectorVelocityComponentAux
 
-## Overview
+The direction is of the velocity is obtained from providing a component index into the
+[!param](/AuxKernels/ADVectorVelocityComponentAux/direction) material property parameter.
 
-!! Replace these lines with information regarding the ADVectorVelocityComponentAux object.
+The velocity component is computed as:
 
-## Example Input File Syntax
+!equation
+velocity = direction(component) * \dfrac{\alpha * \rho * u * A}{\alpha * \rho * A}
 
-!! Describe and include an example of how to use the ADVectorVelocityComponentAux object.
+where $\alpha$ is the phase fraction, $\rho$ the density, $A$ the local area and $u$ the 1D velocity.
+
+!alert note
+This auxkernel may not be used with a local zero phase fraction.
+
+!alert note
+$\rho u A$, $\rho A$ and $\alpha$ are variables usually defined by the [Components](syntax/Components/index.md).
 
 !syntax parameters /AuxKernels/ADVectorVelocityComponentAux
 

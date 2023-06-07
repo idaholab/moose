@@ -1,20 +1,16 @@
 # THMSpecificVolumeAux
 
-!alert construction title=Undocumented Class
-The THMSpecificVolumeAux has not been documented. The content listed below should be used as a starting point for
-documenting the class, which includes the typical automatic documentation associated with a
-MooseObject; however, what is contained is ultimately determined by what is necessary to make the
-documentation clear for users.
-
 !syntax description /AuxKernels/THMSpecificVolumeAux
 
-## Overview
+The phase specific volume $v$ is computed as
 
-!! Replace these lines with information regarding the THMSpecificVolumeAux object.
+!equation
+v = \dfrac{\alpha A}{\rhoA}
 
-## Example Input File Syntax
+where $A$ is the local component area, $\rho$ the fluid density and $\alpha$ the phase fraction.
 
-!! Describe and include an example of how to use the THMSpecificVolumeAux object.
+!alert note
+$A$, $\rho A$ and $\alpha$ are variables usually defined by the [Components](syntax/Components/index.md).
 
 !syntax parameters /AuxKernels/THMSpecificVolumeAux
 

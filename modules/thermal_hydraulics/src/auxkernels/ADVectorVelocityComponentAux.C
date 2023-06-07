@@ -20,8 +20,8 @@ ADVectorVelocityComponentAux::validParams()
   params.addRequiredParam<MaterialPropertyName>("direction",
                                                 "Directional vector of 1D elements in 3D space");
   params.addRequiredParam<unsigned int>("component", "The vector component of interest");
-  params.addClassDescription("Computes the component of a vector-valued velocity field given by "
-                             "its magnitude and direction.");
+  params.addClassDescription("Computes the velocity from the 1D phase-fraction and area weighted "
+                             "momentum and density variables.");
   return params;
 }
 
