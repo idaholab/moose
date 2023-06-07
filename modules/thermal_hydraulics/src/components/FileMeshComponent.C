@@ -197,6 +197,7 @@ FileMeshComponent::buildMesh()
     const std::string sideset_name = genName(_name, id_and_name.second);
     boundary_info.sideset_name(id_and_name.first) = sideset_name;
     boundary_info.nodeset_name(id_and_name.first) = sideset_name;
+    _boundary_names.push_back(sideset_name);
   }
 
   // This appears to be necessary to get the nodesets named correctly, despite
@@ -204,4 +205,13 @@ FileMeshComponent::buildMesh()
   boundary_info.build_node_list_from_side_list();
 
   return subdomain_names;
+}
+
+bool
+FileMeshComponent::hasBoundary(const BoundaryName & boundary_name) const
+{
+  checkSetupStatus(MESH_PREPARED);
+
+  return std::find(_boundary_names.begin(), _boundary_names.end(), boundary_name) !=
+         _boundary_names.end();
 }

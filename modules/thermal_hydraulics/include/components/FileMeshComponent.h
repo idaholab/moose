@@ -21,6 +21,13 @@ public:
 
   FileMeshComponent(const InputParameters & parameters);
 
+  /**
+   * Returns true if this component has the supplied boundary
+   *
+   * @param[in] boundary_name   Boundary name to check
+   */
+  bool hasBoundary(const BoundaryName & boundary_name) const;
+
 protected:
   virtual void setupMesh() override;
 
@@ -37,4 +44,7 @@ protected:
 
   /// Translation vector for the file mesh
   const Point & _position;
+
+  /// Boundary names for this component
+  std::vector<BoundaryName> _boundary_names;
 };
