@@ -68,7 +68,7 @@ have implication in the overall convergence of the optimization problem.
 
 ## Problem Input File Setup
 
-This example makes use of the [TransientAndAdjoint](TransientAndAdjoint.md) executioner, which automatically computes the adjoint by transposing the forward problem's Jacobian.  This frees the user from having to derive and implement and an adjoint input file based on the forward problem kernels.  This also solves the forward and adjoint problems in a single sub-application.  An alternative method with two child applications corresponding to the forward and adjoint problems is given in [Multi-app executioner](materialInv_ConstK.md#sec:MultiAppExecutioner).
+This example makes use of the [TransientAndAdjoint](TransientAndAdjoint.md) executioner, which automatically computes the adjoint by transposing the forward problem's Jacobian.  This frees the user from having to derive and implement an adjoint input file based on the forward problem kernels.  This also solves the forward and adjoint problems in a single sub-application. An alternative method with two child applications corresponding to the forward and adjoint problems is given in [Multi-app executioner](materialInv_ConstK.md#sec:MultiAppExecutioner).
 
 The entire inverse optimization strategy is governed by the [OptimizationReporter](OptimizationReporter.md) object.
 The forward and adjoint problems are set up in the main application input file to be solved as a `FullSolveMultiApp` type of
@@ -87,9 +87,12 @@ These nonlinear systems are inputs to an executioner that drives the simulation 
 !listing examples/materialTransient/forward_and_adjoint.i block=Variables
 
 For material inversion, the derivative of the objective function with respect to the material
-parameters needs to be computed. This quantity is problem-dependent. For this thermal problem,
-the vector posprocessor `ElementOptimizationDiffusionCoefFunctionInnerProduct` computes the inner
-product between the gradient of the adjoint variable and the gradient of the primal variables.
+parameters needs to be computed. This quantity is problem-dependent.
+
+For this thermal problem, the vector posprocessor [ElementOptimizationDiffusionCoefFunctionInnerProduct](ElementOptimizationDiffusionCoefFunctionInnerProduct.md) computes the gradient of the objective with respect
+to the controllable parameter by computing the inner
+product between the gradient of the adjoint variable and the gradient of the primal variables and the function
+computing the derivative of the material property with respect to the controllable parameter.
 
 !listing examples/materialTransient/forward_and_adjoint.i block=VectorPostprocessors
 
