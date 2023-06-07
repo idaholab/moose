@@ -172,14 +172,14 @@
   []
 []
 
-[VectorPostprocessors]
-  [penalty_normal_pressure]
-    type = NodalValueSampler
-    variable = penalty_normal_pressure
-    boundary = 10
-    sort_by = id
-  []
-[]
+# [VectorPostprocessors]
+#   [penalty_normal_pressure]
+#     type = NodalValueSampler
+#     variable = penalty_normal_pressure
+#     boundary = 10
+#     sort_by = id
+#   []
+# []
 
 [Postprocessors]
   [num_nl]
@@ -198,6 +198,15 @@
     type = NodalSum
     boundary = 30
     variable = saved_y
+  []
+  [gap]
+    type = SideExtremeValue
+    value_type = min
+    variable = real_weighted_gap
+    boundary = 10
+  []
+  [num_al]
+    type = NumAugmentedLagrangeIterations
   []
 []
 
@@ -302,11 +311,11 @@
   perf_graph = true
   exodus = true
   csv = true
-  [chkfile]
-    type = CSV
-    start_time = 0.0
-    execute_vector_postprocessors_on = FINAL
-  []
+  # [chkfile]
+  #   type = CSV
+  #   start_time = 0.0
+  #   execute_vector_postprocessors_on = FINAL
+  # []
 
   [console]
     type = Console
@@ -331,13 +340,12 @@
     secondary_subdomain = 10001
     disp_x = disp_x
     disp_y = disp_y
-    friction_coefficient = 0.1 # with 2.0 works
+    friction_coefficient = 0.4 # with 2.0 works
     secondary_variable = disp_x
     penalty = 5e5
     penalty_friction = 1e4
-
     slip_tolerance = 1e-05
-    penetration_tolerance = 1e-05
+    penetration_tolerance = 1e-03
   []
 []
 

@@ -35,6 +35,12 @@ public:
   virtual void reinit() override;
 
   virtual Real getNormalContactPressure(const Node * const node) const override;
+  virtual Real getNormalLagrangeMultiplier(const Node * const node) const;
+
+  virtual Real getDeltaTangentialLagrangeMultiplier(const Node * const, const unsigned int) const
+  {
+    return 0.0;
+  };
 
   virtual bool isContactConverged() override;
   virtual void updateAugmentedLagrangianMultipliers() override;

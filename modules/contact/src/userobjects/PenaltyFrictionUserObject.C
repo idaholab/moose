@@ -173,6 +173,19 @@ PenaltyFrictionUserObject::getTangentialVelocity(const Node * const node,
     return 0.0;
 }
 
+Real
+PenaltyFrictionUserObject::getDeltaTangentialLagrangeMultiplier(const Node * const node,
+                                                                const unsigned int component) const
+{
+  const auto it =
+      _dof_to_frictional_lagrange_multipliers.find(_subproblem.mesh().nodePtr(node->id()));
+
+  if (it != _dof_to_frictional_lagrange_multipliers.end())
+    return MetaPhysicL::raw_value(it->second[component]);
+  else
+    return 0.0;
+}
+
 void
 PenaltyFrictionUserObject::reinit()
 {
@@ -275,35 +288,30 @@ PenaltyFrictionUserObject::isContactConverged()
 
   for (const auto & [dof_object, traction_pair] : _dof_to_tangential_traction)
   {
-    const auto it = _dof_to_real_tangential_velocity.find(dof_object);
-    TwoVector slip_velocity;
-    if (it != _dof_to_real_tangential_velocity.end())
-      slip_velocity = {MetaPhysicL::raw_value(it->second[0]),
-                       MetaPhysicL::raw_value(it->second[1])};
+
+    const auto & tangential_traction = traction_pair.first;
+
+    const auto it = _dof_to_weighted_gap.find(dof_object);
+    if (it == _dof_to_weighted_gap.end())
+    {
+      _console << "no gap found " << _dof_to_weighted_gap.size() << '\n';
+      continue;
+    }
+    const auto & weighted_gap = -it->second.first;
+    const auto normal_lm = _dof_to_lagrange_multiplier[dof_object];
+
+    auto normal_pressure = _penalty * weighted_gap + normal_lm;
+    normal_pressure = normal_pressure > 0.0 ? normal_pressure : 0.0;
 
     // check slip/stick
-    _console << "Cond1: " << (slip_velocity.norm() * _dt) << " < " << _slip_tolerance << '\n';
-    if ((slip_velocity.norm() * _dt) < _slip_tolerance)
+    if (_friction_coefficient * normal_pressure > tangential_traction.norm())
     {
-      _console << "MET!\n";
-      const auto & tangential_traction = traction_pair.first;
-
-      const auto it = _dof_to_weighted_gap.find(dof_object);
-      if (it == _dof_to_weighted_gap.end())
-      {
-        _console << "no gap found " << _dof_to_weighted_gap.size() << '\n';
+      const auto it = _dof_to_real_tangential_velocity.find(dof_object);
+      TwoVector slip_velocity;
+      if (it == _dof_to_real_tangential_velocity.end())
         continue;
-      }
-      const auto & weighted_gap = -it->second.first;
-      const auto normal_lm = _dof_to_lagrange_multiplier[dof_object];
 
-      auto normal_pressure = _penalty * weighted_gap + normal_lm;
-      normal_pressure = normal_pressure > 0.0 ? normal_pressure : 0.0;
-
-      // check coulomb condition
-      _console << "Cond2: " << _friction_coefficient * normal_pressure << " < "
-               << tangential_traction.norm() << '\n';
-      if (_friction_coefficient * normal_pressure < tangential_traction.norm())
+      if ((slip_velocity.norm() * _dt) > _slip_tolerance)
       {
         return false;
         mooseInfoRepeated("Stick tolerance fail");

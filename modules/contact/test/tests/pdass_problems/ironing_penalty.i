@@ -172,14 +172,14 @@
   []
 []
 
-[VectorPostprocessors]
-  [penalty_normal_pressure]
-    type = NodalValueSampler
-    variable = penalty_normal_pressure
-    boundary = 10
-    sort_by = id
-  []
-[]
+# [VectorPostprocessors]
+#   [penalty_normal_pressure]
+#     type = NodalValueSampler
+#     variable = penalty_normal_pressure
+#     boundary = 10
+#     sort_by = id
+#   []
+# []
 
 [Postprocessors]
   [num_nl]
@@ -198,6 +198,28 @@
     type = NodalSum
     boundary = 30
     variable = saved_y
+  []
+  [gap]
+    type = SideExtremeValue
+    value_type = min
+    variable = gap
+    boundary = 10
+  []
+  [num_al]
+    type = NumAugmentedLagrangeIterations
+  []
+[]
+[AuxVariables]
+  [gap]
+  []
+[]
+
+[AuxKernels]
+  [gap]
+    type = PenaltyMortarUserObjectAux
+    variable = gap
+    user_object = friction_uo
+    contact_quantity = weighted_gap
   []
 []
 
@@ -277,7 +299,7 @@
   l_tol = 1e-6
 
   l_max_its = 50
-  nl_max_its = 30
+  nl_max_its = 300
 
   start_time = 0.0
   end_time = 6.5 # 6.5
@@ -302,11 +324,12 @@
   perf_graph = true
   exodus = true
   csv = true
-  [chkfile]
-    type = CSV
-    start_time = 0.0
-    execute_vector_postprocessors_on = FINAL
-  []
+
+  # [chkfile]
+  #   type = CSV
+  #   start_time = 0.0
+  #   execute_vector_postprocessors_on = FINAL
+  # []
 
   [console]
     type = Console
@@ -327,9 +350,9 @@
     secondary_subdomain = 10001
     disp_x = disp_x
     disp_y = disp_y
-    friction_coefficient = 0.1 # with 2.0 works
+    friction_coefficient = 0.4 # with 2.0 works
     secondary_variable = disp_x
-    penalty = 5e5
+    penalty = 5e4 # 5e5
     penalty_friction = 1e4
   []
 []

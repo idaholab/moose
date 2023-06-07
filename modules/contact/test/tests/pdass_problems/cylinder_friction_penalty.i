@@ -98,6 +98,20 @@
   []
 []
 
+[AuxVariables]
+  [gap]
+  []
+[]
+
+[AuxKernels]
+  [gap]
+    type = PenaltyMortarUserObjectAux
+    variable = gap
+    user_object = friction_uo
+    contact_quantity = weighted_gap
+  []
+[]
+
 [AuxKernels]
   [penalty_normal_pressure_auxk]
     type = PenaltyMortarUserObjectAux
@@ -190,6 +204,23 @@
     type = NodalSum
     variable = react_y
     boundary = 4
+  []
+
+  [num_nl]
+    type = NumNonlinearIterations
+  []
+  [cumulative]
+    type = CumulativeValuePostprocessor
+    postprocessor = num_nl
+  []
+  [gap]
+    type = SideExtremeValue
+    value_type = min
+    variable = gap
+    boundary = 3
+  []
+  [num_al]
+    type = NumAugmentedLagrangeIterations
   []
 []
 

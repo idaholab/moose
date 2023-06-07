@@ -39,6 +39,9 @@ public:
                                   const unsigned int component) const override;
   virtual Real getTangentialVelocity(const Node * const node,
                                      const unsigned int component) const override;
+  virtual Real getDeltaTangentialLagrangeMultiplier(const Node * const node,
+                                     const unsigned int component) const override;
+
 
   virtual bool isContactConverged() override;
   virtual void updateAugmentedLagrangianMultipliers() override;

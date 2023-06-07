@@ -104,6 +104,17 @@ PenaltyWeightedGapUserObject::getNormalContactPressure(const Node * const node) 
     return 0.0;
 }
 
+Real
+PenaltyWeightedGapUserObject::getNormalLagrangeMultiplier(const Node * const node) const
+{
+  const auto it = _dof_to_lagrange_multiplier.find(_subproblem.mesh().nodePtr(node->id()));
+
+  if (it != _dof_to_lagrange_multiplier.end())
+    return MetaPhysicL::raw_value(it->second);
+  else
+    return 0.0;
+}
+
 void
 PenaltyWeightedGapUserObject::reinit()
 {

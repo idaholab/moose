@@ -12,7 +12,7 @@
 #include "AuxKernel.h"
 #include "MooseEnum.h"
 
-class WeightedGapUserObject;
+class UserObject;
 
 /**
  * Auxiliary kernel to output mortar penalty contact quantities of interest
@@ -39,7 +39,10 @@ protected:
     ACCUMULATED_SLIP_TWO,
     FRICTIONAL_PRESSURE_TWO,
     TANGENTIAL_VELOCITY_TWO,
-    WEIGHTED_GAP
+    WEIGHTED_GAP,
+    NORMAL_LM,
+    DELTA_TANGENTIAL_LM_ONE,
+    DELTA_TANGENTIAL_LM_TWO
   };
 
   virtual Real computeValue() override;
@@ -48,5 +51,5 @@ protected:
   const ContactQuantityEnum _contact_quantity;
 
   /// The user object inputted by the user to obtain the contact quantities
-  const WeightedGapUserObject * _user_object;
+  const UserObject & _user_object;
 };
