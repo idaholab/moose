@@ -36,7 +36,7 @@ discontinuities.
 
 !alert! note title=Behavior with parallel execution
 
-In certain cases multiple porosity jump faces may be connected by single cells in a
+In certain cases multiple porosity jump faces may be connected by cells in a
 chain. For example at corners or when porous medium zones are one-cell wide. In such
 scenarios, the two-term expansion for the determination of the
 face pressure on the downstream side requires a considerably extended stencil which may not be accommodated by the
@@ -47,7 +47,7 @@ computation on the porosity jump faces, special attention should be paid to
 moving the porosity jump faces sufficiently far from each other (at least two layers
 if skewness correction is disabled and three if it is enabled) or adding
 additional layers of ghosted elements (which can potentially increase local computational and memory costs)
-using the following FVKernel parameter [!param](/FVKernels/FVDiffusion/ghost_layers).
+using the following `FVKernel` parameter [!param](/FVKernels/FVDiffusion/ghost_layers).
 
 !alert-end!
 

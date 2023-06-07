@@ -802,9 +802,9 @@ NSFVBase<BaseType>::validParams()
       "pressure_allow_expansion_on_bernoulli_faces",
       false,
       "Switch to enable the two-term extrapolation on porosity jump faces. "
-      "WARNING: Depending on the mesh, enabling this treatment parameter may lead to "
+      "WARNING: Depending on the mesh, enabling this parameter may lead to "
       "termination in parallel runs due to insufficient ghosting between "
-      "processors. An example can be the presence of multiple porosity jumps connected with only "
+      "processors. An example can be the presence of multiple porosity jumps separated by only "
       "one cell while using the Bernoulli pressure treatment. In such cases adjust the "
       "`ghost_layers` parameter. ");
   params.addParam<bool>(
