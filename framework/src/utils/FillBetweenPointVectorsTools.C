@@ -14,8 +14,9 @@
 #include "MooseError.h"
 
 // libMesh includes
+#include "libmesh/mesh_base.h"
 #include "libmesh/mesh_generation.h"
-#include "libmesh/unstructured_mesh.h"
+#include "libmesh/mesh_serializer.h"
 #include "libmesh/point.h"
 #include "libmesh/elem.h"
 #include "libmesh/node.h"
@@ -25,7 +26,7 @@
 namespace FillBetweenPointVectorsTools
 {
 void
-fillBetweenPointVectorsGenerator(ReplicatedMesh & mesh, // an empty mesh is expected
+fillBetweenPointVectorsGenerator(MeshBase & mesh, // an empty mesh is expected
                                  const std::vector<Point> boundary_points_vec_1,
                                  std::vector<Point> boundary_points_vec_2,
                                  const unsigned int num_layers,
@@ -205,7 +206,7 @@ fillBetweenPointVectorsGenerator(ReplicatedMesh & mesh, // an empty mesh is expe
 }
 
 void
-fillBetweenPointVectorsGenerator(ReplicatedMesh & mesh,
+fillBetweenPointVectorsGenerator(MeshBase & mesh,
                                  const std::vector<Point> boundary_points_vec_1,
                                  const std::vector<Point> boundary_points_vec_2,
                                  const unsigned int num_layers,
@@ -230,7 +231,7 @@ fillBetweenPointVectorsGenerator(ReplicatedMesh & mesh,
 }
 
 void
-elementsCreationFromNodesVectorsQuad(ReplicatedMesh & mesh,
+elementsCreationFromNodesVectorsQuad(MeshBase & mesh,
                                      const std::vector<std::vector<Node *>> nodes,
                                      const unsigned int num_layers,
                                      const std::vector<unsigned int> node_number_vec,
@@ -265,7 +266,7 @@ elementsCreationFromNodesVectorsQuad(ReplicatedMesh & mesh,
 }
 
 void
-elementsCreationFromNodesVectors(ReplicatedMesh & mesh,
+elementsCreationFromNodesVectors(MeshBase & mesh,
                                  const std::vector<std::vector<Node *>> nodes,
                                  const unsigned int num_layers,
                                  const std::vector<unsigned int> node_number_vec,
@@ -479,12 +480,16 @@ needFlip(const std::vector<Point> vec_pts_1, const std::vector<Point> vec_pts_2)
 }
 
 bool
-isBoundarySimpleClosedLoop(ReplicatedMesh & mesh,
+isBoundarySimpleClosedLoop(MeshBase & mesh,
                            Real & max_node_radius,
                            std::vector<dof_id_type> & boundary_ordered_node_list,
                            const Point origin_pt,
                            const boundary_id_type bid)
 {
+  // This has no communication and expects elem_ptr to find any
+  // element, so it only works on serialized meshes
+  MeshSerializer serial(mesh);
+
   max_node_radius = 0.0;
   BoundaryInfo & boundary_info = mesh.get_boundary_info();
   auto side_list_tmp = boundary_info.build_side_list();
@@ -516,7 +521,7 @@ isBoundarySimpleClosedLoop(ReplicatedMesh & mesh,
 }
 
 bool
-isBoundarySimpleClosedLoop(ReplicatedMesh & mesh,
+isBoundarySimpleClosedLoop(MeshBase & mesh,
                            Real & max_node_radius,
                            const Point origin_pt,
                            const boundary_id_type bid)
@@ -527,14 +532,14 @@ isBoundarySimpleClosedLoop(ReplicatedMesh & mesh,
 }
 
 bool
-isBoundarySimpleClosedLoop(ReplicatedMesh & mesh, const Point origin_pt, const boundary_id_type bid)
+isBoundarySimpleClosedLoop(MeshBase & mesh, const Point origin_pt, const boundary_id_type bid)
 {
   Real dummy_max_node_radius;
   return isBoundarySimpleClosedLoop(mesh, dummy_max_node_radius, origin_pt, bid);
 }
 
 bool
-isBoundaryOpenSingleSegment(ReplicatedMesh & mesh,
+isBoundaryOpenSingleSegment(MeshBase & mesh,
                             Real & max_node_radius,
                             std::vector<dof_id_type> & boundary_ordered_node_list,
                             const Point origin_pt,
@@ -558,8 +563,12 @@ isBoundaryOpenSingleSegment(ReplicatedMesh & mesh,
 }
 
 bool
-isExternalBoundary(ReplicatedMesh & mesh, const boundary_id_type bid)
+isExternalBoundary(MeshBase & mesh, const boundary_id_type bid)
 {
+  // This has no communication and expects elem_ptr to find any
+  // element, so it only works on serialized meshes
+  MeshSerializer serial(mesh);
+
   if (!mesh.is_prepared())
     mesh.find_neighbors();
   BoundaryInfo & boundary_info = mesh.get_boundary_info();
@@ -575,11 +584,15 @@ isExternalBoundary(ReplicatedMesh & mesh, const boundary_id_type bid)
 }
 
 bool
-isCurveSimpleClosedLoop(ReplicatedMesh & mesh,
+isCurveSimpleClosedLoop(MeshBase & mesh,
                         Real & max_node_radius,
                         std::vector<dof_id_type> & ordered_node_list,
                         const Point origin_pt)
 {
+  // This has no communication and expects to loop over all elements
+  // on every processor, so it only works on serialized meshes
+  MeshSerializer serial(mesh);
+
   max_node_radius = 0.0;
   std::vector<std::pair<dof_id_type, dof_id_type>> node_assm;
   for (auto it = mesh.active_elements_begin(); it != mesh.active_elements_end(); it++)
@@ -591,21 +604,21 @@ isCurveSimpleClosedLoop(ReplicatedMesh & mesh,
 }
 
 bool
-isCurveSimpleClosedLoop(ReplicatedMesh & mesh, Real & max_node_radius, const Point origin_pt)
+isCurveSimpleClosedLoop(MeshBase & mesh, Real & max_node_radius, const Point origin_pt)
 {
   std::vector<dof_id_type> dummy_ordered_node_list;
   return isCurveSimpleClosedLoop(mesh, max_node_radius, dummy_ordered_node_list, origin_pt);
 }
 
 bool
-isCurveSimpleClosedLoop(ReplicatedMesh & mesh, const Point origin_pt)
+isCurveSimpleClosedLoop(MeshBase & mesh, const Point origin_pt)
 {
   Real dummy_max_node_radius;
   return isCurveSimpleClosedLoop(mesh, dummy_max_node_radius, origin_pt);
 }
 
 bool
-isCurveOpenSingleSegment(ReplicatedMesh & mesh,
+isCurveOpenSingleSegment(MeshBase & mesh,
                          Real & max_node_radius,
                          std::vector<dof_id_type> & ordered_node_list,
                          const Point origin_pt)
@@ -628,7 +641,7 @@ isCurveOpenSingleSegment(ReplicatedMesh & mesh,
 }
 
 void
-isClosedLoop(ReplicatedMesh & mesh,
+isClosedLoop(MeshBase & mesh,
              Real & max_node_radius,
              std::vector<dof_id_type> & ordered_node_list,
              std::vector<std::pair<dof_id_type, dof_id_type>> & node_assm,
@@ -637,6 +650,10 @@ isClosedLoop(ReplicatedMesh & mesh,
              bool & is_closed_loop,
              const bool suppress_exception)
 {
+  // This has no communication and expects node_ptr to find any
+  // node, so it only works on serialized meshes
+  MeshSerializer serial(mesh);
+
   std::vector<dof_id_type> dummy_elem_list = std::vector<dof_id_type>(node_assm.size(), 0);
   std::vector<dof_id_type> ordered_dummy_elem_list;
   is_closed_loop = false;
