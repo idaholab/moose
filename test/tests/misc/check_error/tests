@@ -436,7 +436,7 @@
   [coupled_grad_without_declare]
     type = 'RunException'
     input = 'coupled_grad_without_declare.i'
-    expect_err = 'The coupled variable "\w+" was never added to this objects\'s InputParameters'
+    expect_err = 'The coupled variable "\w+" was never added to this object\'s InputParameters'
 
     requirement = "The system shall report an error when a coupled variable is supplied that was not added as a valid parameter."
     issues = '#1405'

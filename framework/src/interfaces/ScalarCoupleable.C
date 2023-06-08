@@ -81,7 +81,7 @@ ScalarCoupleable::isCoupledScalar(const std::string & var_name_in, unsigned int 
       mooseError(_sc_name,
                  ": The coupled scalar variable \"",
                  var_name,
-                 "\" was never added to this objects's "
+                 "\" was never added to this object's "
                  "InputParameters, please double-check "
                  "your spelling");
 
