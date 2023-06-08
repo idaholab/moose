@@ -39,6 +39,7 @@
     x_coord_name = 'reporterData1/x'
     y_coord_name = 'reporterData1/y'
     z_coord_name = 'reporterData1/z'
+    weight_name = 'reporterData1/weight'
   []
   [reporter_point_source_err]
     type = ReporterPointSource
@@ -75,8 +76,8 @@
 [Reporters]
   [reporterData1]
     type = ConstantReporter
-    real_vector_names = 'x y z u'
-    real_vector_values = '0.2 0.2 0.0; 0.3 0.8 0.0; 0 0 0; 5 5 5'
+    real_vector_names = 'x y z u weight'
+    real_vector_values = '0.2 0.2 0.0; 0.3 0.8 0.0; 0 0 0; 5 5 5; 1 1 1'
   []
   [reporterData2]
     type = ConstantReporter

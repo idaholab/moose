@@ -33,7 +33,7 @@
       type = 'RunException'
       input = '2d_vpp.i'
       cli_args = "DiracKernels/inactive='reporter_point_source'"
-      expect_err = "The value and coordinate vectors are a different size"
+      expect_err = "Number of x_coord_name entries \(2\) does not match number of entries read for value_name \(3\)"
       detail = "and shall report an error if the input arrays are not the same size"
     []
   []

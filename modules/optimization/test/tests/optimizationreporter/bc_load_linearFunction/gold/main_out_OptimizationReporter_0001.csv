@@ -1,5 +1,5 @@
-grad_wrt_p,measurement_values,measurement_xcoord,measurement_ycoord,measurement_zcoord,misfit_values,p1,p2,simulation_values,measurement_time
-0,207,0.2,0.2,0,0.11599999999999999,113.26514660501002,287.85864907637,207,0
-0,204,0.8,0.6,0,-0.17800000000000002,0.0,0.0,204,0
-0,185,0.2,1.4,0,0.08900000000000001,0.0,0.0,185,0
-0,125,0.8,1.8,0,-0.2,0.0,0.0,125,0
+grad_left,grad_right,left,measurement_time,measurement_values,measurement_xcoord,measurement_ycoord,measurement_zcoord,misfit_values,right,simulation_values,weight
+0,0,96,0,207,0.2,0.2,0,0,100,207,1
+0,0,309,0,2040,0.8,0.6,0,0,0,2040,10
+0,0,0,0,18.5,0.2,1.4,0,0,0,18.5,0.1
+0,0,0,0,250,0.8,1.8,0,0,0,250,2

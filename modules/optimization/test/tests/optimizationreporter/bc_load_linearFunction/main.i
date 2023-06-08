@@ -25,21 +25,15 @@
   file_xcoord = 'coordx'
   file_ycoord ='y'
   file_zcoord = 'z'
-  file_value = 'measured_value'
-  # contents of measurementData.csv
-  # measurement_points = '0.2 0.2 0
-  #                       0.8 0.6 0
-  #                       0.2 1.4 0
-  #                       0.8 1.8 0'
-  # measurement_values = '207 204 185 125'
-  outputs=none
+  file_value = 'weightedMeasurement'
+  file_variable_weights = 'weight'
 []
 
 [Executioner]
   type = Optimize
   tao_solver = taonls
   petsc_options_iname = '-tao_gttol -tao_nls_pc_type -tao_nls_ksp_type'
-  petsc_options_value = '1e-5 none cg'
+  petsc_options_value = '1e-3 none cg'
   verbose = true
 []
 
@@ -73,6 +67,7 @@
                       OptimizationReporter/measurement_zcoord
                       OptimizationReporter/measurement_time
                       OptimizationReporter/measurement_values
+                      OptimizationReporter/weight
                       OptimizationReporter/left
                       OptimizationReporter/right'
     to_reporters = 'measure_data/measurement_xcoord
@@ -80,6 +75,7 @@
                     measure_data/measurement_zcoord
                     measure_data/measurement_time
                     measure_data/measurement_values
+                    measure_data/weightForTemperature
                     params_left/vals
                     params_right/vals'
   []
@@ -97,6 +93,7 @@
                       OptimizationReporter/measurement_zcoord
                       OptimizationReporter/measurement_time
                       OptimizationReporter/misfit_values
+                      OptimizationReporter/weight
                       OptimizationReporter/left
                       OptimizationReporter/right'
     to_reporters = 'misfit/measurement_xcoord
@@ -104,6 +101,7 @@
                     misfit/measurement_zcoord
                     misfit/measurement_time
                     misfit/misfit_values
+                    misfit/weight
                     params_left/vals
                     params_right/vals'
   []
@@ -125,6 +123,7 @@
                       OptimizationReporter/measurement_zcoord
                       OptimizationReporter/measurement_time
                       OptimizationReporter/measurement_values
+                      OptimizationReporter/weight
                       OptimizationReporter/left
                       OptimizationReporter/right'
     to_reporters = 'measure_data/measurement_xcoord
@@ -132,6 +131,7 @@
                     measure_data/measurement_zcoord
                     measure_data/measurement_time
                     measure_data/measurement_values
+                    measure_data/weightForTemperature
                     params_left/vals
                     params_right/vals'
   []

@@ -1,0 +1,11 @@
+[Tests]
+  issues = '#24333'
+  design = 'OptimizationData.md'
+  [readData]
+    type = CSVDiff
+    input = two_vars_file.i
+    csvdiff = two_vars_file_out_measure_data_0001.csv
+    requirement = "The system shall be able to read variable weights and use "
+                  "them to scale the misfit."
+  []
+[]

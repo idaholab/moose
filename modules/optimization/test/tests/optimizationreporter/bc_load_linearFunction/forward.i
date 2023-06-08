@@ -97,6 +97,7 @@
   [measure_data]
     type = OptimizationData
     variable = temperature
+    variable_weight_names = weightForTemperature
   []
   [params_left]
     type = ConstantReporter

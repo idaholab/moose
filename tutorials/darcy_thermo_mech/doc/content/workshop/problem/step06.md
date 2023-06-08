@@ -8,9 +8,9 @@ they are coupled together.
 !equation
 -\nabla \cdot \frac{\mathbf{K}}{\mu} \nabla p  = 0
 \\
-C\left( \frac{\partial T}{\partial t} + \underbrace{\epsilon \vec{u}\cdot\nabla p}_{\textrm{DarcyAdvection}} \right) - \nabla \cdot k \nabla T = 0
+C\left( \frac{\partial T}{\partial t} + \underbrace{\epsilon \vec{u}\cdot\nabla T}_{\textrm{DarcyAdvection}} \right) - \nabla \cdot k \nabla T = 0
 
-- Objects have been created for everything except the $\vec{u}\cdot\nabla p$ term; a `Kernel`,
+- Objects have been created for everything except the $\vec{u}\cdot\nabla T$ term; a `Kernel`,
   `DarcyAdvection`, will be developed for this term.
 - A more sophisticated `Material` object will be created that includes temperature dependence.
 
