@@ -136,5 +136,30 @@ OptimizationReporterBase::fillParamsVector(std::string type, Real default_value)
   for (const auto & vec : parsed_data)
     flattened_data.insert(flattened_data.end(), vec.begin(), vec.end());
 
-  return flattened_data;
+  return flattened_data;}
+
+void
+OptimizationReporterBase::computeEqualityConstraints(
+    libMesh::PetscVector<Number> & eqs_constraints) const
+{
+  eqs_constraints.zero();
+}
+
+void
+OptimizationReporterBase::computeInequalityConstraints(
+    libMesh::PetscVector<Number> & ineqs_constraints) const
+{
+  ineqs_constraints.zero();
+}
+
+void
+OptimizationReporterBase::computeEqualityJacobian(libMesh::PetscMatrix<Number> & jacobian) const
+{
+  jacobian.zero();
+}
+
+void
+OptimizationReporterBase::computeInequalityJacobian(libMesh::PetscMatrix<Number> & jacobian) const
+{
+  jacobian.zero();
 }

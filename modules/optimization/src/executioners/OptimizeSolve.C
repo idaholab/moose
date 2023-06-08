@@ -14,14 +14,14 @@
 
 #include "libmesh/petsc_vector.h"
 #include "libmesh/petsc_matrix.h"
+#include <petsctao.h>
 
 InputParameters
 OptimizeSolve::validParams()
 {
   InputParameters params = emptyInputParameters();
-  MooseEnum tao_solver_enum(
-      "taontr taobntr taobncg taonls taobnls taobqnktr taontl taobntl taolmvm "
-      "taoblmvm taonm taobqnls taoowlqn taogpcg taobmrm");
+  MooseEnum tao_solver_enum("taontr taobntr taobncg taonls taobnls taobqnktr taontl taobntl taolmvm "
+                            "taoblmvm taonm taobqnls taoowlqn taogpcg taobmrm taoallm");
   params.addRequiredParam<MooseEnum>(
       "tao_solver", tao_solver_enum, "Tao solver to use for optimization.");
   ExecFlagEnum exec_enum = ExecFlagEnum();
@@ -77,6 +77,9 @@ OptimizeSolve::taoSolve()
   // Initialize tao object
   ierr = TaoCreate(_my_comm.get(), &_tao);
   CHKERRQ(ierr);
+  Tao subsolver;
+  ierr = TaoCreate(_my_comm.get(), &subsolver);
+  CHKERRQ(ierr);
 
   TaoSetMonitor(_tao, monitor, this, nullptr);
 
@@ -129,14 +132,19 @@ OptimizeSolve::taoSolve()
     case TaoSolverEnum::BUNDLE_RISK_MIN:
       ierr = TaoSetType(_tao, TAOBMRM);
       break;
+    case TaoSolverEnum::AUGMENTED_LAGRANGIAN_MULTIPLER_METHOD:
+      ierr = TaoSetType(_tao, TAOALMM);
+      CHKERRQ(ierr);
+      ierr = TaoSetType(subsolver, TAOLMVM);
+      CHKERRQ(ierr);
+      // set sub solver
+      ierr = TaoALMMSetSubsolver(_tao, subsolver);
+      break;
 
     default:
       mooseError("Invalid Tao solve type");
   }
 
-  CHKERRQ(ierr);
-  // Set bounds for bounded optimization
-  ierr = TaoSetVariableBoundsRoutine(_tao, variableBoundsWrapper, this);
   CHKERRQ(ierr);
 
   // Set objective and gradient functions
@@ -176,6 +184,69 @@ OptimizeSolve::taoSolve()
   ierr = TaoSetFromOptions(_tao);
   CHKERRQ(ierr);
 
+  // Set bounds for bounded optimization
+  ierr = TaoSetVariableBoundsRoutine(_tao, variableBoundsWrapper, this);
+  CHKERRQ(ierr);
+
+  if (_tao_solver_enum == TaoSolverEnum::AUGMENTED_LAGRANGIAN_MULTIPLER_METHOD)
+  { // Create equality vector
+    ierr = VecCreate(_my_comm.get(), &_ce);
+    CHKERRQ(ierr);
+    ierr = VecSetSizes(_ce, _ndof, _ndof);
+    CHKERRQ(ierr);
+    ierr = VecSetFromOptions(_ce);
+    CHKERRQ(ierr);
+    ierr = VecSetUp(_ce);
+    CHKERRQ(ierr);
+
+    // Create inequality vector
+    ierr = VecCreate(_my_comm.get(), &_ci);
+    CHKERRQ(ierr);
+    ierr = VecSetSizes(_ci, _ndof, _ndof);
+    CHKERRQ(ierr);
+    ierr = VecSetFromOptions(_ci);
+    CHKERRQ(ierr);
+    ierr = VecSetUp(_ci);
+    CHKERRQ(ierr);
+
+    // Set equality jacobian matrix
+    ierr = MatCreate(_my_comm.get(), &_jacobian_e);
+    CHKERRQ(ierr);
+    ierr = MatSetSizes(_jacobian_e, _ndof, _ndof, _ndof, _ndof);
+    CHKERRQ(ierr);
+    ierr = MatSetFromOptions(_jacobian_e);
+    CHKERRQ(ierr);
+    ierr = MatSetUp(_jacobian_e);
+
+    // Set inequality jacobian matrix
+    ierr = MatCreate(_my_comm.get(), &_jacobian_i);
+    CHKERRQ(ierr);
+    ierr = MatSetSizes(_jacobian_i, _ndof, _ndof, _ndof, _ndof);
+    CHKERRQ(ierr);
+    ierr = MatSetFromOptions(_jacobian_i);
+    CHKERRQ(ierr);
+    ierr = MatSetUp(_jacobian_i);
+    CHKERRQ(ierr);
+
+    // Set the Equality Constriants
+    ierr = TaoSetEqualityConstraintsRoutine(_tao, _ce, equalityFunctionWrapper, this);
+    CHKERRQ(ierr);
+
+    // Set the Equality Constriants Jacobian
+    ierr = TaoSetJacobianEqualityRoutine(
+        _tao, _jacobian_e, _jacobian_e, equalityJacobianFunctionWrapper, this);
+    CHKERRQ(ierr);
+
+    // Set the Inequality constraints
+    ierr = TaoSetInequalityConstraintsRoutine(_tao, _ci, inequalityFunctionWrapper, this);
+    CHKERRQ(ierr);
+
+    // Set the Inequality constraints Jacobian
+    ierr = TaoSetJacobianInequalityRoutine(
+        _tao, _jacobian_i, _jacobian_i, inequalityJacobianFunctionWrapper, this);
+    CHKERRQ(ierr);
+  }
+
   // Backup multiapps so transient problems start with the same initial condition
   _problem.backupMultiApps(OptimizationAppTypes::EXEC_FORWARD);
   _problem.backupMultiApps(OptimizationAppTypes::EXEC_ADJOINT);
@@ -195,8 +266,26 @@ OptimizeSolve::taoSolve()
   ierr = TaoDestroy(&_tao);
   CHKERRQ(ierr);
 
+  ierr = TaoDestroy(&subsolver);
+  CHKERRQ(ierr);
+
   ierr = MatDestroy(&_hessian);
   CHKERRQ(ierr);
+
+  if (_tao_solver_enum == TaoSolverEnum::AUGMENTED_LAGRANGIAN_MULTIPLER_METHOD)
+  {
+    ierr = VecDestroy(&_ce);
+    CHKERRQ(ierr);
+
+    ierr = VecDestroy(&_ci);
+    CHKERRQ(ierr);
+
+    ierr = MatDestroy(&_jacobian_e);
+    CHKERRQ(ierr);
+
+    ierr = MatDestroy(&_jacobian_i);
+    CHKERRQ(ierr);
+  }
 
   return ierr;
 }
@@ -434,5 +523,47 @@ OptimizeSolve::variableBounds(Tao tao)
   // set upper and lower bounds in tao solver
   PetscErrorCode ierr;
   ierr = TaoSetVariableBounds(tao, xl.vec(), xu.vec());
+  return ierr;
+}
+
+PetscErrorCode
+OptimizeSolve::equalityFunctionWrapper(Tao tao, Vec x, Vec ce, void * ctx)
+{
+  PetscErrorCode ierr;
+  ierr = VecSet(ce, 0.0);
+  return ierr;
+}
+
+PetscErrorCode
+OptimizeSolve::equalityJacobianFunctionWrapper(
+    Tao tao, Vec x, Mat jacobian_e, Mat jacobian_epre, void * ctx)
+{
+
+  MatZeroEntries(jacobian_e);
+  // Need to assemble these matricies before returning to ALMM.
+  PetscErrorCode ierr;
+  MatAssemblyBegin(jacobian_e, MAT_FINAL_ASSEMBLY);
+  ierr = MatAssemblyEnd(jacobian_e, MAT_FINAL_ASSEMBLY);
+  return ierr;
+}
+
+PetscErrorCode
+OptimizeSolve::inequalityFunctionWrapper(Tao tao, Vec x, Vec ci, void * ctx)
+{
+  PetscErrorCode ierr;
+  ierr = VecSet(ci, 0.0);
+  return ierr;
+}
+
+PetscErrorCode
+OptimizeSolve::inequalityJacobianFunctionWrapper(
+    Tao tao, Vec x, Mat jacobian_i, Mat jacobian_ipre, void * ctx)
+{
+
+  MatZeroEntries(jacobian_i);
+  // Need to assemble these matricies before returning to ALMM.
+  PetscErrorCode ierr;
+  MatAssemblyBegin(jacobian_i, MAT_FINAL_ASSEMBLY);
+  ierr = MatAssemblyEnd(jacobian_i, MAT_FINAL_ASSEMBLY);
   return ierr;
 }

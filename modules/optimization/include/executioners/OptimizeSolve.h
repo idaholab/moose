@@ -13,6 +13,7 @@
 
 #include "ExecFlagEnum.h"
 #include <petsctao.h>
+
 #include "libmesh/petsc_vector.h"
 #include "libmesh/petsc_matrix.h"
 
@@ -123,6 +124,12 @@ private:
   objectiveAndGradientFunctionWrapper(Tao tao, Vec x, Real * objective, Vec gradient, void * ctx);
   static PetscErrorCode variableBoundsWrapper(Tao /*tao*/, Vec xl, Vec xu, void * ctx);
   static PetscErrorCode monitor(Tao tao, void * ctx);
+  static PetscErrorCode equalityFunctionWrapper(Tao tao, Vec x, Vec ce, void * ctx);
+  static PetscErrorCode
+  equalityJacobianFunctionWrapper(Tao tao, Vec x, Mat jacobian_e, Mat jacobian_epre, void * ctx);
+  static PetscErrorCode inequalityFunctionWrapper(Tao tao, Vec x, Vec ci, void * ctx);
+  static PetscErrorCode
+  inequalityJacobianFunctionWrapper(Tao tao, Vec x, Mat jacobian_i, Mat jacobian_ipre, void * ctx);
   ///@}
 
   /// Enum of tao solver types
@@ -141,7 +148,8 @@ private:
     BOUNDED_QUASI_NEWTON_LINE_SEARCH,
     ORTHANT_QUASI_NEWTON,
     GRADIENT_PROJECTION_CONJUGATE_GRADIENT,
-    BUNDLE_RISK_MIN
+    BUNDLE_RISK_MIN,
+    AUGMENTED_LAGRANGIAN_MULTIPLER_METHOD
   } _tao_solver_enum;
 
   /// Number of parameters being optimized
@@ -152,4 +160,16 @@ private:
 
   /// Hessian (matrix) - usually a matrix-free representation
   Mat _hessian;
+
+  /// Equality constraint vector
+  Vec _ce;
+
+  /// Inequality constraint vector
+  Vec _ci;
+
+  /// Equality constraint Jacobian
+  Mat _jacobian_e;
+
+  /// Inequality constraint Jacobian
+  Mat _jacobian_i;
 };
