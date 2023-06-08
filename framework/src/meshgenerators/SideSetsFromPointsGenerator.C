@@ -13,8 +13,9 @@
 #include "MooseMeshUtils.h"
 #include "CastUniquePointer.h"
 
-#include "libmesh/mesh_generation.h"
 #include "libmesh/mesh.h"
+#include "libmesh/mesh_generation.h"
+#include "libmesh/mesh_serializer.h"
 #include "libmesh/string_to_enum.h"
 #include "libmesh/quadrature_gauss.h"
 #include "libmesh/point_locator_base.h"
@@ -58,8 +59,10 @@ std::unique_ptr<MeshBase>
 SideSetsFromPointsGenerator::generate()
 {
   std::unique_ptr<MeshBase> mesh = std::move(_input);
-  if (!mesh->is_replicated())
-    mooseError("SideSetsFromPointsGenerator is not implemented for distributed meshes");
+
+  // Our flood fill doesn't do any communication, so it requires a
+  // serialized mesh
+  MeshSerializer serial(*mesh);
 
   // Get the BoundaryIDs from the mesh
   std::vector<BoundaryID> boundary_ids =
