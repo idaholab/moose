@@ -63,8 +63,7 @@
     input = 'three_hexagons_coarse.i'
     exodiff = 'three_hexagons_coarse_automatic_pair_reference_out.e'
     cli_args = "Postprocessors/active='' Contact/contact_pressure/secondary='102 102 201' "
-               "Contact/contact_pressure/primary='201 301 301' "
-               "Outputs/hide=penetration "
+               "Contact/contact_pressure/primary='201 301 301' Outputs/hide=penetration "
                "Outputs/file_base=three_hexagons_coarse_automatic_pair_reference_out"
     requirement = 'The system shall assign and accumulate a single contact pressure auxiliary '
                   'variable for all contact pairs supplied to a single contact action object with a '
@@ -79,7 +78,7 @@
     input = 'three_hexagons_coarse_automatic_pair.i'
     exodiff = 'three_hexagons_coarse_automatic_pair_out.e'
     cli_args = "Contact/contact_pressure/automatic_pairing_boundaries='102 201 301' "
-               "Outputs/hide=penetration "
+               "Contact/contact_pressure/automatic_pairing_method='CENTROID' Outputs/hide=penetration "
                "Postprocessors/active=''"
     requirement = 'The system shall be able to, if the user provides a reference distance, assign '
                   'primary-secondary contact pairs automatically.'
@@ -93,7 +92,7 @@
     input = 'three_hexagons_coarse_automatic_pair.i'
     exodiff = 'three_hexagons_coarse_automatic_pair_node_proximity_out.e'
     cli_args = "Contact/contact_pressure/automatic_pairing_boundaries='102 201 301' "
-               "Contact/contact_pressure/automatic_pairing_node_proximity=true "
+               "Contact/contact_pressure/automatic_pairing_method=NODE "
                "Contact/contact_pressure/automatic_pairing_distance=0.002001 "
                "Outputs/file_base=three_hexagons_coarse_automatic_pair_node_proximity_out "
                "Outputs/hide=penetration"
@@ -110,12 +109,12 @@
     input = 'three_hexagons_coarse_automatic_pair.i'
     exodiff = 'three_hexagons_coarse_automatic_pair_node_proximity_small_distance_out.e'
     cli_args = "Contact/contact_pressure/automatic_pairing_boundaries='102 201 301' "
-               "Contact/contact_pressure/automatic_pairing_node_proximity=true "
+               "Contact/contact_pressure/automatic_pairing_method=NODE "
                "Contact/contact_pressure/automatic_pairing_distance=0.0013 "
-               "Outputs/file_base=three_hexagons_coarse_automatic_pair_node_proximity_small_distance_out "
-               "Outputs/hide=penetration"
-    requirement = 'The system shall be able to, if the user provides a too-small reference distance, avoid assigning '
-                  'primary-secondary contact pairs using proximity between nodes.'
+               "Outputs/file_base=three_hexagons_coarse_automatic_pair_node_proximity_small_distance_"
+               "out Outputs/hide=penetration"
+    requirement = 'The system shall be able to, if the user provides a too-small reference distance, '
+                  'avoid assigning primary-secondary contact pairs using proximity between nodes.'
     abs_zero = 1.0e-4
     rel_err = 1.0e-4
     allow_warnings = true
@@ -126,13 +125,13 @@
     input = 'three_hexagons_coarse_automatic_pair.i'
     exodiff = 'three_hexagons_coarse_automatic_pair_node_proximity_large_distance_out.e'
     cli_args = "Contact/contact_pressure/automatic_pairing_boundaries='102 201 301' "
-               "Contact/contact_pressure/automatic_pairing_node_proximity=true "
+               "Contact/contact_pressure/automatic_pairing_method=NODE "
                "Contact/contact_pressure/automatic_pairing_distance=4.0 "
-               "Outputs/file_base=three_hexagons_coarse_automatic_pair_node_proximity_large_distance_out "
-               "Outputs/hide=penetration"
-    requirement = 'The system shall be able to, if the user provides a very large reference distance, assign '
-                  'primary-secondary contact pairs automatically using proximity between nodes that '
-                  'belong to arbitrary boundaries.'
+               "Outputs/file_base=three_hexagons_coarse_automatic_pair_node_proximity_large_distance_"
+               "out Outputs/hide=penetration"
+    requirement = 'The system shall be able to, if the user provides a very large reference '
+                  'distance, assign primary-secondary contact pairs automatically using proximity '
+                  'between nodes that belong to arbitrary boundaries.'
     abs_zero = 1.0e-4
     rel_err = 1.0e-4
     allow_warnings = true

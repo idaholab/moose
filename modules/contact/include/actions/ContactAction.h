@@ -17,7 +17,7 @@ enum class ContactModel
 {
   FRICTIONLESS,
   GLUED,
-  COULOMB,
+  COULOMB
 };
 
 enum class ContactFormulation
@@ -29,6 +29,12 @@ enum class ContactFormulation
   TANGENTIAL_PENALTY,
   MORTAR,
   MORTAR_PENALTY
+};
+
+enum class ProximityMethod
+{
+  NODE,
+  CENTROID
 };
 
 /**
@@ -70,6 +76,12 @@ public:
    * @return enum
    */
   static MooseEnum getSmoothingEnum();
+
+  /**
+   * Get proximity method for automatic pairing
+   * @return enum
+   */
+  static MooseEnum getProximityMethod();
 
   /**
    * Define parameters used by multiple contact objects

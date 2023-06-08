@@ -78,8 +78,8 @@ ContactAction::validParams()
       "'automatic_pairing_boundaries' parameter can be to generate a contact pair automatically. "
       "Due to numerical error in the determination of the centroids, it is encouraged that "
       "the user adds a tolerance to this distance (e.g. extra 10%) to make sure no suitable "
-      "contact pair is missed. If the 'automatic_pairing_node_proximity' option is chosen to be "
-      "true instead, this distance is recommended to be set to twice the minimum distance between "
+      "contact pair is missed. If the 'automatic_pairing_method = NODE' option is chosen instead, "
+      "this distance is recommended to be set to at least twice the minimum distance between "
       "nodes of boundaries to be paired.");
   params.addDeprecatedParam<MeshGeneratorName>(
       "mesh",
@@ -187,9 +187,9 @@ ContactAction::validParams()
       true,
       "Whether to generate the mortar mesh from the action. Typically this will be the case, but "
       "one may also want to reuse an existing lower-dimensional mesh prior to a restart.");
-  params.addParam<bool>("automatic_pairing_node_proximity",
-                        false,
-                        "Whether to generate automatic pairing using nodal proximity.");
+  params.addParam<MooseEnum>("automatic_pairing_method",
+                             ContactAction::getProximityMethod(),
+                             "The proximity method used for automatic pairing of boundaries.");
   params.addParam<bool>(
       "mortar_dynamics",
       false,
@@ -230,6 +230,11 @@ ContactAction::ContactAction(const InputParameters & params)
     paramError("automatic_pairing_distance",
                "For automatic selection of contact pairs (for particular geometries) in contact "
                "action, 'automatic_pairing_distance' needs to be provided.");
+
+  if (_automatic_pairing_boundaries.size() > 0 && !isParamValid("automatic_pairing_method"))
+    paramError("automatic_pairing_distance",
+               "For automatic selection of contact pairs (for particular geometries) in contact "
+               "action, 'automatic_pairing_method' needs to be provided.");
 
   if (_automatic_pairing_boundaries.size() > 0 && _boundary_pairs.size() != 0)
     paramError("automatic_pairing_boundaries",
@@ -990,9 +995,11 @@ ContactAction::addNodeFaceContact()
 {
   if (_current_task == "post_mesh_prepared" && _automatic_pairing_boundaries.size() > 0)
   {
-    if (getParam<bool>("automatic_pairing_node_proximity"))
+    if (getParam<MooseEnum>("automatic_pairing_method").getEnum<ProximityMethod>() ==
+        ProximityMethod::NODE)
       createSidesetsFromNodeProximity();
-    else
+    else if (getParam<MooseEnum>("automatic_pairing_method").getEnum<ProximityMethod>() ==
+             ProximityMethod::CENTROID)
       createSidesetPairsFromGeometry();
   }
 
@@ -1331,6 +1338,12 @@ MooseEnum
 ContactAction::getModelEnum()
 {
   return MooseEnum("frictionless glued coulomb", "frictionless");
+}
+
+MooseEnum
+ContactAction::getProximityMethod()
+{
+  return MooseEnum("node centroid");
 }
 
 MooseEnum
