@@ -2,7 +2,7 @@
 
 !---
 
-The velocity is the primary variable of interest, it is computed base on the pressure as:
+The velocity is the primary variable of interest, it is computed based on the pressure as:
 
 !equation
 \vec{u} = -\frac{\mathbf{K}}{\mu} \nabla p
