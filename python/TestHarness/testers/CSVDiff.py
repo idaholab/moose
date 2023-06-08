@@ -9,7 +9,6 @@
 
 from SchemaDiff import SchemaDiff
 from FileTester import FileTester # checkRunnable
-from TestHarness import util
 import re
 import os
 import csv
@@ -78,7 +77,7 @@ class CSVDiff(SchemaDiff):
         try:
             output_dict = {}
             with open(path1, newline='') as csvfile:
-                reader = csv.DictReader(csvfile)
+                reader = csv.DictReader(csvfile, skipinitialspace=True)
                 for row in reader:
                 # Loop through each column in the row
                     for column, value in row.items():
@@ -117,6 +116,7 @@ class CSVDiff(SchemaDiff):
     def do_deepdiff(self, orig, comp, rel_err, abs_zero, exclude_values:list=None):
         """ Perform DIFF Comparison """
         diff = ''
+        generic_error = None
         # Override global params if comparison file is used
         if self.custom_params:
             rel_err = float(self.custom_params.get('RELATIVE', self.specs['rel_err']))
@@ -127,9 +127,8 @@ class CSVDiff(SchemaDiff):
             if (column in self.specs['override_columns']
                 or (self.custom_params and column in self.custom_params['FIELDS'].keys())):
 
-                # Caveat: Setting the following using global defaults can wind up using these
-                # tolerances in the end. If this ends up being the case, we will apply a caveat
-                # annotation if global ends up being used.
+                # Caveat: Using global defaults can wind up using these tolerances in the end due to
+                # a max() comparison occurring later in this method
                 _rel_err = float(rel_err)
                 _abs_zero = float(abs_zero)
 
@@ -141,26 +140,33 @@ class CSVDiff(SchemaDiff):
                     if self.specs['override_abs_zero']:
                         _abs_zero = float(self.specs['override_abs_zero'][idx])
 
-                # Comparison file override (use more tolerant of the two when both are set). This
-                # can have an unintentional side effect. See Caveat above.
+                # Comparison file override. Use more tolerant of the two if both are set. See Caveat
+                # above.
                 if self.custom_params and column in self.custom_params['FIELDS'].keys():
                     _meta = self.custom_params['FIELDS'][column]
                     _rel_err = float(max(_rel_err, float(_meta.get('RELATIVE', _rel_err))))
                     _abs_zero = float(max(_abs_zero, float(_meta.get('ZERO', _abs_zero))))
 
                 # Do the diff without overriding global parameters
-                col_diff = super().do_deepdiff(orig[column], comp[column], _rel_err, _abs_zero,
-                                               exclude_values)
+                (col_diff, generic_error) = super().do_deepdiff(orig[column],
+                                                                comp[column],
+                                                                _rel_err,
+                                                                _abs_zero,
+                                                                exclude_values)
 
             # Do the diff using default global parameters
             else:
-                col_diff = super().do_deepdiff(orig[column], comp[column], rel_err, abs_zero,
-                                               exclude_values)
+                (col_diff, generic_error) = super().do_deepdiff(orig[column],
+                                                                comp[column],
+                                                                rel_err,
+                                                                abs_zero,
+                                                                exclude_values)
+
             # append diff information
             if col_diff:
                 diff += f'Column {index}: {col_diff}\n'
 
-        return diff
+        return (diff, generic_error)
 
     def getParamValues(self, param, param_line):
         """ return a list of discovered values for param """

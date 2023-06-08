@@ -103,8 +103,17 @@ class SchemaDiff(FileTester):
                     break
 
                 # Perform the diff.
-                diff = self.do_deepdiff(gold_dict, test_dict, specs['rel_err'], specs['abs_zero'],
-                                        specs['ignored_items'])
+                (diff, exception) = self.do_deepdiff(gold_dict,
+                                                     test_dict,
+                                                     specs['rel_err'],
+                                                     specs['abs_zero'],
+                                                     specs['ignored_items'])
+
+                if exception:
+                    output += f'\nDeepDiff Exception:\n{exception}\n'
+                    self.setStatus(self.fail, 'DeepDiff exception')
+                    return output
+
                 if diff:
                     output += (f'Difference detected.\nFile 1: {abs_gold_file}\n'
                                f'File 2: {abs_test_file}\n'
@@ -128,11 +137,12 @@ class SchemaDiff(FileTester):
                 for diff_key, key_value in diff_dict['iterable_item_added'].items():
                     formated_results += (f'  additional row at {diff_key.replace("root", "", 1)}:'
                                          f' {key_value}')
-
         return formated_results
 
     def do_deepdiff(self, orig, comp, rel_err, abs_zero, exclude_values:list=None):
+        diff = ''
         exclude_paths = []
+        generic_error = None
         if exclude_values:
             for value in exclude_values:
                 search = orig | deepdiff.search.grep(value, case_sensitive=True)
@@ -145,18 +155,23 @@ class SchemaDiff(FileTester):
                         exclude_paths.append(path)
 
         custom_operators = [CompareDiff(types=[str,float],rel_err=rel_err,abs_zero=abs_zero)]
-        diff = deepdiff.DeepDiff(orig,
-                                 comp,
-                                 exclude_paths=exclude_paths,
-                                 exclude_regex_paths=self.exclude_regex_paths,
-                                 custom_operators=custom_operators)
+        try:
+            diff = deepdiff.DeepDiff(orig,
+                                     comp,
+                                     exclude_paths=exclude_paths,
+                                     exclude_regex_paths=self.exclude_regex_paths,
+                                     custom_operators=custom_operators)
+
+        except Exception as generic_error:
+            return (diff, generic_error)
+
         # return friendly readable results where we can
 
         if len(diff.affected_paths) or len(diff.affected_root_keys):
-            return self.format_diff(diff)
+            return (self.format_diff(diff), generic_error)
 
         # Empty when there is no diff
-        return diff.pretty()
+        return (diff.pretty(), generic_error)
 
     #this is how we call the load_file in the derived classes, and also check for exceptions in the load
     #all python functions are virtual, so there is no templating, but some self shenanigans required
