@@ -16,6 +16,8 @@ CopyPostprocessorValueControl::validParams()
 {
   InputParameters params = THMControl::validParams();
   params.addRequiredParam<PostprocessorName>("postprocessor", "The name of the postprocessor.");
+  params.addClassDescription("Forwards the value of a postprocessor to a ControlData named with "
+                             "the name of the postprocessor.");
   return params;
 }
 

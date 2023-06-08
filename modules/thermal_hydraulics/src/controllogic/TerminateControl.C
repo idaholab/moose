@@ -16,6 +16,8 @@ InputParameters
 TerminateControl::validParams()
 {
   InputParameters params = THMControl::validParams();
+  params.addClassDescription(
+      "Terminates the simulation when a THMControl boolean data becomes true");
   params.addRequiredParam<std::string>(
       "input", "The name of boolean control data indicating if simulation should be terminated.");
   params.addParam<bool>("throw_error", false, "Flag to throw an error on termination");

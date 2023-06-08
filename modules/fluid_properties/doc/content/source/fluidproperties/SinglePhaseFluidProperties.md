@@ -100,14 +100,14 @@ defines several routines for iteratively converting from one variable set
 to another. This leverages the [numerical inversion methods utilities](utils/FluidPropertiesUtils.md).
 Notably, the following routines are provided:
 
-!listing modules/fluid_properties/include/userobjects/SinglePhaseFluidProperties.h start=p_T_from_v_e end=) const include-end=true
+!listing modules/fluid_properties/include/fluidproperties/SinglePhaseFluidProperties.h start=p_T_from_v_e end=) const include-end=true
 
-!listing modules/fluid_properties/include/userobjects/SinglePhaseFluidProperties.h start=p_T_from_v_h end=) const include-end=true
+!listing modules/fluid_properties/include/fluidproperties/SinglePhaseFluidProperties.h start=p_T_from_v_h end=) const include-end=true
 
-!listing modules/fluid_properties/include/userobjects/SinglePhaseFluidProperties.h start=p_T_from_h_s end=) const include-end=true
+!listing modules/fluid_properties/include/fluidproperties/SinglePhaseFluidProperties.h start=p_T_from_h_s end=) const include-end=true
 
 These routines may then be used to convert from one variable set to another before obtaining the desired
 fluid property. For example, this routine converts (pressure, temperature) to (specific volume, specific energy)
 to compute entropy.
 
-!listing modules/fluid_properties/src/userobjects/SinglePhaseFluidProperties.C start=SinglePhaseFluidProperties::s_from_p_T end=} include-end=true
+!listing modules/fluid_properties/src/fluidproperties/SinglePhaseFluidProperties.C start=SinglePhaseFluidProperties::s_from_p_T end=} include-end=true

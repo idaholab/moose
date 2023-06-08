@@ -8,5 +8,3 @@ which allows all closures to be created directly in the input file.
 !syntax inputs /Closures/Closures1PhaseNone
 
 !syntax children /Closures/Closures1PhaseNone
-
-!bibtex bibliography
