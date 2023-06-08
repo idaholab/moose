@@ -122,7 +122,7 @@ Meshing is hard. We have some tools to help in the [MeshGenerator system](syntax
 
 ## Summary of helpful resources
 
-Documentation for every object
+[Documentation for every object](syntax/index.md)
 
 [Troubleshooting failed solves](application_usage/failed_solves.md)
 
