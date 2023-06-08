@@ -31,49 +31,20 @@
   reference_vector = 'ref'
 []
 
-[Variables]
-  [disp_x]
-  []
-  [disp_y]
-  []
-[]
-
 [AuxVariables]
   [penalty_normal_pressure]
-    order = FIRST
-    family = LAGRANGE
   []
   [penalty_frictional_pressure]
-    order = FIRST
-    family = LAGRANGE
   []
   [accumulated_slip_one]
-    order = FIRST
-    family = LAGRANGE
   []
   [tangential_vel_one]
-    order = FIRST
-    family = LAGRANGE
   []
   [weighted_gap]
-    order = FIRST
-    family = LAGRANGE
-  []
-  [stress_xx]
-    order = CONSTANT
-    family = MONOMIAL
-  []
-  [stress_yy]
-    order = CONSTANT
-    family = MONOMIAL
-  []
-  [stress_xy]
-    order = CONSTANT
-    family = MONOMIAL
   []
   [react_x]
   []
-  [react_y]
+  [saved_y]
   []
 []
 
@@ -90,85 +61,44 @@
   []
 []
 
-[Kernels]
-  [TensorMechanics]
-    use_displaced_mesh = true
-    extra_vector_tags = 'ref'
-    block = '1 2 3 4 5 6 7'
-  []
-[]
-
-[AuxVariables]
-  [gap]
-  []
+[Modules/TensorMechanics/Master/all]
+  strain = FINITE
+  add_variables = true
+  extra_vector_tags = 'ref'
+  block = '1 2 3 4 5 6 7'
+  generate_output = 'stress_xx stress_yy stress_xy'
 []
 
 [AuxKernels]
-  [gap]
-    type = PenaltyMortarUserObjectAux
-    variable = gap
-    user_object = friction_uo
-    contact_quantity = weighted_gap
-  []
-[]
-
-[AuxKernels]
-  [penalty_normal_pressure_auxk]
+  [penalty_normal_pressure]
     type = PenaltyMortarUserObjectAux
     variable = penalty_normal_pressure
     user_object = friction_uo
     contact_quantity = normal_pressure
   []
-  [penalty_frictional_pressure_auxk]
+  [penalty_frictional_pressure]
     type = PenaltyMortarUserObjectAux
     variable = penalty_frictional_pressure
     user_object = friction_uo
     contact_quantity = tangential_pressure_one
   []
-  [penalty_accumulated_slip_auxk]
+  [penalty_accumulated_slip]
     type = PenaltyMortarUserObjectAux
     variable = accumulated_slip_one
     user_object = friction_uo
     contact_quantity = accumulated_slip_one
   []
-  [penalty_tangential_vel_auxk]
+  [penalty_tangential_vel]
     type = PenaltyMortarUserObjectAux
     variable = tangential_vel_one
     user_object = friction_uo
     contact_quantity = tangential_velocity_one
   []
-  [penalty_weighted_gap_auxk]
+  [penalty_weighted_gap]
     type = PenaltyMortarUserObjectAux
     variable = weighted_gap
     user_object = friction_uo
     contact_quantity = weighted_gap
-  []
-  [stress_xx]
-    type = RankTwoAux
-    rank_two_tensor = stress
-    variable = stress_xx
-    index_i = 0
-    index_j = 0
-    execute_on = timestep_end
-    block = '1 2 3 4 5 6 7'
-  []
-  [stress_yy]
-    type = RankTwoAux
-    rank_two_tensor = stress
-    variable = stress_yy
-    index_i = 1
-    index_j = 1
-    execute_on = timestep_end
-    block = '1 2 3 4 5 6 7'
-  []
-  [stress_xy]
-    type = RankTwoAux
-    rank_two_tensor = stress
-    variable = stress_xy
-    index_i = 0
-    index_j = 1
-    execute_on = timestep_end
-    block = '1 2 3 4 5 6 7'
   []
   [react_x]
     type = TagVectorAux
@@ -205,18 +135,23 @@
     variable = react_y
     boundary = 4
   []
-
-  [num_nl]
+  [_dt]
+    type = TimestepSize
+  []
+  [num_lin_it]
+    type = NumLinearIterations
+  []
+  [num_nonlin_it]
     type = NumNonlinearIterations
   []
   [cumulative]
     type = CumulativeValuePostprocessor
-    postprocessor = num_nl
+    postprocessor = num_nonlin_it
   []
   [gap]
     type = SideExtremeValue
     value_type = min
-    variable = gap
+    variable = weighted_gap
     boundary = 3
   []
   [num_al]
@@ -258,10 +193,6 @@
     youngs_modulus = 1e10
     poissons_ratio = 0.0
   []
-  [stuff1_strain]
-    type = ComputeFiniteStrain
-    block = '1'
-  []
   [stuff1_stress]
     type = ComputeFiniteStrainElasticStress
     block = '1'
@@ -271,10 +202,6 @@
     block = '2 3 4 5 6 7'
     youngs_modulus = 1e6
     poissons_ratio = 0.3
-  []
-  [stuff2_strain]
-    type = ComputeFiniteStrain
-    block = '2 3 4 5 6 7'
   []
   [stuff2_stress]
     type = ComputeFiniteStrainElasticStress
@@ -313,27 +240,10 @@
 []
 
 [VectorPostprocessors]
-  [x_disp]
+  [surface]
     type = NodalValueSampler
-    variable = disp_x
-    boundary = '3'
-    sort_by = id
-  []
-  [y_disp]
-    type = NodalValueSampler
-    variable = disp_y
-    boundary = '3'
-    sort_by = id
-  []
-  [cont_press]
-    type = NodalValueSampler
-    variable = penalty_normal_pressure
-    boundary = '3'
-    sort_by = id
-  []
-  [friction]
-    type = NodalValueSampler
-    variable = penalty_frictional_pressure
+    use_displaced_mesh = false
+    variable = 'disp_x disp_y penalty_normal_pressure penalty_frictional_pressure'
     boundary = '3'
     sort_by = id
   []
@@ -348,11 +258,10 @@
     type = Console
     max_rows = 5
   []
-  [chkfile]
+  [vectorpp_output]
     type = CSV
-    show = 'x_disp y_disp cont_press friction'
-    file_base = cylinder_friction_penalty_check
     create_final_symlink = true
+    file_base = cylinder_friction_penalty
     execute_on = 'FINAL'
   []
 []

@@ -22,6 +22,7 @@
     new_block_name = 'primary_lower'
     input = secondary
   []
+  allow_renumbering = false
 []
 
 [Problem]
@@ -31,13 +32,7 @@
 []
 
 [Variables]
-  [disp_x]
-  []
-  [disp_y]
-  []
   [frictionless_normal_lm]
-    order = FIRST
-    family = LAGRANGE
     block = 'secondary_lower'
     use_dual = true
   []
@@ -48,25 +43,9 @@
 []
 
 [AuxVariables]
-  [stress_xx]
-    order = CONSTANT
-    family = MONOMIAL
-  []
-  [stress_yy]
-    order = CONSTANT
-    family = MONOMIAL
-  []
-  [stress_xy]
-    order = CONSTANT
-    family = MONOMIAL
-  []
   [saved_x]
   []
   [saved_y]
-  []
-  [diag_saved_x]
-  []
-  [diag_saved_y]
   []
 []
 
@@ -83,43 +62,13 @@
   []
 []
 
-[Kernels]
-  [TensorMechanics]
-    use_displaced_mesh = true
-    save_in = 'saved_x saved_y'
-    extra_vector_tags = 'ref'
-    block = '1 2 3 4 5 6 7'
-  []
-[]
-
-[AuxKernels]
-  [stress_xx]
-    type = RankTwoAux
-    rank_two_tensor = stress
-    variable = stress_xx
-    index_i = 0
-    index_j = 0
-    execute_on = timestep_end
-    block = '1 2 3 4 5 6 7'
-  []
-  [stress_yy]
-    type = RankTwoAux
-    rank_two_tensor = stress
-    variable = stress_yy
-    index_i = 1
-    index_j = 1
-    execute_on = timestep_end
-    block = '1 2 3 4 5 6 7'
-  []
-  [stress_xy]
-    type = RankTwoAux
-    rank_two_tensor = stress
-    variable = stress_xy
-    index_i = 0
-    index_j = 1
-    execute_on = timestep_end
-    block = '1 2 3 4 5 6 7'
-  []
+[Modules/TensorMechanics/Master/all]
+  strain = FINITE
+  add_variables = true
+  save_in = 'saved_x saved_y'
+  extra_vector_tags = 'ref'
+  block = '1 2 3 4 5 6 7'
+  generate_output = 'stress_xx stress_yy stress_xy'
 []
 
 [Postprocessors]
@@ -188,10 +137,6 @@
     youngs_modulus = 1e10
     poissons_ratio = 0.0
   []
-  [stuff1_strain]
-    type = ComputeFiniteStrain
-    block = '1'
-  []
   [stuff1_stress]
     type = ComputeFiniteStrainElasticStress
     block = '1'
@@ -201,10 +146,6 @@
     block = '2 3 4 5 6 7'
     youngs_modulus = 1e6
     poissons_ratio = 0.3
-  []
-  [stuff2_strain]
-    type = ComputeFiniteStrain
-    block = '2 3 4 5 6 7'
   []
   [stuff2_stress]
     type = ComputeFiniteStrainElasticStress
@@ -239,27 +180,10 @@
 []
 
 [VectorPostprocessors]
-  [x_disp]
+  [surface]
     type = NodalValueSampler
-    variable = disp_x
-    boundary = '3 4'
-    sort_by = id
-  []
-  [y_disp]
-    type = NodalValueSampler
-    variable = disp_y
-    boundary = '3 4'
-    sort_by = id
-  []
-  [cont_press]
-    type = NodalValueSampler
-    variable = frictionless_normal_lm
-    boundary = '3'
-    sort_by = id
-  []
-  [friction]
-    type = NodalValueSampler
-    variable = frictionless_normal_lm
+    use_displaced_mesh = false
+    variable = 'disp_x disp_y frictionless_normal_lm tangential_lm'
     boundary = '3'
     sort_by = id
   []
@@ -274,11 +198,10 @@
     type = Console
     max_rows = 5
   []
-  [chkfile]
+  [vectorpp_output]
     type = CSV
-    show = 'x_disp y_disp cont_press friction'
-    file_base = cylinder_friction_check
     create_final_symlink = true
+    file_base = cylinder_friction
     execute_on = 'FINAL'
   []
 []
@@ -368,5 +291,4 @@
     compute_lm_residuals = false
     weighted_velocities_uo = weighted_vel_uo
   []
-
 []

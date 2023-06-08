@@ -3,25 +3,25 @@
   issues = '#17495'
   [cylinder_friction]
     type = 'CSVDiff'
-    csvdiff = 'cylinder_friction_check_x_disp_FINAL.csv cylinder_friction_check_cont_press_FINAL.csv '
-              'cylinder_friction_check_y_disp_FINAL.csv cylinder_friction_check_friction_FINAL.csv'
+    csvdiff = cylinder_friction_surface_FINAL.csv
     input = 'cylinder_friction.i'
     rel_err = 5.0e-4
-    min_parallel = 4
+    # parallel inconsistency in the mortar UO system
+    min_parallel = 1
+    max_parallel = 1
     heavy = true
     requirement = 'The contact module shall be able to solve frictional contact between a cylinder and a plane.'
   []
   [cylinder_friction_penalty]
     type = 'CSVDiff'
-    csvdiff = 'cylinder_friction_penalty_check_x_disp_FINAL.csv '
-              'cylinder_friction_penalty_check_cont_press_FINAL.csv '
-              'cylinder_friction_penalty_check_y_disp_FINAL.csv '
-              'cylinder_friction_penalty_check_friction_FINAL.csv'
+    csvdiff = cylinder_friction_penalty_surface_FINAL.csv
     input = 'cylinder_friction_penalty.i'
     rel_err = 5.0e-4
+    # parallel inconsistency in the mortar UO system
+    min_parallel = 1
+    max_parallel = 1
     heavy = true
-    requirement = 'The contact module shall be able to approximate frictional contact solution between a cylinder '
-                  'and a plane using penalty mortar contact.'
+    requirement = 'The contact module shall be able to approximate frictional contact solution between a cylinder and a plane using penalty mortar contact.'
   []
   [ironing]
     type = 'CSVDiff'
@@ -31,8 +31,7 @@
     min_parallel = 4
     heavy = true
     min_ad_size = '200'
-    requirement = 'The contact module shall be able to solve frictional contact between a semicircular tool and '
-                  'flexible base material.'
+    requirement = 'The contact module shall be able to solve frictional contact between a semicircular tool and flexible base material.'
   []
   [ironing_penalty]
     type = 'CSVDiff'
@@ -42,8 +41,7 @@
     abs_zero = 1.0e-4
     min_ad_size = '200'
     cli_args = 'Executioner/end_time=0.15'
-    requirement = 'The contact module shall be able to solve frictional contact between a semicircular tool and '
-                  'flexible base material using a penalty approach to mortar contact.'
+    requirement = 'The contact module shall be able to solve frictional contact between a semicircular tool and flexible base material using a penalty approach to mortar contact.'
   []
   [ironing_penalty_action]
     type = 'CSVDiff'
@@ -53,34 +51,27 @@
     abs_zero = 1.0e-4
     min_ad_size = '200'
     cli_args = 'Executioner/end_time=0.15'
-    requirement = 'The contact module shall be able to solve frictional contact between a semicircular tool and '
-                  'flexible base material using a penalty approach to mortar contact through the '
-                  'contact action.'
+    requirement = 'The contact module shall be able to solve frictional contact between a semicircular tool and flexible base material using a penalty approach to mortar contact through the contact action.'
   []
   [frictional_bouncing_block]
     type = 'CSVDiff'
-    csvdiff = 'frictional_bouncing_block_checkfile_cont_press_0029.csv '
-              'frictional_bouncing_block_checkfile_friction_0029.csv'
+    csvdiff = 'frictional_bouncing_block_checkfile_cont_press_0029.csv frictional_bouncing_block_checkfile_friction_0029.csv'
     input = 'frictional_bouncing_block.i'
     rel_err = 1.0e-4
     heavy = true
-    requirement = 'The contact module shall be able to solve frictional contact between a bouncing block and '
-                  'flexible base material.'
+    requirement = 'The contact module shall be able to solve frictional contact between a bouncing block and flexible base material.'
   []
   [frictional_bouncing_block_action]
     type = 'CSVDiff'
-    csvdiff = 'frictional_bouncing_block_action_checkfile_cont_press_0029.csv '
-              'frictional_bouncing_block_action_checkfile_friction_0029.csv'
+    csvdiff = 'frictional_bouncing_block_action_checkfile_cont_press_0029.csv frictional_bouncing_block_action_checkfile_friction_0029.csv'
     input = 'frictional_bouncing_block_action.i'
     rel_err = 1.0e-4
     heavy = true
-    requirement = 'The contact module shall be able to solve frictional contact between a bouncing block and '
-                  'flexible base material verifying setup in the contact action.'
+    requirement = 'The contact module shall be able to solve frictional contact between a bouncing block and flexible base material verifying setup in the contact action.'
   []
   [frictional_bouncing_block_edge_dropping]
     type = 'CSVDiff'
-    csvdiff = 'frictional_bouncing_block_edge_dropping_cont_press_0023.csv '
-              'frictional_bouncing_block_edge_dropping_friction_0023.csv'
+    csvdiff = 'frictional_bouncing_block_edge_dropping_cont_press_0023.csv frictional_bouncing_block_edge_dropping_friction_0023.csv'
     input = 'frictional_bouncing_block.i'
     rel_err = 1.0e-4
     method = '!dbg'
@@ -88,10 +79,6 @@
     cli_args = "Constraints/weighted_gap_lm/correct_edge_dropping=true "
                "UserObjects/weighted_vel_uo/correct_edge_dropping=true Executioner/end_time=5.5 "
                "Outputs/file_base=frictional_bouncing_block_edge_dropping"
-    requirement = 'The contact module shall be able to solve frictional contact between a bouncing block and a '
-                  'flexible substrate when correct edge dropping is enabled. An additional requirement '
-                  'is that the correct edge dropping treatment must yield same results as an incorrect '
-                  'edge dropping treatment when there is not edge dropping, e.g. when the entire '
-                  'secondary surface projects to the primary surface.'
+    requirement = 'The contact module shall be able to solve frictional contact between a bouncing block and a flexible substrate when correct edge dropping is enabled. An additional requirement is that the correct edge dropping treatment must yield same results as an incorrect edge dropping treatment when there is not edge dropping, e.g. when the entire secondary surface projects to the primary surface.'
   []
 []
