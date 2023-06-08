@@ -96,6 +96,7 @@
 [Reporters]
   [measure_data]
     type = OptimizationData
+    variable_weight_names = weightForTemperature
     variable = temperature
   []
   [params_left]

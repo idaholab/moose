@@ -15,38 +15,19 @@ registerMooseObject("OptimizationApp", ReporterTimePointSource);
 InputParameters
 ReporterTimePointSource::validParams()
 {
-  InputParameters params = DiracKernel::validParams();
-  params.addClassDescription("Apply a point load defined by vectors.");
-  params.addParam<ReporterName>("x_coord_name",
-                                "Name of vector-postprocessor or reporter vector containing "
-                                "x-coordinate of points, default is assumed to be all 0s.");
-  params.addParam<ReporterName>("y_coord_name",
-                                "Name of vector-postprocessor or reporter vector containing "
-                                "y-coordinate of points, default is assumed to be all 0s.");
-  params.addParam<ReporterName>("z_coord_name",
-                                "Name of vector-postprocessor or reporter vector containing "
-                                "z-coordinate of points, default is assumed to be all 0s.");
+  InputParameters params = ReporterPointSource::validParams();
+  params.addClassDescription("Apply a time dependent point load defined by Reporters.");
   params.addParam<ReporterName>("time_name",
                                 "Name of vector-postprocessor or reporter vector containing time, "
                                 "default is assumed to be all 0s.");
-  params.addRequiredParam<ReporterName>(
-      "value_name", "Name of vector-postprocessor or reporter vector containing value data.");
   params.addParam<Real>("reverse_time_end", 0.0, "End time used for reversing the time values.");
   return params;
 }
 
 ReporterTimePointSource::ReporterTimePointSource(const InputParameters & parameters)
-  : DiracKernel(parameters),
-    ReporterInterface(this),
-    _coordx(isParamValid("x_coord_name") ? getReporterValue<std::vector<Real>>("x_coord_name")
-                                         : _empty_vec),
-    _coordy(isParamValid("y_coord_name") ? getReporterValue<std::vector<Real>>("y_coord_name")
-                                         : _empty_vec),
-    _coordz(isParamValid("z_coord_name") ? getReporterValue<std::vector<Real>>("z_coord_name")
-                                         : _empty_vec),
+  : ReporterPointSource(parameters),
     _coordt(isParamValid("time_name") ? getReporterValue<std::vector<Real>>("time_name")
-                                      : _empty_vec),
-    _values(getReporterValue<std::vector<Real>>("value_name")),
+                                      : _zeros_vec),
     _reverse_time_end(getParam<Real>("reverse_time_end"))
 {
 }
@@ -58,53 +39,39 @@ ReporterTimePointSource::addPoints()
   const auto nval = _values.size();
   if (nval == 0)
     paramError("value_name", "Value vector must not be empty.");
-  else if (!_coordx.empty() && _coordx.size() != nval)
-    paramError("x_coord_name",
-               "Number of x coordinates (",
-               _coordx.size(),
-               ") does not match number of values (",
-               nval,
-               ").");
-  else if (!_coordy.empty() && _coordy.size() != nval)
-    paramError("y_coord_name",
-               "Number of y coordinates (",
-               _coordy.size(),
-               ") does not match number of values (",
-               nval,
-               ").");
-  else if (!_coordz.empty() && _coordz.size() != nval)
-    paramError("z_coord_name",
-               "Number of z coordinates (",
-               _coordz.size(),
-               ") does not match number of values (",
-               nval,
-               ").");
-  else if (!_coordt.empty() && _coordt.size() != nval)
-    paramError("time_name",
-               "Number of times (",
-               _coordt.size(),
-               ") does not match number of values (",
-               nval,
-               ").");
+
+  // resize these incase the values reporters changed size
+  // this will only change data constructed to reference these
+  _ones_vec.resize(nval, 1.0);
+  _zeros_vec.resize(nval, 0.0);
+  _zeros_pts.resize(nval, Point());
+
+  errorCheck("x_coord_name", _coordx.size());
+  errorCheck("y_coord_name", _coordy.size());
+  errorCheck("z_coord_name", _coordz.size());
+  errorCheck("weight_name", _weight.size());
+  errorCheck("point_name", _point.size());
+  errorCheck("time_name", _coordt.size());
 
   _point_to_index.clear();
   const Real at =
       MooseUtils::absoluteFuzzyEqual(_reverse_time_end, 0.0) ? _t : _reverse_time_end - _t + _dt;
   unsigned int id = 0;
   for (const auto & i : make_range(nval))
+  {
     if (_coordt.empty() || MooseUtils::absoluteFuzzyEqual(at, _coordt[i]))
     {
-      Point pt;
-      pt(0) = _coordx.empty() ? 0.0 : _coordx[i];
-      pt(1) = _coordy.empty() ? 0.0 : _coordy[i];
-      pt(2) = _coordz.empty() ? 0.0 : _coordz[i];
-      _point_to_index[pt] = i;
-      addPoint(pt, id++);
+      if (isParamValid("point_name"))
+      {
+        _point_to_index[_point[i]] = i;
+        addPoint(_point[i], id++);
+      }
+      else
+      {
+        Point pt(_coordx[i], _coordy[i], _coordz[i]);
+        _point_to_index[pt] = i;
+        addPoint(pt, id++);
+      }
     }
-}
-
-Real
-ReporterTimePointSource::computeQpResidual()
-{
-  return -_test[_i][_qp] * _values[_point_to_index[_current_point]];
+  }
 }
