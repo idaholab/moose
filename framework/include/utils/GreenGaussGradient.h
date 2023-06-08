@@ -226,12 +226,14 @@ greenGaussGradient(const ElemArg & elem_arg,
 
     return grad;
   }
-  catch (libMesh::LogicError &)
+  catch (libMesh::LogicError & e)
   {
     // Retry without two-term
-    mooseAssert(two_term_boundary_expansion,
-                "I believe we should only get singular systems when two-term boundary expansion is "
-                "being used");
+    if (!two_term_boundary_expansion)
+      mooseError(
+          "I believe we should only get singular systems when two-term boundary expansion is "
+          "being used. The error thrown during the computation of the gradient: ",
+          e.what());
     const auto grad = greenGaussGradient(elem_arg, state_arg, functor, false, mesh);
 
     return grad;

@@ -63,4 +63,8 @@ protected:
   const Moose::Functor<ADReal> * _eps;
   /// The density
   const Moose::Functor<ADReal> * _rho;
+
+private:
+  /// Switch to enable the two-term extrapolation on porosity jump faces.
+  const bool _allow_two_term_expansion_on_bernoulli_faces;
 };

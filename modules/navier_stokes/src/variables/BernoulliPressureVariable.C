@@ -23,6 +23,13 @@ BernoulliPressureVariable::validParams()
   params.addParam<MooseFunctorName>("w", 0, "The z-component of velocity");
   params.addRequiredParam<MooseFunctorName>(NS::porosity, "The porosity");
   params.addRequiredParam<MooseFunctorName>(NS::density, "The density");
+  params.addParam<bool>(
+      "allow_two_term_expansion_on_bernoulli_faces",
+      false,
+      "Switch to enable the two-term extrapolation on porosity jump faces. "
+      "WARNING: This might lead to crushes in parallel runs if porosity jump faces are connected "
+      "with one cell (usually corners) due to the insufficient number of ghosted "
+      "layers.");
   return params;
 }
 
@@ -33,8 +40,15 @@ BernoulliPressureVariable::BernoulliPressureVariable(const InputParameters & par
     _v(nullptr),
     _w(nullptr),
     _eps(nullptr),
-    _rho(nullptr)
+    _rho(nullptr),
+    _allow_two_term_expansion_on_bernoulli_faces(
+        getParam<bool>("allow_two_term_expansion_on_bernoulli_faces"))
 {
+  if (_allow_two_term_expansion_on_bernoulli_faces &&
+      _face_interp_method == Moose::FV::InterpMethod::SkewCorrectedAverage)
+    paramError(
+        "allow_two_term_expansion_on_bernoulli_faces",
+        "Skewness correction with two term extrapolation on Bernoulli faces is not supported!");
 }
 
 void
@@ -128,24 +142,34 @@ BernoulliPressureVariable::getDirichletBoundaryFaceValue(const FaceInfo & fi,
   const bool fi_elem_is_upwind = elem == &fi.elem() ? elem_is_upwind : !elem_is_upwind;
   const auto & downwind_face = fi_elem_is_upwind ? face_neighbor : face_elem;
 
-  // For incompressible or weakly compressible flow these should really be about the same, and in
-  // fact we are going to assume they are the same because otherwise if the user uses something like
-  // GeneralFunctorFluidProps in which the density is a function of the pressure then we will
-  // infinitely recurse using the below line of code:
-  // const auto rho_elem = (*_rho)(face_elem), rho_neighbor = (*_rho)(face_neighbor);
-  const auto rho = (*_rho)(downwind_face, time);
+  /*
+     If a weakly compressible material is used where the density slightly
+     depends on pressure. Given that the two-term expansion on Bernoulli faces is
+     enabled, we take use the downwind face assuming the continuity (minimal jump) of the
+     density. This protects against an infinite recursion between pressure and
+     density.
+  */
+  ADReal rho_elem = (*_rho)(makeElemArg(fi.elemPtr()), time);
+  ADReal rho_neighbor = (*_rho)(makeElemArg(fi.neighborPtr()), time);
 
   const VectorValue<ADReal> interstitial_vel_elem = vel_elem * (1 / eps_elem);
   const VectorValue<ADReal> interstitial_vel_neighbor = vel_neighbor * (1 / eps_neighbor);
   const auto v_dot_n_elem = interstitial_vel_elem * fi.normal();
   const auto v_dot_n_neighbor = interstitial_vel_neighbor * fi.normal();
-  const auto bernoulli_vel_chunk_elem = 0.5 * rho * v_dot_n_elem * v_dot_n_elem;
-  const auto bernoulli_vel_chunk_neighbor = 0.5 * rho * v_dot_n_neighbor * v_dot_n_neighbor;
+  const auto bernoulli_vel_chunk_elem = 0.5 * rho_elem * v_dot_n_elem * v_dot_n_elem;
+  const auto bernoulli_vel_chunk_neighbor =
+      0.5 * rho_neighbor * v_dot_n_neighbor * v_dot_n_neighbor;
 
   const auto & upwind_bernoulli_vel_chunk =
       fi_elem_is_upwind ? bernoulli_vel_chunk_elem : bernoulli_vel_chunk_neighbor;
   const auto & downwind_bernoulli_vel_chunk =
       fi_elem_is_upwind ? bernoulli_vel_chunk_neighbor : bernoulli_vel_chunk_elem;
-  const auto p_downwind = (*this)(downwind_face, time);
+  ADReal p_downwind;
+  if (_allow_two_term_expansion_on_bernoulli_faces)
+    p_downwind = (*this)(downwind_face, time);
+  else
+    p_downwind = fi_elem_is_upwind ? (*this)(makeElemArg(fi.neighborPtr()), time)
+                                   : (*this)(makeElemArg(fi.elemPtr()), time);
+
   return p_downwind + downwind_bernoulli_vel_chunk - upwind_bernoulli_vel_chunk;
 }

@@ -42,7 +42,12 @@ commonly used in the action syntax is presented below:
 
   !listing include/base/NS.h line=std::string T_fluid
 
-For the default names of other variables used in this action, visit [this site](include/base/NS.h).  
+For the default names of other variables used in this action, visit [this site](include/base/NS.h).
+
+
+## Bernoulli pressure jump treatment
+
+Please see [the Bernouilli pressure variable documentation](BernoulliPressureVariable.md) for more information.
 
 ## Examples
 
@@ -142,7 +147,6 @@ We note that the weakly-compressible handling can be enabled by setting
 As shown in the example, an arbitrary
 energy source function can also be supplied to the incorporated
 energy equation using the [!param](/Modules/NavierStokesFV/external_heat_source) parameter.
-
 
 
 !syntax list /Modules/NavierStokesFV objects=True actions=False subsystems=False
