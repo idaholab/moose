@@ -1,5 +1,6 @@
 [Tests]
   issues = '#5042'
+  parallel_scheduling = true
   [plane_strain]
     type = 'Exodiff'
     input = 'plane_strain.i'
@@ -87,7 +88,7 @@
     requirement = 'The system shall support setting the out-of-plane pressure using a material property for generalized plane strain problems'
     design = 'GeneralizedPlaneStrainAction.md'
     issues = '#17250'
-    #    prereq = out_of_plane_pressure_function
+    prereq = out_of_plane_pressure_function
   []
   [generalized_plane_strain_scalar_vector]
     type = 'Exodiff'
