@@ -22,6 +22,8 @@ PIDControl::validParams()
   params.addRequiredParam<Real>("K_p", "The coefficient for the proportional term.");
   params.addRequiredParam<Real>("K_i", "The coefficient for the integral term.");
   params.addRequiredParam<Real>("K_d", "The coefficient for the derivative term.");
+  params.addClassDescription("Declares a control data named 'output' and uses Proportional "
+                             "Integral Derivative logic on the 'value' control data to set it.");
   return params;
 }
 

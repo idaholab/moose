@@ -1,5 +1,3 @@
-<!-- MOOSE Documentation Stub: Remove this when content is added. -->
-
 # DelayControl
 
 This control takes one input and produces one output value.  The output value is the input value
@@ -14,3 +12,5 @@ The formula used for computing the output value is:
 !syntax parameters /ControlLogic/DelayControl
 
 !syntax inputs /ControlLogic/DelayControl
+
+!syntax children /ControlLogic/DelayControl

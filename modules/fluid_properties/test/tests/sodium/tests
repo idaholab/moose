@@ -1,7 +1,7 @@
 [Tests]
   issues = '#14798'
-  design = 'SodiumProperties.md SodiumPropertiesMaterial.md'
-  [./exact]
+  design = 'fluidproperties/SodiumProperties.md SodiumPropertiesMaterial.md'
+  [exact]
     type = CSVDiff
     input = 'exact.i'
     csvdiff = 'exact_out.csv'
@@ -12,11 +12,11 @@
     # does not.
     method = 'OPT'
     requirement = 'The system shall be able to compute liquid sodium properties and compare exactly to analytical expressions.'
-  [../]
-  [./constant]
+  []
+  [constant]
     type = CSVDiff
     input = 'constant.i'
     csvdiff = 'constant_out.csv'
     requirement = 'The system shall be able to compute liquid sodium properties given constant thermal conductivity and specific heat values.'
-  [../]
+  []
 []

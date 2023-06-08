@@ -1,20 +1,17 @@
 # Closures1PhaseSimple
 
-!alert construction title=Undocumented Class
-The Closures1PhaseSimple has not been documented. The content listed below should be used as a starting point for
-documenting the class, which includes the typical automatic documentation associated with a
-MooseObject; however, what is contained is ultimately determined by what is necessary to make the
-documentation clear for users.
-
 !syntax description /Closures/Closures1PhaseSimple
 
-## Overview
+The closures added are:
 
-!! Replace these lines with information regarding the Closures1PhaseSimple object.
+- a wall friction factor model using [ADWallFrictionFunctionMaterial.md]
+- a wall heat transfer coefficient as a [ADWeightedAverageMaterial.md] of the heat transfer coefficients
+  defined by the flow channel (deriving from [FlowChannel1Phase.md]) weighted by the heated perimeters of each section.
 
-## Example Input File Syntax
+Additionally, this object defines:
 
-!! Describe and include an example of how to use the Closures1PhaseSimple object.
+- a wall temperature material, to be able to retrieve the wall temperature as a material property, using either [ADAverageWallTemperature3EqnMaterial.md], AD[CoupledVariableValueMaterial.md] or [ADTemperatureWall3EqnMaterial.md] depending on the temperature mode of the flow channel (deriving from [FlowChannel1Phase.md])
+
 
 !syntax parameters /Closures/Closures1PhaseSimple
 

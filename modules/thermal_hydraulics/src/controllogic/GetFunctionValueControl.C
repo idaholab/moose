@@ -16,6 +16,7 @@ InputParameters
 GetFunctionValueControl::validParams()
 {
   InputParameters params = THMControl::validParams();
+  params.addClassDescription("Sets a ControlData named 'value' with the value of a function");
   params.addRequiredParam<FunctionName>("function",
                                         "The name of the function prescribing a value.");
   return params;

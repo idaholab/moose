@@ -12,7 +12,7 @@ combinations, as well as to different applications:
 
 - `HEMFluidProperties`: single component, single phase, HEM formulation
 - `MultiComponentFluidProperties`: two components, single phase, $(p,T)$ formulation
-- [source/userobjects/SinglePhaseFluidProperties.md]: single component, single phase
+- [SinglePhaseFluidProperties.md]: single component, single phase
 - `TwoPhaseFluidProperties`: single component, two phases
 - `VaporMixtureFluidProperties`: multiple components, single (vapor) phase
 

@@ -17,6 +17,8 @@ UnitTripControl::validParams()
 {
   InputParameters params = THMControl::validParams();
   params += MooseParsedFunctionBase::validParams();
+  params.addClassDescription(
+      "Trips a boolean based on the evaluation of a parsed condition expression");
   params.addRequiredCustomTypeParam<std::string>(
       "condition",
       "FunctionExpression",
