@@ -228,75 +228,8 @@ CoreMeshGenerator::CoreMeshGenerator(const InputParameters & parameters)
     }
   }
 
-  if (_geom_type == "Square")
+  // Stitch assemblies into a hexagonal / Cartesian core lattice
   {
-    // create a dummy assembly that is 1 assembly sized element that will get deleted later
-    if (make_empty)
-    {
-      Real pitch = getReactorParam<Real>("assembly_pitch");
-
-      auto params = _app.getFactory().getValidParams("PolygonConcentricCircleMeshGenerator");
-      params.set<unsigned int>("num_sides") = 4;
-      params.set<std::vector<unsigned int>>("num_sectors_per_side") =
-          std::vector<unsigned int>(4, 2);
-      params.set<Real>("polygon_size") = pitch / 2.0;
-      params.set<std::vector<subdomain_id_type>>("background_block_ids") =
-          std::vector<subdomain_id_type>{UINT16_MAX - 1};
-      params.set<bool>("flat_side_up") = true;
-
-      addMeshSubgenerator("PolygonConcentricCircleMeshGenerator", std::string(_empty_key), params);
-    }
-    {
-      auto params = _app.getFactory().getValidParams("CartesianIDPatternedMeshGenerator");
-
-      params.set<std::string>("id_name") = "assembly_id";
-      params.set<MooseEnum>("assign_type") =
-          "cell"; // give elems IDs relative to position in assembly
-      params.set<std::vector<MeshGeneratorName>>("inputs") = _inputs;
-      params.set<std::vector<std::vector<unsigned int>>>("pattern") = _pattern;
-      if (make_empty)
-        params.set<std::vector<MeshGeneratorName>>("exclude_id") =
-            std::vector<MeshGeneratorName>{_empty_key};
-
-      params.set<BoundaryName>("top_boundary") = "10000";
-      params.set<BoundaryName>("left_boundary") = "10000";
-      params.set<BoundaryName>("bottom_boundary") = "10000";
-      params.set<BoundaryName>("right_boundary") = "10000";
-
-      addMeshSubgenerator("CartesianIDPatternedMeshGenerator", name() + "_lattice", params);
-    }
-    {
-      auto params = _app.getFactory().getValidParams("SideSetsFromNormalsGenerator");
-
-      params.set<MeshGeneratorName>("input") = name() + "_lattice";
-      params.set<std::vector<Point>>("normals") = {
-          {1, 0, 0},
-          {-1, 0, 0},
-          {0, 1, 0},
-          {0, -1, 0}}; // normal directions over which to define boundaries
-      params.set<bool>("fixed_normal") = true;
-      params.set<bool>("replace") = false;
-      params.set<std::vector<BoundaryName>>("new_boundary") = {
-          "tmp_left", "tmp_right", "tmp_top", "tmp_bottom"};
-
-      addMeshSubgenerator("SideSetsFromNormalsGenerator", name() + "_bds", params);
-    }
-    {
-      auto params = _app.getFactory().getValidParams("RenameBoundaryGenerator");
-
-      params.set<MeshGeneratorName>("input") = name() + "_bds";
-      params.set<std::vector<BoundaryName>>("old_boundary") = {
-          "tmp_left", "tmp_right", "tmp_top", "tmp_bottom"};
-      params.set<std::vector<BoundaryName>>("new_boundary") =
-          std::vector<BoundaryName>(4, "outer_core");
-
-      addMeshSubgenerator("RenameBoundaryGenerator", name() + "_pattern", params);
-    }
-    //***Add assembly duct around PatternedMesh
-  }
-  else
-  {
-    // Hex geometry
     // create a dummy assembly that is a renamed version of one of the inputs
     if (make_empty)
     {
@@ -312,26 +245,35 @@ CoreMeshGenerator::CoreMeshGenerator(const InputParameters & parameters)
         }
         else
         {
-          auto params = _app.getFactory().getValidParams(
-              "HexagonConcentricCircleAdaptiveBoundaryMeshGenerator");
+          const auto adaptive_mg_name = _geom_type == "Hex" ? "HexagonConcentricCircleAdaptiveBoundaryMeshGenerator" : "CartesianConcentricCircleAdaptiveBoundaryMeshGenerator";
+          auto params = _app.getFactory().getValidParams(adaptive_mg_name);
 
-          params.set<Real>("hexagon_size") = getReactorParam<Real>("assembly_pitch") / 2.0;
-          params.set<std::vector<unsigned int>>("num_sectors_per_side") =
+          const auto assembly_pitch = getReactorParam<Real>("assembly_pitch");
+          if (_geom_type == "Hex")
+          {
+            params.set<Real>("hexagon_size") = assembly_pitch / 2.0;
+            params.set<std::vector<unsigned int>>("num_sectors_per_side") =
               std::vector<unsigned int>(6, 2);
+          }
+          else
+          {
+            params.set<Real>("square_size") = assembly_pitch;
+            params.set<std::vector<unsigned int>>("num_sectors_per_side") =
+              std::vector<unsigned int>(4, 2);
+          }
           params.set<std::vector<unsigned int>>("sides_to_adapt") = std::vector<unsigned int>{0};
           params.set<std::vector<MeshGeneratorName>>("meshes_to_adapt_to") =
               std::vector<MeshGeneratorName>{_inputs[0]};
           params.set<std::vector<subdomain_id_type>>("background_block_ids") =
               std::vector<subdomain_id_type>{UINT16_MAX - 1};
 
-          addMeshSubgenerator("HexagonConcentricCircleAdaptiveBoundaryMeshGenerator",
-                              std::string(_empty_key),
-                              params);
+          addMeshSubgenerator(adaptive_mg_name, std::string(_empty_key), params);
         }
       }
     }
     {
-      auto params = _app.getFactory().getValidParams("PatternedHexMeshGenerator");
+      const auto patterned_mg_name = _geom_type == "Hex" ? "PatternedHexMeshGenerator" : "PatternedCartesianMeshGenerator";
+      auto params = _app.getFactory().getValidParams(patterned_mg_name);
 
       params.set<std::string>("id_name") = "assembly_id";
       params.set<MooseEnum>("assign_type") =
@@ -351,7 +293,7 @@ CoreMeshGenerator::CoreMeshGenerator(const InputParameters & parameters)
       params.set<boundary_id_type>("external_boundary_id") = radial_boundary;
       params.set<std::string>("external_boundary_name") = "outer_core";
 
-      addMeshSubgenerator("PatternedHexMeshGenerator", name() + "_pattern", params);
+      addMeshSubgenerator(patterned_mg_name, name() + "_pattern", params);
     }
   }
   if (_empty_pos)
