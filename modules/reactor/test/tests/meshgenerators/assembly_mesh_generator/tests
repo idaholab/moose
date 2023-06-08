@@ -9,6 +9,19 @@
     exodiff = 'assembly_only_in.e'
     recover = false
   []
+  [square_background]
+    requirement = 'The system shall generate a 3D square assembly mesh from 2 pin types and a background region'
+    type = 'Exodiff'
+    input = 'assembly_only.i'
+    cli_args = "Mesh/pin1/pitch=1.25
+                Mesh/pin1/duct_halfpitch=0.58
+                Mesh/pin2/pitch=1.25
+                Mesh/amg/background_region_id='6 16'
+                Mesh/amg/background_intervals=1
+                Outputs/file_base=assembly_square_background"
+    exodiff = 'assembly_square_background.e'
+    recover = false
+  []
   [hex_ID_conflict]
     requirement = 'The system shall allow for multiple region IDs to be mapped to a specific block name'
     type = 'Exodiff'

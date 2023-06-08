@@ -366,37 +366,35 @@ CoreMeshGenerator::CoreMeshGenerator(const InputParameters & parameters)
               "Multiple block name definitions for the same pin type. Check pin_type names.\n");
       }
 
-      if (_geom_type == "Hex")
+      // Define background and duct region ID map from constituent assemblies
+      subdomain_id_type assembly_type =
+          getMeshProperty<subdomain_id_type>("assembly_type", assembly);
+      if (_background_region_id_map.find(assembly_type) == _background_region_id_map.end())
       {
-        subdomain_id_type assembly_type =
-            getMeshProperty<subdomain_id_type>("assembly_type", assembly);
-        if (_background_region_id_map.find(assembly_type) == _background_region_id_map.end())
-        {
-          // Store region ids and block names associated with duct and background regions for each
-          // assembly, in case block names need to be recovered from region ids after
-          // multiple assemblies have been stitched together into a core
-          std::vector<subdomain_id_type> background_region_ids =
-              getMeshProperty<std::vector<subdomain_id_type>>("background_region_ids", assembly);
-          std::vector<std::vector<subdomain_id_type>> duct_region_ids =
-              getMeshProperty<std::vector<std::vector<subdomain_id_type>>>("duct_region_ids",
+        // Store region ids and block names associated with duct and background regions for each
+        // assembly, in case block names need to be recovered from region ids after
+        // multiple assemblies have been stitched together into a core
+        std::vector<subdomain_id_type> background_region_ids =
+            getMeshProperty<std::vector<subdomain_id_type>>("background_region_ids", assembly);
+        std::vector<std::vector<subdomain_id_type>> duct_region_ids =
+            getMeshProperty<std::vector<std::vector<subdomain_id_type>>>("duct_region_ids",
                                                                            assembly);
-          _background_region_id_map.insert(
-              std::pair<subdomain_id_type, std::vector<subdomain_id_type>>(assembly_type,
-                                                                           background_region_ids));
-          _duct_region_id_map.insert(
-              std::pair<subdomain_id_type, std::vector<std::vector<subdomain_id_type>>>(
-                  assembly_type, duct_region_ids));
+        _background_region_id_map.insert(
+            std::pair<subdomain_id_type, std::vector<subdomain_id_type>>(assembly_type,
+                                                                         background_region_ids));
+        _duct_region_id_map.insert(
+            std::pair<subdomain_id_type, std::vector<std::vector<subdomain_id_type>>>(
+                assembly_type, duct_region_ids));
 
-          std::vector<std::string> background_block_names =
-              getMeshProperty<std::vector<std::string>>("background_block_names", assembly);
-          std::vector<std::vector<std::string>> duct_block_names =
-              getMeshProperty<std::vector<std::vector<std::string>>>("duct_block_names", assembly);
-          _background_block_name_map.insert(std::pair<subdomain_id_type, std::vector<std::string>>(
-              assembly_type, background_block_names));
-          _duct_block_name_map.insert(
-              std::pair<subdomain_id_type, std::vector<std::vector<std::string>>>(
-                  assembly_type, duct_block_names));
-        }
+        std::vector<std::string> background_block_names =
+            getMeshProperty<std::vector<std::string>>("background_block_names", assembly);
+        std::vector<std::vector<std::string>> duct_block_names =
+            getMeshProperty<std::vector<std::vector<std::string>>>("duct_block_names", assembly);
+        _background_block_name_map.insert(std::pair<subdomain_id_type, std::vector<std::string>>(
+            assembly_type, background_block_names));
+        _duct_block_name_map.insert(
+            std::pair<subdomain_id_type, std::vector<std::vector<std::string>>>(
+                assembly_type, duct_block_names));
       }
     }
   }
