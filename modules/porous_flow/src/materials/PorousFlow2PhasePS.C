@@ -86,7 +86,7 @@ PorousFlow2PhasePSTempl<is_ad>::computeQpProperties()
     (*_gradp_qp)[_qp][1] = _phase0_gradp_qp[_qp] - dpc * (*_grads_qp)[_qp][1];
   }
 
-  if (!is_ad)
+  if constexpr (!is_ad)
   {
     // _porepressure depends on _phase0_porepressure, and its derivative is 1
     if (_dictator.isPorousFlowVariable(_phase0_porepressure_varnum))
@@ -107,18 +107,17 @@ PorousFlow2PhasePSTempl<is_ad>::computeQpProperties()
       // _phase1_porepressure depends on saturation through the capillary pressure function
       (*_dsaturation_dvar)[_qp][0][_svar] = -1.0;
       (*_dsaturation_dvar)[_qp][1][_svar] = 1.0;
-      (*_dporepressure_dvar)[_qp][1][_svar] = MetaPhysicL::raw_value(-dpc);
+      (*_dporepressure_dvar)[_qp][1][_svar] = -dpc;
 
       if (!_nodal_material)
       {
         (*_dgrads_qp_dgradv)[_qp][0][_svar] = -1.0;
         (*_dgrads_qp_dgradv)[_qp][1][_svar] = 1.0;
 
-        const auto d2pc_qp =
-            _pc_uo.d2CapillaryPressure(1.0 - MetaPhysicL::raw_value(_phase1_saturation[_qp]));
+        const auto d2pc_qp = _pc_uo.d2CapillaryPressure(1.0 - _phase1_saturation[_qp]);
 
-        (*_dgradp_qp_dv)[_qp][1][_svar] = d2pc_qp * MetaPhysicL::raw_value((*_grads_qp)[_qp][1]);
-        (*_dgradp_qp_dgradv)[_qp][1][_svar] = MetaPhysicL::raw_value(-dpc);
+        (*_dgradp_qp_dv)[_qp][1][_svar] = d2pc_qp * (*_grads_qp)[_qp][1];
+        (*_dgradp_qp_dgradv)[_qp][1][_svar] = -dpc;
       }
     }
   }

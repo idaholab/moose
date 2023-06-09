@@ -90,7 +90,7 @@ PorousFlow2PhasePPTempl<is_ad>::computeQpProperties()
 
   // the derivatives of porepressure with respect to porepressure
   // remain fixed (at unity) throughout the simulation
-  if (!is_ad)
+  if constexpr (!is_ad)
   {
     if (_dictator.isPorousFlowVariable(_phase0_porepressure_varnum))
     {
@@ -108,38 +108,34 @@ PorousFlow2PhasePPTempl<is_ad>::computeQpProperties()
 
     if (_dictator.isPorousFlowVariable(_phase0_porepressure_varnum))
     {
-      (*_dsaturation_dvar)[_qp][0][_p0var] = MetaPhysicL::raw_value(ds);
-      (*_dsaturation_dvar)[_qp][1][_p0var] = MetaPhysicL::raw_value(-ds);
+      (*_dsaturation_dvar)[_qp][0][_p0var] = ds;
+      (*_dsaturation_dvar)[_qp][1][_p0var] = -ds;
     }
 
     if (_dictator.isPorousFlowVariable(_phase1_porepressure_varnum))
     {
-      (*_dsaturation_dvar)[_qp][0][_p1var] = MetaPhysicL::raw_value(-ds);
-      (*_dsaturation_dvar)[_qp][1][_p1var] = MetaPhysicL::raw_value(ds);
+      (*_dsaturation_dvar)[_qp][0][_p1var] = -ds;
+      (*_dsaturation_dvar)[_qp][1][_p1var] = ds;
     }
 
     if (!_nodal_material)
     {
-      const auto d2s_qp = _pc_uo.d2Saturation(MetaPhysicL::raw_value(pc)); // d^2(S_qp)/d(pc_qp)^2
+      const auto d2s_qp = _pc_uo.d2Saturation(pc); // d^2(S_qp)/d(pc_qp)^2
 
       if (_dictator.isPorousFlowVariable(_phase0_porepressure_varnum))
       {
-        (*_dgrads_qp_dgradv)[_qp][0][_p0var] = MetaPhysicL::raw_value(ds);
-        (*_dgrads_qp_dv)[_qp][0][_p0var] =
-            d2s_qp * MetaPhysicL::raw_value(_phase0_gradp_qp[_qp] - _phase1_gradp_qp[_qp]);
-        (*_dgrads_qp_dgradv)[_qp][1][_p0var] = MetaPhysicL::raw_value(-ds);
-        (*_dgrads_qp_dv)[_qp][1][_p0var] =
-            -d2s_qp * MetaPhysicL::raw_value(_phase0_gradp_qp[_qp] - _phase1_gradp_qp[_qp]);
+        (*_dgrads_qp_dgradv)[_qp][0][_p0var] = ds;
+        (*_dgrads_qp_dv)[_qp][0][_p0var] = d2s_qp * _phase0_gradp_qp[_qp] - _phase1_gradp_qp[_qp];
+        (*_dgrads_qp_dgradv)[_qp][1][_p0var] = -ds;
+        (*_dgrads_qp_dv)[_qp][1][_p0var] = -d2s_qp * _phase0_gradp_qp[_qp] - _phase1_gradp_qp[_qp];
       }
 
       if (_dictator.isPorousFlowVariable(_phase1_porepressure_varnum))
       {
-        (*_dgrads_qp_dgradv)[_qp][0][_p1var] = MetaPhysicL::raw_value(-ds);
-        (*_dgrads_qp_dv)[_qp][0][_p1var] =
-            -d2s_qp * MetaPhysicL::raw_value(_phase0_gradp_qp[_qp] - _phase1_gradp_qp[_qp]);
-        (*_dgrads_qp_dgradv)[_qp][1][_p1var] = MetaPhysicL::raw_value(ds);
-        (*_dgrads_qp_dv)[_qp][1][_p1var] =
-            d2s_qp * MetaPhysicL::raw_value(_phase0_gradp_qp[_qp] - _phase1_gradp_qp[_qp]);
+        (*_dgrads_qp_dgradv)[_qp][0][_p1var] = -ds;
+        (*_dgrads_qp_dv)[_qp][0][_p1var] = -d2s_qp * _phase0_gradp_qp[_qp] - _phase1_gradp_qp[_qp];
+        (*_dgrads_qp_dgradv)[_qp][1][_p1var] = ds;
+        (*_dgrads_qp_dv)[_qp][1][_p1var] = d2s_qp * _phase0_gradp_qp[_qp] - _phase1_gradp_qp[_qp];
       }
     }
   }

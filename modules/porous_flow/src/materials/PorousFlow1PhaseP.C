@@ -72,21 +72,21 @@ PorousFlow1PhasePTempl<is_ad>::computeQpProperties()
   }
 
     // _porepressure is only dependent on _porepressure, and its derivative is 1
-  if (!is_ad && _dictator.isPorousFlowVariable(_porepressure_varnum))
-  {
-    // _porepressure is a PorousFlow variable
-    (*_dporepressure_dvar)[_qp][0][_p_var_num] = 1.0;
-    (*_dsaturation_dvar)[_qp][0][_p_var_num] = MetaPhysicL::raw_value(ds);
-
-    if (!_nodal_material)
+  if constexpr (!is_ad)
+    if (_dictator.isPorousFlowVariable(_porepressure_varnum))
     {
-      (*_dgradp_qp_dgradv)[_qp][0][_p_var_num] = 1.0;
-      (*_dgrads_qp_dgradv)[_qp][0][_p_var_num] = MetaPhysicL::raw_value(ds);
-      (*_dgrads_qp_dv)[_qp][0][_p_var_num] =
-          _pc_uo.d2Saturation(MetaPhysicL::raw_value(_porepressure_var[_qp])) *
-          MetaPhysicL::raw_value(_gradp_qp_var[_qp]);
+      // _porepressure is a PorousFlow variable
+      (*_dporepressure_dvar)[_qp][0][_p_var_num] = 1.0;
+      (*_dsaturation_dvar)[_qp][0][_p_var_num] = ds;
+
+      if (!_nodal_material)
+      {
+        (*_dgradp_qp_dgradv)[_qp][0][_p_var_num] = 1.0;
+        (*_dgrads_qp_dgradv)[_qp][0][_p_var_num] = ds;
+        (*_dgrads_qp_dv)[_qp][0][_p_var_num] =
+            _pc_uo.d2Saturation(_porepressure_var[_qp]) * _gradp_qp_var[_qp];
+      }
     }
-  }
 }
 
 template <bool is_ad>
