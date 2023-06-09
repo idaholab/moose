@@ -134,6 +134,24 @@
     expect_err = 'This parameter and duct_block_names must be provided simultaneously.'
     requirement = 'The system shall throw an error if background_block_name and duct_block_names are not provided simultaneously if the cartesian mesh has ducts.'
   []
+  [err_duct_oversize]
+    type = 'RunException'
+    input = 'patterned_2d.i'
+    cli_args = 'Mesh/pattern/background_intervals=2 Mesh/pattern/duct_block_ids=20 Mesh/pattern/background_block_id=15
+                  Mesh/pattern/square_size=44 Mesh/pattern/duct_sizes="23" Mesh/pattern/duct_intervals="2"
+                  --mesh-only "patterned_err.e"'
+    expect_err = 'The duct sizes should not exceed the size of the square boundary.'
+    requirement = 'The system shall throw an error if the specified duct size exceeds the external sqaure boundary.'
+  []
+  [err_duct_descending_sizes]
+    type = 'RunException'
+    input = 'patterned_2d.i'
+    cli_args = 'Mesh/pattern/background_intervals=2 Mesh/pattern/duct_block_ids="20 21" Mesh/pattern/background_block_id=15
+                  Mesh/pattern/square_size=44 Mesh/pattern/duct_sizes="21 20" Mesh/pattern/duct_intervals="2 2"
+                  --mesh-only "patterned_err.e"'
+    expect_err = 'This parameter must be strictly ascending.'
+    requirement = 'The system shall throw an error if the specified square duct size is not restrictively ascending.'
+  []
   [err_duct_ids]
     type = 'RunException'
     input = 'patterned_2d.i'

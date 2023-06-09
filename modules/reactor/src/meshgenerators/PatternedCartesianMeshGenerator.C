@@ -227,6 +227,9 @@ PatternedCartesianMeshGenerator::PatternedCartesianMeshGenerator(const InputPara
 
   if (_pattern_boundary == "expanded")
   {
+    for (unsigned int i = 1; i < _duct_sizes.size(); i++)
+      if (_duct_sizes[i] <= _duct_sizes[i - 1])
+        paramError("duct_sizes", "This parameter must be strictly ascending.");
     if (!_peripheral_block_ids.empty() && _peripheral_block_ids.size() != _duct_sizes.size() + 1)
       paramError("duct_block_ids",
                  "This parameter, if provided, must have a length equal to length of duct_sizes.");
@@ -418,6 +421,7 @@ PatternedCartesianMeshGenerator::generate()
   if (_pattern_boundary == "expanded")
   {
     if (_has_assembly_duct)
+    {
       for (unsigned int i = 0; i < _duct_sizes.size(); i++)
       {
         if (_duct_sizes_style == PolygonSizeStyle::radius)
@@ -426,6 +430,10 @@ PatternedCartesianMeshGenerator::generate()
         extra_dist.push_back(0.5 * (_duct_sizes[i] * 2.0 - pitch_array.front() * _pattern.size()));
         peripheral_duct_intervals.push_back(_duct_intervals[i]);
       }
+      if (_duct_sizes.back() >= _pattern_pitch / 2.0)
+        paramError("duct_sizes",
+                   "The duct sizes should not exceed the size of the square boundary.");
+    }
     // calculate the distance between the larger square boundary and the boundary of stitched unit
     // squares this is used to decide whether deformation is needed when cut-off happens or when
     // the distance is small.

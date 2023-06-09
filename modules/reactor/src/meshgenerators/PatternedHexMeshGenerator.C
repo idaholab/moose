@@ -236,6 +236,9 @@ PatternedHexMeshGenerator::PatternedHexMeshGenerator(const InputParameters & par
 
   if (_pattern_boundary == "hexagon")
   {
+    for (unsigned int i = 1; i < _duct_sizes.size(); i++)
+      if (_duct_sizes[i] <= _duct_sizes[i - 1])
+        paramError("duct_sizes", "This parameter must be strictly ascending.");
     if (!_peripheral_block_ids.empty() && _peripheral_block_ids.size() != _duct_sizes.size() + 1)
       paramError("duct_block_ids",
                  "This parameter, if provided, must have a length equal to length of duct_sizes.");
@@ -429,6 +432,7 @@ PatternedHexMeshGenerator::generate()
   if (_pattern_boundary == "hexagon")
   {
     if (_has_assembly_duct)
+    {
       for (unsigned int i = 0; i < _duct_sizes.size(); i++)
       {
         if (_duct_sizes_style == PolygonSizeStyle::radius)
@@ -438,6 +442,10 @@ PatternedHexMeshGenerator::generate()
                                                          (Real)((_pattern.size() / 2) * 3 + 2)));
         peripheral_duct_intervals.push_back(_duct_intervals[i]);
       }
+      if (_duct_sizes.back() >= _pattern_pitch / 2.0)
+        paramError("duct_sizes",
+                   "The duct sizes should not exceed the size of the hexagonal boundary.");
+    }
     // calculate the distance between the larger hexagon boundary and the boundary of stitched unit
     // hexagons this is used to decide whether deformation is needed when cut-off happens or when
     // the distance is small.
