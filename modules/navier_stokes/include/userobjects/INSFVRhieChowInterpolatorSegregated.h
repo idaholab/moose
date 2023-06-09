@@ -63,7 +63,8 @@ public:
   /// Bool of the Rhie Chow user object is used in monolithic/segregated approaches
   bool segregated() const override { return true; };
 
-  void linkMomentumSystem(NonlinearSystemBase & momentum_system, const TagID & momentum_tag);
+  void linkMomentumSystem(std::vector<NonlinearSystemBase *> momentum_systems,
+                          const TagID & momentum_tag);
 
   /**
    * Computes the inverse of the digaonal (1/A) of the system matrix plus the H/A components for the
@@ -72,8 +73,7 @@ public:
    */
   void computeHbyA(const Real & momentum_relaxation, const bool verbose);
 
-  void populateHbyA(NonlinearImplicitSystem & momentum_system,
-                    const NumericVector<Number> & raw_hbya,
+  void populateHbyA(const std::vector<std::unique_ptr<NumericVector<Number>>> & raw_hbya,
                     const std::vector<unsigned int> & var_nums);
 
 protected:
@@ -84,12 +84,12 @@ protected:
    * linearized momentum predictor stem.
    */
   FaceCenteredMapFunctor<RealVectorValue, std::unordered_map<dof_id_type, RealVectorValue>> _HbyA;
-  std::unique_ptr<NumericVector<Number>> _HbyA_raw;
+  std::vector<std::unique_ptr<NumericVector<Number>>> _HbyA_raw;
 
   /**
    * A map from element IDs to $1/A_ij$. ADD MORE
    */
-  CellCenteredMapFunctor<RealVectorValue, std::unordered_map<dof_id_type, RealVectorValue>> _Ainv;
+  CellCenteredMapFunctor<Real, std::unordered_map<dof_id_type, Real>> _Ainv;
 
   /// A functor for computing the (non-RC corrected) velocity
   std::unique_ptr<PiecewiseByBlockLambdaFunctor<ADRealVectorValue>> _vel;
@@ -98,7 +98,8 @@ protected:
       _face_velocity;
 
   /// Reference to the nonlinear system corresponding to the momentum equation
-  NonlinearSystemBase * _momentum_sys;
+  std::vector<NonlinearSystemBase *> _momentum_systems;
+  std::vector<NonlinearImplicitSystem *> _momentum_implicit_systems;
   /// Reference to the nonlinear system corresponding to the pressure equation
   TagID _momentum_tag;
 };

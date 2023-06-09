@@ -6,19 +6,19 @@ velocity_interp_method = 'rc'
 pressure_tag = "pressure_grad"
 
 [Mesh]
-  [mesh]
-    type = CartesianMeshGenerator
-    dim = 2
-    dx = '0.3'
-    dy = '0.3'
-    ix = '3'
-    iy = '3'
-    subdomain_id = '1'
-  []
-  # [read]
-  #   type = FileMeshGenerator
-  #   file = 2d-segregated_in.e
+  # [mesh]
+  #   type = CartesianMeshGenerator
+  #   dim = 2
+  #   dx = '0.3'
+  #   dy = '0.3'
+  #   ix = '1000'
+  #   iy = '1000'
+  #   subdomain_id = '1'
   # []
+  [read]
+    type = FileMeshGenerator
+    file = 2d-segregated_in.e
+  []
 []
 
 [GlobalParams]
@@ -107,7 +107,7 @@ pressure_tag = "pressure_grad"
     extra_vector_tags = ${pressure_tag}
   []
   [p_diffusion]
-    type = FVAnisotropicDiffusion
+    type = FVDiffusion
     variable = pressure
     coeff = "Ainv"
     coeff_interp_method = 'average'

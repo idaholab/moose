@@ -34,20 +34,31 @@ public:
   void execute() override;
   bool lastSolveConverged() const override { return _last_solve_converged; }
 
-  NonlinearSystemBase & getMomentumSystem() { return _momentum_sys; }
+  std::vector<NonlinearSystemBase *> & getMomentumSystem() { return _momentum_systems; }
   Real getMomentumRelaxation() { return _momentum_equation_relaxation; }
 
   const INSFVRhieChowInterpolatorSegregated & getRCUserObject() { return *_rc_uo; }
 
-protected:
-  void relaxEquation(SparseMatrix<Number> & matrix_in,
-                     NumericVector<Number> & rhs_in,
-                     NumericVector<Number> & solution_in,
-                     const Real relaxation_parameter);
+  PetscReal computeNormalizationFactor(const PetscVector<Number> & solution,
+                                       const PetscMatrix<Number> & mat,
+                                       const PetscVector<Number> & rhs);
 
-  Real solveMomentumPredictor(NonlinearImplicitSystem & momentum_system);
-  Real solvePressureCorrector(NonlinearImplicitSystem & pressure_system);
-  void relaxPressureUpdate(NonlinearImplicitSystem & pressure_system);
+protected:
+  void relaxMatrix(SparseMatrix<Number> & matrix_in,
+                   const Real relaxation_parameter,
+                   NumericVector<Number> & diff_diagonal);
+
+  void relaxRightHandSide(NumericVector<Number> & rhs_in,
+                          const NumericVector<Number> & solution_in,
+                          const NumericVector<Number> & diff_diagonal);
+
+  std::vector<Real> solveMomentumPredictor(std::vector<NonlinearSystemBase *> & momentum_system);
+  Real solvePressureCorrector(NonlinearSystemBase & pressure_system_in);
+  void relaxPressureUpdate(NonlinearSystemBase & pressure_system_in);
+
+  bool converged(const std::vector<Real> & momentum_residuals, const Real pressure_residual);
+
+  PetscReal _norm_factor;
 
   FEProblemBase & _problem;
 
@@ -57,14 +68,16 @@ protected:
   int & _time_step;
   Real & _time;
 
+  ///
+  const std::vector<std::string> _momentum_system_names;
   /// The number of the nonlinear system corresponding to the momentum equation
-  const unsigned int _momentum_sys_number;
+  std::vector<unsigned int> _momentum_system_numbers;
   /// The number of the nonlinear system corresponding to the pressure equation
   const unsigned int _pressure_sys_number;
   /// Reference to the nonlinear system corresponding to the momentum equation
-  NonlinearSystemBase & _momentum_sys;
+  std::vector<NonlinearSystemBase *> _momentum_systems;
   /// Reference to the nonlinear system corresponding to the pressure equation
-  NonlinearSystemBase & _pressure_sys;
+  NonlinearSystemBase & _pressure_system;
 
   INSFVRhieChowInterpolatorSegregated * _rc_uo;
 
