@@ -80,27 +80,12 @@ HeatConductionMaterialTempl<is_ad>::computeProperties()
 {
   for (unsigned int qp(0); qp < _qrule->n_points(); ++qp)
   {
-    auto qp_temperature = _temperature[qp];
-    if (_has_temp)
-    {
-      if (qp_temperature < 0)
-      {
-        std::stringstream msg;
-        msg << "WARNING:  In HeatConductionMaterial:  negative temperature!\n"
-            << "\tResetting to zero.\n"
-            << "\t_qp: " << qp << "\n"
-            << "\ttemp: " << qp_temperature << "\n"
-            << "\telem: " << _current_elem->id() << "\n"
-            << "\tproc: " << processor_id() << "\n";
-        mooseWarning(msg.str());
-        qp_temperature = 0;
-      }
-    }
     if (_thermal_conductivity_temperature_function)
     {
-      _thermal_conductivity[qp] = _thermal_conductivity_temperature_function->value(qp_temperature);
+      _thermal_conductivity[qp] =
+          _thermal_conductivity_temperature_function->value(_temperature[_qp]);
       _thermal_conductivity_dT[qp] = _thermal_conductivity_temperature_function->timeDerivative(
-          MetaPhysicL::raw_value(qp_temperature));
+          MetaPhysicL::raw_value(_temperature[_qp]));
     }
     else
     {
@@ -109,7 +94,7 @@ HeatConductionMaterialTempl<is_ad>::computeProperties()
     }
 
     if (_specific_heat_temperature_function)
-      _specific_heat[qp] = _specific_heat_temperature_function->value(qp_temperature);
+      _specific_heat[qp] = _specific_heat_temperature_function->value(_temperature[_qp]);
     else
       _specific_heat[qp] = _my_specific_heat;
   }
