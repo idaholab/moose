@@ -115,8 +115,8 @@ RestartableEquationSystems::store(std::ostream & stream) const
     const auto & sys = *sys_header.sys;
 
     // The vectors we need to store (solution and then additional vectors)
-    std::vector<const libMesh::NumericVector<Number> *> vectors(sys_header.vectors.size() + 1,
-                                                                nullptr);
+    std::vector<const libMesh::NumericVector<libMesh::Number> *> vectors(
+        sys_header.vectors.size() + 1, nullptr);
     vectors[0] = sys_header.sys->solution.get();
     for (const auto i : index_range(sys_header.vectors))
       vectors[i + 1] = sys_header.vectors[i].vec;
@@ -235,7 +235,8 @@ RestartableEquationSystems::load(std::istream & stream)
     auto & sys = sys_header.to_sys;
 
     // The vectors we need to load (solution and then additional vectors)
-    std::vector<libMesh::NumericVector<Number> *> vectors(sys_header.vectors.size() + 1, nullptr);
+    std::vector<libMesh::NumericVector<libMesh::Number> *> vectors(sys_header.vectors.size() + 1,
+                                                                   nullptr);
     if (sys_header.to_sys)
       vectors[0] = sys_header.to_sys->solution.get();
     if (!_skip_additional_vectors)

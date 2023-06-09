@@ -41,9 +41,9 @@ public:
     /// The name of the stored vector
     std::string name;
     /// The stored vector (only valid when _storing_, not when loading)
-    const libMesh::NumericVector<Number> * vec = nullptr;
+    const libMesh::NumericVector<libMesh::Number> * vec = nullptr;
     /// The to vector (only valid when _loading_, not when storing)
-    libMesh::NumericVector<Number> * to_vec = nullptr;
+    libMesh::NumericVector<libMesh::Number> * to_vec = nullptr;
   };
 
   /**
