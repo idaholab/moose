@@ -27,7 +27,7 @@ public:
   HeatConductionMaterialTempl(const InputParameters & parameters);
 
 protected:
-  virtual void computeProperties();
+  virtual void computeQpProperties() override;
 
   const bool _has_temp;
   const GenericVariableValue<is_ad> & _temperature;

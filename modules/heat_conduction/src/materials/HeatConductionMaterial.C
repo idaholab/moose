@@ -76,28 +76,25 @@ HeatConductionMaterialTempl<is_ad>::HeatConductionMaterialTempl(const InputParam
 
 template <bool is_ad>
 void
-HeatConductionMaterialTempl<is_ad>::computeProperties()
+HeatConductionMaterialTempl<is_ad>::computeQpProperties()
 {
-  for (unsigned int qp(0); qp < _qrule->n_points(); ++qp)
+  if (_thermal_conductivity_temperature_function)
   {
-    if (_thermal_conductivity_temperature_function)
-    {
-      _thermal_conductivity[qp] =
-          _thermal_conductivity_temperature_function->value(_temperature[_qp]);
-      _thermal_conductivity_dT[qp] = _thermal_conductivity_temperature_function->timeDerivative(
-          MetaPhysicL::raw_value(_temperature[_qp]));
-    }
-    else
-    {
-      _thermal_conductivity[qp] = _my_thermal_conductivity;
-      _thermal_conductivity_dT[qp] = 0;
-    }
-
-    if (_specific_heat_temperature_function)
-      _specific_heat[qp] = _specific_heat_temperature_function->value(_temperature[_qp]);
-    else
-      _specific_heat[qp] = _my_specific_heat;
+    _thermal_conductivity[_qp] =
+        _thermal_conductivity_temperature_function->value(_temperature[_qp]);
+    _thermal_conductivity_dT[_qp] = _thermal_conductivity_temperature_function->timeDerivative(
+        MetaPhysicL::raw_value(_temperature[_qp]));
   }
+  else
+  {
+    _thermal_conductivity[_qp] = _my_thermal_conductivity;
+    _thermal_conductivity_dT[_qp] = 0;
+  }
+
+  if (_specific_heat_temperature_function)
+    _specific_heat[_qp] = _specific_heat_temperature_function->value(_temperature[_qp]);
+  else
+    _specific_heat[_qp] = _my_specific_heat;
 }
 
 template class HeatConductionMaterialTempl<false>;
