@@ -20,6 +20,7 @@
 
 namespace libMesh
 {
+class DofObject;
 class EquationSystems;
 class MeshBase;
 }
@@ -104,7 +105,7 @@ private:
   EquationSystemsHeader buildHeader() const;
 
   /// Internal method for ordering the DofObjects by ID (elems and the nodes)
-  std::vector<const DofObject *> orderDofObjects() const;
+  std::vector<const libMesh::DofObject *> orderDofObjects() const;
 
   /// The underlying EquationSystems
   libMesh::EquationSystems _es;

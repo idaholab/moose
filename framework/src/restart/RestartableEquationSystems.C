@@ -11,6 +11,9 @@
 
 #include "DataIO.h"
 
+#include "libmesh/dof_map.h"
+#include "libmesh/dof_object.h"
+
 RestartableEquationSystems::RestartableEquationSystems(libMesh::MeshBase & mesh,
                                                        const bool skip_additional_vectors)
   : _es(mesh), _skip_additional_vectors(skip_additional_vectors)
@@ -62,13 +65,13 @@ RestartableEquationSystems::buildHeader() const
   return es_header;
 }
 
-std::vector<const DofObject *>
+std::vector<const libMesh::DofObject *>
 RestartableEquationSystems::orderDofObjects() const
 {
-  std::vector<const DofObject *> objects;
+  std::vector<const libMesh::DofObject *> objects;
   auto add = [&objects](const auto begin, const auto end)
   {
-    std::set<const DofObject *, CompareDofObjectsByID> ordered(begin, end);
+    std::set<const libMesh::DofObject *, libMesh::CompareDofObjectsByID> ordered(begin, end);
     objects.insert(objects.end(), ordered.begin(), ordered.end());
   };
 
