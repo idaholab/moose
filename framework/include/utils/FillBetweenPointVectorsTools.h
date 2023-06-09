@@ -11,14 +11,14 @@
 #include "LinearInterpolation.h"
 #include "SplineInterpolation.h"
 #include "MooseException.h"
-#include "libmesh/replicated_mesh.h"
+#include "libmesh/mesh_base.h"
 #include "libmesh/mesh_modification.h"
 
 namespace FillBetweenPointVectorsTools
 {
 /**
  * Generates a 2D mesh with triangular elements for a region defined by two curves (sets of Points)
- * @param mesh a reference ReplicatedMesh to contain the generated mesh
+ * @param mesh a reference MeshBase to contain the generated mesh
  * @param boundary_points_vec_1 vector of Points of Side #1
  * @param boundary_points_vec_2 vector of Points of Side #2
  * @param num_layers number of sublayers of elements
@@ -39,9 +39,9 @@ namespace FillBetweenPointVectorsTools
  * @param sigma Gaussian parameter used for Gaussian blurring of local node density; only used if
  * bias_parameter <= 0
  */
-void fillBetweenPointVectorsGenerator(ReplicatedMesh & mesh,
-                                      const std::vector<Point> boundary_points_vec_1,
-                                      std::vector<Point> boundary_points_vec_2,
+void fillBetweenPointVectorsGenerator(MeshBase & mesh,
+                                      const std::vector<Point> & boundary_points_vec_1,
+                                      const std::vector<Point> & boundary_points_vec_2,
                                       const unsigned int num_layers,
                                       const subdomain_id_type transition_layer_id,
                                       const boundary_id_type input_boundary_1_id,
@@ -56,7 +56,7 @@ void fillBetweenPointVectorsGenerator(ReplicatedMesh & mesh,
 
 /**
  * Generates a 2D mesh with triangular elements for a region defined by two curves (sets of Points)
- * @param mesh a reference ReplicatedMesh to contain the generated mesh
+ * @param mesh a reference MeshBase to contain the generated mesh
  * @param boundary_points_vec_1 vector of Points of Side #1
  * @param boundary_points_vec_2 vector of Points of Side #2
  * @param num_layers number of sublayers of elements
@@ -66,9 +66,9 @@ void fillBetweenPointVectorsGenerator(ReplicatedMesh & mesh,
  * @param name name of the MOOSE object that calls this method
  * @param quad_elem whether the QUAD4 elements are used to construct the mesh
  */
-void fillBetweenPointVectorsGenerator(ReplicatedMesh & mesh,
-                                      const std::vector<Point> boundary_points_vec_1,
-                                      const std::vector<Point> boundary_points_vec_2,
+void fillBetweenPointVectorsGenerator(MeshBase & mesh,
+                                      const std::vector<Point> & boundary_points_vec_1,
+                                      const std::vector<Point> & boundary_points_vec_2,
                                       const unsigned int num_layers,
                                       const subdomain_id_type transition_layer_id,
                                       const boundary_id_type external_boundary_id,
@@ -78,7 +78,7 @@ void fillBetweenPointVectorsGenerator(ReplicatedMesh & mesh,
 
 /**
  * Generates a 2D mesh based on a 2D vector of Nodes using QUAD4 elements in the xy-plane
- * @param mesh a reference ReplicatedMesh to contain the generated mesh
+ * @param mesh a reference MeshBase to contain the generated mesh
  * @param nodes a 2D vector of nodes based on which the mesh is built
  * @param num_layers number of sublayers of elements
  * @param node_number_vec number of nodes on each sublayer
@@ -92,10 +92,10 @@ void fillBetweenPointVectorsGenerator(ReplicatedMesh & mesh,
  * @param end_side_boundary_id id of the generated mesh's external boundary that connects the last
  * Points of the two input Point vectors
  */
-void elementsCreationFromNodesVectorsQuad(ReplicatedMesh & mesh,
-                                          const std::vector<std::vector<Node *>> nodes,
+void elementsCreationFromNodesVectorsQuad(MeshBase & mesh,
+                                          const std::vector<std::vector<Node *>> & nodes,
                                           const unsigned int num_layers,
-                                          const std::vector<unsigned int> node_number_vec,
+                                          const std::vector<unsigned int> & node_number_vec,
                                           const subdomain_id_type transition_layer_id,
                                           const boundary_id_type input_boundary_1_id,
                                           const boundary_id_type input_boundary_2_id,
@@ -104,7 +104,7 @@ void elementsCreationFromNodesVectorsQuad(ReplicatedMesh & mesh,
 
 /**
  * Generates a 2D mesh based on a 2D vector of Nodes using TRI3 elements in the xy-plane
- * @param mesh a reference ReplicatedMesh to contain the generated mesh
+ * @param mesh a reference MeshBase to contain the generated mesh
  * @param nodes a 2D vector of nodes based on which the mesh is built
  * @param num_layers number of sublayers of elements
  * @param node_number_vec number of nodes on each sublayer
@@ -118,10 +118,10 @@ void elementsCreationFromNodesVectorsQuad(ReplicatedMesh & mesh,
  * @param end_side_boundary_id id of the generated mesh's external boundary that connects the last
  * Points of the two input Point vectors
  */
-void elementsCreationFromNodesVectors(ReplicatedMesh & mesh,
-                                      const std::vector<std::vector<Node *>> nodes,
+void elementsCreationFromNodesVectors(MeshBase & mesh,
+                                      const std::vector<std::vector<Node *>> & nodes,
                                       const unsigned int num_layers,
-                                      const std::vector<unsigned int> node_number_vec,
+                                      const std::vector<unsigned int> & node_number_vec,
                                       const subdomain_id_type transition_layer_id,
                                       const boundary_id_type input_boundary_1_id,
                                       const boundary_id_type input_boundary_2_id,
@@ -141,7 +141,7 @@ void elementsCreationFromNodesVectors(ReplicatedMesh & mesh,
  * @param spline_vec_l spline interpolation of inter-node length based on weighted index
  */
 void weightedInterpolator(const unsigned int vec_node_num,
-                          const std::vector<Point> boundary_points_vec,
+                          const std::vector<Point> & boundary_points_vec,
                           std::vector<Real> & vec_index,
                           std::vector<Real> & wt,
                           std::vector<Real> & index,
@@ -162,9 +162,9 @@ void weightedInterpolator(const unsigned int vec_node_num,
  */
 void surrogateGenerator(std::vector<Real> & weighted_surrogate_index,
                         std::vector<Real> & unweighted_surrogate_index,
-                        const std::vector<unsigned int> node_number_vec,
-                        const std::vector<Real> index,
-                        const std::vector<Real> wt,
+                        const std::vector<unsigned int> & node_number_vec,
+                        const std::vector<Real> & index,
+                        const std::vector<Real> & wt,
                         const unsigned int boundary_node_num,
                         const unsigned int i);
 
@@ -175,7 +175,7 @@ void surrogateGenerator(std::vector<Real> & weighted_surrogate_index,
  * @param vec_pts_2 second vector of points to be examined
  * @return whether one of the vectors needs to be flipped to ensure correct transition layer shape
  */
-bool needFlip(const std::vector<Point> vec_pts_1, const std::vector<Point> vec_pts_2);
+bool needFlip(const std::vector<Point> & vec_pts_1, const std::vector<Point> & vec_pts_2);
 
 /**
  * Decides whether a boundary of a given mesh is a closed loop with consecutive nodes's azimuthal
@@ -189,7 +189,7 @@ bool needFlip(const std::vector<Point> vec_pts_1, const std::vector<Point> vec_p
  * @return whether the boundary is a closed loop with consecutive nodes's azimuthal
  * angles change monotonically
  */
-bool isBoundarySimpleClosedLoop(ReplicatedMesh & mesh,
+bool isBoundarySimpleClosedLoop(MeshBase & mesh,
                                 Real & max_node_radius,
                                 std::vector<dof_id_type> & boundary_ordered_node_list,
                                 const Point origin_pt,
@@ -206,7 +206,7 @@ bool isBoundarySimpleClosedLoop(ReplicatedMesh & mesh,
  * @return whether the boundary is a closed loop with consecutive nodes's azimuthal
  * angles change monotonically
  */
-bool isBoundarySimpleClosedLoop(ReplicatedMesh & mesh,
+bool isBoundarySimpleClosedLoop(MeshBase & mesh,
                                 Real & max_node_radius,
                                 const Point origin_pt,
                                 const boundary_id_type bid);
@@ -220,9 +220,7 @@ bool isBoundarySimpleClosedLoop(ReplicatedMesh & mesh,
  * @return whether the boundary is a closed loop with consecutive nodes's azimuthal
  * angles change monotonically
  */
-bool isBoundarySimpleClosedLoop(ReplicatedMesh & mesh,
-                                const Point origin_pt,
-                                const boundary_id_type bid);
+bool isBoundarySimpleClosedLoop(MeshBase & mesh, const Point origin_pt, const boundary_id_type bid);
 
 /**
  * Decides whether a boundary of a given mesh is an open single-segment boundary.
@@ -234,7 +232,7 @@ bool isBoundarySimpleClosedLoop(ReplicatedMesh & mesh,
  * @param bid ID of the boundary to be examined
  * @return whether the boundary is an open single-segment boundary
  */
-bool isBoundaryOpenSingleSegment(ReplicatedMesh & mesh,
+bool isBoundaryOpenSingleSegment(MeshBase & mesh,
                                  Real & max_node_radius,
                                  std::vector<dof_id_type> & boundary_ordered_node_list,
                                  const Point origin_pt,
@@ -251,7 +249,7 @@ bool isBoundaryOpenSingleSegment(ReplicatedMesh & mesh,
  * @return whether the curve is a closed loop with consecutive nodes's azimuthal
  * angles change monotonically
  */
-bool isCurveSimpleClosedLoop(ReplicatedMesh & mesh,
+bool isCurveSimpleClosedLoop(MeshBase & mesh,
                              Real & max_node_radius,
                              std::vector<dof_id_type> & ordered_node_list,
                              const Point origin_pt);
@@ -266,7 +264,7 @@ bool isCurveSimpleClosedLoop(ReplicatedMesh & mesh,
  * @return whether the curve is a closed loop with consecutive nodes's azimuthal
  * angles change monotonically
  */
-bool isCurveSimpleClosedLoop(ReplicatedMesh & mesh, Real & max_node_radius, const Point origin_pt);
+bool isCurveSimpleClosedLoop(MeshBase & mesh, Real & max_node_radius, const Point origin_pt);
 
 /**
  * Decides whether a curve contained in a given mesh is a closed loop with consecutive nodes's
@@ -276,7 +274,7 @@ bool isCurveSimpleClosedLoop(ReplicatedMesh & mesh, Real & max_node_radius, cons
  * @return whether the curve is a closed loop with consecutive nodes's azimuthal
  * angles change monotonically
  */
-bool isCurveSimpleClosedLoop(ReplicatedMesh & mesh, const Point origin_pt);
+bool isCurveSimpleClosedLoop(MeshBase & mesh, const Point origin_pt);
 
 /**
  * Decides whether a curve contained in a given mesh is an open single-segment curve.
@@ -287,7 +285,7 @@ bool isCurveSimpleClosedLoop(ReplicatedMesh & mesh, const Point origin_pt);
  * @param origin_pt origin position of the given mesh (used for azimuthal angle calculation)
  * @return whether the boundary is an open single-segment boundary
  */
-bool isCurveOpenSingleSegment(ReplicatedMesh & mesh,
+bool isCurveOpenSingleSegment(MeshBase & mesh,
                               Real & max_node_radius,
                               std::vector<dof_id_type> & ordered_node_list,
                               const Point origin_pt);
@@ -304,7 +302,7 @@ bool isCurveOpenSingleSegment(ReplicatedMesh & mesh,
  * @param suppress_exception whether to suppress the exceptions thrown by this function if the
  * boundary is not closed
  */
-void isClosedLoop(ReplicatedMesh & mesh,
+void isClosedLoop(MeshBase & mesh,
                   Real & max_node_radius,
                   std::vector<dof_id_type> & ordered_node_list,
                   std::vector<std::pair<dof_id_type, dof_id_type>> & node_assm,
@@ -319,7 +317,7 @@ void isClosedLoop(ReplicatedMesh & mesh,
  * @param bid ID of the boundary to be examined
  * @return whether the boundary is the external boundary of the given mesh
  */
-bool isExternalBoundary(ReplicatedMesh & mesh, const boundary_id_type bid);
+bool isExternalBoundary(MeshBase & mesh, const boundary_id_type bid);
 
 /**
  * Creates an QUAD4 element that can be extruded in (0 0 1) direction.
