@@ -162,21 +162,26 @@ AssemblyMeshGenerator::AssemblyMeshGenerator(const InputParameters & parameters)
     {
       if ((!MooseUtils::absoluteFuzzyEqual(base_pitch * ny, assembly_pitch)) ||
           (!MooseUtils::absoluteFuzzyEqual(base_pitch * nx, assembly_pitch)))
-        mooseError("Assembly pitch must be equal to lattice dimension times pin pitch for Cartesian "
-                   "assemblies with no background region");
+        mooseError(
+            "Assembly pitch must be equal to lattice dimension times pin pitch for Cartesian "
+            "assemblies with no background region");
       if (_background_intervals > 0)
-        mooseError("\"background_region_id\" must be defined if \"background_intervals\" is greater than 0");
+        mooseError("\"background_region_id\" must be defined if \"background_intervals\" is "
+                   "greater than 0");
     }
     else
     {
       if ((base_pitch * ny > assembly_pitch) || (base_pitch * nx > assembly_pitch))
-        mooseError("Assembly pitch must be larger than lattice dimension times pin pitch for Cartesian "
-                   "assemblies with background region");
+        mooseError(
+            "Assembly pitch must be larger than lattice dimension times pin pitch for Cartesian "
+            "assemblies with background region");
       if (_background_intervals == 0)
-        mooseError("\"background_intervals\" must be greater than 0 if \"background_region_id\" is defined");
+        mooseError("\"background_intervals\" must be greater than 0 if \"background_region_id\" is "
+                   "defined");
       if (_background_region_id.size() != n_axial_levels)
-        mooseError("The size of background_region_id must be equal to the number of axial levels as "
-                   "defined in the ReactorMeshParams object");
+        mooseError(
+            "The size of background_region_id must be equal to the number of axial levels as "
+            "defined in the ReactorMeshParams object");
     }
   }
   else
@@ -237,7 +242,8 @@ AssemblyMeshGenerator::AssemblyMeshGenerator(const InputParameters & parameters)
 
   // Call PatternedHexMeshGenerator or PatternedCartesianMeshGenerator to stitch assembly
   {
-    const auto patterned_mg_name = _geom_type == "Hex" ? "PatternedHexMeshGenerator" : "PatternedCartesianMeshGenerator";
+    const auto patterned_mg_name =
+        _geom_type == "Hex" ? "PatternedHexMeshGenerator" : "PatternedCartesianMeshGenerator";
     auto params = _app.getFactory().getValidParams(patterned_mg_name);
 
     if (_geom_type == "Hex")
@@ -324,9 +330,8 @@ AssemblyMeshGenerator::AssemblyMeshGenerator(const InputParameters & parameters)
                           getMeshProperty<std::vector<std::vector<Real>>>(
                               "control_drums_azimuthal_meta", name() + "_pattern"));
     if (hasMeshProperty<std::string>("position_file_name", name() + "_pattern"))
-      declareMeshProperty(
-          "position_file_name",
-          getMeshProperty<std::string>("position_file_name", name() + "_pattern"));
+      declareMeshProperty("position_file_name",
+                          getMeshProperty<std::string>("position_file_name", name() + "_pattern"));
     if (hasMeshProperty<Real>("pattern_pitch_meta", name() + "_pattern"))
       declareMeshProperty("pattern_pitch_meta",
                           getMeshProperty<Real>("pattern_pitch_meta", name() + "_pattern"));

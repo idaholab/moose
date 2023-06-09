@@ -181,8 +181,8 @@ CoreMeshGenerator::CoreMeshGenerator(const InputParameters & parameters)
       mooseError(
           "All assemblies in the core must be homogenized if assembly homogenization is used\n");
     if (getMeshProperty<bool>("pin_as_assembly", _inputs[i]) != pin_as_assembly)
-      mooseError(
-        "All assemblies in the core must be defined as a single pin if `PinMeshGenerator/use_as_assembly` is set to true\n");
+      mooseError("All assemblies in the core must be defined as a single pin if "
+                 "`PinMeshGenerator/use_as_assembly` is set to true\n");
   }
 
   // Initialize ReactorMeshParams object stored in pin input
@@ -245,7 +245,9 @@ CoreMeshGenerator::CoreMeshGenerator(const InputParameters & parameters)
         }
         else
         {
-          const auto adaptive_mg_name = _geom_type == "Hex" ? "HexagonConcentricCircleAdaptiveBoundaryMeshGenerator" : "CartesianConcentricCircleAdaptiveBoundaryMeshGenerator";
+          const auto adaptive_mg_name =
+              _geom_type == "Hex" ? "HexagonConcentricCircleAdaptiveBoundaryMeshGenerator"
+                                  : "CartesianConcentricCircleAdaptiveBoundaryMeshGenerator";
           auto params = _app.getFactory().getValidParams(adaptive_mg_name);
 
           const auto assembly_pitch = getReactorParam<Real>("assembly_pitch");
@@ -253,13 +255,13 @@ CoreMeshGenerator::CoreMeshGenerator(const InputParameters & parameters)
           {
             params.set<Real>("hexagon_size") = assembly_pitch / 2.0;
             params.set<std::vector<unsigned int>>("num_sectors_per_side") =
-              std::vector<unsigned int>(6, 2);
+                std::vector<unsigned int>(6, 2);
           }
           else
           {
             params.set<Real>("square_size") = assembly_pitch;
             params.set<std::vector<unsigned int>>("num_sectors_per_side") =
-              std::vector<unsigned int>(4, 2);
+                std::vector<unsigned int>(4, 2);
           }
           params.set<std::vector<unsigned int>>("sides_to_adapt") = std::vector<unsigned int>{0};
           params.set<std::vector<MeshGeneratorName>>("meshes_to_adapt_to") =
@@ -272,7 +274,8 @@ CoreMeshGenerator::CoreMeshGenerator(const InputParameters & parameters)
       }
     }
     {
-      const auto patterned_mg_name = _geom_type == "Hex" ? "PatternedHexMeshGenerator" : "PatternedCartesianMeshGenerator";
+      const auto patterned_mg_name =
+          _geom_type == "Hex" ? "PatternedHexMeshGenerator" : "PatternedCartesianMeshGenerator";
       auto params = _app.getFactory().getValidParams(patterned_mg_name);
 
       params.set<std::string>("id_name") = "assembly_id";
@@ -379,7 +382,7 @@ CoreMeshGenerator::CoreMeshGenerator(const InputParameters & parameters)
             getMeshProperty<std::vector<subdomain_id_type>>("background_region_ids", assembly);
         std::vector<std::vector<subdomain_id_type>> duct_region_ids =
             getMeshProperty<std::vector<std::vector<subdomain_id_type>>>("duct_region_ids",
-                                                                           assembly);
+                                                                         assembly);
         _background_region_id_map.insert(
             std::pair<subdomain_id_type, std::vector<subdomain_id_type>>(assembly_type,
                                                                          background_region_ids));
@@ -394,8 +397,8 @@ CoreMeshGenerator::CoreMeshGenerator(const InputParameters & parameters)
         _background_block_name_map.insert(std::pair<subdomain_id_type, std::vector<std::string>>(
             assembly_type, background_block_names));
         _duct_block_name_map.insert(
-            std::pair<subdomain_id_type, std::vector<std::vector<std::string>>>(
-                assembly_type, duct_block_names));
+            std::pair<subdomain_id_type, std::vector<std::vector<std::string>>>(assembly_type,
+                                                                                duct_block_names));
       }
     }
   }
