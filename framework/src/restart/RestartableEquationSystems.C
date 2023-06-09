@@ -30,7 +30,7 @@ RestartableEquationSystems::buildHeader() const
     SystemHeader sys_header;
     sys_header.name = sys.name();
     sys_header.type = sys.system_type();
-    sys_header.number = sys_num;
+    sys_header.sys = &sys;
 
     // Variables in the system
     for (const auto var_num : make_range(sys.n_vars()))
@@ -39,17 +39,21 @@ RestartableEquationSystems::buildHeader() const
 
       VariableHeader var_header;
       var_header.name = var.name();
-      var_header.number = var_num;
       var_header.type = var.type();
+      var_header.var = &var;
 
       mooseAssert(!sys_header.variables.count(var.name()), "Already inserted");
       sys_header.variables.emplace(var.name(), var_header);
     }
 
     // Vectors in the system
+    sys_header.vectors.resize(sys.n_vectors());
     for (const auto vec_num : make_range(sys.n_vectors()))
-      sys_header.vectors.push_back(sys.vector_name(vec_num));
-
+    {
+      auto & vec_header = sys_header.vectors[vec_num];
+      vec_header.name = sys.vector_name(vec_num);
+      vec_header.vec = &sys.get_vector(vec_num);
+    }
     // System in this EquationSystems
     mooseAssert(!es_header.systems.count(sys.name()), "Already inserted");
     es_header.systems.emplace(sys.name(), sys_header);
@@ -143,18 +147,17 @@ RestartableEquationSystems::store(std::ostream & stream) const
   for (const auto & sys_name_header_pair : es_header.systems)
   {
     const auto & sys_header = sys_name_header_pair.second;
-    const auto & sys = _es.get_system(sys_header.number);
+    const auto & sys = *sys_header.sys;
 
     // Store each variable in the system
     for (const auto & var_name_header_pair : sys_header.variables)
     {
-      const auto & var_header = var_name_header_pair.second;
-      const auto & var = sys.variable(var_header.number);
+      const auto & var = *var_name_header_pair.second.var;
 
       // Store the solution vector and then other vectors in the system
       store_vec(*sys.solution, sys, var);
-      for (const auto & vec_name : sys_header.vectors)
-        store_vec(sys.get_vector(vec_name), sys, var);
+      for (const auto & vec_header : sys_header.vectors)
+        store_vec(*vec_header.vec, sys, var);
     }
   }
 }
@@ -259,11 +262,12 @@ RestartableEquationSystems::load(std::istream & stream)
       // Load the solution vector if we have this system and variable
       load_vec(sys ? sys->solution.get() : nullptr, sys, var);
       // Load every other vector if... we're not skipping, and we have this system and variable
-      for (const auto & vec_name : sys_header.vectors)
+      for (const auto & vec_header : sys_header.vectors)
       {
-        auto * const vec = (sys && var && !_skip_additional_vectors && sys->have_vector(vec_name))
-                               ? &sys->get_vector(vec_name)
-                               : nullptr;
+        auto * const vec =
+            (sys && var && !_skip_additional_vectors && sys->have_vector(vec_header.name))
+                ? &sys->get_vector(vec_header.name)
+                : nullptr;
         load_vec(vec, sys, var);
       }
 
@@ -304,7 +308,6 @@ dataStore(std::ostream & stream, RestartableEquationSystems::SystemHeader & head
 {
   dataStore(stream, header.name, nullptr);
   dataStore(stream, header.type, nullptr);
-  dataStore(stream, header.number, nullptr);
   dataStore(stream, header.variables, nullptr);
   dataStore(stream, header.vectors, nullptr);
 }
@@ -314,22 +317,33 @@ dataLoad(std::istream & stream, RestartableEquationSystems::SystemHeader & heade
 {
   dataLoad(stream, header.name, nullptr);
   dataLoad(stream, header.type, nullptr);
-  dataLoad(stream, header.number, nullptr);
   dataLoad(stream, header.variables, nullptr);
   dataLoad(stream, header.vectors, nullptr);
+  header.sys = nullptr;
 }
 
 void
 dataStore(std::ostream & stream, RestartableEquationSystems::VariableHeader & header, void *)
 {
   dataStore(stream, header.name, nullptr);
-  dataStore(stream, header.number, nullptr);
   dataStore(stream, header.type, nullptr);
 }
 void
 dataLoad(std::istream & stream, RestartableEquationSystems::VariableHeader & header, void *)
 {
   dataLoad(stream, header.name, nullptr);
-  dataLoad(stream, header.number, nullptr);
   dataLoad(stream, header.type, nullptr);
+  header.var = nullptr;
+}
+
+void
+dataStore(std::ostream & stream, RestartableEquationSystems::VectorHeader & header, void *)
+{
+  dataStore(stream, header.name, nullptr);
+}
+void
+dataLoad(std::istream & stream, RestartableEquationSystems::VectorHeader & header, void *)
+{
+  dataLoad(stream, header.name, nullptr);
+  header.vec = nullptr;
 }

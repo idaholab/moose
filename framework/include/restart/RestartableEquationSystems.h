@@ -35,11 +35,25 @@ public:
   /**
    * Represents a stored variable in restart
    */
+  struct VectorHeader
+  {
+    /// The name of the stored vector
+    std::string name;
+    /// The stored vector (only valid when _storing_, not when loading)
+    const libMesh::NumericVector<Number> * vec = nullptr;
+  };
+
+  /**
+   * Represents a stored variable in restart
+   */
   struct VariableHeader
   {
+    /// The name of the stored variable
     std::string name;
-    unsigned int number;
+    /// The type of the stored variable
     libMesh::FEType type;
+    /// The stored variable (only valid when _storing_, not when loading)
+    const libMesh::Variable * var = nullptr;
   };
 
   /**
@@ -47,11 +61,16 @@ public:
    */
   struct SystemHeader
   {
+    /// The name of the stored system
     std::string name;
+    /// The type of the stored system
     std::string type;
-    unsigned int number;
+    /// The stored system (only valid when _storing_, not when loading)
+    const libMesh::System * sys = nullptr;
+    /// The stored variables in the system
     std::map<std::string, RestartableEquationSystems::VariableHeader> variables;
-    std::vector<std::string> vectors;
+    /// The stored vectors in the system
+    std::vector<RestartableEquationSystems::VectorHeader> vectors;
   };
 
   /**
@@ -59,6 +78,7 @@ public:
    */
   struct EquationSystemsHeader
   {
+    /// The stored systems in the equation systems
     std::map<std::string, RestartableEquationSystems::SystemHeader> systems;
   };
 
@@ -107,3 +127,6 @@ void dataLoad(std::istream & stream, RestartableEquationSystems::SystemHeader & 
 
 void dataStore(std::ostream & stream, RestartableEquationSystems::VariableHeader & header, void *);
 void dataLoad(std::istream & stream, RestartableEquationSystems::VariableHeader & header, void *);
+
+void dataStore(std::ostream & stream, RestartableEquationSystems::VectorHeader & header, void *);
+void dataLoad(std::istream & stream, RestartableEquationSystems::VectorHeader & header, void *);
