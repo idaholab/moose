@@ -40,8 +40,8 @@ namespace FillBetweenPointVectorsTools
  * bias_parameter <= 0
  */
 void fillBetweenPointVectorsGenerator(MeshBase & mesh,
-                                      const std::vector<Point> boundary_points_vec_1,
-                                      std::vector<Point> boundary_points_vec_2,
+                                      const std::vector<Point> & boundary_points_vec_1,
+                                      const std::vector<Point> & boundary_points_vec_2,
                                       const unsigned int num_layers,
                                       const subdomain_id_type transition_layer_id,
                                       const boundary_id_type input_boundary_1_id,
@@ -67,8 +67,8 @@ void fillBetweenPointVectorsGenerator(MeshBase & mesh,
  * @param quad_elem whether the QUAD4 elements are used to construct the mesh
  */
 void fillBetweenPointVectorsGenerator(MeshBase & mesh,
-                                      const std::vector<Point> boundary_points_vec_1,
-                                      const std::vector<Point> boundary_points_vec_2,
+                                      const std::vector<Point> & boundary_points_vec_1,
+                                      const std::vector<Point> & boundary_points_vec_2,
                                       const unsigned int num_layers,
                                       const subdomain_id_type transition_layer_id,
                                       const boundary_id_type external_boundary_id,
@@ -93,9 +93,9 @@ void fillBetweenPointVectorsGenerator(MeshBase & mesh,
  * Points of the two input Point vectors
  */
 void elementsCreationFromNodesVectorsQuad(MeshBase & mesh,
-                                          const std::vector<std::vector<Node *>> nodes,
+                                          const std::vector<std::vector<Node *>> & nodes,
                                           const unsigned int num_layers,
-                                          const std::vector<unsigned int> node_number_vec,
+                                          const std::vector<unsigned int> & node_number_vec,
                                           const subdomain_id_type transition_layer_id,
                                           const boundary_id_type input_boundary_1_id,
                                           const boundary_id_type input_boundary_2_id,
@@ -119,9 +119,9 @@ void elementsCreationFromNodesVectorsQuad(MeshBase & mesh,
  * Points of the two input Point vectors
  */
 void elementsCreationFromNodesVectors(MeshBase & mesh,
-                                      const std::vector<std::vector<Node *>> nodes,
+                                      const std::vector<std::vector<Node *>> & nodes,
                                       const unsigned int num_layers,
-                                      const std::vector<unsigned int> node_number_vec,
+                                      const std::vector<unsigned int> & node_number_vec,
                                       const subdomain_id_type transition_layer_id,
                                       const boundary_id_type input_boundary_1_id,
                                       const boundary_id_type input_boundary_2_id,
@@ -141,7 +141,7 @@ void elementsCreationFromNodesVectors(MeshBase & mesh,
  * @param spline_vec_l spline interpolation of inter-node length based on weighted index
  */
 void weightedInterpolator(const unsigned int vec_node_num,
-                          const std::vector<Point> boundary_points_vec,
+                          const std::vector<Point> & boundary_points_vec,
                           std::vector<Real> & vec_index,
                           std::vector<Real> & wt,
                           std::vector<Real> & index,
@@ -162,9 +162,9 @@ void weightedInterpolator(const unsigned int vec_node_num,
  */
 void surrogateGenerator(std::vector<Real> & weighted_surrogate_index,
                         std::vector<Real> & unweighted_surrogate_index,
-                        const std::vector<unsigned int> node_number_vec,
-                        const std::vector<Real> index,
-                        const std::vector<Real> wt,
+                        const std::vector<unsigned int> & node_number_vec,
+                        const std::vector<Real> & index,
+                        const std::vector<Real> & wt,
                         const unsigned int boundary_node_num,
                         const unsigned int i);
 
@@ -175,7 +175,7 @@ void surrogateGenerator(std::vector<Real> & weighted_surrogate_index,
  * @param vec_pts_2 second vector of points to be examined
  * @return whether one of the vectors needs to be flipped to ensure correct transition layer shape
  */
-bool needFlip(const std::vector<Point> vec_pts_1, const std::vector<Point> vec_pts_2);
+bool needFlip(const std::vector<Point> & vec_pts_1, const std::vector<Point> & vec_pts_2);
 
 /**
  * Decides whether a boundary of a given mesh is a closed loop with consecutive nodes's azimuthal

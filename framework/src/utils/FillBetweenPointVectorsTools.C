@@ -27,8 +27,8 @@ namespace FillBetweenPointVectorsTools
 {
 void
 fillBetweenPointVectorsGenerator(MeshBase & mesh, // an empty mesh is expected
-                                 const std::vector<Point> boundary_points_vec_1,
-                                 std::vector<Point> boundary_points_vec_2,
+                                 const std::vector<Point> & boundary_points_vec_1,
+                                 const std::vector<Point> & boundary_points_vec_2,
                                  const unsigned int num_layers,
                                  const subdomain_id_type transition_layer_id,
                                  const boundary_id_type input_boundary_1_id,
@@ -73,9 +73,15 @@ fillBetweenPointVectorsGenerator(MeshBase & mesh, // an empty mesh is expected
                ", QUAD4 elements option can only be selected when the two input vectors of Points "
                "have the same length.");
 
+  std::vector<Point> possibly_reoriented_boundary_points_vec_2;
+  const std::vector<Point> * oriented_boundary_points_vec_2 = &boundary_points_vec_2;
+
   if (needFlip(boundary_points_vec_1, boundary_points_vec_2))
   {
-    std::reverse(boundary_points_vec_2.begin(), boundary_points_vec_2.end());
+    possibly_reoriented_boundary_points_vec_2.assign(boundary_points_vec_2.rbegin(),
+                                                     boundary_points_vec_2.rend());
+    oriented_boundary_points_vec_2 = &possibly_reoriented_boundary_points_vec_2;
+
     mooseWarning(
         "In FillBetweenPointVectorsTools, one of the vector of Points must be flipped to ensure "
         "correct transition layer shape.");
@@ -107,7 +113,7 @@ fillBetweenPointVectorsGenerator(MeshBase & mesh, // an empty mesh is expected
                        linear_vec_1_y,
                        spline_vec_1_l);
   weightedInterpolator(vec_2_node_num,
-                       boundary_points_vec_2,
+                       *oriented_boundary_points_vec_2,
                        vec_2_index,
                        wt_2,
                        index_2,
@@ -207,8 +213,8 @@ fillBetweenPointVectorsGenerator(MeshBase & mesh, // an empty mesh is expected
 
 void
 fillBetweenPointVectorsGenerator(MeshBase & mesh,
-                                 const std::vector<Point> boundary_points_vec_1,
-                                 const std::vector<Point> boundary_points_vec_2,
+                                 const std::vector<Point> & boundary_points_vec_1,
+                                 const std::vector<Point> & boundary_points_vec_2,
                                  const unsigned int num_layers,
                                  const subdomain_id_type transition_layer_id,
                                  const boundary_id_type external_boundary_id,
@@ -232,9 +238,9 @@ fillBetweenPointVectorsGenerator(MeshBase & mesh,
 
 void
 elementsCreationFromNodesVectorsQuad(MeshBase & mesh,
-                                     const std::vector<std::vector<Node *>> nodes,
+                                     const std::vector<std::vector<Node *>> & nodes,
                                      const unsigned int num_layers,
-                                     const std::vector<unsigned int> node_number_vec,
+                                     const std::vector<unsigned int> & node_number_vec,
                                      const subdomain_id_type transition_layer_id,
                                      const boundary_id_type input_boundary_1_id,
                                      const boundary_id_type input_boundary_2_id,
@@ -267,9 +273,9 @@ elementsCreationFromNodesVectorsQuad(MeshBase & mesh,
 
 void
 elementsCreationFromNodesVectors(MeshBase & mesh,
-                                 const std::vector<std::vector<Node *>> nodes,
+                                 const std::vector<std::vector<Node *>> & nodes,
                                  const unsigned int num_layers,
-                                 const std::vector<unsigned int> node_number_vec,
+                                 const std::vector<unsigned int> & node_number_vec,
                                  const subdomain_id_type transition_layer_id,
                                  const boundary_id_type input_boundary_1_id,
                                  const boundary_id_type input_boundary_2_id,
@@ -354,7 +360,7 @@ elementsCreationFromNodesVectors(MeshBase & mesh,
 
 void
 weightedInterpolator(const unsigned int vec_node_num,
-                     const std::vector<Point> boundary_points_vec,
+                     const std::vector<Point> & boundary_points_vec,
                      std::vector<Real> & vec_index,
                      std::vector<Real> & wt,
                      std::vector<Real> & index,
@@ -419,9 +425,9 @@ weightedInterpolator(const unsigned int vec_node_num,
 void
 surrogateGenerator(std::vector<Real> & weighted_surrogate_index,
                    std::vector<Real> & unweighted_surrogate_index,
-                   const std::vector<unsigned int> node_number_vec,
-                   const std::vector<Real> wt,
-                   const std::vector<Real> index,
+                   const std::vector<unsigned int> & node_number_vec,
+                   const std::vector<Real> & wt,
+                   const std::vector<Real> & index,
                    const unsigned int boundary_node_num,
                    const unsigned int i)
 {
@@ -458,7 +464,7 @@ surrogateGenerator(std::vector<Real> & weighted_surrogate_index,
 }
 
 bool
-needFlip(const std::vector<Point> vec_pts_1, const std::vector<Point> vec_pts_2)
+needFlip(const std::vector<Point> & vec_pts_1, const std::vector<Point> & vec_pts_2)
 {
   const Real th1 =
       acos((vec_pts_1.back() - vec_pts_1.front()) * (vec_pts_2.front() - vec_pts_1.front()) /
