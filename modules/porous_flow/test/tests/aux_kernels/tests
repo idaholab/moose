@@ -5,8 +5,18 @@
     csvdiff = 'darcy_velocity.csv'
     rel_err = 1.0E-5
     threading = '!pthreads'
-    requirement = 'PorousFlow shall be able to calculate the Darcy flow velocity vector for a fully-saturated case'
+    requirement = 'The system shall be able to calculate the Darcy flow velocity vector for a fully-saturated case.'
     issues = '#17159'
+    design = 'PorousFlowDarcyVelocityComponent.md'
+  []
+  [darcy_velocity_fv]
+    type = 'CSVDiff'
+    input = 'darcy_velocity_fv.i'
+    csvdiff = 'darcy_velocity_fv_out.csv'
+    rel_err = 1.0E-5
+    threading = '!pthreads'
+    requirement = 'The system shall be able to calculate the Darcy flow velocity vector for a fully-saturated finite volume case.'
+    issues = '#17159 #21275'
     design = 'PorousFlowDarcyVelocityComponent.md'
   []
   [properties]
@@ -14,7 +24,7 @@
     input = 'properties.i'
     exodiff = 'properties_out.e'
     threading = '!pthreads'
-    requirement = 'PorousFlow shall be able to populate AuxVariables corresponding to capillary pressure, saturation, fluid density, etc'
+    requirement = 'The system shall be able to populate AuxVariables corresponding to capillary pressure, saturation, fluid density, etc.'
     issues = '#17159'
     design = 'PorousFlowPropertyAux.md'
   []
@@ -23,7 +33,7 @@
     input = 'darcy_velocity_lower.i'
     csvdiff = 'darcy_velocity_lower_out.csv'
     threading = '!pthreads'
-    requirement = 'PorousFlow shall be able to calculate the Darcy flow velocity vector on 2D fracture embedded inside a 3D matrix'
+    requirement = 'The system shall be able to calculate the Darcy flow velocity vector on 2D fracture embedded inside a 3D matrix.'
     issues = '#17159'
     design = 'PorousFlowDarcyVelocityComponentLowerDimensional.md'
   []
@@ -34,7 +44,7 @@
     prereq = 'darcy_velocity_lower'
     csvdiff = 'darcy_velocity_lower_out.csv'
     threading = '!pthreads'
-    requirement = 'PorousFlow shall be able to calculate the Darcy flow velocity vector on 2D fracture embedded inside a 3D matrix, including the case with triangular and tetrahedral elements'
+    requirement = 'The system shall be able to calculate the Darcy flow velocity vector on 2D fracture embedded inside a 3D matrix, including the case with triangular and tetrahedral elements.'
     issues = '#17159'
     design = 'PorousFlowDarcyVelocityComponentLowerDimensional.md'
   []
@@ -43,7 +53,7 @@
     input = 'darcy_velocity_lower_2D.i'
     csvdiff = 'darcy_velocity_lower_2D_out.csv'
     threading = '!pthreads'
-    requirement = 'PorousFlow shall be able to calculate the Darcy flow velocity vector on 1D fracture embedded inside a 2D matrix'
+    requirement = 'The system shall be able to calculate the Darcy flow velocity vector on 1D fracture embedded inside a 2D matrix.'
     issues = '#17159'
     design = 'PorousFlowDarcyVelocityComponentLowerDimensional.md'
   []
@@ -52,7 +62,7 @@
     input = 'darcy_velocity_lower_except.i'
     expect_err = 'The variable fracture_vel_x must must be defined on lower-dimensional elements only since it employs PorousFlowDarcyVelocityComponentLowerDimensional'
     threading = '!pthreads'
-    requirement = 'An error shall be produced if PorousFlow is asked to calculate the Darcy flow velocity vector on a lower-dimensional fracture, but the variables are not defined only on the lower-dimensional elements'
+    requirement = 'An error shall be produced if the system is asked to calculate the Darcy flow velocity vector on a lower-dimensional fracture, but the variables are not defined only on the lower-dimensional elements.'
     issues = '#17159'
     design = 'PorousFlowDarcyVelocityComponentLowerDimensional.md'
   []
@@ -60,7 +70,7 @@
     type = RunException
     input = element_length_except1.i
     expect_err = 'The variable must be an elemental variable'
-    requirement = 'PorousFlow shall be able to calculate a measure of element length in a given direction, and shall produce an error if a nodal variable is used to store the results'
+    requirement = 'The system shall be able to calculate a measure of element length in a given direction, and shall produce an error if a nodal variable is used to store the results.'
     issues = '#18232'
     design = 'PorousFlowElementLength.md'
   []
@@ -68,7 +78,7 @@
     type = RunException
     input = element_length_except2.i
     expect_err = 'Three values or variables must be provided'
-    requirement = 'PorousFlow shall be able to calculate a measure of element length in a given direction, and shall produce an error if the direction is incorrectly specified'
+    requirement = 'The system shall be able to calculate a measure of element length in a given direction, and shall produce an error if the direction is incorrectly specified.'
     issues = '#18232'
     design = 'PorousFlowElementLength.md'
   []
@@ -76,7 +86,7 @@
     type = CSVDiff
     input = element_length_2D.i
     csvdiff = element_length_2D_out.csv
-    requirement = 'PorousFlow shall be able to calculate a measure of element length in a given direction, in 2D'
+    requirement = 'The system shall be able to calculate a measure of element length in a given direction, in 2D.'
     issues = '#18232'
     design = 'PorousFlowElementLength.md'
   []
@@ -84,16 +94,15 @@
     type = CSVDiff
     input = element_length_3D.i
     csvdiff = element_length_3D_out.csv
-    requirement = 'PorousFlow shall be able to calculate a measure of element length in a given direction, in 3D'
+    requirement = 'The system shall be able to calculate a measure of element length in a given direction, in 3D.'
     issues = '#18232'
     design = 'PorousFlowElementLength.md'
   []
-
   [element_normal_except1]
     type = RunException
     input = element_normal_except1.i
     expect_err = 'The variable must be an elemental variable'
-    requirement = 'PorousFlow shall be able to calculate element normal, and shall produce an error if a nodal variable is used to store the result'
+    requirement = 'The system shall be able to calculate element normal, and shall produce an error if a nodal variable is used to store the result.'
     issues = '#18232'
     design = 'PorousFlowElementNormal.md'
   []
@@ -101,7 +110,7 @@
     type = RunException
     input = element_normal_except2.i
     expect_err = 'Must not be the zero vector'
-    requirement = 'PorousFlow shall be able to calculate element normal for 1D elements if provided with a perpendicular vector, and shall produce an error if the perpendicular vector is incorrectly specified'
+    requirement = 'The system shall be able to calculate element normal for 1D elements if provided with a perpendicular vector, and shall produce an error if the perpendicular vector is incorrectly specified.'
     issues = '#18232'
     design = 'PorousFlowElementNormal.md'
   []
@@ -109,7 +118,7 @@
     type = RunException
     input = element_normal_except3.i
     expect_err = 'Must not be the zero vector'
-    requirement = 'PorousFlow shall be able to calculate element normals for meshes containing 3D elements if provided with a default value for the 3D elements, but shall produce an error if that default value is incorrectly specified'
+    requirement = 'The system shall be able to calculate element normals for meshes containing 3D elements if provided with a default value for the 3D elements, but shall produce an error if that default value is incorrectly specified.'
     issues = '#18232'
     design = 'PorousFlowElementNormal.md'
   []
@@ -117,7 +126,7 @@
     type = CSVDiff
     input = element_normal_1D_2D.i
     csvdiff = element_normal_1D_2D_out.csv
-    requirement = 'PorousFlow shall be able to calculate element normals for 1D and 2D elements, if provided with a perpendicular vector for the 1D elements'
+    requirement = 'The system shall be able to calculate element normals for 1D and 2D elements, if provided with a perpendicular vector for the 1D elements.'
     issues = '#18232'
     design = 'PorousFlowElementNormal.md'
   []
@@ -125,7 +134,7 @@
     type = CSVDiff
     input = element_normal_2D_3D.i
     csvdiff = element_normal_2D_3D_out.csv
-    requirement = 'PorousFlow shall be able to calculate element normals for 2D and 3D elements, if provided with a default value for the 3D elements'
+    requirement = 'The system shall be able to calculate element normals for 2D and 3D elements, if provided with a default value for the 3D elements.'
     issues = '#18232'
     design = 'PorousFlowElementNormal.md'
   []

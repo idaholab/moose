@@ -18,15 +18,16 @@
  * infiltration: A versatile nonlinear model, 1 Analytical solution''.
  * Water Resources Research 24 (1988) 145--154.
  */
-class PorousFlowRelativePermeabilityBW : public PorousFlowRelativePermeabilityBase
+template <bool is_ad>
+class PorousFlowRelativePermeabilityBWTempl : public PorousFlowRelativePermeabilityBaseTempl<is_ad>
 {
 public:
   static InputParameters validParams();
 
-  PorousFlowRelativePermeabilityBW(const InputParameters & parameters);
+  PorousFlowRelativePermeabilityBWTempl(const InputParameters & parameters);
 
 protected:
-  virtual Real relativePermeability(Real seff) const override;
+  virtual GenericReal<is_ad> relativePermeability(GenericReal<is_ad> seff) const override;
   virtual Real dRelativePermeability(Real seff) const override;
 
   /// BW's low saturation
@@ -44,3 +45,6 @@ protected:
   /// BW's C parameter
   const Real _c;
 };
+
+typedef PorousFlowRelativePermeabilityBWTempl<false> PorousFlowRelativePermeabilityBW;
+typedef PorousFlowRelativePermeabilityBWTempl<true> ADPorousFlowRelativePermeabilityBW;

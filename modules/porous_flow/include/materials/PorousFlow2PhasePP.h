@@ -14,15 +14,16 @@
 class PorousFlowCapillaryPressure;
 
 /**
- * Base material designed to calculate fluid phase porepressure and saturation
+ * Material designed to calculate fluid phase porepressure and saturation
  * for the two-phase situation assuming phase porepressures as the nonlinear variables.
  */
-class PorousFlow2PhasePP : public PorousFlowVariableBase
+template <bool is_ad>
+class PorousFlow2PhasePPTempl : public PorousFlowVariableBaseTempl<is_ad>
 {
 public:
   static InputParameters validParams();
 
-  PorousFlow2PhasePP(const InputParameters & parameters);
+  PorousFlow2PhasePPTempl(const InputParameters & parameters);
 
 protected:
   virtual void initQpStatefulProperties() override;
@@ -32,24 +33,29 @@ protected:
    * Assemble std::vectors of porepressure and saturation at the nodes
    * and quadpoints, and return the capillary pressure
    */
-  Real buildQpPPSS();
+  GenericReal<is_ad> buildQpPPSS();
 
   /// Nodal or quadpoint value of porepressure of the zero phase (eg, the water phase)
-  const VariableValue & _phase0_porepressure;
+  const GenericVariableValue<is_ad> & _phase0_porepressure;
   /// Gradient(phase0_porepressure) at the qps
-  const VariableGradient & _phase0_gradp_qp;
+  const GenericVariableGradient<is_ad> & _phase0_gradp_qp;
   /// Moose variable number of the phase0 porepressure
   const unsigned int _phase0_porepressure_varnum;
   /// PorousFlow variable number of the phase0 porepressure
   const unsigned int _p0var;
   /// Nodal or quadpoint value of porepressure of the one phase (eg, the gas phase)
-  const VariableValue & _phase1_porepressure;
+  const GenericVariableValue<is_ad> & _phase1_porepressure;
   /// Gradient(phase1_porepressure) at the qps
-  const VariableGradient & _phase1_gradp_qp;
+  const GenericVariableGradient<is_ad> & _phase1_gradp_qp;
   /// Moose variable number of the phase1 porepressure
   const unsigned int _phase1_porepressure_varnum;
   /// PorousFlow variable number of the phase1 porepressure
   const unsigned int _p1var;
   /// Capillary pressure UserObject
   const PorousFlowCapillaryPressure & _pc_uo;
+
+  usingPorousFlowVariableBaseMembers;
 };
+
+typedef PorousFlow2PhasePPTempl<false> PorousFlow2PhasePP;
+typedef PorousFlow2PhasePPTempl<true> ADPorousFlow2PhasePP;

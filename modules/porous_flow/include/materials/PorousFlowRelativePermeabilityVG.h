@@ -24,15 +24,16 @@
  * that the derivative is zero for seff=1, and that the derivative and value matches
  * the van Genuchten expression for seff=_cut.
  */
-class PorousFlowRelativePermeabilityVG : public PorousFlowRelativePermeabilityBase
+template <bool is_ad>
+class PorousFlowRelativePermeabilityVGTempl : public PorousFlowRelativePermeabilityBaseTempl<is_ad>
 {
 public:
   static InputParameters validParams();
 
-  PorousFlowRelativePermeabilityVG(const InputParameters & parameters);
+  PorousFlowRelativePermeabilityVGTempl(const InputParameters & parameters);
 
 protected:
-  virtual Real relativePermeability(Real seff) const override;
+  virtual GenericReal<is_ad> relativePermeability(GenericReal<is_ad> seff) const override;
   virtual Real dRelativePermeability(Real seff) const override;
 
   /// van Genuchten exponent m for the specified phase
@@ -53,3 +54,6 @@ protected:
   /// Parameter of the cubic
   const Real _cub3;
 };
+
+typedef PorousFlowRelativePermeabilityVGTempl<false> PorousFlowRelativePermeabilityVG;
+typedef PorousFlowRelativePermeabilityVGTempl<true> ADPorousFlowRelativePermeabilityVG;

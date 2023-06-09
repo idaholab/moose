@@ -9,7 +9,6 @@
 
 #include "PorousFlowVanGenuchten.h"
 #include "PorousFlowCubic.h"
-#include "libmesh/utility.h"
 
 namespace PorousFlowVanGenuchten
 {
@@ -112,20 +111,6 @@ d2CapillaryPressure(Real seff, Real alpha, Real m, Real pc_max)
 }
 
 Real
-relativePermeability(Real seff, Real m)
-{
-  if (seff <= 0.0)
-    return 0.0;
-  else if (seff >= 1.0)
-    return 1.0;
-
-  const Real a = 1.0 - std::pow(seff, 1.0 / m);
-  const Real b = 1.0 - std::pow(a, m);
-
-  return std::sqrt(seff) * Utility::pow<2>(b);
-}
-
-Real
 dRelativePermeability(Real seff, Real m)
 {
   // Guard against division by zero
@@ -156,20 +141,6 @@ d2RelativePermeability(Real seff, Real m)
 
   return -0.25 * std::pow(seff, -1.5) * Utility::pow<2>(b) + 2.0 * std::pow(seff, -0.5) * b * db +
          2.0 * std::sqrt(seff) * db * db + 2.0 * std::sqrt(seff) * b * d2b;
-}
-
-Real
-relativePermeabilityNW(Real seff, Real m)
-{
-  if (seff <= 0.0)
-    return 0.0;
-  else if (seff >= 1.0)
-    return 1.0;
-
-  const Real a = std::pow(1.0 - seff, 1.0 / m);
-  const Real b = std::pow(1.0 - a, 2.0 * m);
-
-  return std::sqrt(seff) * b;
 }
 
 Real

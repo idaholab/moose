@@ -18,17 +18,22 @@
  * From  Corey, A. T., The interrelation between gas and oil relative
  * permeabilities, Prod. Month. 38-41 (1954)
  */
-class PorousFlowRelativePermeabilityCorey : public PorousFlowRelativePermeabilityBase
+template <bool is_ad>
+class PorousFlowRelativePermeabilityCoreyTempl
+  : public PorousFlowRelativePermeabilityBaseTempl<is_ad>
 {
 public:
   static InputParameters validParams();
 
-  PorousFlowRelativePermeabilityCorey(const InputParameters & parameters);
+  PorousFlowRelativePermeabilityCoreyTempl(const InputParameters & parameters);
 
 protected:
-  virtual Real relativePermeability(Real seff) const override;
+  virtual GenericReal<is_ad> relativePermeability(GenericReal<is_ad> seff) const override;
   virtual Real dRelativePermeability(Real seff) const override;
 
   /// Corey exponent n for the specified phase
   const Real _n;
 };
+
+typedef PorousFlowRelativePermeabilityCoreyTempl<false> PorousFlowRelativePermeabilityCorey;
+typedef PorousFlowRelativePermeabilityCoreyTempl<true> ADPorousFlowRelativePermeabilityCorey;

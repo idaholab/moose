@@ -10,9 +10,11 @@
 #include "PorousFlow1PhaseFullySaturated.h"
 
 registerMooseObject("PorousFlowApp", PorousFlow1PhaseFullySaturated);
+registerMooseObject("PorousFlowApp", ADPorousFlow1PhaseFullySaturated);
 
+template <bool is_ad>
 InputParameters
-PorousFlow1PhaseFullySaturated::validParams()
+PorousFlow1PhaseFullySaturatedTempl<is_ad>::validParams()
 {
   InputParameters params = PorousFlowVariableBase::validParams();
   params.addRequiredCoupledVar("porepressure",
@@ -22,12 +24,14 @@ PorousFlow1PhaseFullySaturated::validParams()
   return params;
 }
 
-PorousFlow1PhaseFullySaturated::PorousFlow1PhaseFullySaturated(const InputParameters & parameters)
-  : PorousFlowVariableBase(parameters),
+template <bool is_ad>
+PorousFlow1PhaseFullySaturatedTempl<is_ad>::PorousFlow1PhaseFullySaturatedTempl(
+    const InputParameters & parameters)
+  : PorousFlowVariableBaseTempl<is_ad>(parameters),
 
-    _porepressure_var(_nodal_material ? coupledDofValues("porepressure")
-                                      : coupledValue("porepressure")),
-    _gradp_qp_var(coupledGradient("porepressure")),
+    _porepressure_var(_nodal_material ? this->template coupledGenericDofValue<is_ad>("porepressure")
+                                      : this->template coupledGenericValue<is_ad>("porepressure")),
+    _gradp_qp_var(this->template coupledGenericGradient<is_ad>("porepressure")),
     _porepressure_varnum(coupled("porepressure")),
     _p_var_num(_dictator.isPorousFlowVariable(_porepressure_varnum)
                    ? _dictator.porousFlowVariableNum(_porepressure_varnum)
@@ -40,18 +44,20 @@ PorousFlow1PhaseFullySaturated::PorousFlow1PhaseFullySaturated(const InputParame
                " Be aware that the Dictator has noted your mistake.");
 }
 
+template <bool is_ad>
 void
-PorousFlow1PhaseFullySaturated::initQpStatefulProperties()
+PorousFlow1PhaseFullySaturatedTempl<is_ad>::initQpStatefulProperties()
 {
-  PorousFlowVariableBase::initQpStatefulProperties();
+  PorousFlowVariableBaseTempl<is_ad>::initQpStatefulProperties();
   buildQpPPSS();
 }
 
+template <bool is_ad>
 void
-PorousFlow1PhaseFullySaturated::computeQpProperties()
+PorousFlow1PhaseFullySaturatedTempl<is_ad>::computeQpProperties()
 {
   // Size vectors correctly and prepare the derivative matrices with zeroes
-  PorousFlowVariableBase::computeQpProperties();
+  PorousFlowVariableBaseTempl<is_ad>::computeQpProperties();
 
   buildQpPPSS();
 
@@ -59,7 +65,7 @@ PorousFlow1PhaseFullySaturated::computeQpProperties()
     (*_gradp_qp)[_qp][0] = _gradp_qp_var[_qp];
 
   // _porepressure is only dependent on _porepressure, and its derivative is 1
-  if (_dictator.isPorousFlowVariable(_porepressure_varnum))
+  if (!is_ad && _dictator.isPorousFlowVariable(_porepressure_varnum))
   {
     // _porepressure is a PorousFlow variable
     (*_dporepressure_dvar)[_qp][0][_p_var_num] = 1.0;
@@ -68,9 +74,13 @@ PorousFlow1PhaseFullySaturated::computeQpProperties()
   }
 }
 
+template <bool is_ad>
 void
-PorousFlow1PhaseFullySaturated::buildQpPPSS()
+PorousFlow1PhaseFullySaturatedTempl<is_ad>::buildQpPPSS()
 {
   _porepressure[_qp][0] = _porepressure_var[_qp];
   _saturation[_qp][0] = 1.0;
 }
+
+template class PorousFlow1PhaseFullySaturatedTempl<false>;
+template class PorousFlow1PhaseFullySaturatedTempl<true>;

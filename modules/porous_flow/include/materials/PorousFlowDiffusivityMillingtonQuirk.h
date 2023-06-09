@@ -17,22 +17,28 @@
  * Millington and Quirk, Permeability of Porous Solids, Trans. Faraday Soc.,
  * 57, 1200- 1207, 1961
  */
-class PorousFlowDiffusivityMillingtonQuirk : public PorousFlowDiffusivityBase
+template <bool is_ad>
+class PorousFlowDiffusivityMillingtonQuirkTempl : public PorousFlowDiffusivityBaseTempl<is_ad>
 {
 public:
   static InputParameters validParams();
 
-  PorousFlowDiffusivityMillingtonQuirk(const InputParameters & parameters);
+  PorousFlowDiffusivityMillingtonQuirkTempl(const InputParameters & parameters);
 
 protected:
   virtual void computeQpProperties() override;
 
   /// Porosity at the qps
-  const MaterialProperty<Real> & _porosity_qp;
+  const GenericMaterialProperty<Real, is_ad> & _porosity_qp;
   /// Derivative of porosity wrt PorousFlow variables (at the qps)
-  const MaterialProperty<std::vector<Real>> & _dporosity_qp_dvar;
+  const MaterialProperty<std::vector<Real>> * const _dporosity_qp_dvar;
   /// Saturation of each phase at the qps
-  const MaterialProperty<std::vector<Real>> & _saturation_qp;
+  const GenericMaterialProperty<std::vector<Real>, is_ad> & _saturation_qp;
   /// Derivative of saturation of each phase wrt PorousFlow variables (at the qps)
-  const MaterialProperty<std::vector<std::vector<Real>>> & _dsaturation_qp_dvar;
+  const MaterialProperty<std::vector<std::vector<Real>>> * const _dsaturation_qp_dvar;
+
+  usingPorousFlowDiffusivityBaseMembers;
 };
+
+typedef PorousFlowDiffusivityMillingtonQuirkTempl<false> PorousFlowDiffusivityMillingtonQuirk;
+typedef PorousFlowDiffusivityMillingtonQuirkTempl<true> ADPorousFlowDiffusivityMillingtonQuirk;

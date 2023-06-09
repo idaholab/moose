@@ -12,28 +12,38 @@
 #include "PorousFlowMaterialVectorBase.h"
 
 /// Base class Material designed to provide the tortuosity and diffusion coefficents
-class PorousFlowDiffusivityBase : public PorousFlowMaterialVectorBase
+template <bool is_ad>
+class PorousFlowDiffusivityBaseTempl : public PorousFlowMaterialVectorBase
 {
 public:
   static InputParameters validParams();
 
-  PorousFlowDiffusivityBase(const InputParameters & parameters);
+  PorousFlowDiffusivityBaseTempl(const InputParameters & parameters);
 
 protected:
   virtual void computeQpProperties() override;
 
   /// Tortuosity tau_0 * tau_{alpha} for fluid phase alpha
-  MaterialProperty<std::vector<Real>> & _tortuosity;
+  GenericMaterialProperty<std::vector<Real>, is_ad> & _tortuosity;
 
   /// Derivative of tortuosity wrt PorousFlow variables
-  MaterialProperty<std::vector<std::vector<Real>>> & _dtortuosity_dvar;
+  MaterialProperty<std::vector<std::vector<Real>>> * const _dtortuosity_dvar;
 
   /// Diffusion coefficients of component k in fluid phase alpha
   MaterialProperty<std::vector<std::vector<Real>>> & _diffusion_coeff;
 
   /// Derivative of the diffusion coefficients wrt PorousFlow variables
-  MaterialProperty<std::vector<std::vector<std::vector<Real>>>> & _ddiffusion_coeff_dvar;
+  MaterialProperty<std::vector<std::vector<std::vector<Real>>>> * const _ddiffusion_coeff_dvar;
 
   /// Input diffusion coefficients
   const std::vector<Real> _input_diffusion_coeff;
 };
+
+#define usingPorousFlowDiffusivityBaseMembers                                                      \
+  using PorousFlowDiffusivityBaseTempl<is_ad>::_num_phases;                                        \
+  using PorousFlowDiffusivityBaseTempl<is_ad>::_num_var;                                           \
+  using PorousFlowDiffusivityBaseTempl<is_ad>::_tortuosity;                                        \
+  using PorousFlowDiffusivityBaseTempl<is_ad>::_qp;                                                \
+  using PorousFlowDiffusivityBaseTempl<is_ad>::_dtortuosity_dvar;                                  \
+  using PorousFlowDiffusivityBaseTempl<is_ad>::_diffusion_coeff;                                   \
+  using PorousFlowDiffusivityBaseTempl<is_ad>::_ddiffusion_coeff_dvar

@@ -117,3 +117,31 @@ TEST(PorousFlowBrooksCoreyTest, drelpermnw)
        eps;
   EXPECT_NEAR(fd, PorousFlowBrooksCorey::dRelativePermeabilityNW(0.3, 2.5), tol);
 }
+
+TEST(PorousFlowBrooksCoreyTest, adrelpermw)
+{
+  DualReal sat = 0.3;
+  Moose::derivInsert(sat.derivatives(), 0, 1.0);
+
+  const auto adrelperm = PorousFlowBrooksCorey::relativePermeabilityW(sat, 2.5);
+
+  const auto relperm = PorousFlowBrooksCorey::relativePermeabilityW(sat.value(), 2.5);
+  const auto drelperm = PorousFlowBrooksCorey::dRelativePermeabilityW(sat.value(), 2.5);
+
+  EXPECT_NEAR(adrelperm.value(), relperm, tol);
+  EXPECT_NEAR(adrelperm.derivatives()[0], drelperm, tol);
+}
+
+TEST(PorousFlowBrooksCoreyTest, adrelpermnw)
+{
+  DualReal sat = 0.3;
+  Moose::derivInsert(sat.derivatives(), 0, 1.0);
+
+  const auto adrelperm = PorousFlowBrooksCorey::relativePermeabilityNW(sat, 2.5);
+
+  const auto relperm = PorousFlowBrooksCorey::relativePermeabilityNW(sat.value(), 2.5);
+  const auto drelperm = PorousFlowBrooksCorey::dRelativePermeabilityNW(sat.value(), 2.5);
+
+  EXPECT_NEAR(adrelperm.value(), relperm, tol);
+  EXPECT_NEAR(adrelperm.derivatives()[0], drelperm, tol);
+}
