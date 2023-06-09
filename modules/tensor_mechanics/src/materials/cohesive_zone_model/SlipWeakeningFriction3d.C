@@ -1,4 +1,4 @@
-/* 
+/*
 Material Description of Slip Weakening Friction 3d
 */
 
@@ -30,7 +30,7 @@ SlipWeakeningFriction3d::validParams()
 
 SlipWeakeningFriction3d::SlipWeakeningFriction3d(const InputParameters & parameters)
   : CZMComputeLocalTractionTotalBase(parameters),
-    _T2_o(getParam<Real>("T2_o")), 
+    _T2_o(getParam<Real>("T2_o")),
     _T3_o(getParam<Real>("T3_o")),
     _mu_d(getParam<Real>("mu_d")),
     _Dc(getParam<Real>("Dc")),
@@ -62,10 +62,10 @@ SlipWeakeningFriction3d::SlipWeakeningFriction3d(const InputParameters & paramet
 
 void
 SlipWeakeningFriction3d::computeInterfaceTractionAndDerivatives()
-{   
+{
    //Global Displacement Jump
    RealVectorValue displacement_jump_global(_disp_slipweakening_x[_qp]-_disp_slipweakening_neighbor_x[_qp],_disp_slipweakening_y[_qp]-_disp_slipweakening_neighbor_y[_qp],_disp_slipweakening_z[_qp]-_disp_slipweakening_neighbor_z[_qp]);
-   
+
    //Global Displacement Jump Old
    RealVectorValue displacement_jump_old_global(_disp_slipweakening_x_old[_qp]-_disp_slipweakening_neighbor_x_old[_qp],_disp_slipweakening_y_old[_qp]-_disp_slipweakening_neighbor_y_old[_qp],_disp_slipweakening_z_old[_qp]-_disp_slipweakening_neighbor_z_old[_qp]);
 
@@ -77,11 +77,11 @@ SlipWeakeningFriction3d::computeInterfaceTractionAndDerivatives()
    RealVectorValue displacement_jump_rate = _rot[_qp].transpose() * displacement_jump_rate_global;
 
    //Parameter initialization
-   Real mu_s = 0; 
-   Real mu_d = _mu_d; 
-   Real Dc = _Dc; 
+   Real mu_s = 0;
+   Real mu_d = _mu_d;
+   Real Dc = _Dc;
    Real tau_f = 0;
-   
+
    Real T1_o = 0;
    Real T2_o = _T2_o;
    Real T3_o = _T3_o;
@@ -103,7 +103,7 @@ SlipWeakeningFriction3d::computeInterfaceTractionAndDerivatives()
    Real R_minus_local_z = R_minus_local(2);
 
    //Compute node mass
-   Real M = _density[_qp] * len * len * len / 2; 
+   Real M = _density[_qp] * len * len * len / 2;
 
    //Compute mu_s for current qp
    mu_s = _mu_s[_qp];
@@ -127,7 +127,7 @@ SlipWeakeningFriction3d::computeInterfaceTractionAndDerivatives()
    if (std::norm(displacement_jump) < Dc)
    {
      tau_f = (mu_s - (mu_s - mu_d)*std::norm(displacement_jump)/Dc)*(-T2); // square for shear component
-   } 
+   }
    else
    {
      tau_f = mu_d * (-T2);
@@ -136,7 +136,7 @@ SlipWeakeningFriction3d::computeInterfaceTractionAndDerivatives()
    //Compute fault traction
    if (std::sqrt(T1*T1 + T3*T3)<tau_f)
    {
-   
+
    }else{
      T1 = tau_f*T1/std::sqrt(T1*T1 + T3*T3);
      T3 = tau_f*T3/std::sqrt(T1*T1 + T3*T3);
@@ -145,8 +145,8 @@ SlipWeakeningFriction3d::computeInterfaceTractionAndDerivatives()
    //Assign back traction in CZM
    RealVectorValue traction;
 
-   traction(0) = T2+T2_o; 
-   traction(1) = -T1+T1_o; 
+   traction(0) = T2+T2_o;
+   traction(1) = -T1+T1_o;
    traction(2) = -T3+T3_o;
 
    _interface_traction[_qp] = traction;

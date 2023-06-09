@@ -28,7 +28,7 @@
       split_interface = true
     []
   []
-    
+
   [GlobalParams]
     #primary variables
     displacements = 'disp_x disp_y disp_z'
@@ -45,7 +45,7 @@
     #element edge length (m)
     len = 200
   []
-  
+
   [AuxVariables]
     [./resid_x]
         order = FIRST
@@ -104,15 +104,15 @@
         family = MONOMIAL
     []
   []
-  
+
   [Modules/TensorMechanics/CohesiveZoneMaster]
     [./czm_ik]
       boundary = 'Block0_Block1'
       strain = SMALL
     [../]
   []
-    
-    
+
+
   [Modules]
     [./TensorMechanics]
       [./Master]
@@ -128,7 +128,7 @@
   [Problem]
     extra_tag_vectors = 'restore_tag'
   []
-  
+
   [AuxKernels]
     [Vel_x]
       type = ComputeValueRate
@@ -218,7 +218,7 @@
       execute_on = 'LINEAR TIMESTEP_BEGIN'
     []
   []
-  
+
   [Kernels]
     [./inertia_x]
       type = InertialForce
@@ -251,7 +251,7 @@
       component = '2'
     []
   []
-  
+
   [Materials]
     [elasticity]
         type = ComputeIsotropicElasticityTensor
@@ -289,7 +289,7 @@
       type = InitialStrikeShearStress
     []
   []
-  
+
   [UserObjects]
     [recompute_residual_tag]
         type = ResidualEvaluationUserObject
@@ -298,7 +298,7 @@
         execute_on = 'TIMESTEP_END'
     []
   []
-  
+
   [Executioner]
     type = Transient
     dt = 0.005
@@ -308,7 +308,7 @@
       solve_type = lumped
     []
   []
-  
+
   [Outputs]
     exodus = true
     interval = 10

@@ -1,4 +1,4 @@
-/* 
+/*
 Material Description of Slip Weakening Friction 3d
 */
 
@@ -46,7 +46,7 @@ protected:
   const VariableValue & _disp_slipweakening_neighbor_y_old;
   const VariableValue & _disp_slipweakening_z_old;
   const VariableValue & _disp_slipweakening_neighbor_z_old;
- 
+
   const VariableValue & _mu_s;
   const VariableValue & _ini_shear_sts;
 };

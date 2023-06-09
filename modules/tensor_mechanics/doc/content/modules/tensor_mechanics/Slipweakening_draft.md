@@ -83,7 +83,11 @@ $$\begin{array}{r} \int_{V}^{}{\rho\ddot{u}\ \psi}\ dV(3) \end{array}$$
 
 The input file defining both kernels are given below, note in 2D formulation, “plane strain” needs to be set:
 
-```
+!listing moose/modules/tensor_mechanics/test/tests/2D_slipweakening/tpv2052D.i 
+block=Modules
+id=input-block
+caption=StressDivergenceTensors Kernels: Input File
+
 [Modules]
 [./TensorMechanics]
     [./Master]
@@ -94,7 +98,7 @@ The input file defining both kernels are given below, note in 2D formulation, �
     [../]
 [../]
 []
-``` 
+
 ```
 [Modules]
 [./TensorMechanics]
