@@ -82,9 +82,14 @@ fillBetweenPointVectorsGenerator(MeshBase & mesh, // an empty mesh is expected
                                                      boundary_points_vec_2.rend());
     oriented_boundary_points_vec_2 = &possibly_reoriented_boundary_points_vec_2;
 
-    mooseWarning(
-        "In FillBetweenPointVectorsTools, one of the vector of Points must be flipped to ensure "
-        "correct transition layer shape.");
+    // This isn't worth warning about.  The way
+    // MooseMeshUtils::makeOrderedNodeList works, we can end up
+    // finding a flip necessary on one element numbering and
+    // unnecessary on another.
+    //
+    // mooseWarning(
+    //     "In FillBetweenPointVectorsTools, one of the vector of Points must be flipped to ensure "
+    //     "correct transition layer shape.");
   }
 
   std::vector<Real> vec_1_index; // Unweighted index
