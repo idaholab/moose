@@ -10,6 +10,7 @@
 #pragma once
 
 #include "MooseTypes.h"
+#include "libmesh/utility.h"
 
 /**
  * van Genuchten effective saturation, capillary pressure and relative

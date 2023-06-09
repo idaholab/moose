@@ -9,7 +9,6 @@
 
 #include "PorousFlowVanGenuchten.h"
 #include "PorousFlowCubic.h"
-#include "libmesh/utility.h"
 
 namespace PorousFlowVanGenuchten
 {
