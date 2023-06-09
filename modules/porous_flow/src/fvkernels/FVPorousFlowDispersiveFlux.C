@@ -98,7 +98,6 @@ FVPorousFlowDispersiveFlux::computeQpResidual()
 {
   ADReal flux = 0.0;
   ADRankTwoTensor dispersion;
-  dispersion.zero();
   ADReal diffusion;
 
   for (unsigned int p = 0; p < _num_phases; ++p)
@@ -107,7 +106,7 @@ FVPorousFlowDispersiveFlux::computeQpResidual()
     ADRealGradient gradX;
 
     const auto state = determineState();
-    auto dudn = gradUDotNormal(state);
+    const auto dudn = gradUDotNormal(state);
 
     // If we are on a boundary face, use the reconstructed gradient computed in _grad_mass_frac
     if (onBoundary(*_face_info))
@@ -119,8 +118,8 @@ FVPorousFlowDispersiveFlux::computeQpResidual()
     else
     {
       // If we are on an internal face, calculate the gradient explicitly
-      const auto X_elem = _mass_fractions[_qp][p][_fluid_component];
-      const auto X_neighbor = _mass_fractions_neighbor[_qp][p][_fluid_component];
+      const auto & X_elem = _mass_fractions[_qp][p][_fluid_component];
+      const auto & X_neighbor = _mass_fractions_neighbor[_qp][p][_fluid_component];
 
       gradX = (X_elem - X_neighbor) * _face_info->eCN() / _face_info->dCNMag();
 
@@ -147,8 +146,8 @@ FVPorousFlowDispersiveFlux::computeQpResidual()
     else
     {
       // If we are on an internal face, calculate the gradient explicitly
-      const auto p_elem = _pressure[_qp][p];
-      const auto p_neighbor = _pressure_neighbor[_qp][p];
+      const auto & p_elem = _pressure[_qp][p];
+      const auto & p_neighbor = _pressure_neighbor[_qp][p];
 
       gradp = (p_elem - p_neighbor) * _face_info->eCN() / _face_info->dCNMag() +
               _density[_qp][p] * _gravity;

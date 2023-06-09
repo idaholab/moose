@@ -75,7 +75,7 @@ FVPorousFlowAdvectiveFlux::computeQpResidual()
     // If we are on a boundary face, use the reconstructed gradient computed in _grad_p
     if (onBoundary(*_face_info))
     {
-      const auto gradp = -_grad_p[_qp][p];
+      const auto & gradp = -_grad_p[_qp][p];
       pressure_grad = gradp + _density[_qp][p] * _gravity;
 
       mobility = _mass_fractions[_qp][p][_fluid_component] * _relperm[_qp][p] * _permeability[_qp] *
@@ -84,8 +84,8 @@ FVPorousFlowAdvectiveFlux::computeQpResidual()
     else
     {
       // If we are on an internal face, calculate the gradient explicitly
-      const auto p_elem = _pressure[_qp][p];
-      const auto p_neighbor = _pressure_neighbor[_qp][p];
+      const auto & p_elem = _pressure[_qp][p];
+      const auto & p_neighbor = _pressure_neighbor[_qp][p];
 
       const auto gradp = (p_elem - p_neighbor) * _face_info->eCN() / _face_info->dCNMag();
 
