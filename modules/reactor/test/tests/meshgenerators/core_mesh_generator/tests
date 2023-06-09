@@ -13,7 +13,8 @@
                 Mesh/pin2/mesh_intervals='2'
                 Mesh/pin3/num_sectors=2
                 Mesh/pin3/ring_radii='0.3818'
-                Mesh/pin3/mesh_intervals='1 1'"
+                Mesh/pin3/mesh_intervals='1 1'
+                Mesh/inactive='rotate90'"
     exodiff = 'core_in.e'
     recover = false
   []
@@ -39,6 +40,7 @@
                 Mesh/amg2/duct_region_ids='7'
                 Mesh/amg2/duct_halfpitch='1.2'
                 Mesh/amg2/duct_intervals=1
+                Mesh/inactive='rotate90'
                 Outputs/file_base=core_square_mixed_background_duct"
     exodiff = 'core_square_mixed_background_duct.e'
     recover = false
@@ -57,6 +59,7 @@
                 Mesh/pin3/ring_radii='0.3818'
                 Mesh/pin3/mesh_intervals='1 1'
                 Mesh/cmg/pattern='2 1; 1 0'
+                Mesh/inactive='rotate90'
                 Outputs/file_base=core_empty_in"
     exodiff = 'core_empty_in.e'
     recover = false
@@ -111,7 +114,7 @@
     requirement = 'The system shall generate a full 3D square core mesh with 2 single assembly types'
     type = 'Exodiff'
     input = 'core.i'
-    cli_args = "Mesh/inactive='pin3 amg1 amg2'
+    cli_args = "Mesh/inactive='pin3 amg1 amg2 rotate90'
                 Mesh/rmp/assembly_pitch=1.42063
                 Mesh/pin1/num_sectors=2
                 Mesh/pin1/ring_radii='0.2'

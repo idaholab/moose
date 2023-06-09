@@ -292,6 +292,7 @@ CoreMeshGenerator::CoreMeshGenerator(const InputParameters & parameters)
       const auto radial_boundary = getReactorParam<boundary_id_type>("radial_boundary_id");
       params.set<boundary_id_type>("external_boundary_id") = radial_boundary;
       params.set<std::string>("external_boundary_name") = "outer_core";
+      params.set<double>("rotate_angle") = 0.0;
 
       addMeshSubgenerator(patterned_mg_name, name() + "_pattern", params);
     }
