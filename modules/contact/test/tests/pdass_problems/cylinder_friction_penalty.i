@@ -277,9 +277,44 @@
     disp_y = disp_y
     friction_coefficient = 0.4 # with 2.0 works
     secondary_variable = disp_x
-    penalty = 5e9
+    penalty = 1e11
     penalty_friction = 5e8 # 1e7
   []
+  [geo_surface]
+    type = GeometrySphere
+    boundary = 3
+    center = '0 4 0'
+    radius = 3
+    execute_on = TIMESTEP_BEGIN
+  []
+  [geo_lower]
+    type = GeometrySphere
+    boundary = secondary_lower
+    center = '0 4 0'
+    radius = 3
+    execute_on = TIMESTEP_BEGIN
+  []
+[]
+
+[Adaptivity]
+  [Markers]
+    [contact_surface]
+      type = BoundaryMarker
+      mark = REFINE
+      next_to = 3
+    []
+    [contact_lower]
+      type = UniformMarker
+      block = secondary_lower
+      mark = REFINE
+    []
+    [contact]
+      type = ComboMarker
+      markers = 'contact_surface' # contact_lower
+    []
+  []
+  initial_marker = contact
+  initial_steps = 1
 []
 
 [Constraints]
