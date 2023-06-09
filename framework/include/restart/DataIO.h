@@ -37,7 +37,6 @@
 
 namespace libMesh
 {
-class EquationSystems;
 template <typename T>
 class NumericVector;
 template <typename T>
@@ -370,8 +369,6 @@ template <>
 void dataStore(std::ostream & stream, RealEigenMatrix & v, void * context);
 template <>
 void dataStore(std::ostream & stream, libMesh::Parameters & p, void * context);
-template <>
-void dataStore(std::ostream & stream, libMesh::EquationSystems & es, void * context);
 
 template <std::size_t N>
 inline void
@@ -670,8 +667,6 @@ template <>
 void dataLoad(std::istream & stream, RealEigenMatrix & v, void * context);
 template <>
 void dataLoad(std::istream & stream, libMesh::Parameters & p, void * context);
-template <>
-void dataLoad(std::istream & stream, libMesh::EquationSystems & es, void * context);
 
 template <std::size_t N>
 inline void

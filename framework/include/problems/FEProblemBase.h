@@ -33,6 +33,8 @@
 #include "MooseObjectWarehouse.h"
 #include "MaterialPropertyRegistry.h"
 
+#include "RestartableEquationSystems.h"
+
 #include "libmesh/enum_quadrature_type.h"
 #include "libmesh/equation_systems.h"
 
@@ -148,7 +150,7 @@ public:
   FEProblemBase(const InputParameters & parameters);
   virtual ~FEProblemBase();
 
-  virtual EquationSystems & es() override { return _eq.set(); }
+  virtual EquationSystems & es() override { return _req.set().es(); }
   virtual MooseMesh & mesh() override { return _mesh; }
   virtual const MooseMesh & mesh() const override { return _mesh; }
   const MooseMesh & mesh(bool use_displaced) const override;
@@ -1712,11 +1714,6 @@ public:
    */
   bool needsPreviousNewtonIteration() const;
 
-  /**
-   * Whether or not to skip loading the additional data when restarting
-   */
-  bool skipAdditionalRestartData() const { return _skip_additional_restart_data; }
-
   ///@{
   /**
    * Convenience zeros
@@ -2116,7 +2113,7 @@ protected:
   MooseMesh & _mesh;
 
 private:
-  Restartable::ManagedValue<EquationSystems> _eq;
+  Restartable::ManagedValue<RestartableEquationSystems> _req;
 
 protected:
   bool _initialized;
@@ -2476,7 +2473,6 @@ private:
   bool _error_on_jacobian_nonzero_reallocation;
   bool _ignore_zeros_in_jacobian;
   const bool _force_restart;
-  const bool _skip_additional_restart_data;
   const bool _allow_ics_during_restart;
   const bool _skip_nl_system_check;
   bool _fail_next_nonlinear_convergence_check;

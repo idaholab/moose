@@ -306,7 +306,8 @@ FEProblemBase::FEProblemBase(const InputParameters & parameters)
   : SubProblem(parameters),
     Restartable(this, "FEProblemBase"),
     _mesh(*getCheckedPointerParam<MooseMesh *>("mesh")),
-    _eq(declareManagedRestartableDataWithContext<EquationSystems>("equation_systems", this, _mesh)),
+    _req(declareManagedRestartableDataWithContext<RestartableEquationSystems>(
+        "equation_systems", nullptr, _mesh, getParam<bool>("skip_additional_restart_data"))),
     _initialized(false),
     _solve(getParam<bool>("solve")),
     _transient(false),
@@ -384,7 +385,6 @@ FEProblemBase::FEProblemBase(const InputParameters & parameters)
             : _app.errorOnJacobianNonzeroReallocation()),
     _ignore_zeros_in_jacobian(getParam<bool>("ignore_zeros_in_jacobian")),
     _force_restart(getParam<bool>("force_restart")),
-    _skip_additional_restart_data(getParam<bool>("skip_additional_restart_data")),
     _allow_ics_during_restart(getParam<bool>("allow_initial_conditions_with_restart")),
     _skip_nl_system_check(getParam<bool>("skip_nl_system_check")),
     _fail_next_nonlinear_convergence_check(false),
