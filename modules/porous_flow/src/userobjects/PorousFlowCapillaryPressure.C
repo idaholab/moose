@@ -68,13 +68,13 @@ PorousFlowCapillaryPressure::capillaryPressure(Real saturation, unsigned qp) con
     return capillaryPressureCurve(saturation, qp);
 }
 
-DualReal
-PorousFlowCapillaryPressure::capillaryPressure(const DualReal & saturation, unsigned qp) const
+ADReal
+PorousFlowCapillaryPressure::capillaryPressure(const ADReal & saturation, unsigned qp) const
 {
   const Real Pc = capillaryPressure(saturation.value(), qp);
   const Real dPc_ds = dCapillaryPressure(saturation.value(), qp);
 
-  DualReal result = Pc;
+  ADReal result = Pc;
   result.derivatives() = saturation.derivatives() * dPc_ds;
 
   return result;
@@ -89,13 +89,13 @@ PorousFlowCapillaryPressure::dCapillaryPressure(Real saturation, unsigned qp) co
     return dCapillaryPressureCurve(saturation, qp);
 }
 
-DualReal
-PorousFlowCapillaryPressure::dCapillaryPressure(const DualReal & saturation, unsigned qp) const
+ADReal
+PorousFlowCapillaryPressure::dCapillaryPressure(const ADReal & saturation, unsigned qp) const
 {
   const Real dPc = dCapillaryPressure(saturation.value(), qp);
   const Real d2Pc_ds2 = d2CapillaryPressure(saturation.value(), qp);
 
-  DualReal result = dPc;
+  ADReal result = dPc;
   result.derivatives() = saturation.derivatives() * d2Pc_ds2;
 
   return result;
@@ -122,13 +122,13 @@ PorousFlowCapillaryPressure::saturation(Real pc, unsigned qp) const
   return effectiveSaturation(pc, qp) * (1.0 - _sat_lr) + _sat_lr;
 }
 
-DualReal
-PorousFlowCapillaryPressure::saturation(const DualReal & pc, unsigned qp) const
+ADReal
+PorousFlowCapillaryPressure::saturation(const ADReal & pc, unsigned qp) const
 {
   const Real s = effectiveSaturation(pc.value(), qp) * (1.0 - _sat_lr) + _sat_lr;
   const Real ds_dpc = dEffectiveSaturation(pc.value(), qp) * (1.0 - _sat_lr);
 
-  DualReal result = s;
+  ADReal result = s;
   result.derivatives() = pc.derivatives() * ds_dpc;
 
   return result;
@@ -140,13 +140,13 @@ PorousFlowCapillaryPressure::dSaturation(Real pc, unsigned qp) const
   return dEffectiveSaturation(pc, qp) * (1.0 - _sat_lr);
 }
 
-DualReal
-PorousFlowCapillaryPressure::dSaturation(const DualReal & pc, unsigned qp) const
+ADReal
+PorousFlowCapillaryPressure::dSaturation(const ADReal & pc, unsigned qp) const
 {
   const Real ds = dEffectiveSaturation(pc.value(), qp) * (1.0 - _sat_lr);
   const Real d2s_dpc2 = d2EffectiveSaturation(pc.value(), qp) * (1.0 - _sat_lr);
 
-  DualReal result = ds;
+  ADReal result = ds;
   result.derivatives() = pc.derivatives() * d2s_dpc2;
 
   return result;
