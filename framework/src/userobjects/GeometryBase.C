@@ -15,16 +15,20 @@ InputParameters
 GeometryBase::validParams()
 {
   InputParameters params = GeneralUserObject::validParams();
-  params.addClassDescription("Snap refined nodes on a given boundary to a given geometry");
+  params.addClassDescription(
+      "Snap refined nodes on a given boundary or block to a given geometry.");
   params.addParam<std::vector<BoundaryName>>(
       "boundary", "List of boundaries whose nodes are snapped to a given geometry");
+  params.addParam<std::vector<SubdomainName>>(
+      "block", "List of blocks whose nodes are snapped to a given geometry");
   return params;
 }
 
 GeometryBase::GeometryBase(const InputParameters & parameters)
   : GeneralUserObject(parameters),
     _mesh(_subproblem.mesh()),
-    _boundary_ids(_mesh.getBoundaryIDs(getParam<std::vector<BoundaryName>>("boundary")))
+    _boundary_ids(_mesh.getBoundaryIDs(getParam<std::vector<BoundaryName>>("boundary"))),
+    _subdomain_ids(_mesh.getSubdomainIDs(getParam<std::vector<SubdomainName>>("block")))
 {
 }
 
@@ -48,6 +52,7 @@ GeometryBase::meshChanged()
 {
   auto & mesh = _mesh.getMesh();
 
+  // go over boundaries
   for (auto & boundary_id : _boundary_ids)
   {
     auto node_ids = _mesh.getNodeList(boundary_id);
@@ -57,5 +62,20 @@ GeometryBase::meshChanged()
 
       snapNode(node);
     }
+  }
+
+  // go over blocks
+  MeshBase::node_iterator node = mesh.active_nodes_begin();
+  MeshBase::node_iterator node_end = mesh.active_nodes_end();
+  for (; node != node_end; ++node)
+  {
+    // check if node is part of any of the selected blocks
+    const auto & node_blocks = _mesh.getNodeBlockIds(**node);
+    for (const auto subdomain_id : _subdomain_ids)
+      if (node_blocks.count(subdomain_id))
+      {
+        snapNode(**node);
+        break;
+      }
   }
 }

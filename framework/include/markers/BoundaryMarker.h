@@ -34,5 +34,5 @@ protected:
   const MarkerValue _mark;
 
   /// boundary near which to mark elements
-  const BoundaryID _boundary;
+  const std::vector<BoundaryID> _boundary_ids;
 };
