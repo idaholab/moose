@@ -53,7 +53,8 @@ TEST(PorousFlowFLACrelpermTest, d2relperm)
 
 TEST(PorousFlowFLACrelpermTest, adrelperm)
 {
-  DualReal sat = 0.3;
+  ADReal sat = 0.3;
+  sat.derivatives() = {};
   Moose::derivInsert(sat.derivatives(), 0, 1.0);
 
   const auto adrelperm = PorousFlowFLACrelperm::relativePermeability(sat, 2.7);

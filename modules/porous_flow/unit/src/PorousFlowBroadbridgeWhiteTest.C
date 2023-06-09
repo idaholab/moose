@@ -104,7 +104,8 @@ TEST_F(PorousFlowBroadbridgeWhiteTest, d2relperm)
 
 TEST_F(PorousFlowBroadbridgeWhiteTest, adrelperm)
 {
-  DualReal sat = 0.3;
+  ADReal sat = 0.3;
+  sat.derivatives() = {};
   Moose::derivInsert(sat.derivatives(), 0, 1.0);
 
   const auto adrelperm =
