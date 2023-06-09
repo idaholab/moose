@@ -1,11 +1,12 @@
 [Tests]
   issues = '#716'
   design = 'syntax/Contact/index.md MechanicalContactConstraint.md'
-  [./glued_kin]
+  [glued_kin]
     type = 'CSVDiff'
     input = 'single_point_2d.i'
     csvdiff = 'single_point_2d_out_glued_kin.csv'
-    cli_args = 'Executioner/end_time=0.002 Contact/leftright/model=glued Contact/leftright/formulation=kinematic'
+    cli_args = 'Executioner/end_time=0.002 Contact/leftright/model=glued '
+               'Contact/leftright/formulation=kinematic'
     rel_err = 5e-4
     abs_zero = 3e-5
     max_parallel = 1
@@ -15,14 +16,17 @@
     compiler = '!INTEL'
     allow_warnings = true
     requirement = "The Contact system shall enforce glued, kinematic contact
-    for 2D plane strain single point contact model."
-  [../]
-  [./glued_pen]
+    for 2D plane strain "
+                  "single point contact model."
+  []
+  [glued_pen]
     type = 'CSVDiff'
     input = 'single_point_2d.i'
     csvdiff = 'single_point_2d_out_glued_pen.csv'
-    cli_args = 'Executioner/end_time=0.002 Executioner/l_tol=1e-4 Executioner/nl_rel_tol=1e-8 Executioner/nl_abs_tol=1e-10
-    Contact/leftright/formulation=penalty Contact/leftright/penalty=2.0e12 Outputs/file_base=single_point_2d_out_glued_pen'
+    cli_args = 'Executioner/end_time=0.002 Executioner/l_tol=1e-4 Executioner/nl_rel_tol=1e-8 '
+               'Executioner/nl_abs_tol=1e-10
+    Contact/leftright/formulation=penalty '
+               'Contact/leftright/penalty=2.0e12 Outputs/file_base=single_point_2d_out_glued_pen'
     rel_err = 5e-4
     abs_zero = 3e-5
     max_parallel = 1
@@ -30,13 +34,16 @@
     superlu = true
     allow_warnings = true
     requirement = "The Contact system shall enforce glued, penalty contact
-    for 2D plane strain single point contact model."
-  [../]
-  [./frictionless_kin]
+    for 2D plane strain "
+                  "single point contact model."
+  []
+  [frictionless_kin]
     type = 'CSVDiff'
     input = 'single_point_2d.i'
     csvdiff = 'single_point_2d_out_frictionless_kin.csv'
-    cli_args = 'Executioner/end_time=0.002 Executioner/nl_rel_tol=1e-8 Executioner/nl_abs_tol=1e-10 Contact/leftright/model=frictionless Contact/leftright/formulation=kinematic Outputs/file_base=single_point_2d_out_frictionless_kin'
+    cli_args = 'Executioner/end_time=0.002 Executioner/nl_rel_tol=1e-8 Executioner/nl_abs_tol=1e-10 '
+               'Contact/leftright/model=frictionless Contact/leftright/formulation=kinematic '
+               'Outputs/file_base=single_point_2d_out_frictionless_kin'
     rel_err = 1e-5
     abs_zero = 1e-5
     max_parallel = 1
@@ -44,13 +51,17 @@
     superlu = true
     allow_warnings = true
     requirement = "The Contact system shall enforce frictionless, kinematic contact
-    for 2D plane strain single point contact model."
-  [../]
-  [./frictionless_pen]
+    for 2D plane "
+                  "strain single point contact model."
+  []
+  [frictionless_pen]
     type = 'CSVDiff'
     input = 'single_point_2d.i'
     csvdiff = 'single_point_2d_out_frictionless_pen.csv'
-    cli_args = 'Executioner/end_time=0.002 Executioner/nl_rel_tol=1e-8 Executioner/nl_abs_tol=1e-10 Contact/leftright/model=frictionless Contact/leftright/formulation=penalty Contact/leftright/penalty=5.0e12 Outputs/file_base=single_point_2d_out_frictionless_pen'
+    cli_args = 'Executioner/end_time=0.002 Executioner/nl_rel_tol=1e-8 Executioner/nl_abs_tol=1e-10 '
+               'Contact/leftright/model=frictionless Contact/leftright/formulation=penalty '
+               'Contact/leftright/penalty=5.0e12 '
+               'Outputs/file_base=single_point_2d_out_frictionless_pen'
     rel_err = 1e-4
     abs_zero = 1e-5
     max_parallel = 1
@@ -58,9 +69,10 @@
     superlu = true
     allow_warnings = true
     requirement = "The Contact system shall enforce frictionless, penalty contact
-    for 2D plane strain single point contact model."
-  [../]
-  [./frictionless_pen_contact_line_search]
+    for 2D plane "
+                  "strain single point contact model."
+  []
+  [frictionless_pen_contact_line_search]
     type = 'CSVDiff'
     input = 'single_point_2d_contact_line_search.i'
     csvdiff = 'single_point_2d_contact_line_search_out.csv'
@@ -69,15 +81,20 @@
     rel_err = 5e-4
     mesh_mode = REPLICATED
     requirement = "The Contact system shall enforce frictionless, penalty contact
-    for 2D plane strain single point contact model using the contact line
-    search solver options."
+    for 2D plane "
+                  "strain single point contact model using the contact line
+    search solver "
+                  "options."
     compiler = 'GCC CLANG'
-  [../]
-  [./mu_0_0_kin]
+  []
+  [mu_0_0_kin]
     type = 'CSVDiff'
     input = 'single_point_2d.i'
     csvdiff = 'single_point_2d_out_fric_0_0_kin.csv'
-    cli_args = 'Executioner/end_time=0.002 Executioner/nl_rel_tol=1e-8 Executioner/nl_abs_tol=1e-10 Contact/leftright/model=coulomb Contact/leftright/formulation=kinematic Contact/leftright/friction_coefficient=0.0 Outputs/file_base=single_point_2d_out_fric_0_0_kin'
+    cli_args = 'Executioner/end_time=0.002 Executioner/nl_rel_tol=1e-8 Executioner/nl_abs_tol=1e-10 '
+               'Contact/leftright/model=coulomb Contact/leftright/formulation=kinematic '
+               'Contact/leftright/friction_coefficient=0.0 '
+               'Outputs/file_base=single_point_2d_out_fric_0_0_kin'
     rel_err = 1e-5
     abs_zero = 1e-5
     max_parallel = 1
@@ -85,13 +102,17 @@
     superlu = true
     allow_warnings = true
     requirement = "The Contact system shall enforce frictional, kinematic contact
-    for 2D plane strain single point contact model."
-  [../]
-  [./mu_0_0_pen]
+    for 2D plane "
+                  "strain single point contact model."
+  []
+  [mu_0_0_pen]
     type = 'CSVDiff'
     input = 'single_point_2d.i'
     csvdiff = 'single_point_2d_out_fric_0_0_pen.csv'
-    cli_args = 'Executioner/end_time=0.002 Executioner/nl_rel_tol=1e-8 Executioner/nl_abs_tol=1e-10 Contact/leftright/model=coulomb Contact/leftright/formulation=penalty Contact/leftright/friction_coefficient=0.0 Contact/leftright/penalty=8.0e12 Outputs/file_base=single_point_2d_out_fric_0_0_pen'
+    cli_args = 'Executioner/end_time=0.002 Executioner/nl_rel_tol=1e-8 Executioner/nl_abs_tol=1e-10 '
+               'Contact/leftright/model=coulomb Contact/leftright/formulation=penalty '
+               'Contact/leftright/friction_coefficient=0.0 Contact/leftright/penalty=8.0e12 '
+               'Outputs/file_base=single_point_2d_out_fric_0_0_pen'
     rel_err = 1e-4
     abs_zero = 1e-5
     max_parallel = 1
@@ -99,13 +120,16 @@
     superlu = true
     allow_warnings = true
     requirement = "The Contact system shall enforce frictional, penalty contact
-    for 2D plane strain single point contact model."
-  [../]
-  [./mu_0_2_kin]
+    for 2D plane "
+                  "strain single point contact model."
+  []
+  [mu_0_2_kin]
     type = 'CSVDiff'
     input = 'single_point_2d_frictional.i'
     csvdiff = 'single_point_2d_out_frictional_0_2_kin.csv'
-    cli_args = 'Executioner/end_time=0.002 Executioner/nl_rel_tol=1e-8 Executioner/nl_abs_tol=1e-10 Contact/leftright/friction_coefficient=0.2 Outputs/file_base=single_point_2d_out_frictional_0_2_kin'
+    cli_args = 'Executioner/end_time=0.002 Executioner/nl_rel_tol=1e-8 Executioner/nl_abs_tol=1e-10 '
+               'Contact/leftright/friction_coefficient=0.2 '
+               'Outputs/file_base=single_point_2d_out_frictional_0_2_kin'
     rel_err = 1e-4
     abs_zero = 4e-5
     max_parallel = 1
@@ -113,15 +137,19 @@
     superlu = true
     allow_warnings = true
     requirement = "The Contact system shall enforce frictional, kinematic contact
-    for 2D plane strain single point contact model with a non-zero friction
+    for 2D plane "
+                  "strain single point contact model with a non-zero friction
     coefficient."
-  [../]
-  [./mu_0_2_pen]
+  []
+  [mu_0_2_pen]
     type = 'CSVDiff'
     input = 'single_point_2d_frictional.i'
     csvdiff = 'single_point_2d_out_frictional_0_2_pen.csv'
-    cli_args = 'Executioner/end_time=0.002 Executioner/nl_rel_tol=1e-8 Executioner/nl_abs_tol=1e-10 Contact/leftright/formulation=penalty
-    Contact/leftright/model=coulomb Contact/leftright/friction_coefficient=0.2 Contact/leftright/penalty=1.0e12 Outputs/file_base=single_point_2d_out_frictional_0_2_pen'
+    cli_args = 'Executioner/end_time=0.002 Executioner/nl_rel_tol=1e-8 Executioner/nl_abs_tol=1e-10 '
+               'Contact/leftright/formulation=penalty
+    Contact/leftright/model=coulomb '
+               'Contact/leftright/friction_coefficient=0.2 Contact/leftright/penalty=5.0e11 '
+               'Outputs/file_base=single_point_2d_out_frictional_0_2_pen'
     rel_err = 1e-4
     abs_zero = 3e-5
     max_parallel = 1
@@ -129,7 +157,8 @@
     superlu = true
     allow_warnings = true
     requirement = "The Contact system shall enforce frictional, penalty contact
-    for 2D plane strain single point contact model with a non-zero friction
+    for 2D plane "
+                  "strain single point contact model with a non-zero friction
     coefficient."
-  [../]
+  []
 []

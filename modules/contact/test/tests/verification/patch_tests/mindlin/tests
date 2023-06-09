@@ -1,0 +1,14 @@
+[Tests]
+  issues = '#24632'
+  design = 'syntax/Contact/index.md MechanicalContactConstraint.md'
+  [cylinder_friction_node_face]
+    type = 'CSVDiff'
+    input = 'cylinder_friction_node_face.i'
+    csvdiff = 'cylinder_friction_node_face_out.csv'
+    heavy = true
+    method = 'opt'
+    abs_zero = 1.0e-8
+    requirement = "The system shall be able to run a two-dimensional simulation of a cylinder "
+                  "pressed onto a plane with a frictional interface."
+  []
+[]
