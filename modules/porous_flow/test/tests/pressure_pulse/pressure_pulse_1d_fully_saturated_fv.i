@@ -14,9 +14,7 @@
 
 [Variables]
   [pp]
-    family = MONOMIAL
-    order = CONSTANT
-    fv = true
+    type = MooseVariableFVReal
     initial_condition = 2E6
   []
 []

@@ -16,30 +16,22 @@
 
 [Variables]
   [ppwater]
-    family = MONOMIAL
-    order = CONSTANT
-    fv = true
+    type = MooseVariableFVReal
     initial_condition = -1.0
   []
   [ppgas]
-    family = MONOMIAL
-    order = CONSTANT
-    fv = true
+    type = MooseVariableFVReal
     initial_condition = 0
   []
 []
 
 [AuxVariables]
   [massfrac_ph0_sp0]
-    family = MONOMIAL
-    order = CONSTANT
-    fv = true
+    type = MooseVariableFVReal
     initial_condition = 1
   []
   [massfrac_ph1_sp0]
-    family = MONOMIAL
-    order = CONSTANT
-    fv = true
+    type = MooseVariableFVReal
     initial_condition = 0
   []
 []
@@ -199,7 +191,6 @@
     full = true
   []
 []
-
 
 [Executioner]
   type = Steady

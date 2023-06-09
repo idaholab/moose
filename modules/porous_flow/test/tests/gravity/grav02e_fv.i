@@ -16,51 +16,36 @@
 
 [Variables]
   [ppwater]
-    family = MONOMIAL
-    order = CONSTANT
-    fv = true
+    type = MooseVariableFVReal
     initial_condition = 1.5e6
   []
   [sgas]
-    family = MONOMIAL
-    order = CONSTANT
-    fv = true
+    type = MooseVariableFVReal
+
     initial_condition = 0.3
   []
 []
 
 [AuxVariables]
   [massfrac_ph0_sp0]
-    family = MONOMIAL
-    order = CONSTANT
-    fv = true
+    type = MooseVariableFVReal
     initial_condition = 1
   []
   [massfrac_ph1_sp0]
-    family = MONOMIAL
-    order = CONSTANT
-    fv = true
+    type = MooseVariableFVReal
     initial_condition = 0
   []
   [ppgas]
-    family = MONOMIAL
-    order = CONSTANT
-    fv = true
+    type = MooseVariableFVReal
   []
   [swater]
-    family = MONOMIAL
-    order = CONSTANT
-    fv = true
+    type = MooseVariableFVReal
   []
   [relpermwater]
-    family = MONOMIAL
-    order = CONSTANT
-    fv = true
+    type = MooseVariableFVReal
   []
   [relpermgas]
-    family = MONOMIAL
-    order = CONSTANT
-    fv = true
+    type = MooseVariableFVReal
   []
 []
 
@@ -204,8 +189,6 @@
   [smp]
     type = SMP
     full = true
-    petsc_options_iname = '-ksp_type -pc_type -snes_atol -snes_rtol'
-    petsc_options_value = 'bcgs bjacobi 1E-12 1E-10'
   []
 []
 
@@ -213,6 +196,7 @@
   type = Transient
   solve_type = Newton
   end_time = 5e3
+  nl_abs_tol = 1e-12
   [TimeStepper]
     type = IterationAdaptiveDT
     dt = 1e3

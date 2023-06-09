@@ -17,9 +17,7 @@
 
 [Variables]
   [pp]
-    family = MONOMIAL
-    order = CONSTANT
-    fv = true
+    type = MooseVariableFVReal
   []
 []
 

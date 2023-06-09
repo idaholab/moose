@@ -6,7 +6,7 @@
     threading = '!pthreads'
     issues = '#13155'
     design = 'porous_flow/tests/dispersion/dispersion_tests.md'
-    requirement = 'The system shall correctly simulate molecular diffusion'
+    requirement = 'The system shall correctly simulate molecular diffusion.'
   []
   [diff01_action]
     type = 'CSVDiff'
@@ -15,7 +15,7 @@
     threading = '!pthreads'
     issues = '#13155'
     design = 'porous_flow/tests/dispersion/dispersion_tests.md'
-    requirement = 'The system shall correctly simulate molecular diffusion when using an action'
+    requirement = 'The system shall correctly simulate molecular diffusion when using an action.'
   []
   [diff01_fv]
     type = 'CSVDiff'
@@ -24,7 +24,7 @@
     threading = '!pthreads'
     issues = '#13155 #21275'
     design = 'porous_flow/tests/dispersion/dispersion_tests.md'
-    requirement = 'The system shall correctly simulate molecular diffusion using finite volumes'
+    requirement = 'The system shall correctly simulate molecular diffusion using finite volumes.'
   []
   [disp01]
     type = 'CSVDiff'
@@ -34,7 +34,7 @@
     threading = '!pthreads'
     issues = '#13155'
     design = 'porous_flow/tests/dispersion/dispersion_tests.md'
-    requirement = 'The system shall correctly simulate hydrodynamic dispersion'
+    requirement = 'The system shall correctly simulate hydrodynamic dispersion.'
   []
   [disp01_fv]
     type = 'CSVDiff'
@@ -44,7 +44,7 @@
     threading = '!pthreads'
     issues = '#13155 #21275'
     design = 'porous_flow/tests/dispersion/dispersion_tests.md'
-    requirement = 'The system shall correctly simulate hydrodynamic dispersion using finite volumes'
+    requirement = 'The system shall correctly simulate hydrodynamic dispersion using finite volumes.'
   []
   [disp01_heavy]
     type = 'CSVDiff'
@@ -55,6 +55,6 @@
     threading = '!pthreads'
     issues = '#13155'
     design = 'porous_flow/tests/dispersion/dispersion_tests.md'
-    requirement = 'The system shall correctly simulate hydrodynamic dispersion in a high-resolution setting'
+    requirement = 'The system shall correctly simulate hydrodynamic dispersion in a high-resolution setting.'
   []
 []

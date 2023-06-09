@@ -18,14 +18,10 @@
 
 [Variables]
   [pp]
-    family = MONOMIAL
-    order = CONSTANT
-    fv = true
+    type = MooseVariableFVReal
   []
   [massfrac0]
-    family = MONOMIAL
-    order = CONSTANT
-    fv = true
+    type = MooseVariableFVReal
   []
 []
 

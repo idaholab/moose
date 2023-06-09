@@ -17,36 +17,27 @@
 
 [Variables]
   [ppwater]
-    family = MONOMIAL
-    order = CONSTANT
-    fv = true
+    type = MooseVariableFVReal
     initial_condition = 2e6
   []
   [sgas]
-    family = MONOMIAL
-    order = CONSTANT
-    fv = true
+    type = MooseVariableFVReal
     initial_condition = 0.3
   []
 []
 
 [AuxVariables]
   [massfrac_ph0_sp0]
-    family = MONOMIAL
-    order = CONSTANT
-    fv = true
+    type = MooseVariableFVReal
     initial_condition = 1
   []
   [massfrac_ph1_sp0]
-    family = MONOMIAL
-    order = CONSTANT
-    fv = true
+    type = MooseVariableFVReal
     initial_condition = 0
   []
   [ppgas]
     family = MONOMIAL
     order = CONSTANT
-    fv = true
   []
 []
 
@@ -181,8 +172,6 @@
   [smp]
     type = SMP
     full = true
-    petsc_options_iname = '-ksp_type -pc_type -snes_atol -snes_rtol -snes_max_it'
-    petsc_options_value = 'bcgs bjacobi 1E-15 1E-20 10000'
   []
 []
 
