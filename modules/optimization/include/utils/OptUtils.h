@@ -15,6 +15,9 @@ namespace libMesh
 {
 template <typename Number>
 class PetscVector;
+
+template <typename Number>
+class PetscMatrix;
 }
 
 namespace OptUtils
@@ -22,5 +25,9 @@ namespace OptUtils
 void copyReporterIntoPetscVector(const std::vector<std::vector<Real> *> reporterVectors,
                                  libMesh::PetscVector<Number> & x);
 void copyPetscVectorIntoReporter(const libMesh::PetscVector<Number> & x,
+                                 std::vector<std::vector<Real> *> reporterVectors);
+void copyReporterIntoPetscMatrix(const std::vector<std::vector<Real> *> reporterVectors,
+                                 libMesh::PetscMatrix<Number> & x);
+void copyPetscMatrixIntoReporter(const libMesh::PetscMatrix<Number> & x,
                                  std::vector<std::vector<Real> *> reporterVectors);
 }
