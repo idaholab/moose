@@ -45,7 +45,10 @@ RestartableEquationSystems::buildHeader() const
       var_header.type = var.type();
       var_header.var = &var;
 
+      mooseAssert(_es.comm().verify("sys_" + sys.name() + "_var_" + var.name()),
+                  "Out of order in parallel");
       mooseAssert(!sys_header.variables.count(var.name()), "Already inserted");
+
       sys_header.variables.emplace(var.name(), var_header);
     }
 
@@ -53,10 +56,14 @@ RestartableEquationSystems::buildHeader() const
     sys_header.vectors.resize(sys.n_vectors());
     for (const auto vec_num : make_range(sys.n_vectors()))
     {
+      mooseAssert(_es.comm().verify("sys_" + sys.name() + "_vec_" + sys.vector_name(vec_num)),
+                  "Out of order in parallel");
+
       auto & vec_header = sys_header.vectors[vec_num];
       vec_header.name = sys.vector_name(vec_num);
       vec_header.vec = &sys.get_vector(vec_num);
     }
+
     // System in this EquationSystems
     mooseAssert(!es_header.systems.count(sys.name()), "Already inserted");
     es_header.systems.emplace(sys.name(), sys_header);
@@ -101,66 +108,63 @@ RestartableEquationSystems::store(std::ostream & stream) const
     dataStore(stream, ordered_objects_ids, nullptr);
   }
 
-  // Lambda for storing vector values for a given system and variable
-  auto store_vec = [this, &ordered_objects, &stream](
-                       const NumericVector<Number> & vec, const System & sys, const Variable & var)
-  {
-    // SCALAR vars on the last proc only
-    if (var.type().family == SCALAR && _es.processor_id() != _es.n_processors() - 1)
-      return;
-
-    // We need a separate stream here because we want to first store the size
-    // so that we can skip these entries on load easily if needed
-    std::ostringstream vec_stream;
-
-    // Non-SCALAR variable
-    if (var.type().family != SCALAR)
-    {
-      // Store for each component of each element and node
-      for (const auto & obj : ordered_objects)
-      {
-        mooseAssert(obj, "Invalid object");
-        for (const auto comp : make_range(obj->n_comp(sys.number(), var.number())))
-        {
-          auto val = vec(obj->dof_number(sys.number(), var.number(), comp));
-          dataStore(vec_stream, val, nullptr);
-        }
-      }
-    }
-    // SCALAR variable
-    else
-    {
-      const auto & dof_map = sys.get_dof_map();
-      std::vector<dof_id_type> scalar_dofs;
-      dof_map.SCALAR_dof_indices(scalar_dofs, var.number());
-      for (const auto dof : scalar_dofs)
-      {
-        auto val = vec(dof);
-        dataStore(vec_stream, val, nullptr);
-      }
-    }
-
-    // First store the size so that we can skip this if needed upon load, and then the data
-    std::size_t vec_stream_size = static_cast<std::size_t>(vec_stream.tellp());
-    dataStore(stream, vec_stream_size, nullptr);
-    stream << vec_stream.str();
-  };
-
   // Store each system
   for (const auto & sys_name_header_pair : es_header.systems)
   {
     const auto & sys_header = sys_name_header_pair.second;
     const auto & sys = *sys_header.sys;
 
-    // Store each variable in the system
-    for (const auto & var_name_header_pair : sys_header.variables)
-    {
-      const auto & var = *var_name_header_pair.second.var;
+    // The vectors we need to store (solution and then additional vectors)
+    std::vector<const libMesh::NumericVector<Number> *> vectors(sys_header.vectors.size() + 1,
+                                                                nullptr);
+    vectors[0] = sys_header.sys->solution.get();
+    for (const auto i : index_range(sys_header.vectors))
+      vectors[i + 1] = sys_header.vectors[i].vec;
 
-      // Store the solution vector and then other vectors in the system
-      store_vec(*sys.solution, sys, var);
-      for (const auto & vec_header : sys_header.vectors)
-        store_vec(*vec_header.vec, sys, var);
+    // Store each vector (see above)
+    for (auto & vec : vectors)
+    {
+      // Store each variable in the system for this vector
+      for (const auto & var_name_header_pair : sys_header.variables)
+      {
+        const auto & var = *var_name_header_pair.second.var;
+
+        // We need a separate stream here because we want to first store the size
+        // so that we can skip these entries on load easily if needed
+        std::ostringstream vec_stream;
+
+        // Non-SCALAR variable
+        if (var.type().family != SCALAR)
+        {
+          // Store for each component of each element and node
+          for (const auto & obj : ordered_objects)
+          {
+            mooseAssert(obj, "Invalid object");
+            for (const auto comp : make_range(obj->n_comp(sys.number(), var.number())))
+            {
+              auto val = (*vec)(obj->dof_number(sys.number(), var.number(), comp));
+              dataStore(vec_stream, val, nullptr);
+            }
+          }
+        }
+        // SCALAR variable on the last rank
+        else if (_es.processor_id() == _es.n_processors() - 1)
+        {
+          const auto & dof_map = sys.get_dof_map();
+          std::vector<dof_id_type> scalar_dofs;
+          dof_map.SCALAR_dof_indices(scalar_dofs, var.number());
+          for (const auto dof : scalar_dofs)
+          {
+            auto val = (*vec)(dof);
+            dataStore(vec_stream, val, nullptr);
+          }
+        }
+
+        // First store the size so that we can skip this if needed upon load, and then the data
+        std::size_t vec_stream_size = static_cast<std::size_t>(vec_stream.tellp());
+        dataStore(stream, vec_stream_size, nullptr);
+        stream << vec_stream.str();
+      }
     }
   }
 }
@@ -190,94 +194,115 @@ RestartableEquationSystems::load(std::istream & stream)
 
   // Vectors that we need to close after setting; helps us avoid calling
   // close after each variable in the same vector, which ain't cheap
-  std::set<NumericVector<Number> *> vecs_to_close;
+  std::set<std::string> vecs_to_close;
 
-  // Lambda for loading vector values for a given system and variable; will skip
-  // through the data if anything is null
-  auto load_vec =
-      [this, &ordered_objects, &stream, &vecs_to_close](
-          NumericVector<Number> * const vec, System * const sys, const Variable * const var)
+  // Fill the mapping in the header, which right now just maps
+  // systems/vectors/variables by name
+  // Loop over systems
+  for (auto & sys_name_header_pair : es_header.systems)
   {
-    // SCALAR vars on the last proc only
-    if (var && var->type().family == SCALAR && _es.processor_id() != _es.n_processors() - 1)
-      return;
+    auto & sys_header = sys_name_header_pair.second;
+    if (_es.has_system(sys_header.name))
+      sys_header.to_sys = &_es.get_system(sys_header.name);
 
-    // This will skip through the entries for this (sys,var,vector) if
-    // we do not want to load it
-    std::size_t size;
-    dataLoad(stream, size, nullptr);
-    if (!vec || !sys || !var)
+    auto & sys = sys_header.to_sys;
+
+    // Loop over variables in the system
+    for (auto & var_name_header_pair : sys_header.variables)
     {
-      stream.seekg(size, std::ios_base::cur);
-      return;
-    }
+      auto & var_header = var_name_header_pair.second;
+      mooseAssert(_es.comm().verify("sys_" + sys_header.name + "_var_" + var_header.name),
+                  "Out of order in parallel");
 
-    // Non-SCALAR variable
-    if (var->type().family != SCALAR)
-    {
-      // Load for each component of each element and node
-      for (const auto & obj : ordered_objects)
-      {
-        mooseAssert(obj, "Invalid object");
-        for (const auto comp : make_range(obj->n_comp(sys->number(), var->number())))
-        {
-          Real val;
-          dataLoad(stream, val, nullptr);
-          vec->set(obj->dof_number(sys->number(), var->number(), comp), val);
-        }
-      }
-    }
-    // SCALAR variable
-    else
-    {
-      const auto & dof_map = sys->get_dof_map();
-      std::vector<dof_id_type> scalar_dofs;
-      dof_map.SCALAR_dof_indices(scalar_dofs, var->number());
-      for (const auto dof : scalar_dofs)
-      {
-        Real val;
-        dataLoad(stream, val, nullptr);
-        vec->set(dof, val);
-      }
-    }
-
-    // Keep track of the vectors that we want to close
-    vecs_to_close.insert(vec);
-  };
-
-  // Load each system
-  for (const auto & [sys_name, sys_header] : es_header.systems)
-  {
-    mooseAssert(sys_name == sys_header.name, "Inconsistent name");
-    auto * const sys = _es.has_system(sys_name) ? &_es.get_system(sys_header.name) : nullptr;
-
-    // Load each variable
-    for (const auto & [var_name, var_header] : sys_header.variables)
-    {
-      mooseAssert(var_name == var_header.name, "Inconsistent name");
-      auto * const var = (sys && sys->has_variable(var_name))
-                             ? &sys->variable(sys->variable_number(var_name))
-                             : nullptr;
+      if (sys && sys->has_variable(var_header.name))
+        var_header.to_var = &sys->variable(sys->variable_number(var_header.name));
+      auto & var = var_header.to_var;
 
       if (var && var->type() != var_header.type)
-        mooseError("Cannot map variable '", var_name, " in restart due to a type mismatch");
+        mooseError("Cannot map variable '", var_header.name, " in restart due to a type mismatch");
+    }
 
-      // Load the solution vector if we have this system and variable
-      load_vec(sys ? sys->solution.get() : nullptr, sys, var);
-      // Load every other vector if... we're not skipping, and we have this system and variable
-      for (const auto & vec_header : sys_header.vectors)
+    // Loop over vectors in the system
+    for (auto & vec_header : sys_header.vectors)
+      if (sys && sys->have_vector(vec_header.name))
+        vec_header.to_vec = &sys->get_vector(vec_header.name);
+  }
+
+  // Actually load each system based on the mapping from above
+  for (auto & sys_name_header_pair : es_header.systems)
+  {
+    auto & sys_header = sys_name_header_pair.second;
+    auto & sys = sys_header.to_sys;
+
+    // The vectors we need to load (solution and then additional vectors)
+    std::vector<libMesh::NumericVector<Number> *> vectors(sys_header.vectors.size() + 1, nullptr);
+    if (sys_header.to_sys)
+      vectors[0] = sys_header.to_sys->solution.get();
+    if (!_skip_additional_vectors)
+      for (const auto i : index_range(sys_header.vectors))
+        vectors[i + 1] = sys_header.vectors[i].to_vec;
+
+    // Load each vector
+    for (auto & vec : vectors)
+    {
+      // Whether or not we should close this vector (true if we wrote to it)
+      bool should_close_vec = false;
+
+      // Load each variable that contributes to this vector
+      for (auto & var_name_header_pair : sys_header.variables)
       {
-        auto * const vec =
-            (sys && var && !_skip_additional_vectors && sys->have_vector(vec_header.name))
-                ? &sys->get_vector(vec_header.name)
-                : nullptr;
-        load_vec(vec, sys, var);
+        auto & var_header = var_name_header_pair.second;
+        auto & var = var_header.to_var;
+
+        // We store the number of entries first so we can skip if needed
+        std::size_t size;
+        dataLoad(stream, size, nullptr);
+
+        // Skip if we don't have somewhere to fill into
+        mooseAssert(_es.comm().verify(bool(vec)), "Inconsistent vector state");
+        mooseAssert(_es.comm().verify(bool(sys)), "Inconsistent system state");
+        mooseAssert(_es.comm().verify(bool(var)), "Inconsistent variable state");
+        if (!vec || !sys || !var)
+        {
+          stream.seekg(size, std::ios_base::cur);
+          continue;
+        }
+
+        // We're gonna write to this vector, so we need to close it
+        should_close_vec = true;
+
+        // Non-SCALAR variable
+        if (var->type().family != SCALAR)
+        {
+          // Load for each component of each element and node
+          for (const auto & obj : ordered_objects)
+          {
+            mooseAssert(obj, "Invalid object");
+            for (const auto comp : make_range(obj->n_comp(sys->number(), var->number())))
+            {
+              Real val;
+              dataLoad(stream, val, nullptr);
+              vec->set(obj->dof_number(sys->number(), var->number(), comp), val);
+            }
+          }
+        }
+        // SCALAR variable on the last rank
+        else if (_es.processor_id() == _es.n_processors() - 1)
+        {
+          const auto & dof_map = sys->get_dof_map();
+          std::vector<dof_id_type> scalar_dofs;
+          dof_map.SCALAR_dof_indices(scalar_dofs, var->number());
+          for (const auto dof : scalar_dofs)
+          {
+            Real val;
+            dataLoad(stream, val, nullptr);
+            vec->set(dof, val);
+          }
+        }
       }
 
-      // Close the vectors that we've written to
-      for (auto & vec : vecs_to_close)
+      if (should_close_vec)
         vec->close();
-      vecs_to_close.clear();
     }
   }
 }

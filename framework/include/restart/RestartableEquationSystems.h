@@ -42,6 +42,8 @@ public:
     std::string name;
     /// The stored vector (only valid when _storing_, not when loading)
     const libMesh::NumericVector<Number> * vec = nullptr;
+    /// The to vector (only valid when _loading_, not when storing)
+    libMesh::NumericVector<Number> * to_vec = nullptr;
   };
 
   /**
@@ -55,6 +57,8 @@ public:
     libMesh::FEType type;
     /// The stored variable (only valid when _storing_, not when loading)
     const libMesh::Variable * var = nullptr;
+    /// The to variable (only valid when _loading_, not when storing)
+    const libMesh::Variable * to_var = nullptr;
   };
 
   /**
@@ -68,6 +72,8 @@ public:
     std::string type;
     /// The stored system (only valid when _storing_, not when loading)
     const libMesh::System * sys = nullptr;
+    /// The to system (only valid when _loading_, not when storing)
+    libMesh::System * to_sys = nullptr;
     /// The stored variables in the system
     std::map<std::string, RestartableEquationSystems::VariableHeader> variables;
     /// The stored vectors in the system
