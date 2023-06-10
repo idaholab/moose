@@ -43,6 +43,7 @@ protected:
 
   const ADMaterialProperty<std::vector<Real>> & _pressure;
   const ADMaterialProperty<std::vector<Real>> & _pressure_neighbor;
+  const ADMaterialProperty<std::vector<RealGradient>> & _grad_p;
 
   const RealVectorValue & _gravity;
 };

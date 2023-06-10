@@ -77,6 +77,15 @@ PorousFlowDispersiveFlux::PorousFlowDispersiveFlux(const InputParameters & param
     _disp_trans(getParam<std::vector<Real>>("disp_trans")),
     _perm_derivs(_dictator.usePermDerivs())
 {
+  if (_fluid_component >= _dictator.numComponents())
+    paramError(
+        "fluid_component",
+        "The Dictator proclaims that the maximum fluid component index in this simulation is ",
+        _dictator.numComponents() - 1,
+        " whereas you have used ",
+        _fluid_component,
+        ". Remember that indexing starts at 0. The Dictator does not take such mistakes lightly.");
+
   // Check that sufficient values of the dispersion coefficients have been entered
   if (_disp_long.size() != _num_phases)
     paramError(
@@ -85,7 +94,7 @@ PorousFlowDispersiveFlux::PorousFlowDispersiveFlux(const InputParameters & param
 
   if (_disp_trans.size() != _num_phases)
     paramError("disp_trans",
-               "The number of transverse dispersion coefficients disp_trans in is not equal to the "
+               "The number of transverse dispersion coefficients disp_trans is not equal to the "
                "number of phases");
 }
 

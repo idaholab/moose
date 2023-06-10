@@ -10,6 +10,7 @@
 #pragma once
 
 #include "MooseTypes.h"
+#include "libmesh/utility.h"
 
 /**
  * van Genuchten effective saturation, capillary pressure and relative
@@ -95,7 +96,20 @@ Real d2CapillaryPressure(Real seff, Real alpha, Real m, Real pc_max);
  * @param m van Genuchten exponent
  * @return relative permeability
  */
-Real relativePermeability(Real seff, Real m);
+template <typename T>
+T
+relativePermeability(const T & seff, Real m)
+{
+  if (MetaPhysicL::raw_value(seff) <= 0.0)
+    return 0.0;
+  else if (MetaPhysicL::raw_value(seff) >= 1.0)
+    return 1.0;
+
+  const T a = 1.0 - std::pow(seff, 1.0 / m);
+  const T b = 1.0 - std::pow(a, m);
+
+  return std::sqrt(seff) * Utility::pow<2>(b);
+}
 
 /**
  * Derivative of relative permeability with respect to effective saturation
@@ -119,7 +133,20 @@ Real d2RelativePermeability(Real seff, Real m);
  * @param m van Genuchten exponent
  * @return relative permeability
  */
-Real relativePermeabilityNW(Real seff, Real m);
+template <typename T>
+T
+relativePermeabilityNW(const T & seff, Real m)
+{
+  if (MetaPhysicL::raw_value(seff) <= 0.0)
+    return 0.0;
+  else if (MetaPhysicL::raw_value(seff) >= 1.0)
+    return 1.0;
+
+  const T a = std::pow(1.0 - seff, 1.0 / m);
+  const T b = std::pow(1.0 - a, 2.0 * m);
+
+  return std::sqrt(seff) * b;
+}
 
 /**
  * Derivative of relative permeability for a non-wetting phase with respect to effective saturation

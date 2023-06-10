@@ -50,7 +50,7 @@ public:
    * @return capillary pressure (Pa)
    */
   virtual Real capillaryPressure(Real saturation, unsigned qp = 0) const;
-  virtual DualReal capillaryPressure(const DualReal & saturation, unsigned qp = 0) const;
+  virtual ADReal capillaryPressure(const ADReal & saturation, unsigned qp = 0) const;
 
   /**
    * Derivative of capillary pressure wrt true saturation
@@ -60,6 +60,7 @@ public:
    * @return derivative of capillary pressure with respect to true saturation
    */
   virtual Real dCapillaryPressure(Real saturation, unsigned qp = 0) const;
+  virtual ADReal dCapillaryPressure(const ADReal & saturation, unsigned qp = 0) const;
 
   /**
    * Second derivative of capillary pressure wrt true saturation
@@ -105,7 +106,7 @@ public:
    * @return saturation
    */
   Real saturation(Real pc, unsigned qp = 0) const;
-  DualReal saturation(const DualReal & pc, unsigned qp = 0) const;
+  ADReal saturation(const ADReal & pc, unsigned qp = 0) const;
 
   /**
    * Derivative of saturation wrt capillary pressure
@@ -115,6 +116,7 @@ public:
    * @return derivative of saturation wrt capillary pressure
    */
   Real dSaturation(Real pc, unsigned qp = 0) const;
+  ADReal dSaturation(const ADReal & pc, unsigned int qp = 0) const;
 
   /**
    * Second derivative of saturation wrt capillary pressure

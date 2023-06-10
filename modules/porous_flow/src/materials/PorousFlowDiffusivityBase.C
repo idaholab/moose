@@ -9,8 +9,9 @@
 
 #include "PorousFlowDiffusivityBase.h"
 
+template <bool is_ad>
 InputParameters
-PorousFlowDiffusivityBase::validParams()
+PorousFlowDiffusivityBaseTempl<is_ad>::validParams()
 {
   InputParameters params = PorousFlowMaterialVectorBase::validParams();
   params.addRequiredParam<std::vector<Real>>(
@@ -24,45 +25,65 @@ PorousFlowDiffusivityBase::validParams()
   return params;
 }
 
-PorousFlowDiffusivityBase::PorousFlowDiffusivityBase(const InputParameters & parameters)
+template <bool is_ad>
+PorousFlowDiffusivityBaseTempl<is_ad>::PorousFlowDiffusivityBaseTempl(
+    const InputParameters & parameters)
   : PorousFlowMaterialVectorBase(parameters),
 
-    _tortuosity(declareProperty<std::vector<Real>>("PorousFlow_tortuosity_qp")),
+    _tortuosity(declareGenericProperty<std::vector<Real>, is_ad>("PorousFlow_tortuosity_qp")),
     _dtortuosity_dvar(
-        declareProperty<std::vector<std::vector<Real>>>("dPorousFlow_tortuosity_qp_dvar")),
+        is_ad ? nullptr
+              : &declareProperty<std::vector<std::vector<Real>>>("dPorousFlow_tortuosity_qp_dvar")),
     _diffusion_coeff(
         declareProperty<std::vector<std::vector<Real>>>("PorousFlow_diffusion_coeff_qp")),
-    _ddiffusion_coeff_dvar(declareProperty<std::vector<std::vector<std::vector<Real>>>>(
-        "dPorousFlow_diffusion_coeff_qp_dvar")),
+    _ddiffusion_coeff_dvar(is_ad ? nullptr
+                                 : &declareProperty<std::vector<std::vector<std::vector<Real>>>>(
+                                       "dPorousFlow_diffusion_coeff_qp_dvar")),
     _input_diffusion_coeff(getParam<std::vector<Real>>("diffusion_coeff"))
 {
   // Also, the number of diffusion coefficients must be equal to the num_phases * num_components
   if (_input_diffusion_coeff.size() != _num_phases * _num_components)
-    paramError("diffusion_coeff",
-               "The number of diffusion coefficients entered is not equal to the number of phases "
-               "multiplied by the number of fluid components");
+    this->template paramError(
+        "diffusion_coeff",
+        "The number of diffusion coefficients entered is not equal to the number of phases "
+        "multiplied by the number of fluid components");
 
   if (_nodal_material == true)
     mooseError("PorousFlowRelativeDiffusivity classes are only defined for at_nodes = false");
 }
 
+template <bool is_ad>
 void
-PorousFlowDiffusivityBase::computeQpProperties()
+PorousFlowDiffusivityBaseTempl<is_ad>::computeQpProperties()
 {
   _diffusion_coeff[_qp].resize(_num_phases);
-  _ddiffusion_coeff_dvar[_qp].resize(_num_phases);
-  _dtortuosity_dvar[_qp].resize(_num_phases);
+  _tortuosity[_qp].resize(_num_phases);
+
+  if (!is_ad)
+  {
+    (*_ddiffusion_coeff_dvar)[_qp].resize(_num_phases);
+    (*_dtortuosity_dvar)[_qp].resize(_num_phases);
+  }
 
   for (unsigned int ph = 0; ph < _num_phases; ++ph)
   {
     _diffusion_coeff[_qp][ph].resize(_num_components);
-    _ddiffusion_coeff_dvar[_qp][ph].resize(_num_components);
-    _dtortuosity_dvar[_qp][ph].assign(_num_var, 0.0);
+
+    if (!is_ad)
+    {
+      (*_ddiffusion_coeff_dvar)[_qp][ph].resize(_num_components);
+      (*_dtortuosity_dvar)[_qp][ph].assign(_num_var, 0.0);
+    }
 
     for (unsigned int comp = 0; comp < _num_components; ++comp)
     {
       _diffusion_coeff[_qp][ph][comp] = _input_diffusion_coeff[ph + comp];
-      _ddiffusion_coeff_dvar[_qp][ph][comp].assign(_num_var, 0.0);
+
+      if (!is_ad)
+        (*_ddiffusion_coeff_dvar)[_qp][ph][comp].assign(_num_var, 0.0);
     }
   }
 }
+
+template class PorousFlowDiffusivityBaseTempl<false>;
+template class PorousFlowDiffusivityBaseTempl<true>;

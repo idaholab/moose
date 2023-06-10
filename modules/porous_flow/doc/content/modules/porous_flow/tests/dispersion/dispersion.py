@@ -20,6 +20,8 @@ import pandas as pd
 #
 # Read MOOSE simulation data
 data = pd.read_csv("../../../../../../test/tests/dispersion/gold/diff01_out_xmass_0021.csv")
+data_fv = pd.read_csv(
+    "../../../../../../test/tests/dispersion/gold/diff01_fv_out_xmass_0021.csv")
 
 # The analytical solution is erfc(u) where u is a similarity variable
 x = np.linspace(0,10,100)
@@ -31,7 +33,8 @@ u = x/(2*np.sqrt(D*t))
 
 plt.figure(1)
 plt.plot(x, erfc(u), label = 'Analytical')
-plt.plot(data.x, data.massfrac0, 'o', label = 'MOOSE')
+plt.plot(data.x, data.massfrac0, 'o', label='MOOSE (FE)')
+plt.plot(data_fv.x, data_fv.massfrac0, '*', label='MOOSE (FV)')
 plt.xlabel('x (m)')
 plt.ylabel('Mass fraction (-)')
 plt.legend()
@@ -53,10 +56,13 @@ def expected(x,t):
 
 # Read MOOSE simulation data
 data = pd.read_csv("../../../../../../test/tests/dispersion/gold/disp01_out_xmass_0029.csv")
+data_fv = pd.read_csv(
+    "../../../../../../test/tests/dispersion/gold/disp01_fv_out_xmass_0023.csv")
 data_heavy = pd.read_csv("../../../../../../test/tests/dispersion/gold/disp01_heavy_out_xmass_0105.csv")
 
 plt.figure(2)
-plt.plot(data.x, data.massfrac0, 'b.', label = 'MOOSE')
+plt.plot(data.x, data.massfrac0, 'b.', label='MOOSE (FE)')
+plt.plot(data_fv.x, data_fv.massfrac0, 'r*', label='MOOSE (FV)')
 plt.plot(data_heavy.x, data_heavy.massfrac0, 'g+', label = 'MOOSE (heavy)')
 plt.plot(x, expected(x, 1e3), 'k-', label = 'Analytical')
 plt.xlabel('x (m)')

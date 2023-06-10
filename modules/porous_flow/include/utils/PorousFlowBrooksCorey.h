@@ -93,7 +93,17 @@ Real d2CapillaryPressure(Real seff, Real pe, Real lambda, Real pc_max);
  * @param lambda Brooks-Corey exponent
  * @return relative permeability
  */
-Real relativePermeabilityW(Real seff, Real lambda);
+template <typename T>
+T
+relativePermeabilityW(const T & seff, Real lambda)
+{
+  if (MetaPhysicL::raw_value(seff) <= 0.0)
+    return 0.0;
+  else if (MetaPhysicL::raw_value(seff) >= 1.0)
+    return 1.0;
+
+  return std::pow(seff, (2.0 + 3.0 * lambda) / lambda);
+}
 
 /**
  * Derivative of relative permeability of the wetting phase wrt to effective saturation
@@ -109,7 +119,17 @@ Real dRelativePermeabilityW(Real seff, Real lambda);
  * @param lambda Brooks-Corey exponent
  * @return relative permeability
  */
-Real relativePermeabilityNW(Real seff, Real lambda);
+template <typename T>
+T
+relativePermeabilityNW(const T & seff, Real lambda)
+{
+  if (MetaPhysicL::raw_value(seff) <= 0.0)
+    return 0.0;
+  else if (MetaPhysicL::raw_value(seff) >= 1.0)
+    return 1.0;
+
+  return seff * seff * (1.0 - std::pow(1.0 - seff, (2.0 + lambda) / lambda));
+}
 
 /**
  * Derivative of relative permeability of the non-wetting phase wrt to effective saturation

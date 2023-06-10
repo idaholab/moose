@@ -12,16 +12,6 @@
 namespace PorousFlowFLACrelperm
 {
 Real
-relativePermeability(Real seff, Real m)
-{
-  if (seff <= 0.0)
-    return 0.0;
-  else if (seff >= 1.0)
-    return 1.0;
-  return (1.0 + m) * std::pow(seff, m) - m * std::pow(seff, m + 1.0);
-}
-
-Real
 dRelativePermeability(Real seff, Real m)
 {
   if (seff <= 0.0 || seff >= 1.0)

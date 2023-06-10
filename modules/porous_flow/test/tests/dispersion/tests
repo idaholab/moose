@@ -1,23 +1,32 @@
 [Tests]
-  [./diff01]
+  [diff01]
     type = 'CSVDiff'
     input = 'diff01.i'
     csvdiff = 'diff01_out_xmass_0021.csv'
     threading = '!pthreads'
     issues = '#13155'
     design = 'porous_flow/tests/dispersion/dispersion_tests.md'
-    requirement = 'PorousFlow shall correctly simulate the molecular diffusion'
-  [../]
-  [./diff01_action]
+    requirement = 'The system shall correctly simulate molecular diffusion.'
+  []
+  [diff01_action]
     type = 'CSVDiff'
     input = 'diff01_action.i'
     csvdiff = 'diff01_action_out_xmass_0021.csv'
     threading = '!pthreads'
     issues = '#13155'
     design = 'porous_flow/tests/dispersion/dispersion_tests.md'
-    requirement = 'PorousFlow shall correctly simulate the molecular diffusion when using an action'
-  [../]
-  [./disp01]
+    requirement = 'The system shall correctly simulate molecular diffusion when using an action.'
+  []
+  [diff01_fv]
+    type = 'CSVDiff'
+    input = 'diff01_fv.i'
+    csvdiff = 'diff01_fv_out_xmass_0021.csv'
+    threading = '!pthreads'
+    issues = '#13155 #21275'
+    design = 'porous_flow/tests/dispersion/dispersion_tests.md'
+    requirement = 'The system shall correctly simulate molecular diffusion using finite volumes.'
+  []
+  [disp01]
     type = 'CSVDiff'
     input = 'disp01.i'
     csvdiff = 'disp01_out_xmass_0029.csv'
@@ -25,9 +34,19 @@
     threading = '!pthreads'
     issues = '#13155'
     design = 'porous_flow/tests/dispersion/dispersion_tests.md'
-    requirement = 'PorousFlow shall correctly simulate the hydrodynamic dispersion'
-  [../]
-  [./disp01_heavy]
+    requirement = 'The system shall correctly simulate hydrodynamic dispersion.'
+  []
+  [disp01_fv]
+    type = 'CSVDiff'
+    input = 'disp01_fv.i'
+    csvdiff = 'disp01_fv_out_xmass_0007.csv'
+    rel_err = 1E-5
+    threading = '!pthreads'
+    issues = '#13155 #21275'
+    design = 'porous_flow/tests/dispersion/dispersion_tests.md'
+    requirement = 'The system shall correctly simulate hydrodynamic dispersion using finite volumes.'
+  []
+  [disp01_heavy]
     type = 'CSVDiff'
     input = 'disp01_heavy.i'
     csvdiff = 'disp01_heavy_out_xmass_0105.csv'
@@ -36,6 +55,6 @@
     threading = '!pthreads'
     issues = '#13155'
     design = 'porous_flow/tests/dispersion/dispersion_tests.md'
-    requirement = 'PorousFlow shall correctly simulate the hydrodynamic dispersion in a high-resolution setting'
-  [../]
+    requirement = 'The system shall correctly simulate hydrodynamic dispersion in a high-resolution setting.'
+  []
 []

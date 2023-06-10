@@ -28,7 +28,7 @@ protected:
   GenericMaterialProperty<std::vector<std::vector<Real>>, is_ad> & _mass_frac;
 
   /// Gradient of the mass fraction matrix at the quad points
-  MaterialProperty<std::vector<std::vector<RealGradient>>> * const _grad_mass_frac;
+  GenericMaterialProperty<std::vector<std::vector<RealGradient>>, is_ad> * const _grad_mass_frac;
 
   /// Derivative of the mass fraction matrix with respect to the porous flow variables
   MaterialProperty<std::vector<std::vector<std::vector<Real>>>> * const _dmass_frac_dvar;
@@ -57,7 +57,7 @@ protected:
   std::vector<const GenericVariableValue<is_ad> *> _mf_vars;
 
   /// The gradient of the mass-fraction variables
-  std::vector<const VariableGradient *> _grad_mf_vars;
+  std::vector<const GenericVariableGradient<is_ad> *> _grad_mf_vars;
 };
 
 typedef PorousFlowMassFractionTempl<false> PorousFlowMassFraction;

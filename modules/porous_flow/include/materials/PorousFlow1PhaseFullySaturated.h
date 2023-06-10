@@ -12,16 +12,17 @@
 #include "PorousFlowVariableBase.h"
 
 /**
- * Base material designed to calculate fluid phase porepressure and saturation
+ * Material designed to calculate fluid phase porepressure and saturation
  * for the single-phase situation assuming full saturation where porepressure
  * is the nonlinear variable.
  */
-class PorousFlow1PhaseFullySaturated : public PorousFlowVariableBase
+template <bool is_ad>
+class PorousFlow1PhaseFullySaturatedTempl : public PorousFlowVariableBaseTempl<is_ad>
 {
 public:
   static InputParameters validParams();
 
-  PorousFlow1PhaseFullySaturated(const InputParameters & parameters);
+  PorousFlow1PhaseFullySaturatedTempl(const InputParameters & parameters);
 
 protected:
   virtual void initQpStatefulProperties() override;
@@ -33,11 +34,16 @@ protected:
   void buildQpPPSS();
 
   /// Nodal or quadpoint value of porepressure of the fluid phase
-  const VariableValue & _porepressure_var;
+  const GenericVariableValue<is_ad> & _porepressure_var;
   /// Gradient(_porepressure at quadpoints)
-  const VariableGradient & _gradp_qp_var;
+  const GenericVariableGradient<is_ad> & _gradp_qp_var;
   /// Moose variable number of the porepressure
   const unsigned int _porepressure_varnum;
   /// The PorousFlow variable number of the porepressure
   const unsigned int _p_var_num;
+
+  usingPorousFlowVariableBaseMembers;
 };
+
+typedef PorousFlow1PhaseFullySaturatedTempl<false> PorousFlow1PhaseFullySaturated;
+typedef PorousFlow1PhaseFullySaturatedTempl<true> ADPorousFlow1PhaseFullySaturated;

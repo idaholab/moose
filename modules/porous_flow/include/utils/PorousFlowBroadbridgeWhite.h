@@ -11,6 +11,7 @@
 
 #include "MooseTypes.h"
 #include "MooseError.h"
+#include "libmesh/utility.h"
 
 /**
  * Broadbridge-White version of relative permeability,
@@ -74,7 +75,21 @@ Real d2EffectiveSaturation(Real pc, Real c, Real sn, Real ss, Real las);
  * @param ks BW's K_s parameter
  * @return relative permeability
  */
-Real relativePermeability(Real s, Real c, Real sn, Real ss, Real kn, Real ks);
+template <typename T>
+T
+relativePermeability(const T & s, Real c, Real sn, Real ss, Real kn, Real ks)
+{
+  if (MetaPhysicL::raw_value(s) <= sn)
+    return kn;
+
+  if (MetaPhysicL::raw_value(s) >= ss)
+    return ks;
+
+  const T coef = (ks - kn) * (c - 1.0);
+  const T th = (s - sn) / (ss - sn);
+  const T krel = kn + coef * Utility::pow<2>(th) / (c - th);
+  return krel;
+}
 
 /**
  * Derivative of relative permeability with respect to saturation

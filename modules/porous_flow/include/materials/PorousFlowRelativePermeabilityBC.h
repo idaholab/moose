@@ -18,15 +18,16 @@
  * From Brooks, R. H. and A. T. Corey (1966), Properties of porous media affecting
  * fluid flow, J. Irrig. Drain. Div., 6, 61
  */
-class PorousFlowRelativePermeabilityBC : public PorousFlowRelativePermeabilityBase
+template <bool is_ad>
+class PorousFlowRelativePermeabilityBCTempl : public PorousFlowRelativePermeabilityBaseTempl<is_ad>
 {
 public:
   static InputParameters validParams();
 
-  PorousFlowRelativePermeabilityBC(const InputParameters & parameters);
+  PorousFlowRelativePermeabilityBCTempl(const InputParameters & parameters);
 
 protected:
-  virtual Real relativePermeability(Real seff) const override;
+  virtual GenericReal<is_ad> relativePermeability(GenericReal<is_ad> seff) const override;
   virtual Real dRelativePermeability(Real seff) const override;
 
   /// Brooks-Corey exponent lambda
@@ -34,3 +35,6 @@ protected:
   /// Flag that is set to true if this is the non-wetting (gas) phase
   const bool _is_nonwetting;
 };
+
+typedef PorousFlowRelativePermeabilityBCTempl<false> PorousFlowRelativePermeabilityBC;
+typedef PorousFlowRelativePermeabilityBCTempl<true> ADPorousFlowRelativePermeabilityBC;

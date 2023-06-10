@@ -10,11 +10,13 @@
 #include "PorousFlowRelativePermeabilityFLAC.h"
 
 registerMooseObject("PorousFlowApp", PorousFlowRelativePermeabilityFLAC);
+registerMooseObject("PorousFlowApp", ADPorousFlowRelativePermeabilityFLAC);
 
+template <bool is_ad>
 InputParameters
-PorousFlowRelativePermeabilityFLAC::validParams()
+PorousFlowRelativePermeabilityFLACTempl<is_ad>::validParams()
 {
-  InputParameters params = PorousFlowRelativePermeabilityBase::validParams();
+  InputParameters params = PorousFlowRelativePermeabilityBaseTempl<is_ad>::validParams();
   params.addRequiredRangeCheckedParam<Real>(
       "m", "m >= 0", "relperm = (1 + m)seff^m - m seff^(m+1)");
   params.addClassDescription(
@@ -22,20 +24,27 @@ PorousFlowRelativePermeabilityFLAC::validParams()
   return params;
 }
 
-PorousFlowRelativePermeabilityFLAC::PorousFlowRelativePermeabilityFLAC(
+template <bool is_ad>
+PorousFlowRelativePermeabilityFLACTempl<is_ad>::PorousFlowRelativePermeabilityFLACTempl(
     const InputParameters & parameters)
-  : PorousFlowRelativePermeabilityBase(parameters), _m(getParam<Real>("m"))
+  : PorousFlowRelativePermeabilityBaseTempl<is_ad>(parameters),
+    _m(this->template getParam<Real>("m"))
 {
 }
 
-Real
-PorousFlowRelativePermeabilityFLAC::relativePermeability(Real seff) const
+template <bool is_ad>
+GenericReal<is_ad>
+PorousFlowRelativePermeabilityFLACTempl<is_ad>::relativePermeability(GenericReal<is_ad> seff) const
 {
   return PorousFlowFLACrelperm::relativePermeability(seff, _m);
 }
 
+template <bool is_ad>
 Real
-PorousFlowRelativePermeabilityFLAC::dRelativePermeability(Real seff) const
+PorousFlowRelativePermeabilityFLACTempl<is_ad>::dRelativePermeability(Real seff) const
 {
   return PorousFlowFLACrelperm::dRelativePermeability(seff, _m);
 }
+
+template class PorousFlowRelativePermeabilityFLACTempl<false>;
+template class PorousFlowRelativePermeabilityFLACTempl<true>;

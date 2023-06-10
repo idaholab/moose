@@ -1,5 +1,5 @@
 [Tests]
-  [./sidesets_from_points_generator_test]
+  [sidesets_from_points_generator_test]
     type = 'Exodiff'
     input = 'sidesets_from_points.i'
     cli_args = '--mesh-only'
@@ -9,5 +9,15 @@
     issues = '#11640'
     mesh_mode = 'REPLICATED'
     recover = false
-  [../]
+  []
+  [sidesets_ambiguity]
+    type = 'RunException'
+    input = 'sidesets_ambiguity.i'
+    cli_args = '--mesh-only'
+    expect_err = "ambiguous potential sideset"
+    requirement = 'The system shall return errors if it detects ambiguous sideset specifications'
+    design = 'meshgenerators/SideSetsFromPointsGenerator.md'
+    issues = '#24619'
+    recover = false
+  []
 []

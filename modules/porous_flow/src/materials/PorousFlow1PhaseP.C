@@ -30,10 +30,9 @@ PorousFlow1PhasePTempl<is_ad>::validParams()
 template <bool is_ad>
 PorousFlow1PhasePTempl<is_ad>::PorousFlow1PhasePTempl(const InputParameters & parameters)
   : PorousFlowVariableBaseTempl<is_ad>(parameters),
-
     _porepressure_var(_nodal_material ? this->template coupledGenericDofValue<is_ad>("porepressure")
                                       : this->template coupledGenericValue<is_ad>("porepressure")),
-    _gradp_qp_var(coupledGradient("porepressure")),
+    _gradp_qp_var(this->template coupledGenericGradient<is_ad>("porepressure")),
     _porepressure_varnum(coupled("porepressure")),
     _p_var_num(_dictator.isPorousFlowVariable(_porepressure_varnum)
                    ? _dictator.porousFlowVariableNum(_porepressure_varnum)
@@ -64,32 +63,30 @@ PorousFlow1PhasePTempl<is_ad>::computeQpProperties()
 
   buildQpPPSS();
 
-  if (!is_ad)
-  {
-    const auto ds = _pc_uo.dSaturation(MetaPhysicL::raw_value(_porepressure_var[_qp]));
+  const auto ds = _pc_uo.dSaturation(_porepressure_var[_qp]);
 
-    if (!_nodal_material)
-    {
-      (*_gradp_qp)[_qp][0] = _gradp_qp_var[_qp];
-      (*_grads_qp)[_qp][0] = ds * _gradp_qp_var[_qp];
-    }
+  if (!_nodal_material)
+  {
+    (*_gradp_qp)[_qp][0] = _gradp_qp_var[_qp];
+    (*_grads_qp)[_qp][0] = ds * _gradp_qp_var[_qp];
+  }
 
     // _porepressure is only dependent on _porepressure, and its derivative is 1
+  if constexpr (!is_ad)
     if (_dictator.isPorousFlowVariable(_porepressure_varnum))
     {
       // _porepressure is a PorousFlow variable
       (*_dporepressure_dvar)[_qp][0][_p_var_num] = 1.0;
       (*_dsaturation_dvar)[_qp][0][_p_var_num] = ds;
+
       if (!_nodal_material)
       {
         (*_dgradp_qp_dgradv)[_qp][0][_p_var_num] = 1.0;
         (*_dgrads_qp_dgradv)[_qp][0][_p_var_num] = ds;
         (*_dgrads_qp_dv)[_qp][0][_p_var_num] =
-            _pc_uo.d2Saturation(MetaPhysicL::raw_value(_porepressure_var[_qp])) *
-            _gradp_qp_var[_qp];
+            _pc_uo.d2Saturation(_porepressure_var[_qp]) * _gradp_qp_var[_qp];
       }
     }
-  }
 }
 
 template <bool is_ad>

@@ -63,7 +63,7 @@ PorousFlowMultiComponentFluidTempl<is_ad>::PorousFlowMultiComponentFluidTempl(
                                                _mass_fraction_variable_name))
                       : nullptr),
     _fp(this->template getUserObject<MultiComponentFluidProperties>("fp")),
-    _is_X_nodal(isCoupled("x") ? getVar("x", 0)->isNodal() : false),
+    _is_X_nodal(isCoupled("x") ? getFieldVar("x", 0)->isNodal() : false),
     _X(_nodal_material && _is_X_nodal ? this->template coupledGenericDofValue<is_ad>("x")
                                       : this->template coupledGenericValue<is_ad>("x"))
 {

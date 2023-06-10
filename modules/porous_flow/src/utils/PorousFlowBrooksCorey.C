@@ -80,17 +80,6 @@ d2CapillaryPressure(Real seff, Real pe, Real lambda, Real pc_max)
 }
 
 Real
-relativePermeabilityW(Real seff, Real lambda)
-{
-  if (seff <= 0.0)
-    return 0.0;
-  else if (seff >= 1.0)
-    return 1.0;
-
-  return std::pow(seff, (2.0 + 3.0 * lambda) / lambda);
-}
-
-Real
 dRelativePermeabilityW(Real seff, Real lambda)
 {
   // Guard against division by zero
@@ -98,17 +87,6 @@ dRelativePermeabilityW(Real seff, Real lambda)
     return 0.0;
 
   return (2.0 + 3.0 * lambda) * std::pow(seff, (2.0 + 2.0 * lambda) / lambda) / lambda;
-}
-
-Real
-relativePermeabilityNW(Real seff, Real lambda)
-{
-  if (seff <= 0.0)
-    return 0.0;
-  else if (seff >= 1.0)
-    return 1.0;
-
-  return seff * seff * (1.0 - std::pow(1.0 - seff, (2.0 + lambda) / lambda));
 }
 
 Real

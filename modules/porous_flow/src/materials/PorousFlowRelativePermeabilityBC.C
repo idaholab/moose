@@ -11,27 +11,31 @@
 #include "PorousFlowBrooksCorey.h"
 
 registerMooseObject("PorousFlowApp", PorousFlowRelativePermeabilityBC);
+registerMooseObject("PorousFlowApp", ADPorousFlowRelativePermeabilityBC);
 
+template <bool is_ad>
 InputParameters
-PorousFlowRelativePermeabilityBC::validParams()
+PorousFlowRelativePermeabilityBCTempl<is_ad>::validParams()
 {
-  InputParameters params = PorousFlowRelativePermeabilityBase::validParams();
+  InputParameters params = PorousFlowRelativePermeabilityBaseTempl<is_ad>::validParams();
   params.addRequiredParam<Real>("lambda", "The Brooks-Corey exponent of the phase");
   params.addParam<bool>("nw_phase", false, "Set true if this is the non-wetting phase");
   params.addClassDescription("Brooks-Corey relative permeability");
   return params;
 }
 
-PorousFlowRelativePermeabilityBC::PorousFlowRelativePermeabilityBC(
+template <bool is_ad>
+PorousFlowRelativePermeabilityBCTempl<is_ad>::PorousFlowRelativePermeabilityBCTempl(
     const InputParameters & parameters)
-  : PorousFlowRelativePermeabilityBase(parameters),
-    _lambda(getParam<Real>("lambda")),
-    _is_nonwetting(getParam<bool>("nw_phase"))
+  : PorousFlowRelativePermeabilityBaseTempl<is_ad>(parameters),
+    _lambda(this->template getParam<Real>("lambda")),
+    _is_nonwetting(this->template getParam<bool>("nw_phase"))
 {
 }
 
-Real
-PorousFlowRelativePermeabilityBC::relativePermeability(Real seff) const
+template <bool is_ad>
+GenericReal<is_ad>
+PorousFlowRelativePermeabilityBCTempl<is_ad>::relativePermeability(GenericReal<is_ad> seff) const
 {
   if (_is_nonwetting)
     return PorousFlowBrooksCorey::relativePermeabilityNW(seff, _lambda);
@@ -39,11 +43,15 @@ PorousFlowRelativePermeabilityBC::relativePermeability(Real seff) const
     return PorousFlowBrooksCorey::relativePermeabilityW(seff, _lambda);
 }
 
+template <bool is_ad>
 Real
-PorousFlowRelativePermeabilityBC::dRelativePermeability(Real seff) const
+PorousFlowRelativePermeabilityBCTempl<is_ad>::dRelativePermeability(Real seff) const
 {
   if (_is_nonwetting)
     return PorousFlowBrooksCorey::dRelativePermeabilityNW(seff, _lambda);
   else
     return PorousFlowBrooksCorey::dRelativePermeabilityW(seff, _lambda);
 }
+
+template class PorousFlowRelativePermeabilityBCTempl<false>;
+template class PorousFlowRelativePermeabilityBCTempl<true>;
