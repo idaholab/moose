@@ -27,6 +27,9 @@ HeatConductionMaterialTempl<is_ad>::validParams()
   params.addParam<FunctionName>("thermal_conductivity_temperature_function",
                                 "",
                                 "Thermal conductivity as a function of temperature.");
+  params.addParam<Real>("min_T",
+                        "Minimum allowable value for temperature for evaluating properties "
+                        "when provided by functions");
 
   params.addParam<Real>("specific_heat", "The specific heat value");
   params.addParam<FunctionName>(
@@ -56,7 +59,8 @@ HeatConductionMaterialTempl<is_ad>::HeatConductionMaterialTempl(const InputParam
     _specific_heat_temperature_function(
         getParam<FunctionName>("specific_heat_temperature_function") != ""
             ? &getFunction("specific_heat_temperature_function")
-            : nullptr)
+            : nullptr),
+    _min_T(isParamValid("min_T") ? &getParam<Real>("min_T") : nullptr)
 {
   if (_thermal_conductivity_temperature_function && !_has_temp)
     paramError("thermal_conductivity_temperature_function",
@@ -78,12 +82,29 @@ template <bool is_ad>
 void
 HeatConductionMaterialTempl<is_ad>::computeQpProperties()
 {
+  auto qp_temperature = _temperature[_qp];
+
+  if (_has_temp && _min_T)
+  {
+    if (qp_temperature < *_min_T)
+    {
+      std::stringstream msg;
+      msg << "WARNING:  In HeatConductionMaterial:  negative temperature!\n"
+          << "\tResetting to 'min_T'.\n"
+          << "\t_qp: " << _qp << "\n"
+          << "\ttemp: " << qp_temperature << "\n"
+          << "\telem: " << _current_elem->id() << "\n"
+          << "\tproc: " << processor_id() << "\n";
+      mooseWarning(msg.str());
+      qp_temperature = *_min_T;
+    }
+  }
+
   if (_thermal_conductivity_temperature_function)
   {
-    _thermal_conductivity[_qp] =
-        _thermal_conductivity_temperature_function->value(_temperature[_qp]);
+    _thermal_conductivity[_qp] = _thermal_conductivity_temperature_function->value(qp_temperature);
     _thermal_conductivity_dT[_qp] = _thermal_conductivity_temperature_function->timeDerivative(
-        MetaPhysicL::raw_value(_temperature[_qp]));
+        MetaPhysicL::raw_value(qp_temperature));
   }
   else
   {
@@ -92,7 +113,7 @@ HeatConductionMaterialTempl<is_ad>::computeQpProperties()
   }
 
   if (_specific_heat_temperature_function)
-    _specific_heat[_qp] = _specific_heat_temperature_function->value(_temperature[_qp]);
+    _specific_heat[_qp] = _specific_heat_temperature_function->value(qp_temperature);
   else
     _specific_heat[_qp] = _my_specific_heat;
 }
