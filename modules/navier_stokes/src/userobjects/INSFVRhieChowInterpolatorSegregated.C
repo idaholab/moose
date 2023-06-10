@@ -174,7 +174,7 @@ INSFVRhieChowInterpolatorSegregated::computeFaceVelocity()
       const Moose::FaceArg face{
           fi, Moose::FV::LimiterType::CentralDifference, true, false, nullptr};
 
-      RealVectorValue Ainv; //  = raw_value(_Ainv(face));
+      Real Ainv; //  = raw_value(_Ainv(face));
       RealVectorValue HbyA = raw_value(_HbyA(face, time_arg));
 
       interpolate(Moose::FV::InterpMethod::Average,
@@ -194,8 +194,7 @@ INSFVRhieChowInterpolatorSegregated::computeFaceVelocity()
       RealVectorValue grad_p = raw_value(_p->gradient(face, time_arg));
       for (const auto comp_index : make_range(_dim))
       {
-        _face_velocity[fi->id()](comp_index) =
-            -HbyA(comp_index) - Ainv(comp_index) * grad_p(comp_index);
+        _face_velocity[fi->id()](comp_index) = -HbyA(comp_index) - Ainv * grad_p(comp_index);
       }
       // _console << "ID " << fi->id() << raw_value(_face_velocity(face)) << std::endl;
     }
@@ -215,13 +214,12 @@ INSFVRhieChowInterpolatorSegregated::computeFaceVelocity()
       }
       else
       {
-        const RealVectorValue & Ainv = raw_value(_Ainv(boundary_face, time_arg));
+        const Real & Ainv = raw_value(_Ainv(boundary_face, time_arg));
         const RealVectorValue & HbyA = raw_value(_HbyA(boundary_face, time_arg));
         const RealVectorValue & grad_p = raw_value(_p->gradient(boundary_face, time_arg));
         for (const auto comp_index : make_range(_dim))
         {
-          _face_velocity[fi->id()](comp_index) =
-              -HbyA(comp_index) - Ainv(comp_index) * grad_p(comp_index);
+          _face_velocity[fi->id()](comp_index) = -HbyA(comp_index) - Ainv * grad_p(comp_index);
         }
         // _console << "ID " << fi->id() << raw_value(_face_velocity(boundary_face)) << std::endl;
       }
@@ -270,8 +268,11 @@ INSFVRhieChowInterpolatorSegregated::computeCellVelocity()
   }
 
   for (auto system_i : index_range(_momentum_implicit_systems))
+  {
+    _momentum_implicit_systems[system_i]->current_local_solution->close();
     _momentum_systems[system_i]->setSolution(
         *_momentum_implicit_systems[system_i]->current_local_solution);
+  }
 
   // std::cout << "After correction" << std::endl;
   // momentum_system.current_local_solution->print();
@@ -340,7 +341,8 @@ void
 INSFVRhieChowInterpolatorSegregated::computeHbyA(const Real & momentum_relaxation,
                                                  const bool verbose)
 {
-  mooseAssert(_momentum_sys, "The momentum system shall be linked before calling this function!");
+  mooseAssert(_momentum_implicit_systems[0],
+              "The momentum system shall be linked before calling this function!");
 
   NonlinearImplicitSystem * momentum_system = _momentum_implicit_systems[0];
   std::vector<unsigned int> var_nums = {_momentum_implicit_systems[0]->variable_number(_u->name())};

@@ -6,19 +6,19 @@ velocity_interp_method = 'rc'
 pressure_tag = "pressure_grad"
 
 [Mesh]
-  # [mesh]
-  #   type = CartesianMeshGenerator
-  #   dim = 2
-  #   dx = '0.3'
-  #   dy = '0.3'
-  #   ix = '1000'
-  #   iy = '1000'
-  #   subdomain_id = '1'
-  # []
-  [read]
-    type = FileMeshGenerator
-    file = 2d-segregated_in.e
+  [mesh]
+    type = CartesianMeshGenerator
+    dim = 2
+    dx = '0.3'
+    dy = '0.3'
+    ix = '3'
+    iy = '3'
+    subdomain_id = '1'
   []
+  # [read]
+  #   type = FileMeshGenerator
+  #   file = 2d-segregated_in.e
+  # []
 []
 
 [GlobalParams]
@@ -171,7 +171,7 @@ pressure_tag = "pressure_grad"
   l_tol = 1e-8
   line_search = 'none'
   rhie_chow_user_object = 'rc'
-  momentum_system = 'momentum_system'
+  momentum_systems = 'momentum_system'
   pressure_system = 'pressure_system'
   momentum_tag = ${pressure_tag}
   momentum_equation_relaxation = 0.8

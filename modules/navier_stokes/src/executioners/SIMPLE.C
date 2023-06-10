@@ -162,8 +162,11 @@ SIMPLE::relaxRightHandSide(NumericVector<Number> & rhs_in,
   const PetscVector<Number> * const solution =
       dynamic_cast<const PetscVector<Number> * const>(&solution_in);
   PetscVector<Number> * rhs = dynamic_cast<PetscVector<Number> *>(&rhs_in);
+  const PetscVector<Number> * const diff_digaonal_petsc =
+      dynamic_cast<const PetscVector<Number> * const>(&diff_diagonal);
 
-  auto working_vector = diff_diagonal.clone();
+  // diff_digaonal_petsc.close();
+  auto working_vector = diff_digaonal_petsc->clone();
   PetscVector<Number> * working_vector_petsc =
       dynamic_cast<PetscVector<Number> *>(working_vector.get());
 
@@ -212,7 +215,7 @@ SIMPLE::solveMomentumPredictor(std::vector<NonlinearSystemBase *> & momentum_sys
 
   relaxMatrix(*mmat, getMomentumRelaxation(), *diff_diagonal);
 
-  relaxRightHandSide(*rhs, *solution, *diff_diagonal);
+  diff_diagonal->close();
 
   Real norm_factor = computeNormalizationFactor(*solution, *mmat, *rhs);
   Real absolute_tolerance = norm_factor * 1e-8;
