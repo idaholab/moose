@@ -21,19 +21,19 @@ StaticFricCoeffMus::validParams()
 {
   InputParameters params = Function::validParams();
   params.addClassDescription("Static Friction Spatial Distribution.");
-  params.addParam<Real>("xcoord_left",-15.0e3 ,"x coordinate (left end of patch)");
-  params.addParam<Real>("xcoord_right",15.0e3,"x coordinate (right end of patch)");
-  params.addParam<Real>("mu_s_weakening_patch",0.677,"mu_s weakening patch");
-  params.addParam<Real>("mu_s_strengthing_patch",10000.0,"mu_s strengthing patch");
+  params.addParam<Real>("xcoord_left", -15.0e3, "x coordinate (left end of patch)");
+  params.addParam<Real>("xcoord_right", 15.0e3, "x coordinate (right end of patch)");
+  params.addParam<Real>("mu_s_weakening_patch", 0.677, "mu_s weakening patch");
+  params.addParam<Real>("mu_s_strengthing_patch", 10000.0, "mu_s strengthing patch");
   return params;
 }
 
 StaticFricCoeffMus::StaticFricCoeffMus(const InputParameters & parameters)
   : Function(parameters),
-  _xcoord_left(getParam<Real>("xcoord_left")),
-  _xcoord_right(getParam<Real>("xcoord_right")),
-  _mu_s_weakening_patch(getParam<Real>("mu_s_weakening_patch")),
-  _mu_s_strengthing_patch(getParam<Real>("mu_s_strengthing_patch"))
+    _xcoord_left(getParam<Real>("xcoord_left")),
+    _xcoord_right(getParam<Real>("xcoord_right")),
+    _mu_s_weakening_patch(getParam<Real>("mu_s_weakening_patch")),
+    _mu_s_strengthing_patch(getParam<Real>("mu_s_strengthing_patch"))
 {
 }
 

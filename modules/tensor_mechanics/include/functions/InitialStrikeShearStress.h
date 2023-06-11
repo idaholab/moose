@@ -26,27 +26,27 @@ public:
   using Function::value;
   virtual Real value(Real t, const Point & p) const override;
 
-  //half length of initialization patch
+  // half length of initialization patch
   Real _len;
 
-  //x coordinate (center of left patch)
+  // x coordinate (center of left patch)
   Real _xcoord_leftpatchcenter;
 
-  //x coordinate (center of middle patch)
+  // x coordinate (center of middle patch)
   Real _xcoord_middlepatchcenter;
 
-  //x coordinate (center of right patch)
+  // x coordinate (center of right patch)
   Real _xcoord_rightpathcenter;
 
-  //initial shear traction (left patch)
+  // initial shear traction (left patch)
   Real _Tso_leftpatch;
 
-  //initial shear traction (center patch)
+  // initial shear traction (center patch)
   Real _Tso_centerpatch;
 
-  //initial shear traction (right)
+  // initial shear traction (right)
   Real _Tso_rightpatch;
 
-  //initial shear traction (elsewhere)
+  // initial shear traction (elsewhere)
   Real _Tso_else;
 };

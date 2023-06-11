@@ -25,15 +25,15 @@ public:
   using Function::value;
   virtual Real value(Real t, const Point & p) const override;
 
-  //x coordinate (left end of patch)
+  // x coordinate (left end of patch)
   Real _xcoord_left;
 
-  //x coordinate (right end of patch)
+  // x coordinate (right end of patch)
   Real _xcoord_right;
 
-  //mu_s weakening patch
+  // mu_s weakening patch
   Real _mu_s_weakening_patch;
 
-  //mu_s strengthing patch
+  // mu_s strengthing patch
   Real _mu_s_strengthing_patch;
 };
