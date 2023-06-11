@@ -69,6 +69,13 @@
     transform = ROTATE
     vector_value = '0 0 90'
   []
+
+  [translate]
+    type = TransformGenerator
+    input = cmg
+    transform = TRANSLATE
+    vector_value = '2.130945 -2.130945 0'
+  []
 []
 
 [Problem]

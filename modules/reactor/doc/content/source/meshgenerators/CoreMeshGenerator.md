@@ -42,7 +42,7 @@ The `CoreMeshGenerator` includes support for meshing a circular reactor peripher
 
 ## Example Core Periphery Syntax
 
-!listing modules/reactor/test/tests/meshgenerators/core_mesh_generator/core_periphery_ptmg.i block=Mesh
+!listing modules/reactor/test/tests/meshgenerators/core_mesh_generator/core_periphery_ptmg_vol.i block=Mesh
 
 This is the resulting mesh block layout:
 

@@ -40,7 +40,7 @@
                 Mesh/amg2/duct_region_ids='7'
                 Mesh/amg2/duct_halfpitch='1.2'
                 Mesh/amg2/duct_intervals=1
-                Mesh/inactive='rotate90'
+                Mesh/inactive='rotate90 translate'
                 Outputs/file_base=core_square_mixed_background_duct"
     exodiff = 'core_square_mixed_background_duct.e'
     recover = false
@@ -106,6 +106,7 @@
                 Mesh/amg2/duct_intervals='1'
                 Mesh/cmg/inputs='amg1 amg2 empty'
                 Mesh/cmg/pattern='  2 1; 1 0 2 ; 2 1'
+                Mesh/inactive='translate'
                 Outputs/file_base=core_hex_in"
     exodiff = 'core_hex_in.e'
     recover = false
@@ -124,6 +125,7 @@
                 Mesh/pin2/num_sectors=2
                 Mesh/pin2/mesh_intervals='2'
                 Mesh/pin2/use_as_assembly=true
+                Mesh/translate/vector_value='0.710315 -0.710315 0'
                 Mesh/cmg/inputs='pin1 pin2 empty'
                 Outputs/out/extra_element_ids_to_output='assembly_id assembly_type_id plane_id pin_type_id region_id'
                 Outputs/file_base=core_single_assembly_square"
@@ -134,7 +136,7 @@
     requirement = 'The system shall generate a full 3D hexagonal core mesh with 2 single assembly types'
     type = 'Exodiff'
     input = 'core.i'
-    cli_args = "Mesh/inactive='pin3 amg1 amg2'
+    cli_args = "Mesh/inactive='pin3 amg1 amg2 translate'
                 Mesh/rmp/geom='Hex'
                 Mesh/rmp/assembly_pitch=1.42063
                 Mesh/pin1/homogenized=true
@@ -154,7 +156,7 @@
     requirement = 'The system shall generate a full 3D hexagonal core mesh with 2 duct heterogeneous assembly types'
     type = 'Exodiff'
     input = 'core.i'
-    cli_args = "Mesh/inactive='pin3 amg1 amg2'
+    cli_args = "Mesh/inactive='pin3 amg1 amg2 translate'
                 Mesh/rmp/geom='Hex'
                 Mesh/rmp/assembly_pitch=1.42063
                 Mesh/pin1/use_as_assembly=true
@@ -179,7 +181,7 @@
     requirement = 'The system shall generate a 2D hexagonal core mesh that transfers metadata correctly across RGMB mesh generators'
     type = 'Exodiff'
     input = 'core.i'
-    cli_args = "Mesh/inactive='pin2 pin3 amg2'
+    cli_args = "Mesh/inactive='pin2 pin3 amg2 translate'
                 Mesh/rmp/dim=2
                 Mesh/rmp/geom=Hex
                 Mesh/rmp/assembly_pitch=3.7884
@@ -215,7 +217,7 @@
     requirement = 'The system shall generate a 2D hexagonal core mesh that transfers metadata correctly across RGMB mesh generators in mesh only with extra element ids that have been defined with default values for certain id names'
     type = 'Exodiff'
     input = 'core.i'
-    cli_args = "Mesh/inactive='pin2 pin3 amg2'
+    cli_args = "Mesh/inactive='pin2 pin3 amg2 translate'
                 Mesh/rmp/dim=2
                 Mesh/rmp/geom=Hex
                 Mesh/rmp/assembly_pitch=3.7884

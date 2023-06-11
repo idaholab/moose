@@ -141,7 +141,7 @@
                   Mesh/pattern/square_size=44 Mesh/pattern/duct_sizes="23" Mesh/pattern/duct_intervals="2"
                   --mesh-only "patterned_err.e"'
     expect_err = 'The duct sizes should not exceed the size of the square boundary.'
-    requirement = 'The system shall throw an error if the specified duct size exceeds the external sqaure boundary.'
+    requirement = 'The system shall throw an error if the specified duct size exceeds the external square boundary.'
   []
   [err_duct_descending_sizes]
     type = 'RunException'
@@ -150,7 +150,7 @@
                   Mesh/pattern/square_size=44 Mesh/pattern/duct_sizes="21 20" Mesh/pattern/duct_intervals="2 2"
                   --mesh-only "patterned_err.e"'
     expect_err = 'This parameter must be strictly ascending.'
-    requirement = 'The system shall throw an error if the specified square duct size is not restrictively ascending.'
+    requirement = 'The system shall throw an error if the specified square duct size is not strictly ascending.'
   []
   [err_duct_ids]
     type = 'RunException'
@@ -185,7 +185,7 @@
     cli_args = 'Mesh/pattern/pattern_boundary=expanded
                   --mesh-only "patterned_err.e"'
     expect_err = 'This parameter must be provided when pattern_boundary is expanded.'
-    requirement = 'The system shall throw an error if no square size is provided when pattern boundary style is expanded.'
+    requirement = 'The system shall throw an error if the enclosing square size is not provided when the pattern boundary style is expanded, which means there is an additional region around the pattern.'
   []
   [err_redundant_square_size]
     type = 'RunException'
@@ -194,7 +194,7 @@
                 Mesh/pattern/square_size=40
                   --mesh-only "patterned_err.e"'
     expect_err = 'This parameter must not be provided when pattern_boundary is none.'
-    requirement = 'The system shall throw an error if square size is provided when pattern boundary style is none.'
+    requirement = 'The system shall throw an error if the enclosing square size is provided when pattern boundary style is none, which means there is no additional region around the pattern'
   []
   [err_missing_input_meshes_in_pattern]
     type = 'RunException'
