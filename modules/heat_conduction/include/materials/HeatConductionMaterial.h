@@ -16,7 +16,7 @@
 class Function;
 
 /**
- * Simple material with constant properties.
+ * Simple material with properties set as constants or by functions.
  */
 template <bool is_ad>
 class HeatConductionMaterialTempl : public Material
@@ -27,7 +27,7 @@ public:
   HeatConductionMaterialTempl(const InputParameters & parameters);
 
 protected:
-  virtual void computeProperties();
+  virtual void computeQpProperties() override;
 
   const bool _has_temp;
   const GenericVariableValue<is_ad> & _temperature;
@@ -41,6 +41,9 @@ protected:
 
   GenericMaterialProperty<Real, is_ad> & _specific_heat;
   const Function * const _specific_heat_temperature_function;
+
+  /// Minimum temperature, below which temperature is "clipped" before evaluating functions
+  const Real * _min_T;
 };
 
 typedef HeatConductionMaterialTempl<false> HeatConductionMaterial;
