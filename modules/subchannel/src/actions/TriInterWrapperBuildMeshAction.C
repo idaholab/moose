@@ -23,6 +23,8 @@ InputParameters
 TriInterWrapperBuildMeshAction::validParams()
 {
   InputParameters params = Action::validParams();
+  params.addClassDescription(
+      "Builds the infastructure for the wrapper mesh in the triangular lattice arrangement");
   return params;
 }
 

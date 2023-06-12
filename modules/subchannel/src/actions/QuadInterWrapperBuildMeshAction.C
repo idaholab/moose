@@ -23,6 +23,8 @@ InputParameters
 QuadInterWrapperBuildMeshAction::validParams()
 {
   InputParameters params = Action::validParams();
+  params.addClassDescription(
+      "Builds the infastructure for the wrapper mesh in the square lattice arrangement");
   return params;
 }
 

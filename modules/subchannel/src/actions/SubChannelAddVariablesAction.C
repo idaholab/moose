@@ -24,6 +24,7 @@ InputParameters
 SubChannelAddVariablesAction::validParams()
 {
   InputParameters params = Action::validParams();
+  params.addClassDescription("Adds the variables associated with the subchannel problem");
   return params;
 }
 
