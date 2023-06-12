@@ -225,9 +225,11 @@ Often times, we do not want to use subdomain IDs for these tasks because otherwi
 MooseMesh[MooseMesh.md] has a parameter `extra_integers` to allow users to introduce more integer IDs for elements each identified with a name in the parameter.
 When this parameter is specified, extra integers will be made available for all elements through `Assembly` in MOOSE objects such as kernels, aux kernels, materials, initial conditions, element user objects, etc.
 To retrieve the integer on an element, one needs to simply call
+
 ```
 getElementID(integer_name_parameter, comp),
 ```
+
 within the initialization list of your constructor.
 `integer_name_parameter` is the name of the parameter in type of `std::vector<ExtraElementIDName>` of this object listing all integer names.
 `comp` is the index into the integer names if multiple are specified for `integer_name_parameter`.
@@ -278,3 +280,66 @@ We point out in this section a few things to look for.
 - Many physics will give better results with high element quality and smooth distributions of element volumes.
   You may examine the spatial distribution of these quantities using the [ElementQualityAux.md] and [VolumeAux.md]
   respectively.
+
+## Coordinate Systems id=coordinate_systems
+
+The following are the coordinate systems currently available in MOOSE:
+
+- `XYZ`: 3D Cartesian.
+- `RZ`: 2D axisymmetric coordinates.
+- `RSPHERICAL`: 1D spherical coordinates with the origin at $(0,0,0)$.
+
+Coordinate systems may be specified in the input file or within code.
+
+### Specifying coordinate systems in the input file
+
+In an input file, coordinate systems may be specified in the [Mesh](Mesh/index.md)
+block.
+First, [!param](/Mesh/GeneratedMesh/coord_type) is used to specify the coordinate
+system type. If you would like to use multiple coordinate systems in your
+application, you can supply multiple entries in this parameter. Then you must
+specify [!param](/Mesh/GeneratedMesh/coord_block) to specify the corresponding
+blocks to which each coordinate system applies.
+
+If the `RZ` coordinate system is used, there are two options for how to specify
+the coordinate axis(es) in an input file:
+
+- Specify [!param](/Mesh/GeneratedMesh/rz_coord_axis) to choose a single `RZ`
+  coordinate system, using the $\hat{x}$ or $\hat{y}$ direction and starting at $(0,0,0)$.
+  If the former is used, then the axial coordinate is $x$, and the radial coordinate
+  is $y$; if the latter is used, these are switched.
+- Specify the following three parameters:
+
+  - [!param](/Mesh/GeneratedMesh/rz_coord_blocks): The list of blocks using an
+    `RZ` coordinate system (all must be specified).
+  - [!param](/Mesh/GeneratedMesh/rz_coord_origins): The list of origin points
+    for the axisymmetric axes corresponding to each block in [!param](/Mesh/GeneratedMesh/rz_coord_blocks).
+  - [!param](/Mesh/GeneratedMesh/rz_coord_directions): The list of direction vectors
+    for the axisymmetric axes corresponding to each block in [!param](/Mesh/GeneratedMesh/rz_coord_blocks).
+    Note that these direction vectors need not be unit vectors, just nonzero vectors.
+
+The second option has greater flexibility, as it allows the following, which the
+first option does not:
+
+- Multiple axisymmetric coordinate systems can be defined.
+- Any point can be used for the origin of the coordinate system, not just $(0,0,0)$.
+- Any direction can be used for the axisymmetric axis, not just the $\hat{x}$ or $\hat{y}$ direction.
+
+Note that the [Transfers](Transfers/index.md) ability for the second option is
+more limited
+
+### Specifying coordinate systems within code
+
+To specify coordinate systems within code, `MooseMesh::setCoordSystem(blocks, coord_sys)` is used,
+where `blocks` and `coord_sys` have the same behavior as the [!param](/Mesh/GeneratedMesh/coord_block)
+and [!param](/Mesh/GeneratedMesh/coord_type) parameters, respectively.
+
+If the `RZ` coordinate system is used, there are two options for how to specify
+the coordinate axis(es) within the code, just like in the input file:
+
+- Call `MooseMesh::setAxisymmetricCoordAxis(rz_coord_axis)`, where
+  `rz_coord_axis` is like [!param](/Mesh/GeneratedMesh/rz_coord_axis).
+- Call `MooseMesh::setGeneralAxisymmetricCoordAxes(blocks, axes)`, where
+  `blocks` is similar to [!param](/Mesh/GeneratedMesh/rz_coord_blocks)
+  and `axes` pairs up the origins and directions, similar to combining the parameters
+  [!param](/Mesh/GeneratedMesh/rz_coord_origins) and [!param](/Mesh/GeneratedMesh/rz_coord_directions).

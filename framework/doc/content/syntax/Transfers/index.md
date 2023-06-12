@@ -134,6 +134,11 @@ if both (1, 0, 0) and (0, 1, 0) points (or any combination of $\sqrt{x^2+y^2}=1$
 points) exist. We are considering how best to handle these situations moving
 forward. One option would be to average the field data from equivalent points.
 
+!alert warning title=Only translation allowed for general axisymmetric coordinates
+For the `RZ` coordinate system with general axes (see [Mesh/index.md#coordinate_systems]),
+only translation is supported for coordinate transformations, i.e., there is
+no scaling, rotation, or coordinate collapsing.
+
 Framework transfer classes that support the coordinate transformation
 processes described here are:
 
