@@ -60,7 +60,6 @@ LiquidMetalSubChannel1PhaseProblem::computeFrictionFactor(_friction_args_struct 
   auto S = friction_args.S;
   auto w_perim = friction_args.w_perim;
   auto Dh_i = friction_args.Dh_i;
-
   const Real & pitch = _subchannel_mesh.getPitch();
   const Real & rod_diameter = _subchannel_mesh.getRodDiameter();
   const Real & wire_lead_length = _tri_sch_mesh.getWireLeadLength();
@@ -79,8 +78,6 @@ LiquidMetalSubChannel1PhaseProblem::computeFrictionFactor(_friction_args_struct 
   Real a_t = 0.0;
   Real b1_t = 0.0;
   Real b2_t = 0.0;
-  Real cfl_p = 0.0;
-  Real cft_p = 0.0;
   auto theta = std::acos(wire_lead_length /
                          std::sqrt(std::pow(wire_lead_length, 2) +
                                    std::pow(libMesh::pi * (rod_diameter + wire_diameter), 2)));
@@ -119,9 +116,9 @@ LiquidMetalSubChannel1PhaseProblem::computeFrictionFactor(_friction_args_struct 
       b2_t = -0.03333;
     }
     // laminar flow friction factor for bare rod bundle - Center subchannel
-    cfl_p = a_l + b1_l * (p_to_d - 1) + b2_l * std::pow((p_to_d - 1), 2);
+    cf_l = a_l + b1_l * (p_to_d - 1) + b2_l * std::pow((p_to_d - 1), 2);
     // turbulent flow friction factor for bare rod bundle - Center subchannel
-    cft_p = a_t + b1_t * (p_to_d - 1) + b2_t * std::pow((p_to_d - 1), 2);
+    cf_t = a_t + b1_t * (p_to_d - 1) + b2_t * std::pow((p_to_d - 1), 2);
   }
   else if (subch_type == EChannelType::EDGE)
   {
@@ -144,9 +141,9 @@ LiquidMetalSubChannel1PhaseProblem::computeFrictionFactor(_friction_args_struct 
       b2_t = -0.04428;
     }
     // laminar flow friction factor for bare rod bundle - Edge subchannel
-    cfl_p = a_l + b1_l * (w_to_d - 1) + b2_l * std::pow((w_to_d - 1), 2);
+    cf_l = a_l + b1_l * (w_to_d - 1) + b2_l * std::pow((w_to_d - 1), 2);
     // turbulent flow friction factor for bare rod bundle - Edge subchannel
-    cft_p = a_t + b1_t * (w_to_d - 1) + b2_t * std::pow((w_to_d - 1), 2);
+    cf_t = a_t + b1_t * (w_to_d - 1) + b2_t * std::pow((w_to_d - 1), 2);
   }
   else
   {
@@ -169,49 +166,55 @@ LiquidMetalSubChannel1PhaseProblem::computeFrictionFactor(_friction_args_struct 
       b2_t = -0.0009567;
     }
     // laminar flow friction factor for bare rod bundle - Corner subchannel
-    cfl_p = a_l + b1_l * (w_to_d - 1) + b2_l * std::pow((w_to_d - 1), 2);
+    cf_l = a_l + b1_l * (w_to_d - 1) + b2_l * std::pow((w_to_d - 1), 2);
     // turbulent flow friction factor for bare rod bundle - Corner subchannel
-    cft_p = a_t + b1_t * (w_to_d - 1) + b2_t * std::pow((w_to_d - 1), 2);
+    cf_t = a_t + b1_t * (w_to_d - 1) + b2_t * std::pow((w_to_d - 1), 2);
   }
 
-  if (subch_type == EChannelType::CENTER)
+  // Find the coefficients of wire-wrapped rod bundle friction factor
+  // correlations for turbulent and laminar flow regimes.
+  if ((wire_diameter != 0.0) && (wire_lead_length != 0.0))
   {
-    // wetted perimeter for center subchannel and bare rod bundle
-    pw_p = libMesh::pi * rod_diameter / 2.0;
-    // wire projected area - center subchannel wire-wrapped bundle
-    ar = libMesh::pi * (rod_diameter + wire_diameter) * wire_diameter / 6.0;
-    // bare rod bundle center subchannel flow area
-    a_p =
-        std::sqrt(3.0) / 4.0 * std::pow(pitch, 2.0) - libMesh::pi * std::pow(rod_diameter, 2) / 8.0;
-    // turbulent friction factor equation constant - Center subchannel
-    cf_t = cft_p * (pw_p / w_perim) + wd_t * (3 * ar / a_p) * (Dh_i / wire_lead_length) *
-                                          std::pow((Dh_i / wire_diameter), 0.18);
-    // laminar friction factor equation constant - Center subchannel
-    cf_l = cfl_p * (pw_p / w_perim) +
-           wd_l * (3 * ar / a_p) * (Dh_i / wire_lead_length) * (Dh_i / wire_diameter);
+    if (subch_type == EChannelType::CENTER)
+    {
+      // wetted perimeter for center subchannel and bare rod bundle
+      pw_p = libMesh::pi * rod_diameter / 2.0;
+      // wire projected area - center subchannel wire-wrapped bundle
+      ar = libMesh::pi * (rod_diameter + wire_diameter) * wire_diameter / 6.0;
+      // bare rod bundle center subchannel flow area
+      a_p = std::sqrt(3.0) / 4.0 * std::pow(pitch, 2.0) -
+            libMesh::pi * std::pow(rod_diameter, 2) / 8.0;
+      // turbulent friction factor equation constant - Center subchannel
+      cf_t = cf_t * (pw_p / w_perim) + wd_t * (3 * ar / a_p) * (Dh_i / wire_lead_length) *
+                                           std::pow((Dh_i / wire_diameter), 0.18);
+      // laminar friction factor equation constant - Center subchannel
+      cf_l = cf_l * (pw_p / w_perim) +
+             wd_l * (3 * ar / a_p) * (Dh_i / wire_lead_length) * (Dh_i / wire_diameter);
+    }
+    else if (subch_type == EChannelType::EDGE)
+    {
+      // wire projected area - edge subchannel wire-wrapped bundle
+      ar = libMesh::pi * (rod_diameter + wire_diameter) * wire_diameter / 4.0;
+      // bare rod bundle edge subchannel flow area
+      a_p = S + 0.5 * libMesh::pi * std::pow(wire_diameter, 2) / 4.0 / std::cos(theta);
+      // turbulent friction factor equation constant - Edge subchannel
+      cf_t = cf_t * std::pow((1 + ws_t * (ar / a_p) * std::pow(std::tan(theta), 2.0)), 1.41);
+      // laminar friction factor equation constant - Edge subchannel
+      cf_l = cf_l * (1 + ws_l * (ar / a_p) * std::pow(std::tan(theta), 2.0));
+    }
+    else
+    {
+      // wire projected area - corner subchannel wire-wrapped bundle
+      ar = libMesh::pi * (rod_diameter + wire_diameter) * wire_diameter / 6.0;
+      // bare rod bundle corner subchannel flow area
+      a_p = S + 1.0 / 6.0 * libMesh::pi / 4.0 * std::pow(wire_diameter, 2) / std::cos(theta);
+      // turbulent friction factor equation constant - Corner subchannel
+      cf_t = cf_t * std::pow((1 + ws_t * (ar / a_p) * std::pow(std::tan(theta), 2.0)), 1.41);
+      // laminar friction factor equation constant - Corner subchannel
+      cf_l = cf_l * (1 + ws_l * (ar / a_p) * std::pow(std::tan(theta), 2.0));
+    }
   }
-  else if (subch_type == EChannelType::EDGE)
-  {
-    // wire projected area - edge subchannel wire-wrapped bundle
-    ar = libMesh::pi * (rod_diameter + wire_diameter) * wire_diameter / 4.0;
-    // bare rod bundle edge subchannel flow area
-    a_p = S + 0.5 * libMesh::pi * std::pow(wire_diameter, 2) / 4.0 / std::cos(theta);
-    // turbulent friction factor equation constant - Edge subchannel
-    cf_t = cft_p * std::pow((1 + ws_t * (ar / a_p) * std::pow(std::tan(theta), 2.0)), 1.41);
-    // laminar friction factor equation constant - Edge subchannel
-    cf_l = cfl_p * (1 + ws_l * (ar / a_p) * std::pow(std::tan(theta), 2.0));
-  }
-  else
-  {
-    // wire projected area - corner subchannel wire-wrapped bundle
-    ar = libMesh::pi * (rod_diameter + wire_diameter) * wire_diameter / 6.0;
-    // bare rod bundle corner subchannel flow area
-    a_p = S + 1.0 / 6.0 * libMesh::pi / 4.0 * std::pow(wire_diameter, 2) / std::cos(theta);
-    // turbulent friction factor equation constant - Corner subchannel
-    cf_t = cft_p * std::pow((1 + ws_t * (ar / a_p) * std::pow(std::tan(theta), 2.0)), 1.41);
-    // laminar friction factor equation constant - Corner subchannel
-    cf_l = cfl_p * (1 + ws_l * (ar / a_p) * std::pow(std::tan(theta), 2.0));
-  }
+
   // laminar friction factor
   auto f_l = cf_l / Re;
   // turbulent friction factor
@@ -240,7 +243,10 @@ LiquidMetalSubChannel1PhaseProblem::computeWijPrime(int iblock)
 {
   unsigned int last_node = (iblock + 1) * _block_size;
   unsigned int first_node = iblock * _block_size + 1;
-
+  const Real & pitch = _subchannel_mesh.getPitch();
+  const Real & rod_diameter = _subchannel_mesh.getRodDiameter();
+  const Real & wire_lead_length = _tri_sch_mesh.getWireLeadLength();
+  const Real & wire_diameter = _tri_sch_mesh.getWireDiameter();
   for (unsigned int iz = first_node; iz < last_node + 1; iz++)
   {
     auto z_grid = _subchannel_mesh.getZGrid();
@@ -252,44 +258,42 @@ LiquidMetalSubChannel1PhaseProblem::computeWijPrime(int iblock)
       unsigned int j_ch = chans.second;
       auto subch_type1 = _subchannel_mesh.getSubchannelType(i_ch);
       auto subch_type2 = _subchannel_mesh.getSubchannelType(j_ch);
+      auto * node_in_i = _subchannel_mesh.getChannelNode(i_ch, iz - 1);
+      auto * node_out_i = _subchannel_mesh.getChannelNode(i_ch, iz);
+      auto * node_in_j = _subchannel_mesh.getChannelNode(j_ch, iz - 1);
+      auto * node_out_j = _subchannel_mesh.getChannelNode(j_ch, iz);
+      auto Si_in = (*_S_flow_soln)(node_in_i);
+      auto Sj_in = (*_S_flow_soln)(node_in_j);
+      auto Si_out = (*_S_flow_soln)(node_out_i);
+      auto Sj_out = (*_S_flow_soln)(node_out_j);
+      // crossflow area between channels i,j (dz*gap_width)
+      auto Sij = dz * _subchannel_mesh.getGapWidth(i_gap);
+      // Calculation of flow regime
+      auto ReL = 320.0 * std::pow(10.0, pitch / rod_diameter - 1);
+      auto ReT = 10000.0 * std::pow(10.0, 0.7 * (pitch / rod_diameter - 1));
+      auto avg_massflux =
+          0.5 * (((*_mdot_soln)(node_in_i) + (*_mdot_soln)(node_in_j)) / (Si_in + Sj_in) +
+                 ((*_mdot_soln)(node_out_i) + (*_mdot_soln)(node_out_j)) / (Si_out + Sj_out));
+      auto w_perim_i = (*_w_perim_soln)(node_in_i);
+      auto w_perim_j = (*_w_perim_soln)(node_in_j);
+      auto mu_i = (*_mu_soln)(node_in_i);
+      auto mu_j = (*_mu_soln)(node_in_j);
+      // hydraulic diameter in the i direction
+      auto hD_i = 4.0 * Si_in / w_perim_i;
+      auto hD_j = 4.0 * Sj_in / w_perim_j;
+      auto avg_hD = 0.5 * (hD_i + hD_j);
+      auto avg_mu = 0.5 * (mu_i + mu_j);
+      auto Re = avg_massflux * avg_hD / avg_mu;
       _WijPrime(i_gap, iz) = 0.0;
-      if (subch_type1 == EChannelType::CENTER || subch_type2 == EChannelType::CENTER)
+      auto beta = 0.0;
+      if ((subch_type1 == EChannelType::CENTER || subch_type2 == EChannelType::CENTER) &&
+          (wire_lead_length != 0) && (wire_diameter != 0))
       {
-        auto * node_in_i = _subchannel_mesh.getChannelNode(i_ch, iz - 1);
-        auto * node_out_i = _subchannel_mesh.getChannelNode(i_ch, iz);
-        auto * node_in_j = _subchannel_mesh.getChannelNode(j_ch, iz - 1);
-        auto * node_out_j = _subchannel_mesh.getChannelNode(j_ch, iz);
-        auto Si_in = (*_S_flow_soln)(node_in_i);
-        auto Sj_in = (*_S_flow_soln)(node_in_j);
-        auto Si_out = (*_S_flow_soln)(node_out_i);
-        auto Sj_out = (*_S_flow_soln)(node_out_j);
-        // crossflow area between channels i,j (dz*gap_width)
-        auto Sij = dz * _subchannel_mesh.getGapWidth(i_gap);
-        const Real & pitch = _subchannel_mesh.getPitch();
-        const Real & rod_diameter = _subchannel_mesh.getRodDiameter();
-        const Real & wire_lead_length = _tri_sch_mesh.getWireLeadLength();
-        const Real & wire_diameter = _tri_sch_mesh.getWireDiameter();
+        // Calculation of geometric parameters
         auto theta =
             std::acos(wire_lead_length /
                       std::sqrt(std::pow(wire_lead_length, 2) +
                                 std::pow(libMesh::pi * (rod_diameter + wire_diameter), 2)));
-        // Calculation of flow regime
-        auto ReL = 320.0 * std::pow(10.0, pitch / rod_diameter - 1);
-        auto ReT = 10000.0 * std::pow(10.0, 0.7 * (pitch / rod_diameter - 1));
-        auto avg_massflux =
-            0.5 * (((*_mdot_soln)(node_in_i) + (*_mdot_soln)(node_in_j)) / (Si_in + Sj_in) +
-                   ((*_mdot_soln)(node_out_i) + (*_mdot_soln)(node_out_j)) / (Si_out + Sj_out));
-        auto w_perim_i = (*_w_perim_soln)(node_in_i);
-        auto w_perim_j = (*_w_perim_soln)(node_in_j);
-        auto mu_i = (*_mu_soln)(node_in_i);
-        auto mu_j = (*_mu_soln)(node_in_j);
-        // hydraulic diameter in the i direction
-        auto hD_i = 4.0 * Si_in / w_perim_i;
-        auto hD_j = 4.0 * Sj_in / w_perim_j;
-        auto avg_hD = 0.5 * (hD_i + hD_j);
-        auto avg_mu = 0.5 * (mu_i + mu_j);
-        auto Re = avg_massflux * avg_hD / avg_mu;
-        // Calculation of geometric parameters
         auto Ar1 = libMesh::pi * (rod_diameter + wire_diameter) * wire_diameter / 6.0;
         auto A1prime = (std::sqrt(3.0) / 4.0) * std::pow(pitch, 2) -
                        libMesh::pi * std::pow(rod_diameter, 2) / 8.0;
@@ -313,11 +317,39 @@ LiquidMetalSubChannel1PhaseProblem::computeWijPrime(int iblock)
                    std::pow(psi, gamma);
         }
         // Calculation of turbulent mixing parameter
-        auto beta = Cm * std::pow(Ar1 / A1, 0.5) * std::tan(theta);
-
-        // Calculation of turbulent crossflow
-        _WijPrime(i_gap, iz) = beta * avg_massflux * Sij;
+        beta = Cm * std::pow(Ar1 / A1, 0.5) * std::tan(theta);
       }
+      else if ((wire_lead_length == 0) && (wire_diameter == 0))
+      {
+        // Calculation of Turbulent Crossflow for bare assemblies, from Kim and Chung (2001).
+        Real gamma1 = 20.0;
+        Real b = 2.0 / 3.0;
+        auto k = 0.25 * (_fp->k_from_p_T((*_P_soln)(node_out_i) + _P_out, (*_T_soln)(node_out_i)) +
+                         _fp->k_from_p_T((*_P_soln)(node_in_i) + _P_out, (*_T_soln)(node_in_i)) +
+                         _fp->k_from_p_T((*_P_soln)(node_out_j) + _P_out, (*_T_soln)(node_out_j)) +
+                         _fp->k_from_p_T((*_P_soln)(node_in_j) + _P_out, (*_T_soln)(node_in_j)));
+        auto cp =
+            0.25 * (_fp->cp_from_p_T((*_P_soln)(node_out_i) + _P_out, (*_T_soln)(node_out_i)) +
+                    _fp->cp_from_p_T((*_P_soln)(node_in_i) + _P_out, (*_T_soln)(node_in_i)) +
+                    _fp->cp_from_p_T((*_P_soln)(node_out_j) + _P_out, (*_T_soln)(node_out_j)) +
+                    _fp->cp_from_p_T((*_P_soln)(node_in_j) + _P_out, (*_T_soln)(node_in_j)));
+        auto Pr = avg_massflux * cp / k;
+        auto Pr_t =
+            Pr / std::pow(gamma1, 2) * 2.0 * std::pow(Re, 1.0 - 0.1) * std::sqrt(0.18 / 8.0);
+        auto eta = pitch / std::sqrt(3.0);
+        auto L_x = b * eta;
+        auto L_y = pitch - rod_diameter;
+        auto lambda = L_y / L_x;
+        auto a_x = 1.0 - 2.0 * lambda * lambda / libMesh::pi;
+        auto z_FP =
+            libMesh::pi * (3.0 * (L_x + L_y) - std::sqrt((3.0 * L_x + L_y) * (L_x + 3.0 * L_y)));
+        auto Str = 1.0 / (0.822 * (L_y / rod_diameter) + 0.144);
+        auto dum1 = 2.0 / std::pow(gamma1, 2) * std::sqrt(0.18 / 8.0) * avg_hD / L_y;
+        auto dum2 = 1.0 / Pr_t * L_y / b / eta + a_x * z_FP / rod_diameter * Str;
+        beta = dum1 * dum2 * std::pow(Re, -0.1);
+      }
+      // Calculation of turbulent crossflow
+      _WijPrime(i_gap, iz) = beta * avg_massflux * Sij;
     }
   }
 }
@@ -381,6 +413,12 @@ LiquidMetalSubChannel1PhaseProblem::computeh(int iblock)
 {
   unsigned int last_node = (iblock + 1) * _block_size;
   unsigned int first_node = iblock * _block_size + 1;
+  auto heated_length = _subchannel_mesh.getHeatedLength();
+  auto unheated_length_entry = _subchannel_mesh.getHeatedLengthEntry();
+  const Real & wire_lead_length = _tri_sch_mesh.getWireLeadLength();
+  const Real & wire_diameter = _tri_sch_mesh.getWireDiameter();
+  const Real & pitch = _subchannel_mesh.getPitch();
+  const Real & rod_diameter = _subchannel_mesh.getRodDiameter();
 
   if (iblock == 0)
   {
@@ -397,9 +435,6 @@ LiquidMetalSubChannel1PhaseProblem::computeh(int iblock)
     {
       auto z_grid = _subchannel_mesh.getZGrid();
       auto dz = z_grid[iz] - z_grid[iz - 1];
-      auto heated_length = _subchannel_mesh.getHeatedLength();
-      auto unheated_length_entry = _subchannel_mesh.getHeatedLengthEntry();
-
       Real gedge_ave = 0.0;
       Real mdot_sum = 0.0;
       Real si_sum = 0.0;
@@ -419,8 +454,6 @@ LiquidMetalSubChannel1PhaseProblem::computeh(int iblock)
 
       for (unsigned int i_ch = 0; i_ch < _n_channels; i_ch++)
       {
-        const Real & pitch = _subchannel_mesh.getPitch();
-        const Real & rod_diameter = _subchannel_mesh.getRodDiameter();
         auto * node_in = _subchannel_mesh.getChannelNode(i_ch, iz - 1);
         auto * node_out = _subchannel_mesh.getChannelNode(i_ch, iz);
         auto mdot_in = (*_mdot_soln)(node_in);
@@ -447,7 +480,8 @@ LiquidMetalSubChannel1PhaseProblem::computeh(int iblock)
         auto subch_type = _subchannel_mesh.getSubchannelType(i_ch);
         Real sweep_enthalpy = 0.0;
 
-        if (subch_type == EChannelType::EDGE || subch_type == EChannelType::CORNER)
+        if ((subch_type == EChannelType::EDGE || subch_type == EChannelType::CORNER) &&
+            (wire_diameter != 0.0) && (wire_lead_length != 0.0))
         {
           const Real & pitch = _subchannel_mesh.getPitch();
           const Real & rod_diameter = _subchannel_mesh.getRodDiameter();
@@ -1032,7 +1066,8 @@ LiquidMetalSubChannel1PhaseProblem::computeh(int iblock)
         gedge_ave = mdot_sum / si_sum;
         auto subch_type = _subchannel_mesh.getSubchannelType(i_ch);
         PetscScalar sweep_enthalpy = 0.0;
-        if (subch_type == EChannelType::EDGE || subch_type == EChannelType::CORNER)
+        if ((subch_type == EChannelType::EDGE || subch_type == EChannelType::CORNER) &&
+            (wire_diameter != 0.0) && (wire_lead_length != 0.0))
         {
           const Real & pitch = _subchannel_mesh.getPitch();
           const Real & rod_diameter = _subchannel_mesh.getRodDiameter();

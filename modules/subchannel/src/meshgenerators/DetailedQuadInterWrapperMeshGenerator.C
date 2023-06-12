@@ -116,24 +116,10 @@ DetailedQuadInterWrapperMeshGenerator::generate()
 
   // specify number and type of sub-channel
   unsigned int n_center, n_side, n_corner;
-  if (_n_channels == 2)
-  {
-    n_corner = 0;
-    n_side = _n_channels;
-    n_center = _n_channels - n_side - n_corner;
-  }
-  else if (_n_channels > 2 && (_ny == 1 || _nx == 1))
-  {
-    n_corner = 0;
-    n_side = 2;
-    n_center = _n_channels - n_side - n_corner;
-  }
-  else
-  {
-    n_corner = 4;
-    n_side = 2 * (_ny - 2) + 2 * (_nx - 2);
-    n_center = _n_channels - n_side - n_corner;
-  }
+
+  n_corner = 4;
+  n_side = 2 * (_ny - 2) + 2 * (_nx - 2);
+  n_center = _n_channels - n_side - n_corner;
 
   // Compute the total number of points and elements.
   const unsigned int points_per_level =
@@ -407,189 +393,95 @@ DetailedQuadInterWrapperMeshGenerator::generate()
   }
 
   // Add the points to the mesh.
-  if (_n_channels == 2)
+
+  unsigned int node_id = 0;
+  Real offset_x = (_nx - 1) * _assembly_pitch / 2.0;
+  Real offset_y = (_ny - 1) * _assembly_pitch / 2.0;
+  for (unsigned int iy = 0; iy < _ny; iy++)
   {
-    unsigned int node_id = 0;
-    Real offset_x = (_nx - 1) * _assembly_pitch / 2.0;
-    Real offset_y = (_ny - 1) * _assembly_pitch / 2.0;
-    for (unsigned int iy = 0; iy < _ny; iy++)
+    Point y0 = {0, _assembly_pitch * iy - offset_y, 0};
+    for (unsigned int ix = 0; ix < _nx; ix++)
     {
-      Point y0 = {0, _assembly_pitch * iy - offset_y, 0};
-      for (unsigned int ix = 0; ix < _nx; ix++)
+      Point x0 = {_assembly_pitch * ix - offset_x, 0, 0};
+      if (ix == 0 && iy == 0) // Bottom Left corner
       {
-        Point x0 = {_assembly_pitch * ix - offset_x, 0, 0};
         for (auto z : _z_grid)
         {
           Point z0{0, 0, z};
-          if (_nx == 1 && iy == 0) // vertical orientation
-          {
-            for (unsigned int i = 0; i < points_per_side; i++)
-              mesh_base->add_point(bottom_points[i] + x0 + y0 + z0, node_id++);
-          }
-          if (_nx == 1 && iy == 1) // vertical orientation
-          {
-            for (unsigned int i = 0; i < points_per_side; i++)
-              mesh_base->add_point(top_points[i] + x0 + y0 + z0, node_id++);
-          }
-          if (_ny == 1 && ix == 0) // horizontal orientation
-          {
-            for (unsigned int i = 0; i < points_per_side; i++)
-              mesh_base->add_point(left_points[i] + x0 + y0 + z0, node_id++);
-          }
-          if (_ny == 1 && ix == 1) // horizontal orientation
-          {
-            for (unsigned int i = 0; i < points_per_side; i++)
-              mesh_base->add_point(right_points[i] + x0 + y0 + z0, node_id++);
-          }
+          for (unsigned int i = 0; i < points_per_corner; i++)
+            mesh_base->add_point(bl_corner_points[i] + x0 + y0 + z0, node_id++);
         }
       }
-    }
-  }
-  else if (_n_channels > 2 && (_ny == 1 || _nx == 1))
-  {
-    unsigned int node_id = 0;
-    Real offset_x = (_nx - 1) * _assembly_pitch / 2.0;
-    Real offset_y = (_ny - 1) * _assembly_pitch / 2.0;
-    for (unsigned int iy = 0; iy < _ny; iy++)
-    {
-      Point y0 = {0, _assembly_pitch * iy - offset_y, 0};
-      for (unsigned int ix = 0; ix < _nx; ix++)
+      else if (ix == _nx - 1 && iy == 0) // Bottom right corner
       {
-        Point x0 = {_assembly_pitch * ix - offset_x, 0, 0};
         for (auto z : _z_grid)
         {
           Point z0{0, 0, z};
-          if (_nx == 1)
-          {
-            if (iy == 0)
-            {
-              for (unsigned int i = 0; i < points_per_side; i++)
-                mesh_base->add_point(bottom_points[i] + x0 + y0 + z0, node_id++);
-            }
-            else if (iy == _ny - 1)
-            {
-              for (unsigned int i = 0; i < points_per_side; i++)
-                mesh_base->add_point(top_points[i] + x0 + y0 + z0, node_id++);
-            }
-            else
-            {
-              for (unsigned int i = 0; i < points_per_center; i++)
-                mesh_base->add_point(center_points[i] + x0 + y0 + z0, node_id++);
-            }
-          }
-          else if (_ny == 1)
-          {
-            if (ix == 0)
-            {
-              for (unsigned int i = 0; i < points_per_side; i++)
-                mesh_base->add_point(left_points[i] + x0 + y0 + z0, node_id++);
-            }
-            else if (ix == _nx - 1)
-            {
-              for (unsigned int i = 0; i < points_per_side; i++)
-                mesh_base->add_point(right_points[i] + x0 + y0 + z0, node_id++);
-            }
-            else
-            {
-              for (unsigned int i = 0; i < points_per_center; i++)
-                mesh_base->add_point(center_points[i] + x0 + y0 + z0, node_id++);
-            }
-          }
+          for (unsigned int i = 0; i < points_per_corner; i++)
+            mesh_base->add_point(br_corner_points[i] + x0 + y0 + z0, node_id++);
         }
       }
-    }
-  }
-  else
-  {
-    unsigned int node_id = 0;
-    Real offset_x = (_nx - 1) * _assembly_pitch / 2.0;
-    Real offset_y = (_ny - 1) * _assembly_pitch / 2.0;
-    for (unsigned int iy = 0; iy < _ny; iy++)
-    {
-      Point y0 = {0, _assembly_pitch * iy - offset_y, 0};
-      for (unsigned int ix = 0; ix < _nx; ix++)
+      else if (ix == 0 && iy == _ny - 1) // top Left corner
       {
-        Point x0 = {_assembly_pitch * ix - offset_x, 0, 0};
-        if (ix == 0 && iy == 0) // Bottom Left corner
+        for (auto z : _z_grid)
         {
-          for (auto z : _z_grid)
-          {
-            Point z0{0, 0, z};
-            for (unsigned int i = 0; i < points_per_corner; i++)
-              mesh_base->add_point(bl_corner_points[i] + x0 + y0 + z0, node_id++);
-          }
+          Point z0{0, 0, z};
+          for (unsigned int i = 0; i < points_per_corner; i++)
+            mesh_base->add_point(tl_corner_points[i] + x0 + y0 + z0, node_id++);
         }
-        else if (ix == _nx - 1 && iy == 0) // Bottom right corner
+      }
+      else if (ix == _nx - 1 && iy == _ny - 1) // top right corner
+      {
+        for (auto z : _z_grid)
         {
-          for (auto z : _z_grid)
-          {
-            Point z0{0, 0, z};
-            for (unsigned int i = 0; i < points_per_corner; i++)
-              mesh_base->add_point(br_corner_points[i] + x0 + y0 + z0, node_id++);
-          }
+          Point z0{0, 0, z};
+          for (unsigned int i = 0; i < points_per_corner; i++)
+            mesh_base->add_point(tr_corner_points[i] + x0 + y0 + z0, node_id++);
         }
-        else if (ix == 0 && iy == _ny - 1) // top Left corner
+      }
+      else if (ix == 0 && (iy != _ny - 1 || iy != 0)) // left side
+      {
+        for (auto z : _z_grid)
         {
-          for (auto z : _z_grid)
-          {
-            Point z0{0, 0, z};
-            for (unsigned int i = 0; i < points_per_corner; i++)
-              mesh_base->add_point(tl_corner_points[i] + x0 + y0 + z0, node_id++);
-          }
+          Point z0{0, 0, z};
+          for (unsigned int i = 0; i < points_per_side; i++)
+            mesh_base->add_point(left_points[i] + x0 + y0 + z0, node_id++);
         }
-        else if (ix == _nx - 1 && iy == _ny - 1) // top right corner
+      }
+      else if (ix == _nx - 1 && (iy != _ny - 1 || iy != 0)) // right side
+      {
+        for (auto z : _z_grid)
         {
-          for (auto z : _z_grid)
-          {
-            Point z0{0, 0, z};
-            for (unsigned int i = 0; i < points_per_corner; i++)
-              mesh_base->add_point(tr_corner_points[i] + x0 + y0 + z0, node_id++);
-          }
+          Point z0{0, 0, z};
+          for (unsigned int i = 0; i < points_per_side; i++)
+            mesh_base->add_point(right_points[i] + x0 + y0 + z0, node_id++);
         }
-        else if (ix == 0 && (iy != _ny - 1 || iy != 0)) // left side
+      }
+      else if (iy == 0 && (ix != _nx - 1 || ix != 0)) // bottom side
+      {
+        for (auto z : _z_grid)
         {
-          for (auto z : _z_grid)
-          {
-            Point z0{0, 0, z};
-            for (unsigned int i = 0; i < points_per_side; i++)
-              mesh_base->add_point(left_points[i] + x0 + y0 + z0, node_id++);
-          }
+          Point z0{0, 0, z};
+          for (unsigned int i = 0; i < points_per_side; i++)
+            mesh_base->add_point(bottom_points[i] + x0 + y0 + z0, node_id++);
         }
-        else if (ix == _nx - 1 && (iy != _ny - 1 || iy != 0)) // right side
+      }
+      else if (iy == _ny - 1 && (ix != _nx - 1 || ix != 0)) // top side
+      {
+        for (auto z : _z_grid)
         {
-          for (auto z : _z_grid)
-          {
-            Point z0{0, 0, z};
-            for (unsigned int i = 0; i < points_per_side; i++)
-              mesh_base->add_point(right_points[i] + x0 + y0 + z0, node_id++);
-          }
+          Point z0{0, 0, z};
+          for (unsigned int i = 0; i < points_per_side; i++)
+            mesh_base->add_point(top_points[i] + x0 + y0 + z0, node_id++);
         }
-        else if (iy == 0 && (ix != _nx - 1 || ix != 0)) // bottom side
+      }
+      else // center
+      {
+        for (auto z : _z_grid)
         {
-          for (auto z : _z_grid)
-          {
-            Point z0{0, 0, z};
-            for (unsigned int i = 0; i < points_per_side; i++)
-              mesh_base->add_point(bottom_points[i] + x0 + y0 + z0, node_id++);
-          }
-        }
-        else if (iy == _ny - 1 && (ix != _nx - 1 || ix != 0)) // top side
-        {
-          for (auto z : _z_grid)
-          {
-            Point z0{0, 0, z};
-            for (unsigned int i = 0; i < points_per_side; i++)
-              mesh_base->add_point(top_points[i] + x0 + y0 + z0, node_id++);
-          }
-        }
-        else // center
-        {
-          for (auto z : _z_grid)
-          {
-            Point z0{0, 0, z};
-            for (unsigned int i = 0; i < points_per_center; i++)
-              mesh_base->add_point(center_points[i] + x0 + y0 + z0, node_id++);
-          }
+          Point z0{0, 0, z};
+          for (unsigned int i = 0; i < points_per_center; i++)
+            mesh_base->add_point(center_points[i] + x0 + y0 + z0, node_id++);
         }
       }
     }
@@ -598,205 +490,80 @@ DetailedQuadInterWrapperMeshGenerator::generate()
   // Add elements to the mesh.  The elements are 6-node prisms.  The
   // bases of these prisms form a triangulated representation of an cross-section
   // of a center subchannel.
-  if (_n_channels == 2)
+  unsigned int elem_id = 0;
+  unsigned int number_of_corner = 0;
+  unsigned int number_of_side = 0;
+  unsigned int number_of_center = 0;
+  unsigned int elems_per_channel = 0;
+  unsigned int points_per_channel = 0;
+  for (unsigned int iy = 0; iy < _ny; iy++)
   {
-    unsigned int elem_id = 0;
-    for (unsigned int iy = 0; iy < _ny; iy++)
+    for (unsigned int ix = 0; ix < _nx; ix++)
     {
-      for (unsigned int ix = 0; ix < _nx; ix++)
+      unsigned int i_ch = _nx * iy + ix;
+      auto subch_type = getSubchannelType(i_ch);
+      if (subch_type == EChannelType::CORNER)
       {
-        unsigned int i_ch = _nx * iy + ix;
-        for (unsigned int iz = 0; iz < _n_cells; iz++)
+        number_of_corner++;
+        elems_per_channel = elems_per_corner;
+        points_per_channel = points_per_corner;
+      }
+      else if (subch_type == EChannelType::EDGE)
+      {
+        number_of_side++;
+        elems_per_channel = elems_per_side;
+        points_per_channel = points_per_side;
+      }
+      else
+      {
+        number_of_center++;
+        elems_per_channel = elems_per_center;
+        points_per_channel = points_per_center;
+      }
+      for (unsigned int iz = 0; iz < _n_cells; iz++)
+      {
+        unsigned int elapsed_points = number_of_corner * points_per_corner * (_n_cells + 1) +
+                                      number_of_side * points_per_side * (_n_cells + 1) +
+                                      number_of_center * points_per_center * (_n_cells + 1) -
+                                      points_per_channel * (_n_cells + 1);
+        // index of the central node at base of cell
+        unsigned int indx1 = iz * points_per_channel + elapsed_points;
+        // index of the central node at top of cell
+        unsigned int indx2 = (iz + 1) * points_per_channel + elapsed_points;
+
+        for (unsigned int i = 0; i < elems_per_channel; i++)
         {
-          for (unsigned int i = 0; i < elems_per_side; i++)
-          {
-            Elem * elem = new Prism6;
-            elem->subdomain_id() = _block_id;
-            elem->set_id(elem_id++);
-            elem = mesh_base->add_elem(elem);
-            // index of the central node at base of cell
-            unsigned int indx1 = iz * points_per_side + points_per_side * (_n_cells + 1) * i_ch;
-            // index of the central node at top of cell
-            unsigned int indx2 =
-                (iz + 1) * points_per_side + points_per_side * (_n_cells + 1) * i_ch;
-            unsigned int elems_per_channel = elems_per_side;
-            elem->set_node(0) = mesh_base->node_ptr(indx1);
-            elem->set_node(1) = mesh_base->node_ptr(indx1 + i + 1);
-            if (i != elems_per_channel - 1)
-              elem->set_node(2) = mesh_base->node_ptr(indx1 + i + 2);
-            else
-              elem->set_node(2) = mesh_base->node_ptr(indx1 + 1);
+          Elem * elem = new Prism6;
+          elem->subdomain_id() = _block_id;
+          elem->set_id(elem_id++);
+          elem = mesh_base->add_elem(elem);
 
-            elem->set_node(3) = mesh_base->node_ptr(indx2);
-            elem->set_node(4) = mesh_base->node_ptr(indx2 + i + 1);
-            if (i != elems_per_channel - 1)
-              elem->set_node(5) = mesh_base->node_ptr(indx2 + i + 2);
-            else
-              elem->set_node(5) = mesh_base->node_ptr(indx2 + 1);
+          elem->set_node(0) = mesh_base->node_ptr(indx1);
+          elem->set_node(1) = mesh_base->node_ptr(indx1 + i + 1);
+          if (i != elems_per_channel - 1)
+            elem->set_node(2) = mesh_base->node_ptr(indx1 + i + 2);
+          else
+            elem->set_node(2) = mesh_base->node_ptr(indx1 + 1);
 
-            if (iz == 0)
-              boundary_info.add_side(elem, 0, 0);
-            if (iz == _n_cells - 1)
-              boundary_info.add_side(elem, 4, 1);
-          }
+          elem->set_node(3) = mesh_base->node_ptr(indx2);
+          elem->set_node(4) = mesh_base->node_ptr(indx2 + i + 1);
+          if (i != elems_per_channel - 1)
+            elem->set_node(5) = mesh_base->node_ptr(indx2 + i + 2);
+          else
+            elem->set_node(5) = mesh_base->node_ptr(indx2 + 1);
+
+          if (iz == 0)
+            boundary_info.add_side(elem, 0, 0);
+          if (iz == _n_cells - 1)
+            boundary_info.add_side(elem, 4, 1);
         }
       }
     }
-    boundary_info.sideset_name(0) = "inlet";
-    boundary_info.sideset_name(1) = "outlet";
-    mesh_base->subdomain_name(_block_id) = name();
-    mesh_base->prepare_for_use();
   }
-  else if (_n_channels > 2 && (_ny == 1 || _nx == 1))
-  {
-    unsigned int elem_id = 0;
-    unsigned int number_of_corner = 0;
-    unsigned int number_of_side = 0;
-    unsigned int number_of_center = 0;
-    unsigned int elems_per_channel = 0;
-    unsigned int points_per_channel = 0;
-    for (unsigned int iy = 0; iy < _ny; iy++)
-    {
-      for (unsigned int ix = 0; ix < _nx; ix++)
-      {
-        unsigned int i_ch = _nx * iy + ix;
-        auto subch_type = getSubchannelType(i_ch);
-        // note that in this case i use side geometry for corner subchannel
-        if (subch_type == EChannelType::CORNER)
-        {
-          number_of_side++;
-          elems_per_channel = elems_per_side;
-          points_per_channel = points_per_side;
-        }
-        // note that in this case i use center geometry for edge subchannel
-        else if (subch_type == EChannelType::EDGE)
-        {
-          number_of_center++;
-          elems_per_channel = elems_per_center;
-          points_per_channel = points_per_center;
-        }
-        for (unsigned int iz = 0; iz < _n_cells; iz++)
-        {
-          unsigned int elapsed_points = number_of_corner * points_per_corner * (_n_cells + 1) +
-                                        number_of_side * points_per_side * (_n_cells + 1) +
-                                        number_of_center * points_per_center * (_n_cells + 1) -
-                                        points_per_channel * (_n_cells + 1);
-          // index of the central node at base of cell
-          unsigned int indx1 = iz * points_per_channel + elapsed_points;
-          // index of the central node at top of cell
-          unsigned int indx2 = (iz + 1) * points_per_channel + elapsed_points;
-
-          for (unsigned int i = 0; i < elems_per_channel; i++)
-          {
-            Elem * elem = new Prism6;
-            elem->subdomain_id() = _block_id;
-            elem->set_id(elem_id++);
-            elem = mesh_base->add_elem(elem);
-
-            elem->set_node(0) = mesh_base->node_ptr(indx1);
-            elem->set_node(1) = mesh_base->node_ptr(indx1 + i + 1);
-            if (i != elems_per_channel - 1)
-              elem->set_node(2) = mesh_base->node_ptr(indx1 + i + 2);
-            else
-              elem->set_node(2) = mesh_base->node_ptr(indx1 + 1);
-
-            elem->set_node(3) = mesh_base->node_ptr(indx2);
-            elem->set_node(4) = mesh_base->node_ptr(indx2 + i + 1);
-            if (i != elems_per_channel - 1)
-              elem->set_node(5) = mesh_base->node_ptr(indx2 + i + 2);
-            else
-              elem->set_node(5) = mesh_base->node_ptr(indx2 + 1);
-
-            if (iz == 0)
-              boundary_info.add_side(elem, 0, 0);
-            if (iz == _n_cells - 1)
-              boundary_info.add_side(elem, 4, 1);
-          }
-        }
-      }
-    }
-    boundary_info.sideset_name(0) = "inlet";
-    boundary_info.sideset_name(1) = "outlet";
-    mesh_base->subdomain_name(_block_id) = name();
-    mesh_base->prepare_for_use();
-  }
-  else
-  {
-    unsigned int elem_id = 0;
-    unsigned int number_of_corner = 0;
-    unsigned int number_of_side = 0;
-    unsigned int number_of_center = 0;
-    unsigned int elems_per_channel = 0;
-    unsigned int points_per_channel = 0;
-    for (unsigned int iy = 0; iy < _ny; iy++)
-    {
-      for (unsigned int ix = 0; ix < _nx; ix++)
-      {
-        unsigned int i_ch = _nx * iy + ix;
-        auto subch_type = getSubchannelType(i_ch);
-        if (subch_type == EChannelType::CORNER)
-        {
-          number_of_corner++;
-          elems_per_channel = elems_per_corner;
-          points_per_channel = points_per_corner;
-        }
-        else if (subch_type == EChannelType::EDGE)
-        {
-          number_of_side++;
-          elems_per_channel = elems_per_side;
-          points_per_channel = points_per_side;
-        }
-        else
-        {
-          number_of_center++;
-          elems_per_channel = elems_per_center;
-          points_per_channel = points_per_center;
-        }
-        for (unsigned int iz = 0; iz < _n_cells; iz++)
-        {
-          unsigned int elapsed_points = number_of_corner * points_per_corner * (_n_cells + 1) +
-                                        number_of_side * points_per_side * (_n_cells + 1) +
-                                        number_of_center * points_per_center * (_n_cells + 1) -
-                                        points_per_channel * (_n_cells + 1);
-          // index of the central node at base of cell
-          unsigned int indx1 = iz * points_per_channel + elapsed_points;
-          // index of the central node at top of cell
-          unsigned int indx2 = (iz + 1) * points_per_channel + elapsed_points;
-
-          for (unsigned int i = 0; i < elems_per_channel; i++)
-          {
-            Elem * elem = new Prism6;
-            elem->subdomain_id() = _block_id;
-            elem->set_id(elem_id++);
-            elem = mesh_base->add_elem(elem);
-
-            elem->set_node(0) = mesh_base->node_ptr(indx1);
-            elem->set_node(1) = mesh_base->node_ptr(indx1 + i + 1);
-            if (i != elems_per_channel - 1)
-              elem->set_node(2) = mesh_base->node_ptr(indx1 + i + 2);
-            else
-              elem->set_node(2) = mesh_base->node_ptr(indx1 + 1);
-
-            elem->set_node(3) = mesh_base->node_ptr(indx2);
-            elem->set_node(4) = mesh_base->node_ptr(indx2 + i + 1);
-            if (i != elems_per_channel - 1)
-              elem->set_node(5) = mesh_base->node_ptr(indx2 + i + 2);
-            else
-              elem->set_node(5) = mesh_base->node_ptr(indx2 + 1);
-
-            if (iz == 0)
-              boundary_info.add_side(elem, 0, 0);
-            if (iz == _n_cells - 1)
-              boundary_info.add_side(elem, 4, 1);
-          }
-        }
-      }
-    }
-    boundary_info.sideset_name(0) = "inlet";
-    boundary_info.sideset_name(1) = "outlet";
-    mesh_base->subdomain_name(_block_id) = name();
-    mesh_base->prepare_for_use();
-  }
+  boundary_info.sideset_name(0) = "inlet";
+  boundary_info.sideset_name(1) = "outlet";
+  mesh_base->subdomain_name(_block_id) = name();
+  mesh_base->prepare_for_use();
 
   return mesh_base;
 }

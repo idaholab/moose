@@ -1,5 +1,3 @@
-T_in = 359.15
-
 [QuadSubChannelMesh]
   [sub_channel]
     type = QuadSubChannelMeshGenerator
@@ -15,6 +13,13 @@ T_in = 359.15
   []
 []
 
+[Functions]
+  [T_fn]
+    type = ParsedFunction
+    expression = if(z>0.5,100.0,50.0)
+  []
+[]
+
 [Variables]
   [T]
   []
@@ -22,20 +27,20 @@ T_in = 359.15
 
 [ICs]
   [T_ic]
-    type = ConstantIC
+    type = FunctionIC
     variable = T
-    value = ${T_in}
+    function = T_fn
   []
 []
 
 [Outputs]
-  exodus = true
+  exodus = false
   [Temp_Out_MATRIX]
     type = QuadSubChannelNormalSliceValues
     variable = T
     execute_on = final
-    file_base = "Temp_out_matrix"
-    height = 3.658
+    file_base = "Temp_out_matrix.csv"
+    height = 0.55
   []
 []
 
