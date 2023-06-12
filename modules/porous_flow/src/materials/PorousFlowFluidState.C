@@ -11,9 +11,11 @@
 #include "PorousFlowCapillaryPressure.h"
 
 registerMooseObject("PorousFlowApp", PorousFlowFluidState);
+registerMooseObject("PorousFlowApp", ADPorousFlowFluidState);
 
+template <bool is_ad>
 InputParameters
-PorousFlowFluidState::validParams()
+PorousFlowFluidStateTempl<is_ad>::validParams()
 {
   InputParameters params = PorousFlowVariableBase::validParams();
   params.addRequiredCoupledVar("gas_porepressure",
@@ -34,12 +36,14 @@ PorousFlowFluidState::validParams()
   return params;
 }
 
-PorousFlowFluidState::PorousFlowFluidState(const InputParameters & parameters)
-  : PorousFlowVariableBase(parameters),
+template <bool is_ad>
+PorousFlowFluidStateTempl<is_ad>::PorousFlowFluidStateTempl(const InputParameters & parameters)
+  : PorousFlowVariableBaseTempl<is_ad>(parameters),
 
-    _gas_porepressure(_nodal_material ? coupledDofValues("gas_porepressure")
-                                      : coupledValue("gas_porepressure")),
-    _gas_gradp_qp(coupledGradient("gas_porepressure")),
+    _gas_porepressure(_nodal_material
+                          ? this->template coupledGenericDofValue<is_ad>("gas_porepressure")
+                          : this->template coupledGenericValue<is_ad>("gas_porepressure")),
+    _gas_gradp_qp(this->template coupledGenericGradient<is_ad>("gas_porepressure")),
     _gas_porepressure_varnum(coupled("gas_porepressure")),
     _pvar(_dictator.isPorousFlowVariable(_gas_porepressure_varnum)
               ? _dictator.porousFlowVariableNum(_gas_porepressure_varnum)
@@ -47,79 +51,106 @@ PorousFlowFluidState::PorousFlowFluidState(const InputParameters & parameters)
 
     _num_Z_vars(coupledComponents("z")),
     _is_Xnacl_nodal(isCoupled("xnacl") ? getFieldVar("xnacl", 0)->isNodal() : false),
-    _Xnacl(_nodal_material && _is_Xnacl_nodal ? coupledDofValues("xnacl") : coupledValue("xnacl")),
-    _grad_Xnacl_qp(coupledGradient("xnacl")),
+    _Xnacl(_nodal_material && _is_Xnacl_nodal
+               ? this->template coupledGenericDofValue<is_ad>("xnacl")
+               : this->template coupledGenericValue<is_ad>("xnacl")),
+    _grad_Xnacl_qp(this->template coupledGenericGradient<is_ad>("xnacl")),
     _Xnacl_varnum(coupled("xnacl")),
     _Xvar(_dictator.isPorousFlowVariable(_Xnacl_varnum)
               ? _dictator.porousFlowVariableNum(_Xnacl_varnum)
               : 0),
 
-    _fs(getUserObject<PorousFlowFluidStateMultiComponentBase>("fluid_state")),
+    _fs(this->template getUserObject<PorousFlowFluidStateMultiComponentBase>("fluid_state")),
     _aqueous_phase_number(_fs.aqueousPhaseIndex()),
     _gas_phase_number(_fs.gasPhaseIndex()),
     _aqueous_fluid_component(_fs.aqueousComponentIndex()),
     _gas_fluid_component(_fs.gasComponentIndex()),
     _salt_component(_fs.saltComponentIndex()),
 
-    _temperature(_nodal_material ? getMaterialProperty<Real>("PorousFlow_temperature_nodal")
-                                 : getMaterialProperty<Real>("PorousFlow_temperature_qp")),
-    _gradT_qp(getMaterialProperty<RealGradient>("PorousFlow_grad_temperature_qp")),
-    _dtemperature_dvar(
+    _temperature(
         _nodal_material
-            ? getMaterialProperty<std::vector<Real>>("dPorousFlow_temperature_nodal_dvar")
-            : getMaterialProperty<std::vector<Real>>("dPorousFlow_temperature_qp_dvar")),
+            ? this->template getGenericMaterialProperty<Real, is_ad>("PorousFlow_temperature_nodal")
+            : this->template getGenericMaterialProperty<Real, is_ad>("PorousFlow_temperature_qp")),
+    _gradT_qp(_nodal_material ? nullptr
+                              : &this->template getGenericMaterialProperty<RealGradient, is_ad>(
+                                    "PorousFlow_grad_temperature_qp")),
+    _dtemperature_dvar(is_ad             ? nullptr
+                       : _nodal_material ? &this->template getMaterialProperty<std::vector<Real>>(
+                                               "dPorousFlow_temperature_nodal_dvar")
+                                         : &this->template getMaterialProperty<std::vector<Real>>(
+                                               "dPorousFlow_temperature_qp_dvar")),
     _temperature_varnum(coupled("temperature")),
     _Tvar(_dictator.isPorousFlowVariable(_temperature_varnum)
               ? _dictator.porousFlowVariableNum(_temperature_varnum)
               : 0),
     _mass_frac(_nodal_material
-                   ? declareProperty<std::vector<std::vector<Real>>>("PorousFlow_mass_frac_nodal")
-                   : declareProperty<std::vector<std::vector<Real>>>("PorousFlow_mass_frac_qp")),
-    _grad_mass_frac_qp(_nodal_material ? nullptr
-                                       : &declareProperty<std::vector<std::vector<RealGradient>>>(
-                                             "PorousFlow_grad_mass_frac_qp")),
-    _dmass_frac_dvar(_nodal_material ? declareProperty<std::vector<std::vector<std::vector<Real>>>>(
-                                           "dPorousFlow_mass_frac_nodal_dvar")
-                                     : declareProperty<std::vector<std::vector<std::vector<Real>>>>(
-                                           "dPorousFlow_mass_frac_qp_dvar")),
+                   ? this->template declareGenericProperty<std::vector<std::vector<Real>>, is_ad>(
+                         "PorousFlow_mass_frac_nodal")
+                   : this->template declareGenericProperty<std::vector<std::vector<Real>>, is_ad>(
+                         "PorousFlow_mass_frac_qp")),
+    _grad_mass_frac_qp(
+        _nodal_material
+            ? nullptr
+            : &this->template declareGenericProperty<std::vector<std::vector<RealGradient>>, is_ad>(
+                  "PorousFlow_grad_mass_frac_qp")),
+    _dmass_frac_dvar(
+        is_ad ? nullptr
+        : _nodal_material
+            ? &this->template declareProperty<std::vector<std::vector<std::vector<Real>>>>(
+                  "dPorousFlow_mass_frac_nodal_dvar")
+            : &this->template declareProperty<std::vector<std::vector<std::vector<Real>>>>(
+                  "dPorousFlow_mass_frac_qp_dvar")),
 
     _fluid_density(_nodal_material
-                       ? declareProperty<std::vector<Real>>("PorousFlow_fluid_phase_density_nodal")
-                       : declareProperty<std::vector<Real>>("PorousFlow_fluid_phase_density_qp")),
-    _dfluid_density_dvar(_nodal_material ? declareProperty<std::vector<std::vector<Real>>>(
-                                               "dPorousFlow_fluid_phase_density_nodal_dvar")
-                                         : declareProperty<std::vector<std::vector<Real>>>(
-                                               "dPorousFlow_fluid_phase_density_qp_dvar")),
+                       ? this->template declareGenericProperty<std::vector<Real>, is_ad>(
+                             "PorousFlow_fluid_phase_density_nodal")
+                       : this->template declareGenericProperty<std::vector<Real>, is_ad>(
+                             "PorousFlow_fluid_phase_density_qp")),
+    _dfluid_density_dvar(is_ad ? nullptr
+                         : _nodal_material
+                             ? &this->template declareProperty<std::vector<std::vector<Real>>>(
+                                   "dPorousFlow_fluid_phase_density_nodal_dvar")
+                             : &this->template declareProperty<std::vector<std::vector<Real>>>(
+                                   "dPorousFlow_fluid_phase_density_qp_dvar")),
     _fluid_viscosity(_nodal_material
-                         ? declareProperty<std::vector<Real>>("PorousFlow_viscosity_nodal")
-                         : declareProperty<std::vector<Real>>("PorousFlow_viscosity_qp")),
-    _dfluid_viscosity_dvar(
-        _nodal_material
-            ? declareProperty<std::vector<std::vector<Real>>>("dPorousFlow_viscosity_nodal_dvar")
-            : declareProperty<std::vector<std::vector<Real>>>("dPorousFlow_viscosity_qp_dvar")),
+                         ? this->template declareGenericProperty<std::vector<Real>, is_ad>(
+                               "PorousFlow_viscosity_nodal")
+                         : this->template declareGenericProperty<std::vector<Real>, is_ad>(
+                               "PorousFlow_viscosity_qp")),
+    _dfluid_viscosity_dvar(is_ad ? nullptr
+                           : _nodal_material
+                               ? &this->template declareProperty<std::vector<std::vector<Real>>>(
+                                     "dPorousFlow_viscosity_nodal_dvar")
+                               : &this->template declareProperty<std::vector<std::vector<Real>>>(
+                                     "dPorousFlow_viscosity_qp_dvar")),
 
-    _fluid_enthalpy(
-        _nodal_material
-            ? declareProperty<std::vector<Real>>("PorousFlow_fluid_phase_enthalpy_nodal")
-            : declareProperty<std::vector<Real>>("PorousFlow_fluid_phase_enthalpy_qp")),
-    _dfluid_enthalpy_dvar(_nodal_material ? declareProperty<std::vector<std::vector<Real>>>(
-                                                "dPorousFlow_fluid_phase_enthalpy_nodal_dvar")
-                                          : declareProperty<std::vector<std::vector<Real>>>(
-                                                "dPorousFlow_fluid_phase_enthalpy_qp_dvar")),
+    _fluid_enthalpy(_nodal_material
+                        ? this->template declareGenericProperty<std::vector<Real>, is_ad>(
+                              "PorousFlow_fluid_phase_enthalpy_nodal")
+                        : this->template declareGenericProperty<std::vector<Real>, is_ad>(
+                              "PorousFlow_fluid_phase_enthalpy_qp")),
+    _dfluid_enthalpy_dvar(is_ad ? nullptr
+                          : _nodal_material
+                              ? &this->template declareProperty<std::vector<std::vector<Real>>>(
+                                    "dPorousFlow_fluid_phase_enthalpy_nodal_dvar")
+                              : &this->template declareProperty<std::vector<std::vector<Real>>>(
+                                    "dPorousFlow_fluid_phase_enthalpy_qp_dvar")),
 
-    _fluid_internal_energy(
-        _nodal_material
-            ? declareProperty<std::vector<Real>>("PorousFlow_fluid_phase_internal_energy_nodal")
-            : declareProperty<std::vector<Real>>("PorousFlow_fluid_phase_internal_energy_qp")),
-    _dfluid_internal_energy_dvar(_nodal_material
-                                     ? declareProperty<std::vector<std::vector<Real>>>(
-                                           "dPorousFlow_fluid_phase_internal_energy_nodal_dvar")
-                                     : declareProperty<std::vector<std::vector<Real>>>(
-                                           "dPorousFlow_fluid_phase_internal_energy_qp_dvar")),
+    _fluid_internal_energy(_nodal_material
+                               ? this->template declareGenericProperty<std::vector<Real>, is_ad>(
+                                     "PorousFlow_fluid_phase_internal_energy_nodal")
+                               : this->template declareGenericProperty<std::vector<Real>, is_ad>(
+                                     "PorousFlow_fluid_phase_internal_energy_qp")),
+    _dfluid_internal_energy_dvar(
+        is_ad             ? nullptr
+        : _nodal_material ? &this->template declareProperty<std::vector<std::vector<Real>>>(
+                                "dPorousFlow_fluid_phase_internal_energy_nodal_dvar")
+                          : &this->template declareProperty<std::vector<std::vector<Real>>>(
+                                "dPorousFlow_fluid_phase_internal_energy_qp_dvar")),
 
-    _T_c2k(getParam<MooseEnum>("temperature_unit") == 0 ? 0.0 : 273.15),
+    _T_c2k(this->template getParam<MooseEnum>("temperature_unit") == 0 ? 0.0 : 273.15),
     _is_initqp(false),
-    _pc(getUserObject<PorousFlowCapillaryPressure>("capillary_pressure")),
+    _pc(this->template getUserObject<PorousFlowCapillaryPressure>("capillary_pressure")),
     _pidx(_fs.getPressureIndex()),
     _Tidx(_fs.getTemperatureIndex()),
     _Zidx(_fs.getZIndex()),
@@ -141,8 +172,9 @@ PorousFlowFluidState::PorousFlowFluidState(const InputParameters & parameters)
 
   for (unsigned int i = 0; i < _num_Z_vars; ++i)
   {
-    _Z[i] = (_nodal_material ? &coupledDofValues("z", i) : &coupledValue("z", i));
-    _gradZ_qp[i] = &coupledGradient("z", i);
+    _Z[i] = (_nodal_material ? &this->template coupledGenericDofValue<is_ad>("z", i)
+                             : &this->template coupledGenericValue<is_ad>("z", i));
+    _gradZ_qp[i] = &this->template coupledGenericGradient<is_ad>("z", i);
     _Z_varnum[i] = coupled("z", i);
     _Zvar[i] = (_dictator.isPorousFlowVariable(_Z_varnum[i])
                     ? _dictator.porousFlowVariableNum(_Z_varnum[i])
@@ -153,21 +185,37 @@ PorousFlowFluidState::PorousFlowFluidState(const InputParameters & parameters)
   _fsp.resize(_num_phases, FluidStateProperties(_num_components));
 }
 
+template <bool is_ad>
 void
-PorousFlowFluidState::thermophysicalProperties()
+PorousFlowFluidStateTempl<is_ad>::thermophysicalProperties()
 {
   // The FluidProperty objects use temperature in K
-  Real Tk = _temperature[_qp] + _T_c2k;
+  const GenericReal<is_ad> Tk = _temperature[_qp] + _T_c2k;
 
   _fs.thermophysicalProperties(_gas_porepressure[_qp], Tk, _Xnacl[_qp], (*_Z[0])[_qp], _qp, _fsp);
 }
 
+template <>
+GenericReal<false>
+PorousFlowFluidStateTempl<false>::genericFSPValue(const ADReal & value)
+{
+  return MetaPhysicL::raw_value(value);
+}
+
+template <>
+GenericReal<true>
+PorousFlowFluidStateTempl<true>::genericFSPValue(const ADReal & value)
+{
+  return value;
+}
+
+template <bool is_ad>
 void
-PorousFlowFluidState::initQpStatefulProperties()
+PorousFlowFluidStateTempl<is_ad>::initQpStatefulProperties()
 {
   _is_initqp = true;
   // Set the size of pressure and saturation vectors
-  PorousFlowVariableBase::initQpStatefulProperties();
+  PorousFlowVariableBaseTempl<is_ad>::initQpStatefulProperties();
 
   // Set the size of all other vectors
   setMaterialVectorSize();
@@ -176,27 +224,29 @@ PorousFlowFluidState::initQpStatefulProperties()
 
   // Set the initial values of the properties at the nodes.
   // Note: not required for qp materials as no old values at the qps are requested
-  if (_nodal_material)
+  // unless the material is AD (for the FV case there are no nodal materials)
+  if (_nodal_material || is_ad)
     for (unsigned int ph = 0; ph < _num_phases; ++ph)
     {
-      _saturation[_qp][ph] = _fsp[ph].saturation.value();
-      _porepressure[_qp][ph] = _fsp[ph].pressure.value();
-      _fluid_density[_qp][ph] = _fsp[ph].density.value();
-      _fluid_viscosity[_qp][ph] = _fsp[ph].viscosity.value();
-      _fluid_enthalpy[_qp][ph] = _fsp[ph].enthalpy.value();
-      _fluid_internal_energy[_qp][ph] = _fsp[ph].internal_energy.value();
+      _saturation[_qp][ph] = genericFSPValue(_fsp[ph].saturation);
+      _porepressure[_qp][ph] = genericFSPValue(_fsp[ph].pressure);
+      _fluid_density[_qp][ph] = genericFSPValue(_fsp[ph].density);
+      _fluid_viscosity[_qp][ph] = genericFSPValue(_fsp[ph].viscosity);
+      _fluid_enthalpy[_qp][ph] = genericFSPValue(_fsp[ph].enthalpy);
+      _fluid_internal_energy[_qp][ph] = genericFSPValue(_fsp[ph].internal_energy);
 
       for (unsigned int comp = 0; comp < _num_components; ++comp)
-        _mass_frac[_qp][ph][comp] = _fsp[ph].mass_fraction[comp].value();
+        _mass_frac[_qp][ph][comp] = genericFSPValue(_fsp[ph].mass_fraction[comp]);
     }
 }
 
+template <bool is_ad>
 void
-PorousFlowFluidState::computeQpProperties()
+PorousFlowFluidStateTempl<is_ad>::computeQpProperties()
 {
   _is_initqp = false;
   // Prepare the derivative vectors
-  PorousFlowVariableBase::computeQpProperties();
+  PorousFlowVariableBaseTempl<is_ad>::computeQpProperties();
 
   // Set the size of all other vectors
   setMaterialVectorSize();
@@ -206,83 +256,95 @@ PorousFlowFluidState::computeQpProperties()
 
   for (unsigned int ph = 0; ph < _num_phases; ++ph)
   {
-    _saturation[_qp][ph] = _fsp[ph].saturation.value();
-    _porepressure[_qp][ph] = _fsp[ph].pressure.value();
-    _fluid_density[_qp][ph] = _fsp[ph].density.value();
-    _fluid_viscosity[_qp][ph] = _fsp[ph].viscosity.value();
-    _fluid_enthalpy[_qp][ph] = _fsp[ph].enthalpy.value();
-    _fluid_internal_energy[_qp][ph] = _fsp[ph].internal_energy.value();
+    _saturation[_qp][ph] = genericFSPValue(_fsp[ph].saturation);
+    _porepressure[_qp][ph] = genericFSPValue(_fsp[ph].pressure);
+    _fluid_density[_qp][ph] = genericFSPValue(_fsp[ph].density);
+    _fluid_viscosity[_qp][ph] = genericFSPValue(_fsp[ph].viscosity);
+    _fluid_enthalpy[_qp][ph] = genericFSPValue(_fsp[ph].enthalpy);
+    _fluid_internal_energy[_qp][ph] = genericFSPValue(_fsp[ph].internal_energy);
 
     for (unsigned int comp = 0; comp < _num_components; ++comp)
-      _mass_frac[_qp][ph][comp] = _fsp[ph].mass_fraction[comp].value();
+      _mass_frac[_qp][ph][comp] = genericFSPValue(_fsp[ph].mass_fraction[comp]);
   }
 
-  // Derivative of properties wrt variables (calculated in fluid state class)
-  for (unsigned int ph = 0; ph < _num_phases; ++ph)
+  // If the material isn't AD, we need to compute the derivatives
+  if (!is_ad)
   {
-    // If porepressure is a PorousFlow variable (it usually is), add derivatives wrt porepressure
-    if (_dictator.isPorousFlowVariable(_gas_porepressure_varnum))
+    // Derivative of properties wrt variables (calculated in fluid state class)
+    for (unsigned int ph = 0; ph < _num_phases; ++ph)
     {
-      (*_dporepressure_dvar)[_qp][ph][_pvar] = _fsp[ph].pressure.derivatives()[_pidx];
-      (*_dsaturation_dvar)[_qp][ph][_pvar] = _fsp[ph].saturation.derivatives()[_pidx];
-      _dfluid_density_dvar[_qp][ph][_pvar] = _fsp[ph].density.derivatives()[_pidx];
-      _dfluid_viscosity_dvar[_qp][ph][_pvar] = _fsp[ph].viscosity.derivatives()[_pidx];
-      _dfluid_enthalpy_dvar[_qp][ph][_pvar] = _fsp[ph].enthalpy.derivatives()[_pidx];
-      _dfluid_internal_energy_dvar[_qp][ph][_pvar] = _fsp[ph].internal_energy.derivatives()[_pidx];
+      // If porepressure is a PorousFlow variable (it usually is), add derivatives wrt
+      // porepressure
+      if (_dictator.isPorousFlowVariable(_gas_porepressure_varnum))
+      {
+        (*_dporepressure_dvar)[_qp][ph][_pvar] = _fsp[ph].pressure.derivatives()[_pidx];
+        (*_dsaturation_dvar)[_qp][ph][_pvar] = _fsp[ph].saturation.derivatives()[_pidx];
+        (*_dfluid_density_dvar)[_qp][ph][_pvar] = _fsp[ph].density.derivatives()[_pidx];
+        (*_dfluid_viscosity_dvar)[_qp][ph][_pvar] = _fsp[ph].viscosity.derivatives()[_pidx];
+        (*_dfluid_enthalpy_dvar)[_qp][ph][_pvar] = _fsp[ph].enthalpy.derivatives()[_pidx];
+        (*_dfluid_internal_energy_dvar)[_qp][ph][_pvar] =
+            _fsp[ph].internal_energy.derivatives()[_pidx];
 
-      for (unsigned int comp = 0; comp < _num_components; ++comp)
-        _dmass_frac_dvar[_qp][ph][comp][_pvar] = _fsp[ph].mass_fraction[comp].derivatives()[_pidx];
-    }
+        for (unsigned int comp = 0; comp < _num_components; ++comp)
+          (*_dmass_frac_dvar)[_qp][ph][comp][_pvar] =
+              _fsp[ph].mass_fraction[comp].derivatives()[_pidx];
+      }
 
-    // If Z is a PorousFlow variable (it usually is), add derivatives wrt Z
-    if (_dictator.isPorousFlowVariable(_Z_varnum[0]))
-    {
-      (*_dporepressure_dvar)[_qp][ph][_Zvar[0]] = _fsp[ph].pressure.derivatives()[_Zidx];
-      (*_dsaturation_dvar)[_qp][ph][_Zvar[0]] = _fsp[ph].saturation.derivatives()[_Zidx];
-      _dfluid_density_dvar[_qp][ph][_Zvar[0]] = _fsp[ph].density.derivatives()[_Zidx];
-      _dfluid_viscosity_dvar[_qp][ph][_Zvar[0]] = _fsp[ph].viscosity.derivatives()[_Zidx];
-      _dfluid_enthalpy_dvar[_qp][ph][_Zvar[0]] = _fsp[ph].enthalpy.derivatives()[_Zidx];
-      _dfluid_internal_energy_dvar[_qp][ph][_Zvar[0]] =
-          _fsp[ph].internal_energy.derivatives()[_Zidx];
+      // If Z is a PorousFlow variable (it usually is), add derivatives wrt Z
+      if (_dictator.isPorousFlowVariable(_Z_varnum[0]))
+      {
+        (*_dporepressure_dvar)[_qp][ph][_Zvar[0]] = _fsp[ph].pressure.derivatives()[_Zidx];
+        (*_dsaturation_dvar)[_qp][ph][_Zvar[0]] = _fsp[ph].saturation.derivatives()[_Zidx];
+        (*_dfluid_density_dvar)[_qp][ph][_Zvar[0]] = _fsp[ph].density.derivatives()[_Zidx];
+        (*_dfluid_viscosity_dvar)[_qp][ph][_Zvar[0]] = _fsp[ph].viscosity.derivatives()[_Zidx];
+        (*_dfluid_enthalpy_dvar)[_qp][ph][_Zvar[0]] = _fsp[ph].enthalpy.derivatives()[_Zidx];
+        (*_dfluid_internal_energy_dvar)[_qp][ph][_Zvar[0]] =
+            _fsp[ph].internal_energy.derivatives()[_Zidx];
 
-      for (unsigned int comp = 0; comp < _num_components; ++comp)
-        _dmass_frac_dvar[_qp][ph][comp][_Zvar[0]] =
-            _fsp[ph].mass_fraction[comp].derivatives()[_Zidx];
-    }
+        for (unsigned int comp = 0; comp < _num_components; ++comp)
+          (*_dmass_frac_dvar)[_qp][ph][comp][_Zvar[0]] =
+              _fsp[ph].mass_fraction[comp].derivatives()[_Zidx];
+      }
 
-    // If temperature is a PorousFlow variable (nonisothermal case), add derivatives wrt temperature
-    if (_dictator.isPorousFlowVariable(_temperature_varnum))
-    {
-      (*_dporepressure_dvar)[_qp][ph][_Tvar] = _fsp[ph].pressure.derivatives()[_Tidx];
-      (*_dsaturation_dvar)[_qp][ph][_Tvar] = _fsp[ph].saturation.derivatives()[_Tidx];
-      _dfluid_density_dvar[_qp][ph][_Tvar] = _fsp[ph].density.derivatives()[_Tidx];
-      _dfluid_viscosity_dvar[_qp][ph][_Tvar] = _fsp[ph].viscosity.derivatives()[_Tidx];
-      _dfluid_enthalpy_dvar[_qp][ph][_Tvar] = _fsp[ph].enthalpy.derivatives()[_Tidx];
-      _dfluid_internal_energy_dvar[_qp][ph][_Tvar] = _fsp[ph].internal_energy.derivatives()[_Tidx];
+      // If temperature is a PorousFlow variable (nonisothermal case), add derivatives wrt
+      // temperature
+      if (_dictator.isPorousFlowVariable(_temperature_varnum))
+      {
+        (*_dporepressure_dvar)[_qp][ph][_Tvar] = _fsp[ph].pressure.derivatives()[_Tidx];
+        (*_dsaturation_dvar)[_qp][ph][_Tvar] = _fsp[ph].saturation.derivatives()[_Tidx];
+        (*_dfluid_density_dvar)[_qp][ph][_Tvar] = _fsp[ph].density.derivatives()[_Tidx];
+        (*_dfluid_viscosity_dvar)[_qp][ph][_Tvar] = _fsp[ph].viscosity.derivatives()[_Tidx];
+        (*_dfluid_enthalpy_dvar)[_qp][ph][_Tvar] = _fsp[ph].enthalpy.derivatives()[_Tidx];
+        (*_dfluid_internal_energy_dvar)[_qp][ph][_Tvar] =
+            _fsp[ph].internal_energy.derivatives()[_Tidx];
 
-      for (unsigned int comp = 0; comp < _num_components; ++comp)
-        _dmass_frac_dvar[_qp][ph][comp][_Tvar] = _fsp[ph].mass_fraction[comp].derivatives()[_Tidx];
-    }
+        for (unsigned int comp = 0; comp < _num_components; ++comp)
+          (*_dmass_frac_dvar)[_qp][ph][comp][_Tvar] =
+              _fsp[ph].mass_fraction[comp].derivatives()[_Tidx];
+      }
 
-    // If Xnacl is a PorousFlow variable, add derivatives wrt Xnacl
-    if (_dictator.isPorousFlowVariable(_Xnacl_varnum))
-    {
-      (*_dporepressure_dvar)[_qp][ph][_Xvar] = _fsp[ph].pressure.derivatives()[_Xidx];
-      (*_dsaturation_dvar)[_qp][ph][_Xvar] = _fsp[ph].saturation.derivatives()[_Xidx];
-      _dfluid_density_dvar[_qp][ph][_Xvar] += _fsp[ph].density.derivatives()[_Xidx];
-      _dfluid_viscosity_dvar[_qp][ph][_Xvar] += _fsp[ph].viscosity.derivatives()[_Xidx];
-      _dfluid_enthalpy_dvar[_qp][ph][_Xvar] = _fsp[ph].enthalpy.derivatives()[_Xidx];
-      _dfluid_internal_energy_dvar[_qp][ph][_Xvar] = _fsp[ph].internal_energy.derivatives()[_Xidx];
+      // If Xnacl is a PorousFlow variable, add derivatives wrt Xnacl
+      if (_dictator.isPorousFlowVariable(_Xnacl_varnum))
+      {
+        (*_dporepressure_dvar)[_qp][ph][_Xvar] = _fsp[ph].pressure.derivatives()[_Xidx];
+        (*_dsaturation_dvar)[_qp][ph][_Xvar] = _fsp[ph].saturation.derivatives()[_Xidx];
+        (*_dfluid_density_dvar)[_qp][ph][_Xvar] += _fsp[ph].density.derivatives()[_Xidx];
+        (*_dfluid_viscosity_dvar)[_qp][ph][_Xvar] += _fsp[ph].viscosity.derivatives()[_Xidx];
+        (*_dfluid_enthalpy_dvar)[_qp][ph][_Xvar] = _fsp[ph].enthalpy.derivatives()[_Xidx];
+        (*_dfluid_internal_energy_dvar)[_qp][ph][_Xvar] =
+            _fsp[ph].internal_energy.derivatives()[_Xidx];
 
-      for (unsigned int comp = 0; comp < _num_components; ++comp)
-        _dmass_frac_dvar[_qp][ph][comp][_Xvar] = _fsp[ph].mass_fraction[comp].derivatives()[_Xidx];
+        for (unsigned int comp = 0; comp < _num_components; ++comp)
+          (*_dmass_frac_dvar)[_qp][ph][comp][_Xvar] =
+              _fsp[ph].mass_fraction[comp].derivatives()[_Xidx];
+      }
     }
   }
 
   // If the material properties are being evaluated at the qps, calculate the gradients as well
   // Note: only nodal properties are evaluated in initQpStatefulProperties(), so no need to check
   // _is_initqp flag for qp properties
-  if (!_nodal_material)
+  if (!_nodal_material && !is_ad)
   {
     // Derivatives of capillary pressure
     const Real dpc = _pc.dCapillaryPressure(_fsp[_aqueous_phase_number].saturation.value(), _qp);
@@ -292,7 +354,7 @@ PorousFlowFluidState::computeQpProperties()
     (*_grads_qp)[_qp][_gas_phase_number] =
         (*_dsaturation_dvar)[_qp][_gas_phase_number][_pvar] * _gas_gradp_qp[_qp] +
         (*_dsaturation_dvar)[_qp][_gas_phase_number][_Zvar[0]] * (*_gradZ_qp[0])[_qp] +
-        (*_dsaturation_dvar)[_qp][_gas_phase_number][_Tvar] * _gradT_qp[_qp];
+        (*_dsaturation_dvar)[_qp][_gas_phase_number][_Tvar] * (*_gradT_qp)[_qp];
     (*_grads_qp)[_qp][_aqueous_phase_number] = -(*_grads_qp)[_qp][_gas_phase_number];
 
     (*_gradp_qp)[_qp][_gas_phase_number] = _gas_gradp_qp[_qp];
@@ -306,7 +368,7 @@ PorousFlowFluidState::computeQpProperties()
         _fsp[_aqueous_phase_number].mass_fraction[_aqueous_fluid_component].derivatives()[_Zidx] *
             (*_gradZ_qp[0])[_qp] +
         _fsp[_aqueous_phase_number].mass_fraction[_aqueous_fluid_component].derivatives()[_Tidx] *
-            _gradT_qp[_qp];
+            (*_gradT_qp)[_qp];
     (*_grad_mass_frac_qp)[_qp][_aqueous_phase_number][_gas_fluid_component] =
         -(*_grad_mass_frac_qp)[_qp][_aqueous_phase_number][_aqueous_fluid_component];
 
@@ -316,82 +378,90 @@ PorousFlowFluidState::computeQpProperties()
         _fsp[_gas_phase_number].mass_fraction[_aqueous_fluid_component].derivatives()[_Zidx] *
             (*_gradZ_qp[0])[_qp] +
         _fsp[_gas_phase_number].mass_fraction[_aqueous_fluid_component].derivatives()[_Tidx] *
-            _gradT_qp[_qp];
+            (*_gradT_qp)[_qp];
     (*_grad_mass_frac_qp)[_qp][_gas_phase_number][_gas_fluid_component] =
         -(*_grad_mass_frac_qp)[_qp][_gas_phase_number][_aqueous_fluid_component];
 
     // Derivatives of gradients wrt variables
-    if (_dictator.isPorousFlowVariable(_gas_porepressure_varnum))
+    if constexpr (!is_ad)
     {
-      for (unsigned int ph = 0; ph < _num_phases; ++ph)
-        (*_dgradp_qp_dgradv)[_qp][ph][_pvar] = 1.0;
+      if (_dictator.isPorousFlowVariable(_gas_porepressure_varnum))
+      {
+        for (unsigned int ph = 0; ph < _num_phases; ++ph)
+          (*_dgradp_qp_dgradv)[_qp][ph][_pvar] = 1.0;
 
-      (*_dgradp_qp_dgradv)[_qp][_aqueous_phase_number][_pvar] +=
-          -dpc * (*_dsaturation_dvar)[_qp][_aqueous_phase_number][_pvar];
+        (*_dgradp_qp_dgradv)[_qp][_aqueous_phase_number][_pvar] +=
+            -dpc * (*_dsaturation_dvar)[_qp][_aqueous_phase_number][_pvar];
 
-      (*_dgradp_qp_dv)[_qp][_aqueous_phase_number][_pvar] =
-          -d2pc * (*_grads_qp)[_qp][_aqueous_phase_number] *
-          (*_dsaturation_dvar)[_qp][_aqueous_phase_number][_pvar];
-    }
+        (*_dgradp_qp_dv)[_qp][_aqueous_phase_number][_pvar] =
+            -d2pc * (*_grads_qp)[_qp][_aqueous_phase_number] *
+            (*_dsaturation_dvar)[_qp][_aqueous_phase_number][_pvar];
+      }
 
-    if (_dictator.isPorousFlowVariable(_Z_varnum[0]))
-    {
-      (*_dgradp_qp_dgradv)[_qp][_aqueous_phase_number][_Zvar[0]] =
-          -dpc * (*_dsaturation_dvar)[_qp][_aqueous_phase_number][_Zvar[0]];
+      if (_dictator.isPorousFlowVariable(_Z_varnum[0]))
+      {
+        (*_dgradp_qp_dgradv)[_qp][_aqueous_phase_number][_Zvar[0]] =
+            -dpc * (*_dsaturation_dvar)[_qp][_aqueous_phase_number][_Zvar[0]];
 
-      (*_dgradp_qp_dv)[_qp][_aqueous_phase_number][_Zvar[0]] =
-          -d2pc * (*_grads_qp)[_qp][_aqueous_phase_number] *
-          (*_dsaturation_dvar)[_qp][_aqueous_phase_number][_Zvar[0]];
-    }
+        (*_dgradp_qp_dv)[_qp][_aqueous_phase_number][_Zvar[0]] =
+            -d2pc * (*_grads_qp)[_qp][_aqueous_phase_number] *
+            (*_dsaturation_dvar)[_qp][_aqueous_phase_number][_Zvar[0]];
+      }
 
-    if (_dictator.isPorousFlowVariable(_temperature_varnum))
-    {
-      (*_dgradp_qp_dgradv)[_qp][_aqueous_phase_number][_Tvar] =
-          -dpc * (*_dsaturation_dvar)[_qp][_aqueous_phase_number][_Tvar];
+      if (_dictator.isPorousFlowVariable(_temperature_varnum))
+      {
+        (*_dgradp_qp_dgradv)[_qp][_aqueous_phase_number][_Tvar] =
+            -dpc * (*_dsaturation_dvar)[_qp][_aqueous_phase_number][_Tvar];
 
-      (*_dgradp_qp_dv)[_qp][_aqueous_phase_number][_Tvar] =
-          -d2pc * (*_grads_qp)[_qp][_aqueous_phase_number] *
-          (*_dsaturation_dvar)[_qp][_aqueous_phase_number][_Tvar];
-    }
+        (*_dgradp_qp_dv)[_qp][_aqueous_phase_number][_Tvar] =
+            -d2pc * (*_grads_qp)[_qp][_aqueous_phase_number] *
+            (*_dsaturation_dvar)[_qp][_aqueous_phase_number][_Tvar];
+      }
 
-    // If Xnacl is a PorousFlow variable, add gradients and derivatives wrt Xnacl
-    if (_dictator.isPorousFlowVariable(_Xnacl_varnum))
-    {
-      (*_dgradp_qp_dgradv)[_qp][_aqueous_phase_number][_Xvar] =
-          -dpc * (*_dsaturation_dvar)[_qp][_aqueous_phase_number][_Xvar];
+      // If Xnacl is a PorousFlow variable, add gradients and derivatives wrt Xnacl
+      if (_dictator.isPorousFlowVariable(_Xnacl_varnum))
+      {
+        (*_dgradp_qp_dgradv)[_qp][_aqueous_phase_number][_Xvar] =
+            -dpc * (*_dsaturation_dvar)[_qp][_aqueous_phase_number][_Xvar];
 
-      (*_grads_qp)[_qp][_aqueous_phase_number] +=
-          (*_dsaturation_dvar)[_qp][_aqueous_phase_number][_Xvar] * _grad_Xnacl_qp[_qp];
+        (*_grads_qp)[_qp][_aqueous_phase_number] +=
+            (*_dsaturation_dvar)[_qp][_aqueous_phase_number][_Xvar] * _grad_Xnacl_qp[_qp];
 
-      (*_grads_qp)[_qp][_gas_phase_number] -=
-          (*_dsaturation_dvar)[_qp][_aqueous_phase_number][_Xvar] * _grad_Xnacl_qp[_qp];
+        (*_grads_qp)[_qp][_gas_phase_number] -=
+            (*_dsaturation_dvar)[_qp][_aqueous_phase_number][_Xvar] * _grad_Xnacl_qp[_qp];
 
-      (*_gradp_qp)[_qp][_aqueous_phase_number] -=
-          dpc * (*_dsaturation_dvar)[_qp][_aqueous_phase_number][_Xvar] * _grad_Xnacl_qp[_qp];
+        (*_gradp_qp)[_qp][_aqueous_phase_number] -=
+            dpc * (*_dsaturation_dvar)[_qp][_aqueous_phase_number][_Xvar] * _grad_Xnacl_qp[_qp];
 
-      (*_dgradp_qp_dv)[_qp][_aqueous_phase_number][_Xvar] =
-          -d2pc * (*_grads_qp)[_qp][_aqueous_phase_number] *
-          (*_dsaturation_dvar)[_qp][_aqueous_phase_number][_Xvar];
+        (*_dgradp_qp_dv)[_qp][_aqueous_phase_number][_Xvar] =
+            -d2pc * (*_grads_qp)[_qp][_aqueous_phase_number] *
+            (*_dsaturation_dvar)[_qp][_aqueous_phase_number][_Xvar];
 
-      (*_grad_mass_frac_qp)[_qp][_aqueous_phase_number][_salt_component] = _grad_Xnacl_qp[_qp];
-      (*_grad_mass_frac_qp)[_qp][_aqueous_phase_number][_aqueous_fluid_component] +=
-          _fsp[_aqueous_phase_number].mass_fraction[_aqueous_fluid_component].derivatives()[_Xidx] *
-          _grad_Xnacl_qp[_qp];
-      (*_grad_mass_frac_qp)[_qp][_aqueous_phase_number][_gas_fluid_component] -=
-          _fsp[_aqueous_phase_number].mass_fraction[_aqueous_fluid_component].derivatives()[_Xidx] *
-          _grad_Xnacl_qp[_qp];
-      (*_grad_mass_frac_qp)[_qp][_gas_phase_number][_aqueous_fluid_component] +=
-          _fsp[_gas_phase_number].mass_fraction[_aqueous_fluid_component].derivatives()[_Xidx] *
-          _grad_Xnacl_qp[_qp];
-      (*_grad_mass_frac_qp)[_qp][_gas_phase_number][_gas_fluid_component] -=
-          _fsp[_gas_phase_number].mass_fraction[_aqueous_fluid_component].derivatives()[_Xidx] *
-          _grad_Xnacl_qp[_qp];
+        (*_grad_mass_frac_qp)[_qp][_aqueous_phase_number][_salt_component] = _grad_Xnacl_qp[_qp];
+        (*_grad_mass_frac_qp)[_qp][_aqueous_phase_number][_aqueous_fluid_component] +=
+            _fsp[_aqueous_phase_number]
+                .mass_fraction[_aqueous_fluid_component]
+                .derivatives()[_Xidx] *
+            _grad_Xnacl_qp[_qp];
+        (*_grad_mass_frac_qp)[_qp][_aqueous_phase_number][_gas_fluid_component] -=
+            _fsp[_aqueous_phase_number]
+                .mass_fraction[_aqueous_fluid_component]
+                .derivatives()[_Xidx] *
+            _grad_Xnacl_qp[_qp];
+        (*_grad_mass_frac_qp)[_qp][_gas_phase_number][_aqueous_fluid_component] +=
+            _fsp[_gas_phase_number].mass_fraction[_aqueous_fluid_component].derivatives()[_Xidx] *
+            _grad_Xnacl_qp[_qp];
+        (*_grad_mass_frac_qp)[_qp][_gas_phase_number][_gas_fluid_component] -=
+            _fsp[_gas_phase_number].mass_fraction[_aqueous_fluid_component].derivatives()[_Xidx] *
+            _grad_Xnacl_qp[_qp];
+      }
     }
   }
 }
 
+template <bool is_ad>
 void
-PorousFlowFluidState::setMaterialVectorSize() const
+PorousFlowFluidStateTempl<is_ad>::setMaterialVectorSize() const
 {
   _fluid_density[_qp].assign(_num_phases, 0.0);
   _fluid_viscosity[_qp].assign(_num_phases, 0.0);
@@ -405,28 +475,38 @@ PorousFlowFluidState::setMaterialVectorSize() const
   // Derivatives and gradients are not required in initQpStatefulProperties
   if (!_is_initqp)
   {
-    _dfluid_density_dvar[_qp].resize(_num_phases);
-    _dfluid_viscosity_dvar[_qp].resize(_num_phases);
-    _dfluid_enthalpy_dvar[_qp].resize(_num_phases);
-    _dfluid_internal_energy_dvar[_qp].resize(_num_phases);
-    _dmass_frac_dvar[_qp].resize(_num_phases);
-
-    if (!_nodal_material)
+    // The gradient of the mass fractions are needed for qp materials and AD materials
+    if (!_nodal_material || is_ad)
+    {
       (*_grad_mass_frac_qp)[_qp].resize(_num_phases);
 
-    for (unsigned int ph = 0; ph < _num_phases; ++ph)
-    {
-      _dfluid_density_dvar[_qp][ph].assign(_num_pf_vars, 0.0);
-      _dfluid_viscosity_dvar[_qp][ph].assign(_num_pf_vars, 0.0);
-      _dfluid_enthalpy_dvar[_qp][ph].assign(_num_pf_vars, 0.0);
-      _dfluid_internal_energy_dvar[_qp][ph].assign(_num_pf_vars, 0.0);
-      _dmass_frac_dvar[_qp][ph].resize(_num_components);
-
-      for (unsigned int comp = 0; comp < _num_components; ++comp)
-        _dmass_frac_dvar[_qp][ph][comp].assign(_num_pf_vars, 0.0);
-
-      if (!_nodal_material)
+      for (unsigned int ph = 0; ph < _num_phases; ++ph)
         (*_grad_mass_frac_qp)[_qp][ph].assign(_num_components, RealGradient());
+    }
+
+    // No derivatives are required for AD materials
+    if (!is_ad)
+    {
+      (*_dfluid_density_dvar)[_qp].resize(_num_phases);
+      (*_dfluid_viscosity_dvar)[_qp].resize(_num_phases);
+      (*_dfluid_enthalpy_dvar)[_qp].resize(_num_phases);
+      (*_dfluid_internal_energy_dvar)[_qp].resize(_num_phases);
+      (*_dmass_frac_dvar)[_qp].resize(_num_phases);
+
+      for (unsigned int ph = 0; ph < _num_phases; ++ph)
+      {
+        (*_dfluid_density_dvar)[_qp][ph].assign(_num_pf_vars, 0.0);
+        (*_dfluid_viscosity_dvar)[_qp][ph].assign(_num_pf_vars, 0.0);
+        (*_dfluid_enthalpy_dvar)[_qp][ph].assign(_num_pf_vars, 0.0);
+        (*_dfluid_internal_energy_dvar)[_qp][ph].assign(_num_pf_vars, 0.0);
+        (*_dmass_frac_dvar)[_qp][ph].resize(_num_components);
+
+        for (unsigned int comp = 0; comp < _num_components; ++comp)
+          (*_dmass_frac_dvar)[_qp][ph][comp].assign(_num_pf_vars, 0.0);
+      }
     }
   }
 }
+
+template class PorousFlowFluidStateTempl<false>;
+template class PorousFlowFluidStateTempl<true>;
