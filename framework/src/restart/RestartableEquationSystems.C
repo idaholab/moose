@@ -225,9 +225,14 @@ RestartableEquationSystems::load(std::istream & stream)
     }
 
     // Loop over vectors in the system
-    for (auto & vec_header : sys_header.vectors)
-      if (sys && sys->have_vector(vec_header.name))
-        vec_header.to_vec = &sys->get_vector(vec_header.name);
+    if (sys)
+      for (auto & vec_header : sys_header.vectors)
+      {
+        if (sys->have_vector(vec_header.name))
+          vec_header.to_vec = &sys->get_vector(vec_header.name);
+        else
+          vec_header.to_vec = &sys->add_vector(vec_header.name);
+      }
   }
 
   // Actually load each system based on the mapping from above
