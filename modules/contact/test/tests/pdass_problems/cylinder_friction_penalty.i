@@ -262,7 +262,7 @@
     type = CSV
     create_final_symlink = true
     file_base = cylinder_friction_penalty
-    execute_on = 'FINAL'
+    execute_on = 'INITIAL TIMESTEP_END FINAL'
   []
 []
 
@@ -280,41 +280,24 @@
     penalty = 1e11
     penalty_friction = 5e8 # 1e7
   []
-  [geo_surface]
+  [geo]
     type = GeometrySphere
     boundary = 3
     center = '0 4 0'
     radius = 3
-    execute_on = TIMESTEP_BEGIN
-  []
-  [geo_lower]
-    type = GeometrySphere
-    boundary = secondary_lower
-    center = '0 4 0'
-    radius = 3
-    execute_on = TIMESTEP_BEGIN
   []
 []
 
 [Adaptivity]
   [Markers]
-    [contact_surface]
+    [contact]
       type = BoundaryMarker
       mark = REFINE
       next_to = 3
     []
-    [contact_lower]
-      type = UniformMarker
-      block = secondary_lower
-      mark = REFINE
-    []
-    [contact]
-      type = ComboMarker
-      markers = 'contact_surface' # contact_lower
-    []
   []
   initial_marker = contact
-  initial_steps = 1
+  initial_steps = 2
 []
 
 [Constraints]

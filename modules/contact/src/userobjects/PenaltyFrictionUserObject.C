@@ -281,10 +281,7 @@ PenaltyFrictionUserObject::isContactConverged()
 {
   // check normal contact convergence first
   if (!PenaltyWeightedGapUserObject::isContactConverged())
-  {
-    mooseInfoRepeated("Penetration tolerance fail");
     return false;
-  }
 
   for (const auto & [dof_object, traction_pair] : _dof_to_tangential_traction)
   {

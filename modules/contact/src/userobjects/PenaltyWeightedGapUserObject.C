@@ -181,11 +181,35 @@ bool
 PenaltyWeightedGapUserObject::isContactConverged()
 {
   // check if penetration is below threshold
-  for (const auto & [dof_object, gap] : _dof_to_weighted_gap)
-    if (physicalGap(gap) < -_penetration_tolerance ||
-        (physicalGap(gap) > _penetration_tolerance && _dof_to_lagrange_multiplier[dof_object] > 0))
-      return false;
+  Real max_gap = 0.0;
 
+  for (const auto & [dof_object, wgap] : _dof_to_weighted_gap)
+  {
+    const Real gap = physicalGap(wgap);
+    if (gap < -_penetration_tolerance)
+    {
+      if (-gap > max_gap)
+        max_gap = -gap;
+      continue;
+    }
+
+    if (gap > _penetration_tolerance && _dof_to_lagrange_multiplier[dof_object] > 0)
+    {
+      if (gap > max_gap)
+        max_gap = gap;
+      continue;
+    }
+  }
+
+  if (max_gap > 0.0)
+  {
+    mooseInfoRepeated("Penetration tolerance fail max_gap = ",
+                      max_gap,
+                      " (gap_tol=",
+                      _penetration_tolerance,
+                      ")");
+    return false;
+  }
   return true;
 }
 
