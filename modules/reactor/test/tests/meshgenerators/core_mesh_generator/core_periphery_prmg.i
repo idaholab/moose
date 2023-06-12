@@ -88,6 +88,13 @@
     outer_circle_radius=15
     periphery_num_layers=3
   []
+
+  [rotate90]
+    type = TransformGenerator
+    input = cmg
+    transform = ROTATE
+    vector_value = '0 0 90'
+  []
 []
 
 

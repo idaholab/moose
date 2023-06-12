@@ -41,6 +41,13 @@
                0 1;'
     extrude = true
   []
+
+  [translate]
+    type = TransformGenerator
+    input = amg
+    transform = TRANSLATE
+    vector_value = '0.710315 -0.710315 0'
+  []
 []
 
 [Executioner]

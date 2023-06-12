@@ -6,7 +6,7 @@
 
 This object is designed to be used in the Reactor MeshGenerator workflow, which also consists of [`ReactorMeshParams`](ReactorMeshParams.md), [`AssemblyMeshGenerator`](AssemblyMeshGenerator.md), and [`CoreMeshGenerator`](CoreMeshGenerator.md).
 
-The `PinMeshGenerator` object generates square or hexagonal reactor geometry pin cell structures which may be combined into larger assembly structures using `AssemblyMeshGenerator`. The block IDs, external boundary ID, region IDs (e.g., materials), and reporting IDs (extra element integers identifying unique planes and pins, as described in [`CartesianIDPatternedMeshGenerator`](CartesianIDPatternedMeshGenerator.md) and [`HexIDPatternedMeshGenerator`](HexIDPatternedMeshGenerator.md) are automatically assigned once the user provides some basic information.
+The `PinMeshGenerator` object generates square or hexagonal reactor geometry pin cell structures which may be combined into larger assembly structures using `AssemblyMeshGenerator`. The block IDs, external boundary ID, region IDs (e.g., materials), and reporting IDs (extra element integers identifying unique planes and pins, as described in [`PatternedCartesianMeshGenerator`](PatternedCartesianMeshGenerator.md) and [`PatternedHexMeshGenerator`](PatternedHexMeshGenerator.md) are automatically assigned once the user provides some basic information.
 
 This pin may be extruded to three dimensions by setting [!param](/Mesh/PinMeshGenerator/extrude) to 'true', however such extruded pins cannot be used as input to `AssemblyMeshGenerator`. Instead, 2-D pins must be inputted to `AssemblyMeshGenerator` and [!param](/Mesh/AssemblyMeshGenerator/extrude) should be set to 'true' at the `AssemblyMeshGenerator` definition to extrude the assembly to 3-D.
 

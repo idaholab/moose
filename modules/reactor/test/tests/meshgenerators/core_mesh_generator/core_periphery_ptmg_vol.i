@@ -90,6 +90,13 @@
     desired_area = 0.5
     periphery_block_name=PERIPHERY_PTMG
   []
+
+  [rotate90]
+    type = TransformGenerator
+    input = cmg
+    transform = ROTATE
+    vector_value = '0 0 90'
+  []
 []
 
 

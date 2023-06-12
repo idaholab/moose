@@ -423,6 +423,7 @@ PinMeshGenerator::PinMeshGenerator(const InputParameters & parameters)
     // Set metadata to indicate homogenized assemblies to inform CoreMeshGenerator
     // dummy assembly deletion
     declareMeshProperty("homogenized_assembly", _homogenized);
+    declareMeshProperty("pin_as_assembly", _is_assembly);
   }
 
   if (_extrude && _mesh_dimensions == 3)
