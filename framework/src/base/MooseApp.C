@@ -224,7 +224,7 @@ MooseApp::validParams()
       "refinements",
       "-r <n>",
       0,
-      "Specify additional initial uniform refinements for automatic scaling");
+      "Specify additional initial uniform mesh refinements for grid convergence studies");
 
   params.addCommandLineParam<std::string>("recover",
                                           "--recover [file_base]",

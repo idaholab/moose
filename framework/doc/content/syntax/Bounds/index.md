@@ -1,29 +1,33 @@
 # Bounds System
 
-!alert! construction title=Undocumented System
-The Bounds system has not been documented. The content listed below should be used as a starting
-point for documenting the system, which includes the typical automatic documentation associated with
-a system; however, what is contained is ultimately determined by what is necessary to make the
-documentation clear for users.
+The `Bounds` system is designed to bound the value of a nonlinear variable. Whether the bound is an upper or lower
+bound depends on the parameters passed to the `Bounds` object. The bound may be spatially and time-dependent,
+and even depend on other simulation quantities, as implemented in the particular `Bounds` object used.
 
-```markdown
-# Bounds System
+The auxiliary variable that serves as the `variable` parameter of a `Bounds` object
+is not actually used or even set in the computation. However, its type is used to decide if the `Bounds` loop
+will be 'nodal' (loop on all nodes) or 'elemental' (loop on quadrature points in elements). Its block restriction
+is used to define where the bounds is applied. It may be re-used for multiple bounds objects.
 
-## Overview
+!alert note
+Only nodal and constant elemental variables are supported at this time.
 
-!! Replace this line with information regarding the Bounds system.
+The `Bounds` system supports both finite element and finite volume variables. Only elemental bounds
+should be used for finite volume variables.
 
-## Example Input File Syntax
+Note that in order for `Bounds` to have an effect, the user has to specify the
+PETSc options `-snes_type vinewtonssls` or `-snes_type vinewtonrsls`. A warning will be generated if neither option is specified. The PETSc manual pages for the `vinewtonssls` algorithm
+can be found
+[here](https://www.mcs.anl.gov/petsc/petsc-current/docs/manualpages/SNES/SNESVINEWTONSSLS.html)
+while the manual page for `vinewtonrsls` can be found
+[here](https://www.mcs.anl.gov/petsc/petsc-current/docs/manualpages/SNES/SNESVINEWTONRSLS.html#SNESVINEWTONRSLS).
 
-!! Describe and include an example of how to use the Bounds system.
+## Example syntax
 
-!syntax list /Bounds objects=True actions=False subsystems=False
+In the following example, a lower and an upper bound are applied to two variables `u` and `v`
+using the same auxiliary variable `bounds_dummy` and four `Bounds` objects.
 
-!syntax list /Bounds objects=False actions=False subsystems=True
-
-!syntax list /Bounds objects=False actions=True subsystems=False
-```
-!alert-end!
+!listing test/tests/auxkernels/bounds/constant_bounds.i block=Variables AuxVariables Bounds
 
 !syntax list /Bounds objects=True actions=False subsystems=False
 
