@@ -19,6 +19,12 @@
 #include <sstream>
 #include <typeinfo>
 
+// Type hash codes can't be relied on for older clang...
+// not sure why, and also don't care why
+#if defined(__clang__) && __clang_major__ >= 12
+#define RESTARTABLE_SKIP_CHECK_HASH_CODE
+#endif
+
 const std::string RestartableDataIO::RESTARTABLE_DATA_EXT = ".rd";
 const unsigned int RestartableDataIO::CURRENT_BACKUP_FILE_VERSION = 3;
 
@@ -99,12 +105,14 @@ RestartableDataIO::readRestartableData(std::istream & stream,
   // Type id for a basic type
   std::size_t this_compare_hash_code;
   dataLoad(stream, this_compare_hash_code, nullptr);
+#ifndef RESTARTABLE_SKIP_CHECK_HASH_CODE
   if (this_compare_hash_code != typeid(COMPARE_HASH_CODE_TYPE).hash_code())
     error("Loaded backup is not compatible",
           "The hash code check for a basic type (" +
               MooseUtils::prettyCppType<COMPARE_HASH_CODE_TYPE>() +
               ") failed; it is likely that this backup was stored with a different architecture or "
               "operating system");
+#endif
 
   // Number of procs
   processor_id_type this_n_procs = 0;
@@ -310,7 +318,10 @@ RestartableDataIO::deserializeRestartableDataValue(RestartableDataValue & value,
                                                    Backup::DataInfo & data_entry,
                                                    std::istream & stream)
 {
-  if (data_entry.type_hash_code != value.typeId().hash_code() &&
+  if (
+#ifndef RESTARTABLE_SKIP_CHECK_HASH_CODE
+      data_entry.type_hash_code != value.typeId().hash_code() &&
+#endif
       data_entry.type != value.typeId().name())
     mooseError("Type mismatch for loading RestartableData '",
                value.name(),
