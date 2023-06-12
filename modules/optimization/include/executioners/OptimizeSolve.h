@@ -14,6 +14,7 @@
 #include "ExecFlagEnum.h"
 #include <petsctao.h>
 
+#include "libmesh/libmesh_common.h"
 #include "libmesh/petsc_vector.h"
 #include "libmesh/petsc_matrix.h"
 
@@ -76,6 +77,9 @@ protected:
 
   /// objective function defining objective, gradient, and hessian
   OptimizationReporterBase * _obj_function = nullptr;
+
+  ///function to get the objective reporter
+  OptimizationReporterBase * getObjFunction() { return _obj_function; }
 
   /// Tao optimization object
   Tao _tao;

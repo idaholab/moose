@@ -192,7 +192,7 @@ OptimizeSolve::taoSolve()
   { // Create equality vector
     ierr = VecCreate(_my_comm.get(), &_ce);
     CHKERRQ(ierr);
-    ierr = VecSetSizes(_ce, _ndof, _ndof);
+    ierr = VecSetSizes(_ce, _obj_function->getNumEqCons(), _obj_function->getNumEqCons());
     CHKERRQ(ierr);
     ierr = VecSetFromOptions(_ce);
     CHKERRQ(ierr);
@@ -212,7 +212,8 @@ OptimizeSolve::taoSolve()
     // Set equality jacobian matrix
     ierr = MatCreate(_my_comm.get(), &_jacobian_e);
     CHKERRQ(ierr);
-    ierr = MatSetSizes(_jacobian_e, _ndof, _ndof, _ndof, _ndof);
+    ierr = MatSetSizes(
+        _jacobian_e, _obj_function->getNumEqCons(), _ndof, _obj_function->getNumEqCons(), _ndof);
     CHKERRQ(ierr);
     ierr = MatSetFromOptions(_jacobian_e);
     CHKERRQ(ierr);
@@ -228,11 +229,11 @@ OptimizeSolve::taoSolve()
     ierr = MatSetUp(_jacobian_i);
     CHKERRQ(ierr);
 
-    // Set the Equality Constriants
+    // Set the Equality Constraints
     ierr = TaoSetEqualityConstraintsRoutine(_tao, _ce, equalityFunctionWrapper, this);
     CHKERRQ(ierr);
 
-    // Set the Equality Constriants Jacobian
+    // Set the Equality Constraints Jacobian
     ierr = TaoSetJacobianEqualityRoutine(
         _tao, _jacobian_e, _jacobian_e, equalityJacobianFunctionWrapper, this);
     CHKERRQ(ierr);
@@ -527,43 +528,53 @@ OptimizeSolve::variableBounds(Tao tao)
 }
 
 PetscErrorCode
-OptimizeSolve::equalityFunctionWrapper(Tao tao, Vec x, Vec ce, void * ctx)
+OptimizeSolve::equalityFunctionWrapper(Tao /*tao*/, Vec /*x*/, Vec ce, void * ctx)
 {
-  PetscErrorCode ierr;
-  ierr = VecSet(ce, 0.0);
-  return ierr;
+  // grab the solver
+  auto * solver = static_cast<OptimizeSolve *>(ctx);
+  libMesh::PetscVector<Number> eq_con(ce, solver->_my_comm);
+  // use the OptimizationReporterBase class to actually compute equality constraints
+  OptimizationReporterBase * obj_func = solver->getObjFunction();
+  obj_func->computeEqualityConstraints(eq_con);
+  return 0;
 }
 
 PetscErrorCode
 OptimizeSolve::equalityJacobianFunctionWrapper(
-    Tao tao, Vec x, Mat jacobian_e, Mat jacobian_epre, void * ctx)
+    Tao /*tao*/, Vec /*x*/, Mat jacobian_e, Mat /*jacobian_epre*/, void * ctx)
 {
-
-  MatZeroEntries(jacobian_e);
-  // Need to assemble these matricies before returning to ALMM.
-  PetscErrorCode ierr;
-  MatAssemblyBegin(jacobian_e, MAT_FINAL_ASSEMBLY);
-  ierr = MatAssemblyEnd(jacobian_e, MAT_FINAL_ASSEMBLY);
-  return ierr;
+  // grab the solver
+  auto * solver = static_cast<OptimizeSolve *>(ctx);
+  libMesh::PetscMatrix<Number> jac_eq(jacobian_e, solver->_my_comm);
+  // use the OptimizationReporterBase class to actually compute equality
+  // constraints jacobian
+  OptimizationReporterBase * obj_func = solver->getObjFunction();
+  obj_func->computeEqualityJacobian(jac_eq);
+  return 0;
 }
 
 PetscErrorCode
-OptimizeSolve::inequalityFunctionWrapper(Tao tao, Vec x, Vec ci, void * ctx)
+OptimizeSolve::inequalityFunctionWrapper(Tao /*tao*/, Vec /*x*/, Vec ci, void * ctx)
 {
-  PetscErrorCode ierr;
-  ierr = VecSet(ci, 0.0);
-  return ierr;
+  // grab the solver
+  auto * solver = static_cast<OptimizeSolve *>(ctx);
+  libMesh::PetscVector<Number> ineq_con(ci, solver->_my_comm);
+  // use the OptimizationReporterBase class to actually compute equality constraints
+  OptimizationReporterBase * obj_func = solver->getObjFunction();
+  obj_func->computeInequalityConstraints(ineq_con);
+  return 0;
 }
 
 PetscErrorCode
 OptimizeSolve::inequalityJacobianFunctionWrapper(
-    Tao tao, Vec x, Mat jacobian_i, Mat jacobian_ipre, void * ctx)
+    Tao /*tao*/, Vec /*x*/, Mat jacobian_i, Mat /*jacobian_ipre*/, void * ctx)
 {
-
-  MatZeroEntries(jacobian_i);
-  // Need to assemble these matricies before returning to ALMM.
-  PetscErrorCode ierr;
-  MatAssemblyBegin(jacobian_i, MAT_FINAL_ASSEMBLY);
-  ierr = MatAssemblyEnd(jacobian_i, MAT_FINAL_ASSEMBLY);
-  return ierr;
+  // grab the solver
+  auto * solver = static_cast<OptimizeSolve *>(ctx);
+  libMesh::PetscMatrix<Number> jac_ineq(jacobian_i, solver->_my_comm);
+  // use the OptimizationReporterBase class to actually compute equality
+  // constraints jacobian
+  OptimizationReporterBase * obj_func = solver->getObjFunction();
+  obj_func->computeInequalityJacobian(jac_ineq);
+  return 0;
 }
