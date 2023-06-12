@@ -357,6 +357,9 @@ heat_flux = ${fparse power / (perimeter * length)}
   scheme = bdf2
   dt = 1.0
   num_steps = 10
+  petsc_options_iname = '-pc_type'
+  petsc_options_value = 'lu'
+  nl_rel_tol = 1e-10
 []
 
 [Outputs]
