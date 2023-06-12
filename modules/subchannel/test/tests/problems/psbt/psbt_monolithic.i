@@ -87,6 +87,7 @@ P_out = 4.923e6 # Pa
   P_out = ${P_out}
   implicit = true
   segregated = false
+  verbose_subchannel = true
 []
 
 [ICs]

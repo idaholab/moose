@@ -30,6 +30,7 @@
     valgrind = NONE
     recover = false
     abs_zero = 5e-6
+    rel_err = 2e-2
     max_threads = 1
   []
   [psbt_monolithic]

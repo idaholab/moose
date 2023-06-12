@@ -45,8 +45,10 @@ QuadSubChannelNormalSliceValues::output(const ExecFlagType & /*type*/)
   auto nz = _mesh.getNumOfAxialCells();
   auto z_grid = _mesh.getZGrid();
   auto n_channels = _mesh.getNumOfChannels();
+  auto total_length =
+      _mesh.getHeatedLength() + _mesh.getHeatedLengthEntry() + _mesh.getHeatedLengthExit();
 
-  if (_height >= _mesh.getHeatedLength())
+  if (_height >= total_length)
   {
     for (unsigned int i_ch = 0; i_ch < n_channels; i_ch++)
     {
@@ -58,32 +60,19 @@ QuadSubChannelNormalSliceValues::output(const ExecFlagType & /*type*/)
   }
   else
   {
-    for (unsigned int iz = 0; iz < nz + 1; iz++)
+    for (unsigned int iz = 0; iz < nz; iz++)
     {
-      if (_height > z_grid[iz])
-        ;
-      else if (std::fabs(_height - z_grid[iz]) < 1e-6)
+      if (_height > z_grid[iz] && _height < z_grid[iz + 1])
       {
         for (unsigned int i_ch = 0; i_ch < n_channels; i_ch++)
         {
-          auto * node = _mesh.getChannelNode(i_ch, iz);
-          unsigned int i = (i_ch / _mesh.getNx());   // row
-          unsigned int j = i_ch - i * _mesh.getNx(); // column
-          _exit_value(i, j) = val_soln(node);
-        }
-        break;
-      }
-      else
-      {
-        for (unsigned int i_ch = 0; i_ch < n_channels; i_ch++)
-        {
-          auto * node_out = _mesh.getChannelNode(i_ch, iz);
-          auto * node_in = _mesh.getChannelNode(i_ch, iz - 1);
+          auto * node_out = _mesh.getChannelNode(i_ch, iz + 1);
+          auto * node_in = _mesh.getChannelNode(i_ch, iz);
           unsigned int i = (i_ch / _mesh.getNx());   // row
           unsigned int j = i_ch - i * _mesh.getNx(); // column
           _exit_value(i, j) = val_soln(node_in) + (val_soln(node_out) - val_soln(node_in)) *
-                                                      (_height - z_grid[iz - 1]) /
-                                                      (z_grid[iz] - z_grid[iz - 1]);
+                                                      (_height - z_grid[iz]) /
+                                                      (z_grid[iz + 1] - z_grid[iz]);
         }
         break;
       }
