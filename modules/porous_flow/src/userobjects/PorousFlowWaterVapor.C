@@ -74,14 +74,14 @@ PorousFlowWaterVapor::thermophysicalProperties(Real pressure,
   FluidStateProperties & gas = fsp[_gas_phase_number];
 
   // AD versions of primary variables
-  DualReal p = pressure;
+  ADReal p = pressure;
   Moose::derivInsert(p.derivatives(), _pidx, 1.0);
-  DualReal h = enthalpy;
+  ADReal h = enthalpy;
   Moose::derivInsert(h.derivatives(), _hidx, 1.0);
 
-  DualReal Tsat = 0.0;
-  DualReal hl = 0.0;
-  DualReal hv = 0.0;
+  ADReal Tsat = 0.0;
+  ADReal hl = 0.0;
+  ADReal hv = 0.0;
 
   // Determine the phase state of the system
   if (p.value() >= _p_triple && p.value() <= _p_critical)
@@ -105,7 +105,7 @@ PorousFlowWaterVapor::thermophysicalProperties(Real pressure,
   else // p.value() > _p_critical
   {
     // Check whether the phase point is in the liquid or vapor state
-    const DualReal T = _water_fp.T_from_p_h(p, h);
+    const ADReal T = _water_fp.T_from_p_h(p, h);
 
     if (T.value() <= _T_critical)
       phase_state = FluidStatePhaseEnum::LIQUID;
@@ -124,7 +124,7 @@ PorousFlowWaterVapor::thermophysicalProperties(Real pressure,
       gas.pressure = p + _pc.capillaryPressure(0.0, qp);
       gas.saturation = 1.0;
 
-      const DualReal T = _water_fp.T_from_p_h(gas.pressure, h);
+      const ADReal T = _water_fp.T_from_p_h(gas.pressure, h);
 
       gas.temperature = T;
       liquid.temperature = T;
@@ -139,7 +139,7 @@ PorousFlowWaterVapor::thermophysicalProperties(Real pressure,
 
     case FluidStatePhaseEnum::LIQUID:
     {
-      const DualReal T = _water_fp.T_from_p_h(p, h);
+      const ADReal T = _water_fp.T_from_p_h(p, h);
 
       liquid.pressure = p;
       liquid.temperature = T;
@@ -155,22 +155,22 @@ PorousFlowWaterVapor::thermophysicalProperties(Real pressure,
     case FluidStatePhaseEnum::TWOPHASE:
     {
       // Latent heat of vaporization
-      const DualReal hvl = hv - hl;
+      const ADReal hvl = hv - hl;
 
       // Vapor quality
-      const DualReal X = (h - hl) / hvl;
+      const ADReal X = (h - hl) / hvl;
 
       // Perturbed saturation temperature to ensure that the correct
       // phase properties are calculated
-      const DualReal Tsatl = Tsat - dT;
-      const DualReal Tsatv = Tsat + dT;
+      const ADReal Tsatl = Tsat - dT;
+      const ADReal Tsatv = Tsat + dT;
 
       // Density
-      const DualReal rhol = _water_fp.rho_from_p_T(p, Tsatl);
-      const DualReal rhov = _water_fp.rho_from_p_T(p, Tsatv);
+      const ADReal rhol = _water_fp.rho_from_p_T(p, Tsatl);
+      const ADReal rhov = _water_fp.rho_from_p_T(p, Tsatv);
 
       // Vapor (gas) saturation
-      const DualReal satv = X * rhol / (rhov + X * (rhol - rhov));
+      const ADReal satv = X * rhol / (rhov + X * (rhol - rhov));
 
       gas.temperature = Tsat;
       gas.density = rhov;

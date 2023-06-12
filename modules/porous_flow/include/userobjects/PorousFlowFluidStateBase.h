@@ -34,14 +34,14 @@ struct FluidStateProperties
       internal_energy(0.0),
       mass_fraction(n, 0.0){};
 
-  DualReal pressure;
-  DualReal temperature;
-  DualReal saturation;
-  DualReal density;
-  DualReal viscosity;
-  DualReal enthalpy;
-  DualReal internal_energy;
-  std::vector<DualReal> mass_fraction;
+  ADReal pressure;
+  ADReal temperature;
+  ADReal saturation;
+  ADReal density;
+  ADReal viscosity;
+  ADReal enthalpy;
+  ADReal internal_energy;
+  std::vector<ADReal> mass_fraction;
 };
 
 /**
