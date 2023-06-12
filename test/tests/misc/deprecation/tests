@@ -5,7 +5,7 @@
   # Note: The no_error_deprecated flag prevents the TestHarness
   # from passing the --error-deprecated flag to MOOSE.
 
-  [./deprecated]
+  [deprecated]
     type = 'RunApp'
     input = 'deprecation.i'
     cli_args = 'Kernels/diff/type=DeprecatedKernel'
@@ -13,8 +13,8 @@
     no_error_deprecated = true
 
     requirement = 'The system shall produce a warning when non-expired deprecated code is executed.'
-  [../]
-  [./expired]
+  []
+  [expired]
     type = 'RunApp'
     input = 'deprecation.i'
     cli_args = 'Kernels/diff/type=ExpiredKernel'
@@ -22,8 +22,8 @@
     no_error_deprecated = true
 
     requirement = 'The system shall produce a warning when expired deprecated code is executed.'
-  [../]
-  [./expired_error]
+  []
+  [expired_error]
     type = 'RunException'
     input = 'deprecation.i'
     cli_args = 'Kernels/diff/type=ExpiredKernel'
@@ -31,8 +31,8 @@
     allow_deprecated = False
 
     requirement = 'The system shall produce an error when the --no-deprecated-flag is passed and deprecated code is executed.'
-  [../]
-  [./renamed]
+  []
+  [renamed]
     type = 'RunApp'
     input = 'deprecation.i'
     cli_args = 'Kernels/diff/type=OldNamedKernel'
@@ -40,7 +40,7 @@
     no_error_deprecated = true
 
     requirement = 'The system shall produce a warning indicating a possible replacement when deprecated code is superseded.'
-  [../]
+  []
 
   [deprecate_param]
     type = 'RunApp'
@@ -49,7 +49,8 @@
     design = 'InputParameters.md'
     issues = '#15497'
     no_error_deprecated = True
-    expect_out = "deprecate-old-for-new-param\.i:[0-9]+:.*coef.*:\n'coef' has been deprecated and will be removed on .+\. Please use 'coeff' instead"
+    expect_out = "deprecate-old-for-new-param\.i:[0-9]+:.*coef.*:\n'coef' has been deprecated and "
+                 "will be removed on .+\. Please use 'coeff' instead"
   []
 
   [deprecated_coupled_var]
@@ -60,16 +61,33 @@
     design = 'InputParameters.md'
     issues = '#15497'
     no_error_deprecated = True
-    expect_out = "deprecated_coupled_var\.i:[0-9]+:.*stupid_name.*:\n'stupid_name' has been deprecated and will be removed on.+\. Please use 'source' instead"
+    expect_out = "deprecated_coupled_var\.i:[0-9]+:.*stupid_name.*:\n'stupid_name' has been "
+                 "deprecated and will be removed on.+\. Please use 'source' instead"
   []
 
   [blessed_coupled_var]
     type = 'Exodiff'
     input = 'deprecated_coupled_var.i'
     exodiff = 'blessed_coupled_var_out.e'
-    cli_args = "Kernels/active='diff_u coupled_u diff_v blessed_coupled_v' Outputs/file_base=blessed_coupled_var_out"
+    cli_args = "Kernels/active='diff_u coupled_u diff_v blessed_coupled_v' "
+               "Outputs/file_base=blessed_coupled_var_out"
     requirement = 'The system shall not give a deprecation warning if the user uses the blessed coupled variable name instead of the deprecated coupled variable name.'
     design = 'InputParameters.md'
     issues = '#15497'
+  []
+  [deprec_param_duplicate_print]
+    type = RunApp
+    input = 'deprecated_param.i'
+    custom_evaluation_script = 'deprec_param_custom_eval.py'
+    issues = '#6780'
+    requirement = 'The system shall output one warning per deprecated parameter, regardless of how many deprecated parameters are in the system.'
+  []
+  [deprec_obj_two_obj]
+    type = 'RunApp'
+    input = 'deprecation.i'
+    cli_args = 'Kernels/diff/type=OldNamedKernel Kernels/diff2/type=DeprecatedKernel'
+    custom_evaluation_script = 'deprec_two_obj_custom_eval.py'
+    issues = '#6780'
+    requirement = 'The system shall produce a warning only once indicating a possible replacement of an object when deprecated code is superseded.'
   []
 []

@@ -6,17 +6,18 @@
 []
 
 [Variables]
-  [./u]
-  [../]
-  [v][]
+  [u]
+  []
+  [v]
+  []
 []
 
 [Kernels]
   active = 'diff_u coupled_u diff_v deprecated_coupled_v'
-  [./diff_u]
+  [diff_u]
     type = Diffusion
     variable = u
-  [../]
+  []
   [coupled_u]
     type = DeprecatedCoupledVarKernel
     variable = u
@@ -39,30 +40,30 @@
 []
 
 [BCs]
-  [./left_u]
+  [left_u]
     type = DirichletBC
     variable = u
     boundary = left
     value = 0
-  [../]
-  [./right_u]
+  []
+  [right_u]
     type = DirichletBC
     variable = u
     boundary = right
     value = 1
-  [../]
-  [./left_v]
+  []
+  [left_v]
     type = DirichletBC
     variable = v
     boundary = left
     value = 1
-  [../]
-  [./right_v]
+  []
+  [right_v]
     type = DirichletBC
     variable = v
     boundary = right
     value = 0
-  [../]
+  []
 []
 
 [Executioner]

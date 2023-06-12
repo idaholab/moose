@@ -262,6 +262,9 @@ protected:
   /// The current stream object used for capturing errors during extraction
   std::ostringstream * _current_error_stream;
 
+  /// Tracks whether a deprecated param has had its warning message printed already.
+  std::unordered_set<std::string> _deprec_param_tracker;
+
 private:
   std::string _errmsg;
   std::string _warnmsg;
