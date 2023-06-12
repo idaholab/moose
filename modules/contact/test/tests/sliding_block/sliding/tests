@@ -26,7 +26,6 @@
     rel_err = 1e-4
     max_time = 800
     allow_warnings = true
-    #    deleted = '#6139'
     requirement = 'The system shall support mechanics frictional contact problems'
   []
 
@@ -39,7 +38,6 @@
     abs_zero = 1e-7
     rel_err = 1e-4
     max_time = 800
-    #    deleted = '#6139'
     requirement = 'The system shall support mechanics frictionless contact problems'
   []
 

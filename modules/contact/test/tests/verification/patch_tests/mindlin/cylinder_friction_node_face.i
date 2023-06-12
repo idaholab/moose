@@ -36,13 +36,9 @@
     order = CONSTANT
     family = MONOMIAL
   []
-  [saved_x]
+  [react_x]
   []
-  [saved_y]
-  []
-  [diag_saved_x]
-  []
-  [diag_saved_y]
+  [react_y]
   []
   [penetration]
   []
@@ -72,7 +68,6 @@
 [Kernels]
   [TensorMechanics]
     use_displaced_mesh = true
-    save_in = 'saved_x saved_y'
     extra_vector_tags = 'ref'
     block = '1 2 3 4 5 6 7'
   []
@@ -138,27 +133,39 @@
     boundary = 3
     paired_boundary = 2
   []
+  [react_x]
+    type = TagVectorAux
+    vector_tag = 'ref'
+    v = 'disp_x'
+    variable = 'react_x'
+  []
+  [react_y]
+    type = TagVectorAux
+    vector_tag = 'ref'
+    v = 'disp_y'
+    variable = 'react_y'
+  []
 []
 
 [Postprocessors]
   [bot_react_x]
     type = NodalSum
-    variable = saved_x
+    variable = react_x
     boundary = 1
   []
   [bot_react_y]
     type = NodalSum
-    variable = saved_y
+    variable = react_y
     boundary = 1
   []
   [top_react_x]
     type = NodalSum
-    variable = saved_x
+    variable = react_x
     boundary = 4
   []
   [top_react_y]
     type = NodalSum
-    variable = saved_y
+    variable = react_y
     boundary = 4
   []
   [penetration]
