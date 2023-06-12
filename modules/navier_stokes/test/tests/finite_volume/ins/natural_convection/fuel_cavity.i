@@ -1,6 +1,6 @@
 # ========================================================================
-# The purpose of this MOOSE scripts is to solve a 2-D axisymmetric
-#     roblem with the following details:
+#     The purpose of this MOOSE scripts is to solve a 2-D axisymmetric
+#     problem with the following details:
 #     ------------------------------------------------------------------
 #     Physics: natural convection through a fluid  and heat conduction
 #              in a solid and there is convective heat transfer from the
@@ -318,7 +318,6 @@ input_heat_flux = 40000.0
     coupled_variables = 'Ra'
     constant_names = 'Pr'
     constant_expressions = '${fparse cp*mu/k}'
-    #expression = '0.1 * Ra * Pr'
     expression = '${k}* (0.68 + 0.67 * pow(Ra, 0.25)/pow(1 + pow(0.437/Pr, 9/16) ,4/9) )/ ${Liquid_width} '
     block = 0
   []

@@ -12,7 +12,7 @@
 #include "FVFluxBC.h"
 
 /**
- * Constant velocity scalar advection boundary conditions
+ * Temperature advection boundary condition allowing for inflow and outflow
  */
 class NSFVOutflowTemperatureBC : public FVFluxBC
 {
@@ -24,7 +24,7 @@ public:
 protected:
   virtual ADReal computeQpResidual() override;
 
-  /// Density
+  /// Advected quantity, here outgoing specific enthalpy
   const Moose::Functor<ADReal> & _adv_quant;
 
   /// x-velocity
@@ -34,7 +34,7 @@ protected:
   /// z-velocity
   const Moose::Functor<ADReal> * const _w;
 
-  /// Density
+  /// Backflow Temperature
   const Moose::Functor<ADReal> & _backflow_T;
 
   /// the dimension of the simulation
