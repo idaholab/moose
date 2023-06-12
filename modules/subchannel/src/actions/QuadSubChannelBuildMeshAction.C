@@ -23,6 +23,8 @@ InputParameters
 QuadSubChannelBuildMeshAction::validParams()
 {
   InputParameters params = Action::validParams();
+  params.addClassDescription(
+      "Builds the infastructure for the subchannel mesh in the square lattice arrangement");
   return params;
 }
 
