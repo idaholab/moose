@@ -305,6 +305,9 @@ RestartableEquationSystems::load(std::istream & stream)
       if (should_close_vec)
         vec->close();
     }
+
+    if (sys_header.to_sys)
+      sys_header.to_sys->update();
   }
 }
 
