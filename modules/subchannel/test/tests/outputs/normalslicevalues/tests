@@ -1,8 +1,8 @@
 [Tests]
   [test]
-    type = Exodiff
+    type = CSVDiff
     input = 'test.i'
-    exodiff = 'test_out.e'
+    csvdiff = 'Temp_out_matrix.csv'
     recover = False
   []
 []

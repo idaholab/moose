@@ -5,4 +5,9 @@
     csvdiff = 'test_out.csv'
     recover = False
   []
+  [subchannel_height]
+    type = 'RunException'
+    input = 'test_error.i'
+    expect_err = ": No element located at given height."
+  []
 []

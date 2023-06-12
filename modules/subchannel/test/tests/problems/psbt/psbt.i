@@ -117,20 +117,42 @@ P_out = 4.923e6 # Pa
 []
 
 [AuxKernels]
+  [P_out_bc]
+    type = PostprocessorConstantAux
+    variable = P
+    boundary = outlet
+    postprocessor = report_pressure_outlet
+    execute_on = 'timestep_begin'
+    block = sub_channel
+  []
   [T_in_bc]
     type = ConstantAux
     variable = T
     boundary = inlet
     value = ${T_in}
     execute_on = 'timestep_begin'
+    block = sub_channel
   []
   [mdot_in_bc]
-    type = MassFlowRateAux
+    type = PostprocessorMassFlowRateAux
     variable = mdot
     boundary = inlet
     area = S
-    mass_flux = ${mass_flux_in}
+    postprocessor = report_mass_flux_inlet
     execute_on = 'timestep_begin'
+    block = sub_channel
+  []
+[]
+
+[Postprocessors]
+  [report_mass_flux_inlet]
+    type = Receiver
+    default = ${mass_flux_in}
+  []
+
+  [report_pressure_outlet]
+    type = Receiver
+    default = ${P_out}
   []
 []
 

@@ -88,8 +88,9 @@ P_out = 4.923e6 # Pa
   implicit = true
   segregated = true
   monolithic_thermal = false
-  staggered_pressure = false
+  staggered_pressure = true
   interpolation_scheme = 'exponential'
+  verbose_subchannel = true
   P_tol = 1e-04
   T_tol = 1e-04
 []

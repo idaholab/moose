@@ -1,0 +1,29 @@
+[Tests]
+    [test_LBE]
+        type = Exodiff
+        input = test_LBE-19pin.i
+        exodiff = test_LBE-19pin_out.e
+        custom_cmp = 'test.exodiff'
+        method = '!DBG'
+        valgrind = NONE
+        recover = false
+    []
+    [test_LEAD]
+        type = Exodiff
+        input = test_LEAD-19pin.i
+        exodiff = test_LEAD-19pin_out.e
+        custom_cmp = 'test.exodiff'
+        method = '!DBG'
+        valgrind = NONE
+        recover = false
+    []
+    [test_BISMOUTH]
+        type = Exodiff
+        input = test_BISMOUTH-19pin.i
+        exodiff = test_BISMOUTH-19pin_out.e
+        custom_cmp = 'test.exodiff'
+        method = '!DBG'
+        valgrind = NONE
+        recover = false
+    []
+  []
