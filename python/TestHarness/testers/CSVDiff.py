@@ -13,12 +13,6 @@ import csv
 from SchemaDiff import SchemaDiff
 from FileTester import FileTester # checkRunnable
 
-try:
-    import deepdiff
-    from mooseutils.deepdiff_custom_operator import CompareDiff
-except:
-    pass
-
 class CSVDiff(SchemaDiff):
     @staticmethod
     def validParams():
