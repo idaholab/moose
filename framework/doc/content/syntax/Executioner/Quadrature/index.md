@@ -5,13 +5,14 @@ by MOOSE are the integration of the residual over an element, or the postprocess
 over the domain.
 
 The `Quadrature` order is chosen by default so that the product of the test function and the shape functions is integrated exactly.
-When using Galerkin's method, this means the quadrature would need to integrate exactly polynomials of order
-twice the order of the variables.
+When using Galerkin's method, this would mean the quadrature needs to integrate exactly polynomials of order
+twice the order of the variables. In order to be able to integrate exactly with a potential third multiplied term in the definition of the residual, we
+actually use a quadrature of order $2 n + 1$, with n the order of the variables.
 
 In 1D, the following quadratures are known to integrate exactly:
 
-- GAUSS (-Legendre), the default rule, of order n integrates exactly 1D polynomials of order up to 2n-1
-- GAUSS_LOBATTO of order n integrates exactly 1D polynomials of order up to 2n-3
+- GAUSS (-Legendre), the default rule, with n points integrates exactly 1D polynomials of order up to 2n-1
+- GAUSS_LOBATTO with n points integrates exactly 1D polynomials of order up to 2n-3
 - SIMPSON's rule is known to integrate exactly 1D polynomials of order up to 3
 
 In higher dimensions, the quadratures are defined differently based on the element types.

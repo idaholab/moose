@@ -8,9 +8,9 @@ See [FVBCs](syntax/FVBCs/index.md) for boundary conditions of finite volume prob
 
 Some of the main types of boundary conditions are:
 - [Dirichlet Boundary conditions](DirichletBC.md) to set the value of a variable on a boundary
-- [Neumann Boundary conditions](NeumannBC.md) to set a condition on the derivative of a variable. Depending on the
-  equation being solved, this can be equivalent to setting the value of the flux on the boundary
-- `Robin Boundary conditions` to solve an equation tying both the variable value and its derivatives on the boundary
+- [Neumann Boundary conditions](NeumannBC.md) to set a flux for the equation corresponding to the variable. Depending on the
+  equation being solved, this can be equivalent to setting the value of the derivative of the variable on the boundary
+- Robin boundary conditions to solve an equation tying both the variable value and its derivatives on the boundary
 
 In MOOSE, boundary conditions are split in two categories: `NodalBC`s and `IntegratedBC`s. Similar to kernels,
 `computeQpResidual/Jacobian` are the main routine to implement for most boundary conditions. [Automatic differentiation](automatic_differentiation/index.md)
@@ -22,7 +22,7 @@ Nodal boundary conditions are applied on nodes in the mesh. Nodal boundary condi
 that have degrees of freedom at nodes, such as Lagrange variables.
 
 We show below code snippets for the `DirichletBCBase`. This boundary condition sets the value of a variable on
-a node. The boundary conditions are im
+a node.
 
 If the value is preset, the `computeQpValue` is called instead of the `computeQpResidual`. This value is then directly placed in the solution vector.
 
@@ -33,12 +33,12 @@ If the value is not preset, the `computeQpResidual` routine is called. The resid
 !listing src/bcs/DirichletBCBase.C start=Real end=} include-end=true
 
 !alert note
-`_qp`, the indexing over quadrature points, is simply 0 on nodes. We use this indexing in order to keep consistent user interfaces.
+`_qp`, the index over quadrature points, is simply 0 on nodes. We use this indexing in order to keep consistent user interfaces.
 
 ## Integrated boundary conditions
 
 Integrated boundary conditions are applied on sides in the mesh. A local quadrature-based integration is performed to compute
-the contribution the residual and Jacobian of the boundary condition.
+the residual and Jacobian contribution of the boundary condition.
 
 In the following snippet, we show the definition of the contribution to the residual of a [FunctionNeumannBC.md].
 The `computeQpResidual` simply returns the value of the flux.

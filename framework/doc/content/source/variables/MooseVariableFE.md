@@ -2,7 +2,7 @@
 
 !syntax description /Variables/MooseVariable
 
-A `MooseVariableFE` is a derived class of a `MooseVariable`. It is a finite element field variable.
+A `MooseVariableFE` is a derived class of a `MooseVariableField`. It is a finite element field variable.
 Depending on the finite element family (chosen with [!param](/Variables/MooseVariable/family) parameter)
 or the [!param](/Variables/MooseVariable/components) parameter,
 it can be a regular, vector or array variable.

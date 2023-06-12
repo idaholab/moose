@@ -1,6 +1,6 @@
 # OutputWarehouse
 
-The `OutputWarehouse` is a storage container for all [Outputs](syntax/Outputs/index.md)
+The `OutputWarehouse` is a storage container for all [Output](syntax/Outputs/index.md)
 objects.
 
 Warehouses are used to store objects. Using warehouses is preferable in terms of encapsulation and code design
@@ -14,6 +14,6 @@ on a call to `outputStep` on the warehouse, all the objects the `OutputWarehouse
 
 In addition to keeping track of all `Outputs` objects, the `OutputWarehouse` also:
 
-- keep track of the `sync_times` at which output is forced
-- handle the output to the console. The `ConsoleStream` that many objects use to output, uses the `OutputWarehouse`
+- keeps track of the `sync_times` at which output is forced
+- handles the output to the console. The `ConsoleStream` that many objects use to output, uses the `OutputWarehouse`
   under the hood to output its messages.

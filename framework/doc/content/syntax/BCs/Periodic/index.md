@@ -10,7 +10,7 @@ MOOSE has full support for Periodic BCs in
 - With mesh adaptivity.
 - Can be restricted to specific variables.
 
-Supports arbitrary translation vectors for defining periodicity.
+Arbitrary translation vectors and arbitrary mapping transformations between boundaries are also supported for defining periodicity.
 
 ## Automatic Periodic Boundary Detection (recommended)
 

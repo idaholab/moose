@@ -62,7 +62,7 @@ For example for UserObjects, the `execution_order_group` parameter lets the mode
 ## Viewing objects created by an applications
 
 Numerous applications will use [Actions](actions/Action.md) to simplify the user input. This reduces opportunities for
-mistakes in an input, but has the inconvenient of hiding part of the simulation setup. The [!param](/Debug/show_actions) will,
+mistakes in an input, but has the inconvenience of hiding part of the simulation setup. The [!param](/Debug/show_actions) will,
 for most objects, list the objects created by an action. The `Debug` system also offers several summaries of objects:
 
 - [!param](/Debug/show_material_props) for material properties, created on elements, neighbors and sides
@@ -71,8 +71,8 @@ for most objects, list the objects created by an action. The `Debug` system also
 
 
 Additionally, [!param](/Debug/show_execution_order) will provide the list of objects executed as they are executed.
-This includes, [Kernels](syntax/Kernels/index.md) (and declinations), [AuxKernels](syntax/AuxKernels/index.md), [boundary conditions](syntax/BCs/index.md)
-(and declinations), [UserObjects](syntax/UserObjects/index.md), [Postprocessors](syntax/Postprocessors/index.md) and
+This includes, [Kernels](syntax/Kernels/index.md) (and `Interface`, `Nodal`, finite volume, etc kernels), [AuxKernels](syntax/AuxKernels/index.md), [boundary conditions](syntax/BCs/index.md)
+(including finite volume), [UserObjects](syntax/UserObjects/index.md), [Postprocessors](syntax/Postprocessors/index.md) and
 [VectorPostprocessors](syntax/Postprocessors/index.md).
 
 

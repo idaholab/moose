@@ -3,7 +3,7 @@
 Nodal kernels are used to solve equations that strictly belong on a node.
 Some examples include:
 
-- solving ordinary differential equations at every nodes. The following `NodalKernels` were implemented for that purpose:
+- solving ordinary differential equations at every node. The following `NodalKernels` were implemented for that purpose:
   - [ConstantRate.md]
   - [TimeDerivativeNodalKernel.md]
   - [UserForcingFunctionNodalKernel.md]

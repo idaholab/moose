@@ -35,9 +35,9 @@ condition is better.
 
 ## Similar Dirichlet BCs
 
-To use a Function instead of a constant value : [FunctionDirichletBC.md]
-To impose a Dirichlet BC using a penalty method or on an elemental variable : [PenaltyDirichletBC.md]
-To use a another variable instead of a constant value : [MatchedValueBC.md]
+- To use a Function instead of a constant value : [FunctionDirichletBC.md]
+- To impose a Dirichlet BC using a penalty method or on an elemental variable : [PenaltyDirichletBC.md]
+- To use a another variable instead of a constant value : [MatchedValueBC.md]
 
 ## Example Input Syntax
 
