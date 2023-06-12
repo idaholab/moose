@@ -7,23 +7,32 @@
 #* Licensed under LGPL 2.1, please see LICENSE for details
 #* https://www.gnu.org/licenses/lgpl-2.1.html
 
-from SchemaDiff import SchemaDiff
-from FileTester import FileTester # checkRunnable
 import re
 import os
 import csv
+from SchemaDiff import SchemaDiff
+from FileTester import FileTester # checkRunnable
+
+try:
+    import deepdiff
+    from mooseutils.deepdiff_custom_operator import CompareDiff
+except:
+    pass
 
 class CSVDiff(SchemaDiff):
     @staticmethod
     def validParams():
         params = SchemaDiff.validParams()
-        params.addRequiredParam('csvdiff',    [], "A list of files to run CSVDiff on.")
-        params.addParam('override_columns',   [], "A list of variable names to customize the CSVDiff tolerances.")
-        params.addParam('override_rel_err',   [], "A list of customized relative error tolerances.")
-        params.addParam('override_abs_zero',  [], "A list of customized absolute zero tolerances.")
-        params.addParam('ignore_columns',     [], "A list of columns names which will not be included in the comparison.")
-        params.addParam('custom_columns',     [], "A list of select columns which will be included in the comparison.")
-        params.addParam('comparison_file',        "Use supplied custom comparison config file.")
+        params.addRequiredParam('csvdiff',    [], 'A list of files to run CSVDiff on.')
+        params.addParam('override_columns',   [], 'A list of variable names to customize the '
+                                                  'CSVDiff tolerances.')
+        params.addParam('override_rel_err',   [], 'A list of customized relative error tolerances.')
+        params.addParam('override_abs_zero',  [], 'A list of customized absolute zero tolerances.')
+        params.addParam('ignore_columns',     [], 'A list of columns names which will not be '
+                                                  'included in the comparison.')
+        params.addParam('custom_columns',     [], 'A list of select columns which will be '
+                                                  'included in the comparison.')
+        params.addParam('comparison_file',        'Use supplied custom comparison config file.')
         return params
 
     @staticmethod
@@ -38,13 +47,13 @@ class CSVDiff(SchemaDiff):
         if custom_columns:
             _tmp_dict = csv_dict.copy()
             for a_column in _tmp_dict.keys():
-                if a_column not in custom_columns:
-                    csv_dict.pop(a_column)
+                if a_column.lower() not in custom_columns:
+                    csv_dict.pop(a_column.lower())
 
         # Drop what is listed in ignore_columns
         for drop_field in ignore_columns:
-            if drop_field in csv_dict.keys():
-                csv_dict.pop(drop_field)
+            if drop_field.lower() in csv_dict.keys():
+                csv_dict.pop(drop_field.lower())
         return csv_dict
 
     def __init__(self, name, params):
@@ -73,35 +82,29 @@ class CSVDiff(SchemaDiff):
 
         return FileTester.checkRunnable(self, options)
 
-    def load_file(self, path1):
-        try:
-            output_dict = {}
-            with open(path1, newline='') as csvfile:
-                reader = csv.DictReader(csvfile, skipinitialspace=True)
-                for row in reader:
-                # Loop through each column in the row
-                    for column, value in row.items():
-                        # If the column is not already in the output dictionary, add it
-                        if column not in output_dict:
-                            output_dict[column] = []
+    def load_file(self, path):
+        """ Load CSV File and return a populated dictionary """
+        output_dict = {}
+        with open(path, 'r', encoding='utf-8') as csvfile:
+            reader = csv.DictReader(csvfile, skipinitialspace=True)
+            for row in reader:
+                for column, value in row.items():
+                    output_dict[column.lower()] = output_dict.get(column.lower(), [])
+                    output_dict[column.lower()].append(value.lower())
 
-                        # Add the value to the list for the corresponding column
-                        output_dict[column].append(value)
+        # Allow modifications to CSV file
+        if self.specs.isValid('ignore_columns') or self.specs.isValid('custom_columns'):
+            output_dict = self.augment_csv(output_dict,
+                                            self.specs['ignore_columns'],
+                                            self.specs['custom_columns'])
 
-            # Allow modifications to CSV file
-            if self.specs.isValid('ignore_columns') or self.specs.isValid('custom_columns'):
-                output_dict = self.augment_csv(output_dict,
-                                               self.specs['ignore_columns'],
-                                               self.specs['custom_columns'])
-            # Allow further modifications based on comparison file
-            if self.custom_params:
-                output_dict = self.augment_csv(output_dict,
-                                               None,
-                                               self.custom_params['FIELDS'].keys())
+        # Allow further modifications based on comparison file
+        if self.custom_params:
+            output_dict = self.augment_csv(output_dict,
+                                            None,
+                                            self.custom_params['FIELDS'].keys())
 
-            return output_dict
-        except Exception as e:
-            return e
+        return output_dict
 
     def processResults(self, moose_dir, options, output):
         if self.specs.isValid('comparison_file'):
@@ -119,8 +122,8 @@ class CSVDiff(SchemaDiff):
         generic_error = None
         # Override global params if comparison file is used
         if self.custom_params:
-            rel_err = float(self.custom_params.get('RELATIVE', self.specs['rel_err']))
-            abs_zero = float(self.custom_params.get('ZERO', self.specs['abs_zero']))
+            rel_err = abs(float(self.custom_params.get('RELATIVE', self.specs['rel_err'])))
+            abs_zero = abs(float(self.custom_params.get('ZERO', self.specs['abs_zero'])))
 
         for index, column in enumerate(orig):
             # Apply field params (overrides global for this single field)
@@ -129,23 +132,23 @@ class CSVDiff(SchemaDiff):
 
                 # Caveat: Using global defaults can wind up using these tolerances in the end due to
                 # a max() comparison occurring later in this method
-                _rel_err = float(rel_err)
-                _abs_zero = float(abs_zero)
+                _rel_err = abs(rel_err)
+                _abs_zero = abs(abs_zero)
 
                 # Test-Specification file override
                 if column in self.specs['override_columns']:
                     idx = self.specs['override_columns'].index(column)
-                    if self.specs['override_rel_err']:
-                        _rel_err = float(self.specs['override_rel_err'][idx])
+                    if self.specs['rel_err']:
+                        _rel_err = abs(float(self.specs['override_rel_err'][idx]))
                     if self.specs['override_abs_zero']:
-                        _abs_zero = float(self.specs['override_abs_zero'][idx])
+                        _abs_zero = abs(float(self.specs['override_abs_zero'][idx]))
 
                 # Comparison file override. Use more tolerant of the two if both are set. See Caveat
                 # above.
                 if self.custom_params and column in self.custom_params['FIELDS'].keys():
                     _meta = self.custom_params['FIELDS'][column]
-                    _rel_err = float(max(_rel_err, float(_meta.get('RELATIVE', _rel_err))))
-                    _abs_zero = float(max(_abs_zero, float(_meta.get('ZERO', _abs_zero))))
+                    _rel_err = abs(max(_rel_err, float(_meta.get('RELATIVE', _rel_err))))
+                    _abs_zero = abs(max(_abs_zero, float(_meta.get('ZERO', _abs_zero))))
 
                 # Do the diff without overriding global parameters
                 (col_diff, generic_error) = super().do_deepdiff(orig[column],
@@ -164,7 +167,9 @@ class CSVDiff(SchemaDiff):
 
             # append diff information
             if col_diff:
-                diff += f'Column {index}: {col_diff}\n'
+                diff += (f'Relative Error Tolorance: {rel_err}\n'
+                         f'Absolute Zero:            {abs_zero}\n'
+                         f'Column {index}: {col_diff}\n')
 
         return (diff, generic_error)
 

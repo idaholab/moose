@@ -7,17 +7,20 @@
 #* Licensed under LGPL 2.1, please see LICENSE for details
 #* https://www.gnu.org/licenses/lgpl-2.1.html
 
-import os, sys, io
-import unittest
+
+from TestHarnessTestCase import TestHarnessTestCase
+import os, io
 import mock
 import TestHarness
 from contextlib import redirect_stdout
 
-class TestHarnessTester(unittest.TestCase):
+class TestHarnessTester(TestHarnessTestCase):
     @mock.patch.object(TestHarness.util, 'checkInstalled')
     def mocked_output(self, mocked, expect_fail, mocked_return):
         MOOSE_DIR = os.getenv('MOOSE_DIR')
         os.chdir(f'{MOOSE_DIR}/test')
+        os.environ['MOOSE_TERM_FORMAT'] = 'njcst'
+        print(f'FORMAT: {os.getenv("MOOSE_TERM_FORMAT")}')
         out = io.StringIO()
         with redirect_stdout(out):
             mocked_return.return_value=mocked
