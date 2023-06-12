@@ -135,6 +135,8 @@ sortMooseVariables(const MooseVariableFEBase * a, const MooseVariableFEBase * b)
 
 Threads::spin_mutex get_function_mutex;
 
+const std::string FEProblemBase::equation_systems_restartable_name = "equation_systems";
+
 InputParameters
 FEProblemBase::validParams()
 {
@@ -307,7 +309,10 @@ FEProblemBase::FEProblemBase(const InputParameters & parameters)
     Restartable(this, "FEProblemBase"),
     _mesh(*getCheckedPointerParam<MooseMesh *>("mesh")),
     _req(declareManagedRestartableDataWithContext<RestartableEquationSystems>(
-        "equation_systems", nullptr, _mesh, getParam<bool>("skip_additional_restart_data"))),
+        equation_systems_restartable_name,
+        nullptr,
+        _mesh,
+        getParam<bool>("skip_additional_restart_data"))),
     _initialized(false),
     _solve(getParam<bool>("solve")),
     _transient(false),

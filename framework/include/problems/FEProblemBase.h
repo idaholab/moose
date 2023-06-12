@@ -2113,6 +2113,9 @@ protected:
   MooseMesh & _mesh;
 
 private:
+  /// The restartable name used for the restartable EquationSystems
+  static const std::string equation_systems_restartable_name;
+  /// The EquationSystems object, wrapped for restart
   Restartable::ManagedValue<RestartableEquationSystems> _req;
 
 protected:
