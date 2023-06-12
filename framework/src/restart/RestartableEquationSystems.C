@@ -13,6 +13,8 @@
 
 #include "libmesh/dof_map.h"
 #include "libmesh/dof_object.h"
+#include "libmesh/elem.h"
+#include "libmesh/node.h"
 
 RestartableEquationSystems::RestartableEquationSystems(libMesh::MeshBase & mesh,
                                                        const bool skip_additional_vectors)
