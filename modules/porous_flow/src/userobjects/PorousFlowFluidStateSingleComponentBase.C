@@ -19,6 +19,6 @@ PorousFlowFluidStateSingleComponentBase::validParams()
 
 PorousFlowFluidStateSingleComponentBase::PorousFlowFluidStateSingleComponentBase(
     const InputParameters & parameters)
-  : PorousFlowFluidStateBase(parameters), _pidx(0), _hidx(1), dT(1.0e-6)
+  : PorousFlowFluidStateBase(parameters), _pidx(0), _hidx(1), _dT(1.0e-6)
 {
 }

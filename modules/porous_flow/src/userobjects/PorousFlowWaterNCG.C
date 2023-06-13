@@ -332,7 +332,7 @@ PorousFlowWaterNCG::saturation(const ADReal & pressure,
 
   // The gas saturation in the two phase case
   const ADReal saturation = vapor_mass_fraction * liquid_density /
-                              (gas_density + vapor_mass_fraction * (liquid_density - gas_density));
+                            (gas_density + vapor_mass_fraction * (liquid_density - gas_density));
 
   return saturation;
 }

@@ -29,13 +29,16 @@ public:
    * @param pressure gas phase pressure (Pa)
    * @param enthalpy fluid enthalpy (J/kg)
    * @param qp quadpoint index
-   * @param[out] phase_state the current phase (gas, liquid or two-phase)
    * @param[out] fsp the FluidStateProperties struct containing all properties
    */
   virtual void thermophysicalProperties(Real pressure,
                                         Real enthalpy,
                                         unsigned int qp,
-                                        FluidStatePhaseEnum & phase_state,
+                                        std::vector<FluidStateProperties> & fsp) const = 0;
+
+  virtual void thermophysicalProperties(const ADReal & pressure,
+                                        const ADReal & enthalpy,
+                                        unsigned int qp,
                                         std::vector<FluidStateProperties> & fsp) const = 0;
 
   unsigned int getPressureIndex() const { return _pidx; };
@@ -47,5 +50,5 @@ protected:
   /// Index of derivative wrt enthalpy
   const unsigned int _hidx;
   /// Perturbation applied to saturation temperature to move to gas/liquid phase
-  const Real dT;
+  const Real _dT;
 };
