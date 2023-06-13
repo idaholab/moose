@@ -100,6 +100,6 @@
     input = csvdiff_comparison_custom_column.i
     csvdiff = csvdiff_comparison_custom_column_out.csv
     custom_columns = time
-    requirement = 'CSVDiff shall compare only a specific column'
+    requirement = 'The system shall be able to diff CSV files for only a specific column.'
   []
 []

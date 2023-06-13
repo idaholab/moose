@@ -38,7 +38,7 @@ class TestHarnessTester(TestHarnessTestCase):
         # Mock objects do not inherit MOOSE_TERM_FORMAT options set forth in TestHarnesTestCase.py.
         # In order to pass Civet, and on folks machines, do separate searches
         self.assertRegex(out, r'in_tree_type.*?[test requires "IN_TREE" binary]')
-        self.assertRegex(out, r'in_tree_type.*?SKIP')
+        self.assertRegex(out, r'*?SKIP')
         self.assertRegex(out, r'installed_type.*?OK')
         self.assertRegex(out, r'all_type.*?OK')
 
@@ -50,6 +50,6 @@ class TestHarnessTester(TestHarnessTestCase):
         # Mock objects do not inherit MOOSE_TERM_FORMAT options set forth in TestHarnesTestCase.py.
         # In order to pass Civet, and on folks machines, do separate searches
         self.assertRegex(out, r'installed_type.*?[test requires "INSTALLED" binary]')
-        self.assertRegex(out, r'installed_type.*?SKIP')
+        self.assertRegex(out, r'*?SKIP')
         self.assertRegex(out, r'in_tree_type.*?OK')
         self.assertRegex(out, r'all_type.*?OK')

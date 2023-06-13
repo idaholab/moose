@@ -409,7 +409,7 @@ class Tester(MooseObject):
     def addCaveats(self, *kwargs):
         """ Add caveat(s) which will be displayed with the final test status """
         for i in [x for x in kwargs if x]:
-            if isinstance(i, dict):
+            if isinstance(i, list):
                 self.__caveats.update(i)
             else:
                 self.__caveats.add(i)
