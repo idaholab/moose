@@ -19,8 +19,8 @@ NSFVOutflowTemperatureBC::validParams()
   InputParameters params = FVFluxBC::validParams();
   params.addClassDescription("Outflow velocity temperature advection boundary conditions for "
                              "finite volume method allowing for thermal backflow.");
-  params.addParam<MooseFunctorName>(NS::density, "The name of the density");
-  params.addParam<MooseFunctorName>(NS::cp, "The name of the specific heat");
+  params.addRequiredParam<MooseFunctorName>(NS::density, "The name of the density");
+  params.addRequiredParam<MooseFunctorName>(NS::cp, "The name of the specific heat");
   params.addRequiredParam<MooseFunctorName>("u", "The velocity in the x direction.");
   params.addParam<MooseFunctorName>("v", "The velocity in the y direction.");
   params.addParam<MooseFunctorName>("w", "The velocity in the z direction.");
@@ -58,13 +58,11 @@ NSFVOutflowTemperatureBC::computeQpResidual()
   if (_w)
     v(2) = (*_w)(boundary_face, state);
 
-  auto vol_flux = v * _normal;
-  auto rho_cp_face = _rho(boundary_face, state) * _cp(boundary_face, state);
+  const auto vol_flux = v * _normal;
+  const auto rho_cp_face = _rho(boundary_face, state) * _cp(boundary_face, state);
 
   if (vol_flux > 0)
-  {
     return rho_cp_face * _var(boundary_face, state) * vol_flux;
-  }
   else
   {
     auto backflow_T = _backflow_T(boundary_face, state);
