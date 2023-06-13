@@ -96,7 +96,7 @@ Material::subdomainSetup()
 
     for (const auto & prop_id : _supplied_prop_ids)
       for (decltype(nqp) qp = 1; qp < nqp; ++qp)
-        props[prop_id]->qpCopy(qp, props[prop_id], 0);
+        props[prop_id]->qpCopy(qp, *props[prop_id], 0);
   }
 }
 
@@ -124,7 +124,7 @@ Material::computeProperties()
     {
       auto nqp = _qrule->n_points();
       for (decltype(nqp) qp = 1; qp < nqp; ++qp)
-        props[prop_id]->qpCopy(qp, props[prop_id], 0);
+        props[prop_id]->qpCopy(qp, *props[prop_id], 0);
     }
   }
   else

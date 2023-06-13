@@ -39,7 +39,6 @@ class MaterialPropertyStorage
 {
 public:
   MaterialPropertyStorage();
-  virtual ~MaterialPropertyStorage();
 
   /// The max time state supported (2 = older)
   static constexpr unsigned int max_state = 2;
@@ -282,12 +281,6 @@ public:
   unsigned int stateIndex() const { return _state_index; }
 
 protected:
-  /// Release all internal data structures
-  void releaseProperties();
-
-  /// Internal property storage release helper
-  void releasePropertyMap(HashMap<unsigned int, MaterialProperties> & inner_map);
-
   using BuildPropertyValuePtr = PropertyValue * (*)();
 
   struct Storage
@@ -325,6 +318,19 @@ private:
                  const Elem * elem,
                  unsigned int side,
                  unsigned int n_qpoints);
+
+  ///@{
+  /**
+   * Shallow copies of material properties
+   *
+   */
+  static void shallowSwapData(const std::vector<unsigned int> & stateful_prop_ids,
+                              MaterialProperties & data,
+                              MaterialProperties & data_from);
+  static void shallowSwapDataBack(const std::vector<unsigned int> & stateful_prop_ids,
+                                  MaterialProperties & data,
+                                  MaterialProperties & data_from);
+  ///@}
 
   PropsType & setProps(const unsigned int state);
 

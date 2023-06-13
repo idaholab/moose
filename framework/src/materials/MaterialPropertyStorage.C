@@ -18,76 +18,48 @@
 
 std::map<std::string, unsigned int> MaterialPropertyStorage::_prop_ids;
 
-/**
- * Shallow copy the material properties
- * @param stateful_prop_ids List of IDs with properties to shallow copy
- * @param data Destination data
- * @param data_from Source data
- */
-void
-shallowSwapData(const std::vector<unsigned int> & stateful_prop_ids,
-                MaterialProperties & data,
-                MaterialProperties & data_from)
-{
-  for (unsigned int i = 0; i < stateful_prop_ids.size(); ++i)
-  {
-    if (i >= data_from.size() || stateful_prop_ids[i] >= data.size())
-      continue;
-    PropertyValue * prop = data[stateful_prop_ids[i]]; // do the look-up just once (OPT)
-    PropertyValue * prop_from = data_from[i];          // do the look-up just once (OPT)
-    if (prop != nullptr && prop_from != nullptr)
-      prop->swap(prop_from);
-  }
-}
-
-void
-shallowSwapDataBack(const std::vector<unsigned int> & stateful_prop_ids,
-                    MaterialProperties & data,
-                    MaterialProperties & data_from)
-{
-  for (unsigned int i = 0; i < stateful_prop_ids.size(); ++i)
-  {
-    if (i >= data.size() || stateful_prop_ids[i] >= data_from.size())
-      continue;
-    PropertyValue * prop = data[i];                              // do the look-up just once (OPT)
-    PropertyValue * prop_from = data_from[stateful_prop_ids[i]]; // do the look-up just once (OPT)
-    if (prop != nullptr && prop_from != nullptr)
-      prop->swap(prop_from);
-  }
-}
-
 MaterialPropertyStorage::MaterialPropertyStorage()
   : _state_index(0), _spin_mtx(libMesh::Threads::spin_mtx)
 {
 }
 
-MaterialPropertyStorage::~MaterialPropertyStorage() { releaseProperties(); }
-
 void
-MaterialPropertyStorage::releaseProperties()
+MaterialPropertyStorage::shallowSwapData(const std::vector<unsigned int> & stateful_prop_ids,
+                                         MaterialProperties & data,
+                                         MaterialProperties & data_from)
 {
-  for (auto & storage_entry : _storage)
-    for (auto & elem_map_pair : storage_entry.props)
-      releasePropertyMap(elem_map_pair.second);
+  for (const auto i : index_range(stateful_prop_ids))
+  {
+    if (i >= data_from.size() || stateful_prop_ids[i] >= data.size())
+      continue;
+    PropertyValue * prop = data[stateful_prop_ids[i]].get();
+    PropertyValue * prop_from = data_from[i].get();
+    if (prop != nullptr && prop_from != nullptr)
+      prop->swap(*prop_from);
+  }
 }
 
 void
-MaterialPropertyStorage::releasePropertyMap(HashMap<unsigned int, MaterialProperties> & inner_map)
+MaterialPropertyStorage::shallowSwapDataBack(const std::vector<unsigned int> & stateful_prop_ids,
+                                             MaterialProperties & data,
+                                             MaterialProperties & data_from)
 {
-  for (auto & side_mat_props_pair : inner_map)
-    side_mat_props_pair.second.destroy();
+  for (const auto i : index_range(stateful_prop_ids))
+  {
+    if (i >= data.size() || stateful_prop_ids[i] >= data_from.size())
+      continue;
+    PropertyValue * prop = data[i].get();
+    PropertyValue * prop_from = data_from[stateful_prop_ids[i]].get();
+    if (prop != nullptr && prop_from != nullptr)
+      prop->swap(*prop_from);
+  }
 }
 
 void
 MaterialPropertyStorage::eraseProperty(const Elem * elem)
 {
   for (auto & storage_entry : _storage)
-  {
-    auto & props = storage_entry.props;
-    if (props.contains(elem))
-      releasePropertyMap(props[elem]);
-    props.erase(elem);
-  }
+    storage_entry.props.erase(elem);
 }
 
 void
@@ -156,7 +128,7 @@ MaterialPropertyStorage::prolongStatefulProps(
       auto & child_props = setProps(child_elem, child_side, state);
       for (const auto i : index_range(_stateful_prop_id_to_prop_id))
         for (const auto qp : index_range(refinement_map[child]))
-          child_props[i]->qpCopy(qp, parent_props[i], child_map[qp]._to);
+          child_props[i]->qpCopy(qp, *parent_props[i], child_map[qp]._to);
     }
   }
 }
@@ -209,7 +181,7 @@ MaterialPropertyStorage::restrictStatefulProps(
     {
       const auto & child_props = props(child_elem, side, state);
       for (const auto i : index_range(_stateful_prop_id_to_prop_id))
-        (*parent_props[state])[i]->qpCopy(qp, child_props[i], qp_map._to);
+        (*parent_props[state])[i]->qpCopy(qp, *child_props[i], qp_map._to);
     }
   }
 }
@@ -253,7 +225,7 @@ MaterialPropertyStorage::initStatefulProps(MaterialData & material_data,
     auto & to_props = setProps(&elem, side, state);
     for (const auto i : index_range(_stateful_prop_id_to_prop_id))
       for (const auto qp : make_range(n_qpoints))
-        to_props[i]->qpCopy(qp, current_props[i], qp);
+        to_props[i]->qpCopy(qp, *current_props[i], qp);
   }
 }
 
@@ -297,7 +269,7 @@ MaterialPropertyStorage::copy(MaterialData & material_data,
     auto & to_props = props(elem_to, side, state);
     for (const auto i : index_range(_stateful_prop_id_to_prop_id))
       for (const auto qp : make_range(n_qpoints))
-        to_props[i]->qpCopy(qp, from_props[i], qp);
+        to_props[i]->qpCopy(qp, *from_props[i], qp);
   }
 }
 
@@ -410,20 +382,23 @@ MaterialPropertyStorage::initProps(MaterialData & material_data,
 
   const auto n_props = _stateful_prop_id_to_prop_id.size();
   if (mat_props.size() < n_props)
-    mat_props.resize(n_props, nullptr);
+    mat_props.resize(n_props);
 
   // init properties (allocate memory. etc)
   for (const auto i : index_range(_stateful_prop_id_to_prop_id))
-    if (mat_props[i] == nullptr)
+    if (!mat_props[i])
     {
       const auto prop_id = _stateful_prop_id_to_prop_id[i];
-      mat_props[i] = material_data.props(0)[prop_id]->init(n_qpoints);
+      mat_props[i] = material_data.props(0)[prop_id]->clone(n_qpoints);
     }
 }
 
 void
 dataStore(std::ostream & stream, MaterialPropertyStorage & storage, void * context)
 {
+  unsigned int state_index = storage.stateIndex();
+  dataStore(stream, state_index, context);
+
   for (const auto state : make_range(storage.stateIndex()))
     dataStore(stream, storage.setProps(state), context);
 }
@@ -431,6 +406,14 @@ dataStore(std::ostream & stream, MaterialPropertyStorage & storage, void * conte
 void
 dataLoad(std::istream & stream, MaterialPropertyStorage & storage, void * context)
 {
+  unsigned int state_index;
+  dataLoad(stream, state_index, context);
+  if (state_index != storage.stateIndex())
+    mooseError("Inconsistent state index; stored state index = ",
+               state_index,
+               ", current state index = ",
+               storage.stateIndex());
+
   for (const auto state : make_range(storage.stateIndex()))
     dataLoad(stream, storage.setProps(state), context);
 }

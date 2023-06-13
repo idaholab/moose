@@ -15,15 +15,6 @@ MaterialData::MaterialData(MaterialPropertyStorage & storage)
 {
 }
 
-MaterialData::~MaterialData() { release(); }
-
-void
-MaterialData::release()
-{
-  for (auto & entry : _props)
-    entry.destroy();
-}
-
 void
 MaterialData::resize(unsigned int n_qpoints)
 {

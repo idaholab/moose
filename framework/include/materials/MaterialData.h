@@ -18,6 +18,7 @@
 #include "libmesh/elem.h"
 
 #include <vector>
+#include <memory>
 
 class Material;
 
@@ -29,12 +30,6 @@ class MaterialData
 {
 public:
   MaterialData(MaterialPropertyStorage & storage);
-  virtual ~MaterialData();
-
-  /**
-   * Calls the destroy() methods for the properties currently stored
-   */
-  void release();
 
   /**
    * Resize the data to hold properties for n_qpoints quadrature points.
@@ -262,7 +257,9 @@ MaterialData::haveGenericProperty(const std::string & prop_name) const
   if (prop_id >= props(0).size())
     return false;
 
-  return dynamic_cast<const GenericMaterialProperty<T, is_ad> *>(props(0)[prop_id]) != nullptr;
+  auto & base_prop = props(0)[prop_id];
+  mooseAssert(base_prop, "Invalid value");
+  return dynamic_cast<const GenericMaterialProperty<T, is_ad> *>(base_prop.get()) != nullptr;
 }
 
 template <typename T, bool is_ad>
@@ -274,13 +271,13 @@ MaterialData::resizeProps(unsigned int id)
   {
     auto & entry = props(state);
     if (entry.size() < size)
-      entry.resize(size, nullptr);
-    if (entry[id] == nullptr)
+      entry.resize(size);
+    if (!entry[id])
     {
       if (is_ad && state == 0)
-        entry[id] = new ADMaterialProperty<T>;
+        entry[id] = std::make_unique<ADMaterialProperty<T>>();
       else
-        entry[id] = new MaterialProperty<T>;
+        entry[id] = std::make_unique<MaterialProperty<T>>();
     }
   }
 }
@@ -296,7 +293,9 @@ MaterialData::declareHelper(const std::string & prop_name, const unsigned int st
   const auto prop_id = _storage.addProperty(prop_name, state);
   resizeProps<T, is_ad>(prop_id);
 
-  auto prop = dynamic_cast<GenericMaterialProperty<T, is_ad> *>(props(state)[prop_id]);
+  auto & base_prop = props(state)[prop_id];
+  mooseAssert(base_prop, "Not valid");
+  auto prop = dynamic_cast<GenericMaterialProperty<T, is_ad> *>(base_prop.get());
   if (!prop)
   {
     const std::string type = is_ad ? "AD" : "non-AD";
@@ -304,7 +303,8 @@ MaterialData::declareHelper(const std::string & prop_name, const unsigned int st
     const auto T_type = MooseUtils::prettyCppType<T>();
 
     // See if a property of the other type exists first
-    if (state == 0 && dynamic_cast<GenericMaterialProperty<T, !is_ad> *>(props(0)[prop_id]))
+    // This only counts for state 0, because old and on are non-ad props
+    if (state == 0 && dynamic_cast<GenericMaterialProperty<T, !is_ad> *>(base_prop.get()))
       mooseError("The requested/declared ",
                  " material property '" + prop_name + "' of type '",
                  T_type,

@@ -10,6 +10,7 @@
 #pragma once
 
 #include <vector>
+#include <memory>
 
 #include "MooseADWrapper.h"
 #include "MooseArray.h"
@@ -29,13 +30,6 @@ class Material;
 class MaterialPropertyInterface;
 
 /**
- * Scalar Init helper routine so that specialization isn't needed for basic scalar MaterialProperty
- * types
- */
-template <typename T>
-PropertyValue * _init_helper(int size, T * prop);
-
-/**
  * Abstract definition of a property value.
  */
 class PropertyValue
@@ -51,7 +45,7 @@ public:
   /**
    * Clone this value.  Useful in copy-construction.
    */
-  virtual PropertyValue * init(int size) = 0;
+  virtual std::unique_ptr<PropertyValue> clone(const std::size_t size) const = 0;
 
   virtual unsigned int size() const = 0;
 
@@ -60,7 +54,7 @@ public:
    */
   virtual void resize(int n) = 0;
 
-  virtual void swap(PropertyValue * rhs) = 0;
+  virtual void swap(PropertyValue & rhs) = 0;
 
   virtual bool isAD() const = 0;
 
@@ -74,26 +68,12 @@ public:
    * @param from_qp The quadrature point in rhs you want to copy _from_.
    */
   virtual void
-  qpCopy(const unsigned int to_qp, const PropertyValue * rhs, const unsigned int from_qp) = 0;
+  qpCopy(const unsigned int to_qp, const PropertyValue & rhs, const unsigned int from_qp) = 0;
 
   // save/restore in a file
   virtual void store(std::ostream & stream) = 0;
   virtual void load(std::istream & stream) = 0;
 };
-
-template <>
-inline void
-dataStore(std::ostream & stream, PropertyValue *& p, void * /*context*/)
-{
-  p->store(stream);
-}
-
-template <>
-inline void
-dataLoad(std::istream & stream, PropertyValue *& p, void * /*context*/)
-{
-  p->load(stream);
-}
 
 /**
  * Concrete definition of a parameter value
@@ -154,7 +134,7 @@ public:
    * @param from_qp The quadrature point in rhs you want to copy _from_.
    */
   virtual void
-  qpCopy(const unsigned int to_qp, const PropertyValue * rhs, const unsigned int from_qp) override;
+  qpCopy(const unsigned int to_qp, const PropertyValue & rhs, const unsigned int from_qp) override;
 
   /**
    * Store the property into a binary stream
@@ -181,7 +161,7 @@ public:
     return _name;
   }
 
-  void swap(PropertyValue * rhs) override;
+  void swap(PropertyValue & rhs) override;
 
 private:
   /// private copy constructor to avoid shallow copying of material properties
@@ -259,46 +239,43 @@ MaterialPropertyBase<T, is_ad>::resize(int n)
 template <typename T, bool is_ad>
 inline void
 MaterialPropertyBase<T, is_ad>::qpCopy(const unsigned int to_qp,
-                                       const PropertyValue * rhs,
+                                       const PropertyValue & rhs,
                                        const unsigned int from_qp)
 {
-  mooseAssert(rhs != NULL, "Assigning NULL?");
-
   // If we're the same
-  if (rhs->isAD() == is_ad)
-    _value[to_qp] = cast_ptr<const MaterialPropertyBase<T, is_ad> *>(rhs)->_value[from_qp];
-
+  if (rhs.isAD() == is_ad)
+    _value[to_qp] = cast_ptr<const MaterialPropertyBase<T, is_ad> *>(&rhs)->_value[from_qp];
   else
     moose::internal::rawValueEqualityHelper(
-        _value[to_qp], (*cast_ptr<const MaterialPropertyBase<T, !is_ad> *>(rhs))[from_qp]);
+        _value[to_qp], (*cast_ptr<const MaterialPropertyBase<T, !is_ad> *>(&rhs))[from_qp]);
 }
 
 template <typename T, bool is_ad>
 inline void
 MaterialPropertyBase<T, is_ad>::store(std::ostream & stream)
 {
-  for (unsigned int i = 0; i < size(); i++)
-    storeHelper(stream, _value[i], NULL);
+  for (const auto i : index_range(_value))
+    storeHelper(stream, _value[i], nullptr);
 }
 
 template <typename T, bool is_ad>
 inline void
 MaterialPropertyBase<T, is_ad>::load(std::istream & stream)
 {
-  for (unsigned int i = 0; i < size(); i++)
-    loadHelper(stream, _value[i], NULL);
+  for (const auto i : index_range(_value))
+    loadHelper(stream, _value[i], nullptr);
 }
 
 template <typename T, bool is_ad>
 inline void
-MaterialPropertyBase<T, is_ad>::swap(PropertyValue * rhs)
+MaterialPropertyBase<T, is_ad>::swap(PropertyValue & rhs)
 {
   mooseAssert(rhs, "Assigning nullptr?");
 
   // If we're the same
-  if (rhs->isAD() == is_ad)
+  if (rhs.isAD() == is_ad)
   {
-    this->_value.swap(cast_ptr<MaterialPropertyBase<T, is_ad> *>(rhs)->_value);
+    this->_value.swap(cast_ptr<MaterialPropertyBase<T, is_ad> *>(&rhs)->_value);
     return;
   }
 
@@ -314,7 +291,7 @@ MaterialPropertyBase<T, is_ad>::swap(PropertyValue * rhs)
   // name, *is* appropriate to how this method is used in practice. See shallowCopyData and
   // shallowCopyDataBack in MaterialPropertyStorage.C
 
-  auto * different_type_prop = dynamic_cast<MaterialPropertyBase<T, !is_ad> *>(rhs);
+  auto * different_type_prop = dynamic_cast<MaterialPropertyBase<T, !is_ad> *>(&rhs);
   mooseAssert(different_type_prop,
               "Wrong material property type T in MaterialPropertyBase<T, is_ad>::swap");
 
@@ -329,7 +306,17 @@ class MaterialProperty : public MaterialPropertyBase<T, false>
 public:
   MaterialProperty() = default;
 
-  PropertyValue * init(int size) override { return _init_helper(size, this); }
+  static std::unique_ptr<PropertyValue> cloneHelper(const std::size_t size)
+  {
+    std::unique_ptr<PropertyValue> value = std::make_unique<MaterialProperty<T>>();
+    value->resize(size);
+    return value;
+  }
+
+  std::unique_ptr<PropertyValue> clone(const std::size_t size) const override
+  {
+    return cloneHelper(size);
+  }
 
 private:
   /// private copy constructor to avoid shallow copying of material properties
@@ -353,7 +340,10 @@ public:
 
   using typename MaterialPropertyBase<T, true>::value_type;
 
-  PropertyValue * init(int size) override { return _init_helper(size, this); }
+  std::unique_ptr<PropertyValue> clone(const std::size_t size) const override
+  {
+    return MaterialProperty<T>::cloneHelper(size);
+  }
 
 private:
   /// private copy constructor to avoid shallow copying of material properties
@@ -372,83 +362,21 @@ private:
 /**
  * Container for storing material properties
  */
-class MaterialProperties : public std::vector<PropertyValue *>
+class MaterialProperties : public std::vector<std::unique_ptr<PropertyValue>>
 {
 public:
-  MaterialProperties() {}
-
-  virtual ~MaterialProperties() {}
-
-  /**
-   * Parameter map iterator.
-   */
-  typedef std::vector<PropertyValue *>::iterator iterator;
-
-  /**
-   * Constant parameter map iterator.
-   */
-  typedef std::vector<PropertyValue *>::const_iterator const_iterator;
-
-  /**
-   * Deallocates the memory
-   */
-  void destroy()
-  {
-    for (iterator k = begin(); k != end(); ++k)
-      delete *k;
-  }
-
   /**
    * Resize items in this array, i.e. the number of values needed in PropertyValue array
    * @param n_qpoints The number of values needed to store (equals the the number of quadrature
    * points per mesh element)
    */
-  void resizeItems(unsigned int n_qpoints)
+  void resizeItems(const unsigned int n_qpoints)
   {
-    for (iterator k = begin(); k != end(); ++k)
-      if (*k != NULL)
-        (*k)->resize(n_qpoints);
+    for (auto & value : *this)
+      if (value)
+        value->resize(n_qpoints);
   }
 };
-
-template <>
-inline void
-dataStore(std::ostream & stream, MaterialProperties & v, void * context)
-{
-  // Cast this to a vector so we can just piggy back on the vector store capability
-  std::vector<PropertyValue *> & mat_props = static_cast<std::vector<PropertyValue *> &>(v);
-
-  storeHelper(stream, mat_props, context);
-}
-
-template <>
-inline void
-dataLoad(std::istream & stream, MaterialProperties & v, void * context)
-{
-  // Cast this to a vector so we can just piggy back on the vector store capability
-  std::vector<PropertyValue *> & mat_props = static_cast<std::vector<PropertyValue *> &>(v);
-
-  // But the vector store capability should not be changing the vector
-  // size
-#ifndef NDEBUG
-  const std::size_t old_size = mat_props.size();
-#endif
-  loadHelper(stream, mat_props, context);
-  mooseAssert(old_size == mat_props.size(),
-              "Loading MaterialProperties data into mis-sized target");
-}
-
-// Scalar Init Helper Function
-template <template <typename> class DerivedMaterialProperty, typename T>
-PropertyValue *
-_init_helper(int size, DerivedMaterialProperty<T> * /*prop*/)
-{
-  // This function is used to initialize stateful material properties. We *never* want to create a
-  // stateful AD material property because it is too memory intensive
-  MaterialProperty<T> * copy = new MaterialProperty<T>;
-  copy->resize(size);
-  return copy;
-}
 
 template <typename T, bool is_ad>
 struct GenericMaterialPropertyStruct
@@ -527,6 +455,12 @@ private:
   friend class OptionalMaterialPropertyProxy<Material, T, is_ad>;
   friend class OptionalMaterialPropertyProxy<MaterialPropertyInterface, T, is_ad>;
 };
+
+void dataStore(std::ostream & stream, PropertyValue & p, void * context);
+void dataLoad(std::istream & stream, PropertyValue & p, void * context);
+
+void dataStore(std::ostream & stream, MaterialProperties & v, void * context);
+void dataLoad(std::istream & stream, MaterialProperties & v, void * context);
 
 template <typename T>
 using OptionalMaterialProperty = GenericOptionalMaterialProperty<T, false>;

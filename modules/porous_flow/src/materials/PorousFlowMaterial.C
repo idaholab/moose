@@ -93,7 +93,7 @@ PorousFlowMaterial::computeNodalProperties()
     // Copy from qp = _current_elem->n_nodes() - 1 to qp = _qrule->n_points() -1
     for (const auto & prop_id : _supplied_prop_ids)
       for (unsigned int qp = numnodes; qp < _qrule->n_points(); ++qp)
-        props[prop_id]->qpCopy(qp, props[prop_id], numnodes - 1);
+        props[prop_id]->qpCopy(qp, *props[prop_id], numnodes - 1);
   }
 }
 
@@ -144,12 +144,12 @@ PorousFlowMaterial::sizeNodalProperties()
     props[prop_id]->resize(new_size);
 
   for (const auto prop_id : _supplied_old_prop_ids)
-    if (auto * const old_prop = props_old[prop_id])
+    if (auto & old_prop = props_old[prop_id])
       old_prop->resize(new_size);
 
   if (storage.hasOlderProperties())
     for (const auto prop_id : _supplied_old_prop_ids)
-      if (auto * const older_prop = props_older[prop_id])
+      if (auto & older_prop = props_older[prop_id])
         older_prop->resize(new_size);
 }
 

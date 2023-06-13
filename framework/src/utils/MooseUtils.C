@@ -670,8 +670,8 @@ MaterialPropertyStorageDump(
       unsigned int cnt = 0;
       for (const auto & mat_prop : side_it.second)
       {
-        MaterialProperty<Real> * mp = dynamic_cast<MaterialProperty<Real> *>(mat_prop);
-        if (mp)
+        mooseAssert(mat_prop, "Not valid");
+        if (auto mp = dynamic_cast<MaterialProperty<Real> *>(mat_prop.get()))
         {
           Moose::out << "    Property " << cnt << '\n';
           cnt++;
