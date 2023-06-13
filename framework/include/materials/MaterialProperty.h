@@ -40,7 +40,7 @@ public:
   /**
    * String identifying the type of parameter stored.
    */
-  virtual std::string type() = 0;
+  virtual const std::string & type() const = 0;
 
   /**
    * Clone this value.  Useful in copy-construction.
@@ -107,7 +107,7 @@ public:
   /**
    * String identifying the type of parameter stored.
    */
-  virtual std::string type() override;
+  virtual const std::string & type() const override;
 
   /**
    * Resizes the property to the size n
@@ -223,10 +223,11 @@ rawValueEqualityHelper(std::array<T1, N> & out, const std::array<T2, N> & in)
 }
 
 template <typename T, bool is_ad>
-inline std::string
-MaterialPropertyBase<T, is_ad>::type()
+inline const std::string &
+MaterialPropertyBase<T, is_ad>::type() const
 {
-  return typeid(MooseADWrapper<T, is_ad>).name();
+  static const std::string type_name = typeid(MooseADWrapper<T, is_ad>).name();
+  return type_name;
 }
 
 template <typename T, bool is_ad>
@@ -270,8 +271,6 @@ template <typename T, bool is_ad>
 inline void
 MaterialPropertyBase<T, is_ad>::swap(PropertyValue & rhs)
 {
-  mooseAssert(rhs, "Assigning nullptr?");
-
   // If we're the same
   if (rhs.isAD() == is_ad)
   {
