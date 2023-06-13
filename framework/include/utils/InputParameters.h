@@ -70,6 +70,9 @@ public:
    */
   virtual void set_attributes(const std::string & name, bool inserted_only) override;
 
+  /// Prints the deprecated parameter message, assuming we have the right flags set
+  bool attemptPrintDeprecated(const std::string & name);
+
   /// This functions is called in set as a 'callback' to avoid code duplication
   template <typename T>
   void setHelper(const std::string & name);

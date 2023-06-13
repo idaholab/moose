@@ -391,6 +391,9 @@ private:
   /// Constructed Moose Object types
   std::set<std::string> _constructed_types;
 
+  /// Set of deprecated object types that have been printed
+  std::set<std::string> _deprecated_types;
+
   /// set<label/appname, objectname> used to track if an object previously added is being added
   /// again - which is okay/allowed, while still allowing us to detect/reject cases of duplicate
   /// object name registration where the label/appname is not identical.

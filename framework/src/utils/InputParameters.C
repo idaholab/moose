@@ -95,33 +95,36 @@ InputParameters::set_attributes(const std::string & name_in, bool inserted_only)
     // valid_params don't make sense for MooseEnums
     if (!have_parameter<MooseEnum>(name) && !have_parameter<MultiMooseEnum>(name))
       _params[name]._valid = true;
-
-    if (_show_deprecated_message)
-    {
-      auto emit_deprecation_message =
-          [this](const auto & deprecated_name, const auto & deprecation_message)
-      {
-        const auto current_show_trace = Moose::show_trace;
-        Moose::show_trace = false;
-        moose::internal::mooseDeprecatedStream(Moose::out,
-                                               false,
-                                               false,
-                                               errorPrefix(deprecated_name),
-                                               ":\n",
-                                               deprecation_message,
-                                               "\n");
-        Moose::show_trace = current_show_trace;
-      };
-
-      if (_params.count(name) && !libmesh_map_find(_params, name)._deprecation_message.empty())
-        emit_deprecation_message(name,
-                                 "The parameter '" + name + "' is deprecated.\n" +
-                                     libmesh_map_find(_params, name)._deprecation_message);
-      else if (auto it = _old_to_new_name_and_dep.find(name_in);
-               it != _old_to_new_name_and_dep.end() && !it->second.second.empty())
-        emit_deprecation_message(name_in, it->second.second);
-    }
   }
+}
+
+bool
+InputParameters::attemptPrintDeprecated(const std::string & name_in)
+{
+  const auto name = checkForRename(name_in);
+  if (_show_deprecated_message)
+  {
+    auto emit_deprecation_message =
+        [this](const auto & deprecated_name, const auto & deprecation_message)
+    {
+      // This is user-facing, no need for a backtrace
+      const auto current_show_trace = Moose::show_trace;
+      Moose::show_trace = false;
+      moose::internal::mooseDeprecatedStream(
+          Moose::out, false, true, errorPrefix(deprecated_name), ":\n", deprecation_message, "\n");
+      Moose::show_trace = current_show_trace;
+      return true;
+    };
+
+    if (_params.count(name) && !libmesh_map_find(_params, name)._deprecation_message.empty())
+      return emit_deprecation_message(name,
+                                      "The parameter '" + name + "' is deprecated.\n" +
+                                          libmesh_map_find(_params, name)._deprecation_message);
+    else if (auto it = _old_to_new_name_and_dep.find(name_in);
+             it != _old_to_new_name_and_dep.end() && !it->second.second.empty())
+      return emit_deprecation_message(name_in, it->second.second);
+  }
+  return false;
 }
 
 std::string
@@ -779,7 +782,6 @@ InputParameters::applyParameters(const InputParameters & common,
   {
     // Common parameter name
     const std::string & common_name = it.first;
-
     // Continue to next parameter, if the current is in list of  excluded parameters
     if (std::find(exclude.begin(), exclude.end(), common_name) != exclude.end())
       continue;

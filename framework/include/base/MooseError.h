@@ -238,28 +238,30 @@ mooseDeprecatedStream(S & oss, const bool expired, const bool print_title, Args 
   if (Moose::_deprecated_is_error)
     mooseError("\n\nDeprecated code:\n", std::forward<Args>(args)...);
 
-  mooseDoOnce(
-      std::ostringstream ss; mooseStreamAll(ss, args...);
-      std::string msg =
-          print_title
-              ? mooseMsgFmt(
-                    ss.str(),
-                    "*** Warning, This code is deprecated and will be removed in future versions:",
-                    expired ? COLOR_RED : COLOR_YELLOW)
-              : mooseMsgFmt(ss.str(), expired ? COLOR_RED : COLOR_YELLOW);
-      oss << msg;
-      ss.str("");
-      if (Moose::show_trace)
-      {
-        if (libMesh::global_n_processors() == 1)
-          print_trace(ss);
-        else
-          libMesh::write_traceout();
-        {
-          Threads::spin_mutex::scoped_lock lock(moose_stream_lock);
-          oss << ss.str() << std::endl;
-        };
-      });
+  std::ostringstream ss;
+  mooseStreamAll(ss, args...);
+
+  const auto color = expired ? COLOR_RED : COLOR_YELLOW;
+  std::string msg =
+      print_title
+          ? mooseMsgFmt(
+                ss.str(),
+                "*** Warning, This code is deprecated and will be removed in future versions:",
+                color)
+          : mooseMsgFmt(ss.str(), color);
+  oss << msg;
+  ss.str("");
+  if (Moose::show_trace)
+  {
+    if (libMesh::global_n_processors() == 1)
+      print_trace(ss);
+    else
+      libMesh::write_traceout();
+    {
+      Threads::spin_mutex::scoped_lock lock(moose_stream_lock);
+      oss << ss.str() << std::endl;
+    };
+  };
 }
 /**
  * @}
