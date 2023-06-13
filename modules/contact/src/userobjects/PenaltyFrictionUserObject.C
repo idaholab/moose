@@ -206,17 +206,15 @@ PenaltyFrictionUserObject::reinit()
         libmesh_map_find(_dof_to_real_tangential_velocity, static_cast<const DofObject *>(node))[1];
 
     // Get accumulated slip in both directions
-    Real slip_direction_one(0.0);
-    Real slip_direction_two(0.0);
+    ADReal slip_direction_one(0.0);
+    ADReal slip_direction_two(0.0);
 
     if (_dof_to_old_accumulated_slip.size() > 0)
     {
-      slip_direction_one = MetaPhysicL::raw_value(
-          _dof_to_old_accumulated_slip[static_cast<const DofObject *>(node)][0]);
+      slip_direction_one = _dof_to_old_accumulated_slip[static_cast<const DofObject *>(node)][0];
 
       if (_has_disp_z)
-        slip_direction_two = MetaPhysicL::raw_value(
-            _dof_to_old_accumulated_slip[static_cast<const DofObject *>(node)][1]);
+        slip_direction_two = _dof_to_old_accumulated_slip[static_cast<const DofObject *>(node)][1];
     }
     // Get current accumulated slip in both directions
     if (_dof_to_normal_pressure[static_cast<const DofObject *>(node)] > TOLERANCE * TOLERANCE)
@@ -251,13 +249,13 @@ PenaltyFrictionUserObject::reinit()
     {
       _dof_to_frictional_pressure[static_cast<const DofObject *>(node)][0] =
           sign_one * _penalty_friction *
-          MetaPhysicL::raw_value(_dof_to_accumulated_slip[static_cast<const DofObject *>(node)][0]);
+          _dof_to_accumulated_slip[static_cast<const DofObject *>(node)][0];
 
       if (_has_disp_z)
         _dof_to_frictional_pressure[static_cast<const DofObject *>(node)][1] =
             sign_two * _penalty_friction *
-            MetaPhysicL::raw_value(
-                _dof_to_accumulated_slip[static_cast<const DofObject *>(node)][1]);
+
+            _dof_to_accumulated_slip[static_cast<const DofObject *>(node)][1];
     }
   }
 
