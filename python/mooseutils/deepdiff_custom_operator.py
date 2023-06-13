@@ -26,9 +26,13 @@ class CompareDiff(BaseOperator):
         """
         level_t1 = []
         level_t2 = []
+        # Split for XML diffing purposes
         if isinstance(level.t1, str) and isinstance(level.t2, str):
             level_t1.extend(level.t1.split(' '))
             level_t2.extend(level.t2.split(' '))
+            # But if the lengths afterwards are different, we can't continue
+            if len(level_t1) != len(level_t2):
+                return False
         else:
             level_t1.append(level.t1)
             level_t2.append(level.t2)
@@ -51,7 +55,9 @@ class CompareDiff(BaseOperator):
 
             # Results not of the same type
             if not isinstance(result_computed, type(result_goldfile)):
-                diff_instance.custom_report_result('diff', level, 'type difference')
+                diff_instance.custom_report_result('diff', level, ('type difference '
+                                                                   f'{type(result_computed)} != '
+                                                                   f'{type(result_goldfile)}'))
                 return False
 
             # Gold result is a string, but did not matched earlier. Meaning they are different

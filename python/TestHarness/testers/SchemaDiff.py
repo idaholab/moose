@@ -123,20 +123,31 @@ class SchemaDiff(FileTester):
         return output
 
     def format_diff(self, diff_dict):
-        """ Iterate over known keys to format pretty results """
+        """ Iterate over known problem keys to format pretty results """
         formated_results = f'{self.specs["type"].upper()} Detected:\n'
         for key in diff_dict.keys():
             # Different Values
             if key == 'values_changed':
                 for diff_key, key_value in diff_dict['values_changed'].items():
-                    formated_results += (f'  {diff_key.replace("root", "", 1)}'
+                    formated_results += (f'{diff_key.replace("root", "", 1)}'
                                          f'\n\tGOLD:   {key_value["old_value"]}'
                                          f'\n\tRESULT: {key_value["new_value"]}\n')
-            # Different field lengths
+            # Different fields added
             if key == 'iterable_item_added':
                 for diff_key, key_value in diff_dict['iterable_item_added'].items():
-                    formated_results += (f'  additional row at {diff_key.replace("root", "", 1)}:'
-                                         f' {key_value}')
+                    formated_results += (f'Additional row at {diff_key.replace("root", "", 1)}:'
+                                         f'\t{key_value}\n')
+            # Different fields removed
+            if key == 'iterable_item_removed':
+                for diff_key, key_value in diff_dict['iterable_item_removed'].items():
+                    formated_results += (f'Missing item at {diff_key.replace("root", "", 1)}:'
+                                         f'\t{key_value}\n')
+
+            if key == 'dictionary_item_added':
+                formated_results += (f'Additional keys found in result:\n')
+                for added_key in diff_dict['dictionary_item_added']:
+                    formated_results += (f'\t{added_key.replace("root", "", 1)}\n')
+
         return formated_results
 
     def do_deepdiff(self, orig, comp, rel_err, abs_zero, exclude_values:list=None):
