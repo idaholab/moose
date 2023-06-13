@@ -363,6 +363,7 @@ public:
   ADReal p_from_T_v(const ADReal & T, const ADReal & v) const override;
 
   using SinglePhaseFluidProperties::e_from_p_rho;
+  Real e_from_p_rho(Real p, Real rho) const override;
   ADReal e_from_p_rho(const ADReal & p, const ADReal & rho) const override;
 
 protected:
