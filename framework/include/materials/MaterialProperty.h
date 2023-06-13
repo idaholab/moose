@@ -62,7 +62,7 @@ public:
 
   virtual void swap(PropertyValue * rhs) = 0;
 
-  virtual bool isAD() = 0;
+  virtual bool isAD() const = 0;
 
   /**
    * Copy the value of a Property from one specific to a specific qp in this Property.
@@ -74,7 +74,7 @@ public:
    * @param from_qp The quadrature point in rhs you want to copy _from_.
    */
   virtual void
-  qpCopy(const unsigned int to_qp, PropertyValue * rhs, const unsigned int from_qp) = 0;
+  qpCopy(const unsigned int to_qp, const PropertyValue * rhs, const unsigned int from_qp) = 0;
 
   // save/restore in a file
   virtual void store(std::ostream & stream) = 0;
@@ -112,7 +112,7 @@ public:
 
   virtual ~MaterialPropertyBase() {}
 
-  bool isAD() override { return is_ad; }
+  bool isAD() const override { return is_ad; }
 
   /**
    * @returns a read-only reference to the parameter value.
@@ -154,7 +154,7 @@ public:
    * @param from_qp The quadrature point in rhs you want to copy _from_.
    */
   virtual void
-  qpCopy(const unsigned int to_qp, PropertyValue * rhs, const unsigned int from_qp) override;
+  qpCopy(const unsigned int to_qp, const PropertyValue * rhs, const unsigned int from_qp) override;
 
   /**
    * Store the property into a binary stream
@@ -259,7 +259,7 @@ MaterialPropertyBase<T, is_ad>::resize(int n)
 template <typename T, bool is_ad>
 inline void
 MaterialPropertyBase<T, is_ad>::qpCopy(const unsigned int to_qp,
-                                       PropertyValue * rhs,
+                                       const PropertyValue * rhs,
                                        const unsigned int from_qp)
 {
   mooseAssert(rhs != NULL, "Assigning NULL?");

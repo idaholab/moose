@@ -91,14 +91,9 @@ RedistributeProperties::redistribute()
           "a threaded region or contact a MOOSE developer to discuss.");
       MaterialData & my_mat_data = *((*mat_data)[/*_tid*/ 0]); // Not threaded
 
-      std::array<MaterialPropertyStorage::PropsType *, 3> props_maps{
-          mat_prop_store->_props_elem.get(),
-          mat_prop_store->_props_elem_old.get(),
-          mat_prop_store->_props_elem_older.get()};
-
-      for (auto * const props_map_ptr : props_maps)
+      for (const auto state : make_range(mat_prop_store->stateIndex()))
       {
-        MaterialPropertyStorage::PropsType & props_map = *props_map_ptr;
+        MaterialPropertyStorage::PropsType & props_map = mat_prop_store->setProps(state);
         typedef std::unordered_map<unsigned int, std::string> stored_props_type;
         typedef std::tuple<stored_props_type, dof_id_type, int> stored_elem_type;
         std::map<processor_id_type, std::vector<stored_elem_type>> props_to_push;
@@ -130,9 +125,9 @@ RedistributeProperties::redistribute()
           {
             mooseAssert(elem->parent(),
                         "Invalid (corrupted?) subactive element in material property map");
-            mooseAssert(
-                elem->parent()->refinement_flag() == Elem::JUST_COARSENED,
-                "Invalid (subactive child of not-just-coarsened) element in material property map");
+            mooseAssert(elem->parent()->refinement_flag() == Elem::JUST_COARSENED,
+                        "Invalid (subactive child of not-just-coarsened) element in material "
+                        "property map");
             target_pids.insert(elem->parent()->processor_id());
           }
           else
@@ -200,7 +195,7 @@ RedistributeProperties::redistribute()
               // on, otherwise we might see an
               // initialized-but-not-filled entry in the next map and
               // foolishly try to send it places.
-              mat_prop_store_ptr->initProps(my_mat_data, props_map, elem, prop_id, n_q_points);
+              mat_prop_store_ptr->initProps(my_mat_data, state, elem, prop_id, n_q_points);
 
               mooseAssert(elem_props.contains(prop_id),
                           "Trying to load into a nonexistant property id?");

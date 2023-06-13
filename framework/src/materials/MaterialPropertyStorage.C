@@ -57,11 +57,8 @@ shallowSwapDataBack(const std::vector<unsigned int> & stateful_prop_ids,
 }
 
 MaterialPropertyStorage::MaterialPropertyStorage()
-  : _has_stateful_props(false), _has_older_prop(false), _spin_mtx(libMesh::Threads::spin_mtx)
+  : _state_index(0), _spin_mtx(libMesh::Threads::spin_mtx)
 {
-  _props_elem = std::make_unique<PropsType>();
-  _props_elem_old = std::make_unique<PropsType>();
-  _props_elem_older = std::make_unique<PropsType>();
 }
 
 MaterialPropertyStorage::~MaterialPropertyStorage() { releaseProperties(); }
@@ -69,37 +66,28 @@ MaterialPropertyStorage::~MaterialPropertyStorage() { releaseProperties(); }
 void
 MaterialPropertyStorage::releaseProperties()
 {
-  for (auto & i : *_props_elem)
-    releasePropertyMap(i.second);
-
-  for (auto & i : *_props_elem_old)
-    releasePropertyMap(i.second);
-
-  for (auto & i : *_props_elem_older)
-    releasePropertyMap(i.second);
+  for (auto & storage_entry : _storage)
+    for (auto & elem_map_pair : storage_entry.props)
+      releasePropertyMap(elem_map_pair.second);
 }
 
 void
 MaterialPropertyStorage::releasePropertyMap(HashMap<unsigned int, MaterialProperties> & inner_map)
 {
-  for (auto & i : inner_map)
-    i.second.destroy();
+  for (auto & side_mat_props_pair : inner_map)
+    side_mat_props_pair.second.destroy();
 }
 
 void
 MaterialPropertyStorage::eraseProperty(const Elem * elem)
 {
-  if (_props_elem->contains(elem))
-    releasePropertyMap((*_props_elem)[elem]);
-  _props_elem->erase(elem);
-
-  if (_props_elem_old->contains(elem))
-    releasePropertyMap((*_props_elem_old)[elem]);
-  _props_elem_old->erase(elem);
-
-  if (_props_elem_older->contains(elem))
-    releasePropertyMap((*_props_elem_older)[elem]);
-  _props_elem_older->erase(elem);
+  for (auto & storage_entry : _storage)
+  {
+    auto & props = storage_entry.props;
+    if (props.contains(elem))
+      releasePropertyMap(props[elem]);
+    props.erase(elem);
+  }
 }
 
 void
@@ -162,23 +150,13 @@ MaterialPropertyStorage::prolongStatefulProps(
 
     initProps(child_material_data, child_elem, child_side, n_qpoints);
 
-    for (unsigned int i = 0; i < _stateful_prop_id_to_prop_id.size(); ++i)
+    for (const auto state : make_range(stateIndex()))
     {
-      // Copy from the parent stateful properties
-      for (unsigned int qp = 0; qp < refinement_map[child].size(); qp++)
-      {
-        PropertyValue * child_property = props(child_elem, child_side)[i];
-        mooseAssert(props().contains(&elem),
-                    "Parent pointer is not in the MaterialProps data structure");
-        PropertyValue * parent_property = parent_material_props.props(&elem, parent_side)[i];
-
-        child_property->qpCopy(qp, parent_property, child_map[qp]._to);
-        propsOld(child_elem, child_side)[i]->qpCopy(
-            qp, parent_material_props.propsOld(&elem, parent_side)[i], child_map[qp]._to);
-        if (hasOlderProperties())
-          propsOlder(child_elem, child_side)[i]->qpCopy(
-              qp, parent_material_props.propsOlder(&elem, parent_side)[i], child_map[qp]._to);
-      }
+      const auto & parent_props = parent_material_props.props(&elem, parent_side, state);
+      auto & child_props = setProps(child_elem, child_side, state);
+      for (const auto i : index_range(_stateful_prop_id_to_prop_id))
+        for (const auto qp : index_range(refinement_map[child]))
+          child_props[i]->qpCopy(qp, parent_props[i], child_map[qp]._to);
     }
   }
 }
@@ -212,8 +190,12 @@ MaterialPropertyStorage::restrictStatefulProps(
 
   initProps(material_data, &elem, side, n_qpoints);
 
+  std::vector<MaterialProperties *> parent_props(stateIndex());
+  for (const auto state : make_range(stateIndex()))
+    parent_props[state] = &setProps(&elem, side, state);
+
   // Copy from the child stateful properties
-  for (unsigned int qp = 0; qp < coarsening_map.size(); qp++)
+  for (const auto qp : index_range(coarsening_map))
   {
     const std::pair<unsigned int, QpMap> & qp_pair = coarsening_map[qp];
     unsigned int child = qp_pair.first;
@@ -223,19 +205,11 @@ MaterialPropertyStorage::restrictStatefulProps(
     const Elem * child_elem = coarsened_element_children[child];
     const QpMap & qp_map = qp_pair.second;
 
-    for (unsigned int i = 0; i < _stateful_prop_id_to_prop_id.size(); ++i)
+    for (const auto state : make_range(stateIndex()))
     {
-      mooseAssert(props().contains(child_elem),
-                  "Child element pointer is not in the MaterialProps data structure");
-
-      PropertyValue * child_property = props(child_elem, side)[i];
-      PropertyValue * parent_property = props(&elem, side)[i];
-
-      parent_property->qpCopy(qp, child_property, qp_map._to);
-
-      propsOld(&elem, side)[i]->qpCopy(qp, propsOld(child_elem, side)[i], qp_map._to);
-      if (hasOlderProperties())
-        propsOlder(&elem, side)[i]->qpCopy(qp, propsOlder(child_elem, side)[i], qp_map._to);
+      const auto & child_props = props(child_elem, side, state);
+      for (const auto i : index_range(_stateful_prop_id_to_prop_id))
+        (*parent_props[state])[i]->qpCopy(qp, child_props[i], qp_map._to);
     }
   }
 }
@@ -272,35 +246,30 @@ MaterialPropertyStorage::initStatefulProps(MaterialData & material_data,
   // swapBack.
   initProps(material_data, &elem, side, n_qpoints);
 
-  // Copy the properties to Old and Older as needed
-  for (unsigned int i = 0; i < _stateful_prop_id_to_prop_id.size(); ++i)
+  // Copy to older states as needed
+  const auto & current_props = props(&elem, side, 0);
+  for (const auto state : make_range((unsigned int)1, stateIndex()))
   {
-    auto curr = setProps(&elem, side)[i];
-    auto old = setPropsOld(&elem, side)[i];
-    PropertyValue * older = hasOlderProperties() ? setPropsOlder(&elem, side)[i] : nullptr;
-    for (unsigned int qp = 0; qp < n_qpoints; ++qp)
-    {
-      old->qpCopy(qp, curr, qp);
-      if (hasOlderProperties())
-        older->qpCopy(qp, curr, qp);
-    }
+    auto & to_props = setProps(&elem, side, state);
+    for (const auto i : index_range(_stateful_prop_id_to_prop_id))
+      for (const auto qp : make_range(n_qpoints))
+        to_props[i]->qpCopy(qp, current_props[i], qp);
   }
 }
 
 void
 MaterialPropertyStorage::shift()
 {
+  mooseAssert(hasStatefulProperties() && stateIndex() > 1, "Doesn't have stateful props");
+
   /**
    * Shift properties back in time and reuse older data for current (save reallocations etc.)
    * With current, old, and older this can be accomplished by two swaps:
    * older <-> old
    * old <-> current
    */
-  if (_has_older_prop)
-    std::swap(_props_elem_older, _props_elem_old);
-
-  // Intentional fall through for case above and for handling just using old properties
-  std::swap(_props_elem_old, _props_elem);
+  for (unsigned int state = stateIndex() - 1; state != 0; state--)
+    std::swap(setProps(state), setProps(state - 1));
 }
 
 void
@@ -321,15 +290,14 @@ MaterialPropertyStorage::copy(MaterialData & material_data,
                               unsigned int n_qpoints)
 {
   initProps(material_data, elem_to, side, n_qpoints);
-  for (unsigned int i = 0; i < _stateful_prop_id_to_prop_id.size(); ++i)
+
+  for (const auto state : make_range(stateIndex()))
   {
-    for (unsigned int qp = 0; qp < n_qpoints; ++qp)
-    {
-      props(elem_to, side)[i]->qpCopy(qp, props(elem_from, side)[i], qp);
-      propsOld(elem_to, side)[i]->qpCopy(qp, propsOld(elem_from, side)[i], qp);
-      if (hasOlderProperties())
-        propsOlder(elem_to, side)[i]->qpCopy(qp, propsOlder(elem_from, side)[i], qp);
-    }
+    auto & from_props = props(elem_from, side, state);
+    auto & to_props = props(elem_to, side, state);
+    for (const auto i : index_range(_stateful_prop_id_to_prop_id))
+      for (const auto qp : make_range(n_qpoints))
+        to_props[i]->qpCopy(qp, from_props[i], qp);
   }
 }
 
@@ -338,11 +306,9 @@ MaterialPropertyStorage::swap(MaterialData & material_data, const Elem & elem, u
 {
   Threads::spin_mutex::scoped_lock lock(this->_spin_mtx);
 
-  shallowSwapData(_stateful_prop_id_to_prop_id, material_data.props(), setProps(&elem, side));
-  shallowSwapData(_stateful_prop_id_to_prop_id, material_data.propsOld(), setPropsOld(&elem, side));
-  if (hasOlderProperties())
+  for (const auto state : make_range(stateIndex()))
     shallowSwapData(
-        _stateful_prop_id_to_prop_id, material_data.propsOlder(), setPropsOlder(&elem, side));
+        _stateful_prop_id_to_prop_id, material_data.props(state), setProps(&elem, side, state));
 }
 
 void
@@ -352,22 +318,15 @@ MaterialPropertyStorage::swapBack(MaterialData & material_data,
 {
   Threads::spin_mutex::scoped_lock lock(this->_spin_mtx);
 
-  shallowSwapDataBack(_stateful_prop_id_to_prop_id, setProps(&elem, side), material_data.props());
-  shallowSwapDataBack(
-      _stateful_prop_id_to_prop_id, setPropsOld(&elem, side), material_data.propsOld());
-  if (hasOlderProperties())
+  for (const auto state : make_range(stateIndex()))
     shallowSwapDataBack(
-        _stateful_prop_id_to_prop_id, setPropsOlder(&elem, side), material_data.propsOlder());
+        _stateful_prop_id_to_prop_id, setProps(&elem, side, state), material_data.props(state));
 
   // Workaround for MOOSE difficulties in keeping materialless
-  // elements (e.g. Lower D elements in Mortar code) materialless
-  if (props(&elem, side).empty())
-    (*_props_elem)[&elem].erase(side);
-  if (propsOld(&elem, side).empty())
-    (*_props_elem_old)[&elem].erase(side);
-  if (hasOlderProperties())
-    if (propsOlder(&elem, side).empty())
-      (*_props_elem_older)[&elem].erase(side);
+  // elements (e.g. Lower D elements in Mortar code) materials
+  for (const auto state : make_range(stateIndex()))
+    if (props(&elem, side, state).empty())
+      setProps(state)[&elem].erase(side);
 }
 
 bool
@@ -377,31 +336,30 @@ MaterialPropertyStorage::hasProperty(const std::string & prop_name) const
 }
 
 unsigned int
-MaterialPropertyStorage::addProperty(const std::string & prop_name)
+MaterialPropertyStorage::addProperty(const std::string & prop_name, const unsigned int state)
 {
-  return getPropertyId(prop_name);
-}
+  if (state > max_state)
+    mooseError("Material property state of ",
+               state,
+               " is not supported. Max state supported: ",
+               max_state);
 
-unsigned int
-MaterialPropertyStorage::addPropertyOld(const std::string & prop_name)
-{
-  unsigned int prop_id = addProperty(prop_name);
-  _has_stateful_props = true;
+  // Increment state as needed
+  if (stateIndex() < (state + 1))
+    _state_index = state + 1;
 
-  if (std::find(_stateful_prop_id_to_prop_id.begin(),
-                _stateful_prop_id_to_prop_id.end(),
-                prop_id) == _stateful_prop_id_to_prop_id.end())
-    _stateful_prop_id_to_prop_id.push_back(prop_id);
-  _prop_names[prop_id] = prop_name;
+  const auto prop_id = getPropertyId(prop_name);
+
+  if (state > 0)
+  {
+    if (std::find(_stateful_prop_id_to_prop_id.begin(),
+                  _stateful_prop_id_to_prop_id.end(),
+                  prop_id) == _stateful_prop_id_to_prop_id.end())
+      _stateful_prop_id_to_prop_id.push_back(prop_id);
+    _prop_names[prop_id] = prop_name;
+  }
 
   return prop_id;
-}
-
-unsigned int
-MaterialPropertyStorage::addPropertyOlder(const std::string & prop_name)
-{
-  _has_older_prop = true;
-  return addPropertyOld(prop_name);
 }
 
 unsigned int
@@ -431,36 +389,48 @@ MaterialPropertyStorage::initProps(MaterialData & material_data,
                                    unsigned int side,
                                    unsigned int n_qpoints)
 {
-  this->initProps(material_data, *_props_elem, elem, side, n_qpoints);
-  this->initProps(material_data, *_props_elem_old, elem, side, n_qpoints);
-  if (this->hasOlderProperties())
-    this->initProps(material_data, *_props_elem_older, elem, side, n_qpoints);
+  for (const auto state : make_range(stateIndex()))
+    this->initProps(material_data, state, elem, side, n_qpoints);
 }
 
 void
 MaterialPropertyStorage::initProps(MaterialData & material_data,
-                                   PropsType & mat_props_map,
+                                   const unsigned int state,
                                    const Elem * elem,
                                    unsigned int side,
                                    unsigned int n_qpoints)
 {
   material_data.resize(n_qpoints);
-  auto n = _stateful_prop_id_to_prop_id.size();
 
-  MaterialProperties & mat_props = mat_props_map[elem][side];
+  auto & mat_props = setProps(elem, side, state);
 
   // In some special cases, material_data might be larger than n_qpoints
   if (material_data.isOnlyResizeIfSmaller())
     n_qpoints = material_data.nQPoints();
 
-  if (mat_props.size() < n)
-    mat_props.resize(n, nullptr);
+  const auto n_props = _stateful_prop_id_to_prop_id.size();
+  if (mat_props.size() < n_props)
+    mat_props.resize(n_props, nullptr);
 
   // init properties (allocate memory. etc)
-  for (unsigned int i = 0; i < n; i++)
-  {
-    auto prop_id = _stateful_prop_id_to_prop_id[i];
+  for (const auto i : index_range(_stateful_prop_id_to_prop_id))
     if (mat_props[i] == nullptr)
-      mat_props[i] = material_data.props()[prop_id]->init(n_qpoints);
-  }
+    {
+      const auto prop_id = _stateful_prop_id_to_prop_id[i];
+      mat_props[i] = material_data.props(0)[prop_id]->init(n_qpoints);
+    }
+}
+
+void
+dataStore(std::ostream & stream, MaterialPropertyStorage & storage, void * context)
+{
+  for (const auto state : make_range(storage.stateIndex()))
+    dataStore(stream, storage.setProps(state), context);
+}
+
+void
+dataLoad(std::istream & stream, MaterialPropertyStorage & storage, void * context)
+{
+  for (const auto state : make_range(storage.stateIndex()))
+    dataLoad(stream, storage.setProps(state), context);
 }

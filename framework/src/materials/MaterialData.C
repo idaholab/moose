@@ -20,9 +20,8 @@ MaterialData::~MaterialData() { release(); }
 void
 MaterialData::release()
 {
-  _props.destroy();
-  _props_old.destroy();
-  _props_older.destroy();
+  for (auto & entry : _props)
+    entry.destroy();
 }
 
 void
@@ -34,18 +33,13 @@ MaterialData::resize(unsigned int n_qpoints)
   if (_resize_only_if_smaller && n_qpoints < _n_qpoints)
     return;
 
-  _props.resizeItems(n_qpoints);
-  // if there are stateful material properties in the system, also resize
-  // storage for old and older material properties
-  if (_storage.hasStatefulProperties())
-    _props_old.resizeItems(n_qpoints);
-  if (_storage.hasOlderProperties())
-    _props_older.resizeItems(n_qpoints);
+  for (const auto state : make_range(_storage.stateIndex()))
+    props(state).resizeItems(n_qpoints);
   _n_qpoints = n_qpoints;
 }
 
 unsigned int
-MaterialData::nQPoints()
+MaterialData::nQPoints() const
 {
   return _n_qpoints;
 }
@@ -90,7 +84,7 @@ MaterialData::swapBack(const Elem & elem, unsigned int side /* = 0*/)
 }
 
 bool
-MaterialData::isSwapped()
+MaterialData::isSwapped() const
 {
   return _swapped;
 }

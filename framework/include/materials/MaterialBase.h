@@ -375,7 +375,7 @@ MaterialBase::declarePropertyOld(const std::string & prop_name)
       mooseDeprecated("declarePropertyOld is deprecated and not needed anymore.\nUse "
                       "getMaterialPropertyOld (only) if a reference is required in this class."));
   registerPropName(prop_name, false, MaterialPropState::OLD);
-  return materialData().declarePropertyOld<T>(prop_name);
+  return materialData().getProperty<T>(prop_name, 1);
 }
 
 template <typename T>
@@ -386,7 +386,7 @@ MaterialBase::declarePropertyOlder(const std::string & prop_name)
       mooseDeprecated("declarePropertyOlder is deprecated and not needed anymore.  Use "
                       "getMaterialPropertyOlder (only) if a reference is required in this class."));
   registerPropName(prop_name, false, MaterialPropState::OLDER);
-  return materialData().declarePropertyOlder<T>(prop_name);
+  return materialData().getProperty<T>(prop_name, 2);
 }
 
 template <typename T, bool is_ad>
