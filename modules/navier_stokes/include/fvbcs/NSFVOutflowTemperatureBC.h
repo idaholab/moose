@@ -24,8 +24,11 @@ public:
 protected:
   virtual ADReal computeQpResidual() override;
 
-  /// Advected quantity, here outgoing specific enthalpy
-  const Moose::Functor<ADReal> & _adv_quant;
+  /// Density
+  const Moose::Functor<ADReal> & _rho;
+
+  /// Specific Heat at Constant Pressure
+  const Moose::Functor<ADReal> & _cp;
 
   /// x-velocity
   const Moose::Functor<ADReal> & _u;

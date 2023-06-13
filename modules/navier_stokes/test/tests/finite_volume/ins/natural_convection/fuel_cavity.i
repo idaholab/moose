@@ -63,8 +63,6 @@ input_heat_flux = 40000.0
 []
 
 [GlobalParams]
-  # retain behavior at time of test creation
-  two_term_boundary_expansion = false
   rhie_chow_user_object = 'rc'
   advected_interp_method = 'upwind'
   velocity_interp_method = 'rc'
@@ -110,8 +108,6 @@ input_heat_flux = 40000.0
 []
 
 [FVKernels]
-
-  # inactive = 'u_time v_time temp_time Ts_time'
 
   [mass]
     type = INSFVMassAdvection
@@ -260,7 +256,8 @@ input_heat_flux = 40000.0
     boundary = 'top_to_0'
     u = vel_x
     v = vel_y
-    advected_quantity = '${fparse rho*cp}'
+    rho = ${rho}
+    cp = '${cp}'
     backflow_T = ${T_init}
   []
   [Insulator]
@@ -352,15 +349,15 @@ input_heat_flux = 40000.0
   [TimeStepper]
     type = IterationAdaptiveDT
     dt = 0.01
-    optimal_iterations = 10
-    iteration_window = 1
+    optimal_iterations = 20
+    iteration_window = 2
   []
 
-  nl_max_its = 12
+  nl_max_its = 30
   nl_abs_tol = 1e-10
 
   steady_state_detection = true
-  steady_state_tolerance = 1e-08
+  steady_state_tolerance = 1e-09
 []
 
 [Postprocessors]
@@ -377,6 +374,6 @@ input_heat_flux = 40000.0
 []
 
 [Outputs]
-  exodus = true
+  exodus = false
   csv = true
 []

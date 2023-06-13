@@ -8,6 +8,8 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "NSFVOutflowTemperatureBC.h"
+#include "SystemBase.h"
+#include "NS.h"
 
 registerMooseObject("NavierStokesApp", NSFVOutflowTemperatureBC);
 
@@ -17,8 +19,8 @@ NSFVOutflowTemperatureBC::validParams()
   InputParameters params = FVFluxBC::validParams();
   params.addClassDescription("Outflow velocity temperature advection boundary conditions for "
                              "finite volume method allowing for thermal backflow.");
-  params.addParam<MooseFunctorName>(
-      "advected_quantity", "rho_cp_temp", "The heat quantity to advect.");
+  params.addParam<MooseFunctorName>(NS::density, "The name of the density");
+  params.addParam<MooseFunctorName>(NS::cp, "The name of the specific heat");
   params.addRequiredParam<MooseFunctorName>("u", "The velocity in the x direction.");
   params.addParam<MooseFunctorName>("v", "The velocity in the y direction.");
   params.addParam<MooseFunctorName>("w", "The velocity in the z direction.");
@@ -29,7 +31,8 @@ NSFVOutflowTemperatureBC::validParams()
 
 NSFVOutflowTemperatureBC::NSFVOutflowTemperatureBC(const InputParameters & parameters)
   : FVFluxBC(parameters),
-    _adv_quant(getFunctor<ADReal>("advected_quantity")),
+    _rho(getFunctor<ADReal>(NS::density)),
+    _cp(getFunctor<ADReal>(NS::cp)),
     _u(getFunctor<ADReal>("u")),
     _v(isParamValid("v") ? &getFunctor<ADReal>("v") : nullptr),
     _w(isParamValid("w") ? &getFunctor<ADReal>("w") : nullptr),
@@ -56,20 +59,15 @@ NSFVOutflowTemperatureBC::computeQpResidual()
     v(2) = (*_w)(boundary_face, state);
 
   auto vol_flux = v * _normal;
+  auto rho_cp_face = _rho(boundary_face, state) * _cp(boundary_face, state);
 
   if (vol_flux > 0)
   {
-    auto face_arg =
-        makeFace(*_face_info, Moose::FV::LimiterType::Upwind, MetaPhysicL::raw_value(vol_flux) > 0);
-    auto rho_cp_face = _adv_quant(face_arg, determineState());
-    return rho_cp_face * _var.getBoundaryFaceValue(*_face_info, determineState()) * vol_flux;
+    return rho_cp_face * _var(boundary_face, state) * vol_flux;
   }
   else
   {
-    auto face_arg =
-        makeFace(*_face_info, Moose::FV::LimiterType::Upwind, MetaPhysicL::raw_value(vol_flux) < 0);
-    auto rho_cp_face = _adv_quant(face_arg, determineState());
-    auto backflow_T = _backflow_T(face_arg, determineState());
+    auto backflow_T = _backflow_T(boundary_face, state);
     return rho_cp_face * backflow_T * vol_flux;
   }
 }

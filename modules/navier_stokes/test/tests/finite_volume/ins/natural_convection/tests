@@ -13,6 +13,5 @@
     csvdiff = 'fuel_cavity_out.csv'
     requirement = 'The system shall be able to correctly predict the maximum fluid and solid temperatures.'
     rel_err = 1.0E-7
-    recover = false
   []
 []
