@@ -36,7 +36,7 @@
                0 1 0 0;
                0 0 1 0;
                0 0 0 0'
-    square_size = 24
+    square_size = 48
     duct_sizes = '21 22 23'
     duct_intervals = '2 2 2'
     rotate_angle = 0
@@ -50,7 +50,7 @@
                0 1 0 0;
                0 0 1 0;
                0 0 0 0'
-    square_size = 23.5
+    square_size = 47
     duct_sizes = '21 22 23'
     duct_intervals = '2 2 2'
     rotate_angle = 0

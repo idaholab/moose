@@ -1,29 +1,19 @@
 # AddPeriodicBCAction
 
-Periodic boundary conditions enforce value constraints on separate boundaries in the mesh.
-This capability is useful for modeling quasi-infinite domains and systems with conserved
-quantities.
+!syntax description /BCs/Periodic/AddPeriodicBCAction
 
-MOOSE has full support for Periodic BCs in
+Periodic boundary conditions are specified as an object inside the `[Periodic]` sub-block of the `[BCs]` block.
+This action adds them to the [Problem](syntax/Problem/index.md).
 
-- 1D, 2D, and 3D.
-- With mesh adaptivity.
-- Can be restricted to specific variables.
+More information about periodic boundary conditions and their parameters can be found on the
+[periodic boundary condition syntax documentation](syntax/BCs/Periodic/index.md).
 
-Supports arbitrary translation vectors for defining periodicity.
+## Example syntax
 
-## Automatic Periodic Boundary Detection (recommended)
+In this example, periodic boundary conditions are set on variable `u` in the X and Y axis directions.
+The boundaries that are matched on all sides of the system are automatically detected, due to using the
+[!param](/BCs/Periodic/AddPeriodicBCAction/auto_direction) parameter.
 
 !listing auto_periodic_bc_test.i block=BCs
 
-## Translation Periodic Boundaries
-
-!listing periodic/periodic_bc_test.i block=BCs
-
-## Function Transform Periodic Boundaries
-
-!listing periodic/trapezoid.i block=Functions BCs
-
 !syntax parameters /BCs/Periodic/AddPeriodicBCAction
-
-!bibtex bibliography

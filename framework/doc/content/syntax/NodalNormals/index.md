@@ -1,29 +1,16 @@
 # NodalNormals System
 
-!alert! construction title=Undocumented System
-The NodalNormals system has not been documented. The content listed below should be used as a starting
-point for documenting the system, which includes the typical automatic documentation associated with
-a system; however, what is contained is ultimately determined by what is necessary to make the
-documentation clear for users.
+The `NodalNormals` system is used to define the outward-facing normal of a boundary at a node.
+The system is mostly used through the [AddNodalNormalsAction.md].
 
-```markdown
-# NodalNormals System
+The nodal normals are stored in auxiliary Lagrange variables named `nodal_normal_x`/`y`/`z`.
+They may be of first or second order to accomodate both mesh orders.
 
-## Overview
+The nodal normals on boundaries are computed in two steps:
+- first a [NodalNormalsPreprocessor.md] populates the `nodal_normal_x`/`y`/`z` variables with the local quadrature weight times the gradient of the shape function
+- then a [NodalNormalsEvaluator.md] normalizes each component so that the nodal normal has a norm of 1
 
-!! Replace this line with information regarding the NodalNormals system.
-
-## Example Input File Syntax
-
-!! Describe and include an example of how to use the NodalNormals system.
-
-!syntax list /NodalNormals objects=True actions=False subsystems=False
-
-!syntax list /NodalNormals objects=False actions=False subsystems=True
-
-!syntax list /NodalNormals objects=False actions=True subsystems=False
-```
-!alert-end!
+On corners, the first step is replaced by obtaining the normal from the [Assembly](source/base/Assembly.md).
 
 !syntax list /NodalNormals objects=True actions=False subsystems=False
 

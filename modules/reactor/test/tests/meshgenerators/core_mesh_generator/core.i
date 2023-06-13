@@ -62,6 +62,20 @@
                0 1'
     extrude = true
   []
+
+  [rotate90]
+    type = TransformGenerator
+    input = cmg
+    transform = ROTATE
+    vector_value = '0 0 90'
+  []
+
+  [translate]
+    type = TransformGenerator
+    input = cmg
+    transform = TRANSLATE
+    vector_value = '2.130945 -2.130945 0'
+  []
 []
 
 [Problem]

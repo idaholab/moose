@@ -46,7 +46,8 @@ public:
    * 5: the r-axis direction
    * 6: the z-axis direction
    * 7: whether there are multiple coordinate system types on the mesh
-   * 8: whether the mesh has been transformed using the transform
+   * 8: whether general axisymmetric coordinate axes are being used
+   * 9: whether the mesh has been transformed using the transform
    */
   typedef std::tuple<short int,
                      Real,
@@ -55,6 +56,7 @@ public:
                      int,
                      unsigned int,
                      unsigned int,
+                     short int,
                      short int,
                      short int>
       MinimalData;
@@ -181,6 +183,11 @@ public:
    */
   void transformMesh(MooseMesh & mesh, const libMesh::Point & translation);
 
+  /**
+   * Returns true if the app has scaling and/or rotation transformation
+   */
+  bool hasScalingOrRotationTransformation() const;
+
 private:
   /**
    * If the coordinate system type is RZ, then we return the provided argument. Otherwise we return
@@ -214,6 +221,9 @@ private:
   /// will not know in what coordinate system our point lies and will not know how to perform the
   /// dimension collapse, and so we will error
   bool _has_different_coord_sys;
+
+  /// Whether general axisymmetric coordinate axes are being used
+  bool _using_general_rz_coord_axes;
 
   /// How much distance one mesh length unit represents, e.g. 1 cm, 1 nm, 1 ft, 5 inches
   MooseUnits _length_unit;

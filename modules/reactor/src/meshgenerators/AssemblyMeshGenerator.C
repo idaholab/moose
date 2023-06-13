@@ -121,6 +121,7 @@ AssemblyMeshGenerator::AssemblyMeshGenerator(const InputParameters & parameters)
   _mesh_dimensions = getReactorParam<int>("mesh_dimensions");
   declareMeshProperty("assembly_type", _assembly_type);
   declareMeshProperty("homogenized_assembly", false);
+  declareMeshProperty("pin_as_assembly", false);
 
   if (_extrude && _mesh_dimensions != 3)
     paramError("extrude",
@@ -148,21 +149,42 @@ AssemblyMeshGenerator::AssemblyMeshGenerator(const InputParameters & parameters)
                  "definition.\n");
   }
   auto assembly_pitch = getReactorParam<Real>("assembly_pitch");
-  if (_geom_type == "Square")
-  {
-    if (_duct_sizes.size() != 0 || _duct_intervals.size() != 0 || _background_intervals != 0)
-      mooseError("Ducts and background regions are not currently supported for square assemblies");
-    if ((!MooseUtils::absoluteFuzzyEqual(base_pitch * _pattern.size(), assembly_pitch)) ||
-        (!MooseUtils::absoluteFuzzyEqual(base_pitch * _pattern[0].size(), assembly_pitch)))
-      mooseError("Assembly pitch must be equal to lattice dimension times pin pitch for Cartesian "
-                 "assemblies");
-  }
 
   unsigned int n_axial_levels =
       (_mesh_dimensions == 3)
           ? getReactorParam<std::vector<unsigned int>>("axial_mesh_intervals").size()
           : 1;
-  if (_geom_type == "Hex")
+  if (_geom_type == "Square")
+  {
+    const auto ny = _pattern.size();
+    const auto nx = _pattern[0].size();
+    if (_background_region_id.size() == 0)
+    {
+      if ((!MooseUtils::absoluteFuzzyEqual(base_pitch * ny, assembly_pitch)) ||
+          (!MooseUtils::absoluteFuzzyEqual(base_pitch * nx, assembly_pitch)))
+        mooseError(
+            "Assembly pitch must be equal to lattice dimension times pin pitch for Cartesian "
+            "assemblies with no background region");
+      if (_background_intervals > 0)
+        mooseError("\"background_region_id\" must be defined if \"background_intervals\" is "
+                   "greater than 0");
+    }
+    else
+    {
+      if ((base_pitch * ny > assembly_pitch) || (base_pitch * nx > assembly_pitch))
+        mooseError(
+            "Assembly pitch must be larger than lattice dimension times pin pitch for Cartesian "
+            "assemblies with background region");
+      if (_background_intervals == 0)
+        mooseError("\"background_intervals\" must be greater than 0 if \"background_region_id\" is "
+                   "defined");
+      if (_background_region_id.size() != n_axial_levels)
+        mooseError(
+            "The size of background_region_id must be equal to the number of axial levels as "
+            "defined in the ReactorMeshParams object");
+    }
+  }
+  else
   {
     if ((_background_region_id.size() == 0) || _background_intervals == 0)
       mooseError("Hexagonal assemblies must have a background region defined");
@@ -218,136 +240,106 @@ AssemblyMeshGenerator::AssemblyMeshGenerator(const InputParameters & parameters)
   _assembly_boundary_id = 2000 + _assembly_type;
   _assembly_boundary_name = "outer_assembly_" + std::to_string(_assembly_type);
 
-  if (_geom_type == "Square")
+  // Call PatternedHexMeshGenerator or PatternedCartesianMeshGenerator to stitch assembly
   {
+    const auto patterned_mg_name =
+        _geom_type == "Hex" ? "PatternedHexMeshGenerator" : "PatternedCartesianMeshGenerator";
+    auto params = _app.getFactory().getValidParams(patterned_mg_name);
+
+    if (_geom_type == "Hex")
     {
-      auto params = _app.getFactory().getValidParams("CartesianIDPatternedMeshGenerator");
-
-      params.set<std::string>("id_name") = "pin_id";
-      params.set<MooseEnum>("assign_type") =
-          "cell"; // give elems IDs relative to position in assembly
-      params.set<std::vector<MeshGeneratorName>>("inputs") = _inputs;
-      params.set<std::vector<std::vector<unsigned int>>>("pattern") = _pattern;
-      params.set<BoundaryName>("top_boundary") = "10000";
-      params.set<BoundaryName>("left_boundary") = "10000";
-      params.set<BoundaryName>("bottom_boundary") = "10000";
-      params.set<BoundaryName>("right_boundary") = "10000";
-
-      addMeshSubgenerator("CartesianIDPatternedMeshGenerator", name() + "_lattice", params);
-    }
-    {
-      auto params = _app.getFactory().getValidParams("SideSetsFromNormalsGenerator");
-
-      params.set<MeshGeneratorName>("input") = name() + "_lattice";
-      params.set<std::vector<Point>>("normals") = {
-          {1, 0, 0},
-          {-1, 0, 0},
-          {0, 1, 0},
-          {0, -1, 0}}; // normal directions over which to define boundaries
-      params.set<bool>("fixed_normal") = true;
-      params.set<bool>("replace") = false;
-      params.set<std::vector<BoundaryName>>("new_boundary") = {
-          "tmp_left", "tmp_right", "tmp_top", "tmp_bottom"};
-
-      addMeshSubgenerator("SideSetsFromNormalsGenerator", name() + "_bds", params);
-    }
-    {
-      auto params = _app.getFactory().getValidParams("RenameBoundaryGenerator");
-
-      params.set<MeshGeneratorName>("input") = name() + "_bds";
-      params.set<std::vector<BoundaryName>>("old_boundary") = {
-          "tmp_left", "tmp_right", "tmp_top", "tmp_bottom"};
-      params.set<std::vector<BoundaryName>>("new_boundary") =
-          std::vector<BoundaryName>(4, _assembly_boundary_name);
-
-      addMeshSubgenerator("RenameBoundaryGenerator", name() + "_pattern", params);
-    }
-    //***Add assembly duct around PatternedMesh
-  }
-  else
-  {
-    // Hex Geometry
-    {
-      auto params = _app.getFactory().getValidParams("PatternedHexMeshGenerator");
-
-      params.set<std::string>("id_name") = "pin_id";
-      params.set<MooseEnum>("assign_type") =
-          "cell"; // give elems IDs relative to position in assembly
-      params.set<std::vector<MeshGeneratorName>>("inputs") = _inputs;
-      params.set<std::vector<std::vector<unsigned int>>>("pattern") = _pattern;
       params.set<Real>("hexagon_size") = getReactorParam<Real>("assembly_pitch") / 2.0;
       params.set<MooseEnum>("hexagon_size_style") = "apothem";
+    }
+    else
+    {
+      if (_background_region_id.size() == 0)
+        params.set<MooseEnum>("pattern_boundary") = "none";
+      else
+      {
+        params.set<MooseEnum>("pattern_boundary") = "expanded";
+        params.set<Real>("square_size") = getReactorParam<Real>("assembly_pitch");
+        params.set<bool>("uniform_mesh_on_sides") = true;
+      }
+    }
+    params.set<std::string>("id_name") = "pin_id";
+    params.set<MooseEnum>("assign_type") =
+        "cell"; // give elems IDs relative to position in assembly
+    params.set<std::vector<MeshGeneratorName>>("inputs") = _inputs;
+    params.set<std::vector<std::vector<unsigned int>>>("pattern") = _pattern;
+    params.set<bool>("create_outward_interface_boundaries") = false;
+
+    unsigned int assembly_block_id_start = 20000;
+    if (_background_intervals > 0)
+    {
       params.set<unsigned int>("background_intervals") = _background_intervals;
-      params.set<bool>("create_outward_interface_boundaries") = false;
       // Initial block id used to define peripheral regions of assembly
-      unsigned int assembly_block_id_start = 20000;
 
       const auto background_block_name = "RGMB_ASSEMBLY" + std::to_string(_assembly_type) + "_R0";
       const auto background_block_id = assembly_block_id_start;
       params.set<subdomain_id_type>("background_block_id") = background_block_id;
       params.set<SubdomainName>("background_block_name") = background_block_name;
+    }
 
-      if (_duct_sizes.size() > 0)
+    if (_duct_sizes.size() > 0)
+    {
+      std::vector<subdomain_id_type> duct_block_ids;
+      std::vector<SubdomainName> duct_block_names;
+      for (std::size_t duct_it = 0; duct_it < _duct_region_ids[0].size(); ++duct_it)
       {
-        std::vector<subdomain_id_type> duct_block_ids;
-        std::vector<SubdomainName> duct_block_names;
-        for (std::size_t duct_it = 0; duct_it < _duct_region_ids[0].size(); ++duct_it)
-        {
-          const auto duct_block_name =
-              "RGMB_ASSEMBLY" + std::to_string(_assembly_type) + "_R" + std::to_string(duct_it + 1);
-          const auto duct_block_id = assembly_block_id_start + duct_it + 1;
-          duct_block_ids.push_back(duct_block_id);
-          duct_block_names.push_back(duct_block_name);
-        }
-
-        params.set<std::vector<Real>>("duct_sizes") = _duct_sizes;
-        params.set<std::vector<subdomain_id_type>>("duct_block_ids") = duct_block_ids;
-        params.set<std::vector<SubdomainName>>("duct_block_names") = duct_block_names;
-        params.set<std::vector<unsigned int>>("duct_intervals") = _duct_intervals;
+        const auto duct_block_name =
+            "RGMB_ASSEMBLY" + std::to_string(_assembly_type) + "_R" + std::to_string(duct_it + 1);
+        const auto duct_block_id = assembly_block_id_start + duct_it + 1;
+        duct_block_ids.push_back(duct_block_id);
+        duct_block_names.push_back(duct_block_name);
       }
 
-      params.set<boundary_id_type>("external_boundary_id") = _assembly_boundary_id;
-      params.set<std::string>("external_boundary_name") = _assembly_boundary_name;
-
-      addMeshSubgenerator("PatternedHexMeshGenerator", name() + "_pattern", params);
-
-      // Pass mesh meta-data defined in subgenerator constructor to this MeshGenerator
-      if (hasMeshProperty<Real>("pitch_meta", name() + "_pattern"))
-        declareMeshProperty("pitch_meta", getMeshProperty<Real>("pitch_meta", name() + "_pattern"));
-      if (hasMeshProperty<std::vector<unsigned int>>("num_sectors_per_side_meta",
-                                                     name() + "_pattern"))
-        declareMeshProperty("num_sectors_per_side_meta",
-                            getMeshProperty<std::vector<unsigned int>>("num_sectors_per_side_meta",
-                                                                       name() + "_pattern"));
-      if (hasMeshProperty<bool>("is_control_drum_meta", name() + "_pattern"))
-        declareMeshProperty("is_control_drum_meta",
-                            getMeshProperty<bool>("is_control_drum_meta", name() + "_pattern"));
-      if (hasMeshProperty<std::vector<Point>>("control_drum_positions", name() + "_pattern"))
-        declareMeshProperty(
-            "control_drum_positions",
-            getMeshProperty<std::vector<Point>>("control_drum_positions", name() + "_pattern"));
-      if (hasMeshProperty<std::vector<Real>>("control_drum_angles", name() + "_pattern"))
-        declareMeshProperty(
-            "control_drum_angles",
-            getMeshProperty<std::vector<Real>>("control_drum_angles", name() + "_pattern"));
-      if (hasMeshProperty<std::vector<std::vector<Real>>>("control_drums_azimuthal_meta",
-                                                          name() + "_pattern"))
-        declareMeshProperty("control_drums_azimuthal_meta",
-                            getMeshProperty<std::vector<std::vector<Real>>>(
-                                "control_drums_azimuthal_meta", name() + "_pattern"));
-      if (hasMeshProperty<std::string>("position_file_name", name() + "_pattern"))
-        declareMeshProperty(
-            "position_file_name",
-            getMeshProperty<std::string>("position_file_name", name() + "_pattern"));
-      if (hasMeshProperty<Real>("pattern_pitch_meta", name() + "_pattern"))
-        declareMeshProperty("pattern_pitch_meta",
-                            getMeshProperty<Real>("pattern_pitch_meta", name() + "_pattern"));
-
-      declareMeshProperty("background_region_ids", _background_region_id);
-      declareMeshProperty("duct_region_ids", _duct_region_ids);
-      declareMeshProperty("background_block_names", _background_block_name);
-      declareMeshProperty("duct_block_names", _duct_block_names);
+      params.set<std::vector<Real>>("duct_sizes") = _duct_sizes;
+      params.set<std::vector<subdomain_id_type>>("duct_block_ids") = duct_block_ids;
+      params.set<std::vector<SubdomainName>>("duct_block_names") = duct_block_names;
+      params.set<std::vector<unsigned int>>("duct_intervals") = _duct_intervals;
     }
+
+    params.set<boundary_id_type>("external_boundary_id") = _assembly_boundary_id;
+    params.set<std::string>("external_boundary_name") = _assembly_boundary_name;
+
+    addMeshSubgenerator(patterned_mg_name, name() + "_pattern", params);
+
+    // Pass mesh meta-data defined in subgenerator constructor to this MeshGenerator
+    if (hasMeshProperty<Real>("pitch_meta", name() + "_pattern"))
+      declareMeshProperty("pitch_meta", getMeshProperty<Real>("pitch_meta", name() + "_pattern"));
+    if (hasMeshProperty<std::vector<unsigned int>>("num_sectors_per_side_meta",
+                                                   name() + "_pattern"))
+      declareMeshProperty("num_sectors_per_side_meta",
+                          getMeshProperty<std::vector<unsigned int>>("num_sectors_per_side_meta",
+                                                                     name() + "_pattern"));
+    if (hasMeshProperty<bool>("is_control_drum_meta", name() + "_pattern"))
+      declareMeshProperty("is_control_drum_meta",
+                          getMeshProperty<bool>("is_control_drum_meta", name() + "_pattern"));
+    if (hasMeshProperty<std::vector<Point>>("control_drum_positions", name() + "_pattern"))
+      declareMeshProperty(
+          "control_drum_positions",
+          getMeshProperty<std::vector<Point>>("control_drum_positions", name() + "_pattern"));
+    if (hasMeshProperty<std::vector<Real>>("control_drum_angles", name() + "_pattern"))
+      declareMeshProperty(
+          "control_drum_angles",
+          getMeshProperty<std::vector<Real>>("control_drum_angles", name() + "_pattern"));
+    if (hasMeshProperty<std::vector<std::vector<Real>>>("control_drums_azimuthal_meta",
+                                                        name() + "_pattern"))
+      declareMeshProperty("control_drums_azimuthal_meta",
+                          getMeshProperty<std::vector<std::vector<Real>>>(
+                              "control_drums_azimuthal_meta", name() + "_pattern"));
+    if (hasMeshProperty<std::string>("position_file_name", name() + "_pattern"))
+      declareMeshProperty("position_file_name",
+                          getMeshProperty<std::string>("position_file_name", name() + "_pattern"));
+    if (hasMeshProperty<Real>("pattern_pitch_meta", name() + "_pattern"))
+      declareMeshProperty("pattern_pitch_meta",
+                          getMeshProperty<Real>("pattern_pitch_meta", name() + "_pattern"));
+
+    declareMeshProperty("background_region_ids", _background_region_id);
+    declareMeshProperty("duct_region_ids", _duct_region_ids);
+    declareMeshProperty("background_block_names", _background_block_name);
+    declareMeshProperty("duct_block_names", _duct_block_names);
   }
 
   std::string build_mesh_name = name() + "_delbds";

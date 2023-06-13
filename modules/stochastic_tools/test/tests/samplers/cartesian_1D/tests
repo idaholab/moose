@@ -1,0 +1,47 @@
+[Tests]
+  issues = '#24566'
+  design = 'Cartesian1DSampler.md'
+  [test]
+    type = CSVDiff
+    input = grid.i
+    csvdiff = grid_out_data_0000.csv
+
+    requirement = "The system shall include the ability to create a 1D Cartesian sampling scheme."
+  []
+
+  [errors]
+    requirement = 'The system shall throw an error when performing 1D Cartesian sampling if'
+    [no_triplet]
+      type = RunException
+      input = grid.i
+      cli_args = "Samplers/sample/linear_space_items='1 1'"
+      expect_err = "The number of numeric items must be divisible by 3; min, max, divisions for each item are required."
+      match_literal = True
+      detail = 'the specified grid does not form a triplet,'
+    []
+    [wrong_num_values]
+      type = RunException
+      input = grid.i
+      cli_args = "Samplers/sample/nominal_values='1 1'"
+      expect_err = "The number of values specified must match the number of triplets in 'linear_space_items'."
+      match_literal = True
+      detail = 'the number of nominal values specified does not match the number of sample columns,'
+    []
+    [non_int]
+      type = RunException
+      input = grid.i
+      cli_args = "Samplers/sample/linear_space_items='1 1 0.1 1 1 1 1 1 1'"
+      expect_err = "The third entry for each item must be an integer; it provides the number of entries in the resulting item vector."
+      match_literal = True
+      detail = 'the number of grid points is not an integer, or'
+    []
+    [negative]
+      type = RunException
+      input = grid.i
+      cli_args = "Samplers/sample/linear_space_items='1 1 -1 1 1 1 1 1 1'"
+      expect_err = "The third entry for each item must be positive; it provides the number of entries in the resulting item vector."
+      match_literal = True
+      detail = 'the number of grid points is negative.'
+    []
+  []
+[]

@@ -148,6 +148,24 @@
     expect_err = 'This parameter and duct_block_names must be provided simultaneously.'
     requirement ='The system shall throw an error if background_block_name and duct_block_names are not provided simultaneously if the hexagonal mesh has ducts.'
   []
+  [err_duct_oversize]
+    type = 'RunException'
+    input = 'patterned_2d.i'
+    cli_args = 'Mesh/pattern/background_intervals=2 Mesh/pattern/duct_block_ids=20 Mesh/pattern/background_block_id=15
+                Mesh/pattern/hexagon_size=18 Mesh/pattern/duct_sizes=19 Mesh/pattern/duct_intervals=2
+                --mesh-only "patterned_err.e"'
+    expect_err = 'The duct sizes should not exceed the size of the hexagonal boundary.'
+    requirement ='The system shall throw an error if the specified duct size exceeds the external hexagonal boundary.'
+  []
+  [err_duct_descending_sizes]
+    type = 'RunException'
+    input = 'patterned_2d.i'
+    cli_args = 'Mesh/pattern/background_intervals=2 Mesh/pattern/duct_block_ids="20 21" Mesh/pattern/background_block_id=15
+                Mesh/pattern/hexagon_size=18 Mesh/pattern/duct_sizes="17.5 17" Mesh/pattern/duct_intervals="2 2"
+                --mesh-only "patterned_err.e"'
+    expect_err = 'This parameter must be strictly ascending.'
+    requirement = 'The system shall throw an error if the specified hexagonal duct size is not strictly ascending.'
+  []
   [err_duct_ids]
     type = 'RunException'
     input = 'patterned_2d.i'

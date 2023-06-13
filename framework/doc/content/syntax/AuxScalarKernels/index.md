@@ -1,29 +1,31 @@
 # AuxScalarKernels System
 
-!alert! construction title=Undocumented System
-The AuxScalarKernels system has not been documented. The content listed below should be used as a starting
-point for documenting the system, which includes the typical automatic documentation associated with
-a system; however, what is contained is ultimately determined by what is necessary to make the
-documentation clear for users.
+An `AuxiliaryScalarVariable` is to a [ScalarVariable.md] what an [AuxVariable.md] is to a [MooseVariable.md].
+It is not the solution of a differential equation and instead can be computed directly by algebraic operations
+using an auxiliary scalar kernel.
 
-```markdown
-# AuxScalarKernels System
+Creating a custom `AuxScalarKernel` object is done by creating a new C++ object that inherits from
+`AuxScalarKernel` and overriding the `computeValue` method.
 
-## Overview
+`AuxScalarKernel` objects, like all `Kernel` objects, must operate on a variable. Thus, there is a required
+parameter ("variable") that indicates the variable that the `AuxScalarKernel` object is computing. These
+variables are defined in the [AuxVariables](syntax/AuxVariables/index.md) block of the input file, and must be of
+family `SCALAR`.
 
-!! Replace this line with information regarding the AuxScalarKernels system.
+!alert note
+For higher order scalar variables, `computeValue` is called multiple times with each order index `_i` for the value of each order.
+The definition of `computeValue` may depend on `_i`, as appropriate.
 
-## Example Input File Syntax
+## Execution schedule
 
-!! Describe and include an example of how to use the AuxScalarKernels system.
+Please see the [documentation for field auxiliary kernels (AuxKernels)](syntax/AuxKernels/index.md#execute_on)
+which applies identically to `AuxScalarKernels`.
 
-!syntax list /AuxScalarKernels objects=True actions=False subsystems=False
+## Examples
 
-!syntax list /AuxScalarKernels objects=False actions=False subsystems=True
-
-!syntax list /AuxScalarKernels objects=False actions=True subsystems=False
-```
-!alert-end!
+`AuxScalarKernels` are essentially used for postprocessing or for decoupling solves.
+The examples in the [documentation for field auxiliary kernels (AuxKernels)](syntax/AuxKernels/index.md#example_a)
+can conceptually be adapted to `AuxScalarKernels`.
 
 !syntax list /AuxScalarKernels objects=True actions=False subsystems=False
 

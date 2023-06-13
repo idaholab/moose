@@ -263,6 +263,7 @@ MooseMesh::MooseMesh(const MooseMesh & other_mesh)
     _need_ghost_ghosted_boundaries(other_mesh._need_ghost_ghosted_boundaries),
     _coord_sys(other_mesh._coord_sys),
     _rz_coord_axis(other_mesh._rz_coord_axis),
+    _subdomain_id_to_rz_coord_axis(other_mesh._subdomain_id_to_rz_coord_axis),
     _coord_system_set(other_mesh._coord_system_set),
     _provided_coord_blocks(other_mesh._provided_coord_blocks)
 {
@@ -419,6 +420,35 @@ MooseMesh::prepare(const MeshBase * const mesh_to_clone)
           "Either remove your coordinate system type information from the input file, or contact "
           "your application developer");
   }
+
+  // Set general axisymmetric axes if provided
+  if (isParamValid("rz_coord_blocks") && isParamValid("rz_coord_origins") &&
+      isParamValid("rz_coord_directions"))
+  {
+    const auto rz_coord_blocks = getParam<std::vector<SubdomainName>>("rz_coord_blocks");
+    const auto rz_coord_origins = getParam<std::vector<Point>>("rz_coord_origins");
+    const auto rz_coord_directions = getParam<std::vector<Point>>("rz_coord_directions");
+    if (rz_coord_origins.size() == rz_coord_blocks.size() &&
+        rz_coord_directions.size() == rz_coord_blocks.size())
+    {
+      std::vector<std::pair<Point, RealVectorValue>> rz_coord_axes;
+      for (unsigned int i = 0; i < rz_coord_origins.size(); ++i)
+        rz_coord_axes.push_back(std::make_pair(rz_coord_origins[i], rz_coord_directions[i]));
+
+      setGeneralAxisymmetricCoordAxes(rz_coord_blocks, rz_coord_axes);
+
+      if (isParamSetByUser("rz_coord_axis"))
+        mooseError("The parameter 'rz_coord_axis' may not be provided if 'rz_coord_blocks', "
+                   "'rz_coord_origins', and 'rz_coord_directions' are provided.");
+    }
+    else
+      mooseError("The parameters 'rz_coord_blocks', 'rz_coord_origins', and "
+                 "'rz_coord_directions' must all have the same size.");
+  }
+  else if (isParamValid("rz_coord_blocks") || isParamValid("rz_coord_origins") ||
+           isParamValid("rz_coord_directions"))
+    mooseError("If any of the parameters 'rz_coord_blocks', 'rz_coord_origins', and "
+               "'rz_coord_directions' are provided, then all must be provided.");
 
   detectOrthogonalDimRanges();
 
@@ -3629,6 +3659,11 @@ MooseMesh::getUniqueCoordSystem() const
   if (!result)
     mooseError("The unique coordinate system of the mesh was requested by the mesh contains "
                "multiple blocks with different coordinate systems");
+
+  if (usingGeneralAxisymmetricCoordAxes())
+    mooseError("General axisymmetric coordinate axes are being used, and it is currently "
+               "conservatively assumed that in this case there is no unique coordinate system.");
+
   return unique_system;
 }
 
@@ -3647,6 +3682,70 @@ MooseMesh::setAxisymmetricCoordAxis(const MooseEnum & rz_coord_axis)
 }
 
 void
+MooseMesh::setGeneralAxisymmetricCoordAxes(
+    const std::vector<SubdomainName> & blocks,
+    const std::vector<std::pair<Point, RealVectorValue>> & axes)
+{
+  // Set the axes for the given blocks
+  mooseAssert(blocks.size() == axes.size(), "Blocks and axes vectors must be the same length.");
+  for (const auto i : index_range(blocks))
+  {
+    const auto subdomain_id = getSubdomainID(blocks[i]);
+    const auto it = _coord_sys.find(subdomain_id);
+    if (it == _coord_sys.end())
+      mooseError("The block '",
+                 blocks[i],
+                 "' has not set a coordinate system. Make sure to call setCoordSystem() before "
+                 "setGeneralAxisymmetricCoordAxes().");
+    else
+    {
+      if (it->second == Moose::COORD_RZ)
+      {
+        const auto direction = axes[i].second;
+        if (direction.is_zero())
+          mooseError("Only nonzero vectors may be supplied for RZ directions.");
+
+        _subdomain_id_to_rz_coord_axis[subdomain_id] =
+            std::make_pair(axes[i].first, direction.unit());
+      }
+      else
+        mooseError("The block '",
+                   blocks[i],
+                   "' was provided in setGeneralAxisymmetricCoordAxes(), but the coordinate system "
+                   "for this block is not 'RZ'.");
+    }
+  }
+
+  // Make sure there are no RZ blocks that still do not have axes
+  const auto all_subdomain_ids = meshSubdomains();
+  for (const auto subdomain_id : all_subdomain_ids)
+    if (getCoordSystem(subdomain_id) == Moose::COORD_RZ &&
+        !_subdomain_id_to_rz_coord_axis.count(subdomain_id))
+      mooseError("The block '",
+                 getSubdomainName(subdomain_id),
+                 "' was specified to use the 'RZ' coordinate system but was not given in "
+                 "setGeneralAxisymmetricCoordAxes().");
+
+  updateCoordTransform();
+}
+
+const std::pair<Point, RealVectorValue> &
+MooseMesh::getGeneralAxisymmetricCoordAxis(SubdomainID subdomain_id) const
+{
+  auto it = _subdomain_id_to_rz_coord_axis.find(subdomain_id);
+  if (it != _subdomain_id_to_rz_coord_axis.end())
+    return (*it).second;
+  else
+    mooseError("Requested subdomain ", subdomain_id, " does not exist.");
+}
+
+bool
+MooseMesh::usingGeneralAxisymmetricCoordAxes() const
+{
+  return _subdomain_id_to_rz_coord_axis.size() > 0;
+}
+
+void
 MooseMesh::updateCoordTransform()
 {
   if (!_coord_transform)
@@ -3658,6 +3757,10 @@ MooseMesh::updateCoordTransform()
 unsigned int
 MooseMesh::getAxisymmetricRadialCoord() const
 {
+  if (usingGeneralAxisymmetricCoordAxes())
+    mooseError("getAxisymmetricRadialCoord() should not be called if "
+               "setGeneralAxisymmetricCoordAxes() has been called.");
+
   if (_rz_coord_axis == 0)
     return 1; // if the rotation axis is x (0), then the radial direction is y (1)
   else
@@ -3684,6 +3787,7 @@ MooseMesh::setCoordData(const MooseMesh & other_mesh)
 {
   _coord_sys = other_mesh._coord_sys;
   _rz_coord_axis = other_mesh._rz_coord_axis;
+  _subdomain_id_to_rz_coord_axis = other_mesh._subdomain_id_to_rz_coord_axis;
 }
 
 const MooseUnits &
