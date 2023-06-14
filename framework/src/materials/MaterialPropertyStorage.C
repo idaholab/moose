@@ -16,10 +16,8 @@
 #include "libmesh/fe_interface.h"
 #include "libmesh/quadrature.h"
 
-std::map<std::string, unsigned int> MaterialPropertyStorage::_prop_ids;
-
-MaterialPropertyStorage::MaterialPropertyStorage()
-  : _max_state(0), _spin_mtx(libMesh::Threads::spin_mtx)
+MaterialPropertyStorage::MaterialPropertyStorage(MaterialPropertyStorage::Registry & registry)
+  : _max_state(0), _spin_mtx(libMesh::Threads::spin_mtx), _registry(registry)
 {
 }
 
@@ -304,7 +302,7 @@ MaterialPropertyStorage::swapBack(MaterialData & material_data,
 bool
 MaterialPropertyStorage::hasProperty(const std::string & prop_name) const
 {
-  return _prop_ids.count(prop_name) > 0;
+  return _registry.prop_ids.count(prop_name) > 0;
 }
 
 unsigned int
@@ -328,7 +326,7 @@ MaterialPropertyStorage::addProperty(const std::string & prop_name, const unsign
                   _stateful_prop_id_to_prop_id.end(),
                   prop_id) == _stateful_prop_id_to_prop_id.end())
       _stateful_prop_id_to_prop_id.push_back(prop_id);
-    _prop_names[prop_id] = prop_name;
+    _stateful_prop_names[prop_id] = prop_name;
   }
 
   return prop_id;
@@ -337,20 +335,21 @@ MaterialPropertyStorage::addProperty(const std::string & prop_name, const unsign
 unsigned int
 MaterialPropertyStorage::getPropertyId(const std::string & prop_name)
 {
-  auto it = _prop_ids.find(prop_name);
-  if (it != _prop_ids.end())
+  const auto it = _registry.prop_ids.find(prop_name);
+  if (it != _registry.prop_ids.end())
     return it->second;
 
-  auto id = _prop_ids.size();
-  _prop_ids[prop_name] = id;
+  const auto id = _registry.prop_names.size();
+  _registry.prop_names.push_back(prop_name);
+  _registry.prop_ids.emplace(prop_name, id);
   return id;
 }
 
 unsigned int
 MaterialPropertyStorage::retrievePropertyId(const std::string & prop_name) const
 {
-  auto it = _prop_ids.find(prop_name);
-  if (it == _prop_ids.end())
+  auto it = _registry.prop_ids.find(prop_name);
+  if (it == _registry.prop_ids.end())
     mooseError("MaterialPropertyStorage: property " + prop_name + " is not yet declared");
   return it->second;
 }

@@ -2175,6 +2175,7 @@ protected:
   ///@}
 
   // material properties
+  MaterialPropertyStorage::Registry _material_registry;
   MaterialPropertyStorage & _material_props;
   MaterialPropertyStorage & _bnd_material_props;
   MaterialPropertyStorage & _neighbor_material_props;

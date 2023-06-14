@@ -120,10 +120,6 @@ public:
   template <typename T>
   MaterialProperty<T> & declareProperty(const std::string & name);
   template <typename T>
-  MaterialProperty<T> & declarePropertyOld(const std::string & prop_name);
-  template <typename T>
-  MaterialProperty<T> & declarePropertyOlder(const std::string & prop_name);
-  template <typename T>
   ADMaterialProperty<T> & declareADPropertyByName(const std::string & prop_name);
   template <typename T>
   ADMaterialProperty<T> & declareADProperty(const std::string & name);
@@ -365,28 +361,6 @@ MaterialBase::declarePropertyByName(const std::string & prop_name_in)
           : MooseUtils::join(std::vector<std::string>({prop_name_in, _declare_suffix}), "_");
   registerPropName(prop_name, false, MaterialPropState::CURRENT);
   return materialData().declareProperty<T>(prop_name);
-}
-
-template <typename T>
-MaterialProperty<T> &
-MaterialBase::declarePropertyOld(const std::string & prop_name)
-{
-  mooseDoOnce(
-      mooseDeprecated("declarePropertyOld is deprecated and not needed anymore.\nUse "
-                      "getMaterialPropertyOld (only) if a reference is required in this class."));
-  registerPropName(prop_name, false, MaterialPropState::OLD);
-  return materialData().getProperty<T>(prop_name, 1);
-}
-
-template <typename T>
-MaterialProperty<T> &
-MaterialBase::declarePropertyOlder(const std::string & prop_name)
-{
-  mooseDoOnce(
-      mooseDeprecated("declarePropertyOlder is deprecated and not needed anymore.  Use "
-                      "getMaterialPropertyOlder (only) if a reference is required in this class."));
-  registerPropName(prop_name, false, MaterialPropState::OLDER);
-  return materialData().getProperty<T>(prop_name, 2);
 }
 
 template <typename T, bool is_ad>

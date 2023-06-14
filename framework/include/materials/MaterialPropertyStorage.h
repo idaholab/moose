@@ -38,7 +38,22 @@ void dataLoad(std::istream & stream, MaterialPropertyStorage & storage, void * c
 class MaterialPropertyStorage
 {
 public:
-  MaterialPropertyStorage();
+  /**
+   * Registry class for material property IDs and names.
+   *
+   * Will be owned by the problem and then passed to the different
+   * storage classes (regular, boundary, neighbor) so that they can
+   * share.
+   */
+  struct Registry
+  {
+    /// Map of material property name -> material property id
+    std::unordered_map<std::string, unsigned int> prop_ids;
+    /// Map of material property id -> material property name
+    std::vector<std::string> prop_names;
+  };
+
+  MaterialPropertyStorage(MaterialPropertyStorage::Registry & registry);
 
   /// The max time state supported (2 = older)
   static constexpr unsigned int max_state = 2;
@@ -227,9 +242,11 @@ public:
    */
   unsigned int addProperty(const std::string & prop_name, const unsigned int state);
 
-  std::vector<unsigned int> & statefulProps() { return _stateful_prop_id_to_prop_id; }
   const std::vector<unsigned int> & statefulProps() const { return _stateful_prop_id_to_prop_id; }
-  const std::map<unsigned int, std::string> statefulPropNames() const { return _prop_names; }
+  const std::unordered_map<unsigned int, std::string> & statefulPropNames() const
+  {
+    return _stateful_prop_names;
+  }
 
   /// Returns the property ID for the given prop_name, adding the property and
   /// creating a new ID if it hasn't already been created.
@@ -239,7 +256,7 @@ public:
 
   bool isStatefulProp(const std::string & prop_name) const
   {
-    return _prop_names.count(retrievePropertyId(prop_name)) > 0;
+    return _stateful_prop_names.count(retrievePropertyId(prop_name)) > 0;
   }
 
   /**
@@ -249,7 +266,7 @@ public:
    */
   void eraseProperty(const Elem * elem);
 
-  static const std::map<std::string, unsigned int> & propIDs() { return _prop_ids; }
+  const std::unordered_map<std::string, unsigned int> & propIDs() { return _registry.prop_ids; }
 
   /**
    * @returns The current maximum stored state (0 = none, 1 = old, 2 = older)
@@ -290,13 +307,8 @@ protected:
   /// The actual storage
   std::array<MaterialPropertyStorage::Storage, max_state + 1> _storage;
 
-  /// mapping from property name to property ID
-  /// NOTE: this is static so the property numbering is global within the simulation (not just FEProblemBase - should be useful when we will use material properties from
-  /// one FEPRoblem in another one - if we will ever do it)
-  static std::map<std::string, unsigned int> _prop_ids;
-
-  /// mapping from property ID to property name
-  std::map<unsigned int, std::string> _prop_names;
+  /// Mapping from stateful property ID to property name
+  std::unordered_map<unsigned int, std::string> _stateful_prop_names;
   /// the vector of stateful property ids (the vector index is the map to stateful prop_id)
   std::vector<unsigned int> _stateful_prop_id_to_prop_id;
 
@@ -352,6 +364,9 @@ private:
   // in the namespace for when that happens, but CI thinks that can
   // make us crash, so I'll just initialize this to Threads::spin_mtx
   libMesh::Threads::spin_mutex & _spin_mtx;
+
+  /// Shared registry (across storage objects) for property names and IDs
+  MaterialPropertyStorage::Registry & _registry;
 
   // Need to be able to eraseProperty from here
   friend class ProjectMaterialProperties;
