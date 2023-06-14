@@ -219,14 +219,18 @@ def __get_pids(application_name, hosts, num_threads, verbose = False):
     """
     jobs = []
     results = {}
+
     for host in hosts:
         jobs.append(get_sshpids(application_name, host))
+
+    if verbose == True:
+        [print('Running command:',i) for i in jobs]
+
     finished_jobs = __schedule_task(jobs, num_threads)
+
     for job in finished_jobs:
         std_out = job.get_stdout().split()
         results[std_out[0]] = std_out[1:]
-    if verbose == True:
-        [print('Running command:',i) for i in jobs]
     return results
 
 def __get_stacks(hosts_pids, num_threads, verbose = False):
@@ -236,14 +240,18 @@ def __get_stacks(hosts_pids, num_threads, verbose = False):
     """
     jobs = []
     results = []
+
     for host, pids in hosts_pids.items():
         for pid in pids:
             jobs.append(get_sshstack(host, pid))
-    finished_jobs = __schedule_task(jobs, num_threads)
-    for job in finished_jobs:
-        results.append(job.get_stdout())
+
     if verbose == True:
         [print('Running command:',i) for i in jobs]
+
+    finished_jobs = __schedule_task(jobs, num_threads)
+
+    for job in finished_jobs:
+        results.append(job.get_stdout())
     return results
 
 def get_sshpids(application_name, host):
