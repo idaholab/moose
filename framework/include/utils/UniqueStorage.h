@@ -149,4 +149,3 @@ protected:
   /// The underlying data
   values_type _values;
 };
-
