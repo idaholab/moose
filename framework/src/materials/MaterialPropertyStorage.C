@@ -277,8 +277,10 @@ MaterialPropertyStorage::swap(MaterialData & material_data, const Elem & elem, u
   Threads::spin_mutex::scoped_lock lock(this->_spin_mtx);
 
   for (const auto state : stateIndexRange())
-    shallowSwapData(
-        _stateful_prop_id_to_prop_id, material_data.props(state), setProps(&elem, side, state));
+    shallowSwapData(_stateful_prop_id_to_prop_id,
+                    material_data.props(state),
+                    // Would be nice to make this setProps()
+                    initAndSetProps(&elem, side, state));
 }
 
 void
@@ -372,7 +374,7 @@ MaterialPropertyStorage::initProps(MaterialData & material_data,
 {
   material_data.resize(n_qpoints);
 
-  auto & mat_props = setProps(elem, side, state);
+  auto & mat_props = initAndSetProps(elem, side, state);
 
   // In some special cases, material_data might be larger than n_qpoints
   if (material_data.isOnlyResizeIfSmaller())

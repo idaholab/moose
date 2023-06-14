@@ -330,7 +330,20 @@ private:
                                   MaterialProperties & data_from);
   ///@}
 
+  /**
+   * @returns A writeable reference to the properties at state \p state.
+   */
   PropsType & setProps(const unsigned int state);
+
+  /**
+   * @returns A writeable reference to the properties for elem \p elem,
+   * side \p side, and state \p state.
+   *
+   * Similar to setProps, but will initialize (default construct) the
+   * entry if it does not exist.
+   */
+  MaterialProperties &
+  initAndSetProps(const Elem * elem, const unsigned int side, const unsigned int state);
 
   /// The maximum state (0 = current, 1 = old, 2 = older)
   unsigned int _max_state;
@@ -361,30 +374,29 @@ MaterialPropertyStorage::props(const unsigned int state) const
 inline const MaterialProperties &
 MaterialPropertyStorage::props(const Elem * elem, unsigned int side, const unsigned int state) const
 {
-  mooseAssert(props(state).contains(elem),
-              "Trying to read properties for state " + std::to_string(state) +
-                  " on an element that lacks them");
-  mooseAssert(props(state).find(elem)->second.contains(side),
-              "Trying to read properties for state " + std::to_string(state) +
-                  " on an element side that lacks them");
-  return props(state).find(elem)->second.find(side)->second;
+  const auto find_elem = props(state).find(elem);
+  mooseAssert(find_elem != props(state).end(), "Material property does not have elem entry");
+  const auto find_side = find_elem->second.find(side);
+  mooseAssert(find_side != find_elem->second.end(), "Material property does not have side entry");
+  return find_side->second;
 }
 
 inline MaterialProperties &
 MaterialPropertyStorage::setProps(const Elem * elem, unsigned int side, const unsigned int state)
 {
-  // Many problems rely on reinitMaterials also being the first
-  // init, and I'm not sure I can clean that up to reallow these
-  // assertions without also hurting performance on subsequent
-  // iterations.
-  // libmesh_assert(_storage[state].contains(elem));
-  // libmesh_assert(_storage[state][elem].props.contains(side));
+  return const_cast<MaterialProperties &>(std::as_const(*this).props(elem, side, state));
+}
+
+inline MaterialProperties &
+MaterialPropertyStorage::initAndSetProps(const Elem * elem,
+                                         unsigned int side,
+                                         const unsigned int state)
+{
   return setProps(state)[elem][side];
 }
 
 inline MaterialPropertyStorage::PropsType &
 MaterialPropertyStorage::setProps(const unsigned int state)
 {
-  mooseAssert(state < _storage.size(), "Unsupported state");
-  return _storage[state].props;
+  return const_cast<MaterialPropertyStorage::PropsType &>(std::as_const(*this).props(state));
 }
