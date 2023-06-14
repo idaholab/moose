@@ -9,7 +9,9 @@
 
 #include "ThermochimicaNodalData.h"
 #include "ThermochimicaUtils.h"
+#include "ActionWarehouse.h"
 #include "libmesh/int_range.h"
+#include <iostream>
 
 #ifdef THERMOCHIMICA_ENABLED
 #include "Thermochimica-cxx.h"
@@ -26,15 +28,29 @@ ThermochimicaNodalData::validParams()
       params, "Provides access to Thermochimica-calculated data at nodes.");
 
   params.addRequiredCoupledVar("elements", "Amounts of elements");
-  params.addCoupledVar("output_element_potentials", "Chemical potentials of elements");
-
-  params.addCoupledVar("pressure", 1.0, "Pressure");
   params.addRequiredCoupledVar("temperature", "Coupled temperature");
+  params.addCoupledVar("pressure", 1.0, "Pressure");
 
   params.addParam<bool>("reinit_requested", true, "Should Thermochimica use re-initialization?");
+
+  params.addCoupledVar("output_element_potentials", "Chemical potentials of elements");
   params.addCoupledVar("output_phases", "Amounts of phases to be output");
   params.addCoupledVar("output_species", "Amounts of species to be output");
   params.addCoupledVar("output_vapor_pressures", "Vapour pressures of species to be output");
+  params.addCoupledVar("output_element_phases",
+                       "Elements whose molar amounts in specific phases are requested");
+
+  params.addParam<std::vector<unsigned int>>("element_ids",
+                                             "Atomic number of each element in the system");
+  params.addParam<std::vector<std::string>>(
+      "phase_species_map", "Separated out phase and species names from output_phases list");
+  params.addParam<std::vector<std::string>>(
+      "phase_vapor_map",
+      "Separated out phase and vapor species names from output_vapor_pressures list");
+  params.addParam<std::vector<std::string>>(
+      "phase_elements_map",
+      "Separated out phase and element names from output_element_phases list");
+
   return params;
 }
 
@@ -47,8 +63,8 @@ ThermochimicaNodalData::ThermochimicaNodalData(const InputParameters & parameter
     _n_species(coupledComponents("output_species")),
     _n_elements(coupledComponents("elements")),
     _n_vapor_species(coupledComponents("output_vapor_pressures")),
+    _n_element_phases(coupledComponents("output_element_phases")),
     _el(_n_elements),
-    _el_name(_n_elements),
     _ph_name(_n_phases),
     _sp_phase_name(_n_species),
     _sp_species_name(_n_species),
@@ -61,128 +77,17 @@ ThermochimicaNodalData::ThermochimicaNodalData(const InputParameters & parameter
 
   if (n_threads() > 1)
     mooseError("Thermochimica does not support multi-threaded runs.");
-  if (coupledComponents("output_element_potentials") != _n_elements)
-    paramError("output_element_potentials",
-               "Specify one element potential for each entry in `elements`");
 
+  _el_id.resize(_n_elements);
   for (const auto i : make_range(_n_elements))
   {
     _el[i] = &coupledValue("elements", i);
-    _el_name[i] = getVar("elements", i)->name();
+    auto el_name = getVar("elements", i)->name();
 #ifdef THERMOCHIMICA_ENABLED
     // check if the element symbol is valid
-    _el_id.resize(_n_elements);
-    _el_id[i] = Thermochimica::atomicNumber(_el_name[i]);
+    _el_id[i] = Thermochimica::atomicNumber(el_name);
 #endif
   }
-
-#ifdef THERMOCHIMICA_ENABLED
-  {
-    // Get thermodynamic database information to compare with input files.
-    _db_num_phases = Thermochimica::getNumberPhasesSystem();
-    _db_phase_names = Thermochimica::getPhaseNamesSystem();
-    _db_species_names = Thermochimica::getSpeciesSystem();
-
-    for (const auto i : make_range(_n_phases))
-    {
-      _ph_name[i] = getVar("output_phases", i)->name();
-      if (std::find(_db_phase_names.begin(), _db_phase_names.end(), _ph_name[i]) ==
-          _db_phase_names.end())
-        paramError("output_phases", "Phase '", _ph_name[i], "' was not found in the simulation.");
-    }
-
-    for (const auto i : make_range(_n_species))
-    {
-      auto species_var_name = getVar("output_species", i)->name();
-      auto colon = species_var_name.find_last_of(':');
-      if (colon == std::string::npos)
-        paramError("output_species", "No ':' separator found in variable '", species_var_name, "'");
-      _sp_phase_name[i] = species_var_name.substr(0, colon);
-      if (std::find(_db_phase_names.begin(), _db_phase_names.end(), _sp_phase_name[i]) ==
-          _db_phase_names.end())
-        paramError("output_species",
-                   "Phase name '",
-                   _sp_phase_name[i],
-                   "' of output species '",
-                   species_var_name,
-                   "' was not found in the simulation.");
-      _sp_species_name[i] = species_var_name.substr(colon + 1);
-
-      auto ph_index = std::distance(
-          _db_phase_names.begin(),
-          std::find(_db_phase_names.begin(), _db_phase_names.end(), _sp_phase_name[i]));
-
-      if (!Thermochimica::isPhaseMQM(ph_index) &&
-          std::find(_db_species_names[ph_index].begin(),
-                    _db_species_names[ph_index].end(),
-                    _sp_species_name[i]) == _db_species_names[ph_index].end())
-        paramError("output_species",
-                   "Species '",
-                   _sp_species_name[i],
-                   "' was not found in the simulation.");
-    }
-
-    if (_output_element_potential)
-    {
-      _element_potentials.resize(_n_elements);
-      for (const auto i : make_range(_n_elements))
-      {
-        auto element_var_name = getVar("output_element_potentials", i)->name();
-        auto colon = element_var_name.find_last_of(':');
-        if (colon == std::string::npos)
-          paramError("output_element_potentials",
-                     "No ':' separator found in variable '",
-                     element_var_name,
-                     "'");
-        _element_potentials[i] = element_var_name.substr(colon + 1);
-        if (std::find(_el_name.begin(), _el_name.end(), _element_potentials[i]) == _el_name.end())
-          paramError("output_element_potentials",
-                     "Element '",
-                     _element_potentials[i],
-                     "' was not found in the simulation.");
-      }
-    }
-
-    if (_output_vapor_pressures)
-    {
-      if (!(Thermochimica::getNumberSpeciesSystem()[0] > 0))
-        paramError("output_vapor_pressures",
-                   "Vapor pressures requested but database contains no gas phase.");
-
-      for (const auto i : make_range(_n_vapor_species))
-      {
-        auto vapor_species_name = getVar("output_vapor_pressures", i)->name();
-        auto colon = vapor_species_name.find_last_of(':');
-        if (colon == std::string::npos)
-          paramError("output_vapor_pressures",
-                     "No ':' separator found in variable '",
-                     vapor_species_name,
-                     "'");
-        _vapor_phase_name[i] = vapor_species_name.substr(0, colon);
-        if (_vapor_phase_name[i] != _db_phase_names[0])
-          paramError("output_vapor_pressures",
-                     "Phase '",
-                     _vapor_phase_name[i],
-                     "' of vapor species '",
-                     vapor_species_name,
-                     "' is not a gas phase. Cannot calculate vapor pressure.");
-        _vapor_species_name[i] = vapor_species_name.substr(colon + 1);
-        if (std::find(_db_species_names[0].begin(),
-                      _db_species_names[0].end(),
-                      _vapor_species_name[i]) == _db_species_names[0].end())
-          paramError("output_vapor_pressures",
-                     "Species '",
-                     _vapor_species_name[i],
-                     "' was not found in the gas phase.");
-      }
-    }
-    // get phase name && phase name should be that of gas phase && gas phase should be in the
-    // database gas phase in the database : get number of species in solution phase 0 and if that is
-    // greater than 0 then we definitely have a gas phase because that is how factsage format is.
-    // Then we can compare to the name of the first phase in database. If the phase name is wrong
-    // then there is an issue. If the phase name is correct then check the database
-  }
-#endif
 }
 
 void
@@ -209,8 +114,10 @@ ThermochimicaNodalData::execute()
   // Optionally ask for a re-initialization (if reinit_requested == true)
   reinitDataMooseToTc();
 
+  std::cout << "Current node: " << _current_node->id() << ". Solving now\n";
   // Calculate thermochemical equilibrium
-  Thermochimica::thermochimica();
+  Thermochimica::solve();
+  std::cout << "Current node: " << _current_node->id() << ". Solved\n";
 
   // fetch data for the current node
   auto & d = _data[_current_node->id()];

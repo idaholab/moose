@@ -2,17 +2,17 @@
   [gen]
     type = GeneratedMeshGenerator
     dim = 2
-    nx = 10
+    nx = 1
     ny = 1
   []
 []
 
 [GlobalParams]
   elements = 'F Li Be'
-  output_phases = 'all'
-  output_species = 'all'
-  element_potentials = 'all'
-  output_vapor_pressures = 'all'
+  output_phases = 'gas_ideal MSFL'
+  output_species = 'gas_ideal:Li'
+  # element_potentials = 'ALL'
+  # output_vapor_pressures = 'ALL'
 []
 
 [ChemicalComposition]
@@ -20,7 +20,18 @@
   tunit = K
   punit = atm
   munit = moles
+  temperature = T
+  reinit_requested = false
+  user_object_name = Thermochimica
 []
+
+[Variables]
+  [T]
+    type = MooseVariable
+    initial_condition = 2250
+  []
+[]
+
 
 [ICs]
   [Li]
@@ -40,15 +51,6 @@
   []
 []
 
-[UserObjects]
-  [data]
-    type = ThermochimicaNodalData
-    temperature = 1250
-    execute_on = 'INITIAL TIMESTEP_END'
-    reinit_requested = false # changes parallel results slightly
-  []
-[]
-
 [AuxVariables]
   [n]
   []
@@ -58,7 +60,7 @@
   [thermochimica]
     type = ThermochimicaAux
     variable = n
-    thermo_nodal_data_uo = data
+    thermo_nodal_data_uo = Thermochimica
   []
 []
 

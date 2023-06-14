@@ -20,18 +20,20 @@
   tunit = K
   punit = atm
   munit = moles
+  temperature = 2250
+  reinit_requested = false
 []
 
-[UserObjects]
-  [data]
-    type = ThermochimicaNodalData
-    temperature = 2250
-    elements = 'Mo Ru'
-    output_phases = 'BCCN HCPN'
-    execute_on = 'INITIAL TIMESTEP_END'
-    reinit_requested = false # changes parallel results slightly
-  []
-[]
+# [UserObjects]
+#   [data]
+#     type = ThermochimicaNodalData
+#     temperature = 2250
+#     elements = 'Mo Ru'
+#     output_phases = 'BCCN HCPN'
+#     execute_on = 'INITIAL TIMESTEP_END'
+#     reinit_requested = false # changes parallel results slightly
+#   []
+# []
 
 [AuxVariables]
   [n]

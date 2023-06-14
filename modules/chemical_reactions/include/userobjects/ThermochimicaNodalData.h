@@ -69,12 +69,12 @@ protected:
   const std::size_t _n_species;
   const std::size_t _n_elements;
   const std::size_t _n_vapor_species;
+  const std::size_t _n_element_phases;
 
   std::vector<const VariableValue *> _el;
-  std::vector<std::string> _el_name;
+  // std::vector<std::string> _el_name;
   std::vector<unsigned int> _el_id;
 
-  std::pair<int, int> _db_num_phases;
   std::vector<std::string> _db_phase_names;
   std::vector<std::vector<std::string>> _db_species_names;
 
@@ -83,6 +83,8 @@ protected:
   std::vector<std::string> _sp_species_name;
   std::vector<std::string> _vapor_phase_name;
   std::vector<std::string> _vapor_species_name;
+  std::vector<std::string> _phelem_phase;
+  std::vector<std::string> _phelem_element;
 
   /// Nodal data (TODO: investigate writing directly to AuxVariables)
   std::unordered_map<dof_id_type, Data> _data;

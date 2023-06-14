@@ -12,7 +12,8 @@
   output_phases = 'BCCN HCPN'
   output_species = 'BCCN:Mo HCPN:Mo BCCN:Ru HCPN:Ru'
   output_element_potentials = 'mu:Mo mu:Ru'
-  output_vapor_pressures = 'gas_ideal:Mo'
+  output_vapor_pressures = 'vp:gas_ideal:Mo'
+  output_element_phases = 'ep:BCCN:Mo'
 []
 
 [ChemicalComposition]
@@ -20,6 +21,9 @@
   tunit = K
   punit = atm
   munit = moles
+  temperature = 2250
+  reinit_requested = false
+  # execute_on = 'TIMESTEP_END'
 []
 
 [ICs]
@@ -35,15 +39,21 @@
   []
 []
 
-[UserObjects]
-  [data]
-    type = ThermochimicaNodalData
-    temperature = 2250
-    output_phases = 'BCCN HCPN'
-    execute_on = 'INITIAL TIMESTEP_END'
-    reinit_requested = false # changes parallel results slightly
-  []
-[]
+# [UserObjects]
+#   [data]
+#     type = ThermochimicaNodalData
+#     temperature = 2250
+#     execute_on = 'INITIAL TIMESTEP_END'
+#     reinit_requested = false # changes parallel results slightly
+#   []
+# []
+
+# [Variables]
+#   [T]
+#     type = MooseVariable
+#     initial_condition = 2250
+#   []
+# []
 
 [AuxVariables]
   [n]
@@ -54,7 +64,7 @@
   [thermochimica]
     type = ThermochimicaAux
     variable = n
-    thermo_nodal_data_uo = data
+    thermo_nodal_data_uo = Thermochimica
   []
 []
 

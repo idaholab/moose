@@ -55,4 +55,19 @@ protected:
 
   /// List of elements in specific phases to extract the molar amount of the element in that phase
   std::vector<std::string> _element_phases;
+
+  /// Flag for whether Thermochimica should use the reinit feature or not
+  bool _reinit;
+
+  /// Name of the ThermochimicaNodalData UO to be set up
+  std::string _uo_name;
+
+  /// Mapped element IDs
+  std::vector<unsigned int> _element_ids;
+
+  /// Tokenized versions of the output variables to avoid redoing tokenization
+  std::vector<std::pair<std::string, std::string>> _token_species;
+  std::vector<std::string> _token_element_potentials;
+  std::vector<std::pair<std::string, std::string>> _token_vapor_species;
+  std::vector<std::pair<std::string, std::string>> _token_phase_elements;
 };

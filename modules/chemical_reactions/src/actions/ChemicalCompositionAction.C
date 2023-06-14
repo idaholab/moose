@@ -13,6 +13,7 @@
 #include "MooseMesh.h"
 #include "MooseUtils.h"
 #include "MooseUtils.h"
+#include <iostream>
 
 #include "libmesh/string_to_enum.h"
 
@@ -36,9 +37,14 @@ ChemicalCompositionAction::validParams()
                                           "Sets up the thermodynamic model and variables for the "
                                           "thermochemistry solve using Thermochimica.");
 
-  params.addParam<std::vector<std::string>>("elements", "List of chemical elements");
+  params.addRequiredParam<std::vector<std::string>>("elements",
+                                                    "List of chemical elements (or ALL)");
+  params.addRequiredCoupledVar("temperature", "Name of temperature variable");
+  params.addCoupledVar("pressure", "Name of pressure variable");
+  params.addParam<bool>("reinit_requested", true, "Should Thermochimica use re-initialization");
   params.addParam<FileName>("initial_values", "The CSV file name with initial conditions.");
   params.addParam<FileName>("thermofile", "Thermodynamics model file");
+  params.addParam<std::string>("user_object_name", "Name of the thermochimica nodal user object");
 
   MooseEnum tUnit("K C F R");
   params.addRequiredParam<MooseEnum>("tunit", tUnit, "Temperature Unit");
@@ -47,6 +53,10 @@ ChemicalCompositionAction::validParams()
   MooseEnum mUnit(
       "mole_fraction atom_fraction atoms moles gram-atoms mass_fraction kilograms grams pounds");
   params.addRequiredParam<MooseEnum>("munit", mUnit, "Mass Unit");
+  ExecFlagEnum exec_enum = MooseUtils::getDefaultExecFlagEnum();
+  exec_enum = {EXEC_INITIAL, EXEC_TIMESTEP_END};
+  params.addParam<ExecFlagEnum>(
+      "execute_on", exec_enum, "When to execute the ThermochimicaNodalData UO");
 
   params.addParam<std::vector<std::string>>("output_phases", "List of phases to be output");
   params.addParam<std::vector<std::string>>(
@@ -60,6 +70,8 @@ ChemicalCompositionAction::validParams()
   params.addParam<std::vector<std::string>>(
       "output_element_phases",
       "List of elements whose molar amounts in specific phases are requested");
+  params.addParam<std::string>(
+      "uo_name", "Thermochimica", "Name of the ThermochimicaNodalDataUserObject.");
   return params;
 }
 
@@ -73,7 +85,9 @@ ChemicalCompositionAction::ChemicalCompositionAction(const InputParameters & par
     _species(getParam<std::vector<std::string>>("output_species")),
     _element_potentials(getParam<std::vector<std::string>>("output_element_potentials")),
     _vapor_pressures(getParam<std::vector<std::string>>("output_vapor_pressures")),
-    _element_phases(getParam<std::vector<std::string>>("output_element_phases"))
+    _element_phases(getParam<std::vector<std::string>>("output_element_phases")),
+    _reinit(getParam<bool>("reinit_requested")),
+    _uo_name(getParam<std::string>("uo_name"))
 {
   ThermochimicaUtils::checkLibraryAvailability(*this);
 
@@ -132,11 +146,11 @@ ChemicalCompositionAction::ChemicalCompositionAction(const InputParameters & par
 
   if (isParamValid("elements"))
   {
-    if (_elements.size() == 1 && _elements[0] == "All")
+    if (_elements.size() == 1 && _elements[0] == "ALL")
     {
       _elements.resize(Thermochimica::getNumberElementsDatabase());
       _elements = Thermochimica::getElementsDatabase();
-      mooseInfo("Thermochimica elements: 'All' specified in input file. Using ",
+      mooseInfo("Thermochimica elements: 'ALL' specified in input file. Using: ",
                 Moose::stringify(_elements));
     }
     else
@@ -147,11 +161,14 @@ ChemicalCompositionAction::ChemicalCompositionAction(const InputParameters & par
         if (std::find(db_elements.begin(), db_elements.end(), _elements[i]) == db_elements.end())
           paramError("elements", "Element '", _elements[i], "' was not found in the database.");
     }
+    _element_ids.resize(_elements.size());
+    for (const auto i : index_range(_elements))
+      _element_ids[i] = Thermochimica::atomicNumber(_elements[i]);
   }
 
 #ifdef THERMOCHIMICA_ENABLED
   // I want to check all the input parameters here and have a list of possible phases and species
-  // for setting up the Aux variables with "All" option
+  // for setting up the Aux variables with "ALL" option
 
   // Temporarily set Thermochimica state space to get the list of possible phases and species
   Thermochimica::setTemperaturePressure(1000.0, 1.0);
@@ -164,12 +181,12 @@ ChemicalCompositionAction::ChemicalCompositionAction(const InputParameters & par
 
   if (isParamValid("output_phases"))
   {
-    if (_phases.size() == 1 && _phases[0] == "All")
+    if (_phases.size() == 1 && _phases[0] == "ALL")
     {
       auto [soln_phases, stoich_phases] = Thermochimica::getNumberPhasesSystem();
       _phases.resize(soln_phases + stoich_phases);
       _phases = Thermochimica::getPhaseNamesSystem();
-      mooseInfo("ChemicalCompositionAction phases: 'All' specified in input file. Using ",
+      mooseInfo("ChemicalCompositionAction phases: 'ALL' specified in input file. Using: ",
                 Moose::stringify(_phases));
     }
     else
@@ -181,31 +198,94 @@ ChemicalCompositionAction::ChemicalCompositionAction(const InputParameters & par
     }
   }
 
+  if (isParamValid("output_species"))
+  {
+    auto phases = Thermochimica::getPhaseNamesSystem();
+    auto n_db_species = Thermochimica::getNumberSpeciesSystem();
+    auto species = Thermochimica::getSpeciesSystem();
+    for (auto i : index_range(n_db_species))
+      if (Thermochimica::isPhaseMQM(i))
+      {
+        auto [pairs, quads, idbg] =
+            Thermochimica::getMqmqaNumberPairsQuads(Thermochimica::getPhaseNamesSystem()[i]);
+        n_db_species[i] = pairs;
+      }
+
+    if (_species.size() == 1 && _species[0] == "ALL")
+    {
+      _species.resize(std::reduce(n_db_species.begin(), n_db_species.end()));
+      _token_species.resize(_species.size());
+      std::size_t indx = 0;
+      for (const auto i : make_range(species.size()))
+      {
+        indx = i == 0 ? 0 : n_db_species[i - 1];
+        for (const auto j : make_range(species[i].size()))
+        {
+          _species[indx + j] = phases[i] + ":" + species[i][j];
+          _token_species[indx + j] = std::make_pair(phases[i], species[i][j]);
+        }
+      }
+      mooseInfo("ChemicalCompositionAction species: 'ALL' specified in input file. Using: ",
+                Moose::stringify(_species));
+    }
+    else
+      for (const auto i : index_range(_species))
+      {
+        _token_species.resize(_species.size());
+        std::vector<std::string> tokens;
+        MooseUtils::tokenize(_species[i], tokens, 1, ":");
+        if (tokens.size() == 1)
+          paramError("output_species", "No ':' separator found in variable '", _species[i], "'");
+
+        auto phase_index = std::find(phases.begin(), phases.end(), tokens[0]);
+        if (phase_index == phases.end())
+          paramError("output_species",
+                     "Phase '",
+                     tokens[0],
+                     "' of output species '",
+                     _species[i],
+                     "' not found in the simulation.");
+        auto sp = species[std::distance(phases.begin(), phase_index)];
+        if (std::find(sp.begin(), sp.end(), tokens[1]) == sp.end())
+          paramError(
+              "output_species", "Species '", tokens[1], "' was not found in the simulation.");
+        _token_species[i] = std::make_pair(tokens[0], tokens[1]);
+      }
+  }
+
   if (isParamValid("output_element_potentials"))
   {
-    if (_element_potentials.size() == 1 && _element_potentials[0] == "All")
+    if (_element_potentials.size() == 1 && _element_potentials[0] == "ALL")
     {
+      _token_element_potentials.resize(_elements.size());
+      _token_element_potentials = _elements;
       _element_potentials.resize(_elements.size());
       for (const auto i : index_range(_elements))
         _element_potentials[i] = "mu:" + _elements[i];
+      mooseInfo(
+          "ChemicalCompositionAction element potentials: 'ALL' specified in input file. Using: ",
+          Moose::stringify(_element_potentials));
     }
     else
+    {
+      _token_element_potentials.resize(_element_potentials.size());
       for (const auto i : index_range(_element_potentials))
       {
-        auto colon = _element_potentials[i].find_last_of(':');
-        if (colon == std::string::npos)
+        std::vector<std::string> tokens;
+        MooseUtils::tokenize(_element_potentials[i], tokens, 1, ":");
+        if (tokens.size() == 1)
           paramError("output_element_potentials",
                      "No ':' separator found in variable '",
                      _element_potentials[i],
                      "'");
-        if (std::find(_elements.begin(),
-                      _elements.end(),
-                      _element_potentials[i].substr(colon + 1)) == _elements.end())
+        if (std::find(_elements.begin(), _elements.end(), tokens[1]) == _elements.end())
           paramError("output_element_potentials",
                      "Element '",
-                     _element_potentials[i].substr(colon + 1),
+                     tokens[1],
                      "' was not found in the simulation.");
+        _token_element_potentials[i] = tokens[1];
       }
+    }
   }
 
   if (isParamValid("output_vapor_pressures"))
@@ -213,47 +293,96 @@ ChemicalCompositionAction::ChemicalCompositionAction(const InputParameters & par
     if (!Thermochimica::isPhaseGas(0))
       paramError("output_vapor_pressures",
                  "No gas phase found in the simulation. Cannot output vapor pressures.");
-    if (_vapor_pressures.size() == 1 && _vapor_pressures[0] == "All")
+    if (_vapor_pressures.size() == 1 && _vapor_pressures[0] == "ALL")
     {
       _vapor_pressures.resize(Thermochimica::getNumberSpeciesSystem()[0]);
+      _token_vapor_species.resize(Thermochimica::getNumberSpeciesSystem()[0]);
       auto db_gas_species = Thermochimica::getSpeciesInPhase(0);
+      auto gas_name = Thermochimica::getPhaseNamesSystem()[0];
       for (const auto i : index_range(db_gas_species))
-        _vapor_pressures[i] = Thermochimica::getPhaseNamesSystem()[0] + db_gas_species[i];
-      mooseInfo("ChemicalCompositionAction vapor pressures: 'All' specified in input file. Using ",
+      {
+        _vapor_pressures[i] = "vp:" + gas_name + ':' + db_gas_species[i];
+        _token_vapor_species[i] = std::make_pair(gas_name, db_gas_species[i]);
+      }
+      mooseInfo("ChemicalCompositionAction vapor pressures: 'ALL' specified in input file. Using: ",
                 Moose::stringify(_vapor_pressures));
     }
     else
     {
       auto db_gas_species = Thermochimica::getSpeciesInPhase(0);
+      _token_vapor_species.resize(_vapor_pressures.size());
       for (const auto i : index_range(_vapor_pressures))
       {
-        auto colon = _vapor_pressures[i].find_last_of(':');
-        if (colon == std::string::npos)
+        std::vector<std::string> tokens;
+        MooseUtils::tokenize(_vapor_pressures[i], tokens, 1, ":");
+        if (tokens.size() == 1)
           paramError("output_vapor_pressures",
                      "No ':' separator found in variable '",
                      _vapor_pressures[i],
                      "'");
-        if (_vapor_pressures[i].substr(0, colon) != Thermochimica::getPhaseNamesSystem()[0])
+        if (tokens[1] != Thermochimica::getPhaseNamesSystem()[0])
           paramError("output_vapor_pressures",
                      "Phase '",
-                     _vapor_pressures[i].substr(0, colon),
+                     tokens[1],
                      "' of vapor species '",
                      _vapor_pressures[i],
                      "' is not a gas phase. Cannot calculate vapor pressure.");
-        if (std::find(db_gas_species.begin(),
-                      db_gas_species.end(),
-                      _vapor_pressures[i].substr(colon + 1)) == db_gas_species.end())
+        if (std::find(db_gas_species.begin(), db_gas_species.end(), tokens[2]) ==
+            db_gas_species.end())
           paramError("output_vapor_pressures",
                      "Species '",
-                     _vapor_pressures[i].substr(colon + 1),
+                     tokens[2],
                      "' was not found in the gas phase of simulation.");
+        _token_vapor_species[i] = std::make_pair(tokens[1], tokens[2]);
       }
     }
   }
 
-  // if (isParamValid("output_element_phases"))
-  // {
-  // }
+  if (isParamValid("output_element_phases"))
+  {
+    auto phases = Thermochimica::getPhaseNamesSystem();
+    if (_element_phases.size() == 1 && _element_phases[0] == "ALL")
+    {
+      _element_phases.resize(_elements.size() * phases.size());
+      _token_phase_elements.resize(_elements.size() * phases.size());
+      for (const auto i : index_range(phases))
+        for (const auto j : index_range(_elements))
+        {
+          _element_phases[i * _elements.size() + j] = phases[i] + ':' + _elements[j];
+          _token_phase_elements[i * _elements.size() + j] = std::make_pair(phases[i], _elements[j]);
+        }
+      mooseInfo(
+          "ChemicalCompositionAction elements in phase: 'ALL' specified in input file. Using: ",
+          Moose::stringify(_element_phases));
+    }
+    else
+    {
+      _token_phase_elements.resize(_element_phases.size());
+      for (const auto i : index_range(_element_phases))
+      {
+        std::vector<std::string> tokens;
+        MooseUtils::tokenize(_vapor_pressures[i], tokens, 1, ":");
+        if (tokens.size() == 1)
+          paramError("output_element_phases",
+                     "No ':' separator found in variable '",
+                     _element_phases[i],
+                     "'");
+        if (std::find(phases.begin(), phases.end(), tokens[1]) == phases.end())
+          paramError("output_element_phases",
+                     "Phase '",
+                     tokens[1],
+                     "' of '",
+                     _element_phases[i],
+                     "' not found in the simulation.");
+        if (std::find(_elements.begin(), _elements.end(), tokens[2]) == _elements.end())
+          paramError("output_element_phases",
+                     "Element '",
+                     tokens[2],
+                     "' was not found in the simulation.");
+        _token_phase_elements[i] = std::make_pair(tokens[1], tokens[2]);
+      }
+    }
+  }
 
 #endif
 }
@@ -306,6 +435,56 @@ ChemicalCompositionAction::act()
       params.set<Real>("value") = it.second;
       _problem->addInitialCondition(class_name, it.first + "_ic", params);
     }
+  }
+
+  //
+  // Set up user object
+  //
+  if (_current_task == "add_user_object")
+  {
+
+    auto uo_params = _factory.getValidParams("ThermochimicaNodalData");
+
+    std::copy(_elements.begin(),
+              _elements.end(),
+              std::back_inserter(uo_params.set<std::vector<VariableName>>("elements")));
+    std::copy(_element_ids.begin(),
+              _element_ids.end(),
+              std::back_inserter(uo_params.set<std::vector<unsigned int>>("element_ids")));
+
+    if (isParamValid("output_phases"))
+      uo_params.set<std::vector<VariableName>>("output_phases")
+          .insert(uo_params.set<std::vector<VariableName>>("output_phases").end(),
+                  _phases.begin(),
+                  _phases.end());
+
+    if (isParamValid("output_species"))
+      uo_params.set<std::vector<VariableName>>("output_species")
+          .insert(uo_params.set<std::vector<VariableName>>("output_species").end(),
+                  _species.begin(),
+                  _species.end());
+
+    if (isParamValid("output_element_potentials"))
+      uo_params.set<std::vector<VariableName>>("output_element_potentials")
+          .insert(uo_params.set<std::vector<VariableName>>("output_element_potentials").end(),
+                  _element_potentials.begin(),
+                  _element_potentials.end());
+
+    if (isParamValid("output_vapor_pressures"))
+      uo_params.set<std::vector<VariableName>>("output_vapor_pressures")
+          .insert(uo_params.set<std::vector<VariableName>>("output_vapor_pressures").end(),
+                  _vapor_pressures.begin(),
+                  _vapor_pressures.end());
+
+    if (isParamValid("output_element_phases"))
+      uo_params.set<std::vector<VariableName>>("output_element_phases")
+          .insert(uo_params.set<std::vector<VariableName>>("output_element_phases").end(),
+                  _vapor_pressures.begin(),
+                  _vapor_pressures.end());
+
+    uo_params.applyParameters(parameters());
+
+    _problem->addUserObject("ThermochimicaNodalData", _uo_name, uo_params);
   }
 
   //
