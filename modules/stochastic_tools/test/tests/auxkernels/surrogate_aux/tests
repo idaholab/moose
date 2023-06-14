@@ -1,0 +1,55 @@
+[Tests]
+  issues = '#23018'
+  design = 'SurrogateModelAuxKernel.md'
+
+  [create]
+    type = CheckFiles
+    input = surrogate.i
+    check_files = 'surrogate_trainer_poly_regression.rd'
+    requirement = 'The system shall be able to create a surrogate that can be read in by file and use in aux kernels.'
+  []
+
+  [evaluate]
+    requirement = 'The system shall be able to assign the values of an auxiliary variable with the evaluation of a surrogate model for'
+    [var]
+      type = RunApp
+      input = surrogate_aux.i
+      prereq = create
+      detail = 'standard field variables and'
+    []
+    [array_var]
+      type = RunApp
+      input = surrogate_array_aux.i
+      prereq = create
+      detail = 'array field variables.'
+    []
+  []
+
+  [errors]
+    requirement = 'The system shall throw an error when evaluating a surrogate for auxiliary variable assignment if'
+    [parameter_unspecified]
+      type = RunException
+      input = surrogate_aux.i
+      cli_args = 'AuxKernels/u_aux/parameters=\'funx 3.14 var pp foo\''
+      prereq = create
+      expect_err = '\'foo\' is not listed in \'scalar_parameters\'\, \'coupled_variables\'\, or \'coupled_array_variables\'.'
+      detail = 'a parameter is undefined,'
+    []
+    [scalar_missing]
+      type = RunException
+      input = surrogate_aux.i
+      cli_args = 'AuxKernels/u_aux/parameters=\'funx 3.14 var pp foo\' AuxKernels/u_aux/scalar_parameters=\'funx funy pp foo\''
+      prereq = create
+      expect_err = '\'foo\' is not a postprocessor or a function.'
+      detail = 'a scalar parameter is not found, or'
+    []
+    [wrong_array_size]
+      type = RunException
+      input = surrogate_array_aux.i
+      cli_args = 'AuxVariables/u/components=3'
+      prereq = create
+      expect_err = 'The number of components in \'\w+\' \(\d+\) does not match the number of components in \'\w+\' \(\d+\).'
+      detail = 'a coupled array variable does not match the number of components.'
+    []
+  []
+[]

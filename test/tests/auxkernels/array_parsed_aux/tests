@@ -1,0 +1,17 @@
+[Tests]
+  design = 'ArrayParsedAux.md'
+  issues = '#20818'
+  [array_parsed_aux]
+    type = Exodiff
+    input = array_parsed_aux.i
+    exodiff = array_parsed_aux_out.e
+    requirement = 'The system shall be able to evaluate a parsed expression dependent on an array of variable values.'
+  []
+  [array_parsed_aux_error]
+    type = RunException
+    input = array_parsed_aux.i
+    cli_args = 'AuxVariables/parsed/components=3'
+    expect_err = 'The number of components in \'\w+\' \(\d+\) does not match the number of components in \'\w+\' \(\d+\).'
+    requirement = 'The system shall issue an error when evaluating a parsed expression with array variable values if the number of components of the variable and coupled variables do not match.'
+  []
+[]
