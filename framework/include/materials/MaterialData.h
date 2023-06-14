@@ -41,7 +41,7 @@ public:
    * Returns the number of quadrature points the material properties
    * support/hold.
    */
-  unsigned int nQPoints() const;
+  unsigned int nQPoints() const { return _n_qpoints; }
 
   /**
    * Declare the Real valued property named "name".
@@ -158,7 +158,7 @@ public:
   /**
    * Returns true if the stateful material is in a swapped state.
    */
-  bool isSwapped() const;
+  bool isSwapped() const { return _swapped; }
 
   /**
    * Provide read-only access to the underlying MaterialPropertyStorage object.
@@ -300,8 +300,7 @@ GenericMaterialProperty<T, is_ad> &
 MaterialData::declareHelper(const std::string & prop_name, const unsigned int state)
 {
   if constexpr (is_ad)
-    if (state != 0)
-      mooseError("Cannot request/declare AD properties for states other than zero");
+    mooseAssert(state == 0, "Can only request/declare for states other than zero");
 
   const auto prop_id = _storage.addProperty(prop_name, state);
   resizeProps<T, is_ad>(prop_id);
