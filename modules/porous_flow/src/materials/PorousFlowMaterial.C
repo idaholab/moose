@@ -136,21 +136,15 @@ PorousFlowMaterial::sizeNodalProperties()
 
   const auto new_size = std::max(_current_elem->n_nodes(), _qrule->n_points());
   auto & storage = _material_data->getMaterialPropertyStorage();
-  auto & props = _material_data->props();
-  auto & props_old = _material_data->propsOld();
-  auto & props_older = _material_data->propsOlder();
 
+  auto & props = _material_data->props();
   for (const auto prop_id : _supplied_prop_ids)
     props[prop_id].resize(new_size);
 
-  for (const auto prop_id : _supplied_old_prop_ids)
-    if (props_old.hasValue(prop_id))
-      props_old[prop_id].resize(new_size);
-
-  if (storage.hasOlderProperties())
+  for (const auto state : storage.statefulIndexRange())
     for (const auto prop_id : _supplied_old_prop_ids)
-      if (props_older.hasValue(prop_id))
-        props_older[prop_id].resize(new_size);
+      if (_material_data->props(state).hasValue(prop_id))
+        _material_data->props(state)[prop_id].resize(new_size);
 }
 
 unsigned

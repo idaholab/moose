@@ -103,14 +103,6 @@ public:
   MaterialProperties & props(const unsigned int state = 0);
   ///@}
 
-  ///@{
-  /**
-   * Deprecated Methods for retrieving older MaterialProperties objects
-   */
-  MaterialProperties & propsOld() { return props(1); }
-  MaterialProperties & propsOlder() { return props(2); }
-  ///@}
-
   template <typename T, bool is_ad>
   bool haveGenericProperty(const std::string & prop_name) const;
 

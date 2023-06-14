@@ -217,30 +217,6 @@ public:
   MaterialProperties & setProps(const Elem * elem, unsigned int side, const unsigned int state = 0);
   ///@}
 
-  /// @{
-  /**
-   * Deprecated access methods to old/older stored material property data.
-   */
-  const PropsType & propsOld() const { return props(1); }
-  const PropsType & propsOlder() const { return props(2); }
-  const MaterialProperties & propsOld(const Elem * elem, unsigned int side) const
-  {
-    return props(elem, side, 1);
-  }
-  const MaterialProperties & propsOlder(const Elem * elem, unsigned int side) const
-  {
-    return props(elem, side, 2);
-  }
-  MaterialProperties & setPropsOld(const Elem * elem, unsigned int side)
-  {
-    return setProps(elem, side, 1);
-  }
-  MaterialProperties & setPropsOlder(const Elem * elem, unsigned int side)
-  {
-    return setProps(elem, side, 1);
-  }
-  ///@}
-
   bool hasProperty(const std::string & prop_name) const;
 
   /**
