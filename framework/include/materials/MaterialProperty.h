@@ -17,6 +17,7 @@
 #include "MooseTypes.h"
 #include "DataIO.h"
 #include "MooseError.h"
+#include "UniqueStorage.h"
 
 #include "libmesh/libmesh_common.h"
 #include "libmesh/tensor_value.h"
@@ -358,10 +359,19 @@ private:
   }
 };
 
-/**
- * Container for storing material properties
- */
-class MaterialProperties : public std::vector<std::unique_ptr<PropertyValue>>
+class MaterialData;
+class MaterialPropertyStorage;
+
+class MaterialPropertiesKey
+{
+  friend class MaterialData;
+  friend class MaterialPropertyStorage;
+
+  MaterialPropertiesKey() {}
+  MaterialPropertiesKey(const MaterialPropertiesKey &) {}
+};
+
+class MaterialProperties : public UniqueProtectedStorage<PropertyValue>
 {
 public:
   /**
@@ -369,11 +379,21 @@ public:
    * @param n_qpoints The number of values needed to store (equals the the number of quadrature
    * points per mesh element)
    */
-  void resizeItems(const unsigned int n_qpoints)
+  void resizeItems(const std::size_t n_qpoints, const MaterialPropertiesKey)
   {
-    for (auto & value : *this)
-      if (value)
-        value->resize(n_qpoints);
+    for (const auto i : index_range(*this))
+      if (hasValue(i))
+        (*this)[i].resize(n_qpoints);
+  }
+
+  void resize(const std::size_t size, const MaterialPropertiesKey)
+  {
+    UniqueProtectedStorage<PropertyValue>::resize(size);
+  }
+
+  auto & setValue(const std::size_t i, const MaterialPropertiesKey)
+  {
+    return UniqueProtectedStorage<PropertyValue>::setValue(i);
   }
 };
 

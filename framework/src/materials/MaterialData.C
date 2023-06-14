@@ -25,7 +25,7 @@ MaterialData::resize(unsigned int n_qpoints)
     return;
 
   for (const auto state : make_range(_storage.stateIndex()))
-    props(state).resizeItems(n_qpoints);
+    props(state).resizeItems(n_qpoints, {});
   _n_qpoints = n_qpoints;
 }
 

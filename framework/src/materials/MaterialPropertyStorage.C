@@ -28,15 +28,14 @@ MaterialPropertyStorage::shallowSwapData(const std::vector<unsigned int> & state
                                          MaterialProperties & data,
                                          MaterialProperties & data_from)
 {
-  for (const auto i : index_range(stateful_prop_ids))
-  {
-    if (i >= data_from.size() || stateful_prop_ids[i] >= data.size())
-      continue;
-    PropertyValue * prop = data[stateful_prop_ids[i]].get();
-    PropertyValue * prop_from = data_from[i].get();
-    if (prop != nullptr && prop_from != nullptr)
-      prop->swap(*prop_from);
-  }
+  for (const auto i : make_range(std::min(stateful_prop_ids.size(), data_from.size())))
+    if (stateful_prop_ids[i] < data.size() && data.hasValue(stateful_prop_ids[i]) &&
+        data_from.hasValue(i))
+    {
+      auto & prop = data[stateful_prop_ids[i]];
+      auto & prop_from = data_from[i];
+      prop.swap(prop_from);
+    }
 }
 
 void
@@ -44,15 +43,14 @@ MaterialPropertyStorage::shallowSwapDataBack(const std::vector<unsigned int> & s
                                              MaterialProperties & data,
                                              MaterialProperties & data_from)
 {
-  for (const auto i : index_range(stateful_prop_ids))
-  {
-    if (i >= data.size() || stateful_prop_ids[i] >= data_from.size())
-      continue;
-    PropertyValue * prop = data[i].get();
-    PropertyValue * prop_from = data_from[stateful_prop_ids[i]].get();
-    if (prop != nullptr && prop_from != nullptr)
-      prop->swap(*prop_from);
-  }
+  for (const auto i : make_range(std::min(stateful_prop_ids.size(), data.size())))
+    if (stateful_prop_ids[i] < data_from.size() && data.hasValue(i) &&
+        data_from.hasValue(stateful_prop_ids[i]))
+    {
+      auto & prop = data[i];
+      auto & prop_from = data_from[stateful_prop_ids[i]];
+      prop.swap(prop_from);
+    }
 }
 
 void
@@ -128,7 +126,7 @@ MaterialPropertyStorage::prolongStatefulProps(
       auto & child_props = setProps(child_elem, child_side, state);
       for (const auto i : index_range(_stateful_prop_id_to_prop_id))
         for (const auto qp : index_range(refinement_map[child]))
-          child_props[i]->qpCopy(qp, *parent_props[i], child_map[qp]._to);
+          child_props[i].qpCopy(qp, parent_props[i], child_map[qp]._to);
     }
   }
 }
@@ -181,7 +179,7 @@ MaterialPropertyStorage::restrictStatefulProps(
     {
       const auto & child_props = props(child_elem, side, state);
       for (const auto i : index_range(_stateful_prop_id_to_prop_id))
-        (*parent_props[state])[i]->qpCopy(qp, *child_props[i], qp_map._to);
+        (*parent_props[state])[i].qpCopy(qp, child_props[i], qp_map._to);
     }
   }
 }
@@ -225,7 +223,7 @@ MaterialPropertyStorage::initStatefulProps(MaterialData & material_data,
     auto & to_props = setProps(&elem, side, state);
     for (const auto i : index_range(_stateful_prop_id_to_prop_id))
       for (const auto qp : make_range(n_qpoints))
-        to_props[i]->qpCopy(qp, *current_props[i], qp);
+        to_props[i].qpCopy(qp, current_props[i], qp);
   }
 }
 
@@ -265,11 +263,11 @@ MaterialPropertyStorage::copy(MaterialData & material_data,
 
   for (const auto state : make_range(stateIndex()))
   {
-    auto & from_props = props(elem_from, side, state);
-    auto & to_props = props(elem_to, side, state);
+    const auto & from_props = props(elem_from, side, state);
+    auto & to_props = setProps(elem_to, side, state);
     for (const auto i : index_range(_stateful_prop_id_to_prop_id))
       for (const auto qp : make_range(n_qpoints))
-        to_props[i]->qpCopy(qp, *from_props[i], qp);
+        to_props[i].qpCopy(qp, from_props[i], qp);
   }
 }
 
@@ -382,14 +380,14 @@ MaterialPropertyStorage::initProps(MaterialData & material_data,
 
   const auto n_props = _stateful_prop_id_to_prop_id.size();
   if (mat_props.size() < n_props)
-    mat_props.resize(n_props);
+    mat_props.resize(n_props, {});
 
   // init properties (allocate memory. etc)
   for (const auto i : index_range(_stateful_prop_id_to_prop_id))
-    if (!mat_props[i])
+    if (!mat_props.hasValue(i))
     {
       const auto prop_id = _stateful_prop_id_to_prop_id[i];
-      mat_props[i] = material_data.props(0)[prop_id]->clone(n_qpoints);
+      mat_props.setValue(i, {}) = material_data.props(0)[prop_id].clone(n_qpoints);
     }
 }
 

@@ -28,10 +28,7 @@ dataStore(std::ostream & stream, MaterialProperties & v, void * context)
   dataStore(stream, prop_size, context);
 
   for (const auto i : index_range(v))
-  {
-    mooseAssert(v[i], "Not valid");
-    dataStore(stream, *v[i], context);
-  }
+    dataStore(stream, v[i], context);
 }
 
 void
@@ -42,8 +39,5 @@ dataLoad(std::istream & stream, MaterialProperties & v, void * context)
   mooseAssert(prop_size == v.size(), "Loading MaterialProperties data into mis-sized target");
 
   for (const auto i : make_range(prop_size))
-  {
-    mooseAssert(v[i], "Not valid");
-    dataLoad(stream, *v[i], context);
-  }
+    dataLoad(stream, v[i], context);
 }

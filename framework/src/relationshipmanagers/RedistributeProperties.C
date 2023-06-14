@@ -158,10 +158,7 @@ RedistributeProperties::redistribute()
                             "Empty MaterialProperties in stateful properties map?");
 
                 for (const auto & prop : prop_vals)
-                {
-                  mooseAssert(prop, "Null pointer in MaterialProperties?");
-                  n_q_points = std::max(n_q_points, prop->size());
-                }
+                  n_q_points = std::max(n_q_points, prop.size());
 
                 std::ostringstream oss;
                 dataStore(oss, prop_vals, nullptr);

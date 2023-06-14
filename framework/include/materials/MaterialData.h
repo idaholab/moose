@@ -257,9 +257,8 @@ MaterialData::haveGenericProperty(const std::string & prop_name) const
   if (prop_id >= props(0).size())
     return false;
 
-  auto & base_prop = props(0)[prop_id];
-  mooseAssert(base_prop, "Invalid value");
-  return dynamic_cast<const GenericMaterialProperty<T, is_ad> *>(base_prop.get()) != nullptr;
+  const auto & base_prop = props(0)[prop_id];
+  return dynamic_cast<const GenericMaterialProperty<T, is_ad> *>(&base_prop) != nullptr;
 }
 
 template <typename T, bool is_ad>
@@ -271,13 +270,13 @@ MaterialData::resizeProps(unsigned int id)
   {
     auto & entry = props(state);
     if (entry.size() < size)
-      entry.resize(size);
-    if (!entry[id])
+      entry.resize(size, {});
+    if (!entry.hasValue(id))
     {
       if (is_ad && state == 0)
-        entry[id] = std::make_unique<ADMaterialProperty<T>>();
+        entry.setValue(id, {}) = std::make_unique<ADMaterialProperty<T>>();
       else
-        entry[id] = std::make_unique<MaterialProperty<T>>();
+        entry.setValue(id, {}) = std::make_unique<MaterialProperty<T>>();
     }
   }
 }
@@ -294,8 +293,7 @@ MaterialData::declareHelper(const std::string & prop_name, const unsigned int st
   resizeProps<T, is_ad>(prop_id);
 
   auto & base_prop = props(state)[prop_id];
-  mooseAssert(base_prop, "Not valid");
-  auto prop = dynamic_cast<GenericMaterialProperty<T, is_ad> *>(base_prop.get());
+  auto prop = dynamic_cast<GenericMaterialProperty<T, is_ad> *>(&base_prop);
   if (!prop)
   {
     const std::string type = is_ad ? "AD" : "non-AD";
@@ -304,7 +302,7 @@ MaterialData::declareHelper(const std::string & prop_name, const unsigned int st
 
     // See if a property of the other type exists first
     // This only counts for state 0, because old and on are non-ad props
-    if (state == 0 && dynamic_cast<GenericMaterialProperty<T, !is_ad> *>(base_prop.get()))
+    if (state == 0 && dynamic_cast<GenericMaterialProperty<T, !is_ad> *>(&base_prop))
       mooseError("The requested/declared ",
                  " material property '" + prop_name + "' of type '",
                  T_type,
