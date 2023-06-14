@@ -371,6 +371,7 @@ public:
   void customSetup(const ExecFlagType & exec_type) override;
   void residualSetup() override;
   void jacobianSetup() override;
+  virtual void solveSetup() {};
 
   virtual void prepare(const Elem * elem, THREAD_ID tid) override;
   virtual void prepareFace(const Elem * elem, THREAD_ID tid) override;
@@ -786,9 +787,7 @@ public:
   /**
    * reinit materials on a boundary
    * @param boundary_id The boundary on which to reinit corresponding materials
-   * @param tid The thread id
-   * @param swap_stateful Whether to swap stateful material properties between \p MaterialData and
-   * \p MaterialPropertyStorage
+   * @param tid The thread id_fe_problem
    * @param execute_stateful Whether to execute material objects that have stateful properties. This
    * should be \p false when for example executing material objects for mortar contexts in which
    * stateful properties don't make sense

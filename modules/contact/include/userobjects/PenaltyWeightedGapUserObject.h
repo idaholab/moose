@@ -10,7 +10,7 @@
 #pragma once
 
 #include "WeightedGapUserObject.h"
-#include "PenaltyMortarAugmentedLagrangeInterface.h"
+#include "AugmentedLagrangeInterface.h"
 
 template <typename>
 class MooseVariableFE;
@@ -21,7 +21,7 @@ class AugmentedLagrangianContactProblemInterface;
  * mortar constraints
  */
 class PenaltyWeightedGapUserObject : virtual public WeightedGapUserObject,
-                                     public PenaltyMortarAugmentedLagrangeInterface
+                                     public AugmentedLagrangeInterface
 {
 public:
   static InputParameters validParams();
@@ -42,7 +42,8 @@ public:
     return 0.0;
   };
 
-  virtual bool isContactConverged() override;
+  virtual bool isAugmentedLagrangianConverged() override;
+  virtual void augmentedLagrangianSetup() override;
   virtual void updateAugmentedLagrangianMultipliers() override;
 
 protected:
@@ -75,7 +76,12 @@ protected:
 
   /// Map from degree of freedom to augmented lagrange multiplier
   std::unordered_map<const DofObject *, Real> _dof_to_lagrange_multiplier;
-  std::unordered_map<const DofObject *, Real> _dof_to_old_lagrange_multiplier;
+
+  /// active set
+  std::set<const DofObject *> _active_set;
+
+  /// Map from degree of freedom to augmented lagrange multiplier
+  std::unordered_map<const DofObject *, Real> _dof_to_local_penalty;
 
   /// scale factor for the linear prediction for the augmented lagrange multipliers
   const Real _predictor_scale;

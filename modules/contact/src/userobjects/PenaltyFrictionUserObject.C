@@ -277,10 +277,10 @@ PenaltyFrictionUserObject::finalize()
 }
 
 bool
-PenaltyFrictionUserObject::isContactConverged()
+PenaltyFrictionUserObject::isAugmentedLagrangianConverged()
 {
   // check normal contact convergence first
-  if (!PenaltyWeightedGapUserObject::isContactConverged())
+  if (!PenaltyWeightedGapUserObject::isAugmentedLagrangianConverged())
     return false;
 
   for (const auto & [dof_object, traction_pair] : _dof_to_tangential_traction)

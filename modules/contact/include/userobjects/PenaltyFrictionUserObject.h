@@ -11,7 +11,7 @@
 
 #include "PenaltyWeightedGapUserObject.h"
 #include "WeightedVelocitiesUserObject.h"
-#include "PenaltyMortarAugmentedLagrangeInterface.h"
+#include "AugmentedLagrangeInterface.h"
 #include "TwoVector.h"
 
 /**
@@ -43,7 +43,7 @@ public:
                                      const unsigned int component) const override;
 
 
-  virtual bool isContactConverged() override;
+  virtual bool isAugmentedLagrangianConverged() override;
   virtual void updateAugmentedLagrangianMultipliers() override;
 
 protected:

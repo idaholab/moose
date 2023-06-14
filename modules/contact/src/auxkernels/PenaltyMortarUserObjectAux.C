@@ -25,7 +25,7 @@ PenaltyMortarUserObjectAux::validParams()
       "Populates an auxiliary variable with a contact quantities from penalty mortar contact.");
   MooseEnum contact_quantity("normal_pressure accumulated_slip_one "
                              "tangential_pressure_one tangential_velocity_one accumulated_slip_two "
-                             "tangential_pressure_two tangential_velocity_two weighted_gap "
+                             "tangential_pressure_two tangential_velocity_two normal_gap "
                              "normal_lm delta_tangential_lm_one delta_tangential_lm_two");
   params.addRequiredParam<MooseEnum>(
       "contact_quantity",
@@ -67,12 +67,12 @@ PenaltyMortarUserObjectAux::computeValue()
                    "The 'normal_pressure' quantity is only provided by a "
                    "'PenaltyWeightedGapUserObject' or derived object.");
 
-    case ContactQuantityEnum::WEIGHTED_GAP:
+    case ContactQuantityEnum::NORMAL_GAP:
       if (wguo)
-        return wguo->getNormalWeightedGap(_current_node);
+        return wguo->getNormalGap(_current_node);
       else
         paramError("user_object",
-                   "The 'normal_pressure' quantity is only provided by a "
+                   "The 'normal_gap' quantity is only provided by a "
                    "'WeightedGapUserObject' or derived object.");
 
     case ContactQuantityEnum::FRICTIONAL_PRESSURE_ONE:

@@ -13,7 +13,10 @@
 #include "MortarUtils.h"
 #include "MooseUtils.h"
 #include "MortarContactUtils.h"
+
 #include "libmesh/quadrature.h"
+
+#include <limits>
 
 InputParameters
 WeightedGapUserObject::validParams()
@@ -123,6 +126,7 @@ void
 WeightedGapUserObject::initialize()
 {
   _dof_to_weighted_gap.clear();
+  mooseInfoRepeated("WeightedGapUserObject::initialize();", _current_execute_flag);
 }
 
 void
@@ -152,7 +156,7 @@ WeightedGapUserObject::execute()
 }
 
 Real
-WeightedGapUserObject::getNormalWeightedGap(const Node * const node) const
+WeightedGapUserObject::getNormalGap(const Node * const node) const
 {
   const auto it = _dof_to_weighted_gap.find(_subproblem.mesh().nodePtr(node->id()));
 
@@ -160,5 +164,5 @@ WeightedGapUserObject::getNormalWeightedGap(const Node * const node) const
   if (it != _dof_to_weighted_gap.end())
     return physicalGap(it->second);
   else
-    return 0.0;
+    return 1e30;
 }

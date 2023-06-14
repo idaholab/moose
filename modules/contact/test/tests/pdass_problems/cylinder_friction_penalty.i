@@ -40,7 +40,7 @@
   []
   [tangential_vel_one]
   []
-  [weighted_gap]
+  [normal_gap]
   []
   [react_x]
   []
@@ -94,11 +94,11 @@
     user_object = friction_uo
     contact_quantity = tangential_velocity_one
   []
-  [penalty_weighted_gap]
+  [penalty_gap]
     type = PenaltyMortarUserObjectAux
-    variable = weighted_gap
+    variable = normal_gap
     user_object = friction_uo
-    contact_quantity = weighted_gap
+    contact_quantity = normal_gap
   []
   [react_x]
     type = TagVectorAux
@@ -151,7 +151,7 @@
   [gap]
     type = SideExtremeValue
     value_type = min
-    variable = weighted_gap
+    variable = normal_gap
     boundary = 3
   []
   [num_al]
@@ -219,7 +219,7 @@
 
   line_search = 'none'
 
-  nl_abs_tol = 1e-7
+  nl_abs_tol = 1e-10
 
   start_time = 0.0
   end_time = 0.3 # 3.5
@@ -230,6 +230,7 @@
     type = SimplePredictor
     scale = 1.0
   []
+  automatic_scaling = true
 []
 
 [Preconditioning]
@@ -243,7 +244,7 @@
   [surface]
     type = NodalValueSampler
     use_displaced_mesh = false
-    variable = 'disp_x disp_y penalty_normal_pressure penalty_frictional_pressure'
+    variable = 'disp_x disp_y penalty_normal_pressure penalty_frictional_pressure normal_gap'
     boundary = '3'
     sort_by = id
   []
@@ -277,7 +278,7 @@
     disp_y = disp_y
     friction_coefficient = 0.4 # with 2.0 works
     secondary_variable = disp_x
-    penalty = 1e11
+    penalty = 1e9
     penalty_friction = 5e8 # 1e7
   []
   [geo]

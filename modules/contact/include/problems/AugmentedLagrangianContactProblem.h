@@ -49,6 +49,7 @@ public:
   virtual ~AugmentedLagrangianContactProblemTempl() {}
 
   virtual void timestepSetup() override;
+  virtual void solveSetup() override;
 
   virtual MooseNonlinearConvergenceReason
   checkNonlinearConvergence(std::string & msg,
@@ -64,6 +65,10 @@ public:
                             const PetscInt max_funcs,
                             const Real ref_resid,
                             const Real div_threshold) override;
+
+protected:
+  /// flag to ensure one call to augmented lagrangian setup is done at the beginning of the timestep
+  bool _do_augmented_lagrangian_setup;
 
   using AugmentedLagrangianContactProblemInterface::_lagrangian_iteration_number;
   using AugmentedLagrangianContactProblemInterface::_maximum_number_lagrangian_iterations;

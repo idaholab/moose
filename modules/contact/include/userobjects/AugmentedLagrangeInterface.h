@@ -9,13 +9,18 @@
 
 #pragma once
 
+class MooseObject;
+
 /**
  * Interface class for penalty mortar user objects that support the augmented Lagrange formalism as
  * implemented in AugmentedLagrangianContactProblem.
  */
-class PenaltyMortarAugmentedLagrangeInterface
+class AugmentedLagrangeInterface
 {
 public:
-  virtual bool isContactConverged() = 0;
+  AugmentedLagrangeInterface(const MooseObject * moose_object);
+
+  virtual bool isAugmentedLagrangianConverged() = 0;
+  virtual void augmentedLagrangianSetup() = 0;
   virtual void updateAugmentedLagrangianMultipliers() = 0;
 };

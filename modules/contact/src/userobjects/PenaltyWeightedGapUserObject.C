@@ -44,6 +44,7 @@ PenaltyWeightedGapUserObject::validParams()
 
 PenaltyWeightedGapUserObject::PenaltyWeightedGapUserObject(const InputParameters & parameters)
   : WeightedGapUserObject(parameters),
+    AugmentedLagrangeInterface(this),
     _penalty(getParam<Real>("penalty")),
     _penalty_multiplier(getParam<Real>("penalty_multiplier")),
     _penetration_tolerance(getParam<Real>("penetration_tolerance")),
@@ -83,7 +84,8 @@ PenaltyWeightedGapUserObject::contactPressure() const
 void
 PenaltyWeightedGapUserObject::selfInitialize()
 {
-  _dof_to_normal_pressure.clear();
+  for (auto & dof_pn : _dof_to_normal_pressure)
+    dof_pn.second = 0.0;
 }
 
 void
@@ -126,46 +128,32 @@ PenaltyWeightedGapUserObject::reinit()
   {
     const Node * const node = _lower_secondary_elem->node_ptr(i);
 
-    // Simo's definition of the gap is positive during penetration
-    const auto & weighted_gap = -libmesh_map_find(_dof_to_weighted_gap, node).first;
+    const auto penalty =
+        findValue(_dof_to_local_penalty, static_cast<const DofObject *>(node), _penalty);
+    const auto & gap = adPhysicalGap(libmesh_map_find(_dof_to_weighted_gap, node));
     const auto lagrange_multiplier =
         _augmented_lagrange_problem ? _dof_to_lagrange_multiplier[node] : 0.0;
     const auto & test_i = (*_test)[i];
 
-    // Simo et al. 2.14
-    auto normal_pressure = _penalty * weighted_gap + lagrange_multiplier;
-    normal_pressure = normal_pressure > 0.0 ? normal_pressure : 0.0;
+    auto normal_pressure = penalty * gap + lagrange_multiplier;
+    normal_pressure = normal_pressure < 0.0 ? normal_pressure : 0.0;
 
-    _dof_to_normal_pressure[node] = normal_pressure;
+    _dof_to_normal_pressure[node] = -normal_pressure;
     for (const auto qp : make_range(_qrule_msm->n_points()))
-      _contact_force[qp] += test_i[qp] * normal_pressure;
+      _contact_force[qp] += -test_i[qp] * normal_pressure;
   }
 }
 
 void
 PenaltyWeightedGapUserObject::selfTimestepSetup()
 {
-  // do not clear the LMs!
+  // clear the LMs
+  for (auto & dof_lm : _dof_to_lagrange_multiplier)
+    dof_lm.second = 0.0;
 
-  // predict next time step LM linearly
-  if (_predictor_scale != 0.0)
-    for (auto & [dof_object, lagrange_multiplier] : _dof_to_lagrange_multiplier)
-    {
-      // save off current LM
-      const auto current_lm = lagrange_multiplier;
-
-      // find old LM
-      const auto it = _dof_to_old_lagrange_multiplier.find(dof_object);
-      if (it != _dof_to_old_lagrange_multiplier.end())
-      {
-        // Linearly extrapolate LM
-        const auto old_lm = it->second;
-        lagrange_multiplier += (current_lm - old_lm) / _dt_old * _dt * _predictor_scale;
-      }
-
-      // save unupdated LM old LM storage
-      _dof_to_old_lagrange_multiplier[dof_object] = current_lm;
-    }
+  // reset penalty
+  for (auto & dof_lp : _dof_to_local_penalty)
+    dof_lp.second = _penalty;
 
   // save old timestep
   _dt_old = _dt;
@@ -178,26 +166,32 @@ PenaltyWeightedGapUserObject::timestepSetup()
 }
 
 bool
-PenaltyWeightedGapUserObject::isContactConverged()
+PenaltyWeightedGapUserObject::isAugmentedLagrangianConverged()
 {
   // check if penetration is below threshold
   Real max_gap = 0.0;
 
-  for (const auto & [dof_object, wgap] : _dof_to_weighted_gap)
+  for (auto & [dof_object, wgap] : _dof_to_weighted_gap)
   {
-    const Real gap = physicalGap(wgap);
-    if (gap < -_penetration_tolerance)
-    {
-      if (-gap > max_gap)
-        max_gap = -gap;
-      continue;
-    }
+    const auto gap = physicalGap(wgap);
 
-    if (gap > _penetration_tolerance && _dof_to_lagrange_multiplier[dof_object] > 0)
+    if (_active_set.count(dof_object))
     {
-      if (gap > max_gap)
-        max_gap = gap;
-      continue;
+      // check active set nodes
+      if (std::abs(gap) < _penetration_tolerance)
+      {
+        if (gap > max_gap)
+          max_gap = gap;
+      }
+    }
+    else
+    {
+      // check non-contact nodes
+      if (gap < -_penetration_tolerance)
+      {
+        if (-gap > max_gap)
+          max_gap = -gap;
+      }
     }
   }
 
@@ -214,17 +208,41 @@ PenaltyWeightedGapUserObject::isContactConverged()
 }
 
 void
+PenaltyWeightedGapUserObject::augmentedLagrangianSetup()
+{
+  // clear active set
+  _active_set.clear();
+
+  // loop over all nodes for which a gap has been computed
+  for (auto & [dof_object, wgap] : _dof_to_weighted_gap)
+  {
+    const auto penalty = findValue(_dof_to_local_penalty, dof_object, _penalty);
+    const Real gap = physicalGap(wgap);
+    const auto lagrange_multiplier = findValue(_dof_to_lagrange_multiplier, dof_object);
+
+    // positive contact pressure (sic. sign) means wee add the node to the active set
+    if (lagrange_multiplier + gap * penalty < 0)
+      _active_set.insert(dof_object);
+  }
+
+  mooseInfoRepeated(_active_set.size(), " nodes in contact");
+}
+
+void
 PenaltyWeightedGapUserObject::updateAugmentedLagrangianMultipliers()
 {
-  for (auto & [dof_object, lagrange_multiplier] : _dof_to_lagrange_multiplier)
-    if (auto it = _dof_to_weighted_gap.find(dof_object); it != _dof_to_weighted_gap.end())
-    {
-      // Simo's definition of the gap is positive during penetration
-      const auto & gap = -MetaPhysicL::raw_value(it->second.first);
+  for (const auto & dof_object : _active_set)
+  {
+    auto & penalty = _dof_to_local_penalty[dof_object];
+    if (penalty == 0.0)
+      penalty = _penalty;
 
-      // Simo et al. 2.15
-      lagrange_multiplier += gap * _penalty;
-      if (lagrange_multiplier < 0.0)
-        lagrange_multiplier = 0.0;
-    }
+    const auto gap = getNormalGap(static_cast<const Node *>(dof_object));
+    auto & lagrange_multiplier = _dof_to_lagrange_multiplier[dof_object];
+
+    // update lm
+    lagrange_multiplier += std::min(gap * penalty, lagrange_multiplier);
+
+    // update penalty
+  }
 }

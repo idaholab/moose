@@ -25,7 +25,7 @@
 #include "AddVariableAction.h"
 #include "ConstraintWarehouse.h"
 #include "MortarUserObject.h"
-#include "PenaltyMortarAugmentedLagrangeInterface.h"
+#include "AugmentedLagrangeInterface.h"
 
 registerMooseObject("ContactApp", AugmentedLagrangianContactProblem);
 registerMooseObject("ContactApp", AugmentedLagrangianContactFEProblem);
@@ -68,7 +68,20 @@ void
 AugmentedLagrangianContactProblemTempl<T>::timestepSetup()
 {
   _lagrangian_iteration_number = 0;
+  _do_augmented_lagrangian_setup = true;
   T::timestepSetup();
+}
+
+template <class T>
+void
+AugmentedLagrangianContactProblemTempl<T>::solveSetup()
+{
+  // setup the augmented lagrange objects before the first augmentation loop (e.g. to determine
+  // active sets). We cannot do this in timestepSetup because the mortar user objects will not have
+  // run at that point.
+  const auto & alis = this->_app.template getInterfaceObjects<AugmentedLagrangeInterface>();
+  for (auto * ali : alis)
+    ali->augmentedLagrangianSetup();
 }
 
 template <class T>
@@ -166,22 +179,13 @@ AugmentedLagrangianContactProblemTempl<T>::checkNonlinearConvergence(std::string
       }
 
       // next loop over penalty mortar user objects
-      std::vector<MortarUserObject *> mortar_uos;
-      std::list<PenaltyMortarAugmentedLagrangeInterface *> pmuos;
-      theWarehouse()
-          .query()
-          .template condition<AttribInterfaces>(Interfaces::MortarUserObject)
-          .queryInto(mortar_uos);
-      for (auto * muo : mortar_uos)
-        if (auto * pmuo = dynamic_cast<PenaltyMortarAugmentedLagrangeInterface *>(muo); pmuo)
-        {
-          // keep a list of all penalty mortar user objects for a later multiplier update
-          pmuos.push_back(pmuo);
-
-          // check if any of the constraints is not yet converged
-          if (!repeat_augmented_lagrange_step && !pmuo->isContactConverged())
-            repeat_augmented_lagrange_step = true;
-        }
+      const auto & pmuos = this->_app.template getInterfaceObjects<AugmentedLagrangeInterface>();
+      for (auto * pmuo : pmuos)
+      {
+        // check if any of the constraints is not yet converged
+        if (!repeat_augmented_lagrange_step && !pmuo->isAugmentedLagrangianConverged())
+          repeat_augmented_lagrange_step = true;
+      }
 
       // repeat update step if necessary
       if (repeat_augmented_lagrange_step)
@@ -197,6 +201,10 @@ AugmentedLagrangianContactProblemTempl<T>::checkNonlinearConvergence(std::string
         // Update all penalty mortar user objects
         for (const auto & pmuo : pmuos)
           pmuo->updateAugmentedLagrangianMultipliers();
+
+        // call AM setup again (e.g. to update active sets)
+        for (const auto & pmuo : pmuos)
+          pmuo->augmentedLagrangianSetup();
 
         // force it to keep iterating
         reason = MooseNonlinearConvergenceReason::ITERATING;
