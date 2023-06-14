@@ -19,24 +19,9 @@
               'cylinder_friction_penalty_check_friction_FINAL.csv'
     input = 'cylinder_friction_penalty.i'
     rel_err = 5.0e-4
-    min_parallel = 4
     heavy = true
     requirement = 'The contact module shall be able to approximate frictional contact solution between a cylinder '
                   'and a plane using penalty mortar contact.'
-  []
-  [cylinder_friction_penalty_serial]
-    type = 'CSVDiff'
-    csvdiff = 'cylinder_friction_penalty_serial_x_disp_FINAL.csv '
-              'cylinder_friction_penalty_serial_cont_press_FINAL.csv '
-              'cylinder_friction_penalty_serial_y_disp_FINAL.csv '
-              'cylinder_friction_penalty_serial_friction_FINAL.csv'
-    input = 'cylinder_friction_penalty.i'
-    cli_args = 'Outputs/chkfile/file_base=cylinder_friction_penalty_serial'
-    rel_err = 5.0e-4
-    max_parallel = 1
-    heavy = true
-    requirement = 'The contact module shall be able to approximate frictional contact solution between a cylinder '
-                  'and a plane using penalty mortar contact and provide the same results as a parallel run.'
   []
   [ironing]
     type = 'CSVDiff'
