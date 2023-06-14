@@ -1,4 +1,4 @@
-mu = 2.6
+mu = 0.01
 rho = 1.0
 advected_interp_method = 'average'
 velocity_interp_method = 'rc'
@@ -8,13 +8,28 @@ pressure_tag = "pressure_grad"
 [Mesh]
   [mesh]
     type = CartesianMeshGenerator
-    dim = 2
-    dx = '0.3'
-    dy = '0.3'
-    ix = '3'
-    iy = '3'
-    subdomain_id = '1'
+    dim = 3
+    dx = '0.2 0.2 0.2'
+    dy = '0.2'
+    dz = '0.8 0.2'
+    ix = '30 30 30'
+    iy = '30'
+    iz = '120 30'
+    subdomain_id = '1 0 1 0 0 0'
   []
+  [sideset]
+    type = SideSetsBetweenSubdomainsGenerator
+    input = mesh
+    new_boundary = side_walls
+    paired_block = 1
+    primary_block = 0
+  []
+  [deletion]
+    type = BlockDeletionGenerator
+    input = sideset
+    block = 1
+  []
+
   # [read]
   #   type = FileMeshGenerator
   #   file = 2d-segregated_in.e
@@ -34,22 +49,29 @@ pressure_tag = "pressure_grad"
 [UserObjects]
   [rc]
     type = INSFVRhieChowInterpolatorSegregated
-    u = u
-    v = v
+    u = vel_x
+    v = vel_y
+    w = vel_z
     pressure = pressure
   []
 []
 
 [Variables]
-  [u]
+  [vel_x]
     type = INSFVVelocityVariable
-    initial_condition = 0.5
+    initial_condition = 0.0
     nl_sys = momentum_system
     two_term_boundary_expansion = false
   []
-  [v]
+  [vel_y]
     type = INSFVVelocityVariable
     initial_condition = 0.0
+    nl_sys = momentum_system
+    two_term_boundary_expansion = false
+  []
+  [vel_z]
+    type = INSFVVelocityVariable
+    initial_condition = 0.5
     nl_sys = momentum_system
     two_term_boundary_expansion = false
   []
@@ -64,7 +86,7 @@ pressure_tag = "pressure_grad"
 [FVKernels]
   [u_advection]
     type = INSFVMomentumAdvection
-    variable = u
+    variable = vel_x
     advected_interp_method = ${advected_interp_method}
     velocity_interp_method = ${velocity_interp_method}
     rho = ${rho}
@@ -73,20 +95,20 @@ pressure_tag = "pressure_grad"
   []
   [u_viscosity]
     type = INSFVMomentumDiffusion
-    variable = u
+    variable = vel_x
     mu = ${mu}
     momentum_component = 'x'
   []
   [u_pressure]
     type = INSFVMomentumPressure
-    variable = u
+    variable = vel_x
     momentum_component = 'x'
     pressure = pressure
     extra_vector_tags = ${pressure_tag}
   []
   [v_advection]
     type = INSFVMomentumAdvection
-    variable = v
+    variable = vel_y
     advected_interp_method = ${advected_interp_method}
     velocity_interp_method = ${velocity_interp_method}
     rho = ${rho}
@@ -95,14 +117,36 @@ pressure_tag = "pressure_grad"
   []
   [v_viscosity]
     type = INSFVMomentumDiffusion
-    variable = v
+    variable = vel_y
     mu = ${mu}
     momentum_component = 'y'
   []
   [v_pressure]
     type = INSFVMomentumPressure
-    variable = v
+    variable = vel_y
     momentum_component = 'y'
+    pressure = pressure
+    extra_vector_tags = ${pressure_tag}
+  []
+  [w_advection]
+    type = INSFVMomentumAdvection
+    variable = vel_z
+    advected_interp_method = ${advected_interp_method}
+    velocity_interp_method = ${velocity_interp_method}
+    rho = ${rho}
+    momentum_component = 'y'
+    linearize = true
+  []
+  [w_viscosity]
+    type = INSFVMomentumDiffusion
+    variable = vel_z
+    mu = ${mu}
+    momentum_component = 'z'
+  []
+  [w_pressure]
+    type = INSFVMomentumPressure
+    variable = vel_z
+    momentum_component = 'z'
     pressure = pressure
     extra_vector_tags = ${pressure_tag}
   []
@@ -123,38 +167,50 @@ pressure_tag = "pressure_grad"
 [FVBCs]
   [inlet-u]
     type = INSFVInletVelocityBC
-    boundary = 'left'
-    variable = u
-    function = '1.1'
+    boundary = 'back'
+    variable = vel_x
+    function = '0'
   []
   [inlet-v]
     type = INSFVInletVelocityBC
-    boundary = 'left'
-    variable = v
-    function = '0.0'
+    boundary = 'back'
+    variable = vel_y
+    function = '0'
+  []
+  [inlet-w]
+    type = INSFVInletVelocityBC
+    boundary = 'back'
+    variable = vel_z
+    function = '1.1'
   []
   [walls-u]
     type = INSFVNoSlipWallBC
-    boundary = 'top bottom'
-    variable = u
+    boundary = 'top bottom front side_walls'
+    variable = vel_x
     function = 0.0
   []
   [walls-v]
     type = INSFVNoSlipWallBC
-    boundary = 'top bottom'
-    variable = v
+    boundary = 'top bottom front side_walls'
+    variable = vel_y
+    function = 0.0
+  []
+  [walls-w]
+    type = INSFVNoSlipWallBC
+    boundary = 'top bottom front side_walls'
+    variable = vel_z
     function = 0.0
   []
   [outlet_p]
     type = INSFVOutletPressureBC
-    boundary = 'right'
+    boundary = 'left right'
     variable = pressure
     function = 1.4
   []
   [zero-grad-pressure]
     type = FVFunctionNeumannBC
     variable = pressure
-    boundary = 'top left bottom'
+    boundary = 'top bottom front side_walls back'
     function = 0.0
   []
 []
@@ -179,7 +235,7 @@ pressure_tag = "pressure_grad"
   num_iterations = 1
   pressure_absolute_tolerance = 1e-9
   momentum_absolute_tolerance = 1e-9
-  print_fields = true
+  print_fields = false
 []
 
 # [Postprocessors]
@@ -196,7 +252,7 @@ pressure_tag = "pressure_grad"
 # []
 
 [Outputs]
-  exodus = false
+  exodus = true
   csv = false
   perf_graph = false
   print_nonlinear_residuals = false

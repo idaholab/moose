@@ -11,8 +11,8 @@ pressure_tag = "pressure_grad"
     dim = 2
     dx = '0.3'
     dy = '0.3'
-    ix = '3'
-    iy = '3'
+    ix = '1000'
+    iy = '1000'
     subdomain_id = '1'
   []
   # [read]
@@ -26,7 +26,7 @@ pressure_tag = "pressure_grad"
 []
 
 [Problem]
-  nl_sys_names = 'momentum_system pressure_system'
+  nl_sys_names = 'u_system v_system pressure_system'
   previous_nl_solution_required = true
   error_on_jacobian_nonzero_reallocation = true
 []
@@ -44,13 +44,13 @@ pressure_tag = "pressure_grad"
   [u]
     type = INSFVVelocityVariable
     initial_condition = 0.5
-    nl_sys = momentum_system
+    nl_sys = u_system
     two_term_boundary_expansion = false
   []
   [v]
     type = INSFVVelocityVariable
     initial_condition = 0.0
-    nl_sys = momentum_system
+    nl_sys = v_system
     two_term_boundary_expansion = false
   []
   [pressure]
@@ -171,15 +171,15 @@ pressure_tag = "pressure_grad"
   l_tol = 1e-8
   line_search = 'none'
   rhie_chow_user_object = 'rc'
-  momentum_systems = 'momentum_system'
+  momentum_systems = 'u_system v_system'
   pressure_system = 'pressure_system'
   momentum_tag = ${pressure_tag}
   momentum_equation_relaxation = 0.8
   pressure_variable_relaxation = 0.3
-  num_iterations = 1
+  num_iterations = 30
   pressure_absolute_tolerance = 1e-9
   momentum_absolute_tolerance = 1e-9
-  print_fields = true
+  print_fields = false
 []
 
 # [Postprocessors]

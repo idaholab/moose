@@ -113,7 +113,7 @@ SIMPLE::init()
   _problem.initialSetup();
   _rc_uo = const_cast<INSFVRhieChowInterpolatorSegregated *>(
       &getUserObject<INSFVRhieChowInterpolatorSegregated>("rhie_chow_user_object"));
-  _rc_uo->linkMomentumSystem(_momentum_systems, _momentum_tag_id);
+  _rc_uo->linkMomentumSystem(_momentum_systems, _momentum_system_numbers, _momentum_tag_id);
   _rc_uo->initFaceVelocities();
 }
 
@@ -152,6 +152,7 @@ SIMPLE::relaxMatrix(SparseMatrix<Number> & matrix_in,
   matrix->close();
 
   diff_diagonal.add(-1.0, *original_diagonal_petsc);
+  diff_diagonal.close();
 }
 
 void
@@ -214,8 +215,7 @@ SIMPLE::solveMomentumPredictor(std::vector<NonlinearSystemBase *> & momentum_sys
   rhs->scale(-1.0);
 
   relaxMatrix(*mmat, getMomentumRelaxation(), *diff_diagonal);
-
-  diff_diagonal->close();
+  relaxRightHandSide(*rhs, *solution, *diff_diagonal);
 
   Real norm_factor = computeNormalizationFactor(*solution, *mmat, *rhs);
   Real absolute_tolerance = norm_factor * 1e-8;
@@ -226,8 +226,12 @@ SIMPLE::solveMomentumPredictor(std::vector<NonlinearSystemBase *> & momentum_sys
 
   if (_print_fields)
   {
+    std::cout << " matrix when we solve " << std::endl;
+    mmat->print();
     std::cout << " rhs when we solve " << std::endl;
     rhs->print();
+    std::cout << " velocity solution component 0" << std::endl;
+    solution->print();
   }
 
   if (_print_fields)
@@ -244,32 +248,37 @@ SIMPLE::solveMomentumPredictor(std::vector<NonlinearSystemBase *> & momentum_sys
     if (!system_i)
       continue;
 
+    std::cout << "Setting nonlinear sys" << _momentum_system_numbers[system_i] << std::endl;
     _problem.setCurrentNonlinearSystem(_momentum_system_numbers[system_i]);
 
     momentum_system =
         dynamic_cast<NonlinearImplicitSystem *>(&(_momentum_systems[system_i]->system()));
 
-    PetscVector<Number> * solution =
-        dynamic_cast<PetscVector<Number> *>(momentum_system->current_local_solution.get());
-    PetscVector<Number> * rhs = dynamic_cast<PetscVector<Number> *>(momentum_system->rhs);
+    solution = dynamic_cast<PetscVector<Number> *>(momentum_system->current_local_solution.get());
+    rhs = dynamic_cast<PetscVector<Number> *>(momentum_system->rhs);
 
-    _problem.computeResidual(*working_vector, *rhs);
+    _problem.computeResidual(*working_vector, *rhs, _momentum_system_numbers[system_i]);
 
     rhs->scale(-1.0);
 
     relaxRightHandSide(*rhs, *solution, *diff_diagonal);
 
     norm_factor = computeNormalizationFactor(*solution, *mmat, *rhs);
-    absolute_tolerance = norm_factor * 1e-8;
+    absolute_tolerance = 1e-10;
 
+    PetscLinearSolver<Real> & momentum_solver =
+        dynamic_cast<PetscLinearSolver<Real> &>(*momentum_system->get_linear_solver());
     momentum_solver.solve(*mmat, *mmat, *solution, *rhs, absolute_tolerance, 100);
-
     normalized_residuals.push_back(momentum_solver.get_initial_residual() / norm_factor);
 
     if (_print_fields)
     {
+      std::cout << " matrix when we solve " << std::endl;
+      mmat->print();
       std::cout << " rhs when we solve " << std::endl;
       rhs->print();
+      std::cout << " velocity solution component " << system_i << std::endl;
+      solution->print();
     }
 
     if (_print_fields)
@@ -353,6 +362,8 @@ SIMPLE::solvePressureCorrector(NonlinearSystemBase & pressure_system_in)
   {
     std::cout << " rhs when we solve pressure " << std::endl;
     rhs->print();
+    std::cout << " Pressure " << std::endl;
+    solution->print();
   }
 
   _pressure_system.setSolution(*solution);
@@ -399,49 +410,83 @@ SIMPLE::execute()
 {
   _problem.timestepSetup();
 
+  _time_step = 0;
+  _problem.outputStep(EXEC_INITIAL);
+
+  preExecute();
+
+  _time_step = 1;
+
   preSolve();
   _problem.execute(EXEC_TIMESTEP_BEGIN);
   _problem.outputStep(EXEC_TIMESTEP_BEGIN);
   _problem.updateActiveObjects();
 
-  Moose::PetscSupport::PetscOptions & po = _problem.getPetscOptions();
-
-  unsigned int iteration_counter = 0;
-  std::vector<Real> momentum_residual(1.0, _momentum_systems.size());
-  Real pressure_residual = 1.0;
-  while (iteration_counter < _num_iterations && !converged(momentum_residual, pressure_residual))
+  if (_problem.shouldSolve())
   {
-    Moose::PetscSupport::petscSetOptions(_problem);
-    Moose::setSolverDefaults(_problem);
-    for (auto system_i : index_range(_momentum_systems))
-      _momentum_systems[system_i]->residualSetup();
-    _pressure_system.residualSetup();
-
-    iteration_counter++;
-
-    momentum_residual = solveMomentumPredictor(_momentum_systems);
-
-    _rc_uo->computeHbyA(_momentum_equation_relaxation, _print_fields);
-
-    pressure_residual = solvePressureCorrector(_pressure_system);
-
-    _rc_uo->computeFaceVelocity();
-
-    relaxPressureUpdate(_pressure_system);
-
-    _rc_uo->computeCellVelocity();
-
-    _console << "Iteration " << iteration_counter << " Initial residual norms:" << std::endl;
-    for (auto system_i : index_range(_momentum_systems))
+    Moose::PetscSupport::PetscOptions & po = _problem.getPetscOptions();
+    unsigned int iteration_counter = 0;
+    std::vector<Real> momentum_residual(1.0, _momentum_systems.size());
+    Real pressure_residual = 1.0;
+    while (iteration_counter < _num_iterations && !converged(momentum_residual, pressure_residual))
     {
-      _console << " Momentum equation: "
-               << (_momentum_systems.size() > 1
-                       ? std::string("Component ") + std::to_string(system_i + 1)
-                       : std::string(""))
-               << COLOR_GREEN << momentum_residual[system_i] << COLOR_DEFAULT << std::endl;
+      Moose::PetscSupport::petscSetOptions(_problem);
+      Moose::setSolverDefaults(_problem);
+      for (auto system_i : index_range(_momentum_systems))
+        _momentum_systems[system_i]->residualSetup();
+      _pressure_system.residualSetup();
+
+      iteration_counter++;
+
+      momentum_residual = solveMomentumPredictor(_momentum_systems);
+
+      if (_print_fields)
+      {
+        std::cout << "************************************" << std::endl;
+        std::cout << "Computing HbyA" << std::endl;
+        std::cout << "************************************" << std::endl;
+      }
+      _rc_uo->computeHbyA(_momentum_equation_relaxation, _print_fields);
+
+      if (_print_fields)
+      {
+        std::cout << "************************************" << std::endl;
+        std::cout << "DONE Computing HbyA " << std::endl;
+        std::cout << "************************************" << std::endl;
+      }
+
+      pressure_residual = solvePressureCorrector(_pressure_system);
+
+      _rc_uo->computeFaceVelocity();
+
+      relaxPressureUpdate(_pressure_system);
+
+      _rc_uo->computeCellVelocity();
+
+      _console << "Iteration " << iteration_counter << " Initial residual norms:" << std::endl;
+      for (auto system_i : index_range(_momentum_systems))
+      {
+        _console << " Momentum equation: "
+                 << (_momentum_systems.size() > 1
+                         ? std::string("Component ") + std::to_string(system_i + 1)
+                         : std::string(""))
+                 << COLOR_GREEN << momentum_residual[system_i] << COLOR_DEFAULT << std::endl;
+      }
+      _console << " Pressure equation: " << COLOR_GREEN << pressure_residual << COLOR_DEFAULT
+               << std::endl;
     }
-    _console << " Pressure equation: " << COLOR_GREEN << pressure_residual << COLOR_DEFAULT
-             << std::endl;
+  }
+
+  _time = _time_step;
+  _problem.outputStep(EXEC_TIMESTEP_END);
+  _time = _system_time;
+
+  {
+    TIME_SECTION("final", 1, "Executing Final Objects")
+    _problem.postExecute();
+    _problem.execute(EXEC_FINAL);
+    _time = _time_step;
+    _problem.outputStep(EXEC_FINAL);
   }
 }
 

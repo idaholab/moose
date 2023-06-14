@@ -64,6 +64,7 @@ public:
   bool segregated() const override { return true; };
 
   void linkMomentumSystem(std::vector<NonlinearSystemBase *> momentum_systems,
+                          const std::vector<unsigned int> & momentum_system_numbers,
                           const TagID & momentum_tag);
 
   /**
@@ -79,7 +80,7 @@ public:
 protected:
   /**
    * A map from element IDs to $HbyA_{ij} = (A_{offdiag}*\mathrm{(predicted~velocity)} -
-   * \mathrm{Source})_{ij}/A_{ij}$. So this contains the offdiagonal part of the system matrix
+   * \mathrm{Source})_{ij}/A_{ij}$. So this contains the offdiagonal part of t`he system matrix
    * multiplied by the predicted velocity minus the source terms from the right hand side of the
    * linearized momentum predictor stem.
    */
@@ -99,6 +100,7 @@ protected:
 
   /// Reference to the nonlinear system corresponding to the momentum equation
   std::vector<NonlinearSystemBase *> _momentum_systems;
+  std::vector<unsigned int> _momentum_system_numbers;
   std::vector<NonlinearImplicitSystem *> _momentum_implicit_systems;
   /// Reference to the nonlinear system corresponding to the pressure equation
   TagID _momentum_tag;

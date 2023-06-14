@@ -88,9 +88,12 @@ INSFVRhieChowInterpolatorSegregated::INSFVRhieChowInterpolatorSegregated(
 
 void
 INSFVRhieChowInterpolatorSegregated::linkMomentumSystem(
-    std::vector<NonlinearSystemBase *> momentum_systems, const TagID & momentum_tag)
+    std::vector<NonlinearSystemBase *> momentum_systems,
+    const std::vector<unsigned int> & momentum_system_numbers,
+    const TagID & momentum_tag)
 {
   _momentum_systems = momentum_systems;
+  _momentum_system_numbers = momentum_system_numbers;
   _momentum_tag = momentum_tag;
 
   _momentum_implicit_systems.clear();
@@ -262,14 +265,15 @@ INSFVRhieChowInterpolatorSegregated::computeCellVelocity()
                                        : _momentum_implicit_systems[0]->number();
 
       const auto index = elem->dof_number(system_number, var_nums[comp_index], 0);
-      _momentum_implicit_systems[hbya_index]->current_local_solution->set(
+      _momentum_implicit_systems[hbya_index]->solution->set(
           index, -(*_HbyA_raw[hbya_index])(index)-Ainv * grad_p(comp_index));
     }
   }
 
   for (auto system_i : index_range(_momentum_implicit_systems))
   {
-    _momentum_implicit_systems[system_i]->current_local_solution->close();
+    _momentum_implicit_systems[system_i]->solution->close();
+    _momentum_implicit_systems[system_i]->update();
     _momentum_systems[system_i]->setSolution(
         *_momentum_implicit_systems[system_i]->current_local_solution);
   }
@@ -372,7 +376,7 @@ INSFVRhieChowInterpolatorSegregated::computeHbyA(const Real & momentum_relaxatio
 
   if (verbose)
   {
-    std::cout << "Matrix" << std::endl;
+    std::cout << "Matrix in rc object" << std::endl;
     mmat->print();
   }
   mmat->get_diagonal(*Ainv_petsc);
@@ -415,6 +419,8 @@ INSFVRhieChowInterpolatorSegregated::computeHbyA(const Real & momentum_relaxatio
   _HbyA_raw.clear();
   for (auto system_i : index_range(_momentum_systems))
   {
+    _fe_problem.setCurrentNonlinearSystem(_momentum_system_numbers[system_i]);
+
     momentum_system = _momentum_implicit_systems[system_i];
 
     PetscVector<Number> * rhs = dynamic_cast<PetscVector<Number> *>(momentum_system->rhs);
@@ -428,7 +434,7 @@ INSFVRhieChowInterpolatorSegregated::computeHbyA(const Real & momentum_relaxatio
     // Wpuld be cool to add asserts here
     if (verbose)
     {
-      std::cout << "Velocity solution" << std::endl;
+      std::cout << "Velocity solution in H(u)" << std::endl;
       solution->print();
     }
 
@@ -451,6 +457,8 @@ INSFVRhieChowInterpolatorSegregated::computeHbyA(const Real & momentum_relaxatio
     {
       std::cout << "total RHS" << std::endl;
       rhs->print();
+      std::cout << "pressure RHS" << std::endl;
+      HbyA->print();
     }
 
     HbyA->scale(-1.0);

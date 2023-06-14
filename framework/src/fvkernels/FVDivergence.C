@@ -58,6 +58,7 @@ FVDivergence::computeQpResidual()
 
   // // We use this on the right hand side as a source so in the residual this will be a sink (factor
   // // of -1)
-  // std::cout << _face_info->faceCentroid() << " " <<  (vector * _normal)*_face_info->faceArea() << std::endl;
+  // std::cout << _face_info->faceCentroid() << " " << (vector * _normal) * _face_info->faceArea()
+  //           << std::endl;
   return -1.0 * (vector * _normal);
 }
