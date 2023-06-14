@@ -54,8 +54,8 @@ MaterialPropertyStorage::shallowSwapDataBack(const std::vector<unsigned int> & s
 void
 MaterialPropertyStorage::eraseProperty(const Elem * elem)
 {
-  for (auto & storage_entry : _storage)
-    storage_entry.props.erase(elem);
+  for (const auto state : stateIndexRange())
+    setProps(state).erase(elem);
 }
 
 void

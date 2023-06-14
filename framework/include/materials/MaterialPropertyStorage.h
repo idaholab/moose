@@ -298,14 +298,8 @@ public:
 protected:
   using BuildPropertyValuePtr = PropertyValue * (*)();
 
-  struct Storage
-  {
-    PropsType props;
-    std::vector<BuildPropertyValuePtr> build_ptr;
-  };
-
   /// The actual storage
-  std::array<MaterialPropertyStorage::Storage, max_state + 1> _storage;
+  std::array<PropsType, max_state + 1> _storage;
 
   /// Mapping from stateful property ID to property name
   std::unordered_map<unsigned int, std::string> _stateful_prop_names;
@@ -383,7 +377,7 @@ inline const MaterialPropertyStorage::PropsType &
 MaterialPropertyStorage::props(const unsigned int state) const
 {
   mooseAssert(state < _storage.size(), "Invalid material property state " + std::to_string(state));
-  return _storage[state].props;
+  return _storage[state];
 }
 
 inline const MaterialProperties &
