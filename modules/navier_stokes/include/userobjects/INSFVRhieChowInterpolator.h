@@ -172,12 +172,10 @@ private:
 
   /// Whether we want to pull all nonlocal 'a' coefficient data
   bool _pull_all_nonlocal;
-};
 
-/// A zero functor potentially used in _a_read
-const Moose::ConstantFunctor<ADReal> _zero_functor{0};
-}
-;
+  /// A zero functor potentially used in _a_read
+  const Moose::ConstantFunctor<ADReal> _zero_functor{0};
+};
 
 inline void
 INSFVRhieChowInterpolator::addToA(const Elem * const elem,
