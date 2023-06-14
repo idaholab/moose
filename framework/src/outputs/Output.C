@@ -22,6 +22,8 @@
 #include "MooseUtils.h"
 #include "MooseApp.h"
 #include "Console.h"
+#include "Function.h"
+#include "PiecewiseLinear.h"
 
 #include "libmesh/equation_systems.h"
 
@@ -50,6 +52,8 @@ Output::validParams()
   params.addParam<int>("end_step", "Time step at which this output object stop operating");
   params.addParam<Real>(
       "time_tolerance", 1e-14, "Time tolerance utilized checking start and end times");
+  params.addParam<FunctionName>("output_limiting_function",
+                                "Piecewise base function that sets sync_times");
 
   // Update the 'execute_on' input parameter for output
   ExecFlagEnum & exec_enum = params.set<ExecFlagEnum>("execute_on", true);
@@ -90,6 +94,7 @@ Output::Output(const InputParameters & parameters)
     Restartable(this, "Output"),
     MeshChangedInterface(parameters),
     SetupInterface(this),
+    FunctionInterface(this),
     PostprocessorInterface(this),
     VectorPostprocessorInterface(this),
     ReporterInterface(this),
@@ -155,6 +160,17 @@ Output::Output(const InputParameters & parameters)
     const ExecFlagEnum & add = getParam<ExecFlagEnum>("additional_execute_on");
     for (auto & me : add)
       _execute_on.push_back(me);
+  }
+
+  if (isParamValid("output_limiting_function"))
+  {
+    const Function & olf = getFunction("output_limiting_function");
+    const PiecewiseBase * pwb_olf = dynamic_cast<const PiecewiseBase *>(&olf);
+    if (pwb_olf == nullptr)
+      mooseError("Function muse have a piecewise base!");
+
+    for (auto i = 0; i < pwb_olf->functionSize(); i++) // i is a Real, might need to cast as int
+      _sync_times.insert(pwb_olf->domain(i));
   }
 }
 
