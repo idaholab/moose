@@ -19,7 +19,7 @@
 std::map<std::string, unsigned int> MaterialPropertyStorage::_prop_ids;
 
 MaterialPropertyStorage::MaterialPropertyStorage()
-  : _state_index(0), _spin_mtx(libMesh::Threads::spin_mtx)
+  : _max_state(0), _spin_mtx(libMesh::Threads::spin_mtx)
 {
 }
 
@@ -120,7 +120,7 @@ MaterialPropertyStorage::prolongStatefulProps(
 
     initProps(child_material_data, child_elem, child_side, n_qpoints);
 
-    for (const auto state : make_range(stateIndex()))
+    for (const auto state : stateIndexRange())
     {
       const auto & parent_props = parent_material_props.props(&elem, parent_side, state);
       auto & child_props = setProps(child_elem, child_side, state);
@@ -160,8 +160,8 @@ MaterialPropertyStorage::restrictStatefulProps(
 
   initProps(material_data, &elem, side, n_qpoints);
 
-  std::vector<MaterialProperties *> parent_props(stateIndex());
-  for (const auto state : make_range(stateIndex()))
+  std::vector<MaterialProperties *> parent_props(numStates());
+  for (const auto state : stateIndexRange())
     parent_props[state] = &setProps(&elem, side, state);
 
   // Copy from the child stateful properties
@@ -175,7 +175,7 @@ MaterialPropertyStorage::restrictStatefulProps(
     const Elem * child_elem = coarsened_element_children[child];
     const QpMap & qp_map = qp_pair.second;
 
-    for (const auto state : make_range(stateIndex()))
+    for (const auto state : stateIndexRange())
     {
       const auto & child_props = props(child_elem, side, state);
       for (const auto i : index_range(_stateful_prop_id_to_prop_id))
@@ -218,7 +218,7 @@ MaterialPropertyStorage::initStatefulProps(MaterialData & material_data,
 
   // Copy to older states as needed
   const auto & current_props = props(&elem, side, 0);
-  for (const auto state : make_range((unsigned int)1, stateIndex()))
+  for (const auto state : statefulIndexRange())
   {
     auto & to_props = setProps(&elem, side, state);
     for (const auto i : index_range(_stateful_prop_id_to_prop_id))
@@ -230,7 +230,7 @@ MaterialPropertyStorage::initStatefulProps(MaterialData & material_data,
 void
 MaterialPropertyStorage::shift()
 {
-  mooseAssert(hasStatefulProperties() && stateIndex() > 1, "Doesn't have stateful props");
+  mooseAssert(hasStatefulProperties(), "Doesn't have stateful props");
 
   /**
    * Shift properties back in time and reuse older data for current (save reallocations etc.)
@@ -238,7 +238,7 @@ MaterialPropertyStorage::shift()
    * older <-> old
    * old <-> current
    */
-  for (unsigned int state = stateIndex() - 1; state != 0; state--)
+  for (unsigned int state = maxState(); state != 0; state--)
     std::swap(setProps(state), setProps(state - 1));
 }
 
@@ -261,7 +261,7 @@ MaterialPropertyStorage::copy(MaterialData & material_data,
 {
   initProps(material_data, elem_to, side, n_qpoints);
 
-  for (const auto state : make_range(stateIndex()))
+  for (const auto state : stateIndexRange())
   {
     const auto & from_props = props(elem_from, side, state);
     auto & to_props = setProps(elem_to, side, state);
@@ -276,7 +276,7 @@ MaterialPropertyStorage::swap(MaterialData & material_data, const Elem & elem, u
 {
   Threads::spin_mutex::scoped_lock lock(this->_spin_mtx);
 
-  for (const auto state : make_range(stateIndex()))
+  for (const auto state : stateIndexRange())
     shallowSwapData(
         _stateful_prop_id_to_prop_id, material_data.props(state), setProps(&elem, side, state));
 }
@@ -288,13 +288,13 @@ MaterialPropertyStorage::swapBack(MaterialData & material_data,
 {
   Threads::spin_mutex::scoped_lock lock(this->_spin_mtx);
 
-  for (const auto state : make_range(stateIndex()))
+  for (const auto state : stateIndexRange())
     shallowSwapDataBack(
         _stateful_prop_id_to_prop_id, setProps(&elem, side, state), material_data.props(state));
 
   // Workaround for MOOSE difficulties in keeping materialless
   // elements (e.g. Lower D elements in Mortar code) materials
-  for (const auto state : make_range(stateIndex()))
+  for (const auto state : stateIndexRange())
     if (props(&elem, side, state).empty())
       setProps(state)[&elem].erase(side);
 }
@@ -315,8 +315,8 @@ MaterialPropertyStorage::addProperty(const std::string & prop_name, const unsign
                max_state);
 
   // Increment state as needed
-  if (stateIndex() < (state + 1))
-    _state_index = state + 1;
+  if (maxState() < state)
+    _max_state = state;
 
   const auto prop_id = getPropertyId(prop_name);
 
@@ -359,7 +359,7 @@ MaterialPropertyStorage::initProps(MaterialData & material_data,
                                    unsigned int side,
                                    unsigned int n_qpoints)
 {
-  for (const auto state : make_range(stateIndex()))
+  for (const auto state : stateIndexRange())
     this->initProps(material_data, state, elem, side, n_qpoints);
 }
 
@@ -394,10 +394,10 @@ MaterialPropertyStorage::initProps(MaterialData & material_data,
 void
 dataStore(std::ostream & stream, MaterialPropertyStorage & storage, void * context)
 {
-  unsigned int state_index = storage.stateIndex();
-  dataStore(stream, state_index, context);
+  unsigned int max_state = storage.maxState();
+  dataStore(stream, max_state, context);
 
-  for (const auto state : make_range(storage.stateIndex()))
+  for (const auto state : storage.stateIndexRange())
     dataStore(stream, storage.setProps(state), context);
 }
 
@@ -406,12 +406,12 @@ dataLoad(std::istream & stream, MaterialPropertyStorage & storage, void * contex
 {
   unsigned int state_index;
   dataLoad(stream, state_index, context);
-  if (state_index != storage.stateIndex())
-    mooseError("Inconsistent state index; stored state index = ",
+  if (state_index != storage.maxState())
+    mooseError("Inconsistent max state; stored max state = ",
                state_index,
-               ", current state index = ",
-               storage.stateIndex());
+               ", current max state = ",
+               storage.maxState());
 
-  for (const auto state : make_range(storage.stateIndex()))
+  for (const auto state : storage.stateIndexRange())
     dataLoad(stream, storage.setProps(state), context);
 }

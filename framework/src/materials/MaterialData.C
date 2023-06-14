@@ -24,7 +24,7 @@ MaterialData::resize(unsigned int n_qpoints)
   if (_resize_only_if_smaller && n_qpoints < _n_qpoints)
     return;
 
-  for (const auto state : make_range(_storage.stateIndex()))
+  for (const auto state : _storage.stateIndexRange())
     props(state).resizeItems(n_qpoints, {});
   _n_qpoints = n_qpoints;
 }

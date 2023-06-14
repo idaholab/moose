@@ -191,12 +191,12 @@ public:
   /**
    * @return a Boolean indicating whether stateful properties exist on this material
    */
-  bool hasStatefulProperties() const { return _state_index > 1; }
+  bool hasStatefulProperties() const { return maxState() > 0; }
 
   /**
    * @return a Boolean indicating whether or not this material has older properties declared
    */
-  bool hasOlderProperties() const { return _state_index > 2; }
+  bool hasOlderProperties() const { return maxState() > 1; }
 
   /**
    * Accessible type of the stored material property data.
@@ -276,9 +276,31 @@ public:
   static const std::map<std::string, unsigned int> & propIDs() { return _prop_ids; }
 
   /**
-   * @returns The index to be used for traversal through states.
+   * @returns The current maximum stored state (0 = none, 1 = old, 2 = older)
    */
-  unsigned int stateIndex() const { return _state_index; }
+  unsigned int maxState() const
+  {
+    mooseAssert(_max_state < _storage.size(), "Too big");
+    return _max_state;
+  }
+  /**
+   * @returns The number of stored states (2 = up to old, 3 = up to older)
+   */
+  unsigned int numStates() const { return maxState() + 1; }
+  /**
+   * @returns A range over states to be used in range-based for loops
+   */
+  IntRange<unsigned int> stateIndexRange() const { return IntRange<unsigned int>(0, numStates()); }
+  /**
+   * @returns A range over stateful states to be used in range-based for loops
+   *
+   * Will be an empty range if there are no stateful states
+   */
+  IntRange<unsigned int> statefulIndexRange() const
+  {
+    return hasStatefulProperties() ? IntRange<unsigned int>(1, numStates())
+                                   : IntRange<unsigned int>(0, 0);
+  }
 
 protected:
   using BuildPropertyValuePtr = PropertyValue * (*)();
@@ -334,9 +356,8 @@ private:
 
   PropsType & setProps(const unsigned int state);
 
-  /// The index to be used for traversal through time states
-  /// This is [current max state + 1], i.e., 1 = current, 2 = old, 3 = older).
-  unsigned int _state_index;
+  /// The maximum state (0 = current, 1 = old, 2 = older)
+  unsigned int _max_state;
 
   // You'd think a private mutex would work here, so I'll leave this
   // in the namespace for when that happens, but CI thinks that can
@@ -357,7 +378,7 @@ private:
 inline const MaterialPropertyStorage::PropsType &
 MaterialPropertyStorage::props(const unsigned int state) const
 {
-  mooseAssert(state < _storage.size(), "Unsupported state");
+  mooseAssert(state < _storage.size(), "Invalid material property state " + std::to_string(state));
   return _storage[state].props;
 }
 

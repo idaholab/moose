@@ -2165,10 +2165,7 @@ XFEM::getGeometricCutForElem(const Elem * elem) const
 void
 XFEM::storeMaterialPropertiesForElementHelper(const Elem * elem, MaterialPropertyStorage & storage)
 {
-  if (!storage.hasStatefulProperties())
-    return;
-
-  for (const auto state : make_range((unsigned int)1, storage.stateIndex()))
+  for (const auto state : storage.statefulIndexRange())
   {
     const auto & elem_props = storage.props(state).at(elem);
     auto & serialized_props = _geom_cut_elems[elem]._elem_material_properties[state - 1];
@@ -2219,7 +2216,7 @@ XFEM::loadMaterialPropertiesForElementHelper(const Elem * elem,
   if (!storage.hasStatefulProperties())
     return;
 
-  for (const auto state : make_range((unsigned int)1, storage.stateIndex()))
+  for (const auto state : storage.statefulIndexRange())
   {
     const auto & serialized_props = cached_props[state - 1];
     for (const auto & [side, serialized_side_props] : serialized_props)

@@ -91,7 +91,7 @@ RedistributeProperties::redistribute()
           "a threaded region or contact a MOOSE developer to discuss.");
       MaterialData & my_mat_data = *((*mat_data)[/*_tid*/ 0]); // Not threaded
 
-      for (const auto state : make_range(mat_prop_store->stateIndex()))
+      for (const auto state : mat_prop_store->stateIndexRange())
       {
         MaterialPropertyStorage::PropsType & props_map = mat_prop_store->setProps(state);
         typedef std::unordered_map<unsigned int, std::string> stored_props_type;
