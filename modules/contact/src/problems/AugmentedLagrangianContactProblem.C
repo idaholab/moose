@@ -68,20 +68,7 @@ void
 AugmentedLagrangianContactProblemTempl<T>::timestepSetup()
 {
   _lagrangian_iteration_number = 0;
-  _do_augmented_lagrangian_setup = true;
   T::timestepSetup();
-}
-
-template <class T>
-void
-AugmentedLagrangianContactProblemTempl<T>::solveSetup()
-{
-  // setup the augmented lagrange objects before the first augmentation loop (e.g. to determine
-  // active sets). We cannot do this in timestepSetup because the mortar user objects will not have
-  // run at that point.
-  const auto & alis = this->_app.template getInterfaceObjects<AugmentedLagrangeInterface>();
-  for (auto * ali : alis)
-    ali->augmentedLagrangianSetup();
 }
 
 template <class T>

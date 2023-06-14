@@ -371,7 +371,6 @@ public:
   void customSetup(const ExecFlagType & exec_type) override;
   void residualSetup() override;
   void jacobianSetup() override;
-  virtual void solveSetup() {};
 
   virtual void prepare(const Elem * elem, THREAD_ID tid) override;
   virtual void prepareFace(const Elem * elem, THREAD_ID tid) override;

@@ -155,8 +155,15 @@ PenaltyWeightedGapUserObject::selfTimestepSetup()
   for (auto & dof_lp : _dof_to_local_penalty)
     dof_lp.second = _penalty;
 
+  // clear previous gap
+  for (auto & dof_pg : _dof_to_previous_gap)
+    dof_pg.second = 0.0;
+
   // save old timestep
   _dt_old = _dt;
+
+  // clear active set
+  _active_set.clear();
 }
 
 void
@@ -178,7 +185,7 @@ PenaltyWeightedGapUserObject::isAugmentedLagrangianConverged()
     if (_active_set.count(dof_object))
     {
       // check active set nodes
-      if (std::abs(gap) < _penetration_tolerance)
+      if (std::abs(gap) > _penetration_tolerance)
       {
         if (gap > max_gap)
           max_gap = gap;
@@ -223,6 +230,9 @@ PenaltyWeightedGapUserObject::augmentedLagrangianSetup()
     // positive contact pressure (sic. sign) means wee add the node to the active set
     if (lagrange_multiplier + gap * penalty < 0)
       _active_set.insert(dof_object);
+
+    // store previous augmented lagrange iteration gap
+    _dof_to_previous_gap[dof_object] = gap;
   }
 
   mooseInfoRepeated(_active_set.size(), " nodes in contact");
@@ -244,5 +254,8 @@ PenaltyWeightedGapUserObject::updateAugmentedLagrangianMultipliers()
     lagrange_multiplier += std::min(gap * penalty, lagrange_multiplier);
 
     // update penalty
+    const auto previous_gap = _dof_to_previous_gap[dof_object];
+    if (std::abs(gap) > 0.25 * previous_gap)
+      penalty *= 10.0;
   }
 }

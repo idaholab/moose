@@ -80,8 +80,11 @@ protected:
   /// active set
   std::set<const DofObject *> _active_set;
 
-  /// Map from degree of freedom to augmented lagrange multiplier
+  /// Map from degree of freedom to local penalty value
   std::unordered_map<const DofObject *, Real> _dof_to_local_penalty;
+
+  /// Map from degree of freedom to previous AL iteration gap values
+  std::unordered_map<const DofObject *, Real> _dof_to_previous_gap;
 
   /// scale factor for the linear prediction for the augmented lagrange multipliers
   const Real _predictor_scale;

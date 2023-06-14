@@ -51,7 +51,6 @@ TimeIntegrator::TimeIntegrator(const InputParameters & parameters)
 void
 TimeIntegrator::solve()
 {
-  _fe_problem.solveSetup();
   _nl.system().solve();
 
   _n_nonlinear_iterations = getNumNonlinearIterationsLastSolve();
