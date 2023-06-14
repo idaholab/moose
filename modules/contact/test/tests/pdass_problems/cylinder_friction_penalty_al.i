@@ -50,6 +50,8 @@
   []
   [saved_y]
   []
+  [active]
+  []
 []
 
 [Functions]
@@ -80,36 +82,50 @@
     variable = penalty_normal_pressure
     user_object = friction_uo
     contact_quantity = normal_pressure
+    boundary = 3
   []
   [penalty_frictional_pressure]
     type = PenaltyMortarUserObjectAux
     variable = penalty_frictional_pressure
     user_object = friction_uo
     contact_quantity = tangential_pressure_one
+    boundary = 3
   []
   [penalty_accumulated_slip]
     type = PenaltyMortarUserObjectAux
     variable = accumulated_slip_one
     user_object = friction_uo
     contact_quantity = accumulated_slip_one
+    boundary = 3
   []
   [penalty_tangential_vel]
     type = PenaltyMortarUserObjectAux
     variable = tangential_vel_one
     user_object = friction_uo
     contact_quantity = tangential_velocity_one
+    boundary = 3
   []
   [penalty_gap]
     type = PenaltyMortarUserObjectAux
     variable = normal_gap
     user_object = friction_uo
     contact_quantity = normal_gap
+    boundary = 3
   []
   [normal_lm]
     type = PenaltyMortarUserObjectAux
     variable = normal_lm
     user_object = friction_uo
     contact_quantity = normal_lm
+    boundary = 3
+  []
+  [active]
+    type = PenaltyMortarUserObjectAux
+    variable = active
+    user_object = friction_uo
+    contact_quantity = active_set
+    # use_displaced_mesh = true
+    boundary = 3
   []
 []
 
@@ -155,6 +171,10 @@
   []
   [num_al]
     type = NumAugmentedLagrangeIterations
+  []
+  [active_set_size]
+    type = NodalSum
+    variable = active
   []
 []
 

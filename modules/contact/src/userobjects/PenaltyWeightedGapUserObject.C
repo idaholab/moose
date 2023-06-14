@@ -164,6 +164,7 @@ PenaltyWeightedGapUserObject::selfTimestepSetup()
 
   // clear active set
   _active_set.clear();
+  mooseInfoRepeated("Clearing active set (1)");
 }
 
 void
@@ -175,6 +176,7 @@ PenaltyWeightedGapUserObject::timestepSetup()
 bool
 PenaltyWeightedGapUserObject::isAugmentedLagrangianConverged()
 {
+  mooseInfoRepeated("PenaltyWeightedGapUserObject::isAugmentedLagrangianConverged()");
   // check if penetration is below threshold
   Real max_gap = 0.0;
 
@@ -187,8 +189,8 @@ PenaltyWeightedGapUserObject::isAugmentedLagrangianConverged()
       // check active set nodes
       if (std::abs(gap) > _penetration_tolerance)
       {
-        if (gap > max_gap)
-          max_gap = gap;
+        if (std::abs(gap) > max_gap)
+          max_gap = std::abs(gap);
       }
     }
     else
@@ -219,6 +221,7 @@ PenaltyWeightedGapUserObject::augmentedLagrangianSetup()
 {
   // clear active set
   _active_set.clear();
+  mooseInfoRepeated("Clearing active set (2)");
 
   // loop over all nodes for which a gap has been computed
   for (auto & [dof_object, wgap] : _dof_to_weighted_gap)
@@ -226,7 +229,7 @@ PenaltyWeightedGapUserObject::augmentedLagrangianSetup()
     const auto penalty = findValue(_dof_to_local_penalty, dof_object, _penalty);
     const Real gap = physicalGap(wgap);
     const auto lagrange_multiplier = findValue(_dof_to_lagrange_multiplier, dof_object);
-
+    std::cout << lagrange_multiplier << '\n';
     // positive contact pressure (sic. sign) means wee add the node to the active set
     if (lagrange_multiplier + gap * penalty < 0)
       _active_set.insert(dof_object);
@@ -255,7 +258,7 @@ PenaltyWeightedGapUserObject::updateAugmentedLagrangianMultipliers()
 
     // update penalty
     const auto previous_gap = _dof_to_previous_gap[dof_object];
-    if (std::abs(gap) > 0.25 * previous_gap)
+    if (std::abs(gap) > 0.25 * std::abs(previous_gap))
       penalty *= 10.0;
   }
 }

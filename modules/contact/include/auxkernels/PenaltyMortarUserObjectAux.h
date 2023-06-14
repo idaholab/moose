@@ -42,7 +42,8 @@ protected:
     NORMAL_GAP,
     NORMAL_LM,
     DELTA_TANGENTIAL_LM_ONE,
-    DELTA_TANGENTIAL_LM_TWO
+    DELTA_TANGENTIAL_LM_TWO,
+    ACTIVE_SET
   };
 
   virtual Real computeValue() override;

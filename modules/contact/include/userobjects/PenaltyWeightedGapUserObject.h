@@ -41,6 +41,10 @@ public:
   {
     return 0.0;
   };
+  virtual bool getActiveSetState(const Node * const node) const
+  {
+    return _active_set.count(_subproblem.mesh().nodePtr(node->id())) > 0;
+  }
 
   virtual bool isAugmentedLagrangianConverged() override;
   virtual void augmentedLagrangianSetup() override;

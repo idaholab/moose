@@ -23,10 +23,11 @@ PenaltyMortarUserObjectAux::validParams()
   InputParameters params = AuxKernel::validParams();
   params.addClassDescription(
       "Populates an auxiliary variable with a contact quantities from penalty mortar contact.");
-  MooseEnum contact_quantity("normal_pressure accumulated_slip_one "
-                             "tangential_pressure_one tangential_velocity_one accumulated_slip_two "
-                             "tangential_pressure_two tangential_velocity_two normal_gap "
-                             "normal_lm delta_tangential_lm_one delta_tangential_lm_two");
+  MooseEnum contact_quantity(
+      "normal_pressure accumulated_slip_one "
+      "tangential_pressure_one tangential_velocity_one accumulated_slip_two "
+      "tangential_pressure_two tangential_velocity_two normal_gap "
+      "normal_lm delta_tangential_lm_one delta_tangential_lm_two active_set");
   params.addRequiredParam<MooseEnum>(
       "contact_quantity",
       contact_quantity,
@@ -146,6 +147,14 @@ PenaltyMortarUserObjectAux::computeValue()
         paramError("user_object",
                    "The 'delta_tangential_lm_two' quantity is only provided by a "
                    "'PenaltyFrictionUserObject' or derived object.");
+
+    case ContactQuantityEnum::ACTIVE_SET:
+      if (pwguo)
+        return pwguo->getActiveSetState(_current_node) ? 1.0 : 0.0;
+      else
+        paramError("user_object",
+                   "The 'active_set' quantity is only provided by a "
+                   "'PenaltyWeightedGapUserObject' or derived object.");
 
     default:
       mooseError("Internal error: Contact quantity request in PressureMortarUserObjectAux is not "
