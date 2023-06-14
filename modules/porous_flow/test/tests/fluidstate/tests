@@ -79,7 +79,7 @@
   [brineco2_fv]
     type = 'CSVDiff'
     input = 'brineco2_fv.i'
-    csvdiff = 'brineco2_fv.csv'
+    csvdiff = 'brineco2.csv'
     threading = '!pthreads'
     prereq = brineco2
     requirement = 'The system shall calculate the solubilities and properties of both the gas and liquid phase in a brine and CO2 system using FV variables.'

@@ -367,10 +367,21 @@
     variable = pressure_gas
     execute_on = 'timestep_end'
   []
+  [x0mass]
+    type = ADPorousFlowFluidMass
+    fluid_component = 0
+    phase = '0 1'
+  []
+  [x1mass]
+    type = ADPorousFlowFluidMass
+    fluid_component = 1
+    phase = '0 1'
+  []
 []
 
 [Outputs]
   csv = true
-  file_base = brineco2_fv
+  file_base = brineco2
+  execute_on = 'timestep_end'
   perf_graph = false
 []
