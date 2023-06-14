@@ -2,7 +2,7 @@
   issues = '#12527'
   design = '/ContactAction.md'
 
-  [./frictional_mu02_penalty]
+  [frictional_mu02_penalty]
     type = 'Exodiff'
     input = 'frictional_02_penalty.i'
     exodiff = 'frictional_02_penalty_out.e'
@@ -14,9 +14,9 @@
     allow_warnings = true
     rel_err = 1e-4
     requirement = 'The system shall support mechanics frictional contact problems'
-  [../]
+  []
 
-  [./frictional_mu04_penalty]
+  [frictional_mu04_penalty]
     type = 'Exodiff'
     input = 'frictional_04_penalty.i'
     exodiff = 'frictional_04_penalty_out.e'
@@ -25,11 +25,11 @@
     abs_zero = 1e-7
     rel_err = 1e-4
     max_time = 800
-#    deleted = '#6139'
+    allow_warnings = true
     requirement = 'The system shall support mechanics frictional contact problems'
-  [../]
+  []
 
-  [./frictionless_kinematic]
+  [frictionless_kinematic]
     type = 'Exodiff'
     input = 'frictionless_kinematic.i'
     exodiff = 'frictionless_kinematic_out.e'
@@ -38,11 +38,10 @@
     abs_zero = 1e-7
     rel_err = 1e-4
     max_time = 800
-#    deleted = '#6139'
     requirement = 'The system shall support mechanics frictionless contact problems'
-  [../]
+  []
 
-  [./frictionless_penalty]
+  [frictionless_penalty]
     type = 'Exodiff'
     input = 'frictionless_penalty.i'
     exodiff = 'frictionless_penalty_out.e'
@@ -53,9 +52,9 @@
     rel_err = 1e-4
     max_time = 800
     requirement = 'The system shall support mechanics frictionless contact problems'
-  [../]
+  []
 
-  [./frictionless_aug]
+  [frictionless_aug]
     type = 'Exodiff'
     input = 'frictionless_aug.i'
     exodiff = 'frictionless_aug_out.e'
@@ -66,9 +65,9 @@
     rel_err = 1e-4
     max_time = 800
     requirement = 'The system shall support mechanics frictionless contact problems'
-  [../]
+  []
 
-  [./frictional_mu02_aug]
+  [frictional_mu02_aug]
     type = 'Exodiff'
     input = 'frictional_02_aug.i'
     exodiff = 'frictional_02_aug_out.e'
@@ -79,6 +78,6 @@
     abs_zero = 1e-4
     max_time = 800
     requirement = 'The system shall support mechanics frictional contact problems'
-  [../]
+  []
 
 []

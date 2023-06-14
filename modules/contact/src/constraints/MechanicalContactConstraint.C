@@ -647,10 +647,8 @@ MechanicalContactConstraint::computeContactForce(PenetrationInfo * pinfo, bool u
           pen_force = penalty * distance_vec;
 
           // Frictional capacity
-          // const Real capacity( _friction_coefficient * (pen_force * pinfo->_normal < 0 ?
-          // -pen_force * pinfo->_normal : 0) );
           const Real capacity(_friction_coefficient *
-                              (res_vec * pinfo->_normal > 0 ? res_vec * pinfo->_normal : 0));
+                              (pen_force * pinfo->_normal < 0 ? -pen_force * pinfo->_normal : 0));
 
           // Elastic predictor
           pinfo->_contact_force =
