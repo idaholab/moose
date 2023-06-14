@@ -212,7 +212,7 @@ def __schedule_task(jobs, num_threads):
     schedule_jobs.wait_finish()
     return schedule_jobs.get_finished()
 
-def __get_pids(application_name, hosts, num_threads):
+def __get_pids(application_name, hosts, num_threads, verbose = False):
     """
     SSH into each host and retrieve PIDs
     return a dictionary of {'hostname' : [pids]}
@@ -225,9 +225,11 @@ def __get_pids(application_name, hosts, num_threads):
     for job in finished_jobs:
         std_out = job.get_stdout().split()
         results[std_out[0]] = std_out[1:]
+    if verbose == True:
+        [print('Running command:',i) for i in jobs]
     return results
 
-def __get_stacks(hosts_pids, num_threads):
+def __get_stacks(hosts_pids, num_threads, verbose = False):
     """
     Iterate over dictionary of hosts, and PIDs and run
     a stack trace on each one, return a list of results.
@@ -240,6 +242,8 @@ def __get_stacks(hosts_pids, num_threads):
     finished_jobs = __schedule_task(jobs, num_threads)
     for job in finished_jobs:
         results.append(job.get_stdout())
+    if verbose == True:
+        [print('Running command:',i) for i in jobs]
     return results
 
 def get_sshpids(application_name, host):
@@ -257,7 +261,7 @@ def get_sshstack(host, pid):
     return f'ssh {host} "echo Host: {host} PID: {pid}; ' \
            f'{PSTACK_BINARY} {pid}; printf "*%.0s" {{1..80}}; echo"'
 
-def generate_traces(job_num, application_name, num_hosts, num_threads):
+def generate_traces(job_num, application_name, num_hosts, num_threads, verbose = False):
     """
     Generate a temporary file with traces and return
     formated results
@@ -266,6 +270,10 @@ def generate_traces(job_num, application_name, num_hosts, num_threads):
     a_job = Job(f'qstat -n {job_num}')
     a_job.run()
     results = a_job.get_stdout()
+
+    if verbose == True:
+        print(f'Running command: qstat -n {job_num}')
+
     for i in node_name_pattern.findall(results):
         hosts.add(i)
     if num_hosts:
@@ -273,11 +281,11 @@ def generate_traces(job_num, application_name, num_hosts, num_threads):
         hosts = set(list(hosts)[:num_hosts])
 
     # Use a Scheduler to get hosts and PIDs
-    hosts_pids = __get_pids(application_name, hosts, num_threads)
+    hosts_pids = __get_pids(application_name, hosts, num_threads, verbose)
 
     # Use a Scheduler to get stack traces from each
     # host for every PID
-    stack_list = __get_stacks(hosts_pids, num_threads)
+    stack_list = __get_stacks(hosts_pids, num_threads, verbose)
 
     traces = []
     for stack in stack_list:
@@ -501,6 +509,7 @@ def main():
     parser.add_argument('-s', '--stacks', metavar='int', action='store', type=int, default=0,
                         help='The number of stack frames to keep and compare for '
                         'uniqueness (Default: ALL)')
+    parser.add_argument('-v', '--verbose', action='store_true',dest='verbose',help='shows output of command line commands used in script.')
     args = parser.parse_args()
 
     cache_filename = None
@@ -508,7 +517,7 @@ def main():
         # Autogenerate a filename based on application name and job number
         cache_filename = f'{args.application}.{args.pbs_job_num}.cache'
 
-        traces = generate_traces(args.pbs_job_num, args.application, args.hosts, args.threads)
+        traces = generate_traces(args.pbs_job_num, args.application, args.hosts, args.threads, args.verbose)
 
         # Cache the restuls to a file
         with open(cache_filename, 'w', encoding='utf-8') as cache_file:
