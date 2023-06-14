@@ -113,14 +113,6 @@ public:
   bool hasValue(const std::size_t i) const { return value(i) != nullptr; }
 
   /**
-   * Resizes the underlying vector.
-   *
-   * This is the only method that allows for modification of
-   * the underlying container. Protect it wisely.
-   */
-  void resize(const std::size_t size) { _values.resize(size); }
-
-  /**
    * Returns a read-only reference to the underlying unique pointer
    * at index \p i.
    */
@@ -130,6 +122,7 @@ public:
     return _values[i];
   }
 
+protected:
   /**
    * Returns a writeable reference to the underlying unique pointer
    * at index \p i.
@@ -145,20 +138,15 @@ public:
     return const_cast<std::unique_ptr<T> &>(std::as_const(*this).value(i));
   }
 
-protected:
+  /**
+   * Resizes the underlying vector.
+   *
+   * This is the only method that allows for modification of
+   * the underlying container. Protect it wisely.
+   */
+  void resize(const std::size_t size) { _values.resize(size); }
+
   /// The underlying data
   values_type _values;
 };
 
-/**
- * Same as UniqueStorage, but makes the unique_ptr accessors protected so that
- * non-const access can be given to this container without granting ownership
- * to the underlying data.
- */
-template <class T>
-class UniqueProtectedStorage : public UniqueStorage<T>
-{
-protected:
-  auto & setValue(const std::size_t i) { return UniqueStorage<T>::setValue(i); }
-  void resize(const std::size_t size) { UniqueStorage<T>::resize(size); }
-};

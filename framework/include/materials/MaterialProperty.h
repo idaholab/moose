@@ -371,7 +371,7 @@ class MaterialPropertiesKey
   MaterialPropertiesKey(const MaterialPropertiesKey &) {}
 };
 
-class MaterialProperties : public UniqueProtectedStorage<PropertyValue>
+class MaterialProperties : public UniqueStorage<PropertyValue>
 {
 public:
   /**
@@ -388,12 +388,12 @@ public:
 
   void resize(const std::size_t size, const MaterialPropertiesKey)
   {
-    UniqueProtectedStorage<PropertyValue>::resize(size);
+    UniqueStorage<PropertyValue>::resize(size);
   }
 
   auto & setValue(const std::size_t i, const MaterialPropertiesKey)
   {
-    return UniqueProtectedStorage<PropertyValue>::setValue(i);
+    return UniqueStorage<PropertyValue>::setValue(i);
   }
 };
 
