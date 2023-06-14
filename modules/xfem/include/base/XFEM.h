@@ -478,16 +478,8 @@ private:
    */
   const GeometricCutUserObject * getGeometricCutForElem(const Elem * elem) const;
 
-  /**
-   * Store the material properties using dataStore
-   * @param props The material properties
-   * @return      Serialized material properties
-   */
-  std::unordered_map<unsigned int, std::string>
-  storeMaterialProperties(HashMap<unsigned int, MaterialProperties> props) const;
-
   void storeMaterialPropertiesForElementHelper(const Elem * elem,
-                                               const MaterialPropertyStorage & storage);
+                                               MaterialPropertyStorage & storage);
 
   /**
    * Helper function to store the material properties of a healed element
@@ -501,19 +493,13 @@ private:
    * Load the material properties
    * @param props_deserialized The material properties
    * @param props_serialized   The serialized material properties
-   */
-  void loadMaterialProperties(
-      HashMap<unsigned int, MaterialProperties> props_deserialized,
-      const std::unordered_map<unsigned int, std::string> & props_serialized) const;
-
-  /**
-   * Load the material properties
-   * @param props_deserialized The material properties
-   * @param props_serialized   The serialized material properties
+   *
+   * This does very dirty things and writes back to MOOSE's stateful properties. It should
+   * not do this in the future.
    */
   void loadMaterialPropertiesForElementHelper(const Elem * elem,
                                               const Xfem::CachedMaterialProperties & cached_props,
-                                              const MaterialPropertyStorage & storage) const;
+                                              MaterialPropertyStorage & storage) const;
 
   /**
    * Helper function to store the material properties of a healed element

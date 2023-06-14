@@ -1385,17 +1385,20 @@ XFEM::cutMeshWithEFA(const std::vector<std::shared_ptr<NonlinearSystemBase>> & n
     // TODO: Also need to copy neighbor material data
     if (parent_elem->processor_id() == _mesh->processor_id())
     {
-      (*_material_data)[0]->copy(*libmesh_elem, *parent_elem, 0);
-      for (unsigned int side = 0; side < parent_elem->n_sides(); ++side)
-      {
-        _mesh->get_boundary_info().boundary_ids(parent_elem, side, parent_boundary_ids);
-        std::vector<boundary_id_type>::iterator it_bd = parent_boundary_ids.begin();
-        for (; it_bd != parent_boundary_ids.end(); ++it_bd)
+      if ((*_material_data)[0]->getMaterialPropertyStorage().hasStatefulProperties())
+        (*_material_data)[0]->copy(*libmesh_elem, *parent_elem, 0);
+
+      if ((*_bnd_material_data)[0]->getMaterialPropertyStorage().hasStatefulProperties())
+        for (unsigned int side = 0; side < parent_elem->n_sides(); ++side)
         {
-          if (_fe_problem->needBoundaryMaterialOnSide(*it_bd, 0))
-            (*_bnd_material_data)[0]->copy(*libmesh_elem, *parent_elem, side);
+          _mesh->get_boundary_info().boundary_ids(parent_elem, side, parent_boundary_ids);
+          std::vector<boundary_id_type>::iterator it_bd = parent_boundary_ids.begin();
+          for (; it_bd != parent_boundary_ids.end(); ++it_bd)
+          {
+            if (_fe_problem->needBoundaryMaterialOnSide(*it_bd, 0))
+              (*_bnd_material_data)[0]->copy(*libmesh_elem, *parent_elem, side);
+          }
         }
-      }
 
       // Store the current information about the geometrically cut element, and load cached material
       // properties into the new child element, if any.
@@ -2159,33 +2162,23 @@ XFEM::getGeometricCutForElem(const Elem * elem) const
   return nullptr;
 }
 
-std::unordered_map<unsigned int, std::string>
-XFEM::storeMaterialProperties(HashMap<unsigned int, MaterialProperties> props) const
-{
-  std::unordered_map<unsigned int, std::string> props_serialized;
-  std::ostringstream oss;
-  std::string serialized_buffer;
-  for (auto p : props)
-  {
-    dataStore(oss, p.second, nullptr);
-    serialized_buffer.assign(oss.str());
-    props_serialized[p.first] = serialized_buffer;
-  }
-  return props_serialized;
-}
-
 void
-XFEM::storeMaterialPropertiesForElementHelper(const Elem * elem,
-                                              const MaterialPropertyStorage & storage)
+XFEM::storeMaterialPropertiesForElementHelper(const Elem * elem, MaterialPropertyStorage & storage)
 {
-  if (storage.hasStatefulProperties())
+  if (!storage.hasStatefulProperties())
+    return;
+
+  for (const auto state : make_range((unsigned int)1, storage.stateIndex()))
   {
-    auto props_old = storage.propsOld().at(elem);
-    _geom_cut_elems[elem]._elem_material_properties[0] = storeMaterialProperties(props_old);
-    if (storage.hasOlderProperties())
+    const auto & elem_props = storage.props(state).at(elem);
+    auto & serialized_props = _geom_cut_elems[elem]._elem_material_properties[state - 1];
+    serialized_props.clear();
+    for (const auto & side_props_pair : elem_props)
     {
-      auto props_older = storage.propsOlder().at(elem);
-      _geom_cut_elems[elem]._elem_material_properties[1] = storeMaterialProperties(props_older);
+      const auto side = side_props_pair.first;
+      std::ostringstream oss;
+      dataStore(oss, storage.setProps(elem, side, state), nullptr);
+      serialized_props[side].assign(oss.str());
     }
   }
 }
@@ -2197,8 +2190,8 @@ XFEM::storeMaterialPropertiesForElement(const Elem * parent_elem, const Elem * c
   _geom_cut_elems[child_elem]._parent_elem = parent_elem;
 
   // Locally store the element material properties
-  storeMaterialPropertiesForElementHelper(child_elem,
-                                          (*_material_data)[0]->getMaterialPropertyStorage());
+  storeMaterialPropertiesForElementHelper(
+      child_elem, (*_material_data)[0]->getMaterialPropertyStorageForXFEM({}));
 
   // Locally store the boundary material properties
   // First check if any of the side need material properties
@@ -2214,37 +2207,30 @@ XFEM::storeMaterialPropertiesForElement(const Elem * parent_elem, const Elem * c
 
   // If boundary material properties are needed for this element, then store them.
   if (need_boundary_materials)
-    storeMaterialPropertiesForElementHelper(child_elem,
-                                            (*_bnd_material_data)[0]->getMaterialPropertyStorage());
-}
-
-void
-XFEM::loadMaterialProperties(
-    HashMap<unsigned int, MaterialProperties> props_deserialized,
-    const std::unordered_map<unsigned int, std::string> & props_serialized) const
-{
-  std::istringstream iss;
-  for (auto p : props_serialized)
-  {
-    iss.str(p.second);
-    iss.clear();
-    dataLoad(iss, props_deserialized.at(p.first), nullptr);
-  }
+    storeMaterialPropertiesForElementHelper(
+        child_elem, (*_bnd_material_data)[0]->getMaterialPropertyStorageForXFEM({}));
 }
 
 void
 XFEM::loadMaterialPropertiesForElementHelper(const Elem * elem,
                                              const Xfem::CachedMaterialProperties & cached_props,
-                                             const MaterialPropertyStorage & storage) const
+                                             MaterialPropertyStorage & storage) const
 {
-  if (storage.hasStatefulProperties())
+  if (!storage.hasStatefulProperties())
+    return;
+
+  for (const auto state : make_range((unsigned int)1, storage.stateIndex()))
   {
-    auto props_old = storage.propsOld().at(elem);
-    loadMaterialProperties(props_old, cached_props[0]);
-    if (storage.hasOlderProperties())
+    const auto & serialized_props = cached_props[state - 1];
+    for (const auto & [side, serialized_side_props] : serialized_props)
     {
-      auto props_older = storage.propsOlder().at(elem);
-      loadMaterialProperties(props_older, cached_props[1]);
+      std::istringstream iss;
+      iss.str(serialized_side_props);
+      iss.clear();
+
+      // This is very dirty. We should not write to MOOSE's stateful properties.
+      // Please remove me :(
+      dataLoad(iss, storage.setProps(elem, side, state), nullptr);
     }
   }
 }
@@ -2261,7 +2247,9 @@ XFEM::loadMaterialPropertiesForElement(
 
   // Load element material properties from cached properties
   loadMaterialPropertiesForElementHelper(
-      elem, cei._elem_material_properties, (*_material_data)[0]->getMaterialPropertyStorage());
+      elem,
+      cei._elem_material_properties,
+      (*_material_data)[0]->getMaterialPropertyStorageForXFEM({}));
 
   // Check if any of the element side need material properties
   bool need_boundary_materials = false;
@@ -2277,7 +2265,9 @@ XFEM::loadMaterialPropertiesForElement(
   // Load boundary material properties from cached properties
   if (need_boundary_materials)
     loadMaterialPropertiesForElementHelper(
-        elem, cei._bnd_material_properties, (*_bnd_material_data)[0]->getMaterialPropertyStorage());
+        elem,
+        cei._bnd_material_properties,
+        (*_bnd_material_data)[0]->getMaterialPropertyStorageForXFEM({}));
 }
 
 CutSubdomainID

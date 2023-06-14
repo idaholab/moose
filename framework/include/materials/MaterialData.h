@@ -21,6 +21,7 @@
 #include <memory>
 
 class Material;
+class XFEM;
 
 /**
  * Proxy for accessing MaterialPropertyStorage.
@@ -171,6 +172,27 @@ public:
    * Provide read-only access to the underlying MaterialPropertyStorage object.
    */
   const MaterialPropertyStorage & getMaterialPropertyStorage() const { return _storage; }
+
+  /**
+   * Key that provides access to only the XFEM class.
+   */
+  class XFEMKey
+  {
+    friend class XFEM;
+    XFEMKey() {}
+    XFEMKey(const XFEM &) {}
+  };
+
+  /**
+   * Provide write-only access to the underlying MaterialPropertyStorage object JUST FOR XFEM.
+   *
+   * This should be removed. To be clear - you should not ever expect to have write access
+   * to this data. It just turned out that XFEM got away with it when we were storing things
+   * as pointers instead of smart pointers...
+   *
+   * These dirty reasons are why this method is named so egregiously.
+   */
+  MaterialPropertyStorage & getMaterialPropertyStorageForXFEM(const XFEMKey) { return _storage; }
 
   /**
    * Wrapper for MaterialStorage::getPropertyId. Allows classes with a MaterialData object
