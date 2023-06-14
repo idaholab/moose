@@ -54,6 +54,7 @@ NaKFluidProperties::molarMass() const
 Real
 NaKFluidProperties::T_from_p_h(Real /* pressure */, Real enthalpy) const
 {
+  // analytical inversion of h_from_p_T
   Real h2 = enthalpy * enthalpy;
   Real B1 =
       std::pow(183.357574154983 * std::sqrt(8405 * h2 - 8208700353 * enthalpy + 9265308922016000) +

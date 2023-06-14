@@ -208,9 +208,14 @@ TEST_F(TabulatedBicubicFluidPropertiesTest, fromFileVE)
   {
     Real s = _tab_fp_ve->s_from_p_T(p, T);
 
+    // density
     Real rho1 = _tab_fp_ve->rho_from_p_T(p, T);
     Real rho2 = _tab_fp_ve->rho_from_p_s(p, s);
     REL_TEST(rho1, rho2, 0.001);
+
+    // temperature
+    Real Ts = _tab_fp_ve->T_from_p_s(p, s);
+    REL_TEST(T, Ts, 0.001);
   }
 
   // are the two version of functions equivalent
@@ -383,7 +388,6 @@ TEST_F(TabulatedBicubicFluidPropertiesTest, derivatives)
   const Real s = _tab_fp_ve->s_from_p_T(p, T);
 
   DERIV_TEST(_tab_fp_ve->rho_from_p_T, p, T, tol);
-  DERIV_TEST(_tab_fp_ve->rho_from_p_s, p, s, tol);
   DERIV_TEST(_tab_fp_ve->e_from_p_T, p, T, tol);
   DERIV_TEST(_tab_fp_ve->v_from_p_T, p, T, tol);
   DERIV_TEST(_tab_fp_ve->h_from_p_T, p, T, tol);
@@ -401,6 +405,9 @@ TEST_F(TabulatedBicubicFluidPropertiesTest, derivatives)
 
   DERIV_TEST(_tab_fp_ve->T_from_p_rho, p, rho, tol);
   DERIV_TEST(_tab_fp_ve->e_from_p_rho, p, rho, tol);
+
+  DERIV_TEST(_tab_fp_ve->T_from_p_s, p, s, tol);
+  DERIV_TEST(_tab_fp_ve->rho_from_p_s, p, s, tol);
 }
 
 // Test generation of tabulated fluid properties

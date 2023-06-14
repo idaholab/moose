@@ -54,7 +54,8 @@ HeliumFluidProperties::e_from_p_rho(Real p, Real rho) const
     e += delta_e;
   } while (++it < max_its);
 
-  mooseAssert(it < max_its, "The iteration failed to converge");
+  if (it >= max_its)
+    mooseWarning("The e_from_p_rho iteration failed to converge");
 
   return e;
 }
@@ -83,7 +84,8 @@ HeliumFluidProperties::e_from_p_rho(const ADReal & p, const ADReal & rho) const
     e += delta_e;
   } while (++it < max_its);
 
-  mooseAssert(it < max_its, "The iteration failed to converge");
+  if (it >= max_its)
+    mooseWarning("The e_from_p_rho iteration failed to converge");
 
   return e;
 }

@@ -467,8 +467,8 @@ TabulatedFluidProperties::rho_from_p_s(
   T_from_p_s(p, s, T, dT_dp, dT_ds);
   Real drho_dp_T, drho_dT;
   rho_from_p_T(p, T, rho, drho_dp_T, drho_dT);
-  drho_dp = drho_dT * dT_dp + drho_dp_T * 1;
-  drho_ds = drho_dT * dT_ds + drho_dp * 0;
+  drho_dp = drho_dT * dT_dp + drho_dp_T;
+  drho_ds = drho_dT * dT_ds;
 }
 
 Real
