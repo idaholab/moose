@@ -112,6 +112,7 @@ Output::Output(const InputParameters & parameters)
     _es_ptr(nullptr),
     _mesh_ptr(nullptr),
     _execute_on(getParam<ExecFlagEnum>("execute_on")),
+    _current_output_execute_on(EXEC_NONE),
     _time(_problem_ptr->time()),
     _time_old(_problem_ptr->timeOld()),
     _t_step(_problem_ptr->timeStep()),
@@ -214,12 +215,17 @@ Output::outputStep(const ExecFlagType & type)
   // store current simulation time
   _last_output_time = _time;
 
+  // set current type
+  _current_output_execute_on = type;
+
   // Call the output method
   if (shouldOutput(type))
   {
     TIME_SECTION("outputStep", 2, "Outputting Step");
-    output(type);
+    output();
   }
+
+  _current_output_execute_on = EXEC_NONE;
 }
 
 bool

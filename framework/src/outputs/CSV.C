@@ -140,8 +140,21 @@ CSV::getVectorPostprocessorFileName(const std::string & vpp_name,
     file_name << '_' << short_name;
 
   if (include_time_step)
+  {
     file_name << '_' << std::setw(_padding) << std::setprecision(0) << std::setfill('0')
               << std::right << timeStep();
+
+    if (_current_output_execute_on == EXEC_NONLINEAR || _current_output_execute_on == EXEC_LINEAR)
+    {
+      file_name << '_' << std::setw(_padding) << std::setprecision(0) << std::setfill('0')
+                << std::right << _nonlinear_iter;
+    }
+    if (_current_output_execute_on == EXEC_LINEAR)
+    {
+      file_name << '_' << std::setw(_padding) << std::setprecision(0) << std::setfill('0')
+                << std::right << _linear_iter;
+    }
+  }
 
   file_name << ".csv";
 
@@ -150,15 +163,14 @@ CSV::getVectorPostprocessorFileName(const std::string & vpp_name,
     int digits = MooseUtils::numDigits(n_processors());
     file_name << "." << std::setw(digits) << std::setfill('0') << processor_id();
   }
-
   return file_name.str();
 }
 
 void
-CSV::output(const ExecFlagType & type)
+CSV::output()
 {
   // Call the base class output (populates tables)
-  TableOutput::output(type);
+  TableOutput::output(_current_output_execute_on);
 
   // Print the table containing all the data to a file
   if (_write_all_table && !_all_data_table.empty() && processor_id() == 0)
@@ -222,7 +234,7 @@ CSV::output(const ExecFlagType & type)
     }
   }
 
-  if (type == EXEC_FINAL && _create_final_symlink)
+  if (_current_output_execute_on == EXEC_FINAL && _create_final_symlink)
   {
     for (const auto & name_tuple : _latest_vpp_filenames)
     {

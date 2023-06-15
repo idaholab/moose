@@ -1,14 +1,15 @@
 [Tests]
   issues = '#1927'
   design = 'syntax/Outputs/index.md outputs/CSV.md'
-  [./steady]
+  [steady]
     type = CSVDiff
     input = 'csv.i'
     csvdiff = 'csv_out.csv'
 
-    requirement =  "The system shall support the output of postprocessors and scalars to CSV files for steady state problems."
-  [../]
-  [./transient]
+    requirement = "The system shall support the output of postprocessors and scalars to CSV files "
+                  "for steady state problems."
+  []
+  [transient]
     type = CSVDiff
     input = 'csv_transient.i'
     csvdiff = 'csv_transient_out.csv'
@@ -17,18 +18,20 @@
     # https://github.com/idaholab/moose/issues/9026
     max_parallel = 1
 
-    requirement = "The system shall support the output of postprocessors and scalars to CSV files for transient propblems."
-  [../]
-  [./no_time]
+    requirement = "The system shall support the output of postprocessors and scalars to CSV files "
+                  "for transient propblems."
+  []
+  [no_time]
     type = CSVDiff
     input = 'csv_no_time.i'
     csvdiff = 'csv_no_time_out.csv'
     # SumNodalValuesAux is unreliable at high processor counts
     max_parallel = 1
 
-    requirement = "The system shall support the output of postprocessors and scalars to CSV files for transient problems without a time column."
-  [../]
-  [./transient_exodus]
+    requirement = "The system shall support the output of postprocessors and scalars to CSV files "
+                  "for transient problems without a time column."
+  []
+  [transient_exodus]
     type = Exodiff
     input = 'csv_transient.i'
     exodiff = 'csv_transient_out.e'
@@ -36,8 +39,9 @@
     prereq = transient
     max_parallel = 1
 
-    requirement = "The system shall support the output of postprocessors and scalars to Exodus files for transient problems."
-  [../]
+    requirement = "The system shall support the output of postprocessors and scalars to Exodus files "
+                  "for transient problems."
+  []
   [restart]
     requirement = "The system shall support the output of CSV data:"
     [restart_part1]
@@ -64,7 +68,7 @@
     []
   []
 
-  [./align]
+  [align]
     # Test the alignment, delimiter, and precision settings
     type = CSVDiff
     input = csv_align.i
@@ -72,15 +76,33 @@
 
     requirement = "The system shall support CSV output aligned columns and a custom delimiter."
     issues = "#3229"
-  [../]
-  [./sort]
+  []
+  [sort]
     # Tests that csv output can be sorted
     type = CheckFiles
     input = 'csv_sort.i'
     check_files = csv_sort_out.csv
     file_expect_out = "time,aux0_0,aux0_1,aux1,aux2,num_aux,num_vars"
 
-    requirement = "The system shall support CSV output to the console that is sorted by the variable name."
+    requirement = "The system shall support CSV output to the console that is sorted by the variable "
+                  "name."
     issues = "#8974"
-  [../]
+  []
+  [csv_transient_vpp_linear]
+    type = CheckFiles
+    input = 'csv_transient_vpp.i'
+    check_files = 'csv_transient_vpp_out_nodes_0003_0002_0001.csv'
+    file_expect_out = 'id,u,x,y,z'
+    requirement = "The system shall support CSV output to files on linear iterations, generating unique filenames containing the time step, current nonlinear and linear iteration numbers."
+    issues = "#24705"
+  []
+  [csv_transient_vpp_nonlinear]
+    type = CheckFiles
+    input = 'csv_transient_vpp.i'
+    check_files = 'csv_transient_vpp_out_nodes_0002_0001.csv'
+    file_expect_out = 'id,u,x,y,z'
+    cli_args = 'Outputs/out/execute_on=NONLINEAR'
+    requirement = "The system shall support CSV output to files on nonlinear iterations, generating unique filenames containing the time step and current nonlinear iteration number."
+    issues = "#24705"
+  []
 []

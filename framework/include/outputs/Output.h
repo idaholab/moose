@@ -143,9 +143,17 @@ public:
 
 protected:
   /**
+   * Overload this function with the desired output activities (deprecated)
+   */
+  virtual void output(const ExecFlagType & /*type*/)
+  {
+    mooseError("Override 'void output()'. 'void output(const ExecFlagType & type)' is deprecated.");
+  }
+
+  /**
    * Overload this function with the desired output activities
    */
-  virtual void output(const ExecFlagType & type) = 0;
+  virtual void output() { output(_current_output_execute_on); };
 
   /**
    * A method called just prior to the solve, this is used by PetscOutput to perform the necessary
@@ -185,6 +193,13 @@ protected:
 
   /// The common Execution types; this is used as the default execution type for everything except system information and input
   ExecFlagEnum _execute_on;
+
+  /**
+   * Current execute on flag. This is different from the flag provided by
+   * FEProblemBase::getCurrentExecuteOnFlag() const, as outputs are triggered
+   * in PETSc callbacks which cannot update  FEProblemBase::_current_execute_on_flag
+   */
+  ExecFlagType _current_output_execute_on;
 
   /// The current time for output purposes
   Real & _time;

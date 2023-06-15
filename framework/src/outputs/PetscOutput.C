@@ -144,18 +144,23 @@ PetscOutput::solveSetup()
 
   _linear_dt = _nonlinear_dt / _linear_dt_divisor; // set the pseudo linear timestep
 
-  // Set the PETSc monitor functions
-  if (_execute_on.contains(EXEC_NONLINEAR) &&
-      (_time >= _nonlinear_start_time - _t_tol && _time <= _nonlinear_end_time + _t_tol))
+  // Set the PETSc monitor functions (register the nonlinear callback so that linear outputs
+  // get an updated nonlinear iteration number)
+  // TODO: not every Output should register its own DM monitor! Just register one each of nonlinear
+  // and linear and dispatch all Outputs from there!
+  if ((_execute_on.contains(EXEC_NONLINEAR) &&
+       (_time >= _nonlinear_start_time - _t_tol && _time <= _nonlinear_end_time + _t_tol)) ||
+      (_execute_on.contains(EXEC_LINEAR) &&
+       (_time >= _linear_start_time - _t_tol && _time <= _linear_end_time + _t_tol)))
   {
-    PetscErrorCode ierr = SNESMonitorSet(snes, petscNonlinearOutput, this, LIBMESH_PETSC_NULLPTR);
+    auto ierr = SNESMonitorSet(snes, petscNonlinearOutput, this, LIBMESH_PETSC_NULLPTR);
     CHKERRABORT(_communicator.get(), ierr);
   }
 
   if (_execute_on.contains(EXEC_LINEAR) &&
       (_time >= _linear_start_time - _t_tol && _time <= _linear_end_time + _t_tol))
   {
-    PetscErrorCode ierr = KSPMonitorSet(ksp, petscLinearOutput, this, LIBMESH_PETSC_NULLPTR);
+    auto ierr = KSPMonitorSet(ksp, petscLinearOutput, this, LIBMESH_PETSC_NULLPTR);
     CHKERRABORT(_communicator.get(), ierr);
   }
 }
@@ -248,4 +253,17 @@ PetscOutput::time()
     return _linear_time;
   else
     return Output::time();
+}
+
+bool
+PetscOutput::shouldOutput(const ExecFlagType & type)
+{
+  if (Output::shouldOutput(type))
+  {
+    if (type == EXEC_NONLINEAR &&
+        (_time < _nonlinear_start_time - _t_tol || _time > _nonlinear_end_time + _t_tol))
+      return false;
+    return true;
+  }
+  return false;
 }
