@@ -453,6 +453,25 @@ TabulatedFluidProperties::rho_from_p_T(const ADReal & pressure,
 }
 
 Real
+TabulatedFluidProperties::rho_from_p_s(Real p, Real s) const
+{
+  Real T = T_from_p_s(p, s);
+  return rho_from_p_T(p, T);
+}
+
+void
+TabulatedFluidProperties::rho_from_p_s(
+    Real p, Real s, Real & rho, Real & drho_dp, Real & drho_ds) const
+{
+  Real T, dT_dp, dT_ds;
+  T_from_p_s(p, s, T, dT_dp, dT_ds);
+  Real drho_dp_T, drho_dT;
+  rho_from_p_T(p, T, rho, drho_dp_T, drho_dT);
+  drho_dp = drho_dT * dT_dp + drho_dp_T;
+  drho_ds = drho_dT * dT_ds;
+}
+
+Real
 TabulatedFluidProperties::e_from_p_T(Real pressure, Real temperature) const
 {
   if (_interpolate_internal_energy)
@@ -543,6 +562,34 @@ TabulatedFluidProperties::T_from_p_rho(
   Real eps = 1e-8;
   dT_dp = (T_from_p_rho(pressure * (1 + eps), rho) - T) / (eps * pressure);
   dT_drho = (T_from_p_rho(pressure, rho * (1 + eps)) - T) / (eps * rho);
+}
+
+Real
+TabulatedFluidProperties::T_from_p_s(Real pressure, Real s) const
+{
+  auto lambda = [&](Real p, Real current_T, Real & new_s, Real & ds_dp, Real & ds_dT)
+  { s_from_p_T(p, current_T, new_s, ds_dp, ds_dT); };
+  Real T = FluidPropertiesUtils::NewtonSolve(
+               pressure, s, _T_initial_guess, _tolerance, lambda, name() + "::T_from_p_s")
+               .first;
+  // check for nans
+  if (std::isnan(T))
+    mooseError("Conversion from pressure (p = ",
+               pressure,
+               ") and entropy (s = ",
+               s,
+               ") to temperature failed to converge.");
+  return T;
+}
+
+void
+TabulatedFluidProperties::T_from_p_s(
+    Real pressure, Real s, Real & T, Real & dT_dp, Real & dT_ds) const
+{
+  T = T_from_p_s(pressure, s);
+  Real eps = 1e-8;
+  dT_dp = (T_from_p_s(pressure * (1 + eps), s) - T) / (eps * pressure);
+  dT_ds = (T_from_p_s(pressure, s * (1 + eps)) - T) / (eps * s);
 }
 
 Real

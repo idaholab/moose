@@ -19,7 +19,10 @@ class TabulatedBicubicFluidProperties;
 class TabulatedBicubicFluidPropertiesTest : public MooseObjectUnitTest
 {
 public:
-  TabulatedBicubicFluidPropertiesTest() : MooseObjectUnitTest("FluidPropertiesApp") { buildObjects(); }
+  TabulatedBicubicFluidPropertiesTest() : MooseObjectUnitTest("FluidPropertiesApp")
+  {
+    buildObjects();
+  }
 
 protected:
   void buildObjects()
@@ -62,10 +65,12 @@ protected:
     _fe_problem->addUserObject("TabulatedBicubicFluidProperties", "tab_gen_fp", tab_gen_uo_params);
     _tab_gen_fp = &_fe_problem->getUserObject<TabulatedBicubicFluidProperties>("tab_gen_fp");
 
-    InputParameters unordered_uo_params = _factory.getValidParams("TabulatedBicubicFluidProperties");
+    InputParameters unordered_uo_params =
+        _factory.getValidParams("TabulatedBicubicFluidProperties");
     unordered_uo_params.set<UserObjectName>("fp") = "co2_fp";
     unordered_uo_params.set<FileName>("fluid_property_file") = "data/csv/unordered_fluid_props.csv";
-    _fe_problem->addUserObject("TabulatedBicubicFluidProperties", "unordered_fp", unordered_uo_params);
+    _fe_problem->addUserObject(
+        "TabulatedBicubicFluidProperties", "unordered_fp", unordered_uo_params);
     _unordered_fp = &_fe_problem->getUserObject<TabulatedBicubicFluidProperties>("unordered_fp");
 
     InputParameters unequal_uo_params = _factory.getValidParams("TabulatedBicubicFluidProperties");
@@ -74,20 +79,27 @@ protected:
     _fe_problem->addUserObject("TabulatedBicubicFluidProperties", "unequal_fp", unequal_uo_params);
     _unequal_fp = &_fe_problem->getUserObject<TabulatedBicubicFluidProperties>("unequal_fp");
 
-    InputParameters missing_col_uo_params = _factory.getValidParams("TabulatedBicubicFluidProperties");
+    InputParameters missing_col_uo_params =
+        _factory.getValidParams("TabulatedBicubicFluidProperties");
     missing_col_uo_params.set<UserObjectName>("fp") = "co2_fp";
     missing_col_uo_params.set<FileName>("fluid_property_file") =
         "data/csv/missing_col_fluid_props.csv";
-    _fe_problem->addUserObject("TabulatedBicubicFluidProperties", "missing_col_fp", missing_col_uo_params);
-    _missing_col_fp = &_fe_problem->getUserObject<TabulatedBicubicFluidProperties>("missing_col_fp");
+    _fe_problem->addUserObject(
+        "TabulatedBicubicFluidProperties", "missing_col_fp", missing_col_uo_params);
+    _missing_col_fp =
+        &_fe_problem->getUserObject<TabulatedBicubicFluidProperties>("missing_col_fp");
 
-    InputParameters unknown_col_uo_params = _factory.getValidParams("TabulatedBicubicFluidProperties");
+    InputParameters unknown_col_uo_params =
+        _factory.getValidParams("TabulatedBicubicFluidProperties");
     unknown_col_uo_params.set<UserObjectName>("fp") = "co2_fp";
     unknown_col_uo_params.set<FileName>("fluid_property_file") = "data/csv/unknown_fluid_props.csv";
-    _fe_problem->addUserObject("TabulatedBicubicFluidProperties", "unknown_col_fp", unknown_col_uo_params);
-    _unknown_col_fp = &_fe_problem->getUserObject<TabulatedBicubicFluidProperties>("unknown_col_fp");
+    _fe_problem->addUserObject(
+        "TabulatedBicubicFluidProperties", "unknown_col_fp", unknown_col_uo_params);
+    _unknown_col_fp =
+        &_fe_problem->getUserObject<TabulatedBicubicFluidProperties>("unknown_col_fp");
 
-    InputParameters missing_data_uo_params = _factory.getValidParams("TabulatedBicubicFluidProperties");
+    InputParameters missing_data_uo_params =
+        _factory.getValidParams("TabulatedBicubicFluidProperties");
     missing_data_uo_params.set<UserObjectName>("fp") = "co2_fp";
     missing_data_uo_params.set<FileName>("fluid_property_file") =
         "data/csv/missing_data_fluid_props.csv";

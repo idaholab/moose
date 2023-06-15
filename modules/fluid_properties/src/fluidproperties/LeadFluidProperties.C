@@ -253,6 +253,35 @@ LeadFluidProperties::T_from_v_e(Real v, Real e, Real & T, Real & dT_dv, Real & d
 }
 
 Real
+LeadFluidProperties::T_from_p_h(Real p, Real h) const
+{
+  auto lambda = [&](Real p, Real current_T, Real & new_h, Real & dh_dp, Real & dh_dT)
+  { h_from_p_T(p, current_T, new_h, dh_dp, dh_dT); };
+  Real T = FluidPropertiesUtils::NewtonSolve(
+               p, h, _T_initial_guess, _tolerance, lambda, name() + "::T_from_p_h")
+               .first;
+  // check for nans
+  if (std::isnan(T))
+    mooseError("Conversion from pressure (p = ",
+               p,
+               ") and enthalpy (h = ",
+               h,
+               ") to temperature failed to converge.");
+  return T;
+}
+
+void
+LeadFluidProperties::T_from_p_h(Real p, Real h, Real & T, Real & dT_dp, Real & dT_dh) const
+{
+  T = T_from_p_h(p, h);
+  dT_dp = 0;
+  // using inverse relation
+  Real h1, dh_dp, dh_dT;
+  h_from_p_T(p, T, h1, dh_dp, dh_dT);
+  dT_dh = 1 / dh_dT;
+}
+
+Real
 LeadFluidProperties::cp_from_p_T(Real /*p*/, Real T) const
 {
   return 176.2 - 4.923e-2 * T + 1.544e-5 * T * T - 1.524e+6 / T / T;

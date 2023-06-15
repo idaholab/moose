@@ -204,6 +204,20 @@ TEST_F(TabulatedBicubicFluidPropertiesTest, fromFileVE)
     REL_TEST(k1, k2, 0.001);
   }
 
+  // check computation of fluid props from p, s
+  {
+    Real s = _tab_fp_ve->s_from_p_T(p, T);
+
+    // density
+    Real rho1 = _tab_fp_ve->rho_from_p_T(p, T);
+    Real rho2 = _tab_fp_ve->rho_from_p_s(p, s);
+    REL_TEST(rho1, rho2, 0.001);
+
+    // temperature
+    Real Ts = _tab_fp_ve->T_from_p_s(p, s);
+    REL_TEST(T, Ts, 0.001);
+  }
+
   // are the two version of functions equivalent
   {
     Real e = _tab_fp_ve->e_from_p_T(p, T);
@@ -352,6 +366,48 @@ TEST_F(TabulatedBicubicFluidPropertiesTest, fromFileVE)
 
   // cannot test AD c_from_v_e because co2 props do not
   // implement enough
+}
+
+/**
+ * Verify calculation of the derivatives of tabulated properties by comparing with finite
+ * differences
+ */
+TEST_F(TabulatedBicubicFluidPropertiesTest, derivatives)
+{
+  // Read the data file
+  Moose::_throw_on_warning = false;
+  const_cast<TabulatedBicubicFluidProperties *>(_tab_fp_ve)->initialSetup();
+  Moose::_throw_on_warning = true;
+  const Real tol = REL_TOL_DERIVATIVE;
+
+  const Real p = 1.6e6;
+  const Real T = 452.0;
+  const Real rho = _tab_fp_ve->rho_from_p_T(p, T);
+  const Real v = 1. / rho;
+  const Real e = _tab_fp_ve->e_from_p_T(p, T);
+  const Real s = _tab_fp_ve->s_from_p_T(p, T);
+
+  DERIV_TEST(_tab_fp_ve->rho_from_p_T, p, T, tol);
+  DERIV_TEST(_tab_fp_ve->e_from_p_T, p, T, tol);
+  DERIV_TEST(_tab_fp_ve->v_from_p_T, p, T, tol);
+  DERIV_TEST(_tab_fp_ve->h_from_p_T, p, T, tol);
+  DERIV_TEST(_tab_fp_ve->k_from_p_T, p, T, tol);
+  DERIV_TEST(_tab_fp_ve->cp_from_p_T, p, T, tol);
+  DERIV_TEST(_tab_fp_ve->cv_from_p_T, p, T, tol);
+  DERIV_TEST(_tab_fp_ve->mu_from_p_T, p, T, tol);
+
+  DERIV_TEST(_tab_fp_ve->p_from_v_e, v, e, tol);
+  DERIV_TEST(_tab_fp_ve->mu_from_v_e, v, e, tol);
+  DERIV_TEST(_tab_fp_ve->k_from_v_e, v, e, tol);
+  DERIV_TEST(_tab_fp_ve->T_from_v_e, v, e, tol);
+  DERIV_TEST(_tab_fp_ve->cp_from_v_e, v, e, tol);
+  DERIV_TEST(_tab_fp_ve->cv_from_v_e, v, e, tol);
+
+  DERIV_TEST(_tab_fp_ve->T_from_p_rho, p, rho, tol);
+  DERIV_TEST(_tab_fp_ve->e_from_p_rho, p, rho, tol);
+
+  DERIV_TEST(_tab_fp_ve->T_from_p_s, p, s, tol);
+  DERIV_TEST(_tab_fp_ve->rho_from_p_s, p, s, tol);
 }
 
 // Test generation of tabulated fluid properties

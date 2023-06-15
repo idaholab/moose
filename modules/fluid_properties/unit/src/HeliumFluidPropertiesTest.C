@@ -105,9 +105,11 @@ TEST_F(HeliumFluidPropertiesTest, specificInternalEnergy)
 {
   const Real T = 120.0 + 273.15;
   const Real p = 101325.0;
+  const Real rho = _fp->rho_from_p_T(p, T);
 
   ABS_TEST(_fp->e_from_p_T(p, T), 1.2254485499999998e6, REL_TOL_SAVED_VALUE);
   DERIV_TEST(_fp->e_from_p_T, p, T, REL_TOL_DERIVATIVE);
+  ABS_TEST(_fp->e_from_p_rho(p, rho), 1.2254485499999998e6, REL_TOL_SAVED_VALUE);
 }
 
 /**

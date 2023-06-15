@@ -71,13 +71,9 @@
     order = CONSTANT
     family = MONOMIAL
   []
-  [saved_x]
+  [react_x]
   []
-  [saved_y]
-  []
-  [diag_saved_x]
-  []
-  [diag_saved_y]
+  [react_y]
   []
 []
 
@@ -97,7 +93,6 @@
 [Kernels]
   [TensorMechanics]
     use_displaced_mesh = true
-    save_in = 'saved_x saved_y'
     extra_vector_tags = 'ref'
     block = '1 2 3 4 5 6 7'
   []
@@ -161,27 +156,39 @@
     execute_on = timestep_end
     block = '1 2 3 4 5 6 7'
   []
+  [react_x]
+    type = TagVectorAux
+    vector_tag = 'ref'
+    v = 'disp_x'
+    variable = 'react_x'
+  []
+  [react_y]
+    type = TagVectorAux
+    vector_tag = 'ref'
+    v = 'disp_y'
+    variable = 'react_y'
+  []
 []
 
 [Postprocessors]
   [bot_react_x]
     type = NodalSum
-    variable = saved_x
+    variable = react_x
     boundary = 1
   []
   [bot_react_y]
     type = NodalSum
-    variable = saved_y
+    variable = react_y
     boundary = 1
   []
   [top_react_x]
     type = NodalSum
-    variable = saved_x
+    variable = react_x
     boundary = 4
   []
   [top_react_y]
     type = NodalSum
-    variable = saved_y
+    variable = react_y
     boundary = 4
   []
 []
@@ -333,7 +340,7 @@
     friction_coefficient = 0.4 # with 2.0 works
     secondary_variable = disp_x
     penalty = 5e9
-    penalty_friction = 2e7 # 1e7
+    penalty_friction = 1e7
   []
 []
 

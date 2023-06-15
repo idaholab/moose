@@ -625,7 +625,7 @@ CO2FluidProperties::partialDensity(Real temperature) const
 {
   // This correlation uses temperature in C
   Real Tc = temperature - _T_c2k;
-  // The parial volume
+  // The partial volume
   Real V = 37.51 - 9.585e-2 * Tc + 8.74e-4 * Tc * Tc - 5.044e-7 * Tc * Tc * Tc;
 
   return 1.0e6 * _Mco2 / V;

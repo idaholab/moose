@@ -19,7 +19,6 @@
               'cylinder_friction_penalty_check_friction_FINAL.csv'
     input = 'cylinder_friction_penalty.i'
     rel_err = 5.0e-4
-    min_parallel = 4
     heavy = true
     requirement = 'The contact module shall be able to approximate frictional contact solution between a cylinder '
                   'and a plane using penalty mortar contact.'

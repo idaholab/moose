@@ -118,8 +118,8 @@ WeightedVelocitiesUserObject::computeQpIProperties()
 
   _dof_to_weighted_tangential_velocity[dof][0] +=
       (*_test)[_i][_qp] * _qp_tangential_velocity_nodal * nodal_tangents[0][_i];
-  _dof_to_real_tangential_velocity[dof][0] =
-      _qp_real_tangential_velocity_nodal * nodal_tangents[0][_i];
+  _dof_to_real_tangential_velocity[dof][0] +=
+      (*_test)[_i][_qp] * _qp_real_tangential_velocity_nodal * nodal_tangents[0][_i];
 
   // Get the _dof_to_weighted_tangential_velocity map for a second direction
   if (_3d)
@@ -127,8 +127,8 @@ WeightedVelocitiesUserObject::computeQpIProperties()
     _dof_to_weighted_tangential_velocity[dof][1] +=
         (*_test)[_i][_qp] * _qp_tangential_velocity_nodal * nodal_tangents[1][_i];
 
-    _dof_to_real_tangential_velocity[dof][1] =
-        _qp_real_tangential_velocity_nodal * nodal_tangents[1][_i];
+    _dof_to_real_tangential_velocity[dof][1] +=
+        (*_test)[_i][_qp] * _qp_real_tangential_velocity_nodal * nodal_tangents[1][_i];
   }
 }
 
