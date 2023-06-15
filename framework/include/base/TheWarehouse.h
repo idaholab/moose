@@ -491,10 +491,13 @@ public:
     for (unsigned int i = 0; i < objs.size(); i++)
     {
       auto obj = objs[i];
-      mooseAssert(dynamic_cast<T *>(obj),
-                  "queried object has incompatible c++ type for object named " + obj->name());
+      mooseAssert(obj, "Null object");
+      auto cast_obj = dynamic_cast<T *>(obj);
+      if (obj)
+        mooseAssert(cast_obj,
+                    "Queried object has incompatible c++ type for object named " + obj->name());
       if (show_all || obj->enabled())
-        results.push_back(dynamic_cast<T *>(obj));
+        results.push_back(cast_obj);
     }
     return results;
   }
