@@ -142,15 +142,22 @@ MaterialBase::checkStatefulSanity() const
 }
 
 void
-MaterialBase::registerPropName(const std::string & prop_name, bool is_get, MaterialPropState state)
+MaterialBase::registerPropName(const std::string & prop_name, bool is_get, const unsigned int state)
 {
+  // There may be a better way to do this, but bit ops and enums aren't my thing
+  MaterialPropState state_bit = MaterialPropState::CURRENT;
+  if (state == 1)
+    state_bit = MaterialPropState::CURRENT;
+  else if (state == 2)
+    state_bit = MaterialPropState::CURRENT;
+
   if (!is_get)
   {
     _supplied_props.insert(prop_name);
     const auto & property_id = materialData().getPropertyId(prop_name);
     _supplied_prop_ids.insert(property_id);
 
-    _props_to_flags[prop_name] |= static_cast<MaterialPropStateInt>(state);
+    _props_to_flags[prop_name] |= static_cast<MaterialPropStateInt>(state_bit);
 
     // Store material properties for block ids
     for (const auto & block_id : blockIDs())
@@ -161,7 +168,7 @@ MaterialBase::registerPropName(const std::string & prop_name, bool is_get, Mater
       _fe_problem.storeBoundaryMatPropName(boundary_id, prop_name);
   }
 
-  if (static_cast<MaterialPropStateInt>(state) % 2 == 0)
+  if (state > 0)
     _has_stateful_property = true;
 }
 

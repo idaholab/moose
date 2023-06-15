@@ -16,8 +16,8 @@
     [old]
       type = 'RunException'
       input = 'material_error_check.i'
-      expect_err = 'Stateful material properties not allowed for this object\. Old property for \S+ '
-                   'was requested.'
+      expect_err = 'Stateful material properties not allowed for this object\. State 1 property for '
+                   '\S+ was requested.'
 
       detail = 'one step back, and'
     []
@@ -25,7 +25,7 @@
       type = 'RunException'
       input = 'material_error_check.i'
       cli_args = 'DiracKernels/material_source/prop_state=older'
-      expect_err = 'Stateful material properties not allowed for this object\. Older property for '
+      expect_err = 'Stateful material properties not allowed for this object\. State 2 property for '
                    '\S+ was requested.'
 
       detail = 'two steps back.'

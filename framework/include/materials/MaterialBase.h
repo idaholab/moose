@@ -321,7 +321,7 @@ protected:
   std::map<std::string, MaterialPropStateInt> _props_to_flags;
 
   /// Small helper function to call store{Subdomain,Boundary}MatPropName
-  void registerPropName(const std::string & prop_name, bool is_get, MaterialPropState state);
+  void registerPropName(const std::string & prop_name, bool is_get, const unsigned int state);
 
   /// Check and throw an error if the execution has progressed past the construction stage
   void checkExecutionStage();
@@ -361,9 +361,9 @@ MaterialBase::declareGenericPropertyByName(const std::string & prop_name)
           : MooseUtils::join(std::vector<std::string>({prop_name, _declare_suffix}), "_");
 
   // Call this before so that the ID is valid
-  auto & prop = materialData().declareGenericProperty<T, is_ad>(prop_name_modified);
+  auto & prop = materialData().getGenericProperty<T, is_ad>(prop_name_modified);
 
-  registerPropName(prop_name_modified, false, MaterialPropState::CURRENT);
+  registerPropName(prop_name_modified, false, 0);
   return prop;
 }
 
@@ -387,7 +387,7 @@ MaterialBase::getGenericZeroMaterialPropertyByName(const std::string & prop_name
   auto & preload_with_zero = materialData().getGenericProperty<T, is_ad>(prop_name);
 
   _requested_props.insert(prop_name);
-  registerPropName(prop_name, true, MaterialPropState::CURRENT);
+  registerPropName(prop_name, true, 0);
   _fe_problem.markMatPropRequested(prop_name);
 
   // Register this material on these blocks and boundaries as a zero property with relaxed

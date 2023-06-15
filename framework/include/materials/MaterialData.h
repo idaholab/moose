@@ -43,31 +43,6 @@ public:
    */
   unsigned int nQPoints() const { return _n_qpoints; }
 
-  /**
-   * Declare the normal/AD/generic valued property named \p prop_name.
-   *
-   * Calling any of these functions multiple times with the same property
-   * name is okay and will result in a single identical reference returned
-   * every time.
-   */
-  ///@{
-  template <typename T, bool is_ad>
-  GenericMaterialProperty<T, is_ad> & declareGenericProperty(const std::string & prop_name)
-  {
-    return declareHelper<T, is_ad>(prop_name, 0);
-  }
-  template <typename T>
-  MaterialProperty<T> & declareProperty(const std::string & prop_name)
-  {
-    return declareGenericProperty<T, false>(prop_name);
-  }
-  template <typename T>
-  ADMaterialProperty<T> & declareADProperty(const std::string & prop_name)
-  {
-    return declareGenericProperty<T, true>(prop_name);
-  }
-  //@}
-
   /// copy material properties from one element to another
   void copy(const Elem & elem_to, const Elem & elem_from, unsigned int side);
 
@@ -129,10 +104,7 @@ public:
    */
   template <typename T, bool is_ad>
   GenericMaterialProperty<T, is_ad> & getGenericProperty(const std::string & prop_name,
-                                                         const unsigned int state = 0)
-  {
-    return declareHelper<T, is_ad>(prop_name, state);
-  }
+                                                         const unsigned int state = 0);
   template <typename T>
   MaterialProperty<T> & getProperty(const std::string & prop_name, const unsigned int state = 0)
   {
@@ -142,16 +114,6 @@ public:
   ADMaterialProperty<T> & getADProperty(const std::string & prop_name)
   {
     return getGenericProperty<T, true>(prop_name, 0);
-  }
-  template <typename T>
-  MaterialProperty<T> & getPropertyOld(const std::string & prop_name)
-  {
-    return declareHelper<T, false>(prop_name, 1);
-  }
-  template <typename T>
-  MaterialProperty<T> & getPropertyOlder(const std::string & prop_name)
-  {
-    return declareHelper<T, false>(prop_name, 2);
   }
   ///@}
 
@@ -239,10 +201,6 @@ private:
   /// Use non-destructive resize of material data (calling resize() will not reduce size).
   /// Default is false (normal resize behaviour)
   bool _resize_only_if_smaller;
-
-  template <typename T, bool is_ad>
-  GenericMaterialProperty<T, is_ad> & declareHelper(const std::string & prop_name,
-                                                    const unsigned int state);
 };
 
 inline const MaterialProperties &
@@ -297,7 +255,7 @@ MaterialData::resizeProps(unsigned int id)
 
 template <typename T, bool is_ad>
 GenericMaterialProperty<T, is_ad> &
-MaterialData::declareHelper(const std::string & prop_name, const unsigned int state)
+MaterialData::getGenericProperty(const std::string & prop_name, const unsigned int state)
 {
   if constexpr (is_ad)
     mooseAssert(state == 0, "Can only request/declare for states other than zero");

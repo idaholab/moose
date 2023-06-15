@@ -29,86 +29,61 @@ public:
   static InputParameters validParams();
 
   /**
-   * Retrieve the property deduced from the name \p name
+   * Retrieve the neighbor property deduced from the name \p name
    */
-  template <typename T>
-  const MaterialProperty<T> & getNeighborMaterialProperty(const std::string & name);
-
-  /**
-   * Retrieve the property named "name" without any deduction
-   */
-  template <typename T>
-  const MaterialProperty<T> & getNeighborMaterialPropertyByName(const std::string & name);
-
-  /**
-   * Retrieve the ADMaterialProperty named "name"
-   */
-  template <typename T>
-  const ADMaterialProperty<T> & getNeighborADMaterialProperty(const std::string & name);
-
-  template <typename T>
-  const ADMaterialProperty<T> & getNeighborADMaterialPropertyByName(const std::string & name);
-
-  template <typename T>
-  const MaterialProperty<T> & getNeighborMaterialPropertyOld(const std::string & name);
-
-  template <typename T>
-  const MaterialProperty<T> & getNeighborMaterialPropertyOlder(const std::string & name);
-
-  /**
-   * Retrieve the neighbor material property whether AD or not
-   */
+  ///@{
   template <typename T, bool is_ad>
-  const auto & getGenericNeighborMaterialProperty(const std::string & name)
+  const GenericMaterialProperty<T, is_ad> &
+  getGenericNeighborMaterialProperty(const std::string & name, const unsigned int state = 0)
   {
-    if constexpr (is_ad)
-      return getADMaterialProperty<T>(name, *_neighbor_material_data);
-    else
-      return getMaterialProperty<T>(name, *_neighbor_material_data);
+    return getGenericMaterialProperty<T, is_ad>(name, *_neighbor_material_data, state);
   }
+  template <typename T>
+  const MaterialProperty<T> & getNeighborMaterialProperty(const std::string & name,
+                                                          const unsigned int state = 0)
+  {
+    return getGenericNeighborMaterialProperty<T, false>(name, state);
+  }
+  template <typename T>
+  const ADMaterialProperty<T> & getNeighborADMaterialProperty(const std::string & name)
+  {
+    return getGenericNeighborMaterialProperty<T, true>(name, 0);
+  }
+  template <typename T>
+  const MaterialProperty<T> & getNeighborMaterialPropertyOld(const std::string & name)
+  {
+    return getGenericNeighborMaterialProperty<T, false>(name, 1);
+  }
+  template <typename T>
+  const MaterialProperty<T> & getNeighborMaterialPropertyOlder(const std::string & name)
+  {
+    return getGenericNeighborMaterialProperty<T, false>(name, 2);
+  }
+  ///@}
+
+  /**
+   * Retrieve the neighbor property named "name" without any deduction
+   */
+  ///@{
+  template <typename T, bool is_ad>
+  const GenericMaterialProperty<T, is_ad> &
+  getGenericNeighborMaterialPropertyByName(const std::string & name, const unsigned int state = 0)
+  {
+    return getGenericMaterialPropertyByName<T, is_ad>(name, *_neighbor_material_data, state);
+  }
+  template <typename T>
+  const MaterialProperty<T> & getNeighborMaterialPropertyByName(const std::string & name,
+                                                                const unsigned int state = 0)
+  {
+    return getGenericNeighborMaterialPropertyByName<T, false>(name, state);
+  }
+  template <typename T>
+  const ADMaterialProperty<T> & getNeighborADMaterialPropertyByName(const std::string & name)
+  {
+    return getGenericNeighborMaterialPropertyByName<T, true>(name, 0);
+  }
+  ///@}
 
 protected:
   std::shared_ptr<MaterialData> _neighbor_material_data;
 };
-
-template <typename T>
-const MaterialProperty<T> &
-TwoMaterialPropertyInterface::getNeighborMaterialProperty(const std::string & name)
-{
-  return getMaterialProperty<T>(name, *_neighbor_material_data);
-}
-
-template <typename T>
-const MaterialProperty<T> &
-TwoMaterialPropertyInterface::getNeighborMaterialPropertyByName(const std::string & name)
-{
-  return getMaterialPropertyByName<T>(name, *_neighbor_material_data);
-}
-
-template <typename T>
-const ADMaterialProperty<T> &
-TwoMaterialPropertyInterface::getNeighborADMaterialPropertyByName(const std::string & name)
-{
-  return getADMaterialPropertyByName<T>(name, *_neighbor_material_data);
-}
-
-template <typename T>
-const ADMaterialProperty<T> &
-TwoMaterialPropertyInterface::getNeighborADMaterialProperty(const std::string & name)
-{
-  return getADMaterialProperty<T>(name, *_neighbor_material_data);
-}
-
-template <typename T>
-const MaterialProperty<T> &
-TwoMaterialPropertyInterface::getNeighborMaterialPropertyOld(const std::string & name)
-{
-  return getMaterialPropertyOld<T>(name, *_neighbor_material_data);
-}
-
-template <typename T>
-const MaterialProperty<T> &
-TwoMaterialPropertyInterface::getNeighborMaterialPropertyOlder(const std::string & name)
-{
-  return getMaterialPropertyOlder<T>(name, *_neighbor_material_data);
-}
