@@ -9,14 +9,14 @@
 
 #pragma once
 
-#include "ElementReporter.h"
+#include "NodalReporter.h"
 
-class ElementStatsReporter : public ElementReporter
+class StatsNodalReporter : public NodalReporter
 {
 public:
   static InputParameters validParams();
 
-  ElementStatsReporter(const InputParameters & parameters);
+  StatsNodalReporter(const InputParameters & parameters);
 
 protected:
   virtual void initialize() override;
@@ -31,6 +31,5 @@ private:
   Real & _max;
   Real & _min;
   Real & _average;
-  Real & _integral;
-  int & _number_elements;
+  int & _number_nodes;
 };

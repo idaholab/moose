@@ -9,9 +9,9 @@
 
 #pragma once
 
-#include "NodalStatsReporter.h"
+#include "StatsNodalReporter.h"
 
-class CoupledVarStatsNodalReporter : public NodalStatsReporter
+class CoupledVarStatsNodalReporter : public StatsNodalReporter
 {
 public:
   static InputParameters validParams();

@@ -9,9 +9,9 @@
 
 #pragma once
 
-#include "ElementStatsReporter.h"
+#include "StatsElementReporter.h"
 
-class CoupledVarStatsElementReporter : public ElementStatsReporter
+class CoupledVarStatsElementReporter : public StatsElementReporter
 {
 public:
   static InputParameters validParams();

@@ -14,7 +14,7 @@ registerMooseObject("MooseApp", CoupledVarStatsNodalReporter);
 InputParameters
 CoupledVarStatsNodalReporter::validParams()
 {
-  InputParameters params = NodalStatsReporter::validParams();
+  InputParameters params = StatsNodalReporter::validParams();
 
   params.addRequiredCoupledVar("coupled_var", "Coupled variable whose value is used.");
 
@@ -24,7 +24,7 @@ CoupledVarStatsNodalReporter::validParams()
 }
 
 CoupledVarStatsNodalReporter::CoupledVarStatsNodalReporter(const InputParameters & parameters)
-  : NodalStatsReporter(parameters), _v(coupledValue("coupled_var"))
+  : StatsNodalReporter(parameters), _v(coupledValue("coupled_var"))
 {
 }
 Real

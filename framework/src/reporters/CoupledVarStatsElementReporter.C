@@ -14,7 +14,7 @@ registerMooseObject("MooseApp", CoupledVarStatsElementReporter);
 InputParameters
 CoupledVarStatsElementReporter::validParams()
 {
-  InputParameters params = ElementStatsReporter::validParams();
+  InputParameters params = StatsElementReporter::validParams();
 
   params.addRequiredCoupledVar("coupled_var", "Coupled variable whose value is used.");
 
@@ -24,7 +24,7 @@ CoupledVarStatsElementReporter::validParams()
 }
 
 CoupledVarStatsElementReporter::CoupledVarStatsElementReporter(const InputParameters & parameters)
-  : ElementStatsReporter(parameters), _v(coupledValue("coupled_var"))
+  : StatsElementReporter(parameters), _v(coupledValue("coupled_var"))
 {
 }
 Real
