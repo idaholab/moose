@@ -51,8 +51,7 @@ P_out = 1.0e5 # Pa
 
 [FluidProperties]
     [LBE]
-        type = PBLeadBismuthFluidProperties
-        metal_type = Bismuth
+        type = LeadBismuthFluidProperties
     []
 []
 
@@ -119,7 +118,6 @@ P_out = 1.0e5 # Pa
     T = T
     fp = LBE
   []
-
 
   [rho_ic]
     type = RhoFromPressureTemperatureIC

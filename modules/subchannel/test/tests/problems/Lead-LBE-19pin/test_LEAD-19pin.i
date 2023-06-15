@@ -50,15 +50,14 @@ P_out = 1.0e5 # Pa
 []
 
 [FluidProperties]
-    [LBE]
-        type = PBLeadBismuthFluidProperties
-        metal_type = LBE
+    [LEAD]
+        type = LeadFluidProperties
     []
 []
 
 [Problem]
   type = LiquidMetalSubChannel1PhaseProblem
-  fp = LBE
+  fp = LEAD
   n_blocks = 1
   beta = 0.006
   P_out = 1.0e5
@@ -117,7 +116,7 @@ P_out = 1.0e5 # Pa
     variable = mu
     p = ${P_out}
     T = T
-    fp = LBE
+    fp = LEAD
   []
 
 
@@ -126,7 +125,7 @@ P_out = 1.0e5 # Pa
     variable = rho
     p = P
     T = T
-    fp = LBE
+    fp = LEAD
   []
 
   [h_ic]
@@ -134,7 +133,7 @@ P_out = 1.0e5 # Pa
     variable = h
     p = P
     T = T
-    fp = LBE
+    fp = LEAD
   []
 
   [mdot_ic]
