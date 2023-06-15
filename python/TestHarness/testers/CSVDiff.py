@@ -111,23 +111,27 @@ class CSVDiff(SchemaDiff):
         return SchemaDiff.processResults(self, moose_dir, options, output)
 
     def do_deepdiff(self, orig, comp, rel_err, abs_zero, exclude_values:list=None):
-        """ Perform DIFF Comparison """
-        diff = ''
-        generic_error = None
+        """ Perform DIFF Comparison and return (diff, error) tuple results """
+        (diff, error) = '', None
+
+        # Sanity check on column size. Test Spec options like custom_columns, ignore_columns
+        # have already been accounted for (see augment_csv method)
+        for column in orig:
+            if len(orig[column]) != len(comp[column]):
+                diff = f'Columns with header \'{column}\' are not the same length'
+                return (diff, error)
+
         # Override global params if comparison file is used
         if self.custom_params:
             rel_err = abs(float(self.custom_params.get('RELATIVE', self.specs['rel_err'])))
             abs_zero = abs(float(self.custom_params.get('ZERO', self.specs['abs_zero'])))
 
         for index, column in enumerate(orig):
+            _rel_err = abs(rel_err)
+            _abs_zero = abs(abs_zero)
             # Apply field params (overrides global for this single field)
             if (column in self.specs['override_columns']
                 or (self.custom_params and column in self.custom_params['FIELDS'].keys())):
-
-                # Caveat: Using global defaults can wind up using these tolerances in the end due to
-                # a max() comparison occurring later in this method
-                _rel_err = abs(rel_err)
-                _abs_zero = abs(abs_zero)
 
                 # Test-Specification file override
                 if column in self.specs['override_columns']:
@@ -137,35 +141,34 @@ class CSVDiff(SchemaDiff):
                     if self.specs['override_abs_zero']:
                         _abs_zero = abs(float(self.specs['override_abs_zero'][idx]))
 
-                # Comparison file override. Use more tolerant of the two if both are set. See Caveat
-                # above.
                 if self.custom_params and column in self.custom_params['FIELDS'].keys():
                     _meta = self.custom_params['FIELDS'][column]
                     _rel_err = abs(max(_rel_err, float(_meta.get('RELATIVE', _rel_err))))
                     _abs_zero = abs(max(_abs_zero, float(_meta.get('ZERO', _abs_zero))))
 
-                # Do the diff without overriding global parameters
-                (col_diff, generic_error) = super().do_deepdiff(orig[column],
-                                                                comp[column],
-                                                                _rel_err,
-                                                                _abs_zero,
-                                                                exclude_values)
-
-            # Do the diff using default global parameters
+            for value_id, value in enumerate(orig[column]):
+                if value == comp[column][value_id]:
+                    continue
+                (diff, error) = super().do_deepdiff(value,
+                                                    comp[column][value_id],
+                                                    _rel_err,
+                                                    _abs_zero,
+                                                    exclude_values)
+                # Overrite global since we are about to exit, with values we diffed with
+                if diff:
+                    rel_err = _rel_err
+                    abs_zero = _abs_zero
+                    break
+            # neat: https://www.geeksforgeeks.org/how-to-break-out-of-multiple-loops-in-python/
             else:
-                (col_diff, generic_error) = super().do_deepdiff(orig[column],
-                                                                comp[column],
-                                                                rel_err,
-                                                                abs_zero,
-                                                                exclude_values)
-
-            # append diff information
-            if col_diff:
-                diff += (f'Relative Error Tolorance: {rel_err}\n'
-                         f'Absolute Zero:            {abs_zero}\n'
-                         f'Column {index}: {col_diff}\n')
-
-        return (diff, generic_error)
+                continue
+            break
+        # overwrite diff with formatted information
+        if diff:
+            diff = (f'Relative Error Tolorance: {rel_err}\n'
+                    f'Absolute Zero:            {abs_zero}\n'
+                    f'Column {index}: {diff}\n')
+        return (diff, error)
 
     def getParamValues(self, param, param_line):
         """ return a list of discovered values for param """
