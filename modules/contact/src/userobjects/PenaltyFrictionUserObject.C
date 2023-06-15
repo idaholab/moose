@@ -310,6 +310,8 @@ PenaltyFrictionUserObject::isAugmentedLagrangianConverged()
       if (it == _dof_to_real_tangential_velocity.end())
         continue;
 
+      // We are not converging on the frictional problem (slip_velocity is always zero)
+      // FIX
       if ((slip_velocity.norm() * _dt) > _slip_tolerance)
       {
         return false;

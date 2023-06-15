@@ -114,7 +114,7 @@ PenaltyWeightedGapUserObject::getNormalLagrangeMultiplier(const Node * const nod
   const auto it = _dof_to_lagrange_multiplier.find(_subproblem.mesh().nodePtr(node->id()));
 
   if (it != _dof_to_lagrange_multiplier.end())
-    return MetaPhysicL::raw_value(it->second);
+    return -MetaPhysicL::raw_value(it->second);
   else
     return 0.0;
 }
@@ -172,10 +172,6 @@ PenaltyWeightedGapUserObject::selfTimestepSetup()
 
   // save old timestep
   _dt_old = _dt;
-
-  // clear active set
-  _active_set.clear();
-  mooseInfoRepeated("Clearing active set (1)");
 }
 
 void
@@ -188,34 +184,24 @@ bool
 PenaltyWeightedGapUserObject::isAugmentedLagrangianConverged()
 {
   mooseInfoRepeated("PenaltyWeightedGapUserObject::isAugmentedLagrangianConverged()");
-  // check if penetration is below threshold
+
   Real max_gap = 0.0;
 
+  // Get maximum gap to ascertain whether we are converged.
   for (auto & [dof_object, wgap] : _dof_to_weighted_gap)
   {
     const auto gap = physicalGap(wgap);
-
-    if (_active_set.count(dof_object))
     {
       // check active set nodes
-      if (std::abs(gap) > _penetration_tolerance)
+      if (gap < 0)
       {
         if (std::abs(gap) > max_gap)
           max_gap = std::abs(gap);
       }
     }
-    else
-    {
-      // check non-contact nodes
-      if (gap < -_penetration_tolerance)
-      {
-        if (-gap > max_gap)
-          max_gap = -gap;
-      }
-    }
   }
 
-  if (max_gap > 0.0)
+  if (max_gap > _penetration_tolerance)
   {
     mooseInfoRepeated("Penetration tolerance fail max_gap = ",
                       max_gap,
@@ -224,38 +210,32 @@ PenaltyWeightedGapUserObject::isAugmentedLagrangianConverged()
                       ")");
     return false;
   }
+  else
+    mooseInfoRepeated("Penetration tolerance success max_gap = ",
+                      max_gap,
+                      " (gap_tol=",
+                      _penetration_tolerance,
+                      ")");
+
   return true;
 }
 
 void
 PenaltyWeightedGapUserObject::augmentedLagrangianSetup()
 {
-  // clear active set
-  _active_set.clear();
-  mooseInfoRepeated("Clearing active set (2)");
-
   // loop over all nodes for which a gap has been computed
   for (auto & [dof_object, wgap] : _dof_to_weighted_gap)
   {
-    const auto penalty = findValue(_dof_to_local_penalty, dof_object, _penalty);
     const Real gap = physicalGap(wgap);
-    const auto lagrange_multiplier = findValue(_dof_to_lagrange_multiplier, dof_object);
-    Moose::out << lagrange_multiplier << '\n';
-    // positive contact pressure (sic. sign) means wee add the node to the active set
-    if (lagrange_multiplier + gap * penalty < 0)
-      _active_set.insert(dof_object);
-
     // store previous augmented lagrange iteration gap
     _dof_to_previous_gap[dof_object] = gap;
   }
-
-  mooseInfoRepeated(_active_set.size(), " nodes in contact");
 }
 
 void
 PenaltyWeightedGapUserObject::updateAugmentedLagrangianMultipliers()
 {
-  for (const auto & dof_object : _active_set)
+  for (const auto & [dof_object, wgap] : _dof_to_weighted_gap)
   {
     auto & penalty = _dof_to_local_penalty[dof_object];
     if (penalty == 0.0)
@@ -264,12 +244,17 @@ PenaltyWeightedGapUserObject::updateAugmentedLagrangianMultipliers()
     const auto gap = getNormalGap(static_cast<const Node *>(dof_object));
     auto & lagrange_multiplier = _dof_to_lagrange_multiplier[dof_object];
 
-    // update lm
+    // // update lm
+    // if (gap < 0)
+    //   lagrange_multiplier += gap * penalty;
+    // else
+    //   lagrange_multiplier = 0.0;
+
     lagrange_multiplier += std::min(gap * penalty, lagrange_multiplier);
 
     // update penalty
     const auto previous_gap = _dof_to_previous_gap[dof_object];
-    if (std::abs(gap) > 0.25 * std::abs(previous_gap))
-      penalty *= 10.0;
+    if (gap < 0 && std::abs(gap) > 0.25 * std::abs(previous_gap))
+      penalty *= 100.0;
   }
 }

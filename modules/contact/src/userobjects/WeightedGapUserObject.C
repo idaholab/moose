@@ -164,5 +164,5 @@ WeightedGapUserObject::getNormalGap(const Node * const node) const
   if (it != _dof_to_weighted_gap.end())
     return physicalGap(it->second);
   else
-    return 1e30;
+    return 0.0;
 }
