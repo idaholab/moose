@@ -115,17 +115,8 @@ OutputWarehouse::addOutput(std::shared_ptr<Output> const output)
   _object_names.insert(output->name());
 
   // Insert object sync times to the global set
-  // if (output->parameters().isParamValid("sync_times"))
-  // {
-  //   std::vector<Real> sync_times = output->parameters().get<std::vector<Real>>("sync_times");
-  //   _sync_times.insert(sync_times.begin(), sync_times.end());
-  // }
-
-  // if (output->parameters().isParamValid("output_limiting_function"))
-  // {
   const std::set<Real> & sync_times = output->getSyncTimes();
   _sync_times.insert(sync_times.begin(), sync_times.end());
-  // }
 }
 
 bool

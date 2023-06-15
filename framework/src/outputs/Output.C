@@ -52,8 +52,10 @@ Output::validParams()
   params.addParam<int>("end_step", "Time step at which this output object stop operating");
   params.addParam<Real>(
       "time_tolerance", 1e-14, "Time tolerance utilized checking start and end times");
-  params.addParam<FunctionName>("output_limiting_function",
-                                "Piecewise base function that sets sync_times");
+  params.addDeprecatedParam<FunctionName>(
+      "output_limiting_function",
+      "Piecewise base function that sets sync_times",
+      "soon to be replaced by centralized system for managing times");
 
   // Update the 'execute_on' input parameter for output
   ExecFlagEnum & exec_enum = params.set<ExecFlagEnum>("execute_on", true);
@@ -169,7 +171,7 @@ Output::Output(const InputParameters & parameters)
     if (pwb_olf == nullptr)
       mooseError("Function muse have a piecewise base!");
 
-    for (auto i = 0; i < pwb_olf->functionSize(); i++) // i is a Real, might need to cast as int
+    for (auto i = 0; i < pwb_olf->functionSize(); i++)
       _sync_times.insert(pwb_olf->domain(i));
   }
 }
