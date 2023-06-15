@@ -318,7 +318,8 @@ protected:
     PREV
   };
 
-  std::map<std::string, MaterialPropStateInt> _props_to_flags;
+  /// The minimum states requested (0 = current, 1 = old, 2 = older)
+  std::unordered_map<unsigned int, unsigned int> _props_to_min_states;
 
   /// Small helper function to call store{Subdomain,Boundary}MatPropName
   void registerPropName(const std::string & prop_name, bool is_get, const unsigned int state);

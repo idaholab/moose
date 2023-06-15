@@ -136,28 +136,29 @@ MaterialBase::initQpStatefulProperties()
 void
 MaterialBase::checkStatefulSanity() const
 {
-  for (const auto & it : _props_to_flags)
-    if (static_cast<int>(it.second) % 2 == 0) // Only Stateful properties declared!
-      mooseError("Material '", name(), "' requests undefined stateful property '", it.first, "'");
+  for (const auto & [id, min_state] : _props_to_min_states)
+    if (min_state > 0)
+      mooseError("The stateful property '",
+                 _fe_problem.getMaterialPropertyRegistry().getName(id),
+                 "' is undefined");
 }
 
 void
 MaterialBase::registerPropName(const std::string & prop_name, bool is_get, const unsigned int state)
 {
-  // There may be a better way to do this, but bit ops and enums aren't my thing
-  MaterialPropState state_bit = MaterialPropState::CURRENT;
-  if (state == 1)
-    state_bit = MaterialPropState::CURRENT;
-  else if (state == 2)
-    state_bit = MaterialPropState::CURRENT;
-
   if (!is_get)
   {
+    const auto property_id = materialData().getPropertyId(prop_name);
+
     _supplied_props.insert(prop_name);
-    const auto & property_id = materialData().getPropertyId(prop_name);
     _supplied_prop_ids.insert(property_id);
 
-    _props_to_flags[prop_name] |= static_cast<MaterialPropStateInt>(state_bit);
+    // Store the minimum state declared
+    auto find_min_state = _props_to_min_states.find(property_id);
+    if (find_min_state == _props_to_min_states.end())
+      _props_to_min_states.emplace(property_id, state);
+    else
+      find_min_state->second = std::min(find_min_state->second, state);
 
     // Store material properties for block ids
     for (const auto & block_id : blockIDs())
