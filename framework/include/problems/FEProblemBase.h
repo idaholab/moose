@@ -31,6 +31,7 @@
 #include "PerfGraphInterface.h"
 #include "Attributes.h"
 #include "MooseObjectWarehouse.h"
+#include "MaterialPropertyRegistry.h"
 
 #include "libmesh/enum_quadrature_type.h"
 #include "libmesh/equation_systems.h"
@@ -1424,6 +1425,14 @@ public:
   void setRestartFile(const std::string & file_name);
 
   /**
+   * @return A reference to the material property registry
+   */
+  const MaterialPropertyRegistry & getMaterialPropertyRegistry() const
+  {
+    return _material_prop_registry;
+  }
+
+  /**
    * Return a reference to the material property storage
    * @return A const reference to the material property storage
    */
@@ -2175,7 +2184,7 @@ protected:
   ///@}
 
   // material properties
-  MaterialPropertyStorage::Registry _material_registry;
+  MaterialPropertyRegistry _material_prop_registry;
   MaterialPropertyStorage & _material_props;
   MaterialPropertyStorage & _bnd_material_props;
   MaterialPropertyStorage & _neighbor_material_props;

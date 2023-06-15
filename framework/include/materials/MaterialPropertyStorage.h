@@ -12,6 +12,7 @@
 #include "Moose.h"
 #include "HashMap.h"
 #include "MaterialProperty.h"
+#include "MaterialPropertyRegistry.h"
 
 // Forward declarations
 class MaterialBase;
@@ -38,22 +39,7 @@ void dataLoad(std::istream & stream, MaterialPropertyStorage & storage, void * c
 class MaterialPropertyStorage
 {
 public:
-  /**
-   * Registry class for material property IDs and names.
-   *
-   * Will be owned by the problem and then passed to the different
-   * storage classes (regular, boundary, neighbor) so that they can
-   * share.
-   */
-  struct Registry
-  {
-    /// Map of material property name -> material property id
-    std::unordered_map<std::string, unsigned int> prop_ids;
-    /// Map of material property id -> material property name
-    std::vector<std::string> prop_names;
-  };
-
-  MaterialPropertyStorage(MaterialPropertyStorage::Registry & registry);
+  MaterialPropertyStorage(MaterialPropertyRegistry & registry);
 
   /// The max time state supported (2 = older)
   static constexpr unsigned int max_state = 2;
@@ -232,7 +218,7 @@ public:
   MaterialProperties & setProps(const Elem * elem, unsigned int side, const unsigned int state = 0);
   ///@}
 
-  bool hasProperty(const std::string & prop_name) const;
+  bool hasProperty(const std::string & prop_name) const { return _registry.hasProperty(prop_name); }
 
   /**
    * Adds a property with the name \p prop_name and state \p state (0 = current, 1 = old, etc)
@@ -248,15 +234,11 @@ public:
     return _stateful_prop_names;
   }
 
-  /// Returns the property ID for the given prop_name, adding the property and
-  /// creating a new ID if it hasn't already been created.
-  unsigned int getPropertyId(const std::string & prop_name);
-
-  unsigned int retrievePropertyId(const std::string & prop_name) const;
+  const MaterialPropertyRegistry & getMaterialPropertyRegistry() const { return _registry; }
 
   bool isStatefulProp(const std::string & prop_name) const
   {
-    return _stateful_prop_names.count(retrievePropertyId(prop_name)) > 0;
+    return _stateful_prop_names.count(_registry.getID(prop_name));
   }
 
   /**
@@ -265,8 +247,6 @@ public:
    * stateful properties) hanging around in our data structures
    */
   void eraseProperty(const Elem * elem);
-
-  const std::unordered_map<std::string, unsigned int> & propIDs() { return _registry.prop_ids; }
 
   /**
    * @returns The current maximum stored state (0 = none, 1 = old, 2 = older)
@@ -360,7 +340,7 @@ private:
   libMesh::Threads::spin_mutex & _spin_mtx;
 
   /// Shared registry (across storage objects) for property names and IDs
-  MaterialPropertyStorage::Registry & _registry;
+  MaterialPropertyRegistry & _registry;
 
   // Need to be able to eraseProperty from here
   friend class ProjectMaterialProperties;

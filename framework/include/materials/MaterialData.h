@@ -195,7 +195,7 @@ public:
    */
   unsigned int getPropertyId(const std::string & prop_name) const
   {
-    return _storage.getPropertyId(prop_name);
+    return _storage.getMaterialPropertyRegistry().getID(prop_name);
   }
 
   /**

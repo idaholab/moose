@@ -16,7 +16,7 @@
 #include "libmesh/fe_interface.h"
 #include "libmesh/quadrature.h"
 
-MaterialPropertyStorage::MaterialPropertyStorage(MaterialPropertyStorage::Registry & registry)
+MaterialPropertyStorage::MaterialPropertyStorage(MaterialPropertyRegistry & registry)
   : _max_state(0), _spin_mtx(libMesh::Threads::spin_mtx), _registry(registry)
 {
 }
@@ -299,12 +299,6 @@ MaterialPropertyStorage::swapBack(MaterialData & material_data,
       setProps(state)[&elem].erase(side);
 }
 
-bool
-MaterialPropertyStorage::hasProperty(const std::string & prop_name) const
-{
-  return _registry.prop_ids.count(prop_name) > 0;
-}
-
 unsigned int
 MaterialPropertyStorage::addProperty(const std::string & prop_name, const unsigned int state)
 {
@@ -318,7 +312,7 @@ MaterialPropertyStorage::addProperty(const std::string & prop_name, const unsign
   if (maxState() < state)
     _max_state = state;
 
-  const auto prop_id = getPropertyId(prop_name);
+  const auto prop_id = _registry.addOrGetID(prop_name, {});
 
   if (state > 0)
   {
@@ -330,28 +324,6 @@ MaterialPropertyStorage::addProperty(const std::string & prop_name, const unsign
   }
 
   return prop_id;
-}
-
-unsigned int
-MaterialPropertyStorage::getPropertyId(const std::string & prop_name)
-{
-  const auto it = _registry.prop_ids.find(prop_name);
-  if (it != _registry.prop_ids.end())
-    return it->second;
-
-  const auto id = _registry.prop_names.size();
-  _registry.prop_names.push_back(prop_name);
-  _registry.prop_ids.emplace(prop_name, id);
-  return id;
-}
-
-unsigned int
-MaterialPropertyStorage::retrievePropertyId(const std::string & prop_name) const
-{
-  auto it = _registry.prop_ids.find(prop_name);
-  if (it == _registry.prop_ids.end())
-    mooseError("MaterialPropertyStorage: property " + prop_name + " is not yet declared");
-  return it->second;
 }
 
 void
