@@ -275,12 +275,14 @@ def generate_traces(job_num, application_name, num_hosts, num_threads, verbose =
     formated results
     """
     hosts = set([])
-    a_job = Job(f'qstat -n {job_num}')
+
+    qstat_command = f'qstat -n {job_num}'
+    a_job = Job(qstat_command)
+    if verbose == True:
+        print(f'Running command: {qstat_command}')
+
     a_job.run()
     results = a_job.get_stdout()
-
-    if verbose == True:
-        print(f'Running command: qstat -n {job_num}')
 
     for i in node_name_pattern.findall(results):
         hosts.add(i)

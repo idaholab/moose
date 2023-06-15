@@ -1,0 +1,173 @@
+Host: r1i2n20 PID: 88036
+Thread 2 (Thread 0x2aaab0100700 (LWP 88084)):
+#0  0x00002aaaac213b5d in read () from /lib64/libc.so.6
+#1  0x00002aaaad4d6906 in ibv_get_async_event () from /lib64/libibverbs.so.1
+#2  0x00002aaaab4e62e2 in async_thread () at ../src/mpid/ch3/channels/mrail/src/gen2/ibv_channel_manager.c:1284
+#3  0x00002aaaad8f0ea5 in start_thread () from /lib64/libpthread.so.0
+#4  0x00002aaaac222b0d in clone () from /lib64/libc.so.6
+Thread 1 (Thread 0x2aaaaaafac00 (LWP 88036)):
+#0  0x00002aaaac1e99fd in nanosleep () from /lib64/libc.so.6
+#1  0x000000000040107e in sleep_for<long, std::ratio<1> > (__rtime=...) at /apps/local/spack/software/gcc-4.8.5/gcc-8.4.0-jacdabugmghmzya2rpfqpym2bpzjomy2/include/c++/8.4.0/thread:379
+#2  some_there (stack_depth=@0x7fffffffb2c8: 6) at bad_mpi.cpp:32
+#3  0x0000000000401375 in specific_stack_hang (stack_depth=@0x7fffffffb2c8: 6, counter=<optimized out>) at bad_mpi.cpp:95
+#4  0x0000000000401299 in specific_stack_hang (stack_depth=@0x7fffffffb2c8: 6, counter=<optimized out>) at bad_mpi.cpp:89
+#5  0x0000000000401299 in specific_stack_hang (stack_depth=@0x7fffffffb2c8: 6, counter=<optimized out>) at bad_mpi.cpp:89
+#6  0x0000000000401299 in specific_stack_hang (stack_depth=@0x7fffffffb2c8: 6, counter=<optimized out>) at bad_mpi.cpp:89
+#7  0x0000000000401299 in specific_stack_hang (stack_depth=@0x7fffffffb2c8: 6, counter=<optimized out>) at bad_mpi.cpp:89
+#8  0x0000000000401299 in specific_stack_hang (stack_depth=@0x7fffffffb2c8: 6, counter=counter@entry=0) at bad_mpi.cpp:89
+#9  0x000000000040144c in main (argc=<optimized out>, argv=<optimized out>) at bad_mpi.cpp:53
+****************************************************************************************************************************************************************
+
+Host: r1i2n20 PID: 88037
+Thread 2 (Thread 0x2aaab0100700 (LWP 88085)):
+#0  0x00002aaaac213b5d in read () from /lib64/libc.so.6
+#1  0x00002aaaad4d6906 in ibv_get_async_event () from /lib64/libibverbs.so.1
+#2  0x00002aaaab4e62e2 in async_thread () at ../src/mpid/ch3/channels/mrail/src/gen2/ibv_channel_manager.c:1284
+#3  0x00002aaaad8f0ea5 in start_thread () from /lib64/libpthread.so.0
+#4  0x00002aaaac222b0d in clone () from /lib64/libc.so.6
+Thread 1 (Thread 0x2aaaaaafac00 (LWP 88037)):
+#0  0x00002aaaac1e99fd in nanosleep () from /lib64/libc.so.6
+#1  0x000000000040107e in sleep_for<long, std::ratio<1> > (__rtime=...) at /apps/local/spack/software/gcc-4.8.5/gcc-8.4.0-jacdabugmghmzya2rpfqpym2bpzjomy2/include/c++/8.4.0/thread:379
+#2  some_there (stack_depth=@0x7fffffffb2c8: 6) at bad_mpi.cpp:32
+#3  0x0000000000401375 in specific_stack_hang (stack_depth=@0x7fffffffb2c8: 6, counter=<optimized out>) at bad_mpi.cpp:95
+#4  0x0000000000401299 in specific_stack_hang (stack_depth=@0x7fffffffb2c8: 6, counter=<optimized out>) at bad_mpi.cpp:89
+#5  0x0000000000401299 in specific_stack_hang (stack_depth=@0x7fffffffb2c8: 6, counter=<optimized out>) at bad_mpi.cpp:89
+#6  0x0000000000401299 in specific_stack_hang (stack_depth=@0x7fffffffb2c8: 6, counter=<optimized out>) at bad_mpi.cpp:89
+#7  0x0000000000401299 in specific_stack_hang (stack_depth=@0x7fffffffb2c8: 6, counter=<optimized out>) at bad_mpi.cpp:89
+#8  0x0000000000401299 in specific_stack_hang (stack_depth=@0x7fffffffb2c8: 6, counter=counter@entry=0) at bad_mpi.cpp:89
+#9  0x000000000040144c in main (argc=<optimized out>, argv=<optimized out>) at bad_mpi.cpp:53
+****************************************************************************************************************************************************************
+
+Host: r1i2n20 PID: 88038
+Thread 2 (Thread 0x2aaab0100700 (LWP 88086)):
+#0  0x00002aaaac213b5d in read () from /lib64/libc.so.6
+#1  0x00002aaaad4d6906 in ibv_get_async_event () from /lib64/libibverbs.so.1
+#2  0x00002aaaab4e62e2 in async_thread () at ../src/mpid/ch3/channels/mrail/src/gen2/ibv_channel_manager.c:1284
+#3  0x00002aaaad8f0ea5 in start_thread () from /lib64/libpthread.so.0
+#4  0x00002aaaac222b0d in clone () from /lib64/libc.so.6
+Thread 1 (Thread 0x2aaaaaafac00 (LWP 88038)):
+#0  0x00002aaaac1e99fd in nanosleep () from /lib64/libc.so.6
+#1  0x000000000040107e in sleep_for<long, std::ratio<1> > (__rtime=...) at /apps/local/spack/software/gcc-4.8.5/gcc-8.4.0-jacdabugmghmzya2rpfqpym2bpzjomy2/include/c++/8.4.0/thread:379
+#2  some_there (stack_depth=@0x7fffffffb2c8: 6) at bad_mpi.cpp:32
+#3  0x0000000000401375 in specific_stack_hang (stack_depth=@0x7fffffffb2c8: 6, counter=<optimized out>) at bad_mpi.cpp:95
+#4  0x0000000000401299 in specific_stack_hang (stack_depth=@0x7fffffffb2c8: 6, counter=<optimized out>) at bad_mpi.cpp:89
+#5  0x0000000000401299 in specific_stack_hang (stack_depth=@0x7fffffffb2c8: 6, counter=<optimized out>) at bad_mpi.cpp:89
+#6  0x0000000000401299 in specific_stack_hang (stack_depth=@0x7fffffffb2c8: 6, counter=<optimized out>) at bad_mpi.cpp:89
+#7  0x0000000000401299 in specific_stack_hang (stack_depth=@0x7fffffffb2c8: 6, counter=<optimized out>) at bad_mpi.cpp:89
+#8  0x0000000000401299 in specific_stack_hang (stack_depth=@0x7fffffffb2c8: 6, counter=counter@entry=0) at bad_mpi.cpp:89
+#9  0x000000000040144c in main (argc=<optimized out>, argv=<optimized out>) at bad_mpi.cpp:53
+****************************************************************************************************************************************************************
+
+Host: r1i2n20 PID: 88039
+Thread 2 (Thread 0x2aaab0100700 (LWP 88089)):
+#0  0x00002aaaac213b5d in read () from /lib64/libc.so.6
+#1  0x00002aaaad4d6906 in ibv_get_async_event () from /lib64/libibverbs.so.1
+#2  0x00002aaaab4e62e2 in async_thread () at ../src/mpid/ch3/channels/mrail/src/gen2/ibv_channel_manager.c:1284
+#3  0x00002aaaad8f0ea5 in start_thread () from /lib64/libpthread.so.0
+#4  0x00002aaaac222b0d in clone () from /lib64/libc.so.6
+Thread 1 (Thread 0x2aaaaaafac00 (LWP 88039)):
+#0  0x00002aaaac1e99fd in nanosleep () from /lib64/libc.so.6
+#1  0x000000000040107e in sleep_for<long, std::ratio<1> > (__rtime=...) at /apps/local/spack/software/gcc-4.8.5/gcc-8.4.0-jacdabugmghmzya2rpfqpym2bpzjomy2/include/c++/8.4.0/thread:379
+#2  some_there (stack_depth=@0x7fffffffb2c8: 6) at bad_mpi.cpp:32
+#3  0x0000000000401375 in specific_stack_hang (stack_depth=@0x7fffffffb2c8: 6, counter=<optimized out>) at bad_mpi.cpp:95
+#4  0x0000000000401299 in specific_stack_hang (stack_depth=@0x7fffffffb2c8: 6, counter=<optimized out>) at bad_mpi.cpp:89
+#5  0x0000000000401299 in specific_stack_hang (stack_depth=@0x7fffffffb2c8: 6, counter=<optimized out>) at bad_mpi.cpp:89
+#6  0x0000000000401299 in specific_stack_hang (stack_depth=@0x7fffffffb2c8: 6, counter=<optimized out>) at bad_mpi.cpp:89
+#7  0x0000000000401299 in specific_stack_hang (stack_depth=@0x7fffffffb2c8: 6, counter=<optimized out>) at bad_mpi.cpp:89
+#8  0x0000000000401299 in specific_stack_hang (stack_depth=@0x7fffffffb2c8: 6, counter=counter@entry=0) at bad_mpi.cpp:89
+#9  0x000000000040144c in main (argc=<optimized out>, argv=<optimized out>) at bad_mpi.cpp:53
+****************************************************************************************************************************************************************
+
+Host: r1i2n20 PID: 88035
+Thread 2 (Thread 0x2aaab0100700 (LWP 88083)):
+#0  0x00002aaaac213b5d in read () from /lib64/libc.so.6
+#1  0x00002aaaad4d6906 in ibv_get_async_event () from /lib64/libibverbs.so.1
+#2  0x00002aaaab4e62e2 in async_thread () at ../src/mpid/ch3/channels/mrail/src/gen2/ibv_channel_manager.c:1284
+#3  0x00002aaaad8f0ea5 in start_thread () from /lib64/libpthread.so.0
+#4  0x00002aaaac222b0d in clone () from /lib64/libc.so.6
+Thread 1 (Thread 0x2aaaaaafac00 (LWP 88035)):
+#0  0x00002aaaac1e99fd in nanosleep () from /lib64/libc.so.6
+#1  0x000000000040107e in sleep_for<long, std::ratio<1> > (__rtime=...) at /apps/local/spack/software/gcc-4.8.5/gcc-8.4.0-jacdabugmghmzya2rpfqpym2bpzjomy2/include/c++/8.4.0/thread:379
+#2  some_there (stack_depth=@0x7fffffffb2c8: 6) at bad_mpi.cpp:32
+#3  0x0000000000401375 in specific_stack_hang (stack_depth=@0x7fffffffb2c8: 6, counter=<optimized out>) at bad_mpi.cpp:95
+#4  0x0000000000401299 in specific_stack_hang (stack_depth=@0x7fffffffb2c8: 6, counter=<optimized out>) at bad_mpi.cpp:89
+#5  0x0000000000401299 in specific_stack_hang (stack_depth=@0x7fffffffb2c8: 6, counter=<optimized out>) at bad_mpi.cpp:89
+#6  0x0000000000401299 in specific_stack_hang (stack_depth=@0x7fffffffb2c8: 6, counter=<optimized out>) at bad_mpi.cpp:89
+#7  0x0000000000401299 in specific_stack_hang (stack_depth=@0x7fffffffb2c8: 6, counter=<optimized out>) at bad_mpi.cpp:89
+#8  0x0000000000401299 in specific_stack_hang (stack_depth=@0x7fffffffb2c8: 6, counter=counter@entry=0) at bad_mpi.cpp:89
+#9  0x000000000040144c in main (argc=<optimized out>, argv=<optimized out>) at bad_mpi.cpp:53
+****************************************************************************************************************************************************************
+
+Host: r1i2n20 PID: 88040
+Thread 2 (Thread 0x2aaab0100700 (LWP 88090)):
+#0  0x00002aaaac213b5d in read () from /lib64/libc.so.6
+#1  0x00002aaaad4d6906 in ibv_get_async_event () from /lib64/libibverbs.so.1
+#2  0x00002aaaab4e62e2 in async_thread () at ../src/mpid/ch3/channels/mrail/src/gen2/ibv_channel_manager.c:1284
+#3  0x00002aaaad8f0ea5 in start_thread () from /lib64/libpthread.so.0
+#4  0x00002aaaac222b0d in clone () from /lib64/libc.so.6
+Thread 1 (Thread 0x2aaaaaafac00 (LWP 88040)):
+#0  0x00002aaaac1e99fd in nanosleep () from /lib64/libc.so.6
+#1  0x000000000040107e in sleep_for<long, std::ratio<1> > (__rtime=...) at /apps/local/spack/software/gcc-4.8.5/gcc-8.4.0-jacdabugmghmzya2rpfqpym2bpzjomy2/include/c++/8.4.0/thread:379
+#2  some_there (stack_depth=@0x7fffffffb2c8: 6) at bad_mpi.cpp:32
+#3  0x0000000000401375 in specific_stack_hang (stack_depth=@0x7fffffffb2c8: 6, counter=<optimized out>) at bad_mpi.cpp:95
+#4  0x0000000000401299 in specific_stack_hang (stack_depth=@0x7fffffffb2c8: 6, counter=<optimized out>) at bad_mpi.cpp:89
+#5  0x0000000000401299 in specific_stack_hang (stack_depth=@0x7fffffffb2c8: 6, counter=<optimized out>) at bad_mpi.cpp:89
+#6  0x0000000000401299 in specific_stack_hang (stack_depth=@0x7fffffffb2c8: 6, counter=<optimized out>) at bad_mpi.cpp:89
+#7  0x0000000000401299 in specific_stack_hang (stack_depth=@0x7fffffffb2c8: 6, counter=<optimized out>) at bad_mpi.cpp:89
+#8  0x0000000000401299 in specific_stack_hang (stack_depth=@0x7fffffffb2c8: 6, counter=counter@entry=0) at bad_mpi.cpp:89
+#9  0x000000000040144c in main (argc=<optimized out>, argv=<optimized out>) at bad_mpi.cpp:53
+****************************************************************************************************************************************************************
+
+Host: r1i2n20 PID: 88041
+Thread 2 (Thread 0x2aaab0100700 (LWP 88087)):
+#0  0x00002aaaac213b5d in read () from /lib64/libc.so.6
+#1  0x00002aaaad4d6906 in ibv_get_async_event () from /lib64/libibverbs.so.1
+#2  0x00002aaaab4e62e2 in async_thread () at ../src/mpid/ch3/channels/mrail/src/gen2/ibv_channel_manager.c:1284
+#3  0x00002aaaad8f0ea5 in start_thread () from /lib64/libpthread.so.0
+#4  0x00002aaaac222b0d in clone () from /lib64/libc.so.6
+Thread 1 (Thread 0x2aaaaaafac00 (LWP 88041)):
+#0  MPIDI_CH3I_read_progress (vc_pptr=vc_pptr@entry=0x7fffffffab80, v_ptr=v_ptr@entry=0x7fffffffab88, rdmafp_found=rdmafp_found@entry=0x7fffffffab78, is_blocking=is_blocking@entry=1) at ../src/mpid/ch3/channels/mrail/src/rdma/ch3_read_progress.c:53
+#1  0x00002aaaab4a5b58 in MPIDI_CH3I_Progress (is_blocking=is_blocking@entry=1, state=state@entry=0x7fffffffac4c) at ../src/mpid/ch3/channels/mrail/src/rdma/ch3_progress.c:252
+#2  0x00002aaaaaf7578d in MPIC_Wait (errflag=0x7fffffffb05c, request_ptr=0x2aaaab853ff8 <MPID_Request_direct+1432>) at ../src/mpi/coll/helper_fns.h:297
+#3  MPIC_Recv (tag=2, errflag=0x7fffffffb05c, status=0x7fffffffac60, comm_ptr=0x2aaaab82e660 <MPID_Comm_direct>, source=<optimized out>, datatype=1275069445, count=1, buf=0x7fffffffb0ac) at ../src/mpi/coll/helper_fns.h:427
+#4  MPIR_Bcast_binomial (buffer=0x7fffffffb0ac, count=count@entry=1, datatype=datatype@entry=1275069445, root=root@entry=0, comm_ptr=comm_ptr@entry=0x2aaaab82e660 <MPID_Comm_direct>, errflag=errflag@entry=0x7fffffffb05c) at ../src/mpi/coll/bcast.c:247
+#5  0x00002aaaaaf75da6 in MPIR_Bcast_intra (buffer=buffer@entry=0x7fffffffb0ac, count=count@entry=1, datatype=datatype@entry=1275069445, root=root@entry=0, comm_ptr=0x2aaaab82e660 <MPID_Comm_direct>, errflag=errflag@entry=0x7fffffffb05c) at ../src/mpi/coll/bcast.c:1291
+#6  0x00002aaaab003854 in MPIR_Bcast_index_tuned_intra_MV2 (buffer=0x7fffffffb0ac, count=1, datatype=1275069445, root=0, comm_ptr=comm_ptr@entry=0x2aaaab82e660 <MPID_Comm_direct>, errflag=0x7fffffffb05c) at ../src/mpi/coll/bcast_osu.c:2763
+#7  0x00002aaaab0005a9 in MPIR_Bcast_MV2 (buf=<optimized out>, count=<optimized out>, datatype=<optimized out>, root=<optimized out>, comm_ptr=0x2aaaab82e660 <MPID_Comm_direct>, errflag=<optimized out>) at ../src/mpi/coll/bcast_osu.c:3184
+#8  0x00002aaaaaf760a4 in MPIR_SMP_Bcast (errflag=0x0, comm_ptr=<optimized out>, root=0, datatype=0, count=1, buffer=<optimized out>) at ../src/mpi/coll/bcast.c:1097
+#9  MPIR_Bcast_intra (buffer=buffer@entry=0x7fffffffb0ac, count=count@entry=1, datatype=datatype@entry=1275069445, root=root@entry=0, comm_ptr=<optimized out>, errflag=errflag@entry=0x7fffffffb05c) at ../src/mpi/coll/bcast.c:1253
+#10 0x00002aaaab003854 in MPIR_Bcast_index_tuned_intra_MV2 (buffer=0x7fffffffb0ac, count=1, datatype=1275069445, root=0, comm_ptr=comm_ptr@entry=0x2aaaab82fa20 <MPID_Comm_builtin>, errflag=0x7fffffffb05c) at ../src/mpi/coll/bcast_osu.c:2763
+#11 0x00002aaaab0005a9 in MPIR_Bcast_MV2 (buf=<optimized out>, count=<optimized out>, datatype=<optimized out>, root=<optimized out>, comm_ptr=0x2aaaab82fa20 <MPID_Comm_builtin>, errflag=<optimized out>) at ../src/mpi/coll/bcast_osu.c:3184
+#12 0x00002aaaaaf7768b in MPIR_Bcast_impl (buffer=buffer@entry=0x7fffffffb0ac, count=count@entry=1, datatype=datatype@entry=1275069445, root=root@entry=0, comm_ptr=comm_ptr@entry=0x2aaaab82fa20 <MPID_Comm_builtin>, errflag=errflag@entry=0x7fffffffb05c) at ../src/mpi/coll/bcast.c:1449
+#13 0x00002aaaaaf77c91 in PMPI_Bcast () at ../src/mpi/coll/bcast.c:1590
+#14 0x0000000000400e85 in some_here (rank=6) at bad_mpi.cpp:11
+#15 0x0000000000401131 in some_there (stack_depth=@0x7fffffffb2c8: 6) at bad_mpi.cpp:26
+#16 0x0000000000401375 in specific_stack_hang (stack_depth=@0x7fffffffb2c8: 6, counter=<optimized out>) at bad_mpi.cpp:95
+#17 0x0000000000401299 in specific_stack_hang (stack_depth=@0x7fffffffb2c8: 6, counter=<optimized out>) at bad_mpi.cpp:89
+#18 0x0000000000401299 in specific_stack_hang (stack_depth=@0x7fffffffb2c8: 6, counter=<optimized out>) at bad_mpi.cpp:89
+#19 0x0000000000401299 in specific_stack_hang (stack_depth=@0x7fffffffb2c8: 6, counter=<optimized out>) at bad_mpi.cpp:89
+#20 0x0000000000401299 in specific_stack_hang (stack_depth=@0x7fffffffb2c8: 6, counter=<optimized out>) at bad_mpi.cpp:89
+#21 0x0000000000401299 in specific_stack_hang (stack_depth=@0x7fffffffb2c8: 6, counter=counter@entry=0) at bad_mpi.cpp:89
+#22 0x000000000040144c in main (argc=<optimized out>, argv=<optimized out>) at bad_mpi.cpp:53
+****************************************************************************************************************************************************************
+
+Host: r1i2n20 PID: 88042
+Thread 2 (Thread 0x2aaab0100700 (LWP 88088)):
+#0  0x00002aaaac213b5d in read () from /lib64/libc.so.6
+#1  0x00002aaaad4d6906 in ibv_get_async_event () from /lib64/libibverbs.so.1
+#2  0x00002aaaab4e62e2 in async_thread () at ../src/mpid/ch3/channels/mrail/src/gen2/ibv_channel_manager.c:1284
+#3  0x00002aaaad8f0ea5 in start_thread () from /lib64/libpthread.so.0
+#4  0x00002aaaac222b0d in clone () from /lib64/libc.so.6
+Thread 1 (Thread 0x2aaaaaafac00 (LWP 88042)):
+#0  0x00002aaaac1e99fd in nanosleep () from /lib64/libc.so.6
+#1  0x000000000040107e in sleep_for<long, std::ratio<1> > (__rtime=...) at /apps/local/spack/software/gcc-4.8.5/gcc-8.4.0-jacdabugmghmzya2rpfqpym2bpzjomy2/include/c++/8.4.0/thread:379
+#2  some_there (stack_depth=@0x7fffffffb2c8: 6) at bad_mpi.cpp:32
+#3  0x0000000000401375 in specific_stack_hang (stack_depth=@0x7fffffffb2c8: 6, counter=<optimized out>) at bad_mpi.cpp:95
+#4  0x0000000000401299 in specific_stack_hang (stack_depth=@0x7fffffffb2c8: 6, counter=<optimized out>) at bad_mpi.cpp:89
+#5  0x0000000000401299 in specific_stack_hang (stack_depth=@0x7fffffffb2c8: 6, counter=<optimized out>) at bad_mpi.cpp:89
+#6  0x0000000000401299 in specific_stack_hang (stack_depth=@0x7fffffffb2c8: 6, counter=<optimized out>) at bad_mpi.cpp:89
+#7  0x0000000000401299 in specific_stack_hang (stack_depth=@0x7fffffffb2c8: 6, counter=<optimized out>) at bad_mpi.cpp:89
+#8  0x0000000000401299 in specific_stack_hang (stack_depth=@0x7fffffffb2c8: 6, counter=counter@entry=0) at bad_mpi.cpp:89
+#9  0x000000000040144c in main (argc=<optimized out>, argv=<optimized out>) at bad_mpi.cpp:53
+****************************************************************************************************************************************************************
+

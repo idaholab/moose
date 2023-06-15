@@ -23,8 +23,8 @@
 
     [verbose_test]
       type = RunApp
-      command = '../../framework/scripts/find_hung_process.py -f bad_mpi-f bad_mpi.5182266.cache'
-      expect_out ="/qstat -n \d+?.*?Running command: ssh \w+? "echo Host: \w+? PID: \d+?;"
+      command = '../../framework/scripts/find_hung_process.py -f bad_mpi-f bad_mpi.5228101.cache'
+      expect_out ='/qstat -n \d+?.*?Running command: ssh \w+? "echo Host: \w+? PID: \d+?;'
     []
   []
 []
