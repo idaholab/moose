@@ -52,21 +52,15 @@ NaKFluidProperties::molarMass() const
 }
 
 Real
-NaKFluidProperties::T_from_p_h(Real pressure, Real enthalpy) const
+NaKFluidProperties::T_from_p_h(Real /* pressure */, Real enthalpy) const
 {
-  auto lambda = [&](Real p, Real current_T, Real & new_h, Real & dh_dp, Real & dh_dT)
-  { h_from_p_T(p, current_T, new_h, dh_dp, dh_dT); };
-  Real T = FluidPropertiesUtils::NewtonSolve(
-               pressure, enthalpy, _T_initial_guess, _tolerance, lambda, name() + "::T_from_p_h")
-               .first;
-  // check for nans
-  if (std::isnan(T))
-    mooseError("Conversion from pressure (p = ",
-               pressure,
-               ") and enthalpy (h = ",
-               enthalpy,
-               ") to temperature failed to converge.");
-  return T;
+  // analytical inversion of h_from_p_T
+  Real h2 = enthalpy * enthalpy;
+  Real B1 =
+      std::pow(183.357574154983 * std::sqrt(8405 * h2 - 8208700353 * enthalpy + 9265308922016000) +
+                   16810 * enthalpy - 8208700353,
+               1. / 3);
+  return _T_c2k + 0.174216027874564 * (3.65930571002297 * B1 - 2.28699205892461e7 / B1 + 3087);
 }
 
 Real

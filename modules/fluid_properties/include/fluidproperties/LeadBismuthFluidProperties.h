@@ -33,6 +33,10 @@ public:
   Real T_from_v_e(Real v, Real e) const override;
   void T_from_v_e(Real v, Real e, Real & T, Real & dT_dv, Real & dT_de) const override;
 
+  using SinglePhaseFluidProperties::T_from_p_h;
+  Real T_from_p_h(Real p, Real h) const override;
+  void T_from_p_h(Real p, Real h, Real & T, Real & dT_dp, Real & dT_dh) const override;
+
   /**
    * Temperature from pressure and density
    *

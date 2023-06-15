@@ -50,6 +50,7 @@ TEST_F(NaKFluidPropertiesTest, properties)
     const Real p = pressures[i];
     const Real T = temperatures[i];
     const Real rho = _fp->rho_from_p_T(p, T);
+    const Real h = _fp->h_from_p_T(p, T);
 
     // Density
     REL_TEST(_fp->rho_from_p_T(p, T), rho_refs[i], tol);
@@ -66,6 +67,7 @@ TEST_F(NaKFluidPropertiesTest, properties)
 
     // Temperature
     REL_TEST(_fp->T_from_p_rho(p, rho), T, tol);
+    REL_TEST(_fp->T_from_p_h(p, h), T, tol);
 
     // Thermal conductivity (function of T only)
     REL_TEST(_fp->k_from_p_T(p, T), k_refs[i], tol);
