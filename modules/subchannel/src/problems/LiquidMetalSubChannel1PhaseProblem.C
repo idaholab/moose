@@ -94,7 +94,7 @@ LiquidMetalSubChannel1PhaseProblem::computeFrictionFactor(_friction_args_struct 
   Real cf_l = 0.0;
 
   // Find the coefficients of bare rod bundle friction factor
-  // correlations for turbulent and laminar flow regimes.
+  // correlations for turbulent and laminar flow regimes. Todreas & Kazimi, Nuclear Systems Volume 1
   if (subch_type == EChannelType::CENTER)
   {
     if (p_to_d < 1.1)
@@ -172,7 +172,8 @@ LiquidMetalSubChannel1PhaseProblem::computeFrictionFactor(_friction_args_struct 
   }
 
   // Find the coefficients of wire-wrapped rod bundle friction factor
-  // correlations for turbulent and laminar flow regimes.
+  // correlations for turbulent and laminar flow regimes. Todreas & Kazimi, Nuclear Systems Volume 1
+  // also Chen and Todreas (2018).
   if ((wire_diameter != 0.0) && (wire_lead_length != 0.0))
   {
     if (subch_type == EChannelType::CENTER)
@@ -267,7 +268,8 @@ LiquidMetalSubChannel1PhaseProblem::computeWijPrime(int iblock)
       auto Si_out = (*_S_flow_soln)(node_out_i);
       auto Sj_out = (*_S_flow_soln)(node_out_j);
       // crossflow area between channels i,j (dz*gap_width)
-      auto Sij = dz * _subchannel_mesh.getGapWidth(i_gap);
+      auto gap = _subchannel_mesh.getGapWidth(i_gap);
+      auto Sij = dz * gap;
       // Calculation of flow regime
       auto ReL = 320.0 * std::pow(10.0, pitch / rod_diameter - 1);
       auto ReT = 10000.0 * std::pow(10.0, 0.7 * (pitch / rod_diameter - 1));
@@ -286,6 +288,8 @@ LiquidMetalSubChannel1PhaseProblem::computeWijPrime(int iblock)
       auto Re = avg_massflux * avg_hD / avg_mu;
       _WijPrime(i_gap, iz) = 0.0;
       auto beta = 0.0;
+      // Calculation of Turbulent Crossflow for wire-wrapped triangular assemblies. Cheng & Todreas
+      // (1986)
       if ((subch_type1 == EChannelType::CENTER || subch_type2 == EChannelType::CENTER) &&
           (wire_lead_length != 0) && (wire_diameter != 0))
       {
@@ -319,11 +323,14 @@ LiquidMetalSubChannel1PhaseProblem::computeWijPrime(int iblock)
         // Calculation of turbulent mixing parameter
         beta = Cm * std::pow(Ar1 / A1, 0.5) * std::tan(theta);
       }
+      // Calculation of Turbulent Crossflow for bare assemblies, from Kim and Chung (2001).
       else if ((wire_lead_length == 0) && (wire_diameter == 0))
       {
-        // Calculation of Turbulent Crossflow for bare assemblies, from Kim and Chung (2001).
-        Real gamma1 = 20.0;
-        Real b = 2.0 / 3.0;
+        Real gamma = 20.0;   // empirical constant
+        Real sf = 2.0 / 3.0; // shape factor
+        Real a = 0.18;
+        Real b = 0.2;
+        auto f = a * std::pow(Re, -b); // Rehme 1992 circular tube friction factor
         auto k = 0.25 * (_fp->k_from_p_T((*_P_soln)(node_out_i) + _P_out, (*_T_soln)(node_out_i)) +
                          _fp->k_from_p_T((*_P_soln)(node_in_i) + _P_out, (*_T_soln)(node_in_i)) +
                          _fp->k_from_p_T((*_P_soln)(node_out_j) + _P_out, (*_T_soln)(node_out_j)) +
@@ -333,20 +340,24 @@ LiquidMetalSubChannel1PhaseProblem::computeWijPrime(int iblock)
                     _fp->cp_from_p_T((*_P_soln)(node_in_i) + _P_out, (*_T_soln)(node_in_i)) +
                     _fp->cp_from_p_T((*_P_soln)(node_out_j) + _P_out, (*_T_soln)(node_out_j)) +
                     _fp->cp_from_p_T((*_P_soln)(node_in_j) + _P_out, (*_T_soln)(node_in_j)));
-        auto Pr = avg_massflux * cp / k;
-        auto Pr_t =
-            Pr / std::pow(gamma1, 2) * 2.0 * std::pow(Re, 1.0 - 0.1) * std::sqrt(0.18 / 8.0);
-        auto eta = pitch / std::sqrt(3.0);
-        auto L_x = b * eta;
-        auto L_y = pitch - rod_diameter;
-        auto lambda = L_y / L_x;
-        auto a_x = 1.0 - 2.0 * lambda * lambda / libMesh::pi;
-        auto z_FP =
-            libMesh::pi * (3.0 * (L_x + L_y) - std::sqrt((3.0 * L_x + L_y) * (L_x + 3.0 * L_y)));
-        auto Str = 1.0 / (0.822 * (L_y / rod_diameter) + 0.144);
-        auto dum1 = 2.0 / std::pow(gamma1, 2) * std::sqrt(0.18 / 8.0) * avg_hD / L_y;
-        auto dum2 = 1.0 / Pr_t * L_y / b / eta + a_x * z_FP / rod_diameter * Str;
-        beta = dum1 * dum2 * std::pow(Re, -0.1);
+        auto Pr = avg_massflux * cp / k;                    // Prandtl number
+        auto Pr_t = Pr * (Re / gamma) * std::sqrt(f / 8.0); // Turbulent Prandtl number
+        auto delta = pitch / std::sqrt(3.0);                // centroid to centroid distance
+        auto L_x = sf * delta;  // axial length scale (gap is the lateral length scale)
+        auto lamda = gap / L_x; // aspect ratio
+        auto a_x = 1.0 - 2.0 * lamda * lamda / libMesh::pi; // velocity coefficient
+        auto z_FP_over_D =
+            (2.0 * L_x / rod_diameter) *
+            (1 + (-0.5 * std::log(lamda) + 0.5 * std::log(4.0) - 0.25) * lamda * lamda);
+        auto Str =
+            1.0 / (0.822 * (gap / rod_diameter) + 0.144); // Strouhal number (Wu & Trupp 1994)
+        auto dum1 = 2.0 / std::pow(gamma, 2) * std::sqrt(a / 8.0) * (avg_hD / gap);
+        auto dum2 =
+            (0.5 * std::pow(gamma, 2) * std::sqrt(8.0 / a) / Pr / std::pow(Re, 1 - b / 2.0) +
+             1 / Pr_t) *
+            lamda;
+        auto dum3 = a_x * z_FP_over_D * Str;
+        beta = dum1 * (dum2 + dum3) * std::pow(Re, -b / 2.0); // gap stanton number
       }
       // Calculation of turbulent crossflow
       _WijPrime(i_gap, iz) = beta * avg_massflux * Sij;

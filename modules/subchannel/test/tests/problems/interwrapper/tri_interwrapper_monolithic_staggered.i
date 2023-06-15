@@ -1,7 +1,6 @@
 T_in = 360.0
 P_out = 4.923e6 # Pa
 
-
 [TriInterWrapperMesh]
   [sub_channel]
     type = TriInterWrapperMeshGenerator
@@ -13,7 +12,6 @@ P_out = 4.923e6 # Pa
     side_bypass = 0.01
   []
 []
-
 
 [AuxVariables]
     [mdot]
@@ -40,15 +38,11 @@ P_out = 4.923e6 # Pa
     []
 []
 
-
-[Modules]
-    [FluidProperties]
-        [sodium]
-            type = PBSodiumFluidProperties
-        []
+[FluidProperties]
+    [sodium]
+        type = PBSodiumFluidProperties
     []
 []
-
 
 [ICs]
     [S_IC]
@@ -115,7 +109,6 @@ P_out = 4.923e6 # Pa
     []
 []
 
-
 [SubChannel]
     type = LiquidMetalInterWrapper1PhaseProblem
     fp = sodium
@@ -135,19 +128,14 @@ P_out = 4.923e6 # Pa
     interpolation_scheme = 'central_difference'
 []
 
-
 [AuxKernels]
 []
-
 
 [Outputs]
   exodus = true
   checkpoint = false
 []
 
-
 [Executioner]
   type = Steady
-  nl_rel_tol = 0.9
-  l_tol = 0.9
 []

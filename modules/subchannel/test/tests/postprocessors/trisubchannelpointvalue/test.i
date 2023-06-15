@@ -49,8 +49,6 @@ T_in = 359.15
 
 [Executioner]
   type = Transient
-  nl_rel_tol = 0.9
-  l_tol = 0.9
   start_time = 0.0
   end_time = 10.0
   dt = 1.0
