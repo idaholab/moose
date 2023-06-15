@@ -31,6 +31,11 @@ public:
   bool hasProperty(const std::string & name) const { return _name_to_id.count(name); }
 
   /**
+   * @return True if a material property is registered with the ID \p id
+   */
+  bool hasProperty(const unsigned int id) const { return id < _id_to_name.size(); }
+
+  /**
    * Key that restricts writing data to the registry.
    */
   class WriteKey
@@ -56,6 +61,11 @@ public:
   unsigned int getID(const std::string & name) const;
 
   /**
+   * @return The property name for the property with the ID \p id
+   */
+  const std::string & getName(const unsigned int id) const;
+
+  /**
    * @return The mapping of material property name to material property ID
    */
   const std::unordered_map<std::string, unsigned int> & getNamesToIDs() const
@@ -66,4 +76,6 @@ public:
 private:
   /// Map of material property name -> material property id
   std::unordered_map<std::string, unsigned int> _name_to_id;
+  /// Map of material property id -> material property name
+  std::vector<std::string> _id_to_name;
 };

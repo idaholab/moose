@@ -19,8 +19,9 @@ MaterialPropertyRegistry::addOrGetID(const std::string & name,
   if (it != _name_to_id.end())
     return it->second;
 
-  const auto id = _name_to_id.size();
+  const auto id = _id_to_name.size();
   _name_to_id.emplace(name, id);
+  _id_to_name.push_back(name);
   return id;
 }
 
@@ -31,4 +32,12 @@ MaterialPropertyRegistry::getID(const std::string & name) const
   if (it == _name_to_id.end())
     mooseError("MaterialPropertyRegistry: Property '" + name + "' is not declared");
   return it->second;
+}
+
+const std::string &
+MaterialPropertyRegistry::getName(const unsigned int id) const
+{
+  if (!hasProperty(id))
+    mooseError("MaterialPropertyRegistry: Property with ID ", id, " is not declared");
+  return _id_to_name[id];
 }
