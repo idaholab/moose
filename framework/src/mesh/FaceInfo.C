@@ -26,37 +26,18 @@ FaceInfo::FaceInfo(const ElemInfo * elem_info, unsigned int side, const dof_id_t
     _gc(0.5)
 {
   // Compute face-related quantities
+  unsigned int dim = _elem_info->elem()->dim();
   const std::unique_ptr<const Elem> face = _elem_info->elem()->build_side_ptr(_elem_side_id);
+  std::unique_ptr<FEBase> fe(FEBase::build(dim, FEType(_elem_info->elem()->default_order())));
+  QGauss qface(dim - 1, CONSTANT);
+  fe->attach_quadrature_rule(&qface);
+  const std::vector<Point> & normals = fe->get_normals();
+  fe->reinit(_elem_info->elem(), _elem_side_id);
+  mooseAssert(normals.size() == 1, "FaceInfo construction broken w.r.t. computing face normals");
+  _normal = normals[0];
+
   _face_area = face->volume();
   _face_centroid = face->vertex_average();
-
-  // Compute the face-normals
-  unsigned int dim = _elem_info->elem()->dim();
-  const auto r_cf = _face_centroid - _elem_info->centroid();
-
-  // For 1D elements, this is simple
-  if (dim == 1)
-    _normal = r_cf / r_cf.norm();
-  // For 2D elements, this is equally simple, we just need to make sure that
-  // the normal points in the right direction.
-  else if (dim == 2)
-  {
-    Point side = face->node_ref(0) - face->node_ref(1);
-    _normal = Point(-side(1), side(0));
-    _normal /= _normal.norm();
-    if (_normal * r_cf < 0.0)
-      _normal *= -1.0;
-  }
-  // In 3D we need to use the vector product
-  else
-  {
-    Point side_1 = face->node_ref(0) - face->node_ref(1);
-    Point side_2 = face->node_ref(0) - face->node_ref(2);
-    _normal = side_1.cross(side_2);
-    _normal /= _normal.norm();
-    if (_normal * r_cf < 0.0)
-      _normal *= -1.0;
-  }
 }
 
 void

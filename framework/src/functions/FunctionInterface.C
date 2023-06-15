@@ -37,3 +37,15 @@ FunctionInterface::getFunctionByName(const FunctionName & name) const
 {
   return _fni_feproblem.getFunction(name, _fni_tid);
 }
+
+bool
+FunctionInterface::hasFunction(const std::string & param_name) const
+{
+  return hasFunctionByName(_fni_params.get<FunctionName>(param_name));
+}
+
+bool
+FunctionInterface::hasFunctionByName(const FunctionName & name) const
+{
+  return _fni_feproblem.hasFunction(name, _fni_tid);
+}
