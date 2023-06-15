@@ -645,13 +645,16 @@ MaterialPropertyInterface::getBlockMaterialProperty(const MaterialPropertyName &
     return std::pair<const MaterialProperty<T> *, std::set<SubdomainID>>(NULL,
                                                                          std::set<SubdomainID>());
 
+  // Call first so that the ID gets registered
+  auto prop_blocks_pair = std::make_pair<const MaterialProperty<T> *, std::set<SubdomainID>>(
+      &_material_data->getProperty<T>(name), getMaterialPropertyBlocks(name));
+
   _material_property_dependencies.insert(_material_data->getPropertyId(name));
 
   // Update consumed properties in MaterialPropertyDebugOutput
   addConsumedPropertyName(_mi_moose_object_name, name);
 
-  return std::pair<const MaterialProperty<T> *, std::set<SubdomainID>>(
-      &_material_data->getProperty<T>(name), getMaterialPropertyBlocks(name));
+  return prop_blocks_pair;
 }
 
 template <typename T>
@@ -807,13 +810,16 @@ MaterialPropertyInterface::getGenericMaterialPropertyByName(const MaterialProper
   // Update the boolean flag.
   _get_material_property_called = true;
 
+  // Call first so that the ID gets registered
+  auto & prop = material_data.getGenericProperty<T, is_ad>(name);
+
   // Does the material data used here matter?
   _material_property_dependencies.insert(material_data.getPropertyId(name));
 
   // Update consumed properties in MaterialPropertyDebugOutput
   addConsumedPropertyName(_mi_moose_object_name, name);
 
-  return material_data.getGenericProperty<T, is_ad>(name);
+  return prop;
 }
 
 template <typename T>
@@ -882,9 +888,12 @@ MaterialPropertyInterface::getMaterialPropertyOldByName(const MaterialPropertyNa
   // mark property as requested
   markMatPropRequested(name);
 
+  // Call first so that the ID gets registered
+  auto & prop = material_data.getPropertyOld<T>(name);
+
   _material_property_dependencies.insert(material_data.getPropertyId(name));
 
-  return material_data.getPropertyOld<T>(name);
+  return prop;
 }
 
 template <typename T>
@@ -905,7 +914,10 @@ MaterialPropertyInterface::getMaterialPropertyOlderByName(const MaterialProperty
   // mark property as requested
   markMatPropRequested(name);
 
+  // Call first so that the ID gets registered
+  const auto & prop = material_data.getPropertyOlder<T>(name);
+
   _material_property_dependencies.insert(material_data.getPropertyId(name));
 
-  return material_data.getPropertyOlder<T>(name);
+  return prop;
 }
