@@ -1,0 +1,15 @@
+
+COORDINATES
+TIME STEPS
+NODAL VARIABLES
+	DP relative
+	P relative
+	S relative
+	SumWij relative
+	T relative
+	h relative
+	mdot relative
+	mu relative
+	q_prime relative
+	rho relative
+	w_perim relative
