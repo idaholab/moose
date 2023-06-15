@@ -1,4 +1,4 @@
-# MeshAlignmentOneToMany
+# MeshAlignment2D3D
 
 This class inherits from [MeshAlignmentOneToMany.md] and builds a mapping between
 elements/faces between a 2D boundary and a 3D boundary.
