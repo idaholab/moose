@@ -31,20 +31,49 @@
   reference_vector = 'ref'
 []
 
+[Variables]
+  [disp_x]
+  []
+  [disp_y]
+  []
+[]
+
 [AuxVariables]
   [penalty_normal_pressure]
+    order = FIRST
+    family = LAGRANGE
   []
   [penalty_frictional_pressure]
+    order = FIRST
+    family = LAGRANGE
   []
   [accumulated_slip_one]
+    order = FIRST
+    family = LAGRANGE
   []
   [tangential_vel_one]
+    order = FIRST
+    family = LAGRANGE
   []
-  [normal_gap]
+  [weighted_gap]
+    order = FIRST
+    family = LAGRANGE
+  []
+  [stress_xx]
+    order = CONSTANT
+    family = MONOMIAL
+  []
+  [stress_yy]
+    order = CONSTANT
+    family = MONOMIAL
+  []
+  [stress_xy]
+    order = CONSTANT
+    family = MONOMIAL
   []
   [react_x]
   []
-  [saved_y]
+  [react_y]
   []
 []
 
@@ -61,44 +90,71 @@
   []
 []
 
-[Modules/TensorMechanics/Master/all]
-  strain = FINITE
-  add_variables = true
-  extra_vector_tags = 'ref'
-  block = '1 2 3 4 5 6 7'
-  generate_output = 'stress_xx stress_yy stress_xy'
+[Kernels]
+  [TensorMechanics]
+    use_displaced_mesh = true
+    extra_vector_tags = 'ref'
+    block = '1 2 3 4 5 6 7'
+  []
 []
 
 [AuxKernels]
-  [penalty_normal_pressure]
+  [penalty_normal_pressure_auxk]
     type = PenaltyMortarUserObjectAux
     variable = penalty_normal_pressure
     user_object = friction_uo
     contact_quantity = normal_pressure
   []
-  [penalty_frictional_pressure]
+  [penalty_frictional_pressure_auxk]
     type = PenaltyMortarUserObjectAux
     variable = penalty_frictional_pressure
     user_object = friction_uo
     contact_quantity = tangential_pressure_one
   []
-  [penalty_accumulated_slip]
+  [penalty_accumulated_slip_auxk]
     type = PenaltyMortarUserObjectAux
     variable = accumulated_slip_one
     user_object = friction_uo
     contact_quantity = accumulated_slip_one
   []
-  [penalty_tangential_vel]
+  [penalty_tangential_vel_auxk]
     type = PenaltyMortarUserObjectAux
     variable = tangential_vel_one
     user_object = friction_uo
     contact_quantity = tangential_velocity_one
   []
-  [penalty_gap]
+  [penalty_weighted_gap_auxk]
     type = PenaltyMortarUserObjectAux
-    variable = normal_gap
+    variable = weighted_gap
     user_object = friction_uo
     contact_quantity = normal_gap
+  []
+  [stress_xx]
+    type = RankTwoAux
+    rank_two_tensor = stress
+    variable = stress_xx
+    index_i = 0
+    index_j = 0
+    execute_on = timestep_end
+    block = '1 2 3 4 5 6 7'
+  []
+  [stress_yy]
+    type = RankTwoAux
+    rank_two_tensor = stress
+    variable = stress_yy
+    index_i = 1
+    index_j = 1
+    execute_on = timestep_end
+    block = '1 2 3 4 5 6 7'
+  []
+  [stress_xy]
+    type = RankTwoAux
+    rank_two_tensor = stress
+    variable = stress_xy
+    index_i = 0
+    index_j = 1
+    execute_on = timestep_end
+    block = '1 2 3 4 5 6 7'
   []
   [react_x]
     type = TagVectorAux
@@ -134,28 +190,6 @@
     type = NodalSum
     variable = react_y
     boundary = 4
-  []
-  [_dt]
-    type = TimestepSize
-  []
-  [num_lin_it]
-    type = NumLinearIterations
-  []
-  [num_nonlin_it]
-    type = NumNonlinearIterations
-  []
-  [cumulative]
-    type = CumulativeValuePostprocessor
-    postprocessor = num_nonlin_it
-  []
-  [gap]
-    type = SideExtremeValue
-    value_type = min
-    variable = normal_gap
-    boundary = 3
-  []
-  [num_al]
-    type = NumAugmentedLagrangeIterations
   []
 []
 
@@ -193,6 +227,10 @@
     youngs_modulus = 1e10
     poissons_ratio = 0.0
   []
+  [stuff1_strain]
+    type = ComputeFiniteStrain
+    block = '1'
+  []
   [stuff1_stress]
     type = ComputeFiniteStrainElasticStress
     block = '1'
@@ -202,6 +240,10 @@
     block = '2 3 4 5 6 7'
     youngs_modulus = 1e6
     poissons_ratio = 0.3
+  []
+  [stuff2_strain]
+    type = ComputeFiniteStrain
+    block = '2 3 4 5 6 7'
   []
   [stuff2_stress]
     type = ComputeFiniteStrainElasticStress
@@ -214,12 +256,14 @@
   solve_type = 'PJFNK'
 
   petsc_options = '-snes_ksp_ew'
-  petsc_options_iname = '-pc_type -pc_factor_mat_solver_type -pc_factor_shift_type -pc_factor_shift_amount -mat_mffd_err'
-  petsc_options_value = 'lu       superlu_dist                  NONZERO               1e-15                   1e-5'
+  petsc_options_iname = '-pc_type -pc_factor_mat_solver_type -pc_factor_shift_type '
+                        '-pc_factor_shift_amount -mat_mffd_err'
+  petsc_options_value = 'lu       superlu_dist                  NONZERO               1e-15          '
+                        '         1e-5'
 
   line_search = 'none'
 
-  nl_abs_tol = 1e-10
+  nl_abs_tol = 1e-7
 
   start_time = 0.0
   end_time = 0.3 # 3.5
@@ -230,7 +274,6 @@
     type = SimplePredictor
     scale = 1.0
   []
-  automatic_scaling = true
 []
 
 [Preconditioning]
@@ -241,10 +284,27 @@
 []
 
 [VectorPostprocessors]
-  [surface]
+  [x_disp]
     type = NodalValueSampler
-    use_displaced_mesh = false
-    variable = 'disp_x disp_y penalty_normal_pressure penalty_frictional_pressure normal_gap'
+    variable = disp_x
+    boundary = '3'
+    sort_by = id
+  []
+  [y_disp]
+    type = NodalValueSampler
+    variable = disp_y
+    boundary = '3'
+    sort_by = id
+  []
+  [cont_press]
+    type = NodalValueSampler
+    variable = penalty_normal_pressure
+    boundary = '3'
+    sort_by = id
+  []
+  [friction]
+    type = NodalValueSampler
+    variable = penalty_frictional_pressure
     boundary = '3'
     sort_by = id
   []
@@ -259,11 +319,12 @@
     type = Console
     max_rows = 5
   []
-  [vectorpp_output]
+  [chkfile]
     type = CSV
+    show = 'x_disp y_disp cont_press friction'
+    file_base = cylinder_friction_penalty_check
     create_final_symlink = true
-    file_base = cylinder_friction_penalty
-    execute_on = 'INITIAL TIMESTEP_END FINAL'
+    execute_on = 'FINAL'
   []
 []
 
@@ -278,27 +339,9 @@
     disp_y = disp_y
     friction_coefficient = 0.4 # with 2.0 works
     secondary_variable = disp_x
-    penalty = 1e9
-    penalty_friction = 5e8 # 1e7
+    penalty = 5e9
+    penalty_friction = 1e7
   []
-  [geo]
-    type = GeometrySphere
-    boundary = 3
-    center = '0 4 0'
-    radius = 3
-  []
-[]
-
-[Adaptivity]
-  [Markers]
-    [contact]
-      type = BoundaryMarker
-      mark = REFINE
-      next_to = 3
-    []
-  []
-  initial_marker = contact
-  initial_steps = 2
 []
 
 [Constraints]

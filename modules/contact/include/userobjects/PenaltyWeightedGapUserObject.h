@@ -98,4 +98,7 @@ protected:
 
   /// previous timestep size
   Real _dt_old;
+
+  /// Use scaled or physical gap
+  const bool _use_mortar_scaled_gap;
 };

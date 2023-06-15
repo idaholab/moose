@@ -6,240 +6,206 @@
 [Mesh]
   [input_file]
     type = FileMeshGenerator
-    file = iron.e
+    file = hertz_cyl_coarser.e
   []
   [secondary]
     type = LowerDBlockFromSidesetGenerator
     new_block_id = 10001
     new_block_name = 'secondary_lower'
-    sidesets = '10'
+    sidesets = '3'
     input = input_file
   []
   [primary]
     type = LowerDBlockFromSidesetGenerator
     new_block_id = 10000
-    sidesets = '20'
+    sidesets = '2'
     new_block_name = 'primary_lower'
     input = secondary
   []
-  patch_update_strategy = auto
-  patch_size = 20
   allow_renumbering = false
 []
 
-[Variables]
-  [disp_x]
-  []
-  [disp_y]
-  []
+[Problem]
+  type = ReferenceResidualProblem
+  extra_tag_vectors = 'ref'
+  reference_vector = 'ref'
 []
 
 [AuxVariables]
   [penalty_normal_pressure]
-    order = FIRST
-    family = LAGRANGE
   []
   [penalty_frictional_pressure]
-    order = FIRST
-    family = LAGRANGE
   []
   [accumulated_slip_one]
-    order = FIRST
-    family = LAGRANGE
   []
   [tangential_vel_one]
-    order = FIRST
-    family = LAGRANGE
   []
-  [real_weighted_gap]
-    order = FIRST
-    family = LAGRANGE
+  [normal_gap]
   []
-  [stress_xx]
-    order = CONSTANT
-    family = MONOMIAL
+  [react_x]
   []
-  [stress_yy]
-    order = CONSTANT
-    family = MONOMIAL
-  []
-  [stress_xy]
-    order = CONSTANT
-    family = MONOMIAL
-  []
-  [saved_x]
-  []
-  [saved_y]
-  []
-  [diag_saved_x]
-  []
-  [diag_saved_y]
-  []
-  [von_mises]
-    order = CONSTANT
-    family = MONOMIAL
+  [react_y]
   []
 []
 
 [Functions]
   [disp_ramp_vert]
     type = PiecewiseLinear
-    x = '0. 2. 8.'
-    y = '0. -1.0 -1.0'
+    x = '0. 1. 3.5'
+    y = '0. -0.020 -0.020'
   []
   [disp_ramp_horz]
     type = PiecewiseLinear
-    x = '0. 8.'
-    y = '0. 8.'
+    x = '0. 1. 3.5'
+    y = '0. 0.0 0.015'
   []
 []
 
-[Kernels]
-  [TensorMechanics]
-    use_displaced_mesh = true
-    save_in = 'saved_x saved_y'
-    block = '1 2'
-    strain = FINITE
-  []
+[Modules/TensorMechanics/Master/all]
+  strain = FINITE
+  add_variables = true
+  extra_vector_tags = 'ref'
+  block = '1 2 3 4 5 6 7'
+  generate_output = 'stress_xx stress_yy stress_xy'
 []
 
 [AuxKernels]
-  [penalty_normal_pressure_auxk]
+  [penalty_normal_pressure]
     type = PenaltyMortarUserObjectAux
     variable = penalty_normal_pressure
     user_object = friction_uo
     contact_quantity = normal_pressure
   []
-  [penalty_frictional_pressure_auxk]
+  [penalty_frictional_pressure]
     type = PenaltyMortarUserObjectAux
     variable = penalty_frictional_pressure
     user_object = friction_uo
     contact_quantity = tangential_pressure_one
   []
-  [penalty_accumulated_slip_auxk]
+  [penalty_accumulated_slip]
     type = PenaltyMortarUserObjectAux
     variable = accumulated_slip_one
     user_object = friction_uo
     contact_quantity = accumulated_slip_one
   []
-  [penalty_tangential_vel_auxk]
+  [penalty_tangential_vel]
     type = PenaltyMortarUserObjectAux
     variable = tangential_vel_one
     user_object = friction_uo
     contact_quantity = tangential_velocity_one
   []
-  [real_weighted_gap_auxk]
+  [penalty_gap]
     type = PenaltyMortarUserObjectAux
-    variable = real_weighted_gap
+    variable = normal_gap
     user_object = friction_uo
     contact_quantity = normal_gap
   []
-  [stress_xx]
-    type = RankTwoAux
-    rank_two_tensor = stress
-    variable = stress_xx
-    index_i = 0
-    index_j = 0
-    execute_on = timestep_end
-    block = '1 2'
+  [react_x]
+    type = TagVectorAux
+    vector_tag = 'ref'
+    v = 'disp_x'
+    variable = 'react_x'
   []
-  [stress_yy]
-    type = RankTwoAux
-    rank_two_tensor = stress
-    variable = stress_yy
-    index_i = 1
-    index_j = 1
-    execute_on = timestep_end
-    block = '1 2'
-  []
-  [stress_xy]
-    type = RankTwoAux
-    rank_two_tensor = stress
-    variable = stress_xy
-    index_i = 0
-    index_j = 1
-    execute_on = timestep_end
-    block = '1 2'
-  []
-  [von_mises_kernel]
-    #Calculates the von mises stress and assigns it to von_mises
-    type = RankTwoScalarAux
-    variable = von_mises
-    rank_two_tensor = stress
-    execute_on = timestep_end
-    scalar_type = VonMisesStress
-    block = '1 2'
+  [react_y]
+    type = TagVectorAux
+    vector_tag = 'ref'
+    v = 'disp_y'
+    variable = 'react_y'
   []
 []
 
-[VectorPostprocessors]
-  [penalty_normal_pressure]
-    type = NodalValueSampler
-    variable = penalty_normal_pressure
-    boundary = 10
-    sort_by = id
+[Postprocessors]
+  [bot_react_x]
+    type = NodalSum
+    variable = react_x
+    boundary = 1
+  []
+  [bot_react_y]
+    type = NodalSum
+    variable = react_y
+    boundary = 1
+  []
+  [top_react_x]
+    type = NodalSum
+    variable = react_x
+    boundary = 4
+  []
+  [top_react_y]
+    type = NodalSum
+    variable = react_y
+    boundary = 4
+  []
+  [_dt]
+    type = TimestepSize
+  []
+  [num_lin_it]
+    type = NumLinearIterations
+  []
+  [num_nonlin_it]
+    type = NumNonlinearIterations
+  []
+  [cumulative]
+    type = CumulativeValuePostprocessor
+    postprocessor = num_nonlin_it
+  []
+  [gap]
+    type = SideExtremeValue
+    value_type = min
+    variable = normal_gap
+    boundary = 3
+  []
+  [num_al]
+    type = NumAugmentedLagrangeIterations
   []
 []
 
 [BCs]
-  [bot_x_disp]
-    type = DirichletBC
-    variable = disp_x
-    boundary = '40'
-    value = 0.0
-    preset = false
-  []
-  [bot_y_disp]
+  [side_x]
     type = DirichletBC
     variable = disp_y
-    boundary = '40'
+    boundary = '1 2'
     value = 0.0
-    preset = false
+  []
+  [bot_y]
+    type = DirichletBC
+    variable = disp_x
+    boundary = '1 2'
+    value = 0.0
   []
   [top_y_disp]
     type = FunctionDirichletBC
     variable = disp_y
-    boundary = '30'
+    boundary = 4
     function = disp_ramp_vert
-    preset = false
   []
   [top_x_disp]
     type = FunctionDirichletBC
     variable = disp_x
-    boundary = '30'
+    boundary = 4
     function = disp_ramp_horz
-    preset = false
   []
 []
 
 [Materials]
   [stuff1_elas_tens]
     type = ComputeIsotropicElasticityTensor
-    block = '2'
-    youngs_modulus = 6896
-    poissons_ratio = 0.32
-  []
-  [stuff1_strain]
-    type = ComputeFiniteStrain
-    block = '2'
+    block = '1'
+    youngs_modulus = 1e10
+    poissons_ratio = 0.0
   []
   [stuff1_stress]
     type = ComputeFiniteStrainElasticStress
-    block = '2'
+    block = '1'
   []
   [stuff2_elas_tens]
     type = ComputeIsotropicElasticityTensor
-    block = '1'
-    youngs_modulus = 689.6
-    poissons_ratio = 0.32
-  []
-  [stuff2_strain]
-    type = ComputeFiniteStrain
-    block = '1'
+    block = '2 3 4 5 6 7'
+    youngs_modulus = 1e6
+    poissons_ratio = 0.3
   []
   [stuff2_stress]
     type = ComputeFiniteStrainElasticStress
-    block = '1'
+    block = '2 3 4 5 6 7'
   []
 []
 
@@ -248,22 +214,18 @@
   solve_type = 'PJFNK'
 
   petsc_options = '-snes_ksp_ew'
-  petsc_options_iname = '-pc_type -pc_factor_mat_solver_type'
-  petsc_options_value = 'lu     superlu_dist'
+  petsc_options_iname = '-pc_type -pc_factor_mat_solver_type -pc_factor_shift_type -pc_factor_shift_amount -mat_mffd_err'
+  petsc_options_value = 'lu       superlu_dist                  NONZERO               1e-15                   1e-5'
+
   line_search = 'none'
 
-  nl_abs_tol = 1e-7
-  nl_rel_tol = 1e-7
-  l_tol = 1e-6
-
-  l_max_its = 50
-  nl_max_its = 30
+  nl_abs_tol = 1e-10
 
   start_time = 0.0
-  end_time = 6.5 # 6.5
-
-  dt = 0.0125
-  dtmin = 1e-5
+  end_time = 0.3 # 3.5
+  l_tol = 1e-4
+  dt = 0.1
+  dtmin = 0.001
   [Predictor]
     type = SimplePredictor
     scale = 1.0
@@ -277,50 +239,74 @@
   []
 []
 
+[VectorPostprocessors]
+  [surface]
+    type = NodalValueSampler
+    use_displaced_mesh = false
+    variable = 'disp_x disp_y penalty_normal_pressure penalty_frictional_pressure normal_gap'
+    boundary = '3'
+    sort_by = id
+  []
+[]
+
 [Outputs]
   print_linear_residuals = true
   perf_graph = true
   exodus = true
-  csv = true
-  [chkfile]
-    type = CSV
-    start_time = 0.0
-    execute_vector_postprocessors_on = FINAL
-  []
-
+  csv = false
   [console]
     type = Console
     max_rows = 5
   []
-[]
-
-[Debug]
-  show_var_residual_norms = true
+  [vectorpp_output]
+    type = CSV
+    create_final_symlink = true
+    file_base = cylinder_friction_penalty_adaptivity
+    execute_on = 'INITIAL TIMESTEP_END FINAL'
+  []
 []
 
 [UserObjects]
   [friction_uo]
     type = PenaltyFrictionUserObject
-    primary_boundary = 20
-    secondary_boundary = 10
-    primary_subdomain = 10000
-    secondary_subdomain = 10001
+    primary_boundary = '2'
+    secondary_boundary = '3'
+    primary_subdomain = '10000'
+    secondary_subdomain = '10001'
     disp_x = disp_x
     disp_y = disp_y
-    friction_coefficient = 0.1 # with 2.0 works
+    friction_coefficient = 0.4
     secondary_variable = disp_x
-    penalty = 5e5
-    penalty_friction = 1e4
+    penalty = 5e7
+    penalty_friction = 5e8
   []
+  [geo]
+    type = GeometrySphere
+    boundary = 3
+    center = '0 4 0'
+    radius = 3
+  []
+[]
+
+[Adaptivity]
+  [Markers]
+    [contact]
+      type = BoundaryMarker
+      mark = REFINE
+      next_to = 3
+    []
+  []
+  initial_marker = contact
+  initial_steps = 2
 []
 
 [Constraints]
   [x]
     type = NormalMortarMechanicalContact
-    primary_boundary = 20
-    secondary_boundary = 10
-    primary_subdomain = 10000
-    secondary_subdomain = 10001
+    primary_boundary = '2'
+    secondary_boundary = '3'
+    primary_subdomain = '10000'
+    secondary_subdomain = '10001'
     secondary_variable = disp_x
     component = x
     use_displaced_mesh = true
@@ -329,20 +315,20 @@
   []
   [y]
     type = NormalMortarMechanicalContact
-    primary_boundary = 20
-    secondary_boundary = 10
-    primary_subdomain = 10000
-    secondary_subdomain = 10001
+    primary_boundary = '2'
+    secondary_boundary = '3'
+    primary_subdomain = '10000'
+    secondary_subdomain = '10001'
     secondary_variable = disp_y
     component = y
     use_displaced_mesh = true
     compute_lm_residuals = false
     weighted_gap_uo = friction_uo
   []
-  [t_x]
+  [tangential_x]
     type = TangentialMortarMechanicalContact
-    primary_boundary = 20
-    secondary_boundary = 10
+    primary_boundary = 2
+    secondary_boundary = 3
     primary_subdomain = 10000
     secondary_subdomain = 10001
     secondary_variable = disp_x
@@ -351,10 +337,10 @@
     compute_lm_residuals = false
     weighted_velocities_uo = friction_uo
   []
-  [t_y]
+  [tangential_y]
     type = TangentialMortarMechanicalContact
-    primary_boundary = 20
-    secondary_boundary = 10
+    primary_boundary = 2
+    secondary_boundary = 3
     primary_subdomain = 10000
     secondary_subdomain = 10001
     secondary_variable = disp_y

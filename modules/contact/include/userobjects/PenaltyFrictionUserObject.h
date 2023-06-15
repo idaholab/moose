@@ -40,8 +40,7 @@ public:
   virtual Real getTangentialVelocity(const Node * const node,
                                      const unsigned int component) const override;
   virtual Real getDeltaTangentialLagrangeMultiplier(const Node * const node,
-                                     const unsigned int component) const override;
-
+                                                    const unsigned int component) const override;
 
   virtual bool isAugmentedLagrangianConverged() override;
   virtual void updateAugmentedLagrangianMultipliers() override;

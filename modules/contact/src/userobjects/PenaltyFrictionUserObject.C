@@ -238,6 +238,8 @@ PenaltyFrictionUserObject::reinit()
       ADReal phi_trial = tangential_trial_traction_norm - _friction_coefficient * normal_pressure;
 
       tangential_traction = tangential_trial_traction;
+
+      // Simo considers this a 'return mapping'; we are just capping friction to the Coulomb limit.
       if (phi_trial > 0.0)
       {
         // Simo 3.14 (the penalty formulation has an error in the paper)

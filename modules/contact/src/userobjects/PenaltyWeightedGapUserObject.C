@@ -31,6 +31,7 @@ PenaltyWeightedGapUserObject::validParams()
                         0.0,
                         "Perform a linear extrapolation from the last two augmented lagrange "
                         "multipliers to the current timestep");
+  params.addParam<bool>("use_mortar_scaled_gap", false, "Whether to use the mortar scaled gap.");
   params.addRangeCheckedParam<Real>(
       "penetration_tolerance",
       1e-5,
@@ -54,7 +55,8 @@ PenaltyWeightedGapUserObject::PenaltyWeightedGapUserObject(const InputParameters
                                      ? _augmented_lagrange_problem->getLagrangianIterationNumber()
                                      : _no_iterations),
     _predictor_scale(getParam<Real>("augmented_lagrange_predictor_scale")),
-    _dt(_fe_problem.dt())
+    _dt(_fe_problem.dt()),
+    _use_mortar_scaled_gap(getParam<bool>("use_mortar_scaled_gap"))
 {
   auto check_type = [this](const auto & var, const auto & var_name)
   {
@@ -130,17 +132,26 @@ PenaltyWeightedGapUserObject::reinit()
 
     const auto penalty =
         findValue(_dof_to_local_penalty, static_cast<const DofObject *>(node), _penalty);
-    const auto & gap = adPhysicalGap(libmesh_map_find(_dof_to_weighted_gap, node));
+
+    // Let's keep existing behavior scaling the weighted gap scaled with the element dimension.
+    // For AL (and penalty too), it'll be better to just have a physical ('real') gap so that the
+    // user (or even our algorithms) can better select this coefficient.
+    ADReal gap;
+    if (_use_mortar_scaled_gap)
+      gap = adPhysicalGap(libmesh_map_find(_dof_to_weighted_gap, node));
+    else
+      gap = libmesh_map_find(_dof_to_weighted_gap, node).first;
+
     const auto lagrange_multiplier =
         _augmented_lagrange_problem ? _dof_to_lagrange_multiplier[node] : 0.0;
     const auto & test_i = (*_test)[i];
 
     auto normal_pressure = penalty * gap + lagrange_multiplier;
-    normal_pressure = normal_pressure < 0.0 ? normal_pressure : 0.0;
+    normal_pressure = normal_pressure < 0.0 ? -normal_pressure : 0.0;
 
-    _dof_to_normal_pressure[node] = -normal_pressure;
+    _dof_to_normal_pressure[node] = normal_pressure;
     for (const auto qp : make_range(_qrule_msm->n_points()))
-      _contact_force[qp] += -test_i[qp] * normal_pressure;
+      _contact_force[qp] += test_i[qp] * normal_pressure;
   }
 }
 
@@ -229,7 +240,7 @@ PenaltyWeightedGapUserObject::augmentedLagrangianSetup()
     const auto penalty = findValue(_dof_to_local_penalty, dof_object, _penalty);
     const Real gap = physicalGap(wgap);
     const auto lagrange_multiplier = findValue(_dof_to_lagrange_multiplier, dof_object);
-    std::cout << lagrange_multiplier << '\n';
+    Moose::out << lagrange_multiplier << '\n';
     // positive contact pressure (sic. sign) means wee add the node to the active set
     if (lagrange_multiplier + gap * penalty < 0)
       _active_set.insert(dof_object);
