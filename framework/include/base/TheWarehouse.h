@@ -488,9 +488,8 @@ public:
     auto & objs = query(query_id);
     results.clear();
     results.reserve(objs.size());
-    for (unsigned int i = 0; i < objs.size(); i++)
+    for (auto & obj : objs)
     {
-      auto obj = objs[i];
       mooseAssert(obj, "Null object");
       auto cast_obj = dynamic_cast<T *>(obj);
       if (obj)
