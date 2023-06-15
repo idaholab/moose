@@ -42,7 +42,7 @@ Real
 capillaryPressure(Real seff, Real pe, Real lambda, Real pc_max)
 {
   if (seff >= 1.0)
-    return 0.0;
+    return pe;
   else if (seff <= 0.0)
     return pc_max;
   else
@@ -52,7 +52,7 @@ capillaryPressure(Real seff, Real pe, Real lambda, Real pc_max)
 Real
 dCapillaryPressure(Real seff, Real pe, Real lambda, Real pc_max)
 {
-  if (seff <= 0.0 || seff >= 1.0)
+  if (seff <= 0.0 || seff > 1.0)
     return 0.0;
   else
   {
@@ -67,7 +67,7 @@ dCapillaryPressure(Real seff, Real pe, Real lambda, Real pc_max)
 Real
 d2CapillaryPressure(Real seff, Real pe, Real lambda, Real pc_max)
 {
-  if (seff <= 0.0 || seff >= 1.0)
+  if (seff <= 0.0 || seff > 1.0)
     return 0.0;
   else
   {
