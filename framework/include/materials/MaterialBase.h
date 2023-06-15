@@ -116,11 +116,17 @@ public:
    * Declare the property named "name"
    */
   template <typename T>
-  MaterialProperty<T> & declarePropertyByName(const std::string & prop_name);
+  MaterialProperty<T> & declarePropertyByName(const std::string & prop_name)
+  {
+    return declareGenericPropertyByName<T, false>(prop_name);
+  }
   template <typename T>
   MaterialProperty<T> & declareProperty(const std::string & name);
   template <typename T>
-  ADMaterialProperty<T> & declareADPropertyByName(const std::string & prop_name);
+  ADMaterialProperty<T> & declareADPropertyByName(const std::string & prop_name)
+  {
+    return declareGenericPropertyByName<T, true>(prop_name);
+  }
   template <typename T>
   ADMaterialProperty<T> & declareADProperty(const std::string & name);
 
@@ -133,13 +139,7 @@ public:
       return declareProperty<T>(prop_name);
   }
   template <typename T, bool is_ad>
-  auto & declareGenericPropertyByName(const std::string & prop_name)
-  {
-    if constexpr (is_ad)
-      return declareADPropertyByName<T>(prop_name);
-    else
-      return declarePropertyByName<T>(prop_name);
-  }
+  GenericMaterialProperty<T, is_ad> & declareGenericPropertyByName(const std::string & prop_name);
   ///@}
 
   /**
@@ -321,7 +321,7 @@ protected:
   std::map<std::string, MaterialPropStateInt> _props_to_flags;
 
   /// Small helper function to call store{Subdomain,Boundary}MatPropName
-  void registerPropName(std::string prop_name, bool is_get, MaterialPropState state);
+  void registerPropName(const std::string & prop_name, bool is_get, MaterialPropState state);
 
   /// Check and throw an error if the execution has progressed past the construction stage
   void checkExecutionStage();
@@ -351,16 +351,20 @@ MaterialBase::declareProperty(const std::string & name)
   return declarePropertyByName<T>(prop_name);
 }
 
-template <typename T>
-MaterialProperty<T> &
-MaterialBase::declarePropertyByName(const std::string & prop_name_in)
+template <typename T, bool is_ad>
+GenericMaterialProperty<T, is_ad> &
+MaterialBase::declareGenericPropertyByName(const std::string & prop_name)
 {
-  const auto prop_name =
+  const auto prop_name_modified =
       _declare_suffix.empty()
-          ? prop_name_in
-          : MooseUtils::join(std::vector<std::string>({prop_name_in, _declare_suffix}), "_");
-  registerPropName(prop_name, false, MaterialPropState::CURRENT);
-  return materialData().declareProperty<T>(prop_name);
+          ? prop_name
+          : MooseUtils::join(std::vector<std::string>({prop_name, _declare_suffix}), "_");
+
+  // Call this before so that the ID is valid
+  auto & prop = materialData().declareGenericProperty<T, is_ad>(prop_name_modified);
+
+  registerPropName(prop_name_modified, false, MaterialPropState::CURRENT);
+  return prop;
 }
 
 template <typename T, bool is_ad>
@@ -435,18 +439,6 @@ MaterialBase::declareADProperty(const std::string & name)
     prop_name = _pars.get<MaterialPropertyName>(name);
 
   return declareADPropertyByName<T>(prop_name);
-}
-
-template <typename T>
-ADMaterialProperty<T> &
-MaterialBase::declareADPropertyByName(const std::string & prop_name_in)
-{
-  const auto prop_name =
-      _declare_suffix.empty()
-          ? prop_name_in
-          : MooseUtils::join(std::vector<std::string>({prop_name_in, _declare_suffix}), "_");
-  registerPropName(prop_name, false, MaterialPropState::CURRENT);
-  return materialData().declareADProperty<T>(prop_name);
 }
 
 template <typename Consumers>

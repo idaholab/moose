@@ -142,7 +142,7 @@ MaterialBase::checkStatefulSanity() const
 }
 
 void
-MaterialBase::registerPropName(std::string prop_name, bool is_get, MaterialPropState state)
+MaterialBase::registerPropName(const std::string & prop_name, bool is_get, MaterialPropState state)
 {
   if (!is_get)
   {

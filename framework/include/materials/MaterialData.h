@@ -44,29 +44,29 @@ public:
   unsigned int nQPoints() const { return _n_qpoints; }
 
   /**
-   * Declare the Real valued property named "name".
-   * Calling any of the declareProperty
-   * functions multiple times with the same property name is okay and
-   * will result in a single identical reference returned every time.
+   * Declare the normal/AD/generic valued property named \p prop_name.
+   *
+   * Calling any of these functions multiple times with the same property
+   * name is okay and will result in a single identical reference returned
+   * every time.
    */
+  ///@{
+  template <typename T, bool is_ad>
+  GenericMaterialProperty<T, is_ad> & declareGenericProperty(const std::string & prop_name)
+  {
+    return declareHelper<T, is_ad>(prop_name, 0);
+  }
   template <typename T>
   MaterialProperty<T> & declareProperty(const std::string & prop_name)
   {
-    return declareHelper<T, false>(prop_name, 0);
-    ;
+    return declareGenericProperty<T, false>(prop_name);
   }
-
-  /**
-   * Declare the AD property named "name".
-   * Calling any of the declareProperty
-   * functions multiple times with the same property name is okay and
-   * will result in a single identical reference returned every time.
-   */
   template <typename T>
   ADMaterialProperty<T> & declareADProperty(const std::string & prop_name)
   {
-    return declareHelper<T, true>(prop_name, 0);
+    return declareGenericProperty<T, true>(prop_name);
   }
+  //@}
 
   /// copy material properties from one element to another
   void copy(const Elem & elem_to, const Elem & elem_from, unsigned int side);
