@@ -20,6 +20,7 @@ InputParameters
 THMAddControlAction::validParams()
 {
   InputParameters params = AddControlAction::validParams();
+  params.addClassDescription("Adds Controls from the ControlLogic block.");
   return params;
 }
 

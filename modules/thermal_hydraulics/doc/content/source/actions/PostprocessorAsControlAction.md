@@ -1,21 +1,15 @@
 # PostprocessorAsControlAction
 
-!alert construction title=Undocumented Action Class
-The PostprocessorAsControlAction has not been documented. The content listed below should be used as a starting point for
-documenting the class, which includes the typical automatic documentation associated with an Action;
-however, what is contained is ultimately determined by what is necessary to make the documentation
-clear for users.
-
 !syntax description /Postprocessors/PostprocessorAsControlAction
 
-## Overview
+This conversion is performed for every postprocessor by every application that registers the
+`ThermalHydraulicsApp` syntax.
 
-!! Replace these lines with information regarding the PostprocessorAsControlAction action.
-
-## Example Input File Syntax
-
-!! Describe and include an example of how to use the PostprocessorAsControlAction action.
-
-!syntax description /Postprocessors/PostprocessorAsControlAction
+This [Action](source/actions/Action.md) relies on creating a [CopyPostprocessorValueControl.md]
+with the postprocessor as the [!param](/Controls/CopyPostprocessorValueControl/postprocessor) parameter.
 
 !syntax parameters /Postprocessors/PostprocessorAsControlAction
+
+!syntax inputs /Postprocessors/PostprocessorAsControlAction
+
+!syntax children /Postprocessors/PostprocessorAsControlAction
