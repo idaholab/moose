@@ -17,7 +17,8 @@ Turbine1PhaseFrictionTorqueAux::validParams()
 {
   InputParameters params = AuxScalarKernel::validParams();
   params.addRequiredParam<UserObjectName>("turbine_uo", "Turbine user object name");
-  params.addClassDescription("Friction torque computed in the 1-phase shaft-connected turbine.");
+  params.addClassDescription(
+      "Returns the friction torque computed in the 1-phase shaft-connected turbine.");
   return params;
 }
 

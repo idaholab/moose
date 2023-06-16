@@ -18,7 +18,7 @@ Compressor1PhaseDissipationTorqueAux::validParams()
   InputParameters params = AuxScalarKernel::validParams();
   params.addRequiredParam<UserObjectName>("compressor_uo", "Compressor user object name");
   params.addClassDescription(
-      "Dissipation torque computed in the 1-phase shaft-connected compressor.");
+      "Returns the dissipation torque computed in the 1-phase shaft-connected compressor.");
   return params;
 }
 

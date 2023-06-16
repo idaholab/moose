@@ -16,10 +16,10 @@ class ADShaftConnectedPump1PhaseUserObject;
 /**
  * Hydraulic torque computed in the 1-phase shaft-connected pump
  */
-class HydraulicTorqueAux : public AuxScalarKernel
+class PumpHydraulicTorqueAux : public AuxScalarKernel
 {
 public:
-  HydraulicTorqueAux(const InputParameters & parameters);
+  PumpHydraulicTorqueAux(const InputParameters & parameters);
 
 protected:
   virtual Real computeValue();
