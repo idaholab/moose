@@ -36,7 +36,6 @@
                   'between a cylinder and a plane using penalty mortar contact after performing '
                   'initial adaptivity around the contact area.'
   []
-
   [cylinder_friction_penalty_al_normal]
     type = 'CSVDiff'
     csvdiff = 'cylinder_friction_penalty_normal_al_vectorpp_output_surface_FINAL.csv'
@@ -64,6 +63,20 @@
     max_parallel = 1
     requirement = 'The contact module shall be able to approximate frictional contact in a two-dimensional cylinder via an augmented '
                   'Lagrange approach to constraint enforcement.'
+  []
+  [cylinder_friction_penalty_al_separation]
+    type = 'CSVDiff'
+    csvdiff = 'cylinder_friction_penalty_normal_al_backup_vectorpp_output_surface_FINAL.csv'
+    input = 'cylinder_friction_penalty_normal_al_backup.i'
+    rel_err = 5.0e-4
+    abs_zero = 1.0e-2
+    heavy = true
+    valgrind = none
+    method = opt
+    # Parallel bug in AL?
+    max_parallel = 1
+    requirement = 'The contact module shall be able to approximate normal contact in a two-dimensional cylinder via an augmented '
+                  'Lagrange approach to constraint enforcement and allow for separation.'
   []
   [ironing]
     type = 'CSVDiff'
