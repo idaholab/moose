@@ -356,7 +356,9 @@ SIMPLE::solvePressureCorrector(NonlinearSystemBase & pressure_system_in)
   Real absolute_tolerance = norm_factor * 1e-8;
 
   KSPSetNormType(pressure_solver.ksp(), KSP_NORM_UNPRECONDITIONED);
-  pressure_solver.solve(*mmat, *mmat, *solution, *rhs, absolute_tolerance, 100);
+  pressure_solver.solve(
+      *mmat, *mmat, *pressure_system.solution.get(), *rhs, absolute_tolerance, 100);
+  pressure_system.update();
 
   if (_print_fields)
   {

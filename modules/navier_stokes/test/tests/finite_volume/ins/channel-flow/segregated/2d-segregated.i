@@ -179,7 +179,7 @@ pressure_tag = "pressure_grad"
   num_iterations = 1
   pressure_absolute_tolerance = 1e-9
   momentum_absolute_tolerance = 1e-9
-  print_fields = true
+  print_fields = false
 []
 
 # [Postprocessors]

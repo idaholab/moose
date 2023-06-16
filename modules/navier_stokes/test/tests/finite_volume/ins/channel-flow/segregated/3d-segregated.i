@@ -1,4 +1,4 @@
-mu = 0.01
+mu = 0.001
 rho = 1.0
 advected_interp_method = 'average'
 velocity_interp_method = 'rc'
@@ -12,9 +12,9 @@ pressure_tag = "pressure_grad"
     dx = '0.2 0.2 0.2'
     dy = '0.2'
     dz = '0.8 0.2'
-    ix = '30 30 30'
-    iy = '30'
-    iz = '120 30'
+    ix = '50 50 50'
+    iy = '50'
+    iz = '200 50'
     subdomain_id = '1 0 1 0 0 0'
   []
   [sideset]
@@ -232,7 +232,7 @@ pressure_tag = "pressure_grad"
   momentum_tag = ${pressure_tag}
   momentum_equation_relaxation = 0.8
   pressure_variable_relaxation = 0.3
-  num_iterations = 1
+  num_iterations = 2
   pressure_absolute_tolerance = 1e-9
   momentum_absolute_tolerance = 1e-9
   print_fields = false

@@ -371,8 +371,9 @@ INSFVRhieChowInterpolatorSegregated::computeHbyA(const Real & momentum_relaxatio
   PetscVector<Number> * working_vector_petsc =
       dynamic_cast<PetscVector<Number> *>(working_vector.get());
 
-  auto active_local_begin = _mesh.active_local_elements_begin();
-  auto active_local_end = _mesh.active_local_elements_end();
+  auto active_local_begin =
+      _mesh.evaluable_elements_begin(momentum_system->get_dof_map(), var_nums[0]);
+  auto active_local_end = _mesh.evaluable_elements_end(momentum_system->get_dof_map(), var_nums[0]);
 
   if (verbose)
   {
