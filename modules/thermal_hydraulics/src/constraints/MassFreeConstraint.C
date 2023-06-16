@@ -21,6 +21,8 @@ MassFreeConstraint::validParams()
   params.addRequiredParam<std::vector<Real>>("normals", "node normals");
   params.addRequiredParam<std::vector<dof_id_type>>("nodes", "node IDs");
   params.addRequiredCoupledVar("rhouA", "Momentum");
+  params.addClassDescription(
+      "Constrains the momentum at the user-specified nodes along the user-specified normals");
   return params;
 }
 
