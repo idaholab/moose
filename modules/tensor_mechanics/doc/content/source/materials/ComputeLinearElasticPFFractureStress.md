@@ -250,8 +250,8 @@ PETSc options `-snes_type vinewtonssls` or `-snes_type vinewtonrsls`.
 
 !syntax parameters /Materials/ComputeLinearElasticPFFractureStress
 
-!syntax inputs /Materials/ComputeLinearElasticFractureStress
+!syntax inputs /Materials/ComputeLinearElasticPFFractureStress
 
-!syntax children /Materials/ComputeLinearElasticFractureStress
+!syntax children /Materials/ComputeLinearElasticPFFractureStress
 
 !bibtex bibliography
