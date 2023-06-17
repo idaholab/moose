@@ -31,7 +31,7 @@
 []
 
 [DomainIntegral]
-  integrals = 'Jintegral InteractionIntegralKI InteractionIntegralKII'
+  integrals = 'InteractionIntegralKI InteractionIntegralKII'
   displacements = 'disp_x disp_y'
   crack_front_points_provider = cut_mesh2
   2d=true
@@ -174,8 +174,8 @@
 []
 
 [Outputs]
-  # csv=true
-  exodus = true
+  csv=true
+  exodus = false
   execute_on = TIMESTEP_END
   # [xfemcutter]
   #   type=XFEMCutMeshOutput
