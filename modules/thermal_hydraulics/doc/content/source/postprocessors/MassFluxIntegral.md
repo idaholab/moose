@@ -1,20 +1,13 @@
 # MassFluxIntegral
 
-!alert construction title=Undocumented Class
-The MassFluxIntegral has not been documented. The content listed below should be used as a starting point for
-documenting the class, which includes the typical automatic documentation associated with a
-MooseObject; however, what is contained is ultimately determined by what is necessary to make the
-documentation clear for users.
-
 !syntax description /Postprocessors/MassFluxIntegral
 
-## Overview
+The integral of the mass flux $I_M$ over boundary $\partial \Omega$ is:
 
-!! Replace these lines with information regarding the MassFluxIntegral object.
+!equation
+I_M = \int_{\partial \Omega} arhouA d\partial \Omega
 
-## Example Input File Syntax
-
-!! Describe and include an example of how to use the MassFluxIntegral object.
+with $arhouA$ the conserved phase momentum at the boundary.
 
 !syntax parameters /Postprocessors/MassFluxIntegral
 
