@@ -16,7 +16,8 @@ InputParameters
 WallFrictionFunctionMaterial::validParams()
 {
   InputParameters params = Material::validParams();
-
+  params.addClassDescription("Defines a Darcy friction factor equal to the value of the function "
+                             "at the local coordinates and time");
   params.addRequiredParam<MaterialPropertyName>("f_D", "Darcy friction factor material property");
 
   params.addRequiredParam<FunctionName>("function", "Darcy friction factor function");

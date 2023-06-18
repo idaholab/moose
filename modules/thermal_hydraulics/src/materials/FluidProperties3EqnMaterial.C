@@ -24,6 +24,8 @@ FluidProperties3EqnMaterial::validParams()
   params.addRequiredCoupledVar("rhoEA", "Conserved total energy");
 
   params.addRequiredParam<UserObjectName>("fp", "The name of the user object for fluid properties");
+  params.addClassDescription(
+      "Defines material properties from fluid properties to serve in the 3-equation model");
 
   return params;
 }

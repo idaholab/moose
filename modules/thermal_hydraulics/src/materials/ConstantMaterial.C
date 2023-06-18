@@ -15,11 +15,14 @@ InputParameters
 ConstantMaterial::validParams()
 {
   InputParameters params = Material::validParams();
+  params.addClassDescription("Defines a single constant material property, along with zero "
+                             "derivative material properties for user-defined variables");
   params.addParam<Real>("value", 0., "Constant value being assigned into the property");
   params.addRequiredParam<std::string>("property_name", "The property name to declare");
   params.addCoupledVar(
       "derivative_vars",
       "Names of variables for which to create (zero) material derivative properties");
+  params.set<MooseEnum>("constant_on") = "SUBDOMAIN";
   return params;
 }
 
