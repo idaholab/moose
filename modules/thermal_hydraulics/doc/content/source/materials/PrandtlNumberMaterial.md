@@ -1,20 +1,14 @@
 # PrandtlNumberMaterial
 
-!alert construction title=Undocumented Class
-The PrandtlNumberMaterial has not been documented. The content listed below should be used as a starting point for
-documenting the class, which includes the typical automatic documentation associated with a
-MooseObject; however, what is contained is ultimately determined by what is necessary to make the
-documentation clear for users.
-
 !syntax description /Materials/PrandtlNumberMaterial
 
-## Overview
+The Prandtl number $Pr$ is computed as:
 
-!! Replace these lines with information regarding the PrandtlNumberMaterial object.
+!equation
+Pr = \dfrac{cp * \mu}{k}
 
-## Example Input File Syntax
-
-!! Describe and include an example of how to use the PrandtlNumberMaterial object.
+with $cp$ the specific isobaric heat capacity, $\mu$ the dynamic viscosity and $k$ the thermal
+conductivity.
 
 !syntax parameters /Materials/PrandtlNumberMaterial
 

@@ -1,20 +1,47 @@
 # FluidProperties3EqnMaterial
 
-!alert construction title=Undocumented Class
-The FluidProperties3EqnMaterial has not been documented. The content listed below should be used as a starting point for
-documenting the class, which includes the typical automatic documentation associated with a
-MooseObject; however, what is contained is ultimately determined by what is necessary to make the
-documentation clear for users.
-
 !syntax description /Materials/FluidProperties3EqnMaterial
 
-## Overview
+Both fluid properties and several physical quantities are defined as material
+properties.
+The material properties defined (declared and computed) are:
 
-!! Replace these lines with information regarding the FluidProperties3EqnMaterial object.
+- density $\rho$
+- specific volume $v$
+- 1D velocity $vel$
+- specific internal energy $e$
+- pressure $p$
+- temperature $T$
+- specific enthalpy $h$
+- specific total enthalpy $H$
+- speed of sound $c$
+- specific isobaric heat capacity $c_p$
+- specific isochoric heat capacity $c_v$
+- thermal conductivity $k$
 
-## Example Input File Syntax
+Additionally, several derivative of material properties with regards to the conserved variables;
+the conserved density $\rhoA$, the conserved momentum $\rho uA$ and the conserved total energy
+$\rho E A$ are defined:
 
-!! Describe and include an example of how to use the FluidProperties3EqnMaterial object.
+- $\dfrac{d\rho}{d\rhoA}
+- $\dfrac{dv}{d\rhoA}
+- $\dfrac{dvel}{d\rhoA}
+- $\dfrac{dvel}{d\rhouA}
+- $\dfrac{de}{d\rhoA}
+- $\dfrac{de}{d\rhouA}
+- $\dfrac{de}{d\rhoEA}
+- $\dfrac{dp}{d\rhoA}
+- $\dfrac{dp}{d\rhouA}
+- $\dfrac{dp}{d\rhoEA}
+- $\dfrac{dT}{d\rhoA}
+- $\dfrac{dT}{d\rhouA}
+- $\dfrac{dT}{d\rhoEA}
+- $\dfrac{dh}{d\rhoA}
+- $\dfrac{dh}{d\rhouA}
+- $\dfrac{dh}{d\rhoEA}
+- $\dfrac{dH}{d\rhoA}
+- $\dfrac{dH}{d\rhouA}
+- $\dfrac{dH}{d\rhoEA}
 
 !syntax parameters /Materials/FluidProperties3EqnMaterial
 

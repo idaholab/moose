@@ -1,20 +1,20 @@
 # WallHeatTransferCoefficient3EqnDittusBoelterMaterial
 
-!alert construction title=Undocumented Class
-The WallHeatTransferCoefficient3EqnDittusBoelterMaterial has not been documented. The content listed below should be used as a starting point for
-documenting the class, which includes the typical automatic documentation associated with a
-MooseObject; however, what is contained is ultimately determined by what is necessary to make the
-documentation clear for users.
-
 !syntax description /Materials/WallHeatTransferCoefficient3EqnDittusBoelterMaterial
 
-## Overview
+The Dittus-Boelter heat transfer coefficient $h$ is computed as:
 
-!! Replace these lines with information regarding the WallHeatTransferCoefficient3EqnDittusBoelterMaterial object.
+!equation
+h = \dfrac{Nu k}{D_h}
 
-## Example Input File Syntax
+with $D_h$ the local hydraulic diameter, $k$ the thermal conductivity and $Nu$ the Nusselt number.
+The Nusselt number in this correlation is:
 
-!! Describe and include an example of how to use the WallHeatTransferCoefficient3EqnDittusBoelterMaterial object.
+!equation
+Nu = 0.023 * (Re^{\dfrac{4}{5}} * Pr^n;
+
+with $n$ = 0.4 if the fluid temperature is greater than the wall temperature and 0.3 otherwise,
+$Re$ the Reynolds number and $Pr$ the Prandtl number.
 
 !syntax parameters /Materials/WallHeatTransferCoefficient3EqnDittusBoelterMaterial
 

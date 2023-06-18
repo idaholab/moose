@@ -1,20 +1,20 @@
 # WallFrictionFunctionMaterial
 
-!alert construction title=Undocumented Class
-The WallFrictionFunctionMaterial has not been documented. The content listed below should be used as a starting point for
-documenting the class, which includes the typical automatic documentation associated with a
-MooseObject; however, what is contained is ultimately determined by what is necessary to make the
-documentation clear for users.
-
 !syntax description /Materials/WallFrictionFunctionMaterial
 
-## Overview
+The Darcy friction factor $f_D$ is directly computed from the spatial and temporal value of the user-input function $f$:
 
-!! Replace these lines with information regarding the WallFrictionFunctionMaterial object.
+!equation
+f_D = f(x,y,z,t)
 
-## Example Input File Syntax
+with $x,y,z$ the spatial coordinates and $t$ the current simulation time.
+As the function is not supposed to (and should not) depend on any variable,
+this material also defines +zero+ material properties for the derivatives of the friction factor with regards to:
 
-!! Describe and include an example of how to use the WallFrictionFunctionMaterial object.
+- $alpha*rho*A$
+- $alpha*rho*vel*A$
+- $alpha*rho*E*A$
+- $beta$ if the [!param](/Materials/WallFrictionFunctionMaterial/beta) parameter is set by the user
 
 !syntax parameters /Materials/WallFrictionFunctionMaterial
 
