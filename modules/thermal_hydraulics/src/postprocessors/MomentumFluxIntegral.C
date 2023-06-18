@@ -15,6 +15,7 @@ InputParameters
 MomentumFluxIntegral::validParams()
 {
   InputParameters params = SideIntegralPostprocessor::validParams();
+  params.addClassDescription("Computes the integral of the momentum flux over a boundary");
   params.addRequiredCoupledVar("arhouA", "Momentum equation variable");
   params.addRequiredCoupledVar("vel", "Velocity");
   params.addRequiredCoupledVar("p", "Pressure");
