@@ -29,7 +29,8 @@ MaterialPropertyInterface::validParams()
 MaterialPropertyInterface::MaterialPropertyInterface(const MooseObject * moose_object,
                                                      const std::set<SubdomainID> & block_ids,
                                                      const std::set<BoundaryID> & boundary_ids)
-  : _mi_params(moose_object->parameters()),
+  : _mi_moose_object(*moose_object),
+    _mi_params(_mi_moose_object.parameters()),
     _mi_name(_mi_params.get<std::string>("_object_name")),
     _mi_moose_object_name(_mi_params.get<std::string>("_moose_base"), _mi_name, "::"),
     _mi_feproblem(*_mi_params.getCheckedPointerParam<FEProblemBase *>("_fe_problem_base")),

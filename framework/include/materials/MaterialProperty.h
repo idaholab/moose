@@ -18,6 +18,7 @@
 #include "DataIO.h"
 #include "MooseError.h"
 #include "UniqueStorage.h"
+#include "MooseUtils.h"
 
 #include "libmesh/libmesh_common.h"
 #include "libmesh/tensor_value.h"
@@ -227,7 +228,7 @@ template <typename T, bool is_ad>
 inline const std::string &
 MaterialPropertyBase<T, is_ad>::type() const
 {
-  static const std::string type_name = typeid(MooseADWrapper<T, is_ad>).name();
+  static const std::string type_name = MooseUtils::prettyCppType<T>();
   return type_name;
 }
 

@@ -362,7 +362,7 @@ MaterialBase::declareGenericPropertyByName(const std::string & prop_name)
           : MooseUtils::join(std::vector<std::string>({prop_name, _declare_suffix}), "_");
 
   // Call this before so that the ID is valid
-  auto & prop = materialData().getGenericProperty<T, is_ad>(prop_name_modified);
+  auto & prop = materialData().declareProperty<T, is_ad>(prop_name_modified, *this);
 
   registerPropName(prop_name_modified, false, 0);
   return prop;
@@ -385,7 +385,7 @@ const GenericMaterialProperty<T, is_ad> &
 MaterialBase::getGenericZeroMaterialPropertyByName(const std::string & prop_name)
 {
   checkExecutionStage();
-  auto & preload_with_zero = materialData().getGenericProperty<T, is_ad>(prop_name);
+  auto & preload_with_zero = materialData().getProperty<T, is_ad>(prop_name, 0, *this);
 
   _requested_props.insert(prop_name);
   registerPropName(prop_name, true, 0);

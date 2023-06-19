@@ -424,6 +424,10 @@ public:
     return getMaterialPropertyByName<T>(name, material_data, 2);
   }
 
+private:
+  /// The MooseObject creating the MaterialPropertyInterface
+  const MooseObject & _mi_moose_object;
+
 protected:
   /// Parameters of the object with this interface
   const InputParameters & _mi_params;
@@ -780,7 +784,7 @@ MaterialPropertyInterface::getGenericMaterialPropertyByName(const MaterialProper
   _get_material_property_called = true;
 
   // Call first so that the ID gets registered
-  auto & prop = material_data.getGenericProperty<T, is_ad>(name, state);
+  auto & prop = material_data.getProperty<T, is_ad>(name, state, _mi_moose_object);
 
   // Does the material data used here matter?
   _material_property_dependencies.insert(material_data.getPropertyId(name));

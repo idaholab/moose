@@ -67,3 +67,9 @@ MaterialData::swapBack(const Elem & elem, unsigned int side /* = 0*/)
     _swapped = false;
   }
 }
+
+void
+MaterialData::mooseErrorHelper(const MooseObject & object, const std::string_view & error)
+{
+  object.mooseError(error);
+}

@@ -1,0 +1,37 @@
+[Tests]
+  design = 'syntax/Materials/index.md'
+  issues = '#8444'
+
+  [errors]
+    requirement = 'The material data system shall report a reasonable error when requesting'
+
+    [get_different_types]
+      type = RunException
+      input = 'errors.i'
+      cli_args = 'UserObjects/test/get_different_types=true'
+      expect_err = 'The requested non-AD material property \'foo\' of type \'std::vector<double>\'\nis already retrieved or declared as a non-AD property of type \'double\''
+      detail = 'a non-AD property and the property has already been requested with a different non-AD type'
+    []
+    [get_different_types_ad]
+      type = RunException
+      input = 'errors.i'
+      cli_args = 'UserObjects/test/get_different_types=true UserObjects/test/use_ad=true'
+      expect_err = 'The requested AD material property \'foo\' of type \'std::vector<double>\'\nis already retrieved or declared as a AD property of type \'double\''
+      detail = 'an AD property and the property has already been requested with a different AD type'
+    []
+    [get_different_ad_types]
+      type = RunException
+      input = 'errors.i'
+      cli_args = 'UserObjects/test/get_different_ad_types=true'
+      expect_err = 'The requested AD material property \'foo\' of type \'double\'\nis already retrieved or declared as a non-AD property of type \'double\'.'
+      detail = 'a non-AD property and the property has already been requested as an AD property'
+    []
+    [get_different_ad_types_ad]
+      type = RunException
+      input = 'errors.i'
+      cli_args = 'UserObjects/test/get_different_ad_types=true UserObjects/test/use_ad=true'
+      expect_err = 'The requested non-AD material property \'foo\' of type \'double\'\nis already retrieved or declared as a AD property of type \'double\'.'
+      detail = 'an AD property and the property has already been requested as a non-AD property'
+    []
+  []
+[]

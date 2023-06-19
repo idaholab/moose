@@ -20,6 +20,7 @@
 #include <vector>
 #include <memory>
 
+class MooseObject;
 class Material;
 class XFEM;
 
@@ -96,26 +97,35 @@ public:
   }
 
   /**
-   * @{ Methods for retieving a MaterialProperty object
+   * Retreives a material property
    * @tparam T The type of the property
+   * @tparam is_ad Whether or not the property is AD
    * @param prop_name The name of the property
    * @param state The time state (0 = current, 1 = old, etc; defaults to 0)
+   * @param requestor The MooseObject requesting the property
    * @return The property for the supplied type and name
    */
   template <typename T, bool is_ad>
-  GenericMaterialProperty<T, is_ad> & getGenericProperty(const std::string & prop_name,
-                                                         const unsigned int state = 0);
-  template <typename T>
-  MaterialProperty<T> & getProperty(const std::string & prop_name, const unsigned int state = 0)
+  GenericMaterialProperty<T, is_ad> & getProperty(const std::string & prop_name,
+                                                  const unsigned int state,
+                                                  const MooseObject & requestor)
   {
-    return getGenericProperty<T, false>(prop_name, state);
+    return getPropertyHelper<T, is_ad, false>(prop_name, state, requestor);
   }
-  template <typename T>
-  ADMaterialProperty<T> & getADProperty(const std::string & prop_name)
+  /**
+   * Retreives a material property
+   * @tparam T The type of the property
+   * @tparam is_ad Whether or not the property is AD
+   * @param prop_name The name of the property
+   * @param requestor The MooseObject declaring the property
+   * @return The property for the supplied type and name
+   */
+  template <typename T, bool is_ad>
+  GenericMaterialProperty<T, is_ad> & declareProperty(const std::string & prop_name,
+                                                      const MooseObject & requestor)
   {
-    return getGenericProperty<T, true>(prop_name, 0);
+    return getPropertyHelper<T, is_ad, true>(prop_name, 0, requestor);
   }
-  ///@}
 
   /**
    * Returns true if the stateful material is in a swapped state.
@@ -189,6 +199,13 @@ private:
   /// The underlying property data
   std::array<MaterialProperties, MaterialPropertyStorage::max_state + 1> _props;
 
+  template <typename T, bool is_ad, bool declare>
+  GenericMaterialProperty<T, is_ad> & getPropertyHelper(const std::string & prop_name,
+                                                        const unsigned int state,
+                                                        const MooseObject & requestor);
+
+  static void mooseErrorHelper(const MooseObject & object, const std::string_view & error);
+
   /**
    * Calls resizeProps helper function for regular material properties
    */
@@ -253,12 +270,16 @@ MaterialData::resizeProps(unsigned int id)
   }
 }
 
-template <typename T, bool is_ad>
+template <typename T, bool is_ad, bool declare>
 GenericMaterialProperty<T, is_ad> &
-MaterialData::getGenericProperty(const std::string & prop_name, const unsigned int state)
+MaterialData::getPropertyHelper(const std::string & prop_name,
+                                const unsigned int state,
+                                const MooseObject & requestor)
 {
   if constexpr (is_ad)
     mooseAssert(state == 0, "Cannot request/declare AD properties for states other than zero");
+  if constexpr (declare)
+    mooseAssert(state == 0, "Cannot declare properties for states other than zero");
 
   const auto prop_id = _storage.addProperty(prop_name, state);
   resizeProps<T, is_ad>(prop_id);
@@ -267,21 +288,17 @@ MaterialData::getGenericProperty(const std::string & prop_name, const unsigned i
   auto prop = dynamic_cast<GenericMaterialProperty<T, is_ad> *>(&base_prop);
   if (!prop)
   {
-    const std::string type = is_ad ? "AD" : "non-AD";
-    const std::string other_type = is_ad ? "non-AD" : "AD";
-    const auto T_type = MooseUtils::prettyCppType<T>();
+    constexpr std::string_view action = declare ? "declared" : "requested";
+    constexpr auto is_ad_to_str = [](const bool is_ad_bool)
+    { return std::string_view(is_ad_bool ? "AD" : "non-AD"); };
+    constexpr std::string_view ad_type = is_ad_to_str(is_ad);
 
-    // See if a property of the other type exists first
-    // This only counts for state 0, because old and on are non-ad props
-    if (state == 0 && dynamic_cast<GenericMaterialProperty<T, !is_ad> *>(&base_prop))
-      mooseError("The requested/declared ",
-                 " material property '" + prop_name + "' of type '",
-                 T_type,
-                 "',\nbut it is already retrieved/declared as a ",
-                 other_type,
-                 " property.");
-
-    mooseError("Material has no ", type, " property '", prop_name, "' of type '", T_type, "'");
+    std::stringstream error;
+    error << "The " << action << " " << ad_type << " "
+          << "material property '" + prop_name + "' of type '" << MooseUtils::prettyCppType<T>()
+          << "'\nis already retrieved or declared as a " << is_ad_to_str(base_prop.isAD())
+          << " property of type '" << base_prop.type() << "'.";
+    mooseErrorHelper(requestor, error.str());
   }
 
   prop->setName(prop_name);
