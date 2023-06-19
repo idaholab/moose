@@ -258,7 +258,7 @@ GenericMaterialProperty<T, is_ad> &
 MaterialData::getGenericProperty(const std::string & prop_name, const unsigned int state)
 {
   if constexpr (is_ad)
-    mooseAssert(state == 0, "Can only request/declare for states other than zero");
+    mooseAssert(state == 0, "Cannot request/declare AD properties for states other than zero");
 
   const auto prop_id = _storage.addProperty(prop_name, state);
   resizeProps<T, is_ad>(prop_id);
