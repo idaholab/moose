@@ -199,7 +199,7 @@ $(moose_config_symlink): $(moose_config) | $(moose_all_header_dir)
 	@echo "Symlinking MOOSE configure "$(moose_config_symlink)
 	@ln -sf $(moose_config) $(moose_config_symlink)
 
-header_symlinks: $(all_header_dir) $(link_names)
+moose_header_symlinks: $(all_header_dir) $(link_names)
 moose_INC_DIRS := $(all_header_dir)
 
 else # No Header Symlinks
@@ -329,7 +329,7 @@ app_DIRS     := $(FRAMEWORK_DIR)
 
 moose_revision_header := $(FRAMEWORK_DIR)/include/base/MooseRevision.h
 
-all: libmesh_submodule_status header_symlinks $(moose_revision_header) moose
+all: libmesh_submodule_status moose
 
 # revision header
 moose_GIT_DIR := $(shell cd "$(FRAMEWORK_DIR)" && which git &> /dev/null && git rev-parse --show-toplevel)
@@ -341,7 +341,7 @@ ifeq (x$(moose_HEADER_deps),x)
   moose_HEADER_deps := $(realpath $(moose_GIT_DIR)/HEAD $(moose_GIT_DIR)/index)
 endif
 
-$(moose_revision_header): $(moose_HEADER_deps)
+$(moose_revision_header): $(moose_HEADER_deps) | $(moose_all_header_dir)
 	@echo "Checking if header needs updating: "$@"..."
 	$(shell $(FRAMEWORK_DIR)/scripts/get_repo_revision.py $(FRAMEWORK_DIR) \
 	  $(moose_revision_header) MOOSE)
@@ -363,7 +363,7 @@ endif
 libmesh_submodule_status:
 	@if [ x$(libmesh_message) != "x" ]; then printf $(libmesh_message); fi
 
-moose: $(moose_LIB)
+moose: $(moose_revision_header) $(moose_LIB)
 
 # [JWP] With libtool, there is only one link command, it should work whether you are creating
 # shared or static libraries, and it should be portable across Linux and Mac...
@@ -393,7 +393,8 @@ $(moose_LIB): $(moose_objects) $(pcre_LIB) $(gtest_LIB) $(hit_LIB) $(pyhit_LIB)
 
 ifeq ($(MOOSE_HEADER_SYMLINKS),true)
 
-$(moose_objects): $(moose_config_symlink)
+
+$(moose_objects): $(moose_config_symlink) | moose_header_symlinks
 
 else
 

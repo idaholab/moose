@@ -110,11 +110,7 @@ endif
 
 all:
 
-# Add all header symlinks as dependencies to this target
-header_symlinks:
-
 unity_files:
-
 
 #
 # C++ rules
@@ -312,8 +308,9 @@ endif
 # out to be more trouble than it was worth to get working.
 #
 PLUGIN_FLAGS := -shared -fPIC -Wl,-undefined,dynamic_lookup
+
+# we add include/base so that MooseConfig.h can be found, which is absent from the symlink dirs
 %-$(METHOD).plugin : %.C
-	# we add include/base so that MooseConfig.h can be found, which is absent from the symlink dirs
 	@$(libmesh_CXX) $(libmesh_CPPFLAGS) $(ADDITIONAL_CPPFLAGS) $(CXXFLAGS) $(libmesh_CXXFLAGS) $(PLUGIN_FLAGS) $(app_INCLUDES) $(libmesh_INCLUDE) -I $(FRAMEWORK_DIR)/include/base $< -o $@
 %-$(METHOD).plugin : %.c
 	@echo "Compiling C Plugin (in "$(METHOD)" mode) "$<"..."

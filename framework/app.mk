@@ -144,20 +144,6 @@ test_fobjects:= $(patsubst %.f, %.$(obj-suffix), $(test_fsrcfiles))
 test_f90objects:= $(patsubst %.f90, %.$(obj-suffix), $(test_f90srcfiles))
 app_test_objects := $(test_objects) $(test_cobjects) $(test_fobjects) $(test_f90objects)
 
-ifeq ($(MOOSE_HEADER_SYMLINKS),true)
-
-$(app_objects): $(moose_config_symlink)
-$(app_test_objects): $(moose_config_symlink)
-$(excluded_objects): $(moose_config_symlink)
-
-else
-
-$(app_objects): $(moose_config)
-$(app_test_objects): $(moose_config)
-$(excluded_objects): $(moose_config_symlink)
-
-endif
-
 # plugin files
 plugfiles   := $(shell find $(PLUGIN_DIR) -regex "[^\#~]*\.C" 2>/dev/null)
 cplugfiles  := $(shell find $(PLUGIN_DIR) -name "*.c" 2>/dev/null)
@@ -174,6 +160,9 @@ plugins	    += $(patsubst %.f90, %-$(METHOD).plugin, $(f90plugfiles))
 MAIN_DIR    ?= $(APPLICATION_DIR)/src
 main_src    := $(MAIN_DIR)/main.C
 main_object := $(patsubst %.C, %.$(obj-suffix), $(main_src))
+
+# all objects that make up an application
+all_app_objects := $(app_objects) $(app_test_objects) $(plugins) $(main_object) $(excluded_objects)
 
 # dependency files
 app_deps     := $(patsubst %.$(obj-suffix), %.$(obj-suffix).d, $(objects)) \
@@ -219,7 +208,7 @@ link_names := $(foreach i, $(include_files), $(all_header_dir)/$(notdir $(i)))
 $(eval $(call all_header_dir_rule, $(all_header_dir)))
 $(call symlink_rules, $(all_header_dir), $(include_files))
 
-header_symlinks: $(all_header_dir) $(link_names)
+$(APPLICATION_NAME)_header_symlinks: $(all_header_dir) $(link_names)
 app_INCLUDE = -I$(all_header_dir)
 
 else # No Header Symlinks
@@ -291,6 +280,20 @@ LIBRARY_SUFFIX :=
 #
 ###############################################################################
 
+ifeq ($(MOOSE_HEADER_SYMLINKS),true)
+
+# If we are compiling with header symlinks, we don't want to start compiling any
+# object files until all symlinking is completed. The first dependency in the
+# list below ensures this.
+
+$(all_app_objects) : | $(APPLICATION_NAME)_header_symlinks $(moose_config_symlink)
+
+else
+
+$(all_app_objects) : $(moose_config)
+
+endif
+
 # Instantiate a new suffix rule for the module loader
 $(eval $(call CXX_RULE_TEMPLATE,_with$(app_LIB_SUFFIX)))
 
@@ -335,7 +338,7 @@ endif
 $(app_HEADER): curr_dir    := $(APPLICATION_DIR)
 $(app_HEADER): curr_app    := $(APPLICATION_NAME)
 $(app_HEADER): all_header_dir := $(all_header_dir)
-$(app_HEADER): $(app_HEADER_deps)
+$(app_HEADER): $(app_HEADER_deps) | $(all_header_dir)
 	@echo "Checking if header needs updating: "$@"..."
 	$(shell $(FRAMEWORK_DIR)/scripts/get_repo_revision.py $(curr_dir) $@ $(curr_app))
 	@ln -sf $@ $(all_header_dir)
@@ -414,7 +417,7 @@ endif
 
 # Write resource file
 $(app_resource):
-	@echo "Creating resource file"
+	@echo "Creating Resource file $@"
 	@$(shell $(FRAMEWORK_DIR)/scripts/write_appresource_file.py $(app_resource) $(APPLICATION_NAME) \
      $(libmesh_CXXFLAGS) \
      compiler_type=$(compilertype) \
@@ -423,7 +426,7 @@ $(app_resource):
 
 # Update and Copy resource file to prefix/bin
 install_$(APPLICATION_NAME)_resource:
-	@echo "Installing $(APPLICATION_NAME).yaml resource file"
+	@echo "Installing $(APPLICATION_NAME).yaml Resource file"
 	@$(shell $(FRAMEWORK_DIR)/scripts/write_appresource_file.py $(app_resource) $(APPLICATION_NAME) installation_type=relocated)
 	@mkdir -p $(bin_install_dir)
 	@cp $(app_resource) $(bin_install_dir)
