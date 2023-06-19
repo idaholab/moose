@@ -319,6 +319,8 @@ protected:
   };
 
   /// The minimum states requested (0 = current, 1 = old, 2 = older)
+  /// This is sparse and is used to keep track of whether or not stateful
+  /// properties are requested without state 0 being requested
   std::unordered_map<unsigned int, unsigned int> _props_to_min_states;
 
   /// Small helper function to call store{Subdomain,Boundary}MatPropName
