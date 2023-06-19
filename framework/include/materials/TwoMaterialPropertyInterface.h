@@ -30,6 +30,8 @@ public:
 
   /**
    * Retrieve the neighbor property deduced from the name \p name
+   *
+   * \p state is the property state; 0 = current, 1 = old, 2 = older, etc.
    */
   ///@{
   template <typename T, bool is_ad>
@@ -63,6 +65,8 @@ public:
 
   /**
    * Retrieve the neighbor property named "name" without any deduction
+   *
+   * \p state is the property state; 0 = current, 1 = old, 2 = older, etc.
    */
   ///@{
   template <typename T, bool is_ad>

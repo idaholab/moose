@@ -142,6 +142,7 @@ public:
   ///@}
 
   ///@{ Optional material property getters
+  /// \p state is the property state; 0 = current, 1 = old, 2 = older, etc.
   template <typename T, bool is_ad>
   const GenericOptionalMaterialProperty<T, is_ad> &
   getGenericOptionalMaterialProperty(const std::string & name, const unsigned int state = 0);
@@ -325,6 +326,8 @@ public:
 
   /**
    * Retrieve the property named "name" for the specified \p material_data
+   *
+   * \p state is the property state; 0 = current, 1 = old, 2 = older, etc.
    */
   template <typename T>
   const MaterialProperty<T> & getMaterialProperty(const std::string & name,
@@ -336,6 +339,8 @@ public:
 
   /**
    * Retrieve the AD property named "name" for the specified \p material_data
+   *
+   * \p state is the property state; 0 = current, 1 = old, 2 = older, etc.
    */
   template <typename T>
   const ADMaterialProperty<T> & getADMaterialProperty(const std::string & name,
@@ -354,6 +359,8 @@ public:
 
   /**
    * Retrieve the property named "name" without any deduction for the specified \p material_data
+   *
+   * \p state is the property state; 0 = current, 1 = old, 2 = older, etc.
    */
   template <typename T>
   const MaterialProperty<T> & getMaterialPropertyByName(const MaterialPropertyName & name,
@@ -364,7 +371,7 @@ public:
   }
 
   /**
-   * Retrieve the AD property named "name" without any deduction for the specified \p
+   * Retrieve the AD property named "name" without any deduction for the specified \q
    * material_data
    */
   template <typename T>

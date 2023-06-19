@@ -44,6 +44,8 @@ public:
   /**
    * Retrieve the property through a given input parameter key with a fallback
    * to getting it by name
+   *
+   * \p state is the property state; 0 = current, 1 = old, 2 = older, etc.
    */
   template <typename T, bool is_ad>
   const GenericMaterialProperty<T, is_ad> &
@@ -74,6 +76,8 @@ public:
   ///@{
   /**
    * Retrieve the property named "name"
+   *
+   * \p state is the property state; 0 = current, 1 = old, 2 = older, etc.
    */
   template <typename T, bool is_ad>
   const GenericMaterialProperty<T, is_ad> &
@@ -109,6 +113,8 @@ public:
   /**
    * Retrieve the neighbor property through a given input parameter key with a fallback
    * to getting it by name
+   *
+   * \p state is the property state; 0 = current, 1 = old, 2 = older, etc.
    */
   template <typename T, bool is_ad>
   const GenericMaterialProperty<T, is_ad> &
@@ -139,6 +145,8 @@ public:
   ///@{
   /**
    * Retrieve the neighbor property named "name"
+   *
+   * \p state is the property state; 0 = current, 1 = old, 2 = older, etc.
    */
   template <typename T, bool is_ad>
   const GenericMaterialProperty<T, is_ad> &
