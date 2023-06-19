@@ -225,16 +225,16 @@ def check_configuration(packages, message=True):
             # Try and verify version
             if (_operator in ['>=', '>']
                 and version.parse(__import__(_package).__version__) < version.parse(_version)):
-                missing.append(f'{_package}>={_version}')
+                missing.append(f'{_package} is not {_operator} {_version}')
             elif (_operator in ['<=', '<']
                 and version.parse(__import__(_package).__version__) > version.parse(_version)):
-                missing.append(f'{_package}<={_version}')
+                missing.append(f'{_package} is not {_operator} {_version}')
             elif (_operator in ['==', '=']
                 and version.parse(__import__(_package).__version__) != version.parse(_version)):
-                missing.append(f'{_package}!={_version}')
+                missing.append(f'{_package} != {_version}')
 
         except ImportError:
-            missing.append(_package)
+            missing.append(f'no {_package}')
 
         # Python package does not support a __version__ method. Good luck!
         except AttributeError:

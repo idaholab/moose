@@ -656,7 +656,7 @@ class Tester(MooseObject):
         if py_packages is not None:
             missing = mooseutils.check_configuration(py_packages.split(), message=False)
             if missing:
-                reasons['python_packages_required'] = ', '.join(['no {}'.format(p) for p in missing])
+                reasons['python_packages_required'] = ', '.join(['{}'.format(p) for p in missing])
 
         # Check for programs
         programs = self.specs['requires']
