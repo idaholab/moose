@@ -39,7 +39,6 @@ ActiveLearningMonteCarloSampler::validParams()
 
 ActiveLearningMonteCarloSampler::ActiveLearningMonteCarloSampler(const InputParameters & parameters)
   : Sampler(parameters),
-    ReporterInterface(this),
     _flag_sample(getReporterValue<std::vector<bool>>("flag_sample")),
     _step(getCheckedPointerParam<FEProblemBase *>("_fe_problem_base")->timeStep()),
     _num_batch(getParam<dof_id_type>("num_batch")),

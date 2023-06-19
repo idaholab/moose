@@ -42,6 +42,11 @@ SamplerData::SamplerData(const InputParameters & parameters)
     _sampler(getSampler("sampler")),
     _sampler_method(getParam<MooseEnum>("sampler_method"))
 {
+}
+
+void
+SamplerData::initialize()
+{
   const int padding = MooseUtils::numDigits(_sampler.getNumberOfCols());
   for (dof_id_type j = 0; j < _sampler.getNumberOfCols(); ++j)
   {
@@ -49,11 +54,7 @@ SamplerData::SamplerData(const InputParameters & parameters)
     nm << getParam<SamplerName>("sampler") << "_" << std::setw(padding) << std::setfill('0') << j;
     _sample_vectors.push_back(&declareVector(nm.str()));
   }
-}
 
-void
-SamplerData::initialize()
-{
   dof_id_type n = (_sampler_method == "get_global_samples") ? _sampler.getNumberOfRows()
                                                             : _sampler.getNumberOfLocalRows();
   for (auto & ppv_ptr : _sample_vectors)

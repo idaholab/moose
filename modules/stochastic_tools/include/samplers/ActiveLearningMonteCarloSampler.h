@@ -14,7 +14,7 @@
 /**
  * A class used to perform Monte Carlo Sampling with active learning
  */
-class ActiveLearningMonteCarloSampler : public Sampler, public ReporterInterface
+class ActiveLearningMonteCarloSampler : public Sampler
 {
 public:
   static InputParameters validParams();

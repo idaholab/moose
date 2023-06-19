@@ -10,12 +10,11 @@
 #pragma once
 
 #include "Sampler.h"
-#include "ReporterInterface.h"
 
 /**
  * A class used to perform Adaptive Importance Sampling using a Markov Chain Monte Carlo algorithm
  */
-class AdaptiveImportanceSampler : public Sampler, public ReporterInterface
+class AdaptiveImportanceSampler : public Sampler
 {
 public:
   static InputParameters validParams();
