@@ -703,14 +703,20 @@ class Tester(MooseObject):
                     tmp_reason.append(value)
 
             flat_reason = ', '.join(tmp_reason)
-
-            # If the test is deleted we still need to treat this differently
             self.addCaveats(flat_reason)
+
+            # Reasons we wish to silence tests
             if 'deleted' in reasons.keys():
                 if options.extra_info:
                     self.setStatus(self.deleted)
                 else:
                     self.setStatus(self.silent)
+            elif ('heavy' in reasons.keys()
+                  and options.heavy_tests
+                  and not self.specs['heavy']):
+                self.setStatus(self.silent)
+
+            # Failed already (cannot run)
             elif self.getStatus() == self.fail:
                 return False
             else:
