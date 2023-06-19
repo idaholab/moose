@@ -28,6 +28,7 @@ if __name__ == '__main__':
     data += mooseutils.compute_requirement_stats('modules/fluid_properties')
     data += mooseutils.compute_requirement_stats('modules/fsi')
     data += mooseutils.compute_requirement_stats('modules/functional_expansion_tools')
+    data += mooseutils.compute_requirement_stats('modules/fusion')
     data += mooseutils.compute_requirement_stats('modules/geochemistry')
     data += mooseutils.compute_requirement_stats('modules/heat_conduction')
     data += mooseutils.compute_requirement_stats('modules/level_set')

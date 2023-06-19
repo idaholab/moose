@@ -20,6 +20,7 @@
 #include "FluidPropertiesApp.h"
 #include "FsiApp.h"
 #include "FunctionalExpansionToolsApp.h"
+#include "FusionApp.h"
 #include "GeochemistryApp.h"
 #include "HeatConductionApp.h"
 #include "LevelSetApp.h"
@@ -79,6 +80,7 @@ CombinedApp::registerAll(Factory & f, ActionFactory & af, Syntax & s)
   FluidPropertiesApp::registerAll(f, af, s);
   FsiApp::registerAll(f, af, s);
   FunctionalExpansionToolsApp::registerAll(f, af, s);
+  FusionApp::registerAll(f, af, s);
   GeochemistryApp::registerAll(f, af, s);
   HeatConductionApp::registerAll(f, af, s);
   LevelSetApp::registerAll(f, af, s);
