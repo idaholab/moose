@@ -36,12 +36,6 @@ MaterialData::copy(const Elem & elem_to, const Elem & elem_from, unsigned int si
 }
 
 void
-MaterialData::copy(const Elem * elem_to, const Elem * elem_from, unsigned int side)
-{
-  _storage.copy(*this, elem_to, elem_from, side, nQPoints());
-}
-
-void
 MaterialData::swap(const Elem & elem, unsigned int side /* = 0*/)
 {
   if (!_storage.hasStatefulProperties() || isSwapped())
