@@ -1,0 +1,18 @@
+[Tests]
+  design = 'Parser.md'
+  issues = '#24337'
+
+  [parse_vector_value]
+    type = 'RunApp'
+    input = 'parse_vectorvalue.i'
+    requirement = 'The system shall support reading in a vector of size-3 vectors.'
+  []
+  [parse_vector_value_error]
+    type = 'RunException'
+    input = 'parse_vectorvalue.i'
+    cli_args = "UserObjects/parse_tester/vector_realvv='0.1 0.2 0.3 0.4 0.5 0.6 0.7'"
+    requirement = "The system shall throw an exception if the given input cannot be parsed into a "
+                  "vector of size-3 vectors."
+    expect_err = "size 7 is not a multiple of 3"
+  []
+[]
