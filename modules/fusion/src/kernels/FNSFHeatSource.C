@@ -20,8 +20,7 @@ FNSFHeatSource::validParams()
   return params;
 }
 
-FNSFHeatSource::FNSFHeatSource(const InputParameters & parameters)
-  : FNSFSource(parameters)
+FNSFHeatSource::FNSFHeatSource(const InputParameters & parameters) : FNSFSource(parameters)
 
 {
   _source = getParam<std::vector<Real>>("heat");

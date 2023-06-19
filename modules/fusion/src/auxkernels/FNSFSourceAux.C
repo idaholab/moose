@@ -16,10 +16,10 @@ registerMooseObject("MooseApp", FNSFSourceAux);
 
 std::pair<int, int>
 FNSFSourceAux::index_xi_depth(Real xi,
-               Real depth,
-               const std::vector<Real> & inner_xi_grid,
-               const std::vector<Real> & outer_xi_grid,
-               const std::vector<Real> & depth_grid)
+                              Real depth,
+                              const std::vector<Real> & inner_xi_grid,
+                              const std::vector<Real> & outer_xi_grid,
+                              const std::vector<Real> & depth_grid)
 {
   // Perform a linear search to find the index of the given depth on the grid.
   // Compute the fractional location of the given value on the depth grid.

@@ -31,7 +31,7 @@ FusionApp::registerAll(Factory & f, ActionFactory & af, Syntax & syntax)
   Registry::registerActionsTo(af, {"FusionApp"});
 
   /* register custom execute flags, action syntax, etc. here */
-  ThermalHydraulicsApp::registerAll(f,  af, syntax);
+  ThermalHydraulicsApp::registerAll(f, af, syntax);
 }
 
 void

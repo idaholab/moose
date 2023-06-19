@@ -129,7 +129,7 @@ MultiAppMapNearestNodeTransfer::execute()
   // by the current processor
   std::vector<BoundaryID> all_bdry_ids;
 
-  for (auto bdry_id: _subapp_id_to_bdryid)
+  for (auto bdry_id : _subapp_id_to_bdryid)
   {
     auto it = curr_bdry_ids.find(bdry_id.second);
 
@@ -148,9 +148,9 @@ MultiAppMapNearestNodeTransfer::execute()
   for (auto bdry_id : all_bdry_ids)
   {
     if (bdry_id != Moose::ANY_BOUNDARY_ID)
-      pid_bdry_ids[index/_multi_app->numGlobalApps()].insert(bdry_id);
+      pid_bdry_ids[index / _multi_app->numGlobalApps()].insert(bdry_id);
 
-    index ++;
+    index++;
   }
 
   // Get the bounding boxes for the "from" domains.
@@ -204,8 +204,6 @@ MultiAppMapNearestNodeTransfer::execute()
 
   // local to global maps for all processors
   _communicator.allgather(local2global_map);
-
-
 
   ////////////////////
   // For every point in the local "to" domain, figure out which "from" domains
@@ -293,19 +291,19 @@ MultiAppMapNearestNodeTransfer::execute()
               }
               else if (_current_direction == TO_MULTIAPP && _subapp_id_to_bdryid.size() > 0)
               {
-                 // Find right boundaryid for i_to subapp
-                 auto from_bdry_id = _subapp_id_to_bdryid[_to_local2global_map[i_to]];
-                 auto & i_from_bdry_ids = pid_bdry_ids[i_proc];
-                 auto it = i_from_bdry_ids.find(from_bdry_id);
-                 if (it != i_from_bdry_ids.end())
-                 {
-                   std::pair<unsigned int, dof_id_type> key(i_to, node.first->id());
-                   // Record a local ID for each quadrature point
-                   node_index_map[i_proc][key] = outgoing_qps[i_proc].size();
-                   outgoing_qps[i_proc].push_back(
-                       std::make_pair(_to_local2global_map[i_to], *node.first + _to_positions[i_to]));
-                   local_nodes_found.insert(node.first);
-                 }
+                // Find right boundaryid for i_to subapp
+                auto from_bdry_id = _subapp_id_to_bdryid[_to_local2global_map[i_to]];
+                auto & i_from_bdry_ids = pid_bdry_ids[i_proc];
+                auto it = i_from_bdry_ids.find(from_bdry_id);
+                if (it != i_from_bdry_ids.end())
+                {
+                  std::pair<unsigned int, dof_id_type> key(i_to, node.first->id());
+                  // Record a local ID for each quadrature point
+                  node_index_map[i_proc][key] = outgoing_qps[i_proc].size();
+                  outgoing_qps[i_proc].push_back(std::make_pair(_to_local2global_map[i_to],
+                                                                *node.first + _to_positions[i_to]));
+                  local_nodes_found.insert(node.first);
+                }
               }
               else if (distance <= nearest_max_distance ||
                        bboxes[i_from].contains_point(*node.first))
@@ -386,23 +384,23 @@ MultiAppMapNearestNodeTransfer::execute()
                 Real distance = bboxMinDistance(point, bboxes[i_from]);
                 if (_current_direction == TO_MULTIAPP && _subapp_id_to_bdryid.size() > 0)
                 {
-                   auto from_bdry_id = _subapp_id_to_bdryid[_to_local2global_map[i_to]];
-                   auto & i_from_bdry_ids = pid_bdry_ids[i_proc];
-                   auto it = i_from_bdry_ids.find(from_bdry_id);
-                   if (it != i_from_bdry_ids.end())
-                   {
-                     std::pair<unsigned int, dof_id_type> key(
-                         i_to,
-                         point_ids[offset]); // Create an unique ID
-                     // If this point already exist, we skip it
-                     if (node_index_map[i_proc].find(key) != node_index_map[i_proc].end())
-                       continue;
+                  auto from_bdry_id = _subapp_id_to_bdryid[_to_local2global_map[i_to]];
+                  auto & i_from_bdry_ids = pid_bdry_ids[i_proc];
+                  auto it = i_from_bdry_ids.find(from_bdry_id);
+                  if (it != i_from_bdry_ids.end())
+                  {
+                    std::pair<unsigned int, dof_id_type> key(
+                        i_to,
+                        point_ids[offset]); // Create an unique ID
+                    // If this point already exist, we skip it
+                    if (node_index_map[i_proc].find(key) != node_index_map[i_proc].end())
+                      continue;
 
-                     node_index_map[i_proc][key] = outgoing_qps[i_proc].size();
-                     outgoing_qps[i_proc].push_back(
-                         std::make_pair(_to_local2global_map[i_to], point + _to_positions[i_to]));
-                     local_elems_found.insert(elem);
-                   }
+                    node_index_map[i_proc][key] = outgoing_qps[i_proc].size();
+                    outgoing_qps[i_proc].push_back(
+                        std::make_pair(_to_local2global_map[i_to], point + _to_positions[i_to]));
+                    local_elems_found.insert(elem);
+                  }
                 }
                 else if (distance <= nearest_max_distance || bboxes[i_from].contains_point(point))
                 {
@@ -488,13 +486,14 @@ MultiAppMapNearestNodeTransfer::execute()
     std::map<processor_id_type, std::vector<std::pair<dof_id_type, Point>>> incoming_qps;
     auto qps_action_functor =
         [&incoming_qps](processor_id_type pid,
-                        const std::vector<std::pair<dof_id_type, Point>> & qps) {
-          // Quadrature points from processor 'pid'
-          auto & incoming_qps_from_pid = incoming_qps[pid];
-          // Store data for late use
-          incoming_qps_from_pid.reserve(incoming_qps_from_pid.size() + qps.size());
-          std::copy(qps.begin(), qps.end(), std::back_inserter(incoming_qps_from_pid));
-        };
+                        const std::vector<std::pair<dof_id_type, Point>> & qps)
+    {
+      // Quadrature points from processor 'pid'
+      auto & incoming_qps_from_pid = incoming_qps[pid];
+      // Store data for late use
+      incoming_qps_from_pid.reserve(incoming_qps_from_pid.size() + qps.size());
+      std::copy(qps.begin(), qps.end(), std::back_inserter(incoming_qps_from_pid));
+    };
 
     Parallel::push_parallel_vector_data(comm(), outgoing_qps, qps_action_functor);
 
@@ -539,7 +538,8 @@ MultiAppMapNearestNodeTransfer::execute()
                 _subapp_id_to_bdryid[subapp_id] == local_bdry_id)
               current_distance -= 1000;
 
-            if (_current_direction == FROM_MULTIAPP && subapp_id == _from_local2global_map[i_local_from])
+            if (_current_direction == FROM_MULTIAPP &&
+                subapp_id == _from_local2global_map[i_local_from])
               current_distance -= 1000;
 
             // If an incoming_qp is equally close to two or more local nodes, then
@@ -604,8 +604,9 @@ MultiAppMapNearestNodeTransfer::execute()
     }
   }
 
-  auto evals_action_functor = [&incoming_evals](processor_id_type pid,
-                                                const std::vector<Real> & evals) {
+  auto evals_action_functor =
+      [&incoming_evals](processor_id_type pid, const std::vector<Real> & evals)
+  {
     // evals for processor 'pid'
     auto & incoming_evals_for_pid = incoming_evals[pid];
     // Copy evals for late use
@@ -1040,7 +1041,8 @@ MultiAppMapNearestNodeTransfer::getTargetLocalNodes(const unsigned int to_proble
 }
 
 void
-MultiAppMapNearestNodeTransfer::getBoundaryIDsForCurrProcessor(MooseMesh & master_moose_mesh, std::set<BoundaryID> & curr_bdry_ids)
+MultiAppMapNearestNodeTransfer::getBoundaryIDsForCurrProcessor(MooseMesh & master_moose_mesh,
+                                                               std::set<BoundaryID> & curr_bdry_ids)
 {
 
   std::set<BoundaryID> bdry_ids;

@@ -20,8 +20,7 @@ FNSFTritiumSource::validParams()
   return params;
 }
 
-FNSFTritiumSource::FNSFTritiumSource(const InputParameters & parameters)
-  : FNSFSource(parameters)
+FNSFTritiumSource::FNSFTritiumSource(const InputParameters & parameters) : FNSFSource(parameters)
 {
   _source = getParam<std::vector<Real>>("tritium");
 }

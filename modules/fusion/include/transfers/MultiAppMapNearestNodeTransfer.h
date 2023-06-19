@@ -67,7 +67,8 @@ protected:
                         std::vector<std::tuple<Point, DofObject *, BoundaryID>> & local_entities,
                         bool nodal);
 
-  void getBoundaryIDsForCurrProcessor(MooseMesh & master_moose_mesh, std::set<BoundaryID> & curr_bdry_ids);
+  void getBoundaryIDsForCurrProcessor(MooseMesh & master_moose_mesh,
+                                      std::set<BoundaryID> & curr_bdry_ids);
 
   std::vector<BoundingBox> getFromBoundingBoxes(std::set<BoundaryID> bdry_ids);
 

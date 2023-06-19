@@ -21,12 +21,11 @@ public:
 protected:
   virtual Real computeValue() override;
 
-  std::pair<int, int>
-  index_xi_depth(Real xi,
-                 Real depth,
-                 const std::vector<Real> & inner_xi_grid,
-                 const std::vector<Real> & outer_xi_grid,
-                 const std::vector<Real> & depth_grid);
+  std::pair<int, int> index_xi_depth(Real xi,
+                                     Real depth,
+                                     const std::vector<Real> & inner_xi_grid,
+                                     const std::vector<Real> & outer_xi_grid,
+                                     const std::vector<Real> & depth_grid);
 
   std::vector<Real> _inner_xi_grid;
   std::vector<Real> _outer_xi_grid;

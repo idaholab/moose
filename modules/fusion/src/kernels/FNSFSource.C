@@ -16,10 +16,10 @@ using namespace FNSF;
 
 std::pair<int, int>
 FNSFSource::index_xi_depth(Real xi,
-               Real depth,
-               const std::vector<Real> & inner_xi_grid,
-               const std::vector<Real> & outer_xi_grid,
-               const std::vector<Real> & depth_grid)
+                           Real depth,
+                           const std::vector<Real> & inner_xi_grid,
+                           const std::vector<Real> & outer_xi_grid,
+                           const std::vector<Real> & depth_grid)
 {
   // Perform a linear search to find the index of the given depth on the grid.
   // Compute the fractional location of the given value on the depth grid.
@@ -106,7 +106,7 @@ FNSFSource::computeQpResidual()
   std::tie(i_xi, i_depth) = index_xi_depth(xi, depth, _inner_xi_grid, _outer_xi_grid, _depth_grid);
 
   int indx = i_depth * (_inner_xi_grid.size() - 1) + i_xi;
-  return -_source.at(indx)* _test[_i][_qp] * _coeff;
+  return -_source.at(indx) * _test[_i][_qp] * _coeff;
 }
 
 Real
