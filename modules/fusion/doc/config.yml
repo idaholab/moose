@@ -1,22 +1,22 @@
 Content:
-    FussionApp:
-        root_dir: ${ROOT_DIR}/doc/content
-    moose:
-        root_dir: ${MOOSE_DIR}/framework/doc/content
-        content:
-            - js/*
-            - css/*
-            - contrib/**
-            - media/**
+    - framework/doc/content
+    - modules/fusion/doc/content
 
 Renderer:
     type: MooseDocs.base.MaterializeRenderer
-
 Extensions:
     MooseDocs.extensions.navigation:
-        name: FussionApp
+        name: Fusion
+        repo: https://github.com/idaholab/moose
+        home: /modules/fusion
     MooseDocs.extensions.appsyntax:
-        executable: ${ROOT_DIR}
-        remove: !include ${MOOSE_DIR}/framework/doc/remove.yml
+        executable: ${MOOSE_DIR}/modules/fusion
+        remove: !include framework/doc/remove.yml
         includes:
-            - include
+            - framework/include
+            - modules/fusion/include
+    MooseDocs.extensions.common:
+        shortcuts: !include framework/doc/globals.yml
+    MooseDocs.extensions.acronym:
+        acronyms: !include framework/doc/acronyms.yml
+    MooseDocs.extensions.sqa: disable

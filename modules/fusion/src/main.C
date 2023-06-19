@@ -14,7 +14,7 @@
 #include "AppFactory.h"
 
 // Create a performance log
-PerfLog Moose::perf_log("FussionApp");
+PerfLog Moose::perf_log("FusionApp");
 
 // Begin the main program.
 int
