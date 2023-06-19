@@ -46,22 +46,29 @@
     type = 'CSVDiff'
     input = 'conservation.i'
     csvdiff = 'conservation_out.csv'
-    abs_zero = 2e-8
+  []
+  [conservation_1phase_K_crtl]
+    type = 'CSVDiff'
+    input = 'conservation.i'
+    cli_args = "ControlLogic/active=K_crtl Outputs/file_base=conservation_K "
+               "Outputs/out/show='dp_junction'"
+    csvdiff = 'conservation_K.csv'
   []
 
   # error checking
   [err.missing_ics]
     type = 'RunException'
     input = 'err.missing_ics.i'
-    expect_err = "junction: The following initial condition parameters are missing: initial_p initial_T initial_vel_x initial_vel_y initial_vel_z"
+    expect_err = "junction: The following initial condition parameters are missing: initial_p "
+                 "initial_T initial_vel_x initial_vel_y initial_vel_z"
   []
 
   [err.non_parallel_channels]
     type = 'RunException'
     input = 'equal_area_with_junction.i'
     cli_args = "--error Components/junction/volume=1.0 Components/pipe2/orientation='0 1 0'"
-    expect_err = "junction: Connected flow channels are not parallel, use "
-    "VolumeJunction1Phase component instead."
+    expect_err = "junction: Connected flow channels are not parallel, use VolumeJunction1Phase "
+                 "component instead."
   []
 
   # jacobian test
