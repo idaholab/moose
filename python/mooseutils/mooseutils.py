@@ -16,6 +16,8 @@ import subprocess
 import time
 import cProfile as profile
 import pstats
+from packaging import version
+
 try:
     from io import StringIO
 except ImportError:
@@ -205,11 +207,38 @@ def check_configuration(packages, message=True):
         [list]: A list of missing packages.
     """
     missing = []
+    re_operators = re.compile(f'([=<>]+)')
     for package in packages:
+        (_package, _operator, _version) = package, None, None
+        # parse version operator
+        if re_operators.findall(_package):
+            try:
+                _op = re_operators.findall(_package)[0]
+                (_package, _operator, _version) = re.findall(f'([.\w_-]+)([{_op}]+)(.*)',
+                                                             _package)[0]
+            except IndexError:
+                missing.extend([_package, 'version parse error'])
+
+        # Try to import the package
         try:
-            __import__(package)
+            __import__(_package)
+            # Try and verify version
+            if (_operator in ['>=', '>']
+                and version.parse(__import__(_package).__version__) < version.parse(_version)):
+                missing.append(f'{_package}>={_version}')
+            elif (_operator in ['<=', '<']
+                and version.parse(__import__(_package).__version__) > version.parse(_version)):
+                missing.append(f'{_package}<={_version}')
+            elif (_operator in ['==', '=']
+                and version.parse(__import__(_package).__version__) != version.parse(_version)):
+                missing.append(f'{_package}!={_version}')
+
         except ImportError:
-            missing.append(package)
+            missing.append(_package)
+
+        # Python package does not support a __version__ method. Good luck!
+        except AttributeError:
+            pass
 
     if missing and message:
         msg = "The following packages are missing but required: {0}\n"

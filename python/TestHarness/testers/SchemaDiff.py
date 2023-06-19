@@ -27,9 +27,9 @@ class SchemaDiff(RunApp):
     def __init__(self, name, params):
         RunApp.__init__(self, name, params)
         if self.specs['required_python_packages'] is None:
-            self.specs['required_python_packages'] = 'deepdiff'
+            self.specs['required_python_packages'] = 'deepdiff>=6.1.0'
         elif 'deepdiff' not in self.specs['required_python_packages']:
-            self.specs['required_python_packages'] += ' deepdiff'
+            self.specs['required_python_packages'] += ' deepdiff>=6.1.0'
 
         # So that derived classes can internally pass skip regex paths
         self.exclude_regex_paths = []
