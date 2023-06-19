@@ -51,6 +51,7 @@ communicateVelocities(std::unordered_map<const DofObject *, std::array<T, 2>> & 
                       const Parallel::Communicator & communicator,
                       const bool send_data_back)
 {
+  libmesh_parallel_only(communicator);
   const auto our_proc_id = communicator.rank();
 
   // We may have weighted gap information that should go to other processes that own the dofs
