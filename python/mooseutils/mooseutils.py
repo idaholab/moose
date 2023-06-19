@@ -216,7 +216,10 @@ def check_configuration(packages, message=True):
                 _op = re_operators.findall(_package)[0]
                 (_package, _operator, _version) = re.findall(f'([.\w_-]+)([{_op}]+)(.*)',
                                                              _package)[0]
+            # Try and capture possible regex issues
             except IndexError:
+                missing.extend([_package, 'version parse error'])
+            except ValueError:
                 missing.extend([_package, 'version parse error'])
 
         # Try to import the package
