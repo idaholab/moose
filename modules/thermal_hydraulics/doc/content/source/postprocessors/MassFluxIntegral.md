@@ -5,9 +5,9 @@
 The integral of the mass flux $I_M$ over boundary $\partial \Omega$ is:
 
 !equation
-I_M = \int_{\partial \Omega} arhouA d\partial \Omega
+I_M = \int_{\partial \Omega} \alpha \rho u A d\partial \Omega
 
-with $arhouA$ the conserved phase momentum at the boundary.
+with $\alpha \rho u A$ the conserved phase momentum at the boundary.
 
 !syntax parameters /Postprocessors/MassFluxIntegral
 

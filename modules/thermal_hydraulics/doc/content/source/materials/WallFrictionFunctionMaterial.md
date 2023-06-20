@@ -11,10 +11,10 @@ with $x,y,z$ the spatial coordinates and $t$ the current simulation time.
 As the function is not supposed to (and should not) depend on any variable,
 this material also defines +zero+ material properties for the derivatives of the friction factor with regards to:
 
-- $alpha*rho*A$
-- $alpha*rho*vel*A$
-- $alpha*rho*E*A$
-- $beta$ if the [!param](/Materials/WallFrictionFunctionMaterial/beta) parameter is set by the user
+- $\alpha \rho A$
+- $\alpha \rho u A$
+- $\alpha \rho E A$
+- $\beta$ if the [!param](/Materials/WallFrictionFunctionMaterial/beta) parameter is set by the user
 
 !syntax parameters /Materials/WallFrictionFunctionMaterial
 

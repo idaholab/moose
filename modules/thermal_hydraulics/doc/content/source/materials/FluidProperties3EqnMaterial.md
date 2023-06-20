@@ -8,7 +8,7 @@ The material properties defined (declared and computed) are:
 
 - density $\rho$
 - specific volume $v$
-- 1D velocity $vel$
+- 1D velocity $u$
 - specific internal energy $e$
 - pressure $p$
 - temperature $T$
@@ -20,28 +20,28 @@ The material properties defined (declared and computed) are:
 - thermal conductivity $k$
 
 Additionally, several derivative of material properties with regards to the conserved variables;
-the conserved density $\rhoA$, the conserved momentum $\rho uA$ and the conserved total energy
+the conserved density $\rho A$, the conserved momentum $\rho uA$ and the conserved total energy
 $\rho E A$ are defined:
 
-- $\dfrac{d\rho}{d\rhoA}
-- $\dfrac{dv}{d\rhoA}
-- $\dfrac{dvel}{d\rhoA}
-- $\dfrac{dvel}{d\rhouA}
-- $\dfrac{de}{d\rhoA}
-- $\dfrac{de}{d\rhouA}
-- $\dfrac{de}{d\rhoEA}
-- $\dfrac{dp}{d\rhoA}
-- $\dfrac{dp}{d\rhouA}
-- $\dfrac{dp}{d\rhoEA}
-- $\dfrac{dT}{d\rhoA}
-- $\dfrac{dT}{d\rhouA}
-- $\dfrac{dT}{d\rhoEA}
-- $\dfrac{dh}{d\rhoA}
-- $\dfrac{dh}{d\rhouA}
-- $\dfrac{dh}{d\rhoEA}
-- $\dfrac{dH}{d\rhoA}
-- $\dfrac{dH}{d\rhouA}
-- $\dfrac{dH}{d\rhoEA}
+- $\dfrac{d\rho}{d\rho A}$
+- $\dfrac{dv}{d\rho A}$
+- $\dfrac{du}{d\rho A}$
+- $\dfrac{du}{d\rho u A}$
+- $\dfrac{de}{d\rho A}$
+- $\dfrac{de}{d\rho u A}$
+- $\dfrac{de}{d\rho E A}$
+- $\dfrac{dp}{d\rho A}$
+- $\dfrac{dp}{d\rho u A}$
+- $\dfrac{dp}{d\rho E A}$
+- $\dfrac{dT}{d\rho A}$
+- $\dfrac{dT}{d\rho u A}$
+- $\dfrac{dT}{d\rho E A}$
+- $\dfrac{dh}{d\rho A}$
+- $\dfrac{dh}{d\rho u A}$
+- $\dfrac{dh}{d\rho E A}$
+- $\dfrac{dH}{d\rho A}$
+- $\dfrac{dH}{d\rho u A}$
+- $\dfrac{dH}{d\rho E A}$
 
 !syntax parameters /Materials/FluidProperties3EqnMaterial
 

@@ -1,4 +1,4 @@
-# ADWallHeatTransferCoefficient3EqnDittusBoelterMaterialxw
+# ADWallHeatTransferCoefficient3EqnDittusBoelterMaterial
 
 !syntax description /Materials/ADWallHeatTransferCoefficient3EqnDittusBoelterMaterial
 

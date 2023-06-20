@@ -4,10 +4,10 @@
 
 This object has similar capabilities to the [MaterialVectorPostprocessor.md], but is
 implemented differently. It creates its own standalone loop on elements in the mesh
-to gather the material properties.c
+to gather the material properties.
 
 !alert note
-To sample AD materials properties, use `ADSampler1DVector`.
+To sample AD material properties, use `ADSampler1DReal`.
 
 !syntax parameters /VectorPostprocessors/Sampler1DReal
 
