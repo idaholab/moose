@@ -198,7 +198,6 @@ m_dot_sec_in = 1    # kg/s
       materials = 'steel'
       names = '0'
       inner_radius = ${fparse hx_dia_inner / 2.}
-      offset_mesh_by_inner_radius = true
     []
 
     [ht_sec]

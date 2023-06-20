@@ -8,7 +8,6 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "HeatStructureCylindricalBase.h"
-#include "MooseUtils.h"
 
 InputParameters
 HeatStructureCylindricalBase::validParams()
@@ -27,13 +26,7 @@ HeatStructureCylindricalBase::HeatStructureCylindricalBase(const InputParameters
 void
 HeatStructureCylindricalBase::setupMesh()
 {
-  if (getParam<bool>("offset_mesh_by_inner_radius") || !_connected_to_flow_channel)
-    _axial_offset = _inner_radius;
-  else if (!MooseUtils::absoluteFuzzyEqual(_inner_radius, 0.0))
-    mooseDeprecated(
-        "Cylindrical heat structure meshes must now be offset by their inner radii. Set "
-        "'offset_mesh_by_inner_radius = true', and re-gold any output files depending "
-        "on heat structure mesh position.");
+  _axial_offset = _inner_radius;
 
   HeatStructureBase::setupMesh();
 }
