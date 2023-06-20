@@ -12,9 +12,9 @@
   [block]
     type = 'Exodiff'
     input = 'block.i'
-    exodiff = 'block.e-s004'
+    exodiff = 'block_out.e-s004'
     issues = '#24645'
-    requirement = "The system shall support 'snapping' or moving new nodes in lower dimensioanl "
+    requirement = "The system shall support 'snapping' or moving new nodes in lower dimensional "
                   "subdomains created by mesh adaptivity to the surface of a geometric sphere to "
                   "capture high fidelity features on curved geometries."
   []

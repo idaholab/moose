@@ -1,12 +1,3 @@
-###########################################################
-# This is a test of the Mesh Marker System. It marks
-# elements with flags indicating whether they should be
-# refined, coarsened, or left alone. This system
-# has the ability to use the Mesh Indicator System.
-#
-# @Requirement F2.50
-###########################################################
-
 [Mesh]
   type = GeneratedMesh
   dim = 2

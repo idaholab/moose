@@ -44,6 +44,7 @@ BoundaryMarker::computeElementMarker()
 {
   if (_distance == 0.0)
   {
+    // is the current element member of any selected boundary element set?
     for (const auto boundary : _boundary_ids)
       if (_mesh.isBoundaryElem(_current_elem->id(), boundary))
         return _mark;
@@ -58,6 +59,11 @@ BoundaryMarker::computeElementMarker()
       if (it != _bnd_elem_ids.end())
         for (const auto id : it->second)
         {
+          // shortcut if we are checing the current element itself
+          if (id == _current_elem->id())
+            return _mark;
+
+          // otherwise compute distance to the boundary elements
           const auto elem = _mesh.elemPtr(id);
           const auto r = _current_elem->vertex_average() - elem->vertex_average();
           if (r.norm() < _distance)
