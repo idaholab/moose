@@ -174,6 +174,10 @@ AugmentedLagrangianContactProblemTempl<T>::checkNonlinearConvergence(std::string
           repeat_augmented_lagrange_step = true;
       }
 
+      // Communicate the repeat_augmented_lagrange_step in parallel.
+      // If one proc needs to do another loop, all do.
+      this->_communicator.max(repeat_augmented_lagrange_step);
+
       // repeat update step if necessary
       if (repeat_augmented_lagrange_step)
       {
