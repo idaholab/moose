@@ -31,6 +31,10 @@ VectorPostprocessorSampler::VectorPostprocessorSampler(const InputParameters & p
   if (!_reporter_names.empty())
     for (auto & vpp_vec : _reporter_names)
       _data.emplace_back(&getReporterValueByName<std::vector<Real>>(vpp_vec));
+
+  // set a non-zero value for number of rows to avoid error in rankConfig, the actual value will be
+  // set in executableSetup() and update via reinit()
+  setNumberOfRows(1);
 }
 
 void
