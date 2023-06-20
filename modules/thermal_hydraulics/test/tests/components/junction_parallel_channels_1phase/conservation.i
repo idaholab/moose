@@ -37,6 +37,14 @@
   []
 []
 
+[Functions]
+  [K_loss_fn]
+    type = PiecewiseLinear
+    x = '0 0.2'
+    y = '0 1'
+  []
+[]
+
 [Components]
   [pipe1]
     type = FlowChannel1Phase
@@ -50,10 +58,9 @@
   [junction1]
     type = JunctionParallelChannels1Phase
     connections = 'pipe1:out pipe2:in'
-    scaling_factor_rhouV = 1e-4
-    scaling_factor_rhoEV = 1e-5
     position = '1 0 0'
     volume = 1e-2
+    K = 0
   []
 
   [pipe2]
@@ -68,10 +75,18 @@
   [junction2]
     type = JunctionParallelChannels1Phase
     connections = 'pipe2:out pipe1:in'
-    scaling_factor_rhouV = 1e-4
-    scaling_factor_rhoEV = 1e-5
     position = '1 0 0'
     volume = 1e-2
+  []
+[]
+
+[ControlLogic]
+  active = ''
+  [K_crtl]
+    type = TimeFunctionComponentControl
+    component = junction1
+    parameter = K
+    function = K_loss_fn
   []
 []
 
@@ -96,16 +111,12 @@
   petsc_options_iname = '-pc_type'
   petsc_options_value = ' lu'
   nl_rel_tol = 0
-  nl_abs_tol = 1e-6
+  nl_abs_tol = 1e-8
   nl_max_its = 20
 
   l_tol = 1e-3
   l_max_its = 20
 
-  [Quadrature]
-    type = GAUSS
-    order = SECOND
-  []
 []
 
 [Postprocessors]
@@ -167,6 +178,22 @@
     postprocessor = E_tot
     compute_relative_change = true
     execute_on = 'initial timestep_end'
+  []
+
+  [p_pipe1_out]
+    type = SideAverageValue
+    boundary = pipe1:out
+    variable = p
+  []
+  [p_pipe2_in]
+    type = SideAverageValue
+    boundary = pipe2:in
+    variable = p
+  []
+  [dp_junction]
+    type = DifferencePostprocessor
+    value1 = p_pipe1_out
+    value2 = p_pipe2_in
   []
 []
 

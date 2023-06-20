@@ -142,6 +142,7 @@ ShaftConnectedPump1Phase::buildVolumeJunctionUserObject()
     params.set<std::string>("pump_name") = cname();
     params.set<ExecFlagEnum>("execute_on") = execute_on;
     getTHMProblem().addUserObject(class_name, getShaftConnectedUserObjectName(), params);
+    connectObject(params, _junction_uo_name, "K");
   }
 }
 

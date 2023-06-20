@@ -111,6 +111,7 @@ JunctionParallelChannels1Phase::buildVolumeJunctionUserObject()
     params.set<UserObjectName>("fp") = _fp_name;
     params.set<ExecFlagEnum>("execute_on") = execute_on;
     getTHMProblem().addUserObject(class_name, _junction_uo_name, params);
+    connectObject(params, _junction_uo_name, "K");
   }
 }
 
