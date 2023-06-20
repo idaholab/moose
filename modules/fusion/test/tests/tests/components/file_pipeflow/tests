@@ -3,6 +3,5 @@
     type = 'Exodiff'
     input = 'file_channel.i'
     exodiff = 'file_channel_out.e'
-    issue = "#213"
   []
 []

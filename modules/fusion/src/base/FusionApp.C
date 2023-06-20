@@ -2,6 +2,7 @@
 #include "Moose.h"
 #include "AppFactory.h"
 #include "MooseSyntax.h"
+#include "ThermalHydraulicsApp.h"
 
 InputParameters
 FusionApp::validParams()
@@ -22,9 +23,9 @@ FusionApp::FusionApp(InputParameters parameters) : MooseApp(parameters)
 FusionApp::~FusionApp() {}
 
 void
-FusionApp::registerAll(Factory & f, ActionFactory & af, Syntax & /*s*/)
+FusionApp::registerAll(Factory & f, ActionFactory & af, Syntax & s)
 {
-  /* ModulesApp::registerAll(f, af, s); */
+  ThermalHydraulicsApp::registerAll(f, af, s);
   Registry::registerObjectsTo(f, {"FusionApp"});
   Registry::registerActionsTo(af, {"FusionApp"});
 

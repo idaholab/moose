@@ -48,12 +48,6 @@ endif
 # on the modules defined above them.
 ifeq ($(FUSION),yes)
         THERMAL_HYDRAULICS          := yes
-        NAVIER_STOKES               := yes
-        FLUID_PROPERTIES            := yes
-        HEAT_CONDUCTION             := yes
-        RAY_TRACING                 := yes
-        RDG                         := yes
-        MISC                        := yes
 endif
 
 ifeq ($(THERMAL_HYDRAULICS),yes)
