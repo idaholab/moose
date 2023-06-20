@@ -389,9 +389,13 @@ PinMeshGenerator::PinMeshGenerator(const InputParameters & parameters)
   if (hasMeshProperty<dof_id_type>("node_id_background_meta", name() + "_2D"))
     declareMeshProperty("node_id_background_meta",
                         getMeshProperty<dof_id_type>("node_id_background_meta", name() + "_2D"));
-  if (hasMeshProperty<Real>("pattern_pitch_meta", name() + "_2D"))
-    declareMeshProperty("pattern_pitch_meta",
-                        getMeshProperty<Real>("pattern_pitch_meta", name() + "_2D"));
+  if (_is_assembly)
+    declareMeshProperty("pattern_pitch_meta", getReactorParam<Real>("assembly_pitch"));
+  else
+    if (hasMeshProperty<Real>("pattern_pitch_meta", name() + "_2D"))
+      declareMeshProperty("pattern_pitch_meta",
+                          getMeshProperty<Real>("pattern_pitch_meta", name() + "_2D"));
+  declareMeshProperty("is_control_drum_meta", false);
 
   // Store pin region ids and block names for id swap after extrusion if needed
   // by future mesh generators
@@ -419,12 +423,11 @@ PinMeshGenerator::PinMeshGenerator(const InputParameters & parameters)
     declareMeshProperty("background_block_names", std::vector<std::string>());
     declareMeshProperty("duct_region_ids", std::vector<std::vector<subdomain_id_type>>());
     declareMeshProperty("duct_block_names", std::vector<std::vector<std::string>>());
-
-    // Set metadata to indicate homogenized assemblies to inform CoreMeshGenerator
-    // dummy assembly deletion
-    declareMeshProperty("homogenized_assembly", _homogenized);
-    declareMeshProperty("pin_as_assembly", _is_assembly);
   }
+  // Set metadata to indicate homogenized assemblies to inform CoreMeshGenerator
+  // dummy assembly deletion
+  declareMeshProperty("homogenized_assembly", _homogenized);
+  declareMeshProperty("pin_as_assembly", _is_assembly);
 
   if (_extrude && _mesh_dimensions == 3)
   {

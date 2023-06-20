@@ -181,8 +181,8 @@ CoreMeshGenerator::CoreMeshGenerator(const InputParameters & parameters)
       mooseError(
           "All assemblies in the core must be homogenized if assembly homogenization is used\n");
     if (getMeshProperty<bool>("pin_as_assembly", _inputs[i]) != pin_as_assembly)
-      mooseError("All assemblies in the core must be defined as a single pin if "
-                 "`PinMeshGenerator/use_as_assembly` is set to true\n");
+      mooseWarning("Not all assemblies in the core are defined as a single pin by setting "
+                   "`PinMeshGenerator/use_as_assembly` to true\n");
   }
 
   // Initialize ReactorMeshParams object stored in pin input
