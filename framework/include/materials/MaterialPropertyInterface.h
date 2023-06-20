@@ -622,13 +622,15 @@ MaterialPropertyInterface::getBlockMaterialProperty(const MaterialPropertyName &
   if (_mi_block_ids.empty())
     mooseError("getBlockMaterialProperty must be called by a block restrictable object");
 
+  using pair_type = std::pair<const MaterialProperty<T> *, std::set<SubdomainID>>;
+
   if (!hasMaterialPropertyByName<T>(name))
-    return std::pair<const MaterialProperty<T> *, std::set<SubdomainID>>(NULL,
-                                                                         std::set<SubdomainID>());
+    return pair_type(nullptr, {});
 
   // Call first so that the ID gets registered
-  auto prop_blocks_pair = std::make_pair<const MaterialProperty<T> *, std::set<SubdomainID>>(
-      &_material_data->getProperty<T>(name), getMaterialPropertyBlocks(name));
+  const auto & prop = _material_data->getProperty<T, false>(name, 0, _mi_moose_object);
+  auto blocks = getMaterialPropertyBlocks(name);
+  auto prop_blocks_pair = pair_type(&prop, std::move(blocks));
 
   _material_property_dependencies.insert(_material_data->getPropertyId(name));
 
