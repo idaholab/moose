@@ -130,10 +130,10 @@ private:
   static PetscErrorCode monitor(Tao tao, void * ctx);
   static PetscErrorCode equalityFunctionWrapper(Tao tao, Vec x, Vec ce, void * ctx);
   static PetscErrorCode
-  equalityJacobianFunctionWrapper(Tao tao, Vec x, Mat jacobian_e, Mat jacobian_epre, void * ctx);
+  equalityGradientFunctionWrapper(Tao tao, Vec x, Mat gradient_e, Mat gradient_epre, void * ctx);
   static PetscErrorCode inequalityFunctionWrapper(Tao tao, Vec x, Vec ci, void * ctx);
   static PetscErrorCode
-  inequalityJacobianFunctionWrapper(Tao tao, Vec x, Mat jacobian_i, Mat jacobian_ipre, void * ctx);
+  inequalityGradientFunctionWrapper(Tao tao, Vec x, Mat gradient_i, Mat gradient_ipre, void * ctx);
   ///@}
 
   /// Enum of tao solver types
@@ -171,9 +171,9 @@ private:
   /// Inequality constraint vector
   Vec _ci;
 
-  /// Equality constraint Jacobian
-  Mat _jacobian_e;
+  /// Equality constraint gradient
+  Mat _gradient_e;
 
-  /// Inequality constraint Jacobian
-  Mat _jacobian_i;
+  /// Inequality constraint gradient
+  Mat _gradient_i;
 };

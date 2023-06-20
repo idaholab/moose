@@ -85,13 +85,13 @@ public:
    * Function to compute the jacobian of the equality constraints/
    * This is the last call of the equality constraint jacobian routine.
    */
-  virtual void computeEqualityJacobian(libMesh::PetscMatrix<Number> & jacobian) const;
+  virtual void computeEqualityGradient(libMesh::PetscMatrix<Number> & jacobian) const;
 
   /**
    * Function to compute the jacobian of the inequality constraints/
    * This is the last call of the inequality constraint jacobian routine.
    */
-  virtual void computeInequalityJacobian(libMesh::PetscMatrix<Number> & jacobian) const;
+  virtual void computeInequalityGradient(libMesh::PetscMatrix<Number> & jacobian) const;
 
   /**
    * Function to get the total number of parameters
@@ -128,15 +128,15 @@ protected:
   const unsigned int _n_eq_cons;
   /// Equality values declared as reporter data
   std::vector<std::vector<Real> *> _eq_constraints;
-  /// Jacobian values declared as reporter data
-  std::vector<std::vector<Real> *> _eq_jacobians;
+  /// Gradient values declared as reporter data
+  std::vector<std::vector<Real> *> _eq_gradients;
 
   const std::vector<ReporterValueName> * _inequality_names;
   const unsigned int _n_ineq_cons;
   /// Inequality values declared as reporter data
   std::vector<std::vector<Real> *> _ineq_constraints;
-  /// Jacobian values declared as reporter data
-  std::vector<std::vector<Real> *> _ineq_jacobians;
+  /// Gradient values declared as reporter data
+  std::vector<std::vector<Real> *> _ineq_gradients;
 
   /// Bounds of the parameters
   std::vector<Real> _lower_bounds;

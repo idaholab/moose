@@ -11,7 +11,6 @@
 #include "OptimizationReporterBase.h"
 #include "OptUtils.h"
 #include "libmesh/petsc_vector.h"
-#include <cstddef>
 
 InputParameters
 OptimizationReporterBase::validParams()
@@ -53,14 +52,14 @@ OptimizationReporterBase::OptimizationReporterBase(const InputParameters & param
   {
     _eq_constraints[i] =
         &declareValueByName<std::vector<Real>>(_equality_names->at(i), REPORTER_MODE_REPLICATED);
-    _eq_jacobians[i] = &declareValueByName<std::vector<Real>>("grad_" + _equality_names->at(i),
+    _eq_gradients[i] = &declareValueByName<std::vector<Real>>("grad_" + _equality_names->at(i),
                                                               REPORTER_MODE_REPLICATED);
   }
   for (const auto & i : make_range(_n_ineq_cons))
   {
     _ineq_constraints[i] =
         &declareValueByName<std::vector<Real>>(_inequality_names->at(i), REPORTER_MODE_REPLICATED);
-    _ineq_jacobians[i] = &declareValueByName<std::vector<Real>>("grad_" + _inequality_names->at(i),
+    _ineq_gradients[i] = &declareValueByName<std::vector<Real>>("grad_" + _inequality_names->at(i),
                                                                 REPORTER_MODE_REPLICATED);
   }
 }
@@ -177,31 +176,31 @@ OptimizationReporterBase::computeInequalityConstraints(
 }
 
 void
-OptimizationReporterBase::computeEqualityJacobian(libMesh::PetscMatrix<Number> & jacobian) const
+OptimizationReporterBase::computeEqualityGradient(libMesh::PetscMatrix<Number> & jacobian) const
 {
   for (const auto & p : make_range(_n_eq_cons))
-    if (_eq_jacobians[p]->size() != _nvalues[p])
+    if (_eq_gradients[p]->size() != _nvalues[p])
       mooseError("The equality jacobian for parameter ",
                  _parameter_names[p],
                  " has changed, expected ",
                  _nvalues[p],
                  " versus ",
-                 _eq_jacobians[p]->size(),
+                 _eq_gradients[p]->size(),
                  ".");
-  OptUtils::copyReporterIntoPetscMatrix(_eq_jacobians, jacobian);
+  OptUtils::copyReporterIntoPetscMatrix(_eq_gradients, jacobian);
 }
 
 void
-OptimizationReporterBase::computeInequalityJacobian(libMesh::PetscMatrix<Number> & jacobian) const
+OptimizationReporterBase::computeInequalityGradient(libMesh::PetscMatrix<Number> & jacobian) const
 {
   for (const auto & p : make_range(_n_ineq_cons))
-    if (_ineq_jacobians[p]->size() != _nvalues[p])
+    if (_ineq_gradients[p]->size() != _nvalues[p])
       mooseError("The inequality jacobian for parameter ",
                  _parameter_names[p],
                  " has changed, expected ",
                  _nvalues[p],
                  " versus ",
-                 _ineq_jacobians[p]->size(),
+                 _ineq_gradients[p]->size(),
                  ".");
-  OptUtils::copyReporterIntoPetscMatrix(_ineq_jacobians, jacobian);
+  OptUtils::copyReporterIntoPetscMatrix(_ineq_gradients, jacobian);
 }
