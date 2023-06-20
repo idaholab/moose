@@ -102,7 +102,7 @@ public:
    * @param requestor The MooseObject requesting the property
    * @return The property for the supplied type and name
    */
-  template <typename T, bool is_ad>
+  template <typename T, bool is_ad = false>
   GenericMaterialProperty<T, is_ad> & getProperty(const std::string & prop_name,
                                                   const unsigned int state,
                                                   const MooseObject & requestor)
