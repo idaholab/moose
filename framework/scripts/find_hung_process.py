@@ -212,32 +212,44 @@ def __schedule_task(jobs, num_threads):
     schedule_jobs.wait_finish()
     return schedule_jobs.get_finished()
 
-def __get_pids(application_name, hosts, num_threads):
+def __get_pids(application_name, hosts, num_threads, verbose = False):
     """
     SSH into each host and retrieve PIDs
     return a dictionary of {'hostname' : [pids]}
     """
     jobs = []
     results = {}
+
     for host in hosts:
         jobs.append(get_sshpids(application_name, host))
+
+    if verbose == True:
+        [print(f'Running command:',i) for i in jobs]
+
     finished_jobs = __schedule_task(jobs, num_threads)
+
     for job in finished_jobs:
         std_out = job.get_stdout().split()
         results[std_out[0]] = std_out[1:]
     return results
 
-def __get_stacks(hosts_pids, num_threads):
+def __get_stacks(hosts_pids, num_threads, verbose = False):
     """
     Iterate over dictionary of hosts, and PIDs and run
     a stack trace on each one, return a list of results.
     """
     jobs = []
     results = []
+
     for host, pids in hosts_pids.items():
         for pid in pids:
             jobs.append(get_sshstack(host, pid))
+
+    if verbose == True:
+        [print('Running command:',i) for i in jobs]
+
     finished_jobs = __schedule_task(jobs, num_threads)
+
     for job in finished_jobs:
         results.append(job.get_stdout())
     return results
@@ -257,13 +269,19 @@ def get_sshstack(host, pid):
     return f'ssh {host} "echo Host: {host} PID: {pid}; ' \
            f'{PSTACK_BINARY} {pid}; printf "*%.0s" {{1..80}}; echo"'
 
-def generate_traces(job_num, application_name, num_hosts, num_threads):
+def generate_traces(job_num, application_name, num_hosts, num_threads, verbose = False):
     """
     Generate a temporary file with traces and return
     formated results
     """
     hosts = set([])
-    a_job = Job(f'qstat -n {job_num}')
+
+    qstat_command = f'qstat -n {job_num}'
+    a_job = Job(qstat_command)
+    if verbose == True:
+        print(f'Running command: {qstat_command}')
+        #print(f"applicaiton name: {application_name}")
+
     a_job.run()
     results = a_job.get_stdout()
     for i in node_name_pattern.findall(results):
@@ -272,17 +290,21 @@ def generate_traces(job_num, application_name, num_hosts, num_threads):
         # convert back into set
         hosts = set(list(hosts)[:num_hosts])
 
+    #if verbose == True:
+        #print("Current hosts: ",(i for i in hosts))
+
     # Use a Scheduler to get hosts and PIDs
-    hosts_pids = __get_pids(application_name, hosts, num_threads)
+    hosts_pids = __get_pids(application_name, hosts, num_threads, verbose)
 
     # Use a Scheduler to get stack traces from each
     # host for every PID
-    stack_list = __get_stacks(hosts_pids, num_threads)
-
+    stack_list = __get_stacks(hosts_pids, num_threads, verbose)
+    #print(f"stack_list: {(i for i in stack_list)}")
     traces = []
     for stack in stack_list:
         output = os.linesep.join([s for s in stack.splitlines() if s])
         traces.extend(ProcessTraces.split_traces(output))
+    #print (f"Current traces: {(i for i in traces)}")
     return traces
 
 
@@ -501,6 +523,8 @@ def main():
     parser.add_argument('-s', '--stacks', metavar='int', action='store', type=int, default=0,
                         help='The number of stack frames to keep and compare for '
                         'uniqueness (Default: ALL)')
+    parser.add_argument('-v', '--verbose', action='store_true',dest='verbose', help='shows output of command line commands used in script.')
+    parser.add_argument('--test-local', action='store_true', dest='localhost', help='for testing without PBS queuing system, changes node_name_pattern to search for "localhost", instead of hpc node patterns.')
     args = parser.parse_args()
 
     cache_filename = None
@@ -508,7 +532,11 @@ def main():
         # Autogenerate a filename based on application name and job number
         cache_filename = f'{args.application}.{args.pbs_job_num}.cache'
 
-        traces = generate_traces(args.pbs_job_num, args.application, args.hosts, args.threads)
+        if args.localhost == True:#changes node name pattern when doing local testing
+            global node_name_pattern
+            node_name_pattern = re.compile(r'(localhost)')
+
+        traces = generate_traces(args.pbs_job_num, args.application, args.hosts, args.threads, args.verbose)
 
         # Cache the restuls to a file
         with open(cache_filename, 'w', encoding='utf-8') as cache_file:
