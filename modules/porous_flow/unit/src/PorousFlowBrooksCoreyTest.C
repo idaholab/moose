@@ -52,10 +52,11 @@ TEST(PorousFlowBrooksCoreyTest, d2sat)
 
 TEST(PorousFlowBrooksCoreyTest, cap)
 {
-  EXPECT_NEAR(0.0, PorousFlowBrooksCorey::capillaryPressure(1.3, 1.2, 2.0, 1.0e9), tol);
+  EXPECT_NEAR(1.2, PorousFlowBrooksCorey::capillaryPressure(1.3, 1.2, 2.0, 1.0e9), tol);
   const Real pc = 1.2 * std::pow(0.3, -1.0 / 2.0);
   EXPECT_NEAR(pc, PorousFlowBrooksCorey::capillaryPressure(0.3, 1.2, 2.0, 1.0e9), tol);
   EXPECT_NEAR(1000.0, PorousFlowBrooksCorey::capillaryPressure(0.0, 1.2, 2.0, 1000.0), tol);
+  EXPECT_NEAR(1.2, PorousFlowBrooksCorey::capillaryPressure(1.0, 1.2, 2.0, 1000.0), tol);
 }
 
 TEST(PorousFlowBrooksCoreyTest, dcap)
@@ -66,7 +67,7 @@ TEST(PorousFlowBrooksCoreyTest, dcap)
         PorousFlowBrooksCorey::capillaryPressure(0.3, 1.2, 2.0, 1.0e9)) /
        eps;
   EXPECT_NEAR(fd, PorousFlowBrooksCorey::dCapillaryPressure(0.3, 1.2, 2.0, 1.0e9), tol);
-  EXPECT_NEAR(0.0, PorousFlowBrooksCorey::dCapillaryPressure(1.0, 1.2, 2.0, 1.0e9), tol);
+  EXPECT_NEAR(0.0, PorousFlowBrooksCorey::dCapillaryPressure(1.01, 1.2, 2.0, 1.0e9), tol);
 }
 
 TEST(PorousFlowBrooksCoreyTest, d2cap)
@@ -77,7 +78,7 @@ TEST(PorousFlowBrooksCoreyTest, d2cap)
         PorousFlowBrooksCorey::dCapillaryPressure(0.3, 1.2, 2.0, 1.0e9)) /
        eps;
   EXPECT_NEAR(fd, PorousFlowBrooksCorey::d2CapillaryPressure(0.3, 1.2, 2.0, 1.0e9), tol);
-  EXPECT_NEAR(0.0, PorousFlowBrooksCorey::d2CapillaryPressure(1.0, 1.2, 2.0, 1.0e9), tol);
+  EXPECT_NEAR(0.0, PorousFlowBrooksCorey::d2CapillaryPressure(1.01, 1.2, 2.0, 1.0e9), tol);
 }
 
 TEST(PorousFlowBrooksCoreyTest, relpermw)
