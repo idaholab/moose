@@ -1,1 +1,5 @@
-../../../../../../test/tests/vectorpostprocessors/csv_reader/example.csv
+year,month,day
+1980,6,24
+1980,10,9
+2011,5,1
+2013,5,15
