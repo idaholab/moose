@@ -1,0 +1,73 @@
+[Tests]
+  design = 'HSCoupler2D3D.md'
+  issues = '#23059'
+
+  [check_input_mesh]
+    type = RunApp
+    input = mesh.i
+    cli_args = '--mesh-only mesh.e'
+    recover = False # No recover for --mesh-only
+    requirement = 'The system shall have correct input for the HSCoupler2D3D test mesh.'
+  []
+
+  [test]
+    type = Exodiff
+    input = hs_coupler_2d3d.i
+    exodiff = hs_coupler_2d3d_out.e
+    requirement = 'The system shall couple a 2D heat structure with a 3D heat structure.'
+  []
+
+  [error_reporting]
+    requirement = 'The system shall report an error for HSCoupler2D3D'
+
+    [nonexistent_hs2d_component]
+      type = RunException
+      input = hs_coupler_2d3d.i
+      cli_args = 'Components/hs_coupler/heat_structure_2d=foo'
+      expect_err = "There is no 2D cylindrical heat structure with the name 'foo'"
+      detail = 'If the 2D heat structure does not exist.'
+    []
+    [nonexistent_hs3d_component]
+      type = RunException
+      input = hs_coupler_2d3d.i
+      cli_args = 'Components/hs_coupler/heat_structure_3d=foo'
+      expect_err = "There is no 3D heat structure with the name 'foo'"
+      detail = 'If the 3D heat structure does not exist.'
+    []
+    [nonexistent_hs2d_boundary]
+      type = RunException
+      input = hs_coupler_2d3d.i
+      cli_args = 'Components/hs_coupler/boundary_2d=foo'
+      expect_err = "The heat structure 'hs2d' does not have the boundary 'foo'"
+      detail = 'If the 2D heat structure boundary does not exist.'
+    []
+    [nonexistent_hs3d_boundary]
+      type = RunException
+      input = hs_coupler_2d3d.i
+      cli_args = 'Components/hs_coupler/boundary_3d=foo'
+      expect_err = "The heat structure 'hs3d' does not have the boundary 'foo'"
+      detail = 'If the 3D heat structure boundary does not exist.'
+    []
+    [misaligned_meshes]
+      type = RunException
+      input = hs_coupler_2d3d.i
+      cli_args = 'Components/hs2d/orientation="1 0 0"'
+      expect_err = 'The meshes of the heat structures are not aligned'
+      detail = 'If the meshes of the heat structures are not aligned.'
+    []
+    [exceeded_max_ad_container_size]
+      type = RunException
+      input = hs_coupler_2d3d.i
+      cli_args = 'Components/hs3d/file=mesh/mesh_fine.e'
+      expect_err = 'MOOSE must be configured with a larger AD container size'
+      detail = 'If the max AD container size is predicted to be exceeded.'
+    []
+    [zero_gap_size]
+      type = RunException
+      input = hs_coupler_2d3d.i
+      cli_args = 'Components/hs_coupler/gap_thickness=0'
+      expect_err = 'Gap thickness must be > 0.'
+      detail = 'If the gap thickness is less than or equal to zero.'
+    []
+  []
+[]

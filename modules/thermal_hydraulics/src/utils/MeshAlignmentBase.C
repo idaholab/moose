@@ -11,7 +11,10 @@
 
 #include "libmesh/elem.h"
 
-MeshAlignmentBase::MeshAlignmentBase(const MooseMesh & mesh) : _mesh(mesh) {}
+MeshAlignmentBase::MeshAlignmentBase(const MooseMesh & mesh)
+  : _mesh(mesh), _meshes_are_aligned(false)
+{
+}
 
 void
 MeshAlignmentBase::extractFrom1DElements(const std::vector<dof_id_type> & elem_ids,

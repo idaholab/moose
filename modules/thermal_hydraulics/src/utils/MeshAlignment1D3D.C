@@ -13,7 +13,7 @@
 
 #include "libmesh/elem.h"
 
-MeshAlignment1D3D::MeshAlignment1D3D(const MooseMesh & mesh) : MeshAlignmentBase(mesh) {}
+MeshAlignment1D3D::MeshAlignment1D3D(const MooseMesh & mesh) : MeshAlignmentOneToMany(mesh) {}
 
 void
 MeshAlignment1D3D::initialize(
@@ -74,6 +74,7 @@ MeshAlignment1D3D::buildCoupledElemQpIndexMap(Assembly & assembly)
       assembly.setCurrentSubdomainID(primary_elem->subdomain_id());
       assembly.reinit(primary_elem);
       std::vector<Point> primary_qps = assembly.qPoints().stdVector();
+      _n_qp_primary = primary_qps.size();
 
       const auto & secondary_elem_ids = getCoupledSecondaryElemIDs(primary_elem_id);
       for (const auto & secondary_elem_id : secondary_elem_ids)
@@ -88,6 +89,7 @@ MeshAlignment1D3D::buildCoupledElemQpIndexMap(Assembly & assembly)
         assembly.setCurrentSubdomainID(secondary_elem->subdomain_id());
         assembly.reinit(secondary_elem, secondary_side_id);
         const std::vector<Point> secondary_qps = assembly.qPointsFace().stdVector();
+        _n_qp_secondary = secondary_qps.size();
 
         _secondary_elem_id_to_qp_indices[secondary_elem_id].resize(secondary_qps.size());
         KDTree kd_tree_qp(primary_qps, _mesh.getMaxLeafSize());
@@ -101,39 +103,4 @@ MeshAlignment1D3D::buildCoupledElemQpIndexMap(Assembly & assembly)
       }
     }
   }
-}
-
-bool
-MeshAlignment1D3D::hasCoupledSecondaryElemIDs(const dof_id_type & primary_elem_id) const
-{
-  return _primary_elem_id_to_secondary_elem_ids.find(primary_elem_id) !=
-         _primary_elem_id_to_secondary_elem_ids.end();
-}
-
-const std::vector<dof_id_type> &
-MeshAlignment1D3D::getCoupledSecondaryElemIDs(const dof_id_type & primary_elem_id) const
-{
-  mooseAssert(hasCoupledSecondaryElemIDs(primary_elem_id),
-              "The element ID has no coupled elements.");
-  return _primary_elem_id_to_secondary_elem_ids.find(primary_elem_id)->second;
-}
-
-unsigned int
-MeshAlignment1D3D::getSecondaryNumberOfQuadraturePoints(const dof_id_type & secondary_elem_id) const
-{
-  auto it = _secondary_elem_id_to_qp_indices.find(secondary_elem_id);
-  mooseAssert(it != _secondary_elem_id_to_qp_indices.end(),
-              "The element ID has no coupled quadrature point indices.");
-  return it->second.size();
-}
-
-unsigned int
-MeshAlignment1D3D::getCoupledPrimaryElemQpIndex(const dof_id_type & secondary_elem_id,
-                                                const unsigned int & secondary_qp) const
-{
-  auto it = _secondary_elem_id_to_qp_indices.find(secondary_elem_id);
-  mooseAssert(it != _secondary_elem_id_to_qp_indices.end(),
-              "The element ID has no coupled quadrature point indices.");
-  mooseAssert(secondary_qp < it->second.size(), "The quadrature index does not exist in the map.");
-  return it->second[secondary_qp];
 }

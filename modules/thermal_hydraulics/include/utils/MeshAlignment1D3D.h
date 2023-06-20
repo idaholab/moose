@@ -9,7 +9,7 @@
 
 #pragma once
 
-#include "MeshAlignmentBase.h"
+#include "MeshAlignmentOneToMany.h"
 
 class Assembly;
 
@@ -18,7 +18,7 @@ class Assembly;
  *
  * The "primary" mesh is the 1D subdomain, and the "secondary" mesh is the 3D boundary.
  */
-class MeshAlignment1D3D : public MeshAlignmentBase
+class MeshAlignment1D3D : public MeshAlignmentOneToMany
 {
 public:
   /**
@@ -48,51 +48,9 @@ public:
    */
   void buildCoupledElemQpIndexMap(Assembly & assembly);
 
-  /**
-   * Returns true if the given primary element ID has coupled secondary elements
-   *
-   * @param[in] primary_elem_id   Primary element ID for which to find the coupled secondary element
-   * IDs
-   */
-  bool hasCoupledSecondaryElemIDs(const dof_id_type & primary_elem_id) const;
-
-  /**
-   * Gets the coupled secondary element IDs for a given primary element ID
-   *
-   * @param[in] primary_elem_id   Primary element ID for which to find the coupled secondary element
-   * IDs
-   */
-  const std::vector<dof_id_type> &
-  getCoupledSecondaryElemIDs(const dof_id_type & primary_elem_id) const;
-
-  /**
-   * Gets the number of quadrature points for the given secondary element
-   *
-   * @param[in] secondary_elem_id   Secondary element ID
-   */
-  unsigned int getSecondaryNumberOfQuadraturePoints(const dof_id_type & secondary_elem_id) const;
-
-  /**
-   * Gets the quadrature point index on the primary element corresponding to the
-   * quadrature point index on the provided secondary element
-   *
-   * Only secondary elements corresponding to local primary elements may be queried.
-   *
-   * @param[in] secondary_elem_id   Secondary element ID for which to find the coupled quadrature
-   * point
-   * @param[in] secondary_qp        Quadrature point index on the given secondary element
-   */
-  unsigned int getCoupledPrimaryElemQpIndex(const dof_id_type & secondary_elem_id,
-                                            const unsigned int & secondary_qp) const;
-
 protected:
   /**
    * Builds the mapping using the extracted mesh information
    */
   void buildMapping();
-
-  /// Map of primary element ID to coupled secondary element IDs
-  std::map<dof_id_type, std::vector<dof_id_type>> _primary_elem_id_to_secondary_elem_ids;
-  /// Map of secondary element ID to vector of coupled quadrature points
-  std::map<dof_id_type, std::vector<unsigned int>> _secondary_elem_id_to_qp_indices;
 };

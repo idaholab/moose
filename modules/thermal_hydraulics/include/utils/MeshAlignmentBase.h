@@ -33,6 +33,16 @@ public:
    */
   const std::vector<dof_id_type> & getPrimaryElemIDs() const { return _primary_elem_ids; }
 
+  /**
+   * Returns the list of element IDs on the secondary boundary
+   */
+  const std::vector<dof_id_type> & getSecondaryElemIDs() const { return _secondary_elem_ids; }
+
+  /**
+   * Returns true if the primary and secondary meshes are aligned
+   */
+  bool meshesAreAligned() const { return _meshes_are_aligned; }
+
 protected:
   /**
    * Extracts mesh information from 1D elements
@@ -90,4 +100,7 @@ protected:
   std::vector<Point> _primary_node_points;
   /// List of secondary node points
   std::vector<Point> _secondary_node_points;
+
+  /// Flag that meshes are aligned
+  bool _meshes_are_aligned;
 };

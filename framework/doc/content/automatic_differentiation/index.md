@@ -303,6 +303,23 @@ properties can be retrieved in compute objects like `ADKernels` by using the
 encouraged to investigate the tensor mechanics, navier-stokes, and level-set
 modules, all of which heavily leverage MOOSE's [!ac](AD) capabilities.
 
+### Maximum AD container size id=max_container_size
+
+For performance reasons, AD values in MOOSE have a maximum container size, i.e.,
+they have a maximum number of degrees of freedom that each AD quantity may
+depend upon. Currently, MOOSE's default maximum AD container size is 53. If the
+maximum AD container size is exceeded, then an error will result.
+If a quantity needs to depend on more degrees of freedom than the maximum AD
+container size, then MOOSE needs to be reconfigured: go to the
+root of the MOOSE repository and run the following, where `n` should be
+substituted with the desired size.
+
+```
+./configure --with-derivative-size=n
+```
+
+Then, you must recompile your application.
+
 ### Combining AD and non-AD classes
 
 It is possible to support the use of AD and non-AD variables in classes without
