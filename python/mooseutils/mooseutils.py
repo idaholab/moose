@@ -16,7 +16,6 @@ import subprocess
 import time
 import cProfile as profile
 import pstats
-from packaging import version
 
 try:
     from io import StringIO
@@ -199,15 +198,36 @@ def runExe(app_path, args):
     stdout_data = data[0].decode("utf-8")
     return stdout_data
 
+def version_comparison(a_version, b_version):
+    """
+    Return bool for 'a_version' is greater than or equal to 'b_version'
+    """
+    _a_version = str(a_version).split('.')
+    _b_version = str(b_version).split('.')
+    for k_version, v_version in enumerate(_a_version):
+        try:
+            if int(v_version) < int(_b_version[k_version]):
+                return False
+            elif int(v_version) > int(_b_version[k_version]):
+                return True
+        # a_version has more iterators and has been equal up to this point, and so it is higher
+        except IndexError:
+            break
+    # b_version has more iterators and has been equal up to this point, and so it is higher
+    if len(_a_version) < len(_b_version):
+        return False
+    return True
+
 def check_configuration(packages, message=True):
     """
-    Check that the supplied packages exist.
+    Check that the supplied python packages exist, and optionally at
+    requested version (packages=['package<=version'])
 
     Return:
         [list]: A list of missing packages.
     """
     missing = []
-    re_operators = re.compile(f'([=<>]+)')
+    re_operators = re.compile(r'([=<>]+)')
     for package in packages:
         (_package, _operator, _version) = package, None, None
         # parse version operator
@@ -225,15 +245,14 @@ def check_configuration(packages, message=True):
         # Try to import the package
         try:
             __import__(_package)
-            # Try and verify version
             if (_operator in ['>=', '>']
-                and version.parse(__import__(_package).__version__) < version.parse(_version)):
+             and not version_comparison(__import__(_package).__version__, _version)):
                 missing.append(f'{_package} is not {_operator} {_version}')
             elif (_operator in ['<=', '<']
-                and version.parse(__import__(_package).__version__) > version.parse(_version)):
+             and not version_comparison(_version, __import__(_package).__version__)):
                 missing.append(f'{_package} is not {_operator} {_version}')
             elif (_operator in ['==', '=']
-                and version.parse(__import__(_package).__version__) != version.parse(_version)):
+             and str(__import__(_package).__version__) != str(_version)):
                 missing.append(f'{_package} != {_version}')
 
         except ImportError:
