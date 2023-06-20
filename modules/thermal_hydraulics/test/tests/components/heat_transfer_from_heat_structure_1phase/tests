@@ -73,7 +73,6 @@
       Components/heat_transfer/P_hf=1.5
       Components/heat_structure/type=HeatStructureCylindrical
       Components/heat_structure/inner_radius=1.0
-      Components/heat_structure/offset_mesh_by_inner_radius=true
       Postprocessors/E_heat_structure/type=ADHeatStructureEnergyRZ
       Postprocessors/E_heat_structure/axis_point='0 2 0'
       Postprocessors/E_heat_structure/axis_dir='1 0 0'
@@ -218,7 +217,7 @@
     input = 'jac.1phase.i'
     ratio_tol = 1e-5
     difference_tol = 55
-    cli_args = "Debug/check_jacobian=true Components/pipe/position='0 0 0' Components/hs/inner_radius=0.1 Components/hs/offset_mesh_by_inner_radius=true Components/hs/type=HeatStructureCylindrical Components/hx/hs_side=inner"
+    cli_args = "Debug/check_jacobian=true Components/pipe/position='0 0 0' Components/hs/inner_radius=0.1 Components/hs/type=HeatStructureCylindrical Components/hx/hs_side=inner"
     max_parallel = 1
 
     requirement = "The system shall compute jacobians when a flow channel is coupled to the inner side of a cylindrical heat structure."

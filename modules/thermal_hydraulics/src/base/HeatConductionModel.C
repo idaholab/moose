@@ -118,8 +118,6 @@ HeatConductionModel::addHeatEquationRZ()
   const auto & blocks = hs_cyl.getSubdomainNames();
   const auto & position = hs_cyl.getPosition();
   const auto & direction = hs_cyl.getDirection();
-  const auto & inner_radius = hs_cyl.getInnerRadius();
-  const auto & axis_offset = hs_cyl.getAxialOffset();
 
   // add transient term
   {
@@ -132,7 +130,6 @@ HeatConductionModel::addHeatEquationRZ()
     pars.set<bool>("use_displaced_mesh") = false;
     pars.set<Point>("axis_point") = position;
     pars.set<RealVectorValue>("axis_dir") = direction;
-    pars.set<Real>("offset") = inner_radius - axis_offset;
     _sim.addKernel(class_name, genName(_comp_name, "td"), pars);
   }
   // add diffusion term
@@ -145,7 +142,6 @@ HeatConductionModel::addHeatEquationRZ()
     pars.set<bool>("use_displaced_mesh") = false;
     pars.set<Point>("axis_point") = position;
     pars.set<RealVectorValue>("axis_dir") = direction;
-    pars.set<Real>("offset") = inner_radius - axis_offset;
     _sim.addKernel(class_name, genName(_comp_name, "hc"), pars);
   }
 }

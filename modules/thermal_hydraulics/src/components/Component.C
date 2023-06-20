@@ -65,13 +65,6 @@ Component::mesh()
 }
 
 void
-Component::executePreSetupMesh()
-{
-  preSetupMesh();
-  _component_setup_status = PRE_SETUP_MESH_COMPLETED;
-}
-
-void
 Component::executeInit()
 {
   init();

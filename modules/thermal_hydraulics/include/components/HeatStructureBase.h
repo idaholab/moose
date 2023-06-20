@@ -47,11 +47,6 @@ public:
    */
   Real getNumberOfUnits() const { return _num_rods; }
 
-  /**
-   * Sets the flag specifying that the heat structure is connected to a flow channel to 'true'
-   */
-  void setConnectedToFlowChannel() const { _connected_to_flow_channel = true; }
-
 protected:
   virtual void init() override;
   virtual void check() const override;
@@ -66,9 +61,6 @@ protected:
   std::vector<std::string> _material_names;
   /// The number of rods represented by this heat structure
   Real _num_rods;
-
-  /// True if this heat structure is connected to at least one flow channel
-  mutable bool _connected_to_flow_channel;
 
   // This reference should be deleted after applications start using _n_regions:
   unsigned int & _number_of_hs;

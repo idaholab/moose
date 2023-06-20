@@ -22,7 +22,6 @@ HeatStructureBase::validParams()
 HeatStructureBase::HeatStructureBase(const InputParameters & params)
   : Component2D(params),
     HeatStructureInterface(this),
-    _connected_to_flow_channel(false),
     _number_of_hs(_n_regions)
 {
 }
