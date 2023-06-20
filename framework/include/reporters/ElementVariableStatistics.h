@@ -9,14 +9,14 @@
 
 #pragma once
 
-#include "StatsElementReporter.h"
+#include "ElementStatistics.h"
 
-class CoupledVarStatsElementReporter : public StatsElementReporter
+class ElementVariableStatistics : public ElementStatistics
 {
 public:
   static InputParameters validParams();
 
-  CoupledVarStatsElementReporter(const InputParameters & parameters);
+  ElementVariableStatistics(const InputParameters & parameters);
 
 private:
   /// The coupled variable used.

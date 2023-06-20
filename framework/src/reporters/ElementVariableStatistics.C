@@ -7,14 +7,14 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "CoupledVarStatsElementReporter.h"
+#include "ElementVariableStatistics.h"
 
-registerMooseObject("MooseApp", CoupledVarStatsElementReporter);
+registerMooseObject("MooseApp", ElementVariableStatistics);
 
 InputParameters
-CoupledVarStatsElementReporter::validParams()
+ElementVariableStatistics::validParams()
 {
-  InputParameters params = StatsElementReporter::validParams();
+  InputParameters params = ElementStatistics::validParams();
 
   params.addRequiredCoupledVar("coupled_var", "Coupled variable whose value is used.");
 
@@ -23,12 +23,12 @@ CoupledVarStatsElementReporter::validParams()
   return params;
 }
 
-CoupledVarStatsElementReporter::CoupledVarStatsElementReporter(const InputParameters & parameters)
-  : StatsElementReporter(parameters), _v(coupledValue("coupled_var"))
+ElementVariableStatistics::ElementVariableStatistics(const InputParameters & parameters)
+  : ElementStatistics(parameters), _v(coupledValue("coupled_var"))
 {
 }
 Real
-CoupledVarStatsElementReporter::computeValue()
+ElementVariableStatistics::computeValue()
 {
   Real avg_val = 0;
 

@@ -7,20 +7,17 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "StatsNodalReporter.h"
-
-#include "NodalReporter.h"
-#include <string>
+#include "NodalStatistics.h"
 
 InputParameters
-StatsNodalReporter::validParams()
+NodalStatistics::validParams()
 {
   InputParameters params = NodalReporter::validParams();
   params.addParam<std::string>("base_name", "Name to append to reporters.");
   return params;
 }
 
-StatsNodalReporter::StatsNodalReporter(const InputParameters & parameters)
+NodalStatistics::NodalStatistics(const InputParameters & parameters)
   : NodalReporter(parameters),
     _base_name(isParamValid("base_name") ? getParam<std::string>("base_name") + "_" : ""),
     _max(declareValueByName<Real>(_base_name + "max")),
@@ -30,7 +27,7 @@ StatsNodalReporter::StatsNodalReporter(const InputParameters & parameters)
 {
 }
 void
-StatsNodalReporter::initialize()
+NodalStatistics::initialize()
 {
   _max = std::numeric_limits<Real>::min();
   _min = std::numeric_limits<Real>::max();
@@ -39,7 +36,7 @@ StatsNodalReporter::initialize()
 }
 
 void
-StatsNodalReporter::execute()
+NodalStatistics::execute()
 {
   // Get value to to update statistics
   Real value = computeValue();
@@ -54,21 +51,9 @@ StatsNodalReporter::execute()
   _average += value;
   _number_nodes++;
 }
-void
-StatsNodalReporter::threadJoin(const UserObject & uo)
-{
-  const StatsNodalReporter & es = static_cast<const StatsNodalReporter &>(uo);
-  if (_max < es._max)
-    _max = es._max;
 
-  if (_min > es._min)
-    _min = es._min;
-
-  _average += es._average;
-  _number_nodes += es._number_nodes;
-}
 void
-StatsNodalReporter::finalize()
+NodalStatistics::finalize()
 {
   _communicator.max(_max);
   _communicator.min(_min);

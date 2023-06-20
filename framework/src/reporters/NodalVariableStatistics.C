@@ -7,14 +7,14 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "CoupledVarStatsNodalReporter.h"
+#include "NodalVariableStatistics.h"
 
-registerMooseObject("MooseApp", CoupledVarStatsNodalReporter);
+registerMooseObject("MooseApp", NodalVariableStatistics);
 
 InputParameters
-CoupledVarStatsNodalReporter::validParams()
+NodalVariableStatistics::validParams()
 {
-  InputParameters params = StatsNodalReporter::validParams();
+  InputParameters params = NodalStatistics::validParams();
 
   params.addRequiredCoupledVar("coupled_var", "Coupled variable whose value is used.");
 
@@ -23,12 +23,12 @@ CoupledVarStatsNodalReporter::validParams()
   return params;
 }
 
-CoupledVarStatsNodalReporter::CoupledVarStatsNodalReporter(const InputParameters & parameters)
-  : StatsNodalReporter(parameters), _v(coupledValue("coupled_var"))
+NodalVariableStatistics::NodalVariableStatistics(const InputParameters & parameters)
+  : NodalStatistics(parameters), _v(coupledValue("coupled_var"))
 {
 }
 Real
-CoupledVarStatsNodalReporter::computeValue()
+NodalVariableStatistics::computeValue()
 {
   return _v[_qp];
 }

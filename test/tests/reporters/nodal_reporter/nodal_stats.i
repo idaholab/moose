@@ -36,7 +36,7 @@
 
 [Reporters]
   [elem_stats]
-    type = CoupledVarStatsElementReporter
+    type = NodalVariableStatistics
     coupled_var = u
     base_name = diffusion
   []

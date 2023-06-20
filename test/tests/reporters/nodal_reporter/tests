@@ -1,11 +1,11 @@
 [Tests]
-  design = 'CoupledVarStatsNodalReporter.md'
+  design = 'NodalVariableStatistics.md'
   issues = '#24678'
 
-  [coupledvarstats]
+  [nodal_stats]
     type = 'JSONDiff'
-    input = 'coupledvarstats.i'
-    jsondiff = 'coupledvarstats_stats.json'
+    input = 'nodal_stats.i'
+    jsondiff = 'nodal_stats_stats.json'
     requirement = 'The system shall be able to produce nodal statistics of a variable for use in other calculations.'
   []
 []

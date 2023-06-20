@@ -7,22 +7,17 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "StatsElementReporter.h"
-
-#include "ElementReporter.h"
-#include "libmesh/enum_eigen_solver_type.h"
-#include <slepceps.h>
-#include <string>
+#include "ElementStatistics.h"
 
 InputParameters
-StatsElementReporter::validParams()
+ElementStatistics::validParams()
 {
   InputParameters params = ElementReporter::validParams();
   params.addParam<std::string>("base_name", "Name to append to reporters.");
   return params;
 }
 
-StatsElementReporter::StatsElementReporter(const InputParameters & parameters)
+ElementStatistics::ElementStatistics(const InputParameters & parameters)
   : ElementReporter(parameters),
     _base_name(isParamValid("base_name") ? getParam<std::string>("base_name") + "_" : ""),
     _max(declareValueByName<Real>(_base_name + "max")),
@@ -33,7 +28,7 @@ StatsElementReporter::StatsElementReporter(const InputParameters & parameters)
 {
 }
 void
-StatsElementReporter::initialize()
+ElementStatistics::initialize()
 {
   _max = std::numeric_limits<Real>::min();
   _min = std::numeric_limits<Real>::max();
@@ -43,7 +38,7 @@ StatsElementReporter::initialize()
 }
 
 void
-StatsElementReporter::execute()
+ElementStatistics::execute()
 {
   // Get value to to update statistics
   Real value = computeValue();
@@ -60,23 +55,9 @@ StatsElementReporter::execute()
   _average += value;
   _number_elements++;
 }
+
 void
-StatsElementReporter::threadJoin(const UserObject & uo)
-{
-  const StatsElementReporter & es = static_cast<const StatsElementReporter &>(uo);
-  if (_max < es._max)
-    _max = es._max;
-
-  if (_min > es._min)
-    _min = es._min;
-
-  _integral += es._integral;
-
-  _average += es._average;
-  _number_elements += es._number_elements;
-}
-void
-StatsElementReporter::finalize()
+ElementStatistics::finalize()
 {
   _communicator.max(_max);
   _communicator.min(_min);

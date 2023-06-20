@@ -11,18 +11,18 @@
 
 #include "ElementReporter.h"
 
-class StatsElementReporter : public ElementReporter
+class ElementStatistics : public ElementReporter
 {
 public:
   static InputParameters validParams();
 
-  StatsElementReporter(const InputParameters & parameters);
+  ElementStatistics(const InputParameters & parameters);
 
 protected:
   virtual void initialize() override;
   virtual void execute() override;
   virtual void finalize() override;
-  virtual void threadJoin(const UserObject & uo) override;
+  virtual void threadJoin(const UserObject & /*uo*/) override final{};
 
   virtual Real computeValue() = 0;
 

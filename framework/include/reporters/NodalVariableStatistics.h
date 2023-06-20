@@ -9,14 +9,14 @@
 
 #pragma once
 
-#include "StatsNodalReporter.h"
+#include "NodalStatistics.h"
 
-class CoupledVarStatsNodalReporter : public StatsNodalReporter
+class NodalVariableStatistics : public NodalStatistics
 {
 public:
   static InputParameters validParams();
 
-  CoupledVarStatsNodalReporter(const InputParameters & parameters);
+  NodalVariableStatistics(const InputParameters & parameters);
 
 private:
   /// The coupled variable used.

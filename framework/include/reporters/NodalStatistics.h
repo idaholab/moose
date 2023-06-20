@@ -11,18 +11,18 @@
 
 #include "NodalReporter.h"
 
-class StatsNodalReporter : public NodalReporter
+class NodalStatistics : public NodalReporter
 {
 public:
   static InputParameters validParams();
 
-  StatsNodalReporter(const InputParameters & parameters);
+  NodalStatistics(const InputParameters & parameters);
 
 protected:
   virtual void initialize() override;
   virtual void execute() override;
   virtual void finalize() override;
-  virtual void threadJoin(const UserObject & uo) override;
+  virtual void threadJoin(const UserObject & /*uo*/) override final{};
 
   virtual Real computeValue() = 0;
 

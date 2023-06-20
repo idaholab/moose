@@ -1,11 +1,11 @@
 [Tests]
-  design = 'CoupledVarStatsElementReporter.md'
+  design = 'ElementVariableStatistics.md'
   issues = '#24678'
 
-  [coupledvarstats]
+  [elem_stats]
     type = 'JSONDiff'
-    input = 'coupledvarstats.i'
-    jsondiff = 'coupledvarstats_stats.json'
+    input = 'elem_stats.i'
+    jsondiff = 'elem_stats_stats.json'
     requirement = 'The system shall be able to produce elememental statistics of a variable for use in other calculations.'
   []
 []
