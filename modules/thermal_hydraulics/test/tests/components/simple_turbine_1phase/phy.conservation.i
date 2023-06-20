@@ -13,6 +13,8 @@
 
   rdg_slope_reconstruction = minmod
   gravity_vector = '0 0 0'
+
+  scaling_factor_1phase = '1 1 1e-5'
 []
 
 [FluidProperties]
@@ -159,7 +161,6 @@
   abort_on_solve_fail = true
 
   solve_type = 'newton'
-  line_search = 'basic'
   petsc_options_iname = '-pc_type'
   petsc_options_value = ' lu'
 
@@ -168,6 +169,10 @@
 
   nl_max_its = 10
   l_tol = 1e-3
+
+  # automatic_scaling = true
+  # compute_scaling_once = false
+  # off_diagonals_in_auto_scaling = true
 []
 
 [Outputs]

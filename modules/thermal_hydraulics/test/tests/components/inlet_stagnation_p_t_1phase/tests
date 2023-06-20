@@ -17,6 +17,7 @@
     input = 'phy.p0T0_3eqn.i'
     exodiff = 'phy.p0T0_3eqn.e'
     max_time = 500
+    max_parallel = 11 # https://github.com/idaholab/moose/issues/24537
     group = 'inlet_p0_T0 outlet pipe 1phase'
   []
 

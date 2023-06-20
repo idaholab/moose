@@ -105,7 +105,7 @@
   num_steps = 20
   abort_on_solve_fail = true
 
-  solve_type = 'PJFNK'
+  solve_type = NEWTON
   nl_rel_tol = 1e-9
   nl_abs_tol = 1e-8
   nl_max_its = 30

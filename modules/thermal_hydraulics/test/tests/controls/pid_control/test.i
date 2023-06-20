@@ -116,6 +116,9 @@
   l_tol = 1e-3
   l_max_its = 5
 
+  petsc_options_iname = '-pc_type'
+  petsc_options_value = 'lu'
+
   start_time = 0.0
   end_time = 300.0
 []
@@ -130,5 +133,4 @@
     type = Console
     max_rows = 1
   []
-  print_linear_residuals = false
 []

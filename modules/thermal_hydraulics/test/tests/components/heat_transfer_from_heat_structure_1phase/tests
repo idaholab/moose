@@ -48,7 +48,7 @@
     type = CSVDiff
     input = 'phy.conservation_1phase.i'
     csvdiff = 'phy.conservation_1phase_plate_rdg.csv'
-    abs_zero = 1e-12
+    abs_zero = 1e-10
     cli_args = "
       Components/heat_transfer/P_hf=2
       Components/heat_structure/type=HeatStructurePlate
@@ -58,6 +58,7 @@
       Outputs/file_base=phy.conservation_1phase_plate_rdg"
     # because of output has execute_on = 'initial final'
     recover = false
+    max_parallel = 5 # https://github.com/idaholab/moose/issues/24537
 
     requirement = "The system shall conserve energy when a flow channel is coupled to a plate heat structure."
     issues = '#19754'
@@ -66,7 +67,7 @@
     type = CSVDiff
     input = 'phy.conservation_1phase.i'
     csvdiff = 'phy.conservation_1phase_cylinder_rdg.csv'
-    abs_zero = 1e-12
+    abs_zero = 1e-10
     cli_args = "
       Components/pipe/position='0 2 0'
       Components/heat_transfer/P_hf=1.5

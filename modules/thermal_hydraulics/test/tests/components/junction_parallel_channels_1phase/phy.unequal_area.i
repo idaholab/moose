@@ -100,6 +100,9 @@
   l_tol = 1e-10
   l_max_its = 10
 
+  petsc_options_iname = '-pc_type'
+  petsc_options_value = 'lu'
+
   start_time = 0
   end_time = 3
   dt = 0.1

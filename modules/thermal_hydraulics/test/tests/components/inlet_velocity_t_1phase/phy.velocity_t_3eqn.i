@@ -79,6 +79,9 @@
   l_tol = 1e-3
   l_max_its = 100
 
+  petsc_options_iname = '-pc_type'
+  petsc_options_value = 'lu'
+
   abort_on_solve_fail = true
 
 []
