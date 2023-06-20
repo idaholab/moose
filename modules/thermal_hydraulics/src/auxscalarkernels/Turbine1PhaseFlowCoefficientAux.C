@@ -17,7 +17,8 @@ Turbine1PhaseFlowCoefficientAux::validParams()
 {
   InputParameters params = AuxScalarKernel::validParams();
   params.addRequiredParam<UserObjectName>("turbine_uo", "Turbine user object name");
-  params.addClassDescription("Flow coefficient computed in the 1-phase shaft-connected turbine.");
+  params.addClassDescription(
+      "Returns the flow coefficient computed in the 1-phase shaft-connected turbine.");
   return params;
 }
 

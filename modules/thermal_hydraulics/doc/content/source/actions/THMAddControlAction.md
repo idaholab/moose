@@ -1,21 +1,14 @@
 # THMAddControlAction
 
-!alert construction title=Undocumented Action Class
-The THMAddControlAction has not been documented. The content listed below should be used as a starting point for
-documenting the class, which includes the typical automatic documentation associated with an Action;
-however, what is contained is ultimately determined by what is necessary to make the documentation
-clear for users.
-
 !syntax description /ControlLogic/THMAddControlAction
 
-## Overview
-
-!! Replace these lines with information regarding the THMAddControlAction action.
-
-## Example Input File Syntax
-
-!! Describe and include an example of how to use the THMAddControlAction action.
-
-!syntax description /ControlLogic/THMAddControlAction
+The `THMAddControlAction` is a [MooseObjectAction.md] that creates the specified
+[ControlLogic](syntax/ControlLogic/index.md) object for
+each sub-block of the `[ControlLogic]` block of an input file, then adds them to the
+[Problem](syntax/Problem/index.md).
 
 !syntax parameters /ControlLogic/THMAddControlAction
+
+!syntax inputs /ControlLogic/THMAddControlAction
+
+!syntax children /ControlLogic/THMAddControlAction

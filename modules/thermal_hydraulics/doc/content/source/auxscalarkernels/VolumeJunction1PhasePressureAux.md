@@ -1,20 +1,11 @@
 # VolumeJunction1PhasePressureAux
 
-!alert construction title=Undocumented Class
-The VolumeJunction1PhasePressureAux has not been documented. The content listed below should be used as a starting point for
-documenting the class, which includes the typical automatic documentation associated with a
-MooseObject; however, what is contained is ultimately determined by what is necessary to make the
-documentation clear for users.
-
 !syntax description /AuxScalarKernels/VolumeJunction1PhasePressureAux
 
-## Overview
+The pressure is computed from the specific volume and specific internal energy of the fluid
+using the [!param](/AuxScalarKernels/VolumeJunction1PhasePressureAux/fp) parameter fluid properties.
 
-!! Replace these lines with information regarding the VolumeJunction1PhasePressureAux object.
-
-## Example Input File Syntax
-
-!! Describe and include an example of how to use the VolumeJunction1PhasePressureAux object.
+This object is automatically added to the simulation by the [VolumeJunction1Phase.md] component.
 
 !syntax parameters /AuxScalarKernels/VolumeJunction1PhasePressureAux
 

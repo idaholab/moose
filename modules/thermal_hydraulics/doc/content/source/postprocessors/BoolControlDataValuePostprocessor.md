@@ -1,20 +1,11 @@
 # BoolControlDataValuePostprocessor
 
-!alert construction title=Undocumented Class
-The BoolControlDataValuePostprocessor has not been documented. The content listed below should be used as a starting point for
-documenting the class, which includes the typical automatic documentation associated with a
-MooseObject; however, what is contained is ultimately determined by what is necessary to make the
-documentation clear for users.
-
 !syntax description /Postprocessors/BoolControlDataValuePostprocessor
 
-## Overview
+The value of the postprocessor is 1 when the [ControlData.md] is true and 0 when false.
 
-!! Replace these lines with information regarding the BoolControlDataValuePostprocessor object.
-
-## Example Input File Syntax
-
-!! Describe and include an example of how to use the BoolControlDataValuePostprocessor object.
+!alert note
+This can only be used with a [THMProblem.md], usually within a THM simulation.
 
 !syntax parameters /Postprocessors/BoolControlDataValuePostprocessor
 

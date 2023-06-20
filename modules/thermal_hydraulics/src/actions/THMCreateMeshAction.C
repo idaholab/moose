@@ -23,7 +23,7 @@ THMCreateMeshAction::validParams()
 {
   InputParameters params = Action::validParams();
   params.addClassDescription("Action that creates an empty mesh (in case one was not already "
-                             "created) and also builds THMProblem.");
+                             "created) and also builds THMProblem (same).");
   return params;
 }
 

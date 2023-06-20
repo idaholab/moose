@@ -1,20 +1,14 @@
 # WeightedAverageMaterial
 
-!alert construction title=Undocumented Class
-The WeightedAverageMaterial has not been documented. The content listed below should be used as a starting point for
-documenting the class, which includes the typical automatic documentation associated with a
-MooseObject; however, what is contained is ultimately determined by what is necessary to make the
-documentation clear for users.
-
 !syntax description /Materials/WeightedAverageMaterial
 
-## Overview
+The output material property $p$ is equal to:
 
-!! Replace these lines with information regarding the WeightedAverageMaterial object.
+!equation
+p = \dfrac{\sum_i v_i m_i}{\sum_i v_i}
 
-## Example Input File Syntax
-
-!! Describe and include an example of how to use the WeightedAverageMaterial object.
+where $v_i$ are the variables passed in the [!param](/Materials/WeightedAverageMaterial/weights) parameter and
+$m_i$ are the material properties passed in the [!param](/Materials/WeightedAverageMaterial/values) parameter.
 
 !syntax parameters /Materials/WeightedAverageMaterial
 

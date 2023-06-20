@@ -17,6 +17,8 @@ Sampler1DVector::validParams()
   InputParameters params = Sampler1DBase<Real>::validParams();
   params.addRequiredParam<unsigned int>("index",
                                         "Index of the vector property component to sample");
+  params.addClassDescription("Samples a single component of array material properties at all "
+                             "quadrature points in mesh block(s)");
   return params;
 }
 

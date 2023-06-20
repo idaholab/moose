@@ -18,7 +18,7 @@ Compressor1PhaseIsentropicTorqueAux::validParams()
   InputParameters params = AuxScalarKernel::validParams();
   params.addRequiredParam<UserObjectName>("compressor_uo", "Compressor user object name");
   params.addClassDescription(
-      "Isentropic torque computed in the 1-phase shaft-connected compressor.");
+      "Returns the isentropic torque computed in the 1-phase shaft-connected compressor.");
   return params;
 }
 

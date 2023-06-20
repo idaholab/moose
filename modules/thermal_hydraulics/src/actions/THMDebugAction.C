@@ -17,6 +17,7 @@ THMDebugAction::validParams()
 {
   InputParameters params = Action::validParams();
   params.addParam<bool>("check_jacobian", false, "Set to true to check jacobian");
+  params.addClassDescription("Add specific THM debugging option.");
 
   return params;
 }

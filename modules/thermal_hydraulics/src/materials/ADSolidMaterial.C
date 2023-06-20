@@ -16,6 +16,7 @@ InputParameters
 ADSolidMaterial::validParams()
 {
   InputParameters params = Material::validParams();
+  params.addClassDescription("Computes solid thermal properties as a function of temperature");
   // Coupled variables
   params.addRequiredCoupledVar("T", "Temperature in the solid");
 

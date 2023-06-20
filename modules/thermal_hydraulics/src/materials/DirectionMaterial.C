@@ -16,6 +16,7 @@ DirectionMaterial::validParams()
 {
   InputParameters params = Material::validParams();
   params.set<MooseEnum>("constant_on") = 1; // constant on element
+  params.addClassDescription("Computes the direction of 1D elements");
   return params;
 }
 

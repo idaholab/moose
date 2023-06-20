@@ -15,6 +15,8 @@ InputParameters
 HydraulicDiameterCircularMaterial::validParams()
 {
   InputParameters params = Material::validParams();
+  params.addClassDescription(
+      "Defines a circular-equivalent hydraulic diameter from the local area");
   params.addRequiredParam<MaterialPropertyName>("D_h_name",
                                                 "Hydraulic diameter material property name");
   params.addRequiredCoupledVar("A", "Cross-sectional area");

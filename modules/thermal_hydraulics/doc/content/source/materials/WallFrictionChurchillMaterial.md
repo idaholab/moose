@@ -1,20 +1,34 @@
 # WallFrictionChurchillMaterial
 
-!alert construction title=Undocumented Class
-The WallFrictionChurchillMaterial has not been documented. The content listed below should be used as a starting point for
-documenting the class, which includes the typical automatic documentation associated with a
-MooseObject; however, what is contained is ultimately determined by what is necessary to make the
-documentation clear for users.
-
 !syntax description /Materials/WallFrictionChurchillMaterial
 
-## Overview
+The Churchill friction factor material is computed with the following equations:
 
-!! Replace these lines with information regarding the WallFrictionChurchillMaterial object.
+First the Reynold number is computed, then limited to a minimum value of 10.
 
-## Example Input File Syntax
+!equation
+\tilde{Re} = max(Re, 10.0)
 
-!! Describe and include an example of how to use the WallFrictionChurchillMaterial object.
+Then two intermediate quantities are computed as:
+
+!equation
+a = \left(2.457 \log\left(\dfrac{1.0}{(7.0 / \tilde{Re})^{0.9}} + 0.27 \dfrac{roughness}{D_h}\right)\right)^{16}
+
+equation
+b = \dfrac{3.753e4}{\tilde{Re}}^{16}
+
+with $D_h$ the hydraulic diameter and the roughness of the pipe being a user input.
+
+Finally the Darcy friction factor $D_C$ for the Churchill model is computed as:
+
+!equation
+D_C = 8.0 \left( (8.0 / \tilde{Re})^{12} + \dfrac{1.0}{ (a + b)^{1.5}} \right)^{\dfrac{1.0}{12.0}}
+
+This material also defines material properties for the derivatives of the friction factor with regards to:
+
+- $\alpha \rho A$
+- $\alpha \rho u A$
+- $\alpha \rho E A$
 
 !syntax parameters /Materials/WallFrictionChurchillMaterial
 

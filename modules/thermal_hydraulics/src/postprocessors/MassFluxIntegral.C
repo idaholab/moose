@@ -15,6 +15,7 @@ InputParameters
 MassFluxIntegral::validParams()
 {
   InputParameters params = SideIntegralPostprocessor::validParams();
+  params.addClassDescription("Computes the integral of the mass flux over a boundary");
   params.addRequiredCoupledVar("arhouA", "Momentum equation variable");
   return params;
 }

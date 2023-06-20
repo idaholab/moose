@@ -1,20 +1,11 @@
 # HydraulicDiameterCircularMaterial
 
-!alert construction title=Undocumented Class
-The HydraulicDiameterCircularMaterial has not been documented. The content listed below should be used as a starting point for
-documenting the class, which includes the typical automatic documentation associated with a
-MooseObject; however, what is contained is ultimately determined by what is necessary to make the
-documentation clear for users.
-
 !syntax description /Materials/HydraulicDiameterCircularMaterial
 
-## Overview
+Based on an equivalence with a circle, the hydraulic diameter $D_h$ is defined from the area $A$ as:
 
-!! Replace these lines with information regarding the HydraulicDiameterCircularMaterial object.
-
-## Example Input File Syntax
-
-!! Describe and include an example of how to use the HydraulicDiameterCircularMaterial object.
+!equation
+D_h = \sqrt{\dfrac{4 A}{\pi}}
 
 !syntax parameters /Materials/HydraulicDiameterCircularMaterial
 

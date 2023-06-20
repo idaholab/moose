@@ -1,20 +1,12 @@
 # SimpleTurbinePowerAux
 
-!alert construction title=Undocumented Class
-The SimpleTurbinePowerAux has not been documented. The content listed below should be used as a starting point for
-documenting the class, which includes the typical automatic documentation associated with a
-MooseObject; however, what is contained is ultimately determined by what is necessary to make the
-documentation clear for users.
-
 !syntax description /AuxScalarKernels/SimpleTurbinePowerAux
 
-## Overview
+If the [!param](/AuxScalarKernels/SimpleTurbinePowerAux/on) parameter is true, the power is
+equal to [!param](/AuxScalarKernels/SimpleTurbinePowerAux/value), else it is 0.
 
-!! Replace these lines with information regarding the SimpleTurbinePowerAux object.
-
-## Example Input File Syntax
-
-!! Describe and include an example of how to use the SimpleTurbinePowerAux object.
+The [!param](/AuxScalarKernels/SimpleTurbinePowerAux/on) parameter is controllable,
+meaning that its value can be changed dynamically during a simulation using the [Controls system](syntax/Controls/index.md).
 
 !syntax parameters /AuxScalarKernels/SimpleTurbinePowerAux
 

@@ -16,7 +16,7 @@ SimpleTurbinePowerAux::validParams()
 {
   InputParameters params = ConstantScalarAux::validParams();
   params.addRequiredParam<bool>("on", "Flag determining if turbine is operating or not");
-  params.addClassDescription("Computes turbine power for 1-phase flow");
+  params.addClassDescription("Computes turbine power for 1-phase flow for a simple on/off turbine");
   params.declareControllable("on");
   return params;
 }
