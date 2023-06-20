@@ -4,11 +4,8 @@
 
   [VectorPostprocessors_sampler]
     requirement = 'The VectorPostprocessorSampler shall read samples from VectorPostprocessors.'
-
-    [sampling_test]
-      type = 'CSVDiff'
-      input = 'vectorpostprocessor.i'
-      csvdiff = 'vectorpostprocessor_out_data_0002.csv'
-    []
+    type = 'CSVDiff'
+    input = 'vectorpostprocessor.i'
+    csvdiff = 'vectorpostprocessor_out_data_0002.csv'
   []
 []
