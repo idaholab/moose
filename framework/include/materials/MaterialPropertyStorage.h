@@ -271,8 +271,7 @@ public:
    */
   IntRange<unsigned int> statefulIndexRange() const
   {
-    return hasStatefulProperties() ? IntRange<unsigned int>(1, numStates())
-                                   : IntRange<unsigned int>(0, 0);
+    return IntRange<unsigned int>(1, numStates());
   }
 
 protected:
