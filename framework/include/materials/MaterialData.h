@@ -97,7 +97,7 @@ public:
   }
 
   /**
-   * Retreives a material property
+   * Retrieves a material property
    * @tparam T The type of the property
    * @tparam is_ad Whether or not the property is AD
    * @param prop_name The name of the property
@@ -113,7 +113,7 @@ public:
     return getPropertyHelper<T, is_ad, false>(prop_name, state, requestor);
   }
   /**
-   * Retreives a material property
+   * Declares a material property
    * @tparam T The type of the property
    * @tparam is_ad Whether or not the property is AD
    * @param prop_name The name of the property
