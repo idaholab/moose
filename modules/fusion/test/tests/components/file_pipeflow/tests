@@ -4,4 +4,9 @@
     input = 'file_channel.i'
     exodiff = 'file_channel_out.e'
   []
+  [channel_run]
+    type = 'RunApp'
+    input = 'file_channel.i'
+    requirement = 'An input file calling the flow channel should be able to run'
+  []
 []

@@ -1,0 +1,12 @@
+[Tests]
+    [trans_multiapp]
+        type = 'RunApp'
+        input = 'transfer_interface.i'
+        requirement = 'A simple transfer input script should be able to run'
+    []
+    [trans_per]
+        type = 'RunApp'
+        input = 'transfer_per.i'
+        requirement = 'A simple transfer input script should be able to run'
+    []
+[]

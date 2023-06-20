@@ -7,4 +7,9 @@
     exodiff = 'simple_diffusion_out.e'
     requirement = 'The system shall be able to solve a simple diffusion problem.'
   []
+  [input_runs]
+    type = 'RunApp'
+    input = 'simple_diffusion.i'
+    requirement = 'A simple diffusion input file should be able to run'
+  []
 []
