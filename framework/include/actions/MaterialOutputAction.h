@@ -89,10 +89,10 @@ private:
                                                 bool get_names_only);
 
   /// Pointer the MaterialData object storing the block restricted materials
-  std::shared_ptr<MaterialData> _block_material_data;
+  const MaterialData * _block_material_data;
 
   /// Pointer the MaterialData object storing the boundary restricted materials
-  std::shared_ptr<MaterialData> _boundary_material_data;
+  const MaterialData * _boundary_material_data;
 
   /// Map of variable name that contains the blocks to which the variable should be restricted
   std::map<std::string, std::set<SubdomainID>> _block_variable_map;

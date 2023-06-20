@@ -108,7 +108,7 @@ Material::computeProperties()
 
   // Reference to *all* the MaterialProperties in the MaterialData object, not
   // just the ones for this Material.
-  MaterialProperties & props = _material_data->props();
+  MaterialProperties & props = _material_data.props();
 
   // If this Material ist set to be constant over elements, we take the
   // value computed for _qp == 0 and use it at all the quadrature points

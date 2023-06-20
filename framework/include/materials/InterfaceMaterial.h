@@ -174,8 +174,8 @@ public:
   }
 
 protected:
-  virtual const MaterialData & materialData() const override { return *_material_data; }
-  virtual MaterialData & materialData() override { return *_material_data; }
+  virtual const MaterialData & materialData() const override { return _material_data; }
+  virtual MaterialData & materialData() override { return _material_data; }
 
   virtual const QBase & qRule() const override { return *_qrule; }
 

@@ -19,6 +19,8 @@
 MaterialPropertyStorage::MaterialPropertyStorage(MaterialPropertyRegistry & registry)
   : _max_state(0), _spin_mtx(libMesh::Threads::spin_mtx), _registry(registry)
 {
+  for (const auto & tid : make_range(libMesh::n_threads()))
+    _material_data.emplace_back(*this, tid);
 }
 
 void
@@ -65,7 +67,7 @@ MaterialPropertyStorage::prolongStatefulProps(
     const QBase & qrule,
     const QBase & qrule_face,
     MaterialPropertyStorage & parent_material_props,
-    MaterialData & child_material_data,
+    const THREAD_ID tid,
     const Elem & elem,
     const int input_parent_side,
     const int input_child,
@@ -84,7 +86,7 @@ MaterialPropertyStorage::prolongStatefulProps(
   else
     n_qpoints = qrule_face.n_points();
 
-  child_material_data.resize(n_qpoints);
+  getMaterialData(tid).resize(n_qpoints);
 
   unsigned int n_children = elem.n_children();
 
@@ -116,7 +118,7 @@ MaterialPropertyStorage::prolongStatefulProps(
     mooseAssert(child < refinement_map.size(), "Refinement_map vector not initialized");
     const std::vector<QpMap> & child_map = refinement_map[child];
 
-    initProps(child_material_data, child_elem, child_side, n_qpoints);
+    initProps(tid, child_elem, child_side, n_qpoints);
 
     for (const auto state : stateIndexRange())
     {
@@ -135,7 +137,7 @@ MaterialPropertyStorage::restrictStatefulProps(
     const std::vector<const Elem *> & coarsened_element_children,
     const QBase & qrule,
     const QBase & qrule_face,
-    MaterialData & material_data,
+    const THREAD_ID tid,
     const Elem & elem,
     int input_side)
 {
@@ -156,7 +158,7 @@ MaterialPropertyStorage::restrictStatefulProps(
     n_qpoints = qrule_face.n_points();
   }
 
-  initProps(material_data, &elem, side, n_qpoints);
+  initProps(tid, &elem, side, n_qpoints);
 
   std::vector<MaterialProperties *> parent_props(numStates());
   for (const auto state : stateIndexRange())
@@ -183,24 +185,24 @@ MaterialPropertyStorage::restrictStatefulProps(
 }
 
 void
-MaterialPropertyStorage::initStatefulProps(MaterialData & material_data,
+MaterialPropertyStorage::initStatefulProps(const THREAD_ID tid,
                                            const std::vector<std::shared_ptr<MaterialBase>> & mats,
-                                           unsigned int n_qpoints,
+                                           const unsigned int n_qpoints,
                                            const Elem & elem,
-                                           unsigned int side /* = 0*/)
+                                           const unsigned int side /* = 0*/)
 {
   // NOTE: since materials are storing their computed properties in MaterialData class, we need to
   // juggle the memory between MaterialData and MaterialProperyStorage classes
 
-  initProps(material_data, &elem, side, n_qpoints);
+  initProps(tid, &elem, side, n_qpoints);
 
   // copy from storage to material data
-  swap(material_data, elem, side);
+  swap(tid, elem, side);
   // run custom init on properties
   for (const auto & mat : mats)
     mat->initStatefulProperties(n_qpoints);
 
-  swapBack(material_data, elem, side);
+  swapBack(tid, elem, side);
 
   if (!hasStatefulProperties())
     return;
@@ -212,7 +214,7 @@ MaterialPropertyStorage::initStatefulProps(MaterialData & material_data,
   // getMaterialProperty[Old/Older] can potentially trigger a material to
   // become stateful that previously wasn't.  This needs to go after the
   // swapBack.
-  initProps(material_data, &elem, side, n_qpoints);
+  initProps(tid, &elem, side, n_qpoints);
 
   // Copy to older states as needed
   const auto & current_props = props(&elem, side, 0);
@@ -241,23 +243,23 @@ MaterialPropertyStorage::shift()
 }
 
 void
-MaterialPropertyStorage::copy(MaterialData & material_data,
+MaterialPropertyStorage::copy(const THREAD_ID tid,
                               const Elem & elem_to,
                               const Elem & elem_from,
                               unsigned int side,
                               unsigned int n_qpoints)
 {
-  copy(material_data, &elem_to, &elem_from, side, n_qpoints);
+  copy(tid, &elem_to, &elem_from, side, n_qpoints);
 }
 
 void
-MaterialPropertyStorage::copy(MaterialData & material_data,
+MaterialPropertyStorage::copy(const THREAD_ID tid,
                               const Elem * elem_to,
                               const Elem * elem_from,
                               unsigned int side,
                               unsigned int n_qpoints)
 {
-  initProps(material_data, elem_to, side, n_qpoints);
+  initProps(tid, elem_to, side, n_qpoints);
 
   for (const auto state : stateIndexRange())
   {
@@ -270,27 +272,26 @@ MaterialPropertyStorage::copy(MaterialData & material_data,
 }
 
 void
-MaterialPropertyStorage::swap(MaterialData & material_data, const Elem & elem, unsigned int side)
+MaterialPropertyStorage::swap(const THREAD_ID tid, const Elem & elem, unsigned int side)
 {
   Threads::spin_mutex::scoped_lock lock(this->_spin_mtx);
 
   for (const auto state : stateIndexRange())
     shallowSwapData(_stateful_prop_id_to_prop_id,
-                    material_data.props(state),
+                    getMaterialData(tid).props(state),
                     // Would be nice to make this setProps()
                     initAndSetProps(&elem, side, state));
 }
 
 void
-MaterialPropertyStorage::swapBack(MaterialData & material_data,
-                                  const Elem & elem,
-                                  unsigned int side)
+MaterialPropertyStorage::swapBack(const THREAD_ID tid, const Elem & elem, unsigned int side)
 {
   Threads::spin_mutex::scoped_lock lock(this->_spin_mtx);
 
   for (const auto state : stateIndexRange())
-    shallowSwapDataBack(
-        _stateful_prop_id_to_prop_id, setProps(&elem, side, state), material_data.props(state));
+    shallowSwapDataBack(_stateful_prop_id_to_prop_id,
+                        setProps(&elem, side, state),
+                        getMaterialData(tid).props(state));
 
   // Workaround for MOOSE difficulties in keeping materialless
   // elements (e.g. Lower D elements in Mortar code) materials
@@ -302,11 +303,11 @@ MaterialPropertyStorage::swapBack(MaterialData & material_data,
 unsigned int
 MaterialPropertyStorage::addProperty(const std::string & prop_name, const unsigned int state)
 {
-  if (state > max_state)
+  if (state > MaterialData::max_state)
     mooseError("Material property state of ",
                state,
                " is not supported. Max state supported: ",
-               max_state);
+               MaterialData::max_state);
 
   // Increment state as needed
   if (maxState() < state)
@@ -327,22 +328,23 @@ MaterialPropertyStorage::addProperty(const std::string & prop_name, const unsign
 }
 
 void
-MaterialPropertyStorage::initProps(MaterialData & material_data,
+MaterialPropertyStorage::initProps(const THREAD_ID tid,
                                    const Elem * elem,
                                    unsigned int side,
                                    unsigned int n_qpoints)
 {
   for (const auto state : stateIndexRange())
-    this->initProps(material_data, state, elem, side, n_qpoints);
+    this->initProps(tid, state, elem, side, n_qpoints);
 }
 
 void
-MaterialPropertyStorage::initProps(MaterialData & material_data,
+MaterialPropertyStorage::initProps(const THREAD_ID tid,
                                    const unsigned int state,
                                    const Elem * elem,
                                    unsigned int side,
                                    unsigned int n_qpoints)
 {
+  auto & material_data = getMaterialData(tid);
   material_data.resize(n_qpoints);
 
   auto & mat_props = initAndSetProps(elem, side, state);

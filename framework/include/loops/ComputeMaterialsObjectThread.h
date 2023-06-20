@@ -24,9 +24,6 @@ class ComputeMaterialsObjectThread : public ThreadedElementLoop<ConstElemRange>
 {
 public:
   ComputeMaterialsObjectThread(FEProblemBase & fe_problem,
-                               std::vector<std::shared_ptr<MaterialData>> & material_data,
-                               std::vector<std::shared_ptr<MaterialData>> & bnd_material_data,
-                               std::vector<std::shared_ptr<MaterialData>> & neighbor_material_data,
                                MaterialPropertyStorage & material_props,
                                MaterialPropertyStorage & bnd_material_props,
                                MaterialPropertyStorage & neighbor_material_props,
@@ -50,9 +47,6 @@ public:
 protected:
   FEProblemBase & _fe_problem;
   NonlinearSystemBase & _nl;
-  std::vector<std::shared_ptr<MaterialData>> & _material_data;
-  std::vector<std::shared_ptr<MaterialData>> & _bnd_material_data;
-  std::vector<std::shared_ptr<MaterialData>> & _neighbor_material_data;
   MaterialPropertyStorage & _material_props;
   MaterialPropertyStorage & _bnd_material_props;
   MaterialPropertyStorage & _neighbor_material_props;

@@ -36,28 +36,17 @@ MaterialPropertyInterface::MaterialPropertyInterface(const MooseObject * moose_o
     _mi_feproblem(*_mi_params.getCheckedPointerParam<FEProblemBase *>("_fe_problem_base")),
     _mi_subproblem(*_mi_params.getCheckedPointerParam<SubProblem *>("_subproblem")),
     _mi_tid(_mi_params.get<THREAD_ID>("_tid")),
+    _mi_boundary_restricted(!boundary_ids.empty() &&
+                            BoundaryRestrictable::restricted(boundary_ids)),
+    _material_data_type(getMaterialDataType()),
+    _material_data(_mi_feproblem.getMaterialData(_material_data_type, _mi_tid)),
     _stateful_allowed(true),
     _get_material_property_called(false),
     _get_suffix(_mi_params.get<MaterialPropertyName>("prop_getter_suffix")),
-    _mi_boundary_restricted(!boundary_ids.empty() &&
-                            BoundaryRestrictable::restricted(boundary_ids)),
     _mi_block_ids(block_ids),
     _mi_boundary_ids(boundary_ids)
 {
   moose_object->getMooseApp().registerInterfaceObject(*this);
-
-  // Set the MaterialDataType flag
-  if (_mi_params.isParamValid("_material_data_type"))
-    _material_data_type = _mi_params.get<Moose::MaterialDataType>("_material_data_type");
-
-  else if (_mi_boundary_restricted)
-    _material_data_type = Moose::BOUNDARY_MATERIAL_DATA;
-
-  else
-    _material_data_type = Moose::BLOCK_MATERIAL_DATA;
-
-  _material_data =
-      _mi_feproblem.getMaterialData(_material_data_type, _mi_params.get<THREAD_ID>("_tid"));
 }
 
 std::string
@@ -325,4 +314,14 @@ MaterialPropertyInterface::resolveOptionalProperties()
 {
   for (auto & proxy : _optional_property_proxies)
     proxy->resolve(*this);
+}
+
+Moose::MaterialDataType
+MaterialPropertyInterface::getMaterialDataType() const
+{
+  if (_mi_params.isParamValid("_material_data_type"))
+    return _mi_params.get<Moose::MaterialDataType>("_material_data_type");
+  if (_mi_boundary_restricted)
+    return Moose::BOUNDARY_MATERIAL_DATA;
+  return Moose::BLOCK_MATERIAL_DATA;
 }

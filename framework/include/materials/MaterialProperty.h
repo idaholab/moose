@@ -363,38 +363,37 @@ private:
 class MaterialData;
 class MaterialPropertyStorage;
 
-class MaterialPropertiesKey
-{
-  friend class MaterialData;
-  friend class MaterialPropertyStorage;
-
-  MaterialPropertiesKey() {}
-  MaterialPropertiesKey(const MaterialPropertiesKey &) {}
-};
-
 class MaterialProperties : public UniqueStorage<PropertyValue>
 {
 public:
+  class WriteKey
+  {
+    friend class MaterialData;
+    friend class MaterialPropertyStorage;
+    friend void dataLoad(std::istream &, MaterialPropertyStorage &, void *);
+
+    WriteKey() {}
+    WriteKey(const WriteKey &) {}
+  };
+
   /**
    * Resize items in this array, i.e. the number of values needed in PropertyValue array
    * @param n_qpoints The number of values needed to store (equals the the number of quadrature
    * points per mesh element)
    */
-  void resizeItems(const std::size_t n_qpoints, const MaterialPropertiesKey)
+  void resizeItems(const std::size_t n_qpoints, const WriteKey)
   {
     for (const auto i : index_range(*this))
-      if (hasValue(i))
-        (*this)[i].resize(n_qpoints);
+      if (auto value = queryValue(i))
+        value->resize(n_qpoints);
   }
 
-  void resize(const std::size_t size, const MaterialPropertiesKey)
+  void resize(const std::size_t size, const WriteKey)
   {
     UniqueStorage<PropertyValue>::resize(size);
   }
 
-  void setPointer(const std::size_t i,
-                  std::unique_ptr<PropertyValue> && ptr,
-                  const MaterialPropertiesKey)
+  void setPointer(const std::size_t i, std::unique_ptr<PropertyValue> && ptr, const WriteKey)
   {
     return UniqueStorage<PropertyValue>::setPointer(i, std::move(ptr));
   }

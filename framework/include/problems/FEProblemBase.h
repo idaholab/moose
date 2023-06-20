@@ -1626,9 +1626,9 @@ public:
                                             bool no_warn = false);
 
   /*
-   * Return a pointer to the MaterialData
+   * @return The MaterialData for the type \p type for thread \p tid
    */
-  std::shared_ptr<MaterialData> getMaterialData(Moose::MaterialDataType type, THREAD_ID tid = 0);
+  MaterialData & getMaterialData(Moose::MaterialDataType type, THREAD_ID tid = 0);
 
   /**
    * Will return True if the user wants to get an error when
@@ -2188,10 +2188,6 @@ protected:
   MaterialPropertyStorage & _material_props;
   MaterialPropertyStorage & _bnd_material_props;
   MaterialPropertyStorage & _neighbor_material_props;
-
-  std::vector<std::shared_ptr<MaterialData>> _material_data;
-  std::vector<std::shared_ptr<MaterialData>> _bnd_material_data;
-  std::vector<std::shared_ptr<MaterialData>> _neighbor_material_data;
 
   ///@{
   // Material Warehouses

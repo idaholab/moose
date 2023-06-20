@@ -79,7 +79,7 @@ public:
   const GenericMaterialProperty<T, is_ad> & getGenericMaterialProperty(const std::string & name,
                                                                        const unsigned int state = 0)
   {
-    return getGenericMaterialProperty<T, is_ad>(name, *_material_data, state);
+    return getGenericMaterialProperty<T, is_ad>(name, _material_data, state);
   }
   template <typename T>
   const MaterialProperty<T> & getMaterialProperty(const std::string & name,
@@ -116,7 +116,7 @@ public:
   const GenericMaterialProperty<T, is_ad> &
   getGenericMaterialPropertyByName(const MaterialPropertyName & name, const unsigned int state = 0)
   {
-    return getGenericMaterialPropertyByName<T, is_ad>(name, *_material_data, state);
+    return getGenericMaterialPropertyByName<T, is_ad>(name, _material_data, state);
   }
   template <typename T>
   const MaterialProperty<T> & getMaterialPropertyByName(const MaterialPropertyName & name,
@@ -438,12 +438,6 @@ protected:
   /// The "complete" name of the object that this interface belongs for material property output
   const MooseObjectName _mi_moose_object_name;
 
-  /// The type of data
-  Moose::MaterialDataType _material_data_type;
-
-  /// Pointer to the material data class that stores properties
-  std::shared_ptr<MaterialData> _material_data;
-
   /// Reference to the FEProblemBase class
   FEProblemBase & _mi_feproblem;
 
@@ -452,6 +446,17 @@ protected:
 
   /// Current threaded it
   const THREAD_ID _mi_tid;
+
+private:
+  /// BoundaryRestricted flag
+  const bool _mi_boundary_restricted;
+
+protected:
+  /// The type of data
+  const Moose::MaterialDataType _material_data_type;
+
+  /// The material data class that stores properties
+  MaterialData & _material_data;
 
   /**
    * A helper method for checking material properties
@@ -529,6 +534,11 @@ protected:
   const MaterialPropertyName _get_suffix;
 
 private:
+  /**
+   * @returns The MaterialDataType given the interface's parameters
+   */
+  Moose::MaterialDataType getMaterialDataType() const;
+
   /*
    * A proxy method for _mi_feproblem.getMaxQps()
    */
@@ -538,9 +548,6 @@ private:
    * A proxy method for _mi_feproblem.addConsumedPropertyName()
    */
   void addConsumedPropertyName(const MooseObjectName & obj_name, const std::string & prop_name);
-
-  /// BoundaryRestricted flag
-  const bool _mi_boundary_restricted;
 
   /// Storage for the block ids created by BlockRestrictable
   const std::set<SubdomainID> & _mi_block_ids;
@@ -628,11 +635,11 @@ MaterialPropertyInterface::getBlockMaterialProperty(const MaterialPropertyName &
     return pair_type(nullptr, {});
 
   // Call first so that the ID gets registered
-  const auto & prop = _material_data->getProperty<T, false>(name, 0, _mi_moose_object);
+  const auto & prop = _material_data.getProperty<T, false>(name, 0, _mi_moose_object);
   auto blocks = getMaterialPropertyBlocks(name);
   auto prop_blocks_pair = pair_type(&prop, std::move(blocks));
 
-  _material_property_dependencies.insert(_material_data->getPropertyId(name));
+  _material_property_dependencies.insert(_material_data.getPropertyId(name));
 
   // Update consumed properties in MaterialPropertyDebugOutput
   addConsumedPropertyName(_mi_moose_object_name, name);
@@ -656,7 +663,7 @@ MaterialPropertyInterface::hasMaterialPropertyByName(const std::string & name_in
   const auto name = _get_suffix.empty()
                         ? name_in
                         : MooseUtils::join(std::vector<std::string>({name_in, _get_suffix}), "_");
-  return _material_data->haveProperty<T>(name);
+  return _material_data.haveProperty<T>(name);
 }
 
 template <typename T, bool is_ad>
@@ -727,7 +734,7 @@ MaterialPropertyInterface::hasADMaterialPropertyByName(const std::string & name_
   const auto name = _get_suffix.empty()
                         ? name_in
                         : MooseUtils::join(std::vector<std::string>({name_in, _get_suffix}), "_");
-  return _material_data->haveADProperty<T>(name);
+  return _material_data.haveADProperty<T>(name);
 }
 
 template <typename T, bool is_ad>

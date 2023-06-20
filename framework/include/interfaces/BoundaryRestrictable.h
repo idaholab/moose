@@ -207,7 +207,7 @@ private:
   THREAD_ID _bnd_tid;
 
   /// Pointer to MaterialData for boundary (@see hasBoundaryMaterialProperty)
-  std::shared_ptr<MaterialData> _bnd_material_data;
+  const MaterialData & _bnd_material_data;
 
   /// Whether or not this object is restricted to nodesets
   bool _bnd_nodal;
@@ -235,5 +235,5 @@ BoundaryRestrictable::hasBoundaryMaterialProperty(const std::string & prop_name)
   // If you get here the supplied property is defined on all boundaries, but is still subject
   // existence in the MateialData class
   return hasBoundaryMaterialPropertyHelper(prop_name) &&
-         _bnd_material_data->haveGenericProperty<T, is_ad>(prop_name);
+         _bnd_material_data.haveGenericProperty<T, is_ad>(prop_name);
 }

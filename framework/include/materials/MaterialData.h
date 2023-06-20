@@ -11,7 +11,6 @@
 
 #include "MaterialProperty.h"
 #include "Moose.h"
-#include "MaterialPropertyStorage.h"
 #include "MooseUtils.h"
 
 // libMesh
@@ -20,6 +19,7 @@
 #include <vector>
 #include <memory>
 
+class MaterialPropertyStorage;
 class MooseObject;
 class Material;
 class XFEM;
@@ -31,7 +31,10 @@ class XFEM;
 class MaterialData
 {
 public:
-  MaterialData(MaterialPropertyStorage & storage);
+  MaterialData(MaterialPropertyStorage & storage, const THREAD_ID tid);
+
+  /// The max time state supported (2 = older)
+  static constexpr unsigned int max_state = 2;
 
   /**
    * Resize the data to hold properties for n_qpoints quadrature points.
@@ -156,16 +159,18 @@ public:
   MaterialPropertyStorage & getMaterialPropertyStorageForXFEM(const XFEMKey) { return _storage; }
 
   /**
+   * @return Whether or not a property exists with the name \p name
+   */
+  bool hasProperty(const std::string & prop_name) const;
+
+  /**
    * Wrapper for MaterialStorage::getPropertyId. Allows classes with a MaterialData object
    * (i.e. MaterialPropertyInterface) to access material property IDs.
    * @param prop_name The name of the material property
    *
    * @return An unsigned int corresponding to the property ID of the passed in prop_name
    */
-  unsigned int getPropertyId(const std::string & prop_name) const
-  {
-    return _storage.getMaterialPropertyRegistry().getID(prop_name);
-  }
+  unsigned int getPropertyId(const std::string & prop_name) const;
 
   /**
    * Set _resize_only_if_smaller to perform a non-destructive resize. Setting this
@@ -184,17 +189,22 @@ public:
    * Use this when elements are deleted so we don't end up with invalid elem pointers (for e.g.
    * stateful properties) hanging around in our data structures
    */
-  void eraseProperty(const Elem * elem) { _storage.eraseProperty(elem); };
+  void eraseProperty(const Elem * elem);
 
 private:
   /// Reference to the MaterialStorage class
   MaterialPropertyStorage & _storage;
 
+  /// The thread id
+  const THREAD_ID _tid;
+
   /// Number of quadrature points
   unsigned int _n_qpoints;
 
   /// The underlying property data
-  std::array<MaterialProperties, MaterialPropertyStorage::max_state + 1> _props;
+  std::array<MaterialProperties, max_state + 1> _props;
+
+  unsigned int addPropertyHelper(const std::string & prop_name, const unsigned int state);
 
   template <typename T, bool is_ad, bool declare>
   GenericMaterialProperty<T, is_ad> & getPropertyHelper(const std::string & prop_name,
@@ -235,7 +245,7 @@ template <typename T, bool is_ad>
 inline bool
 MaterialData::haveGenericProperty(const std::string & prop_name) const
 {
-  if (!_storage.hasProperty(prop_name))
+  if (!hasProperty(prop_name))
     return false;
 
   const auto prop_id = getPropertyId(prop_name);
@@ -280,7 +290,7 @@ MaterialData::getPropertyHelper(const std::string & prop_name,
   if constexpr (declare)
     mooseAssert(state == 0, "Cannot declare properties for states other than zero");
 
-  const auto prop_id = _storage.addProperty(prop_name, state);
+  const auto prop_id = addPropertyHelper(prop_name, state);
   resizeProps<T, is_ad>(prop_id);
 
   auto & base_prop = props(state)[prop_id];

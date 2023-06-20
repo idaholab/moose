@@ -60,10 +60,9 @@ RedistributeProperties::operator>=(const RelationshipManager & rhs) const
 }
 
 void
-RedistributeProperties::addMaterialPropertyStorage(
-    std::vector<std::shared_ptr<MaterialData>> & mat_data, MaterialPropertyStorage & mat_props)
+RedistributeProperties::addMaterialPropertyStorage(MaterialPropertyStorage & mat_props)
 {
-  _materials.emplace_back(&mat_data, &mat_props);
+  _materials.emplace_back(&mat_props);
 }
 
 void
@@ -72,7 +71,7 @@ RedistributeProperties::redistribute()
   const MeshBase & mesh = _moose_mesh->getMesh();
   const processor_id_type pid = mesh.processor_id();
 
-  for (auto & [mat_data, mat_prop_store] : _materials)
+  for (auto & mat_prop_store : _materials)
   {
     // Once we've redistributed data elsewhere we'll delete it here.
     //
@@ -89,7 +88,6 @@ RedistributeProperties::redistribute()
           !Threads::in_threads,
           "This routine has not been implemented for threads. Please query this routine before "
           "a threaded region or contact a MOOSE developer to discuss.");
-      MaterialData & my_mat_data = *((*mat_data)[/*_tid*/ 0]); // Not threaded
 
       for (const auto state : mat_prop_store->stateIndexRange())
       {
@@ -192,7 +190,7 @@ RedistributeProperties::redistribute()
               // on, otherwise we might see an
               // initialized-but-not-filled entry in the next map and
               // foolishly try to send it places.
-              mat_prop_store_ptr->initProps(my_mat_data, state, elem, prop_id, n_q_points);
+              mat_prop_store_ptr->initProps(0, state, elem, prop_id, n_q_points);
 
               mooseAssert(elem_props.contains(prop_id),
                           "Trying to load into a nonexistant property id?");

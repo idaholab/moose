@@ -44,7 +44,7 @@ MaterialCopyUserObject::execute()
     {
       Elem * elem_from = _mesh.elemPtr(_copy_from_element);
       Elem * elem_to = _mesh.elemPtr(_copy_to_element);
-      _material_data->copy(*elem_to, *elem_from, 0);
+      _material_data.copy(*elem_to, *elem_from, 0);
     }
   }
 }
