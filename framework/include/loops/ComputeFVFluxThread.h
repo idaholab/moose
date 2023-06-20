@@ -587,7 +587,7 @@ ComputeFVFluxThread<RangeType, AttributeTagType>::checkPropDeps(
       auto pr = supplied_props.insert(prop_id);
       if (!pr.second)
       {
-        const auto & prop_ids = MaterialPropertyStorage::propIDs();
+        const auto & prop_ids = _fe_problem.getMaterialPropertyRegistry().getNamesToIDs();
         auto same_matprop_name_it =
             std::find_if(prop_ids.begin(),
                          prop_ids.end(),

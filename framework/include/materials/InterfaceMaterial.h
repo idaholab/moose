@@ -44,66 +44,124 @@ public:
   /**
    * Retrieve the property through a given input parameter key with a fallback
    * to getting it by name
+   *
+   * \p state is the property state; 0 = current, 1 = old, 2 = older, etc.
    */
   template <typename T, bool is_ad>
-  const auto & getGenericMaterialProperty(const std::string & name)
+  const GenericMaterialProperty<T, is_ad> &
+  getGenericMaterialProperty(const std::string & name, const unsigned int state = 0);
+  template <typename T>
+  const MaterialProperty<T> & getMaterialProperty(const std::string & name,
+                                                  const unsigned int state = 0)
   {
-    if constexpr (is_ad)
-      return getADMaterialProperty<T>(name);
-    else
-      return getMaterialProperty<T>(name);
+    return getGenericMaterialProperty<T, false>(name, state);
   }
   template <typename T>
-  const MaterialProperty<T> & getMaterialProperty(const std::string & name);
+  const ADMaterialProperty<T> & getADMaterialProperty(const std::string & name)
+  {
+    return getGenericMaterialProperty<T, true>(name, 0);
+  }
   template <typename T>
-  const ADMaterialProperty<T> & getADMaterialProperty(const std::string & name);
+  const MaterialProperty<T> & getMaterialPropertyOld(const std::string & name)
+  {
+    return getGenericMaterialProperty<T, false>(name, 1);
+  }
   template <typename T>
-  const MaterialProperty<T> & getMaterialPropertyOld(const std::string & name);
-  template <typename T>
-  const MaterialProperty<T> & getMaterialPropertyOlder(const std::string & name);
+  const MaterialProperty<T> & getMaterialPropertyOlder(const std::string & name)
+  {
+    return getGenericMaterialProperty<T, false>(name, 2);
+  }
   ///@}
 
   ///@{
   /**
    * Retrieve the property named "name"
+   *
+   * \p state is the property state; 0 = current, 1 = old, 2 = older, etc.
    */
+  template <typename T, bool is_ad>
+  const GenericMaterialProperty<T, is_ad> &
+  getGenericMaterialPropertyByName(const std::string & name, const unsigned int state = 0);
   template <typename T>
-  const MaterialProperty<T> & getMaterialPropertyByName(const std::string & prop_name);
+  const MaterialProperty<T> & getMaterialPropertyByName(const std::string & prop_name,
+                                                        const unsigned int state = 0)
+  {
+
+    return getGenericMaterialPropertyByName<T, false>(prop_name, state);
+  }
   template <typename T>
-  const ADMaterialProperty<T> & getADMaterialPropertyByName(const std::string & prop_name);
+  const ADMaterialProperty<T> & getADMaterialPropertyByName(const std::string & prop_name)
+  {
+
+    return getGenericMaterialPropertyByName<T, true>(prop_name, 0);
+  }
   template <typename T>
-  const MaterialProperty<T> & getMaterialPropertyOldByName(const std::string & prop_name);
+  const MaterialProperty<T> & getMaterialPropertyOldByName(const std::string & prop_name)
+  {
+
+    return getGenericMaterialPropertyByName<T, false>(prop_name, 1);
+  }
   template <typename T>
-  const MaterialProperty<T> & getMaterialPropertyOlderByName(const std::string & prop_name);
+  const MaterialProperty<T> & getMaterialPropertyOlderByName(const std::string & prop_name)
+  {
+
+    return getGenericMaterialPropertyByName<T, false>(prop_name, 2);
+  }
   ///@}
 
   ///@{
   /**
    * Retrieve the neighbor property through a given input parameter key with a fallback
    * to getting it by name
+   *
+   * \p state is the property state; 0 = current, 1 = old, 2 = older, etc.
    */
+  template <typename T, bool is_ad>
+  const GenericMaterialProperty<T, is_ad> &
+  getGenericNeighborMaterialProperty(const std::string & name, const unsigned int state = 0);
   template <typename T>
-  const MaterialProperty<T> & getNeighborMaterialProperty(const std::string & name);
-
+  const MaterialProperty<T> & getNeighborMaterialProperty(const std::string & name,
+                                                          const unsigned int state = 0)
+  {
+    return getGenericNeighborMaterialProperty<T, false>(name, state);
+  }
   template <typename T>
-  const ADMaterialProperty<T> & getNeighborADMaterialProperty(const std::string & name);
-
+  const ADMaterialProperty<T> & getNeighborADMaterialProperty(const std::string & name)
+  {
+    return getGenericNeighborMaterialProperty<T, true>(name, 0);
+  }
   template <typename T>
-  const MaterialProperty<T> & getNeighborMaterialPropertyOld(const std::string & name);
+  const MaterialProperty<T> & getNeighborMaterialPropertyOld(const std::string & name)
+  {
+    return getGenericNeighborMaterialProperty<T, false>(name, 1);
+  }
   template <typename T>
-  const MaterialProperty<T> & getNeighborMaterialPropertyOlder(const std::string & name);
+  const MaterialProperty<T> & getNeighborMaterialPropertyOlder(const std::string & name)
+  {
+    return getGenericNeighborMaterialProperty<T, false>(name, 2);
+  }
   ///@}
 
   ///@{
   /**
    * Retrieve the neighbor property named "name"
+   *
+   * \p state is the property state; 0 = current, 1 = old, 2 = older, etc.
    */
+  template <typename T, bool is_ad>
+  const GenericMaterialProperty<T, is_ad> &
+  getGenericNeighborMaterialPropertyByName(const std::string & name, const unsigned int state = 0);
   template <typename T>
-  const MaterialProperty<T> & getNeighborMaterialPropertyByName(const std::string & prop_name);
-
+  const MaterialProperty<T> & getNeighborMaterialPropertyByName(const std::string & prop_name,
+                                                                const unsigned int state = 0)
+  {
+    return getGenericNeighborMaterialPropertyByName<T, false>(prop_name, state);
+  }
   template <typename T>
-  const ADMaterialProperty<T> & getNeighborADMaterialPropertyByName(const std::string & name);
-
+  const ADMaterialProperty<T> & getNeighborADMaterialPropertyByName(const std::string & prop_name)
+  {
+    return getGenericNeighborMaterialPropertyByName<T, true>(prop_name, 0);
+  }
   ///@}
 
   using MaterialBase::getZeroMaterialProperty;
@@ -136,186 +194,73 @@ protected:
   const unsigned int & _neighbor_side;
 };
 
-template <typename T>
-const MaterialProperty<T> &
-InterfaceMaterial::getMaterialProperty(const std::string & name)
+template <typename T, bool is_ad>
+const GenericMaterialProperty<T, is_ad> &
+InterfaceMaterial::getGenericMaterialProperty(const std::string & name, const unsigned int state)
 {
   // Check if the supplied parameter is a valid input parameter key
   std::string prop_name = deducePropertyName(name);
 
   // Check if it's just a constant.
-  const MaterialProperty<T> * default_property = defaultMaterialProperty<T>(prop_name);
-  if (default_property)
+  if (const auto * default_property = defaultGenericMaterialProperty<T, is_ad>(prop_name))
     return *default_property;
 
-  return getMaterialPropertyByName<T>(prop_name);
+  return getGenericMaterialPropertyByName<T, is_ad>(prop_name, state);
 }
 
-template <typename T>
-const ADMaterialProperty<T> &
-InterfaceMaterial::getADMaterialProperty(const std::string & name)
-{
-  // Check if the supplied parameter is a valid input parameter key
-  std::string prop_name = deducePropertyName(name);
-
-  // Check if it's just a constant.
-  const ADMaterialProperty<T> * default_property = defaultADMaterialProperty<T>(prop_name);
-  if (default_property)
-    return *default_property;
-
-  return getADMaterialPropertyByName<T>(prop_name);
-}
-
-template <typename T>
-const MaterialProperty<T> &
-InterfaceMaterial::getMaterialPropertyOld(const std::string & name)
-{
-  // Check if the supplied parameter is a valid input parameter key
-  std::string prop_name = deducePropertyName(name);
-
-  // Check if it's just a constant.
-  const MaterialProperty<T> * default_property = defaultMaterialProperty<T>(prop_name);
-  if (default_property)
-    return *default_property;
-
-  return getMaterialPropertyOldByName<T>(prop_name);
-}
-
-template <typename T>
-const MaterialProperty<T> &
-InterfaceMaterial::getMaterialPropertyOlder(const std::string & name)
-{
-  // Check if the supplied parameter is a valid input parameter key
-  std::string prop_name = deducePropertyName(name);
-
-  // Check if it's just a constant.
-  const MaterialProperty<T> * default_property = defaultMaterialProperty<T>(prop_name);
-  if (default_property)
-    return *default_property;
-
-  return getMaterialPropertyOlderByName<T>(prop_name);
-}
-
-template <typename T>
-const MaterialProperty<T> &
-InterfaceMaterial::getMaterialPropertyByName(const std::string & prop_name)
+template <typename T, bool is_ad>
+const GenericMaterialProperty<T, is_ad> &
+InterfaceMaterial::getGenericMaterialPropertyByName(const std::string & prop_name,
+                                                    const unsigned int state)
 {
   MaterialBase::checkExecutionStage();
+
   // The property may not exist yet, so declare it (declare/getMaterialProperty are referencing the
   // same memory)
-  _requested_props.insert(prop_name);
-  registerPropName(prop_name, true, MaterialPropState::CURRENT);
-  return TwoMaterialPropertyInterface::getMaterialPropertyByName<T>(prop_name);
+  if (state == 0)
+    _requested_props.insert(prop_name);
+
+  // Do this before hand so that the propery id is defined
+  auto & prop =
+      TwoMaterialPropertyInterface::getGenericMaterialPropertyByName<T, is_ad>(prop_name, state);
+
+  registerPropName(prop_name, true, state);
+
+  return prop;
 }
 
-template <typename T>
-const ADMaterialProperty<T> &
-InterfaceMaterial::getADMaterialPropertyByName(const std::string & prop_name)
-{
-  MaterialBase::checkExecutionStage();
-  // The property may not exist yet, so declare it (declare/getADMaterialProperty are referencing
-  // the same memory)
-  _requested_props.insert(prop_name);
-  registerPropName(prop_name, true, MaterialPropState::CURRENT);
-  return TwoMaterialPropertyInterface::getADMaterialPropertyByName<T>(prop_name);
-}
-
-template <typename T>
-const MaterialProperty<T> &
-InterfaceMaterial::getMaterialPropertyOldByName(const std::string & prop_name)
-{
-  registerPropName(prop_name, true, MaterialPropState::OLD);
-  return TwoMaterialPropertyInterface::getMaterialPropertyOldByName<T>(prop_name);
-}
-
-template <typename T>
-const MaterialProperty<T> &
-InterfaceMaterial::getMaterialPropertyOlderByName(const std::string & prop_name)
-{
-  registerPropName(prop_name, true, MaterialPropState::OLDER);
-  return TwoMaterialPropertyInterface::getMaterialPropertyOlderByName<T>(prop_name);
-}
-
-// Neighbor material properties
-
-template <typename T>
-const MaterialProperty<T> &
-InterfaceMaterial::getNeighborMaterialProperty(const std::string & name)
+template <typename T, bool is_ad>
+const GenericMaterialProperty<T, is_ad> &
+InterfaceMaterial::getGenericNeighborMaterialProperty(const std::string & name,
+                                                      const unsigned int state)
 {
   // Check if the supplied parameter is a valid input parameter key
   std::string prop_name = deducePropertyName(name);
 
   // Check if it's just a constant.
-  const MaterialProperty<T> * default_property = defaultMaterialProperty<T>(prop_name);
-  if (default_property)
+  if (const auto * default_property = defaultGenericMaterialProperty<T, is_ad>(prop_name))
     return *default_property;
 
-  return getNeighborMaterialPropertyByName<T>(prop_name);
+  return getGenericNeighborMaterialPropertyByName<T, is_ad>(prop_name, state);
 }
 
-template <typename T>
-const MaterialProperty<T> &
-InterfaceMaterial::getNeighborMaterialPropertyByName(const std::string & prop_name)
+template <typename T, bool is_ad>
+const GenericMaterialProperty<T, is_ad> &
+InterfaceMaterial::getGenericNeighborMaterialPropertyByName(const std::string & name,
+                                                            const unsigned int state)
 {
   MaterialBase::checkExecutionStage();
+
   // The property may not exist yet, so declare it (declare/getMaterialProperty are referencing the
   // same memory)
-  _requested_props.insert(prop_name);
-  registerPropName(prop_name, true, MaterialPropState::CURRENT);
-  return TwoMaterialPropertyInterface::getNeighborMaterialPropertyByName<T>(prop_name);
-}
-template <typename T>
-const ADMaterialProperty<T> &
-InterfaceMaterial::getNeighborADMaterialProperty(const std::string & name)
-{
-  // Check if the supplied parameter is a valid input parameter key
-  std::string prop_name = deducePropertyName(name);
+  if (state == 0)
+    _requested_props.insert(name);
 
-  // Check if it's just a constant.
-  const ADMaterialProperty<T> * default_property = defaultADMaterialProperty<T>(prop_name);
-  if (default_property)
-    return *default_property;
+  // Do this before hand so that the propery id is defined
+  auto & prop =
+      TwoMaterialPropertyInterface::getGenericNeighborMaterialPropertyByName<T, is_ad>(name, state);
 
-  return getNeighborADMaterialPropertyByName<T>(prop_name);
-}
+  registerPropName(name, true, state);
 
-template <typename T>
-const ADMaterialProperty<T> &
-InterfaceMaterial::getNeighborADMaterialPropertyByName(const std::string & prop_name)
-{
-  MaterialBase::checkExecutionStage();
-  // The property may not exist yet, so declare it (declare/getMaterialProperty are referencing the
-  // same memory)
-  _requested_props.insert(prop_name);
-  registerPropName(prop_name, true, MaterialPropState::CURRENT);
-  return TwoMaterialPropertyInterface::getNeighborADMaterialPropertyByName<T>(prop_name);
-}
-template <typename T>
-const MaterialProperty<T> &
-InterfaceMaterial::getNeighborMaterialPropertyOld(const std::string & name)
-{
-  // Check if the supplied parameter is a valid input parameter key
-  std::string prop_name = deducePropertyName(name);
-
-  // Check if it's just a constant.
-  const MaterialProperty<T> * default_property = defaultMaterialProperty<T>(prop_name);
-  if (default_property)
-    return *default_property;
-
-  return TwoMaterialPropertyInterface::getNeighborMaterialPropertyOld<T>(prop_name);
-}
-
-template <typename T>
-const MaterialProperty<T> &
-InterfaceMaterial::getNeighborMaterialPropertyOlder(const std::string & name)
-{
-  // Check if the supplied parameter is a valid input parameter key
-  std::string prop_name = deducePropertyName(name);
-
-  // Check if it's just a constant.
-  const MaterialProperty<T> * default_property = defaultMaterialProperty<T>(prop_name);
-  if (default_property)
-    return *default_property;
-
-  return TwoMaterialPropertyInterface::getNeighborMaterialPropertyOlder<T>(prop_name);
+  return prop;
 }

@@ -647,7 +647,7 @@ isZero(const T & value, const Real tolerance = TOLERANCE * TOLERANCE * TOLERANCE
 /**
  * Function to dump the contents of MaterialPropertyStorage for debugging purposes
  * @param props The storage item to dump, this should be
- * MaterialPropertyStorage.props()/propsOld()/propsOlder().
+ * MaterialPropertyStorage.props(state)
  *
  * Currently this only words for scalar material properties. Something to do as needed would be to
  * create a method in MaterialProperty

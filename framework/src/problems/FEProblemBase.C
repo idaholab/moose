@@ -315,12 +315,12 @@ FEProblemBase::FEProblemBase(const InputParameters & parameters)
     _current_nl_sys(nullptr),
     _aux(nullptr),
     _coupling(Moose::COUPLING_DIAG),
-    _material_props(
-        declareRestartableDataWithContext<MaterialPropertyStorage>("material_props", &_mesh)),
-    _bnd_material_props(
-        declareRestartableDataWithContext<MaterialPropertyStorage>("bnd_material_props", &_mesh)),
+    _material_props(declareRestartableDataWithContext<MaterialPropertyStorage>(
+        "material_props", &_mesh, _material_prop_registry)),
+    _bnd_material_props(declareRestartableDataWithContext<MaterialPropertyStorage>(
+        "bnd_material_props", &_mesh, _material_prop_registry)),
     _neighbor_material_props(declareRestartableDataWithContext<MaterialPropertyStorage>(
-        "neighbor_material_props", &_mesh)),
+        "neighbor_material_props", &_mesh, _material_prop_registry)),
     _reporter_data(_app),
     // TODO: delete the following line after apps have been updated to not call getUserObjects
     _all_user_objects(_app.getExecuteOnEnum()),
