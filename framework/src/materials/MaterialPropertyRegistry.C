@@ -28,9 +28,18 @@ MaterialPropertyRegistry::addOrGetID(const std::string & name,
 unsigned int
 MaterialPropertyRegistry::getID(const std::string & name) const
 {
+  const auto id = queryID(name);
+  if (!id)
+    mooseError("MaterialPropertyRegistry: Property '" + name + "' is not declared");
+  return *id;
+}
+
+std::optional<unsigned int>
+MaterialPropertyRegistry::queryID(const std::string & name) const
+{
   const auto it = _name_to_id.find(name);
   if (it == _name_to_id.end())
-    mooseError("MaterialPropertyRegistry: Property '" + name + "' is not declared");
+    return {};
   return it->second;
 }
 
