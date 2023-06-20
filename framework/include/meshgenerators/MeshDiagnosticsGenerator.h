@@ -41,5 +41,11 @@ protected:
   /// whether to check different element types in the same sub-domain
   bool _check_element_types;
   /// whether to check for intersecting elements
-  bool _check_element_intersect;
+  bool _check_element_overlap;
+  /// whether to check for number of elements overlapping
+  unsigned int _num_elem_overlaps;
+  /// whether to check for elements in different planes (non_planar)
+  bool _check_non_planar_sides;
+  /// counting number of sides that are non-planar
+  unsigned int _sides_non_planar;
 };

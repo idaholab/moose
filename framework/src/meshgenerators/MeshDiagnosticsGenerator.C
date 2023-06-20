@@ -31,7 +31,9 @@ MeshDiagnosticsGenerator::validParams()
   params.addParam<bool>("examine_element_types",
                         true,
                         "whether to look for multiple element types in the same sub-domain");
-
+  params.addParam<bool>("examine_element_overlap", true, "whether to find overlapping elements");
+  params.addParam<bool>(
+      "examine_nonplanar_sides", true, "whether to check element sides are planar");
   return params;
 }
 
@@ -42,7 +44,8 @@ MeshDiagnosticsGenerator::MeshDiagnosticsGenerator(const InputParameters & param
     _min_volume(getParam<Real>("minimum_element_volumes")),
     _max_volume(getParam<Real>("maximum_element_volumes")),
     _check_element_types(getParam<bool>("examine_element_types")),
-    _check_element_intersect(getParam<bool>("examine_element_intersect"))
+    _check_element_overlap(getParam<bool>("examine_element_overlap")),
+    _check_non_planar_sides(getParam<bool>("examine_nonplanar_sides"))
 {
 }
 
@@ -53,6 +56,7 @@ MeshDiagnosticsGenerator::generate()
 
   if (_check_element_volumes)
   {
+    // loop elements within the mesh
     for (auto & elem : mesh->active_element_ptr_range())
     {
       if (elem->volume() <= _min_volume)
@@ -75,8 +79,9 @@ MeshDiagnosticsGenerator::generate()
     // loop on sub-domain
     for (auto & id : ids)
     {
+      // ElemType defines an enum for geometric element types
       std::set<ElemType> types;
-      // for loop on elements within this sub-domain
+      // loop on elements within this sub-domain
       for (auto & elem : mesh->active_subdomain_elements_ptr_range(id))
       {
         types.insert(elem->type());
@@ -92,21 +97,103 @@ MeshDiagnosticsGenerator::generate()
         mooseWarning("Two different element types in subdomain " + std::to_string(id));
     }
   }
-  if (_check_element_intersect)
+
+  if (_check_element_overlap)
   {
-    for (auto & elem : mesh->active_element_ptr_range())
+    auto pl = mesh->sub_point_locator();
+    _console << pl.get() << std::endl;
+    // loop on nodes
+    for (auto & node : mesh->local_node_ptr_range())
     {
-      if (elem->volume() <= _min_volume)
+      // find all the elements around this node
+      std::set<const Elem *> elements;
+      (*pl)(*node, elements);
+
+      for (auto & elem : elements)
       {
-        _num_tiny_elems++;
-      }
-      if (elem->volume() >= _max_volume)
-      {
-        _num_big_elems++;
+        if (!elem->contains_point(*node))
+          continue;
+
+        bool found = false;
+        for (auto & elem_node : elem->node_ref_range())
+        {
+          if (*node == elem_node)
+          {
+            found = true;
+            break;
+          }
+        }
+        if (!found)
+        {
+          _num_elem_overlaps++;
+
+          _console << "Element overlap detected at : " << *node << std::endl;
+        }
       }
     }
-    _console << "Number of elements below volume size : " << _num_tiny_elems << std::endl;
-    _console << "Number of elements above volume size : " << _num_big_elems << std::endl;
+    _console << "Number of elements overlapping (node-based heuristics): " << _num_elem_overlaps
+             << std::endl;
+
+    _num_elem_overlaps = 0;
+
+    // loop all elements in mesh
+    for (auto & elem : mesh->active_element_ptr_range())
+    {
+      // find all the elements around the centroid of this element
+      std::set<const Elem *> overlaps;
+      (*pl)(elem->vertex_average(), overlaps);
+
+      if (overlaps.size() > 1)
+
+        _num_elem_overlaps++;
+
+      _console << "Element overlap detected at a centroid : " << elem->vertex_average()
+               << std::endl;
+    }
   }
+  _console << "Number of elements overlapping (centroid-based heuristics): " << _num_elem_overlaps
+           << std::endl;
+
+  if (_check_non_planar_sides)
+  {
+    // loop all elements in mesh
+    for (auto & elem : mesh->active_element_ptr_range())
+    {
+      for (auto i : make_range(elem->n_sides()))
+      {
+        auto side = elem->side_ptr(i);
+        std::vector<Point *> nodes;
+        for (auto & node : side->node_ref_range())
+          nodes.emplace_back(&node);
+
+        if (nodes.size() <= 3)
+          continue;
+        RealVectorValue v1 = *nodes[0] - *nodes[1];
+        RealVectorValue v2 = *nodes[0] - *nodes[2];
+        bool aligned = MooseUtils::absoluteFuzzyEqual(v1 * v2 - v1.norm() * v2.norm(), 0);
+        if (aligned)
+          continue; // TODO
+
+        bool found_non_planar = false;
+
+        for (auto i : make_range(nodes.size() - 3))
+        {
+          RealVectorValue v3 = nodes[0] - nodes[i + 3];
+          bool planar = MooseUtils::absoluteFuzzyEqual(v2.cross(v1) * v3, 0);
+          if (!planar)
+            found_non_planar = true;
+        }
+
+        if (found_non_planar)
+        {
+          _sides_non_planar++;
+
+          _console << "Nonplanar side detected at :" << elem->side_ptr(i)->vertex_average()
+                   << std::endl;
+        }
+      }
+    }
+  }
+
   return dynamic_pointer_cast<MeshBase>(mesh);
 }
