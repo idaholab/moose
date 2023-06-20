@@ -90,7 +90,7 @@ public:
   const T & operator[](const std::size_t i) const
   {
     mooseAssert(hasValue(i), "Null object");
-    return *value(i);
+    return *pointerValue(i);
   }
   T & operator[](const std::size_t i) { return const_cast<T &>(std::as_const(*this)[i]); }
   ///@}
@@ -110,32 +110,36 @@ public:
   /**
    * @returns whether or not the underlying object at index \p is initialized
    */
-  bool hasValue(const std::size_t i) const { return value(i) != nullptr; }
+  bool hasValue(const std::size_t i) const { return pointerValue(i) != nullptr; }
 
   /**
-   * Returns a read-only reference to the underlying unique pointer
-   * at index \p i.
+   * @returns A pointer to the underlying data at index \p i
+   *
+   * The pointer will be nullptr if !hasValue(i), that is, if the
+   * unique_ptr at index \p i is not initialized
    */
-  const std::unique_ptr<T> & value(const std::size_t i) const
+  ///@{
+  const T * queryValue(const std::size_t i) const { return pointerValue(i).get(); }
+  T * queryValue(const std::size_t i)
   {
-    mooseAssert(size() > i, "Invalid size");
-    return _values[i];
+    return const_cast<T *>(std::as_const(*this).queryValue(i));
   }
+  ///@}
 
 protected:
   /**
-   * Returns a writeable reference to the underlying unique pointer
-   * at index \p i.
+   * Sets the underlying unique_ptr at index \p i to \p ptr.
    *
    * This can be used to construct objects in the storage, i.e.,
-   * setValue(0) = std::make_unique<T>(...);
+   * setPointer(0, std::make_unique<T>(...));
    *
    * This is the only method that allows for the modification of
    * ownership in the underlying vector. Protect it wisely.
    */
-  std::unique_ptr<T> & setValue(const std::size_t i)
+  void setPointer(const std::size_t i, std::unique_ptr<T> && ptr)
   {
-    return const_cast<std::unique_ptr<T> &>(std::as_const(*this).value(i));
+    mooseAssert(size() > i, "Invalid size");
+    _values[i] = std::move(ptr);
   }
 
   /**
@@ -145,6 +149,20 @@ protected:
    * the underlying container. Protect it wisely.
    */
   void resize(const std::size_t size) { _values.resize(size); }
+
+private:
+  /**
+   * Returns a read-only reference to the underlying unique pointer
+   * at index \p i.
+   *
+   * We hope to only expose the underlying unique_ptr to this API,
+   * and not in derived classes. Hopefully it can stay that way.
+   */
+  const std::unique_ptr<T> & pointerValue(const std::size_t i) const
+  {
+    mooseAssert(size() > i, "Invalid size");
+    return _values[i];
+  }
 
   /// The underlying data
   values_type _values;

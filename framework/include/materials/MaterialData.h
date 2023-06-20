@@ -243,8 +243,8 @@ MaterialData::haveGenericProperty(const std::string & prop_name) const
   if (prop_id >= props(0).size())
     return false;
 
-  const auto & base_prop = props(0)[prop_id];
-  return dynamic_cast<const GenericMaterialProperty<T, is_ad> *>(&base_prop) != nullptr;
+  const PropertyValue * const base_prop = props(0).queryValue(prop_id);
+  return dynamic_cast<const GenericMaterialProperty<T, is_ad> *>(base_prop) != nullptr;
 }
 
 template <typename T, bool is_ad>
@@ -259,10 +259,12 @@ MaterialData::resizeProps(unsigned int id)
       entry.resize(size, {});
     if (!entry.hasValue(id))
     {
+      std::unique_ptr<PropertyValue> value;
       if (is_ad && state == 0)
-        entry.setValue(id, {}) = std::make_unique<ADMaterialProperty<T>>();
+        value = std::make_unique<ADMaterialProperty<T>>();
       else
-        entry.setValue(id, {}) = std::make_unique<MaterialProperty<T>>();
+        value = std::make_unique<MaterialProperty<T>>();
+      entry.setPointer(id, std::move(value), {});
     }
   }
 }
