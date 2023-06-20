@@ -30,7 +30,7 @@ PorousFlowPeacemanBorehole::validParams()
                                         "For function_of=pressure, this function is the "
                                         "pressure at the bottom of the borehole, "
                                         "otherwise it is the temperature at the bottom of "
-                                        "the borehole");
+                                        "the borehole.");
   params.addRequiredParam<RealVectorValue>(
       "unit_weight",
       "(fluid_density*gravitational_acceleration) as a vector pointing downwards.  "
@@ -100,6 +100,15 @@ void
 PorousFlowPeacemanBorehole::initialSetup()
 {
   PorousFlowLineGeometry::initialSetup();
+
+  if (!_point_file.empty() && _zs[0] < _zs.back())
+    mooseError("PorousFlowPeacemanBorehole: The last entry in the point_file needs to be at the "
+               "bottom of the well_bore because this is the point where the function bottom_p_or_t "
+               "is evaluated.  The depth of the first point is z=",
+               _zs[0],
+               " and the last point is z=",
+               _zs.back());
+
   // construct the rotation matrix needed to rotate the permeability
   const unsigned int num_pts = _zs.size();
   _rot_matrix.resize(std::max(num_pts - 1, (unsigned)1));

@@ -207,6 +207,16 @@
     design = 'porous_flow/tests/dirackernels/dirackernels_tests.md porous_flow/sinks.md PorousFlowPeacemanBorehole.md'
     issues = '#7992 #8139'
   [../]
+  [./bh_except17]
+    type = 'RunException'
+    input = 'bh02.i'
+    cli_args = 'DiracKernels/bh/point_file=bh02_error.bh'
+    expect_err = 'PorousFlowPeacemanBorehole: The last entry in the point_file needs to be at the bottom of the well_bore because this is the point where the function bottom_p_or_t is evaluated.'
+    threading = '!pthreads'
+    requirement = 'PorousFlowPeacemanBorehole shall throw an error if the last point in the point_file is not at the well bottom, ie has the lowest z coordinate value.'
+    design = 'PorousFlowPeacemanBorehole.md'
+    issues = '#24639'
+  [../]
 
   [./pls01_00]
     type = 'CSVDiff'
