@@ -1,7 +1,11 @@
 [Mesh]
   [gen]
-    type = GeneratedMeshGenerator
-    dim = 2
+    type = PolyLineMeshGenerator
+    points = "0 0 0
+              0 1 0
+              1 1 0
+              1 0 0"
+    loop = true
   []
 []
 
@@ -23,9 +27,9 @@
 [UserObjects]
   [sphere]
     type = GeometrySphere
-    boundary = 'left right top bottom'
     center = '0.5 0.5 0'
     radius = 0.7071
+    block = 0
   []
 []
 
