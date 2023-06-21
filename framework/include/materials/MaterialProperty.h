@@ -392,9 +392,11 @@ public:
     UniqueStorage<PropertyValue>::resize(size);
   }
 
-  auto & setValue(const std::size_t i, const MaterialPropertiesKey)
+  void setPointer(const std::size_t i,
+                  std::unique_ptr<PropertyValue> && ptr,
+                  const MaterialPropertiesKey)
   {
-    return UniqueStorage<PropertyValue>::setValue(i);
+    return UniqueStorage<PropertyValue>::setPointer(i, std::move(ptr));
   }
 };
 

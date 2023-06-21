@@ -360,7 +360,7 @@ MaterialPropertyStorage::initProps(MaterialData & material_data,
     if (!mat_props.hasValue(i))
     {
       const auto prop_id = _stateful_prop_id_to_prop_id[i];
-      mat_props.setValue(i, {}) = material_data.props(0)[prop_id].clone(n_qpoints);
+      mat_props.setPointer(i, material_data.props(0)[prop_id].clone(n_qpoints), {});
     }
 }
 
