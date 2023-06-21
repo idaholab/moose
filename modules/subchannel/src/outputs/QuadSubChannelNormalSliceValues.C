@@ -39,7 +39,7 @@ QuadSubChannelNormalSliceValues::QuadSubChannelNormalSliceValues(const InputPara
 }
 
 void
-QuadSubChannelNormalSliceValues::output(const ExecFlagType & /*type*/)
+QuadSubChannelNormalSliceValues::output()
 {
   auto val_soln = SolutionHandle(_problem_ptr->getVariable(0, _variable));
   auto nz = _mesh.getNumOfAxialCells();

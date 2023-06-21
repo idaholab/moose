@@ -25,7 +25,7 @@ class QuadSubChannelNormalSliceValues : public FileOutput
 {
 public:
   QuadSubChannelNormalSliceValues(const InputParameters & params);
-  virtual void output(const ExecFlagType & type) override;
+  virtual void output() override;
 
 protected:
   QuadSubChannelMesh & _mesh;
