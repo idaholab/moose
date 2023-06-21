@@ -245,7 +245,7 @@ NonlinearEigenSystem::solve()
   for (unsigned int n = 0; n < n_converged_eigenvalues; n++)
     _eigen_values[n] = getConvergedEigenvalue(n);
 
-  // Update the active eigenvector to the solution vector
+  // Update the solution vector to the active eigenvector
   if (n_converged_eigenvalues)
     getConvergedEigenpair(_eigen_problem.activeEigenvalueIndex());
 }
