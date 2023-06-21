@@ -260,6 +260,7 @@ FlowModelSinglePhase::addMooseObjects()
   ////////////////////////////////////////////////////////
 
   // Density equation (transient term + advection term)
+  if (_flow_channel.problemIsTransient())
   {
     std::string class_name = "ADTimeDerivative";
     InputParameters params = _factory.getValidParams(class_name);
@@ -272,6 +273,7 @@ FlowModelSinglePhase::addMooseObjects()
 
   // Momentum equation, for 1-D flow channel, x-momentum equation only
   // (transient term + remaining terms[advection, pressure, body force, etc])
+  if (_flow_channel.problemIsTransient())
   {
     std::string class_name = "ADTimeDerivative";
     InputParameters params = _factory.getValidParams(class_name);
@@ -317,6 +319,7 @@ FlowModelSinglePhase::addMooseObjects()
 
   // Total energy equation
   // (transient term + remaining terms[advection, wall heating, work from body force, etc])
+  if (_flow_channel.problemIsTransient())
   {
     std::string class_name = "ADTimeDerivative";
     InputParameters params = _factory.getValidParams(class_name);

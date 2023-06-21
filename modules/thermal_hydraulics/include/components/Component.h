@@ -239,6 +239,11 @@ public:
   template <typename T>
   T getEnumParam(const std::string & param) const;
 
+  /**
+   * Whether the problem is transient
+   */
+  bool problemIsTransient() const { return getTHMProblem().isTransient(); }
+
 protected:
   /**
    * Initializes the component
