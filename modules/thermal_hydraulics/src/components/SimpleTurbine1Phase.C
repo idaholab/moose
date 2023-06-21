@@ -78,6 +78,7 @@ SimpleTurbine1Phase::buildVolumeJunctionUserObject()
     getTHMProblem().addUserObject(class_name, _junction_uo_name, params);
     connectObject(params, _junction_uo_name, "power", "W_dot");
     connectObject(params, _junction_uo_name, "on");
+    connectObject(params, _junction_uo_name, "K");
   }
 }
 

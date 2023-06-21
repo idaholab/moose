@@ -105,7 +105,6 @@ HeatSourceFromTotalPower::addMooseObjects()
     {
       pars.set<Point>("axis_point") = hs_cyl->getPosition();
       pars.set<RealVectorValue>("axis_dir") = hs_cyl->getDirection();
-      pars.set<Real>("offset") = hs_cyl->getInnerRadius() - hs_cyl->getAxialOffset();
     }
     pars.set<ExecFlagEnum>("execute_on") = {EXEC_INITIAL};
     // TODO: This seems to produce incorrect output files, even though this is the line
@@ -131,7 +130,6 @@ HeatSourceFromTotalPower::addMooseObjects()
     {
       pars.set<Point>("axis_point") = hs_cyl->getPosition();
       pars.set<RealVectorValue>("axis_dir") = hs_cyl->getDirection();
-      pars.set<Real>("offset") = hs_cyl->getInnerRadius() - hs_cyl->getAxialOffset();
     }
     else if (is_plate)
     {

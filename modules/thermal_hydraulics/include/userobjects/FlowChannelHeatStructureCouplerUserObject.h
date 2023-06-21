@@ -62,11 +62,6 @@ protected:
   unsigned int _hs_qp;
 
 private:
-  /**
-   * Parallel gather of all local contributions into one global map
-   */
-  void allGatherMap(std::map<dof_id_type, std::vector<ADReal>> & data);
-
   /// Mesh alignment object
   MeshAlignment & _mesh_alignment;
 

@@ -409,7 +409,7 @@ class Tester(MooseObject):
     def addCaveats(self, *kwargs):
         """ Add caveat(s) which will be displayed with the final test status """
         for i in [x for x in kwargs if x]:
-            if type(i) == type([]):
+            if isinstance(i, list):
                 self.__caveats.update(i)
             else:
                 self.__caveats.add(i)
@@ -656,7 +656,7 @@ class Tester(MooseObject):
         if py_packages is not None:
             missing = mooseutils.check_configuration(py_packages.split(), message=False)
             if missing:
-                reasons['python_packages_required'] = ', '.join(['no {}'.format(p) for p in missing])
+                reasons['python_packages_required'] = ', '.join(['{}'.format(p) for p in missing])
 
         # Check for programs
         programs = self.specs['requires']

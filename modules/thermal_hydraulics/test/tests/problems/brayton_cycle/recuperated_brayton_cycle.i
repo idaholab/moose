@@ -474,7 +474,6 @@ hs_power = 105750
     names = recuperator
     materials = steel
     inner_radius = ${D1}
-    offset_mesh_by_inner_radius = true
   []
   # heat transfer from recuperator to cold leg
   [heat_transfer_cold_leg]

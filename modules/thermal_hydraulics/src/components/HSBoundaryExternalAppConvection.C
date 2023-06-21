@@ -79,7 +79,6 @@ HSBoundaryExternalAppConvection::addMooseObjects()
     {
       pars.set<Point>("axis_point") = hs_cyl->getPosition();
       pars.set<RealVectorValue>("axis_dir") = hs_cyl->getDirection();
-      pars.set<Real>("offset") = hs_cyl->getInnerRadius() - hs_cyl->getAxialOffset();
     }
     pars.set<FunctionName>("scale") = getParam<FunctionName>("scale");
     if (isParamValid("scale_pp"))
@@ -99,7 +98,6 @@ HSBoundaryExternalAppConvection::addMooseObjects()
     pars.set<std::vector<VariableName>>("htc_ext") = {_htc_ext_var_name};
     pars.set<Point>("axis_point") = hs_cyl->getPosition();
     pars.set<RealVectorValue>("axis_dir") = hs_cyl->getDirection();
-    pars.set<Real>("offset") = hs_cyl->getInnerRadius() - hs_cyl->getAxialOffset();
     if (getParam<bool>("scale_heat_rate_pp"))
       pars.set<FunctionName>("scale") = getParam<FunctionName>("scale");
     pars.set<ExecFlagEnum>("execute_on") = {EXEC_INITIAL, EXEC_TIMESTEP_END};

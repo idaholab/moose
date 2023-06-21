@@ -11,6 +11,7 @@
       csvdiff = 'pressure_drop_csv_pressure_vpp_FINAL.csv'
       rel_err = 1e-6
       cli_args = 'GlobalParams/rdg_slope_reconstruction=minmod Executioner/num_steps=5'
+      max_parallel = 5 # https://github.com/idaholab/moose/issues/24537
 
       detail = 'without a junction, and'
     []
@@ -20,6 +21,7 @@
       csvdiff = 'pressure_drop_with_junction_csv_pressure_vpp_FINAL.csv'
       rel_err = 1e-6
       cli_args = 'GlobalParams/rdg_slope_reconstruction=minmod Executioner/num_steps=5'
+      max_parallel = 4 # https://github.com/idaholab/moose/issues/24537
 
       detail = 'with a junction.'
     []

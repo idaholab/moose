@@ -21,6 +21,24 @@ public:
 
   FileMeshComponent(const InputParameters & parameters);
 
+  /**
+   * Returns true if this component has the supplied boundary
+   *
+   * @param[in] boundary_name   Boundary name to check
+   */
+  bool hasBoundary(const BoundaryName & boundary_name) const;
+
+  /**
+   * Gets boundary info associated with the component boundary
+   *
+   * @param[in] boundary  Boundary name of a component boundary
+   *
+   * @return The list of tuples (element id, local side id) that is associated with boundary
+   * `boundary`
+   */
+  const std::vector<std::tuple<dof_id_type, unsigned short int>> &
+  getBoundaryInfo(const BoundaryName & boundary_name) const;
+
 protected:
   virtual void setupMesh() override;
 
@@ -37,4 +55,10 @@ protected:
 
   /// Translation vector for the file mesh
   const Point & _position;
+
+  /// Boundary names for this component
+  std::vector<BoundaryName> _boundary_names;
+
+  /// Map of boundary name to list of tuples of element and side IDs for that boundary
+  std::map<BoundaryName, std::vector<std::tuple<dof_id_type, unsigned short int>>> _boundary_info;
 };

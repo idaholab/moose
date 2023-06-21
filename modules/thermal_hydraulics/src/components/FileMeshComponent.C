@@ -164,7 +164,7 @@ FileMeshComponent::buildMesh()
     // Generate the boundary ID for THMMesh and populate boundary_id_map
     unsigned int bc_id = thm_mesh.getNextBoundaryId();
     boundary_id_map[ex_sideset_id] = bc_id;
-    new_ids_to_names.emplace(bc_id, sideset_name);
+    new_ids_to_names.emplace(bc_id, genName(_name, sideset_name));
   }
 
   auto & boundary_info = thm_mesh.getMesh().get_boundary_info();
@@ -189,14 +189,16 @@ FileMeshComponent::buildMesh()
     // Get the boundary ID and add the elem/side pair to the boundary
     unsigned int bc_id = boundary_id_map[exio_helper.id_list[e]];
     boundary_info.add_side(elem, mapped_side, bc_id);
+    _boundary_info[new_ids_to_names[bc_id]].push_back(
+        std::tuple<dof_id_type, unsigned short int>(elem->id(), mapped_side));
   }
 
   // Generate and set the boundary name
   for (const auto & id_and_name : new_ids_to_names)
   {
-    const std::string sideset_name = genName(_name, id_and_name.second);
-    boundary_info.sideset_name(id_and_name.first) = sideset_name;
-    boundary_info.nodeset_name(id_and_name.first) = sideset_name;
+    boundary_info.sideset_name(id_and_name.first) = id_and_name.second;
+    boundary_info.nodeset_name(id_and_name.first) = id_and_name.second;
+    _boundary_names.push_back(id_and_name.second);
   }
 
   // This appears to be necessary to get the nodesets named correctly, despite
@@ -204,4 +206,27 @@ FileMeshComponent::buildMesh()
   boundary_info.build_node_list_from_side_list();
 
   return subdomain_names;
+}
+
+bool
+FileMeshComponent::hasBoundary(const BoundaryName & boundary_name) const
+{
+  checkSetupStatus(MESH_PREPARED);
+
+  return std::find(_boundary_names.begin(), _boundary_names.end(), boundary_name) !=
+         _boundary_names.end();
+}
+
+const std::vector<std::tuple<dof_id_type, unsigned short int>> &
+FileMeshComponent::getBoundaryInfo(const BoundaryName & boundary_name) const
+{
+  checkSetupStatus(MESH_PREPARED);
+
+  if (_boundary_info.find(boundary_name) != _boundary_info.end())
+    return _boundary_info.at(boundary_name);
+  else
+    mooseError(name(),
+               ": No boundary info exists for the boundary '",
+               boundary_name,
+               "' on this component.");
 }

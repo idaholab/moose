@@ -61,13 +61,8 @@ HeatStructure2DCoupler::addMooseObjects()
     params.set<Real>("coupling_area_fraction") = _coupling_area_fractions[i];
     if (_is_cylindrical[i])
     {
-      const HeatStructureCylindricalBase & hs_cylindrical =
-          getComponentByName<HeatStructureCylindricalBase>(_hs_names[i]);
-
       params.set<Point>("axis_point") = hs.getPosition();
       params.set<RealVectorValue>("axis_dir") = hs.getDirection();
-      params.set<Real>("offset") =
-          hs_cylindrical.getInnerRadius() - hs_cylindrical.getAxialOffset();
     }
     getTHMProblem().addBoundaryCondition(class_name, genName(name(), class_name, i), params);
   }

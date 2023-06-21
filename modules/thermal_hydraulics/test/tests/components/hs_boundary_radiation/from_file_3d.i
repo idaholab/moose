@@ -75,6 +75,9 @@ E_change = ${fparse scale * heat_flux * A * t}
   dt = ${t}
   num_steps = 1
   abort_on_solve_fail = true
+
+  petsc_options_iname = '-pc_type'
+  petsc_options_value = 'lu'
 []
 
 [Outputs]

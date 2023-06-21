@@ -21,6 +21,8 @@
     rel_err = 4e-3
     abs_zero = 1e-9
     cli_args = 'Outputs/exodus=true'
+    prereq = 'phy:mass_energy_conservation' # recover testing uses same output file
+    max_parallel = 14 # https://github.com/idaholab/moose/issues/24533
 
     requirement = 'The system shall be able to model a compressor with ShaftConnectedCompressor1Phase.'
   []

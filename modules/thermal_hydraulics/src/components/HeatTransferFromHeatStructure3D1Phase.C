@@ -74,25 +74,11 @@ HeatTransferFromHeatStructure3D1Phase::setupMesh()
                              flow_channel.getElementIDs().end());
       }
     }
-    // Boundary info (element ID, local side number) for the heat structure side
-    std::vector<std::tuple<dof_id_type, unsigned short int>> bnd_info;
-    BoundaryID bd_id = mesh().getBoundaryID(_boundary);
-    mesh().buildBndElemList();
-    const auto & bnd_to_elem_map = mesh().getBoundariesToActiveSemiLocalElemIds();
-    auto search = bnd_to_elem_map.find(bd_id);
-    if (search == bnd_to_elem_map.end())
-      mooseDoOnce(logError("The boundary '", _boundary, "' (", bd_id, ") was not found."));
-    else
-    {
-      const std::unordered_set<dof_id_type> & bnd_elems = search->second;
-      for (auto elem_id : bnd_elems)
-      {
-        const Elem * elem = mesh().elemPtr(elem_id);
-        unsigned int side = mesh().sideWithBoundaryID(elem, bd_id);
-        bnd_info.push_back(std::tuple<dof_id_type, unsigned short int>(elem_id, side));
-      }
 
-      _mesh_alignment.initialize(fchs_elem_ids, bnd_info);
+    const auto & hs = getComponentByName<HeatStructureFromFile3D>(_hs_name);
+    if (hs.hasBoundary(_boundary))
+    {
+      _mesh_alignment.initialize(fchs_elem_ids, hs.getBoundaryInfo(_boundary));
 
       for (const auto & fc_elem_id : fchs_elem_ids)
       {
@@ -234,7 +220,13 @@ HeatTransferFromHeatStructure3D1Phase::check() const
       clsr->checkHeatTransfer(*this, getComponentByName<FlowChannel1Phase>(_flow_channel_names[i]));
   }
 
-  if (!hasComponentByName<HeatStructureFromFile3D>(_hs_name))
+  if (hasComponentByName<HeatStructureFromFile3D>(_hs_name))
+  {
+    const auto & hs = getComponentByName<HeatStructureFromFile3D>(_hs_name);
+    if (!hs.hasBoundary(_boundary))
+      logError("The boundary '", _boundary, "' does not exist on the component '", _hs_name, "'.");
+  }
+  else
     logError("The component '", _hs_name, "' is not a HeatStructureFromFile3D component.");
 }
 

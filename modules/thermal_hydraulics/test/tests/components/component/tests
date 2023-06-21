@@ -9,7 +9,7 @@
   [err:setup_status]
     type = 'RunException'
     input = 'err.setup_status.i'
-    expect_err = "pipe: The component setup status \(2\) is less than the required status \(3\)"
+    expect_err = "pipe: The component setup status \(1\) is less than the required status \(2\)"
     allow_test_objects = true
   []
 []

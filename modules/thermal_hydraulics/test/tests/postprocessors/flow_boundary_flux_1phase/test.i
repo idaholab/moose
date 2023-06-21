@@ -84,6 +84,9 @@ p_out = 1e5
   nl_max_its = 25
   l_tol = 1e-3
   l_max_its = 5
+
+  petsc_options_iname = '-pc_type'
+  petsc_options_value = 'lu'
 []
 
 [Outputs]
