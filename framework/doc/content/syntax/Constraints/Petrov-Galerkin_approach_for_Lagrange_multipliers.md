@@ -21,7 +21,7 @@ where $\lambda$ and $\delta \lambda$ are the Lagrange multiplier variable and it
 
 The Petrov-Galerkin method is implemented in MOOSE by overwriting the Lagrange multiplier's (dual) test functions using that of a standard Lagrange multiplier variable. This functionality is enabled for all mortar-based constraints and the weighted-gap user object.
 
-To successfully use this approach in `ContactAction`, one just need to set `use_petrov_galerkin = true` in the `Contact` block. For example:
+To successfully use this approach in the contact action, one just needs to set `use_petrov_galerkin = true` in the `Contact` block. For example:
 
 ```
 [Contact]
