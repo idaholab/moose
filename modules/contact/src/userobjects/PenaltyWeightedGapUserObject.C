@@ -193,15 +193,15 @@ PenaltyWeightedGapUserObject::isAugmentedLagrangianConverged()
     const auto gap = physicalGap(wgap);
     {
       // check active set nodes
-      if (gap < 0)
+      if (gap < 0 || _dof_to_lagrange_multiplier[dof_object] < 0.0)
       {
         if (std::abs(gap) > max_gap)
-          max_gap = std::abs(gap);
+          max_gap = gap;
       }
     }
   }
 
-  if (max_gap > _penetration_tolerance)
+  if (std::abs(max_gap) > _penetration_tolerance)
   {
     mooseInfoRepeated("Penetration tolerance fail max_gap = ",
                       max_gap,
@@ -250,11 +250,17 @@ PenaltyWeightedGapUserObject::updateAugmentedLagrangianMultipliers()
     // else
     //   lagrange_multiplier = 0.0;
 
-    lagrange_multiplier += std::min(gap * penalty, lagrange_multiplier);
+    if (lagrange_multiplier + gap * penalty <= 0)
+      lagrange_multiplier += gap * penalty;
+    else
+      lagrange_multiplier = 0.0;
 
     // update penalty
     const auto previous_gap = _dof_to_previous_gap[dof_object];
-    if (gap < 0 && std::abs(gap) > 0.25 * std::abs(previous_gap))
-      penalty *= 100.0;
+    if (std::abs(gap) > 0.25 * std::abs(previous_gap))
+      penalty *= 10.0;
+
+    // if (penalty > 1e11)
+    //   penalty = 1e11;
   }
 }
