@@ -12,10 +12,33 @@
 // MOOSE includes
 #include "Output.h"
 
+class PetscOutput;
+
+class PetscOutputInterface
+{
+public:
+  PetscOutputInterface(PetscOutput * obj);
+
+protected:
+  PetscOutput * _petsc_output;
+
+  /**
+   * Performs the output on non-linear iterations
+   * This is the monitor method that PETSc will call on non-linear iterations
+   */
+  static PetscErrorCode petscNonlinearOutput(SNES, PetscInt its, PetscReal fnorm, void * void_ptr);
+
+  /**
+   * Performs the output onlinear iterations
+   * This is the monitor method that PETSc will call on linear iterations
+   */
+  static PetscErrorCode petscLinearOutput(KSP, PetscInt its, PetscReal fnorm, void * void_ptr);
+};
+
 /**
  * Adds the ability to output on every nonlinear and/or linear residual
  */
-class PetscOutput : public Output
+class PetscOutput : public Output, public PetscOutputInterface
 {
 public:
   static InputParameters validParams();
@@ -37,7 +60,14 @@ public:
   virtual Real time() override;
 
 protected:
-  virtual bool shouldOutput() override;
+  bool inNonlinearTimeWindow()
+  {
+    return _time >= _nonlinear_start_time - _t_tol && _time <= _nonlinear_end_time + _t_tol;
+  }
+  bool inLinearTimeWindow()
+  {
+    return _time >= _linear_start_time - _t_tol && _time <= _linear_end_time + _t_tol;
+  }
 
   /// Current norm returned from PETSc
   Real _norm;
@@ -59,20 +89,6 @@ private:
    * Internal setup function that executes at the beginning of the time step
    */
   void solveSetup() override;
-
-  /**
-   * Performs the output on non-linear iterations
-   *
-   * This is the monitor method that PETSc will call on non-linear iterations
-   */
-  static PetscErrorCode petscNonlinearOutput(SNES, PetscInt its, PetscReal fnorm, void * void_ptr);
-
-  /**
-   * Performs the output onlinear iterations
-   *
-   * This is the monitor method that PETSc will call on linear iterations
-   */
-  static PetscErrorCode petscLinearOutput(KSP, PetscInt its, PetscReal fnorm, void * void_ptr);
 
   /// The psuedo non-linear time
   Real _nonlinear_time;
@@ -103,4 +119,6 @@ private:
 
   /// Linear residual output end time
   Real _linear_end_time;
+
+  friend class PetscOutputInterface;
 };
