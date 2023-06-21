@@ -200,6 +200,12 @@ ContactAction::validParams()
   params.addParam<std::vector<TagName>>(
       "extra_vector_tags",
       "The tag names for extra vectors that residual data should be saved into");
+  params.addParam<bool>(
+      "use_petrov_galerkin",
+      false,
+      "Whether to use the Petrov-Galerkin approach for the mortar-based constraints. If set to "
+      "true, we use the standard basis as the test function and dual basis as "
+      "the shape function for the interpolation of the Lagrange multiplier variable.");
   return params;
 }
 
@@ -596,6 +602,7 @@ ContactAction::addRelationshipManagers(Moose::RelationshipManagerType input_rm_t
     params.set<BoundaryName>("secondary_boundary") = _boundary_pairs[0].second;
     params.set<SubdomainName>("primary_subdomain") = primary_subdomain_name;
     params.set<SubdomainName>("secondary_subdomain") = secondary_subdomain_name;
+    params.set<bool>("use_petrov_galerkin") = getParam<bool>("use_petrov_galerkin");
     addRelationshipManagers(input_rm_type, params);
   }
 }
@@ -614,6 +621,7 @@ ContactAction::addMortarContact()
   const std::string normal_lagrange_multiplier_name = action_name + "_normal_lm";
   const std::string tangential_lagrange_multiplier_name = action_name + "_tangential_lm";
   const std::string tangential_lagrange_multiplier_3d_name = action_name + "_tangential_3d_lm";
+  const std::string auxiliary_lagrange_multiplier_name = action_name + "_aux_lm";
 
   if (_current_task == "append_mesh_generator")
   {
@@ -644,15 +652,16 @@ ContactAction::addMortarContact()
   {
     // Add the lagrange multiplier on the secondary subdomain.
     const auto addLagrangeMultiplier =
-        [this, &secondary_subdomain_name, &displacements](const std::string & variable_name,
-                                                          const Real scaling_factor) //
+        [this, &secondary_subdomain_name, &displacements](
+            const std::string & variable_name, const Real scaling_factor, const bool add_aux_lm) //
     {
       InputParameters params = _factory.getValidParams("MooseVariableBase");
 
       // Allow the user to select "weighted" constraints and standard bases (use_dual = false) or
       // "legacy" constraints and dual bases (use_dual = true). Unless it's for testing purposes,
       // this combination isn't recommended
-      params.set<bool>("use_dual") = _use_dual;
+      if (!add_aux_lm)
+        params.set<bool>("use_dual") = _use_dual;
 
       mooseAssert(_problem->systemBaseNonlinear().hasVariable(displacements[0]),
                   "Displacement variable is missing");
@@ -670,22 +679,30 @@ ContactAction::addMortarContact()
         mooseError("Invalid bases for mortar contact.");
 
       params.set<std::vector<SubdomainName>>("block") = {secondary_subdomain_name};
-      params.set<std::vector<Real>>("scaling") = {scaling_factor};
+      if (!add_aux_lm)
+        params.set<std::vector<Real>>("scaling") = {scaling_factor};
       auto fe_type = AddVariableAction::feType(params);
       auto var_type = AddVariableAction::variableType(fe_type);
-      _problem->addVariable(var_type, variable_name, params);
+      if (add_aux_lm)
+        _problem->addAuxVariable(var_type, variable_name, params);
+      else
+        _problem->addVariable(var_type, variable_name, params);
     };
 
-    addLagrangeMultiplier(normal_lagrange_multiplier_name, getParam<Real>("normal_lm_scaling"));
+    addLagrangeMultiplier(
+        normal_lagrange_multiplier_name, getParam<Real>("normal_lm_scaling"), false);
 
     if (_model == ContactModel::COULOMB)
     {
-      addLagrangeMultiplier(tangential_lagrange_multiplier_name,
-                            getParam<Real>("tangential_lm_scaling"));
+      addLagrangeMultiplier(
+          tangential_lagrange_multiplier_name, getParam<Real>("tangential_lm_scaling"), false);
       if (ndisp > 2)
-        addLagrangeMultiplier(tangential_lagrange_multiplier_3d_name,
-                              getParam<Real>("tangential_lm_scaling"));
+        addLagrangeMultiplier(
+            tangential_lagrange_multiplier_3d_name, getParam<Real>("tangential_lm_scaling"), false);
     }
+
+    if (getParam<bool>("use_petrov_galerkin"))
+      addLagrangeMultiplier(auxiliary_lagrange_multiplier_name, 1.0, true);
   }
 
   if (_current_task == "add_user_object")
@@ -706,6 +723,9 @@ ContactAction::addMortarContact()
         var_params.set<std::vector<VariableName>>("disp_z") = {displacements[2]};
       var_params.set<bool>("use_displaced_mesh") = true;
       var_params.set<std::vector<VariableName>>("lm_variable") = {normal_lagrange_multiplier_name};
+      var_params.set<bool>("use_petrov_galerkin") = getParam<bool>("use_petrov_galerkin");
+      if (getParam<bool>("use_petrov_galerkin"))
+        var_params.set<std::vector<VariableName>>("aux_lm") = {auxiliary_lagrange_multiplier_name};
 
       _problem->addUserObject(
           "LMWeightedGapUserObject", "lm_weightedgap_object_" + name(), var_params);
@@ -732,6 +752,9 @@ ContactAction::addMortarContact()
       if (ndisp > 2)
         var_params.set<std::vector<VariableName>>("lm_variable_tangential_two") = {
             tangential_lagrange_multiplier_3d_name};
+      var_params.set<bool>("use_petrov_galerkin") = getParam<bool>("use_petrov_galerkin");
+      if (getParam<bool>("use_petrov_galerkin"))
+        var_params.set<std::vector<VariableName>>("aux_lm") = {auxiliary_lagrange_multiplier_name};
 
       _problem->addUserObject(
           "LMWeightedVelocitiesUserObject", "lm_weightedvelocities_object_" + name(), var_params);
