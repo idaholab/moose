@@ -121,11 +121,11 @@ AuxKernelTempl<ComputeValueType>::AuxKernelTempl(const InputParameters & paramet
     _nodal(_var.isNodal()),
     _u(_nodal ? _var.nodalValueArray() : _var.sln()),
 
-    _test(_var.phi()),
     _assembly(_subproblem.assembly(_tid, 0)),
     _bnd(boundaryRestricted()),
     _mesh(_subproblem.mesh()),
 
+    _test(_bnd ? _var.phiFace() : _var.phi()),
     _q_point(_bnd ? _assembly.qPointsFace() : _assembly.qPoints()),
     _qrule(_bnd ? _assembly.qRuleFace() : _assembly.qRule()),
     _JxW(_bnd ? _assembly.JxWFace() : _assembly.JxW()),
@@ -323,7 +323,6 @@ AuxKernelTempl<ComputeValueType>::compute()
           for (unsigned int j = 0; j < _test.size(); j++)
             _local_ke(i, j) += t * _test[j][_qp];
         }
-
       // mass matrix is always SPD but in case of boundary restricted, it will be rank deficient
       _local_sol.resize(_n_local_dofs);
       if (_bnd)

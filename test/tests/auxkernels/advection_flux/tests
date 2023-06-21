@@ -1,0 +1,29 @@
+[Tests]
+  issues = '#24289'
+  design = 'auxkernels/AdvectiveFluxAux.md'
+  [Finite_Element]
+    requirement = 'The system shall be able to output the components of the flux vector for advection problems'
+    [x_flux]
+      type = 'CSVDiff'
+      input = 'advection_flux_fe.i'
+      csvdiff = 'advection_flux_fe_out.csv'
+      abs_zero = 1e-9
+      detail = 'in x direction'
+    []
+
+    [normal_flux]
+      type = 'CSVDiff'
+      input = 'normal_advection_flux_fe.i'
+      csvdiff = 'normal_advection_flux_fe_out.csv'
+      abs_zero = 1e-9
+      detail = 'in normal direction'
+    []
+  []
+
+  [Finite_Volume]
+    requirement = 'The system shall throw an error when finite volume variable is used(currently not support)'
+    type = RunException
+    input = 'advection_flux_fv.i'
+    expect_err = "The following error occurred in the object \"[^\"]+\", of type \"AdvectiveFluxAux.[^\"]+simulations."
+  []
+[]

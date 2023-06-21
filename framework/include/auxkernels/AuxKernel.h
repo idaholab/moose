@@ -174,9 +174,6 @@ protected:
   /// Holds the solution at current quadrature points
   const typename OutputTools<ComputeValueType>::VariableValue & _u;
 
-  /// Holds the the test functions
-  const typename OutputTools<ComputeValueType>::VariableTestValue & _test;
-
   /// Assembly class
   Assembly & _assembly;
 
@@ -186,6 +183,9 @@ protected:
   MooseMesh & _mesh;
   /// Dimension of the problem being solved
   //  unsigned int _dim;
+
+  /// Holds the the test functions
+  const typename OutputTools<ComputeValueType>::VariableTestValue & _test;
 
   /// Active quadrature points
   const MooseArray<Point> & _q_point;
