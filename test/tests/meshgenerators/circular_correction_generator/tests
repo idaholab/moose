@@ -9,15 +9,14 @@
     requirement = 'The system shall correct full circular boundaries radii to preserve areas.'
     recover = false
   []
-# Temporarily disabled for Exodiff-breaking triangulator upgrades
-#  [partial_curve_rad]
-#    type = 'Exodiff'
-#    input = 'partial_circle_rad.i'
-#    exodiff = 'partial_circle_rad_in.e'
-#    cli_args = '--mesh-only'
-#    requirement = 'The system shall correct partial circular boundaries radii to preserve areas by moving all the nodes in the radial direction.'
-#    recover = false
-#  []
+  [partial_curve_rad]
+    type = 'Exodiff'
+    input = 'partial_circle_rad.i'
+    exodiff = 'partial_circle_rad_in.e'
+    cli_args = '--mesh-only'
+    requirement = 'The system shall correct partial circular boundaries radii to preserve areas by moving all the nodes in the radial direction.'
+    recover = false
+  []
   [partial_curve_span]
     type = 'Exodiff'
     input = 'partial_circle_span.i'

@@ -68,15 +68,14 @@
       recover = false
       detail = "assigning user-provided hole boundary names"
     []
-# Temporarily disabled for Exodiff-breaking triangulator upgrades
-#    [stitching]
-#      type = 'Exodiff'
-#      input = 'xydelaunay_stitching.i'
-#      cli_args = '--mesh-only'
-#      exodiff = 'xydelaunay_stitching_in.e'
-#      recover = false
-#      detail = "selectively stitching 'hole' meshes into the final mesh"
-#    []
+    [stitching]
+      type = 'Exodiff'
+      input = 'xydelaunay_stitching.i'
+      cli_args = '--mesh-only'
+      exodiff = 'xydelaunay_stitching_in.e'
+      recover = false
+      detail = "selectively stitching 'hole' meshes into the final mesh"
+    []
     [nested]
       type = 'Exodiff'
       input = 'xydelaunay_nested.i'
@@ -93,14 +92,13 @@
       recover = false
       detail = "with optional Laplacian mesh smoothing."
     []
-# Temporarily disabled for Exodiff-breaking triangulator upgrades
-#    [area_func]
-#      type = 'Exodiff'
-#      input = 'xydelaunay_area_func.i'
-#      cli_args = '--mesh-only'
-#      exodiff = 'xydelaunay_area_func_in.e'
-#      recover = false
-#      detail = "with optional non-uniform refinement."
-#    []
+    [area_func]
+      type = 'Exodiff'
+      input = 'xydelaunay_area_func.i'
+      cli_args = '--mesh-only'
+      exodiff = 'xydelaunay_area_func_in.e'
+      recover = false
+      detail = "with optional non-uniform refinement."
+    []
   []
 []
