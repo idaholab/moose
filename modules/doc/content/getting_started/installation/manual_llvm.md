@@ -16,6 +16,7 @@ Configure LLVM using the recommended arguments:
 mkdir llvm-build
 cd llvm-build
 cmake ../llvm -G 'Unix Makefiles' \
+-DLLVM_ENABLE_PROJECTS='clang;clang-tools-extra;compiler-rt;libcxx;libcxxabi;libunwind;openmp;lldb' \
 -DCMAKE_INSTALL_PREFIX=/target/installation/path/llvm-__CLANG__ \
 -DCMAKE_INSTALL_RPATH:STRING=/target/installation/path/llvm-__CLANG__/lib \
 -DCMAKE_INSTALL_NAME_DIR:STRING=/target/installation/path/llvm-__CLANG__/lib \
