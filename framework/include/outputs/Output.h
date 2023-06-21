@@ -145,15 +145,22 @@ protected:
   /**
    * Overload this function with the desired output activities (deprecated)
    */
+#include "libmesh/ignore_warnings.h"
   virtual void output(const ExecFlagType & /*type*/)
   {
     mooseError("Override 'void output()'. 'void output(const ExecFlagType & type)' is deprecated.");
   }
+#include "libmesh/restore_warnings.h"
 
   /**
    * Overload this function with the desired output activities
    */
-  virtual void output() { output(_current_output_execute_on); };
+  virtual void output()
+  {
+    mooseDeprecated(
+        "Override 'void output()'. 'void output(const ExecFlagType & type)' is deprecated.");
+    output(_current_output_execute_on);
+  };
 
   /**
    * A method called just prior to the solve, this is used by PetscOutput to perform the necessary

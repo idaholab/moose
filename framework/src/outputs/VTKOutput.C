@@ -40,7 +40,7 @@ VTKOutput::VTKOutput(const InputParameters & parameters)
 }
 
 void
-VTKOutput::output(const ExecFlagType & /*type*/)
+VTKOutput::output()
 {
 #ifdef LIBMESH_HAVE_VTK
   /// Create VTKIO object

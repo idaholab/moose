@@ -49,7 +49,7 @@ public:
    * added
    * as well.
    */
-  virtual void output(const ExecFlagType & type) override;
+  virtual void output() override;
 
   /**
    * Creates the output file name

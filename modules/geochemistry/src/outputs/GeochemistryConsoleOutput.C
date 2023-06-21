@@ -63,10 +63,8 @@ GeochemistryConsoleOutput::GeochemistryConsoleOutput(const InputParameters & par
 }
 
 void
-GeochemistryConsoleOutput::output(const ExecFlagType & type)
+GeochemistryConsoleOutput::output()
 {
-  if (!shouldOutput(type))
-    return;
   const Node * closest_node = _nnn.getClosestNode();
   if (!closest_node)
     return;

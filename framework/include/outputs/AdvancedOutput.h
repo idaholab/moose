@@ -216,7 +216,7 @@ protected:
    *
    * @see outputNodalVariables outputElementalVariables outputScalarVariables outputPostprocessors
    */
-  virtual void output(const ExecFlagType & type);
+  virtual void output();
 
   /**
    * Performs output of nodal nonlinear variables

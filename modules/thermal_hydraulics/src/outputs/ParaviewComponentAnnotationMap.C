@@ -44,7 +44,7 @@ ParaviewComponentAnnotationMap::ParaviewComponentAnnotationMap(const InputParame
 }
 
 void
-ParaviewComponentAnnotationMap::output(const ExecFlagType & /*type*/)
+ParaviewComponentAnnotationMap::output()
 {
   if (processor_id() == 0)
   {

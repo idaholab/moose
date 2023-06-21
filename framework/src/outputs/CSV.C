@@ -170,7 +170,7 @@ void
 CSV::output()
 {
   // Call the base class output (populates tables)
-  TableOutput::output(_current_output_execute_on);
+  TableOutput::output();
 
   // Print the table containing all the data to a file
   if (_write_all_table && !_all_data_table.empty() && processor_id() == 0)

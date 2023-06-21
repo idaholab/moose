@@ -87,14 +87,21 @@ OversampleOutput::outputStep(const ExecFlagType & type)
   if (type != EXEC_FINAL && !onInterval())
     return;
 
-  // Call the output method (this has the file checking built in b/c OversampleOutput is a
-  // FileOutput)
+  // store current simulation time
+  _last_output_time = _time;
+
+  // set current type
+  _current_output_execute_on = type;
+
+  // Call the output method
   if (shouldOutput(type))
   {
-    TIME_SECTION("outputStep", 1);
+    TIME_SECTION("outputStep", 2, "Outputting Step");
     updateOversample();
-    output(type);
+    output();
   }
+
+  _current_output_execute_on = EXEC_NONE;
 }
 
 OversampleOutput::~OversampleOutput()

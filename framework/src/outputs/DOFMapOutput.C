@@ -106,7 +106,7 @@ DOFMapOutput::join(const T & begin, const T & end, const char * const delim)
 }
 
 void
-DOFMapOutput::output(const ExecFlagType & /*type*/)
+DOFMapOutput::output()
 {
   // Don't build this information if nothing is to be written
   if (!_write_screen && !_write_file)

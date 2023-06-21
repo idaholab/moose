@@ -30,7 +30,7 @@ protected:
   /**
    * Perform the output of VTKOutput
    */
-  virtual void output(const ExecFlagType & type) override;
+  virtual void output() override;
 
   /**
    * Return the file name with the *.vtk extension

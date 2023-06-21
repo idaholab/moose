@@ -30,7 +30,7 @@ protected:
    * Overload the Output::output method, this is required for XDA
    * output due to the method utlized for outputting single/global parameters
    */
-  virtual void output(const ExecFlagType & type) override;
+  virtual void output() override;
 
   /**
    * Returns the current filename, this method handles adding the timestep suffix

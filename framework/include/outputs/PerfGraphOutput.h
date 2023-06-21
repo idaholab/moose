@@ -24,7 +24,7 @@ public:
 
 protected:
   virtual bool shouldOutput(const ExecFlagType & type) override;
-  virtual void output(const ExecFlagType & type) override;
+  virtual void output() override;
 
   // Detail level
   unsigned int _level;

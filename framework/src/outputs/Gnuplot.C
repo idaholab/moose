@@ -38,10 +38,10 @@ Gnuplot::filename()
 }
 
 void
-Gnuplot::output(const ExecFlagType & type)
+Gnuplot::output()
 {
   // Call the base class output (populates tables)
-  TableOutput::output(type);
+  TableOutput::output();
 
   // Print the table containing all the data to a file
   if (!_all_data_table.empty())

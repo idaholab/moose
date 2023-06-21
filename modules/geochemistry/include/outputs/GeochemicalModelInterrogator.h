@@ -28,7 +28,7 @@ public:
   GeochemicalModelInterrogator(const InputParameters & parameters);
 
 protected:
-  virtual void output(const ExecFlagType & type) override;
+  virtual void output() override;
 
   ModelGeochemicalDatabase _mgd;
   GeochemistrySpeciesSwapper _swapper;

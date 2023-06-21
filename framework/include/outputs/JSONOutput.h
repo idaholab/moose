@@ -19,7 +19,7 @@ public:
   JSONOutput(const InputParameters & parameters);
 
 protected:
-  virtual void output(const ExecFlagType & type) override;
+  virtual void output() override;
   virtual void outputReporters() override;
   virtual void outputSystemInformation() override;
   virtual void timestepSetup() override;

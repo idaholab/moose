@@ -269,8 +269,10 @@ AdvancedOutput::shouldOutput(const ExecFlagType & type)
 }
 
 void
-AdvancedOutput::output(const ExecFlagType & type)
+AdvancedOutput::output()
 {
+  const auto & type = _current_output_execute_on;
+
   // (re)initialize the list of available items for output
   init();
 
