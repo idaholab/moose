@@ -43,7 +43,7 @@ ControlOutput::ControlOutput(const InputParameters & parameters)
 void
 ControlOutput::output()
 {
-  if (_current_output_execute_on == EXEC_INITIAL)
+  if (_current_execute_flag == EXEC_INITIAL)
     outputControls();
   else
     outputChangedControls();

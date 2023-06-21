@@ -95,7 +95,7 @@ Checkpoint::outputStep(const ExecFlagType & type)
   _last_output_time = _time;
 
   // set current type
-  _current_output_execute_on = type;
+  _current_execute_flag = type;
 
   // Check whether we should output, then do it.
   if (shouldOutput())
@@ -104,18 +104,16 @@ Checkpoint::outputStep(const ExecFlagType & type)
     output();
   }
 
-  _current_output_execute_on = EXEC_NONE;
+  _current_execute_flag = EXEC_NONE;
 }
 
 bool
 Checkpoint::shouldOutput()
 {
-  const auto & type = _current_output_execute_on;
-
   // Check if the checkpoint should "normally" output, i.e. if it was created
   // through checkpoint=true
   bool should_output =
-      (onInterval() || type == EXEC_FINAL) ? FileOutput::shouldOutput() : false;
+      (onInterval() || _current_execute_flag == EXEC_FINAL) ? FileOutput::shouldOutput() : false;
 
   // If this is either a auto-created checkpoint, or if its an existing checkpoint acting
   // as the autosave and that checkpoint isn't on its interval, then output.

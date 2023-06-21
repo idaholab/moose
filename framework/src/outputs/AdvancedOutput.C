@@ -262,7 +262,7 @@ AdvancedOutput::shouldOutput()
   if (!checkFilename())
     return false;
 
-  if (hasOutput(_current_output_execute_on))
+  if (hasOutput(_current_execute_flag))
     return true;
   else
     return Output::shouldOutput();
@@ -271,7 +271,7 @@ AdvancedOutput::shouldOutput()
 void
 AdvancedOutput::output()
 {
-  const auto & type = _current_output_execute_on;
+  const auto & type = _current_execute_flag;
 
   // (re)initialize the list of available items for output
   init();

@@ -260,7 +260,7 @@ PetscOutput::shouldOutput()
 {
   if (Output::shouldOutput())
   {
-    if (_current_output_execute_on == EXEC_NONLINEAR &&
+    if (_current_execute_flag == EXEC_NONLINEAR &&
         (_time < _nonlinear_start_time - _t_tol || _time > _nonlinear_end_time + _t_tol))
       return false;
     return true;

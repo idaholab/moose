@@ -190,8 +190,9 @@ protected:
    * Current execute on flag. This is different from the flag provided by
    * FEProblemBase::getCurrentExecuteOnFlag() const, as outputs are triggered
    * in PETSc callbacks which cannot update  FEProblemBase::_current_execute_on_flag
+   * so we shadow it with a new member of the same name.
    */
-  ExecFlagType _current_output_execute_on;
+  ExecFlagType _current_execute_flag;
 
   /// The current time for output purposes
   Real & _time;

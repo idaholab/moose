@@ -91,7 +91,7 @@ OversampleOutput::outputStep(const ExecFlagType & type)
   _last_output_time = _time;
 
   // set current type
-  _current_output_execute_on = type;
+  _current_execute_flag = type;
 
   // Call the output method
   if (shouldOutput())
@@ -101,7 +101,7 @@ OversampleOutput::outputStep(const ExecFlagType & type)
     output();
   }
 
-  _current_output_execute_on = EXEC_NONE;
+  _current_execute_flag = EXEC_NONE;
 }
 
 OversampleOutput::~OversampleOutput()

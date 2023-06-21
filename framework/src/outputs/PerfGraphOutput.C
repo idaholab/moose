@@ -61,7 +61,7 @@ bool
 PerfGraphOutput::shouldOutput()
 {
   // We don't want the Perflog to get dumped at odd times. Ignore the FORCED flag.
-  return _execute_on.contains(_current_output_execute_on);
+  return _execute_on.contains(_current_execute_flag);
 }
 
 void

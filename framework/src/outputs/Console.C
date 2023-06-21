@@ -309,7 +309,7 @@ Console::timestepSetup()
 void
 Console::output()
 {
-  const auto & type = _current_output_execute_on;
+  const auto & type = _current_execute_flag;
 
   // Return if the current output is not on the desired interval
   if (type != EXEC_FINAL && !onInterval())

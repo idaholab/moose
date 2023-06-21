@@ -112,7 +112,7 @@ Output::Output(const InputParameters & parameters)
     _es_ptr(nullptr),
     _mesh_ptr(nullptr),
     _execute_on(getParam<ExecFlagEnum>("execute_on")),
-    _current_output_execute_on(EXEC_NONE),
+    _current_execute_flag(EXEC_NONE),
     _time(_problem_ptr->time()),
     _time_old(_problem_ptr->timeOld()),
     _t_step(_problem_ptr->timeStep()),
@@ -216,7 +216,7 @@ Output::outputStep(const ExecFlagType & type)
   _last_output_time = _time;
 
   // set current type
-  _current_output_execute_on = type;
+  _current_execute_flag = type;
 
   // Call the output method
   if (shouldOutput())
@@ -225,14 +225,13 @@ Output::outputStep(const ExecFlagType & type)
     output();
   }
 
-  _current_output_execute_on = EXEC_NONE;
+  _current_execute_flag = EXEC_NONE;
 }
 
 bool
 Output::shouldOutput()
 {
-  const auto & type = _current_output_execute_on;
-  if (_execute_on.contains(type) || type == EXEC_FORCED)
+  if (_execute_on.contains(_current_execute_flag) || _current_execute_flag == EXEC_FORCED)
     return true;
   return false;
 }
