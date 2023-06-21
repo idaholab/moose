@@ -27,9 +27,36 @@
   [./dynamic_load_error_check]
     type = 'RunException'
     input = 'misc_parent_bad.i'
-    expect_err = 'Unable to locate library for "InvalidApp"'
+    expect_err = 'Unable to locate library archive for "InvalidApp"'
     allow_warnings = true
     library_mode = 'DYNAMIC'
     requirement = "The system shall error out if the type of application to dynamically load is not included in the dynamic library."
   [../]
+
+  [dynamic_load_bad_libary_name]
+    type = 'RunException'
+    input = 'misc_parent.i'
+    expect_err = 'We attempted to locate the library archive "foo.la"'
+    cli_args = 'MultiApps/sub_app/library_name=foo.la'
+    library_mode = 'DYNAMIC'
+
+    # Test must be run with the misc app to test dynamic loading
+    executable_pattern = 'misc-\w+$'
+    issues = '#24751'
+    requirement = "The system shall throw an error message when the library name is manually supplied but does not
+                  supply the right application."
+  []
+
+  [dynamic_load_no_path]
+    type = 'RunException'
+    input = 'misc_parent_no_path.i'
+    expect_err = 'No search paths were set.'
+    library_mode = 'DYNAMIC'
+    env_vars_not_set = 'MOOSE_LIBRARY_PATH'
+
+    # Test must be run with the misc app to test dynamic loading
+    executable_pattern = 'misc-\w+$'
+    issues = '#24751'
+    requirement = "The system shall throw an error when no path or environment variable is supplied for dynamic loading."
+  []
 []

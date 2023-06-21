@@ -131,7 +131,7 @@
   [dynamic_object_loading_bogus_app]
     type = 'RunException'
     input = 'dynamic_wrong_lib.i'
-    expect_err = 'Unable to open library file'
+    expect_err = 'If you are trying to find this object in a dynamically loaded library'
     cli_args = 'Problem/register_objects_from=FooApp'
     library_mode = 'DYNAMIC'
     prereq = 'dynamic_object_loading_wrong_app'
