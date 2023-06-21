@@ -14,10 +14,10 @@
     valgrind = 'none'
   []
   [frictionless-mortar-3d_pg]
-    type = 'Exodiff'
+    type = 'CSVDiff'
     input = 'frictionless-mortar-3d_pg.i'
     min_ad_size = 100
-    exodiff = 'frictionless-mortar-3d_pg_out.e'
+    csvdiff = 'frictionless-mortar-3d_pg_out_contact-pressure_0002.csv'
     requirement = 'The system shall solve a 3D frictionless bouncing block problem with mortar '
                   'constraint using Petrov-Galerkin approach.'
   []
@@ -43,6 +43,7 @@
     valgrind = 'none'
   []
   [frictionless-mortar-3d-pg-action]
+    prereq = 'frictionless-mortar-3d_pg'
     type = 'CSVDiff'
     input = 'frictionless-mortar-3d-action.i'
     cli_args = 'Contact/mortar/use_petrov_galerkin=true '
@@ -93,10 +94,12 @@
     valgrind = 'none'
   []
   [frictional-mortar-3d-pg]
-    type = 'Exodiff'
+    type = 'CSVDiff'
     input = 'frictional-mortar-3d_pg.i'
     min_ad_size = 100
-    exodiff = 'frictional-mortar-3d_pg_out.e'
+    csvdiff = 'frictional-mortar-3d_pg_out_contact-pressure_0001.csv '
+              'frictional-mortar-3d_pg_out_frictional-pressure-3d_0001.csv '
+              'frictional-mortar-3d_pg_out_frictional-pressure_0001.csv'
     requirement = 'The system shall solve a 3D frictional bouncing block problem with mortar '
                   'constraint using the Petrov-Galerkin approach.'
     rel_err = 1.0e-5
@@ -132,16 +135,15 @@
     valgrind = 'none'
   []
   [frictional-mortar-3d-pg-action]
+    prereq = 'frictional-mortar-3d-pg'
     type = 'CSVDiff'
     input = 'frictional-mortar-3d-action.i'
     cli_args = 'Contact/mortar/use_petrov_galerkin=true '
-               'Outputs/file_base="frictional-mortar-3d_pg_out"'
+               'Outputs/file_base=frictional-mortar-3d_pg_out'
     min_ad_size = 100
     csvdiff = 'frictional-mortar-3d_pg_out_contact-pressure_0001.csv '
               'frictional-mortar-3d_pg_out_frictional-pressure-3d_0001.csv '
-              'frictional-mortar-3d_pg_out_frictional-pressure_0001.csv '
-              'frictional-mortar-3d_pg_out_tangent_x_0001.csv '
-              'frictional-mortar-3d_pg_out_tangent_y_0001.csv'
+              'frictional-mortar-3d_pg_out_frictional-pressure_0001.csv'
     requirement = 'The system shall solve a 3D frictional bouncing block problem with mortar '
                   'constraint using the Petrov-Galerkin approach in contact action.'
     rel_err = 1.0e-5

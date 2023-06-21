@@ -206,9 +206,6 @@ ContactAction::validParams()
       "Whether to use the Petrov-Galerkin approach for the mortar-based constraints. If set to "
       "true, we use the standard basis as the test function and dual basis as "
       "the shape function for the interpolation of the Lagrange multiplier variable.");
-  params.addCoupledVar("aux_lm",
-                       "Auxiliary Lagrange multiplier variable that is utilized together with the "
-                       "Petrov-Galerkin approach.");
   return params;
 }
 
