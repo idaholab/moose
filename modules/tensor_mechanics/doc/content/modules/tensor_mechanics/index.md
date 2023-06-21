@@ -97,7 +97,7 @@ introductory theory pages on the various models:
 - [Reduced Order Models](/LAROMANCE.md)
 - [Frequency Domain Dynamics](/1d_elastic_waves.md)
 - [Isogeometric Analysis](tensor_mechanics/examples/cframe_iga.md)
-- [Slip Weakening Friction](tensor_mechanics/Slipweakening_draft.md)
+- [Slip Weakening Friction](tensor_mechanics/Slipweakening.md)
 !col-end!
 !row-end!
 

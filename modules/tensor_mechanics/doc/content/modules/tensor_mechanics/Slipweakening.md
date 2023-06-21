@@ -24,7 +24,7 @@ The example input file for the ```Mesh``` section is given below:
 
 !listing moose/modules/tensor_mechanics/examples/slip_weakening/3D_slipweakening/tpv2053D.i
          block=Mesh
-         id=input-block
+         id=input-block-0
          caption=Mesh Generation: Input File.
 
 #### Weak Formulation
@@ -67,19 +67,19 @@ The input file defining both kernels are given below, note in 2D formulation, �
 
 !listing moose/modules/tensor_mechanics/examples/slip_weakening/2D_slipweakening/tpv2052D.i 
          block=Modules
-         id=input-block
+         id=input-block-1
          caption=StressDivergenceTensors Kernels: Input File (2D)
 
 !listing moose/modules/tensor_mechanics/examples/slip_weakening/3D_slipweakening/tpv2053D.i
          block=Modules
-         id=input-block
+         id=input-block-2
          caption=StressDivergenceTensors Kernels: Input File (3D)
 
 The inertia force kernel is given as follows, with the assumption of small strain, we set ```use_displaced_mesh``` to ```false```:
 
 !listing moose/modules/tensor_mechanics/examples/slip_weakening/3D_slipweakening/tpv2053D.i
          block=Kernels
-         id=input-block
+         id=input-block-3
          caption=InertiaForce Kernels: Input File
 
 #### Custom Kernel: StiffPropDamping
@@ -116,7 +116,7 @@ To utilize the kernel, allocate it inside ```[Kernels]``` section of input file:
 
 !listing moose/modules/tensor_mechanics/examples/slip_weakening/3D_slipweakening/tpv2053D.i
          block=Kernels
-         id=input-block
+         id=input-block-4
          caption=StiffPropDamping: Input File
 
 #### AuxKernels
@@ -125,14 +125,14 @@ All the quantities passed as variable input into the material kernel are defined
 
 !listing moose/modules/tensor_mechanics/examples/slip_weakening/3D_slipweakening/tpv2053D.i
          block=AuxVariables
-         id=input-block
+         id=input-block-5
          caption=AuxVariables: Input File
 
 Two Aux Kernels ```CopyValueAux``` ```ComputeValueRate``` are defined to pass/store data ```coupled```, data time change ```coupledDot``` to aux variables. Below provides the input file:
 
 !listing moose/modules/tensor_mechanics/examples/slip_weakening/3D_slipweakening/tpv2053D.i
          block=AuxKernels
-         id=input-block
+         id=input-block-6
          caption=AuxKernels: Input File
          start=Vel_x
          end=Residual_z
@@ -143,17 +143,17 @@ The time integration is handled using ```CentralDifference``` explicit time inte
 
 !listing moose/modules/tensor_mechanics/examples/slip_weakening/3D_slipweakening/tpv2053D.i
          block=Executioner
-         id=input-block
+         id=input-block-7
          caption=CentralDifference: Input File
 
 !listing moose/modules/tensor_mechanics/examples/slip_weakening/3D_slipweakening/tpv2053D.i
          block=Outputs
-         id=input-block
+         id=input-block-8
          caption=Output: Input File
 
 #### Tagging System
 
-To obtain the most up-to-date restoration force from ```StressDivergenTensors``` kernel, a custom ```Tagging UserObject``` is set up to retrieve them after the system solve. MOOSE provides such a system to easily obtain solution or restoration force vector/matrix, please refer to https://mooseframework.inl.gov/framework_development/tagging.html for more information. Here, we define a custom UserObject ```ResidualEvaluationUserObject``` inherited from ```GeneralUserObject``` to obtain the stress divergence term $\begin{array}{r} \int_{V}^{}{\sigma \cdot \nabla\psi}\ dV(2) \end{array}$ evaluated at each quadrature point, the header and source file is presented below.
+To obtain the most up-to-date restoration force from ```StressDivergenTensors``` kernel, a custom ```Tagging UserObject``` is set up to retrieve them after the system solve. MOOSE provides such a system to easily obtain solution or restoration force vector/matrix, please refer to [the tagging documentation](TaggingInterface.md) for more information. Here, we define a custom UserObject ```ResidualEvaluationUserObject``` inherited from ```GeneralUserObject``` to obtain the stress divergence term $\begin{array}{r} \int_{V}^{}{\sigma \cdot \nabla\psi}\ dV(2) \end{array}$ evaluated at each quadrature point, the header and source file is presented below.
 
 !listing moose/modules/tensor_mechanics/include/userobjects/ResidualEvaluationUserObject.h
 caption=ResidualEvaluationUserObject: Header File*
@@ -165,28 +165,28 @@ To execute the ```ResidualEvaluationUserObject```, in the input file we add the 
 
 !listing moose/modules/tensor_mechanics/examples/slip_weakening/3D_slipweakening/tpv2053D.i
          block=Problem
-         id=input-block
+         id=input-block-9
          caption=Problem: Input File
 
 This allocates the tag vector. The tag vector needs to link with the action block ```[TensorMechanics]```, which automatically set up stress divergence term:
 
 !listing moose/modules/tensor_mechanics/examples/slip_weakening/3D_slipweakening/tpv2053D.i
          block=Modules
-         id=input-block
-         caption=Add "extra_vector_tags" in the Action [TensorMechanics]: Input File
+         id=input-block-10
+         caption=Add "extra_vector_tags" in the Action `[TensorMechanics]`: Input File
 
 ```ResidualEvaluationUserObject``` is called in ```[UserObjects]```:
 
 !listing moose/modules/tensor_mechanics/examples/slip_weakening/3D_slipweakening/tpv2053D.i
          block=UserObjects
-         id=input-block
+         id=input-block-11
          caption=UserObject: Input File
 
 The block executes ```ResidualEvaluationUserObject``` at ```TIMESTEP_END``` but before the execuation of ```[AuxKernels]```. After retrieving the force vector, in the ```[AuxKernels]```, we assign it to pre-defined restoration force aux variable using ```TagVectorAux```:
 
 !listing moose/modules/tensor_mechanics/examples/slip_weakening/3D_slipweakening/tpv2053D.i
          block=AuxKernels
-         id=input-block
+         id=input-block-12
          caption=TagVectorAux: Input File
 
 Here ```v``` is primary variable name ```disp_x, disp_y, disp_z``` and ```variable``` accepts aux variable. As mentioned before, these operation happens only after the latest restoration force is obtained through ```ResidualEvaluationUserObject```.
@@ -198,7 +198,7 @@ Isotropic, linear elastic material is used for simplicity, but users are free to
 
 !listing moose/modules/tensor_mechanics/examples/slip_weakening/3D_slipweakening/tpv2053D.i
          block=Materials
-         id=input-block
+         id=input-block-13
          caption=Materials: Input File
 
 Note a custom material kernel ```SlipWeakeningFriction3d``` is added after the definition of ```density```, this part related to the Cohesive Zone Model, and it is explained next.
@@ -248,7 +248,7 @@ D_{i} = \mathbf{R}^{\mathbf{T}}D_{i}^{global}\ \hspace{3mm} {\dot{D}}_{i} = \mat
 
 The code snippet is given below:
 
-!listing id=local caption=SlipWeakeningFriction: Source File. language=cpp
+!listing id=local0 caption=SlipWeakeningFriction: Source File. language=cpp
 // Global Displacement Jump
 RealVectorValue displacement_jump_global(_disp_slipweakening_x[_qp] - _disp_slipweakening_neighbor_x[_qp], _disp_slipweakening_y[_qp] - _disp_slipweakening_neighbor_y[_qp], _disp_slipweakening_z[_qp] - _disp_slipweakening_neighbor_z[_qp]);
 // Global Displacement Jump Old
@@ -289,7 +289,7 @@ Where $\rho$ is the density, $a$ is the edge element length of the fault surface
 
 The code snippet is given below:
 
-!listing id=local caption=SlipWeakeningFriction: Source File. language=cpp
+!listing id=local1 caption=SlipWeakeningFriction: Source File. language=cpp
 //Parameter initialization
 Real mu_s = 0;
 Real mu_d = _mu_d;
@@ -335,13 +335,13 @@ We then have them defined in the input file within ```[Functions]``` section:
 
 !listing moose/modules/tensor_mechanics/examples/slip_weakening/3D_slipweakening/tpv2053D.i
          block=Functions
-         id=input-block
+         id=input-block-14
          caption=”InitialStrikeShearStress” and “StaticFricCoeffMus" Example
 Function
 
 In the ```[AuxKernels]```, we pass the functions to pre-defined aux variables:
 
-!listing id=local caption=FunctionAux: Input File. language=cpp
+!listing id=local2 caption=FunctionAux: Input File. language=cpp
 [StaticFricCoeff]
     type = FunctionAux
     variable = mu_s
@@ -372,7 +372,7 @@ With all the parameters at hand, the construction of ```SlipWeakeningFriction3d`
 Where
 $M^{\pm},\ \ u_{i}^{\pm},\ \ {{\dot{u}}_{i}}^{\pm},\ f_{i}^{\pm},\ a$ are node mass, displacement, velocity, elastic forces for plus/minus side, the edge element size of the fault surface. The code is provided below:
 
-!listing id=local caption=SlipWeakeningFriction: Source File. language=cpp
+!listing id=local3 caption=SlipWeakeningFriction: Source File. language=cpp
 //Compute sticking stress
 Real T1 =  (1/_dt)*M*displacement_jump_rate(1)/(2*len*len) + (R_plus_local_x - R_minus_local_x)/(2*len*len) + T1_o;
 Real T3 =  (1/_dt)*M*displacement_jump_rate(2)/(2*len*len) + (R_plus_local_z - R_minus_local_z)/(2*len*len) + T3_o;
@@ -401,7 +401,7 @@ The friction strength $\tau_{f}$, which is a function of slip magnitude,is compu
 
 $\tau_{s}$ and $\tau_{r}$ are the peak and residual frictional strength, $D_{c}$ is the critical slip required for stress to reach the residual value, $\mu_{s}$ and $\mu_{d}$ are static and dynamic friction parameters, respectively.
 
-!listing id=local caption=SlipWeakeningFriction: Source File. language=cpp
+!listing id=local4 caption=SlipWeakeningFriction: Source File. language=cpp
 //Compute friction strength
    if (std::norm(displacement_jump) < Dc)
    {
@@ -429,7 +429,7 @@ T_{v} = \left\{ \begin{array}{r}
 \end{aligned}
 \end{equation}
 
-!listing id=local caption=SlipWeakeningFriction: Source File. language=cpp
+!listing id=local5 caption=SlipWeakeningFriction: Source File. language=cpp
 //Compute fault traction
 if (T2<0)
 {
@@ -448,7 +448,7 @@ Note that the first two conditions for $v = x,z$ in equation (12) are utilized f
 
 Finally, the new computed local tractions increments (measured from the initial stage) are plugged into the ```interface_traction``` to enforce traction boundary condition along the interface:
 
-!listing id=local caption=SlipWeakeningFriction: Source File. language=cpp
+!listing id=local6 caption=SlipWeakeningFriction: Source File. language=cpp
 //Assign back traction in CZM
 RealVectorValue traction;
 traction(0) = T2+T2_o; 
@@ -499,7 +499,7 @@ A flow chart summarizing the solving procedure is given as follows;
 
 !media large_media/tensor_mechanics/slip_weakening/flowchart.png
        id=sw-flowchart
-       style=width:50%;padding:20px;
+       style=halign=center
        caption=Solve Procedure Flow Chart
 
 ### Verification Case: TPV205-2D
@@ -529,7 +529,7 @@ The rupture is nucleated using a 3-km wide overstressed region located at the ce
 !media large_media/tensor_mechanics/slip_weakening/swlaw.png
        id=sw-swlaw
        caption=TPV205 Problem Description (Problem Setup, Initial Shear Stress Distribution, Linear Slip Weakening Friction Law)
-       style=width:50%;padding:20px;
+       style=halign=center
 
 The parameter table used for this validation is summarized in Table 1.
 
@@ -595,7 +595,7 @@ The rupture is nucleated within a (3km $\times$ 3km) overstressed region which t
 !media large_media/tensor_mechanics/slip_weakening/3dshearstressdistribution.png
        id=sw-3dshearstressdistribution
        caption=Fault Surface Background Shear Stress Distribution
-       style=width:50%;padding:20px;
+       style=halign=center
 
 The parameter table used for this validation is summarized in Table 2.
 
