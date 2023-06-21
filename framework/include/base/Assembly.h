@@ -243,11 +243,7 @@ public:
 
   const MooseArray<ADReal> & adJxWFace() const { return _ad_JxW_face; }
 
-  const MooseArray<ADReal> & adCurvatures() const
-  {
-    _calculate_curvatures = true;
-    return _ad_curvatures;
-  }
+  const MooseArray<ADReal> & adCurvatures() const;
 
   /**
    * Returns the reference to the coordinate transformation coefficients

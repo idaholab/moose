@@ -4592,6 +4592,19 @@ Assembly::feCurlPhiFaceNeighbor<VectorValue<Real>>(FEType type) const
   return _vector_fe_shape_data_face_neighbor[type]->_curl_phi;
 }
 
+const MooseArray<ADReal> &
+Assembly::adCurvatures() const
+{
+  _calculate_curvatures = true;
+  const Order helper_order = _mesh.hasSecondOrderElements() ? SECOND : FIRST;
+  const FEType helper_type(helper_order, LAGRANGE);
+  // Must prerequest the second derivatives. Sadly because there is only one _need_second_derivative
+  // map for both volumetric and face FE objects we must request both here
+  feSecondPhi<Real>(helper_type);
+  feSecondPhiFace<Real>(helper_type);
+  return _ad_curvatures;
+}
+
 template void coordTransformFactor<Point, Real>(const SubProblem & s,
                                                 SubdomainID sub_id,
                                                 const Point & point,
