@@ -1,20 +1,21 @@
 # ReynoldsNumberMaterial
 
-!alert construction title=Undocumented Class
-The ReynoldsNumberMaterial has not been documented. The content listed below should be used as a starting point for
-documenting the class, which includes the typical automatic documentation associated with a
-MooseObject; however, what is contained is ultimately determined by what is necessary to make the
-documentation clear for users.
-
 !syntax description /Materials/ReynoldsNumberMaterial
 
-## Overview
+The Reynolds number $Re$ is computed as:
 
-!! Replace these lines with information regarding the ReynoldsNumberMaterial object.
+!equation
+Re = \dfrac{\rho u D_h}{\mu}
 
-## Example Input File Syntax
+with $\rho$ the fluid phase density, $u$ the velocity of the phase, $D_h$ the hydraulic diameter
+and $\mu$ the dynamic viscosity.
 
-!! Describe and include an example of how to use the ReynoldsNumberMaterial object.
+This material also defines material properties for the derivatives of the Reynolds number with regards to:
+
+- $\alpha rho A$
+- $\alpha rho u A$
+- $\alpha rho E A$
+- $beta$ if the [!param](/Materials/ReynoldsNumberMaterial/beta) parameter is set by the user
 
 !syntax parameters /Materials/ReynoldsNumberMaterial
 

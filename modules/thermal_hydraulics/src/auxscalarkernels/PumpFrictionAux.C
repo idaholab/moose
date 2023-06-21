@@ -17,7 +17,8 @@ PumpFrictionAux::validParams()
 {
   InputParameters params = AuxScalarKernel::validParams();
   params.addRequiredParam<UserObjectName>("pump_uo", "Pump user object name");
-  params.addClassDescription("Friction torque computed in the 1-phase shaft-connected pump.");
+  params.addClassDescription(
+      "Returns the friction torque computed in the 1-phase shaft-connected pump.");
   return params;
 }
 

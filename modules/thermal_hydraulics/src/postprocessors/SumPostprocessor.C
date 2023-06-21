@@ -15,6 +15,7 @@ InputParameters
 SumPostprocessor::validParams()
 {
   InputParameters params = GeneralPostprocessor::validParams();
+  params.addClassDescription("Sums the values of several postprocessors");
   params.addParam<std::vector<PostprocessorName>>("values", "List of postprocessors to add");
   params.addDeprecatedParam<PostprocessorName>("a", "First postprocessor", "Use 'values' instead.");
   params.addDeprecatedParam<PostprocessorName>(

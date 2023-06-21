@@ -1,20 +1,9 @@
 # ADConvectiveHeatTransferCoefficientMaterial
 
-!alert construction title=Undocumented Class
-The ADConvectiveHeatTransferCoefficientMaterial has not been documented. The content listed below should be used as a starting point for
-documenting the class, which includes the typical automatic documentation associated with a
-MooseObject; however, what is contained is ultimately determined by what is necessary to make the
-documentation clear for users.
-
 !syntax description /Materials/ADConvectiveHeatTransferCoefficientMaterial
 
-## Overview
-
-!! Replace these lines with information regarding the ADConvectiveHeatTransferCoefficientMaterial object.
-
-## Example Input File Syntax
-
-!! Describe and include an example of how to use the ADConvectiveHeatTransferCoefficientMaterial object.
+This is the [automatic differentiation](automatic_differentiation/index.md) version of the [ConvectiveHeatTransferCoefficientMaterial.md].
+Please refer to the regular version for additional documentation.
 
 !syntax parameters /Materials/ADConvectiveHeatTransferCoefficientMaterial
 

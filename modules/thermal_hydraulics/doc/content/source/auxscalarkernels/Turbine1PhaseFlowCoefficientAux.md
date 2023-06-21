@@ -1,20 +1,13 @@
 # Turbine1PhaseFlowCoefficientAux
 
-!alert construction title=Undocumented Class
-The Turbine1PhaseFlowCoefficientAux has not been documented. The content listed below should be used as a starting point for
-documenting the class, which includes the typical automatic documentation associated with a
-MooseObject; however, what is contained is ultimately determined by what is necessary to make the
-documentation clear for users.
-
 !syntax description /AuxScalarKernels/Turbine1PhaseFlowCoefficientAux
 
-## Overview
+More information about the computed flow coefficient can be found in the
+documentation for the [ADShaftConnectedTurbine1PhaseUserObject.md] used.
 
-!! Replace these lines with information regarding the Turbine1PhaseFlowCoefficientAux object.
-
-## Example Input File Syntax
-
-!! Describe and include an example of how to use the Turbine1PhaseFlowCoefficientAux object.
+This object and the [ADShaftConnectedTurbine1PhaseUserObject.md] to fill the
+[!param](/AuxScalarKernels/Turbine1PhaseFlowCoefficientAux/turbine_uo) parameter are
+automatically added to the simulation by the [ShaftConnectedTurbine1Phase.md] component.
 
 !syntax parameters /AuxScalarKernels/Turbine1PhaseFlowCoefficientAux
 

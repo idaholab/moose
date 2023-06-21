@@ -1,20 +1,18 @@
 # DirectionMaterial
 
-!alert construction title=Undocumented Class
-The DirectionMaterial has not been documented. The content listed below should be used as a starting point for
-documenting the class, which includes the typical automatic documentation associated with a
-MooseObject; however, what is contained is ultimately determined by what is necessary to make the
-documentation clear for users.
-
 !syntax description /Materials/DirectionMaterial
 
-## Overview
+This material declares the "direction" material property.
 
-!! Replace these lines with information regarding the DirectionMaterial object.
+This material is added automatically for every `FlowChannelBase` derived component, which includes most
+flow components.
 
-## Example Input File Syntax
+## Example input syntax
 
-!! Describe and include an example of how to use the DirectionMaterial object.
+In this example, the `DirectionMaterial` is used to compute the direction of the elements,
+and the "direction" is passed as a parameter to the `energy_flux` kernel.
+
+!listing tests/jacobians/kernels/one_d_3eqn_energy_flux.i block=Materials Kernels
 
 !syntax parameters /Materials/DirectionMaterial
 

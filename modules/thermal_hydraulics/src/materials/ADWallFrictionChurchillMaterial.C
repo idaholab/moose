@@ -17,6 +17,7 @@ InputParameters
 ADWallFrictionChurchillMaterial::validParams()
 {
   InputParameters params = Material::validParams();
+  params.addClassDescription("Computes the Darcy friction factor using the Churchill correlation.");
   params.addRequiredParam<MaterialPropertyName>("rho", "Density");
   params.addRequiredParam<MaterialPropertyName>("vel", "x-component of the velocity");
   params.addRequiredParam<MaterialPropertyName>("D_h", "hydraulic diameter");

@@ -18,7 +18,7 @@ Compressor1PhaseDeltaPAux::validParams()
   InputParameters params = AuxScalarKernel::validParams();
   params.addRequiredParam<UserObjectName>("compressor_uo", "Compressor user object name");
   params.addClassDescription(
-      "Change in pressure computed in the 1-phase shaft-connected compressor.");
+      "Returns the change in pressure computed in the 1-phase shaft-connected compressor.");
   return params;
 }
 

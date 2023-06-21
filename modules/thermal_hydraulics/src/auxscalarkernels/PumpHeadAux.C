@@ -17,7 +17,7 @@ PumpHeadAux::validParams()
 {
   InputParameters params = AuxScalarKernel::validParams();
   params.addRequiredParam<UserObjectName>("pump_uo", "Pump user object name");
-  params.addClassDescription("Head computed in the 1-phase shaft-connected pump.");
+  params.addClassDescription("Returns the head computed in the 1-phase shaft-connected pump.");
   return params;
 }
 

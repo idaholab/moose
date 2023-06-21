@@ -1,20 +1,14 @@
 # MomentumFluxIntegral
 
-!alert construction title=Undocumented Class
-The MomentumFluxIntegral has not been documented. The content listed below should be used as a starting point for
-documenting the class, which includes the typical automatic documentation associated with a
-MooseObject; however, what is contained is ultimately determined by what is necessary to make the
-documentation clear for users.
-
 !syntax description /Postprocessors/MomentumFluxIntegral
 
-## Overview
+The integral of the momentum flux $I_M$ over boundary $\partial \Omega$ is:
 
-!! Replace these lines with information regarding the MomentumFluxIntegral object.
+!equation
+I_M = \int_{\partial \Omega} \alpha \rho u^2 A + \alpha p A d\partial \Omega
 
-## Example Input File Syntax
-
-!! Describe and include an example of how to use the MomentumFluxIntegral object.
+with $\alpha \rho u A$ the conserved phase momentum, $u$ the boundary 1D velocity,
+$\alpha$ the phase fraction, $p$ the pressure and $A$ the channel area at the boundary.
 
 !syntax parameters /Postprocessors/MomentumFluxIntegral
 

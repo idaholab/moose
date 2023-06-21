@@ -1,20 +1,11 @@
 # ConstantMaterial
 
-!alert construction title=Undocumented Class
-The ConstantMaterial has not been documented. The content listed below should be used as a starting point for
-documenting the class, which includes the typical automatic documentation associated with a
-MooseObject; however, what is contained is ultimately determined by what is necessary to make the
-documentation clear for users.
-
 !syntax description /Materials/ConstantMaterial
 
-## Overview
-
-!! Replace these lines with information regarding the ConstantMaterial object.
-
-## Example Input File Syntax
-
-!! Describe and include an example of how to use the ConstantMaterial object.
+!alert note
+The ConstantMaterial is part of the THM module. The [GenericConstantMaterial.md] is available in the framework.
+The equivalent syntax will define `d<prop_name>_d<variable_name>` in the [!param](/Materials/GenericConstantMaterial/prop_names)
+parameter with `0` as the [!param](/Materials/GenericConstantMaterial/prop_values).
 
 !syntax parameters /Materials/ConstantMaterial
 

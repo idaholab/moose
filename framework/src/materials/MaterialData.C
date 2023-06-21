@@ -15,57 +15,30 @@ MaterialData::MaterialData(MaterialPropertyStorage & storage)
 {
 }
 
-MaterialData::~MaterialData() { release(); }
-
-void
-MaterialData::release()
-{
-  _props.destroy();
-  _props_old.destroy();
-  _props_older.destroy();
-}
-
 void
 MaterialData::resize(unsigned int n_qpoints)
 {
-  if (n_qpoints == _n_qpoints)
+  if (n_qpoints == nQPoints())
     return;
 
-  if (_resize_only_if_smaller && n_qpoints < _n_qpoints)
+  if (_resize_only_if_smaller && n_qpoints < nQPoints())
     return;
 
-  _props.resizeItems(n_qpoints);
-  // if there are stateful material properties in the system, also resize
-  // storage for old and older material properties
-  if (_storage.hasStatefulProperties())
-    _props_old.resizeItems(n_qpoints);
-  if (_storage.hasOlderProperties())
-    _props_older.resizeItems(n_qpoints);
+  for (const auto state : _storage.stateIndexRange())
+    props(state).resizeItems(n_qpoints, {});
   _n_qpoints = n_qpoints;
-}
-
-unsigned int
-MaterialData::nQPoints()
-{
-  return _n_qpoints;
 }
 
 void
 MaterialData::copy(const Elem & elem_to, const Elem & elem_from, unsigned int side)
 {
-  _storage.copy(*this, &elem_to, &elem_from, side, _n_qpoints);
-}
-
-void
-MaterialData::copy(const Elem * elem_to, const Elem * elem_from, unsigned int side)
-{
-  _storage.copy(*this, elem_to, elem_from, side, _n_qpoints);
+  _storage.copy(*this, &elem_to, &elem_from, side, nQPoints());
 }
 
 void
 MaterialData::swap(const Elem & elem, unsigned int side /* = 0*/)
 {
-  if (!_storage.hasStatefulProperties() || _swapped)
+  if (!_storage.hasStatefulProperties() || isSwapped())
     return;
 
   _storage.swap(*this, elem, side);
@@ -82,15 +55,15 @@ MaterialData::reset(const std::vector<std::shared_ptr<MaterialBase>> & mats)
 void
 MaterialData::swapBack(const Elem & elem, unsigned int side /* = 0*/)
 {
-  if (_swapped && _storage.hasStatefulProperties())
+  if (isSwapped() && _storage.hasStatefulProperties())
   {
     _storage.swapBack(*this, elem, side);
     _swapped = false;
   }
 }
 
-bool
-MaterialData::isSwapped()
+void
+MaterialData::mooseErrorHelper(const MooseObject & object, const std::string_view & error)
 {
-  return _swapped;
+  object.mooseError(error);
 }

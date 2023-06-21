@@ -11,8 +11,8 @@
 
 #include "Moose.h"
 #include "HashMap.h"
-#include "DataIO.h"
 #include "MaterialProperty.h"
+#include "MaterialPropertyRegistry.h"
 
 // Forward declarations
 class MaterialBase;
@@ -26,6 +26,11 @@ class QBase;
 class Elem;
 }
 
+class MaterialPropertyStorage;
+
+void dataStore(std::ostream & stream, MaterialPropertyStorage & storage, void * context);
+void dataLoad(std::istream & stream, MaterialPropertyStorage & storage, void * context);
+
 /**
  * Stores the stateful material properties computed by materials.
  *
@@ -34,8 +39,10 @@ class Elem;
 class MaterialPropertyStorage
 {
 public:
-  MaterialPropertyStorage();
-  virtual ~MaterialPropertyStorage();
+  MaterialPropertyStorage(MaterialPropertyRegistry & registry);
+
+  /// The max time state supported (2 = older)
+  static constexpr unsigned int max_state = 2;
 
   /**
    * Creates storage for newly created elements from mesh Adaptivity.  Also, copies values from the
@@ -185,12 +192,12 @@ public:
   /**
    * @return a Boolean indicating whether stateful properties exist on this material
    */
-  bool hasStatefulProperties() const { return _has_stateful_props; }
+  bool hasStatefulProperties() const { return maxState() > 0; }
 
   /**
    * @return a Boolean indicating whether or not this material has older properties declared
    */
-  bool hasOlderProperties() const { return _has_older_prop; }
+  bool hasOlderProperties() const { return maxState() > 1; }
 
   /**
    * Accessible type of the stored material property data.
@@ -203,40 +210,35 @@ public:
 
   ///@{
   /**
-   * Access methods to the stored material property data.
+   * Access methods to the stored material property data with the given state \p state.
    */
-  const PropsType & props() const { return *_props_elem; }
-  const PropsType & propsOld() const { return *_props_elem_old; }
-  const PropsType & propsOlder() const { return *_props_elem_older; }
-  const MaterialProperties & props(const Elem * elem, unsigned int side) const;
-  const MaterialProperties & propsOld(const Elem * elem, unsigned int side) const;
-  const MaterialProperties & propsOlder(const Elem * elem, unsigned int side) const;
-  MaterialProperties & setProps(const Elem * elem, unsigned int side);
-  MaterialProperties & setPropsOld(const Elem * elem, unsigned int side);
-  MaterialProperties & setPropsOlder(const Elem * elem, unsigned int side);
+  const PropsType & props(const unsigned int state = 0) const;
+  const MaterialProperties &
+  props(const Elem * elem, unsigned int side, const unsigned int state = 0) const;
+  MaterialProperties & setProps(const Elem * elem, unsigned int side, const unsigned int state = 0);
   ///@}
 
-  bool hasProperty(const std::string & prop_name) const;
+  bool hasProperty(const std::string & prop_name) const { return _registry.hasProperty(prop_name); }
 
-  /// The addProperty functions are idempotent - calling multiple times with
-  /// the same name will provide the same id and works fine.
-  unsigned int addProperty(const std::string & prop_name);
-  unsigned int addPropertyOld(const std::string & prop_name);
-  unsigned int addPropertyOlder(const std::string & prop_name);
+  /**
+   * Adds a property with the name \p prop_name and state \p state (0 = current, 1 = old, etc)
+   *
+   * This is idempotent - calling multiple times with the same name will provide the same id and
+   * works fine.
+   */
+  unsigned int addProperty(const std::string & prop_name, const unsigned int state);
 
-  std::vector<unsigned int> & statefulProps() { return _stateful_prop_id_to_prop_id; }
   const std::vector<unsigned int> & statefulProps() const { return _stateful_prop_id_to_prop_id; }
-  const std::map<unsigned int, std::string> statefulPropNames() const { return _prop_names; }
+  const std::unordered_map<unsigned int, std::string> & statefulPropNames() const
+  {
+    return _stateful_prop_names;
+  }
 
-  /// Returns the property ID for the given prop_name, adding the property and
-  /// creating a new ID if it hasn't already been created.
-  unsigned int getPropertyId(const std::string & prop_name);
-
-  unsigned int retrievePropertyId(const std::string & prop_name) const;
+  const MaterialPropertyRegistry & getMaterialPropertyRegistry() const { return _registry; }
 
   bool isStatefulProp(const std::string & prop_name) const
   {
-    return _prop_names.count(retrievePropertyId(prop_name)) > 0;
+    return _stateful_prop_names.count(_registry.getID(prop_name));
   }
 
   /**
@@ -246,39 +248,40 @@ public:
    */
   void eraseProperty(const Elem * elem);
 
-  static const std::map<std::string, unsigned int> & propIDs() { return _prop_ids; }
+  /**
+   * @returns The current maximum stored state (0 = none, 1 = old, 2 = older)
+   */
+  unsigned int maxState() const
+  {
+    mooseAssert(_max_state < _storage.size(), "Too big");
+    return _max_state;
+  }
+  /**
+   * @returns The number of stored states (2 = up to old, 3 = up to older)
+   */
+  unsigned int numStates() const { return maxState() + 1; }
+  /**
+   * @returns A range over states to be used in range-based for loops
+   */
+  IntRange<unsigned int> stateIndexRange() const { return IntRange<unsigned int>(0, numStates()); }
+  /**
+   * @returns A range over stateful states to be used in range-based for loops
+   *
+   * Will be an empty range if there are no stateful states
+   */
+  IntRange<unsigned int> statefulIndexRange() const
+  {
+    return IntRange<unsigned int>(1, numStates());
+  }
 
 protected:
-  /// Release all internal data structures
-  void releaseProperties();
+  using BuildPropertyValuePtr = PropertyValue * (*)();
 
-  /// Internal property storage release helper
-  void releasePropertyMap(HashMap<unsigned int, MaterialProperties> & inner_map);
+  /// The actual storage
+  std::array<PropsType, max_state + 1> _storage;
 
-  // indexing: [element][side]->material_properties
-  std::unique_ptr<PropsType> _props_elem;
-  std::unique_ptr<PropsType> _props_elem_old;
-  std::unique_ptr<PropsType> _props_elem_older;
-
-  /// mapping from property name to property ID
-  /// NOTE: this is static so the property numbering is global within the simulation (not just FEProblemBase - should be useful when we will use material properties from
-  /// one FEPRoblem in another one - if we will ever do it)
-  static std::map<std::string, unsigned int> _prop_ids;
-
-  /**
-   * Whether or not we have stateful properties.  This will get automatically
-   * set to true if a stateful property is declared.
-   */
-  bool _has_stateful_props;
-
-  /**
-   * True if any material requires older properties to be computed.  This will get automatically
-   * set to true if a older stateful property is declared.
-   */
-  bool _has_older_prop;
-
-  /// mapping from property ID to property name
-  std::map<unsigned int, std::string> _prop_names;
+  /// Mapping from stateful property ID to property name
+  std::unordered_map<unsigned int, std::string> _stateful_prop_names;
   /// the vector of stateful property ids (the vector index is the map to stateful prop_id)
   std::vector<unsigned int> _stateful_prop_id_to_prop_id;
 
@@ -294,15 +297,49 @@ private:
 
   /// Initializes just one hashmap's entries
   void initProps(MaterialData & material_data,
-                 PropsType & mat_props_map,
+                 const unsigned int state,
                  const Elem * elem,
                  unsigned int side,
                  unsigned int n_qpoints);
+
+  ///@{
+  /**
+   * Shallow copies of material properties
+   *
+   */
+  static void shallowSwapData(const std::vector<unsigned int> & stateful_prop_ids,
+                              MaterialProperties & data,
+                              MaterialProperties & data_from);
+  static void shallowSwapDataBack(const std::vector<unsigned int> & stateful_prop_ids,
+                                  MaterialProperties & data,
+                                  MaterialProperties & data_from);
+  ///@}
+
+  /**
+   * @returns A writeable reference to the properties at state \p state.
+   */
+  PropsType & setProps(const unsigned int state);
+
+  /**
+   * @returns A writeable reference to the properties for elem \p elem,
+   * side \p side, and state \p state.
+   *
+   * Similar to setProps, but will initialize (default construct) the
+   * entry if it does not exist.
+   */
+  MaterialProperties &
+  initAndSetProps(const Elem * elem, const unsigned int side, const unsigned int state);
+
+  /// The maximum state (0 = current, 1 = old, 2 = older)
+  unsigned int _max_state;
 
   // You'd think a private mutex would work here, so I'll leave this
   // in the namespace for when that happens, but CI thinks that can
   // make us crash, so I'll just initialize this to Threads::spin_mtx
   libMesh::Threads::spin_mutex & _spin_mtx;
+
+  /// Shared registry (across storage objects) for property names and IDs
+  MaterialPropertyRegistry & _registry;
 
   // Need to be able to eraseProperty from here
   friend class ProjectMaterialProperties;
@@ -311,85 +348,43 @@ private:
   friend class RedistributeProperties;
 
   // Need non-const props from here
-  friend void dataLoad<MaterialPropertyStorage>(std::istream &, MaterialPropertyStorage &, void *);
-  friend void dataStore<MaterialPropertyStorage>(std::ostream &, MaterialPropertyStorage &, void *);
+  friend void dataLoad(std::istream &, MaterialPropertyStorage &, void *);
+  friend void dataStore(std::ostream &, MaterialPropertyStorage &, void *);
 };
 
-inline const MaterialProperties &
-MaterialPropertyStorage::props(const Elem * elem, unsigned int side) const
+inline const MaterialPropertyStorage::PropsType &
+MaterialPropertyStorage::props(const unsigned int state) const
 {
-  mooseAssert(props().contains(elem), "Trying to read properties on an element that lacks them");
-  mooseAssert(props().find(elem)->second.contains(side),
-              "Trying to read properties on an element side that lacks them");
-  return props().find(elem)->second.find(side)->second;
+  mooseAssert(state < _storage.size(), "Invalid material property state " + std::to_string(state));
+  return _storage[state];
 }
 
 inline const MaterialProperties &
-MaterialPropertyStorage::propsOld(const Elem * elem, unsigned int side) const
+MaterialPropertyStorage::props(const Elem * elem, unsigned int side, const unsigned int state) const
 {
-  mooseAssert(propsOld().contains(elem),
-              "Trying to read old properties on an element that lacks them");
-  mooseAssert(propsOld().find(elem)->second.contains(side),
-              "Trying to read old properties on an element side that lacks them");
-  return propsOld().find(elem)->second.find(side)->second;
-}
-
-inline const MaterialProperties &
-MaterialPropertyStorage::propsOlder(const Elem * elem, unsigned int side) const
-{
-  mooseAssert(propsOlder().contains(elem),
-              "Trying to read older properties on an element that lacks them");
-  mooseAssert(propsOlder().find(elem)->second.contains(side),
-              "Trying to read older properties on an element side that lacks them");
-  return propsOlder().find(elem)->second.find(side)->second;
+  const auto find_elem = props(state).find(elem);
+  mooseAssert(find_elem != props(state).end(), "Material property does not have elem entry");
+  const auto find_side = find_elem->second.find(side);
+  mooseAssert(find_side != find_elem->second.end(), "Material property does not have side entry");
+  return find_side->second;
 }
 
 inline MaterialProperties &
-MaterialPropertyStorage::setProps(const Elem * elem, unsigned int side)
+MaterialPropertyStorage::setProps(const Elem * elem, unsigned int side, const unsigned int state)
 {
-  // Many problems rely on reinitMaterials also being the first
-  // init, and I'm not sure I can clean that up to reallow these
-  // assertions without also hurting performance on subsequent
-  // iterations.
-  // libmesh_assert(_props_elem->contains(elem));
-  // libmesh_assert((*_props_elem)[elem].contains(side));
-  return (*_props_elem)[elem][side];
+  return const_cast<MaterialProperties &>(std::as_const(*this).props(elem, side, state));
 }
 
 inline MaterialProperties &
-MaterialPropertyStorage::setPropsOld(const Elem * elem, unsigned int side)
+MaterialPropertyStorage::initAndSetProps(const Elem * elem,
+                                         unsigned int side,
+                                         const unsigned int state)
 {
-  // libmesh_assert(_props_elem_old->contains(elem));
-  // libmesh_assert((*_props_elem_old)[elem].contains(side));
-  return (*_props_elem_old)[elem][side];
+  return setProps(state)[elem][side];
 }
 
-inline MaterialProperties &
-MaterialPropertyStorage::setPropsOlder(const Elem * elem, unsigned int side)
+inline MaterialPropertyStorage::PropsType &
+MaterialPropertyStorage::setProps(const unsigned int state)
 {
-  // libmesh_assert(_props_elem_older->contains(elem));
-  // libmesh_assert((*_props_elem_older)[elem].contains(side));
-  return (*_props_elem_older)[elem][side];
-}
-
-template <>
-inline void
-dataStore(std::ostream & stream, MaterialPropertyStorage & storage, void * context)
-{
-  dataStore(stream, *storage._props_elem, context);
-  dataStore(stream, *storage._props_elem_old, context);
-
-  if (storage.hasOlderProperties())
-    dataStore(stream, *storage._props_elem_older, context);
-}
-
-template <>
-inline void
-dataLoad(std::istream & stream, MaterialPropertyStorage & storage, void * context)
-{
-  dataLoad(stream, *storage._props_elem, context);
-  dataLoad(stream, *storage._props_elem_old, context);
-
-  if (storage.hasOlderProperties())
-    dataLoad(stream, *storage._props_elem_older, context);
+  return const_cast<MaterialPropertyStorage::PropsType &>(std::as_const(*this).props(state));
 }

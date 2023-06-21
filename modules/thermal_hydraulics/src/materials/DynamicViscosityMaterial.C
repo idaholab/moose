@@ -28,7 +28,7 @@ DynamicViscosityMaterial::validParams()
 
   params.addRequiredParam<UserObjectName>("fp_1phase", "Single-phase fluid properties");
 
-  params.addClassDescription("Computes dynamic viscosity");
+  params.addClassDescription("Computes the dynamic viscosity as a material property");
 
   return params;
 }

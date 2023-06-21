@@ -16,8 +16,7 @@ ADWeightedAverageMaterial::validParams()
 {
   InputParameters params = Material::validParams();
 
-  params.addClassDescription(
-      "Weighted average of material properties using aux variables as weights");
+  params.addClassDescription("Weighted average of material properties using variables as weights");
 
   params.addRequiredParam<MaterialPropertyName>(
       "prop_name", "The name of the material property where the average is stored");

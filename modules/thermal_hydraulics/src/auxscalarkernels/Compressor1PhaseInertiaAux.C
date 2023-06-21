@@ -18,7 +18,7 @@ Compressor1PhaseInertiaAux::validParams()
   InputParameters params = AuxScalarKernel::validParams();
   params.addRequiredParam<UserObjectName>("compressor_uo", "Compressor user object name");
   params.addClassDescription(
-      "Moment of inertia computed in the 1-phase shaft-connected compressor.");
+      "Returns the moment of inertia computed in the 1-phase shaft-connected compressor.");
   return params;
 }
 

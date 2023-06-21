@@ -1,20 +1,13 @@
 # Sampler1DVector
 
-!alert construction title=Undocumented Class
-The Sampler1DVector has not been documented. The content listed below should be used as a starting point for
-documenting the class, which includes the typical automatic documentation associated with a
-MooseObject; however, what is contained is ultimately determined by what is necessary to make the
-documentation clear for users.
-
 !syntax description /VectorPostprocessors/Sampler1DVector
 
-## Overview
+!alert warning
+The index must be smaller than the size of the array material property, and indexing
+starts at 0.
 
-!! Replace these lines with information regarding the Sampler1DVector object.
-
-## Example Input File Syntax
-
-!! Describe and include an example of how to use the Sampler1DVector object.
+!alert note
+There is no AD version currently implemented.
 
 !syntax parameters /VectorPostprocessors/Sampler1DVector
 

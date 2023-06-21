@@ -17,6 +17,7 @@ InputParameters
 WallFrictionChurchillMaterial::validParams()
 {
   InputParameters params = Material::validParams();
+  params.addClassDescription("Computes the Darcy friction factor using the Churchill correlation.");
   params.addRequiredCoupledVar("rhoA", "Mass equation variable: rho*A");
   params.addRequiredCoupledVar("rhouA", "Momentum equation variable: rho*u*A");
   params.addRequiredCoupledVar("rhoEA", "Total energy equation variable: rho*E*A");

@@ -16,7 +16,9 @@ registerMooseAction("ThermalHydraulicsApp",
 InputParameters
 AddHeatStructureMaterialAction::validParams()
 {
-  return AddUserObjectAction::validParams();
+  InputParameters params = AddUserObjectAction::validParams();
+  params.addClassDescription("Adds HeatStructureMaterials to the Problem");
+  return params;
 }
 
 AddHeatStructureMaterialAction::AddHeatStructureMaterialAction(const InputParameters & params)

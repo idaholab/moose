@@ -7,28 +7,33 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "HydraulicTorqueAux.h"
+#include "PumpHydraulicTorqueAux.h"
 #include "ADShaftConnectedPump1PhaseUserObject.h"
 
-registerMooseObject("ThermalHydraulicsApp", HydraulicTorqueAux);
+registerMooseObject("ThermalHydraulicsApp", PumpHydraulicTorqueAux);
+registerMooseObjectRenamed("ThermalHydraulicsApp",
+                           HydraulicTorqueAux,
+                           "02/01/2024 00:00",
+                           PumpHydraulicTorqueAux);
 
 InputParameters
-HydraulicTorqueAux::validParams()
+PumpHydraulicTorqueAux::validParams()
 {
   InputParameters params = AuxScalarKernel::validParams();
   params.addRequiredParam<UserObjectName>("pump_uo", "Pump user object name");
-  params.addClassDescription("Hydraulic torque computed in the 1-phase shaft-connected pump.");
+  params.addClassDescription(
+      "Returns the hydraulic torque computed in the 1-phase shaft-connected pump.");
   return params;
 }
 
-HydraulicTorqueAux::HydraulicTorqueAux(const InputParameters & parameters)
+PumpHydraulicTorqueAux::PumpHydraulicTorqueAux(const InputParameters & parameters)
   : AuxScalarKernel(parameters),
     _pump_uo(getUserObject<ADShaftConnectedPump1PhaseUserObject>("pump_uo"))
 {
 }
 
 Real
-HydraulicTorqueAux::computeValue()
+PumpHydraulicTorqueAux::computeValue()
 {
   return MetaPhysicL::raw_value(_pump_uo.getHydraulicTorque());
 }

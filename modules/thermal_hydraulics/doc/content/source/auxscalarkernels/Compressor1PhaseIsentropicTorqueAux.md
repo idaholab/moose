@@ -1,20 +1,13 @@
 # Compressor1PhaseIsentropicTorqueAux
 
-!alert construction title=Undocumented Class
-The Compressor1PhaseIsentropicTorqueAux has not been documented. The content listed below should be used as a starting point for
-documenting the class, which includes the typical automatic documentation associated with a
-MooseObject; however, what is contained is ultimately determined by what is necessary to make the
-documentation clear for users.
-
 !syntax description /AuxScalarKernels/Compressor1PhaseIsentropicTorqueAux
 
-## Overview
+More information about the computed isentropic torque can be found in the
+documentation for the [ADShaftConnectedCompressor1PhaseUserObject.md] used.
 
-!! Replace these lines with information regarding the Compressor1PhaseIsentropicTorqueAux object.
-
-## Example Input File Syntax
-
-!! Describe and include an example of how to use the Compressor1PhaseIsentropicTorqueAux object.
+This object and the [ADShaftConnectedCompressor1PhaseUserObject.md] to fill the
+[!param](/AuxScalarKernels/Compressor1PhaseIsentropicTorqueAux/compressor_uo) parameter are
+automatically added to the simulation by the [ShaftConnectedCompressor1Phase.md] component.
 
 !syntax parameters /AuxScalarKernels/Compressor1PhaseIsentropicTorqueAux
 

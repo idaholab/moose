@@ -16,6 +16,7 @@ InputParameters
 BoolControlDataValuePostprocessor::validParams()
 {
   InputParameters params = GeneralPostprocessor::validParams();
+  params.addClassDescription("Output the value of a boolean ControlData as a postprocessor");
   params.addRequiredParam<std::string>("control_data_name",
                                        "The name of the control data to output.");
   return params;

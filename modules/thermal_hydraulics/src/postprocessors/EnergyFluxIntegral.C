@@ -15,6 +15,7 @@ InputParameters
 EnergyFluxIntegral::validParams()
 {
   InputParameters params = SideIntegralPostprocessor::validParams();
+  params.addClassDescription("Computes the integral of the energy flux over a boundary");
   params.addRequiredCoupledVar("arhouA", "alpha*rho*u*A");
   params.addRequiredCoupledVar("H", "Specific total enthalpy");
   return params;

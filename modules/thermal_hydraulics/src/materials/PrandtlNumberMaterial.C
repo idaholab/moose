@@ -19,7 +19,7 @@ PrandtlNumberMaterial::validParams()
   params.addRequiredParam<MaterialPropertyName>("cp", "Constant-pressure specific heat");
   params.addRequiredParam<MaterialPropertyName>("mu", "Dynamic viscosity");
   params.addRequiredParam<MaterialPropertyName>("k", "Thermal conductivity");
-  params.addClassDescription("Computes Prandtl number as material property");
+  params.addClassDescription("Computes the Prandtl number as a material property");
   return params;
 }
 

@@ -29,7 +29,8 @@ MaterialPropertyInterface::validParams()
 MaterialPropertyInterface::MaterialPropertyInterface(const MooseObject * moose_object,
                                                      const std::set<SubdomainID> & block_ids,
                                                      const std::set<BoundaryID> & boundary_ids)
-  : _mi_params(moose_object->parameters()),
+  : _mi_moose_object(*moose_object),
+    _mi_params(_mi_moose_object.parameters()),
     _mi_name(_mi_params.get<std::string>("_object_name")),
     _mi_moose_object_name(_mi_params.get<std::string>("_moose_base"), _mi_name, "::"),
     _mi_feproblem(*_mi_params.getCheckedPointerParam<FEProblemBase *>("_fe_problem_base")),
@@ -225,17 +226,20 @@ MaterialPropertyInterface::addConsumedPropertyName(const MooseObjectName & obj_n
 }
 
 void
-MaterialPropertyInterface::checkMaterialProperty(const std::string & name)
+MaterialPropertyInterface::checkMaterialProperty(const std::string & name, const unsigned int state)
 {
-  // If the material property is boundary restrictable, add to the list of materials to check
-  if (_mi_boundary_restricted)
-    for (const auto & bnd_id : _mi_boundary_ids)
-      _mi_feproblem.storeBoundaryDelayedCheckMatProp(_mi_name, bnd_id, name);
+  if (state == 0)
+  {
+    // If the material property is boundary restrictable, add to the list of materials to check
+    if (_mi_boundary_restricted)
+      for (const auto & bnd_id : _mi_boundary_ids)
+        _mi_feproblem.storeBoundaryDelayedCheckMatProp(_mi_name, bnd_id, name);
 
-  // The default is to assume block restrictions
-  else
-    for (const auto & blk_ids : _mi_block_ids)
-      _mi_feproblem.storeSubdomainDelayedCheckMatProp(_mi_name, blk_ids, name);
+    // The default is to assume block restrictions
+    else
+      for (const auto & blk_ids : _mi_block_ids)
+        _mi_feproblem.storeSubdomainDelayedCheckMatProp(_mi_name, blk_ids, name);
+  }
 }
 
 void

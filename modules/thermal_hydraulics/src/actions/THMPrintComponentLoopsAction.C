@@ -19,7 +19,7 @@ THMPrintComponentLoopsAction::validParams()
 {
   InputParameters params = Action::validParams();
   params.addParam<bool>("print_component_loops", false, "Flag to print component loops");
-
+  params.addClassDescription("Prints the component loops");
   return params;
 }
 
