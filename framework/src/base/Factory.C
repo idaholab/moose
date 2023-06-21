@@ -273,7 +273,7 @@ Factory::reportUnregisteredError(const std::string & obj_name) const
     oss << '\n';
   }
 
-  oss << "\nIf you are trying to find this object in a dynamically linked library, make sure that\n"
+  oss << "\nIf you are trying to find this object in a dynamically loaded library, make sure that\n"
          "the library can be found either in your \"Problem/library_path\" parameter or in the\n"
          "MOOSE_LIBRARY_PATH environment variable.";
 
