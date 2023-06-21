@@ -427,7 +427,7 @@ MooseMesh::prepare(const MeshBase * const mesh_to_clone)
   {
     const auto rz_coord_blocks = getParam<std::vector<SubdomainName>>("rz_coord_blocks");
     const auto rz_coord_origins = getParam<std::vector<Point>>("rz_coord_origins");
-    const auto rz_coord_directions = getParam<std::vector<Point>>("rz_coord_directions");
+    const auto rz_coord_directions = getParam<std::vector<RealVectorValue>>("rz_coord_directions");
     if (rz_coord_origins.size() == rz_coord_blocks.size() &&
         rz_coord_directions.size() == rz_coord_blocks.size())
     {

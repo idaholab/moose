@@ -6,34 +6,34 @@
 []
 
 [Variables]
-  [./u]
-  [../]
+  [u]
+  []
 []
 
 [Kernels]
-  [./diff]
+  [diff]
     type = Diffusion
     variable = u
-  [../]
+  []
 []
 
 [BCs]
-  [./left]
+  [left]
     type = DirichletBC
     variable = u
     boundary = left
     value = 0
-  [../]
-  [./right]
+  []
+  [right]
     type = DirichletBC
     variable = u
     boundary = right
     value = 1
-  [../]
+  []
 []
 
 [UserObjects]
-  [./double_index]
+  [double_index]
     type = ReadDoubleIndex
     real_di = ' 1.1 ; 2.1 2.2 2.3 ; 3.1 3.2'
     uint_di = ' 11 ; 21 22 23 ;
@@ -59,14 +59,13 @@
     vector_postprocessor_name_di = 'vector_postprocessor_name00; vector_postprocessor_name10 vector_postprocessor_name11 vector_postprocessor_name12; vector_postprocessor_name20 vector_postprocessor_name21'
     output_name_di = 'output_name00; output_name10 output_name11 output_name12; output_name20 output_name21'
     material_property_name_di = 'material_property_name00; material_property_name10 material_property_name11 material_property_name12; material_property_name20 material_property_name21'
-  [../]
+  []
 []
 
 [Executioner]
   type = Steady
 
   solve_type = 'PJFNK'
-
 
   petsc_options_iname = '-pc_type -pc_hypre_type'
   petsc_options_value = 'hypre boomeramg'
