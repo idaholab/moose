@@ -23,7 +23,7 @@ public:
   PerfGraphOutput(const InputParameters & parameters);
 
 protected:
-  virtual bool shouldOutput(const ExecFlagType & type) override;
+  virtual bool shouldOutput() override;
   virtual void output() override;
 
   // Detail level

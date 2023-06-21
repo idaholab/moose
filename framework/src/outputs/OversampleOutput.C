@@ -94,7 +94,7 @@ OversampleOutput::outputStep(const ExecFlagType & type)
   _current_output_execute_on = type;
 
   // Call the output method
-  if (shouldOutput(type))
+  if (shouldOutput())
   {
     TIME_SECTION("outputStep", 2, "Outputting Step");
     updateOversample();

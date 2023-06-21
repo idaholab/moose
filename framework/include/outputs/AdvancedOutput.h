@@ -204,7 +204,7 @@ protected:
    * Handles logic for determining if a step should be output
    * @return True if a call if output should be performed
    */
-  virtual bool shouldOutput(const ExecFlagType & type);
+  virtual bool shouldOutput();
 
   /**
    * A single call to this function should output all the necessary data for a single timestep. By

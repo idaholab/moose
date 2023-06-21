@@ -37,7 +37,7 @@ public:
   virtual Real time() override;
 
 protected:
-  virtual bool shouldOutput(const ExecFlagType & type) override;
+  virtual bool shouldOutput() override;
 
   /// Current norm returned from PETSc
   Real _norm;

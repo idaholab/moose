@@ -257,15 +257,15 @@ AdvancedOutput::outputReporters()
 }
 
 bool
-AdvancedOutput::shouldOutput(const ExecFlagType & type)
+AdvancedOutput::shouldOutput()
 {
   if (!checkFilename())
     return false;
 
-  if (hasOutput(type))
+  if (hasOutput(_current_output_execute_on))
     return true;
   else
-    return Output::shouldOutput(type);
+    return Output::shouldOutput();
 }
 
 void

@@ -68,11 +68,11 @@ FileOutput::FileOutput(const InputParameters & parameters)
 }
 
 bool
-FileOutput::shouldOutput(const ExecFlagType & type)
+FileOutput::shouldOutput()
 {
   if (!checkFilename())
     return false;
-  return Output::shouldOutput(type);
+  return Output::shouldOutput();
 }
 
 bool

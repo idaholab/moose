@@ -142,10 +142,6 @@ Nemesis::outputScalarVariables()
 void
 Nemesis::output()
 {
-  // const auto & type = _current_output_execute_on;
-  // if (!shouldOutput(type))
-  //   return;
-
   // Clear the global variables (postprocessors and scalars)
   _global_names.clear();
   _global_values.clear();

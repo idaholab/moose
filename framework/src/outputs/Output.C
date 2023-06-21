@@ -219,7 +219,7 @@ Output::outputStep(const ExecFlagType & type)
   _current_output_execute_on = type;
 
   // Call the output method
-  if (shouldOutput(type))
+  if (shouldOutput())
   {
     TIME_SECTION("outputStep", 2, "Outputting Step");
     output();
@@ -229,11 +229,9 @@ Output::outputStep(const ExecFlagType & type)
 }
 
 bool
-Output::shouldOutput(const ExecFlagType & type)
+Output::shouldOutput()
 {
-  // Note that in older versions of MOOSE, this was overloaded (unintentionally) to always return
-  // true for the Console output subclass - basically ignoring execute_on options specified for
-  // the console (e.g. via the input file).
+  const auto & type = _current_output_execute_on;
   if (_execute_on.contains(type) || type == EXEC_FORCED)
     return true;
   return false;
