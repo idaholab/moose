@@ -35,7 +35,7 @@ public:
   /**
    * Get a value from the solution vector.
    */
-  Number operator()(Node * node)
+  Number operator()(Node * node) const
   {
     // The 0 assumes linear Lagrange (I think)
     dof_id_type dof = node->dof_number(_var.sys().number(), _var.number(), 0);
@@ -44,7 +44,7 @@ public:
   /**
    * Get a value from the old solution vector.
    */
-  Number old(Node * node)
+  Number old(Node * node) const
   {
     // The 0 assumes linear Lagrange (I think)
     dof_id_type dof = node->dof_number(_var.sys().number(), _var.number(), 0);

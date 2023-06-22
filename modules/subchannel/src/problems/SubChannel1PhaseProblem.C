@@ -44,6 +44,9 @@ formFunction(SNES, Vec x, Vec f, void * ctx)
   for (PetscInt i = 0; i < size; i++)
     solution_seed(i) = xx[i];
 
+  ierr = VecRestoreArrayRead(x, &xx);
+  CHKERRQ(ierr);
+
   libMesh::DenseVector<Real> Wij_residual_vector =
       cc->schp->residualFunction(cc->iblock, solution_seed);
 
@@ -52,10 +55,9 @@ formFunction(SNES, Vec x, Vec f, void * ctx)
   for (int i = 0; i < size; i++)
     ff[i] = Wij_residual_vector(i);
 
-  ierr = VecRestoreArrayRead(x, &xx);
-  CHKERRQ(ierr);
   ierr = VecRestoreArray(f, &ff);
   CHKERRQ(ierr);
+
   return 0;
 }
 
@@ -227,45 +229,78 @@ SubChannel1PhaseProblem::initialSetup()
 {
   ExternalProblem::initialSetup();
   _fp = &getUserObject<SinglePhaseFluidProperties>(getParam<UserObjectName>("fp"));
-  _mdot_soln = new SolutionHandle(getVariable(0, SubChannelApp::MASS_FLOW_RATE));
-  _SumWij_soln = new SolutionHandle(getVariable(0, SubChannelApp::SUM_CROSSFLOW));
-  _P_soln = new SolutionHandle(getVariable(0, SubChannelApp::PRESSURE));
-  _DP_soln = new SolutionHandle(getVariable(0, SubChannelApp::PRESSURE_DROP));
-  _h_soln = new SolutionHandle(getVariable(0, SubChannelApp::ENTHALPY));
-  _T_soln = new SolutionHandle(getVariable(0, SubChannelApp::TEMPERATURE));
+  _mdot_soln = std::make_unique<SolutionHandle>(getVariable(0, SubChannelApp::MASS_FLOW_RATE));
+  _SumWij_soln = std::make_unique<SolutionHandle>(getVariable(0, SubChannelApp::SUM_CROSSFLOW));
+  _P_soln = std::make_unique<SolutionHandle>(getVariable(0, SubChannelApp::PRESSURE));
+  _DP_soln = std::make_unique<SolutionHandle>(getVariable(0, SubChannelApp::PRESSURE_DROP));
+  _h_soln = std::make_unique<SolutionHandle>(getVariable(0, SubChannelApp::ENTHALPY));
+  _T_soln = std::make_unique<SolutionHandle>(getVariable(0, SubChannelApp::TEMPERATURE));
   if (_pin_mesh_exist)
-    _Tpin_soln = new SolutionHandle(getVariable(0, SubChannelApp::PIN_TEMPERATURE));
-  _rho_soln = new SolutionHandle(getVariable(0, SubChannelApp::DENSITY));
-  _mu_soln = new SolutionHandle(getVariable(0, SubChannelApp::VISCOSITY));
-  _S_flow_soln = new SolutionHandle(getVariable(0, SubChannelApp::SURFACE_AREA));
-  _w_perim_soln = new SolutionHandle(getVariable(0, SubChannelApp::WETTED_PERIMETER));
-  _q_prime_soln = new SolutionHandle(getVariable(0, SubChannelApp::LINEAR_HEAT_RATE));
+    _Tpin_soln = std::make_unique<SolutionHandle>(getVariable(0, SubChannelApp::PIN_TEMPERATURE));
+  _rho_soln = std::make_unique<SolutionHandle>(getVariable(0, SubChannelApp::DENSITY));
+  _mu_soln = std::make_unique<SolutionHandle>(getVariable(0, SubChannelApp::VISCOSITY));
+  _S_flow_soln = std::make_unique<SolutionHandle>(getVariable(0, SubChannelApp::SURFACE_AREA));
+  _w_perim_soln = std::make_unique<SolutionHandle>(getVariable(0, SubChannelApp::WETTED_PERIMETER));
+  _q_prime_soln = std::make_unique<SolutionHandle>(getVariable(0, SubChannelApp::LINEAR_HEAT_RATE));
   if (_duct_mesh_exist)
   {
-    _q_prime_duct_soln = new SolutionHandle(getVariable(0, SubChannelApp::DUCT_LINEAR_HEAT_RATE));
-    _Tduct_soln = new SolutionHandle(getVariable(0, SubChannelApp::DUCT_TEMPERATURE));
+    _q_prime_duct_soln =
+        std::make_unique<SolutionHandle>(getVariable(0, SubChannelApp::DUCT_LINEAR_HEAT_RATE));
+    _Tduct_soln = std::make_unique<SolutionHandle>(getVariable(0, SubChannelApp::DUCT_TEMPERATURE));
   }
 }
 
 SubChannel1PhaseProblem::~SubChannel1PhaseProblem()
 {
-  delete _mdot_soln;
-  delete _SumWij_soln;
-  delete _P_soln;
-  delete _DP_soln;
-  delete _h_soln;
-  delete _T_soln;
-  delete _Tpin_soln;
-  delete _rho_soln;
-  delete _mu_soln;
-  delete _S_flow_soln;
-  delete _w_perim_soln;
-  delete _q_prime_soln;
-  if (_duct_mesh_exist)
-  {
-    delete _q_prime_duct_soln;
-    delete _Tduct_soln;
-  }
+  // We need to clean up the petsc matrices/vectors
+  // Mass conservation components
+  MatDestroy(&_mc_sumWij_mat);
+  VecDestroy(&_Wij_vec);
+  VecDestroy(&_prod);
+  VecDestroy(&_prodp);
+  MatDestroy(&_mc_axial_convection_mat);
+  VecDestroy(&_mc_axial_convection_rhs);
+
+  // Axial momentum conservation components
+  MatDestroy(&_amc_turbulent_cross_flows_mat);
+  VecDestroy(&_amc_turbulent_cross_flows_rhs);
+  MatDestroy(&_amc_time_derivative_mat);
+  VecDestroy(&_amc_time_derivative_rhs);
+  MatDestroy(&_amc_advective_derivative_mat);
+  VecDestroy(&_amc_advective_derivative_rhs);
+  MatDestroy(&_amc_cross_derivative_mat);
+  VecDestroy(&_amc_cross_derivative_rhs);
+  MatDestroy(&_amc_friction_force_mat);
+  VecDestroy(&_amc_friction_force_rhs);
+  VecDestroy(&_amc_gravity_rhs);
+  MatDestroy(&_amc_pressure_force_mat);
+  VecDestroy(&_amc_pressure_force_rhs);
+  MatDestroy(&_amc_sys_mdot_mat);
+  VecDestroy(&_amc_sys_mdot_rhs);
+
+  // Lateral momentum conservation components
+  MatDestroy(&_cmc_time_derivative_mat);
+  VecDestroy(&_cmc_time_derivative_rhs);
+  MatDestroy(&_cmc_advective_derivative_mat);
+  VecDestroy(&_cmc_advective_derivative_rhs);
+  MatDestroy(&_cmc_friction_force_mat);
+  VecDestroy(&_cmc_friction_force_rhs);
+  MatDestroy(&_cmc_pressure_force_mat);
+  VecDestroy(&_cmc_pressure_force_rhs);
+  MatDestroy(&_cmc_sys_Wij_mat);
+  VecDestroy(&_cmc_sys_Wij_rhs);
+  VecDestroy(&_cmc_Wij_channel_dummy);
+
+  // Energy conservation components
+  MatDestroy(&_hc_time_derivative_mat);
+  VecDestroy(&_hc_time_derivative_rhs);
+  MatDestroy(&_hc_advective_derivative_mat);
+  VecDestroy(&_hc_advective_derivative_rhs);
+  MatDestroy(&_hc_cross_derivative_mat);
+  VecDestroy(&_hc_cross_derivative_rhs);
+  VecDestroy(&_hc_added_heat_rhs);
+  MatDestroy(&_hc_sys_h_mat);
+  VecDestroy(&_hc_sys_h_rhs);
 }
 
 bool
@@ -410,7 +445,7 @@ SubChannel1PhaseProblem::populateVectorFromHandle(Vec & x,
     for (unsigned int i_l = 0; i_l < cross_dimension; i_l++)
     {
       auto * loc_node = _subchannel_mesh.getChannelNode(i_l, iz);
-      xx[iz_ind * cross_dimension + i_l] = (*loc_solution)(loc_node);
+      xx[iz_ind * cross_dimension + i_l] = loc_solution(loc_node);
     }
   }
   ierr = VecRestoreArray(x, &xx);
@@ -436,7 +471,7 @@ SubChannel1PhaseProblem::populateSolutionChan(const Vec & x,
     for (unsigned int i_l = 0; i_l < cross_dimension; i_l++)
     {
       loc_node = _subchannel_mesh.getChannelNode(i_l, iz);
-      loc_solution->set(loc_node, xx[iz_ind * cross_dimension + i_l]);
+      loc_solution.set(loc_node, xx[iz_ind * cross_dimension + i_l]);
     }
   }
   return 0;
@@ -554,8 +589,8 @@ SubChannel1PhaseProblem::computeSumWij(int iblock)
       populateVectorFromDense<libMesh::DenseMatrix<Real>>(
           loc_Wij, _Wij, first_node, last_node + 1, _n_gaps);
       MatMult(_mc_sumWij_mat, loc_Wij, loc_prod);
-      populateSolutionChan<SolutionHandle *>(
-          loc_prod, _SumWij_soln, first_node, last_node, _n_channels);
+      populateSolutionChan<SolutionHandle>(
+          loc_prod, *_SumWij_soln, first_node, last_node, _n_channels);
       VecDestroy(&loc_prod);
       VecDestroy(&loc_Wij);
     }
@@ -660,7 +695,7 @@ SubChannel1PhaseProblem::computeMdot(int iblock)
       KSPSetTolerances(ksploc, _rtol, _atol, _dtol, _maxit);
       KSPSetFromOptions(ksploc);
       KSPSolve(ksploc, _mc_axial_convection_rhs, sol);
-      populateSolutionChan<SolutionHandle *>(sol, _mdot_soln, first_node, last_node, _n_channels);
+      populateSolutionChan<SolutionHandle>(sol, *_mdot_soln, first_node, last_node, _n_channels);
       VecZeroEntries(_mc_axial_convection_rhs);
       KSPDestroy(&ksploc);
       VecDestroy(&sol);
@@ -770,8 +805,8 @@ SubChannel1PhaseProblem::computeWijPrime(int iblock)
     Vec loc_Wij;
     VecDuplicate(_amc_sys_mdot_rhs, &loc_prod);
     VecDuplicate(_Wij_vec, &loc_Wij);
-    populateVectorFromHandle<SolutionHandle *>(
-        loc_prod, _mdot_soln, first_node, last_node, _n_channels);
+    populateVectorFromHandle<SolutionHandle>(
+        loc_prod, *_mdot_soln, first_node, last_node, _n_channels);
     MatMult(_amc_turbulent_cross_flows_mat, loc_prod, loc_Wij);
     VecAXPY(loc_Wij, -1.0, _amc_turbulent_cross_flows_rhs);
     populateDenseFromVector<libMesh::DenseMatrix<Real>>(
@@ -825,7 +860,7 @@ SubChannel1PhaseProblem::computeDP(int iblock)
           auto rho_j = (*_rho_soln)(node_in_j);
           auto Si = (*_S_flow_soln)(node_in_i);
           auto Sj = (*_S_flow_soln)(node_in_j);
-          auto u_star = 0.0;
+          Real u_star = 0.0;
           // figure out donor axial velocity
           if (_Wij(i_gap, iz) > 0.0)
             u_star = (*_mdot_soln)(node_out_i) / Si / rho_i;
@@ -1217,8 +1252,8 @@ SubChannel1PhaseProblem::computeDP(int iblock)
     if (_segregated_bool)
     {
       // Assembly the matrix system
-      populateVectorFromHandle<SolutionHandle *>(
-          _prod, _mdot_soln, first_node, last_node, _n_channels);
+      populateVectorFromHandle<SolutionHandle>(
+          _prod, *_mdot_soln, first_node, last_node, _n_channels);
       Vec ls;
       VecDuplicate(_amc_sys_mdot_rhs, &ls);
       MatMult(_amc_sys_mdot_mat, _prod, ls);
@@ -1585,7 +1620,7 @@ SubChannel1PhaseProblem::computeh(int iblock)
           auto * node_in_i = _subchannel_mesh.getChannelNode(ii_ch, iz - 1);
           auto * node_in_j = _subchannel_mesh.getChannelNode(jj_ch, iz - 1);
           // Define donor enthalpy
-          auto h_star = 0.0;
+          Real h_star = 0.0;
           if (_Wij(i_gap, iz) > 0.0)
             h_star = (*_h_soln)(node_in_i);
           else if (_Wij(i_gap, iz) < 0.0)
@@ -2009,6 +2044,7 @@ SubChannel1PhaseProblem::computeWij(int iblock)
         auto pressure_term = 2 * std::pow(Sij, 2.0) * DPij * rho_star;
         auto time_term =
             _TR * 2.0 * (_Wij(i_gap, iz) - _Wij_old(i_gap, iz)) * Lij * Sij * rho_star / _dt;
+
         _Wij_residual_matrix(i_gap, iz - 1 - iblock * _block_size) =
             time_term + friction_term + inertia_term - pressure_term;
       }
@@ -2243,8 +2279,8 @@ SubChannel1PhaseProblem::computeWij(int iblock)
       createPetscVector(sol_holder_W, _block_size * _n_gaps);
       Vec loc_holder_Wij;
       createPetscVector(loc_holder_Wij, _block_size * _n_gaps);
-      populateVectorFromHandle<SolutionHandle *>(
-          _prodp, _P_soln, iblock * _block_size, (iblock + 1) * _block_size - 1, _n_channels);
+      populateVectorFromHandle<SolutionHandle>(
+          _prodp, *_P_soln, iblock * _block_size, (iblock + 1) * _block_size - 1, _n_channels);
       populateVectorFromDense<libMesh::DenseMatrix<Real>>(
           loc_holder_Wij, _Wij, first_node, last_node, _n_gaps);
       MatMult(_cmc_sys_Wij_mat, _Wij_vec, sol_holder_W);
@@ -2367,6 +2403,7 @@ SubChannel1PhaseProblem::petscSnesSolver(int iblock,
   }
   ierr = VecRestoreArray(x, &xx);
   CHKERRQ(ierr);
+
   ierr = SNESSolve(snes, NULL, x);
   CHKERRQ(ierr);
   ierr = VecGetArray(x, &xx);
@@ -2522,8 +2559,8 @@ SubChannel1PhaseProblem::implicitPetscSolve(int iblock)
   {
     unsigned int last_node = (iblock + 1) * _block_size;
     unsigned int first_node = iblock * _block_size + 1;
-    populateVectorFromHandle<SolutionHandle *>(
-        _prod, _mdot_soln, first_node, last_node, _n_channels);
+    populateVectorFromHandle<SolutionHandle>(
+        _prod, *_mdot_soln, first_node, last_node, _n_channels);
     Vec ls;
     VecDuplicate(_amc_sys_mdot_rhs, &ls);
     MatMult(_amc_sys_mdot_mat, _prod, ls);
@@ -2576,8 +2613,8 @@ SubChannel1PhaseProblem::implicitPetscSolve(int iblock)
   {
     Vec sol_holder_P;
     createPetscVector(sol_holder_P, _block_size * _n_gaps);
-    populateVectorFromHandle<SolutionHandle *>(
-        _prodp, _P_soln, iblock * _block_size, (iblock + 1) * _block_size - 1, _n_channels);
+    populateVectorFromHandle<SolutionHandle>(
+        _prodp, *_P_soln, iblock * _block_size, (iblock + 1) * _block_size - 1, _n_channels);
 
     ierr = MatMult(_cmc_pressure_force_mat, _prodp, sol_holder_P);
     CHKERRQ(ierr);
@@ -2587,6 +2624,7 @@ SubChannel1PhaseProblem::implicitPetscSolve(int iblock)
     CHKERRQ(ierr);
     ierr = VecAXPY(vec_array[field_num], 1.0, sol_holder_P);
     CHKERRQ(ierr);
+    VecDestroy(&sol_holder_P);
   }
 
   if (_verbose_subchannel)
@@ -2629,8 +2667,8 @@ SubChannel1PhaseProblem::implicitPetscSolve(int iblock)
   if (true)
   {
     // Estimating cross-flow resistances to achieve realizable solves
-    populateVectorFromHandle<SolutionHandle *>(
-        _prod, _mdot_soln, first_node, last_node, _n_channels);
+    populateVectorFromHandle<SolutionHandle>(
+        _prod, *_mdot_soln, first_node, last_node, _n_channels);
     Vec mdot_estimate;
     createPetscVector(mdot_estimate, _block_size * _n_channels);
     Vec pmat_diag;
@@ -2791,8 +2829,8 @@ SubChannel1PhaseProblem::implicitPetscSolve(int iblock)
     CHKERRQ(ierr);
     ierr = MatDiagonalSet(mat_array[Q * field_num + field_num], diag_mdot, INSERT_VALUES);
     CHKERRQ(ierr);
-    populateVectorFromHandle<SolutionHandle *>(
-        _prod, _mdot_soln, first_node, last_node, _n_channels);
+    populateVectorFromHandle<SolutionHandle>(
+        _prod, *_mdot_soln, first_node, last_node, _n_channels);
     ierr = VecScale(diag_mdot, (1.0 - relaxation_factor_mdot));
     CHKERRQ(ierr);
     ierr = VecPointwiseMult(_prod, _prod, diag_mdot);
@@ -2816,7 +2854,7 @@ SubChannel1PhaseProblem::implicitPetscSolve(int iblock)
     CHKERRQ(ierr);
     if (_verbose_subchannel)
       _console << "Mat assembled" << std::endl;
-    populateVectorFromHandle<SolutionHandle *>(_prod, _P_soln, first_node, last_node, _n_channels);
+    populateVectorFromHandle<SolutionHandle>(_prod, *_P_soln, first_node, last_node, _n_channels);
     ierr = VecScale(diag_P, (1.0 - relaxation_factor_P));
     CHKERRQ(ierr);
     ierr = VecPointwiseMult(_prod, _prod, diag_P);
@@ -2952,7 +2990,7 @@ SubChannel1PhaseProblem::implicitPetscSolve(int iblock)
   VecGetArray(sol_Wij, &sol_Wij_array);
 
   /// Populating Mass flow
-  populateSolutionChan<SolutionHandle *>(sol_mdot, _mdot_soln, first_node, last_node, _n_channels);
+  populateSolutionChan<SolutionHandle>(sol_mdot, *_mdot_soln, first_node, last_node, _n_channels);
 
   /// Populating Pressure
   for (unsigned int iz = last_node; iz > first_node - 1; iz--)
@@ -3045,12 +3083,12 @@ SubChannel1PhaseProblem::implicitPetscSolve(int iblock)
 
   /// Populating sum_Wij
   MatMult(_mc_sumWij_mat, sol_Wij, _prod);
-  populateSolutionChan<SolutionHandle *>(_prod, _SumWij_soln, first_node, last_node, _n_channels);
+  populateSolutionChan<SolutionHandle>(_prod, *_SumWij_soln, first_node, last_node, _n_channels);
 
   Vec sumWij_loc;
   createPetscVector(sumWij_loc, _block_size * _n_channels);
-  populateVectorFromHandle<SolutionHandle *>(
-      _prod, _SumWij_soln, first_node, last_node, _n_channels);
+  populateVectorFromHandle<SolutionHandle>(
+      _prod, *_SumWij_soln, first_node, last_node, _n_channels);
 
   VecAbs(_prod);
   ierr = VecMax(_prod, NULL, &_max_sumWij_new);
@@ -3071,6 +3109,8 @@ SubChannel1PhaseProblem::implicitPetscSolve(int iblock)
   ierr = VecDestroy(&sol_p);
   CHKERRQ(ierr);
   ierr = VecDestroy(&sol_Wij);
+  CHKERRQ(ierr);
+  ierr = VecDestroy(&sumWij_loc);
   CHKERRQ(ierr);
   if (_verbose_subchannel)
     _console << "Solutions destroyed." << std::endl;
@@ -3271,7 +3311,7 @@ SubChannel1PhaseProblem::externalSolve()
   initializeSolution();
   if (_verbose_subchannel)
     _console << "Solution initialized" << std::endl;
-  auto P_error = 1.0;
+  Real P_error = 1.0;
   unsigned int P_it = 0;
   unsigned int P_it_max;
 
@@ -3297,7 +3337,7 @@ SubChannel1PhaseProblem::externalSolve()
     {
       int last_level = (iblock + 1) * _block_size;
       int first_level = iblock * _block_size + 1;
-      auto T_block_error = 1.0;
+      Real T_block_error = 1.0;
       auto T_it = 0;
       _console << "Solving Block: " << iblock << " From first level: " << first_level
                << " to last level: " << last_level << std::endl;
@@ -3315,6 +3355,7 @@ SubChannel1PhaseProblem::externalSolve()
         if (_segregated_bool)
         {
           computeWijFromSolve(iblock);
+
           if (_compute_power)
           {
             computeh(iblock);
@@ -3455,11 +3496,11 @@ SubChannel1PhaseProblem::externalSolve()
   _aux->solution().close();
   _aux->update();
 
-  auto power_in = 0.0;
-  auto power_out = 0.0;
-  auto Total_surface_area = 0.0;
-  auto mass_flow_in = 0.0;
-  auto mass_flow_out = 0.0;
+  Real power_in = 0.0;
+  Real power_out = 0.0;
+  Real Total_surface_area = 0.0;
+  Real mass_flow_in = 0.0;
+  Real mass_flow_out = 0.0;
   for (unsigned int i_ch = 0; i_ch < _n_channels; i_ch++)
   {
     auto * node_in = _subchannel_mesh.getChannelNode(i_ch, 0);

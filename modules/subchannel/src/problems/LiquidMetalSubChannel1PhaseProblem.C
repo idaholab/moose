@@ -41,6 +41,17 @@ LiquidMetalSubChannel1PhaseProblem::LiquidMetalSubChannel1PhaseProblem(
   createPetscVector(_hc_sweep_enthalpy_rhs, _block_size * _n_channels);
 }
 
+LiquidMetalSubChannel1PhaseProblem::~LiquidMetalSubChannel1PhaseProblem()
+{
+  // Clean up heat conduction system
+  MatDestroy(&_hc_axial_heat_conduction_mat);
+  VecDestroy(&_hc_axial_heat_conduction_rhs);
+  MatDestroy(&_hc_radial_heat_conduction_mat);
+  VecDestroy(&_hc_radial_heat_conduction_rhs);
+  MatDestroy(&_hc_sweep_enthalpy_mat);
+  VecDestroy(&_hc_sweep_enthalpy_rhs);
+}
+
 double
 LiquidMetalSubChannel1PhaseProblem::computeFrictionFactor(_friction_args_struct friction_args)
 {

@@ -5,8 +5,9 @@
 # Thermal-hydraulics parameters
 ###################################################
 T_in = 624.70556 #Kelvin
-Total_Surface_Area = 0.000854322 #m3
-mass_flux_in = ${fparse 2.45 / Total_Surface_Area} # ${fparse 2.6923 / Total_Surface_Area} #
+Total_Surface_Area = 0.000854322 #m2
+Mass_In = 2.45 #kg # 2.6923
+mass_flux_in = '${fparse Mass_In / Total_Surface_Area}' #kg/m2
 #P_out = 43850.66 # Pa plus 4.778 meters of Na to the free surface in pool or Plus 0.57 meters of Na to core outlet.
 P_out = 2.0e5
 Power_initial = 486200 #W (Page 26,35 of ANL document)
@@ -20,14 +21,14 @@ Power_initial = 486200 #W (Page 26,35 of ANL document)
 # Geometric parameters
 ###################################################
 scale_factor = 0.01
-fuel_pin_pitch = ${fparse 0.5664*scale_factor}
-fuel_pin_diameter = ${fparse 0.4419*scale_factor}
-wire_z_spacing = ${fparse 15.24*scale_factor}
-wire_diameter = ${fparse 0.1244*scale_factor}
-inner_duct_in = ${fparse 4.64*scale_factor}
+fuel_pin_pitch = '${fparse 0.5664*scale_factor}'
+fuel_pin_diameter = '${fparse 0.4419*scale_factor}'
+wire_z_spacing = '${fparse 15.24*scale_factor}'
+wire_diameter = '${fparse 0.1244*scale_factor}'
+inner_duct_in = '${fparse 4.64*scale_factor}'
 n_rings = 5
-heated_length = ${fparse 34.3*scale_factor}
-unheated_length_exit = ${fparse 26.9*scale_factor}
+heated_length = '${fparse 34.3*scale_factor}'
+unheated_length_exit = '${fparse 26.9*scale_factor}'
 ###################################################
 
 [TriSubChannelMesh]
