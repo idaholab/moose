@@ -6,6 +6,7 @@
     input = 'dynamic_objects.i'
     exodiff = 'dynamic_objects_out.e'
     library_mode = 'DYNAMIC'
+    group = 'dynamic_loading'
 
     # Test must be run with the misc app to test dynamic loading
     executable_pattern = 'misc-\w+$'
@@ -20,6 +21,7 @@
     type = 'RunApp'
     input = 'dynamic_objects2.i'
     library_mode = 'DYNAMIC'
+    group = 'dynamic_loading'
 
     # Test must be run with the misc app to test dynamic loading
     executable_pattern = 'misc-\w+$'
@@ -37,6 +39,7 @@
     method = OPT # because the library name is explicitly given
     prereq = 'dynamic_object_restrict_bad'
     library_mode = 'DYNAMIC'
+    group = 'dynamic_loading'
 
     # Test must be run with the misc app to test dynamic loading
     executable_pattern = 'misc-\w+$'
@@ -51,6 +54,7 @@
     input = 'dynamic_syntax.i'
     exodiff = 'dynamic_syntax_out.e'
     library_mode = 'DYNAMIC'
+    group = 'dynamic_loading'
 
     # Test must be run with the misc app to test dynamic loading
     executable_pattern = 'misc-\w+$'
@@ -69,6 +73,7 @@
     method = OPT # because the library name is explicitly given
     prereq = 'dynamic_object_loading_syntax'
     library_mode = 'DYNAMIC'
+    group = 'dynamic_loading'
 
     # Test must be run with the misc app to test dynamic loading
     executable_pattern = 'misc-\w+$'
@@ -87,6 +92,7 @@
     cli_args = "Problem/object_names='CHMath CHInterface'"
     library_mode = 'DYNAMIC'
     prereq = 'dynamic_object_loading'
+    group = 'dynamic_loading'
 
     # Test must be run with the misc app to test dynamic loading
     executable_pattern = 'misc-\w+$'
@@ -104,6 +110,7 @@
     cli_args = "Problem/object_names='CHMath'"
     library_mode = 'DYNAMIC'
     prereq = 'dynamic_object_restrict'
+    group = 'dynamic_loading'
 
     # Test must be run with the misc app to test dynamic loading
     executable_pattern = 'misc-\w+$'
@@ -119,6 +126,7 @@
     input = 'dynamic_wrong_lib.i'
     expect_err = 'We loaded objects from the following libraries.*\n\tlibtensor_mechanics'
     library_mode = 'DYNAMIC'
+    group = 'dynamic_loading'
 
     # Test must be run with the misc app to test dynamic loading
     executable_pattern = 'misc-\w+$'
@@ -135,6 +143,7 @@
     cli_args = 'Problem/register_objects_from=FooApp'
     library_mode = 'DYNAMIC'
     prereq = 'dynamic_object_loading_wrong_app'
+    group = 'dynamic_loading'
 
     # Test must be run with the misc app to test dynamic loading
     executable_pattern = 'misc-\w+$'
