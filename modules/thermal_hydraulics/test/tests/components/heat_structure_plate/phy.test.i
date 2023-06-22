@@ -14,10 +14,10 @@
     orientation = '1 0 0'
 
     length = 1
-    n_elems = 2
+    n_elems = 5
     names = 'blk'
     widths = '1'
-    n_part_elems = '2'
+    n_part_elems = '5'
     materials = 'hs-mat'
 
     initial_T = 350
@@ -55,8 +55,11 @@
   abort_on_solve_fail = true
 
   solve_type = 'NEWTON'
+  nl_rel_tol = 1e-8
+  nl_abs_tol = 1e-8
+  petsc_options_iname = '-pc_type'
+  petsc_options_value = 'lu'
 []
-
 
 [Outputs]
   exodus = true
