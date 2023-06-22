@@ -1805,11 +1805,9 @@ MooseApp::dynamicAppRegistration(const std::string & app_name,
 
   auto successfully_loaded = false;
   if (paths.empty())
-  {
     oss << '"' << app_name << "\" is not a registered application name.\n"
         << "No search paths were set. We made no attempts to locate the corresponding library "
            "file.\n";
-  }
   else
   {
     dynamicRegistration(params);
