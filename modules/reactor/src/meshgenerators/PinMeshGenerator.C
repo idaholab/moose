@@ -21,7 +21,7 @@ registerMooseObject("ReactorApp", PinMeshGenerator);
 InputParameters
 PinMeshGenerator::validParams()
 {
-  auto params = MeshGenerator::validParams();
+  auto params = ReactorGeometryMeshBuilderBase::validParams();
 
   params.addRequiredParam<MeshGeneratorName>(
       "reactor_params",
@@ -481,7 +481,52 @@ PinMeshGenerator::PinMeshGenerator(const InputParameters & parameters)
   else
     declareMeshProperty("extruded", false);
 
+  if (getReactorParam<bool>("generate_rgmb_metadata"))
+    generateMetadata();
+
   _build_mesh = &getMeshByName(build_mesh_name);
+}
+
+void
+PinMeshGenerator::generateMetadata()
+{
+  std::string mg_struct = _is_assembly ? "assembly" : "pin";
+  std::string metadata_prefix = mg_struct + "_" + std::to_string(_pin_type);
+
+  declareMeshProperty(metadata_prefix + "_pitch", _pitch);
+  declareMeshProperty(metadata_prefix + "_ring_radii", _ring_radii);
+  declareMeshProperty(metadata_prefix + "_duct_halfpitches", _duct_halfpitch);
+  declareMeshProperty(metadata_prefix + "_is_homogenized", _homogenized);
+  if (_is_assembly)
+    declareMeshProperty(metadata_prefix + "_is_single_pin", _is_assembly);
+
+  unsigned int n_axial_levels =
+      (_mesh_dimensions == 3)
+          ? getReactorParam<std::vector<unsigned int>>("axial_mesh_intervals").size()
+          : 1;
+  std::vector<std::vector<subdomain_id_type>> ring_region_ids(n_axial_levels, std::vector<subdomain_id_type>(_ring_radii.size()));
+  std::vector<std::vector<subdomain_id_type>> duct_region_ids(n_axial_levels, std::vector<subdomain_id_type>(_duct_halfpitch.size()));
+  std::vector<subdomain_id_type> background_region_ids(n_axial_levels);
+
+  for (unsigned int axial_idx = 0; axial_idx < n_axial_levels; ++axial_idx)
+  {
+    for (unsigned int ring_idx = 0; ring_idx < _ring_radii.size(); ++ring_idx)
+      ring_region_ids[axial_idx][ring_idx] = _region_ids[axial_idx][ring_idx];
+
+    background_region_ids[axial_idx] = _region_ids[axial_idx][_ring_radii.size()];
+
+    for (unsigned int duct_idx = _ring_radii.size() + 1; duct_idx < _duct_halfpitch.size(); ++duct_idx)
+      duct_region_ids[axial_idx][duct_idx - _ring_radii.size() - 1] = _region_ids[axial_idx][duct_idx];
+  }
+
+  declareMeshProperty(metadata_prefix + "_ring_region_ids", ring_region_ids);
+  declareMeshProperty(metadata_prefix + "_background_region_id", background_region_ids);
+  declareMeshProperty(metadata_prefix + "_duct_region_ids", duct_region_ids);
+
+  generateGlobalReactorMetadata(metadata_prefix);
+
+  if (getParam<bool>("show_rgmb_metadata"))
+    printReactorMetadata(metadata_prefix);
 }
 
 std::unique_ptr<MeshBase>

@@ -26,6 +26,8 @@ public:
   std::unique_ptr<MeshBase> generate() override;
 
 protected:
+  void generateMetadata();
+
   ///The names of the assemblies that compose the core
   const std::vector<MeshGeneratorName> _inputs;
 

@@ -440,7 +440,48 @@ AssemblyMeshGenerator::AssemblyMeshGenerator(const InputParameters & parameters)
   else
     declareMeshProperty("extruded", false);
 
+  if (getReactorParam<bool>("generate_rgmb_metadata"))
+    generateMetadata();
+
   _build_mesh = &getMeshByName(build_mesh_name);
+}
+
+void
+AssemblyMeshGenerator::generateMetadata()
+{
+  std::string metadata_prefix = "assembly_" + std::to_string(_assembly_type);
+  declareMeshProperty(metadata_prefix + "_pitch", getReactorParam<Real>("assembly_pitch"));
+  declareMeshProperty(metadata_prefix + "_background_region_id", _background_region_id);
+  declareMeshProperty(metadata_prefix + "_duct_halfpitches", _duct_sizes);
+  declareMeshProperty(metadata_prefix + "_duct_region_ids", _duct_region_ids);
+  declareMeshProperty(metadata_prefix + "_is_homogenized", false);
+  declareMeshProperty(metadata_prefix + "_is_single_pin", false);
+
+  // Determine constituent pin type ids and define lattice
+  std::vector<std::vector<int>> pin_type_lattice;
+  std::set<unsigned int> assembly_pin_types;
+  for (unsigned int i = 0; i < _pattern.size(); ++i)
+  {
+    std::vector<int> pin_type_ids(_pattern[i].size());
+    for (unsigned int j = 0; j < _pattern[i].size(); ++j)
+    {
+      const auto input_pin_name = _inputs[_pattern[i][j]];
+      pin_type_ids[j] = getMeshProperty<subdomain_id_type>("pin_type", input_pin_name);
+      if (assembly_pin_types.find(pin_type_ids[j]) == assembly_pin_types.end())
+      {
+        copyPinMetadata(input_pin_name, pin_type_ids[j]);
+        assembly_pin_types.insert(pin_type_ids[j]);
+      }
+    }
+    pin_type_lattice.push_back(pin_type_ids);
+  }
+  declareMeshProperty(metadata_prefix + "_pin_types", assembly_pin_types);
+  declareMeshProperty(metadata_prefix + "_lattice", pin_type_lattice);
+
+  generateGlobalReactorMetadata(metadata_prefix);
+
+  if (getParam<bool>("show_rgmb_metadata"))
+    printReactorMetadata(metadata_prefix);
 }
 
 std::unique_ptr<MeshBase>

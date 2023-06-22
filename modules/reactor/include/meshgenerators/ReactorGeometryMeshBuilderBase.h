@@ -42,6 +42,71 @@ protected:
   void initializeReactorMeshParams(const std::string reactor_param_name);
 
   /**
+   * Declares global reactor-level metadata onto current ReactorGeometryMeshBuilder object
+   * @param prefix prefix to preprend to add metadata names
+   */
+  void generateGlobalReactorMetadata(const std::string prefix);
+
+  /**
+   * Copies pin-level metadata to current ReactorGeometryMeshBuilder object
+   * @param input_name name of input mesh generator object to copy metadata from
+   * @param pin_type_id pin_type_id of pin to query metadata of
+   */
+  void copyPinMetadata(const std::string input_name, const unsigned int pin_type_id);
+
+  /**
+   * Copies assembly-level metadata to current ReactorGeometryMeshBuilder object
+   * @param input_name name of input mesh generator object to copy metadata from
+   * @param assembly_type_id assembly_type_id of pin to query metadata of
+   */
+  void copyAssemblyMetadata(const std::string input_name, const unsigned int assembly_type_id);
+
+  /**
+   * Print metadata associated with ReactorGeometryMeshBuilder object
+   * @param metadata_prefix Prefix associated with metadata
+   * @param whether this is the original function call, which will trigger additional output messages
+   */
+  void printReactorMetadata(const std::string metadata_prefix, const bool first_function_call = true);
+
+  /**
+   * Print core-level metadata associated with ReactorGeometryMeshBuilder object
+   * @param prefix Prefix associated with metadata
+   * @param whether this is the original function call, which will trigger additional output messages
+   */
+  void printCoreMetadata(const std::string prefix, const bool first_function_call);
+
+  /**
+   * Print assembly-level metadata associated with ReactorGeometryMeshBuilder object
+   * @param prefix Prefix associated with metadata
+   * @param whether this is the original function call, which will trigger additional output messages
+   */
+  void printAssemblyMetadata(const std::string prefix, const bool first_function_call);
+
+  /**
+   * Print pin-level metadata associated with ReactorGeometryMeshBuilder object
+   * @param prefix Prefix associated with metadata
+   */
+  void printPinMetadata(const std::string prefix);
+
+  /**
+   * Print global ReactorMeshParams metadata associated with ReactorGeometryMeshBuilder object
+   * @param prefix Prefix associated with metadata
+   */
+  void printGlobalReactorMetadata(const std::string prefix);
+
+  /**
+   * Print metadata to console output
+   * @param metadata_name Name of metadata to output
+   */
+  template <typename T> void printMetadataToConsole(const std::string metadata_name);
+
+  /**
+   * Print metadata with datatype std::vector<std::vector<T>> to console output
+   * @param metadata_name Name of metadata to output
+   */
+  template <typename T> void print2dMetadataToConsole(const std::string metadata_name);
+
+  /**
    * Releases the mesh obtained in _reactor_params_mesh.
    *
    * This _must_ be called in any object that derives from this one, because

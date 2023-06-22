@@ -502,7 +502,70 @@ CoreMeshGenerator::CoreMeshGenerator(const InputParameters & parameters)
   else
     declareMeshProperty("extruded", false);
 
+  if (getReactorParam<bool>("generate_rgmb_metadata"))
+    generateMetadata();
+
   _build_mesh = &getMeshByName(build_mesh_name);
+}
+
+void
+CoreMeshGenerator::generateMetadata()
+{
+  std::string metadata_prefix = "core";
+
+  if (_mesh_periphery)
+  {
+    declareMeshProperty(metadata_prefix + "_peripheral_ring_radius", _outer_circle_radius);
+    declareMeshProperty(metadata_prefix + "_peripheral_ring_region_id", _periphery_region_id);
+  }
+
+  // Determine constituent pin type ids and define lattice
+  std::vector<std::vector<int>> assembly_type_lattice;
+  std::set<unsigned int> core_assembly_types;
+  std::set<unsigned int> core_pin_types;
+  for (unsigned int i = 0; i < _pattern.size(); ++i)
+  {
+    std::vector<int> assembly_type_ids(_pattern[i].size());
+    for (unsigned int j = 0; j < _pattern[i].size(); ++j)
+    {
+      const auto input_assembly_name = _inputs[_pattern[i][j]];
+      // Use an assembly type of -1 to represent a dummy assembly
+      if (input_assembly_name == _empty_key)
+        assembly_type_ids[j] = -1;
+      else
+      {
+        assembly_type_ids[j] = getMeshProperty<subdomain_id_type>("assembly_type", input_assembly_name);
+        // Copy assembly metadata to core
+        if (core_assembly_types.find(assembly_type_ids[j]) == core_assembly_types.end())
+        {
+          copyAssemblyMetadata(input_assembly_name, assembly_type_ids[j]);
+          core_assembly_types.insert(assembly_type_ids[j]);
+          std::string assembly_prefix = "assembly_" + std::to_string(assembly_type_ids[j]);
+
+          // Copy pin metadata to core if assembly is defined as lattice of pins
+          if (!getMeshProperty<bool>(assembly_prefix + "_is_single_pin"))
+          {
+            const auto pin_type_ids = getMeshProperty<std::set<unsigned int>>(assembly_prefix + "_pin_types");
+            for (const auto & pin_type_id : pin_type_ids)
+              if (core_pin_types.find(pin_type_id) == core_pin_types.end())
+              {
+                copyPinMetadata(input_assembly_name, pin_type_id);
+                core_pin_types.insert(pin_type_id);
+              }
+          }
+        }
+      }
+    }
+    assembly_type_lattice.push_back(assembly_type_ids);
+  }
+  declareMeshProperty(metadata_prefix + "_pin_types", core_pin_types);
+  declareMeshProperty(metadata_prefix + "_assembly_types", core_assembly_types);
+  declareMeshProperty(metadata_prefix + "_lattice", assembly_type_lattice);
+
+  generateGlobalReactorMetadata(metadata_prefix);
+
+  if (getParam<bool>("show_rgmb_metadata"))
+    printReactorMetadata(metadata_prefix);
 }
 
 std::unique_ptr<MeshBase>

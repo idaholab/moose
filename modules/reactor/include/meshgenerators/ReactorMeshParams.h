@@ -51,4 +51,7 @@ protected:
 
   // Map between RGMB element block names, block ids, and region ids
   std::map<std::string, std::pair<subdomain_id_type, dof_id_type>> _name_id_map;
+
+  // Whether to define additional metadata to represent RGMB geometry and region IDs
+  const bool _define_metadata;
 };

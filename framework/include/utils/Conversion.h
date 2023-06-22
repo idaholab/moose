@@ -67,6 +67,11 @@ stringify(const T & t)
 
 // overloads for integer types where std::to_string gives the same result and is faster
 inline std::string
+stringify(bool v)
+{
+  return v ? "true" : "false";
+}
+inline std::string
 stringify(int v)
 {
   return std::to_string(v);

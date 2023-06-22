@@ -25,6 +25,8 @@ public:
   std::unique_ptr<MeshBase> generate() override;
 
 protected:
+  void generateMetadata();
+
   ///The id number for this pin type
   const subdomain_id_type _pin_type;
 
