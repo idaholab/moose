@@ -1,7 +1,7 @@
 [Tests]
-  issues = '#24289'
-  design = 'auxkernels/AdvectiveFluxAux.md'
   [Finite_Element]
+    issues = '#24289'
+    design = 'AdvectiveFluxAux.md'
     requirement = 'The system shall be able to output the components of the flux vector for advection problems'
     [x_flux]
       type = 'CSVDiff'
@@ -21,6 +21,8 @@
   []
 
   [Finite_Volume]
+    issues = '#24289'
+    design = 'AdvectiveFluxAux.md'
     requirement = 'The system shall throw an error when finite volume variable is used(currently not support)'
     type = RunException
     input = 'advection_flux_fv.i'

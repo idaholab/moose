@@ -1,6 +1,7 @@
 [Tests]
+  [test]
   issues = '#24289'
-  design = 'auxkernels/AdvectiveFluxAux.md'
+  design = 'SideAdvectiveFluxIntegral.md'
   requirement = 'The system shall be able to output computing the integral of the component of the flux vector for advection problems'
     [x_flux_fe]
       type = 'CSVDiff'
@@ -17,4 +18,5 @@
       abs_zero = 1e-9
       detail = 'with finite volumn variable'
     []
+  []
 []

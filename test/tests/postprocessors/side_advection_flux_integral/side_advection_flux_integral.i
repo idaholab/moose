@@ -42,8 +42,6 @@
 
 [Variables]
   [u]
-    order = FIRST
-    family = LAGRANGE
   []
 []
 
