@@ -1432,7 +1432,7 @@ Parser::extractParams(const std::string & prefix, InputParameters & p)
 
         setvector(SubdomainID, int);
         setvector(BoundaryID, int);
-        setvector(RealVectorValue, double);
+        setvector(RealVectorValue, RealVectorValue);
         setvector(Point, Point);
         setvector(MooseEnum, MooseEnum);
 

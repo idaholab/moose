@@ -212,11 +212,8 @@ MooseAppCoordTransform::validParams()
       "rz_coord_blocks", "Blocks using general axisymmetric coordinate systems");
   params.addParam<std::vector<Point>>("rz_coord_origins",
                                       "Axis origin points for each block in 'rz_coord_blocks'");
-  // Elsewhere, we use RealVectorValue for these directions, but InputParameters
-  // does not handle std::vector<RealVectorValue> in the expected way.
-  // See https://github.com/idaholab/moose/issues/24337.
-  params.addParam<std::vector<Point>>("rz_coord_directions",
-                                      "Axis directions for each block in 'rz_coord_blocks'");
+  params.addParam<std::vector<RealVectorValue>>(
+      "rz_coord_directions", "Axis directions for each block in 'rz_coord_blocks'");
   params.addParam<std::string>(
       "length_unit",
       "How much distance one mesh length unit represents, e.g. 1 cm, 1 nm, 1 ft, 5inches");
