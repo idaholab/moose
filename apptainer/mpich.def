@@ -8,7 +8,7 @@ BootStrap: oras
 {%- if ALTERNATE_FROM == "rocky9" %}
 From: mooseharbor.hpc.inl.gov/moose-hpcbase/rocky9-{{ ARCH }}:9.0-0
 {%- elif ALTERNATE_FROM == "clang" %}
-From: mooseharbor.hpc.inl.gov/moose-hpcbase/rocky8-clang-{{ ARCH }}:8.6-0
+From: mooseharbor.hpc.inl.gov/moose-base/clang-{{ ARCH }}:13.0.1-0
 {%- elif ALTERNATE_FROM == "cuda" %}
 From: mooseharbor.hpc.inl.gov/moose-hpcbase/rocky8-cuda-{{ ARCH }}:8.6-cuda11.4.0-0
 {%- else %}
@@ -20,6 +20,14 @@ From: harbor.hpc.inl.gov/hpcbase/mpi_03:1.1.0
     export LC_ALL=C
 
 %post
+{%- if ALTERNATE_FROM == "clang" %}
+    COMPILER='llvm/'
+    export MOOSE_COMPILER='clang'
+{%- else %}
+    COMPILER=''
+    export MOOSE_COMPILER='gcc'
+{%- endif %}
+    export MOOSE_MPICH_DIR=${MOOSE_MPICH_DIR:-"/opt/mpi/${COMPILER}mpich-3.4.3"}
     export MOOSE_MPICH_DIR=${MOOSE_MPICH_DIR:-"/opt/mpi/mpich-3.4.3"}
     export MOOSE_OPENMPI_DIR=${MOOSE_OPENMPI_DIR:-"/opt/mpi/openmpi-4.1.5"}
 
@@ -43,7 +51,7 @@ From: harbor.hpc.inl.gov/hpcbase/mpi_03:1.1.0
                    cmake diffutils bison flex perl-IO-Compress perl-JSON perl-JSON-PP \
                    libtirpc libtirpc-devel zlib-devel patch patchutils epel-release file \
                    libpng libpng-devel unzip jq valgrind cppunit doxygen fftw-devel gsl-devel \
-                   libtool autoconf automake
+                   libtool autoconf automake git-lfs
     # After epel-release
     dnf install -y glpk-devel patchelf lcov
 
@@ -90,14 +98,6 @@ else
     PS1="\[\033[1;34m\][`basename ${APPTAINER_NAME:-$SINGULARITY_NAME} .sif`]\[\033[1;32m\][\w]\[\033[0m\]> "
 fi
 EOF
-
-    # We need git lfs
-    mkdir ${TEMP_LOC}/gitlfs
-    cd ${TEMP_LOC}/gitlfs
-    curl -L -O https://github.com/git-lfs/git-lfs/releases/download/v3.2.0/git-lfs-linux-amd64-v3.2.0.tar.gz
-    tar -xf git-lfs-linux-amd64-v3.2.0.tar.gz
-    cd git-lfs-3.2.0
-    ./install.sh
 
     # Basic script for setting mpich environment
     USE_MPI_SCRIPT='export LD_LIBRARY_PATH=${MOOSE_MPI_DIR}/lib:${LD_LIBRARY_PATH}
