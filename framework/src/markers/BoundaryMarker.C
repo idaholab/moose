@@ -21,7 +21,8 @@ BoundaryMarker::validParams()
 
   params.addRequiredParam<MooseEnum>(
       "mark", marker_states, "How to mark elements adjacent to the boundary.");
-  params.addRequiredParam<BoundaryName>("next_to", "Boundary to refine elements along");
+  params.addRequiredParam<std::vector<BoundaryName>>("next_to",
+                                                     "Boundaries to refine elements along");
   params.addParam<Real>("distance", 0.0, "Distance from the boundary to refine within");
   return params;
 }
@@ -31,7 +32,7 @@ BoundaryMarker::BoundaryMarker(const InputParameters & parameters)
     _distance(getParam<Real>("distance")),
     _bnd_elem_ids(_mesh.getBoundariesToActiveSemiLocalElemIds()),
     _mark(parameters.get<MooseEnum>("mark").getEnum<MarkerValue>()),
-    _boundary(_mesh.getBoundaryID(getParam<BoundaryName>("next_to")))
+    _boundary_ids(_mesh.getBoundaryIDs(getParam<std::vector<BoundaryName>>("next_to")))
 {
   if (_mesh.isDistributedMesh() && _distance > 0)
     mooseWarning("Elements with in `distance ` of a boundary segment on a different processor "
@@ -43,23 +44,32 @@ BoundaryMarker::computeElementMarker()
 {
   if (_distance == 0.0)
   {
-    if (_mesh.isBoundaryElem(_current_elem->id(), _boundary))
-      return _mark;
+    // is the current element member of any selected boundary element set?
+    for (const auto boundary : _boundary_ids)
+      if (_mesh.isBoundaryElem(_current_elem->id(), boundary))
+        return _mark;
 
     return DONT_MARK;
   }
   else
   {
-    const auto it = _bnd_elem_ids.find(_boundary);
-    if (it != _bnd_elem_ids.end())
-      for (const auto id : it->second)
-      {
-        const auto elem = _mesh.elemPtr(id);
-        const auto r = _current_elem->vertex_average() - elem->vertex_average();
-        if (r.norm() < _distance)
-          return _mark;
-      }
+    for (const auto boundary : _boundary_ids)
+    {
+      const auto it = _bnd_elem_ids.find(boundary);
+      if (it != _bnd_elem_ids.end())
+        for (const auto id : it->second)
+        {
+          // shortcut if we are checing the current element itself
+          if (id == _current_elem->id())
+            return _mark;
 
+          // otherwise compute distance to the boundary elements
+          const auto elem = _mesh.elemPtr(id);
+          const auto r = _current_elem->vertex_average() - elem->vertex_average();
+          if (r.norm() < _distance)
+            return _mark;
+        }
+    }
     return DONT_MARK;
   }
 }
