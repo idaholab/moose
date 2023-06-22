@@ -347,6 +347,15 @@ MeshGeneratorSystem::executeMeshGenerators()
       const auto & name = generator->name();
 
       auto current_mesh = generator->generateInternal();
+#ifdef DEBUG
+      // Assert that the mesh is either marked as not prepared or if it is marked as prepared,
+      // that it's *actually* prepared
+      if (!_has_bmbb && !MeshTools::valid_is_prepared(*current_mesh))
+        generator->mooseError("The generated mesh is marked as prepared but is not actually "
+                              "prepared. Please edit the '",
+                              generator->type(),
+                              "' class to call 'set_isnt_prepared()'");
+#endif
 
       // Now we need to possibly give this mesh to downstream generators
       auto & outputs = _mesh_generator_outputs[name];

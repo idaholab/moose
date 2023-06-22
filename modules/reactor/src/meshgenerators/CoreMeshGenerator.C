@@ -637,7 +637,7 @@ CoreMeshGenerator::generate()
     }
   }
 
-  (*_build_mesh)->find_neighbors();
+  (*_build_mesh)->set_isnt_prepared();
 
   return std::move(*_build_mesh);
 }
