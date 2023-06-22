@@ -236,11 +236,12 @@ PBSodiumFluidProperties::temperature_correction(Real & temperature) const
 }
 
 Real
-PBSodiumFluidProperties::T_from_p_h(Real temperature, Real enthalpy) const
+PBSodiumFluidProperties::T_from_p_h(Real /*pressure*/, Real enthalpy) const
 {
   // the algorithm were made fully compliant with the enthalpy correlations above.
   // Consistent with the approach in SAM, it ignores that sodium boiling.
   // This part will be revisited in future.
+  Real temperature = 0;
   if (enthalpy > _H_Tmax)
   {
     temperature = (enthalpy - _H_Tmax) / _Cp_Tmax + _Tmax;

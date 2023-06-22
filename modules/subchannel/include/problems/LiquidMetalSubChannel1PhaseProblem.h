@@ -26,6 +26,8 @@ class LiquidMetalSubChannel1PhaseProblem : public SubChannel1PhaseProblem
 public:
   LiquidMetalSubChannel1PhaseProblem(const InputParameters & params);
 
+  virtual ~LiquidMetalSubChannel1PhaseProblem();
+
 protected:
   /**
    * Computes the axial friction factor for the sodium coolant and

@@ -23,7 +23,7 @@ SubChannelMesh::validParams()
   return params;
 }
 
-SubChannelMesh::SubChannelMesh(const InputParameters & params) : MooseMesh(params) {}
+SubChannelMesh::SubChannelMesh(const InputParameters & params) : MooseMesh(params), _kij(0.0) {}
 
 SubChannelMesh::SubChannelMesh(const SubChannelMesh & other_mesh)
   : MooseMesh(other_mesh),

@@ -191,20 +191,20 @@ protected:
 
   /// Solutions handles and link to TH tables properties
   const SinglePhaseFluidProperties * _fp;
-  SolutionHandle * _mdot_soln;
-  SolutionHandle * _SumWij_soln;
-  SolutionHandle * _P_soln;
-  SolutionHandle * _DP_soln;
-  SolutionHandle * _h_soln;
-  SolutionHandle * _T_soln;
-  SolutionHandle * _Tpin_soln;
-  SolutionHandle * _rho_soln;
-  SolutionHandle * _mu_soln;
-  SolutionHandle * _S_flow_soln;
-  SolutionHandle * _w_perim_soln;
-  SolutionHandle * _q_prime_soln;
-  SolutionHandle * _q_prime_duct_soln; // Only used for ducted assemblies
-  SolutionHandle * _Tduct_soln;        // Only used for ducted assemblies
+  std::unique_ptr<SolutionHandle> _mdot_soln;
+  std::unique_ptr<SolutionHandle> _SumWij_soln;
+  std::unique_ptr<SolutionHandle> _P_soln;
+  std::unique_ptr<SolutionHandle> _DP_soln;
+  std::unique_ptr<SolutionHandle> _h_soln;
+  std::unique_ptr<SolutionHandle> _T_soln;
+  std::unique_ptr<SolutionHandle> _Tpin_soln;
+  std::unique_ptr<SolutionHandle> _rho_soln;
+  std::unique_ptr<SolutionHandle> _mu_soln;
+  std::unique_ptr<SolutionHandle> _S_flow_soln;
+  std::unique_ptr<SolutionHandle> _w_perim_soln;
+  std::unique_ptr<SolutionHandle> _q_prime_soln;
+  std::unique_ptr<SolutionHandle> _q_prime_duct_soln; // Only used for ducted assemblies
+  std::unique_ptr<SolutionHandle> _Tduct_soln;        // Only used for ducted assemblies
 
   /// Petsc Functions
   virtual PetscErrorCode createPetscVector(Vec & v, PetscInt n);
