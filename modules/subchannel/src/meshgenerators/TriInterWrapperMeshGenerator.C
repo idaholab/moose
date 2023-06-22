@@ -34,6 +34,7 @@ TriInterWrapperMeshGenerator::validParams()
   params.addRequiredParam<unsigned int>("nrings", "Number of fuel rod rings per assembly [-]");
   params.addRequiredParam<Real>("flat_to_flat",
                                 "Flat to flat distance for the hexagonal assembly [m]");
+  params.addParam<Real>("Kij", 0.5, "Lateral form loss coefficient [-]");
   params.addRequiredParam<Real>("side_bypass",
                                 "Extra size of the bypass for the side assemblies [m]");
   return params;
@@ -44,6 +45,7 @@ TriInterWrapperMeshGenerator::TriInterWrapperMeshGenerator(const InputParameters
     _unheated_length_entry(getParam<Real>("unheated_length_entry")),
     _heated_length(getParam<Real>("heated_length")),
     _unheated_length_exit(getParam<Real>("unheated_length_exit")),
+    _kij(getParam<Real>("Kij")),
     _assembly_pitch(getParam<Real>("assembly_pitch")),
     _n_cells(getParam<unsigned int>("n_cells")),
     _n_rings(getParam<unsigned int>("nrings")),
@@ -684,6 +686,7 @@ TriInterWrapperMeshGenerator::generate()
   sch_mesh->_unheated_length_exit = _unheated_length_exit;
   sch_mesh->_z_grid = _z_grid;
   sch_mesh->_k_grid = _k_grid;
+  sch_mesh->_kij = _kij;
   sch_mesh->_assembly_pitch = _assembly_pitch;
   sch_mesh->_n_cells = _n_cells;
   sch_mesh->_n_rings = _n_rings;

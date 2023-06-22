@@ -54,6 +54,8 @@ protected:
   std::vector<Real> _k_blockage;
   /// Distance between the neighbor fuel rods, pitch
   Real _pitch;
+  /// Lateral form loss coefficient
+  const Real & _kij;
   /// fuel rod diameter
   Real _rod_diameter;
   /// number of axial cells
