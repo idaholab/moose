@@ -14,10 +14,10 @@
     valgrind = 'none'
   []
   [frictionless-mortar-3d_pg]
-    type = 'Exodiff'
+    type = 'CSVDiff'
     input = 'frictionless-mortar-3d_pg.i'
     min_ad_size = 100
-    exodiff = 'frictionless-mortar-3d_pg_out.e'
+    csvdiff = 'frictionless-mortar-3d_pg_out_contact-pressure_0002.csv'
     requirement = 'The system shall solve a 3D frictionless bouncing block problem with mortar '
                   'constraint using Petrov-Galerkin approach.'
   []
@@ -41,6 +41,17 @@
     abs_zero = 1.0e-5
     method = '!dbg'
     valgrind = 'none'
+  []
+  [frictionless-mortar-3d-pg-action]
+    prereq = 'frictionless-mortar-3d_pg'
+    type = 'CSVDiff'
+    input = 'frictionless-mortar-3d-action.i'
+    cli_args = 'Contact/mortar/use_petrov_galerkin=true '
+               'Outputs/file_base="frictionless-mortar-3d_pg_out"'
+    min_ad_size = 100
+    csvdiff = 'frictionless-mortar-3d_pg_out_contact-pressure_0002.csv'
+    requirement = 'The system shall solve a 3D frictionless bouncing block problem with mortar '
+                  'constraint using Petrov-Galerkin approach in contact action.'
   []
   [frictionless-mortar-3d-action-correct-edge-dropping]
     type = 'CSVDiff'
@@ -83,10 +94,12 @@
     valgrind = 'none'
   []
   [frictional-mortar-3d-pg]
-    type = 'Exodiff'
+    type = 'CSVDiff'
     input = 'frictional-mortar-3d_pg.i'
     min_ad_size = 100
-    exodiff = 'frictional-mortar-3d_pg_out.e'
+    csvdiff = 'frictional-mortar-3d_pg_out_contact-pressure_0001.csv '
+              'frictional-mortar-3d_pg_out_frictional-pressure-3d_0001.csv '
+              'frictional-mortar-3d_pg_out_frictional-pressure_0001.csv'
     requirement = 'The system shall solve a 3D frictional bouncing block problem with mortar '
                   'constraint using the Petrov-Galerkin approach.'
     rel_err = 1.0e-5
@@ -97,8 +110,8 @@
     input = 'frictional-mortar-3d-function.i'
     min_ad_size = 100
     exodiff = 'frictional-mortar-3d-function_out.e'
-    requirement = 'The system shall solve a 3D frictional block problem with mortar '
-                  'constraint using a simple frictional model dependent on relative velocity and contact pressure.'
+    requirement = 'The system shall solve a 3D frictional block problem with mortar constraint using '
+                  'a simple frictional model dependent on relative velocity and contact pressure.'
     rel_err = 1.0e-5
     abs_zero = 1.0e-5
     method = '!dbg'
@@ -121,13 +134,29 @@
     method = '!dbg'
     valgrind = 'none'
   []
+  [frictional-mortar-3d-pg-action]
+    prereq = 'frictional-mortar-3d-pg'
+    type = 'CSVDiff'
+    input = 'frictional-mortar-3d-action.i'
+    cli_args = 'Contact/mortar/use_petrov_galerkin=true '
+               'Outputs/file_base=frictional-mortar-3d_pg_out'
+    min_ad_size = 100
+    csvdiff = 'frictional-mortar-3d_pg_out_contact-pressure_0001.csv '
+              'frictional-mortar-3d_pg_out_frictional-pressure-3d_0001.csv '
+              'frictional-mortar-3d_pg_out_frictional-pressure_0001.csv'
+    requirement = 'The system shall solve a 3D frictional bouncing block problem with mortar '
+                  'constraint using the Petrov-Galerkin approach in contact action.'
+    rel_err = 1.0e-5
+    abs_zero = 1.0e-5
+  []
   [half_sphere_nodal_geometry]
     type = 'Exodiff'
     exodiff = 'nodal_geometry_only.e'
     input = 'half_sphere_nodal_geometry.i'
     min_ad_size = 100
     valgrind = 'heavy'
-    requirement = 'The system shall generate consistent mortar nodal geometry (normal and tangent vectors) on a spherical surface.'
+    requirement = 'The system shall generate consistent mortar nodal geometry (normal and tangent '
+                  'vectors) on a spherical surface.'
     rel_err = 1.0e-5
     abs_zero = 1.0e-5
     allow_warnings = true
@@ -138,8 +167,8 @@
     input = 'frictional-mortar-3d-penalty.i'
     min_ad_size = 100
     exodiff = 'frictional-mortar-3d-penalty_out.e'
-    requirement = 'The system shall solve a 3D frictional problem with mortar '
-                  'constraint using a penalty approach'
+    requirement = 'The system shall solve a 3D frictional problem with mortar constraint using a '
+                  'penalty approach'
     rel_err = 1.0e-5
     abs_zero = 1.0e-5
   []
@@ -148,8 +177,8 @@
     input = 'frictionless-mortar-3d-penalty.i'
     min_ad_size = 100
     exodiff = 'frictionless-mortar-3d-penalty_out.e'
-    requirement = 'The system shall solve a 3D frictionless problem with mortar '
-                  'constraint using a penalty approach'
+    requirement = 'The system shall solve a 3D frictionless problem with mortar constraint using a '
+                  'penalty approach'
     rel_err = 1.0e-5
     abs_zero = 1.0e-5
   []

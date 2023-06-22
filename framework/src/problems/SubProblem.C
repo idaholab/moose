@@ -786,7 +786,7 @@ SubProblem::getVariableHelper(THREAD_ID tid,
     else
       mooseError("Unknown variable " + var_name);
   }
-  else if (expected_var_type == Moose::VarKindType::VAR_NONLINEAR &&
+  else if (expected_var_type == Moose::VarKindType::VAR_NONLINEAR && var_in_nl &&
            nls[nl_sys_num]->hasVariable(var_name))
     var = &(nls[nl_sys_num]->getVariable(tid, var_name));
   else if (expected_var_type == Moose::VarKindType::VAR_AUXILIARY && aux.hasVariable(var_name))
