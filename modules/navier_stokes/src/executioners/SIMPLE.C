@@ -33,15 +33,10 @@ SIMPLE::validParams()
       "momentum_systems", "The nonlinear system for the momentum equation");
   params.addRequiredParam<NonlinearSystemName>("pressure_system",
                                                "The nonlinear system for the pressure equation");
-  params.addParam<std::string>("momentum_tag",
+  params.addParam<std::string>("pressure_gradient_tag",
                                "non_pressure_momentum_kernels",
                                "The name of the tags associated with the kernels in the momentum "
                                "equations which are not related to the pressure gradient.");
-  params.addRangeCheckedParam<Real>(
-      "momentum_variable_relaxation",
-      1.0,
-      "0.0<momentum_variable_relaxation<=1.0",
-      "The relaxation which should be used for the momentum variable.");
   params.addRangeCheckedParam<Real>(
       "pressure_variable_relaxation",
       1.0,
@@ -53,15 +48,10 @@ SIMPLE::validParams()
       "0.0<momentum_equation_relaxation<=1.0",
       "The relaxation which should be used for the momentum equation.");
   params.addRangeCheckedParam<Real>(
-      "pressure_equation_relaxation",
-      1.0,
-      "0.0<pressure_equation_relaxation<=1.0",
-      "The relaxation which should be used for the pressure equation.");
-  params.addRangeCheckedParam<Real>(
       "momentum_absolute_tolerance",
       1e-5,
       "0.0<momentum_absolute_tolerance",
-      "The absolute tolerance on ther residual of the momentum equation.");
+      "The absolute tolerance on the residual of the momentum equation.");
   params.addRangeCheckedParam<Real>(
       "pressure_absolute_tolerance",
       1e-5,
@@ -71,7 +61,10 @@ SIMPLE::validParams()
                                             1000,
                                             "0<num_iterations",
                                             "The number of momentum-pressure iterations needed.");
-  params.addParam<bool>("print_fields", false, "ASD");
+  params.addParam<bool>(
+      "print_fields",
+      false,
+      "Use this to print the coupling and solution fields and matrices throughout the iteration.");
 
   return params;
 }
@@ -85,10 +78,10 @@ SIMPLE::SIMPLE(const InputParameters & parameters)
     _momentum_system_names(getParam<std::vector<std::string>>("momentum_systems")),
     _pressure_sys_number(_problem.nlSysNum(getParam<NonlinearSystemName>("pressure_system"))),
     _pressure_system(_problem.getNonlinearSystemBase(_pressure_sys_number)),
-    _momentum_tag_name(getParam<std::string>("momentum_tag")),
-    _momentum_tag_id(_problem.addVectorTag(_momentum_tag_name)),
-    _pressure_variable_relaxation(getParam<Real>("pressure_variable_relaxation")),
+    _pressure_tag_name(getParam<std::string>("pressure_gradient_tag")),
+    _pressure_tag_id(_problem.addVectorTag(_pressure_tag_name)),
     _momentum_equation_relaxation(getParam<Real>("momentum_equation_relaxation")),
+    _pressure_variable_relaxation(getParam<Real>("pressure_variable_relaxation")),
     _momentum_absolute_tolerance(getParam<Real>("momentum_absolute_tolerance")),
     _pressure_absolute_tolerance(getParam<Real>("pressure_absolute_tolerance")),
     _num_iterations(getParam<unsigned int>("num_iterations")),
@@ -96,12 +89,20 @@ SIMPLE::SIMPLE(const InputParameters & parameters)
 {
   _fixed_point_solve->setInnerSolve(_feproblem_solve);
 
+  if (_momentum_system_names.size() != 1 &&
+      _momentum_system_names.size() != _problem.mesh().dimension())
+    paramError("momentum_systems",
+               "The number of momentum components should either be equal to 1 or the number of "
+               "spatial dimensions on the mesh.");
+
+  // We fetch the system numbers for the momentum components plus add vectors
+  // for removing the contribution from the pressure gradient terms.
   for (auto system_i : index_range(_momentum_system_names))
   {
     _momentum_system_numbers.push_back(_problem.nlSysNum(_momentum_system_names[system_i]));
     _momentum_systems.push_back(
         &_problem.getNonlinearSystemBase(_momentum_system_numbers[system_i]));
-    _momentum_systems[system_i]->addVector(_momentum_tag_id, false, ParallelType::PARALLEL);
+    _momentum_systems[system_i]->addVector(_pressure_tag_id, false, ParallelType::PARALLEL);
   }
 
   _time = 0;
@@ -111,9 +112,14 @@ void
 SIMPLE::init()
 {
   _problem.initialSetup();
+
+  // Fetch the segregated rhie-chow object and transfer some information about the momentum
+  // system(s)
   _rc_uo = const_cast<INSFVRhieChowInterpolatorSegregated *>(
       &getUserObject<INSFVRhieChowInterpolatorSegregated>("rhie_chow_user_object"));
-  _rc_uo->linkMomentumSystem(_momentum_systems, _momentum_system_numbers, _momentum_tag_id);
+  _rc_uo->linkMomentumSystem(_momentum_systems, _momentum_system_numbers, _pressure_tag_id);
+
+  // Initialize the face velocities in the RC object
   _rc_uo->initFaceVelocities();
 }
 
@@ -122,17 +128,35 @@ SIMPLE::relaxMatrix(SparseMatrix<Number> & matrix_in,
                     const Real relaxation_parameter,
                     NumericVector<Number> & diff_diagonal)
 {
+  // We cast out matrix into a PetscMatrix to get access to some of the
+  // specific functionalities
   PetscMatrix<Number> * matrix = cast_ptr<PetscMatrix<Number> *>(&matrix_in);
 
+  // Zero the diagonal difference vector
   diff_diagonal = 0;
 
+  // Get the diagonal of the matrix
   matrix->get_diagonal(diff_diagonal);
 
+  // Create a copy of the diagonal for later use and cast it
   std::unique_ptr<NumericVector<Number>> original_diagonal = diff_diagonal.clone();
-  PetscVector<Number> * original_diagonal_petsc =
-      dynamic_cast<PetscVector<Number> *>(original_diagonal.get());
 
+  // We cache the inverse of the relaxation parameter because doing divisions might
+  // be more expensive for every row
   const Real inverse_relaxation = 1 / relaxation_parameter;
+
+  // Now we loop over the matrix row by row and sum the absolute values of the
+  // offdiagonal values, If these sums are larger than the diagonal entry,
+  // we switch the diagonal value with the sum. At the same time we increase the
+  // diagonal by dividing it with the relaxation parameter. So the new diagonal will be:
+  // D* = 1/lambda*max(|D|,sum(|Offdiag|))
+  // For more information see
+  //
+  // Juretic, Franjo. Error analysis in finite volume CFD. Diss.
+  // Imperial College London (University of London), 2005.
+  //
+  // The trickery comes with storing everything in the diff-diagonal vector
+  // to avoid the allocation and manipulation of a third vector
   for (auto row_i = matrix->row_start(); row_i < matrix->row_stop(); row_i++)
   {
     std::vector<numeric_index_type> indices;
@@ -145,84 +169,95 @@ SIMPLE::relaxMatrix(SparseMatrix<Number> & matrix_in,
     diff_diagonal.set(row_i, new_diagonal);
   }
 
+  // Time to modify the diagonal of the matrix
   for (auto row_i = matrix->row_start(); row_i < matrix->row_stop(); row_i++)
-  {
     matrix->set(row_i, row_i, diff_diagonal(row_i));
-  }
   matrix->close();
 
-  diff_diagonal.add(-1.0, *original_diagonal_petsc);
+  // Finally, we can create (D*-D) vector which is used for the relaxation of the
+  // right hand side later
+  diff_diagonal.add(-1.0, *original_diagonal);
   diff_diagonal.close();
 }
 
 void
-SIMPLE::relaxRightHandSide(NumericVector<Number> & rhs_in,
-                           const NumericVector<Number> & solution_in,
+SIMPLE::relaxRightHandSide(NumericVector<Number> & rhs,
+                           const NumericVector<Number> & solution,
                            const NumericVector<Number> & diff_diagonal)
 {
-  const PetscVector<Number> * const solution =
-      dynamic_cast<const PetscVector<Number> * const>(&solution_in);
-  PetscVector<Number> * rhs = dynamic_cast<PetscVector<Number> *>(&rhs_in);
-  const PetscVector<Number> * const diff_digaonal_petsc =
-      dynamic_cast<const PetscVector<Number> * const>(&diff_diagonal);
 
-  // diff_digaonal_petsc.close();
-  auto working_vector = diff_digaonal_petsc->clone();
-  PetscVector<Number> * working_vector_petsc =
-      dynamic_cast<PetscVector<Number> *>(working_vector.get());
+  // We need a working vector here to make sure we don't modify the
+  // (D*-D) vector
+  auto working_vector = diff_diagonal.clone();
+  working_vector->pointwise_mult(solution, *working_vector);
 
-  working_vector_petsc->pointwise_mult(*solution, *working_vector_petsc);
-
-  // if (_print_fields)
-  // {
-  //   std::cout << " rhs before relaxation " << std::endl;
-  //   rhs->print();
-  //   std::cout << " relaxation source " << std::endl;
-  //   working_vector_petsc->print();
-  // }
-
-  rhs->add(*working_vector_petsc);
-  rhs->close();
-
-  // if (_print_fields)
-  // {
-  //   std::cout << " rhs after relaxation " << std::endl;
-  //   rhs->print();
-  // }
+  // The correction to the right hand side is just
+  // (D*-D)*old_solution
+  // For more information see
+  //
+  // Juretic, Franjo. Error analysis in finite volume CFD. Diss.
+  // Imperial College London (University of London), 2005.
+  rhs.add(*working_vector);
+  rhs.close();
 }
 
 std::vector<Real>
-SIMPLE::solveMomentumPredictor(std::vector<NonlinearSystemBase *> & momentum_systems)
+SIMPLE::solveMomentumPredictor()
 {
+  // Temporary storage for the (flux-normalized) residuals form
+  // different momentum components
   std::vector<Real> normalized_residuals;
   _problem.setCurrentNonlinearSystem(_momentum_system_numbers[0]);
 
+  // We will use functions from the implicit system directly
   NonlinearImplicitSystem * momentum_system =
       dynamic_cast<NonlinearImplicitSystem *>(&(_momentum_systems[0]->system()));
 
+  // We need a linear solver
+  // TODO: ADD FUNCTIONALITY TO LIBMESH TO ACCEPT ABS TOLERANCES!
   PetscLinearSolver<Real> & momentum_solver =
       dynamic_cast<PetscLinearSolver<Real> &>(*momentum_system->get_linear_solver());
 
+  // We create a vector which can be used as a helper in different situations
   auto working_vector = momentum_system->current_local_solution->zero_clone();
+
+  // We need a vector that stores the (diagonal_relaxed-original_diagonal) vector
   auto diff_diagonal = momentum_system->current_local_solution->zero_clone();
+
+  // We will use the solution vector of the equation, we use the current local solution because
+  // we will need the ghosting
   PetscVector<Number> * solution =
       dynamic_cast<PetscVector<Number> *>(momentum_system->current_local_solution.get());
+
+  // We get the matrix and right hand side
   PetscMatrix<Number> * mmat = dynamic_cast<PetscMatrix<Number> *>(momentum_system->matrix);
   PetscVector<Number> * rhs = dynamic_cast<PetscVector<Number> *>(momentum_system->rhs);
 
+  // We plug zero in this to get the system matrix and the right hand side of the linear problem
   _problem.computeResidualAndJacobian(*working_vector, *rhs, *mmat);
 
+  // Unfortunately, the the right hand side has the opposite side due to the definition of the
+  // residual
   rhs->scale(-1.0);
 
-  relaxMatrix(*mmat, getMomentumRelaxation(), *diff_diagonal);
+  // Go and relax the system matrix and the right hand side
+  relaxMatrix(*mmat, _momentum_equation_relaxation, *diff_diagonal);
   relaxRightHandSide(*rhs, *solution, *diff_diagonal);
 
+  // We need to compute normalization factors to be able to decide if we are converged
+  // or not
   Real norm_factor = computeNormalizationFactor(*solution, *mmat, *rhs);
-  Real absolute_tolerance = norm_factor * 1e-8;
 
+  // Very important, for deciding the convergence, we need the unpreconditioned
+  // norms in the linear solve
   KSPSetNormType(momentum_solver.ksp(), KSP_NORM_UNPRECONDITIONED);
 
-  momentum_solver.solve(*mmat, *mmat, *solution, *rhs, absolute_tolerance, 100);
+  // We solve the equation
+  // TO DO: Add options to this function in Libmesh to accept absolute tolerance
+  momentum_solver.solve(*mmat, *mmat, *solution, *rhs, 1e-10, 100);
+  // Make sure that we reuse the preconditioner if we end up solving the segregated
+  // momentum components
+  momentum_solver.reuse_preconditioner(true);
 
   if (_print_fields)
   {
@@ -232,43 +267,45 @@ SIMPLE::solveMomentumPredictor(std::vector<NonlinearSystemBase *> & momentum_sys
     rhs->print();
     std::cout << " velocity solution component 0" << std::endl;
     solution->print();
-  }
-
-  if (_print_fields)
-  {
     std::cout << "Norm factor " << norm_factor << std::endl;
     std::cout << Moose::stringify(momentum_solver.get_initial_residual()) << std::endl;
   }
-  std::cout << "Norm factor " << norm_factor << std::endl;
 
+  // Compute the normalized residual
   normalized_residuals.push_back(momentum_solver.get_initial_residual() / norm_factor);
 
+  // If we use a segregated approach between momentum components as well, we need to solve
+  // the other equations. Luckily, the system matrix is exactly the same so we only need
+  // to compute right hand sides.
   for (auto system_i : index_range(_momentum_systems))
   {
+    // We are already done with the first system
     if (!system_i)
       continue;
 
-    std::cout << "Setting nonlinear sys" << _momentum_system_numbers[system_i] << std::endl;
     _problem.setCurrentNonlinearSystem(_momentum_system_numbers[system_i]);
 
+    // We will need the right hand side and the solution of the next component
     momentum_system =
         dynamic_cast<NonlinearImplicitSystem *>(&(_momentum_systems[system_i]->system()));
-
     solution = dynamic_cast<PetscVector<Number> *>(momentum_system->current_local_solution.get());
     rhs = dynamic_cast<PetscVector<Number> *>(momentum_system->rhs);
 
+    // Only evaluating right hand side which is R(0)
     _problem.computeResidual(*working_vector, *rhs, _momentum_system_numbers[system_i]);
-
+    // Sadly, this returns -b so we multiply with -1
     rhs->scale(-1.0);
 
+    // Still need to relax the right hand side with the same vector
     relaxRightHandSide(*rhs, *solution, *diff_diagonal);
 
+    // The normalization factor depends on the right hand side so we need to recompute it for this
+    // component
     norm_factor = computeNormalizationFactor(*solution, *mmat, *rhs);
-    absolute_tolerance = 1e-10;
 
-    PetscLinearSolver<Real> & momentum_solver =
-        dynamic_cast<PetscLinearSolver<Real> &>(*momentum_system->get_linear_solver());
-    momentum_solver.solve(*mmat, *mmat, *solution, *rhs, absolute_tolerance, 100);
+    // Solve this component
+    momentum_solver.solve(*mmat, *mmat, *solution, *rhs, 1e-10, 100);
+    // Save the normalized residual
     normalized_residuals.push_back(momentum_solver.get_initial_residual() / norm_factor);
 
     if (_print_fields)
@@ -279,14 +316,9 @@ SIMPLE::solveMomentumPredictor(std::vector<NonlinearSystemBase *> & momentum_sys
       rhs->print();
       std::cout << " velocity solution component " << system_i << std::endl;
       solution->print();
-    }
-
-    if (_print_fields)
-    {
       std::cout << "Norm factor " << norm_factor << std::endl;
       std::cout << Moose::stringify(momentum_solver.get_initial_residual()) << std::endl;
     }
-    std::cout << "Norm factor " << norm_factor << std::endl;
   }
 
   return normalized_residuals;
@@ -324,12 +356,12 @@ SIMPLE::computeNormalizationFactor(const PetscVector<Number> & solution,
 }
 
 Real
-SIMPLE::solvePressureCorrector(NonlinearSystemBase & pressure_system_in)
+SIMPLE::solvePressureCorrector()
 {
   _problem.setCurrentNonlinearSystem(_pressure_sys_number);
 
   NonlinearImplicitSystem & pressure_system =
-      dynamic_cast<NonlinearImplicitSystem &>(pressure_system_in.system());
+      dynamic_cast<NonlinearImplicitSystem &>(_pressure_system.system());
   PetscVector<Number> * solution =
       dynamic_cast<PetscVector<Number> *>(pressure_system.current_local_solution.get());
   PetscMatrix<Number> * mmat = dynamic_cast<PetscMatrix<Number> *>(pressure_system.matrix);
@@ -353,7 +385,7 @@ SIMPLE::solvePressureCorrector(NonlinearSystemBase & pressure_system_in)
   rhs->scale(-1.0);
 
   Real norm_factor = computeNormalizationFactor(*solution, *mmat, *rhs);
-  Real absolute_tolerance = norm_factor * 1e-8;
+  Real absolute_tolerance = norm_factor * 1e-5;
 
   KSPSetNormType(pressure_solver.ksp(), KSP_NORM_UNPRECONDITIONED);
   pressure_solver.solve(
@@ -426,7 +458,6 @@ SIMPLE::execute()
 
   if (_problem.shouldSolve())
   {
-    Moose::PetscSupport::PetscOptions & po = _problem.getPetscOptions();
     unsigned int iteration_counter = 0;
     std::vector<Real> momentum_residual(1.0, _momentum_systems.size());
     Real pressure_residual = 1.0;
@@ -440,7 +471,7 @@ SIMPLE::execute()
 
       iteration_counter++;
 
-      momentum_residual = solveMomentumPredictor(_momentum_systems);
+      momentum_residual = solveMomentumPredictor();
 
       if (_print_fields)
       {
@@ -457,7 +488,7 @@ SIMPLE::execute()
         std::cout << "************************************" << std::endl;
       }
 
-      pressure_residual = solvePressureCorrector(_pressure_system);
+      pressure_residual = solvePressureCorrector();
 
       _rc_uo->computeFaceVelocity();
 

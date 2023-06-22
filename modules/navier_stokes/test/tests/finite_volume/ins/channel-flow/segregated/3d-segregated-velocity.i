@@ -28,7 +28,7 @@ pressure_tag = "pressure_grad"
 []
 
 [Problem]
-  nl_sys_names = 'momentum_system pressure_system'
+  nl_sys_names = 'u_system v_system w_system pressure_system'
   previous_nl_solution_required = true
   error_on_jacobian_nonzero_reallocation = true
 []
@@ -47,19 +47,19 @@ pressure_tag = "pressure_grad"
   [vel_x]
     type = INSFVVelocityVariable
     initial_condition = 0.0
-    nl_sys = momentum_system
+    nl_sys = u_system
     two_term_boundary_expansion = false
   []
   [vel_y]
     type = INSFVVelocityVariable
     initial_condition = 0.0
-    nl_sys = momentum_system
+    nl_sys = v_system
     two_term_boundary_expansion = false
   []
   [vel_z]
     type = INSFVVelocityVariable
     initial_condition = 0.5
-    nl_sys = momentum_system
+    nl_sys = w_system
     two_term_boundary_expansion = false
   []
   [pressure]
@@ -214,7 +214,7 @@ pressure_tag = "pressure_grad"
   l_tol = 1e-8
   line_search = 'none'
   rhie_chow_user_object = 'rc'
-  momentum_systems = 'momentum_system'
+  momentum_systems = 'u_system v_system w_system'
   pressure_system = 'pressure_system'
   pressure_gradient_tag = ${pressure_tag}
   momentum_equation_relaxation = 0.8
