@@ -161,18 +161,18 @@ protected:
 
   /// Solutions handles and link to TH tables properties
   const SinglePhaseFluidProperties * _fp;
-  SolutionHandle * _mdot_soln;
-  SolutionHandle * _SumWij_soln;
-  SolutionHandle * _P_soln;
-  SolutionHandle * _DP_soln;
-  SolutionHandle * _h_soln;
-  SolutionHandle * _T_soln;
-  SolutionHandle * _Tpin_soln;
-  SolutionHandle * _rho_soln;
-  SolutionHandle * _mu_soln;
-  SolutionHandle * _S_flow_soln;
-  SolutionHandle * _w_perim_soln;
-  SolutionHandle * _q_prime_soln;
+  std::unique_ptr<SolutionHandle> _mdot_soln;
+  std::unique_ptr<SolutionHandle> _SumWij_soln;
+  std::unique_ptr<SolutionHandle> _P_soln;
+  std::unique_ptr<SolutionHandle> _DP_soln;
+  std::unique_ptr<SolutionHandle> _h_soln;
+  std::unique_ptr<SolutionHandle> _T_soln;
+  std::unique_ptr<SolutionHandle> _Tpin_soln;
+  std::unique_ptr<SolutionHandle> _rho_soln;
+  std::unique_ptr<SolutionHandle> _mu_soln;
+  std::unique_ptr<SolutionHandle> _S_flow_soln;
+  std::unique_ptr<SolutionHandle> _w_perim_soln;
+  std::unique_ptr<SolutionHandle> _q_prime_soln;
 
   /// Petsc Functions
   virtual PetscErrorCode createPetscVector(Vec & v, PetscInt n);
@@ -180,6 +180,12 @@ protected:
   template <class T>
   PetscErrorCode populateVectorFromDense(Vec & x,
                                          const T & solution,
+                                         const unsigned int first_axial_level,
+                                         const unsigned int last_axial_level,
+                                         const unsigned int cross_dimension);
+  template <class T>
+  PetscErrorCode populateDenseFromVector(const Vec & x,
+                                         T & solution,
                                          const unsigned int first_axial_level,
                                          const unsigned int last_axial_level,
                                          const unsigned int cross_dimension);
@@ -207,75 +213,75 @@ protected:
 
   /// Mass conservation
   // Mass conservation - sum of cross fluxes
-  Mat mc_sumWij_mat;
-  Vec Wij_vec;
-  Vec prod;
-  Vec prodp;
+  Mat _mc_sumWij_mat;
+  Vec _Wij_vec;
+  Vec _prod;
+  Vec _prodp;
   // Mass conservation - axial convection
-  Mat mc_axial_convection_mat;
-  Vec mc_axial_convection_rhs;
+  Mat _mc_axial_convection_mat;
+  Vec _mc_axial_convection_rhs;
   // Mass conservation - density time derivative
   // No implicit matrix
 
   /// Axial momentum
   // Axial momentum conservation - compute turbulent cross fluxes
-  Mat amc_turbulent_cross_flows_mat;
-  Vec amc_turbulent_cross_flows_rhs;
+  Mat _amc_turbulent_cross_flows_mat;
+  Vec _amc_turbulent_cross_flows_rhs;
   // Axial momentum conservation - time derivative
-  Mat amc_time_derivative_mat;
-  Vec amc_time_derivative_rhs;
+  Mat _amc_time_derivative_mat;
+  Vec _amc_time_derivative_rhs;
   // Axial momentum conservation - advective (Eulerian) derivative
-  Mat amc_advective_derivative_mat;
-  Vec amc_advective_derivative_rhs;
+  Mat _amc_advective_derivative_mat;
+  Vec _amc_advective_derivative_rhs;
   // Axial momentum conservation - cross flux derivative
-  Mat amc_cross_derivative_mat;
-  Vec amc_cross_derivative_rhs;
+  Mat _amc_cross_derivative_mat;
+  Vec _amc_cross_derivative_rhs;
   // Axial momentum conservation - friction force
-  Mat amc_friction_force_mat;
-  Vec amc_friction_force_rhs;
+  Mat _amc_friction_force_mat;
+  Vec _amc_friction_force_rhs;
   // Axial momentum conservation - buoyancy force
   // No implicit matrix
-  Vec amc_gravity_rhs;
+  Vec _amc_gravity_rhs;
   // Axial momentum conservation - pressure force
-  Mat amc_pressure_force_mat;
-  Vec amc_pressure_force_rhs;
+  Mat _amc_pressure_force_mat;
+  Vec _amc_pressure_force_rhs;
   // Axial momentum system matrix
-  Mat amc_sys_mdot_mat;
-  Vec amc_sys_mdot_rhs;
+  Mat _amc_sys_mdot_mat;
+  Vec _amc_sys_mdot_rhs;
 
   /// Cross momentum
   // Cross momentum conservation - time derivative
-  Mat cmc_time_derivative_mat;
-  Vec cmc_time_derivative_rhs;
+  Mat _cmc_time_derivative_mat;
+  Vec _cmc_time_derivative_rhs;
   // Cross momentum conservation - advective (Eulerian) derivative
-  Mat cmc_advective_derivative_mat;
-  Vec cmc_advective_derivative_rhs;
+  Mat _cmc_advective_derivative_mat;
+  Vec _cmc_advective_derivative_rhs;
   // Cross momentum conservation - friction force
-  Mat cmc_friction_force_mat;
-  Vec cmc_friction_force_rhs;
+  Mat _cmc_friction_force_mat;
+  Vec _cmc_friction_force_rhs;
   // Cross momentum conservation - pressure force
-  Mat cmc_pressure_force_mat;
-  Vec cmc_pressure_force_rhs;
+  Mat _cmc_pressure_force_mat;
+  Vec _cmc_pressure_force_rhs;
   // Lateral momentum system matrix
-  Mat cmc_sys_Wij_mat;
-  Vec cmc_sys_Wij_rhs;
-  Vec cmc_Wij_channel_dummy;
+  Mat _cmc_sys_Wij_mat;
+  Vec _cmc_sys_Wij_rhs;
+  Vec _cmc_Wij_channel_dummy;
 
   /// Enthalpy
   // Enthalpy conservation - time derivative
-  Mat hc_time_derivative_mat;
-  Vec hc_time_derivative_rhs;
+  Mat _hc_time_derivative_mat;
+  Vec _hc_time_derivative_rhs;
   // Enthalpy conservation - advective (Eulerian) derivative;
-  Mat hc_advective_derivative_mat;
-  Vec hc_advective_derivative_rhs;
+  Mat _hc_advective_derivative_mat;
+  Vec _hc_advective_derivative_rhs;
   // Enthalpy conservation - cross flux derivative
-  Mat hc_cross_derivative_mat;
-  Vec hc_cross_derivative_rhs;
+  Mat _hc_cross_derivative_mat;
+  Vec _hc_cross_derivative_rhs;
   // Enthalpy conservation - source and sink
-  Vec hc_added_heat_rhs;
+  Vec _hc_added_heat_rhs;
   // System matrices
-  Mat hc_sys_h_mat;
-  Vec hc_sys_h_rhs;
+  Mat _hc_sys_h_mat;
+  Vec _hc_sys_h_rhs;
   // No implicit matrix
   PetscInt _global_counter = 0;
 

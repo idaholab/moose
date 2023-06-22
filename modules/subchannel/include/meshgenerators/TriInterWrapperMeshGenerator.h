@@ -34,6 +34,8 @@ protected:
   Real _heated_length;
   /// unheated length of the fuel rod at the exit of the assembly
   Real _unheated_length_exit;
+  /// Lateral form loss coefficient
+  const Real & _kij;
   /// axial location of nodes
   std::vector<Real> _z_grid;
   /// axial form loss coefficient per computational cell

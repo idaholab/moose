@@ -40,6 +40,7 @@ TriSubChannelMeshGenerator::validParams()
                                              "Axial location of spacers/vanes/mixing_vanes [m]");
   params.addRequiredParam<std::vector<Real>>(
       "spacer_k", "K-loss coefficient of spacers/vanes/mixing_vanes [-]");
+  params.addParam<Real>("Kij", 0.5, "Lateral form loss coefficient [-]");
   params.addParam<std::vector<Real>>("z_blockage",
                                      std::vector<Real>({0.0, 0.0}),
                                      "axial location of blockage (inlet, outlet) [m]");
@@ -70,6 +71,7 @@ TriSubChannelMeshGenerator::TriSubChannelMeshGenerator(const InputParameters & p
     _reduction_blockage(getParam<std::vector<Real>>("reduction_blockage")),
     _k_blockage(getParam<std::vector<Real>>("k_blockage")),
     _pitch(getParam<Real>("pitch")),
+    _kij(getParam<Real>("Kij")),
     _rod_diameter(getParam<Real>("rod_diameter")),
     _n_cells(getParam<unsigned int>("n_cells")),
     _n_rings(getParam<unsigned int>("nrings")),
@@ -804,6 +806,7 @@ TriSubChannelMeshGenerator::generate()
   sch_mesh->_z_blockage = _z_blockage;
   sch_mesh->_index_blockage = _index_blockage;
   sch_mesh->_reduction_blockage = _reduction_blockage;
+  sch_mesh->_kij = _kij;
   sch_mesh->_pitch = _pitch;
   sch_mesh->_rod_diameter = _rod_diameter;
   sch_mesh->_n_cells = _n_cells;
