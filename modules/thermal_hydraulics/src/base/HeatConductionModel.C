@@ -87,6 +87,7 @@ HeatConductionModel::addHeatEquationXYZ()
   const auto & blocks = _geometrical_component.getSubdomainNames();
 
   // add transient term
+  if (_geometrical_component.problemIsTransient())
   {
     std::string class_name = "ADHeatConductionTimeDerivative";
     InputParameters pars = _factory.getValidParams(class_name);
@@ -120,6 +121,7 @@ HeatConductionModel::addHeatEquationRZ()
   const auto & direction = hs_cyl.getDirection();
 
   // add transient term
+  if (_geometrical_component.problemIsTransient())
   {
     std::string class_name = "ADHeatConductionTimeDerivativeRZ";
     InputParameters pars = _factory.getValidParams(class_name);
