@@ -9,6 +9,7 @@
 
 #include "NSFVPump.h"
 #include "NS.h"
+#include "Function.h"
 
 registerMooseObject("NavierStokesApp", NSFVPump);
 
