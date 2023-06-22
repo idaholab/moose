@@ -1,17 +1,31 @@
 [Tests]
-  [phy:rz]
-    type = Exodiff
-    input = 'phy.rz.i'
-    exodiff = 'phy.rz_out.e'
-    custom_cmp = 'phy.rz.exodiff'
-  []
+  design = 'HeatStructureCylindrical.md'
+  issues = '#19830'
 
-  [phy:rz_mats]
-    type = Exodiff
-    input = 'phy.rz_mats.i'
-    exodiff = 'phy.rz_out.e'
-    custom_cmp = 'phy.rz.exodiff'
-    cli_args = 'Outputs/file_base=phy.rz_out'
-    prereq = phy:rz
+  [physics]
+    requirement = 'The system shall simulate a 2D cylindrical heat structure'
+
+    [transient]
+      type = Exodiff
+      input = 'phy.rz.i'
+      exodiff = 'phy.rz_out.e'
+      custom_cmp = 'phy.rz.exodiff'
+      detail = 'in a transient problem, with properties defined by HeatStructureMaterials.'
+    []
+    [transient_mats]
+      type = Exodiff
+      input = 'phy.rz_mats.i'
+      exodiff = 'phy.rz_out.e'
+      custom_cmp = 'phy.rz.exodiff'
+      cli_args = 'Outputs/file_base=phy.rz_out'
+      prereq = 'physics/transient'
+      detail = 'in a transient problem, with properties defined by Materials.'
+    []
+    [steady]
+      type = Exodiff
+      input = 'steady.i'
+      exodiff = 'steady_out.e'
+      detail = 'in a steady problem.'
+    []
   []
 []

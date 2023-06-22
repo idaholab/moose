@@ -1,35 +1,47 @@
 [Tests]
-  # physics
-  [phy:f_fn_3eqn]
-    type = 'CSVDiff'
-    input = 'phy.f_fn.3eqn.i'
-    csvdiff = 'phy.f_fn.3eqn_out.csv'
-    rel_err = 1e-10
-  []
+  design = 'FlowChannel1Phase.md'
+  issues = '#19830'
 
-  [phy:par_fn]
-    type = 'CSVDiff'
-    input = 'phy.par_fn.i'
-    csvdiff = 'phy.par_fn_out.csv'
-    rel_err = 1e-10
-  []
+  [physics]
+    requirement = 'The system shall simulate a single-phase flow channel'
 
-  [phy:sub_discretization]
-    type = 'Exodiff'
-    input = 'phy.sub_discretization.i'
-    exodiff = 'phy.sub_discretization_out.e'
-    custom_cmp = 'phy.sub_discretization.exodiff'
-    # matching geometry at t=0
-    recover = false
+    [phy:f_fn_3eqn]
+      type = 'CSVDiff'
+      input = 'phy.f_fn.3eqn.i'
+      csvdiff = 'phy.f_fn.3eqn_out.csv'
+      rel_err = 1e-10
+      detail = 'with a friction factor provided by a function.'
+    []
+    [phy:par_fn]
+      type = 'CSVDiff'
+      input = 'phy.par_fn.i'
+      csvdiff = 'phy.par_fn_out.csv'
+      rel_err = 1e-10
+      detail = 'with a hydraulic diameter provided by a function.'
+    []
+    [phy:sub_discretization]
+      type = 'Exodiff'
+      input = 'phy.sub_discretization.i'
+      exodiff = 'phy.sub_discretization_out.e'
+      custom_cmp = 'phy.sub_discretization.exodiff'
+      # matching geometry at t=0
+      recover = false
+      detail = 'with multiple length subsections.'
+    []
+    [steady]
+      type = Exodiff
+      input = 'steady.i'
+      exodiff = 'steady_out.e'
+      detail = 'in a steady problem.'
+    []
   []
-
-  # controls
 
   # error checking
   [err:wrong_fp]
     type = 'RunException'
     input = 'err.wrong_fp.i'
     expect_err = "pipe: Supplied fluid properties must be for 1-phase fluids."
+    requirement = 'The system shall report an error if fluid properties are not single-phase.'
   []
 
   [jacobian]
@@ -40,5 +52,6 @@
     cli_args = 'Debug/check_jacobian=true'
     max_threads = 1
     max_parallel = 1
+    requirement = 'The system shall have correct Jacobians for the single-phase flow channel.'
   []
 []
