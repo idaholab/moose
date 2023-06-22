@@ -83,7 +83,7 @@ public:
   /**
    * @return An iterator range to the property ID to name map
    */
-  auto idsToNamesRange() const { return SimpleRange(idsToNamesBegin(), idsToNamesEnd()); }
+  auto idsToNamesRange() const { return libMesh::SimpleRange(idsToNamesBegin(), idsToNamesEnd()); }
 
 private:
   /// Map of material property name -> material property id
