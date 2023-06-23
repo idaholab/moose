@@ -2,6 +2,7 @@
 # REMEMBER TO UPDATE the .yaml files for the following packages:
 #   template/
 #   moose/
+#   moose-dev/
 {% set build = 0 %}
 {% set strbuild = "build_" + build|string %}
 {% set version = "2023.06.23" %}
