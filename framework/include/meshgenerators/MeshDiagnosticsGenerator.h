@@ -48,4 +48,10 @@ protected:
   bool _check_non_planar_sides;
   /// counting number of sides that are non-planar
   unsigned int _sides_non_planar;
+  /// whether to check for non-conformal meshes
+  bool _check_non_conformal_mesh;
+  /// tolerance for meshes that are not comformal
+  Real _non_conformality_tol;
+  /// counting the number of non-conformal elements
+  unsigned int _num_nonconformal_nodes;
 };

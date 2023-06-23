@@ -34,6 +34,10 @@ MeshDiagnosticsGenerator::validParams()
   params.addParam<bool>("examine_element_overlap", true, "whether to find overlapping elements");
   params.addParam<bool>(
       "examine_nonplanar_sides", true, "whether to check element sides are planar");
+  params.addParam<bool>("examine_non_conformality",
+                        true,
+                        "whether to examine the conformality of elements in the mesh");
+  params.addParam<Real>("nonconformal_tol", 1e-2, "tolerance for element non-conformality");
   return params;
 }
 
@@ -45,7 +49,9 @@ MeshDiagnosticsGenerator::MeshDiagnosticsGenerator(const InputParameters & param
     _max_volume(getParam<Real>("maximum_element_volumes")),
     _check_element_types(getParam<bool>("examine_element_types")),
     _check_element_overlap(getParam<bool>("examine_element_overlap")),
-    _check_non_planar_sides(getParam<bool>("examine_nonplanar_sides"))
+    _check_non_planar_sides(getParam<bool>("examine_nonplanar_sides")),
+    _check_non_conformal_mesh(getParam<bool>("examine_non_conformality")),
+    _non_conformality_tol(getParam<Real>("nonconformal_tol"))
 {
 }
 
@@ -53,6 +59,7 @@ std::unique_ptr<MeshBase>
 MeshDiagnosticsGenerator::generate()
 {
   std::unique_ptr<MeshBase> mesh = std::move(_input);
+  mesh->prepare_for_use();
 
   if (_check_element_volumes)
   {
@@ -101,7 +108,6 @@ MeshDiagnosticsGenerator::generate()
   if (_check_element_overlap)
   {
     auto pl = mesh->sub_point_locator();
-    _console << pl.get() << std::endl;
     // loop on nodes
     for (auto & node : mesh->local_node_ptr_range())
     {
@@ -126,7 +132,6 @@ MeshDiagnosticsGenerator::generate()
         if (!found)
         {
           _num_elem_overlaps++;
-
           _console << "Element overlap detected at : " << *node << std::endl;
         }
       }
@@ -144,11 +149,11 @@ MeshDiagnosticsGenerator::generate()
       (*pl)(elem->vertex_average(), overlaps);
 
       if (overlaps.size() > 1)
-
+      {
         _num_elem_overlaps++;
-
-      _console << "Element overlap detected at a centroid : " << elem->vertex_average()
-               << std::endl;
+        _console << "Element overlap detected at a centroid : " << elem->vertex_average()
+                 << std::endl;
+      }
     }
   }
   _console << "Number of elements overlapping (centroid-based heuristics): " << _num_elem_overlaps
@@ -176,9 +181,9 @@ MeshDiagnosticsGenerator::generate()
 
         bool found_non_planar = false;
 
-        for (auto i : make_range(nodes.size() - 3))
+        for (auto in : make_range(nodes.size() - 3))
         {
-          RealVectorValue v3 = nodes[0] - nodes[i + 3];
+          RealVectorValue v3 = *nodes[0] - *nodes[in + 3];
           bool planar = MooseUtils::absoluteFuzzyEqual(v2.cross(v1) * v3, 0);
           if (!planar)
             found_non_planar = true;
@@ -187,12 +192,48 @@ MeshDiagnosticsGenerator::generate()
         if (found_non_planar)
         {
           _sides_non_planar++;
-
           _console << "Nonplanar side detected at :" << elem->side_ptr(i)->vertex_average()
                    << std::endl;
         }
       }
+      _console << "Number of nonplanar element sides detected: " << _sides_non_planar << std::endl;
     }
+  }
+
+  if (_check_non_conformal_mesh)
+  {
+    auto pl = mesh->sub_point_locator();
+    // loop on nodes
+    for (auto & node : mesh->local_node_ptr_range())
+    {
+      pl->set_close_to_point_tol(_non_conformality_tol);
+      // find all the elements around this node
+      std::set<const Elem *> elements;
+      (*pl)(*node, elements);
+      // loop through the set of elements
+      for (auto & elem : elements)
+      {
+        // If the node is not part of this element's nodes, it is a
+        // case of non-conformality
+        bool found_conformal = false;
+
+        for (auto & elem_node : elem->node_ref_range())
+        {
+          if (*node == elem_node)
+          {
+            found_conformal = true;
+            break;
+          }
+        }
+        if (!found_conformal)
+        {
+          _num_nonconformal_nodes++;
+          _console << "Non-conformality detected at  : " << *node << std::endl;
+        }
+      }
+    }
+    _console << "Number of non-conformal nodes: " << _num_nonconformal_nodes << std::endl;
+    pl->unset_close_to_point_tol();
   }
 
   return dynamic_pointer_cast<MeshBase>(mesh);
