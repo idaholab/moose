@@ -34,14 +34,12 @@ public:
   void execute() override;
   bool lastSolveConverged() const override { return _last_solve_converged; }
 
-  Real getMomentumRelaxation() { return _momentum_equation_relaxation; }
-
   const INSFVRhieChowInterpolatorSegregated & getRCUserObject() { return *_rc_uo; }
 
   /// Compute a normalizan factor which is applied to the linear residual to determine convergence
-  PetscReal computeNormalizationFactor(const PetscVector<Number> & solution,
-                                       const PetscMatrix<Number> & mat,
-                                       const PetscVector<Number> & rhs);
+  PetscReal computeNormalizationFactor(const NumericVector<Number> & solution,
+                                       const SparseMatrix<Number> & mat,
+                                       const NumericVector<Number> & rhs);
 
 protected:
   /// Relax the matrix to ensure diagonal dominance, we hold onto the difference in diagonals

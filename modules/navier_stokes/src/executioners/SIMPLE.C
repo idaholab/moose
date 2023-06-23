@@ -124,19 +124,15 @@ SIMPLE::init()
 }
 
 void
-SIMPLE::relaxMatrix(SparseMatrix<Number> & matrix_in,
+SIMPLE::relaxMatrix(SparseMatrix<Number> & matrix,
                     const Real relaxation_parameter,
                     NumericVector<Number> & diff_diagonal)
 {
-  // We cast out matrix into a PetscMatrix to get access to some of the
-  // specific functionalities
-  PetscMatrix<Number> * matrix = cast_ptr<PetscMatrix<Number> *>(&matrix_in);
-
   // Zero the diagonal difference vector
   diff_diagonal = 0;
 
   // Get the diagonal of the matrix
-  matrix->get_diagonal(diff_diagonal);
+  matrix.get_diagonal(diff_diagonal);
 
   // Create a copy of the diagonal for later use and cast it
   std::unique_ptr<NumericVector<Number>> original_diagonal = diff_diagonal.clone();
@@ -157,11 +153,11 @@ SIMPLE::relaxMatrix(SparseMatrix<Number> & matrix_in,
   //
   // The trickery comes with storing everything in the diff-diagonal vector
   // to avoid the allocation and manipulation of a third vector
-  for (auto row_i = matrix->row_start(); row_i < matrix->row_stop(); row_i++)
+  for (auto row_i = matrix.row_start(); row_i < matrix.row_stop(); row_i++)
   {
     std::vector<numeric_index_type> indices;
     std::vector<Real> values;
-    matrix->get_row(row_i, indices, values);
+    matrix.get_row(row_i, indices, values);
     Real abs_sum = std::transform_reduce(
         values.cbegin(), values.cend(), 0.0, std::plus{}, [](auto val) { return std::abs(val); });
     Real abs_diagonal = std::abs(diff_diagonal(row_i));
@@ -170,9 +166,9 @@ SIMPLE::relaxMatrix(SparseMatrix<Number> & matrix_in,
   }
 
   // Time to modify the diagonal of the matrix
-  for (auto row_i = matrix->row_start(); row_i < matrix->row_stop(); row_i++)
-    matrix->set(row_i, row_i, diff_diagonal(row_i));
-  matrix->close();
+  for (auto row_i = matrix.row_start(); row_i < matrix.row_stop(); row_i++)
+    matrix.set(row_i, row_i, diff_diagonal(row_i));
+  matrix.close();
 
   // Finally, we can create (D*-D) vector which is used for the relaxation of the
   // right hand side later
@@ -325,34 +321,43 @@ SIMPLE::solveMomentumPredictor()
 }
 
 PetscReal
-SIMPLE::computeNormalizationFactor(const PetscVector<Number> & solution,
-                                   const PetscMatrix<Number> & mat,
-                                   const PetscVector<Number> & rhs)
+SIMPLE::computeNormalizationFactor(const NumericVector<Number> & solution,
+                                   const SparseMatrix<Number> & mat,
+                                   const NumericVector<Number> & rhs)
 {
-  auto average_solution = solution.zero_clone();
-  auto multiplied_solution = solution.zero_clone();
+  // This function is based on the description provided here:
+  // https://www.openfoam.com/documentation/guides/latest/doc/guide-solvers-residuals.html
+  // (Accessed 06/01/2023)
+  // so basically we normalize the residual with the following number:
+  // sum(|Ax-Ax_avg|+|b-Ax_avg|)
+  // where A is the system matrix, b is the system right hand side while x and x_avg are
+  // the solution and average solution vectors
 
-  *average_solution = 1.0;
-  *multiplied_solution = solution.sum() / solution.size();
+  // We create a vector for Ax_avg and Ax
+  auto A_times_average_solution = solution.zero_clone();
+  auto A_times_solution = solution.zero_clone();
 
-  if (_print_fields)
-  {
-    std::cout << "Average solution " << solution.sum() / solution.size() << std::endl;
-  }
+  // Beware, trickery here! To avoid allocating unused vectors, we
+  // first compute Ax_avg using the storage used for Ax, then we
+  // overwrite Ax with the right value
+  *A_times_solution = solution.sum() / solution.size();
+  mat.vector_mult(*A_times_average_solution, *A_times_solution);
+  mat.vector_mult(*A_times_solution, solution);
 
-  // Beware, trickey here!
-  mat.vector_mult(*average_solution, *multiplied_solution);
-  mat.vector_mult(*multiplied_solution, solution);
+  // We create Ax-Ax_avg
+  A_times_solution->add(-1.0, *A_times_average_solution);
+  // We create Ax_avg - b (ordering shouldn't matter we will take absolute value soon)
+  A_times_average_solution->add(-1.0, rhs);
+  A_times_solution->abs();
+  A_times_average_solution->abs();
 
-  multiplied_solution->add(-1.0, *average_solution);
-  average_solution->add(-1.0, rhs);
+  // Create |Ax-Ax_avg|+|b-Ax_avg|
+  A_times_average_solution->add(*A_times_solution);
 
-  multiplied_solution->abs();
-  average_solution->abs();
-
-  average_solution->add(*multiplied_solution);
-
-  return average_solution->l2_norm();
+  // Since use the l2 norm of the solution vectors in the linear solver, we will
+  // make this consistent and use the l2 norm of the vector
+  // TODO: Would be nice to see if we can do l1 norms in the linear solve
+  return A_times_average_solution->l2_norm();
 }
 
 Real
