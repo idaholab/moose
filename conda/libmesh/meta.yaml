@@ -4,7 +4,7 @@
 #   moose/
 {% set build = 0 %}
 {% set strbuild = "build_" + build|string %}
-{% set version = "2023.06.19" %}
+{% set version = "2023.06.23" %}
 {% set vtk_friendly_version = "9.2" %}
 
 package:

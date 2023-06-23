@@ -1,5 +1,5 @@
 {% set build = 0 %}
-{% set version = "2023.06.22" %}
+{% set version = "2023.06.23" %}
 {% set strbuild = "build_" + build|string %}
 
 package:
