@@ -59,7 +59,7 @@ the [!param](/UserObjects/LayeredAverage/cumulative) to `true`.
 ## Example input syntax
 
 In this example, the average of variable `u` is taken over the whole domain in direction `y` over
-two layers. The result of this averaging in stored is the variable `layered_average` using a
+two layers. The result of this averaging in stored in the variable `layered_average` using a
 [SpatialUserObjectAux.md], and output to a CSV file using a [SpatialUserObjectVectorPostprocessor.md].
 
 !listing test/tests/userobjects/layered_average/layered_average.i block=UserObjects AuxKernels VectorPostprocessors
