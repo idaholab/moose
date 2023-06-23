@@ -921,10 +921,7 @@ FEProblemBase::initialSetup()
     {
       TIME_SECTION("computingInitialStatefulProps", 3, "Computing Initial Material Values");
 
-      const ConstElemRange & elem_range = *_mesh.getActiveLocalElementRange();
-      ComputeMaterialsObjectThread cmt(
-          *this, _material_props, _bnd_material_props, _neighbor_material_props, _assembly);
-      Threads::parallel_reduce(elem_range, cmt);
+      initElementStatefulProps(*_mesh.getActiveLocalElementRange());
 
       if (_material_props.hasStatefulProperties() || _bnd_material_props.hasStatefulProperties() ||
           _neighbor_material_props.hasStatefulProperties())
@@ -1181,10 +1178,7 @@ FEProblemBase::initialSetup()
   {
     TIME_SECTION("computeMaterials", 2, "Computing Initial Material Properties");
 
-    const ConstElemRange & elem_range = *_mesh.getActiveLocalElementRange();
-    ComputeMaterialsObjectThread cmt(
-        *this, _material_props, _bnd_material_props, _neighbor_material_props, _assembly);
-    Threads::parallel_reduce(elem_range, cmt);
+    initElementStatefulProps(*_mesh.getActiveLocalElementRange());
   }
 
   // Control Logic
