@@ -14,7 +14,7 @@ Problem-Specific: TPV205-2D
 
 #include "StaticFricCoeffMus.h"
 
-registerMooseObject("TensorMechanicsApp", StaticFricCoeffMus);
+registerMooseObject("TensorMechanicsTestApp", StaticFricCoeffMus);
 
 InputParameters
 StaticFricCoeffMus::validParams()

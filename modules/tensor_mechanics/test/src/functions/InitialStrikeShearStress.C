@@ -14,7 +14,7 @@ Problem-Specific: TPV205-2D
 
 #include "InitialStrikeShearStress.h"
 
-registerMooseObject("TensorMechanicsApp", InitialStrikeShearStress);
+registerMooseObject("TensorMechanicsTestApp", InitialStrikeShearStress);
 
 InputParameters
 InitialStrikeShearStress::validParams()

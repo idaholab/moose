@@ -96,7 +96,7 @@ Where $\overline{\sigma}$ is the damping stress tensor, $q$ is damping constant.
 
 The header file explains its inherence relation with its parent class ```StressDivergenceTensors```, which is introduced earlier.
 
-!listing moose/modules/tensor_mechanics/include/kernels/StiffPropDamping.h
+!listing moose/modules/tensor_mechanics/test/include/kernels/StiffPropDamping.h
 caption=StiffPropDamping: Input File
 
 The source file implements the weak form evaluation at each quadrature point, here we follow similar definition of damping stress tensor given in [!cite](Day_Dalguer_Lapusta_Liu_2005) , Appendix A8:
@@ -109,7 +109,7 @@ The source file implements the weak form evaluation at each quadrature point, he
 
 Where $\sigma_{t}$ and $\sigma_{t - \Delta t}$ are stress tensor from current/last time step. The code snippet is given below, notice that for each custom function, user needs to register the function to their own app using ```registerMooseObject```. (```TensorMechanicsApp``` is a custom app name that can be replaced).
 
-!listing moose/modules/tensor_mechanics/src/kernels/StiffPropDamping.C
+!listing moose/modules/tensor_mechanics/test/include/kernels/StiffPropDamping.C
 caption=StiffPropDamping: Source File
 
 To utilize the kernel, allocate it inside ```[Kernels]``` section of input file:
@@ -321,15 +321,15 @@ Notice the last two lines that the spatial distribution of static friction coeff
 
 The spatial distribution of $\mu_s$:
 
-!listing moose/modules/tensor_mechanics/include/functions/StaticFricCoeffMus.h
+!listing moose/modules/tensor_mechanics/test/include/functions/StaticFricCoeffMus.h
 
-!listing moose/modules/tensor_mechanics/src/functions/StaticFricCoeffMus.C
+!listing moose/modules/tensor_mechanics/test/src/functions/StaticFricCoeffMus.C
 
 The spatial distribution of $T_1^o$:
 
-!listing moose/modules/tensor_mechanics/include/functions/InitialStrikeShearStress.h
+!listing moose/modules/tensor_mechanics/test/include/functions/InitialStrikeShearStress.h
 
-!listing moose/modules/tensor_mechanics/src/functions/InitialStrikeShearStress.C
+!listing moose/modules/tensor_mechanics/test/src/functions/InitialStrikeShearStress.C
 
 We then have them defined in the input file within ```[Functions]``` section:
 
