@@ -90,6 +90,9 @@ Kernel::Kernel(const InputParameters & parameters)
 void
 Kernel::computeResidual()
 {
+  if (!hasVectorTags())
+    return;
+
   prepareVectorTag(_assembly, _var.number());
 
   precalculateResidual();

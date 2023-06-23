@@ -90,6 +90,8 @@ public:
 
   bool isMatrixTagged() { return _matrix_tags.size() > 0; }
 
+  bool hasVectorTags() const { return !_vector_tags.empty(); }
+
   const std::set<TagID> & getVectorTags(VectorTagsKey) const { return _vector_tags; }
 
   const std::set<TagID> & getMatrixTags(MatrixTagsKey) const { return _matrix_tags; }

@@ -187,7 +187,7 @@ public:
   /**
    * Get a TagID from a TagName.
    */
-  virtual TagID getMatrixTagID(const TagName & tag_name);
+  virtual TagID getMatrixTagID(const TagName & tag_name) const;
 
   /**
    * Retrieve the name associated with a TagID
@@ -197,12 +197,12 @@ public:
   /**
    * Check to see if a particular Tag exists
    */
-  virtual bool matrixTagExists(const TagName & tag_name);
+  virtual bool matrixTagExists(const TagName & tag_name) const;
 
   /**
    * Check to see if a particular Tag exists
    */
-  virtual bool matrixTagExists(TagID tag_id);
+  virtual bool matrixTagExists(TagID tag_id) const;
 
   /**
    * The total number of tags

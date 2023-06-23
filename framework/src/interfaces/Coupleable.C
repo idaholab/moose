@@ -772,7 +772,7 @@ Coupleable::coupledMatrixTagValue(const std::string & var_names,
                                   TagID tag,
                                   unsigned int index) const
 {
-  const auto * var = getVar(var_names, index);
+  const auto * var = getVarHelper<MooseVariableField<Real>>(var_names, index);
   if (!var)
     mooseError(var_names, ": invalid variable name for coupledMatrixTagValue");
   checkFuncType(var_names, VarType::Ignore, FuncAge::Curr);

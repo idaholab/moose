@@ -354,6 +354,8 @@ public:
   virtual const FieldVariableValue & vectorTagValue(TagID tag) const = 0;
   virtual const DoFValue & nodalVectorTagValue(TagID tag) const = 0;
   virtual const DoFValue & vectorTagDofValue(TagID tag) const = 0;
+  virtual const DoFValue & nodalMatrixTagValue(TagID tag) const = 0;
+  virtual const FieldVariableValue & matrixTagValue(TagID tag) const = 0;
 
   virtual void residualSetup() override;
   virtual void jacobianSetup() override;

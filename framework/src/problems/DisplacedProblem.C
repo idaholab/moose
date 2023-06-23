@@ -421,7 +421,7 @@ DisplacedProblem::addMatrixTag(TagName tag_name)
 }
 
 TagID
-DisplacedProblem::getMatrixTagID(const TagName & tag_name)
+DisplacedProblem::getMatrixTagID(const TagName & tag_name) const
 {
   return _mproblem.getMatrixTagID(tag_name);
 }
@@ -433,13 +433,13 @@ DisplacedProblem::matrixTagName(TagID tag)
 }
 
 bool
-DisplacedProblem::matrixTagExists(const TagName & tag_name)
+DisplacedProblem::matrixTagExists(const TagName & tag_name) const
 {
   return _mproblem.matrixTagExists(tag_name);
 }
 
 bool
-DisplacedProblem::matrixTagExists(TagID tag_id)
+DisplacedProblem::matrixTagExists(TagID tag_id) const
 {
   return _mproblem.matrixTagExists(tag_id);
 }
