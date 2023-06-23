@@ -27,7 +27,7 @@
 /framework/*/dampers @GiudGiud @lindsayad
 /framework/*/executioners/*Solve* @GiudGiud @lindsayad
 /framework/*/materials/Derivative* @dschwen @lindsayad
-/framework/*/materials/Material* @roystgnr @lindsayad
+/framework/*/materials/Material* @roystgnr @loganharbour @lindsayad
 /framework/*/materials/Parsed* @dschwen @lindsayad
 /framework/*/mesh @roystgnr @GiudGiud @lindsayad
 /framework/*/meshgenerators @roystgnr @GiudGiud @lindsayad
@@ -35,6 +35,7 @@
 /framework/*/loops @GiudGiud @lindsayad
 /framework/*/outputs @roystgnr @lindsayad
 /framework/*/postprocessors @GiudGiud @lindsayad
+/framework/*/restart @loganharbour @lindsayad
 /framework/*/reporters @loganharbour @zachmprince @lindsayad
 /framework/*/samplers @zachmprince @lindsayad
 /framework/*/systems @roystgnr @lindsayad
