@@ -2,7 +2,6 @@
 
 - [Documentation](https://relap5-docs.hpcondemand.inl.gov/)
 - [Support Forum (Discourse)](https://relap5-discourse.hpcondemand.inl.gov)
-- [Level 1 - HPC OnDemand Execution](ncrc/applications/ncrc_ondemand_relap5.md)
 - [Level 1 - HPC Binary Execution](ncrc/applications/ncrc_hpc_relap5.md)
 
 !row!
