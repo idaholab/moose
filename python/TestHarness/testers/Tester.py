@@ -86,7 +86,8 @@ class Tester(MooseObject):
         params.addParam('installation_type',['ALL'], "A test that runs under certain executable installation configurations ('ALL', 'IN_TREE', 'RELOCATED')")
 
         params.addParam('depend_files',  [], "A test that only runs if all depend files exist (files listed are expected to be relative to the base directory, not the test directory")
-        params.addParam('env_vars',      [], "A test that only runs if all the environment variables listed exist")
+        params.addParam('env_vars',      [], "A test that only runs if all the environment variables listed are set")
+        params.addParam('env_vars_not_set', [], "A test that only runs if all the environment variables listed are not set")
         params.addParam('should_execute', True, 'Whether or not the executable needs to be run.  Use this to chain together multiple tests based off of one executeable invocation')
         params.addParam('required_submodule', [], "A list of initialized submodules for which this test requires.")
         params.addParam('required_objects', [], "A list of required objects that are in the executable.")
@@ -634,6 +635,10 @@ class Tester(MooseObject):
         for var in self.specs['env_vars']:
             if not os.environ.get(var):
                 reasons['env_vars'] = 'ENV VAR NOT SET'
+
+        for var in self.specs['env_vars_not_set']:
+            if os.environ.get(var):
+                reasons['env_vars'] = 'ENV VAR SET'
 
         # Check for display
         if self.specs['display_required'] and not os.getenv('DISPLAY', False):

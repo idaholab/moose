@@ -10,6 +10,7 @@
     cli_args = "Outputs/out/type=CSV Outputs/out/execute_on=final Outputs/out/show='mass_conservation energy_conservation'"
     abs_zero = 1e-8
     rel_err = 0
+    max_parallel = 14 # https://github.com/idaholab/moose/issues/24533
 
     requirement = 'The system shall conserve mass and energy when using ShaftConnectedPump1Phase.'
   []
