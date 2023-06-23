@@ -11,6 +11,7 @@
 
 #include <vector>
 #include <memory>
+#include <typeinfo>
 
 #include "MooseADWrapper.h"
 #include "MooseArray.h"
@@ -75,6 +76,11 @@ public:
   // save/restore in a file
   virtual void store(std::ostream & stream) = 0;
   virtual void load(std::istream & stream) = 0;
+
+  /**
+   * @return The type_info for the underlying stored type T
+   */
+  virtual const std::type_info & typeID() const = 0;
 };
 
 /**
@@ -91,8 +97,6 @@ public:
   MaterialPropertyBase() : PropertyValue()
   { /* */
   }
-
-  virtual ~MaterialPropertyBase() {}
 
   bool isAD() const override { return is_ad; }
 
@@ -149,6 +153,8 @@ public:
   virtual void load(std::istream & stream) override;
 
   void swap(PropertyValue & rhs) override;
+
+  const std::type_info & typeID() const override final;
 
 private:
   /// private copy constructor to avoid shallow copying of material properties
@@ -255,10 +261,13 @@ template <typename T, bool is_ad>
 inline void
 MaterialPropertyBase<T, is_ad>::swap(PropertyValue & rhs)
 {
+  mooseAssert(this->typeID() == rhs.typeID(), "Inconsistent types");
+
   // If we're the same
   if (rhs.isAD() == is_ad)
   {
-    this->_value.swap(cast_ptr<MaterialPropertyBase<T, is_ad> *>(&rhs)->_value);
+    mooseAssert(dynamic_cast<decltype(this)>(&rhs), "Expected same type is not the same");
+    this->_value.swap(cast_ptr<decltype(this)>(&rhs)->_value);
     return;
   }
 
@@ -281,6 +290,14 @@ MaterialPropertyBase<T, is_ad>::swap(PropertyValue & rhs)
   this->resize(different_type_prop->size());
   for (const auto qp : make_range(this->size()))
     moose::internal::rawValueEqualityHelper(this->_value[qp], (*different_type_prop)[qp]);
+}
+
+template <typename T, bool is_ad>
+inline const std::type_info &
+MaterialPropertyBase<T, is_ad>::typeID() const
+{
+  static const auto & info = typeid(T);
+  return info;
 }
 
 template <typename T>
