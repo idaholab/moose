@@ -34,7 +34,7 @@ TimeSequenceStepperBase::setupSequence(const std::vector<Real> & times)
   // In case of half transient, transient's end time needs to be reset to
   // be able to imprint TimeSequenceStepperBase's end time
   if (_app.halfTransient())
-    _executioner.endTime() *= 2.0;
+    _executioner.endTime() = _executioner.endTime() * 2.0 - _executioner.getStartTime();
 
   // only set up _time_sequence if the app is _not_ recovering
   if (!_app.isRecovering())
