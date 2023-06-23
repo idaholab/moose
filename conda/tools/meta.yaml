@@ -38,6 +38,7 @@ test:
     - pybtex
     - mock
     - pylatexenc
+    - matplotlib
 
 about:
   home: https://mooseframework.org/

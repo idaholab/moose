@@ -18,6 +18,11 @@ From: harbor.hpc.inl.gov/hpcbase/mpi_03:1.1.0
 %environment
     # Fix locale warnings
     export LC_ALL=C
+{%- if ALTERNATE_FROM == "clang" %}
+    export MOOSE_COMPILER='clang'
+{%- else %}
+    export MOOSE_COMPILER='gcc'
+{%- endif %}
 
 %post
 {%- if ALTERNATE_FROM == "clang" %}

@@ -68,9 +68,16 @@ From: {{ APPTAINER_FROM }}
     if [ -n "$CONDA_ALT_CHANNEL" ]; then
         conda config --env --add channels ${CONDA_ALT_CHANNEL}
     fi
+
     {% if DEV_CONTAINER is defined %}
     # DEV_CONTAINER is set, installing moose-tools
-    MAMBA_PACKAGES="moose-tools=${MOOSE_TOOLS_VERSION}"
+    if [ "${MOOSE_COMPILER}" == 'clang' ]; then
+        # But not if Clang is detected. Prevent conflicting libclang libraries by install
+        # moose-test-tools instead
+        MAMBA_PACKAGES="moose-test-tools=${MOOSE_TEST_TOOLS_VERSION}"
+    else
+        MAMBA_PACKAGES="moose-tools=${MOOSE_TOOLS_VERSION}"
+    fi
     {% else %}
     # DEV_CONTAINER is not set, installing moose-test-tools
     MAMBA_PACKAGES="moose-test-tools=${MOOSE_TEST_TOOLS_VERSION}"

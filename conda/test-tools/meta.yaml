@@ -21,7 +21,6 @@ requirements:
     - setuptools
   run:
     - numpy
-    - matplotlib
     - pandas
     - pyyaml
     - lxml
@@ -50,7 +49,6 @@ test:
     - pg_config --help
   imports:
     - numpy
-    - matplotlib
     - pandas
     - yaml
     - lxml
