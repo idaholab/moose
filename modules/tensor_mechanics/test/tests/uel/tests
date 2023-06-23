@@ -1,0 +1,14 @@
+[Tests]
+  [reference]
+    type = Exodiff
+    input = reference.i
+    exodiff = reference_out.e
+    abs_zero = 1e-12
+  []
+  [small]
+    type = Exodiff
+    input = small.i
+    exodiff = small_out.e
+    abs_zero = 1e-12
+  []
+[]

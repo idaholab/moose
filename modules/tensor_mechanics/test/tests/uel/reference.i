@@ -114,11 +114,13 @@
     type = SideAverageValue
     variable = disp_x
     boundary = right
+    execute_on = 'INITIAL TIMESTEP_END'
   []
   [V]
     type = ElementIntegralMaterialProperty
     mat_prop = 1
     use_displaced_mesh = true
+    execute_on = 'INITIAL TIMESTEP_END'
   []
 []
 
