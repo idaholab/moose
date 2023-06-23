@@ -310,8 +310,6 @@ MaterialData::getPropertyHelper(const std::string & prop_name,
     mooseErrorHelper(requestor, error.str());
   }
 
-  prop->setName(prop_name);
-
   return *prop;
 }
 

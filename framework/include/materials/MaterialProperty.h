@@ -148,21 +148,6 @@ public:
    */
   virtual void load(std::istream & stream) override;
 
-  void setName(const MaterialPropertyName & name_in)
-  {
-    mooseAssert(
-        _name.empty() || _name == name_in,
-        "We're trying to apply a new name to a material property. I don't think that makes sense.");
-    _name = name_in;
-  }
-
-  const MaterialPropertyName & name() const
-  {
-    if (_name.empty())
-      mooseError("Retrieving a material property name before it's set.");
-    return _name;
-  }
-
   void swap(PropertyValue & rhs) override;
 
 private:
@@ -177,9 +162,6 @@ private:
   {
     mooseError("Material properties must be assigned to references (missing '&')");
   }
-
-  /// the name of this material property
-  MaterialPropertyName _name;
 
 protected:
   /// Stored parameter value.

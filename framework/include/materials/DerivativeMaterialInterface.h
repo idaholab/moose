@@ -231,7 +231,7 @@ const GenericMaterialProperty<U, is_ad> &
 DerivativeMaterialInterface<T>::getDefaultMaterialProperty(const std::string & name)
 {
   // get the base property name
-  std::string prop_name = this->deducePropertyName(name);
+  std::string prop_name = this->getMaterialPropertyName(name);
 
   // Check if it's just a constant
   const auto * default_property =
@@ -305,7 +305,7 @@ DerivativeMaterialInterface<T>::getMaterialPropertyDerivative(const std::string 
                                                               const std::vector<SymbolName> & c)
 {
   // get the base property name
-  std::string prop_name = this->deducePropertyName(base);
+  std::string prop_name = this->getMaterialPropertyName(base);
 
   /**
    * Check if base is a default property and shortcut to returning zero, as
@@ -327,7 +327,7 @@ DerivativeMaterialInterface<T>::getMaterialPropertyDerivative(const std::string 
                                                               const SymbolName & c3)
 {
   // get the base property name
-  std::string prop_name = this->deducePropertyName(base);
+  std::string prop_name = this->getMaterialPropertyName(base);
 
   /**
    * Check if base is a default property and shortcut to returning zero, as
@@ -463,7 +463,7 @@ DerivativeMaterialInterface<T>::validateCoupling(const MaterialPropertyName & ba
                                                  bool validate_aux)
 {
   // get the base property name
-  std::string prop_name = this->deducePropertyName(base);
+  std::string prop_name = this->getMaterialPropertyName(base);
   // list of potentially missing coupled variables
   std::vector<VariableName> missing;
 

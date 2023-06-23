@@ -49,13 +49,12 @@ MaterialPropertyInterface::MaterialPropertyInterface(const MooseObject * moose_o
   moose_object->getMooseApp().registerInterfaceObject(*this);
 }
 
-std::string
-MaterialPropertyInterface::deducePropertyName(const std::string & name) const
+MaterialPropertyName
+MaterialPropertyInterface::getMaterialPropertyName(const std::string & name) const
 {
   if (_mi_params.have_parameter<MaterialPropertyName>(name) && _mi_params.isParamValid(name))
     return _mi_params.get<MaterialPropertyName>(name);
-  else
-    return name;
+  return name;
 }
 
 template <>

@@ -471,9 +471,13 @@ protected:
   void markMatPropRequested(const std::string &);
 
   /**
-   * Small helper to look up a material property name through the input parameter keys
+   * @return The name of the material property associated with name \p name.
+   *
+   * If \p name is the name of a material property parameter and the parameter is
+   * valid, this will return the value of said parameter. Otherwise, it will just
+   * return the name.
    */
-  std::string deducePropertyName(const std::string & name) const;
+  MaterialPropertyName getMaterialPropertyName(const std::string & name) const;
 
   /**
    * Helper function to parse default material property values. This is implemented
@@ -652,7 +656,7 @@ bool
 MaterialPropertyInterface::hasMaterialProperty(const std::string & name)
 {
   // Check if the supplied parameter is a valid input parameter key
-  std::string prop_name = deducePropertyName(name);
+  const auto prop_name = getMaterialPropertyName(name);
   return hasMaterialPropertyByName<T>(prop_name);
 }
 
@@ -670,7 +674,7 @@ template <typename T, bool is_ad>
 const GenericMaterialProperty<T, is_ad> &
 MaterialPropertyInterface::getGenericZeroMaterialProperty(const std::string & name)
 {
-  std::string prop_name = deducePropertyName(name);
+  const auto prop_name = getMaterialPropertyName(name);
   return getGenericZeroMaterialPropertyByName<T, is_ad>(prop_name);
 }
 
@@ -723,7 +727,7 @@ bool
 MaterialPropertyInterface::hasADMaterialProperty(const std::string & name)
 {
   // Check if the supplied parameter is a valid input parameter key
-  std::string prop_name = deducePropertyName(name);
+  const auto prop_name = getMaterialPropertyName(name);
   return hasADMaterialPropertyByName<T>(prop_name);
 }
 
@@ -756,7 +760,7 @@ MaterialPropertyInterface::getGenericMaterialProperty(const std::string & name,
                                                       const unsigned int state)
 {
   // Check if the supplied parameter is a valid input parameter key
-  std::string prop_name = deducePropertyName(name);
+  const auto prop_name = getMaterialPropertyName(name);
 
   // Check if it's just a constant
   if (const auto * default_property = defaultGenericMaterialProperty<T, is_ad>(prop_name))
