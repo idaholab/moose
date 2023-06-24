@@ -1014,6 +1014,9 @@ DerivativeStringClass(ReporterValueName);
 /// Name of a Positions object
 DerivativeStringClass(PositionsName);
 
+/// Name of a Times object
+DerivativeStringClass(TimesName);
+
 /// Name of an Executor.  Used for inputs to Executors
 DerivativeStringClass(ExecutorName);
 

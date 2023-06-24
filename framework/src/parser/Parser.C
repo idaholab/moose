@@ -1393,6 +1393,7 @@ Parser::extractParams(const std::string & prefix, InputParameters & p)
         setscalar(PositionsName, string);
         setscalar(SamplerName, string);
         setscalar(TagName, string);
+        setscalar(TimesName, string);
         setscalar(MeshGeneratorName, string);
         setscalar(ExtraElementIDName, string);
         setscalar(PostprocessorName, PostprocessorName);
@@ -1463,6 +1464,7 @@ Parser::extractParams(const std::string & prefix, InputParameters & p)
         setvector(ExtraElementIDName, string);
         setvector(ReporterName, string);
         setvector(PositionsName, string);
+        setvector(TimesName, string);
         setvector(ReporterValueName, string);
         setvector(ExecutorName, string);
         setvector(NonlinearSystemName, string);
