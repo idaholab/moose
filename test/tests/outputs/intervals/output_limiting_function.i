@@ -10,6 +10,14 @@
   []
 []
 
+[Functions]
+  [test_function]
+    type = PiecewiseLinear
+    x = '0.15 0.375 0.892'
+    y = '1    1     1'
+  []
+[]
+
 [Kernels]
   [diff]
     type = CoefDiffusion
@@ -51,7 +59,7 @@
   execute_on = 'timestep_end'
   [out]
     type = Exodus
-    sync_times = '0.15 0.375 0.892'
+    output_limiting_function = test_function
     sync_only = true
   []
 []
