@@ -212,7 +212,7 @@ Transient::Transient(const InputParameters & parameters)
 
   if (_app.halfTransient()) // Cut timesteps and end_time in half...
   {
-    _end_time /= 2.0;
+    _end_time = (_start_time + _end_time) / 2.0;
     _num_steps /= 2.0;
 
     if (_num_steps == 0) // Always do one step in the first half
