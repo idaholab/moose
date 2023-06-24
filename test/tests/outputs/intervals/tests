@@ -37,6 +37,13 @@
 
     requirement = "The system shall support output at specific simulation times."
   []
+  [output_limiting_function]
+    type = 'Exodiff'
+    input = 'output_limiting_function.i'
+    exodiff = 'output_limiting_function_out.e'
+
+    requirement = "The system shall support output at times defined by the function."
+  []
   [multiple_sync_times]
     # Tests the use of different sync times for outputs
     type = 'Exodiff'
@@ -50,7 +57,8 @@
     type = 'CSVDiff'
     input = 'minimum_time_interval.i'
     csvdiff = 'minimum_time_interval_out.csv'
-    requirement = "The system shall support specifying an minimum time difference between successive outputs."
+    requirement = "The system shall support specifying an minimum time difference between successive "
+                  "outputs."
   []
 
   [no_output]

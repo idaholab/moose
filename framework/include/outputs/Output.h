@@ -19,6 +19,7 @@
 #include "ReporterInterface.h"
 #include "AdvancedOutputUtils.h"
 #include "PerfGraphInterface.h"
+#include "FunctionInterface.h"
 
 class MooseMesh;
 
@@ -40,6 +41,7 @@ class Output : public MooseObject,
                public Restartable,
                public MeshChangedInterface,
                public SetupInterface,
+               public FunctionInterface,
                public PostprocessorInterface,
                public VectorPostprocessorInterface,
                public ReporterInterface,
@@ -135,6 +137,8 @@ public:
    * @see outputNodalVariables outputElementalVariables outputScalarVariables outputPostprocessors
    */
   virtual void outputStep(const ExecFlagType & type);
+
+  const std::set<Real> & getSyncTimes() { return _sync_times; }
 
 protected:
   /**
