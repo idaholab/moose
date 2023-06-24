@@ -66,6 +66,11 @@ Console::validParams()
   params.addParam<unsigned int>(
       "time_precision",
       "The number of significant digits that are printed on time related outputs");
+  MooseEnum time_format("plain=0 second=1 dtime=2", "plain");
+  params.addParam<MooseEnum>(
+      "time_format",
+      time_format,
+      "The format for the printed times ('dtime' means a format like 1d 01:01:0.1)");
 
   // Performance Logging
   params.addDeprecatedParam<bool>("perf_log",
@@ -133,7 +138,8 @@ Console::validParams()
                               "Variable and Residual Norms");
 
   // Number formatting
-  params.addParamNamesToGroup("scientific_time time_precision", "Time output formatting");
+  params.addParamNamesToGroup("scientific_time time_precision time_format",
+                              "Time output formatting");
 
   // Table of postprocessor output formatting
   params.addParamNamesToGroup("max_rows fit_mode", "Table formatting");
@@ -181,6 +187,7 @@ Console::Console(const InputParameters & parameters)
     _outlier_variable_norms(getParam<bool>("outlier_variable_norms")),
     _outlier_multiplier(getParam<std::vector<Real>>("outlier_multiplier")),
     _precision(isParamValid("time_precision") ? getParam<unsigned int>("time_precision") : 0),
+    _time_format(getParam<MooseEnum>("time_format")),
     _console_buffer(_app.getOutputWarehouse().consoleBuffer()),
     _old_linear_norm(std::numeric_limits<Real>::max()),
     _old_nonlinear_norm(std::numeric_limits<Real>::max()),
@@ -412,39 +419,33 @@ Console::writeTimestepInformation(bool output_dt)
   {
     // Write time step and time information
     oss << "\nTime Step " << timeStep();
-
-    // Set precision
-    if (_precision > 0)
-      oss << std::setw(_precision) << std::setprecision(_precision) << std::setfill('0')
-          << std::showpoint;
-
-    // Show scientific notation
-    if (_scientific_time)
-      oss << std::scientific;
+    unsigned int time_step_digits = oss.str().length() - 11;
 
     // Print the time
-    oss << ", time = " << time();
+    oss << ", time = " << formatTime(time());
 
     if (output_dt)
     {
       if (!_verbose)
         // Show the time delta information
-        oss << ", dt = " << std::left << dt();
+        oss << ", dt = " << std::left << formatTime(dt());
 
       // Show old time information, if desired on separate lines
       else
       {
+        unsigned int fillsize = 19 + time_step_digits;
         oss << '\n'
-            << std::right << std::setw(21) << std::setfill(' ') << "old time = " << std::left
-            << timeOld() << '\n';
+            << std::right << std::setw(fillsize) << std::setfill(' ') << "old time = " << std::left
+            << formatTime(timeOld()) << '\n';
 
         // Show the time delta information
-        oss << std::right << std::setw(21) << std::setfill(' ') << "dt = " << std::left << dt()
-            << '\n';
+        oss << std::right << std::setw(fillsize) << std::setfill(' ') << "dt = " << std::left
+            << formatTime(dt()) << '\n';
 
         // Show the old time delta information, if desired
         if (_verbose)
-          oss << std::right << std::setw(21) << std::setfill(' ') << "old dt = " << _dt_old << '\n';
+          oss << std::right << std::setw(fillsize) << std::setfill(' ')
+              << "old dt = " << formatTime(_dt_old) << '\n';
       }
     }
 
@@ -453,6 +454,56 @@ Console::writeTimestepInformation(bool output_dt)
     // Output to the screen
     _console << oss.str() << std::flush;
   }
+}
+
+std::string
+Console::formatTime(const Real t) const
+{
+  std::ostringstream oss;
+  if (_time_format == "plain" || _time_format == "second")
+  {
+    if (_precision > 0)
+      oss << std::setw(_precision) << std::setprecision(_precision) << std::setfill('0')
+          << std::showpoint;
+    if (_scientific_time)
+      oss << std::scientific;
+    oss << t;
+    if (_time_format == "second")
+      oss << "s";
+  }
+  else if (_time_format == "dtime")
+  {
+    Real abst = t;
+    if (t < 0)
+    {
+      oss << "-";
+      abst = -t;
+    }
+    int days = std::floor(abst / 24 / 3600);
+    int hours = std::floor(abst / 3600 - days * 24);
+    int mins = std::floor(abst / 60 - days * 24 * 60 - hours * 60);
+    Real second = abst - days * 24 * 3600 - hours * 3600 - mins * 60;
+
+    if (days != 0)
+      oss << days << "d";
+    if (hours != 0 || mins != 0 || second != 0)
+    {
+      if (days != 0)
+        oss << " ";
+      oss << std::setfill('0') << std::setw(2) << hours << ":" << std::setfill('0') << std::setw(2)
+          << mins << ":";
+
+      if (second < 10)
+        oss << "0";
+      if (_precision > 0)
+        oss << std::setw(_precision) << std::setprecision(_precision) << std::setfill('0')
+            << std::showpoint;
+      if (_scientific_time)
+        oss << std::scientific;
+      oss << second;
+    }
+  }
+  return oss.str();
 }
 
 void
