@@ -141,6 +141,7 @@ Extensions:
             surrogates: syntax/Surrogates/index.md
             systems: syntax/Systems/index.md
             timeintegrators: syntax/Executioner/TimeIntegrator/index.md
+            times: syntax/Times/index.md
             timesteppers: syntax/Executioner/TimeStepper/index.md
             transfers: syntax/Transfers/index.md
             userobject: syntax/UserObjects/index.md
