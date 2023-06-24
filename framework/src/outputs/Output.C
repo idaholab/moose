@@ -24,6 +24,7 @@
 #include "Console.h"
 #include "Function.h"
 #include "PiecewiseLinear.h"
+#include "Times.h"
 
 #include "libmesh/equation_systems.h"
 
@@ -45,6 +46,9 @@ Output::validParams()
       "minimum_time_interval", 0.0, "The minimum simulation time between output steps");
   params.addParam<std::vector<Real>>("sync_times",
                                      "Times at which the output and solution is forced to occur");
+  params.addParam<TimesName>(
+      "sync_times_object",
+      "Times object providing the times at which the output and solution is forced to occur");
   params.addParam<bool>("sync_only", false, "Only export results at sync times");
   params.addParam<Real>("start_time", "Time at which this output object begins to operate");
   params.addParam<Real>("end_time", "Time at which this output object stop operating");
@@ -69,9 +73,10 @@ Output::validParams()
   params.addParamNamesToGroup("execute_on additional_execute_on", "execute_on");
 
   // 'Timing' group
-  params.addParamNamesToGroup("time_tolerance interval sync_times sync_only start_time end_time "
-                              "start_step end_step minimum_time_interval",
-                              "Timing and frequency");
+  params.addParamNamesToGroup(
+      "time_tolerance interval sync_times sync_times_object sync_only start_time end_time "
+      "start_step end_step minimum_time_interval",
+      "Timing and frequency");
 
   // Add a private parameter for indicating if it was created with short-cut syntax
   params.addPrivateParam<bool>("_built_by_moose", false);
@@ -117,6 +122,10 @@ Output::Output(const InputParameters & parameters)
     _minimum_time_interval(getParam<Real>("minimum_time_interval")),
     _sync_times(std::set<Real>(getParam<std::vector<Real>>("sync_times").begin(),
                                getParam<std::vector<Real>>("sync_times").end())),
+    _sync_times_object(isParamValid("sync_times_object")
+                           ? dynamic_cast<Times *>(&_problem_ptr->getUserObject<Times>(
+                                 getParam<TimesName>("sync_times_object")))
+                           : nullptr),
     _start_time(isParamValid("start_time") ? getParam<Real>("start_time")
                                            : std::numeric_limits<Real>::lowest()),
     _end_time(isParamValid("end_time") ? getParam<Real>("end_time")
@@ -174,6 +183,14 @@ Output::Output(const InputParameters & parameters)
     for (auto i = 0; i < pwb_olf->functionSize(); i++)
       _sync_times.insert(pwb_olf->domain(i));
   }
+
+  // Check that the sync times were retrieved as expected
+  if (isParamSetByUser("sync_times_object") && !_sync_times_object)
+    paramError("sync_times_object", "Times object does not exist");
+  if (_sync_times_object &&
+      (isParamValid("output_limiting_function") || isParamSetByUser("sync_times")))
+    paramError("sync_times_object",
+               "Only one method of specifying sync times is supported at a time");
 }
 
 void
@@ -233,6 +250,10 @@ Output::onInterval()
   // Return false if 'sync_only' is set to true
   if (_sync_only)
     output = false;
+
+  // Update sync times if a sync time object is in use
+  if (_sync_times_object)
+    _sync_times = _sync_times_object->getUniqueTimes();
 
   // If sync times are not skipped, return true if the current time is a sync_time
   if (_sync_times.find(_time) != _sync_times.end())
