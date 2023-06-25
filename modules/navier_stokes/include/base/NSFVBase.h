@@ -33,8 +33,8 @@ public:
   std::string rhieChowName() const
   {
     if (_porous_medium_treatment)
-      return "pins_rhie_chow_interpolator";
-    return "ins_rhie_chow_interpolator";
+      return prefix() + "pins_rhie_chow_interpolator";
+    return prefix() + "ins_rhie_chow_interpolator";
   }
   ///@}
 
