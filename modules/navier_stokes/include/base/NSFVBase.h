@@ -39,7 +39,7 @@ public:
   ///@}
 
   ///@{ public interface for variable and property names
-  std::string pressureName() const { return _pressure_name; }
+  NonlinearVariableName pressureName() const { return _pressure_name; }
   std::string fluidTemperatureName() const { return _fluid_temperature_name; }
   std::string velocityName(unsigned int j) const;
   std::vector<std::string> velocityNames() const { return _velocity_name; }
