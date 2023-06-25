@@ -3541,7 +3541,7 @@ template <class BaseType>
 std::string
 NSFVBase<BaseType>::velocityName(unsigned int j) const
 {
-  if (j >= _velocity_name.size())
+  if (dim >= _velocity_name.size())
     mooseError("Argument dim = ", dim, " out of bounds");
   return _velocity_name[j];
 }
