@@ -3538,8 +3538,8 @@ NSFVBase<BaseType>::checkRhieChowFunctorsDefined()
 }
 
 template <class BaseType>
-std::string
-NSFVBase<BaseType>::velocityName(unsigned int j) const
+const std::string &
+NSFVBase<BaseType>::velocityName(const unsigned int dim) const
 {
   if (dim >= _velocity_name.size())
     mooseError("Argument dim = ", dim, " out of bounds");
