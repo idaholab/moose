@@ -3542,7 +3542,7 @@ std::string
 NSFVBase<BaseType>::velocityName(unsigned int j) const
 {
   if (j >= _velocity_name.size())
-    mooseError("Argument j = ", j, " out of bounds");
+    mooseError("Argument dim = ", dim, " out of bounds");
   return _velocity_name[j];
 }
 
