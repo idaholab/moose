@@ -30,20 +30,18 @@ public:
   bool hasEnergyEquation() const { return _has_energy_equation; }
   bool hasScalar() const { return _has_scalar_equation; }
   unsigned int dim() const { return _dim; }
-  std::string rhieChowName() const
-  {
-    if (_porous_medium_treatment)
-      return prefix() + "pins_rhie_chow_interpolator";
-    return prefix() + "ins_rhie_chow_interpolator";
-  }
+  const std::string & rhieChowName() const;
   ///@}
 
   ///@{ public interface for variable and property names
-  NonlinearVariableName pressureName() const { return _pressure_name; }
+  const NonlinearVariableName & pressureName() const { return _pressure_name; }
   const NonlinearVariableName & fluidTemperatureName() const { return _fluid_temperature_name; }
-  const std::string & velocityName(unsigned int j) const;
+  const std::string & velocityName(unsigned int dim) const;
   const std::vector<std::string> & velocityNames() const { return _velocity_name; }
-  const std::vector<NonlinearVariableName> & passiveScalarNames() const { return _passive_scalar_names; }
+  const std::vector<NonlinearVariableName> & passiveScalarNames() const
+  {
+    return _passive_scalar_names;
+  }
   MooseFunctorName densityName() const { return _density_name; }
   ///@}
 
@@ -3543,7 +3541,7 @@ NSFVBase<BaseType>::velocityName(const unsigned int dim) const
 {
   if (dim >= _velocity_name.size())
     mooseError("Argument dim = ", dim, " out of bounds");
-  return _velocity_name[j];
+  return _velocity_name[dim];
 }
 
 template <class BaseType>
@@ -3560,4 +3558,13 @@ NSFVBase<BaseType>::isOutletBoundary(const BoundaryName & boundary_name) const
 {
   return std::find(_outlet_boundaries.begin(), _outlet_boundaries.end(), boundary_name) !=
          _outlet_boundaries.end();
+}
+
+template <class BaseType>
+const std::string &
+NSFVBase<BaseType>::rhieChowName() const
+{
+  if (_porous_medium_treatment)
+    return prefix() + "pins_rhie_chow_interpolator";
+  return prefix() + "ins_rhie_chow_interpolator";
 }
