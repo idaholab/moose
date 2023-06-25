@@ -1,0 +1,39 @@
+{
+    "reporters": {
+        "functor": {
+            "type": "FunctorTimes",
+            "values": {
+                "times": {
+                    "type": "std::vector<double>"
+                }
+            }
+        }
+    },
+    "time_steps": [
+        {
+            "functor": {
+                "times": []
+            },
+            "time": 0.0,
+            "time_step": 0
+        },
+        {
+            "functor": {
+                "times": [
+                    2.0
+                ]
+            },
+            "time": 1.0,
+            "time_step": 1
+        },
+        {
+            "functor": {
+                "times": [
+                    2.0
+                ]
+            },
+            "time": 2.0,
+            "time_step": 2
+        }
+    ]
+}

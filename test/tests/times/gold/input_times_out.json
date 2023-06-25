@@ -1,0 +1,47 @@
+{
+    "reporters": {
+        "input": {
+            "type": "InputTimes",
+            "values": {
+                "times": {
+                    "type": "std::vector<double>"
+                }
+            }
+        }
+    },
+    "time_steps": [
+        {
+            "input": {
+                "times": [
+                    0.2,
+                    0.4,
+                    0.9
+                ]
+            },
+            "time": 0.0,
+            "time_step": 0
+        },
+        {
+            "input": {
+                "times": [
+                    0.2,
+                    0.4,
+                    0.9
+                ]
+            },
+            "time": 1.0,
+            "time_step": 1
+        },
+        {
+            "input": {
+                "times": [
+                    0.2,
+                    0.4,
+                    0.9
+                ]
+            },
+            "time": 2.0,
+            "time_step": 2
+        }
+    ]
+}
