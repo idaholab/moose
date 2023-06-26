@@ -28,8 +28,20 @@
     type = 'Exodiff'
     input = 'iteration_adaptivity_parallel.i'
     exodiff = 'iteration_adaptivity_parallel_out.e'
+    # Issue #24824: Unable to make it distributed at the moment.
+    mesh_mode = replicated
     map = false
     requirement = "The system shall be able to couple iteration patch update strategies with initial "
-                  "adaptivity when using geometric searches."
+                  "adaptivity when using geometric searches with a replicated mesh."
+  []
+  [iteration_adaptivity_parallel_node_face]
+    type = 'Exodiff'
+    input = 'iteration_adaptivity_parallel_node_face.i'
+    exodiff = 'iteration_adaptivity_parallel_node_face_out.e'
+    abs_zero = 5.0e-8
+    rel_err = 5.0e-5
+    requirement = "The system shall be able to couple iteration patch update strategies with initial "
+                  "adaptivity when using geometric searches using node face contact with a "
+                  "replicated or distributed mesh."
   []
 []

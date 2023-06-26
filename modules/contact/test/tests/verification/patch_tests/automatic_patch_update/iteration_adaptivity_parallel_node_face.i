@@ -131,8 +131,10 @@
     secondary = cube1_top
     primary = cube2_bottom
     model = frictionless
-    formulation = mortar_penalty
-    penalty = 1.0e12
+    formulation = kinematic
+    penalty = 1.0e6
+    normalize_penalty = true
+    tangential_tolerance = 0.1
   []
 []
 
@@ -151,8 +153,8 @@
 
   line_search = 'none'
 
-  nl_rel_tol = 1e-9
-  nl_abs_tol = 1e-9
+  nl_rel_tol = 1e-16
+  nl_abs_tol = 1e-16
   nl_max_its = 50
 
   l_tol = 1e-4
@@ -175,5 +177,5 @@
 
 [Outputs]
   exodus = true
-  print_linear_residuals = true
+  execute_on = 'FINAL'
 []
