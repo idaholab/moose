@@ -371,24 +371,135 @@ MaterialPropertyStorage::initProps(const THREAD_ID tid,
 void
 dataStore(std::ostream & stream, MaterialPropertyStorage & storage, void * context)
 {
-  unsigned int max_state = storage.maxState();
-  dataStore(stream, max_state, context);
+  auto num_states = storage.numStates();
+  dataStore(stream, num_states, nullptr);
+
+  const auto & registry = storage.getMaterialPropertyRegistry();
+  std::vector<std::string> ids_to_names(registry.idsToNamesBegin(), registry.idsToNamesEnd());
+  dataStore(stream, ids_to_names, nullptr);
+
+  dataStore(stream, storage._stateful_prop_id_to_prop_id, nullptr);
 
   for (const auto state : storage.stateIndexRange())
-    dataStore(stream, storage.setProps(state), context);
+  {
+    std::size_t num_elems = storage.setProps(state).size();
+    dataStore(stream, num_elems, nullptr);
+
+    for (auto & elem_side_map_pair : storage.setProps(state))
+    {
+      const Elem * elem = elem_side_map_pair.first;
+      mooseAssert(elem, "Null element");
+      dataStore(stream, elem, context);
+
+      auto & side_map = elem_side_map_pair.second;
+      std::size_t num_sides = side_map.size();
+      dataStore(stream, num_sides, nullptr);
+
+      for (auto & side_props_pair : side_map)
+      {
+        unsigned int side = side_props_pair.first;
+        dataStore(stream, side, nullptr);
+
+        auto & props = side_props_pair.second;
+        std::size_t num_props = props.size();
+        dataStore(stream, num_props, nullptr);
+        mooseAssert(num_props > 0, "No properties");
+
+        std::size_t n_q_points = 0;
+        for (const auto & entry : props)
+          if (entry.size() > n_q_points)
+            n_q_points = entry.size();
+        dataStore(stream, n_q_points, nullptr);
+
+        for (auto & entry : props)
+          dataStoreSkippable(stream, entry, nullptr);
+      }
+    }
+  }
 }
 
 void
 dataLoad(std::istream & stream, MaterialPropertyStorage & storage, void * context)
 {
-  unsigned int state_index;
-  dataLoad(stream, state_index, context);
-  if (state_index != storage.maxState())
-    mooseError("Inconsistent max state; stored max state = ",
-               state_index,
-               ", current max state = ",
-               storage.maxState());
+  const auto & registry = storage.getMaterialPropertyRegistry();
+
+  decltype(storage.numStates()) num_states;
+  dataLoad(stream, num_states, nullptr);
+
+  std::vector<std::string> from_prop_ids_to_names;
+  dataLoad(stream, from_prop_ids_to_names, nullptr);
+
+  decltype(storage._stateful_prop_id_to_prop_id) from_stateful_prop_id_to_prop_id;
+  dataLoad(stream, from_stateful_prop_id_to_prop_id, nullptr);
+
+  const unsigned int skip_id = std::numeric_limits<unsigned int>::max();
+  std::vector<unsigned int> to_stateful_ids(from_stateful_prop_id_to_prop_id.size(), skip_id);
+
+  for (const auto from_stateful_id : index_range(from_stateful_prop_id_to_prop_id))
+  {
+    const auto from_prop_id = from_stateful_prop_id_to_prop_id[from_stateful_id];
+
+    mooseAssert(from_prop_id < from_prop_ids_to_names.size(), "Invalid ID map");
+    const auto & from_name = from_prop_ids_to_names[from_prop_id];
+
+    // Material property with the same name does not exist
+    const auto to_prop_id = registry.queryID(from_name);
+    if (!to_prop_id)
+      mooseError("Not supported yet");
+
+    const auto find_prop_id = std::find(storage._stateful_prop_id_to_prop_id.begin(),
+                                        storage._stateful_prop_id_to_prop_id.end(),
+                                        *to_prop_id);
+    if (find_prop_id == storage._stateful_prop_id_to_prop_id.end())
+      mooseError("Not supported yet");
+
+    const auto to_stateful_id =
+        std::distance(storage._stateful_prop_id_to_prop_id.begin(), find_prop_id);
+    to_stateful_ids[from_stateful_id] = to_stateful_id;
+    if (to_stateful_id != from_stateful_id)
+      mooseError("Not supported yet");
+  }
+
+  mooseAssert(num_states == storage.numStates(), "Inconsistent max state");
 
   for (const auto state : storage.stateIndexRange())
-    dataLoad(stream, storage.setProps(state), context);
+  {
+    std::size_t num_elems;
+    dataLoad(stream, num_elems, nullptr);
+
+    for (std::size_t i_elem = 0; i_elem < num_elems; ++i_elem)
+    {
+      const Elem * elem;
+      dataLoad(stream, elem, context);
+      mooseAssert(elem, "Null element");
+
+      std::size_t num_sides;
+      dataLoad(stream, num_sides, nullptr);
+
+      for (std::size_t i_side = 0; i_side < num_sides; ++i_side)
+      {
+        unsigned int side;
+        dataLoad(stream, side, nullptr);
+
+        std::size_t num_props;
+        dataLoad(stream, num_props, nullptr);
+
+        std::size_t num_q_points;
+        dataLoad(stream, num_q_points, nullptr);
+
+        storage.initProps(0, state, elem, side, num_q_points);
+        auto & props = storage.setProps(elem, side, state);
+
+        for (const auto from_stateful_id : make_range(num_props))
+        {
+          const auto to_stateful_id = to_stateful_ids[from_stateful_id];
+          if (to_stateful_id == skip_id)
+            mooseError("nope");
+          // dataLoadSkip(stream);
+          else
+            dataLoadSkippable(stream, props[to_stateful_id], nullptr);
+        }
+      }
+    }
+  }
 }

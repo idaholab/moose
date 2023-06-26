@@ -769,13 +769,11 @@ FEProblemBase::initialSetup()
       _restart_io->readRestartableDataHeader(true);
       _restart_io->restartEquationSystemsObject();
 
-      /**
-       * TODO: Move the RestartableDataIO call to reload data here. Only a few tests fail when doing
-       * this now. Material Properties aren't sized properly at this point and fail across the
-       * board, there are a few other misc tests that fail too.
-       *
-       * _restart_io->readRestartableData();
-       */
+      _restart_io->readRestartableData(_app.getRestartableData(), _app.getRecoverableData());
+
+      if (_material_props.hasStatefulProperties() || _bnd_material_props.hasStatefulProperties() ||
+          _neighbor_material_props.hasStatefulProperties())
+        _has_initialized_stateful = true;
     }
   }
   else
@@ -918,6 +916,7 @@ FEProblemBase::initialSetup()
       }
     }
 
+    if (!_has_initialized_stateful)
     {
       TIME_SECTION("computingInitialStatefulProps", 3, "Computing Initial Material Values");
 
@@ -1014,12 +1013,6 @@ FEProblemBase::initialSetup()
     if (_app.hasCachedBackup()) // This happens when this app is a sub-app and has been given a
                                 // Backup
       _app.restoreCachedBackup();
-    else
-    {
-      TIME_SECTION("restoreRestartData", 3, "Restoring Restart Data");
-
-      _restart_io->readRestartableData(_app.getRestartableData(), _app.getRecoverableData());
-    }
 
     // We may have just clobbered initial conditions that were explicitly set
     // In a _restart_ scenario it is completely valid to specify new initial conditions
