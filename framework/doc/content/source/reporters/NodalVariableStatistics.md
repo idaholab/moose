@@ -13,7 +13,7 @@ name to each reporter.
 
 ## Example Input File Syntax
 
-!listing nodal_reporter/nodal_stats.i block=elem_stats
+!listing nodal_reporter/nodal_stats.i block=nodal_stats
   indent=2 header=[Reporters] footer=[]
 
 !syntax parameters /Reporters/NodalVariableStatistics
