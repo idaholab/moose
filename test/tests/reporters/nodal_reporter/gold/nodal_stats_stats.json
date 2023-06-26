@@ -1,6 +1,6 @@
 {
     "reporters": {
-        "elem_stats": {
+        "nodal_stats": {
             "type": "NodalVariableStatistics",
             "values": {
                 "diffusion_average": {
@@ -20,7 +20,7 @@
     },
     "time_steps": [
         {
-            "elem_stats": {
+            "nodal_stats": {
                 "diffusion_average": 0.0,
                 "diffusion_max": 0.0,
                 "diffusion_min": 0.0,
@@ -30,7 +30,7 @@
             "time_step": 0
         },
         {
-            "elem_stats": {
+            "nodal_stats": {
                 "diffusion_average": 0.5,
                 "diffusion_max": 1.0,
                 "diffusion_min": 0.0,

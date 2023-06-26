@@ -35,7 +35,7 @@
 []
 
 [Reporters]
-  [elem_stats]
+  [nodal_stats]
     type = NodalVariableStatistics
     coupled_var = u
     base_name = diffusion

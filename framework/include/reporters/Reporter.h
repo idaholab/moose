@@ -10,6 +10,7 @@
 #pragma once
 
 // Moose includes
+#include "MooseTypes.h"
 #include "OutputInterface.h"
 #include "ReporterData.h"
 #include "InputParameters.h"
@@ -243,6 +244,13 @@ Reporter::declareValueByName(const ReporterValueName & value_name,
 
   buildOutputHideVariableList({state_name.getCombinedName()});
 
+  // Only thread 0 will declare the reporter value. The rest will get a reference
+  // to an UnusedValue
+  const THREAD_ID tid = _reporter_moose_object.parameters().isParamValid("_tid")
+                            ? _reporter_moose_object.parameters().get<THREAD_ID>("_tid")
+                            : 0;
+  if (tid)
+    return declareUnusedValue<T>();
   return _reporter_data.declareReporterValue<T, S>(
       state_name, mode, _reporter_moose_object, args...);
 }

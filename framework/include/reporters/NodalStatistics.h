@@ -22,8 +22,7 @@ protected:
   virtual void initialize() override;
   virtual void execute() override;
   virtual void finalize() override;
-  virtual void threadJoin(const UserObject & /*uo*/) override final{};
-
+  virtual void threadJoin(const UserObject &) override;
   virtual Real computeValue() = 0;
 
 private:

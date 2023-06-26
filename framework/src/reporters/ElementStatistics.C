@@ -57,6 +57,17 @@ ElementStatistics::execute()
 }
 
 void
+ElementStatistics::threadJoin(const UserObject & uo)
+{
+  const ElementStatistics & ele_uo = static_cast<const ElementStatistics &>(uo);
+  _max = std::max(_max, ele_uo._max);
+  _min = std::min(_min, ele_uo._min);
+  _integral += ele_uo._integral;
+  _average += ele_uo._average;
+  _number_elements += ele_uo._number_elements;
+}
+
+void
 ElementStatistics::finalize()
 {
   _communicator.max(_max);
