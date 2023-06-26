@@ -372,9 +372,7 @@ public:
    *
    * @return Whether the mesh has changed because of an adaptivity step.
    */
-  virtual bool hasMeshChanged() {
-    return _is_changed;
-  }
+  virtual bool hasMeshChanged() { return _is_changed; }
 
   /**
    * Cache information about what elements were refined and coarsened in the previous step.

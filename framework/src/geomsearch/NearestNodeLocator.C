@@ -200,7 +200,7 @@ NearestNodeLocator::findNodes()
         for (const auto & dof : elems_connected_to_node)
           if (std::find(ghost.begin(), ghost.end(), dof) == ghost.end() &&
               _mesh.elemPtr(dof)->processor_id() != _mesh.processor_id())
-            mooseError("Error in NearestNodeLocator : The nearest neighbor lies outside the "
+            mooseError("Error in NearestNodeLocator: The nearest neighbor lies outside the "
                        "ghosted set of elements. Increase the ghosting_patch_size parameter in the "
                        "mesh block and try again.");
       }
@@ -346,7 +346,7 @@ NearestNodeLocator::updatePatch(std::vector<dof_id_type> & secondary_nodes)
       for (const auto & dof : elems_connected_to_node)
         if (std::find(ghost.begin(), ghost.end(), dof) == ghost.end() &&
             _mesh.elemPtr(dof)->processor_id() != _mesh.processor_id())
-          mooseError("Error in NearestNodeLocator : The nearest neighbor lies outside the ghosted "
+          mooseError("Error in NearestNodeLocator: The nearest neighbor lies outside the ghosted "
                      "set of elements. Increase the ghosting_patch_size parameter in the mesh "
                      "block and try again.");
     }
