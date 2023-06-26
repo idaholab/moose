@@ -64,11 +64,17 @@ MaxQpsThread::operator()(const ConstElemRange & range)
     // We'll use one for element interiors, which calculates nothing
     std::unique_ptr<FEBase> fe(FEBase::build(dim, fe_type));
     fe->get_nothing();
+    // Alex: This seems wrong, e.g. like we'd want the quadrature order to be higher if the
+    // polynomial basis is higher, but our fe_type up above is first Lagrange, so it seems like the
+    // person who wrote this code didn't want to consider higher order bases even if if the user
+    // asked for higher order bases
+    fe->add_p_level_in_reinit(false);
 
     // And another for element sides, which calculates the minimum
     // libMesh currently allows for that
     std::unique_ptr<FEBase> side_fe(FEBase::build(dim, fe_type));
     side_fe->get_xyz();
+    side_fe->add_p_level_in_reinit(false);
 
     // figure out the number of qps for volume
     auto qrule = assem.attachQRuleElem(dim, *fe);
