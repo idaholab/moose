@@ -25,7 +25,7 @@ public:
   LayeredExtremumMaterialProperty(const InputParameters & parameters);
 
   /**
-   * Given a Point return the integral value associated with the layer that point falls in.
+   * Given a Point, return the integral value associated with the layer that point falls in.
    *
    * @param p The point to look for in the layers.
    */
@@ -35,7 +35,7 @@ public:
 
   virtual void initialize() override;
   virtual void execute() override;
-  Real extreme_value(Real a, Real b) const;
+  Real extreme_value(const Real a, const Real b) const;
   virtual void finalize() override;
   virtual void threadJoin(const UserObject & y) override;
 };

@@ -36,7 +36,7 @@ LayeredExtremumMaterialProperty::initialize()
   LayeredBase::initialize();
 
   // Initialize layer values
-  for (auto layer : make_range(_num_layers))
+  for (const auto layer : make_range(_num_layers))
     setLayerValue(
         layer, _type == MIN ? std::numeric_limits<Real>::max() : -std::numeric_limits<Real>::max());
 }
@@ -47,13 +47,13 @@ LayeredExtremumMaterialProperty::execute()
   // Do not keep track of the layer extremum with _value
   ElementExtremeMaterialProperty::initialize();
   ElementExtremeMaterialProperty::execute();
-  unsigned int layer = getLayer(_current_elem->vertex_average());
+  const auto layer = getLayer(_current_elem->vertex_average());
 
   setLayerValue(layer, extreme_value(getLayerValue(layer), _value));
 }
 
 Real
-LayeredExtremumMaterialProperty::extreme_value(Real a, Real b) const
+LayeredExtremumMaterialProperty::extreme_value(const Real a, const Real b) const
 {
   if (_type == MIN)
     return std::min(a, b);
