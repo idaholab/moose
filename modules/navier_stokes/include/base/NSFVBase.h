@@ -26,6 +26,32 @@ public:
 
   NSFVBase(const InputParameters & parameters);
 
+  ///@{ general public interface functions
+  bool hasEnergyEquation() const { return _has_energy_equation; }
+  bool hasScalar() const { return _has_scalar_equation; }
+  unsigned int dim() const { return _dim; }
+  const std::string & rhieChowName() const;
+  ///@}
+
+  ///@{ public interface for variable and property names
+  const NonlinearVariableName & pressureName() const { return _pressure_name; }
+  const NonlinearVariableName & fluidTemperatureName() const { return _fluid_temperature_name; }
+  const std::string & velocityName(unsigned int dim) const;
+  const std::vector<std::string> & velocityNames() const { return _velocity_name; }
+  const std::vector<NonlinearVariableName> & passiveScalarNames() const
+  {
+    return _passive_scalar_names;
+  }
+  MooseFunctorName densityName() const { return _density_name; }
+  ///@}
+
+  ///@{ public interface for boundaries
+  bool isInletBoundary(const BoundaryName & boundary_name) const;
+  bool isOutletBoundary(const BoundaryName & boundary_name) const;
+  const std::vector<BoundaryName> & inletBoundaries() const { return _inlet_boundaries; }
+  const std::vector<BoundaryName> & outletBoundaries() const { return _outlet_boundaries; }
+  ///@}
+
 protected:
   /// Type that we use in Actions for declaring coupling between the solutions
   /// of different physics components
@@ -3507,4 +3533,38 @@ NSFVBase<BaseType>::checkRhieChowFunctorsDefined()
   if (_dim == 3 && !getProblem().hasFunctor("az", /*thread_id=*/0))
     paramError("add_flow_equations",
                "Rhie Chow coefficient az must be provided for advection by auxiliary velocities");
+}
+
+template <class BaseType>
+const std::string &
+NSFVBase<BaseType>::velocityName(const unsigned int dim) const
+{
+  if (dim >= _velocity_name.size())
+    mooseError("Argument dim = ", dim, " out of bounds");
+  return _velocity_name[dim];
+}
+
+template <class BaseType>
+bool
+NSFVBase<BaseType>::isInletBoundary(const BoundaryName & boundary_name) const
+{
+  return std::find(_inlet_boundaries.begin(), _inlet_boundaries.end(), boundary_name) !=
+         _inlet_boundaries.end();
+}
+
+template <class BaseType>
+bool
+NSFVBase<BaseType>::isOutletBoundary(const BoundaryName & boundary_name) const
+{
+  return std::find(_outlet_boundaries.begin(), _outlet_boundaries.end(), boundary_name) !=
+         _outlet_boundaries.end();
+}
+
+template <class BaseType>
+const std::string &
+NSFVBase<BaseType>::rhieChowName() const
+{
+  if (_porous_medium_treatment)
+    return prefix() + "pins_rhie_chow_interpolator";
+  return prefix() + "ins_rhie_chow_interpolator";
 }
