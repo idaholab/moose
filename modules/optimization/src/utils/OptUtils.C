@@ -62,8 +62,8 @@ copyPetscMatrixIntoReporter(const libMesh::PetscMatrix<Number> & x,
   for (auto & data : reporterVectors)
   {
     for (auto & val : *data)
-      val = x(i, j++);
-    i++;
+      val = x(i++, j);
+    j++;
   }
 }
 }

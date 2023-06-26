@@ -82,22 +82,28 @@ public:
   virtual void computeInequalityConstraints(libMesh::PetscVector<Number> & ineqs_constraints) const;
 
   /**
-   * Function to compute the jacobian of the equality constraints/
-   * This is the last call of the equality constraint jacobian routine.
+   * Function to compute the gradient of the equality constraints/
+   * This is the last call of the equality constraint gradient routine.
    */
-  virtual void computeEqualityGradient(libMesh::PetscMatrix<Number> & jacobian) const;
+  virtual void computeEqualityGradient(libMesh::PetscMatrix<Number> & gradient) const;
 
   /**
-   * Function to compute the jacobian of the inequality constraints/
-   * This is the last call of the inequality constraint jacobian routine.
+   * Function to compute the gradient of the inequality constraints/
+   * This is the last call of the inequality constraint gradient routine.
    */
-  virtual void computeInequalityGradient(libMesh::PetscMatrix<Number> & jacobian) const;
+  virtual void computeInequalityGradient(libMesh::PetscMatrix<Number> & gradient) const;
 
   /**
-   * Function to get the total number of parameters
+   * Function to get the total number of equalities
    * @return total number of parameters
    */
   dof_id_type getNumEqCons() const { return _n_eq_cons; }
+
+  /**
+   * Function to get the total number of equalities
+   * @return total number of parameters
+   */
+  dof_id_type getNumInEqCons() const { return _n_ineq_cons; }
 
 protected:
   /**

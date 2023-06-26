@@ -38,8 +38,12 @@ OptimizationReporterBase::OptimizationReporterBase(const InputParameters & param
     _tikhonov_coeff(getParam<Real>("tikhonov_coeff"))
     _equality_names(&getParam<std::vector<ReporterValueName>>("equality_names")),
     _n_eq_cons(_equality_names->size()),
+    _eq_constraints(_n_eq_cons),
+    _eq_gradients(_n_eq_cons),
     _inequality_names(&getParam<std::vector<ReporterValueName>>("inequality_names")),
-    _n_ineq_cons(_equality_names->size())
+    _n_ineq_cons(_inequality_names->size()),
+    _ineq_constraints(_n_ineq_cons),
+    _ineq_gradients(_n_ineq_cons)
 {
   for (const auto & i : make_range(_nparams))
   {
