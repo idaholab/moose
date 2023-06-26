@@ -1,6 +1,6 @@
 # RhoEAFromPressureTemperatureFunctionVelocityIC
 
-This object computes the value of $rhoEA$ given pressure and temperature as variables and velocity as a function.
+This object computes the value of $\rho E A$, the conserved total energy, given pressure and temperature as variables and velocity as a function.
 
 The cross-sectional area variable, [!param](/ICs/SpecificTotalEnthalpyIC/A),
 is usually set by the [Component](syntax/Components/index.md).
