@@ -5,7 +5,7 @@
 The phase specific volume $v$ is computed as
 
 !equation
-v = \dfrac{\alpha A}{\rhoA}
+v = \dfrac{\alpha A}{\rho A}
 
 where $A$ is the local component area, $\rho$ the fluid density and $\alpha$ the phase fraction.
 

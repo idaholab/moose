@@ -5,7 +5,9 @@
 The expression for the generalized circumference is:
 
 !equation
-circumference = \sqrt{4 \pi area + (\dfrac{dA}{dx})^2}
+circumference = \sqrt{4 \pi A + (\dfrac{dA}{dx})^2}
+
+with $A$ the local area variable, usually defined by the [Components](syntax/Components/index.md).
 
 !alert note
 The function providing the area must have the gradient routine implemented.

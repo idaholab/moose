@@ -21,6 +21,8 @@ SetComponentRealValueControl::validParams()
       "parameter", "The name of the parameter in the component to be controlled.");
   params.addRequiredParam<std::string>("value",
                                        "The name of control data to be set in the component.");
+  params.addClassDescription("Control to set a floating point (Real) value of a component "
+                             "parameter with control data boolean");
   return params;
 }
 
