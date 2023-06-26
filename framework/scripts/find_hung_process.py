@@ -290,16 +290,12 @@ def generate_traces(job_num, application_name, num_hosts, num_threads, verbose =
         # convert back into set
         hosts = set(list(hosts)[:num_hosts])
 
-    #if verbose == True:
-        #print("Current hosts: ",(i for i in hosts))
-
     # Use a Scheduler to get hosts and PIDs
     hosts_pids = __get_pids(application_name, hosts, num_threads, verbose)
 
     # Use a Scheduler to get stack traces from each
     # host for every PID
     stack_list = __get_stacks(hosts_pids, num_threads, verbose)
-    #print(f"stack_list: {(i for i in stack_list)}")
     traces = []
     for stack in stack_list:
         output = os.linesep.join([s for s in stack.splitlines() if s])
@@ -508,7 +504,9 @@ def main():
     parser = argparse.ArgumentParser(description="Normally you will run this script with your PBS job number AND the name of your executable (e.g. find_hung_processes.py 1234 my_app-opt)."
                                      "\nHowever, you can also pass in the name of the cache file containing traces from a previous run to process (e.g. find_hung_processes.py -f my_app-opt.1234.cache).")
 
-    if '-f' not in sys.argv and '--file' not in sys.argv:
+    sub_parser = parser.add_subparsers(help='Sub command help:')
+
+    if '-f' not in sys.argv and '--file' not in sys.argv and '--test-local' not in sys.argv:
         parser.add_argument('pbs_job_num', type=int)
         parser.add_argument('application', type=str)
 
@@ -523,8 +521,18 @@ def main():
     parser.add_argument('-s', '--stacks', metavar='int', action='store', type=int, default=0,
                         help='The number of stack frames to keep and compare for '
                         'uniqueness (Default: ALL)')
-    parser.add_argument('-v', '--verbose', action='store_true',dest='verbose', help='shows output of command line commands used in script.')
-    parser.add_argument('--test-local', action='store_true', dest='localhost', help='for testing without PBS queuing system, changes node_name_pattern to search for "localhost", instead of hpc node patterns.')
+
+    parser.add_argument('-v', '--verbose', action='store_true',dest='verbose',
+                        help='shows output of command line commands used in script.')
+    #parser.add_argument('--test-local', action='store_true', dest='localhost',
+    #                   help='for testing without PBS queuing system, changes node_name_pattern to search for "localhost", instead of hpc node patterns.')
+
+    test_sub_parser = sub_parser.add_parser('test', help='Used when performing a local test on machine without job queuing system.')
+    test_sub_parser.add_argument('application', type=str)
+    test_sub_parser.add_argument('-l','--test-local', action='store_true', dest='localhost',
+                                help='for testing script without job queuing system, changes node_name_pattern to search for "localhost", instead of hpc node patterns.')
+    test_sub_parser.add_argument('-id', dest='pbs_job_num', type=int, default=0)
+
     args = parser.parse_args()
 
     cache_filename = None
@@ -535,6 +543,9 @@ def main():
         if args.localhost == True:#changes node name pattern when doing local testing
             global node_name_pattern
             node_name_pattern = re.compile(r'(localhost)')
+
+
+
 
         traces = generate_traces(args.pbs_job_num, args.application, args.hosts, args.threads, args.verbose)
 
