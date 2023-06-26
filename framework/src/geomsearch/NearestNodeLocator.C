@@ -39,6 +39,7 @@ NearestNodeLocator::NearestNodeLocator(SubProblem & subproblem,
     _boundary1(boundary1),
     _boundary2(boundary2),
     _first(true),
+    _reinit_iteration(true),
     _patch_update_strategy(_mesh.getPatchUpdateStrategy())
 {
   /*
@@ -69,8 +70,13 @@ NearestNodeLocator::findNodes()
    */
   const std::map<dof_id_type, std::vector<dof_id_type>> & node_to_elem_map = _mesh.nodeToElemMap();
 
-  if (_first)
+  if (_first || (_reinit_iteration && _patch_update_strategy == Moose::Iteration))
   {
+    // After a call from system reinit, mesh has been updated with initial adaptivity.
+    // Moose::Iteration relies on data generated for ghosting (i.e. trial_primary_nodes)
+    if (!_first)
+      _reinit_iteration = false;
+
     _first = false;
 
     // Trial secondary nodes are all the nodes on the secondary side

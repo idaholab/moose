@@ -101,6 +101,11 @@ public:
   BoundaryID _boundary2;
 
   bool _first;
+
+  // Compute neighborhood nodes around the secondary nodes if iteration update strategy is
+  // selected. This is required for (at least initial) adaptivity in parallel
+  bool _reinit_iteration;
+
   std::vector<dof_id_type> _secondary_nodes;
 
   std::map<dof_id_type, std::vector<dof_id_type>> _neighbor_nodes;
