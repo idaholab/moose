@@ -271,9 +271,9 @@ MaterialData::resizeProps(unsigned int id)
     {
       std::unique_ptr<PropertyValue> value;
       if (is_ad && state == 0)
-        value = std::make_unique<ADMaterialProperty<T>>();
+        value = std::make_unique<ADMaterialProperty<T>>(id);
       else
-        value = std::make_unique<MaterialProperty<T>>();
+        value = std::make_unique<MaterialProperty<T>>(id);
       entry.setPointer(id, std::move(value), {});
     }
   }

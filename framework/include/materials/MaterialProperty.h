@@ -38,7 +38,14 @@ class MaterialPropertyInterface;
 class PropertyValue
 {
 public:
+  PropertyValue(const unsigned int id) : _id(id) {}
+
   virtual ~PropertyValue(){};
+
+  /**
+   * @return The ID of the underlying material property
+   */
+  unsigned int id() const { return _id; }
 
   /**
    * String identifying the type of parameter stored.
@@ -81,6 +88,10 @@ public:
    * @return The type_info for the underlying stored type T
    */
   virtual const std::type_info & typeID() const = 0;
+
+protected:
+  /// The material property ID
+  const unsigned int _id;
 };
 
 /**
@@ -93,9 +104,9 @@ class MaterialPropertyBase : public PropertyValue
 public:
   typedef MooseADWrapper<T, is_ad> value_type;
 
-  /// Explicitly declare a public constructor because we made the copy constructor private
-  MaterialPropertyBase() : PropertyValue()
-  { /* */
+  MaterialPropertyBase(const unsigned int id, const unsigned int size)
+    : PropertyValue(id), _value(size)
+  {
   }
 
   bool isAD() const override { return is_ad; }
@@ -261,6 +272,7 @@ template <typename T, bool is_ad>
 inline void
 MaterialPropertyBase<T, is_ad>::swap(PropertyValue & rhs)
 {
+  mooseAssert(this->id() == rhs.id(), "Inconsistent properties");
   mooseAssert(this->typeID() == rhs.typeID(), "Inconsistent types");
 
   // If we're the same
@@ -304,18 +316,20 @@ template <typename T>
 class MaterialProperty : public MaterialPropertyBase<T, false>
 {
 public:
-  MaterialProperty() = default;
-
-  static std::unique_ptr<PropertyValue> cloneHelper(const std::size_t size)
+  MaterialProperty(const unsigned int id, const unsigned int size = 0)
+    : MaterialPropertyBase<T, false>(id, size)
   {
-    std::unique_ptr<PropertyValue> value = std::make_unique<MaterialProperty<T>>();
-    value->resize(size);
+  }
+
+  static std::unique_ptr<PropertyValue> build(const unsigned int id, const std::size_t size)
+  {
+    std::unique_ptr<PropertyValue> value = std::make_unique<MaterialProperty<T>>(id, size);
     return value;
   }
 
   std::unique_ptr<PropertyValue> clone(const std::size_t size) const override
   {
-    return cloneHelper(size);
+    return build(this->id(), size);
   }
 
 private:
@@ -336,13 +350,16 @@ template <typename T>
 class ADMaterialProperty : public MaterialPropertyBase<T, true>
 {
 public:
-  ADMaterialProperty() = default;
+  ADMaterialProperty(const unsigned int id, const unsigned int size = 0)
+    : MaterialPropertyBase<T, true>(id, size)
+  {
+  }
 
   using typename MaterialPropertyBase<T, true>::value_type;
 
   std::unique_ptr<PropertyValue> clone(const std::size_t size) const override
   {
-    return MaterialProperty<T>::cloneHelper(size);
+    return MaterialProperty<T>::build(this->id(), size);
   }
 
 private:

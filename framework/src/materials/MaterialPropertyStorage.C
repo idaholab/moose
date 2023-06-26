@@ -364,6 +364,7 @@ MaterialPropertyStorage::initProps(const THREAD_ID tid,
     {
       const auto prop_id = _stateful_prop_id_to_prop_id[i];
       mat_props.setPointer(i, material_data.props(0)[prop_id].clone(n_qpoints), {});
+      mooseAssert(mat_props[i].id() == prop_id, "Inconsistent id");
     }
 }
 
