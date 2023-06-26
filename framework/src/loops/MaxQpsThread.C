@@ -11,7 +11,7 @@
 #include "FEProblem.h"
 #include "Assembly.h"
 
-#include "libmesh/fe_base.h"
+#include "libmesh/fe.h"
 #include "libmesh/threads.h"
 #include LIBMESH_INCLUDE_UNORDERED_SET
 LIBMESH_DEFINE_HASH_POINTERS
@@ -82,7 +82,23 @@ MaxQpsThread::operator()(const ConstElemRange & range)
     if (qrule->n_points() > _max)
       _max = qrule->n_points();
 
-    unsigned int n_shape_funcs = fe->n_shape_functions();
+    const auto n_shape_funcs = [dim, &fe]()
+    {
+      const auto elem_type = fe->get_type();
+      switch (dim)
+      {
+        case 0:
+          return static_cast<FE<0, LAGRANGE> *>(fe.get())->n_shape_functions(elem_type, FIRST);
+        case 1:
+          return static_cast<FE<1, LAGRANGE> *>(fe.get())->n_shape_functions(elem_type, FIRST);
+        case 2:
+          return static_cast<FE<2, LAGRANGE> *>(fe.get())->n_shape_functions(elem_type, FIRST);
+        case 3:
+          return static_cast<FE<3, LAGRANGE> *>(fe.get())->n_shape_functions(elem_type, FIRST);
+        default:
+          mooseError("Unhandled dimension ", dim);
+      }
+    }();
     if (n_shape_funcs > _max_shape_funcs)
       _max_shape_funcs = n_shape_funcs;
 
