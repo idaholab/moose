@@ -4728,7 +4728,13 @@ Assembly::havePRefinement()
       // so that they're not penalized (in the "we should be able to do p-refinement sense") for our
       // perhaps silly helpers
       if (!user_added_helper_type)
-        fe_container[dim].erase(helper_type);
+      {
+        auto & fe_container_dim = fe_container[dim];
+        auto fe_it = fe_container_dim.find(helper_type);
+        mooseAssert(fe_it != fe_container_dim.end(), "We should have the helper type");
+        delete fe_it->second;
+        fe_container_dim.erase(fe_it);
+      }
     }
   };
 
