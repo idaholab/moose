@@ -128,6 +128,18 @@
     requirement = 'The system shall support outputting the Performance Log at user specified intervals.'
     issues = '#1927 #2728'
   [../]
+  [./console_dtime_format]
+    # Test the transient console output, with negative start-time
+    type = RunApp
+    input = 'console_dtime_format.i'
+    expect_out = 'Time Step 1, time = -00:00:00\.700000[\s\S]*'
+                 'Time Step 6, time = 00:00:06\.20000[\s\S]*'
+                 'Time Step 48, time = 03:15:40\.2000[\s\S]*'
+                 'Time Step 59, time = 1d 03:46:40\.0000'
+
+    requirement = 'The system shall support writing time information in DTIME format in the console.'
+    issues = '#24813'
+  [../]
   [./_console]
     # Test the used of MooseObject::_console method
     type = RunApp

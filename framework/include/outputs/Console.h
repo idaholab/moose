@@ -87,6 +87,11 @@ public:
     return _system_info_flags;
   }
 
+  /**
+   * A reference to the time format to allow callers to set a new format for this console object
+   */
+  MooseEnum & timeFormat() { return _time_format; }
+
 protected:
   /**
    * Print the input file at the beginning of the simulation
@@ -150,6 +155,9 @@ protected:
    */
   void writeVariableNorms();
 
+  /// A help function to format a time
+  std::string formatTime(const Real t) const;
+
   /// The max number of table rows
   unsigned int _max_rows;
 
@@ -197,6 +205,9 @@ protected:
 
   /// Number of significant digits
   unsigned int _precision;
+
+  /// Time format
+  MooseEnum _time_format;
 
 private:
   /**
