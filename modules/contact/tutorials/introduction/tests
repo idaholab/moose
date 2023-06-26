@@ -13,6 +13,5 @@
     type = RunApp
     command = plot02.py
     display_required = true
-    required_python_packages = matplotlib
   []
 []
