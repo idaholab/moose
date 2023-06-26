@@ -28,8 +28,8 @@ protected:
   MooseFunctorName _functor_name;
 
   ///@{ A, B, f(t), g(t)
-  RealVectorValue _A;
-  RealVectorValue _B;
+  const RealVectorValue _A;
+  const RealVectorValue _B;
   const Moose::Functor<ADReal> & _f;
   const Moose::Functor<ADReal> & _g;
   ///@}

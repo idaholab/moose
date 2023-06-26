@@ -21,7 +21,7 @@ rho = 1
     dynamic_viscosity = 'mu'
     porosity = 'porosity'
 
-    initial_velocity = '1 1e-6 0'
+    initial_velocity = '1 0 0'
     initial_pressure = 0.0
 
     inlet_boundaries = 'left'

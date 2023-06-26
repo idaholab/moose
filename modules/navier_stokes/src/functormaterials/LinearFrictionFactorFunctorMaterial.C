@@ -9,6 +9,7 @@
 
 #include "LinearFrictionFactorFunctorMaterial.h"
 #include "NS.h"
+#include "NavierStokesMethods.h"
 
 registerMooseObject("NavierStokesApp", LinearFrictionFactorFunctorMaterial);
 
@@ -16,9 +17,10 @@ InputParameters
 LinearFrictionFactorFunctorMaterial::validParams()
 {
   InputParameters params = FunctorMaterial::validParams();
-  params.addClassDescription("Material class used to compute a friction factor of the form A * "
-                             "f(t) + B * g(t) * |v_I| with A, B vector constants, f(t) and g(t) "
-                             "functions of time, and |v_I| the interstitial speed");
+  params.addClassDescription(
+      "Material class used to compute a friction factor of the form A * "
+      "f(r, t) + B * g(r, t) * |v_I| with A, B vector constants, f(r, t) and g(r, t) "
+      "functors of space and time, and |v_I| the interstitial speed");
 
   params.addRequiredParam<MooseFunctorName>("functor_name",
                                             "The name of functor storing the friction factor");
@@ -32,7 +34,7 @@ LinearFrictionFactorFunctorMaterial::validParams()
   params.addParam<RealVectorValue>(
       "A", RealVectorValue(1, 1, 1), "Coefficient of the A * f(t) term");
   params.addParam<RealVectorValue>(
-      "B", RealVectorValue(1, 1, 1), "Coefficient of the B * g(t) * |v_I| term");
+      "B", RealVectorValue(), "Coefficient of the B * g(t) * |v_I| term");
   params.addParam<MooseFunctorName>("f", "Functor f in the A * f(t) term");
   params.addParam<MooseFunctorName>("g", "Functor g in the B * g(t) * |v_I| term");
   return params;
@@ -68,16 +70,9 @@ LinearFrictionFactorFunctorMaterial::LinearFrictionFactorFunctorMaterial(
       {
         // Compute speed
         // see PINSFVSpeedFunctorMaterial.C for explanation
-        ADReal speed;
-        if ((MooseUtils::absoluteFuzzyEqual(_superficial_vel_x(r, t), 0)) &&
-            (MooseUtils::absoluteFuzzyEqual(_superficial_vel_y(r, t), 0)) &&
-            (MooseUtils::absoluteFuzzyEqual(_superficial_vel_z(r, t), 0)))
-          speed = 1e-42;
-
-        speed = ADRealVectorValue(
-                    _superficial_vel_x(r, t), _superficial_vel_y(r, t), _superficial_vel_z(r, t))
-                    .norm() /
-                _eps(r, t);
+        const ADRealVectorValue superficial_vel(
+            _superficial_vel_x(r, t), _superficial_vel_y(r, t), _superficial_vel_z(r, t));
+        const auto speed = NS::computeSpeed(superficial_vel) / _eps(r, t);
 
         return _A * _f(r, t) + _B * _g(r, t) * speed;
       });

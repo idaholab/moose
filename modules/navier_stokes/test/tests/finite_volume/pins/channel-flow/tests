@@ -191,7 +191,7 @@
     type = 'Exodiff'
     input = linear_friction.i
     exodiff = linear_friction_out.e
-    issues = '#24703'
+    issues = '#24702'
     method = "!dbg"
     requirement = 'The system shall be able to model porous flow with volumetric friction with a friction factor that depends linearly on velocity.'
     abs_zero = 1e-9
