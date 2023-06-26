@@ -39,8 +39,8 @@ P_out = 4.923e6 # Pa
   segregated = false
   staggered_pressure = false
   monolithic_thermal = false
-  interpolation_scheme = 'exponential'
-  # P_tol = 1e-11
+  P_tol = 1e-04
+  T_tol = 1e-04
   verbose_subchannel = false
 []
 
@@ -187,6 +187,18 @@ P_out = 4.923e6 # Pa
   [report_pressure_outlet]
     type = Receiver
     default = ${P_out}
+  []
+
+  [m_dot_in]
+    type = SideIntegralVariablePostprocessor
+    variable = mdot
+    boundary = inlet
+  []
+
+  [m_dot_out]
+    type = SideIntegralVariablePostprocessor
+    variable = mdot
+    boundary = outlet
   []
 []
 

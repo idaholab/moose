@@ -267,25 +267,24 @@ LiquidMetalSubChannel1PhaseProblem::computeWijPrime(int iblock)
       auto Sj_in = (*_S_flow_soln)(node_in_j);
       auto Si_out = (*_S_flow_soln)(node_out_i);
       auto Sj_out = (*_S_flow_soln)(node_out_j);
+      auto S_total = Si_in + Sj_in + Si_out + Sj_out;
+      auto Si = 0.5 * (Si_in + Si_out);
+      auto Sj = 0.5 * (Sj_in + Sj_out);
+      auto w_perim_i = 0.5 * ((*_w_perim_soln)(node_in_i) + (*_w_perim_soln)(node_out_i));
+      auto w_perim_j = 0.5 * ((*_w_perim_soln)(node_in_j) + (*_w_perim_soln)(node_out_j));
+      auto avg_mu = (1 / S_total) * ((*_mu_soln)(node_out_i)*Si_out + (*_mu_soln)(node_in_i)*Si_in +
+                                     (*_mu_soln)(node_out_j)*Sj_out + (*_mu_soln)(node_in_j)*Sj_in);
+      auto avg_hD = 4.0 * (Si + Sj) / (w_perim_i + w_perim_j);
+      auto avg_massflux =
+          0.5 * (((*_mdot_soln)(node_in_i) + (*_mdot_soln)(node_in_j)) / (Si_in + Sj_in) +
+                 ((*_mdot_soln)(node_out_i) + (*_mdot_soln)(node_out_j)) / (Si_out + Sj_out));
+      auto Re = avg_massflux * avg_hD / avg_mu;
       // crossflow area between channels i,j (dz*gap_width)
       auto gap = _subchannel_mesh.getGapWidth(i_gap);
       auto Sij = dz * gap;
       // Calculation of flow regime
       auto ReL = 320.0 * std::pow(10.0, pitch / rod_diameter - 1);
       auto ReT = 10000.0 * std::pow(10.0, 0.7 * (pitch / rod_diameter - 1));
-      auto avg_massflux =
-          0.5 * (((*_mdot_soln)(node_in_i) + (*_mdot_soln)(node_in_j)) / (Si_in + Sj_in) +
-                 ((*_mdot_soln)(node_out_i) + (*_mdot_soln)(node_out_j)) / (Si_out + Sj_out));
-      auto w_perim_i = (*_w_perim_soln)(node_in_i);
-      auto w_perim_j = (*_w_perim_soln)(node_in_j);
-      auto mu_i = (*_mu_soln)(node_in_i);
-      auto mu_j = (*_mu_soln)(node_in_j);
-      // hydraulic diameter in the i direction
-      auto hD_i = 4.0 * Si_in / w_perim_i;
-      auto hD_j = 4.0 * Sj_in / w_perim_j;
-      auto avg_hD = 0.5 * (hD_i + hD_j);
-      auto avg_mu = 0.5 * (mu_i + mu_j);
-      auto Re = avg_massflux * avg_hD / avg_mu;
       _WijPrime(i_gap, iz) = 0.0;
       auto beta = 0.0;
       // Calculation of Turbulent Crossflow for wire-wrapped triangular assemblies. Cheng & Todreas
@@ -331,16 +330,19 @@ LiquidMetalSubChannel1PhaseProblem::computeWijPrime(int iblock)
         Real a = 0.18;
         Real b = 0.2;
         auto f = a * std::pow(Re, -b); // Rehme 1992 circular tube friction factor
-        auto k = 0.25 * (_fp->k_from_p_T((*_P_soln)(node_out_i) + _P_out, (*_T_soln)(node_out_i)) +
-                         _fp->k_from_p_T((*_P_soln)(node_in_i) + _P_out, (*_T_soln)(node_in_i)) +
-                         _fp->k_from_p_T((*_P_soln)(node_out_j) + _P_out, (*_T_soln)(node_out_j)) +
-                         _fp->k_from_p_T((*_P_soln)(node_in_j) + _P_out, (*_T_soln)(node_in_j)));
+        auto k =
+            (1 / S_total) *
+            (_fp->k_from_p_T((*_P_soln)(node_out_i) + _P_out, (*_T_soln)(node_out_i)) * Si_out +
+             _fp->k_from_p_T((*_P_soln)(node_in_i) + _P_out, (*_T_soln)(node_in_i)) * Si_in +
+             _fp->k_from_p_T((*_P_soln)(node_out_j) + _P_out, (*_T_soln)(node_out_j)) * Sj_out +
+             _fp->k_from_p_T((*_P_soln)(node_in_j) + _P_out, (*_T_soln)(node_in_j)) * Sj_in);
         auto cp =
-            0.25 * (_fp->cp_from_p_T((*_P_soln)(node_out_i) + _P_out, (*_T_soln)(node_out_i)) +
-                    _fp->cp_from_p_T((*_P_soln)(node_in_i) + _P_out, (*_T_soln)(node_in_i)) +
-                    _fp->cp_from_p_T((*_P_soln)(node_out_j) + _P_out, (*_T_soln)(node_out_j)) +
-                    _fp->cp_from_p_T((*_P_soln)(node_in_j) + _P_out, (*_T_soln)(node_in_j)));
-        auto Pr = avg_massflux * cp / k;                    // Prandtl number
+            (1 / S_total) *
+            (_fp->cp_from_p_T((*_P_soln)(node_out_i) + _P_out, (*_T_soln)(node_out_i)) * Si_out +
+             _fp->cp_from_p_T((*_P_soln)(node_in_i) + _P_out, (*_T_soln)(node_in_i)) * Si_in +
+             _fp->cp_from_p_T((*_P_soln)(node_out_j) + _P_out, (*_T_soln)(node_out_j)) * Sj_out +
+             _fp->cp_from_p_T((*_P_soln)(node_in_j) + _P_out, (*_T_soln)(node_in_j)) * Sj_in);
+        auto Pr = avg_mu * cp / k;                          // Prandtl number
         auto Pr_t = Pr * (Re / gamma) * std::sqrt(f / 8.0); // Turbulent Prandtl number
         auto delta = pitch / std::sqrt(3.0);                // centroid to centroid distance
         auto L_x = sf * delta;  // axial length scale (gap is the lateral length scale)
@@ -352,12 +354,10 @@ LiquidMetalSubChannel1PhaseProblem::computeWijPrime(int iblock)
         auto Str =
             1.0 / (0.822 * (gap / rod_diameter) + 0.144); // Strouhal number (Wu & Trupp 1994)
         auto dum1 = 2.0 / std::pow(gamma, 2) * std::sqrt(a / 8.0) * (avg_hD / gap);
-        auto dum2 =
-            (0.5 * std::pow(gamma, 2) * std::sqrt(8.0 / a) / Pr / std::pow(Re, 1 - b / 2.0) +
-             1 / Pr_t) *
-            lamda;
+        auto dum2 = (1 / Pr_t) * lamda;
         auto dum3 = a_x * z_FP_over_D * Str;
-        beta = dum1 * (dum2 + dum3) * std::pow(Re, -b / 2.0); // gap stanton number
+        // Mixing Stanton number: Stg (eq 25,Kim and Chung (2001), eq 19 (Jeong et. al 2005)
+        beta = dum1 * (dum2 + dum3) * std::pow(Re, -b / 2.0);
       }
       // Calculation of turbulent crossflow
       _WijPrime(i_gap, iz) = beta * avg_massflux * Sij;
