@@ -1,4 +1,4 @@
-T_in = 473.15
+T_in = 673.15
 flow_area = 0.00128171 #m2
 rho_in = 10453.21705
 # [10 m^3/hour] turns into kg/m^2-sec
