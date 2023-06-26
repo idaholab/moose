@@ -16,15 +16,15 @@
 class SinglePhaseFluidProperties;
 
 /**
- * This postprocessor computes the mass-flow rate weighted average of a flow
+ * This postprocessor computes the mass-flux weighted average of a flow
  * quantity over a boundary, internal or external to the flow domain.
  */
-class MfrWeightedAverage : public VolumetricFlowRate
+class MassFluxWeightedFlowRate : public VolumetricFlowRate
 {
 public:
   static InputParameters validParams();
 
-  MfrWeightedAverage(const InputParameters & parameters);
+  MassFluxWeightedFlowRate(const InputParameters & parameters);
 
   void initialize() override;
   void finalize() override;

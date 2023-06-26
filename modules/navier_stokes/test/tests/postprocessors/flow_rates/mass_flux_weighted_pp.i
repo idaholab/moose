@@ -136,8 +136,8 @@ p_outlet = 10
     variable = hsrc
   []
 
-  [mfr-weighted-T-out]
-    type = MfrWeightedAverage
+  [mass-flux-weighted-T-out]
+    type = MassFluxWeightedFlowRate
     vel_x = superficial_vel_x
     vel_y = superficial_vel_y
     advected_quantity = T_fluid
@@ -146,8 +146,8 @@ p_outlet = 10
     boundary = 'right'
   []
 
-  [mfr-weighted-T-interior]
-    type = MfrWeightedAverage
+  [mass-flux-weighted-T-interior]
+    type = MassFluxWeightedFlowRate
     vel_x = superficial_vel_x
     vel_y = superficial_vel_y
     advected_quantity = T_fluid

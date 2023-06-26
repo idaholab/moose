@@ -7,7 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "MfrWeightedAverage.h"
+#include "MassFluxWeightedFlowRate.h"
 #include "MathFVUtils.h"
 #include "INSFVRhieChowInterpolator.h"
 #include "NSFVUtils.h"
@@ -16,20 +16,20 @@
 
 #include <math.h>
 
-registerMooseObject("NavierStokesApp", MfrWeightedAverage);
+registerMooseObject("NavierStokesApp", MassFluxWeightedFlowRate);
 
 InputParameters
-MfrWeightedAverage::validParams()
+MassFluxWeightedFlowRate::validParams()
 {
   InputParameters params = VolumetricFlowRate::validParams();
   params.addRequiredParam<MooseFunctorName>("density",
                                             "Provide a functor that returns the density.");
-  params.addClassDescription("Computes the mass flow rate weighted average of the quantity "
+  params.addClassDescription("Computes the mass flux weighted average of the quantity "
                              "provided by advected_quantity over a boundary.");
   return params;
 }
 
-MfrWeightedAverage::MfrWeightedAverage(const InputParameters & parameters)
+MassFluxWeightedFlowRate::MassFluxWeightedFlowRate(const InputParameters & parameters)
   : VolumetricFlowRate(parameters), _density(getFunctor<ADReal>("density")), _mdot(0)
 {
   if (_qp_integration)
@@ -37,14 +37,14 @@ MfrWeightedAverage::MfrWeightedAverage(const InputParameters & parameters)
 }
 
 void
-MfrWeightedAverage::initialize()
+MassFluxWeightedFlowRate::initialize()
 {
   VolumetricFlowRate::initialize();
   _mdot = 0;
 }
 
 Real
-MfrWeightedAverage::computeFaceInfoIntegral([[maybe_unused]] const FaceInfo * fi)
+MassFluxWeightedFlowRate::computeFaceInfoIntegral([[maybe_unused]] const FaceInfo * fi)
 {
   mooseAssert(fi, "We should have a face info in " + name());
   mooseAssert(_adv_quant, "We should have an advected quantity in " + name());
@@ -68,21 +68,21 @@ MfrWeightedAverage::computeFaceInfoIntegral([[maybe_unused]] const FaceInfo * fi
 }
 
 void
-MfrWeightedAverage::threadJoin(const UserObject & y)
+MassFluxWeightedFlowRate::threadJoin(const UserObject & y)
 {
   VolumetricFlowRate::threadJoin(y);
-  const MfrWeightedAverage & pps = static_cast<const MfrWeightedAverage &>(y);
+  const MassFluxWeightedFlowRate & pps = static_cast<const MassFluxWeightedFlowRate &>(y);
   _mdot += pps._mdot;
 }
 
 Real
-MfrWeightedAverage::getValue()
+MassFluxWeightedFlowRate::getValue()
 {
   return _integral_value / _mdot;
 }
 
 void
-MfrWeightedAverage::finalize()
+MassFluxWeightedFlowRate::finalize()
 {
   VolumetricFlowRate::finalize();
   gatherSum(_mdot);

@@ -1,6 +1,6 @@
-# VolumetricFlowRate
+# MassFluxWeightedFlowRate
 
-!syntax description /Postprocessors/MfrWeightedAverage
+!syntax description /Postprocessors/MassFluxWeightedFlowRate
 
 ## Explanation
 
@@ -25,10 +25,10 @@ when the problem is run to steady-state. However `outlet-temp` does not, because
 it is a simple side average and does not take into account differences of
 $\rho \vec{v}$ over the face.
 
-!listing test/tests/postprocessors/flow_rates/mfr_weighted_pp.i block=Postprocessors
+!listing test/tests/postprocessors/flow_rates/mass_flux_weighted_pp.i block=Postprocessors
 
-!syntax parameters /Postprocessors/MfrWeightedAverage
+!syntax parameters /Postprocessors/MassFluxWeightedFlowRate
 
-!syntax inputs /Postprocessors/MfrWeightedAverage
+!syntax inputs /Postprocessors/MassFluxWeightedFlowRate
 
-!syntax children /Postprocessors/MfrWeightedAverage
+!syntax children /Postprocessors/MassFluxWeightedFlowRate

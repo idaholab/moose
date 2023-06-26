@@ -128,12 +128,12 @@
     []
   []
 
-  [pinsfv_mfr_weighted]
+  [pinsfv_mass_flux_weighted]
     type = CSVDiff
-    input = mfr_weighted_pp.i
-    csvdiff = 'mfr_weighted_pp_out.csv'
-    requirement = 'The system shall compute mass-flow rate averaged quantities over boundaries.'
-    design = 'MfrWeightedAverage.md'
+    input = mass_flux_weighted_pp.i
+    csvdiff = 'mass_flux_weighted_pp_out.csv'
+    requirement = 'The system shall compute mass-flux weighted averages of quantities over boundaries.'
+    design = 'MassFluxWeightedFlowRate.md'
     issues = '#24676'
   []
 
