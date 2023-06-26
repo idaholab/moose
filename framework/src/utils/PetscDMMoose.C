@@ -1913,17 +1913,6 @@ DMSetUp_Moose(DM dm)
       ierr = DMSetVariableBounds(dm, DMVariableBounds_Moose);
     CHKERRQ(ierr);
   }
-  else
-  {
-    /*
-     Fow now we don't implement even these, although a linear "Dirichlet" subproblem is
-     well-defined.
-     Creating the submatrix, however, might require extracting the submatrix preallocation from an
-     unassembled matrix.
-     */
-    dm->ops->createglobalvector = 0;
-    dm->ops->creatematrix = 0;
-  }
   PetscFunctionReturn(0);
 }
 
