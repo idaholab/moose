@@ -19,7 +19,8 @@ public:
   ElementVariableStatistics(const InputParameters & parameters);
 
 private:
-  /// The coupled variable used.
+  virtual Real computeValue() override;
+
+    /// The coupled variable used.
   const VariableValue & _v;
-  virtual Real computeValue();
 };
