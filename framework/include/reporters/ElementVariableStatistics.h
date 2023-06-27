@@ -21,6 +21,6 @@ public:
 private:
   virtual Real computeValue() override;
 
-    /// The coupled variable used.
+  /// The coupled variable used.
   const VariableValue & _v;
 };
