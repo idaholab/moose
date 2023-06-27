@@ -27,7 +27,7 @@ public:
   /**
    * @param size The initial size of the array.
    */
-  explicit MooseArray(const unsigned int size) : _data(nullptr), _allocated_size(0)
+  explicit MooseArray(const unsigned int size) : _data(nullptr), _size(0), _allocated_size(0)
   {
     resize(size);
   }
@@ -216,7 +216,7 @@ MooseArray<T>::resize(unsigned int size)
     _size = size;
   else
   {
-    if (value_initialize)
+    if constexpr (value_initialize)
       _data_ptr.reset(new T[size]());
     else
       _data_ptr.reset(new T[size]);
