@@ -29,8 +29,11 @@ public:
 
 protected:
   virtual Real computeFrictionFactor(_friction_args_struct friction_args) override;
+  virtual void computeWijPrime(int iblock) override;
   QuadSubChannelMesh & _subchannel_mesh;
 
+  /// Thermal diffusion coefficient used in turbulent crossflow
+  const Real & _beta;
   /// Flag that activates one of the two friction models (default: f=a*Re^b, non-default: Todreas-Kazimi)
   const bool _default_friction_model;
 
