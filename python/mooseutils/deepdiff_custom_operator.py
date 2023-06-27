@@ -7,13 +7,15 @@
 #* Licensed under LGPL 2.1, please see LICENSE for details
 #* https://www.gnu.org/licenses/lgpl-2.1.html
 
+import math
 from deepdiff.operator import BaseOperator
 class CompareDiff(BaseOperator):
     """ A derived DeepDiff class to allow custom comparison operations """
-    def __init__(self, rel_err, abs_zero, types, regex_paths=None):
+    def __init__(self, rel_err, abs_err, abs_zero, types, regex_paths=None):
         """ Initialization routine """
-        self.rel_err = rel_err
-        self.abs_zero = abs_zero
+        self.relative_tolerance = rel_err
+        self.absolute_tolerance = abs_err
+        self.floor = abs_zero
 
         # While not used, next two members are necessary for deepdiff constructor to work
         self.types = types
@@ -22,7 +24,7 @@ class CompareDiff(BaseOperator):
     def give_up_diffing(self, level, diff_instance):
         """
         Derived method called by deepdiff to allow more flexibility when making comparisons.
-        This method returns False at the first opportunity of a diff.
+        This method returns at the first opportunity of a diff.
         """
         level_t1 = []
         level_t2 = []
@@ -32,11 +34,15 @@ class CompareDiff(BaseOperator):
             level_t2.extend(level.t2.split(' '))
             # But if the lengths afterwards are different, we can't continue
             if len(level_t1) != len(level_t2):
-                return False
+                diff_instance.custom_report_result('diff', level, ('field length difference '
+                                                                   f'{len(level_t1)} != '
+                                                                   f'{len(level_t2)}'))
+                return True
         else:
             level_t1.append(level.t1)
             level_t2.append(level.t2)
 
+        custom_report = ''
         for i_index, value in enumerate(level_t1):
             result_goldfile = level_t1[i_index]
             result_computed = level_t2[i_index]
@@ -55,41 +61,53 @@ class CompareDiff(BaseOperator):
 
             # Results not of the same type
             if not isinstance(result_computed, type(result_goldfile)):
-                diff_instance.custom_report_result('diff', level, ('type difference '
+                diff_instance.custom_report_result('diff', level, ('result type difference: '
                                                                    f'{type(result_computed)} != '
                                                                    f'{type(result_goldfile)}'))
-                return False
+                return True
 
             # Gold result is a string, but did not matched earlier. Meaning they are different
-            # (the rest of this method's comparisons assume we are dealing with floats)
             if isinstance(result_goldfile, str):
                 diff_instance.custom_report_result('diff', level, (f'{result_computed} != '
                                                                    f'{result_goldfile}'))
-                return False
+                return True
 
-            # Convert results to floats
-            result_goldfile = float(result_goldfile)
-            result_computed = float(result_computed)
+            # Corner cases have been discovered above. The following routines will detect minor
+            # differences based on supplied floating point tolerances/floors
 
-            if result_goldfile < self.abs_zero and result_computed < self.abs_zero:
+            # handle NaN and divide by zero errors by setting results to absolute zero (the floor)
+            if math.isnan(result_goldfile) or result_goldfile == 0:
+                result_goldfile = self.floor
+            if math.isnan(result_computed) or result_computed == 0:
+                result_computed = self.floor
+
+            # both reference and result are below or at the floor (pass)
+            if (max(abs(result_goldfile), self.floor) == self.floor and
+                max(abs(result_computed), self.floor) == self.floor):
                 continue
 
-            # difference between both results
-            result_difference = max(result_goldfile,
-                                    result_computed) - min(result_goldfile,
-                                                           result_computed)
+            # compute absolute difference
+            absolute_diff = abs(result_goldfile - result_computed)
 
-            # the biggest value of the two results
-            max_ofresults = abs(max(result_goldfile, result_computed))
+            # compute relative difference
+            relative_diff = abs(absolute_diff / result_goldfile)
 
-            if self.rel_err == 0 or result_computed == 0:
-                if result_difference > self.rel_err:
-                    exp_results = f'{result_difference} > {self.rel_err}'
-                    diff_instance.custom_report_result('diff', level, exp_results)
-                    return False
+            # test for absolute difference
+            if (self.relative_tolerance == 0 and
+                max(absolute_diff, self.absolute_tolerance) == self.absolute_tolerance):
+                continue
+            elif self.relative_tolerance == 0:
+                custom_report = f'absolute diff: {absolute_diff:.8e}'
+                break
 
-                elif abs(result_difference / max_ofresults) > self.rel_err:
-                    exp_results = f'{abs(result_difference/max_ofresults)} > {self.rel_err}'
-                    diff_instance.custom_report_result('diff', level, exp_results)
-                    return False
+            # test for relative difference
+            if max(relative_diff, self.relative_tolerance) == self.relative_tolerance:
+                continue
+            else:
+                custom_report = f'relative diff: {relative_diff:.8e}'
+                break
+
+        if custom_report:
+            diff_instance.custom_report_result('diff', level, custom_report)
+
         return True

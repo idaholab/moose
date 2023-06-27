@@ -1,4 +1,27 @@
 [Tests]
+  [schema_csvdiff_absolute]
+    type = CSVDiff
+    input = csvdiff_spec_override_specific_floor.i
+    csvdiff = csvdiff_spec_override_specific_floor_out.csv
+    override_columns = z_field
+    # While setting rel_err to 0, we force the use of absolute diff
+    override_rel_err = 0
+    override_abs_err = 1.0e-1
+  []
+    [schema_csvdiff_relative_override]
+    type = CSVDiff
+    input = csvdiff_spec_override_specific_floor.i
+    csvdiff = csvdiff_spec_override_specific_floor_out.csv
+    override_columns = z_field
+    # While specifying anything other than 0, we verify we are using relative diff
+    override_rel_err = 1.0e-1
+    override_abs_err = 1.0e+1
+  []
+  [schema_csvdiff_relative]
+    type = CSVDiff
+    input = csvdiff_spec_override_specific_floor.i
+    csvdiff = csvdiff_spec_override_specific_floor_out.csv
+  []
   [schema_xmldiff]
     type = XMLDiff
     input = schema.i

@@ -30,6 +30,7 @@ class SchemaDiff(FileTester):
         params.addParam('rel_err',      5.5e-6, 'Relative error value allowed in comparisons. If '
                                                 'rel_err value is set to 0, it will work on the '
                                                 'absolute difference between the values.')
+        params.addParam('abs_err',      5.5e-4, 'Absolute error value to be used in comparisons.')
         params.addParam('abs_zero',      1e-10, 'Absolute zero cutoff used in diff comparisons. '
                                                 'Every value smaller than this threshold will be '
                                                 'ignored.')
@@ -40,6 +41,7 @@ class SchemaDiff(FileTester):
         # convert test specs entering the constraints as string, i.e. rel_err = '1.1e-2' instead
         # of rel_err = 1.1e-2
         params['rel_err'] = float(params['rel_err'])
+        params['abs_err'] = float(params['abs_err'])
         params['abs_zero'] = float(params['abs_zero'])
         FileTester.__init__(self, name, params)
         if self.specs['required_python_packages'] is None:
@@ -106,6 +108,7 @@ class SchemaDiff(FileTester):
                 (diff, exception) = self.do_deepdiff(gold_dict,
                                                      test_dict,
                                                      specs['rel_err'],
+                                                     specs['abs_err'],
                                                      specs['abs_zero'],
                                                      specs['ignored_items'])
 
@@ -150,7 +153,7 @@ class SchemaDiff(FileTester):
 
         return formated_results
 
-    def do_deepdiff(self, orig, comp, rel_err, abs_zero, exclude_values:list=None):
+    def do_deepdiff(self, orig, comp, rel_err, abs_err, abs_zero, exclude_values:list=None):
         diff = ''
         exclude_paths = []
         generic_error = None
@@ -165,7 +168,10 @@ class SchemaDiff(FileTester):
                     for path in search2['matched_paths']:
                         exclude_paths.append(path)
 
-        custom_operators = [CompareDiff(types=[str,float],rel_err=rel_err,abs_zero=abs_zero)]
+        custom_operators = [CompareDiff(types=[str,float],
+                                        rel_err=rel_err,
+                                        abs_err=abs_err,
+                                        abs_zero=abs_zero)]
         try:
             diff = deepdiff.DeepDiff(orig,
                                      comp,
@@ -179,6 +185,10 @@ class SchemaDiff(FileTester):
         # return friendly readable results where we can
         if len(diff.affected_paths) or len(diff.affected_root_keys):
             return (self.format_diff(diff), generic_error)
+
+        # custom operator caught a diff
+        if 'diff' in diff:
+            return (diff['diff']['root'], generic_error)
 
         # Empty when there is no diff
         return (diff.pretty(), generic_error)

@@ -21,6 +21,7 @@ class CSVDiff(SchemaDiff):
         params.addParam('override_columns',   [], 'A list of variable names to customize the '
                                                   'CSVDiff tolerances.')
         params.addParam('override_rel_err',   [], 'A list of customized relative error tolerances.')
+        params.addParam('override_abs_err',   [], 'A list of customized absolute error tolerances.')
         params.addParam('override_abs_zero',  [], 'A list of customized absolute zero tolerances.')
         params.addParam('ignore_columns',     [], 'A list of columns names which will not be '
                                                   'included in the comparison.')
@@ -60,11 +61,19 @@ class CSVDiff(SchemaDiff):
 
     # Check that override parameter lists are the same length
     def checkRunnable(self, options):
-        if ((len(self.specs['override_columns']) != len(self.specs['override_rel_err']))
-        or (len(self.specs['override_columns']) != len(self.specs['override_abs_zero']))
-        or (len(self.specs['override_rel_err']) != len(self.specs['override_abs_zero']))):
-            self.setStatus(self.fail, 'Override inputs not the same length')
-            return False
+        if len(self.specs['override_columns']):
+            check_columns = ['override_rel_err', 'override_abs_err', 'override_abs_zero']
+            incompatible_map = {'override_rel_err':  'override_abs_err',
+                                'override_abs_err':  'override_rel_err',
+                                'override_abs_zero':  None}
+            for column in check_columns:
+                _do_not_check = incompatible_map[column]
+                if (_do_not_check is not None and
+                    _do_not_check != column and
+                    len(self.specs[column]) and
+                    len(self.specs[column]) != len(self.specs['override_columns'])):
+                    self.setStatus(self.fail, 'Override inputs not the same length')
+                    return False
 
         if (any(x in self.specs['override_columns'] for x in self.specs['ignore_columns'])
         or any(x in self.specs['ignore_columns'] for x in self.specs['override_columns'])
@@ -95,8 +104,8 @@ class CSVDiff(SchemaDiff):
         # Allow further modifications based on comparison file
         if self.custom_params:
             output_dict = self.augment_csv(output_dict,
-                                            None,
-                                            self.custom_params['FIELDS'].keys())
+                                           None,
+                                           self.custom_params['FIELDS'].keys())
 
         return output_dict
 
@@ -110,7 +119,7 @@ class CSVDiff(SchemaDiff):
                 self.custom_params = self.parseComparisonFile(comparison_file)
         return SchemaDiff.processResults(self, moose_dir, options, output)
 
-    def do_deepdiff(self, orig, comp, rel_err, abs_zero, exclude_values:list=None):
+    def do_deepdiff(self, orig, comp, rel_err, abs_err, abs_zero, exclude_values:list=None):
         """ Perform DIFF Comparison and return (diff, error) tuple results """
         (diff, error) = '', None
 
@@ -124,11 +133,17 @@ class CSVDiff(SchemaDiff):
         # Override global params if comparison file is used
         if self.custom_params:
             rel_err = abs(float(self.custom_params.get('RELATIVE', self.specs['rel_err'])))
+            abs_err = abs(float(self.custom_params.get('ABSOLUTE', self.specs['abs_err'])))
             abs_zero = abs(float(self.custom_params.get('ZERO', self.specs['abs_zero'])))
 
+        # Set nested loop values so variables can be used for error printing
+        value_id = 0
+        value = ''
         for index, column in enumerate(orig):
             _rel_err = abs(rel_err)
+            _abs_err = abs(abs_err)
             _abs_zero = abs(abs_zero)
+
             # Apply field params (overrides global for this single field)
             if (column in self.specs['override_columns']
                 or (self.custom_params and column in self.custom_params['FIELDS'].keys())):
@@ -138,25 +153,28 @@ class CSVDiff(SchemaDiff):
                     idx = self.specs['override_columns'].index(column)
                     if self.specs['rel_err']:
                         _rel_err = abs(float(self.specs['override_rel_err'][idx]))
+                    if self.specs['abs_err'] and self.specs['override_abs_err']:
+                        _abs_err = abs(float(self.specs['override_abs_err'][idx]))
                     if self.specs['override_abs_zero']:
                         _abs_zero = abs(float(self.specs['override_abs_zero'][idx]))
 
                 if self.custom_params and column in self.custom_params['FIELDS'].keys():
                     _meta = self.custom_params['FIELDS'][column]
-                    _rel_err = abs(max(_rel_err, float(_meta.get('RELATIVE', _rel_err))))
-                    _abs_zero = abs(max(_abs_zero, float(_meta.get('ZERO', _abs_zero))))
+                    _rel_err = abs(float(_meta.get('RELATIVE', _rel_err)))
+                    _abs_err = abs(float(_meta.get('ABSOLUTE', _abs_err)))
+                    _abs_zero = abs(float(_meta.get('ZERO', _abs_zero)))
 
             for value_id, value in enumerate(orig[column]):
-                if value == comp[column][value_id]:
-                    continue
                 (diff, error) = super().do_deepdiff(value,
                                                     comp[column][value_id],
                                                     _rel_err,
+                                                    _abs_err,
                                                     _abs_zero,
                                                     exclude_values)
                 # Overrite global since we are about to exit, with values we diffed with
                 if diff:
                     rel_err = _rel_err
+                    abs_err = _abs_err
                     abs_zero = _abs_zero
                     break
             # neat: https://www.geeksforgeeks.org/how-to-break-out-of-multiple-loops-in-python/
@@ -165,9 +183,14 @@ class CSVDiff(SchemaDiff):
             break
         # overwrite diff with formatted information
         if diff:
-            diff = (f'Relative Error Tolorance: {rel_err}\n'
-                    f'Absolute Zero:            {abs_zero}\n'
-                    f'Column {index}: {diff}\n')
+            rel_diff = f'Relative Error Tolorance:\t{rel_err}\n'
+            abs_diff = f'Absolute Error Tolorance:\t{abs_err}\n'
+
+            diff = (f'{abs_diff if rel_err == 0 else rel_diff}'
+                    f'Absolute Zero:\t\t{abs_zero}\n'
+                    f'Column {index+1}, Step {value_id+1}:\t\tgold: {float(value):.8e}, '
+                    f'result: {float(comp[column][value_id]):.8e}\n'
+                    f'\t\t\t\t{diff}')
         return (diff, error)
 
     def getParamValues(self, param, param_line):
@@ -181,7 +204,8 @@ class CSVDiff(SchemaDiff):
         # exodiff output.
         zero_params = set(['floor', 'abs_zero', 'absolute'])
         tolerance_params = set(['relative', 'rel_tol'])
-        custom_params = {'RELATIVE': 0.0, 'ZERO': 0.0, 'FIELDS': {}}
+        absolute_params = set(['abs_err', 'abs_tol'])
+        custom_params = {'RELATIVE': 0.0, 'ABSOLUTE': 0.0, 'ZERO': 0.0, 'FIELDS': {}}
 
         with open(config_file, 'r') as comparison_file:
             lines = comparison_file.readlines()
@@ -207,6 +231,11 @@ class CSVDiff(SchemaDiff):
                         custom_params['ZERO'] = self.getParamValues(
                             words.intersection(zero_params).pop(), a_line)[0]
 
+                    # Possible global header containing absolute params
+                    if not re.match(r'^\s', a_line) and words.intersection(absolute_params):
+                        custom_params['ABSOLUTE'] = self.getParamValues(
+                            words.intersection(absolute_params).pop(), a_line)[0]
+
                     # Possible global header containing tolerance params
                     if not re.match(r'^\s', a_line) and words.intersection(tolerance_params):
                         custom_params['RELATIVE'] = self.getParamValues(
@@ -216,6 +245,11 @@ class CSVDiff(SchemaDiff):
                     if field_key and words.intersection(zero_params):
                         custom_params['FIELDS'][field_key[0]]['ZERO'] = self.getParamValues(
                             words.intersection(zero_params).pop(), a_line)[0]
+
+                    # Possible field containing absolute params
+                    if field_key and words.intersection(absolute_params):
+                        custom_params['FIELDS'][field_key[0]]['ABSOLUTE'] = self.getParamValues(
+                            words.intersection(absolute_params).pop(), a_line)[0]
 
                     # Possible field containing tolerance params
                     if field_key and words.intersection(tolerance_params):
