@@ -27,6 +27,7 @@ ElementStatistics::ElementStatistics(const InputParameters & parameters)
     _number_elements(declareValueByName<int>(_base_name + "number_elements"))
 {
 }
+
 void
 ElementStatistics::initialize()
 {

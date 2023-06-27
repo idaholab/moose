@@ -27,6 +27,7 @@ NodalVariableStatistics::NodalVariableStatistics(const InputParameters & paramet
   : NodalStatistics(parameters), _v(coupledValue("coupled_var"))
 {
 }
+
 Real
 NodalVariableStatistics::computeValue()
 {

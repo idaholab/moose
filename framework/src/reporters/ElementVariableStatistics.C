@@ -27,6 +27,7 @@ ElementVariableStatistics::ElementVariableStatistics(const InputParameters & par
   : ElementStatistics(parameters), _v(coupledValue("coupled_var"))
 {
 }
+
 Real
 ElementVariableStatistics::computeValue()
 {

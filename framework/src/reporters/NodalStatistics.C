@@ -26,6 +26,7 @@ NodalStatistics::NodalStatistics(const InputParameters & parameters)
     _number_nodes(declareValueByName<int>(_base_name + "number_nodes"))
 {
 }
+
 void
 NodalStatistics::initialize()
 {
