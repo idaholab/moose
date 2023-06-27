@@ -22,11 +22,6 @@
   num_steps = 10
 
   [TimeSteppers]
-    [SolutionTimeAdaptiveDT]
-      type = SolutionTimeAdaptiveDT
-      dt = 0.5
-    []
-
     [LogConstDT]
       type = LogConstantDT
       log_dt = 0.2
