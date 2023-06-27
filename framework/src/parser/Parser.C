@@ -173,6 +173,27 @@ Parser::Parser(MooseApp & app, ActionWarehouse & action_wh)
 
 Parser::~Parser() {}
 
+InputParameters
+Parser::validParams()
+{
+  InputParameters params = emptyInputParameters();
+
+  /**
+   * Add the "active" and "inactive" parameters so that all blocks in the input file
+   * can selectively create lists of active/inactive sub-blocks.
+   */
+  params.addParam<std::vector<std::string>>(
+      "active",
+      std::vector<std::string>({"__all__"}),
+      "If specified only the blocks named will be visited and made active");
+  params.addParam<std::vector<std::string>>(
+      "inactive",
+      std::vector<std::string>(),
+      "If specified blocks matching these identifiers will be skipped.");
+
+  return params;
+}
+
 bool
 isSectionActive(std::string path, hit::Node * root)
 {
