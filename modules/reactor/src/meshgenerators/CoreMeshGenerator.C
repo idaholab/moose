@@ -167,9 +167,11 @@ CoreMeshGenerator::CoreMeshGenerator(const InputParameters & parameters)
       MeshGeneratorName(getMeshProperty<std::string>("reactor_params_name", _inputs[0]));
   const auto assembly_homogenization = getMeshProperty<bool>("homogenized_assembly", _inputs[0]);
   const auto pin_as_assembly = getMeshProperty<bool>("pin_as_assembly", _inputs[0]);
+  std::map<subdomain_id_type, std::string> global_pin_input_id_map;
+  std::map<subdomain_id_type, std::string> assembly_input_id_map;
   // Check that MG name for reactor params and assembly homogenization schemes are
-  // consistent across all assemblies
-  for (unsigned int i = 1; i < _inputs.size(); i++)
+  // consistent across all assemblies, and there is no overlap in pin_type / assembly_type ids
+  for (unsigned int i = 0; i < _inputs.size(); i++)
   {
     // Skip if assembly name is equal to dummy assembly name
     if (_inputs[i] == _empty_key)
@@ -183,6 +185,23 @@ CoreMeshGenerator::CoreMeshGenerator(const InputParameters & parameters)
     if (getMeshProperty<bool>("pin_as_assembly", _inputs[i]) != pin_as_assembly)
       mooseWarning("Not all assemblies in the core are defined as a single pin by setting "
                    "`PinMeshGenerator/use_as_assembly` to true\n");
+
+    // Check assembly_types across constituent assemblies are uniquely defined
+    const auto assembly_type = getMeshProperty<subdomain_id_type>("assembly_type", _inputs[i]);
+    if (assembly_input_id_map.find(assembly_type) != assembly_input_id_map.end() && assembly_input_id_map[assembly_type] != _inputs[i])
+      mooseError("Constituent assemblies have shared assembly_type ids but different names. Each uniquely defined assembly in AssemblyMeshGenerator must have its own assembly_type id.");
+    assembly_input_id_map[assembly_type] = _inputs[i];
+
+    // Check pin_types across all constituent assemblies are uniquely defined
+    const auto pin_input_id_map = getMeshProperty<std::map<subdomain_id_type, std::string>>("input_id_map", _inputs[i]);
+    for (auto it = pin_input_id_map.begin(); it != pin_input_id_map.end(); ++it)
+    {
+      const auto pin_type = it->first;
+      const auto input_pin_name = it->second;
+      if (global_pin_input_id_map.find(pin_type) != global_pin_input_id_map.end() && global_pin_input_id_map[pin_type] != input_pin_name)
+        mooseError("Constituent pins within assemblies have shared pin_type ids but different names. Each uniquely defined pin in AssemblyMeshGenerator must have its own pin_type id.");
+      global_pin_input_id_map[pin_type] = input_pin_name;
+    }
   }
 
   // Initialize ReactorMeshParams object stored in pin input
@@ -348,27 +367,19 @@ CoreMeshGenerator::CoreMeshGenerator(const InputParameters & parameters)
           getMeshProperty<std::map<subdomain_id_type, std::vector<std::vector<subdomain_id_type>>>>(
               "pin_region_id_map", assembly);
       for (auto pin = pin_region_id_map.begin(); pin != pin_region_id_map.end(); ++pin)
-      {
         if (_pin_region_id_map.find(pin->first) == _pin_region_id_map.end())
           _pin_region_id_map.insert(
               std::pair<subdomain_id_type, std::vector<std::vector<subdomain_id_type>>>(
                   pin->first, pin->second));
-        else if (pin->second != _pin_region_id_map.find(pin->first)->second)
-          mooseError("Multiple region id definitions for the same pin type. Check pin_type ids.\n");
-      }
+
       std::map<subdomain_id_type, std::vector<std::vector<std::string>>> pin_block_name_map =
           getMeshProperty<std::map<subdomain_id_type, std::vector<std::vector<std::string>>>>(
               "pin_block_name_map", assembly);
       for (auto pin = pin_block_name_map.begin(); pin != pin_block_name_map.end(); ++pin)
-      {
         if (_pin_block_name_map.find(pin->first) == _pin_block_name_map.end())
           _pin_block_name_map.insert(
               std::pair<subdomain_id_type, std::vector<std::vector<std::string>>>(pin->first,
                                                                                   pin->second));
-        else if (pin->second != _pin_block_name_map.find(pin->first)->second)
-          mooseError(
-              "Multiple block name definitions for the same pin type. Check pin_type names.\n");
-      }
 
       // Define background and duct region ID map from constituent assemblies
       subdomain_id_type assembly_type =

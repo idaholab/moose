@@ -5,7 +5,11 @@
     requirement = 'The system shall generate a 3D square assembly mesh from 2 pin types'
     type = 'Exodiff'
     input = 'assembly_only.i'
-    cli_args = "Outputs/file_base=assembly_only_in"
+    cli_args = "Mesh/rmp/axial_regions='1.0 1.0'
+                Mesh/rmp/axial_mesh_intervals='1 1'
+                Mesh/rmp/top_boundary_id=201
+                Mesh/rmp/bottom_boundary_id=202
+                Outputs/file_base=assembly_only_in"
     exodiff = 'assembly_only_in.e'
     recover = false
   []
@@ -13,7 +17,11 @@
     requirement = 'The system shall generate a 3D square assembly mesh from 2 pin types and a background region'
     type = 'Exodiff'
     input = 'assembly_only.i'
-    cli_args = "Mesh/pin1/pitch=1.25
+    cli_args = "Mesh/rmp/axial_regions='1.0 1.0'
+                Mesh/rmp/axial_mesh_intervals='1 1'
+                Mesh/rmp/top_boundary_id=201
+                Mesh/rmp/bottom_boundary_id=202
+                Mesh/pin1/pitch=1.25
                 Mesh/pin1/duct_halfpitch=0.58
                 Mesh/pin2/pitch=1.25
                 Mesh/amg/background_region_id='6 16'
@@ -27,7 +35,11 @@
     requirement = 'The system shall allow for multiple region IDs to be mapped to a specific block name'
     type = 'Exodiff'
     input = 'assembly_only.i'
-    cli_args = "Mesh/rmp/geom='Hex'
+    cli_args = "Mesh/rmp/axial_regions='1.0 1.0'
+                Mesh/rmp/axial_mesh_intervals='1 1'
+                Mesh/rmp/top_boundary_id=201
+                Mesh/rmp/bottom_boundary_id=202
+                Mesh/rmp/geom='Hex'
                 Mesh/rmp/assembly_pitch=7.10315
                 Mesh/pin1/region_ids='1 2 5; 11 12 15'
                 Mesh/pin1/quad_center_elements=true
@@ -50,7 +62,11 @@
     requirement = 'The system shall generate a 3D hexagonal assembly mesh with duct regions with assigned IDs'
     type = 'Exodiff'
     input = 'assembly_only.i'
-    cli_args = "Mesh/rmp/geom='Hex'
+    cli_args = "Mesh/rmp/axial_regions='1.0 1.0'
+                Mesh/rmp/axial_mesh_intervals='1 1'
+                Mesh/rmp/top_boundary_id=201
+                Mesh/rmp/bottom_boundary_id=202
+                Mesh/rmp/geom='Hex'
                 Mesh/rmp/assembly_pitch=7.10315
                 Mesh/pin1/region_ids='1 2 5; 11 12 15'
                 Mesh/pin1/quad_center_elements=true

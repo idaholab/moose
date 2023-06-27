@@ -4,9 +4,6 @@
     dim = 2
     geom = "Square"
     assembly_pitch = 7.10315
-    axial_mesh_intervals = '1'
-    top_boundary_id = 201
-    bottom_boundary_id = 202
   []
 
   [pin1]

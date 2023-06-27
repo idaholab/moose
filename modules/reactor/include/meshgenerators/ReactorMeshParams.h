@@ -35,10 +35,10 @@ protected:
   const Real _assembly_pitch;
 
   ///The heights of the axial regions.
-  const std::vector<Real> _axial_regions;
+  std::vector<Real> _axial_regions;
 
   ///The number of mesh divisions in each axial region.
-  const std::vector<unsigned int> _axial_mesh_intervals;
+  std::vector<unsigned int> _axial_mesh_intervals;
 
   ///Boundary id assigned to top boundary of extruded mesh.
   boundary_id_type _top_boundary;

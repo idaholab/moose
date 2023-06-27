@@ -84,6 +84,8 @@
                 Mesh/rmp/dim=3
                 Mesh/rmp/axial_regions='1.0 1.0'
                 Mesh/rmp/axial_mesh_intervals='1 1'
+                Mesh/rmp/top_boundary_id=201
+                Mesh/rmp/bottom_boundary_id=202
                 Mesh/pin1/region_ids='11 12 13; 11 12 13'
                 Mesh/pin1/num_sectors=2
                 Mesh/pin1/pin_type=1
@@ -131,6 +133,8 @@
                 Mesh/pin1/homogenized=true
                 Mesh/rmp/dim=3
                 Mesh/rmp/axial_regions='1.0'
+                Mesh/rmp/top_boundary_id=201
+                Mesh/rmp/bottom_boundary_id=202
                 Mesh/rmp/axial_mesh_intervals='1'
                 Mesh/pin1/quad_center_elements=true
                 Mesh/pin1/extrude=true

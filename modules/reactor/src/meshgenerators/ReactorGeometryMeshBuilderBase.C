@@ -100,10 +100,14 @@ ReactorGeometryMeshBuilderBase::updateElementBlockNameId(
 void
 ReactorGeometryMeshBuilderBase::generateGlobalReactorMetadata(const std::string prefix)
 {
-  declareMeshProperty(prefix + "_mesh_dimensions", getReactorParam<int>("mesh_dimensions"));
+  const auto mesh_dimension = getReactorParam<int>("mesh_dimensions");
+  declareMeshProperty(prefix + "_mesh_dimensions", mesh_dimension);
   declareMeshProperty(prefix + "_mesh_geometry", getReactorParam<std::string>("mesh_geometry"));
-  declareMeshProperty(prefix + "_axial_boundaries", getReactorParam<std::vector<Real>>("axial_boundaries"));
-  declareMeshProperty(prefix + "_axial_mesh_intervals", getReactorParam<std::vector<unsigned int>>("axial_mesh_intervals"));
+  if (mesh_dimension == 3)
+  {
+    declareMeshProperty(prefix + "_axial_boundaries", getReactorParam<std::vector<Real>>("axial_boundaries"));
+    declareMeshProperty(prefix + "_axial_mesh_intervals", getReactorParam<std::vector<unsigned int>>("axial_mesh_intervals"));
+  }
 }
 
 void

@@ -39,10 +39,9 @@ ReactorMeshParams::validParams()
       "radial_boundary_id",
       "The boundary ID to set on the outer radial boundary of a CoreMeshGenerator object");
   params.addParam<std::vector<Real>>(
-      "axial_regions", std::vector<Real>(1), "Length of each axial region");
+      "axial_regions", "Length of each axial region");
   params.addParam<std::vector<unsigned int>>(
       "axial_mesh_intervals",
-      std::vector<unsigned int>(1),
       "Number of elements in the Z direction for each axial region");
   params.addParam<bool>("generate_rgmb_metadata", "Whether to define additional metadata to represent geometry and region IDs of RGMB mesh generators");
   params.addClassDescription("This ReactorMeshParams object acts as storage for persistent "
@@ -55,19 +54,29 @@ ReactorMeshParams::ReactorMeshParams(const InputParameters & parameters)
     _dim(getParam<MooseEnum>("dim")),
     _geom(getParam<MooseEnum>("geom")),
     _assembly_pitch(getParam<Real>("assembly_pitch")),
-    _axial_regions(getParam<std::vector<Real>>("axial_regions")),
-    _axial_mesh_intervals(getParam<std::vector<unsigned int>>("axial_mesh_intervals")),
     _define_metadata(isParamValid("generate_rgmb_metadata") ? getParam<bool>("generate_rgmb_metadata") : false)
 {
-  if (_axial_regions.size() != _axial_mesh_intervals.size())
-    mooseError("The number of axial regions is not consistent with the number of axial intervals.");
+  if (int(_dim) == 2)
+  {
+    std::vector<std::string> invalid_params = {"axial_regions", "axial_mesh_intervals", "top_boundary_id", "bottom_boundary_id"};
+    for (const auto & param : invalid_params)
+      if (isParamValid(param))
+        paramError(param, param + " should not be defined for 2-D meshes");
+  }
+  else
+  {
+    _axial_regions = getParam<std::vector<Real>>("axial_regions");
+    _axial_mesh_intervals = getParam<std::vector<unsigned int>>("axial_mesh_intervals");
+
+    if (_axial_regions.size() != _axial_mesh_intervals.size())
+      mooseError("The number of axial regions is not consistent with the number of axial intervals.");
+    this->declareMeshProperty("axial_boundaries", _axial_regions);
+    this->declareMeshProperty("axial_mesh_intervals", _axial_mesh_intervals);
+  }
 
   this->declareMeshProperty("mesh_dimensions", int(_dim));
   this->declareMeshProperty("mesh_geometry", std::string(_geom));
-  this->declareMeshProperty("axial_boundaries", _axial_regions);
-  this->declareMeshProperty("axial_mesh_intervals", _axial_mesh_intervals);
   this->declareMeshProperty("assembly_pitch", _assembly_pitch);
-
   this->declareMeshProperty("name_id_map", _name_id_map);
 
   if (isParamValid("top_boundary_id"))

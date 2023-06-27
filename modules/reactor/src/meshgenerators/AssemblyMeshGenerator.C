@@ -133,6 +133,9 @@ AssemblyMeshGenerator::AssemblyMeshGenerator(const InputParameters & parameters)
                "if using extruded geometry");
 
   Real base_pitch = 0.0;
+
+  // Check constitutent pins do not have shared pin_type ids
+  std::map<subdomain_id_type, std::string> input_id_map;
   for (const auto i : index_range(_inputs))
   {
     auto pin = _inputs[i];
@@ -147,7 +150,12 @@ AssemblyMeshGenerator::AssemblyMeshGenerator(const InputParameters & parameters)
     if (getMeshProperty<bool>("extruded", pin))
       mooseError("Pins that have already been extruded cannot be used in AssemblyMeshGenerator "
                  "definition.\n");
+    const auto pin_type = getMeshProperty<subdomain_id_type>("pin_type", pin);
+    if (input_id_map.find(pin_type) != input_id_map.end() && input_id_map[pin_type] != pin)
+      mooseError("Constituent pins have shared pin_type ids but different names. Each uniquely defined pin in PinMeshGenerator must have its own pin_type id.");
+    input_id_map[pin_type] = pin;
   }
+  declareMeshProperty("input_id_map", input_id_map);
   auto assembly_pitch = getReactorParam<Real>("assembly_pitch");
 
   unsigned int n_axial_levels =
