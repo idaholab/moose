@@ -197,6 +197,73 @@ SIMPLE::relaxRightHandSide(NumericVector<Number> & rhs,
   rhs.close();
 }
 
+PetscReal
+SIMPLE::computeNormalizationFactor(const NumericVector<Number> & solution,
+                                   const SparseMatrix<Number> & mat,
+                                   const NumericVector<Number> & rhs)
+{
+  // This function is based on the description provided here:
+  // https://www.openfoam.com/documentation/guides/latest/doc/guide-solvers-residuals.html
+  // (Accessed 06/01/2023)
+  // so basically we normalize the residual with the following number:
+  // sum(|Ax-Ax_avg|+|b-Ax_avg|)
+  // where A is the system matrix, b is the system right hand side while x and x_avg are
+  // the solution and average solution vectors
+
+  // We create a vector for Ax_avg and Ax
+  auto A_times_average_solution = solution.zero_clone();
+  auto A_times_solution = solution.zero_clone();
+
+  // Beware, trickery here! To avoid allocating unused vectors, we
+  // first compute Ax_avg using the storage used for Ax, then we
+  // overwrite Ax with the right value
+  *A_times_solution = solution.sum() / solution.size();
+  mat.vector_mult(*A_times_average_solution, *A_times_solution);
+  mat.vector_mult(*A_times_solution, solution);
+
+  // We create Ax-Ax_avg
+  A_times_solution->add(-1.0, *A_times_average_solution);
+  // We create Ax_avg - b (ordering shouldn't matter we will take absolute value soon)
+  A_times_average_solution->add(-1.0, rhs);
+  A_times_solution->abs();
+  A_times_average_solution->abs();
+
+  // Create |Ax-Ax_avg|+|b-Ax_avg|
+  A_times_average_solution->add(*A_times_solution);
+
+  // Since use the l2 norm of the solution vectors in the linear solver, we will
+  // make this consistent and use the l2 norm of the vector
+  // TODO: Would be nice to see if we can do l1 norms in the linear solve
+  return A_times_average_solution->l2_norm();
+}
+
+void
+SIMPLE::relaxSolutionUpdate(NonlinearSystemBase & system_in, Real relaxation_factor)
+{
+  // We will need the latest and the second latest solution for the relaxation
+  NonlinearImplicitSystem & system = dynamic_cast<NonlinearImplicitSystem &>(system_in.system());
+  NumericVector<Number> & solution = *(system.current_local_solution.get());
+  NumericVector<Number> & solution_old = *(system_in.solutionPreviousNewton());
+
+  // The relaxation is just u = lambda * u* + (1-lambda) u_old
+  solution.scale(relaxation_factor);
+  solution.add(1 - relaxation_factor, solution_old);
+  solution.close();
+
+  if (_print_fields)
+  {
+    std::cout << "Pressure solution" << std::endl;
+    solution.print();
+    std::cout << "Pressure solution old" << std::endl;
+    solution_old.print();
+  }
+
+  // We will overwrite the old solution here
+  solution_old = solution;
+  system_in.setSolution(solution);
+  system_in.residualSetup();
+}
+
 std::vector<Real>
 SIMPLE::solveMomentumPredictor()
 {
@@ -299,9 +366,9 @@ SIMPLE::solveMomentumPredictor()
     // component
     norm_factor = computeNormalizationFactor(solution, mmat, rhs);
 
-    // Solve this component
+    // Solve this component. We don't update the ghosted solution yet, that will come at the end of
+    // the corrector step
     momentum_solver.solve(mmat, mmat, solution, rhs, 1e-10, 100);
-    momentum_system.update();
     // Save the normalized residual
     normalized_residuals.push_back(momentum_solver.get_initial_residual() / norm_factor);
 
@@ -317,46 +384,6 @@ SIMPLE::solveMomentumPredictor()
   }
 
   return normalized_residuals;
-}
-
-PetscReal
-SIMPLE::computeNormalizationFactor(const NumericVector<Number> & solution,
-                                   const SparseMatrix<Number> & mat,
-                                   const NumericVector<Number> & rhs)
-{
-  // This function is based on the description provided here:
-  // https://www.openfoam.com/documentation/guides/latest/doc/guide-solvers-residuals.html
-  // (Accessed 06/01/2023)
-  // so basically we normalize the residual with the following number:
-  // sum(|Ax-Ax_avg|+|b-Ax_avg|)
-  // where A is the system matrix, b is the system right hand side while x and x_avg are
-  // the solution and average solution vectors
-
-  // We create a vector for Ax_avg and Ax
-  auto A_times_average_solution = solution.zero_clone();
-  auto A_times_solution = solution.zero_clone();
-
-  // Beware, trickery here! To avoid allocating unused vectors, we
-  // first compute Ax_avg using the storage used for Ax, then we
-  // overwrite Ax with the right value
-  *A_times_solution = solution.sum() / solution.size();
-  mat.vector_mult(*A_times_average_solution, *A_times_solution);
-  mat.vector_mult(*A_times_solution, solution);
-
-  // We create Ax-Ax_avg
-  A_times_solution->add(-1.0, *A_times_average_solution);
-  // We create Ax_avg - b (ordering shouldn't matter we will take absolute value soon)
-  A_times_average_solution->add(-1.0, rhs);
-  A_times_solution->abs();
-  A_times_average_solution->abs();
-
-  // Create |Ax-Ax_avg|+|b-Ax_avg|
-  A_times_average_solution->add(*A_times_solution);
-
-  // Since use the l2 norm of the solution vectors in the linear solver, we will
-  // make this consistent and use the l2 norm of the vector
-  // TODO: Would be nice to see if we can do l1 norms in the linear solve
-  return A_times_average_solution->l2_norm();
 }
 
 Real
@@ -413,33 +440,6 @@ SIMPLE::solvePressureCorrector()
   _pressure_system.setSolution(current_local_solution);
 
   return pressure_solver.get_initial_residual() / norm_factor;
-}
-
-void
-SIMPLE::relaxSolutionUpdate(NonlinearSystemBase & system_in, Real relaxation_factor)
-{
-  // We will need the latest and the second latest solution for the relaxation
-  NonlinearImplicitSystem & system = dynamic_cast<NonlinearImplicitSystem &>(system_in.system());
-  NumericVector<Number> & solution = *(system.current_local_solution.get());
-  NumericVector<Number> & solution_old = *(system_in.solutionPreviousNewton());
-
-  // The relaxation is just u = lambda * u* + (1-lambda) u_old
-  solution.scale(relaxation_factor);
-  solution.add(1 - relaxation_factor, solution_old);
-  solution.close();
-
-  if (_print_fields)
-  {
-    std::cout << "Pressure solution" << std::endl;
-    solution.print();
-    std::cout << "Pressure solution old" << std::endl;
-    solution_old.print();
-  }
-
-  // We will overwrite the old solution here
-  solution_old = solution;
-  system_in.setSolution(solution);
-  system_in.residualSetup();
 }
 
 void
@@ -501,10 +501,10 @@ SIMPLE::execute()
 
       _console << "Iteration " << iteration_counter << " Initial residual norms:" << std::endl;
       for (auto system_i : index_range(_momentum_systems))
-        _console << " Momentum equation: "
+        _console << " Momentum equation:"
                  << (_momentum_systems.size() > 1
-                         ? std::string("Component ") + std::to_string(system_i + 1)
-                         : std::string(""))
+                         ? std::string(" Component ") + std::to_string(system_i + 1)
+                         : std::string(" "))
                  << COLOR_GREEN << momentum_residual[system_i] << COLOR_DEFAULT << std::endl;
       _console << " Pressure equation: " << COLOR_GREEN << pressure_residual << COLOR_DEFAULT
                << std::endl;

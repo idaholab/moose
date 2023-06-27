@@ -27,7 +27,8 @@ class MeshBase;
 }
 
 /**
- * Something nice here at some point
+ * A user object which implements the Rhie Chow interpolation for segregated
+ * momentum-pressure systems.
  */
 class INSFVRhieChowInterpolatorSegregated : public RhieChowInterpolatorBase
 {
@@ -35,17 +36,20 @@ public:
   static InputParameters validParams();
   INSFVRhieChowInterpolatorSegregated(const InputParameters & params);
 
+  /// Get the face velocity (used in advection terms)
   VectorValue<ADReal> getVelocity(const FaceInfo & fi,
                                   const Moose::StateArg & time,
                                   THREAD_ID tid,
                                   Moose::FV::InterpMethod m) const override;
 
+  /// Initialize the container for face velocities
   void initFaceVelocities();
-
+  /// Update the values of the face velocities in the containers
   void computeFaceVelocity();
-
+  /// Update the cell values of the velocity variables
   void computeCellVelocity();
 
+  /// We disable this for the segregated solver
   void addToA(const libMesh::Elem * /*elem*/,
               unsigned int /*component*/,
               const ADReal & /*value*/) override
@@ -55,53 +59,67 @@ public:
   }
 
   void meshChanged() override;
-
   void initialize() override;
-  void execute() override;
+  void execute() override{};
   void finalize() override{};
 
   /// Bool of the Rhie Chow user object is used in monolithic/segregated approaches
   bool segregated() const override { return true; };
 
+  /// Update the momentum system-related information
   void linkMomentumSystem(std::vector<NonlinearSystemBase *> momentum_systems,
                           const std::vector<unsigned int> & momentum_system_numbers,
-                          const TagID & momentum_tag);
+                          const TagID & pressure_gradient_tag);
 
   /**
    * Computes the inverse of the digaonal (1/A) of the system matrix plus the H/A components for the
-   * pressure equation plus Rhie-Chow interpolation. This should nly be used with segregated
-   * solvers.
+   * pressure equation plus Rhie-Chow interpolation.
    */
   void computeHbyA(bool verbose);
 
+protected:
+  /// Populatethe face values of the H/A
   void populateHbyA(const std::vector<std::unique_ptr<NumericVector<Number>>> & raw_hbya,
                     const std::vector<unsigned int> & var_nums);
-
-protected:
   /**
-   * A map from element IDs to $HbyA_{ij} = (A_{offdiag}*\mathrm{(predicted~velocity)} -
-   * \mathrm{Source})_{ij}/A_{ij}$. So this contains the offdiagonal part of t`he system matrix
+   * A map functor from faces to $HbyA_{ij} = (A_{offdiag}*\mathrm{(predicted~velocity)} -
+   * \mathrm{Source})_{ij}/A_{ij}$. So this contains the offdiagonal part of the system matrix
    * multiplied by the predicted velocity minus the source terms from the right hand side of the
-   * linearized momentum predictor stem.
+   * linearized momentum predictor step.
    */
   FaceCenteredMapFunctor<RealVectorValue, std::unordered_map<dof_id_type, RealVectorValue>> _HbyA;
+
+  /**
+   * We hold on to the raw values of the HbyA vectors so that we can easily reconstruct the
+   * cell velocities as well. This vector might be either of size 1 or DIM depending on if we
+   * segregate the velocity components as well.
+   */
   std::vector<std::unique_ptr<NumericVector<Number>>> _HbyA_raw;
 
   /**
-   * A map from element IDs to $1/A_ij$. ADD MORE
+   * A map functor from element IDs to $1/A_i$. Where $A_i$ is the diagonal of the system matrix
+   * for the momentum equation.
    */
   CellCenteredMapFunctor<Real, std::unordered_map<dof_id_type, Real>> _Ainv;
 
   /// A functor for computing the (non-RC corrected) velocity
   std::unique_ptr<PiecewiseByBlockLambdaFunctor<ADRealVectorValue>> _vel;
 
+  /**
+   * A map functor from faces to face velocities which are used in the advection terms
+   */
   FaceCenteredMapFunctor<RealVectorValue, std::unordered_map<dof_id_type, RealVectorValue>>
       _face_velocity;
 
-  /// Reference to the nonlinear system corresponding to the momentum equation
+  /// Pointers to the nonlinear system(s) corresponding to the momentum equation(s)
   std::vector<NonlinearSystemBase *> _momentum_systems;
+
+  /// Numbers of the momentum system(s)
   std::vector<unsigned int> _momentum_system_numbers;
+
+  /// Pointers to the implicit system(s) to the momentum system(s)
   std::vector<NonlinearImplicitSystem *> _momentum_implicit_systems;
-  /// Reference to the nonlinear system corresponding to the pressure equation
-  TagID _momentum_tag;
+
+  /// Residual tag corresponding to the pressure graadient contribution
+  TagID _pressure_gradient_tag;
 };
