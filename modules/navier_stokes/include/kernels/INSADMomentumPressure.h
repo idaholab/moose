@@ -31,4 +31,7 @@ protected:
   const ADVariableGradient & _grad_p;
 
   const Moose::CoordinateSystemType & _coord_sys;
+
+  /// The radial coordinate index for RZ coordinate systems
+  const unsigned int _rz_radial_coord;
 };
