@@ -55,14 +55,14 @@ public:
   /**
    * Clone this value.  Useful in copy-construction.
    */
-  virtual std::unique_ptr<PropertyValue> clone(const std::size_t size) const = 0;
+  virtual std::unique_ptr<PropertyValue> clone(const std::size_t size = 0) const = 0;
 
   virtual unsigned int size() const = 0;
 
   /**
    * Resizes the property to the size n
    */
-  virtual void resize(int n) = 0;
+  virtual void resize(const std::size_t size) = 0;
 
   virtual void swap(PropertyValue & rhs) = 0;
 
@@ -104,10 +104,7 @@ class MaterialPropertyBase : public PropertyValue
 public:
   typedef MooseADWrapper<T, is_ad> value_type;
 
-  MaterialPropertyBase(const unsigned int id, const unsigned int size)
-    : PropertyValue(id), _value(size)
-  {
-  }
+  MaterialPropertyBase(const unsigned int id) : PropertyValue(id) {}
 
   bool isAD() const override final { return is_ad; }
 
@@ -129,7 +126,7 @@ public:
   /**
    * Resizes the property to the size n
    */
-  virtual void resize(int n) override final;
+  virtual void resize(const std::size_t size) override final;
 
   virtual unsigned int size() const override final { return _value.size(); }
 
@@ -167,6 +164,15 @@ public:
   virtual void swap(PropertyValue & rhs) override final;
 
   const std::type_info & typeID() const override final;
+
+  /**
+   * @return A clone of this property.
+   *
+   * Note that this will only ever return a non-AD clone, even if this property
+   * is an AD property. This is on purpose; whenever we need clones, it's for
+   * older states in which we don't store derivatives beacuse it's too expensive.
+   */
+  virtual std::unique_ptr<PropertyValue> clone(const std::size_t size = 0) const override final;
 
 private:
   /// private copy constructor to avoid shallow copying of material properties
@@ -234,9 +240,9 @@ MaterialPropertyBase<T, is_ad>::type() const
 
 template <typename T, bool is_ad>
 inline void
-MaterialPropertyBase<T, is_ad>::resize(int n)
+MaterialPropertyBase<T, is_ad>::resize(const std::size_t size)
 {
-  _value.template resize</*value_initalize=*/true>(n);
+  _value.template resize</*value_initalize=*/true>(size);
 }
 
 template <typename T, bool is_ad>
@@ -313,24 +319,21 @@ MaterialPropertyBase<T, is_ad>::typeID() const
   return info;
 }
 
+template <typename T, bool is_ad>
+std::unique_ptr<PropertyValue>
+MaterialPropertyBase<T, is_ad>::clone(const std::size_t size) const
+{
+  auto prop = std::make_unique<MaterialProperty<T>>(this->id());
+  if (size)
+    prop->resize(size);
+  return prop;
+}
+
 template <typename T>
 class MaterialProperty : public MaterialPropertyBase<T, false>
 {
 public:
-  MaterialProperty(const unsigned int id, const unsigned int size = 0)
-    : MaterialPropertyBase<T, false>(id, size)
-  {
-  }
-
-  static std::unique_ptr<PropertyValue> build(const unsigned int id, const std::size_t size)
-  {
-    return std::make_unique<MaterialProperty<T>>(id, size);
-  }
-
-  virtual std::unique_ptr<PropertyValue> clone(const std::size_t size) const override final
-  {
-    return build(this->id(), size);
-  }
+  MaterialProperty(const unsigned int id) : MaterialPropertyBase<T, false>(id) {}
 
 private:
   /// private copy constructor to avoid shallow copying of material properties
@@ -350,17 +353,9 @@ template <typename T>
 class ADMaterialProperty : public MaterialPropertyBase<T, true>
 {
 public:
-  ADMaterialProperty(const unsigned int id, const unsigned int size = 0)
-    : MaterialPropertyBase<T, true>(id, size)
-  {
-  }
+  ADMaterialProperty(const unsigned int id) : MaterialPropertyBase<T, true>(id) {}
 
   using typename MaterialPropertyBase<T, true>::value_type;
-
-  virtual std::unique_ptr<PropertyValue> clone(const std::size_t size) const override final
-  {
-    return MaterialProperty<T>::build(this->id(), size);
-  }
 
 private:
   /// private copy constructor to avoid shallow copying of material properties

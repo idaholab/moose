@@ -601,9 +601,10 @@ MaterialPropertyInterface::defaultGenericMaterialProperty(const std::string & na
 
       const auto nqp = Moose::constMaxQpsPerElem;
       auto & property =
-          _default_properties.emplace_back(std::make_unique<prop_type>(default_prop_id, nqp));
+          _default_properties.emplace_back(std::make_unique<prop_type>(default_prop_id));
       auto & T_property = static_cast<prop_type &>(*property);
 
+      T_property.resize(nqp);
       for (const auto qp : make_range(nqp))
         T_property[qp] = real_value;
 
