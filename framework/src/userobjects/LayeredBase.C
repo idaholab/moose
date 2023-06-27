@@ -89,9 +89,9 @@ LayeredBase::LayeredBase(const InputParameters & parameters)
     _using_displaced_mesh(_layered_base_params.get<bool>("use_displaced_mesh")),
     _layer_values(declareRestartableData<std::vector<Real>>("layer_values")),
     _layer_has_value(declareRestartableData<std::vector<int>>("layer_has_value")),
-    _layered_base_subproblem(*parameters.getCheckedPointerParam<SubProblem *>("_subproblem")),
     _cumulative(parameters.get<bool>("cumulative")),
     _positive_cumulative_direction(parameters.get<bool>("positive_cumulative_direction")),
+    _layered_base_subproblem(*parameters.getCheckedPointerParam<SubProblem *>("_subproblem")),
     _layer_bounding_blocks(),
     _has_direction_max_min(false)
 {
@@ -209,7 +209,7 @@ LayeredBase::integralValue(Point p) const
 
   switch (_sample_type)
   {
-    case 0: // direct
+    case 0:                   // direct
     {
       if (higher_layer == -1) // Didn't find a higher layer
         return _layer_values[lower_layer];
@@ -222,7 +222,7 @@ LayeredBase::integralValue(Point p) const
 
       return (_layer_values[higher_layer] + _layer_values[lower_layer]) / 2;
     }
-    case 1: // interpolate
+    case 1:                   // interpolate
     {
       if (higher_layer == -1) // Didn't find a higher layer
         return _layer_values[lower_layer];

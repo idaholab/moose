@@ -64,7 +64,30 @@ LayeredExtremumMaterialProperty::extreme_value(const Real a, const Real b) const
 void
 LayeredExtremumMaterialProperty::finalize()
 {
-  LayeredBase::finalize();
+  if (_type == MIN)
+    comm().min(_layer_values);
+  else
+    comm().max(_layer_values);
+  comm().max(_layer_has_value);
+
+  if (_cumulative)
+  {
+    Real value =
+        _type == MIN ? std::numeric_limits<Real>::max() : -std::numeric_limits<Real>::max();
+
+    if (_positive_cumulative_direction)
+      for (unsigned i = 0; i < _num_layers; i++)
+      {
+        value = extreme_value(value, getLayerValue(i));
+        setLayerValue(i, value);
+      }
+    else
+      for (int i = _num_layers - 1; i >= 0; i--)
+      {
+        value = extreme_value(value, getLayerValue(i));
+        setLayerValue(i, value);
+      }
+  }
 }
 
 void
