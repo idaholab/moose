@@ -41,31 +41,23 @@ Registry::registerObjectsTo(Factory & f, const std::set<std::string> & labels)
 
     for (const auto & obj : r._per_label_objects[label])
     {
-      std::string name = obj->_name;
-      if (name.empty())
-        name = obj->_alias;
-      if (name.empty())
-        name = obj->_classname;
-
+      const auto name = obj->name();
       r._name_to_entry[name] = obj;
 
       f.reg(obj);
-
       if (!obj->_alias.empty())
         f.associateNameToClass(name, obj->_classname);
     }
   }
 }
 
-RegistryEntryPtr
+const RegistryEntryBase &
 Registry::objData(const std::string & name)
 {
   auto & r = getRegistry();
 
-  auto it = r._name_to_entry.find(name);
-
-  if (it != r._name_to_entry.end())
-    return it->second;
+  if (const auto it = r._name_to_entry.find(name); it != r._name_to_entry.end())
+    return *it->second;
   else
     mooseError("Object ", name, " is not registered yet");
 }

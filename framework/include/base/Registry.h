@@ -85,13 +85,9 @@ class Action;
 struct RegistryEntryBase;
 
 /**
- * aliases to wrap shared pointer types
+ * Holds details and meta-data info for a particular MooseObject or Action for use in the
+ * use in the registry.
  */
-using MooseObjectPtr = std::shared_ptr<MooseObject>;
-using RegistryEntryPtr = std::shared_ptr<RegistryEntryBase>;
-
-/// Holds details and meta-data info for a particular MooseObject or Action for use in the
-/// registry.
 struct RegistryEntryData
 {
   /// label (usually app name - e.g. "YourAnimalApp") that the object or action is associated with.
@@ -118,7 +114,7 @@ struct RegistryEntryBase : public RegistryEntryData
   RegistryEntryBase(const RegistryEntryData & data) : RegistryEntryData(data) {}
   virtual ~RegistryEntryBase() {}
   /// proxy functions
-  virtual MooseObjectPtr build(const InputParameters & parameters) = 0;
+  virtual std::shared_ptr<MooseObject> build(const InputParameters & parameters) = 0;
   virtual std::shared_ptr<Action> buildAction(const InputParameters & parameters) = 0;
   virtual InputParameters buildParameters() = 0;
   /// resolve the name from _classname, _alias, and _name
@@ -137,7 +133,7 @@ template <typename T>
 struct RegistryEntry : public RegistryEntryBase
 {
   RegistryEntry(const RegistryEntryData & data) : RegistryEntryBase(data) {}
-  virtual MooseObjectPtr build(const InputParameters & parameters) override;
+  virtual std::shared_ptr<MooseObject> build(const InputParameters & parameters) override;
   virtual std::shared_ptr<Action> buildAction(const InputParameters & parameters) override;
   virtual InputParameters buildParameters() override;
 };
@@ -158,13 +154,6 @@ public:
    * Get the global Registry singleton.
    */
   static Registry & getRegistry();
-
-  static void clear()
-  {
-    auto & registry = getRegistry();
-    registry._per_label_objects.clear();
-    registry._per_label_actions.clear();
-  }
 
   /// Adds information on a MooseObject to the registry.  The _build_ptr, _build_action_ptr, and
   /// _params_ptr objects of the info object should all be nullptr - these are set automatically by
@@ -211,17 +200,17 @@ public:
   static void addDataFilePath(const std::string & path);
 
   /// Returns a per-label keyed map of all MooseObjects in the registry.
-  static const std::map<std::string, std::vector<RegistryEntryPtr>> & allObjects()
+  static const std::map<std::string, std::vector<std::shared_ptr<RegistryEntryBase>>> & allObjects()
   {
     return getRegistry()._per_label_objects;
   }
   /// Returns a per-label keyed map of all Actions in the registry.
-  static const std::map<std::string, std::vector<RegistryEntryPtr>> & allActions()
+  static const std::map<std::string, std::vector<std::shared_ptr<RegistryEntryBase>>> & allActions()
   {
     return getRegistry()._per_label_actions;
   }
 
-  static RegistryEntryPtr objData(const std::string & name);
+  static const RegistryEntryBase & objData(const std::string & name);
 
   /**
    * \returns true if an object with the given name is registered
@@ -252,9 +241,9 @@ public:
 private:
   Registry(){};
 
-  std::map<std::string, RegistryEntryPtr> _name_to_entry;
-  std::map<std::string, std::vector<RegistryEntryPtr>> _per_label_objects;
-  std::map<std::string, std::vector<RegistryEntryPtr>> _per_label_actions;
+  std::map<std::string, std::shared_ptr<RegistryEntryBase>> _name_to_entry;
+  std::map<std::string, std::vector<std::shared_ptr<RegistryEntryBase>>> _per_label_objects;
+  std::map<std::string, std::vector<std::shared_ptr<RegistryEntryBase>>> _per_label_actions;
   std::set<std::string> _known_labels;
   std::vector<std::string> _data_file_paths;
   std::map<std::string, std::string> _type_to_classname;
@@ -271,7 +260,7 @@ Registry::getRegisteredName()
 }
 
 template <typename T>
-MooseObjectPtr
+std::shared_ptr<MooseObject>
 RegistryEntry<T>::build(const InputParameters & parameters)
 {
   if constexpr (!std::is_base_of_v<MooseObject, T>)

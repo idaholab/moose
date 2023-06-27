@@ -165,7 +165,7 @@ JsonSyntaxTree::addGlobal()
     // Just create a list of registered app names
     nlohmann::json apps;
     auto & factory = AppFactory::instance();
-    for (auto name_bi_pair : factory.registeredObjects())
+    for (const auto & name_bi_pair : factory.registeredObjects())
       apps.push_back(name_bi_pair.first);
 
     _root["global"]["registered_apps"] = apps;

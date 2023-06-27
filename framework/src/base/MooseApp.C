@@ -629,9 +629,6 @@ MooseApp::~MooseApp()
   _executioner.reset();
   _the_warehouse.reset();
 
-  // if (!_lib_handles.emoty() && isUltimateMaster())
-  //   Registry::clear();
-
   // Don't wait for implicit destruction of input parameter storage
   _input_parameter_warehouse.reset();
 

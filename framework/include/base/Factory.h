@@ -31,7 +31,7 @@ public:
   Factory(MooseApp & app);
   virtual ~Factory();
 
-  void reg(RegistryEntryPtr obj);
+  void reg(std::shared_ptr<RegistryEntryBase> obj);
 
   /**
    * Gets file and line information where an object was initially registered.
@@ -70,11 +70,11 @@ public:
    * @param print_deprecated controls the deprecated message
    * @return The created object
    */
-  MooseObjectPtr create(const std::string & obj_name,
-                        const std::string & name,
-                        const InputParameters & parameters,
-                        THREAD_ID tid = 0,
-                        bool print_deprecated = true);
+  std::shared_ptr<MooseObject> create(const std::string & obj_name,
+                                      const std::string & name,
+                                      const InputParameters & parameters,
+                                      THREAD_ID tid = 0,
+                                      bool print_deprecated = true);
 
   /**
    * Build an object (must be registered)
@@ -117,9 +117,9 @@ public:
   void restrictRegisterableObjects(const std::vector<std::string> & names);
 
   /**
-   * Access to registered object iterator (begin)
+   * Returns a reference to the map from names to RegistryEntryBase pointers
    */
-  const auto & registeredObjects() { return _name_to_object; }
+  const auto & registeredObjects() const { return _name_to_object; }
 
   /**
    * Get a list of all constructed Moose Object types
@@ -152,7 +152,7 @@ private:
   MooseApp & _app;
 
   /// Storage for pointers to the object registry entry
-  std::map<std::string, RegistryEntryPtr> _name_to_object;
+  std::map<std::string, std::shared_ptr<RegistryEntryBase>> _name_to_object;
 
   FileLineInfoMap _name_to_line;
 

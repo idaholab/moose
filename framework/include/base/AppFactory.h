@@ -45,7 +45,7 @@ struct AppFactoryBuildInfo : public AppFactoryBuildInfoBase
   virtual InputParameters buildParameters() override { return T::validParams(); }
 };
 
-using AppFactoryBuildInfoMap = std::map<std::string, std::shared_ptr<AppFactoryBuildInfoBase>>;
+using AppFactoryBuildInfoMap = std::map<std::string, std::unique_ptr<AppFactoryBuildInfoBase>>;
 
 /**
  * Generic AppFactory class for building Application objects
@@ -96,9 +96,9 @@ public:
                            MPI_Comm COMM_WORLD_IN);
 
   /**
-   * Returns a reference to the from names to AppFactoryBuildInfo pointers
+   * Returns a reference to the map from names to AppFactoryBuildInfo pointers
    */
-  const auto & registeredObjects() { return _name_to_build_info; }
+  const auto & registeredObjects() const { return _name_to_build_info; }
 
   /**
    * Returns a Boolean indicating whether an application type has been registered
@@ -137,5 +137,5 @@ AppFactory::reg(const std::string & name)
   if (isRegistered(name))
     return;
 
-  _name_to_build_info[name] = std::make_shared<AppFactoryBuildInfo<T>>();
+  _name_to_build_info[name] = std::make_unique<AppFactoryBuildInfo<T>>();
 }

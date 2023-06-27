@@ -28,10 +28,10 @@ AppFactory::~AppFactory() {}
 InputParameters
 AppFactory::getValidParams(const std::string & name)
 {
-  if (_name_to_build_info.find(name) == _name_to_build_info.end())
-    mooseError(std::string("A '") + name + "' is not a registered object\n\n");
+  if (const auto it = _name_to_build_info.find(name); it != _name_to_build_info.end())
+    return it->second->buildParameters();
 
-  return _name_to_build_info[name]->buildParameters();
+  mooseError(std::string("A '") + name + "' is not a registered object\n\n");
 }
 
 MooseAppPtr
@@ -64,7 +64,8 @@ AppFactory::createShared(const std::string & app_type,
                          MPI_Comm comm_world_in)
 {
   // Error if the application type is not located
-  if (_name_to_build_info.find(app_type) == _name_to_build_info.end())
+  const auto it = _name_to_build_info.find(app_type);
+  if (it == _name_to_build_info.end())
     mooseError("Object '" + app_type + "' was not registered.");
 
   // Take the app_type and add it to the parameters so that it can be retrieved in the Application
