@@ -269,11 +269,9 @@ MaterialData::resizeProps(unsigned int id)
       entry.resize(size, {});
     if (!entry.hasValue(id))
     {
-      std::unique_ptr<PropertyValue> value;
-      if (is_ad && state == 0)
-        value = std::make_unique<ADMaterialProperty<T>>(id);
-      else
-        value = std::make_unique<MaterialProperty<T>>(id);
+      std::unique_ptr<PropertyValue> value =
+          state == 0 ? std::make_unique<GenericMaterialProperty<T, is_ad>>(id)
+                     : _props[0][id]->clone();
       entry.setPointer(id, std::move(value), {});
     }
   }
