@@ -34,4 +34,23 @@ ADReal DarcyFrictionFactor(const ADReal & f_F);
  */
 Real FanningFrictionFactorChurchill(Real Re, Real roughness, Real D_h);
 ADReal FanningFrictionFactorChurchill(ADReal Re, ADReal roughness, ADReal D_h);
+
+/**
+ * Computes Fanning friction factor using Cheng-Todreas correlation
+ *
+ * @param Re   Reynolds number
+ * @param a    Correlation constant
+ * @param b    Correlation constant
+ * @param c    Correlation constant
+ * @param n    Correlation constant
+ * @param PoD  Pitch-to-diameter ratio
+ */
+
+template <typename T1, typename T2, typename T3, typename T4, typename T5, typename T6>
+auto
+FanningFrictionFactorCheng(
+    const T1 & Re, const T2 & a, const T3 & b, const T4 & c, const T5 & n, const T6 & PoD)
+{
+  return (a + b * (PoD - 1) + c * std::pow(PoD - 1, 2)) / std::pow(std::max(Re, 10.0), n);
+}
 }

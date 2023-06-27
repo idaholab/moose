@@ -1,0 +1,22 @@
+[Tests]
+  design = 'ADWallFrictionChengMaterial.md'
+  issues = '#24340'
+  [out_of_range_warning]
+    requirement = "The system shall return a warning message when the Cheng-Todreas correlation is "
+                  "used with a Pitch-to-Diameter ration above 1.50."
+    type = 'RunException'
+    input = 'cheng_ff_test.i'
+    cli_args = "PoD=1.55"
+    expect_err = "The Cheng-Todreas correlation for the friction factor is valid when P/D is between "
+                 "1.0 and 1.5. Be aware that using values out of this range may lead to significant "
+                 "errors in your results!"
+  []
+  [normal_operation]
+    requirement = "The system shall compute the friction factor using the Cheng-Todreas correlation "
+                  "with different subchannel configurations."
+    type = 'CSVDiff'
+    input = 'cheng_ff_test.i'
+    csvdiff = 'cheng_ff_test_out.csv'
+  []
+[]
+
