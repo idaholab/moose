@@ -17,7 +17,7 @@
     type = 'CSVDiff'
     input = 'frictionless-mortar-3d_pg.i'
     min_ad_size = 100
-    csvdiff = 'frictionless-mortar-3d_pg_out_contact-pressure_0002.csv'
+    csvdiff = 'frictionless-mortar-3d_pg_out.csv'
     requirement = 'The system shall solve a 3D frictionless bouncing block problem with mortar '
                   'constraint using Petrov-Galerkin approach.'
   []
@@ -47,9 +47,10 @@
     type = 'CSVDiff'
     input = 'frictionless-mortar-3d-action.i'
     cli_args = 'Contact/mortar/use_petrov_galerkin=true '
-               'Outputs/file_base="frictionless-mortar-3d_pg_out"'
+               'Outputs/file_base="frictionless-mortar-3d_pg_out" '
+               'Postprocessors/active="contact lambda"'
     min_ad_size = 100
-    csvdiff = 'frictionless-mortar-3d_pg_out_contact-pressure_0002.csv'
+    csvdiff = 'frictionless-mortar-3d_pg_out.csv'
     requirement = 'The system shall solve a 3D frictionless bouncing block problem with mortar '
                   'constraint using Petrov-Galerkin approach in contact action.'
   []
