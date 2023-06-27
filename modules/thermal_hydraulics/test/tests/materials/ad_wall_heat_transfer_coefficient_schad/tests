@@ -1,0 +1,44 @@
+[Tests]
+  design = 'ADWallHeatTransferCoefficientSchadMaterial.md'
+  issues = '#24340'
+  [normal_operation]
+    requirement = "The system shall compute the the heat transfer coefficient using the Schad "
+                  "correlation for the Nusselt number for "
+    [Peclet_above_150]
+      type = 'CSVDiff'
+      input = 'schad_test.i'
+      csvdiff = 'schad_pe_above_150.csv'
+      detail = 'Peclet numbers above or equal to 150, or'
+    []
+    [Peclet_below_150]
+      type = 'CSVDiff'
+      input = 'schad_test.i'
+      csvdiff = 'schad_pe_below_150.csv'
+      cli_args = "vel=0.09
+                  Outputs/file_base='schad_pe_below_150'"
+      detail = 'Peclet numbers below 150.'
+    []
+  []
+  [abnormal_operation]
+    requirement = "The system shall return a warning message when the Schad correlation is used "
+                  "with: "
+    [out_of_range_warning_1]
+      type = 'RunException'
+      input = 'schad_test.i'
+      cli_args = "PoD=1.05"
+      expect_err = "Schad's correlation is valid when Pe<1000, and P/D is between 1.1 and 1.5. Be "
+                   "aware that using values out of this range may lead to significant errors in your "
+                   "results!"
+      detail = 'Pitch-to-diameter out of bonds, or'
+    []
+    [out_of_range_warning_2]
+      type = 'RunException'
+      input = 'schad_test.i'
+      cli_args = "vel=10"
+      expect_err = "Schad's correlation is valid when Pe<1000, and P/D is between 1.1 and 1.5. Be "
+                   "aware that using values out of this range may lead to significant errors in your "
+                   "results!"
+      detail = 'Peclet out of bonds.'
+    []
+  []
+[]

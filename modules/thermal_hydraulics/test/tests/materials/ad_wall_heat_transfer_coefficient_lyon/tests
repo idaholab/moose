@@ -1,0 +1,12 @@
+[Tests]
+  [test]
+    design = 'ADWallHeatTransferCoefficientLyonMaterial.md'
+    issues = '#24340'
+    requirement = "The system shall compute the heat transfer coefficient using the Lyon correlation "
+                  "for the Nusselt number"
+    type = 'CSVDiff'
+    input = 'lyon_test.i'
+    csvdiff = 'lyon_test_out.csv'
+  []
+[]
+
