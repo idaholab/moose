@@ -109,7 +109,7 @@ public:
   {
   }
 
-  bool isAD() const override { return is_ad; }
+  bool isAD() const override final { return is_ad; }
 
   /**
    * @returns a read-only reference to the parameter value.
@@ -124,14 +124,14 @@ public:
   /**
    * String identifying the type of parameter stored.
    */
-  virtual const std::string & type() const override;
+  virtual const std::string & type() const override final;
 
   /**
    * Resizes the property to the size n
    */
-  virtual void resize(int n) override;
+  virtual void resize(int n) override final;
 
-  virtual unsigned int size() const override { return _value.size(); }
+  virtual unsigned int size() const override final { return _value.size(); }
 
   /**
    * Get element i out of the array as a writeable reference.
@@ -150,20 +150,21 @@ public:
    * @param rhs The Property you want to copy _from_.
    * @param from_qp The quadrature point in rhs you want to copy _from_.
    */
-  virtual void
-  qpCopy(const unsigned int to_qp, const PropertyValue & rhs, const unsigned int from_qp) override;
+  virtual void qpCopy(const unsigned int to_qp,
+                      const PropertyValue & rhs,
+                      const unsigned int from_qp) override final;
 
   /**
    * Store the property into a binary stream
    */
-  virtual void store(std::ostream & stream) override;
+  virtual void store(std::ostream & stream) override final;
 
   /**
    * Load the property from a binary stream
    */
-  virtual void load(std::istream & stream) override;
+  virtual void load(std::istream & stream) override final;
 
-  void swap(PropertyValue & rhs) override;
+  virtual void swap(PropertyValue & rhs) override final;
 
   const std::type_info & typeID() const override final;
 
@@ -323,11 +324,10 @@ public:
 
   static std::unique_ptr<PropertyValue> build(const unsigned int id, const std::size_t size)
   {
-    std::unique_ptr<PropertyValue> value = std::make_unique<MaterialProperty<T>>(id, size);
-    return value;
+    return std::make_unique<MaterialProperty<T>>(id, size);
   }
 
-  std::unique_ptr<PropertyValue> clone(const std::size_t size) const override
+  virtual std::unique_ptr<PropertyValue> clone(const std::size_t size) const override final
   {
     return build(this->id(), size);
   }
@@ -357,7 +357,7 @@ public:
 
   using typename MaterialPropertyBase<T, true>::value_type;
 
-  std::unique_ptr<PropertyValue> clone(const std::size_t size) const override
+  virtual std::unique_ptr<PropertyValue> clone(const std::size_t size) const override final
   {
     return MaterialProperty<T>::build(this->id(), size);
   }
