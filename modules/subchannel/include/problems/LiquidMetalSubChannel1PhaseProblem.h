@@ -40,7 +40,7 @@ protected:
   virtual void computeWijPrime(int iblock) override;
   virtual void computeh(int iblock) override;
   TriSubChannelMesh & _tri_sch_mesh;
-  // Extra objects for heat conduction, which is important in sodium
+  // Extra objects for heat conduction, which is important with metal coolants
   Mat _hc_axial_heat_conduction_mat;
   Vec _hc_axial_heat_conduction_rhs;
   Mat _hc_radial_heat_conduction_mat;

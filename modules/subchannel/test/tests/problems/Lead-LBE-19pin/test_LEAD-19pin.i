@@ -59,7 +59,6 @@ P_out = 1.0e5 # Pa
   type = LiquidMetalSubChannel1PhaseProblem
   fp = LEAD
   n_blocks = 1
-  beta = 0.006
   P_out = 1.0e5
   CT = 1.0
   # enforce_uniform_pressure = false

@@ -102,7 +102,6 @@ unheated_length_exit = ${fparse 26.9*scale_factor}
   type = LiquidMetalSubChannel1PhaseProblem
   fp = sodium
   n_blocks = 1
-  beta = 0.006
   P_out = ${P_out}
   CT = 2.6
   compute_density = true

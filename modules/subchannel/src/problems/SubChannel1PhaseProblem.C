@@ -66,9 +66,6 @@ SubChannel1PhaseProblem::validParams()
 {
   InputParameters params = ExternalProblem::validParams();
   params.addRequiredParam<unsigned int>("n_blocks", "The number of blocks in the axial direction");
-  params.addRequiredParam<Real>("beta",
-                                "Thermal diffusion coefficient used in turbulent crossflow. This "
-                                "parameter in not user defined in triangular subchannels");
   params.addRequiredParam<Real>("CT", "Turbulent modeling parameter");
   params.addParam<Real>("P_tol", 1e-6, "Pressure tolerance");
   params.addParam<Real>("T_tol", 1e-6, "Temperature tolerance");
@@ -118,7 +115,6 @@ SubChannel1PhaseProblem::SubChannel1PhaseProblem(const InputParameters & params)
     _duct_mesh_exist(_subchannel_mesh.ductMeshExist()),
     _dt(isTransient() ? dt() : _one),
     _P_out(getParam<Real>("P_out")),
-    _beta(getParam<Real>("beta")),
     _CT(getParam<Real>("CT")),
     _P_tol(getParam<Real>("P_tol")),
     _T_tol(getParam<Real>("T_tol")),
@@ -696,119 +692,6 @@ SubChannel1PhaseProblem::computeMdot(int iblock)
       KSPDestroy(&ksploc);
       VecDestroy(&sol);
     }
-  }
-}
-
-void
-SubChannel1PhaseProblem::computeWijPrime(int iblock)
-{
-  unsigned int last_node = (iblock + 1) * _block_size;
-  unsigned int first_node = iblock * _block_size + 1;
-  if (!_implicit_bool)
-  {
-    for (unsigned int iz = first_node; iz < last_node + 1; iz++)
-    {
-      auto dz = _z_grid[iz] - _z_grid[iz - 1];
-      for (unsigned int i_gap = 0; i_gap < _n_gaps; i_gap++)
-      {
-        auto chans = _subchannel_mesh.getGapNeighborChannels(i_gap);
-        unsigned int i_ch = chans.first;
-        unsigned int j_ch = chans.second;
-        auto * node_in_i = _subchannel_mesh.getChannelNode(i_ch, iz - 1);
-        auto * node_out_i = _subchannel_mesh.getChannelNode(i_ch, iz);
-        auto * node_in_j = _subchannel_mesh.getChannelNode(j_ch, iz - 1);
-        auto * node_out_j = _subchannel_mesh.getChannelNode(j_ch, iz);
-        auto Si_in = (*_S_flow_soln)(node_in_i);
-        auto Sj_in = (*_S_flow_soln)(node_in_j);
-        auto Si_out = (*_S_flow_soln)(node_out_i);
-        auto Sj_out = (*_S_flow_soln)(node_out_j);
-        // crossflow area between channels i,j (dz*gap_width)
-        auto Sij = dz * _subchannel_mesh.getGapWidth(i_gap);
-        // Calculation of Turbulent Crossflow
-        _WijPrime(i_gap, iz) =
-            _beta * 0.5 *
-            (((*_mdot_soln)(node_in_i) + (*_mdot_soln)(node_in_j)) / (Si_in + Sj_in) +
-             ((*_mdot_soln)(node_out_i) + (*_mdot_soln)(node_out_j)) / (Si_out + Sj_out)) *
-            Sij;
-      }
-    }
-  }
-  else
-  {
-    for (unsigned int iz = first_node; iz < last_node + 1; iz++)
-    {
-      auto dz = _z_grid[iz] - _z_grid[iz - 1];
-      auto iz_ind = iz - first_node;
-      for (unsigned int i_gap = 0; i_gap < _n_gaps; i_gap++)
-      {
-        auto chans = _subchannel_mesh.getGapNeighborChannels(i_gap);
-        unsigned int i_ch = chans.first;
-        unsigned int j_ch = chans.second;
-        auto * node_in_i = _subchannel_mesh.getChannelNode(i_ch, iz - 1);
-        auto * node_out_i = _subchannel_mesh.getChannelNode(i_ch, iz);
-        auto * node_in_j = _subchannel_mesh.getChannelNode(j_ch, iz - 1);
-        auto * node_out_j = _subchannel_mesh.getChannelNode(j_ch, iz);
-        auto Si_in = (*_S_flow_soln)(node_in_i);
-        auto Sj_in = (*_S_flow_soln)(node_in_j);
-        auto Si_out = (*_S_flow_soln)(node_out_i);
-        auto Sj_out = (*_S_flow_soln)(node_out_j);
-        // crossflow area between channels i,j (dz*gap_width)
-        auto Sij = dz * _subchannel_mesh.getGapWidth(i_gap);
-
-        // Base value - I don't want to write it every time
-        PetscScalar base_value = _beta * 0.5 * Sij;
-
-        // Bottom values
-        if (iz == first_node)
-        {
-          PetscScalar value_tl = -1.0 * base_value / (Si_in + Sj_in) *
-                                 ((*_mdot_soln)(node_in_i) + (*_mdot_soln)(node_in_j));
-          PetscInt row = i_gap + _n_gaps * iz_ind;
-          VecSetValues(_amc_turbulent_cross_flows_rhs, 1, &row, &value_tl, INSERT_VALUES);
-        }
-        else
-        {
-          PetscScalar value_tl = base_value / (Si_in + Sj_in);
-          PetscInt row = i_gap + _n_gaps * iz_ind;
-
-          PetscInt col_ich = i_ch + _n_channels * (iz_ind - 1);
-          MatSetValues(
-              _amc_turbulent_cross_flows_mat, 1, &row, 1, &col_ich, &value_tl, INSERT_VALUES);
-
-          PetscInt col_jch = j_ch + _n_channels * (iz_ind - 1);
-          MatSetValues(
-              _amc_turbulent_cross_flows_mat, 1, &row, 1, &col_jch, &value_tl, INSERT_VALUES);
-        }
-
-        // Top values
-        PetscScalar value_bl = base_value / (Si_out + Sj_out);
-        PetscInt row = i_gap + _n_gaps * iz_ind;
-
-        PetscInt col_ich = i_ch + _n_channels * iz_ind;
-        MatSetValues(
-            _amc_turbulent_cross_flows_mat, 1, &row, 1, &col_ich, &value_bl, INSERT_VALUES);
-
-        PetscInt col_jch = j_ch + _n_channels * iz_ind;
-        MatSetValues(
-            _amc_turbulent_cross_flows_mat, 1, &row, 1, &col_jch, &value_bl, INSERT_VALUES);
-      }
-    }
-    MatAssemblyBegin(_amc_turbulent_cross_flows_mat, MAT_FINAL_ASSEMBLY);
-    MatAssemblyEnd(_amc_turbulent_cross_flows_mat, MAT_FINAL_ASSEMBLY);
-
-    /// Update turbulent crossflow
-    Vec loc_prod;
-    Vec loc_Wij;
-    VecDuplicate(_amc_sys_mdot_rhs, &loc_prod);
-    VecDuplicate(_Wij_vec, &loc_Wij);
-    populateVectorFromHandle<SolutionHandle>(
-        loc_prod, *_mdot_soln, first_node, last_node, _n_channels);
-    MatMult(_amc_turbulent_cross_flows_mat, loc_prod, loc_Wij);
-    VecAXPY(loc_Wij, -1.0, _amc_turbulent_cross_flows_rhs);
-    populateDenseFromVector<libMesh::DenseMatrix<Real>>(
-        loc_Wij, _WijPrime, first_node, last_node, _n_gaps);
-    VecDestroy(&loc_prod);
-    VecDestroy(&loc_Wij);
   }
 }
 

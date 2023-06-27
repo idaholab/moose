@@ -64,7 +64,7 @@ protected:
   /// Computes mass flow per channel for block iblock
   virtual void computeMdot(int iblock);
   /// Computes turbulent crossflow per gap for block iblock
-  virtual void computeWijPrime(int iblock);
+  virtual void computeWijPrime(int iblock) = 0;
   /// Computes Pressure Drop per channel for block iblock
   virtual void computeDP(int iblock);
   /// Computes Pressure per channel for block iblock
@@ -155,8 +155,6 @@ protected:
   const Real & _dt;
   /// Outlet Pressure
   const Real & _P_out;
-  /// Thermal diffusion coefficient used in turbulent crossflow
-  const Real & _beta;
   /// Turbulent modeling parameter used in axial momentum equation
   const Real & _CT;
   /// Convergence tolerance for the pressure loop in external solve
