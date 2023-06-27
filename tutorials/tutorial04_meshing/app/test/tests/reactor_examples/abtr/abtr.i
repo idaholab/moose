@@ -4,7 +4,7 @@
 [Mesh]
 
   #################################      # This parameter allows us to execute the file but stop at this block so we can see intermediate output.
-  final_generator = control              # User: Change this to
+  final_generator = abtr_mesh            # User: Change this to control, dummy, core, del_dummy, extrude, plane_id, or abtr_mesh
   ################################
 
   # step 1: control
