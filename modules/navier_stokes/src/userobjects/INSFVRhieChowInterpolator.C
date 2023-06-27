@@ -583,6 +583,19 @@ INSFVRhieChowInterpolator::getVelocity(const Moose::FV::InterpMethod m,
   if (m == Moose::FV::InterpMethod::Average ||
       std::get<0>(NS::isPorosityJumpFace(epsilon(tid), fi, time)))
     return velocity;
+  // Rhie-Chow coefficients are not available on initial
+  if (_fe_problem.getCurrentExecuteOnFlag() == EXEC_INITIAL)
+  {
+    mooseDoOnce(mooseWarning("Cannot compute Rhie Chow coefficients on initial. Returning linearly "
+                             "interpolated velocities"););
+    return velocity;
+  }
+  if (!_fe_problem.shouldSolve())
+  {
+    mooseDoOnce(mooseWarning("Cannot compute Rhie Chow coefficients if not solving. Returning "
+                             "linearly interpolated velocities"););
+    return velocity;
+  }
 
   mooseAssert(((m == Moose::FV::InterpMethod::RhieChow) &&
                (_velocity_interp_method == Moose::FV::InterpMethod::RhieChow)) ||
