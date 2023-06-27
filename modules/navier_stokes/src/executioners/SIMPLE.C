@@ -206,43 +206,42 @@ SIMPLE::solveMomentumPredictor()
   _problem.setCurrentNonlinearSystem(_momentum_system_numbers[0]);
 
   // We will use functions from the implicit system directly
-  NonlinearImplicitSystem * momentum_system =
-      dynamic_cast<NonlinearImplicitSystem *>(&(_momentum_systems[0]->system()));
+  NonlinearImplicitSystem & momentum_system =
+      dynamic_cast<NonlinearImplicitSystem &>(_momentum_systems[0]->system());
 
   // We need a linear solver
   // TODO: ADD FUNCTIONALITY TO LIBMESH TO ACCEPT ABS TOLERANCES!
   PetscLinearSolver<Real> & momentum_solver =
-      dynamic_cast<PetscLinearSolver<Real> &>(*momentum_system->get_linear_solver());
+      dynamic_cast<PetscLinearSolver<Real> &>(*momentum_system.get_linear_solver());
 
-  // We create a vector which can be used as a helper in different situations
-  auto working_vector = momentum_system->current_local_solution->zero_clone();
+  // We create a vector which can be used as a helper in different situations. We
+  // need the ghosting here so we use current_local_solution
+  auto zero_solution = momentum_system.current_local_solution->zero_clone();
 
   // We need a vector that stores the (diagonal_relaxed-original_diagonal) vector
-  auto diff_diagonal = momentum_system->current_local_solution->zero_clone();
+  auto diff_diagonal = momentum_system.solution->zero_clone();
 
-  // We will use the solution vector of the equation, we use the current local solution because
-  // we will need the ghosting
-  PetscVector<Number> * solution =
-      dynamic_cast<PetscVector<Number> *>(momentum_system->current_local_solution.get());
+  // We will use the solution vector of the equation
+  NumericVector<Number> & solution = *(momentum_system.solution);
 
   // We get the matrix and right hand side
-  PetscMatrix<Number> * mmat = dynamic_cast<PetscMatrix<Number> *>(momentum_system->matrix);
-  PetscVector<Number> * rhs = dynamic_cast<PetscVector<Number> *>(momentum_system->rhs);
+  SparseMatrix<Number> & mmat = *(momentum_system.matrix);
+  NumericVector<Number> & rhs = *(momentum_system.rhs);
 
   // We plug zero in this to get the system matrix and the right hand side of the linear problem
-  _problem.computeResidualAndJacobian(*working_vector, *rhs, *mmat);
+  _problem.computeResidualAndJacobian(*zero_solution, rhs, mmat);
 
   // Unfortunately, the the right hand side has the opposite side due to the definition of the
   // residual
-  rhs->scale(-1.0);
+  rhs.scale(-1.0);
 
   // Go and relax the system matrix and the right hand side
-  relaxMatrix(*mmat, _momentum_equation_relaxation, *diff_diagonal);
-  relaxRightHandSide(*rhs, *solution, *diff_diagonal);
+  relaxMatrix(mmat, _momentum_equation_relaxation, *diff_diagonal);
+  relaxRightHandSide(rhs, solution, *diff_diagonal);
 
   // We need to compute normalization factors to be able to decide if we are converged
   // or not
-  Real norm_factor = computeNormalizationFactor(*solution, *mmat, *rhs);
+  Real norm_factor = computeNormalizationFactor(solution, mmat, rhs);
 
   // Very important, for deciding the convergence, we need the unpreconditioned
   // norms in the linear solve
@@ -250,7 +249,8 @@ SIMPLE::solveMomentumPredictor()
 
   // We solve the equation
   // TO DO: Add options to this function in Libmesh to accept absolute tolerance
-  momentum_solver.solve(*mmat, *mmat, *solution, *rhs, 1e-10, 100);
+  momentum_solver.solve(mmat, mmat, solution, rhs, 1e-10, 100);
+  momentum_system.update();
   // Make sure that we reuse the preconditioner if we end up solving the segregated
   // momentum components
   momentum_solver.reuse_preconditioner(true);
@@ -258,11 +258,11 @@ SIMPLE::solveMomentumPredictor()
   if (_print_fields)
   {
     std::cout << " matrix when we solve " << std::endl;
-    mmat->print();
+    mmat.print();
     std::cout << " rhs when we solve " << std::endl;
-    rhs->print();
+    rhs.print();
     std::cout << " velocity solution component 0" << std::endl;
-    solution->print();
+    solution.print();
     std::cout << "Norm factor " << norm_factor << std::endl;
     std::cout << Moose::stringify(momentum_solver.get_initial_residual()) << std::endl;
   }
@@ -282,36 +282,35 @@ SIMPLE::solveMomentumPredictor()
     _problem.setCurrentNonlinearSystem(_momentum_system_numbers[system_i]);
 
     // We will need the right hand side and the solution of the next component
-    momentum_system =
-        dynamic_cast<NonlinearImplicitSystem *>(&(_momentum_systems[system_i]->system()));
-    solution = dynamic_cast<PetscVector<Number> *>(momentum_system->current_local_solution.get());
-    rhs = dynamic_cast<PetscVector<Number> *>(momentum_system->rhs);
+    NonlinearImplicitSystem & momentum_system =
+        dynamic_cast<NonlinearImplicitSystem &>(_momentum_systems[system_i]->system());
+    NumericVector<Number> & solution = *(momentum_system.solution);
+    NumericVector<Number> & rhs = *(momentum_system.rhs);
 
     // Only evaluating right hand side which is R(0)
-    _problem.computeResidual(*working_vector, *rhs, _momentum_system_numbers[system_i]);
+    _problem.computeResidual(*zero_solution, rhs, _momentum_system_numbers[system_i]);
     // Sadly, this returns -b so we multiply with -1
-    rhs->scale(-1.0);
+    rhs.scale(-1.0);
 
     // Still need to relax the right hand side with the same vector
-    relaxRightHandSide(*rhs, *solution, *diff_diagonal);
+    relaxRightHandSide(rhs, solution, *diff_diagonal);
 
     // The normalization factor depends on the right hand side so we need to recompute it for this
     // component
-    norm_factor = computeNormalizationFactor(*solution, *mmat, *rhs);
+    norm_factor = computeNormalizationFactor(solution, mmat, rhs);
 
     // Solve this component
-    momentum_solver.solve(*mmat, *mmat, *solution, *rhs, 1e-10, 100);
+    momentum_solver.solve(mmat, mmat, solution, rhs, 1e-10, 100);
+    momentum_system.update();
     // Save the normalized residual
     normalized_residuals.push_back(momentum_solver.get_initial_residual() / norm_factor);
 
     if (_print_fields)
     {
-      std::cout << " matrix when we solve " << std::endl;
-      mmat->print();
       std::cout << " rhs when we solve " << std::endl;
-      rhs->print();
+      rhs.print();
       std::cout << " velocity solution component " << system_i << std::endl;
-      solution->print();
+      solution.print();
       std::cout << "Norm factor " << norm_factor << std::endl;
       std::cout << Moose::stringify(momentum_solver.get_initial_residual()) << std::endl;
     }
@@ -365,83 +364,82 @@ SIMPLE::solvePressureCorrector()
 {
   _problem.setCurrentNonlinearSystem(_pressure_sys_number);
 
+  // We will need some members from the implocot nonlinear system
   NonlinearImplicitSystem & pressure_system =
       dynamic_cast<NonlinearImplicitSystem &>(_pressure_system.system());
-  PetscVector<Number> * solution =
-      dynamic_cast<PetscVector<Number> *>(pressure_system.current_local_solution.get());
-  PetscMatrix<Number> * mmat = dynamic_cast<PetscMatrix<Number> *>(pressure_system.matrix);
-  PetscVector<Number> * rhs = dynamic_cast<PetscVector<Number> *>(pressure_system.rhs);
 
+  // We will need the solution, the right hand side and the matrix
+  NumericVector<Number> & current_local_solution = *(pressure_system.current_local_solution);
+  NumericVector<Number> & solution = *(pressure_system.solution);
+  SparseMatrix<Number> & mmat = *(pressure_system.matrix);
+  NumericVector<Number> & rhs = *(pressure_system.rhs);
+
+  // Fetch the linear solver from the system
   PetscLinearSolver<Real> & pressure_solver =
       dynamic_cast<PetscLinearSolver<Real> &>(*pressure_system.get_linear_solver());
 
-  // KSP momentum_solve.ksp();
-
-  auto zero_solution = solution->zero_clone();
-
-  _problem.computeResidualAndJacobian(*zero_solution, *rhs, *mmat);
+  // We need a zero vector to be able to emulate the Ax=b system by evaluating the
+  // residual and jacobian. Unfortunately, this will leave us with the -b on the righ hand side
+  // so we correct it by multiplying it with (-1)
+  auto zero_solution = current_local_solution.zero_clone();
+  _problem.computeResidualAndJacobian(*zero_solution, rhs, mmat);
+  rhs.scale(-1.0);
 
   if (_print_fields)
   {
     std::cout << "Pressure matrix" << std::endl;
-    mmat->print();
+    mmat.print();
   }
 
-  rhs->scale(-1.0);
+  // We compute the normalization factors based on the fluxes
+  Real norm_factor = computeNormalizationFactor(solution, mmat, rhs);
 
-  Real norm_factor = computeNormalizationFactor(*solution, *mmat, *rhs);
-  Real absolute_tolerance = norm_factor * 1e-5;
-
+  // We need the non-preconditioned norm to be consistent with the norm factor
   KSPSetNormType(pressure_solver.ksp(), KSP_NORM_UNPRECONDITIONED);
-  pressure_solver.solve(
-      *mmat, *mmat, *pressure_system.solution.get(), *rhs, absolute_tolerance, 100);
+
+  // Solve the system and update current local solution
+  pressure_solver.solve(mmat, mmat, solution, rhs, 1e-10, 100);
   pressure_system.update();
 
   if (_print_fields)
   {
     std::cout << " rhs when we solve pressure " << std::endl;
-    rhs->print();
+    rhs.print();
     std::cout << " Pressure " << std::endl;
-    solution->print();
-  }
-
-  _pressure_system.setSolution(*solution);
-  if (_print_fields)
-  {
-    std::cout << pressure_solver.get_initial_residual() << std::endl;
+    solution.print();
     std::cout << "Norm factor " << norm_factor << std::endl;
   }
-  std::cout << "Norm factor " << norm_factor << std::endl;
+
+  _pressure_system.setSolution(current_local_solution);
+
   return pressure_solver.get_initial_residual() / norm_factor;
 }
 
 void
-SIMPLE::relaxPressureUpdate(NonlinearSystemBase & pressure_system_in)
+SIMPLE::relaxSolutionUpdate(NonlinearSystemBase & system_in, Real relaxation_factor)
 {
-  NonlinearImplicitSystem & pressure_system =
-      dynamic_cast<NonlinearImplicitSystem &>(pressure_system_in.system());
-  PetscVector<Number> * pressure_solution =
-      dynamic_cast<PetscVector<Number> *>(pressure_system.current_local_solution.get());
-  PetscVector<Number> * pressure_solution_old =
-      dynamic_cast<PetscVector<Number> *>(_pressure_system.solutionPreviousNewton());
+  // We will need the latest and the second latest solution for the relaxation
+  NonlinearImplicitSystem & system = dynamic_cast<NonlinearImplicitSystem &>(system_in.system());
+  NumericVector<Number> & solution = *(system.current_local_solution.get());
+  NumericVector<Number> & solution_old = *(system_in.solutionPreviousNewton());
 
-  pressure_solution->scale(_pressure_variable_relaxation);
-  pressure_solution->add(1 - _pressure_variable_relaxation, *pressure_solution_old);
-
-  // solution->print();
-  pressure_solution->close();
+  // The relaxation is just u = lambda * u* + (1-lambda) u_old
+  solution.scale(relaxation_factor);
+  solution.add(1 - relaxation_factor, solution_old);
+  solution.close();
 
   if (_print_fields)
   {
     std::cout << "Pressure solution" << std::endl;
-    pressure_solution->print();
+    solution.print();
     std::cout << "Pressure solution old" << std::endl;
-    pressure_solution_old->print();
+    solution_old.print();
   }
 
-  *pressure_solution_old = *pressure_solution;
-  _pressure_system.setSolution(*pressure_solution);
-  _pressure_system.residualSetup();
+  // We will overwrite the old solution here
+  solution_old = solution;
+  system_in.setSolution(solution);
+  system_in.residualSetup();
 }
 
 void
@@ -463,53 +461,51 @@ SIMPLE::execute()
 
   if (_problem.shouldSolve())
   {
+    // Initialize the quantities which matter in terms of the iteration
     unsigned int iteration_counter = 0;
     std::vector<Real> momentum_residual(1.0, _momentum_systems.size());
     Real pressure_residual = 1.0;
+
+    // Loop until converged or hit the maximum allowed iteration number
     while (iteration_counter < _num_iterations && !converged(momentum_residual, pressure_residual))
     {
+      // We set the preconditioner type using this option.
+      // TODO: We need a way to specify different perconditioners for different systems
       Moose::PetscSupport::petscSetOptions(_problem);
       Moose::setSolverDefaults(_problem);
+
+      // We clear the caches in the momentum and pressure variables
       for (auto system_i : index_range(_momentum_systems))
         _momentum_systems[system_i]->residualSetup();
       _pressure_system.residualSetup();
 
       iteration_counter++;
 
+      // Solve the momentum predictor step
       momentum_residual = solveMomentumPredictor();
 
-      if (_print_fields)
-      {
-        std::cout << "************************************" << std::endl;
-        std::cout << "Computing HbyA" << std::endl;
-        std::cout << "************************************" << std::endl;
-      }
-      _rc_uo->computeHbyA(_momentum_equation_relaxation, _print_fields);
+      // Compute the coupling fields between the momentum and pressure equations
+      _rc_uo->computeHbyA(_print_fields);
 
-      if (_print_fields)
-      {
-        std::cout << "************************************" << std::endl;
-        std::cout << "DONE Computing HbyA " << std::endl;
-        std::cout << "************************************" << std::endl;
-      }
-
+      // Solve the pressure corrector
       pressure_residual = solvePressureCorrector();
 
+      // Compute the face velocity which is used in the advection terms
       _rc_uo->computeFaceVelocity();
 
-      relaxPressureUpdate(_pressure_system);
+      // Relax the pressure update for the next momentum predictor
+      relaxSolutionUpdate(_pressure_system, _pressure_variable_relaxation);
 
+      // Reconstruct the cell velocity as well to accelerate convergence
       _rc_uo->computeCellVelocity();
 
       _console << "Iteration " << iteration_counter << " Initial residual norms:" << std::endl;
       for (auto system_i : index_range(_momentum_systems))
-      {
         _console << " Momentum equation: "
                  << (_momentum_systems.size() > 1
                          ? std::string("Component ") + std::to_string(system_i + 1)
                          : std::string(""))
                  << COLOR_GREEN << momentum_residual[system_i] << COLOR_DEFAULT << std::endl;
-      }
       _console << " Pressure equation: " << COLOR_GREEN << pressure_residual << COLOR_DEFAULT
                << std::endl;
     }

@@ -61,7 +61,7 @@ protected:
   Real solvePressureCorrector();
 
   /// Relax the update on the pressure.
-  void relaxPressureUpdate(NonlinearSystemBase & pressure_system_in);
+  void relaxSolutionUpdate(NonlinearSystemBase & system_in, Real relaxation_factor);
 
   /// Determine if the iterative process converged or not
   bool converged(const std::vector<Real> & momentum_residuals, const Real pressure_residual);

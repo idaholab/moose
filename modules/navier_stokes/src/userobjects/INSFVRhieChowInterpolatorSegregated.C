@@ -342,9 +342,14 @@ INSFVRhieChowInterpolatorSegregated::populateHbyA(
 }
 
 void
-INSFVRhieChowInterpolatorSegregated::computeHbyA(const Real & momentum_relaxation,
-                                                 const bool verbose)
+INSFVRhieChowInterpolatorSegregated::computeHbyA(bool verbose)
 {
+  if (verbose)
+  {
+    std::cout << "************************************" << std::endl;
+    std::cout << "Computing HbyA" << std::endl;
+    std::cout << "************************************" << std::endl;
+  }
   mooseAssert(_momentum_implicit_systems[0],
               "The momentum system shall be linked before calling this function!");
 
@@ -497,6 +502,13 @@ INSFVRhieChowInterpolatorSegregated::computeHbyA(const Real & momentum_relaxatio
   }
 
   populateHbyA(_HbyA_raw, var_nums);
+
+  if (verbose)
+  {
+    std::cout << "************************************" << std::endl;
+    std::cout << "DONE Computing HbyA " << std::endl;
+    std::cout << "************************************" << std::endl;
+  }
 
   // **************************************************************************
   // END
