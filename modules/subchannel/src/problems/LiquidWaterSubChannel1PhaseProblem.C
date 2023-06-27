@@ -20,12 +20,17 @@ InputParameters
 LiquidWaterSubChannel1PhaseProblem::validParams()
 {
   InputParameters params = SubChannel1PhaseProblem::validParams();
+  params.addParam<bool>("default_friction_model",
+                        true,
+                        "Boolean to define which friction model to use (Only for quad use)");
   return params;
 }
 
 LiquidWaterSubChannel1PhaseProblem::LiquidWaterSubChannel1PhaseProblem(
     const InputParameters & params)
-  : SubChannel1PhaseProblem(params), _subchannel_mesh(dynamic_cast<QuadSubChannelMesh &>(_mesh))
+  : SubChannel1PhaseProblem(params),
+    _subchannel_mesh(dynamic_cast<QuadSubChannelMesh &>(_mesh)),
+    _default_friction_model(getParam<bool>("default_friction_model"))
 {
 }
 

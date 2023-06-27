@@ -185,9 +185,6 @@ protected:
   const bool _monolithic_thermal_bool;
   /// Boolean to printout information related to subchannel solve
   const bool _verbose_subchannel;
-  /// Flag that activates one of the two friction models (default: f=a*Re^b, non-default: Todreas-Kazimi)
-  /// doesn't apply to liquid metal
-  const bool _default_friction_model;
 
   /// Solutions handles and link to TH tables properties
   const SinglePhaseFluidProperties * _fp;
