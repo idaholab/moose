@@ -31,6 +31,9 @@ protected:
   virtual Real computeFrictionFactor(_friction_args_struct friction_args) override;
   QuadSubChannelMesh & _subchannel_mesh;
 
+  /// Flag that activates one of the two friction models (default: f=a*Re^b, non-default: Todreas-Kazimi)
+  const bool _default_friction_model;
+
 public:
   static InputParameters validParams();
 };

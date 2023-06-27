@@ -9,7 +9,7 @@ NODAL VARIABLES
 	T relative 8.0e-06
 	h relative 4.0e-05
 	mdot relative 4.5e-05
-	mu relative 8.0e-06
+	mu relative 8.5e-06
 	q_prime
 	rho
 	w_perim
