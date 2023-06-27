@@ -93,8 +93,11 @@ LayeredExtremumMaterialProperty::finalize()
 void
 LayeredExtremumMaterialProperty::threadJoin(const UserObject & y)
 {
-  ElementExtremeMaterialProperty::threadJoin(y);
-  LayeredBase::threadJoin(y);
+  const LayeredExtremumMaterialProperty & lb =
+      dynamic_cast<const LayeredExtremumMaterialProperty &>(y);
+  for (unsigned int i = 0; i < _num_layers; i++)
+    if (lb.layerHasValue(i))
+      setLayerValue(i, extreme_value(getLayerValue(i), lb.getLayerValue(i)));
 }
 
 const std::vector<Point>

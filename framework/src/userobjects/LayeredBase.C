@@ -209,7 +209,7 @@ LayeredBase::integralValue(Point p) const
 
   switch (_sample_type)
   {
-    case 0:                   // direct
+    case 0: // direct
     {
       if (higher_layer == -1) // Didn't find a higher layer
         return _layer_values[lower_layer];
@@ -222,7 +222,7 @@ LayeredBase::integralValue(Point p) const
 
       return (_layer_values[higher_layer] + _layer_values[lower_layer]) / 2;
     }
-    case 1:                   // interpolate
+    case 1: // interpolate
     {
       if (higher_layer == -1) // Didn't find a higher layer
         return _layer_values[lower_layer];
