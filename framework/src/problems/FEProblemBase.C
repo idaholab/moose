@@ -261,9 +261,6 @@ FEProblemBase::validParams()
   params.addParam<std::vector<NonlinearSystemName>>(
       "nl_sys_names", std::vector<NonlinearSystemName>{"nl0"}, "The nonlinear system names");
 
-  params.addParam<std::vector<Real>>("nl_sys_relaxation",
-                                     "The relaxation constants for the given nonlinear systems.");
-
   params.addParam<bool>("check_uo_aux_state",
                         false,
                         "True to turn on a check that no state presents during the evaluation of "
@@ -319,7 +316,6 @@ FEProblemBase::FEProblemBase(const InputParameters & parameters)
     _dt(declareRestartableData<Real>("dt")),
     _dt_old(declareRestartableData<Real>("dt_old")),
     _nl_sys_names(getParam<std::vector<NonlinearSystemName>>("nl_sys_names")),
-    _nl_sys_relaxation(getParam<std::vector<Real>>("nl_sys_relaxation")),
     _num_nl_sys(_nl_sys_names.size()),
     _nl(_num_nl_sys, nullptr),
     _current_nl_sys(nullptr),
@@ -483,24 +479,6 @@ FEProblemBase::FEProblemBase(const InputParameters & parameters)
   if (!_app.isUltimateMaster())
     PetscOptionsCreate(&_petsc_option_data_base);
 #endif
-
-  if (isParamValid("nl_sys_relaxation"))
-  {
-    if (!getParam<bool>("previous_nl_solution_required"))
-      paramError("nl_sys_relaxation",
-                 "System relaxation is enabled only for cases where the previous nonlinear iterate "
-                 "is kept!");
-    if (_nl_sys_relaxation.size() != _num_nl_sys)
-      paramError(
-          "nl_sys_relaxation",
-          "The number of relaxation parameters should be the same as the number of nonlinear "
-          "systems!");
-  }
-
-  for (const auto & relaxation : _nl_sys_relaxation)
-    if (relaxation > 1.0 || relaxation < std::numeric_limits<Real>::epsilon())
-      paramError("nl_sys_relaxation",
-                 "System relaxation parameter should be in the (0,1] interval!");
 }
 
 const MooseMesh &
@@ -6753,8 +6731,6 @@ FEProblemBase::computePostCheck(NonlinearImplicitSystem & sys,
 
   if (vectorTagExists(Moose::PREVIOUS_NL_SOLUTION_TAG))
   {
-    // std::cout << " Updating previous NL" << std::endl;
-    // old_soln.print();
     _current_nl_sys->setPreviousNewtonSolution(old_soln);
     _aux->setPreviousNewtonSolution();
   }
@@ -7598,15 +7574,11 @@ FEProblemBase::checkNonlinearConvergence(std::string & msg,
 
   nonlinearConvergenceSetup();
 
-  // std::cout << "Here Pre " << _current_nl_sys->name() << std::endl;
-
   if (_fail_next_nonlinear_convergence_check)
   {
     _fail_next_nonlinear_convergence_check = false;
     return MooseNonlinearConvergenceReason::DIVERGED_FNORM_NAN;
   }
-
-  // std::cout << "Here" << _current_nl_sys->name() << std::endl;
 
   NonlinearSystemBase & system = *_current_nl_sys;
   MooseNonlinearConvergenceReason reason = MooseNonlinearConvergenceReason::ITERATING;

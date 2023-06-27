@@ -2146,9 +2146,6 @@ protected:
   /// The nonlinear system names
   const std::vector<NonlinearSystemName> _nl_sys_names;
 
-  /// The nonlinear system names
-  const std::vector<Real> _nl_sys_relaxation;
-
   /// The number of nonlinear systems
   const std::size_t _num_nl_sys;
 

@@ -326,9 +326,9 @@ INSFVRhieChowInterpolatorSegregated::computeHbyA(bool verbose)
 {
   if (verbose)
   {
-    std::cout << "************************************" << std::endl;
-    std::cout << "Computing HbyA" << std::endl;
-    std::cout << "************************************" << std::endl;
+    _console << "************************************" << std::endl;
+    _console << "Computing HbyA" << std::endl;
+    _console << "************************************" << std::endl;
   }
   mooseAssert(_momentum_implicit_systems.size() && _momentum_implicit_systems[0],
               "The momentum system shall be linked before calling this function!");
@@ -363,7 +363,7 @@ INSFVRhieChowInterpolatorSegregated::computeHbyA(bool verbose)
 
   if (verbose)
   {
-    std::cout << "Matrix in rc object" << std::endl;
+    _console << "Matrix in rc object" << std::endl;
     mmat->print();
   }
 
@@ -372,7 +372,7 @@ INSFVRhieChowInterpolatorSegregated::computeHbyA(bool verbose)
 
   if (verbose)
   {
-    std::cout << "A" << std::endl;
+    _console << "A" << std::endl;
     Ainv_petsc->print();
   }
 
@@ -401,7 +401,7 @@ INSFVRhieChowInterpolatorSegregated::computeHbyA(bool verbose)
 
   if (verbose)
   {
-    std::cout << "H" << std::endl;
+    _console << "H" << std::endl;
     mmat->print();
   }
 
@@ -421,7 +421,7 @@ INSFVRhieChowInterpolatorSegregated::computeHbyA(bool verbose)
 
     if (verbose)
     {
-      std::cout << "Velocity solution in H(u)" << std::endl;
+      _console << "Velocity solution in H(u)" << std::endl;
       solution.print();
     }
 
@@ -439,9 +439,9 @@ INSFVRhieChowInterpolatorSegregated::computeHbyA(bool verbose)
 
     if (verbose)
     {
-      std::cout << "total RHS" << std::endl;
+      _console << "total RHS" << std::endl;
       rhs.print();
-      std::cout << "pressure RHS" << std::endl;
+      _console << "pressure RHS" << std::endl;
       HbyA.print();
     }
 
@@ -451,7 +451,7 @@ INSFVRhieChowInterpolatorSegregated::computeHbyA(bool verbose)
 
     if (verbose)
     {
-      std::cout << "H RHS" << std::endl;
+      _console << "H RHS" << std::endl;
       HbyA.print();
     }
 
@@ -460,7 +460,7 @@ INSFVRhieChowInterpolatorSegregated::computeHbyA(bool verbose)
 
     if (verbose)
     {
-      std::cout << " H(u)" << std::endl;
+      _console << " H(u)" << std::endl;
       working_vector_petsc->print();
     }
 
@@ -469,7 +469,7 @@ INSFVRhieChowInterpolatorSegregated::computeHbyA(bool verbose)
 
     if (verbose)
     {
-      std::cout << " H(u)-rhs-relaxation_source" << std::endl;
+      _console << " H(u)-rhs-relaxation_source" << std::endl;
       HbyA.print();
     }
 
@@ -478,7 +478,7 @@ INSFVRhieChowInterpolatorSegregated::computeHbyA(bool verbose)
 
     if (verbose)
     {
-      std::cout << " (H(u)-rhs)/A" << std::endl;
+      _console << " (H(u)-rhs)/A" << std::endl;
       HbyA.print();
     }
   }
@@ -487,8 +487,8 @@ INSFVRhieChowInterpolatorSegregated::computeHbyA(bool verbose)
 
   if (verbose)
   {
-    std::cout << "************************************" << std::endl;
-    std::cout << "DONE Computing HbyA " << std::endl;
-    std::cout << "************************************" << std::endl;
+    _console << "************************************" << std::endl;
+    _console << "DONE Computing HbyA " << std::endl;
+    _console << "************************************" << std::endl;
   }
 }

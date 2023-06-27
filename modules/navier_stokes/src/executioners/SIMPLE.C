@@ -252,9 +252,9 @@ SIMPLE::relaxSolutionUpdate(NonlinearSystemBase & system_in, Real relaxation_fac
 
   if (_print_fields)
   {
-    std::cout << "Pressure solution" << std::endl;
+    _console << "Pressure solution" << std::endl;
     solution.print();
-    std::cout << "Pressure solution old" << std::endl;
+    _console << "Pressure solution old" << std::endl;
     solution_old.print();
   }
 
@@ -324,14 +324,14 @@ SIMPLE::solveMomentumPredictor()
 
   if (_print_fields)
   {
-    std::cout << " matrix when we solve " << std::endl;
+    _console << " matrix when we solve " << std::endl;
     mmat.print();
-    std::cout << " rhs when we solve " << std::endl;
+    _console << " rhs when we solve " << std::endl;
     rhs.print();
-    std::cout << " velocity solution component 0" << std::endl;
+    _console << " velocity solution component 0" << std::endl;
     solution.print();
-    std::cout << "Norm factor " << norm_factor << std::endl;
-    std::cout << Moose::stringify(momentum_solver.get_initial_residual()) << std::endl;
+    _console << "Norm factor " << norm_factor << std::endl;
+    _console << Moose::stringify(momentum_solver.get_initial_residual()) << std::endl;
   }
 
   // Compute the normalized residual
@@ -374,12 +374,12 @@ SIMPLE::solveMomentumPredictor()
 
     if (_print_fields)
     {
-      std::cout << " rhs when we solve " << std::endl;
+      _console << " rhs when we solve " << std::endl;
       rhs.print();
-      std::cout << " velocity solution component " << system_i << std::endl;
+      _console << " velocity solution component " << system_i << std::endl;
       solution.print();
-      std::cout << "Norm factor " << norm_factor << std::endl;
-      std::cout << Moose::stringify(momentum_solver.get_initial_residual()) << std::endl;
+      _console << "Norm factor " << norm_factor << std::endl;
+      _console << Moose::stringify(momentum_solver.get_initial_residual()) << std::endl;
     }
   }
 
@@ -414,7 +414,7 @@ SIMPLE::solvePressureCorrector()
 
   if (_print_fields)
   {
-    std::cout << "Pressure matrix" << std::endl;
+    _console << "Pressure matrix" << std::endl;
     mmat.print();
   }
 
@@ -430,11 +430,11 @@ SIMPLE::solvePressureCorrector()
 
   if (_print_fields)
   {
-    std::cout << " rhs when we solve pressure " << std::endl;
+    _console << " rhs when we solve pressure " << std::endl;
     rhs.print();
-    std::cout << " Pressure " << std::endl;
+    _console << " Pressure " << std::endl;
     solution.print();
-    std::cout << "Norm factor " << norm_factor << std::endl;
+    _console << "Norm factor " << norm_factor << std::endl;
   }
 
   _pressure_system.setSolution(current_local_solution);

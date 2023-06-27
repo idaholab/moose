@@ -42,9 +42,5 @@ INSFVMomentumPressure::INSFVMomentumPressure(const InputParameters & params)
 ADReal
 INSFVMomentumPressure::computeQpResidual()
 {
-  // std::cout << _current_elem->vertex_average() << " "
-  //           << _p.gradient(Moose::ElemArg{_current_elem, _correct_skewness},
-  //                          determineState())(_index)
-  //           << std::endl;
   return _p.gradient(Moose::ElemArg{_current_elem, _correct_skewness}, determineState())(_index);
 }

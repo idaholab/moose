@@ -93,8 +93,6 @@ INSFVMomentumAdvection::computeResidualsAndAData(const FaceInfo & fi)
   const auto v_face = _rc_vel_provider.getVelocity(_velocity_interp_method, fi, state, _tid);
   const auto vdotn = _normal * v_face;
 
-  // std::cout << _normal * v_face << std::endl;
-
   if (onBoundary(fi))
   {
     const auto ssf = singleSidedFaceArg();
@@ -180,18 +178,9 @@ INSFVMomentumAdvection::computeResidualsAndAData(const FaceInfo & fi)
       const auto var_elem = advected.first / rho_elem * eps_elem,
                  var_neighbor = advected.second / rho_neighbor * eps_neighbor;
 
-<<<<<<< HEAD
       _ae = vdotn * rho_elem / eps_elem * interp_coeffs.first;
       // Minus sign because we apply a minus sign to the residual in computeResidual
       _an = -vdotn * rho_neighbor / eps_neighbor * interp_coeffs.second;
-=======
-      _ae = _linearize ? _normal * raw_value(v_face) * rho_elem / eps_elem * interp_coeffs.first
-                       : _normal * v_face * rho_elem / eps_elem * interp_coeffs.first;
-      // Minus sign because we apply a minus sign to the residual in computeResidual
-      _an = _linearize
-                ? -_normal * raw_value(v_face) * rho_neighbor / eps_neighbor * interp_coeffs.second
-                : -_normal * v_face * rho_neighbor / eps_neighbor * interp_coeffs.second;
->>>>>>> Populate Ainv and HbyA functors with correct values. (#22356)
 
       _elem_residual = _ae * var_elem - _an * var_neighbor;
       _neighbor_residual = -_elem_residual;

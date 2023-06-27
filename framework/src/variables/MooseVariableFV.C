@@ -714,7 +714,6 @@ void
 MooseVariableFV<OutputType>::clearCaches()
 {
   _elem_to_grad.clear();
-  // std::cout << this->name() << " <<<<<<<<< CLEARING CACHES <<<<<<<<<<<<<<<" << std::endl;
 }
 
 template <typename OutputType>

@@ -34,31 +34,8 @@ ADReal
 FVDivergence::computeQpResidual()
 {
   using namespace Moose::FV;
-
-  // const auto face = makeFace(*_face_info, limiterType(Moose::FV::InterpMethod::Average), false);
   const auto face =
       makeFace(*_face_info, Moose::FV::limiterType(Moose::FV::InterpMethod::Average), true);
   RealVectorValue vector = _vector_field(face, determineState());
-
-  // // If we are on internal faces, we interpolate the diffusivity as usual
-  // if (_var.isInternalFace(*_face_info))
-  //   interpolate(Moose::FV::InterpMethod::Average,
-  //               vector,
-  //               _vector_field(elemArg()),
-  //               _vector_field(neighborArg()),
-  //               *_face_info,
-  //               true);
-  // // Else we just use the boundary values (which depend on how the diffusion
-  // // coefficient is constructed)
-  // else
-  // {
-  //   const auto face = singleSidedFaceArg();
-  //   vector = _vector_field(face);
-  // }
-
-  // // We use this on the right hand side as a source so in the residual this will be a sink (factor
-  // // of -1)
-  // std::cout << _face_info->faceCentroid() << " " << (vector * _normal) * _face_info->faceArea()
-  //           << std::endl;
   return -1.0 * (vector * _normal);
 }
