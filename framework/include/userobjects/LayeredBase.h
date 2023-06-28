@@ -135,21 +135,21 @@ protected:
   Real _direction_min;
   Real _direction_max;
 
-private:
   /// Value of the integral for each layer
   std::vector<Real> & _layer_values;
 
   /// Whether or not each layer has had any value summed into it
   std::vector<int> & _layer_has_value;
 
-  /// Subproblem for the child object
-  SubProblem & _layered_base_subproblem;
-
   /// Whether the values are cumulative over the layers
   bool _cumulative;
 
   /// Whether the cumulative values should be summed in the positive or negative direction
   const bool _positive_cumulative_direction;
+
+private:
+  /// Subproblem for the child object
+  SubProblem & _layered_base_subproblem;
 
   /// List of SubdomainIDs, if given
   std::vector<SubdomainID> _layer_bounding_blocks;
