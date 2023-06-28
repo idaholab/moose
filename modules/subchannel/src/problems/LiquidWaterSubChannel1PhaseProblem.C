@@ -23,9 +23,10 @@ LiquidWaterSubChannel1PhaseProblem::validParams()
   params.addRequiredParam<Real>("beta",
                                 "Thermal diffusion coefficient used in turbulent crossflow. This "
                                 "parameter in not user defined in triangular subchannels");
-  params.addParam<bool>("default_friction_model",
-                        true,
-                        "Boolean to define which friction model to use (Only for quad use)");
+  params.addParam<bool>(
+      "default_friction_model", true, "Boolean to define which friction model to use");
+  params.addParam<bool>(
+      "constant_beta", true, "Boolean to define the use of constant beta or computeBeta");
   return params;
 }
 
@@ -34,11 +35,12 @@ LiquidWaterSubChannel1PhaseProblem::LiquidWaterSubChannel1PhaseProblem(
   : SubChannel1PhaseProblem(params),
     _subchannel_mesh(dynamic_cast<QuadSubChannelMesh &>(_mesh)),
     _beta(getParam<Real>("beta")),
-    _default_friction_model(getParam<bool>("default_friction_model"))
+    _default_friction_model(getParam<bool>("default_friction_model")),
+    _constant_beta(getParam<bool>("constant_beta"))
 {
 }
 
-double
+Real
 LiquidWaterSubChannel1PhaseProblem::computeFrictionFactor(_friction_args_struct friction_args)
 {
   auto Re = friction_args.Re;
@@ -162,6 +164,8 @@ LiquidWaterSubChannel1PhaseProblem::computeWijPrime(int iblock)
 {
   unsigned int last_node = (iblock + 1) * _block_size;
   unsigned int first_node = iblock * _block_size + 1;
+  const Real & pitch = _subchannel_mesh.getPitch();
+  const Real & rod_diameter = _subchannel_mesh.getRodDiameter();
   if (!_implicit_bool)
   {
     for (unsigned int iz = first_node; iz < last_node + 1; iz++)
@@ -181,13 +185,61 @@ LiquidWaterSubChannel1PhaseProblem::computeWijPrime(int iblock)
         auto Si_out = (*_S_flow_soln)(node_out_i);
         auto Sj_out = (*_S_flow_soln)(node_out_j);
         // crossflow area between channels i,j (dz*gap_width)
-        auto Sij = dz * _subchannel_mesh.getGapWidth(i_gap);
+        auto gap = _subchannel_mesh.getGapWidth(i_gap);
+        auto Sij = dz * gap;
+        auto avg_massflux =
+            0.5 * (((*_mdot_soln)(node_in_i) + (*_mdot_soln)(node_in_j)) / (Si_in + Sj_in) +
+                   ((*_mdot_soln)(node_out_i) + (*_mdot_soln)(node_out_j)) / (Si_out + Sj_out));
+
+        auto beta = _beta;
+        if (!_constant_beta)
+        {
+          auto w_perim_i = (*_w_perim_soln)(node_in_i);
+          auto w_perim_j = (*_w_perim_soln)(node_in_j);
+          auto mu_i = (*_mu_soln)(node_in_i);
+          auto mu_j = (*_mu_soln)(node_in_j);
+          // hydraulic diameter in the i direction
+          auto hD_i = 4.0 * Si_in / w_perim_i;
+          auto hD_j = 4.0 * Sj_in / w_perim_j;
+          auto avg_hD = 0.5 * (hD_i + hD_j);
+          auto avg_mu = 0.5 * (mu_i + mu_j);
+          auto Re = avg_massflux * avg_hD / avg_mu;
+
+          Real gamma = 20.0; // empirical constant
+          Real sf = 1.0;     // shape factor
+          Real a = 0.18;
+          Real b = 0.2;
+          auto f = a * std::pow(Re, -b); // Rehme 1992 circular tube friction factor
+          auto k =
+              0.25 * (_fp->k_from_p_T((*_P_soln)(node_out_i) + _P_out, (*_T_soln)(node_out_i)) +
+                      _fp->k_from_p_T((*_P_soln)(node_in_i) + _P_out, (*_T_soln)(node_in_i)) +
+                      _fp->k_from_p_T((*_P_soln)(node_out_j) + _P_out, (*_T_soln)(node_out_j)) +
+                      _fp->k_from_p_T((*_P_soln)(node_in_j) + _P_out, (*_T_soln)(node_in_j)));
+          auto cp =
+              0.25 * (_fp->cp_from_p_T((*_P_soln)(node_out_i) + _P_out, (*_T_soln)(node_out_i)) +
+                      _fp->cp_from_p_T((*_P_soln)(node_in_i) + _P_out, (*_T_soln)(node_in_i)) +
+                      _fp->cp_from_p_T((*_P_soln)(node_out_j) + _P_out, (*_T_soln)(node_out_j)) +
+                      _fp->cp_from_p_T((*_P_soln)(node_in_j) + _P_out, (*_T_soln)(node_in_j)));
+          auto Pr = avg_mu * cp / k;                          // Prandtl number
+          auto Pr_t = Pr * (Re / gamma) * std::sqrt(f / 8.0); // Turbulent Prandtl number
+          auto delta = pitch;                                 // centroid to centroid distance
+          auto L_x = sf * delta;  // axial length scale (gap is the lateral length scale)
+          auto lamda = gap / L_x; // aspect ratio
+          auto a_x = 1.0 - 2.0 * lamda * lamda / libMesh::pi; // velocity coefficient
+          auto z_FP_over_D =
+              (2.0 * L_x / rod_diameter) *
+              (1 + (-0.5 * std::log(lamda) + 0.5 * std::log(4.0) - 0.25) * lamda * lamda);
+          auto Str =
+              1.0 / (0.822 * (gap / rod_diameter) + 0.144); // Strouhal number (Wu & Trupp 1994)
+          auto dum1 = 2.0 / std::pow(gamma, 2) * std::sqrt(a / 8.0) * (avg_hD / gap);
+          auto dum2 = (1 / Pr_t) * lamda;
+          auto dum3 = a_x * z_FP_over_D * Str;
+          // Mixing Stanton number: Stg (eq 25,Kim and Chung (2001), eq 19 (Jeong et. al 2005)
+          beta = dum1 * (dum2 + dum3) * std::pow(Re, -b / 2.0);
+        }
+
         // Calculation of Turbulent Crossflow
-        _WijPrime(i_gap, iz) =
-            _beta * 0.5 *
-            (((*_mdot_soln)(node_in_i) + (*_mdot_soln)(node_in_j)) / (Si_in + Sj_in) +
-             ((*_mdot_soln)(node_out_i) + (*_mdot_soln)(node_out_j)) / (Si_out + Sj_out)) *
-            Sij;
+        _WijPrime(i_gap, iz) = beta * avg_massflux * Sij;
       }
     }
   }
@@ -211,10 +263,60 @@ LiquidWaterSubChannel1PhaseProblem::computeWijPrime(int iblock)
         auto Si_out = (*_S_flow_soln)(node_out_i);
         auto Sj_out = (*_S_flow_soln)(node_out_j);
         // crossflow area between channels i,j (dz*gap_width)
-        auto Sij = dz * _subchannel_mesh.getGapWidth(i_gap);
+        auto gap = _subchannel_mesh.getGapWidth(i_gap);
+        auto Sij = dz * gap;
+        auto avg_massflux =
+            0.5 * (((*_mdot_soln)(node_in_i) + (*_mdot_soln)(node_in_j)) / (Si_in + Sj_in) +
+                   ((*_mdot_soln)(node_out_i) + (*_mdot_soln)(node_out_j)) / (Si_out + Sj_out));
+        auto beta = _beta;
+        if (!_constant_beta)
+        {
+          auto w_perim_i = (*_w_perim_soln)(node_in_i);
+          auto w_perim_j = (*_w_perim_soln)(node_in_j);
+          auto mu_i = (*_mu_soln)(node_in_i);
+          auto mu_j = (*_mu_soln)(node_in_j);
+          // hydraulic diameter in the i direction
+          auto hD_i = 4.0 * Si_in / w_perim_i;
+          auto hD_j = 4.0 * Sj_in / w_perim_j;
+          auto avg_hD = 0.5 * (hD_i + hD_j);
+          auto avg_mu = 0.5 * (mu_i + mu_j);
+          auto Re = avg_massflux * avg_hD / avg_mu;
+
+          Real gamma = 20.0; // empirical constant
+          Real sf = 1.0;     // shape factor
+          Real a = 0.18;
+          Real b = 0.2;
+          auto f = a * std::pow(Re, -b); // Rehme 1992 circular tube friction factor
+          auto k =
+              0.25 * (_fp->k_from_p_T((*_P_soln)(node_out_i) + _P_out, (*_T_soln)(node_out_i)) +
+                      _fp->k_from_p_T((*_P_soln)(node_in_i) + _P_out, (*_T_soln)(node_in_i)) +
+                      _fp->k_from_p_T((*_P_soln)(node_out_j) + _P_out, (*_T_soln)(node_out_j)) +
+                      _fp->k_from_p_T((*_P_soln)(node_in_j) + _P_out, (*_T_soln)(node_in_j)));
+          auto cp =
+              0.25 * (_fp->cp_from_p_T((*_P_soln)(node_out_i) + _P_out, (*_T_soln)(node_out_i)) +
+                      _fp->cp_from_p_T((*_P_soln)(node_in_i) + _P_out, (*_T_soln)(node_in_i)) +
+                      _fp->cp_from_p_T((*_P_soln)(node_out_j) + _P_out, (*_T_soln)(node_out_j)) +
+                      _fp->cp_from_p_T((*_P_soln)(node_in_j) + _P_out, (*_T_soln)(node_in_j)));
+          auto Pr = avg_mu * cp / k;                          // Prandtl number
+          auto Pr_t = Pr * (Re / gamma) * std::sqrt(f / 8.0); // Turbulent Prandtl number
+          auto delta = pitch;                                 // centroid to centroid distance
+          auto L_x = sf * delta;  // axial length scale (gap is the lateral length scale)
+          auto lamda = gap / L_x; // aspect ratio
+          auto a_x = 1.0 - 2.0 * lamda * lamda / libMesh::pi; // velocity coefficient
+          auto z_FP_over_D =
+              (2.0 * L_x / rod_diameter) *
+              (1 + (-0.5 * std::log(lamda) + 0.5 * std::log(4.0) - 0.25) * lamda * lamda);
+          auto Str =
+              1.0 / (0.822 * (gap / rod_diameter) + 0.144); // Strouhal number (Wu & Trupp 1994)
+          auto dum1 = 2.0 / std::pow(gamma, 2) * std::sqrt(a / 8.0) * (avg_hD / gap);
+          auto dum2 = (1 / Pr_t) * lamda;
+          auto dum3 = a_x * z_FP_over_D * Str;
+          // Mixing Stanton number: Stg (eq 25,Kim and Chung (2001), eq 19 (Jeong et. al 2005)
+          beta = dum1 * (dum2 + dum3) * std::pow(Re, -b / 2.0);
+        }
 
         // Base value - I don't want to write it every time
-        PetscScalar base_value = _beta * 0.5 * Sij;
+        PetscScalar base_value = beta * 0.5 * Sij;
 
         // Bottom values
         if (iz == first_node)

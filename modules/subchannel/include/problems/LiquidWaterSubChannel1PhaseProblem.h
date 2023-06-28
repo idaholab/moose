@@ -36,6 +36,8 @@ protected:
   const Real & _beta;
   /// Flag that activates one of the two friction models (default: f=a*Re^b, non-default: Todreas-Kazimi)
   const bool _default_friction_model;
+  /// Flag that activates the use of constant beta
+  const bool _constant_beta;
 
 public:
   static InputParameters validParams();
