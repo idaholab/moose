@@ -13,7 +13,9 @@
 UELThread::UELThread(FEProblemBase & fe_problem, AbaqusUserElement & uel_uo)
   : ThreadedElementLoop<ConstElemRange>(fe_problem),
     _sys(fe_problem.currentNonlinearSystem()),
+    _aux_sys(&_fe_problem.getAuxiliarySystem()),
     _variables(uel_uo.getVariables()),
+    _aux_variables(uel_uo.getAuxVariables()),
     _uel_uo(uel_uo),
     _uel(uel_uo.getPlugin()),
     _statev_copy(uel_uo._nstatev)
@@ -30,7 +32,9 @@ UELThread::UELThread(FEProblemBase & fe_problem, AbaqusUserElement & uel_uo)
 UELThread::UELThread(UELThread & x, Threads::split split)
   : ThreadedElementLoop<ConstElemRange>(x, split),
     _sys(x._sys),
+    _aux_sys(x._aux_sys),
     _variables(x._variables),
+    _aux_variables(x._aux_variables),
     _uel_uo(x._uel_uo),
     _uel(x._uel),
     _lflags(x._lflags),
@@ -57,6 +61,7 @@ UELThread::onElement(const Elem * elem)
   const auto nvar = _variables.size();
   _all_dof_indices.resize(nnode * nvar);
 
+  // ** System variables **
   // prepare DOF indices in the correct order
   for (const auto i : index_range(_variables))
   {
@@ -74,7 +79,7 @@ UELThread::onElement(const Elem * elem)
 
   int ndofel = _all_dof_indices.size();
 
-  // get solution values
+  // Get solution values
   _all_dof_values.resize(ndofel);
   _sys.currentSolution()->get(_all_dof_indices, _all_dof_increments);
   _all_dof_increments.resize(ndofel);
@@ -86,7 +91,7 @@ UELThread::onElement(const Elem * elem)
   _all_udot_dof_values.resize(ndofel);
   _all_udotdot_dof_values.resize(ndofel);
 
-  // get u_dot and u_dotdot solution values
+  // Get u_dot and u_dotdot solution values
   if (false)
   {
     _all_udot_dof_values.resize(ndofel);
@@ -94,6 +99,48 @@ UELThread::onElement(const Elem * elem)
     _all_udotdot_dof_values.resize(ndofel);
     _sys.solutionUDot()->get(_all_dof_indices, _all_udotdot_dof_values);
   }
+
+  // *** Auxiliary variables ***
+  // TODO: Account for a _vector_ of auxiliary variables
+  _all_aux_var_dof_indices.resize(nnode);
+  _all_aux_var_dof_increments.resize(nnode);
+  const auto nvar_aux = _aux_variables.size();
+
+  // if (nnode != nvar_aux)
+  // mooseError("Number of aux variables is different from the number of nodes. Multiple auxiliary
+  // variable types not yet supported.");
+
+  for (const auto i : index_range(_aux_variables))
+  {
+    _aux_variables[i]->getDofIndices(elem, _aux_var_dof_indices);
+
+    if (static_cast<int>(_aux_var_dof_indices.size()) != nnode)
+      mooseError("All auxiliary variables must be full order lagrangian");
+
+    for (const auto j : make_range(nnode))
+      _all_aux_var_dof_indices[j * nvar_aux + i] = _aux_var_dof_indices[j];
+  }
+  // HERE
+  _all_aux_var_dof_values.resize(nnode);
+  _aux_var_values_to_uel.resize(2 * nnode);
+
+  _aux_sys->solution().get(_all_aux_var_dof_indices, _all_aux_var_dof_increments);
+  _all_aux_var_dof_increments.resize(nnode);
+  _aux_sys->solutionOld().get(_all_aux_var_dof_indices, _all_aux_var_dof_values);
+
+  for (const auto i : index_range(_all_aux_var_dof_values))
+    _all_aux_var_dof_increments[i] -= _all_aux_var_dof_values[i];
+
+  unsigned int index = 0;
+  for (unsigned int i = 0; i < _all_aux_var_dof_values.size(); i = i + 2)
+  {
+    _aux_var_values_to_uel[i] = _all_aux_var_dof_values[index];
+    _aux_var_values_to_uel[i + 1] = _all_aux_var_dof_increments[index];
+    index++;
+  }
+
+  // const NumericVector<Number> & aux_sol_old = _aux_sys->solutionOld();
+  // const NumericVector<Number> & aux_sol = _aux_sys->solution();
 
   const bool do_residual = _sys.hasVector(_sys.residualVectorTag());
   const bool do_jacobian = _sys.hasMatrix(_sys.systemMatrixTag());
@@ -119,13 +166,15 @@ UELThread::onElement(const Elem * elem)
   _local_re.resize(ndofel);
   _local_ke.resize(ndofel, ndofel);
 
-  int nrhs = 1;              // : RHS should contain the residual vector
+  int nrhs = 1;               // : RHS should contain the residual vector
   int jtype = _uel_uo._jtype; // type of user element
-  std::vector<Real> time(2); // dummy
-  Real dt = 0;
+  std::vector<Real> time(2);  // dummy
+  Real dt = _fe_problem.dt();
   std::array<Real, 8> energy;
   int jelem = elem->id() + 1; // User-assigned element number
   Real pnewdt;
+
+  int npredf = 1; // One temperature var.
 
   // dummy vars
   Real rdummy = 0;
@@ -165,8 +214,8 @@ UELThread::onElement(const Elem * elem)
        &idummy /* NDLOAD */,
        nullptr /* JDLTYP[] */,
        nullptr /* ADLMAG[] */,
-       nullptr /* PREDEF[] */,
-       &idummy /* NPREDF */,
+       _aux_var_values_to_uel.data() /* PREDEF[] */,
+       &npredf /* NPREDF */,
        nullptr /* LFLAGS[] */,
        &ndofel /* MLVARX */,
        nullptr /* DDLMAG[] */,

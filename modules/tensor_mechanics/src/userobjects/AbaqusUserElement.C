@@ -33,6 +33,8 @@ AbaqusUserElement::validParams()
 
   // coupled variables
   params.addParam<std::vector<NonlinearVariableName>>("variables", "coupled variables");
+  // auxiliary variables (including temperature)
+  params.addParam<std::vector<AuxVariableName>>("aux_variables", "coupled variables");
 
   // UEL plugin file
   params.addParam<FileName>("plugin", "UEL plugin file");
@@ -58,6 +60,7 @@ AbaqusUserElement::AbaqusUserElement(const InputParameters & params)
     _mesh(_moose_mesh.getMesh()),
     _dim(_moose_mesh.dimension()),
     _variable_names(getParam<std::vector<NonlinearVariableName>>("variables")),
+    _aux_variable_names(getParam<std::vector<AuxVariableName>>("aux_variables")),
     _sub_ids(blockRestricted() ? blockIDs() : _moose_mesh.meshSubdomains()),
     _props(getParam<std::vector<Real>>("constant_properties")),
     _nprops(_props.size()),
@@ -79,6 +82,20 @@ AbaqusUserElement::AbaqusUserElement(const InputParameters & params)
     // check block restriction
     if (!var->hasBlocks(blockIDs()))
       paramError("variables", "must be defined on all blocks the UEL is operating on.");
+  }
+
+  for (const auto & aux_variable_name : _aux_variable_names)
+  {
+    const auto * aux_var =
+        &UserObject::_subproblem.getVariable(0,
+                                             aux_variable_name,
+                                             Moose::VarKindType::VAR_AUXILIARY,
+                                             Moose::VarFieldType::VAR_FIELD_STANDARD);
+    _aux_variables.push_back(aux_var);
+
+    // check block restriction
+    if (!aux_var->hasBlocks(blockIDs()))
+      paramError("aux_variables", "must be defined on all blocks the UEL is operating on.");
   }
 }
 

@@ -12,7 +12,7 @@
 #include "ThreadedElementLoop.h"
 #include "AbaqusUserElement.h"
 #include "libmesh/elem_range.h"
-
+#include "AuxiliarySystem.h"
 class UELThread : public ThreadedElementLoop<ConstElemRange>
 {
 public:
@@ -31,6 +31,9 @@ private:
   /// Current nonlinear system
   NonlinearSystemBase & _sys;
 
+  /// Auxiliary system object
+  AuxiliarySystem * _aux_sys;
+
   /// dof indices of all coupled variables
   std::vector<dof_id_type> _var_dof_indices;
   std::vector<dof_id_type> _all_dof_indices; // numeric_index_type?
@@ -39,10 +42,19 @@ private:
   std::vector<Real> _all_udot_dof_values;
   std::vector<Real> _all_udotdot_dof_values;
 
+  // vectors for aux variables
+  std::vector<dof_id_type> _aux_var_dof_indices;
+  std::vector<dof_id_type> _all_aux_var_dof_indices; // numeric_index_type?
+  std::vector<Real> _all_aux_var_dof_increments;
+  std::vector<Real> _all_aux_var_dof_values;
+  std::vector<Real> _aux_var_values_to_uel;
+
   DenseVector<Real> _local_re;
   DenseMatrix<Real> _local_ke;
 
   const std::vector<const MooseVariableFieldBase *> & _variables;
+
+  const std::vector<const MooseVariableFieldBase *> & _aux_variables;
 
   /// reference to the userobject (to access parameters)
   AbaqusUserElement & _uel_uo;

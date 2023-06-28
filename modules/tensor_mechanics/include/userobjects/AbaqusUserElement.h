@@ -108,6 +108,8 @@ public:
 
   /// getters for the loop class
   const std::vector<const MooseVariableFieldBase *> & getVariables() const { return _variables; }
+  const std::vector<const MooseVariableFieldBase *> & getAuxVariables() const { return _aux_variables; }
+
   const uel_t & getPlugin() const { return _uel; }
 
 protected:
@@ -137,8 +139,14 @@ protected:
   /// coupled variables to provide the DOF values
   std::vector<NonlinearVariableName> _variable_names;
 
+  /// Auxiliary variable names
+  std::vector<AuxVariableName> _aux_variable_names;
+
   /// pointers to the variable objects
   std::vector<const MooseVariableFieldBase *> _variables;
+
+  /// pointers to the auxiliary variable objects
+  std::vector<const MooseVariableFieldBase *> _aux_variables;
 
   /// The subdomain ids this object operates on
   const std::set<SubdomainID> _sub_ids;
