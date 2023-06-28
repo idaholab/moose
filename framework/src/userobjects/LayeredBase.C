@@ -250,7 +250,7 @@ LayeredBase::integralValue(Point p) const
 
       if (higher_layer != -1)
       {
-        for (unsigned int i = 0; i < _average_radius; i++)
+        for (const auto i : make_range(_average_radius))
         {
           int current_layer = higher_layer + i;
 
@@ -267,7 +267,7 @@ LayeredBase::integralValue(Point p) const
 
       if (lower_layer != -1)
       {
-        for (unsigned int i = 0; i < _average_radius; i++)
+        for (const auto i : make_range(_average_radius))
         {
           int current_layer = lower_layer - i;
 
@@ -303,7 +303,7 @@ LayeredBase::initialize()
   if (_using_displaced_mesh)
     getBounds();
 
-  for (unsigned int i = 0; i < _layer_values.size(); i++)
+  for (const auto i : index_range(_layer_values))
   {
     _layer_values[i] = 0.0;
     _layer_has_value[i] = false;
@@ -321,7 +321,7 @@ LayeredBase::finalize()
     Real value = 0;
 
     if (_positive_cumulative_direction)
-      for (unsigned i = 0; i < _num_layers; i++)
+      for (const auto i : make_range(_num_layers))
       {
         value += getLayerValue(i);
         setLayerValue(i, value);
@@ -339,7 +339,7 @@ void
 LayeredBase::threadJoin(const UserObject & y)
 {
   const LayeredBase & lb = dynamic_cast<const LayeredBase &>(y);
-  for (unsigned int i = 0; i < _layer_values.size(); i++)
+  for (const auto i : index_range(_layer_values))
     if (lb.layerHasValue(i))
       setLayerValue(i, getLayerValue(i) + lb._layer_values[i]);
 }
@@ -393,12 +393,12 @@ LayeredBase::computeLayerCenters()
   {
     Real dx = (_direction_max - _direction_min) / _num_layers;
 
-    for (unsigned int i = 0; i < _num_layers; ++i)
+    for (const auto i : make_range(_num_layers))
       _layer_centers[i] = (i + 0.5) * dx;
   }
   else
   {
-    for (unsigned int i = 0; i < _num_layers; ++i)
+    for (const auto i : make_range(_num_layers))
       _layer_centers[i] = 0.5 * (_layer_bounds[i + 1] + _layer_bounds[i]);
   }
 }
