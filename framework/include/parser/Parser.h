@@ -59,8 +59,12 @@ public:
   };
 
   Parser(MooseApp & app, ActionWarehouse & action_wh);
-
   virtual ~Parser();
+
+  /**
+   * Parameters that are processed directly by the Parser and are valid anywhere in the input
+   */
+  static InputParameters validParams();
 
   /**
    * Return the primary (first) filename that was parsed
