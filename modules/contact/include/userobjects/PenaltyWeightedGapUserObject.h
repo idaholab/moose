@@ -101,4 +101,7 @@ protected:
 
   /// Use scaled or physical gap
   const bool _use_mortar_scaled_gap;
+
+  /// The auxiliary Lagrange multiplier variable (used together whith the Petrov-Galerkin approach)
+  const MooseVariable * const _aux_lm_var;
 };

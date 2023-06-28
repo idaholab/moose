@@ -37,7 +37,10 @@ PenaltyWeightedGapUserObject::validParams()
       1e-5,
       "penetration_tolerance > 0",
       "Acceptable penetration distance at which augmented Lagrange iterations can be stopped");
-
+  params.addRequiredCoupledVar(
+      "aux_lm",
+      "Auxiliary Lagrange multiplier variable that is utilized together with the "
+      "dual approach.");
   params.addParamNamesToGroup("penalty_multiplier penetration_tolerance", "Augmented Lagrange");
 
   return params;
@@ -56,7 +59,8 @@ PenaltyWeightedGapUserObject::PenaltyWeightedGapUserObject(const InputParameters
                                      : _no_iterations),
     _predictor_scale(getParam<Real>("augmented_lagrange_predictor_scale")),
     _dt(_fe_problem.dt()),
-    _use_mortar_scaled_gap(getParam<bool>("use_mortar_scaled_gap"))
+    _use_mortar_scaled_gap(getParam<bool>("use_mortar_scaled_gap")),
+    _aux_lm_var(getVar("aux_lm", 0))
 {
   auto check_type = [this](const auto & var, const auto & var_name)
   {
@@ -74,7 +78,7 @@ PenaltyWeightedGapUserObject::PenaltyWeightedGapUserObject(const InputParameters
 const VariableTestValue &
 PenaltyWeightedGapUserObject::test() const
 {
-  return _disp_x_var->phiLower();
+  return _aux_lm_var->phiLower();
 }
 
 const ADVariableValue &
@@ -146,7 +150,7 @@ PenaltyWeightedGapUserObject::reinit()
         _augmented_lagrange_problem ? _dof_to_lagrange_multiplier[node] : 0.0;
     const auto & test_i = (*_test)[i];
 
-    auto normal_pressure = penalty * gap + lagrange_multiplier;
+    auto normal_pressure = penalty / _dof_to_weighted_gap[node].second * gap + lagrange_multiplier;
     normal_pressure = normal_pressure < 0.0 ? -normal_pressure : 0.0;
 
     _dof_to_normal_pressure[node] = normal_pressure;
@@ -251,14 +255,14 @@ PenaltyWeightedGapUserObject::updateAugmentedLagrangianMultipliers()
     //   lagrange_multiplier = 0.0;
 
     if (lagrange_multiplier + gap * penalty <= 0)
-      lagrange_multiplier += gap * penalty;
+      lagrange_multiplier += gap * penalty / _dof_to_weighted_gap[dof_object].second;
     else
       lagrange_multiplier = 0.0;
 
     // update penalty
-    const auto previous_gap = _dof_to_previous_gap[dof_object];
-    if (std::abs(gap) > 0.25 * std::abs(previous_gap))
-      penalty *= 10.0;
+    // const auto previous_gap = _dof_to_previous_gap[dof_object];
+    // if (std::abs(gap) > 0.25 * std::abs(previous_gap))
+    //   penalty *= 10.0;
 
     // if (penalty > 1e11)
     //   penalty = 1e11;
