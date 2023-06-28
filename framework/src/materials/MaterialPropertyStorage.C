@@ -453,7 +453,7 @@ dataLoad(std::istream & stream, MaterialPropertyStorage & storage, void * contex
     if (find_prop_id == storage._stateful_prop_id_to_prop_id.end())
       mooseError("Not supported yet");
 
-    const auto to_stateful_id =
+    const std::size_t to_stateful_id =
         std::distance(storage._stateful_prop_id_to_prop_id.begin(), find_prop_id);
     to_stateful_ids[from_stateful_id] = to_stateful_id;
     if (to_stateful_id != from_stateful_id)
