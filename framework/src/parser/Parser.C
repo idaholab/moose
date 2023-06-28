@@ -922,27 +922,23 @@ Parser::buildJsonSyntaxTree(JsonSyntaxTree & root) const
     if (action_obj_params.have_parameter<bool>("isObjectAction") &&
         action_obj_params.get<bool>("isObjectAction"))
     {
-      for (registeredMooseObjectIterator moose_obj = _factory.registeredObjectsBegin();
-           moose_obj != _factory.registeredObjectsEnd();
-           ++moose_obj)
+      for (auto & [moose_obj_name, obj] : _factory.registeredObjects())
       {
-        InputParameters moose_obj_params = (moose_obj->second)();
+        auto moose_obj_params = obj->buildParameters();
         // Now that we know that this is a MooseObjectAction we need to see if it has been
         // restricted
         // in any way by the user.
         const std::vector<std::string> & buildable_types = action_obj_params.getBuildableTypes();
-        std::string moose_obj_name = moose_obj->first;
 
         // See if the current Moose Object syntax belongs under this Action's block
         if ((buildable_types.empty() || // Not restricted
-             std::find(buildable_types.begin(), buildable_types.end(), moose_obj->first) !=
+             std::find(buildable_types.begin(), buildable_types.end(), moose_obj_name) !=
                  buildable_types.end()) &&                                 // Restricted but found
             moose_obj_params.have_parameter<std::string>("_moose_base") && // Has a registered base
             _syntax.verifyMooseObjectTask(moose_obj_params.get<std::string>("_moose_base"),
-                                          task) &&             // and that base is associated
-            action_obj_params.mooseObjectSyntaxVisibility() && // and the Action says it's visible
-            moose_obj_name.find("<JACOBIAN>") ==
-                std::string::npos) // And it is not a Jacobian templated AD object
+                                          task) &&          // and that base is associated
+            action_obj_params.mooseObjectSyntaxVisibility() // and the Action says it's visible
+        )
         {
           std::string name;
           size_t pos = 0;
@@ -969,9 +965,6 @@ Parser::buildJsonSyntaxTree(JsonSyntaxTree & root) const
 
           auto lineinfo = _factory.getLineInfo(moose_obj_name);
           std::string classname = _factory.associatedClassName(moose_obj_name);
-          name = name.substr(0, name.find("<RESIDUAL>"));
-          moose_obj_name = moose_obj_name.substr(0, moose_obj_name.find("<RESIDUAL>"));
-          classname = classname.substr(0, classname.find("<RESIDUAL>"));
           root.addParameters(act_name,
                              name,
                              is_type,
@@ -1023,11 +1016,9 @@ Parser::buildFullTree(const std::string & search_string)
     if (action_obj_params.have_parameter<bool>("isObjectAction") &&
         action_obj_params.get<bool>("isObjectAction"))
     {
-      for (registeredMooseObjectIterator moose_obj = _factory.registeredObjectsBegin();
-           moose_obj != _factory.registeredObjectsEnd();
-           ++moose_obj)
+      for (const auto & [moose_obj_name, obj] : _factory.registeredObjects())
       {
-        InputParameters moose_obj_params = (moose_obj->second)();
+        auto moose_obj_params = obj->buildParameters();
         /**
          * Now that we know that this is a MooseObjectAction we need to see if it has been
          * restricted in any way by the user.
@@ -1036,14 +1027,13 @@ Parser::buildFullTree(const std::string & search_string)
 
         // See if the current Moose Object syntax belongs under this Action's block
         if ((buildable_types.empty() || // Not restricted
-             std::find(buildable_types.begin(), buildable_types.end(), moose_obj->first) !=
+             std::find(buildable_types.begin(), buildable_types.end(), moose_obj_name) !=
                  buildable_types.end()) &&                                 // Restricted but found
             moose_obj_params.have_parameter<std::string>("_moose_base") && // Has a registered base
             _syntax.verifyMooseObjectTask(moose_obj_params.get<std::string>("_moose_base"),
-                                          task) &&             // and that base is associated
-            action_obj_params.mooseObjectSyntaxVisibility() && // and the Action says it's visible
-            moose_obj->first.find("<JACOBIAN>") ==
-                std::string::npos) // And it is not a Jacobian templated AD object
+                                          task) &&          // and that base is associated
+            action_obj_params.mooseObjectSyntaxVisibility() // and the Action says it's visible
+        )
         {
           std::string name;
           size_t pos = 0;
@@ -1052,27 +1042,22 @@ Parser::buildFullTree(const std::string & search_string)
           {
             pos = act_name.size();
 
-            // Remove <RESIDUAL> append for AD objects
-            std::string obj_name = moose_obj->first;
-            removeSubstring(obj_name, "<RESIDUAL>");
-
             if (!action_obj_params.collapseSyntaxNesting())
-              name = act_name.substr(0, pos - 1) + obj_name;
+              name = act_name.substr(0, pos - 1) + moose_obj_name;
             else
             {
-              name = act_name.substr(0, pos - 1) + "/<type>/" + moose_obj->first;
+              name = act_name.substr(0, pos - 1) + "/<type>/" + moose_obj_name;
               is_action_params = true;
             }
           }
           else
           {
-            name = act_name + "/<type>/" + moose_obj->first;
+            name = act_name + "/<type>/" + moose_obj_name;
           }
 
-          moose_obj_params.set<std::string>("type") = moose_obj->first;
+          moose_obj_params.set<std::string>("type") = moose_obj_name;
 
-          _syntax_formatter->insertNode(
-              name, moose_obj->first, is_action_params, &moose_obj_params);
+          _syntax_formatter->insertNode(name, moose_obj_name, is_action_params, &moose_obj_params);
         }
       }
     }

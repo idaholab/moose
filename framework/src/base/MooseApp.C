@@ -798,26 +798,16 @@ MooseApp::setupOptions()
 
     auto & objmap = Registry::allObjects();
     for (auto & entry : objmap)
-    {
       for (auto & obj : entry.second)
-      {
-        std::string name = obj._name;
-        if (name.empty())
-          name = obj._alias;
-        if (name.empty())
-          name = obj._classname;
-
-        Moose::out << entry.first << "\tobject\t" << name << "\t" << obj._classname << "\t"
-                   << obj._file << "\n";
-      }
-    }
+        Moose::out << entry.first << "\tobject\t" << obj->name() << "\t" << obj->_classname << "\t"
+                   << obj->_file << "\n";
 
     auto & actmap = Registry::allActions();
     for (auto & entry : actmap)
     {
       for (auto & act : entry.second)
-        Moose::out << entry.first << "\taction\t" << act._name << "\t" << act._classname << "\t"
-                   << act._file << "\n";
+        Moose::out << entry.first << "\taction\t" << act->_name << "\t" << act->_classname << "\t"
+                   << act->_file << "\n";
     }
 
     _ready_to_exit = true;
@@ -836,41 +826,31 @@ MooseApp::setupOptions()
 
     auto & objmap = Registry::allObjects();
     for (auto & entry : objmap)
-    {
       for (auto & obj : entry.second)
       {
-        std::string name = obj._name;
-        if (name.empty())
-          name = obj._alias;
-        if (name.empty())
-          name = obj._classname;
-
         auto ent = new hit::Section("entry");
         objsec->addChild(ent);
         ent->addChild(new hit::Field("label", hit::Field::Kind::String, entry.first));
         ent->addChild(new hit::Field("type", hit::Field::Kind::String, "object"));
-        ent->addChild(new hit::Field("name", hit::Field::Kind::String, name));
-        ent->addChild(new hit::Field("class", hit::Field::Kind::String, obj._classname));
-        ent->addChild(new hit::Field("file", hit::Field::Kind::String, obj._file));
+        ent->addChild(new hit::Field("name", hit::Field::Kind::String, obj->name()));
+        ent->addChild(new hit::Field("class", hit::Field::Kind::String, obj->_classname));
+        ent->addChild(new hit::Field("file", hit::Field::Kind::String, obj->_file));
       }
-    }
 
     auto actsec = new hit::Section("actions");
     sec->addChild(actsec);
     auto & actmap = Registry::allActions();
     for (auto & entry : actmap)
-    {
       for (auto & act : entry.second)
       {
         auto ent = new hit::Section("entry");
         actsec->addChild(ent);
         ent->addChild(new hit::Field("label", hit::Field::Kind::String, entry.first));
         ent->addChild(new hit::Field("type", hit::Field::Kind::String, "action"));
-        ent->addChild(new hit::Field("task", hit::Field::Kind::String, act._name));
-        ent->addChild(new hit::Field("class", hit::Field::Kind::String, act._classname));
-        ent->addChild(new hit::Field("file", hit::Field::Kind::String, act._file));
+        ent->addChild(new hit::Field("task", hit::Field::Kind::String, act->_name));
+        ent->addChild(new hit::Field("class", hit::Field::Kind::String, act->_classname));
+        ent->addChild(new hit::Field("file", hit::Field::Kind::String, act->_file));
       }
-    }
 
     Moose::out << root.render();
 
