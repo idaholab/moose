@@ -108,19 +108,30 @@ DenseVector<Real> applyQuotientRule(const Real & num,
  * @param vel The velocity of the phase
  * @param D_h The hydraulic diameter
  * @param mu The viscosity of the phase
+ *
+ * @return Reynolds number
  */
-Real Reynolds(Real volume_fraction, Real rho, Real vel, Real D_h, Real mu);
-ADReal Reynolds(ADReal volume_fraction, ADReal rho, ADReal vel, ADReal D_h, ADReal mu);
+template <typename T1, typename T2, typename T3, typename T4, typename T5>
+auto
+Reynolds(const T1 & volume_fraction, const T2 & rho, const T3 & vel, const T4 & D_h, const T5 & mu)
+{
+  return volume_fraction * rho * std::fabs(vel) * D_h / mu;
+}
 
 /**
  * Compute Prandtl number
  * @param cp Specific heat
  * @param mu Dynamic viscosity
  * @param k Thermal conductivity
- * @return
+ *
+ * @return Prandtl number
  */
-Real Prandtl(Real cp, Real mu, Real k);
-ADReal Prandtl(ADReal cp, ADReal mu, ADReal k);
+template <typename T1, typename T2, typename T3>
+auto
+Prandtl(const T1 & cp, const T2 & mu, const T3 & k)
+{
+  return cp * mu / k;
+}
 
 /**
  * Compute Peclet number
@@ -135,8 +146,17 @@ ADReal Prandtl(ADReal cp, ADReal mu, ADReal k);
  *
  * @return Peclet number
  */
-Real Peclet(Real volume_fraction, Real cp, Real rho, Real vel, Real D_h, Real k);
-ADReal Peclet(ADReal volume_fraction, ADReal cp, ADReal rho, ADReal vel, ADReal D_h, ADReal k);
+template <typename T1, typename T2, typename T3, typename T4, typename T5, typename T6>
+auto
+Peclet(const T1 & volume_fraction,
+       const T2 & cp,
+       const T3 & rho,
+       const T4 & vel,
+       const T5 & D_h,
+       const T6 & k)
+{
+  return volume_fraction * cp * D_h * rho * std::fabs(vel) / k;
+}
 
 /**
  * Compute Grashof number
@@ -150,13 +170,18 @@ ADReal Peclet(ADReal volume_fraction, ADReal cp, ADReal rho, ADReal vel, ADReal 
  *
  * @return Grashof number
  */
-Real Grashof(Real beta, Real dT, Real D_h, Real rho_liquid, Real mu_liquid, Real gravity_magnitude);
-ADReal Grashof(ADReal beta,
-               ADReal dT,
-               ADReal D_h,
-               ADReal rho_liquid,
-               ADReal mu_liquid,
-               Real gravity_magnitude);
+template <typename T1, typename T2, typename T3, typename T4, typename T5>
+auto
+Grashof(const T1 & beta,
+        const T2 & dT,
+        const T3 & D_h,
+        const T4 & rho_liquid,
+        const T5 & mu_liquid,
+        const Real & gravity_magnitude)
+{
+  return gravity_magnitude * beta * dT * std::pow(D_h, 3) * (rho_liquid * rho_liquid) /
+         (mu_liquid * mu_liquid);
+}
 
 /**
  * Compute Laplace number (or coefficient)
@@ -167,8 +192,12 @@ ADReal Grashof(ADReal beta,
  *
  * @return Laplace number
  */
-Real Laplace(Real surf_tension, Real delta_rho, Real gravity_magnitude);
-ADReal Laplace(ADReal surf_tension, ADReal delta_rho, Real gravity_magnitude);
+template <typename T1, typename T2>
+auto
+Laplace(const T1 & surf_tension, const T2 & delta_rho, const Real & gravity_magnitude)
+{
+  return std::sqrt(surf_tension / (gravity_magnitude * delta_rho));
+}
 
 /**
  * Compute viscosity number (or coefficient)
@@ -181,29 +210,46 @@ ADReal Laplace(ADReal surf_tension, ADReal delta_rho, Real gravity_magnitude);
  *
  * @return viscosity number
  */
-Real viscosityNumber(
-    Real viscosity, Real surf_tension, Real rho_k, Real delta_rho, Real gravity_magnitude);
-ADReal viscosityNumber(
-    ADReal viscosity, ADReal surf_tension, ADReal rho_k, ADReal delta_rho, Real gravity_magnitude);
+template <typename T1, typename T2, typename T3, typename T4>
+auto
+viscosityNumber(const T1 & viscosity,
+                const T2 & surf_tension,
+                const T3 & rho_k,
+                const T4 & delta_rho,
+                const Real & gravity_magnitude)
+{
+  return viscosity /
+         std::sqrt(rho_k * surf_tension * std::sqrt(surf_tension / gravity_magnitude / delta_rho));
+}
 
 /**
  * Compute wall heat transfer coefficient
  * @param Nu Nusselt number
  * @param k Thermal conductivity
  * @param D_h Hydraulic diameter
+ *
  * @return the wall heat transfer coefficient
  */
-Real wallHeatTransferCoefficient(Real Nu, Real k, Real D_h);
-ADReal wallHeatTransferCoefficient(ADReal Nu, ADReal k, ADReal D_h);
+template <typename T1, typename T2, typename T3>
+auto
+wallHeatTransferCoefficient(const T1 & Nu, const T2 & k, const T3 & D_h)
+{
+  return Nu * k / D_h;
+}
 
 /**
  * Compute Dean number
  * @param Re Reynolds number
  * @param doD tube diameter to coil diameter ratio
+ *
  * @return Dean number
  */
-Real Dean(Real Re, Real doD);
-ADReal Dean(ADReal Re, ADReal doD);
+template <typename T1, typename T2>
+auto
+Dean(const T1 & Re, const T2 & doD)
+{
+  return Re * std::sqrt(doD);
+}
 
 /**
  * Computes velocity and its derivatives from alpha*rho*A and alpha*rho*u*A
