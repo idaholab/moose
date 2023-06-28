@@ -24,6 +24,27 @@ The `CoreMeshGenerator` objects automatically assigns boundary information. The 
 
 If the core is extruded to three dimensions the top-most boundary ID must be assigned using [!param](/Mesh/ReactorMeshParams/top_boundary_id) and will have the name "top", while the bottom-most boundary must be assigned using [!param](/Mesh/ReactorMeshParams/bottom_boundary_id) and will have the name "bottom".
 
+## Metadata Information
+
+Users may be interested in defining additional metadata to represent the reactor geometry and region IDs assigned to each geometry zone, which may be useful to users who want mesh geometry and composition information without having to inspect the generated mesh itself. In order to do so,  [ReactorMeshParams](ReactorMeshParams.md)/[!param](/Mesh/ReactorMeshParams/generate_rgmb_metadata) must be set to true. [!param](/Mesh/CoreMeshGenerator/show_rgmb_metadata) can be set to true in order to see the values of these metadata entries as console output.
+
+At the core level, each metadata entry is prepended with the prefix `"core_"`, and the following metadata is defined on the assembly mesh:
+
+- `mesh_dimensions`: Number of dimensions in core mesh, equivalent to  [ReactorMeshParams](ReactorMeshParams.md)/[!param](/Mesh/ReactorMeshParams/dim)
+- `mesh_geometry`: Whether core geometry is hexagonal ("Hex") or Cartesian ("Square"), equivalent to  [ReactorMeshParams](ReactorMeshParams.md)/[!param](/Mesh/ReactorMeshParams/geom)
+- `axial_boundaries`: Length of each axial region, equivalent to  [ReactorMeshParams](ReactorMeshParams.md)/[!param](/Mesh/ReactorMeshParams/axial_regions). Only relevant for 3-D meshes.
+- `axial_mesh_intervals`: Number of elements in the axial dimension for each axial region, equivalent to [ReactorMeshParams](ReactorMeshParams.md)/[!param](/Mesh/ReactorMeshParams/axial_mesh_intervals). Only relevant for 3-D meshes.
+- `assembly_types`: assembly_type ids of assembly comprising of assembly lattice in the core.
+- `lattice`: 2-D lattice of assemblies in core, where each location represents the assembly_type id of the assembly in that lattice position. A value of -1 represents a dummy assembly location
+
+For each of the assemblies listed in `assembly_types`, the assembly-level metadata is also displayed. In addition, if any of these assemblies are comprised of pins in a lattice, the pin-level metadata of these constituent pins is also displayed. A list of assembly-level and pin-level metadata defined on the core mesh can be found in [AssemblyMeshGenerator](AssemblyMeshGenerator.md) and [PinMeshGenerator](PinMeshGenerator.md) respectively.
+
+For meshes where a core periphery is defined, the following metadata is also defined:
+
+- `peripheral_ring_radius`: Outer radius of core periphery, equivalent to [!param](/Mesh/CoreMeshGenerator/outer_circle_radius).
+- `peripheral_ring_region_id`: Region ID associated with core periphery, equivalent to [!param](/Mesh/CoreMeshGenerator/periphery_region_id).
+
+
 ## Example Syntax
 
 !listing modules/reactor/test/tests/meshgenerators/core_mesh_generator/core.i block=Mesh

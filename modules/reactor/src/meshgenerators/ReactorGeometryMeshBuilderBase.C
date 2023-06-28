@@ -14,8 +14,8 @@ ReactorGeometryMeshBuilderBase::validParams()
 {
   InputParameters params = MeshGenerator::validParams();
 
-  params.addParam<bool>("show_rgmb_metadata", false,
-                        "Print out RGMB-related metadata to console output");
+  params.addParam<bool>(
+      "show_rgmb_metadata", false, "Print out RGMB-related metadata to console output");
   params.addClassDescription("A base class that contains common members and methods for Reactor "
                              "Geometry Mesh Builder mesh generators.");
 
@@ -47,7 +47,9 @@ ReactorGeometryMeshBuilderBase::initializeReactorMeshParams(const std::string re
 
   // Check value of show_rgmb_metadata is valid
   if (getParam<bool>("show_rgmb_metadata") && !getReactorParam<bool>("generate_rgmb_metadata"))
-    paramError("show_rgmb_metadata", "`ReactorMeshParams/generate_rgmb_metadata` must be set to true in order for show_rgmb_metadata to be true");
+    paramError("show_rgmb_metadata",
+               "`ReactorMeshParams/generate_rgmb_metadata` must be set to true in order for "
+               "show_rgmb_metadata to be true");
 }
 
 void
@@ -105,34 +107,57 @@ ReactorGeometryMeshBuilderBase::generateGlobalReactorMetadata(const std::string 
   declareMeshProperty(prefix + "_mesh_geometry", getReactorParam<std::string>("mesh_geometry"));
   if (mesh_dimension == 3)
   {
-    declareMeshProperty(prefix + "_axial_boundaries", getReactorParam<std::vector<Real>>("axial_boundaries"));
-    declareMeshProperty(prefix + "_axial_mesh_intervals", getReactorParam<std::vector<unsigned int>>("axial_mesh_intervals"));
+    declareMeshProperty(prefix + "_axial_boundaries",
+                        getReactorParam<std::vector<Real>>("axial_boundaries"));
+    declareMeshProperty(prefix + "_axial_mesh_intervals",
+                        getReactorParam<std::vector<unsigned int>>("axial_mesh_intervals"));
   }
 }
 
 void
-ReactorGeometryMeshBuilderBase::copyPinMetadata(const std::string input_name, const unsigned int pin_type_id)
+ReactorGeometryMeshBuilderBase::copyPinMetadata(const std::string input_name,
+                                                const unsigned int pin_type_id)
 {
   std::string metadata_prefix = "pin_" + std::to_string(pin_type_id);
 
-  declareMeshProperty(metadata_prefix + "_pitch", getMeshProperty<Real>(metadata_prefix + "_pitch", input_name));
-  declareMeshProperty(metadata_prefix + "_ring_radii", getMeshProperty<std::vector<Real>>(metadata_prefix + "_ring_radii", input_name));
-  declareMeshProperty(metadata_prefix + "_ring_region_ids", getMeshProperty<std::vector<std::vector<subdomain_id_type>>>(metadata_prefix + "_ring_region_ids", input_name));
-  declareMeshProperty(metadata_prefix + "_background_region_id", getMeshProperty<std::vector<subdomain_id_type>>(metadata_prefix + "_background_region_id", input_name));
-  declareMeshProperty(metadata_prefix + "_duct_halfpitches", getMeshProperty<std::vector<Real>>(metadata_prefix + "_duct_halfpitches", input_name));
-  declareMeshProperty(metadata_prefix + "_duct_region_ids", getMeshProperty<std::vector<std::vector<subdomain_id_type>>>(metadata_prefix + "_duct_region_ids", input_name));
+  declareMeshProperty(metadata_prefix + "_pitch",
+                      getMeshProperty<Real>(metadata_prefix + "_pitch", input_name));
+  declareMeshProperty(
+      metadata_prefix + "_ring_radii",
+      getMeshProperty<std::vector<Real>>(metadata_prefix + "_ring_radii", input_name));
+  declareMeshProperty(metadata_prefix + "_ring_region_ids",
+                      getMeshProperty<std::vector<std::vector<subdomain_id_type>>>(
+                          metadata_prefix + "_ring_region_ids", input_name));
+  declareMeshProperty(metadata_prefix + "_background_region_id",
+                      getMeshProperty<std::vector<subdomain_id_type>>(
+                          metadata_prefix + "_background_region_id", input_name));
+  declareMeshProperty(
+      metadata_prefix + "_duct_halfpitches",
+      getMeshProperty<std::vector<Real>>(metadata_prefix + "_duct_halfpitches", input_name));
+  declareMeshProperty(metadata_prefix + "_duct_region_ids",
+                      getMeshProperty<std::vector<std::vector<subdomain_id_type>>>(
+                          metadata_prefix + "_duct_region_ids", input_name));
 }
 
 void
-ReactorGeometryMeshBuilderBase::copyAssemblyMetadata(const std::string input_name, const unsigned int assembly_type_id)
+ReactorGeometryMeshBuilderBase::copyAssemblyMetadata(const std::string input_name,
+                                                     const unsigned int assembly_type_id)
 {
   std::string metadata_prefix = "assembly_" + std::to_string(assembly_type_id);
 
-  declareMeshProperty(metadata_prefix + "_pitch", getMeshProperty<Real>(metadata_prefix + "_pitch", input_name));
-  declareMeshProperty(metadata_prefix + "_background_region_id", getMeshProperty<std::vector<subdomain_id_type>>(metadata_prefix + "_background_region_id", input_name));
-  declareMeshProperty(metadata_prefix + "_duct_halfpitches", getMeshProperty<std::vector<Real>>(metadata_prefix + "_duct_halfpitches", input_name));
-  declareMeshProperty(metadata_prefix + "_duct_region_ids", getMeshProperty<std::vector<std::vector<subdomain_id_type>>>(metadata_prefix + "_duct_region_ids", input_name));
-  const auto is_homogenized = getMeshProperty<bool>(metadata_prefix + "_is_homogenized", input_name);
+  declareMeshProperty(metadata_prefix + "_pitch",
+                      getMeshProperty<Real>(metadata_prefix + "_pitch", input_name));
+  declareMeshProperty(metadata_prefix + "_background_region_id",
+                      getMeshProperty<std::vector<subdomain_id_type>>(
+                          metadata_prefix + "_background_region_id", input_name));
+  declareMeshProperty(
+      metadata_prefix + "_duct_halfpitches",
+      getMeshProperty<std::vector<Real>>(metadata_prefix + "_duct_halfpitches", input_name));
+  declareMeshProperty(metadata_prefix + "_duct_region_ids",
+                      getMeshProperty<std::vector<std::vector<subdomain_id_type>>>(
+                          metadata_prefix + "_duct_region_ids", input_name));
+  const auto is_homogenized =
+      getMeshProperty<bool>(metadata_prefix + "_is_homogenized", input_name);
   const auto is_single_pin = getMeshProperty<bool>(metadata_prefix + "_is_single_pin", input_name);
   declareMeshProperty(metadata_prefix + "_is_homogenized", is_homogenized);
   declareMeshProperty(metadata_prefix + "_is_single_pin", is_single_pin);
@@ -140,19 +165,28 @@ ReactorGeometryMeshBuilderBase::copyAssemblyMetadata(const std::string input_nam
   // Define metadata specific to assemblies defined as a lattice of pins
   if (!is_single_pin)
   {
-    declareMeshProperty(metadata_prefix + "_pin_types", getMeshProperty<std::set<unsigned int>>(metadata_prefix + "_pin_types", input_name));
-    declareMeshProperty(metadata_prefix + "_lattice", getMeshProperty<std::vector<std::vector<int>>>(metadata_prefix + "_lattice", input_name));
+    declareMeshProperty(
+        metadata_prefix + "_pin_types",
+        getMeshProperty<std::set<unsigned int>>(metadata_prefix + "_pin_types", input_name));
+    declareMeshProperty(
+        metadata_prefix + "_lattice",
+        getMeshProperty<std::vector<std::vector<int>>>(metadata_prefix + "_lattice", input_name));
   }
   // Defined metadata specific to assemblies defined as a single heterogeneous pin
   else if (!is_homogenized)
   {
-    declareMeshProperty(metadata_prefix + "_ring_radii", getMeshProperty<std::vector<Real>>(metadata_prefix + "_ring_radii", input_name));
-  declareMeshProperty(metadata_prefix + "_ring_region_ids", getMeshProperty<std::vector<std::vector<subdomain_id_type>>>(metadata_prefix + "_ring_region_ids", input_name));
+    declareMeshProperty(
+        metadata_prefix + "_ring_radii",
+        getMeshProperty<std::vector<Real>>(metadata_prefix + "_ring_radii", input_name));
+    declareMeshProperty(metadata_prefix + "_ring_region_ids",
+                        getMeshProperty<std::vector<std::vector<subdomain_id_type>>>(
+                            metadata_prefix + "_ring_region_ids", input_name));
   }
 }
 
 void
-ReactorGeometryMeshBuilderBase::printReactorMetadata(const std::string metadata_prefix, bool first_function_call)
+ReactorGeometryMeshBuilderBase::printReactorMetadata(const std::string metadata_prefix,
+                                                     bool first_function_call)
 {
   if (metadata_prefix == "core")
   {
@@ -170,7 +204,8 @@ ReactorGeometryMeshBuilderBase::printReactorMetadata(const std::string metadata_
     {
       if (first_function_call)
       {
-        Moose::out << "Assembly-level metadata defined using Reactor Geometry Mesh Builder:" << std::endl;
+        Moose::out << "Assembly-level metadata defined using Reactor Geometry Mesh Builder:"
+                   << std::endl;
         printGlobalReactorMetadata(metadata_prefix);
       }
       printAssemblyMetadata(metadata_prefix, first_function_call);
@@ -179,7 +214,8 @@ ReactorGeometryMeshBuilderBase::printReactorMetadata(const std::string metadata_
     {
       if (first_function_call)
       {
-        Moose::out << "Pin-level metadata defined using Reactor Geometry Mesh Builder:" << std::endl;
+        Moose::out << "Pin-level metadata defined using Reactor Geometry Mesh Builder:"
+                   << std::endl;
         printGlobalReactorMetadata(metadata_prefix);
       }
       printPinMetadata(metadata_prefix);
@@ -190,7 +226,8 @@ ReactorGeometryMeshBuilderBase::printReactorMetadata(const std::string metadata_
 }
 
 void
-ReactorGeometryMeshBuilderBase::printCoreMetadata(const std::string prefix, bool first_function_call)
+ReactorGeometryMeshBuilderBase::printCoreMetadata(const std::string prefix,
+                                                  bool first_function_call)
 {
   bool has_mesh_periphery = hasMeshProperty<Real>(prefix + "_peripheral_ring_radius");
   if (has_mesh_periphery)
@@ -204,7 +241,8 @@ ReactorGeometryMeshBuilderBase::printCoreMetadata(const std::string prefix, bool
 
   if (first_function_call)
   {
-    const auto core_assembly_types = getMeshProperty<std::set<unsigned int>>(prefix + "_assembly_types");
+    const auto core_assembly_types =
+        getMeshProperty<std::set<unsigned int>>(prefix + "_assembly_types");
     for (const auto & assembly_type_id : core_assembly_types)
       printReactorMetadata("assembly_" + Moose::stringify(assembly_type_id), false);
 
@@ -215,7 +253,8 @@ ReactorGeometryMeshBuilderBase::printCoreMetadata(const std::string prefix, bool
 }
 
 void
-ReactorGeometryMeshBuilderBase::printAssemblyMetadata(const std::string prefix, bool first_function_call)
+ReactorGeometryMeshBuilderBase::printAssemblyMetadata(const std::string prefix,
+                                                      bool first_function_call)
 {
   printMetadataToConsole<Real>(prefix + "_pitch");
   printMetadataToConsole<bool>(prefix + "_is_homogenized");
@@ -241,7 +280,8 @@ ReactorGeometryMeshBuilderBase::printAssemblyMetadata(const std::string prefix, 
     // Print information about constituent pins if this is the first function call
     if (first_function_call)
     {
-      const auto assembly_pin_types = getMeshProperty<std::set<unsigned int>>(prefix + "_pin_types");
+      const auto assembly_pin_types =
+          getMeshProperty<std::set<unsigned int>>(prefix + "_pin_types");
       for (const auto & pin_type_id : assembly_pin_types)
         printReactorMetadata("pin_" + Moose::stringify(pin_type_id), false);
     }
@@ -289,13 +329,16 @@ ReactorGeometryMeshBuilderBase::printGlobalReactorMetadata(const std::string pre
   printMetadataToConsole<std::vector<unsigned int>>(prefix + "_axial_mesh_intervals");
 }
 
-template <typename T> void
+template <typename T>
+void
 ReactorGeometryMeshBuilderBase::printMetadataToConsole(const std::string metadata_name)
 {
-  Moose::out << "  " << metadata_name << ": " << Moose::stringify(getMeshProperty<T>(metadata_name)) << std::endl;
+  Moose::out << "  " << metadata_name << ": " << Moose::stringify(getMeshProperty<T>(metadata_name))
+             << std::endl;
 }
 
-template <typename T> void
+template <typename T>
+void
 ReactorGeometryMeshBuilderBase::print2dMetadataToConsole(const std::string metadata_name)
 {
   const auto metadata_value = getMeshProperty<std::vector<std::vector<T>>>(metadata_name);

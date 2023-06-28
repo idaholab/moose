@@ -152,7 +152,8 @@ AssemblyMeshGenerator::AssemblyMeshGenerator(const InputParameters & parameters)
                  "definition.\n");
     const auto pin_type = getMeshProperty<subdomain_id_type>("pin_type", pin);
     if (input_id_map.find(pin_type) != input_id_map.end() && input_id_map[pin_type] != pin)
-      mooseError("Constituent pins have shared pin_type ids but different names. Each uniquely defined pin in PinMeshGenerator must have its own pin_type id.");
+      mooseError("Constituent pins have shared pin_type ids but different names. Each uniquely "
+                 "defined pin in PinMeshGenerator must have its own pin_type id.");
     input_id_map[pin_type] = pin;
   }
   declareMeshProperty("input_id_map", input_id_map);

@@ -64,21 +64,25 @@ protected:
   /**
    * Print metadata associated with ReactorGeometryMeshBuilder object
    * @param metadata_prefix Prefix associated with metadata
-   * @param whether this is the original function call, which will trigger additional output messages
+   * @param whether this is the original function call, which will trigger additional output
+   * messages
    */
-  void printReactorMetadata(const std::string metadata_prefix, const bool first_function_call = true);
+  void printReactorMetadata(const std::string metadata_prefix,
+                            const bool first_function_call = true);
 
   /**
    * Print core-level metadata associated with ReactorGeometryMeshBuilder object
    * @param prefix Prefix associated with metadata
-   * @param whether this is the original function call, which will trigger additional output messages
+   * @param whether this is the original function call, which will trigger additional output
+   * messages
    */
   void printCoreMetadata(const std::string prefix, const bool first_function_call);
 
   /**
    * Print assembly-level metadata associated with ReactorGeometryMeshBuilder object
    * @param prefix Prefix associated with metadata
-   * @param whether this is the original function call, which will trigger additional output messages
+   * @param whether this is the original function call, which will trigger additional output
+   * messages
    */
   void printAssemblyMetadata(const std::string prefix, const bool first_function_call);
 
@@ -98,13 +102,15 @@ protected:
    * Print metadata to console output
    * @param metadata_name Name of metadata to output
    */
-  template <typename T> void printMetadataToConsole(const std::string metadata_name);
+  template <typename T>
+  void printMetadataToConsole(const std::string metadata_name);
 
   /**
    * Print metadata with datatype std::vector<std::vector<T>> to console output
    * @param metadata_name Name of metadata to output
    */
-  template <typename T> void print2dMetadataToConsole(const std::string metadata_name);
+  template <typename T>
+  void print2dMetadataToConsole(const std::string metadata_name);
 
   /**
    * Releases the mesh obtained in _reactor_params_mesh.

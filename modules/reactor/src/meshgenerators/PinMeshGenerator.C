@@ -391,10 +391,9 @@ PinMeshGenerator::PinMeshGenerator(const InputParameters & parameters)
                         getMeshProperty<dof_id_type>("node_id_background_meta", name() + "_2D"));
   if (_is_assembly)
     declareMeshProperty("pattern_pitch_meta", getReactorParam<Real>("assembly_pitch"));
-  else
-    if (hasMeshProperty<Real>("pattern_pitch_meta", name() + "_2D"))
-      declareMeshProperty("pattern_pitch_meta",
-                          getMeshProperty<Real>("pattern_pitch_meta", name() + "_2D"));
+  else if (hasMeshProperty<Real>("pattern_pitch_meta", name() + "_2D"))
+    declareMeshProperty("pattern_pitch_meta",
+                        getMeshProperty<Real>("pattern_pitch_meta", name() + "_2D"));
   declareMeshProperty("is_control_drum_meta", false);
 
   // Store pin region ids and block names for id swap after extrusion if needed
@@ -504,8 +503,10 @@ PinMeshGenerator::generateMetadata()
       (_mesh_dimensions == 3)
           ? getReactorParam<std::vector<unsigned int>>("axial_mesh_intervals").size()
           : 1;
-  std::vector<std::vector<subdomain_id_type>> ring_region_ids(n_axial_levels, std::vector<subdomain_id_type>(_ring_radii.size()));
-  std::vector<std::vector<subdomain_id_type>> duct_region_ids(n_axial_levels, std::vector<subdomain_id_type>(_duct_halfpitch.size()));
+  std::vector<std::vector<subdomain_id_type>> ring_region_ids(
+      n_axial_levels, std::vector<subdomain_id_type>(_ring_radii.size()));
+  std::vector<std::vector<subdomain_id_type>> duct_region_ids(
+      n_axial_levels, std::vector<subdomain_id_type>(_duct_halfpitch.size()));
   std::vector<subdomain_id_type> background_region_ids(n_axial_levels);
 
   for (unsigned int axial_idx = 0; axial_idx < n_axial_levels; ++axial_idx)
@@ -515,8 +516,10 @@ PinMeshGenerator::generateMetadata()
 
     background_region_ids[axial_idx] = _region_ids[axial_idx][_ring_radii.size()];
 
-    for (unsigned int duct_idx = _ring_radii.size() + 1; duct_idx < _duct_halfpitch.size(); ++duct_idx)
-      duct_region_ids[axial_idx][duct_idx - _ring_radii.size() - 1] = _region_ids[axial_idx][duct_idx];
+    for (unsigned int duct_idx = _ring_radii.size() + 1; duct_idx < _duct_halfpitch.size();
+         ++duct_idx)
+      duct_region_ids[axial_idx][duct_idx - _ring_radii.size() - 1] =
+          _region_ids[axial_idx][duct_idx];
   }
 
   declareMeshProperty(metadata_prefix + "_ring_region_ids", ring_region_ids);
