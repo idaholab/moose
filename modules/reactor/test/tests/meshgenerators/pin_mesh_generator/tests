@@ -12,6 +12,17 @@
     exodiff = 'pin_only_in.e'
     recover = false
   []
+  [2d_square_w_3d_info]
+    requirement = 'The system shall throw an error if 3d info is provided to a 2d mesh'
+    type = 'RunException'
+    input = 'pin_only.i'
+    cli_args = "Mesh/rmp/axial_mesh_intervals='5'
+                Mesh/pin1/ring_radii='0.3385 0.3705 0.4665'
+                Mesh/pin1/num_sectors=4
+                Mesh/pin1/mesh_intervals='1 1 1 1'
+                Outputs/file_base=pin_only_in"
+    expect_err = "should not be defined for 2-D meshes"
+  []
   [tri]
     requirement = 'The system shall generate a 3D square pin mesh with ring and background region and tri center elements'
     type = 'Exodiff'

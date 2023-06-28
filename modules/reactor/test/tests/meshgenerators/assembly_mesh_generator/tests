@@ -13,6 +13,17 @@
     exodiff = 'assembly_only_in.e'
     recover = false
   []
+  [assembly_shared_pin_ids]
+    requirement = 'The system shall throw an error if an assembly mesh is composed of pins with identical pin_type ids'
+    type = 'RunException'
+    input = 'assembly_only.i'
+    cli_args = "Mesh/rmp/axial_regions='1.0 1.0'
+                Mesh/rmp/axial_mesh_intervals='1 1'
+                Mesh/rmp/top_boundary_id=201
+                Mesh/rmp/bottom_boundary_id=202
+                Mesh/pin2/pin_type=1"
+    expect_err = 'Constituent pins have shared pin_type ids but different names.'
+  []
   [square_background]
     requirement = 'The system shall generate a 3D square assembly mesh from 2 pin types and a background region'
     type = 'Exodiff'

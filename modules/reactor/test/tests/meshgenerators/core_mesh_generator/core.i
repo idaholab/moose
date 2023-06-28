@@ -4,10 +4,6 @@
     dim = 3
     geom = "Square"
     assembly_pitch = 2.84126
-    axial_regions = '1.0'
-    axial_mesh_intervals = '1'
-    top_boundary_id = 201
-    bottom_boundary_id = 202
     radial_boundary_id = 200
   []
 

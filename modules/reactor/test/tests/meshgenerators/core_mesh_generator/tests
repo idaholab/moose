@@ -5,7 +5,11 @@
     requirement = 'The system shall generate a full 3D square core mesh with 3 pin types and 2 assembly types'
     type = 'Exodiff'
     input = 'core.i'
-    cli_args = "Mesh/pin1/num_sectors=2
+    cli_args = "Mesh/rmp/axial_regions='1.0'
+                Mesh/rmp/axial_mesh_intervals='1'
+                Mesh/rmp/top_boundary_id=201
+                Mesh/rmp/bottom_boundary_id=202
+                Mesh/pin1/num_sectors=2
                 Mesh/pin1/ring_radii='0.2'
                 Mesh/pin1/duct_halfpitch='0.68'
                 Mesh/pin1/mesh_intervals='1 1 1'
@@ -18,11 +22,59 @@
     exodiff = 'core_in.e'
     recover = false
   []
+  [core_shared_assembly_ids]
+    requirement = 'The system shall throw an error if a core is composed of assemblies with shared assembly_type ids'
+    type = 'RunException'
+    input = 'core.i'
+    cli_args = "Mesh/rmp/axial_regions='1.0'
+                Mesh/rmp/axial_mesh_intervals='1'
+                Mesh/rmp/top_boundary_id=201
+                Mesh/rmp/bottom_boundary_id=202
+                Mesh/pin1/num_sectors=2
+                Mesh/pin1/ring_radii='0.2'
+                Mesh/pin1/duct_halfpitch='0.68'
+                Mesh/pin1/mesh_intervals='1 1 1'
+                Mesh/pin2/num_sectors=2
+                Mesh/pin2/mesh_intervals='2'
+                Mesh/pin3/num_sectors=2
+                Mesh/pin3/ring_radii='0.3818'
+                Mesh/pin3/mesh_intervals='1 1'
+                Mesh/amg2/assembly_type=1
+                Mesh/inactive='rotate90'"
+    expect_err = 'Constituent assemblies have shared assembly_type ids but different names.'
+  []
+  [core_shared_pin_ids]
+    requirement = 'The system shall throw an error if a core is composed of pins with shared pin_type ids'
+    type = 'RunException'
+    input = 'core.i'
+    cli_args = "Mesh/rmp/axial_regions='1.0'
+                Mesh/rmp/axial_mesh_intervals='1'
+                Mesh/rmp/top_boundary_id=201
+                Mesh/rmp/bottom_boundary_id=202
+                Mesh/pin1/num_sectors=2
+                Mesh/pin1/ring_radii='0.2'
+                Mesh/pin1/duct_halfpitch='0.68'
+                Mesh/pin1/mesh_intervals='1 1 1'
+                Mesh/pin2/pin_type=1
+                Mesh/pin2/num_sectors=2
+                Mesh/pin2/mesh_intervals='2'
+                Mesh/pin3/num_sectors=2
+                Mesh/pin3/ring_radii='0.3818'
+                Mesh/pin3/mesh_intervals='1 1'
+                Mesh/amg2/inputs='pin3 pin1'
+                Mesh/amg2/pattern='0 1; 1 0'
+                Mesh/inactive='rotate90'"
+    expect_err = 'Constituent pins within assemblies have shared pin_type ids but different names.'
+  []
   [square_mixed_background_duct]
     requirement = 'The system shall generate a full 3D square core mesh with an assembly that has a background and duct region and another with no duct/background region'
     type = 'Exodiff'
     input = 'core.i'
-    cli_args = "Mesh/pin1/pitch=1.0
+    cli_args = "Mesh/rmp/axial_regions='1.0'
+                Mesh/rmp/axial_mesh_intervals='1'
+                Mesh/rmp/top_boundary_id=201
+                Mesh/rmp/bottom_boundary_id=202
+                Mesh/pin1/pitch=1.0
                 Mesh/pin1/num_sectors=2
                 Mesh/pin1/ring_radii='0.2'
                 Mesh/pin1/duct_halfpitch='0.38'
@@ -49,7 +101,11 @@
     requirement = 'The system shall generate a 3D square core mesh with empty lattice positions'
     type = 'Exodiff'
     input = 'core.i'
-    cli_args = "Mesh/pin1/num_sectors=2
+    cli_args = "Mesh/rmp/axial_regions='1.0'
+                Mesh/rmp/axial_mesh_intervals='1'
+                Mesh/rmp/top_boundary_id=201
+                Mesh/rmp/bottom_boundary_id=202
+                Mesh/pin1/num_sectors=2
                 Mesh/pin1/ring_radii='0.2'
                 Mesh/pin1/duct_halfpitch='0.68'
                 Mesh/pin1/mesh_intervals='1 1 1'
@@ -68,7 +124,9 @@
     requirement = 'The system shall generate a 3D hexagonal core mesh with empty lattice positions and explicit block name specification'
     type = 'Exodiff'
     input = 'core.i'
-    cli_args = "Mesh/rmp/geom='Hex'
+    cli_args = "Mesh/rmp/top_boundary_id=201
+                Mesh/rmp/bottom_boundary_id=202
+                Mesh/rmp/geom='Hex'
                 Mesh/rmp/assembly_pitch=7.10315
                 Mesh/rmp/axial_regions='1.0 1.0'
                 Mesh/rmp/axial_mesh_intervals='1 1'
@@ -116,6 +174,10 @@
     type = 'Exodiff'
     input = 'core.i'
     cli_args = "Mesh/inactive='pin3 amg1 amg2 rotate90'
+                Mesh/rmp/axial_regions='1.0'
+                Mesh/rmp/axial_mesh_intervals='1'
+                Mesh/rmp/top_boundary_id=201
+                Mesh/rmp/bottom_boundary_id=202
                 Mesh/rmp/assembly_pitch=1.42063
                 Mesh/pin1/num_sectors=2
                 Mesh/pin1/ring_radii='0.2'
@@ -137,6 +199,10 @@
     type = 'Exodiff'
     input = 'core.i'
     cli_args = "Mesh/inactive='pin3 amg1 amg2 translate'
+                Mesh/rmp/axial_regions='1.0'
+                Mesh/rmp/axial_mesh_intervals='1'
+                Mesh/rmp/top_boundary_id=201
+                Mesh/rmp/bottom_boundary_id=202
                 Mesh/rmp/geom='Hex'
                 Mesh/rmp/assembly_pitch=1.42063
                 Mesh/pin1/homogenized=true
@@ -157,6 +223,10 @@
     type = 'Exodiff'
     input = 'core.i'
     cli_args = "Mesh/inactive='pin3 amg1 amg2 translate'
+                Mesh/rmp/axial_regions='1.0'
+                Mesh/rmp/axial_mesh_intervals='1'
+                Mesh/rmp/top_boundary_id=201
+                Mesh/rmp/bottom_boundary_id=202
                 Mesh/rmp/geom='Hex'
                 Mesh/rmp/assembly_pitch=1.42063
                 Mesh/pin1/use_as_assembly=true

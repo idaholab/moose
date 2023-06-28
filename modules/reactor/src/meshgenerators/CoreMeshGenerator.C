@@ -192,15 +192,18 @@ CoreMeshGenerator::CoreMeshGenerator(const InputParameters & parameters)
       mooseError("Constituent assemblies have shared assembly_type ids but different names. Each uniquely defined assembly in AssemblyMeshGenerator must have its own assembly_type id.");
     assembly_input_id_map[assembly_type] = _inputs[i];
 
-    // Check pin_types across all constituent assemblies are uniquely defined
-    const auto pin_input_id_map = getMeshProperty<std::map<subdomain_id_type, std::string>>("input_id_map", _inputs[i]);
-    for (auto it = pin_input_id_map.begin(); it != pin_input_id_map.end(); ++it)
+    // If assembly is composed of pins, check pin_types across all constituent assemblies are uniquely defined
+    if (hasMeshProperty<std::map<subdomain_id_type, std::string>>("input_id_map", _inputs[i]))
     {
-      const auto pin_type = it->first;
-      const auto input_pin_name = it->second;
-      if (global_pin_input_id_map.find(pin_type) != global_pin_input_id_map.end() && global_pin_input_id_map[pin_type] != input_pin_name)
-        mooseError("Constituent pins within assemblies have shared pin_type ids but different names. Each uniquely defined pin in AssemblyMeshGenerator must have its own pin_type id.");
-      global_pin_input_id_map[pin_type] = input_pin_name;
+      const auto pin_input_id_map = getMeshProperty<std::map<subdomain_id_type, std::string>>("input_id_map", _inputs[i]);
+      for (auto it = pin_input_id_map.begin(); it != pin_input_id_map.end(); ++it)
+      {
+        const auto pin_type = it->first;
+        const auto input_pin_name = it->second;
+        if (global_pin_input_id_map.find(pin_type) != global_pin_input_id_map.end() && global_pin_input_id_map[pin_type] != input_pin_name)
+          mooseError("Constituent pins within assemblies have shared pin_type ids but different names. Each uniquely defined pin in AssemblyMeshGenerator must have its own pin_type id.");
+        global_pin_input_id_map[pin_type] = input_pin_name;
+      }
     }
   }
 
