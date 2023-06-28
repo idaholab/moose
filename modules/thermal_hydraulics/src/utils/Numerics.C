@@ -79,6 +79,18 @@ Prandtl(ADReal cp, ADReal mu, ADReal k)
 }
 
 Real
+Peclet(Real volume_fraction, Real cp, Real rho, Real vel, Real D_h, Real k)
+{
+  return volume_fraction * cp * rho * std::fabs(vel) * D_h / k;
+}
+
+ADReal
+Peclet(ADReal volume_fraction, ADReal cp, ADReal rho, ADReal vel, ADReal D_h, ADReal k)
+{
+  return volume_fraction * cp * rho * std::fabs(vel) * D_h / k;
+}
+
+Real
 Grashof(Real beta, Real dT, Real D_h, Real rho_liquid, Real mu_liquid, Real gravity_magnitude)
 {
   return gravity_magnitude * beta * dT * std::pow(D_h, 3) * (rho_liquid * rho_liquid) /

@@ -16,11 +16,11 @@ class TestHarnessTester(TestHarnessTestCase):
         Test for error in input to CSVDiff
         """
         with self.assertRaises(subprocess.CalledProcessError) as cm:
-            self.runTests('-c', '-i', 'csvdiffs')
+            self.runTests('-i', 'csvdiffs')
 
         e = cm.exception
         self.assertRegex(e.output.decode('utf-8'), r'test_harness\.test_csvdiff.*?FAILED \(Override inputs not the same length\)')
-        self.assertRegex(e.output.decode('utf-8'), r'test_harness\.test_missingfile.*?FAILED \(MISSING GOLD FILE\)')
+        self.assertRegex(e.output.decode('utf-8'), r'test_harness\.test_badfile.*?FAILED \(MISSING GOLD FILE\)')
         self.checkStatus(e.output.decode('utf-8'), failed=2)
 
     def testMissingComparison(self):

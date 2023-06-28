@@ -1,0 +1,47 @@
+[Tests]
+  design = 'ADWallHeatTransferCoefficientWeismanMaterial.md'
+  issues = '#24340'
+  [normal_operation]
+    requirement = "The system shall compute the the heat transfer coefficient using the Weisman "
+                  "correlation for: "
+    [square_array]
+      type = 'CSVDiff'
+      input = 'weisman_test.i'
+      csvdiff = 'square_cooled.csv'
+      detail = 'square array rod bundle or, '
+    []
+    [triangular_array]
+      type = 'CSVDiff'
+      input = 'weisman_test.i'
+      csvdiff = 'triangular_heated.csv'
+      cli_args = "array='Triangular'
+                  T_wall=572
+                  file_base='triangular_heated'"
+      detail = 'triangular array rod bundle.'
+    []
+  []
+
+  [abnormal_operation_square_array]
+    requirement = "The system shall return a warning message when the Weisman correlation is used "
+                  "with: "
+    [out_of_range_warning_square]
+      type = 'RunException'
+      input = 'weisman_test.i'
+      cli_args = "PoD=1.05"
+      expect_err = "The Weisman correlation for square arrays is valid when P/D is between 1.1 and "
+                   "1.3. Be aware that using values out of this range may lead to significant errors "
+                   "in your results!"
+      detail = 'pitch-to-diameter out of bonds for a square array rod bundle, '
+    []
+    [out_of_range_warning_triangular]
+      type = 'RunException'
+      input = 'weisman_test.i'
+      cli_args = "array='Triangular'
+                  PoD=1.55"
+      expect_err = "The Weisman correlation for triangular arrays is valid when P/D is between 1.1 "
+                   "and 1.5. Be aware that using values out of this range may lead to significant "
+                   "errors in your results!"
+      detail = 'pitch-to-diameter ratio out of bonds for a triangular array rod bundle,  '
+    []
+  []
+[]

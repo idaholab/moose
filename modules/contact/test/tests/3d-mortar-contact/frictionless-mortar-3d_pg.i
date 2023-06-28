@@ -8,7 +8,6 @@ offset = 0.00
 []
 
 [Mesh]
-  second_order = false
   [top_block]
     type = GeneratedMeshGenerator
     dim = 3
@@ -314,7 +313,6 @@ offset = 0.00
   petsc_options_value = 'lu       superlu_dist                  NONZERO               1e-15                   1e-5'
   l_max_its = 100
   nl_max_its = 30
-  # nl_rel_tol = 1e-6
   nl_abs_tol = 1e-12
   line_search = 'none'
   snesmf_reuse_base = false
@@ -325,7 +323,6 @@ offset = 0.00
 []
 
 [Outputs]
-  exodus = true
   csv = true
 []
 
@@ -337,28 +334,15 @@ offset = 0.00
 []
 
 [Postprocessors]
-  active = 'num_nl cumulative contact'
-  [num_nl]
-    type = NumNonlinearIterations
-  []
-  [cumulative]
-    type = CumulativeValuePostprocessor
-    postprocessor = num_nl
-  []
   [contact]
     type = ContactDOFSetSize
     variable = mortar_normal_lm
     subdomain = 'secondary_lower'
     execute_on = 'nonlinear timestep_end'
   []
-[]
-
-[VectorPostprocessors]
-  [contact-pressure]
-    type = NodalValueSampler
-    block = secondary_lower
+  [lambda]
+    type = ElementAverageValue
     variable = mortar_normal_lm
-    sort_by = 'id'
-    execute_on = NONLINEAR
+    block = 'secondary_lower'
   []
 []
