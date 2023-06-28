@@ -37,11 +37,10 @@ Channels = 'CH1 CH2 CH3 CH4 CH5 CH6 CH7 CH8 CH9 CH10 CH11 CH12 CH13 CH14 CH15 CH
     variable = temp
   []
   [heat_generation]
-    type = BodyForce
+    type = CoupledForce
     variable = temp
     block = 'Shield First_Wall Multiplier Toroidal_Plate Breeder'
-    value = 100
-    function = 'x + y'
+    v = power_density
   []
 []
 
@@ -50,7 +49,7 @@ Channels = 'CH1 CH2 CH3 CH4 CH5 CH6 CH7 CH8 CH9 CH10 CH11 CH12 CH13 CH14 CH15 CH
     type = NeumannBC
     variable = temp
     boundary = 'Heated_Surface'
-    value = 50000 # 0.25 MW/m^2
+    value = 3202.5 # 0.25 MW/m^2
   []
   [heat_channel]
     type = DirichletBC
@@ -83,7 +82,45 @@ Channels = 'CH1 CH2 CH3 CH4 CH5 CH6 CH7 CH8 CH9 CH10 CH11 CH12 CH13 CH14 CH15 CH
     type = HeatConductionMaterial
     thermal_conductivity_temperature_function = tungsten
     temp = temp
-    block = "Shield"
+    block = 'Shield'
+  []
+[]
+
+[AuxVariables]
+  [power_density]
+  []
+[]
+
+[AuxKernels]
+  [pd_armor]
+    type = ConstantAux
+    variable = power_density
+    value = 2.7544e+07
+    block = 'Shield'
+  []
+  [pd_fw]
+    type = ConstantAux
+    variable = power_density
+    value = 4.6228e+06
+    block = 'First_Wall'
+  []
+  [pd_mult]
+    type = ConstantAux
+    variable = power_density
+    value = 6.4374e+06
+    block = 'Multiplier'
+  []
+  [pd_ts]
+    type = ConstantAux
+    variable = power_density
+    value = 6.3422e+06
+    block = 'Toroidal_Plate'
+  []
+  [pd_breeder]
+    type = ConstantAux
+    variable = power_density
+    value = 1.6260e+07
+    block = 'Breeder'
   []
 []
 
