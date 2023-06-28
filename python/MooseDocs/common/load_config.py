@@ -22,7 +22,8 @@ from ..common import exceptions
 LOG = logging.getLogger(__name__)
 
 # Set of extensions to load by default
-DEFAULT_EXTENSIONS = ['MooseDocs.extensions.core',
+DEFAULT_EXTENSIONS =[ 'MooseDocs.extensions.tagger',
+                      'MooseDocs.extensions.core',
                       'MooseDocs.extensions.shortcut',
                       'MooseDocs.extensions.floats',
                       'MooseDocs.extensions.command',
