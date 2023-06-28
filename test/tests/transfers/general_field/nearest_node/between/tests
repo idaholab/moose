@@ -8,36 +8,45 @@
       type = Exodiff
       input = main_between_multiapp.i
       exodiff = 'nodal_nodal_ma10.e nodal_nodal_ma20.e'
-      cli_args = "Outputs/file_base=nodal_nodal Transfers/active='app1_to_2_nodal_nodal app2_to_1_nodal_nodal'"
+      cli_args = "Outputs/file_base=nodal_nodal Transfers/active='app1_to_2_nodal_nodal "
+                 "app2_to_1_nodal_nodal'"
       detail = 'between nodal variables,'
     []
     [elem_elem]
       type = Exodiff
       input = main_between_multiapp.i
       exodiff = 'elem_elem_ma10.e elem_elem_ma20.e'
-      cli_args = "Outputs/file_base=elem_elem Transfers/active='app1_to_2_elem_elem app2_to_1_elem_elem'"
+      cli_args = "Outputs/file_base=elem_elem Transfers/active='app1_to_2_elem_elem "
+                 "app2_to_1_elem_elem'"
       detail = 'between elemental variables,'
     []
     [elem_nodal]
       type = Exodiff
       input = main_between_multiapp.i
       exodiff = 'elem_nodal_ma10.e elem_nodal_ma20.e'
-      cli_args = "Outputs/file_base=elem_nodal Transfers/active='app1_to_2_elem_nodal app2_to_1_elem_nodal'"
+      cli_args = "Outputs/file_base=elem_nodal Transfers/active='app1_to_2_elem_nodal "
+                 "app2_to_1_elem_nodal'"
       detail = 'from elemental to nodal variables,'
+      # Transferring between nodes and centroids
+      allow_warnings = true
     []
     [nodal_elem]
       type = Exodiff
       input = main_between_multiapp.i
       exodiff = 'nodal_elem_ma10.e nodal_elem_ma20.e'
-      cli_args = "Outputs/file_base=nodal_elem Transfers/active='app1_to_2_nodal_elem app2_to_1_nodal_elem'"
+      cli_args = "Outputs/file_base=nodal_elem Transfers/active='app1_to_2_nodal_elem "
+                 "app2_to_1_nodal_elem'"
       detail = 'from nodal to elemental variables,'
+      # Transferring between nodes and centroids
+      allow_warnings = true
     []
 
     [one_app_serial]
       type = Exodiff
       input = main_between_multiapp.i
       exodiff = 'nodal_nodal_serial_ma10.e nodal_nodal_serial_ma20.e'
-      cli_args = "Outputs/file_base=nodal_nodal_serial Transfers/active='app1_to_2_nodal_nodal app2_to_1_nodal_nodal' MultiApps/ma1/max_procs_per_app=1"
+      cli_args = "Outputs/file_base=nodal_nodal_serial Transfers/active='app1_to_2_nodal_nodal "
+                 "app2_to_1_nodal_nodal' MultiApps/ma1/max_procs_per_app=1"
       detail = 'when one multiapp is run in serial,'
     []
 
@@ -59,6 +68,8 @@
                   MultiApps/ma1/cli_args='AuxVariables/sent_nodal/block=1;AuxVariables/received_nodal/block=1;AuxVariables/sent_elem/block=1;AuxVariables/received_elem/block=1'
                   MultiApps/ma2/cli_args='AuxVariables/sent_nodal/block=1;AuxVariables/received_nodal/block=1;AuxVariables/sent_elem/block=1;AuxVariables/received_elem/block=1'"
       detail = 'with block restricted variables of different types.'
+      # Transferring between nodes and centroids
+      allow_warnings = true
     []
   []
 []
