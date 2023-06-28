@@ -1,19 +1,28 @@
 [Tests]
   issues = '#716'
   design = 'syntax/Contact/index.md MechanicalContactConstraint.md'
-  [sliding_blocks]
+  [sliding_blocks_always]
     type = 'Exodiff'
     input = 'sliding_update.i'
     exodiff = 'sliding_update_out.e'
+    cli_args = "Mesh/patch_update_strategy='always'"
     abs_zero = 1e-7
-    superlu = true
-    requirement = "The system shall enforce the automatic patch update using the iteration option."
+    requirement = "The system shall enforce the automatic patch update using the 'always' option."
+  []
+  [sliding_blocks]
+    type = 'Exodiff'
+    input = 'sliding_update.i'
+    exodiff = 'sliding_blocks_iteration.e'
+    cli_args = "Mesh/patch_update_strategy='iteration' Outputs/file_base=sliding_blocks_iteration"
+    abs_zero = 1e-7
+    requirement = "The system shall enforce the automatic patch update using the iteration option "
+                  "and give results equal to the 'always' option."
   []
   [error_test]
     type = RunException
     input = 'sliding_update.i'
-    cli_args = 'Mesh/ghosting_patch_size=2
-                Outputs/file_base=sliding_error_out'
+    cli_args = "Mesh/ghosting_patch_size=2 Mesh/patch_update_strategy='iteration' "
+               "Outputs/file_base=sliding_error_out"
     expect_err = "Error in NearestNodeLocator: The nearest neighbor lies outside the ghosted set of "
                  "elements. Increase the ghosting_patch_size parameter in the mesh block and try "
                  "again."

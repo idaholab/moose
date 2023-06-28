@@ -72,11 +72,6 @@ NearestNodeLocator::findNodes()
 
   if (_first || (_reinit_iteration && _patch_update_strategy == Moose::Iteration))
   {
-    // After a call from system reinit, mesh has been updated with initial adaptivity.
-    // Moose::Iteration relies on data generated for ghosting (i.e. trial_primary_nodes)
-    if (!_first)
-      _reinit_iteration = false;
-
     _first = false;
 
     // Trial secondary nodes are all the nodes on the secondary side
@@ -224,8 +219,14 @@ NearestNodeLocator::reinit()
 
   _new_ghosted_elems.clear();
 
+  // After a call from system reinit, mesh has been updated with initial adaptivity.
+  // Moose::Iteration relies on data generated for ghosting (i.e. trial_primary_nodes)
+  _reinit_iteration = true;
+
   // Redo the search
   findNodes();
+
+  _reinit_iteration = false;
 }
 
 Real
