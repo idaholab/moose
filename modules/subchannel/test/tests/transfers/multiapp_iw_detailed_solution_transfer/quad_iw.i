@@ -3,17 +3,17 @@ mass_flux_in = ${fparse 1e+4 * 17.0 / 3600.}
 P_out = 4.923e6 # Pa
 
 [QuadInterWrapperMesh]
-    [sub_channel]
-      type = QuadInterWrapperMeshGenerator
-      nx = 5
-      ny = 5
-      n_cells = 10
-      assembly_pitch = 0.2
-      assembly_side_x = 0.18
-      assembly_side_y = 0.18
-      side_bypass = 0.001
-      heated_length = 3.0
-    []
+  [sub_channel]
+    type = QuadInterWrapperMeshGenerator
+    nx = 5
+    ny = 5
+    n_cells = 10
+    assembly_pitch = 0.2
+    assembly_side_x = 0.18
+    assembly_side_y = 0.18
+    side_bypass = 0.001
+    heated_length = 3.0
+  []
 []
 
 
@@ -54,11 +54,9 @@ P_out = 4.923e6 # Pa
 []
 
 
-[Modules]
-  [FluidProperties]
-    [water]
-      type = Water97FluidProperties
-    []
+[FluidProperties]
+  [water]
+    type = Water97FluidProperties
   []
 []
 
@@ -175,8 +173,6 @@ P_out = 4.923e6 # Pa
 
 [Executioner]
   type = Steady
-  nl_rel_tol = 0.9
-  l_tol = 0.9
 []
 
 ################################################################################
