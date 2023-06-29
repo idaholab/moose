@@ -7,14 +7,14 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "ReynoldsNumberMaterial.h"
+#include "ReynoldsNumberFunctorMaterial.h"
 #include "MooseMesh.h"
 #include "NS.h"
 
-registerMooseObject("NavierStokesApp", ReynoldsNumberMaterial);
+registerMooseObject("NavierStokesApp", ReynoldsNumberFunctorMaterial);
 
 InputParameters
-ReynoldsNumberMaterial::validParams()
+ReynoldsNumberFunctorMaterial::validParams()
 {
   InputParameters params = FunctorMaterial::validParams();
   params.addClassDescription("Computes a Reynolds number.");
@@ -27,7 +27,7 @@ ReynoldsNumberMaterial::validParams()
   return params;
 }
 
-ReynoldsNumberMaterial::ReynoldsNumberMaterial(const InputParameters & parameters)
+ReynoldsNumberFunctorMaterial::ReynoldsNumberFunctorMaterial(const InputParameters & parameters)
   : FunctorMaterial(parameters),
     _speed(getFunctor<ADReal>(NS::speed)),
     _mu(getFunctor<ADReal>(NS::mu)),

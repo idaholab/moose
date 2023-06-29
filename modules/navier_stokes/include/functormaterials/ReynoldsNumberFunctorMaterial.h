@@ -20,11 +20,11 @@
  * where $rho$, $|u|$, $\mu$ and $D$ are the fluid density, velocity magnitude,
  * dynamic viscosity and hydraulic diameter, respectively.
  */
-class ReynoldsNumberMaterial : public FunctorMaterial
+class ReynoldsNumberFunctorMaterial : public FunctorMaterial
 {
 public:
   static InputParameters validParams();
-  ReynoldsNumberMaterial(const InputParameters & parameters);
+  ReynoldsNumberFunctorMaterial(const InputParameters & parameters);
 
 private:
   /// Speed (velocity magnitude) of the fluid

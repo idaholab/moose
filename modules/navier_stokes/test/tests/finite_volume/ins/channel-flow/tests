@@ -53,7 +53,7 @@
       abs_zero = 1e-9
       valgrind = HEAVY
       detail = 'monolithic preconditioning technique'
-       cli_args = 'Preconditioning/active=SMP'
+      cli_args = 'Preconditioning/active=SMP'
     []
     [no-slip-field-split]
       type = 'Exodiff'
@@ -94,7 +94,9 @@
     input = 2d-scalar-transport-action.i
     exodiff = 2d-scalar-transport-action_out.e
     method = "!dbg"
-    cli_args = "Modules/NavierStokesFV/initial_velocity='1 1 0' Modules/NavierStokesFV/initial_pressure=0 Modules/NavierStokesFV/initial_temperature=0"
+    cli_args = "Modules/NavierStokesFV/initial_velocity='1 1 0' "
+               "Modules/NavierStokesFV/initial_pressure=0 "
+               "Modules/NavierStokesFV/initial_temperature=0"
     requirement = 'The system shall be able to create and transport scalar field variables in a fluid flow field using the NSFVAction syntax.'
     design = 'NSFVAction.md'
     issues = '#19472'
@@ -106,7 +108,9 @@
     exodiff = 2d-scalar-transport-action_out.e
     method = "!dbg"
     requirement = 'The system shall be able to transport an externally-generated scalar field variables in a fluid flow field using the NSFVAction syntax.'
-    cli_args = "Variables/inactive='' Modules/NavierStokesFV/velocity_variable='vel_x vel_y' Modules/NavierStokesFV/pressure_variable='pressure' Modules/NavierStokesFV/fluid_temperature_variable='T_fluid'"
+    cli_args = "Variables/inactive='' Modules/NavierStokesFV/velocity_variable='vel_x vel_y' "
+               "Modules/NavierStokesFV/pressure_variable='pressure' "
+               "Modules/NavierStokesFV/fluid_temperature_variable='T_fluid'"
     design = 'NSFVAction.md'
     issues = '#19472'
     valgrind = HEAVY
@@ -161,38 +165,6 @@
     difference_tol = 1e-6
     cli_args = "Mesh/gen/nx=2 Mesh/gen/ny=2"
     only_final_jacobian = True
-  []
-  [linear-friction]
-    type = 'Exodiff'
-    input = 2d-rc-friction.i
-    exodiff = 2d-rc-friction_out.e
-    requirement = 'The system shall be able to model linear volumetric friction in a channel.'
-    issues = '#16872'
-    design = 'INSFVMomentumFriction.md'
-  []
-  [quadratic-friction]
-    type = 'Exodiff'
-    input = 2d-rc-friction.i
-    exodiff = 2d-rc-friction-quad_out.e
-    requirement = 'The system shall be able to model quadratic volumetric friction in a channel.'
-    issues = '#16872'
-    cli_args = "Outputs/file_base='2d-rc-friction-quad_out' FVKernels/inactive='u_friction_linear v_friction_linear'"
-    design = 'INSFVMomentumFriction.md'
-  []
-  [linear-friction-action]
-    type = 'Exodiff'
-    input = 2d-rc-friction-action.i
-    exodiff = 2d-rc-friction-action_out.e
-    requirement = 'The system shall be able to model linear volumetric friction in a channel using NSFVAction syntax.'
-    issues = '#19472'
-  []
-  [quadratic-friction-action]
-    type = 'Exodiff'
-    input = 2d-rc-friction-action.i
-    exodiff = 2d-rc-friction-action-quad_out.e
-    requirement = 'The system shall be able to model quadratic volumetric friction in a channel using NSFVAction syntax.'
-    issues = '#19472'
-    cli_args = "Modules/NavierStokesFV/friction_types='forchheimer' Outputs/file_base='2d-rc-friction-action-quad_out'"
   []
   [ambient-convection]
     type = 'CSVDiff'

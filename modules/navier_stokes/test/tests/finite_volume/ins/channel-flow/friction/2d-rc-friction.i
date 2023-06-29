@@ -167,7 +167,7 @@ velocity_interp_method = 'rc'
     porosity = 1
   []
   [Re_material]
-    type = ReynoldsNumberMaterial
+    type = ReynoldsNumberFunctorMaterial
     speed = speed
     characteristic_length = 2
     rho = ${rho}
