@@ -52,7 +52,7 @@ PolynomialRegressionTrainer::PolynomialRegressionTrainer(const InputParameters &
     mooseWarning("Penalty parameter is not used for OLS regression, found penalty=", _penalty);
 
   // Check if we have enough data points to solve the problem
-  if (_sampler.getNumberOfRows() <= _n_poly_terms)
+  if (_sampler.getNumberOfRows() < _n_poly_terms)
     mooseError("Number of data points must be greater than the number of terms in the polynomial.");
 
   // Creating calculators needed for feature standardization.
