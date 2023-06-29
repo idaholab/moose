@@ -40,15 +40,11 @@ P_out = 4.923e6 # Pa
     []
 []
 
-
-[Modules]
-    [FluidProperties]
-        [sodium]
-            type = PBSodiumFluidProperties
-        []
+[FluidProperties]
+    [sodium]
+        type = PBSodiumFluidProperties
     []
 []
-
 
 [ICs]
     [S_IC]
@@ -147,6 +143,4 @@ P_out = 4.923e6 # Pa
 
 [Executioner]
   type = Steady
-  nl_rel_tol = 0.9
-  l_tol = 0.9
 []
