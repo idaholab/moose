@@ -7,25 +7,41 @@
 #* Licensed under LGPL 2.1, please see LICENSE for details
 #* https://www.gnu.org/licenses/lgpl-2.1.html
 
-from RunApp import RunApp
-from TestHarness import util
 import os
+from FileTester import FileTester
 
-class SchemaDiff(RunApp):
+try:
+    import deepdiff
+    from mooseutils.deepdiff_custom_operator import CompareDiff
+except:
+    pass
+
+class SchemaDiff(FileTester):
+    """ Generic Differntial Tester """
     @staticmethod
-
     def validParams():
-        params = RunApp.validParams()
-        params.addParam('schemadiff',   [], "A list of XML or JSON files to compare.")
-        params.addParam('gold_dir',      'gold', "The directory where the \"gold standard\" files (the expected output to compare against) reside relative to the TEST_DIR: (default: ./gold/). This only needs to be set if the gold file is in a non-standard location.")
-        params.addParam('gold_file',      None, "Specify the file in the gold_dir that the output should be compared against. This only needs to be set if the gold file uses a different file name than the output file.")
-        params.addParam('ignored_items',  [], "Items in the schema that the differ will ignore. These can be keys or values, i.e. for \"foo\": \"bar\", either foo or bar can be chosen to be selected. Note that entering a value located inside a list will skip the whole list.")
-        params.addParam('rel_err',       5.5e-6, "Relative error value allowed in comparisons. If rel_err value is set to 0, it will work on the absolute difference between the values.")
-        params.addParam('abs_zero',      1e-10, "Absolute zero cutoff used in diff comparisons. Every value smaller than this threshold will be ignored."),
+        params = FileTester.validParams()
+        params.addParam('schemadiff',       [], 'A list of CSV, XML, or JSON files to compare.')
+        params.addParam('gold_file',      None, 'Specify the file in the gold_dir that the output '
+                                                'should be compared against. This only needs to '
+                                                'be set if the gold file uses a different file '
+                                                'name than the output file.')
+        params.addParam('ignored_items',    [], 'Regular expressions of items to ignore')
+        params.addParam('rel_err',      5.5e-6, 'Relative error value allowed in comparisons. If '
+                                                'rel_err value is set to 0, it will work on the '
+                                                'absolute difference between the values.')
+        params.addParam('abs_zero',      1e-10, 'Absolute zero cutoff used in diff comparisons. '
+                                                'Every value smaller than this threshold will be '
+                                                'ignored.')
         return params
 
     def __init__(self, name, params):
-        RunApp.__init__(self, name, params)
+        """ Initialize SchemaDiff """
+        # convert test specs entering the constraints as string, i.e. rel_err = '1.1e-2' instead
+        # of rel_err = 1.1e-2
+        params['rel_err'] = float(params['rel_err'])
+        params['abs_zero'] = float(params['abs_zero'])
+        FileTester.__init__(self, name, params)
         if self.specs['required_python_packages'] is None:
             self.specs['required_python_packages'] = 'deepdiff>=6.1.0'
         elif 'deepdiff' not in self.specs['required_python_packages']:
@@ -34,9 +50,8 @@ class SchemaDiff(RunApp):
         # So that derived classes can internally pass skip regex paths
         self.exclude_regex_paths = []
 
-    def prepare(self, options):
-        if self.specs['delete_output_before_running'] == True:
-            util.deleteFilesAndFolders(self.getTestDir(), self.specs['schemadiff'])
+    def getOutputDirs(self, options):
+        return self.specs['schemadiff']
 
     def processResults(self, moose_dir, options, output):
         output += self.testFileOutput(moose_dir, options, output)
@@ -50,124 +65,129 @@ class SchemaDiff(RunApp):
         if options.scaling and specs['scale_refine']:
             return output
 
+        # Support unittests. Explain what post-process is taking place
+        output += f'Running {specs["type"].lower()}\n'
+
         # Loop over every file
         for file in specs['schemadiff']:
             gold_file = specs['gold_file'] if specs['gold_file'] else file
-            if not os.path.exists(os.path.join(self.getTestDir(), specs['gold_dir'], gold_file)):
-                output += "File Not Found: " + os.path.join(self.getTestDir(), specs['gold_dir'], file)
+            abs_gold_file = os.path.join(self.getTestDir(), specs['gold_dir'], gold_file)
+            abs_test_file = os.path.join(self.getTestDir(), file)
+
+            if not os.path.exists(abs_gold_file):
+                output += f'File Not Found: {abs_gold_file}'
                 self.setStatus(self.fail, 'MISSING GOLD FILE')
                 break
 
             # Perform diff
             else:
-                gold = os.path.join(self.getTestDir(), specs['gold_dir'], gold_file)
-                test = os.path.join(self.getTestDir(), file)
                 # We always ignore the header_type attribute, since it was
                 # introduced in VTK 7 and doesn't seem to be important as
                 # far as Paraview is concerned.
                 specs['ignored_items'].append('header_type')
 
-                gold_dict = self.try_load(gold)
-                test_dict = self.try_load(test)
+                gold_dict = self.try_load(abs_gold_file)
+                test_dict = self.try_load(abs_test_file)
 
                 if isinstance(gold_dict, Exception):
-                    output += "Gold Schema File Failed To Load: "+gold+"\n"
-                    output += "Gold Schema Exception: " + str(gold_dict) + "\n"
-                    self.setStatus(self.fail, 'LOAD FAILED')
+                    output += (f'Test Schema File Failed To Load: {abs_gold_file}\n'
+                               f'Gold Schema Exception: {str(gold_dict)}\n')
 
                 if isinstance(test_dict, Exception):
-                    output += "Test Schema File Failed To Load: "+test+"\n"
-                    output += "Test Schema Exception: " + str(test_dict) + "\n"
-                    self.setStatus(self.fail, 'LOAD FAILED')
+                    output += (f'Test Schema File Failed To Load: {abs_test_file}\n'
+                               f'Gold Schema Exception: {str(test_dict)}\n')
 
                 #Break after testing both to provide both errors in the log if both are applicable
                 if isinstance(test_dict, Exception) or isinstance(gold_dict, Exception):
+                    self.setStatus(self.fail, 'LOAD FAILED')
                     break
 
                 # Perform the diff.
-                diff = self.do_deepdiff(gold_dict, test_dict, specs['rel_err'], specs['abs_zero'], specs['ignored_items'])
+                (diff, exception) = self.do_deepdiff(gold_dict,
+                                                     test_dict,
+                                                     specs['rel_err'],
+                                                     specs['abs_zero'],
+                                                     specs['ignored_items'])
+
+                if exception:
+                    output += f'\nDeepDiff Exception:\n{exception}\n'
+                    self.setStatus(self.fail, 'DeepDiff exception')
+                    return output
+
                 if diff:
-                    output += "Schema difference detected.\nFile 1: " + gold + "\nFile 2: " + test + "\nErrors:\n"
-                    output += diff
-                    self.setStatus(self.diff, 'SCHEMADIFF')
+                    output += (f'Difference detected.\nFile 1: {abs_gold_file}\n'
+                               f'File 2: {abs_test_file}\n'
+                               f'Errors:\n{diff}\n')
+                    self.setStatus(self.diff, f'{self.specs["type"].upper()}')
                     break
         return output
 
-    def do_deepdiff(self,orig, comp, rel_err, abs_zero, exclude_values:list=None):
-        import deepdiff
-        from deepdiff.operator import BaseOperator
-        class testcompare(BaseOperator):
-            def __init__(self, rel_err,abs_zero,types,regex_paths=None):
-                self.rel_err = rel_err
-                self.abs_zero = abs_zero
-                #next two members are necessary for deepdiff constructor to work
-                self.regex_paths = regex_paths
-                self.types = types
+    def format_diff(self, diff_dict):
+        """ Iterate over known problem keys to format pretty results """
+        formated_results = f'{self.specs["type"].upper()} Detected:\n'
+        for key in diff_dict.keys():
+            # Different Values
+            if key == 'values_changed':
+                for diff_key, key_value in diff_dict['values_changed'].items():
+                    formated_results += (f'{diff_key.replace("root", "", 1)}'
+                                         f'\n\tGOLD:   {key_value["old_value"]}'
+                                         f'\n\tRESULT: {key_value["new_value"]}\n')
+            # Different fields added
+            if key == 'iterable_item_added':
+                for diff_key, key_value in diff_dict['iterable_item_added'].items():
+                    formated_results += (f'Additional row at {diff_key.replace("root", "", 1)}:'
+                                         f'\t{key_value}\n')
+            # Different fields removed
+            if key == 'iterable_item_removed':
+                for diff_key, key_value in diff_dict['iterable_item_removed'].items():
+                    formated_results += (f'Missing item at {diff_key.replace("root", "", 1)}:'
+                                         f'\t{key_value}\n')
 
-            def give_up_diffing(self,level, diff_instance):
-                try:
-                    if level.t1 != level.t2:
-                        x = float(level.t1)
-                        y = float(level.t2)
+            if key == 'dictionary_item_added':
+                formated_results += (f'Additional keys found in result:\n')
+                for added_key in diff_dict['dictionary_item_added']:
+                    formated_results += (f'\t{added_key.replace("root", "", 1)}\n')
 
-                        if x < self.abs_zero and y < self.abs_zero:
-                            return True
-                        if self.rel_err == 0 or y == 0:
-                            if abs(x-y) > self.rel_err:
-                                return False
-                        elif abs(x-y)/y > self.rel_err:
-                            return False
-                    return True #if the two items are the same, you can stop evaluating them.
+        return formated_results
 
-                #Often in XML data is not stored correctly as a list/array, and are instead big strings. This should be fixed with "fix_XML_arrays",
-                #but here we do the logic to diff the long string in case it sneaks in, or if for some reason, someone made a JSON like this.
-                except ValueError:
-                    try:
-                        split1 = level.t1.split(" ")
-                        split2 = level.t2.split(" ")
-                        if len(split1) != len(split2):
-                            return False
-                        for i in range(len(split1)):
-                            if not split1[i] and not split2[i]: #if the two values are both just an empty str, continue.
-                                continue
-                            x = float(split1[i])
-                            y = float(split2[i])
-                            if x != y:
-                                if x < self.abs_zero and y < self.abs_zero:
-                                    return True
-                                if self.rel_err == 0 or y == 0:
-                                    if abs(x-y) > self.rel_err:
-                                        return False
-                                elif abs(x-y)/y > self.rel_err:
-                                    return False
-                        return True #if the values in the pseudo-list are different, but all fall within the accepted rel_err, the list is skipped for diffing.
-                    except ValueError:
-                        return False
+    def do_deepdiff(self, orig, comp, rel_err, abs_zero, exclude_values:list=None):
+        diff = ''
         exclude_paths = []
+        generic_error = None
         if exclude_values:
             for value in exclude_values:
                 search = orig | deepdiff.search.grep(value, case_sensitive=True)
                 search2 = comp | deepdiff.search.grep(value, case_sensitive=True)
                 if search:
-                    for path in search["matched_paths"]:
+                    for path in search['matched_paths']:
                         exclude_paths.append(path)
                 if search2:
-                    for path in search2["matched_paths"]:
+                    for path in search2['matched_paths']:
                         exclude_paths.append(path)
 
-        custom_operators = [testcompare(types=[str,float],rel_err=rel_err,abs_zero=abs_zero)]
-        return deepdiff.DeepDiff(orig,
-                                 comp,
-                                 exclude_paths=exclude_paths,
-                                 exclude_regex_paths=self.exclude_regex_paths,
-                                 custom_operators=custom_operators).pretty()
+        custom_operators = [CompareDiff(types=[str,float],rel_err=rel_err,abs_zero=abs_zero)]
+        try:
+            diff = deepdiff.DeepDiff(orig,
+                                     comp,
+                                     exclude_paths=exclude_paths,
+                                     exclude_regex_paths=self.exclude_regex_paths,
+                                     custom_operators=custom_operators)
 
-    #this is how we call the load_file in the derived classes, and also check for exceptions in the load
-    #all python functions are virtual, so there is no templating, but some self shenanigans required
+        except Exception as generic_error:
+            return (diff, generic_error)
+
+        # return friendly readable results where we can
+        if len(diff.affected_paths) or len(diff.affected_root_keys):
+            return (self.format_diff(diff), generic_error)
+
+        # Empty when there is no diff
+        return (diff.pretty(), generic_error)
+
+    # this is how we call the load_file in the derived classes, and also check for exceptions in the
+    # load all python functions are virtual, so there is no templating, but some self shenanigans
+    # required
     def try_load(self, path1):
         try:
             return self.load_file(path1)
         except Exception as e:
             return e
-
-
