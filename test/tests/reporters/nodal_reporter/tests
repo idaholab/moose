@@ -1,0 +1,11 @@
+[Tests]
+  design = 'NodalVariableStatistics.md'
+  issues = '#24678'
+
+  [nodal_stats]
+    type = 'JSONDiff'
+    input = 'nodal_stats.i'
+    jsondiff = 'nodal_stats_stats.json'
+    requirement = 'The system shall be able to produce nodal statistics of a variable for use in other calculations.'
+  []
+[]

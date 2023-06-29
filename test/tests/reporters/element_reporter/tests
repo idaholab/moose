@@ -1,0 +1,11 @@
+[Tests]
+  design = 'ElementVariableStatistics.md'
+  issues = '#24678'
+
+  [elem_stats]
+    type = 'JSONDiff'
+    input = 'elem_stats.i'
+    jsondiff = 'elem_stats_stats.json'
+    requirement = 'The system shall be able to produce elememental statistics of a variable for use in other calculations.'
+  []
+[]

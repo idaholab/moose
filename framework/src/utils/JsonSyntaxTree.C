@@ -33,25 +33,12 @@ JsonSyntaxTree::JsonSyntaxTree(const std::string & search_string) : _search(sear
   auto & actmap = Registry::allActions();
   for (auto & entry : actmap)
     for (auto & act : entry.second)
-      _action_label_map[act._classname] = std::make_pair(entry.first, act._file);
+      _action_label_map[act->_classname] = std::make_pair(entry.first, act->_file);
 
   auto & objmap = Registry::allObjects();
   for (auto & entry : objmap)
     for (auto & obj : entry.second)
-    {
-      std::string name = obj._name;
-      if (name.empty())
-        name = obj._alias;
-      if (name.empty())
-        name = obj._classname;
-
-      // Skip <JACOBIAN> instances and remove <RESIDUAL> from name
-      if (name.find("<JACOBIAN>") == std::string::npos)
-      {
-        name = name.substr(0, name.find("<RESIDUAL>"));
-        _object_label_map[name] = std::make_pair(entry.first, obj._file);
-      }
-    }
+      _object_label_map[obj->name()] = std::make_pair(entry.first, obj->_file);
 }
 
 std::vector<std::string>
@@ -170,7 +157,7 @@ JsonSyntaxTree::addGlobal()
   // If they are doing a search they probably don't want to see this
   if (_search.empty())
   {
-    auto params = Action::validParams();
+    auto params = Parser::validParams();
     nlohmann::json jparams;
     setParams(&params, true, jparams);
     _root["global"]["parameters"] = jparams;
@@ -178,8 +165,8 @@ JsonSyntaxTree::addGlobal()
     // Just create a list of registered app names
     nlohmann::json apps;
     auto & factory = AppFactory::instance();
-    for (auto app = factory.registeredObjectsBegin(); app != factory.registeredObjectsEnd(); ++app)
-      apps.push_back(app->first);
+    for (const auto & name_bi_pair : factory.registeredObjects())
+      apps.push_back(name_bi_pair.first);
 
     _root["global"]["registered_apps"] = apps;
   }

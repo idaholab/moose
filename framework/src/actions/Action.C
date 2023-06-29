@@ -12,6 +12,7 @@
 #include "MooseApp.h"
 #include "MooseTypes.h"
 #include "MooseUtils.h" // remove when getBaseName is removed
+#include "Parser.h"
 #include "MooseMesh.h"
 #include "FEProblemBase.h"
 #include "DisplacedProblem.h"
@@ -21,20 +22,7 @@
 InputParameters
 Action::validParams()
 {
-  InputParameters params = emptyInputParameters();
-
-  /**
-   * Add the "active" and "inactive" parameters so that all blocks in the input file can selectively
-   * create white or black lists of active/inactive sub-blocks.
-   */
-  params.addParam<std::vector<std::string>>(
-      "active",
-      std::vector<std::string>({"__all__"}),
-      "If specified only the blocks named will be visited and made active");
-  params.addParam<std::vector<std::string>>(
-      "inactive",
-      std::vector<std::string>(),
-      "If specified blocks matching these identifiers will be skipped.");
+  InputParameters params = Parser::validParams();
 
   params.addPrivateParam<std::string>("_moose_docs_type",
                                       "action"); // the type of syntax for documentation system

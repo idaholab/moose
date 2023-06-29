@@ -1,0 +1,43 @@
+{
+    "reporters": {
+        "nodal_stats": {
+            "type": "NodalVariableStatistics",
+            "values": {
+                "diffusion_average": {
+                    "type": "double"
+                },
+                "diffusion_max": {
+                    "type": "double"
+                },
+                "diffusion_min": {
+                    "type": "double"
+                },
+                "diffusion_number_nodes": {
+                    "type": "int"
+                }
+            }
+        }
+    },
+    "time_steps": [
+        {
+            "nodal_stats": {
+                "diffusion_average": 0.0,
+                "diffusion_max": 0.0,
+                "diffusion_min": 0.0,
+                "diffusion_number_nodes": 0
+            },
+            "time": 0.0,
+            "time_step": 0
+        },
+        {
+            "nodal_stats": {
+                "diffusion_average": 0.5,
+                "diffusion_max": 1.0,
+                "diffusion_min": 0.0,
+                "diffusion_number_nodes": 121
+            },
+            "time": 1.0,
+            "time_step": 1
+        }
+    ]
+}

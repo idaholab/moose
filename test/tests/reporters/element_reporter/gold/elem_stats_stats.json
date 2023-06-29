@@ -1,0 +1,48 @@
+{
+    "reporters": {
+        "elem_stats": {
+            "type": "ElementVariableStatistics",
+            "values": {
+                "diffusion_average": {
+                    "type": "double"
+                },
+                "diffusion_integral": {
+                    "type": "double"
+                },
+                "diffusion_max": {
+                    "type": "double"
+                },
+                "diffusion_min": {
+                    "type": "double"
+                },
+                "diffusion_number_elements": {
+                    "type": "int"
+                }
+            }
+        }
+    },
+    "time_steps": [
+        {
+            "elem_stats": {
+                "diffusion_average": 0.0,
+                "diffusion_integral": 0.0,
+                "diffusion_max": 0.0,
+                "diffusion_min": 0.0,
+                "diffusion_number_elements": 0
+            },
+            "time": 0.0,
+            "time_step": 0
+        },
+        {
+            "elem_stats": {
+                "diffusion_average": 0.5000000000000001,
+                "diffusion_integral": 2.0000000000000013,
+                "diffusion_max": 0.9500000000000004,
+                "diffusion_min": 0.049999999999999996,
+                "diffusion_number_elements": 100
+            },
+            "time": 1.0,
+            "time_step": 1
+        }
+    ]
+}

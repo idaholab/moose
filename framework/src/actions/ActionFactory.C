@@ -18,26 +18,21 @@ ActionFactory::ActionFactory(MooseApp & app) : _app(app) {}
 ActionFactory::~ActionFactory() {}
 
 void
-ActionFactory::reg(const std::string & name,
-                   const std::string & task,
-                   buildActionPtr obj_builder,
-                   paramsActionPtr ref_params,
-                   const std::string & file,
-                   int line)
+ActionFactory::reg(std::shared_ptr<RegistryEntryBase> obj)
 {
+  const std::string & name = obj->_classname;
+  const std::string & task = obj->_name;
+
   auto key = std::make_pair(name, task);
   if (_current_objs.count(key) > 0)
     return;
   _current_objs.insert(key);
 
-  BuildInfo build_info;
-  build_info._build_pointer = obj_builder;
-  build_info._params_pointer = ref_params;
-  build_info._task = task;
+  BuildInfo build_info{obj, task};
   _name_to_build_info.insert(std::make_pair(name, build_info));
   _task_to_action_map.insert(std::make_pair(task, name));
   _tasks.insert(task);
-  _name_to_line.addInfo(name, task, file, line);
+  _name_to_line.addInfo(name, task, obj->_file, obj->_line);
 }
 
 std::shared_ptr<Action>
@@ -69,7 +64,7 @@ ActionFactory::create(const std::string & action,
   // Add the name to the parameters and create the object
   action_params.set<std::string>("_action_name") = action_name;
   action_params.set<std::string>("_unique_action_name") = unique_action_name;
-  std::shared_ptr<Action> action_obj = (*build_info->_build_pointer)(action_params);
+  std::shared_ptr<Action> action_obj = build_info->_obj_pointer->buildAction(action_params);
 
   if (action_params.get<std::string>("task") == "")
     action_obj->appendTask(build_info->_task);
@@ -90,7 +85,7 @@ ActionFactory::getValidParams(const std::string & name)
   if (iter == _name_to_build_info.end())
     mooseError(std::string("A '") + name + "' is not a registered Action\n\n");
 
-  InputParameters params = (iter->second._params_pointer)();
+  InputParameters params = iter->second._obj_pointer->buildParameters();
   params.addPrivateParam("_moose_app", &_app);
   params.addPrivateParam<ActionWarehouse *>("awh", &_app.actionWarehouse());
 

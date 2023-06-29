@@ -175,7 +175,7 @@ private:
 
   ///@{
   /// The factory is allowed to call addInputParameters and removeInputParameters.
-  friend MooseObjectPtr Factory::create(
+  friend std::shared_ptr<MooseObject> Factory::create(
       const std::string &, const std::string &, const InputParameters &, THREAD_ID, bool);
   friend std::shared_ptr<Action>
   ActionFactory::create(const std::string &, const std::string &, InputParameters &);
