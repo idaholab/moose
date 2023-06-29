@@ -4,33 +4,34 @@ import pickle
 from ..tree import tokens 
 from ..common import __init__ 
 from . import command 
-
+import json
+import codecs
 """     Tagger ouputs to tags.pkl found at: 'moose/python/MooseDocs/extensions'
 
-        This extension defines the tagger command: !tagger moosepage  key:value.  Tagger will except a string that represents the markdown file that is associated with an arb. list of key:value pairs.
-        Arb spacing is allowed after the moosepage/markdown name, however only one space is allowed before the moosepage/markdown.  Ex: !tagger moosepage     k1:v1  ka:va thing1:thing2 is okay, but not
-        !tagger  moosepage.
+        This extension defines the tagger command: !tagger name path key:value.  Tagger will except a string that represents the markdown file that is associated with an arb. list of key:value pairs.
+        Arb spacing is allowed after the name/markdown name, however only one space is allowed before the name/markdown.  Ex: !tagger name path    k1:v1  ka:va thing1:thing2 is okay, but not
+        !tagger  name.
         
-        Tagger checks that all linked moose pages are unique and will not allow duplicate pages in the dictionary.  Duplicate key value pairs are allowed.
+        Tagger checks that all linked moose pages are unique and will not allow duplicate namess in the dictionary.  Duplicate key value pairs are allowed.
         
         If moose is served and *.md is editied to change an existing !tagger command, recompiling will NOT pick up the change since the moose page is already in the dictionary.  To fix this rm tags.pkl found 
         in the 'moose/python/MooseDocs/extensions' and create a new one: vim tags.pkl.  After compiling with the empty pkl the changes will be up dated. Probably a best practice to do this before using the 
         pkl to generate the database filtering system. 
         
-        Since tagger & database happen before moose is served !tagger in *.md must be saved before ./moosedocs.py build --serve for the moosepage to appear in the database filtering system. However, saving
+        Since tagger & database happen before moose is served !tagger in *.md must be saved before ./moosedocs.py build --serve for the name to appear in the database filtering system. However, saving
         *.md with new !tagger will add it to the tags.pkl.   
         
         Example Tagger command in *.md:
-        !tagger moose/modules/geochemistry/doc/content/modules/geochemistry/index.md keyg:valg keychem:valuechem
+        !tagger geochem moose/modules/geochemistry/doc/content/modules/geochemistry/index.md keyg:valg keychem:valuechem
 
-        Example Output TagDictionary in tags.pkl:
-        {'data': [
-            {'MoosePage': 'moose/modules/doc/content/index.md', 'key_vals': {'key1': 'val1', 'keya': 'val'}}, 
-            {'MoosePage': 'moose/modules/heat_conduction/doc/content/modules/heat_conduction/index.md', 'key_vals': {'keyheat': 'valheat', 'key': 'val', 'key1': 'val1'}}, 
-            {'MoosePage': 'moose/modules/level_set/doc/content/modules/level_set/example_vortex.md', 'key_vals': {'keyvor': 'valvor', 'key': 'val', 'key1': 'val1'}}, 
-            {'MoosePage': 'moose/modules/geochemistry/doc/content/modules/geochemistry/index.md', 'key_vals': {'keyg': 'valg', 'keychem': 'valuechem'}}, 
-            {'MoosePage': 'moose/modules/doc/content/index2.md', 'key_vals': {'key1': 'val1', 'keya': 'val', 'thing1': 'thing2'}}
-            ]}  """
+        Example Output TagDictionary in tags.txt:
+        {"data": 
+        [{"name": "heatconduction", "path": "moose/modules/heat_conduction/doc/content/modules/heat_conduction/index.md", "key_vals": {"keyheat": "valheat", "key": "val", "key1": "val1"}}, 
+        {"name": "index", "path": "moose/modules/doc/content/index.md", "key_vals": {"key1": "val1", "keya": "val"}}, 
+        {"name": "index2", "path": "moose/modules/doc/content/index2.md", "key_vals": {"key1": "val1", "keya": "val", "thing1": "thing2"}}, 
+        {"name": "geochem", "path": "moose/modules/geochemistry/doc/content/modules/geochemistry/index.md", "key_vals": {"keyg": "valg", "keychem": "valuechem"}}, 
+        {"name": "vortex", "path": "moose/modules/level_set/doc/content/modules/level_set/example_vortex.md", "key_vals": {"keyvor": "valvor", "key": "val", "key1": "val1"}}]
+        }  """
 
 def make_extension(**kwargs):  #reqired extension
     return TaggingExtension(**kwargs)
@@ -55,14 +56,16 @@ class TaggingCommand(command.CommandComponent):
         return settings
     
     def createToken(self, parent, info, page, settings):
-        MoosePage=info[2]
+        name=info[2]
         keylist=info[3].split()
+        mpath=keylist[0]
+        keylist=keylist[1:]
         EntryKeyValDict=[]
         for keys in keylist:
             key_vals=keys.split(':')
             EntryKeyValDict.append([key_vals[0],key_vals[1]])
             
-        PageData= {'MoosePage':MoosePage, "key_vals":dict(EntryKeyValDict)}
+        PageData= {'name':name, "path":mpath, "key_vals":dict(EntryKeyValDict)}
         UploadableEntry={'data':[]}
         UploadableEntry['data'].append(PageData)
         # print('\n\n\n\n')
@@ -79,18 +82,21 @@ class TaggingCommand(command.CommandComponent):
         first_flag=0  # if there are no elements in dict then logic is needed to include 1st entry since  TagDictionary == listed
         existing_dictionary=0
         try:
-            with open('tags.pkl', 'rb') as f:
-                TagDictionary= pickle.load(f)
+            with open('tags.txt') as f:
+                TagDictionary=json.load(f)
+
+            # with open('tags.pkl', 'rb') as f:
+            #     TagDictionary= pickle.load(f)
         except:
             # if len(TagDictionary.keys())<1:
             TagDictionary = UploadableEntry
             first_flag+=1
         else:
             for d in TagDictionary['data']:
-                if PageData['MoosePage'] in d['MoosePage']:
+                if PageData['name'] in d['name']:
                     existing_dictionary+=1
                     if existing_dictionary ==1 and first_flag==0:
-                        print('Existing / Not Adding Tag to MoosePage Dictionary: \n', PageData['MoosePage'])
+                        print('Existing / Not Adding Tag to name Dictionary: \n', PageData['name'])
                     break
 
         # if not in set or first then save the new dict
@@ -98,9 +104,12 @@ class TaggingCommand(command.CommandComponent):
             if first_flag ==0: # Dont want to append the 1st entry twice
                 TagDictionary['data'].append(PageData)
             # print('\nTagDictionary :\n',TagDictionary)
-            # print('new Tag for MoosePages\n')
+            # print('new Tag for names\n')
 
-            with open('tags.pkl', 'wb') as f:
-                pickle.dump(TagDictionary, f)
+            # with open('tags.pkl', 'wb') as f:
+            #     pickle.dump(TagDictionary, f)
+
+            with open('tags.txt', 'wb') as f:
+                json.dump(TagDictionary, codecs.getwriter('utf-8')(f), ensure_ascii=False)
             
         return info
