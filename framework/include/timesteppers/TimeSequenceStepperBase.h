@@ -38,6 +38,9 @@ protected:
   virtual Real computeDT() override;
   virtual Real computeFailedDT() override;
 
+  /// Whether to use the final dt past the last t in sequence
+  const bool _use_last_dt_after_last_t;
+
   /// the step that the time stepper is currently at
   unsigned int & _current_step;
 

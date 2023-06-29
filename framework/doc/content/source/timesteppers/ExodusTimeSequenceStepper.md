@@ -1,10 +1,9 @@
 # ExodusTimeSequenceStepper
 
-!syntax description /Executioner/TimeSteppers/ExodusTimeSequenceStepper
+This time stepper derives from [TimeSequenceStepperBase.md] and provides the
+sequence of time values from an Exodus file.
 
 The Exodus file is read by the first process (rank 0), and the time step sequence is then broadcast to all other processes.
-
-If the solve fails to converge during a time step, the behavior of the `ExodusTimeSequenceStepper` is the same as the [TimeSequenceStepper.md]. The time step will be cut then the time stepper will attempt to return to the original sequence.
 
 ## Example input file
 

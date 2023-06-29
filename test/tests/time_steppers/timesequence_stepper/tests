@@ -1,5 +1,5 @@
 [Tests]
-  issues = '#9698 #6353 #6795'
+  issues = '#9698 #6353 #6795 #24868'
   design = 'TimeSequenceStepper.md'
 
   [time_sequence]
@@ -64,6 +64,14 @@
       exodiff = 'csvtimesequence_out.e'
 
       detail = 'when reading the sequence from a comma-separated input file.'
+    []
+
+    [use_last_dt]
+      type = CSVDiff
+      input = 'timesequence_last_dt.i'
+      csvdiff = 'timesequence_last_dt_out.csv'
+
+      detail = 'allowing the last time step size to be used past the final time in the sequence.'
     []
   []
 
