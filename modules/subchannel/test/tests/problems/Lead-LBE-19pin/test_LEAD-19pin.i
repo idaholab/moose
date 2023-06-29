@@ -50,9 +50,9 @@ P_out = 1.0e5 # Pa
 []
 
 [FluidProperties]
-    [LEAD]
-        type = LeadFluidProperties
-    []
+  [LEAD]
+      type = LeadFluidProperties
+  []
 []
 
 [Problem]
@@ -173,8 +173,6 @@ P_out = 1.0e5 # Pa
 
 [Executioner]
   type = Steady
-  nl_rel_tol = 0.9
-  l_tol = 0.9
 []
 
 # ################################################################################

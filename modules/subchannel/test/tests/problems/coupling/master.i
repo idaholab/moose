@@ -65,11 +65,9 @@ P_out = 101325 # Pa
   []
 []
 
-[Modules]
-  [FluidProperties]
-    [water]
-      type = Water97FluidProperties
-    []
+[FluidProperties]
+  [water]
+    type = Water97FluidProperties
   []
 []
 
@@ -216,7 +214,7 @@ P_out = 101325 # Pa
     variable = Pin_surface_temperature
     user_object = Tpin_avg_uo
   []
-#
+
   [from_SLAVE] # send heat flux from BISON to subchannel
     type = MultiAppUserObjectTransfer2
     from_multi_app = SLAVE
