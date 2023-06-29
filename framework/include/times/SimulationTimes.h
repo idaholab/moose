@@ -22,5 +22,6 @@ public:
   SimulationTimes(const InputParameters & parameters);
   virtual ~SimulationTimes() = default;
 
-  void initialize() override;
+protected:
+  virtual void initialize() override;
 };

@@ -22,9 +22,9 @@ public:
   CSVFileTimes(const InputParameters & parameters);
   virtual ~CSVFileTimes() = default;
 
-  void initialize() override {}
-
 protected:
+  virtual void initialize() override {}
+
   /// Column in (all) the CSV file(s) where the time is
   const unsigned int _time_column_index;
 };

@@ -22,5 +22,6 @@ public:
   ReporterTimes(const InputParameters & parameters);
   virtual ~ReporterTimes() = default;
 
-  void initialize() override;
+protected:
+  virtual void initialize() override;
 };

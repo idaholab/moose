@@ -23,7 +23,8 @@ public:
   FunctorTimes(const InputParameters & parameters);
   virtual ~FunctorTimes() = default;
 
-  void initialize() override;
+protected:
+  virtual void initialize() override;
 
 private:
   /// Functor to evaluate the time to append to the Times vector

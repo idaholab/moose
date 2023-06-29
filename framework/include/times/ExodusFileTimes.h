@@ -22,5 +22,6 @@ public:
   ExodusFileTimes(const InputParameters & parameters);
   virtual ~ExodusFileTimes() = default;
 
-  void initialize() override {}
+protected:
+  virtual void initialize() override {}
 };

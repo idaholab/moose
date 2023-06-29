@@ -14,7 +14,7 @@
 class Times;
 
 /**
- * Time sequence stepper that gets it sequence of times to hit from a times object
+ * Time sequence stepper that gets its sequence of times to hit from a times object
  */
 class TimeSequenceFromTimes : public TimeSequenceStepperBase
 {

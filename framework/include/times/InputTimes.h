@@ -22,5 +22,6 @@ public:
   InputTimes(const InputParameters & parameters);
   virtual ~InputTimes() = default;
 
-  void initialize() override {}
+protected:
+  virtual void initialize() override {}
 };

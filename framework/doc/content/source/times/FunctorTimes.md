@@ -2,7 +2,7 @@
 
 !syntax description /Times/FunctorTimes
 
-The functor and its factor will be evaluated in the element containing the (0,0,0) point, the latter of which should lay
+The functor and its factor will be evaluated in the element containing the (0,0,0) point, the latter of which should lie
 inside the mesh. They will be evaluated at the current simulation time, but only at the specified
 `execute_on` flags.
 
