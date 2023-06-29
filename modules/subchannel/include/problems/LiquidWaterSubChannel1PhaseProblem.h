@@ -18,9 +18,8 @@
 #include "QuadSubChannelMesh.h"
 
 class LiquidWaterSubChannel1PhaseProblem;
-
 /**
- * Steady state subchannel solver for 1-phase liquid water coolant
+ * Steady state subchannel solver for 1-phase quad liquid water coolant
  */
 class LiquidWaterSubChannel1PhaseProblem : public SubChannel1PhaseProblem
 {

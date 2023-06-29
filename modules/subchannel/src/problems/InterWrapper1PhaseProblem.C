@@ -63,6 +63,7 @@ InputParameters
 InterWrapper1PhaseProblem::validParams()
 {
   InputParameters params = ExternalProblem::validParams();
+  params.addClassDescription("Base class of the interwrapper solvers");
   params.addRequiredParam<unsigned int>("n_blocks", "The number of blocks in the axial direction");
   params.addRequiredParam<Real>("beta",
                                 "Thermal diffusion coefficient used in turbulent crossflow");

@@ -22,6 +22,8 @@ InputParameters
 LiquidMetalSubChannel1PhaseProblem::validParams()
 {
   InputParameters params = SubChannel1PhaseProblem::validParams();
+  params.addClassDescription("Solver class for metal-cooled subchannels in a triangular lattice "
+                             "assembly and bare/wire-wrapped fuel rods");
   return params;
 }
 
@@ -52,7 +54,7 @@ LiquidMetalSubChannel1PhaseProblem::~LiquidMetalSubChannel1PhaseProblem()
   VecDestroy(&_hc_sweep_enthalpy_rhs);
 }
 
-double
+Real
 LiquidMetalSubChannel1PhaseProblem::computeFrictionFactor(_friction_args_struct friction_args)
 {
   auto Re = friction_args.Re;
@@ -60,24 +62,20 @@ LiquidMetalSubChannel1PhaseProblem::computeFrictionFactor(_friction_args_struct 
   auto S = friction_args.S;
   auto w_perim = friction_args.w_perim;
   auto Dh_i = friction_args.Dh_i;
+  Real aL, b1L, b2L, cL;
+  Real aT, b1T, b2T, cT;
   const Real & pitch = _subchannel_mesh.getPitch();
   const Real & rod_diameter = _subchannel_mesh.getRodDiameter();
   const Real & wire_lead_length = _tri_sch_mesh.getWireLeadLength();
   const Real & wire_diameter = _tri_sch_mesh.getWireDiameter();
-  auto p_to_d = pitch / rod_diameter;
+  auto p_over_d = pitch / rod_diameter;
   auto subch_type = _subchannel_mesh.getSubchannelType(i_ch);
   auto gap = _tri_sch_mesh.getDuctToRodGap();
-  auto w_to_d = (rod_diameter + gap) / rod_diameter;
-  auto Reb_l = std::pow(10, (p_to_d - 1)) * 320.0;
-  auto Reb_t = std::pow(10, 0.7 * (p_to_d - 1)) * 1.0E+4;
+  auto w_over_d = (rod_diameter + gap) / rod_diameter;
+  auto ReL = std::pow(10, (p_over_d - 1)) * 320.0;
+  auto ReT = std::pow(10, 0.7 * (p_over_d - 1)) * 1.0E+4;
   const Real lambda = 7.0;
-  auto psi = std::log(Re / Reb_l) / std::log(Reb_t / Reb_l);
-  Real a_l = 0.0;
-  Real b1_l = 0.0;
-  Real b2_l = 0.0;
-  Real a_t = 0.0;
-  Real b1_t = 0.0;
-  Real b2_t = 0.0;
+  auto psi = std::log(Re / ReL) / std::log(ReT / ReL);
   auto theta = std::acos(wire_lead_length /
                          std::sqrt(std::pow(wire_lead_length, 2) +
                                    std::pow(libMesh::pi * (rod_diameter + wire_diameter), 2)));
@@ -90,85 +88,83 @@ LiquidMetalSubChannel1PhaseProblem::computeFrictionFactor(_friction_args_struct 
   Real pw_p = 0.0;
   Real ar = 0.0;
   Real a_p = 0.0;
-  Real cf_t = 0.0;
-  Real cf_l = 0.0;
 
   // Find the coefficients of bare rod bundle friction factor
   // correlations for turbulent and laminar flow regimes. Todreas & Kazimi, Nuclear Systems Volume 1
   if (subch_type == EChannelType::CENTER)
   {
-    if (p_to_d < 1.1)
+    if (p_over_d < 1.1)
     {
-      a_l = 26.0;
-      b1_l = 888.2;
-      b2_l = -3334.0;
-      a_t = 0.09378;
-      b1_t = 1.398;
-      b2_t = -8.664;
+      aL = 26.0;
+      b1L = 888.2;
+      b2L = -3334.0;
+      aT = 0.09378;
+      b1T = 1.398;
+      b2T = -8.664;
     }
     else
     {
-      a_l = 62.97;
-      b1_l = 216.9;
-      b2_l = -190.2;
-      a_t = 0.1458;
-      b1_t = 0.03632;
-      b2_t = -0.03333;
+      aL = 62.97;
+      b1L = 216.9;
+      b2L = -190.2;
+      aT = 0.1458;
+      b1T = 0.03632;
+      b2T = -0.03333;
     }
     // laminar flow friction factor for bare rod bundle - Center subchannel
-    cf_l = a_l + b1_l * (p_to_d - 1) + b2_l * std::pow((p_to_d - 1), 2);
+    cL = aL + b1L * (p_over_d - 1) + b2L * std::pow((p_over_d - 1), 2);
     // turbulent flow friction factor for bare rod bundle - Center subchannel
-    cf_t = a_t + b1_t * (p_to_d - 1) + b2_t * std::pow((p_to_d - 1), 2);
+    cT = aT + b1T * (p_over_d - 1) + b2T * std::pow((p_over_d - 1), 2);
   }
   else if (subch_type == EChannelType::EDGE)
   {
-    if (p_to_d < 1.1)
+    if (p_over_d < 1.1)
     {
-      a_l = 26.18;
-      b1_l = 554.5;
-      b2_l = -1480.0;
-      a_t = 0.09377;
-      b1_t = 0.8732;
-      b2_t = -3.341;
+      aL = 26.18;
+      b1L = 554.5;
+      b2L = -1480.0;
+      aT = 0.09377;
+      b1T = 0.8732;
+      b2T = -3.341;
     }
     else
     {
-      a_l = 44.4;
-      b1_l = 256.7;
-      b2_l = -267.6;
-      a_t = 0.1430;
-      b1_t = 0.04199;
-      b2_t = -0.04428;
+      aL = 44.4;
+      b1L = 256.7;
+      b2L = -267.6;
+      aT = 0.1430;
+      b1T = 0.04199;
+      b2T = -0.04428;
     }
     // laminar flow friction factor for bare rod bundle - Edge subchannel
-    cf_l = a_l + b1_l * (w_to_d - 1) + b2_l * std::pow((w_to_d - 1), 2);
+    cL = aL + b1L * (w_over_d - 1) + b2L * std::pow((w_over_d - 1), 2);
     // turbulent flow friction factor for bare rod bundle - Edge subchannel
-    cf_t = a_t + b1_t * (w_to_d - 1) + b2_t * std::pow((w_to_d - 1), 2);
+    cT = aT + b1T * (w_over_d - 1) + b2T * std::pow((w_over_d - 1), 2);
   }
   else
   {
-    if (p_to_d < 1.1)
+    if (p_over_d < 1.1)
     {
-      a_l = 26.98;
-      b1_l = 1636.0;
-      b2_l = -10050.0;
-      a_t = 0.1004;
-      b1_t = 1.625;
-      b2_t = -11.85;
+      aL = 26.98;
+      b1L = 1636.0;
+      b2L = -10050.0;
+      aT = 0.1004;
+      b1T = 1.625;
+      b2T = -11.85;
     }
     else
     {
-      a_l = 87.26;
-      b1_l = 38.59;
-      b2_l = -55.12;
-      a_t = 0.1499;
-      b1_t = 0.006706;
-      b2_t = -0.0009567;
+      aL = 87.26;
+      b1L = 38.59;
+      b2L = -55.12;
+      aT = 0.1499;
+      b1T = 0.006706;
+      b2T = -0.0009567;
     }
     // laminar flow friction factor for bare rod bundle - Corner subchannel
-    cf_l = a_l + b1_l * (w_to_d - 1) + b2_l * std::pow((w_to_d - 1), 2);
+    cL = aL + b1L * (w_over_d - 1) + b2L * std::pow((w_over_d - 1), 2);
     // turbulent flow friction factor for bare rod bundle - Corner subchannel
-    cf_t = a_t + b1_t * (w_to_d - 1) + b2_t * std::pow((w_to_d - 1), 2);
+    cT = aT + b1T * (w_over_d - 1) + b2T * std::pow((w_over_d - 1), 2);
   }
 
   // Find the coefficients of wire-wrapped rod bundle friction factor
@@ -186,11 +182,11 @@ LiquidMetalSubChannel1PhaseProblem::computeFrictionFactor(_friction_args_struct 
       a_p = std::sqrt(3.0) / 4.0 * std::pow(pitch, 2.0) -
             libMesh::pi * std::pow(rod_diameter, 2) / 8.0;
       // turbulent friction factor equation constant - Center subchannel
-      cf_t = cf_t * (pw_p / w_perim) + wd_t * (3 * ar / a_p) * (Dh_i / wire_lead_length) *
-                                           std::pow((Dh_i / wire_diameter), 0.18);
+      cT = cT * (pw_p / w_perim) + wd_t * (3 * ar / a_p) * (Dh_i / wire_lead_length) *
+                                       std::pow((Dh_i / wire_diameter), 0.18);
       // laminar friction factor equation constant - Center subchannel
-      cf_l = cf_l * (pw_p / w_perim) +
-             wd_l * (3 * ar / a_p) * (Dh_i / wire_lead_length) * (Dh_i / wire_diameter);
+      cL = cL * (pw_p / w_perim) +
+           wd_l * (3 * ar / a_p) * (Dh_i / wire_lead_length) * (Dh_i / wire_diameter);
     }
     else if (subch_type == EChannelType::EDGE)
     {
@@ -199,9 +195,9 @@ LiquidMetalSubChannel1PhaseProblem::computeFrictionFactor(_friction_args_struct 
       // bare rod bundle edge subchannel flow area
       a_p = S + 0.5 * libMesh::pi * std::pow(wire_diameter, 2) / 4.0 / std::cos(theta);
       // turbulent friction factor equation constant - Edge subchannel
-      cf_t = cf_t * std::pow((1 + ws_t * (ar / a_p) * std::pow(std::tan(theta), 2.0)), 1.41);
+      cT = cT * std::pow((1 + ws_t * (ar / a_p) * std::pow(std::tan(theta), 2.0)), 1.41);
       // laminar friction factor equation constant - Edge subchannel
-      cf_l = cf_l * (1 + ws_l * (ar / a_p) * std::pow(std::tan(theta), 2.0));
+      cL = cL * (1 + ws_l * (ar / a_p) * std::pow(std::tan(theta), 2.0));
     }
     else
     {
@@ -210,32 +206,32 @@ LiquidMetalSubChannel1PhaseProblem::computeFrictionFactor(_friction_args_struct 
       // bare rod bundle corner subchannel flow area
       a_p = S + 1.0 / 6.0 * libMesh::pi / 4.0 * std::pow(wire_diameter, 2) / std::cos(theta);
       // turbulent friction factor equation constant - Corner subchannel
-      cf_t = cf_t * std::pow((1 + ws_t * (ar / a_p) * std::pow(std::tan(theta), 2.0)), 1.41);
+      cT = cT * std::pow((1 + ws_t * (ar / a_p) * std::pow(std::tan(theta), 2.0)), 1.41);
       // laminar friction factor equation constant - Corner subchannel
-      cf_l = cf_l * (1 + ws_l * (ar / a_p) * std::pow(std::tan(theta), 2.0));
+      cL = cL * (1 + ws_l * (ar / a_p) * std::pow(std::tan(theta), 2.0));
     }
   }
 
   // laminar friction factor
-  auto f_l = cf_l / Re;
+  auto fL = cL / Re;
   // turbulent friction factor
-  auto f_t = cf_t / std::pow(Re, 0.18);
+  auto fT = cT / std::pow(Re, 0.18);
 
-  if (Re < Reb_l)
+  if (Re < ReL)
   {
     // laminar flow
-    return f_l;
+    return fL;
   }
-  else if (Re > Reb_t)
+  else if (Re > ReT)
   {
     // turbulent flow
-    return f_t;
+    return fT;
   }
   else
   {
     // transition flow
-    return f_l * std::pow((1 - psi), 1.0 / 3.0) * (1 - std::pow(psi, lambda)) +
-           f_t * std::pow(psi, 1.0 / 3.0);
+    return fL * std::pow((1 - psi), 1.0 / 3.0) * (1 - std::pow(psi, lambda)) +
+           fT * std::pow(psi, 1.0 / 3.0);
   }
 }
 

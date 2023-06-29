@@ -65,6 +65,7 @@ InputParameters
 SubChannel1PhaseProblem::validParams()
 {
   InputParameters params = ExternalProblem::validParams();
+  params.addClassDescription("Base class of the subchannel solvers");
   params.addRequiredParam<unsigned int>("n_blocks", "The number of blocks in the axial direction");
   params.addRequiredParam<Real>("CT", "Turbulent modeling parameter");
   params.addParam<Real>("P_tol", 1e-6, "Pressure tolerance");
