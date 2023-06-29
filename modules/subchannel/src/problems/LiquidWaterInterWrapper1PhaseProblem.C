@@ -20,6 +20,8 @@ InputParameters
 LiquidWaterInterWrapper1PhaseProblem::validParams()
 {
   InputParameters params = InterWrapper1PhaseProblem::validParams();
+  params.addClassDescription(
+      "Solver class for water-cooled interwrapper of assemblies in a square-lattice arrangement");
   return params;
 }
 

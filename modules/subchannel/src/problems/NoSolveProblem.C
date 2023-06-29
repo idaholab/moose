@@ -20,6 +20,7 @@ InputParameters
 NoSolveProblem::validParams()
 {
   InputParameters params = ExternalProblem::validParams();
+  params.addClassDescription("Dummy problem class that doesn't solve anything");
   return params;
 }
 

@@ -22,6 +22,8 @@ InputParameters
 LiquidMetalInterWrapper1PhaseProblem::validParams()
 {
   InputParameters params = InterWrapper1PhaseProblem::validParams();
+  params.addClassDescription("Solver class for metal-cooled interwrapper of assemblies in a "
+                             "triangular-lattice arrangement");
   return params;
 }
 
