@@ -137,6 +137,7 @@ Extensions:
             restart: application_usage/restart_recover.md
             samplers: syntax/Samplers/index.md
             scalarkernels: syntax/ScalarKernels/index.md
+            solidproperties: syntax/SolidProperties/index.md
             splits: syntax/Preconditioning/index.md
             surrogates: syntax/Surrogates/index.md
             systems: syntax/Systems/index.md

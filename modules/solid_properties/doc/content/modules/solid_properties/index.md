@@ -27,7 +27,7 @@ the overall type of property. The overall design of this module is as follows:
    of dependent quantities (temperature, porosity, etc.). Different "categories" of
    solid properties are grouped together into different userobjects. For example,
    common solid properties used in thermal simulations (specific heat, thermal conductivity),
-   are provided by derived classes of the [ThermalSolidProperties](/userobjects/ThermalSolidProperties.md)
+   are provided by derived classes of the [ThermalSolidProperties](/solidproperties/ThermalSolidProperties.md)
    userobject. Mechanics properties (Youngs modulus, Poisson ratio), would be provided by
    a separate "family" of userobjects.
 2. *Materials* call these userobject functions to compute the material properties at
@@ -38,7 +38,7 @@ the overall type of property. The overall design of this module is as follows:
 ## Thermal properties
 
 Thermal properties (density, specific heat, and thermal conductivity) are computed by
-userobjects inheriting from the [ThermalSolidProperties](/userobjects/ThermalSolidProperties.md) base class. This class
+userobjects inheriting from the [ThermalSolidProperties](/solidproperties/ThermalSolidProperties.md) base class. This class
 defines functions to compute these properties as a function of temperature:
 
 - compute isobaric specific heat - `Real cp_from_T(const Real & T)`
@@ -157,7 +157,7 @@ to the formulation and overriding the methods that describe the solid properties
 
 For example, suppose new thermal solid properties were desired for granite.
 The first step is to create a userobject named `ThermalGraniteProperties` by
-inheriting from [ThermalSolidProperties](/userobjects/ThermalSolidProperties.md) and
+inheriting from [ThermalSolidProperties](/solidproperties/ThermalSolidProperties.md) and
 overriding all methods that you would like to implement.
 The header file for your new userobject indicates all methods that will be defined.
 
