@@ -21,6 +21,26 @@ public:
   static InputParameters validParams();
   ChemicalCompositionAction(const InputParameters & params);
 
+  const std::vector<unsigned int> & elementIDs() const { return _element_ids; }
+
+  const std::vector<std::string> & phases() const { return _phases; }
+  const std::vector<std::string> & elementPotentials() const { return _token_element_potentials; }
+
+  const std::vector<std::pair<std::string, std::string>> & speciesPhasePairs() const
+  {
+    return _token_species;
+  }
+
+  const std::vector<std::pair<std::string, std::string>> & vaporPhasePairs() const
+  {
+    return _token_vapor_species;
+  }
+
+  const std::vector<std::pair<std::string, std::string>> & phaseElementPairs() const
+  {
+    return _token_phase_elements;
+  }
+
   virtual void act();
 
 protected:

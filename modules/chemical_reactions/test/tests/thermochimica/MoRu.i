@@ -23,7 +23,6 @@
   munit = moles
   temperature = 2250
   reinit_requested = false
-  # execute_on = 'TIMESTEP_END'
 []
 
 [ICs]
@@ -36,35 +35,6 @@
     type = FunctionIC
     variable = Ru
     function = '0.2*(1-x)+4.5*x'
-  []
-[]
-
-# [UserObjects]
-#   [data]
-#     type = ThermochimicaNodalData
-#     temperature = 2250
-#     execute_on = 'INITIAL TIMESTEP_END'
-#     reinit_requested = false # changes parallel results slightly
-#   []
-# []
-
-# [Variables]
-#   [T]
-#     type = MooseVariable
-#     initial_condition = 2250
-#   []
-# []
-
-[AuxVariables]
-  [n]
-  []
-[]
-
-[AuxKernels]
-  [thermochimica]
-    type = ThermochimicaAux
-    variable = n
-    thermo_nodal_data_uo = Thermochimica
   []
 []
 
@@ -87,4 +57,5 @@
 
 [Outputs]
   exodus = true
+  csv = true
 []

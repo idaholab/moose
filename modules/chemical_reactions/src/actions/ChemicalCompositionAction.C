@@ -448,15 +448,13 @@ ChemicalCompositionAction::act()
     std::copy(_elements.begin(),
               _elements.end(),
               std::back_inserter(uo_params.set<std::vector<VariableName>>("elements")));
-    std::copy(_element_ids.begin(),
-              _element_ids.end(),
-              std::back_inserter(uo_params.set<std::vector<unsigned int>>("element_ids")));
 
     if (isParamValid("output_phases"))
-      uo_params.set<std::vector<VariableName>>("output_phases")
-          .insert(uo_params.set<std::vector<VariableName>>("output_phases").end(),
-                  _phases.begin(),
-                  _phases.end());
+    {
+      std::copy(_phases.begin(),
+                _phases.end(),
+                std::back_inserter(uo_params.set<std::vector<VariableName>>("output_phases")));
+    }
 
     if (isParamValid("output_species"))
       uo_params.set<std::vector<VariableName>>("output_species")
@@ -482,57 +480,11 @@ ChemicalCompositionAction::act()
                   _vapor_pressures.begin(),
                   _vapor_pressures.end());
 
+    uo_params.set<ChemicalCompositionAction *>("_chemical_composition_action") = this;
+
     uo_params.applyParameters(parameters());
 
     _problem->addUserObject("ThermochimicaNodalData", _uo_name, uo_params);
-  }
-
-  //
-  // do we need those?! (yes, for now we do)
-  //
-  if (_current_task == "add_aux_kernel")
-  {
-    auto params = _factory.getValidParams("ProjectionAux");
-    params.set<ExecFlagEnum>("execute_on") = {EXEC_INITIAL, EXEC_TIMESTEP_END};
-
-    for (const auto i : index_range(_phases))
-    {
-      const std::string ker_name = _phases[i];
-      params.set<AuxVariableName>("variable") = ker_name;
-      params.set<std::vector<VariableName>>("v") = {ker_name};
-      _problem->addAuxKernel("ProjectionAux", ker_name, params);
-    }
-
-    for (const auto i : index_range(_species))
-    {
-      const std::string ker_name = _species[i];
-      params.set<AuxVariableName>("variable") = ker_name;
-      params.set<std::vector<VariableName>>("v") = {ker_name};
-      _problem->addAuxKernel("ProjectionAux", ker_name, params);
-    }
-
-    for (const auto i : index_range(_element_potentials))
-    {
-      const std::string ker_name = _element_potentials[i];
-      params.set<AuxVariableName>("variable") = ker_name;
-      params.set<std::vector<VariableName>>("v") = {ker_name};
-      _problem->addAuxKernel("ProjectionAux", ker_name, params);
-    }
-
-    for (const auto i : index_range(_vapor_pressures))
-    {
-      const std::string ker_name = _vapor_pressures[i];
-      params.set<AuxVariableName>("variable") = ker_name;
-      params.set<std::vector<VariableName>>("v") = {ker_name};
-      _problem->addAuxKernel("ProjectionAux", ker_name, params);
-    }
-
-    for (const auto i : index_range(_element_phases))
-    {
-      const std::string ker_name = _element_phases[i];
-      params.set<AuxVariableName>("variable") = ker_name;
-      _problem->addAuxKernel("SelfAux", ker_name, params);
-    }
   }
 
 #endif
