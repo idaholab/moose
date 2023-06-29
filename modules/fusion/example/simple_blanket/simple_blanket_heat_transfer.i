@@ -1,9 +1,9 @@
-Channels = 'CH1 CH2 CH3 CH4 CH5 CH6 CH7 CH8 CH9 CH10 CH11 CH12 CH13 CH14 CH15 CH16 CH17 CH18 CH19 CH20 CH21 CH22 CH23 CH24 CH25 CH26'
+#Channels = 'CH1 CH2 CH3 CH4 CH5 CH6 CH7 CH8 CH9 CH10 CH11 CH12 CH13 CH14 CH15 CH16 CH17 CH18 CH19 CH20 CH21 CH22 CH23 CH24 CH25 CH26'
 
 [Mesh]
   [fmg]
     type = FileMeshGenerator
-    file = 'Blanket_Simple.msh'
+    file = 'Blanket_OneRow.msh'
   []
 []
 
@@ -73,13 +73,22 @@ Channels = 'CH1 CH2 CH3 CH4 CH5 CH6 CH7 CH8 CH9 CH10 CH11 CH12 CH13 CH14 CH15 CH
     type = NeumannBC
     variable = temp
     boundary = 'Heated_Surface'
-    value = 3202.5 # 0.25 MW/m^2
+    value = 305.61 # 0.25 MW/m^2 3202.5 for simple blanket mesh
   []
-  [heat_channel]
+
+  [channel]
+    type = CoupledConvectiveHeatFluxBC
+    variable = temp
+    htc = htc
+    T_infinity = Tfluid
+    boundary = 'CH1 CH2'
+  []
+
+  [bw_bc]
     type = DirichletBC
     variable = temp
-    boundary = "${Channels}"
-    value = 685.65 # K
+    boundary = 'Back_Wall'
+    value = 800
   []
 []
 
@@ -145,4 +154,45 @@ Channels = 'CH1 CH2 CH3 CH4 CH5 CH6 CH7 CH8 CH9 CH10 CH11 CH12 CH13 CH14 CH15 CH
     x = '365.44 464.99 556.82 660.93 757.28 858.82 947.70 1115.15 1254.55 1343.22' #K
     y = '178.86 162.76 149.22 142.95 140.10 134.69 129.26 122.23 119.01 117.86' # W/mK
   [../]
+[]
+
+[AuxVariables]
+  [Tfluid]
+  []
+  [htc]
+  []
+[]
+
+[MultiApps]
+  [channel]
+    type = FullSolveMultiApp
+    input_files = 'simple_channel_plate.i simple_channel_plate_bottom.i'
+    positions = '0 0 0
+                0 0 0'
+    cli_args = 'Components/channel/csv_file=csv_pipes/Top_Pipe.csv;Problem/master_bdry_name=CH1
+                Components/channel/csv_file=csv_pipes/Bottom_Pipe.csv;Problem/master_bdry_name=CH2'
+  []
+[]
+
+[Transfers]
+  [wall_temperature]
+    type = MultiAppMapNearestNodeTransfer
+    to_multi_app = channel
+    source_variable = temp
+    variable = T_wall
+  []
+
+  [fluid_temperature]
+    type = MultiAppMapNearestNodeTransfer
+    from_multi_app = channel
+    variable = Tfluid
+    source_variable = T
+  []
+
+  [htc]
+    type = MultiAppMapNearestNodeTransfer
+    from_multi_app = channel
+    variable = htc
+    source_variable = Hw
+  []
 []
