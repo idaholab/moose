@@ -36,11 +36,35 @@ Channels = 'CH1 CH2 CH3 CH4 CH5 CH6 CH7 CH8 CH9 CH10 CH11 CH12 CH13 CH14 CH15 CH
     type = HeatConduction
     variable = temp
   []
-  [heat_generation]
-    type = CoupledForce
+  [pd_shield]
+    type = HeatSource
     variable = temp
-    block = 'Shield First_Wall Multiplier Toroidal_Plate Breeder'
-    v = power_density
+    block = 'Shield'
+    value = 2.7544e+06
+  []
+  [pd_fw]
+    type = HeatSource
+    variable = temp
+    value = 4.6228e+05
+    block = 'First_Wall'
+  []
+  [pd_mult]
+    type = HeatSource
+    variable = temp
+    value = 6.4374e+05
+    block = 'Multiplier'
+  []
+  [pd_ts]
+    type = HeatSource
+    variable = temp
+    value = 6.3422e+05
+    block = 'Toroidal_Plate'
+  []
+  [pd_breeder]
+    type = HeatSource
+    variable = temp
+    value = 1.6260e+06
+    block = 'Breeder'
   []
 []
 
@@ -83,44 +107,6 @@ Channels = 'CH1 CH2 CH3 CH4 CH5 CH6 CH7 CH8 CH9 CH10 CH11 CH12 CH13 CH14 CH15 CH
     thermal_conductivity_temperature_function = tungsten
     temp = temp
     block = 'Shield'
-  []
-[]
-
-[AuxVariables]
-  [power_density]
-  []
-[]
-
-[AuxKernels]
-  [pd_armor]
-    type = ConstantAux
-    variable = power_density
-    value = 2.7544e+07
-    block = 'Shield'
-  []
-  [pd_fw]
-    type = ConstantAux
-    variable = power_density
-    value = 4.6228e+06
-    block = 'First_Wall'
-  []
-  [pd_mult]
-    type = ConstantAux
-    variable = power_density
-    value = 6.4374e+06
-    block = 'Multiplier'
-  []
-  [pd_ts]
-    type = ConstantAux
-    variable = power_density
-    value = 6.3422e+06
-    block = 'Toroidal_Plate'
-  []
-  [pd_breeder]
-    type = ConstantAux
-    variable = power_density
-    value = 1.6260e+07
-    block = 'Breeder'
   []
 []
 
