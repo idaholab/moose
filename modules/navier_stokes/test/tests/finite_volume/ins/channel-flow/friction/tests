@@ -31,13 +31,13 @@
     type = 'Exodiff'
     input = 2d-rc-friction-action.i
     exodiff = 2d-rc-friction-action_out.e
-    requirement = 'The system shall be able to model linear volumetric friction in a channel using NSFVAction syntax.'
+    requirement = 'The system shall be able to model linear volumetric friction in a channel using a custom action syntax.'
   []
   [quadratic-friction-action]
     type = 'Exodiff'
     input = 2d-rc-friction-action.i
     exodiff = 2d-rc-friction-action-quad_out.e
-    requirement = 'The system shall be able to model quadratic volumetric friction in a channel using NSFVAction syntax.'
+    requirement = 'The system shall be able to model quadratic volumetric friction in a channel using a custom action syntax.'
     cli_args = "Modules/NavierStokesFV/friction_types='forchheimer' "
                "Outputs/file_base='2d-rc-friction-action-quad_out'"
   []
@@ -45,7 +45,7 @@
     type = 'Exodiff'
     input = 2d-rc-friction-action.i
     exodiff = 2d-rc-friction-exp-factor-action_out.e
-    requirement = 'The system shall be able to model quadratic volumetric friction with an exponential friction factor correlation in a channel.'
+    requirement = 'The system shall be able to model quadratic volumetric friction with an exponential friction factor correlation in a channel a custom action syntax.'
     cli_args = "Modules/NavierStokesFV/friction_types='forchheimer' "
                "Modules/NavierStokesFV/friction_coeffs='friction_coefficient' "
                "Outputs/file_base='2d-rc-friction-exp-factor-action_out' "

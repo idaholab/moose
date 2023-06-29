@@ -47,14 +47,23 @@ rho = 1.1
     prop_names = 'rho mu'
     prop_values = '${rho} ${mu}'
   []
-  [exponential_friction_coefficient]
-    type = NSFVExponentialFrictionMaterial
-    u = vel_x
-    v = vel_y
-    mu = ${mu}
+  [speed_material]
+    type = PINSFVSpeedFunctorMaterial
+    superficial_vel_x = vel_x
+    superficial_vel_y = vel_y
+    porosity = 1
+  []
+  [Re_material]
+    type = ReynoldsNumberMaterial
+    speed = speed
+    characteristic_length = 2
     rho = ${rho}
-    characteristic_lenght = 2
+    mu = ${mu}
+  []
+  [exponential_friction_coefficient]
+    type = ExponentialFrictionMaterial
     friction_factor_name = 'friction_coefficient'
+    Re = Re
     c1 = 0.25
     c2 = 0.55
   []
@@ -66,10 +75,6 @@ rho = 1.1
   petsc_options_iname = '-pc_type -pc_factor_shift_type'
   petsc_options_value = 'lu NONZERO'
   nl_rel_tol = 1e-12
-[]
-
-[Debug]
-  show_actions = true
 []
 
 [Outputs]

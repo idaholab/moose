@@ -160,14 +160,23 @@ velocity_interp_method = 'rc'
     prop_names = 'friction_coefficient'
     prop_values = '25'
   []
-  [exponential_friction_coefficient]
-    type = NSFVExponentialFrictionMaterial
-    u = vel_x
-    v = vel_y
-    mu = ${mu}
+  [speed_material]
+    type = PINSFVSpeedFunctorMaterial
+    superficial_vel_x = vel_x
+    superficial_vel_y = vel_y
+    porosity = 1
+  []
+  [Re_material]
+    type = ReynoldsNumberMaterial
+    speed = speed
+    characteristic_length = 2
     rho = ${rho}
-    characteristic_lenght = 2
+    mu = ${mu}
+  []
+  [exponential_friction_coefficient]
+    type = ExponentialFrictionMaterial
     friction_factor_name = 'friction_coefficient'
+    Re = Re
     c1 = 0.25
     c2 = 0.55
   []
