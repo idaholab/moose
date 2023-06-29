@@ -70,7 +70,7 @@ protected:
   /// Computes Pressure per channel for block iblock
   virtual void computeP(int iblock);
   /// Computes Enthalpy per channel for block iblock
-  virtual void computeh(int iblock);
+  virtual void computeh(int iblock) = 0;
   /// Computes Temperature per channel for block iblock
   virtual void computeT(int iblock);
   /// Computes Density per channel for block iblock
@@ -80,7 +80,7 @@ protected:
   /// Computes cross fluxes for block iblock
   virtual void computeWij(int iblock);
   /// Computes added heat for channel i_ch and cell iz
-  virtual Real computeAddedHeatPin(unsigned int i_ch, unsigned int iz);
+  virtual Real computeAddedHeatPin(unsigned int i_ch, unsigned int iz) = 0;
   /// Function that computes the heat flux added by the duct
   virtual Real computeAddedHeatDuct(unsigned int i_ch, unsigned int iz);
   /// compute massflow that matches the given dp/dz.

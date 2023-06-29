@@ -35,7 +35,6 @@ protected:
    * Upgraded Cheng-Todreas Correlation (2018).
    */
   virtual Real computeFrictionFactor(_friction_args_struct friction_args) override;
-  /// Computes added heat for channel i_ch and cell iz
   virtual Real computeAddedHeatPin(unsigned int i_ch, unsigned int iz) override;
   virtual void computeWijPrime(int iblock) override;
   virtual void computeh(int iblock) override;
