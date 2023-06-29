@@ -154,10 +154,22 @@ velocity_interp_method = 'rc'
 []
 
 [Materials]
+  inactive = exponential_friction_coefficient
   [friction_coefficient]
     type = ADGenericFunctorMaterial
     prop_names = 'friction_coefficient'
     prop_values = '25'
+  []
+  [exponential_friction_coefficient]
+    type = NSFVExponentialFrictionMaterial
+    u = vel_x
+    v = vel_y
+    mu = ${mu}
+    rho = ${rho}
+    characteristic_lenght = 2
+    friction_factor_name = 'friction_coefficient'
+    c1 = 0.25
+    c2 = 0.55
   []
 []
 

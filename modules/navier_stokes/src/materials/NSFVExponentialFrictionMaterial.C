@@ -7,14 +7,14 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "PINSFVFrictionMaterial.h"
+#include "NSFVExponentialFrictionMaterial.h"
 #include "MooseMesh.h"
 #include "NS.h"
 
-registerMooseObject("NavierStokesApp", PINSFVFrictionMaterial);
+registerMooseObject("NavierStokesApp", NSFVExponentialFrictionMaterial);
 
 InputParameters
-PINSFVFrictionMaterial::validParams()
+NSFVExponentialFrictionMaterial::validParams()
 {
   InputParameters params = FunctorMaterial::validParams();
   params.addClassDescription("Computes the friction factor for simple cases.");
@@ -27,12 +27,17 @@ PINSFVFrictionMaterial::validParams()
                                             "The characteristic length in the domain.");
   params.addRequiredParam<MooseFunctorName>("c1", "Constant in c1/Re^(c2) expression.");
   params.addRequiredParam<MooseFunctorName>("c2", "Constant in c1/Re^(c2) expression.");
-  params.addParam<MooseFunctorName>("porosity", "1", "prosity.");
-  params.addRequiredParam<MooseFunctorName>("friction_factor_name", "prosity.");
+  params.addParam<MooseFunctorName>("porosity", "1", " The the prosity functor.");
+  params.addRequiredParam<std::string>("friction_factor_name",
+                                       "The name of the output friction factor.");
+  params.addParam<bool>(
+      "include_velocity_factor",
+      false,
+      "If a factor of velocity magnitude should be included in the friction factor.");
   return params;
 }
 
-PINSFVFrictionMaterial::PINSFVFrictionMaterial(const InputParameters & parameters)
+NSFVExponentialFrictionMaterial::NSFVExponentialFrictionMaterial(const InputParameters & parameters)
   : FunctorMaterial(parameters),
     _u(getFunctor<ADReal>("u")),
     _v(isParamValid("v") ? &getFunctor<ADReal>("v") : nullptr),
@@ -43,7 +48,8 @@ PINSFVFrictionMaterial::PINSFVFrictionMaterial(const InputParameters & parameter
     _c1(getFunctor<ADReal>("c1")),
     _c2(getFunctor<ADReal>("c2")),
     _porosity(getFunctor<ADReal>("porosity")),
-    _friction_factor_name(getParam<std::string>("friction_factor_name"))
+    _friction_factor_name(getParam<std::string>("friction_factor_name")),
+    _include_velicity_factor(getParam<bool>("include_velocity_factor"))
 {
   addFunctorProperty<ADReal>(_friction_factor_name,
                              [this](const auto & r, const auto & t) -> ADReal
@@ -58,6 +64,7 @@ PINSFVFrictionMaterial::PINSFVFrictionMaterial(const InputParameters & parameter
                                const auto Re = _rho(r, t) * _characteristic_length(r, t) *
                                                velocity.norm() / _mu(r, t);
 
-                               return _c1(r, t) / (pow(Re, _c2(r, t))) * velocity.norm();
+                               return _c1(r, t) * pow(Re, _c2(r, t)) *
+                                      (_include_velicity_factor ? velocity.norm() : ADReal(1.0));
                              });
 }

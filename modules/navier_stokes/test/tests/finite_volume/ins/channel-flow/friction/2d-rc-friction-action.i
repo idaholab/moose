@@ -47,6 +47,17 @@ rho = 1.1
     prop_names = 'rho mu'
     prop_values = '${rho} ${mu}'
   []
+  [exponential_friction_coefficient]
+    type = NSFVExponentialFrictionMaterial
+    u = vel_x
+    v = vel_y
+    mu = ${mu}
+    rho = ${rho}
+    characteristic_lenght = 2
+    friction_factor_name = 'friction_coefficient'
+    c1 = 0.25
+    c2 = 0.55
+  []
 []
 
 [Executioner]
@@ -55,6 +66,10 @@ rho = 1.1
   petsc_options_iname = '-pc_type -pc_factor_shift_type'
   petsc_options_value = 'lu NONZERO'
   nl_rel_tol = 1e-12
+[]
+
+[Debug]
+  show_actions = true
 []
 
 [Outputs]
