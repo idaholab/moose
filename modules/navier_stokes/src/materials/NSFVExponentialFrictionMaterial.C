@@ -62,9 +62,9 @@ NSFVExponentialFrictionMaterial::NSFVExponentialFrictionMaterial(const InputPara
                                  velocity(2) = (*_w)(r, t);
 
                                const auto Re = _rho(r, t) * _characteristic_length(r, t) *
-                                               velocity.norm() / _mu(r, t);
+                                               velocity.norm() / _porosity(r, t) / _mu(r, t);
 
-                               return _c1(r, t) * pow(Re, _c2(r, t)) *
+                               return _c1(r, t) * std::pow(Re, _c2(r, t)) *
                                       (_include_velicity_factor ? velocity.norm() : ADReal(1.0));
                              });
 }
