@@ -39,6 +39,7 @@ NearestNodeLocator::NearestNodeLocator(SubProblem & subproblem,
     _boundary1(boundary1),
     _boundary2(boundary2),
     _first(true),
+    _reinit_iteration(true),
     _patch_update_strategy(_mesh.getPatchUpdateStrategy())
 {
   /*
@@ -69,7 +70,7 @@ NearestNodeLocator::findNodes()
    */
   const std::map<dof_id_type, std::vector<dof_id_type>> & node_to_elem_map = _mesh.nodeToElemMap();
 
-  if (_first)
+  if (_first || (_reinit_iteration && _patch_update_strategy == Moose::Iteration))
   {
     _first = false;
 
@@ -194,7 +195,7 @@ NearestNodeLocator::findNodes()
         for (const auto & dof : elems_connected_to_node)
           if (std::find(ghost.begin(), ghost.end(), dof) == ghost.end() &&
               _mesh.elemPtr(dof)->processor_id() != _mesh.processor_id())
-            mooseError("Error in NearestNodeLocator : The nearest neighbor lies outside the "
+            mooseError("Error in NearestNodeLocator: The nearest neighbor lies outside the "
                        "ghosted set of elements. Increase the ghosting_patch_size parameter in the "
                        "mesh block and try again.");
       }
@@ -218,8 +219,14 @@ NearestNodeLocator::reinit()
 
   _new_ghosted_elems.clear();
 
+  // After a call from system reinit, mesh has been updated with initial adaptivity.
+  // Moose::Iteration relies on data generated for ghosting (i.e. trial_primary_nodes)
+  _reinit_iteration = true;
+
   // Redo the search
   findNodes();
+
+  _reinit_iteration = false;
 }
 
 Real
@@ -340,7 +347,7 @@ NearestNodeLocator::updatePatch(std::vector<dof_id_type> & secondary_nodes)
       for (const auto & dof : elems_connected_to_node)
         if (std::find(ghost.begin(), ghost.end(), dof) == ghost.end() &&
             _mesh.elemPtr(dof)->processor_id() != _mesh.processor_id())
-          mooseError("Error in NearestNodeLocator : The nearest neighbor lies outside the ghosted "
+          mooseError("Error in NearestNodeLocator: The nearest neighbor lies outside the ghosted "
                      "set of elements. Increase the ghosting_patch_size parameter in the mesh "
                      "block and try again.");
     }

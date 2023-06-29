@@ -1,25 +1,56 @@
 [Tests]
   issues = '#716'
   design = 'syntax/Contact/index.md MechanicalContactConstraint.md'
-  [./sliding_blocks]
+  [sliding_blocks_always]
     type = 'Exodiff'
     input = 'sliding_update.i'
     exodiff = 'sliding_update_out.e'
+    cli_args = "Mesh/patch_update_strategy='always'"
     abs_zero = 1e-7
-    superlu = true
-    requirement = "The Contact system shall enforce the automatic patch update
-                   using the iteration option."
-  [../]
-  [./error_test]
+    requirement = "The system shall enforce the automatic patch update using the 'always' option."
+  []
+  [sliding_blocks]
+    type = 'Exodiff'
+    input = 'sliding_update.i'
+    exodiff = 'sliding_blocks_iteration.e'
+    cli_args = "Mesh/patch_update_strategy='iteration' Outputs/file_base=sliding_blocks_iteration"
+    abs_zero = 1e-7
+    requirement = "The system shall enforce the automatic patch update using the iteration option "
+                  "and give results equal to the 'always' option."
+  []
+  [error_test]
     type = RunException
     input = 'sliding_update.i'
-    cli_args = 'Mesh/ghosting_patch_size=2
-                Outputs/file_base=sliding_error_out'
-    expect_err = "Error in NearestNodeLocator : The nearest neighbor lies outside the ghosted set of elements. Increase the ghosting_patch_size parameter in the mesh block and try again."
+    cli_args = "Mesh/ghosting_patch_size=2 Mesh/patch_update_strategy='iteration' "
+               "Outputs/file_base=sliding_error_out"
+    expect_err = "Error in NearestNodeLocator: The nearest neighbor lies outside the ghosted set of "
+                 "elements. Increase the ghosting_patch_size parameter in the mesh block and try "
+                 "again."
     prereq = sliding_blocks
-    min_parallel=2
+    min_parallel = 2
     mesh_mode = REPLICATED
-    requirement = "The Contact system shall enforce that the nearest neighbor
-                   node is inside the ghosted set of elements."
-  [../]
+    requirement = "The system shall enforce that the nearest neighbor
+                   node is "
+                  "inside the ghosted set of elements."
+  []
+  [iteration_adaptivity_parallel]
+    type = 'Exodiff'
+    input = 'iteration_adaptivity_parallel.i'
+    exodiff = 'iteration_adaptivity_parallel_out.e'
+    # Issue #24824: Unable to make it distributed at the moment.
+    mesh_mode = replicated
+    map = false
+    requirement = "The system shall be able to couple iteration patch update strategies with initial "
+                  "adaptivity when using geometric searches with a replicated mesh."
+  []
+  [iteration_adaptivity_parallel_node_face]
+    type = 'Exodiff'
+    input = 'iteration_adaptivity_parallel_node_face.i'
+    exodiff = 'iteration_adaptivity_parallel_node_face_out.e'
+    abs_zero = 5.0e-8
+    rel_err = 5.0e-5
+    requirement = "The system shall be able to couple iteration patch update strategies with initial "
+                  "adaptivity when using geometric searches using node face contact with a "
+                  "replicated or distributed mesh."
+  []
 []
