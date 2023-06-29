@@ -205,7 +205,9 @@ class CSVDiff(SchemaDiff):
         zero_params = set(['floor', 'abs_zero', 'absolute'])
         tolerance_params = set(['relative', 'rel_tol'])
         absolute_params = set(['abs_err', 'abs_tol'])
-        custom_params = {'RELATIVE': 0.0, 'ABSOLUTE': 0.0, 'ZERO': 0.0, 'FIELDS': {}}
+        custom_params = {'RELATIVE': self.specs['rel_err'],
+                         'ABSOLUTE': self.specs['abs_err'],
+                         'ZERO': self.specs['abs_zero'], 'FIELDS': {}}
 
         with open(config_file, 'r') as comparison_file:
             lines = comparison_file.readlines()
