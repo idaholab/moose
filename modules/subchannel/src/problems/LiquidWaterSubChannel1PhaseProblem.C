@@ -20,6 +20,8 @@ InputParameters
 LiquidWaterSubChannel1PhaseProblem::validParams()
 {
   InputParameters params = SubChannel1PhaseProblem::validParams();
+  params.addClassDescription(
+      "Solver class for water-cooled subchannels in a square lattice assembly and bare fuel rods");
   params.addRequiredParam<Real>("beta",
                                 "Thermal diffusion coefficient used in turbulent crossflow. This "
                                 "parameter in not user defined in triangular subchannels");
@@ -71,8 +73,8 @@ LiquidWaterSubChannel1PhaseProblem::computeFrictionFactor(_friction_args_struct 
   }
   else
   {
-    Real aL, b1L, b2L, CL, ratio;
-    Real aT, b1T, b2T, CT;
+    Real aL, b1L, b2L, cL;
+    Real aT, b1T, b2T, cT;
     auto pitch = _subchannel_mesh.getPitch();
     auto rod_diameter = _subchannel_mesh.getRodDiameter();
     auto gap = _subchannel_mesh.getGap();
@@ -85,60 +87,89 @@ LiquidWaterSubChannel1PhaseProblem::computeFrictionFactor(_friction_args_struct 
     auto subch_type = _subchannel_mesh.getSubchannelType(i_ch);
     const Real lambda = 7.0;
 
-    if (subch_type == EChannelType::CORNER)
+    // Find the coefficients of bare rod bundle friction factor
+    // correlations for turbulent and laminar flow regimes. Todreas & Kazimi, Nuclear Systems Volume
+    // 1
+    if (subch_type == EChannelType::CENTER)
     {
-      ratio = w_over_d;
-      if ((1.0 <= p_over_d) && (p_over_d <= 1.1))
+      if (p_over_d < 1.1)
       {
-        aL = 28.62, b1L = 715.9, b2L = -2807;
-        aT = 0.09755, b1T = 1.127, b2T = -6.304;
-      }
-      else if ((1.1 < p_over_d) && (p_over_d <= 1.5))
-      {
-        aL = 58.83, b1L = 160.7, b2L = -203.5;
-        aT = 0.1452, b1T = 0.02681, b2T = -0.03411;
+        aL = 26.37;
+        b1L = 374.2;
+        b2L = -493.9;
+        aT = 0.09423;
+        b1T = 0.5806;
+        b2T = -1.239;
       }
       else
-        mooseError(" Geometric parameters beyond scope of friction factor model ");
+      {
+        aL = 35.55;
+        b1L = 263.7;
+        b2L = -190.2;
+        aT = 0.1339;
+        b1T = 0.09059;
+        b2T = -0.09926;
+      }
+      // laminar flow friction factor for bare rod bundle - Center subchannel
+      cL = aL + b1L * (p_over_d - 1) + b2L * std::pow((p_over_d - 1), 2);
+      // turbulent flow friction factor for bare rod bundle - Center subchannel
+      cT = aT + b1T * (p_over_d - 1) + b2T * std::pow((p_over_d - 1), 2);
     }
     else if (subch_type == EChannelType::EDGE)
     {
-      ratio = w_over_d;
-      if ((1.0 <= p_over_d) && (p_over_d <= 1.1))
+      if (p_over_d < 1.1)
       {
-        aL = 26.18, b1L = 554.5, b2L = -1480;
-        aT = 0.09377, b1T = 0.8732, b2T = -3.341;
-      }
-      else if ((1.1 < p_over_d) && (p_over_d <= 1.5))
-      {
-        aL = 44.40, b1L = 256.7, b2L = -267.6;
-        aT = 0.1430, b1T = 0.04199, b2T = -0.04428;
+        aL = 26.18;
+        b1L = 554.5;
+        b2L = -1480;
+        aT = 0.09377;
+        b1T = 0.8732;
+        b2T = -3.341;
       }
       else
-        mooseError(" Geometric parameters beyond scope of friction factor model ");
+      {
+        aL = 44.40;
+        b1L = 256.7;
+        b2L = -267.6;
+        aT = 0.1430;
+        b1T = 0.04199;
+        b2T = -0.04428;
+      }
+      // laminar flow friction factor for bare rod bundle - Edge subchannel
+      cL = aL + b1L * (w_over_d - 1) + b2L * std::pow((w_over_d - 1), 2);
+      // turbulent flow friction factor for bare rod bundle - Edge subchannel
+      cT = aT + b1T * (w_over_d - 1) + b2T * std::pow((w_over_d - 1), 2);
     }
     else
     {
-      ratio = p_over_d;
-      if ((1.0 <= p_over_d) && (p_over_d <= 1.1))
+      if (p_over_d < 1.1)
       {
-        aL = 26.37, b1L = 374.2, b2L = -493.9;
-        aT = 0.09423, b1T = 0.5806, b2T = -1.239;
-      }
-      else if ((1.1 < p_over_d) && (p_over_d <= 1.5))
-      {
-        aL = 35.55, b1L = 263.7, b2L = -190.2;
-        aT = 0.1339, b1T = 0.09059, b2T = -0.09926;
+        aL = 28.62;
+        b1L = 715.9;
+        b2L = -2807;
+        aT = 0.09755;
+        b1T = 1.127;
+        b2T = -6.304;
       }
       else
-        mooseError(" Geometric parameters beyond scope of friction factor model ");
+      {
+        aL = 58.83;
+        b1L = 160.7;
+        b2L = -203.5;
+        aT = 0.1452;
+        b1T = 0.02681;
+        b2T = -0.03411;
+      }
+      // laminar flow friction factor for bare rod bundle - Corner subchannel
+      cL = aL + b1L * (w_over_d - 1) + b2L * std::pow((w_over_d - 1), 2);
+      // turbulent flow friction factor for bare rod bundle - Corner subchannel
+      cT = aT + b1T * (w_over_d - 1) + b2T * std::pow((w_over_d - 1), 2);
     }
 
-    CL = aL + b1L * (ratio - 1) + b2L * (ratio - 1) * (ratio - 1);
-    CT = aT + b1T * (ratio - 1) + b2T * (ratio - 1) * (ratio - 1);
-
-    auto fL = CL / Re;
-    auto fT = CT * std::pow(Re, -0.18);
+    // laminar friction factor
+    auto fL = cL / Re;
+    // turbulent friction factor
+    auto fT = cT / std::pow(Re, 0.18);
 
     if (Re < ReL)
     {
