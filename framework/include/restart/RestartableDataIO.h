@@ -78,7 +78,7 @@ public:
    * @restartable_data The data to be written
    */
   void writeRestartableData(const std::string & file_name,
-                            const RestartableDataMap & restartable_data);
+                            RestartableDataMap & restartable_data);
 
   /**
    * Reads restartable data from a binary file.
@@ -129,7 +129,7 @@ private:
   /**
    * Serializes the data into the stream object.
    */
-  void serializeRestartableData(const RestartableDataMap & restartable_data, std::ostream & stream);
+  void serializeRestartableData(RestartableDataMap & restartable_data, std::ostream & stream);
 
   /**
    * Deserializes the data from the stream object.

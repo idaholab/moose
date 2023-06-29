@@ -2191,6 +2191,15 @@ protected:
   ScalarInitialConditionWarehouse _scalar_ics; // use base b/c of setup methods
   ///@}
 
+private:
+  /// The name of the restartable material property storage
+  static const std::string material_props_restartable_name;
+  /// The name of the restartable boundary material property storage
+  static const std::string bnd_material_props_restartable_name;
+  /// The name of the restartable neighbor material property storage
+  static const std::string neighbor_material_props_restartable_name;
+
+protected:
   // material properties
   MaterialPropertyRegistry _material_prop_registry;
   MaterialPropertyStorage & _material_props;

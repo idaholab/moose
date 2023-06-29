@@ -20,3 +20,10 @@ RestartableDataValue::setDeclared()
   mooseAssert(!_declared, "Already declared");
   _declared = true;
 }
+
+void
+RestartableDataValue::addDependency(const RestartableDataValue & value)
+{
+  std::cerr << "'" << name() << "' depends on '" << value.name() << "'" << std::endl;
+  _dependencies.insert(&value);
+}

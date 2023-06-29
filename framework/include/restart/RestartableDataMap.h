@@ -22,6 +22,8 @@
 class RestartableDataMap
 {
 public:
+  RestartableDataMap();
+
   /**
    * Adds the restartable data \p data to the map
    */
@@ -63,6 +65,8 @@ public:
    * @returns Whether or not there is no registered data
    */
   auto empty() const { return _data.empty(); }
+
+  std::vector<RestartableDataValue *> sortedData();
 
 private:
   /// The registered data

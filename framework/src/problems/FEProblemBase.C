@@ -136,6 +136,10 @@ sortMooseVariables(const MooseVariableFEBase * a, const MooseVariableFEBase * b)
 Threads::spin_mutex get_function_mutex;
 
 const std::string FEProblemBase::equation_systems_restartable_name = "equation_systems";
+const std::string FEProblemBase::material_props_restartable_name = "material_props";
+const std::string FEProblemBase::bnd_material_props_restartable_name = "bnd_material_props";
+const std::string FEProblemBase::neighbor_material_props_restartable_name =
+    "neighbor_material_props";
 
 InputParameters
 FEProblemBase::validParams()
@@ -328,11 +332,11 @@ FEProblemBase::FEProblemBase(const InputParameters & parameters)
     _aux(nullptr),
     _coupling(Moose::COUPLING_DIAG),
     _material_props(declareRestartableDataWithContext<MaterialPropertyStorage>(
-        "material_props", &_mesh, _material_prop_registry)),
+        material_props_restartable_name, &_mesh, _material_prop_registry)),
     _bnd_material_props(declareRestartableDataWithContext<MaterialPropertyStorage>(
-        "bnd_material_props", &_mesh, _material_prop_registry)),
+        bnd_material_props_restartable_name, &_mesh, _material_prop_registry)),
     _neighbor_material_props(declareRestartableDataWithContext<MaterialPropertyStorage>(
-        "neighbor_material_props", &_mesh, _material_prop_registry)),
+        neighbor_material_props_restartable_name, &_mesh, _material_prop_registry)),
     _reporter_data(_app),
     // TODO: delete the following line after apps have been updated to not call getUserObjects
     _all_user_objects(_app.getExecuteOnEnum()),
@@ -766,6 +770,15 @@ FEProblemBase::initialSetup()
 
   if (_app.isRestarting() || _app.isRecovering() || _force_restart)
   {
+    // Let the EquationSystems load depend on everything lse so that it comes last
+    {
+      auto & restartable_data = _app.getRestartableData()[0];
+      auto & res_value = restartable_data.data(restartableName(equation_systems_restartable_name));
+      for (auto & value : restartable_data)
+        if (value.get() != &res_value)
+          res_value.addDependency(*value);
+    }
+
     // We could have a cached backup when this app is a sub-app and has been given a Backup
     if (!_app.hasCachedBackup())
     {
@@ -1031,6 +1044,25 @@ FEProblemBase::initialSetup()
     }
   }
 
+<<<<<<< HEAD
+=======
+  if (_app.isRestarting() || _app.isRecovering())
+  {
+    // We may have just clobbered initial conditions that were explicitly set
+    // In a _restart_ scenario it is completely valid to specify new initial conditions
+    // for some of the variables which should override what's coming from the restart file
+    if (!_app.isRecovering())
+    {
+      TIME_SECTION("reprojectInitialConditions", 3, "Reprojecting Initial Conditions");
+
+      for (THREAD_ID tid = 0; tid < n_threads; tid++)
+        _ics.initialSetup(tid);
+      _scalar_ics.sort();
+      projectSolution();
+    }
+  }
+
+>>>>>>> cad6019c51 (WIP dependent restart)
   // HUGE NOTE: MultiApp initialSetup() MUST... I repeat MUST be _after_ main-app restartable data
   // has been restored
 

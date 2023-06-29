@@ -55,8 +55,6 @@ public:
     std::size_t type_hash_code;
     /// The type for this data
     std::string type;
-    /// Whether or not this data has been loaded yet
-    bool loaded = false;
   };
 
   /**

@@ -9,6 +9,10 @@
 
 #include "RestartableDataMap.h"
 
+#include "DependencyResolver.h"
+
+RestartableDataMap::RestartableDataMap() {}
+
 RestartableDataValue &
 RestartableDataMap::addData(std::unique_ptr<RestartableDataValue> data)
 {
@@ -71,4 +75,35 @@ bool
 RestartableDataMap::hasData(const std::string & name) const
 {
   return findData(name) != nullptr;
+}
+
+std::vector<RestartableDataValue *>
+RestartableDataMap::sortedData()
+{
+  DependencyResolver<RestartableDataValue *, RestartableDataValue::Comparator> resolver;
+  std::vector<RestartableDataValue *> sorted_data;
+
+  for (const auto & value : _data)
+  {
+    resolver.addItem(value.get());
+    for (auto & dep_value : value->dependencies())
+      resolver.addEdge(&data(dep_value->name()), value.get());
+  }
+
+  auto sorted_values = resolver.getSortedValuesSets();
+  for (auto & values : sorted_values)
+  {
+    std::cerr << values.size() << std::endl;
+    std::sort(values.begin(),
+              values.end(),
+              [this](const auto & a, const auto & b)
+              {
+                mooseAssert(a, "Invalid object");
+                mooseAssert(b, "Invalid object");
+                return _name_to_data_index.at(a->name()) < _name_to_data_index.at(b->name());
+              });
+    sorted_data.insert(sorted_data.end(), values.begin(), values.end());
+  }
+
+  return sorted_data;
 }

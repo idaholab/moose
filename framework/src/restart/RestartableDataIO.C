@@ -38,7 +38,7 @@ RestartableDataIO::createBackup()
 {
   std::shared_ptr<Backup> backup = std::make_shared<Backup>();
 
-  const auto & restartable_data_maps = _moose_app.getRestartableData();
+  auto & restartable_data_maps = _moose_app.getRestartableData();
 
   for (const auto tid : make_range(libMesh::n_threads()))
     serializeRestartableData(restartable_data_maps[tid], backup->data(tid, {}));
@@ -167,6 +167,8 @@ RestartableDataIO::readRestartableData(std::istream & stream,
 void
 RestartableDataIO::restoreBackup(bool for_restart)
 {
+  mooseAssert(_backup, "Backup not set");
+
   auto & restartable_data_maps = _moose_app.getRestartableData();
 
   for (const auto tid : make_range(libMesh::n_threads()))
@@ -183,11 +185,6 @@ RestartableDataIO::restoreBackup(bool for_restart)
           restartable_data_maps[tid], stream, data_info, _moose_app.getRecoverableData());
     else
       deserializeRestartableData(restartable_data_maps[tid], stream, data_info, DataNames());
-
-    // Now that we've loaded everything, clear the load list
-    // TODO: move this somewhere else!
-    for (auto & entry : data_info)
-      entry.second.loaded = false;
   }
 }
 
@@ -218,7 +215,7 @@ RestartableDataIO::restoreData(const std::string & name, const THREAD_ID tid)
 
 void
 RestartableDataIO::writeRestartableData(const std::string & file_name,
-                                        const RestartableDataMap & restartable_data)
+                                        RestartableDataMap & restartable_data)
 
 {
   std::ofstream out;
@@ -251,7 +248,7 @@ RestartableDataIO::readRestartableData(const std::string & file_name,
 }
 
 void
-RestartableDataIO::serializeRestartableData(const RestartableDataMap & restartable_data,
+RestartableDataIO::serializeRestartableData(RestartableDataMap & restartable_data,
                                             std::ostream & stream)
 
 {
@@ -282,7 +279,7 @@ RestartableDataIO::serializeRestartableData(const RestartableDataMap & restartab
   // Write out the RestartableData header, and store the actual data separately
   std::ostringstream data_header_blk;
   std::ostringstream data_blk;
-  for (const auto & data : restartable_data)
+  for (const auto & data : restartable_data.sortedData())
   {
     // Store the data separately, to be added later
     std::ostringstream data_stream;
@@ -291,6 +288,8 @@ RestartableDataIO::serializeRestartableData(const RestartableDataMap & restartab
 
     // Append data to the full block
     data_blk << data_stream.str();
+
+    std::cerr << "storing " << data->name() << " " << data->type() << std::endl;
 
     // Store name, size, type hash, and type in the header
     mooseAssert(data->name().size(), "Empty name");
@@ -334,15 +333,13 @@ RestartableDataIO::deserializeRestartableDataValue(RestartableDataValue & value,
                "\n  Declared type hash code: ",
                value.typeId().hash_code());
 
-  // We loaded this earlier
-  if (data_entry.loaded)
-    return;
-
   stream.seekg(data_entry.position);
   value.load(stream);
 
   if (stream.tellg() == -1)
     mooseError("Failed to load RestartableData '", value.name(), "' of type '", value.type(), "'");
+
+  std::cerr << "loading " << value.name() << " " << value.type() << std::endl;
 
   if ((data_entry.position + (std::streampos)data_entry.size) != stream.tellg())
     mooseError("Size mismatch for loading RestartableData '",
@@ -353,8 +350,6 @@ RestartableDataIO::deserializeRestartableDataValue(RestartableDataValue & value,
                data_entry.size,
                "\n  Loaded size: ",
                stream.tellg() - data_entry.position);
-
-  data_entry.loaded = true;
 }
 
 void
@@ -370,7 +365,7 @@ RestartableDataIO::deserializeRestartableData(
   std::vector<std::string> ignored_data;
 
   // Load the data in the order that it was requested
-  for (auto & data : restartable_data)
+  for (auto & data : restartable_data.sortedData())
   {
     const auto & name = data->name();
 

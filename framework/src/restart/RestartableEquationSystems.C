@@ -230,8 +230,8 @@ RestartableEquationSystems::load(std::istream & stream)
       {
         if (sys->have_vector(vec_header.name))
           vec_header.to_vec = &sys->get_vector(vec_header.name);
-        else
-          vec_header.to_vec = &sys->add_vector(vec_header.name);
+        // else
+        //   vec_header.to_vec = &sys->add_vector(vec_header.name);
       }
   }
 

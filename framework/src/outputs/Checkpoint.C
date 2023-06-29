@@ -157,7 +157,7 @@ Checkpoint::output()
     for (auto & map_pair :
          libMesh::as_range(_app.getRestartableDataMapBegin(), _app.getRestartableDataMapEnd()))
     {
-      const RestartableDataMap & meta_data = map_pair.second.first;
+      RestartableDataMap & meta_data = map_pair.second.first;
       const std::string & suffix = map_pair.second.second;
       const std::string filename(current_file + fullMetaDataSuffix(suffix));
 
