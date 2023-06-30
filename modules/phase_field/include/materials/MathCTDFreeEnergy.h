@@ -9,22 +9,20 @@
 
 #pragma once
 
-#include "DerivativeParsedMaterialHelper.h"
-#include "ExpressionBuilder.h"
+#include "Material.h"
+#include "CompileTimeDerivativesMaterial.h"
 
 /**
- * Material class that creates the math free energy with the expression builder
- * and uses automatic differentiation to get the derivatives.
+ * Material class that creates the math free energy with the compile time derivatives framework.
  * \f$ F = \frac14 (1 + c)^2 (1 - c)^2 \f$.
  */
-class MathEBFreeEnergy : public DerivativeParsedMaterialHelper, public ExpressionBuilder
+class MathCTDFreeEnergy : public CompileTimeDerivativesMaterial<1, false, 2>
 {
 public:
   static InputParameters validParams();
 
-  MathEBFreeEnergy(const InputParameters & parameters);
+  MathCTDFreeEnergy(const InputParameters & parameters);
 
 protected:
-  /// Coupled variable value for the concentration \f$ c \f$.
-  EBTerm _c;
+  void computeQpProperties();
 };

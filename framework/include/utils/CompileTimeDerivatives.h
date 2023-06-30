@@ -341,6 +341,7 @@ class CTArrayRef : public CTBase
 {
 public:
   CTArrayRef(const T & arr, const I & idx) : _arr(arr), _idx(idx) {}
+  // CTArrayRef(const CTArrayRef<tag, T, I> & ref) : _arr(ref._arr), _idx(ref._idx) {}
   auto operator()() const { return _arr[_idx]; }
   std::string print() const { return "[a" + printTag<tag>() + "[" + Moose::stringify(_idx) + "]]"; }
 
@@ -353,7 +354,10 @@ public:
       return CTNull<O>();
   }
 
-  typedef typename T::value_type O;
+  // get the value type returned by operator[]
+  typedef CTCleanType<decltype((static_cast<T>(0))[0])> O;
+  static_assert(!std::is_same_v<O, void>,
+                "Instantiation of CTArrayRef was attempted for a non-subscriptable type.");
 
 protected:
   const T & _arr;
