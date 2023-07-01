@@ -76,4 +76,7 @@ protected:
 
   /// Map from degree of freedom to augmented lagrange multiplier
   std::unordered_map<const DofObject *, TwoVector> _dof_to_frictional_lagrange_multipliers;
+
+  /// Map from degree of freedom to local friction penalty value
+  std::unordered_map<const DofObject *, Real> _dof_to_local_penalty_friction;
 };

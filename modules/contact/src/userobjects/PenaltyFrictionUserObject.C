@@ -44,7 +44,7 @@ PenaltyFrictionUserObject::validParams()
 
 PenaltyFrictionUserObject::PenaltyFrictionUserObject(const InputParameters & parameters)
   /*
-   * We are using vitrual inheritance to avoid teh "Diamond inheritance" problem. This means that
+   * We are using virtual inheritance to avoid teh "Diamond inheritance" problem. This means that
    * that we have to construct WeightedGapUserObject explicitly as it will_not_ be constructed in
    * the intermediate base classes PenaltyWeightedGapUserObject and WeightedVelocitiesUserObject.
    * Virtual inheritance ensures that only one instance of WeightedGapUserObject is included in this
@@ -81,7 +81,7 @@ PenaltyFrictionUserObject::PenaltyFrictionUserObject(const InputParameters & par
 const VariableTestValue &
 PenaltyFrictionUserObject::test() const
 {
-  return _disp_x_var->phiLower();
+  return _aux_lm_var ? _aux_lm_var->phiLower() : _disp_x_var->phiLower();
 }
 
 const ADVariableValue &
@@ -113,12 +113,16 @@ PenaltyFrictionUserObject::timestepSetup()
     old_accumulated_slip = accumulated_slip;
   }
 
+  for (auto & dof_lp : _dof_to_local_penalty_friction)
+    dof_lp.second = _penalty_friction;
+
   // save off tangential traction from the last timestep
   for (auto & map_pr : _dof_to_tangential_traction)
   {
     auto & [tangential_traction, old_tangential_traction] = map_pr.second;
     old_tangential_traction = {MetaPhysicL::raw_value(tangential_traction(0)),
                                MetaPhysicL::raw_value(tangential_traction(1))};
+    tangential_traction = {0.0, 0.0};
   }
 
   // TODO call it delta_tangential_lm
@@ -210,6 +214,9 @@ PenaltyFrictionUserObject::reinit()
     // current node
     const Node * const node = _lower_secondary_elem->node_ptr(i);
 
+    const auto penalty_friction = findValue(
+        _dof_to_local_penalty_friction, static_cast<const DofObject *>(node), _penalty_friction);
+
     // utilized quantities
     const auto & normal_pressure = _dof_to_normal_pressure[node];
 
@@ -217,13 +224,19 @@ PenaltyFrictionUserObject::reinit()
     auto & [tangential_traction, old_tangential_traction] = _dof_to_tangential_traction[node];
     auto & [accumulated_slip, old_accumulated_slip] = _dof_to_accumulated_slip[node];
 
-    if (normal_pressure > 0.0)
+    Real normal_lm = -1;
+    if (_dof_to_lagrange_multiplier.find(node) != _dof_to_lagrange_multiplier.end())
+      normal_lm = libmesh_map_find(_dof_to_lagrange_multiplier, node);
+
+    // Keep active set fixed from second Uzawa loop
+    if (normal_lm < -TOLERANCE && normal_pressure > TOLERANCE)
     {
       using namespace std;
 
       const auto & real_tangential_velocity =
           libmesh_map_find(_dof_to_real_tangential_velocity, node);
-      const ADTwoVector slip_velocity = {real_tangential_velocity[0], real_tangential_velocity[1]};
+      const ADTwoVector slip_distance = {real_tangential_velocity[0] * _dt,
+                                         real_tangential_velocity[1] * _dt};
 
       // frictional lagrange multiplier (delta lambda^(k)_T)
       const auto & tangential_lm =
@@ -231,28 +244,21 @@ PenaltyFrictionUserObject::reinit()
 
       // tangential trial traction (Simo 3.12)
       ADTwoVector tangential_trial_traction =
-          old_tangential_traction + tangential_lm + _penalty_friction * slip_velocity * _dt;
+          old_tangential_traction + tangential_lm + penalty_friction * slip_distance;
 
+      // Nonlinearity below
       ADReal tangential_trial_traction_norm = tangential_trial_traction.norm();
-
       ADReal phi_trial = tangential_trial_traction_norm - _friction_coefficient * normal_pressure;
-
       tangential_traction = tangential_trial_traction;
 
       // Simo considers this a 'return mapping'; we are just capping friction to the Coulomb limit.
       if (phi_trial > 0.0)
-      {
-        // Simo 3.14 (the penalty formulation has an error in the paper)
-        ADReal delta_xi = phi_trial; // / _penalty_friction;
-
-        // Simo 3.13
+        // Simo 3.13/3.14 (the penalty formulation has an error in the paper)
         tangential_traction -=
-            delta_xi * tangential_trial_traction / tangential_trial_traction_norm;
-      }
+            phi_trial * tangential_trial_traction / tangential_trial_traction_norm;
 
       // track accumulated slip for output purposes
-      accumulated_slip =
-          old_accumulated_slip + MetaPhysicL::raw_value(slip_velocity).cwiseAbs() * _dt;
+      accumulated_slip = old_accumulated_slip + MetaPhysicL::raw_value(slip_distance);
     }
     else
     {
@@ -281,42 +287,50 @@ PenaltyFrictionUserObject::finalize()
 bool
 PenaltyFrictionUserObject::isAugmentedLagrangianConverged()
 {
-  // check normal contact convergence first
+  // Check normal contact convergence first
   if (!PenaltyWeightedGapUserObject::isAugmentedLagrangianConverged())
     return false;
 
   for (const auto & [dof_object, traction_pair] : _dof_to_tangential_traction)
   {
-
     const auto & tangential_traction = traction_pair.first;
+    auto normal_pressure = _dof_to_normal_pressure[dof_object];
 
-    const auto it = _dof_to_weighted_gap.find(dof_object);
-    if (it == _dof_to_weighted_gap.end())
+    // We may not find a node in the map because AL machinery gets called at different system
+    // configurations. That is, we may want to find a key from a node that computed a zero traction
+    // on the verge of not projecting. Since, when we computed the velocity, the system was at a
+    // slightly different configuration, that node may not a computed physical weighted velocity.
+    // This doesn't seem an issue at all as non-projecting nodes should be a corner case not
+    // affecting the physics.
+    TwoVector slip_velocity = {0.0, 0.0};
+    if (_dof_to_real_tangential_velocity.find(dof_object) != _dof_to_real_tangential_velocity.end())
     {
-      _console << "no gap found " << _dof_to_weighted_gap.size() << '\n';
-      continue;
+      const auto & real_tangential_velocity =
+          libmesh_map_find(_dof_to_real_tangential_velocity, dof_object);
+      slip_velocity = {MetaPhysicL::raw_value(real_tangential_velocity[0]),
+                       MetaPhysicL::raw_value(real_tangential_velocity[1])};
     }
-    const auto & weighted_gap = -it->second.first;
-    const auto normal_lm = _dof_to_lagrange_multiplier[dof_object];
 
-    auto normal_pressure = _penalty * weighted_gap + normal_lm;
-    normal_pressure = normal_pressure > 0.0 ? normal_pressure : 0.0;
-
-    // check slip/stick
-    if (_friction_coefficient * normal_pressure > tangential_traction.norm())
+    // Check slip/stick
+    if (_friction_coefficient * normal_pressure < tangential_traction.norm() * (1 + TOLERANCE))
     {
-      const auto it = _dof_to_real_tangential_velocity.find(dof_object);
-      TwoVector slip_velocity;
-      if (it == _dof_to_real_tangential_velocity.end())
-        continue;
+      // If it's slipping, any slip distance is physical.
+    }
+    else if (slip_velocity.norm() * _dt > _slip_tolerance)
+    {
+      Moose::out << "_friction_coefficient * normal_pressure: "
+                 << _friction_coefficient * normal_pressure << "\n";
+      Moose::out << "tangential_traction.norm(): " << tangential_traction.norm() << "\n";
 
-      // We are not converging on the frictional problem (slip_velocity is always zero)
-      // FIX
-      if ((slip_velocity.norm() * _dt) > _slip_tolerance)
-      {
-        return false;
-        mooseInfoRepeated("Stick tolerance fail");
-      }
+      mooseInfoRepeated(
+          "Stick tolerance fails. Slip distance for a sticking node ",
+          dof_object->id(),
+          " is: ",
+          slip_velocity.norm() * _dt,
+          ", but slip tolerance is chosen to be ",
+          _slip_tolerance,
+          ". Relax the slip tolerance if there are too many augmented Lagrange iterations.");
+      return false;
     }
   }
 
@@ -328,8 +342,14 @@ PenaltyFrictionUserObject::updateAugmentedLagrangianMultipliers()
 {
   PenaltyWeightedGapUserObject::updateAugmentedLagrangianMultipliers();
 
+  Real max_slip = 0.0;
+
   for (auto & [dof_object, tangential_lm] : _dof_to_frictional_lagrange_multipliers)
   {
+    auto & penalty_friction = _dof_to_local_penalty_friction[dof_object];
+    if (penalty_friction == 0.0)
+      penalty_friction = _penalty_friction;
+
     // normal quantities
     const auto & normal_lm = libmesh_map_find(_dof_to_lagrange_multiplier, dof_object);
 
@@ -338,19 +358,34 @@ PenaltyFrictionUserObject::updateAugmentedLagrangianMultipliers()
         libmesh_map_find(_dof_to_real_tangential_velocity, dof_object);
     const TwoVector slip_velocity = {MetaPhysicL::raw_value(real_tangential_velocity[0]),
                                      MetaPhysicL::raw_value(real_tangential_velocity[1])};
-    const auto & tangential_traction =
-        MetaPhysicL::raw_value(_dof_to_tangential_traction[dof_object].first);
+
+    auto & [tangential_traction, old_tangential_traction] = _dof_to_tangential_traction[dof_object];
+
     const TwoVector tangential_trial_traction =
-        tangential_traction + tangential_lm + _penalty_friction * slip_velocity * _dt;
+        old_tangential_traction + tangential_lm + penalty_friction * slip_velocity * _dt;
     const Real tangential_trial_traction_norm = tangential_trial_traction.norm();
 
     // Augment
-    if (tangential_trial_traction_norm <= _friction_coefficient * normal_lm)
-      tangential_lm += _penalty_friction * slip_velocity * _dt;
+    if (tangential_trial_traction_norm * (1 + TOLERANCE) <=
+        std::abs(_friction_coefficient * normal_lm))
+    {
+      tangential_lm += penalty_friction * slip_velocity * _dt;
+      // Moose::out << "Updating LM of node " << dof_object->id() << " with sticking behavior.\n";
+    }
     else
-      tangential_lm = tangential_trial_traction / tangential_trial_traction_norm *
-                          _penalty_friction * normal_lm -
-                      tangential_traction;
-    _console << "delta_tangential_lm = " << tangential_lm << '\n';
+    {
+      tangential_lm = -tangential_trial_traction / tangential_trial_traction_norm *
+                          penalty_friction * normal_lm -
+                      old_tangential_traction;
+
+      // Moose::out << "Updating LM of node " << dof_object->id() << " with saturated behavior.\n";
+    }
+
+    if (max_slip < slip_velocity.norm() * _dt)
+      max_slip = slip_velocity.norm() * _dt;
+
+    // Update penalty
+    if (_lagrangian_iteration_number > 3)
+      penalty_friction /= 10.0;
   }
 }

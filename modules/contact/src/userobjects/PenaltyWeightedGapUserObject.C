@@ -22,25 +22,24 @@ PenaltyWeightedGapUserObject::validParams()
   InputParameters params = WeightedGapUserObject::validParams();
   params.addClassDescription("Computes the mortar normal contact force via a penalty approach.");
   params.addRequiredParam<Real>("penalty", "The penalty factor");
-  params.addRangeCheckedParam<Real>(
-      "penalty_multiplier",
-      1.0,
-      "penalty_multiplier > 0",
-      "The penalty growth factor between augmented Lagrange iterations");
-  params.addParam<Real>("augmented_lagrange_predictor_scale",
-                        0.0,
-                        "Perform a linear extrapolation from the last two augmented lagrange "
-                        "multipliers to the current timestep");
-  params.addParam<bool>("use_mortar_scaled_gap", false, "Whether to use the mortar scaled gap.");
+  params.addRangeCheckedParam<Real>("penalty_multiplier",
+                                    100.0,
+                                    "penalty_multiplier > 0",
+                                    "The penalty growth factor between augmented Lagrange "
+                                    "iterations if weighted gap does not get closed fast enough.");
+  params.addParam<bool>(
+      "use_physical_gap",
+      false,
+      "Whether to use the physical normal gap (not scaled by mortar integration).");
   params.addRangeCheckedParam<Real>(
       "penetration_tolerance",
       1e-5,
       "penetration_tolerance > 0",
       "Acceptable penetration distance at which augmented Lagrange iterations can be stopped");
-  params.addRequiredCoupledVar(
+  params.addCoupledVar(
       "aux_lm",
-      "Auxiliary Lagrange multiplier variable that is utilized together with the "
-      "dual approach.");
+      "Auxiliary variable that is utilized together with the "
+      "penalty approach to interpolate the resulting contact tractions using dual bases.");
   params.addParamNamesToGroup("penalty_multiplier penetration_tolerance", "Augmented Lagrange");
 
   return params;
@@ -57,10 +56,9 @@ PenaltyWeightedGapUserObject::PenaltyWeightedGapUserObject(const InputParameters
     _lagrangian_iteration_number(_augmented_lagrange_problem
                                      ? _augmented_lagrange_problem->getLagrangianIterationNumber()
                                      : _no_iterations),
-    _predictor_scale(getParam<Real>("augmented_lagrange_predictor_scale")),
     _dt(_fe_problem.dt()),
-    _use_mortar_scaled_gap(getParam<bool>("use_mortar_scaled_gap")),
-    _aux_lm_var(getVar("aux_lm", 0))
+    _use_physical_gap(getParam<bool>("use_physical_gap")),
+    _aux_lm_var(isCoupled("aux_lm") ? getVar("aux_lm", 0) : nullptr)
 {
   auto check_type = [this](const auto & var, const auto & var_name)
   {
@@ -78,7 +76,7 @@ PenaltyWeightedGapUserObject::PenaltyWeightedGapUserObject(const InputParameters
 const VariableTestValue &
 PenaltyWeightedGapUserObject::test() const
 {
-  return _aux_lm_var->phiLower();
+  return _aux_lm_var ? _aux_lm_var->phiLower() : _disp_x_var->phiLower();
 }
 
 const ADVariableValue &
@@ -141,7 +139,7 @@ PenaltyWeightedGapUserObject::reinit()
     // For AL (and penalty too), it'll be better to just have a physical ('real') gap so that the
     // user (or even our algorithms) can better select this coefficient.
     ADReal gap;
-    if (_use_mortar_scaled_gap)
+    if (_use_physical_gap)
       gap = adPhysicalGap(libmesh_map_find(_dof_to_weighted_gap, node));
     else
       gap = libmesh_map_find(_dof_to_weighted_gap, node).first;
@@ -150,7 +148,7 @@ PenaltyWeightedGapUserObject::reinit()
         _augmented_lagrange_problem ? _dof_to_lagrange_multiplier[node] : 0.0;
     const auto & test_i = (*_test)[i];
 
-    auto normal_pressure = penalty / _dof_to_weighted_gap[node].second * gap + lagrange_multiplier;
+    auto normal_pressure = penalty * gap + lagrange_multiplier;
     normal_pressure = normal_pressure < 0.0 ? -normal_pressure : 0.0;
 
     _dof_to_normal_pressure[node] = normal_pressure;
@@ -187,39 +185,48 @@ PenaltyWeightedGapUserObject::timestepSetup()
 bool
 PenaltyWeightedGapUserObject::isAugmentedLagrangianConverged()
 {
-  mooseInfoRepeated("PenaltyWeightedGapUserObject::isAugmentedLagrangianConverged()");
-
-  Real max_gap = 0.0;
+  Real positive_gap = 0.0;
+  Real negative_gap = 0.0;
 
   // Get maximum gap to ascertain whether we are converged.
   for (auto & [dof_object, wgap] : _dof_to_weighted_gap)
   {
     const auto gap = physicalGap(wgap);
     {
-      // check active set nodes
+      // Check condition for nodes that are active
       if (gap < 0 || _dof_to_lagrange_multiplier[dof_object] < 0.0)
       {
-        if (std::abs(gap) > max_gap)
-          max_gap = gap;
+        if (gap > positive_gap || gap < negative_gap)
+          gap > 0 ? positive_gap = gap : negative_gap = gap;
       }
     }
   }
 
-  if (std::abs(max_gap) > _penetration_tolerance)
+  // Communicate the max_gap in parallel.
+  this->_communicator.min(negative_gap);
+  this->_communicator.max(positive_gap);
+
+  Real absolute_gap = positive_gap > -negative_gap ? positive_gap : negative_gap;
+
+  if (std::abs(absolute_gap) > _penetration_tolerance)
   {
     mooseInfoRepeated("Penetration tolerance fail max_gap = ",
-                      max_gap,
+                      absolute_gap,
                       " (gap_tol=",
                       _penetration_tolerance,
-                      ")");
+                      "). Iteration number is: ",
+                      _lagrangian_iteration_number,
+                      ".");
     return false;
   }
   else
     mooseInfoRepeated("Penetration tolerance success max_gap = ",
-                      max_gap,
+                      absolute_gap,
                       " (gap_tol=",
                       _penetration_tolerance,
-                      ")");
+                      "). Iteration number is: ",
+                      _lagrangian_iteration_number,
+                      ".");
 
   return true;
 }
@@ -227,11 +234,11 @@ PenaltyWeightedGapUserObject::isAugmentedLagrangianConverged()
 void
 PenaltyWeightedGapUserObject::augmentedLagrangianSetup()
 {
-  // loop over all nodes for which a gap has been computed
+  // Loop over all nodes for which a gap has been computed
   for (auto & [dof_object, wgap] : _dof_to_weighted_gap)
   {
     const Real gap = physicalGap(wgap);
-    // store previous augmented lagrange iteration gap
+    // Store previous augmented lagrange iteration gap
     _dof_to_previous_gap[dof_object] = gap;
   }
 }
@@ -248,23 +255,16 @@ PenaltyWeightedGapUserObject::updateAugmentedLagrangianMultipliers()
     const auto gap = getNormalGap(static_cast<const Node *>(dof_object));
     auto & lagrange_multiplier = _dof_to_lagrange_multiplier[dof_object];
 
-    // // update lm
-    // if (gap < 0)
-    //   lagrange_multiplier += gap * penalty;
-    // else
-    //   lagrange_multiplier = 0.0;
-
     if (lagrange_multiplier + gap * penalty <= 0)
-      lagrange_multiplier += gap * penalty / _dof_to_weighted_gap[dof_object].second;
+      lagrange_multiplier += gap * penalty;
     else
       lagrange_multiplier = 0.0;
 
-    // update penalty
-    // const auto previous_gap = _dof_to_previous_gap[dof_object];
-    // if (std::abs(gap) > 0.25 * std::abs(previous_gap))
-    //   penalty *= 10.0;
+    // Update penalty
+    const auto previous_gap = _dof_to_previous_gap[dof_object];
+    if (std::abs(gap) > 0.25 * std::abs(previous_gap))
+      penalty *= _penalty_multiplier;
 
-    // if (penalty > 1e11)
-    //   penalty = 1e11;
+    // Possible future development: Add possible check for a too-large penalty coefficient.
   }
 }

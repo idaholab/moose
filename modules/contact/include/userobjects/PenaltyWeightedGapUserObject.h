@@ -43,7 +43,7 @@ public:
   };
   virtual bool getActiveSetState(const Node * const node) const
   {
-    return _active_set.count(_subproblem.mesh().nodePtr(node->id())) > 0;
+    return _dof_to_normal_pressure.find(_subproblem.mesh().nodePtr(node->id()))->second > 0;
   }
 
   virtual bool isAugmentedLagrangianConverged() override;
@@ -81,17 +81,11 @@ protected:
   /// Map from degree of freedom to augmented lagrange multiplier
   std::unordered_map<const DofObject *, Real> _dof_to_lagrange_multiplier;
 
-  /// active set
-  std::set<const DofObject *> _active_set;
-
   /// Map from degree of freedom to local penalty value
   std::unordered_map<const DofObject *, Real> _dof_to_local_penalty;
 
   /// Map from degree of freedom to previous AL iteration gap values
   std::unordered_map<const DofObject *, Real> _dof_to_previous_gap;
-
-  /// scale factor for the linear prediction for the augmented lagrange multipliers
-  const Real _predictor_scale;
 
   /// Current delta t... or timestep size.
   const Real & _dt;
@@ -100,7 +94,7 @@ protected:
   Real _dt_old;
 
   /// Use scaled or physical gap
-  const bool _use_mortar_scaled_gap;
+  const bool _use_physical_gap;
 
   /// The auxiliary Lagrange multiplier variable (used together whith the Petrov-Galerkin approach)
   const MooseVariable * const _aux_lm_var;

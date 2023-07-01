@@ -50,6 +50,10 @@
   []
   [active]
   []
+  [dual_var]
+    use_dual = true
+    block = '10001'
+  []
 []
 
 [Functions]
@@ -87,6 +91,20 @@
     variable = penalty_frictional_pressure
     user_object = friction_uo
     contact_quantity = tangential_pressure_one
+    boundary = 3
+  []
+  [penalty_tangential_vel_one]
+    type = PenaltyMortarUserObjectAux
+    variable = tangential_vel_one
+    user_object = friction_uo
+    contact_quantity = tangential_velocity_one
+    boundary = 3
+  []
+  [penalty_accumulated_slip_one]
+    type = PenaltyMortarUserObjectAux
+    variable = accumulated_slip_one
+    user_object = friction_uo
+    contact_quantity = accumulated_slip_one
     boundary = 3
   []
   [normal_lm]
@@ -211,25 +229,27 @@
   petsc_options = '-snes_ksp_ew'
   petsc_options_iname = -pc_type
   petsc_options_value = lu
-  line_search = 'none'
+  line_search = 'basic'
 
   nl_abs_tol = 1e-10
   nl_rel_tol = 1e-8
-  nl_max_its = 1300
+  nl_max_its = 50
   l_tol = 1e-05
   l_abs_tol = 1e-13
 
   start_time = 0.0
   end_time = 0.2 # 3.5
-
   dt = 0.1
-  dtmin = 0.001
+  dtmin = 0.1
+
   [Predictor]
     type = SimplePredictor
     scale = 1.0
   []
 
   automatic_scaling = true
+  compute_scaling_once = false
+  off_diagonals_in_auto_scaling = true
 []
 
 [Preconditioning]
@@ -273,10 +293,12 @@
     penalty = 1e7
     secondary_variable = disp_x
     friction_coefficient = 0.4
-    penetration_tolerance = 1e-9
-    slip_tolerance = 1e-14
-    penalty_friction = 1e7
-    use_mortar_scaled_gap = true
+    penetration_tolerance = 1e-7
+    slip_tolerance = 1 # 1e-6
+    penalty_friction = 1e9
+    penalty_multiplier = 100
+    use_physical_gap = true
+    aux_lm = dual_var
   []
 []
 

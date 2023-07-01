@@ -34,8 +34,6 @@
 [AuxVariables]
   [penalty_normal_pressure]
   []
-  [penalty_frictional_pressure]
-  []
   [accumulated_slip_one]
   []
   [tangential_vel_one]
@@ -265,7 +263,7 @@
     disp_y = disp_y
     penalty = 1e7
     penetration_tolerance = 1e-12
-    use_mortar_scaled_gap = true
+    use_physical_gap = true
   []
 []
 

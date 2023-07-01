@@ -45,8 +45,6 @@
     heavy = true
     method = opt
     valgrind = none
-    # Parallel bug in AL?
-    max_parallel = 1
     requirement = 'The contact module shall be able to approximate normal contact in a two-dimensional cylinder via an augmented '
                   'Lagrange approach to constraint enforcement.'
   []
@@ -59,8 +57,6 @@
     heavy = true
     valgrind = none
     method = opt
-    # Parallel bug in AL?
-    max_parallel = 1
     requirement = 'The contact module shall be able to approximate frictional contact in a two-dimensional cylinder via an augmented '
                   'Lagrange approach to constraint enforcement.'
   []
@@ -73,8 +69,6 @@
     heavy = true
     valgrind = none
     method = opt
-    # Parallel bug in AL?
-    max_parallel = 1
     requirement = 'The contact module shall be able to approximate normal contact in a two-dimensional cylinder via an augmented '
                   'Lagrange approach to constraint enforcement and allow for separation.'
   []
