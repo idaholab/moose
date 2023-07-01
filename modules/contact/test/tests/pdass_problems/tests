@@ -52,13 +52,25 @@
     type = 'CSVDiff'
     csvdiff = 'cylinder_friction_penalty_frictional_al_vectorpp_output_surface_FINAL.csv'
     input = 'cylinder_friction_penalty_frictional_al.i'
-    rel_err = 5.0e-4
-    abs_zero = 1.0e-2
+    rel_err = 1.0e-4
+    abs_zero = 1.0e-4
     heavy = true
     valgrind = none
     method = opt
     requirement = 'The contact module shall be able to approximate frictional contact in a two-dimensional cylinder via an augmented '
                   'Lagrange approach to constraint enforcement.'
+  []
+  [cylinder_friction_penalty_al_frictional_action]
+    type = 'CSVDiff'
+    csvdiff = 'cylinder_friction_penalty_frictional_al_action_vectorpp_output_surface_FINAL.csv'
+    input = 'cylinder_friction_penalty_frictional_al_action.i'
+    rel_err = 1.0e-4
+    abs_zero = 1.0e-4
+    heavy = true
+    valgrind = none
+    method = opt
+    requirement = 'The contact module shall be able to approximate frictional contact in a two-dimensional cylinder via an augmented '
+                  'Lagrange approach to constraint enforcement using the contact action.'
   []
   [cylinder_friction_penalty_al_separation]
     type = 'CSVDiff'

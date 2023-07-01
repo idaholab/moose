@@ -168,6 +168,7 @@
     formulation = mortar_penalty
     penalty = 5e5
     penalty_friction = 1e4
+    use_dual = false
   []
 []
 
