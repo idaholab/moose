@@ -9,6 +9,7 @@
 
 #include "ReactorMeshParams.h"
 #include "CastUniquePointer.h"
+#include "ReactorGeometryMeshBuilderBase.h"
 
 // libMesh includes
 #include "libmesh/mesh_generation.h"
@@ -74,29 +75,29 @@ ReactorMeshParams::ReactorMeshParams(const InputParameters & parameters)
     if (_axial_regions.size() != _axial_mesh_intervals.size())
       mooseError(
           "The number of axial regions is not consistent with the number of axial intervals.");
-    this->declareMeshProperty("axial_boundaries", _axial_regions);
-    this->declareMeshProperty("axial_mesh_intervals", _axial_mesh_intervals);
+    this->declareMeshProperty(RGMB::axial_mesh_sizes, _axial_regions);
+    this->declareMeshProperty(RGMB::axial_mesh_intervals, _axial_mesh_intervals);
   }
 
-  this->declareMeshProperty("mesh_dimensions", int(_dim));
-  this->declareMeshProperty("mesh_geometry", std::string(_geom));
-  this->declareMeshProperty("assembly_pitch", _assembly_pitch);
+  this->declareMeshProperty(RGMB::mesh_dimensions, int(_dim));
+  this->declareMeshProperty(RGMB::mesh_geometry, std::string(_geom));
+  this->declareMeshProperty(RGMB::assembly_pitch, _assembly_pitch);
   this->declareMeshProperty("name_id_map", _name_id_map);
 
   if (isParamValid("top_boundary_id"))
   {
     _top_boundary = getParam<boundary_id_type>("top_boundary_id");
-    this->declareMeshProperty("top_boundary_id", _top_boundary);
+    this->declareMeshProperty(RGMB::top_boundary_id, _top_boundary);
   }
   if (isParamValid("bottom_boundary_id"))
   {
     _bottom_boundary = getParam<boundary_id_type>("bottom_boundary_id");
-    this->declareMeshProperty("bottom_boundary_id", _bottom_boundary);
+    this->declareMeshProperty(RGMB::bottom_boundary_id, _bottom_boundary);
   }
   if (isParamValid("radial_boundary_id"))
   {
     _radial_boundary = getParam<boundary_id_type>("radial_boundary_id");
-    this->declareMeshProperty("radial_boundary_id", _radial_boundary);
+    this->declareMeshProperty(RGMB::radial_boundary_id, _radial_boundary);
     if (isParamValid("top_boundary_id") && _radial_boundary == _top_boundary)
       mooseError("top_boundary_id and radial_boundary_id must be unique values");
     if (isParamValid("bottom_boundary_id") && _radial_boundary == _bottom_boundary)
@@ -106,7 +107,7 @@ ReactorMeshParams::ReactorMeshParams(const InputParameters & parameters)
       (_bottom_boundary == _top_boundary))
     mooseError("top_boundary_id and bottom_boundary_id must be unique values");
 
-  this->declareMeshProperty("generate_rgmb_metadata", _define_metadata);
+  this->declareMeshProperty(RGMB::generate_metadata, _define_metadata);
 }
 
 std::unique_ptr<MeshBase>

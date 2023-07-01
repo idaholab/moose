@@ -188,6 +188,17 @@ protected:
   ///@}
 
   /**
+   * Method for copying attribute from input mesh meta-data store to current mesh meta-data store
+   */
+  template <typename T>
+  T & copyMeshProperty(const std::string & source_data_name,
+                       const std::string & source_mesh,
+                       const std::string & target_data_name)
+  {
+    return declareMeshProperty(target_data_name, getMeshProperty<T>(source_data_name, source_mesh));
+  }
+
+  /**
    * Takes the name of a MeshGeneratorName parameter and then gets a pointer to the
    * Mesh that MeshGenerator is going to create.
    *

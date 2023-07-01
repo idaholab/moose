@@ -42,7 +42,7 @@
                 Mesh/pin3/mesh_intervals='1 1'
                 Mesh/cmg/show_rgmb_metadata=true
                 Mesh/inactive='rotate90'"
-    expect_out = 'core_mesh_dimensions: 3.+core_mesh_geometry: Square.+core_axial_boundaries: 1.+core_axial_mesh_intervals: 1.+core_assembly_types: 1, 2.+core_lattice:.+1, 2.+2, 1.+assembly_1_pin_types: 2.+assembly_1_lattice:.+2, 2.+2, 2.+assembly_2_pin_types: 1, 2, 3.+assembly_2_lattice:.+3, 1.+1, 2.+pin_1_background_region_id: 2.+pin_2_background_region_id: 2.+pin_3_background_region_id: 4'
+    expect_out = 'core_mesh_dimensions: 3.+core_mesh_geometry: Square.+core_axial_mesh_sizes: 1.+core_axial_mesh_intervals: 1.+core_assembly_types: 1, 2.+core_lattice:.+1, 2.+2, 1.+assembly_1_pin_types: 2.+assembly_1_lattice:.+2, 2.+2, 2.+assembly_2_pin_types: 1, 2, 3.+assembly_2_lattice:.+3, 1.+1, 2.+pin_1_background_region_id: 2.+pin_2_background_region_id: 2.+pin_3_background_region_id: 4'
   []
   [core_shared_assembly_ids]
     requirement = 'The system shall throw an error if a core is composed of assemblies with shared assembly_type ids'
@@ -239,7 +239,7 @@
                 Mesh/cmg/show_rgmb_metadata=true
                 Mesh/inactive='translate'
                 Outputs/file_base=core_hex_in"
-    expect_out = 'core_mesh_dimensions: 3.+core_mesh_geometry: Hex.+core_axial_boundaries: 1, 1.+core_axial_mesh_intervals: 1, 1.+core_assembly_types: 1, 2.+core_lattice:.+-1, 2.+2, 1, -1.+-1, 2.+assembly_1_pin_types: 2.+assembly_1_lattice:.+2, 2.+2, 2, 2.+2, 2.+assembly_2_pin_types: 1, 3.+assembly_2_lattice:.+1, 1.+1, 3, 1.+1, 1.+pin_1_background_region_id: 12, 112.+pin_2_background_region_id: 21, 121.+pin_3_background_region_id: 32, 132'
+    expect_out = 'core_mesh_dimensions: 3.+core_mesh_geometry: Hex.+core_axial_mesh_sizes: 1, 1.+core_axial_mesh_intervals: 1, 1.+core_assembly_types: 1, 2.+core_lattice:.+-1, 2.+2, 1, -1.+-1, 2.+assembly_1_pin_types: 2.+assembly_1_lattice:.+2, 2.+2, 2, 2.+2, 2.+assembly_2_pin_types: 1, 3.+assembly_2_lattice:.+1, 1.+1, 3, 1.+1, 1.+pin_1_background_region_id: 12, 112.+pin_2_background_region_id: 21, 121.+pin_3_background_region_id: 32, 132'
   []
   [single_assembly_square_core]
     requirement = 'The system shall generate a full 3D square core mesh with 2 single assembly types'

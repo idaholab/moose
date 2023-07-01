@@ -107,61 +107,62 @@ AssemblyMeshGenerator::AssemblyMeshGenerator(const InputParameters & parameters)
   declareMeshesForSub("inputs");
 
   MeshGeneratorName reactor_params =
-      MeshGeneratorName(getMeshProperty<std::string>("reactor_params_name", _inputs[0]));
+      MeshGeneratorName(getMeshProperty<std::string>(RGMB::reactor_params_name, _inputs[0]));
   // Check that MG name for reactor params is consistent across all assemblies
   for (unsigned int i = 1; i < _inputs.size(); i++)
-    if (getMeshProperty<std::string>("reactor_params_name", _inputs[i]) != reactor_params)
+    if (getMeshProperty<std::string>(RGMB::reactor_params_name, _inputs[i]) != reactor_params)
       mooseError("The name of all reactor_params objects should be identical across all input pins "
                  "in the assembly.\n");
 
   // Initialize ReactorMeshParams object stored in pin input
   initializeReactorMeshParams(reactor_params);
 
-  _geom_type = getReactorParam<std::string>("mesh_geometry");
-  _mesh_dimensions = getReactorParam<int>("mesh_dimensions");
-  declareMeshProperty("assembly_type", _assembly_type);
-  declareMeshProperty("homogenized_assembly", false);
-  declareMeshProperty("pin_as_assembly", false);
+  _geom_type = getReactorParam<std::string>(RGMB::mesh_geometry);
+  _mesh_dimensions = getReactorParam<int>(RGMB::mesh_dimensions);
+  declareMeshProperty(RGMB::assembly_type, _assembly_type);
+  declareMeshProperty(RGMB::is_homogenized, false);
+  declareMeshProperty(RGMB::is_single_pin, false);
 
   if (_extrude && _mesh_dimensions != 3)
     paramError("extrude",
                "This is a 2 dimensional mesh, you cannot extrude it. Check you ReactorMeshParams "
                "inputs\n");
-  if (_extrude && (!hasReactorParam<boundary_id_type>("top_boundary_id") ||
-                   !hasReactorParam<boundary_id_type>("bottom_boundary_id")))
+  if (_extrude && (!hasReactorParam<boundary_id_type>(RGMB::top_boundary_id) ||
+                   !hasReactorParam<boundary_id_type>(RGMB::bottom_boundary_id)))
     mooseError("Both top_boundary_id and bottom_boundary_id must be provided in ReactorMeshParams "
                "if using extruded geometry");
 
   Real base_pitch = 0.0;
 
   // Check constitutent pins do not have shared pin_type ids
-  std::map<subdomain_id_type, std::string> input_id_map;
+  std::map<subdomain_id_type, std::string> pin_map_type_to_name;
   for (const auto i : index_range(_inputs))
   {
     auto pin = _inputs[i];
     if (i == 0)
-      base_pitch = getMeshProperty<Real>("pitch", pin);
+      base_pitch = getMeshProperty<Real>(RGMB::pitch, pin);
     else
     {
-      auto pitch = getMeshProperty<Real>("pitch", pin);
+      auto pitch = getMeshProperty<Real>(RGMB::pitch, pin);
       if (!MooseUtils::absoluteFuzzyEqual(pitch, base_pitch))
         mooseError("All pins within an assembly must have the same pitch");
     }
-    if (getMeshProperty<bool>("extruded", pin))
+    if (getMeshProperty<bool>(RGMB::extruded, pin))
       mooseError("Pins that have already been extruded cannot be used in AssemblyMeshGenerator "
                  "definition.\n");
-    const auto pin_type = getMeshProperty<subdomain_id_type>("pin_type", pin);
-    if (input_id_map.find(pin_type) != input_id_map.end() && input_id_map[pin_type] != pin)
+    const auto pin_type = getMeshProperty<subdomain_id_type>(RGMB::pin_type, pin);
+    if (pin_map_type_to_name.find(pin_type) != pin_map_type_to_name.end() &&
+        pin_map_type_to_name[pin_type] != pin)
       mooseError("Constituent pins have shared pin_type ids but different names. Each uniquely "
                  "defined pin in PinMeshGenerator must have its own pin_type id.");
-    input_id_map[pin_type] = pin;
+    pin_map_type_to_name[pin_type] = pin;
   }
-  declareMeshProperty("input_id_map", input_id_map);
-  auto assembly_pitch = getReactorParam<Real>("assembly_pitch");
+  declareMeshProperty(RGMB::pin_map_type_to_name, pin_map_type_to_name);
+  auto assembly_pitch = getReactorParam<Real>(RGMB::assembly_pitch);
 
   unsigned int n_axial_levels =
       (_mesh_dimensions == 3)
-          ? getReactorParam<std::vector<unsigned int>>("axial_mesh_intervals").size()
+          ? getReactorParam<std::vector<unsigned int>>(RGMB::axial_mesh_intervals).size()
           : 1;
   if (_geom_type == "Square")
   {
@@ -257,7 +258,7 @@ AssemblyMeshGenerator::AssemblyMeshGenerator(const InputParameters & parameters)
 
     if (_geom_type == "Hex")
     {
-      params.set<Real>("hexagon_size") = getReactorParam<Real>("assembly_pitch") / 2.0;
+      params.set<Real>("hexagon_size") = getReactorParam<Real>(RGMB::assembly_pitch) / 2.0;
       params.set<MooseEnum>("hexagon_size_style") = "apothem";
     }
     else
@@ -267,7 +268,7 @@ AssemblyMeshGenerator::AssemblyMeshGenerator(const InputParameters & parameters)
       else
       {
         params.set<MooseEnum>("pattern_boundary") = "expanded";
-        params.set<Real>("square_size") = getReactorParam<Real>("assembly_pitch");
+        params.set<Real>("square_size") = getReactorParam<Real>(RGMB::assembly_pitch);
         params.set<bool>("uniform_mesh_on_sides") = true;
       }
     }
@@ -345,10 +346,10 @@ AssemblyMeshGenerator::AssemblyMeshGenerator(const InputParameters & parameters)
       declareMeshProperty("pattern_pitch_meta",
                           getMeshProperty<Real>("pattern_pitch_meta", name() + "_pattern"));
 
-    declareMeshProperty("background_region_ids", _background_region_id);
-    declareMeshProperty("duct_region_ids", _duct_region_ids);
-    declareMeshProperty("background_block_names", _background_block_name);
-    declareMeshProperty("duct_block_names", _duct_block_names);
+    declareMeshProperty(RGMB::background_region_id, _background_region_id);
+    declareMeshProperty(RGMB::duct_region_ids, _duct_region_ids);
+    declareMeshProperty(RGMB::background_block_name, _background_block_name);
+    declareMeshProperty(RGMB::duct_block_names, _duct_block_names);
   }
 
   std::string build_mesh_name = name() + "_delbds";
@@ -362,7 +363,7 @@ AssemblyMeshGenerator::AssemblyMeshGenerator(const InputParameters & parameters)
       for (const auto & pattern_idx : pattern_x)
       {
         const auto pin_name = _inputs[pattern_idx];
-        const auto pin_id = getMeshProperty<subdomain_id_type>("pin_type", pin_name);
+        const auto pin_id = getMeshProperty<subdomain_id_type>(RGMB::pin_type, pin_name);
         const BoundaryName boundary_name = "outer_pin_" + std::to_string(pin_id);
         if (!std::count(boundaries_to_delete.begin(), boundaries_to_delete.end(), boundary_name))
           boundaries_to_delete.push_back(boundary_name);
@@ -380,35 +381,33 @@ AssemblyMeshGenerator::AssemblyMeshGenerator(const InputParameters & parameters)
   {
     std::map<subdomain_id_type, std::vector<std::vector<subdomain_id_type>>> region_id_map =
         getMeshProperty<std::map<subdomain_id_type, std::vector<std::vector<subdomain_id_type>>>>(
-            "pin_region_ids", pinMG);
+            RGMB::pin_region_ids, pinMG);
     _pin_region_id_map.insert(
         std::pair<subdomain_id_type, std::vector<std::vector<subdomain_id_type>>>(
             region_id_map.begin()->first, region_id_map.begin()->second));
     std::map<subdomain_id_type, std::vector<std::vector<std::string>>> block_name_map =
         getMeshProperty<std::map<subdomain_id_type, std::vector<std::vector<std::string>>>>(
-            "pin_block_names", pinMG);
+            RGMB::pin_block_names, pinMG);
     _pin_block_name_map.insert(std::pair<subdomain_id_type, std::vector<std::vector<std::string>>>(
         block_name_map.begin()->first, block_name_map.begin()->second));
   }
-  declareMeshProperty("pin_region_id_map", _pin_region_id_map);
-  declareMeshProperty("pin_block_name_map", _pin_block_name_map);
-  declareMeshProperty("assembly_pitch", getMeshProperty<Real>("assembly_pitch", _reactor_params));
+  declareMeshProperty(RGMB::pin_region_id_map, _pin_region_id_map);
+  declareMeshProperty(RGMB::pin_block_name_map, _pin_block_name_map);
+  declareMeshProperty(RGMB::assembly_pitch, getReactorParam<Real>(RGMB::assembly_pitch));
 
   if (_extrude && _mesh_dimensions == 3)
   {
-    std::vector<Real> axial_boundaries =
-        getMeshProperty<std::vector<Real>>("axial_boundaries", _reactor_params);
-    const auto top_boundary = getMeshProperty<boundary_id_type>("top_boundary_id", _reactor_params);
-    const auto bottom_boundary =
-        getMeshProperty<boundary_id_type>("bottom_boundary_id", _reactor_params);
+    std::vector<Real> axial_boundaries = getReactorParam<std::vector<Real>>(RGMB::axial_mesh_sizes);
+    const auto top_boundary = getReactorParam<boundary_id_type>(RGMB::top_boundary_id);
+    const auto bottom_boundary = getReactorParam<boundary_id_type>(RGMB::bottom_boundary_id);
     {
-      declareMeshProperty("extruded", true);
+      declareMeshProperty(RGMB::extruded, true);
       auto params = _app.getFactory().getValidParams("AdvancedExtruderGenerator");
 
       params.set<MeshGeneratorName>("input") = name() + "_delbds";
       params.set<Point>("direction") = Point(0, 0, 1);
       params.set<std::vector<unsigned int>>("num_layers") =
-          getMeshProperty<std::vector<unsigned int>>("axial_mesh_intervals", _reactor_params);
+          getReactorParam<std::vector<unsigned int>>(RGMB::axial_mesh_intervals);
       params.set<std::vector<Real>>("heights") = axial_boundaries;
       params.set<boundary_id_type>("bottom_boundary") = bottom_boundary;
       params.set<boundary_id_type>("top_boundary") = top_boundary;
@@ -447,9 +446,9 @@ AssemblyMeshGenerator::AssemblyMeshGenerator(const InputParameters & parameters)
     }
   }
   else
-    declareMeshProperty("extruded", false);
+    declareMeshProperty(RGMB::extruded, false);
 
-  if (getReactorParam<bool>("generate_rgmb_metadata"))
+  if (getReactorParam<bool>(RGMB::generate_metadata))
     generateMetadata();
 
   _build_mesh = &getMeshByName(build_mesh_name);
@@ -459,12 +458,13 @@ void
 AssemblyMeshGenerator::generateMetadata()
 {
   std::string metadata_prefix = "assembly_" + std::to_string(_assembly_type);
-  declareMeshProperty(metadata_prefix + "_pitch", getReactorParam<Real>("assembly_pitch"));
-  declareMeshProperty(metadata_prefix + "_background_region_id", _background_region_id);
-  declareMeshProperty(metadata_prefix + "_duct_halfpitches", _duct_sizes);
-  declareMeshProperty(metadata_prefix + "_duct_region_ids", _duct_region_ids);
-  declareMeshProperty(metadata_prefix + "_is_homogenized", false);
-  declareMeshProperty(metadata_prefix + "_is_single_pin", false);
+  declareMeshProperty(metadata_prefix + "_" + RGMB::pitch,
+                      getReactorParam<Real>(RGMB::assembly_pitch));
+  declareMeshProperty(metadata_prefix + "_" + RGMB::background_region_id, _background_region_id);
+  declareMeshProperty(metadata_prefix + "_" + RGMB::duct_halfpitches, _duct_sizes);
+  declareMeshProperty(metadata_prefix + "_" + RGMB::duct_region_ids, _duct_region_ids);
+  declareMeshProperty(metadata_prefix + "_" + RGMB::is_homogenized, false);
+  declareMeshProperty(metadata_prefix + "_" + RGMB::is_single_pin, false);
 
   // Determine constituent pin type ids and define lattice
   std::vector<std::vector<int>> pin_type_lattice;
@@ -475,7 +475,7 @@ AssemblyMeshGenerator::generateMetadata()
     for (unsigned int j = 0; j < _pattern[i].size(); ++j)
     {
       const auto input_pin_name = _inputs[_pattern[i][j]];
-      pin_type_ids[j] = getMeshProperty<subdomain_id_type>("pin_type", input_pin_name);
+      pin_type_ids[j] = getMeshProperty<subdomain_id_type>(RGMB::pin_type, input_pin_name);
       if (assembly_pin_types.find(pin_type_ids[j]) == assembly_pin_types.end())
       {
         copyPinMetadata(input_pin_name, pin_type_ids[j]);
@@ -484,8 +484,8 @@ AssemblyMeshGenerator::generateMetadata()
     }
     pin_type_lattice.push_back(pin_type_ids);
   }
-  declareMeshProperty(metadata_prefix + "_pin_types", assembly_pin_types);
-  declareMeshProperty(metadata_prefix + "_lattice", pin_type_lattice);
+  declareMeshProperty(metadata_prefix + "_" + RGMB::pin_types, assembly_pin_types);
+  declareMeshProperty(metadata_prefix + "_" + RGMB::lattice, pin_type_lattice);
 
   generateGlobalReactorMetadata(metadata_prefix);
 

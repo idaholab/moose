@@ -164,11 +164,11 @@ CoreMeshGenerator::CoreMeshGenerator(const InputParameters & parameters)
   }
 
   MeshGeneratorName reactor_params =
-      MeshGeneratorName(getMeshProperty<std::string>("reactor_params_name", _inputs[0]));
-  const auto assembly_homogenization = getMeshProperty<bool>("homogenized_assembly", _inputs[0]);
-  const auto pin_as_assembly = getMeshProperty<bool>("pin_as_assembly", _inputs[0]);
-  std::map<subdomain_id_type, std::string> global_pin_input_id_map;
-  std::map<subdomain_id_type, std::string> assembly_input_id_map;
+      MeshGeneratorName(getMeshProperty<std::string>(RGMB::reactor_params_name, _inputs[0]));
+  const auto assembly_homogenization = getMeshProperty<bool>(RGMB::is_homogenized, _inputs[0]);
+  const auto pin_as_assembly = getMeshProperty<bool>(RGMB::is_single_pin, _inputs[0]);
+  std::map<subdomain_id_type, std::string> global_pin_map_type_to_name;
+  std::map<subdomain_id_type, std::string> assembly_map_type_to_name;
   // Check that MG name for reactor params and assembly homogenization schemes are
   // consistent across all assemblies, and there is no overlap in pin_type / assembly_type ids
   for (unsigned int i = 0; i < _inputs.size(); i++)
@@ -176,41 +176,42 @@ CoreMeshGenerator::CoreMeshGenerator(const InputParameters & parameters)
     // Skip if assembly name is equal to dummy assembly name
     if (_inputs[i] == _empty_key)
       continue;
-    if (getMeshProperty<std::string>("reactor_params_name", _inputs[i]) != reactor_params)
+    if (getMeshProperty<std::string>(RGMB::reactor_params_name, _inputs[i]) != reactor_params)
       mooseError("The name of all reactor_params objects should be identical across all pins in "
                  "the input assemblies.\n");
-    if (getMeshProperty<bool>("homogenized_assembly", _inputs[i]) != assembly_homogenization)
+    if (getMeshProperty<bool>(RGMB::is_homogenized, _inputs[i]) != assembly_homogenization)
       mooseError(
           "All assemblies in the core must be homogenized if assembly homogenization is used\n");
-    if (getMeshProperty<bool>("pin_as_assembly", _inputs[i]) != pin_as_assembly)
+    if (getMeshProperty<bool>(RGMB::is_single_pin, _inputs[i]) != pin_as_assembly)
       mooseWarning("Not all assemblies in the core are defined as a single pin by setting "
                    "`PinMeshGenerator/use_as_assembly` to true\n");
 
     // Check assembly_types across constituent assemblies are uniquely defined
-    const auto assembly_type = getMeshProperty<subdomain_id_type>("assembly_type", _inputs[i]);
-    if (assembly_input_id_map.find(assembly_type) != assembly_input_id_map.end() &&
-        assembly_input_id_map[assembly_type] != _inputs[i])
+    const auto assembly_type = getMeshProperty<subdomain_id_type>(RGMB::assembly_type, _inputs[i]);
+    if (assembly_map_type_to_name.find(assembly_type) != assembly_map_type_to_name.end() &&
+        assembly_map_type_to_name[assembly_type] != _inputs[i])
       mooseError(
           "Constituent assemblies have shared assembly_type ids but different names. Each uniquely "
           "defined assembly in AssemblyMeshGenerator must have its own assembly_type id.");
-    assembly_input_id_map[assembly_type] = _inputs[i];
+    assembly_map_type_to_name[assembly_type] = _inputs[i];
 
     // If assembly is composed of pins, check pin_types across all constituent assemblies are
     // uniquely defined
-    if (hasMeshProperty<std::map<subdomain_id_type, std::string>>("input_id_map", _inputs[i]))
+    if (hasMeshProperty<std::map<subdomain_id_type, std::string>>(RGMB::pin_map_type_to_name,
+                                                                  _inputs[i]))
     {
-      const auto pin_input_id_map =
-          getMeshProperty<std::map<subdomain_id_type, std::string>>("input_id_map", _inputs[i]);
-      for (auto it = pin_input_id_map.begin(); it != pin_input_id_map.end(); ++it)
+      const auto pin_map_type_to_name = getMeshProperty<std::map<subdomain_id_type, std::string>>(
+          RGMB::pin_map_type_to_name, _inputs[i]);
+      for (auto it = pin_map_type_to_name.begin(); it != pin_map_type_to_name.end(); ++it)
       {
         const auto pin_type = it->first;
         const auto input_pin_name = it->second;
-        if (global_pin_input_id_map.find(pin_type) != global_pin_input_id_map.end() &&
-            global_pin_input_id_map[pin_type] != input_pin_name)
+        if (global_pin_map_type_to_name.find(pin_type) != global_pin_map_type_to_name.end() &&
+            global_pin_map_type_to_name[pin_type] != input_pin_name)
           mooseError(
               "Constituent pins within assemblies have shared pin_type ids but different names. "
               "Each uniquely defined pin in AssemblyMeshGenerator must have its own pin_type id.");
-        global_pin_input_id_map[pin_type] = input_pin_name;
+        global_pin_map_type_to_name[pin_type] = input_pin_name;
       }
     }
   }
@@ -218,17 +219,17 @@ CoreMeshGenerator::CoreMeshGenerator(const InputParameters & parameters)
   // Initialize ReactorMeshParams object stored in pin input
   initializeReactorMeshParams(reactor_params);
 
-  _geom_type = getReactorParam<std::string>("mesh_geometry");
-  _mesh_dimensions = getReactorParam<int>("mesh_dimensions");
+  _geom_type = getReactorParam<std::string>(RGMB::mesh_geometry);
+  _mesh_dimensions = getReactorParam<int>(RGMB::mesh_dimensions);
 
   if (_extrude && _mesh_dimensions != 3)
     mooseError("This is a 2 dimensional mesh, you cannot extrude it. Check your ReactorMeshParams "
                "inputs\n");
-  if (_extrude && (!hasReactorParam<boundary_id_type>("top_boundary_id") ||
-                   !hasReactorParam<boundary_id_type>("bottom_boundary_id")))
+  if (_extrude && (!hasReactorParam<boundary_id_type>(RGMB::top_boundary_id) ||
+                   !hasReactorParam<boundary_id_type>(RGMB::bottom_boundary_id)))
     mooseError("Both top_boundary_id and bottom_boundary_id must be provided in ReactorMeshParams "
                "if using extruded geometry");
-  if (!hasReactorParam<boundary_id_type>("radial_boundary_id"))
+  if (!hasReactorParam<boundary_id_type>(RGMB::radial_boundary_id))
     mooseError("radial_boundary_id must be provided in ReactorMeshParams for CoreMeshGenerators");
 
   std::size_t empty_pattern_loc = 0;
@@ -238,7 +239,7 @@ CoreMeshGenerator::CoreMeshGenerator(const InputParameters & parameters)
     if (assembly != _empty_key)
     {
       ++empty_pattern_loc;
-      if (getMeshProperty<bool>("extruded", assembly))
+      if (getMeshProperty<bool>(RGMB::extruded, assembly))
         mooseError("Assemblies that have already been extruded cannot be used in CoreMeshGenerator "
                    "definition.\n");
     }
@@ -268,7 +269,7 @@ CoreMeshGenerator::CoreMeshGenerator(const InputParameters & parameters)
         {
           auto params = _app.getFactory().getValidParams("SimpleHexagonGenerator");
 
-          params.set<Real>("hexagon_size") = getReactorParam<Real>("assembly_pitch") / 2.0;
+          params.set<Real>("hexagon_size") = getReactorParam<Real>(RGMB::assembly_pitch) / 2.0;
           params.set<std::vector<subdomain_id_type>>("block_id") = {UINT16_MAX - 1};
 
           addMeshSubgenerator("SimpleHexagonGenerator", std::string(_empty_key), params);
@@ -280,7 +281,7 @@ CoreMeshGenerator::CoreMeshGenerator(const InputParameters & parameters)
                                   : "CartesianConcentricCircleAdaptiveBoundaryMeshGenerator";
           auto params = _app.getFactory().getValidParams(adaptive_mg_name);
 
-          const auto assembly_pitch = getReactorParam<Real>("assembly_pitch");
+          const auto assembly_pitch = getReactorParam<Real>(RGMB::assembly_pitch);
           if (_geom_type == "Hex")
           {
             params.set<Real>("hexagon_size") = assembly_pitch / 2.0;
@@ -322,7 +323,7 @@ CoreMeshGenerator::CoreMeshGenerator(const InputParameters & parameters)
             std::vector<MeshGeneratorName>{_empty_key};
       }
 
-      const auto radial_boundary = getReactorParam<boundary_id_type>("radial_boundary_id");
+      const auto radial_boundary = getReactorParam<boundary_id_type>(RGMB::radial_boundary_id);
       params.set<boundary_id_type>("external_boundary_id") = radial_boundary;
       params.set<std::string>("external_boundary_name") = "outer_core";
       params.set<double>("rotate_angle") = 0.0;
@@ -355,7 +356,8 @@ CoreMeshGenerator::CoreMeshGenerator(const InputParameters & parameters)
         const auto assembly_name = _inputs[pattern_idx];
         if (assembly_name == _empty_key)
           continue;
-        const auto assembly_id = getMeshProperty<subdomain_id_type>("assembly_type", assembly_name);
+        const auto assembly_id =
+            getMeshProperty<subdomain_id_type>(RGMB::assembly_type, assembly_name);
         const BoundaryName boundary_name = "outer_assembly_" + std::to_string(assembly_id);
         if (!std::count(boundaries_to_delete.begin(), boundaries_to_delete.end(), boundary_name))
           boundaries_to_delete.push_back(boundary_name);
@@ -376,7 +378,7 @@ CoreMeshGenerator::CoreMeshGenerator(const InputParameters & parameters)
     {
       std::map<subdomain_id_type, std::vector<std::vector<subdomain_id_type>>> pin_region_id_map =
           getMeshProperty<std::map<subdomain_id_type, std::vector<std::vector<subdomain_id_type>>>>(
-              "pin_region_id_map", assembly);
+              RGMB::pin_region_id_map, assembly);
       for (auto pin = pin_region_id_map.begin(); pin != pin_region_id_map.end(); ++pin)
         if (_pin_region_id_map.find(pin->first) == _pin_region_id_map.end())
           _pin_region_id_map.insert(
@@ -385,7 +387,7 @@ CoreMeshGenerator::CoreMeshGenerator(const InputParameters & parameters)
 
       std::map<subdomain_id_type, std::vector<std::vector<std::string>>> pin_block_name_map =
           getMeshProperty<std::map<subdomain_id_type, std::vector<std::vector<std::string>>>>(
-              "pin_block_name_map", assembly);
+              RGMB::pin_block_name_map, assembly);
       for (auto pin = pin_block_name_map.begin(); pin != pin_block_name_map.end(); ++pin)
         if (_pin_block_name_map.find(pin->first) == _pin_block_name_map.end())
           _pin_block_name_map.insert(
@@ -394,16 +396,16 @@ CoreMeshGenerator::CoreMeshGenerator(const InputParameters & parameters)
 
       // Define background and duct region ID map from constituent assemblies
       subdomain_id_type assembly_type =
-          getMeshProperty<subdomain_id_type>("assembly_type", assembly);
+          getMeshProperty<subdomain_id_type>(RGMB::assembly_type, assembly);
       if (_background_region_id_map.find(assembly_type) == _background_region_id_map.end())
       {
         // Store region ids and block names associated with duct and background regions for each
         // assembly, in case block names need to be recovered from region ids after
         // multiple assemblies have been stitched together into a core
         std::vector<subdomain_id_type> background_region_ids =
-            getMeshProperty<std::vector<subdomain_id_type>>("background_region_ids", assembly);
+            getMeshProperty<std::vector<subdomain_id_type>>(RGMB::background_region_id, assembly);
         std::vector<std::vector<subdomain_id_type>> duct_region_ids =
-            getMeshProperty<std::vector<std::vector<subdomain_id_type>>>("duct_region_ids",
+            getMeshProperty<std::vector<std::vector<subdomain_id_type>>>(RGMB::duct_region_ids,
                                                                          assembly);
         _background_region_id_map.insert(
             std::pair<subdomain_id_type, std::vector<subdomain_id_type>>(assembly_type,
@@ -413,9 +415,10 @@ CoreMeshGenerator::CoreMeshGenerator(const InputParameters & parameters)
                 assembly_type, duct_region_ids));
 
         std::vector<std::string> background_block_names =
-            getMeshProperty<std::vector<std::string>>("background_block_names", assembly);
+            getMeshProperty<std::vector<std::string>>(RGMB::background_block_name, assembly);
         std::vector<std::vector<std::string>> duct_block_names =
-            getMeshProperty<std::vector<std::vector<std::string>>>("duct_block_names", assembly);
+            getMeshProperty<std::vector<std::vector<std::string>>>(RGMB::duct_block_names,
+                                                                   assembly);
         _background_block_name_map.insert(std::pair<subdomain_id_type, std::vector<std::string>>(
             assembly_type, background_block_names));
         _duct_block_name_map.insert(
@@ -424,9 +427,7 @@ CoreMeshGenerator::CoreMeshGenerator(const InputParameters & parameters)
       }
     }
   }
-  declareMeshProperty("pin_id_map", _pin_region_id_map);
-
-  declareMeshProperty("assembly_pitch", getReactorParam<Real>("assembly_pitch"));
+  declareMeshProperty(RGMB::assembly_pitch, getReactorParam<Real>(RGMB::assembly_pitch));
 
   // periphery meshing
   if (_mesh_periphery)
@@ -468,11 +469,11 @@ CoreMeshGenerator::CoreMeshGenerator(const InputParameters & parameters)
 
   if (_extrude && _mesh_dimensions == 3)
   {
-    std::vector<Real> axial_boundaries = getReactorParam<std::vector<Real>>("axial_boundaries");
-    const auto top_boundary = getReactorParam<boundary_id_type>("top_boundary_id");
-    const auto bottom_boundary = getReactorParam<boundary_id_type>("bottom_boundary_id");
+    std::vector<Real> axial_boundaries = getReactorParam<std::vector<Real>>(RGMB::axial_mesh_sizes);
+    const auto top_boundary = getReactorParam<boundary_id_type>(RGMB::top_boundary_id);
+    const auto bottom_boundary = getReactorParam<boundary_id_type>(RGMB::bottom_boundary_id);
     {
-      declareMeshProperty("extruded", true);
+      declareMeshProperty(RGMB::extruded, true);
       auto params = _app.getFactory().getValidParams("AdvancedExtruderGenerator");
 
       if (_mesh_periphery)
@@ -482,7 +483,7 @@ CoreMeshGenerator::CoreMeshGenerator(const InputParameters & parameters)
 
       params.set<Point>("direction") = Point(0, 0, 1);
       params.set<std::vector<unsigned int>>("num_layers") =
-          getReactorParam<std::vector<unsigned int>>("axial_mesh_intervals");
+          getReactorParam<std::vector<unsigned int>>(RGMB::axial_mesh_intervals);
       params.set<std::vector<Real>>("heights") = axial_boundaries;
       params.set<boundary_id_type>("bottom_boundary") = bottom_boundary;
       params.set<boundary_id_type>("top_boundary") = top_boundary;
@@ -522,9 +523,9 @@ CoreMeshGenerator::CoreMeshGenerator(const InputParameters & parameters)
     }
   }
   else
-    declareMeshProperty("extruded", false);
+    declareMeshProperty(RGMB::extruded, false);
 
-  if (getReactorParam<bool>("generate_rgmb_metadata"))
+  if (getReactorParam<bool>(RGMB::generate_metadata))
     generateMetadata();
 
   _build_mesh = &getMeshByName(build_mesh_name);
@@ -537,8 +538,9 @@ CoreMeshGenerator::generateMetadata()
 
   if (_mesh_periphery)
   {
-    declareMeshProperty(metadata_prefix + "_peripheral_ring_radius", _outer_circle_radius);
-    declareMeshProperty(metadata_prefix + "_peripheral_ring_region_id", _periphery_region_id);
+    declareMeshProperty(metadata_prefix + "_" + RGMB::peripheral_ring_radius, _outer_circle_radius);
+    declareMeshProperty(metadata_prefix + "_" + RGMB::peripheral_ring_region_id,
+                        _periphery_region_id);
   }
 
   // Determine constituent pin type ids and define lattice
@@ -557,7 +559,7 @@ CoreMeshGenerator::generateMetadata()
       else
       {
         assembly_type_ids[j] =
-            getMeshProperty<subdomain_id_type>("assembly_type", input_assembly_name);
+            getMeshProperty<subdomain_id_type>(RGMB::assembly_type, input_assembly_name);
         // Copy assembly metadata to core
         if (core_assembly_types.find(assembly_type_ids[j]) == core_assembly_types.end())
         {
@@ -566,10 +568,10 @@ CoreMeshGenerator::generateMetadata()
           std::string assembly_prefix = "assembly_" + std::to_string(assembly_type_ids[j]);
 
           // Copy pin metadata to core if assembly is defined as lattice of pins
-          if (!getMeshProperty<bool>(assembly_prefix + "_is_single_pin"))
+          if (!getMeshProperty<bool>(assembly_prefix + "_" + RGMB::is_single_pin))
           {
             const auto pin_type_ids =
-                getMeshProperty<std::set<unsigned int>>(assembly_prefix + "_pin_types");
+                getMeshProperty<std::set<unsigned int>>(assembly_prefix + "_" + RGMB::pin_types);
             for (const auto & pin_type_id : pin_type_ids)
               if (core_pin_types.find(pin_type_id) == core_pin_types.end())
               {
@@ -582,9 +584,9 @@ CoreMeshGenerator::generateMetadata()
     }
     assembly_type_lattice.push_back(assembly_type_ids);
   }
-  declareMeshProperty(metadata_prefix + "_pin_types", core_pin_types);
-  declareMeshProperty(metadata_prefix + "_assembly_types", core_assembly_types);
-  declareMeshProperty(metadata_prefix + "_lattice", assembly_type_lattice);
+  declareMeshProperty(metadata_prefix + "_" + RGMB::pin_types, core_pin_types);
+  declareMeshProperty(metadata_prefix + "_" + RGMB::assembly_types, core_assembly_types);
+  declareMeshProperty(metadata_prefix + "_" + RGMB::lattice, assembly_type_lattice);
 
   generateGlobalReactorMetadata(metadata_prefix);
 

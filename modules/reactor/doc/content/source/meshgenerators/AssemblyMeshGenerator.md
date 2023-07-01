@@ -45,13 +45,13 @@ At the assembly level, each metadata entry is prepended with the prefix `"assemb
 - `pitch`: Assembly pitch, equivalent to [!param](/Mesh/ReactorMeshParams/assembly_pitch)
 - `is_homogenized`: Whether or not assembly mesh is homogenized, equivalent to [!param](/Mesh/PinMeshGenerator/homogenized)
 - `is_single_pin`: Whether or not assembly mesh is represented by a single pin region or a lattice of pins, equivalent to [!param](/Mesh/PinMeshGenerator/use_as_assembly).
-- `duct_halfpitches`: Location of apothems defining the duct locations, equivalent to [!param](/Mesh/AssemblyMeshGenerator/duct_halfpitch)
+- `duct_halfpitches`: Location of apothems defining the duct locations, equivalent to [`AssemblyMeshGenerator`](AssemblyMeshGenerator.md)/[!param](/Mesh/AssemblyMeshGenerator/duct_halfpitch)
 - `background_region_id`: 1-D vector of region_ids corresponding to axial zones of background regions of assembly mesh.
 - `duct_region_ids`: 2-D vector of region ids corresponding to radial and axial zones within duct regions of assembly mesh. Inner indexing is radial zones, while outer index is axial zones.
 
 If the assembly is represented as a single pin, the following metadata is also defined:
 
-- `ring_radii`: Location of rings comprising of assembly region, equivalent to [!param](/Mesh/PinMeshGenerator/ring_radii).
+- `ring_radii`: Location of rings comprising of assembly region, equivalent to [`PinMeshGenerator`](PinMeshGenerator.md)/[!param](/Mesh/PinMeshGenerator/ring_radii).
 - `ring_region_ids`: 2-D vector of region ids corresponding to radial and axial zones within ring regions of assembly mesh. Inner indexing is radial zones, while outer index is axial zones.
 
 If instead the assembly is represented as a lattice of pins, the following metadata is defined:

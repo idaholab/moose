@@ -41,8 +41,8 @@ For each of the assemblies listed in `assembly_types`, the assembly-level metada
 
 For meshes where a core periphery is defined, the following metadata is also defined:
 
-- `peripheral_ring_radius`: Outer radius of core periphery, equivalent to [!param](/Mesh/CoreMeshGenerator/outer_circle_radius).
-- `peripheral_ring_region_id`: Region ID associated with core periphery, equivalent to [!param](/Mesh/CoreMeshGenerator/periphery_region_id).
+- `peripheral_ring_radius`: Outer radius of core periphery, equivalent to [`CoreMeshGenerator`](CoreMeshGenerator.md)/[!param](/Mesh/CoreMeshGenerator/outer_circle_radius).
+- `peripheral_ring_region_id`: Region ID associated with core periphery, equivalent to [`CoreMeshGenerator`](CoreMeshGenerator.md)/[!param](/Mesh/CoreMeshGenerator/periphery_region_id).
 
 
 ## Example Syntax

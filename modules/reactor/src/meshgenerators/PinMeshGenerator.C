@@ -111,18 +111,18 @@ PinMeshGenerator::PinMeshGenerator(const InputParameters & parameters)
     _homogenized(getParam<bool>("homogenized")),
     _is_assembly(getParam<bool>("use_as_assembly"))
 {
-  declareMeshProperty("pitch", _pitch);
-  declareMeshProperty("pin_type", _pin_type);
+  declareMeshProperty(RGMB::pitch, _pitch);
+  declareMeshProperty(RGMB::pin_type, _pin_type);
 
   // Initialize ReactorMeshParams object
   initializeReactorMeshParams(getParam<MeshGeneratorName>("reactor_params"));
 
-  _mesh_dimensions = getReactorParam<int>("mesh_dimensions");
-  _mesh_geometry = getReactorParam<std::string>("mesh_geometry");
+  _mesh_dimensions = getReactorParam<int>(RGMB::mesh_dimensions);
+  _mesh_geometry = getReactorParam<std::string>(RGMB::mesh_geometry);
 
   if (_is_assembly)
   {
-    auto assembly_pitch = getReactorParam<Real>("assembly_pitch");
+    auto assembly_pitch = getReactorParam<Real>(RGMB::assembly_pitch);
     if (assembly_pitch != _pitch)
       mooseError("Pitch defined in PinMeshGenerator must match assembly_pitch defined in "
                  "ReactorMeshParams if use_as_assembly is set to true");
@@ -131,8 +131,8 @@ PinMeshGenerator::PinMeshGenerator(const InputParameters & parameters)
   if (_extrude && _mesh_dimensions != 3)
     mooseError("This is a 2 dimensional mesh, you cannot extrude it. Check your ReactorMeshParams "
                "inputs\n");
-  if (_extrude && (!hasReactorParam<boundary_id_type>("top_boundary_id") ||
-                   !hasReactorParam<boundary_id_type>("bottom_boundary_id")))
+  if (_extrude && (!hasReactorParam<boundary_id_type>(RGMB::top_boundary_id) ||
+                   !hasReactorParam<boundary_id_type>(RGMB::bottom_boundary_id)))
     mooseError("Both top_boundary_id and bottom_boundary_id must be provided in ReactorMeshParams "
                "if using extruded geometry");
 
@@ -163,7 +163,7 @@ PinMeshGenerator::PinMeshGenerator(const InputParameters & parameters)
   {
     unsigned int n_axial_levels =
         (_mesh_dimensions == 3)
-            ? getReactorParam<std::vector<unsigned int>>("axial_mesh_intervals").size()
+            ? getReactorParam<std::vector<unsigned int>>(RGMB::axial_mesh_intervals).size()
             : 1;
     if (_region_ids.size() != n_axial_levels)
       mooseError("The size of region IDs must be equal to the number of axial levels as defined in "
@@ -390,7 +390,7 @@ PinMeshGenerator::PinMeshGenerator(const InputParameters & parameters)
     declareMeshProperty("node_id_background_meta",
                         getMeshProperty<dof_id_type>("node_id_background_meta", name() + "_2D"));
   if (_is_assembly)
-    declareMeshProperty("pattern_pitch_meta", getReactorParam<Real>("assembly_pitch"));
+    declareMeshProperty("pattern_pitch_meta", getReactorParam<Real>(RGMB::assembly_pitch));
   else if (hasMeshProperty<Real>("pattern_pitch_meta", name() + "_2D"))
     declareMeshProperty("pattern_pitch_meta",
                         getMeshProperty<Real>("pattern_pitch_meta", name() + "_2D"));
@@ -400,47 +400,47 @@ PinMeshGenerator::PinMeshGenerator(const InputParameters & parameters)
   // by future mesh generators
   std::map<subdomain_id_type, std::vector<std::vector<subdomain_id_type>>> region_id_map{
       {_pin_type, _region_ids}};
-  declareMeshProperty("pin_region_ids", region_id_map);
+  declareMeshProperty(RGMB::pin_region_ids, region_id_map);
   std::map<subdomain_id_type, std::vector<std::vector<std::string>>> block_name_map;
   block_name_map[_pin_type] = _block_names;
-  declareMeshProperty("pin_block_names", block_name_map);
+  declareMeshProperty(RGMB::pin_block_names, block_name_map);
 
   // Declare mesh properties that need to be moved up to the assembly level
   if (_is_assembly)
   {
-    declareMeshProperty("assembly_type", _pin_type);
+    declareMeshProperty(RGMB::assembly_type, _pin_type);
     std::map<subdomain_id_type, std::vector<std::vector<subdomain_id_type>>> pin_region_id_map;
     pin_region_id_map.insert(
         std::pair<subdomain_id_type, std::vector<std::vector<subdomain_id_type>>>(
             region_id_map.begin()->first, region_id_map.begin()->second));
-    declareMeshProperty("pin_region_id_map", pin_region_id_map);
+    declareMeshProperty(RGMB::pin_region_id_map, pin_region_id_map);
     std::map<subdomain_id_type, std::vector<std::vector<std::string>>> pin_block_name_map;
     pin_block_name_map.insert(std::pair<subdomain_id_type, std::vector<std::vector<std::string>>>(
         block_name_map.begin()->first, block_name_map.begin()->second));
-    declareMeshProperty("pin_block_name_map", pin_block_name_map);
-    declareMeshProperty("background_region_ids", std::vector<subdomain_id_type>());
-    declareMeshProperty("background_block_names", std::vector<std::string>());
-    declareMeshProperty("duct_region_ids", std::vector<std::vector<subdomain_id_type>>());
-    declareMeshProperty("duct_block_names", std::vector<std::vector<std::string>>());
+    declareMeshProperty(RGMB::pin_block_name_map, pin_block_name_map);
+    declareMeshProperty(RGMB::background_region_id, std::vector<subdomain_id_type>());
+    declareMeshProperty(RGMB::background_block_name, std::vector<std::string>());
+    declareMeshProperty(RGMB::duct_region_ids, std::vector<std::vector<subdomain_id_type>>());
+    declareMeshProperty(RGMB::duct_block_names, std::vector<std::vector<std::string>>());
   }
   // Set metadata to indicate homogenized assemblies to inform CoreMeshGenerator
   // dummy assembly deletion
-  declareMeshProperty("homogenized_assembly", _homogenized);
-  declareMeshProperty("pin_as_assembly", _is_assembly);
+  declareMeshProperty(RGMB::is_homogenized, _homogenized);
+  declareMeshProperty(RGMB::is_single_pin, _is_assembly);
 
   if (_extrude && _mesh_dimensions == 3)
   {
-    std::vector<Real> axial_boundaries = getReactorParam<std::vector<Real>>("axial_boundaries");
-    const auto top_boundary = getReactorParam<boundary_id_type>("top_boundary_id");
-    const auto bottom_boundary = getReactorParam<boundary_id_type>("bottom_boundary_id");
+    std::vector<Real> axial_boundaries = getReactorParam<std::vector<Real>>(RGMB::axial_mesh_sizes);
+    const auto top_boundary = getReactorParam<boundary_id_type>(RGMB::top_boundary_id);
+    const auto bottom_boundary = getReactorParam<boundary_id_type>(RGMB::bottom_boundary_id);
     {
-      declareMeshProperty("extruded", true);
+      declareMeshProperty(RGMB::extruded, true);
       auto params = _app.getFactory().getValidParams("AdvancedExtruderGenerator");
 
       params.set<MeshGeneratorName>("input") = _homogenized ? name() + "_2D" : name() + "_del_bds";
       params.set<Point>("direction") = Point(0, 0, 1);
       params.set<std::vector<unsigned int>>("num_layers") =
-          getReactorParam<std::vector<unsigned int>>("axial_mesh_intervals");
+          getReactorParam<std::vector<unsigned int>>(RGMB::axial_mesh_intervals);
       params.set<std::vector<Real>>("heights") = axial_boundaries;
       params.set<boundary_id_type>("bottom_boundary") = bottom_boundary;
       params.set<boundary_id_type>("top_boundary") = top_boundary;
@@ -478,9 +478,9 @@ PinMeshGenerator::PinMeshGenerator(const InputParameters & parameters)
     }
   }
   else
-    declareMeshProperty("extruded", false);
+    declareMeshProperty(RGMB::extruded, false);
 
-  if (getReactorParam<bool>("generate_rgmb_metadata"))
+  if (getReactorParam<bool>(RGMB::generate_metadata))
     generateMetadata();
 
   _build_mesh = &getMeshByName(build_mesh_name);
@@ -492,16 +492,16 @@ PinMeshGenerator::generateMetadata()
   std::string mg_struct = _is_assembly ? "assembly" : "pin";
   std::string metadata_prefix = mg_struct + "_" + std::to_string(_pin_type);
 
-  declareMeshProperty(metadata_prefix + "_pitch", _pitch);
-  declareMeshProperty(metadata_prefix + "_ring_radii", _ring_radii);
-  declareMeshProperty(metadata_prefix + "_duct_halfpitches", _duct_halfpitch);
-  declareMeshProperty(metadata_prefix + "_is_homogenized", _homogenized);
+  declareMeshProperty(metadata_prefix + "_" + RGMB::pitch, _pitch);
+  declareMeshProperty(metadata_prefix + "_" + RGMB::ring_radii, _ring_radii);
+  declareMeshProperty(metadata_prefix + "_" + RGMB::duct_halfpitches, _duct_halfpitch);
+  declareMeshProperty(metadata_prefix + "_" + RGMB::is_homogenized, _homogenized);
   if (_is_assembly)
-    declareMeshProperty(metadata_prefix + "_is_single_pin", _is_assembly);
+    declareMeshProperty(metadata_prefix + "_" + RGMB::is_single_pin, _is_assembly);
 
   unsigned int n_axial_levels =
       (_mesh_dimensions == 3)
-          ? getReactorParam<std::vector<unsigned int>>("axial_mesh_intervals").size()
+          ? getReactorParam<std::vector<unsigned int>>(RGMB::axial_mesh_intervals).size()
           : 1;
   std::vector<std::vector<subdomain_id_type>> ring_region_ids(
       n_axial_levels, std::vector<subdomain_id_type>(_ring_radii.size()));
@@ -522,9 +522,9 @@ PinMeshGenerator::generateMetadata()
           _region_ids[axial_idx][duct_idx];
   }
 
-  declareMeshProperty(metadata_prefix + "_ring_region_ids", ring_region_ids);
-  declareMeshProperty(metadata_prefix + "_background_region_id", background_region_ids);
-  declareMeshProperty(metadata_prefix + "_duct_region_ids", duct_region_ids);
+  declareMeshProperty(metadata_prefix + "_" + RGMB::ring_region_ids, ring_region_ids);
+  declareMeshProperty(metadata_prefix + "_" + RGMB::background_region_id, background_region_ids);
+  declareMeshProperty(metadata_prefix + "_" + RGMB::duct_region_ids, duct_region_ids);
 
   generateGlobalReactorMetadata(metadata_prefix);
 
