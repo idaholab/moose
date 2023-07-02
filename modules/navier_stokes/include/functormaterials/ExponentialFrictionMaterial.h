@@ -30,7 +30,7 @@ private:
   /// Functor for the Reynolds number
   const Moose::Functor<ADReal> & _Re;
   /// Speed (velocity magnitude) of the fluid
-  const Moose::Functor<ADReal> & _speed;
+  const Moose::Functor<ADReal> * const _speed;
   /// $C_1$ in $f(Re) = C_1 Re^{C_2}$
   const Real _c1;
   /// $C_2$ in $f(Re) = C_1 Re^{C_2}$

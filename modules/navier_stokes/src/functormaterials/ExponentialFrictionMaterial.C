@@ -19,7 +19,7 @@ ExponentialFrictionMaterial::validParams()
   InputParameters params = FunctorMaterial::validParams();
   params.addClassDescription("Computes a Reynolds number-exponential friction factor.");
   params.addRequiredParam<MooseFunctorName>(NS::Reynolds, "The Reynolds number.");
-  params.addParam<MooseFunctorName>(NS::speed, 1.0, "The velocity magnitude of the fluid.");
+  params.addParam<MooseFunctorName>(NS::speed, "The velocity magnitude of the fluid.");
   params.addRequiredParam<Real>("c1", "c2 in c1/Re^(c2) expression.");
   params.addRequiredParam<Real>("c2", "c2 in c1/Re^(c2) expression.");
   params.addRequiredParam<std::string>("friction_factor_name",
@@ -35,13 +35,13 @@ ExponentialFrictionMaterial::validParams()
 ExponentialFrictionMaterial::ExponentialFrictionMaterial(const InputParameters & parameters)
   : FunctorMaterial(parameters),
     _Re(getFunctor<ADReal>(NS::Reynolds)),
-    _speed(getFunctor<ADReal>(NS::speed)),
+    _speed(isParamValid(NS::speed) ? &getFunctor<ADReal>(NS::speed) : nullptr),
     _c1(getParam<Real>("c1")),
     _c2(getParam<Real>("c2")),
     _friction_factor_name(getParam<std::string>("friction_factor_name")),
     _include_velocity_factor(getParam<bool>("include_velocity_factor"))
 {
-  if (_include_velocity_factor && !isParamSetByUser(NS::speed))
+  if (_include_velocity_factor && !_speed)
     paramError(NS::speed,
                "To be able to include an additional multiplier in the friction factor, please "
                "provide the speed of the fluid.");
@@ -49,6 +49,6 @@ ExponentialFrictionMaterial::ExponentialFrictionMaterial(const InputParameters &
                              [this](const auto & r, const auto & t) -> ADReal
                              {
                                return _c1 * std::pow(_Re(r, t), _c2) *
-                                      (_include_velocity_factor ? _speed(r, t) : ADReal(1.0));
+                                      (_include_velocity_factor ? (*_speed)(r, t) : ADReal(1.0));
                              });
 }
