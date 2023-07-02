@@ -8,7 +8,7 @@
       input = 'side_advection_flux_integral.i'
       csvdiff = 'side_advection_flux_integral_out.csv'
       abs_zero = 1e-9
-      detail = 'with finite element variable'
+      detail = 'with finite element variable and'
     []
 
     [x_flux_fv]
@@ -16,7 +16,7 @@
       input = 'side_advection_flux_integral_fv.i'
       csvdiff = 'side_advection_flux_integral_fv_out.csv'
       abs_zero = 1e-9
-      detail = 'with finite volumn variable'
+      detail = 'with finite volume variable.'
     []
   []
 []

@@ -23,9 +23,9 @@
   [Finite_Volume]
     issues = '#24289'
     design = 'AdvectiveFluxAux.md'
-    requirement = 'The system shall throw an error when finite volume variable is used(currently not support)'
+    requirement = 'The system shall throw an error when finite volume variables are used to compute a volumetric advection flux, as it is currently not supported.'
     type = RunException
     input = 'advection_flux_fv.i'
-    expect_err = "The following error occurred in the object \"[^\"]+\", of type \"AdvectiveFluxAux.[^\"]+simulations."
+    expect_err = "AdvectiveFluxAux is designed to use for finite element simulations."
   []
 []

@@ -31,15 +31,15 @@ protected:
   const int _component;
 
   /// Holds the solution at the current quadrature points
-  const VariableValue & _advected_variable;
+  const Moose::Functor<Real> & _advected_variable;
 
   /// normals at quadrature points
   const MooseArray<Point> & _normals;
 
   /// Velocity components
-  const Moose::Functor<ADReal> & _vel_x;
-  const Moose::Functor<ADReal> * _vel_y;
-  const Moose::Functor<ADReal> * _vel_z;
+  const Moose::Functor<Real> & _vel_x;
+  const Moose::Functor<Real> * _vel_y;
+  const Moose::Functor<Real> * _vel_z;
 
   /// Whether an advected variable was supplied in the input
   const bool _advected_variable_supplied;
@@ -48,5 +48,5 @@ protected:
   const bool _advected_mat_prop_supplied;
 
   /// Material property storing the advected quantity; used for finite elements
-  const Moose::Functor<ADReal> & _advected_material_property;
+  const MaterialProperty<Real> & _advected_material_property;
 };

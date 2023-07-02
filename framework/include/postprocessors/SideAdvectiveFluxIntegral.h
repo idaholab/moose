@@ -43,18 +43,18 @@ protected:
   /// Whether an advected variable was supplied in the input
   const bool _advected_variable_supplied;
   /// Variable storing the advected quantity; used for finite elements
-  const VariableValue & _advected_variable;
+  const Moose::Functor<Real> & _advected_variable;
 
   /// Whether an advected material property was supplied in the input
   const bool _advected_mat_prop_supplied;
   /// Material property storing the advected quantity; used for finite elements
-  const Moose::Functor<ADReal> & _advected_material_property;
+  const GenericMaterialProperty<T, is_ad> & _advected_material_property;
 
   /// The functor representing the advected quantity for finite volume
-  const Moose::Functor<ADReal> * const _adv_quant;
+  const Moose::Functor<Real> * const _adv_quant;
 
   /// Velocity components
-  const Moose::Functor<ADReal> & _vel_x;
-  const Moose::Functor<ADReal> * _vel_y;
-  const Moose::Functor<ADReal> * _vel_z;
+  const Moose::Functor<Real> & _vel_x;
+  const Moose::Functor<Real> * _vel_y;
+  const Moose::Functor<Real> * _vel_z;
 };

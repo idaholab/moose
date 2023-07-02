@@ -87,7 +87,7 @@
 
 [Materials]
   [rho]
-    type = ADGenericFunctorMaterial
+    type = GenericConstantMaterial
     prop_names = 'rho'
     prop_values = '1'
   []
