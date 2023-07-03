@@ -43,9 +43,9 @@ public:
    * should be of the dependent variable.  These values should
    * correspond to one and other in the same position.
    */
-  BilinearInterpolation(const std::vector<Real> & XAXIS,
-                        const std::vector<Real> & YAXIS,
-                        const ColumnMajorMatrix & ZSURFACE);
+  BilinearInterpolation(const std::vector<Real> & xaxis,
+                        const std::vector<Real> & yaxis,
+                        const ColumnMajorMatrix & zsurface);
 
   virtual ~BilinearInterpolation() = default;
 
@@ -55,14 +55,17 @@ public:
    */
   Real sample(const Real s1, const Real s2) const override;
   ADReal sample(const ADReal & s1, const ADReal & s2) const override;
+  ChainedReal sample(const ChainedReal & s1, const ChainedReal & s2) const override;
 
   /**
-   * Samples value and first derivatives at point (s1, s2)
-   * Use this function for speed when computing both value and derivatives,
-   * as it minimizes the amount of time spent locating the point in the
-   * tabulated data
+   * Samples first derivative at point (s1, s2)
    */
-  Real sampleDerivative(Real s1, Real s2, unsigned int deriv_var) const override;
+  Real sampleDerivative(const Real s1, const Real s2, unsigned int deriv_var) const override;
+  ADReal
+  sampleDerivative(const ADReal & s1, const ADReal & s2, unsigned int deriv_var) const override;
+  ChainedReal sampleDerivative(const ChainedReal & s1,
+                               const ChainedReal & s2,
+                               unsigned int deriv_var) const override;
 
   using BidimensionalInterpolation::sampleValueAndDerivatives;
   void sampleValueAndDerivatives(
@@ -78,6 +81,9 @@ private:
   template <typename T>
   T sampleInternal(const T & s1, const T & s2) const;
 
-  ColumnMajorMatrix _zSurface;
+  template <typename T>
+  T sampleDerivativeInternal(const T s1, const T s2, const unsigned int deriv_var) const;
+
+  ColumnMajorMatrix _z_surface;
   static int _file_number;
 };

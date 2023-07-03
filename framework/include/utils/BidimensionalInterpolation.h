@@ -43,13 +43,28 @@ public:
    */
   virtual Real sample(const Real x1, const Real x2) const = 0;
   virtual ADReal sample(const ADReal & x1, const ADReal & x2) const = 0;
+  virtual ChainedReal sample(const ChainedReal & x1, const ChainedReal & x2) const = 0;
 
   /**
    * Samples first derivative at point (x1, x2)
    */
-  virtual Real sampleDerivative(Real /*x1*/, Real /*x2*/, unsigned int /*deriv_var*/) const
+  virtual Real
+  sampleDerivative(const Real /*x1*/, const Real /*x2*/, unsigned int /*deriv_var*/) const
   {
-    mooseError("sampleDerivative is not implemented for this interpolation class");
+    mooseError("sampleDerivative for Real numbers is not implemented for this interpolation class");
+  }
+  virtual ADReal
+  sampleDerivative(const ADReal & /*x1*/, const ADReal & /*x2*/, unsigned int /*deriv_var*/) const
+  {
+    mooseError(
+        "sampleDerivative for ADReal numbers is not implemented for this interpolation class");
+  }
+  virtual ChainedReal sampleDerivative(const ChainedReal & /*x1*/,
+                                       const ChainedReal & /*x2*/,
+                                       unsigned int /*deriv_var*/) const
+  {
+    mooseError(
+        "sampleDerivative for ChainedReal numbers is not implemented for this interpolation class");
   }
 
   /**
@@ -69,18 +84,25 @@ public:
   virtual void sampleValueAndDerivatives(
       Real /*x1*/, Real /*x2*/, Real & /* y*/, Real & /* dy1*/, Real & /* dy2*/) const
   {
-    mooseError("sampleValueAndDerivatives is not implemented for this interpolation class");
+    mooseError("sampleValueAndDerivatives for Real numbers is not implemented for this "
+               "interpolation class");
   }
-
-  /**
-   * Same as sampleValueAndDerivatives, but ADReal instead of Real
-   */
   virtual void sampleValueAndDerivatives(const ADReal & /*x1*/,
                                          const ADReal & /*x2*/,
                                          ADReal & /* y*/,
                                          ADReal & /* dy1*/,
                                          ADReal & /* dy2*/) const
   {
-    mooseError("sampleValueAndDerivatives is not implemented for this interpolation class");
+    mooseError("sampleValueAndDerivatives for ADReal numbers is not implemented for this "
+               "interpolation class");
+  }
+  virtual void sampleValueAndDerivatives(const ChainedReal & /*x1*/,
+                                         const ChainedReal & /*x2*/,
+                                         ChainedReal & /* y*/,
+                                         ChainedReal & /* dy1*/,
+                                         ChainedReal & /* dy2*/) const
+  {
+    mooseError("sampleValueAndDerivatives for ChainedReal numbers is not implemented for this "
+               "interpolation class");
   }
 };
