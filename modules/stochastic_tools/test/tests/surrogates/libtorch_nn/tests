@@ -49,4 +49,25 @@
     libtorch = true
     prereq = retrain
   []
+  [train-standardized]
+    requirement = 'The system shall be able to train a libtorch-based neural network with standardized input and output parameters.'
+    type = CheckFiles
+    input = train.i
+    check_files = 'standardized_train.rd mynet.pt'
+    cli_args = "Trainers/train/read_from_file=false Trainers/train/standardize_input=true "
+               "Trainers/train/standardize_output=true Outputs/file_base=standardized"
+    allow_test_objects = true
+    libtorch = true
+  []
+  [evaluate-standardized]
+    requirement = 'The system shall be able to evaluate a previously trained, libtorch-based neural network with standardized input and output parameters.'
+    type = CSVDiff
+    input = evaluate.i
+    allow_test_objects = true
+    csvdiff = 'evaluate_standardized_results_0002.csv'
+    cli_args = "Surrogates/surr/filename='standardized_train.rd' "
+               "Outputs/file_base=evaluate_standardized"
+    prereq = train-standardized
+    libtorch = true
+  []
 []

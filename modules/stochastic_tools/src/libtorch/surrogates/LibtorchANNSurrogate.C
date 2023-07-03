@@ -23,7 +23,9 @@ LibtorchANNSurrogate::validParams()
 
 LibtorchANNSurrogate::LibtorchANNSurrogate(const InputParameters & parameters)
   : SurrogateModel(parameters),
-    _nn(getModelData<std::shared_ptr<Moose::LibtorchArtificialNeuralNet>>("nn"))
+    _nn(getModelData<std::shared_ptr<Moose::LibtorchArtificialNeuralNet>>("nn")),
+    _input_standardizer(getModelData<StochasticTools::Standardizer>("input_standardizer")),
+    _output_standardizer(getModelData<StochasticTools::Standardizer>("output_standardizer"))
 {
   // We check if MOOSE is compiled with torch, if not this throws an error
   StochasticToolsApp::requiresTorch(*this);
@@ -38,10 +40,31 @@ LibtorchANNSurrogate::evaluate(const std::vector<Real> & x) const
   mooseAssert(_nn->numInputs() == x.size(),
               "Input point does not match dimensionality of training data.");
 
-  torch::Tensor x_tf = torch::tensor(torch::ArrayRef<Real>(x.data(), x.size())).to(at::kDouble);
+  auto converted_input = x;
+  const auto & input_mean = _input_standardizer.getMean();
+  const auto & input_std = _input_standardizer.getMean();
+
+  mooseAssert(mean.size() == converted_input.size() && std.size() == converted_input.size(),
+              "The input standardizer's dimensions should be the same as the input dimension!");
+
+  for (auto input_i : index_range(converted_input))
+    converted_input[input_i] =
+        (converted_input[input_i] - input_mean[input_i]) / input_std[input_i];
+
+  torch::Tensor x_tf =
+      torch::tensor(torch::ArrayRef<Real>(converted_input.data(), converted_input.size()))
+          .to(at::kDouble);
+
+  const auto & output_mean = _output_standardizer.getMean();
+  const auto & output_std = _output_standardizer.getMean();
+
+  mooseAssert(output_mean.size() == 1 && output_std.size() == 1,
+              "The output standardizer's dimensions should be 1!");
 
   // Compute prediction
   val = _nn->forward(x_tf).item<double>();
+
+  val = val * output_std[0] + output_mean[0];
 
   return val;
 }

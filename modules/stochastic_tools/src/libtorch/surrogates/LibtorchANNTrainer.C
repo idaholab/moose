@@ -54,6 +54,11 @@ LibtorchANNTrainer::validParams()
   params.addParam<unsigned int>(
       "max_processes", 1, "The maximum number of parallel processes that the trainer will use.");
 
+  params.addParam<bool>(
+      "standardize_input", true, "Standardize (center and scale) training inputs (x values)");
+  params.addParam<bool>(
+      "standardize_output", true, "Standardize (center and scale) training outputs (y values)");
+
   params.suppressParameter<MooseEnum>("response_type");
   return params;
 }
@@ -67,7 +72,11 @@ LibtorchANNTrainer::LibtorchANNTrainer(const InputParameters & parameters)
         "activation_function", getParam<std::vector<std::string>>("activation_function"))),
     _nn_filename(getParam<std::string>("nn_filename")),
     _read_from_file(getParam<bool>("read_from_file")),
-    _nn(declareModelData<std::shared_ptr<Moose::LibtorchArtificialNeuralNet>>("nn"))
+    _nn(declareModelData<std::shared_ptr<Moose::LibtorchArtificialNeuralNet>>("nn")),
+    _standardize_input(getParam<bool>("standardize_input")),
+    _standardize_output(getParam<bool>("standardize_output")),
+    _input_standardizer(declareModelData<StochasticTools::Standardizer>("input_standardizer")),
+    _output_standardizer(declareModelData<StochasticTools::Standardizer>("output_standardizer"))
 {
   // Fixing the RNG seed to make sure every experiment is the same.
   // Otherwise sampling / stochastic gradient descent would be different.
@@ -110,7 +119,7 @@ LibtorchANNTrainer::postTrain()
 
   // Then, we create and load our Tensors
   unsigned int num_samples = _flattened_response.size();
-  unsigned int num_inputs = _sampler.getNumberOfCols();
+  unsigned int num_inputs = _n_dims;
 
   // We create a neural net (for the definition of the net see the header file)
   _nn = std::make_shared<Moose::LibtorchArtificialNeuralNet>(
@@ -134,6 +143,41 @@ LibtorchANNTrainer::postTrain()
       torch::from_blob(_flattened_data.data(), {num_samples, num_inputs}, options).to(at::kDouble);
   torch::Tensor response_tensor =
       torch::from_blob(_flattened_response.data(), {num_samples, 1}, options).to(at::kDouble);
+
+  // We standardize the input/output pairs if the user requested it
+  if (_standardize_input)
+  {
+    auto data_std_mean = torch::std_mean(data_tensor, 0);
+    auto & data_std = std::get<0>(data_std_mean);
+    auto & data_mean = std::get<1>(data_std_mean);
+
+    data_tensor = (data_tensor - data_mean) / data_std;
+
+    std::vector<Real> converted_data_mean;
+    LibtorchUtils::tensorToVector(data_mean, converted_data_mean);
+    std::vector<Real> converted_data_std;
+    LibtorchUtils::tensorToVector(data_std, converted_data_std);
+    _input_standardizer.set(converted_data_mean, converted_data_std);
+  }
+  else
+    _input_standardizer.set(0, 1, _n_dims);
+
+  if (_standardize_input)
+  {
+    auto response_std_mean = torch::std_mean(response_tensor, 0);
+    auto & response_std = std::get<0>(response_std_mean);
+    auto & response_mean = std::get<1>(response_std_mean);
+
+    response_tensor = (response_tensor - response_mean) / response_std;
+
+    std::vector<Real> converted_response_mean;
+    LibtorchUtils::tensorToVector(response_mean, converted_response_mean);
+    std::vector<Real> converted_response_std;
+    LibtorchUtils::tensorToVector(response_std, converted_response_std);
+    _output_standardizer.set(converted_response_mean, converted_response_std);
+  }
+  else
+    _output_standardizer.set(0, 1, 1);
 
   // We create a custom data set from our converted data
   Moose::LibtorchDataset my_data(data_tensor, response_tensor);

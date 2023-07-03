@@ -14,6 +14,7 @@
 #include <torch/torch.h>
 #include "LibtorchArtificialNeuralNet.h"
 #include "SurrogateModel.h"
+#include "Standardizer.h"
 
 class LibtorchANNSurrogate : public SurrogateModel
 {
@@ -27,6 +28,12 @@ public:
 protected:
   /// Pointer to the neural net object (initialized as null)
   const std::shared_ptr<Moose::LibtorchArtificialNeuralNet> & _nn;
+
+  /// Standardizer for use with input (x)
+  const StochasticTools::Standardizer & _input_standardizer;
+
+  /// Standardizer for use with output response (y)
+  const StochasticTools::Standardizer & _output_standardizer;
 };
 
 #endif
