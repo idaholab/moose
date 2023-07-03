@@ -63,7 +63,7 @@
       input = 'csvtimesequence.i'
       exodiff = 'csvtimesequence_out.e'
 
-      detail = 'when reading the sequence from a comma-separated input file.'
+      detail = 'when reading the sequence from a comma-separated input file, and'
     []
 
     [use_last_dt]

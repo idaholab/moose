@@ -3,6 +3,15 @@
 `TimeSequenceStepperBase` is a base class for time steppers that use a sequence
 time values $t_i$ to produce time step sizes.
 
+## Failed solves id=failed_solves
+
+If the solver fails to obtain a converged solution for a given
+step, the executioner cuts back the step size and attempts to advance the time
+from the previous step using a smaller time step. The time step is cut back by
+multiplying the time step by the cutback factor, defaulting to 0.5. If this is successful,
+the time stepper will then attempt to use the next time in the sequence,
+adjusting the time step to "get back on track".
+
 ## Choosing the time step size past the final time value
 
 Suppose that $t_N$ is the maximum time value provided in the sequence. This value
@@ -23,12 +32,3 @@ for all time past $t_N$:
 
 !equation
 \Delta t = t_N - t_{N-1} \,.
-
-## Failed solves
-
-If the solver fails to obtain a converged solution for a given
-step, the executioner cuts back the step size and attempts to advance the time
-from the previous step using a smaller time step. The time step is cut back by
-multiplying the time step by the cutback factor, defaulting to 0.5. If this is successful,
-the time stepper will then attempt to use the next time in the sequence,
-adjusting the time step to "get back on track".
