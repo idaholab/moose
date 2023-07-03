@@ -5,7 +5,7 @@ pipe_radius=1 # m
 u_inlet=1
 
 [GlobalParams]
-  integrate_p_by_parts = false
+  integrate_p_by_parts = true
 []
 
 [Mesh]
@@ -90,13 +90,6 @@ u_inlet=1
     boundary = 'bottom'
     set_x_comp = false
     function_y = 0
-  []
-  # pressure is not integrated by parts so we cannot remove the nullspace through a natural condition
-  [p_corner]
-    type = DirichletBC
-    boundary = 'right'
-    value = 0
-    variable = p
   []
 []
 

@@ -36,7 +36,8 @@ INSADMomentumViscous::INSADMomentumViscous(const InputParameters & parameters)
   : ADVectorKernel(parameters),
     _mu(getADMaterialProperty<Real>("mu_name")),
     _coord_sys(_assembly.coordSystem()),
-    _form(getParam<MooseEnum>("viscous_form"))
+    _form(getParam<MooseEnum>("viscous_form")),
+    _rz_radial_coord(_mesh.getAxisymmetricRadialCoord())
 {
   auto & obj_tracker = const_cast<INSADObjectTracker &>(
       _fe_problem.getUserObject<INSADObjectTracker>("ins_ad_object_tracker"));
@@ -57,14 +58,14 @@ ADRealVectorValue
 INSADMomentumViscous::qpAdditionalRZTerm()
 {
   // Add the u_r / r^2 term. There is an extra factor of 2 for the traction form
-  ADReal resid = _mu[_qp] * _u[_qp](0);
+  ADReal resid = _mu[_qp] * _u[_qp](_rz_radial_coord);
   if (_form == "traction")
     resid *= 2.;
 
   if (_use_displaced_mesh)
-    return resid / (_ad_q_point[_qp](0) * _ad_q_point[_qp](0));
+    return resid / (_ad_q_point[_qp](_rz_radial_coord) * _ad_q_point[_qp](_rz_radial_coord));
   else
-    return resid / (_q_point[_qp](0) * _q_point[_qp](0));
+    return resid / (_q_point[_qp](_rz_radial_coord) * _q_point[_qp](_rz_radial_coord));
 }
 
 void

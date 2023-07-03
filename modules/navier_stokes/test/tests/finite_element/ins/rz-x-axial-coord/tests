@@ -1,10 +1,19 @@
 [Tests]
-  design = 'insfv.md'
+  design = 'cgfe.md'
   issues = '#21102'
-  [exo]
-    type = 'Exodiff'
-    input = 'pipe-flow.i'
-    requirement = 'The system shall be able to solve an axisymmetric pipe flow problem using a finite element discretization in which the axis of symmetry is the x-axis.'
-    exodiff = 'pipe-flow_out.e'
+  [rz]
+    requirement = 'The system shall be able to solve an axisymmetric pipe flow problem using a finite element discretization in which the axis of symmetry is the x-axis'
+    [dirichlet]
+      type = 'Exodiff'
+      input = 'pipe-flow.i'
+      detail = 'in which the pressure is constrained with a Dirichlet boundary condition on the outlet,'
+      exodiff = 'pipe-flow_out.e'
+    []
+    [natural]
+      type = 'Exodiff'
+      input = 'pipe-flow-natural-bc.i'
+      detail = 'and in which the pressure is constrained with natural boundary conditions for the velocity equations on the outlet.'
+      exodiff = 'pipe-flow-natural-bc_out.e'
+    []
   []
 []

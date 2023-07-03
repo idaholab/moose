@@ -1,4 +1,4 @@
-# SideIntegralVariablePostprocessor
+# InternalSideIntegralVariablePostprocessor
 
 !syntax description /Postprocessors/InternalSideIntegralVariablePostprocessor
 
