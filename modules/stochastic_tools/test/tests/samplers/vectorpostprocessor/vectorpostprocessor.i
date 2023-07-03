@@ -4,18 +4,13 @@
 [Samplers]
   [vpp]
     type = VectorPostprocessorSampler
-    vectors_names = 'VPP1/year VPP2/month'
+    vectors_names = 'csv/year csv/month'
     execute_on = 'initial timestep_end'
   []
 []
 
 [VectorPostprocessors]
-  [VPP1]
-    type = CSVReader
-    csv_file = 'example.csv'
-  []
-
-  [VPP2]
+  [csv]
     type = CSVReader
     csv_file = 'example.csv'
   []

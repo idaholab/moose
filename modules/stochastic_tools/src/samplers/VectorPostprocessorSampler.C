@@ -8,7 +8,6 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "VectorPostprocessorSampler.h"
-#include "VectorPostprocessorInterface.h"
 
 registerMooseObject("StochasticToolsApp", VectorPostprocessorSampler);
 
@@ -18,30 +17,35 @@ VectorPostprocessorSampler::validParams()
   InputParameters params = Sampler::validParams();
 
   params.addRequiredParam<std::vector<ReporterName>>(
-      "vectors_names", "The names of the vector postprocessors containing the column data.");
+      "vectors_names",
+      "The names of the vector-postprocessors and/or vector reporter values containing the column "
+      "data.");
 
   params.addClassDescription("The sampler uses vector postprocessors as inputs.");
   return params;
 }
 
 VectorPostprocessorSampler::VectorPostprocessorSampler(const InputParameters & parameters)
-  : Sampler(parameters), _reporter_names(getParam<std::vector<ReporterName>>("vectors_names"))
+  : Sampler(parameters)
 {
-  _data.clear();
-  if (!_reporter_names.empty())
-    for (auto & vpp_vec : _reporter_names)
-      _data.emplace_back(&getReporterValueByName<std::vector<Real>>(vpp_vec));
+  for (auto & vpp_vec : getParam<std::vector<ReporterName>>("vectors_names"))
+    _data.emplace_back(&getReporterValueByName<std::vector<Real>>(vpp_vec));
 
   // set a non-zero value for number of rows to avoid error in rankConfig, the actual value will be
   // set in executableSetup() and update via reinit()
   setNumberOfRows(1);
+  setNumberOfCols(_data.size());
 }
 
 void
 VectorPostprocessorSampler::executeSetUp()
 {
-  setNumberOfRows(_data[0]->size());
-  setNumberOfCols(_data.size());
+  const auto vsize = _data[0]->size();
+  for (const auto & vec : _data)
+    if (vec->size() != vsize)
+      paramError("vector_names", "Vectors must all be the same size.");
+
+  setNumberOfRows(vsize);
 }
 
 Real

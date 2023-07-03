@@ -27,9 +27,6 @@ public:
   virtual void threadJoin(const UserObject & uo) override;
 
 protected:
-  // Helper class to set num of column of the vector when availiable
-  void setupSampleVector(const dof_id_type num_column);
-
   /// Storage for declared vectors, one for each column
   std::vector<VectorPostprocessorValue *> _sample_vectors;
 

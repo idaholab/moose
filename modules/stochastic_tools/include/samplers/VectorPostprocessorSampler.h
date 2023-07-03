@@ -28,7 +28,4 @@ protected:
 private:
   /// Storage of VPP data
   std::vector<const std::vector<Real> *> _data;
-
-  /// Storage of VPP names
-  const std::vector<ReporterName> & _reporter_names;
 };
