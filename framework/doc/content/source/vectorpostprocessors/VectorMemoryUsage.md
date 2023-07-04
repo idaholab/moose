@@ -49,7 +49,7 @@ and the memory used:
 !row-end!
 
 !alert note
-Due to differences in the data collection method, the memory consumption different may be slightly different from
+Due to differences in the data collection method, the memory consumption may be slightly different from
 the [PerfGraphOutput.md].
 
 !syntax parameters /VectorPostprocessors/VectorMemoryUsage
