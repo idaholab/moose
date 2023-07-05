@@ -17,14 +17,11 @@
 LIBMESH_DEFINE_HASH_POINTERS
 #include "libmesh/quadrature.h"
 
-MaxQpsThread::MaxQpsThread(FEProblemBase & fe_problem)
-  : _fe_problem(fe_problem), _max(0), _max_shape_funcs(0)
-{
-}
+MaxQpsThread::MaxQpsThread(FEProblemBase & fe_problem) : _fe_problem(fe_problem), _max(0) {}
 
 // Splitting Constructor
 MaxQpsThread::MaxQpsThread(MaxQpsThread & x, Threads::split /*split*/)
-  : _fe_problem(x._fe_problem), _max(x._max), _max_shape_funcs(x._max_shape_funcs)
+  : _fe_problem(x._fe_problem), _max(x._max)
 {
 }
 
@@ -82,26 +79,6 @@ MaxQpsThread::operator()(const ConstElemRange & range)
     if (qrule->n_points() > _max)
       _max = qrule->n_points();
 
-    const auto n_shape_funcs = [dim, &fe]()
-    {
-      const auto elem_type = fe->get_type();
-      switch (dim)
-      {
-        case 0:
-          return static_cast<FE<0, LAGRANGE> *>(fe.get())->n_shape_functions(elem_type, FIRST);
-        case 1:
-          return static_cast<FE<1, LAGRANGE> *>(fe.get())->n_shape_functions(elem_type, FIRST);
-        case 2:
-          return static_cast<FE<2, LAGRANGE> *>(fe.get())->n_shape_functions(elem_type, FIRST);
-        case 3:
-          return static_cast<FE<3, LAGRANGE> *>(fe.get())->n_shape_functions(elem_type, FIRST);
-        default:
-          mooseError("Unhandled dimension ", dim);
-      }
-    }();
-    if (n_shape_funcs > _max_shape_funcs)
-      _max_shape_funcs = n_shape_funcs;
-
     // figure out the number of qps for the face
     // NOTE: user might specify higher order rule for faces, thus possibly ending up with more qps
     // than in the volume
@@ -126,7 +103,4 @@ MaxQpsThread::join(const MaxQpsThread & y)
 {
   if (y._max > _max)
     _max = y._max;
-
-  if (y._max_shape_funcs > _max_shape_funcs)
-    _max_shape_funcs = y._max_shape_funcs;
 }
