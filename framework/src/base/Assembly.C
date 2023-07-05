@@ -699,6 +699,15 @@ Assembly::setNeighborQRule(QBase * qrule, unsigned int dim)
 }
 
 void
+Assembly::clearCachedQRules()
+{
+  _current_qrule = nullptr;
+  _current_qrule_face = nullptr;
+  _current_qrule_lower = nullptr;
+  _current_qrule_neighbor = nullptr;
+}
+
+void
 Assembly::setMortarQRule(Order order)
 {
   if (order != _qrule_msm->get_order())
@@ -1751,6 +1760,16 @@ Assembly::reinitAtPhysical(const Elem * elem, const std::vector<Point> & physica
 }
 
 void
+Assembly::setVolumeQRule(const Elem * const elem)
+{
+  unsigned int elem_dimension = elem->dim();
+  _current_qrule_volume = qrules(elem_dimension).vol.get();
+  // Make sure the qrule is the right one
+  if (_current_qrule != _current_qrule_volume)
+    setVolumeQRule(_current_qrule_volume, elem_dimension);
+}
+
+void
 Assembly::reinit(const Elem * elem)
 {
   _current_elem = elem;
@@ -1759,14 +1778,7 @@ Assembly::reinit(const Elem * elem)
               "current subdomain has been set incorrectly");
   _current_elem_volume_computed = false;
 
-  unsigned int elem_dimension = elem->dim();
-
-  _current_qrule_volume = qrules(elem_dimension).vol.get();
-
-  // Make sure the qrule is the right one
-  if (_current_qrule != _current_qrule_volume)
-    setVolumeQRule(_current_qrule_volume, elem_dimension);
-
+  setVolumeQRule(elem);
   reinitFE(elem);
 
   computeCurrentElemVolume();
@@ -1853,7 +1865,17 @@ Assembly::qruleArbitraryFace(const Elem * elem, unsigned int side)
 }
 
 void
-Assembly::reinit(const Elem * elem, unsigned int side)
+Assembly::setFaceQRule(const Elem * const elem, const unsigned int side)
+{
+  const auto elem_dimension = elem->dim();
+  //// Make sure the qrule is the right one
+  auto rule = qruleFace(elem, side);
+  if (_current_qrule_face != rule)
+    setFaceQRule(rule, elem_dimension);
+}
+
+void
+Assembly::reinit(const Elem * const elem, const unsigned int side)
 {
   _current_elem = elem;
   _current_neighbor_elem = nullptr;
@@ -1863,15 +1885,9 @@ Assembly::reinit(const Elem * elem, unsigned int side)
   _current_elem_volume_computed = false;
   _current_side_volume_computed = false;
 
-  unsigned int elem_dimension = elem->dim();
-
   _current_side_elem = &_current_side_elem_builder(*elem, side);
 
-  //// Make sure the qrule is the right one
-  auto rule = qruleFace(elem, side);
-  if (_current_qrule_face != rule)
-    setFaceQRule(rule, elem_dimension);
-
+  setFaceQRule(elem, side);
   reinitFEFace(elem, side);
 
   computeCurrentFaceVolume();

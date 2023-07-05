@@ -568,6 +568,11 @@ public:
    */
   bool needDual() const { return _need_dual; }
 
+  /**
+   * Set the cached quadrature rules to nullptr
+   */
+  void clearCachedQRules();
+
 private:
   /**
    * Set the qrule to be used for lower dimensional integration.
@@ -594,6 +599,11 @@ public:
    * @param elem The element we want to reinitialize on
    */
   void reinit(const Elem * elem);
+
+  /**
+   * Set the volumetric quadrature rule based on the provided element
+   */
+  void setVolumeQRule(const Elem * elem);
 
   /**
    * Reinitialize FE data for the given element on the given side, optionally
@@ -663,6 +673,11 @@ public:
    * Reinitialize the assembly data at specific points in the reference element.
    */
   void reinit(const Elem * elem, const std::vector<Point> & reference_points);
+
+  /**
+   * Set the face quadrature rule based on the provided element and side
+   */
+  void setFaceQRule(const Elem * const elem, const unsigned int side);
 
   /**
    * Reinitialize the assembly data on an side of an element
