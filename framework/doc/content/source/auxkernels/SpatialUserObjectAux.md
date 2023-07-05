@@ -5,7 +5,7 @@
 User objects are generally more flexible than auxiliary kernels, and this object creates
 allows to connect them to the [`Variables` system](syntax/Variables/index.md).
 
-The `UserObject` _must_ implement the `spatialValue()` virtual function. In the framework,
+The `UserObject` *must* implement the `spatialValue()` virtual function. In the framework,
 the following objects can currently be used:
 
 - [PostprocessorSpatialUserObject.md]
