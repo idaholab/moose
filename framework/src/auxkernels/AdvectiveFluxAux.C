@@ -63,14 +63,13 @@ AdvectiveFluxAux::computeValue()
 {
   using MetaPhysicL::raw_value;
 
-  const auto qp_arg = std::make_tuple(_current_elem, _qp, _qrule);
-  const auto state = determineState();
   const Moose::ElemSideQpArg side_arg = {_current_elem, _current_side, _qp, _qrule};
+  const auto state = determineState();
   Real vel_x, vel_y, vel_z = 0;
 
-  vel_x = raw_value(_vel_x(qp_arg, state));
-  vel_y = _vel_y ? raw_value((*_vel_y)(qp_arg, state)) : 0;
-  vel_z = _vel_z ? raw_value((*_vel_z)(qp_arg, state)) : 0;
+  vel_x = raw_value(_vel_x(side_arg, state));
+  vel_y = _vel_y ? raw_value((*_vel_y)(side_arg, state)) : 0;
+  vel_z = _vel_z ? raw_value((*_vel_z)(side_arg, state)) : 0;
 
   if (_advected_variable_supplied)
     return (_use_normal ? raw_value(_advected_variable(side_arg, state)) *
