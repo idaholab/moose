@@ -43,7 +43,8 @@ protected:
   /// Whether an advected variable was supplied in the input
   const bool _advected_variable_supplied;
   /// Variable storing the advected quantity; used for finite elements
-  const Moose::Functor<Real> & _advected_variable;
+
+  const VariableValue & _advected_variable;
 
   /// Whether an advected material property was supplied in the input
   const bool _advected_mat_prop_supplied;

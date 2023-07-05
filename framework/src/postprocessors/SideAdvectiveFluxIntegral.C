@@ -26,15 +26,15 @@ SideAdvectiveFluxIntegralTempl<is_ad, T>::validParams()
   params.addRequiredParam<MooseFunctorName>("vel_x", "x-component of the velocity vector");
   params.addParam<MooseFunctorName>("vel_y", "y-component of the velocity vector");
   params.addParam<MooseFunctorName>("vel_z", "z-component of the velocity vector");
-  params.addParam<MooseFunctorName>(
+  params.addCoupledVar(
       "advected_variable",
       0,
-      "The advected variable quantity of which to study the flow; useful for "
+      "The advected variable quantity of which to compute advection flux; useful for "
       "finite element simulations");
   params.addParam<MaterialPropertyName>(
       "advected_mat_prop",
       0,
-      "The advected material property of which to study the flow; "
+      "The advected material property of which to compute advection flux; "
       "useful for finite element simulations");
   params.addParam<MooseFunctorName>("advected_quantity",
                                     "The quantity to advect. This is the canonical parameter to "
@@ -52,7 +52,7 @@ SideAdvectiveFluxIntegralTempl<is_ad, T>::SideAdvectiveFluxIntegralTempl(
     _use_normal(getParam<MooseEnum>("component") == "normal"),
     _component(getParam<MooseEnum>("component")),
     _advected_variable_supplied(parameters.isParamSetByUser("advected_variable")),
-    _advected_variable(getFunctor<Real>("advected_variable")),
+    _advected_variable(coupledValue("advected_variable")),
     _advected_mat_prop_supplied(parameters.isParamSetByUser("advected_mat_prop")),
     _advected_material_property(getGenericMaterialProperty<T, is_ad>("advected_mat_prop")),
     _adv_quant(isParamValid("advected_quantity") ? &getFunctor<Real>("advected_quantity")
@@ -112,13 +112,20 @@ SideAdvectiveFluxIntegralTempl<is_ad, T>::computeQpIntegral()
   const auto vel_x = raw_value(_vel_x(qp_arg, state));
   const auto vel_y = _vel_y ? raw_value((*_vel_y)(qp_arg, state)) : 0;
   const auto vel_z = _vel_z ? raw_value((*_vel_z)(qp_arg, state)) : 0;
-  const Moose::ElemSideQpArg side_arg = {_current_elem, _current_side, _qp, _qrule};
 
   if (_advected_variable_supplied)
-    return (_use_normal ? raw_value(_advected_variable(side_arg, state)) *
+  {
+
+    auto & variable = getCoupledMooseVars();
+    if (std::any_of(variable.begin(), variable.end(), [](auto & var) { return !var->isNodal(); }))
+      mooseError("Trying to use a non-nodal variable 'advected_variable' for side advection "
+                 "integral calculation, which is currently not supported.");
+
+    return (_use_normal ? raw_value(_advected_variable[_qp]) *
                               RealVectorValue(vel_x, vel_y, vel_z) * _normals[_qp]
-                        : raw_value(_advected_variable(qp_arg, state)) *
+                        : raw_value(_advected_variable[_qp]) *
                               RealVectorValue(vel_x, vel_y, vel_z)(_component));
+  }
   else if (_advected_mat_prop_supplied)
     return (_use_normal ? raw_value(_advected_material_property[_qp]) *
                               RealVectorValue(vel_x, vel_y, vel_z) * _normals[_qp]

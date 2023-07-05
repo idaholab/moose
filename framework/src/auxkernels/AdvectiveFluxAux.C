@@ -75,7 +75,7 @@ AdvectiveFluxAux::computeValue()
   if (_advected_variable_supplied)
     return (_use_normal ? raw_value(_advected_variable(side_arg, state)) *
                               RealVectorValue(vel_x, vel_y, vel_z) * _normals[_qp]
-                        : raw_value(_advected_variable(qp_arg, state)) *
+                        : raw_value(_advected_variable(side_arg, state)) *
                               RealVectorValue(vel_x, vel_y, vel_z)(_component));
   else if (_advected_mat_prop_supplied)
     return (_use_normal ? _advected_material_property[_qp] * RealVectorValue(vel_x, vel_y, vel_z) *
