@@ -1,0 +1,11 @@
+[Tests]
+    [test]
+      type = 'FindHungProcessTester'
+      input = 'simple_diffusion.i'
+
+
+      issues = '#1493'
+      design = 'kernels/Diffusion.md'
+      requirement = 'The system shall run a simple 2D linear diffusion problem with Dirichlet boundary conditions on a regular mesh.'
+    []
+  []
