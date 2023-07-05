@@ -259,6 +259,7 @@ def get_sshpids(application_name, host):
     Generate and return a valid SSH remote ps command
     """
     ps_grep = f'ps -e | grep {application_name}'
+    #ps_grep = f'ps -f | grep {application_name}'
     awk_print = r"awk '{print \$1}'"
     return f'ssh {host} "echo {host}; {ps_grep} | {awk_print}"'
 
@@ -269,7 +270,7 @@ def get_sshstack(host, pid):
     return f'ssh {host} "echo Host: {host} PID: {pid}; ' \
            f'{PSTACK_BINARY} {pid}; printf "*%.0s" {{1..80}}; echo"'
 
-def generate_traces(job_num, application_name, num_hosts, num_threads, verbose = False):
+def generate_traces(job_num, application_name, num_hosts, num_threads, verbose = False, alt_qstat_cmd = False):
     """
     Generate a temporary file with traces and return
     formated results
@@ -277,6 +278,10 @@ def generate_traces(job_num, application_name, num_hosts, num_threads, verbose =
     hosts = set([])
 
     qstat_command = f'qstat -n {job_num}'
+
+    if alt_qstat_cmd == True:
+        qstat_command = f'./qstat -n {job_num}'
+
     a_job = Job(qstat_command)
     if verbose == True:
         print(f'Running command: {qstat_command}')
@@ -497,6 +502,7 @@ class ProcessTraces:
 
         return True
 
+
 def main():
     """
     Parse arguments, gather hosts and launch SSH commands
@@ -504,11 +510,10 @@ def main():
     parser = argparse.ArgumentParser(description="Normally you will run this script with your PBS job number AND the name of your executable (e.g. find_hung_processes.py 1234 my_app-opt)."
                                      "\nHowever, you can also pass in the name of the cache file containing traces from a previous run to process (e.g. find_hung_processes.py -f my_app-opt.1234.cache).")
 
-    sub_parser = parser.add_subparsers(help='Sub command help:')
-
-    if '-f' not in sys.argv and '--file' not in sys.argv and '--test-local' not in sys.argv:
+    if '-f' not in sys.argv and '--file' not in sys.argv and 'test' not in sys.argv:
         parser.add_argument('pbs_job_num', type=int)
         parser.add_argument('application', type=str)
+        parser.set_defaults(alt_qstat_cmd='store_false', localhost = 'store_false' )
 
     parser.add_argument('-n', '--hosts', metavar='int', action='store', type=int, default=0,
                         help='The number of hosts to visit (Default: ALL)')
@@ -524,30 +529,35 @@ def main():
 
     parser.add_argument('-v', '--verbose', action='store_true',dest='verbose',
                         help='shows output of command line commands used in script.')
-    #parser.add_argument('--test-local', action='store_true', dest='localhost',
-    #                   help='for testing without PBS queuing system, changes node_name_pattern to search for "localhost", instead of hpc node patterns.')
+
+    sub_parser = parser.add_subparsers(help='Sub command help:', dest='command')
 
     test_sub_parser = sub_parser.add_parser('test', help='Used when performing a local test on machine without job queuing system.')
     test_sub_parser.add_argument('application', type=str)
-    test_sub_parser.add_argument('-l','--test-local', action='store_true', dest='localhost',
-                                help='for testing script without job queuing system, changes node_name_pattern to search for "localhost", instead of hpc node patterns.')
-    test_sub_parser.add_argument('-id', dest='pbs_job_num', type=int, default=0)
+    test_sub_parser.add_argument('--test-local', action='store_true', dest='localhost', default=False,
+                                help='used for testing script without job queuing system, changes node_name_pattern to search for "localhost", instead of HPC node patterns. This is required if you are not running on an HPC with the node naming conventions recognized by this script.')
+
+    test_sub_parser.add_argument('-id','--job-id', dest='pbs_job_num', type=int, default=0,
+                                 help='The id of the job. Set to default as 0, can be changed to a different int. Typically created by job queuing system, the job ID is almost meaningless when testing locally / without the system.')
+    test_sub_parser.add_argument('-qp','--qstat-path',action='store_true', dest='alt_qstat_cmd', default=False,
+                                 help='for testing purposes, will run an alternate command for using the mock qstat.')
+
 
     args = parser.parse_args()
+    #print(args)
 
     cache_filename = None
     if args.file == None:
         # Autogenerate a filename based on application name and job number
         cache_filename = f'{args.application}.{args.pbs_job_num}.cache'
+        if args.verbose == True:
+            print(cache_filename)
 
-        if args.localhost == True:#changes node name pattern when doing local testing
+        if args.localhost == True:
             global node_name_pattern
             node_name_pattern = re.compile(r'(localhost)')
 
-
-
-
-        traces = generate_traces(args.pbs_job_num, args.application, args.hosts, args.threads, args.verbose)
+        traces = generate_traces(args.pbs_job_num, args.application, args.hosts, args.threads, args.verbose, args.alt_qstat_cmd)
 
         # Cache the restuls to a file
         with open(cache_filename, 'w', encoding='utf-8') as cache_file:

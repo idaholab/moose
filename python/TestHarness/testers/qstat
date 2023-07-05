@@ -1,0 +1,47 @@
+#!/usr/bin/env python3
+
+import os
+import sys
+import subprocess
+
+class Job():
+
+    def __init__(self):
+        self.jobID = 1
+        self.host = str("localhost")
+
+    #currently taskes second argument to be job number, TODO should add some parsing to validate that the numbers are unsigned int
+    def get_JobID(self):
+
+        for i in range(len(sys.argv)):
+            if sys.argv[i].isnumeric() == 1:
+                self.jobID = sys.argv[i]
+                return str(self.jobID)
+
+    def get_host(self):
+        return self.host
+
+    def print_qstat_alt(self, ID = "", usrname = "username", queue = "default", jobname = "STDIN", SessID = "00001", NDS = "1", TSK = "1", memory = "32gb", Req_time = "00:00", S ="Default", Elap_Time = "00:00", host = "localhost"):
+        #alternate display for qstat: JobID, Usrname, Queue, Jobname, SessID, NDS, TSK, Memory, Req'd time, Elap Time
+        print(ID, usrname, queue, jobname, SessID, NDS, TSK,memory,Req_time, S, Elap_Time, host)
+
+
+    def get_qstat(self):
+
+        for i in range(len(sys.argv)):
+            if (sys.argv[i]== "-n"):
+                self.print_qstat_alt(self.jobID)
+
+            else:
+                print(self.get_JobID(), "bad_mpi", "user", "0", "R","short", self.get_host())
+
+
+def main():
+    #subprocess.run("chmod +rx qstat")
+    active_job = Job()
+    temp_ID = active_job.get_JobID()
+    active_job.print_qstat_alt(temp_ID)
+
+    return 0
+
+main()
