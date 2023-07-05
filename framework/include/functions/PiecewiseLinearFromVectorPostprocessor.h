@@ -17,12 +17,12 @@
  * Function which provides a piecewise continuous linear interpolation
  * of a data set provided as two columns of a VectorPostprocessor.
  */
-class VectorPostprocessorFunction : public Function, public VectorPostprocessorInterface
+class PiecewiseLinearFromVectorPostprocessor : public Function, public VectorPostprocessorInterface
 {
 public:
   static InputParameters validParams();
 
-  VectorPostprocessorFunction(const InputParameters & parameters);
+  PiecewiseLinearFromVectorPostprocessor(const InputParameters & parameters);
 
   using Function::value;
   virtual Real value(Real t, const Point & p) const override;
