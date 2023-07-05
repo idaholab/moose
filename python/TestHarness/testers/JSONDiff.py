@@ -28,13 +28,13 @@ class JSONDiff(SchemaDiff):
         SchemaDiff.__init__(self, name, params)
         if not params['keep_system_information']:
             self.specs['ignored_items'].extend(['app_name',
-                                            'current_time',
-                                            'executable',
-                                            'executable_time',
-                                            'moose_version',
-                                            'libmesh_version',
-                                            'petsc_version',
-                                            'slepc_version'])
+                                                'current_time',
+                                                'executable',
+                                                'executable_time',
+                                                'moose_version',
+                                                'libmesh_version',
+                                                'petsc_version',
+                                                'slepc_version'])
         if not params['keep_reporter_types']:
             self.specs['ignored_regex_items'].append('reporters/.*/values/.*/type')
 

@@ -8,7 +8,11 @@
 #* https://www.gnu.org/licenses/lgpl-2.1.html
 
 import os
+import re
+from functools import reduce  # Dictionary transversal
+import operator               # Dictionary transversal
 from FileTester import FileTester
+import moosetree
 
 try:
     import deepdiff
@@ -30,7 +34,7 @@ class SchemaDiff(FileTester):
         params.addParam('rel_err',      5.5e-6, 'Relative error value allowed in comparisons. If '
                                                 'rel_err value is set to 0, it will work on the '
                                                 'absolute difference between the values.')
-        params.addParam('abs_err',      5.5e-4, 'Absolute error value to be used in comparisons.')
+        params.addParam('abs_err',      5.5e-6, 'Absolute error value to be used in comparisons.')
         params.addParam('abs_zero',      1e-10, 'Absolute zero cutoff used in diff comparisons. '
                                                 'Every value smaller than this threshold will be '
                                                 'ignored.')
@@ -118,14 +122,13 @@ class SchemaDiff(FileTester):
                     return output
 
                 if diff:
-                    output += (f'Difference detected.\nFile 1: {abs_gold_file}\n'
-                               f'File 2: {abs_test_file}\n'
-                               f'Errors:\n{diff}\n')
+                    output += (f'Gold File: {abs_gold_file}\n'
+                               f'Results File: {abs_test_file}\n{diff}\n')
                     self.setStatus(self.diff, f'{self.specs["type"].upper()}')
                     break
         return output
 
-    def format_diff(self, diff_dict):
+    def format_diff(self, diff_dict, reference, result):
         """ Iterate over known problem keys to format pretty results """
         formated_results = f'{self.specs["type"].upper()} Detected:\n'
         for key in diff_dict.keys():
@@ -151,7 +154,28 @@ class SchemaDiff(FileTester):
                 for added_key in diff_dict['dictionary_item_added']:
                     formated_results += (f'\t{added_key.replace("root", "", 1)}\n')
 
+        # custom operator caught a diff
+        if 'diff' in diff_dict:
+            if 'root' in diff_dict['diff']:
+                formated_results += diff_dict['diff']['root']
+            # Multiple root entries, use moosetree to print a pretty picture
+            else:
+                find_nodes = re.compile(r'\[\'|([\w+:@#]+)|\'\]')
+                for node_key, value in diff_dict['diff'].items():
+                    nodes = list(filter(None, find_nodes.findall(node_key)))
+                    gold = self.get_dictitem(reference, nodes[1:])
+                    computed = self.get_dictitem(result, nodes[1:])
+                    formated_results += (f'\n\tGOLD:   {",".join(nodes[1:])}: {gold}'
+                                         f'\n\tRESULT: {",".join(nodes[1:])}: {computed}\n')
+
         return formated_results
+
+    def compare_func(self, x, y, level):
+        """
+        Our custom iterator. Needed for what we believe is a bug
+        See issue: https://github.com/seperman/deepdiff/issues/404
+        """
+        return True
 
     def do_deepdiff(self, orig, comp, rel_err, abs_err, abs_zero, exclude_values:list=None):
         diff = ''
@@ -177,21 +201,25 @@ class SchemaDiff(FileTester):
                                      comp,
                                      exclude_paths=exclude_paths,
                                      exclude_regex_paths=self.exclude_regex_paths,
-                                     custom_operators=custom_operators)
+                                     custom_operators=custom_operators,
+                                     iterable_compare_func=self.compare_func)
 
         except Exception as generic_error:
             return (diff, generic_error)
 
         # return friendly readable results where we can
-        if len(diff.affected_paths) or len(diff.affected_root_keys):
-            return (self.format_diff(diff), generic_error)
-
-        # custom operator caught a diff
-        if 'diff' in diff:
-            return (diff['diff']['root'], generic_error)
+        if len(diff.affected_paths) or len(diff.affected_root_keys) or 'diff' in diff:
+            return (self.format_diff(diff, orig, comp), generic_error)
 
         # Empty when there is no diff
         return (diff.pretty(), generic_error)
+
+    @staticmethod
+    def get_dictitem(dict_data, map_list):
+        """ return a value nested inside a dictionary """
+        return reduce(operator.getitem,
+                      [int(x) if x.isdigit() else x for x in map_list],
+                      dict_data)
 
     # this is how we call the load_file in the derived classes, and also check for exceptions in the
     # load all python functions are virtual, so there is no templating, but some self shenanigans
