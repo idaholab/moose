@@ -40,30 +40,28 @@ LibtorchANNSurrogate::evaluate(const std::vector<Real> & x) const
   mooseAssert(_nn->numInputs() == x.size(),
               "Input point does not match dimensionality of training data.");
 
-  auto converted_input = x;
+  std::vector<Real> converted_input(x.size(), 0);
   const auto & input_mean = _input_standardizer.getMean();
-  const auto & input_std = _input_standardizer.getMean();
+  const auto & input_std = _input_standardizer.getStdDev();
 
   mooseAssert(mean.size() == converted_input.size() && std.size() == converted_input.size(),
               "The input standardizer's dimensions should be the same as the input dimension!");
 
   for (auto input_i : index_range(converted_input))
-    converted_input[input_i] =
-        (converted_input[input_i] - input_mean[input_i]) / input_std[input_i];
+    converted_input[input_i] = (x[input_i] - input_mean[input_i]) / input_std[input_i];
 
   torch::Tensor x_tf =
       torch::tensor(torch::ArrayRef<Real>(converted_input.data(), converted_input.size()))
           .to(at::kDouble);
 
   const auto & output_mean = _output_standardizer.getMean();
-  const auto & output_std = _output_standardizer.getMean();
+  const auto & output_std = _output_standardizer.getStdDev();
 
   mooseAssert(output_mean.size() == 1 && output_std.size() == 1,
               "The output standardizer's dimensions should be 1!");
 
   // Compute prediction
   val = _nn->forward(x_tf).item<double>();
-
   val = val * output_std[0] + output_mean[0];
 
   return val;

@@ -160,9 +160,9 @@ LibtorchANNTrainer::postTrain()
     _input_standardizer.set(converted_data_mean, converted_data_std);
   }
   else
-    _input_standardizer.set(0, 1, _n_dims);
+    _input_standardizer.set(_n_dims);
 
-  if (_standardize_input)
+  if (_standardize_output)
   {
     auto response_std_mean = torch::std_mean(response_tensor, 0);
     auto & response_std = std::get<0>(response_std_mean);
@@ -177,7 +177,7 @@ LibtorchANNTrainer::postTrain()
     _output_standardizer.set(converted_response_mean, converted_response_std);
   }
   else
-    _output_standardizer.set(0, 1, 1);
+    _output_standardizer.set(1);
 
   // We create a custom data set from our converted data
   Moose::LibtorchDataset my_data(data_tensor, response_tensor);
