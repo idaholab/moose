@@ -153,7 +153,7 @@
     type = PiecewiseLinear
     x = '365.44 464.99 556.82 660.93 757.28 858.82 947.70 1115.15 1254.55 1343.22' #K
     y = '178.86 162.76 149.22 142.95 140.10 134.69 129.26 122.23 119.01 117.86' # W/mK
-  [../]
+  [../] 
 []
 
 [AuxVariables]
@@ -171,6 +171,11 @@
                 0 0 0'
     cli_args = 'Components/channel/csv_file=csv_pipes/Top_Pipe.csv;Problem/master_bdry_name=CH1
                 Components/channel/csv_file=csv_pipes/Bottom_Pipe.csv;Problem/master_bdry_name=CH2'
+  []
+  [tritium]
+    type = FullSolveMultiApp
+    input_files = 'tritium_diffusion.i'
+    potsition = '0 0 0'
   []
 []
 
@@ -194,5 +199,12 @@
     from_multi_app = channel
     variable = htc
     source_variable = Hw
+  []
+
+  [temp_tritium]
+    type = MultiAppNearestNodeTransfer
+    to_multi_app = tritium
+    source_variable = temp
+    variable = temperature
   []
 []

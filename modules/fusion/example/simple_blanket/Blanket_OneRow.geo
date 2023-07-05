@@ -139,7 +139,7 @@ Translate {w_ch/2, -d_ch/2, -h/2} {
 }
 
 xyz[] = Point{45};
-Printf("%g", xyz[2]);
+Printf("%g, %g, %g", xyz[0], xyz[1], xyz[2]);
 
 h_point = xyz[2];
 xyz2[] = Point{28};
