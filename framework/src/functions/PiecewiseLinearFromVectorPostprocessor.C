@@ -7,12 +7,16 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "VectorPostprocessorFunction.h"
+#include "PiecewiseLinearFromVectorPostprocessor.h"
 
-registerMooseObject("MooseApp", VectorPostprocessorFunction);
+registerMooseObject("MooseApp", PiecewiseLinearFromVectorPostprocessor);
+registerMooseObjectRenamed("MooseApp",
+                           VectorPostprocessorFunction,
+                           "02/03/2024 00:00",
+                           PiecewiseLinearFromVectorPostprocessor);
 
 InputParameters
-VectorPostprocessorFunction::validParams()
+PiecewiseLinearFromVectorPostprocessor::validParams()
 {
   InputParameters params = Function::validParams();
   params.addRequiredParam<VectorPostprocessorName>(
@@ -41,7 +45,8 @@ VectorPostprocessorFunction::validParams()
   return params;
 }
 
-VectorPostprocessorFunction::VectorPostprocessorFunction(const InputParameters & parameters)
+PiecewiseLinearFromVectorPostprocessor::PiecewiseLinearFromVectorPostprocessor(
+    const InputParameters & parameters)
   : Function(parameters),
     VectorPostprocessorInterface(this),
     _argument_column(getVectorPostprocessorValue("vectorpostprocessor_name",
@@ -61,25 +66,25 @@ VectorPostprocessorFunction::VectorPostprocessorFunction(const InputParameters &
   }
   catch (std::domain_error & e)
   {
-    mooseError("In VectorPostprocessorFunction ", _name, ": ", e.what());
+    mooseError("In PiecewiseLinearFromVectorPostprocessor ", _name, ": ", e.what());
   }
 }
 
 Real
-VectorPostprocessorFunction::value(Real t, const Point & p) const
+PiecewiseLinearFromVectorPostprocessor::value(Real t, const Point & p) const
 {
   return valueInternal(t, p);
 }
 
 ADReal
-VectorPostprocessorFunction::value(const ADReal & t, const ADPoint & p) const
+PiecewiseLinearFromVectorPostprocessor::value(const ADReal & t, const ADPoint & p) const
 {
   return valueInternal(t, p);
 }
 
 template <typename T, typename P>
 T
-VectorPostprocessorFunction::valueInternal(const T & t, const P & p) const
+PiecewiseLinearFromVectorPostprocessor::valueInternal(const T & t, const P & p) const
 {
   if (_argument_column.empty())
     return 0.0;

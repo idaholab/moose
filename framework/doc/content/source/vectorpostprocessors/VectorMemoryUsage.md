@@ -23,25 +23,34 @@ This VectorPostprocessor can be visualized using the
 AuxKernel.
 Both the IDs:
 
-!media media/vectorpostprocessors/ss_grid.png style=width:32%;margin-left:30px;float:left;
+!row!
+
+!media media/vectorpostprocessors/ss_grid.png style=width:32%;float:left;
     caption=Refined grid
 
-!media media/vectorpostprocessors/ss_processor_id.png style=width:32%;margin-left:30px;float:left
+!media media/vectorpostprocessors/ss_processor_id.png style=width:32%;float:left
     caption=Processor id (using [`ProcessorIDAux`](/ProcessorIDAux.md))
 
-!media media/vectorpostprocessors/ss_hardware_id.png style=width:32%;margin-left:30px;float:left
+!media media/vectorpostprocessors/ss_hardware_id.png style=width:32%;float:left
     caption=Hardware id (i.e. compute node)
 
+!row-end!
 
 and the memory used:
 
+!row!
 
-!media media/vectorpostprocessors/ss_physical_mem.png style=width:32%;margin-left:30px;float:left
+!media media/vectorpostprocessors/ss_physical_mem.png style=width:32%;float:left
     caption=Physical memory used by rank
 
-!media media/vectorpostprocessors/ss_node_utilization.png style=width:32%;margin-left:30px;float:left
+!media media/vectorpostprocessors/ss_node_utilization.png style=width:32%;float:left
     caption=Fraction of RAM used by the current simulation on the compute node
 
+!row-end!
+
+!alert note
+Due to differences in the data collection method, the memory consumption may be slightly different from
+the [PerfGraphOutput.md].
 
 !syntax parameters /VectorPostprocessors/VectorMemoryUsage
 
