@@ -29,11 +29,15 @@ InclinedNoDisplacementBCAction::validParams()
   params.addParam<std::vector<AuxVariableName>>("save_in", "The displacement residuals");
 
   params.addRequiredParam<Real>("penalty", "Penalty parameter");
+  params.addParam<bool>("use_automatic_differentiation",
+                        false,
+                        "Flag to use automatic differentiation (AD) objects when possible");
   return params;
 }
 
 InclinedNoDisplacementBCAction::InclinedNoDisplacementBCAction(const InputParameters & params)
   : Action(params),
+    _use_ad(getParam<bool>("use_automatic_differentiation")),
     _displacements(getParam<std::vector<VariableName>>("displacements")),
     _ndisp(_displacements.size()),
     _save_in(getParam<std::vector<AuxVariableName>>("save_in"))
@@ -49,7 +53,10 @@ InclinedNoDisplacementBCAction::InclinedNoDisplacementBCAction(const InputParame
 void
 InclinedNoDisplacementBCAction::act()
 {
-  const std::string kernel_name = "PenaltyInclinedNoDisplacementBC";
+  std::string ad_prepend = "";
+  if (_use_ad)
+    ad_prepend = "AD";
+  const std::string kernel_name = ad_prepend + "PenaltyInclinedNoDisplacementBC";
 
   // Create pressure BCs
   for (unsigned int i = 0; i < _ndisp; ++i)
