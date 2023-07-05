@@ -3,7 +3,7 @@
 [Mesh]
   [fmg]
     type = FileMeshGenerator
-    file = 'Blanket_OneRow.msh'
+    file = 'Meshes/Blanket_OneRow.msh'
   []
 []
 
@@ -81,14 +81,7 @@
     variable = temp
     htc = htc
     T_infinity = Tfluid
-    boundary = 'CH1 CH2'
-  []
-
-  [bw_bc]
-    type = DirichletBC
-    variable = temp
-    boundary = 'Back_Wall'
-    value = 800
+    boundary = 'CH1 CH2 Back_Wall'
   []
 []
 
@@ -166,11 +159,13 @@
 [MultiApps]
   [channel]
     type = FullSolveMultiApp
-    input_files = 'simple_channel_plate.i simple_channel_plate_bottom.i'
+    input_files = 'simple_channel_plate.i simple_channel_plate_bottom.i simple_channel_backwall.i'
     positions = '0 0 0
+                0 0 0
                 0 0 0'
     cli_args = 'Components/channel/csv_file=csv_pipes/Top_Pipe.csv;Problem/master_bdry_name=CH1
-                Components/channel/csv_file=csv_pipes/Bottom_Pipe.csv;Problem/master_bdry_name=CH2'
+                Components/channel/csv_file=csv_pipes/Bottom_Pipe.csv;Problem/master_bdry_name=CH2
+                Components/channel/csv_file=csv_pipes/Back_Pipe.csv;Problem/master_bdry_name=Back_Wall'
   []
   [tritium]
     type = FullSolveMultiApp

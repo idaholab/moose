@@ -1,7 +1,7 @@
 [Mesh]
     [fmg]
       type = FileMeshGenerator
-      file = 'Blanket_OneRow.msh'
+      file = 'Meshes/Blanket_OneRow.msh'
     []
 []
   

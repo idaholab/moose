@@ -183,3 +183,26 @@ For (0:5)
    Point(p4) = {xyz3[0], xyz3[1], h_point_3, 1.0};
    Printf("%g", h_point_3);
 EndFor
+
+Translate {w_off+w_ch/2, w_off+d_ch/2, -h/2} {
+  Duplicata { Point{23}; }
+}
+
+xyz4 = Point{71};
+Printf("%g, %g, %g", xyz4[0], xyz4[1], xyz4[2]);
+
+h4_point = xyz4[2];
+For (0:5)
+  h4_point += h_add;
+  p5 = newp;
+  Point(p5) = {xyz4[0], xyz4[1], h4_point, 1.0};
+  Printf("%g", h4_point);
+EndFor
+
+h_point_4 = xyz4[2];
+For (0:5)
+   h_point_4 -= h_add;
+   p6 = newp;
+   Point(p6) = {xyz4[0], xyz4[1], h_point_4, 1.0};
+   Printf("%g", h_point_4);
+EndFor
