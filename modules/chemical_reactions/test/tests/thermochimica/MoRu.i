@@ -46,16 +46,6 @@
   type = Steady
 []
 
-[VectorPostprocessors]
-  [NodalData]
-    type = NodalValueSampler
-    variable = 'Mo Ru BCCN:Mo HCPN:Mo BCCN:Ru HCPN:Ru mu:Mo mu:Ru'
-    execute_on = TIMESTEP_END
-    sort_by = id
-  []
-[]
-
 [Outputs]
   exodus = true
-  csv = true
 []

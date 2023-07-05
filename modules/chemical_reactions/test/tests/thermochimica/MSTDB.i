@@ -2,7 +2,7 @@
   [gen]
     type = GeneratedMeshGenerator
     dim = 2
-    nx = 1
+    nx = 10
     ny = 1
   []
 []
@@ -10,9 +10,9 @@
 [GlobalParams]
   elements = 'F Li Be'
   output_phases = 'gas_ideal MSFL'
-  output_species = 'gas_ideal:Li'
-  # element_potentials = 'ALL'
-  # output_vapor_pressures = 'ALL'
+  output_species = 'gas_ideal:Li MSFL:LiF'
+  output_element_potentials = 'ALL'
+  output_vapor_pressures = 'vp:gas_ideal:LiF'
 []
 
 [ChemicalComposition]
@@ -28,10 +28,9 @@
 [Variables]
   [T]
     type = MooseVariable
-    initial_condition = 2250
+    initial_condition = 750
   []
 []
-
 
 [ICs]
   [Li]
@@ -51,19 +50,6 @@
   []
 []
 
-[AuxVariables]
-  [n]
-  []
-[]
-
-[AuxKernels]
-  [thermochimica]
-    type = ThermochimicaAux
-    variable = n
-    thermo_nodal_data_uo = Thermochimica
-  []
-[]
-
 [Problem]
   solve = false
 []
@@ -71,21 +57,6 @@
 [Executioner]
   type = Steady
 []
-
-# [VectorPostprocessors]
-#   [NodalData]
-#     type = NodalValueSampler
-#     variable = 'Mo Ru BCCN:Mo HCPN:Mo BCCN:Ru HCPN:Ru cp:Mo cp:Ru'
-#     execute_on = TIMESTEP_END
-#     sort_by = id
-#   []
-# []
-
-# [Debug]
-#   show_execution_order = ALWAYS
-#   show_actions = true
-#   show_action_dependencies = true
-# []
 
 [Outputs]
   exodus = true

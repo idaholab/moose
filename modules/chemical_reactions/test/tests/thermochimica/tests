@@ -38,6 +38,19 @@
     required_submodule = 'contrib/thermochimica'
   []
 
+  [MSTDB_all]
+    type = Exodiff
+    input = MSTDB.i
+    exodiff = MSTDB_out.e
+    design = ChemicalCompositionAction.md
+    issues = '#24552'
+    requirement = 'The system shall be able to use pairs as MQMQA phase species'
+
+    max_threads = 1
+    rel_err = 1e-3 # this is the same error thermochimica uses for its internal tests
+    required_submodule = 'contrib/thermochimica'
+  []
+
   [separator_error1]
     type = RunException
     input = MoRu.i

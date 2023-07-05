@@ -156,7 +156,7 @@ ThermochimicaNodalData::execute()
   reinitDataMooseToTc();
 
   // Calculate thermochemical equilibrium
-  Thermochimica::solve();
+  Thermochimica::thermochimica();
 
   // fetch data for the current node
   auto & d = _data[_current_node->id()];

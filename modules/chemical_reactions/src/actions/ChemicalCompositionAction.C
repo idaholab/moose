@@ -114,35 +114,24 @@ ChemicalCompositionAction::ChemicalCompositionAction(const InputParameters & par
       paramError("thermofile", "Thermochimica data file cannot be parsed. ", idbg);
   }
 
-  if (isParamValid("tunit"))
-  {
-    Thermochimica::checkTemperature(_tunit);
-    Thermochimica::setUnitTemperature(_tunit);
+  // Set thermochimica units
+  Thermochimica::checkTemperature(_tunit);
+  Thermochimica::setUnitTemperature(_tunit);
+  int idbg = Thermochimica::checkInfoThermo();
+  if (idbg != 0)
+    paramError("tunit", "Cannot set temperature unit in Thermochimica", idbg);
 
-    int idbg = Thermochimica::checkInfoThermo();
-    if (idbg != 0)
-      paramError("tunit", "Cannot set temperature unit in Thermochimica", idbg);
-  }
+  Thermochimica::checkPressure(_punit);
+  Thermochimica::setUnitPressure(_punit);
+  idbg = Thermochimica::checkInfoThermo();
+  if (idbg != 0)
+    paramError("punit", "Cannot set pressure unit in Thermochimica", idbg);
 
-  if (isParamValid("punit"))
-  {
-    Thermochimica::checkPressure(_punit);
-    Thermochimica::setUnitPressure(_punit);
-
-    int idbg = Thermochimica::checkInfoThermo();
-    if (idbg != 0)
-      paramError("punit", "Cannot set pressure unit in Thermochimica", idbg);
-  }
-
-  if (isParamValid("munit"))
-  {
-    Thermochimica::checkMass(_munit);
-    Thermochimica::setUnitMass(_munit);
-
-    int idbg = Thermochimica::checkInfoThermo();
-    if (idbg != 0)
-      paramError("munit", "Cannot set mass unit in Thermochimica", idbg);
-  }
+  Thermochimica::checkMass(_munit);
+  Thermochimica::setUnitMass(_munit);
+  idbg = Thermochimica::checkInfoThermo();
+  if (idbg != 0)
+    paramError("munit", "Cannot set mass unit in Thermochimica", idbg);
 
   if (isParamValid("elements"))
   {
@@ -213,7 +202,12 @@ ChemicalCompositionAction::ChemicalCompositionAction(const InputParameters & par
 
     if (_species.size() == 1 && _species[0] == "ALL")
     {
-      _species.resize(std::reduce(n_db_species.begin(), n_db_species.end()));
+      if (!n_db_species.empty())
+        _species.resize(n_db_species.back());
+      else
+        mooseInfo("ChemicalCompositionAction species: 'ALL' specified in input file. Thermochimica "
+                  "returned no possible species.");
+
       _token_species.resize(_species.size());
       std::size_t indx = 0;
       for (const auto i : make_range(species.size()))
@@ -450,11 +444,9 @@ ChemicalCompositionAction::act()
               std::back_inserter(uo_params.set<std::vector<VariableName>>("elements")));
 
     if (isParamValid("output_phases"))
-    {
       std::copy(_phases.begin(),
                 _phases.end(),
                 std::back_inserter(uo_params.set<std::vector<VariableName>>("output_phases")));
-    }
 
     if (isParamValid("output_species"))
       uo_params.set<std::vector<VariableName>>("output_species")
