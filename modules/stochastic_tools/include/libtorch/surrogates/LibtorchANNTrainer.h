@@ -16,6 +16,8 @@
 #include "LibtorchArtificialNeuralNetTrainer.h"
 #include "libmesh/utility.h"
 #include "SurrogateTrainer.h"
+#include "Standardizer.h"
+#include "LibtorchUtils.h"
 
 /// Trainer responsible of fitting a neural network on predefined data
 class LibtorchANNTrainer : public SurrogateTrainer
@@ -66,6 +68,18 @@ private:
 
   /// Pointer to the neural net object (initialized as null)
   std::shared_ptr<Moose::LibtorchArtificialNeuralNet> & _nn;
+
+  /// If the training output should be standardized (scaled and shifted)
+  const bool _standardize_input;
+
+  /// If the training output should be standardized (scaled and shifted)
+  const bool _standardize_output;
+
+  /// Standardizer for use with input (x)
+  StochasticTools::Standardizer & _input_standardizer;
+
+  /// Standardizer for use with output response (y)
+  StochasticTools::Standardizer & _output_standardizer;
 };
 
 #endif

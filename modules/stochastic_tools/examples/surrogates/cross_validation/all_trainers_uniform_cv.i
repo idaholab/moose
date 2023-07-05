@@ -118,15 +118,17 @@
     print_epoch_loss = 0
     activation_function = 'relu'
     cv_surrogate = "ann_surr"
+    standardize_input = false
+    standardize_output = false
   []
 []
 
 [Covariance]
   [rbf]
-    type=SquaredExponentialCovariance
+    type = SquaredExponentialCovariance
     noise_variance = 3.79e-6
-    signal_variance = 1                      #Use a signal variance of 1 in the kernel
-    length_factor = '5.34471 1.41191 5.90721 2.83723'                  #Select a length factor for each parameter
+    signal_variance = 1 #Use a signal variance of 1 in the kernel
+    length_factor = '5.34471 1.41191 5.90721 2.83723' #Select a length factor for each parameter
   []
 []
 
