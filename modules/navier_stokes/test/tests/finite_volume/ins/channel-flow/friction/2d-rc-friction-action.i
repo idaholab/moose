@@ -47,6 +47,26 @@ rho = 1.1
     prop_names = 'rho mu'
     prop_values = '${rho} ${mu}'
   []
+  [speed_material]
+    type = PINSFVSpeedFunctorMaterial
+    superficial_vel_x = vel_x
+    superficial_vel_y = vel_y
+    porosity = 1
+  []
+  [Re_material]
+    type = ReynoldsNumberFunctorMaterial
+    speed = speed
+    characteristic_length = 2
+    rho = ${rho}
+    mu = ${mu}
+  []
+  [exponential_friction_coefficient]
+    type = ExponentialFrictionMaterial
+    friction_factor_name = 'friction_coefficient'
+    Re = Re
+    c1 = 0.25
+    c2 = 0.55
+  []
 []
 
 [Executioner]
