@@ -81,9 +81,11 @@ UELThread::onElement(const Elem * elem)
 
   // Get solution values
   _all_dof_values.resize(ndofel);
+
   _sys.currentSolution()->get(_all_dof_indices, _all_dof_increments);
   _all_dof_increments.resize(ndofel);
   _sys.solutionOld().get(_all_dof_indices, _all_dof_values);
+
   mooseAssert(_all_dof_values.size() == _all_dof_increments.size(), "Inconsistent solution size.");
   for (const auto i : index_range(_all_dof_values))
     _all_dof_increments[i] -= _all_dof_values[i];
@@ -100,15 +102,11 @@ UELThread::onElement(const Elem * elem)
     _sys.solutionUDot()->get(_all_dof_indices, _all_udotdot_dof_values);
   }
 
-  // *** Auxiliary variables ***
-  // TODO: Account for a _vector_ of auxiliary variables
-  _all_aux_var_dof_indices.resize(nnode);
-  _all_aux_var_dof_increments.resize(nnode);
-  const auto nvar_aux = _aux_variables.size();
+  // Prepare external fields
 
-  // if (nnode != nvar_aux)
-  // mooseError("Number of aux variables is different from the number of nodes. Multiple auxiliary
-  // variable types not yet supported.");
+  const auto nvar_aux = _aux_variables.size();
+  _all_aux_var_dof_indices.resize(nnode * nvar_aux);    // ok
+  _all_aux_var_dof_increments.resize(nnode * nvar_aux); // ok
 
   for (const auto i : index_range(_aux_variables))
   {
@@ -120,27 +118,41 @@ UELThread::onElement(const Elem * elem)
     for (const auto j : make_range(nnode))
       _all_aux_var_dof_indices[j * nvar_aux + i] = _aux_var_dof_indices[j];
   }
-  // HERE
-  _all_aux_var_dof_values.resize(nnode);
-  _aux_var_values_to_uel.resize(2 * nnode);
+
+  _all_aux_var_dof_values.resize(nnode * nvar_aux);
+  _aux_var_values_to_uel.resize(nnode * nvar_aux * 2); // Value _and_ increment
 
   _aux_sys->solution().get(_all_aux_var_dof_indices, _all_aux_var_dof_increments);
-  _all_aux_var_dof_increments.resize(nnode);
+  _all_aux_var_dof_increments.resize(nnode * nvar_aux);
   _aux_sys->solutionOld().get(_all_aux_var_dof_indices, _all_aux_var_dof_values);
 
+  // First, one external field and increment; then, second external field and increment, etc.
   for (const auto i : index_range(_all_aux_var_dof_values))
     _all_aux_var_dof_increments[i] -= _all_aux_var_dof_values[i];
 
   unsigned int index = 0;
-  for (unsigned int i = 0; i < _all_aux_var_dof_values.size(); i = i + 2)
+  for (unsigned int i = 0; i < _all_aux_var_dof_values.size() * 2; i = i + 2)
   {
     _aux_var_values_to_uel[i] = _all_aux_var_dof_values[index];
     _aux_var_values_to_uel[i + 1] = _all_aux_var_dof_increments[index];
     index++;
   }
+  // End of prepare external fields.
 
-  // const NumericVector<Number> & aux_sol_old = _aux_sys->solutionOld();
-  // const NumericVector<Number> & aux_sol = _aux_sys->solution();
+  // for (unsigned int n = 0; n < nvar_aux; n++)
+  // {
+  //   for (int i = 0; i < nnode; i++)
+  //   {
+  //     _aux_var_values_to_uel[n * nnode + i] = _all_aux_var_dof_values[nvar_aux * index + n];
+  //     _aux_var_values_to_uel[n * nnode + i + 1] = _all_aux_var_dof_increments[nvar_aux * index +
+  //     n]; Moose::out << "aux field nodal value: " << _aux_var_values_to_uel[n * nnode + i] <<
+  //     "\n"; Moose::out << "aux field increment nodal value: " << _aux_var_values_to_uel[n * nnode
+  //     + i + 1]
+  //                << "\n";
+  //     // Moose::out << "_aux_var_values_to_uel[i]: " << _aux_var_values_to_uel[i] << "\n";
+  //     // Moose::out << "_aux_var_values_to_uel[i+1]: " << _aux_var_values_to_uel[i + 1] << "\n";
+  //   }
+  // }
 
   const bool do_residual = _sys.hasVector(_sys.residualVectorTag());
   const bool do_jacobian = _sys.hasMatrix(_sys.systemMatrixTag());
@@ -174,7 +186,7 @@ UELThread::onElement(const Elem * elem)
   int jelem = elem->id() + 1; // User-assigned element number
   Real pnewdt;
 
-  int npredf = 1; // One temperature var.
+  int npredf = nvar_aux; // Number of external fields.
 
   // dummy vars
   Real rdummy = 0;
@@ -233,9 +245,11 @@ UELThread::onElement(const Elem * elem)
   }
 
   // write to the residual vector
+  // sign of 'residuals' has been tested with external loading and matches that of moose-umat
+  // setups.
   if (do_residual)
     _uel_uo.addResiduals(
-        _fe_problem.assembly(_tid, _sys.number()), _local_re, _all_dof_indices, 1.0);
+        _fe_problem.assembly(_tid, _sys.number()), _local_re, _all_dof_indices, -1.0);
 
   // write to the Jacobian (hope we don't have to transpose...)
   if (do_jacobian)
@@ -243,5 +257,5 @@ UELThread::onElement(const Elem * elem)
                         _local_ke,
                         _all_dof_indices,
                         _all_dof_indices,
-                        1.0);
+                        -1.0);
 }

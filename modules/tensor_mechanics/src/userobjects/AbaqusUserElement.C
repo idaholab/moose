@@ -34,7 +34,10 @@ AbaqusUserElement::validParams()
   // coupled variables
   params.addParam<std::vector<NonlinearVariableName>>("variables", "coupled variables");
   // auxiliary variables (including temperature)
-  params.addParam<std::vector<AuxVariableName>>("aux_variables", "coupled variables");
+  params.addParam<std::vector<AuxVariableName>>(
+      "external_fields",
+      "External fields passed to the uel plugins. Some users may assume that the first field is "
+      "temperature when there are multiple external fields.");
 
   // UEL plugin file
   params.addParam<FileName>("plugin", "UEL plugin file");
@@ -60,7 +63,7 @@ AbaqusUserElement::AbaqusUserElement(const InputParameters & params)
     _mesh(_moose_mesh.getMesh()),
     _dim(_moose_mesh.dimension()),
     _variable_names(getParam<std::vector<NonlinearVariableName>>("variables")),
-    _aux_variable_names(getParam<std::vector<AuxVariableName>>("aux_variables")),
+    _aux_variable_names(getParam<std::vector<AuxVariableName>>("external_fields")),
     _sub_ids(blockRestricted() ? blockIDs() : _moose_mesh.meshSubdomains()),
     _props(getParam<std::vector<Real>>("constant_properties")),
     _nprops(_props.size()),
