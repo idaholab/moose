@@ -10,7 +10,7 @@ This class implements a weak form corresponding to
 - \int_{\Omega} \psi_i K_d v d\Omega
 \end{equation}
 
-where $K_d$ is a dissociation coefficient specified with [!param](/BCs/DissociationFluxBC/Kd) and
+where $K_d$ is a dissociation coefficient specified as a material property with [!param](/BCs/DissociationFluxBC/Kd) and
 $v$ is the coupled variable specified with [!param](/BCs/DissociationFluxBC/v) that is
 dissociating at the boundary to create the species corresponding to
 [!param](/BCs/DissociationFluxBC/variable).
