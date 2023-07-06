@@ -12,7 +12,7 @@
 #include "AuxKernel.h"
 
 /**
- * Auxiliary kernel responsible for computing the components of the advection flux vector
+ * Auxiliary kernel responsible for computing a component of the advection flux vector
  */
 class AdvectiveFluxAux : public AuxKernel
 {
@@ -30,19 +30,19 @@ protected:
   /// Will hold 0, 1, or 2 corresponding to x, y, or z.
   const int _component;
 
-  /// Holds the solution at the current quadrature points
-  const Moose::Functor<Real> & _advected_variable;
+  /// Functor for the scalar field advected quantity (for a variable usually)
+  const Moose::Functor<Real> & _advected_quantity;
 
   /// normals at quadrature points
   const MooseArray<Point> & _normals;
 
   /// Velocity components
   const Moose::Functor<Real> & _vel_x;
-  const Moose::Functor<Real> * _vel_y;
-  const Moose::Functor<Real> * _vel_z;
+  const Moose::Functor<Real> * const _vel_y;
+  const Moose::Functor<Real> * const _vel_z;
 
-  /// Whether an advected variable was supplied in the input
-  const bool _advected_variable_supplied;
+  /// Whether an advected quantity was supplied in the input
+  const bool _advected_quantity_supplied;
 
   /// Whether an advected material property was supplied in the input
   const bool _advected_mat_prop_supplied;

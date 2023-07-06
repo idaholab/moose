@@ -4,12 +4,12 @@
 
 ## Description
 
-The `AdvectiveFluxAux` AuxKernel is used to compute the component of the flux vector for advection problems. The flux is computed as
+The `AdvectiveFluxAux` AuxKernel is used to compute a component of an advective flux vector. The flux is computed as
 
 !equation
 (\\vec{J} = \\vec{v} u \\cdot \\vec{n})
 
-where $\\vec{J}$ is the advection flux vector, $u$ is the advected quantity, $\\vec{v}$ is the velocity, and $\\vec{n}$ is the desired component including x, y, z and normal direction.
+where $\\vec{J}$ is the advection flux vector, $u$ is the advected quantity, $\\vec{v}$ is the velocity, and $\\vec{n}$ is the normal for the desired component which can be the x, y, z axis or the normal direction (only near boundaries).
 
 This auxkernel supports CONSTANT and FIRST MONOMIAL AuxVariable types. The advection velocity is required with [!param](/AuxKernels/AdvectiveFluxAux/vel_x) for advection flux calculation. [!param](/Postprocessors/SideAdvectiveFluxIntegral/vel_y) and [!param](/Postprocessors/SideAdvectiveFluxIntegral/vel_z) are needed for 2D and 3D simulations. The advected quantity can be either a variable[!param](/AuxKernels/AdvectiveFluxAux/advected_variable) or material property[!param](/AuxKernels/AdvectiveFluxAux/advected_mat_prop).
 

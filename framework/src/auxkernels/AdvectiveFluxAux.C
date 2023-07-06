@@ -16,7 +16,7 @@ InputParameters
 AdvectiveFluxAux::validParams()
 {
   InputParameters params = AuxKernel::validParams();
-  MooseEnum component("x y z normal");
+  MooseEnum component("x y z normal", "x");
 
   params.addRequiredParam<MooseEnum>("component", component, "The desired component of flux.");
   params.addParam<MooseFunctorName>("advected_variable", 0, "The name of the variable");
@@ -39,23 +39,22 @@ AdvectiveFluxAux::AdvectiveFluxAux(const InputParameters & parameters)
   : AuxKernel(parameters),
     _use_normal(getParam<MooseEnum>("component") == "normal"),
     _component(getParam<MooseEnum>("component")),
-    _advected_variable(getFunctor<Real>("advected_variable")),
+    _advected_quantity(getFunctor<Real>("advected_variable")),
     _normals(_assembly.normals()),
     _vel_x(getFunctor<Real>("vel_x")),
     _vel_y(_mesh.dimension() >= 2 ? &getFunctor<Real>("vel_y") : nullptr),
     _vel_z(_mesh.dimension() == 3 ? &getFunctor<Real>("vel_z") : nullptr),
-    _advected_variable_supplied(parameters.isParamSetByUser("advected_variable")),
+    _advected_quantity_supplied(parameters.isParamSetByUser("advected_variable")),
     _advected_mat_prop_supplied(parameters.isParamSetByUser("advected_mat_prop")),
     _advected_material_property(getMaterialProperty<Real>("advected_mat_prop"))
-
 {
   if (_use_normal && !isParamValid("boundary"))
     paramError("boundary", "A boundary must be provided if using the normal component!");
-  if (_advected_variable_supplied && _advected_mat_prop_supplied)
+  if (_advected_quantity_supplied && _advected_mat_prop_supplied)
     mooseError("AdvectiveFluxAux should be provided either an advected variable "
                "or an advected material property");
   if (dynamic_cast<MooseVariableFV<Real> *>(&_var))
-    mooseError("AdvectiveFluxAux is designed to use for finite element simulations.");
+    mooseError("AdvectiveFluxAux is designed for use in finite element simulations.");
 }
 
 Real
@@ -71,10 +70,10 @@ AdvectiveFluxAux::computeValue()
   vel_y = _vel_y ? raw_value((*_vel_y)(side_arg, state)) : 0;
   vel_z = _vel_z ? raw_value((*_vel_z)(side_arg, state)) : 0;
 
-  if (_advected_variable_supplied)
-    return (_use_normal ? raw_value(_advected_variable(side_arg, state)) *
+  if (_advected_quantity_supplied)
+    return (_use_normal ? raw_value(_advected_quantity(side_arg, state)) *
                               RealVectorValue(vel_x, vel_y, vel_z) * _normals[_qp]
-                        : raw_value(_advected_variable(side_arg, state)) *
+                        : raw_value(_advected_quantity(side_arg, state)) *
                               RealVectorValue(vel_x, vel_y, vel_z)(_component));
   else if (_advected_mat_prop_supplied)
     return (_use_normal ? _advected_material_property[_qp] * RealVectorValue(vel_x, vel_y, vel_z) *

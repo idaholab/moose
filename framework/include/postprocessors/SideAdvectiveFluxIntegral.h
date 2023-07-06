@@ -14,15 +14,15 @@
 #include "MooseVariableInterface.h"
 
 // Forward Declarations
-template <bool, typename>
+template <bool>
 class SideAdvectiveFluxIntegralTempl;
-typedef SideAdvectiveFluxIntegralTempl<false, Real> SideAdvectiveFluxIntegral;
-typedef SideAdvectiveFluxIntegralTempl<true, Real> ADSideAdvectiveFluxIntegral;
+typedef SideAdvectiveFluxIntegralTempl<false> SideAdvectiveFluxIntegral;
+typedef SideAdvectiveFluxIntegralTempl<true> ADSideAdvectiveFluxIntegral;
 
 /**
  * This postprocessor computes a side integral of the mass flux.
  */
-template <bool is_ad, typename T>
+template <bool is_ad>
 class SideAdvectiveFluxIntegralTempl : public SideIntegralPostprocessor
 {
 public:
@@ -42,20 +42,21 @@ protected:
 
   /// Whether an advected variable was supplied in the input
   const bool _advected_variable_supplied;
-  /// Variable storing the advected quantity; used for finite elements
 
+  /// Variable storing the advected quantity; used for finite elements
   const VariableValue & _advected_variable;
 
   /// Whether an advected material property was supplied in the input
   const bool _advected_mat_prop_supplied;
+
   /// Material property storing the advected quantity; used for finite elements
-  const GenericMaterialProperty<T, is_ad> & _advected_material_property;
+  const GenericMaterialProperty<Real, is_ad> & _advected_material_property;
 
   /// The functor representing the advected quantity for finite volume
   const Moose::Functor<Real> * const _adv_quant;
 
   /// Velocity components
   const Moose::Functor<Real> & _vel_x;
-  const Moose::Functor<Real> * _vel_y;
-  const Moose::Functor<Real> * _vel_z;
+  const Moose::Functor<Real> * const _vel_y;
+  const Moose::Functor<Real> * const _vel_z;
 };

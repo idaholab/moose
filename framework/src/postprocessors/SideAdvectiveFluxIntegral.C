@@ -15,9 +15,9 @@
 registerMooseObject("MooseApp", SideAdvectiveFluxIntegral);
 registerMooseObject("MooseApp", ADSideAdvectiveFluxIntegral);
 
-template <bool is_ad, typename T>
+template <bool is_ad>
 InputParameters
-SideAdvectiveFluxIntegralTempl<is_ad, T>::validParams()
+SideAdvectiveFluxIntegralTempl<is_ad>::validParams()
 {
   InputParameters params = SideIntegralPostprocessor::validParams();
   MooseEnum component("x y z normal");
@@ -28,7 +28,6 @@ SideAdvectiveFluxIntegralTempl<is_ad, T>::validParams()
   params.addParam<MooseFunctorName>("vel_z", "z-component of the velocity vector");
   params.addCoupledVar(
       "advected_variable",
-      0,
       "The advected variable quantity of which to compute advection flux; useful for "
       "finite element simulations");
   params.addParam<MaterialPropertyName>(
@@ -45,16 +44,16 @@ SideAdvectiveFluxIntegralTempl<is_ad, T>::validParams()
   return params;
 }
 
-template <bool is_ad, typename T>
-SideAdvectiveFluxIntegralTempl<is_ad, T>::SideAdvectiveFluxIntegralTempl(
+template <bool is_ad>
+SideAdvectiveFluxIntegralTempl<is_ad>::SideAdvectiveFluxIntegralTempl(
     const InputParameters & parameters)
   : SideIntegralPostprocessor(parameters),
     _use_normal(getParam<MooseEnum>("component") == "normal"),
     _component(getParam<MooseEnum>("component")),
-    _advected_variable_supplied(parameters.isParamSetByUser("advected_variable")),
-    _advected_variable(coupledValue("advected_variable")),
+    _advected_variable_supplied(isParamValid("advected_variable")),
+    _advected_variable(_advected_variable_supplied ? coupledValue("advected_variable") : _zero),
     _advected_mat_prop_supplied(parameters.isParamSetByUser("advected_mat_prop")),
-    _advected_material_property(getGenericMaterialProperty<T, is_ad>("advected_mat_prop")),
+    _advected_material_property(getGenericMaterialProperty<Real, is_ad>("advected_mat_prop")),
     _adv_quant(isParamValid("advected_quantity") ? &getFunctor<Real>("advected_quantity")
                                                  : nullptr),
     _vel_x(getFunctor<Real>("vel_x")),
@@ -62,17 +61,21 @@ SideAdvectiveFluxIntegralTempl<is_ad, T>::SideAdvectiveFluxIntegralTempl(
     _vel_z(_mesh.dimension() == 3 ? &getFunctor<Real>("vel_z") : nullptr)
 {
   // Check that at most one advected quantity has been provided
-  if (_advected_variable_supplied && _advected_mat_prop_supplied)
-    mooseError(
-        "SideAdvectiveFluxIntegralPostprocessor should be provided either an advected variable "
-        "or an advected material property");
+  if (_advected_mat_prop_supplied)
+  {
+    if (_advected_variable_supplied || _adv_quant)
+      mooseError(
+          "SideAdvectiveFluxIntegralPostprocessor should be provided either an advected quantity "
+          "or an advected material property");
+  }
+
   // Check whether a finite element or finite volume variable is provide
   _qp_integration = !_adv_quant;
 }
 
-template <bool is_ad, typename T>
+template <bool is_ad>
 Real
-SideAdvectiveFluxIntegralTempl<is_ad, T>::computeFaceInfoIntegral(const FaceInfo * const fi)
+SideAdvectiveFluxIntegralTempl<is_ad>::computeFaceInfoIntegral(const FaceInfo * const fi)
 {
   using MetaPhysicL::raw_value;
 
@@ -101,9 +104,9 @@ SideAdvectiveFluxIntegralTempl<is_ad, T>::computeFaceInfoIntegral(const FaceInfo
   return fi->normal() * adv_quant_face * RealVectorValue(vel_x, vel_y, vel_z);
 }
 
-template <bool is_ad, typename T>
+template <bool is_ad>
 Real
-SideAdvectiveFluxIntegralTempl<is_ad, T>::computeQpIntegral()
+SideAdvectiveFluxIntegralTempl<is_ad>::computeQpIntegral()
 {
   using MetaPhysicL::raw_value;
 
@@ -121,10 +124,9 @@ SideAdvectiveFluxIntegralTempl<is_ad, T>::computeQpIntegral()
       mooseError("Trying to use a non-nodal variable 'advected_variable' for side advection "
                  "integral calculation, which is currently not supported.");
 
-    return (_use_normal ? raw_value(_advected_variable[_qp]) *
-                              RealVectorValue(vel_x, vel_y, vel_z) * _normals[_qp]
-                        : raw_value(_advected_variable[_qp]) *
-                              RealVectorValue(vel_x, vel_y, vel_z)(_component));
+    return (_use_normal
+                ? _advected_variable[_qp] * RealVectorValue(vel_x, vel_y, vel_z) * _normals[_qp]
+                : _advected_variable[_qp] * RealVectorValue(vel_x, vel_y, vel_z)(_component));
   }
   else if (_advected_mat_prop_supplied)
     return (_use_normal ? raw_value(_advected_material_property[_qp]) *
@@ -136,5 +138,5 @@ SideAdvectiveFluxIntegralTempl<is_ad, T>::computeQpIntegral()
                         : RealVectorValue(vel_x, vel_y, vel_z)(_component));
 }
 
-template class SideAdvectiveFluxIntegralTempl<false, Real>;
-template class SideAdvectiveFluxIntegralTempl<true, Real>;
+template class SideAdvectiveFluxIntegralTempl<false>;
+template class SideAdvectiveFluxIntegralTempl<true>;
