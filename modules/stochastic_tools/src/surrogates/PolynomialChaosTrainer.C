@@ -85,6 +85,13 @@ PolynomialChaosTrainer::preTrain()
 
   if (_rtype == 1)
   {
+    if (getCurrentSampleSize() < _ncoeff)
+      paramError("order",
+                 "Number of data points (",
+                 getCurrentSampleSize(),
+                 ") must be greater than the number of terms in the polynomial (",
+                 _ncoeff,
+                 ").");
     _matrix.resize(_ncoeff, _ncoeff);
     _rhs.resize(_ncoeff);
     for (auto & calc : _calculators)

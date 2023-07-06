@@ -56,7 +56,7 @@ q_i = \frac{1}{\left\langle\Phi_i(\vec{\xi}),\Phi_i(\vec{\xi})\right\rangle}\sum
 
 The numerical quadrature method is typically much more efficient that than the Monte Carlo method and has the added benefit of exactly integrating the polynomial basis. However, the quadrature suffers from the curse of dimensionality. The naive approach uses a Cartesian product of one-dimensional quadratures, which results in $(\max(k^d_i) + 1)^D$ quadrature points to be sampled. Sparse grids can help mitigate the curse of dimensionality significantly.
 
-The other technique is using ordinary least-squares (OLS) regression, like in [PolynomialRegressionTrainer.md]. This is generally more accurate than integration for Monte Carlo sampling, as shown in the figure below.
+The other technique is using ordinary least-squares (OLS) regression, like in [PolynomialRegressionTrainer.md]. In the majority of cases, OLS is more accurate than integration for Monte Carlo sampling, as shown in the figure below.
 
 !plot scatter caption=Comparison between OLS regression and integration methods for computing polynomial chaos coefficients
     data=[{'name': 'OLS',
