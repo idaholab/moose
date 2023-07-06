@@ -16,12 +16,16 @@ Times::validParams()
   InputParameters params = GeneralReporter::validParams();
   params.addParam<bool>(
       "unique_times", true, "Whether duplicate values should be removed from the Times vector");
+  params.addParam<Real>(
+      "unique_tolerance",
+      1e-12,
+      "Absolute tolerance for removing duplicated times when using setting unique_times to true");
   params.addParam<bool>("auto_sort", true, "Whether Times should be sorted");
   // This parameter should be set by each derived class depending on whether the generation of
   // times is replicated or distributed. We want times to be replicated across all ranks
   params.addRequiredParam<bool>("auto_broadcast",
                                 "Wether Times should be broadcasted across all ranks");
-  params.addParamNamesToGroup("auto_broadcast auto_sort unique_times", "Advanced");
+  params.addParamNamesToGroup("auto_broadcast auto_sort unique_times unique_tolerance", "Advanced");
   params.registerBase("Times");
   return params;
 }
@@ -33,7 +37,8 @@ Times::Times(const InputParameters & parameters)
         "times", REPORTER_MODE_REPLICATED)),
     _need_broadcast(getParam<bool>("auto_broadcast")),
     _need_sort(getParam<bool>("auto_sort")),
-    _need_unique(getParam<bool>("unique_times"))
+    _need_unique(getParam<bool>("unique_times")),
+    _unique_tol(getParam<Real>("unique_tolerance"))
 {
 }
 
@@ -112,5 +117,8 @@ Times::finalize()
   if (_need_sort)
     std::sort(_times.begin(), _times.end());
   if (_need_unique)
-    _times.erase(unique(_times.begin(), _times.end()), _times.end());
+    _times.erase(unique(_times.begin(),
+                        _times.end(),
+                        [this](Real l, Real r) { return std::abs(l - r) < _unique_tol; }),
+                 _times.end());
 }

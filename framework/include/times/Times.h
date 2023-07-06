@@ -68,9 +68,11 @@ protected:
   std::vector<Real> & _times;
 
   /// Whether generation of times is distributed or not (and therefore needs a broadcast)
-  bool _need_broadcast;
+  const bool _need_broadcast;
   /// Whether times should be sorted, because they come from different sources for example
-  bool _need_sort;
+  const bool _need_sort;
   /// Whether duplicate times should be removed
-  bool _need_unique;
+  const bool _need_unique;
+  /// Absolute tolerance for performing duplication checks to make the times vector unique
+  const Real _unique_tol;
 };
