@@ -30,7 +30,7 @@ RefineBlockGenerator::validParams()
   params.addParam<bool>(
       "enable_neighbor_refinement",
       true,
-      "Toggles whether neighboring level one elements should be refined or not. Defaults to true."
+      "Toggles whether neighboring level one elements should be refined or not. Defaults to true. "
       "False may lead to unsupported mesh non-conformality without great care.");
 
   return params;

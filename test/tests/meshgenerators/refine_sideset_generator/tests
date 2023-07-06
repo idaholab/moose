@@ -37,14 +37,14 @@
       recover = false
       cli_args = "Mesh/refine/boundaries='foo' --mesh-only"
       expect_err = "The boundary *"
-      requirement = 'the specified boundary to be refined does not exist and'
+      detail = 'the specified boundary to be refined does not exist, and'
     []
     [wrong_size_inputs]
       type = RunException
       input = test_left.i
       cli_args = 'Mesh/refine/refinement="1 2" --mesh-only'
       expect_err = "The boundaries and refinement parameter vectors should be the same size"
-      detail = "specifying a vector of refinement levels that does not match the vector of "
+      detail = "if specifying a vector of refinement levels that does not match the vector of "
                "boundaries to refine."
     []
   []

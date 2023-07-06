@@ -30,7 +30,7 @@ RefineSidesetGenerator::validParams()
   params.addParam<bool>(
       "enable_neighbor_refinement",
       true,
-      "Toggles whether neighboring level one elements should be refined or not. Defaults to true."
+      "Toggles whether neighboring level one elements should be refined or not. Defaults to true. "
       "False may lead to unsupported mesh non-conformality without great care.");
   MultiMooseEnum boundary_side("primary secondary both", "both");
   params.addParam<MultiMooseEnum>("boundary_side",

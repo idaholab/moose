@@ -45,7 +45,7 @@
       input = test_single.i
       cli_args = 'Mesh/refine/refinement="1 2" --mesh-only'
       expect_err = "The blocks and refinement parameter vectors should be the same size"
-      detail = "specifying a vector of refinement levels that does not match the vector of "
+      detail = "if specifying a vector of refinement levels that does not match the vector of "
                "subdomains to refine."
     []
   []
