@@ -91,4 +91,24 @@ protected:
    * Calls into MeshCutNucleation UO to add cracks.
    */
   void addNucleatedCracksToMesh();
+
+private:
+  /**
+   * Remove nucleated elements that are too close too each other.  Lowest map key wins
+   * @param  nucleated_elems_map  map from nucleation userObject with key for mesh element id and
+   * two nodes of nucleated crack
+   * @param  nucleationRadius  exclusion distance between cracks
+   */
+  void removeNucleatedCracksTooCloseToEachOther(
+      std::map<unsigned int, std::pair<RealVectorValue, RealVectorValue>> & nucleated_elems_map,
+      Real nucleationRadius);
+  /**
+   * Remove nucleated elements that are too close to a pre-existing crack in the mesh.
+   * @param  nucleated_elems_map  map from nucleation userObject with key for mesh element id and
+   * two nodes of nucleated crack
+   * @param  nucleationRadius  exclusion distance between cracks
+   */
+  void removeNucleatedCracksTooCloseToOtherCracks(
+      std::map<unsigned int, std::pair<RealVectorValue, RealVectorValue>> & nucleated_elems_map,
+      Real nucleationRadius);
 };

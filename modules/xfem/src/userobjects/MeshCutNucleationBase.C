@@ -8,6 +8,8 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "MeshCutNucleationBase.h"
+#include "XFEMAppTypes.h"
+#include "XFEM.h"
 
 #include "MooseMesh.h"
 
@@ -21,6 +23,10 @@ MeshCutNucleationBase::validParams()
   params.addRequiredParam<std::vector<BoundaryName>>(
       "initiate_on_boundary",
       "Cracks can only initiate on elements adjacent to specified boundaries.");
+  params.addParam<Real>("nucleation_radius",
+                        0,
+                        "Cracks will only nucleate if they are outside the nucleation_radius of an "
+                        "existing crack.");
   // Make this userobject execute before every other standard UO including meshCutterUO
   params.setDocString(
       "execution_order_group",
@@ -38,7 +44,9 @@ MeshCutNucleationBase::validParams()
 }
 
 MeshCutNucleationBase::MeshCutNucleationBase(const InputParameters & parameters)
-  : ElementUserObject(parameters), _mesh(_subproblem.mesh())
+  : ElementUserObject(parameters),
+    _mesh(_subproblem.mesh()),
+    _nucleation_radius(getParam<Real>("nucleation_radius"))
 {
   FEProblemBase * fe_problem = dynamic_cast<FEProblemBase *>(&_subproblem);
   if (fe_problem == NULL)
@@ -68,21 +76,17 @@ MeshCutNucleationBase::execute()
 {
   std::pair<RealVectorValue, RealVectorValue> cutterElemNodes;
   bool isCut = _xfem->isElemCut(_current_elem);
+  if (_current_elem->processor_id() != processor_id())
+    return;
 
   bool isOnBoundary = false;
-  unsigned int boundarySide = std::numeric_limits<unsigned int>::max();
   unsigned int current_eid = _current_elem->id();
   std::map<unsigned int, std::pair<RealVectorValue, RealVectorValue>>::iterator mit;
   mit = _nucleated_elems.find(current_eid);
 
   for (unsigned int i = 0; i < _initiation_boundary_ids.size(); ++i)
-  {
     if (_mesh.isBoundaryElem(current_eid, _initiation_boundary_ids[i]))
-    {
       isOnBoundary = true;
-      boundarySide = _mesh.sideWithBoundaryID(_current_elem, _initiation_boundary_ids[i]);
-    }
-  }
   // fixme lynn, only allowing one nucleation per element
   if (!isCut && isOnBoundary && doesElementCrack(cutterElemNodes))
   {

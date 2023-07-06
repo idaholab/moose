@@ -51,9 +51,9 @@ void
 MeshCut2DFractureUserObject::initialize()
 {
   _is_mesh_modified = false;
-  addNucleatedCracksToMesh();
   findActiveBoundaryGrowth();
   growFront();
+  addNucleatedCracksToMesh();
   // update _crack_front_definition with nucleated nodes
   _crack_front_definition->updateNumberOfCrackFrontPoints(
       _original_and_current_front_node_ids.size());
@@ -72,10 +72,14 @@ MeshCut2DFractureUserObject::findActiveBoundaryGrowth()
   // InteractionIntegral vpp
   if (k1.empty())
     return;
-  mooseAssert(k1.size() == k2.size(), "KI and KII VPPs should have the same size");
-  mooseAssert(k1.size() == _original_and_current_front_node_ids.size(),
-              "the number of crack front nodes in the should equal to the "
-              "size of VPP defined at the crack front");
+  if ((k1.size() != k2.size()) || (k1.size() != _original_and_current_front_node_ids.size()))
+    mooseError("KI and KII VPPs should have the same number of crack tips as the size.",
+               "\n  k1 size = ",
+               k1.size(),
+               "\n  k2 size = ",
+               k2.size(),
+               "\n  cracktips in MeshCut2DFractureUserObject = ",
+               _original_and_current_front_node_ids.size());
   std::vector<Real> k_squared = getKSquared(k1, k2);
   _active_front_node_growth_vectors.clear();
   for (unsigned int i = 0; i < _original_and_current_front_node_ids.size(); ++i)

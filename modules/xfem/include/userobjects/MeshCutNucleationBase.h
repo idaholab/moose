@@ -24,11 +24,11 @@ public:
   virtual void execute() override;
   virtual void threadJoin(const UserObject & y) override;
   virtual void finalize() override;
-  const std::map<unsigned int, std::pair<RealVectorValue, RealVectorValue>> &
-  getNucleatedElemsMap() const
+  std::map<unsigned int, std::pair<RealVectorValue, RealVectorValue>> getNucleatedElemsMap() const
   {
     return _nucleated_elems;
   }
+  Real getNucleationRadius() const { return _nucleation_radius; }
 
 protected:
   /**
@@ -40,6 +40,7 @@ protected:
 
 private:
   MooseMesh & _mesh;
+  Real _nucleation_radius;
   std::shared_ptr<XFEM> _xfem;
   std::vector<BoundaryID> _initiation_boundary_ids;
   std::map<unsigned int, std::pair<RealVectorValue, RealVectorValue>> _nucleated_elems;
