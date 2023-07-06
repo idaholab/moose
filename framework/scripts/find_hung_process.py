@@ -223,7 +223,7 @@ def __get_pids(application_name, hosts, num_threads, verbose = False):
     for host in hosts:
         jobs.append(get_sshpids(application_name, host))
 
-    if verbose == True:
+    if verbose == True:#this print statement is not entirely working?
         [print(f'Running command:',i) for i in jobs]
 
     finished_jobs = __schedule_task(jobs, num_threads)
@@ -258,8 +258,8 @@ def get_sshpids(application_name, host):
     """
     Generate and return a valid SSH remote ps command
     """
+
     ps_grep = f'ps -e | grep {application_name}'
-    #ps_grep = f'ps -f | grep {application_name}'
     awk_print = r"awk '{print \$1}'"
     return f'ssh {host} "echo {host}; {ps_grep} | {awk_print}"'
 
@@ -281,6 +281,7 @@ def generate_traces(job_num, application_name, num_hosts, num_threads, verbose =
 
     if alt_qstat_cmd == True:
         qstat_command = f'./qstat -n {job_num}'
+        #qstat_command = f'../../python/TestHarness/testers/qstat'
 
     a_job = Job(qstat_command)
     if verbose == True:
@@ -305,7 +306,6 @@ def generate_traces(job_num, application_name, num_hosts, num_threads, verbose =
     for stack in stack_list:
         output = os.linesep.join([s for s in stack.splitlines() if s])
         traces.extend(ProcessTraces.split_traces(output))
-    #print (f"Current traces: {(i for i in traces)}")
     return traces
 
 
@@ -550,8 +550,6 @@ def main():
     if args.file == None:
         # Autogenerate a filename based on application name and job number
         cache_filename = f'{args.application}.{args.pbs_job_num}.cache'
-        if args.verbose == True:
-            print(cache_filename)
 
         if args.localhost == True:
             global node_name_pattern

@@ -66,6 +66,8 @@ class SignalTester(RunApp):
         cmd = self.getCommand(options).split(" ")
         cwd = self.getTestDir()
 
+        print(f'in runCommand, commands passed in: {cmd}')
+
         # Verify that the working directory is available right before we execute.
         if not os.path.exists(cwd):
             # Timers must be used since they are directly indexed in the Job class
