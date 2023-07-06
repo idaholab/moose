@@ -225,32 +225,33 @@ LiquidWaterSubChannel1PhaseProblem::computeWijPrime(int iblock)
         auto beta = _beta;
         if (!_constant_beta)
         {
-          auto w_perim_i = (*_w_perim_soln)(node_in_i);
-          auto w_perim_j = (*_w_perim_soln)(node_in_j);
-          auto mu_i = (*_mu_soln)(node_in_i);
-          auto mu_j = (*_mu_soln)(node_in_j);
-          // hydraulic diameter in the i direction
-          auto hD_i = 4.0 * Si_in / w_perim_i;
-          auto hD_j = 4.0 * Sj_in / w_perim_j;
-          auto avg_hD = 0.5 * (hD_i + hD_j);
-          auto avg_mu = 0.5 * (mu_i + mu_j);
+          auto S_total = Si_in + Sj_in + Si_out + Sj_out;
+          auto Si = 0.5 * (Si_in + Si_out);
+          auto Sj = 0.5 * (Sj_in + Sj_out);
+          auto w_perim_i = 0.5 * ((*_w_perim_soln)(node_in_i) + (*_w_perim_soln)(node_out_i));
+          auto w_perim_j = 0.5 * ((*_w_perim_soln)(node_in_j) + (*_w_perim_soln)(node_out_j));
+          auto avg_mu =
+              (1 / S_total) * ((*_mu_soln)(node_out_i)*Si_out + (*_mu_soln)(node_in_i)*Si_in +
+                               (*_mu_soln)(node_out_j)*Sj_out + (*_mu_soln)(node_in_j)*Sj_in);
+          auto avg_hD = 4.0 * (Si + Sj) / (w_perim_i + w_perim_j);
           auto Re = avg_massflux * avg_hD / avg_mu;
-
           Real gamma = 20.0; // empirical constant
           Real sf = 1.0;     // shape factor
           Real a = 0.18;
           Real b = 0.2;
           auto f = a * std::pow(Re, -b); // Rehme 1992 circular tube friction factor
           auto k =
-              0.25 * (_fp->k_from_p_T((*_P_soln)(node_out_i) + _P_out, (*_T_soln)(node_out_i)) +
-                      _fp->k_from_p_T((*_P_soln)(node_in_i) + _P_out, (*_T_soln)(node_in_i)) +
-                      _fp->k_from_p_T((*_P_soln)(node_out_j) + _P_out, (*_T_soln)(node_out_j)) +
-                      _fp->k_from_p_T((*_P_soln)(node_in_j) + _P_out, (*_T_soln)(node_in_j)));
+              (1 / S_total) *
+              (_fp->k_from_p_T((*_P_soln)(node_out_i) + _P_out, (*_T_soln)(node_out_i)) * Si_out +
+               _fp->k_from_p_T((*_P_soln)(node_in_i) + _P_out, (*_T_soln)(node_in_i)) * Si_in +
+               _fp->k_from_p_T((*_P_soln)(node_out_j) + _P_out, (*_T_soln)(node_out_j)) * Sj_out +
+               _fp->k_from_p_T((*_P_soln)(node_in_j) + _P_out, (*_T_soln)(node_in_j)) * Sj_in);
           auto cp =
-              0.25 * (_fp->cp_from_p_T((*_P_soln)(node_out_i) + _P_out, (*_T_soln)(node_out_i)) +
-                      _fp->cp_from_p_T((*_P_soln)(node_in_i) + _P_out, (*_T_soln)(node_in_i)) +
-                      _fp->cp_from_p_T((*_P_soln)(node_out_j) + _P_out, (*_T_soln)(node_out_j)) +
-                      _fp->cp_from_p_T((*_P_soln)(node_in_j) + _P_out, (*_T_soln)(node_in_j)));
+              (1 / S_total) *
+              (_fp->cp_from_p_T((*_P_soln)(node_out_i) + _P_out, (*_T_soln)(node_out_i)) * Si_out +
+               _fp->cp_from_p_T((*_P_soln)(node_in_i) + _P_out, (*_T_soln)(node_in_i)) * Si_in +
+               _fp->cp_from_p_T((*_P_soln)(node_out_j) + _P_out, (*_T_soln)(node_out_j)) * Sj_out +
+               _fp->cp_from_p_T((*_P_soln)(node_in_j) + _P_out, (*_T_soln)(node_in_j)) * Sj_in);
           auto Pr = avg_mu * cp / k;                          // Prandtl number
           auto Pr_t = Pr * (Re / gamma) * std::sqrt(f / 8.0); // Turbulent Prandtl number
           auto delta = pitch;                                 // centroid to centroid distance
@@ -302,32 +303,33 @@ LiquidWaterSubChannel1PhaseProblem::computeWijPrime(int iblock)
         auto beta = _beta;
         if (!_constant_beta)
         {
-          auto w_perim_i = (*_w_perim_soln)(node_in_i);
-          auto w_perim_j = (*_w_perim_soln)(node_in_j);
-          auto mu_i = (*_mu_soln)(node_in_i);
-          auto mu_j = (*_mu_soln)(node_in_j);
-          // hydraulic diameter in the i direction
-          auto hD_i = 4.0 * Si_in / w_perim_i;
-          auto hD_j = 4.0 * Sj_in / w_perim_j;
-          auto avg_hD = 0.5 * (hD_i + hD_j);
-          auto avg_mu = 0.5 * (mu_i + mu_j);
+          auto S_total = Si_in + Sj_in + Si_out + Sj_out;
+          auto Si = 0.5 * (Si_in + Si_out);
+          auto Sj = 0.5 * (Sj_in + Sj_out);
+          auto w_perim_i = 0.5 * ((*_w_perim_soln)(node_in_i) + (*_w_perim_soln)(node_out_i));
+          auto w_perim_j = 0.5 * ((*_w_perim_soln)(node_in_j) + (*_w_perim_soln)(node_out_j));
+          auto avg_mu =
+              (1 / S_total) * ((*_mu_soln)(node_out_i)*Si_out + (*_mu_soln)(node_in_i)*Si_in +
+                               (*_mu_soln)(node_out_j)*Sj_out + (*_mu_soln)(node_in_j)*Sj_in);
+          auto avg_hD = 4.0 * (Si + Sj) / (w_perim_i + w_perim_j);
           auto Re = avg_massflux * avg_hD / avg_mu;
-
           Real gamma = 20.0; // empirical constant
           Real sf = 1.0;     // shape factor
           Real a = 0.18;
           Real b = 0.2;
           auto f = a * std::pow(Re, -b); // Rehme 1992 circular tube friction factor
           auto k =
-              0.25 * (_fp->k_from_p_T((*_P_soln)(node_out_i) + _P_out, (*_T_soln)(node_out_i)) +
-                      _fp->k_from_p_T((*_P_soln)(node_in_i) + _P_out, (*_T_soln)(node_in_i)) +
-                      _fp->k_from_p_T((*_P_soln)(node_out_j) + _P_out, (*_T_soln)(node_out_j)) +
-                      _fp->k_from_p_T((*_P_soln)(node_in_j) + _P_out, (*_T_soln)(node_in_j)));
+              (1 / S_total) *
+              (_fp->k_from_p_T((*_P_soln)(node_out_i) + _P_out, (*_T_soln)(node_out_i)) * Si_out +
+               _fp->k_from_p_T((*_P_soln)(node_in_i) + _P_out, (*_T_soln)(node_in_i)) * Si_in +
+               _fp->k_from_p_T((*_P_soln)(node_out_j) + _P_out, (*_T_soln)(node_out_j)) * Sj_out +
+               _fp->k_from_p_T((*_P_soln)(node_in_j) + _P_out, (*_T_soln)(node_in_j)) * Sj_in);
           auto cp =
-              0.25 * (_fp->cp_from_p_T((*_P_soln)(node_out_i) + _P_out, (*_T_soln)(node_out_i)) +
-                      _fp->cp_from_p_T((*_P_soln)(node_in_i) + _P_out, (*_T_soln)(node_in_i)) +
-                      _fp->cp_from_p_T((*_P_soln)(node_out_j) + _P_out, (*_T_soln)(node_out_j)) +
-                      _fp->cp_from_p_T((*_P_soln)(node_in_j) + _P_out, (*_T_soln)(node_in_j)));
+              (1 / S_total) *
+              (_fp->cp_from_p_T((*_P_soln)(node_out_i) + _P_out, (*_T_soln)(node_out_i)) * Si_out +
+               _fp->cp_from_p_T((*_P_soln)(node_in_i) + _P_out, (*_T_soln)(node_in_i)) * Si_in +
+               _fp->cp_from_p_T((*_P_soln)(node_out_j) + _P_out, (*_T_soln)(node_out_j)) * Sj_out +
+               _fp->cp_from_p_T((*_P_soln)(node_in_j) + _P_out, (*_T_soln)(node_in_j)) * Sj_in);
           auto Pr = avg_mu * cp / k;                          // Prandtl number
           auto Pr_t = Pr * (Re / gamma) * std::sqrt(f / 8.0); // Turbulent Prandtl number
           auto delta = pitch;                                 // centroid to centroid distance

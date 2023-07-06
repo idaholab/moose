@@ -91,6 +91,7 @@ P_out = 4.923e6 # Pa
   verbose_subchannel = true
   P_tol = 1e-04
   T_tol = 1e-04
+  constant_beta = false
 []
 
 [ICs]

@@ -84,6 +84,7 @@ P_out = 4.923e6 # Pa
   compute_power = true
   P_out = ${P_out}
   default_friction_model = false
+  constant_beta = false
 []
 
 [ICs]
