@@ -30,7 +30,8 @@ RefineBlockGenerator::validParams()
   params.addParam<bool>(
       "enable_neighbor_refinement",
       true,
-      "Toggles whether neighboring level one elements should be refined or not. Defaults to true");
+      "Toggles whether neighboring level one elements should be refined or not. Defaults to true."
+      "False may lead to unsupported mesh non-conformality without great care.");
 
   return params;
 }
@@ -42,6 +43,8 @@ RefineBlockGenerator::RefineBlockGenerator(const InputParameters & parameters)
     _refinement(getParam<std::vector<unsigned int>>("refinement")),
     _enable_neighbor_refinement(getParam<bool>("enable_neighbor_refinement"))
 {
+  if (_block.size() != _refinement.size())
+    paramError("refinement", "The blocks and refinement parameter vectors should be the same size");
 }
 
 std::unique_ptr<MeshBase>

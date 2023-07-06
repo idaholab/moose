@@ -30,7 +30,8 @@ RefineSidesetGenerator::validParams()
   params.addParam<bool>(
       "enable_neighbor_refinement",
       true,
-      "Toggles whether neighboring level one elements should be refined or not. Defaults to true");
+      "Toggles whether neighboring level one elements should be refined or not. Defaults to true."
+      "False may lead to unsupported mesh non-conformality without great care.");
   MultiMooseEnum boundary_side("primary secondary both", "both");
   params.addParam<MultiMooseEnum>("boundary_side",
                                   boundary_side,
@@ -48,6 +49,9 @@ RefineSidesetGenerator::RefineSidesetGenerator(const InputParameters & parameter
     _enable_neighbor_refinement(getParam<bool>("enable_neighbor_refinement")),
     _boundary_side(getParam<MultiMooseEnum>("boundary_side"))
 {
+  if (_boundaries.size() != _refinement.size())
+    paramError("refinement",
+               "The boundaries and refinement parameter vectors should be the same size");
 }
 
 std::unique_ptr<MeshBase>
