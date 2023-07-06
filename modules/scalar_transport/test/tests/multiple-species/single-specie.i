@@ -1,4 +1,4 @@
-Krtt=0
+Krtt=0.
 Kdt2=1
 Pt2_left=1
 Pt2_right=0
@@ -41,22 +41,35 @@ l=1
     type = BinaryRecombinationBC
     variable = t
     v = t
-    Kr = ${Krtt}
+    Kr = Krtt
     boundary = 'left right'
   []
   [t_from_t2_left]
     type = DissociationFluxBC
     variable = t
     v = ${Pt2_left} # Partial pressure of T2
-    Kd = ${Kdt2}
+    Kd = Kdt2
     boundary = left
   []
   [t_from_t2_right]
     type = DissociationFluxBC
     variable = t
     v = ${Pt2_right} # Partial pressure of T2
-    Kd = ${Kdt2}
+    Kd = Kdt2
     boundary = right
+  []
+[]
+
+[Materials]
+  [Krtt]
+    type = ADConstantMaterial
+    property_name = 'Krtt'
+    value = ${Krtt}
+  []
+  [Kdt2]
+    type = ADConstantMaterial
+    property_name = 'Kdt2'
+    value = '${Kdt2}'
   []
 []
 

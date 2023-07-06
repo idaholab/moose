@@ -1,17 +1,17 @@
-Krht=1
-Krtt=1
-Krhh=1
-Kdh2=1
-Kdt2=1
-Kdht=1
-Ph2_left=1
-Pt2_left=2
-Pht_left=3
-Ph2_right=0
-Pt2_right=0
-Pht_right=0
-d_h=1
-d_t=1
+Krht = 1
+Krtt = 1
+Krhh = 1
+Kdh2 = 1
+Kdt2 = 1
+Kdht = 1
+Ph2_left = 1
+Pt2_left = 2
+Pht_left = 3
+Ph2_right = 0
+Pt2_right = 0
+Pht_right = 0
+d_h = 1
+d_t = 1
 
 [Mesh]
   type = GeneratedMesh
@@ -26,8 +26,10 @@ d_t=1
 []
 
 [Variables]
-  [h][]
-  [t][]
+  [h]
+  []
+  [t]
+  []
 []
 
 [Kernels]
@@ -60,113 +62,146 @@ d_t=1
     type = BinaryRecombinationBC
     variable = h
     v = t
-    Kr = ${Krht}
+    Kr = Krht
     boundary = left
   []
   [ht_t_left]
     type = BinaryRecombinationBC
     variable = t
     v = h
-    Kr = ${Krht}
+    Kr = Krht
     boundary = left
   []
   [hh_left]
     type = BinaryRecombinationBC
     variable = h
     v = h
-    Kr = ${Krhh}
+    Kr = Krhh
     boundary = left
   []
   [tt_left]
     type = BinaryRecombinationBC
     variable = t
     v = t
-    Kr = ${Krtt}
+    Kr = Krtt
     boundary = left
   []
   [h_from_h2_left]
     type = DissociationFluxBC
     variable = h
     v = ${Ph2_left} # Partial pressure of H2
-    Kd = ${Kdh2}
+    Kd = Kdh2
     boundary = left
   []
   [t_from_t2_left]
     type = DissociationFluxBC
     variable = t
     v = ${Pt2_left} # Partial pressure of T2
-    Kd = ${Kdt2}
+    Kd = Kdt2
     boundary = left
   []
   [h_from_ht_left]
     type = DissociationFluxBC
     variable = h
     v = ${Pht_left} # Partial pressure of HT
-    Kd = ${Kdht}
+    Kd = Kdht
     boundary = left
   []
   [t_from_ht_left]
     type = DissociationFluxBC
     variable = t
     v = ${Pht_left} # Partial pressure of HT
-    Kd = ${Kdht}
+    Kd = Kdht
     boundary = left
   []
   [ht_h_right]
     type = BinaryRecombinationBC
     variable = h
     v = t
-    Kr = ${Krht}
+    Kr = Krht
     boundary = right
   []
   [ht_t_right]
     type = BinaryRecombinationBC
     variable = t
     v = h
-    Kr = ${Krht}
+    Kr = Krht
     boundary = right
   []
   [hh_right]
     type = BinaryRecombinationBC
     variable = h
     v = h
-    Kr = ${Krhh}
+    Kr = Krhh
     boundary = right
   []
   [tt_right]
     type = BinaryRecombinationBC
     variable = t
     v = t
-    Kr = ${Krtt}
+    Kr = Krtt
     boundary = right
   []
   [h_from_h2_right]
     type = DissociationFluxBC
     variable = h
     v = ${Ph2_right} # Partial pressure of H2
-    Kd = ${Kdh2}
+    Kd = Kdh2
     boundary = right
   []
   [t_from_t2_right]
     type = DissociationFluxBC
     variable = t
     v = ${Pt2_right} # Partial pressure of T2
-    Kd = ${Kdt2}
+    Kd = Kdt2
     boundary = right
   []
   [h_from_ht_right]
     type = DissociationFluxBC
     variable = h
     v = ${Pht_right} # Partial pressure of HT
-    Kd = ${Kdht}
+    Kd = Kdht
     boundary = right
   []
   [t_from_ht_right]
     type = DissociationFluxBC
     variable = t
     v = ${Pht_right} # Partial pressure of HT
-    Kd = ${Kdht}
+    Kd = Kdht
     boundary = right
+  []
+[]
+
+[Materials]
+  [Krht]
+    type = ADConstantMaterial
+    property_name = 'Krht'
+    value = '${Krht}'
+  []
+  [Krhh]
+    type = ADConstantMaterial
+    property_name = 'Krhh'
+    value = '${Krhh}'
+  []
+  [Krtt]
+    type = ADConstantMaterial
+    property_name = 'Krtt'
+    value = '${Krtt}'
+  []
+  [Kdh2]
+    type = ADConstantMaterial
+    property_name = 'Kdh2'
+    value = '${Kdh2}'
+  []
+  [Kdt2]
+    type = ADConstantMaterial
+    property_name = 'Kdt2'
+    value = '${Kdt2}'
+  []
+  [Kdht]
+    type = ADConstantMaterial
+    property_name = 'Kdht'
+    value = '${Kdht}'
   []
 []
 
