@@ -26,6 +26,7 @@ PolynomialChaosTrainer::validParams()
       "regression_type",
       rtype,
       "The type of regression to perform for finding polynomial coefficents.");
+  params.addParam<Real>("penalty", 0.0, "Ridge regularization penalty factor for OLS regression.");
 
   params.suppressParameter<MooseEnum>("response_type");
   return params;
@@ -42,6 +43,7 @@ PolynomialChaosTrainer::PolynomialChaosTrainer(const InputParameters & parameter
     _coeff(declareModelData<std::vector<Real>>("_coeff")),
     _poly(declareModelData<std::vector<std::unique_ptr<const PolynomialQuadrature::Polynomial>>>(
         "_poly")),
+    _ridge_penalty(getParam<Real>("penalty")),
     _quad_sampler(dynamic_cast<QuadratureSampler *>(&_sampler))
 {
   // Check if number of distributions is correct
@@ -60,6 +62,9 @@ PolynomialChaosTrainer::PolynomialChaosTrainer(const InputParameters & parameter
     paramError("sampler",
                "QuadratureSampler must use all Sampler columns for training, and cannot be"
                " used with other Reporters - otherwise, quadrature integration does not work.");
+  if (_rtype == 0 && _ridge_penalty != 0.0)
+    paramError("penalty",
+               "Ridge regularization penalty is only relevant if 'regression_type = ols'.");
 
   // Make polynomials
   for (const auto & nm : getParam<std::vector<DistributionName>>("distributions"))
@@ -137,6 +142,10 @@ PolynomialChaosTrainer::train()
         _calculators[c]->updateCalculator(basis[i]);
     }
     _r_sum += (*_rval);
+
+    if (_ridge_penalty != 0.0)
+      for (const auto i : make_range(_ncoeff))
+        _matrix(i, i) += _ridge_penalty;
   }
 }
 

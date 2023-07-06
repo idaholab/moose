@@ -53,6 +53,9 @@ private:
   /// The method in which to perform the regression (0=integration, 1=OLS)
   unsigned int _rtype;
 
+  /// The penalty parameter for Ridge regularization
+  const Real & _ridge_penalty;
+
   /// QuadratureSampler pointer, necessary for applying quadrature weights
   QuadratureSampler * _quad_sampler;
 
