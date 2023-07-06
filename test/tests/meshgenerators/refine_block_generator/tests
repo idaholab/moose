@@ -31,11 +31,22 @@
     []
   []
 
-  [invalid_block]
-    type = RunException
-    input = test_single.i
-    cli_args = 'Mesh/refine/block="missing"'
-    expect_err = "The block 'missing' was not found within the mesh"
-    requirement = "The system shall error if attempting to refine a block that does not exist in the mesh."
+  [errors]
+    requirement = "The system shall error if "
+    [invalid_block]
+      type = RunException
+      input = test_single.i
+      cli_args = 'Mesh/refine/block="missing"'
+      expect_err = "The block 'missing' was not found within the mesh"
+      detail = "attempting to refine a block that does not exist in the mesh, and "
+    []
+    [wrong_size_inputs]
+      type = RunException
+      input = test_single.i
+      cli_args = 'Mesh/refine/refinement="1 2" --mesh-only'
+      expect_err = "The blocks and refinement parameter vectors should be the same size"
+      detail = "specifying a vector of refinement levels that does not match the vector of "
+               "subdomains to refine."
+    []
   []
 []
