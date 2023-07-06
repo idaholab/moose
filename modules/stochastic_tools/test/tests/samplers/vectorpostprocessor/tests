@@ -1,0 +1,11 @@
+[Tests]
+  issues = '#24651'
+  design = 'VectorPostprocessorSampler.md'
+
+  [VectorPostprocessors_sampler]
+    requirement = 'The system shall be able to perform stochastic sampling based on global vector data.'
+    type = 'CSVDiff'
+    input = 'vectorpostprocessor.i'
+    csvdiff = 'vectorpostprocessor_out_data_0002.csv'
+  []
+[]
