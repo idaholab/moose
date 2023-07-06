@@ -83,24 +83,6 @@ public:
   unsigned int gasPhaseIndex() const { return _gas_phase_number; };
 
   /**
-   * The index of the aqueous fluid component
-   * @return aqueous fluid component number
-   */
-  unsigned int aqueousComponentIndex() const { return _aqueous_fluid_component; };
-
-  /**
-   * The index of the gas fluid component
-   * @return gas fluid component number
-   */
-  unsigned int gasComponentIndex() const { return _gas_fluid_component; };
-
-  /**
-   * The index of the salt component
-   * @return salt component number
-   */
-  unsigned int saltComponentIndex() const { return _salt_component; };
-
-  /**
    * Name of FluidState
    */
   virtual std::string fluidStateName() const = 0;
@@ -120,12 +102,6 @@ protected:
   const unsigned int _aqueous_phase_number;
   /// Phase number of the gas phase
   unsigned int _gas_phase_number;
-  /// Fluid component number of the aqueous component
-  const unsigned int _aqueous_fluid_component;
-  /// Fluid component number of the gas phase
-  unsigned int _gas_fluid_component;
-  /// Salt component index
-  const unsigned int _salt_component;
   /// Universal gas constant (J/mol/K)
   const Real _R;
   /// Conversion from C to K

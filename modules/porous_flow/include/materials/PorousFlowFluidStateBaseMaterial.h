@@ -16,7 +16,7 @@ class PorousFlowCapillaryPressure;
 
 /**
  * Fluid state base class using a persistent set of primary variables for
- *  mutliphase, single and multicomponent cases.
+ * multiphase, single and multicomponent cases.
  */
 template <bool is_ad>
 class PorousFlowFluidStateBaseMaterialTempl : public PorousFlowVariableBaseTempl<is_ad>
@@ -49,16 +49,16 @@ protected:
 
   /// Conversion from degrees Celsius to degrees Kelvin
   const Real _T_c2k;
-  /// Flag to indicate whether to calculate stateful properties
+  /// Flag to indicate whether stateful properties should be computed
   bool _is_initqp;
-  /// FluidStateProperties data structure
+  /// FluidStateProperties data  for each fluid component in each fluid phase
   std::vector<FluidStateProperties> _fsp;
   /// Capillary pressure UserObject
   const PorousFlowCapillaryPressure & _pc;
-  /// Extension to append to material properties (qp or nodal)
-  const std::string _ext;
+  /// Suffix to append to material property names (either qp or nodal as required)
+  const std::string _sfx;
 
-  /// Mass fraction matrix
+  /// Mass fraction matrix (indexing is fluid component in fluid phase)
   GenericMaterialProperty<std::vector<std::vector<Real>>, is_ad> & _mass_frac;
   /// Gradient of the mass fraction matrix (only defined at the qps)
   GenericMaterialProperty<std::vector<std::vector<RealGradient>>, is_ad> * const _grad_mass_frac_qp;
@@ -96,7 +96,7 @@ protected:
   using PorousFlowVariableBaseTempl<is_ad>::_num_pf_vars;                                          \
   using PorousFlowFluidStateBaseMaterialTempl<is_ad>::_T_c2k;                                      \
   using PorousFlowFluidStateBaseMaterialTempl<is_ad>::_fsp;                                        \
-  using PorousFlowFluidStateBaseMaterialTempl<is_ad>::_ext;                                        \
+  using PorousFlowFluidStateBaseMaterialTempl<is_ad>::_sfx;                                        \
   using PorousFlowFluidStateBaseMaterialTempl<is_ad>::_pc;                                         \
   using PorousFlowFluidStateBaseMaterialTempl<is_ad>::_is_initqp;                                  \
   using PorousFlowFluidStateBaseMaterialTempl<is_ad>::genericValue;                                \

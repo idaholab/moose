@@ -368,12 +368,12 @@
     execute_on = 'timestep_end'
   []
   [x0mass]
-    type = ADPorousFlowFluidMass
+    type = FVPorousFlowFluidMass
     fluid_component = 0
     phase = '0 1'
   []
   [x1mass]
-    type = ADPorousFlowFluidMass
+    type = FVPorousFlowFluidMass
     fluid_component = 1
     phase = '0 1'
   []

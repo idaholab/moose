@@ -63,22 +63,20 @@ PorousFlowFluidMassTempl<is_ad>::PorousFlowFluidMassTempl(const InputParameters 
     _dictator(getUserObject<PorousFlowDictator>("PorousFlowDictator")),
     _fluid_component(getParam<unsigned int>("fluid_component")),
     _phase_index(getParam<std::vector<unsigned int>>("phase")),
-    _is_fv(_fe_problem.haveFV()),
-    _ext(_is_fv ? "_qp" : "_nodal"),
     _base_name(isParamValid("base_name") ? getParam<std::string>("base_name") + "_" : ""),
     _has_total_strain(hasMaterialProperty<RankTwoTensor>(_base_name + "total_strain")),
     _total_strain(_has_total_strain
                       ? &getMaterialProperty<RankTwoTensor>(_base_name + "total_strain")
                       : nullptr),
-    _porosity(getGenericMaterialProperty<Real, is_ad>("PorousFlow_porosity" + _ext)),
+    _porosity(getGenericMaterialProperty<Real, is_ad>("PorousFlow_porosity_nodal")),
     _fluid_density(getGenericMaterialProperty<std::vector<Real>, is_ad>(
-        "PorousFlow_fluid_phase_density" + _ext)),
+        "PorousFlow_fluid_phase_density_nodal")),
     _fluid_saturation(
-        getGenericMaterialProperty<std::vector<Real>, is_ad>("PorousFlow_saturation" + _ext)),
+        getGenericMaterialProperty<std::vector<Real>, is_ad>("PorousFlow_saturation_nodal")),
     _mass_fraction(getGenericMaterialProperty<std::vector<std::vector<Real>>, is_ad>(
-        "PorousFlow_mass_frac" + _ext)),
+        "PorousFlow_mass_frac_nodal")),
     _saturation_threshold(getParam<Real>("saturation_threshold")),
-    _var(getParam<unsigned>("kernel_variable_number") < _dictator.numVariables() && !_is_fv
+    _var(getParam<unsigned>("kernel_variable_number") < _dictator.numVariables()
              ? &_fe_problem.getStandardVariable(
                    _tid,
                    _dictator
@@ -119,8 +117,7 @@ PorousFlowFluidMassTempl<is_ad>::PorousFlowFluidMassTempl(const InputParameters 
 
   // Now that we know kernel_variable_number is OK, _var must be OK,
   // so ensure that reinit is called on _var:
-  if (!_is_fv)
-    addMooseVariableDependency(_var);
+  addMooseVariableDependency(_var);
 
   // Also check that the phase indices entered are not greater than the number of phases
   // to avoid a segfault. Note that the input parser takes care of negative inputs so we
@@ -153,43 +150,34 @@ PorousFlowFluidMassTempl<is_ad>::computeIntegral()
 {
   Real sum = 0;
 
-  if (!_is_fv)
-  {
-    // The use of _test in the loops below mean that the
-    // integral is exactly the same as the one computed
-    // by the PorousFlowMassTimeDerivative Kernel.  Because that
-    // Kernel is lumped, this Postprocessor also needs to
-    // be lumped.  Hence the use of the "nodal" Material
-    // Properties
-    const VariableTestValue & test = _var->phi();
+  // The use of _test in the loops below mean that the
+  // integral is exactly the same as the one computed
+  // by the PorousFlowMassTimeDerivative Kernel.  Because that
+  // Kernel is lumped, this Postprocessor also needs to
+  // be lumped.  Hence the use of the "nodal" Material
+  // Properties
+  const VariableTestValue & test = _var->phi();
 
-    for (unsigned node = 0; node < test.size(); ++node)
+  for (unsigned node = 0; node < test.size(); ++node)
+  {
+    Real nodal_volume = 0.0;
+    for (_qp = 0; _qp < _qrule->n_points(); ++_qp)
     {
-      Real nodal_volume = 0.0;
-      for (_qp = 0; _qp < _qrule->n_points(); ++_qp)
-      {
-        const Real n_v = _JxW[_qp] * _coord[_qp] * test[node][_qp];
-        if (_has_total_strain)
-          nodal_volume += n_v * (1.0 + (*_total_strain)[_qp].trace());
-        else
-          nodal_volume += n_v;
-      }
-
-      Real mass = 0.0;
-      for (auto ph : _phase_index)
-      {
-        if (MetaPhysicL::raw_value(_fluid_saturation[node][ph]) <= _saturation_threshold)
-          mass += MetaPhysicL::raw_value(_fluid_density[node][ph] * _fluid_saturation[node][ph] *
-                                         _mass_fraction[node][ph][_fluid_component]);
-      }
-      sum += nodal_volume * MetaPhysicL::raw_value(_porosity[node]) * mass;
+      const Real n_v = _JxW[_qp] * _coord[_qp] * test[node][_qp];
+      if (_has_total_strain)
+        nodal_volume += n_v * (1.0 + (*_total_strain)[_qp].trace());
+      else
+        nodal_volume += n_v;
     }
-  }
-  else
-  {
-    // For the FV case, no fancy nodal lumping is needed so we can use
-    // ElementIntegralPostprocessor::computeIntegral()
-    sum = ElementIntegralPostprocessor::computeIntegral();
+
+    Real mass = 0.0;
+    for (auto ph : _phase_index)
+    {
+      if (MetaPhysicL::raw_value(_fluid_saturation[node][ph]) <= _saturation_threshold)
+        mass += MetaPhysicL::raw_value(_fluid_density[node][ph] * _fluid_saturation[node][ph] *
+                                       _mass_fraction[node][ph][_fluid_component]);
+    }
+    sum += nodal_volume * MetaPhysicL::raw_value(_porosity[node]) * mass;
   }
 
   return sum;
@@ -199,18 +187,7 @@ template <bool is_ad>
 Real
 PorousFlowFluidMassTempl<is_ad>::computeQpIntegral()
 {
-  // The fluid mass for the finite volume case is much simpler
-  Real mass = 0.0;
-  const Real strain = (_has_total_strain ? (*_total_strain)[_qp].trace() : 0.0);
-
-  for (auto ph : _phase_index)
-  {
-    if (MetaPhysicL::raw_value(_fluid_saturation[_qp][ph]) <= _saturation_threshold)
-      mass += MetaPhysicL::raw_value(_fluid_density[_qp][ph] * _fluid_saturation[_qp][ph] *
-                                     _mass_fraction[_qp][ph][_fluid_component]);
-  }
-
-  return MetaPhysicL::raw_value(_porosity[_qp]) * (1.0 + strain) * mass;
+  return 0.0;
 }
 
 template class PorousFlowFluidMassTempl<false>;

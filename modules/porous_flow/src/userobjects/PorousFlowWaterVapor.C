@@ -40,7 +40,6 @@ PorousFlowWaterVapor::PorousFlowWaterVapor(const InputParameters & parameters)
   _num_phases = 2;
   _num_components = 1;
   _gas_phase_number = 1 - _aqueous_phase_number;
-  _gas_fluid_component = _aqueous_fluid_component;
 
   // Check that _aqueous_phase_number is <= total number of phases
   if (_aqueous_phase_number >= _num_phases)
@@ -48,9 +47,9 @@ PorousFlowWaterVapor::PorousFlowWaterVapor(const InputParameters & parameters)
                "This value is larger than the possible number of phases ",
                _num_phases);
 
-  // Check that _aqueous_fluid_component is <= total number of fluid components
-  if (_aqueous_fluid_component >= _num_components)
-    paramError("liquid_fluid_component",
+  // Check that _fluid_component is <= total number of fluid components
+  if (_fluid_component >= _num_components)
+    paramError("fluid_component",
                "This value is larger than the possible number of fluid components",
                _num_components);
 
@@ -153,7 +152,7 @@ PorousFlowWaterVapor::thermophysicalProperties(const ADReal & pressure,
       gas.viscosity = _water_fp.mu_from_p_T(gas.pressure, T);
       gas.enthalpy = enthalpy;
       gas.internal_energy = _water_fp.e_from_p_T(gas.pressure, T);
-      gas.mass_fraction[_gas_fluid_component] = 1.0;
+      gas.mass_fraction[_fluid_component] = 1.0;
 
       break;
     }
@@ -169,7 +168,7 @@ PorousFlowWaterVapor::thermophysicalProperties(const ADReal & pressure,
       liquid.enthalpy = enthalpy;
       liquid.internal_energy = _water_fp.e_from_p_T(pressure, T);
       liquid.saturation = 1.0;
-      liquid.mass_fraction[_aqueous_fluid_component] = 1.0;
+      liquid.mass_fraction[_fluid_component] = 1.0;
 
       break;
     }
@@ -211,8 +210,8 @@ PorousFlowWaterVapor::thermophysicalProperties(const ADReal & pressure,
       liquid.pressure = pressure;
       gas.pressure = pressure + _pc.capillaryPressure(liquid.saturation, qp);
 
-      gas.mass_fraction[_gas_fluid_component] = 1.0;
-      liquid.mass_fraction[_aqueous_fluid_component] = 1.0;
+      gas.mass_fraction[_fluid_component] = 1.0;
+      liquid.mass_fraction[_fluid_component] = 1.0;
 
       break;
     }

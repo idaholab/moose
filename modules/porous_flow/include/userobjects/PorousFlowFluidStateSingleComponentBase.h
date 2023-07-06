@@ -23,6 +23,18 @@ public:
   PorousFlowFluidStateSingleComponentBase(const InputParameters & parameters);
 
   /**
+   * The index of the aqueous fluid component
+   * @return aqueous fluid component number
+   */
+  unsigned int aqueousComponentIndex() const { return _fluid_component; };
+
+  /**
+   * The index of the gas fluid component
+   * @return gas fluid component number
+   */
+  unsigned int gasComponentIndex() const { return _fluid_component; };
+
+  /**
    * Determines the complete thermophysical state of the system for a given set of
    * primary variables
    *
@@ -45,6 +57,8 @@ public:
   unsigned int getEnthalpyIndex() const { return _hidx; };
 
 protected:
+  /// Fluid component number (only one fluid component in all phases)
+  const unsigned int _fluid_component;
   /// Index of derivative wrt pressure
   const unsigned int _pidx;
   /// Index of derivative wrt enthalpy

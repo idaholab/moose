@@ -33,39 +33,39 @@ PorousFlowFluidStateBaseMaterialTempl<is_ad>::PorousFlowFluidStateBaseMaterialTe
     _T_c2k(this->template getParam<MooseEnum>("temperature_unit") == 0 ? 0.0 : 273.15),
     _is_initqp(false),
     _pc(this->template getUserObject<PorousFlowCapillaryPressure>("capillary_pressure")),
-    _ext(_nodal_material ? "_nodal" : "_qp"),
+    _sfx(_nodal_material ? "_nodal" : "_qp"),
     _mass_frac(this->template declareGenericProperty<std::vector<std::vector<Real>>, is_ad>(
-        "PorousFlow_mass_frac" + _ext)),
+        "PorousFlow_mass_frac" + _sfx)),
     _grad_mass_frac_qp(
         _nodal_material
             ? nullptr
             : &this->template declareGenericProperty<std::vector<std::vector<RealGradient>>, is_ad>(
-                  "PorousFlow_grad_mass_frac" + _ext)),
+                  "PorousFlow_grad_mass_frac" + _sfx)),
     _dmass_frac_dvar(
         is_ad ? nullptr
               : &this->template declareProperty<std::vector<std::vector<std::vector<Real>>>>(
-                    "dPorousFlow_mass_frac" + _ext + "_dvar")),
+                    "dPorousFlow_mass_frac" + _sfx + "_dvar")),
     _fluid_density(this->template declareGenericProperty<std::vector<Real>, is_ad>(
-        "PorousFlow_fluid_phase_density" + _ext)),
+        "PorousFlow_fluid_phase_density" + _sfx)),
     _dfluid_density_dvar(is_ad ? nullptr
                                : &this->template declareProperty<std::vector<std::vector<Real>>>(
-                                     "dPorousFlow_fluid_phase_density" + _ext + "_dvar")),
+                                     "dPorousFlow_fluid_phase_density" + _sfx + "_dvar")),
     _fluid_viscosity(this->template declareGenericProperty<std::vector<Real>, is_ad>(
-        "PorousFlow_viscosity" + _ext)),
+        "PorousFlow_viscosity" + _sfx)),
     _dfluid_viscosity_dvar(is_ad ? nullptr
                                  : &this->template declareProperty<std::vector<std::vector<Real>>>(
-                                       "dPorousFlow_viscosity" + _ext + "_dvar")),
+                                       "dPorousFlow_viscosity" + _sfx + "_dvar")),
     _fluid_enthalpy(this->template declareGenericProperty<std::vector<Real>, is_ad>(
-        "PorousFlow_fluid_phase_enthalpy" + _ext)),
+        "PorousFlow_fluid_phase_enthalpy" + _sfx)),
     _dfluid_enthalpy_dvar(is_ad ? nullptr
                                 : &this->template declareProperty<std::vector<std::vector<Real>>>(
-                                      "dPorousFlow_fluid_phase_enthalpy" + _ext + "_dvar")),
+                                      "dPorousFlow_fluid_phase_enthalpy" + _sfx + "_dvar")),
     _fluid_internal_energy(this->template declareGenericProperty<std::vector<Real>, is_ad>(
-        "PorousFlow_fluid_phase_internal_energy" + _ext)),
+        "PorousFlow_fluid_phase_internal_energy" + _sfx)),
     _dfluid_internal_energy_dvar(
         is_ad ? nullptr
               : &this->template declareProperty<std::vector<std::vector<Real>>>(
-                    "dPorousFlow_fluid_phase_internal_energy" + _ext + "_dvar"))
+                    "dPorousFlow_fluid_phase_internal_energy" + _sfx + "_dvar"))
 {
   // Set the size of the FluidStateProperties vector
   _fsp.resize(_num_phases, FluidStateProperties(_num_components));
@@ -148,10 +148,10 @@ template <bool is_ad>
 void
 PorousFlowFluidStateBaseMaterialTempl<is_ad>::setMaterialVectorSize() const
 {
-  _fluid_density[_qp].assign(_num_phases, 0.0);
-  _fluid_viscosity[_qp].assign(_num_phases, 0.0);
-  _fluid_enthalpy[_qp].assign(_num_phases, 0.0);
-  _fluid_internal_energy[_qp].assign(_num_phases, 0.0);
+  _fluid_density[_qp].resize(_num_phases, 0.0);
+  _fluid_viscosity[_qp].resize(_num_phases, 0.0);
+  _fluid_enthalpy[_qp].resize(_num_phases, 0.0);
+  _fluid_internal_energy[_qp].resize(_num_phases, 0.0);
   _mass_frac[_qp].resize(_num_phases);
 
   for (unsigned int ph = 0; ph < _num_phases; ++ph)

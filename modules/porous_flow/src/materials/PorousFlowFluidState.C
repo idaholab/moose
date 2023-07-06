@@ -57,13 +57,13 @@ PorousFlowFluidStateTempl<is_ad>::PorousFlowFluidStateTempl(const InputParameter
     _gas_fluid_component(_fs.gasComponentIndex()),
     _salt_component(_fs.saltComponentIndex()),
     _temperature(
-        this->template getGenericMaterialProperty<Real, is_ad>("PorousFlow_temperature" + _ext)),
+        this->template getGenericMaterialProperty<Real, is_ad>("PorousFlow_temperature" + _sfx)),
     _gradT_qp(_nodal_material ? nullptr
                               : &this->template getGenericMaterialProperty<RealGradient, is_ad>(
-                                    "PorousFlow_grad_temperature" + _ext)),
+                                    "PorousFlow_grad_temperature" + _sfx)),
     _dtemperature_dvar(is_ad ? nullptr
                              : &this->template getMaterialProperty<std::vector<Real>>(
-                                   "dPorousFlow_temperature" + _ext + "_dvar")),
+                                   "dPorousFlow_temperature" + _sfx + "_dvar")),
     _temperature_varnum(coupled("temperature")),
     _Tvar(_dictator.isPorousFlowVariable(_temperature_varnum)
               ? _dictator.porousFlowVariableNum(_temperature_varnum)

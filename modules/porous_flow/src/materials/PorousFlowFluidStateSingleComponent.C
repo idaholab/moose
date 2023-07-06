@@ -50,20 +50,15 @@ PorousFlowFluidStateSingleComponentTempl<is_ad>::PorousFlowFluidStateSingleCompo
     _aqueous_phase_number(_fs.aqueousPhaseIndex()),
     _gas_phase_number(_fs.gasPhaseIndex()),
     _temperature(
-        _nodal_material
-            ? this->template declareGenericProperty<Real, is_ad>("PorousFlow_temperature_nodal")
-            : this->template declareGenericProperty<Real, is_ad>("PorousFlow_temperature_qp")),
+        this->template declareGenericProperty<Real, is_ad>("PorousFlow_temperature" + _sfx)),
     _grad_temperature_qp(_nodal_material
                              ? nullptr
                              : &this->template declareGenericProperty<RealGradient, is_ad>(
                                    "PorousFlow_grad_temperature_qp")),
-    _dtemperature_dvar(is_ad             ? nullptr
-                       : _nodal_material ? &this->template declareProperty<std::vector<Real>>(
-                                               "dPorousFlow_temperature_nodal_dvar")
-                                         : &this->template declareProperty<std::vector<Real>>(
-                                               "dPorousFlow_temperature_qp_dvar")),
-    _dgrad_temperature_dgradv(is_ad ? nullptr
-                              : _nodal_material
+    _dtemperature_dvar(is_ad ? nullptr
+                             : &this->template declareProperty<std::vector<Real>>(
+                                   "dPorousFlow_temperature" + _sfx + "_dvar")),
+    _dgrad_temperature_dgradv(is_ad || _nodal_material
                                   ? nullptr
                                   : &this->template declareProperty<std::vector<Real>>(
                                         "dPorousFlow_grad_temperature_qp_dgradvar")),
@@ -161,8 +156,8 @@ PorousFlowFluidStateSingleComponentTempl<is_ad>::computeQpProperties()
     {
       // Need to compute second derivatives of properties wrt variables for some of
       // the gradient derivatives. Use finite differences for now
-      const Real dp = 1.0e-2;
-      const Real dh = 1.0e-2;
+      const Real dp = 1.0e-5 * _liquid_porepressure[_qp];
+      const Real dh = 1.0e-5 * _enthalpy[_qp];
 
       std::vector<FluidStateProperties> fsp_dp(_num_phases, FluidStateProperties(_num_components));
       _fs.thermophysicalProperties(_liquid_porepressure[_qp] + dp, _enthalpy[_qp], _qp, fsp_dp);
@@ -186,10 +181,10 @@ PorousFlowFluidStateSingleComponentTempl<is_ad>::computeQpProperties()
 
       const auto d2T_dph = (fsp_dp[_aqueous_phase_number].temperature.derivatives()[_hidx] -
                             _fsp[_aqueous_phase_number].temperature.derivatives()[_hidx]) /
-                               (2.0 * dp) +
+                               dp +
                            (fsp_dh[_aqueous_phase_number].temperature.derivatives()[_pidx] -
                             _fsp[_aqueous_phase_number].temperature.derivatives()[_pidx]) /
-                               (2.0 * dh);
+                               dh;
 
       (*_dgrad_temperature_dv)[_qp][_pvar] =
           d2T_dp2 * _liquid_gradp_qp[_qp] + d2T_dph * _gradh_qp[_qp];
@@ -222,10 +217,10 @@ PorousFlowFluidStateSingleComponentTempl<is_ad>::computeQpProperties()
 
       const Real d2s_dph = (fsp_dp[_gas_phase_number].saturation.derivatives()[_hidx] -
                             _fsp[_gas_phase_number].saturation.derivatives()[_hidx]) /
-                               (2.0 * dp) +
+                               dp +
                            (fsp_dh[_gas_phase_number].saturation.derivatives()[_pidx] -
                             _fsp[_gas_phase_number].saturation.derivatives()[_pidx]) /
-                               (2.0 * dh);
+                               dh;
 
       (*_dgrads_qp_dv)[_qp][_gas_phase_number][_pvar] =
           d2s_dp2 * _liquid_gradp_qp[_qp] + d2s_dph * _gradh_qp[_qp];

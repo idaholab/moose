@@ -41,10 +41,6 @@ protected:
   const unsigned int _fluid_component;
   /// The phase indices that this Postprocessor is restricted to
   std::vector<unsigned int> _phase_index;
-  /// Whether the problem uses finite volume variables
-  const bool _is_fv;
-  /// Extension for material properties - nodal for FE, qp for FV
-  const std::string _ext;
   /// base name used in the Tensor Mechanics strain calculator
   const std::string _base_name;
   /// Whether there is a Material called _base_name_total_strain
