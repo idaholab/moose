@@ -16,7 +16,7 @@ InputParameters
 AdvectiveFluxAux::validParams()
 {
   InputParameters params = AuxKernel::validParams();
-  MooseEnum component("x y z normal", "x");
+  MooseEnum component("x y z normal");
 
   params.addRequiredParam<MooseEnum>("component", component, "The desired component of flux.");
   params.addParam<MooseFunctorName>("advected_variable", 0, "The name of the variable");
@@ -71,9 +71,9 @@ AdvectiveFluxAux::computeValue()
   vel_z = _vel_z ? raw_value((*_vel_z)(side_arg, state)) : 0;
 
   if (_advected_quantity_supplied)
-    return (_use_normal ? raw_value(_advected_quantity(side_arg, state)) *
+    return (_use_normal ? _advected_quantity(side_arg, state) *
                               RealVectorValue(vel_x, vel_y, vel_z) * _normals[_qp]
-                        : raw_value(_advected_quantity(side_arg, state)) *
+                        : _advected_quantity(side_arg, state) *
                               RealVectorValue(vel_x, vel_y, vel_z)(_component));
   else if (_advected_mat_prop_supplied)
     return (_use_normal ? _advected_material_property[_qp] * RealVectorValue(vel_x, vel_y, vel_z) *
