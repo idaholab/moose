@@ -167,8 +167,69 @@
     required_submodule = 'contrib/thermochimica'
   []
 
-  # [all_elements]
-  #   type =
-  # []
+  [wrong_datafile]
+    type = RunException
+    input = MoRu.i
+    expect_err = "Thermochimica data file cannot be parsed. 6"
+    cli_args = "ChemicalComposition/thermofile='SomeRandomFile.dat'"
+    issues = '#24552'
+    requirement = 'The system shall throw an error if the wrong datafile is specified'
+    design = ChemicalCompositionAction.md
+
+    max_threads = 1
+    required_submodule = 'contrib/thermochimica'
+  []
+
+  [option_all]
+    type = Exodiff
+    input = csv_ic_all.i
+    exodiff = csv_ic_all_out.e
+    design = ChemicalCompositionAction.md
+    issues = '#24552'
+    requirement = 'The system shall be able to handle ALL option for elements by using all database elements'
+
+    max_threads = 1
+    rel_err = 1e-3 # this is the same error thermochimica uses for its internal tests
+    required_submodule = 'contrib/thermochimica'
+  []
+
+  [wrong_element_phase1]
+    type = RunException
+    input = MoRu.i
+    expect_err = "Phase 'Rand' of 'ep:Rand:Mo' not found in the simulation."
+    cli_args = "GlobalParams/output_element_phases='ep:Rand:Mo'"
+    issues = '#24269'
+    requirement = 'The system shall throw an error if a wrong phase name is specified'
+    design = ChemicalCompositionAction.md
+
+    max_threads = 1
+    required_submodule = 'contrib/thermochimica'
+  []
+
+  [wrong_element_phase2]
+    type = RunException
+    input = MoRu.i
+    expect_err = "Element 'W' was not found in the simulation."
+    cli_args = "GlobalParams/output_element_phases='ep:BCCN:W'"
+    issues = '#24269'
+    requirement = 'The system shall throw an error if a wrong element name is specified'
+    design = ChemicalCompositionAction.md
+
+    max_threads = 1
+    required_submodule = 'contrib/thermochimica'
+  []
+
+  [wrong_element_phase3]
+    type = RunException
+    input = MoRu.i
+    expect_err = "No ':' separator found in variable 'vpgas_idealXe'"
+    cli_args = "GlobalParams/output_element_phases='vpgas_idealXe'"
+    issues = '#24552'
+    requirement = 'The system shall throw an error if the output elements in phase do not have enough tokens'
+    design = ThermochimicaNodalData.md
+
+    max_threads = 1
+    required_submodule = 'contrib/thermochimica'
+  []
 
 []

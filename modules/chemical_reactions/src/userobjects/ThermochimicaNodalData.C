@@ -250,8 +250,8 @@ ThermochimicaNodalData::execute()
     if (_output_element_phases)
       for (const auto i : make_range(_n_phase_elements))
       {
-        auto [moles, idbg] = Thermochimica::getElementMolesInPhase(_phase_element_pairs[i].first,
-                                                                   _phase_element_pairs[i].second);
+        auto [moles, idbg] = Thermochimica::getElementMolesInPhase(_phase_element_pairs[i].second,
+                                                                   _phase_element_pairs[i].first);
 
         if (idbg == 0)
           _el_ph[i]->setNodalValue(moles, _qp);
@@ -261,7 +261,7 @@ ThermochimicaNodalData::execute()
           mooseError("Failed to get moles of element '",
                      _phase_element_pairs[i].second,
                      "' in phase '",
-                     _vapor_phase_pairs[i].first,
+                     _phase_element_pairs[i].first,
                      "'. Thermochimica returned ",
                      idbg);
       }

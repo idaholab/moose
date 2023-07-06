@@ -11,7 +11,7 @@
   elements = 'F Li Be'
   output_phases = 'gas_ideal MSFL'
   output_species = 'gas_ideal:Li MSFL:LiF'
-  output_element_potentials = 'ALL'
+  output_element_potentials = 'mu:F mu:Li mu:Be'
   output_vapor_pressures = 'vp:gas_ideal:LiF'
 []
 

@@ -93,6 +93,7 @@ ChemicalCompositionAction::ChemicalCompositionAction(const InputParameters & par
 
   std::replace(_munit.begin(), _munit.end(), '_', ' ');
 
+#ifdef THERMOCHIMICA_ENABLED
   // Initialize database in Thermochimica
   if (isParamValid("thermofile"))
   {
@@ -155,7 +156,6 @@ ChemicalCompositionAction::ChemicalCompositionAction(const InputParameters & par
       _element_ids[i] = Thermochimica::atomicNumber(_elements[i]);
   }
 
-#ifdef THERMOCHIMICA_ENABLED
   // I want to check all the input parameters here and have a list of possible phases and species
   // for setting up the Aux variables with "ALL" option
 
@@ -355,7 +355,7 @@ ChemicalCompositionAction::ChemicalCompositionAction(const InputParameters & par
       for (const auto i : index_range(_element_phases))
       {
         std::vector<std::string> tokens;
-        MooseUtils::tokenize(_vapor_pressures[i], tokens, 1, ":");
+        MooseUtils::tokenize(_element_phases[i], tokens, 1, ":");
         if (tokens.size() == 1)
           paramError("output_element_phases",
                      "No ':' separator found in variable '",
@@ -469,8 +469,8 @@ ChemicalCompositionAction::act()
     if (isParamValid("output_element_phases"))
       uo_params.set<std::vector<VariableName>>("output_element_phases")
           .insert(uo_params.set<std::vector<VariableName>>("output_element_phases").end(),
-                  _vapor_pressures.begin(),
-                  _vapor_pressures.end());
+                  _element_phases.begin(),
+                  _element_phases.end());
 
     uo_params.set<ChemicalCompositionAction *>("_chemical_composition_action") = this;
 
