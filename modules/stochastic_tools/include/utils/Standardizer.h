@@ -33,6 +33,11 @@ public:
   /// Sets mean and std directly using provided vectors
   void set(const std::vector<Real> & mean, const std::vector<Real> & stdev);
 
+  /// Get the mean vector
+  const std::vector<Real> & getMean() const { return _mean; }
+  /// Get the standard deviation vector
+  const std::vector<Real> & getStdDev() const { return _stdev; }
+
   /// Methods for computing and setting mean and standard
   void computeSet(const RealEigenMatrix & input);
 

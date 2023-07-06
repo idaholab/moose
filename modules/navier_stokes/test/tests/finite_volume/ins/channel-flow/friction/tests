@@ -1,0 +1,62 @@
+[Tests]
+  issues = '#19472 #24856 #16872'
+  design = 'navier_stokes/insfv.md NSFVAction.md'
+  [linear-friction]
+    type = 'Exodiff'
+    input = 2d-rc-friction.i
+    exodiff = 2d-rc-friction_out.e
+    requirement = 'The system shall be able to model linear volumetric friction in a channel.'
+    design = 'INSFVMomentumFriction.md'
+  []
+  [quadratic-friction]
+    type = 'Exodiff'
+    input = 2d-rc-friction.i
+    exodiff = 2d-rc-friction-quad_out.e
+    requirement = 'The system shall be able to model quadratic volumetric friction in a channel.'
+    cli_args = "Outputs/file_base='2d-rc-friction-quad_out' FVKernels/inactive='u_friction_linear "
+               "v_friction_linear'"
+    design = 'INSFVMomentumFriction.md'
+  []
+  [exponential-friction-factor]
+    type = 'Exodiff'
+    input = 2d-rc-friction.i
+    exodiff = 2d-rc-friction-exp-factor_out.e
+    requirement = 'The system shall be able to model quadratic volumetric friction with an exponential friction factor correlation in a channel.'
+    cli_args = "Outputs/file_base='2d-rc-friction-exp-factor_out' "
+               "FVKernels/inactive='u_friction_linear v_friction_linear' "
+               "Materials/inactive='friction_coefficient'"
+    design = 'ExponentialFrictionMaterial.md'
+  []
+  [exponential-friction-factor-jacobian]
+    type = PetscJacobianTester
+    input = 2d-rc-friction.i
+    requirement = 'The system shall be able to build the correct Jacobian using exponential correlation for the friction factor.'
+    cli_args = "Outputs/file_base='2d-rc-friction-exp-factor_out' "
+               "FVKernels/inactive='u_friction_linear v_friction_linear' "
+               "Materials/inactive='friction_coefficient' Mesh/gen/nx=4 Mesh/gen/ny=4 "
+  []
+  [linear-friction-action]
+    type = 'Exodiff'
+    input = 2d-rc-friction-action.i
+    exodiff = 2d-rc-friction-action_out.e
+    requirement = 'The system shall be able to model linear volumetric friction in a channel using a custom action syntax.'
+  []
+  [quadratic-friction-action]
+    type = 'Exodiff'
+    input = 2d-rc-friction-action.i
+    exodiff = 2d-rc-friction-action-quad_out.e
+    requirement = 'The system shall be able to model quadratic volumetric friction in a channel using a custom action syntax.'
+    cli_args = "Modules/NavierStokesFV/friction_types='forchheimer' "
+               "Outputs/file_base='2d-rc-friction-action-quad_out'"
+  []
+  [exponential-friction-factor-action]
+    type = 'Exodiff'
+    input = 2d-rc-friction-action.i
+    exodiff = 2d-rc-friction-exp-factor-action_out.e
+    requirement = 'The system shall be able to model quadratic volumetric friction with an exponential friction factor correlation in a channel a custom action syntax.'
+    cli_args = "Modules/NavierStokesFV/friction_types='forchheimer' "
+               "Modules/NavierStokesFV/friction_coeffs='friction_coefficient' "
+               "Outputs/file_base='2d-rc-friction-exp-factor-action_out' "
+    design = 'ExponentialFrictionMaterial.md'
+  []
+[]
