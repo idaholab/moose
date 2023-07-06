@@ -18,7 +18,8 @@ BinaryRecombinationBC::validParams()
   params.addClassDescription("Models recombination of the variable with a coupled species at "
                              "boundaries, resulting in loss");
   params.addRequiredCoupledVar("v", "The other mobile variable that takes part in recombination");
-  params.addParam<MaterialPropertyName>("Kr", "Kr", "The name of the material property for the recombination coefficient");
+  params.addParam<MaterialPropertyName>(
+      "Kr", "Kr", "The name of the material property for the recombination coefficient");
   return params;
 }
 
