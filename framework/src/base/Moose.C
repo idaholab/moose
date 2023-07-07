@@ -163,6 +163,7 @@ addActionTypes(Syntax & syntax)
   registerMooseObjectTask("add_vector_postprocessor",     VectorPostprocessor,    false);
   registerMooseObjectTask("add_reporter",                 Reporter,               false);
   registerMooseObjectTask("add_positions",                Positions,              false);
+  registerMooseObjectTask("add_times",                    Times,                  false);
 
   registerMooseObjectTask("add_indicator",                Indicator,              false);
   registerMooseObjectTask("add_marker",                   Marker,                 false);
@@ -311,6 +312,7 @@ addActionTypes(Syntax & syntax)
                            "(add_ic)"
                            "(add_constraint, add_field_split)"
                            "(add_preconditioning)"
+                           "(add_times)"
                            "(add_time_stepper, add_time_steppers)"
                            "(compose_time_stepper)"
                            "(setup_time_steppers)"
@@ -483,6 +485,9 @@ associateSyntaxInner(Syntax & syntax, ActionFactory & /*action_factory*/)
 
   registerSyntax("AddPositionsAction", "Positions/*");
   syntax.registerSyntaxType("Positions/*", "PositionsName");
+
+  registerSyntax("AddTimesAction", "Times/*");
+  syntax.registerSyntaxType("Times/*", "TimesName");
 
   registerSyntax("AddDamperAction", "Dampers/*");
 

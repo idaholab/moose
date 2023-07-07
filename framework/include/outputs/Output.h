@@ -22,6 +22,7 @@
 #include "FunctionInterface.h"
 
 class MooseMesh;
+class Times;
 
 // libMesh forward declarations
 namespace libMesh
@@ -211,6 +212,9 @@ protected:
 
   /// Sync times for this outputter
   std::set<Real> _sync_times;
+
+  /// Sync times object for this outputter
+  const Times * const _sync_times_object;
 
   /// Start outputting time
   Real _start_time;
