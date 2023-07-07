@@ -46,7 +46,6 @@ ParallelMarkovChainMonteCarloBase::validParams()
 ParallelMarkovChainMonteCarloBase::ParallelMarkovChainMonteCarloBase(
     const InputParameters & parameters)
   : Sampler(parameters),
-    ReporterInterface(this),
     _num_parallel_proposals(getParam<unsigned int>("num_parallel_proposals")),
     _lb(isParamValid("lb") ? &getParam<std::vector<Real>>("lb") : nullptr),
     _ub(isParamValid("ub") ? &getParam<std::vector<Real>>("ub") : nullptr),
