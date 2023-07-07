@@ -106,6 +106,9 @@ InternalSideIndicator::finalize()
 
   if (_scale_by_flux_faces)
   {
+    if (_var.isFV())
+      paramError("scale_by_flux_faces", "Unsupported at this time for finite volume variables");
+
     // Figure out the total number of sides contributing to the error.
     // We'll scale by this so boundary elements are less penalized
     for (unsigned int side = 0; side < _current_elem->n_sides(); side++)
