@@ -135,10 +135,14 @@ MeshDiagnosticsGenerator::generate()
         if (!found)
         {
           _num_elem_overlaps++;
-          _console << "Element overlap detected at : " << *node << std::endl;
+          if (_num_elem_overlaps < 10)
+            _console << "Element overlap detected at : " << *node << std::endl;
+          else if (_num_elem_overlaps == 10)
+            _console << "Maximum output reached, log is silenced" << std::endl;
         }
       }
     }
+
     _console << "Number of elements overlapping (node-based heuristics): " << _num_elem_overlaps
              << std::endl;
 
@@ -154,13 +158,16 @@ MeshDiagnosticsGenerator::generate()
       if (overlaps.size() > 1)
       {
         _num_elem_overlaps++;
-        _console << "Element overlap detected at a centroid : " << elem->vertex_average()
-                 << std::endl;
+        if (_num_big_elems < 10)
+          _console << "Element overlap detected at a centroid : " << elem->vertex_average()
+                   << std::endl;
+        else if (_num_elem_overlaps == 10)
+          _console << "Maximum output reached, log is silenced" << std::endl;
       }
     }
+    _console << "Number of elements overlapping (centroid-based heuristics): " << _num_elem_overlaps
+             << std::endl;
   }
-  _console << "Number of elements overlapping (centroid-based heuristics): " << _num_elem_overlaps
-           << std::endl;
 
   if (_check_non_planar_sides)
   {
@@ -195,8 +202,11 @@ MeshDiagnosticsGenerator::generate()
         if (found_non_planar)
         {
           _sides_non_planar++;
-          _console << "Nonplanar side detected at :" << elem->side_ptr(i)->vertex_average()
-                   << std::endl;
+          if (_sides_non_planar < 10)
+            _console << "Nonplanar side detected at :" << elem->side_ptr(i)->vertex_average()
+                     << std::endl;
+          else if (_sides_non_planar == 10)
+            _console << "Maximum output reached, log is silenced" << std::endl;
         }
       }
     }
@@ -232,7 +242,10 @@ MeshDiagnosticsGenerator::generate()
         if (!found_conformal)
         {
           _num_nonconformal_nodes++;
-          _console << "Non-conformality detected at  : " << *node << std::endl;
+          if (_num_nonconformal_nodes < 10)
+            _console << "Non-conformality detected at  : " << *node << std::endl;
+          else if (_num_nonconformal_nodes == 10)
+            _console << "Maximum output reached, log is silenced" << std::endl;
         }
       }
     }
