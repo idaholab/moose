@@ -38,6 +38,9 @@ MeshDiagnosticsGenerator::validParams()
                         true,
                         "whether to examine the conformality of elements in the mesh");
   params.addParam<Real>("nonconformal_tol", 1e-2, "tolerance for element non-conformality");
+  params.addParam<bool>("examine_adaptivity_non_conformal",
+                        true,
+                        "whether to check for adaptavity in non-conformal meshes");
   return params;
 }
 
@@ -51,7 +54,8 @@ MeshDiagnosticsGenerator::MeshDiagnosticsGenerator(const InputParameters & param
     _check_element_overlap(getParam<bool>("examine_element_overlap")),
     _check_non_planar_sides(getParam<bool>("examine_nonplanar_sides")),
     _check_non_conformal_mesh(getParam<bool>("examine_non_conformality")),
-    _non_conformality_tol(getParam<Real>("nonconformal_tol"))
+    _non_conformality_tol(getParam<Real>("nonconformal_tol")),
+    _check_adaptivity_non_conformality(getParam<bool>("examine_adaptivity_non_conformal"))
 {
 }
 
@@ -60,7 +64,6 @@ MeshDiagnosticsGenerator::generate()
 {
   std::unique_ptr<MeshBase> mesh = std::move(_input);
   mesh->prepare_for_use();
-
   if (_check_element_volumes)
   {
     // loop elements within the mesh
@@ -86,7 +89,7 @@ MeshDiagnosticsGenerator::generate()
     // loop on sub-domain
     for (auto & id : ids)
     {
-      // ElemType defines an enum for geometric element types
+      // ElemType defines an num for geometric element types
       std::set<ElemType> types;
       // loop on elements within this sub-domain
       for (auto & elem : mesh->active_subdomain_elements_ptr_range(id))
@@ -196,8 +199,8 @@ MeshDiagnosticsGenerator::generate()
                    << std::endl;
         }
       }
-      _console << "Number of nonplanar element sides detected: " << _sides_non_planar << std::endl;
     }
+    _console << "Number of nonplanar element sides detected: " << _sides_non_planar << std::endl;
   }
 
   if (_check_non_conformal_mesh)
@@ -210,6 +213,7 @@ MeshDiagnosticsGenerator::generate()
       // find all the elements around this node
       std::set<const Elem *> elements;
       (*pl)(*node, elements);
+
       // loop through the set of elements
       for (auto & elem : elements)
       {
@@ -236,5 +240,96 @@ MeshDiagnosticsGenerator::generate()
     pl->unset_close_to_point_tol();
   }
 
+  // if (_check_non_conformal_mesh)
+  // {
+  //   auto pl = mesh->sub_point_locator();
+  //   // loop on nodes
+  //   for (auto & node : mesh->local_node_ptr_range())
+  //   {
+  //     pl->set_close_to_point_tol(_non_conformality_tol);
+  //     // find all the elements around this node
+  //     std::set<const Elem *> elements;
+  //     (*pl)(*node, elements);
+  //     // loop through the set of elements
+  //     for (auto & elem : elements)
+  //     {
+  //       // If the node is not part of this element's nodes, it is a
+  //       // case of non-conformality
+  //       bool found_conformal = false;
+
+  //       for (auto & elem_node : elem->node_ref_range())
+  //       {
+  //         if (*node == elem_node)
+  //         {
+  //           found_conformal = true;
+  //           break;
+  //         }
+  //       }
+  //       if (!found_conformal)
+  //         elements.erase(elem);
+  //     }
+  //     // if there is a non-conformality
+  //     // loop on elements that actually do have the node as one of their nodes
+  //     if (((mesh->mesh_dimension() == 2) && (elements.size() == 2)) ||
+  //         ((mesh->mesh_dimension() == 3) && (elements.size() == 4)))
+  //     {
+  //       for (auto & elem : elements)
+  //       {
+  //         if (!MooseUtils::absoluteFuzzyEqual(elem->volume(), (*elements.begin())->volume()))
+  //           break;
+  //       }
+  //     }
+  //   }
+  //   _console << "Number of non-conformal nodes: " << _num_nonconformal_nodes << std::endl;
+  //   pl->unset_close_to_point_tol();
+  // }
+
+  if (_check_adaptivity_non_conformality)
+  {
+    auto pl = mesh->sub_point_locator();
+    // loop on nodes
+    for (auto & node : mesh->local_node_ptr_range())
+    {
+      pl->set_close_to_point_tol(_non_conformality_tol);
+      // find all the elements around this node
+      std::set<const Elem *> elements;
+      (*pl)(*node, elements);
+
+      // loop through the set of elements
+      for (auto & elem : elements)
+      {
+        // If the node is not part of this element's nodes, it is a
+        // case of non-conformality
+        bool found_conformal = false;
+
+        for (auto & elem_node : elem->node_ref_range())
+        {
+          if (*node == elem_node)
+          {
+            found_conformal = true;
+            break;
+          }
+        }
+        if (!found_conformal)
+          elements.erase(elem);
+      }
+      if (elements.size() > 0)
+      {
+        for (auto & elem : mesh->active_element_ptr_range())
+        {
+          for (auto i : make_range(elem->n_sides()))
+          {
+            auto side = elem->side_ptr(i);
+            std::vector<Point *> nodes;
+            for (auto & node : side->node_ref_range())
+              nodes.emplace_back(&node);
+            {
+              // if (*node ==)
+            }
+          }
+        }
+      }
+    }
+  }
   return dynamic_pointer_cast<MeshBase>(mesh);
 }

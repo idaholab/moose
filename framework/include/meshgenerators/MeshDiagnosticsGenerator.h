@@ -54,4 +54,8 @@ protected:
   Real _non_conformality_tol;
   /// counting the number of non-conformal elements
   unsigned int _num_nonconformal_nodes;
+  /// whether to check
+
+  /// whether to check for the adaptivity of non-conformal meshes
+  bool _check_adaptivity_non_conformality;
 };
