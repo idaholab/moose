@@ -68,7 +68,34 @@ experiment:
 !style-end!
 
 ```pre
-SEE EXAMPLE INSIDE CONTAINER
+= Study reactor kinetics problem
+* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+100 new transnt
+*  time step control
+201 2.000 1.0-7 0.0001 3  1 10000 10000
+*
+301 rkfipow
+302 rkreac
+303 rkrecper
+*
+0030000 edwards pipe
+0030001 2
+0030101 4.56037-3,2
+0030301 2.04801-1,2
+0030601 0,2
+0030801 1.177911-6,0,2
+0031001 0,2
+0031101 0,1
+0031201 0,7.0+6,9.78293+5,2.58184+6,0,0,2
+0031301 0,0,0,1
+* reactivity table
+20201100 reac-t
+20201101  0.0,0.0, 1.1,1.1  2.0,-2.0
+* reactor kinetics input
+30000000 point
+30000001 no-gamma  1.0+6  0.0  200.0
+30000011 11
+. end of case
 ```
 
 Name the test file `rk.i`. This file can be created in your INL-HPC home directory or copied via scp
