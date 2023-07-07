@@ -43,9 +43,6 @@ ReactorMeshParams::validParams()
   params.addParam<std::vector<unsigned int>>(
       "axial_mesh_intervals",
       "Number of elements in the Z direction for each axial region");
-  params.addParam<bool>("generate_rgmb_metadata",
-                        "Whether to define additional metadata to represent geometry and region "
-                        "IDs of RGMB mesh generators");
   params.addClassDescription("This ReactorMeshParams object acts as storage for persistent "
                              "information about the reactor geometry.");
   return params;
@@ -55,9 +52,7 @@ ReactorMeshParams::ReactorMeshParams(const InputParameters & parameters)
   : MeshGenerator(parameters),
     _dim(getParam<MooseEnum>("dim")),
     _geom(getParam<MooseEnum>("geom")),
-    _assembly_pitch(getParam<Real>("assembly_pitch")),
-    _define_metadata(
-        isParamValid("generate_rgmb_metadata") ? getParam<bool>("generate_rgmb_metadata") : false)
+    _assembly_pitch(getParam<Real>("assembly_pitch"))
 {
   if (int(_dim) == 2)
   {
@@ -106,8 +101,6 @@ ReactorMeshParams::ReactorMeshParams(const InputParameters & parameters)
   if (isParamValid("top_boundary_id") && isParamValid("bottom_boundary_id") &&
       (_bottom_boundary == _top_boundary))
     mooseError("top_boundary_id and bottom_boundary_id must be unique values");
-
-  this->declareMeshProperty(RGMB::generate_metadata, _define_metadata);
 }
 
 std::unique_ptr<MeshBase>

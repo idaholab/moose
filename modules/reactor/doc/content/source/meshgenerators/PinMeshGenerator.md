@@ -37,14 +37,11 @@ If the pin is extruded to three dimensions the top-most boundary ID must be assi
 
 ## Metadata Information
 
-Users may be interested in defining additional metadata to represent the reactor geometry and region IDs assigned to each geometry zone, which may be useful to users who want mesh geometry and composition information without having to inspect the generated mesh itself. In order to do so,  [ReactorMeshParams](ReactorMeshParams.md)/[!param](/Mesh/ReactorMeshParams/generate_rgmb_metadata) must be set to true. [!param](/Mesh/PinMeshGenerator/show_rgmb_metadata) can be set to true in order to see the values of these metadata entries as console output.
+Users may be interested in defining metadata to represent the reactor geometry and region IDs assigned to each geometry zone, which may be useful to users who want mesh geometry and composition information without having to inspect the generated mesh itself. In order to see the values of these metadata entries as console output, [!param](/Mesh/PinMeshGenerator/show_rgmb_metadata) can be set to true.
 
-At the pin level, each metadata entry is prepended with the prefix `"pin_<pin_type_id>_"`, where `<pin_type_id>` is the pin_type id assigned with [!param](/Mesh/PinMeshGenerator/pin_type), and the following metadata is defined on the pin mesh:
+At the pin level, the following metadata is defined on the pin mesh:
 
-- `mesh_dimensions`: Number of dimensions in pin mesh, equivalent to  [ReactorMeshParams](ReactorMeshParams.md)/[!param](/Mesh/ReactorMeshParams/dim)
-- `mesh_geometry`: Whether pin geometry is hexagonal ("Hex") or Cartesian ("Square"), equivalent to  [ReactorMeshParams](ReactorMeshParams.md)/[!param](/Mesh/ReactorMeshParams/geom)
-- `axial_boundaries`: Length of each axial region, equivalent to  [ReactorMeshParams](ReactorMeshParams.md)/[!param](/Mesh/ReactorMeshParams/axial_regions). Only relevant for 3-D meshes.
-- `axial_mesh_intervals`: Number of elements in the axial dimension for each axial region, equivalent to [ReactorMeshParams](ReactorMeshParams.md)/[!param](/Mesh/ReactorMeshParams/axial_mesh_intervals). Only relevant for 3-D meshes.
+- `pin_type`: pin_type id associated with pin mesh, equivalent to [!param](/Mesh/PinMeshGenerator/pin_type)
 - `pitch`: Pitch of outermost boundary polygon, equivalent to [!param](/Mesh/PinMeshGenerator/pitch)
 - `is_homogenized`: Whether or not pin mesh is homogenized, equivalent to [!param](/Mesh/PinMeshGenerator/homogenized)
 - `ring_radii`: Location of rings comprising of pin region, equivalent to [!param](/Mesh/PinMeshGenerator/ring_radii).
@@ -52,6 +49,8 @@ At the pin level, each metadata entry is prepended with the prefix `"pin_<pin_ty
 - `ring_region_ids`: 2-D vector of region ids corresponding to radial and axial zones within ring regions of pin mesh. Inner indexing is radial zones, while outer index is axial zones.
 - `background_region_id`: 1-D vector of region_ids corresponding to axial zones of background regions of pin mesh.
 - `duct_region_ids`: 2-D vector of region ids corresponding to radial and axial zones within duct regions of pin mehs. Inner indexing is radial zones, while outer index is axial zones.
+
+In addition, the value of the metadata `reactor_params_name` can be used to retrieve global metadata defined by [ReactorMeshParams](ReactorMeshParams.md). Please refer to [ReactorMeshParams](ReactorMeshParams.md) to see a list of metadata defined by this mesh generator.
 
 ## Example Syntax
 

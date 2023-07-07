@@ -25,6 +25,7 @@ public:
   std::unique_ptr<MeshBase> generate() override;
 
 protected:
+  // Define metadata associated with PinMeshGenerator
   void generateMetadata();
 
   ///The id number for this pin type

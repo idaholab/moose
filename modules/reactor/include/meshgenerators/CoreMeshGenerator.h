@@ -26,6 +26,7 @@ public:
   std::unique_ptr<MeshBase> generate() override;
 
 protected:
+  // Define metadata associated with CoreMeshGenerator
   void generateMetadata();
 
   ///The names of the assemblies that compose the core

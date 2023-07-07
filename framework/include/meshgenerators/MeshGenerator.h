@@ -191,11 +191,21 @@ protected:
    * Method for copying attribute from input mesh meta-data store to current mesh meta-data store
    */
   template <typename T>
-  T & copyMeshProperty(const std::string & source_data_name,
-                       const std::string & source_mesh,
-                       const std::string & target_data_name)
+  T & copyMeshProperty(const std::string & target_data_name,
+                       const std::string & source_data_name,
+                       const std::string & source_mesh)
   {
     return declareMeshProperty(target_data_name, getMeshProperty<T>(source_data_name, source_mesh));
+  }
+
+  /**
+   * Method for copying attribute from input mesh meta-data store to current mesh meta-data store,
+   * keeping source and target data names the same
+   */
+  template <typename T>
+  T & copyMeshProperty(const std::string & source_data_name, const std::string & source_mesh)
+  {
+    return copyMeshProperty<T>(source_data_name, source_data_name, source_mesh);
   }
 
   /**

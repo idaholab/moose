@@ -34,14 +34,9 @@ If the assembly is extruded to three dimensions the top-most boundary ID must be
 
 ## Metadata Information
 
-Users may be interested in defining additional metadata to represent the reactor geometry and region IDs assigned to each geometry zone, which may be useful to users who want mesh geometry and composition information without having to inspect the generated mesh itself. In order to do so,  [ReactorMeshParams](ReactorMeshParams.md)/[!param](/Mesh/ReactorMeshParams/generate_rgmb_metadata) must be set to true. [!param](/Mesh/AssemblyMeshGenerator/show_rgmb_metadata) can be set to true in order to see the values of these metadata entries as console output.
+Users may be interested in defining additional metadata to represent the reactor geometry and region IDs assigned to each geometry zone, which may be useful to users who want mesh geometry and composition information without having to inspect the generated mesh itself. [!param](/Mesh/AssemblyMeshGenerator/show_rgmb_metadata) can be set to true in order to see the values of these metadata entries as console output. The following metadata is defined on the assembly mesh:
 
-At the assembly level, each metadata entry is prepended with the prefix `"assembly_<assembly_type_id>_"`, where `<assembly_type_id>` is the assembly_type id assigned with [!param](/Mesh/AssemblyMeshGenerator/assembly_type), and the following metadata is defined on the assembly mesh:
-
-- `mesh_dimensions`: Number of dimensions in assembly mesh, equivalent to  [ReactorMeshParams](ReactorMeshParams.md)/[!param](/Mesh/ReactorMeshParams/dim)
-- `mesh_geometry`: Whether assembly geometry is hexagonal ("Hex") or Cartesian ("Square"), equivalent to  [ReactorMeshParams](ReactorMeshParams.md)/[!param](/Mesh/ReactorMeshParams/geom)
-- `axial_boundaries`: Length of each axial region, equivalent to  [ReactorMeshParams](ReactorMeshParams.md)/[!param](/Mesh/ReactorMeshParams/axial_regions). Only relevant for 3-D meshes.
-- `axial_mesh_intervals`: Number of elements in the axial dimension for each axial region, equivalent to [ReactorMeshParams](ReactorMeshParams.md)/[!param](/Mesh/ReactorMeshParams/axial_mesh_intervals). Only relevant for 3-D meshes.
+- `assembly_type`: Value of type_id associated with assembly, equivalent to [!param](/Mesh/AssemblyMeshGenerator/assembly_type)
 - `pitch`: Assembly pitch, equivalent to [!param](/Mesh/ReactorMeshParams/assembly_pitch)
 - `is_homogenized`: Whether or not assembly mesh is homogenized, equivalent to [!param](/Mesh/PinMeshGenerator/homogenized)
 - `is_single_pin`: Whether or not assembly mesh is represented by a single pin region or a lattice of pins, equivalent to [!param](/Mesh/PinMeshGenerator/use_as_assembly).
@@ -56,10 +51,12 @@ If the assembly is represented as a single pin, the following metadata is also d
 
 If instead the assembly is represented as a lattice of pins, the following metadata is defined:
 
-- `pin_types`: pin_type ids of pins comprising of pin lattice.
-- `lattice`: 2-D lattice of pins in assembly, where each location represents the pin_type id of the pin in that lattice position.
+- `pin_names`: Mesh generator names of constituent pins in lattice.
+- `pin_lattice`: 2-D lattice of pins in assembly, where each location represents the index of the pin in the list of names under the `pin_names` metadata entry
 
-For each of the pins listed in `pin_types`, the pin-level metadata is also displayed. A list of pin-level metadata that is defined on the assembly mesh can be found in [PinMeshGenerator](PinMeshGenerator.md).
+For each of the pins listed in `pin_names`, the pin-level metadata is also displayed when [!param](/Mesh/AssemblyMeshGenerator/show_rgmb_metadata) is set to true. A list of pin-level metadata that is defined on the assembly mesh can be found in [PinMeshGenerator](PinMeshGenerator.md).
+
+In addition, the value of the `reactor_params_name` metadata can be used to retrieve global metadata defined by [ReactorMeshParams](ReactorMeshParams.md). Please refer to [ReactorMeshParams](ReactorMeshParams.md) to see a list of metadata defined by this mesh generator.
 
 ## Example Syntax
 
