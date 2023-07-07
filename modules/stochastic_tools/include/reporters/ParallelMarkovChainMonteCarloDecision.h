@@ -13,6 +13,7 @@
 #include "ParallelMarkovChainMonteCarloBase.h"
 #include "LikelihoodFunctionBase.h"
 #include "LikelihoodInterface.h"
+#include "Distribution.h"
 
 /**
  * ParallelMarkovChainMonteCarloDecision will help make sample accept/reject decisions in MCMC

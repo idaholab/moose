@@ -4,12 +4,14 @@
 
 ## Overview
 
-!equation
-k(x,x^\prime) = \sigma_f^2 \, exp \left(- r_\ell(x,x^\prime)^\gamma \right) + \sigma_n^2 \, \delta_{x,x^\prime},
+The Truncated Gaussian likelihood function considering $N$ experimental configurations is given by:
 
-## Example Input File Syntax
+\begin{equation}
+    \label{eqn:triso_likelihood}
+    \mathcal{L} = \prod_{i=1}^N \mathcal{TN}\big(\hat{M}(\pmb{\theta},~\pmb{\Theta}_i) - M(\pmb{\Theta}_i),~\sigma,~lb,~ub \big)
+\end{equation}
 
-!listing test/tests/reporters/likelihoods/gaussian/main.i block=Likelihood
+\noindent where, $\hat{M}(\pmb{\theta},~\pmb{\Theta}_i)$ is the model prediction given model parameters $\pmb{\theta}$ and the $i^{\text{th}}$ experimental configuration $\pmb{\Theta}_i$ and $M(\pmb{\Theta}_i)$ is the $i^{\text{th}}$ experimental data point. $\sigma$ above the scale of the distribution representing the model inadequacy and experimental noise uncertainties. $lb$ and $ub$ are the lower and upper bounds, respectively. $\mathcal{TN}$ represents a Truncated Gaussian distribution.
 
 !syntax parameters /Likelihood/TruncatedGaussian
 

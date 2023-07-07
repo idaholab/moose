@@ -2,17 +2,15 @@
 
 ## Overview
 
+For performing Bayesian inference using MCMC techniques, a likelihood function needs to be defined for measuring the quality of model predictions with reference to the experiments. The likelihood functions can be defined in the `[Likelihood]` block.
+
 ## Creating a Likelihood Function
 
-A covariance function is created by inheriting from `CovarainceFunctionBase` and overriding the methods in the base class.
-
-## Using a Likelihood Function
-
-
+A likelihood function is created by inheriting from `LikelihoodFunctionBase` and `ReporterInterface` and overriding the `function` method in the base class. See the [Gaussian](Gaussian.md) class for an example.
 
 ## Example Input File Syntax
 
-!listing test/tests/reporters/likelihoods/gaussian/main.i block=Likelihood
+!listing test/tests/reporters/likelihoods/gaussian_derived/main.i block=Likelihood
 
 !syntax list /Likelihood objects=True actions=False subsystems=False
 

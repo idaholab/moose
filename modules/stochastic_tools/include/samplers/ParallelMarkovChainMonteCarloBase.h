@@ -10,12 +10,11 @@
 #pragma once
 
 #include "Sampler.h"
-#include "ReporterInterface.h"
 
 /**
  * A base class used to perform Parallel Markov Chain Monte Carlo (MCMC) sampling
  */
-class ParallelMarkovChainMonteCarloBase : public Sampler, public ReporterInterface
+class ParallelMarkovChainMonteCarloBase : public Sampler
 {
 public:
   static InputParameters validParams();
