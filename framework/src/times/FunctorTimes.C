@@ -41,6 +41,7 @@ FunctorTimes::FunctorTimes(const InputParameters & parameters)
 void
 FunctorTimes::initialize()
 {
+  _fe_problem.mesh().errorIfDistributedMesh(type());
   // Locate the origin on the mesh
   Point p(0, 0, 0);
   auto pl = _fe_problem.mesh().getMesh().sub_point_locator();
@@ -49,7 +50,7 @@ FunctorTimes::initialize()
     mooseError("Origin point not in local mesh, cannot evaluate the functor there");
   Moose::ElemArg elem_origin = makeElemArg(elem);
 
-  auto t = determineState();
+  const auto t = determineState();
   // Initialize is by default what is called by ::execute()
   _times.push_back(_factor(elem_origin, t) * _functor(elem_origin, t));
   // if this is performed multiple times (fixed point iterations, similar results at various

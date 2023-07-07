@@ -19,7 +19,7 @@ Times::validParams()
   params.addParam<Real>(
       "unique_tolerance",
       1e-12,
-      "Absolute tolerance for removing duplicated times when using setting unique_times to true");
+      "Absolute tolerance for removing duplicated times when getting a set of unique times");
   params.addParam<bool>("auto_sort", true, "Whether Times should be sorted");
   // This parameter should be set by each derived class depending on whether the generation of
   // times is replicated or distributed. We want times to be replicated across all ranks
@@ -61,9 +61,9 @@ Times::getPreviousTime(const Real current_time) const
     mooseError("Times vector has not been initialized.");
 
   Real previous_time = _times[0];
-  for (const auto i : make_range(_times.size() - 1))
+  for (const auto i : make_range(std::size_t(1), _times.size()))
   {
-    const auto & time = _times[i + 1];
+    const auto & time = _times[i];
     if (MooseUtils::absoluteFuzzyGreaterThan(time, current_time))
       return previous_time;
     previous_time = time;

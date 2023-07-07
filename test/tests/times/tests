@@ -35,7 +35,7 @@
       type = 'JSONDiff'
       input = 'reporter_times.i'
       jsondiff = 'reporter_times_out.json'
-      detail = 'a reporter with data in the expected floating point vector format and'
+      detail = 'a reporter with data in the expected floating point vector format, and'
     []
     [simulation]
       type = 'JSONDiff'

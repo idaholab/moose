@@ -20,7 +20,7 @@ ExodusFileTimes::validParams()
   InputParameters params = Times::validParams();
   params.addClassDescription("Import times from one or more Exodus files.");
   params.addRequiredParam<std::vector<FileName>>("files", "Exodus file(s) with the times");
-  // File is loaded only on 1st process
+  // File is loaded only on zeroth process
   params.set<bool>("auto_broadcast") = true;
 
   return params;

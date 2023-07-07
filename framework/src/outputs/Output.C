@@ -123,7 +123,7 @@ Output::Output(const InputParameters & parameters)
     _sync_times(std::set<Real>(getParam<std::vector<Real>>("sync_times").begin(),
                                getParam<std::vector<Real>>("sync_times").end())),
     _sync_times_object(isParamValid("sync_times_object")
-                           ? dynamic_cast<Times *>(&_problem_ptr->getUserObject<Times>(
+                           ? static_cast<Times *>(&_problem_ptr->getUserObject<Times>(
                                  getParam<TimesName>("sync_times_object")))
                            : nullptr),
     _start_time(isParamValid("start_time") ? getParam<Real>("start_time")
@@ -185,8 +185,6 @@ Output::Output(const InputParameters & parameters)
   }
 
   // Check that the sync times were retrieved as expected
-  if (isParamSetByUser("sync_times_object") && !_sync_times_object)
-    paramError("sync_times_object", "Times object does not exist");
   if (_sync_times_object &&
       (isParamValid("output_limiting_function") || isParamSetByUser("sync_times")))
     paramError("sync_times_object",

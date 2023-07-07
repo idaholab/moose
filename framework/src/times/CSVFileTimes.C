@@ -39,7 +39,7 @@ CSVFileTimes::CSVFileTimes(const InputParameters & parameters)
     file.setFormatFlag(MooseUtils::DelimitedFileReader::FormatFlag::COLUMNS);
     file.read();
 
-    const std::vector<std::vector<double>> & data = file.getData();
+    const auto & data = file.getData();
     for (const auto & d : data[_time_column_index])
       _times.push_back(d);
   }

@@ -42,7 +42,7 @@ ReporterTimes::initialize()
 
   for (const auto r_it : index_range(positions_reporters))
   {
-    const std::string & reporter_name = positions_reporters[r_it];
+    const auto & reporter_name = positions_reporters[r_it];
 
     const auto & reporter_data = _fe_problem.getReporterData();
     if (reporter_data.getReporterContextBase(reporter_name).getProducerModeEnum() ==

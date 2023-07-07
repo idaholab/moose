@@ -28,7 +28,7 @@ TimeSequenceFromTimes::TimeSequenceFromTimes(const InputParameters & parameters)
     _times(_fe_problem.getUserObject<Times>(getParam<TimesName>("times")))
 {
   // If they are available, initialize
-  auto times = _times.getTimes();
+  const auto & times = _times.getTimes();
   setupSequence(times);
 }
 
@@ -36,7 +36,7 @@ void
 TimeSequenceFromTimes::step()
 {
   // Get the times again in case there are new ones
-  auto times = _times.getTimes();
+  const auto & times = _times.getTimes();
   setupSequence(times);
 
   TimeSequenceStepperBase::step();

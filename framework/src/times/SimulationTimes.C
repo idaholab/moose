@@ -21,7 +21,7 @@ SimulationTimes::validParams()
   params.set<bool>("auto_broadcast") = false;
   // Times history of a simulation is already one-way
   params.set<bool>("auto_sort") = false;
-  // Timestep_begin is as early and as often as we need
+  // TIMESTEP_BEGIN is as early and as often as we need
   params.set<ExecFlagEnum>("execute_on") = EXEC_TIMESTEP_BEGIN;
 
   return params;
@@ -32,8 +32,8 @@ SimulationTimes::SimulationTimes(const InputParameters & parameters) : Times(par
 void
 SimulationTimes::initialize()
 {
-  // Initialize is by default what is called by ::execute()
+  // Initialize is by default what is called by execute()
   _times.push_back(_fe_problem.time());
   // if this is performed multiple times (fixed point iterations)
-  // it will be caught by our logic to make the vector hold unique times
+  // it will be caught by our logic to make the vector hold unique times in finalize()
 }
