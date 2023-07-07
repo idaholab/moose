@@ -38,8 +38,6 @@ public:
 
   unsigned int max() const { return _max; }
 
-  unsigned int max_shape_funcs() const { return _max_shape_funcs; }
-
 protected:
   FEProblemBase & _fe_problem;
 
@@ -47,7 +45,4 @@ protected:
 
   /// Maximum number of qps encountered
   unsigned int _max;
-
-  /// Maximum number of shape functions encountered
-  unsigned int _max_shape_funcs;
 };

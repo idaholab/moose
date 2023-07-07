@@ -362,7 +362,6 @@ FEProblemBase::FEProblemBase(const InputParameters & parameters)
     _material_dependency_check(getParam<bool>("material_dependency_check")),
     _uo_aux_state_check(getParam<bool>("check_uo_aux_state")),
     _max_qps(std::numeric_limits<unsigned int>::max()),
-    _max_shape_funcs(std::numeric_limits<unsigned int>::max()),
     _max_scalar_order(INVALID_ORDER),
     _has_time_integrator(false),
     _has_exception(false),
@@ -1360,14 +1359,6 @@ FEProblemBase::getMaxQps() const
   if (_max_qps == std::numeric_limits<unsigned int>::max())
     mooseError("Max QPS uninitialized");
   return _max_qps;
-}
-
-unsigned int
-FEProblemBase::getMaxShapeFunctions() const
-{
-  if (_max_shape_funcs == std::numeric_limits<unsigned int>::max())
-    mooseError("Max shape functions uninitialized");
-  return _max_shape_funcs;
 }
 
 Order
@@ -5241,13 +5232,11 @@ FEProblemBase::updateMaxQps()
     MaxQpsThread mqt(*this);
     Threads::parallel_reduce(*_mesh.getActiveLocalElementRange(), mqt);
     _max_qps = mqt.max();
-    _max_shape_funcs = mqt.max_shape_funcs();
 
     // If we have more shape functions or more quadrature points on
     // another processor, then we may need to handle those elements
     // ourselves later after repartitioning.
     _communicator.max(_max_qps);
-    _communicator.max(_max_shape_funcs);
   }
 
   unsigned int max_qpts = getMaxQps();
@@ -8094,4 +8083,15 @@ FEProblemBase::reinitMortarUserObjects(const BoundaryID primary_boundary_id,
     mortar_uo->setNormals();
     mortar_uo->reinit();
   }
+}
+
+void
+FEProblemBase::havePRefinement()
+{
+  for (auto & assembly_vecs : _assembly)
+    for (auto & assembly : assembly_vecs)
+      assembly->havePRefinement();
+
+  if (_displaced_problem)
+    _displaced_problem->havePRefinement();
 }

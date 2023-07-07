@@ -568,6 +568,11 @@ public:
    */
   bool needDual() const { return _need_dual; }
 
+  /**
+   * Set the cached quadrature rules to nullptr
+   */
+  void clearCachedQRules();
+
 private:
   /**
    * Set the qrule to be used for lower dimensional integration.
@@ -594,6 +599,11 @@ public:
    * @param elem The element we want to reinitialize on
    */
   void reinit(const Elem * elem);
+
+  /**
+   * Set the volumetric quadrature rule based on the provided element
+   */
+  void setVolumeQRule(const Elem * elem);
 
   /**
    * Reinitialize FE data for the given element on the given side, optionally
@@ -663,6 +673,11 @@ public:
    * Reinitialize the assembly data at specific points in the reference element.
    */
   void reinit(const Elem * elem, const std::vector<Point> & reference_points);
+
+  /**
+   * Set the face quadrature rule based on the provided element and side
+   */
+  void setFaceQRule(const Elem * const elem, const unsigned int side);
 
   /**
    * Reinitialize the assembly data on an side of an element
@@ -1817,6 +1832,11 @@ public:
    */
   const Elem * const & msmElem() const { return _msm_elem; }
 
+  /**
+   * Indicate that we have p-refinement
+   */
+  void havePRefinement();
+
 private:
   /**
    * Just an internal helper function to reinit the volume FE objects.
@@ -2150,6 +2170,11 @@ private:
     return _jacobian_block_nonlocal_used[tag][ivar][_block_diagonal_matrix ? 0 : jvar];
   }
 
+  /**
+   * request phi, dphi, xyz, JxW, etc. data through the FE helper functions
+   */
+  void helpersRequestData();
+
   SystemBase & _sys;
   SubProblem & _subproblem;
 
@@ -2194,6 +2219,28 @@ private:
 
   unsigned int _mesh_dimension;
 
+  /// The finite element type of the FE helper classes. The helper class gives us data like JxW, the
+  /// physical quadrature point locations, etc.
+  const FEType _helper_type;
+
+  /// Whether user code requested a \p FEType the same as our \p _helper_type
+  mutable bool _user_added_fe_of_helper_type;
+  mutable bool _user_added_fe_face_of_helper_type;
+  mutable bool _user_added_fe_face_neighbor_of_helper_type;
+  mutable bool _user_added_fe_neighbor_of_helper_type;
+  mutable bool _user_added_fe_lower_of_helper_type;
+
+  /// Containers for holding unique FE helper types if we are doing p-refinement. If we are not
+  /// doing p-refinement then the helper data is owned by the \p _fe data members
+  std::vector<std::unique_ptr<FEBase>> _unique_fe_helper;
+  std::vector<std::unique_ptr<FEBase>> _unique_fe_face_helper;
+  std::vector<std::unique_ptr<FEBase>> _unique_fe_face_neighbor_helper;
+  std::vector<std::unique_ptr<FEBase>> _unique_fe_neighbor_helper;
+  std::vector<std::unique_ptr<FEBase>> _unique_fe_lower_helper;
+
+  /// Whether we are currently building the FE classes for the helpers
+  bool _building_helpers;
+
   /// The XFEM controller
   std::shared_ptr<XFEMInterface> _xfem;
 
@@ -2222,7 +2269,7 @@ private:
   /// Each dimension's actual vector fe objects indexed on type
   mutable std::map<unsigned int, std::map<FEType, FEVectorBase *>> _vector_fe;
   /// Each dimension's helper objects
-  std::map<unsigned int, FEBase **> _holder_fe_helper;
+  std::map<unsigned int, FEBase *> _holder_fe_helper;
   /// The current helper object for transforming coordinates
   FEBase * _current_fe_helper;
   /// The current current quadrature rule being used (could be either volumetric or arbitrary - for dirac kernels)
@@ -2334,7 +2381,7 @@ private:
   /// types of vector finite elements
   mutable std::map<unsigned int, std::map<FEType, FEVectorBase *>> _vector_fe_face;
   /// Each dimension's helper objects
-  std::map<unsigned int, FEBase **> _holder_fe_face_helper;
+  std::map<unsigned int, FEBase *> _holder_fe_face_helper;
   /// helper object for transforming coordinates
   FEBase * _current_fe_face_helper;
   /// quadrature rule used on faces
@@ -2370,15 +2417,15 @@ private:
   mutable std::map<unsigned int, std::map<FEType, FEVectorBase *>> _vector_fe_face_neighbor;
 
   /// Each dimension's helper objects
-  std::map<unsigned int, FEBase **> _holder_fe_neighbor_helper;
-  std::map<unsigned int, FEBase **> _holder_fe_face_neighbor_helper;
+  std::map<unsigned int, FEBase *> _holder_fe_neighbor_helper;
+  std::map<unsigned int, FEBase *> _holder_fe_face_neighbor_helper;
 
   /// FE objects for lower dimensional elements
   mutable std::map<unsigned int, std::map<FEType, FEBase *>> _fe_lower;
   /// Vector FE objects for lower dimensional elements
   mutable std::map<unsigned int, std::map<FEType, FEVectorBase *>> _vector_fe_lower;
   /// helper object for transforming coordinates for lower dimensional element quadrature points
-  std::map<unsigned int, FEBase **> _holder_fe_lower_helper;
+  std::map<unsigned int, FEBase *> _holder_fe_lower_helper;
 
   /// quadrature rule used on neighbors
   QBase * _current_qrule_neighbor;

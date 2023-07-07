@@ -86,6 +86,13 @@ Assembly::Assembly(SystemBase & sys, THREAD_ID tid)
     _tid(tid),
     _mesh(sys.mesh()),
     _mesh_dimension(_mesh.dimension()),
+    _helper_type(_mesh.hasSecondOrderElements() ? SECOND : FIRST, LAGRANGE),
+    _user_added_fe_of_helper_type(false),
+    _user_added_fe_face_of_helper_type(false),
+    _user_added_fe_face_neighbor_of_helper_type(false),
+    _user_added_fe_neighbor_of_helper_type(false),
+    _user_added_fe_lower_of_helper_type(false),
+    _building_helpers(false),
     _current_qrule(nullptr),
     _current_qrule_volume(nullptr),
     _current_qrule_arbitrary(nullptr),
@@ -131,55 +138,39 @@ Assembly::Assembly(SystemBase & sys, THREAD_ID tid)
     _calculate_curvatures(false),
     _calculate_ad_coord(false)
 {
-  Order helper_order = _mesh.hasSecondOrderElements() ? SECOND : FIRST;
+  const Order helper_order = _mesh.hasSecondOrderElements() ? SECOND : FIRST;
+  _building_helpers = true;
   // Build fe's for the helpers
   buildFE(FEType(helper_order, LAGRANGE));
   buildFaceFE(FEType(helper_order, LAGRANGE));
   buildNeighborFE(FEType(helper_order, LAGRANGE));
   buildFaceNeighborFE(FEType(helper_order, LAGRANGE));
   buildLowerDFE(FEType(helper_order, LAGRANGE));
+  _building_helpers = false;
 
   // Build an FE helper object for this type for each dimension up to the dimension of the current
   // mesh
   for (unsigned int dim = 0; dim <= _mesh_dimension; dim++)
   {
-    _holder_fe_helper[dim] = &_fe[dim][FEType(helper_order, LAGRANGE)];
-    (*_holder_fe_helper[dim])->get_phi();
-    (*_holder_fe_helper[dim])->get_dphi();
-    (*_holder_fe_helper[dim])->get_xyz();
-    (*_holder_fe_helper[dim])->get_JxW();
-
-    _holder_fe_face_helper[dim] = &_fe_face[dim][FEType(helper_order, LAGRANGE)];
-    (*_holder_fe_face_helper[dim])->get_phi();
-    (*_holder_fe_face_helper[dim])->get_dphi();
-    (*_holder_fe_face_helper[dim])->get_xyz();
-    (*_holder_fe_face_helper[dim])->get_JxW();
-    (*_holder_fe_face_helper[dim])->get_normals();
-
-    _holder_fe_face_neighbor_helper[dim] = &_fe_face_neighbor[dim][FEType(helper_order, LAGRANGE)];
-    (*_holder_fe_face_neighbor_helper[dim])->get_xyz();
-    (*_holder_fe_face_neighbor_helper[dim])->get_JxW();
-    (*_holder_fe_face_neighbor_helper[dim])->get_normals();
-
-    _holder_fe_neighbor_helper[dim] = &_fe_neighbor[dim][FEType(helper_order, LAGRANGE)];
-    (*_holder_fe_neighbor_helper[dim])->get_xyz();
-    (*_holder_fe_neighbor_helper[dim])->get_JxW();
+    _holder_fe_helper[dim] = _fe[dim][FEType(helper_order, LAGRANGE)];
+    _holder_fe_face_helper[dim] = _fe_face[dim][FEType(helper_order, LAGRANGE)];
+    _holder_fe_face_neighbor_helper[dim] = _fe_face_neighbor[dim][FEType(helper_order, LAGRANGE)];
+    _holder_fe_neighbor_helper[dim] = _fe_neighbor[dim][FEType(helper_order, LAGRANGE)];
   }
 
-  for (unsigned int dim = 0; dim <= _mesh_dimension - 1; dim++)
-  {
-    _holder_fe_lower_helper[dim] = &_fe_lower[dim][FEType(helper_order, LAGRANGE)];
-    // We need these computations in order to compute correct lower-d element volumes in curvilinear
-    // coordinates
-    (*_holder_fe_lower_helper[dim])->get_xyz();
-    (*_holder_fe_lower_helper[dim])->get_JxW();
-  }
+  for (unsigned int dim = 0; dim < _mesh_dimension; dim++)
+    _holder_fe_lower_helper[dim] = _fe_lower[dim][FEType(helper_order, LAGRANGE)];
+
+  // request phi, dphi, xyz, JxW, etc. data
+  helpersRequestData();
 
   // For 3D mortar, mortar segments are always TRI3 elements so we want FIRST LAGRANGE regardless
   // of discretization
   _fe_msm = (_mesh_dimension == 2)
                 ? FEGenericBase<Real>::build(_mesh_dimension - 1, FEType(helper_order, LAGRANGE))
                 : FEGenericBase<Real>::build(_mesh_dimension - 1, FEType(FIRST, LAGRANGE));
+  // This FE object should not take part in p-refinement
+  _fe_msm->add_p_level_in_reinit(false);
   _JxW_msm = &_fe_msm->get_JxW();
   // Prerequest xyz so that it is computed for _fe_msm so that it can be used for calculating
   // _coord_msm
@@ -267,6 +258,9 @@ Assembly::JxWNeighbor() const
 void
 Assembly::buildFE(FEType type) const
 {
+  if (!_building_helpers && type == _helper_type)
+    _user_added_fe_of_helper_type = true;
+
   if (!_fe_shape_data[type])
     _fe_shape_data[type] = std::make_unique<FEShapeData>();
 
@@ -290,6 +284,9 @@ Assembly::buildFE(FEType type) const
 void
 Assembly::buildFaceFE(FEType type) const
 {
+  if (!_building_helpers && type == _helper_type)
+    _user_added_fe_face_of_helper_type = true;
+
   if (!_fe_shape_data_face[type])
     _fe_shape_data_face[type] = std::make_unique<FEShapeData>();
 
@@ -309,6 +306,9 @@ Assembly::buildFaceFE(FEType type) const
 void
 Assembly::buildNeighborFE(FEType type) const
 {
+  if (!_building_helpers && type == _helper_type)
+    _user_added_fe_neighbor_of_helper_type = true;
+
   if (!_fe_shape_data_neighbor[type])
     _fe_shape_data_neighbor[type] = std::make_unique<FEShapeData>();
 
@@ -328,6 +328,9 @@ Assembly::buildNeighborFE(FEType type) const
 void
 Assembly::buildFaceNeighborFE(FEType type) const
 {
+  if (!_building_helpers && type == _helper_type)
+    _user_added_fe_face_neighbor_of_helper_type = true;
+
   if (!_fe_shape_data_face_neighbor[type])
     _fe_shape_data_face_neighbor[type] = std::make_unique<FEShapeData>();
 
@@ -347,6 +350,9 @@ Assembly::buildFaceNeighborFE(FEType type) const
 void
 Assembly::buildLowerDFE(FEType type) const
 {
+  if (!_building_helpers && type == _helper_type)
+    _user_added_fe_lower_of_helper_type = true;
+
   if (!_fe_shape_data_lower[type])
     _fe_shape_data_lower[type] = std::make_unique<FEShapeData>();
 
@@ -632,6 +638,11 @@ Assembly::setVolumeQRule(QBase * qrule, unsigned int dim)
       it.second->attach_quadrature_rule(qrule);
     for (auto & it : _vector_fe[dim])
       it.second->attach_quadrature_rule(qrule);
+    if (!_unique_fe_helper.empty())
+    {
+      mooseAssert(dim < _unique_fe_helper.size(), "We should not be indexing out of bounds");
+      _unique_fe_helper[dim]->attach_quadrature_rule(qrule);
+    }
   }
 }
 
@@ -644,6 +655,11 @@ Assembly::setFaceQRule(QBase * qrule, unsigned int dim)
     it.second->attach_quadrature_rule(qrule);
   for (auto & it : _vector_fe_face[dim])
     it.second->attach_quadrature_rule(qrule);
+  if (!_unique_fe_face_helper.empty())
+  {
+    mooseAssert(dim < _unique_fe_face_helper.size(), "We should not be indexing out of bounds");
+    _unique_fe_face_helper[dim]->attach_quadrature_rule(qrule);
+  }
 }
 
 void
@@ -658,6 +674,11 @@ Assembly::setLowerQRule(QBase * qrule, unsigned int dim)
     it.second->attach_quadrature_rule(qrule);
   for (auto & it : _vector_fe_lower[dim])
     it.second->attach_quadrature_rule(qrule);
+  if (!_unique_fe_lower_helper.empty())
+  {
+    mooseAssert(dim < _unique_fe_lower_helper.size(), "We should not be indexing out of bounds");
+    _unique_fe_lower_helper[dim]->attach_quadrature_rule(qrule);
+  }
 }
 
 void
@@ -669,6 +690,21 @@ Assembly::setNeighborQRule(QBase * qrule, unsigned int dim)
     it.second->attach_quadrature_rule(qrule);
   for (auto & it : _vector_fe_face_neighbor[dim])
     it.second->attach_quadrature_rule(qrule);
+  if (!_unique_fe_face_neighbor_helper.empty())
+  {
+    mooseAssert(dim < _unique_fe_face_neighbor_helper.size(),
+                "We should not be indexing out of bounds");
+    _unique_fe_face_neighbor_helper[dim]->attach_quadrature_rule(qrule);
+  }
+}
+
+void
+Assembly::clearCachedQRules()
+{
+  _current_qrule = nullptr;
+  _current_qrule_face = nullptr;
+  _current_qrule_lower = nullptr;
+  _current_qrule_neighbor = nullptr;
 }
 
 void
@@ -740,12 +776,17 @@ Assembly::reinitFE(const Elem * elem)
       fesd._curl_phi.shallowCopy(
           const_cast<std::vector<std::vector<VectorValue<Real>>> &>(fe.get_curl_phi()));
   }
+  if (!_unique_fe_helper.empty())
+  {
+    mooseAssert(dim < _unique_fe_helper.size(), "We should be in bounds here");
+    _unique_fe_helper[dim]->reinit(elem);
+  }
 
   // During that last loop the helper objects will have been reinitialized as well
   // We need to dig out the q_points and JxW from it.
   _current_q_points.shallowCopy(
-      const_cast<std::vector<Point> &>((*_holder_fe_helper[dim])->get_xyz()));
-  _current_JxW.shallowCopy(const_cast<std::vector<Real> &>((*_holder_fe_helper[dim])->get_JxW()));
+      const_cast<std::vector<Point> &>(_holder_fe_helper[dim]->get_xyz()));
+  _current_JxW.shallowCopy(const_cast<std::vector<Real> &>(_holder_fe_helper[dim]->get_JxW()));
 
   if (_subproblem.haveADObjects())
   {
@@ -755,7 +796,7 @@ Assembly::reinitFE(const Elem * elem)
     {
       const auto & qw = _current_qrule->get_weights();
       for (unsigned int qp = 0; qp != n_qp; qp++)
-        computeSinglePointMapAD(elem, qw, qp, *_holder_fe_helper[dim]);
+        computeSinglePointMapAD(elem, qw, qp, _holder_fe_helper[dim]);
     }
     else
       for (unsigned qp = 0; qp < n_qp; ++qp)
@@ -1235,15 +1276,20 @@ Assembly::reinitFEFace(const Elem * elem, unsigned int side)
       fesd._curl_phi.shallowCopy(
           const_cast<std::vector<std::vector<VectorValue<Real>>> &>(fe_face.get_curl_phi()));
   }
+  if (!_unique_fe_face_helper.empty())
+  {
+    mooseAssert(dim < _unique_fe_face_helper.size(), "We should be in bounds here");
+    _unique_fe_face_helper[dim]->reinit(elem, side);
+  }
 
   // During that last loop the helper objects will have been reinitialized as well
   // We need to dig out the q_points and JxW from it.
   _current_q_points_face.shallowCopy(
-      const_cast<std::vector<Point> &>((*_holder_fe_face_helper[dim])->get_xyz()));
+      const_cast<std::vector<Point> &>(_holder_fe_face_helper[dim]->get_xyz()));
   _current_JxW_face.shallowCopy(
-      const_cast<std::vector<Real> &>((*_holder_fe_face_helper[dim])->get_JxW()));
+      const_cast<std::vector<Real> &>(_holder_fe_face_helper[dim]->get_JxW()));
   _current_normals.shallowCopy(
-      const_cast<std::vector<Point> &>((*_holder_fe_face_helper[dim])->get_normals()));
+      const_cast<std::vector<Point> &>(_holder_fe_face_helper[dim]->get_normals()));
 
   _mapped_normals.resize(_current_normals.size(), Eigen::Map<RealDIMValue>(nullptr));
   for (unsigned int i = 0; i < _current_normals.size(); i++)
@@ -1252,7 +1298,7 @@ Assembly::reinitFEFace(const Elem * elem, unsigned int side)
 
   if (_calculate_curvatures)
     _curvatures.shallowCopy(
-        const_cast<std::vector<Real> &>((*_holder_fe_face_helper[dim])->get_curvatures()));
+        const_cast<std::vector<Real> &>(_holder_fe_face_helper[dim]->get_curvatures()));
 
   computeADFace(*elem, side);
 
@@ -1277,9 +1323,9 @@ Assembly::computeFaceMap(const Elem & elem, const unsigned int side, const std::
   const Elem & side_elem = _compute_face_map_side_elem_builder(elem, side);
   const auto dim = elem.dim();
   const auto n_qp = qw.size();
-  const auto & dpsidxi_map = (*_holder_fe_face_helper[dim])->get_fe_map().get_dpsidxi();
-  const auto & dpsideta_map = (*_holder_fe_face_helper[dim])->get_fe_map().get_dpsideta();
-  const auto & psi_map = (*_holder_fe_face_helper[dim])->get_fe_map().get_psi();
+  const auto & dpsidxi_map = _holder_fe_face_helper[dim]->get_fe_map().get_dpsidxi();
+  const auto & dpsideta_map = _holder_fe_face_helper[dim]->get_fe_map().get_dpsideta();
+  const auto & psi_map = _holder_fe_face_helper[dim]->get_fe_map().get_psi();
   std::vector<std::vector<Real>> const * d2psidxi2_map = nullptr;
   std::vector<std::vector<Real>> const * d2psidxideta_map = nullptr;
   std::vector<std::vector<Real>> const * d2psideta2_map = nullptr;
@@ -1288,9 +1334,9 @@ Assembly::computeFaceMap(const Elem & elem, const unsigned int side, const std::
 
   if (_calculate_curvatures)
   {
-    d2psidxi2_map = &(*_holder_fe_face_helper[dim])->get_fe_map().get_d2psidxi2();
-    d2psidxideta_map = &(*_holder_fe_face_helper[dim])->get_fe_map().get_d2psidxideta();
-    d2psideta2_map = &(*_holder_fe_face_helper[dim])->get_fe_map().get_d2psideta2();
+    d2psidxi2_map = &_holder_fe_face_helper[dim]->get_fe_map().get_d2psidxi2();
+    d2psidxideta_map = &_holder_fe_face_helper[dim]->get_fe_map().get_d2psidxideta();
+    d2psideta2_map = &_holder_fe_face_helper[dim]->get_fe_map().get_d2psideta2();
   }
 
   switch (dim)
@@ -1530,6 +1576,12 @@ Assembly::reinitFEFaceNeighbor(const Elem * neighbor, const std::vector<Point> &
       fesd._curl_phi.shallowCopy(const_cast<std::vector<std::vector<VectorValue<Real>>> &>(
           fe_face_neighbor.get_curl_phi()));
   }
+  if (!_unique_fe_face_neighbor_helper.empty())
+  {
+    mooseAssert(neighbor_dim < _unique_fe_face_neighbor_helper.size(),
+                "We should be in bounds here");
+    _unique_fe_face_neighbor_helper[neighbor_dim]->reinit(neighbor, &reference_points);
+  }
 }
 
 void
@@ -1577,6 +1629,11 @@ Assembly::reinitFENeighbor(const Elem * neighbor, const std::vector<Point> & ref
       fesd._curl_phi.shallowCopy(
           const_cast<std::vector<std::vector<VectorValue<Real>>> &>(fe_neighbor.get_curl_phi()));
   }
+  if (!_unique_fe_neighbor_helper.empty())
+  {
+    mooseAssert(neighbor_dim < _unique_fe_neighbor_helper.size(), "We should be in bounds here");
+    _unique_fe_neighbor_helper[neighbor_dim]->reinit(neighbor, &reference_points);
+  }
 }
 
 void
@@ -1596,7 +1653,7 @@ Assembly::reinitNeighbor(const Elem * neighbor, const std::vector<Point> & refer
   if (_need_neighbor_elem_volume)
   {
     unsigned int dim = neighbor->dim();
-    FEBase & fe = **_holder_fe_neighbor_helper[dim];
+    FEBase & fe = *_holder_fe_neighbor_helper[dim];
     QBase * qrule = qrules(dim).vol.get();
 
     fe.attach_quadrature_rule(qrule);
@@ -1691,7 +1748,7 @@ Assembly::reinitAtPhysical(const Elem * elem, const std::vector<Point> & physica
   _current_elem_volume_computed = false;
 
   FEInterface::inverse_map(elem->dim(),
-                           (*_holder_fe_helper[elem->dim()])->get_fe_type(),
+                           _holder_fe_helper[elem->dim()]->get_fe_type(),
                            elem,
                            physical_points,
                            _temp_reference_points);
@@ -1703,6 +1760,16 @@ Assembly::reinitAtPhysical(const Elem * elem, const std::vector<Point> & physica
 }
 
 void
+Assembly::setVolumeQRule(const Elem * const elem)
+{
+  unsigned int elem_dimension = elem->dim();
+  _current_qrule_volume = qrules(elem_dimension).vol.get();
+  // Make sure the qrule is the right one
+  if (_current_qrule != _current_qrule_volume)
+    setVolumeQRule(_current_qrule_volume, elem_dimension);
+}
+
+void
 Assembly::reinit(const Elem * elem)
 {
   _current_elem = elem;
@@ -1711,14 +1778,7 @@ Assembly::reinit(const Elem * elem)
               "current subdomain has been set incorrectly");
   _current_elem_volume_computed = false;
 
-  unsigned int elem_dimension = elem->dim();
-
-  _current_qrule_volume = qrules(elem_dimension).vol.get();
-
-  // Make sure the qrule is the right one
-  if (_current_qrule != _current_qrule_volume)
-    setVolumeQRule(_current_qrule_volume, elem_dimension);
-
+  setVolumeQRule(elem);
   reinitFE(elem);
 
   computeCurrentElemVolume();
@@ -1805,7 +1865,17 @@ Assembly::qruleArbitraryFace(const Elem * elem, unsigned int side)
 }
 
 void
-Assembly::reinit(const Elem * elem, unsigned int side)
+Assembly::setFaceQRule(const Elem * const elem, const unsigned int side)
+{
+  const auto elem_dimension = elem->dim();
+  //// Make sure the qrule is the right one
+  auto rule = qruleFace(elem, side);
+  if (_current_qrule_face != rule)
+    setFaceQRule(rule, elem_dimension);
+}
+
+void
+Assembly::reinit(const Elem * const elem, const unsigned int side)
 {
   _current_elem = elem;
   _current_neighbor_elem = nullptr;
@@ -1815,15 +1885,9 @@ Assembly::reinit(const Elem * elem, unsigned int side)
   _current_elem_volume_computed = false;
   _current_side_volume_computed = false;
 
-  unsigned int elem_dimension = elem->dim();
-
   _current_side_elem = &_current_side_elem_builder(*elem, side);
 
-  //// Make sure the qrule is the right one
-  auto rule = qruleFace(elem, side);
-  if (_current_qrule_face != rule)
-    setFaceQRule(rule, elem_dimension);
-
+  setFaceQRule(elem, side);
   reinitFEFace(elem, side);
 
   computeCurrentFaceVolume();
@@ -1899,7 +1963,7 @@ Assembly::reinitElemAndNeighbor(const Elem * elem,
 
     // compute JxW on the neighbor's face
     _current_JxW_neighbor.shallowCopy(const_cast<std::vector<Real> &>(
-        (*_holder_fe_face_neighbor_helper[_current_neighbor_side_elem->dim()])->get_JxW()));
+        _holder_fe_face_neighbor_helper[_current_neighbor_side_elem->dim()]->get_JxW()));
   }
 
   reinitFEFaceNeighbor(neighbor, *reference_points_ptr);
@@ -1971,20 +2035,26 @@ Assembly::reinitElemFaceRef(const Elem * elem,
       fesd._curl_phi.shallowCopy(
           const_cast<std::vector<std::vector<VectorValue<Real>>> &>(fe_face.get_curl_phi()));
   }
+  if (!_unique_fe_face_helper.empty())
+  {
+    mooseAssert(elem_dim < _unique_fe_face_helper.size(), "We should be in bounds here");
+    _unique_fe_face_helper[elem_dim]->reinit(elem, elem_side, tolerance, pts, weights);
+  }
+
   // During that last loop the helper objects will have been reinitialized
   _current_q_points_face.shallowCopy(
-      const_cast<std::vector<Point> &>((*_holder_fe_face_helper[elem_dim])->get_xyz()));
+      const_cast<std::vector<Point> &>(_holder_fe_face_helper[elem_dim]->get_xyz()));
   _current_normals.shallowCopy(
-      const_cast<std::vector<Point> &>((*_holder_fe_face_helper[elem_dim])->get_normals()));
+      const_cast<std::vector<Point> &>(_holder_fe_face_helper[elem_dim]->get_normals()));
   _current_tangents.shallowCopy(const_cast<std::vector<std::vector<Point>> &>(
-      (*_holder_fe_face_helper[elem_dim])->get_tangents()));
+      _holder_fe_face_helper[elem_dim]->get_tangents()));
   // Note that if the user did pass in points and not weights to this method, JxW will be garbage
   // and should not be used
   _current_JxW_face.shallowCopy(
-      const_cast<std::vector<Real> &>((*_holder_fe_face_helper[elem_dim])->get_JxW()));
+      const_cast<std::vector<Real> &>(_holder_fe_face_helper[elem_dim]->get_JxW()));
   if (_calculate_curvatures)
     _curvatures.shallowCopy(
-        const_cast<std::vector<Real> &>((*_holder_fe_face_helper[elem_dim])->get_curvatures()));
+        const_cast<std::vector<Real> &>(_holder_fe_face_helper[elem_dim]->get_curvatures()));
 
   computeADFace(*elem, elem_side);
 }
@@ -2012,7 +2082,7 @@ Assembly::computeADFace(const Elem & elem, const unsigned int side)
       const std::vector<Real> dummy_qw(n_qp, 1.);
 
       for (unsigned int qp = 0; qp != n_qp; qp++)
-        computeSinglePointMapAD(&elem, dummy_qw, qp, *_holder_fe_face_helper[dim]);
+        computeSinglePointMapAD(&elem, dummy_qw, qp, _holder_fe_face_helper[dim]);
     }
     else
       for (unsigned qp = 0; qp < n_qp; ++qp)
@@ -2129,12 +2199,19 @@ Assembly::reinitNeighborFaceRef(const Elem * neighbor,
       fesd._curl_phi.shallowCopy(const_cast<std::vector<std::vector<VectorValue<Real>>> &>(
           fe_face_neighbor.get_curl_phi()));
   }
+  if (!_unique_fe_face_neighbor_helper.empty())
+  {
+    mooseAssert(neighbor_dim < _unique_fe_face_neighbor_helper.size(),
+                "We should be in bounds here");
+    _unique_fe_face_neighbor_helper[neighbor_dim]->reinit(
+        neighbor, neighbor_side, tolerance, pts, weights);
+  }
   // During that last loop the helper objects will have been reinitialized as well
   // We need to dig out the q_points from it
-  _current_q_points_face_neighbor.shallowCopy(const_cast<std::vector<Point> &>(
-      (*_holder_fe_face_neighbor_helper[neighbor_dim])->get_xyz()));
+  _current_q_points_face_neighbor.shallowCopy(
+      const_cast<std::vector<Point> &>(_holder_fe_face_neighbor_helper[neighbor_dim]->get_xyz()));
   _current_neighbor_normals.shallowCopy(const_cast<std::vector<Point> &>(
-      (*_holder_fe_face_neighbor_helper[neighbor_dim])->get_normals()));
+      _holder_fe_face_neighbor_helper[neighbor_dim]->get_normals()));
 }
 
 void
@@ -2210,6 +2287,11 @@ Assembly::reinitLowerDElem(const Elem * elem,
             const_cast<std::vector<std::vector<TensorValue<Real>>> &>(fe_lower.get_dual_d2phi()));
     }
   }
+  if (!_unique_fe_lower_helper.empty())
+  {
+    mooseAssert(elem_dim < _unique_fe_lower_helper.size(), "We should be in bounds here");
+    _unique_fe_lower_helper[elem_dim]->reinit(elem);
+  }
 
   if (!_need_lower_d_elem_volume)
     return;
@@ -2231,7 +2313,7 @@ Assembly::reinitLowerDElem(const Elem * elem,
   else
   {
     // During that last loop the helper objects will have been reinitialized as well
-    FEBase & helper_fe = **_holder_fe_lower_helper[elem_dim];
+    FEBase & helper_fe = *_holder_fe_lower_helper[elem_dim];
     const auto & physical_q_points = helper_fe.get_xyz();
     const auto & JxW = helper_fe.get_JxW();
     MooseArray<Real> coord;
@@ -2296,7 +2378,7 @@ Assembly::reinitNeighborAtPhysical(const Elem * neighbor,
   // compute JxW on the neighbor's face
   unsigned int neighbor_side_dim = _current_neighbor_side_elem->dim();
   _current_JxW_neighbor.shallowCopy(const_cast<std::vector<Real> &>(
-      (*_holder_fe_face_neighbor_helper[neighbor_side_dim])->get_JxW()));
+      _holder_fe_face_neighbor_helper[neighbor_side_dim]->get_JxW()));
 
   reinitFEFaceNeighbor(neighbor, reference_points);
   reinitNeighbor(neighbor, reference_points);
@@ -4603,6 +4685,102 @@ Assembly::adCurvatures() const
   feSecondPhi<Real>(helper_type);
   feSecondPhiFace<Real>(helper_type);
   return _ad_curvatures;
+}
+
+void
+Assembly::helpersRequestData()
+{
+  for (unsigned int dim = 0; dim <= _mesh_dimension; dim++)
+  {
+    _holder_fe_helper[dim]->get_phi();
+    _holder_fe_helper[dim]->get_dphi();
+    _holder_fe_helper[dim]->get_xyz();
+    _holder_fe_helper[dim]->get_JxW();
+
+    _holder_fe_face_helper[dim]->get_phi();
+    _holder_fe_face_helper[dim]->get_dphi();
+    _holder_fe_face_helper[dim]->get_xyz();
+    _holder_fe_face_helper[dim]->get_JxW();
+    _holder_fe_face_helper[dim]->get_normals();
+
+    _holder_fe_face_neighbor_helper[dim]->get_xyz();
+    _holder_fe_face_neighbor_helper[dim]->get_JxW();
+    _holder_fe_face_neighbor_helper[dim]->get_normals();
+
+    _holder_fe_neighbor_helper[dim]->get_xyz();
+    _holder_fe_neighbor_helper[dim]->get_JxW();
+  }
+
+  for (unsigned int dim = 0; dim < _mesh_dimension; dim++)
+  {
+    // We need these computations in order to compute correct lower-d element volumes in curvilinear
+    // coordinates
+    _holder_fe_lower_helper[dim]->get_xyz();
+    _holder_fe_lower_helper[dim]->get_JxW();
+  }
+}
+
+void
+Assembly::havePRefinement()
+{
+  const Order helper_order = _mesh.hasSecondOrderElements() ? SECOND : FIRST;
+  const FEType helper_type(helper_order, LAGRANGE);
+  auto setup_helpers = [&helper_type](auto & unique_helper_container,
+                                      auto & helper_container,
+                                      const unsigned int num_dimensionalities,
+                                      const bool user_added_helper_type,
+                                      auto & fe_container)
+  {
+    unique_helper_container.resize(num_dimensionalities);
+    for (const auto dim : make_range(num_dimensionalities))
+    {
+      auto & unique_helper = unique_helper_container[dim];
+      unique_helper = FEGenericBase<Real>::build(dim, helper_type);
+      // don't participate in p-refinement
+      unique_helper->add_p_level_in_reinit(false);
+      helper_container[dim] = unique_helper.get();
+
+      // If the user did not request the helper type then we should erase it from our FE container
+      // so that they're not penalized (in the "we should be able to do p-refinement sense") for our
+      // perhaps silly helpers
+      if (!user_added_helper_type)
+      {
+        auto & fe_container_dim = fe_container[dim];
+        auto fe_it = fe_container_dim.find(helper_type);
+        mooseAssert(fe_it != fe_container_dim.end(), "We should have the helper type");
+        delete fe_it->second;
+        fe_container_dim.erase(fe_it);
+      }
+    }
+  };
+
+  setup_helpers(_unique_fe_helper,
+                _holder_fe_helper,
+                _mesh_dimension + 1,
+                _user_added_fe_of_helper_type,
+                _fe);
+  setup_helpers(_unique_fe_face_helper,
+                _holder_fe_face_helper,
+                _mesh_dimension + 1,
+                _user_added_fe_face_of_helper_type,
+                _fe_face);
+  setup_helpers(_unique_fe_face_neighbor_helper,
+                _holder_fe_face_neighbor_helper,
+                _mesh_dimension + 1,
+                _user_added_fe_face_neighbor_of_helper_type,
+                _fe_face_neighbor);
+  setup_helpers(_unique_fe_neighbor_helper,
+                _holder_fe_neighbor_helper,
+                _mesh_dimension + 1,
+                _user_added_fe_neighbor_of_helper_type,
+                _fe_neighbor);
+  setup_helpers(_unique_fe_lower_helper,
+                _holder_fe_lower_helper,
+                _mesh_dimension,
+                _user_added_fe_lower_of_helper_type,
+                _fe_lower);
+
+  helpersRequestData();
 }
 
 template void coordTransformFactor<Point, Real>(const SubProblem & s,

@@ -50,7 +50,7 @@ class Adaptivity : public ConsoleStreamInterface,
                    public libMesh::ParallelObject
 {
 public:
-  Adaptivity(FEProblemBase & subproblem);
+  Adaptivity(FEProblemBase & fe_problem);
   virtual ~Adaptivity();
 
   /**
@@ -127,6 +127,11 @@ public:
    * @param flag The flag to recompute markers
    */
   void setRecomputeMarkersFlag(const bool flag) { _recompute_markers_during_cycles = flag; }
+
+  /**
+   * Switch from h-refinement to p-refinement
+   */
+  void switchHToPRefinement();
 
   /**
    * Adapts the mesh based on the error estimator used
@@ -245,7 +250,7 @@ public:
   bool isAdaptivityDue();
 
 protected:
-  FEProblemBase & _subproblem;
+  FEProblemBase & _fe_problem;
   MooseMesh & _mesh;
 
   /// on/off flag reporting if the adaptivity is being used
@@ -302,6 +307,8 @@ protected:
 
   /// Stores pointers to ErrorVectors associated with indicator field names
   std::map<std::string, std::unique_ptr<ErrorVector>> _indicator_field_to_error_vector;
+
+  bool _p_refinement_flag = false;
 };
 
 template <typename T>
