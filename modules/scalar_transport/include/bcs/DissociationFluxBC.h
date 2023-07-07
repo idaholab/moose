@@ -30,5 +30,5 @@ protected:
   const ADVariableValue & _v;
 
   /// The dissociation rate coefficient
-  const Real & _Kd;
+  const ADMaterialProperty<Real> & _Kd;
 };

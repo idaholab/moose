@@ -30,5 +30,5 @@ protected:
   const ADVariableValue & _v;
 
   /// recombination rate coefficient
-  const Real & _Kr;
+  const ADMaterialProperty<Real> & _Kr;
 };

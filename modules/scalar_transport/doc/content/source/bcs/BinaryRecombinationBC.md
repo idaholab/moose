@@ -10,7 +10,7 @@ This class implements a weak form corresponding to
 \int_{\Omega} \psi_i K_r uv d\Omega
 \end{equation}
 
-where $K_r$ is the recombination coefficient specified with [!param](/BCs/BinaryRecombinationBC/Kr),
+where $K_r$ is the recombination coefficient specified as a material property with [!param](/BCs/BinaryRecombinationBC/Kr),
 $u$ corresponds to [!param](/BCs/BinaryRecombinationBC/variable) and $v$ is a coupled variable specified by [!param](/BCs/BinaryRecombinationBC/v).
 As the name states, this class is meant to model binary recombination
 reactions occuring at a boundary.
