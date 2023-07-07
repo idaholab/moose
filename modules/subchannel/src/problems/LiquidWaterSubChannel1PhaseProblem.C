@@ -26,9 +26,14 @@ LiquidWaterSubChannel1PhaseProblem::validParams()
                                 "Thermal diffusion coefficient used in turbulent crossflow. This "
                                 "parameter in not user defined in triangular subchannels");
   params.addParam<bool>(
-      "default_friction_model", true, "Boolean to define which friction model to use");
+      "default_friction_model",
+      true,
+      "Boolean to define which friction model to use (default: Pang, B. et al. "
+      "KIT, 2013. / non-default: Todreas-Kazimi NUCLEAR SYSTEMS, second edition, Volume 1, 2011)");
   params.addParam<bool>(
-      "constant_beta", true, "Boolean to define the use of constant beta or computeBeta");
+      "constant_beta",
+      true,
+      "Boolean to define the use of a constant beta or beta correlation (Kim and Chung, 2001)");
   return params;
 }
 
