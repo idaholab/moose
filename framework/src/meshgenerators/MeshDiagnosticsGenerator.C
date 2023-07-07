@@ -89,7 +89,7 @@ MeshDiagnosticsGenerator::generate()
     // loop on sub-domain
     for (auto & id : ids)
     {
-      // ElemType defines an num for geometric element types
+      // ElemType defines an enum for geometric element types
       std::set<ElemType> types;
       // loop on elements within this sub-domain
       for (auto & elem : mesh->active_subdomain_elements_ptr_range(id))
