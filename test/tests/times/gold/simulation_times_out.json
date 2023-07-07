@@ -1,0 +1,69 @@
+{
+    "reporters": {
+        "check_times": {
+            "type": "SimulationTimes",
+            "values": {
+                "times": {
+                    "type": "std::vector<double>"
+                }
+            }
+        },
+        "input": {
+            "type": "InputTimes",
+            "values": {
+                "times": {
+                    "type": "std::vector<double>"
+                }
+            }
+        }
+    },
+    "time_steps": [
+        {
+            "check_times": {
+                "times": []
+            },
+            "input": {
+                "times": [
+                    0.2,
+                    0.4,
+                    0.9
+                ]
+            },
+            "time": 0.0,
+            "time_step": 0
+        },
+        {
+            "check_times": {
+                "times": [
+                    0.2
+                ]
+            },
+            "input": {
+                "times": [
+                    0.2,
+                    0.4,
+                    0.9
+                ]
+            },
+            "time": 0.2,
+            "time_step": 1
+        },
+        {
+            "check_times": {
+                "times": [
+                    0.2,
+                    0.4
+                ]
+            },
+            "input": {
+                "times": [
+                    0.2,
+                    0.4,
+                    0.9
+                ]
+            },
+            "time": 0.4,
+            "time_step": 2
+        }
+    ]
+}

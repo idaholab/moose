@@ -1,0 +1,27 @@
+{
+    "reporters": {
+        "reporter": {
+            "type": "ReporterTimes",
+            "values": {
+                "times": {
+                    "type": "std::vector<double>"
+                }
+            }
+        }
+    },
+    "time_steps": [
+        {
+            "reporter": {
+                "times": [
+                    0.2,
+                    0.4,
+                    0.5,
+                    0.6,
+                    0.9
+                ]
+            },
+            "time": 2.0,
+            "time_step": 2
+        }
+    ]
+}

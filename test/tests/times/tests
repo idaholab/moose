@@ -1,0 +1,47 @@
+[Tests]
+  issues = '#24696'
+  design = 'syntax/Times/index.md'
+
+  [test]
+    requirement = "The system shall be able to gather times from"
+
+    [input]
+      type = 'JSONDiff'
+      input = 'input_times.i'
+      jsondiff = 'input_times_out.json'
+      detail = 'a parameter in the input file,'
+    []
+    [functors]
+      type = 'JSONDiff'
+      input = 'functor_times.i'
+      jsondiff = 'functor_times_out.json'
+      detail = 'a functor evaluated at the element containing the origin,'
+      # Needs to be able to find the element containing the origin
+      mesh_mode = replicated
+    []
+    [csv]
+      type = 'JSONDiff'
+      input = 'csv_times.i'
+      jsondiff = 'csv_times_out.json'
+      detail = 'a CSV file,'
+    []
+    [exodus]
+      type = 'JSONDiff'
+      input = 'exodus_times.i'
+      jsondiff = 'exodus_times_out.json'
+      detail = 'multiple exodus files,'
+    []
+    [reporter]
+      type = 'JSONDiff'
+      input = 'reporter_times.i'
+      jsondiff = 'reporter_times_out.json'
+      detail = 'a reporter with data in the expected floating point vector format, and'
+    []
+    [simulation]
+      type = 'JSONDiff'
+      input = 'simulation_times.i'
+      jsondiff = 'simulation_times_out.json'
+      detail = 'the time steps taken by the simulation.'
+    []
+  []
+[]
