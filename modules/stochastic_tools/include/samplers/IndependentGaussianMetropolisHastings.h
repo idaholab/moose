@@ -22,7 +22,7 @@ public:
   IndependentGaussianMetropolisHastings(const InputParameters & parameters);
 
 protected:
-  virtual void sampleSetUp(const Sampler::SampleMode mode) override;
+  virtual void proposeSamples(const unsigned int seed_value) override;
 
 private:
   /// Reporter value the seed input values for proposing the next set of samples

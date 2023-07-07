@@ -24,5 +24,9 @@ public:
 
 protected:
   virtual void computeTransitionVector(std::vector<Real> & tv,
-                                       DenseMatrix<Real> & inputs_matrix) override;
+                                       std::vector<Real> & evidence) override;
+
+private:
+  /// Affine differential sampler
+  const AffineInvariantDifferentialEvolutionSampler * const _aides;
 };

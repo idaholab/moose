@@ -18,17 +18,19 @@ registerMooseObjectAliased("StochasticToolsApp", AffineInvariantDifferentialEvol
   1. Braak2006_static:
   - the gamma param is set to 2.38 / sqrt(2 * dim)
   - the b param is set to 1e-6
+  2. Braak2006_scaled:
+  - the gamma param is set to 2.38 / sqrt(2 * dim)
+  - the b param is set to (upper_bound - lower_bound) * 1e-6
 */
 
 InputParameters
 AffineInvariantDifferentialEvolutionSampler::validParams()
 {
   InputParameters params = ParallelMarkovChainMonteCarloBase::validParams();
-  params.addClassDescription("Perform Affine Invariant Ensemble MCMC with stretch sampler.");
-  params.addRequiredParam<ReporterName>("previous_state",
-                                "Reporter value with the previous state of all the walkers.");
-  params.addParam<Real>("step_size", 2.0, "Step size for each of the walkers.");
-  MooseEnum tuning_option("Braak2006_static", "Braak2006_static");
+  params.addClassDescription("Perform Affine Invariant Ensemble MCMC with differential sampler.");
+  params.addRequiredParam<ReporterName>(
+      "previous_state", "Reporter value with the previous state of all the walkers.");
+  MooseEnum tuning_option("Braak2006_static Braak2006_scaled", "Braak2006_static");
   params.addParam<MooseEnum>("tuning_option", tuning_option, "The tuning option for internal parameters.");
   return params;
 }
@@ -49,34 +51,39 @@ void
 AffineInvariantDifferentialEvolutionSampler::computeDifferential(const Real & state1,
                                                                  const Real & state2,
                                                                  const Real & rnd,
+                                                                 const unsigned int & index,
                                                                  Real & diff)
 {
   Real gamma;
   Real b;
-  tuneParams(gamma, b);
+  tuneParams(gamma, b, index);
   diff = gamma * (state1 - state2) + Normal::quantile(rnd, 0.0, b);
 }
 
 void
-AffineInvariantDifferentialEvolutionSampler::tuneParams(Real & gamma, Real & b)
+AffineInvariantDifferentialEvolutionSampler::tuneParams(Real & gamma,
+                                                        Real & b,
+                                                        const unsigned int & index)
 {
   if (_tuning_option == "Braak2006_static")
   {
     gamma = 2.38 / std::sqrt(2 * _priors.size());
-    b = 1e-4;
+    b = 1e-6;
   }
+  else if (_tuning_option == "Braak2006_scaled")
+  {
+    if (!_lb)
+      mooseError("The bounds need to be specified for the Braak2006_scaled tuning option.");
+    gamma = 2.38 / std::sqrt(2 * _priors.size());
+    b = 1e-6 * ((*_ub)[index] - (*_lb)[index]);
+  }
+  else
+    mooseError("Invalid tuning option ", std::string(_tuning_option));
 }
 
 void
-AffineInvariantDifferentialEvolutionSampler::sampleSetUp(const SampleMode /*mode*/)
+AffineInvariantDifferentialEvolutionSampler::proposeSamples(const unsigned int seed_value)
 {
-  if (_step < 1 || _check_step == _step)
-    return;
-  _check_step = _step;
-
-  unsigned int seed_value = _step > 0 ? (_step - 1) : 0;
-
-  // Filling the new_samples vector of vectors with new proposal samples
   unsigned int j = 0;
   bool indicator;
   unsigned int index_req1, index_req2;
@@ -87,23 +94,16 @@ AffineInvariantDifferentialEvolutionSampler::sampleSetUp(const SampleMode /*mode
     randomIndex2(_num_parallel_proposals, j, seed_value, index_req1, index_req2);
     for (unsigned int i = 0; i < _priors.size(); ++i)
     {
-      // computeDifferential(_previous_state[index_req1][i],
-      //                     _previous_state[index_req2][i],
-      //                     getRand(seed_value),
-      //                     diff);
-      // _new_samples[j][i] = (_step > decisionStep()) ? (_previous_state[j][i] + diff)
-      //                                               : _priors[i]->quantile(getRand(seed_value));
-      computeDifferential(std::log(_previous_state[index_req1][i]),
-                          std::log(_previous_state[index_req2][i]),
+      computeDifferential(_previous_state[index_req1][i],
+                          _previous_state[index_req2][i],
                           getRand(seed_value),
+                          i,
                           diff);
-      _new_samples[j][i] = (_step > decisionStep())
-                               ? std::exp(std::log(_previous_state[j][i]) + diff)
-                               : _priors[i]->quantile(getRand(seed_value));
+      _new_samples[j][i] = (_step > decisionStep()) ? (_previous_state[j][i] + diff)
+                                                    : _priors[i]->quantile(getRand(seed_value));
       if (_lb)
         indicator = (_new_samples[j][i] < (*_lb)[i] || _new_samples[j][i] > (*_ub)[i]) ? 1 : indicator;
     }
-    _rnd_vec[j] = getRand(seed_value);
     j = (!indicator) ? ++j : j;
   }
 }

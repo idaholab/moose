@@ -35,10 +35,11 @@
 
 [Samplers]
   [sample]
-    type = AffineInvariantStretchSampler # AffineInvariantDES #
+    type = AffineInvariantDES # AffineInvariantStretchSampler #
     prior_distributions = 'left right'
     previous_state = 'mcmc_reporter/inputs'
     num_parallel_proposals = 10
+    # tuning_option = Braak2006_scaled
     # lb = '-3.0 -3.0' # if needed
     # ub = '3.0 3.0' # if needed
     file_name = 'confg.csv'
@@ -79,7 +80,7 @@
     type = StochasticReporter
   []
   [mcmc_reporter]
-    type = AffineInvariantStretchDecision # AffineInvariantDifferentialDecision #
+    type = AffineInvariantDifferentialDecision #
     output_value = constant/reporter_transfer:average:value
     sampler = sample
     likelihoods = 'gaussian'

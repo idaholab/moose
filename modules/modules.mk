@@ -108,10 +108,6 @@ ifeq ($(SCALAR_TRANSPORT),yes)
         MISC                        := yes
 endif
 
-ifeq ($(STOCHASTIC_TOOLS),yes)
-        HEAT_CONDUCTION             := yes
-endif
-
 # The master list of all moose modules
 MODULE_NAMES := "chemical_reactions contact electromagnetics external_petsc_solver fluid_properties fsi functional_expansion_tools geochemistry heat_conduction level_set misc navier_stokes optimization peridynamics phase_field porous_flow ray_tracing rdg reactor richards scalar_transport solid_properties stochastic_tools tensor_mechanics thermal_hydraulics xfem"
 
@@ -228,14 +224,6 @@ ifeq ($(SOLID_PROPERTIES),yes)
   APPLICATION_NAME   := solid_properties
   DEPEND_MODULES     := heat_conduction
   SUFFIX             := sp
-  include $(FRAMEWORK_DIR)/app.mk
-endif
-
-ifeq ($(STOCHASTIC_TOOLS),yes)
-  APPLICATION_DIR    := $(MOOSE_DIR)/modules/stochastic_tools
-  APPLICATION_NAME   := stochastic_tools
-  DEPEND_MODULES     := heat_conduction
-  SUFFIX             := st
   include $(FRAMEWORK_DIR)/app.mk
 endif
 

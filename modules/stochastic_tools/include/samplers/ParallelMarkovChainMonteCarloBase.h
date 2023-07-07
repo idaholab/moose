@@ -44,8 +44,13 @@ public:
   virtual int decisionStep() const { return 1; }
 
 protected:
+  // Fill in the _new_samples vector of vectors (happens within sampleSetUp)
+  virtual void proposeSamples(const unsigned int seed_value);
+
+  // See Sampler.h for description
   virtual void sampleSetUp(const Sampler::SampleMode mode) override;
 
+  // See Sampler.h for description
   virtual Real computeSample(dof_id_type row_index, dof_id_type col_index) override;
 
   /// Sample a random index excluding a specified index

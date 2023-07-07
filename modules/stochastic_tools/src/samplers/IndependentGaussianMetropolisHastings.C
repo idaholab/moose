@@ -39,16 +39,9 @@ IndependentGaussianMetropolisHastings::IndependentGaussianMetropolisHastings(con
 }
 
 void
-IndependentGaussianMetropolisHastings::sampleSetUp(const SampleMode /*mode*/)
+IndependentGaussianMetropolisHastings::proposeSamples(const unsigned int seed_value)
 {
-  if (_step < 1 || _check_step == _step)
-    return;
-  _check_step = _step;
-
-  unsigned int seed_value = _step > 0 ? (_step - 1) : 0;
-  
-  // Filling the new_samples vector of vectors with new proposal samples
-  std::vector<Real> old_sample = (_step > 2) ? _seed_inputs : _initial_values;
+  std::vector<Real> old_sample = (_step > decisionStep()) ? _seed_inputs : _initial_values;
   for (unsigned int j = 0; j < _num_parallel_proposals; ++j)
   {
     for (unsigned int i = 0; i < _priors.size(); ++i)

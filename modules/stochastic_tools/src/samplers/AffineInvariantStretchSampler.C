@@ -38,15 +38,8 @@ AffineInvariantStretchSampler::AffineInvariantStretchSampler(const InputParamete
 }
 
 void
-AffineInvariantStretchSampler::sampleSetUp(const SampleMode /*mode*/)
+AffineInvariantStretchSampler::proposeSamples(const unsigned int seed_value)
 {
-  if (_step < 1 || _check_step == _step)
-    return;
-  _check_step = _step;
-
-  unsigned int seed_value = _step > 0 ? (_step - 1) : 0;
-
-  // Filling the new_samples vector of vectors with new proposal samples
   unsigned int j = 0;
   bool indicator;
   unsigned int index_req = 0;
@@ -65,7 +58,6 @@ AffineInvariantStretchSampler::sampleSetUp(const SampleMode /*mode*/)
       if (_lb)
         indicator = (_new_samples[j][i] < (*_lb)[i] || _new_samples[j][i] > (*_ub)[i]) ? 1 : indicator;
     }
-    _rnd_vec[j] = getRand(seed_value);
     j = (!indicator) ? ++j : j;
   }
 }
