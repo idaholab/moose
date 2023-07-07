@@ -30,7 +30,7 @@ public:
   bool hasEnergyEquation() const { return _has_energy_equation; }
   bool hasScalar() const { return _has_scalar_equation; }
   unsigned int dim() const { return _dim; }
-  const std::string & rhieChowName() const;
+  std::string rhieChowName() const;
   ///@}
 
   ///@{ public interface for variable and property names
@@ -3561,7 +3561,7 @@ NSFVBase<BaseType>::isOutletBoundary(const BoundaryName & boundary_name) const
 }
 
 template <class BaseType>
-const std::string &
+std::string
 NSFVBase<BaseType>::rhieChowName() const
 {
   if (_porous_medium_treatment)
