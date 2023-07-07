@@ -135,7 +135,7 @@ OptimizeSolve::taoSolve()
     case TaoSolverEnum::AUGMENTED_LAGRANGIAN_MULTIPLER_METHOD:
       ierr = TaoSetType(_tao, TAOALMM);
       CHKERRQ(ierr);
-      ierr = TaoSetType(subsolver, TAOLMVM);
+      ierr = TaoSetType(subsolver, TAOBQNKTR);
       CHKERRQ(ierr);
       // set sub solver
       ierr = TaoALMMSetSubsolver(_tao, subsolver);
@@ -232,24 +232,26 @@ OptimizeSolve::taoSolve()
     CHKERRQ(ierr);
     ierr = MatSetUp(_gradient_i);
     CHKERRQ(ierr);
+    if (_obj_function->getNumEqCons())
+    { // Set the Equality Constraints
+      ierr = TaoSetEqualityConstraintsRoutine(_tao, _ce, equalityFunctionWrapper, this);
+      CHKERRQ(ierr);
 
-    // Set the Equality Constraints
-    ierr = TaoSetEqualityConstraintsRoutine(_tao, _ce, equalityFunctionWrapper, this);
-    CHKERRQ(ierr);
+      // Set the Equality Constraints Jacobian
+      ierr = TaoSetJacobianEqualityRoutine(
+          _tao, _gradient_e, _gradient_e, equalityGradientFunctionWrapper, this);
+      CHKERRQ(ierr);
+    }
+    if (_obj_function->getNumInEqCons())
+    { // Set the Inequality constraints
+      ierr = TaoSetInequalityConstraintsRoutine(_tao, _ci, inequalityFunctionWrapper, this);
+      CHKERRQ(ierr);
 
-    // Set the Equality Constraints Jacobian
-    ierr = TaoSetJacobianEqualityRoutine(
-        _tao, _gradient_e, _gradient_e, equalityGradientFunctionWrapper, this);
-    CHKERRQ(ierr);
-
-    // Set the Inequality constraints
-    ierr = TaoSetInequalityConstraintsRoutine(_tao, _ci, inequalityFunctionWrapper, this);
-    CHKERRQ(ierr);
-
-    // Set the Inequality constraints Jacobian
-    ierr = TaoSetJacobianInequalityRoutine(
-        _tao, _gradient_i, _gradient_i, inequalityGradientFunctionWrapper, this);
-    CHKERRQ(ierr);
+      // Set the Inequality constraints Jacobian
+      ierr = TaoSetJacobianInequalityRoutine(
+          _tao, _gradient_i, _gradient_i, inequalityGradientFunctionWrapper, this);
+      CHKERRQ(ierr);
+    }
   }
 
   // Backup multiapps so transient problems start with the same initial condition
