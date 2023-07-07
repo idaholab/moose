@@ -90,6 +90,16 @@ ParallelMarkovChainMonteCarloBase::ParallelMarkovChainMonteCarloBase(const Input
 }
 
 void
+ParallelMarkovChainMonteCarloBase::proposeSamples(const unsigned int seed_value)
+{
+  for (unsigned int j = 0; j < _num_parallel_proposals; ++j)
+  {
+    for (unsigned int i = 0; i < _priors.size(); ++i)
+      _new_samples[j][i] = _priors[i]->quantile(getRand(seed_value));
+  }
+}
+
+void
 ParallelMarkovChainMonteCarloBase::sampleSetUp(const SampleMode /*mode*/)
 {
   if (_step < 1 || _check_step == _step)
@@ -99,12 +109,11 @@ ParallelMarkovChainMonteCarloBase::sampleSetUp(const SampleMode /*mode*/)
   unsigned int seed_value = _step > 0 ? (_step - 1) : 0;
 
   // Filling the new_samples vector of vectors with new proposal samples
+  proposeSamples(seed_value);
+
+  // Draw random numbers to facilitate decision making later on
   for (unsigned int j = 0; j < _num_parallel_proposals; ++j)
-  {
-    for (unsigned int i = 0; i < _priors.size(); ++i)
-      _new_samples[j][i] = _priors[i]->quantile(getRand(seed_value));
     _rnd_vec[j] = getRand(seed_value);
-  }
 }
 
 void
@@ -149,6 +158,8 @@ ParallelMarkovChainMonteCarloBase::getRandomNumbers() const
 Real
 ParallelMarkovChainMonteCarloBase::computeSample(dof_id_type row_index, dof_id_type col_index)
 {
+  // Combine the proposed samples with experimental configurations
   combineWithConfg();
+
   return _new_samples_confg[row_index][col_index];
 }

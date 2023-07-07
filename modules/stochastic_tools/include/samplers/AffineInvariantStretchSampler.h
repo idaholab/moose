@@ -27,9 +27,9 @@ public:
   std::vector<Real> getAffineStepSize() const { return _affine_step; }
 
 protected:
-  virtual void sampleSetUp(const Sampler::SampleMode mode) override;
+  virtual void proposeSamples(const unsigned int seed_value) override;
 
-  virtual int decisionStep() const override { return 1; }
+  // virtual int decisionStep() const override { return 1; }
 
 private:
   /// The step size for the stretch sampler

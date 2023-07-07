@@ -23,30 +23,18 @@ AffineInvariantStretchDecision::AffineInvariantStretchDecision(const InputParame
   : ParallelMarkovChainMonteCarloDecision(parameters),
     _aiss(dynamic_cast<const AffineInvariantStretchSampler *>(&_sampler))
 {
+  // Check whether the selected sampler is a stretch sampler or not
+  if (!_aiss)
+    paramError("sampler", "The selected sampler is not of type AffineInvariantStretchSampler.");
+
+  // Fetch the affine step sizes
+  _step_size = _aiss->getAffineStepSize();
 }
 
 void
 AffineInvariantStretchDecision::computeTransitionVector(std::vector<Real> & tv,
-                                                        DenseMatrix<Real> & inputs_matrix)
+                                                        std::vector<Real> & evidence)
 {
-  Real quant1;
-  std::vector<Real> out1(_num_confg);
-  std::vector<Real> out2(_num_confg);
-  std::vector<Real> z = _aiss->getAffineStepSize();
   for (unsigned int i = 0; i < tv.size(); ++i)
-  {
-    quant1 = 0.0;
-    for (unsigned int j = 0; j < _priors.size(); ++j)
-      quant1 += (std::log(_priors[j]->pdf(inputs_matrix(i, j))) -
-                 std::log(_priors[j]->pdf(_data_prev(i, j))));
-    for (unsigned int j = 0; j < _num_confg; ++j)
-    {
-      out1[j] = _outputs_required[j * _pmcmc->getNumParallelProposals() + i];
-      out2[j] = _outputs_prev[j * _pmcmc->getNumParallelProposals() + i];
-    }
-    for (unsigned int j = 0; j < _likelihoods.size(); ++j)
-      quant1 += (_likelihoods[j]->function(out1) - _likelihoods[j]->function(out2));
-    quant1 = std::exp(std::min((_priors.size() - 1) * std::log(z[i]) + quant1, 0.0));
-    tv[i] = quant1;
-  }
+    tv[i] = std::exp(std::min((_priors.size() - 1) * std::log(_step_size[i]) + evidence[i], 0.0));
 }

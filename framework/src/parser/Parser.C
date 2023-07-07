@@ -608,6 +608,8 @@ Parser::hitCLIFilter(std::string appname, const std::vector<std::string> & argv)
         ; // cli param is ":" prefixed meaning global for all main+subapps
       else if (pos == std::string::npos) // param is for main app - skip
         continue;
+      else if (arg.find(":", pos + 1) != std::string::npos) // param is for a nested multiapp - skip
+        continue;
       else if (arg.substr(0, pos) != appname &&
                arg.substr(0, pos) != name) // param is for different multiapp - skip
       {
@@ -1235,26 +1237,15 @@ Parser::extractParams(const std::string & prefix, InputParameters & p)
 
     bool found = false;
     bool in_global = false;
-    std::string orig_name = prefix + "/" + it.first;
-    std::string full_name = orig_name;
 
-    // Mark parameters appearing in the input file or command line
-    auto node = _root->find(full_name);
-    if (node && node->type() == hit::NodeType::Field)
+    for (const auto & param_name : p.paramAliases(it.first))
     {
-      p.set_attributes(it.first, false);
-      _extracted_vars.insert(
-          full_name); // Keep track of all variables extracted from the input file
-      found = true;
-      p.inputLocation(it.first) = node->filename() + ":" + std::to_string(node->line());
-      p.paramFullpath(it.first) = full_name;
-    }
-    // Wait! Check the GlobalParams section
-    else if (global_params_block)
-    {
-      full_name = global_params_block_name + "/" + it.first;
-      node = _root->find(full_name);
-      if (node)
+      std::string orig_name = prefix + "/" + param_name;
+      std::string full_name = orig_name;
+
+      // Mark parameters appearing in the input file or command line
+      auto node = _root->find(full_name);
+      if (node && node->type() == hit::NodeType::Field)
       {
         p.inputLocation(param_name) = node->filename() + ":" + std::to_string(node->line());
         p.paramFullpath(param_name) = full_name;
@@ -1268,30 +1259,21 @@ Parser::extractParams(const std::string & prefix, InputParameters & p)
             full_name); // Keep track of all variables extracted from the input file
         found = true;
       }
-    }
-
-    if (!found)
-    {
-      /**
-       * Special case handling
-       *   if the parameter wasn't found in the input file or the cli object the logic in this
-       * branch will execute
-       */
-
-      // In the case where we have OutFileName but it wasn't actually found in the input filename,
-      // we will populate it with the actual parsed filename which is available here in the
-      // parser.
-
-      InputParameters::Parameter<OutFileBase> * scalar_p =
-          dynamic_cast<InputParameters::Parameter<OutFileBase> *>(MooseUtils::get(it.second));
-      if (scalar_p)
+      // Wait! Check the GlobalParams section
+      else if (global_params_block)
       {
-        std::string input_file_name = getPrimaryFileName();
-        mooseAssert(input_file_name != "", "Input Filename is nullptr");
-        size_t pos = input_file_name.find_last_of('.');
-        mooseAssert(pos != std::string::npos, "Unable to determine suffix of input file name");
-        scalar_p->set() = input_file_name.substr(0, pos) + "_out";
-        p.set_attributes(it.first, false);
+        full_name = global_params_block_name + "/" + param_name;
+        node = _root->find(full_name);
+        if (node)
+        {
+          p.inputLocation(param_name) = node->filename() + ":" + std::to_string(node->line());
+          p.paramFullpath(param_name) = full_name;
+          p.set_attributes(param_name, false);
+          _extracted_vars.insert(
+              full_name); // Keep track of all variables extracted from the input file
+          found = true;
+          in_global = true;
+        }
       }
       if (found)
       {
@@ -1372,25 +1354,25 @@ Parser::extractParams(const std::string & prefix, InputParameters & p)
           in_global,                                                                               \
           global_params_block)
 
-      /**
-       * Scalar types
-       */
-      // built-ins
-      // NOTE: Similar dynamic casting is done in InputParameters.C, please update appropriately
-      if (false)
-        ;
-      setscalarvaltype(Real, double, Real);
-      setscalarvaltype(int, int, long);
-      setscalarvaltype(unsigned short, unsigned int, long);
-      setscalarvaltype(long, int, long);
-      setscalarvaltype(unsigned int, unsigned int, long);
-      setscalarvaltype(unsigned long, unsigned int, long);
-      setscalarvaltype(long int, int64_t, long);
-      setscalarvaltype(unsigned long long, unsigned int, long);
+        /**
+         * Scalar types
+         */
+        // built-ins
+        // NOTE: Similar dynamic casting is done in InputParameters.C, please update appropriately
+        if (false)
+          ;
+        setscalarvaltype(Real, double, Real);
+        setscalarvaltype(int, int, long);
+        setscalarvaltype(unsigned short, unsigned int, long);
+        setscalarvaltype(long, int, long);
+        setscalarvaltype(unsigned int, unsigned int, long);
+        setscalarvaltype(unsigned long, unsigned int, long);
+        setscalarvaltype(long int, int64_t, long);
+        setscalarvaltype(unsigned long long, unsigned int, long);
 
-      setscalar(bool, bool);
-      setscalar(SubdomainID, int);
-      setscalar(BoundaryID, int);
+        setscalar(bool, bool);
+        setscalar(SubdomainID, int);
+        setscalar(BoundaryID, int);
 
         // string and string-subclass types
         setscalar(string, string);
@@ -1425,25 +1407,25 @@ Parser::extractParams(const std::string & prefix, InputParameters & p)
         setscalar(ExecutorName, string);
         setscalar(NonlinearSystemName, string);
 
-      // Moose Compound Scalars
-      setscalar(RealVectorValue, RealVectorValue);
-      setscalar(Point, Point);
-      setscalar(RealEigenVector, RealEigenVector);
-      setscalar(RealEigenMatrix, RealEigenMatrix);
-      setscalar(MooseEnum, MooseEnum);
-      setscalar(MultiMooseEnum, MultiMooseEnum);
-      setscalar(RealTensorValue, RealTensorValue);
-      setscalar(ExecFlagEnum, ExecFlagEnum);
-      setscalar(ReporterName, string);
-      setscalar(ReporterValueName, string);
-      setscalar(ParsedFunctionExpression, string);
+        // Moose Compound Scalars
+        setscalar(RealVectorValue, RealVectorValue);
+        setscalar(Point, Point);
+        setscalar(RealEigenVector, RealEigenVector);
+        setscalar(RealEigenMatrix, RealEigenMatrix);
+        setscalar(MooseEnum, MooseEnum);
+        setscalar(MultiMooseEnum, MultiMooseEnum);
+        setscalar(RealTensorValue, RealTensorValue);
+        setscalar(ExecFlagEnum, ExecFlagEnum);
+        setscalar(ReporterName, string);
+        setscalar(ReporterValueName, string);
+        setscalar(ParsedFunctionExpression, string);
 
-      // vector types
-      setvector(bool, bool);
-      setvector(Real, double);
-      setvector(int, int);
-      setvector(long, int);
-      setvector(unsigned int, int);
+        // vector types
+        setvector(bool, bool);
+        setvector(Real, double);
+        setvector(int, int);
+        setvector(long, int);
+        setvector(unsigned int, int);
 
 // We need to be able to parse 8-byte unsigned types when
 // libmesh is configured --with-dof-id-bytes=8.  Officially,
@@ -1453,7 +1435,7 @@ Parser::extractParams(const std::string & prefix, InputParameters & p)
 // but presumably uint64_t is the "most standard" way to get a
 // 64-bit unsigned type, so we'll stick with that here.
 #if LIBMESH_DOF_ID_BYTES == 8
-      setvector(uint64_t, int);
+        setvector(uint64_t, int);
 #endif
 
         setvector(SubdomainID, int);
@@ -1495,96 +1477,96 @@ Parser::extractParams(const std::string & prefix, InputParameters & p)
         setvector(ExecutorName, string);
         setvector(NonlinearSystemName, string);
 
-      // map types
-      setmap(string, Real);
-      setmap(string, string);
-      setmap(unsigned int, unsigned int);
-      setmap(unsigned long, unsigned int);
-      setmap(unsigned long long, unsigned int);
+        // map types
+        setmap(string, Real);
+        setmap(string, string);
+        setmap(unsigned int, unsigned int);
+        setmap(unsigned long, unsigned int);
+        setmap(unsigned long long, unsigned int);
 
-      // Double indexed types
-      setvectorvector(Real);
-      setvectorvector(int);
-      setvectorvector(long);
-      setvectorvector(unsigned int);
-      setvectorvector(unsigned long long);
-
-// See vector type explanation
-#if LIBMESH_DOF_ID_BYTES == 8
-      setvectorvector(uint64_t);
-#endif
-
-      setvectorvector(SubdomainID);
-      setvectorvector(BoundaryID);
-      setvectorvector(Point);
-      setvectorvector(string);
-      setvectorvector(FileName);
-      setvectorvector(FileNameNoExtension);
-      setvectorvector(MeshFileName);
-      setvectorvector(SubdomainName);
-      setvectorvector(BoundaryName);
-      setvectorvector(VariableName);
-      setvectorvector(NonlinearVariableName);
-      setvectorvector(AuxVariableName);
-      setvectorvector(FunctionName);
-      setvectorvector(UserObjectName);
-      setvectorvector(IndicatorName);
-      setvectorvector(MarkerName);
-      setvectorvector(MultiAppName);
-      setvectorvector(PostprocessorName);
-      setvectorvector(VectorPostprocessorName);
-      setvectorvector(MarkerName);
-      setvectorvector(OutputName);
-      setvectorvector(MaterialPropertyName);
-      setvectorvector(MooseFunctorName);
-      setvectorvector(MaterialName);
-      setvectorvector(DistributionName);
-      setvectorvector(LikelihoodName);
-      setvectorvector(SamplerName);
-      setvectorvector(TagName);
-
-      // Triple indexed types
-      setvectorvectorvector(Real);
-      setvectorvectorvector(int);
-      setvectorvectorvector(long);
-      setvectorvectorvector(unsigned int);
-      setvectorvectorvector(unsigned long long);
+        // Double indexed types
+        setvectorvector(Real);
+        setvectorvector(int);
+        setvectorvector(long);
+        setvectorvector(unsigned int);
+        setvectorvector(unsigned long long);
 
 // See vector type explanation
 #if LIBMESH_DOF_ID_BYTES == 8
-      setvectorvectorvector(uint64_t);
+        setvectorvector(uint64_t);
 #endif
 
-      setvectorvectorvector(SubdomainID);
-      setvectorvectorvector(BoundaryID);
-      setvectorvectorvector(string);
-      setvectorvectorvector(FileName);
-      setvectorvectorvector(FileNameNoExtension);
-      setvectorvectorvector(MeshFileName);
-      setvectorvectorvector(SubdomainName);
-      setvectorvectorvector(BoundaryName);
-      setvectorvectorvector(VariableName);
-      setvectorvectorvector(NonlinearVariableName);
-      setvectorvectorvector(AuxVariableName);
-      setvectorvectorvector(FunctionName);
-      setvectorvectorvector(UserObjectName);
-      setvectorvectorvector(IndicatorName);
-      setvectorvectorvector(MarkerName);
-      setvectorvectorvector(MultiAppName);
-      setvectorvectorvector(PostprocessorName);
-      setvectorvectorvector(VectorPostprocessorName);
-      setvectorvectorvector(MarkerName);
-      setvectorvectorvector(OutputName);
-      setvectorvectorvector(MaterialPropertyName);
-      setvectorvectorvector(MooseFunctorName);
-      setvectorvectorvector(MaterialName);
-      setvectorvectorvector(DistributionName);
-      setvectorvectorvector(LikelihoodName);
-      setvectorvectorvector(SamplerName);
-      else
-      {
-        mooseError("unsupported type '", par->type(), "' for input parameter '", full_name, "'");
-      }
+        setvectorvector(SubdomainID);
+        setvectorvector(BoundaryID);
+        setvectorvector(Point);
+        setvectorvector(string);
+        setvectorvector(FileName);
+        setvectorvector(FileNameNoExtension);
+        setvectorvector(MeshFileName);
+        setvectorvector(SubdomainName);
+        setvectorvector(BoundaryName);
+        setvectorvector(VariableName);
+        setvectorvector(NonlinearVariableName);
+        setvectorvector(AuxVariableName);
+        setvectorvector(FunctionName);
+        setvectorvector(UserObjectName);
+        setvectorvector(IndicatorName);
+        setvectorvector(MarkerName);
+        setvectorvector(MultiAppName);
+        setvectorvector(PostprocessorName);
+        setvectorvector(VectorPostprocessorName);
+        setvectorvector(MarkerName);
+        setvectorvector(OutputName);
+        setvectorvector(MaterialPropertyName);
+        setvectorvector(MooseFunctorName);
+        setvectorvector(MaterialName);
+        setvectorvector(DistributionName);
+        setvectorvector(LikelihoodName);
+        setvectorvector(SamplerName);
+        setvectorvector(TagName);
+
+        // Triple indexed types
+        setvectorvectorvector(Real);
+        setvectorvectorvector(int);
+        setvectorvectorvector(long);
+        setvectorvectorvector(unsigned int);
+        setvectorvectorvector(unsigned long long);
+
+// See vector type explanation
+#if LIBMESH_DOF_ID_BYTES == 8
+        setvectorvectorvector(uint64_t);
+#endif
+
+        setvectorvectorvector(SubdomainID);
+        setvectorvectorvector(BoundaryID);
+        setvectorvectorvector(string);
+        setvectorvectorvector(FileName);
+        setvectorvectorvector(FileNameNoExtension);
+        setvectorvectorvector(MeshFileName);
+        setvectorvectorvector(SubdomainName);
+        setvectorvectorvector(BoundaryName);
+        setvectorvectorvector(VariableName);
+        setvectorvectorvector(NonlinearVariableName);
+        setvectorvectorvector(AuxVariableName);
+        setvectorvectorvector(FunctionName);
+        setvectorvectorvector(UserObjectName);
+        setvectorvectorvector(IndicatorName);
+        setvectorvectorvector(MarkerName);
+        setvectorvectorvector(MultiAppName);
+        setvectorvectorvector(PostprocessorName);
+        setvectorvectorvector(VectorPostprocessorName);
+        setvectorvectorvector(MarkerName);
+        setvectorvectorvector(OutputName);
+        setvectorvectorvector(MaterialPropertyName);
+        setvectorvectorvector(MooseFunctorName);
+        setvectorvectorvector(MaterialName);
+        setvectorvectorvector(DistributionName);
+        setvectorvectorvector(LikelihoodName);
+        setvectorvectorvector(SamplerName);
+        else
+        {
+          mooseError("unsupported type '", par->type(), "' for input parameter '", full_name, "'");
+        }
 
 #undef setscalarValueType
 #undef setscalar
@@ -1592,6 +1574,33 @@ Parser::extractParams(const std::string & prefix, InputParameters & p)
 #undef setvectorvectorvector
 #undef setvectorvector
 #undef setmap
+        break;
+      }
+    }
+
+    if (!found)
+    {
+      /**
+       * Special case handling
+       *   if the parameter wasn't found in the input file or the cli object the logic in this
+       * branch will execute
+       */
+
+      // In the case where we have OutFileName but it wasn't actually found in the input filename,
+      // we will populate it with the actual parsed filename which is available here in the
+      // parser.
+
+      InputParameters::Parameter<OutFileBase> * scalar_p =
+          dynamic_cast<InputParameters::Parameter<OutFileBase> *>(MooseUtils::get(it.second));
+      if (scalar_p)
+      {
+        std::string input_file_name = getPrimaryFileName();
+        mooseAssert(input_file_name != "", "Input Filename is nullptr");
+        size_t pos = input_file_name.find_last_of('.');
+        mooseAssert(pos != std::string::npos, "Unable to determine suffix of input file name");
+        scalar_p->set() = input_file_name.substr(0, pos) + "_out";
+        p.set_attributes(it.first, false);
+      }
     }
   }
 

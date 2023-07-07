@@ -12,7 +12,7 @@
 #include "ParallelMarkovChainMonteCarloBase.h"
 
 /**
- * A class for performing Affine Invariant Ensemble MCMC with stretch sampler
+ * A class for performing Affine Invariant Ensemble MCMC with differential sampler
  */
 class AffineInvariantDifferentialEvolutionSampler : public ParallelMarkovChainMonteCarloBase
 {
@@ -22,16 +22,17 @@ public:
   AffineInvariantDifferentialEvolutionSampler(const InputParameters & parameters);
 
 protected:
-  virtual void sampleSetUp(const Sampler::SampleMode mode) override;
+  virtual void proposeSamples(const unsigned int seed_value) override;
 
-  virtual int decisionStep() const override { return 1; }
-
-private:
   /// Compute the differential evolution from the current state
-  void computeDifferential(const Real & state1, const Real & state2, const Real & rnd, Real & diff);
+  void computeDifferential(const Real & state1,
+                           const Real & state2,
+                           const Real & rnd,
+                           const unsigned int & index,
+                           Real & diff);
 
   /// Tune the internal parameters
-  void tuneParams(Real & gamma, Real & b);
+  void tuneParams(Real & gamma, Real & b, const unsigned int & index);
 
   /// Reporter value with the previous state of all the walkers
   const std::vector<std::vector<Real>> & _previous_state;

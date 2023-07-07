@@ -24,9 +24,12 @@ public:
 
 protected:
   virtual void computeTransitionVector(std::vector<Real> & tv,
-                                       DenseMatrix<Real> & inputs_matrix) override;
+                                       std::vector<Real> & evidence) override;
 
 private:
   /// Affine stretch sampler
   const AffineInvariantStretchSampler * const _aiss;
+
+  /// Affine step sizes
+  std::vector<Real> _step_size;
 };

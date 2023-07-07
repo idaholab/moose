@@ -10,8 +10,6 @@
 #include "AdaptiveMonteCarloUtils.h"
 #include "IndirectSort.h"
 #include "libmesh/int_range.h"
-#include "MooseRandom.h"
-#include "Sampler.h"
 
 /* AdaptiveMonteCarloUtils contains functions that are used across the Adaptive Monte
  Carlo set of algorithms.*/

@@ -21,31 +21,19 @@ AffineInvariantDifferentialDecision::validParams()
 
 AffineInvariantDifferentialDecision::AffineInvariantDifferentialDecision(
     const InputParameters & parameters)
-  : ParallelMarkovChainMonteCarloDecision(parameters)
+  : ParallelMarkovChainMonteCarloDecision(parameters),
+    _aides(dynamic_cast<const AffineInvariantDifferentialEvolutionSampler *>(&_sampler))
 {
+  // Check whether the selected sampler is a differential evolution sampler or not
+  if (!_aides)
+    paramError("sampler",
+               "The selected sampler is not of type AffineInvariantDifferentialEvolutionSampler.");
 }
 
 void
 AffineInvariantDifferentialDecision::computeTransitionVector(std::vector<Real> & tv,
-                                                             DenseMatrix<Real> & inputs_matrix)
+                                                             std::vector<Real> & evidence)
 {
-  Real quant1;
-  std::vector<Real> out1(_num_confg);
-  std::vector<Real> out2(_num_confg);
   for (unsigned int i = 0; i < tv.size(); ++i)
-  {
-    quant1 = 0.0;
-    for (unsigned int j = 0; j < _priors.size(); ++j)
-      quant1 += (std::log(_priors[j]->pdf(inputs_matrix(i, j))) -
-                 std::log(_priors[j]->pdf(_data_prev(i, j))));
-    for (unsigned int j = 0; j < _num_confg; ++j)
-    {
-      out1[j] = _outputs_required[j * _pmcmc->getNumParallelProposals() + i];
-      out2[j] = _outputs_prev[j * _pmcmc->getNumParallelProposals() + i];
-    }
-    for (unsigned int j = 0; j < _likelihoods.size(); ++j)
-      quant1 += (_likelihoods[j]->function(out1) - _likelihoods[j]->function(out2));
-    quant1 = std::exp(std::min(quant1, 0.0));
-    tv[i] = quant1;
-  }
+    tv[i] = std::exp(std::min(evidence[i], 0.0));
 }
