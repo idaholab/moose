@@ -50,7 +50,6 @@ AdaptiveImportanceSampler::validParams()
 
 AdaptiveImportanceSampler::AdaptiveImportanceSampler(const InputParameters & parameters)
   : Sampler(parameters),
-    ReporterInterface(this),
     _proposal_std(getParam<std::vector<Real>>("proposal_std")),
     _initial_values(getParam<std::vector<Real>>("initial_values")),
     _output_limit(getParam<Real>("output_limit")),

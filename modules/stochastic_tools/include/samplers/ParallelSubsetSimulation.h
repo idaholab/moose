@@ -15,7 +15,7 @@
 /**
  * A class used to perform Parallel Subset Simulation Sampling
  */
-class ParallelSubsetSimulation : public Sampler, public ReporterInterface
+class ParallelSubsetSimulation : public Sampler
 {
 public:
   static InputParameters validParams();

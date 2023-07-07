@@ -45,7 +45,6 @@ ParallelSubsetSimulation::validParams()
 
 ParallelSubsetSimulation::ParallelSubsetSimulation(const InputParameters & parameters)
   : Sampler(parameters),
-    ReporterInterface(this),
     _num_samplessub(getParam<unsigned int>("num_samplessub")),
     _num_subsets(getParam<unsigned int>("num_subsets")),
     _use_absolute_value(getParam<bool>("use_absolute_value")),
