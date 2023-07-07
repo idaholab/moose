@@ -47,7 +47,7 @@ registerMooseAction("ExampleApp", ExampleAction, "example_task_a");
 registerMooseAction("ExampleApp", ExampleAction, "example_task_b");
 ```
 
-## Registering Tasks
+## Registering Tasks id=registering_tasks
 
 Like MOOSE objects, tasks and syntax are registered in an application's constructor,
 conventionally from a static method called `registerAll`. MOOSE's tasks, actions,
@@ -75,7 +75,7 @@ addTaskDependency("secondary_task", "primary_task")
 Here a task called "secondary_task" will be executed sometime after the task
 called "primary_task".
 
-## Registering Syntax
+## Registering Syntax id=registering_syntax
 
 There are two macros associated with registering syntax to an action/task:
 `registerSyntax` and `registerSyntaxTask`:
@@ -111,6 +111,19 @@ always will be built:
 ``` language=cpp
 registerTask("task_name", true);
 ```
+
+## How Actions Are Built
+
+The input file parser creates actions by finding actions/tasks that are associated to
+a given syntax via the syntax registration calls (see [#registering_syntax]).
+After these actions are created, other actions may be "auto-built" to satisfy
+unsatisfied *required* (see [#registering_tasks]) tasks: the tasks are sorted
+via the dependency resolver, using the registered dependencies between them, and
+then for each unsatisfied, required task, a loop over all of the actions registered
+to that task is performed. If the all of the action's required parameters are
+valid, then it is auto-built. Note that this loop continues for the remaining
+actions registered to the task, even if an action has already been auto-built
+to satisfy it.
 
 ## Relationship Managers and Actions
 
