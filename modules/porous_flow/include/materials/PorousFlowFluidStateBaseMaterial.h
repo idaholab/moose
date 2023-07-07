@@ -103,12 +103,15 @@ protected:
   using PorousFlowFluidStateBaseMaterialTempl<is_ad>::setMaterialVectorSize;                       \
   using PorousFlowFluidStateBaseMaterialTempl<is_ad>::_mass_frac;                                  \
   using PorousFlowFluidStateBaseMaterialTempl<is_ad>::_grad_mass_frac_qp;                          \
-  using PorousFlowFluidStateBaseMaterialTempl<is_ad>::_dmass_frac_dvar;                            \
   using PorousFlowFluidStateBaseMaterialTempl<is_ad>::_fluid_density;                              \
-  using PorousFlowFluidStateBaseMaterialTempl<is_ad>::_dfluid_density_dvar;                        \
   using PorousFlowFluidStateBaseMaterialTempl<is_ad>::_fluid_viscosity;                            \
-  using PorousFlowFluidStateBaseMaterialTempl<is_ad>::_dfluid_viscosity_dvar;                      \
   using PorousFlowFluidStateBaseMaterialTempl<is_ad>::_fluid_enthalpy;                             \
+  using PorousFlowFluidStateBaseMaterialTempl<is_ad>::_fluid_internal_energy
+
+#define usingPorousFlowFluidStateBaseMaterialDerivativeMembers                                     \
+  usingPorousFlowFluidStateBaseMaterialMembers;                                                    \
+  using PorousFlowFluidStateBaseMaterialTempl<is_ad>::_dmass_frac_dvar;                            \
+  using PorousFlowFluidStateBaseMaterialTempl<is_ad>::_dfluid_density_dvar;                        \
+  using PorousFlowFluidStateBaseMaterialTempl<is_ad>::_dfluid_viscosity_dvar;                      \
   using PorousFlowFluidStateBaseMaterialTempl<is_ad>::_dfluid_enthalpy_dvar;                       \
-  using PorousFlowFluidStateBaseMaterialTempl<is_ad>::_fluid_internal_energy;                      \
   using PorousFlowFluidStateBaseMaterialTempl<is_ad>::_dfluid_internal_energy_dvar

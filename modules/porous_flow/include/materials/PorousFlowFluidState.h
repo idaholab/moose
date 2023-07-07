@@ -115,7 +115,11 @@ protected:
   /// Index of derivative wrt salt mass fraction X
   const unsigned int _Xidx;
 
+#if (is_ad)
   usingPorousFlowFluidStateBaseMaterialMembers;
+#else
+  usingPorousFlowFluidStateBaseMaterialDerivativeMembers;
+#endif
 };
 
 typedef PorousFlowFluidStateTempl<false> PorousFlowFluidState;

@@ -75,7 +75,11 @@ protected:
   /// Index of derivative wrt enthalpy
   const unsigned int _hidx;
 
+#if (is_ad)
   usingPorousFlowFluidStateBaseMaterialMembers;
+#else
+  usingPorousFlowFluidStateBaseMaterialDerivativeMembers;
+#endif
 };
 
 typedef PorousFlowFluidStateSingleComponentTempl<false> PorousFlowFluidStateSingleComponent;
