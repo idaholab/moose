@@ -18,19 +18,20 @@ DissociationFluxBC::validParams()
   params.addRequiredCoupledVar("v",
                                "The variable that is dissociating on this boundary to "
                                "form the mobile species (specified with the variable param)");
-  params.addParam<Real>("Kd", 1, "The dissociation coefficient");
+  params.addParam<MaterialPropertyName>(
+      "Kd", "Kd", "The name of the material property for the dissociation coefficient");
   params.addClassDescription("Models creation of the variable at boundaries due to dissociation of "
                              "a coupled variable, e.g. B -> A");
   return params;
 }
 
 DissociationFluxBC::DissociationFluxBC(const InputParameters & parameters)
-  : ADIntegratedBC(parameters), _v(adCoupledValue("v")), _Kd(getParam<Real>("Kd"))
+  : ADIntegratedBC(parameters), _v(adCoupledValue("v")), _Kd(getADMaterialProperty<Real>("Kd"))
 {
 }
 
 ADReal
 DissociationFluxBC::computeQpResidual()
 {
-  return -_test[_i][_qp] * _Kd * _v[_qp];
+  return -_test[_i][_qp] * _Kd[_qp] * _v[_qp];
 }

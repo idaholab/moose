@@ -354,6 +354,11 @@ public:
 
   virtual const std::vector<VectorTag> & currentResidualVectorTags() const override;
 
+  /**
+   * Indicate that we have p-refinement
+   */
+  void havePRefinement();
+
 protected:
   FEProblemBase & _mproblem;
   MooseMesh & _mesh;

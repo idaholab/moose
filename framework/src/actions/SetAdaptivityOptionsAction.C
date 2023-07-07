@@ -49,6 +49,7 @@ SetAdaptivityOptionsAction::validParams()
       "The number of adaptive steps to use when on each timestep during a Transient simulation.");
   params.addParam<bool>(
       "recompute_markers_during_cycles", false, "Recompute markers during adaptivity cycles");
+  params.addParam<bool>("switch_h_to_p_refinement", false, "True to perform p-refinement");
   return params;
 }
 
@@ -137,5 +138,7 @@ SetAdaptivityOptionsAction::act()
     adapt.setInterval(getParam<unsigned int>("interval"));
 
     adapt.setRecomputeMarkersFlag(getParam<bool>("recompute_markers_during_cycles"));
+    if (getParam<bool>("switch_h_to_p_refinement"))
+      adapt.switchHToPRefinement();
   }
 }

@@ -1,13 +1,20 @@
 [Tests]
-  issues = '#869'
   design = 'source/bcs/DGFunctionDiffusionDirichletBC.md source/dgkernels/DGDiffusion.md'
-  [./test]
+  [test]
     type = 'Exodiff'
     input = '3d_diffusion_dg_test.i'
     exodiff = 'out.e'
     group = 'adaptive'
-    max_parallel = 1
     valgrind = 'HEAVY'
     requirement = "The system shall support solving 3D diffusion using the discontinuous Galerkin method."
-  [../]
+    issues = '#869'
+  []
+  [p_refinement_test]
+    type = 'Exodiff'
+    input = '3d_diffusion_p_refinement.i'
+    exodiff = '3d_diffusion_p_refinement_out.e-s003'
+    requirement = "The system shall support solving 3D diffusion using the discontinuous Galerkin "
+                  "method with p-refinement."
+    issues = '#869 #24141'
+  []
 []

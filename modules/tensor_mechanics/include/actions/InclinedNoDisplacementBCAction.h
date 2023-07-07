@@ -21,6 +21,9 @@ public:
   virtual void act() override;
 
 protected:
+  /// Flag to use automatic differentiation
+  const bool _use_ad;
+
   /// displacement variables
   std::vector<VariableName> _displacements;
 

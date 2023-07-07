@@ -79,6 +79,7 @@ AdaptivityAction::validParams()
       "show_initial_progress", true, "Show the progress of the initial adaptivity");
   params.addParam<bool>(
       "recompute_markers_during_cycles", false, "Recompute markers during adaptivity cycles");
+  params.addParam<bool>("switch_h_to_p_refinement", false, "True to perform p-refinement");
   return params;
 }
 
@@ -202,6 +203,8 @@ AdaptivityAction::act()
 
     adapt.setTimeActive(getParam<Real>("start_time"), getParam<Real>("stop_time"));
     adapt.setInterval(getParam<unsigned int>("interval"));
+    if (getParam<bool>("switch_h_to_p_refinement"))
+      adapt.switchHToPRefinement();
   }
 }
 

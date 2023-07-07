@@ -1,9 +1,9 @@
 [Mesh]
   type = GeneratedMesh
   dim = 3
-  nx = 5
-  ny = 5
-  nz = 5
+  nx = 1
+  ny = 1
+  nz = 1
   xmin = 0
   xmax = 1
   ymin = 0
@@ -14,12 +14,9 @@
 []
 
 [Variables]
-  active = 'u'
-
   [u]
     order = FIRST
     family = MONOMIAL
-
     [InitialCondition]
       type = ConstantIC
       value = 0.5
@@ -28,16 +25,12 @@
 []
 
 [Functions]
-  active = 'forcing_fn exact_fn'
-
   [forcing_fn]
     type = ParsedFunction
     expression = 2*pow(e,-x-(y*y))*(1-2*y*y)
   []
-
   [exact_fn]
     type = ParsedGradFunction
-
     expression = pow(e,-x-(y*y))
     grad_x = -pow(e,-x-(y*y))
     grad_y = -2*y*pow(e,-x-(y*y))
@@ -45,18 +38,14 @@
 []
 
 [Kernels]
-  active = 'diff abs forcing'
-
   [diff]
     type = Diffusion
     variable = u
   []
-
-  [abs]          # u * v
+  [abs]
     type = Reaction
     variable = u
   []
-
   [forcing]
     type = BodyForce
     variable = u
@@ -65,8 +54,6 @@
 []
 
 [DGKernels]
-  active = 'dg_diff'
-
   [dg_diff]
     type = DGDiffusion
     variable = u
@@ -76,8 +63,6 @@
 []
 
 [BCs]
-  active = 'all'
-
   [all]
     type = DGFunctionDiffusionDirichletBC
     variable = u
@@ -90,23 +75,25 @@
 
 [Executioner]
   type = Steady
-
   solve_type = 'PJFNK'
+  [Adaptivity]
+    switch_h_to_p_refinement = true
+    steps = 2
+    refine_fraction = 1.0
+    coarsen_fraction = 0
+    max_h_level = 8
+  []
 []
 
 [Postprocessors]
-  active = 'h dofs l2_err'
-
   [h]
     type = AverageElementSize
     execute_on = 'initial timestep_end'
   []
-
   [dofs]
     type = NumDOFs
     execute_on = 'initial timestep_end'
   []
-
   [l2_err]
     type = ElementL2Error
     variable = u
@@ -116,6 +103,5 @@
 []
 
 [Outputs]
-  file_base = out
   exodus = true
 []

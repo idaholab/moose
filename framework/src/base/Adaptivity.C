@@ -28,19 +28,19 @@
 
 #ifdef LIBMESH_ENABLE_AMR
 
-Adaptivity::Adaptivity(FEProblemBase & subproblem)
-  : ConsoleStreamInterface(subproblem.getMooseApp()),
-    PerfGraphInterface(subproblem.getMooseApp().perfGraph(), "Adaptivity"),
-    ParallelObject(subproblem.getMooseApp()),
-    _subproblem(subproblem),
-    _mesh(_subproblem.mesh()),
+Adaptivity::Adaptivity(FEProblemBase & fe_problem)
+  : ConsoleStreamInterface(fe_problem.getMooseApp()),
+    PerfGraphInterface(fe_problem.getMooseApp().perfGraph(), "Adaptivity"),
+    ParallelObject(fe_problem.getMooseApp()),
+    _fe_problem(fe_problem),
+    _mesh(_fe_problem.mesh()),
     _mesh_refinement_on(false),
     _initialized(false),
     _initial_steps(0),
     _steps(0),
     _print_mesh_changed(false),
-    _t(_subproblem.time()),
-    _step(_subproblem.timeStep()),
+    _t(_fe_problem.time()),
+    _step(_fe_problem.timeStep()),
     _interval(1),
     _start_time(-std::numeric_limits<Real>::max()),
     _stop_time(std::numeric_limits<Real>::max()),
@@ -59,12 +59,12 @@ Adaptivity::init(unsigned int steps, unsigned int initial_steps)
   // Get the pointer to the DisplacedProblem, this cannot be done at construction because
   // DisplacedProblem
   // does not exist at that point.
-  _displaced_problem = _subproblem.getDisplacedProblem();
+  _displaced_problem = _fe_problem.getDisplacedProblem();
 
   _mesh_refinement = std::make_unique<MeshRefinement>(_mesh);
   _error = std::make_unique<ErrorVector>();
 
-  EquationSystems & es = _subproblem.es();
+  EquationSystems & es = _fe_problem.es();
   es.parameters.set<bool>("adaptivity") = true;
 
   _initial_steps = initial_steps;
@@ -72,7 +72,7 @@ Adaptivity::init(unsigned int steps, unsigned int initial_steps)
   _mesh_refinement_on = true;
 
   _mesh_refinement->set_periodic_boundaries_ptr(
-      _subproblem.getNonlinearSystemBase().dofMap().get_periodic_boundaries());
+      _fe_problem.getNonlinearSystemBase().dofMap().get_periodic_boundaries());
 
   // displaced problem
   if (_displaced_problem != nullptr)
@@ -88,7 +88,7 @@ Adaptivity::init(unsigned int steps, unsigned int initial_steps)
     // i.e. neighbors across periodic boundaries, for the purposes of
     // refinement.
     _displaced_mesh_refinement->set_periodic_boundaries_ptr(
-        _subproblem.getNonlinearSystemBase().dofMap().get_periodic_boundaries());
+        _fe_problem.getNonlinearSystemBase().dofMap().get_periodic_boundaries());
 
     // TODO: This is currently an empty function on the DisplacedProblem... could it be removed?
     _displaced_problem->initAdaptivity();
@@ -141,7 +141,7 @@ Adaptivity::adaptMesh(std::string marker_name /*=std::string()*/)
 
       std::vector<Number> serialized_solution;
 
-      auto distributed_mesh = dynamic_cast<DistributedMesh *>(&_subproblem.mesh().getMesh());
+      auto distributed_mesh = dynamic_cast<DistributedMesh *>(&_fe_problem.mesh().getMesh());
 
       // Element range
       std::unique_ptr<ConstElemRange> all_elems;
@@ -152,7 +152,7 @@ Adaptivity::adaptMesh(std::string marker_name /*=std::string()*/)
       if (distributed_mesh && !distributed_mesh->is_serial_on_zero())
       {
         // We update here to make sure local solution is up-to-date
-        _subproblem.getAuxiliarySystem().update();
+        _fe_problem.getAuxiliarySystem().update();
         distributed_adaptivity = true;
 
         // We can not assume that geometric and algebraic ghosting functors cover
@@ -166,13 +166,13 @@ Adaptivity::adaptMesh(std::string marker_name /*=std::string()*/)
         // After we set markers for all local elements, we will do a global
         // communication to sync markers for ghosted elements from their owners.
         all_elems = std::make_unique<ConstElemRange>(
-            _subproblem.mesh().getMesh().active_local_elements_begin(),
-            _subproblem.mesh().getMesh().active_local_elements_end());
+            _fe_problem.mesh().getMesh().active_local_elements_begin(),
+            _fe_problem.mesh().getMesh().active_local_elements_end());
       }
       else // This is not scalable but it might be useful for small-size problems
       {
-        _subproblem.getAuxiliarySystem().solution().close();
-        _subproblem.getAuxiliarySystem().solution().localize(serialized_solution);
+        _fe_problem.getAuxiliarySystem().solution().close();
+        _fe_problem.getAuxiliarySystem().solution().localize(serialized_solution);
         distributed_adaptivity = false;
 
         // For a replicated mesh or a serialized distributed mesh, the solution
@@ -182,20 +182,20 @@ Adaptivity::adaptMesh(std::string marker_name /*=std::string()*/)
         // We might not care about much since a replicated mesh
         // or a serialized distributed mesh is not scalable anyway.
         all_elems =
-            std::make_unique<ConstElemRange>(_subproblem.mesh().getMesh().active_elements_begin(),
-                                             _subproblem.mesh().getMesh().active_elements_end());
+            std::make_unique<ConstElemRange>(_fe_problem.mesh().getMesh().active_elements_begin(),
+                                             _fe_problem.mesh().getMesh().active_elements_end());
       }
 
       FlagElementsThread fet(
-          _subproblem, serialized_solution, _max_h_level, marker_name, !distributed_adaptivity);
+          _fe_problem, serialized_solution, _max_h_level, marker_name, !distributed_adaptivity);
       Threads::parallel_reduce(*all_elems, fet);
-      _subproblem.getAuxiliarySystem().solution().close();
+      _fe_problem.getAuxiliarySystem().solution().close();
     }
   }
   else
   {
     // Compute the error for each active element
-    _error_estimator->estimate_error(_subproblem.getNonlinearSystemBase().system(), *_error);
+    _error_estimator->estimate_error(_fe_problem.getNonlinearSystemBase().system(), *_error);
 
     // Flag elements to be refined and coarsened
     _mesh_refinement->flag_elements_by_error_fraction(*_error);
@@ -220,6 +220,9 @@ Adaptivity::adaptMesh(std::string marker_name /*=std::string()*/)
   if (distributed_adaptivity)
     _mesh_refinement->make_flags_parallel_consistent();
 
+  if (_p_refinement_flag)
+    _mesh_refinement->switch_h_to_p_refinement();
+
   // Perform refinement and coarsening
   mesh_changed = _mesh_refinement->refine_and_coarsen_elements();
 
@@ -229,6 +232,10 @@ Adaptivity::adaptMesh(std::string marker_name /*=std::string()*/)
     // we sync them here.
     if (distributed_adaptivity)
       _displaced_mesh_refinement->make_flags_parallel_consistent();
+
+    if (_p_refinement_flag)
+      _displaced_mesh_refinement->switch_h_to_p_refinement();
+
 #ifndef NDEBUG
     bool displaced_mesh_changed =
 #endif
@@ -303,7 +310,7 @@ Adaptivity::uniformRefineWithProjection()
 
     if (_displaced_problem)
       displaced_mesh_refinement.uniformly_refine(1);
-    _subproblem.meshChanged();
+    _fe_problem.meshChanged();
   }
 }
 
@@ -364,18 +371,25 @@ Adaptivity::updateErrorVectors()
   }
 
   // Fill the vectors with the local contributions
-  UpdateErrorVectorsThread uevt(_subproblem, _indicator_field_to_error_vector);
+  UpdateErrorVectorsThread uevt(_fe_problem, _indicator_field_to_error_vector);
   Threads::parallel_reduce(*_mesh.getActiveLocalElementRange(), uevt);
 
   // Now sum across all processors
   for (const auto & it : _indicator_field_to_error_vector)
-    _subproblem.comm().sum((std::vector<float> &)*(it.second));
+    _fe_problem.comm().sum((std::vector<float> &)*(it.second));
 }
 
 bool
 Adaptivity::isAdaptivityDue()
 {
   return _mesh_refinement_on && (_start_time <= _t && _t < _stop_time) && _step % _interval == 0;
+}
+
+void
+Adaptivity::switchHToPRefinement()
+{
+  _p_refinement_flag = true;
+  _fe_problem.havePRefinement();
 }
 
 #endif // LIBMESH_ENABLE_AMR
