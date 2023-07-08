@@ -57,6 +57,7 @@ class Tester(MooseObject):
         params.addParam('vtk_version', ['ALL'], "A list of VTK versions for which this test will run on, supports normal comparison operators ('<', '>', etc...)")
         params.addParam('mesh_mode',     ['ALL'], "A list of mesh modes for which this test will run ('DISTRIBUTED', 'REPLICATED')")
         params.addParam('min_ad_size',   None, "A minimum AD size for which this test will run")
+        params.addParam('max_ad_size',   None, "A maximum AD size for which this test will run")
         params.addParam('method',        ['ALL'], "A test that runs under certain executable configurations ('ALL', 'OPT', 'DBG', 'DEVEL', 'OPROF', 'PRO')")
         params.addParam('library_mode',  ['ALL'], "A test that only runs when libraries are built under certain configurations ('ALL', 'STATIC', 'DYNAMIC')")
         params.addParam('dtk',           ['ALL'], "A test that runs only if DTK is detected ('ALL', 'TRUE', 'FALSE')")
@@ -519,6 +520,9 @@ class Tester(MooseObject):
         min_ad_size = self.specs['min_ad_size']
         if min_ad_size is not None and int(min_ad_size) > ad_size:
             reasons['min_ad_size'] = "Minimum AD size %d needed, but MOOSE is configured with %d" % (int(min_ad_size), ad_size)
+        max_ad_size = self.specs['max_ad_size']
+        if max_ad_size is not None and int(max_ad_size) < ad_size:
+            reasons['max_ad_size'] = "Maximum AD size %d needed, but MOOSE is configured with %d" % (int(max_ad_size), ad_size)
 
         # Check for PETSc versions
         (petsc_status, petsc_version) = util.checkPetscVersion(checks, self.specs)

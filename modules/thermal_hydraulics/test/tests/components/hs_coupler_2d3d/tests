@@ -60,6 +60,7 @@
       input = hs_coupler_2d3d.i
       cli_args = 'Components/hs3d/file=mesh/mesh_fine.e'
       expect_err = 'MOOSE must be configured with a larger AD container size'
+      max_ad_size = 55
       detail = 'If the max AD container size is predicted to be exceeded.'
     []
     [zero_gap_size]
