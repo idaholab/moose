@@ -52,7 +52,7 @@ WallFrictionChurchillMaterial::WallFrictionChurchillMaterial(const InputParamete
 void
 WallFrictionChurchillMaterial::computeQpProperties()
 {
-  Real Re = THM::Reynolds(1, _rho[_qp], _vel[_qp], _D_h[_qp], _mu[_qp]);
+  Real Re = THM::Reynolds(1., _rho[_qp], _vel[_qp], _D_h[_qp], _mu[_qp]);
 
   const Real f_F = WallFriction::FanningFrictionFactorChurchill(Re, _roughness, _D_h[_qp]);
 
