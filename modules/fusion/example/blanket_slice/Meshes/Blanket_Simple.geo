@@ -296,11 +296,11 @@ Curve Loop(32) = {123, 120, 121, 122};
 Plane Surface(6) = {19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32};
 
 /////////Transfinite Stuff////////////
-Transfinite Curve {70, 67, 12, 10, 7, 3, 1} = 30 Using Progression 1;
-Transfinite Curve {71, 66, 11, 6, 5, 8, 9, 13, 68, 69} = 6 Using Progression 1;
-Transfinite Curve {4, 2} = 2 Using Progression 1;
-Transfinite Curve {62, 64, 58, 60, 54, 56, 50, 52, 46, 48, 42, 44, 38, 40, 34, 36, 30, 32, 26, 28, 22, 24, 18, 20, 14, 16, 72, 74, 78, 76, 80, 82, 86, 84, 88, 90, 94, 92, 98, 96, 102, 100, 106, 104, 110, 108, 112, 114, 116, 118, 120, 122} = 12 Using Progression 1;
-Transfinite Curve {75, 73, 79, 77, 83, 81, 87, 85, 91, 89, 95, 93, 99, 99, 97, 103, 101, 107, 105, 111, 109, 115, 113, 119, 117, 123, 121, 17, 15, 21, 19, 25, 23, 29, 27, 33, 31, 37, 35, 41, 39, 45, 43, 49, 47, 53, 51, 57, 55, 61, 59, 65, 63} = 4 Using Progression 1;
+Transfinite Curve {70, 67, 12, 10, 7, 3, 1} = 40 Using Progression 1;
+Transfinite Curve {71, 66, 11, 6, 5, 8, 9, 13, 68, 69} = 10 Using Progression 1;
+Transfinite Curve {4, 2} = 4 Using Progression 1;
+Transfinite Curve {62, 64, 58, 60, 54, 56, 50, 52, 46, 48, 42, 44, 38, 40, 34, 36, 30, 32, 26, 28, 22, 24, 18, 20, 14, 16, 72, 74, 78, 76, 80, 82, 86, 84, 88, 90, 94, 92, 98, 96, 102, 100, 106, 104, 110, 108, 112, 114, 116, 118, 120, 122} = 18 Using Progression 1;
+Transfinite Curve {75, 73, 79, 77, 83, 81, 87, 85, 91, 89, 95, 93, 99, 99, 97, 103, 101, 107, 105, 111, 109, 115, 113, 119, 117, 123, 121, 17, 15, 21, 19, 25, 23, 29, 27, 33, 31, 37, 35, 41, 39, 45, 43, 49, 47, 53, 51, 57, 55, 61, 59, 65, 63} = 8 Using Progression 1;
 Transfinite Surface {5};
 Transfinite Surface {3};
 Transfinite Surface {2};
@@ -308,7 +308,7 @@ Transfinite Surface {1};
 
 /////////Extruding in the Z direction////////////
 Extrude {0, 0, h} {
-  Surface{6}; Surface{5}; Surface{4}; Surface{3}; Surface{2}; Surface{1}; Layers {3};
+  Surface{6}; Surface{5}; Surface{4}; Surface{3}; Surface{2}; Surface{1}; Layers {10};
 }
 
 /////////Surface and Volume Labels////////////
@@ -344,8 +344,9 @@ Physical Surface("Back_Wall", 396) = {10};
 Physical Volume("Shield", 391) = {6};
 Physical Volume("First_Wall", 392) = {5};
 Physical Volume("Multiplier", 393) = {4};
-Physical Volume("Toroidal_Plate", 394) = {1,3};
 Physical Volume("Breeder", 395) = {2};
+Physical Volume("Toroidal_Plate1", 397) = {3};
+Physical Volume("Toroidal_Plate2", 398) = {1};
 
 ///////////////Making the 1D lines for TH///////////////
 
@@ -363,13 +364,12 @@ z = xyz[2];
 
 For(0:12)
   Printf("----------------New Channel-------------");
-  Printf("x = %g, y = %g", x, y);
-  Printf("%g", z);
+  Printf("%g, %g, %g", x, y, z);
   For (1:10)
     z += h_point;
     p1 = newp;
     Point(p1) = {x, y, z, 1.0};
-    Printf("%g", z);
+    Printf("%g, %g, %g",x, y, z);
   EndFor
   x += w_ch+w_off;
   z -= h;
@@ -389,16 +389,16 @@ z = xyz2[2];
 
 For(0:12)
   Printf("----------------New Channel-------------");
-  Printf("x = %g, y = %g", x, y);
-  Printf("%g", z);
+  Printf("%g, %g, %g",x, y, z);
   For (1:10)
     z += h_point;
     p3 = newp;
     Point(p3) = {x, y, z, 1.0};
-    Printf("%g", z);
+    Printf("%g, %g, %g",x, y, z);
   EndFor
   x += w_ch+w_off;
   z -= h;
   p4 = newp;
   Point(p4) = {x, y, z, 1.0};
 EndFor
+

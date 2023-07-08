@@ -1,14 +1,26 @@
-#Channels = 'CH1 CH2 CH3 CH4 CH5 CH6 CH7 CH8 CH9 CH10 CH11 CH12 CH13 CH14 CH15 CH16 CH17 CH18 CH19 CH20 CH21 CH22 CH23 CH24 CH25 CH26'
+Channels = 'CH1 CH2 CH3 CH4 CH5 CH6 CH7 CH8 CH9 CH10 CH11 CH12 CH13 CH14 CH15 CH16 CH17 CH18 CH19 CH20 CH21 CH22 CH23 CH24 CH25 CH26'
 
 [Mesh]
   [fmg]
     type = FileMeshGenerator
-    file = 'Meshes/Blanket_OneRow.msh'
+    file = 'Meshes/Blanket_Simple.msh'
   []
 []
 
 [Outputs]
   exodus = true
+  csv = true
+[]
+
+[VectorPostprocessors]
+  [temp_y]
+    type = LineValueSampler
+    start_point = '-0.01 0 0.0183'
+    end_point = '-0.01 0.119 0.0183'
+    num_points = 100
+    variable = temp
+    sort_by = y
+  []
 []
 
 [Preconditioning]
@@ -40,31 +52,37 @@
     type = HeatSource
     variable = temp
     block = 'Shield'
-    value = 2.7544e+06
+    value = 5.5088e6 #2.7544e07 original 
   []
   [pd_fw]
     type = HeatSource
     variable = temp
-    value = 4.6228e+05
+    value = 9.2456e5 #4.6228e06 original
     block = 'First_Wall'
   []
   [pd_mult]
     type = HeatSource
     variable = temp
-    value = 6.4374e+05
+    value = 1.28748e6 #6.4374e06 original
     block = 'Multiplier'
   []
   [pd_ts]
     type = HeatSource
     variable = temp
-    value = 6.3422e+05
-    block = 'Toroidal_Plate'
+    value = 1.26844e6 #6.3422e06 original
+    block = 'Toroidal_Plate1'
   []
-  [pd_breeder]
+  [pd_ts1]
     type = HeatSource
     variable = temp
-    value = 1.6260e+06
+    value = 3.252e6 #1.6260e07 original
     block = 'Breeder'
+  []
+  [pd_ts2]
+    type = HeatSource
+    variable = temp
+    value = 8.4966e5 #4.2483e6 original 
+    block = 'Toroidal_Plate2'
   []
 []
 
@@ -73,7 +91,7 @@
     type = NeumannBC
     variable = temp
     boundary = 'Heated_Surface'
-    value = 305.61 # 0.25 MW/m^2 3202.5 for simple blanket mesh
+    value = 3202.5 # 0.25 MW/m^2 3202.5 for simple blanket mesh
   []
 
   [channel]
@@ -81,7 +99,7 @@
     variable = temp
     htc = htc
     T_infinity = Tfluid
-    boundary = 'CH1 CH2 Back_Wall'
+    boundary = ${Channels}
   []
 []
 
@@ -102,7 +120,7 @@
     type = HeatConductionMaterial
     thermal_conductivity_temperature_function = F82H
     temp = temp
-    block = 'First_Wall Toroidal_Plate'
+    block = 'First_Wall Toroidal_Plate1 Toroidal_Plate2'
   []
   [armor_material_conductivity]
     type = HeatConductionMaterial
@@ -159,18 +177,59 @@
 [MultiApps]
   [channel]
     type = FullSolveMultiApp
-    input_files = 'simple_channel_plate.i simple_channel_plate_bottom.i simple_channel_backwall.i'
+    input_files = 'Blanket_Slice_CH1.i
+                  Blanket_Slice_CH2.i
+                  Blanket_Slice_CH3.i
+                  Blanket_Slice_CH4.i
+                  Blanket_Slice_CH5.i
+                  Blanket_Slice_CH6.i
+                  Blanket_Slice_CH7.i
+                  Blanket_Slice_CH8.i
+                  Blanket_Slice_CH9.i
+                  Blanket_Slice_CH10.i
+                  Blanket_Slice_CH11.i
+                  Blanket_Slice_CH12.i
+                  Blanket_Slice_CH13.i
+                  Blanket_Slice_CH14.i
+                  Blanket_Slice_CH15.i
+                  Blanket_Slice_CH16.i
+                  Blanket_Slice_CH17.i
+                  Blanket_Slice_CH18.i
+                  Blanket_Slice_CH19.i
+                  Blanket_Slice_CH20.i
+                  Blanket_Slice_CH21.i
+                  Blanket_Slice_CH22.i
+                  Blanket_Slice_CH23.i
+                  Blanket_Slice_CH24.i
+                  Blanket_Slice_CH25.i
+                  Blanket_Slice_CH26.i'
     positions = '0 0 0
                 0 0 0
+                0 0 0
+                0 0 0
+                0 0 0
+                0 0 0
+                0 0 0
+                0 0 0
+                0 0 0
+                0 0 0
+                0 0 0
+                0 0 0
+                0 0 0
+                0 0 0
+                0 0 0
+                0 0 0
+                0 0 0
+                0 0 0
+                0 0 0
+                0 0 0
+                0 0 0
+                0 0 0
+                0 0 0
+                0 0 0
+                0 0 0
                 0 0 0'
-    cli_args = 'Components/channel/csv_file=csv_pipes/Top_Pipe.csv;Problem/master_bdry_name=CH1
-                Components/channel/csv_file=csv_pipes/Bottom_Pipe.csv;Problem/master_bdry_name=CH2
-                Components/channel/csv_file=csv_pipes/Back_Pipe.csv;Problem/master_bdry_name=Back_Wall'
-  []
-  [tritium]
-    type = FullSolveMultiApp
-    input_files = 'tritium_diffusion.i'
-    potsition = '0 0 0'
+    cli_args_files = 'clig_args.txt'
   []
 []
 
@@ -194,12 +253,5 @@
     from_multi_app = channel
     variable = htc
     source_variable = Hw
-  []
-
-  [temp_tritium]
-    type = MultiAppNearestNodeTransfer
-    to_multi_app = tritium
-    source_variable = temp
-    variable = temperature
   []
 []
