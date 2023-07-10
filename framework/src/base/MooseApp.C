@@ -938,10 +938,6 @@ MooseApp::setupOptions()
     if (_input_filenames.empty())
       _input_filenames = getParam<std::vector<std::string>>("input_file");
 
-    // Reset output to the buffer what was cached before it was turned it off
-    if (!Moose::out.rdbuf() && _output_buffer_cache)
-      Moose::out.rdbuf(_output_buffer_cache);
-
     if (isParamValid("recover"))
     {
       // We need to set the flag manually here since the recover parameter is a string type (takes

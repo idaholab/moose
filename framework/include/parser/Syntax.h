@@ -11,6 +11,7 @@
 
 #include <string>
 #include <map>
+#include <set>
 #include "DependencyResolver.h"
 #include "FileLineInfo.h"
 
@@ -161,9 +162,12 @@ public:
 
   /**
    * Method for determining whether a piece of syntax is associated with an Action
+   * an optional syntax map may be given to traverse instead of _syntax_to_actions
    * TODO: I need a better name
    */
-  std::string isAssociated(const std::string & real_id, bool * is_parent) const;
+  std::string isAssociated(const std::string & real_id,
+                           bool * is_parent,
+                           const std::map<std::string, std::set<std::string>> & alt_map = {}) const;
 
   /**
    * Returns a pair of multimap iterators to all the ActionInfo objects associated with a given

@@ -422,6 +422,11 @@ public:
   bool isParamRequired(const std::string & name) const;
 
   /**
+   * Forces parameter of given name to be not required regardless of type
+   */
+  void makeParamNotRequired(const std::string & name);
+
+  /**
    * This method returns parameters that have been initialized in one fashion or another,
    * i.e. The value was supplied as a default argument or read and properly converted from
    * the input file
