@@ -70,13 +70,13 @@ MultiAppGeneralFieldNearestNodeTransfer::initialSetup()
   MultiAppGeneralFieldTransfer::initialSetup();
 
   // Handle the source types ahead of time
-  auto source_types = getParam<std::vector<MooseEnum>>("source_type");
+  const auto & source_types = getParam<std::vector<MooseEnum>>("source_type");
   _source_is_nodes.resize(_from_var_names.size());
   _use_zero_dof_for_value.resize(_from_var_names.size());
   if (source_types.size() != _from_var_names.size())
     mooseError("Not enough source types specified for this number of variables. Source types must "
                "be specified for transfers with multiple variables");
-  for (auto var_index : make_range(_from_var_names.size()))
+  for (const auto var_index : index_range(_from_var_names))
   {
     // Local app does not own any of the source problems
     if (_from_problems.empty())
@@ -109,11 +109,13 @@ MultiAppGeneralFieldNearestNodeTransfer::initialSetup()
 
     // Some variables can be sampled directly at their 0 dofs
     // - lagrange at nodes on a first order mesh
-    // - anything constant elemental on the centroid
-    // - monomials also hold their centroid value on the 0th dof
+    // - anything constant and elemental obviously has the 0-dof value at the centroid (or
+    // vertex-average). However, higher order elemental, even monomial, do not hold the centroid
+    // value at dof index 0 For example: pyramid has dof 0 at the center of the base, prism has dof
+    // 0 on an edge etc
     if ((_source_is_nodes[var_index] && fe_type.family == LAGRANGE &&
          !from_problem.mesh().hasSecondOrderElements()) ||
-        (!_source_is_nodes[var_index] && (fe_type.order == CONSTANT || fe_type.family == MONOMIAL)))
+        (!_source_is_nodes[var_index] && fe_type.order == CONSTANT))
       _use_zero_dof_for_value[var_index] = true;
     else
       _use_zero_dof_for_value[var_index] = false;
@@ -221,19 +223,12 @@ MultiAppGeneralFieldNearestNodeTransfer::buildKDTrees(const unsigned int var_ind
             continue;
 
           _local_points[i_source].push_back(*node + _from_positions[i_from]);
-          if (_use_zero_dof_for_value[var_index])
-          {
-            auto dof = node->dof_number(from_sys.number(), from_var_num, 0);
-            _local_values[i_source].push_back((*from_sys.solution)(dof));
-          }
-          else
-          {
+          auto dof = node->dof_number(from_sys.number(), from_var_num, 0);
+          _local_values[i_source].push_back((*from_sys.solution)(dof));
+          if (!_use_zero_dof_for_value[var_index])
             flagInvalidSolution(
                 "Nearest-location is not implemented for this source variable type on "
                 "this mesh. Returning value at dof 0");
-            auto dof = node->dof_number(from_sys.number(), from_var_num, 0);
-            _local_values[i_source].push_back((*from_sys.solution)(dof));
-          }
         }
       }
       // Build KDTree from centroids and value at centroids
@@ -251,20 +246,21 @@ MultiAppGeneralFieldNearestNodeTransfer::buildKDTrees(const unsigned int var_ind
           if (!_from_boundaries.empty() && !onBoundaries(_from_boundaries, from_mesh, elem))
             continue;
 
-          const auto centroid = elem->vertex_average();
+          const auto vertex_average = elem->vertex_average();
 
           if (_nearest_positions_obj &&
-              !closestToPosition(i_source, centroid + _from_positions[i_from]))
+              !closestToPosition(i_source, vertex_average + _from_positions[i_from]))
             continue;
 
-          _local_points[i_source].push_back(centroid + _from_positions[i_from]);
+          _local_points[i_source].push_back(vertex_average + _from_positions[i_from]);
           if (_use_zero_dof_for_value[var_index])
           {
             auto dof = elem->dof_number(from_sys.number(), from_var_num, 0);
             _local_values[i_source].push_back((*from_sys.solution)(dof));
           }
           else
-            _local_values[i_source].push_back(from_sys.point_value(from_var_num, centroid, elem));
+            _local_values[i_source].push_back(
+                from_sys.point_value(from_var_num, vertex_average, elem));
         }
       }
       max_leaf_size = std::max(max_leaf_size, from_mesh.getMaxLeafSize());
