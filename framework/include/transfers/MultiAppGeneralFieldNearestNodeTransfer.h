@@ -11,12 +11,14 @@
 
 #include "MultiAppGeneralFieldTransfer.h"
 #include "KDTree.h"
+#include "SolutionInvalidInterface.h"
 
 /**
  * Performs a geometric interpolation based on the values at the nearest nodes to a target location
  * in the origin mesh.
  */
-class MultiAppGeneralFieldNearestNodeTransfer : public MultiAppGeneralFieldTransfer
+class MultiAppGeneralFieldNearestNodeTransfer : public MultiAppGeneralFieldTransfer,
+                                                public SolutionInvalidInterface
 {
 public:
   static InputParameters validParams();

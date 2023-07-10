@@ -54,6 +54,7 @@ MultiAppGeneralFieldNearestNodeTransfer::validParams()
 MultiAppGeneralFieldNearestNodeTransfer::MultiAppGeneralFieldNearestNodeTransfer(
     const InputParameters & parameters)
   : MultiAppGeneralFieldTransfer(parameters),
+    SolutionInvalidInterface(this),
     _num_nearest_points(getParam<unsigned int>("num_nearest_points"))
 {
   if (_source_app_must_contain_point && _nearest_positions_obj)
@@ -77,6 +78,10 @@ MultiAppGeneralFieldNearestNodeTransfer::initialSetup()
                "be specified for transfers with multiple variables");
   for (auto var_index : make_range(_from_var_names.size()))
   {
+    // Local app does not own any of the source problems
+    if (_from_problems.empty())
+      break;
+
     // Get some info on the source variable
     FEProblemBase & from_problem = *_from_problems[0];
     MooseVariableFieldBase & from_var =
@@ -103,8 +108,12 @@ MultiAppGeneralFieldNearestNodeTransfer::initialSetup()
     }
 
     // Some variables can be sampled directly at their 0 dofs
-    if ((_source_is_nodes[var_index] && fe_type.family == LAGRANGE) ||
-        (!_source_is_nodes[var_index] && fe_type.family == MONOMIAL && fe_type.family == CONSTANT))
+    // - lagrange at nodes on a first order mesh
+    // - anything constant elemental on the centroid
+    // - monomials also hold their centroid value on the 0th dof
+    if ((_source_is_nodes[var_index] && fe_type.family == LAGRANGE &&
+         !from_problem.mesh().hasSecondOrderElements()) ||
+        (!_source_is_nodes[var_index] && (fe_type.order == CONSTANT || fe_type.family == MONOMIAL)))
       _use_zero_dof_for_value[var_index] = true;
     else
       _use_zero_dof_for_value[var_index] = false;
@@ -114,6 +123,10 @@ MultiAppGeneralFieldNearestNodeTransfer::initialSetup()
       if (from_var.getContinuity() == DISCONTINUOUS ||
           from_var.getContinuity() == SIDE_DISCONTINUOUS)
         mooseError("Source variable cannot be sampled at nodes as it is discontinuous");
+
+    // Local app does not own any of the target problems
+    if (_to_problems.empty())
+      break;
 
     // Check with the target variable that we are not doing awful projections
     MooseVariableFieldBase & to_var =
@@ -214,7 +227,13 @@ MultiAppGeneralFieldNearestNodeTransfer::buildKDTrees(const unsigned int var_ind
             _local_values[i_source].push_back((*from_sys.solution)(dof));
           }
           else
-            _local_values[i_source].push_back(from_sys.point_value(from_var_num, *node));
+          {
+            flagInvalidSolution(
+                "Nearest-location is not implemented for this source variable type on "
+                "this mesh. Returning value at dof 0");
+            auto dof = node->dof_number(from_sys.number(), from_var_num, 0);
+            _local_values[i_source].push_back((*from_sys.solution)(dof));
+          }
         }
       }
       // Build KDTree from centroids and value at centroids
