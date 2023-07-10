@@ -32,6 +32,14 @@ public:
    * Copy of the functionality from Steady to keep track of whether the latest solve converged
    */
   virtual bool lastSolveConverged() const override { return _last_solve_converged; }
+  /**
+   * Get optimization iteration number from main app (Optimize)
+   */
+  virtual unsigned int getIterationNumberOutput() const;
+  /**
+   * Set optimization iteration number from main app (Optimize)
+   */
+  virtual void setIterationNumberOutput(unsigned int iteration_number);
 
 protected:
   /// The solver which computes the adjoint system. This is where the real magic happens,
@@ -40,4 +48,7 @@ protected:
 
 private:
   bool _last_solve_converged = true;
+
+  /// Iteration number obtained from the main application
+  unsigned int _iteration_number;
 };

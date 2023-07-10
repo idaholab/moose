@@ -255,8 +255,8 @@ Exodus::outputSetup()
   else
   {
     // Increment file counter
-    if (_exodus_mesh_changed || _sequence)
-      _file_num++;
+    incrementFileCounter();
+
 
     // Disable file appending and reset exodus file number count
     _exodus_io_ptr->append(false);
@@ -264,6 +264,11 @@ Exodus::outputSetup()
   }
 
   setOutputDimensionInExodusWriter(*_exodus_io_ptr, *_mesh_ptr, _output_dimension);
+}
+
+void Exodus::incrementFileCounter() {
+      if (_exodus_mesh_changed || _sequence)
+      _file_num++;
 }
 
 void

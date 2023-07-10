@@ -64,7 +64,7 @@ public:
    * not had data written. Thus, it is important to only create a new ExodusII_IO object
    * if it is certain that it will be used.
    */
-  void outputSetup();
+  virtual void outputSetup();
 
   /**
    * Set the sequence state
@@ -130,6 +130,11 @@ protected:
   virtual void outputReporters() override;
 
   /**
+   * Increment file counter
+   */
+  virtual void incrementFileCounter();
+
+  /**
    * Returns the current filename, this method handles the -s000 suffix
    * common to ExodusII files.
    * @return A string containing the current filename to be written
@@ -159,7 +164,7 @@ protected:
    */
   bool _exodus_initialized;
 
-private:
+protected:
   /// Handle the call to mesh renumbering in libmesh's ExodusIO on non-contiguously numbered meshes
   void handleExodusIOMeshRenumbering();
 

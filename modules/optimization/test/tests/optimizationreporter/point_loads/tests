@@ -43,5 +43,18 @@
       recover = false
       detail = 'gradient-based optimization with an automatically computed adjoint.'
     []
+    [auto_adjoint_iter_output]
+      type = Exodiff
+      input = main_auto_adjoint.i
+      cli_args = 'MultiApps/forward/input_files=forward_and_adjoint_iteration_output.i'
+      exodiff = 'main_auto_adjoint_out_forward0_exodus.e-s005'
+      # Optimize executioner does not support multiple threads
+      max_threads = 1
+      rel_err = 0.1
+      abs_zero = 10
+      # steady solve
+      recover = false
+      detail = 'gradient-based optimization with an automatically computed adjoint and output the exodus output per iteration.'
+    []
   []
 []
