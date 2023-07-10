@@ -34,9 +34,6 @@ protected:
   const Point _point1;
   const Point _point2;
 
-  /// Whether to average the value for all quadrature points in an element
-  bool _average;
-
   /// Length of crack to be nucleated
   const Real _nucleation_length;
 

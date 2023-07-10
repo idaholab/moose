@@ -1,4 +1,4 @@
-# MeshCutRankTwoTensorNucleation
+/# MeshCutRankTwoTensorNucleation
 
 !syntax description /UserObjects/MeshCutRankTwoTensorNucleation
 
@@ -26,8 +26,7 @@ quantity used for nucleation.
 By providing the nucleation threshold as a coupled variable, it can be specified as either a constant or variable value.
 Coupled variable input is useful for introducing randomness in the strength by using an AuxVariable that has been initialized
 with a random initial condition, see the [VolumeWeightedWeibull.md] initial condition.
-The determination of crack nucleation is based either on the maximum value of the scalar quantity at all of the quadrature points in an element,
-or their average value.
+The determination of crack nucleation is based on the scalar quantity averaged over all the quadrature points in an element.
 
 ## Example Input File Syntax
 

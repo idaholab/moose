@@ -31,8 +31,6 @@ MeshCutRankTwoTensorNucleation::validParams()
   params.addRequiredCoupledVar(
       "nucleation_threshold",
       "Cracks nucleation occurs when RankTwo scalar exceeds this threshold.");
-  params.addRequiredParam<bool>(
-      "average", "Should the tensor quantity be averaged over the quadrature points?");
   params.addRequiredParam<Real>("nucleation_length", "Nucleated crack length.");
   // fixme why is this along y?
   params.addParam<Point>(
@@ -53,7 +51,6 @@ MeshCutRankTwoTensorNucleation::MeshCutRankTwoTensorNucleation(const InputParame
     _scalar_type(getParam<MooseEnum>("scalar_type")),
     _point1(parameters.get<Point>("point1")),
     _point2(parameters.get<Point>("point2")),
-    _average(getParam<bool>("average")),
     _nucleation_length(getParam<Real>("nucleation_length")),
     _JxW(_assembly.JxW()),
     _coord(_assembly.coordTransformation())
@@ -67,66 +64,32 @@ MeshCutRankTwoTensorNucleation::doesElementCrack(
   bool does_it_crack = false;
   unsigned int numqp = _qrule->n_points();
   Point zero; // Used for checking whether cutter Element is zero length
-  if (_average)
-  {
-    Real average_threshold = 0.0;
-    RankTwoTensor average_tensor;
-    Point average_point;
-    for (unsigned int qp = 0; qp < numqp; ++qp)
-    {
-      if (_nucleation_threshold[qp] <= 0.0)
-        mooseError("Threshold must be strictly positive in MeshCutRankTwoTensorNucleation");
-      average_threshold += _JxW[qp] * _coord[qp] * _nucleation_threshold[qp];
-      average_tensor += _JxW[qp] * _coord[qp] * _tensor[qp];
-      average_point += _JxW[qp] * _coord[qp] * _q_point[qp];
-    }
-    Point point_dir;
-    Real tensor_quantity = RankTwoScalarTools::getQuantity(
-        average_tensor, _scalar_type, _point1, _point2, average_point, point_dir);
-    if (point_dir.absolute_fuzzy_equals(zero))
-      mooseError("Cutter element has zero length in MeshCutRankTwoTensorNucleation");
 
-    if (tensor_quantity > average_threshold)
-    {
-      const Point elem_center(_current_elem->vertex_average());
-      does_it_crack = true;
-      Point crack_dir = point_dir.cross(Point(0, 0, 1));
-      RealVectorValue point_0 = elem_center - _nucleation_length / 2.0 * crack_dir.unit();
-      RealVectorValue point_1 = elem_center + _nucleation_length / 2.0 * crack_dir.unit();
-      cutterElemNodes = {point_0, point_1};
-    }
-  }
-  else
+  Real average_threshold = 0.0;
+  RankTwoTensor average_tensor;
+  Point average_point;
+  for (unsigned int qp = 0; qp < numqp; ++qp)
   {
-    unsigned int max_index = std::numeric_limits<unsigned int>::max();
-    Real max_ratio = 0.0;
-    std::vector<Point> directions(numqp);
-    for (unsigned int qp = 0; qp < numqp; ++qp)
-    {
-      if (_nucleation_threshold[qp] <= 0.0)
-        mooseError("Threshold must be strictly positive in MeshCutRankTwoTensorNucleation");
-      const Real tensor_quantity = RankTwoScalarTools::getQuantity(
-          _tensor[qp], _scalar_type, _point1, _point2, _q_point[qp], directions[qp]);
-      if (directions[qp].absolute_fuzzy_equals(zero))
-        mooseError("Cutter element has zero length in MeshCutRankTwoTensorNucleation");
-      Real ratio = tensor_quantity / _nucleation_threshold[qp];
-      if (ratio > max_ratio)
-      {
-        max_ratio = ratio;
-        max_index = qp;
-      }
-    }
-    if (max_ratio > 1.0)
-    {
-      if (max_index == std::numeric_limits<unsigned int>::max())
-        mooseError("max_index out of bounds in MeshCutRankTwoTensorNucleation");
-      does_it_crack = true;
-      const Point elem_center(_current_elem->vertex_average());
-      const Point crack_dir = directions[max_index].cross(Point(0, 0, 1));
-      const RealVectorValue point_0 = elem_center - _nucleation_length / 2.0 * crack_dir.unit();
-      const RealVectorValue point_1 = elem_center + _nucleation_length / 2.0 * crack_dir.unit();
-      cutterElemNodes = {point_0, point_1};
-    }
+    if (_nucleation_threshold[qp] <= 0.0)
+      mooseError("Threshold must be strictly positive in MeshCutRankTwoTensorNucleation");
+    average_threshold += _JxW[qp] * _coord[qp] * _nucleation_threshold[qp];
+    average_tensor += _JxW[qp] * _coord[qp] * _tensor[qp];
+    average_point += _JxW[qp] * _coord[qp] * _q_point[qp];
+  }
+  Point point_dir;
+  Real tensor_quantity = RankTwoScalarTools::getQuantity(
+      average_tensor, _scalar_type, _point1, _point2, average_point, point_dir);
+  if (point_dir.absolute_fuzzy_equals(zero))
+    mooseError("Cutter element has zero length in MeshCutRankTwoTensorNucleation");
+
+  if (tensor_quantity > average_threshold)
+  {
+    const Point elem_center(_current_elem->vertex_average());
+    does_it_crack = true;
+    Point crack_dir = point_dir.cross(Point(0, 0, 1));
+    RealVectorValue point_0 = elem_center - _nucleation_length / 2.0 * crack_dir.unit();
+    RealVectorValue point_1 = elem_center + _nucleation_length / 2.0 * crack_dir.unit();
+    cutterElemNodes = {point_0, point_1};
   }
 
   return does_it_crack;

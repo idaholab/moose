@@ -12,13 +12,13 @@
 [gen]
   type = GeneratedMeshGenerator
   dim = 2
-  nx = 5
-  ny = 10
+  nx = 10
+  ny = 20
   xmin = 0
   xmax = 1.0
   ymin = 0.0
   ymax = 2.0
-  elem_type = QUAD8
+  elem_type = QUAD4
 []
 [top_left]
   type = BoundingBoxNodeSetGenerator
@@ -52,9 +52,8 @@
     scalar_type = MaxPrincipal
     nucleation_threshold = 180
     initiate_on_boundary = 'left'
-    average = false
-    nucleation_length = .4
-    nucleation_radius = .41
+    nucleation_length = .2
+    nucleation_radius = .21
   []
   [cut_mesh2]
     type = MeshCut2DFractureUserObject
@@ -142,5 +141,6 @@
 
 [Outputs]
   csv=true
+  exodus=true
   execute_on = TIMESTEP_END
 []

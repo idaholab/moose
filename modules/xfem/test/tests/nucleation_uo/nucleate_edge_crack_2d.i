@@ -75,7 +75,6 @@
     scalar_type = MaxPrincipal
     nucleation_threshold = nucleation_threshold
     initiate_on_boundary = 'left right'
-    average = true
     nucleation_length = .2
   []
   [cut_mesh2]
