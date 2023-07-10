@@ -61,8 +61,6 @@ AdaptiveImportanceSampler::AdaptiveImportanceSampler(const InputParameters & par
     _use_absolute_value(getParam<bool>("use_absolute_value")),
     _num_random_seeds(getParam<unsigned int>("num_random_seeds")),
     _is_sampling_completed(false),
-    // _flag_sample(isParamValid("flag_sample") ?
-    // getReporterValue<std::vector<bool>>("flag_sample")[0] : false),
     _step(getCheckedPointerParam<FEProblemBase *>("_fe_problem_base")->timeStep()),
     _inputs(getReporterValue<std::vector<std::vector<Real>>>("inputs_reporter"))
 {

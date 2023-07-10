@@ -46,6 +46,8 @@ AdaptiveImportanceStats::AdaptiveImportanceStats(const InputParameters & paramet
     _cov_pf(declareValue<std::vector<Real>>("cov_pf")),
     _step(getCheckedPointerParam<FEProblemBase *>("_fe_problem_base")->timeStep()),
     _ais(getSampler<AdaptiveImportanceSampler>("sampler")),
+    _gp_flag(isParamValid("flag_sample") ? &getReporterValue<std::vector<bool>>("flag_sample")
+                                         : nullptr),
     _check_step(std::numeric_limits<int>::max())
 {
   // Initialize variables
@@ -69,8 +71,7 @@ AdaptiveImportanceStats::execute()
     return;
   }
 
-  const bool gp_flag =
-      isParamValid("flag_sample") ? getReporterValue<std::vector<bool>>("flag_sample")[0] : false;
+  const bool gp_flag = _gp_flag ? (*_gp_flag)[0] : false;
   // Compute AdaptiveImportanceSampler statistics at each sample during the evaluation phase only.
   if (_step > _ais.getNumSamplesTrain() && !gp_flag)
   {

@@ -82,4 +82,7 @@ private:
 
   /// Store the intermediate ouput failure thresholds
   Real _output_limit;
+
+  /// Check if a GP is used
+  bool _gp_used;
 };

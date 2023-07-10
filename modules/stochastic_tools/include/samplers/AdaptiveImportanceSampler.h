@@ -84,9 +84,6 @@ protected:
   /// True if the sampling is completed
   bool _is_sampling_completed;
 
-  /// Flag samples if the surrogate prediction was inadequate
-  // const bool & _flag_sample;
-
 private:
   /// Track the current step of the main App
   const int & _step;

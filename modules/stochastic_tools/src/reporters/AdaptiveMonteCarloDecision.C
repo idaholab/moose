@@ -64,6 +64,9 @@ AdaptiveMonteCarloDecision::AdaptiveMonteCarloDecision(const InputParameters & p
   _output_required.resize(rows);
   _prev_val_out.resize(rows);
 
+  // Check if GP is used as part of active learning
+  _gp_used = isParamValid("gp_decision") ? true : false;
+
   if (_ais)
   {
     for (dof_id_type j = 0; j < _sampler.getNumberOfCols(); ++j)
@@ -82,7 +85,7 @@ AdaptiveMonteCarloDecision::AdaptiveMonteCarloDecision(const InputParameters & p
 void
 AdaptiveMonteCarloDecision::reinitChain()
 {
-  std::vector<Real> tmp1 = _ais->getInitialValues();
+  const std::vector<Real> & tmp1 = _ais->getInitialValues();
   for (dof_id_type j = 0; j < tmp1.size(); ++j)
     _inputs[j][0] = tmp1[j];
   _prev_val = _inputs;
@@ -108,12 +111,11 @@ AdaptiveMonteCarloDecision::execute()
     /* Checking whether a GP surrogate is used. If it is used, importance sampling is not performed
     during the training phase of the GP and all proposed samples are accepted until the training
     phase is completed. Once the training is completed, the importance sampling starts.
-
     If a GP surrogate is not used, the standard proposal and acceptance/rejection is performed as
     part of the importance sampling. */
     bool restart_gp = 0;
     output_limit_reached = tmp >= _output_limit;
-    if (isParamValid("gp_decision"))
+    if (_gp_used)
     {
       const int training_samples =
           getUserObject<ActiveLearningGPDecision>("gp_decision").getTrainingSamples();
