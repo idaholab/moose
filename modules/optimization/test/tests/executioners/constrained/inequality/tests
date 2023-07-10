@@ -1,0 +1,11 @@
+[Tests]
+  design = 'Optimize.md'
+  [inequality_constraint]
+    issues = '#24930'
+    max_threads = 1 # Optimize executioner does not support multiple threads
+    input = main_auto_adjoint.i
+    jsondiff = main_auto_adjoint_out_forward0.json
+    type = JSONDiff
+    requirement = "The system shall minimize a quadratic objective function from a test object."
+  []
+[]

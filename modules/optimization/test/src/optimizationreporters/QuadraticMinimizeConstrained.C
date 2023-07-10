@@ -78,13 +78,10 @@ void
 QuadraticMinimizeConstrained::computeEqualityGradient(libMesh::PetscMatrix<Number> & gradient) const
 {
   gradient.zero();
-  unsigned int i = 0;
-  unsigned int j = 0;
-  for (const auto & param : _parameters)
-  {
-    for (const auto & val : *param)
-      gradient.set(i, j++, 1);
-    i++;
-  }
+
+  for (unsigned long i = 0; i < _n_eq_cons; i++)
+    for (unsigned long j = 0; j < _parameters[0]->size(); j++)
+      gradient.set(i, j, 1);
+
   gradient.close();
 }
