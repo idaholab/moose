@@ -31,4 +31,7 @@ protected:
 
   /// Fluid specific heat capacity functor
   const Moose::Functor<ADReal> * const _cp;
+
+  /// Fluid temperature functor
+  const Moose::Functor<ADReal> * _temperature;
 };

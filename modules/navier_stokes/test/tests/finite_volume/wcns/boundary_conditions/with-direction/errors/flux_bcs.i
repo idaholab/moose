@@ -217,6 +217,7 @@ inlet_velocity = 0.001
   [inlet_T]
     type = WCNSFVEnergyFluxBC
     variable = T_fluid
+    temperature = T_fluid
     boundary = 'mid-inlet'
     temperature_pp = 'inlet_T'
     velocity_pp = 'inlet_velocity'

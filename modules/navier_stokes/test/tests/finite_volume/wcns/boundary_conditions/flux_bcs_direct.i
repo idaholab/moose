@@ -219,6 +219,7 @@ inlet_velocity = 0.001
   [inlet_T]
     type = WCNSFVEnergyFluxBC
     variable = T
+    temperature = T
     boundary = 'left'
     energy_pp = 'inlet_Edot'
     area_pp = 'surface_inlet'

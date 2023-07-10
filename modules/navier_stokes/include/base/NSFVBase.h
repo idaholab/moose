@@ -2422,7 +2422,7 @@ NSFVBase<BaseType>::addINSEnergyInletBC()
       }
       else
         params.template set<PostprocessorName>("velocity_pp") = _flux_inlet_pps[flux_bc_counter];
-
+      params.set<MooseFunctorName>("temperature") = _fluid_temperature_name;
       params.template set<PostprocessorName>("temperature_pp") = _energy_inlet_function[bc_ind];
       params.template set<MooseFunctorName>(NS::density) = _density_name;
       params.template set<MooseFunctorName>(NS::cp) = _specific_heat_name;
