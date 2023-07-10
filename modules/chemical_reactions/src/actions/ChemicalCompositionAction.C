@@ -13,7 +13,6 @@
 #include "MooseMesh.h"
 #include "MooseUtils.h"
 #include "MooseUtils.h"
-#include <iostream>
 
 #include "libmesh/string_to_enum.h"
 
@@ -134,27 +133,24 @@ ChemicalCompositionAction::ChemicalCompositionAction(const InputParameters & par
   if (idbg != 0)
     paramError("munit", "Cannot set mass unit in Thermochimica", idbg);
 
-  if (isParamValid("elements"))
+  if (_elements.size() == 1 && _elements[0] == "ALL")
   {
-    if (_elements.size() == 1 && _elements[0] == "ALL")
-    {
-      _elements.resize(Thermochimica::getNumberElementsDatabase());
-      _elements = Thermochimica::getElementsDatabase();
-      mooseInfo("Thermochimica elements: 'ALL' specified in input file. Using: ",
-                Moose::stringify(_elements));
-    }
-    else
-    {
-      std::vector<std::string> db_elements(Thermochimica::getNumberElementsDatabase());
-      db_elements = Thermochimica::getElementsDatabase();
-      for (const auto i : index_range(_elements))
-        if (std::find(db_elements.begin(), db_elements.end(), _elements[i]) == db_elements.end())
-          paramError("elements", "Element '", _elements[i], "' was not found in the database.");
-    }
-    _element_ids.resize(_elements.size());
-    for (const auto i : index_range(_elements))
-      _element_ids[i] = Thermochimica::atomicNumber(_elements[i]);
+    _elements.resize(Thermochimica::getNumberElementsDatabase());
+    _elements = Thermochimica::getElementsDatabase();
+    mooseInfo("Thermochimica elements: 'ALL' specified in input file. Using: ",
+              Moose::stringify(_elements));
   }
+  else
+  {
+    std::vector<std::string> db_elements(Thermochimica::getNumberElementsDatabase());
+    db_elements = Thermochimica::getElementsDatabase();
+    for (const auto i : index_range(_elements))
+      if (std::find(db_elements.begin(), db_elements.end(), _elements[i]) == db_elements.end())
+        paramError("elements", "Element '", _elements[i], "' was not found in the database.");
+  }
+  _element_ids.resize(_elements.size());
+  for (const auto i : index_range(_elements))
+    _element_ids[i] = Thermochimica::atomicNumber(_elements[i]);
 
   // I want to check all the input parameters here and have a list of possible phases and species
   // for setting up the Aux variables with "ALL" option
@@ -208,7 +204,7 @@ ChemicalCompositionAction::ChemicalCompositionAction(const InputParameters & par
         mooseInfo("ChemicalCompositionAction species: 'ALL' specified in input file. Thermochimica "
                   "returned no possible species.");
 
-      _token_species.resize(_species.size());
+      _tokenized_species.resize(_species.size());
       std::size_t indx = 0;
       for (const auto i : make_range(species.size()))
       {
@@ -216,7 +212,7 @@ ChemicalCompositionAction::ChemicalCompositionAction(const InputParameters & par
         for (const auto j : make_range(species[i].size()))
         {
           _species[indx + j] = phases[i] + ":" + species[i][j];
-          _token_species[indx + j] = std::make_pair(phases[i], species[i][j]);
+          _tokenized_species[indx + j] = std::make_pair(phases[i], species[i][j]);
         }
       }
       mooseInfo("ChemicalCompositionAction species: 'ALL' specified in input file. Using: ",
@@ -225,7 +221,7 @@ ChemicalCompositionAction::ChemicalCompositionAction(const InputParameters & par
     else
       for (const auto i : index_range(_species))
       {
-        _token_species.resize(_species.size());
+        _tokenized_species.resize(_species.size());
         std::vector<std::string> tokens;
         MooseUtils::tokenize(_species[i], tokens, 1, ":");
         if (tokens.size() == 1)
@@ -243,7 +239,7 @@ ChemicalCompositionAction::ChemicalCompositionAction(const InputParameters & par
         if (std::find(sp.begin(), sp.end(), tokens[1]) == sp.end())
           paramError(
               "output_species", "Species '", tokens[1], "' was not found in the simulation.");
-        _token_species[i] = std::make_pair(tokens[0], tokens[1]);
+        _tokenized_species[i] = std::make_pair(tokens[0], tokens[1]);
       }
   }
 
@@ -251,8 +247,8 @@ ChemicalCompositionAction::ChemicalCompositionAction(const InputParameters & par
   {
     if (_element_potentials.size() == 1 && _element_potentials[0] == "ALL")
     {
-      _token_element_potentials.resize(_elements.size());
-      _token_element_potentials = _elements;
+      _tokenized_element_potentials.resize(_elements.size());
+      _tokenized_element_potentials = _elements;
       _element_potentials.resize(_elements.size());
       for (const auto i : index_range(_elements))
         _element_potentials[i] = "mu:" + _elements[i];
@@ -262,7 +258,7 @@ ChemicalCompositionAction::ChemicalCompositionAction(const InputParameters & par
     }
     else
     {
-      _token_element_potentials.resize(_element_potentials.size());
+      _tokenized_element_potentials.resize(_element_potentials.size());
       for (const auto i : index_range(_element_potentials))
       {
         std::vector<std::string> tokens;
@@ -277,7 +273,7 @@ ChemicalCompositionAction::ChemicalCompositionAction(const InputParameters & par
                      "Element '",
                      tokens[1],
                      "' was not found in the simulation.");
-        _token_element_potentials[i] = tokens[1];
+        _tokenized_element_potentials[i] = tokens[1];
       }
     }
   }
@@ -290,13 +286,13 @@ ChemicalCompositionAction::ChemicalCompositionAction(const InputParameters & par
     if (_vapor_pressures.size() == 1 && _vapor_pressures[0] == "ALL")
     {
       _vapor_pressures.resize(Thermochimica::getNumberSpeciesSystem()[0]);
-      _token_vapor_species.resize(Thermochimica::getNumberSpeciesSystem()[0]);
+      _tokenized_vapor_species.resize(Thermochimica::getNumberSpeciesSystem()[0]);
       auto db_gas_species = Thermochimica::getSpeciesInPhase(0);
       auto gas_name = Thermochimica::getPhaseNamesSystem()[0];
       for (const auto i : index_range(db_gas_species))
       {
         _vapor_pressures[i] = "vp:" + gas_name + ':' + db_gas_species[i];
-        _token_vapor_species[i] = std::make_pair(gas_name, db_gas_species[i]);
+        _tokenized_vapor_species[i] = std::make_pair(gas_name, db_gas_species[i]);
       }
       mooseInfo("ChemicalCompositionAction vapor pressures: 'ALL' specified in input file. Using: ",
                 Moose::stringify(_vapor_pressures));
@@ -304,7 +300,7 @@ ChemicalCompositionAction::ChemicalCompositionAction(const InputParameters & par
     else
     {
       auto db_gas_species = Thermochimica::getSpeciesInPhase(0);
-      _token_vapor_species.resize(_vapor_pressures.size());
+      _tokenized_vapor_species.resize(_vapor_pressures.size());
       for (const auto i : index_range(_vapor_pressures))
       {
         std::vector<std::string> tokens;
@@ -327,7 +323,7 @@ ChemicalCompositionAction::ChemicalCompositionAction(const InputParameters & par
                      "Species '",
                      tokens[2],
                      "' was not found in the gas phase of simulation.");
-        _token_vapor_species[i] = std::make_pair(tokens[1], tokens[2]);
+        _tokenized_vapor_species[i] = std::make_pair(tokens[1], tokens[2]);
       }
     }
   }
@@ -338,12 +334,13 @@ ChemicalCompositionAction::ChemicalCompositionAction(const InputParameters & par
     if (_element_phases.size() == 1 && _element_phases[0] == "ALL")
     {
       _element_phases.resize(_elements.size() * phases.size());
-      _token_phase_elements.resize(_elements.size() * phases.size());
+      _tokenized_phase_elements.resize(_elements.size() * phases.size());
       for (const auto i : index_range(phases))
         for (const auto j : index_range(_elements))
         {
           _element_phases[i * _elements.size() + j] = phases[i] + ':' + _elements[j];
-          _token_phase_elements[i * _elements.size() + j] = std::make_pair(phases[i], _elements[j]);
+          _tokenized_phase_elements[i * _elements.size() + j] =
+              std::make_pair(phases[i], _elements[j]);
         }
       mooseInfo(
           "ChemicalCompositionAction elements in phase: 'ALL' specified in input file. Using: ",
@@ -351,7 +348,7 @@ ChemicalCompositionAction::ChemicalCompositionAction(const InputParameters & par
     }
     else
     {
-      _token_phase_elements.resize(_element_phases.size());
+      _tokenized_phase_elements.resize(_element_phases.size());
       for (const auto i : index_range(_element_phases))
       {
         std::vector<std::string> tokens;
@@ -373,7 +370,7 @@ ChemicalCompositionAction::ChemicalCompositionAction(const InputParameters & par
                      "Element '",
                      tokens[2],
                      "' was not found in the simulation.");
-        _token_phase_elements[i] = std::make_pair(tokens[1], tokens[2]);
+        _tokenized_phase_elements[i] = std::make_pair(tokens[1], tokens[2]);
       }
     }
   }

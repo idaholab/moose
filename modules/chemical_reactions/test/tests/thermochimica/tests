@@ -38,10 +38,10 @@
     required_submodule = 'contrib/thermochimica'
   []
 
-  [MSTDB_all]
+  [FeTiVO]
     type = Exodiff
-    input = MSTDB.i
-    exodiff = MSTDB_out.e
+    input = FeTiVO.i
+    exodiff = FeTiVO_out.e
     design = ChemicalCompositionAction.md
     issues = '#24552'
     requirement = 'The system shall be able to use pairs as MQMQA phase species'
