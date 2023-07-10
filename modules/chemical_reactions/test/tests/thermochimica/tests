@@ -198,7 +198,7 @@
     input = MoRu.i
     expect_err = "Phase 'Rand' of 'ep:Rand:Mo' not found in the simulation."
     cli_args = "GlobalParams/output_element_phases='ep:Rand:Mo'"
-    issues = '#24269'
+    issues = '#24552'
     requirement = 'The system shall throw an error if a wrong phase name is specified'
     design = ChemicalCompositionAction.md
 
@@ -211,7 +211,7 @@
     input = MoRu.i
     expect_err = "Element 'W' was not found in the simulation."
     cli_args = "GlobalParams/output_element_phases='ep:BCCN:W'"
-    issues = '#24269'
+    issues = '#24552'
     requirement = 'The system shall throw an error if a wrong element name is specified'
     design = ChemicalCompositionAction.md
 
@@ -226,7 +226,7 @@
     cli_args = "GlobalParams/output_element_phases='vpgas_idealXe'"
     issues = '#24552'
     requirement = 'The system shall throw an error if the output elements in phase do not have enough tokens'
-    design = ThermochimicaNodalData.md
+    design = ChemicalCompositionAction.md
 
     max_threads = 1
     required_submodule = 'contrib/thermochimica'

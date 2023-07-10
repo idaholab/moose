@@ -204,6 +204,7 @@ ThermochimicaNodalData::execute()
         _sp[i]->setNodalValue(fraction, _qp);
       else if (idbg == 1)
         _sp[i]->setNodalValue(0.0, _qp);
+#ifndef NDEBUG
       else
         mooseError("Failed to get phase speciation for phase '",
                    _species_phase_pairs[i].first,
@@ -211,6 +212,7 @@ ThermochimicaNodalData::execute()
                    _species_phase_pairs[i].second,
                    "'. Thermochimica returned ",
                    idbg);
+#endif
     }
 
     if (_output_element_potentials)
@@ -238,6 +240,7 @@ ThermochimicaNodalData::execute()
           _vp[i]->setNodalValue(fraction * pressure, _qp);
         else if (idbg == 1)
           _vp[i]->setNodalValue(0.0, _qp);
+#ifndef NDEBUG
         else
           mooseError("Failed to get vapor pressure for phase '",
                      _vapor_phase_pairs[i].first,
@@ -245,6 +248,7 @@ ThermochimicaNodalData::execute()
                      _vapor_phase_pairs[i].second,
                      "'. Thermochimica returned ",
                      idbg);
+#endif
       }
 
     if (_output_element_phases)
@@ -257,6 +261,7 @@ ThermochimicaNodalData::execute()
           _el_ph[i]->setNodalValue(moles, _qp);
         else if (idbg == 1)
           _el_ph[i]->setNodalValue(0.0, _qp);
+#ifndef NDEBUG
         else
           mooseError("Failed to get moles of element '",
                      _phase_element_pairs[i].second,
@@ -264,6 +269,7 @@ ThermochimicaNodalData::execute()
                      _phase_element_pairs[i].first,
                      "'. Thermochimica returned ",
                      idbg);
+#endif
       }
   }
 #endif
