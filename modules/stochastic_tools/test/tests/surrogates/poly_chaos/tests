@@ -10,6 +10,19 @@
       csvdiff = 'main_2d_mc_out_pc_samp_0002.csv'
       detail = 'MonteCarlo sampler with Uniform distribution, '
     []
+    [monte_carlo_ols]
+      type = JSONDiff
+      input = ols_test.i
+      jsondiff = ols_test_out.json
+      detail = 'MonteCarlo sampler with Uniform distribution using least-squares regression, '
+    []
+    [monte_carlo_ridge]
+      type = JSONDiff
+      input = ols_test.i
+      cli_args = 'Trainers/train_ols/penalty=1.0 Trainers/train_pet_ols/penalty=1.0 Outputs/file_base=ridge_test_out'
+      jsondiff = ridge_test_out.json
+      detail = 'MonteCarlo sampler with Uniform distribution using Ridge regression, '
+    []
     [gauss_legendre_integration]
       type = CSVDiff
       input = main_2d_quad.i

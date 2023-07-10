@@ -13,8 +13,11 @@
 #include "PolynomialQuadrature.h"
 #include "QuadratureSampler.h"
 #include "MultiDimPolynomialGenerator.h"
+#include "Calculators.h"
 
 #include "Distribution.h"
+
+typedef StochasticTools::Calculator<std::vector<Real>, Real> RealCalculator;
 
 class PolynomialChaosTrainer : public SurrogateTrainer
 {
@@ -47,6 +50,22 @@ private:
   /// The distributions used for sampling
   std::vector<std::unique_ptr<const PolynomialQuadrature::Polynomial>> & _poly;
 
+  /// The method in which to perform the regression (0=integration, 1=OLS)
+  unsigned int _rtype;
+
+  /// The penalty parameter for Ridge regularization
+  const Real & _ridge_penalty;
+
   /// QuadratureSampler pointer, necessary for applying quadrature weights
   QuadratureSampler * _quad_sampler;
+
+  /// Calculators used for standardization in linear regression
+  std::vector<std::unique_ptr<RealCalculator>> _calculators;
+  Real _r_sum;
+
+  ///@{
+  /// Matrix and rhs for the regression problem
+  DenseMatrix<Real> _matrix;
+  DenseVector<Real> _rhs;
+  ///@}
 };
