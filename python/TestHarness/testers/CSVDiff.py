@@ -130,7 +130,7 @@ class CSVDiff(SchemaDiff):
                 diff = f'Columns with header \'{column}\' are not the same length'
                 return (diff, error)
 
-        # Override global params if comparison file is used
+        # Override global params if comparison global variables are to be used
         if self.custom_params:
             rel_err = abs(float(self.custom_params.get('RELATIVE', self.specs['rel_err'])))
             abs_err = abs(float(self.custom_params.get('ABSOLUTE', self.specs['abs_err'])))
@@ -140,11 +140,12 @@ class CSVDiff(SchemaDiff):
         value_id = 0
         value = ''
         for index, column in enumerate(orig):
-            _rel_err = abs(rel_err)
-            _abs_err = abs(abs_err)
-            _abs_zero = abs(abs_zero)
+            # assign field variables without reassigning global
+            field_rel_err = abs(rel_err)
+            field_abs_err = abs(abs_err)
+            field_abs_zero = abs(abs_zero)
 
-            # Apply field params (overrides global for this single field)
+            # Apply field params for this single field
             if (column in self.specs['override_columns']
                 or (self.custom_params and column in self.custom_params['FIELDS'].keys())):
 
@@ -152,30 +153,30 @@ class CSVDiff(SchemaDiff):
                 if column in self.specs['override_columns']:
                     idx = self.specs['override_columns'].index(column)
                     if self.specs['rel_err']:
-                        _rel_err = abs(float(self.specs['override_rel_err'][idx]))
+                        field_rel_err = abs(float(self.specs['override_rel_err'][idx]))
                     if self.specs['abs_err'] and self.specs['override_abs_err']:
-                        _abs_err = abs(float(self.specs['override_abs_err'][idx]))
+                        field_abs_err = abs(float(self.specs['override_abs_err'][idx]))
                     if self.specs['override_abs_zero']:
-                        _abs_zero = abs(float(self.specs['override_abs_zero'][idx]))
+                        field_abs_zero = abs(float(self.specs['override_abs_zero'][idx]))
 
                 if self.custom_params and column in self.custom_params['FIELDS'].keys():
-                    _meta = self.custom_params['FIELDS'][column]
-                    _rel_err = abs(float(_meta.get('RELATIVE', _rel_err)))
-                    _abs_err = abs(float(_meta.get('ABSOLUTE', _abs_err)))
-                    _abs_zero = abs(float(_meta.get('ZERO', _abs_zero)))
+                    field_meta = self.custom_params['FIELDS'][column]
+                    field_rel_err = abs(float(field_meta.get('RELATIVE', field_rel_err)))
+                    field_abs_err = abs(float(field_meta.get('ABSOLUTE', field_abs_err)))
+                    field_abs_zero = abs(float(field_meta.get('ZERO', field_abs_zero)))
 
             for value_id, value in enumerate(orig[column]):
                 (diff, error) = super().do_deepdiff(value,
                                                     comp[column][value_id],
-                                                    _rel_err,
-                                                    _abs_err,
-                                                    _abs_zero,
+                                                    field_rel_err,
+                                                    field_abs_err,
+                                                    field_abs_zero,
                                                     exclude_values)
-                # Overrite global since we are about to exit, with values we diffed with
+                # Overwrite global with the values we just diffed with so the error makes sense
                 if diff:
-                    rel_err = _rel_err
-                    abs_err = _abs_err
-                    abs_zero = _abs_zero
+                    rel_err = field_rel_err
+                    abs_err = field_abs_err
+                    abs_zero = field_abs_zero
                     break
             # neat: https://www.geeksforgeeks.org/how-to-break-out-of-multiple-loops-in-python/
             else:

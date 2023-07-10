@@ -37,17 +37,17 @@ class CompareDiff(BaseOperator):
 
     @staticmethod
     def do_floor(reference, result, floor) -> bool:
-        """ Return bool if both reference and result are below floor """
+        """ Return bool if reference and result are below floor """
         return (max(abs(reference), floor) == floor and max(abs(result), floor) == floor)
 
     @staticmethod
     def do_absolute(reference, result, tolerance) -> bool:
-        """ Return bool if both reference and result differences are below absolute tolerances """
+        """ Return bool if reference and result differences are below absolute tolerances """
         return max(abs(reference - result), tolerance) == tolerance
 
     @staticmethod
     def do_relative(reference, result, tolerance) -> bool:
-        """ Return bool if both reference and result differences are below relative tolerances """
+        """ Return bool if reference and result differences are below relative tolerances """
         return max(abs(abs(reference - result) / reference), tolerance) == tolerance
 
     def give_up_diffing(self, level, diff_instance) -> bool:
@@ -56,7 +56,7 @@ class CompareDiff(BaseOperator):
 
         To use, set up a test (see do_* methods above), and if your test passes return True with
         without applying a diff_instance. If your test failes, apply a diff_instance (see
-        examples below, and also return True).
+        examples below), and also return True.
 
         Returning True from this mehtod tells deepdiff to stop trying to determin a diff.
         """
@@ -76,6 +76,9 @@ class CompareDiff(BaseOperator):
         # a str != str difference later.
         try:
             result_goldfile = float(result_goldfile)
+        except ValueError:
+            pass
+        try:
             result_computed = float(result_computed)
         except ValueError:
             pass
