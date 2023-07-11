@@ -20,13 +20,16 @@ BiFidelityActiveLearningGPDecision::validParams()
   params.addClassDescription("Perform active learning decision making in bi-fidelity modeling.");
   params.addRequiredParam<ReporterName>("outputs_lf",
                                         "Value of the LF model output from the SubApp.");
+  params.addParam<ReporterValueName>("lf_corrected", "lf_corrected", "GP-corrected LF prediciton.");
   return params;
 }
 
 BiFidelityActiveLearningGPDecision::BiFidelityActiveLearningGPDecision(
     const InputParameters & parameters)
   : ActiveLearningGPDecision(parameters),
-    _outputs_lf(getReporterValue<std::vector<Real>>("outputs_lf", REPORTER_MODE_DISTRIBUTED))
+    _outputs_lf(getReporterValue<std::vector<Real>>("outputs_lf", REPORTER_MODE_DISTRIBUTED)),
+    _lf_corrected(declareValue<std::vector<Real>>("lf_corrected",
+                                                  std::vector<Real>(sampler().getNumberOfRows())))
 {
   // Create communicator that only has processors with rows
   _communicator.split(
@@ -40,6 +43,7 @@ BiFidelityActiveLearningGPDecision::facilitateDecision()
   {
     _gp_mean[i] = _gp_eval.evaluate(_inputs[i], _gp_std[i]);
     _flag_sample[i] = !learningFunction(_outputs_lf_batch[i] + _gp_mean[i], _gp_std[i]);
+    _lf_corrected[i] = _outputs_lf_batch[i] + _gp_mean[i];
   }
 
   for (const auto & fs : _flag_sample)

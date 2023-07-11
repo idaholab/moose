@@ -26,6 +26,7 @@
     distributions = 'k_dist q_dist Tinf_dist'
     flag_sample = 'conditional/flag_sample'
     seed = 5
+    num_samples = 10
     execute_on = PRE_MULTIAPP_SETUP
   []
 []
@@ -92,7 +93,7 @@
     inputs = 'inputs'
     gp_mean = 'gp_mean'
     gp_std = 'gp_std'
-    n_train = 12
+    n_train = 5
     al_gp = GP_al_trainer
     gp_evaluator = GP_eval
     learning_function='Ufunction'
@@ -110,8 +111,8 @@
     standardize_data = 'true'
     tune_parameters = 'signal_variance length_factor'
     tuning_algorithm = 'adam'
-    iter_adam = 2000
-    learning_rate_adam = 0.005
+    iter_adam = 5000
+    learning_rate_adam = 0.001
     show_optimization_details = true
     batch_size = 200
   []
@@ -135,7 +136,6 @@
 
 [Executioner]
   type = Transient
-  num_steps = 20
 []
 
 [Outputs]

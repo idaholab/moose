@@ -36,6 +36,12 @@ protected:
   /**
    * Based on the computations in preNeedSample, the decision to get more data is passed and results
    * from the GP fills @param val
+   *
+   * @param row Input parameters to the model
+   * @param local_ind Current processor row index
+   * @param global_ind All processors row index
+   * @param val Output predicted by either the LF model + GP correction or the HF model
+   * @return bool Whether a full order model evaluation is required
    */
   virtual bool needSample(const std::vector<Real> & row,
                           dof_id_type local_ind,
@@ -43,7 +49,7 @@ protected:
                           Real & val) override;
 
   /**
-   * This makes decisions whether to call the full model or not based on
+   * Make decisions whether to call the full model or not based on
    * GP prediction and uncertainty.
    *
    * @return bool Whether a full order model evaluation is required
@@ -60,7 +66,7 @@ protected:
                          const std::vector<Real> & outputs);
 
   /**
-   * This evaluates the active learning acquisition function and returns bool
+   * This method evaluates the active learning acquisition function and returns bool
    * that indicates whether the GP model failed.
    *
    * @param gp_mean Mean of the gaussian process model

@@ -33,6 +33,12 @@ protected:
   /**
    * Based on the computations in preNeedSample, the decision to get more data is passed and results
    * from the GP fills @param val
+   *
+   * @param row Input parameters to the model
+   * @param local_ind Current processor row index
+   * @param global_ind All processors row index
+   * @param val Output predicted by either the LF model + GP correction or the HF model
+   * @return bool Whether a full order model evaluation is required
    */
   virtual bool needSample(const std::vector<Real> & row,
                           dof_id_type local_ind,
@@ -53,6 +59,9 @@ private:
 
   /// Store all the outputs used for training from the LF model
   std::vector<Real> _outputs_lf_batch;
+
+  /// Broadcast the GP-corrected LF prediciton to JSON
+  std::vector<Real> & _lf_corrected;
 
   /// Communicator that was split based on samples that have rows
   libMesh::Parallel::Communicator _local_comm;
