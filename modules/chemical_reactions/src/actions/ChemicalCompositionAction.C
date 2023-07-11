@@ -43,7 +43,6 @@ ChemicalCompositionAction::validParams()
   params.addParam<bool>("reinit_requested", true, "Should Thermochimica use re-initialization");
   params.addParam<FileName>("initial_values", "The CSV file name with initial conditions.");
   params.addParam<FileName>("thermofile", "Thermodynamics model file");
-  params.addParam<std::string>("user_object_name", "Name of the thermochimica nodal user object");
 
   MooseEnum tUnit("K C F R");
   params.addRequiredParam<MooseEnum>("tunit", tUnit, "Temperature Unit");
