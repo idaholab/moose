@@ -3,9 +3,10 @@
       type = 'FindHungProcessTester'
       input = 'simple_diffusion.i'
 
-
+      platform = 'LINUX'
       issues = '#1493'
       design = 'kernels/Diffusion.md'
       requirement = 'The system shall run a simple 2D linear diffusion problem with Dirichlet boundary conditions on a regular mesh.'
+      expect_out ='/qstat -n \d+?.*?Running command: ssh \w+? "echo Host: \w+? PID: \d+?;'
     []
   []
