@@ -1,6 +1,6 @@
 [Tests]
   design = 'meshgenerators/FlexiblePatternGenerator.md'
-  # issues = '#19949'
+  issues = '#24938'
   [test]
     requirement = "The system shall generate "
     [single_hex_pattern_hex]
@@ -94,6 +94,7 @@
       input = patterned_assm.i
       csvdiff = patterned_assm.csv
       recover = false
+      mesh_mode = 'REPLICATED'
       detail = "a patterned assembly mesh by stiching flexible patterned meshes."
     []  
   []

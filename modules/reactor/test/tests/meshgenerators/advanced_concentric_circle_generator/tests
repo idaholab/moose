@@ -1,6 +1,6 @@
 [Tests]
   design = 'meshgenerators/AdvancedConcentricCircleGenerator.md'
-  # issues = '#19949'
+  issues = '#24938'
   [test]
     requirement = "The system shall generate "
     [general]

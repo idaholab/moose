@@ -30,7 +30,7 @@
     rect_pitches_y = 5
     rect_patterns = '1 1;
                      1 1'
-    extra_positions = '0.0 10.0 0.0 
+    extra_positions = '0.0 10.0 0.0
                        0.0 -10.0 0.0'
     extra_positions_mg_indices = '1 1'
     desired_area = 1.0
@@ -53,8 +53,8 @@
   [circle2]
     type = VolumePostprocessor
     block = '20'
-  []  
-[]  
+  []
+[]
 
 [Executioner]
   type = Transient

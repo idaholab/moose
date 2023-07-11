@@ -46,7 +46,7 @@
   [circle2]
     type = VolumePostprocessor
     block = '20'
-  []  
+  []
 []
 
 [Executioner]

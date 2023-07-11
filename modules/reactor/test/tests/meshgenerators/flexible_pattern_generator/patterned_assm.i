@@ -30,7 +30,7 @@
                0 0'
     generate_core_metadata = true
     pattern_boundary = none
-  []  
+  []
 []
 
 [Problem]
@@ -49,8 +49,8 @@
   [circle2]
     type = VolumePostprocessor
     block = '20'
-  []  
-[]  
+  []
+[]
 
 [Executioner]
   type = Transient

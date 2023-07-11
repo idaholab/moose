@@ -16,11 +16,11 @@
     boundary_type = HEXAGON
     boundary_size = ${fparse 16.0*sqrt(3.0)}
     boundary_sectors = 10
-    extra_positions = '0.0 6.0 0.0 
-                       -3.0 0.0 0.0 
-                       3.0 0.0 0.0 
-                       -6.0 -6.0 0.0 
-                       0.0 -6.0 0.0 
+    extra_positions = '0.0 6.0 0.0
+                       -3.0 0.0 0.0
+                       3.0 0.0 0.0
+                       -6.0 -6.0 0.0
+                       0.0 -6.0 0.0
                        6.0 -6.0 0.0'
     extra_positions_mg_indices = '0 0 0 0 0 0'
     desired_area = 1.0
@@ -43,8 +43,8 @@
   [circle2]
     type = VolumePostprocessor
     block = '20'
-  []  
-[]  
+  []
+[]
 
 [Executioner]
   type = Transient

@@ -449,5 +449,6 @@ FlexiblePatternGenerator::generate()
     MooseMesh::changeBoundaryId(
         **_build_mesh, OUTER_SIDESET_ID, getParam<boundary_id_type>("external_boundary_id"), false);
   (*_build_mesh)->find_neighbors();
+  (*_build_mesh)->set_isnt_prepared();
   return std::move(*_build_mesh);
 }
