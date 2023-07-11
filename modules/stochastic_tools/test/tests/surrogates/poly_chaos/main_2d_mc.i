@@ -77,6 +77,7 @@
     distributions = 'D_dist S_dist'
     sampler = sample
     response = storage/data:avg:value
+    regression_type = integration
   []
 []
 

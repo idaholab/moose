@@ -6,7 +6,7 @@
 
 Polynomial chaos is a surrogate modeling technique where a quantity of interest (QoI) that is dependent on input parameters is expanded as a sum of orthogonal polynomials. Given a QoI $Q$ dependent on a set of parameters $\vec{\xi}$, the polynomial chaos expansion (PCE) is:
 
-!equation
+!equation id=eq:expansion
 Q(\vec{\xi}) = \sum_{i=1}^{P}q_i\Phi_i(\vec{\xi}) ,
 
 
@@ -42,19 +42,46 @@ The weighting functions are defined by the probability density function of the p
 | Exponential | $e^{-\xi}$ | Laguerre | $[0,\infty]$ |
 | Gamma | $\frac{\xi^{\alpha}e^{-\xi}}{\Gamma(\alpha+1)}$ | Generalized Laguerre | $[0,\infty]$ |
 
-The expression in [eq:coeff] can be integrated using many different techniques. One is performing a Monte Carlo integration,
+## Computing Coefficients
+
+There are currently two techniques to compute the coefficients in [!eqref](eq:expansion), the first performs the integration described by [!eqref](eq:coeff). For Monte Carlo sampling, the integration is in the form
 
 !equation
-q_i = \frac{1}{\left\langle\Phi_i(\vec{\xi}),\Phi_i(\vec{\xi})\right\rangle} \frac{1}{N_{\mathrm{mc}}}\sum_{n=1}^{N_{\mathrm{mc}}} Q(\vec{\xi}_n)\Phi_i(\vec{\xi}_n) ,
+q_i = \frac{1}{\left\langle\Phi_i(\vec{\xi}),\Phi_i(\vec{\xi})\right\rangle} \frac{1}{N_{\mathrm{mc}}}\sum_{n=1}^{N_{\mathrm{mc}}} Q(\vec{\xi}_n)\Phi_i(\vec{\xi}_n) .
 
-
-or using numerical quadrature,
+And for using a [QuadratureSampler.md]
 
 !equation
 q_i = \frac{1}{\left\langle\Phi_i(\vec{\xi}),\Phi_i(\vec{\xi})\right\rangle}\sum_{n=1}^{N_q} w_n Q(\vec{\xi}_n)\Phi_i(\vec{\xi}_n) .
 
-
 The numerical quadrature method is typically much more efficient that than the Monte Carlo method and has the added benefit of exactly integrating the polynomial basis. However, the quadrature suffers from the curse of dimensionality. The naive approach uses a Cartesian product of one-dimensional quadratures, which results in $(\max(k^d_i) + 1)^D$ quadrature points to be sampled. Sparse grids can help mitigate the curse of dimensionality significantly.
+
+The other technique is using ordinary least-squares (OLS) regression, like in [PolynomialRegressionTrainer.md]. In the majority of cases, OLS is more accurate than integration for Monte Carlo sampling, as shown in the figure below.
+
+!plot scatter caption=Comparison between OLS regression and integration methods for computing polynomial chaos coefficients
+    data=[{'name': 'OLS',
+           'type': 'scatter',
+           'x': [16, 32, 64, 128, 256, 512, 1024, 2048, 4096, 8192],
+           'y': [81.6696267803207, 8.454300942177698, 4.926398159556231,
+                 2.874495194734781, 2.2416013478899863, 1.3479621256735075,
+                 1.1574930187341494, 0.6939367594300845, 0.5817680465237121,
+                 0.417989501880757]},
+           {'name': 'OLS with Regularization (penalty = 1)',
+            'type': 'scatter',
+            'x': [16, 32, 64, 128, 256, 512, 1024, 2048, 4096, 8192],
+            'y': [4.91600612112163, 3.94911986807379, 3.4242180431008484,
+                  2.7094356794174708, 1.6871974555746947, 1.3923862418279123,
+                  1.1994658425158664, 1.0696251119444582, 0.9079419204733286,
+                  0.8692326803241464]},
+           {'name': 'Integration',
+            'type': 'scatter',
+            'x': [16, 32, 64, 128, 256, 512, 1024, 2048, 4096, 8192],
+            'y': [80.62685305548119, 57.810722889054325, 45.68405898596861,
+                  35.58856802819979, 19.925532186155436, 15.879940134036879,
+                  11.862525598455559, 8.760052389181865, 4.967900255917786,
+                  3.9340295519499127]}]
+    layout={'xaxis': {'title': 'Number of Samples', 'type': 'log'},
+            'yaxis': {'title': 'Coefficient RRMSE', 'type': 'log'}}
 
 ## Generating a Tuple
 

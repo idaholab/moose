@@ -71,6 +71,7 @@
     type = PolynomialChaosTrainer
     execute_on = timestep_end
     order = 10
+    regression_type = integration
     distributions = 'k_dist q_dist L_dist Tinf_dist'
     sampler = sample
     response = results/data:avg:value
@@ -79,6 +80,7 @@
     type = PolynomialChaosTrainer
     execute_on = timestep_end
     order = 10
+    regression_type = integration
     distributions = 'k_dist q_dist L_dist Tinf_dist'
     sampler = sample
     response = results/data:max:value
