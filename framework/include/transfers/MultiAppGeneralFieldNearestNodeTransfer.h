@@ -11,17 +11,21 @@
 
 #include "MultiAppGeneralFieldTransfer.h"
 #include "KDTree.h"
+#include "SolutionInvalidInterface.h"
 
 /**
  * Performs a geometric interpolation based on the values at the nearest nodes to a target location
  * in the origin mesh.
  */
-class MultiAppGeneralFieldNearestNodeTransfer : public MultiAppGeneralFieldTransfer
+class MultiAppGeneralFieldNearestNodeTransfer : public MultiAppGeneralFieldTransfer,
+                                                public SolutionInvalidInterface
 {
 public:
   static InputParameters validParams();
 
   MultiAppGeneralFieldNearestNodeTransfer(const InputParameters & parameters);
+
+  void initialSetup() override;
 
 protected:
   virtual void prepareEvaluationOfInterpValues(const unsigned int var_index) override;
@@ -66,4 +70,10 @@ private:
 
   /// Number of points to consider
   unsigned int _num_nearest_points;
+
+  /// Whether the source of the values is at nodes (true) or centroids (false) for each variable
+  std::vector<bool> _source_is_nodes;
+
+  /// Whether we can just use the local zero-indexed dof to get the value from the solution
+  std::vector<bool> _use_zero_dof_for_value;
 };

@@ -3,7 +3,7 @@
   dim = 2
   nx = 10
   ny = 10
-  elem_type = QUAD8
+  elem_type = QUAD4
 []
 
 [Variables]
