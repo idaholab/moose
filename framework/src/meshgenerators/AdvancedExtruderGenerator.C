@@ -114,7 +114,8 @@ AdvancedExtruderGenerator::validParams()
       "Boundary Assignment");
   params.addParamNamesToGroup(
       "subdomain_swaps boundary_swaps elem_integer_names_to_swap elem_integers_swaps", "ID Swap");
-
+  params.addParam<Real>("twist_pitch",
+                        "conversion factor that will allow for a helical twist extrusion");
   return params;
 }
 
@@ -155,7 +156,8 @@ AdvancedExtruderGenerator::AdvancedExtruderGenerator(const InputParameters & par
         isParamValid("downward_boundary_ids")
             ? getParam<std::vector<std::vector<boundary_id_type>>>("downward_boundary_ids")
             : std::vector<std::vector<boundary_id_type>>(_heights.size(),
-                                                         std::vector<boundary_id_type>()))
+                                                         std::vector<boundary_id_type>())),
+    _twist_pitch(getParam<Real>("twist_pitch"))
 {
   if (!_direction.norm())
     paramError("direction", "Must have some length!");
@@ -397,14 +399,30 @@ AdvancedExtruderGenerator::generate()
           // Shift the previous position by a certain fraction of 'height' along the extrusion
           // direction to get the new position.
           auto layer_index = (k - (e == 0 ? 1 : 0)) / order + 1;
-          if (MooseUtils::absoluteFuzzyEqual(bias, 1.0))
-            current_distance =
-                old_distance + _direction * (height / (Real)num_layers / (Real)order);
-          else
-            current_distance =
-                old_distance + _direction * height * std::pow(bias, (Real)(layer_index - 1)) *
-                                   (1.0 - bias) / (1.0 - std::pow(bias, (Real)(num_layers))) /
-                                   (Real)order;
+
+          // twist 1 should be 'normal' to the extruded shape
+          RealVectorValue twist1 = _direction.cross(*node);
+          twist1 /= twist1.norm();
+          RealVectorValue twist2 = twist1.cross(_direction);
+
+          auto step_size = MooseUtils::absoluteFuzzyEqual(bias, 1.0)
+                               ? height / (Real)num_layers / (Real)order
+                               : height * std::pow(bias, (Real)(layer_index - 1)) * (1.0 - bias) /
+                                     (1.0 - std::pow(bias, (Real)(num_layers))) / (Real)order;
+          auto twist = (cos(1 / 2. * libMesh::pi * layer_index * step_size / _twist_pitch) -
+                        cos(1 / 2. * libMesh::pi * (layer_index - 1) * step_size / _twist_pitch)) *
+                           twist2 +
+                       (sin(1 / 2. * libMesh::pi * layer_index * step_size / _twist_pitch) -
+                        sin(1 / 2. * libMesh::pi * (layer_index - 1) * step_size / _twist_pitch)) *
+                           twist1;
+          _console << twist1 << " " << twist2 << std::endl;
+          twist *= sqrt(node->norm_sq() + std::pow(_direction * (*node), 2));
+
+          // _console << twist << twist1 << twist2 << std::endl;
+          // _console << sin(2. * libMesh::pi * step_size / _twist_pitch) << step_size <<
+          // _twist_pitch
+          //          << std::endl;
+          current_distance = old_distance + _direction * step_size + twist;
         }
 
         Node * new_node = mesh->add_point(*node + current_distance,
