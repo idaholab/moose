@@ -140,6 +140,42 @@
     requirement = 'The system shall support writing time information in DTIME format in the console.'
     issues = '#24813'
   [../]
+  [./console_minute_format]
+    type = RunApp
+    input = 'console_dtime_format.i'
+    cli_args = 'Outputs/screen/time_format=minute'
+    expect_out = 'Time Step 1, time = -0\.0116667m[\s\S]*'
+                 'Time Step 6, time = 0\.103333m[\s\S]*'
+                 'Time Step 48, time = 195\.670m[\s\S]*'
+                 'Time Step 59, time = 1666\.67m'
+
+    requirement = 'The system shall support writing time information in minutes in the console.'
+    issues = '#24944'
+  [../]
+  [./console_hour_format]
+    type = RunApp
+    input = 'console_dtime_format.i'
+    cli_args = 'Outputs/screen/time_format=hour'
+    expect_out = 'Time Step 1, time = -0\.000194444h[\s\S]*'
+                 'Time Step 6, time = 0\.00172222h[\s\S]*'
+                 'Time Step 48, time = 3\.26117h[\s\S]*'
+                 'Time Step 59, time = 27\.7778h'
+
+    requirement = 'The system shall support writing time information in hours in the console.'
+    issues = '#24944'
+  [../]
+  [./console_day_format]
+    type = RunApp
+    input = 'console_dtime_format.i'
+    cli_args = 'Outputs/screen/time_format=day'
+    expect_out = 'Time Step 1, time = -8\.10185e-06[\s\S]*'
+                 'Time Step 6, time = 7\.17593e-05d[\s\S]*'
+                 'Time Step 48, time = 0\.135882d[\s\S]*'
+                 'Time Step 59, time = 1\.15741d'
+
+    requirement = 'The system shall support writing time information in days in the console.'
+    issues = '#24944'
+  [../]
   [./_console]
     # Test the used of MooseObject::_console method
     type = RunApp
