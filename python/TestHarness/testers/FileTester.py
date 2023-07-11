@@ -19,7 +19,7 @@ class FileTester(RunApp):
         params = RunApp.validParams()
         params.addParam('gold_dir', 'gold', "The directory where the \"golden standard\" files reside relative to the TEST_DIR: (default: ./gold/)")
         params.addParam('abs_zero',       1e-10, "Absolute zero cutoff used in exo/csvdiff comparisons.")
-        params.addParam('rel_err',       5.5e-6, "Relative error value used in exo/csvdiff comparisons.")
+        params.addParam('rel_err',        1e-6, "Relative error value used in exo/csvdiff comparisons.")
         return params
 
     def __init__(self, name, params):
