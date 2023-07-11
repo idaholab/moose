@@ -1,0 +1,47 @@
+# Making a Change to this package?
+# REMEMBER TO UPDATE the .yaml files for the following packages:
+#   peacock-trame/*
+#
+# As well as any directions pertaining to modifying those files.
+{% set name = "trame-xterm" %}
+{% set version = "0.2.1" %}
+
+package:
+  name: {{ name|lower }}
+  version: {{ version }}
+
+source:
+  url: https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/trame-xterm-{{ version }}.tar.gz
+  sha256: 208ca977325e7c7b77fe5e1a42d0f54531d2f2d5ecf1e05c666ddf3269e5e41d
+
+build:
+  noarch: python
+  script: {{ PYTHON }} -m pip install . -vv
+  number: 0
+
+requirements:
+  host:
+    - python
+    - pip
+  run:
+    - python
+    - trame <=2.5.0
+    - termcolor
+
+test:
+  imports:
+    - trame
+    - trame_xterm
+  commands:
+    - pip check
+  requires:
+    - pip
+
+about:
+  summary: Trame widget to expose xterm.js
+  license: MIT
+  license_file: LICENSE
+
+extra:
+  recipe-maintainers:
+    - milljm

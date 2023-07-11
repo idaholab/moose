@@ -5,4 +5,7 @@ moose_wasp:
   - moose-wasp 2023.05.01
 
 moose_tools:
-  - moose-tools 2023.05.12
+  - moose-tools 2023.07.17
+
+moose_peacock:
+  - moose-peacock 2023.07.17

@@ -1,18 +1,10 @@
 # Making a Change to this package?
 # REMEMBER TO UPDATE the .yaml files for the following packages:
-#   template/ (must contain any python major.minor version this
-#              package supports. Usually the latest version.)
-#   moose-dev/
+#   moose-dev/*
 #
-# If adding a new Python version, you will need to update
-# version in mpich/meta.yaml:
-#
-# run_constrains:
-#     - python <{{version}}
-#
-# as well as follow the directions pertaining to modifying that file.
+# As well as any directions pertaining to modifying those files.
 {% set build = 0 %}
-{% set version = "2023.05.12" %}
+{% set version = "2023.07.17" %}
 
 package:
   name: moose-tools
@@ -29,6 +21,7 @@ requirements:
     - {{ moose_python }}
     - setuptools
   run:
+    - {{ moose_mpich }}
     - moose-test-tools
     - beautifulsoup4
     - livereload
@@ -36,7 +29,7 @@ requirements:
     - mock
     - pylatexenc
     - python
-    - clang-tools 12.0.1
+    - clang-tools
 
 test:
   commands:
