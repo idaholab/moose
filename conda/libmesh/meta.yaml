@@ -1,8 +1,9 @@
 # Making a Change to this package?
 # REMEMBER TO UPDATE the .yaml files for the following packages:
-#   template/
-#   moose/
-#   moose-dev/
+#   moose-dev/*
+#
+# As well as any directions pertaining to modifying those files.
+# ALSO: Follow the directions in scripts/tests/versioner_hashes.yaml
 {% set build = 1 %}
 {% set strbuild = "build_" + build|string %}
 {% set version = "2023.07.26" %}

@@ -1,0 +1,59 @@
+# Making a Change to this package?
+# REMEMBER TO UPDATE the .yaml files for the following packages:
+#   moose-dev/*
+#
+# As well as any directions pertaining to modifying those files.
+{% set build = 0 %}
+{% set version = "0.1.0" %}
+{% set name = "peacock-trame" %}
+
+package:
+  name: {{ name|lower }}
+  version: {{ version }}
+
+source:
+  - url: https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/peacock-trame-{{ version }}.tar.gz
+  - sha256: c32b48fa7ec6cdd6728dd5447668c78de9f855a588b0e71b65e7a79bf44a69c5
+  - path: ../../../moose/python/mooseutils
+    folder: moose/python/mooseutils
+
+build:
+  number: {{ build }}
+  entry_points:
+    - peacock-trame = peacock_trame:main
+  noarch: python
+  script: {{ PYTHON }} -m pip install . -vv
+  script_env:
+    - MOOSE_DIR={{ SRC_DIR }}/moose
+
+requirements:
+  build:
+    - python
+    - pip
+  run:
+    - {{ moose_mpich }}
+    - python
+    - trame <=2.5.0
+    - trame-xterm
+    - pyaml
+    - numpy
+    - paraview
+    - pyqt
+  # Python min/max constraints
+  run_constrained:
+    - python <{{3.11}}
+
+test:
+  commands:
+    - pip check
+  requires:
+    - pip
+
+about:
+  summary: MOOSE GUI developed using Trame from Kitware Inc.
+  license: Apache-2.0
+  license_file: LICENSE
+
+extra:
+  recipe-maintainers:
+    - milljm

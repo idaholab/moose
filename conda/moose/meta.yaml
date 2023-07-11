@@ -24,16 +24,10 @@ build:
 
 requirements:
   build:
-    - {{ moose_libmesh }}
-    - {{ moose_python }}
-    - {{ moose_wasp }}
-    - moose-tools
+    - {{ moose_dev }}
 
   run:
-    - {{ moose_libmesh }}
-    - {{ moose_python }}
-    - {{ moose_wasp }}
-    - moose-tools
+    - {{ moose_dev }}
 
 test:
   script: run_test.sh

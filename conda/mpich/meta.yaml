@@ -1,16 +1,15 @@
 # Making a Change to this package?
 # REMEMBER TO UPDATE the .yaml files for the following packages:
-#   petsc/
-#   libmesh-vtk/
-#   libmesh/
-#   template/
-#   moose/
-#   moose-dev/
+#   petsc/*
+#   libmesh-vtk/*
+#   peacock-trame/*
+#   tools/*
 #
+# As well as any directions pertaining to modifying those files.
 # ALSO: Follow the directions in scripts/tests/versioner_hashes.yaml
-{% set build = 8 %}
+{% set build = 0 %}
 {% set strbuild = "build_" + build|string %}
-{% set version = "4.0.2" %}
+{% set version = "4.1.1" %}
 
 package:
   name: moose-mpich
@@ -36,6 +35,7 @@ requirements:
     - {{ moose_libgfortran }}
     - {{ moose_libgfortran5 }}
     - {{ moose_hdf5 }}
+    - {{ moose_krb5 }}
     - {{ moose_ld64 }}          # [osx]
     - make
     - libtool
@@ -51,13 +51,8 @@ requirements:
     - {{ moose_libgfortran }}
     - {{ moose_libgfortran5 }}
     - {{ moose_hdf5 }}
+    - {{ moose_krb5 }}
     - {{ moose_ld64 }}          # [osx]
-    - cmake
-    - make
-    - libtool
-    - autoconf
-    - automake 1.16.1
-    - m4
     - {{ moose_libxt }}         # [linux]
     - {{ moose_libsm }}         # [linux]
     - {{ moose_libx11 }}        # [linux]
@@ -67,6 +62,12 @@ requirements:
     - {{ moose_xorg_x11 }}      # [linux]
     - {{ moose_libglu }}        # [linux]
     - {{ moose_mesalib }}       # [linux]
+    - cmake
+    - make
+    - libtool
+    - autoconf
+    - automake 1.16.1
+    - m4
     - mpi 1.0 mpich
   # Python min/max constraints
   run_constrained:
