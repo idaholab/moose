@@ -22,7 +22,7 @@
   munit = moles
   temperature = T
   reinit_requested = false
-  user_object_name = Thermochimica
+  uo_name = Thermochimica
 []
 
 [Variables]
