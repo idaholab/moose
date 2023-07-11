@@ -187,7 +187,7 @@ Console::Console(const InputParameters & parameters)
     _outlier_variable_norms(getParam<bool>("outlier_variable_norms")),
     _outlier_multiplier(getParam<std::vector<Real>>("outlier_multiplier")),
     _precision(isParamValid("time_precision") ? getParam<unsigned int>("time_precision") : 0),
-    _time_format(getParam<MooseEnum>("time_format")),
+    _time_format(getParam<MooseEnum>("time_format").getEnum<TimeFormatEnum>()),
     _console_buffer(_app.getOutputWarehouse().consoleBuffer()),
     _old_linear_norm(std::numeric_limits<Real>::max()),
     _old_nonlinear_norm(std::numeric_limits<Real>::max()),
@@ -460,7 +460,7 @@ std::string
 Console::formatTime(const Real t) const
 {
   std::ostringstream oss;
-  if (_time_format != "dtime")
+  if (_time_format != TimeFormatEnum::DTIME)
   {
     if (_precision > 0)
       oss << std::setw(_precision) << std::setprecision(_precision) << std::setfill('0')
@@ -468,15 +468,15 @@ Console::formatTime(const Real t) const
     if (_scientific_time)
       oss << std::scientific;
 
-    if (_time_format == "plain")
+    if (_time_format == TimeFormatEnum::PLAIN)
       oss << t;
-    else if (_time_format == "second")
+    else if (_time_format == TimeFormatEnum::SECOND)
       oss << t << "s";
-    else if (_time_format == "minute")
+    else if (_time_format == TimeFormatEnum::MINUTE)
       oss << t / 60 << "m";
-    else if (_time_format == "hour")
+    else if (_time_format == TimeFormatEnum::HOUR)
       oss << t / 3600 << "h";
-    else if (_time_format == "day")
+    else if (_time_format == TimeFormatEnum::DAY)
       oss << t / 86400 << "d";
   }
   else
