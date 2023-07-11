@@ -66,7 +66,7 @@ Console::validParams()
   params.addParam<unsigned int>(
       "time_precision",
       "The number of significant digits that are printed on time related outputs");
-  MooseEnum time_format("plain=0 second=1 dtime=2", "plain");
+  MooseEnum time_format("plain=0 second=1 minute=2 hour=3 day=4 dtime=5", "plain");
   params.addParam<MooseEnum>(
       "time_format",
       time_format,
@@ -460,18 +460,26 @@ std::string
 Console::formatTime(const Real t) const
 {
   std::ostringstream oss;
-  if (_time_format == "plain" || _time_format == "second")
+  if (_time_format != "dtime")
   {
     if (_precision > 0)
       oss << std::setw(_precision) << std::setprecision(_precision) << std::setfill('0')
           << std::showpoint;
     if (_scientific_time)
       oss << std::scientific;
-    oss << t;
-    if (_time_format == "second")
-      oss << "s";
+
+    if (_time_format == "plain")
+      oss << t;
+    else if (_time_format == "second")
+      oss << t << "s";
+    else if (_time_format == "minute")
+      oss << t / 60 << "m";
+    else if (_time_format == "hour")
+      oss << t / 3600 << "h";
+    else if (_time_format == "day")
+      oss << t / 86400 << "d";
   }
-  else if (_time_format == "dtime")
+  else
   {
     Real abst = t;
     if (t < 0)
