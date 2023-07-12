@@ -161,9 +161,16 @@ AdaptiveImportanceSampler::computeSample(dof_id_type /*row_index*/, dof_id_type 
     }
 
     // check if we have performed all the importance sampling steps
-    if (_step >= _num_samples_train + _num_importance_sampling_steps)
+    if (_step >= _num_samples_train + _num_importance_sampling_steps + _retraining_steps)
       _is_sampling_completed = true;
   }
+
+  // When the GP fails, the current time step is 'wasted' and the retraining step doesn't
+  // happen until the next time step. Therefore, keep track of the number of retraining steps
+  // to increase the total number of steps taken.
+  if (sample && gp_flag && _step > _num_samples_train)
+    ++_retraining_steps;
+
   _check_step = _step;
   return _distributions[col_index]->quantile(Normal::cdf(_prev_value[col_index], 0.0, 1.0));
 }

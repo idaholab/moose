@@ -105,4 +105,7 @@ private:
 
   /// Storage for previously accepted samples by the decision reporter system
   std::vector<std::vector<Real>> _inputs_sto;
+
+  /// Number of retraining performed
+  int _retraining_steps = 0;
 };
