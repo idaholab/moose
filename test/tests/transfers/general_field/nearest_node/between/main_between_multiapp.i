@@ -29,14 +29,14 @@
 [Transfers]
   # Nodal to nodal variables
   [app1_to_2_nodal_nodal]
-    type = MultiAppGeneralFieldNearestNodeTransfer
+    type = MultiAppGeneralFieldNearestLocationTransfer
     from_multi_app = ma1
     to_multi_app = ma2
     source_variable = sent_nodal
     variable = received_nodal
   []
   [app2_to_1_nodal_nodal]
-    type = MultiAppGeneralFieldNearestNodeTransfer
+    type = MultiAppGeneralFieldNearestLocationTransfer
     from_multi_app = ma2
     to_multi_app = ma1
     source_variable = sent_nodal
@@ -45,14 +45,14 @@
 
   # Elemental to elemental variables
   [app1_to_2_elem_elem]
-    type = MultiAppGeneralFieldNearestNodeTransfer
+    type = MultiAppGeneralFieldNearestLocationTransfer
     from_multi_app = ma1
     to_multi_app = ma2
     source_variable = sent_elem
     variable = received_elem
   []
   [app2_to_1_elem_elem]
-    type = MultiAppGeneralFieldNearestNodeTransfer
+    type = MultiAppGeneralFieldNearestLocationTransfer
     from_multi_app = ma2
     to_multi_app = ma1
     source_variable = sent_elem
@@ -61,14 +61,14 @@
 
   # Elemental to nodal variables
   [app1_to_2_elem_nodal]
-    type = MultiAppGeneralFieldNearestNodeTransfer
+    type = MultiAppGeneralFieldNearestLocationTransfer
     from_multi_app = ma1
     to_multi_app = ma2
     source_variable = sent_elem
     variable = received_nodal
   []
   [app2_to_1_elem_nodal]
-    type = MultiAppGeneralFieldNearestNodeTransfer
+    type = MultiAppGeneralFieldNearestLocationTransfer
     from_multi_app = ma2
     to_multi_app = ma1
     source_variable = sent_elem
@@ -77,14 +77,14 @@
 
   # Nodal to elemental variables
   [app1_to_2_nodal_elem]
-    type = MultiAppGeneralFieldNearestNodeTransfer
+    type = MultiAppGeneralFieldNearestLocationTransfer
     from_multi_app = ma1
     to_multi_app = ma2
     source_variable = sent_nodal
     variable = received_elem
   []
   [app2_to_1_nodal_elem]
-    type = MultiAppGeneralFieldNearestNodeTransfer
+    type = MultiAppGeneralFieldNearestLocationTransfer
     from_multi_app = ma2
     to_multi_app = ma1
     source_variable = sent_nodal

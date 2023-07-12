@@ -72,7 +72,7 @@
   # Surface to volume data transfer
   # This extrapolates, so we inflate the bounding box size
   [./from_sub]
-    type = MultiAppGeneralFieldNearestNodeTransfer
+    type = MultiAppGeneralFieldNearestLocationTransfer
     from_multi_app = sub
     source_variable = u
     variable = from_sub

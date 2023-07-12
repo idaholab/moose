@@ -1,6 +1,6 @@
 [Tests]
   issues = '#13754 #19451'
-  design = 'MultiAppGeneralFieldNearestNodeTransfer.md'
+  design = 'MultiAppGeneralFieldNearestLocationTransfer.md'
 
   [from_sub_to_sub]
     requirement = "The system shall support nearest-node transfers between multiapps"

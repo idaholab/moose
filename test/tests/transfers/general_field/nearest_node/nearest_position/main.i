@@ -73,7 +73,7 @@
 
 [Transfers]
   [to_sub]
-    type = MultiAppGeneralFieldNearestNodeTransfer
+    type = MultiAppGeneralFieldNearestLocationTransfer
     to_multi_app = sub
     source_variable = to_sub
     variable = from_main
@@ -83,14 +83,14 @@
   []
 
   [to_sub_elem]
-    type = MultiAppGeneralFieldNearestNodeTransfer
+    type = MultiAppGeneralFieldNearestLocationTransfer
     to_multi_app = sub
     source_variable = to_sub_elem
     variable = from_main_elem
   []
 
   [from_sub]
-    type = MultiAppGeneralFieldNearestNodeTransfer
+    type = MultiAppGeneralFieldNearestLocationTransfer
     from_multi_app = sub
     source_variable = to_main
     variable = from_sub
@@ -99,7 +99,7 @@
   []
 
   [from_sub_elem]
-    type = MultiAppGeneralFieldNearestNodeTransfer
+    type = MultiAppGeneralFieldNearestLocationTransfer
     from_multi_app = sub
     source_variable = to_main_elem
     variable = from_sub_elem

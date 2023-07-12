@@ -78,7 +78,7 @@
 
 [Transfers]
   [from_sub]
-    type = MultiAppGeneralFieldNearestNodeTransfer
+    type = MultiAppGeneralFieldNearestLocationTransfer
     from_multi_app = sub
     source_variable = u
     from_boundaries = 'right'

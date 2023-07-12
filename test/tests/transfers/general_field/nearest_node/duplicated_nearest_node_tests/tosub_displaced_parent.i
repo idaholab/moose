@@ -59,14 +59,14 @@
 
 [Transfers]
   [./to_sub]
-    type = MultiAppGeneralFieldNearestNodeTransfer
+    type = MultiAppGeneralFieldNearestLocationTransfer
     to_multi_app = sub
     source_variable = u
     variable = from_parent
     displaced_target_mesh = true
   [../]
   [./elemental_to_sub]
-    type = MultiAppGeneralFieldNearestNodeTransfer
+    type = MultiAppGeneralFieldNearestLocationTransfer
     to_multi_app = sub
     source_variable = u
     variable = elemental_from_parent

@@ -69,21 +69,21 @@
 
 [Transfers]
   [to_sub_1]
-    type = MultiAppGeneralFieldNearestNodeTransfer
+    type = MultiAppGeneralFieldNearestLocationTransfer
     to_multi_app = sub
     source_variable = u
     from_boundaries = '1'
     variable = from_parent_1
   []
   [to_sub_2]
-    type = MultiAppGeneralFieldNearestNodeTransfer
+    type = MultiAppGeneralFieldNearestLocationTransfer
     to_multi_app = sub
     source_variable = u
     from_boundaries = '2'
     variable = from_parent_2
   []
   [to_sub_3]
-    type = MultiAppGeneralFieldNearestNodeTransfer
+    type = MultiAppGeneralFieldNearestLocationTransfer
     to_multi_app = sub
     source_variable = u
     from_boundaries = '3'
@@ -92,7 +92,7 @@
     search_value_conflicts = false
   []
   [to_sub_4]
-    type = MultiAppGeneralFieldNearestNodeTransfer
+    type = MultiAppGeneralFieldNearestLocationTransfer
     to_multi_app = sub
     source_variable = u
     from_boundaries = '4'

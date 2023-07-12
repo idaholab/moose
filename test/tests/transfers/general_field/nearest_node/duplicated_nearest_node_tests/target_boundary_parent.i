@@ -50,7 +50,7 @@
 
 [Transfers]
   [target_boundary]
-    type = MultiAppGeneralFieldNearestNodeTransfer
+    type = MultiAppGeneralFieldNearestLocationTransfer
     source_variable = u
     to_multi_app = sub
     variable = source

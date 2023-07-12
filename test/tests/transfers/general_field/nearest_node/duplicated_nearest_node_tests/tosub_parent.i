@@ -77,7 +77,7 @@
 
 [Transfers]
   [to_sub_nodal_to_nodal]
-    type = MultiAppGeneralFieldNearestNodeTransfer
+    type = MultiAppGeneralFieldNearestLocationTransfer
     to_multi_app = sub
     source_variable = u
     variable = nodal_source_from_parent_nodal
@@ -85,7 +85,7 @@
     search_value_conflicts = false
   []
   [to_sub_nodal_to_elemental]
-    type = MultiAppGeneralFieldNearestNodeTransfer
+    type = MultiAppGeneralFieldNearestLocationTransfer
     to_multi_app = sub
     source_variable = u
     variable = nodal_source_from_parent_elemental
@@ -93,7 +93,7 @@
     search_value_conflicts = false
   []
   [to_sub_elemental_to_nodal]
-    type = MultiAppGeneralFieldNearestNodeTransfer
+    type = MultiAppGeneralFieldNearestLocationTransfer
     to_multi_app = sub
     source_variable = u_elemental
     variable = elemental_source_from_parent_nodal
@@ -101,7 +101,7 @@
     search_value_conflicts = false
   []
   [to_sub_elemental_to_elemental]
-    type = MultiAppGeneralFieldNearestNodeTransfer
+    type = MultiAppGeneralFieldNearestLocationTransfer
     to_multi_app = sub
     source_variable = u_elemental
     variable = elemental_source_from_parent_elemental

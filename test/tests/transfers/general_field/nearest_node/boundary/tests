@@ -1,6 +1,6 @@
 [Tests]
   issues = '#16427 #16429'
-  design = 'transfers/MultiAppGeneralFieldNearestNodeTransfer.md'
+  design = 'transfers/MultiAppGeneralFieldNearestLocationTransfer.md'
 
   [3d_boxes]
     requirement = "The system shall be able to transfer variables using the value from the nearest node in the origin mesh, limiting the transfer to boundaries,"

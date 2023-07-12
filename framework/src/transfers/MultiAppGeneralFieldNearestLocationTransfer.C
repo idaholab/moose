@@ -7,7 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "MultiAppGeneralFieldNearestNodeTransfer.h"
+#include "MultiAppGeneralFieldNearestLocationTransfer.h"
 
 // MOOSE includes
 #include "FEProblem.h"
@@ -19,10 +19,14 @@
 
 #include "libmesh/system.h"
 
-registerMooseObject("MooseApp", MultiAppGeneralFieldNearestNodeTransfer);
+registerMooseObject("MooseApp", MultiAppGeneralFieldNearestLocationTransfer);
+registerMooseObjectRenamed("MooseApp",
+                           MultiAppGeneralFieldNearestNodeTransfer,
+                           "12/31/2024 24:00",
+                           MultiAppGeneralFieldNearestLocationTransfer);
 
 InputParameters
-MultiAppGeneralFieldNearestNodeTransfer::validParams()
+MultiAppGeneralFieldNearestLocationTransfer::validParams()
 {
   InputParameters params = MultiAppGeneralFieldTransfer::validParams();
   params.addClassDescription(
@@ -51,7 +55,7 @@ MultiAppGeneralFieldNearestNodeTransfer::validParams()
   return params;
 }
 
-MultiAppGeneralFieldNearestNodeTransfer::MultiAppGeneralFieldNearestNodeTransfer(
+MultiAppGeneralFieldNearestLocationTransfer::MultiAppGeneralFieldNearestLocationTransfer(
     const InputParameters & parameters)
   : MultiAppGeneralFieldTransfer(parameters),
     SolutionInvalidInterface(this),
@@ -65,7 +69,7 @@ MultiAppGeneralFieldNearestNodeTransfer::MultiAppGeneralFieldNearestNodeTransfer
 }
 
 void
-MultiAppGeneralFieldNearestNodeTransfer::initialSetup()
+MultiAppGeneralFieldNearestLocationTransfer::initialSetup()
 {
   MultiAppGeneralFieldTransfer::initialSetup();
 
@@ -157,7 +161,7 @@ MultiAppGeneralFieldNearestNodeTransfer::initialSetup()
 }
 
 void
-MultiAppGeneralFieldNearestNodeTransfer::prepareEvaluationOfInterpValues(
+MultiAppGeneralFieldNearestLocationTransfer::prepareEvaluationOfInterpValues(
     const unsigned int var_index)
 {
   _local_kdtrees.clear();
@@ -167,7 +171,7 @@ MultiAppGeneralFieldNearestNodeTransfer::prepareEvaluationOfInterpValues(
 }
 
 void
-MultiAppGeneralFieldNearestNodeTransfer::buildKDTrees(const unsigned int var_index)
+MultiAppGeneralFieldNearestLocationTransfer::buildKDTrees(const unsigned int var_index)
 {
   const unsigned int num_sources =
       _nearest_positions_obj ? _nearest_positions_obj->getPositions(/*initial=*/false).size()
@@ -275,14 +279,14 @@ MultiAppGeneralFieldNearestNodeTransfer::buildKDTrees(const unsigned int var_ind
 }
 
 void
-MultiAppGeneralFieldNearestNodeTransfer::evaluateInterpValues(
+MultiAppGeneralFieldNearestLocationTransfer::evaluateInterpValues(
     const std::vector<Point> & incoming_points, std::vector<std::pair<Real, Real>> & outgoing_vals)
 {
   evaluateInterpValuesNearestNode(incoming_points, outgoing_vals);
 }
 
 void
-MultiAppGeneralFieldNearestNodeTransfer::evaluateInterpValuesNearestNode(
+MultiAppGeneralFieldNearestLocationTransfer::evaluateInterpValuesNearestNode(
     const std::vector<Point> & incoming_points, std::vector<std::pair<Real, Real>> & outgoing_vals)
 {
   dof_id_type i_pt = 0;
@@ -396,9 +400,9 @@ MultiAppGeneralFieldNearestNodeTransfer::evaluateInterpValuesNearestNode(
 }
 
 bool
-MultiAppGeneralFieldNearestNodeTransfer::inBlocks(const std::set<SubdomainID> & blocks,
-                                                  const MooseMesh & mesh,
-                                                  const Elem * elem) const
+MultiAppGeneralFieldNearestLocationTransfer::inBlocks(const std::set<SubdomainID> & blocks,
+                                                      const MooseMesh & mesh,
+                                                      const Elem * elem) const
 {
   // We need to override the definition of block restriction for an element
   // because we have to consider whether each node of an element is adjacent to a block

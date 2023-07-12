@@ -1,5 +1,5 @@
 [Tests]
-  design = 'transfers/MultiAppGeneralFieldNearestNodeTransfer.md'
+  design = 'transfers/MultiAppGeneralFieldNearestLocationTransfer.md'
 
   [tosub]
     type = 'Exodiff'
