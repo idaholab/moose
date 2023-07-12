@@ -88,9 +88,22 @@ public:
   }
 
   /**
+   * Time formatting options
+   */
+  enum class TimeFormatEnum
+  {
+    PLAIN = 0,
+    SECOND = 1,
+    MINUTE = 2,
+    HOUR = 3,
+    DAY = 4,
+    DTIME = 5
+  };
+
+  /**
    * A reference to the time format to allow callers to set a new format for this console object
    */
-  MooseEnum & timeFormat() { return _time_format; }
+  TimeFormatEnum & timeFormat() { return _time_format; }
 
 protected:
   /**
@@ -207,7 +220,7 @@ protected:
   unsigned int _precision;
 
   /// Time format
-  MooseEnum _time_format;
+  TimeFormatEnum _time_format;
 
 private:
   /**

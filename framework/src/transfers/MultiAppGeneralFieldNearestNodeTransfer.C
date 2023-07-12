@@ -41,12 +41,20 @@ MultiAppGeneralFieldNearestNodeTransfer::validParams()
   params.set<bool>("use_nearest_app") = false;
   params.suppressParameter<bool>("use_nearest_app");
 
+  // the default of node/centroid switching based on the variable is causing lots of mistakes and
+  // bad results
+  std::vector<MooseEnum> source_types = {
+      MooseEnum("nodes centroids variable_default", "variable_default")};
+  params.addParam<std::vector<MooseEnum>>(
+      "source_type", source_types, "Where to get the source values from for each source variable");
+
   return params;
 }
 
 MultiAppGeneralFieldNearestNodeTransfer::MultiAppGeneralFieldNearestNodeTransfer(
     const InputParameters & parameters)
   : MultiAppGeneralFieldTransfer(parameters),
+    SolutionInvalidInterface(this),
     _num_nearest_points(getParam<unsigned int>("num_nearest_points"))
 {
   if (_source_app_must_contain_point && _nearest_positions_obj)
@@ -54,6 +62,98 @@ MultiAppGeneralFieldNearestNodeTransfer::MultiAppGeneralFieldNearestNodeTransfer
                "We do not support using both nearest positions matching and checking if target "
                "points are within an app domain because the KDTrees for nearest-positions matching "
                "are (currently) built with data from multiple applications.");
+}
+
+void
+MultiAppGeneralFieldNearestNodeTransfer::initialSetup()
+{
+  MultiAppGeneralFieldTransfer::initialSetup();
+
+  // Handle the source types ahead of time
+  const auto & source_types = getParam<std::vector<MooseEnum>>("source_type");
+  _source_is_nodes.resize(_from_var_names.size());
+  _use_zero_dof_for_value.resize(_from_var_names.size());
+  if (source_types.size() != _from_var_names.size())
+    mooseError("Not enough source types specified for this number of variables. Source types must "
+               "be specified for transfers with multiple variables");
+  for (const auto var_index : index_range(_from_var_names))
+  {
+    // Local app does not own any of the source problems
+    if (_from_problems.empty())
+      break;
+
+    // Get some info on the source variable
+    FEProblemBase & from_problem = *_from_problems[0];
+    MooseVariableFieldBase & from_var =
+        from_problem.getVariable(0,
+                                 _from_var_names[var_index],
+                                 Moose::VarKindType::VAR_ANY,
+                                 Moose::VarFieldType::VAR_FIELD_ANY);
+    System & from_sys = from_var.sys().system();
+    const auto & fe_type = from_sys.variable_type(from_var.number());
+
+    // Select where to get the origin values
+    if (source_types[var_index] == "nodes")
+      _source_is_nodes[var_index] = true;
+    else if (source_types[var_index] == "centroids")
+      _source_is_nodes[var_index] = false;
+    else
+    {
+      // "Nodal" variables are continuous for sure at nodes
+      if (from_var.isNodal())
+        _source_is_nodes[var_index] = true;
+      // for everyone else, we know they are continuous at centroids
+      else
+        _source_is_nodes[var_index] = false;
+    }
+
+    // Some variables can be sampled directly at their 0 dofs
+    // - lagrange at nodes on a first order mesh
+    // - anything constant and elemental obviously has the 0-dof value at the centroid (or
+    // vertex-average). However, higher order elemental, even monomial, do not hold the centroid
+    // value at dof index 0 For example: pyramid has dof 0 at the center of the base, prism has dof
+    // 0 on an edge etc
+    if ((_source_is_nodes[var_index] && fe_type.family == LAGRANGE &&
+         !from_problem.mesh().hasSecondOrderElements()) ||
+        (!_source_is_nodes[var_index] && fe_type.order == CONSTANT))
+      _use_zero_dof_for_value[var_index] = true;
+    else
+      _use_zero_dof_for_value[var_index] = false;
+
+    // Check with the source variable that it is not discontinuous at the source
+    if (_source_is_nodes[var_index])
+      if (from_var.getContinuity() == DISCONTINUOUS ||
+          from_var.getContinuity() == SIDE_DISCONTINUOUS)
+        mooseError("Source variable cannot be sampled at nodes as it is discontinuous");
+
+    // Local app does not own any of the target problems
+    if (_to_problems.empty())
+      break;
+
+    // Check with the target variable that we are not doing awful projections
+    MooseVariableFieldBase & to_var =
+        _to_problems[0]->getVariable(0,
+                                     _to_var_names[var_index],
+                                     Moose::VarKindType::VAR_ANY,
+                                     Moose::VarFieldType::VAR_FIELD_ANY);
+    System & to_sys = to_var.sys().system();
+    const auto & to_fe_type = to_sys.variable_type(to_var.number());
+    if (_source_is_nodes[var_index])
+    {
+      if (to_fe_type.order == CONSTANT)
+        mooseWarning(
+            "Transfer is projecting from nearest-nodes to centroids. This is likely causing "
+            "floating point indetermination in the results because multiple nodes are 'nearest' to "
+            "a centroid. Please consider using a ProjectionAux to build an elemental source "
+            "variable (for example constant monomial) before transferring");
+    }
+    else if (to_var.isNodal())
+      mooseWarning(
+          "Transfer is projecting from nearest-centroids to nodes. This is likely causing "
+          "floating point indetermination in the results because multiple centroids are "
+          "'nearest' to a node. Please consider using a ProjectionAux to build a nodal source "
+          "variable (for example linear Lagrange) before transferring");
+  }
 }
 
 void
@@ -100,11 +200,9 @@ MultiAppGeneralFieldNearestNodeTransfer::buildKDTrees(const unsigned int var_ind
 
       System & from_sys = from_var.sys().system();
       const unsigned int from_var_num = from_sys.variable_number(getFromVarName(var_index));
-      // FEM type info
-      const auto & fe_type = from_sys.variable_type(from_var.number());
-      const bool is_nodal = fe_type.family == LAGRANGE;
 
-      if (is_nodal)
+      // Build KDTree from nodes and nodal values
+      if (_source_is_nodes[var_index])
       {
         for (const auto & node : from_mesh.getMesh().local_node_ptr_range())
         {
@@ -124,11 +222,16 @@ MultiAppGeneralFieldNearestNodeTransfer::buildKDTrees(const unsigned int var_ind
               !closestToPosition(i_source, *node + _from_positions[i_from]))
             continue;
 
-          const auto dof = node->dof_number(from_sys.number(), from_var_num, 0);
           _local_points[i_source].push_back(*node + _from_positions[i_from]);
+          auto dof = node->dof_number(from_sys.number(), from_var_num, 0);
           _local_values[i_source].push_back((*from_sys.solution)(dof));
+          if (!_use_zero_dof_for_value[var_index])
+            flagInvalidSolution(
+                "Nearest-location is not implemented for this source variable type on "
+                "this mesh. Returning value at dof 0");
         }
       }
+      // Build KDTree from centroids and value at centroids
       else
       {
         for (auto & elem : as_range(from_mesh.getMesh().local_elements_begin(),
@@ -143,13 +246,21 @@ MultiAppGeneralFieldNearestNodeTransfer::buildKDTrees(const unsigned int var_ind
           if (!_from_boundaries.empty() && !onBoundaries(_from_boundaries, from_mesh, elem))
             continue;
 
+          const auto vertex_average = elem->vertex_average();
+
           if (_nearest_positions_obj &&
-              !closestToPosition(i_source, elem->vertex_average() + _from_positions[i_from]))
+              !closestToPosition(i_source, vertex_average + _from_positions[i_from]))
             continue;
 
-          const auto dof = elem->dof_number(from_sys.number(), from_var_num, 0);
-          _local_points[i_source].push_back(elem->vertex_average() + _from_positions[i_from]);
-          _local_values[i_source].push_back((*from_sys.solution)(dof));
+          _local_points[i_source].push_back(vertex_average + _from_positions[i_from]);
+          if (_use_zero_dof_for_value[var_index])
+          {
+            auto dof = elem->dof_number(from_sys.number(), from_var_num, 0);
+            _local_values[i_source].push_back((*from_sys.solution)(dof));
+          }
+          else
+            _local_values[i_source].push_back(
+                from_sys.point_value(from_var_num, vertex_average, elem));
         }
       }
       max_leaf_size = std::max(max_leaf_size, from_mesh.getMaxLeafSize());
