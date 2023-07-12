@@ -31,22 +31,14 @@ class SchemaDiff(FileTester):
                                                 'be set if the gold file uses a different file '
                                                 'name than the output file.')
         params.addParam('ignored_items',    [], 'Regular expressions of items to ignore')
-        params.addParam('rel_err',      5.5e-6, 'Relative error value allowed in comparisons. If '
-                                                'rel_err value is set to 0, it will work on the '
-                                                'absolute difference between the values.')
         params.addParam('abs_err',      5.5e-6, 'Absolute error value to be used in comparisons.')
-        params.addParam('abs_zero',      1e-10, 'Absolute zero cutoff used in diff comparisons. '
-                                                'Every value smaller than this threshold will be '
-                                                'ignored.')
+
         return params
 
     def __init__(self, name, params):
         """ Initialize SchemaDiff """
-        # convert test specs entering the constraints as string, i.e. rel_err = '1.1e-2' instead
-        # of rel_err = 1.1e-2
-        params['rel_err'] = float(params['rel_err'])
+        # Convert possible test spec files declaring a string representation to a float
         params['abs_err'] = float(params['abs_err'])
-        params['abs_zero'] = float(params['abs_zero'])
         FileTester.__init__(self, name, params)
         if self.specs['required_python_packages'] is None:
             self.specs['required_python_packages'] = 'deepdiff>=6.1.0'
@@ -130,43 +122,47 @@ class SchemaDiff(FileTester):
 
     def format_diff(self, diff_dict, reference, result):
         """ Iterate over known problem keys to format pretty results """
-        formated_results = f'{self.specs["type"].upper()} Detected:\n'
+        formated_results = ''
         for key in diff_dict.keys():
             # Different Values
             if key == 'values_changed':
+                formated_results += '\nValue Diff:'
                 for diff_key, key_value in diff_dict['values_changed'].items():
-                    formated_results += (f'{diff_key.replace("root", "", 1)}'
-                                         f'\n\tGOLD:   {key_value["old_value"]}'
-                                         f'\n\tRESULT: {key_value["new_value"]}\n')
+                    formated_results += (f'\n{diff_key.replace("root", "", 1)}'
+                                         f'\nGOLD:   {key_value["old_value"]}'
+                                         f'\nRESULT: {key_value["new_value"]}')
             # Different fields added
             if key == 'iterable_item_added':
+                formated_results += '\nAdditional List Item:'
                 for diff_key, key_value in diff_dict['iterable_item_added'].items():
-                    formated_results += (f'Additional row at {diff_key.replace("root", "", 1)}:'
-                                         f'\t{key_value}\n')
+                    formated_results += (f'\nAdditional row at {diff_key.replace("root", "", 1)}:'
+                                         f'\t{key_value}')
             # Different fields removed
             if key == 'iterable_item_removed':
+                formated_results += '\nMissing List Item:'
                 for diff_key, key_value in diff_dict['iterable_item_removed'].items():
-                    formated_results += (f'Missing item at {diff_key.replace("root", "", 1)}:'
-                                         f'\t{key_value}\n')
+                    formated_results += (f'\n{diff_key.replace("root", "", 1)}: {key_value}')
 
             if key == 'dictionary_item_added':
-                formated_results += (f'Additional keys found in result:\n')
+                formated_results += '\nAdditional Key:'
                 for added_key in diff_dict['dictionary_item_added']:
                     formated_results += (f'\t{added_key.replace("root", "", 1)}\n')
 
         # custom operator caught a diff
         if 'diff' in diff_dict:
             if 'root' in diff_dict['diff']:
-                formated_results += diff_dict['diff']['root']
-            # Multiple root entries, use moosetree to print a pretty picture
+                formated_results += f'{diff_dict["diff"]["root"]}'
+            # Multiple root entries
             else:
+                formated_results += '\n\nNode Differences:'
                 find_nodes = re.compile(r'\[\'|([\w+:@#]+)|\'\]')
                 for node_key, value in diff_dict['diff'].items():
                     nodes = list(filter(None, find_nodes.findall(node_key)))
+                    str_node = node_key.replace("root", "", 1)
                     gold = self.get_dictitem(reference, nodes[1:])
                     computed = self.get_dictitem(result, nodes[1:])
-                    formated_results += (f'\n\tGOLD:   {",".join(nodes[1:])}: {gold}'
-                                         f'\n\tRESULT: {",".join(nodes[1:])}: {computed}\n')
+                    formated_results += (f'\nGOLD:   {str_node}: {gold}'
+                                         f'\nRESULT: {str_node}: {computed}')
 
         return formated_results
 

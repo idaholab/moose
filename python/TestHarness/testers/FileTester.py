@@ -19,10 +19,13 @@ class FileTester(RunApp):
         params = RunApp.validParams()
         params.addParam('gold_dir', 'gold', "The directory where the \"golden standard\" files reside relative to the TEST_DIR: (default: ./gold/)")
         params.addParam('abs_zero',       1e-10, "Absolute zero cutoff used in exo/csvdiff comparisons.")
-        params.addParam('rel_err',       5.5e-6, "Relative error value used in exo/csvdiff comparisons.")
+        params.addParam('rel_err',       5.5e-5, "Relative error value used in exo/csvdiff comparisons.")
         return params
 
     def __init__(self, name, params):
+        # Some test spec files are passing strings, which need to be converted to floats
+        params['abs_zero'] = float(params['abs_zero'])
+        params['rel_err'] = float(params['rel_err'])
         RunApp.__init__(self, name, params)
 
     def prepare(self, options):

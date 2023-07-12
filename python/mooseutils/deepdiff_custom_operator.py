@@ -116,13 +116,13 @@ class CompareDiff(BaseOperator):
         # test for absolute difference (relative tolerances need to be zero to enable test)
         if self.relative_tolerance == 0:
             if not self.do_absolute(result_goldfile, result_computed, self.absolute_tolerance):
-                custom_report = f'absolute diff: {abs(result_goldfile - result_computed):.8e}'
+                custom_report = f'Absolute diff:\t\t{abs(result_goldfile - result_computed):.8e}'
                 diff_instance.custom_report_result('diff', level, custom_report)
 
         # test for relative difference
         elif not self.do_relative(result_goldfile, result_computed, self.relative_tolerance):
             relative = abs(abs(result_goldfile - result_computed) / result_goldfile)
-            custom_report = f'relative diff: {relative:.8e}'
+            custom_report = f'Relative diff:\t\t{relative:.8e}'
             diff_instance.custom_report_result('diff', level, custom_report)
 
         return True

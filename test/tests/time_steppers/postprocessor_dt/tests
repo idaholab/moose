@@ -3,7 +3,7 @@
     type = 'Exodiff'
     input = 'postprocessor_dt.i'
     exodiff = 'postprocessor_dt_out.e'
-    abs_zero = 1-e8
+    abs_zero = 1e-8
 
     issues = '#1963'
     design = 'PostprocessorDT.md'

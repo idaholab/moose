@@ -189,9 +189,9 @@ class CSVDiff(SchemaDiff):
 
             diff = (f'{abs_diff if rel_err == 0 else rel_diff}'
                     f'Absolute Zero:\t\t{abs_zero}\n'
-                    f'Column {index+1}, Step {value_id+1}:\t\tgold: {float(value):.8e}, '
+                    f'Column {index+1}, Step {value_id}:\t\tgold: {float(value):.8e}, '
                     f'result: {float(comp[column][value_id]):.8e}\n'
-                    f'\t\t\t\t{diff}')
+                    f'{diff}')
         return (diff, error)
 
     def getParamValues(self, param, param_line):
