@@ -27,7 +27,7 @@
 #include "libmesh/mesh_function.h"
 #include "libmesh/mesh_tools.h"
 
-registerMooseObject("MooseApp", MultiAppUserObjectTransfer);
+registerMooseObjectDeprecated("MooseApp", MultiAppUserObjectTransfer, "12/31/2024 24:00");
 
 InputParameters
 MultiAppUserObjectTransfer::validParams()
@@ -86,6 +86,9 @@ MultiAppUserObjectTransfer::MultiAppUserObjectTransfer(const InputParameters & p
     _skip_bbox_check(getParam<bool>("skip_bounding_box_check")),
     _nearest_sub_app(getParam<bool>("nearest_sub_app"))
 {
+  mooseDeprecated("MultiAppUserObjectTransfer is deprecated. Use "
+                  "MultiAppGeneralFieldUserObjectTransfer instead and adapt the parameters");
+
   // This transfer does not work with DistributedMesh
   _fe_problem.mesh().errorIfDistributedMesh("MultiAppUserObjectTransfer");
 

@@ -27,7 +27,7 @@
 #include "timpi/communicator.h"
 #include "timpi/parallel_sync.h"
 
-registerMooseObject("MooseApp", MultiAppShapeEvaluationTransfer);
+registerMooseObjectDeprecated("MooseApp", MultiAppShapeEvaluationTransfer, "12/31/2024 24:00");
 registerMooseObjectRenamed("MooseApp",
                            MultiAppMeshFunctionTransfer,
                            "12/31/2023 24:00",
@@ -52,6 +52,9 @@ MultiAppShapeEvaluationTransfer::validParams()
 MultiAppShapeEvaluationTransfer::MultiAppShapeEvaluationTransfer(const InputParameters & parameters)
   : MultiAppConservativeTransfer(parameters), _error_on_miss(getParam<bool>("error_on_miss"))
 {
+  mooseDeprecated("MultiAppShapeEvaluationTransfer is deprecated. Use "
+                  "MultiAppGeneralFieldShapeEvaluationTransfer instead and adapt the parameters");
+
   if (_to_var_names.size() == _from_var_names.size())
     _var_size = _to_var_names.size();
   else
