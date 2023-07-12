@@ -36,23 +36,23 @@ If the assembly is extruded to three dimensions the top-most boundary ID must be
 
 Users may be interested in defining additional metadata to represent the reactor geometry and region IDs assigned to each geometry zone, which may be useful to users who want mesh geometry and composition information without having to inspect the generated mesh itself. [!param](/Mesh/AssemblyMeshGenerator/show_rgmb_metadata) can be set to true in order to see the values of these metadata entries as console output. The following metadata is defined on the assembly mesh:
 
-- `assembly_type`: Value of type_id associated with assembly, equivalent to [!param](/Mesh/AssemblyMeshGenerator/assembly_type)
-- `pitch`: Assembly pitch, equivalent to [!param](/Mesh/ReactorMeshParams/assembly_pitch)
-- `is_homogenized`: Whether or not assembly mesh is homogenized, equivalent to [!param](/Mesh/PinMeshGenerator/homogenized)
-- `is_single_pin`: Whether or not assembly mesh is represented by a single pin region or a lattice of pins, equivalent to [!param](/Mesh/PinMeshGenerator/use_as_assembly).
-- `duct_halfpitches`: Location of apothems defining the duct locations, equivalent to [`AssemblyMeshGenerator`](AssemblyMeshGenerator.md)/[!param](/Mesh/AssemblyMeshGenerator/duct_halfpitch)
-- `background_region_id`: 1-D vector of region_ids corresponding to axial zones of background regions of assembly mesh.
-- `duct_region_ids`: 2-D vector of region ids corresponding to radial and axial zones within duct regions of assembly mesh. Inner indexing is radial zones, while outer index is axial zones.
+- `assembly_type`: Value of type_id associated with assembly, equivalent to the input parameter [!param](/Mesh/AssemblyMeshGenerator/assembly_type)
+- `pitch`: Assembly pitch, equivalent to the input parameter [!param](/Mesh/ReactorMeshParams/assembly_pitch)
+- `is_homogenized`: Whether or not assembly mesh is homogenized, equivalent to the input parameter [!param](/Mesh/PinMeshGenerator/homogenized)
+- `is_single_pin`: Whether or not assembly mesh is represented by a single pin region or a lattice of pins, equivalent to the input parameter [!param](/Mesh/PinMeshGenerator/use_as_assembly).
+- `duct_halfpitches`: Length of apothems defining the duct locations, equivalent to the input parameter [`AssemblyMeshGenerator`](AssemblyMeshGenerator.md)/[!param](/Mesh/AssemblyMeshGenerator/duct_halfpitch)
+- `background_region_id`: 1-D vector of region_ids corresponding to axial zones of background regions of assembly mesh, equivalent to the input parameter [!param](/Mesh/AssemblyMeshGenerator/background_region_id).
+- `duct_region_ids`: 2-D vector of region ids corresponding to radial and axial zones within duct regions of assembly mesh, equivalent to the input parameter [!param](/Mesh/AssemblyMeshGenerator/duct_region_ids). Inner indexing is radial zones, while outer index is axial zones.
 
 If the assembly is represented as a single pin, the following metadata is also defined:
 
-- `ring_radii`: Location of rings comprising of assembly region, equivalent to [`PinMeshGenerator`](PinMeshGenerator.md)/[!param](/Mesh/PinMeshGenerator/ring_radii).
-- `ring_region_ids`: 2-D vector of region ids corresponding to radial and axial zones within ring regions of assembly mesh. Inner indexing is radial zones, while outer index is axial zones.
+- `ring_radii`: Length of ring radii comprising of assembly region, equivalent to [`PinMeshGenerator`](PinMeshGenerator.md)/[!param](/Mesh/PinMeshGenerator/ring_radii).
+- `ring_region_ids`: 2-D vector of region ids corresponding to radial and axial zones within ring regions of assembly mesh, corresponding to the ring-related region ids of the input parameter [`PinMeshGenerator`](PinMeshGenerator.md)/[!param](/Mesh/PinMeshGenerator/region_ids). Inner indexing is radial zones, while outer index is axial zones.
 
 If instead the assembly is represented as a lattice of pins, the following metadata is defined:
 
-- `pin_names`: Mesh generator names of constituent pins in lattice.
-- `pin_lattice`: 2-D lattice of pins in assembly, where each location represents the index of the pin in the list of names under the `pin_names` metadata entry
+- `pin_names`: List of mesh generator names of constituent pins in lattice.
+- `pin_lattice`: 2-D lattice of pins in assembly, where each location represents the index of the pin in the list of names under the `pin_names` metadata entry.
 
 For each of the pins listed in `pin_names`, the pin-level metadata is also displayed when [!param](/Mesh/AssemblyMeshGenerator/show_rgmb_metadata) is set to true. A list of pin-level metadata that is defined on the assembly mesh can be found in [PinMeshGenerator](PinMeshGenerator.md).
 

@@ -37,8 +37,8 @@ For each of the assemblies listed in `assembly_names`, the assembly-level metada
 
 For meshes where a core periphery is defined, the following metadata is also defined:
 
-- `peripheral_ring_radius`: Outer radius of core periphery, equivalent to [`CoreMeshGenerator`](CoreMeshGenerator.md)/[!param](/Mesh/CoreMeshGenerator/outer_circle_radius).
-- `peripheral_ring_region_id`: Region ID associated with core periphery, equivalent to [`CoreMeshGenerator`](CoreMeshGenerator.md)/[!param](/Mesh/CoreMeshGenerator/periphery_region_id).
+- `peripheral_ring_radius`: Outer radius of core periphery, equivalent to the input parameter [`CoreMeshGenerator`](CoreMeshGenerator.md)/[!param](/Mesh/CoreMeshGenerator/outer_circle_radius).
+- `peripheral_ring_region_id`: Region ID associated with core periphery, equivalent to the input parameter [`CoreMeshGenerator`](CoreMeshGenerator.md)/[!param](/Mesh/CoreMeshGenerator/periphery_region_id).
 
 In addition, the value of the metadata `reactor_params_name` can be used to retrieve global metadata defined by [ReactorMeshParams](ReactorMeshParams.md). Please refer to [ReactorMeshParams](ReactorMeshParams.md) to see a list of metadata defined by this mesh generator.
 

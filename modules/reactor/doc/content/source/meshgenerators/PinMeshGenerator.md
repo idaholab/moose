@@ -41,14 +41,14 @@ Users may be interested in defining metadata to represent the reactor geometry a
 
 At the pin level, the following metadata is defined on the pin mesh:
 
-- `pin_type`: pin_type id associated with pin mesh, equivalent to [!param](/Mesh/PinMeshGenerator/pin_type)
-- `pitch`: Pitch of outermost boundary polygon, equivalent to [!param](/Mesh/PinMeshGenerator/pitch)
-- `is_homogenized`: Whether or not pin mesh is homogenized, equivalent to [!param](/Mesh/PinMeshGenerator/homogenized)
-- `ring_radii`: Location of rings comprising of pin region, equivalent to [!param](/Mesh/PinMeshGenerator/ring_radii).
-- `duct_halfpitches`: Location of apothems defining the duct locations, equivalent to [!param](/Mesh/PinMeshGenerator/duct_halfpitch)
-- `ring_region_ids`: 2-D vector of region ids corresponding to radial and axial zones within ring regions of pin mesh. Inner indexing is radial zones, while outer index is axial zones.
-- `background_region_id`: 1-D vector of region_ids corresponding to axial zones of background regions of pin mesh.
-- `duct_region_ids`: 2-D vector of region ids corresponding to radial and axial zones within duct regions of pin mehs. Inner indexing is radial zones, while outer index is axial zones.
+- `pin_type`: pin_type id associated with pin mesh, equivalent to the input parameter [!param](/Mesh/PinMeshGenerator/pin_type)
+- `pitch`: Pitch of outermost boundary polygon, equivalent to the input parameter [!param](/Mesh/PinMeshGenerator/pitch)
+- `is_homogenized`: Whether or not pin mesh is homogenized, equivalent to the input parameter [!param](/Mesh/PinMeshGenerator/homogenized)
+- `ring_radii`: Length of ring radii comprising of pin region, equivalent to the input parameter [!param](/Mesh/PinMeshGenerator/ring_radii).
+- `duct_halfpitches`: Length of apothems defining the duct locations, equivalent to the input parameter [!param](/Mesh/PinMeshGenerator/duct_halfpitch)
+- `ring_region_ids`: 2-D vector of region ids corresponding to radial and axial zones within ring regions of pin mesh, based on the ring-related region ids of the input parameter [!param](/Mesh/PinMeshGenerator/region_ids). Inner indexing is radial zones, while outer index is axial zones.
+- `background_region_id`: 1-D vector of region_ids corresponding to axial zones of background regions of pin mesh, based on the background-related region ids of the input parameter [!param](/Mesh/PinMeshGenerator/region_ids).
+- `duct_region_ids`: 2-D vector of region ids corresponding to radial and axial zones within duct regions of pin mesh, based on the duct-related region ids of the input parameter [!param](/Mesh/PinMeshGenerator/region_ids). Inner indexing is radial zones, while outer index is axial zones.
 
 In addition, the value of the metadata `reactor_params_name` can be used to retrieve global metadata defined by [ReactorMeshParams](ReactorMeshParams.md). Please refer to [ReactorMeshParams](ReactorMeshParams.md) to see a list of metadata defined by this mesh generator.
 
