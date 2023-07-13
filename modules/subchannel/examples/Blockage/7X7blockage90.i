@@ -23,16 +23,6 @@ P_out = 101325  # Pa
     spacer_z = '0.4064 1.4224'
     spacer_k = '1.14 1.14'
   []
-
-#   [fuel_pins]
-#     type = QuadPinMeshGenerator
-#     input = sub_channel
-#     nx = 8
-#     ny = 8
-#     n_cells = 40
-#     pitch = 0.0136906
-#     heated_length = 1.4478
-#   []
 []
 
 [AuxVariables]
@@ -54,9 +44,6 @@ P_out = 101325  # Pa
   [T]
     block = sub_channel
   []
-  # [Tpin]
-  #   block = fuel_pins
-  # []
   [rho]
     block = sub_channel
   []
@@ -69,16 +56,11 @@ P_out = 101325  # Pa
   [w_perim]
     block = sub_channel
   []
-  # [q_prime]
-  #   block = fuel_pins
-  # []
 []
 
-[Modules]
-  [FluidProperties]
-    [water]
-      type = Water97FluidProperties
-    []
+[FluidProperties]
+  [water]
+    type = Water97FluidProperties
   []
 []
 
@@ -186,35 +168,11 @@ P_out = 101325  # Pa
 
 [Outputs]
   exodus = true
-  [Temp_Out_MATRIX]
-    type = QuadSubChannelNormalSliceValues
-    variable = T
-    execute_on = final
-    file_base = "Temp_Out.txt"
-    height = 3.658
-  []
-  [mdot_Out_MATRIX]
-    type = QuadSubChannelNormalSliceValues
-    variable = mdot
-    execute_on = final
-    file_base = "mdot_Out.txt"
-    height = 3.658
-  []
-  [mdot_In_MATRIX]
-    type = QuadSubChannelNormalSliceValues
-    variable = mdot
-    execute_on = final
-    file_base = "mdot_In.txt"
-    height = 0.0
-  []
 []
 
 [Executioner]
   type = Steady
-  nl_rel_tol = 0.9
-  l_tol = 0.9
 []
-
 
 [MultiApps]
   [viz]
@@ -231,9 +189,4 @@ P_out = 101325  # Pa
     to_multi_app = viz
     variable = 'mdot SumWij P DP h T rho mu S'
   []
-#   [pin_transfer]
-#     type = MultiAppDetailedPinSolutionTransfer
-#     to_multi_app = viz
-#     variable = 'Tpin q_prime'
-#   []
 []
