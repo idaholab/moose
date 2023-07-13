@@ -1152,10 +1152,6 @@ class TestHarness:
         if opts.libmesh_dir:
             self.libmesh_dir = opts.libmesh_dir
 
-        # When running heavy tests, we'll make sure we use --no-report
-        if opts.heavy_tests:
-            self.options.report_skipped = False
-
         # User wants to write all output, so unify the options involved
         if opts.sep_files:
             opts.ok_files = True
