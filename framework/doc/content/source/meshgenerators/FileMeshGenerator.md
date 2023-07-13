@@ -7,24 +7,87 @@
 The `FileMeshGenerator` is the default type for MOOSE and as the name suggests it reads the mesh from an external file. MOOSE
 supports reading and writing a large number of formats and could be extended to read more.
 
+Reading with the `FileMeshGenerator`. These capabilities are inherited from the
+libmesh file IO readers.
 
 | Extension   | Description |
 | :-          | :- |
 | .e, .exd    | Sandia's ExodusII format |
-| .dat        | Tecplot ASCII file |
+| .bxt        | DynaIO |
+| .cpr        | Checkpoint file |
 | .fro        | ACDL's surface triangulation file |
-| .gmv        | LANL's GMV (General Mesh Viewer) format |
-| .mat        | Matlab triangular ASCII file (read only) |
+| .mat        | Matlab triangular ASCII file |
 | .msh        | GMSH ASCII file |
 | .n, .nem    | Sandia's Nemesis format |
-| .plt        | Tecplot binary file (write only) |
-| .node, .ele; .poly | TetGen ASCII file (read; write) |
-| .inp        | Abaqus .inp format (read only) |
+| .node, .ele; .poly | TetGen ASCII file |
+| .inp        | Abaqus .inp format |
+| .off        | OFF |
 | .ucd        | AVS's ASCII UCD format |
 | .unv        | I-deas Universal format |
 | .xda, .xdr  | libMesh formats |
 | .vtk, .pvtu | Visualization Toolkit |
-| .cpr        | Checkpoint file |
+
+Writing (using the [Outputs](syntax/Outputs/index.md) block). We list these formats here
+for conversion if you are considering using MOOSE as a mesh file converter.
+
+| Extension   | Description              | Output type |
+| :-          | :-                       | :- |
+| .e, .exd    | Sandia's ExodusII format | [Exodus.md] |
+| .cpr        | Checkpoint file          | [Checkpoint.md] |
+| .dat        | Tecplot ASCII file       | [Tecplot.md] |
+| .gmv        | LANL's GMV (General Mesh Viewer) format | [GMVOutput.md] |
+| .n, .nem    | Sandia's Nemesis format  | [Nemesis.md] |
+| .plt        | Tecplot binary file      | [Tecplot.md] |
+| .xda, .xdr  | libMesh formats          | [XDA.md] |
+| .vtk, .pvtu | Visualization Toolkit    | [VTKOutput.md] |
+
+These formats (for writing meshes) are supported by libmesh and could easily be added to MOOSE if needed:
+
+| Extension     | Description                       |
+| :-            | :-                       | :- |
+| .fro          | ACDL's surface triangulation file |
+| .mesh, .meshb | Medit |
+| .msh          | GMSH ASCII file |
+| .node, .ele; .poly | TetGen ASCII file |
+| .ucd          | AVS's ASCII UCD format |
+
+
+## Unsupported File Formats
+
+These file formats are unsupported, however, using other tools they can be converted to supported formats.
+In general, the mesh must respect the limitations of the target format for a successful conversion.
+
+Tools offering conversion capabilities:
+
+- Paraview
+- [meshio](https://pypi.org/project/meshio/2.3.5/), can also be installed with `mamba/conda`
+
+The conversion capabilities to be able to read those files are summarized here for convenience:
+
+| Extension   | Description | Conversion tool | Target format |
+| :-          | :-          | :-              | :-     |
+| .msh        | ANSYS msh   | meshio          | Exodus |
+| .avs        | AVS-UCD     | meshio          | Exodus |
+| .cgns       | CGNS        | meshio/Paraview | Exodus |
+| .xml        | DOLFIN xml  | meshio          | Exodus |
+| .case       | EnSight     | Paraview        | Exodus |
+| .f3grid     | FLAC3D      | meshio          | Exodus |
+| .h5m        | H5M         | meshio          | Exodus |
+| .mdpa       | Kratos/MDPA | meshio          | Exodus |
+| .mesh, .meshb | Medit     | meshio          | Exodus |
+| .med        | MED/Salome  | meshio          | Exodus |
+| .bdf/.fem/.nas | Nastran  | meshio          | Exodus |
+| .vol        | Netgen      | meshio          | Exodus |
+|             | Neuroglancer | meshio         | Exodus |
+| .obj        | OBJ         | meshio          | Exodus |
+| .post, .dato | PERMAS     | meshio          | Exodus |
+| .ply        | PLY         | meshio          | Exodus |
+| .stl        | STL         | meshio          | Exodus |
+| .svg        | SVG         | meshio          | Exodus |
+| .su2        | SU2         | meshio          | Exodus |
+| .ugrid      | UGRID       | meshio          | Exodus |
+| .tin        | WKT TIN     | meshio          | Exodus |
+| .xdmf, .xmf | XDMF        | meshio          | Exodus |
 
 ## Extra element integer
 
