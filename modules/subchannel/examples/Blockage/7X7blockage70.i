@@ -19,20 +19,10 @@ P_out = 101325  # Pa
     z_blockage = '0.60325 0.67945'
     index_blockage = '18 19 20 21 26 27 28 29 34 35 36 37 42 43 44 45'
     reduction_blockage = '0.83 0.65 0.65 0.83 0.65 0.30 0.30 0.65 0.65 0.30 0.30 0.65 0.83 0.65 0.65 0.83'
-    k_blockage = '0.0 0.0 0.0 0.0 0.0 0.3 0.3 0.0 0.0 0.3 0.3 0.0 0.0 0.0 0.0 0.0'
+    k_blockage = '0.0 0.0 0.0 0.0 0.0 1 1 0.0 0.0 1 1 0.0 0.0 0.0 0.0 0.0'
     spacer_z = '0.3683 1.3843'
     spacer_k = '1.14 1.14'
   []
-
-#   [fuel_pins]
-#     type = QuadPinMeshGenerator
-#     input = sub_channel
-#     nx = 8
-#     ny = 8
-#     n_cells = 20
-#     pitch = 0.0136906
-#     heated_length = 1.4478
-#   []
 []
 
 [AuxVariables]
@@ -54,9 +44,6 @@ P_out = 101325  # Pa
   [T]
     block = sub_channel
   []
-#   [Tpin]
-#     block = fuel_pins
-#   []
   [rho]
     block = sub_channel
   []
@@ -69,16 +56,11 @@ P_out = 101325  # Pa
   [w_perim]
     block = sub_channel
   []
-#   [q_prime]
-#     block = fuel_pins
-#   []
 []
 
-[Modules]
-  [FluidProperties]
-    [water]
-      type = Water97FluidProperties
-    []
+[FluidProperties]
+  [water]
+    type = Water97FluidProperties
   []
 []
 
@@ -190,10 +172,7 @@ P_out = 101325  # Pa
 
 [Executioner]
   type = Steady
-  nl_rel_tol = 0.9
-  l_tol = 0.9
 []
-
 
 [MultiApps]
   [viz]
@@ -210,9 +189,4 @@ P_out = 101325  # Pa
     to_multi_app = viz
     variable = 'mdot SumWij P DP h T rho mu S'
   []
-#   [pin_transfer]
-#     type = MultiAppDetailedPinSolutionTransfer
-#     to_multi_app = viz
-#     variable = 'Tpin q_prime'
-#   []
 []

@@ -28,8 +28,8 @@ P_out = 2.0e5 # Pa
     spacer_k = '0.0'
     z_blockage = '0.49 0.52'
     index_blockage = '29 31 30 32 34 33 35 15 16 8 17 18 9 19'
-    reduction_blockage = '0.04 0.04 0.04 0.04 0.04 0.04 0.04 0.04 0.04 0.04 0.04 0.04 0.04 0.04'
-    k_blockage = '2 2 2 2 2 2 2 2 2 2 2 2 2 2 '
+    reduction_blockage = '0.09 0.09 0.09 0.09 0.09 0.09 0.09 0.09 0.09 0.09 0.09 0.09 0.09 0.09'
+    k_blockage = '6 6 6 6 6 6 6 6 6 6 6 6 6 6 '
   []
 []
 
@@ -69,7 +69,7 @@ P_out = 2.0e5 # Pa
   fp = sodium
   n_blocks = 1
   P_out = 2.0e5
-  CT = 10.0
+  CT = 5
   compute_density = true
   compute_viscosity = true
   compute_power = true
