@@ -818,7 +818,8 @@ ContactAction::addMortarContact()
         var_params.set<Real>("penetration_tolerance") = getParam<Real>("al_penetration_tolerance");
       if (isParamValid("penalty_multiplier"))
         var_params.set<Real>("penalty_multiplier") = getParam<Real>("penalty_multiplier");
-      // In the contact action, we force the physical value of the normal gap
+      // In the contact action, we force the physical value of the normal gap, which also normalizes
+      // the penalty factor with the "area" around the node
       var_params.set<bool>("use_physical_gap") = true;
 
       if (_use_dual)
@@ -856,7 +857,8 @@ ContactAction::addMortarContact()
         var_params.set<Real>("penalty_multiplier") = getParam<Real>("penalty_multiplier");
       if (isParamValid("al_incremental_slip_tolerance"))
         var_params.set<Real>("slip_tolerance") = getParam<Real>("al_incremental_slip_tolerance");
-      // In the contact action, we force the physical value of the normal gap
+      // In the contact action, we force the physical value of the normal gap, which also normalizes
+      // the penalty factor with the "area" around the node
       var_params.set<bool>("use_physical_gap") = true;
 
       if (_use_dual)

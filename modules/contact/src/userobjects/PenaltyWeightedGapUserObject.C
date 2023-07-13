@@ -30,7 +30,9 @@ PenaltyWeightedGapUserObject::validParams()
   params.addParam<bool>(
       "use_physical_gap",
       false,
-      "Whether to use the physical normal gap (not scaled by mortar integration).");
+      "Whether to use the physical normal gap (not scaled by mortar integration) and normalize the "
+      "penalty coefficient with a representative lower-dimensional volume assigned to the node in "
+      "the contacting boundary. This parameter is defaulted to 'true' in the contact action.");
   params.addRangeCheckedParam<Real>(
       "penetration_tolerance",
       1e-5,

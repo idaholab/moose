@@ -370,15 +370,12 @@ PenaltyFrictionUserObject::updateAugmentedLagrangianMultipliers()
         std::abs(_friction_coefficient * normal_lm))
     {
       tangential_lm += penalty_friction * slip_velocity * _dt;
-      // Moose::out << "Updating LM of node " << dof_object->id() << " with sticking behavior.\n";
     }
     else
     {
       tangential_lm = -tangential_trial_traction / tangential_trial_traction_norm *
                           penalty_friction * normal_lm -
                       old_tangential_traction;
-
-      // Moose::out << "Updating LM of node " << dof_object->id() << " with saturated behavior.\n";
     }
 
     if (max_slip < slip_velocity.norm() * _dt)
