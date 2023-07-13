@@ -179,20 +179,8 @@ P_out = 2.0e5 # Pa
   exodus = true
 []
 
-# [Postprocessors]
-#   [T]
-#     type = SubChannelPointValue
-#     variable = T
-#     index = 0
-#     execute_on = 'initial timestep_end'
-#     height = 0.5
-#   []
-# []
-
 [Executioner]
   type = Steady
-  nl_rel_tol = 0.9
-  l_tol = 0.9
 []
 
 ################################################################################

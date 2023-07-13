@@ -29,20 +29,8 @@ P_out = 2.0e5 # Pa
     spacer_k = '0.0'
     z_blockage = '0.6858 0.69215'
     index_blockage = '0 1 2 3 4 5'
-    reduction_blockage = '0.1 0.1 0.1 0.1 0.1 0.1'
-    k_blockage = '0.0 0.0 0.0 0.0 0.0 0.0'
-    # z_blockage = '0.6 0.80'
-    # index_blockage = '0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33 34 35 36 37 38 39 40 41'
-    # reduction_blockage = '.1 .1 .1 .1 .1 .1 .1 .1 .1 .1
-    #                       .1 .1 .1 .1 .1 .1 .1 .1 .1 .1
-    #                       .1 .1 .1 .1 .1 .1 .1 .1 .1 .1
-    #                       .1 .1 .1 .1 .1 .1 .1 .1 .1 .1
-    #                                               .1 .1'
-    # k_blockage = '.0 .0 .0 .0 .0 .0 .0 .0 .0 .0
-    #               .0 .0 .0 .0 .0 .0 .0 .0 .0 .0
-    #               .0 .0 .0 .0 .0 .0 .0 .0 .0 .0
-    #               .0 .0 .0 .0 .0 .0 .0 .0 .0 .0
-    #                                       .0 .0'
+    reduction_blockage = '0.08 0.08 0.08 0.08 0.08 0.08'
+    k_blockage = '6 6 6 6 6 6'
   []
 []
 
@@ -73,11 +61,9 @@ P_out = 2.0e5 # Pa
   []
 []
 
-[Modules]
-  [FluidProperties]
-    [sodium]
-       type = PBSodiumFluidProperties
-    []
+[FluidProperties]
+  [sodium]
+      type = PBSodiumFluidProperties
   []
 []
 
@@ -86,12 +72,12 @@ P_out = 2.0e5 # Pa
   fp = sodium
   n_blocks = 1
   P_out = 2.0e5
-  CT = 2.6
+  CT = 10
   compute_density = true
   compute_viscosity = true
   compute_power = true
-  P_tol = 1.0e-5
-  T_tol = 1.0e-5
+  P_tol = 1.0e-4
+  T_tol = 1.0e-3
   implicit = true
   segregated = false
   interpolation_scheme = 'upwind'
@@ -190,6 +176,7 @@ P_out = 2.0e5 # Pa
 
 [Outputs]
   exodus = true
+  csv = true
 []
 
 [Executioner]
@@ -199,80 +186,60 @@ P_out = 2.0e5 # Pa
 []
 
 [Postprocessors]
-  [T37]
+  [1]
     type = SubChannelPointValue
     variable = T
     index = 37
     execute_on ='TIMESTEP_END'
     height = 0.9144
   []
-  [T36]
+  [2]
     type = SubChannelPointValue
     variable = T
     index = 36
     execute_on ='TIMESTEP_END'
     height = 0.9144
   []
-  [T20]
+  [3]
     type = SubChannelPointValue
     variable = T
     index = 20
     execute_on ='TIMESTEP_END'
     height = 0.9144
   []
-  [T10]
+  [4]
     type = SubChannelPointValue
     variable = T
     index = 10
     execute_on ='TIMESTEP_END'
     height = 0.9144
   []
-  [T4]
+  [5]
     type = SubChannelPointValue
     variable = T
     index = 4
     execute_on ='TIMESTEP_END'
     height = 0.9144
   []
-  [T1]
+  [6]
     type = SubChannelPointValue
     variable = T
     index = 1
     execute_on ='TIMESTEP_END'
     height = 0.9144
   []
-  [T14]
+  [7]
     type = SubChannelPointValue
     variable = T
     index = 14
     execute_on ='TIMESTEP_END'
     height = 0.9144
   []
-  [T28]
+  [8]
     type = SubChannelPointValue
     variable = T
     index = 28
     execute_on ='TIMESTEP_END'
     height = 0.9144
-  []
-[]
-
-################################################################################
-# A multiapp that projects data to a detailed mesh
-################################################################################
-
-[MultiApps]
-  [viz]
-    type = FullSolveMultiApp
-    input_files = "FFM-3Adetailed.i"
-    execute_on = "timestep_end"
-  []
-[]
-
-[Transfers]
-  [xfer]
-    type = MultiAppDetailedSolutionTransfer
-    to_multi_app = viz
-    variable = 'mdot SumWij P DP h T rho mu q_prime S'
   []
 []
