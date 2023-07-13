@@ -2,14 +2,23 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 
+#Importing Data Frames
 dataset1 = pd.read_csv('simple_blanket_heat_transfer_out_temp_y_0001.csv')
 df1 = pd.DataFrame(dataset1)
 cols = [1,3]
 df1 = df1[df1.columns[cols]]
 
+dataset2 = pd.read_csv('Pipe_Plot_Data.csv')
+df2= pd.DataFrame(dataset2)
+cols = [0,1]
+df2 = df2[df2.columns[cols]]
+
 d = df1["y"]*100
 temp = df1["temp"]
+z = df2["z"]
+T = df2["Temp"]
 
+#Plotting Nuclear Heating Profile
 x_FWA = 0.2
 x_FW = x_FWA + 3.8
 x_M = x_FW + 2.3
@@ -49,7 +58,18 @@ ax2.tick_params(axis = 'y', labelcolor = color, labelsize = fs)
 fig.tight_layout()
 plt.savefig('Power_and_temp' + '.png', format = 'png', dpi = 300)
 
+fs2 = 16
+lw2 = 3
 
+plt.figure(figsize = (10,8), dpi =300)
+plt.plot(z, T, color = 'black', linewidth = lw2)
+plt.grid()
+plt.xticks(fontsize = fs2)
+plt.yticks(fontsize = fs2)
+plt.xlabel('Axial Height (m)', fontsize = fs2)
+plt.ylabel('Helium Gas Temperature (K)', fontsize = fs2)
+plt.tight_layout()
+plt.savefig('TH_TempProfile' + '.png', format = 'png', dpi = 300)
 
 '''
 plt.figure(figsize = (10,8), dpi =300)
