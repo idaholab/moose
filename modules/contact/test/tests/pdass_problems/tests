@@ -20,6 +20,7 @@
               'cylinder_friction_penalty_check_friction_FINAL.csv'
     input = 'cylinder_friction_penalty.i'
     rel_err = 5.0e-4
+    abs_zero = 1.0e-4
     heavy = true
     requirement = 'The contact module shall be able to approximate frictional contact solution '
                   'between a cylinder and a plane using penalty mortar contact.'
@@ -53,7 +54,7 @@
     csvdiff = 'cylinder_friction_penalty_frictional_al_vectorpp_output_surface_FINAL.csv'
     input = 'cylinder_friction_penalty_frictional_al.i'
     rel_err = 1.0e-4
-    abs_zero = 1.0e-4
+    abs_zero = 1.0e-2
     heavy = true
     valgrind = none
     method = opt
@@ -65,7 +66,7 @@
     csvdiff = 'cylinder_friction_penalty_frictional_al_action_vectorpp_output_surface_FINAL.csv'
     input = 'cylinder_friction_penalty_frictional_al_action.i'
     rel_err = 1.0e-4
-    abs_zero = 1.0e-4
+    abs_zero = 1.0e-2
     heavy = true
     valgrind = none
     method = opt

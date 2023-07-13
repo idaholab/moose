@@ -148,7 +148,12 @@ PenaltyWeightedGapUserObject::reinit()
         _augmented_lagrange_problem ? _dof_to_lagrange_multiplier[node] : 0.0;
     const auto & test_i = (*_test)[i];
 
-    auto normal_pressure = penalty * gap + lagrange_multiplier;
+    // If _use_physical_gap is true we "normalize" the penalty parameter with the surrounding area.
+    auto normal_pressure =
+        penalty * gap /
+            (_use_physical_gap ? libmesh_map_find(_dof_to_weighted_gap, node).second : 1.0) +
+        lagrange_multiplier;
+
     normal_pressure = normal_pressure < 0.0 ? -normal_pressure : 0.0;
 
     _dof_to_normal_pressure[node] = normal_pressure;
@@ -255,8 +260,11 @@ PenaltyWeightedGapUserObject::updateAugmentedLagrangianMultipliers()
     const auto gap = getNormalGap(static_cast<const Node *>(dof_object));
     auto & lagrange_multiplier = _dof_to_lagrange_multiplier[dof_object];
 
-    if (lagrange_multiplier + gap * penalty <= 0)
-      lagrange_multiplier += gap * penalty;
+    const auto possible_normalization =
+        (_use_physical_gap ? libmesh_map_find(_dof_to_weighted_gap, dof_object).second : 1.0);
+
+    if (lagrange_multiplier + gap * penalty / possible_normalization <= 0)
+      lagrange_multiplier += gap * penalty / possible_normalization;
     else
       lagrange_multiplier = 0.0;
 

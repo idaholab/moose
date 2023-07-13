@@ -290,7 +290,7 @@
     secondary_subdomain = '10001'
     disp_x = disp_x
     disp_y = disp_y
-    penalty = 1e7
+    penalty = 1e5
     secondary_variable = disp_x
     friction_coefficient = 0.4
     penetration_tolerance = 1e-7

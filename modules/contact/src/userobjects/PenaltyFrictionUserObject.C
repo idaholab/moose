@@ -258,7 +258,7 @@ PenaltyFrictionUserObject::reinit()
             phi_trial * tangential_trial_traction / tangential_trial_traction_norm;
 
       // track accumulated slip for output purposes
-      accumulated_slip = old_accumulated_slip + MetaPhysicL::raw_value(slip_distance);
+      accumulated_slip = old_accumulated_slip + MetaPhysicL::raw_value(slip_distance).cwiseAbs();
     }
     else
     {
