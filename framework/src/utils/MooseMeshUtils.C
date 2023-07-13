@@ -137,6 +137,12 @@ getBoundaryIDs(const MeshBase & mesh,
     {
       std::istringstream ss(boundary_name[i]);
       ss >> id;
+      if (ss.fail())
+        mooseError("Failed to convert integer ",
+                   boundary_name[i],
+                   " to a boundary id.  Got ",
+                   id,
+                   " instead.  Is the integer too large for boundary_id_type?");
     }
 
     ids[i] = id;
