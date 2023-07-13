@@ -46,8 +46,9 @@
     heavy = true
     method = opt
     valgrind = none
-    requirement = 'The contact module shall be able to approximate normal contact in a two-dimensional cylinder via an augmented '
-                  'Lagrange approach to constraint enforcement.'
+    requirement = 'The contact module shall be able to approximate normal contact in a '
+                  'two-dimensional cylinder via an augmented Lagrange approach to constraint '
+                  'enforcement.'
   []
   [cylinder_friction_penalty_al_frictional]
     type = 'CSVDiff'
@@ -58,8 +59,9 @@
     heavy = true
     valgrind = none
     method = opt
-    requirement = 'The contact module shall be able to approximate frictional contact in a two-dimensional cylinder via an augmented '
-                  'Lagrange approach to constraint enforcement.'
+    requirement = 'The contact module shall be able to approximate frictional contact in a '
+                  'two-dimensional cylinder via an augmented Lagrange approach to constraint '
+                  'enforcement.'
   []
   [cylinder_friction_penalty_al_frictional_action]
     type = 'CSVDiff'
@@ -70,8 +72,21 @@
     heavy = true
     valgrind = none
     method = opt
-    requirement = 'The contact module shall be able to approximate frictional contact in a two-dimensional cylinder via an augmented '
-                  'Lagrange approach to constraint enforcement using the contact action.'
+    requirement = 'The contact module shall be able to approximate frictional contact in a '
+                  'two-dimensional cylinder via an augmented Lagrange approach to constraint '
+                  'enforcement using the contact action.'
+  []
+  [cylinder_friction_penalty_al_frictional_action_amg]
+    type = 'CSVDiff'
+    csvdiff = 'cylinder_friction_penalty_frictional_al_action_amg_vectorpp_output_surface_FINAL.csv'
+    input = 'cylinder_friction_penalty_frictional_al_action_amg.i'
+    rel_err = 1.0e-4
+    abs_zero = 1.0e-2
+    requirement = 'The contact module shall be able to approximate frictional contact in a '
+                  'two-dimensional cylinder via an augmented Lagrange approach to constraint '
+                  'enforcement using the contact action and use the hypre algebraic multigrid '
+                  'preconditioner since the augmented Lagrange (Uzawa) constraint enfrocement '
+                  'approach allows for maintaining reasonable system condition numbers.'
   []
   [cylinder_friction_penalty_al_separation]
     type = 'CSVDiff'
@@ -82,8 +97,9 @@
     heavy = true
     valgrind = none
     method = opt
-    requirement = 'The contact module shall be able to approximate normal contact in a two-dimensional cylinder via an augmented '
-                  'Lagrange approach to constraint enforcement and allow for separation.'
+    requirement = 'The contact module shall be able to approximate normal contact in a '
+                  'two-dimensional cylinder via an augmented Lagrange approach to constraint '
+                  'enforcement and allow for separation.'
   []
   [ironing]
     type = 'CSVDiff'
