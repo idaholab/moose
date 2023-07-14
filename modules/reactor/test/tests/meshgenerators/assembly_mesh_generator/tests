@@ -1,6 +1,6 @@
 [Tests]
   design = 'meshgenerators/AssemblyMeshGenerator.md'
-  issues = '#19949'
+  issues = '#19949 #25396'
   [square]
     requirement = 'The system shall generate a 3D square assembly mesh from 2 pin types'
     type = 'Exodiff'
@@ -54,6 +54,28 @@
     input = 'assembly_hex_2d.i'
     cli_args = "Outputs/file_base=assembly_metadata_transfer"
     exodiff = 'assembly_metadata_transfer.e'
+    recover = false
+  []
+  [depletion_id_pin]
+    requirement = 'The system shall generate a 2D hexagonal assembly mesh with pin-wise depletion IDs'
+    type = 'Exodiff'
+    input = 'assembly_hex.i'
+    cli_args = "Mesh/amg/generate_depletion_id=true
+                Mesh/amg/depletion_id_type=pin
+                Outputs/file_base=assembly_depl_id_pin
+                Outputs/out/extra_element_ids_to_output=depletion_id"
+    exodiff = 'assembly_depl_id_pin.e'
+    recover = false
+  []
+  [depletion_id_pin_type]
+    requirement = 'The system shall generate a 2D hexagonal assembly mesh with pin type-wise depletion IDs'
+    type = 'Exodiff'
+    input = 'assembly_hex.i'
+    cli_args = "Mesh/amg/generate_depletion_id=true
+                Mesh/amg/depletion_id_type=pin_type
+                Outputs/file_base=assembly_depl_id_pin_type
+                Outputs/out/extra_element_ids_to_output=depletion_id"
+    exodiff = 'assembly_depl_id_pin_type.e'
     recover = false
   []
 []

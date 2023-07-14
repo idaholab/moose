@@ -80,6 +80,8 @@ AssemblyMeshGenerator::validParams()
                              "A hexagonal assembly will be placed inside of a bounding hexagon "
                              "consisting of a background region and, optionally,"
                              " duct regions.");
+  // depletion id generation params are added
+  addDepletionIDParams(params);
 
   return params;
 }
@@ -560,6 +562,12 @@ AssemblyMeshGenerator::generate()
       updateElementBlockNameId(
           *(*_build_mesh), elem, rgmb_name_id_map, elem_block_name, next_block_id);
     }
+  }
+
+  if (getParam<bool>("generate_depletion_id"))
+  {
+    const MooseEnum option = getParam<MooseEnum>("depletion_id_type");
+    addDepletionId(*(*_build_mesh), option, DepletionIDGenerationLevel::Assembly, _extrude);
   }
 
   (*_build_mesh)->find_neighbors();

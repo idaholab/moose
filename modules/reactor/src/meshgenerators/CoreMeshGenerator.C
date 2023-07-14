@@ -89,6 +89,8 @@ CoreMeshGenerator::validParams()
                              "and is permitted to have \"empty\" locations. The size and spacing "
                              "of the assembly-like structures is defined, and "
                              "enforced by declaration in the ReactorMeshParams.");
+  // depletion id generation params are added
+  addDepletionIDParams(params);
 
   return params;
 }
@@ -730,6 +732,12 @@ CoreMeshGenerator::generate()
       if (!found)
         boundary_info.add_side(elem, side_id, target_id);
     }
+  }
+
+  if (getParam<bool>("generate_depletion_id"))
+  {
+    const MooseEnum option = getParam<MooseEnum>("depletion_id_type");
+    addDepletionId(*(*_build_mesh), option, DepletionIDGenerationLevel::Core, _extrude);
   }
 
   (*_build_mesh)->set_isnt_prepared();

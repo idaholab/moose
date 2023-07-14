@@ -8,6 +8,8 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "ReactorGeometryMeshBuilderBase.h"
+#include "DepletionIDGenerator.h"
+#include "MooseMeshUtils.h"
 
 InputParameters
 ReactorGeometryMeshBuilderBase::validParams()
@@ -20,6 +22,18 @@ ReactorGeometryMeshBuilderBase::validParams()
                              "Geometry Mesh Builder mesh generators.");
 
   return params;
+}
+
+void
+ReactorGeometryMeshBuilderBase::addDepletionIDParams(InputParameters & params)
+{
+  params.addParam<bool>(
+      "generate_depletion_id", false, "Determine wheter the depletion ID is assigned.");
+  MooseEnum depletion_id_option("assembly assembly_type pin pin_type");
+  params.addParam<MooseEnum>("depletion_id_type",
+                             depletion_id_option,
+                             "Determine level of details in depletion ID assignment.");
+  params.addParamNamesToGroup("generate_depletion_id depletion_id_type", "Depletion ID assignment");
 }
 
 ReactorGeometryMeshBuilderBase::ReactorGeometryMeshBuilderBase(const InputParameters & parameters)
@@ -253,4 +267,52 @@ ReactorGeometryMeshBuilderBase::print2dMetadataToConsole(const std::string metad
   _console << "  " << metadata_name << ":" << std::endl;
   for (const auto & row : metadata_value)
     _console << "    " << Moose::stringify(row) << std::endl;
+}
+
+void
+ReactorGeometryMeshBuilderBase::addDepletionId(MeshBase & input_mesh,
+                                               const MooseEnum & option,
+                                               const DepletionIDGenerationLevel generation_level,
+                                               const bool extrude)
+{
+  // prepare set of extra elem ids for depletion ID generation
+  std::vector<ExtraElementIDName> id_names = {};
+  if (extrude)
+    id_names.push_back("plane_id");
+  if (generation_level == DepletionIDGenerationLevel::Core)
+  {
+    if (option == "pin")
+      id_names.insert(id_names.end(), {"assembly_id", "pin_id"});
+    else if (option == "pin_type")
+      id_names.insert(id_names.end(), {"assembly_id", "pin_type_id"});
+    else if (option == "assembly")
+      id_names.push_back("assembly_id");
+    else if (option == "assembly_type")
+      id_names.push_back("assembly_type_id");
+  }
+  else if (generation_level == DepletionIDGenerationLevel::Assembly)
+  {
+    if (option == "pin")
+      id_names.push_back("pin_id");
+    else if (option == "pin_type")
+      id_names.push_back("pin_type_id");
+    else
+      paramError("depletion_id_type",
+                 "'assembly_id' or 'assembly_type_id' is not allowd in depletion ID generation at "
+                 "assembly level");
+  }
+  else if (generation_level == DepletionIDGenerationLevel::Pin)
+    mooseError("Depletion ID generation is not supported at pin level yet in RGMB");
+  id_names.push_back("region_id");
+  // no block restriction
+  std::set<SubdomainID> block_ids = {};
+  // create depletion IDs
+  // depletion IDs will be assigned in the following order:
+  // regions (materials) within pin -> pins in assembly -> assemblies in core -> axial planes
+  std::unordered_map<dof_id_type, dof_id_type> depl_ids =
+      MooseMeshUtils::getExtraIDUniqueCombinationMap(input_mesh, block_ids, id_names);
+  // assign depletion ids to elements
+  const auto depl_id_index = input_mesh.add_elem_integer("depletion_id");
+  for (Elem * const elem : input_mesh.active_element_ptr_range())
+    elem->set_extra_integer(depl_id_index, depl_ids.at(elem->id()));
 }
