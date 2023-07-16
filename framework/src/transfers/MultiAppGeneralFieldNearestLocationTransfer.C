@@ -370,18 +370,25 @@ MultiAppGeneralFieldNearestLocationTransfer::evaluateInterpValuesNearestNode(
             zipped_nearest_points.push_back(std::make_pair(return_dist_sqr[i], return_index[i]));
           std::sort(zipped_nearest_points.begin(), zipped_nearest_points.end());
 
-          // If two furthest are equally far from target point, then we have an indetermination
-          if (num_found > 1 &&
+          // If two furthest are equally far from target point, then we have an indetermination in
+          // what is sent in this communication round from this process. However, it may not
+          // materialize to an actual conflict, as values sent from another process for the desired
+          // target point could be closer (nearest). There is no way to know at this point in the
+          // communication that a closer value exists somewhere else
+          if (num_found > 1 && num_found == num_search &&
               MooseUtils::absoluteFuzzyEqual(zipped_nearest_points[num_found - 1].first,
                                              zipped_nearest_points[num_found - 2].first))
             registerConflict(i_from, 0, local_pt, outgoing_vals[i_pt].second, true);
 
+          // Recompute the distance for this problem. If it matches the cached value more than once
+          // it means multiple problems provide equidistant values for this point
           Real dist_sum = 0;
           for (auto i : make_range(num_search - 1))
           {
             auto index = zipped_nearest_points[i].second;
             dist_sum += (_local_points[i_from][index] - pt).norm();
           }
+
           // Compare to the selected value found after looking at all the problems
           if (MooseUtils::absoluteFuzzyEqual(dist_sum / return_dist_sqr.size(),
                                              outgoing_vals[i_pt].second))
