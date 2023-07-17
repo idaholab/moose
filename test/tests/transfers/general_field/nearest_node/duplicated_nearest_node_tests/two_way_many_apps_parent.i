@@ -102,6 +102,9 @@
     from_multi_app = sub
     source_variable = u_elem
     variable = elemental_from_sub
+    # Transfer relies on two nodes that are equidistant to the target point
+    search_value_conflicts = false
+    greedy_search = true
   []
   [to_sub]
     type = MultiAppGeneralFieldNearestLocationTransfer

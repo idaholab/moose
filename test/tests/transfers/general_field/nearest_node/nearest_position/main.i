@@ -79,7 +79,6 @@
     variable = from_main
     # Transfer relies on two nodes that are equidistant to the target point
     search_value_conflicts = false
-    greedy_search = true
   []
 
   [to_sub_elem]
@@ -96,6 +95,8 @@
     variable = from_sub
     use_nearest_position = input
     bbox_factor = 100
+    # Transfer relies on two nodes that are equidistant to the target point
+    search_value_conflicts = false
   []
 
   [from_sub_elem]

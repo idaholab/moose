@@ -84,6 +84,8 @@
     from_multi_app = sub
     source_variable = to_main
     variable = from_sub
+    # Some equidistant nodes
+    search_value_conflicts = false
   []
 
   [from_sub_elem]
