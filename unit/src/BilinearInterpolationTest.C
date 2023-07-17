@@ -155,6 +155,11 @@ TEST(BilinearInterpolationTest, sample)
   ADReal ad_p1 = 1.555555, ad_p2 = 5.0111111;
   function(ad_p1.value(), ad_p2.value(), y0, dydx1, dydx2);
   EXPECT_NEAR(interp.sample(ad_p2, ad_p1).value(), y0, apprx_tol);
+
+  // Check that AD forwarding works, no need to redo all cases
+  ChainedReal cr_p1 = 1.555555, cr_p2 = 5.0111111;
+  function(cr_p1.value(), cr_p2.value(), y0, dydx1, dydx2);
+  EXPECT_NEAR(interp.sample(cr_p2, cr_p1).value(), y0, apprx_tol);
 }
 
 TEST(BilinearInterpolationTest, unimplemented_errors)

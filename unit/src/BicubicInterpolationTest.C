@@ -67,4 +67,16 @@ TEST(BicubicInterpolationTest, sample)
   EXPECT_NEAR(ad_y2.value(), 111.0, tol);
   EXPECT_NEAR(ad_dy2_dx1.value(), 9.0, tol);
   EXPECT_NEAR(ad_dy2_dx2.value(), 33.0, tol);
+
+  // Check ChainedReal routines
+  // Check sampled value and first derivatives
+  ChainedReal cr_p1 = 4.5, cr_p2 = 5.5;
+  EXPECT_NEAR(interp.sample(cr_p1, cr_p2).value(), 111.0, tol);
+
+  // Check that ADsampleValueAndDerivatives() returns the same results as above
+  ChainedReal cr_y2, cr_dy2_dx1, cr_dy2_dx2;
+  interp.sampleValueAndDerivatives(cr_p1, cr_p2, cr_y2, cr_dy2_dx1, cr_dy2_dx2);
+  EXPECT_NEAR(cr_y2.value(), 111.0, tol);
+  EXPECT_NEAR(cr_dy2_dx1.value(), 9.0, tol);
+  EXPECT_NEAR(cr_dy2_dx2.value(), 33.0, tol);
 }
