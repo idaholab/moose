@@ -26,6 +26,7 @@ requirements:
   build:
     - {{ moose_libmesh }}
     - {{ moose_python }}
+    - {{ moose_wasp }}
     - moose-tools
 
   run:
