@@ -32,8 +32,7 @@ AdvancedConcentricCircleGenerator::validParams()
       "ring_intervals",
       "ring_intervals>0",
       "Number of radial mesh intervals within each major concentric circle excluding their "
-      "boundary "
-      "layers.");
+      "boundary layers.");
   params.addRangeCheckedParam<std::vector<Real>>(
       "ring_radial_biases",
       "ring_radial_biases>0",
@@ -404,7 +403,7 @@ AdvancedConcentricCircleGenerator::generate()
 
   // Set up customized Block Names and/or IDs
   unsigned int block_it = 0;
-  unsigned ring_block_num = 0;
+  unsigned int ring_block_num = 0;
   std::vector<subdomain_id_type> block_ids_old;
   std::vector<subdomain_id_type> block_ids_new;
   std::vector<SubdomainName> block_names;

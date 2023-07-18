@@ -38,7 +38,7 @@ FlexiblePatternGenerator::validParams()
                                     "the diameter of the CIRCLE boundary mesh.");
 
   params.addParam<std::vector<Point>>(
-      "extra_positions", "The extra non-patterned positions to set the inout MeshGenerators.");
+      "extra_positions", "The extra non-patterned positions to set the input MeshGenerators.");
   params.addParam<std::vector<unsigned int>>(
       "extra_positions_mg_indices",
       "the indices of the input mesh generators for the extra position.");
@@ -77,7 +77,7 @@ FlexiblePatternGenerator::validParams()
       "circular_rotations",
       "the rotation angles of the circular patterns (the azimuthal angle of the first unit mesh).");
 
-  // Parameters directly passed to XYDelauanyMeshGenerator
+  // Parameters directly passed to XYDelaunayMeshGenerator
   params.addParam<Real>("desired_area", 0.0, "Desired are for the background area meshing.");
   params.addParam<std::string>(
       "desired_area_func",
@@ -90,7 +90,7 @@ FlexiblePatternGenerator::validParams()
       "The boundary id of the external boundary in addition to the default 10000.");
 
   params.addClassDescription("This FlexiblePatternGenerator object is designed to generate a "
-                             "complex mesh with a background region with dispersed unit meshes in "
+                             "mesh with a background region with dispersed unit meshes in "
                              "it and distributed based on a series of flexible patterns.");
 
   params.addParamNamesToGroup("hex_patterns hex_pitches hex_origins hex_rotations",

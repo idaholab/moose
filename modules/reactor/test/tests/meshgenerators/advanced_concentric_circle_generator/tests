@@ -29,7 +29,7 @@
                   --mesh-only accg_custom_azi_in.e"
       exodiff = accg_custom_azi_in.e
       recover = false
-      detail = "a volume preserved concentric circles mesh based on customized azimuthal angles."
+      detail = "a volume preserved concentric circles mesh with custom nodal azimuthal angles."
     []
   []
   [error]
