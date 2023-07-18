@@ -59,7 +59,8 @@ public:
   unsigned int numChildren() const;
   void addChild(EFAElement * child);
   void clearParentAndChildren();
-  void findGeneralNeighbors(std::map<EFANode *, std::set<EFAElement *>> & InverseConnectivity);
+  void
+  findGeneralNeighbors(const std::map<EFANode *, std::set<EFAElement *>> & InverseConnectivity);
   EFAElement * getGeneralNeighbor(unsigned int index) const;
   unsigned int numGeneralNeighbors() const;
 

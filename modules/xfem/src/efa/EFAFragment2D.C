@@ -57,7 +57,7 @@ EFAFragment2D::~EFAFragment2D()
     if (_boundary_edges[i])
     {
       delete _boundary_edges[i];
-      _boundary_edges[i] = NULL;
+      _boundary_edges[i] = nullptr;
     }
   }
 }
@@ -371,7 +371,7 @@ EFAFragment2D::split()
       // check to make sure an edge wasn't cut
       if (this_frag_nodes.size() >= 3)
       {
-        EFAFragment2D * new_frag = new EFAFragment2D(_host_elem, false, NULL);
+        EFAFragment2D * new_frag = new EFAFragment2D(_host_elem, false, nullptr);
         for (unsigned int inode = 0; inode < this_frag_nodes.size() - 1; inode++)
           new_frag->addEdge(new EFAEdge(this_frag_nodes[inode], this_frag_nodes[inode + 1]));
 
@@ -384,7 +384,7 @@ EFAFragment2D::split()
   }
   else if (edge_cut_count == 1) // single edge cut case
   {
-    EFAFragment2D * new_frag = new EFAFragment2D(_host_elem, false, NULL);
+    EFAFragment2D * new_frag = new EFAFragment2D(_host_elem, false, nullptr);
     for (unsigned int inode = 0; inode < fragment_nodes[0].size() - 1;
          inode++) // assemble fragment part 1
       new_frag->addEdge(new EFAEdge(fragment_nodes[0][inode], fragment_nodes[0][inode + 1]));
@@ -400,7 +400,7 @@ EFAFragment2D::split()
   }
   else if (node_cut_count == 1) // single node cut case
   {
-    EFAFragment2D * new_frag = new EFAFragment2D(_host_elem, false, NULL);
+    EFAFragment2D * new_frag = new EFAFragment2D(_host_elem, false, nullptr);
     for (unsigned int iedge = 0; iedge < _boundary_edges.size(); ++iedge)
     {
       EFANode * first_node_on_edge = _boundary_edges[iedge]->getNode(0);

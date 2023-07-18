@@ -53,7 +53,7 @@ EFANode::parent() const
 void
 EFANode::removeParent()
 {
-  _parent = NULL;
+  _parent = nullptr;
 }
 
 void

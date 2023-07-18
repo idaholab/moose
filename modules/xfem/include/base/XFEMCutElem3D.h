@@ -39,22 +39,22 @@ public:
 
 private:
   EFAElement3D _efa_elem3d; // 3D EFAelement
-  virtual Point getNodeCoordinates(EFANode * node, MeshBase * displaced_mesh = NULL) const;
+  virtual Point getNodeCoordinates(EFANode * node, MeshBase * displaced_mesh = nullptr) const;
 
 public:
   virtual void computePhysicalVolumeFraction();
   virtual void computePhysicalFaceAreaFraction(unsigned int side);
   virtual void computeMomentFittingWeights();
-  virtual Point getCutPlaneOrigin(unsigned int plane_id, MeshBase * displaced_mesh = NULL) const;
-  virtual Point getCutPlaneNormal(unsigned int plane_id, MeshBase * displaced_mesh = NULL) const;
+  virtual Point getCutPlaneOrigin(unsigned int plane_id, MeshBase * displaced_mesh = nullptr) const;
+  virtual Point getCutPlaneNormal(unsigned int plane_id, MeshBase * displaced_mesh = nullptr) const;
   virtual void
   getCrackTipOriginAndDirection(unsigned tip_id, Point & origin, Point & direction) const;
   virtual void getFragmentFaces(std::vector<std::vector<Point>> & frag_faces,
-                                MeshBase * displaced_mesh = NULL) const;
+                                MeshBase * displaced_mesh = nullptr) const;
   virtual const EFAElement * getEFAElement() const;
   virtual unsigned int numCutPlanes() const;
   virtual void getIntersectionInfo(unsigned int plane_id,
                                    Point & normal,
                                    std::vector<Point> & intersectionPoints,
-                                   MeshBase * displaced_mesh = NULL) const;
+                                   MeshBase * displaced_mesh = nullptr) const;
 };

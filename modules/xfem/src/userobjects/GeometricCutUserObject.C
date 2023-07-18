@@ -45,7 +45,7 @@ GeometricCutUserObject::GeometricCutUserObject(const InputParameters & parameter
   auto new_xfem_epl = std::make_shared<XFEMElementPairLocator>(_xfem, _interface_id);
   _fe_problem.geomSearchData().addElementPairLocator(_interface_id, new_xfem_epl);
 
-  if (_fe_problem.getDisplacedProblem() != NULL)
+  if (_fe_problem.getDisplacedProblem() != nullptr)
   {
     auto new_xfem_epl2 = std::make_shared<XFEMElementPairLocator>(_xfem, _interface_id, true);
     _fe_problem.getDisplacedProblem()->geomSearchData().addElementPairLocator(_interface_id,

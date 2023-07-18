@@ -17,7 +17,7 @@ EFAEdge::EFAEdge(EFANode * node1, EFANode * node2) : _edge_node1(node1), _edge_n
 {
   _embedded_nodes.clear();
   _intersection_x.clear();
-  _edge_interior_node = NULL;
+  _edge_interior_node = nullptr;
   consistencyCheck();
 }
 
@@ -198,10 +198,10 @@ bool
 EFAEdge::hasIntersection() const
 {
   bool has = false;
-  if (_edge_node1->parent() != NULL)
+  if (_edge_node1->parent() != nullptr)
     has = has || _edge_node1->parent()->category() == EFANode::N_CATEGORY_EMBEDDED_PERMANENT;
 
-  if (_edge_node2->parent() != NULL)
+  if (_edge_node2->parent() != nullptr)
     has = has || _edge_node2->parent()->category() == EFANode::N_CATEGORY_EMBEDDED_PERMANENT;
 
   return has || _embedded_nodes.size() > 0;
