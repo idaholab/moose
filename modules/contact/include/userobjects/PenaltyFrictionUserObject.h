@@ -82,5 +82,4 @@ protected:
 
   /// Penalty growth factor for augmented Lagrange
   const Real _penalty_multiplier_friction;
-
 };

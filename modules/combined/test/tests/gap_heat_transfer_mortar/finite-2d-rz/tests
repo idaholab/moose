@@ -3,7 +3,8 @@
   issues = '#17252'
   parallel_scheduling = true
   [thermomechanical_mortar]
-    requirement = 'The system shall be able to solve axisymmetric thermomechanical contact with finite-strain tensor mechanics and heat conduction physics with'
+    requirement = 'The system shall be able to solve axisymmetric thermomechanical contact with '
+                  'finite-strain tensor mechanics and heat conduction physics with'
     [first_low_k]
       type = CSVDiff
       input = finite.i
@@ -35,13 +36,16 @@
       csvdiff = second_high_k.csv
       heavy = true
       detail = 'high conductivity in the gap and second order variables'
-      cli_args = 'name=second_high_k Mesh/second_order=true order=SECOND Constraints/thermal_contact/k=100'
+      cli_args = 'name=second_high_k Mesh/second_order=true order=SECOND '
+                 'Constraints/thermal_contact/k=100'
       min_ad_size = '73'
     []
   []
 
   [thermomechanical_mortar_action]
-    requirement = 'The system shall be able to solve axisymmetric thermomechanical contact with finite-strain tensor mechanics and heat conduction physics using the mechanical and thermal contact actions with '
+    requirement = 'The system shall be able to solve axisymmetric thermomechanical contact with '
+                  'finite-strain tensor mechanics and heat conduction physics using the mechanical '
+                  'and thermal contact actions with '
     [first_low_k_action]
       type = CSVDiff
       input = finite_action.i
@@ -56,7 +60,8 @@
       csvdiff = first_high_k_action.csv
       heavy = true
       detail = 'high conductivity in the gap and first order variables.'
-      cli_args = 'name=first_high_k_action MortarGapHeatTransfer/mortar_heat_transfer/gap_conductivity=100'
+      cli_args = 'name=first_high_k_action '
+                 'MortarGapHeatTransfer/mortar_heat_transfer/gap_conductivity=100'
     []
     [second_low_k_action]
       type = CSVDiff
@@ -73,8 +78,17 @@
       csvdiff = second_high_k_action.csv
       heavy = true
       detail = 'high conductivity in the gap and second order variables.'
-      cli_args = 'name=second_high_k_action Mesh/second_order=true order=SECOND MortarGapHeatTransfer/mortar_heat_transfer/gap_conductivity=100'
+      cli_args = 'name=second_high_k_action Mesh/second_order=true order=SECOND '
+                 'MortarGapHeatTransfer/mortar_heat_transfer/gap_conductivity=100'
       min_ad_size = '73'
+    []
+    [finite_action_al]
+      type = CSVDiff
+      input = finite_action_al.i
+      csvdiff = finite_al.csv
+      heavy = true
+      detail = 'low conductivity in the gap and first order variables using an augmented Lagrange '
+               'approach to mechanical contact enforcement.'
     []
   []
 []
