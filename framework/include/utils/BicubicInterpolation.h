@@ -45,6 +45,7 @@ public:
    */
   Real sample(const Real x1, const Real x2) const override;
   ADReal sample(const ADReal & x1, const ADReal & x2) const override;
+  ChainedReal sample(const ChainedReal & x1, const ChainedReal & x2) const override;
 
   /**
    * Samples value and first derivatives at point (x1, x2)
@@ -52,14 +53,21 @@ public:
    * as it minimizes the amount of time spent locating the point in the
    * tabulated data
    */
+  using BidimensionalInterpolation::sampleValueAndDerivatives;
   virtual void
   sampleValueAndDerivatives(Real x1, Real x2, Real & y, Real & dy1, Real & dy2) const override;
   virtual void sampleValueAndDerivatives(
       const ADReal & x1, const ADReal & x2, ADReal & y, ADReal & dy1, ADReal & dy2) const override;
+  virtual void sampleValueAndDerivatives(const ChainedReal & x1,
+                                         const ChainedReal & x2,
+                                         ChainedReal & y,
+                                         ChainedReal & dy1,
+                                         ChainedReal & dy2) const override;
 
   /**
    * Samples first derivative at point (x1, x2)
    */
+  using BidimensionalInterpolation::sampleDerivative;
   Real sampleDerivative(Real x1, Real x2, unsigned int deriv_var) const override;
 
   /**
@@ -77,15 +85,18 @@ protected:
   /**
    * Find the indices of the dependent values axis which bracket the point xi
    */
-  template <class C>
+  template <typename T>
   void findInterval(const std::vector<Real> & x,
-                    const C & xi,
+                    const T & xi,
                     unsigned int & klo,
                     unsigned int & khi,
-                    C & xs) const;
+                    T & xs) const;
 
-  template <class C>
-  C sampleInternal(const C & x1, const C & x2) const;
+  template <typename T>
+  T sampleInternal(const T & x1, const T & x2) const;
+
+  template <typename T>
+  void sampleValueAndDerivativesInternal(T x1, T x2, T & y, T & dy1, T & dy2) const;
 
   /**
    * Provides the values of the first derivatives in each direction at all

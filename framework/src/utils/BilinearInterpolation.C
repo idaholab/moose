@@ -12,10 +12,10 @@
 
 int BilinearInterpolation::_file_number = 0;
 
-BilinearInterpolation::BilinearInterpolation(const std::vector<Real> & x1,
-                                             const std::vector<Real> & x2,
-                                             const ColumnMajorMatrix & y)
-  : BidimensionalInterpolation(x1, x2), _zSurface(y)
+BilinearInterpolation::BilinearInterpolation(const std::vector<Real> & xaxis,
+                                             const std::vector<Real> & yaxis,
+                                             const ColumnMajorMatrix & zsurface)
+  : BidimensionalInterpolation(xaxis, yaxis), _z_surface(zsurface)
 {
 }
 
@@ -68,6 +68,12 @@ BilinearInterpolation::sample(const ADReal & s1, const ADReal & s2) const
   return sampleInternal(s1, s2);
 }
 
+ChainedReal
+BilinearInterpolation::sample(const ChainedReal & s1, const ChainedReal & s2) const
+{
+  return sampleInternal(s1, s2);
+}
+
 template <typename T>
 T
 BilinearInterpolation::sampleInternal(const T & s1, const T & s2) const
@@ -81,10 +87,10 @@ BilinearInterpolation::sampleInternal(const T & s1, const T & s2) const
   unsigned int uy = 0; // index of y coordinate of adjacent grid point above P
   getNeighborIndices(_x2, MetaPhysicL::raw_value(s2), ly, uy);
 
-  const Real & fQ11 = _zSurface(ly, lx);
-  const Real & fQ21 = _zSurface(ly, ux);
-  const Real & fQ12 = _zSurface(uy, lx);
-  const Real & fQ22 = _zSurface(uy, ux);
+  const Real & fQ11 = _z_surface(ly, lx);
+  const Real & fQ21 = _z_surface(ly, ux);
+  const Real & fQ12 = _z_surface(uy, lx);
+  const Real & fQ22 = _z_surface(uy, ux);
 
   // if point exactly found on a node do not interpolate
   if ((lx == ux) && (ly == uy))
@@ -116,9 +122,32 @@ BilinearInterpolation::sampleInternal(const T & s1, const T & s2) const
 }
 
 Real
-BilinearInterpolation::sampleDerivative(const Real s1,
-                                        const Real s2,
+BilinearInterpolation::sampleDerivative(Real s1, Real s2, const unsigned int deriv_var) const
+{
+  return sampleDerivativeInternal(s1, s2, deriv_var);
+}
+
+ADReal
+BilinearInterpolation::sampleDerivative(const ADReal & s1,
+                                        const ADReal & s2,
                                         const unsigned int deriv_var) const
+{
+  return sampleDerivativeInternal(s1, s2, deriv_var);
+}
+
+ChainedReal
+BilinearInterpolation::sampleDerivative(const ChainedReal & s1,
+                                        const ChainedReal & s2,
+                                        const unsigned int deriv_var) const
+{
+  return sampleDerivativeInternal(s1, s2, deriv_var);
+}
+
+template <typename T>
+T
+BilinearInterpolation::sampleDerivativeInternal(const T s1,
+                                                const T s2,
+                                                const unsigned int deriv_var) const
 {
   // check input
   if (deriv_var != 1 && deriv_var != 2)
@@ -135,10 +164,10 @@ BilinearInterpolation::sampleDerivative(const Real s1,
 
   // xy indexing
   // 11 is point on lower-left (x low, y low), 22 on upper-right (x high, y high)
-  const Real & fQ11 = _zSurface(ly, lx);
-  const Real & fQ21 = _zSurface(ly, ux);
-  const Real & fQ12 = _zSurface(uy, lx);
-  const Real & fQ22 = _zSurface(uy, ux);
+  const Real & fQ11 = _z_surface(ly, lx);
+  const Real & fQ21 = _z_surface(ly, ux);
+  const Real & fQ12 = _z_surface(uy, lx);
+  const Real & fQ22 = _z_surface(uy, ux);
   // when on a grid bound or node, lx can be equal to ux or ly be equal to uy
   // this would lead to a 0 slope, which isn't desirable
   // we then refer to 0 as the coordinate before, so 00 is lx-1, ly-1
@@ -161,11 +190,11 @@ BilinearInterpolation::sampleDerivative(const Real s1,
   // instead of a weighting of the four neighbor cells
 
   // Check all four grid corners, use a quarter of the slope in the cell next to the corner
-  if ((ux == 0) && (uy == 0)) // bottom left node
+  if (ux == 0 && uy == 0) // bottom left node
   {
-    const auto & fQ13 = _zSurface(ly + 1, lx);     // fQ at (x1,y3)
-    const auto & fQ31 = _zSurface(ly, lx + 1);     // fQ at (x3,y1)
-    const auto & fQ33 = _zSurface(ly + 1, lx + 1); // fQ at (x3,y3)
+    const auto & fQ13 = _z_surface(ly + 1, lx);     // fQ at (x1,y3)
+    const auto & fQ31 = _z_surface(ly, lx + 1);     // fQ at (x3,y1)
+    const auto & fQ33 = _z_surface(ly + 1, lx + 1); // fQ at (x3,y3)
     const Real & x3 = _x1[lx + 1];                 // ux value
     const Real & y3 = _x2[ly + 1];                 // uy value
 
@@ -188,11 +217,11 @@ BilinearInterpolation::sampleDerivative(const Real s1,
       return dfdy;
     }
   }
-  else if ((uy == 0) && (lx == nx1 - 1)) // bottom right node
+  else if (uy == 0 && lx == nx1 - 1) // bottom right node
   {
-    const auto & fQ01 = _zSurface(ly, lx - 1);     // fQ at (x0,y1)
-    const auto & fQ03 = _zSurface(ly + 1, lx - 1); // fQ at (x0,y3)
-    const auto & fQ23 = _zSurface(ly + 1, lx);     // fQ at (x2,y3)
+    const auto & fQ01 = _z_surface(ly, lx - 1);     // fQ at (x0,y1)
+    const auto & fQ03 = _z_surface(ly + 1, lx - 1); // fQ at (x0,y3)
+    const auto & fQ23 = _z_surface(ly + 1, lx);     // fQ at (x2,y3)
     const Real & x0 = _x1[lx - 1];                 // lx value
     const Real & y3 = _x2[ly + 1];                 // uy value
 
@@ -215,11 +244,11 @@ BilinearInterpolation::sampleDerivative(const Real s1,
       return dfdy;
     }
   }
-  else if ((ly == nx2 - 1) && (ux == 0)) // top left node
+  else if (ly == nx2 - 1 && ux == 0) // top left node
   {
-    const auto & fQ10 = _zSurface(ly - 1, lx);     // fQ at (x1,y0)
-    const auto & fQ30 = _zSurface(ly - 1, lx + 1); // fQ at (x3,y0)
-    const auto & fQ32 = _zSurface(ly, lx + 1);     // fQ at (x3,y2)
+    const auto & fQ10 = _z_surface(ly - 1, lx);     // fQ at (x1,y0)
+    const auto & fQ30 = _z_surface(ly - 1, lx + 1); // fQ at (x3,y0)
+    const auto & fQ32 = _z_surface(ly, lx + 1);     // fQ at (x3,y2)
     const Real & x3 = _x1[lx + 1];                 // ux value
     const Real & y0 = _x2[ly - 1];                 // ly value
 
@@ -242,11 +271,11 @@ BilinearInterpolation::sampleDerivative(const Real s1,
       return dfdy;
     }
   }
-  else if ((ly == nx2 - 1) && (lx == nx1 - 1)) // top right node
+  else if (ly == nx2 - 1 && lx == nx1 - 1) // top right node
   {
-    const auto & fQ00 = _zSurface(ly - 1, lx - 1); // fQ at (x0,y0)
-    const auto & fQ20 = _zSurface(ly - 1, lx);     // fQ at (x2,y0)
-    const auto & fQ02 = _zSurface(ly, lx - 1);     // fQ at (x0,y2)
+    const auto & fQ00 = _z_surface(ly - 1, lx - 1); // fQ at (x0,y0)
+    const auto & fQ20 = _z_surface(ly - 1, lx);     // fQ at (x2,y0)
+    const auto & fQ02 = _z_surface(ly, lx - 1);     // fQ at (x0,y2)
     const Real & x0 = _x1[lx - 1];                 // lx value
     const Real & y0 = _x2[ly - 1];                 // ly value
 
@@ -271,12 +300,12 @@ BilinearInterpolation::sampleDerivative(const Real s1,
   }
 
   // Nodes along the four grid bounds, use the two grid cells adjacent to the node
-  else if ((ux == 0) && (ly == uy) && (ux == lx)) // when along left boundary, at a grid node
+  else if (ux == 0 && ly == uy && ux == lx) // when along left boundary, at a grid node
   {
-    const auto & fQ10 = _zSurface(uy - 1, lx);     // fQ at (x1,y0)
-    const auto & fQ30 = _zSurface(uy, ux + 1);     // fQ at (x3,y0)
-    const auto & fQ13 = _zSurface(uy + 1, lx);     // fQ at (x1,y3)
-    const auto & fQ33 = _zSurface(uy + 1, ux + 1); // fQ at (x3,y3)
+    const auto & fQ10 = _z_surface(uy - 1, lx);     // fQ at (x1,y0)
+    const auto & fQ30 = _z_surface(uy, ux + 1);     // fQ at (x3,y0)
+    const auto & fQ13 = _z_surface(uy + 1, lx);     // fQ at (x1,y3)
+    const auto & fQ33 = _z_surface(uy + 1, ux + 1); // fQ at (x3,y3)
 
     const Real & x3 = _x1[lx + 1]; // ux value
     const Real & y0 = _x2[ly - 1]; // ly value
@@ -301,12 +330,12 @@ BilinearInterpolation::sampleDerivative(const Real s1,
       return dfdy;
     }
   }
-  else if ((lx == nx1 - 1) && (ly == uy) && (ux == lx)) // when along right boundary, at a grid node
+  else if (lx == nx1 - 1 && ly == uy && ux == lx) // when along right boundary, at a grid node
   {
-    const auto & fQ00 = _zSurface(uy - 1, lx - 1); // fQ at (x0,y0)
-    const auto & fQ10 = _zSurface(uy - 1, lx);     // fQ at (x1,y0)
-    const auto & fQ03 = _zSurface(uy + 1, lx - 1); // fQ at (x0,y3)
-    const auto & fQ13 = _zSurface(uy + 1, lx);     // fQ at (x1,y3)
+    const auto & fQ00 = _z_surface(uy - 1, lx - 1); // fQ at (x0,y0)
+    const auto & fQ10 = _z_surface(uy - 1, lx);     // fQ at (x1,y0)
+    const auto & fQ03 = _z_surface(uy + 1, lx - 1); // fQ at (x0,y3)
+    const auto & fQ13 = _z_surface(uy + 1, lx);     // fQ at (x1,y3)
 
     const Real & x0 = _x1[lx - 1]; // lx value
     const Real & y0 = _x2[ly - 1]; // ly value
@@ -331,12 +360,12 @@ BilinearInterpolation::sampleDerivative(const Real s1,
       return dfdy;
     }
   }
-  else if ((uy == nx2 - 1) && (ly == uy) && (ux == lx)) // when along top boundary, at a grid node
+  else if (uy == nx2 - 1 && ly == uy && ux == lx) // when along top boundary, at a grid node
   {
-    const auto & fQ00 = _zSurface(uy - 1, lx - 1); // fQ at (x0,y0)
-    const auto & fQ01 = _zSurface(uy, lx - 1);     // fQ at (x0,y1)
-    const auto & fQ30 = _zSurface(uy - 1, lx + 1); // fQ at (x3,y0)
-    const auto & fQ31 = _zSurface(uy, lx + 1);     // fQ at (x3,y1)
+    const auto & fQ00 = _z_surface(uy - 1, lx - 1); // fQ at (x0,y0)
+    const auto & fQ01 = _z_surface(uy, lx - 1);     // fQ at (x0,y1)
+    const auto & fQ30 = _z_surface(uy - 1, lx + 1); // fQ at (x3,y0)
+    const auto & fQ31 = _z_surface(uy, lx + 1);     // fQ at (x3,y1)
 
     const Real & x0 = _x1[lx - 1]; // lx value
     const Real & x3 = _x1[lx + 1]; // ux value
@@ -361,12 +390,12 @@ BilinearInterpolation::sampleDerivative(const Real s1,
       return dfdy;
     }
   }
-  else if ((uy == 0) && (ly == uy) && (ux == lx)) // when along bottom boundary, at a grid node
+  else if (uy == 0 && ly == uy && ux == lx) // when along bottom boundary, at a grid node
   {
-    const auto & fQ01 = _zSurface(ly, lx - 1);     // fQ at (x0,y1)
-    const auto & fQ03 = _zSurface(ly + 1, lx - 1); // fQ at (x0,y3)
-    const auto & fQ31 = _zSurface(ly, lx + 1);     // fQ at (x3,y1)
-    const auto & fQ33 = _zSurface(ly + 1, lx + 1); // fQ at (x3,y3)
+    const auto & fQ01 = _z_surface(ly, lx - 1);     // fQ at (x0,y1)
+    const auto & fQ03 = _z_surface(ly + 1, lx - 1); // fQ at (x0,y3)
+    const auto & fQ31 = _z_surface(ly, lx + 1);     // fQ at (x3,y1)
+    const auto & fQ33 = _z_surface(ly + 1, lx + 1); // fQ at (x3,y3)
 
     const Real & x0 = _x1[lx - 1]; // lx value
     const Real & x3 = _x1[lx + 1]; // ux value
@@ -393,12 +422,12 @@ BilinearInterpolation::sampleDerivative(const Real s1,
   }
 
   // at a grid node inside the domain, use the super box around
-  else if ((ux == lx) && (uy == ly))
+  else if (ux == lx && uy == ly)
   {
-    const auto & fQ00 = _zSurface(ly - 1, lx - 1); // fQ at (x0,y0)
-    const auto & fQ03 = _zSurface(ly + 1, lx - 1); // fQ at (x0,y3)
-    const auto & fQ30 = _zSurface(ly - 1, lx + 1); // fQ at (x3,y0)
-    const auto & fQ33 = _zSurface(ly + 1, lx + 1); // fQ at (x3,y3)
+    const auto & fQ00 = _z_surface(ly - 1, lx - 1); // fQ at (x0,y0)
+    const auto & fQ03 = _z_surface(ly + 1, lx - 1); // fQ at (x0,y3)
+    const auto & fQ30 = _z_surface(ly - 1, lx + 1); // fQ at (x3,y0)
+    const auto & fQ33 = _z_surface(ly + 1, lx + 1); // fQ at (x3,y3)
 
     const Real & x0 = _x1[lx - 1]; // lx value
     const Real & x3 = _x1[lx + 1]; // ux value
@@ -431,17 +460,15 @@ BilinearInterpolation::sampleDerivative(const Real s1,
   {
     // Find derivative when on interval between two nodes
     if (y == y1)
-    {
       return (fQ21 - fQ11) / (x2 - x1);
-    }
     // interior grid line
-    else if ((lx == ux) && lx > 0 && ux < nx1 - 1)
+    else if (lx == ux && lx > 0 && ux < nx1 - 1)
     {
       // expand grid size so x1 does not equal x2
-      const auto & fQ01 = _zSurface(ly, lx - 1); // new lx at ly
-      const auto & fQ31 = _zSurface(ly, lx + 1); // new ux at ly
-      const auto & fQ02 = _zSurface(uy, lx - 1); // new lx at uy
-      const auto & fQ32 = _zSurface(uy, lx + 1); // new ux at uy
+      const auto & fQ01 = _z_surface(ly, lx - 1); // new lx at ly
+      const auto & fQ31 = _z_surface(ly, lx + 1); // new ux at ly
+      const auto & fQ02 = _z_surface(uy, lx - 1); // new lx at uy
+      const auto & fQ32 = _z_surface(uy, lx + 1); // new ux at uy
 
       const Real & x0 = _x1[lx - 1]; // lx value
       const Real & x3 = _x1[lx + 1]; // ux value
@@ -460,10 +487,10 @@ BilinearInterpolation::sampleDerivative(const Real s1,
       return 0.5 * (dfdx_a + dfdx_b);
     }
     // left boundary
-    else if ((lx == ux) && lx == 0)
+    else if (lx == ux && lx == 0)
     {
-      const auto & fQ31 = _zSurface(ly, lx + 1); // new ux at ly
-      const auto & fQ32 = _zSurface(uy, lx + 1); // new ux at uy
+      const auto & fQ31 = _z_surface(ly, lx + 1); // new ux at ly
+      const auto & fQ32 = _z_surface(uy, lx + 1); // new ux at uy
 
       const Real & x3 = _x1[lx + 1]; // ux value
 
@@ -475,10 +502,10 @@ BilinearInterpolation::sampleDerivative(const Real s1,
       return dfdx;
     }
     // right boundary
-    else if ((lx == ux) && (ux == nx1 - 1))
+    else if (lx == ux && ux == nx1 - 1)
     {
-      const auto & fQ01 = _zSurface(ly, ux - 1); // new lx at ly
-      const auto & fQ02 = _zSurface(uy, ux - 1); // new lx at uy
+      const auto & fQ01 = _z_surface(ly, ux - 1); // new lx at ly
+      const auto & fQ02 = _z_surface(uy, ux - 1); // new lx at uy
       const Real & x0 = _x1[ux - 1];             // lx value
 
       auto dfdx = fQ01 * (y - y2);
@@ -503,17 +530,15 @@ BilinearInterpolation::sampleDerivative(const Real s1,
   else if (deriv_var == 2)
   {
     if (x == x1) // if x equal to x1 node
-    {
       return (fQ12 - fQ11) / (y2 - y1);
-    }
     // interior grid line
-    else if ((ly == uy) && ly > 0 && uy < nx2 - 1)
+    else if (ly == uy && ly > 0 && uy < nx2 - 1)
     {
       // expand grid size so x1 does not equal x2
-      const auto & fQ10 = _zSurface(ly - 1, lx); // new ly at lx
-      const auto & fQ20 = _zSurface(ly - 1, ux); // new uy at lx
-      const auto & fQ13 = _zSurface(ly + 1, lx); // new ly at ux
-      const auto & fQ23 = _zSurface(ly + 1, ux); // new uy at ux
+      const auto & fQ10 = _z_surface(ly - 1, lx); // new ly at lx
+      const auto & fQ20 = _z_surface(ly - 1, ux); // new uy at lx
+      const auto & fQ13 = _z_surface(ly + 1, lx); // new ly at ux
+      const auto & fQ23 = _z_surface(ly + 1, ux); // new uy at ux
       const Real & y0 = _x2[ly - 1];
       const Real & y3 = _x2[ly + 1];
 
@@ -531,10 +556,10 @@ BilinearInterpolation::sampleDerivative(const Real s1,
       return 0.5 * (dfdy_a + dfdy_b);
     }
     // bottom boundary
-    else if ((ly == uy) && ly == 0)
+    else if (ly == uy && ly == 0)
     {
-      const auto & fQ13 = _zSurface(ly + 1, lx); // new uy at lx
-      const auto & fQ23 = _zSurface(ly + 1, ux); // new uy at ux
+      const auto & fQ13 = _z_surface(ly + 1, lx); // new uy at lx
+      const auto & fQ23 = _z_surface(ly + 1, ux); // new uy at ux
 
       const Real & y3 = _x2[ly + 1]; // lx value
 
@@ -546,10 +571,10 @@ BilinearInterpolation::sampleDerivative(const Real s1,
       return dfdy;
     }
     // top boundary
-    else if ((ly == uy) && (uy == nx2 - 1))
+    else if (ly == uy && uy == nx2 - 1)
     {
-      const auto & fQ10 = _zSurface(ly - 1, lx); // new ly at lx
-      const auto & fQ20 = _zSurface(ly - 1, ux); // new ly at ux
+      const auto & fQ10 = _z_surface(ly - 1, lx); // new ly at lx
+      const auto & fQ20 = _z_surface(ly - 1, ux); // new ly at ux
       const Real & y0 = _x2[ly - 1];             // lx value
 
       auto dfdy = fQ10 * (x - x2);
