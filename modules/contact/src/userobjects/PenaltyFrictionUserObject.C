@@ -38,7 +38,12 @@ PenaltyFrictionUserObject::validParams()
       1e-5,
       "slip_tolerance > 0",
       "Acceptable slip distance at which augmented Lagrange iterations can be stopped");
-
+  params.addRangeCheckedParam<Real>(
+      "penalty_multiplier_friction",
+      5.0,
+      "penalty_multiplier_friction > 0",
+      "The penalty growth factor between augmented Lagrange "
+      "iterations for penalizing relative slip distance if the node is under stick conditions.");
   return params;
 }
 
@@ -63,7 +68,8 @@ PenaltyFrictionUserObject::PenaltyFrictionUserObject(const InputParameters & par
     _penalty_friction(isParamValid("penalty_friction") ? getParam<Real>("penalty_friction")
                                                        : getParam<Real>("penalty")),
     _slip_tolerance(getParam<Real>("slip_tolerance")),
-    _friction_coefficient(getParam<Real>("friction_coefficient"))
+    _friction_coefficient(getParam<Real>("friction_coefficient")),
+    _penalty_multiplier_friction(getParam<Real>("penalty_multiplier_friction"))
 {
   auto check_type = [this](const auto & var, const auto & var_name)
   {
@@ -316,12 +322,8 @@ PenaltyFrictionUserObject::isAugmentedLagrangianConverged()
     {
       // If it's slipping, any slip distance is physical.
     }
-    else if (slip_velocity.norm() * _dt > _slip_tolerance)
+    else if (slip_velocity.norm() * _dt > _slip_tolerance && normal_pressure > TOLERANCE)
     {
-      Moose::out << "_friction_coefficient * normal_pressure: "
-                 << _friction_coefficient * normal_pressure << "\n";
-      Moose::out << "tangential_traction.norm(): " << tangential_traction.norm() << "\n";
-
       mooseInfoRepeated(
           "Stick tolerance fails. Slip distance for a sticking node ",
           dof_object->id(),
@@ -341,8 +343,6 @@ void
 PenaltyFrictionUserObject::updateAugmentedLagrangianMultipliers()
 {
   PenaltyWeightedGapUserObject::updateAugmentedLagrangianMultipliers();
-
-  Real max_slip = 0.0;
 
   for (auto & [dof_object, tangential_lm] : _dof_to_frictional_lagrange_multipliers)
   {
@@ -377,12 +377,9 @@ PenaltyFrictionUserObject::updateAugmentedLagrangianMultipliers()
                           penalty_friction * normal_lm -
                       old_tangential_traction;
     }
-
-    if (max_slip < slip_velocity.norm() * _dt)
-      max_slip = slip_velocity.norm() * _dt;
-
-    // Update penalty
-    if (_lagrangian_iteration_number > 3)
-      penalty_friction /= 10.0;
+    // Update penalty.
+    // TODO: Include a more "consistent" adaptation of penalty values
+    if (_lagrangian_iteration_number > 1 && _lagrangian_iteration_number < 6)
+      penalty_friction *= _penalty_multiplier_friction;
   }
 }

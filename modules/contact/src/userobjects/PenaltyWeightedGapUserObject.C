@@ -22,11 +22,13 @@ PenaltyWeightedGapUserObject::validParams()
   InputParameters params = WeightedGapUserObject::validParams();
   params.addClassDescription("Computes the mortar normal contact force via a penalty approach.");
   params.addRequiredParam<Real>("penalty", "The penalty factor");
-  params.addRangeCheckedParam<Real>("penalty_multiplier",
-                                    100.0,
-                                    "penalty_multiplier > 0",
-                                    "The penalty growth factor between augmented Lagrange "
-                                    "iterations if weighted gap does not get closed fast enough.");
+  params.addRangeCheckedParam<Real>(
+      "penalty_multiplier",
+      100.0,
+      "penalty_multiplier > 0",
+      "The penalty growth factor between augmented Lagrange "
+      "iterations if weighted gap does not get closed fast enough. For frictional simulations, "
+      "values smaller than 100 are recommended, e.g. 5.");
   params.addParam<bool>(
       "use_physical_gap",
       false,
@@ -272,7 +274,7 @@ PenaltyWeightedGapUserObject::updateAugmentedLagrangianMultipliers()
 
     // Update penalty
     const auto previous_gap = _dof_to_previous_gap[dof_object];
-    if (std::abs(gap) > 0.25 * std::abs(previous_gap))
+    if (std::abs(gap) > 0.25 * std::abs(previous_gap) && _lagrangian_iteration_number < 6)
       penalty *= _penalty_multiplier;
 
     // Possible future development: Add possible check for a too-large penalty coefficient.

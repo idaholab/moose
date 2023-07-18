@@ -203,7 +203,7 @@
   [stuff1_elas_tens]
     type = ComputeIsotropicElasticityTensor
     block = '1'
-    youngs_modulus = 1e8
+    youngs_modulus = 1e10
     poissons_ratio = 0.0
   []
   [stuff1_stress]
@@ -238,7 +238,7 @@
   l_abs_tol = 1e-13
 
   start_time = 0.0
-  end_time = 0.2 # 3.5
+  end_time = 0.1 # 3.5
   dt = 0.1
   dtmin = 0.1
 
@@ -294,11 +294,9 @@
     secondary_variable = disp_x
     friction_coefficient = 0.4
     penetration_tolerance = 1e-7
-    # Not solving the frictional problem tightly (below)
-    slip_tolerance = 1 # 1e-6
-    penalty_friction = 1e9
-    penalty_multiplier = 100
-    penalty_multiplier_friction = 1
+    slip_tolerance = 3e-7
+    penalty_friction = 1e6
+    penalty_multiplier = 10
     use_physical_gap = true
     aux_lm = dual_var
   []

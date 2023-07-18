@@ -79,4 +79,8 @@ protected:
 
   /// Map from degree of freedom to local friction penalty value
   std::unordered_map<const DofObject *, Real> _dof_to_local_penalty_friction;
+
+  /// Penalty growth factor for augmented Lagrange
+  const Real _penalty_multiplier_friction;
+
 };

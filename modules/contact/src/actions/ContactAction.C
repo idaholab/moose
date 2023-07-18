@@ -101,10 +101,18 @@ ContactAction::validParams()
       1e8,
       "The penalty factor to apply in mortar penalty frictional constraints.  It is applied to the "
       "tangential accumulated slip to build the frictional force");
-  params.addParam<Real>("penalty_multiplier",
-                        1.0,
-                        "The growth factor for the penalty applied at the end of each augmented "
-                        "Lagrange update iteration");
+  params.addRangeCheckedParam<Real>(
+      "penalty_multiplier",
+      1.0,
+      "penalty_multiplier > 0",
+      "The growth factor for the penalty applied at the end of each augmented "
+      "Lagrange update iteration");
+  params.addRangeCheckedParam<Real>(
+      "penalty_multiplier_friction",
+      1.0,
+      "penalty_multiplier_friction > 0",
+      "The penalty growth factor between augmented Lagrange "
+      "iterations for penalizing relative slip distance if the node is under stick conditions.");
   params.addParam<Real>("friction_coefficient", 0, "The friction coefficient");
   params.addParam<Real>("tension_release",
                         0.0,
@@ -853,8 +861,13 @@ ContactAction::addMortarContact()
       var_params.set<Real>("penalty_friction") = getParam<Real>("penalty_friction");
       if (isParamValid("al_penetration_tolerance"))
         var_params.set<Real>("penetration_tolerance") = getParam<Real>("al_penetration_tolerance");
+
       if (isParamValid("penalty_multiplier"))
         var_params.set<Real>("penalty_multiplier") = getParam<Real>("penalty_multiplier");
+      if (isParamValid("penalty_multiplier_friction"))
+        var_params.set<Real>("penalty_multiplier_friction") =
+            getParam<Real>("penalty_multiplier_friction");
+
       if (isParamValid("al_incremental_slip_tolerance"))
         var_params.set<Real>("slip_tolerance") = getParam<Real>("al_incremental_slip_tolerance");
       // In the contact action, we force the physical value of the normal gap, which also normalizes
