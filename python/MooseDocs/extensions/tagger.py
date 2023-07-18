@@ -44,7 +44,13 @@ class TaggingExtension(command.CommandExtension):
     def extend(self, reader, renderer):
         self.requires(command)
         self.addCommand(reader, TaggingCommand())
-
+    def __init__(self, *args, **kwargs):
+        command.CommandExtension.__init__(self, *args, **kwargs)
+        self._database={'data':[]}
+    @property
+    def database(self):
+        return self._database
+        
 
 class TaggingCommand(command.CommandComponent):
     COMMAND= 'tagger'
@@ -65,13 +71,13 @@ class TaggingCommand(command.CommandComponent):
             EntryKeyValDict.append([key_vals[0],key_vals[1]])
             
         PageData= {'name':name, "path":mpath, "key_vals":dict(EntryKeyValDict)}
-        UploadableEntry={'data':[]}
-        UploadableEntry['data'].append(PageData)
+        # UploadableEntry={'data':[]}
+        # UploadableEntry['data'].append(PageData)
         # print('\n\n\n\n')
         # print('UploadableEntry')
         # print(UploadableEntry)
         # print('\n')
-
+        
         # # Set storage location
         while "moose" not in os.listdir():
             os.chdir('../')
@@ -88,6 +94,8 @@ class TaggingCommand(command.CommandComponent):
             #     TagDictionary= pickle.load(f)
         except:
             # if len(TagDictionary.keys())<1:
+            UploadableEntry={'data':[]}
+            UploadableEntry['data'].append(PageData)
             TagDictionary = UploadableEntry
             first_flag+=1
         else:
@@ -97,7 +105,10 @@ class TaggingCommand(command.CommandComponent):
                     if existing_dictionary ==1 and first_flag==0:
                         print('Existing / Not Adding Tag to name Dictionary: \n', PageData['name'])
                     break
-
+                
+        self.extension.database['data'].append(PageData)
+        print("DATABASE")
+        print(self.extension.database)
         # if not in set or first then save the new dict
         if existing_dictionary ==0 or first_flag==1:
             if first_flag ==0: # Dont want to append the 1st entry twice
