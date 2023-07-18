@@ -66,6 +66,7 @@ protected:
    * Retrieves a functor from the passed-in subproblem. This method also leverages the ability to
    * create default functors if the user passed an integer or real in the input file
    * @param name The actual name of the functor to retrieve instead of the parameter name
+   * @param subproblem The subproblem to query for the functor
    * @return The functor
    */
   template <typename T>
