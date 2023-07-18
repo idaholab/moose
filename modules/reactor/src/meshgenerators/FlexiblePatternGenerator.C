@@ -94,17 +94,16 @@ FlexiblePatternGenerator::validParams()
                              "it and distributed based on a series of flexible patterns.");
 
   params.addParamNamesToGroup("hex_patterns hex_pitches hex_origins hex_rotations",
-                              "Hexagonal Pattern Parameters");
+                              "Hexagonal Pattern");
   params.addParamNamesToGroup(
       "rect_patterns rect_pitches_x rect_pitches_y rect_origins rect_rotations",
-      "Rectangular Pattern Parameters");
+      "Rectangular Pattern");
   params.addParamNamesToGroup(
-      "circular_patterns circular_radii circular_origins circular_rotations",
-      "Circular Pattern Parameters");
+      "circular_patterns circular_radii circular_origins circular_rotations", "Circular Pattern");
   params.addParamNamesToGroup("extra_positions extra_positions_mg_indices",
-                              "Extra Positions (Free-Style Patterns) Parameters");
+                              "Extra Positions (Free-Style Patterns)");
   params.addParamNamesToGroup("desired_area desired_area_func verify_holes",
-                              "Background Area Delaunay Parameters");
+                              "Background Area Delaunay");
 
   return params;
 }

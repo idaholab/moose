@@ -65,7 +65,7 @@
       input = accg.i
       cli_args = "Mesh/accg/customized_azimuthal_angles='15 150 300 340'
                   --mesh-only err.e"
-      expect_err = "please make sure the difference between neighboring elements is less than"
+      expect_err = "please make sure the circle azimuthal discretization angles are less than"
       detail = "if the customized azimuthal angles have oversize intervals."
     []
     [err_unneeded_inward_names]

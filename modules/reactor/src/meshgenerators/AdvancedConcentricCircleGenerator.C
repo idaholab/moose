@@ -86,10 +86,22 @@ AdvancedConcentricCircleGenerator::validParams()
   params.addParam<std::vector<std::string>>(
       "outward_interface_boundary_names",
       "Optional customized boundary names for the internal outward interfaces between block.");
-  params.addParam<bool>("create_side_specific_boundaries",
+  params.addParam<bool>("generate_side_specific_boundaries",
                         false,
                         "Whether the side-specific boundaries are created.");
-
+  params.addParamNamesToGroup(
+      "ring_block_ids ring_block_names external_boundary_id external_boundary_name "
+      "inward_interface_boundary_names outward_interface_boundary_names "
+      "block_id_shift create_inward_interface_boundaries create_outward_interface_boundaries "
+      "interface_boundary_id_shift generate_side_specific_boundaries",
+      "Customized Subdomain/Boundary");
+  params.addParamNamesToGroup("num_sectors customized_azimuthal_angles ring_intervals",
+                              "General Mesh Density");
+  params.addParamNamesToGroup(
+      "ring_radial_biases ring_inner_boundary_layer_biases ring_inner_boundary_layer_widths "
+      "ring_inner_boundary_layer_intervals ring_outer_boundary_layer_biases "
+      "ring_outer_boundary_layer_widths ring_outer_boundary_layer_intervals ",
+      "Mesh Boundary Layers and Biasing Options");
   params.addClassDescription("This AdvancedConcentricCircleGenerator object is designed to mesh a "
                              "concentric circular geometry.");
 
@@ -156,10 +168,8 @@ AdvancedConcentricCircleGenerator::AdvancedConcentricCircleGenerator(
         isParamValid("outward_interface_boundary_names")
             ? getParam<std::vector<std::string>>("outward_interface_boundary_names")
             : std::vector<std::string>()),
-    _create_side_specific_boundaries(getParam<bool>("create_side_specific_boundaries"))
+    _generate_side_specific_boundaries(getParam<bool>("generate_side_specific_boundaries"))
 {
-  declareMeshProperty<Real>("max_radius_meta", 0.0);
-
   if (_num_sectors == 0)
     paramError(
         "num_sectors",
@@ -188,7 +198,7 @@ AdvancedConcentricCircleGenerator::AdvancedConcentricCircleGenerator(
                    "the azimuthal angles provided must be strictly increasing.");
       else if (azi_angle_interval >= 120.0)
         paramError("customized_azimuthal_angles",
-                   "please make sure the difference between neighboring elements is less than "
+                   "please make sure the circle azimuthal discretization angles are less than "
                    "120.0 to avert awkward polygonization.");
       _virtual_nums_sectors.push_back(360.0 / azi_angle_interval);
     }
@@ -314,13 +324,13 @@ AdvancedConcentricCircleGenerator::generate()
   for (const auto & ring_radius : _ring_radii)
     ring_radii_corr.push_back(ring_radius * corr_factor);
 
-  setMeshProperty("max_radius_meta", ring_radii_corr.back());
-
   const multiBdryLayerParams empty_params = {
       std::vector<Real>(), std::vector<Real>(), std::vector<unsigned int>(), std::vector<Real>()};
   const singleBdryLayerParams empty_param = {0.0, 0.0, 0, 1.0};
 
-  const Real pitch = _ring_radii.back() * 3.0;
+  // A dummy pitch number is needed for callind buildSlice()
+  // Any value larger than twice of the largest ring radius will work
+  const Real dummy_pitch = _ring_radii.back() * 3.0;
   const unsigned int num_sectors_per_side = 1;
   const unsigned int background_intervals = 0;
   const Real background_radial_bias = 1.0;
@@ -337,7 +347,7 @@ AdvancedConcentricCircleGenerator::generate()
                          std::vector<Real>(),
                          empty_params,
                          empty_params,
-                         pitch,
+                         dummy_pitch,
                          num_sectors_per_side,
                          background_intervals,
                          background_radial_bias,
@@ -367,7 +377,7 @@ AdvancedConcentricCircleGenerator::generate()
                                std::vector<Real>(),
                                empty_params,
                                empty_params,
-                               pitch,
+                               dummy_pitch,
                                num_sectors_per_side,
                                background_intervals,
                                background_radial_bias,
@@ -392,7 +402,7 @@ AdvancedConcentricCircleGenerator::generate()
     other_mesh.clear();
   }
 
-  if (!_create_side_specific_boundaries)
+  if (!_generate_side_specific_boundaries)
     for (unsigned int i = 0; i < _num_sectors; i++)
       mesh->get_boundary_info().remove_id(i + 1 + OUTER_SIDESET_ID_ALT);
 

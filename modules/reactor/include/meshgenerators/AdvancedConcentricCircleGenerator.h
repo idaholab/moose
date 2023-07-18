@@ -62,5 +62,5 @@ protected:
   /// Boundary Names of the mesh's outward interface boundaries
   const std::vector<std::string> _outward_interface_boundary_names;
   /// Whether side specific boundaries are created
-  const bool _create_side_specific_boundaries;
+  const bool _generate_side_specific_boundaries;
 };
