@@ -60,7 +60,7 @@ In addition, the value of the `reactor_params_name` metadata can be used to retr
 
 ## Example Syntax
 
-!listing modules/reactor/test/tests/meshgenerators/assembly_mesh_generator/assembly_only.i block=Mesh
+!listing modules/reactor/test/tests/meshgenerators/assembly_mesh_generator/assembly_square.i block=Mesh
 
 This is the resulting mesh block layout, where by default a single block is assigned to the triangular elements and another block is assigned to the quadrilateral elements:
 

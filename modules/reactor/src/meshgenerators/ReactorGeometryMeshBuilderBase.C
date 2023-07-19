@@ -106,19 +106,19 @@ ReactorGeometryMeshBuilderBase::printReactorMetadata(const std::string geometry_
   if (geometry_type == "core")
   {
     _console << "Core-level metadata defined using Reactor Geometry Mesh Builder for " << mg_name
-               << ":" << std::endl;
+             << ":" << std::endl;
     printCoreMetadata(mg_name, first_function_call);
   }
   else if (geometry_type == "assembly")
   {
     _console << "Assembly-level metadata defined using Reactor Geometry Mesh Builder for "
-               << mg_name << ":" << std::endl;
+             << mg_name << ":" << std::endl;
     printAssemblyMetadata(mg_name, first_function_call);
   }
   else if (geometry_type == "pin")
   {
     _console << "Pin-level metadata defined using Reactor Geometry Mesh Builder for " << mg_name
-               << ":" << std::endl;
+             << ":" << std::endl;
     printPinMetadata(mg_name);
   }
   if (first_function_call)
@@ -237,7 +237,7 @@ ReactorGeometryMeshBuilderBase::printMetadataToConsole(const std::string metadat
                                                        const std::string mg_name)
 {
   _console << "  " << metadata_name << ": "
-            << Moose::stringify(getMeshProperty<T>(metadata_name, mg_name)) << std::endl;
+           << Moose::stringify(getMeshProperty<T>(metadata_name, mg_name)) << std::endl;
 }
 
 template <typename T>

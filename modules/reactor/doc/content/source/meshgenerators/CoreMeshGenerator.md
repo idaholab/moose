@@ -44,7 +44,7 @@ In addition, the value of the metadata `reactor_params_name` can be used to retr
 
 ## Example Syntax
 
-!listing modules/reactor/test/tests/meshgenerators/core_mesh_generator/core.i block=Mesh
+!listing modules/reactor/test/tests/meshgenerators/core_mesh_generator/core_square.i block=Mesh
 
 This is the resulting mesh block layout, where by default a single block is assigned to all of the quadrilateral elements in the mesh:
 

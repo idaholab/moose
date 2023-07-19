@@ -2,9 +2,13 @@
   [rmp]
     type = ReactorMeshParams
     dim = 3
-    geom = "Square"
-    assembly_pitch = 2.84126
+    geom = "Hex"
+    assembly_pitch = 1.42063
     radial_boundary_id = 200
+    top_boundary_id = 201
+    bottom_boundary_id = 202
+    axial_regions = '1.0'
+    axial_mesh_intervals = '1'
   []
 
   [pin1]
@@ -12,8 +16,10 @@
     reactor_params = rmp
     pin_type = 1
     pitch = 1.42063
-    region_ids='1 2 5'
+    region_ids='2'
     quad_center_elements = true
+    use_as_assembly = true
+    homogenized = true
   []
 
   [pin2]
@@ -21,41 +27,19 @@
     reactor_params = rmp
     pin_type = 2
     pitch = 1.42063
-    region_ids='2'
-    quad_center_elements = true
-  []
-
-  [pin3]
-    type = PinMeshGenerator
-    reactor_params = rmp
-    pin_type = 3
-    pitch = 1.42063
-    region_ids='3 4'
-    quad_center_elements = true
-  []
-
-  [amg1]
-    type = AssemblyMeshGenerator
-    assembly_type = 1
-    inputs = 'pin2'
-    pattern = '0 0;
-               0 0'
-  []
-
-  [amg2]
-    type = AssemblyMeshGenerator
-    assembly_type = 2
-    inputs = 'pin3 pin1 pin2'
-    pattern = '0 1;
-               1 2'
+    region_ids = '2'
+    quad_center_elements = false
+    use_as_assembly = true
+    homogenized = true
   []
 
   [cmg]
     type = CoreMeshGenerator
-    inputs = 'amg2 amg1 empty'
+    inputs = 'pin1 pin2 empty'
     dummy_assembly_name = empty
-    pattern = '1 0;
-               0 1'
+    pattern = '2 1;
+              1 0 2;
+               2 1'
     extrude = true
   []
 
@@ -68,9 +52,9 @@
 
   [translate]
     type = TransformGenerator
-    input = cmg
+    input = rotate90
     transform = TRANSLATE
-    vector_value = '2.130945 -2.130945 0'
+    vector_value = '0.710315 -0.710315 0'
   []
 []
 
@@ -87,7 +71,7 @@
     type = Exodus
     execute_on = timestep_end
     output_extra_element_ids = true
-    extra_element_ids_to_output = 'assembly_id assembly_type_id plane_id pin_id pin_type_id region_id'
+    extra_element_ids_to_output = 'assembly_id assembly_type_id plane_id pin_type_id region_id'
   []
   file_base = core_in
 []

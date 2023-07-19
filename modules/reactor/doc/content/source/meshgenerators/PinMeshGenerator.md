@@ -54,7 +54,7 @@ In addition, the value of the metadata `reactor_params_name` can be used to retr
 
 ## Example Syntax
 
-!listing modules/reactor/test/tests/meshgenerators/pin_mesh_generator/pin_only.i block=Mesh
+!listing modules/reactor/test/tests/meshgenerators/pin_mesh_generator/pin_square.i block=Mesh
 
 This is the resulting mesh block layout, where by default a single block is assigned to the triangular elements and another block is assigned to the quadrilateral elements:
 

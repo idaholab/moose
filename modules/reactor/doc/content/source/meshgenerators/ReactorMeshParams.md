@@ -17,7 +17,7 @@ The `ReactorMeshParams` object stores certain global mesh information as metadat
 
 ## Example Syntax
 
-!listing modules/reactor/test/tests/meshgenerators/pin_mesh_generator/pin_only.i block=Mesh/rmp
+!listing modules/reactor/test/tests/meshgenerators/pin_mesh_generator/pin_square.i block=Mesh/rmp
 
 !syntax parameters /Mesh/ReactorMeshParams
 

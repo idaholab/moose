@@ -356,8 +356,7 @@ AssemblyMeshGenerator::AssemblyMeshGenerator(const InputParameters & parameters)
             region_id_map.begin()->first, region_id_map.begin()->second));
     subdomain_id_type pin_type_id = getMeshProperty<subdomain_id_type>(RGMB::pin_type, pinMG);
     std::vector<std::vector<std::string>> pin_block_names =
-        getMeshProperty<std::vector<std::vector<std::string>>>(
-            RGMB::pin_block_names, pinMG);
+        getMeshProperty<std::vector<std::vector<std::string>>>(RGMB::pin_block_names, pinMG);
     _pin_block_name_map.insert(std::pair<subdomain_id_type, std::vector<std::vector<std::string>>>(
         pin_type_id, pin_block_names));
   }

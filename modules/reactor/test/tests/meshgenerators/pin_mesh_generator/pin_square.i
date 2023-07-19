@@ -11,8 +11,10 @@
     reactor_params = rmp
     pin_type = 2
     pitch = 1.42063
-    region_ids='1 2 3 4'
+    region_ids='3'
     quad_center_elements = false
+    num_sectors = 2
+    mesh_intervals = '2'
   []
 []
 

@@ -4,10 +4,11 @@
   [square]
     requirement = 'The system shall generate a 2D square pin mesh with fuel, gap, clad, background regions'
     type = 'Exodiff'
-    input = 'pin_only.i'
+    input = 'pin_square.i'
     cli_args = "Mesh/pin1/ring_radii='0.3385 0.3705 0.4665'
-                Mesh/pin1/num_sectors=4
                 Mesh/pin1/mesh_intervals='1 1 1 1'
+                Mesh/pin1/region_ids='1 2 3 4'
+                Mesh/pin1/num_sectors='4'
                 Outputs/file_base=pin_only_in"
     exodiff = 'pin_only_in.e'
     recover = false
@@ -15,21 +16,15 @@
   [2d_square_w_3d_info]
     requirement = 'The system shall throw an error if 3d info is provided to a 2d mesh'
     type = 'RunException'
-    input = 'pin_only.i'
-    cli_args = "Mesh/rmp/axial_mesh_intervals='5'
-                Mesh/pin1/ring_radii='0.3385 0.3705 0.4665'
-                Mesh/pin1/num_sectors=4
-                Mesh/pin1/mesh_intervals='1 1 1 1'
-                Outputs/file_base=pin_only_in"
+    input = 'pin_square.i'
+    cli_args = "Mesh/rmp/axial_mesh_intervals='5'"
     expect_err = "should not be defined for 2-D meshes"
   []
   [tri]
     requirement = 'The system shall generate a 3D square pin mesh with ring and background region and tri center elements'
     type = 'Exodiff'
-    input = 'pin_only.i'
-    cli_args = "Mesh/pin1/quad_center_elements=false
-                Mesh/pin1/num_sectors=2
-                Mesh/pin1/mesh_intervals='1 1'
+    input = 'pin_square.i'
+    cli_args = "Mesh/pin1/mesh_intervals='1 1'
                 Mesh/pin1/region_ids='1 2'
                 Mesh/pin1/ring_radii='0.4665'
                 Outputs/file_base=pin_only_tri_in"
@@ -39,10 +34,8 @@
   [tri_intervals]
     requirement = 'The system shall generate a pin mesh with more than 1 radial region and tri center elements'
     type = 'Exodiff'
-    input = 'pin_only.i'
-    cli_args = "Mesh/pin1/quad_center_elements=false
-                Mesh/pin1/num_sectors=2
-                Mesh/pin1/mesh_intervals='2 1'
+    input = 'pin_square.i'
+    cli_args = "Mesh/pin1/mesh_intervals='2 1'
                 Mesh/pin1/region_ids='1 2'
                 Mesh/pin1/ring_radii='0.4665'
                 Outputs/file_base=pin_only_tri_intervals_in"
@@ -52,9 +45,8 @@
   [quad_intervals]
     requirement = 'The system shall generate a pin mesh with more than 1 radial region and quad center elements'
     type = 'Exodiff'
-    input = 'pin_only.i'
+    input = 'pin_square.i'
     cli_args = "Mesh/pin1/quad_center_elements=true
-                Mesh/pin1/num_sectors=2
                 Mesh/pin1/mesh_intervals='2 1'
                 Mesh/pin1/region_ids='1 2'
                 Mesh/pin1/ring_radii='0.4665'
@@ -65,40 +57,29 @@
   [background_tri_intervals]
     requirement = 'The system shall generate a pin mesh with no radial region and more than 1 background intervals with tri center elements'
     type = 'Exodiff'
-    input = 'pin_only.i'
-    cli_args = "Mesh/pin1/quad_center_elements=false
-                Mesh/pin1/num_sectors=2
-                Mesh/pin1/mesh_intervals='2'
-                Mesh/pin1/region_ids='3'
-                Outputs/file_base=pin_only_background_tri_intervals_in"
+    input = 'pin_square.i'
+    cli_args = "Outputs/file_base=pin_only_background_tri_intervals_in"
     exodiff = 'pin_only_background_tri_intervals_in.e'
     recover = false
   []
   [hex]
     requirement = 'The system shall generate a 2D hexagonal pin mesh with 2 radial regions'
     type = 'Exodiff'
-    input = 'pin_only.i'
-    cli_args = "Mesh/rmp/geom='Hex'
-                Mesh/pin1/num_sectors=2
-                Mesh/pin1/ring_radii='0.4665'
-                Mesh/pin1/region_ids='1 2'
-                Mesh/pin1/mesh_intervals='1 1'
-                Outputs/file_base=pin_only_hex_in"
+    input = 'pin_hex.i'
+    cli_args = "Outputs/file_base=pin_only_hex_in"
     exodiff = 'pin_only_hex_in.e'
     recover = false
   []
   [complex]
     requirement = 'The system shall generate a 3D hexagonal pin mesh with radial, background, and duct regions'
     type = 'Exodiff'
-    input = 'pin_only.i'
-    cli_args = "Mesh/rmp/geom='Hex'
-                Mesh/rmp/dim=3
+    input = 'pin_hex.i'
+    cli_args = "Mesh/rmp/dim=3
                 Mesh/rmp/axial_regions='1.0 1.0'
                 Mesh/rmp/axial_mesh_intervals='1 1'
                 Mesh/rmp/top_boundary_id=201
                 Mesh/rmp/bottom_boundary_id=202
                 Mesh/pin1/region_ids='11 12 13; 11 12 13'
-                Mesh/pin1/num_sectors=2
                 Mesh/pin1/pin_type=1
                 Mesh/pin1/ring_radii='0.4665'
                 Mesh/pin1/duct_halfpitch='0.68'
@@ -113,96 +94,68 @@
   [hex_pin_homogenized_quad]
     requirement = 'The system shall generate a 2D hexagonal homogenized pin mesh with quad discretization'
     type = 'Exodiff'
-    input = 'pin_only.i'
-    cli_args = "Mesh/rmp/geom=Hex
-                Mesh/pin1/region_ids='1'
-                Mesh/pin1/homogenized=true
-                Mesh/pin1/quad_center_elements=true
-                Outputs/file_base=hex_pin_homogenized_quad
-                Outputs/out/extra_element_ids_to_output='region_id pin_type_id'"
+    input = 'pin_homogenized.i'
+    cli_args = "Outputs/file_base=hex_pin_homogenized_quad"
     exodiff = 'hex_pin_homogenized_quad.e'
     recover = false
   []
   [hex_pin_homogenized_tri]
     requirement = 'The system shall generate a 2D hexagonal homogenized pin mesh with tri discretization'
     type = 'Exodiff'
-    input = 'pin_only.i'
-    cli_args = "Mesh/rmp/geom=Hex
-                Mesh/pin1/region_ids='1'
-                Mesh/pin1/homogenized=true
-                Outputs/file_base=hex_pin_homogenized_tri
-                Outputs/out/extra_element_ids_to_output='region_id pin_type_id'"
+    input = 'pin_homogenized.i'
+    cli_args = "Mesh/pin1/quad_center_elements=false
+                Outputs/file_base=hex_pin_homogenized_tri"
     exodiff = 'hex_pin_homogenized_tri.e'
     recover = false
   []
   [hex_pin_homogenized_3d]
     requirement = 'The system shall generate a 3D hexagonal homogenized pin mesh with quad discretization'
     type = 'Exodiff'
-    input = 'pin_only.i'
-    cli_args = "Mesh/rmp/geom=Hex
-                Mesh/pin1/region_ids='1'
-                Mesh/pin1/homogenized=true
-                Mesh/rmp/dim=3
+    input = 'pin_homogenized.i'
+    cli_args = "Mesh/rmp/dim=3
                 Mesh/rmp/axial_regions='1.0'
                 Mesh/rmp/top_boundary_id=201
                 Mesh/rmp/bottom_boundary_id=202
                 Mesh/rmp/axial_mesh_intervals='1'
-                Mesh/pin1/quad_center_elements=true
                 Mesh/pin1/extrude=true
-                Outputs/file_base=hex_pin_homogenized_3d
-                Outputs/out/extra_element_ids_to_output='region_id pin_type_id'"
+                Outputs/file_base=hex_pin_homogenized_3d"
     exodiff = 'hex_pin_homogenized_3d.e'
     recover = false
   []
   [hex_single_assembly_homogenized]
     requirement = 'The system shall generate a 2D hexagonal homogenized pin mesh that is treated as a single assembly'
     type = 'Exodiff'
-    input = 'pin_only.i'
-    cli_args = "Mesh/rmp/geom=Hex
-                Mesh/pin1/region_ids='1'
-                Mesh/pin1/homogenized=true
-                Mesh/pin1/use_as_assembly=true
-                Mesh/pin1/pitch=7.10315
-                Mesh/pin1/quad_center_elements=true
-                Outputs/file_base=hex_single_assembly_homogenized
-                Outputs/out/extra_element_ids_to_output='region_id pin_type_id assembly_type_id'"
+    input = 'single_pin_assembly.i'
+    cli_args = "Outputs/file_base=hex_single_assembly_homogenized"
     exodiff = 'hex_single_assembly_homogenized.e'
     recover = false
   []
   [hex_single_assembly_ducted]
     requirement = 'The system shall generate a 2D hexagonal ducted pin mesh that is treated as a single assembly'
     type = 'Exodiff'
-    input = 'pin_only.i'
-    cli_args = "Mesh/rmp/geom=Hex
-                Mesh/pin1/use_as_assembly=true
-                Mesh/pin1/pitch=7.10315
-                Mesh/pin1/homogenized=false
+    input = 'single_pin_assembly.i'
+    cli_args = "Mesh/pin1/homogenized=false
                 Mesh/pin1/num_sectors=2
                 Mesh/pin1/region_ids='1 2 3'
                 Mesh/pin1/ring_radii='2.0'
                 Mesh/pin1/duct_halfpitch='3.0'
                 Mesh/pin1/mesh_intervals='1 1 1'
-                Mesh/pin1/quad_center_elements=true
-                Outputs/file_base=hex_single_assembly_ducted
-                Outputs/out/extra_element_ids_to_output='region_id pin_type_id assembly_type_id'"
+                Outputs/file_base=hex_single_assembly_ducted"
     exodiff = 'hex_single_assembly_ducted.e'
     recover = false
   []
   [cart_single_assembly_ducted]
     requirement = 'The system shall generate a 2D Cartesian ducted pin mesh that is treated as a single assembly'
     type = 'Exodiff'
-    input = 'pin_only.i'
-    cli_args = "Mesh/pin1/use_as_assembly=true
-                Mesh/pin1/pitch=7.10315
+    input = 'single_pin_assembly.i'
+    cli_args = "Mesh/rmp/geom='Square'
                 Mesh/pin1/homogenized=false
                 Mesh/pin1/num_sectors=2
                 Mesh/pin1/region_ids='1 2 3'
                 Mesh/pin1/ring_radii='2.0'
                 Mesh/pin1/duct_halfpitch='3.0'
                 Mesh/pin1/mesh_intervals='1 1 1'
-                Mesh/pin1/quad_center_elements=true
-                Outputs/file_base=cart_single_assembly_ducted
-                Outputs/out/extra_element_ids_to_output='region_id pin_type_id assembly_type_id'"
+                Outputs/file_base=cart_single_assembly_ducted"
     exodiff = 'cart_single_assembly_ducted.e'
     recover = false
   []
