@@ -7,15 +7,15 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "ParallelMarkovChainMonteCarloBase.h"
+#include "PMCMCBase.h"
 #include "AdaptiveMonteCarloUtils.h"
 #include "Uniform.h"
 #include "DelimitedFileReader.h"
 
-registerMooseObjectAliased("StochasticToolsApp", ParallelMarkovChainMonteCarloBase, "PMCMCBase");
+registerMooseObject("StochasticToolsApp", PMCMCBase);
 
 InputParameters
-ParallelMarkovChainMonteCarloBase::validParams()
+PMCMCBase::validParams()
 {
   InputParameters params = Sampler::validParams();
   params.addClassDescription("Parallel Markov chain Monte Carlo base.");
@@ -25,15 +25,15 @@ ParallelMarkovChainMonteCarloBase::validParams()
       "prior_variance", "The prior distribution of the variance parameter to be calibrated.");
   params.addRequiredParam<unsigned int>(
       "num_parallel_proposals",
-      "Number of proposals to made and corresponding subApps executed in "
+      "Number of proposals to make and corresponding subApps executed in "
       "parallel.");
   params.addRequiredParam<FileName>("file_name", "Name of the CSV file with configuration values.");
   params.addParam<std::string>(
       "file_column_name", "Name of column in CSV file to use, by default first column is used.");
   params.addParam<unsigned int>(
       "num_columns", "Number of columns to be used in the CSV file with the configuration values.");
-  params.addParam<std::vector<Real>>("lb", "Lower bounds for making the next proposal.");
-  params.addParam<std::vector<Real>>("ub", "Upper bounds for making the next proposal.");
+  params.addParam<std::vector<Real>>("lower_bound", "Lower bounds for making the next proposal.");
+  params.addParam<std::vector<Real>>("upper_bound", "Upper bounds for making the next proposal.");
   params.addRequiredParam<std::vector<Real>>("initial_values",
                                              "The starting values of the inputs to be calibrated.");
   params.addParam<unsigned int>(
@@ -43,12 +43,13 @@ ParallelMarkovChainMonteCarloBase::validParams()
   return params;
 }
 
-ParallelMarkovChainMonteCarloBase::ParallelMarkovChainMonteCarloBase(
-    const InputParameters & parameters)
+PMCMCBase::PMCMCBase(const InputParameters & parameters)
   : Sampler(parameters),
     _num_parallel_proposals(getParam<unsigned int>("num_parallel_proposals")),
-    _lb(isParamValid("lb") ? &getParam<std::vector<Real>>("lb") : nullptr),
-    _ub(isParamValid("ub") ? &getParam<std::vector<Real>>("ub") : nullptr),
+    _lower_bound(isParamValid("lower_bound") ? &getParam<std::vector<Real>>("lower_bound")
+                                             : nullptr),
+    _upper_bound(isParamValid("upper_bound") ? &getParam<std::vector<Real>>("upper_bound")
+                                             : nullptr),
     _step(getCheckedPointerParam<FEProblemBase *>("_fe_problem_base")->timeStep()),
     _check_step(0),
     _initial_values(getParam<std::vector<Real>>("initial_values")),
@@ -98,11 +99,11 @@ ParallelMarkovChainMonteCarloBase::ParallelMarkovChainMonteCarloBase(
   _check_step = 0;
 
   // Check whether both the lower and the upper bounds are specified and of same size
-  bool bound_check1 = _lb && !_ub;
-  bool bound_check2 = !_lb && _ub;
+  bool bound_check1 = _lower_bound && !_upper_bound;
+  bool bound_check2 = !_lower_bound && _upper_bound;
   if (bound_check1 || bound_check2)
     mooseError("Both lower and upper bounds should be specified.");
-  bool size_check = _lb ? ((*_lb).size() != (*_ub).size()) : 0;
+  bool size_check = _lower_bound ? ((*_lower_bound).size() != (*_upper_bound).size()) : 0;
   if (size_check)
     mooseError("Lower and upper bounds should be of the same size.");
 
@@ -112,17 +113,15 @@ ParallelMarkovChainMonteCarloBase::ParallelMarkovChainMonteCarloBase(
 }
 
 void
-ParallelMarkovChainMonteCarloBase::proposeSamples(const unsigned int seed_value)
+PMCMCBase::proposeSamples(const unsigned int seed_value)
 {
   for (unsigned int j = 0; j < _num_parallel_proposals; ++j)
-  {
     for (unsigned int i = 0; i < _priors.size(); ++i)
       _new_samples[j][i] = _priors[i]->quantile(getRand(seed_value));
-  }
 }
 
 void
-ParallelMarkovChainMonteCarloBase::sampleSetUp(const SampleMode /*mode*/)
+PMCMCBase::sampleSetUp(const SampleMode /*mode*/)
 {
   if (_step < 1 || _check_step == _step)
     return;
@@ -139,31 +138,31 @@ ParallelMarkovChainMonteCarloBase::sampleSetUp(const SampleMode /*mode*/)
 }
 
 void
-ParallelMarkovChainMonteCarloBase::randomIndex(const unsigned int & ub,
-                                               const unsigned int & exclude,
-                                               const unsigned int & seed,
-                                               unsigned int & req_index)
+PMCMCBase::randomIndex(const unsigned int & upper_bound,
+                       const unsigned int & exclude,
+                       const unsigned int & seed,
+                       unsigned int & req_index)
 {
   req_index = exclude;
   while (req_index == exclude)
-    req_index = getRandl(seed, 0, ub);
+    req_index = getRandl(seed, 0, upper_bound);
 }
 
 void
-ParallelMarkovChainMonteCarloBase::randomIndex2(const unsigned int & ub,
-                                                const unsigned int & exclude,
-                                                const unsigned int & seed,
-                                                unsigned int & req_index1,
-                                                unsigned int & req_index2)
+PMCMCBase::randomIndex2(const unsigned int & upper_bound,
+                        const unsigned int & exclude,
+                        const unsigned int & seed,
+                        unsigned int & req_index1,
+                        unsigned int & req_index2)
 {
-  randomIndex(ub, exclude, seed, req_index1);
+  randomIndex(upper_bound, exclude, seed, req_index1);
   req_index2 = req_index1;
   while (req_index1 == req_index2)
-    randomIndex(ub, exclude, seed, req_index2);
+    randomIndex(upper_bound, exclude, seed, req_index2);
 }
 
 void
-ParallelMarkovChainMonteCarloBase::combineWithConfg()
+PMCMCBase::combineWithExperimentalConfig()
 {
   unsigned int index1;
   int index2 = -1;
@@ -181,40 +180,38 @@ ParallelMarkovChainMonteCarloBase::combineWithConfg()
 }
 
 const std::vector<Real> &
-ParallelMarkovChainMonteCarloBase::getRandomNumbers() const
+PMCMCBase::getRandomNumbers() const
 {
   return _rnd_vec;
 }
 
 const std::vector<Real> &
-ParallelMarkovChainMonteCarloBase::getVarSamples() const
+PMCMCBase::getVarSamples() const
 {
   return _new_var_samples;
 }
 
 const std::vector<const Distribution *>
-ParallelMarkovChainMonteCarloBase::getPriors() const
+PMCMCBase::getPriors() const
 {
   return _priors;
 }
 
 const Distribution *
-ParallelMarkovChainMonteCarloBase::getVarPrior() const
+PMCMCBase::getVarPrior() const
 {
   return _var_prior;
 }
 
 Real
-ParallelMarkovChainMonteCarloBase::computeSample(dof_id_type row_index, dof_id_type col_index)
+PMCMCBase::computeSample(dof_id_type row_index, dof_id_type col_index)
 {
   if (_step < 1)
-  {
     for (unsigned int i = 0; i < _num_parallel_proposals; ++i)
       _new_samples[i] = _initial_values;
-  }
 
   // Combine the proposed samples with experimental configurations
-  combineWithConfg();
+  combineWithExperimentalConfig();
 
   return _new_samples_confg[row_index][col_index];
 }

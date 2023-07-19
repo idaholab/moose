@@ -9,17 +9,17 @@
 
 #pragma once
 
-#include "ParallelMarkovChainMonteCarloBase.h"
+#include "PMCMCBase.h"
 
 /**
  * A class for performing M-H MCMC sampling with independent Gaussian propoposals
  */
-class IndependentGaussianMetropolisHastings : public ParallelMarkovChainMonteCarloBase
+class IndependentGaussianMH : public PMCMCBase
 {
 public:
   static InputParameters validParams();
 
-  IndependentGaussianMetropolisHastings(const InputParameters & parameters);
+  IndependentGaussianMH(const InputParameters & parameters);
 
   virtual int decisionStep() const override { return 2; }
 

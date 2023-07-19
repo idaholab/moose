@@ -9,37 +9,37 @@
 
 #pragma once
 
-#include "ParallelMarkovChainMonteCarloDecision.h"
-#include "IndependentGaussianMetropolisHastings.h"
+#include "PMCMCDecision.h"
+#include "IndependentGaussianMH.h"
 #include "AdaptiveMonteCarloUtils.h"
 
 /**
  * A class for performing independent Metropolis-Hastings MCMC decision making
  */
-class IndependentMetropolisHastingsDecision : public ParallelMarkovChainMonteCarloDecision
+class IndependentMHDecision : public PMCMCDecision
 {
 public:
   static InputParameters validParams();
 
-  IndependentMetropolisHastingsDecision(const InputParameters & parameters);
+  IndependentMHDecision(const InputParameters & parameters);
 
 protected:
   virtual void computeEvidence(std::vector<Real> & evidence,
-                               DenseMatrix<Real> & inputs_matrix) override;
+                               const DenseMatrix<Real> & input_matrix) override;
 
   virtual void computeTransitionVector(std::vector<Real> & tv,
-                                       std::vector<Real> & evidence) override;
+                                       const std::vector<Real> & evidence) override;
 
   virtual void nextSamples(std::vector<Real> & req_inputs,
-                           DenseMatrix<Real> & inputs_matrix,
+                           DenseMatrix<Real> & input_matrix,
                            const std::vector<Real> & tv,
                            const unsigned int & parallel_index) override;
 
   virtual void nextSeeds() override;
 
 private:
-  /// IndependentGaussianMetropolisHastings sampler
-  const IndependentGaussianMetropolisHastings * const _igmh;
+  /// IndependentGaussianMH sampler
+  const IndependentGaussianMH * const _igmh;
 
   /// Seed vector input for proposing new samples
   std::vector<Real> & _seed_input;

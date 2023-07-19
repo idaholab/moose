@@ -131,6 +131,14 @@ public:
     return false;
   }
 
+  /// Communicator that was split based on samples that have rows
+  libMesh::Parallel::Communicator _local_comm;
+
+  /**
+   * Return the parallel communicator
+   */
+  libMesh::Parallel::Communicator & getLocalComm() { return _local_comm; }
+
 protected:
   /**
    * Enum describing the type of parallel communication to perform.
@@ -283,9 +291,6 @@ protected:
   const dof_id_type _min_procs_per_row;
   /// The maximum number of processors that are associated with a set of rows
   const dof_id_type _max_procs_per_row;
-
-  /// Communicator that was split based on samples that have rows
-  libMesh::Parallel::Communicator _local_comm;
 
 private:
   ///@{

@@ -9,12 +9,12 @@
 
 #pragma once
 
-#include "ParallelMarkovChainMonteCarloBase.h"
+#include "PMCMCBase.h"
 
 /**
  * A class for performing Affine Invariant Ensemble MCMC with stretch sampler
  */
-class AffineInvariantStretchSampler : public ParallelMarkovChainMonteCarloBase
+class AffineInvariantStretchSampler : public PMCMCBase
 {
 public:
   static InputParameters validParams();

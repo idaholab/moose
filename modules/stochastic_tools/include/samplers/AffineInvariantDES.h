@@ -9,24 +9,22 @@
 
 #pragma once
 
-#include "ParallelMarkovChainMonteCarloBase.h"
+#include "PMCMCBase.h"
 
 /**
  * A class for performing Affine Invariant Ensemble MCMC with differential sampler
  */
-class AffineInvariantDifferentialEvolutionSampler : public ParallelMarkovChainMonteCarloBase
+class AffineInvariantDES : public PMCMCBase
 {
 public:
   static InputParameters validParams();
 
-  AffineInvariantDifferentialEvolutionSampler(const InputParameters & parameters);
+  AffineInvariantDES(const InputParameters & parameters);
 
   virtual int decisionStep() const override { return 2; }
 
 protected:
   virtual void proposeSamples(const unsigned int seed_value) override;
-
-  // virtual void proposeVarSamples(const unsigned int seed_value) override;
 
   /// Compute the differential evolution from the current state
   void computeDifferential(

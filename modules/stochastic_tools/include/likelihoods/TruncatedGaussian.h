@@ -26,14 +26,14 @@ public:
   static Real function(const std::vector<Real> & exp,
                        const std::vector<Real> & model,
                        const Real & noise,
-                       const Real & lb,
-                       const Real & ub,
+                       const Real & lower_bound,
+                       const Real & upper_bound,
                        const bool & log_likelihood);
 
 private:
   /// Lower bound
-  const Real & _lb;
+  const Real & _lower_bound;
 
   /// Upper bound
-  const Real & _ub;
+  const Real & _upper_bound;
 };

@@ -1,8 +1,8 @@
-# IndependentMetropolisHastingsDecision (IndependentMHDecision)
+# IndependentMHDecision (Independent Metropolis-Hastings Decision)
 
 !syntax description /Reporters/IndependentMHDecision
 
-The `IndependentMHDecision` derives from [ParallelMarkovChainMonteCarloDecision](ParallelMarkovChainMonteCarloDecision.md) and overrides both the \newline `computeEvidence` and the `computeTransitionVector` functions. This is due to the fact that Metropolis-Hastings samplers use a single seed to compute the next $P$ proposals and the evidences for all these samples need to be evaluated in reference to the seed sample. As such, any MCMC sampler that follows this single seed principle should derive off of `IndependentMHDecision` and should typically only override the `computeTransitionVector` function, depending upon its mathematical construction.
+The `IndependentMHDecision` derives from [PMCMCDecision](PMCMCDecision.md) and overrides both the `computeEvidence` and the `computeTransitionVector` functions. This is due to the fact that Metropolis-Hastings samplers use a single seed to compute the next $P$ proposals and the evidences for all these samples need to be evaluated in reference to the seed sample. As such, any MCMC sampler that follows this single seed principle should derive from `IndependentMHDecision` and should typically only override the `computeTransitionVector` function, depending upon its mathematical construction.
 
 Parallelized Metropolis-Hastings class of samplers is proposed by [!cite](Calderhead2014a). The sampling procedure is similar to that of a serial Metropolis-Hastings sampler with some modifications to account for the parallelization. At each serial step, a seed state $\mathcal{S}_x$ is defined. Using this seed state, $P$ parallel proposals are made using a proposal distribution $\mathcal{G}$. The computational model is evaluated in parallel for these proposals and likelihood function is computed. Then, a transition probability vector $\pmb{t}_{xy}$ is computed whose elements are defined as:
 

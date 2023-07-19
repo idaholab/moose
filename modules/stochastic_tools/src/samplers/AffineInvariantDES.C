@@ -7,13 +7,11 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "AffineInvariantDifferentialEvolutionSampler.h"
+#include "AffineInvariantDES.h"
 #include "Normal.h"
 #include "Uniform.h"
 
-registerMooseObjectAliased("StochasticToolsApp",
-                           AffineInvariantDifferentialEvolutionSampler,
-                           "AffineInvariantDES");
+registerMooseObject("StochasticToolsApp", AffineInvariantDES);
 
 /*
  Tuning options for the internal parameters
@@ -23,9 +21,9 @@ registerMooseObjectAliased("StochasticToolsApp",
 */
 
 InputParameters
-AffineInvariantDifferentialEvolutionSampler::validParams()
+AffineInvariantDES::validParams()
 {
-  InputParameters params = ParallelMarkovChainMonteCarloBase::validParams();
+  InputParameters params = PMCMCBase::validParams();
   params.addClassDescription("Perform Affine Invariant Ensemble MCMC with differential sampler.");
   params.addRequiredParam<ReporterName>(
       "previous_state", "Reporter value with the previous state of all the walkers.");
@@ -39,33 +37,35 @@ AffineInvariantDifferentialEvolutionSampler::validParams()
   return params;
 }
 
-AffineInvariantDifferentialEvolutionSampler::AffineInvariantDifferentialEvolutionSampler(
-    const InputParameters & parameters)
-  : ParallelMarkovChainMonteCarloBase(parameters),
+AffineInvariantDES::AffineInvariantDES(const InputParameters & parameters)
+  : PMCMCBase(parameters),
     _previous_state(getReporterValue<std::vector<std::vector<Real>>>("previous_state")),
     _previous_state_var(getReporterValue<std::vector<Real>>("previous_state_var")),
     _tuning_option(getParam<MooseEnum>("tuning_option"))
 {
   if (_num_parallel_proposals < 5)
-    mooseError(
+    paramError(
+        "num_parallel_proposals",
         "At least five parallel proposals should be used for the Differential Evolution Sampler.");
 
   if (_num_parallel_proposals < _priors.size())
-    mooseWarning("It is recommended that the parallel proposals be greater than or equal to the "
-                 "inferred parameters.");
+    mooseWarning(
+        "It is recommended that the parallel proposals be greater than or equal to the "
+        "inferred parameters. This will allow the sampler to not get stuck on a hyper-plane.");
 
   if (isParamValid("scales"))
   {
     _scales = getParam<std::vector<Real>>("scales");
     if (_scales.size() != _priors.size())
-      mooseError("The number of scales provided should match the number of tunable params.");
+      paramError("scales",
+                 "The number of scales provided should match the number of tunable params.");
   }
   else
     _scales.assign(_priors.size(), 1.0);
 }
 
 void
-AffineInvariantDifferentialEvolutionSampler::computeDifferential(
+AffineInvariantDES::computeDifferential(
     const Real & state1, const Real & state2, const Real & rnd, const Real & scale, Real & diff)
 {
   Real gamma;
@@ -75,19 +75,17 @@ AffineInvariantDifferentialEvolutionSampler::computeDifferential(
 }
 
 void
-AffineInvariantDifferentialEvolutionSampler::tuneParams(Real & gamma, Real & b, const Real & scale)
+AffineInvariantDES::tuneParams(Real & gamma, Real & b, const Real & scale)
 {
   if (_tuning_option == "Braak2006_static")
   {
     gamma = 2.38 / std::sqrt(2 * _priors.size());
     b = 1e-6 * scale;
   }
-  else
-    mooseError("Invalid tuning option ", std::string(_tuning_option));
 }
 
 void
-AffineInvariantDifferentialEvolutionSampler::proposeSamples(const unsigned int seed_value)
+AffineInvariantDES::proposeSamples(const unsigned int seed_value)
 {
   unsigned int j = 0;
   bool indicator;
@@ -106,9 +104,11 @@ AffineInvariantDifferentialEvolutionSampler::proposeSamples(const unsigned int s
                           diff);
       _new_samples[j][i] = (_step > decisionStep()) ? (_previous_state[j][i] + diff)
                                                     : _priors[i]->quantile(getRand(seed_value));
-      if (_lb)
+      if (_lower_bound)
         indicator =
-            (_new_samples[j][i] < (*_lb)[i] || _new_samples[j][i] > (*_ub)[i]) ? 1 : indicator;
+            (_new_samples[j][i] < (*_lower_bound)[i] || _new_samples[j][i] > (*_upper_bound)[i])
+                ? 1
+                : indicator;
     }
     if (_var_prior)
     {

@@ -9,7 +9,7 @@
 
 #include "TestLikelihood.h"
 
-registerMooseObject("StochasticToolsApp", TestLikelihood);
+registerMooseObject("StochasticToolsTestApp", TestLikelihood);
 
 InputParameters
 TestLikelihood::validParams()

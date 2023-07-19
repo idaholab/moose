@@ -11,7 +11,7 @@ The Gaussian likelihood function considering $N$ experimental configurations is 
     \mathcal{L} = \prod_{i=1}^N \mathcal{N}\big(\hat{M}(\pmb{\theta},~\pmb{\Theta}_i) - M(\pmb{\Theta}_i),~\sigma \big)
 \end{equation}
 
-where, $\hat{M}(\pmb{\theta},~\pmb{\Theta}_i)$ is the model prediction given model parameters $\pmb{\theta}$ and the $i^{\text{th}}$ experimental configuration $\pmb{\Theta}_i$ and $M(\pmb{\Theta}_i)$ is the $i^{\text{th}}$ experimental data point. $\sigma$ above the scale of the distribution representing the model inadequacy and experimental noise uncertainties. $\mathcal{N}$ represents a Gaussian distribution.
+where, $\hat{M}(\pmb{\theta},~\pmb{\Theta}_i)$ is the model prediction given model parameters $\pmb{\theta}$ and the $i^{\text{th}}$ experimental configuration $\pmb{\Theta}_i$ and $M(\pmb{\Theta}_i)$ is the $i^{\text{th}}$ experimental data point. $\sigma$ above is the scale of the distribution representing the model inadequacy and experimental noise uncertainties, while $\mathcal{N}$ represents a Gaussian distribution.
 
 ## Example Input File Syntax
 

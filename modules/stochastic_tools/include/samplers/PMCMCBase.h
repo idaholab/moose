@@ -14,12 +14,12 @@
 /**
  * A base class used to perform Parallel Markov Chain Monte Carlo (MCMC) sampling
  */
-class ParallelMarkovChainMonteCarloBase : public Sampler
+class PMCMCBase : public Sampler
 {
 public:
   static InputParameters validParams();
 
-  ParallelMarkovChainMonteCarloBase(const InputParameters & parameters);
+  PMCMCBase(const InputParameters & parameters);
 
   /**
    * Return the number of configuration parameters.
@@ -62,23 +62,50 @@ public:
   virtual int decisionStep() const { return 1; }
 
 protected:
-  // Fill in the _new_samples vector of vectors (happens within sampleSetUp)
+  /**
+   * Fill in the _new_samples vector of vectors (happens within sampleSetUp)
+   *
+   * @param the seed for the random number generator
+   */
   virtual void proposeSamples(const unsigned int seed_value);
 
-  // See Sampler.h for description
+  /**
+   * See Sampler.h for description
+   *
+   * @param the mode for the sampler
+   */
   virtual void sampleSetUp(const Sampler::SampleMode mode) override;
 
-  // See Sampler.h for description
+  /**
+   * See Sampler.h for description
+   *
+   * @param the mode for the sampler
+   */
   virtual Real computeSample(dof_id_type row_index, dof_id_type col_index) override;
 
-  /// Sample a random index excluding a specified index
-  void randomIndex(const unsigned int & ub,
+  /**
+   * Sample a random index excluding a specified index
+   *
+   * @param the upper bound provided
+   * @param the index to be excluded from sampling
+   * @param the seed of the random number generator
+   * @param the required index to be filled
+   */
+  void randomIndex(const unsigned int & upper_bound,
                    const unsigned int & exclude,
                    const unsigned int & seed,
                    unsigned int & req_index);
 
-  /// Sample two random indices without repitition excluding a specified index
-  void randomIndex2(const unsigned int & ub,
+  /**
+   * Sample two random indices without repitition excluding a specified index
+   *
+   * @param the upper bound provided
+   * @param the index to be excluded from sampling
+   * @param the seed of the random number generator
+   * @param the required index 1 to be filled
+   * @param the required index 2 to be filled
+   */
+  void randomIndex2(const unsigned int & upper_bound,
                     const unsigned int & exclude,
                     const unsigned int & seed,
                     unsigned int & req_index1,
@@ -94,10 +121,10 @@ protected:
   const Distribution * _var_prior;
 
   /// Lower bounds for making the next proposal
-  const std::vector<Real> * _lb;
+  const std::vector<Real> * _lower_bound;
 
   /// Upper bounds for making the next proposal
-  const std::vector<Real> * _ub;
+  const std::vector<Real> * _upper_bound;
 
   /// Track the current step of the main App
   const int & _step;
@@ -121,7 +148,7 @@ private:
   /**
    * Generates combinations of the new samples with the experimental configurations
    */
-  void combineWithConfg();
+  void combineWithExperimentalConfig();
 
   /// Initialize a certain number of random seeds. Change from the default only if you have to.
   const unsigned int & _num_random_seeds;

@@ -7,16 +7,14 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "ParallelMarkovChainMonteCarloDecision.h"
+#include "PMCMCDecision.h"
 #include "Sampler.h"
 #include "DenseMatrix.h"
 
-registerMooseObjectAliased("StochasticToolsApp",
-                           ParallelMarkovChainMonteCarloDecision,
-                           "PMCMCDecision");
+registerMooseObject("StochasticToolsApp", PMCMCDecision);
 
 InputParameters
-ParallelMarkovChainMonteCarloDecision::validParams()
+PMCMCDecision::validParams()
 {
   InputParameters params = GeneralReporter::validParams();
   params += LikelihoodInterface::validParams();
@@ -38,8 +36,7 @@ ParallelMarkovChainMonteCarloDecision::validParams()
   return params;
 }
 
-ParallelMarkovChainMonteCarloDecision::ParallelMarkovChainMonteCarloDecision(
-    const InputParameters & parameters)
+PMCMCDecision::PMCMCDecision(const InputParameters & parameters)
   : GeneralReporter(parameters),
     LikelihoodInterface(parameters),
     _output_value(getReporterValue<std::vector<Real>>("output_value", REPORTER_MODE_DISTRIBUTED)),
@@ -49,12 +46,13 @@ ParallelMarkovChainMonteCarloDecision::ParallelMarkovChainMonteCarloDecision(
     _variance(declareValue<std::vector<Real>>("variance")),
     _noise(declareValue<Real>("noise")),
     _sampler(getSampler("sampler")),
-    _pmcmc(dynamic_cast<const ParallelMarkovChainMonteCarloBase *>(&_sampler)),
+    _pmcmc(dynamic_cast<const PMCMCBase *>(&_sampler)),
     _rnd_vec(_pmcmc->getRandomNumbers()),
     _new_var_samples(_pmcmc->getVarSamples()),
     _priors(_pmcmc->getPriors()),
     _var_prior(_pmcmc->getVarPrior()),
     _step(getCheckedPointerParam<FEProblemBase *>("_fe_problem_base")->timeStep()),
+    _local_comm(_sampler.getLocalComm()),
     _check_step(std::numeric_limits<int>::max())
 {
   // Filling the `likelihoods` vector with the user-provided distributions.
@@ -64,10 +62,6 @@ ParallelMarkovChainMonteCarloDecision::ParallelMarkovChainMonteCarloDecision(
   // Check whether the selected sampler is an MCMC sampler or not
   if (!_pmcmc)
     paramError("sampler", "The selected sampler is not of type MCMC.");
-
-  // Create communicator that only has processors with rows
-  _communicator.split(
-      _sampler.getNumberOfLocalRows() > 0 ? 1 : MPI_UNDEFINED, processor_id(), _local_comm);
 
   // Fetching the sampler characteristics
   _props = _pmcmc->getNumParallelProposals();
@@ -84,8 +78,7 @@ ParallelMarkovChainMonteCarloDecision::ParallelMarkovChainMonteCarloDecision(
 }
 
 void
-ParallelMarkovChainMonteCarloDecision::computeEvidence(std::vector<Real> & evidence,
-                                                       DenseMatrix<Real> & inputs_matrix)
+PMCMCDecision::computeEvidence(std::vector<Real> & evidence, const DenseMatrix<Real> & input_matrix)
 {
   std::vector<Real> out1(_num_confg_values);
   std::vector<Real> out2(_num_confg_values);
@@ -93,7 +86,7 @@ ParallelMarkovChainMonteCarloDecision::computeEvidence(std::vector<Real> & evide
   {
     evidence[i] = 0.0;
     for (unsigned int j = 0; j < _priors.size(); ++j)
-      evidence[i] += (std::log(_priors[j]->pdf(inputs_matrix(i, j))) -
+      evidence[i] += (std::log(_priors[j]->pdf(input_matrix(i, j))) -
                       std::log(_priors[j]->pdf(_data_prev(i, j))));
     for (unsigned int j = 0; j < _num_confg_values; ++j)
     {
@@ -112,30 +105,28 @@ ParallelMarkovChainMonteCarloDecision::computeEvidence(std::vector<Real> & evide
         evidence[i] -= _likelihoods[j]->function(out2);
     }
     else
-    {
       for (unsigned int j = 0; j < _likelihoods.size(); ++j)
         evidence[i] += (_likelihoods[j]->function(out1) - _likelihoods[j]->function(out2));
-    }
   }
 }
 
 void
-ParallelMarkovChainMonteCarloDecision::computeTransitionVector(std::vector<Real> & tv,
-                                                               std::vector<Real> & /*evidence*/)
+PMCMCDecision::computeTransitionVector(std::vector<Real> & tv,
+                                       const std::vector<Real> & /*evidence*/)
 {
   tv.assign(_props, 1.0);
 }
 
 void
-ParallelMarkovChainMonteCarloDecision::nextSamples(std::vector<Real> & req_inputs,
-                                                   DenseMatrix<Real> & inputs_matrix,
-                                                   const std::vector<Real> & tv,
-                                                   const unsigned int & parallel_index)
+PMCMCDecision::nextSamples(std::vector<Real> & req_inputs,
+                           DenseMatrix<Real> & input_matrix,
+                           const std::vector<Real> & tv,
+                           const unsigned int & parallel_index)
 {
   if (tv[parallel_index] >= _rnd_vec[parallel_index])
   {
     for (unsigned int k = 0; k < _sampler.getNumberOfCols() - _num_confg_params; ++k)
-      req_inputs[k] = inputs_matrix(parallel_index, k);
+      req_inputs[k] = input_matrix(parallel_index, k);
     _variance[parallel_index] = _new_var_samples[parallel_index];
   }
   else
@@ -143,7 +134,7 @@ ParallelMarkovChainMonteCarloDecision::nextSamples(std::vector<Real> & req_input
     for (unsigned int k = 0; k < _sampler.getNumberOfCols() - _num_confg_params; ++k)
     {
       req_inputs[k] = _data_prev(parallel_index, k);
-      inputs_matrix(parallel_index, k) = _data_prev(parallel_index, k);
+      input_matrix(parallel_index, k) = _data_prev(parallel_index, k);
     }
     if (_var_prior)
       _variance[parallel_index] = _var_prev[parallel_index];
@@ -153,7 +144,7 @@ ParallelMarkovChainMonteCarloDecision::nextSamples(std::vector<Real> & req_input
 }
 
 void
-ParallelMarkovChainMonteCarloDecision::execute()
+PMCMCDecision::execute()
 {
   if (_sampler.getNumberOfLocalRows() == 0 || _check_step == _step)
   {
@@ -171,7 +162,7 @@ ParallelMarkovChainMonteCarloDecision::execute()
   }
   _local_comm.sum(data_in.get_values());
   _outputs_required = _output_value;
-  _local_comm.allgather(_outputs_required); // _local_comm.gather(0, _outputs_required);
+  _local_comm.allgather(_outputs_required);
 
   // Compute the evidence and transition vectors
   std::vector<Real> evidence(_props);

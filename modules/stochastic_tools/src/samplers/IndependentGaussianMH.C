@@ -7,18 +7,16 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "IndependentGaussianMetropolisHastings.h"
+#include "IndependentGaussianMH.h"
 #include "Normal.h"
 #include "TruncatedNormal.h"
 
-registerMooseObjectAliased("StochasticToolsApp",
-                           IndependentGaussianMetropolisHastings,
-                           "IndependentGaussianMH");
+registerMooseObject("StochasticToolsApp", IndependentGaussianMH);
 
 InputParameters
-IndependentGaussianMetropolisHastings::validParams()
+IndependentGaussianMH::validParams()
 {
-  InputParameters params = ParallelMarkovChainMonteCarloBase::validParams();
+  InputParameters params = PMCMCBase::validParams();
   params.addClassDescription("Perform M-H MCMC sampling with independent Gaussian propoposals.");
   params.addRequiredParam<ReporterName>("seed_inputs",
                                         "Reporter with seed inputs values for the next proposals.");
@@ -27,9 +25,8 @@ IndependentGaussianMetropolisHastings::validParams()
   return params;
 }
 
-IndependentGaussianMetropolisHastings::IndependentGaussianMetropolisHastings(
-    const InputParameters & parameters)
-  : ParallelMarkovChainMonteCarloBase(parameters),
+IndependentGaussianMH::IndependentGaussianMH(const InputParameters & parameters)
+  : PMCMCBase(parameters),
     _seed_inputs(getReporterValue<std::vector<Real>>("seed_inputs")),
     _std_prop(getParam<std::vector<Real>>("std_prop"))
 {
@@ -39,18 +36,19 @@ IndependentGaussianMetropolisHastings::IndependentGaussianMetropolisHastings(
 }
 
 void
-IndependentGaussianMetropolisHastings::proposeSamples(const unsigned int seed_value)
+IndependentGaussianMH::proposeSamples(const unsigned int seed_value)
 {
   std::vector<Real> old_sample = (_step > decisionStep()) ? _seed_inputs : _initial_values;
   for (unsigned int j = 0; j < _num_parallel_proposals; ++j)
-  {
     for (unsigned int i = 0; i < _priors.size(); ++i)
     {
-      if (_lb)
-        _new_samples[j][i] = TruncatedNormal::quantile(
-            getRand(seed_value), old_sample[i], _std_prop[i], (*_lb)[i], (*_ub)[i]);
+      if (_lower_bound)
+        _new_samples[j][i] = TruncatedNormal::quantile(getRand(seed_value),
+                                                       old_sample[i],
+                                                       _std_prop[i],
+                                                       (*_lower_bound)[i],
+                                                       (*_upper_bound)[i]);
       else
         _new_samples[j][i] = Normal::quantile(getRand(seed_value), old_sample[i], _std_prop[i]);
     }
-  }
 }
