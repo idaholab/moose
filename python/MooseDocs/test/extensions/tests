@@ -55,6 +55,11 @@
       input = test_alert.py
       detail = "creating alert text boxes,"
     []
+    [tagging]
+      type = PythonUnitTest
+      input = test_tagging.py
+      detail = "creating tag dict,"
+    []
     [media]
       type = PythonUnitTest
       input = test_media.py

@@ -105,10 +105,12 @@ class TaggingCommand(command.CommandComponent):
                     if existing_dictionary ==1 and first_flag==0:
                         print('Existing / Not Adding Tag to name Dictionary: \n', PageData['name'])
                     break
-                
-        self.extension.database['data'].append(PageData)
-        print("DATABASE")
-        print(self.extension.database)
+
+
+
+        # self.extension.database['data'].append(PageData)
+        # print("DATABASE")
+        # print(self.extension.database)
         # if not in set or first then save the new dict
         if existing_dictionary ==0 or first_flag==1:
             if first_flag ==0: # Dont want to append the 1st entry twice
