@@ -14,13 +14,13 @@ registerMooseObject("StochasticToolsApp", AffineInvariantStretchDecision);
 InputParameters
 AffineInvariantStretchDecision::validParams()
 {
-  InputParameters params = ParallelMarkovChainMonteCarloDecision::validParams();
+  InputParameters params = PMCMCDecision::validParams();
   params.addClassDescription("Perform decision making for Affine Invariant stretch MCMC.");
   return params;
 }
 
 AffineInvariantStretchDecision::AffineInvariantStretchDecision(const InputParameters & parameters)
-  : ParallelMarkovChainMonteCarloDecision(parameters),
+  : PMCMCDecision(parameters),
     _aiss(dynamic_cast<const AffineInvariantStretchSampler *>(&_sampler)),
     _step_size(_aiss->getAffineStepSize())
 {
@@ -31,7 +31,7 @@ AffineInvariantStretchDecision::AffineInvariantStretchDecision(const InputParame
 
 void
 AffineInvariantStretchDecision::computeTransitionVector(std::vector<Real> & tv,
-                                                        std::vector<Real> & evidence)
+                                                        const std::vector<Real> & evidence)
 {
   for (unsigned int i = 0; i < tv.size(); ++i)
     tv[i] = std::exp(std::min((_priors.size() - 1) * std::log(_step_size[i]) + evidence[i], 0.0));

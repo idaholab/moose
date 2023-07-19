@@ -24,6 +24,13 @@ public:
 
   virtual Real function(const std::vector<Real> & x) const override;
 
+  /**
+   * Return the probability density function
+   * @param exp The experimental measurement
+   * @param model The model prediction
+   * @param noise The standard deviation
+   * @param log_likelihood Bool to return the log likelihood value
+   */
   static Real function(const std::vector<Real> & exp,
                        const std::vector<Real> & model,
                        const Real & noise,
@@ -31,7 +38,7 @@ public:
 
 protected:
   /// return log-likelihood or likelihood
-  const bool & _log_likelihood;
+  const bool _log_likelihood;
 
   /// Noise value
   const Real & _noise;

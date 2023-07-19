@@ -18,7 +18,7 @@ InputParameters
 AddLikelihoodAction::validParams()
 {
   InputParameters params = MooseObjectAction::validParams();
-  params.addClassDescription("Adds Likelihood objects contained.");
+  params.addClassDescription("Adds Likelihood objects.");
   return params;
 }
 

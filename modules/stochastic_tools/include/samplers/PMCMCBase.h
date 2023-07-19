@@ -10,16 +10,18 @@
 #pragma once
 
 #include "Sampler.h"
+#include "TransientInterface.h"
+#include "Distribution.h"
 
 /**
  * A base class used to perform Parallel Markov Chain Monte Carlo (MCMC) sampling
  */
-class ParallelMarkovChainMonteCarloBase : public Sampler
+class PMCMCBase : public Sampler, public TransientInterface
 {
 public:
   static InputParameters validParams();
 
-  ParallelMarkovChainMonteCarloBase(const InputParameters & parameters);
+  PMCMCBase(const InputParameters & parameters);
 
   /**
    * Return the number of configuration parameters.
@@ -62,7 +64,10 @@ public:
   virtual int decisionStep() const { return 1; }
 
 protected:
-  // Fill in the _new_samples vector of vectors (happens within sampleSetUp)
+  /**
+   * Fill in the _new_samples vector of vectors (happens within sampleSetUp)
+   * @param seed_value The seed for the random number generator
+   */
   virtual void proposeSamples(const unsigned int seed_value);
 
   // See Sampler.h for description
@@ -71,21 +76,34 @@ protected:
   // See Sampler.h for description
   virtual Real computeSample(dof_id_type row_index, dof_id_type col_index) override;
 
-  /// Sample a random index excluding a specified index
-  void randomIndex(const unsigned int & ub,
+  /**
+   * Sample a random index excluding a specified index
+   * @param upper_bound The upper bound provided
+   * @param exclude The index to be excluded from sampling
+   * @param seed The seed of the random number generator
+   * @param req_index The required index to be filled
+   */
+  void randomIndex(const unsigned int & upper_bound,
                    const unsigned int & exclude,
                    const unsigned int & seed,
                    unsigned int & req_index);
 
-  /// Sample two random indices without repitition excluding a specified index
-  void randomIndex2(const unsigned int & ub,
-                    const unsigned int & exclude,
-                    const unsigned int & seed,
-                    unsigned int & req_index1,
-                    unsigned int & req_index2);
+  /**
+   * Sample two random indices without repitition excluding a specified index
+   * @param upper_bound The upper bound provided
+   * @param exclude The index to be excluded from sampling
+   * @param seed The seed of the random number generator
+   * @param req_index1 The required index 1 to be filled
+   * @param req_index2 The required index 2 to be filled
+   */
+  void randomIndexPair(const unsigned int & upper_bound,
+                       const unsigned int & exclude,
+                       const unsigned int & seed,
+                       unsigned int & req_index1,
+                       unsigned int & req_index2);
 
   /// Number of parallel proposals to be made and subApps to be executed
-  const unsigned int & _num_parallel_proposals;
+  const unsigned int _num_parallel_proposals;
 
   /// Storage for prior distribution objects to be utilized
   std::vector<const Distribution *> _priors;
@@ -94,13 +112,10 @@ protected:
   const Distribution * _var_prior;
 
   /// Lower bounds for making the next proposal
-  const std::vector<Real> * _lb;
+  const std::vector<Real> * _lower_bound;
 
   /// Upper bounds for making the next proposal
-  const std::vector<Real> * _ub;
-
-  /// Track the current step of the main App
-  const int & _step;
+  const std::vector<Real> * _upper_bound;
 
   /// Ensure that the MCMC algorithm proceeds in a sequential fashion
   int _check_step;
@@ -121,10 +136,10 @@ private:
   /**
    * Generates combinations of the new samples with the experimental configurations
    */
-  void combineWithConfg();
+  void combineWithExperimentalConfig();
 
   /// Initialize a certain number of random seeds. Change from the default only if you have to.
-  const unsigned int & _num_random_seeds;
+  const unsigned int _num_random_seeds;
 
   /// Configuration values
   std::vector<std::vector<Real>> _confg_values;

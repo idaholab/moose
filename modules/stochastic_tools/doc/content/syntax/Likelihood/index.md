@@ -10,7 +10,7 @@ A likelihood function is created by inheriting from `LikelihoodFunctionBase` and
 
 ## Example Input File Syntax
 
-!listing test/tests/reporters/likelihoods/gaussian_derived/main.i block=Likelihood
+!listing test/tests/likelihoods/gaussian_derived/main.i block=Likelihood
 
 !syntax list /Likelihood objects=True actions=False subsystems=False
 

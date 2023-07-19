@@ -10,20 +10,20 @@
 #pragma once
 
 #include "GeneralReporter.h"
-#include "ParallelMarkovChainMonteCarloBase.h"
+#include "PMCMCBase.h"
 #include "LikelihoodFunctionBase.h"
 #include "LikelihoodInterface.h"
 #include "Distribution.h"
 
 /**
- * ParallelMarkovChainMonteCarloDecision will help make sample accept/reject decisions in MCMC
+ * PMCMCDecision will help making sample accept/reject decisions in MCMC
  * schemes (for e.g., when performing Bayesian inference).
  */
-class ParallelMarkovChainMonteCarloDecision : public GeneralReporter, public LikelihoodInterface
+class PMCMCDecision : public GeneralReporter, public LikelihoodInterface
 {
 public:
   static InputParameters validParams();
-  ParallelMarkovChainMonteCarloDecision(const InputParameters & parameters);
+  PMCMCDecision(const InputParameters & parameters);
   virtual void initialize() override {}
   virtual void finalize() override {}
   virtual void execute() override;
@@ -31,24 +31,33 @@ public:
 protected:
   /**
    * Compute the evidence (aka, betterness of the proposed sample vs the previous)
+   * @param evidence The evidence vector to be filled
+   * @param input_matrix The matrix of proposed inputs that are provided
    */
-  virtual void computeEvidence(std::vector<Real> & evidence, DenseMatrix<Real> & inputs_matrix);
+  virtual void computeEvidence(std::vector<Real> & evidence,
+                               const DenseMatrix<Real> & input_matrix);
 
   /**
    * Compute the transition probability vector (after the computation of evidence)
+   * @param tv The transition probability vector to be filled
+   * @param evidence The vector of evidences provided
    */
-  virtual void computeTransitionVector(std::vector<Real> & tv, std::vector<Real> & evidence);
+  virtual void computeTransitionVector(std::vector<Real> & tv, const std::vector<Real> & evidence);
 
   /**
    * Resample inputs given the transition vector (after transition vector computed)
+   * @param req_inputs The vector of accepted samples to be filled
+   * @param input_matrix The matrix of proposed inputs provided
+   * @param tv The vector of transition probabilities provided
+   * @param parallel_index The current parallel proposal index provided
    */
   virtual void nextSamples(std::vector<Real> & req_inputs,
-                           DenseMatrix<Real> & inputs_matrix,
+                           DenseMatrix<Real> & input_matrix,
                            const std::vector<Real> & tv,
                            const unsigned int & parallel_index);
 
   /**
-   * Compute the next set of seeds to facilitate proposals
+   * Compute the next set of seeds to facilitate proposals.
    * Set to empty in base to permit flexibility for MCMC samplers
    */
   virtual void nextSeeds() {}
@@ -78,7 +87,7 @@ protected:
   Sampler & _sampler;
 
   /// MCMC sampler base
-  const ParallelMarkovChainMonteCarloBase * const _pmcmc;
+  const PMCMCBase * const _pmcmc;
 
   /// Storage for the number of parallel proposals
   dof_id_type _props;
@@ -111,11 +120,8 @@ protected:
   std::vector<Real> _outputs_prev;
 
 private:
-  /// Track the current step of the main App
-  const int & _step;
-
   /// Communicator that was split based on samples that have rows
-  libMesh::Parallel::Communicator _local_comm;
+  libMesh::Parallel::Communicator & _local_comm;
 
   /// Ensure that the MCMC algorithm proceeds in a sequential fashion
   int _check_step;

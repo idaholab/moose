@@ -8,14 +8,13 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "AffineInvariantStretchSampler.h"
-#include "TruncatedNormal.h"
 
 registerMooseObject("StochasticToolsApp", AffineInvariantStretchSampler);
 
 InputParameters
 AffineInvariantStretchSampler::validParams()
 {
-  InputParameters params = ParallelMarkovChainMonteCarloBase::validParams();
+  InputParameters params = PMCMCBase::validParams();
   params.addClassDescription("Perform Affine Invariant Ensemble MCMC with stretch sampler.");
   params.addRequiredParam<ReporterName>(
       "previous_state", "Reporter value with the previous state of all the walkers.");
@@ -27,17 +26,19 @@ AffineInvariantStretchSampler::validParams()
 }
 
 AffineInvariantStretchSampler::AffineInvariantStretchSampler(const InputParameters & parameters)
-  : ParallelMarkovChainMonteCarloBase(parameters),
+  : PMCMCBase(parameters),
     _step_size(getParam<Real>("step_size")),
     _previous_state(getReporterValue<std::vector<std::vector<Real>>>("previous_state")),
     _previous_state_var(getReporterValue<std::vector<Real>>("previous_state_var"))
 {
   if (_num_parallel_proposals < 3)
-    mooseError("At least three parallel proposals should be used for the Stretch Sampler.");
+    paramError("num_parallel_proposals",
+               "At least three parallel proposals should be used for the Stretch Sampler.");
 
   if (_num_parallel_proposals < _priors.size())
-    mooseWarning("It is recommended that the parallel proposals be greater than or equal to the "
-                 "inferred parameters.");
+    mooseWarning(
+        "It is recommended that the parallel proposals be greater than or equal to the "
+        "inferred parameters. This will allow the sampler to not get stuck on a hyper-plane.");
 
   // Assign the correct size to the step size vector
   _affine_step.resize(_num_parallel_proposals);
@@ -57,18 +58,20 @@ AffineInvariantStretchSampler::proposeSamples(const unsigned int seed_value)
     for (unsigned int i = 0; i < _priors.size(); ++i)
     {
       _new_samples[j][i] =
-          (_step > decisionStep())
+          (_t_step > decisionStep())
               ? (_previous_state[index_req][i] +
                  _affine_step[j] * (_previous_state[j][i] - _previous_state[index_req][i]))
               : _priors[i]->quantile(getRand(seed_value));
-      if (_lb)
+      if (_lower_bound)
         indicator =
-            (_new_samples[j][i] < (*_lb)[i] || _new_samples[j][i] > (*_ub)[i]) ? 1 : indicator;
+            (_new_samples[j][i] < (*_lower_bound)[i] || _new_samples[j][i] > (*_upper_bound)[i])
+                ? 1
+                : indicator;
     }
     if (_var_prior)
     {
       _new_var_samples[j] =
-          (_step > decisionStep())
+          (_t_step > decisionStep())
               ? (_previous_state_var[index_req] +
                  _affine_step[j] * (_previous_state_var[j] - _previous_state_var[index_req]))
               : _var_prior->quantile(getRand(seed_value));

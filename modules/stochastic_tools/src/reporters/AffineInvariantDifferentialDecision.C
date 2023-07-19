@@ -14,25 +14,23 @@ registerMooseObject("StochasticToolsApp", AffineInvariantDifferentialDecision);
 InputParameters
 AffineInvariantDifferentialDecision::validParams()
 {
-  InputParameters params = ParallelMarkovChainMonteCarloDecision::validParams();
+  InputParameters params = PMCMCDecision::validParams();
   params.addClassDescription("Perform decision making for Affine Invariant differential MCMC.");
   return params;
 }
 
 AffineInvariantDifferentialDecision::AffineInvariantDifferentialDecision(
     const InputParameters & parameters)
-  : ParallelMarkovChainMonteCarloDecision(parameters),
-    _aides(dynamic_cast<const AffineInvariantDifferentialEvolutionSampler *>(&_sampler))
+  : PMCMCDecision(parameters), _aides(dynamic_cast<const AffineInvariantDES *>(&_sampler))
 {
   // Check whether the selected sampler is a differential evolution sampler or not
   if (!_aides)
-    paramError("sampler",
-               "The selected sampler is not of type AffineInvariantDifferentialEvolutionSampler.");
+    paramError("sampler", "The selected sampler is not of type AffineInvariantDES.");
 }
 
 void
 AffineInvariantDifferentialDecision::computeTransitionVector(std::vector<Real> & tv,
-                                                             std::vector<Real> & evidence)
+                                                             const std::vector<Real> & evidence)
 {
   for (unsigned int i = 0; i < tv.size(); ++i)
     tv[i] = std::exp(std::min(evidence[i], 0.0));

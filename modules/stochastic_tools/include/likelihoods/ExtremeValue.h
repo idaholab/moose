@@ -12,28 +12,26 @@
 #include "Gaussian.h"
 
 /**
- * A class used to generate a truncated Gaussian likelihood of observing model predictions
+ * A class used to generate a generalized extreme value likelihood of observing model predictions
  */
-class TruncatedGaussian : public Gaussian
+class ExtremeValue : public Gaussian
 {
 public:
   static InputParameters validParams();
 
-  TruncatedGaussian(const InputParameters & parameters);
+  ExtremeValue(const InputParameters & parameters);
 
   virtual Real function(const std::vector<Real> & x) const override;
 
+  /**
+   * Return the probability density function
+   * @param exp The experimental measurement
+   * @param model The model prediction
+   * @param noise The scale value
+   * @param log_likelihood Bool to return the log likelihood value
+   */
   static Real function(const std::vector<Real> & exp,
                        const std::vector<Real> & model,
                        const Real & noise,
-                       const Real & lb,
-                       const Real & ub,
                        const bool & log_likelihood);
-
-private:
-  /// Lower bound
-  const Real & _lb;
-
-  /// Upper bound
-  const Real & _ub;
 };

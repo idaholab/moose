@@ -9,12 +9,12 @@
 
 #pragma once
 
-#include "ParallelMarkovChainMonteCarloBase.h"
+#include "PMCMCBase.h"
 
 /**
  * A class for performing Affine Invariant Ensemble MCMC with stretch sampler
  */
-class AffineInvariantStretchSampler : public ParallelMarkovChainMonteCarloBase
+class AffineInvariantStretchSampler : public PMCMCBase
 {
 public:
   static InputParameters validParams();
@@ -32,7 +32,7 @@ protected:
   virtual void proposeSamples(const unsigned int seed_value) override;
 
   /// The step size for the stretch sampler
-  const Real & _step_size;
+  const Real _step_size;
 
   /// Reporter value with the previous state of all the walkers
   const std::vector<std::vector<Real>> & _previous_state;

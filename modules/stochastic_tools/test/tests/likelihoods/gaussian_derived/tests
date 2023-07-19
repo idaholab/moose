@@ -1,6 +1,6 @@
 [Tests]
     issues = '#23837'
-    design = 'Gaussian.md TruncatedGaussian.md'
+    design = 'Gaussian.md TruncatedGaussian.md ExtremeValue.md'
     [calculate_likelihoods]
       requirement = 'The system shall be be able to calculate the likelihood values when '
       [loglikelihood_scalar]
@@ -27,10 +27,10 @@
         input = main.i
         allow_test_objects = true
         jsondiff = 'truncatedgaussian.json'
-        cli_args = "Likelihood/gaussian/type='TruncatedGaussian' Likelihood/gaussian/lb='-1.0' Likelihood/gaussian/ub='1.0' Outputs/file_base='truncatedgaussian'"
+        cli_args = "Likelihood/gaussian/type='TruncatedGaussian' Likelihood/gaussian/lower_bound='-1.0' Likelihood/gaussian/upper_bound='1.0' Outputs/file_base='truncatedgaussian'"
         min_parallel = 2
         max_parallel = 2
-        detail = 'using a Truncated Gaussian type with likelihoods requested and model/experiment values are scalars. '
+        detail = 'using a truncated Gaussian type with likelihoods requested and model/experiment values are scalars. '
       []
       [extremevalue]
         type = 'JSONDiff'
@@ -48,7 +48,8 @@
       [truncatedgaussian_bounds]
         type = RunException
         input = main.i
-        cli_args = "Likelihood/gaussian/type=TruncatedGaussian Likelihood/gaussian/lb=1.0 Likelihood/gaussian/ub=-1.0"
+        allow_test_objects = True
+        cli_args = "Likelihood/gaussian/type=TruncatedGaussian Likelihood/gaussian/lower_bound=1.0 Likelihood/gaussian/upper_bound=-1.0"
         detail = 'the specified lower bound is greater than the upper bound; '
         expect_err = "The specified lower bound should be less than the upper bound."
       []

@@ -1,6 +1,6 @@
 [Tests]
   issues = '#23837'
-  design = 'ParallelMarkovChainMonteCarloBase.md'
+  design = 'PMCMCBase.md'
   [mcmc_sampling]
     requirement = 'The system shall be be able to perform MCMC sampling when '
     [pmcmc_base]
@@ -17,7 +17,7 @@
       input = main_base.i
       allow_test_objects = true
       jsondiff = 'mcmc_base_bounds.json'
-      cli_args = "Samplers/sample/lb='-2.0 -2.0' Samplers/sample/ub='2.0 2.0' Outputs/file_base='mcmc_base_bounds'"
+      cli_args = "Samplers/sample/lower_bound='-2.0 -2.0' Samplers/sample/upper_bound='2.0 2.0' Outputs/file_base='mcmc_base_bounds'"
       min_parallel = 2
       max_parallel = 2
       detail = 'using the base MCMC class with bounds specified; '
@@ -74,14 +74,14 @@
     [pmcmc_base_bounds1]
       type = RunException
       input = main_base.i
-      cli_args = "Samplers/sample/lb='-2.0 -2.0'"
+      cli_args = "Samplers/sample/lower_bound='-2.0 -2.0'"
       detail = 'only the lower bounds specified; '
       expect_err = "Both lower and upper bounds should be specified."
     []
     [pmcmc_base_bounds2]
       type = RunException
       input = main_base.i
-      cli_args = "Samplers/sample/lb='-2.0 -2.0' Samplers/sample/ub='2.0'"
+      cli_args = "Samplers/sample/lower_bound='-2.0 -2.0' Samplers/sample/upper_bound='2.0'"
       detail = 'the specified bounds are not of the same size; '
       expect_err = "Lower and upper bounds should be of the same size."
     []

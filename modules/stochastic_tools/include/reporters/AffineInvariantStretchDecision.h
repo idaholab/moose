@@ -9,13 +9,13 @@
 
 #pragma once
 
-#include "ParallelMarkovChainMonteCarloDecision.h"
+#include "PMCMCDecision.h"
 #include "AffineInvariantStretchSampler.h"
 
 /**
  * A class for performing Affine Invariant Ensemble MCMC with stretch sampler
  */
-class AffineInvariantStretchDecision : public ParallelMarkovChainMonteCarloDecision
+class AffineInvariantStretchDecision : public PMCMCDecision
 {
 public:
   static InputParameters validParams();
@@ -24,7 +24,7 @@ public:
 
 protected:
   virtual void computeTransitionVector(std::vector<Real> & tv,
-                                       std::vector<Real> & evidence) override;
+                                       const std::vector<Real> & evidence) override;
 
 private:
   /// Affine stretch sampler

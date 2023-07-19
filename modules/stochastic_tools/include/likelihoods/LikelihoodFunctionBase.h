@@ -22,7 +22,8 @@ public:
   LikelihoodFunctionBase(const InputParameters & parameters);
 
   /**
-   * Compute the probability density or mass function at vector x
+   * Return the probability density or mass function at vector x
+   * @param x The input vector x
    */
   virtual Real function(const std::vector<Real> & x) const = 0;
 };

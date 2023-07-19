@@ -7,58 +7,54 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "IndependentMetropolisHastingsDecision.h"
+#include "IndependentMHDecision.h"
 
-registerMooseObjectAliased("StochasticToolsApp",
-                           IndependentMetropolisHastingsDecision,
-                           "IndependentMHDecision");
+registerMooseObject("StochasticToolsApp", IndependentMHDecision);
 
 InputParameters
-IndependentMetropolisHastingsDecision::validParams()
+IndependentMHDecision::validParams()
 {
-  InputParameters params = ParallelMarkovChainMonteCarloDecision::validParams();
+  InputParameters params = PMCMCDecision::validParams();
   params.addClassDescription("Perform decision making for independent Metropolis-Hastings MCMC.");
   params.addParam<ReporterValueName>(
       "seed_input", "seed_input", "The seed vector input for proposing new samples.");
   return params;
 }
 
-IndependentMetropolisHastingsDecision::IndependentMetropolisHastingsDecision(
-    const InputParameters & parameters)
-  : ParallelMarkovChainMonteCarloDecision(parameters),
-    _igmh(dynamic_cast<const IndependentGaussianMetropolisHastings *>(&_sampler)),
+IndependentMHDecision::IndependentMHDecision(const InputParameters & parameters)
+  : PMCMCDecision(parameters),
+    _igmh(dynamic_cast<const IndependentGaussianMH *>(&_sampler)),
     _seed_input(declareValue<std::vector<Real>>("seed_input"))
 {
-  // Check whether the selected sampler is a stretch sampler or not
+  // Check whether the selected sampler is a M-H sampler or not
   if (!_igmh)
-    paramError("sampler",
-               "The selected sampler is not of type IndependentGaussianMetropolisHastings.");
+    paramError("sampler", "The selected sampler is not of type IndependentGaussianMH.");
 
   _seed_outputs.resize(_num_confg_values);
   _tpm_modified.assign(_props + 1, 1.0 / (_props + 1));
 }
 
 void
-IndependentMetropolisHastingsDecision::computeEvidence(std::vector<Real> & evidence,
-                                                       DenseMatrix<Real> & inputs_matrix)
+IndependentMHDecision::computeEvidence(std::vector<Real> & evidence,
+                                       const DenseMatrix<Real> & input_matrix)
 {
-  std::vector<Real> out1(_num_confg_values);
+  std::vector<Real> out(_num_confg_values);
   for (unsigned int i = 0; i < evidence.size(); ++i)
   {
     evidence[i] = 0.0;
     for (unsigned int j = 0; j < _priors.size(); ++j)
-      evidence[i] += (std::log(_priors[j]->pdf(inputs_matrix(i, j))) -
+      evidence[i] += (std::log(_priors[j]->pdf(input_matrix(i, j))) -
                       std::log(_priors[j]->pdf(_seed_input[j])));
     for (unsigned int j = 0; j < _num_confg_values; ++j)
-      out1[j] = _outputs_required[j * _props + i];
+      out[j] = _outputs_required[j * _props + i];
     for (unsigned int j = 0; j < _likelihoods.size(); ++j)
-      evidence[i] += (_likelihoods[j]->function(out1) - _likelihoods[j]->function(_seed_outputs));
+      evidence[i] += (_likelihoods[j]->function(out) - _likelihoods[j]->function(_seed_outputs));
   }
 }
 
 void
-IndependentMetropolisHastingsDecision::computeTransitionVector(std::vector<Real> & tv,
-                                                               std::vector<Real> & evidence)
+IndependentMHDecision::computeTransitionVector(std::vector<Real> & tv,
+                                               const std::vector<Real> & evidence)
 {
   for (unsigned int i = 0; i < tv.size(); ++i)
     tv[i] = (1.0 / tv.size()) * std::exp(std::min(evidence[i], 0.0));
@@ -68,10 +64,10 @@ IndependentMetropolisHastingsDecision::computeTransitionVector(std::vector<Real>
 }
 
 void
-IndependentMetropolisHastingsDecision::nextSamples(std::vector<Real> & req_inputs,
-                                                   DenseMatrix<Real> & inputs_matrix,
-                                                   const std::vector<Real> & /*tv*/,
-                                                   const unsigned int & parallel_index)
+IndependentMHDecision::nextSamples(std::vector<Real> & req_inputs,
+                                   DenseMatrix<Real> & input_matrix,
+                                   const std::vector<Real> & /*tv*/,
+                                   const unsigned int & parallel_index)
 {
   const bool value = (_tpm_modified[0] == 1.0 / (_props + 1));
   if (!value)
@@ -81,7 +77,7 @@ IndependentMetropolisHastingsDecision::nextSamples(std::vector<Real> & req_input
     if (index < _props)
     {
       for (unsigned int k = 0; k < _sampler.getNumberOfCols() - _num_confg_params; ++k)
-        req_inputs[k] = inputs_matrix(index, k);
+        req_inputs[k] = input_matrix(index, k);
       for (unsigned int k = 0; k < _num_confg_values; ++k)
         _outputs_required[k * _props + parallel_index] = _outputs_sto[k * _props + index];
     }
@@ -95,13 +91,13 @@ IndependentMetropolisHastingsDecision::nextSamples(std::vector<Real> & req_input
   else
   {
     for (unsigned int k = 0; k < _sampler.getNumberOfCols() - _num_confg_params; ++k)
-      req_inputs[k] = inputs_matrix(parallel_index, k);
+      req_inputs[k] = input_matrix(parallel_index, k);
     _variance[parallel_index] = _new_var_samples[parallel_index];
   }
 }
 
 void
-IndependentMetropolisHastingsDecision::nextSeeds()
+IndependentMHDecision::nextSeeds()
 {
   _seed_input = _inputs[_props - 1];
   for (unsigned int k = 0; k < _num_confg_values; ++k)
