@@ -229,10 +229,14 @@ Real
 FeatureVolumeVectorPostprocessor::computeIntegral(std::size_t var_index) const
 {
   Real sum = 0;
-
   for (unsigned int qp = 0; qp < _qrule->n_points(); ++qp)
-    sum += _JxW[qp] * _coord[qp] * (*_coupled_sln[var_index])[qp];
-
+  {
+    Real entity_value = (*_coupled_sln[var_index])[qp];
+    Real threshold = _feature_counter.getThreshold(var_index);
+    bool is_selected = _feature_counter.compareValueWithThreshold(entity_value, threshold);
+    Real value = is_selected ? 1.0 : 0.0;
+    sum += _JxW[qp] * _coord[qp] * value;
+  }
   return sum;
 }
 
@@ -283,7 +287,12 @@ FeatureVolumeVectorPostprocessor::computeFaceIntegral(std::size_t var_index) con
 {
   Real sum = 0;
   for (unsigned int qp = 0; qp < _qrule_face->n_points(); ++qp)
-    sum += _JxW_face[qp] * _coord[qp] * (*_coupled_sln[var_index])[qp];
-
+  {
+    Real entity_value = (*_coupled_sln[var_index])[qp];
+    Real threshold = _feature_counter.getThreshold(var_index);
+    bool is_selected = _feature_counter.compareValueWithThreshold(entity_value, threshold);
+    Real value = is_selected ? 1.0 : 0.0;
+    sum += _JxW_face[qp] * _coord[qp] * value;
+  }
   return sum;
 }
