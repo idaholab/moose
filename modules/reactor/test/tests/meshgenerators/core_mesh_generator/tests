@@ -44,7 +44,7 @@
     expect_out = 'Global metadata.+mesh_dimensions: 3.+mesh_geometry: Square.+axial_mesh_sizes: 1.+axial_mesh_intervals: 1.+Core-level metadata.+cmg.+assembly_names: amg1, amg2.+assembly_lattice:.+0, 1.+1, 0.+Assembly-level metadata.+amg1.+assembly_type: 1.+pin_names: pin2.+pin_lattice:.+0, 0.+0, 0.+Assembly-level metadata.+amg2.+assembly_type: 2.+pin_names: pin3, pin1, pin2.+pin_lattice:.+0, 1.+1, 2.+Pin-level metadata.+pin2.+pin_type: 2.+background_region_id: 2.+Pin-level metadata.+pin3.+pin_type: 3.+background_region_id: 4.+Pin-level metadata.+pin1.+pin_type: 1.+background_region_id: 2'
   []
   [core_shared_assembly_ids]
-    requirement = 'The system shall throw an error if a core is composed of assemblies with shared assembly_type ids'
+    requirement = 'The system shall throw an error if a core is composed of different assemblies with a shared assembly type id'
     type = 'RunException'
     input = 'core.i'
     cli_args = "Mesh/rmp/axial_regions='1.0'
@@ -65,7 +65,7 @@
     expect_err = 'Constituent assemblies have shared assembly_type ids but different names.'
   []
   [core_shared_pin_ids]
-    requirement = 'The system shall throw an error if a core is composed of pins with shared pin_type ids'
+    requirement = 'The system shall throw an error if a core is composed of different pins with a shared pin type id'
     type = 'RunException'
     input = 'core.i'
     cli_args = "Mesh/rmp/axial_regions='1.0'

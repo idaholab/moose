@@ -291,7 +291,7 @@ AssemblyMeshGenerator::AssemblyMeshGenerator(const InputParameters & parameters)
     {
       std::vector<subdomain_id_type> duct_block_ids;
       std::vector<SubdomainName> duct_block_names;
-      for (std::size_t duct_it = 0; duct_it < _duct_region_ids[0].size(); ++duct_it)
+      for (const auto duct_it : index_range(_duct_region_ids[0]))
       {
         const auto duct_block_name =
             "RGMB_ASSEMBLY" + std::to_string(_assembly_type) + "_R" + std::to_string(duct_it + 1);
@@ -354,11 +354,12 @@ AssemblyMeshGenerator::AssemblyMeshGenerator(const InputParameters & parameters)
     _pin_region_id_map.insert(
         std::pair<subdomain_id_type, std::vector<std::vector<subdomain_id_type>>>(
             region_id_map.begin()->first, region_id_map.begin()->second));
-    std::map<subdomain_id_type, std::vector<std::vector<std::string>>> block_name_map =
-        getMeshProperty<std::map<subdomain_id_type, std::vector<std::vector<std::string>>>>(
+    subdomain_id_type pin_type_id = getMeshProperty<subdomain_id_type>(RGMB::pin_type, pinMG);
+    std::vector<std::vector<std::string>> pin_block_names =
+        getMeshProperty<std::vector<std::vector<std::string>>>(
             RGMB::pin_block_names, pinMG);
     _pin_block_name_map.insert(std::pair<subdomain_id_type, std::vector<std::vector<std::string>>>(
-        block_name_map.begin()->first, block_name_map.begin()->second));
+        pin_type_id, pin_block_names));
   }
 
   if (_extrude && _mesh_dimensions == 3)
@@ -435,10 +436,10 @@ AssemblyMeshGenerator::generateMetadata()
   // Determine constituent pin names and define lattice as metadata
   std::vector<std::vector<int>> pin_name_lattice;
   std::vector<std::string> input_pin_names;
-  for (unsigned int i = 0; i < _pattern.size(); ++i)
+  for (const auto i : index_range(_pattern))
   {
     std::vector<int> pin_name_idx(_pattern[i].size());
-    for (unsigned int j = 0; j < _pattern[i].size(); ++j)
+    for (const auto j : index_range(_pattern[i]))
     {
       const auto input_pin_name = _inputs[_pattern[i][j]];
       const auto it = std::find(input_pin_names.begin(), input_pin_names.end(), input_pin_name);

@@ -188,7 +188,7 @@ protected:
   ///@}
 
   /**
-   * Method for copying attribute from input mesh meta-data store to current mesh meta-data store
+   * Method for copying attribute from input mesh meta-data store to current mesh meta-data store. This may often be avoided as getMeshProperty calls can traverse the tree of mesh generators to find a metadata instance
    */
   template <typename T>
   T & copyMeshProperty(const std::string & target_data_name,
@@ -200,7 +200,7 @@ protected:
 
   /**
    * Method for copying attribute from input mesh meta-data store to current mesh meta-data store,
-   * keeping source and target data names the same
+   * keeping source and target data names the same. This may often be avoided as getMeshProperty calls can traverse the tree of mesh generators to find a metadata instance
    */
   template <typename T>
   T & copyMeshProperty(const std::string & source_data_name, const std::string & source_mesh)

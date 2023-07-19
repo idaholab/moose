@@ -100,29 +100,29 @@ ReactorGeometryMeshBuilderBase::printReactorMetadata(const std::string geometry_
 {
   if (first_function_call)
   {
-    Moose::out << "Global metadata defined using Reactor Geometry Mesh Builder:" << std::endl;
+    _console << "Global metadata defined using Reactor Geometry Mesh Builder:" << std::endl;
     printGlobalReactorMetadata();
   }
   if (geometry_type == "core")
   {
-    Moose::out << "Core-level metadata defined using Reactor Geometry Mesh Builder for " << mg_name
+    _console << "Core-level metadata defined using Reactor Geometry Mesh Builder for " << mg_name
                << ":" << std::endl;
     printCoreMetadata(mg_name, first_function_call);
   }
   else if (geometry_type == "assembly")
   {
-    Moose::out << "Assembly-level metadata defined using Reactor Geometry Mesh Builder for "
+    _console << "Assembly-level metadata defined using Reactor Geometry Mesh Builder for "
                << mg_name << ":" << std::endl;
     printAssemblyMetadata(mg_name, first_function_call);
   }
   else if (geometry_type == "pin")
   {
-    Moose::out << "Pin-level metadata defined using Reactor Geometry Mesh Builder for " << mg_name
+    _console << "Pin-level metadata defined using Reactor Geometry Mesh Builder for " << mg_name
                << ":" << std::endl;
     printPinMetadata(mg_name);
   }
   if (first_function_call)
-    Moose::out << std::endl;
+    _console << std::endl;
 }
 
 void
@@ -236,8 +236,8 @@ void
 ReactorGeometryMeshBuilderBase::printMetadataToConsole(const std::string metadata_name,
                                                        const std::string mg_name)
 {
-  Moose::out << "  " << metadata_name << ": "
-             << Moose::stringify(getMeshProperty<T>(metadata_name, mg_name)) << std::endl;
+  _console << "  " << metadata_name << ": "
+            << Moose::stringify(getMeshProperty<T>(metadata_name, mg_name)) << std::endl;
 }
 
 template <typename T>
@@ -246,7 +246,7 @@ ReactorGeometryMeshBuilderBase::print2dMetadataToConsole(const std::string metad
                                                          const std::string mg_name)
 {
   const auto metadata_value = getMeshProperty<std::vector<std::vector<T>>>(metadata_name, mg_name);
-  Moose::out << "  " << metadata_name << ":" << std::endl;
+  _console << "  " << metadata_name << ":" << std::endl;
   for (const auto & row : metadata_value)
-    Moose::out << "    " << Moose::stringify(row) << std::endl;
+    _console << "    " << Moose::stringify(row) << std::endl;
 }

@@ -1,4 +1,4 @@
-//* This file is part of the MOOSE framework
+ //* This file is part of the MOOSE framework
 //* https://www.mooseframework.org
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
@@ -360,7 +360,7 @@ PinMeshGenerator::PinMeshGenerator(const InputParameters & parameters)
 
       auto num_sides = (_mesh_geometry == "Square") ? 4 : 6;
       std::vector<BoundaryName> boundaries_to_delete = {};
-      for (int i = 0; i < num_sides; i++)
+      for (const auto i : make_range(num_sides))
         boundaries_to_delete.insert(boundaries_to_delete.end(),
                                     {std::to_string(10001 + i), std::to_string(15001 + i)});
       params.set<std::vector<BoundaryName>>("boundary_names") = boundaries_to_delete;
@@ -443,8 +443,6 @@ PinMeshGenerator::generateMetadata()
   // by future mesh generators
   std::map<subdomain_id_type, std::vector<std::vector<subdomain_id_type>>> region_id_map{
       {_pin_type, _region_ids}};
-  std::map<subdomain_id_type, std::vector<std::vector<std::string>>> block_name_map;
-  block_name_map[_pin_type] = _block_names;
 
   // Declare mesh properties that need to be moved up to the assembly level
   if (_is_assembly)
@@ -457,7 +455,7 @@ PinMeshGenerator::generateMetadata()
     declareMeshProperty(RGMB::pin_region_id_map, pin_region_id_map);
     std::map<subdomain_id_type, std::vector<std::vector<std::string>>> pin_block_name_map;
     pin_block_name_map.insert(std::pair<subdomain_id_type, std::vector<std::vector<std::string>>>(
-        block_name_map.begin()->first, block_name_map.begin()->second));
+        _pin_type, _block_names));
     declareMeshProperty(RGMB::pin_block_name_map, pin_block_name_map);
     declareMeshProperty(RGMB::background_block_name, std::vector<std::string>());
     declareMeshProperty(RGMB::duct_block_names, std::vector<std::vector<std::string>>());
@@ -467,7 +465,7 @@ PinMeshGenerator::generateMetadata()
   {
     declareMeshProperty(RGMB::pin_type, _pin_type);
     declareMeshProperty(RGMB::pin_region_ids, region_id_map);
-    declareMeshProperty(RGMB::pin_block_names, block_name_map);
+    declareMeshProperty(RGMB::pin_block_names, _block_names);
   }
 
   // Set metadata to describe pin attributes
@@ -488,9 +486,9 @@ PinMeshGenerator::generateMetadata()
       n_axial_levels, std::vector<subdomain_id_type>(_duct_halfpitch.size()));
   std::vector<subdomain_id_type> background_region_ids(n_axial_levels);
 
-  for (unsigned int axial_idx = 0; axial_idx < n_axial_levels; ++axial_idx)
+  for (const auto axial_idx : make_range(n_axial_levels))
   {
-    for (unsigned int ring_idx = 0; ring_idx < _ring_radii.size(); ++ring_idx)
+    for (const auto ring_idx : index_range(_ring_radii))
       ring_region_ids[axial_idx][ring_idx] = _region_ids[axial_idx][ring_idx];
 
     background_region_ids[axial_idx] = _region_ids[axial_idx][_ring_radii.size()];

@@ -171,7 +171,7 @@ CoreMeshGenerator::CoreMeshGenerator(const InputParameters & parameters)
   std::map<subdomain_id_type, std::string> assembly_map_type_to_name;
   // Check that MG name for reactor params and assembly homogenization schemes are
   // consistent across all assemblies, and there is no overlap in pin_type / assembly_type ids
-  for (unsigned int i = 0; i < _inputs.size(); i++)
+  for (const auto i : index_range(_inputs))
   {
     // Skip if assembly name is equal to dummy assembly name
     if (_inputs[i] == _empty_key)
@@ -536,10 +536,10 @@ CoreMeshGenerator::generateMetadata()
   std::vector<std::vector<int>> assembly_name_lattice;
   std::vector<std::string> input_assembly_names;
   std::vector<std::string> input_pin_names;
-  for (unsigned int i = 0; i < _pattern.size(); ++i)
+  for (const auto i : index_range(_pattern))
   {
     std::vector<int> assembly_name_idx(_pattern[i].size());
-    for (unsigned int j = 0; j < _pattern[i].size(); ++j)
+    for (const auto j : index_range(_pattern[i]))
     {
       const auto input_assembly_name = _inputs[_pattern[i][j]];
       // Use an assembly type of -1 to represent a dummy assembly
