@@ -1,6 +1,7 @@
 # Writing an extension from scratch
 import os, re
 import pickle
+import logging
 from ..tree import tokens 
 from ..common import __init__ 
 from . import command 
@@ -32,6 +33,8 @@ import codecs
         {"name": "geochem", "path": "moose/modules/geochemistry/doc/content/modules/geochemistry/index.md", "key_vals": {"keyg": "valg", "keychem": "valuechem"}}, 
         {"name": "vortex", "path": "moose/modules/level_set/doc/content/modules/level_set/example_vortex.md", "key_vals": {"keyvor": "valvor", "key": "val", "key1": "val1"}}]
         }  """
+
+LOG = logging.getLogger(__name__)
 
 def make_extension(**kwargs):  #reqired extension
     return TaggingExtension(**kwargs)
@@ -103,7 +106,9 @@ class TaggingCommand(command.CommandComponent):
                 if PageData['name'] in d['name']:
                     existing_dictionary+=1
                     if existing_dictionary ==1 and first_flag==0:
-                        print('Existing / Not Adding Tag to name Dictionary: \n', PageData['name'])
+                        msg = "Tag already exists; not adding to 'name' dictionary: "
+                        msg += PageData['name']
+                        LOG.warning(msg)
                     break
 
 
