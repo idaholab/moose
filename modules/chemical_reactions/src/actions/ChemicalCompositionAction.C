@@ -203,17 +203,14 @@ ChemicalCompositionAction::ChemicalCompositionAction(const InputParameters & par
         mooseInfo("ChemicalCompositionAction species: 'ALL' specified in input file. Thermochimica "
                   "returned no possible species.");
 
-      _tokenized_species.resize(_species.size());
-      std::size_t indx = 0;
-      for (const auto i : make_range(species.size()))
-      {
-        indx = i == 0 ? 0 : n_db_species[i - 1];
-        for (const auto j : make_range(species[i].size()))
+      _species.clear();
+      _tokenized_species.clear();
+      for (const auto i : index_range(species))
+        for (const auto j : index_range(species[i]))
         {
-          _species[indx + j] = phases[i] + ":" + species[i][j];
-          _tokenized_species[indx + j] = std::make_pair(phases[i], species[i][j]);
+          _species.push_back(phases[i] + ":" + species[i][j]);
+          _tokenized_species.push_back(std::make_pair(phases[i], species[i][j]));
         }
-      }
       mooseInfo("ChemicalCompositionAction species: 'ALL' specified in input file. Using: ",
                 Moose::stringify(_species));
     }
