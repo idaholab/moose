@@ -6,6 +6,7 @@ export INSTALL_PATH=${PREFIX}/seacas
 export BUILD=YES
 export GNU_PARALLEL=NO
 export H5VERSION=V112
+export NEEDS_ZLIB=YES
 export JOBS=${MOOSE_JOBS:-2}
 
 # If on macOS, set COMPILER to clang

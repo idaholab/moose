@@ -1,5 +1,5 @@
 diff --git a/install-tpl.sh b/install-tpl.sh
-index 5a23107a04..a592c3b3c5 100755
+index 32f5256465..df1ffbe687 100755
 --- a/install-tpl.sh
 +++ b/install-tpl.sh
 @@ -215,7 +215,6 @@ fi
@@ -10,12 +10,21 @@ index 5a23107a04..a592c3b3c5 100755
 
  if [ "$NEEDS_SZIP" == "YES" ]
  then
-@@ -423,7 +422,7 @@ then
+@@ -358,7 +357,7 @@ then
+                 echo "${txtgrn}+++ Downloading...${txtrst}"
+                 rm -rf zlib-${zlib_version}
+                 rm -rf zlib-${zlib_version}.tar.gz
+-                wget --no-check-certificate https://zlib.net/fossils/zlib-${zlib_version}.tar.gz
++                curl --insecure -L -O https://zlib.net/fossils/zlib-${zlib_version}.tar.gz
+                 tar -xzf zlib-${zlib_version}.tar.gz
+                 rm -rf zlib-${zlib_version}.tar.gz
+             fi
+@@ -428,7 +427,7 @@ then
          if [ "${H5VERSION}" == "develop" ]; then
              git clone https://github.com/HDFGroup/hdf5.git hdf5-develop
          else
--            wget --no-check-certificate https://support.hdfgroup.org/ftp/HDF5/releases/hdf5-${hdf_base}/hdf5-${hdf_version}/src/hdf5-${hdf_version}.tar.bz2
-+            curl --insecure -L -O https://support.hdfgroup.org/ftp/HDF5/releases/hdf5-${hdf_base}/hdf5-${hdf_version}/src/hdf5-${hdf_version}.tar.bz2
+-            wget --no-check-certificate https://support.hdfgroup.org/ftp/HDF5/releases/hdf5-${hdf_base}/hdf5-${hdf_version}/src/hdf5-${hdf_version}${hdf_suffix}.tar.bz2
++            curl --insecure -L -O https://support.hdfgroup.org/ftp/HDF5/releases/hdf5-${hdf_base}/hdf5-${hdf_version}/src/hdf5-${hdf_version}${hdf_suffix}.tar.bz2
          fi
          if [ "${H5VERSION}" != "develop" ]
          then
