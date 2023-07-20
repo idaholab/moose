@@ -468,7 +468,8 @@ SolutionUserObject::initialSetup()
   _mesh = std::make_unique<ReplicatedMesh>(_communicator);
 
   // ExodusII mesh file supplied
-  if (MooseUtils::hasExtension(_mesh_file, "e", /*strip_exodus_ext =*/true))
+  if (MooseUtils::hasExtension(_mesh_file, "e", /*strip_exodus_ext =*/true) ||
+      MooseUtils::hasExtension(_mesh_file, "exo", true))
   {
     _file_type = "exodusII";
     readExodusII();
@@ -489,7 +490,7 @@ SolutionUserObject::initialSetup()
 
   // Produce an error for an unknown file type
   else
-    mooseError("In SolutionUserObject, invalid file type (only .xda, .xdr, and .e supported)");
+    mooseError("In SolutionUserObject, invalid file type: only .xda, .xdr, .exo and .e supported");
 
   // Initialize the serial solution vector
   _serialized_solution = NumericVector<Number>::build(_communicator);
