@@ -25,6 +25,9 @@ public:
   std::unique_ptr<MeshBase> generate() override;
 
 protected:
+  // Define metadata associated with AssemblyMeshGenerator
+  void generateMetadata();
+
   ///The names of the pins that compose the Assembly
   const std::vector<MeshGeneratorName> _inputs;
 

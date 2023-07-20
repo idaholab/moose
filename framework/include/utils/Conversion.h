@@ -65,6 +65,13 @@ stringify(const T & t)
   return os.str();
 }
 
+// overload for boolean type instead of simply printing 0 or 1
+inline std::string
+stringify(bool v)
+{
+  return v ? "true" : "false";
+}
+
 // overloads for integer types where std::to_string gives the same result and is faster
 inline std::string
 stringify(int v)

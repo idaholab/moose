@@ -32,9 +32,35 @@ The `AssemblyMeshGenerator` objects automatically assigns boundary information d
 
 If the assembly is extruded to three dimensions the top-most boundary ID must be assigned using [!param](/Mesh/ReactorMeshParams/top_boundary_id) and will have the name "top", while the bottom-most boundary must be assigned using [!param](/Mesh/ReactorMeshParams/bottom_boundary_id) and will have the name "bottom".
 
+## Metadata Information
+
+Users may be interested in defining additional metadata to represent the reactor geometry and region IDs assigned to each geometry zone, which may be useful to users who want mesh geometry and composition information without having to inspect the generated mesh itself. [!param](/Mesh/AssemblyMeshGenerator/show_rgmb_metadata) can be set to true in order to see the values of these metadata entries as console output. The following metadata is defined on the assembly mesh:
+
+- `assembly_type`: Value of type_id associated with assembly, equivalent to the input parameter [!param](/Mesh/AssemblyMeshGenerator/assembly_type)
+- `pitch`: Assembly pitch, equivalent to the input parameter [!param](/Mesh/ReactorMeshParams/assembly_pitch)
+- `is_single_pin`: Whether or not assembly mesh is represented by a single pin region or a lattice of pins, equivalent to the input parameter [!param](/Mesh/PinMeshGenerator/use_as_assembly).
+- `duct_halfpitches`: Length of apothems defining the duct locations, equivalent to the input parameter [`AssemblyMeshGenerator`](AssemblyMeshGenerator.md)/[!param](/Mesh/AssemblyMeshGenerator/duct_halfpitch)
+- `background_region_id`: 1-D vector of region_ids corresponding to axial zones of background regions of assembly mesh, equivalent to the input parameter [!param](/Mesh/AssemblyMeshGenerator/background_region_id).
+- `duct_region_ids`: 2-D vector of region ids corresponding to radial and axial zones within duct regions of assembly mesh, equivalent to the input parameter [!param](/Mesh/AssemblyMeshGenerator/duct_region_ids). Inner indexing is radial zones, while outer index is axial zones.
+
+If the assembly is represented as a single pin, the following metadata is also defined:
+
+- `ring_radii`: Length of ring radii comprising of assembly region, equivalent to [`PinMeshGenerator`](PinMeshGenerator.md)/[!param](/Mesh/PinMeshGenerator/ring_radii).
+- `ring_region_ids`: 2-D vector of region ids corresponding to radial and axial zones within ring regions of assembly mesh, corresponding to the ring-related region ids of the input parameter [`PinMeshGenerator`](PinMeshGenerator.md)/[!param](/Mesh/PinMeshGenerator/region_ids). Inner indexing is radial zones, while outer index is axial zones.
+- `is_homogenized`: Whether or not assembly mesh is homogenized, equivalent to the input parameter [`PinMeshGenerator`](PinMeshGenerator.md)/[!param](/Mesh/PinMeshGenerator/homogenized)
+
+If instead the assembly is represented as a lattice of pins, the following metadata is defined:
+
+- `pin_names`: List of mesh generator names of constituent pins in lattice.
+- `pin_lattice`: 2-D lattice of pins in assembly, where each location represents the 0-based index of the pin in the list of names under the `pin_names` metadata entry.
+
+For each of the pins listed in `pin_names`, the pin-level metadata is also displayed when [!param](/Mesh/AssemblyMeshGenerator/show_rgmb_metadata) is set to true. A list of pin-level metadata that is defined on the assembly mesh can be found in [PinMeshGenerator](PinMeshGenerator.md).
+
+In addition, the value of the `reactor_params_name` metadata can be used to retrieve global metadata defined by [ReactorMeshParams](ReactorMeshParams.md). Please refer to [ReactorMeshParams](ReactorMeshParams.md) to see a list of metadata defined by this mesh generator.
+
 ## Example Syntax
 
-!listing modules/reactor/test/tests/meshgenerators/assembly_mesh_generator/assembly_only.i block=Mesh
+!listing modules/reactor/test/tests/meshgenerators/assembly_mesh_generator/assembly_square.i block=Mesh
 
 This is the resulting mesh block layout, where by default a single block is assigned to the triangular elements and another block is assigned to the quadrilateral elements:
 
