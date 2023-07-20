@@ -20,9 +20,9 @@ WallDistanceMixingLengthAux::validParams()
       "proportional to the distance from the nearest wall. The mixing"
       "length is capped at a distance proportional to inputted parameter delta.");
   params.addParam<std::vector<BoundaryName>>("walls", "Boundaries that correspond to solid walls");
-  params.addParam<Real>("von_karman_const", 0.41, "");   // Von Karman constant
-  params.addParam<Real>("von_karman_const_0", 0.09, ""); // Escudier' model parameter
-  params.addParam<Real>(
+  params.addParam<MooseFunctorName>("von_karman_const", 0.41, "");   // Von Karman constant
+  params.addParam<MooseFunctorName>("von_karman_const_0", 0.09, ""); // Escudier' model parameter
+  params.addParam<MooseFunctorName>(
       "delta",
       1e9,
       ""); // Tunable parameter related to the thickness of the boundary layer.
@@ -33,9 +33,9 @@ WallDistanceMixingLengthAux::validParams()
 WallDistanceMixingLengthAux::WallDistanceMixingLengthAux(const InputParameters & parameters)
   : AuxKernel(parameters),
     _wall_boundary_names(getParam<std::vector<BoundaryName>>("walls")),
-    _von_karman_const(getParam<Real>("von_karman_const")),
-    _von_karman_const_0(getParam<Real>("von_karman_const_0")),
-    _delta(getParam<Real>("delta"))
+    _von_karman_const(getFunctor<Real>("von_karman_const")),
+    _von_karman_const_0(getFunctor<Real>("von_karman_const_0")),
+    _delta(getFunctor<Real>("delta"))
 {
   const MeshBase & mesh = _subproblem.mesh().getMesh();
   if (!mesh.is_replicated())
@@ -95,8 +95,15 @@ WallDistanceMixingLengthAux::computeValue()
     }
   }
 
-  if (std::sqrt(min_dist2) / _delta <= _von_karman_const_0 / _von_karman_const)
-    return _von_karman_const * std::sqrt(min_dist2);
+  const Moose::ElemArg elem_arg = {_current_elem, false};
+  const Moose::StateArg state_arg = Moose::currentState();
+
+  const auto delta = _delta(elem_arg, state_arg);
+  const auto von_karman_const = _von_karman_const(elem_arg, state_arg);
+  const auto von_karman_const_0 = _von_karman_const_0(elem_arg, state_arg);
+
+  if (std::sqrt(min_dist2) / delta <= von_karman_const_0 / von_karman_const)
+    return von_karman_const * std::sqrt(min_dist2);
   else
-    return _von_karman_const_0 * _delta;
+    return von_karman_const_0 * delta;
 }

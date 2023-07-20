@@ -36,6 +36,13 @@ velocity_interp_method = 'rc'
   []
 []
 
+[Functions]
+  [delta_func]
+    type = ParsedFunction
+    expression = '1.0-x/150'
+  []
+[]
+
 [Problem]
   fv_bcs_integrity_check = false
 []
