@@ -57,10 +57,12 @@
     exodiff = 'two_block_1st_order_constraint_lm_xy_friction_vcp_out.e'
     input = 'two_block_1st_order_constraint_lm_xy_friction_vcp.i'
     rel_err = 5.0e-4
-    max_parallel = 4
     min_ad_size = '50'
     mesh_mode = 'REPLICATED'
     requirement = 'The contact module shall be able to solve a flat surface-flat surface frictional problem with Cartesian Lagrange multipliers using VCP.'
+    # This test is causing sporadic test failures (see issue #24986)
+    # Limit the parallel test as a temporary solution here
+    max_parallel = 1
   []
   [cylinder_friction_cartesian_vcp]
     type = 'Exodiff'
