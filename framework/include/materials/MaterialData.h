@@ -213,12 +213,6 @@ private:
 
   static void mooseErrorHelper(const MooseObject & object, const std::string_view & error);
 
-  /**
-   * Calls resizeProps helper function for regular material properties
-   */
-  template <typename T, bool is_ad>
-  void resizeProps(unsigned int id);
-
   /// Status of storage swapping (calling swap sets this to true; swapBack sets it to false)
   bool _swapped;
 
@@ -257,26 +251,6 @@ MaterialData::haveGenericProperty(const std::string & prop_name) const
   return dynamic_cast<const GenericMaterialProperty<T, is_ad> *>(base_prop) != nullptr;
 }
 
-template <typename T, bool is_ad>
-void
-MaterialData::resizeProps(unsigned int id)
-{
-  const auto size = id + 1;
-  for (const auto state : index_range(_props))
-  {
-    auto & entry = props(state);
-    if (entry.size() < size)
-      entry.resize(size, {});
-    if (!entry.hasValue(id))
-    {
-      std::unique_ptr<PropertyValue> value =
-          state == 0 ? std::make_unique<GenericMaterialProperty<T, is_ad>>(id)
-                     : _props[0][id].clone();
-      entry.setPointer(id, std::move(value), {});
-    }
-  }
-}
-
 template <typename T, bool is_ad, bool declare>
 GenericMaterialProperty<T, is_ad> &
 MaterialData::getPropertyHelper(const std::string & prop_name,
@@ -288,10 +262,30 @@ MaterialData::getPropertyHelper(const std::string & prop_name,
   if constexpr (declare)
     mooseAssert(state == 0, "Cannot declare properties for states other than zero");
 
+  // Register/get the ID of the property
   const auto prop_id = addPropertyHelper(prop_name, state);
-  resizeProps<T, is_ad>(prop_id);
 
+  // Initialize the states that we need
+  const auto size = prop_id + 1;
+  for (const auto state_i : make_range(state + 1))
+  {
+    auto & entry = props(state_i);
+    if (entry.size() < size)
+      entry.resize(size, {});
+    if (!entry.hasValue(prop_id))
+    {
+      std::unique_ptr<PropertyValue> value =
+          state_i == 0 ? std::make_unique<GenericMaterialProperty<T, is_ad>>(prop_id)
+                       : _props[0][prop_id].clone();
+      entry.setPointer(prop_id, std::move(value), {});
+    }
+  }
+
+  // Should be available now
   auto & base_prop = props(state)[prop_id];
+
+  // In the event that this property was already declared/requested, make sure
+  // that the types are consistent
   auto prop = dynamic_cast<GenericMaterialProperty<T, is_ad> *>(&base_prop);
   if (!prop)
   {
