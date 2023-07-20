@@ -1,1 +1,14 @@
-../test-tools/conda_build_config.yaml
+moose_test_tools:
+  - moose-test-tools 2023.07.17
+
+moose_python:
+  - python 3.10
+  - python 3.9
+  - python 3.8
+
+# Pesky packages that break internal CI
+# Note: Modifying/Updating this will require changes to conda/mpich!
+setuptools:
+  - <60.0
+pin_run_as_build:
+  setuptools: x.x

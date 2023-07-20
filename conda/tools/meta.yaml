@@ -21,8 +21,7 @@ requirements:
     - {{ moose_python }}
     - setuptools
   run:
-    - {{ moose_mpich }}
-    - moose-test-tools
+    - {{ moose_test_tools }}
     - beautifulsoup4
     - livereload
     - pybtex

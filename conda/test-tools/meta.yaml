@@ -1,10 +1,10 @@
 # Making a Change to this package?
 # REMEMBER TO UPDATE the .yaml files for the following packages:
-#   tools/meta.yaml
+#   tools/*
 #
 # As well as any directions pertaining to modifying those files.
 {% set build = 0 %}
-{% set version = "2023.05.12" %}
+{% set version = "2023.07.17" %}
 
 package:
   name: moose-test-tools
