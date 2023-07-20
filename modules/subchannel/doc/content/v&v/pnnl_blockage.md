@@ -2,7 +2,7 @@
 
 ## Benchmark Description
 
-PNL's $7 \times 7$ sleeve blockage facility was designed to investigate the turbulent flow phenomena near postulated sleeve blockages in a model nuclear fuel rod bundle. The sleeve blockages were characteristic of fuel-clad `swelling` or `ballooning`, which could occur during loss-of-coolant accidents in pressurized-water reactors [!citep](creer1976effects). The experimental parameters are presented in [parameters].
+PNL's $7 \times 7$ sleeve blockage facility was designed to investigate the turbulent flow phenomena near postulated sleeve blockages in a model nuclear fuel rod bundle. The sleeve blockages were characteristic of fuel-clad `swelling` or `ballooning`, which could occur during loss-of-coolant accidents in pressurized-water reactors [!cite](creer1976effects). The experimental parameters are presented in [parameters].
 
 !table id=parameters caption=Design and operational parameters for PNL's $7\times7$ sleeve blockage benchmark.
 | Experiment Parameter (unit) | Value |
