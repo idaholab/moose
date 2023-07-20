@@ -403,7 +403,6 @@ SubChannel1PhaseProblem::populateVectorFromDense(Vec & x,
   CHKERRQ(ierr);
   return 0;
 }
-
 template <class T>
 PetscErrorCode
 SubChannel1PhaseProblem::populateVectorFromHandle(Vec & x,
