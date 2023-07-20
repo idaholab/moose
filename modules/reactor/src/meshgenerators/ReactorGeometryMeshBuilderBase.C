@@ -227,8 +227,12 @@ ReactorGeometryMeshBuilderBase::printGlobalReactorMetadata()
 {
   printMetadataToConsole<int>(RGMB::mesh_dimensions, _reactor_params);
   printMetadataToConsole<std::string>(RGMB::mesh_geometry, _reactor_params);
-  printMetadataToConsole<std::vector<Real>>(RGMB::axial_mesh_sizes, _reactor_params);
-  printMetadataToConsole<std::vector<unsigned int>>(RGMB::axial_mesh_intervals, _reactor_params);
+  const auto mesh_dimensions = getReactorParam<int>(RGMB::mesh_dimensions);
+  if (mesh_dimensions == 3)
+  {
+    printMetadataToConsole<std::vector<Real>>(RGMB::axial_mesh_sizes, _reactor_params);
+    printMetadataToConsole<std::vector<unsigned int>>(RGMB::axial_mesh_intervals, _reactor_params);
+  }
 }
 
 template <typename T>
