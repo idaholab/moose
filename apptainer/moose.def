@@ -94,6 +94,9 @@ From: {{ APPTAINER_FROM }}
     cd ..
     rm -rf moose
 
+    # Install node.js
+    dnf install -y nodejs npm
+
     # Clean up
     conda clean -ya
     dnf clean all
