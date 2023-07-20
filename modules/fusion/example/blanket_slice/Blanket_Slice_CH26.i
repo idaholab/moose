@@ -136,7 +136,7 @@ D_h = ${fparse (4*area)/wetted_perimeter}
   steady_state_detection = true
   [TimeStepper]
     type = IterationAdaptiveDT
-    dt = 0.01
+    dt = 1e-5
     iteration_window = 3
     optimal_iterations = 6
     growth_factor = 1.05

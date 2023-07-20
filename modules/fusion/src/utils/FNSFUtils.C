@@ -13,15 +13,10 @@
 namespace FNSF
 {
 
-const Real R0{4.8};   // Major radius, m
-const Real a{1.2};    // Minor radius, m
-const Real tau{0.63}; // triangularity
-const Real k{2.2};    // elongation
-const Real b{a * k};
-
 Point
-torus(Real xi)
+torus(Real xi, Real R0 = 4.8, Real a = 1.2, Real tau = 0.63, Real k = 2.2)
 {
+  const Real b{a * k};
   xi *= M_PI / 180.0;
   Real R = R0 + a * std::cos(xi + tau * std::sin(xi));
   Real z = b * std::sin(xi);
@@ -29,8 +24,9 @@ torus(Real xi)
 }
 
 Point
-orthogonal(Real xi)
+orthogonal(Real xi, Real R0 = 4.8, Real a = 1.2, Real tau = 0.63, Real k = 2.2)
 {
+  const Real b{a * k};
   xi *= M_PI / 180.0;
   return {b * std::cos(xi), 0, a * std::sin(xi + tau * std::sin(xi)) * (1 + tau * std::cos(xi))};
 }

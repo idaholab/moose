@@ -7,6 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
+#pragma once
 #include "libmesh/libmesh_common.h"
 #include "libmesh/point.h"
 
@@ -14,7 +15,6 @@ using namespace libMesh;
 
 namespace FNSF
 {
-
 extern const Real R0;  // Major radius, m
 extern const Real a;   // Minor radius, m
 extern const Real tau; // triangularity
@@ -24,12 +24,11 @@ extern const Real b;
 /**
  * Parametric definition of plasma shape (x-z plane cross-section)
  */
-Point torus(Real xi);
-
+Point torus(Real xi, Real R0 = 4.8, Real a = 1.2, Real tau = 0.63, Real k = 2.2);
 /**
  * Orthogonal vector
  */
-Point orthogonal(Real xi);
+Point orthogonal(Real xi, Real R0 = 4.8, Real a = 1.2, Real tau = 0.63, Real k = 2.2)
 
 /**
  * Convert (r, z) coordinates to (xi, depth)
