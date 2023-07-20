@@ -27,13 +27,11 @@ build:
 
 requirements:
   build:
-    - {{ moose_mpich }}
     - {{ moose_petsc }}
     - {{ moose_libmesh_vtk }}
     - pkg-config
     - libpng
   run:
-    - {{ moose_mpich }}
     - {{ moose_petsc }}
     - {{ moose_libmesh_vtk }}
     - pkg-config

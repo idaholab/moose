@@ -1,11 +1,8 @@
-moose_mpich:
-  - moose-mpich 4.1.1 build_0
-
 moose_petsc:
-  - moose-petsc 3.16.6
+  - moose-petsc 3.16.6 build_9
 
 moose_libmesh_vtk:
-  - moose-libmesh-vtk 9.2.6
+  - moose-libmesh-vtk 9.2.6 build_2
 
 #### Darwin SDK SYSROOT
 CONDA_BUILD_SYSROOT:                                        # [osx]

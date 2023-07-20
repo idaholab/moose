@@ -2,8 +2,7 @@
 # REMEMBER TO UPDATE the .yaml files for the following packages:
 #   petsc/*
 #   libmesh-vtk/*
-#   peacock-trame/*
-#   tools/*
+#   peacock/*
 #
 # As well as any directions pertaining to modifying those files.
 # ALSO: Follow the directions in scripts/tests/versioner_hashes.yaml
