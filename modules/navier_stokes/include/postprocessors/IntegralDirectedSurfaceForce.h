@@ -34,9 +34,7 @@ protected:
   Real computeQpIntegral() override;
 
   /// Velocity components
-  const Moose::Functor<Real> & _vel_x;
-  const Moose::Functor<Real> * _vel_y;
-  const Moose::Functor<Real> * _vel_z;
+  std::Vector<const Moose::Functor<Real> const *> _vel_components;
 
   /// The dynamic viscosity
   const Moose::Functor<Real> & _mu;
