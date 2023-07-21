@@ -908,16 +908,12 @@ NSFVBase<BaseType>::validParams()
                                 exec_enum,
                                 "When the mixing length aux kernels should be executed.");
 
-  params.addRangeCheckedParam<Real>("von_karman_const",
-                                    0.41,
-                                    "von_karman_const > 0.0",
-                                    "Von Karman parameter for the mixing length model");
-  params.addRangeCheckedParam<Real>(
-      "von_karman_const_0", 0.09, "von_karman_const_0 > 0.0", "'Escudier' model parameter");
-  params.addRangeCheckedParam<Real>(
+  params.addParam<MooseFunctorName>(
+      "von_karman_const", 0.41, "Von Karman parameter for the mixing length model");
+  params.addParam<MooseFunctorName>("von_karman_const_0", 0.09, "'Escudier' model parameter");
+  params.addParam<MooseFunctorName>(
       "mixing_length_delta",
       1.0,
-      "mixing_length_delta > 0.0",
       "Tunable parameter related to the thickness of the boundary layer."
       "When it is not specified, Prandtl's original unbounded wall distance mixing length model is"
       "retrieved.");
@@ -1747,11 +1743,12 @@ NSFVBase<BaseType>::addINSMomentumMixingLengthKernels()
         parameters().template get<ExecFlagEnum>("mixing_length_aux_execute_on");
   else
     ml_params.template set<ExecFlagEnum>("execute_on") = {EXEC_INITIAL, EXEC_TIMESTEP_END};
-  ml_params.template set<Real>("von_karman_const") =
-      parameters().template get<Real>("von_karman_const");
-  ml_params.template set<Real>("von_karman_const_0") =
-      parameters().template get<Real>("von_karman_const_0");
-  ml_params.template set<Real>("delta") = parameters().template get<Real>("mixing_length_delta");
+  ml_params.template set<MooseFunctorName>("von_karman_const") =
+      parameters().template get<MooseFunctorName>("von_karman_const");
+  ml_params.template set<MooseFunctorName>("von_karman_const_0") =
+      parameters().template get<MooseFunctorName>("von_karman_const_0");
+  ml_params.template set<MooseFunctorName>("delta") =
+      parameters().template get<MooseFunctorName>("mixing_length_delta");
 
   getProblem().addAuxKernel(ml_kernel_type, prefix() + "mixing_length_aux ", ml_params);
 }

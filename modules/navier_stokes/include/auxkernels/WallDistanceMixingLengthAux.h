@@ -26,7 +26,7 @@ protected:
 
   std::vector<BoundaryName> _wall_boundary_names;
 
-  const Real & _von_karman_const;
-  const Real & _von_karman_const_0;
-  const Real & _delta;
+  const Moose::Functor<Real> & _von_karman_const;
+  const Moose::Functor<Real> & _von_karman_const_0;
+  const Moose::Functor<Real> & _delta;
 };
