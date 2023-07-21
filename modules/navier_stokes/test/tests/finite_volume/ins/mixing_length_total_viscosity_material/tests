@@ -37,5 +37,29 @@
       recover = false
       abs_zero = 5e-10
     []
+    [steady-functor-delta]
+      type = 'Exodiff'
+      input = steady.i
+      exodiff = steady-functor-delta.e
+      method = "!dbg"
+      mesh_mode = REPLICATED
+      valgrind = 'none'
+      recover = false
+      cli_args = "AuxKernels/mixing_length/delta=delta_func Outputs/file_base=steady-functor-delta"
+      detail = 'steady simulations with functions describing the boundary layer parameter, and'
+      abs_zero = 5e-10
+    []
+    [steady-functor-delta_action]
+      type = 'Exodiff'
+      input = steady-action.i
+      exodiff = steady-functor-delta-action.e
+      method = "!dbg"
+      cli_args = "Modules/NavierStokesFV/mixing_length_delta=delta_func Outputs/file_base=steady-functor-delta-action"
+      detail = 'steady simulations with functions describing the boundary layer parameter with action syntax.'
+      mesh_mode = REPLICATED
+      valgrind = 'none'
+      recover = false
+      abs_zero = 5e-10
+    []
   []
 []

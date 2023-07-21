@@ -52,6 +52,13 @@ mu = '${fparse rho * bulk_u * 2 * H / Re}'
   []
 []
 
+[Functions]
+  [delta_func]
+    type = ParsedFunction
+    expression = '1.0-x/150'
+  []
+[]
+
 [Executioner]
   type = Steady
   solve_type = 'NEWTON'
