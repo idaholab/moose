@@ -31,7 +31,7 @@ AdvancedConcentricCircleGenerator::validParams()
       "customized_azimuthal_angles>=0&customized_azimuthal_angles<360",
       "List of the user-specified azimuthal angles of the nodes.");
 
-  params.addParamNamesToGroup("num_sectors customized_azimuthal_angles", "General Mesh Density");
+  params.addParamNamesToGroup("num_sectors customized_azimuthal_angles", "Azimuthal Mesh Density");
 
   params.addClassDescription("This AdvancedConcentricCircleGenerator object is designed to mesh a "
                              "concentric circular geometry.");

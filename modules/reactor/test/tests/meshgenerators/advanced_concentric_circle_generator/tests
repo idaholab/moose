@@ -66,7 +66,7 @@
       cli_args = "Mesh/accg/customized_azimuthal_angles='15 150 300 340'
                   --mesh-only err.e"
       expect_err = "please make sure the circle azimuthal discretization angles are less than"
-      detail = "if the customized azimuthal angles have oversize intervals."
+      detail = "if some of the customized azimuthal angles are larger than the supported intervals."
     []
     [err_unneeded_inward_names]
       type = RunException

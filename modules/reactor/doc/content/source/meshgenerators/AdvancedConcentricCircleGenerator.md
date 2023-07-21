@@ -4,7 +4,7 @@
 
 ## Overview
 
-`AdvancedConcentricCircleGenerator` generates concentric circular meshes that similar to the output of [`PolygonConcentricCircleMeshGenerator`](PolygonConcentricCircleMeshGenerator.md) but without background and duct regions. While all the features of `PolygonConcentricCircleMeshGenerator` involving the concentric circular "ring" regions are preserved, this mesh generator has some unique features because of the absence of the polygon outer regions.
+`AdvancedConcentricCircleGenerator` generates concentric circular meshes that are similar to the output of [`PolygonConcentricCircleMeshGenerator`](PolygonConcentricCircleMeshGenerator.md) but without background and duct regions. While all the features of `PolygonConcentricCircleMeshGenerator` involving the concentric circular "ring" regions are preserved, this mesh generator has some unique features because of the absence of the polygon outer regions.
 
 ### Azimuthal Mesh Density
 

@@ -16,7 +16,8 @@ The background region is meshed by [`XYDelaunayGenerator`](XYDelaunayGenerator.m
 
 ## Patterning
 
-Within the interior region defined by [!param](/Mesh/FlexiblePatternGenerator/boundary_mesh), `FlexiblePatternGenerator` can place single or multiple patterns of input unit meshes provided by [!param](/Mesh/FlexiblePatternGenerator/inputs). Supporting patterning mode includes hexagonal, rectangular, and circular geometry. In addition, free-style patterning is supported by directly providing positions of unit meshes. The details are discussed as follows.
+Within the interior region defined by [!param](/Mesh/FlexiblePatternGenerator/boundary_mesh), `FlexiblePatternGenerator` can place single or multiple patterns of input unit meshes provided by [!param](/Mesh/FlexiblePatternGenerator/inputs). Supporting patterning mode includes hexagonal, rectangular, and circular geometry. In addition, free-style patterning is supported by directly providing positions of unit meshes. Styles of patterns can be combined as well when using multiple patterns.
+The details are discussed as follows.
 
 ### Hexagonal Patterning
 

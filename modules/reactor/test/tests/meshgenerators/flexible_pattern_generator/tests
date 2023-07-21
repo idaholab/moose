@@ -8,7 +8,7 @@
       input = single_hex_pattern.i
       csvdiff = single_hex_pattern_hex.csv
       recover = false
-      detail = "an single full hexagonal patterned mesh with hexagonal background."
+      detail = "a single full hexagonal patterned mesh within a hexagonal background."
     []
     [single_hex_pattern_cartesian]
       type = CSVDiff
@@ -17,7 +17,7 @@
                   Outputs/csv/file_base=single_hex_pattern_cart"
       csvdiff = single_hex_pattern_cart.csv
       recover = false
-      detail = "an single full hexagonal patterned mesh with cartesian background."
+      detail = "a single full hexagonal patterned mesh with a cartesian background shape."
     []
     [single_hex_pattern_circular]
       type = CSVDiff
@@ -28,14 +28,14 @@
                   Outputs/csv/file_base=single_hex_pattern_circ"
       csvdiff = single_hex_pattern_circ.csv
       recover = false
-      detail = "an single full hexagonal patterned mesh with circular background."
+      detail = "a single full hexagonal patterned mesh with a circular background shape."
     []
     [single_hex_pattern_custom]
       type = CSVDiff
       input = single_hex_pattern_custom.i
       csvdiff = single_hex_pattern_custom.csv
       recover = false
-      detail = "an single full hexagonal patterned mesh with custom background."
+      detail = "a single full hexagonal patterned mesh with a custom background shape."
     []
     [single_hex_pattern_dummy]
       type = CSVDiff
@@ -59,7 +59,7 @@
       input = single_rect_pattern.i
       csvdiff = single_rect_pattern.csv
       recover = false
-      detail = "an single rectangular patterned mesh with hexagonal background."
+      detail = "a single rectangular patterned mesh with hexagonal background."
     []
     [single_circ_pattern]
       type = CSVDiff
@@ -95,7 +95,7 @@
       csvdiff = patterned_assm.csv
       recover = false
       mesh_mode = 'REPLICATED'
-      detail = "a patterned assembly mesh by stiching flexible patterned meshes."
+      detail = "a patterned assembly mesh by stitching flexible patterned meshes."
     []  
   []
   [error]
@@ -130,7 +130,7 @@
       cli_args = "/Mesh/fpg/hex_patterns='0 0'
                   --mesh-only err.e"
       expect_err = "of each element of this parameter must be larger than unity"
-      detail = "if the hexagnal pattern provided has a unity length element."
+      detail = "if the hexagonal pattern provided has a unity length element."
     []
     [err_incorrect_hex_pattern]
       type = RunException
@@ -138,7 +138,7 @@
       cli_args = "/Mesh/fpg/hex_patterns='0 0;0 0;0 0'
                   --mesh-only err.e"
       expect_err = "The two-dimentional array element of this parameter must have a correct hexagonal shape."
-      detail = "if the hexagnal pattern provided has a correct shape."
+      detail = "if the hexagonal pattern provided has an incorrect, non-hexagonal, shape."
     []
     [err_wrong_hex_pitches_size]
       type = RunException
@@ -242,7 +242,7 @@
       cli_args = "/Mesh/fpg/boundary_type=CUSTOM
                   --mesh-only err.e"
       expect_err = "boundary_mesh must be specified for CUSTOM boundary_type."
-      detail = "if the boundary input mesh is not provided when boundary type is selected to be custom."
+      detail = "if the boundary input mesh is not provided when the boundary type is selected to be custom."
     []
     [err_custom_mesh_with_boundary_sector]
       type = RunException
@@ -250,7 +250,7 @@
       cli_args = "/Mesh/fpg/boundary_sectors=10
                   --mesh-only err.e"
       expect_err = "this parameter should not be provided for CUSTOM boundary_type."
-      detail = "if the boundary sector number is provided when boundary type is selected to be custom."
+      detail = "if the boundary sector number is provided when the boundary type is selected to be custom."
     []
     [err_custom_mesh_with_boundary_size]
       type = RunException
@@ -258,7 +258,7 @@
       cli_args = "/Mesh/fpg/boundary_size=10
                   --mesh-only err.e"
       expect_err = "this parameter should not be provided for CUSTOM boundary_type."
-      detail = "if the boundary pitch value is provided when boundary type is selected to be custom."
+      detail = "if the boundary pitch value is provided when the boundary type is selected to be custom."
     []
     [err_redundant_custom_mesh]
       type = RunException
@@ -266,7 +266,7 @@
       cli_args = "/Mesh/fpg/boundary_type=HEXAGON
                   --mesh-only err.e"
       expect_err = "this parameter should not be provided for non-CUSTOM"
-      detail = "if the boundary input mesh is provided when boundary type is not custom."
+      detail = "if the boundary input mesh is provided when the boundary type is not custom."
     []
     [err_noncustom_mesh_without_boundary_sectors]
       type = RunException
@@ -274,7 +274,7 @@
       cli_args = "/Mesh/fpg/boundary_size=20
                   --mesh-only err.e"
       expect_err = "this parameter must be provided for non-CUSTOM"
-      detail = "if the boundary sectors nunber is not provided when boundary type is not custom."
+      detail = "if the boundary sectors nunber is not provided when the boundary type is not custom."
     []
     [err_noncustom_mesh_without_boundary_size]
       type = RunException
@@ -282,7 +282,7 @@
       cli_args = "/Mesh/fpg/boundary_sectors=10
                   --mesh-only err.e"
       expect_err = "this parameter must be provided for non-CUSTOM"
-      detail = "if the boundary pitch value is not provided when boundary type is not custom."
+      detail = "if the boundary pitch value is not provided when the boundary type is not custom."
     []
   []
 []

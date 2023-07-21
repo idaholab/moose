@@ -15,7 +15,6 @@
  * This ConcentricCircleGeneratorBase object is a base class to be inherited for mesh generators
  * that involve concentric circles.
  */
-
 class ConcentricCircleGeneratorBase : public PolygonMeshGeneratorBase
 {
 public:
