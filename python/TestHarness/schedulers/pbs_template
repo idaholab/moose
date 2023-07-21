@@ -7,10 +7,33 @@
 #PBS -j oe
 #PBS -o <OUTPUT>
 #PBS -l place=free
-<PRE_COMMAND>
 JOB_NUM=${PBS_JOBID%\.*}
-
 export MV2_ENABLE_AFFINITY=0
 
-cd <WORKING_DIR>
-<COMMAND>
+export MOOSE_COMMAND="cd <WORKING_DIR>; <COMMAND>"
+
+# --pbs-pre-source:
+<PRE_COMMAND>
+
+if [ -n "<USE_APPTAINER>" ]; then
+    if [ -z "${APPTAINER_URI}" ]; then
+      printf "Unknown Apptainer whereabouts. Cannot continue.
+Please use --pbs-pre-source to source some file that will establish
+necessary Apptainer variables.
+
+Missing APPTAINER_URI, where APPTAINER_URI satisfies the following
+funtionality:
+
+    apptainer exec \${APPTAINER_URI}\n\n"
+      exit 1
+    fi
+    if [ -z "${APPTAINER_BINDPATH}" ]; then
+        printf "Warning: No APPTAINER_BINDPATH detected. Perhaps you do not need them?\n"
+    fi
+    # TestHarness influential Apptainer environment variables
+    export APPTAINERENV_MOOSE_STAGE='loopback'
+    export APPTAINERENV_PBS_NODEFILE=${PBS_NODEFILE}
+    export APPTAINERENV_APPTAINER_URI=${APPTAINER_URI}
+    export MOOSE_COMMAND="apptainer exec --containall ${APPTAINER_URI} \"${MOOSE_COMMAND}\""
+fi
+eval ${MOOSE_COMMAND}

@@ -65,6 +65,27 @@ class RunApp(Tester):
         if not (params.isValid('input') or params.isValid('command') or params['no_additional_cli_args']):
             raise Exception('One of "input", "command", or "no_additional_cli_args" must be supplied for a RunApp test')
 
+    def get_apptainer_command(self, options, ncpus):
+        """
+        Apptainer loopback get command method
+
+        In order to run a parallel process (across nodes), it is necessary to engage MPI
+        at the apptainer level instead of the moose based binary within. Assumptions are
+        being made, and thus this method can be brittle (see pbs_template for influential
+        environment variables being set/made use of).
+        """
+        command = False
+        # Stage 2: in container and trying to run an MPI process on a binary
+        if os.getenv('MOOSE_STAGE') == 'loopback':
+            source = ''
+            if options.queue_source_command:
+                source = f'source {options.queue_source_command}; '
+            command = (f'ssh localhost PBS_NODEFILE={os.getenv("PBS_NODEFILE")}'
+                       f' "{source if source else ""}'
+                       f'{self.mpi_command} -n {ncpus} apptainer exec --containall'
+                       f' {os.getenv("APPTAINER_URI")}')
+        return command
+
     def getInputFile(self):
         if self.specs.isValid('input'):
             return self.specs['input'].strip()
@@ -201,14 +222,18 @@ class RunApp(Tester):
         if specs['redirect_output'] and ncpus > 1:
             cli_args.append('--keep-cout --redirect-output ' + self.name())
 
-        command = specs['executable'] + ' ' + specs['input_switch'] + ' ' + specs['input'] + ' ' + ' '.join(cli_args)
+        command = f'{specs["executable"]} {specs["input_switch"]} {specs["input"]} {" ".join(cli_args)}'
         if options.valgrind_mode.upper() == specs['valgrind'].upper() or options.valgrind_mode.upper() == 'HEAVY' and specs['valgrind'].upper() == 'NORMAL':
-            command = 'valgrind --suppressions=' + os.path.join(specs['moose_dir'], 'python', 'TestHarness', 'suppressions', 'errors.supp') + ' --leak-check=full --tool=memcheck --dsymutil=yes --track-origins=yes --demangle=yes -v ' + command
+            command = f'valgrind --suppressions={os.path.join(specs["moose_dir"], "python", "TestHarness", "suppressions", "errors.supp")} --leak-check=full --tool=memcheck --dsymutil=yes --track-origins=yes --demangle=yes -v {command}'
         elif nthreads > 1:
-            command = command + ' --n-threads=' + str(nthreads)
+            command = f'{command} --n-threads={nthreads}'
 
-        if self.force_mpi or options.parallel or ncpus > 1:
-            command = self.mpi_command + ' -n ' + str(ncpus) + ' ' + command
+        # Set MPI usage or Apptainer loop back call (note: trailing double quote is no mistake)
+        if self.get_apptainer_command(options, ncpus):
+            command = f'{self.get_apptainer_command(options, ncpus)} \\\"cd {specs["test_dir"]}; {command}\\\""'
+
+        elif self.force_mpi or options.parallel or ncpus > 1:
+            command = f'{self.mpi_command} -n {ncpus} {command}'
 
         return command
 

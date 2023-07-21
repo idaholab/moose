@@ -7,7 +7,7 @@
 #* Licensed under LGPL 2.1, please see LICENSE for details
 #* https://www.gnu.org/licenses/lgpl-2.1.html
 
-import os, sys, re, json
+import os, sys, json
 from QueueManager import QueueManager
 from TestHarness import util # to execute qsub
 import math # to compute node requirement
@@ -169,6 +169,10 @@ class RunPBS(QueueManager):
 
         # Command
         template['command'] = ' '.join(self.getRunTestsCommand(job, template['mpi_procs']))
+
+        # Use Apptainer if detected
+        if os.getenv('APPTAINER_NAME'):
+            template['use_apptainer'] = os.getenv('APPTAINER_NAME', '')
 
         return template
 
