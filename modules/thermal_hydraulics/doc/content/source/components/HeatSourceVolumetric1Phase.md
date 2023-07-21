@@ -1,20 +1,10 @@
 # HeatSourceVolumetric1Phase
 
-!alert construction title=Undocumented Class
-The HeatSourceVolumetric1Phase has not been documented. The content listed below should be used as a starting point for
-documenting the class, which includes the typical automatic documentation associated with a
-MooseObject; however, what is contained is ultimately determined by what is necessary to make the
-documentation clear for users.
-
 !syntax description /Components/HeatSourceVolumetric1Phase
 
-## Overview
-
-!! Replace these lines with information regarding the HeatSourceVolumetric1Phase object.
-
-## Example Input File Syntax
-
-!! Describe and include an example of how to use the HeatSourceVolumetric1Phase object.
+The volumetric heat source is applied to the [1-phase flow channel](FlowChannel1Phase.md)
+volume using a [OneD3EqnEnergyHeatSource.md] kernel, added to the energy equation (with the
+$\rho E A$ variable).
 
 !syntax parameters /Components/HeatSourceVolumetric1Phase
 
