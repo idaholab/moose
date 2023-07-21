@@ -14,8 +14,8 @@
 #include "MathFVUtils.h"
 
 /**
- * This postprocessor which computes the directed force coming from friction and pressure differences
- *  on a surface defined as:
+ * This postprocessor which computes the directed force coming from friction and pressure
+ * differences on a surface defined as:
  *
  * $F_d = \int\limits_S (\sigma \vec{n}) \cdot \vec{d} dS$
  *
@@ -34,7 +34,7 @@ protected:
   Real computeQpIntegral() override;
 
   /// Velocity components
-  std::Vector<const Moose::Functor<Real> const *> _vel_components;
+  std::vector<const Moose::Functor<Real> * const> _vel_components;
 
   /// The dynamic viscosity
   const Moose::Functor<Real> & _mu;

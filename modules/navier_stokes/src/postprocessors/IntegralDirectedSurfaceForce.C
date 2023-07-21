@@ -42,15 +42,16 @@ IntegralDirectedSurfaceForce::IntegralDirectedSurfaceForce(const InputParameters
     _direction(getParam<RealVectorValue>("principal_direction"))
 {
   _vel_components.push_back(&getFunctor<Real>("vel_x"));
-  else if (_mesh.dimension() == 2)
+  if (_mesh.dimension() == 2)
   {
-    if (!isParamValid("vel_y")):
-      paramError("vel_y", "For 2D meshes the second velocity component should be provided as well!");
+    if (!isParamValid("vel_y"))
+      paramError("vel_y",
+                 "For 2D meshes the second velocity component should be provided as well!");
     _vel_components.push_back(&getFunctor<Real>("vel_y"));
   }
   else
   {
-    if (!isParamValid("vel_z")):
+    if (!isParamValid("vel_z"))
       paramError("vel_z", "For 3D meshes the third velocity component should be provided as well!");
     _vel_components.push_back(&getFunctor<Real>("vel_z"));
   }
