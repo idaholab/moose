@@ -89,6 +89,8 @@ TemperatureDependentHardeningStressUpdateTempl<is_ad>::computeStressInitialize(
     const GenericReal<is_ad> & effectiveTrialStress,
     const GenericRankFourTensor<is_ad> & elasticity_tensor)
 {
+  RadialReturnStressUpdateTempl<is_ad>::computeStressInitialize(effectiveTrialStress,
+                                                                elasticity_tensor);
   initializeHardeningFunctions();
   computeYieldStress(elasticity_tensor);
 

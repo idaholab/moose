@@ -79,8 +79,10 @@ HyperbolicViscoplasticityStressUpdate::propagateQpStatefulProperties()
 
 void
 HyperbolicViscoplasticityStressUpdate::computeStressInitialize(
-    const Real & effective_trial_stress, const RankFourTensor & /*elasticity_tensor*/)
+    const Real & effective_trial_stress, const RankFourTensor & elasticity_tensor)
 {
+  RadialReturnStressUpdate::computeStressInitialize(effective_trial_stress, elasticity_tensor);
+
   _yield_condition = effective_trial_stress - _hardening_variable_old[_qp] - _yield_stress;
 
   _hardening_variable[_qp] = _hardening_variable_old[_qp];
@@ -121,7 +123,7 @@ HyperbolicViscoplasticityStressUpdate::computeDerivative(const Real & /*effectiv
 }
 
 void
-HyperbolicViscoplasticityStressUpdate::iterationFinalize(Real scalar)
+HyperbolicViscoplasticityStressUpdate::iterationFinalize(const Real & scalar)
 {
   if (_yield_condition > 0.0)
     _hardening_variable[_qp] = computeHardeningValue(scalar);

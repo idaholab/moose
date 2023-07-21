@@ -37,14 +37,9 @@ public:
 
   virtual void resetIncrementalMaterialProperties() override;
 
-protected:
   virtual void
   computeStressInitialize(const GenericReal<is_ad> & effective_trial_stress,
                           const GenericRankFourTensor<is_ad> & elasticity_tensor) override;
-
-  virtual void
-  computeStressFinalize(const GenericRankTwoTensor<is_ad> & plastic_strain_increment) override;
-
   virtual GenericReal<is_ad> computeResidual(const GenericReal<is_ad> & effective_trial_stress,
                                              const GenericReal<is_ad> & scalar) override
   {
@@ -52,6 +47,10 @@ protected:
   }
   virtual GenericReal<is_ad> computeDerivative(const GenericReal<is_ad> & effective_trial_stress,
                                                const GenericReal<is_ad> & scalar) override;
+  virtual void
+  computeStressFinalize(const GenericRankTwoTensor<is_ad> & plastic_strain_increment) override;
+
+protected:
   virtual GenericChainedReal<is_ad>
   computeResidualAndDerivative(const GenericReal<is_ad> & effective_trial_stress,
                                const GenericChainedReal<is_ad> & scalar) override

@@ -40,7 +40,7 @@ protected:
                                        const RankFourTensor & elasticity_tensor) override;
   virtual Real computeResidual(const Real & effective_trial_stress, const Real & scalar) override;
   virtual Real computeDerivative(const Real & effective_trial_stress, const Real & scalar) override;
-  virtual void iterationFinalize(Real scalar) override;
+  virtual void iterationFinalize(const Real & scalar) override;
   virtual void computeStressFinalize(const RankTwoTensor & plasticStrainIncrement) override;
   virtual Real computeHardeningValue(Real scalar);
 

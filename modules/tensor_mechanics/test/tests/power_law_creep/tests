@@ -51,6 +51,12 @@
       exodiff = 'power_law_creep_out.e'
       detail = 'that works with a finite strain formulation.'
     []
+    [cp_power_law_creep]
+      type = 'Exodiff'
+      input = 'cp_power_law_creep.i'
+      exodiff = 'cp_power_law_creep_out.e'
+      detail = 'that works with a coupled plasticty model.'
+    []
     [restart1]
       type = 'RunApp'
       input = 'restart1.i'

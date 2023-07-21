@@ -130,6 +130,16 @@ RadialReturnStressUpdateTempl<is_ad>::initQpStatefulProperties()
 
 template <bool is_ad>
 void
+RadialReturnStressUpdateTempl<is_ad>::computeStressInitialize(
+    const GenericReal<is_ad> & /*effective_trial_stress*/,
+    const GenericRankFourTensor<is_ad> & elasticity_tensor)
+{
+  // Set the value of 3 * shear modulus for use as a reference residual value
+  _three_shear_modulus = 3.0 * ElasticityTensorTools::getIsotropicShearModulus(elasticity_tensor);
+}
+
+template <bool is_ad>
+void
 RadialReturnStressUpdateTempl<is_ad>::propagateQpStatefulPropertiesRadialReturn()
 {
   _effective_inelastic_strain[_qp] = _effective_inelastic_strain_old[_qp];
@@ -167,13 +177,13 @@ RadialReturnStressUpdateTempl<is_ad>::calculateNumberSubsteps(
     return 1;
   }
 
-  mooseError("calculateNumberSubsteps should not have been called. Nofify a developer.");
+  mooseError("calculateNumberSubsteps should not have been called. Notify a developer.");
 }
 
 template <bool is_ad>
 void
 RadialReturnStressUpdateTempl<is_ad>::computeTangentOperator(Real /*effective_trial_stress*/,
-                                                             RankTwoTensor & /*stress_new*/,
+                                                             const RankTwoTensor & /*stress_new*/,
                                                              RankFourTensor & /*tangent_operator*/)
 {
   mooseError("computeTangentOperator called: no tangent computation is needed for AD");
@@ -182,7 +192,7 @@ RadialReturnStressUpdateTempl<is_ad>::computeTangentOperator(Real /*effective_tr
 template <>
 void
 RadialReturnStressUpdateTempl<false>::computeTangentOperator(Real effective_trial_stress,
-                                                             RankTwoTensor & stress_new,
+                                                             const RankTwoTensor & stress_new,
                                                              RankFourTensor & tangent_operator)
 {
   if (getTangentCalculationMethod() == TangentCalculationMethod::PARTIAL)
@@ -247,10 +257,11 @@ RadialReturnStressUpdateTempl<is_ad>::updateState(
                                                   ? std::sqrt(3.0 / 2.0 * dev_trial_stress_squared)
                                                   : 0.0;
 
-  // Set the value of 3 * shear modulus for use as a reference residual value
-  _three_shear_modulus = 3.0 * ElasticityTensorTools::getIsotropicShearModulus(elasticity_tensor);
-
   computeStressInitialize(effective_trial_stress, elasticity_tensor);
+
+  mooseAssert(
+      _three_shear_modulus != 0.0,
+      "Shear modulus is zero. Ensure that the base class computeStressInitialize() is called.");
 
   // Use Newton iteration to determine the scalar effective inelastic strain increment
   _scalar_effective_inelastic_strain = 0.0;
@@ -271,8 +282,7 @@ RadialReturnStressUpdateTempl<is_ad>::updateState(
   if (_apply_strain)
   {
     strain_increment -= inelastic_strain_increment;
-    _effective_inelastic_strain[_qp] =
-        _effective_inelastic_strain_old[_qp] + _scalar_effective_inelastic_strain;
+    updateEffectiveInelasticStrain(_scalar_effective_inelastic_strain);
 
     // Use the old elastic strain here because we require tensors used by this class
     // to be isotropic and this method natively allows for changing in time
@@ -395,8 +405,7 @@ RadialReturnStressUpdateTempl<is_ad>::updateStateSubstepInternal(
   stress_new = sub_stress_new;
 
   // update effective inelastic strain
-  _effective_inelastic_strain[_qp] =
-      _effective_inelastic_strain_old[_qp] + sub_scalar_effective_inelastic_strain;
+  updateEffectiveInelasticStrain(sub_scalar_effective_inelastic_strain);
 }
 
 template <bool is_ad>
