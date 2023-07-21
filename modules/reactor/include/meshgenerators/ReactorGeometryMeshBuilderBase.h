@@ -12,6 +12,49 @@
 #include "MeshGenerator.h"
 #include "libmesh/elem.h"
 
+namespace RGMB
+{
+
+// General global quantities for mesh building
+static const std::string mesh_dimensions = "mesh_dimensions";
+static const std::string mesh_geometry = "mesh_geometry";
+static const std::string top_boundary_id = "top_boundary_id";
+static const std::string bottom_boundary_id = "bottom_boundary_id";
+static const std::string radial_boundary_id = "radial_boundary_id";
+static const std::string axial_mesh_intervals = "axial_mesh_intervals";
+static const std::string axial_mesh_sizes = "axial_mesh_sizes";
+static const std::string reactor_params_name = "reactor_params_name";
+static const std::string is_single_pin = "is_single_pin";
+static const std::string is_homogenized = "is_homogenized";
+static const std::string extruded = "extruded";
+static const std::string pin_region_ids = "pin_region_ids";
+static const std::string pin_block_names = "pin_block_names";
+static const std::string pin_region_id_map = "pin_region_id_map";
+static const std::string pin_block_name_map = "pin_block_name_map";
+
+// Geometrical quantities
+static const std::string pitch = "pitch";
+static const std::string assembly_pitch = "assembly_pitch";
+static const std::string ring_radii = "ring_radii";
+static const std::string duct_halfpitches = "duct_halfpitches";
+static const std::string peripheral_ring_radius = "peripheral_ring_radius";
+static const std::string pin_lattice = "pin_lattice";
+static const std::string assembly_lattice = "assembly_lattice";
+
+// Quantities related to region ids, type ids, and block names
+static const std::string pin_type = "pin_type";
+static const std::string pin_names = "pin_names";
+static const std::string assembly_type = "assembly_type";
+static const std::string assembly_names = "assembly_names";
+static const std::string ring_region_ids = "ring_region_ids";
+static const std::string background_region_id = "background_region_id";
+static const std::string background_block_name = "background_block_name";
+static const std::string duct_region_ids = "duct_region_ids";
+static const std::string duct_block_names = "duct_block_names";
+static const std::string peripheral_ring_region_id = "peripheral_ring_region_id";
+
+}
+
 /**
  * A base class that contains common members for Reactor Geometry Mesh Builder mesh generators.
  */
@@ -42,6 +85,63 @@ protected:
   void initializeReactorMeshParams(const std::string reactor_param_name);
 
   /**
+   * Print metadata associated with ReactorGeometryMeshBuilder object
+   * @param geometry_type       type of geometry (pin / assembly / core) under consideration
+   * @param mg_name             name of mesh generator associated with this object
+   * @param first_function_call whether this is the original function call, which will trigger
+   * additional output messages
+   */
+  void printReactorMetadata(const std::string geometry_type,
+                            const std::string mg_name,
+                            const bool first_function_call = true);
+
+  /**
+   * Print core-level metadata associated with ReactorGeometryMeshBuilder object
+   * @param mg_name name of mesh generator associated with core
+   * @param first_function_call whether this is the original function call, which will trigger
+   * additional output messages
+   */
+  void printCoreMetadata(const std::string mg_name, const bool first_function_call);
+
+  /**
+   * Print assembly-level metadata associated with ReactorGeometryMeshBuilder object
+   * @param mg_name name of mesh generator associated with assembly
+   * @param whether this is the original function call, which will trigger additional output
+   * messages
+   */
+  void printAssemblyMetadata(const std::string mg_name, const bool first_function_call);
+
+  /**
+   * Print pin-level metadata associated with ReactorGeometryMeshBuilder object
+   * @param mg_name name of mesh generator associated with assembly
+   */
+  void printPinMetadata(const std::string mg_name);
+
+  /**
+   * Print global ReactorMeshParams metadata associated with ReactorGeometryMeshBuilder object
+   */
+  void printGlobalReactorMetadata();
+
+  /**
+   * Print metadata with provided name that can be found with given mesh generator name
+   * @tparam T datatype of metadata value to output
+   * @param metadata_name Name of metadata to output
+   * @param mg_name Name of mesh generator that stores metadata
+   */
+  template <typename T>
+  void printMetadataToConsole(const std::string metadata_name, const std::string mg_name);
+
+  /**
+   * Print metadata with data type std::vector<std::vector<T>> and provided name that can be found
+   * with given mesh generator name
+   * @tparam T datatype of elements in 2-D vector to output
+   * @param metadata_name Name of metadata to output
+   * @param mg_name Name of mesh generator that stores metadata
+   */
+  template <typename T>
+  void print2dMetadataToConsole(const std::string metadata_name, const std::string mg_name);
+
+  /**
    * Releases the mesh obtained in _reactor_params_mesh.
    *
    * This _must_ be called in any object that derives from this one, because
@@ -54,6 +154,7 @@ protected:
 
   /**
    * Checks whether parameter is defined in ReactorMeshParams metadata
+   * @tparam T datatype of metadata value associated with metadata name
    * @param param_name name of ReactorMeshParams parameter
    * @return whether parameter is defined in ReactorMeshParams metadata
    */
@@ -62,6 +163,7 @@ protected:
 
   /**
    * Returns reference of parameter in ReactorMeshParams object
+   * @tparam T datatype of metadata value associated with metadata name
    * @param param_name name of ReactorMeshParams parameter
    * @return reference to parameter defined in ReactorMeshParams metadata
    */

@@ -24,9 +24,27 @@ The `CoreMeshGenerator` objects automatically assigns boundary information. The 
 
 If the core is extruded to three dimensions the top-most boundary ID must be assigned using [!param](/Mesh/ReactorMeshParams/top_boundary_id) and will have the name "top", while the bottom-most boundary must be assigned using [!param](/Mesh/ReactorMeshParams/bottom_boundary_id) and will have the name "bottom".
 
+## Metadata Information
+
+Users may be interested in defining metadata to represent the reactor geometry and region IDs assigned to each geometry zone, which may be useful to users who want mesh geometry and composition information without having to inspect the generated mesh itself. [!param](/Mesh/CoreMeshGenerator/show_rgmb_metadata) can be set to true in order to see the values of these metadata entries as console output.
+
+At the core level, the following metadata is defined on the output mesh:
+
+- `assembly_names`: Mesh generator names of constituent assemblies in lattice
+- `lattice`: 2-D lattice of assemblies in core, where each location represents the 0-based index of the assembly in the list of names under the `assembly_names` metadata entry.
+
+For each of the assemblies listed in `assembly_names`, the assembly-level metadata is also displayed. In addition, if any of these assemblies are comprised of pins in a lattice, the pin-level metadata of these constituent pins is also displayed. A list of assembly-level and pin-level metadata defined on the core mesh can be found in [AssemblyMeshGenerator](AssemblyMeshGenerator.md) and [PinMeshGenerator](PinMeshGenerator.md) respectively.
+
+For meshes where a core periphery is defined, the following metadata is also defined:
+
+- `peripheral_ring_radius`: Outer radius of core periphery, equivalent to the input parameter [`CoreMeshGenerator`](CoreMeshGenerator.md)/[!param](/Mesh/CoreMeshGenerator/outer_circle_radius).
+- `peripheral_ring_region_id`: Region ID associated with core periphery, equivalent to the input parameter [`CoreMeshGenerator`](CoreMeshGenerator.md)/[!param](/Mesh/CoreMeshGenerator/periphery_region_id).
+
+In addition, the value of the metadata `reactor_params_name` can be used to retrieve global metadata defined by [ReactorMeshParams](ReactorMeshParams.md). Please refer to [ReactorMeshParams](ReactorMeshParams.md) to see a list of metadata defined by this mesh generator.
+
 ## Example Syntax
 
-!listing modules/reactor/test/tests/meshgenerators/core_mesh_generator/core.i block=Mesh
+!listing modules/reactor/test/tests/meshgenerators/core_mesh_generator/core_square.i block=Mesh
 
 This is the resulting mesh block layout, where by default a single block is assigned to all of the quadrilateral elements in the mesh:
 

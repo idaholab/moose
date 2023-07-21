@@ -4,15 +4,22 @@
   [square]
     requirement = 'The system shall generate a 3D square assembly mesh from 2 pin types'
     type = 'Exodiff'
-    input = 'assembly_only.i'
+    input = 'assembly_square.i'
     cli_args = "Outputs/file_base=assembly_only_in"
     exodiff = 'assembly_only_in.e'
     recover = false
   []
+  [assembly_shared_pin_ids]
+    requirement = 'The system shall throw an error if an assembly mesh is composed of pins with identical pin_type ids'
+    type = 'RunException'
+    input = 'assembly_square.i'
+    cli_args = "Mesh/pin2/pin_type=1"
+    expect_err = 'Constituent pins have shared pin_type ids but different names.'
+  []
   [square_background]
     requirement = 'The system shall generate a 3D square assembly mesh from 2 pin types and a background region'
     type = 'Exodiff'
-    input = 'assembly_only.i'
+    input = 'assembly_square.i'
     cli_args = "Mesh/pin1/pitch=1.25
                 Mesh/pin1/duct_halfpitch=0.58
                 Mesh/pin2/pitch=1.25
@@ -26,22 +33,9 @@
   [hex_ID_conflict]
     requirement = 'The system shall allow for multiple region IDs to be mapped to a specific block name'
     type = 'Exodiff'
-    input = 'assembly_only.i'
-    cli_args = "Mesh/rmp/geom='Hex'
-                Mesh/rmp/assembly_pitch=7.10315
-                Mesh/pin1/region_ids='1 2 5; 11 12 15'
-                Mesh/pin1/quad_center_elements=true
-                Mesh/pin2/region_ids='3; 13'
-                Mesh/pin2/block_names='BLK3; BLK13'
-                Mesh/pin2/quad_center_elements=true
-                Mesh/amg/pattern='  1   1; 1   0   1; 1   1'
-                Mesh/amg/background_intervals=1
-                Mesh/amg/background_region_id='6 16'
+    input = 'assembly_hex.i'
+    cli_args = "Mesh/pin2/block_names='BLK3; BLK13'
                 Mesh/amg/background_block_name='BLK3 BLK16'
-                Mesh/amg/duct_halfpitch='3.5'
-                Mesh/amg/duct_region_ids='7; 17'
-                Mesh/amg/duct_intervals='1'
-                Mesh/inactive='translate'
                 Outputs/file_base=assembly_ductIDs_conflict"
     exodiff = assembly_ductIDs_conflict.e
     recover = false
@@ -49,46 +43,16 @@
   [hex_ductIDs]
     requirement = 'The system shall generate a 3D hexagonal assembly mesh with duct regions with assigned IDs'
     type = 'Exodiff'
-    input = 'assembly_only.i'
-    cli_args = "Mesh/rmp/geom='Hex'
-                Mesh/rmp/assembly_pitch=7.10315
-                Mesh/pin1/region_ids='1 2 5; 11 12 15'
-                Mesh/pin1/quad_center_elements=true
-                Mesh/pin2/region_ids='3; 13'
-                Mesh/pin2/quad_center_elements=true
-                Mesh/amg/pattern='  1   1; 1   0   1; 1   1'
-                Mesh/amg/background_intervals=1
-                Mesh/amg/background_region_id='6 16'
-                Mesh/amg/duct_halfpitch='3.5'
-                Mesh/amg/duct_region_ids='7; 17'
-                Mesh/amg/duct_intervals='1'
-                Mesh/inactive='translate'
-                Outputs/file_base=assembly_ductIDs_in"
+    input = 'assembly_hex.i'
+    cli_args = "Outputs/file_base=assembly_ductIDs_in"
     exodiff = 'assembly_ductIDs_in.e'
     recover = false
   []
   [hex_metadata_transfer]
     requirement = 'The system shall generate a 2D hexagonal assembly mesh that transfers metadata correctly across RGMB mesh generators'
     type = 'Exodiff'
-    input = 'assembly_only.i'
-    cli_args = "Mesh/inactive='pin2 translate'
-                Mesh/rmp/dim=2
-                Mesh/rmp/geom=Hex
-                Mesh/rmp/assembly_pitch=3.7884
-                Mesh/rmp/radial_boundary_id=200
-                Mesh/pin1/pitch=1.3425
-                Mesh/pin1/ring_radii=0.4404
-                Mesh/pin1/duct_halfpitch=0.5404
-                Mesh/pin1/region_ids='1 2 3'
-                Mesh/amg/inputs=pin1
-                Mesh/amg/pattern='0 0; 0 0 0; 0 0'
-                Mesh/amg/background_intervals=1
-                Mesh/amg/background_region_id=4
-                Mesh/amg/duct_halfpitch=1.7703
-                Mesh/amg/duct_intervals=1
-                Mesh/amg/duct_region_ids=5
-                Mesh/amg/extrude=false
-                Outputs/file_base=assembly_metadata_transfer"
+    input = 'assembly_hex_2d.i'
+    cli_args = "Outputs/file_base=assembly_metadata_transfer"
     exodiff = 'assembly_metadata_transfer.e'
     recover = false
   []
