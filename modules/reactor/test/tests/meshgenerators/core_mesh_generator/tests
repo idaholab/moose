@@ -143,6 +143,13 @@
     exodiff = 'core_metadata_transfer.e'
     recover = false
   []
+  [hex_metadata_2d]
+    requirement = 'The system shall print out reactor-related metadata to console output for a 2D hexagonal core mesh'
+    type = 'RunApp'
+    input = 'core_hex_2d.i'
+    cli_args = "Mesh/cmg/show_rgmb_metadata=true"
+    expect_out = 'Global metadata.+mesh_dimensions: 2.+mesh_geometry: Hex.+Core-level metadata.+cmg.+peripheral_ring_radius: 7.+peripheral_ring_region_id: 5.+assembly_names: amg1.+assembly_lattice:.+0, 0.+0, 0, 0.+0, 0.+Assembly-level metadata.+amg1.+assembly_type: 1.+pin_names: pin1.+pin_lattice:.+0, 0.+0, 0, 0.+0, 0.+Pin-level metadata.+pin1.+pin_type: 1.+background_region_id: 2'
+  []
   [ptmg_periphery]
     requirement = 'The system shall generate a 2D hex core mesh with a reactor periphery meshed using a triangular mesh.'
     type = 'CSVDiff'
