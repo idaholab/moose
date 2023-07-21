@@ -19,7 +19,7 @@
     design = ThermochimicaNodalData.md
     issues = '#22711'
     requirement = 'The system shall be able to use reinitialization to speed up a thermochimica solve'
-    cli_args = 'ChemicalComposition/reinit_requested=true'
+    cli_args = 'ChemicalComposition/reinitialization_type=time'
     max_threads = 1
     rel_err = 1e-3 # this is the same error thermochimica uses for its internal tests
     required_submodule = 'contrib/thermochimica'

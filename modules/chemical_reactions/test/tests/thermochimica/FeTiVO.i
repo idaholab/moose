@@ -21,8 +21,8 @@
   punit = atm
   munit = moles
   temperature = T
-  reinit_requested = false
   uo_name = Thermochimica
+  output_species_unit = mole_fraction
 []
 
 [Variables]

@@ -22,7 +22,7 @@
   punit = atm
   munit = moles
   temperature = 2250
-  reinit_requested = false
+  output_species_unit = mole_fraction
 []
 
 [ICs]

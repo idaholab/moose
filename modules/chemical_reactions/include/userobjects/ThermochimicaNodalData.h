@@ -61,9 +61,6 @@ protected:
   const VariableValue & _pressure;
   const VariableValue & _temperature;
 
-  // re-initialization data
-  const bool _reinit_requested;
-
   const std::size_t _n_phases;
   const std::size_t _n_species;
   const std::size_t _n_elements;
@@ -75,6 +72,9 @@ protected:
 
   const ChemicalCompositionAction & _action;
   std::vector<unsigned int> _el_ids;
+
+  // re-initialization data
+  const std::string _reinit;
 
   const std::vector<std::string> & _ph_names;
   const std::vector<std::string> & _element_potentials;
@@ -105,4 +105,7 @@ protected:
 
   /// Writable variable for molar amounts of each element in specified phase
   std::vector<MooseVariable *> _el_ph;
+
+  /// Mass unit for output species
+  std::string _output_mass_unit;
 };

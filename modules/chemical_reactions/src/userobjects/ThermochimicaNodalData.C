@@ -31,7 +31,9 @@ ThermochimicaNodalData::validParams()
   params.addRequiredCoupledVar("temperature", "Coupled temperature");
   params.addCoupledVar("pressure", 1.0, "Pressure");
 
-  params.addParam<bool>("reinit_requested", true, "Should Thermochimica use re-initialization?");
+  MooseEnum reinit_type("none time nodal", "nodal");
+  params.addParam<MooseEnum>(
+      "reinit_type", reinit_type, "Reinitialization scheme to use with Thermochimica");
 
   params.addCoupledVar("output_element_potentials", "Chemical potentials of elements");
   params.addCoupledVar("output_phases", "Amounts of phases to be output");
@@ -39,6 +41,12 @@ ThermochimicaNodalData::validParams()
   params.addCoupledVar("output_vapor_pressures", "Vapour pressures of species to be output");
   params.addCoupledVar("output_element_phases",
                        "Elements whose molar amounts in specific phases are requested");
+
+  MooseEnum mUnit_op("mole_fraction moles", "moles");
+  params.addParam<MooseEnum>(
+      "output_species_unit", mUnit_op, "Mass unit for output species: mole_fractions or moles");
+
+  params.set<bool>("unique_node_execute") = true;
 
   params.addPrivateParam<ChemicalCompositionAction *>("_chemical_composition_action");
   return params;
@@ -48,7 +56,6 @@ ThermochimicaNodalData::ThermochimicaNodalData(const InputParameters & parameter
   : NodalUserObject(parameters),
     _pressure(coupledValue("pressure")),
     _temperature(coupledValue("temperature")),
-    _reinit_requested(getParam<bool>("reinit_requested")),
     _n_phases(coupledComponents("output_phases")),
     _n_species(coupledComponents("output_species")),
     _n_elements(coupledComponents("elements")),
@@ -59,6 +66,7 @@ ThermochimicaNodalData::ThermochimicaNodalData(const InputParameters & parameter
     _action(*parameters.getCheckedPointerParam<ChemicalCompositionAction *>(
         "_chemical_composition_action")),
     _el_ids(_action.elementIDs()),
+    _reinit(_action.reinitializationType()),
     _ph_names(_action.phases()),
     _element_potentials(_action.elementPotentials()),
     _species_phase_pairs(_action.speciesPhasePairs()),
@@ -71,7 +79,8 @@ ThermochimicaNodalData::ThermochimicaNodalData(const InputParameters & parameter
     _sp(_n_species),
     _vp(_n_vapor_species),
     _el_pot(_n_potentials),
-    _el_ph(_n_phase_elements)
+    _el_ph(_n_phase_elements),
+    _output_mass_unit(_action.outputSpeciesUnit())
 {
   ThermochimicaUtils::checkLibraryAvailability(*this);
 
@@ -158,9 +167,6 @@ ThermochimicaNodalData::execute()
   // Calculate thermochemical equilibrium
   Thermochimica::thermochimica();
 
-  // fetch data for the current node
-  auto & d = _data[_current_node->id()];
-
   // Check for error status
   auto idbg = Thermochimica::checkInfoThermo();
   if (idbg != 0)
@@ -172,6 +178,8 @@ ThermochimicaNodalData::execute()
 
     // Get requested phase indices if phase concentration output was requested
     // i.e. if output_phases is coupled
+    auto moles_phase = Thermochimica::getMolesPhase();
+
     for (const auto i : make_range(_n_phases))
     {
       // Is this maybe constant? No it isn't for now
@@ -182,23 +190,58 @@ ThermochimicaNodalData::execute()
       if (index - 1 < 0)
         _ph[i]->setNodalValue(0.0, _qp);
       else
-        _ph[i]->setNodalValue(d._moles_phase[index - 1], _qp);
+        _ph[i]->setNodalValue(moles_phase[index - 1], _qp);
     }
 
     auto db_phases = Thermochimica::getPhaseNamesSystem();
+    auto getSpeciesMoles =
+        [this, moles_phase, db_phases](const std::string phase,
+                                       const std::string species) -> std::pair<double, int>
+    {
+      Real value = 0.0;
+      int code = 0;
+
+      auto [index, idbg] = Thermochimica::getPhaseIndex(phase);
+
+      if (Thermochimica::isPhaseMQM(std::distance(
+              db_phases.begin(), std::find(db_phases.begin(), db_phases.end(), phase))))
+      {
+        auto [fraction, idbg] = Thermochimica::getMqmqaPairMolFraction(phase, species);
+
+        if (_output_mass_unit == "mole_fraction")
+        {
+          value = fraction;
+          code = idbg;
+        }
+        else if (_output_mass_unit == "moles")
+        {
+          auto [molesPair, idbgPair] = Thermochimica::getMqmqaMolesPairs(phase);
+          value = molesPair * fraction;
+          code = idbg + idbgPair;
+        }
+      }
+      else
+      {
+        auto [fraction, idbg] = Thermochimica::getOutputMolSpeciesPhase(phase, species);
+        if (_output_mass_unit == "mole_fraction")
+        {
+          value = fraction;
+          code = idbg;
+        }
+        else if (_output_mass_unit == "moles")
+        {
+          value = moles_phase[index - 1] * fraction;
+          code = idbg;
+        }
+      }
+      return {value, code};
+    };
+
     for (const auto i : make_range(_n_species))
     {
-      auto ph_index = std::distance(
-          db_phases.begin(),
-          std::find(db_phases.begin(), db_phases.end(), _species_phase_pairs[i].first));
-
-      auto [fraction, idbg] =
-          // can we somehow use IDs instead of strings here?
-          Thermochimica::isPhaseMQM(ph_index)
-              ? Thermochimica::getMqmqaPairMolFraction(_species_phase_pairs[i].first,
-                                                       _species_phase_pairs[i].second)
-              : Thermochimica::getOutputMolSpeciesPhase(_species_phase_pairs[i].first,
-                                                        _species_phase_pairs[i].second);
+      auto [fraction, idbg] = getSpeciesMoles(
+          _species_phase_pairs[i].first,
+          _species_phase_pairs[i].second); // can we somehow use IDs instead of strings here?
 
       if (idbg == 0)
         _sp[i]->setNodalValue(fraction, _qp);
@@ -281,29 +324,21 @@ ThermochimicaNodalData::reinitDataMooseFromTc()
 #ifdef THERMOCHIMICA_ENABLED
   auto & d = _data[_current_node->id()];
 
-  if (_reinit_requested)
+  if (_reinit != "none")
   {
     Thermochimica::saveReinitData();
     auto data = Thermochimica::getReinitData();
-    d._assemblage = std::move(data.assemblage);
-    d._moles_phase = std::move(data.molesPhase);
-    d._element_potential = std::move(data.elementPotential);
-    d._chemical_potential = std::move(data.chemicalPotential);
-    d._mol_fraction = std::move(data.moleFraction);
-    d._elements_used = std::move(data.elementsUsed);
-    d._reinit_available = data.reinitAvailable;
-  }
-  else
-  {
-    // If phase concentration data output has been requested, _moles_phase is required even if other
-    // re-initialization data is not
-    if (_n_phases > 0)
-      d._moles_phase = Thermochimica::getMolesPhase();
 
-    // If element chemical potential data output has been requested, _element_potential is required
-    // even if other re-initialization data is not
-    if (_output_element_potentials)
-      d._element_potential = Thermochimica::getAllElementPotential();
+    if (_reinit == "time")
+    {
+      d._assemblage = std::move(data.assemblage);
+      d._moles_phase = std::move(data.molesPhase);
+      d._element_potential = std::move(data.elementPotential);
+      d._chemical_potential = std::move(data.chemicalPotential);
+      d._mol_fraction = std::move(data.moleFraction);
+      d._elements_used = std::move(data.elementsUsed);
+      d._reinit_available = data.reinitAvailable;
+    }
   }
 #endif
 }
@@ -313,12 +348,15 @@ ThermochimicaNodalData::reinitDataMooseToTc()
 {
 #ifdef THERMOCHIMICA_ENABLED
   // Tell Thermochimica whether a re-initialization is requested for this calculation
-  Thermochimica::setReinitRequested(_reinit_requested);
+  if (_reinit == "none")
+    Thermochimica::setReinitRequested(false);
+  else
+    Thermochimica::setReinitRequested(true);
 
   // If we have re-initialization data and want a re-initialization, then
   // load data into Thermochimica
   auto it = _data.find(_current_node->id());
-  if (it != _data.end() && _reinit_requested)
+  if (it != _data.end() && _reinit == "time") // If doing previous timestep reinit
   {
     auto & d = it->second;
     if (d._reinit_available)

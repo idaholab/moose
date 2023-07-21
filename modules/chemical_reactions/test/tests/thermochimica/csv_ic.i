@@ -23,7 +23,7 @@
   punit = atm
   munit = moles
   temperature = 2250
-  reinit_requested = false
+  reinitialization_type = nodal
 []
 
 [Problem]

@@ -40,7 +40,9 @@ ChemicalCompositionAction::validParams()
                                                     "List of chemical elements (or ALL)");
   params.addRequiredCoupledVar("temperature", "Name of temperature variable");
   params.addCoupledVar("pressure", "Name of pressure variable");
-  params.addParam<bool>("reinit_requested", true, "Should Thermochimica use re-initialization");
+  MooseEnum reinit_type("none time nodal", "nodal");
+  params.addParam<MooseEnum>(
+      "reinitialization_type", reinit_type, "Reinitialization scheme to use with Thermochimica");
   params.addParam<FileName>("initial_values", "The CSV file name with initial conditions.");
   params.addParam<FileName>("thermofile", "Thermodynamics model file");
 
@@ -59,6 +61,9 @@ ChemicalCompositionAction::validParams()
   params.addParam<std::vector<std::string>>("output_phases", "List of phases to be output");
   params.addParam<std::vector<std::string>>(
       "output_species", "List species for which concentration in the phases is needed");
+  MooseEnum mUnit_op("mole_fraction moles", "moles");
+  params.addParam<MooseEnum>(
+      "output_species_unit", mUnit_op, "Mass unit for output species: mole_fractions or moles");
   params.addParam<std::vector<std::string>>(
       "output_element_potentials",
       "List of chemical elements for which chemical potentials are requested");
@@ -81,10 +86,11 @@ ChemicalCompositionAction::ChemicalCompositionAction(const InputParameters & par
     _munit(getParam<MooseEnum>("munit")),
     _phases(getParam<std::vector<std::string>>("output_phases")),
     _species(getParam<std::vector<std::string>>("output_species")),
+    _output_mass_unit(getParam<MooseEnum>("output_species_unit")),
     _element_potentials(getParam<std::vector<std::string>>("output_element_potentials")),
     _vapor_pressures(getParam<std::vector<std::string>>("output_vapor_pressures")),
     _element_phases(getParam<std::vector<std::string>>("output_element_phases")),
-    _reinit(getParam<bool>("reinit_requested")),
+    _reinit(getParam<MooseEnum>("reinitialization_type")),
     _uo_name(getParam<std::string>("uo_name"))
 {
   ThermochimicaUtils::checkLibraryAvailability(*this);

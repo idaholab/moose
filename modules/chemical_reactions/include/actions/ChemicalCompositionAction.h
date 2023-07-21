@@ -44,6 +44,10 @@ public:
     return _tokenized_phase_elements;
   }
 
+  const std::string & outputSpeciesUnit() const { return _output_mass_unit; }
+
+  const std::string & reinitializationType() const { return _reinit; }
+
   virtual void act();
 
 protected:
@@ -70,6 +74,9 @@ protected:
   /// List of species tracked by Thermochimica
   std::vector<std::string> _species;
 
+  /// Mass unit for output species
+  std::string _output_mass_unit;
+
   /// List of element chemical potentials to be extracted from Thermochimica
   std::vector<std::string> _element_potentials;
 
@@ -80,7 +87,7 @@ protected:
   std::vector<std::string> _element_phases;
 
   /// Flag for whether Thermochimica should use the reinit feature or not
-  bool _reinit;
+  std::string _reinit;
 
   /// Name of the ThermochimicaNodalData UO to be set up
   std::string _uo_name;
