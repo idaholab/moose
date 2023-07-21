@@ -256,18 +256,6 @@ PolygonConcentricCircleMeshGeneratorBase::PolygonConcentricCircleMeshGeneratorBa
                       ? _polygon_size
                       : _polygon_size * std::cos(M_PI / Real(_num_sides)));
   declareMeshProperty<Real>("pitch_meta", _pitch);
-  if (!_create_inward_interface_boundaries && _inward_interface_boundary_names.size() > 0)
-    paramError("create_inward_interface_boundaries",
-               "If set false, inward_interface_boundary_names "
-               "should not be set as they are not used.");
-  if (!_create_outward_interface_boundaries && _outward_interface_boundary_names.size() > 0)
-    paramError("create_outward_interface_boundaries",
-               "If set false, outward_interface_boundary_names "
-               "should not be set as they are not used.");
-  if (!_create_outward_interface_boundaries && !_create_inward_interface_boundaries &&
-      _interface_boundary_id_shift != 0)
-    paramError("interface_boundary_id_shift",
-               "this parameter should not be set if no interface boundaries are created.");
   if (_inward_interface_boundary_names.size() > 0 &&
       _inward_interface_boundary_names.size() != _duct_sizes.size() + _ring_radii.size())
     paramError("inward_interface_boundary_names",
@@ -317,23 +305,7 @@ PolygonConcentricCircleMeshGeneratorBase::PolygonConcentricCircleMeshGeneratorBa
     if (*it % 2 == 1)
       paramError("num_sectors_per_side", "This parameter must be even.");
   declareMeshProperty("num_sectors_per_side_meta", _num_sectors_per_side);
-  // Rings related error messages
-  if (_ring_radii.size() != _ring_intervals.size())
-    paramError("ring_radii", "This parameter and ring_intervals must have the same length.");
-  if (_ring_radii.size() != _ring_radial_biases.size())
-    paramError("ring_radii", "This parameter and ring_radial_biases must have the same length.");
-  for (unsigned int i = 1; i < _ring_intervals.size(); i++)
-    if (_ring_radii[i] <= _ring_radii[i - 1])
-      paramError("ring_radii", "This parameter must be strictly ascending.");
-  if (_ring_radii.size() != _ring_inner_boundary_layer_params.widths.size() ||
-      _ring_radii.size() != _ring_inner_boundary_layer_params.intervals.size() ||
-      _ring_radii.size() != _ring_inner_boundary_layer_params.biases.size() ||
-      _ring_radii.size() != _ring_outer_boundary_layer_params.widths.size() ||
-      _ring_radii.size() != _ring_outer_boundary_layer_params.intervals.size() ||
-      _ring_radii.size() != _ring_outer_boundary_layer_params.biases.size())
-    paramError("ring_radii",
-               "The inner and outer ring boundary layer parameters must have the same sizes as "
-               "ring_radii.");
+
   if (_has_rings)
   {
     const unsigned int num_innermost_ring_layers =
@@ -744,28 +716,7 @@ PolygonConcentricCircleMeshGeneratorBase::generate()
   std::vector<SubdomainName> block_names;
   if (_has_rings)
   {
-    if (_ring_intervals.front() == 1)
-      ring_block_num = _ring_intervals.size();
-    else
-    {
-      ring_block_num = _ring_intervals.size() + 1;
-      block_ids_old.push_back(_block_id_shift + 1);
-      block_ids_new.push_back(_ring_block_ids.empty() ? block_ids_old.back()
-                                                      : _ring_block_ids.front());
-      block_names.push_back(_ring_block_names.empty()
-                                ? (SubdomainName)std::to_string(block_ids_new.back())
-                                : _ring_block_names.front());
-      block_it++;
-    }
-    for (unsigned int i = ring_block_num - _ring_intervals.size(); i < ring_block_num; i++)
-    {
-      block_ids_old.push_back(_block_id_shift + 1 + i);
-      block_ids_new.push_back(_ring_block_ids.empty() ? block_ids_old.back() : _ring_block_ids[i]);
-      block_names.push_back(_ring_block_names.empty()
-                                ? (SubdomainName)std::to_string(block_ids_new.back())
-                                : _ring_block_names[i]);
-      block_it++;
-    }
+    ringBlockIdsNamesPreparer(block_it, ring_block_num, block_ids_old, block_ids_new, block_names);
   }
   else
   {
@@ -801,25 +752,8 @@ PolygonConcentricCircleMeshGeneratorBase::generate()
     }
   }
 
-  for (auto it = block_names.begin(); it != block_names.end() - 1; it++)
-  {
-    auto it_tmp = std::find(block_names.begin(), it + 1, *(it + 1));
-    if (it_tmp != it + 1 && block_ids_new[std::distance(block_names.begin(), it + 1)] !=
-                                block_ids_new[std::distance(block_names.begin(), it_tmp)])
-      mooseError("In ConcentricCircleMeshGenerator ",
-                 _name,
-                 ": blocks with different ids cannot have the same block name.");
-  }
-
-  for (const auto & elem : mesh0->element_ptr_range())
-    for (unsigned i = 0; i < block_ids_old.size(); ++i)
-      if (elem->subdomain_id() == block_ids_old[i])
-      {
-        elem->subdomain_id() = block_ids_new[i];
-        break;
-      }
-  for (unsigned i = 0; i < block_ids_new.size(); ++i)
-    mesh0->subdomain_name(block_ids_new[i]) = block_names[i];
+  assignBlockIdsNames(
+      *mesh0, block_ids_old, block_ids_new, block_names, "ConcentricCircleMeshGenerator");
 
   if (_external_boundary_id > 0)
     MooseMesh::changeBoundaryId(*mesh0, OUTER_SIDESET_ID, _external_boundary_id, false);

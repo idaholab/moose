@@ -22,7 +22,7 @@ public:
 
   ConcentricCircleGeneratorBase(const InputParameters & parameters);
 
-  virtual std::unique_ptr<MeshBase> generate() override;
+  virtual std::unique_ptr<MeshBase> generate() override = 0;
 
 protected:
   /// Radii of concentric circles
@@ -65,4 +65,32 @@ protected:
    * @param mesh Mesh to which the interface boundary names are assigned
    */
   void assignInterfaceBoundaryNames(ReplicatedMesh & mesh);
+
+  /**
+   * Assign block IDs and names to the mesh if applicable.
+   * @param mesh Mesh to which the block IDs and names are assigned
+   * @param block_ids_old old block ids that are assigned by default
+   * @param block_ids_new new block ids that are user-defined
+   * @param block_names block names that are user-defined
+   * @param generator_name class name of the mesh generator
+   */
+  void assignBlockIdsNames(ReplicatedMesh & mesh,
+                           std::vector<subdomain_id_type> & block_ids_old,
+                           std::vector<subdomain_id_type> & block_ids_new,
+                           std::vector<SubdomainName> & block_names,
+                           const std::string & generator_name);
+
+  /**
+   * Prepare user-defined ring block IDs and names to replace the default ones.
+   * @param block_it block iterator
+   * @param ring_block_num number of blocks in the ring region
+   * @param block_ids_old old block ids that are assigned by default
+   * @param block_ids_new new block ids that are user-defined
+   * @param block_names block names that are user-defined
+   */
+  void ringBlockIdsNamesPreparer(unsigned int & block_it,
+                                 unsigned int & ring_block_num,
+                                 std::vector<subdomain_id_type> & block_ids_old,
+                                 std::vector<subdomain_id_type> & block_ids_new,
+                                 std::vector<SubdomainName> & block_names);
 };
