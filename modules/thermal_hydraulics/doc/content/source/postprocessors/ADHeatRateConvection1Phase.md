@@ -1,20 +1,15 @@
 # ADHeatRateConvection1Phase
 
-!alert construction title=Undocumented Class
-The ADHeatRateConvection1Phase has not been documented. The content listed below should be used as a starting point for
-documenting the class, which includes the typical automatic documentation associated with a
-MooseObject; however, what is contained is ultimately determined by what is necessary to make the
-documentation clear for users.
-
 !syntax description /Postprocessors/ADHeatRateConvection1Phase
 
-## Overview
+The heat convective heat rate $R$ is the integral of the convective heat flux over the flow channel / subdomains
+specified in the [!param](/Postprocessors/ADHeatRateConvection1Phase/block) parameter.
 
-!! Replace these lines with information regarding the ADHeatRateConvection1Phase object.
+!equation
+R = \int_\Omega H_{wall} P_w (T - T_{wall}) d\Omega
 
-## Example Input File Syntax
-
-!! Describe and include an example of how to use the ADHeatRateConvection1Phase object.
+where $H_w$ is the wall heat transfer coefficient, $P_w$ is the wetted perimeter,
+$T$ is the fluid temperature and $T_{wall}$ is the wall temperature.
 
 !syntax parameters /Postprocessors/ADHeatRateConvection1Phase
 

@@ -1,20 +1,11 @@
 # ADFlowBoundaryFlux1Phase
 
-!alert construction title=Undocumented Class
-The ADFlowBoundaryFlux1Phase has not been documented. The content listed below should be used as a starting point for
-documenting the class, which includes the typical automatic documentation associated with a
-MooseObject; however, what is contained is ultimately determined by what is necessary to make the
-documentation clear for users.
-
 !syntax description /Postprocessors/ADFlowBoundaryFlux1Phase
 
-## Overview
-
-!! Replace these lines with information regarding the ADFlowBoundaryFlux1Phase object.
-
-## Example Input File Syntax
-
-!! Describe and include an example of how to use the ADFlowBoundaryFlux1Phase object.
+This object can be used to get the flux for either of the mass, momentum and energy equations.
+The flux is computed by an AD boundary flux user object.
+The boundary user object is retrieved using the boundary name specified in the
+[!param](/Postprocessors/ADFlowBoundaryFlux1Phase/boundary) parameter.
 
 !syntax parameters /Postprocessors/ADFlowBoundaryFlux1Phase
 
