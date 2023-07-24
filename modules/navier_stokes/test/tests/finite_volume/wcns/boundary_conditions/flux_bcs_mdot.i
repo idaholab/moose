@@ -202,6 +202,8 @@ inlet_velocity = 0.001
     mdot_pp = 'inlet_mdot'
     area_pp = 'area_pp_left'
     rho = 'rho'
+    vel_x = vel_x
+    vel_y = vel_y
   []
   [inlet_u]
     type = WCNSFVMomentumFluxBC
@@ -211,6 +213,8 @@ inlet_velocity = 0.001
     area_pp = 'area_pp_left'
     rho = 'rho'
     momentum_component = 'x'
+    vel_x = vel_x
+    vel_y = vel_y
   []
   [inlet_v]
     type = WCNSFVMomentumFluxBC
@@ -220,6 +224,8 @@ inlet_velocity = 0.001
     area_pp = 'area_pp_left'
     rho = 'rho'
     momentum_component = 'y'
+    vel_x = vel_x
+    vel_y = vel_y
   []
   [inlet_T]
     type = WCNSFVEnergyFluxBC
@@ -231,6 +237,8 @@ inlet_velocity = 0.001
     area_pp = 'area_pp_left'
     rho = 'rho'
     cp = 'cp'
+    vel_x = vel_x
+    vel_y = vel_y
   []
   [inlet_scalar]
     type = WCNSFVScalarFluxBC
@@ -240,6 +248,8 @@ inlet_velocity = 0.001
     mdot_pp = 'inlet_mdot'
     area_pp = 'area_pp_left'
     rho = 'rho'
+    vel_x = vel_x
+    vel_y = vel_y
   []
 
   [outlet_p]

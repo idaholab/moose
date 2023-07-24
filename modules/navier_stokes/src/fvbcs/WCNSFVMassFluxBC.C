@@ -31,17 +31,13 @@ WCNSFVMassFluxBC::WCNSFVMassFluxBC(const InputParameters & params) : WCNSFVFluxB
   // Need enough information to compute the mass flux
   if (_mdot_pp && !_area_pp)
     mooseError("The inlet area should be provided along with the mass flow rate");
-  if (!_mdot_pp && (!_velocity_pp || !_rho))
-    mooseError("Velocity and density should be provided if the mass flow rate is not");
+  if (!_mdot_pp && !_velocity_pp)
+    mooseError("Velocity should be provided if the mass flow rate is not");
 }
 
 ADReal
 WCNSFVMassFluxBC::computeQpResidual()
 {
-  if (_area_pp)
-    if (MooseUtils::absoluteFuzzyEqual(*_area_pp, 0))
-      mooseError("Surface area is 0");
-
   /*
    * We assume the following orientation: The supplied mass flow and velocity magnitude need to be
    * positive if:
@@ -57,7 +53,7 @@ WCNSFVMassFluxBC::computeQpResidual()
     const Point incoming_vector = !_direction_specified_by_user ? _face_info->normal() : _direction;
     const Real cos_angle = std::abs(incoming_vector * _face_info->normal());
     return -_scaling_factor * (*_velocity_pp) * cos_angle *
-           (*_rho)(singleSidedFaceArg(), determineState());
+           _rho(singleSidedFaceArg(), determineState());
   }
   else
     return -_scaling_factor * (*_mdot_pp) / (*_area_pp);

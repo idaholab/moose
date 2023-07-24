@@ -196,6 +196,8 @@ inlet_velocity = 0.001
     boundary = 'left'
     velocity_pp = 'inlet_u'
     rho = 'rho'
+    vel_x = vel_x
+    vel_y = vel_y
   []
   [inlet_u]
     type = WCNSFVMomentumFluxBC
@@ -204,6 +206,8 @@ inlet_velocity = 0.001
     velocity_pp = 'inlet_u'
     rho = 'rho'
     momentum_component = 'x'
+    vel_x = vel_x
+    vel_y = vel_y
   []
   [inlet_v]
     type = WCNSFVMomentumFluxBC
@@ -212,6 +216,8 @@ inlet_velocity = 0.001
     velocity_pp = 0
     rho = 'rho'
     momentum_component = 'y'
+    vel_x = vel_x
+    vel_y = vel_y
   []
   [inlet_T]
     type = WCNSFVEnergyFluxBC
@@ -222,6 +228,8 @@ inlet_velocity = 0.001
     temperature_pp = 'inlet_T'
     rho = 'rho'
     cp = 'cp'
+    vel_x = vel_x
+    vel_y = vel_y
   []
   [inlet_scalar]
     type = WCNSFVScalarFluxBC
@@ -229,6 +237,9 @@ inlet_velocity = 0.001
     boundary = 'left'
     scalar_value_pp = 'inlet_scalar_value'
     velocity_pp = 'inlet_u'
+    vel_x = vel_x
+    vel_y = vel_y
+    rho = rho
   []
 
   [outlet_p]

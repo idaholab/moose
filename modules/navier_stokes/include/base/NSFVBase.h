@@ -2341,6 +2341,12 @@ NSFVBase<BaseType>::addINSInletBC()
         else
           params.template set<PostprocessorName>("velocity_pp") = _flux_inlet_pps[flux_bc_counter];
 
+        params.template set<MooseFunctorName>(NS::velocity_x) = velocityName(0);
+        if (_dim > 1)
+          params.template set<MooseFunctorName>(NS::velocity_y) = velocityName(1);
+        if (_dim > 2)
+          params.template set<MooseFunctorName>(NS::velocity_z) = velocityName(2);
+
         for (unsigned int d = 0; d < _dim; ++d)
         {
           params.template set<MooseEnum>("momentum_component") = NS::directions[d];
@@ -2368,6 +2374,12 @@ NSFVBase<BaseType>::addINSInletBC()
         }
         else
           params.template set<PostprocessorName>("velocity_pp") = _flux_inlet_pps[flux_bc_counter];
+
+        params.template set<MooseFunctorName>(NS::velocity_x) = velocityName(0);
+        if (_dim > 1)
+          params.template set<MooseFunctorName>(NS::velocity_y) = velocityName(1);
+        if (_dim > 2)
+          params.template set<MooseFunctorName>(NS::velocity_z) = velocityName(2);
 
         getProblem().addFVBC(bc_type, _pressure_name + "_" + _inlet_boundaries[bc_ind], params);
       }
@@ -2426,7 +2438,11 @@ NSFVBase<BaseType>::addINSEnergyInletBC()
       params.template set<PostprocessorName>("temperature_pp") = _energy_inlet_function[bc_ind];
       params.template set<MooseFunctorName>(NS::density) = _density_name;
       params.template set<MooseFunctorName>(NS::cp) = _specific_heat_name;
-
+      params.template set<MooseFunctorName>(NS::velocity_x) = velocityName(0);
+      if (_dim > 1)
+        params.template set<MooseFunctorName>(NS::velocity_y) = velocityName(1);
+      if (_dim > 2)
+        params.template set<MooseFunctorName>(NS::velocity_z) = velocityName(2);
       params.template set<std::vector<BoundaryName>>("boundary") = {_inlet_boundaries[bc_ind]};
 
       getProblem().addFVBC(
@@ -2471,14 +2487,20 @@ NSFVBase<BaseType>::addScalarInletBC()
           params.template set<PostprocessorName>("mdot_pp") = _flux_inlet_pps[flux_bc_counter];
           params.template set<PostprocessorName>("area_pp") =
               "area_pp_" + _inlet_boundaries[bc_ind];
-          params.template set<MooseFunctorName>(NS::density) = _density_name;
         }
         else
           params.template set<PostprocessorName>("velocity_pp") = _flux_inlet_pps[flux_bc_counter];
 
+        params.template set<MooseFunctorName>(NS::density) = _density_name;
         params.template set<PostprocessorName>("scalar_value_pp") =
             _passive_scalar_inlet_function[name_i][bc_ind];
         params.template set<std::vector<BoundaryName>>("boundary") = {_inlet_boundaries[bc_ind]};
+
+        params.template set<MooseFunctorName>(NS::velocity_x) = velocityName(0);
+        if (_dim > 1)
+          params.template set<MooseFunctorName>(NS::velocity_y) = velocityName(1);
+        if (_dim > 2)
+          params.template set<MooseFunctorName>(NS::velocity_z) = velocityName(2);
 
         getProblem().addFVBC(
             bc_type, _passive_scalar_names[name_i] + "_" + _inlet_boundaries[bc_ind], params);

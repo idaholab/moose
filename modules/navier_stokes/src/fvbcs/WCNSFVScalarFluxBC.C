@@ -50,8 +50,8 @@ WCNSFVScalarFluxBC::WCNSFVScalarFluxBC(const InputParameters & params)
     if (!_velocity_pp && !_mdot_pp)
       mooseError("If not providing the scalar flow rate, the inlet velocity or mass flow "
                  "should be provided");
-    if (_mdot_pp && (!_rho || !_area_pp))
-      mooseError("If providing the inlet mass flow rate, the inlet density and flow "
+    if (_mdot_pp && !_area_pp)
+      mooseError("If providing the inlet mass flow rate, the inlet flow "
                  "area should be provided as well");
   }
   else if (!_area_pp)
@@ -62,10 +62,6 @@ WCNSFVScalarFluxBC::WCNSFVScalarFluxBC(const InputParameters & params)
 ADReal
 WCNSFVScalarFluxBC::computeQpResidual()
 {
-  if (_area_pp)
-    if (MooseUtils::absoluteFuzzyEqual(*_area_pp, 0))
-      mooseError("Surface area is 0");
-
   if (_scalar_flux_pp)
     return -_scaling_factor * *_scalar_flux_pp / *_area_pp;
   else
@@ -89,6 +85,6 @@ WCNSFVScalarFluxBC::computeQpResidual()
     }
     else
       return -_scaling_factor * *_mdot_pp / *_area_pp /
-             (*_rho)(singleSidedFaceArg(), determineState()) / cos_angle * *_scalar_value_pp;
+             _rho(singleSidedFaceArg(), determineState()) / cos_angle * *_scalar_value_pp;
   }
 }
