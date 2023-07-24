@@ -45,7 +45,7 @@ TopResidualDebugOutput::TopResidualDebugOutput(const InputParameters & parameter
 }
 
 void
-TopResidualDebugOutput::output(const ExecFlagType & /*type*/)
+TopResidualDebugOutput::output()
 {
   // Display the top residuals
   if (_num_residuals > 0)

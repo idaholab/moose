@@ -177,10 +177,10 @@ JSONOutput::outputReporters()
 }
 
 void
-JSONOutput::output(const ExecFlagType & type)
+JSONOutput::output()
 {
   _has_distributed = false;
-  AdvancedOutput::output(type);
+  AdvancedOutput::output();
   if (processor_id() == 0 || _has_distributed)
   {
     std::ofstream out(filename().c_str());

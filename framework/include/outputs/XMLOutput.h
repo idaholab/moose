@@ -19,7 +19,7 @@ public:
   XMLOutput(const InputParameters & parameters);
 
 protected:
-  virtual void output(const ExecFlagType & type) override;
+  virtual void output() override;
 
   virtual std::string filename() override;
 

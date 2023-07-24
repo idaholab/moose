@@ -66,7 +66,7 @@ public:
   {
   }
 
-  void output(const ExecFlagType &) override
+  void output() override
   {
     // Must call compute_nodal_geometry first!
     if (_amg._secondary_node_to_nodal_normal.empty() ||

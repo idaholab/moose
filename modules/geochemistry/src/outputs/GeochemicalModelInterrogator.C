@@ -105,10 +105,8 @@ GeochemicalModelInterrogator::GeochemicalModelInterrogator(const InputParameters
 }
 
 void
-GeochemicalModelInterrogator::output(const ExecFlagType & type)
+GeochemicalModelInterrogator::output()
 {
-  if (!shouldOutput(type))
-    return;
   for (const auto & sp : eqmSpeciesOfInterest())
   {
     switch (_interrogation)
@@ -124,6 +122,7 @@ GeochemicalModelInterrogator::output(const ExecFlagType & type)
         break;
     }
   }
+
   for (unsigned i = 0; i < _swap_out.size(); ++i)
   {
     // any exception here is an error

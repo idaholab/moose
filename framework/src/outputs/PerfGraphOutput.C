@@ -58,14 +58,14 @@ PerfGraphOutput::PerfGraphOutput(const InputParameters & parameters)
 }
 
 bool
-PerfGraphOutput::shouldOutput(const ExecFlagType & type)
+PerfGraphOutput::shouldOutput()
 {
   // We don't want the Perflog to get dumped at odd times. Ignore the FORCED flag.
-  return _execute_on.contains(type);
+  return _execute_on.contains(_current_execute_flag);
 }
 
 void
-PerfGraphOutput::output(const ExecFlagType & /*type*/)
+PerfGraphOutput::output()
 {
   if (!_app.getParam<bool>("no_timing"))
   {

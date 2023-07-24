@@ -429,7 +429,7 @@ Exodus::outputInput()
 }
 
 void
-Exodus::output(const ExecFlagType & type)
+Exodus::output()
 {
   // Prepare the ExodusII_IO object
   outputSetup();
@@ -444,7 +444,7 @@ Exodus::output(const ExecFlagType & type)
   _global_values.clear();
 
   // Call the individual output methods
-  AdvancedOutput::output(type);
+  AdvancedOutput::output();
 
   // Write the global variables (populated by the output methods)
   if (!_global_values.empty())

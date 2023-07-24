@@ -22,5 +22,5 @@ public:
   ReporterDebugOutput(const InputParameters & parameters);
 
 protected:
-  void output(const ExecFlagType & type) override;
+  void output() override;
 };

@@ -32,7 +32,7 @@ MappingOutput::MappingOutput(const InputParameters & parameters)
 }
 
 void
-MappingOutput::output(const ExecFlagType & /*type*/)
+MappingOutput::output()
 {
   if (processor_id() == 0)
   {

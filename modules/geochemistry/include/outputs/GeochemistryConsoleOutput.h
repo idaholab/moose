@@ -28,7 +28,7 @@ public:
   GeochemistryConsoleOutput(const InputParameters & parameters);
 
 protected:
-  virtual void output(const ExecFlagType & type) override;
+  virtual void output() override;
 
   /// the Reactor from which to extract info
   const GeochemistryReactorBase & _reactor;

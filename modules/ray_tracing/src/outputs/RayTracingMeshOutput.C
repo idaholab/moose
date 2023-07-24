@@ -98,7 +98,7 @@ RayTracingMeshOutput::filename()
 }
 
 void
-RayTracingMeshOutput::output(const ExecFlagType & /* type */)
+RayTracingMeshOutput::output()
 {
   // Do we even have any traces?
   auto num_segments = _study.getCachedTraces().size();

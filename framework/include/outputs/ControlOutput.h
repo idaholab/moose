@@ -29,7 +29,7 @@ protected:
   /**
    * Perform the output of control information
    */
-  virtual void output(const ExecFlagType & type) override;
+  virtual void output() override;
 
 private:
   /**

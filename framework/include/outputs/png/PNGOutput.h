@@ -48,7 +48,7 @@ protected:
   void makePNG();
 
   /// Called to run the functions in this class.
-  virtual void output(const ExecFlagType & type);
+  virtual void output();
 
   /// Variable to determine the size, or resolution, of the image.
   const unsigned int _resolution;

@@ -91,21 +91,29 @@ Checkpoint::outputStep(const ExecFlagType & type)
   if (type == EXEC_INITIAL && _app.isRecovering())
     return;
 
+  // store current simulation time
+  _last_output_time = _time;
+
+  // set current type
+  _current_execute_flag = type;
+
   // Check whether we should output, then do it.
-  if (shouldOutput(type))
+  if (shouldOutput())
   {
     TIME_SECTION("outputStep", 2, "Outputting Checkpoint");
-    output(type);
+    output();
   }
+
+  _current_execute_flag = EXEC_NONE;
 }
 
 bool
-Checkpoint::shouldOutput(const ExecFlagType & type)
+Checkpoint::shouldOutput()
 {
   // Check if the checkpoint should "normally" output, i.e. if it was created
   // through checkpoint=true
   bool should_output =
-      (onInterval() || type == EXEC_FINAL) ? FileOutput::shouldOutput(type) : false;
+      (onInterval() || _current_execute_flag == EXEC_FINAL) ? FileOutput::shouldOutput() : false;
 
   // If this is either a auto-created checkpoint, or if its an existing checkpoint acting
   // as the autosave and that checkpoint isn't on its interval, then output.
@@ -127,7 +135,7 @@ Checkpoint::shouldOutput(const ExecFlagType & type)
 }
 
 void
-Checkpoint::output(const ExecFlagType & /*type*/)
+Checkpoint::output()
 {
   // Create the output directory
   std::string cp_dir = directory();

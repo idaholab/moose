@@ -25,7 +25,7 @@ public:
   ParaviewComponentAnnotationMap(const InputParameters & parameters);
 
 protected:
-  virtual void output(const ExecFlagType & type);
+  virtual void output();
   virtual std::string filename();
 
 public:

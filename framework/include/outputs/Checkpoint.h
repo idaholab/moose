@@ -92,10 +92,10 @@ protected:
    * Outputs a checkpoint file.
    * Each call to this function creates various files associated with
    */
-  virtual void output(const ExecFlagType & type) override;
+  virtual void output() override;
 
   /// Determines if the checkpoint should write out to a file.
-  virtual bool shouldOutput(const ExecFlagType & type) override;
+  virtual bool shouldOutput() override;
 
 private:
   void updateCheckpointFiles(CheckpointFileNames file_struct);

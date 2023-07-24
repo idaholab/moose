@@ -98,9 +98,9 @@ XMLOutput::outputVectorPostprocessors()
 }
 
 void
-XMLOutput::output(const ExecFlagType & type)
+XMLOutput::output()
 {
-  AdvancedOutput::output(type);
+  AdvancedOutput::output();
   if (processor_id() == 0 || _distributed)
     _xml_doc.save_file(filename().c_str());
 }

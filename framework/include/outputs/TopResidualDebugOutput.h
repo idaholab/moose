@@ -82,7 +82,7 @@ protected:
   /**
    * Perform the debugging output
    */
-  virtual void output(const ExecFlagType & type) override;
+  virtual void output() override;
 
   /**
    * Prints the n top residuals for the variables in the system

@@ -36,7 +36,7 @@ MaterialPropertyDebugOutput::MaterialPropertyDebugOutput(const InputParameters &
 }
 
 void
-MaterialPropertyDebugOutput::output(const ExecFlagType & /*type*/)
+MaterialPropertyDebugOutput::output()
 {
   // Write out objects that consume properties
   std::stringstream consumed;
