@@ -33,7 +33,7 @@ public:
 
 protected:
   virtual Real computeQpIntegral();
-  virtual Real getValue();
+  virtual Real getValue() const;
 
   const unsigned int _component;
   const Real _scale;

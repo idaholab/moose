@@ -37,7 +37,7 @@ public:
 
   virtual void initialize() override;
   virtual void execute() override;
-  virtual PostprocessorValue getValue() override;
+  virtual PostprocessorValue getValue() const override;
 
 protected:
   /// Values of the first vector post-processor to compare

@@ -103,7 +103,7 @@ AsymptoticExpansionHomogenizationElasticConstants::execute()
 }
 
 Real
-AsymptoticExpansionHomogenizationElasticConstants::getValue()
+AsymptoticExpansionHomogenizationElasticConstants::getValue() const
 {
   return (_integral_value / _volume);
 }

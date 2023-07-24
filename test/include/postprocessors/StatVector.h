@@ -21,7 +21,7 @@ public:
   static InputParameters validParams();
   StatVector(const InputParameters & parameters);
   virtual void execute() override;
-  virtual Real getValue() override;
+  virtual Real getValue() const override;
   virtual void initialize() final{};
   virtual void finalize() final{};
 

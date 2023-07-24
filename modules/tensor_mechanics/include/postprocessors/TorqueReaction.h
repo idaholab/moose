@@ -38,7 +38,7 @@ public:
 
   virtual void initialize();
   virtual void execute();
-  virtual Real getValue();
+  virtual Real getValue() const;
   virtual void finalize();
   void threadJoin(const UserObject & y);
 

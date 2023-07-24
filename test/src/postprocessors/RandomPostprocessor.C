@@ -32,7 +32,7 @@ RandomPostprocessor::RandomPostprocessor(const InputParameters & parameters)
 }
 
 Real
-RandomPostprocessor::getValue()
+RandomPostprocessor::getValue() const
 {
   return _random.rand(_generator_id);
 }

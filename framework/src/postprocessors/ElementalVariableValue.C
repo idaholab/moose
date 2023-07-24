@@ -60,7 +60,7 @@ ElementalVariableValue::execute()
 }
 
 Real
-ElementalVariableValue::getValue()
+ElementalVariableValue::getValue() const
 {
   return _value;
 }

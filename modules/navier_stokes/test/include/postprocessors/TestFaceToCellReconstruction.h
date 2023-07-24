@@ -26,7 +26,7 @@ public:
   void initialize() override;
   void execute() override {}
 
-  PostprocessorValue getValue() override final;
+  PostprocessorValue getValue() const override final;
 
 protected:
   PostprocessorValue _reconstruction_error;

@@ -58,7 +58,7 @@ NumVars::NumVars(const InputParameters & parameters)
 }
 
 Real
-NumVars::getValue()
+NumVars::getValue() const
 {
   switch (_system_enum)
   {

@@ -55,10 +55,11 @@ NodalMaxValueId::execute()
 }
 
 Real
-NodalMaxValueId::getValue()
+NodalMaxValueId::getValue() const
 {
   return _node_id;
 }
+
 void
 NodalMaxValueId::finalize()
 {

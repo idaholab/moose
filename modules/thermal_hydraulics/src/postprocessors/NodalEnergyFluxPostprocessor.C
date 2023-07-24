@@ -39,7 +39,7 @@ NodalEnergyFluxPostprocessor::execute()
 }
 
 PostprocessorValue
-NodalEnergyFluxPostprocessor::getValue()
+NodalEnergyFluxPostprocessor::getValue() const
 {
   return _value;
 }

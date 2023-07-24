@@ -29,7 +29,7 @@ public:
   void initialize() override;
   void finalize() override;
   void threadJoin(const UserObject & y) override;
-  Real getValue() override;
+  Real getValue() const override;
 
 protected:
   Real computeFaceInfoIntegral(const FaceInfo * fi) override;

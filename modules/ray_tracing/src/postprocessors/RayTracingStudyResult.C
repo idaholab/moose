@@ -40,7 +40,7 @@ RayTracingStudyResult::RayTracingStudyResult(const InputParameters & parameters)
 }
 
 Real
-RayTracingStudyResult::getValue()
+RayTracingStudyResult::getValue() const
 {
   switch (_result)
   {

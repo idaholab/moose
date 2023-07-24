@@ -28,7 +28,7 @@ public:
 
   virtual void initialize() override;
   virtual void finalize() override;
-  virtual Real getValue() override;
+  virtual Real getValue() const override;
   virtual void execute() override;
 
   // GrainTrackerInterface methods

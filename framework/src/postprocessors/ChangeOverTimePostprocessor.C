@@ -37,7 +37,8 @@ ChangeOverTimePostprocessor::ChangeOverTimePostprocessor(const InputParameters &
     _take_absolute_value(getParam<bool>("take_absolute_value")),
     _pps_value(getPostprocessorValue("postprocessor")),
     _pps_value_old(getPostprocessorValueOld("postprocessor")),
-    _pps_value_initial(declareRestartableData<Real>("pps_value_initial"))
+    _pps_value_initial(declareRestartableData<Real>("pps_value_initial")),
+    _value(0.0)
 {
   if (_change_with_respect_to_initial)
   {
@@ -67,8 +68,8 @@ ChangeOverTimePostprocessor::execute()
 {
 }
 
-Real
-ChangeOverTimePostprocessor::getValue()
+void
+ChangeOverTimePostprocessor::finalize()
 {
   // copy initial value in case difference is measured against initial value
   if (_t_step == 0)
@@ -95,7 +96,13 @@ ChangeOverTimePostprocessor::getValue()
     change = _pps_value - base_value;
 
   if (_take_absolute_value)
-    return std::fabs(change);
+    _value = std::fabs(change);
   else
-    return change;
+    _value = change;
+}
+
+Real
+ChangeOverTimePostprocessor::getValue() const
+{
+  return _value;
 }

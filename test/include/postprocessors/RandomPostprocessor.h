@@ -25,7 +25,7 @@ public:
   virtual void initialize() override {}
   virtual void execute() override {}
 
-  virtual Real getValue() override;
+  virtual Real getValue() const override;
 
 private:
   const unsigned int _generator_id;

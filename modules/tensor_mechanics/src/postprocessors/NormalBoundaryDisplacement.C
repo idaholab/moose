@@ -78,7 +78,7 @@ NormalBoundaryDisplacement::execute()
 }
 
 Real
-NormalBoundaryDisplacement::getValue()
+NormalBoundaryDisplacement::getValue() const
 {
   return _boundary_displacement;
 }

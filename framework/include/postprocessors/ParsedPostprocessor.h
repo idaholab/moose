@@ -24,7 +24,8 @@ public:
 
   void initialize() override final;
   void execute() override final;
-  PostprocessorValue getValue() override final;
+  void finalize() override final;
+  PostprocessorValue getValue() const override final;
 
 private:
   /// number of postprocessors in parsed expression
@@ -38,6 +39,9 @@ private:
 
   /// function parser object for the resudual and on-diagonal Jacobian
   SymFunctionPtr _func_F;
+
+  /// This post-processor value
+  Real _value;
 
   usingFunctionParserUtilsMembers(false);
 };

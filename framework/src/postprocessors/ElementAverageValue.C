@@ -39,7 +39,7 @@ ElementAverageValue::execute()
 }
 
 Real
-ElementAverageValue::getValue()
+ElementAverageValue::getValue() const
 {
   return _integral_value / _volume;
 }

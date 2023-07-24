@@ -42,7 +42,7 @@ public:
    * Returns the postprocessor depending on the 'test_type' parameter
    * @return The postprocessor value
    */
-  virtual Real getValue() override;
+  virtual Real getValue() const override;
 
 private:
   /// Type of testing action to perform

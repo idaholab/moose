@@ -25,7 +25,7 @@ public:
   void execute() override{};
   void initialize() override{};
 
-  Real getValue() override;
+  Real getValue() const override;
 
 protected:
   /// UserObject that manages nucleus insertin and deletion

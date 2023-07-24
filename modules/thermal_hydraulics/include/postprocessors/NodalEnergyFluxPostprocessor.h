@@ -21,7 +21,7 @@ public:
 
   virtual void initialize();
   virtual void execute();
-  virtual PostprocessorValue getValue();
+  virtual PostprocessorValue getValue() const;
   virtual void finalize();
   virtual void threadJoin(const UserObject & uo);
 

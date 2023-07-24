@@ -36,7 +36,8 @@ ParsedPostprocessor::ParsedPostprocessor(const InputParameters & parameters)
   : GeneralPostprocessor(parameters),
     FunctionParserUtils(parameters),
     _n_pp(coupledPostprocessors("pp_names")),
-    _use_t(getParam<bool>("use_t"))
+    _use_t(getParam<bool>("use_t")),
+    _value(0.0)
 {
   // build postprocessors argument
   std::string postprocessors;
@@ -101,8 +102,8 @@ ParsedPostprocessor::execute()
 {
 }
 
-PostprocessorValue
-ParsedPostprocessor::getValue()
+void
+ParsedPostprocessor::finalize()
 {
   for (unsigned int i = 0; i < _n_pp; i++)
     _func_params[i] = *_pp_values[i];
@@ -110,5 +111,11 @@ ParsedPostprocessor::getValue()
   if (_use_t)
     _func_params[_n_pp] = _t;
 
-  return evaluate(_func_F);
+  _value = evaluate(_func_F);
+}
+
+PostprocessorValue
+ParsedPostprocessor::getValue() const
+{
+  return _value;
 }

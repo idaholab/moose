@@ -28,7 +28,7 @@ ElementL2Error::ElementL2Error(const InputParameters & parameters)
 }
 
 Real
-ElementL2Error::getValue()
+ElementL2Error::getValue() const
 {
   return std::sqrt(ElementIntegralPostprocessor::getValue());
 }

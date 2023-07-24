@@ -27,7 +27,7 @@ public:
   virtual void threadJoin(const UserObject & uo);
   virtual void finalize();
   virtual void initialize();
-  virtual PostprocessorValue getValue();
+  virtual PostprocessorValue getValue() const;
   const unsigned int & count() const { return _count; }
 
 private:

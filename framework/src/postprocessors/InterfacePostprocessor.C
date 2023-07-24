@@ -45,3 +45,9 @@ InterfacePostprocessor::threadJoin(const UserObject & y)
   const InterfacePostprocessor & pps = static_cast<const InterfacePostprocessor &>(y);
   _interface_primary_area += pps._interface_primary_area;
 }
+
+void
+InterfacePostprocessor::finalize()
+{
+  gatherSum(_interface_primary_area);
+}

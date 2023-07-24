@@ -34,7 +34,7 @@ public:
   /**
    * Return the summed value.
    */
-  virtual Real getValue();
+  virtual Real getValue() const;
 
 protected:
   /// The system to be tested

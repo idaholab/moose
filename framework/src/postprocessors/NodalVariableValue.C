@@ -69,9 +69,8 @@ NodalVariableValue::execute()
 }
 
 Real
-NodalVariableValue::getValue()
+NodalVariableValue::getValue() const
 {
-
   return _scale_factor * _value;
 }
 

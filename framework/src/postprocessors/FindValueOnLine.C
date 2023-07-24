@@ -191,7 +191,7 @@ FindValueOnLine::getValueAtPoint(const Point & p)
 }
 
 PostprocessorValue
-FindValueOnLine::getValue()
+FindValueOnLine::getValue() const
 {
   return _position;
 }

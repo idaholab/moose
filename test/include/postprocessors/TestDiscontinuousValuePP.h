@@ -36,7 +36,7 @@ public:
   /// initialSetup gets the pointer to the solution UO
   virtual void initialSetup();
 
-  virtual Real getValue();
+  virtual Real getValue() const;
 
 protected:
   /// The variable name from which a values is to be extracted

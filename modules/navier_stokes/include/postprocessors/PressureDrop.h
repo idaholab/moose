@@ -30,7 +30,7 @@ public:
   virtual void execute() override;
   virtual void threadJoin(const UserObject & y) override;
   virtual void finalize() override;
-  virtual Real getValue() override;
+  virtual Real getValue() const override;
 
 protected:
   /// Computes the contribution on a face to the weighted pressure integral

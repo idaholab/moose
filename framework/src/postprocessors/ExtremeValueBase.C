@@ -76,7 +76,7 @@ ExtremeValueBase<T>::computeExtremeValue()
 
 template <class T>
 Real
-ExtremeValueBase<T>::getValue()
+ExtremeValueBase<T>::getValue() const
 {
   return _proxy_value.second;
 }

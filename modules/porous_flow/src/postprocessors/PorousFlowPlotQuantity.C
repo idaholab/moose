@@ -40,7 +40,7 @@ PorousFlowPlotQuantity::execute()
 }
 
 PostprocessorValue
-PorousFlowPlotQuantity::getValue()
+PorousFlowPlotQuantity::getValue() const
 {
   return _total_mass.getValue();
 }

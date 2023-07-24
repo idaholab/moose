@@ -45,7 +45,7 @@ TimeIntegratedPostprocessor::execute()
 }
 
 Real
-TimeIntegratedPostprocessor::getValue()
+TimeIntegratedPostprocessor::getValue() const
 {
   return _value;
 }

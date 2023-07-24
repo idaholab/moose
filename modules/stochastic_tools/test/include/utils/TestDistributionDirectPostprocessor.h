@@ -26,7 +26,7 @@ public:
   TestDistributionDirectPostprocessor(const InputParameters & parameters);
   virtual void initialize() override {}
   virtual void execute() override {}
-  virtual PostprocessorValue getValue() override;
+  virtual PostprocessorValue getValue() const override;
 
 protected:
   /// Object of statistics distribution

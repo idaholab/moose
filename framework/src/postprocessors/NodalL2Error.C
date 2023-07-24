@@ -42,7 +42,7 @@ NodalL2Error::execute()
 }
 
 Real
-NodalL2Error::getValue()
+NodalL2Error::getValue() const
 {
   return std::sqrt(_integral_value);
 }

@@ -25,7 +25,7 @@ public:
 
   ElementH1SemiError(const InputParameters & parameters);
 
-  virtual Real getValue() override;
+  virtual Real getValue() const override;
 
 protected:
   virtual Real computeQpIntegral() override;

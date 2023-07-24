@@ -38,7 +38,7 @@ public:
    * Returns the value stored in _my_value
    * @return A const reference to the value of the postprocessor
    */
-  virtual Real getValue() override;
+  virtual Real getValue() const override;
 
 private:
   /// Flag for initializing the old value

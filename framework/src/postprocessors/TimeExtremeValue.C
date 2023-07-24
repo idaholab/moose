@@ -113,7 +113,7 @@ TimeExtremeValue::execute()
 }
 
 Real
-TimeExtremeValue::getValue()
+TimeExtremeValue::getValue() const
 {
   if (_output_type == OutputType::EXTREME_VALUE)
     return _value;

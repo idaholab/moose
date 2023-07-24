@@ -49,7 +49,7 @@ PostprocessorComparison::execute()
 }
 
 PostprocessorValue
-PostprocessorComparison::getValue()
+PostprocessorComparison::getValue() const
 {
   return _comparison_value;
 }

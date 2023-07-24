@@ -42,9 +42,8 @@ InterfaceIntegralPostprocessor::execute()
 }
 
 Real
-InterfaceIntegralPostprocessor::getValue()
+InterfaceIntegralPostprocessor::getValue() const
 {
-  InterfacePostprocessor::getValue();
   return _integral_value;
 }
 
@@ -69,5 +68,6 @@ InterfaceIntegralPostprocessor::computeIntegral()
 void
 InterfaceIntegralPostprocessor::finalize()
 {
+  InterfacePostprocessor::finalize();
   gatherSum(_integral_value);
 }

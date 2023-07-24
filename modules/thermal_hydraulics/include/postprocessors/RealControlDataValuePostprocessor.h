@@ -23,7 +23,7 @@ public:
   RealControlDataValuePostprocessor(const InputParameters & parameters);
 
   virtual void initialize();
-  virtual Real getValue();
+  virtual Real getValue() const;
   virtual void execute();
 
 protected:

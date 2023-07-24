@@ -23,7 +23,7 @@ public:
   MaterialTimeStepPostprocessor(const InputParameters & parameters);
   virtual void initialize();
   virtual void execute();
-  virtual Real getValue();
+  virtual Real getValue() const;
   virtual void finalize();
   virtual void threadJoin(const UserObject & y);
 

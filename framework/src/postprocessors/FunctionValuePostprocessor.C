@@ -74,7 +74,7 @@ FunctionValuePostprocessor::execute()
 }
 
 PostprocessorValue
-FunctionValuePostprocessor::getValue()
+FunctionValuePostprocessor::getValue() const
 {
   Point p;
   if (_has_space_pp)

@@ -30,7 +30,7 @@ public:
 
   virtual void initialize() override;
   virtual void execute() override;
-  virtual PostprocessorValue getValue() override;
+  virtual PostprocessorValue getValue() const override;
 
 protected:
   /// Number of post-processors in linear combination

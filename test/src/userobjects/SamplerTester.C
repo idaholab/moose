@@ -34,7 +34,7 @@ SamplerTester::SamplerTester(const InputParameters & parameters)
 }
 
 Real
-SamplerTester::getValue()
+SamplerTester::getValue() const
 {
   return 0.0;
 }

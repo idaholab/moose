@@ -56,7 +56,7 @@ LibtorchControlValuePostprocessor::initialSetup()
 }
 
 Real
-LibtorchControlValuePostprocessor::getValue()
+LibtorchControlValuePostprocessor::getValue() const
 {
   // Return the value of the control signal
   return _libtorch_nn_control->getSignal(_signal_index);

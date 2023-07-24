@@ -49,7 +49,7 @@ RealControlDataValuePostprocessor::execute()
 }
 
 Real
-RealControlDataValuePostprocessor::getValue()
+RealControlDataValuePostprocessor::getValue() const
 {
   return _control_data_value->get();
 }

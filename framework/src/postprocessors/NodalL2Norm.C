@@ -41,7 +41,7 @@ NodalL2Norm::execute()
 }
 
 Real
-NodalL2Norm::getValue()
+NodalL2Norm::getValue() const
 {
   return std::sqrt(_sum_of_squares);
 }

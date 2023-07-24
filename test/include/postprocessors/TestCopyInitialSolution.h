@@ -23,7 +23,7 @@ public:
   virtual ~TestCopyInitialSolution();
   virtual void initialize();
   virtual void execute();
-  virtual Real getValue();
+  virtual Real getValue() const;
 
 protected:
   bool _value;

@@ -36,7 +36,7 @@ ShaftConnectedComponentPostprocessor::execute()
 }
 
 Real
-ShaftConnectedComponentPostprocessor::getValue()
+ShaftConnectedComponentPostprocessor::getValue() const
 {
   switch (_quantity)
   {

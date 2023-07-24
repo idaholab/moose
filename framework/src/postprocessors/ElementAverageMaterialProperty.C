@@ -48,7 +48,7 @@ ElementAverageMaterialPropertyTempl<is_ad>::execute()
 
 template <bool is_ad>
 Real
-ElementAverageMaterialPropertyTempl<is_ad>::getValue()
+ElementAverageMaterialPropertyTempl<is_ad>::getValue() const
 {
   return _integral_value / _volume;
 }

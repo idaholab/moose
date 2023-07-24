@@ -34,7 +34,7 @@ ShaftConnectedCompressor1PhasePostprocessor::execute()
 }
 
 Real
-ShaftConnectedCompressor1PhasePostprocessor::getValue()
+ShaftConnectedCompressor1PhasePostprocessor::getValue() const
 {
   switch (_quantity)
   {

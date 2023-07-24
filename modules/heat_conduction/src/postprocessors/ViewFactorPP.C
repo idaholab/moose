@@ -36,7 +36,7 @@ ViewFactorPP::ViewFactorPP(const InputParameters & parameters)
 }
 
 PostprocessorValue
-ViewFactorPP::getValue()
+ViewFactorPP::getValue() const
 {
   return _vf_uo.getViewFactor(_from_bnd_id, _to_bnd_id);
 }

@@ -101,7 +101,7 @@ ParisLaw::execute()
 }
 
 Real
-ParisLaw::getValue()
+ParisLaw::getValue() const
 {
   return Real(_dn);
 }

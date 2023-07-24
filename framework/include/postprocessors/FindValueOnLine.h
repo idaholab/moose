@@ -29,7 +29,7 @@ public:
   virtual void initialize() override;
   virtual void execute() override;
 
-  virtual PostprocessorValue getValue() override;
+  virtual PostprocessorValue getValue() const override;
 
 protected:
   Real getValueAtPoint(const Point & p);

@@ -20,7 +20,7 @@ public:
   static InputParameters validParams();
 
   NSEntropyError(const InputParameters & parameters);
-  virtual Real getValue();
+  virtual Real getValue() const;
 
 protected:
   virtual Real computeQpIntegral();

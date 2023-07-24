@@ -35,7 +35,7 @@ public:
   /**
    * Return the parameter value
    */
-  virtual Real getValue();
+  virtual Real getValue() const;
 
 private:
   // Pointer to the parameter to report, a pointer is used because the access

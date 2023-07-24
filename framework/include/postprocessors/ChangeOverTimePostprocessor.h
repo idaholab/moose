@@ -24,7 +24,8 @@ public:
 
   virtual void initialize() override;
   virtual void execute() override;
-  virtual Real getValue() override;
+  virtual void finalize() override;
+  virtual Real getValue() const override;
 
 protected:
   /// option to compute change with respect to initial value instead of previous time value
@@ -44,4 +45,7 @@ protected:
 
   /// initial post-processor value
   Real & _pps_value_initial;
+
+  /// This post-processor value
+  Real _value;
 };

@@ -92,7 +92,7 @@ ElementExtremeMaterialPropertyTempl<is_ad>::computeQpValue()
 
 template <bool is_ad>
 Real
-ElementExtremeMaterialPropertyTempl<is_ad>::getValue()
+ElementExtremeMaterialPropertyTempl<is_ad>::getValue() const
 {
   return _value;
 }

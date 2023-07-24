@@ -262,7 +262,7 @@ FauxGrainTracker::finalize()
 }
 
 Real
-FauxGrainTracker::getValue()
+FauxGrainTracker::getValue() const
 {
   return static_cast<Real>(_variables_used.size());
 }

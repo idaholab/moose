@@ -37,10 +37,15 @@ ElementIntegralUserObject::execute()
   _integral_value += computeIntegral();
 }
 
-Real
-ElementIntegralUserObject::getValue()
+void
+ElementIntegralUserObject::finalize()
 {
   gatherSum(_integral_value);
+}
+
+Real
+ElementIntegralUserObject::getValue() const
+{
   return _integral_value;
 }
 

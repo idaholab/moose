@@ -29,7 +29,7 @@ NearestNodeNumber::NearestNodeNumber(const InputParameters & parameters)
 }
 
 Real
-NearestNodeNumber::getValue()
+NearestNodeNumber::getValue() const
 {
   return _nnn.getClosestNodeId();
 }

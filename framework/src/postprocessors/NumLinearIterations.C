@@ -28,7 +28,7 @@ NumLinearIterations::NumLinearIterations(const InputParameters & parameters)
 }
 
 Real
-NumLinearIterations::getValue()
+NumLinearIterations::getValue() const
 {
   return _subproblem.nLinearIterations();
 }

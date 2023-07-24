@@ -25,5 +25,5 @@ public:
   virtual void execute() override {}
   virtual void initialize() override{};
 
-  virtual Real getValue() override;
+  virtual Real getValue() const override;
 };

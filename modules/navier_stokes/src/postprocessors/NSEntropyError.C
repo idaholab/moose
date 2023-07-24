@@ -41,7 +41,7 @@ NSEntropyError::NSEntropyError(const InputParameters & parameters)
 }
 
 Real
-NSEntropyError::getValue()
+NSEntropyError::getValue() const
 {
   return std::sqrt(ElementIntegralPostprocessor::getValue());
 }

@@ -70,7 +70,7 @@ PointValue::execute()
 }
 
 Real
-PointValue::getValue()
+PointValue::getValue() const
 {
   return _value;
 }

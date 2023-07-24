@@ -797,7 +797,7 @@ FeatureFloodCount::scatterAndUpdateRanks()
 }
 
 Real
-FeatureFloodCount::getValue()
+FeatureFloodCount::getValue() const
 {
   return static_cast<Real>(_feature_count);
 }

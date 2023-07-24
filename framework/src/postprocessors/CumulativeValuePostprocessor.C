@@ -40,7 +40,7 @@ CumulativeValuePostprocessor::execute()
 }
 
 Real
-CumulativeValuePostprocessor::getValue()
+CumulativeValuePostprocessor::getValue() const
 {
   return _sum;
 }

@@ -29,7 +29,7 @@ ElementL2Difference::ElementL2Difference(const InputParameters & parameters)
 }
 
 Real
-ElementL2Difference::getValue()
+ElementL2Difference::getValue() const
 {
   return std::sqrt(ElementIntegralPostprocessor::getValue());
 }

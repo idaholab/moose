@@ -25,7 +25,7 @@ ElementSidesL2Norm::ElementSidesL2Norm(const InputParameters & parameters)
 }
 
 Real
-ElementSidesL2Norm::getValue()
+ElementSidesL2Norm::getValue() const
 {
   return std::sqrt(InternalSideIntegralVariablePostprocessor::getValue());
 }

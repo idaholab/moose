@@ -47,7 +47,7 @@ SideAverageMaterialPropertyTempl<is_ad>::execute()
 
 template <bool is_ad>
 Real
-SideAverageMaterialPropertyTempl<is_ad>::getValue()
+SideAverageMaterialPropertyTempl<is_ad>::getValue() const
 {
   return _integral_value / _area;
 }

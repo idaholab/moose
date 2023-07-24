@@ -26,7 +26,7 @@ public:
 
   virtual void initialize() override;
   virtual void execute() override;
-  virtual PostprocessorValue getValue() override;
+  virtual PostprocessorValue getValue() const override;
   virtual void threadJoin(const UserObject & y) override;
   virtual void finalize() override;
 

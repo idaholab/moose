@@ -49,7 +49,7 @@ TestCrackCounter::execute()
 }
 
 Real
-TestCrackCounter::getValue()
+TestCrackCounter::getValue() const
 {
   return _number_of_cracks;
 }

@@ -94,7 +94,7 @@ INSExplicitTimestepSelector::execute()
 }
 
 Real
-INSExplicitTimestepSelector::getValue()
+INSExplicitTimestepSelector::getValue() const
 {
   return _value;
 }

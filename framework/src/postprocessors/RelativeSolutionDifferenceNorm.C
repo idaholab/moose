@@ -31,7 +31,7 @@ RelativeSolutionDifferenceNorm::RelativeSolutionDifferenceNorm(const InputParame
 }
 
 Real
-RelativeSolutionDifferenceNorm::getValue()
+RelativeSolutionDifferenceNorm::getValue() const
 {
   return _trex->relativeSolutionDifferenceNorm();
 }

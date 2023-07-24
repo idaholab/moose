@@ -20,7 +20,8 @@ public:
 
   virtual void initialize() override {}
   virtual void execute() override {}
-  virtual Real getValue() override;
+  virtual void finalize() override;
+  virtual Real getValue() const override;
 
 protected:
   /// The data type to request in regards to the PerfGraph section

@@ -19,7 +19,7 @@ public:
   ElementSidePP(const InputParameters & parameters);
 
 protected:
-  virtual Real getValue();
+  virtual Real getValue() const;
 
   virtual Real computeQpIntegral();
 

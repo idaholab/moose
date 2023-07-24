@@ -26,7 +26,7 @@ public:
   virtual void initialize() override {}
   virtual void execute() override {}
 
-  virtual Real getValue() override;
+  virtual Real getValue() const override;
 
 private:
   // Positions object to count the number of positions from

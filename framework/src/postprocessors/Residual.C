@@ -31,7 +31,7 @@ Residual::Residual(const InputParameters & parameters)
 }
 
 Real
-Residual::getValue()
+Residual::getValue() const
 {
   Real residual = 0.0;
   if (_residual_type == "FINAL")

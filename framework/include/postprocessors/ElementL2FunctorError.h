@@ -22,7 +22,7 @@ public:
 
   ElementL2FunctorErrorTempl(const InputParameters & parameters);
 
-  Real getValue() override;
+  Real getValue() const override;
 
 protected:
   Real computeQpIntegral() override;

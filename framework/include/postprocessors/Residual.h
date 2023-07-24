@@ -24,7 +24,7 @@ public:
   /**
    * This will return the final nonlinear residual.
    */
-  virtual Real getValue() override;
+  virtual Real getValue() const override;
 
 protected:
   MooseEnum _residual_type;

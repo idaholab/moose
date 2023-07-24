@@ -39,7 +39,7 @@ VectorPostprocessorComponent::VectorPostprocessorComponent(const InputParameters
 }
 
 Real
-VectorPostprocessorComponent::getValue()
+VectorPostprocessorComponent::getValue() const
 {
   if (_vpp_index >= _vpp_values.size())
     mooseError("In VectorPostprocessorComponent index greater than size of vector");

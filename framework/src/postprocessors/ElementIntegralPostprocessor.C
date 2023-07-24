@@ -36,7 +36,7 @@ ElementIntegralPostprocessor::execute()
 }
 
 Real
-ElementIntegralPostprocessor::getValue()
+ElementIntegralPostprocessor::getValue() const
 {
   return _integral_value;
 }

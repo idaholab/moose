@@ -29,7 +29,7 @@ InterfaceAverageVariableValuePostprocessor::InterfaceAverageVariableValuePostpro
 }
 
 Real
-InterfaceAverageVariableValuePostprocessor::getValue()
+InterfaceAverageVariableValuePostprocessor::getValue() const
 {
   Real integral = InterfaceIntegralVariableValuePostprocessor::getValue();
   return integral / _interface_primary_area;

@@ -50,7 +50,7 @@ TestPostprocessor::customSetup(const ExecFlagType & exec_type)
 }
 
 Real
-TestPostprocessor::getValue()
+TestPostprocessor::getValue() const
 {
   if (_test_type == "grow")
   {

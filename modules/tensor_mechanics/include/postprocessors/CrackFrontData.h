@@ -32,7 +32,7 @@ public:
   /**
    * This will return the degrees of freedom in the system.
    */
-  virtual Real getValue();
+  virtual Real getValue() const;
 
 protected:
   const CrackFrontDefinition * const _crack_front_definition;

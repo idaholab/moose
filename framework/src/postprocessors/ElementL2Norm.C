@@ -24,7 +24,7 @@ ElementL2Norm::ElementL2Norm(const InputParameters & parameters)
 }
 
 Real
-ElementL2Norm::getValue()
+ElementL2Norm::getValue() const
 {
   return std::sqrt(ElementIntegralVariablePostprocessor::getValue());
 }

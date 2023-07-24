@@ -69,6 +69,9 @@ protected:
   /// total thrust
   Real _thrust;
 
+  /// The value of this post-processor
+  Real _value;
+
 public:
   static InputParameters validParams();
 };

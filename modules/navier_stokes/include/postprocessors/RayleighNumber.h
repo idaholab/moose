@@ -25,7 +25,7 @@ public:
 protected:
   void initialize() override {}
   void execute() override {}
-  Real getValue() override;
+  Real getValue() const override;
 
   /// Minimum density
   const PostprocessorValue * const _rho_min;

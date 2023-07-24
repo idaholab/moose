@@ -99,7 +99,7 @@ GreaterThanLessThanPostprocessor::execute()
 }
 
 PostprocessorValue
-GreaterThanLessThanPostprocessor::getValue()
+GreaterThanLessThanPostprocessor::getValue() const
 {
   return _count;
 }

@@ -22,7 +22,7 @@ protected:
   /**
    * Get the L2 Error.
    */
-  virtual Real getValue();
+  virtual Real getValue() const;
 
   virtual Real computeQpIntegral();
 

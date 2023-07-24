@@ -24,7 +24,7 @@ public:
 
   void initialize() override {}
   void execute() override {}
-  Real getValue() override;
+  Real getValue() const override;
 
 protected:
   /// Retrieves the current TimeStepper used by the executioner.

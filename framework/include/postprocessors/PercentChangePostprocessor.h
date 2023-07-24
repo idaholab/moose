@@ -24,7 +24,7 @@ public:
   PercentChangePostprocessor(const InputParameters & parameters);
   virtual void initialize() override;
   virtual void execute() override;
-  virtual Real getValue() override;
+  virtual Real getValue() const override;
 
 protected:
   const PostprocessorValue &_postprocessor, &_postprocessor_old;

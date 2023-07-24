@@ -42,7 +42,7 @@ StatVector::execute()
 }
 
 Real
-StatVector::getValue()
+StatVector::getValue() const
 {
   return _value;
 }

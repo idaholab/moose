@@ -39,7 +39,7 @@ RichardsPlotQuantity::execute()
 }
 
 PostprocessorValue
-RichardsPlotQuantity::getValue()
+RichardsPlotQuantity::getValue() const
 {
   return _total_mass.getValue();
 }

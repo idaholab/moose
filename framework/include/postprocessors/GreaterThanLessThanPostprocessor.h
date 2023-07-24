@@ -28,7 +28,7 @@ public:
   void execute() override;
 
   virtual void finalize() override;
-  PostprocessorValue getValue() override;
+  PostprocessorValue getValue() const override;
 
 private:
   /// MOOSE variable we compute the contact set from

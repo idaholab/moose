@@ -27,7 +27,7 @@ ElementH1SemiError::ElementH1SemiError(const InputParameters & parameters)
 }
 
 Real
-ElementH1SemiError::getValue()
+ElementH1SemiError::getValue() const
 {
   return std::sqrt(ElementIntegralVariablePostprocessor::getValue());
 }

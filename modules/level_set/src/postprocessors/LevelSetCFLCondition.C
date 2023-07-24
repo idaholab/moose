@@ -55,7 +55,7 @@ LevelSetCFLCondition::threadJoin(const UserObject & user_object)
 }
 
 PostprocessorValue
-LevelSetCFLCondition::getValue()
+LevelSetCFLCondition::getValue() const
 {
   return _cfl_timestep;
 }

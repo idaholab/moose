@@ -26,7 +26,7 @@ public:
 
   virtual void initialize();
   virtual void execute();
-  virtual Real getValue();
+  virtual Real getValue() const;
 
 protected:
   const InsideUserObject & _uo;

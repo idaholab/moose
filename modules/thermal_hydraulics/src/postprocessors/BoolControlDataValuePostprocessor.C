@@ -49,7 +49,7 @@ BoolControlDataValuePostprocessor::execute()
 }
 
 Real
-BoolControlDataValuePostprocessor::getValue()
+BoolControlDataValuePostprocessor::getValue() const
 {
   if (_control_data_value->get())
     return 1.;

@@ -25,5 +25,5 @@ public:
   virtual void initialize() {}
   virtual void execute() {}
 
-  virtual PostprocessorValue getValue();
+  virtual PostprocessorValue getValue() const;
 };
