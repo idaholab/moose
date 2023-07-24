@@ -11,7 +11,7 @@ to bring their own hardware to participate.
 
 - MOOSE training will be conducted in the GTMI Auditorium
 - Coffee and Lunch will be provided by Georgia Tech every day
-- Visitor parking is available on campus, but we recommend taking Uber/Lift or walking when feasible.
+- Visitor parking is available on campus, but we recommend taking Uber/Lyft or walking when feasible.
 
 #### Agenda
 
