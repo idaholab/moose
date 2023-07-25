@@ -284,6 +284,5 @@ InputParameters
 RegistryEntry<T>::buildParameters()
 {
   auto params = T::validParams();
-  params.template set<std::string>("_type") = _classname;
   return params;
 }

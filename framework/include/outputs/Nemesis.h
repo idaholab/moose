@@ -51,7 +51,7 @@ protected:
    * Overload the Output::output method, this is required for Nemesis
    * output due to the method utilized for outputting single/global parameters
    */
-  virtual void output(const ExecFlagType & type) override;
+  virtual void output() override;
 
   /**
    * Writes postprocessor values to global output parameters

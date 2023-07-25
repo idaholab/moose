@@ -34,7 +34,7 @@ protected:
   /**
    * Perform the debugging output
    */
-  virtual void output(const ExecFlagType & type) override;
+  virtual void output() override;
 
   /// Reference to libMesh system
   System & _sys;

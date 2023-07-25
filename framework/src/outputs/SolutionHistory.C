@@ -36,7 +36,7 @@ SolutionHistory::filename()
 }
 
 void
-SolutionHistory::output(const ExecFlagType & /*type*/)
+SolutionHistory::output()
 {
   // Reference to the Non-linear System
   NonlinearSystemBase & nl_sys = _problem_ptr->getNonlinearSystemBase();

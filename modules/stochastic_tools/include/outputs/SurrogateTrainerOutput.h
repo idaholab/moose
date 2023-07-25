@@ -22,7 +22,7 @@ public:
   SurrogateTrainerOutput(const InputParameters & parameters);
 
 protected:
-  virtual void output(const ExecFlagType & type) override;
+  virtual void output() override;
 
 private:
   /// List of supplied SurrogateModel objects

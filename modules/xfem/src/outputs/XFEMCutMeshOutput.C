@@ -46,7 +46,7 @@ XFEMCutMeshOutput::filename()
 }
 
 void
-XFEMCutMeshOutput::output(const ExecFlagType & /* type */)
+XFEMCutMeshOutput::output()
 {
   // exodus_num is always one because we are always assuming the mesh changes between outputs
   int exodus_num = 1;

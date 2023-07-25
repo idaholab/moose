@@ -140,17 +140,14 @@ Nemesis::outputScalarVariables()
 }
 
 void
-Nemesis::output(const ExecFlagType & type)
+Nemesis::output()
 {
-  if (!shouldOutput(type))
-    return;
-
   // Clear the global variables (postprocessors and scalars)
   _global_names.clear();
   _global_values.clear();
 
   // Call the output methods
-  AdvancedOutput::output(type);
+  AdvancedOutput::output();
 
   // Set up the whitelist of nodal variable names to write.
   _nemesis_io_ptr->set_output_variables(

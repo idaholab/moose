@@ -34,7 +34,7 @@ SurrogateTrainerOutput::SurrogateTrainerOutput(const InputParameters & parameter
 }
 
 void
-SurrogateTrainerOutput::output(const ExecFlagType & /*type*/)
+SurrogateTrainerOutput::output()
 {
   if (processor_id() == 0)
   {

@@ -61,7 +61,7 @@ Tecplot::Tecplot(const InputParameters & parameters)
 }
 
 void
-Tecplot::output(const ExecFlagType & /*type*/)
+Tecplot::output()
 {
   TecplotIO out(*_mesh_ptr, _binary, time() + _app.getGlobalTimeOffset());
 

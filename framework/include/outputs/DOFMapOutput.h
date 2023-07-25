@@ -34,7 +34,7 @@ public:
   /**
    * Write the DOF mapt
    */
-  void output(const ExecFlagType & type) override;
+  void output() override;
 
 protected:
   /**

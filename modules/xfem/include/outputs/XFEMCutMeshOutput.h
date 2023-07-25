@@ -31,7 +31,7 @@ public:
 
   virtual std::string filename() override;
 
-  virtual void output(const ExecFlagType & type) override;
+  virtual void output() override;
 
 private:
   /// The mesh cutting user object

@@ -41,9 +41,9 @@ ControlOutput::ControlOutput(const InputParameters & parameters)
 }
 
 void
-ControlOutput::output(const ExecFlagType & type)
+ControlOutput::output()
 {
-  if (type == EXEC_INITIAL)
+  if (_current_execute_flag == EXEC_INITIAL)
     outputControls();
   else
     outputChangedControls();

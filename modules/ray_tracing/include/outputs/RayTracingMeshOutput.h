@@ -39,7 +39,7 @@ public:
 
   virtual std::string filename() override;
 
-  void output(const ExecFlagType & type) override;
+  void output() override;
 
 protected:
   /**

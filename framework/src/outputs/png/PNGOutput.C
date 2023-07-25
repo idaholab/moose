@@ -313,7 +313,7 @@ PNGOutput::setRGB(png_byte * rgb, Real selection)
 }
 
 void
-PNGOutput::output(const ExecFlagType & /*type*/)
+PNGOutput::output()
 {
   makeMeshFunc();
   _box = MeshTools::create_bounding_box(*_mesh_ptr);

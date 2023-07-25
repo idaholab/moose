@@ -60,7 +60,7 @@ protected:
   /**
    * Checks if the output method should be executed
    */
-  virtual bool shouldOutput(const ExecFlagType & type) override;
+  virtual bool shouldOutput() override;
 
   /**
    * Checks the filename for output

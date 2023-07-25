@@ -42,7 +42,7 @@ GMVOutput::GMVOutput(const InputParameters & parameters)
 }
 
 void
-GMVOutput::output(const ExecFlagType & /*type*/)
+GMVOutput::output()
 {
   GMVIO out(_es_ptr->get_mesh());
   out.write_equation_systems(filename(), *_es_ptr);

@@ -44,7 +44,7 @@ public:
    * Overload the OutputBase::output method, this is required for ExodusII
    * output due to the method utilized for outputting single/global parameters
    */
-  virtual void output(const ExecFlagType & type) override;
+  virtual void output() override;
 
   /**
    * Performs basic error checking and initial setup of ExodusII_IO output object

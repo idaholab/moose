@@ -29,9 +29,8 @@ public:
 protected:
   /**
    * Perform the debugging output
-   * For this object this is empty; the output is performed in the constructor
    */
-  virtual void output(const ExecFlagType & type) override;
+  virtual void output() override;
 
   /**
    * Prints material property information in a format similar to Moose system information

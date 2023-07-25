@@ -42,7 +42,7 @@ XDA::XDA(const InputParameters & parameters)
 }
 
 void
-XDA::output(const ExecFlagType & /*type*/)
+XDA::output()
 {
   // Strings for the two filenames to be written
   std::string es_name = filename();

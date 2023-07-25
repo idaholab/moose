@@ -388,7 +388,7 @@ private:
   friend class OutputInterface;
 
   // Console for calling flushConsoleBuffer()
-  friend class PetscOutput;
+  friend class PetscOutputInterface;
 
   // MooseApp for resetFileBase()
   friend class MooseApp;
