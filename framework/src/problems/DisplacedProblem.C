@@ -1311,3 +1311,15 @@ DisplacedProblem::havePRefinement()
     for (auto & assembly : assembly_vecs)
       assembly->havePRefinement();
 }
+
+bool
+DisplacedProblem::safeAccessTaggedMatrices() const
+{
+  return _mproblem.safeAccessTaggedMatrices();
+}
+
+bool
+DisplacedProblem::safeAccessTaggedVectors() const
+{
+  return _mproblem.safeAccessTaggedVectors();
+}
