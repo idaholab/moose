@@ -42,6 +42,7 @@ EigenProblem::validParams()
       "active_eigen_index",
       0,
       "Which eigenvector is used to compute residual and also associated to nonlinear variable");
+  params.addParam<PostprocessorName>("bx_norm", "A postprocessor describing the norm of Bx");
 
   return params;
 }
@@ -60,7 +61,8 @@ EigenProblem::EigenProblem(const InputParameters & parameters)
     _constant_matrices(false),
     _has_normalization(false),
     _normal_factor(1.0),
-    _first_solve(declareRestartableData<bool>("first_solve", true))
+    _first_solve(declareRestartableData<bool>("first_solve", true)),
+    _bx_norm_provided(isParamValid("bx_norm"))
 {
 #ifdef LIBMESH_HAVE_SLEPC
   if (_nl_sys_names.size() > 1)
@@ -637,4 +639,11 @@ EigenProblem::initPetscOutput()
   _app.getOutputWarehouse().solveSetup();
 }
 
+Real
+EigenProblem::formNorm()
+{
+  mooseAssert(_bx_norm_provided,
+              "We should not get here unless a bx_norm postprocessor has been provided");
+  return getPostprocessorValueByName(getParam<PostprocessorName>("bx_norm"));
+}
 #endif

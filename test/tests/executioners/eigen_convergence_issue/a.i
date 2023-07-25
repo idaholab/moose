@@ -61,6 +61,11 @@
   []
 []
 
+[Problem]
+  type = EigenProblem
+  bx_norm = fluxintegral
+[]
+
 [Executioner]
   type = Eigenvalue
   solve_type = PJFNK

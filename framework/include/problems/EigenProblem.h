@@ -224,21 +224,15 @@ public:
    */
   void wereMatricesFormed(bool mf) { _matrices_formed = mf; }
 
-private:
   /**
-   * Do some free/extra power iterations
+   * Form the Bx norm
    */
-  void doFreeNonlinearPowerIterations(unsigned int free_power_iterations);
+  Real formNorm();
 
   /**
-   * Adjust eigen vector by either scaling the existing values or setting new values
-   * The operations are applied for only eigen variables
+   * Whether a Bx norm postprocessor has been provided
    */
-  void adjustEigenVector(const Real value, bool scaling);
-
-#endif
-
-  using FEProblemBase::_nl;
+  bool bxNormProvided() const { return _bx_norm_provided; }
 
 protected:
   unsigned int _n_eigen_pairs_required;
@@ -275,6 +269,25 @@ protected:
   bool & _first_solve;
   /// A value used for initial normalization
   Real _initial_eigenvalue;
+
+private:
+  /**
+   * Do some free/extra power iterations
+   */
+  void doFreeNonlinearPowerIterations(unsigned int free_power_iterations);
+
+  /**
+   * Adjust eigen vector by either scaling the existing values or setting new values
+   * The operations are applied for only eigen variables
+   */
+  void adjustEigenVector(const Real value, bool scaling);
+
+  /// Whether the bx norm postprocessor is provided
+  const bool _bx_norm_provided;
+
+#endif
+
+  using FEProblemBase::_nl;
 };
 
 #ifdef LIBMESH_HAVE_SLEPC
