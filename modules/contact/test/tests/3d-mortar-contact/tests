@@ -6,7 +6,7 @@
   [frictionless-mortar-3d]
     type = 'Exodiff'
     input = 'frictionless-mortar-3d.i'
-    min_ad_size = 100
+    min_ad_size = 150
     exodiff = 'frictionless-mortar-3d_out.e'
     requirement = 'The system shall solve a 3D frictionless bouncing block problem with mortar '
                   'constraint'
@@ -16,7 +16,7 @@
   [frictionless-mortar-3d_pg]
     type = 'CSVDiff'
     input = 'frictionless-mortar-3d_pg.i'
-    min_ad_size = 100
+    min_ad_size = 150
     csvdiff = 'frictionless-mortar-3d_pg_out.csv'
     requirement = 'The system shall solve a 3D frictionless bouncing block problem with mortar '
                   'constraint using Petrov-Galerkin approach.'
@@ -32,7 +32,7 @@
   [frictionless-mortar-3d-action]
     type = 'CSVDiff'
     input = 'frictionless-mortar-3d-action.i'
-    min_ad_size = 100
+    min_ad_size = 150
     csvdiff = 'frictionless-mortar-3d-action_out_contact-pressure_0002.csv'
     mesh_mode = 'REPLICATED' # see issue 24255
     requirement = 'The system shall solve a 3D frictionless bouncing block problem with mortar '
@@ -57,7 +57,7 @@
   [frictionless-mortar-3d-action-correct-edge-dropping]
     type = 'CSVDiff'
     input = 'frictionless-mortar-3d-action.i'
-    min_ad_size = 100
+    min_ad_size = 150
     csvdiff = 'frictionless-mortar-3d-action-correct-edge-dropping_out_contact-pressure_0002.csv'
     mesh_mode = 'REPLICATED' # see issue 24255
     requirement = 'The system shall solve a 3D frictionless bouncing block problem with mortar '
@@ -73,7 +73,7 @@
   [frictionless-mortar-3d-debug-mesh]
     type = 'Exodiff'
     input = 'frictionless-mortar-3d.i'
-    min_ad_size = 100
+    min_ad_size = 150
     exodiff = 'mortar_segment_mesh.e'
     cli_args = 'Executioner/end_time=0.5 Executioner/dtmin=0.5 Constraints/normal_lm/debug_mesh=true '
                'Constraints/normal_x/debug_mesh=true Constraints/normal_y/debug_mesh=true '
@@ -85,7 +85,7 @@
   [frictional-mortar-3d]
     type = 'Exodiff'
     input = 'frictional-mortar-3d.i'
-    min_ad_size = 100
+    min_ad_size = 150
     exodiff = 'frictional-mortar-3d_out.e'
     requirement = 'The system shall solve a 3D frictional bouncing block problem with mortar '
                   'constraint using nodal-attached geometry.'
@@ -97,7 +97,7 @@
   [frictional-mortar-3d-pg]
     type = 'CSVDiff'
     input = 'frictional-mortar-3d_pg.i'
-    min_ad_size = 100
+    min_ad_size = 150
     csvdiff = 'frictional-mortar-3d_pg_out_contact-pressure_0001.csv '
               'frictional-mortar-3d_pg_out_frictional-pressure-3d_0001.csv '
               'frictional-mortar-3d_pg_out_frictional-pressure_0001.csv'
@@ -109,7 +109,7 @@
   [frictional-mortar-3d-function]
     type = 'Exodiff'
     input = 'frictional-mortar-3d-function.i'
-    min_ad_size = 100
+    min_ad_size = 150
     exodiff = 'frictional-mortar-3d-function_out.e'
     requirement = 'The system shall solve a 3D frictional block problem with mortar constraint using '
                   'a simple frictional model dependent on relative velocity and contact pressure.'
@@ -121,7 +121,7 @@
   [frictional-mortar-3d-action]
     type = 'CSVDiff'
     input = 'frictional-mortar-3d-action.i'
-    min_ad_size = 100
+    min_ad_size = 150
     csvdiff = 'frictional-mortar-3d-action_out_frictional-pressure_0001.csv '
               'frictional-mortar-3d-action_out_frictional-pressure-3d_0001.csv '
               'frictional-mortar-3d-action_out_tangent_x_0001.csv '
@@ -141,7 +141,7 @@
     input = 'frictional-mortar-3d-action.i'
     cli_args = 'Contact/mortar/use_petrov_galerkin=true '
                'Outputs/file_base=frictional-mortar-3d_pg_out'
-    min_ad_size = 100
+    min_ad_size = 150
     csvdiff = 'frictional-mortar-3d_pg_out_contact-pressure_0001.csv '
               'frictional-mortar-3d_pg_out_frictional-pressure-3d_0001.csv '
               'frictional-mortar-3d_pg_out_frictional-pressure_0001.csv'
@@ -166,7 +166,7 @@
   [frictional-mortar-3d-penalty]
     type = 'Exodiff'
     input = 'frictional-mortar-3d-penalty.i'
-    min_ad_size = 100
+    min_ad_size = 150
     exodiff = 'frictional-mortar-3d-penalty_out.e'
     requirement = 'The system shall solve a 3D frictional problem with mortar constraint using a '
                   'penalty approach'
@@ -176,7 +176,7 @@
   [frictionless-mortar-3d-penalty]
     type = 'Exodiff'
     input = 'frictionless-mortar-3d-penalty.i'
-    min_ad_size = 100
+    min_ad_size = 200
     exodiff = 'frictionless-mortar-3d-penalty_out.e'
     requirement = 'The system shall solve a 3D frictionless problem with mortar constraint using a '
                   'penalty approach'
