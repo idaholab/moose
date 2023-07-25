@@ -59,7 +59,7 @@
       input = 'main.i'
       cli_args = 'Transfers/to_sub_elem/use_nearest_app=true'
       allow_warnings = true
-      expect_err = '(Cannot use nearest-position algorithm when sending from the main application|Should have a source multiapp when using the nearest-app informed search)'
+      expect_err = '(Cannot use nearest-position algorithm when sending from the main application|Should have a \'from_multiapp\' when using the nearest-app informed search)'
       detail = "a nearest-point algorithm is used for sending app-based data from a main app to "
                "multi-apps as the data naturally lives near only one of the positions,"
     []
