@@ -43,6 +43,9 @@ From: {{ APPTAINER_FROM }}
 %post
     umask 022
 
+    # We could put this in mpich too, but I wanted to rebuild less
+    dnf install -y cppunit-devel
+
     # Load jinja vars
     ROOT_BUILD_DIR={{ ROOT_BUILD_DIR }}
     MOOSE_MAMBAFORGE={{ MOOSE_MAMBAFORGE }}
