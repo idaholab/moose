@@ -28,14 +28,14 @@ public:
 
 protected:
   /**
-   * Outputs nodal, nonlinear variables
-   */
-  virtual void outputNodalVariables() override;
-
-  /**
    * Increment file counter with steady and adjoint iteration number
    */
   virtual void incrementFileCounter() override;
+
+  /**
+   * Get time step for output.
+   */
+  virtual Real getTimeStepForOutput() override;
 
 private:
   /// For steady and adjoint executioner

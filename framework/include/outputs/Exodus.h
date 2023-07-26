@@ -135,6 +135,11 @@ protected:
   virtual void incrementFileCounter();
 
   /**
+   * Get time step that will be outputted to exodus file.
+   */
+  virtual Real getTimeStepForOutput();
+
+  /**
    * Returns the current filename, this method handles the -s000 suffix
    * common to ExodusII files.
    * @return A string containing the current filename to be written
@@ -164,7 +169,7 @@ protected:
    */
   bool _exodus_initialized;
 
-protected:
+private:
   /// Handle the call to mesh renumbering in libmesh's ExodusIO on non-contiguously numbered meshes
   void handleExodusIOMeshRenumbering();
 
@@ -185,12 +190,14 @@ protected:
   /// Storage for input file record; this is written to the file only after it has been initialized
   std::vector<std::string> _input_record;
 
+protected:
   /// A flag indicating to the Exodus object that the mesh has changed
   bool & _exodus_mesh_changed;
 
   /// Sequence flag, if true each timestep is written to a new file
   bool _sequence;
 
+private:
   /// Flag for overwriting timesteps
   bool _overwrite;
 

@@ -37,33 +37,8 @@ ExodusSteadyAndAdjoint::incrementFileCounter()
     _file_num++;
 }
 
-void
-ExodusSteadyAndAdjoint::outputNodalVariables()
+Real
+ExodusSteadyAndAdjoint::getTimeStepForOutput()
 {
-  // Set the output variable to the nodal variables
-  std::vector<std::string> nodal(getNodalVariableOutput().begin(), getNodalVariableOutput().end());
-  _exodus_io_ptr->set_output_variables(nodal);
-
-  // Write the data via libMesh::ExodusII_IO
-  if (_discontinuous)
-    _exodus_io_ptr->write_timestep_discontinuous(
-        filename(),
-        *_es_ptr,
-        _exodus_num,
-        (_steady_and_adjoint_exec ? _steady_and_adjoint_exec->getIterationNumberOutput() : time()) +
-            +_app.getGlobalTimeOffset());
-  else
-    _exodus_io_ptr->write_timestep(
-        filename(),
-        *_es_ptr,
-        _exodus_num,
-        (_steady_and_adjoint_exec ? _steady_and_adjoint_exec->getIterationNumberOutput() : time()) +
-            _app.getGlobalTimeOffset());
-
-  if (!_overwrite)
-    _exodus_num++;
-
-  // This satisfies the initialization of the ExodusII_IO object
-  handleExodusIOMeshRenumbering();
-  _exodus_initialized = true;
+  return _steady_and_adjoint_exec ? _steady_and_adjoint_exec->getIterationNumberOutput() : time();
 }
