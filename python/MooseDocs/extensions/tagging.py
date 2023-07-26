@@ -5,25 +5,16 @@ from ..tree import tokens
 from ..common import __init__
 from . import command
 
-"""     Tagger ouputs to tags.txt found at: 'moose/python/MooseDocs/extensions'
-
-        This extension defines the tagger command: !tagger name path key:value.  Tagger will except a string that represents the markdown file that is associated with an arb. list of key:value pairs.
+"""     This extension defines the tagger command: !tagger name path key:value.  Tagger will except a string that represents the markdown file that is associated with an arb. list of key:value pairs.
         Arb spacing is allowed after the name/markdown name, however only one space is allowed before the name/markdown.  Ex: !tagger name    k1:v1  ka:va thing1:thing2 is okay, but not
         !tagger  name.
 
         Tagger checks that all linked moose pages are unique and will not allow duplicate namess in the dictionary.  Duplicate key value pairs are allowed.
 
-        If moose is served and *.md is editied to change an existing !tagger command, recompiling will NOT pick up the change since the moose page is already in the dictionary.  To fix this rm tags.txt found
-        in the 'moose/python/MooseDocs/extensions' and create a new one: vim tags.txt.  After compiling with the empty txt the changes will be up dated. Probably a best practice to do this before using the
-        pkl to generate the database filtering system.
-
-        Since tagger & database happen before moose is served !tagger in *.md must be saved before ./moosedocs.py build --serve for the name to appear in the database filtering system. However, saving
-        *.md with new !tagger will add it to the tags.txt.
-
         Example Tagger command in *.md:
         !tagger geochem keyg:valg keychem:valuechem
 
-        Example Output TagDictionary in tags.txt:
+        Example Output TagDictionary:
         {"data":
         [{"name": "heatconduction", "path": "moose/modules/heat_conduction/doc/content/modules/heat_conduction/index.md", "key_vals": {"keyheat": "valheat", "key": "val", "key1": "val1"}},
         {"name": "index", "path": "moose/modules/doc/content/index.md", "key_vals": {"key1": "val1", "keya": "val"}},
@@ -48,7 +39,7 @@ class TaggingExtension(command.CommandExtension):
     def __init__(self, *args, **kwargs):
         command.CommandExtension.__init__(self, *args, **kwargs)
         self._database={'data':[]}
-        self._allowed_keys=['key','key1','key2','keya','keyb']
+        self._allowed_keys=['application','simulation_tool','other','simulation_type','dynamics']
     @property
     def database(self):
         return self._database
@@ -108,6 +99,5 @@ class TaggingCommand(command.CommandComponent):
         with open(static_path, 'w') as f:
             f.writelines(content)
             f.close()
-        
-        print(f"Findal Dict:\n{tag_dict_str}\n")
+
         return(info)
