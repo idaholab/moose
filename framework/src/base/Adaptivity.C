@@ -258,7 +258,62 @@ Adaptivity::adaptMesh(std::string marker_name /*=std::string()*/)
 bool
 Adaptivity::initialAdaptMesh()
 {
-  return adaptMesh(_initial_marker_variable_name);
+  // This is an initial adaptivity step.  We're going to be projecting
+  // any initial conditions onto the fine mesh from their source, so
+  // we don't need to project them from the coarse mesh; that would be
+  // inaccurate if we trusted it and it's redundant since we don't.
+
+  // libMesh doesn't currently provide an API to turn projections on
+  // and off with a single switch, so we'll manually disable
+  // projections on every vector, then afterward reenable the ones we
+  // disabled.
+  //
+  // The catch is that we can only safely disable projections if
+  // project_initial_marker has been switched to false, because we
+  // don't know if the user code wants to look at adaptivity marker
+  // variables on the new mesh.
+  std::tuple<EquationSystems *,
+             std::vector<std::pair<unsigned int, std::string>>,
+             std::vector<unsigned int>>
+      main, disp;
+  if (!_project_initial_marker)
+  {
+    std::get<0>(main) = &_fe_problem.es();
+    std::get<0>(disp) = _displaced_problem ? &_displaced_problem->es() : nullptr;
+    for (auto [es, vecs, solns] : {main, disp})
+      if (es)
+        for (auto s : make_range(es->n_systems()))
+        {
+          System & sys = es->get_system(s);
+          if (sys.project_solution_on_reinit())
+          {
+            solns.push_back(s);
+            sys.project_solution_on_reinit() = false;
+          }
+          for (auto v : make_range(sys.n_vectors()))
+          {
+            const std::string & vecname = sys.vector_name(v);
+            if (sys.vector_preservation(vecname))
+            {
+              vecs.emplace_back(s, vecname);
+              sys.set_vector_preservation(vecname, false);
+            }
+          }
+        }
+  }
+
+  const bool returnval = adaptMesh(_initial_marker_variable_name);
+
+  for (auto [es, vecs, solns] : {main, disp})
+    if (es)
+    {
+      for (const auto s : solns)
+        es->get_system(s).project_solution_on_reinit() = true;
+      for (const auto & [s, vecname] : vecs)
+        es->get_system(s).set_vector_preservation(vecname, true);
+    }
+
+  return returnval;
 }
 
 void

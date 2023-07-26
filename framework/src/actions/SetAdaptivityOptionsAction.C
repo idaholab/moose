@@ -33,6 +33,9 @@ SetAdaptivityOptionsAction::validParams()
   params.addParam<MarkerName>(
       "initial_marker",
       "The name of the Marker to use to adapt the mesh during initial refinement.");
+  params.addParam<bool>("project_initial_marker",
+                        true,
+                        "Whether to project initial Marker values onto the refined mesh.");
   params.addParam<unsigned int>(
       "max_h_level",
       0,
@@ -136,6 +139,7 @@ SetAdaptivityOptionsAction::act()
 
     adapt.setTimeActive(getParam<Real>("start_time"), getParam<Real>("stop_time"));
     adapt.setInterval(getParam<unsigned int>("interval"));
+    adapt.setProjectInitialMarker(getParam<bool>("project_initial_marker"));
 
     adapt.setRecomputeMarkersFlag(getParam<bool>("recompute_markers_during_cycles"));
     if (getParam<bool>("switch_h_to_p_refinement"))

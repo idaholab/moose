@@ -215,6 +215,22 @@ public:
   void setInitialMarkerVariableName(std::string marker_field);
 
   /**
+   * Sets whether or not to project initial marker values onto the
+   * initial refined mesh.
+   *
+   * Currently defaults to true for backwards compatibility, but
+   * setting this to false can obviate the requirement for *any*
+   * initial projection steps, thereby saving memory and CPU time.
+   *
+   * @param project_initial_marker Whether to project the initial
+   * marker onto the initial refined mesh.
+   */
+  void setProjectInitialMarker(bool project_initial_marker)
+  {
+    _project_initial_marker = project_initial_marker;
+  }
+
+  /**
    * Set the maximum refinement level (for the new Adaptivity system).
    */
   void setMaxHLevel(unsigned int level) { _max_h_level = level; }
@@ -298,6 +314,9 @@ protected:
 
   /// Name of the initial marker variable if using the new adaptivity system
   std::string _initial_marker_variable_name;
+
+  /// Whether or not to project initial marker onto refined mesh
+  bool _project_initial_marker;
 
   /// The maximum number of refinement levels
   unsigned int _max_h_level;
