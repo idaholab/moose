@@ -8,7 +8,6 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "ExodusSteadyAndAdjoint.h"
-#include "DisplacedProblem.h"
 
 registerMooseObject("OptimizationApp", ExodusSteadyAndAdjoint);
 
@@ -26,15 +25,15 @@ ExodusSteadyAndAdjoint::ExodusSteadyAndAdjoint(const InputParameters & parameter
   : Exodus(parameters),
     _steady_and_adjoint_exec(dynamic_cast<SteadyAndAdjoint *>(_app.getExecutioner()))
 {
+  if (!_steady_and_adjoint_exec)
+    mooseError("ExodusSteadyAndAdjoint output can only be used with the SteadyAndAdjoint "
+               "executioner to output a per-optimization iteration solution.");
 }
 
 void
 ExodusSteadyAndAdjoint::incrementFileCounter()
 {
-  if (_steady_and_adjoint_exec)
-    _file_num = _steady_and_adjoint_exec->getIterationNumberOutput();
-  else if (_exodus_mesh_changed || _sequence)
-    _file_num++;
+  _file_num = _steady_and_adjoint_exec->getIterationNumberOutput();
 }
 
 Real
