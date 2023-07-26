@@ -140,6 +140,8 @@ public:
   virtual bool matrixTagExists(const TagName & tag_name) override;
   virtual bool matrixTagExists(TagID tag_id) override;
   virtual unsigned int numMatrixTags() const override;
+  virtual bool safeAccessTaggedMatrices() const override;
+  virtual bool safeAccessTaggedVectors() const override;
 
   virtual bool isTransient() const override;
 
