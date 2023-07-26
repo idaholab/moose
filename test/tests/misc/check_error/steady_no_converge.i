@@ -40,5 +40,5 @@
 
   petsc_options_iname = '-pc_type -pc_hypre_type'
   petsc_options_value = 'hypre boomeramg'
-  l_max_its = 10
+  nl_max_its = 2
 []
