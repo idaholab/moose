@@ -1,6 +1,6 @@
 # Do not alter <BUILD>, <VERSION>. These are template tokens altered
 # on the fly by the generate_recipe.py script. The only modifiable
-# item in template/ is the conda_build_config.yaml file (moose_libmesh)
+# item in template/ is the conda_build_config.yaml file (moose_dev)
 {% set version = "<VERSION>" %}
 
 package:
