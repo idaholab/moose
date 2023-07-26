@@ -103,6 +103,35 @@ PenaltyWeightedGapUserObject::initialize()
   selfInitialize();
 }
 
+void
+PenaltyWeightedGapUserObject::selfFinalize()
+{
+  // compute new normal pressure for each node
+  for (const auto & [dof_object, wgap] : _dof_to_weighted_gap)
+  {
+    auto penalty = findValue(_dof_to_local_penalty, dof_object, _penalty);
+
+    // If _use_physical_gap is true we "normalize" the penalty parameter with the surrounding area.
+    auto gap = _use_physical_gap ? adPhysicalGap(wgap) / wgap.second : wgap.first;
+
+    const auto lagrange_multiplier =
+        _augmented_lagrange_problem ? _dof_to_lagrange_multiplier[dof_object] : 0.0;
+
+    // keep the negative normal pressure (compressive per convention here)
+    auto normal_pressure = std::min(0.0, penalty * gap + lagrange_multiplier);
+
+    // we switch conventins here and consider positive normal pressure as compressive
+    _dof_to_normal_pressure[dof_object] = -normal_pressure;
+  }
+}
+
+void
+PenaltyWeightedGapUserObject::finalize()
+{
+  WeightedGapUserObject::finalize();
+  selfFinalize();
+}
+
 Real
 PenaltyWeightedGapUserObject::getNormalContactPressure(const Node * const node) const
 {
@@ -130,39 +159,14 @@ PenaltyWeightedGapUserObject::reinit()
 {
   _contact_force.resize(_qrule_msm->n_points());
   for (const auto qp : make_range(_qrule_msm->n_points()))
-    _contact_force[qp] = 0;
+    _contact_force[qp] = 0.0;
 
   for (const auto i : make_range(_test->size()))
   {
     const Node * const node = _lower_secondary_elem->node_ptr(i);
 
-    const auto penalty =
-        findValue(_dof_to_local_penalty, static_cast<const DofObject *>(node), _penalty);
-
-    // Let's keep existing behavior scaling the weighted gap scaled with the element dimension.
-    // For AL (and penalty too), it'll be better to just have a physical ('real') gap so that the
-    // user (or even our algorithms) can better select this coefficient.
-    ADReal gap;
-    if (_use_physical_gap)
-      gap = adPhysicalGap(libmesh_map_find(_dof_to_weighted_gap, node));
-    else
-      gap = libmesh_map_find(_dof_to_weighted_gap, node).first;
-
-    const auto lagrange_multiplier =
-        _augmented_lagrange_problem ? _dof_to_lagrange_multiplier[node] : 0.0;
-    const auto & test_i = (*_test)[i];
-
-    // If _use_physical_gap is true we "normalize" the penalty parameter with the surrounding area.
-    auto normal_pressure =
-        penalty * gap /
-            (_use_physical_gap ? libmesh_map_find(_dof_to_weighted_gap, node).second : 1.0) +
-        lagrange_multiplier;
-
-    normal_pressure = normal_pressure < 0.0 ? -normal_pressure : 0.0;
-
-    _dof_to_normal_pressure[node] = normal_pressure;
     for (const auto qp : make_range(_qrule_msm->n_points()))
-      _contact_force[qp] += test_i[qp] * normal_pressure;
+      _contact_force[qp] += (*_test)[i][qp] * _dof_to_normal_pressure[node];
   }
 }
 
@@ -211,11 +215,9 @@ PenaltyWeightedGapUserObject::isAugmentedLagrangianConverged()
     }
   }
 
-  // Communicate the max_gap in parallel.
-  this->_communicator.min(negative_gap);
-  this->_communicator.max(positive_gap);
-
-  Real absolute_gap = positive_gap > -negative_gap ? positive_gap : negative_gap;
+  // Communicate the extreme gap values in parallel.
+  Real absolute_gap = std::max(-negative_gap, positive_gap);
+  this->_communicator.min(absolute_gap);
 
   if (std::abs(absolute_gap) > _penetration_tolerance)
   {

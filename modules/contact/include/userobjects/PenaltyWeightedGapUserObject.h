@@ -32,6 +32,7 @@ public:
 
   virtual const ADVariableValue & contactPressure() const override;
   virtual void initialize() override;
+  virtual void finalize() override;
   virtual void reinit() override;
 
   virtual Real getNormalContactPressure(const Node * const node) const override;
@@ -55,6 +56,7 @@ protected:
   virtual bool constrainedByOwner() const override { return false; }
 
   void selfInitialize();
+  void selfFinalize();
   void selfTimestepSetup();
 
   /// The penalty factor

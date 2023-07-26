@@ -288,6 +288,7 @@ void
 PenaltyFrictionUserObject::finalize()
 {
   WeightedVelocitiesUserObject::finalize();
+  PenaltyWeightedGapUserObject::selfFinalize();
 }
 
 bool
