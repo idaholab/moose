@@ -1,12 +1,10 @@
 # Writing an extension from scratch
 import os, re
-import pickle
 import logging
 from ..tree import tokens
 from ..common import __init__
 from . import command
-import json
-import codecs
+
 """     Tagger ouputs to tags.txt found at: 'moose/python/MooseDocs/extensions'
 
         This extension defines the tagger command: !tagger name path key:value.  Tagger will except a string that represents the markdown file that is associated with an arb. list of key:value pairs.
@@ -50,10 +48,13 @@ class TaggingExtension(command.CommandExtension):
     def __init__(self, *args, **kwargs):
         command.CommandExtension.__init__(self, *args, **kwargs)
         self._database={'data':[]}
+        self._allowed_keys=['key','key1','key2','keya','keyb']
     @property
     def database(self):
         return self._database
-
+    @property
+    def allowed_keys(self):
+        return self._allowed_keys
 
 class TaggingCommand(command.CommandComponent):
     COMMAND= 'tagger'
@@ -73,60 +74,40 @@ class TaggingCommand(command.CommandComponent):
             key_vals=keys.split(':')
             EntryKeyValDict.append([key_vals[0],key_vals[1]])
 
-        PageData= {'name':name, "path":mpath, "key_vals":dict(EntryKeyValDict)}
-        # UploadableEntry={'data':[]}
-        # UploadableEntry['data'].append(PageData)
-        # print('\n\n\n\n')
-        # print('UploadableEntry')
-        # print(UploadableEntry)
-        # print('\n')
+        goodkeys=[]
+        for pair in EntryKeyValDict:
+            if pair[0] not in self.extension.allowed_keys:
+                msg = "Not an Allowed Key; not adding 'key' to dictionary: "
+                msg += pair[0]
+                LOG.warning(msg)
+            else:
+                goodkeys.append([pair[0], pair[1]])
 
-        # # Set storage location
-        while "moose" not in os.listdir():
-            os.chdir('../')
-        os.chdir('moose/python/MooseDocs/extensions')
+        PageData= {'name':name, "path":mpath, "key_vals":dict(goodkeys)}
 
-        # save the dictionary
-        first_flag=0  # if there are no elements in dict then logic is needed to include 1st entry since  TagDictionary == listed
-        existing_dictionary=0
-        try:
-            with open('tags.txt') as f:
-                TagDictionary=json.load(f)
-
-            # with open('tags.pkl', 'rb') as f:
-            #     TagDictionary= pickle.load(f)
-        except:
-            # if len(TagDictionary.keys())<1:
-            UploadableEntry={'data':[]}
-            UploadableEntry['data'].append(PageData)
-            TagDictionary = UploadableEntry
-            first_flag+=1
+        if len(self.extension.database['data'])>0 and PageData['name'] in self.extension.database['data'][0]['name']:
+            msg = "Tag already exists; not adding 'name' to dictionary: "
+            msg += PageData['name']
+            LOG.warning(msg)
         else:
-            for d in TagDictionary['data']:
-                if PageData['name'] in d['name']:
-                    existing_dictionary+=1
-                    if existing_dictionary ==1 and first_flag==0:
-                        msg = "Tag already exists; not adding to 'name' dictionary: "
-                        msg += PageData['name']
-                        LOG.warning(msg)
-                    break
+            self.extension.database['data'].append(PageData)
+            
+        tag_dict_str=str(self.extension.database)
+        key_list_regex=self.extension.allowed_keys+['data','name', 'path', 'key_vals']
+        for i in range(len(key_list_regex)):
+            regex_replace=f"'{key_list_regex[i]}':"
+            tag_dict_str=re.sub(regex_replace,key_list_regex[i]+':', tag_dict_str)
+        tag_dict_str=re.sub("\s","", tag_dict_str)
 
-
-
-        # self.extension.database['data'].append(PageData)
-        # print("DATABASE")
-        # print(self.extension.database)
-        # if not in set or first then save the new dict
-        if existing_dictionary ==0 or first_flag==1:
-            if first_flag ==0: # Dont want to append the 1st entry twice
-                TagDictionary['data'].append(PageData)
-            # print('\nTagDictionary :\n',TagDictionary)
-            # print('new Tag for names\n')
-
-            # with open('tags.pkl', 'wb') as f:
-            #     pickle.dump(TagDictionary, f)
-
-            with open('tags.txt', 'wb') as f:
-                json.dump(TagDictionary, codecs.getwriter('utf-8')(f), ensure_ascii=False)
-
-        return info
+        # regex to replace any old dict of this format: \{data: \[{.+}}]}
+        #my path to Derek's static file: /Users/rogedd/projects/tagview/dist/assets/index-93b559a6.js
+        static_path='/Users/rogedd/projects/tagview/dist/assets/index-93b559a6.js'
+        with open(static_path,'r') as f:
+            content=f.readlines()        
+        content[-1]=re.sub('\{data:\[\{.+\}\}\]\}',str(tag_dict_str), content[-1])
+        with open(static_path, 'w') as f:
+            f.writelines(content)
+            f.close()
+        
+        print(f"Findal Dict:\n{tag_dict_str}\n")
+        return(info)
