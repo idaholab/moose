@@ -418,7 +418,7 @@ EigenProblem::preScaleEigenVector(const std::pair<Real, Real> & eig)
   // Eigenvalue magnitude
   Real v = std::sqrt(eig.first * eig.first + eig.second * eig.second);
   // Scaling factor
-  Real factor = 1 / v / _nl_eigen->residualVectorBX().l2_norm();
+  Real factor = 1 / v / (_bx_norm_provided ? formNorm() : _nl_eigen->residualVectorBX().l2_norm());
   // Scale eigenvector
   if (!MooseUtils::absoluteFuzzyEqual(factor, 1))
     scaleEigenvector(factor);
