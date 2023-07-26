@@ -66,7 +66,11 @@ SetAdaptivityOptionsAction::validParams()
   params.addParam<MarkerName>(
       "initial_marker",
       "The name of the Marker to use to adapt the mesh during initial refinement.");
-  params.addParamNamesToGroup("initial_steps initial_marker", "Initial Adaptivity");
+  params.addParam<bool>("project_initial_marker",
+                        true,
+                        "Whether to project initial Marker values onto the refined mesh.");
+  params.addParamNamesToGroup("initial_steps initial_marker project_initial_marker",
+                              "Initial Adaptivity");
   return params;
 }
 
@@ -153,6 +157,7 @@ SetAdaptivityOptionsAction::act()
 
     adapt.setTimeActive(getParam<Real>("start_time"), getParam<Real>("stop_time"));
     adapt.setInterval(getParam<unsigned int>("interval"));
+    adapt.setProjectInitialMarker(getParam<bool>("project_initial_marker"));
 
     adapt.setRecomputeMarkersFlag(getParam<bool>("recompute_markers_during_cycles"));
     if (getParam<bool>("switch_h_to_p_refinement"))
