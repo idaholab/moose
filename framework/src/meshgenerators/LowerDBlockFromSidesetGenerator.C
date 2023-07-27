@@ -150,8 +150,16 @@ LowerDBlockFromSidesetGenerator::generate()
     if (sidesets.count(std::get<2>(triple)))
     {
       if (auto elem = mesh->query_elem_ptr(std::get<0>(triple)))
+      {
+        if (!elem->active())
+          mooseError(
+              "Only active, level 0 elements can be made interior parents of new level 0 lower-d "
+              "elements. Make sure that ",
+              type(),
+              "s are run before any refinement generators");
         element_sides_on_boundary.push_back(
             std::make_pair(counter, ElemSideDouble(elem, std::get<1>(triple))));
+      }
       ++counter;
     }
 
