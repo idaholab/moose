@@ -671,10 +671,10 @@ public:
   }
 
   /// Is it safe to access the tagged  matrices
-  bool safeAccessTaggedMatrices() const { return _safe_access_tagged_matrices; }
+  virtual bool safeAccessTaggedMatrices() const { return _safe_access_tagged_matrices; }
 
   /// Is it safe to access the tagged vectors
-  bool safeAccessTaggedVectors() const { return _safe_access_tagged_vectors; }
+  virtual bool safeAccessTaggedVectors() const { return _safe_access_tagged_vectors; }
 
   virtual void clearActiveFEVariableCoupleableMatrixTags(THREAD_ID tid);
 

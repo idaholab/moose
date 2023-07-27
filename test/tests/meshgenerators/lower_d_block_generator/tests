@@ -20,7 +20,7 @@
       recover = false
     []
   []
-  
+
   [second_order]
     requirement = "The system shall support the creation of lower dimensional elements on an "
                   "existing sideset of second-order elements."
@@ -31,5 +31,13 @@
     mesh_mode = REPLICATED
     cli_args = 'Mesh/second_order=true Outputs/file_base=lower_d_second_order_out '
                  'GlobalParams/order=SECOND Mesh/gmg/nx=5 Mesh/gmg/ny=5'
+  []
+  [dont_refine_before]
+    requirement = 'The system shall error if refinement generators are executed before lower dimensional elements are added.'
+    issues = '#24638'
+    type = 'RunException'
+    cli_args = '--mesh-only'
+    expect_err = 'Make sure that LowerDBlockFromSidesetGenerators are run before any refinement generators'
+    input = 'refine-error.i'
   []
 []
