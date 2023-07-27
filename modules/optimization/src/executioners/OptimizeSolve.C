@@ -259,9 +259,8 @@ OptimizeSolve::setTaoSolutionStatus(double f, int its, double gnorm, double cnor
   // This enables exodus per-iteration output.
   for (auto & sub_app : _app.getExecutioner()->feProblem().getMultiAppWarehouse().getObjects())
   {
-    if (dynamic_cast<SteadyAndAdjoint *>(sub_app->getExecutioner(0)))
-      dynamic_cast<SteadyAndAdjoint *>(sub_app->getExecutioner(0))
-          ->setIterationNumberOutput(_optimize_iteration_number);
+    if (auto steady_and_adjoint = dynamic_cast<SteadyAndAdjoint *>(sub_app->getExecutioner(0)))
+      steady_and_adjoint->setIterationNumberOutput(_optimize_iteration_number);
   }
 
   // print verbose per iteration output

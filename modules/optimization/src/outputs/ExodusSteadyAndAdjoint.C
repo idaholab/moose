@@ -39,5 +39,5 @@ ExodusSteadyAndAdjoint::incrementFileCounter()
 Real
 ExodusSteadyAndAdjoint::getTimeStepForOutput()
 {
-  return _steady_and_adjoint_exec ? _steady_and_adjoint_exec->getIterationNumberOutput() : time();
+  return _steady_and_adjoint_exec->getIterationNumberOutput();
 }

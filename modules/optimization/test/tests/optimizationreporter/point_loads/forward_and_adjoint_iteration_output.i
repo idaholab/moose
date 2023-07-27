@@ -124,7 +124,6 @@
 
 [Outputs]
   console = false
-
   [exodus]
     type = ExodusSteadyAndAdjoint
     execute_on = 'TIMESTEP_END'

@@ -93,12 +93,12 @@ Exodus::validParams()
 Exodus::Exodus(const InputParameters & parameters)
   : OversampleOutput(parameters),
     _exodus_initialized(false),
-    _exodus_num(declareRestartableData<unsigned int>("exodus_num", 0)),
-    _recovering(_app.isRecovering()),
     _exodus_mesh_changed(declareRestartableData<bool>("exodus_mesh_changed", true)),
     _sequence(isParamValid("sequence") ? getParam<bool>("sequence")
               : _use_displaced         ? true
                                        : false),
+    _exodus_num(declareRestartableData<unsigned int>("exodus_num", 0)),
+    _recovering(_app.isRecovering()),
     _overwrite(getParam<bool>("overwrite")),
     _output_dimension(getParam<MooseEnum>("output_dimension").getEnum<OutputDimension>()),
     _discontinuous(getParam<bool>("discontinuous")),

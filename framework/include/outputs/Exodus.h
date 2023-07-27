@@ -169,6 +169,12 @@ protected:
    */
   bool _exodus_initialized;
 
+  /// A flag indicating to the Exodus object that the mesh has changed
+  bool & _exodus_mesh_changed;
+
+  /// Sequence flag, if true each timestep is written to a new file
+  bool _sequence;
+
 private:
   /// Handle the call to mesh renumbering in libmesh's ExodusIO on non-contiguously numbered meshes
   void handleExodusIOMeshRenumbering();
@@ -190,14 +196,6 @@ private:
   /// Storage for input file record; this is written to the file only after it has been initialized
   std::vector<std::string> _input_record;
 
-protected:
-  /// A flag indicating to the Exodus object that the mesh has changed
-  bool & _exodus_mesh_changed;
-
-  /// Sequence flag, if true each timestep is written to a new file
-  bool _sequence;
-
-private:
   /// Flag for overwriting timesteps
   bool _overwrite;
 

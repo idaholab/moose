@@ -149,7 +149,7 @@ private:
   /// Parameters (solution)
   std::unique_ptr<libMesh::PetscVector<Number>> _parameters;
 
-  /// Iteration number for the forward problem
+  /// Optimization teration number
   unsigned int _optimize_iteration_number;
 
   /// Hessian (matrix) - usually a matrix-free representation
