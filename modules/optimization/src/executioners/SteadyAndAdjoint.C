@@ -27,7 +27,7 @@ SteadyAndAdjoint::validParams()
 }
 
 SteadyAndAdjoint::SteadyAndAdjoint(const InputParameters & parameters)
-  : Steady(parameters), _adjoint_solve(*this), _iteration_number(0)
+  : Steady(parameters), _adjoint_solve(*this)
 {
 }
 
@@ -77,16 +77,4 @@ SteadyAndAdjoint::execute()
   }
 
   postExecute();
-}
-
-unsigned int
-SteadyAndAdjoint::getIterationNumberOutput() const
-{
-  return _iteration_number;
-}
-
-void
-SteadyAndAdjoint::setIterationNumberOutput(unsigned int iteration_number)
-{
-  _iteration_number = iteration_number;
 }

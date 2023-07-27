@@ -8,11 +8,27 @@
     csvdiff = main_out_OptimizationReporter_0001.csv
     # steady solve
     recover = false
-
     issues = '#21885'
     design = 'ElementOptimizationDiffusionCoefFunctionInnerProduct.md'
-    requirement = 'The system shall be able to perform gradient based material'
-                  ' parameter inversion for a single material property.'
+    requirement = 'The system shall be able to perform gradient based material parameter inversion '
+                  'for a single material property.'
 
+  []
+  [adjoint_grad_iteration_output]
+    type = Exodiff
+    max_threads = 1
+    # Optimize executioner does not support multiple threads
+    input = main.i
+    exodiff = adjoint.e-s007
+    rel_err = 1.0e-5
+    abs_zero = 1.0e-5
+    # steady solve
+    recover = false
+    issues = '#25009'
+    design = 'ExodusOptimizationSteady.md'
+    cli_args = "MultiApps/adjoint/input_files='adjoint_iteration_output.i'"
+    requirement = 'The system shall be able to perform gradient based material parameter inversion '
+                  'for a single material property and output the iteration-wise output for the '
+                  'adjoint problem.'
   []
 []

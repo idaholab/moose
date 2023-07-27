@@ -10,7 +10,7 @@
 #include "OptimizeSolve.h"
 #include "OptimizationAppTypes.h"
 #include "OptimizationReporterBase.h"
-#include "SteadyAndAdjoint.h"
+#include "Steady.h"
 
 #include "libmesh/petsc_vector.h"
 #include "libmesh/petsc_matrix.h"
@@ -255,12 +255,12 @@ OptimizeSolve::setTaoSolutionStatus(double f, int its, double gnorm, double cnor
   _hess_iterate = 0;
   _optimize_iteration_number = (unsigned int)its;
 
-  // Pass down the iteration number if the subapp is of the SteadyAndAdjoint type.
+  // Pass down the iteration number if the subapp is of the Steady/SteadyAndAdjoint type.
   // This enables exodus per-iteration output.
   for (auto & sub_app : _app.getExecutioner()->feProblem().getMultiAppWarehouse().getObjects())
   {
-    if (auto steady_and_adjoint = dynamic_cast<SteadyAndAdjoint *>(sub_app->getExecutioner(0)))
-      steady_and_adjoint->setIterationNumberOutput(_optimize_iteration_number);
+    if (auto steady = dynamic_cast<Steady *>(sub_app->getExecutioner(0)))
+      steady->setIterationNumberOutput(_optimize_iteration_number);
   }
 
   // print verbose per iteration output

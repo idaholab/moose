@@ -125,7 +125,7 @@
 [Outputs]
   console = false
   [exodus]
-    type = ExodusSteadyAndAdjoint
+    type = ExodusOptimizationSteady
     execute_on = 'TIMESTEP_END'
   []
 []

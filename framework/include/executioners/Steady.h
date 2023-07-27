@@ -45,6 +45,15 @@ public:
 
   virtual bool lastSolveConverged() const override { return _last_solve_converged; }
 
+  /**
+   * Get optimization iteration number from main app (when Steady solves an optimization problem)
+   */
+  virtual unsigned int getIterationNumberOutput() const;
+  /**
+   * Set optimization iteration number from main app (when Steady solves an optimization problem)
+   */
+  virtual void setIterationNumberOutput(unsigned int iteration_number);
+
 protected:
   FEProblemBase & _problem;
 
@@ -53,6 +62,9 @@ protected:
   Real _system_time;
   int & _time_step;
   Real & _time;
+
+  /// Iteration number obtained from the main application
+  unsigned int _optimization_iteration_number;
 
 private:
   bool _last_solve_converged;

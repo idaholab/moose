@@ -34,7 +34,8 @@ Steady::Steady(const InputParameters & parameters)
     _feproblem_solve(*this),
     _system_time(getParam<Real>("time")),
     _time_step(_problem.timeStep()),
-    _time(_problem.time())
+    _time(_problem.time()),
+    _optimization_iteration_number(0)
 {
   _fixed_point_solve->setInnerSolve(_feproblem_solve);
 
@@ -125,4 +126,16 @@ Steady::checkIntegrity()
   // check to make sure that we don't have any time kernels in this simulation (Steady State)
   if (_problem.getNonlinearSystemBase().containsTimeKernel())
     mooseError("You have specified time kernels in your steady state simulation");
+}
+
+unsigned int
+Steady::getIterationNumberOutput() const
+{
+  return _optimization_iteration_number;
+}
+
+void
+Steady::setIterationNumberOutput(unsigned int iteration_number)
+{
+  _optimization_iteration_number = iteration_number;
 }

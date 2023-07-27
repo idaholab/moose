@@ -11,12 +11,12 @@
 
 // MOOSE includes
 #include "Exodus.h"
-#include "SteadyAndAdjoint.h"
+#include "Steady.h"
 
 /**
  * Class for output data to the ExodusII format
  */
-class ExodusSteadyAndAdjoint : public Exodus
+class ExodusOptimizationSteady : public Exodus
 {
 public:
   static InputParameters validParams();
@@ -24,7 +24,7 @@ public:
   /**
    * Class constructor
    */
-  ExodusSteadyAndAdjoint(const InputParameters & parameters);
+  ExodusOptimizationSteady(const InputParameters & parameters);
 
 protected:
   /**
@@ -38,6 +38,6 @@ protected:
   virtual Real getTimeStepForOutput() override;
 
 private:
-  /// For steady and adjoint executioner
-  const SteadyAndAdjoint * const _steady_and_adjoint_exec;
+  /// For steady (and steady and adjoint) executioner
+  const Steady * const _steady_exec;
 };
