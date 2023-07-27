@@ -286,9 +286,6 @@ protected:
 
   Real & _solution_change_norm;
 
-  /// The difference of current and old solutions
-  NumericVector<Number> & _sln_diff;
-
   void setupTimeIntegrator();
 
   /// Whether to divide the solution difference norm by dt. If taking 'small' time steps this member
