@@ -6,6 +6,7 @@
     input = 'abtr_tri.i'
     exodiff = 'abtr_tri.e'
     cli_args = '--mesh-only "abtr_tri.e"'
+    installation_type = in_tree
     requirement ='The system shall generate a triangulation without any refinement.'
     recover = false
   []

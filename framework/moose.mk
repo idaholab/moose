@@ -9,7 +9,7 @@ ENABLE_LIBTORCH ?= false
 
 # this allows us to modify the linked names/rpaths safely later for install targets
 ifneq (,$(findstring darwin,$(libmesh_HOST)))
-	libmesh_LDFLAGS += -headerpad_max_install_names
+	libmesh_LDFLAGS += -Wl,-headerpad_max_install_names
 endif
 
 #

@@ -426,6 +426,7 @@
     csvdiff = 'bh05.csv'
     rel_err = 5.7e-06 # diff is ~5.6e-6 on falcon
     threading = '!pthreads'
+    installation_type = in_tree
     requirement = 'PorousFlowPeacemanBorehole shall inject fluid at the specified rate in an unsaturated system'
     design = 'porous_flow/tests/dirackernels/dirackernels_tests.md porous_flow/sinks.md PorousFlowPeacemanBorehole.md'
     issues = '#7992 #8139'

@@ -102,6 +102,7 @@
     map = false
     # XFEM requires --enable-unique-ids in libmesh
     unique_id = true
+    installation_type = in_tree
     requirement = 'The XFEM module shall represent a propagating crack in a 2D mechanics model with XFEM, where the crack is defined using a topologically surface cutting mesh by MeshCut2DFractureUserObject where crack growth and direction is computed by a fracture integral'
     design = 'MeshCut2DFractureUserObject.md'
   [../]

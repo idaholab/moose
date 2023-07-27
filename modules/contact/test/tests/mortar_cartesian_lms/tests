@@ -10,6 +10,7 @@
     max_parallel = 4
     min_ad_size = '50'
     valgrind = 'heavy'
+    installation_type = in_tree
     requirement = 'The contact module shall be able to solve a two-dimensional frictionless problem with Cartesian Lagrange multipliers.'
   []
   [frictionless-mortar-3d]
