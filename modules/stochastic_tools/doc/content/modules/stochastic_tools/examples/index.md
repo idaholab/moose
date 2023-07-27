@@ -23,11 +23,15 @@ Surrogate Models:
 - Example 12: [examples/gaussian_process_surrogate.md]
 - Example 13: [modules/stochastic_tools/examples/cross_validation.md]
 
+Bayesian UQ:
+
+- Example 14: [modules/stochastic_tools/examples/bayesian_uq_1d_diff.md]
+
 !if! function=hasLibtorch()
 
 Deep Reinforcement Learning Models:
 
-- Example 14: [modules/stochastic_tools/examples/libtorch_drl_control.md]
+- Example 15: [modules/stochastic_tools/examples/libtorch_drl_control.md]
 
 !if-end!
 
