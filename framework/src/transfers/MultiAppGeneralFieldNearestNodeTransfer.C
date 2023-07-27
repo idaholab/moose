@@ -372,11 +372,10 @@ MultiAppGeneralFieldNearestNodeTransfer::evaluateInterpValuesNearestNode(
                                              zipped_nearest_points[num_found - 2].first))
             registerConflict(i_from, 0, local_pt, outgoing_vals[i_pt].second, true);
 
-          Real val_sum = 0, dist_sum = 0;
+          Real dist_sum = 0;
           for (auto i : make_range(num_search - 1))
           {
             auto index = zipped_nearest_points[i].second;
-            val_sum += _local_values[i_from][index];
             dist_sum += (_local_points[i_from][index] - pt).norm();
           }
           // Compare to the selected value found after looking at all the problems
