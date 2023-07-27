@@ -294,9 +294,7 @@ PenaltyFrictionUserObject::finalize()
 bool
 PenaltyFrictionUserObject::isAugmentedLagrangianConverged()
 {
-  // Check normal contact convergence first
-  if (!PenaltyWeightedGapUserObject::isAugmentedLagrangianConverged())
-    return false;
+  std::pair<Real, dof_id_type> max_slip{0.0, 0};
 
   for (const auto & [dof_object, traction_pair] : _dof_to_tangential_traction)
   {
@@ -325,16 +323,35 @@ PenaltyFrictionUserObject::isAugmentedLagrangianConverged()
     }
     else if (slip_velocity.norm() * _dt > _slip_tolerance && normal_pressure > TOLERANCE)
     {
+      const auto new_slip =
+          std::make_pair<Real, dof_id_type>(slip_velocity.norm() * _dt, dof_object->id());
+      if (new_slip > max_slip)
+        max_slip = new_slip;
+    }
+  }
+
+  // Communicate max_slip here where all ranks get to
+  this->_communicator.max(max_slip);
+
+  // Check normal contact convergence now, to make sure all ranks get here
+  if (!PenaltyWeightedGapUserObject::isAugmentedLagrangianConverged())
+    return false;
+
+  // Did we observe any above tolerance slip anywhere?
+  if (max_slip.first > _slip_tolerance)
+  {
+    if (this->_communicator.rank() == 0)
+    {
       mooseInfoRepeated(
-          "Stick tolerance fails. Slip distance for a sticking node ",
-          dof_object->id(),
+          "Stick tolerance fails. Slip distance for sticking node ",
+          max_slip.second,
           " is: ",
-          slip_velocity.norm() * _dt,
+          max_slip.first,
           ", but slip tolerance is chosen to be ",
           _slip_tolerance,
           ". Relax the slip tolerance if there are too many augmented Lagrange iterations.");
-      return false;
     }
+    return false;
   }
 
   return true;

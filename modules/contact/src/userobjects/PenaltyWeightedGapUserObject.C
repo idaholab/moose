@@ -216,28 +216,38 @@ PenaltyWeightedGapUserObject::isAugmentedLagrangianConverged()
   }
 
   // Communicate the extreme gap values in parallel.
-  Real absolute_gap = std::max(-negative_gap, positive_gap);
-  this->_communicator.min(absolute_gap);
+  std::vector<Real> recv;
+  if (this->_communicator.rank() == 0)
+    recv.resize(this->_communicator.size());
+  this->_communicator.gather(0, -negative_gap > positive_gap ? negative_gap : positive_gap, recv);
 
-  if (std::abs(absolute_gap) > _penetration_tolerance)
+  if (this->_communicator.rank() == 0)
   {
-    mooseInfoRepeated("Penetration tolerance fail max_gap = ",
-                      absolute_gap,
-                      " (gap_tol=",
-                      _penetration_tolerance,
-                      "). Iteration number is: ",
-                      _lagrangian_iteration_number,
-                      ".");
-    return false;
+    negative_gap = *std::min_element(recv.begin(), recv.end());
+    positive_gap = *std::max_element(recv.begin(), recv.end());
+
+    // report the gap value with the largest magnitude
+    const Real reported_gap = -negative_gap > positive_gap ? negative_gap : positive_gap;
+    if (std::abs(reported_gap) > _penetration_tolerance)
+    {
+      mooseInfoRepeated("Penetration tolerance fail max_gap = ",
+                        reported_gap,
+                        " (gap_tol=",
+                        _penetration_tolerance,
+                        "). Iteration number is: ",
+                        _lagrangian_iteration_number,
+                        ".");
+      return false;
+    }
+    else
+      mooseInfoRepeated("Penetration tolerance success max_gap = ",
+                        reported_gap,
+                        " (gap_tol=",
+                        _penetration_tolerance,
+                        "). Iteration number is: ",
+                        _lagrangian_iteration_number,
+                        ".");
   }
-  else
-    mooseInfoRepeated("Penetration tolerance success max_gap = ",
-                      absolute_gap,
-                      " (gap_tol=",
-                      _penetration_tolerance,
-                      "). Iteration number is: ",
-                      _lagrangian_iteration_number,
-                      ".");
 
   return true;
 }
