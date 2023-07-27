@@ -240,6 +240,7 @@ inlet_velocity = 0.001
     vel_x = vel_x
     vel_y = vel_y
     rho = rho
+    passive_scalar = scalar
   []
 
   [outlet_p]

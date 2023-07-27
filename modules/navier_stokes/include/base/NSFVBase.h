@@ -2480,6 +2480,7 @@ NSFVBase<BaseType>::addScalarInletBC()
         const std::string bc_type = "WCNSFVScalarFluxBC";
         InputParameters params = getFactory().getValidParams(bc_type);
         params.template set<NonlinearVariableName>("variable") = _passive_scalar_names[name_i];
+        params.template set<MooseFunctorName>("passive_scalar") = _passive_scalar_names[name_i];
         if (_flux_inlet_directions.size())
           params.template set<Point>("direction") = _flux_inlet_directions[flux_bc_counter];
         if (_passive_scalar_inlet_types[name_i * num_inlets + bc_ind] == "flux-mass")

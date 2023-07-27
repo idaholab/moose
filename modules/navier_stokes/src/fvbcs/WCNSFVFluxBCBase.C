@@ -94,12 +94,24 @@ WCNSFVFluxBCBase::varVelocity(Moose::StateArg state) const
 ADReal
 WCNSFVFluxBCBase::inflowMassFlux(Moose::StateArg state) const
 {
+  checkForInternalDirection();
   if (_mdot_pp)
     return *_mdot_pp / *_area_pp;
+  const ADRealVectorValue incoming_vector = !_direction_specified_by_user ? _normal : _direction;
+  const ADReal cos_angle = std::abs(incoming_vector * _normal);
+  return _rho(singleSidedFaceArg(), state) * (*_velocity_pp) * cos_angle;
+}
+
+ADReal
+WCNSFVFluxBCBase::inflowSpeed(Moose::StateArg state) const
+{
   checkForInternalDirection();
   const ADRealVectorValue incoming_vector = !_direction_specified_by_user ? _normal : _direction;
-  const ADReal cos_angle = std::abs(incoming_vector * _face_info->normal());
-  return _rho(singleSidedFaceArg(), state) * (*_velocity_pp) * cos_angle;
+  const ADReal cos_angle = std::abs(incoming_vector * _normal);
+  if (_mdot_pp)
+    return *_mdot_pp / (*_area_pp * _rho(singleSidedFaceArg(), state) * cos_angle);
+
+  return (*_velocity_pp) * cos_angle;
 }
 
 void

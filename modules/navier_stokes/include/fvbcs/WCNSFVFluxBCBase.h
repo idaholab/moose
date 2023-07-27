@@ -40,6 +40,9 @@ protected:
   /// computes the inflow massflux
   ADReal inflowMassFlux(Moose::StateArg state) const;
 
+  /// computes the inflow speed
+  ADReal inflowSpeed(Moose::StateArg state) const;
+
   /// returns the velocity vector (vel_x, vel_y, vel_z)
   ADRealVectorValue varVelocity(Moose::StateArg state) const;
 

@@ -71,6 +71,16 @@
       recover = false # see #19126
       detail = 'using the inlet mass flow rate to compute the fluxes with NSFVAction syntax'
     []
+    [reversal]
+      type = 'Exodiff'
+      input = flux_bcs_reversal.i
+      exodiff = flux_bcs_reversal_out.e
+      method = "!dbg"
+      abs_zero = 1e-6
+      recover = false
+      issues = '#24936'
+      detail = 'and correctly handle inflow and outflow boundaries'
+    []
   []
   [exceptions_dirichlet_bcs]
     issues = '#18086'
@@ -173,21 +183,21 @@
     [scalar_need_flux_or_value]
       type = RunException
       input = 'flux_bcs_velocity.i'
-      cli_args = 'FVBCs/inactive=inlet_scalar FVBCs/inlet_scalar_bis/type=WCNSFVScalarFluxBC FVBCs/inlet_scalar_bis/variable=scalar FVBCs/inlet_scalar_bis/boundary=left FVBCs/inlet_scalar_bis/vel_x=vel_x FVBCs/inlet_scalar_bis/vel_y=vel_y FVBCs/inlet_scalar_bis/rho=rho'
+      cli_args = 'FVBCs/inactive=inlet_scalar FVBCs/inlet_scalar_bis/type=WCNSFVScalarFluxBC FVBCs/inlet_scalar_bis/variable=scalar FVBCs/inlet_scalar_bis/boundary=left FVBCs/inlet_scalar_bis/vel_x=vel_x FVBCs/inlet_scalar_bis/vel_y=vel_y FVBCs/inlet_scalar_bis/rho=rho FVBCs/inlet_scalar_bis/passive_scalar=scalar'
       expect_err = 'If not providing the scalar flow rate, the inlet scalar concentration should be provided'
       detail = 'neither the scalar quantity flux or boundary values are specified when attempting to compute the scalar quantity flux'
     []
     [scalar_mdot_needs_area]
       type = RunException
       input = 'flux_bcs_velocity.i'
-      cli_args = 'FVBCs/inactive=inlet_scalar FVBCs/inlet_scalar_bis/type=WCNSFVScalarFluxBC FVBCs/inlet_scalar_bis/variable=scalar FVBCs/inlet_scalar_bis/boundary=left FVBCs/inlet_scalar_bis/scalar_value_pp=0 FVBCs/inlet_scalar_bis/mdot_pp=0 FVBCs/inlet_scalar_bis/vel_x=vel_x FVBCs/inlet_scalar_bis/vel_y=vel_y FVBCs/inlet_scalar_bis/rho=rho'
+      cli_args = 'FVBCs/inactive=inlet_scalar FVBCs/inlet_scalar_bis/type=WCNSFVScalarFluxBC FVBCs/inlet_scalar_bis/variable=scalar FVBCs/inlet_scalar_bis/boundary=left FVBCs/inlet_scalar_bis/scalar_value_pp=0 FVBCs/inlet_scalar_bis/mdot_pp=0 FVBCs/inlet_scalar_bis/vel_x=vel_x FVBCs/inlet_scalar_bis/vel_y=vel_y FVBCs/inlet_scalar_bis/rho=rho FVBCs/inlet_scalar_bis/passive_scalar=scalar'
       expect_err = 'If providing the inlet mass flow rate, the inlet flow area should be provided as well'
       detail = 'only the mass flow rate is provided to compute the inlet scalar quantity flux'
     []
     [scalar_need_some_velocity_info]
       type = RunException
       input = 'flux_bcs_velocity.i'
-      cli_args = 'FVBCs/inactive=inlet_scalar FVBCs/inlet_scalar_bis/type=WCNSFVScalarFluxBC FVBCs/inlet_scalar_bis/variable=scalar FVBCs/inlet_scalar_bis/boundary=left FVBCs/inlet_scalar_bis/scalar_value_pp=0 FVBCs/inlet_scalar_bis/vel_x=vel_x FVBCs/inlet_scalar_bis/vel_y=vel_y FVBCs/inlet_scalar_bis/rho=rho'
+      cli_args = 'FVBCs/inactive=inlet_scalar FVBCs/inlet_scalar_bis/type=WCNSFVScalarFluxBC FVBCs/inlet_scalar_bis/variable=scalar FVBCs/inlet_scalar_bis/boundary=left FVBCs/inlet_scalar_bis/scalar_value_pp=0 FVBCs/inlet_scalar_bis/vel_x=vel_x FVBCs/inlet_scalar_bis/vel_y=vel_y FVBCs/inlet_scalar_bis/rho=rho FVBCs/inlet_scalar_bis/passive_scalar=scalar'
       expect_err = 'If not providing the scalar flow rate, the inlet velocity or mass flow should be provided'
       detail = 'only the scalar quantity boundary value is provided to compute the inlet scalar quantity flux'
     []

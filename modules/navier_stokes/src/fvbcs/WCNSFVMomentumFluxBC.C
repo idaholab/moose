@@ -42,34 +42,20 @@ WCNSFVMomentumFluxBC::WCNSFVMomentumFluxBC(const InputParameters & params)
 ADReal
 WCNSFVMomentumFluxBC::computeQpResidual()
 {
-  /*
-   * We assume the following orientation: The supplied mass flow and velocity magnitude need to be
-   * positive if:
-   * 1. No direction parameter is supplied and we want to define an inlet condition (similarly, if
-   * the mass flow/velocity magnitude are negative we define an outlet)
-   * 2. If the fluid flows aligns with the direction parameter specified by the user. (similarly, if
-   * the postprocessor values ae)
-   *
-   */
-  checkForInternalDirection();
+  const auto state = determineState();
+
+  if (!isInflow())
+  {
+    auto fa = singleSidedFaceArg();
+    auto vel_vec = varVelocity(state);
+    return vel_vec * _normal * _rho(fa, state) * vel_vec(_index);
+  }
+
   const Point incoming_vector =
       !_direction_specified_by_user ? Point(-_face_info->normal()) : _direction;
-  const Real cos_angle = std::abs(incoming_vector * _face_info->normal());
-
+  ADReal a = 1;
   if (_velocity_pp)
-  {
-    // In the case when the stream comes with an angle we need to multiply this quantity
-    // with the dot product of the surface normal and the incoming jet direction
-    return -_scaling_factor * std::pow((*_velocity_pp), 2) * incoming_vector(_index) * cos_angle *
-           _rho(singleSidedFaceArg(), determineState());
-  }
-  else
-  // In this case the cosine of the angle is already incorporated in mdot so we will
-  // have to correct back to get the right velocity magnitude
-  {
-    const auto velocity_magnitude =
-        (*_mdot_pp) / ((*_area_pp) * _rho(singleSidedFaceArg(), determineState()) * cos_angle);
-    return -_scaling_factor * (*_mdot_pp) / (*_area_pp) * incoming_vector(_index) *
-           velocity_magnitude;
-  }
+    a = 1.0 / std::abs(incoming_vector * _normal);
+  return -_scaling_factor * a * inflowMassFlux(state) * inflowSpeed(state) *
+         incoming_vector(_index);
 }
