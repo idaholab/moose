@@ -43,6 +43,19 @@
     abs_zero = 5e-6
     max_threads = 1
   []
+  [tri_interwrapper_tight_side]
+    type = Exodiff
+    input = tri_interwrapper.i
+    exodiff = tri_interwrapper_tight_side.e
+    cli_args = "TriInterWrapperMesh/sub_channel/tight_side_bypass=true "
+               "Outputs/file_base=tri_interwrapper_tight_side"
+    custom_cmp = 'test.exodiff'
+    method = '!DBG'
+    valgrind = NONE
+    recover = false
+    abs_zero = 5e-6
+    max_threads = 1
+  []
   [tri_interwrapper_implicit]
     type = Exodiff
     input = tri_interwrapper_implicit.i
@@ -54,6 +67,7 @@
     abs_zero = 5e-6
     max_threads = 1
   []
+
   [tri_interwrapper_monolithic]
     type = Exodiff
     input = tri_interwrapper_monolithic.i
