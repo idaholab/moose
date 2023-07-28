@@ -616,44 +616,41 @@ MooseMesh::node(const dof_id_type i)
 const Node &
 MooseMesh::nodeRef(const dof_id_type i) const
 {
-  if (i > getMesh().max_node_id())
-    return *(*_quadrature_nodes.find(i)).second;
-
-  return getMesh().node_ref(i);
+  const auto node_ptr = queryNodePtr(i);
+  mooseAssert(node_ptr, "Missing node");
+  return *node_ptr;
 }
 
 Node &
 MooseMesh::nodeRef(const dof_id_type i)
 {
-  if (i > getMesh().max_node_id())
-    return *_quadrature_nodes[i];
-
-  return getMesh().node_ref(i);
+  return const_cast<Node &>(const_cast<const MooseMesh *>(this)->nodeRef(i));
 }
 
 const Node *
 MooseMesh::nodePtr(const dof_id_type i) const
 {
-  if (i > getMesh().max_node_id())
-    return (*_quadrature_nodes.find(i)).second;
-
-  return getMesh().node_ptr(i);
+  return &nodeRef(i);
 }
 
 Node *
 MooseMesh::nodePtr(const dof_id_type i)
 {
-  if (i > getMesh().max_node_id())
-    return _quadrature_nodes[i];
-
-  return getMesh().node_ptr(i);
+  return &nodeRef(i);
 }
 
 const Node *
 MooseMesh::queryNodePtr(const dof_id_type i) const
 {
   if (i > getMesh().max_node_id())
-    return (*_quadrature_nodes.find(i)).second;
+  {
+    auto it = _quadrature_nodes.find(i);
+    if (it == _quadrature_nodes.end())
+      return nullptr;
+    auto & node_ptr = it->second;
+    mooseAssert(node_ptr, "Uninitialized quadrature node");
+    return node_ptr;
+  }
 
   return getMesh().query_node_ptr(i);
 }
@@ -661,10 +658,7 @@ MooseMesh::queryNodePtr(const dof_id_type i) const
 Node *
 MooseMesh::queryNodePtr(const dof_id_type i)
 {
-  if (i > getMesh().max_node_id())
-    return _quadrature_nodes[i];
-
-  return getMesh().query_node_ptr(i);
+  return const_cast<Node *>(const_cast<const MooseMesh *>(this)->queryNodePtr(i));
 }
 
 void
