@@ -35,6 +35,19 @@ struct GatherMatProp
   }
 };
 
+template <typename T>
+struct GatherMatPropOld
+{
+  typedef T type;
+  typedef const MaterialProperty<T> gather_type;
+
+  template <typename M>
+  static gather_type * getPointer(M & mpi, const MaterialPropertyName & name)
+  {
+    return &mpi.template getMaterialPropertyOld<T>(name);
+  }
+};
+
 struct GatherVariable
 {
   typedef Real type;
@@ -44,6 +57,18 @@ struct GatherVariable
   static gather_type * getPointer(const C & coupleable, const VariableName & name)
   {
     return &coupleable.coupledValue(name);
+  }
+};
+
+struct GatherVariableOld
+{
+  typedef Real type;
+  typedef const VariableValue gather_type;
+
+  template <typename C>
+  static gather_type * getPointer(const C & coupleable, const VariableName & name)
+  {
+    return &coupleable.coupledValueOld(name);
   }
 };
 
@@ -172,6 +197,8 @@ public:
   std::map<dof_id_type, std::size_t> _index_map;
 
   friend struct BatchMaterialUtils::GatherVariable;
+
+  friend struct BatchMaterialUtils::GatherVariableOld;
 
 private:
   /// flag that indicates if _output_data has been fully computed
