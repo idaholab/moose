@@ -1,0 +1,30 @@
+[Tests]
+  [test]
+  issues = '#24289'
+  design = 'SideAdvectiveFluxIntegral.md'
+  requirement = 'The system shall be able to output the integral of a component of an advective flux vector for problems '
+    [x_flux_fe]
+      type = CSVDiff
+      input = 'side_advection_flux_integral.i'
+      csvdiff = 'side_advection_flux_integral_out.csv'
+      abs_zero = 1e-9
+      detail = 'with continous finite element variable and'
+    []
+
+    [x_flux_fv]
+      type = CSVDiff
+      input = 'side_advection_flux_integral_fv.i'
+      csvdiff = 'side_advection_flux_integral_fv_out.csv'
+      abs_zero = 1e-9
+      detail = 'with finite volume variable'
+    []
+
+    [err_message]
+      type = RunException
+      input = 'side_advection_flux_integral.i'
+      cli_args = 'Variables/u/order=CONSTANT Variables/u/family=MONOMIAL'
+      expect_err =  "Trying to use a non-nodal variable 'advected_variable' for side advection integral calculation, which is currently not supported."
+      detail = 'error out for discontinous finite element family.'
+    []
+  []
+[]
