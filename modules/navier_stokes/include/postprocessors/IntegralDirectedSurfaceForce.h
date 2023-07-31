@@ -14,7 +14,7 @@
 #include "MathFVUtils.h"
 
 /**
- * This postprocessor which computes the directed force coming from friction and pressure
+ * Postprocessor which computes the directed force coming from friction and pressure
  * differences on a surface defined as:
  *
  * $F_d = \int\limits_S (\sigma \vec{n}) \cdot \vec{d} dS$
@@ -42,6 +42,6 @@ protected:
   /// Pressure field
   const Moose::Functor<Real> & _pressure;
 
-  /// The direction in which the force is measured is measured
+  /// The direction in which the force is measured
   const RealVectorValue _direction;
 };

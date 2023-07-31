@@ -23,8 +23,7 @@ IntegralDirectedSurfaceForce::validParams()
   InputParameters params = SideIntegralPostprocessor::validParams();
   params.addClassDescription(
       "Computes the directed force coming from friction and pressure differences on a surface. One "
-      "can "
-      "use this object for the computation of the drag and lift coefficient as well.");
+      "can use this object for the computation of the drag and lift coefficient as well.");
   params.addRequiredParam<MooseFunctorName>("vel_x", "The velocity in direction x.");
   params.addParam<MooseFunctorName>("vel_y", "The velocity in direction y.");
   params.addParam<MooseFunctorName>("vel_z", "The velocity in direction z.");
@@ -73,25 +72,26 @@ IntegralDirectedSurfaceForce::computeFaceInfoIntegral(const FaceInfo * fi)
   RealTensorValue pressure_term;
   RealVectorValue cell_velocity = 0;
   RealVectorValue face_velocity = 0;
-  Real pressure = _pressure(face_arg, state);
-  Real mu = _mu(face_arg, state);
-  for (auto i : make_range(_mesh.dimension()))
+  const Real pressure = _pressure(face_arg, state);
+  const Real mu = _mu(face_arg, state);
+  for (const auto i : make_range(_mesh.dimension()))
   {
     cell_velocity(i) = (*_vel_components[i])(elem_arg, state);
     face_velocity(i) = (*_vel_components[i])(face_arg, state);
     pressure_term(i, i) = -pressure;
   }
 
-  auto sheer_force = -mu *
-                     (cell_velocity - face_velocity -
-                      (cell_velocity - face_velocity) * fi->normal() * fi->normal()) /
-                     std::abs(fi->dCN() * fi->normal());
+  const auto sheer_force = mu *
+                           (cell_velocity - face_velocity -
+                            (cell_velocity - face_velocity) * fi->normal() * fi->normal()) /
+                           std::abs(fi->dCN() * fi->normal());
 
-  return (sheer_force * _direction + pressure_term * fi->normal() * _direction);
+  return (sheer_force * _direction - pressure_term * fi->normal() * _direction);
 }
 
 Real
 IntegralDirectedSurfaceForce::computeQpIntegral()
 {
+  mooseError(this->type() + " does not have an implementation for quadrature-based evaluation!");
   return 0.0;
 }

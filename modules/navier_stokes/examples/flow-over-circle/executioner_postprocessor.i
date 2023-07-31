@@ -59,7 +59,7 @@
     vel_y = vel_y
     mu = ${mu}
     pressure = pressure
-    principal_direction = '-1 0 0'
+    principal_direction = '1 0 0'
     boundary = 'circle'
     outputs = none
     execute_on = 'INITIAL TIMESTEP_END'
@@ -78,7 +78,7 @@
     vel_y = vel_y
     mu = ${mu}
     pressure = pressure
-    principal_direction = '0 -1 0'
+    principal_direction = '0 1 0'
     boundary = 'circle'
     outputs = none
     execute_on = 'INITIAL TIMESTEP_END'
