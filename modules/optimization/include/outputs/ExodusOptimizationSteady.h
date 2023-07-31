@@ -33,9 +33,9 @@ protected:
   virtual void incrementFileCounter() override;
 
   /**
-   * Get time step for output.
+   * Get time for output (i.e. iteration number for optimization solves).
    */
-  virtual Real getTimeStepForOutput() override;
+  virtual Real getOutputTime() override;
 
 private:
   /// For steady (and steady and adjoint) executioner

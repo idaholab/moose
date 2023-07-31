@@ -315,10 +315,10 @@ Exodus::outputNodalVariables()
   // Write the data via libMesh::ExodusII_IO
   if (_discontinuous)
     _exodus_io_ptr->write_timestep_discontinuous(
-        filename(), *_es_ptr, _exodus_num, getTimeStepForOutput() + _app.getGlobalTimeOffset());
+        filename(), *_es_ptr, _exodus_num, getOutputTime() + _app.getGlobalTimeOffset());
   else
     _exodus_io_ptr->write_timestep(
-        filename(), *_es_ptr, _exodus_num, getTimeStepForOutput() + _app.getGlobalTimeOffset());
+        filename(), *_es_ptr, _exodus_num, getOutputTime() + _app.getGlobalTimeOffset());
 
   if (!_overwrite)
     _exodus_num++;
@@ -511,7 +511,7 @@ Exodus::outputEmptyTimestep()
   // Write a timestep with no variables
   _exodus_io_ptr->set_output_variables(std::vector<std::string>());
   _exodus_io_ptr->write_timestep(
-      filename(), *_es_ptr, _exodus_num, getTimeStepForOutput() + _app.getGlobalTimeOffset());
+      filename(), *_es_ptr, _exodus_num, getOutputTime() + _app.getGlobalTimeOffset());
 
   if (!_overwrite)
     _exodus_num++;
@@ -536,10 +536,4 @@ Exodus::handleExodusIOMeshRenumbering()
     _problem_ptr->meshChanged();
     _mesh_contiguous_numbering = true;
   }
-}
-
-Real
-Exodus::getTimeStepForOutput()
-{
-  return time();
 }

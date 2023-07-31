@@ -37,7 +37,7 @@ ExodusOptimizationSteady::incrementFileCounter()
 }
 
 Real
-ExodusOptimizationSteady::getTimeStepForOutput()
+ExodusOptimizationSteady::getOutputTime()
 {
   return _steady_exec->getIterationNumberOutput();
 }

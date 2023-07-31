@@ -102,13 +102,15 @@ TableOutput::outputReporter(const ReporterName & name)
 
   if (_reporter_data.hasReporterValue<T>(name))
   {
-    if (_reporter_table.empty() ||
-        !MooseUtils::absoluteFuzzyEqual(_reporter_table.getLastTime(), time(), _new_row_tol))
-      _reporter_table.addRow(time());
+    if (_reporter_table.empty() || !MooseUtils::absoluteFuzzyEqual(_reporter_table.getLastTime(),
+                                                                   getOutputTime(),
+                                                                   _new_row_tol))
+      _reporter_table.addRow(getOutputTime());
 
-    if (_all_data_table.empty() ||
-        !MooseUtils::absoluteFuzzyEqual(_all_data_table.getLastTime(), time(), _new_row_tol))
-      _all_data_table.addRow(time());
+    if (_all_data_table.empty() || !MooseUtils::absoluteFuzzyEqual(_all_data_table.getLastTime(),
+                                                                   getOutputTime(),
+                                                                   _new_row_tol))
+      _all_data_table.addRow(getOutputTime());
 
     const T & value = _reporter_data.getReporterValue<T>(name);
     _reporter_table.addData<T>(name.getCombinedName(), value);

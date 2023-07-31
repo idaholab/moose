@@ -135,11 +135,6 @@ protected:
   virtual void incrementFileCounter();
 
   /**
-   * Get time step that will be outputted to exodus file.
-   */
-  virtual Real getTimeStepForOutput();
-
-  /**
    * Returns the current filename, this method handles the -s000 suffix
    * common to ExodusII files.
    * @return A string containing the current filename to be written

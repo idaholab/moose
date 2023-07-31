@@ -57,9 +57,10 @@ public:
    * nested solve This output iteration number may be set by the parent app for a sub-app, e.g.
    * OptimizeSolve.
    */
-  virtual void setIterationNumberOutput(unsigned int iteration_number){
-  _output_iteration_number = iteration_number;
-}
+  virtual void setIterationNumberOutput(unsigned int iteration_number)
+  {
+    _output_iteration_number = iteration_number;
+  }
 
 protected:
   FEProblemBase & _problem;

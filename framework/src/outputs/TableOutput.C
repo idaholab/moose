@@ -87,12 +87,13 @@ TableOutput::outputPostprocessors()
 {
   // Add new row to the tables
   if (_postprocessor_table.empty() ||
-      !MooseUtils::absoluteFuzzyEqual(_postprocessor_table.getLastTime(), time(), _new_row_tol))
-    _postprocessor_table.addRow(time());
+      !MooseUtils::absoluteFuzzyEqual(
+          _postprocessor_table.getLastTime(), getOutputTime(), _new_row_tol))
+    _postprocessor_table.addRow(getOutputTime());
 
   if (_all_data_table.empty() ||
-      !MooseUtils::absoluteFuzzyEqual(_all_data_table.getLastTime(), time(), _new_row_tol))
-    _all_data_table.addRow(time());
+      !MooseUtils::absoluteFuzzyEqual(_all_data_table.getLastTime(), getOutputTime(), _new_row_tol))
+    _all_data_table.addRow(getOutputTime());
 
   // List of names of the postprocessors to output
   const std::set<std::string> & out = getPostprocessorOutput();
@@ -222,8 +223,8 @@ TableOutput::outputScalarVariables()
     // If the variable has a single component, simply output the value with the name
     if (dof_size == 1)
     {
-      _scalar_table.addData(out_name, value[0], time());
-      _all_data_table.addData(out_name, value[0], time());
+      _scalar_table.addData(out_name, value[0], getOutputTime());
+      _all_data_table.addData(out_name, value[0], getOutputTime());
     }
 
     // Multi-component variables are appended with the component index
@@ -232,8 +233,8 @@ TableOutput::outputScalarVariables()
       {
         std::ostringstream os;
         os << out_name << "_" << i;
-        _scalar_table.addData(os.str(), value[i], time());
-        _all_data_table.addData(os.str(), value[i], time());
+        _scalar_table.addData(os.str(), value[i], getOutputTime());
+        _all_data_table.addData(os.str(), value[i], getOutputTime());
       }
 
     // If we ended up reallocating, we'll need to release memory or leak it
