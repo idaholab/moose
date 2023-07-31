@@ -131,6 +131,11 @@ public:
     return false;
   }
 
+  /**
+   * Return the parallel communicator
+   */
+  libMesh::Parallel::Communicator & getLocalComm() { return _local_comm; }
+
 protected:
   /**
    * Enum describing the type of parallel communication to perform.
