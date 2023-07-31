@@ -105,7 +105,7 @@ PenaltyMortarUserObjectAux::computeValue()
         return pfuo->getFrictionalContactPressure(_current_node, 1);
       else
         paramError("user_object",
-                   "The 'tangential_pressure_one' quantity is only provided by a "
+                   "The 'tangential_pressure_two' quantity is only provided by a "
                    "'PenaltyFrictionUserObject' or derived object.");
 
     case ContactQuantityEnum::ACCUMULATED_SLIP_TWO:

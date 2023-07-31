@@ -10,9 +10,11 @@
 #include "Moose.h"
 #include "Material.h"
 #include "DenseMatrix.h"
+#include "ADReal.h"
 
 #include "libmesh/dense_vector.h"
 #include "gtest_include.h"
+#include "Eigen/Dense"
 
 #include <vector>
 
@@ -57,4 +59,14 @@ TEST(ADTypesTest, vector_DenseVector_Real)
   v2(2) = 3;
   auto val = v1.dot(v2);
   EXPECT_EQ(14.0, val);
+}
+
+TEST(ADTypesTest, EigenMatrix_ADReal)
+{
+  Eigen::Matrix<ADReal, 3, 3> m1;
+  m1 << 1, 2, 3, 4, 5, 6, 7, 8, 9;
+
+  const Eigen::Matrix<Real, 3, 3> m2 = MetaPhysicL::raw_value(m1);
+
+  EXPECT_EQ((m1 - m2).norm(), 0.0);
 }
