@@ -22,8 +22,8 @@ namespace BatchMaterialUtils
 {
 
 // type wrappers
-template <typename T>
-struct GatherMatProp
+template <typename T, unsigned int state>
+struct GatherMatPropTempl
 {
   typedef T type;
   typedef const MaterialProperty<T> gather_type;
@@ -31,22 +31,14 @@ struct GatherMatProp
   template <typename M>
   static gather_type * getPointer(M & mpi, const MaterialPropertyName & name)
   {
-    return &mpi.template getMaterialProperty<T>(name);
+    return &mpi.template getGenericMaterialProperty<T, false>(name, state);
   }
 };
 
 template <typename T>
-struct GatherMatPropOld
-{
-  typedef T type;
-  typedef const MaterialProperty<T> gather_type;
-
-  template <typename M>
-  static gather_type * getPointer(M & mpi, const MaterialPropertyName & name)
-  {
-    return &mpi.template getMaterialPropertyOld<T>(name);
-  }
-};
+using GatherMatProp = GatherMatPropTempl<T, 0>;
+template <typename T>
+using GatherMatPropOld = GatherMatPropTempl<T, 1>;
 
 struct GatherVariable
 {
