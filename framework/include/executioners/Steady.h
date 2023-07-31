@@ -46,13 +46,20 @@ public:
   virtual bool lastSolveConverged() const override { return _last_solve_converged; }
 
   /**
-   * Get optimization iteration number from main app (when Steady solves an optimization problem)
+   * Get a general iteration number for the purpose of outputting, useful in the presence of a
+   * nested solve This output iteration number may be set by the parent app for a sub-app. This
+   * behavior is decided by the Executioner/Executor/SolveObject in charge of the solve.
    */
-  virtual unsigned int getIterationNumberOutput() const;
+  virtual unsigned int getIterationNumberOutput() const { return _output_iteration_number; }
+
   /**
-   * Set optimization iteration number from main app (when Steady solves an optimization problem)
+   * Set a general iteration number for the purpose of outputting, useful in the presence of a
+   * nested solve This output iteration number may be set by the parent app for a sub-app, e.g.
+   * OptimizeSolve.
    */
-  virtual void setIterationNumberOutput(unsigned int iteration_number);
+  virtual void setIterationNumberOutput(unsigned int iteration_number){
+  _output_iteration_number = iteration_number;
+}
 
 protected:
   FEProblemBase & _problem;
@@ -64,7 +71,7 @@ protected:
   Real & _time;
 
   /// Iteration number obtained from the main application
-  unsigned int _optimization_iteration_number;
+  unsigned int _output_iteration_number;
 
 private:
   bool _last_solve_converged;

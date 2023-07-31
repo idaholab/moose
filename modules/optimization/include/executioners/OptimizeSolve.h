@@ -149,9 +149,6 @@ private:
   /// Parameters (solution)
   std::unique_ptr<libMesh::PetscVector<Number>> _parameters;
 
-  /// Optimization teration number
-  unsigned int _optimize_iteration_number;
-
   /// Hessian (matrix) - usually a matrix-free representation
   Mat _hessian;
 };

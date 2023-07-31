@@ -42,8 +42,7 @@ OptimizeSolve::OptimizeSolve(Executioner & ex)
     _solve_on(getParam<ExecFlagEnum>("solve_on")),
     _verbose(getParam<bool>("verbose")),
     _tao_solver_enum(getParam<MooseEnum>("tao_solver").getEnum<TaoSolverEnum>()),
-    _parameters(std::make_unique<libMesh::PetscVector<Number>>(_my_comm)),
-    _optimize_iteration_number(0)
+    _parameters(std::make_unique<libMesh::PetscVector<Number>>(_my_comm))
 {
   if (libMesh::n_threads() > 1)
     mooseError("OptimizeSolve does not currently support threaded execution");
@@ -253,14 +252,13 @@ OptimizeSolve::setTaoSolutionStatus(double f, int its, double gnorm, double cnor
   _obj_iterate = 0;
   _grad_iterate = 0;
   _hess_iterate = 0;
-  _optimize_iteration_number = (unsigned int)its;
 
   // Pass down the iteration number if the subapp is of the Steady/SteadyAndAdjoint type.
   // This enables exodus per-iteration output.
   for (auto & sub_app : _app.getExecutioner()->feProblem().getMultiAppWarehouse().getObjects())
   {
     if (auto steady = dynamic_cast<Steady *>(sub_app->getExecutioner(0)))
-      steady->setIterationNumberOutput(_optimize_iteration_number);
+      steady->setIterationNumberOutput((unsigned int)its);
   }
 
   // print verbose per iteration output
