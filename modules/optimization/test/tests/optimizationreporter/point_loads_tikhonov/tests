@@ -6,7 +6,8 @@
     max_threads = 1
     rel_err = 0.1
     abs_zero = 10
-    input = main1.i
+    input = main.i
+    cli_args = "OptimizationReporter/initial_condition='1000 1000 1000'"
     csvdiff = main_out_OptimizationReporter_0001.csv
     requirement = "optimization results should be independent of starting point"
                   "with regularization."
