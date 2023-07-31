@@ -70,9 +70,13 @@
 []
 
 [Postprocessors]
-  [average]
+  [average1]
     type = ElementAverageMaterialProperty
-    mat_prop = batch_out
+    mat_prop = batch_out1
+  []
+  [average2]
+    type = ElementAverageMaterialProperty
+    mat_prop = batch_out2
   []
 []
 

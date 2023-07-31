@@ -29,6 +29,9 @@ BatchMaterialTest::BatchMaterialTest(const InputParameters & params)
         // in the same order as in the template parameter pack
         "var1",
         "prop1",
+        "prop2",
+        "var1",
+        "prop1",
         "prop2")
 {
 }
@@ -42,10 +45,10 @@ BatchMaterialTest::batchCompute()
     const auto & input = _input_data[i];
     auto & output = _output_data[i];
 
-    const auto & var1 = std::get<0>(input);
-    const auto & prop1 = std::get<1>(input);
-    const auto & prop2 = std::get<2>(input);
+    const auto & [var1, prop1, prop2, var1_n, prop1_n, prop2_n] = input;
+    auto & [out1, out2] = output;
 
-    output = var1 * prop1.L2norm() + prop2;
+    out1 = 5 * (var1 * prop1.L2norm() + prop2);
+    out2 = 3 * (var1_n - prop1_n.trace() * prop2_n);
   }
 }
