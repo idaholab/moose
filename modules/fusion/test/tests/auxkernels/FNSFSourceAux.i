@@ -1,7 +1,8 @@
 [Mesh]
   [msh]
     type = FileMeshGenerator
-    file = 'Blanket_mesh.msh'
+    file = '../Franklin_Blanket.msh'
+    construct_side_list_from_node_list = true
   []
 []
 
@@ -41,18 +42,18 @@
 []
 
 [BCs]
-  #[LeftBC]
-    #type = NeumannBC
-    #variable = temp
-    #boundary = 'left'
-    #value = 1
-  #[]
-  #[RightBC]
-    #type = DirichletBC
-    #variable = temp
-    #boundary = 'right'
-    #value = 1
-  #[]
+  [front]
+    type = DirichletBC
+    variable = temp
+    boundary = 'front'
+    value = 1
+  []
+  [back]
+    type = DirichletBC
+    variable = temp
+    boundary = 'back'
+    value = 2
+  []
 []
 
 [Materials]
@@ -74,9 +75,9 @@
   [power]
     type = FNSFSourceAux
     variable = power_density
-    inner_xi = '-30 -15 15 30'
-    outer_xi = '-35 -20 20 35'
-    depth = '0.46 1 1.4'
-    source = '1e5 1e5 1e5 1e6 1e6 1e6'
+    inner_xi = '-60 -30 -15 15 30 60'
+    outer_xi = '-65 -35 -20 20 35 65'
+    depth = '1 1.8 1.17'
+    source = '1 1 1 1 1 2 2 2 2 2'
   []
 []
