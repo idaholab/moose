@@ -1,20 +1,21 @@
 # ShaftTimeDerivativeScalarKernel
 
-!alert construction title=Undocumented Class
-The ShaftTimeDerivativeScalarKernel has not been documented. The content listed below should be used as a starting point for
-documenting the class, which includes the typical automatic documentation associated with a
-MooseObject; however, what is contained is ultimately determined by what is necessary to make the
-documentation clear for users.
-
 !syntax description /ScalarKernels/ShaftTimeDerivativeScalarKernel
 
-## Overview
+The momentum equation time derivative term is expressed in terms of the sum of the moment of inertia of the
+connected shafts $L_{sum}$ :
 
-!! Replace these lines with information regarding the ShaftTimeDerivativeScalarKernel object.
+!equation
+L_{sum} \dfrac{du}{dt}
 
-## Example Input File Syntax
+!alert note
+The time integration scheme will be shared with the other non-linear variables,
+as specified in the [TimeIntegrator](syntax/Executioner/TimeIntegrator/index.md).
+To use a different time integrating scheme, this scalar kernel should be replaced with a custom implementation.
 
-!! Describe and include an example of how to use the ShaftTimeDerivativeScalarKernel object.
+!alert note
+In THM, most kernels are added automatically by components. This scalar kernel is created by the
+[Shaft.md] component.
 
 !syntax parameters /ScalarKernels/ShaftTimeDerivativeScalarKernel
 
