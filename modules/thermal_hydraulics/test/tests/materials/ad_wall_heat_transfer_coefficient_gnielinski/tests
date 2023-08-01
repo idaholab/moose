@@ -1,0 +1,33 @@
+[Tests]
+  design = 'ADWallHeatTransferCoefficientGnielinskiMaterial.md'
+  issues = '#24340'
+  [normal_operation]
+    requirement = "The system shall compute the heat transfer coefficient using the Gnielinski "
+                  "correlation for the Nusselt number"
+    type = 'CSVDiff'
+    input = 'gnielinski_test.i'
+    csvdiff = 'gnielinski_test_out.csv'
+  []
+  [warnings]
+    requirement = "The system shall return a warning message when the Gnielinski correlation is used "
+                  "with: "
+    [Re_of_range_warning]
+      type = 'RunException'
+      input = 'gnielinski_test.i'
+      cli_args = "D_h=0.03"
+      expect_err = "The Gnielinski correlation is valid when Pr is between 0.5 and 2000, and Re is "
+                   "between 2300 and 5000000.  Be aware that using values out of this range may lead "
+                   "to significant errors in your results!"
+      detail = 'Reynolds number out of bonds, or'
+    []
+    [Pr_of_range_warning]
+      type = 'RunException'
+      input = 'gnielinski_test.i'
+      cli_args = "cp=2000"
+      expect_err = "The Gnielinski correlation is valid when Pr is between 0.5 and 2000, and Re is "
+                   "between 2300 and 5000000.  Be aware that using values out of this range may lead "
+                   "to significant errors in your results!"
+      detail = 'Prandtl out of bonds.'
+    []
+  []
+[]
