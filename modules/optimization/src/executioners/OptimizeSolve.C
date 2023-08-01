@@ -22,7 +22,6 @@ OptimizeSolve::validParams()
                             "taoblmvm taonm taobqnls taoowlqn taogpcg taobmrm");
   params.addRequiredParam<MooseEnum>(
       "tao_solver", tao_solver_enum, "Tao solver to use for optimization.");
-  params.addParam<Real>("tikhonov_coeff", 0.0, "Coefficient for Tikhonov Regularization.");
   ExecFlagEnum exec_enum = ExecFlagEnum();
   exec_enum.addAvailableFlags(EXEC_NONE,
                               OptimizationAppTypes::EXEC_FORWARD,
@@ -42,8 +41,7 @@ OptimizeSolve::OptimizeSolve(Executioner & ex)
     _solve_on(getParam<ExecFlagEnum>("solve_on")),
     _verbose(getParam<bool>("verbose")),
     _tao_solver_enum(getParam<MooseEnum>("tao_solver").getEnum<TaoSolverEnum>()),
-    _parameters(std::make_unique<libMesh::PetscVector<Number>>(_my_comm)),
-    _tikhonov_parameter(getParam<Real>("tikhonov_coeff"))
+    _parameters(std::make_unique<libMesh::PetscVector<Number>>(_my_comm))
 {
   if (libMesh::n_threads() > 1)
     mooseError("OptimizeSolve does not currently support threaded execution");
@@ -281,7 +279,7 @@ OptimizeSolve::objectiveFunctionWrapper(Tao /*tao*/, Vec x, Real * objective, vo
   libMesh::PetscVector<Number> param(x, solver->_my_comm);
   *solver->_parameters = param;
 
-  (*objective) = solver->objectiveFunction(param);
+  (*objective) = solver->objectiveFunction();
   return 0;
 }
 
@@ -294,11 +292,11 @@ OptimizeSolve::objectiveAndGradientFunctionWrapper(
   libMesh::PetscVector<Number> param(x, solver->_my_comm);
   *solver->_parameters = param;
 
-  (*objective) = solver->objectiveFunction(param);
+  (*objective) = solver->objectiveFunction();
 
   libMesh::PetscVector<Number> grad(gradient, solver->_my_comm);
 
-  solver->gradientFunction(param, grad);
+  solver->gradientFunction(grad);
   return 0;
 }
 
@@ -336,7 +334,7 @@ OptimizeSolve::variableBoundsWrapper(Tao tao, Vec /*xl*/, Vec /*xu*/, void * ctx
 }
 
 Real
-OptimizeSolve::objectiveFunction(const libMesh::PetscVector<Number> & param)
+OptimizeSolve::objectiveFunction()
 {
   TIME_SECTION("objectiveFunction", 2, "Objective forward solve");
   _obj_function->updateParameters(*_parameters.get());
@@ -350,14 +348,11 @@ OptimizeSolve::objectiveFunction(const libMesh::PetscVector<Number> & param)
     _inner_solve->solve();
 
   _obj_iterate++;
-  double main_part = _obj_function->computeObjective();
-  double param_norm = param.l2_norm();
-  return main_part + 0.5 * _tikhonov_parameter * param_norm * param_norm;
+  return _obj_function->computeObjective();
 }
 
 void
-OptimizeSolve::gradientFunction(const libMesh::PetscVector<Number> & param,
-                                libMesh::PetscVector<Number> & gradient)
+OptimizeSolve::gradientFunction(libMesh::PetscVector<Number> & gradient)
 {
   TIME_SECTION("gradientFunction", 2, "Gradient adjoint solve");
   _obj_function->updateParameters(*_parameters.get());
@@ -371,7 +366,6 @@ OptimizeSolve::gradientFunction(const libMesh::PetscVector<Number> & param,
 
   _grad_iterate++;
   _obj_function->computeGradient(gradient);
-  gradient.add(_tikhonov_parameter, param);
 }
 
 PetscErrorCode
@@ -404,10 +398,6 @@ OptimizeSolve::applyHessian(libMesh::PetscVector<Number> & s, libMesh::PetscVect
     _inner_solve->solve();
 
   _obj_function->computeGradient(Hs);
-  // If this is to be moved to Optimization Reporter, do the following
-  // reporter->computeHsForRegularizer(s,Hs_reg);
-  // Hs.add(1.0,Hs_reg);
-  Hs.add(_tikhonov_parameter, s);
   _hess_iterate++;
   return 0;
 }

@@ -1,6 +1,6 @@
 [Tests]
-  issues = '#21885'
-  design = 'ReporterPointSource.md'
+  issues = '#21885 #24101'
+  design = 'ReporterPointSource.md OptimizationReporter/index.md'
   [point_loads]
     requirement = "The system shall be able to invert for point loads using"
     [hessian]
@@ -17,9 +17,20 @@
       recover = false
       detail = 'Hessian-based optimization,'
     []
+    [hessian_reg]
+      type = CSVDiff
+      input = "main.i regularization_for_main.i"
+      csvdiff = main_out_reg_OptimizationReporter_0001.csv
+      max_threads = 1 # Optimize executioner does not support multiple threads
+      rel_err = 0.1
+      abs_zero = 10
+      # steady solve
+      recover = false
+      detail = 'ill-posed Hessian-based optimization with Tikhonov regularization,'
+    []
     [adjoint]
       type = CSVDiff
-      input = main.i
+      input =main.i
       cli_args = "Executioner/tao_solver=taolmvm "
                  "Executioner/petsc_options_iname='-tao_gttol' "
                  "Executioner/petsc_options_value='1e-5'"
@@ -29,7 +40,21 @@
       abs_zero = 10
       # steady solve
       recover = false
-      detail = "gradient-based optimization, or"
+      detail = 'gradient-based optimization, '
+    []
+    [adjoint_reg]
+      type = CSVDiff
+      input = "main.i regularization_for_main.i"
+      cli_args = "Executioner/tao_solver=taolmvm "
+                 "Executioner/petsc_options_iname='-tao_gttol' "
+                 "Executioner/petsc_options_value='1e-5'"
+      csvdiff = main_out_reg_OptimizationReporter_0001.csv
+      max_threads = 1 # Optimize executioner does not support multiple threads
+      rel_err = 0.1
+      abs_zero = 10
+      # steady solve
+      recover = false
+      detail = 'ill-posed gradient-based optimization with Tikhonov regularization, '
     []
     [auto_adjoint]
       type = CSVDiff
@@ -41,7 +66,19 @@
       abs_zero = 10
       # steady solve
       recover = false
-      detail = 'gradient-based optimization with an automatically computed adjoint.'
+      detail = 'gradient-based optimization with an automatically computed adjoint, or '
+    []
+    [auto_adjoint_reg]
+      type = CSVDiff
+      cli_args = "OptimizationReporter/initial_condition='1000 1000 1000'"
+      input = 'main_auto_adjoint.i regularization_for_main.i'
+      csvdiff = main_out_reg_OptimizationReporter_0001.csv
+      max_threads = 1 # Optimize executioner does not support multiple threads
+      rel_err = 0.1
+      abs_zero = 10
+      # steady solve
+      recover = false
+      detail = 'gradient-based optimization with an automatically computed adjoint, with Tikhonov regularization, and initial conditions do not affect the converged regularized solution.'
     []
   []
 []
