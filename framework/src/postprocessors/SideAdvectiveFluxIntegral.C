@@ -77,37 +77,38 @@ template <bool is_ad>
 Real
 SideAdvectiveFluxIntegralTempl<is_ad>::computeFaceInfoIntegral(const FaceInfo * const fi)
 {
-  using MetaPhysicL::raw_value;
-
   mooseAssert(fi, "We should have a face info in " + name());
   mooseAssert(_adv_quant, "We should have an advected quantity in " + name());
 
   const auto state = determineState();
 
   // Get face value for velocity
-  const auto vel_x = raw_value((
-      _vel_x)(Moose::FaceArg({fi, Moose::FV::LimiterType::CentralDifference, true, false, nullptr}),
-              state));
+  const auto vel_x =
+      (_vel_x)(Moose::FaceArg(
+                   {fi, Moose::FV::LimiterType::CentralDifference, true, false, nullptr}),
+               state);
   const auto vel_y =
-      _vel_y ? raw_value((*_vel_y)(
-                   Moose::FaceArg(
-                       {fi, Moose::FV::LimiterType::CentralDifference, true, false, nullptr}),
-                   state))
-             : 0;
+      _vel_y
+          ? ((*_vel_y)(Moose::FaceArg(
+                           {fi, Moose::FV::LimiterType::CentralDifference, true, false, nullptr}),
+                       state))
+          : 0;
   const auto vel_z =
-      _vel_z ? raw_value((*_vel_z)(
-                   Moose::FaceArg(
-                       {fi, Moose::FV::LimiterType::CentralDifference, true, false, nullptr}),
-                   state))
-             : 0;
+      _vel_z
+          ? ((*_vel_z)(Moose::FaceArg(
+                           {fi, Moose::FV::LimiterType::CentralDifference, true, false, nullptr}),
+                       state))
+          : 0;
 
-  const bool elem_is_upwind = RealVectorValue(vel_x, vel_y, vel_z) * _normals[0] >= 0;
-  const auto adv_quant_face = raw_value((*_adv_quant)(
+  auto fi_normal = _current_elem == fi->elemPtr() ? fi->normal() : Point(-fi->normal());
+  const bool elem_is_upwind = RealVectorValue(vel_x, vel_y, vel_z) * fi_normal >= 0;
+
+  const auto adv_quant_face = (*_adv_quant)(
       Moose::FaceArg(
           {fi, Moose::FV::LimiterType::CentralDifference, elem_is_upwind, false, nullptr}),
-      state));
+      state);
 
-  return _normals[0] * adv_quant_face * RealVectorValue(vel_x, vel_y, vel_z);
+  return fi_normal * adv_quant_face * RealVectorValue(vel_x, vel_y, vel_z);
 }
 
 template <bool is_ad>
