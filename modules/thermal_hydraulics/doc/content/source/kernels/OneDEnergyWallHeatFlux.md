@@ -1,20 +1,23 @@
 # OneDEnergyWallHeatFlux
 
-!alert construction title=Undocumented Class
-The OneDEnergyWallHeatFlux has not been documented. The content listed below should be used as a starting point for
-documenting the class, which includes the typical automatic documentation associated with a
-MooseObject; however, what is contained is ultimately determined by what is necessary to make the
-documentation clear for users.
-
 !syntax description /Kernels/OneDEnergyWallHeatFlux
 
-## Overview
+The heat flux contribution to the residual $R_i$ for the weak form is computed as:
 
-!! Replace these lines with information regarding the OneDEnergyWallHeatFlux object.
+\begin{equation}
+R_i = (\psi_i, -q_{wall} P_{hf}) \quad \forall \psi_i,
+\end{equation}
+where $\psi_i$ are the test functions and $q_{wall}$ is the local heat flux, and $P_{hf}$ the
+heated perimeter.
 
-## Example Input File Syntax
+!alert note
+The dependence of the heat flux on any non-linear variable is not considered by this kernel, as such, there
+is no contribution to the Jacobian.
 
-!! Describe and include an example of how to use the OneDEnergyWallHeatFlux object.
+!alert note
+In THM, most kernels are added automatically by components. This kernel is no-longer in use, having
+been replaced by its [AD](automatic_differentiation/index.md) counterpart [ADOneD3EqnEnergyHeatFlux.md],
+designed to provide numerically exact contributions to the Jacobian.
 
 !syntax parameters /Kernels/OneDEnergyWallHeatFlux
 

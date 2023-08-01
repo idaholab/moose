@@ -1,20 +1,17 @@
 # OneD3EqnMomentumFlux
 
-!alert construction title=Undocumented Class
-The OneD3EqnMomentumFlux has not been documented. The content listed below should be used as a starting point for
-documenting the class, which includes the typical automatic documentation associated with a
-MooseObject; however, what is contained is ultimately determined by what is necessary to make the
-documentation clear for users.
-
 !syntax description /Kernels/OneD3EqnMomentumFlux
 
-## Overview
+This kernel implements a momentum advection and pressure gradient flux after an integration by
+parts.
+The contribution to the residual $R_i$ for the weak form of the momentum equation is computed as:
 
-!! Replace these lines with information regarding the OneD3EqnMomentumFlux object.
-
-## Example Input File Syntax
-
-!! Describe and include an example of how to use the OneD3EqnMomentumFlux object.
+\begin{equation}
+R_i = (\nabla \psi_i, -(\rho u^2 + p) A \vec{d}) \quad \forall \psi_i,
+\end{equation}
+where $\nabla \psi_i$ is the gradient of each test function, $\rho$ is the density,
+$A$ the area of the component, $u$ the one-dimensional velocity, $p$ the pressure, and
+$\vec{d}$ the direction of the flow channel.
 
 !syntax parameters /Kernels/OneD3EqnMomentumFlux
 

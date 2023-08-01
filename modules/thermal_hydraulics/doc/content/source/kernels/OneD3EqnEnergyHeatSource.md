@@ -1,20 +1,21 @@
 # OneD3EqnEnergyHeatSource
 
-!alert construction title=Undocumented Class
-The OneD3EqnEnergyHeatSource has not been documented. The content listed below should be used as a starting point for
-documenting the class, which includes the typical automatic documentation associated with a
-MooseObject; however, what is contained is ultimately determined by what is necessary to make the
-documentation clear for users.
-
 !syntax description /Kernels/OneD3EqnEnergyHeatSource
 
-## Overview
+The local heat source in the energy equation strong form is:
 
-!! Replace these lines with information regarding the OneD3EqnEnergyHeatSource object.
+!equation
+q(\vec{x}, t) A
 
-## Example Input File Syntax
+where $q$ is a volumetric heat source, a [Function](syntax/Functions/index.md) of space and time and $A$ is the local area of the component.
 
-!! Describe and include an example of how to use the OneD3EqnEnergyHeatSource object.
+!alert warning
+If the heat source function spatial shape is not integrated exactly by the quadrature, this will lead
+to non-conservation of energy.
+
+!alert note
+In THM, most kernels are added automatically by components. This kernel is created to add volumetric heat sources
+by the [HeatSourceVolumetric1Phase.md].
 
 !syntax parameters /Kernels/OneD3EqnEnergyHeatSource
 

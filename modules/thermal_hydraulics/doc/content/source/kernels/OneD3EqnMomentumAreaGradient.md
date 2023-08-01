@@ -1,20 +1,19 @@
 # OneD3EqnMomentumAreaGradient
 
-!alert construction title=Undocumented Class
-The OneD3EqnMomentumAreaGradient has not been documented. The content listed below should be used as a starting point for
-documenting the class, which includes the typical automatic documentation associated with a
-MooseObject; however, what is contained is ultimately determined by what is necessary to make the
-documentation clear for users.
-
 !syntax description /Kernels/OneD3EqnMomentumAreaGradient
 
-## Overview
+The area gradient term, a form loss, in the momentum equation strong form is:
 
-!! Replace these lines with information regarding the OneD3EqnMomentumAreaGradient object.
+!equation
+-P \nabla A \cdot \vec{d}
 
-## Example Input File Syntax
+where $\nabla A$ the area of the component, $P$ the pressure and $\vec{d}$ the direction of the flow
+channel.
 
-!! Describe and include an example of how to use the OneD3EqnMomentumAreaGradient object.
+!alert note
+In THM, most kernels are added automatically by components. This kernel is no-longer in use, having
+been replaced by its [AD](automatic_differentiation/index.md) counterpart [ADOneD3EqnMomentumAreaGradient.md],
+designed to provide numerically exact contributions to the Jacobian.
 
 !syntax parameters /Kernels/OneD3EqnMomentumAreaGradient
 
