@@ -1,4 +1,4 @@
-# AdaptiveImportanceSamplerActiveLearning (AISActiveLearning)
+# AISActiveLearning (AISActiveLearning)
 
 !syntax description /Samplers/AISActiveLearning
 

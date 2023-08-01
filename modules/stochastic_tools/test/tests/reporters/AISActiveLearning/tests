@@ -1,6 +1,6 @@
 [Tests]
   issues = "#23142"
-  design = "AdaptiveImportanceSamplerActiveLearning.md"
+  design = "AISActiveLearning.md"
   [sampling]
     requirement = 'The system shall be able to perform importance sampling with active learning while'
     [ais_al_uval]

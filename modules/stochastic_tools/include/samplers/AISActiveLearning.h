@@ -16,10 +16,10 @@
  * A class used to perform Adaptive Importance Sampling using a Markov Chain Monte Carlo algorithm
  * and Gaussian Process active learning
  */
-class AdaptiveImportanceSamplerActiveLearning : public AdaptiveImportanceSampler
+class AISActiveLearning : public AdaptiveImportanceSampler
 {
 public:
   static InputParameters validParams();
 
-  AdaptiveImportanceSamplerActiveLearning(const InputParameters & parameters);
+  AISActiveLearning(const InputParameters & parameters);
 };

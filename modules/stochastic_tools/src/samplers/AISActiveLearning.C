@@ -7,22 +7,19 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "AdaptiveImportanceSamplerActiveLearning.h"
+#include "AISActiveLearning.h"
 
-registerMooseObjectAliased("StochasticToolsApp",
-                           AdaptiveImportanceSamplerActiveLearning,
-                           "AISActiveLearning");
+registerMooseObject("StochasticToolsApp", AISActiveLearning);
 
 InputParameters
-AdaptiveImportanceSamplerActiveLearning::validParams()
+AISActiveLearning::validParams()
 {
   InputParameters params = AdaptiveImportanceSampler::validParams();
   params.addClassDescription("Adaptive Importance Sampler with Gaussian Process Active Learning.");
   return params;
 }
 
-AdaptiveImportanceSamplerActiveLearning::AdaptiveImportanceSamplerActiveLearning(
-    const InputParameters & parameters)
+AISActiveLearning::AISActiveLearning(const InputParameters & parameters)
   : AdaptiveImportanceSampler(parameters)
 {
 }

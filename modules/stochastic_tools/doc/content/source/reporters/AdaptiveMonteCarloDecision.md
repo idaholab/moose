@@ -35,7 +35,7 @@ The following adaptive Monte Carlo samplers have been implemented in MOOSE:
 - +Active Learning in Adaptive Importance Sampling (AIS-AL)+
 
   Similar to the AIS method, except that instead of calling the full model every time, a Gaussian Process surrogate is called as part
-  of an active learning scheme. See [AdaptiveImportanceSamplerActiveLearning](AdaptiveImportanceSamplerActiveLearning.md) for more information.
+  of an active learning scheme. See [AISActiveLearning](AISActiveLearning.md) for more information.
 
 !syntax parameters /Reporters/AdaptiveMonteCarloDecision
 

@@ -40,11 +40,15 @@ AdaptiveMonteCarloDecision::AdaptiveMonteCarloDecision(const InputParameters & p
                                                     "output_value", REPORTER_MODE_DISTRIBUTED)),
     _output_required(declareValue<std::vector<Real>>("output_required")),
     _inputs(declareValue<std::vector<std::vector<Real>>>("inputs")),
-    _step(getCheckedPointerParam<FEProblemBase *>("_fe_problem_base")->timeStep()),
     _sampler(getSampler("sampler")),
     _ais(dynamic_cast<const AdaptiveImportanceSampler *>(&_sampler)),
     _pss(dynamic_cast<const ParallelSubsetSimulation *>(&_sampler)),
-    _check_step(std::numeric_limits<int>::max())
+    _check_step(std::numeric_limits<int>::max()),
+    _local_comm(_sampler.getLocalComm()),
+    _gp_used(isParamValid("gp_decision")),
+    _gp_training_samples(
+        _gp_used ? &getUserObject<ActiveLearningGPDecision>("gp_decision").getTrainingSamples()
+                 : nullptr)
 {
 
   // Check whether the selected sampler is an adaptive sampler or not
@@ -54,18 +58,11 @@ AdaptiveMonteCarloDecision::AdaptiveMonteCarloDecision(const InputParameters & p
   const auto rows = _sampler.getNumberOfRows();
   const auto cols = _sampler.getNumberOfCols();
 
-  // Create communicator that only has processors with rows
-  _communicator.split(
-      _sampler.getNumberOfLocalRows() > 0 ? 1 : MPI_UNDEFINED, processor_id(), _local_comm);
-
   // Initialize the required variables depending upon the type of adaptive Monte Carlo algorithm
   _inputs.resize(cols, std::vector<Real>(rows));
   _prev_val.resize(cols, std::vector<Real>(rows));
   _output_required.resize(rows);
   _prev_val_out.resize(rows);
-
-  // Check if GP is used as part of active learning
-  _gp_used = isParamValid("gp_decision") ? true : false;
 
   if (_ais)
   {
@@ -95,9 +92,9 @@ AdaptiveMonteCarloDecision::reinitChain()
 void
 AdaptiveMonteCarloDecision::execute()
 {
-  if (_sampler.getNumberOfLocalRows() == 0 || _check_step == _step)
+  if (_sampler.getNumberOfLocalRows() == 0 || _check_step == _t_step)
   {
-    _check_step = _step;
+    _check_step = _t_step;
     return;
   }
 
@@ -106,28 +103,20 @@ AdaptiveMonteCarloDecision::execute()
   if (_ais)
   {
     const Real tmp = _ais->getUseAbsoluteValue() ? std::abs(_output_value[0]) : _output_value[0];
-    bool output_limit_reached;
 
     /* Checking whether a GP surrogate is used. If it is used, importance sampling is not performed
     during the training phase of the GP and all proposed samples are accepted until the training
     phase is completed. Once the training is completed, the importance sampling starts.
     If a GP surrogate is not used, the standard proposal and acceptance/rejection is performed as
     part of the importance sampling. */
-    bool restart_gp = 0;
-    output_limit_reached = tmp >= _output_limit;
-    if (_gp_used)
-    {
-      const int training_samples =
-          getUserObject<ActiveLearningGPDecision>("gp_decision").getTrainingSamples();
-      restart_gp = _step == training_samples;
-      output_limit_reached = 1.0;
-      if (restart_gp)
-        reinitChain();
-    }
+    const bool restart_gp = _gp_used && _t_step == *_gp_training_samples;
+    const bool output_limit_reached = _gp_used || tmp >= _output_limit;
+    if (restart_gp)
+      reinitChain();
 
     _output_required[0] = output_limit_reached ? 1.0 : 0.0;
 
-    if (_step <= _ais->getNumSamplesTrain() && !restart_gp)
+    if (_t_step <= _ais->getNumSamplesTrain() && !restart_gp)
     {
       /* This is the training phase of the Adaptive Importance Sampling algorithm.
         Here, it is decided whether or not to accept a proposed sample by the
@@ -139,7 +128,7 @@ AdaptiveMonteCarloDecision::execute()
         _prev_val = _inputs;
       _prev_val_out = _output_required;
     }
-    else if (_step > _ais->getNumSamplesTrain() && !restart_gp)
+    else if (_t_step > _ais->getNumSamplesTrain() && !restart_gp)
     {
       /* This is the sampling phase of the Adaptive Importance Sampling algorithm.
         Here, all proposed samples by the AdaptiveImportanceSampler.C sampler are accepted since
@@ -152,9 +141,9 @@ AdaptiveMonteCarloDecision::execute()
   {
     // Track the current subset
     const unsigned int subset =
-        ((_step - 1) * _sampler.getNumberOfRows()) / _pss->getNumSamplesSub();
+        ((_t_step - 1) * _sampler.getNumberOfRows()) / _pss->getNumSamplesSub();
     const unsigned int sub_ind =
-        (_step - 1) - (_pss->getNumSamplesSub() / _sampler.getNumberOfRows()) * subset;
+        (_t_step - 1) - (_pss->getNumSamplesSub() / _sampler.getNumberOfRows()) * subset;
     const unsigned int offset = sub_ind * _sampler.getNumberOfRows();
     const unsigned int count_max = 1 / _pss->getSubsetProbability();
 
@@ -229,5 +218,5 @@ AdaptiveMonteCarloDecision::execute()
     }
   }
   // Track the current step
-  _check_step = _step;
+  _check_step = _t_step;
 }

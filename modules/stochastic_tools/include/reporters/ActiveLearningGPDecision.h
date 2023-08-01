@@ -21,7 +21,7 @@ public:
   static InputParameters validParams();
   ActiveLearningGPDecision(const InputParameters & parameters);
 
-  // Access the number of training samples
+  /// Access the number of training samples
   const int & getTrainingSamples() const { return _n_train; }
 
 protected:
@@ -68,9 +68,6 @@ private:
    * @return bool Whether a full order model evaluation is required
    */
   bool facilitateDecision();
-
-  /// Track the current step of the main App
-  const int & _step;
 
   /// The learning function for active learning
   const MooseEnum & _learning_function;
