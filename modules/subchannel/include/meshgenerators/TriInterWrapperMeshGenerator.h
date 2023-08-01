@@ -54,6 +54,8 @@ protected:
   Real _flat_to_flat;
   /// the gap thickness between the duct and peripheral fuel rods
   Real _duct_to_rod_gap;
+  /// whether the side bypass shape follows the assemblies
+  const bool _tight_side_bypass;
 
   /// nodes
   std::vector<std::vector<Node *>> _nodes;
