@@ -485,12 +485,11 @@ LiquidMetalInterWrapper1PhaseProblem::computeh(int iblock)
 
       if (h_out < 0)
       {
-        _console << "Wij = : " << _Wij << "\n";
-        mooseError(name(),
-                   " : Calculation of negative Enthalpy h_out = : ",
-                   h_out,
-                   " Axial Level= : ",
-                   iz);
+        mooseWarning(name(),
+                     " : Calculation of negative Enthalpy h_out = : ",
+                     h_out,
+                     " Axial Level= : ",
+                     iz);
       }
       _h_soln->set(node_out, h_out); // J/kg
     }
