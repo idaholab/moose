@@ -37,6 +37,8 @@ TriInterWrapperMeshGenerator::validParams()
   params.addParam<Real>("Kij", 0.5, "Lateral form loss coefficient [-]");
   params.addRequiredParam<Real>("side_bypass",
                                 "Extra size of the bypass for the side assemblies [m]");
+  params.addParam<bool>(
+      "tight_side_bypass", false, "Whether the side bypass shape follows the assemblies");
   return params;
 }
 
@@ -50,7 +52,8 @@ TriInterWrapperMeshGenerator::TriInterWrapperMeshGenerator(const InputParameters
     _n_cells(getParam<unsigned int>("n_cells")),
     _n_rings(getParam<unsigned int>("nrings")),
     _flat_to_flat(getParam<Real>("flat_to_flat")),
-    _duct_to_rod_gap(getParam<Real>("side_bypass"))
+    _duct_to_rod_gap(getParam<Real>("side_bypass")),
+    _tight_side_bypass(getParam<bool>("tight_side_bypass"))
 {
 
   InterWrapperMesh::generateZGrid(
@@ -600,7 +603,10 @@ TriInterWrapperMeshGenerator::TriInterWrapperMeshGenerator(const InputParameters
                     _rod_position[_subchannel_to_rod_map[i][1]](0));
         y1 = 0.5 * (_rod_position[_subchannel_to_rod_map[i][0]](1) +
                     _rod_position[_subchannel_to_rod_map[i][1]](1));
-        a1 = _flat_to_flat / 2.0 + _duct_to_rod_gap / 2.0;
+        if (_tight_side_bypass)
+          a1 = _flat_to_flat * std::tan(libMesh::pi / 6.0) / 2.0 + _duct_to_rod_gap / 2.0;
+        else
+          a1 = _flat_to_flat / 2.0 + _duct_to_rod_gap / 2.0;
         a2 = std::sqrt((x1 - x0) * (x1 - x0) + (y1 - y0) * (y1 - y0)) + a1;
         _subchannel_position[i][0] = (a2 * x1 - a1 * x0) / (a2 - a1);
         _subchannel_position[i][1] = (a2 * y1 - a1 * y0) / (a2 - a1);
@@ -709,6 +715,7 @@ TriInterWrapperMeshGenerator::generate()
   sch_mesh->_gap_type = _gap_type;
   sch_mesh->_gap_pairs_sf = _gap_pairs_sf;
   sch_mesh->_chan_pairs_sf = _chan_pairs_sf;
+  sch_mesh->_tight_side_bypass = _tight_side_bypass;
 
   // Overloading assembly sides with flat_to_flat distance
   sch_mesh->_assembly_side_x = _flat_to_flat;

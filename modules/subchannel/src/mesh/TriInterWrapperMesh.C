@@ -56,7 +56,8 @@ TriInterWrapperMesh::TriInterWrapperMesh(const TriInterWrapperMesh & other_mesh)
     _gap_type(other_mesh._gap_type),
     _gap_pairs_sf(other_mesh._gap_pairs_sf),
     _chan_pairs_sf(other_mesh._chan_pairs_sf),
-    _pin_to_chan_map(other_mesh._pin_to_chan_map)
+    _pin_to_chan_map(other_mesh._pin_to_chan_map),
+    _tight_side_bypass(other_mesh._tight_side_bypass)
 {
 }
 

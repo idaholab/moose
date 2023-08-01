@@ -101,6 +101,8 @@ public:
     return _subchannel_to_rod_map[i_chan];
   }
 
+  virtual const bool & getIsTightSide() const { return _tight_side_bypass; }
+
   virtual unsigned int getPinIndexFromPoint(const Point & p) const override;
   virtual unsigned int pinIndex(const Point & p) const override;
 
@@ -166,6 +168,8 @@ protected:
   std::vector<std::pair<unsigned int, unsigned int>> _chan_pairs_sf;
   /// TODO: channel indices corresponding to a given pin index
   std::vector<std::vector<unsigned int>> _pin_to_chan_map;
+  /// whether the side bypass shape follows the assemblies
+  bool _tight_side_bypass;
 
 public:
   static InputParameters validParams();
