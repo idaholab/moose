@@ -71,6 +71,10 @@ protected:
   {
     return _non_ad_functor(elem_point, state);
   }
+  ValueType evaluate(const NodeArg & node, const StateArg & state) const override
+  {
+    return _non_ad_functor(node, state);
+  }
 
   GradientType evaluateGradient(const ElemArg & elem, const StateArg & state) const override
   {
@@ -93,6 +97,10 @@ protected:
   {
     return _non_ad_functor.gradient(elem_point, state);
   }
+  GradientType evaluateGradient(const NodeArg & node, const StateArg & state) const override
+  {
+    return _non_ad_functor.gradient(node, state);
+  }
 
   DotType evaluateDot(const ElemArg & elem, const StateArg & state) const override
   {
@@ -113,6 +121,10 @@ protected:
   DotType evaluateDot(const ElemPointArg & elem_point, const StateArg & state) const override
   {
     return _non_ad_functor.dot(elem_point, state);
+  }
+  DotType evaluateDot(const NodeArg & node, const StateArg & state) const override
+  {
+    return _non_ad_functor.dot(node, state);
   }
   ///@}
 

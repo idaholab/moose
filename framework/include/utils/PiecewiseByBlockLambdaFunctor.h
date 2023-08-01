@@ -70,6 +70,7 @@ protected:
   using ElemQpFn = std::function<T(const Moose::ElemQpArg &, const Moose::StateArg &)>;
   using ElemSideQpFn = std::function<T(const Moose::ElemSideQpArg &, const Moose::StateArg &)>;
   using ElemPointFn = std::function<T(const Moose::ElemPointArg &, const Moose::StateArg &)>;
+  using NodeFn = std::function<T(const Moose::NodeArg &, const Moose::StateArg &)>;
 
   ValueType evaluate(const Moose::ElemArg & elem_arg, const Moose::StateArg & time) const override;
   ValueType evaluate(const Moose::FaceArg & face, const Moose::StateArg & time) const override;
@@ -78,11 +79,14 @@ protected:
                      const Moose::StateArg & time) const override;
   ValueType evaluate(const Moose::ElemPointArg & elem_point,
                      const Moose::StateArg & time) const override;
+  ValueType evaluate(const Moose::NodeArg & node_arg, const Moose::StateArg & time) const override;
 
   using Moose::FunctorBase<T>::evaluateGradient;
   GradientType evaluateGradient(const Moose::ElemArg & elem_arg,
                                 const Moose::StateArg &) const override;
   GradientType evaluateGradient(const Moose::FaceArg & face_arg,
+                                const Moose::StateArg &) const override;
+  GradientType evaluateGradient(const Moose::NodeArg & node_arg,
                                 const Moose::StateArg &) const override;
 
 private:
@@ -108,6 +112,10 @@ private:
 
   /// Functors that return evaluations at an arbitrary physical point in an element
   std::unordered_map<SubdomainID, ElemPointFn> _elem_point_functor;
+
+  /// Functors that return element average values (or cell centroid values or whatever the
+  /// implementer wants to return for a given element argument)
+  std::unordered_map<SubdomainID, NodeFn> _node_functor;
 
   /// The mesh that this functor operates on
   const MooseMesh & _mesh;
@@ -289,6 +297,21 @@ PiecewiseByBlockLambdaFunctor<T>::evaluate(const Moose::ElemPointArg & elem_poin
 }
 
 template <typename T>
+typename PiecewiseByBlockLambdaFunctor<T>::ValueType
+PiecewiseByBlockLambdaFunctor<T>::evaluate(const Moose::NodeArg & node_arg,
+                                           const Moose::StateArg & time) const
+{
+  const Node * const node = node_arg.node;
+  mooseAssert(node && node != libMesh::remote_node,
+              "The element must be non-null and non-remote in functor material properties");
+  auto it = _node_functor.find(node->subdomain_id());
+  if (it == _node_functor.end())
+    subdomainErrorMessage(node->subdomain_id());
+
+  return it->second(node_arg, time);
+}
+
+template <typename T>
 typename PiecewiseByBlockLambdaFunctor<T>::GradientType
 PiecewiseByBlockLambdaFunctor<T>::evaluateGradient(const Moose::ElemArg & elem_arg,
                                                    const Moose::StateArg & time) const
@@ -302,4 +325,12 @@ PiecewiseByBlockLambdaFunctor<T>::evaluateGradient(const Moose::FaceArg & face_a
                                                    const Moose::StateArg & time) const
 {
   return Moose::FV::greenGaussGradient(face_arg, time, *this, true, _mesh);
+}
+
+template <typename T>
+typename PiecewiseByBlockLambdaFunctor<T>::GradientType
+PiecewiseByBlockLambdaFunctor<T>::evaluateGradient(const Moose::NodeArg & node_arg,
+                                                   const Moose::StateArg & time) const
+{
+  return Moose::FV::greenGaussGradient(node_arg, time, *this, true, _mesh);
 }
