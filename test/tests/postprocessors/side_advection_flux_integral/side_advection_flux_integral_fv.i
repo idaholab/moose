@@ -104,5 +104,5 @@
 []
 
 [Outputs]
-   csv = true
+  csv = true
 []
