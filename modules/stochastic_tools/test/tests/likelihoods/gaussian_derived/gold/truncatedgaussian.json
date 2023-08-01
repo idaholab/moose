@@ -22,6 +22,9 @@
             "values": {
                 "function": {
                     "type": "std::vector<double>"
+                },
+                "model_pred_required": {
+                    "type": "std::vector<double>"
                 }
             }
         },
@@ -49,7 +52,8 @@
             "likelihoodtest": {
                 "function": [
                     0.0
-                ]
+                ],
+                "model_pred_required": []
             },
             "noise_specified": {
                 "noise_specified": 0.2
@@ -70,7 +74,12 @@
             },
             "likelihoodtest": {
                 "function": [
-                    -2.3832432847464218
+                    1.9242540625981073
+                ],
+                "model_pred_required": [
+                    -0.5769720319127907,
+                    0.4873549495108542,
+                    -0.6411786542848692
                 ]
             },
             "noise_specified": {
