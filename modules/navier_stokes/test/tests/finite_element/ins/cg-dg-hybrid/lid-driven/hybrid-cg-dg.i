@@ -1,7 +1,8 @@
 mu = 1
 rho = 1
-l = 200
+l = 1
 U = 1
+n = 20
 
 [Mesh]
   [gen]
@@ -11,8 +12,8 @@ U = 1
     xmax = ${l}
     ymin = 0
     ymax = ${l}
-    nx = 20
-    ny = 20
+    nx = ${n}
+    ny = ${n}
   []
   [corner_node]
     type = ExtraNodesetGenerator
@@ -43,6 +44,7 @@ U = 1
     type = MatDiffusion
     variable = u
     diffusivity = 'mu'
+    extra_matrix_tags = 'L'
   []
   [momentum_x_pressure]
     type = PressureGradient
@@ -50,6 +52,12 @@ U = 1
     variable = u
     pressure = pressure
     component = 0
+  []
+  [momentum_x_mass]
+    type = MassKernel
+    variable = u
+    density = ${rho}
+    matrix_tags = 'mass'
   []
   [momentum_y_convection]
     type = ADConservativeAdvection
@@ -61,6 +69,7 @@ U = 1
     type = MatDiffusion
     variable = v
     diffusivity = 'mu'
+    extra_matrix_tags = 'L'
   []
   [momentum_y_pressure]
     type = PressureGradient
@@ -68,6 +77,12 @@ U = 1
     variable = v
     pressure = pressure
     component = 1
+  []
+  [momentum_y_mass]
+    type = MassKernel
+    variable = v
+    density = ${rho}
+    matrix_tags = 'mass'
   []
   [mass]
     type = ADConservativeAdvection
@@ -90,6 +105,7 @@ U = 1
     sigma = 6
     epsilon = -1
     diff = 'mu'
+    extra_matrix_tags = 'L'
   []
   [momentum_y_convection]
     type = ADDGAdvection
@@ -103,10 +119,12 @@ U = 1
     sigma = 6
     epsilon = -1
     diff = 'mu'
+    extra_matrix_tags = 'L'
   []
 []
 
 [BCs]
+  inactive = 'pressure_pin'
   [u_walls]
     type = DGFunctionDiffusionDirichletBC
     boundary = 'left bottom right'
@@ -115,6 +133,7 @@ U = 1
     epsilon = -1
     function = '0'
     diff = 'mu'
+    extra_matrix_tags = 'L'
   []
   [v_walls]
     type = DGFunctionDiffusionDirichletBC
@@ -124,6 +143,7 @@ U = 1
     epsilon = -1
     function = '0'
     diff = 'mu'
+    extra_matrix_tags = 'L'
   []
   [u_top]
     type = DGFunctionDiffusionDirichletBC
@@ -133,6 +153,7 @@ U = 1
     epsilon = -1
     function = '${U}'
     diff = 'mu'
+    extra_matrix_tags = 'L'
   []
   [pressure_pin]
     type = DirichletBC
@@ -195,24 +216,58 @@ U = 1
     type = ProjectionAux
     variable = vel_x
     v = u
+    execute_on = 'initial timestep_end'
   []
   [vel_y]
     type = ProjectionAux
     variable = vel_y
     v = v
+    execute_on = 'initial timestep_end'
   []
   [p]
     type = ProjectionAux
     variable = p
     v = pressure
+    execute_on = 'initial timestep_end'
+  []
+[]
+
+[Problem]
+  type = NavierStokesProblem
+  mass_matrix = 'mass'
+  L_matrix = 'L'
+  extra_tag_matrices = 'mass L'
+[]
+
+[Preconditioning]
+  active = FSP
+  [FSP]
+    type = FSP
+    topsplit = 'up'
+    [up]
+      splitting = 'u p'
+      splitting_type  = schur
+      petsc_options_iname = '-pc_fieldsplit_schur_fact_type  -pc_fieldsplit_schur_precondition -ksp_gmres_restart -ksp_type -ksp_pc_side -ksp_rtol'
+      petsc_options_value = 'full                            self                              300                fgmres    right        1e-4'
+    []
+    [u]
+      vars = 'u v'
+      # petsc_options = '-ksp_monitor'
+      petsc_options_iname = '-pc_type -pc_hypre_type -ksp_type -ksp_rtol -ksp_gmres_restart -ksp_pc_side'
+      petsc_options_value = 'hypre    boomeramg      gmres     1e-2      300                right'
+    []
+    [p]
+      vars = 'pressure'
+      petsc_options = '-pc_lsc_scale_diag -ksp_monitor'# -lsc_ksp_monitor'
+      petsc_options_iname = '-ksp_type -ksp_gmres_restart -ksp_rtol -pc_type -ksp_pc_side -lsc_pc_type -lsc_ksp_type -lsc_ksp_pc_side -lsc_ksp_rtol'
+      petsc_options_value = 'fgmres    300                1e-2      lsc      right        hypre        gmres         right            1e-1'
+    []
   []
 []
 
 [Executioner]
   type = Steady
   solve_type = 'NEWTON'
-  petsc_options_iname = '-pc_type -pc_factor_shift_type'
-  petsc_options_value = 'lu       NONZERO'
   nl_rel_tol = 1e-12
 []
 

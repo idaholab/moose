@@ -26,7 +26,9 @@ public:
   NavierStokesProblem(const InputParameters & parameters);
 
   TagID massMatrixTagID() const { return getMatrixTagID(_mass_matrix); }
+  TagID LMatrixTagID() const { return getMatrixTagID(_L_matrix); }
   Mat & getQscale() { return _Q_scale; }
+  Mat & getL() { return _L; }
 
   void clearIndexSets() { _index_sets.clear(); }
   KSP findSchurKSP(KSP node, unsigned int tree_position);
@@ -42,8 +44,10 @@ protected:
 
 private:
   const TagName & _mass_matrix;
+  const TagName & _L_matrix;
   const std::vector<unsigned int> & _schur_fs_index;
 
   Mat _Q_scale = nullptr;
+  Mat _L = nullptr;
   std::vector<IS> _index_sets;
 };

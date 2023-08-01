@@ -33,6 +33,14 @@ finite elements for velocity and pressure.'
     issues = '#23121'
     requirement = 'The system shall be able to solve a canonical lid-driven problem using same order variables and the PSPG/SUPG stabilization scheme.'
   [../]
+  [lid_driven_fs]
+    type = 'Exodiff'
+    input = 'lid_driven_fs.i'
+    exodiff = 'lid_driven_fs_out.e'
+    issues = '#24548'
+    requirement = 'The system shall be able to run scalable Taylor-Hood finite element simulations using a field split preconditioner with least-squares commutator preconditioning for the Schur complement and multigrid for the sub-solves.'
+    cli_args = "n=20 BCs/inactive='' Outputs/exodus=true"
+  []
   [./ad_lid_driven]
     type = 'Exodiff'
     input = 'ad_lid_driven.i'

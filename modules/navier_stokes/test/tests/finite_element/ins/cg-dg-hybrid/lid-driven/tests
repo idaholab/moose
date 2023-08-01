@@ -9,12 +9,13 @@
       exodiff = hybrid-cg-dg_out.e
       detail = 'accurate results, and'
       installation_type = 'in_tree' # uses JIT
+      cli_args = "l=200 BCs/inactive=''"
     []
     [hybrid-jac]
       type = PetscJacobianTester
       run_sim = True
       input = hybrid-cg-dg.i
-      cli_args = 'Mesh/gen/nx=4 Mesh/gen/ny=4'
+      cli_args = 'l=200 n=4 BCs/inactive='''
       detail = 'a perfect Jacobian.'
       difference_tol = 1e0
       ratio_tol = 1e-7
