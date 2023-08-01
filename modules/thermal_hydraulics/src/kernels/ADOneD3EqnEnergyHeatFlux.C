@@ -16,6 +16,7 @@ InputParameters
 ADOneD3EqnEnergyHeatFlux::validParams()
 {
   InputParameters params = ADOneDHeatFluxBase::validParams();
+  params.addClassDescription("Computes a heat flux term for the energy equation in a flow channel");
   return params;
 }
 

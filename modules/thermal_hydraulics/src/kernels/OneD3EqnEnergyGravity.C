@@ -23,7 +23,7 @@ OneD3EqnEnergyGravity::validParams()
   params.addRequiredParam<MaterialPropertyName>("rho", "Density property");
   params.addRequiredParam<MaterialPropertyName>("vel", "Velocity property");
   params.addRequiredParam<RealVectorValue>("gravity_vector", "Gravitational acceleration vector");
-  params.addClassDescription("Computes gravity term for the energy equation in 1-phase flow");
+  params.addClassDescription("Computes a gravity term for the energy equation in 1-phase flow");
   return params;
 }
 

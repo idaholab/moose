@@ -20,6 +20,8 @@ ADOneDEnergyWallHeating::validParams()
   params.addRequiredParam<MaterialPropertyName>("Hw",
                                                 "Convective heat transfer coefficient, W/m^2-K");
   params.addRequiredParam<MaterialPropertyName>("T", "Temperature material property");
+  params.addClassDescription(
+      "Computes a convective heat flux term for the energy equation for 1-phase flow");
 
   return params;
 }

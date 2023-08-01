@@ -15,6 +15,7 @@ InputParameters
 OneDEnergyWallHeating::validParams()
 {
   InputParameters params = Kernel::validParams();
+  params.addClassDescription("Adds a convective heat flux term from a wall temperature");
   params.addRequiredCoupledVar("rhoA", "");
   params.addRequiredCoupledVar("rhouA", "");
   params.addRequiredCoupledVar("rhoEA", "Energy equation variable");

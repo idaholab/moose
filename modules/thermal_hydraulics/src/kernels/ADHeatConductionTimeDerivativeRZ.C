@@ -16,6 +16,8 @@ ADHeatConductionTimeDerivativeRZ::validParams()
 {
   InputParameters params = ADHeatConductionTimeDerivative::validParams();
   params += RZSymmetry::validParams();
+  params.addClassDescription("Add a time derivative term for the energy equation in XY coordinates "
+                             "interpreted as cylindrical coordinates");
   return params;
 }
 

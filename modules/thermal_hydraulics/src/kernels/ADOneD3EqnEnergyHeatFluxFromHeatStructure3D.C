@@ -24,6 +24,8 @@ ADOneD3EqnEnergyHeatFluxFromHeatStructure3D::validParams()
   params.addRequiredParam<MaterialPropertyName>("T", "Fluid temperature");
   params.addRequiredParam<MaterialPropertyName>("Hw", "Convective heat transfer coefficient");
   params.addRequiredCoupledVar("P_hf", "Heat flux perimeter");
+  params.addClassDescription(
+      "Computes a heat flux term from a 3D heat structure in the energy equation for 1-phase flow");
   return params;
 }
 
