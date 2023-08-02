@@ -1,16 +1,14 @@
 # M. H. Fontana et al 1973, 1976, Inlet blockage, Case 719.
-# This input file models a block at the inlet of the assembly:
-# 1- using the aux kernel BlockedMassFlowRateAux. The affected subchannels get a mass flow BC that is
-# hard-coded to be very low.
-# 2- Reducing the flow area of the blocked subchannels and defining a local loss coefficient.
+# This input file models a block at the inlet of the assembly,
+# using the aux kernel BlockedMassFlowRateAux. The affected subchannels get a mass flux BC that is
+# user defined to be very low.
 T_in = 589.15
 A12 = 1.00423e3
 A13 = -0.21390
 A14 = -1.1046e-5
 rho = ${fparse A12 + A13 * T_in + A14 * T_in * T_in}
 Total_surface_area = 0.000452826 #m2
-# Blocked_surface_area = ${fparse 8.63577e-06 * 13}
-Blocked_surface_area = 0.0
+Blocked_surface_area = ${fparse 8.65158e-06 * 13}
 Flow_area = ${fparse Total_surface_area - Blocked_surface_area}
 vol_flow = 0.0034 #m3/sec
 mass_flux_in = ${fparse rho *  vol_flow / Flow_area}
@@ -30,10 +28,6 @@ P_out = 2.0e5 # Pa
     hwire = 0.3048
     spacer_z = '0.0'
     spacer_k = '0.0'
-    z_blockage = '0.01 0.02'
-    index_blockage = '0 1 2 3 4 5 11 22 21 10 20 19 9'
-    reduction_blockage = '0.02 0.02 0.02 0.02 0.02 0.02 0.02 0.02 0.02 0.02 0.02 0.02 0.02'
-    k_blockage = '6 6 6 6 6 6 6 6 6 6 6 6 6'
   []
 []
 
@@ -77,7 +71,7 @@ P_out = 2.0e5 # Pa
   fp = sodium
   n_blocks = 1
   P_out = 2.0e5
-  CT = 10.0
+  CT = 1.0
   compute_density = true
   compute_viscosity = true
   compute_power = true
@@ -85,6 +79,7 @@ P_out = 2.0e5 # Pa
   T_tol = 1.0e-4
   implicit = true
   segregated = false
+  interpolation_scheme = 'upwind'
 []
 
 [ICs]
@@ -168,21 +163,14 @@ P_out = 2.0e5 # Pa
     value = ${T_in}
     execute_on = 'timestep_begin'
   []
-  # [mdot_in_bc]
-  #   type = BlockedMassFlowRateAux
-  #   variable = mdot
-  #   boundary = inlet
-  #   index_blockage = '0 1 2 3 4 5 11 22 21 10 20 19 9'
-  #   area = S
-  #   mass_flux = ${mass_flux_in}
-  #   execute_on = 'timestep_begin'
-  # []
   [mdot_in_bc]
-    type = MassFlowRateAux
+    type = BlockedMassFlowRateAux
     variable = mdot
     boundary = inlet
+    index_blockage = '0 1 2 3 4 5 11 22 21 10 20 19 9'
     area = S
-    mass_flux = ${mass_flux_in}
+    unblocked_mass_flux = ${mass_flux_in}
+    blocked_mass_flux = ${fparse 0.1 * mass_flux_in}
     execute_on = 'timestep_begin'
   []
 []
