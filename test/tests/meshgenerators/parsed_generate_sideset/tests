@@ -37,6 +37,18 @@
     issues = '#24354'
   []
 
+  [limit_to_external_sides]
+    type = 'Exodiff'
+    input = 'parsed_generate_sideset.i parsed_generate_sideset_exterior_limited.i'
+    cli_args = '--mesh-only'
+    exodiff = 'parsed_generate_sideset_exterior_limited_in.e'
+    mesh_mode = 'REPLICATED'
+    recover = false
+    requirement = 'The system shall have the ability to assign mesh side sets based on parsed spatial functions, with a restriction on using sides that are on the exterior of the mesh only.'
+    design = 'meshgenerators/ParsedGenerateSideset.md'
+    issues = '#25082'
+  []
+
   [invalid_included_subdomains]
     type = RunException
     input = parsed_generate_sideset.i
