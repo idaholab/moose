@@ -120,4 +120,5 @@
 
 [Outputs]
   console = false
+  csv = true
 []
