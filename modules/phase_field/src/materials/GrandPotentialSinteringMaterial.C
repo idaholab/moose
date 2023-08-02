@@ -156,11 +156,6 @@ GrandPotentialSinteringMaterial::GrandPotentialSinteringMaterial(const InputPara
 void
 GrandPotentialSinteringMaterial::computeQpProperties()
 {
-  // Calculate bnds
-  Real sum_eta_i = 0.0;
-  for (unsigned int i = 0; i < _neta; ++i)
-    sum_eta_i += (*_eta[i])[_qp] * (*_eta[i])[_qp];
-
   // Calculate phase switching functions
   _hv[_qp] = 0.0;
   _dhv[_qp] = 0.0;
