@@ -1,0 +1,96 @@
+[Tests]
+  design = 'Closures1PhaseTHM.md'
+  issues = '#19909'
+  [tests]
+    requirement = "The system shall compute the heat transfer coefficient and the friction factor "
+                  "when used with:"
+    [dittus_boelter_churchill]
+      type = 'CSVDiff'
+      input = 'thm1phase.i'
+      csvdiff = 'db_churchill.csv'
+      detail = "the Dittus-Boelter correlation for the Heat Transfer Coefficient and the Churchill "
+               "or Cheng-Todreas correlation for the friction factor"
+    []
+    [kazimi_cheng]
+      type = 'CSVDiff'
+      input = 'thm1phase.i'
+      cli_args = "file_base='kc_cheng'
+                  GlobalParams/PoD='1.1'
+                  GlobalParams/heat_transfer_geom='hex_rod_bundle'
+                  GlobalParams/pipe_location='interior'
+                  Closures/thm/wall_htc_closure='kazimi_carelli'
+                  Closures/thm/wall_ff_closure='cheng_todreas'"
+      csvdiff = 'kc_cheng.csv'
+      detail = "the Kazimi-Carelli correlation for the Heat Transfer Coefficient and the Churchill "
+               "or Cheng-Todreas correlation for the friction factor"
+    []
+    [lyon]
+      type = 'CSVDiff'
+      input = 'thm1phase.i'
+      cli_args = "file_base='lyon'
+                  Closures/thm/wall_htc_closure='lyon'"
+      csvdiff = 'lyon.csv'
+      detail = "the Lyon correlation for the Heat Transfer Coefficient and the Churchill or "
+               "Cheng-Todreas correlation for the friction factor"
+    []
+    [mikityuk]
+      type = 'CSVDiff'
+      input = 'thm1phase.i'
+      cli_args = "file_base='mikityuk'
+                  GlobalParams/PoD='1.1'
+                  Closures/thm/wall_htc_closure='mikityuk'"
+      csvdiff = 'mikityuk.csv'
+      detail = "the Mikityuk correlation for the Heat Transfer Coefficient and the Churchill or "
+               "Cheng-Todreas correlation for the friction factor"
+    []
+    [schad]
+      type = 'CSVDiff'
+      input = 'thm1phase.i'
+      cli_args = "file_base='schad'
+                  mdot='0.004'
+                  GlobalParams/PoD='1.1'
+                  GlobalParams/initial_vel='0.0008'
+                  Closures/thm/wall_htc_closure='schad'"
+      csvdiff = 'schad.csv'
+      detail = "the Schad correlation for the Heat Transfer Coefficient and the Churchill or "
+               "Cheng-Todreas correlation for the friction factor"
+    []
+    [weisman]
+      type = 'CSVDiff'
+      input = 'thm1phase.i'
+      cli_args = "file_base='weisman'
+                  GlobalParams/PoD='1.1'
+                  GlobalParams/heat_transfer_geom='hex_rod_bundle'
+                  Closures/thm/wall_htc_closure='weisman'"
+      csvdiff = 'weisman.csv'
+      detail = "the Weisman correlation for the Heat Transfer Coefficient and the Churchill or "
+               "Cheng-Todreas correlation for the friction factor"
+    []
+    [wolf]
+      type = 'CSVDiff'
+      input = 'thm1phase.i'
+      cli_args = "file_base='wolf'
+                  Closures/thm/wall_htc_closure='wolf_mccarthy'"
+      csvdiff = 'wolf.csv'
+      detail = "the Wolf-McCarthy correlation for the Heat Transfer Coefficient and the Churchill or "
+               "Cheng-Todreas correlation for the friction factor"
+    []
+    [gnielinski]
+      type = 'CSVDiff'
+      input = 'thm1phase.i'
+      cli_args = "file_base='gnielinski'
+                  Closures/thm/wall_htc_closure='gnielinski'"
+      csvdiff = 'gnielinski.csv'
+      detail = "the Gnielinski correlation for the Heat Transfer Coefficient and the Churchill or "
+               "Cheng-Todreas correlation for the friction factor"
+    []
+    [overwriten_f]
+      type = 'CSVDiff'
+      input = 'thm1phase.i'
+      cli_args = "file_base='overwriten_f'
+                  Components/pipe/f='0.1'"
+      csvdiff = 'overwriten_f.csv'
+      detail = "the friction factor is prescribed by the user"
+    []
+  []
+[]

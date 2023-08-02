@@ -17,10 +17,14 @@
 #include "libmesh/edge_edge3.h"
 
 const std::map<std::string, FlowChannelBase::EConvHeatTransGeom>
-    FlowChannelBase::_heat_transfer_geom_to_enum{{"PIPE", PIPE}, {"ROD_BUNDLE", ROD_BUNDLE}};
+    FlowChannelBase::_heat_transfer_geom_to_enum{
+        {"PIPE", PIPE}, {"ROD_BUNDLE", ROD_BUNDLE}, {"HEX_ROD_BUNDLE", HEX_ROD_BUNDLE}};
 
 const std::map<std::string, FlowChannelBase::EPipeType> FlowChannelBase::_pipe_type_to_enum{
     {"STRAIGHT", STRAIGHT}, {"CURVED", CURVED}, {"DOWNCOMER", DOWNCOMER}};
+
+const std::map<std::string, FlowChannelBase::EPipeLocation> FlowChannelBase::_pipe_location_to_enum{
+    {"INTERIOR", INTERIOR}, {"EDGE", EDGE}, {"CORNER", CORNER}};
 
 MooseEnum
 FlowChannelBase::getConvHeatTransGeometry(const std::string & name)
@@ -32,6 +36,12 @@ MooseEnum
 FlowChannelBase::getPipeType(const std::string & name)
 {
   return THM::getMooseEnum<EPipeType>(name, _pipe_type_to_enum);
+}
+
+MooseEnum
+FlowChannelBase::getPipeLocation(const std::string & name)
+{
+  return THM::getMooseEnum<EPipeLocation>(name, _pipe_location_to_enum);
 }
 
 template <>
@@ -49,6 +59,13 @@ THM::stringToEnum(const std::string & s)
   return stringToEnum<FlowChannelBase::EPipeType>(s, FlowChannelBase::_pipe_type_to_enum);
 }
 
+template <>
+FlowChannelBase::EPipeLocation
+THM::stringToEnum(const std::string & s)
+{
+  return stringToEnum<FlowChannelBase::EPipeLocation>(s, FlowChannelBase::_pipe_location_to_enum);
+}
+
 InputParameters
 FlowChannelBase::validParams()
 {
@@ -63,6 +80,9 @@ FlowChannelBase::validParams()
   params.addParam<MooseEnum>("heat_transfer_geom",
                              FlowChannelBase::getConvHeatTransGeometry("PIPE"),
                              "Convective heat transfer geometry");
+  params.addParam<MooseEnum>("pipe_location",
+                             FlowChannelBase::getPipeLocation("INTERIOR"),
+                             "Pipe location within the bundle");
   params.addParam<Real>("PoD", 1, "Pitch-to-diameter ratio for parallel bundle heat transfer [-]");
   params.addParam<bool>(
       "pipe_pars_transferred",
@@ -97,6 +117,7 @@ FlowChannelBase::FlowChannelBase(const InputParameters & params)
     _pipe_pars_transferred(getParam<bool>("pipe_pars_transferred")),
     _roughness(getParam<Real>("roughness")),
     _HT_geometry(getEnumParam<EConvHeatTransGeom>("heat_transfer_geom")),
+    _pipe_location(getEnumParam<EPipeLocation>("pipe_location")),
     _PoD(getParam<Real>("PoD")),
     _has_PoD(isParamValid("PoD")),
     _temperature_mode(false),
