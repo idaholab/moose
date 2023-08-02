@@ -1,4 +1,4 @@
-# INSADConvectedMesh
+# INSADMeshConvection
 
 !syntax description /Kernels/INSADConvectedMesh
 

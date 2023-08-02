@@ -116,11 +116,10 @@ INSADMaterial::subdomainSetup()
     addMooseVariableDependency(&disp_x);
     _disp_x_dot = &disp_x.adUDot();
     _disp_x_sys_num = disp_x.sys().number();
-    _disp_x_num =
-        disp_x.kind() == (Moose::VarKindType::VAR_NONLINEAR &&
-                          (_disp_x_sys_num == _fe_problem.currentNonlinearSystem().number()))
-            ? disp_x.number()
-            : libMesh::invalid_uint;
+    _disp_x_num = (disp_x.kind() == Moose::VarKindType::VAR_NONLINEAR) &&
+                          (_disp_x_sys_num == _fe_problem.currentNonlinearSystem().number())
+                      ? disp_x.number()
+                      : libMesh::invalid_uint;
     if (_object_tracker->isTrackerParamValid("disp_y", _current_subdomain_id))
     {
       auto & disp_y = _subproblem.getStandardVariable(

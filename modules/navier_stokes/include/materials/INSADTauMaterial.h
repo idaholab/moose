@@ -79,7 +79,7 @@ protected:
   /// they're currently not supported for vector FE types
   const FEBase * const & _scalar_lagrange_fe;
 
-  /// Containers to hold second derivatives with respect to velocities
+  /// Containers to hold second derivatives of velocity with respect to velocities
   std::vector<ADRealTensorValue> _d2u;
   std::vector<ADRealTensorValue> _d2v;
   std::vector<ADRealTensorValue> _d2w;
@@ -249,6 +249,8 @@ INSADTauMaterialTempl<T>::computeViscousStrongResidual()
   for (const auto i : index_range(vel_dof_indices))
   {
     // This may not work if the element and spatial dimensions are different
+    mooseAssert(_current_elem->dim() == _mesh.dimension(),
+                "Below logic only applicable if element and mesh dimension are the same");
     const auto dimensional_component = i % _mesh.dimension();
     auto & d2vel = get_d2(dimensional_component);
     const auto dof_index = vel_dof_indices[i];
@@ -323,17 +325,14 @@ INSADTauMaterialTempl<T>::viscousTermRZ()
       _viscous_strong_residual[_qp] +=
           // u_r
           // Additional term from vector Laplacian
-          ADRealVectorValue(
-              _mu[_qp] * (_velocity[_qp](_rz_radial_coord) /
-                              (_q_point[_qp](_rz_radial_coord) * _q_point[_qp](_rz_radial_coord)) -
-                          // Additional term from scalar Laplacian
-                          _grad_velocity[_qp](_rz_radial_coord, _rz_radial_coord) /
-                              _q_point[_qp](_rz_radial_coord)),
-              // u_z
-              // Additional term from scalar Laplacian
-              -_mu[_qp] * _grad_velocity[_qp](_rz_axial_coord, _rz_radial_coord) /
-                  _q_point[_qp](_rz_radial_coord),
-              0);
+          ADRealVectorValue(_mu[_qp] *
+                                (_velocity[_qp](_rz_radial_coord) / (r * r) -
+                                 // Additional term from scalar Laplacian
+                                 _grad_velocity[_qp](_rz_radial_coord, _rz_radial_coord) / r),
+                            // u_z
+                            // Additional term from scalar Laplacian
+                            -_mu[_qp] * _grad_velocity[_qp](_rz_axial_coord, _rz_radial_coord) / r,
+                            0);
     else
       _viscous_strong_residual[_qp] +=
           ADRealVectorValue(2. * _mu[_qp] *
