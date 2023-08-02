@@ -11,6 +11,7 @@
 #include "CastUniquePointer.h"
 
 #include "libmesh/mesh_tools.h"
+#include "libmesh/mesh_modification.h"
 
 registerMooseObject("MooseApp", MeshRepairGenerator);
 
@@ -19,21 +20,26 @@ MeshRepairGenerator::validParams()
 {
 
   InputParameters params = MeshGenerator::validParams();
+  params.addClassDescription(
+      "Mesh generator to perform various improvement / fixing operations on an input mesh");
+  params.addRequiredParam<MeshGeneratorName>("input",
+                                             "Name of the mesh generator providing the mesh");
 
-  params.addRequiredParam<MeshGeneratorName>("input", "T         ");
-  params.addClassDescription("");
+  params.addParam<bool>("fix_node_overlap", false, "Whether to merge overlapping nodes");
+  params.addParam<bool>("node_overlap_tol", 1e-8, "Tolerance for merging nodes");
+  params.addParam<Real>("maximum_elements_size", "refining elements that are too big");
 
-  params.addParam<bool>("fix_node_overlap",
-                        true,
-                        "fixing the mesh by deleting overlapping nodes for stitching capabilities");
-
+  params.addParam<bool>(
+      "fix_elements_orientation", false, "Whether to flip elements with negative volumes");
   return params;
 }
 
 MeshRepairGenerator::MeshRepairGenerator(const InputParameters & parameters)
   : MeshGenerator(parameters),
     _input(getMesh("input")),
-    _fix_overlapping_nodes(getParam<bool>("fix_node_overlap"))
+    _fix_overlapping_nodes(getParam<bool>("fix_node_overlap")),
+    _fix_max_element_size(isParamValid("maximum_elements_size")),
+    _max_element_size(_fix_max_element_size ? getParam<Real>("fix_elem_size") : 0)
 {
 }
 
@@ -92,5 +98,26 @@ MeshRepairGenerator::generate()
     }
     _console << "Number of nodes overlapping which got merged: " << _num_fixed_nodes << std::endl;
   }
+
+  if (_fix_max_element_size)
+  {
+    // loop elements within the mesh
+    for (auto & elem : mesh->active_element_ptr_range())
+    {
+      if (elem->volume() >= _max_element_size)
+      {
+        elem->set_refinement_flag(Elem::REFINE);
+        _num_refined_elems++;
+      }
+    }
+    MeshRefinement refinedmesh(*mesh);
+    refinedmesh.refine_elements();
+    _console << "Number of elements below volume size : " << _num_refined_elems << std::endl;
+  }
+
+  // Fix flipped orientation from the symmetry
+  MeshTools::Modification::orient_elements(*mesh);
+
+  mesh->prepare_for_use();
   return dynamic_pointer_cast<MeshBase>(mesh);
 }

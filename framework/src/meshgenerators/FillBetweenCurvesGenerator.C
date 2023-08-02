@@ -121,6 +121,7 @@ FillBetweenCurvesGenerator::generate()
   {
     paramError("input_mesh_1", e.what());
   }
+
   try
   {
     FillBetweenPointVectorsTools::isCurveOpenSingleSegment(*input_mesh_2,

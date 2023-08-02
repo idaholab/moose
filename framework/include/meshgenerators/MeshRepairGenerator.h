@@ -12,8 +12,8 @@
 #include "MeshGenerator.h"
 #include "MooseEnum.h"
 
-/*
- *
+/**
+ * Mesh generator to perform various improvement / fixing operations on an input mesh
  */
 class MeshRepairGenerator : public MeshGenerator
 {
@@ -24,12 +24,19 @@ public:
 
   std::unique_ptr<MeshBase> generate() override;
 
-protected:
+private:
   /// the input mesh
   std::unique_ptr<MeshBase> & _input;
 
-  /// fixing mesh by deleting overalpping nodes
-  bool _fix_overlapping_nodes;
+  /// fixing mesh by deleting overlapping nodes
+  const bool _fix_overlapping_nodes;
   /// counting number of overlapped nodes fixed
-  unsigned int _num_fixed_nodes;
+  const unsigned int _num_fixed_nodes;
+
+  /// refining elements that are too big
+  const bool _fix_max_element_size;
+  /// maximum element size over which elements are refined
+  const Real _max_element_size;
+  /// counting the number of elements that need to be refined for being too big
+  const unsigned int _num_refined_elems;
 };
