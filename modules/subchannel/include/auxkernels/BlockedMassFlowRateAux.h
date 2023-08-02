@@ -33,7 +33,9 @@ public:
 protected:
   SubChannelMesh & _subchannel_mesh;
   /// Specified mass flux
-  const Real & _mass_flux;
+  const Real & _unblocked_mass_flux;
+  /// Specified mass flow rate
+  const Real & _blocked_mass_flux;
   /// Cross-sectional area
   const VariableValue & _area;
   /// index of subchannels affected by blockage

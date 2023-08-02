@@ -62,7 +62,7 @@ QuadSubChannelNormalSliceValues::output()
   {
     for (unsigned int iz = 0; iz < nz; iz++)
     {
-      if (_height > z_grid[iz] && _height < z_grid[iz + 1])
+      if (_height >= z_grid[iz] && _height < z_grid[iz + 1])
       {
         for (unsigned int i_ch = 0; i_ch < n_channels; i_ch++)
         {

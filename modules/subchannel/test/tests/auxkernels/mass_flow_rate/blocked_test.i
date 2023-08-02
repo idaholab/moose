@@ -35,7 +35,8 @@
     variable = mdot
     area = S
     index_blockage = '0'
-    mass_flux = 4722
+    unblocked_mass_flux = 4722
+    blocked_mass_flux = 1.0
     execute_on = 'initial'
   []
 []
