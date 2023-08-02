@@ -56,6 +56,7 @@
     type = TestLikelihood
     likelihoods = 'gaussian'
     model_pred = constant/reporter_transfer:average:value
+    sampler = sample
   []
 []
 

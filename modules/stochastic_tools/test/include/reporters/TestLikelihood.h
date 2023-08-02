@@ -35,4 +35,13 @@ private:
 
   /// model prediction values
   const std::vector<Real> & _model_pred;
+
+  /// Transfer the right outputs to the file
+  std::vector<Real> & _model_pred_required;
+
+  /// The MCMC sampler
+  Sampler & _sampler;
+
+  /// Communicator that was split based on samples that have rows
+  libMesh::Parallel::Communicator & _local_comm;
 };
