@@ -731,8 +731,7 @@ void
 MultiAppGeneralFieldTransfer::examineReceivedValueConflicts(
     const unsigned int var_index,
     const DofobjectToInterpValVec & dofobject_to_valsvec,
-    const InterpCaches & distance_caches,
-    std::vector<std::tuple<unsigned int, dof_id_type, Point, Real>> & conflicts_vec)
+    const InterpCaches & distance_caches)
 {
   const auto var_name = getToVarName(var_index);
   // We must check a posteriori because we could have two
@@ -740,7 +739,7 @@ MultiAppGeneralFieldTransfer::examineReceivedValueConflicts(
   // another problem is actually closer, so there is no conflict because only that last one matters
   // We check here whether the potential conflicts actually were the nearest points
   // Loop over potential conflicts
-  for (auto conflict_it = conflicts_vec.begin(); conflict_it != conflicts_vec.end();)
+  for (auto conflict_it = _received_conflicts.begin(); conflict_it != _received_conflicts.end();)
   {
     const auto potential_conflict = *conflict_it;
     bool overlap_found = false;
@@ -775,7 +774,7 @@ MultiAppGeneralFieldTransfer::examineReceivedValueConflicts(
 
     // Map will only keep the actual overlaps
     if (!overlap_found)
-      conflicts_vec.erase(conflict_it);
+      _received_conflicts.erase(conflict_it);
     else
       ++conflict_it;
   }
@@ -785,8 +784,7 @@ void
 MultiAppGeneralFieldTransfer::examineLocalValueConflicts(
     const unsigned int var_index,
     const DofobjectToInterpValVec & dofobject_to_valsvec,
-    const InterpCaches & distance_caches,
-    std::vector<std::tuple<unsigned int, dof_id_type, Point, Real>> & conflicts_vec)
+    const InterpCaches & distance_caches)
 {
   const auto var_name = getToVarName(var_index);
   // We must check a posteriori because we could have:
@@ -799,10 +797,11 @@ MultiAppGeneralFieldTransfer::examineLocalValueConflicts(
 
   // Move relevant conflict info (location, distance) to a smaller data structure
   std::vector<std::tuple<Point, Real>> potential_conflicts;
-  potential_conflicts.reserve(conflicts_vec.size());
+  potential_conflicts.reserve(_local_conflicts.size());
 
   // Loop over potential conflicts to broadcast all the conflicts
-  for (auto conflict_it = conflicts_vec.begin(); conflict_it != conflicts_vec.end(); ++conflict_it)
+  for (auto conflict_it = _local_conflicts.begin(); conflict_it != _local_conflicts.end();
+       ++conflict_it)
   {
     // Extract info for the potential conflict
     const auto potential_conflict = *conflict_it;
@@ -918,7 +917,7 @@ MultiAppGeneralFieldTransfer::examineLocalValueConflicts(
   // Each local list of conflicts will now be updated. It's important to keep conflict lists local
   // so we can give more context like the sending processor id (the domain of which can be inspected
   // by the user)
-  for (auto conflict_it = conflicts_vec.begin(); conflict_it != conflicts_vec.end();)
+  for (auto conflict_it = _local_conflicts.begin(); conflict_it != _local_conflicts.end();)
   {
     // Extract info for the potential conflict
     const auto potential_conflict = *conflict_it;
@@ -936,7 +935,7 @@ MultiAppGeneralFieldTransfer::examineLocalValueConflicts(
                        return std::get<0>(item).absolute_fuzzy_equals(p) &&
                               std::abs(std::get<1>(item) - distance) < TOLERANCE;
                      }) == real_conflicts.end())
-      conflicts_vec.erase(conflict_it);
+      _local_conflicts.erase(conflict_it);
     else
       ++conflict_it;
   }
@@ -949,9 +948,8 @@ MultiAppGeneralFieldTransfer::outputValueConflicts(
     const InterpCaches & distance_caches)
 {
   // Remove potential conflicts that did not materialize, the value did not end up being used
-  examineReceivedValueConflicts(
-      var_index, dofobject_to_valsvec, distance_caches, _received_conflicts);
-  examineLocalValueConflicts(var_index, dofobject_to_valsvec, distance_caches, _local_conflicts);
+  examineReceivedValueConflicts(var_index, dofobject_to_valsvec, distance_caches);
+  examineLocalValueConflicts(var_index, dofobject_to_valsvec, distance_caches);
 
   // Output the conflicts from the selection of local values (evaluateInterpValues-type routines)
   // to send in response to value requests at target points

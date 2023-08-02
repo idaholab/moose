@@ -328,13 +328,10 @@ private:
    * distances (used for nodal-value-dof-only variables and constant monomials)
    * @param distance_caches a cache holding the distances received (used for higher order elemental
    * variables)
-   * @param conflicts_vec a vector holding all the potential received conflicts
    */
-  void examineReceivedValueConflicts(
-      const unsigned int var_index,
-      const DofobjectToInterpValVec & dofobject_to_valsvec,
-      const InterpCaches & distance_caches,
-      std::vector<std::tuple<unsigned int, dof_id_type, Point, Real>> & conflicts_vec);
+  void examineReceivedValueConflicts(const unsigned int var_index,
+                                     const DofobjectToInterpValVec & dofobject_to_valsvec,
+                                     const InterpCaches & distance_caches);
 
   /**
    * Remove potential value conflicts that did not materialize because another source was closer
@@ -345,13 +342,10 @@ private:
    * distances (used for nodal-value-dof-only variables and constant monomials)
    * @param distance_caches a cache holding the distances received (used for higher order elemental
    * variables)
-   * @param conflicts_vec a vector holding all the potential local conflicts
    */
-  void examineLocalValueConflicts(
-      const unsigned int var_index,
-      const DofobjectToInterpValVec & dofobject_to_valsvec,
-      const InterpCaches & distance_caches,
-      std::vector<std::tuple<unsigned int, dof_id_type, Point, Real>> & conflicts_vec);
+  void examineLocalValueConflicts(const unsigned int var_index,
+                                  const DofobjectToInterpValVec & dofobject_to_valsvec,
+                                  const InterpCaches & distance_caches);
 
   /// Report on conflicts between overlapping child apps, equidistant origin points etc
   void outputValueConflicts(const unsigned int var_index,
