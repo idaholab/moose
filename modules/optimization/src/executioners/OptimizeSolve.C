@@ -132,7 +132,7 @@ OptimizeSolve::taoSolve()
     case TaoSolverEnum::BUNDLE_RISK_MIN:
       ierr = TaoSetType(_tao, TAOBMRM);
       break;
-    case TaoSolverEnum::AUGMENTED_LAGRANGIAN_MULTIPLER_METHOD:
+    case TaoSolverEnum::AUGMENTED_LAGRANGIAN_MULTIPLIER_METHOD:
       ierr = TaoSetType(_tao, TAOALMM);
       CHKERRQ(ierr);
       ierr = TaoSetType(subsolver, TAOBQNKTR);
@@ -188,7 +188,7 @@ OptimizeSolve::taoSolve()
   ierr = TaoSetVariableBoundsRoutine(_tao, variableBoundsWrapper, this);
   CHKERRQ(ierr);
 
-  if (_tao_solver_enum == TaoSolverEnum::AUGMENTED_LAGRANGIAN_MULTIPLER_METHOD)
+  if (_tao_solver_enum == TaoSolverEnum::AUGMENTED_LAGRANGIAN_MULTIPLIER_METHOD)
   { // Create equality vector
     ierr = VecCreate(_my_comm.get(), &_ce);
     CHKERRQ(ierr);
@@ -279,7 +279,7 @@ OptimizeSolve::taoSolve()
   ierr = MatDestroy(&_hessian);
   CHKERRQ(ierr);
 
-  if (_tao_solver_enum == TaoSolverEnum::AUGMENTED_LAGRANGIAN_MULTIPLER_METHOD)
+  if (_tao_solver_enum == TaoSolverEnum::AUGMENTED_LAGRANGIAN_MULTIPLIER_METHOD)
   {
     ierr = VecDestroy(&_ce);
     CHKERRQ(ierr);

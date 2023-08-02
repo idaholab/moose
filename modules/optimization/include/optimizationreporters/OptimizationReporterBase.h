@@ -67,7 +67,7 @@ public:
    * Function to get the total number of parameters
    * @return total number of parameters
    */
-  dof_id_type getNumParams() const { return _ndof; }
+  virtual dof_id_type getNumParams() const { return _ndof; }
 
   /**
    * Function to compute the equality constraints.
