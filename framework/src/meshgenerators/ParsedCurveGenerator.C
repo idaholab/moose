@@ -154,7 +154,7 @@ ParsedCurveGenerator::ParsedCurveGenerator(const InputParameters & parameters)
   if (_node_set_boundaries.size() > 1 && _is_closed_loop)
     paramError("edge_nodesets", "Cannot add more than one edge nodeset on a closed loop");
   if (_node_set_boundaries.size() && _node_set_boundaries.size() != 2 && !_is_closed_loop)
-    paramError("edge_nodesets", "Only two edges in an open loop");
+    paramError("edge_nodesets", "Exactly two edges in an open loop");
 }
 
 std::unique_ptr<MeshBase>
