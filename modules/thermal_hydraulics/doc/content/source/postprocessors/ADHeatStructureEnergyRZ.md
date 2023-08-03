@@ -11,7 +11,7 @@ where $E$ is the stored energy, $\rho$ the medium density, $c_p$ the medium spec
 $T$ the medium temperature, $T_{ref}$ the reference temperature (reference for the enthalpy)
 and $n_{units}$ the number of units this heat structure represents and $r$ the local circumference.
 
-This volumetric integral is computed numerically using the system's quadrature.
+This volumetric integral is computed numerically using the [local quadrature](syntax/Executioner/Quadrature/index.md).
 
 !alert warning
 With the recent development of general RZ coordinates, this object along with all THM's "RZ"-specific

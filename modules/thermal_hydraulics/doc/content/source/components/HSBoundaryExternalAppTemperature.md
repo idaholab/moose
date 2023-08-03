@@ -3,7 +3,7 @@
 !syntax description /Components/HSBoundaryExternalAppTemperature
 
 This component is the same as [HSBoundarySpecifiedTemperature.md] but uses
-a temperature transferred from an external application into an auxiliary variables.
+a temperature transferred from an external application into an auxiliary variable.
 
 The temperature variable is added by this component on the subdomains of the heat structure with a variable type
 defined by the [HeatConductionModel.md].

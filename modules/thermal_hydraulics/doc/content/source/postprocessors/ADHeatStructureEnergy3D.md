@@ -11,7 +11,7 @@ where $E$ is the stored energy, $\rho$ the medium density, $c_p$ the medium spec
 $T$ the medium temperature and $T_{ref}$ the reference temperature (reference for the enthalpy).
 Only a single unit of the heat structure is considered.
 
-This volumetric integral is computed numerically using the system's quadrature.
+This volumetric integral is computed numerically using the [local quadrature](syntax/Executioner/Quadrature/index.md).
 
 !syntax parameters /Postprocessors/ADHeatStructureEnergy3D
 
