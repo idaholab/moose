@@ -261,19 +261,25 @@ getExtraIDUniqueCombinationMap(const MeshBase & mesh,
   ExtraElementIDName id_name = extra_ids.back();
   extra_ids.pop_back();
   const auto id_index = mesh.get_elem_integer_index(id_name);
+
   // create base parsed id set
   if (extra_ids.empty())
   {
     // get set of extra id values;
-    std::set<dof_id_type> ids;
-    for (const auto & elem : mesh.active_element_ptr_range())
+    std::vector<dof_id_type> ids;
     {
-      if (block_restricted && block_ids.find(elem->subdomain_id()) == block_ids.end())
-        continue;
-      auto id = elem->get_extra_integer(id_index);
-      ids.insert(id);
+      std::set<dof_id_type> ids_set;
+      for (const auto & elem : mesh.active_element_ptr_range())
+      {
+        if (block_restricted && block_ids.find(elem->subdomain_id()) == block_ids.end())
+          continue;
+        const auto id = elem->get_extra_integer(id_index);
+        ids_set.insert(id);
+      }
+      mesh.comm().set_union(ids_set);
+      ids.assign(ids_set.begin(), ids_set.end());
     }
-    mesh.comm().set_union(ids);
+
     // determine new extra id values;
     std::unordered_map<dof_id_type, dof_id_type> parsed_ids;
     for (auto & elem : mesh.active_element_ptr_range())
@@ -281,7 +287,7 @@ getExtraIDUniqueCombinationMap(const MeshBase & mesh,
       if (block_restricted && block_ids.find(elem->subdomain_id()) == block_ids.end())
         continue;
       parsed_ids[elem->id()] = std::distance(
-          ids.begin(), std::find(ids.begin(), ids.end(), elem->get_extra_integer(id_index)));
+          ids.begin(), std::lower_bound(ids.begin(), ids.end(), elem->get_extra_integer(id_index)));
     }
     return parsed_ids;
   }
