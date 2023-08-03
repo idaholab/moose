@@ -18,6 +18,9 @@ point gradient. This is only accurate if the (interface) kernel is also computin
 this way. Currently, only [FVDiffusionInterface](/fviks/FVDiffusionInterface.md)
 is computing gradients this way.
 
+!alert warning
+The expression of the diffusive flux in this object is generic, as described, and may differ from the diffusive flux in your specific physics implementation. If so, you may not use this object to compute the diffusive flux.
+
 !syntax parameters /Postprocessors/InterfaceDiffusiveFluxIntegral
 
 !syntax inputs /Postprocessors/InterfaceDiffusiveFluxIntegral

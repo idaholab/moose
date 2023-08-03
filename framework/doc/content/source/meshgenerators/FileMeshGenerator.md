@@ -28,7 +28,7 @@ libmesh file IO readers.
 | .vtk, .pvtu | Visualization Toolkit |
 
 Writing (using the [Outputs](syntax/Outputs/index.md) block). We list these formats here
-for conversion if you are considering using MOOSE as a mesh file converter.
+for convenience if you are considering using MOOSE as a mesh file converter.
 
 | Extension   | Description              | Output type |
 | :-          | :-                       | :- |
@@ -59,8 +59,9 @@ In general, the mesh must respect the limitations of the target format for a suc
 
 Tools offering conversion capabilities:
 
-- Paraview
+- [Paraview](https://www.paraview.org/)
 - [meshio](https://pypi.org/project/meshio/2.3.5/), can also be installed with `mamba/conda`
+- [em2ex](https://github.com/cpgr/em2ex)
 
 The conversion capabilities to be able to read those files are summarized here for convenience:
 
@@ -72,6 +73,8 @@ The conversion capabilities to be able to read those files are summarized here f
 | .xml        | DOLFIN xml  | meshio          | Exodus |
 | .case       | EnSight     | Paraview        | Exodus |
 | .f3grid     | FLAC3D      | meshio          | Exodus |
+| .grdecl     | Eclipse     | em2ex           | Exodus |
+| .csv        | Leapfrog Geothermal | em2ex   | Exodus |
 | .h5m        | H5M         | meshio          | Exodus |
 | .mdpa       | Kratos/MDPA | meshio          | Exodus |
 | .mesh, .meshb | Medit     | meshio          | Exodus |
