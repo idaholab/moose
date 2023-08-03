@@ -23,7 +23,7 @@
     []
   []
   [flux]
-    issues = '#19543 #19472'
+    issues = '#19543 #19472 #24936'
     design = 'WCNSFVMassFluxBC.md WCNSFVMomentumFluxBC.md WCNSFVEnergyFluxBC.md WCNSFVScalarFluxBC.md NSFVAction.md'
     requirement = 'The system shall be able to use flux boundary conditions for specifying inlet conditions in a weakly compressible fluid flow simulation'
     [direct]
@@ -78,7 +78,6 @@
       method = "!dbg"
       abs_zero = 1e-6
       recover = false
-      issues = '#24936'
       detail = 'and correctly handle inflow and outflow boundaries'
     []
   []
