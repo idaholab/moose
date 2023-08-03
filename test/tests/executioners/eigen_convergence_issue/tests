@@ -1,0 +1,29 @@
+[Tests]
+  [testb]
+    type = RunApp
+    input = 'b.i'
+    expect_out = '4 Nonlinear'
+    absent_out = '5 Nonlinear'
+  []
+  [test11]
+    type = RunApp
+    input = 'a.i'
+    expect_out = '11 Nonlinear'
+    absent_out = '12 Nonlinear'
+    cli_args = '-eps_tol 1e-10'
+  []
+  [test7]
+    type = RunApp
+    input = 'a.i'
+    expect_out = '7 Nonlinear'
+    absent_out = '8 Nonlinear'
+    cli_args = 'Problem/bx_norm=fluxintegral -eps_tol 1e-10'
+  []
+  [test4]
+    type = RunApp
+    input = 'a.i'
+    expect_out = '4 Nonlinear'
+    absent_out = '5 Nonlinear'
+    cli_args = 'Problem/bx_norm=fluxintegral -eps_power_sign_normalization 0 -eps_tol 1e-10'
+  []
+[]

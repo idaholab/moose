@@ -63,7 +63,6 @@
 
 [Problem]
   type = EigenProblem
-  bx_norm = fluxintegral
 []
 
 [Executioner]
@@ -71,8 +70,9 @@
   solve_type = PJFNK
   free_power_iterations = 4
   nl_abs_tol = 1e-10
-  petsc_options_iname = '-eps_tol'
-  petsc_options_value = '1e-10'
+  # The first set of power iterations don't seem to respect these options
+  # petsc_options_iname = '-eps_tol'
+  # petsc_options_value = '1e-10'
 []
 
 [Outputs]
