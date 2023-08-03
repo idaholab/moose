@@ -1,0 +1,7 @@
+[Tests]
+  [FNSF]
+    type = 'Exodiff'
+    input = 'FNSFSourceAux.i'
+    exodiff = 'FNSFSourceAux_out.e'
+  []
+[]

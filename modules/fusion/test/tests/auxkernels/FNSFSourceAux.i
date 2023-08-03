@@ -1,7 +1,7 @@
 [Mesh]
   [msh]
     type = FileMeshGenerator
-    file = '../Franklin_Blanket.msh'
+    file = 'Blanket_mesh.msh'
     construct_side_list_from_node_list = true
   []
 []
