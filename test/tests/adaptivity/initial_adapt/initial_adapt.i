@@ -63,6 +63,10 @@
   marker = box
   max_h_level = 2
   initial_steps = 2
+
+  # backwards compatibility for exodiffs after #25067
+  project_initial_marker = true
+
   [./Markers]
     [./box]
       bottom_left = '0.3 0.3 0'
