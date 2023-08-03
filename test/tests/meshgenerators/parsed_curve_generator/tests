@@ -6,7 +6,7 @@
     input = 'parsed_curve_open.i'
     exodiff = 'parsed_curve_open_in.e'
     cli_args = '--mesh-only'
-    requirement ='The system shall generate a 2D open curve mesh.'
+    requirement = 'The system shall generate a 2D open curve mesh.'
     recover = false
   []
   [open_curve_3d]
@@ -14,7 +14,15 @@
     input = 'parsed_curve_3d.i'
     exodiff = 'parsed_curve_3d_in.e'
     cli_args = '--mesh-only'
-    requirement ='The system shall generate a 3D open curve mesh.'
+    requirement = 'The system shall generate a 3D open curve mesh.'
+    recover = false
+  []
+  [open_curve_with_ends]
+    type = 'Exodiff'
+    input = 'parsed_curve_open.i'
+    exodiff = 'parsed_curve_open_nodeset_in.e'
+    cli_args = "Mesh/pcg/edge_nodesets='start end' --mesh-only parsed_curve_open_nodeset_in.e"
+    requirement = 'The system shall generate a 2D open curve mesh with nodesets on both ends.'
     recover = false
   []
   [closed_curve]
@@ -22,7 +30,7 @@
     input = 'parsed_curve_closed.i'
     exodiff = 'parsed_curve_closed_in.e'
     cli_args = '--mesh-only'
-    requirement ='The system shall generate a closed loop curve mesh with starting and ending points overlapped.'
+    requirement = 'The system shall generate a closed loop curve mesh with starting and ending points coincident.'
     recover = false
   []
   [forced_closed_curve]
@@ -32,7 +40,7 @@
     cli_args = 'Mesh/pcg/section_bounding_t_values="0 5"
                 Mesh/pcg/nums_segments=10
                 --mesh-only parsed_curve_closed_forced_in.e'
-    requirement ='The system shall generate a closed loop curve mesh with starting and ending points separated.'
+    requirement = 'The system shall generate a closed loop curve mesh with starting and ending points separated.'
     recover = false
   []
   [forced_closed_curve_multi_segments]
@@ -43,7 +51,7 @@
                 Mesh/pcg/nums_segments=10
                 Mesh/pcg/forced_closing_num_segments=5
                 --mesh-only parsed_curve_closed_forced_ms_in.e'
-    requirement ='The system shall generate a closed loop curve mesh with starting and ending points separated using a section that contains multiple elements.'
+    requirement = 'The system shall generate a closed loop curve mesh with starting and ending points separated using a section that contains multiple elements.'
     recover = false
   []
   [xy_delaunay_curve]
@@ -51,7 +59,7 @@
     input = 'xy_curve.i'
     exodiff = 'xy_curve_in.e'
     cli_args = '--mesh-only'
-    requirement ='The system shall generate closed 2D curve meshes that can be used by XYDelaunayGenerator as inputs.'
+    requirement = 'The system shall generate closed 2D curve meshes that can be used as inputs to Delaunay triangulation mesh generators.'
     recover = false
   []
   [err_crossed_curve]
@@ -76,7 +84,7 @@
     cli_args = 'Mesh/pcg/section_bounding_t_values="0.0 1.0 1.0"
                 --mesh-only err.e'
     expect_err = 'elements must be unique.'
-    requirement ='The system shall throw an error if the elements in section_bounding_t_values are not unique.'
+    requirement = 'The system shall throw an error if there are repeated elements in the user-specified curve abscissas.'
   []
   [err_unneeded_forced_closed_num_segments_1]
     type = 'RunException'
@@ -84,7 +92,7 @@
     cli_args = 'Mesh/pcg/forced_closing_num_segments=5
                 --mesh-only err.e'
     expect_err = 'this parameter is not needed if the first and last points of the curve to be generated are overlapped.'
-    requirement ='The system shall throw an error if forced_closed_num_segments is provided but the starting and ending points of the curve are overlapped.'
+    requirement = 'The system shall throw an error if the user specifies to force closing a parsed curve, but it is already closed as the starting and ending points of the curve are overlapped.'
   []
   [err_unneeded_forced_closed_num_segments_2]
     type = 'RunException'
@@ -95,7 +103,7 @@
                 Mesh/pcg/forced_closing_num_segments=5
                 --mesh-only err.e'
     expect_err = 'this parameter is not needed if the curve to be generated is not a closed loop.'
-    requirement ='The system shall throw an error if forced_closed_num_segments is provided but the curve to be generated is open.'
+    requirement = 'The system shall throw an error if the user specifies to force closing a parsed curve but the curve to be generated is also specified to be open.'
   []
   [err_unsorted_t_series]
     type = 'RunException'
@@ -103,7 +111,7 @@
     cli_args = 'Mesh/pcg/section_bounding_t_values="0.0 2.0 1.0"
                 --mesh-only err.e'
     expect_err = 'elements must change monotonically.'
-    requirement ='The system shall throw an error if elements in section_bounding_t_values do not change monotonically.'
+    requirement = 'The system shall throw an error if the abscissa used to generate the curve is specified non-monotonically.'
   []
   [err_bad_nums_segments]
     type = 'RunException'
@@ -111,7 +119,7 @@
     cli_args = 'Mesh/pcg/nums_segments=10
                 --mesh-only err.e'
     expect_err = 'The size of this parameter must be one less than size of section_bounding_t_values.'
-    requirement ='The system shall throw an error if size of nums_segments is not consistent with size of section_bounding_t_values.'
+    requirement = 'The system shall throw an error if the number of curve segments is not consistent with the number of abscissa ranges.'
   []
   [err_failed_parsing_x]
     type = 'RunException'
@@ -119,7 +127,7 @@
     cli_args = 'Mesh/pcg/x_formula=t2
                 --mesh-only err.e'
     expect_err = 'Invalid function'
-    requirement ='The system shall throw an error if x_formula cannot be parsed as a function.'
+    requirement = 'The system shall throw an error if the parsed expression for the x coordinate cannot be parsed as a function.'
   []
   [err_failed_parsing_y]
     type = 'RunException'
@@ -127,7 +135,7 @@
     cli_args = 'Mesh/pcg/y_formula=t2
                 --mesh-only err.e'
     expect_err = 'Invalid function'
-    requirement ='The system shall throw an error if y_formula cannot be parsed as a function.'
+    requirement = 'The system shall throw an error if the parsed expression for the y coordinate cannot be parsed as a function.'
   []
   [err_failed_parsing_z]
     type = 'RunException'
@@ -135,6 +143,6 @@
     cli_args = 'Mesh/pcg/z_formula=t2
                 --mesh-only err.e'
     expect_err = 'Invalid function'
-    requirement ='The system shall throw an error if z_formula cannot be parsed as a function.'
+    requirement = 'The system shall throw an error if the parsed expression for the z coordinate cannot be parsed as a function.'
   []
 []
