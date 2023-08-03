@@ -46,6 +46,10 @@
 
 [Adaptivity]
   initial_marker = uniform
+
+  # backwards compatibility for exodiffs after #25067
+  project_initial_marker = true
+
   initial_steps = 1
   [Markers/uniform]
     type = UniformMarker

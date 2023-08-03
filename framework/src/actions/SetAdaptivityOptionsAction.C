@@ -34,7 +34,7 @@ SetAdaptivityOptionsAction::validParams()
       "initial_marker",
       "The name of the Marker to use to adapt the mesh during initial refinement.");
   params.addParam<bool>("project_initial_marker",
-                        true,
+                        false,
                         "Whether to project initial Marker values onto the refined mesh.");
   params.addParam<unsigned int>(
       "max_h_level",

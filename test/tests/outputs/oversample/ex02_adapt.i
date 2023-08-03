@@ -50,6 +50,10 @@
   marker = marker
   steps = 2
   initial_marker = marker
+
+  # backwards compatibility for exodiffs after #25067
+  project_initial_marker = true
+
   [./Indicators]
     [./indicator]
       type = GradientJumpIndicator

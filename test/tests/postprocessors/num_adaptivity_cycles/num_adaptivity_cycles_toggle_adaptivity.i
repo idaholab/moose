@@ -64,6 +64,10 @@
   max_h_level = 2
   initial_steps = 4
   initial_marker = initial_box
+
+  # backwards compatibility for exodiffs after #25067
+  project_initial_marker = true
+
   [./Markers]
     [./box]
       bottom_left = '0.3 0.3 0'

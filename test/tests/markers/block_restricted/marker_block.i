@@ -26,6 +26,10 @@
 [Adaptivity]
   initial_steps = 2
   initial_marker = marker
+
+  # backwards compatibility for exodiffs after #25067
+  project_initial_marker = true
+
   [./Markers]
     [./marker]
       type = UniformMarker
