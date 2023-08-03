@@ -10,6 +10,10 @@
 
 [Adaptivity]
   initial_marker = u_marker
+
+  # backwards compatibility for exodiffs after #25067
+  project_initial_marker = true
+
   marker = u_marker
   max_h_level = 1
   [Markers]

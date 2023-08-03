@@ -7,6 +7,10 @@
 
 [Adaptivity]
   initial_marker = marker
+
+  # backwards compatibility for exodiffs after #25067
+  project_initial_marker = true
+
   initial_steps = 2
   max_h_level = 2
   [./Markers]

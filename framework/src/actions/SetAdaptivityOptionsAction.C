@@ -67,7 +67,7 @@ SetAdaptivityOptionsAction::validParams()
       "initial_marker",
       "The name of the Marker to use to adapt the mesh during initial refinement.");
   params.addParam<bool>("project_initial_marker",
-                        true,
+                        false,
                         "Whether to project initial Marker values onto the refined mesh.");
   params.addParamNamesToGroup("initial_steps initial_marker project_initial_marker",
                               "Initial Adaptivity");

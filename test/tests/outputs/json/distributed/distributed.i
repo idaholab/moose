@@ -9,6 +9,10 @@
 
 [Adaptivity]
   initial_marker = marker
+
+  # backwards compatibility for exodiffs after #25067
+  project_initial_marker = true
+
   [Markers/marker]
     type = BoxMarker
     bottom_left = '0 0 0'
