@@ -28,7 +28,7 @@ Point torus(Real xi, Real R0 = 4.8, Real a = 1.2, Real tau = 0.63, Real k = 2.2)
 /**
  * Orthogonal vector
  */
-Point orthogonal(Real xi, Real R0 = 4.8, Real a = 1.2, Real tau = 0.63, Real k = 2.2)
+Point orthogonal(Real xi, Real R0 = 4.8, Real a = 1.2, Real tau = 0.63, Real k = 2.2);
 
 /**
  * Convert (r, z) coordinates to (xi, depth)
