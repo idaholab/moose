@@ -66,6 +66,8 @@ protected:
   const Real _oversample_factor;
   /// A factor used to calculate the maximum oversampling points number in each section
   const unsigned int _max_oversample_number_factor;
+  /// vector of the names of the boundaries at the ends of the parsed curve
+  std::vector<BoundaryName> _node_set_boundaries;
   /// t values that are sampled for curve points
   std::vector<Real> _t_space;
   /// cumulative distances of the curve points from the starting ppint

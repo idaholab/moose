@@ -16,21 +16,31 @@
 #define TIME_SECTION1(id)                                                                          \
   mooseAssert(!Threads::in_threads, "PerfGraph timing cannot be used within threaded sections");   \
   PerfGuard time_guard(this->_pg_moose_app.perfGraph(), id);
+#define CHECK_TIME_SECTION(id, section_name)                                                       \
+  mooseAssert(moose::internal::getPerfGraphRegistry().sectionInfo(id)._name ==                     \
+                  timedSectionName(section_name),                                                  \
+              "PerfGraph section '" + timedSectionName(section_name) +                             \
+                  "' is already registered with name '" +                                          \
+                  moose::internal::getPerfGraphRegistry().sectionInfo(id)._name + "'");
 #else
 #define TIME_SECTION1(id)
+#define CHECK_TIME_SECTION(id, section_name)
 #endif
 
 #define TIME_SECTION2(section_name, level)                                                         \
-  static const PerfID __perf_id = this->registerTimedSection(section_name, level);                 \
+  const PerfID __perf_id = this->registerTimedSection(section_name, level);                        \
+  CHECK_TIME_SECTION(__perf_id, section_name);                                                     \
   TIME_SECTION1(__perf_id);
 
 #define TIME_SECTION3(section_name, level, live_message)                                           \
-  static const PerfID __perf_id = this->registerTimedSection(section_name, level, live_message);   \
+  const PerfID __perf_id = this->registerTimedSection(section_name, level, live_message);          \
+  CHECK_TIME_SECTION(__perf_id, section_name);                                                     \
   TIME_SECTION1(__perf_id);
 
 #define TIME_SECTION4(section_name, level, live_message, print_dots)                               \
-  static const PerfID __perf_id =                                                                  \
+  const PerfID __perf_id =                                                                         \
       this->registerTimedSection(section_name, level, live_message, print_dots);                   \
+  CHECK_TIME_SECTION(__perf_id, section_name);                                                     \
   TIME_SECTION1(__perf_id);
 
 // Overloading solution from https://stackoverflow.com/a/11763277
@@ -102,6 +112,13 @@ protected:
                               const unsigned int level,
                               const std::string & live_message,
                               const bool print_dots = true) const;
+
+  /**
+   * @returns The name of the timed section with the name \p section_name.
+   *
+   * Optionally adds a prefix if one is defined.
+   */
+  std::string timedSectionName(const std::string & section_name) const;
 
   /// The MooseApp that owns the PerfGraph
   MooseApp & _pg_moose_app;
