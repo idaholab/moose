@@ -6276,6 +6276,12 @@ FEProblemBase::computeResidualTags(const std::set<TagID> & tags)
   for (auto & nl : _nl)
     nl->computeTimeDerivatives();
 
+  auto reset_state = [this]()
+  {
+    ADReal::do_derivatives = true;
+    _current_execute_on_flag = EXEC_NONE;
+    clearCurrentResidualVectorTags();
+  };
   try
   {
     _aux->compute(EXEC_LINEAR);
@@ -6290,6 +6296,7 @@ FEProblemBase::computeResidualTags(const std::set<TagID> & tags)
     // computing anything else after this.  Plus, using incompletely
     // computed AuxVariables in subsequent calculations could lead to
     // other errors or unhandled exceptions being thrown.
+    reset_state();
     return;
   }
 
@@ -6300,16 +6307,9 @@ FEProblemBase::computeResidualTags(const std::set<TagID> & tags)
   _app.getOutputWarehouse().residualSetup();
 
   _safe_access_tagged_vectors = false;
-
   _current_nl_sys->computeResidualTags(tags);
-
   _safe_access_tagged_vectors = true;
-  ADReal::do_derivatives = true;
-
-  // Reset execution flag as after this point we are no longer on LINEAR
-  _current_execute_on_flag = EXEC_NONE;
-
-  clearCurrentResidualVectorTags();
+  reset_state();
 }
 
 void
