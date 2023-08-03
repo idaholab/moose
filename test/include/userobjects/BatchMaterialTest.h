@@ -18,11 +18,14 @@ typedef BatchMaterial<
     // tuple representation
     BatchMaterialUtils::TupleStd,
     // output data type
-    Real,
+    std::tuple<Real, Real>,
     // gathered input data types:
     BatchMaterialUtils::GatherVariable,
     BatchMaterialUtils::GatherMatProp<RankTwoTensor>,
-    BatchMaterialUtils::GatherMatProp<Real>>
+    BatchMaterialUtils::GatherMatProp<Real>,
+    BatchMaterialUtils::GatherVariableOld,
+    BatchMaterialUtils::GatherMatPropOld<RankTwoTensor>,
+    BatchMaterialUtils::GatherMatPropOld<Real>>
 
     BatchMaterialTestParent;
 

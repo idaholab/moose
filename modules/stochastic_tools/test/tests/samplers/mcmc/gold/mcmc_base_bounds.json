@@ -1,0 +1,303 @@
+{
+    "number_of_parts": 4,
+    "part": 0,
+    "reporters": {
+        "constant": {
+            "type": "StochasticReporter",
+            "values": {
+                "reporter_transfer:average:value": {
+                    "row_begin": 0,
+                    "row_end": 1,
+                    "type": "std::vector<double>"
+                },
+                "reporter_transfer:converged": {
+                    "row_begin": 0,
+                    "row_end": 1,
+                    "type": "std::vector<bool>"
+                }
+            }
+        },
+        "mcmc_reporter": {
+            "type": "PMCMCDecision",
+            "values": {
+                "inputs": {
+                    "type": "std::vector<std::vector<double>>"
+                },
+                "noise": {
+                    "type": "double"
+                },
+                "outputs_required": {
+                    "type": "std::vector<double>"
+                },
+                "tpm": {
+                    "type": "std::vector<double>"
+                },
+                "variance": {
+                    "type": "std::vector<double>"
+                }
+            }
+        },
+        "noise_specified": {
+            "type": "ConstantReporter",
+            "values": {
+                "noise_specified": {
+                    "type": "double"
+                }
+            }
+        }
+    },
+    "time_steps": [
+        {
+            "constant": {
+                "reporter_transfer:average:value": [
+                    0.0
+                ],
+                "reporter_transfer:converged": [
+                    false
+                ]
+            },
+            "mcmc_reporter": {
+                "inputs": [
+                    [
+                        0.0,
+                        0.0
+                    ],
+                    [
+                        0.0,
+                        0.0
+                    ]
+                ],
+                "noise": 0.0,
+                "outputs_required": [
+                    0.0,
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "tpm": [
+                    0.0,
+                    0.0
+                ],
+                "variance": [
+                    0.0,
+                    0.0
+                ]
+            },
+            "noise_specified": {
+                "noise_specified": 0.05
+            },
+            "time": 0.0,
+            "time_step": 0
+        },
+        {
+            "constant": {
+                "reporter_transfer:average:value": [
+                    0.09743591614083168
+                ],
+                "reporter_transfer:converged": [
+                    true
+                ]
+            },
+            "mcmc_reporter": {
+                "inputs": [
+                    [
+                        -1.151000508681518,
+                        -1.2176210623575638
+                    ],
+                    [
+                        1.800129457073951,
+                        0.20059047788849593
+                    ]
+                ],
+                "noise": 0.0,
+                "outputs_required": [
+                    0.09743591614083168,
+                    0.09743591614083168,
+                    0.07329136264166623,
+                    0.07329136264166623
+                ],
+                "tpm": [
+                    1.0,
+                    1.0
+                ],
+                "variance": [
+                    0.0,
+                    0.0
+                ]
+            },
+            "noise_specified": {
+                "noise_specified": 0.05
+            },
+            "time": 1.0,
+            "time_step": 1
+        },
+        {
+            "constant": {
+                "reporter_transfer:average:value": [
+                    0.17390354155392757
+                ],
+                "reporter_transfer:converged": [
+                    true
+                ]
+            },
+            "mcmc_reporter": {
+                "inputs": [
+                    [
+                        0.8662317871517903,
+                        -0.5092719545934339
+                    ],
+                    [
+                        1.4399705881721165,
+                        -0.6195897243113289
+                    ]
+                ],
+                "noise": 0.0,
+                "outputs_required": [
+                    0.17390354155392757,
+                    0.3996728052737176,
+                    0.13081036268271634,
+                    0.3006341569875221
+                ],
+                "tpm": [
+                    1.0,
+                    1.0
+                ],
+                "variance": [
+                    0.0,
+                    0.0
+                ]
+            },
+            "noise_specified": {
+                "noise_specified": 0.05
+            },
+            "time": 2.0,
+            "time_step": 2
+        },
+        {
+            "constant": {
+                "reporter_transfer:average:value": [
+                    -0.6944287487608779
+                ],
+                "reporter_transfer:converged": [
+                    true
+                ]
+            },
+            "mcmc_reporter": {
+                "inputs": [
+                    [
+                        -0.543417447980052,
+                        -0.8819886574181426
+                    ],
+                    [
+                        -1.0808398402157053,
+                        -0.5713184486246254
+                    ]
+                ],
+                "noise": 0.0,
+                "outputs_required": [
+                    -0.6944287487608779,
+                    -0.8048977824137532,
+                    -0.522349778911921,
+                    -0.6054446614441553
+                ],
+                "tpm": [
+                    1.0,
+                    1.0
+                ],
+                "variance": [
+                    0.0,
+                    0.0
+                ]
+            },
+            "noise_specified": {
+                "noise_specified": 0.05
+            },
+            "time": 3.0,
+            "time_step": 3
+        },
+        {
+            "constant": {
+                "reporter_transfer:average:value": [
+                    -0.6867074746305079
+                ],
+                "reporter_transfer:converged": [
+                    true
+                ]
+            },
+            "mcmc_reporter": {
+                "inputs": [
+                    [
+                        -1.6316171989760926,
+                        0.22206002164752792
+                    ],
+                    [
+                        1.3077906547599483,
+                        0.40060782333619493
+                    ]
+                ],
+                "noise": 0.0,
+                "outputs_required": [
+                    -0.6867074746305079,
+                    0.8322968542340848,
+                    -0.516541831238754,
+                    0.6260542619730737
+                ],
+                "tpm": [
+                    1.0,
+                    1.0
+                ],
+                "variance": [
+                    0.0,
+                    0.0
+                ]
+            },
+            "noise_specified": {
+                "noise_specified": 0.05
+            },
+            "time": 4.0,
+            "time_step": 4
+        },
+        {
+            "constant": {
+                "reporter_transfer:average:value": [
+                    0.22596666320572156
+                ],
+                "reporter_transfer:converged": [
+                    true
+                ]
+            },
+            "mcmc_reporter": {
+                "inputs": [
+                    [
+                        0.36272858714613476,
+                        0.10109763249799797
+                    ],
+                    [
+                        -1.5152047502448314,
+                        0.3556470737526294
+                    ]
+                ],
+                "noise": 0.0,
+                "outputs_required": [
+                    0.22596666320572156,
+                    -0.56491282263639,
+                    0.16997227833325587,
+                    -0.4249278108585866
+                ],
+                "tpm": [
+                    1.0,
+                    1.0
+                ],
+                "variance": [
+                    0.0,
+                    0.0
+                ]
+            },
+            "noise_specified": {
+                "noise_specified": 0.05
+            },
+            "time": 5.0,
+            "time_step": 5
+        }
+    ]
+}

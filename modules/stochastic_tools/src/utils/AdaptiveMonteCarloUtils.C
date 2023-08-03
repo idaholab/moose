@@ -91,4 +91,19 @@ computeVectorABS(const std::vector<Real> & data)
   return data_abs;
 }
 
+unsigned int
+weightedResample(const std::vector<Real> & weights, Real rnd)
+{
+  unsigned int req_index = 0;
+  for (unsigned int i = 0; i < weights.size(); ++i)
+  {
+    if (rnd < weights[i])
+    {
+      req_index = i;
+      break;
+    }
+    rnd -= weights[i];
+  }
+  return req_index;
+}
 } // namespace AdaptiveMonteCarloUtils

@@ -1,0 +1,92 @@
+{
+    "number_of_parts": 2,
+    "part": 0,
+    "reporters": {
+        "constant": {
+            "type": "StochasticReporter",
+            "values": {
+                "reporter_transfer:average:value": {
+                    "row_begin": 0,
+                    "row_end": 2,
+                    "type": "std::vector<double>"
+                },
+                "reporter_transfer:converged": {
+                    "row_begin": 0,
+                    "row_end": 2,
+                    "type": "std::vector<bool>"
+                }
+            }
+        },
+        "likelihoodtest": {
+            "type": "TestLikelihood",
+            "values": {
+                "function": {
+                    "type": "std::vector<double>"
+                },
+                "model_pred_required": {
+                    "type": "std::vector<double>"
+                }
+            }
+        },
+        "noise_specified": {
+            "type": "ConstantReporter",
+            "values": {
+                "noise_specified": {
+                    "type": "double"
+                }
+            }
+        }
+    },
+    "time_steps": [
+        {
+            "constant": {
+                "reporter_transfer:average:value": [
+                    0.0,
+                    0.0
+                ],
+                "reporter_transfer:converged": [
+                    false,
+                    false
+                ]
+            },
+            "likelihoodtest": {
+                "function": [
+                    0.0
+                ],
+                "model_pred_required": []
+            },
+            "noise_specified": {
+                "noise_specified": 0.2
+            },
+            "time": 0.0,
+            "time_step": 0
+        },
+        {
+            "constant": {
+                "reporter_transfer:average:value": [
+                    -0.5769720319127907,
+                    0.4873549495108542
+                ],
+                "reporter_transfer:converged": [
+                    true,
+                    true
+                ]
+            },
+            "likelihoodtest": {
+                "function": [
+                    1.8646195211506778
+                ],
+                "model_pred_required": [
+                    -0.5769720319127907,
+                    0.4873549495108542,
+                    -0.6411786542848692
+                ]
+            },
+            "noise_specified": {
+                "noise_specified": 0.2
+            },
+            "time": 1.0,
+            "time_step": 1
+        }
+    ]
+}

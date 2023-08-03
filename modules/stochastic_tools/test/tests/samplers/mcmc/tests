@@ -1,0 +1,100 @@
+[Tests]
+  issues = '#23837'
+  design = 'PMCMCBase.md'
+  [mcmc_sampling]
+    requirement = 'The system shall be be able to perform MCMC sampling when '
+    [pmcmc_base]
+      type = 'JSONDiff'
+      input = main_base.i
+      allow_test_objects = true
+      jsondiff = 'mcmc_base.json'
+      min_parallel = 4
+      max_parallel = 4
+      detail = 'using the base MCMC class; '
+    []
+    [pmcmc_base_bounds]
+      type = 'JSONDiff'
+      input = main_base.i
+      allow_test_objects = true
+      jsondiff = 'mcmc_base_bounds.json'
+      cli_args = "Samplers/sample/lower_bound='-2.0 -2.0' Samplers/sample/upper_bound='2.0 2.0' Outputs/file_base='mcmc_base_bounds'"
+      min_parallel = 4
+      max_parallel = 4
+      detail = 'using the base MCMC class with bounds specified; '
+    []
+    [imh_5prop]
+      type = 'JSONDiff'
+      input = main_imh.i
+      allow_test_objects = true
+      jsondiff = 'imh_5prop.json'
+      min_parallel = 4
+      max_parallel = 4
+      detail = 'using the independent Metropolis-Hastings class; '
+    []
+    [des_5prop]
+      type = 'JSONDiff'
+      input = main_des.i
+      allow_test_objects = true
+      jsondiff = 'des_5prop.json'
+      min_parallel = 4
+      max_parallel = 4
+      detail = 'using the differential evolution sampler class; '
+    []
+    [ss_5prop]
+      type = 'JSONDiff'
+      input = main_ss.i
+      allow_test_objects = true
+      jsondiff = 'ss_5prop.json'
+      min_parallel = 4
+      max_parallel = 4
+      detail = 'using the stretch sampler class; '
+    []
+    [des_5prop_var]
+      type = 'JSONDiff'
+      input = main_des_var.i
+      allow_test_objects = true
+      jsondiff = 'des_5prop_var.json'
+      min_parallel = 4
+      max_parallel = 4
+      detail = 'using the differential evolution sampler class with variance inferred; '
+    []
+  []
+  [mcmc_sampling_errors]
+    requirement = 'The system shall throw an error when '
+    [pmcmc_base_bounds1]
+      type = RunException
+      input = main_base.i
+      cli_args = "Samplers/sample/lower_bound='-2.0 -2.0'"
+      detail = 'only the lower bounds specified; '
+      expect_err = "Both lower and upper bounds should be specified."
+    []
+    [pmcmc_base_bounds2]
+      type = RunException
+      input = main_base.i
+      cli_args = "Samplers/sample/lower_bound='-2.0 -2.0' Samplers/sample/upper_bound='2.0'"
+      detail = 'the specified bounds are not of the same size; '
+      expect_err = "Lower and upper bounds should be of the same size."
+    []
+    [pmcmc_base_sizes]
+      type = RunException
+      input = main_base.i
+      cli_args = "Samplers/sample/initial_values='0.1'"
+      detail = 'the priors, bounds, and initial values are not of the same size; '
+      expect_err = "The priors and initial values should be of the same size."
+    []
+    [imh_std_sizes]
+      type = RunException
+      input = main_imh.i
+      cli_args = "Samplers/sample/std_prop='0.05'"
+      detail = 'the proposal stds, initial values, and priors are not of the same size; '
+      expect_err = "The number of proposal stds, initial values, and priors should be the same."
+    []
+    [des_scale_sizes]
+      type = RunException
+      input = main_des.i
+      cli_args = "Samplers/sample/scales='1.0'"
+      detail = 'the number of scales provided do not match the number of tunable params; '
+      expect_err = "The number of scales provided should match the number of tunable params."
+    []
+  []
+[]

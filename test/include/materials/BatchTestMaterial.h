@@ -30,9 +30,13 @@ protected:
   const VariableValue & _var1;
   const MaterialProperty<RankTwoTensor> & _prop1;
   const MaterialProperty<Real> & _prop2;
+  const VariableValue & _var1_n;
+  const MaterialProperty<RankTwoTensor> & _prop1_n;
+  const MaterialProperty<Real> & _prop2_n;
 
   // output batch result as property
-  MaterialProperty<Real> & _prop_out;
+  MaterialProperty<Real> & _prop_out1;
+  MaterialProperty<Real> & _prop_out2;
 
   // coupling the batch computation result
   const BatchMaterialTest & _batch_uo;

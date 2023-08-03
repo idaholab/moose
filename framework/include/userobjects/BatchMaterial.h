@@ -22,8 +22,8 @@ namespace BatchMaterialUtils
 {
 
 // type wrappers
-template <typename T>
-struct GatherMatProp
+template <typename T, unsigned int state>
+struct GatherMatPropTempl
 {
   typedef T type;
   typedef const MaterialProperty<T> gather_type;
@@ -31,9 +31,14 @@ struct GatherMatProp
   template <typename M>
   static gather_type * getPointer(M & mpi, const MaterialPropertyName & name)
   {
-    return &mpi.template getMaterialProperty<T>(name);
+    return &mpi.template getGenericMaterialProperty<T, false>(name, state);
   }
 };
+
+template <typename T>
+using GatherMatProp = GatherMatPropTempl<T, 0>;
+template <typename T>
+using GatherMatPropOld = GatherMatPropTempl<T, 1>;
 
 struct GatherVariable
 {
@@ -44,6 +49,18 @@ struct GatherVariable
   static gather_type * getPointer(const C & coupleable, const VariableName & name)
   {
     return &coupleable.coupledValue(name);
+  }
+};
+
+struct GatherVariableOld
+{
+  typedef Real type;
+  typedef const VariableValue gather_type;
+
+  template <typename C>
+  static gather_type * getPointer(const C & coupleable, const VariableName & name)
+  {
+    return &coupleable.coupledValueOld(name);
   }
 };
 
@@ -172,6 +189,8 @@ public:
   std::map<dof_id_type, std::size_t> _index_map;
 
   friend struct BatchMaterialUtils::GatherVariable;
+
+  friend struct BatchMaterialUtils::GatherVariableOld;
 
 private:
   /// flag that indicates if _output_data has been fully computed
