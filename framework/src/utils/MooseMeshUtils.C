@@ -16,6 +16,7 @@
 #include "libmesh/mesh_base.h"
 #include "libmesh/parallel.h"
 #include "libmesh/parallel_algebra.h"
+#include "libmesh/utility.h"
 
 using namespace libMesh;
 
@@ -249,7 +250,7 @@ meshCentroidCalculator(const MeshBase & mesh)
   return centroid_pt;
 }
 
-std::map<dof_id_type, dof_id_type>
+std::unordered_map<dof_id_type, dof_id_type>
 getExtraIDUniqueCombinationMap(const MeshBase & mesh,
                                const std::set<SubdomainID> & block_ids,
                                std::vector<ExtraElementIDName> extra_ids)
@@ -274,7 +275,7 @@ getExtraIDUniqueCombinationMap(const MeshBase & mesh,
     }
     mesh.comm().set_union(ids);
     // determine new extra id values;
-    std::map<dof_id_type, dof_id_type> parsed_ids;
+    std::unordered_map<dof_id_type, dof_id_type> parsed_ids;
     for (auto & elem : mesh.active_element_ptr_range())
     {
       if (block_restricted && block_ids.find(elem->subdomain_id()) == block_ids.end())
@@ -285,7 +286,7 @@ getExtraIDUniqueCombinationMap(const MeshBase & mesh,
     return parsed_ids;
   }
   // if extra_ids is not empty, recursively call getExtraIDUniqueCombinationMap
-  std::map<dof_id_type, dof_id_type> base_parsed_ids =
+  const auto base_parsed_ids =
       MooseMeshUtils::getExtraIDUniqueCombinationMap(mesh, block_ids, extra_ids);
   // parsing extra ids based on ref_parsed_ids
   std::vector<std::pair<dof_id_type, dof_id_type>> unique_ids;
@@ -296,7 +297,7 @@ getExtraIDUniqueCombinationMap(const MeshBase & mesh,
     {
       if (block_restricted && block_ids.find(elem->subdomain_id()) == block_ids.end())
         continue;
-      const dof_id_type id1 = base_parsed_ids[elem->id()];
+      const dof_id_type id1 = libmesh_map_find(base_parsed_ids, elem->id());
       const dof_id_type id2 = elem->get_extra_integer(id_index);
       const std::pair<dof_id_type, dof_id_type> ids = std::make_pair(id1, id2);
       unique_ids_set.insert(ids);
@@ -306,7 +307,7 @@ getExtraIDUniqueCombinationMap(const MeshBase & mesh,
     unique_ids.assign(unique_ids_set.begin(), unique_ids_set.end());
   }
 
-  std::map<dof_id_type, dof_id_type> parsed_ids;
+  std::unordered_map<dof_id_type, dof_id_type> parsed_ids;
 
   for (const auto & [ids, elements] : map_unique_id_to_elem)
   {
