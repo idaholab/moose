@@ -58,7 +58,6 @@ Q = 200
   [wall_left_boundary_1]
     type = SideSetsFromBoundingBoxGenerator
     input = solid_fluid_interface_2
-    block_id = 0
     bottom_left = '0 0 0'
     top_right = '0.1 0.0127 0'
     boundaries_old = left
@@ -68,7 +67,6 @@ Q = 200
   [wall_left_boundary_2]
     type = SideSetsFromBoundingBoxGenerator
     input = wall_left_boundary_1
-    block_id = 0
     bottom_left = '0 2.9857 0'
     top_right = '0.1 2.9984 0'
     boundaries_old = left
@@ -78,7 +76,6 @@ Q = 200
   [fluid_left_boundary]
     type = SideSetsFromBoundingBoxGenerator
     input = wall_left_boundary_2
-    block_id = '2'
     bottom_left = '0 0.0127 0'
     top_right = '0.1 2.9857 0'
     boundaries_old = left
