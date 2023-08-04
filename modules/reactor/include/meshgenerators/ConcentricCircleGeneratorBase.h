@@ -36,12 +36,12 @@ protected:
   /// Widths, fractions, radial sectors and growth factors of the outer boundary layers of the ring regions
   multiBdryLayerParams _ring_outer_boundary_layer_params;
   /// Subdomain IDs of the ring regions
-  std::vector<subdomain_id_type> _ring_block_ids;
-  /// Subdomain Names of the ting regions
-  std::vector<SubdomainName> _ring_block_names;
+  const std::vector<subdomain_id_type> _ring_block_ids;
+  /// Subdomain Names of the ring regions
+  const std::vector<SubdomainName> _ring_block_names;
   /// Volume preserving function is optional
   const bool _preserve_volumes;
-  /// Shift in default subdomain IDs to avert potential conflicts
+  /// Shift in default subdomain IDs to avert potential conflicts with other meshes
   const subdomain_id_type _block_id_shift;
   /// Whether inward interface boundaries are created
   const bool _create_inward_interface_boundaries;

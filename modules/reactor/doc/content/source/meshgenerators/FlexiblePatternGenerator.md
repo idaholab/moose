@@ -82,12 +82,12 @@ In both [!param](/Mesh/FlexiblePatternGenerator/hex_patterns) and [!param](/Mesh
 !listing modules/reactor/test/tests/meshgenerators/flexible_pattern_generator/mixed_pattern.i
          block=Mesh/fpg
          id=mixed_pattern
-         caption=Input example of mixed patterning with dummy united meshes.
+         caption=Input example of mixed patterning with dummy unit meshes.
 
 !media reactor/meshgenerators/mixed_pattern.png
       style=display: block;margin-left:auto;margin-right:auto;width:40%;
       id=mixed_pattern_m
-      caption=Output example of mixed patterning with dummy united meshes.
+      caption=Output example of mixed patterning with dummy unit meshes.
 
 !syntax parameters /Mesh/FlexiblePatternGenerator
 

@@ -19,8 +19,7 @@ ConcentricCircleGeneratorBase::validParams()
       "ring_intervals",
       "ring_intervals>0",
       "Number of radial mesh intervals within each major concentric circle excluding their "
-      "boundary "
-      "layers.");
+      "boundary layers.");
   params.addRangeCheckedParam<std::vector<Real>>(
       "ring_radial_biases",
       "ring_radial_biases>0",
