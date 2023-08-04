@@ -117,9 +117,4 @@ protected:
   /// Depend Markers
   std::set<std::string> _depend;
   std::set<std::string> _supplied;
-
-private:
-  /// Data member for storing dof values when p-refinement is occurring. We store a data member to
-  /// avoid constant dynamic memory allocation
-  DenseVector<Real> _dof_values;
 };

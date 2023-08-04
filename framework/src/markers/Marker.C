@@ -70,17 +70,7 @@ void
 Marker::computeMarker()
 {
   int mark = computeElementMarker();
-  if (_current_elem->p_level())
-  {
-    const auto num_dofs = _field_var.dofIndices().size();
-    _dof_values.resize(num_dofs);
-    _dof_values(0) = mark;
-    for (const auto i : make_range(std::size_t(1), num_dofs))
-      _dof_values(i) = 0;
-    _field_var.setDofValues(_dof_values);
-  }
-  else
-    _field_var.setNodalValue(mark);
+  _field_var.setNodalValue(mark);
 }
 
 ErrorVector &
