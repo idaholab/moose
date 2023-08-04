@@ -1,0 +1,7 @@
+[Tests]
+  [FVFunctionNormalDirichlet]
+    type = 'Exodiff'
+    input = 'FVFunctionNormalDirichlet.i'
+    exodiff = 'FVFunctionNormalDirichlet_out.e'
+  []
+[]

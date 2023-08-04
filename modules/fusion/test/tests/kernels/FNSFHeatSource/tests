@@ -1,0 +1,7 @@
+[Tests]
+  [FNSFHeatSource]
+    type = 'Exodiff'
+    input = 'FNSFHeatSource.i'
+    exodiff = 'FNSFHeatSource_out.e'
+  []
+[]

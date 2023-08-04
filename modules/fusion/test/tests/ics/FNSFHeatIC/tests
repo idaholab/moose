@@ -1,0 +1,7 @@
+[Tests]
+  [FNSFHeatIC]
+    type = 'Exodiff'
+    input = 'FNSFHeatIC.i'
+    exodiff = 'FNSFHeatIC_out.e'
+  []
+[]

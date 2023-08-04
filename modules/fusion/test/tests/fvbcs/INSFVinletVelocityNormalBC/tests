@@ -1,0 +1,7 @@
+[Tests]
+  [INFVInletVelocityNormalBC]
+    type = 'Exodiff'
+    input = 'INFVInletVelocityNormalBC.i'
+    exodiff = 'INFVInletVelocityNormalBC_out.e'
+  []
+[]
