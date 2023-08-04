@@ -9,33 +9,18 @@
 
 #pragma once
 
-// MOOSE includes
+#include "LayeredSideIntegralBase.h"
 #include "SideIntegralVariableUserObject.h"
-#include "LayeredBase.h"
 
 /**
  * This UserObject computes volume integrals of a variable storing
  * partial sums for the specified number of intervals in a direction
  * (x,y,z).
  */
-class LayeredSideIntegral : public SideIntegralVariableUserObject, public LayeredBase
+class LayeredSideIntegral : public LayeredSideIntegralBase<SideIntegralVariableUserObject>
 {
 public:
   static InputParameters validParams();
 
   LayeredSideIntegral(const InputParameters & parameters);
-
-  /**
-   * Given a Point return the integral value associated with the layer that point falls in.
-   *
-   * @param p The point to look for in the layers.
-   */
-  virtual Real spatialValue(const Point & p) const override { return integralValue(p); }
-
-  virtual const std::vector<Point> spatialPoints() const override;
-
-  virtual void initialize() override;
-  virtual void execute() override;
-  virtual void finalize() override;
-  virtual void threadJoin(const UserObject & y) override;
 };
