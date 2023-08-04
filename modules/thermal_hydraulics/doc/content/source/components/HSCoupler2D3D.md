@@ -77,8 +77,9 @@ r^\text{gap}_{z,\theta} = \frac{1}{2}(r_\text{2D} + r_{z,\theta}) \,.
 
 ### Conduction Heat Flux
 
-The conduction heat flux is computed using a conduction thermal resistance from a
-steady analysis [!citep](incropera2002); the conduction heat flux *to* the 3D heat structure side is
+The conduction heat flux is computed using the model described in
+[utils/HeatTransferModels.md#cylindrical_gap_conduction_heat_flux];
+the conduction heat flux *to* the 3D heat structure side is
 
 !equation
 q^\text{cond}_{z,\theta} = (T_z - T_{z,\theta}) \frac{k^\text{gap}_{z,\theta}}
@@ -91,7 +92,8 @@ k^\text{gap}_{z,\theta} = k_\text{gap}(T^\text{gap}_{z,\theta}) \,.
 
 ### Radiation Heat Flux
 
-The radiation heat flux is computed assuming opaque, gray, diffuse surfaces.
+The radiation heat flux is computed using the model described in
+[utils/HeatTransferModels.md#cylindrical_gap_radiation_heat_flux];
 For each quadrature point on the 3D heat structure boundary, view factors are
 effectively computed between two surfaces, corresponding to infinitely long,
 concentric cylinders at the radii $r_\text{2D}$ and $r_{z,\theta}$ [!citep](incropera2002).
