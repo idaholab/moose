@@ -41,7 +41,7 @@ protected:
   /// Number of extra IDs in use
   const unsigned int _n_extra_id;
   // Map of element ids to parsed vpp ids
-  std::map<dof_id_type, dof_id_type> _unique_vpp_ids;
+  std::unordered_map<dof_id_type, dof_id_type> _unique_vpp_ids;
   /// Vectors holding extra IDs
   std::vector<VectorPostprocessorValue *> _var_extra_ids;
   /// Coupled MOOSE variables to be integrated

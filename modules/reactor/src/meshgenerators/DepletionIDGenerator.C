@@ -53,8 +53,7 @@ DepletionIDGenerator::generate()
                "'is not defined in input mesh!");
   id_names.push_back(_material_id_name);
   const std::set<SubdomainID> block_ids = {Moose::ANY_BLOCK_ID};
-  std::map<dof_id_type, dof_id_type> parsed_ids =
-      MooseMeshUtils::getExtraIDUniqueCombinationMap(*mesh, block_ids, id_names);
+  auto parsed_ids = MooseMeshUtils::getExtraIDUniqueCombinationMap(*mesh, block_ids, id_names);
   // re-numbering if exclude_id_name is used
   if (isParamValid("exclude_id_name") && isParamValid("exclude_id_value"))
   {
