@@ -83,14 +83,14 @@ public:
   virtual bool addCouplingEntriesToJacobian() override { return _primary_secondary_jacobian; }
 
   bool shouldApply() override;
-  void computeContactForce(PenetrationInfo * pinfo, bool update_contact_set);
+  void computeContactForce(const Node & node, PenetrationInfo * pinfo, bool update_contact_set);
 
 protected:
   MooseSharedPointer<DisplacedProblem> _displaced_problem;
-  Real gapOffset(const Node * node);
-  Real nodalArea(PenetrationInfo & pinfo);
-  Real getPenalty(PenetrationInfo & pinfo);
-  Real getTangentialPenalty(PenetrationInfo & pinfo);
+  Real gapOffset(const Node & node);
+  Real nodalArea(const Node & node);
+  Real getPenalty(const Node & node);
+  Real getTangentialPenalty(const Node & node);
 
   const unsigned int _component;
   const ContactModel _model;

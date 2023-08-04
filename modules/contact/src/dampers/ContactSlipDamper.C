@@ -94,9 +94,9 @@ ContactSlipDamper::timestepSetup()
         if (pen_loc._penetration_info[secondary_node_num])
         {
           PenetrationInfo & info = *pen_loc._penetration_info[secondary_node_num];
-          const Node * node = info._node;
+          const Node & node = _displaced_problem->mesh().nodeRef(secondary_node_num);
 
-          if (node->processor_id() == processor_id())
+          if (node.processor_id() == processor_id())
             //              && info.isCaptured())                  //TODO maybe just set this
             //              everywhere?
             info._slip_reversed = false;
@@ -137,9 +137,9 @@ ContactSlipDamper::computeDamping(const NumericVector<Number> & solution,
         if (pen_loc._penetration_info[secondary_node_num])
         {
           PenetrationInfo & info = *pen_loc._penetration_info[secondary_node_num];
-          const Node * node = info._node;
+          const Node & node = _displaced_problem->mesh().nodeRef(secondary_node_num);
 
-          if (node->processor_id() == processor_id())
+          if (node.processor_id() == processor_id())
           {
             if (info.isCaptured())
             {
@@ -189,7 +189,7 @@ ContactSlipDamper::computeDamping(const NumericVector<Number> & solution,
                     (tangential_it_slip.norm() - _max_iterative_slip) / tangential_it_slip.norm();
 
               if (_debug_output && node_damping_factor < 1.0)
-                _console << "Damping node: " << node->id()
+                _console << "Damping node: " << node.id()
                          << " prev iter slip: " << info._incremental_slip_prev_iter
                          << " curr iter slip: " << info._incremental_slip
                          << " slip_tol: " << info._slip_tol
