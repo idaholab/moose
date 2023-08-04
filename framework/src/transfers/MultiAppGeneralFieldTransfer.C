@@ -163,7 +163,8 @@ MultiAppGeneralFieldTransfer::MultiAppGeneralFieldTransfer(const InputParameters
     if (_nearest_positions_obj)
       paramError("use_nearest_app", "Cannot use nearest-app and nearest-position together");
     if (!hasFromMultiApp())
-      mooseError("Should have a source multiapp when using the nearest-app informed search");
+      paramError("use_nearest_app",
+                 "Should have a 'from_multiapp' when using the nearest-app informed search");
     auto pos_params = MultiAppPositions::validParams();
     pos_params.set<std::vector<MultiAppName>>("multiapps") = {getMultiApp()->name()};
     pos_params.set<MooseApp *>("_moose_app") =

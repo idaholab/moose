@@ -20,6 +20,7 @@ SupersonicInlet::validParams()
   params.addParam<Real>("p", "Prescribed pressure [Pa]");
   params.addParam<Real>("T", "Prescribed temperature [K]");
   params.addParam<Real>("vel", "Prescribed velocity [m/s]");
+  params.addClassDescription("Deprecated component to add a supersonic flow inlet");
   return params;
 }
 

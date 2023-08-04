@@ -1,20 +1,16 @@
 # HSBoundaryExternalAppTemperature
 
-!alert construction title=Undocumented Class
-The HSBoundaryExternalAppTemperature has not been documented. The content listed below should be used as a starting point for
-documenting the class, which includes the typical automatic documentation associated with a
-MooseObject; however, what is contained is ultimately determined by what is necessary to make the
-documentation clear for users.
-
 !syntax description /Components/HSBoundaryExternalAppTemperature
 
-## Overview
+This component is the same as [HSBoundarySpecifiedTemperature.md] but uses
+a temperature transferred from an external application into an auxiliary variable.
 
-!! Replace these lines with information regarding the HSBoundaryExternalAppTemperature object.
+The temperature variable is added by this component on the subdomains of the heat structure with a variable type
+defined by the [HeatConductionModel.md].
 
-## Example Input File Syntax
-
-!! Describe and include an example of how to use the HSBoundaryExternalAppTemperature object.
+The boundary temperature is imposed weakly on the boundary defined by the
+[!param](/Components/HSBoundaryExternalAppTemperature/boundary) parameter
+using an [ADMatchedValueBC.md] nodal boundary condition.
 
 !syntax parameters /Components/HSBoundaryExternalAppTemperature
 

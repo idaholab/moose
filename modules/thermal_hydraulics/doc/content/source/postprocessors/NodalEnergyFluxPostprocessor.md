@@ -1,20 +1,14 @@
 # NodalEnergyFluxPostprocessor
 
-!alert construction title=Undocumented Class
-The NodalEnergyFluxPostprocessor has not been documented. The content listed below should be used as a starting point for
-documenting the class, which includes the typical automatic documentation associated with a
-MooseObject; however, what is contained is ultimately determined by what is necessary to make the
-documentation clear for users.
-
 !syntax description /Postprocessors/NodalEnergyFluxPostprocessor
 
-## Overview
+The energy flux $\Phi$ through nodes is computed as:
 
-!! Replace these lines with information regarding the NodalEnergyFluxPostprocessor object.
+!equation
+\Phi = \sum_{nodes} \alpha \rho u A H
 
-## Example Input File Syntax
-
-!! Describe and include an example of how to use the NodalEnergyFluxPostprocessor object.
+where $\alpha$ is the phase fraction, $\rho$ is the phase density, $u$ is the phase velocity,
+$A$ the local area, and $H$ the specific total enthalpy.
 
 !syntax parameters /Postprocessors/NodalEnergyFluxPostprocessor
 
