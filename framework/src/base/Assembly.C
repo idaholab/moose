@@ -4721,15 +4721,19 @@ Assembly::helpersRequestData()
 }
 
 void
-Assembly::havePRefinement()
+Assembly::havePRefinement(const bool user_disabled_lagrange_p_refinement)
 {
   const Order helper_order = _mesh.hasSecondOrderElements() ? SECOND : FIRST;
   const FEType helper_type(helper_order, LAGRANGE);
-  auto setup_helpers = [&helper_type](auto & unique_helper_container,
-                                      auto & helper_container,
-                                      const unsigned int num_dimensionalities,
-                                      const bool user_added_helper_type,
-                                      auto & fe_container)
+  std::vector<FEType> lagrange_types = {helper_type};
+  if (helper_order == SECOND)
+    lagrange_types.push_back(FEType(FIRST, LAGRANGE));
+  auto process_lagrange_fe = [&helper_type, user_disabled_lagrange_p_refinement, &lagrange_types](
+                                 auto & unique_helper_container,
+                                 auto & helper_container,
+                                 const unsigned int num_dimensionalities,
+                                 const bool user_added_helper_type,
+                                 auto & fe_container)
   {
     unique_helper_container.resize(num_dimensionalities);
     for (const auto dim : make_range(num_dimensionalities))
@@ -4745,40 +4749,51 @@ Assembly::havePRefinement()
       // perhaps silly helpers
       if (!user_added_helper_type)
       {
-        auto & fe_container_dim = fe_container[dim];
+        auto & fe_container_dim = libmesh_map_find(fe_container, dim);
         auto fe_it = fe_container_dim.find(helper_type);
         mooseAssert(fe_it != fe_container_dim.end(), "We should have the helper type");
         delete fe_it->second;
         fe_container_dim.erase(fe_it);
       }
+      else if (user_disabled_lagrange_p_refinement)
+        // We cannot invalidate FE references so we can't use the logic in the above if block
+        for (const auto & lagrange_type : lagrange_types)
+        {
+          auto & fe_container_dim = libmesh_map_find(fe_container, dim);
+          auto fe_it = fe_container_dim.find(lagrange_type);
+          if (lagrange_type == helper_type)
+            mooseAssert(fe_it != fe_container_dim.end(), "We should have the helper type");
+          if (fe_it != fe_container_dim.end())
+            fe_it->second->add_p_level_in_reinit(false);
+        }
     }
   };
 
-  setup_helpers(_unique_fe_helper,
-                _holder_fe_helper,
-                _mesh_dimension + 1,
-                _user_added_fe_of_helper_type,
-                _fe);
-  setup_helpers(_unique_fe_face_helper,
-                _holder_fe_face_helper,
-                _mesh_dimension + 1,
-                _user_added_fe_face_of_helper_type,
-                _fe_face);
-  setup_helpers(_unique_fe_face_neighbor_helper,
-                _holder_fe_face_neighbor_helper,
-                _mesh_dimension + 1,
-                _user_added_fe_face_neighbor_of_helper_type,
-                _fe_face_neighbor);
-  setup_helpers(_unique_fe_neighbor_helper,
-                _holder_fe_neighbor_helper,
-                _mesh_dimension + 1,
-                _user_added_fe_neighbor_of_helper_type,
-                _fe_neighbor);
-  setup_helpers(_unique_fe_lower_helper,
-                _holder_fe_lower_helper,
-                _mesh_dimension,
-                _user_added_fe_lower_of_helper_type,
-                _fe_lower);
+  process_lagrange_fe(_unique_fe_helper,
+                      _holder_fe_helper,
+                      _mesh_dimension + 1,
+                      _user_added_fe_of_helper_type,
+                      _fe);
+  process_lagrange_fe(_unique_fe_face_helper,
+                      _holder_fe_face_helper,
+                      _mesh_dimension + 1,
+                      _user_added_fe_face_of_helper_type,
+                      _fe_face);
+  process_lagrange_fe(_unique_fe_face_neighbor_helper,
+                      _holder_fe_face_neighbor_helper,
+                      _mesh_dimension + 1,
+                      _user_added_fe_face_neighbor_of_helper_type,
+                      _fe_face_neighbor);
+  process_lagrange_fe(_unique_fe_neighbor_helper,
+                      _holder_fe_neighbor_helper,
+                      _mesh_dimension + 1,
+                      _user_added_fe_neighbor_of_helper_type,
+                      _fe_neighbor);
+  process_lagrange_fe(_unique_fe_lower_helper,
+                      _holder_fe_lower_helper,
+                      _mesh_dimension,
+                      _user_added_fe_lower_of_helper_type,
+                      _fe_lower);
 
   helpersRequestData();
 }

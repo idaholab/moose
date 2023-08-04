@@ -130,8 +130,9 @@ public:
 
   /**
    * Switch from h-refinement to p-refinement
+   * @param disable_lagrange_p_refinement Whether to disable the p-refinement of Lagrange variables
    */
-  void switchHToPRefinement();
+  void switchHToPRefinement(bool disable_lagrange_p_refinement);
 
   /**
    * Adapts the mesh based on the error estimator used

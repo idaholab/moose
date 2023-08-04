@@ -358,11 +358,6 @@ public:
 
   virtual const std::vector<VectorTag> & currentResidualVectorTags() const override;
 
-  /**
-   * Indicate that we have p-refinement
-   */
-  void havePRefinement();
-
   virtual void needFV() override;
   virtual bool haveFV() const override;
 

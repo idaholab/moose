@@ -1304,14 +1304,6 @@ DisplacedProblem::currentResidualVectorTags() const
   return _mproblem.currentResidualVectorTags();
 }
 
-void
-DisplacedProblem::havePRefinement()
-{
-  for (auto & assembly_vecs : _assembly)
-    for (auto & assembly : assembly_vecs)
-      assembly->havePRefinement();
-}
-
 bool
 DisplacedProblem::safeAccessTaggedMatrices() const
 {

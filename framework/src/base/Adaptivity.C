@@ -387,10 +387,10 @@ Adaptivity::isAdaptivityDue()
 }
 
 void
-Adaptivity::switchHToPRefinement()
+Adaptivity::switchHToPRefinement(const bool disable_lagrange_p_refinement)
 {
   _p_refinement_flag = true;
-  _fe_problem.havePRefinement();
+  _fe_problem.havePRefinement(disable_lagrange_p_refinement);
 }
 
 #endif // LIBMESH_ENABLE_AMR

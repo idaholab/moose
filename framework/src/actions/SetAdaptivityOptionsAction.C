@@ -17,22 +17,16 @@ registerMooseAction("MooseApp", SetAdaptivityOptionsAction, "set_adaptivity_opti
 registerMooseAction("MooseApp", SetAdaptivityOptionsAction, "add_geometric_rm");
 registerMooseAction("MooseApp", SetAdaptivityOptionsAction, "add_algebraic_rm");
 
+namespace Moose
+{
 InputParameters
-SetAdaptivityOptionsAction::validParams()
+commonAdaptivityParams()
 {
   InputParameters params = Action::validParams();
-  params.addClassDescription("Action for defining adaptivity parameters.");
-  params.addParam<MarkerName>("marker",
-                              "The name of the Marker to use to actually adapt the mesh.");
   params.addParam<unsigned int>(
       "steps", 0, "The number of adaptive steps to use when doing a Steady simulation.");
-  params.addParam<unsigned int>(
-      "initial_steps", 0, "The number of adaptive steps to do based on the initial condition.");
   params.addRangeCheckedParam<unsigned int>(
       "interval", 1, "interval>0", "The number of time steps betweeen each adaptivity phase");
-  params.addParam<MarkerName>(
-      "initial_marker",
-      "The name of the Marker to use to adapt the mesh during initial refinement.");
   params.addParam<unsigned int>(
       "max_h_level",
       0,
@@ -50,6 +44,25 @@ SetAdaptivityOptionsAction::validParams()
   params.addParam<bool>(
       "recompute_markers_during_cycles", false, "Recompute markers during adaptivity cycles");
   params.addParam<bool>("switch_h_to_p_refinement", false, "True to perform p-refinement");
+  params.addParam<bool>("disable_lagrange_p_refinement",
+                        false,
+                        "Whether to disable p-refinement of Lagrange variables.");
+  return params;
+}
+}
+
+InputParameters
+SetAdaptivityOptionsAction::validParams()
+{
+  InputParameters params = Moose::commonAdaptivityParams();
+  params.addClassDescription("Action for defining adaptivity parameters.");
+  params.addParam<MarkerName>("marker",
+                              "The name of the Marker to use to actually adapt the mesh.");
+  params.addParam<unsigned int>(
+      "initial_steps", 0, "The number of adaptive steps to do based on the initial condition.");
+  params.addParam<MarkerName>(
+      "initial_marker",
+      "The name of the Marker to use to adapt the mesh during initial refinement.");
   return params;
 }
 
@@ -139,6 +152,6 @@ SetAdaptivityOptionsAction::act()
 
     adapt.setRecomputeMarkersFlag(getParam<bool>("recompute_markers_during_cycles"));
     if (getParam<bool>("switch_h_to_p_refinement"))
-      adapt.switchHToPRefinement();
+      adapt.switchHToPRefinement(getParam<bool>("disable_lagrange_p_refinement"));
   }
 }

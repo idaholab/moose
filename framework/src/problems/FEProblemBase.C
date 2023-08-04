@@ -8247,12 +8247,9 @@ FEProblemBase::reinitMortarUserObjects(const BoundaryID primary_boundary_id,
 }
 
 void
-FEProblemBase::havePRefinement()
+FEProblemBase::havePRefinement(const bool disable_lagrange_p_refinement)
 {
-  for (auto & assembly_vecs : _assembly)
-    for (auto & assembly : assembly_vecs)
-      assembly->havePRefinement();
-
+  SubProblem::havePRefinement(disable_lagrange_p_refinement);
   if (_displaced_problem)
-    _displaced_problem->havePRefinement();
+    _displaced_problem->havePRefinement(disable_lagrange_p_refinement);
 }

@@ -1836,7 +1836,7 @@ public:
   /**
    * Indicate that we have p-refinement
    */
-  void havePRefinement();
+  void havePRefinement(bool disable_lagrange_p_refinement);
 
 private:
   /**

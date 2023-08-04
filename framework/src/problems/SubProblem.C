@@ -1273,6 +1273,21 @@ SubProblem::addCachedJacobian(const THREAD_ID tid)
   assembly(tid, currentNlSysNum()).addCachedJacobian(Assembly::GlobalDataKey{});
 }
 
+void
+SubProblem::havePRefinement(const bool disable_lagrange_p_refinement)
+{
+  for (const auto tid : make_range(libMesh::n_threads()))
+    for (const auto s : make_range(numNonlinearSystems()))
+      assembly(tid, s).havePRefinement(disable_lagrange_p_refinement);
+
+  if (disable_lagrange_p_refinement)
+  {
+    auto & eq = es();
+    for (const auto i : make_range(eq.n_systems()))
+      eq.get_system(i).get_dof_map().dont_p_refine(LAGRANGE);
+  }
+}
+
 template MooseVariableFEBase &
 SubProblem::getVariableHelper(const THREAD_ID tid,
                               const std::string & var_name,

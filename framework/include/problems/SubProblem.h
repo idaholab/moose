@@ -920,6 +920,11 @@ public:
    */
   virtual bool hasNonlocalCoupling() const = 0;
 
+  /**
+   * Indicate that we have p-refinement
+   */
+  virtual void havePRefinement(bool disable_lagrange_p_refinement);
+
 protected:
   /**
    * Helper function called by getVariable that handles the logic for

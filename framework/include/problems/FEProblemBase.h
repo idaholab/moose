@@ -2115,10 +2115,7 @@ public:
    */
   void clearCurrentResidualVectorTags();
 
-  /**
-   * Indicate that we have p-refinement
-   */
-  void havePRefinement();
+  virtual void havePRefinement(bool disable_lagrange_p_refinement) override;
 
   virtual void needFV() override { _have_fv = true; }
   virtual bool haveFV() const override { return _have_fv; }
