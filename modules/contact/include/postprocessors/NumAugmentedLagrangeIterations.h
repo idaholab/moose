@@ -14,9 +14,9 @@
 class AugmentedLagrangianContactProblemInterface;
 
 /**
- * Get the number of extra augmented lagrange loops. This PP will return zero if the current problem
- * is not an augmented Lagrangian problem, and for all time steps that converged on teh first
- * iteration.
+ * Get the number of extra augmented Lagrange loops around the non-linear solve. This PP will return
+ * zero if the current problem is not an augmented Lagrangian problem, and for all time steps that
+ * converged on the first iteration.
  */
 class NumAugmentedLagrangeIterations : public GeneralPostprocessor
 {

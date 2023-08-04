@@ -13,6 +13,10 @@
 #include "MooseEnum.h"
 
 class UserObject;
+class WeightedGapUserObject;
+class PenaltyWeightedGapUserObject;
+class WeightedVelocitiesUserObject;
+class PenaltyFrictionUserObject;
 
 /**
  * Auxiliary kernel to output mortar penalty contact quantities of interest
@@ -53,4 +57,11 @@ protected:
 
   /// The user object inputted by the user to obtain the contact quantities
   const UserObject & _user_object;
+
+  ///@{ Cast pointers to specific UOs
+  const WeightedGapUserObject * _wguo;
+  const PenaltyWeightedGapUserObject * _pwguo;
+  const WeightedVelocitiesUserObject * _wvuo;
+  const PenaltyFrictionUserObject * _pfuo;
+  ///@}
 };

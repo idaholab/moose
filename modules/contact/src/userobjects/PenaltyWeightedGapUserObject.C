@@ -198,8 +198,8 @@ PenaltyWeightedGapUserObject::timestepSetup()
 bool
 PenaltyWeightedGapUserObject::isAugmentedLagrangianConverged()
 {
-  Real positive_gap = 0.0;
-  Real negative_gap = 0.0;
+  Real max_positive_gap = 0.0;
+  Real min_negative_gap = 0.0;
 
   // Get maximum gap to ascertain whether we are converged.
   for (auto & [dof_object, wgap] : _dof_to_weighted_gap)
@@ -209,8 +209,8 @@ PenaltyWeightedGapUserObject::isAugmentedLagrangianConverged()
       // Check condition for nodes that are active
       if (gap < 0 || _dof_to_lagrange_multiplier[dof_object] < 0.0)
       {
-        if (gap > positive_gap || gap < negative_gap)
-          gap > 0 ? positive_gap = gap : negative_gap = gap;
+        max_positive_gap = std::max(max_positive_gap, gap);
+        min_negative_gap = std::min(min_negative_gap, gap);
       }
     }
   }
@@ -219,15 +219,17 @@ PenaltyWeightedGapUserObject::isAugmentedLagrangianConverged()
   std::vector<Real> recv;
   if (this->_communicator.rank() == 0)
     recv.resize(this->_communicator.size());
-  this->_communicator.gather(0, -negative_gap > positive_gap ? negative_gap : positive_gap, recv);
+  this->_communicator.gather(
+      0, -min_negative_gap > max_positive_gap ? min_negative_gap : max_positive_gap, recv);
 
   if (this->_communicator.rank() == 0)
   {
-    negative_gap = *std::min_element(recv.begin(), recv.end());
-    positive_gap = *std::max_element(recv.begin(), recv.end());
+    min_negative_gap = *std::min_element(recv.begin(), recv.end());
+    max_positive_gap = *std::max_element(recv.begin(), recv.end());
 
     // report the gap value with the largest magnitude
-    const Real reported_gap = -negative_gap > positive_gap ? negative_gap : positive_gap;
+    const Real reported_gap =
+        -min_negative_gap > max_positive_gap ? min_negative_gap : max_positive_gap;
     if (std::abs(reported_gap) > _penetration_tolerance)
     {
       mooseInfoRepeated("Penetration tolerance fail max_gap = ",

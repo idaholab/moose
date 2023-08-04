@@ -12,7 +12,7 @@
 class MooseObject;
 
 /**
- * Interface class for penalty mortar user objects that support the augmented Lagrange formalism as
+ * Interface class for user objects that support the augmented Lagrange formalism as
  * implemented in AugmentedLagrangianContactProblem.
  */
 class AugmentedLagrangeInterface

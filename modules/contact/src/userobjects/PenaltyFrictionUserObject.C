@@ -49,7 +49,7 @@ PenaltyFrictionUserObject::validParams()
 
 PenaltyFrictionUserObject::PenaltyFrictionUserObject(const InputParameters & parameters)
   /*
-   * We are using virtual inheritance to avoid teh "Diamond inheritance" problem. This means that
+   * We are using virtual inheritance to avoid the "Diamond inheritance" problem. This means that
    * that we have to construct WeightedGapUserObject explicitly as it will_not_ be constructed in
    * the intermediate base classes PenaltyWeightedGapUserObject and WeightedVelocitiesUserObject.
    * Virtual inheritance ensures that only one instance of WeightedGapUserObject is included in this

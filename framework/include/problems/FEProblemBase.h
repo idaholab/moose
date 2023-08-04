@@ -786,10 +786,12 @@ public:
   /**
    * reinit materials on a boundary
    * @param boundary_id The boundary on which to reinit corresponding materials
-   * @param tid The thread id_fe_problem
-   * @param execute_stateful Whether to execute material objects that have stateful properties. This
-   * should be \p false when for example executing material objects for mortar contexts in which
-   * stateful properties don't make sense
+   * @param tid The thread id
+   * @param swap_stateful Whether to swap stateful material properties between \p MaterialData and
+   * \p MaterialPropertyStorage
+   * @param execute_stateful Whether to execute material objects that have stateful properties.
+   * This should be \p false when for example executing material objects for mortar contexts in
+   * which stateful properties don't make sense
    */
   void reinitMaterialsBoundary(BoundaryID boundary_id,
                                THREAD_ID tid,

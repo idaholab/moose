@@ -277,7 +277,7 @@ ContactAction::ContactAction(const InputParameters & params)
       _use_dual = true;
 
     if (_model == ContactModel::GLUED)
-      paramError("model", "The penalty 'mortar' formulation does not support glued contact");
+      paramError("model", "The 'mortar_penalty' formulation does not support glued contact");
 
     if (getParam<bool>("mortar_dynamics"))
       paramError("mortar_dynamics",

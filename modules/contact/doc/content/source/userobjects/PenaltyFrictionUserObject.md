@@ -10,7 +10,7 @@ value of the `penalty_friction` value is required to obtain realistic frictional
 pressure; otherwise, the tangential model will underpredict frictional forces. That is,
 higher values of the `penalty_friction` parameter will more accurately predict the stick
 and slip Coulomb behavior at the expense of worsening the convergence behavior. The
-`slip_tolerance` parameter can be chosen to limit the amount of relative slip distance
+`slip_tolerance` parameter can be chosen to limit the amount of relative slip
 at nodes that are not slipping (at the Coulomb limit).
 
 The tangential traction (or tractions for a three-dimensional problem) generated
@@ -20,18 +20,18 @@ surfaces by [TangentialMortarMechanicalContact](/TangentialMortarMechanicalConta
 That is, the tangential contact pressure values computed by this object serve a purpose
 analogous to the Lagrange multipliers when exact enforcement is used
 (see [ComputeFrictionalForceLMMechanicalContact](/ComputeFrictionalForceLMMechanicalContact.md)).
-This object is set up automatically when using the contact action [ContactAction](/ContactAction.md).
+This object is set up automatically when using the [contact action](/ContactAction.md).
 
 This object is built from within the contact action when the formulation `MORTAR_PENALTY` and
 the model `COULOMB` is selected. The action sets the `use_physical_gap` parameter to true,
 which allows the user to select a normal contact penalty parameter on the order of the
-stiffness of the materials into contact. Also, to ensure solution stability, dual bases
+stiffness of the materials coming into contact. Also, to ensure solution stability, dual bases
 (i.e. `use_dual = true`) are employed by default to interpolate the contact traction
 when using the contact action.
 
 An augmented Lagrange (AL) approach can be used to enforce the contact constraints to a user-prescribed
 tolerance. That tolerance can be the normal gap distance (distance to exact enforcement if in contact) or
-the relative slip tolerance for slipping nodes. The AL approach solves the original MOOSE problem
+the relative slip tolerance for slipping nodes. The AL approach solves the original MOOSE problem, in which contact is enforced using a pure penalty approach,
 taking the necessary nonlinear iterations and updates "fixed" Lagrange multipliers in an outer loop. This
 process repeats until the contact-related tolerances are met. The "fixed" Lagrange multipliers represent
 accumulated normal and tangential tractions over the AL iterations (see [!citep](wriggers2006computational)).

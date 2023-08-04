@@ -44,113 +44,115 @@ PenaltyMortarUserObjectAux::validParams()
 PenaltyMortarUserObjectAux::PenaltyMortarUserObjectAux(const InputParameters & parameters)
   : AuxKernel(parameters),
     _contact_quantity(getParam<MooseEnum>("contact_quantity").getEnum<ContactQuantityEnum>()),
-    _user_object(getUserObject<UserObject>("user_object"))
+    _user_object(getUserObject<UserObject>("user_object")),
+    _wguo(dynamic_cast<const WeightedGapUserObject *>(&_user_object)),
+    _pwguo(dynamic_cast<const PenaltyWeightedGapUserObject *>(&_user_object)),
+    _wvuo(dynamic_cast<const WeightedVelocitiesUserObject *>(&_user_object)),
+    _pfuo(dynamic_cast<const PenaltyFrictionUserObject *>(&_user_object))
 {
   if (!isNodal())
     mooseError("This auxiliary kernel requires nodal variables to obtain contact pressure values");
+
+  // call compute value to perform error checking upon construction
+  computeValue();
 }
 
 Real
 PenaltyMortarUserObjectAux::computeValue()
 {
-  const auto wguo = dynamic_cast<const WeightedGapUserObject *>(&_user_object);
-  const auto pwguo = dynamic_cast<const PenaltyWeightedGapUserObject *>(&_user_object);
-  const auto wvuo = dynamic_cast<const WeightedVelocitiesUserObject *>(&_user_object);
-  const auto pfuo = dynamic_cast<const PenaltyFrictionUserObject *>(&_user_object);
-
   switch (_contact_quantity)
   {
     case ContactQuantityEnum::NORMAL_PRESSURE:
-      if (pwguo)
-        return pwguo->getNormalContactPressure(_current_node);
+      if (_pwguo)
+        return _pwguo->getNormalContactPressure(_current_node);
       else
         paramError("user_object",
                    "The 'normal_pressure' quantity is only provided by a "
                    "'PenaltyWeightedGapUserObject' or derived object.");
 
     case ContactQuantityEnum::NORMAL_GAP:
-      if (wguo)
-        return wguo->getNormalGap(_current_node);
+      if (_wguo)
+        return _wguo->getNormalGap(_current_node);
       else
         paramError("user_object",
                    "The 'normal_gap' quantity is only provided by a "
                    "'WeightedGapUserObject' or derived object.");
 
     case ContactQuantityEnum::FRICTIONAL_PRESSURE_ONE:
-      if (pfuo)
-        return pfuo->getFrictionalContactPressure(_current_node, 0);
+      if (_pfuo)
+        return _pfuo->getFrictionalContactPressure(_current_node, 0);
       else
         paramError("user_object",
                    "The 'tangential_pressure_one' quantity is only provided by a "
                    "'PenaltyFrictionUserObject' or derived object.");
 
     case ContactQuantityEnum::ACCUMULATED_SLIP_ONE:
-      if (pfuo)
-        return pfuo->getAccumulatedSlip(_current_node, 0);
+      if (_pfuo)
+        return _pfuo->getAccumulatedSlip(_current_node, 0);
       else
         paramError("user_object",
                    "The 'accumulated_slip_one' quantity is only provided by a "
                    "'PenaltyFrictionUserObject' or derived object.");
 
     case ContactQuantityEnum::TANGENTIAL_VELOCITY_ONE:
-      if (wvuo)
-        return wvuo->getTangentialVelocity(_current_node, 0);
+      if (_wvuo)
+        return _wvuo->getTangentialVelocity(_current_node, 0);
       else
         paramError("user_object",
                    "The 'tangential_velocity_one' quantity is only provided by a "
                    "'WeightedVelocitiesUserObject' or derived object.");
 
     case ContactQuantityEnum::FRICTIONAL_PRESSURE_TWO:
-      if (pfuo)
-        return pfuo->getFrictionalContactPressure(_current_node, 1);
+      if (_pfuo)
+        return _pfuo->getFrictionalContactPressure(_current_node, 1);
       else
         paramError("user_object",
                    "The 'tangential_pressure_two' quantity is only provided by a "
                    "'PenaltyFrictionUserObject' or derived object.");
 
     case ContactQuantityEnum::ACCUMULATED_SLIP_TWO:
-      if (pfuo)
-        return pfuo->getAccumulatedSlip(_current_node, 1);
+      if (_pfuo)
+        return _pfuo->getAccumulatedSlip(_current_node, 1);
       else
         paramError("user_object",
                    "The 'accumulated_slip_two' quantity is only provided by a "
                    "'PenaltyFrictionUserObject' or derived object.");
 
     case ContactQuantityEnum::TANGENTIAL_VELOCITY_TWO:
-      if (wvuo)
-        return wvuo->getTangentialVelocity(_current_node, 1);
+      if (_wvuo)
+        return _wvuo->getTangentialVelocity(_current_node, 1);
       else
         paramError("user_object",
                    "The 'tangential_velocity_two' quantity is only provided by a "
                    "'WeightedVelocitiesUserObject' or derived object.");
 
     case ContactQuantityEnum::NORMAL_LM:
-      if (pwguo)
-        return pwguo->getNormalLagrangeMultiplier(_current_node);
+      if (_pwguo)
+        return _pwguo->getNormalLagrangeMultiplier(_current_node);
       else
         paramError("user_object",
                    "The 'normal_lm' quantity is only provided by a "
                    "'PenaltyWeightedGapUserObject' or derived object.");
 
     case ContactQuantityEnum::DELTA_TANGENTIAL_LM_ONE:
-      if (pfuo)
-        return pfuo->getDeltaTangentialLagrangeMultiplier(_current_node, 0);
+      if (_pfuo)
+        return _pfuo->getDeltaTangentialLagrangeMultiplier(_current_node, 0);
       else
         paramError("user_object",
                    "The 'delta_tangential_lm_one' quantity is only provided by a "
                    "'PenaltyFrictionUserObject' or derived object.");
 
     case ContactQuantityEnum::DELTA_TANGENTIAL_LM_TWO:
-      if (pfuo)
-        return pfuo->getDeltaTangentialLagrangeMultiplier(_current_node, 1);
+      if (_pfuo)
+        return _pfuo->getDeltaTangentialLagrangeMultiplier(_current_node, 1);
       else
         paramError("user_object",
                    "The 'delta_tangential_lm_two' quantity is only provided by a "
                    "'PenaltyFrictionUserObject' or derived object.");
 
     case ContactQuantityEnum::ACTIVE_SET:
-      if (pwguo)
-        return pwguo->getActiveSetState(_current_node) ? 1.0 : 0.0;
+      if (_pwguo)
+        return _pwguo->getActiveSetState(_current_node) ? 1.0 : 0.0;
       else
         paramError("user_object",
                    "The 'active_set' quantity is only provided by a "

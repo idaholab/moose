@@ -16,7 +16,8 @@ InputParameters
 NumAugmentedLagrangeIterations::validParams()
 {
   InputParameters params = GeneralPostprocessor::validParams();
-  params.addClassDescription("");
+  params.addClassDescription(
+      "Get the number of extra augmented Lagrange loops around the non-linear solve.");
   return params;
 }
 

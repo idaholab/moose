@@ -29,7 +29,7 @@ when using the contact action.
 
 An augmented Lagrange (AL) approach can be used to enforce the contact constraints to a user-prescribed
 tolerance. That tolerance parameter is the normal gap distance (distance to exact enforcement if in contact)
-for normal contact. The AL approach solves the original MOOSE problem
+for normal contact. The AL approach solves the original MOOSE problem, in which contact is enforced using a pure penalty approach,
 taking the necessary nonlinear iterations and updates "fixed" Lagrange multipliers in an outer loop. This
 process repeats until the contact-related tolerances are met. The "fixed" Lagrange multipliers represent
 accumulated normal tractions over the AL iterations (see [!citep](wriggers2006computational)),

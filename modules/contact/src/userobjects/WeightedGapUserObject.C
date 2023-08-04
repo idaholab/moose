@@ -126,7 +126,6 @@ void
 WeightedGapUserObject::initialize()
 {
   _dof_to_weighted_gap.clear();
-  // mooseInfoRepeated("WeightedGapUserObject::initialize();", _current_execute_flag);
 }
 
 void
