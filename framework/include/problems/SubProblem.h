@@ -925,6 +925,11 @@ public:
    */
   virtual void havePRefinement(bool disable_lagrange_p_refinement);
 
+  /**
+   * Query whether we have p-refinement
+   */
+  bool havePRefinement() const { return _have_p_refinement; }
+
 protected:
   /**
    * Helper function called by getVariable that handles the logic for
@@ -1106,6 +1111,9 @@ private:
   /// 0
   std::unordered_map<GhostingFunctor *, std::vector<std::shared_ptr<GhostingFunctor>>>
       _root_coupling_gf_to_sys_clones;
+
+  /// Whether this simulation has p-refinement in it
+  bool _have_p_refinement;
 
   friend class Restartable;
 };

@@ -57,7 +57,8 @@ SubProblem::SubProblem(const InputParameters & parameters)
     _safe_access_tagged_vectors(false),
     _have_ad_objects(false),
     _output_functors(false),
-    _typed_vector_tags(2)
+    _typed_vector_tags(2),
+    _have_p_refinement(false)
 {
   unsigned int n_threads = libMesh::n_threads();
   _active_elemental_moose_variables.resize(n_threads);
@@ -1286,6 +1287,8 @@ SubProblem::havePRefinement(const bool disable_lagrange_p_refinement)
     for (const auto i : make_range(eq.n_systems()))
       eq.get_system(i).get_dof_map().dont_p_refine(LAGRANGE);
   }
+
+  _have_p_refinement = true;
 }
 
 template MooseVariableFEBase &
