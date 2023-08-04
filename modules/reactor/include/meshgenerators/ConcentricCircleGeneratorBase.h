@@ -36,9 +36,9 @@ protected:
   /// Widths, fractions, radial sectors and growth factors of the outer boundary layers of the ring regions
   multiBdryLayerParams _ring_outer_boundary_layer_params;
   /// Subdomain IDs of the ring regions
-  const std::vector<subdomain_id_type> _ring_block_ids;
+  std::vector<subdomain_id_type> _ring_block_ids;
   /// Subdomain Names of the ring regions
-  const std::vector<SubdomainName> _ring_block_names;
+  std::vector<SubdomainName> _ring_block_names;
   /// Volume preserving function is optional
   const bool _preserve_volumes;
   /// Shift in default subdomain IDs to avert potential conflicts with other meshes
@@ -64,7 +64,7 @@ protected:
    * Assign interface boundary names to the mesh if applicable.
    * @param mesh Mesh to which the interface boundary names are assigned
    */
-  void assignInterfaceBoundaryNames(ReplicatedMesh & mesh);
+  void assignInterfaceBoundaryNames(ReplicatedMesh & mesh) const;
 
   /**
    * Assign block IDs and names to the mesh if applicable.
@@ -78,19 +78,19 @@ protected:
                            std::vector<subdomain_id_type> & block_ids_old,
                            std::vector<subdomain_id_type> & block_ids_new,
                            std::vector<SubdomainName> & block_names,
-                           const std::string & generator_name);
+                           const std::string & generator_name) const;
 
   /**
    * Prepare user-defined ring block IDs and names to replace the default ones.
-   * @param block_it block iterator
+   * @param block_counter a counter to keep track of the number of blocks
    * @param ring_block_num number of blocks in the ring region
    * @param block_ids_old old block ids that are assigned by default
    * @param block_ids_new new block ids that are user-defined
    * @param block_names block names that are user-defined
    */
-  void ringBlockIdsNamesPreparer(unsigned int & block_it,
+  void ringBlockIdsNamesPreparer(unsigned int & block_counter,
                                  unsigned int & ring_block_num,
                                  std::vector<subdomain_id_type> & block_ids_old,
                                  std::vector<subdomain_id_type> & block_ids_new,
-                                 std::vector<SubdomainName> & block_names);
+                                 std::vector<SubdomainName> & block_names) const;
 };

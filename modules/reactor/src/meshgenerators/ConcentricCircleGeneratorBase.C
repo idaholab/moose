@@ -188,7 +188,7 @@ ConcentricCircleGeneratorBase::ConcentricCircleGeneratorBase(const InputParamete
 }
 
 void
-ConcentricCircleGeneratorBase::assignInterfaceBoundaryNames(ReplicatedMesh & mesh)
+ConcentricCircleGeneratorBase::assignInterfaceBoundaryNames(ReplicatedMesh & mesh) const
 {
   if (!_inward_interface_boundary_names.empty())
   {
@@ -217,8 +217,15 @@ ConcentricCircleGeneratorBase::assignBlockIdsNames(ReplicatedMesh & mesh,
                                                    std::vector<subdomain_id_type> & block_ids_old,
                                                    std::vector<subdomain_id_type> & block_ids_new,
                                                    std::vector<SubdomainName> & block_names,
-                                                   const std::string & generator_name)
+                                                   const std::string & generator_name) const
 {
+  if (block_ids_old.size() != block_ids_new.size() || block_ids_old.size() != block_names.size())
+    mooseError("In ",
+               generator_name,
+               " ",
+               _name,
+               ": block_ids_old, block_ids_new and block_names must have the same size.");
+
   for (auto it = block_names.begin(); it != block_names.end() - 1; it++)
   {
     auto it_tmp = std::find(block_names.begin(), it + 1, *(it + 1));
@@ -243,11 +250,11 @@ ConcentricCircleGeneratorBase::assignBlockIdsNames(ReplicatedMesh & mesh,
 
 void
 ConcentricCircleGeneratorBase::ringBlockIdsNamesPreparer(
-    unsigned int & block_it,
+    unsigned int & block_counter,
     unsigned int & ring_block_num,
     std::vector<subdomain_id_type> & block_ids_old,
     std::vector<subdomain_id_type> & block_ids_new,
-    std::vector<SubdomainName> & block_names)
+    std::vector<SubdomainName> & block_names) const
 {
   if (_ring_intervals.front() == 1)
     ring_block_num = _ring_intervals.size();
@@ -260,7 +267,7 @@ ConcentricCircleGeneratorBase::ringBlockIdsNamesPreparer(
     block_names.push_back(_ring_block_names.empty()
                               ? (SubdomainName)std::to_string(block_ids_new.back())
                               : _ring_block_names.front());
-    block_it++;
+    block_counter++;
   }
   for (unsigned int i = ring_block_num - _ring_intervals.size(); i < ring_block_num; i++)
   {
@@ -269,6 +276,6 @@ ConcentricCircleGeneratorBase::ringBlockIdsNamesPreparer(
     block_names.push_back(_ring_block_names.empty()
                               ? (SubdomainName)std::to_string(block_ids_new.back())
                               : _ring_block_names[i]);
-    block_it++;
+    block_counter++;
   }
 }
