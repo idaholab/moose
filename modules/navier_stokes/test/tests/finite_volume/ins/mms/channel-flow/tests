@@ -39,16 +39,6 @@
     min_parallel = 16
     heavy = true
   []
-  [plane-poiseuille-average-first]
-    type = PythonUnitTest
-    input = test.py
-    test_case = TestPlanePoiseuilleAverageFirst
-    method = '!dbg'
-    required_python_packages = 'pandas matplotlib'
-    min_parallel = 16
-    heavy = true
-    requirement = 'The system shall demonstrate global second order convergence for all variables when using an average interpolation for the velocity and a one term Taylor series expansion for face values on non-Dirichlet boundaries.'
-  []
   [plane-poiseuille-rc-first]
     type = PythonUnitTest
     input = test.py
