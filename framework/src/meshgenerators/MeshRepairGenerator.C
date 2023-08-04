@@ -26,8 +26,7 @@ MeshRepairGenerator::validParams()
                                              "Name of the mesh generator providing the mesh");
 
   params.addParam<bool>("fix_node_overlap", false, "Whether to merge overlapping nodes");
-  params.addParam<bool>("node_overlap_tol", 1e-8, "Tolerance for merging nodes");
-  params.addParam<Real>("maximum_elements_size", "refining elements that are too big");
+  params.addParam<bool>("node_overlap_tol", 1e-8, "Tolerance for merging overlapping nodes");
 
   params.addParam<bool>(
       "fix_elements_orientation", false, "Whether to flip elements with negative volumes");
@@ -39,8 +38,6 @@ MeshRepairGenerator::MeshRepairGenerator(const InputParameters & parameters)
     _input(getMesh("input")),
     _fix_overlapping_nodes(getParam<bool>("fix_node_overlap")),
     _node_overlap_tol(getParam<Real>("node_overlap_tol")),
-    _fix_max_element_size(isParamValid("maximum_elements_size")),
-    _max_element_size(_fix_max_element_size ? getParam<Real>("fix_elem_size") : 0),
     _fix_element_orientation(getParam<bool>("fix_elements_orientation"))
 {
 }
@@ -102,22 +99,6 @@ MeshRepairGenerator::generate()
       }
     }
     _console << "Number of nodes overlapping which got merged: " << _num_fixed_nodes << std::endl;
-  }
-
-  if (_fix_max_element_size)
-  {
-    // loop elements within the mesh
-    for (auto & elem : mesh->active_element_ptr_range())
-    {
-      if (elem->volume() >= _max_element_size)
-      {
-        elem->set_refinement_flag(Elem::REFINE);
-        _num_refined_elems++;
-      }
-    }
-    MeshRefinement refinedmesh(*mesh);
-    refinedmesh.refine_elements();
-    _console << "Number of elements below volume size : " << _num_refined_elems << std::endl;
   }
 
   // Flip orientation of elements to keep positive volumes
