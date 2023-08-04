@@ -16,6 +16,7 @@
 #include "libmesh/mesh_base.h"
 #include "libmesh/parallel.h"
 #include "libmesh/parallel_algebra.h"
+#include "libmesh/utility.h"
 
 using namespace libMesh;
 
@@ -249,7 +250,7 @@ meshCentroidCalculator(const MeshBase & mesh)
   return centroid_pt;
 }
 
-std::map<dof_id_type, dof_id_type>
+std::unordered_map<dof_id_type, dof_id_type>
 getExtraIDUniqueCombinationMap(const MeshBase & mesh,
                                const std::set<SubdomainID> & block_ids,
                                std::vector<ExtraElementIDName> extra_ids)
@@ -260,55 +261,71 @@ getExtraIDUniqueCombinationMap(const MeshBase & mesh,
   ExtraElementIDName id_name = extra_ids.back();
   extra_ids.pop_back();
   const auto id_index = mesh.get_elem_integer_index(id_name);
+
   // create base parsed id set
   if (extra_ids.empty())
   {
     // get set of extra id values;
-    std::set<dof_id_type> ids;
-    for (const auto & elem : mesh.active_element_ptr_range())
+    std::vector<dof_id_type> ids;
     {
-      if (block_restricted && block_ids.find(elem->subdomain_id()) == block_ids.end())
-        continue;
-      auto id = elem->get_extra_integer(id_index);
-      ids.insert(id);
+      std::set<dof_id_type> ids_set;
+      for (const auto & elem : mesh.active_element_ptr_range())
+      {
+        if (block_restricted && block_ids.find(elem->subdomain_id()) == block_ids.end())
+          continue;
+        const auto id = elem->get_extra_integer(id_index);
+        ids_set.insert(id);
+      }
+      mesh.comm().set_union(ids_set);
+      ids.assign(ids_set.begin(), ids_set.end());
     }
-    mesh.comm().set_union(ids);
+
     // determine new extra id values;
-    std::map<dof_id_type, dof_id_type> parsed_ids;
+    std::unordered_map<dof_id_type, dof_id_type> parsed_ids;
     for (auto & elem : mesh.active_element_ptr_range())
     {
       if (block_restricted && block_ids.find(elem->subdomain_id()) == block_ids.end())
         continue;
       parsed_ids[elem->id()] = std::distance(
-          ids.begin(), std::find(ids.begin(), ids.end(), elem->get_extra_integer(id_index)));
+          ids.begin(), std::lower_bound(ids.begin(), ids.end(), elem->get_extra_integer(id_index)));
     }
     return parsed_ids;
   }
+
   // if extra_ids is not empty, recursively call getExtraIDUniqueCombinationMap
-  std::map<dof_id_type, dof_id_type> base_parsed_ids =
+  const auto base_parsed_ids =
       MooseMeshUtils::getExtraIDUniqueCombinationMap(mesh, block_ids, extra_ids);
   // parsing extra ids based on ref_parsed_ids
-  std::set<std::pair<dof_id_type, dof_id_type>> unique_ids;
-  std::map<std::pair<dof_id_type, dof_id_type>, std::set<const Elem *>> map_unique_id_to_elem;
+  std::vector<std::pair<dof_id_type, dof_id_type>> unique_ids;
+  {
+    std::set<std::pair<dof_id_type, dof_id_type>> unique_ids_set;
+    for (const auto & elem : mesh.active_element_ptr_range())
+    {
+      if (block_restricted && block_ids.find(elem->subdomain_id()) == block_ids.end())
+        continue;
+      const dof_id_type id1 = libmesh_map_find(base_parsed_ids, elem->id());
+      const dof_id_type id2 = elem->get_extra_integer(id_index);
+      const std::pair<dof_id_type, dof_id_type> ids = std::make_pair(id1, id2);
+      unique_ids_set.insert(ids);
+    }
+    mesh.comm().set_union(unique_ids_set);
+    unique_ids.assign(unique_ids_set.begin(), unique_ids_set.end());
+  }
+
+  std::unordered_map<dof_id_type, dof_id_type> parsed_ids;
+
   for (const auto & elem : mesh.active_element_ptr_range())
   {
     if (block_restricted && block_ids.find(elem->subdomain_id()) == block_ids.end())
       continue;
-    const dof_id_type id1 = base_parsed_ids[elem->id()];
+    const dof_id_type id1 = libmesh_map_find(base_parsed_ids, elem->id());
     const dof_id_type id2 = elem->get_extra_integer(id_index);
-    const std::pair<dof_id_type, dof_id_type> ids = std::make_pair(id1, id2);
-    unique_ids.insert(ids);
-    map_unique_id_to_elem[ids].insert(elem);
+    const dof_id_type new_id = std::distance(
+        unique_ids.begin(),
+        std::lower_bound(unique_ids.begin(), unique_ids.end(), std::make_pair(id1, id2)));
+    parsed_ids[elem->id()] = new_id;
   }
-  mesh.comm().set_union(unique_ids);
-  std::map<dof_id_type, dof_id_type> parsed_ids;
 
-  for (const auto & [ids, elements] : map_unique_id_to_elem)
-  {
-    const dof_id_type new_id = std::distance(unique_ids.begin(), unique_ids.find(ids));
-    for (const Elem * elem : elements)
-      parsed_ids[elem->id()] = new_id;
-  }
   return parsed_ids;
 }
 

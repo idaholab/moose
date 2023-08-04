@@ -50,8 +50,7 @@ UniqueExtraIDMeshGenerator::generate()
 {
   std::unique_ptr<MeshBase> mesh = std::move(_input);
   std::set<SubdomainID> block_ids = {Moose::ANY_BLOCK_ID};
-  std::map<dof_id_type, dof_id_type> parsed_ids =
-      MooseMeshUtils::getExtraIDUniqueCombinationMap(*mesh, block_ids, _extra_ids);
+  auto parsed_ids = MooseMeshUtils::getExtraIDUniqueCombinationMap(*mesh, block_ids, _extra_ids);
 
   // override the extra ID values from MooseMeshUtils::getExtraIDUniqueCombinationMap by using
   // new_id_rule

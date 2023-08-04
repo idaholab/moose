@@ -200,7 +200,7 @@ computeFaceInfoFaceCoord(FaceInfo & fi,
  * @param extra_ids extra ids
  * @return map of element id to new extra id
  **/
-std::map<dof_id_type, dof_id_type>
+std::unordered_map<dof_id_type, dof_id_type>
 getExtraIDUniqueCombinationMap(const MeshBase & mesh,
                                const std::set<SubdomainID> & block_ids,
                                std::vector<ExtraElementIDName> extra_ids);
