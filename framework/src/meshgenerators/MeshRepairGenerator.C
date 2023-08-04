@@ -39,7 +39,8 @@ MeshRepairGenerator::MeshRepairGenerator(const InputParameters & parameters)
     _input(getMesh("input")),
     _fix_overlapping_nodes(getParam<bool>("fix_node_overlap")),
     _fix_max_element_size(isParamValid("maximum_elements_size")),
-    _max_element_size(_fix_max_element_size ? getParam<Real>("fix_elem_size") : 0)
+    _max_element_size(_fix_max_element_size ? getParam<Real>("fix_elem_size") : 0),
+    _fix_element_orientation(getParam<bool>("fix_elements_orientation"))
 {
 }
 
@@ -115,8 +116,9 @@ MeshRepairGenerator::generate()
     _console << "Number of elements below volume size : " << _num_refined_elems << std::endl;
   }
 
-  // Fix flipped orientation from the symmetry
-  MeshTools::Modification::orient_elements(*mesh);
+  // Flip orientation of elements to keep positive volumes
+  if (_fix_element_orientation)
+    MeshTools::Modification::orient_elements(*mesh);
 
   mesh->prepare_for_use();
   return dynamic_pointer_cast<MeshBase>(mesh);

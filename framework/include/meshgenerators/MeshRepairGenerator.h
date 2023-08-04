@@ -39,4 +39,7 @@ private:
   const Real _max_element_size;
   /// counting the number of elements that need to be refined for being too big
   const unsigned int _num_refined_elems;
+
+  /// whether to flip elements that are oriented such that they have a negative volume
+  const bool _fix_element_orientation;
 };
