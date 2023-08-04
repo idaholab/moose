@@ -173,11 +173,13 @@ InitialConditionTempl<T>::compute()
   // From here on out we won't be sampling at nodes anymore
   _current_node = nullptr;
 
+  const bool add_p_level = _var.dofMap().should_p_refine(_fe_type.family);
+
   // In 3D, project any edge values next
   if (_dim > 2 && _cont != DISCONTINUOUS)
     for (unsigned int e = 0; e != _current_elem->n_edges(); ++e)
     {
-      FEInterface::dofs_on_edge(_current_elem, _dim, _fe_type, e, _side_dofs);
+      FEInterface::dofs_on_edge(_current_elem, _dim, _fe_type, e, _side_dofs, add_p_level);
 
       // Some edge dofs are on nodes and already
       // fixed, others are free to calculate
@@ -202,7 +204,7 @@ InitialConditionTempl<T>::compute()
   if (_dim > 1 && _cont != DISCONTINUOUS)
     for (unsigned int s = 0; s != _current_elem->n_sides(); ++s)
     {
-      FEInterface::dofs_on_side(_current_elem, _dim, _fe_type, s, _side_dofs);
+      FEInterface::dofs_on_side(_current_elem, _dim, _fe_type, s, _side_dofs, add_p_level);
 
       // Some side dofs are on nodes/edges and already
       // fixed, others are free to calculate
