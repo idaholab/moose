@@ -17,20 +17,21 @@
 
 registerMooseObject("ContactApp", PenaltyMortarUserObjectAux);
 
+const MooseEnum PenaltyMortarUserObjectAux::_contact_quantities(
+    "normal_pressure accumulated_slip_one "
+    "tangential_pressure_one tangential_velocity_one accumulated_slip_two "
+    "tangential_pressure_two tangential_velocity_two normal_gap "
+    "normal_lm delta_tangential_lm_one delta_tangential_lm_two active_set");
+
 InputParameters
 PenaltyMortarUserObjectAux::validParams()
 {
   InputParameters params = AuxKernel::validParams();
   params.addClassDescription(
       "Populates an auxiliary variable with a contact quantities from penalty mortar contact.");
-  MooseEnum contact_quantity(
-      "normal_pressure accumulated_slip_one "
-      "tangential_pressure_one tangential_velocity_one accumulated_slip_two "
-      "tangential_pressure_two tangential_velocity_two normal_gap "
-      "normal_lm delta_tangential_lm_one delta_tangential_lm_two active_set");
   params.addRequiredParam<MooseEnum>(
       "contact_quantity",
-      contact_quantity,
+      _contact_quantities,
       "The desired contact quantity to output as an auxiliary variable.");
   params.addRequiredParam<UserObjectName>(
       "user_object",
@@ -48,118 +49,88 @@ PenaltyMortarUserObjectAux::PenaltyMortarUserObjectAux(const InputParameters & p
     _wguo(dynamic_cast<const WeightedGapUserObject *>(&_user_object)),
     _pwguo(dynamic_cast<const PenaltyWeightedGapUserObject *>(&_user_object)),
     _wvuo(dynamic_cast<const WeightedVelocitiesUserObject *>(&_user_object)),
-    _pfuo(dynamic_cast<const PenaltyFrictionUserObject *>(&_user_object))
+    _pfuo(dynamic_cast<const PenaltyFrictionUserObject *>(&_user_object)),
+    _outputs({
+        {ContactQuantityEnum::NORMAL_PRESSURE,
+         {"PenaltyWeightedGapUserObject",
+          _pwguo,
+          [&]() { return _pwguo->getNormalContactPressure(_current_node); }}},
+
+        {ContactQuantityEnum::NORMAL_GAP,
+         {"WeightedGapUserObject", _wguo, [&]() { return _wguo->getNormalGap(_current_node); }}},
+
+        {ContactQuantityEnum::FRICTIONAL_PRESSURE_ONE,
+         {"PenaltyFrictionUserObject",
+          _pfuo,
+          [&]() { return _pfuo->getFrictionalContactPressure(_current_node, 0); }}},
+
+        {ContactQuantityEnum::ACCUMULATED_SLIP_ONE,
+         {"PenaltyFrictionUserObject",
+          _pfuo,
+          [&]() { return _pfuo->getAccumulatedSlip(_current_node, 0); }}},
+
+        {ContactQuantityEnum::TANGENTIAL_VELOCITY_ONE,
+         {"WeightedVelocitiesUserObject",
+          _wvuo,
+          [&]() { return _wvuo->getTangentialVelocity(_current_node, 0); }}},
+
+        {ContactQuantityEnum::FRICTIONAL_PRESSURE_TWO,
+         {"PenaltyFrictionUserObject",
+          _pfuo,
+          [&]() { return _pfuo->getFrictionalContactPressure(_current_node, 1); }}},
+
+        {ContactQuantityEnum::ACCUMULATED_SLIP_TWO,
+         {"PenaltyFrictionUserObject",
+          _pfuo,
+          [&]() { return _pfuo->getAccumulatedSlip(_current_node, 1); }}},
+
+        {ContactQuantityEnum::TANGENTIAL_VELOCITY_TWO,
+         {"WeightedVelocitiesUserObject",
+          _wvuo,
+          [&]() { return _wvuo->getTangentialVelocity(_current_node, 1); }}},
+
+        {ContactQuantityEnum::NORMAL_LM,
+         {"PenaltyWeightedGapUserObject",
+          _pwguo,
+          [&]() { return _pwguo->getNormalLagrangeMultiplier(_current_node); }}},
+
+        {ContactQuantityEnum::DELTA_TANGENTIAL_LM_ONE,
+         {"PenaltyFrictionUserObject",
+          _wvuo,
+          [&]() { return _pfuo->getDeltaTangentialLagrangeMultiplier(_current_node, 0); }}},
+
+        {ContactQuantityEnum::DELTA_TANGENTIAL_LM_TWO,
+         {"PenaltyFrictionUserObject",
+          _wvuo,
+          [&]() { return _pfuo->getDeltaTangentialLagrangeMultiplier(_current_node, 1); }}},
+
+        {ContactQuantityEnum::ACTIVE_SET,
+         {"PenaltyWeightedGapUserObject",
+          _wvuo,
+          [&]() { return _pwguo->getActiveSetState(_current_node) ? 1.0 : 0.0; }}}
+        // end outputs list
+    })
 {
   if (!isNodal())
     mooseError("This auxiliary kernel requires nodal variables to obtain contact pressure values");
 
-  // call compute value to perform error checking upon construction
-  computeValue();
+  // error check
+  const auto it = _outputs.find(_contact_quantity);
+  if (it == _outputs.end())
+    mooseError("Internal error: Contact quantity request in PressureMortarUserObjectAux is not "
+               "recognized.");
+  if (!std::get<1>(it->second))
+    paramError("user_object",
+               "The '",
+               _contact_quantities.getNames()[static_cast<int>(it->first)],
+               "' quantity is only provided by a '",
+               std::get<0>(it->second),
+               "' or derived object.");
 }
 
 Real
 PenaltyMortarUserObjectAux::computeValue()
 {
-  switch (_contact_quantity)
-  {
-    case ContactQuantityEnum::NORMAL_PRESSURE:
-      if (_pwguo)
-        return _pwguo->getNormalContactPressure(_current_node);
-      else
-        paramError("user_object",
-                   "The 'normal_pressure' quantity is only provided by a "
-                   "'PenaltyWeightedGapUserObject' or derived object.");
-
-    case ContactQuantityEnum::NORMAL_GAP:
-      if (_wguo)
-        return _wguo->getNormalGap(_current_node);
-      else
-        paramError("user_object",
-                   "The 'normal_gap' quantity is only provided by a "
-                   "'WeightedGapUserObject' or derived object.");
-
-    case ContactQuantityEnum::FRICTIONAL_PRESSURE_ONE:
-      if (_pfuo)
-        return _pfuo->getFrictionalContactPressure(_current_node, 0);
-      else
-        paramError("user_object",
-                   "The 'tangential_pressure_one' quantity is only provided by a "
-                   "'PenaltyFrictionUserObject' or derived object.");
-
-    case ContactQuantityEnum::ACCUMULATED_SLIP_ONE:
-      if (_pfuo)
-        return _pfuo->getAccumulatedSlip(_current_node, 0);
-      else
-        paramError("user_object",
-                   "The 'accumulated_slip_one' quantity is only provided by a "
-                   "'PenaltyFrictionUserObject' or derived object.");
-
-    case ContactQuantityEnum::TANGENTIAL_VELOCITY_ONE:
-      if (_wvuo)
-        return _wvuo->getTangentialVelocity(_current_node, 0);
-      else
-        paramError("user_object",
-                   "The 'tangential_velocity_one' quantity is only provided by a "
-                   "'WeightedVelocitiesUserObject' or derived object.");
-
-    case ContactQuantityEnum::FRICTIONAL_PRESSURE_TWO:
-      if (_pfuo)
-        return _pfuo->getFrictionalContactPressure(_current_node, 1);
-      else
-        paramError("user_object",
-                   "The 'tangential_pressure_two' quantity is only provided by a "
-                   "'PenaltyFrictionUserObject' or derived object.");
-
-    case ContactQuantityEnum::ACCUMULATED_SLIP_TWO:
-      if (_pfuo)
-        return _pfuo->getAccumulatedSlip(_current_node, 1);
-      else
-        paramError("user_object",
-                   "The 'accumulated_slip_two' quantity is only provided by a "
-                   "'PenaltyFrictionUserObject' or derived object.");
-
-    case ContactQuantityEnum::TANGENTIAL_VELOCITY_TWO:
-      if (_wvuo)
-        return _wvuo->getTangentialVelocity(_current_node, 1);
-      else
-        paramError("user_object",
-                   "The 'tangential_velocity_two' quantity is only provided by a "
-                   "'WeightedVelocitiesUserObject' or derived object.");
-
-    case ContactQuantityEnum::NORMAL_LM:
-      if (_pwguo)
-        return _pwguo->getNormalLagrangeMultiplier(_current_node);
-      else
-        paramError("user_object",
-                   "The 'normal_lm' quantity is only provided by a "
-                   "'PenaltyWeightedGapUserObject' or derived object.");
-
-    case ContactQuantityEnum::DELTA_TANGENTIAL_LM_ONE:
-      if (_pfuo)
-        return _pfuo->getDeltaTangentialLagrangeMultiplier(_current_node, 0);
-      else
-        paramError("user_object",
-                   "The 'delta_tangential_lm_one' quantity is only provided by a "
-                   "'PenaltyFrictionUserObject' or derived object.");
-
-    case ContactQuantityEnum::DELTA_TANGENTIAL_LM_TWO:
-      if (_pfuo)
-        return _pfuo->getDeltaTangentialLagrangeMultiplier(_current_node, 1);
-      else
-        paramError("user_object",
-                   "The 'delta_tangential_lm_two' quantity is only provided by a "
-                   "'PenaltyFrictionUserObject' or derived object.");
-
-    case ContactQuantityEnum::ACTIVE_SET:
-      if (_pwguo)
-        return _pwguo->getActiveSetState(_current_node) ? 1.0 : 0.0;
-      else
-        paramError("user_object",
-                   "The 'active_set' quantity is only provided by a "
-                   "'PenaltyWeightedGapUserObject' or derived object.");
-
-    default:
-      mooseError("Internal error: Contact quantity request in PressureMortarUserObjectAux is not "
-                 "recognized.");
-  }
+  // execute functional to retrieve selected quantity
+  return std::get<2>(_outputs[_contact_quantity])();
 }

@@ -286,7 +286,8 @@ PenaltyWeightedGapUserObject::updateAugmentedLagrangianMultipliers()
     else
       lagrange_multiplier = 0.0;
 
-    // Update penalty
+    // Update penalty (the factor of 1/4 is suggested in the literature, the limit on AL iteration
+    // caps the penalty increase)
     const auto previous_gap = _dof_to_previous_gap[dof_object];
     if (std::abs(gap) > 0.25 * std::abs(previous_gap) && _lagrangian_iteration_number < 6)
       penalty *= _penalty_multiplier;

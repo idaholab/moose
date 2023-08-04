@@ -28,7 +28,9 @@ public:
   virtual void initialize() override {}
   virtual void execute() override {}
   virtual void finalize() override {}
-  virtual PostprocessorValue getValue() override;
+
+  using Postprocessor::getValue;
+  virtual PostprocessorValue getValue() const override;
 
   // only needed for ElementPostprocessors and NodalPostprocessors
   virtual void threadJoin(const UserObject &) override {}

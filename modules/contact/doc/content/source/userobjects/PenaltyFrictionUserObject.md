@@ -31,11 +31,12 @@ when using the contact action.
 
 An augmented Lagrange (AL) approach can be used to enforce the contact constraints to a user-prescribed
 tolerance. That tolerance can be the normal gap distance (distance to exact enforcement if in contact) or
-the relative slip tolerance for slipping nodes. The AL approach solves the original MOOSE problem, in which contact is enforced using a pure penalty approach,
-taking the necessary nonlinear iterations and updates "fixed" Lagrange multipliers in an outer loop. This
+the relative slip tolerance for slipping nodes. The AL approach solves the original MOOSE problem,
+in which contact is enforced using a pure penalty approach, taking the necessary nonlinear iterations
+and updates "fixed" Lagrange multipliers in an outer loop. This
 process repeats until the contact-related tolerances are met. The "fixed" Lagrange multipliers represent
 accumulated normal and tangential tractions over the AL iterations (see [!citep](wriggers2006computational)).
-Usage of AL with this mortar constraint allows for, simultaneously 1. Having a consistent contact formulation,
+Usage of AL with this mortar constraint allows for, simultaneously 1. Having a contact formulation that, upon AL convergence, will yield results equivalent to Lagrange multiplier-enforced dual mortar,
 2. Enforcement of the contact constraint to a user-prescribed tolerance (analogous to Lagrange multiplier
 enforcement, see [ComputeWeightedGapLMMechanicalContact](/ComputeWeightedGapLMMechanicalContact.md)), and 3. Keeps
 the system's condition number as if mechanical contact is not present; as long as the initial penalty coefficients are

@@ -15,7 +15,9 @@
 #include "TwoVector.h"
 
 /**
- * User object that computes tangential pressures due to friction using a penalty approach
+ * User object that computes tangential pressures due to friction using a penalty approach,
+ * following J.C. Simo, T.A. Laursen, An augmented lagrangian treatment of contact problems
+ * involving friction, https://doi.org/10.1016/0045-7949(92)90540-G.
  */
 class PenaltyFrictionUserObject : virtual public PenaltyWeightedGapUserObject,
                                   virtual public WeightedVelocitiesUserObject

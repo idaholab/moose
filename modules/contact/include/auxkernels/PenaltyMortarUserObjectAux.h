@@ -12,6 +12,11 @@
 #include "AuxKernel.h"
 #include "MooseEnum.h"
 
+#include <functional>
+#include <map>
+#include <tuple>
+#include <string>
+
 class UserObject;
 class WeightedGapUserObject;
 class PenaltyWeightedGapUserObject;
@@ -64,4 +69,14 @@ protected:
   const WeightedVelocitiesUserObject * _wvuo;
   const PenaltyFrictionUserObject * _pfuo;
   ///@}
+
+  /// Definition of the output quantities and
+  std::map<ContactQuantityEnum, std::tuple<std::string, const void *, std::function<Real(void)>>>
+      _outputs;
+
+  /// if true computeValue only performs error checking (used in constructor)
+  bool _check_only;
+
+  /// available contact quantities
+  static const MooseEnum _contact_quantities;
 };

@@ -30,7 +30,7 @@ NumAugmentedLagrangeIterations::NumAugmentedLagrangeIterations(const InputParame
 }
 
 PostprocessorValue
-NumAugmentedLagrangeIterations::getValue()
+NumAugmentedLagrangeIterations::getValue() const
 {
   return _augmented_lagrange_problem ? _augmented_lagrange_problem->getLagrangianIterationNumber()
                                      : 0;

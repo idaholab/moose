@@ -16,6 +16,7 @@
 #include "MortarConstraintBase.h"
 #include "NonlinearSystemBase.h"
 #include "Parser.h"
+#include "AugmentedLagrangianContactProblem.h"
 
 #include "NanoflannMeshAdaptor.h"
 #include "PointListAdaptor.h"
@@ -756,6 +757,21 @@ ContactAction::addMortarContact()
 
   if (_current_task == "add_user_object")
   {
+    // check if the correct problem class is selected if AL parameters are provided
+    if (_formulation == ContactFormulation::MORTAR_PENALTY &&
+        !dynamic_cast<AugmentedLagrangianContactProblemInterface *>(_problem.get()))
+    {
+      const std::vector<std::string> params = {"penalty_multiplier",
+                                               "penalty_multiplier_friction",
+                                               "al_penetration_tolerance",
+                                               "al_incremental_slip_tolerance",
+                                               "al_frictional_force_tolerance"};
+      for (const auto & param : params)
+        if (parameters().isParamSetByUser(param))
+          paramError(param,
+                     "Augmented Lagrange parameter was specified, but the selected problem type "
+                     "does not support Augmented Lagrange iterations.");
+    }
 
     if (_model != ContactModel::COULOMB && _formulation == ContactFormulation::MORTAR)
     {
@@ -1435,9 +1451,48 @@ ContactAction::getProximityMethod()
 MooseEnum
 ContactAction::getFormulationEnum()
 {
-  return MooseEnum(
+  auto formulations = MooseEnum(
       "ranfs kinematic penalty augmented_lagrange tangential_penalty mortar mortar_penalty",
       "kinematic");
+
+  formulations.addDocumentation(
+      "ranfs",
+      "Reduced Active Nonlinear Function Set scheme for node-on-face contact. Provides exact "
+      "enforcement without Lagrange multipliers or penalty terms.");
+  formulations.addDocumentation(
+      "kinematic",
+      "Kinematic contact constraint enforcement transfers the internal forces at secondary nodes "
+      "to the corresponding primary face for node-on-face contact. Provides exact "
+      "enforcement without Lagrange multipliers or penalty terms.");
+  formulations.addDocumentation(
+      "penalty",
+      "Node-on-face penalty based contact constraint enforcement. Interpenetration is penalized. "
+      "Enforcement depends on the penalty magnitude. High penalties can introduce ill conditioning "
+      "of the system.");
+  formulations.addDocumentation("augmented_lagrange",
+                                "Node-on-face augmented Lagrange penalty based contact constraint "
+                                "enforcement. Interpenetration is enforced up to a user specified "
+                                "tolerance, ill-conditioning is generally avoided. Requires an "
+                                "Augmented Lagrange Problem class to be used in the simulation.");
+  formulations.addDocumentation(
+      "tangential_penalty",
+      "Node-on-face penalty based frictional contact constraint enforcement. Interpenetration and "
+      "slip distance for sticking nodes are penalized. Enforcement depends on the penalty "
+      "magnitudes. High penalties can introduce ill conditioning of the system.");
+  formulations.addDocumentation(
+      "mortar",
+      "Mortar based contact constraint enforcement using Lagrange multipliers. Provides exact "
+      "enforcement and a variationally consistent formulation. Lagrange multipliers introduce a "
+      "saddle point character in the system matrix which can have a negative impact on scalability "
+      "with iterative solvers");
+  formulations.addDocumentation(
+      "mortar_penalty",
+      "Mortar and penalty based contact constraint enforcement. When using an Augmented Lagrange "
+      "Problem class this provides normal (and tangential) contact constratint enforced up to a "
+      "user specified tolerances. Without AL the enforcement depends on the penalty magnitudes. "
+      "High penalties can introduce ill conditioning of the system.");
+
+  return formulations;
 }
 
 MooseEnum
