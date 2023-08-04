@@ -9,6 +9,7 @@
 
 #include "MeshRepairGenerator.h"
 #include "CastUniquePointer.h"
+#include "MooseMeshUtils.h"
 
 #include "libmesh/mesh_tools.h"
 #include "libmesh/mesh_modification.h"
@@ -26,10 +27,15 @@ MeshRepairGenerator::validParams()
                                              "Name of the mesh generator providing the mesh");
 
   params.addParam<bool>("fix_node_overlap", false, "Whether to merge overlapping nodes");
-  params.addParam<bool>("node_overlap_tol", 1e-8, "Tolerance for merging overlapping nodes");
+  params.addParam<Real>("node_overlap_tol", 1e-8, "Tolerance for merging overlapping nodes");
 
   params.addParam<bool>(
       "fix_elements_orientation", false, "Whether to flip elements with negative volumes");
+
+  params.addParam<bool>("separate_blocks_by_element_types",
+                        false,
+                        "Create new blocks if multiple element types are present in a block");
+
   return params;
 }
 
@@ -38,7 +44,8 @@ MeshRepairGenerator::MeshRepairGenerator(const InputParameters & parameters)
     _input(getMesh("input")),
     _fix_overlapping_nodes(getParam<bool>("fix_node_overlap")),
     _node_overlap_tol(getParam<Real>("node_overlap_tol")),
-    _fix_element_orientation(getParam<bool>("fix_elements_orientation"))
+    _fix_element_orientation(getParam<bool>("fix_elements_orientation")),
+    _elem_type_separation(getParam<bool>("separate_blocks_by_element_types"))
 {
 }
 
@@ -73,7 +80,7 @@ MeshRepairGenerator::generate()
           for (auto & elem_node : elem->node_ref_range())
           {
             const Real tol = _node_overlap_tol;
-            // Compares the coordinates (add absoluteFuzzyEqual)
+            // Compares the coordinates
             const auto x_node = (*node)(0);
             const auto x_elem_node = elem_node(0);
             const auto y_node = (*node)(1);
@@ -98,12 +105,44 @@ MeshRepairGenerator::generate()
         }
       }
     }
-    _console << "Number of nodes overlapping which got merged: " << _num_fixed_nodes << std::endl;
+    _console << "Number of overlapping nodes which got merged: " << _num_fixed_nodes << std::endl;
   }
 
   // Flip orientation of elements to keep positive volumes
   if (_fix_element_orientation)
     MeshTools::Modification::orient_elements(*mesh);
+
+  // Disambiguate any block that has elements of multiple types
+  if (_elem_type_separation)
+  {
+    std::set<subdomain_id_type> ids;
+    mesh->subdomain_ids(ids);
+    // loop on sub-domain
+    for (auto & id : ids)
+    {
+      // Gather all the element types and blocks
+      // ElemType defines an enum for geometric element types
+      std::set<ElemType> types;
+      // loop on elements within this sub-domain
+      for (auto & elem : mesh->active_subdomain_elements_ptr_range(id))
+        types.insert(elem->type());
+
+      if (types.size() > 1)
+      {
+        auto next_block_id = MooseMeshUtils::getNextFreeSubdomainID(*mesh);
+        unsigned int i = 0;
+        for (const auto & type_it : types)
+        {
+          auto new_id = next_block_id + i++;
+          // Create blocks when a block has multiple element types
+          mesh->subdomain_name(new_id) = mesh->subdomain_name(id) + "_" + Moose::stringify(type_it);
+
+          // Re-assign elements to the new blocks
+          MooseMeshUtils::changeSubdomainId(*mesh, id, new_id);
+        }
+      }
+    }
+  }
 
   mesh->prepare_for_use();
   return dynamic_pointer_cast<MeshBase>(mesh);

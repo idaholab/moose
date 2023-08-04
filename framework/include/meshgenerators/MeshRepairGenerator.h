@@ -37,4 +37,7 @@ private:
 
   /// whether to flip elements that are oriented such that they have a negative volume
   const bool _fix_element_orientation;
+
+  /// whether to split subdomains using each element's type
+  const bool _elem_type_separation;
 };
