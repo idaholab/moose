@@ -59,32 +59,29 @@ GapHeatPointSourceMaster::GapHeatPointSourceMaster(const InputParameters & param
 void
 GapHeatPointSourceMaster::addPoints()
 {
-  point_to_info.clear();
+  point_to_node.clear();
   _secondary_flux.close();
 
-  std::map<dof_id_type, PenetrationInfo *>::iterator
-      it = _penetration_locator._penetration_info.begin(),
-      end = _penetration_locator._penetration_info.end();
-
-  for (; it != end; ++it)
+  for (const auto & [id, pinfo] : _penetration_locator._penetration_info)
   {
-    PenetrationInfo * pinfo = it->second;
+    if (!pinfo)
+      continue;
 
+    const auto & node = _mesh.nodeRef(id);
     // Skip this pinfo if there are no DOFs on this node.
-    if (!pinfo || pinfo->_node->n_comp(_sys.number(), _var.number()) < 1)
+    if (node.n_comp(_sys.number(), _var.number()) < 1)
       continue;
 
     addPoint(pinfo->_elem, pinfo->_closest_point);
-    point_to_info[pinfo->_closest_point] = pinfo;
+    point_to_node[pinfo->_closest_point] = &node;
   }
 }
 
 Real
 GapHeatPointSourceMaster::computeQpResidual()
 {
-  PenetrationInfo * pinfo = point_to_info[_current_point];
-  const Node * node = pinfo->_node;
-  long int dof_number = node->dof_number(_sys.number(), _var.number(), 0);
+  const Node & node = *point_to_node[_current_point];
+  const auto dof_number = node.dof_number(_sys.number(), _var.number(), 0);
 
   return -_test[_i][_qp] * _secondary_flux(dof_number);
 }

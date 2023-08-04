@@ -29,8 +29,7 @@ class Elem;
 class PenetrationInfo
 {
 public:
-  PenetrationInfo(const Node * node,
-                  const Elem * elem,
+  PenetrationInfo(const Elem * elem,
                   const Elem * side,
                   unsigned int side_num,
                   RealVectorValue norm,
@@ -70,7 +69,6 @@ public:
   }
   void release() { _mech_status = MS_NO_CONTACT; }
 
-  const Node * _node;
   const Elem * _elem;
   const Elem * _side;
   unsigned int _side_num;
