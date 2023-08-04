@@ -24,7 +24,7 @@
     [2d_mbb_pde_amr]
       type = 'CSVDiff'
       input = '2d_mbb_pde_amr.i'
-      csvdiff = '2d_mbb_pde_amr.csv'
+      csvdiff = '2d_mbb_pde_amr_out.csv'
       requirement = 'The system shall be able to compute the compliance sensitivty correctly for a 2D topology optimization problem with AMR.'
       heavy = true
     []

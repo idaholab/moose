@@ -24,6 +24,8 @@ DensityUpdate::validParams()
   params.addRequiredParam<VariableName>("density_sensitivity",
                                         "Name of the density_sensitivity variable.");
   params.addRequiredParam<Real>("volume_fraction", "Volume Fraction");
+  params.addParam<Real>("bisection_lower_bound", 0, "Lower bound for the bisection algorithm.");
+  params.addParam<Real>("bisection_upper_bound", 1e16, "Upper bound for the bisection algorithm.");
   return params;
 }
 
@@ -33,7 +35,9 @@ DensityUpdate::DensityUpdate(const InputParameters & parameters)
     _density_sensitivity_name(getParam<VariableName>("density_sensitivity")),
     _design_density(writableVariable("design_density")),
     _density_sensitivity(_subproblem.getStandardVariable(_tid, _density_sensitivity_name)),
-    _volume_fraction(getParam<Real>("volume_fraction"))
+    _volume_fraction(getParam<Real>("volume_fraction")),
+    _lower_bound(getParam<Real>("bisection_lower_bound")),
+    _upper_bound(getParam<Real>("bisection_upper_bound"))
 {
 }
 
@@ -54,7 +58,7 @@ DensityUpdate::execute()
   if (elem_data_iter != _elem_data_map.end())
   {
     ElementData & elem_data = elem_data_iter->second;
-    _design_density.setNodalValue(elem_data.curr_filtered_density);
+    _design_density.setNodalValue(elem_data.new_density);
   }
   else
   {
@@ -86,8 +90,8 @@ void
 DensityUpdate::performOptimCritLoop()
 {
   // Initialize the lower and upper bounds for the bisection method
-  Real l1 = 0;
-  Real l2 = 1e16;
+  Real l1 = _lower_bound;
+  Real l2 = _upper_bound;
   bool perform_loop = true;
   // Loop until the relative difference between l1 and l2 is less than a small tolerance
   while (perform_loop)
@@ -101,9 +105,9 @@ DensityUpdate::performOptimCritLoop()
     for (auto && [id, elem_data] : _elem_data_map)
     {
       // Compute the updated density for the current element
-      Real new_density = computeUpdatedDensity(elem_data.density, elem_data.sensitivity, lmid);
+      Real new_density = computeUpdatedDensity(elem_data.old_density, elem_data.sensitivity, lmid);
       // Update the current filtered density for the current element
-      elem_data.curr_filtered_density = new_density;
+      elem_data.new_density = new_density;
       // Update the current total volume
       curr_total_volume += new_density * elem_data.volume;
     }
@@ -120,8 +124,6 @@ DensityUpdate::performOptimCritLoop()
 
     // Determine whether to continue the loop based on the relative difference between l1 and l2
     perform_loop = (l2 - l1) / (l1 + l2) > 1e-3;
-    // Broadcast the decision to continue the loop to all processors
-    _communicator.broadcast(perform_loop);
   }
 }
 

@@ -10,6 +10,7 @@ The `ComplianceSensitivity` material class extends the `StrainEnergyDensity` cla
 
 An example of how to use the `ComplianceSensitivity` class in an input file:
 
+listing test/tests/materials/ComplianceSensitivity/2d_mbb.i block=Materials/dc
 
 
 !syntax parameters /Materials/ComplianceSensitivity

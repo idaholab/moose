@@ -1,7 +1,7 @@
 vol_frac = 0.4
 E0 = 1e5
 Emin = 1e-4
-power = 3
+power = 2
 [GlobalParams]
   displacements = 'disp_x disp_y'
 []
@@ -26,41 +26,22 @@ power = 3
 []
 
 [Variables]
-  [disp_x]
-  []
-  [disp_y]
-  []
   [Dc]
     initial_condition = -1.0
   []
 []
 
 [AuxVariables]
-    [sensitivity]
-        family = MONOMIAL
-        order = FIRST
-        initial_condition = -1.0
-        [AuxKernel]
-          type = MaterialRealAux
-          variable = sensitivity
-          property = sensitivity
-          execute_on = LINEAR
-        []
-      []
-  [Emin]
+  [sensitivity]
     family = MONOMIAL
-    order = CONSTANT
-    initial_condition = ${Emin}
-  []
-  [power]
-    family = MONOMIAL
-    order = CONSTANT
-    initial_condition = ${power}
-  []
-  [E0]
-    family = MONOMIAL
-    order = CONSTANT
-    initial_condition = ${E0}
+    order = FIRST
+    initial_condition = -1.0
+    [AuxKernel]
+      type = MaterialRealAux
+      variable = sensitivity
+      property = sensitivity
+      execute_on = LINEAR
+    []
   []
 
   [compliance]
@@ -145,15 +126,17 @@ power = 3
     type = ComputeVariableIsotropicElasticityTensor
     youngs_modulus = E_phys
     poissons_ratio = poissons_ratio
-    args = 'Emin mat_den power E0'
+    args = 'mat_den'
   []
+
   [E_phys]
-    type = CoupledValueFunctionMaterial
+    type = ParsedMaterial
     # Emin + (density^penal) * (E0 - Emin)
-    function = 'x + (y ^ z) * (t-x)'
-    prop_name = E_phys
-    v = 'Emin mat_den power E0'
+    function = '${Emin} + (mat_den ^ ${power}) * (${E0}-${Emin})'
+    coupled_variables = 'mat_den'
+    property_name = E_phys
   []
+
   [poissons_ratio]
     type = GenericConstantMaterial
     prop_names = poissons_ratio

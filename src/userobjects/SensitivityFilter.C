@@ -44,7 +44,8 @@ SensitivityFilter::execute()
   // If the element is not found in the filter, throw an error
   if (filter_iter == _filter.end())
   {
-    mooseError("Could not find the element in the filter.");
+    mooseError("Could not find the element in the filter. Check that RadialAverage UserObject ran "
+               "before this object.");
   }
 
   // Get the quadrature point values from the filter
@@ -55,9 +56,8 @@ SensitivityFilter::execute()
 
   // Compute the total elemental sensitivity value by summing over all quadrature points
   for (unsigned int qp = 0; qp < _qrule->n_points(); qp++)
-  {
     den_sense_val += qp_vals[qp] * _JxW[qp];
-  }
+
   den_sense_val /= _current_elem_volume;
 
   // Set the nodal value of the density sensitivity

@@ -47,21 +47,6 @@ power = 3
 []
 
 [AuxVariables]
-  [Emin]
-    family = MONOMIAL
-    order = CONSTANT
-    initial_condition = ${Emin}
-  []
-  [power]
-    family = MONOMIAL
-    order = CONSTANT
-    initial_condition = ${power}
-  []
-  [E0]
-    family = MONOMIAL
-    order = CONSTANT
-    initial_condition = ${E0}
-  []
   [sensitivity]
     family = MONOMIAL
     order = FIRST
@@ -166,15 +151,17 @@ power = 3
     type = ComputeVariableIsotropicElasticityTensor
     youngs_modulus = E_phys
     poissons_ratio = poissons_ratio
-    args = 'Emin mat_den power E0'
+    args = 'mat_den'
   []
+
   [E_phys]
-    type = CoupledValueFunctionMaterial
+    type = ParsedMaterial
     # Emin + (density^penal) * (E0 - Emin)
-    function = 'x + (y ^ z) * (t-x)'
-    prop_name = E_phys
-    v = 'Emin mat_den power E0'
+    function = '${Emin} + (mat_den ^ ${power}) * (${E0}-${Emin})'
+    coupled_variables = 'mat_den'
+    property_name = E_phys
   []
+
   [poissons_ratio]
     type = GenericConstantMaterial
     prop_names = poissons_ratio

@@ -10,7 +10,7 @@ The `SensitivityFilter` class is an `ElementUserObject` that calculates the dens
 
 An example of how to use the `SensitivityFilter` class in an input file:
 
-
+listing test/tests/materials/ComplianceSensitivity/2d_mbb.i block=UserObjects/calc_sense
 
 
 !syntax parameters /UserObjects/SensitivityFilter

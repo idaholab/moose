@@ -26,7 +26,7 @@ public:
   virtual void threadJoin(const UserObject &) override{};
 
 protected:
-  MooseMesh & _mesh;
+  const MooseMesh & _mesh;
   const VariableName _design_density_name;
   const VariableName _density_sensitivity_name;
 
@@ -38,13 +38,13 @@ protected:
 private:
   struct ElementData
   {
-    Real density;
+    Real old_density;
     Real sensitivity;
     Real volume;
-    Real curr_filtered_density;
+    Real new_density;
     ElementData() = default;
     ElementData(Real dens, Real sens, Real vol, Real filt_dens)
-      : density(dens), sensitivity(sens), volume(vol), curr_filtered_density(filt_dens)
+      : old_density(dens), sensitivity(sens), volume(vol), new_density(filt_dens)
     {
     }
   };
@@ -55,8 +55,14 @@ private:
 
   Real computeUpdatedDensity(Real current_density, Real dc, Real lmid);
 
+  /// Total volume allowed for volume contraint
   Real _total_allowable_volume;
-  std::vector<Point> _elem_centroids;
-  std::vector<dof_id_type> _elem_id;
+
+  /// Data structure to hold old density, sensitivity, volume, current density.
   std::map<dof_id_type, ElementData> _elem_data_map;
+
+  /// Lower bound for bisection algorithm
+  const Real _lower_bound;
+  /// Upper bound for bisection algorithm
+  const Real _upper_bound;
 };

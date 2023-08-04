@@ -1,7 +1,7 @@
 vol_frac = 0.5
 E0 = 1e5
 Emin = 1e-2
-power = 3
+power = 2
 
 [GlobalParams]
   displacements = 'disp_x disp_y disp_z'
@@ -29,33 +29,7 @@ power = 3
   []
 []
 
-[Variables]
-  [disp_x]
-  []
-  [disp_y]
-  []
-  [disp_z]
-  []
-[]
-
 [AuxVariables]
-
-  [Emin]
-    family = MONOMIAL
-    order = CONSTANT
-    initial_condition = ${Emin}
-  []
-  [power]
-    family = MONOMIAL
-    order = CONSTANT
-    initial_condition = ${power}
-  []
-  [E0]
-    family = MONOMIAL
-    order = CONSTANT
-    initial_condition = ${E0}
-  []
-
   [compliance]
     family = MONOMIAL
     order = CONSTANT
@@ -114,15 +88,17 @@ power = 3
     type = ComputeVariableIsotropicElasticityTensor
     youngs_modulus = E_phys
     poissons_ratio = poissons_ratio
-    args = 'Emin mat_den power E0'
+    args = 'mat_den'
   []
+
   [E_phys]
-    type = CoupledValueFunctionMaterial
+    type = ParsedMaterial
     # Emin + (density^penal) * (E0 - Emin)
-    function = 'x + (y ^ z) * (t-x)'
-    prop_name = E_phys
-    v = 'Emin mat_den power E0'
+    function = '${Emin} + (mat_den ^ ${power}) * (${E0}-${Emin})'
+    coupled_variables = 'mat_den'
+    property_name = E_phys
   []
+
   [poissons_ratio]
     type = GenericConstantMaterial
     prop_names = poissons_ratio
@@ -155,7 +131,7 @@ power = 3
     weights = constant
     prop_name = sensitivity
     execute_on = TIMESTEP_END
-    force_preaux = true
+    execution_order_group = -1
   []
   [update]
     type = DensityUpdate
@@ -171,7 +147,6 @@ power = 3
     design_density = mat_den
     filter_UO = rad_avg
     execute_on = TIMESTEP_END
-    force_postaux = true
   []
 []
 

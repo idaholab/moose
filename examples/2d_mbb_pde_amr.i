@@ -1,7 +1,7 @@
 vol_frac = 0.5
 E0 = 1
 Emin = 1e-8
-power = 3
+power = 2
 [GlobalParams]
   displacements = 'disp_x disp_y'
 []
@@ -33,10 +33,6 @@ power = 3
 []
 
 [Variables]
-  [disp_x]
-  []
-  [disp_y]
-  []
   [Dc]
     initial_condition = -1.0
   []

@@ -1,7 +1,9 @@
+# 2D MBB Beam with a Convolution Filter
+
 In this example we will go through the general setup of a topology optimization
 problem.  The problem is to find the optimal material distribution in a 2D
 domain that minimizes the compliance of the structure.  We will first define the
-problem paremeters. Below is a list of the parameters that we will use in this
+problem parameters. Below is a list of the parameters that we will use in this
 example corresponding to the volume fraction, Young's modulus of the material,
 and the penalization power. We will go over the material that is needed for the
 setup and running the optimization problem, but skip over any information that
@@ -20,7 +22,7 @@ Next we define the mesh and add the necessary nodesets.
          block=Mesh id=mesh_block
          caption=MBB `Mesh` block
 
-In the auxvariables block there are two initial conditions.  The first is
+In the `AuxVariables` block there are two initial conditions.  The first is a
 constant, negative value that is needed for the sensitivity variable `Dc`. It
 needs to be negative for the first density update. The second initial condition
 is setting the material density to the initial value of `vol_frac`.
@@ -39,11 +41,11 @@ sensitivity, which is used for updating the density field.
          caption=MBB `Materials` block
 
 The final block is the `UserObjects` block.  This block contains the main
-optimization functionailty. First is the `RadialAverage` and `SensitivityFilter` objects that filter the
+optimization functionality. First is the `RadialAverage` and `SensitivityFilter` objects that filter the
 sensitivity to prevent checkerboarding. The radius of the filter sets the
 minimum size of a feature in the structure. Finally is the `DensityUpdate`
 object that updates the density field based on the sensitivity and the keeps the
-volume constraint statisfied.
+volume constraint satisfied.
 
 !listing test/tests/materials/ComplianceSensitivity/2d_mbb.i
          block=UserObjects id=uo_block

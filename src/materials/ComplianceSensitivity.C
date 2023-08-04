@@ -17,9 +17,10 @@ ComplianceSensitivity::validParams()
   InputParameters params = StrainEnergyDensity::validParams();
   params.addClassDescription("Computes compliance sensitivity needed for SIMP method.");
   params.addRequiredCoupledVar("design_density", "Design density variable name.");
-  params.addRequiredParam<int>("power", "Penalty power for SIMP method.");
-  params.addRequiredParam<Real>("E", "Young's modulus for the material.");
-  params.addRequiredParam<Real>("Emin", "Minimum value of Young's modulus for the material.");
+  params.addRequiredRangeCheckedParam<int>("power", "power>=1", "Penalty power for SIMP method.");
+  params.addRequiredRangeCheckedParam<Real>("E", "E>0", "Young's modulus for the material.");
+  params.addRequiredRangeCheckedParam<Real>(
+      "Emin", "Emin>0", "Minimum value of Young's modulus for the material.");
 
   return params;
 }
@@ -46,7 +47,7 @@ ComplianceSensitivity::computeQpProperties()
   // Compute the derivative of the compliance with respect to the design density
   // _power-2 because StrainEnergyDensity needed to be divided by the _design_density
   Real derivative =
-      -_power * (_E - _Emin) * MathUtils::pow(_design_density[_qp], _power - 2) * compliance;
+      -_power * (_E - _Emin) * MathUtils::pow(_design_density[_qp], _power - 1) * compliance;
 
   // This makes the sensitivity mesh size independent
   _sensitivity[_qp] = derivative;
