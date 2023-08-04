@@ -296,19 +296,25 @@ PiecewiseByBlockLambdaFunctor<T>::evaluate(const Moose::ElemPointArg & elem_poin
   return it->second(elem_point_arg, time);
 }
 
-template <typename T>
-typename PiecewiseByBlockLambdaFunctor<T>::ValueType
-PiecewiseByBlockLambdaFunctor<T>::evaluate(const Moose::NodeArg & node_arg,
-                                           const Moose::StateArg & time) const
-{
-  const Node * const node = node_arg.node;
-  mooseAssert(node && node != libMesh::remote_node,
-              "The element must be non-null and non-remote in functor material properties");
-  auto it = _node_functor.find(node->subdomain_id());
-  if (it == _node_functor.end())
-    subdomainErrorMessage(node->subdomain_id());
+// template <typename T>
+// typename PiecewiseByBlockLambdaFunctor<T>::ValueType
+// PiecewiseByBlockLambdaFunctor<T>::evaluate(const Moose::NodeArg & node_arg,
+//                                            const Moose::StateArg & time) const
+// {
+//   const Node * const node = node_arg.node;
+//   mooseAssert(node && node != libMesh::remote_node,
+//               "The element must be non-null and non-remote in functor material properties");
+//   auto it = _node_functor.find(node_arg.subdomain_id);
+//   if (it == _node_functor.end())
+//     subdomainErrorMessage(node_arg.subdomain_id);
 
-  return it->second(node_arg, time);
+//   return it->second(node_arg, time);
+// }
+template <typename T>
+typename FunctorBase<T>::ValueType
+FunctorBase<T>::operator()(const NodeArg & node, const StateArg & state) const
+{
+    return evaluate(node, state);
 }
 
 template <typename T>
