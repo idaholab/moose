@@ -1,20 +1,22 @@
 # ADHeatStructureEnergyRZ
 
-!alert construction title=Undocumented Class
-The ADHeatStructureEnergyRZ has not been documented. The content listed below should be used as a starting point for
-documenting the class, which includes the typical automatic documentation associated with a
-MooseObject; however, what is contained is ultimately determined by what is necessary to make the
-documentation clear for users.
-
 !syntax description /Postprocessors/ADHeatStructureEnergyRZ
 
-## Overview
+The energy stored in these heat structures is calculated as:
 
-!! Replace these lines with information regarding the ADHeatStructureEnergyRZ object.
+!equation
+E = \int_\Omega \rho c_p (T - T_{ref}) n_{units} r d\Omega
 
-## Example Input File Syntax
+where $E$ is the stored energy, $\rho$ the medium density, $c_p$ the medium specific heat capacity,
+$T$ the medium temperature, $T_{ref}$ the reference temperature (reference for the enthalpy)
+and $n_{units}$ the number of units this heat structure represents and $r$ the local circumference.
 
-!! Describe and include an example of how to use the ADHeatStructureEnergyRZ object.
+This volumetric integral is computed numerically using the [local quadrature](syntax/Executioner/Quadrature/index.md).
+
+!alert warning
+With the recent development of general RZ coordinates, this object along with all THM's "RZ"-specific
+objects will soon be deprecated in favor of more general 2D objects used in general RZ coordinates.
+Stay tuned!
 
 !syntax parameters /Postprocessors/ADHeatStructureEnergyRZ
 

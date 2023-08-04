@@ -1,20 +1,18 @@
 # ADHeatStructureEnergy
 
-!alert construction title=Undocumented Class
-The ADHeatStructureEnergy has not been documented. The content listed below should be used as a starting point for
-documenting the class, which includes the typical automatic documentation associated with a
-MooseObject; however, what is contained is ultimately determined by what is necessary to make the
-documentation clear for users.
-
 !syntax description /Postprocessors/ADHeatStructureEnergy
 
-## Overview
+The energy stored in these heat structures is calculated as:
 
-!! Replace these lines with information regarding the ADHeatStructureEnergy object.
+!equation
+E = \int_\Omega \rho c_p (T - T_{ref}) n_{units} d d\Omega
 
-## Example Input File Syntax
+where $E$ is the stored energy, $\rho$ the medium density, $c_p$ the medium specific heat capacity,
+$T$ the medium temperature, $T_{ref}$ the reference temperature (reference for the enthalpy)
+and $n_{units}$ the number of units this heat structure represents, and $d$ is the plate depth, i.e., the
+size of uni-dimensional heat structures modeled.
 
-!! Describe and include an example of how to use the ADHeatStructureEnergy object.
+This volumetric integral is computed numerically using the [local quadrature](syntax/Executioner/Quadrature/index.md)
 
 !syntax parameters /Postprocessors/ADHeatStructureEnergy
 

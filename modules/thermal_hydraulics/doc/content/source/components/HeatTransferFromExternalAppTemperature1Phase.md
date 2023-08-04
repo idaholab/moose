@@ -1,20 +1,18 @@
 # HeatTransferFromExternalAppTemperature1Phase
 
-!alert construction title=Undocumented Class
-The HeatTransferFromExternalAppTemperature1Phase has not been documented. The content listed below should be used as a starting point for
-documenting the class, which includes the typical automatic documentation associated with a
-MooseObject; however, what is contained is ultimately determined by what is necessary to make the
-documentation clear for users.
-
 !syntax description /Components/HeatTransferFromExternalAppTemperature1Phase
 
-## Overview
+This component is a [single-phase heat transfer component](thermal_hydraulics/component_groups/heat_transfer_1phase.md).
 
-!! Replace these lines with information regarding the HeatTransferFromExternalAppTemperature1Phase object.
+It adds a [ADOneDEnergyWallHeating.md] kernel to the energy equation.
+The wall temperature is added as either a constant monomial or a linear Lagrange variable, depending
+on the [!param](/Components/HeatTransferFromExternalAppTemperature1Phase/var_type) parameter.
+It is named after the [!param](/Components/HeatTransferFromExternalAppTemperature1Phase/T_ext) parameter.
+This variable should be set using transferred data from an external application.
 
-## Example Input File Syntax
+## Formulation
 
-!! Describe and include an example of how to use the HeatTransferFromExternalAppTemperature1Phase object.
+Please refer to [ADOneDEnergyWallHeating.md] for the heat flux formulation.
 
 !syntax parameters /Components/HeatTransferFromExternalAppTemperature1Phase
 

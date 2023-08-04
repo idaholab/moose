@@ -1,20 +1,21 @@
 # HeatTransferFromExternalAppHeatFlux1Phase
 
-!alert construction title=Undocumented Class
-The HeatTransferFromExternalAppHeatFlux1Phase has not been documented. The content listed below should be used as a starting point for
-documenting the class, which includes the typical automatic documentation associated with a
-MooseObject; however, what is contained is ultimately determined by what is necessary to make the
-documentation clear for users.
-
 !syntax description /Components/HeatTransferFromExternalAppHeatFlux1Phase
 
-## Overview
+This component is a
+[single-phase heat transfer component](thermal_hydraulics/component_groups/heat_transfer_1phase.md).
 
-!! Replace these lines with information regarding the HeatTransferFromExternalAppHeatFlux1Phase object.
+It adds a [ADOneDEnergyWallHeatFlux.md] kernel to the energy equation. The
+heat source is gathered from a constant monomial variable named "q_wall" plus a suffix dependent on
+the index of the connected heat transfer component. This variable should
+be set using transferred data from an external application.
 
-## Example Input File Syntax
+The variable is provided to the [ADOneDEnergyWallHeatFlux.md] kernel as a material property.
+The conversion is done using a [CoupledVariableValueMaterial.md].
 
-!! Describe and include an example of how to use the HeatTransferFromExternalAppHeatFlux1Phase object.
+## Formulation
+
+Please refer to [ADOneDEnergyWallHeatFlux.md] for the heat flux formulation.
 
 !syntax parameters /Components/HeatTransferFromExternalAppHeatFlux1Phase
 

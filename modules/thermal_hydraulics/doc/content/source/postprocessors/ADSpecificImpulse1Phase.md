@@ -1,20 +1,30 @@
 # ADSpecificImpulse1Phase
 
-!alert construction title=Undocumented Class
-The ADSpecificImpulse1Phase has not been documented. The content listed below should be used as a starting point for
-documenting the class, which includes the typical automatic documentation associated with a
-MooseObject; however, what is contained is ultimately determined by what is necessary to make the
-documentation clear for users.
-
 !syntax description /Postprocessors/ADSpecificImpulse1Phase
 
-## Overview
+The flux on the boundary is first computed using the boundary user object for the boundary
+of interest. Then we assume the process is isentropic and compute the inlet entropy $s_{in}$
+from the inlet specific volume $v$ and specific internal energy $e$:
 
-!! Replace these lines with information regarding the ADSpecificImpulse1Phase object.
+!equation
+s_{in} = s(v_{in}, e_{in})
 
-## Example Input File Syntax
+We know the outlet pressure, and we use the bisection method to compute the outlet
+temperature considering the process is isentropic. From the outlet pressure and temperature, we can
+compute the outlet enthalpy:
 
-!! Describe and include an example of how to use the ADSpecificImpulse1Phase object.
+!equation
+h_{out} = p(p_{out}, T_{out})
+
+then compute the thrust from the outlet velocity and the mass flow rate $\dot{m}$ for the quadrature point as:
+
+!equation
+thrust_{qp} = |\sqrt(2 (h_{in} - h_{out})) \dot{m}|
+
+The specific impulse $I_{sp}$ is finally returned from the boundary thrust as:
+
+!equation
+I_{sp} = \dfrac{thrust}{\dot{m} g}
 
 !syntax parameters /Postprocessors/ADSpecificImpulse1Phase
 

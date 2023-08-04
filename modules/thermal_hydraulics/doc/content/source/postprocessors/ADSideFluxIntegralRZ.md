@@ -1,20 +1,19 @@
 # ADSideFluxIntegralRZ
 
-!alert construction title=Undocumented Class
-The ADSideFluxIntegralRZ has not been documented. The content listed below should be used as a starting point for
-documenting the class, which includes the typical automatic documentation associated with a
-MooseObject; however, what is contained is ultimately determined by what is necessary to make the
-documentation clear for users.
-
 !syntax description /Postprocessors/ADSideFluxIntegralRZ
 
-## Overview
+The diffusive flux $I$ over the cylindrical surface is computed as:
 
-!! Replace these lines with information regarding the ADSideFluxIntegralRZ object.
+!equation
+I = \int_{\partial \Omega} \nabla v \cdot \vec{n} r(\vec{M}) d\partial \Omega
 
-## Example Input File Syntax
+where $v$ is the variable of interest, $\vec{n}$ the normal to the surface and $r(\vec{M})$ is
+the local circumference.
 
-!! Describe and include an example of how to use the ADSideFluxIntegralRZ object.
+!alert warning
+With the recent development of general RZ coordinates, this object along with all THM's "RZ"-specific
+objects will soon be deprecated in favor of more general 2D objects used in general RZ coordinates.
+Stay tuned!
 
 !syntax parameters /Postprocessors/ADSideFluxIntegralRZ
 

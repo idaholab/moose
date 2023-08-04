@@ -1,20 +1,9 @@
 # SupersonicInlet
 
-!alert construction title=Undocumented Class
-The SupersonicInlet has not been documented. The content listed below should be used as a starting point for
-documenting the class, which includes the typical automatic documentation associated with a
-MooseObject; however, what is contained is ultimately determined by what is necessary to make the
-documentation clear for users.
-
 !syntax description /Components/SupersonicInlet
 
-## Overview
-
-!! Replace these lines with information regarding the SupersonicInlet object.
-
-## Example Input File Syntax
-
-!! Describe and include an example of how to use the SupersonicInlet object.
+!alert warning
+This component is deprecated and was not replaced. Do not use it.
 
 !syntax parameters /Components/SupersonicInlet
 

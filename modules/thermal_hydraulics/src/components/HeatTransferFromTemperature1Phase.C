@@ -17,6 +17,8 @@ HeatTransferFromTemperature1Phase::validParams()
   MooseEnum var_type("nodal elemental", "nodal", false);
   params.addParam<MooseEnum>(
       "var_type", var_type, "The type of wall temperature variable (nodal, elemental).");
+  params.addClassDescription("Heat transfer specified by a wall temperature provided by an "
+                             "external application going into 1-phase flow channel.");
   return params;
 }
 

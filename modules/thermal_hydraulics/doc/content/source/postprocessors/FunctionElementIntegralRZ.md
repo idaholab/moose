@@ -1,20 +1,20 @@
 # FunctionElementIntegralRZ
 
-!alert construction title=Undocumented Class
-The FunctionElementIntegralRZ has not been documented. The content listed below should be used as a starting point for
-documenting the class, which includes the typical automatic documentation associated with a
-MooseObject; however, what is contained is ultimately determined by what is necessary to make the
-documentation clear for users.
-
 !syntax description /Postprocessors/FunctionElementIntegralRZ
 
-## Overview
+The integral is computed as:
 
-!! Replace these lines with information regarding the FunctionElementIntegralRZ object.
+!equation
+I = \int_\Omega f(t, \vec{M}) r(\vec{M}) d\Omega
 
-## Example Input File Syntax
+where $I$ is the integral, $f$ is the function evaluated at the current time $t$ and position $\vec{M}$,
+and $r$ is the local circumference.
+This volumetric integral is computed numerically using the system's quadrature.
 
-!! Describe and include an example of how to use the FunctionElementIntegralRZ object.
+!alert warning
+With the recent development of general RZ coordinates, this object along with all THM's "RZ"-specific
+objects will soon be deprecated in favor of more general 2D objects used in general RZ coordinates.
+Stay tuned!
 
 !syntax parameters /Postprocessors/FunctionElementIntegralRZ
 

@@ -1,20 +1,12 @@
 # ElbowPipe1Phase
 
-!alert construction title=Undocumented Class
-The ElbowPipe1Phase has not been documented. The content listed below should be used as a starting point for
-documenting the class, which includes the typical automatic documentation associated with a
-MooseObject; however, what is contained is ultimately determined by what is necessary to make the
-documentation clear for users.
-
 !syntax description /Components/ElbowPipe1Phase
 
-## Overview
+This component creates a bent 1-phase [flow channel](component_groups/flow_channel.md),
+with a bending angle supplied by the user.
+The component does not have straight sections, only the bend is modelled.
 
-!! Replace these lines with information regarding the ElbowPipe1Phase object.
-
-## Example Input File Syntax
-
-!! Describe and include an example of how to use the ElbowPipe1Phase object.
+The underlying flow model is a [FlowChannel1Phase.md].
 
 !syntax parameters /Components/ElbowPipe1Phase
 
