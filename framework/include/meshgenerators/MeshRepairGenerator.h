@@ -30,15 +30,17 @@ private:
 
   /// fixing mesh by deleting overlapping nodes
   const bool _fix_overlapping_nodes;
+  /// tolerance for merging overlapping nodes
+  const Real _node_overlap_tol;
   /// counting number of overlapped nodes fixed
-  const unsigned int _num_fixed_nodes;
+  unsigned int _num_fixed_nodes;
 
   /// refining elements that are too big
   const bool _fix_max_element_size;
   /// maximum element size over which elements are refined
   const Real _max_element_size;
   /// counting the number of elements that need to be refined for being too big
-  const unsigned int _num_refined_elems;
+  unsigned int _num_refined_elems;
 
   /// whether to flip elements that are oriented such that they have a negative volume
   const bool _fix_element_orientation;
