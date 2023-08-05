@@ -59,7 +59,18 @@ PenetrationLocator::PenetrationLocator(SubProblem & subproblem,
     unsigned int n_dims = _mesh.dimension();
     _fe[i].resize(n_dims + 1);
     for (unsigned int dim = 0; dim <= n_dims; ++dim)
+    {
       _fe[i][dim] = FEBase::build(dim, _fe_type).release();
+      _fe[i][dim]->get_xyz();
+      _fe[i][dim]->get_phi();
+      _fe[i][dim]->get_dphi();
+      _fe[i][dim]->get_dxyzdxi();
+      _fe[i][dim]->get_d2xyzdxi2();
+      _fe[i][dim]->get_d2xyzdxideta();
+      _fe[i][dim]->get_dxyzdeta();
+      _fe[i][dim]->get_d2xyzdeta2();
+      _fe[i][dim]->get_d2xyzdxideta();
+    }
   }
 
   if (_normal_smoothing_method == NSM_NODAL_NORMAL_BASED)
