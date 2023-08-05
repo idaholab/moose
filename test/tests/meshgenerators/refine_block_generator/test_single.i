@@ -19,7 +19,7 @@
   [refine]
     type = RefineBlockGenerator
     input = eg
-    block = '0'
+    block = '3'
     refinement = '0'
     enable_neighbor_refinement = false
   []

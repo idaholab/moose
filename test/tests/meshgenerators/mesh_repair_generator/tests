@@ -15,9 +15,6 @@
   []
   [separate_element_types]
     type = JSONDiff
-    input = mixed_types.i
-    jsondiff = mixed_types_json.json
-    requirement = 'The system shall be able to split blocks across their element's type.'
     input = mixed_elements.i
     jsondiff = mixed_elements_json.json
     requirement = "The system shall be able to split blocks across their element's type."
