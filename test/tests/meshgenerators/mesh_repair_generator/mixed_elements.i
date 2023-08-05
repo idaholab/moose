@@ -9,20 +9,21 @@
   []
   [dir2]
     type = ElementGenerator
-    nodal_positions = '1 1 0
+    nodal_positions = '0 0 0
                      1 0 0
+                     1 1 0
                      0 1 0'
-    element_connectivity = '0 1 2'
-    elem_type = 'TRI3'
+    element_connectivity = '0 1 2 3'
+    elem_type = 'QUAD4'
   []
   [combine]
     type = CombinerGenerator
     inputs = 'dir1 dir2'
   []
-  [diag]
+  [separate]
     type = MeshRepairGenerator
-    input = combine
-    fix_node_overlap = true
+    input = 'combine'
+    separate_blocks_by_element_types = true
   []
 []
 
@@ -38,7 +39,7 @@
   [mesh]
     type = MeshInfo
     outputs = json
-    items = 'num_nodes'
+    items = 'subdomains'
   []
 []
 
