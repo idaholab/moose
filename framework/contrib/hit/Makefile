@@ -27,7 +27,7 @@ hit.so: parse.cc lex.cc braceexpr.cc
 	$(CXX) -std=c++17 -w -fPIC -lstdc++ -shared -L$(PYTHONPREFIX)/lib $(PYTHONCFLAGS) $(DYNAMIC_LOOKUP) $^ $(HITCPP) -o $@
 
 $(HITCPP): hit.pyx chit.pxd
-	cython -3 -o $@ --cplus $<
+	cython3 -o $@ --cplus $<
 
 .PRECIOUS: $(HITCPP)
 
