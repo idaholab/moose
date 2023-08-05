@@ -78,6 +78,11 @@ RefineBlockGenerator::generate()
 
   auto mesh_ptr = recursive_refine(block_ids, mesh, _refinement, max);
 
+  if (max > 0 && !mesh_ptr->is_replicated() && !mesh_ptr->is_prepared())
+    // refinement requires that (or at least it asserts that) the mesh is either replicated or
+    // prepared
+    mesh_ptr->prepare_for_use();
+
   // Refine elements that are too big
   bool found_element_to_refine = true;
   unsigned int i = 0;
@@ -95,10 +100,18 @@ RefineBlockGenerator::generate()
         }
       }
     }
-    MeshRefinement refinedmesh(*mesh_ptr);
-    refinedmesh.refine_elements();
+    if (found_element_to_refine)
+    {
+      MeshRefinement refinedmesh(*mesh_ptr);
+      if (!_enable_neighbor_refinement)
+        refinedmesh.face_level_mismatch_limit() = 0;
+      refinedmesh.refine_elements();
+    }
     i++;
   }
+
+  if (i > 1 || max > 0)
+    mesh_ptr->set_isnt_prepared();
 
   return mesh_ptr;
 }
