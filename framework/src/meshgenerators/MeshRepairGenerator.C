@@ -57,9 +57,14 @@ MeshRepairGenerator::generate()
   if (_fix_overlapping_nodes)
   {
     auto pl = mesh->sub_point_locator();
+    std::set<dof_id_type> nodes_removed;
     // loop on nodes
     for (auto & node : mesh->local_node_ptr_range())
     {
+      // this node has already been removed
+      if (nodes_removed.count(node->id()))
+        continue;
+
       // find all the elements around this node
       std::set<const Elem *> elements;
       (*pl)(*node, elements);
@@ -69,7 +74,7 @@ MeshRepairGenerator::generate()
         bool found = false;
         for (auto & elem_node : elem->node_ref_range())
         {
-          if ((*node).id() == elem_node.id())
+          if (node->id() == elem_node.id())
           {
             found = true;
             break;
@@ -95,6 +100,7 @@ MeshRepairGenerator::generate()
               // Coordinates are the same but it's not the same node
               // Replace the node in the element
               const_cast<Elem *>(elem)->set_node(elem->get_node_index(&elem_node)) = node;
+              nodes_removed.insert(elem_node.id());
               _num_fixed_nodes++;
               if (_num_fixed_nodes < 10)
                 _console << "Stitching a node at : " << *node << std::endl;
