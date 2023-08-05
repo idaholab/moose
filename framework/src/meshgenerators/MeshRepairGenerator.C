@@ -138,7 +138,9 @@ MeshRepairGenerator::generate()
           mesh->subdomain_name(new_id) = mesh->subdomain_name(id) + "_" + Moose::stringify(type_it);
 
           // Re-assign elements to the new blocks
-          MooseMeshUtils::changeSubdomainId(*mesh, id, new_id);
+          for (auto elem : mesh->active_subdomain_elements_ptr_range(id))
+            if (elem->type() == type_it)
+              elem->subdomain_id() = new_id;
         }
       }
     }

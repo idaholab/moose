@@ -518,6 +518,92 @@ stringify(ElementType t)
 }
 
 std::string
+stringify(libMesh::ElemType t)
+{
+  switch (t)
+  {
+    case EDGE2:
+      return "EDGE2";
+    case EDGE3:
+      return "EDGE3";
+    case EDGE4:
+      return "EDGE4";
+    case TRI3:
+      return "TRI3";
+    case TRI6:
+      return "TRI6";
+    case QUAD4:
+      return "QUAD4";
+    case QUAD8:
+      return "QUAD8";
+    case QUAD9:
+      return "QUAD9";
+    case TET4:
+      return "TET4";
+    case TET10:
+      return "TET10";
+    case HEX8:
+      return "HEX8";
+    case HEX20:
+      return "HEX20";
+    case HEX27:
+      return "HEX27";
+    case PRISM6:
+      return "PRISM6";
+    case PRISM15:
+      return "PRISM15";
+    case PRISM18:
+      return "PRISM18";
+    case PYRAMID5:
+      return "PYRAMID5";
+    case PYRAMID13:
+      return "PYRAMID13";
+    case PYRAMID14:
+      return "PYRAMID14";
+    case INFEDGE2:
+      return "INFEDGE2";
+    case INFQUAD4:
+      return "INFQUAD4";
+    case INFQUAD6:
+      return "INFQUAD6";
+    case INFHEX8:
+      return "INFHEX8";
+    case INFHEX16:
+      return "INFHEX16";
+    case INFHEX18:
+      return "INFHEX18";
+    case INFPRISM6:
+      return "INFPRISM6";
+    case INFPRISM12:
+      return "INFPRISM12";
+    case NODEELEM:
+      return "NODEELEM";
+    case REMOTEELEM:
+      return "REMOTEELEM";
+    case TRI3SUBDIVISION:
+      return "TRI3SUBDIVISION";
+    case TRISHELL3:
+      return "TRISHELL3";
+    case QUADSHELL4:
+      return "QUADSHELL4";
+    case QUADSHELL8:
+      return "QUADSHELL8";
+    case TRI7:
+      return "TRI7";
+    case TET14:
+      return "TET14";
+    case PRISM20:
+      return "PRISM20";
+    case PRISM21:
+      return "PRISM21";
+    case PYRAMID18:
+      return "PYRAMID18";
+    default:
+      mooseError("unrecognized type");
+  }
+}
+
+std::string
 stringify(const std::string & s)
 {
   return s;
