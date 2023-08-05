@@ -100,6 +100,10 @@ ParsedGenerateSideset::ParsedGenerateSideset(const InputParameters & parameters)
     paramError("included_neighbor_ids",
                "included_neighbor_ids is deprecated, only specify included_neighbors");
 
+  // Handle incompatible parameters
+  if (_include_only_external_sides && _check_neighbor_subdomains)
+    paramError("include_only_external_sides", "External sides dont have neighbors");
+
   // base function object
   _func_F = std::make_shared<SymFunction>();
 
