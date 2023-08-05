@@ -3,7 +3,7 @@
     type = Exodiff
     input = MoRu.i
     exodiff = MoRu_out.e
-    design = ChemicalCompositionAction.md
+    design = 'ChemicalCompositionAction.md ThermochimicaNodalData.md'
     issues = '#22711'
     requirement = 'The system shall be able to set up a nodal thermochemistry solve using an action'
 
@@ -16,7 +16,7 @@
     type = Exodiff
     input = MoRu.i
     exodiff = MoRu_out.e
-    design = ThermochimicaNodalData.md
+    design = 'ChemicalCompositionAction.md ThermochimicaNodalData.md'
     issues = '#22711'
     requirement = 'The system shall be able to use reinitialization to speed up a thermochimica solve'
     cli_args = 'ChemicalComposition/reinitialization_type=time'
@@ -29,7 +29,7 @@
     type = Exodiff
     input = csv_ic.i
     exodiff = csv_ic_out.e
-    design = ChemicalCompositionAction.md
+    design = 'ChemicalCompositionAction.md ThermochimicaNodalData.md'
     issues = '#22711'
     requirement = 'The system shall be able to set up constant initial conditions from a CSV file'
 
@@ -42,9 +42,23 @@
     type = Exodiff
     input = FeTiVO.i
     exodiff = FeTiVO_out.e
-    design = ChemicalCompositionAction.md
+    design = 'ChemicalCompositionAction.md ThermochimicaNodalData.md'
     issues = '#24552'
     requirement = 'The system shall be able to use pairs as MQMQA phase species'
+
+    max_threads = 1
+    rel_err = 1e-3 # this is the same error thermochimica uses for its internal tests
+    required_submodule = 'contrib/thermochimica'
+  []
+
+  [FeTiVO_csv]
+    type = CSVDiff
+    input = FeTiVO.i
+    csvdiff = FeTiVO_out_Fe2O3_0001.csv
+    design = 'ChemicalCompositionAction.md ThermochimicaNodalData.md'
+    issues = '#24552'
+    requirement = 'The system shall be able to use pairs as MQMQA phase species'
+    cli_args = 'Outputs/csv=true'
 
     max_threads = 1
     rel_err = 1e-3 # this is the same error thermochimica uses for its internal tests
@@ -58,7 +72,7 @@
     cli_args = "GlobalParams/output_species='BCCN:Mo HCPN_Mo BCCN:Ru HCPN:Ru'"
     issues = '#23865'
     requirement = 'The system shall throw an error if an invalid output species format is detected'
-    design = ThermochimicaNodalData.md
+    design = ChemicalCompositionAction.md
 
     max_threads = 1
     required_submodule = 'contrib/thermochimica'
@@ -70,7 +84,7 @@
     cli_args = "GlobalParams/output_element_potentials='mu:Mo mu_Ru'"
     issues = '#23865'
     requirement = 'The system shall throw an error if an invalid element potential format is detected'
-    design = ThermochimicaNodalData.md
+    design = ChemicalCompositionAction.md
 
     max_threads = 1
     required_submodule = 'contrib/thermochimica'
@@ -83,7 +97,7 @@
     cli_args = "GlobalParams/elements='Xxx Mo Ru'"
     issues = '#23865'
     requirement = 'The system shall throw an error if an invalid element is specified'
-    design = ThermochimicaNodalData.md
+    design = ChemicalCompositionAction.md
 
     max_threads = 1
     required_submodule = 'contrib/thermochimica'
@@ -96,7 +110,7 @@
     cli_args = "GlobalParams/output_species='BCCN:Mo HCPN:Xe BCCN:Ru HCPN:Ru'"
     issues = '#23865 #24269'
     requirement = 'The system shall throw an error if a species absent from the database is specified for species output'
-    design = ThermochimicaNodalData.md
+    design = ChemicalCompositionAction.md
 
     max_threads = 1
     required_submodule = 'contrib/thermochimica'
@@ -108,7 +122,7 @@
     cli_args = "GlobalParams/output_species='BCCN:Mo HCCN:Mo BCCN:Ru HCPN:Ru'"
     issues = '#23865 #24269'
     requirement = 'The system shall throw an error if a wrong phase name of a species is specified for species output'
-    design = ThermochimicaNodalData.md
+    design = ChemicalCompositionAction.md
 
     max_threads = 1
     required_submodule = 'contrib/thermochimica'
@@ -122,7 +136,7 @@
     cli_args = "GlobalParams/output_element_potentials='mu:Mo mu:W'"
     issues = '#23865'
     requirement = 'The system shall throw an error if an element absent from the simulation is specified for chemical potential output'
-    design = ThermochimicaNodalData.md
+    design = ChemicalCompositionAction.md
 
     max_threads = 1
     required_submodule = 'contrib/thermochimica'
@@ -135,7 +149,7 @@
     cli_args = "GlobalParams/output_phases='BCCN HCPN RandomPhase' UserObjects/data/output_phases='BCCN HCPN RandomPhase'"
     issues = '#24269'
     requirement = 'The system shall throw an error if a phase absent from the simulation is specified for phase output'
-    design = ThermochimicaNodalData.md
+    design = ChemicalCompositionAction.md
 
     max_threads = 1
     required_submodule = 'contrib/thermochimica'
@@ -144,11 +158,11 @@
   [wrong_vapor_pressure1]
     type = RunException
     input = MoRu.i
-    expect_err = "Phase 'HCPN' of vapor species 'vp:HCPN:Mo' is not a gas phase. Cannot calculate vapor pressure."
-    cli_args = "GlobalParams/output_vapor_pressures='vp:HCPN:Mo'"
-    issues = '#24269'
-    requirement = 'The system shall throw an error if a species in a phase other than the gas phase is specified for vapor pressure output'
-    design = ThermochimicaNodalData.md
+    expect_err = "No ':' separator found in variable 'vp/HCPN/Mo'"
+    cli_args = "GlobalParams/output_vapor_pressures='vp/HCPN/Mo'"
+    issues = '#24269 #24552'
+    requirement = 'The system shall throw an error if a gas phase species name is not in correct format'
+    design = ChemicalCompositionAction.md
 
     max_threads = 1
     required_submodule = 'contrib/thermochimica'
@@ -157,11 +171,24 @@
   [wrong_vapor_pressure2]
     type = RunException
     input = MoRu.i
+    expect_err = "Phase 'HCPN' of vapor species 'vp:HCPN:Mo' is not a gas phase. Cannot calculate vapor pressure."
+    cli_args = "GlobalParams/output_vapor_pressures='vp:HCPN:Mo'"
+    issues = '#24269'
+    requirement = 'The system shall throw an error if a species in a phase other than the gas phase is specified for vapor pressure output'
+    design = ChemicalCompositionAction.md
+
+    max_threads = 1
+    required_submodule = 'contrib/thermochimica'
+  []
+
+  [wrong_vapor_pressure3]
+    type = RunException
+    input = MoRu.i
     expect_err = "Species 'Xe' was not found in the gas phase."
     cli_args = "GlobalParams/output_vapor_pressures='vp:gas_ideal:Xe'"
     issues = '#24269'
     requirement = 'The system shall throw an error if a species not present in gas phase is specified for vapor pressure output'
-    design = ThermochimicaNodalData.md
+    design = ChemicalCompositionAction.md
 
     max_threads = 1
     required_submodule = 'contrib/thermochimica'

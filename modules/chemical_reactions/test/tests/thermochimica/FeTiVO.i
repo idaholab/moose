@@ -59,6 +59,14 @@
   solve = false
 []
 
+[VectorPostprocessors]
+  [Fe2O3]
+    type = NodalValueSampler
+    variable = "SlagBsoln:Fe2O3"
+    sort_by = id
+  []
+[]
+
 [Executioner]
   type = Steady
 []
