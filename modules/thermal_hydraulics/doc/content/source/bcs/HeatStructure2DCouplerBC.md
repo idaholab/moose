@@ -1,20 +1,21 @@
 # HeatStructure2DCouplerBC
 
-!alert construction title=Undocumented Class
-The HeatStructure2DCouplerBC has not been documented. The content listed below should be used as a starting point for
-documenting the class, which includes the typical automatic documentation associated with a
-MooseObject; however, what is contained is ultimately determined by what is necessary to make the
-documentation clear for users.
-
 !syntax description /BCs/HeatStructure2DCouplerBC
 
-## Overview
+The contribution to the residual $R_i$ for the weak form of the energy equation is computed as:
 
-!! Replace these lines with information regarding the HeatStructure2DCouplerBC object.
+\begin{equation}
+R_i = (\psi_i, h(t, \vec{x}) (T - T_{coupled} ) A_{fraction} ) \quad \forall \psi_i,
+\end{equation}
 
-## Example Input File Syntax
+where $\psi_i$ are the test functions, $h$ is the heat transfer coefficient provided by a [Function](syntax/Functions/index.md),
+$T$ is the temperature variable on one of the components, $T_{coupled}$ the temperature variable on the other
+component, and $A_{fraction}$ the area of contact between the two components.
 
-!! Describe and include an example of how to use the HeatStructure2DCouplerBC object.
+!alert note
+In THM, most boundary conditions are added automatically by components. This boundary condition is created by the
+[HeatStructure2DCoupler.md] to couple the temperature variable on both sides of the boundaries between the heat structure
+components. It is added once for each heat structure involved.
 
 !syntax parameters /BCs/HeatStructure2DCouplerBC
 

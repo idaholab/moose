@@ -1,20 +1,17 @@
 # ConvectionHeatTransferRZBC
 
-!alert construction title=Undocumented Class
-The ConvectionHeatTransferRZBC has not been documented. The content listed below should be used as a starting point for
-documenting the class, which includes the typical automatic documentation associated with a
-MooseObject; however, what is contained is ultimately determined by what is necessary to make the
-documentation clear for users.
-
 !syntax description /BCs/ConvectionHeatTransferRZBC
 
-## Overview
+!alert warning
+This boundary condition is meant to be used in XY coordinates that are interpreted as general cylindrical coordinates.
+With the recent development of general RZ coordinates, this object along with all THM's "RZ"-specific
+objects will soon be deprecated in favor of more general RZ-coordinate objects.
+Stay tuned!
 
-!! Replace these lines with information regarding the ConvectionHeatTransferRZBC object.
-
-## Example Input File Syntax
-
-!! Describe and include an example of how to use the ConvectionHeatTransferRZBC object.
+!alert note
+In THM, most boundary conditions are added automatically by components. This boundary condition is no-longer in use, having
+been replaced by its [AD](automatic_differentiation/index.md) counterpart [ADConvectionHeatTransferRZBC.md],
+designed to provide numerically exact contributions to the Jacobian.
 
 !syntax parameters /BCs/ConvectionHeatTransferRZBC
 

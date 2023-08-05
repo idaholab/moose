@@ -1,20 +1,16 @@
 # ADHSHeatFluxRZBC
 
-!alert construction title=Undocumented Class
-The ADHSHeatFluxRZBC has not been documented. The content listed below should be used as a starting point for
-documenting the class, which includes the typical automatic documentation associated with a
-MooseObject; however, what is contained is ultimately determined by what is necessary to make the
-documentation clear for users.
-
 !syntax description /BCs/ADHSHeatFluxRZBC
 
-## Overview
+!alert warning
+This boundary condition is meant to be used in XY coordinates that are interpreted as general cylindrical coordinates.
+With the recent development of general RZ coordinates, this object along with all THM's "RZ"-specific
+objects will soon be deprecated in favor of more general RZ-coordinate objects.
+Stay tuned!
 
-!! Replace these lines with information regarding the ADHSHeatFluxRZBC object.
-
-## Example Input File Syntax
-
-!! Describe and include an example of how to use the ADHSHeatFluxRZBC object.
+!alert note
+In THM, most boundary conditions are added automatically by components. This boundary condition is created by the
+[HSBoundaryHeatFlux.md] boundary heat structure.
 
 !syntax parameters /BCs/ADHSHeatFluxRZBC
 
