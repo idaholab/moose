@@ -28,7 +28,7 @@ public:
 
 protected:
   PenetrationLocator & _penetration_locator;
-  std::map<Point, PenetrationInfo *> point_to_info;
+  std::map<Point, const Node *> point_to_node;
   NumericVector<Number> & _secondary_flux;
 
   //  std::vector<Real> _localized_secondary_flux;

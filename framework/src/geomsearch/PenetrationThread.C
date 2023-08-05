@@ -453,7 +453,7 @@ PenetrationThread::operator()(const NodeIdRange & range)
     }
     else
     {
-      smoothNormal(info, p_info);
+      smoothNormal(info, p_info, node);
       FEBase * fe = _fes[_tid][info->_side->dim()];
       computeSlip(*fe, *info);
     }
@@ -1237,7 +1237,9 @@ PenetrationThread::computeSlip(FEBase & fe, PenetrationInfo & info)
 }
 
 void
-PenetrationThread::smoothNormal(PenetrationInfo * info, std::vector<PenetrationInfo *> & p_info)
+PenetrationThread::smoothNormal(PenetrationInfo * info,
+                                std::vector<PenetrationInfo *> & p_info,
+                                const Node & node)
 {
   if (_do_normal_smoothing)
   {
@@ -1248,7 +1250,7 @@ PenetrationThread::smoothNormal(PenetrationInfo * info, std::vector<PenetrationI
       std::vector<Real> edge_face_weights;
       std::vector<PenetrationInfo *> edge_face_info;
 
-      getSmoothingFacesAndWeights(info, edge_face_info, edge_face_weights, p_info);
+      getSmoothingFacesAndWeights(info, edge_face_info, edge_face_weights, p_info, node);
 
       mooseAssert(edge_face_info.size() == edge_face_weights.size(),
                   "edge_face_info.size() != edge_face_weights.size()");
@@ -1296,13 +1298,13 @@ void
 PenetrationThread::getSmoothingFacesAndWeights(PenetrationInfo * info,
                                                std::vector<PenetrationInfo *> & edge_face_info,
                                                std::vector<Real> & edge_face_weights,
-                                               std::vector<PenetrationInfo *> & p_info)
+                                               std::vector<PenetrationInfo *> & p_info,
+                                               const Node & secondary_node)
 {
   const Elem * side = info->_side;
   const Point & p = info->_closest_point_ref;
   std::set<dof_id_type> elems_to_exclude;
   elems_to_exclude.insert(info->_elem->id());
-  const Node * secondary_node = info->_node;
 
   std::vector<std::vector<const Node *>> edge_nodes;
 
@@ -1320,7 +1322,7 @@ PenetrationThread::getSmoothingFacesAndWeights(PenetrationInfo * info,
 
     std::vector<PenetrationInfo *> face_info_comm_edge;
     getInfoForFacesWithCommonNodes(
-        secondary_node, elems_to_exclude, edge_nodes[i], face_info_comm_edge, p_info);
+        &secondary_node, elems_to_exclude, edge_nodes[i], face_info_comm_edge, p_info);
 
     if (face_info_comm_edge.size() == 0)
       edges_without_neighbors.push_back(i);
@@ -1362,7 +1364,7 @@ PenetrationThread::getSmoothingFacesAndWeights(PenetrationInfo * info,
 
     std::vector<PenetrationInfo *> face_info_comm_edge;
     getInfoForFacesWithCommonNodes(
-        secondary_node, elems_to_exclude, common_nodes, face_info_comm_edge, p_info);
+        &secondary_node, elems_to_exclude, common_nodes, face_info_comm_edge, p_info);
 
     unsigned int num_corner_neighbors = face_info_comm_edge.size();
 
@@ -1723,8 +1725,7 @@ PenetrationThread::createInfoForElem(std::vector<PenetrationInfo *> & thisElemIn
     std::vector<RealGradient> dxyzdeta;
     std::vector<RealGradient> d2xyzdxideta;
 
-    PenetrationInfo * pen_info = new PenetrationInfo(secondary_node,
-                                                     elem,
+    PenetrationInfo * pen_info = new PenetrationInfo(elem,
                                                      side,
                                                      sides[i],
                                                      normal,

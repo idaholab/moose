@@ -147,12 +147,14 @@ protected:
                                  const Point * secondary_point,
                                  const Real tangential_tolerance);
 
-  void smoothNormal(PenetrationInfo * info, std::vector<PenetrationInfo *> & p_info);
+  void
+  smoothNormal(PenetrationInfo * info, std::vector<PenetrationInfo *> & p_info, const Node & node);
 
   void getSmoothingFacesAndWeights(PenetrationInfo * info,
                                    std::vector<PenetrationInfo *> & edge_face_info,
                                    std::vector<Real> & edge_face_weights,
-                                   std::vector<PenetrationInfo *> & p_info);
+                                   std::vector<PenetrationInfo *> & p_info,
+                                   const Node & secondary_node);
   void getSmoothingEdgeNodesAndWeights(const Point & p,
                                        const Elem * side,
                                        std::vector<std::vector<const Node *>> & edge_nodes,
