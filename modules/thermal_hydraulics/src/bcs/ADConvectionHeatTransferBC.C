@@ -27,6 +27,8 @@ ADConvectionHeatTransferBC::validParams()
       "parameter instead of a post-processor parameter. If you need to scale from a post-processor "
       "value, use a PostprocessorFunction.");
   params.addParam<FunctionName>("scale", 1.0, "Function by which to scale the boundary condition");
+  params.addClassDescription("Adds a convective heat flux boundary condition with user-specified "
+                             "ambient temperature and heat transfer coefficient functions");
   return params;
 }
 

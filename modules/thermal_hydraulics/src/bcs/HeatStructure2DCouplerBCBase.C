@@ -18,7 +18,8 @@ HeatStructure2DCouplerBCBase::validParams()
   params.addRequiredParam<std::string>("coupled_variable",
                                        "The variable on the coupled heat structure boundary");
   params.addRequiredParam<MeshAlignment *>("_mesh_alignment", "Mesh alignment object");
-
+  params.addClassDescription(
+      "Base class for heat flux boundary condition for coupling two heat structures");
   return params;
 }
 

@@ -18,6 +18,7 @@ InputParameters
 ADHeatFlux3EqnBC::validParams()
 {
   InputParameters params = ADHeatFluxBaseBC::validParams();
+  params.addClassDescription("Wall heat flux boundary condition for the energy equation");
   return params;
 }
 

@@ -19,6 +19,8 @@ ADConvectionHeatTransfer3DBC::validParams()
   InputParameters params = ADIntegratedBC::validParams();
   params.addRequiredParam<UserObjectName>(
       "ht_uo", "The name of the user object that computes the heat flux");
+  params.addClassDescription("Adds a convective heat flux boundary condition between the local "
+                             "component heat structure and a 3D heat structure");
   return params;
 }
 
