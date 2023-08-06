@@ -19,7 +19,7 @@ VolumeJunctionBaseUserObject::validParams()
   params.addRequiredParam<std::vector<UserObjectName>>(
       "numerical_flux_names",
       "The names of the user objects that compute the numerical flux at each flow channel.");
-
+  params.addClassDescription("User object to compute quantities pertaining to a volume junction");
   return params;
 }
 
