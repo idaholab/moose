@@ -1,20 +1,17 @@
 # ADShaftConnectedMotorUserObject
 
-!alert construction title=Undocumented Class
-The ADShaftConnectedMotorUserObject has not been documented. The content listed below should be used as a starting point for
-documenting the class, which includes the typical automatic documentation associated with a
-MooseObject; however, what is contained is ultimately determined by what is necessary to make the
-documentation clear for users.
-
 !syntax description /UserObjects/ADShaftConnectedMotorUserObject
 
-## Overview
+The torque and moment of inertia are specified as [Functions](syntax/Functions/index.md),
+that only depend on the shaft speed variable.
 
-!! Replace these lines with information regarding the ADShaftConnectedMotorUserObject object.
+!alert note
+The `time` argument of the Functions is used to evaluate the `Functions` at the shaft speed.
 
-## Example Input File Syntax
-
-!! Describe and include an example of how to use the ADShaftConnectedMotorUserObject object.
+!alert note
+This user object is created automatically by the [ShaftConnectedMotor.md]
+component (if its [!param](/Components/ShaftConnectedMotor/ad) parameter is set to true),
+users do not need to add it to an input file.
 
 !syntax parameters /UserObjects/ADShaftConnectedMotorUserObject
 

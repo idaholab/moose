@@ -1,20 +1,32 @@
 # ADSimpleTurbine1PhaseUserObject
 
-!alert construction title=Undocumented Class
-The ADSimpleTurbine1PhaseUserObject has not been documented. The content listed below should be used as a starting point for
-documenting the class, which includes the typical automatic documentation associated with a
-MooseObject; however, what is contained is ultimately determined by what is necessary to make the
-documentation clear for users.
-
 !syntax description /UserObjects/ADSimpleTurbine1PhaseUserObject
 
-## Overview
+A turbine is a parallel channel junction, a [ADJunctionParallelChannels1PhaseUserObject.md], a type of volume junction,
+a [ADVolumeJunction1PhaseUserObject.md]. As such its base contribution to the residual and Jacobian is set by these classes.
 
-!! Replace these lines with information regarding the ADSimpleTurbine1PhaseUserObject object.
+The additional residual for the momentum equation in each direction are:
 
-## Example Input File Syntax
+!equation
+\vec{R} = \Delta p A \vec{d}
 
-!! Describe and include an example of how to use the ADSimpleTurbine1PhaseUserObject object.
+where $\Delta p$ is the pressure drop across the turbine, as computed below, $A$ the flow area and $\vec{d}$ the direction of
+the turbine.
+
+!equation
+\Delta p = p_{in} * (1 - (1 - \dfrac{_W_dot}{\rho uA h_{in})^{\dfrac{\gamma}{\gamma -1}})
+
+where $p_{in}$ is the inlet pressure, $\rho uA$ is the inlet conserved momentum variable, $h_in$ is the inlet
+enthalpy and $\gamma$ is the ratio of the specific isobaric and isochoric heat capacities of the fluid.
+
+For the energy equation, the residual $R_e$ is simply the work $\dot{W}$ the turbine:
+
+!equation
+R_e = \dot{W}
+
+!alert note
+This user object is created automatically by the [SimpleTurbine1Phase.md]
+component, users do not need to add it to an input file.
 
 !syntax parameters /UserObjects/ADSimpleTurbine1PhaseUserObject
 
