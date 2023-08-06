@@ -37,20 +37,20 @@ public:
   /**
    * Each setup methods simply increments a counter.
    */
-  virtual void initialSetup() override { _counts["initial"]++; }
-  virtual void timestepSetup() override { _counts["timestep"]++; }
-  virtual void residualSetup() override { _counts["linear"]++; }
-  virtual void jacobianSetup() override { _counts["nonlinear"]++; }
-  virtual void initialize() override;
-  virtual void finalize() override;
-  virtual void execute() override { _execute++; }
+  virtual void initialSetup();
+  virtual void timestepSetup() { _counts.at("TIMESTEP")++; }
+  virtual void residualSetup() { _counts.at("LINEAR")++; }
+  virtual void jacobianSetup() { _counts.at("NONLINEAR")++; }
+  virtual void initialize();
+  virtual void finalize();
+  virtual void execute() { _execute++; }
   ///@}
 
   ///@{
   /**
    *  Helper functions to account for final on subdomainSetup and threadJoin
    */
-  void subdomainSetupHelper() { _counts["subdomain"]++; }
+  void subdomainSetupHelper() { _counts.at("SUBDOMAIN")++; }
   void threadJoinHelper(const UserObject & uo);
   ///@}
 
@@ -67,6 +67,10 @@ private:
   /// Local count of execute (allows execute count to work with parallel and threading)
   unsigned int _execute;
 
+  /// Whether or not we called initialSetup once (not accounting for restart/recover)
+  /// See initialSetup() as to why we need this
+  bool _called_initial_setup;
+
   /// Storage for the various counts
   std::map<std::string, unsigned int> & _counts;
 };
@@ -77,7 +81,7 @@ SetupInterfaceCount<T>::validParams()
 {
   InputParameters parameters = T::validParams();
   MooseEnum count_type(
-      "initial timestep subdomain linear nonlinear initialize finalize execute threadjoin");
+      "INITIAL TIMESTEP SUBDOMAIN LINEAR NONLINEAR INITIALIZE FINALIZE EXECUTE THREADJOIN");
   parameters.addRequiredParam<MooseEnum>(
       "count_type", count_type, "Specify the count type to return.");
   return parameters;
@@ -88,27 +92,40 @@ SetupInterfaceCount<T>::SetupInterfaceCount(const InputParameters & parameters)
   : T(parameters),
     _count_type(T::template getParam<MooseEnum>("count_type")),
     _execute(0),
+    _called_initial_setup(false),
     _counts(T::template declareRestartableData<std::map<std::string, unsigned int>>("counts"))
 {
   // Initialize the count storage map
-  const std::vector<std::string> & names = _count_type.getNames();
-  for (std::vector<std::string>::const_iterator it = names.begin(); it != names.end(); ++it)
-    _counts[*it] = 0;
+  for (const auto & name : _count_type.getNames())
+    _counts[name] = 0;
 }
 
 template <class T>
 PostprocessorValue
 SetupInterfaceCount<T>::getValue()
 {
-  unsigned int count = _counts[_count_type];
-  return count;
+  return _counts.at(_count_type);
+}
+
+template <class T>
+void
+SetupInterfaceCount<T>::initialSetup()
+{
+  // In the case of restart/recover, we will _actually_ be doing more than one initial
+  // setups... but, we want to support all of these tests with --recover and still have
+  // them work. So, we will cheat and zero this whenever we're doing restart/recover
+  // the first time
+  if (!_called_initial_setup && (this->_app.isRestarting() || this->_app.isRecovering()))
+    _counts.at("INITIAL") = 0;
+  _called_initial_setup = true;
+  _counts.at("INITIAL")++;
 }
 
 template <class T>
 void
 SetupInterfaceCount<T>::initialize()
 {
-  _counts["initialize"]++;
+  _counts.at("INITIALIZE")++;
   _execute = 0;
 }
 
@@ -117,8 +134,8 @@ void
 SetupInterfaceCount<T>::finalize()
 {
   T::gatherSum(_execute);
-  _counts["execute"] += _execute;
-  _counts["finalize"]++;
+  _counts.at("EXECUTE") += _execute;
+  _counts.at("FINALIZE")++;
 }
 
 template <class T>
@@ -128,7 +145,7 @@ SetupInterfaceCount<T>::threadJoinHelper(const UserObject & uo)
   // Accumulate 'execute' count from other threads
   const SetupInterfaceCount<T> & sic = static_cast<const SetupInterfaceCount<T> &>(uo);
   _execute += sic._execute;
-  _counts["threadjoin"]++;
+  _counts.at("THREADJOIN")++;
 }
 
 // Define objects for each of the UserObject base classes
