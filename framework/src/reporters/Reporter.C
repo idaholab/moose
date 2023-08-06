@@ -10,6 +10,7 @@
 #include "Reporter.h"
 #include "InputParameters.h"
 #include "FEProblemBase.h"
+#include "MooseApp.h"
 
 InputParameters
 Reporter::validParams()
@@ -34,6 +35,8 @@ Reporter::Reporter(const MooseObject * moose_object)
         *_reporter_params.getCheckedPointerParam<FEProblemBase *>("_fe_problem_base")),
     _reporter_data(_reporter_fe_problem.getReporterData(ReporterData::WriteKey()))
 {
+  // For the callback to declareLateValues()
+  _reporter_moose_object.getMooseApp().registerInterfaceObject(*this);
 }
 
 void
