@@ -8,6 +8,7 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "DeclareLateReportersAction.h"
+#include "MooseApp.h"
 #include "Reporter.h"
 
 registerMooseAction("MooseApp", DeclareLateReportersAction, "declare_late_reporters");
