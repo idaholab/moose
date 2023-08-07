@@ -1,23 +1,23 @@
 #### Compilers
 base_mpich:
-  - mpich 4.1.1                                             # [linux]
-  - mpich 4.1.1                                             # [not arm64 and osx]
-  - mpich 4.1.1                                             # [arm64]
+  - mpich 4.0.3                                             # [linux]
+  - mpich 4.0.3                                             # [not arm64 and osx]
+  - mpich 4.0.3                                             # [arm64]
 
 base_mpicc:
-  - mpich-mpicc 4.1.1                                       # [linux]
-  - mpich-mpicc 4.1.1                                       # [not arm64 and osx]
-  - mpich-mpicc 4.1.1                                       # [arm64]
+  - mpich-mpicc 4.0.3                                       # [linux]
+  - mpich-mpicc 4.0.3                                       # [not arm64 and osx]
+  - mpich-mpicc 4.0.3                                       # [arm64]
 
 base_mpicxx:
-  - mpich-mpicxx 4.1.1                                      # [linux]
-  - mpich-mpicxx 4.1.1                                      # [not arm64 and osx]
-  - mpich-mpicxx 4.1.1                                      # [arm64]
+  - mpich-mpicxx 4.0.3                                      # [linux]
+  - mpich-mpicxx 4.0.3                                      # [not arm64 and osx]
+  - mpich-mpicxx 4.0.3                                      # [arm64]
 
 base_mpifort:
-  - mpich-mpifort 4.1.1                                     # [linux]
-  - mpich-mpifort 4.1.1                                     # [not arm64 and osx]
-  - mpich-mpifort 4.1.1                                     # [arm64]
+  - mpich-mpifort 4.0.3                                     # [linux]
+  - mpich-mpifort 4.0.3                                     # [not arm64 and osx]
+  - mpich-mpifort 4.0.3                                     # [arm64]
 
 moose_libgfortran:
   - libgfortran-ng 13.1.0 h69a702a_0                        # [linux]
