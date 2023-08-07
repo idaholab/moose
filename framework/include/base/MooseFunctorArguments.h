@@ -132,6 +132,12 @@ public:
   }
 };
 
+struct NodeArg
+{
+  const Node * node;
+  SubdomainID subdomain_id;
+};
+
 /**
  * Argument for requesting functor evaluation at a quadrature point location in an element. Data
  * in the argument:
@@ -200,11 +206,6 @@ struct ElemSideQpArg
  * equivalent); a state of 1 indicates the most-recent "old" time or the most recent previous
  * nonlinear iteration, etc.
  */
-struct NodeArg
-{
-  const Node * node;
-  SubdomainID subdomain_id;
-};
  
 struct StateArg
 {

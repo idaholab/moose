@@ -311,8 +311,8 @@ PiecewiseByBlockLambdaFunctor<T>::evaluate(const Moose::ElemPointArg & elem_poin
 //   return it->second(node_arg, time);
 // }
 template <typename T>
-typename FunctorBase<T>::ValueType
-FunctorBase<T>::operator()(const NodeArg & node, const StateArg & state) const
+typename PiecewiseByBlockLambdaFunctor<T>::ValueType
+PiecewiseByBlockLambdaFunctor<T>::operator()(const Moose::NodeArg & node, const Moose::StateArg & state) const
 {
     return evaluate(node, state);
 }
