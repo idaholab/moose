@@ -8,7 +8,7 @@
 # ALSO: Follow the directions in scripts/tests/versioner_hashes.yaml
 {% set build = 0 %}
 {% set strbuild = "build_" + build|string %}
-{% set version = "4.1.1" %}
+{% set version = "4.0.3" %}
 
 package:
   name: moose-mpich
@@ -27,22 +27,8 @@ build:
 
 requirements:
   build:
-    - {{ base_mpich }}
-    - {{ base_mpicc }}
+    # expose variables during build.sh to populate the activation script
     - {{ base_mpicxx }}
-    - {{ base_mpifort }}
-    - {{ moose_libgfortran }}
-    - {{ moose_libgfortran5 }}
-    - {{ moose_hdf5 }}
-    - {{ moose_krb5 }}
-    - {{ moose_ld64 }}          # [osx]
-    - make
-    - libtool
-    - autoconf
-    - automake 1.16.1
-    - m4
-    - zfp 0.5.5
-  host: []
   run:
     - {{ base_mpich }}
     - {{ base_mpicc }}

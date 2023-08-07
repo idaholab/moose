@@ -6,7 +6,7 @@
 # ALSO: Follow the directions in scripts/tests/versioner_hashes.yaml
 {% set build = 0 %}
 {% set strbuild = "build_" + build|string %}
-{% set version = "2023.05.01" %}
+{% set version = "2023.07.17" %}
 
 package:
   name: moose-wasp
