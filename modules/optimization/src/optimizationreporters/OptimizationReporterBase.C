@@ -54,12 +54,15 @@ OptimizationReporterBase::computeObjective()
   for (auto & misfit : _misfit_values)
     val += misfit * misfit;
 
-  Real param_norm_sqr = 0;
-  for (const auto & data : _parameters)
-    for (const auto & val : *data)
-      param_norm_sqr += val * val;
+  if (_tikhonov_coeff > 0.0)
+  {
+    Real param_norm_sqr = 0;
+    for (const auto & data : _parameters)
+      for (const auto & val : *data)
+        param_norm_sqr += val * val;
 
-  val += _tikhonov_coeff * param_norm_sqr;
+    val += _tikhonov_coeff * param_norm_sqr;
+  }
 
   return val * 0.5;
 }
@@ -91,10 +94,14 @@ OptimizationReporterBase::computeGradient(libMesh::PetscVector<Number> & gradien
                  " versus ",
                  _gradients[param_group_id]->size(),
                  ".");
-    auto params = _parameters[param_group_id];
-    auto grads = _gradients[param_group_id];
-    for (const auto & param_id : make_range(_nvalues[param_group_id]))
-      grads->at(param_id) += params->at(param_id) * _tikhonov_coeff;
+
+    if (_tikhonov_coeff > 0.0)
+    {
+      auto params = _parameters[param_group_id];
+      auto grads = _gradients[param_group_id];
+      for (const auto & param_id : make_range(_nvalues[param_group_id]))
+        (*grads)[param_id] += (*params)[param_id] * _tikhonov_coeff;
+    }
   }
 
   OptUtils::copyReporterIntoPetscVector(_gradients, gradient);
