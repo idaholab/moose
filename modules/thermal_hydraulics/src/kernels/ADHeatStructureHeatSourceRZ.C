@@ -17,7 +17,7 @@ ADHeatStructureHeatSourceRZ::validParams()
   InputParameters params = ADHeatStructureHeatSource::validParams();
   params += RZSymmetry::validParams();
   params.addClassDescription(
-      "Add a heat source term in XY coordinates interpreted as cylindrical coordinates");
+      "Adds a heat source term in XY coordinates interpreted as cylindrical coordinates");
   return params;
 }
 

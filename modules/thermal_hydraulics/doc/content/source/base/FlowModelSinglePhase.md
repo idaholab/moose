@@ -1,6 +1,6 @@
 # FlowModelSinglePhase
 
-The `FlowModelSinglePhase` creates for [FlowChannel1Phase.md] components using the three equation model:
+The `FlowModelSinglePhase` creates for [FlowChannel1Phase.md] components using the three equations model:
 
 - variables
 - initial conditions
