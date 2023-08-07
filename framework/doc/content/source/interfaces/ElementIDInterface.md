@@ -24,6 +24,7 @@ areElemIDsIdentical | Whether two element integers are identical for all element
 getAllElemIDs | Gets all the unique element IDs for an element integer with its index on the entire domain
 getElemIDsOnBlocks | Gets all the unique element IDs for an extra element integer with its index on a set of subdomains
 getElementID | Gets an element integer for an element
+getElemIDMapping | Get the mapping from IDs of one extra element integer to another given the two integer names
 
 Because MOOSE creates three copies of materials for the current element, element face and neighboring element face ([Material](syntax/Materials/index.md)), `getElementID` and `getElementIDByName` return the reference to either the current element ID or the neighbor element ID based on whether the current copy of material is for neighboring element or not. Correspondingly, directly calling `getElementIDNeighbor` and `getElementIDNeighborByName` is not allowed in `Material`.
 

@@ -1,0 +1,11 @@
+[Tests]
+  [map_ids_test]
+    type = JSONDiff
+    design = 'ElementIDInterface.md'
+    issues = '#25119'
+    input = 'map_extra_element_ids.i'
+    jsondiff = map_extra_element_ids_out.json
+    recover = false
+    requirement = "The system shall provide an interface function to get the relation of two extra element integers."
+  []
+[]
