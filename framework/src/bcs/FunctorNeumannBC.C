@@ -29,7 +29,6 @@ FunctorNeumannBC::validParams()
 
 FunctorNeumannBC::FunctorNeumannBC(const InputParameters & parameters)
   : ADIntegratedBC(parameters),
-
     _functor(getFunctor<ADReal>("functor")),
     _coef(getFunctor<ADReal>("coefficient"))
 {
