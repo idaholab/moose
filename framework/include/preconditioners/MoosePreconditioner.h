@@ -17,6 +17,7 @@
 // Libmesh include
 #include "libmesh/preconditioner.h"
 #include "libmesh/linear_solver.h"
+#include "libmesh/coupling_matrix.h"
 
 // Forward declarations
 class FEProblemBase;
@@ -51,6 +52,9 @@ public:
                             NumericVector<Number> & to_vector);
 
 protected:
+  /// Setup the coupling matrix on the finite element problem
+  void setCouplingMatrix(std::unique_ptr<CouplingMatrix> cm);
+
   /// Subproblem this preconditioner is part of
   FEProblemBase & _fe_problem;
 };

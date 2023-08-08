@@ -78,7 +78,7 @@ FieldSplitPreconditioner::FieldSplitPreconditioner(const InputParameters & param
       for (unsigned int j = 0; j < n_vars; j++)
         (*cm)(i, j) = 1; // full coupling
   }
-  _fe_problem.setCouplingMatrix(std::move(cm));
+  setCouplingMatrix(std::move(cm));
 
   // turn on a flag
   _nl.useFieldSplitPreconditioner(true);
