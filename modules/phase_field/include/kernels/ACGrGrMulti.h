@@ -42,7 +42,6 @@ protected:
   using ACGrGrMultiBase<is_ad>::_vals;
   using ACGrGrMultiBase<is_ad>::_u;
   using ACGrGrMultiBase<is_ad>::_mu;
-  using ACGrGrMultiBase<is_ad>::_test;
 
   GenericReal<is_ad> computedF0du();
 };
@@ -53,7 +52,7 @@ public:
   ACGrGrMulti(const InputParameters & parameters);
 
 protected:
-  virtual Real computeDFDOP(PFFunctionType type);
+  virtual Real computeDFDOP(PFFunctionType type) override;
   virtual Real computeQpOffDiagJacobian(unsigned int jvar) override;
 
   const NonlinearVariableName _uname;
@@ -68,5 +67,5 @@ public:
   using ACGrGrMultiTempl<true>::ACGrGrMultiTempl;
 
 protected:
-  virtual ADReal computeDFDOP();
+  virtual ADReal computeDFDOP() override;
 };

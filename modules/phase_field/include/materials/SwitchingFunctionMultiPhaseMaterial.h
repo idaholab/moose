@@ -21,12 +21,13 @@
  * \f$ h_\alpha = (sum_i \eta_{\alpha i}^2) / (sum_\rho sum_i \eta_{\rho i}^2) \f$
  * for phase alpha, where \f$ i \f$  indexes grains of a phase and \f$ rho \f$  indexes phases
  */
-class SwitchingFunctionMultiPhaseMaterial : public DerivativeMaterialInterface<Material>
+template <bool is_ad>
+class SwitchingFunctionMultiPhaseMaterialTempl : public DerivativeMaterialInterface<Material>
 {
 public:
   static InputParameters validParams();
 
-  SwitchingFunctionMultiPhaseMaterial(const InputParameters & parameters);
+  SwitchingFunctionMultiPhaseMaterialTempl(const InputParameters & parameters);
 
 protected:
   virtual void computeQpProperties();
@@ -48,7 +49,10 @@ protected:
   std::vector<bool> _is_p;
 
   /// Switching function and derivatives
-  MaterialProperty<Real> & _prop_h;
-  std::vector<MaterialProperty<Real> *> _prop_dh;
-  std::vector<std::vector<MaterialProperty<Real> *>> _prop_d2h;
+  GenericMaterialProperty<Real, is_ad> & _prop_h;
+  std::vector<GenericMaterialProperty<Real, is_ad> *> _prop_dh;
+  std::vector<std::vector<GenericMaterialProperty<Real, is_ad> *>> _prop_d2h;
 };
+
+typedef SwitchingFunctionMultiPhaseMaterialTempl<false> SwitchingFunctionMultiPhaseMaterial;
+typedef SwitchingFunctionMultiPhaseMaterialTempl<true> ADSwitchingFunctionMultiPhaseMaterial;

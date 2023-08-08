@@ -72,7 +72,7 @@ ACGrGrMulti::computeDFDOP(PFFunctionType type)
     case Jacobian:
     {
       Real d2f0du2 = 3.0 * _u[_qp] * _u[_qp] - 1.0 + 2.0 * SumGammaEtaj;
-      return this->_phi[_j][_qp] * (_mu[_qp] * d2f0du2 + _dmudu[_qp] * computedF0du());
+      return _phi[_j][_qp] * (_mu[_qp] * d2f0du2 + _dmudu[_qp] * computedF0du());
     }
 
     default:
