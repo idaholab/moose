@@ -18,6 +18,14 @@
     requirement = 'The system shall be able to output material properties calculated at quadrature '
                   'points on all active elements.'
   []
+  [all_elements_block_restricted]
+    type = 'CSVDiff'
+    input = 'all_elements_block_restricted.i'
+    csvdiff = 'all_elements_block_restricted_out_vpp_0001.csv all_elements_block_restricted_out_vpp_0002.csv'
+
+    requirement = 'The system shall be able to output material properties calculated at quadrature '
+                  'points on all active elements within the specified subdomains.'  
+  []
   
   [errors]
     requirement = 'The system shall issue an error if material output samples are attempted for '
