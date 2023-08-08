@@ -2603,6 +2603,12 @@ MooseApp::getRestartableDataMap(const RestartableDataMapName & name) const
   return iter->second.first;
 }
 
+bool
+MooseApp::hasRestartableDataMap(const RestartableDataMapName & name) const
+{
+  return _restartable_meta_data.count(name);
+}
+
 void
 MooseApp::registerRestartableDataMapName(const RestartableDataMapName & name, std::string suffix)
 {
@@ -2611,6 +2617,15 @@ MooseApp::registerRestartableDataMapName(const RestartableDataMapName & name, st
   suffix.insert(0, "_");
   _restartable_meta_data.emplace(
       std::make_pair(name, std::make_pair(RestartableDataMap(), suffix)));
+}
+
+const std::string &
+MooseApp::getRestartableDataMapName(const RestartableDataMapName & name) const
+{
+  const auto it = _restartable_meta_data.find(name);
+  if (it == _restartable_meta_data.end())
+    mooseError("MooseApp::getRestartableDataMapName: The name '", name, "' is not registered");
+  return it->second.second;
 }
 
 PerfGraph &
