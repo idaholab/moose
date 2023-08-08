@@ -52,3 +52,15 @@ Postprocessor::Postprocessor(const MooseObject * moose_object)
     mooseAssert(fe_problem.getReporterData().hasReporterValue<PostprocessorValue>(r_name),
                 "Postprocessor Reporter value is not declared");
 }
+
+PostprocessorValue
+Postprocessor::getValue()
+{
+  return static_cast<const Postprocessor *>(this)->getValue();
+}
+
+PostprocessorValue
+Postprocessor::getValue() const
+{
+  mooseError("getValue() (const or non-const) must be implemented.");
+}
