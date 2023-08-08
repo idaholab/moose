@@ -38,6 +38,7 @@
     ring_intervals = '1 1;1 1;1 1'
     ring_block_ids = '200 400;200 400;200 400'
     background_block_ids = '40'
+    background_block_names = 'background_1'
     num_sectors_per_side = 14
     background_intervals = 2
     hexagon_size = ${fparse 40.0/sqrt(3.0)}
