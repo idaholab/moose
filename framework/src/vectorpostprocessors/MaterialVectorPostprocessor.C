@@ -26,15 +26,14 @@ MaterialVectorPostprocessor::validParams()
                              "elements at the indicated execution points.");
   params.addRequiredParam<MaterialName>("material",
                                         "Material for which all properties will be recorded.");
-  params.addRequiredParam<std::vector<unsigned int>>(
-      "elem_ids", "Element IDs to print data for (others are ignored).");
+  params.addParam<std::vector<unsigned int>>(
+      "elem_ids", "Element IDs to print data for (others are ignored). If not supplied, all "
+                  "elements will be printed.");
   return params;
 }
 
 MaterialVectorPostprocessor::MaterialVectorPostprocessor(const InputParameters & parameters)
   : ElementVectorPostprocessor(parameters),
-    _elem_filter(getParam<std::vector<unsigned int>>("elem_ids").begin(),
-                 getParam<std::vector<unsigned int>>("elem_ids").end()),
     _elem_ids(declareVector("elem_id")),
     _qp_ids(declareVector("qp_id"))
 {
@@ -43,6 +42,21 @@ MaterialVectorPostprocessor::MaterialVectorPostprocessor(const InputParameters &
   if (mat.isBoundaryMaterial())
     mooseError(name(), ": boundary materials (i.e. ", mat.name(), ") cannot be used");
 
+  // Get list of elements from user, or use all elements if not supplied
+  if (parameters.isParamSetByUser("elem_ids"))
+  {
+    _elem_filter = std::set(getParam<std::vector<unsigned int>>("elem_ids").begin(),
+                            getParam<std::vector<unsigned int>>("elem_ids").end());
+  }
+  else
+  {
+    // get vector of all element ids
+    std::vector<unsigned int> all_elem_ids;
+    for (const auto & elem : _mesh.getMesh().active_element_ptr_range())
+      all_elem_ids.push_back(elem->id());
+    _elem_filter = std::set<unsigned int>(all_elem_ids.begin(), all_elem_ids.end());
+  }
+  
   for (auto & id : _elem_filter)
   {
     auto el = _mesh.getMesh().query_elem_ptr(id);

@@ -10,7 +10,15 @@
     requirement = 'The system shall be able to output material properties calculated at quadrature '
                   'points on user-defined elements in a comma separated format.'
   []
+  [all_elements]
+    type = 'CSVDiff'
+    input = 'all_elements.i'
+    csvdiff = 'all_elements_out_vpp_0001.csv all_elements_out_vpp_0002.csv'
 
+    requirement = 'The system shall be able to output material properties calculated at quadrature '
+                  'points on all active elements.'
+  []
+  
   [errors]
     requirement = 'The system shall issue an error if material output samples are attempted for '
                   'elements:'
