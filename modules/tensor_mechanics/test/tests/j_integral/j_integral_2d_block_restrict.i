@@ -61,6 +61,7 @@
   output_q = false
   incremental = true
   block = '1'
+  symmetry_plane = 1
 []
 
 [Modules/TensorMechanics/Master]
