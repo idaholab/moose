@@ -1,0 +1,64 @@
+{
+    "app_name": "main",
+    "current_time": "Mon Aug  7 20:32:39 2023",
+    "executable": "/Users/wangy2/projects/griffin/moose/test/tests/meshgenerators/map_extra_element_ids/../../../moose_test-opt",
+    "executable_time": "Mon Aug  7 20:31:56 2023",
+    "libmesh_version": "fd900b54a02b9d1b99f0a4371d4acb4761e57b0f",
+    "moose_version": "git commit 581744e8b3 on 2023-08-07",
+    "petsc_version": "3.16.6",
+    "reporters": {
+        "id_map": {
+            "type": "ElementIDTest",
+            "values": {
+                "id1_to_id2": {
+                    "type": "std::unordered_map<unsigned long long, std::set<unsigned long long, std::less<unsigned long long>, std::allocator<unsigned long long>>, std::hash<unsigned long long>, std::equal_to<unsigned long long>, std::allocator<std::pair<unsigned long long const, std::set<unsigned long long, std::less<unsigned long long>, std::allocator<unsigned long long>>>>>"
+                }
+            }
+        }
+    },
+    "slepc_version": "3.16.2",
+    "time_steps": [
+        {
+            "id_map": {
+                "id1_to_id2": [
+                    [
+                        2,
+                        [
+                            1,
+                            3
+                        ]
+                    ],
+                    [
+                        0,
+                        [
+                            1
+                        ]
+                    ]
+                ]
+            },
+            "time": 0.0,
+            "time_step": 0
+        },
+        {
+            "id_map": {
+                "id1_to_id2": [
+                    [
+                        2,
+                        [
+                            1,
+                            3
+                        ]
+                    ],
+                    [
+                        0,
+                        [
+                            1
+                        ]
+                    ]
+                ]
+            },
+            "time": 1.0,
+            "time_step": 1
+        }
+    ]
+}
