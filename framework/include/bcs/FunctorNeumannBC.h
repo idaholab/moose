@@ -14,22 +14,18 @@
 /**
  * Neumann boundary condition with functor inputs.
  */
-template <bool is_ad>
-class FunctorNeumannBCTempl : public ADIntegratedBC
+class FunctorNeumannBC : public ADIntegratedBC
 {
 public:
   static InputParameters validParams();
 
-  FunctorNeumannBCTempl(const InputParameters & parameters);
+  FunctorNeumannBC(const InputParameters & parameters);
 
 protected:
   virtual ADReal computeQpResidual() override;
 
   /// The functor to impose
-  const Moose::Functor<GenericReal<is_ad>> & _functor;
+  const Moose::Functor<ADReal> & _functor;
   /// Coefficient
-  const Moose::Functor<GenericReal<is_ad>> & _coef;
+  const Moose::Functor<ADReal> & _coef;
 };
-
-typedef FunctorNeumannBCTempl<false> FunctorNeumannBC;
-typedef FunctorNeumannBCTempl<true> ADFunctorNeumannBC;

@@ -51,7 +51,7 @@
     value = 0
   []
   [right]
-    type = ADFunctorNeumannBC
+    type = FunctorNeumannBC
     variable = u
     boundary = right
     functor = v

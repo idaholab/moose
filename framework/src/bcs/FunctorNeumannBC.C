@@ -10,11 +10,9 @@
 #include "FunctorNeumannBC.h"
 
 registerMooseObject("MooseApp", FunctorNeumannBC);
-registerMooseObject("MooseApp", ADFunctorNeumannBC);
 
-template <bool is_ad>
 InputParameters
-FunctorNeumannBCTempl<is_ad>::validParams()
+FunctorNeumannBC::validParams()
 {
   InputParameters params = ADIntegratedBC::validParams();
 
@@ -29,23 +27,18 @@ FunctorNeumannBCTempl<is_ad>::validParams()
   return params;
 }
 
-template <bool is_ad>
-FunctorNeumannBCTempl<is_ad>::FunctorNeumannBCTempl(const InputParameters & parameters)
+FunctorNeumannBC::FunctorNeumannBC(const InputParameters & parameters)
   : ADIntegratedBC(parameters),
 
-    _functor(getFunctor<GenericReal<is_ad>>("functor")),
-    _coef(getFunctor<GenericReal<is_ad>>("coefficient"))
+    _functor(getFunctor<ADReal>("functor")),
+    _coef(getFunctor<ADReal>("coefficient"))
 {
 }
 
-template <bool is_ad>
 ADReal
-FunctorNeumannBCTempl<is_ad>::computeQpResidual()
+FunctorNeumannBC::computeQpResidual()
 {
   const auto space_arg = std::make_tuple(_current_elem, _current_side, _qp, _qrule);
   return -_coef(space_arg, Moose::currentState()) * _functor(space_arg, Moose::currentState()) *
          _test[_i][_qp];
 }
-
-template class FunctorNeumannBCTempl<false>;
-template class FunctorNeumannBCTempl<true>;
