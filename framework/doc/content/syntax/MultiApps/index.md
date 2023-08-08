@@ -49,15 +49,15 @@ The input file(s) for the sub-app(s) are specified using the [!param](/MultiApps
 parameter. If only one input file is provided, then this input file is used for all
 sub-apps in this `MultiApp`.
 
-!alert! warning title=Multiple input files per application not possible with `MultiApp`
+!alert! warning title=Multiple input files per application
 The ability to specify multiple input files per application, e.g.,
 
 ```
 subapp-opt -i input1.i input2.i
 ```
 
-is not possible with `MultiApp`s, since each input file in [!param](/MultiApps/TransientMultiApp/input_files)
-is interpreted as a different application.
+will not work correct in [!param](/MultiApps/TransientMultiApp/input_files), as
+each input file in is interpreted as a different application.
 !alert-end!
 
 ## Positions id=multiapp-positions

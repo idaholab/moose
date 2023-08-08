@@ -34,10 +34,11 @@ larger than the main app's start time, then sub apps will not take steps until
 their start time is reached, regardless of sub-cycling.
 
 The [!param](/Executioner/Transient/end_time) of the sub app may also differ from
-the main app. If smaller than the parent, then the main app will continue to
-solve past the main app's end time, but the sub apps will not solve anymore.
-If larger than the parent, then the sub apps will just not solve past the main
-app's end time.
+the main app. If the sub app's end time is smaller than the parent's end time,
+then the main app will continue to solve past the sub app's end time, but the sub app will not solve anymore.
+If the sub app's end time is larger than the parent's end time,
+then the sub app will not reach its end time, since the solve will not go past
+the parent app's end time.
 
 ## Time state of TransientMultiApps
 
