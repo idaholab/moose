@@ -35,7 +35,11 @@ MaterialVectorPostprocessor::validParams()
 MaterialVectorPostprocessor::MaterialVectorPostprocessor(const InputParameters & parameters)
   : ElementVectorPostprocessor(parameters),
     _elem_ids(declareVector("elem_id")),
-    _qp_ids(declareVector("qp_id"))
+    _qp_ids(declareVector("qp_id")),
+    _x_coords(declareVector("x")),
+    _y_coords(declareVector("y")),
+    _z_coords(declareVector("z"))
+    
 {
   auto & mat = getMaterialByName(getParam<MaterialName>("material"), true);
   auto & prop_names = mat.getSuppliedItems();
@@ -99,6 +103,9 @@ MaterialVectorPostprocessor::initialize()
   {
     _elem_ids.clear();
     _qp_ids.clear();
+    _x_coords.clear();
+    _y_coords.clear();
+    _z_coords.clear();
     for (auto vec : _prop_vecs)
       vec->clear();
   }
@@ -116,6 +123,9 @@ MaterialVectorPostprocessor::execute()
   {
     _elem_ids.push_back(elem_id);
     _qp_ids.push_back(qp);
+    _x_coords.push_back(_q_point[qp](0));
+    _y_coords.push_back(_q_point[qp](1));
+    _z_coords.push_back(_q_point[qp](2));
   }
 
   for (unsigned int i = 0; i < _prop_names.size(); i++)
@@ -150,6 +160,9 @@ MaterialVectorPostprocessor::finalize()
   // collect all processor data
   comm().gather(0, _elem_ids);
   comm().gather(0, _qp_ids);
+  comm().gather(0, _x_coords);
+  comm().gather(0, _y_coords);
+  comm().gather(0, _z_coords);
   for (auto vec : _prop_vecs)
     comm().gather(0, *vec);
   sortVecs();
@@ -161,6 +174,10 @@ MaterialVectorPostprocessor::threadJoin(const UserObject & y)
   auto & vpp = static_cast<const MaterialVectorPostprocessor &>(y);
   _elem_ids.insert(_elem_ids.end(), vpp._elem_ids.begin(), vpp._elem_ids.end());
   _qp_ids.insert(_qp_ids.end(), vpp._qp_ids.begin(), vpp._qp_ids.end());
+  _x_coords.insert(_x_coords.end(), vpp._x_coords.begin(), vpp._x_coords.end());
+  _y_coords.insert(_y_coords.end(), vpp._y_coords.begin(), vpp._y_coords.end());
+  _z_coords.insert(_z_coords.end(), vpp._z_coords.begin(), vpp._z_coords.end());
+ 
 
   for (unsigned int i = 0; i < _prop_vecs.size(); i++)
   {
@@ -190,6 +207,9 @@ MaterialVectorPostprocessor::sortVecs()
 
   Moose::applyIndices(_elem_ids, ind);
   Moose::applyIndices(_qp_ids, ind);
+  Moose::applyIndices(_x_coords, ind);
+  Moose::applyIndices(_y_coords, ind);
+  Moose::applyIndices(_z_coords, ind);
   for (auto vec : _prop_vecs)
     Moose::applyIndices(*vec, ind);
 }
