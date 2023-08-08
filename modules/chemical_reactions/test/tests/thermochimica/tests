@@ -57,8 +57,8 @@
     csvdiff = FeTiVO_out_Fe2O3_0001.csv
     design = 'ChemicalCompositionAction.md ThermochimicaNodalData.md'
     issues = '#24552'
-    requirement = 'The system shall be able to use pairs as MQMQA phase species'
-    cli_args = 'Outputs/csv=true'
+    requirement = 'The system shall be able to output moles of pairs for MQMQA phase species'
+    cli_args = 'ChemicalComposition/output_species_unit=moles ChemicalComposition/reinitialization_type=none Outputs/csv=true'
 
     max_threads = 1
     rel_err = 1e-3 # this is the same error thermochimica uses for its internal tests
