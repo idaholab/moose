@@ -1106,6 +1106,9 @@ public:
   std::set<dof_id_type> getElemIDsOnBlocks(unsigned int elem_id_index,
                                            const std::set<SubdomainID> & blks) const;
 
+  std::unordered_map<dof_id_type, std::set<dof_id_type>>
+  getElemIDMapping(const std::string & from_id_name, const std::string & to_id_name) const;
+
   ///@{ accessors for the FaceInfo objects
   unsigned int nFace() const { return _face_info.size(); }
 

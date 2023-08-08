@@ -879,6 +879,32 @@ MooseMesh::buildElemIDInfo()
   comm().min(_min_ids);
 }
 
+std::unordered_map<dof_id_type, std::set<dof_id_type>>
+MooseMesh::getElemIDMapping(const std::string & from_id_name, const std::string & to_id_name) const
+{
+  auto & mesh_base = getMesh();
+
+  if (!mesh_base.has_elem_integer(from_id_name))
+    mooseError("Mesh does not have the element integer name '", from_id_name, "'");
+  if (!mesh_base.has_elem_integer(to_id_name))
+    mooseError("Mesh does not have the element integer name '", to_id_name, "'");
+
+  const auto id1 = mesh_base.get_elem_integer_index(from_id_name);
+  const auto id2 = mesh_base.get_elem_integer_index(to_id_name);
+
+  std::unordered_map<dof_id_type, std::set<dof_id_type>> id_map;
+  for (const auto id : getAllElemIDs(id1))
+    id_map[id] = std::set<dof_id_type>();
+
+  for (const auto & elem : mesh_base.active_local_element_ptr_range())
+    id_map[elem->get_extra_integer(id1)].insert(elem->get_extra_integer(id2));
+
+  for (auto & [id, ids] : id_map)
+    comm().set_union(ids);
+
+  return id_map;
+}
+
 std::set<dof_id_type>
 MooseMesh::getAllElemIDs(unsigned int elem_id_index) const
 {
