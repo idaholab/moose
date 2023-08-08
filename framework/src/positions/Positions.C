@@ -77,6 +77,7 @@ const Point &
 Positions::getNearestPosition(const Point & target, const bool initial) const
 {
   const auto & positions = (initial && _initial_positions) ? *_initial_positions : _positions;
+  // To keep track of indetermination due to equidistant positions
   std::pair<int, int> conflict_index(-1, -1);
 
   // TODO Use faster & fancier machinery such as a KNN-partition
@@ -93,12 +94,13 @@ Positions::getNearestPosition(const Point & target, const bool initial) const
     // Check that no two positions are equidistant to the target
     else if (MooseUtils::absoluteFuzzyEqual((_positions[i] - target).norm_sq(),
                                             nearest_distance_sq))
-      conflict_index = std::make_pair(int(i), int(nearest_index));
+      conflict_index = std::make_pair(cast_int<int>(i), cast_int<int>(nearest_index));
   }
 
-  if (nearest_index == conflict_index.first || nearest_index == conflict_index.second)
+  // If there were multiple "closest" positions, report a warning
+  if (cast_int<int>(nearest_index) == conflict_index.second)
   {
-    mooseWarning("Search for nearest position found several matches: " +
+    mooseWarning("Search for nearest position found at least two matches: " +
                      Moose::stringify(_positions[conflict_index.first]) + " and " +
                      Moose::stringify(_positions[nearest_index]),
                  " for point " + Moose::stringify(target) + " at a distance of " +
