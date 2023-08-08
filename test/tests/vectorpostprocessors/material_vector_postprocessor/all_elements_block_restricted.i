@@ -1,5 +1,6 @@
 # test that all scalar material properties are properly recorded for all elements.
 [Mesh]
+  allow_renumbering = false
   [gen]
     type = GeneratedMeshGenerator
     dim = 2

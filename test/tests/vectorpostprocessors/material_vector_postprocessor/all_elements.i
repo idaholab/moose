@@ -4,6 +4,7 @@
   dim = 2
   nx = 2
   ny = 3
+  allow_renumbering = false
 []
 
 [Variables]
