@@ -218,6 +218,10 @@ ContactAction::validParams()
   params.addParam<std::vector<TagName>>(
       "extra_vector_tags",
       "The tag names for extra vectors that residual data should be saved into");
+  params.addParam<std::vector<TagName>>(
+      "absolute_value_vector_tags",
+      "The tags for the vectors this residual object should fill with the "
+      "absolute value of the residual contribution");
   params.addParam<bool>(
       "use_petrov_galerkin",
       false,
@@ -872,9 +876,7 @@ ContactAction::addMortarContact()
 
       var_params.set<VariableName>("secondary_variable") = displacements[0];
       var_params.set<bool>("use_displaced_mesh") = true;
-      var_params.set<Real>("friction_coefficient") = getParam<Real>("friction_coefficient");
-      var_params.set<Real>("penalty") = getParam<Real>("penalty");
-      var_params.set<Real>("penalty_friction") = getParam<Real>("penalty_friction");
+
       if (isParamValid("al_penetration_tolerance"))
         var_params.set<Real>("penetration_tolerance") = getParam<Real>("al_penetration_tolerance");
 
@@ -892,6 +894,9 @@ ContactAction::addMortarContact()
 
       if (_use_dual)
         var_params.set<std::vector<VariableName>>("aux_lm") = {auxiliary_lagrange_multiplier_name};
+
+      var_params.applySpecificParameters(parameters(),
+                                         {"friction_coefficient", "penalty", "penalty_friction"});
 
       _problem->addUserObject(
           "PenaltyFrictionUserObject", "penalty_friction_object_" + name(), var_params);
@@ -913,24 +918,18 @@ ContactAction::addMortarContact()
 
       InputParameters params = _factory.getValidParams(mortar_constraint_name);
       if (_mortar_dynamics)
-      {
-        params.set<Real>("newmark_beta") = getParam<Real>("newmark_beta");
-        params.set<Real>("newmark_gamma") = getParam<Real>("newmark_gamma");
-        params.set<Real>("capture_tolerance") = getParam<Real>("capture_tolerance");
-        if (isParamValid("wear_depth"))
-          params.set<CoupledName>("wear_depth") = getParam<CoupledName>("wear_depth");
-      }
+        params.applySpecificParameters(
+            parameters(), {"newmark_beta", "newmark_gamma", "capture_tolerance", "wear_depth"});
+
       else // We need user objects for quasistatic constraints
         params.set<UserObjectName>("weighted_gap_uo") = "lm_weightedgap_object_" + name();
 
-      params.set<bool>("correct_edge_dropping") = getParam<bool>("correct_edge_dropping");
       params.set<BoundaryName>("primary_boundary") = _boundary_pairs[0].first;
       params.set<BoundaryName>("secondary_boundary") = _boundary_pairs[0].second;
       params.set<SubdomainName>("primary_subdomain") = primary_subdomain_name;
       params.set<SubdomainName>("secondary_subdomain") = secondary_subdomain_name;
       params.set<NonlinearVariableName>("variable") = normal_lagrange_multiplier_name;
       params.set<std::vector<VariableName>>("disp_x") = {displacements[0]};
-      params.set<bool>("normalize_c") = getParam<bool>("normalize_c");
       params.set<Real>("c") = getParam<Real>("c_normal");
 
       if (ndisp > 1)
@@ -939,9 +938,12 @@ ContactAction::addMortarContact()
         params.set<std::vector<VariableName>>("disp_z") = {displacements[2]};
 
       params.set<bool>("use_displaced_mesh") = true;
-      if (isParamValid("extra_vector_tags"))
-        params.set<std::vector<TagName>>("extra_vector_tags") =
-            getParam<std::vector<TagName>>("extra_vector_tags");
+
+      params.applySpecificParameters(parameters(),
+                                     {"correct_edge_dropping",
+                                      "normalize_c",
+                                      "extra_vector_tags",
+                                      "absolute_value_vector_tags"});
 
       _problem->addConstraint(
           mortar_constraint_name, action_name + "_normal_lm_weighted_gap", params);
@@ -959,13 +961,8 @@ ContactAction::addMortarContact()
 
       InputParameters params = _factory.getValidParams(mortar_constraint_name);
       if (_mortar_dynamics)
-      {
-        params.set<Real>("newmark_beta") = getParam<Real>("newmark_beta");
-        params.set<Real>("newmark_gamma") = getParam<Real>("newmark_gamma");
-        params.set<Real>("capture_tolerance") = getParam<Real>("capture_tolerance");
-        if (isParamValid("wear_depth"))
-          params.set<CoupledName>("wear_depth") = getParam<CoupledName>("wear_depth");
-      }
+        params.applySpecificParameters(
+            parameters(), {"newmark_beta", "newmark_gamma", "capture_tolerance", "wear_depth"});
       else
       { // We need user objects for quasistatic constraints
         params.set<UserObjectName>("weighted_gap_uo") = "lm_weightedvelocities_object_" + name();
@@ -999,9 +996,8 @@ ContactAction::addMortarContact()
             tangential_lagrange_multiplier_3d_name};
 
       params.set<Real>("mu") = getParam<Real>("friction_coefficient");
-      if (isParamValid("extra_vector_tags"))
-        params.set<std::vector<TagName>>("extra_vector_tags") =
-            getParam<std::vector<TagName>>("extra_vector_tags");
+      params.applySpecificParameters(parameters(),
+                                     {"extra_vector_tags", "absolute_value_vector_tags"});
 
       _problem->addConstraint(mortar_constraint_name, action_name + "_tangential_lm", params);
       _problem->haveADObjects(true);
@@ -1033,9 +1029,8 @@ ContactAction::addMortarContact()
       // The second frictional LM acts on a perpendicular direction.
       if (is_additional_frictional_constraint)
         params.set<MooseEnum>("direction") = "direction_2";
-      if (isParamValid("extra_vector_tags"))
-        params.set<std::vector<TagName>>("extra_vector_tags") =
-            getParam<std::vector<TagName>>("extra_vector_tags");
+      params.applySpecificParameters(parameters(),
+                                     {"extra_vector_tags", "absolute_value_vector_tags"});
 
       for (unsigned int i = 0; i < displacements.size(); ++i)
       {
@@ -1163,9 +1158,8 @@ ContactAction::addNodeFaceContact()
       params.set<BoundaryName>("secondary") = contact_pair.second;
       params.set<NonlinearVariableName>("variable") = displacements[i];
       params.set<std::vector<VariableName>>("primary_variable") = {displacements[i]};
-      if (isParamValid("extra_vector_tags"))
-        params.set<std::vector<TagName>>("extra_vector_tags") =
-            getParam<std::vector<TagName>>("extra_vector_tags");
+      params.applySpecificParameters(parameters(),
+                                     {"extra_vector_tags", "absolute_value_vector_tags"});
       _problem->addConstraint(constraint_type, name, params);
     }
   }
