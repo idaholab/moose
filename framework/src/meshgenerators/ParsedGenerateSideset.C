@@ -50,6 +50,10 @@ ParsedGenerateSideset::validParams()
       "A set of neighboring subdomain ids. A face is only added if the subdomain id of the "
       "neighbor is in this set",
       "included_neighbor_ids is deprecated, use included_neighbors with names or ids");
+  params.addParam<bool>(
+      "include_only_external_sides",
+      false,
+      "Whether to only include external sides when considering sides to add to the sideset");
   params.addParam<Point>(
       "normal",
       Point(),
@@ -85,6 +89,7 @@ ParsedGenerateSideset::ParsedGenerateSideset(const InputParameters & parameters)
     _included_neighbor_ids(isParamValid("included_neighbor_ids")
                                ? parameters.get<std::vector<SubdomainID>>("included_neighbor_ids")
                                : std::vector<SubdomainID>()),
+    _include_only_external_sides(getParam<bool>("include_only_external_sides")),
     _normal(getParam<Point>("normal"))
 {
   // Handle deprecated parameters
@@ -94,6 +99,10 @@ ParsedGenerateSideset::ParsedGenerateSideset(const InputParameters & parameters)
   if (isParamValid("included_neighbor_ids") && isParamValid("included_neighbors"))
     paramError("included_neighbor_ids",
                "included_neighbor_ids is deprecated, only specify included_neighbors");
+
+  // Handle incompatible parameters
+  if (_include_only_external_sides && _check_neighbor_subdomains)
+    paramError("include_only_external_sides", "External sides dont have neighbors");
 
   // base function object
   _func_F = std::make_shared<SymFunction>();
@@ -210,6 +219,10 @@ ParsedGenerateSideset::generate()
         if (!in_included_boundaries)
           continue;
       }
+
+      // avoid internal sides if specified by the suer
+      if (_include_only_external_sides && elem->neighbor_ptr(side))
+        continue;
 
       // check expression
       std::unique_ptr<Elem> curr_side = elem->side_ptr(side);
