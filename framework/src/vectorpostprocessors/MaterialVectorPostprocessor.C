@@ -27,8 +27,9 @@ MaterialVectorPostprocessor::validParams()
   params.addRequiredParam<MaterialName>("material",
                                         "Material for which all properties will be recorded.");
   params.addParam<std::vector<unsigned int>>(
-      "elem_ids", "Element IDs to print data for (others are ignored). If not supplied, all "
-                  "elements will be printed.");
+      "elem_ids",
+      "Element IDs to print data for (others are ignored). If not supplied, all "
+      "elements will be printed.");
   return params;
 }
 
@@ -39,7 +40,7 @@ MaterialVectorPostprocessor::MaterialVectorPostprocessor(const InputParameters &
     _x_coords(declareVector("x")),
     _y_coords(declareVector("y")),
     _z_coords(declareVector("z"))
-    
+
 {
   auto & mat = getMaterialByName(getParam<MaterialName>("material"), true);
   auto & prop_names = mat.getSuppliedItems();
@@ -60,7 +61,7 @@ MaterialVectorPostprocessor::MaterialVectorPostprocessor(const InputParameters &
       all_elem_ids.push_back(elem->id());
     _elem_filter = std::set<unsigned int>(all_elem_ids.begin(), all_elem_ids.end());
   }
-  
+
   for (auto & id : _elem_filter)
   {
     auto el = _mesh.getMesh().query_elem_ptr(id);
@@ -177,7 +178,6 @@ MaterialVectorPostprocessor::threadJoin(const UserObject & y)
   _x_coords.insert(_x_coords.end(), vpp._x_coords.begin(), vpp._x_coords.end());
   _y_coords.insert(_y_coords.end(), vpp._y_coords.begin(), vpp._y_coords.end());
   _z_coords.insert(_z_coords.end(), vpp._z_coords.begin(), vpp._z_coords.end());
- 
 
   for (unsigned int i = 0; i < _prop_vecs.size(); i++)
   {

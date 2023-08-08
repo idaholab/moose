@@ -46,7 +46,7 @@ private:
   VectorPostprocessorValue & _x_coords;
   VectorPostprocessorValue & _y_coords;
   VectorPostprocessorValue & _z_coords;
-  
+
   /// Columns for each (scalar) property of the material.
   std::vector<VectorPostprocessorValue *> _prop_vecs;
 
