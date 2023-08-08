@@ -30,24 +30,13 @@ public:
   Postprocessor(const MooseObject * moose_object);
 
   /**
-   * This will get called to actually grab the final value the postprocessor has calculated
-   *
-   * Note that this should only be called by internal methods, namely the problem that
-   * actually sets the value globally for other things to use. If you want the value
-   * outside of one of these external methods, you should use getCurrentValue().
-   *
-   * This method will be removed in favor of the const version.
-   */
-  virtual PostprocessorValue getValue();
-
-  /**
    * This will get called to actually grab the final value the postprocessor has calculated.
    *
    * Note that this should only be called by internal methods, namely the problem that
    * actually sets the value globally for other things to use. If you want the value
    * outside of one of these external methods, you should use getCurrentValue().
    */
-  virtual PostprocessorValue getValue() const;
+  virtual PostprocessorValue getValue() const = 0;
 
   /**
    * @return The "current" value of this Postprocessor.
