@@ -1,6 +1,23 @@
 [Tests]
   issues = '#00000'
   design = 'AbaqusUserElement.md'
+
+  [build_uel_tri_tests]
+    type = 'RunCommand'
+    command = 'cd ../../../examples/uel_tri_tests; make'
+    requirement = "The uel_tri_states_tests exampel shall be built."
+  []
+  [build_uel_tri_states_tests]
+    type = 'RunCommand'
+    command = 'cd ../../../examples/uel_tri_states_tests; make'
+    requirement = "The uel_tri_states_tests exampel shall be built."
+  []
+  [build_uel_build_tests]
+    type = 'RunCommand'
+    command = 'cd ../../../examples/uel_build_tests; make'
+    requirement = "The uel_tri_states_tests exampel shall be built."
+  []
+
   [reference]
     type = Exodiff
     input = reference.i
