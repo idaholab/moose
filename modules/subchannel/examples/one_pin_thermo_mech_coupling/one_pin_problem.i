@@ -1,29 +1,32 @@
-T_in = 297.039 # K
-P_out = 101325 # Pa
-heated_length = 1.0 # m
+######## BC's #################
+T_in = 359.15
+# [1e+6 kg/m^2-hour] turns into kg/m^2-sec
+mass_flux_in = ${fparse 1e+6 * 17.00 / 3600.}
+P_out = 4.923e6 # Pa
+heated_length = 1.0
+
+[GlobalParams]
+  ######## Geometry #
+  nx = 2
+  ny = 2
+  n_cells = 25
+  pitch = 0.0126
+  rod_diameter = 0.00950
+  gap = 0.00095
+  heated_length = ${heated_length}
+  spacer_z = '0.0'
+  spacer_k = '0.0'
+  power = 50000.0 # W
+[]
 
 [QuadSubChannelMesh]
-  [sub_channel]
+  [subchannel]
     type = QuadSubChannelMeshGenerator
-    nx = 2
-    ny = 2
-    n_cells = 10
-    pitch = 0.014605
-    rod_diameter = 0.012065
-    gap = 0.0015875
-    heated_length = 1.0
-    spacer_z = '0.0'
-    spacer_k = '0.0'
   []
 
   [fuel_pins]
     type = QuadPinMeshGenerator
-    input = sub_channel
-    nx = 2
-    ny = 2
-    n_cells = 10
-    pitch = 0.014605
-    heated_length = 1.0
+    input = subchannel
   []
 []
 
@@ -31,46 +34,46 @@ heated_length = 1.0 # m
   [axial_heat_rate]
     type = ParsedFunction
     expression = '(pi/2)*sin(pi*z/L)'
-    vars = 'L'
+    symbol_names = 'L'
     symbol_values = '${heated_length}'
   []
 []
 
 [AuxVariables]
   [mdot]
-    block = sub_channel
+    block = subchannel
   []
   [SumWij]
-    block = sub_channel
+    block = subchannel
   []
   [P]
-    block = sub_channel
+    block = subchannel
   []
   [DP]
-    block = sub_channel
+    block = subchannel
   []
   [h]
-    block = sub_channel
+    block = subchannel
   []
   [T]
-    block = sub_channel
-  []
-  [Tpin]
-    block = fuel_pins
+    block = subchannel
   []
   [rho]
-    block = sub_channel
+    block = subchannel
   []
   [mu]
-    block = sub_channel
+    block = subchannel
   []
   [S]
-    block = sub_channel
+    block = subchannel
   []
   [w_perim]
-    block = sub_channel
+    block = subchannel
   []
   [q_prime]
+    block = fuel_pins
+  []
+  [Tpin]
     block = fuel_pins
   []
 []
@@ -83,12 +86,10 @@ heated_length = 1.0 # m
 
 [SubChannel]
   type = LiquidWaterSubChannel1PhaseProblem
-  n_blocks = 1
   fp = water
+  n_blocks = 1
   beta = 0.006
   CT = 2.6
-  P_tol = 1e-6
-  T_tol = 1e-6
   compute_density = true
   compute_viscosity = true
   compute_power = true
@@ -109,7 +110,6 @@ heated_length = 1.0 # m
   [q_prime_IC]
     type = QuadPowerIC
     variable = q_prime
-    power = 1000  # W
     filename = "power_profile.txt"
     axial_heat_rate = axial_heat_rate
   []
@@ -176,11 +176,35 @@ heated_length = 1.0 # m
     variable = mdot
     boundary = inlet
     area = S
-    mass_flux = 131.43435930715006
+    mass_flux = ${mass_flux_in}
     execute_on = 'timestep_begin'
   []
 []
 
+[Outputs]
+  exodus = true
+  [Temp_Out_MATRIX]
+    type = QuadSubChannelNormalSliceValues
+    variable = T
+    execute_on = final
+    file_base = "Temp_Out.txt"
+    height = 1.0
+  []
+  [mdot_Out_MATRIX]
+    type = QuadSubChannelNormalSliceValues
+    variable = mdot
+    execute_on = final
+    file_base = "mdot_Out.txt"
+    height = 1.0
+  []
+  [mdot_In_MATRIX]
+    type = QuadSubChannelNormalSliceValues
+    variable = mdot
+    execute_on = final
+    file_base = "mdot_In.txt"
+    height = 0.0
+  []
+[]
 [UserObjects]
   [Tpin_avg_uo]
     type = NearestPointLayeredAverage
@@ -193,57 +217,56 @@ heated_length = 1.0 # m
   []
 []
 
-[Outputs]
-  exodus = true
-[]
-
 [Executioner]
   type = Steady
   petsc_options_iname = '-pc_type -pc_hypre_type'
   petsc_options_value = 'hypre boomeramg'
-  fixed_point_max_its = 30
+  fixed_point_max_its = 2
   fixed_point_min_its = 1
   fixed_point_rel_tol = 1e-6
 []
 
 ################################################################################
-# A multiapp that transfers data to BISON/heatconduction simulations
-################################################################################
-
-[MultiApps] # I have as many multiapps as pins
-  [SLAVE]
-    # app_type = BisonApp
+[MultiApps]
+  ################################################################################
+  # Couple to BISON
+  ################################################################################
+  [sub]
     type = FullSolveMultiApp
-    input_files = slave.i # seperate file for multiapps due to radial power profile
+    app_type = BisonApp
+    input_files = one_pin_problem_sub.i
     execute_on = 'timestep_end'
     positions = '0   0   0 '
+    output_in_position = true
     bounding_box_padding = '0 0 0.01'
   []
 
+  ################################################################################
+  # A multiapp that projects data to a detailed mesh
+  ################################################################################
   [viz]
     type = FullSolveMultiApp
-    input_files = "detailedMesh.i"
-    execute_on = "final"
+    input_files = '3d.i'
+    execute_on = 'FINAL'
   []
 []
 
 [Transfers]
   [Tpin] # send pin surface temperature to bison,
     type = MultiAppUserObjectTransfer2
-    to_multi_app = SLAVE
+    to_multi_app = sub
     variable = Pin_surface_temperature
     user_object = Tpin_avg_uo
   []
 
-  [q_prime] # send heat flux from slave/BISON/heatConduction to subchannel/master
+  [q_prime] # send heat flux from /BISON/heatConduction to subchannel/master
     type = MultiAppUserObjectTransfer2
-    from_multi_app = SLAVE
+    from_multi_app = sub
     variable = q_prime
     user_object = q_prime_uo
     execute_on = 'timestep_end'
   []
 
-###### Transfers to the detailedMesh at the end of the coupled simulations
   [subchannel_transfer]
     type = MultiAppDetailedSolutionTransfer
     to_multi_app = viz
