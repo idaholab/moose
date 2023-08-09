@@ -69,9 +69,11 @@ function configure_petsc()
 
   # If HDF5 is not found locally, download it via PETSc
   HDF5_FORTRAN_STR=""
+  HDF5_CONFIGURE_STR=""
   if [ -z "$HDF5_STR" ]; then
     HDF5_STR="--download-hdf5=1"
     HDF5_FORTRAN_STR="--download-hdf5-fortran-bindings=0"
+    HDF5_CONFIGURE_STR="--with-zlib"
     echo "INFO: HDF5 library not detected, opting to download via PETSc..."
   fi
 
@@ -105,6 +107,7 @@ function configure_petsc()
       --with-shared-libraries=1 \
       "$HDF5_STR" \
       "$HDF5_FORTRAN_STR" \
+      "$HDF5_CONFIGURE_STR" \
       "$MAKE_NP_STR" \
       "$MUMPS_ARM_STR" \
       --with-debugging=no \
