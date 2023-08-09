@@ -1,10 +1,10 @@
 # FlowModelSinglePhase
 
-The `FlowModelSinglePhase` creates for [FlowChannel1Phase.md] components using the three equations model:
+The `FlowModelSinglePhase` creates the following for [FlowChannel1Phase.md] components using the 3-equation model:
 
 - variables
 - initial conditions
-- kernels and DGKernels for RDG
+- kernels and DGKernels
 - auxiliary kernels to compute density, velocity etc
 - material properties needed for the kernels
 - flux objects for HLLC

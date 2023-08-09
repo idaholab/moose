@@ -3,7 +3,7 @@
 !syntax description /Kernels/ADHeatConductionRZ
 
 The equation term added is the same as for the [HeatConduction.md] kernel,
-except that the residual and Jacobian contributions are derived for cylindrical coordinates, the axis and origin
+except that the residual and Jacobian contributions are integrated with cylindrical coordinates, the axis and origin
 of which are being defined through input parameters.
 
 !alert warning
