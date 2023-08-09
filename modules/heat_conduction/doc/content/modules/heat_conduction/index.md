@@ -1,7 +1,10 @@
 # Heat Conduction Module
 
-Heat is transferred by three mechanisms: conduction, convection, and radiation. The heat conduction module allows modeling conduction, radiation between gray, diffuse surfaces, and it contains
-provisions to couple temperature fields to fluid domains through boundary conditions.
+Heat is transferred by three mechanisms: conduction, convection, and radiation.
+The heat conduction module provides various implementations of the heat conduction
+equation, as well as associated boundary/interface conditions, including radiation
+between gray, diffuse surfaces and provisions to couple temperature fields to
+fluid domains through boundary conditions.
 
 ## Tutorial Problems
 
@@ -182,7 +185,22 @@ The implementation of the net radiation method in MOOSE relies on the following 
 
 - In the future an action will be added that allows setting up view-factor net radiation transfer using only a single block.
 
+## Gap Heat Transfer
 
+There are multiple approaches in the Heat Conduction module for modeling heat
+transfer across a gap:
+
+- [ModularGapConductanceConstraint.md] uses the mortar finite element method and
+  may be used when the gap is based on the distance between mesh faces.
+- [SideSetHeatTransferKernel.md] is an [InterfaceKernel](InterfaceKernels/index.md)
+  that models heat transfer across a side set, via conduction, convection, and
+  radiation.
+- [ThermalContact](syntax/ThermalContact/index.md) uses a "node-on-face" approach
+  to model gap heat transfer and may be used when the gap is based on
+  the distance between mesh faces.
+- [CylindricalGapHeatFluxFunctorMaterial.md] is a [FunctorMaterial](FunctorMaterials/index.md)
+  that computes heat fluxes across a cylindrical gap, where the gap thickness
+  is provided via radii functors rather than taken from mesh information.
 
 ## Objects, Actions, and Syntax
 

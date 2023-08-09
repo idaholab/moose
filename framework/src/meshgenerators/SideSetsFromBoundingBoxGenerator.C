@@ -36,8 +36,10 @@ SideSetsFromBoundingBoxGenerator::validParams()
       "bottom_left", "The bottom left point (in x,y,z with spaces in-between).");
   params.addRequiredParam<RealVectorValue>(
       "top_right", "The bottom left point (in x,y,z with spaces in-between).");
-  params.addRequiredParam<subdomain_id_type>(
-      "block_id", "Subdomain id to set for inside/outside the bounding box");
+  params.addDeprecatedParam<subdomain_id_type>(
+      "block_id",
+      "Subdomain id to set for inside/outside the bounding box",
+      "The parameter 'block_id' is not used.");
   params.addDeprecatedParam<std::vector<BoundaryName>>(
       "boundary_id_old",
       "Boundary id on specified block within the bounding box to select",
@@ -65,7 +67,6 @@ SideSetsFromBoundingBoxGenerator::SideSetsFromBoundingBoxGenerator(
   : MeshGenerator(parameters),
     _input(getMesh("input")),
     _location(parameters.get<MooseEnum>("location")),
-    _block_id(parameters.get<SubdomainID>("block_id")),
     _bounding_box(MooseUtils::buildBoundingBox(parameters.get<RealVectorValue>("bottom_left"),
                                                parameters.get<RealVectorValue>("top_right"))),
     _boundary_id_overlap(parameters.get<bool>("boundary_id_overlap"))

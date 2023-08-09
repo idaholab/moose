@@ -116,7 +116,7 @@ Here are some important details about how brace-expressions are evaluated:
 - If there are no arguments in the brace-expression beyond the "cmd" (e.g. `${foo}`), then the
   `replace` command is implied: e.g. `${foo}` means `${replace foo}`.
 
-## Overridding input parameters from the command line.
+## Overriding input parameters from the command line
 
 See the [CommandLine.md] object for information on how input parameters can be
 changed on the command line.

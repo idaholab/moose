@@ -900,7 +900,10 @@ MooseMesh::getElemIDMapping(const std::string & from_id_name, const std::string 
     id_map[elem->get_extra_integer(id1)].insert(elem->get_extra_integer(id2));
 
   for (auto & [id, ids] : id_map)
+  {
+    libmesh_ignore(id); // avoid overzealous gcc 9.4 unused var warning
     comm().set_union(ids);
+  }
 
   return id_map;
 }

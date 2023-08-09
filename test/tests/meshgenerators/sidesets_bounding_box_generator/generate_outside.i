@@ -14,7 +14,6 @@
     boundary_new = 10
     location = OUTSIDE
     bottom_left = '-0.1 -0.1 0'
-    block_id = 0
     top_right = '0.5 0.5 0'
   []
 []

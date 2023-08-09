@@ -1,0 +1,10 @@
+[Tests]
+  [test]
+    type = Exodiff
+    input = 'cylindrical_gap_heat_flux_functor_material.i'
+    exodiff = 'cylindrical_gap_heat_flux_functor_material_out.e'
+    requirement = 'The system shall compute functor material properties for heat flux across a cylindrical gap.'
+    design = 'source/functormaterials/CylindricalGapHeatFluxFunctorMaterial.md'
+    issues = '#25113'
+  []
+[]

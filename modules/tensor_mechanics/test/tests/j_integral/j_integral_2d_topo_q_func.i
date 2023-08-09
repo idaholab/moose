@@ -45,6 +45,7 @@
   ring_last = 4
   output_q = false
   incremental = true
+  symmetry_plane = 1
 []
 
 [Modules/TensorMechanics/Master]

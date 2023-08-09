@@ -46,6 +46,7 @@
   radius_outer = '5.5 7.0'
   output_q = false
   incremental = true
+  symmetry_plane = 1
 []
 
 [Modules/TensorMechanics/Master]
