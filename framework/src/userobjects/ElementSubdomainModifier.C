@@ -223,7 +223,7 @@ ElementSubdomainModifier::finalize()
   }
 
   // Initialize stateful material properties for the newly activated elements
-  _fe_problem.initElementStatefulProps(movedElemsRange());
+  _fe_problem.initElementStatefulProps(movedElemsRange(), false);
 }
 
 void

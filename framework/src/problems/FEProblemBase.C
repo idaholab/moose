@@ -7075,11 +7075,14 @@ FEProblemBase::notifyWhenMeshChanges(MeshChangedInterface * mci)
 }
 
 void
-FEProblemBase::initElementStatefulProps(const ConstElemRange & elem_range)
+FEProblemBase::initElementStatefulProps(const ConstElemRange & elem_range, const bool threaded)
 {
   ComputeMaterialsObjectThread cmt(
       *this, _material_props, _bnd_material_props, _neighbor_material_props, _assembly);
-  cmt(elem_range, true);
+  if (threaded)
+    Threads::parallel_reduce(elem_range, cmt);
+  else
+    cmt(elem_range, true);
 }
 
 void
