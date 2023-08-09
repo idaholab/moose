@@ -985,7 +985,8 @@ class TestHarness:
             and not os.path.exists(self.options.results_file)):
             print('A previous run does not exist')
             sys.exit(1)
-
+        elif os.path.exists(self.options.results_file):
+            os.remove(self.options.results_file)
 
     ## Parse command line options and assign them to self.options
     def parseCLArgs(self, argv):
