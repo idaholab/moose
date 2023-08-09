@@ -91,4 +91,23 @@
                   'and the Jacobian.'
     abs_zero = 1e-12
   []
+  [small_test_uel_states_fields]
+    type = Exodiff
+    input = small_test_uel_states_fields.i
+    exodiff = small_test_uel_states_fields_out.e
+    requirement = 'The Abaqus UEL interface, calling a UMAT routine, must yield the same results for '
+                  'a triangular element that a UMAT routine that computes internal forces when the '
+                  'solution depends on system states and two external fields, including temperature.'
+    abs_zero = 1e-12
+  []
+  [small_test_umat_states_fields]
+    type = Exodiff
+    input = small_test_umat_states_fields.i
+    exodiff = small_test_umat_states_fields_out.e
+    requirement = 'The Abaqus UMAT interface must yield the same results for a triangular element '
+                  'that a UEL routine that computes internal forces, calling a UMAT routine, when '
+                  'the solution depends on system states and two external fields, including '
+                  'temperature.'
+    abs_zero = 1e-12
+  []
 []
