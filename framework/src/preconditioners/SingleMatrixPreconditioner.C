@@ -96,13 +96,7 @@ SingleMatrixPreconditioner::SingleMatrixPreconditioner(const InputParameters & p
         (*cm)(i, j) = 1;
   }
 
-  for (const auto i : make_range(_fe_problem.numNonlinearSystems()))
-  {
-    if (i == libMesh::cast_int<unsigned int>(_fe_problem.numNonlinearSystems() - 1))
-      _fe_problem.setCouplingMatrix(std::move(cm), i);
-    else
-      _fe_problem.setCouplingMatrix(std::make_unique<CouplingMatrix>(*cm), i);
-  }
+  setCouplingMatrix(std::move(cm));
   if (getParam<bool>("trust_my_coupling"))
     _fe_problem.trustUserCouplingMatrix();
 }

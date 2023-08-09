@@ -5,6 +5,10 @@ pyconfig := python3-config
 ifeq (, $(shell which $(pyconfig) 2>/dev/null))
 	pyconfig := python-config
 endif
+cython := cython3
+ifeq (, $(shell which $(cython) 2>/dev/null))
+	cython := 'cython -3'
+endif
 
 ifeq ($(UNAME), Darwin)
 	DYNAMIC_LOOKUP := -undefined dynamic_lookup
@@ -27,7 +31,7 @@ hit.so: parse.cc lex.cc braceexpr.cc
 	$(CXX) -std=c++17 -w -fPIC -lstdc++ -shared -L$(PYTHONPREFIX)/lib $(PYTHONCFLAGS) $(DYNAMIC_LOOKUP) $^ $(HITCPP) -o $@
 
 $(HITCPP): hit.pyx chit.pxd
-	cython -3 -o $@ --cplus $<
+	$(cython) -o $@ --cplus $<
 
 .PRECIOUS: $(HITCPP)
 

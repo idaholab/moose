@@ -88,7 +88,7 @@ FiniteDifferencePreconditioner::FiniteDifferencePreconditioner(const InputParame
         (*cm)(i, j) = 1;
   }
 
-  _fe_problem.setCouplingMatrix(std::move(cm));
+  setCouplingMatrix(std::move(cm));
 
   bool implicit_geometric_coupling = getParam<bool>("implicit_geometric_coupling");
 

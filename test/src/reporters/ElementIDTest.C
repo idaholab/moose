@@ -25,7 +25,7 @@ ElementIDTest::ElementIDTest(const InputParameters & params)
     _id_name1(getParam<ExtraElementIDName>("id_name1")),
     _id_name2(getParam<ExtraElementIDName>("id_name2")),
     _mapping(declareValueByName<std::unordered_map<dof_id_type, std::set<dof_id_type>>>(
-        _id_name1 + "_to_" + _id_name2, REPORTER_MODE_ROOT))
+        _id_name1 + "_to_" + _id_name2, REPORTER_MODE_REPLICATED))
 {
   _mapping = getElemIDMapping(_id_name1, _id_name2);
 }

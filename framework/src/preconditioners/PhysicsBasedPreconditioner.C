@@ -95,7 +95,7 @@ PhysicsBasedPreconditioner::PhysicsBasedPreconditioner(const InputParameters & p
           (*cm)(i, j) = 1;
     }
 
-    _fe_problem.setCouplingMatrix(std::move(cm));
+    setCouplingMatrix(std::move(cm));
   }
 
   // PC types
