@@ -11,7 +11,7 @@
 #include "StoreVariableByElemIDSideUserObject.h"
 #include "MeshAlignment2D3D.h"
 #include "THMUtils.h"
-#include "HeatConductionNames.h"
+#include "HeatTransferModels.h"
 #include "Function.h"
 
 registerMooseObject("ThermalHydraulicsApp", HSCoupler2D3DUserObject);
@@ -97,12 +97,11 @@ HSCoupler2D3DUserObject::execute()
 
     const auto r_3d = _r_2d + gap_thickness;
     const auto r_gap = 0.5 * (_r_2d + r_3d);
-    const auto rad_resistance =
-        1.0 / emissivity_2d + _r_2d / r_3d * (1.0 - emissivity_3d) / emissivity_3d;
 
-    const auto heat_flux_cond = k_gap / (r_gap * std::log(r_3d / _r_2d)) * (T_2d - T_3d);
-    const auto heat_flux_rad =
-        HeatConduction::Constants::sigma * (std::pow(T_2d, 4) - std::pow(T_3d, 4)) / rad_resistance;
+    const auto heat_flux_cond =
+        HeatTransferModels::cylindricalGapConductionHeatFlux(k_gap, _r_2d, r_3d, T_2d, T_3d);
+    const auto heat_flux_rad = HeatTransferModels::cylindricalGapRadiationHeatFlux(
+        _r_2d, r_3d, emissivity_2d, emissivity_3d, T_2d, T_3d);
     const auto heat_flux = heat_flux_cond + heat_flux_rad;
 
     heat_flux_3d[qp_3d] = heat_flux;
