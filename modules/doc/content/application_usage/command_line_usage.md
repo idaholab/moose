@@ -27,7 +27,7 @@ Options:
   -e --error-unused                                 Error when encountering unused input file options
   --half-transient                                  When true the simulation will only run half of its specified transient (ie half the timesteps).  This is useful for testing recovery and restart
   -h --help                                         Displays CLI usage statement.
-  -i <input_file>                                   Specify an input file
+  -i <input_files>                                  Specify one or multiple input files. Multiple files get merged into a single simulation input.
   --json                                            Dumps input file syntax in JSON format.
   --keep-cout                                       Keep standard output from all processors when running in parallel
   --list-constructed-objects                        List all moose object type names constructed by the master app factory.
@@ -72,6 +72,18 @@ The most important option is `-i` this is how you specify an input file to read 
 ```
 
 It's always important to `cd` to the directory where your input file is so that relative paths within the input file are treated properly.
+
+It's also possible to specify multiple input files like the following:
+
+```
+./yourapp-opt -i base.i input.i
+```
+
+The input files are processed from left to right, so in this example, `base.i`
+is processed before `input.i`. This feature is useful when you have multiple
+input files that share input: you can factor out the common input into another
+file (e.g., `base.i`) so that you do not duplicate it (and thus risk changing
+it in one input file but not another).
 
 ### `--dump`
 

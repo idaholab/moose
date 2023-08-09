@@ -45,28 +45,63 @@ equations can be solved with [Fixed Point iterations](syntax/Executioner/index.m
 
 !listing multiapps/transient_multiapp/dt_from_parent.i block=MultiApps
 
+The input file(s) for the sub-app(s) are specified using the [!param](/MultiApps/TransientMultiApp/input_files)
+parameter. If only one input file is provided, then this input file is used for all
+sub-apps in this `MultiApp`.
+
+!alert! warning title=Multiple input files per application
+The ability to specify multiple input files per application, e.g.,
+
+```
+subapp-opt -i input1.i input2.i
+```
+
+will not work correct in [!param](/MultiApps/TransientMultiApp/input_files), as
+each input file in is interpreted as a different application.
+!alert-end!
+
 ## Positions id=multiapp-positions
 
-The [!param](/MultiApps/TransientMultiApp/positions) parameter is a coordinate offset from
-the main app domain to the sub-app domain, as illustrated by [multiapps_pos]. The parameter
-requires the positions to be provided as a set of $(x, y, z)$ coordinates for each sub-app.
-
-The number of coordinate sets determines the actual number of sub-applications created.  If there is
-a large number of positions a file can be provided instead using the
-[!param](/MultiApps/TransientMultiApp/positions_file) parameter.
-
-
-- The $(x, y, z)$ coordinates are a vector that is being added to the coordinates of the sub-app's
-  domain to put that domain in a specific location within the main domain.
-- If the sub-app's domain starts at $(0,0,0)$ it is easy to think of moving that point around
-  using [!param](/MultiApps/TransientMultiApp/positions).
-- For sub-apps on completely different scales, `positions` is the point in the main domain where
-  that app is located.
+Each sub-app has a "position" relative to the parent app, interpreted as the
+translation vector to apply to the sub-app's coordinate system to put it in the correct
+physical position in the parent app. For instance, suppose one is modeling a
+fuel assembly with multiple fuel rods, and the parent app contains the mesh of
+the assembly matrix, excluding the fuel rods. A `MultiApp` can be created where
+each sub-app corresponds to a single fuel rod. A single input file may be created
+for a fuel rod, where the rod starts at $(0,0,0)$, and the parent app can specify
+that multiple instances of this sub-app be created, translated to the correct
+physical positions in the assembly matrix. See [multiapps_pos] for an example
+illustration.
 
 !media framework/multiapps_positions.png id=multiapps_pos style=width:80%;margin-left:auto;margin-right:auto;
        caption=Example of MultiApp object position.
 
-If this parameter is not provided, a single position (0,0,0) will be used.
+The following are the options for specifying the position(s) of the sub-app(s):
+
+- Use the [!param](/MultiApps/TransientMultiApp/positions) parameter to specify
+  a list of position vectors directly. Each set of three values corresponds to
+  one position vector. For example, `positions = '1 2 3 4 5 6'` creates two position vectors,
+  $(1,2,3)$ and $(4,5,6)$. If multiple input files are specified via [!param](/MultiApps/TransientMultiApp/input_files),
+  then the number of positions vectors must match the number of input files.
+- Use the [!param](/MultiApps/TransientMultiApp/positions_file) parameter to specify
+  a list of files containing position vectors. If a single input file is specified
+  via [!param](/MultiApps/TransientMultiApp/input_files), then the positions files
+  are treated as if their entries were all in a single positions file. If multiple input files
+  are specified, then each positions file corresponds to an input file. Each positions
+  file must be formatted with one positions vector per row. The entries in each
+  row may be delimited by space, comma, or tab, so long as this is consistent
+  throughout the file. For example, the following creates two positions vectors, $(1,2,3)$ and $(4,5,6)$:
+
+  ```
+  1 2 3
+  4 5 6
+  ```
+- Use the [!param](/MultiApps/TransientMultiApp/positions_objects) parameter to specify
+  a list of names of [Positions](Positions/index.md) objects. If a single input file is specified
+  via [!param](/MultiApps/TransientMultiApp/input_files), then the `Positions` objects
+  are treated as if they were merged into a single `Positions` object. If multiple input files
+  are specified, then each `Positions` object corresponds to an input file.
+- Omit all of these parameters, which defaults to the single position vector $(0,0,0)$.
 
 ## Mesh optimizations
 
