@@ -33,6 +33,7 @@ public:
   /**
    * Get the L2 Error.
    */
+  using Postprocessor::getValue;
   virtual Real getValue() const override;
 
 protected:

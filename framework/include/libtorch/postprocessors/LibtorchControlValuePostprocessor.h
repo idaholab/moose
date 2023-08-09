@@ -46,6 +46,7 @@ public:
    * Returns the value of the latest response of a neural-network-based controller.
    * This means that we grab current response value stored wihtin the controller.
    */
+  using Postprocessor::getValue;
   virtual Real getValue() const override;
 
 private:

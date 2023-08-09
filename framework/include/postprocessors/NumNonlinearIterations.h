@@ -34,6 +34,7 @@ public:
   /**
    * Get the number of nonlinear iterations
    */
+  using Postprocessor::getValue;
   virtual Real getValue() const override;
 
 protected:

@@ -28,6 +28,7 @@ public:
   virtual void execute() override;
 
   /// Get number of Cracks
+  using Postprocessor::getValue;
   virtual Real getValue() const override;
 
 protected:

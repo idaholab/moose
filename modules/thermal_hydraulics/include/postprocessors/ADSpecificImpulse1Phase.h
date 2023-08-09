@@ -29,6 +29,7 @@ public:
   virtual void finalize() override;
 
 protected:
+  using Postprocessor::getValue;
   virtual Real getValue() const override;
 
   /// Number of components in the solution vector used to compute the flux

@@ -28,6 +28,7 @@ public:
   virtual void initialize() override;
   virtual void execute() override;
   virtual void threadJoin(const UserObject & uo) override;
+  using Postprocessor::getValue;
   virtual Real getValue() const override;
   virtual void finalize() override;
 

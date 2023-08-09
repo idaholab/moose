@@ -22,10 +22,11 @@ public:
 
   ParsedPostprocessor(const InputParameters & parameters);
 
-  void initialize() override final;
-  void execute() override final;
-  void finalize() override final;
-  PostprocessorValue getValue() const override final;
+  virtual void initialize() override final;
+  virtual void execute() override final;
+  virtual void finalize() override final;
+  using Postprocessor::getValue;
+  virtual PostprocessorValue getValue() const override final;
 
 private:
   /// number of postprocessors in parsed expression

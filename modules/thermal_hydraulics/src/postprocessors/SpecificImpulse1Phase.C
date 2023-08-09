@@ -79,7 +79,7 @@ SpecificImpulse1Phase::initialize()
 }
 
 Real
-SpecificImpulse1Phase::getValue()
+SpecificImpulse1Phase::getValue() const
 {
   return _value;
 }

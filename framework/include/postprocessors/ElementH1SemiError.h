@@ -25,6 +25,7 @@ public:
 
   ElementH1SemiError(const InputParameters & parameters);
 
+  using Postprocessor::getValue;
   virtual Real getValue() const override;
 
 protected:

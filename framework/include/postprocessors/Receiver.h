@@ -38,6 +38,7 @@ public:
    * Returns the value stored in _my_value
    * @return A const reference to the value of the postprocessor
    */
+  using Postprocessor::getValue;
   virtual Real getValue() const override;
 
 private:

@@ -23,5 +23,6 @@ public:
   static InputParameters validParams();
 
   InterfaceAverageVariableValuePostprocessor(const InputParameters & parameters);
+  using Postprocessor::getValue;
   virtual Real getValue() const override;
 };

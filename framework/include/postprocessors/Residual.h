@@ -24,6 +24,7 @@ public:
   /**
    * This will return the final nonlinear residual.
    */
+  using Postprocessor::getValue;
   virtual Real getValue() const override;
 
 protected:

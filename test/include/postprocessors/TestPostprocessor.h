@@ -42,6 +42,7 @@ public:
    * Returns the postprocessor depending on the 'test_type' parameter
    * @return The postprocessor value
    */
+  using Postprocessor::getValue;
   virtual Real getValue() const override;
 
 private:
