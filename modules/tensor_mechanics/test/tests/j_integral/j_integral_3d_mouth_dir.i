@@ -46,6 +46,7 @@
   output_variable = 'disp_x'
   output_q = false
   incremental = true
+  # symmetry_plane = 1
 []
 
 [Modules/TensorMechanics/Master]
