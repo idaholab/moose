@@ -1,0 +1,10 @@
+[Tests]
+  issues = '#25132'
+  design = 'FunctorNeumannBC.md'
+  [test]
+    type = Exodiff
+    input = 'functor_neumann_bc.i'
+    exodiff = 'functor_neumann_bc_out.e'
+    requirement = 'The system shall support Neumann boundary conditions defined by a functor.'
+  []
+[]
