@@ -114,6 +114,11 @@ DomainIntegralAction::validParams()
       "updates the values in the vector postprocessor which will allow the crack to grow in XFEM "
       "cutter objects that use the domainIntegral vector postprocssor values as a growth "
       "criterion.");
+  params.addParam<bool>("output_vpp",
+                        true,
+                        "Flag to control the VectorPostProcessors outputs. "
+                        "Use false to suppress the outputs to prevent redandunt csv files for each "
+                        "timestep and ring.");
   return params;
 }
 
@@ -656,6 +661,10 @@ DomainIntegralAction::act()
 
       const std::string vpp_type_name("JIntegral");
       InputParameters params = _factory.getValidParams(vpp_type_name);
+      if (!getParam<bool>("output_vpp"))
+      {
+        params.set<std::vector<OutputName>>("outputs") = {"none"};
+      }
       params.set<ExecFlagEnum>("execute_on") = EXEC_TIMESTEP_END;
       params.set<UserObjectName>("crack_front_definition") = uo_name;
       params.set<std::vector<SubdomainName>>("block") = {_blocks};
@@ -700,6 +709,10 @@ DomainIntegralAction::act()
       std::string vpp_type_name(ad_prepend + "InteractionIntegral");
 
       InputParameters params = _factory.getValidParams(vpp_type_name);
+      if (!getParam<bool>("output_vpp"))
+      {
+        params.set<std::vector<OutputName>>("outputs") = {"none"};
+      }
       if (_use_crack_front_points_provider && _used_by_xfem_to_grow_crack)
         params.set<ExecFlagEnum>("execute_on") = {EXEC_TIMESTEP_END, EXEC_NONLINEAR};
       else
