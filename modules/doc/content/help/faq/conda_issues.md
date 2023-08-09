@@ -31,6 +31,17 @@ section for what may look familiar, and follow those instructions:
     - defaults
   ```
 
+- #### Download error, Timeouts
+
+  Conda packages we produce can be quite large, and can trigger the default download timeout imposed
+  upon by Conda's download routines. You can increase this time in the following way:
+
+  ```bash
+  conda config --set remote_read_timeout_secs new_timeout
+  ```
+
+  Where `new_timeout` is an integer greater than `60` (the default in seconds).
+
 - #### command not found: mamba
 
   You have yet to install conda, or your path to it is incorrect or not set. You will need to recall
