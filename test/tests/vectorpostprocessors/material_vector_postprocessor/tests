@@ -44,7 +44,16 @@
       input = 'block-restrict-err.i'
       expect_err = 'is not defined on element'
 
-      detail = 'the material is restricted to a block not containing the desired elements.'
+      detail = 'the material is restricted to a block not containing the desired elements, or.'
+    []
+
+    [nonexistent_mat]
+      type = 'RunException'
+      input = 'all_elements.i'
+      cli_args = 'VectorPostprocessors/vpp/material=foo'
+      expect_err = 'Unable to locate active object: foo'
+
+      detail = 'the material does not exist on the mesh.'
     []
   []
 []

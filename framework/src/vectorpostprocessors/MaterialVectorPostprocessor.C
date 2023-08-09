@@ -26,7 +26,7 @@ MaterialVectorPostprocessor::validParams()
                              "elements at the indicated execution points.");
   params.addRequiredParam<MaterialName>("material",
                                         "Material for which all properties will be recorded.");
-  params.addParam<std::vector<unsigned int>>(
+  params.addParam<std::vector<dof_id_type>>(
       "elem_ids",
       "Element IDs to print data for (others are ignored). If not supplied, all "
       "elements will be printed.");
@@ -47,35 +47,28 @@ MaterialVectorPostprocessor::MaterialVectorPostprocessor(const InputParameters &
   if (mat.isBoundaryMaterial())
     mooseError(name(), ": boundary materials (i.e. ", mat.name(), ") cannot be used");
 
-  // Get list of elements from user, or use all elements if not supplied
-  if (parameters.isParamSetByUser("elem_ids"))
+  // Get list of elements from user
+  if (parameters.isParamValid("elem_ids"))
   {
-    _elem_filter = std::set(getParam<std::vector<unsigned int>>("elem_ids").begin(),
-                            getParam<std::vector<unsigned int>>("elem_ids").end());
-  }
-  else
-  {
-    // get vector of all element ids
-    std::vector<unsigned int> all_elem_ids;
-    for (const auto & elem : _mesh.getMesh().active_element_ptr_range())
-      all_elem_ids.push_back(elem->id());
-    _elem_filter = std::set<unsigned int>(all_elem_ids.begin(), all_elem_ids.end());
-  }
+    const auto & ids = getParam<std::vector<dof_id_type>>("elem_ids");
+    _elem_filter = std::set(ids.begin(), ids.end());
 
-  for (auto & id : _elem_filter)
-  {
-    auto el = _mesh.getMesh().query_elem_ptr(id);
+    // check requested materials are available
+    for (const auto & id : ids)
+    {
+      auto el = _mesh.getMesh().query_elem_ptr(id);
 
-    // We'd better have found the requested element on *some*
-    // processor.
-    bool found_elem = (el != nullptr);
-    this->comm().max(found_elem);
+      // We'd better have found the requested element on *some*
+      // processor.
+      bool found_elem = (el != nullptr);
+      this->comm().max(found_elem);
 
-    // We might not have el on this processor in a distributed mesh,
-    // but it should be somewhere and it ought to have a material
-    // defined for its subdomain
-    if (!found_elem || (el && !mat.hasBlocks(el->subdomain_id())))
-      mooseError(name(), ": material ", mat.name(), " is not defined on element ", id);
+      // We might not have el on this processor in a distributed mesh,
+      // but it should be somewhere and it ought to have a material
+      // defined for its subdomain
+      if (!found_elem || (el && !mat.hasBlocks(el->subdomain_id())))
+        mooseError(name(), ": material ", mat.name(), " is not defined on element ", id);
+    }
   }
 
   for (auto & prop : prop_names)
@@ -115,8 +108,9 @@ MaterialVectorPostprocessor::initialize()
 void
 MaterialVectorPostprocessor::execute()
 {
-  unsigned int elem_id = _current_elem->id();
-  if (_elem_filter.count(elem_id) == 0)
+  // skip execution if element not in filter, assuming filter was used
+  dof_id_type elem_id = _current_elem->id();
+  if (_elem_filter && !_elem_filter->count(elem_id))
     return;
 
   unsigned int nqp = _qrule->n_points();
