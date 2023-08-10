@@ -17,9 +17,6 @@ build:
   number: {{ build }}
 
 requirements:
-  build:
-    - python
-    - setuptools
   run:
     - {{ moose_mpich }}
     - python

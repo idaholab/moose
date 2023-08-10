@@ -28,12 +28,15 @@ build:
 requirements:
   build:
     # expose variables during build.sh to populate the activation script
-    - {{ base_mpicxx }}
+    - mpich {{ version }}
+    - mpich-mpicc {{ version }}
+    - mpich-mpicxx {{ version }}
+    - mpich-mpifort {{ version }}
   run:
-    - {{ base_mpich }}
-    - {{ base_mpicc }}
-    - {{ base_mpicxx }}
-    - {{ base_mpifort }}
+    - mpich {{ version }}
+    - mpich-mpicc {{ version }}
+    - mpich-mpicxx {{ version }}
+    - mpich-mpifort {{ version }}
     - {{ moose_libgfortran }}
     - {{ moose_libgfortran5 }}
     - {{ moose_hdf5 }}
@@ -48,11 +51,12 @@ requirements:
     - {{ moose_xorg_x11 }}      # [linux]
     - {{ moose_libglu }}        # [linux]
     - {{ moose_mesalib }}       # [linux]
+    - {{ moose_icu }}           # [linux]
     - cmake
     - make
     - libtool
     - autoconf
-    - automake 1.16.1
+    - automake 1.16.5
     - m4
     - zfp 0.5.5
     - mpi 1.0 mpich
