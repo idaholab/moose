@@ -35,6 +35,8 @@ public:
   using ElemSideQpArg = Moose::ElemSideQpArg;
   using ElemPointArg = Moose::ElemPointArg;
   using StateArg = Moose::StateArg;
+  using NodeArg = Moose::NodeArg;
+
 
   /**
    * Use this constructor when you want the object to live everywhere on the mesh
@@ -75,6 +77,8 @@ private:
   ValueType evaluate(const FaceArg & face, const StateArg &) const override;
   ValueType evaluate(const ElemQpArg &, const StateArg &) const override;
   ValueType evaluate(const ElemSideQpArg &, const StateArg &) const override;
+  ValueType evaluate(const NodeArg & elem_arg, const StateArg &) const override;
+
 
   const bool _extrapolated_boundary;
 
@@ -220,6 +224,33 @@ typename CellCenteredMapFunctor<T, Map>::ValueType
 CellCenteredMapFunctor<T, Map>::evaluate(const ElemSideQpArg &, const StateArg &) const
 {
   mooseError("not implemented");
+}
+
+template <typename T, typename Map>
+typename CellCenteredMapFunctor<T, Map>::ValueType
+CellCenteredMapFunctor<T, Map>::evaluate(const NodeArg & node_arg, const StateArg &) const
+{
+  const Node * const node = node_arg.node;
+
+  try
+  {
+    return libmesh_map_find(*this, node->id());
+  }
+  catch (libMesh::LogicError &)
+  {
+    if (!_sub_ids.empty() && !_sub_ids.count(node->subdomain_id()))
+      mooseError("Attempted to evaluate CellCenteredMapFunctor '",
+                 this->functorName(),
+                 "' with an element subdomain id of '",
+                 node->subdomain_id(),
+                 "' but that subdomain id is not one of the subdomain ids the functor is "
+                 "restricted to.");
+    else
+      mooseError("Attempted access into CellCenteredMapFunctor '",
+                 this->functorName(),
+                 "' with a key that does not yet exist in the map. Make sure to fill your "
+                 "CellCenteredMapFunctor for all elements you will attempt to access later.");
+  }
 }
 
 template <typename T, typename Map>
