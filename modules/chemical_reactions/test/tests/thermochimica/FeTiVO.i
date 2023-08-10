@@ -1,9 +1,8 @@
 [Mesh]
   [gen]
     type = GeneratedMeshGenerator
-    dim = 2
+    dim = 1
     nx = 10
-    ny = 1
   []
 []
 
@@ -23,6 +22,7 @@
   temperature = T
   uo_name = Thermochimica
   output_species_unit = mole_fraction
+  reinitialization_type = none
 []
 
 [Variables]
@@ -62,15 +62,11 @@
 [VectorPostprocessors]
   [Fe2O3]
     type = NodalValueSampler
-    variable = "SlagBsoln:Fe2O3"
-    sort_by = id
+    variable = SlagBsoln:Fe2O3
+    sort_by = x
   []
 []
 
 [Executioner]
   type = Steady
-[]
-
-[Outputs]
-  exodus = true
 []
