@@ -40,7 +40,6 @@ MaterialVectorPostprocessor::MaterialVectorPostprocessor(const InputParameters &
     _x_coords(declareVector("x")),
     _y_coords(declareVector("y")),
     _z_coords(declareVector("z"))
-
 {
   auto & mat = getMaterialByName(getParam<MaterialName>("material"), true);
   auto & prop_names = mat.getSuppliedItems();
@@ -109,7 +108,7 @@ void
 MaterialVectorPostprocessor::execute()
 {
   // skip execution if element not in filter, assuming filter was used
-  dof_id_type elem_id = _current_elem->id();
+  const auto elem_id = _current_elem->id();
   if (_elem_filter && !_elem_filter->count(elem_id))
     return;
 
