@@ -478,9 +478,9 @@ HillElastoPlasticityStressUpdateTempl<is_ad>::computeStressFinalize(
   stress_new(0, 0) = stress_output(0);
   stress_new(1, 1) = stress_output(1);
   stress_new(2, 2) = stress_output(2);
-  stress_new(0, 1) = stress_output(3);
-  stress_new(1, 2) = stress_output(4);
-  stress_new(0, 2) = stress_output(5);
+  stress_new(0, 1) = stress_new(1, 0) = stress_output(3);
+  stress_new(1, 2) = stress_new(2, 1) = stress_output(4);
+  stress_new(0, 2) = stress_new(2, 0) = stress_output(5);
 }
 
 template <bool is_ad>
