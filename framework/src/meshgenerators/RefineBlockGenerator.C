@@ -100,6 +100,9 @@ RefineBlockGenerator::generate()
         }
       }
     }
+    // Refinement needs to be done on all ranks at the same time
+    mesh_ptr->comm().max(found_element_to_refine);
+
     if (found_element_to_refine)
     {
       MeshRefinement refinedmesh(*mesh_ptr);
