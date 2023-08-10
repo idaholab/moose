@@ -108,5 +108,6 @@
   file_base = 'adjoint'
   [exodus]
     type = ExodusOptimizationSteady
+    execute_on = 'TIMESTEP_END'
   []
 []

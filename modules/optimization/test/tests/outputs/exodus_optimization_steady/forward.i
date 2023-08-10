@@ -87,4 +87,8 @@
 [Outputs]
   console = false
   file_base = 'forward'
+  [exo]
+    type = ExodusOptimizationSteady
+    execute_on = 'TIMESTEP_END'
+  []
 []

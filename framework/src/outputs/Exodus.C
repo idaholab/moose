@@ -254,22 +254,23 @@ Exodus::outputSetup()
   }
   else
   {
-    // Increment file counter
-    incrementFileCounter();
-
     // Disable file appending and reset exodus file number count
     _exodus_io_ptr->append(false);
-    _exodus_num = 1;
+
+    // Customize file output
+    customizeFileOutput();
   }
 
   setOutputDimensionInExodusWriter(*_exodus_io_ptr, *_mesh_ptr, _output_dimension);
 }
 
 void
-Exodus::incrementFileCounter()
+Exodus::customizeFileOutput()
 {
   if (_exodus_mesh_changed || _sequence)
     _file_num++;
+
+  _exodus_num = 1;
 }
 
 void

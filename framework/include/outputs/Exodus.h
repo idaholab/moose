@@ -130,9 +130,9 @@ protected:
   virtual void outputReporters() override;
 
   /**
-   * Increment file counter
+   * Customizes file output settings.
    */
-  virtual void incrementFileCounter();
+  virtual void customizeFileOutput();
 
   /**
    * Returns the current filename, this method handles the -s000 suffix
@@ -170,6 +170,9 @@ protected:
   /// Sequence flag, if true each timestep is written to a new file
   bool _sequence;
 
+  /// Count of outputs per exodus file
+  unsigned int & _exodus_num;
+
 private:
   /// Handle the call to mesh renumbering in libmesh's ExodusIO on non-contiguously numbered meshes
   void handleExodusIOMeshRenumbering();
@@ -181,9 +184,6 @@ private:
    * @see _initialized
    */
   void outputEmptyTimestep();
-
-  /// Count of outputs per exodus file
-  unsigned int & _exodus_num;
 
   /// Flag indicating MOOSE is recovering via --recover command-line option
   bool _recovering;

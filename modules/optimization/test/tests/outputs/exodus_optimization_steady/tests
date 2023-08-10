@@ -6,7 +6,7 @@
     max_threads = 1
     # Optimize executioner does not support multiple threads
     input = main.i
-    exodiff = adjoint.e-s007
+    exodiff = adjoint.e
     rel_err = 1.0e-5
     abs_zero = 1.0e-5
     # steady solve
@@ -22,7 +22,7 @@
     type = Exodiff
     input = main_auto_adjoint.i
     cli_args = 'MultiApps/forward/input_files=forward_and_adjoint_iteration_output.i'
-    exodiff = 'main_auto_adjoint_out_forward0_exodus.e-s005'
+    exodiff = 'main_auto_adjoint_out_forward0_exodus.e'
     # Optimize executioner does not support multiple threads
     max_threads = 1
     # steady solve

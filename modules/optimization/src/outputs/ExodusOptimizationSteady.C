@@ -16,6 +16,7 @@ ExodusOptimizationSteady::validParams()
 {
   // Get the base class parameters
   InputParameters params = Exodus::validParams();
+  params.set<ExecFlagEnum>("execute_on") = EXEC_TIMESTEP_END;
 
   // Return the InputParameters
   return params;
@@ -31,9 +32,17 @@ ExodusOptimizationSteady::ExodusOptimizationSteady(const InputParameters & param
 }
 
 void
-ExodusOptimizationSteady::incrementFileCounter()
+ExodusOptimizationSteady::customizeFileOutput()
 {
-  _file_num = _steady_exec->getIterationNumberOutput();
+  if (_exodus_mesh_changed || _sequence)
+    _file_num++;
+
+  _exodus_num = _steady_exec->getIterationNumberOutput() + 1;
+
+  if (_exodus_num == 1)
+    _exodus_io_ptr->append(false);
+  else
+    _exodus_io_ptr->append(true);
 }
 
 Real

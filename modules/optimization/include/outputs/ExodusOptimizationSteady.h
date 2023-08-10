@@ -28,9 +28,9 @@ public:
 
 protected:
   /**
-   * Increment file counter with steady and adjoint iteration number
+   * Customize file output with steady and adjoint iteration number
    */
-  virtual void incrementFileCounter() override;
+  void customizeFileOutput() override;
 
   /**
    * Get time for output (i.e. iteration number for optimization solves).
