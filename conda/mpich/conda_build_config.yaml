@@ -1,24 +1,3 @@
-#### Compilers
-base_mpich:
-  - mpich 4.0.3                                             # [linux]
-  - mpich 4.0.3                                             # [not arm64 and osx]
-  - mpich 4.0.3                                             # [arm64]
-
-base_mpicc:
-  - mpich-mpicc 4.0.3                                       # [linux]
-  - mpich-mpicc 4.0.3                                       # [not arm64 and osx]
-  - mpich-mpicc 4.0.3                                       # [arm64]
-
-base_mpicxx:
-  - mpich-mpicxx 4.0.3                                      # [linux]
-  - mpich-mpicxx 4.0.3                                      # [not arm64 and osx]
-  - mpich-mpicxx 4.0.3                                      # [arm64]
-
-base_mpifort:
-  - mpich-mpifort 4.0.3                                     # [linux]
-  - mpich-mpifort 4.0.3                                     # [not arm64 and osx]
-  - mpich-mpifort 4.0.3                                     # [arm64]
-
 moose_libgfortran:
   - libgfortran-ng 13.1.0 h69a702a_0                        # [linux]
   - libgfortran 5.0.0 11_3_0_h97931a8_31                    # [not arm64 and osx]
@@ -34,15 +13,20 @@ moose_ld64:                                                 # [osx]
   - ld64_osx-arm64 609                                      # [arm64]
 
 moose_hdf5:
-  - hdf5 1.14.0 mpi_mpich_h18663c6_3                        # [not arm64 and osx]
-  - hdf5 1.14.0 mpi_mpich_hcccbd3f_3                        # [linux]
-  - hdf5 1.14.0 mpi_mpich_hb001883_3                        # [arm64]
+  - hdf5 1.12.2 mpi_mpich_h5d83325_0                        # [linux]
+  - hdf5 1.12.2 mpi_mpich_hc154f39_0                        # [not arm64 and osx]
+  - hdf5 1.12.2 mpi_mpich_h16e63df_0                        # [arm64]
 
-# Paraview (peacock-trame) constraints/compatibility
+### Paraview (peacock) constraints/compatibility
 moose_krb5:
-  - krb5 1.20.1 h049b76e_0                                  # [not arm64 and osx]
   - krb5 1.20.1 h81ceb04_0                                  # [linux]
+  - krb5 1.20.1 h049b76e_0                                  # [not arm64 and osx]
   - krb5 1.20.1 h69eda48_0                                  # [arm64]
+
+moose_icu:                                                  # [linux]
+  - icu 70.1                                                # [linux]
+
+### End Paraview constraints
 
 mpi:
   - moose-mpich
@@ -67,13 +51,13 @@ moose_mesa_libgl:                                           # [linux]
   - mesa-libgl-devel-cos7-x86_64 18.3.4                     # [linux]
 
 moose_xorg_x11:                                             # [linux]
-  - xorg-x11-proto-devel-cos7-x86_64 2018.4                 # [linux]
+  - xorg-x11-proto-devel-cos7-x86_64 2018.4 h9b0a68f_1105   # [linux]
 
 moose_libglu:                                               # [linux]
   - libglu 9.0.0                                            # [linux]
 
 moose_mesalib:                                              # [linux]
-  - mesalib 18.3.1                                          # [linux]
+  - mesalib 23.0.2                                          # [linux]
 
 #### Darwin SDK SYSROOT
 CONDA_BUILD_SYSROOT:                                        # [osx]
