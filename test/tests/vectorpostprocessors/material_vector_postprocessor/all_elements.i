@@ -1,9 +1,9 @@
-# test that all scalar material properties are properly recorded in basic usage.
+# test that all scalar material properties are properly recorded for all elements.
 [Mesh]
   type = GeneratedMesh
   dim = 2
-  nx = 10
-  ny = 10
+  nx = 2
+  ny = 3
   allow_renumbering = false
 []
 
@@ -46,7 +46,6 @@
   [vpp]
     type = MaterialVectorPostprocessor
     material = 'mat'
-    elem_ids = '3 4 7 42 88'
   []
 []
 

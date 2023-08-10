@@ -10,7 +10,23 @@
     requirement = 'The system shall be able to output material properties calculated at quadrature '
                   'points on user-defined elements in a comma separated format.'
   []
+  [all_elements]
+    type = 'CSVDiff'
+    input = 'all_elements.i'
+    csvdiff = 'all_elements_out_vpp_0001.csv all_elements_out_vpp_0002.csv'
 
+    requirement = 'The system shall be able to output material properties calculated at quadrature '
+                  'points on all active elements.'
+  []
+  [all_elements_block_restricted]
+    type = 'CSVDiff'
+    input = 'all_elements_block_restricted.i'
+    csvdiff = 'all_elements_block_restricted_out_vpp_0001.csv all_elements_block_restricted_out_vpp_0002.csv'
+
+    requirement = 'The system shall be able to output material properties calculated at quadrature '
+                  'points on all active elements within the specified subdomains.'  
+  []
+  
   [errors]
     requirement = 'The system shall issue an error if material output samples are attempted for '
                   'elements:'
@@ -28,7 +44,16 @@
       input = 'block-restrict-err.i'
       expect_err = 'is not defined on element'
 
-      detail = 'the material is restricted to a block not containing the desired elements.'
+      detail = 'the material is restricted to a block not containing the desired elements, or.'
+    []
+
+    [nonexistent_mat]
+      type = 'RunException'
+      input = 'all_elements.i'
+      cli_args = 'VectorPostprocessors/vpp/material=foo'
+      expect_err = 'Unable to locate active object: foo'
+
+      detail = 'the material does not exist on the mesh.'
     []
   []
 []
