@@ -1285,7 +1285,16 @@ SubProblem::havePRefinement(const bool disable_lagrange_p_refinement)
   {
     auto & eq = es();
     for (const auto i : make_range(eq.n_systems()))
-      eq.get_system(i).get_dof_map().dont_p_refine(LAGRANGE);
+    {
+      auto & system = eq.get_system(i);
+      auto & dof_map = system.get_dof_map();
+      for (const auto vg : make_range(system.n_variable_groups()))
+      {
+        const auto & var_group = system.variable_group(vg);
+        if (var_group.type().family == LAGRANGE)
+          dof_map.should_p_refine(vg, false);
+      }
+    }
   }
 
   _have_p_refinement = true;
