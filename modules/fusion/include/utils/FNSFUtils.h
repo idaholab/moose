@@ -24,11 +24,11 @@ extern const Real b;
 /**
  * Parametric definition of plasma shape (x-z plane cross-section)
  */
-Point torus(Real xi, Real R0 = 4.8, Real a = 1.2, Real tau = 0.63, Real k = 2.2);
+Point torus(Real xi);
 /**
  * Orthogonal vector
  */
-Point orthogonal(Real xi, Real R0 = 4.8, Real a = 1.2, Real tau = 0.63, Real k = 2.2);
+Point orthogonal(Real xi);
 
 /**
  * Convert (r, z) coordinates to (xi, depth)

@@ -40,13 +40,9 @@ Extrude {{0, 1, 0}, {0, 0, 0}, 11.25*(Pi/180)} {
 Extrude {{0, 1, 0}, {0, 0, 0}, -11.25*(Pi/180)} {
   Surface{1}; Surface{2}; Layers{3}; Recombine;
 }
-//+
-Physical Surface("left", 34) += {16, 20};
-//+
-Physical Surface("right", 35) += {7, 11};
-//+
+
 Physical Volume("Blanket", 36) = {3, 1, 2, 4};
-//+
 Physical Surface("front", 37) = {4, 13, 19, 10};
-//+
 Physical Surface("back", 38) = {15, 6, 8, 17};
+Physical Surface("sides", 39) = {16, 20, 7, 11};
+Physical Surface("ends", 40) = {3, 12, 18, 9};

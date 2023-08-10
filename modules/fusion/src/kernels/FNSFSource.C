@@ -12,6 +12,13 @@
 
 using namespace FNSF;
 
+/*
+ * This class is the base for:
+ * - FNSFHeatSource 
+ * - FNSFTritiumSource
+ * 
+ * So, does not need to be registered explicitly.
+ */
 // registerMooseObject("MooseApp", FNSFSource);
 
 std::pair<int, int>

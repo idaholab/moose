@@ -1,0 +1,7 @@
+[Tests]
+  [FNSFTritiumSource]
+    type = 'Exodiff'
+    input = 'FNSFTritiumSource.i'
+    exodiff = 'FNSFTritiumSource_out.e'
+  []
+[]
