@@ -54,6 +54,11 @@ MeshRepairGenerator::generate()
 {
   std::unique_ptr<MeshBase> mesh = std::move(_input);
   mesh->prepare_for_use();
+
+  // Blanket ban on distributed. This can be relaxed for some operations if needed
+  if (!mesh->is_replicated())
+    mooseError("MeshRepairGenerator is not implemented for distributed meshes");
+
   if (_fix_overlapping_nodes)
   {
     auto pl = mesh->sub_point_locator();
