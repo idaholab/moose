@@ -113,7 +113,7 @@ public:
   /**
    * Returns the amount of times the AppFactory created the named App-type
    */
-  size_t createdAppCount(const std::string & app_type) const;
+  std::size_t createdAppCount(const std::string & app_type) const;
 
   /**
    * Returns the map of object name to a function pointer for building said object's
