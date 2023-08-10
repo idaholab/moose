@@ -1,3 +1,5 @@
+#This test was created by Fande and test a simple diffusion case against a gold file.
+
 [Mesh]
   type = GeneratedMesh
   dim = 2

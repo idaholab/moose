@@ -1,3 +1,7 @@
+# This test uses the custom kernel "FNSFHeatSource" to project a temperature on an outboard fusion blanket. The test projects a vlaue of 1 on the first half of the fusion blanket near the
+# first wall and a value of 2 near the back wall. The results where visually confirmed in paraview and used as a gold file for testing. There is also a manufactured solution for this test
+# with a mms.i input file that uses the custom kernal. 
+
 [Mesh]
   [msh]
     type = FileMeshGenerator

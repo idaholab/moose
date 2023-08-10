@@ -1,3 +1,6 @@
+# This tests uses the custom boundary condition "INFVInletVelcityNormalBC" that provides and inlet boundry condition to the normal for velocity. This case uses the object 
+# for the velocity variable alongside a 1D line. The results from this case was visually confirmed in paraview and used as a gold file for testing.
+
 [Mesh]
   [msh]
     type = GeneratedMeshGenerator

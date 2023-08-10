@@ -1,3 +1,6 @@
+# This test was already in place from Fande's work. It implements an interface boundary condition to make sure the objects works as intended.
+# Currently the only test is a run app test to make sure the input file runs. 
+
 [Mesh]
   [gen]
     type = GeneratedMeshGenerator

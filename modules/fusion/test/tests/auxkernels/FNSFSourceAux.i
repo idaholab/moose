@@ -1,3 +1,7 @@
+# This test uses the custom auxkernel "FNSFSourceAux" to project a coupled force onto an outboard blanket. It projects a value of 1 on the first half of the blanket
+# near the first wall and a value of 2 onto the second half of the blanket near the back wall. The results where visually checked in paraview and an exodiff test was
+# put into place using the visually confirmed output file as the gold file.
+
 [Mesh]
   [msh]
     type = FileMeshGenerator

@@ -1,3 +1,7 @@
+# This test uses the custom initial condition "FNSFHeatIC" which projects an initial condition onto the outboard fusion blanket. This test projects an intial
+# condtion of 1 on half of the blanket near the frist wall and a initial condition of 2 alongside the back wall. The results where visually confirmed in paraview
+# and used as a gold fild for testing.
+
 [Mesh]
   [msh]
     type = FileMeshGenerator

@@ -1,3 +1,5 @@
+# This was one of the test already put in place by Fande. The test uses the custom 1D csv file channel and compares it with a gold file.0
+
 T_in = 658.15 # K
 p_out = 8e+6 # Pa
 

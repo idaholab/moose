@@ -1,3 +1,6 @@
+# This test uses the custom object "FNSFOBExpHeatIC" to project an initial condition onto the outboard fusion blanket in the shape of a decay function based on distance
+# depth of the blanket. The obeject was used and visually verified and the results was used as a gold file for testing.
+
 [Mesh]
   [msh]
     type = FileMeshGenerator
