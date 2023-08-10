@@ -9,10 +9,12 @@
 
 #include "AnnularMeshGenerator.h"
 #include "CastUniquePointer.h"
+// #include "MooseEnum.h"
 
 #include "libmesh/replicated_mesh.h"
 #include "libmesh/face_quad4.h"
 #include "libmesh/face_tri3.h"
+#include "libmesh/mesh_modification.h"
 
 registerMooseObject("MooseApp", AnnularMeshGenerator);
 
