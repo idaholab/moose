@@ -24,11 +24,12 @@ public:
   RichardsPlotQuantity(const InputParameters & parameters);
   virtual ~RichardsPlotQuantity();
 
-  virtual void initialize();
-  virtual void execute();
+  virtual void initialize() override;
+  virtual void execute() override;
 
   /// returns the value of the RichardsSumQuantity
-  virtual PostprocessorValue getValue();
+  using Postprocessor::getValue;
+  virtual PostprocessorValue getValue() const override;
 
 protected:
   /// the RichardsSumQuantity userobject

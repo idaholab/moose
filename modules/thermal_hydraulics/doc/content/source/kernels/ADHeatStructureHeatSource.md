@@ -1,20 +1,27 @@
 # ADHeatStructureHeatSource
 
-!alert construction title=Undocumented Class
-The ADHeatStructureHeatSource has not been documented. The content listed below should be used as a starting point for
-documenting the class, which includes the typical automatic documentation associated with a
-MooseObject; however, what is contained is ultimately determined by what is necessary to make the
-documentation clear for users.
-
 !syntax description /Kernels/ADHeatStructureHeatSource
 
-## Overview
+The equation term modeled by this kernel is:
 
-!! Replace these lines with information regarding the ADHeatStructureHeatSource object.
+!equation
+\text{scale} \dfrac{\text{power} * \text{power shape}(x,t)}{N_{units} \text{power shape integral}}
 
-## Example Input File Syntax
+where `power` is a scalar variable set using the [!param](/Kernels/ADHeatStructureHeatSource/total_power) parameter,
+`power shape` is function set using the [!param](/Kernels/ADHeatStructureHeatSource/power_shape_function) parameter,
+`scale` is a controllable scaling factor and $N_{units}$ is the number of heat structures modeled.
 
-!! Describe and include an example of how to use the ADHeatStructureHeatSource object.
+This kernel offers several options (scalar, scalar variable, function) to specify the value of the power. To use only one,
+set all the others to `1`.
+
+!alert note
+If the function spatial shape is not integrated exactly by the quadrature, specifying the
+[!param](/Kernels/ADHeatStructureHeatSource/power_shape_integral_pp) parameter will ensure that
+power is conserved.
+
+!alert note
+In THM, most kernels are added automatically by components. This kernel is created by the
+[HeatSourceFromTotalPower.md] component which is used to add heat sources to heat structures.
 
 !syntax parameters /Kernels/ADHeatStructureHeatSource
 

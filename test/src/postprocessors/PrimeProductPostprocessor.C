@@ -28,7 +28,7 @@ PrimeProductPostprocessor::PrimeProductPostprocessor(const InputParameters & par
 }
 
 Real
-PrimeProductPostprocessor::getValue()
+PrimeProductPostprocessor::getValue() const
 {
   return _prime_product.getProduct();
 }

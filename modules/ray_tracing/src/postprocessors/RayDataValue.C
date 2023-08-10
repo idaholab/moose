@@ -81,7 +81,7 @@ RayDataValue::initialize()
 }
 
 Real
-RayDataValue::getValue()
+RayDataValue::getValue() const
 {
   RayID id;
   if (_ray_name)

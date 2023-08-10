@@ -46,7 +46,7 @@ TestControlPointPP::execute()
 }
 
 PostprocessorValue
-TestControlPointPP::getValue()
+TestControlPointPP::getValue() const
 {
   return _scale_factor * _function.value(_t, _point);
 }

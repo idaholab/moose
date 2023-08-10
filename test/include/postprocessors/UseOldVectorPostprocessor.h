@@ -23,7 +23,8 @@ public:
 
   virtual void initialize() override {}
   virtual void execute() override;
-  virtual PostprocessorValue getValue() override;
+  using Postprocessor::getValue;
+  virtual PostprocessorValue getValue() const override;
 
 private:
   /// The reference to the _current_ value of a coupled VectorPostprocessor

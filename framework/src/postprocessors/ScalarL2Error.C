@@ -44,7 +44,7 @@ ScalarL2Error::execute()
 }
 
 Real
-ScalarL2Error::getValue()
+ScalarL2Error::getValue() const
 {
   _var.reinit();
   Real diff = (_var.sln()[0] - _func.value(_t));

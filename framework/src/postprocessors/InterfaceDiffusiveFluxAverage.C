@@ -45,7 +45,7 @@ InterfaceDiffusiveFluxAverageTempl<is_ad>::execute()
 
 template <bool is_ad>
 Real
-InterfaceDiffusiveFluxAverageTempl<is_ad>::getValue()
+InterfaceDiffusiveFluxAverageTempl<is_ad>::getValue() const
 {
   return _integral_value / _volume;
 }

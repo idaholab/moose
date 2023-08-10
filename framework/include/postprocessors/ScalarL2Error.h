@@ -33,7 +33,8 @@ public:
   /**
    * Get the L2 Error.
    */
-  virtual Real getValue() override;
+  using Postprocessor::getValue;
+  virtual Real getValue() const override;
 
 protected:
   MooseVariableScalar & _var;

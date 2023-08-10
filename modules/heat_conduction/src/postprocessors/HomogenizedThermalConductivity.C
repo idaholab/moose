@@ -80,7 +80,7 @@ HomogenizedThermalConductivity::execute()
 }
 
 Real
-HomogenizedThermalConductivity::getValue()
+HomogenizedThermalConductivity::getValue() const
 {
   return _integral_value / _volume;
 }

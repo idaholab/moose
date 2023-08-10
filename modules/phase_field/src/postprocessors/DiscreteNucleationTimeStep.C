@@ -92,7 +92,7 @@ DiscreteNucleationTimeStep::DiscreteNucleationTimeStep(const InputParameters & p
 }
 
 PostprocessorValue
-DiscreteNucleationTimeStep::getValue()
+DiscreteNucleationTimeStep::getValue() const
 {
   // check if a nucleus insertion has occurred...
   if (_changes_made.first > 0)

@@ -25,7 +25,7 @@ ElementSidePP::ElementSidePP(const InputParameters & parameters)
 }
 
 Real
-ElementSidePP::getValue()
+ElementSidePP::getValue() const
 {
   return _sidepp;
 }

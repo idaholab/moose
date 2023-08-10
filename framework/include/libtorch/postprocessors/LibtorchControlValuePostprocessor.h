@@ -46,7 +46,8 @@ public:
    * Returns the value of the latest response of a neural-network-based controller.
    * This means that we grab current response value stored wihtin the controller.
    */
-  virtual Real getValue() override;
+  using Postprocessor::getValue;
+  virtual Real getValue() const override;
 
 private:
   unsigned int _signal_index;

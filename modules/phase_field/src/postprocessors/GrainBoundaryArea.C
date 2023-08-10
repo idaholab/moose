@@ -57,7 +57,7 @@ GrainBoundaryArea::computeQpIntegral()
 }
 
 Real
-GrainBoundaryArea::getValue()
+GrainBoundaryArea::getValue() const
 {
   return ElementIntegralPostprocessor::getValue() / _factor;
 }

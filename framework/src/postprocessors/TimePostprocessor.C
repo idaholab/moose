@@ -26,7 +26,7 @@ TimePostprocessor::TimePostprocessor(const InputParameters & parameters)
 }
 
 Real
-TimePostprocessor::getValue()
+TimePostprocessor::getValue() const
 {
   return _feproblem.time();
 }

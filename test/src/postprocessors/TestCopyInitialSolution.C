@@ -53,7 +53,7 @@ TestCopyInitialSolution::execute()
 }
 
 Real
-TestCopyInitialSolution::getValue()
+TestCopyInitialSolution::getValue() const
 {
   if (_value)
     mooseError("Solutions are equal, test passed!");

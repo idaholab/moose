@@ -121,7 +121,7 @@ MaterialTimeStepPostprocessor::execute()
 }
 
 Real
-MaterialTimeStepPostprocessor::getValue()
+MaterialTimeStepPostprocessor::getValue() const
 {
   if (_count == 0 || !_use_elements_changed)
     return _matl_value;

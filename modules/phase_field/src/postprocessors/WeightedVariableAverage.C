@@ -54,7 +54,7 @@ WeightedVariableAverage::finalize()
 }
 
 PostprocessorValue
-WeightedVariableAverage::getValue()
+WeightedVariableAverage::getValue() const
 {
   if (_weight_integral == 0.0)
     return 0.0;

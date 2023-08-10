@@ -63,7 +63,7 @@ RayleighNumber::RayleighNumber(const InputParameters & parameters)
 }
 
 Real
-RayleighNumber::getValue()
+RayleighNumber::getValue() const
 {
   Real drho;
   if (_rho_min)

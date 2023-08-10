@@ -40,7 +40,7 @@ LotsOfRaysExpectedDistance::LotsOfRaysExpectedDistance(const InputParameters & p
 }
 
 Real
-LotsOfRaysExpectedDistance::getValue()
+LotsOfRaysExpectedDistance::getValue() const
 {
   return _study.expectedDistance();
 }

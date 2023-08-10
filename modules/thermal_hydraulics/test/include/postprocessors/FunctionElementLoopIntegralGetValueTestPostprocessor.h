@@ -23,7 +23,8 @@ public:
 
   virtual void initialize() override;
   virtual void execute() override;
-  virtual PostprocessorValue getValue() override;
+  using Postprocessor::getValue;
+  virtual PostprocessorValue getValue() const override;
 
 protected:
   /// User object to get value from

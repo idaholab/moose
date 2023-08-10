@@ -28,7 +28,8 @@ public:
 
   virtual void initialize() override;
   virtual void finalize() override;
-  virtual Real getValue() override;
+  using Postprocessor::getValue;
+  virtual Real getValue() const override;
   virtual void execute() override;
 
   // GrainTrackerInterface methods

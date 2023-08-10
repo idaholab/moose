@@ -39,7 +39,7 @@ DifferencePostprocessor::execute()
 }
 
 PostprocessorValue
-DifferencePostprocessor::getValue()
+DifferencePostprocessor::getValue() const
 {
   return _value1 - _value2;
 }

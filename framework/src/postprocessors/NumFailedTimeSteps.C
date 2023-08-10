@@ -34,7 +34,7 @@ NumFailedTimeSteps::NumFailedTimeSteps(const InputParameters & parameters)
 }
 
 Real
-NumFailedTimeSteps::getValue()
+NumFailedTimeSteps::getValue() const
 {
   return _timestepper->numFailures();
 }

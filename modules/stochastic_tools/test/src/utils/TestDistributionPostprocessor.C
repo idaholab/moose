@@ -35,7 +35,7 @@ TestDistributionPostprocessor::TestDistributionPostprocessor(const InputParamete
 }
 
 PostprocessorValue
-TestDistributionPostprocessor::getValue()
+TestDistributionPostprocessor::getValue() const
 {
   if (_distribution_method == "pdf")
     return _distribution.pdf(_value);

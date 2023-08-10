@@ -24,7 +24,8 @@ public:
 
   virtual void execute() override {}
 
-  virtual PostprocessorValue getValue() override;
+  using Postprocessor::getValue;
+  virtual PostprocessorValue getValue() const override;
 
 protected:
   const CavityPressureUserObject & _cpuo;

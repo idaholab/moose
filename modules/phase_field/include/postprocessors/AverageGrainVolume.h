@@ -31,7 +31,8 @@ public:
   virtual void initialize() override;
   virtual void execute() override;
   virtual void finalize() override;
-  virtual Real getValue() override;
+  using Postprocessor::getValue;
+  virtual Real getValue() const override;
 
 protected:
   void accumulateVolumes(const std::vector<unsigned int> & var_to_features,

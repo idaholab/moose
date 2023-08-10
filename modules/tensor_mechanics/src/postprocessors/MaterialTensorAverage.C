@@ -47,7 +47,7 @@ MaterialTensorAverageTempl<is_ad>::execute()
 
 template <bool is_ad>
 Real
-MaterialTensorAverageTempl<is_ad>::getValue()
+MaterialTensorAverageTempl<is_ad>::getValue() const
 {
   return _integral_value / _volume;
 }

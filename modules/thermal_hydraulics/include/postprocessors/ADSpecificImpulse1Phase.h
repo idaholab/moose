@@ -29,7 +29,8 @@ public:
   virtual void finalize() override;
 
 protected:
-  virtual Real getValue() override;
+  using Postprocessor::getValue;
+  virtual Real getValue() const override;
 
   /// Number of components in the solution vector used to compute the flux
   const unsigned int _n_components;
@@ -68,6 +69,9 @@ protected:
   Real _mass_flow_rate;
   /// total thrust
   Real _thrust;
+
+  /// The value of this post-processor
+  Real _value;
 
 public:
   static InputParameters validParams();

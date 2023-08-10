@@ -46,7 +46,7 @@ Receiver::Receiver(const InputParameters & params)
 }
 
 Real
-Receiver::getValue()
+Receiver::getValue() const
 {
   // Return the stored value (references stored value in getPostprocessorData)
   return _my_value;

@@ -50,7 +50,7 @@ LinearCombinationPostprocessor::execute()
 }
 
 PostprocessorValue
-LinearCombinationPostprocessor::getValue()
+LinearCombinationPostprocessor::getValue() const
 {
   Real linear_combination = _b_value;
   for (unsigned int i = 0; i < _n_pp; i++)

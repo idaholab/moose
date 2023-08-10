@@ -60,7 +60,7 @@ TestSerializedSolution::execute()
 }
 
 Real
-TestSerializedSolution::getValue()
+TestSerializedSolution::getValue() const
 {
   return _sum;
 }

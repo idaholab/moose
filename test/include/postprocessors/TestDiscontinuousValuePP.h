@@ -27,16 +27,17 @@ public:
 
   virtual ~TestDiscontinuousValuePP(){};
 
-  virtual void initialize(){};
+  virtual void initialize() override{};
 
-  virtual void execute(){};
+  virtual void execute() override{};
 
-  virtual void finalize(){};
+  virtual void finalize() override{};
 
   /// initialSetup gets the pointer to the solution UO
-  virtual void initialSetup();
+  virtual void initialSetup() override;
 
-  virtual Real getValue();
+  using Postprocessor::getValue;
+  virtual Real getValue() const override;
 
 protected:
   /// The variable name from which a values is to be extracted

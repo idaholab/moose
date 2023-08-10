@@ -38,7 +38,7 @@ ElementL2FunctorErrorTempl<is_ad>::ElementL2FunctorErrorTempl(const InputParamet
 
 template <bool is_ad>
 Real
-ElementL2FunctorErrorTempl<is_ad>::getValue()
+ElementL2FunctorErrorTempl<is_ad>::getValue() const
 {
   return std::sqrt(ElementIntegralPostprocessor::getValue());
 }

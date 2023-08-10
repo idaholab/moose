@@ -37,9 +37,8 @@ InternalSideIntegralPostprocessor::execute()
 }
 
 Real
-InternalSideIntegralPostprocessor::getValue()
+InternalSideIntegralPostprocessor::getValue() const
 {
-
   return _integral_value;
 }
 

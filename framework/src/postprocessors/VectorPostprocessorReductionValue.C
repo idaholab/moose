@@ -44,7 +44,7 @@ VectorPostprocessorReductionValue::VectorPostprocessorReductionValue(
 }
 
 Real
-VectorPostprocessorReductionValue::getValue()
+VectorPostprocessorReductionValue::getValue() const
 {
   Real r = 0;
   switch (_value_type)

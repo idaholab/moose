@@ -39,7 +39,7 @@ TestDistributionDirectPostprocessor::TestDistributionDirectPostprocessor(
 }
 
 PostprocessorValue
-TestDistributionDirectPostprocessor::getValue()
+TestDistributionDirectPostprocessor::getValue() const
 {
   if (_distribution_method == "pdf")
     return _distribution.pdf(_value, _mean, _std_dev);

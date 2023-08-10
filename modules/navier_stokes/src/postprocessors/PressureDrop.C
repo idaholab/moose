@@ -305,7 +305,7 @@ PressureDrop::finalize()
 }
 
 Real
-PressureDrop::getValue()
+PressureDrop::getValue() const
 {
   if (MooseUtils::absoluteFuzzyEqual(_weight_upstream, 0) ||
       MooseUtils::absoluteFuzzyEqual(_weight_downstream, 0))

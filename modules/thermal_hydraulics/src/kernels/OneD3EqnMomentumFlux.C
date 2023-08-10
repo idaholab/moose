@@ -24,7 +24,7 @@ OneD3EqnMomentumFlux::validParams()
   params.addRequiredParam<MaterialPropertyName>("rho", "Density material property");
   params.addRequiredParam<MaterialPropertyName>("vel", "Velocity material property");
   params.addRequiredParam<MaterialPropertyName>("p", "Pressure material property");
-  params.addClassDescription("Momentum flux for 1-phase flow");
+  params.addClassDescription("Computes a momentum flux term for 1-phase flow");
   return params;
 }
 

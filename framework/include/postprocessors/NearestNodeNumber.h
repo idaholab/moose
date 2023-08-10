@@ -24,7 +24,8 @@ public:
 
   virtual void execute() override{};
   virtual void initialize() override{};
-  virtual PostprocessorValue getValue() override;
+  using Postprocessor::getValue;
+  virtual PostprocessorValue getValue() const override;
 
 private:
   /// The nearest node number UserObject that does all the work

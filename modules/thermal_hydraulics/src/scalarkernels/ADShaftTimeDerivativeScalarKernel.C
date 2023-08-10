@@ -19,7 +19,7 @@ ADShaftTimeDerivativeScalarKernel::validParams()
   InputParameters params = ADScalarTimeDerivative::validParams();
   params.addRequiredParam<std::vector<UserObjectName>>("uo_names",
                                                        "Names of shaft-connectable user objects");
-
+  params.addClassDescription("Adds a time derivative term to the shaft ODE");
   params.set<MultiMooseEnum>("vector_tags") = "time";
   params.set<MultiMooseEnum>("matrix_tags") = "system time";
 

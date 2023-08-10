@@ -1,20 +1,19 @@
 # OneD3EqnMomentumFriction
 
-!alert construction title=Undocumented Class
-The OneD3EqnMomentumFriction has not been documented. The content listed below should be used as a starting point for
-documenting the class, which includes the typical automatic documentation associated with a
-MooseObject; however, what is contained is ultimately determined by what is necessary to make the
-documentation clear for users.
-
 !syntax description /Kernels/OneD3EqnMomentumFriction
 
-## Overview
+The friction loss term in the momentum equation strong form is:
 
-!! Replace these lines with information regarding the OneD3EqnMomentumFriction object.
+!equation
+\dfrac{1}{2 D_h} f_D \rho u |u| A
 
-## Example Input File Syntax
+where $\rho$ is the density, $A$ the area of the component, $u$ the one-dimensional velocity, $D_h$
+the hydraulic diameter and $f_D$ the Darcy friction factor.
 
-!! Describe and include an example of how to use the OneD3EqnMomentumFriction object.
+!alert note
+In THM, most kernels are added automatically by components. This kernel is no-longer in use, having
+been replaced by its [AD](automatic_differentiation/index.md) counterpart [ADOneD3EqnMomentumFriction.md],
+designed to provide numerically exact contributions to the Jacobian.
 
 !syntax parameters /Kernels/OneD3EqnMomentumFriction
 

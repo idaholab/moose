@@ -37,7 +37,7 @@ CavityPressurePostprocessor::CavityPressurePostprocessor(const InputParameters &
 }
 
 PostprocessorValue
-CavityPressurePostprocessor::getValue()
+CavityPressurePostprocessor::getValue() const
 {
   return _cpuo.getValue(_quantity);
 }

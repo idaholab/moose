@@ -67,7 +67,7 @@ LevelSetVolume::finalize()
 }
 
 Real
-LevelSetVolume::getValue()
+LevelSetVolume::getValue() const
 {
   return _volume;
 }

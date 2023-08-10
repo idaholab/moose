@@ -31,7 +31,7 @@ ScalePostprocessor::ScalePostprocessor(const InputParameters & parameters)
 }
 
 PostprocessorValue
-ScalePostprocessor::getValue()
+ScalePostprocessor::getValue() const
 {
   return _scaling_factor * _value;
 }

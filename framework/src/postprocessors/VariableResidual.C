@@ -53,7 +53,7 @@ VariableResidual::execute()
 }
 
 PostprocessorValue
-VariableResidual::getValue()
+VariableResidual::getValue() const
 {
   return _var_residual;
 }

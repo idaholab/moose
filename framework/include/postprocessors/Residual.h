@@ -24,7 +24,8 @@ public:
   /**
    * This will return the final nonlinear residual.
    */
-  virtual Real getValue() override;
+  using Postprocessor::getValue;
+  virtual Real getValue() const override;
 
 protected:
   MooseEnum _residual_type;

@@ -34,7 +34,7 @@ NumRelationshipManagers::NumRelationshipManagers(const InputParameters & paramet
 }
 
 Real
-NumRelationshipManagers::getValue()
+NumRelationshipManagers::getValue() const
 {
   const auto & rms = _app.relationshipManagers();
 

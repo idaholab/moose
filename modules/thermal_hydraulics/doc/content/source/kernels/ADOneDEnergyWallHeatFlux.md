@@ -1,20 +1,18 @@
 # ADOneDEnergyWallHeatFlux
 
-!alert construction title=Undocumented Class
-The ADOneDEnergyWallHeatFlux has not been documented. The content listed below should be used as a starting point for
-documenting the class, which includes the typical automatic documentation associated with a
-MooseObject; however, what is contained is ultimately determined by what is necessary to make the
-documentation clear for users.
-
 !syntax description /Kernels/ADOneDEnergyWallHeatFlux
 
-## Overview
+The heat flux contribution to the residual $R_i$ for the weak form is computed as:
 
-!! Replace these lines with information regarding the ADOneDEnergyWallHeatFlux object.
+\begin{equation}
+R_i = (\psi_i, -q_{wall} P_{hf}) \quad \forall \psi_i,
+\end{equation}
+where $\psi_i$ are the test functions and $q_{wall}$ is the local heat flux, and $P_{hf}$ the
+heated perimeter.
 
-## Example Input File Syntax
-
-!! Describe and include an example of how to use the ADOneDEnergyWallHeatFlux object.
+!alert note
+In THM, most kernels are added automatically by components. This kernel is created by the
+heat transfer components such as the [HeatTransferFromHeatFlux1Phase.md].
 
 !syntax parameters /Kernels/ADOneDEnergyWallHeatFlux
 

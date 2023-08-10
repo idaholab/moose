@@ -21,7 +21,8 @@ public:
 
   GrainBoundaryArea(const InputParameters & parameters);
 
-  virtual Real getValue() override;
+  using Postprocessor::getValue;
+  virtual Real getValue() const override;
 
 protected:
   virtual Real computeQpIntegral() override;

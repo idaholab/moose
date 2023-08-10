@@ -30,7 +30,7 @@ NumPositions::NumPositions(const InputParameters & parameters)
 }
 
 Real
-NumPositions::getValue()
+NumPositions::getValue() const
 {
   if (_fe_problem.getCurrentExecuteOnFlag() == EXEC_INITIAL)
     return _positions.getPositions(/*initial=*/true).size();

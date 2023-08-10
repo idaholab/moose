@@ -28,7 +28,7 @@ ConstantPostprocessor::ConstantPostprocessor(const InputParameters & params)
 }
 
 Real
-ConstantPostprocessor::getValue()
+ConstantPostprocessor::getValue() const
 {
   return _value;
 }

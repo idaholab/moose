@@ -21,7 +21,8 @@ public:
   virtual void initialize() override {}
   virtual void execute() override {}
 
-  virtual Real getValue() override;
+  using Postprocessor::getValue;
+  virtual Real getValue() const override;
 
 private:
   enum class ElemFilter

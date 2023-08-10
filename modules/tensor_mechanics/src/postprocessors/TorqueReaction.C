@@ -86,7 +86,7 @@ TorqueReaction::execute()
 }
 
 Real
-TorqueReaction::getValue()
+TorqueReaction::getValue() const
 {
   return _sum;
 }

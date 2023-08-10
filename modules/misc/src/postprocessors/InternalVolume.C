@@ -128,7 +128,7 @@ InternalVolume::computeQpIntegral()
 }
 
 Real
-InternalVolume::getValue()
+InternalVolume::getValue() const
 {
   return _scale * SideIntegralPostprocessor::getValue() + _addition.value(_t);
 }

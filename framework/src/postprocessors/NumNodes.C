@@ -30,7 +30,7 @@ NumNodes::NumNodes(const InputParameters & parameters)
 }
 
 Real
-NumNodes::getValue()
+NumNodes::getValue() const
 {
   return _mesh.n_nodes();
 }

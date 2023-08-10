@@ -1,20 +1,18 @@
 # ADOneD3EqnMomentumFormLoss
 
-!alert construction title=Undocumented Class
-The ADOneD3EqnMomentumFormLoss has not been documented. The content listed below should be used as a starting point for
-documenting the class, which includes the typical automatic documentation associated with a
-MooseObject; however, what is contained is ultimately determined by what is necessary to make the
-documentation clear for users.
-
 !syntax description /Kernels/ADOneD3EqnMomentumFormLoss
 
-## Overview
+The form loss term in the momentum equation strong form is:
 
-!! Replace these lines with information regarding the ADOneD3EqnMomentumFormLoss object.
+!equation
+\dfrac{1}{2} K' \rho u |u| A
 
-## Example Input File Syntax
+where $\rho$ is the density, $A$ the area of the component, $u$ the one-dimensional velocity and
+$K'$ a form loss factor.
 
-!! Describe and include an example of how to use the ADOneD3EqnMomentumFormLoss object.
+!alert note
+In THM, most kernels are added automatically by components or flow models. This kernel is created by components
+derived from the [FormLoss1PhaseBase.md] component to add form loss terms in components with single-phase fluid flow.
 
 !syntax parameters /Kernels/ADOneD3EqnMomentumFormLoss
 

@@ -46,7 +46,7 @@ AverageNodalVariableValue::execute()
 }
 
 Real
-AverageNodalVariableValue::getValue()
+AverageNodalVariableValue::getValue() const
 {
   return _sum / _n;
 }

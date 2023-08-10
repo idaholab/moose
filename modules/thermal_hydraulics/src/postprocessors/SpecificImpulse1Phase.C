@@ -53,7 +53,8 @@ SpecificImpulse1Phase::SpecificImpulse1Phase(const InputParameters & parameters)
     _max_nit(getParam<unsigned int>("bisection_max_it")),
     _cumulative(getParam<bool>("cumulative")),
     _accumulated_mass_flow_rate(declareRestartableData<Real>("accumulated_mass_flow_rate", 0)),
-    _accumulated_thrust(declareRestartableData<Real>("accumulated_thrust", 0))
+    _accumulated_thrust(declareRestartableData<Real>("accumulated_thrust", 0)),
+    _value(0.0)
 {
   if (_cumulative && !_fe_problem.isTransient())
     paramError("cumulative", "Must be false unless problem is transient");
@@ -78,16 +79,9 @@ SpecificImpulse1Phase::initialize()
 }
 
 Real
-SpecificImpulse1Phase::getValue()
+SpecificImpulse1Phase::getValue() const
 {
-  if (_cumulative)
-  {
-    _accumulated_thrust += _dt * _thrust;
-    _accumulated_mass_flow_rate += _dt * _mass_flow_rate;
-    return _accumulated_thrust / _accumulated_mass_flow_rate / THM::gravity_const;
-  }
-  else
-    return _thrust / _mass_flow_rate / THM::gravity_const;
+  return _value;
 }
 
 void
@@ -95,7 +89,17 @@ SpecificImpulse1Phase::finalize()
 {
   gatherSum(_thrust);
   gatherSum(_mass_flow_rate);
+
+  if (_cumulative)
+  {
+    _accumulated_thrust += _dt * _thrust;
+    _accumulated_mass_flow_rate += _dt * _mass_flow_rate;
+    _value = _accumulated_thrust / _accumulated_mass_flow_rate / THM::gravity_const;
+  }
+  else
+    _value = _thrust / _mass_flow_rate / THM::gravity_const;
 }
+
 void
 SpecificImpulse1Phase::execute()
 {

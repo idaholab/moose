@@ -61,7 +61,7 @@ InternalSideJump::finalize()
 }
 
 Real
-InternalSideJump::getValue()
+InternalSideJump::getValue() const
 {
   return _integral_value;
 }

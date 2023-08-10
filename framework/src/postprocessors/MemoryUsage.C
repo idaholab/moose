@@ -119,7 +119,7 @@ MemoryUsage::finalize()
 }
 
 PostprocessorValue
-MemoryUsage::getValue()
+MemoryUsage::getValue() const
 {
   return _report_peak_value ? _peak_value : _value;
 }

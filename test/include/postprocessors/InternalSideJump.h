@@ -18,7 +18,8 @@ public:
 
   InternalSideJump(const InputParameters & parameters);
 
-  virtual PostprocessorValue getValue() override;
+  using Postprocessor::getValue;
+  virtual PostprocessorValue getValue() const override;
   virtual void execute() override;
   virtual void initialize() override;
   virtual void finalize() override;

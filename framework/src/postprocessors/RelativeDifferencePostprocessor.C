@@ -44,7 +44,7 @@ RelativeDifferencePostprocessor::execute()
 }
 
 PostprocessorValue
-RelativeDifferencePostprocessor::getValue()
+RelativeDifferencePostprocessor::getValue() const
 {
   if (MooseUtils::absoluteFuzzyEqual(_value2, 0))
     return std::abs(_value1 - _value2);

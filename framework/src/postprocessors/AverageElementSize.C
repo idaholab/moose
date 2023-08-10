@@ -39,9 +39,8 @@ AverageElementSize::execute()
 }
 
 Real
-AverageElementSize::getValue()
+AverageElementSize::getValue() const
 {
-
   return _total_size / _elems;
 }
 

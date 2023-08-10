@@ -24,7 +24,8 @@ public:
   /**
    * This will return the current time step size.
    */
-  virtual Real getValue() override;
+  using Postprocessor::getValue;
+  virtual Real getValue() const override;
 
 protected:
   FEProblemBase & _feproblem;

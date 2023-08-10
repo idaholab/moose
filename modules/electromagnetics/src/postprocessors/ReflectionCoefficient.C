@@ -63,7 +63,7 @@ ReflectionCoefficient::execute()
 }
 
 PostprocessorValue
-ReflectionCoefficient::getValue()
+ReflectionCoefficient::getValue() const
 {
   return _reflection_coefficient;
 }

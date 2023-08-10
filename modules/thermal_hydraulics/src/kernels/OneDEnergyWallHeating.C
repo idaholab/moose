@@ -15,11 +15,12 @@ InputParameters
 OneDEnergyWallHeating::validParams()
 {
   InputParameters params = Kernel::validParams();
+  params.addClassDescription("Adds a convective heat flux term from a wall temperature");
   params.addRequiredCoupledVar("rhoA", "");
   params.addRequiredCoupledVar("rhouA", "");
   params.addRequiredCoupledVar("rhoEA", "Energy equation variable");
   params.addRequiredCoupledVar("P_hf", "heat flux perimeter");
-  params.addCoupledVar("T_wall", 0, "Wall temperature (const)");
+  params.addCoupledVar("T_wall", "Wall temperature as a field variable");
   params.addRequiredParam<MaterialPropertyName>("Hw",
                                                 "Convective heat transfer coefficient, W/m^2-K");
   params.addRequiredParam<MaterialPropertyName>("T", "Temperature material property");

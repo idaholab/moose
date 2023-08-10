@@ -31,7 +31,8 @@ protected:
   virtual void execute() final;
   virtual void initialize() final;
   virtual void finalize() final;
-  virtual Real getValue() final;
+  using Postprocessor::getValue;
+  virtual Real getValue() const final;
   virtual void threadJoin(const UserObject & uo) final;
   Sampler & _sampler;
   const MooseEnum & _test_type;

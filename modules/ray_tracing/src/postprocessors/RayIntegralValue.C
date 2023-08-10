@@ -86,7 +86,7 @@ RayIntegralValue::initialize()
 }
 
 Real
-RayIntegralValue::getValue()
+RayIntegralValue::getValue() const
 {
   // This gathers the value from the proc that killed the Ray we're looking for
   return _study->getBankedRayData(_ray_id, _ray_data_index);

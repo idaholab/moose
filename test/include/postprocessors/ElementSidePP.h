@@ -19,9 +19,10 @@ public:
   ElementSidePP(const InputParameters & parameters);
 
 protected:
-  virtual Real getValue();
+  using Postprocessor::getValue;
+  virtual Real getValue() const override;
 
-  virtual Real computeQpIntegral();
+  virtual Real computeQpIntegral() override;
 
   const PostprocessorValue & _sidepp;
 };

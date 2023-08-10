@@ -24,7 +24,8 @@ public:
   /**
    * This will return the number of nodes in the system
    */
-  virtual Real getValue() override;
+  using Postprocessor::getValue;
+  virtual Real getValue() const override;
 
 private:
   const MeshBase & _mesh;

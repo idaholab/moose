@@ -25,10 +25,11 @@ public:
 
   ContactDOFSetSize(const InputParameters & parameters);
 
-  void initialize() override;
-  void execute() override;
+  virtual void initialize() override;
+  virtual void execute() override;
 
-  PostprocessorValue getValue() override;
+  using Postprocessor::getValue;
+  virtual PostprocessorValue getValue() const override;
 
 private:
   /// MOOSE variable we compute the contact set from

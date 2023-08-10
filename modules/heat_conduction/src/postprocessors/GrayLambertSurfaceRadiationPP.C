@@ -36,7 +36,7 @@ GrayLambertSurfaceRadiationPP::GrayLambertSurfaceRadiationPP(const InputParamete
 }
 
 PostprocessorValue
-GrayLambertSurfaceRadiationPP::getValue()
+GrayLambertSurfaceRadiationPP::getValue() const
 {
   if (_return_type == "RADIOSITY")
     return _glsr_uo.getSurfaceRadiosity(_bnd_id);

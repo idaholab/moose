@@ -16,6 +16,8 @@ ADHeatConductionRZ::validParams()
 {
   InputParameters params = ADHeatConduction::validParams();
   params += RZSymmetry::validParams();
+  params.addClassDescription(
+      "Adds a heat conduction term in XY coordinates interpreted as cylindrical coordinates");
   return params;
 }
 

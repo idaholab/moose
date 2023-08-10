@@ -16,10 +16,12 @@ ADOneDEnergyWallHeating::validParams()
 {
   InputParameters params = ADKernel::validParams();
   params.addRequiredCoupledVar("P_hf", "heat flux perimeter");
-  params.addCoupledVar("T_wall", 0, "Wall temperature (const)");
+  params.addCoupledVar("T_wall", "Wall temperature as a variable");
   params.addRequiredParam<MaterialPropertyName>("Hw",
                                                 "Convective heat transfer coefficient, W/m^2-K");
   params.addRequiredParam<MaterialPropertyName>("T", "Temperature material property");
+  params.addClassDescription(
+      "Computes a convective heat flux term for the energy equation for 1-phase flow");
 
   return params;
 }

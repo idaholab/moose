@@ -47,13 +47,17 @@ NumNonlinearIterations::timestepSetup()
   }
 }
 
-Real
-NumNonlinearIterations::getValue()
+void
+NumNonlinearIterations::finalize()
 {
   if (_accumulate_over_step)
     _num_iters += _subproblem.nNonlinearIterations();
   else
     _num_iters = _subproblem.nNonlinearIterations();
+}
 
+Real
+NumNonlinearIterations::getValue() const
+{
   return _num_iters;
 }
