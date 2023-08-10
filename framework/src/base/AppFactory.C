@@ -93,7 +93,7 @@ AppFactory::createShared(const std::string & app_type,
   return build_info->build(parameters);
 }
 
-size_t
+std::size_t
 AppFactory::createdAppCount(const std::string & app_type) const
 {
   // Error if the application type is not located
