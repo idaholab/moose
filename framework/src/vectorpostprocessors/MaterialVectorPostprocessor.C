@@ -28,8 +28,7 @@ MaterialVectorPostprocessor::validParams()
                                         "Material for which all properties will be recorded.");
   params.addParam<std::vector<dof_id_type>>(
       "elem_ids",
-      "Element IDs to print data for (others are ignored). If not supplied, all "
-      "elements will be printed.");
+      "Subset of element IDs to print data for. If omitted, all elements will be printed.");
   return params;
 }
 
