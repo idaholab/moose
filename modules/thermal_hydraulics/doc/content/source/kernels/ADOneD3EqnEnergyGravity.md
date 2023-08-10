@@ -1,20 +1,18 @@
 # ADOneD3EqnEnergyGravity
 
-!alert construction title=Undocumented Class
-The ADOneD3EqnEnergyGravity has not been documented. The content listed below should be used as a starting point for
-documenting the class, which includes the typical automatic documentation associated with a
-MooseObject; however, what is contained is ultimately determined by what is necessary to make the
-documentation clear for users.
-
 !syntax description /Kernels/ADOneD3EqnEnergyGravity
 
-## Overview
+The local work term from the action of gravity in the energy equation strong form is:
 
-!! Replace these lines with information regarding the ADOneD3EqnEnergyGravity object.
+!equation
+\rho u A \vec{g} \cdot \vec{d}
 
-## Example Input File Syntax
+where $\rho$ is the density, $u$ the one-dimensional velocity, $A$ the area of the component, $\vec{g}$ the gravity vector
+and $\vec{d}$ the direction of the flow component.
 
-!! Describe and include an example of how to use the ADOneD3EqnEnergyGravity object.
+!alert note
+In THM, most kernels are added automatically by components or flow models. This kernel is created by the
+[FlowModelSinglePhase.md] to act inside components with single-phase fluid flow.
 
 !syntax parameters /Kernels/ADOneD3EqnEnergyGravity
 

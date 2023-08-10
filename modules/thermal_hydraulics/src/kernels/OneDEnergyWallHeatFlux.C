@@ -17,6 +17,7 @@ OneDEnergyWallHeatFlux::validParams()
   InputParameters params = Kernel::validParams();
   params.addRequiredParam<MaterialPropertyName>("q_wall", "Wall heat flux material property");
   params.addRequiredCoupledVar("P_hf", "heat flux perimeter");
+  params.addClassDescription("Adds a heat flux along the local heated perimeter");
   return params;
 }
 

@@ -19,6 +19,8 @@ ADOneD3EqnMomentumFormLoss::validParams()
   params.addRequiredCoupledVar("A", "Cross-sectional area");
   params.addRequiredParam<MaterialPropertyName>("rho", "Density property");
   params.addRequiredParam<MaterialPropertyName>("vel", "Velocity property");
+  params.addClassDescription(
+      "Computes a volumetric form loss for the momentum equation for 1-phase flow");
 
   return params;
 }

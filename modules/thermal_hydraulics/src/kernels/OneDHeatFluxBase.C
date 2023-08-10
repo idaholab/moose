@@ -16,6 +16,8 @@ InputParameters
 OneDHeatFluxBase::validParams()
 {
   InputParameters params = Kernel::validParams();
+  params.addClassDescription(
+      "Base class for a one-dimensional heat flux term in an energy equation");
   params.addRequiredParam<UserObjectName>(
       "q_uo", "The name of the user object that computed the heat flux");
   return params;

@@ -16,6 +16,8 @@ CoupledForceRZ::validParams()
 {
   InputParameters params = CoupledForce::validParams();
   params += RZSymmetry::validParams();
+  params.addClassDescription(
+      "Adds a coupled force term in XY coordinates interpreted as cylindrical coordinates");
   return params;
 }
 

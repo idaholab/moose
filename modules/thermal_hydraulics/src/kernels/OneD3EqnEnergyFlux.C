@@ -25,7 +25,7 @@ OneD3EqnEnergyFlux::validParams()
   params.addRequiredParam<MaterialPropertyName>("vel", "Velocity material property");
   params.addRequiredParam<MaterialPropertyName>("e", "Specific internal energy material property");
   params.addRequiredParam<MaterialPropertyName>("p", "Pressure material property");
-  params.addClassDescription("Energy flux for single phase flow");
+  params.addClassDescription("Computes an energy flux for single phase flow");
   return params;
 }
 
