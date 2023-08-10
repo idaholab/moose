@@ -11,6 +11,7 @@
 #include "CSV.h"
 #include "FEProblem.h"
 #include "MooseApp.h"
+#include "Steady.h"
 
 registerMooseObject("MooseApp", CSV);
 
@@ -172,6 +173,23 @@ CSV::getVectorPostprocessorFileName(const std::string & vpp_name,
     {
       file_name << '_' << std::setw(_padding) << std::setprecision(0) << std::setfill('0')
                 << std::right << _linear_iter;
+    }
+    if (true)
+    {
+      std::string append = "";
+      bool is_optimization_run = false;
+
+      // This enables exodus per-iteration output.
+      if (auto steady = dynamic_cast<Steady *>(_app.getExecutioner()))
+      {
+        append = "iteration_" + Moose::stringify(steady->getIterationNumberOutput());
+        is_optimization_run = true;
+        Moose::out << "Moose iteration output is: " << steady->getIterationNumberOutput() << "\n";
+        file_name << '_' << std::setw(_padding) << std::setprecision(0) << std::setfill('0')
+                  << std::right << append;
+      }
+
+      Moose::out << "Execution flags Lynn: " << _current_execute_flag << "\n";
     }
   }
 

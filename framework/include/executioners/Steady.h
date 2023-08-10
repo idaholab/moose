@@ -47,7 +47,7 @@ public:
 
   /**
    * Get a general iteration number for the purpose of outputting, useful in the presence of a
-   * nested solve This output iteration number may be set by the parent app for a sub-app. This
+   * nested solve. This output iteration number may be set by the parent app for a sub-app. This
    * behavior is decided by the Executioner/Executor/SolveObject in charge of the solve.
    */
   virtual unsigned int getIterationNumberOutput() const { return _output_iteration_number; }

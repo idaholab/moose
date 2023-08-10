@@ -42,6 +42,20 @@
       recover = false
       detail = 'gradient-based optimization, '
     []
+    [adjoint_output]
+      type = CSVDiff
+      input =main_csv.i
+      cli_args = "Executioner/tao_solver=taolmvm "
+                 "Executioner/petsc_options_iname='-tao_gttol' "
+                 "Executioner/petsc_options_value='1e-5'"
+      csvdiff = forward_measure_data_0001_iteration_9.csv
+      max_threads = 1 # Optimize executioner does not support multiple threads
+      rel_err = 0.1
+      abs_zero = 10
+      # steady solve
+      recover = false
+      detail = 'gradient-based optimization, with csv output at each iteration.'
+    []
     [adjoint_reg]
       type = CSVDiff
       input = "main.i regularization_for_main.i"
