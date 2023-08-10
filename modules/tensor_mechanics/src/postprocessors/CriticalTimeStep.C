@@ -74,7 +74,7 @@ CriticalTimeStep::finalize()
 }
 
 Real
-CriticalTimeStep::getValue()
+CriticalTimeStep::getValue() const
 {
   return _critical_time;
 }

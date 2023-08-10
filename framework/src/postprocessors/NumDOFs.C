@@ -54,7 +54,7 @@ NumDOFs::NumDOFs(const InputParameters & parameters)
 }
 
 Real
-NumDOFs::getValue()
+NumDOFs::getValue() const
 {
   switch (_system_enum)
   {

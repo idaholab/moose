@@ -53,7 +53,7 @@ SideDiffusiveFluxAverageTempl<is_ad>::execute()
 
 template <bool is_ad>
 Real
-SideDiffusiveFluxAverageTempl<is_ad>::getValue()
+SideDiffusiveFluxAverageTempl<is_ad>::getValue() const
 {
   return _integral_value / _volume;
 }

@@ -43,7 +43,7 @@ public:
   const FunctionSeries & getFunctionSeries() const;
 
   // Override from <IntegralBaseVariableUserObject>
-  virtual Real getValue() final;
+  virtual Real getValue() const final;
 
   // Overrides from UserObject
   virtual void finalize() final;
@@ -213,7 +213,7 @@ FXIntegralBaseUserObject<IntegralBaseVariableUserObject>::getFunctionSeries() co
 
 template <class IntegralBaseVariableUserObject>
 Real
-FXIntegralBaseUserObject<IntegralBaseVariableUserObject>::getValue()
+FXIntegralBaseUserObject<IntegralBaseVariableUserObject>::getValue() const
 {
   return _integral_value;
 }

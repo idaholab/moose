@@ -66,7 +66,7 @@ UseOldVectorPostprocessor::execute()
 }
 
 PostprocessorValue
-UseOldVectorPostprocessor::getValue()
+UseOldVectorPostprocessor::getValue() const
 {
   return _old_value;
 }

@@ -20,10 +20,11 @@ public:
   static InputParameters validParams();
 
   NSEntropyError(const InputParameters & parameters);
-  virtual Real getValue();
+  using Postprocessor::getValue;
+  virtual Real getValue() const override;
 
 protected:
-  virtual Real computeQpIntegral();
+  virtual Real computeQpIntegral() override;
 
   Real _rho_infty;
   Real _p_infty;

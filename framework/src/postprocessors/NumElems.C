@@ -36,7 +36,7 @@ NumElems::NumElems(const InputParameters & parameters)
 }
 
 Real
-NumElems::getValue()
+NumElems::getValue() const
 {
   if (_filt == ElemFilter::ACTIVE)
     return _mesh.n_active_elem();

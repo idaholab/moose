@@ -39,7 +39,7 @@ FunctionSideAverage::execute()
 }
 
 Real
-FunctionSideAverage::getValue()
+FunctionSideAverage::getValue() const
 {
   return _integral_value / _volume;
 }

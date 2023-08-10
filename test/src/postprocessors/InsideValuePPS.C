@@ -43,7 +43,7 @@ InsideValuePPS::execute()
 }
 
 Real
-InsideValuePPS::getValue()
+InsideValuePPS::getValue() const
 {
   return _value;
 }

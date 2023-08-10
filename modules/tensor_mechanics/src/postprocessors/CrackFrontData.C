@@ -74,7 +74,7 @@ CrackFrontData::execute()
 }
 
 Real
-CrackFrontData::getValue()
+CrackFrontData::getValue() const
 {
 
   return _scale_factor * _value;

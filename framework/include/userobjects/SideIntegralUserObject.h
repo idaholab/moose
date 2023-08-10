@@ -28,10 +28,10 @@ public:
   virtual void initialize() override;
   virtual void execute() override;
   virtual void threadJoin(const UserObject & y) override;
-  virtual void finalize() override {}
+  virtual void finalize() override;
 
   /// Returns the integral value
-  virtual Real getValue();
+  virtual Real getValue() const;
 
 protected:
   virtual Real computeQpIntegral() = 0;

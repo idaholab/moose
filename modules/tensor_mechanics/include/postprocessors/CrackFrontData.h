@@ -25,14 +25,15 @@ public:
 
   CrackFrontData(const InputParameters & parameters);
 
-  virtual void initialize();
-  virtual void execute();
-  virtual void finalize();
+  virtual void initialize() override;
+  virtual void execute() override;
+  virtual void finalize() override;
 
   /**
    * This will return the degrees of freedom in the system.
    */
-  virtual Real getValue();
+  using Postprocessor::getValue;
+  virtual Real getValue() const override;
 
 protected:
   const CrackFrontDefinition * const _crack_front_definition;

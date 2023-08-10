@@ -24,7 +24,8 @@ public:
   void execute() override;
   void finalize() override;
   void threadJoin(const UserObject & user_object) override;
-  virtual PostprocessorValue getValue() override;
+  using Postprocessor::getValue;
+  virtual PostprocessorValue getValue() const override;
 
 private:
   /// The max velocity on an element, this is done simply to avoid creating temporary calls to execute.

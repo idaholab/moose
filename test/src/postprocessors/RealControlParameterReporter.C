@@ -45,7 +45,7 @@ RealControlParameterReporter::initialSetup()
 }
 
 Real
-RealControlParameterReporter::getValue()
+RealControlParameterReporter::getValue() const
 {
   return *_parameter;
 }

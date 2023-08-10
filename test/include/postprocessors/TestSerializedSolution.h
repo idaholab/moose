@@ -24,17 +24,18 @@ public:
   /**
    * Reset data
    */
-  virtual void initialize();
+  virtual void initialize() override;
 
   /**
    * Sum up all entries in the solution vector - verify the same answer on all processors
    */
-  virtual void execute();
+  virtual void execute() override;
 
   /**
    * Return the summed value.
    */
-  virtual Real getValue();
+  using Postprocessor::getValue;
+  virtual Real getValue() const override;
 
 protected:
   /// The system to be tested

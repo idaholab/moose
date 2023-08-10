@@ -23,7 +23,9 @@ public:
 
   ThermalConductivity(const InputParameters & parameters);
 
-  virtual Real getValue();
+  virtual void finalize() override;
+  using Postprocessor::getValue;
+  virtual Real getValue() const override;
 
 protected:
   const Real _dx;
@@ -38,4 +40,7 @@ private:
   /// This boolean is delcared as a reference so that the variable is restartable
   /// data:  if we restart, the code will not think it is the zero timestep again.
   bool & _step_zero;
+
+  /// The value of this post-processor
+  Real _value;
 };

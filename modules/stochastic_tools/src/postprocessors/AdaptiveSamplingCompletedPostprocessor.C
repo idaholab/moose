@@ -43,7 +43,7 @@ AdaptiveSamplingCompletedPostprocessor::finalize()
 }
 
 Real
-AdaptiveSamplingCompletedPostprocessor::getValue()
+AdaptiveSamplingCompletedPostprocessor::getValue() const
 {
   return _sampling_completed;
 }

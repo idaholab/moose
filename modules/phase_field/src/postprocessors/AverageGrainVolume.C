@@ -153,7 +153,7 @@ AverageGrainVolume::finalize()
 }
 
 Real
-AverageGrainVolume::getValue()
+AverageGrainVolume::getValue() const
 {
   Real total_volume = 0;
   for (auto & volume : _feature_volumes)

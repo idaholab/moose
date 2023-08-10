@@ -29,11 +29,13 @@ public:
 
   virtual void initialize() override {}
   virtual void execute() override {}
+  virtual void finalize() override;
 
   /**
-   * Get the numer of nonlinear iterations
+   * Get the number of nonlinear iterations
    */
-  virtual Real getValue() override;
+  using Postprocessor::getValue;
+  virtual Real getValue() const override;
 
 protected:
   /// Pointer to the FEProblemBase

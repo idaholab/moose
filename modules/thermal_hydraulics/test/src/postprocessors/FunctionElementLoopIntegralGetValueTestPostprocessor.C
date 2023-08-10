@@ -44,7 +44,7 @@ FunctionElementLoopIntegralGetValueTestPostprocessor::execute()
 }
 
 PostprocessorValue
-FunctionElementLoopIntegralGetValueTestPostprocessor::getValue()
+FunctionElementLoopIntegralGetValueTestPostprocessor::getValue() const
 {
   return _uo.getValue();
 }

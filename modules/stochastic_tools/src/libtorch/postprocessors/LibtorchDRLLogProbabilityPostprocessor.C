@@ -58,7 +58,7 @@ LibtorchDRLLogProbabilityPostprocessor::initialSetup()
 }
 
 Real
-LibtorchDRLLogProbabilityPostprocessor::getValue()
+LibtorchDRLLogProbabilityPostprocessor::getValue() const
 {
   // Return the value of the control signal
   return _libtorch_nn_control->getSignalLogProbability(_signal_index);

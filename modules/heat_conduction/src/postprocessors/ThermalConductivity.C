@@ -31,14 +31,17 @@ ThermalConductivity::ThermalConductivity(const InputParameters & parameters)
     _T_hot(getPostprocessorValue("T_hot")),
     _length_scale(getParam<Real>("length_scale")),
     _k0(getParam<Real>("k0")),
-    _step_zero(declareRestartableData<bool>("step_zero", true))
+    _step_zero(declareRestartableData<bool>("step_zero", true)),
+    _value(0.0)
 {
 }
 
-Real
-ThermalConductivity::getValue()
+void
+ThermalConductivity::finalize()
 {
-  const Real T_cold = SideAverageValue::getValue();
+  SideAverageValue::finalize();
+
+  const Real T_cold = _integral_value / _volume;
   Real Th_cond = 0.0;
   if (_t_step >= 1)
     _step_zero = false;
@@ -48,7 +51,13 @@ ThermalConductivity::getValue()
     Th_cond = std::abs(_flux) * _dx / std::abs(_T_hot - T_cold);
 
   if (_step_zero)
-    return _k0;
+    _value = _k0;
   else
-    return Th_cond / _length_scale; // In W/(m-K)
+    _value = Th_cond / _length_scale; // In W/(m-K)
+}
+
+Real
+ThermalConductivity::getValue() const
+{
+  return _value;
 }

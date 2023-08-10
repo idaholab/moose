@@ -35,10 +35,15 @@ SideIntegralUserObject::execute()
   _integral_value += computeIntegral();
 }
 
-Real
-SideIntegralUserObject::getValue()
+void
+SideIntegralUserObject::finalize()
 {
   gatherSum(_integral_value);
+}
+
+Real
+SideIntegralUserObject::getValue() const
+{
   return _integral_value;
 }
 

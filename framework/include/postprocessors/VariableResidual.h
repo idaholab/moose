@@ -21,7 +21,8 @@ public:
   virtual void initialize() override;
   virtual void execute() override;
 
-  virtual PostprocessorValue getValue() override;
+  using Postprocessor::getValue;
+  virtual PostprocessorValue getValue() const override;
 
 protected:
   /// MOOSE variable we compute the residual for

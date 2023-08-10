@@ -41,7 +41,7 @@ SideAverageValue::execute()
 }
 
 Real
-SideAverageValue::getValue()
+SideAverageValue::getValue() const
 {
   if (MooseUtils::absoluteFuzzyEqual(_volume, 0.0))
   {

@@ -19,11 +19,12 @@ class NodalEnergyFluxPostprocessor : public NodalPostprocessor
 public:
   NodalEnergyFluxPostprocessor(const InputParameters & parameters);
 
-  virtual void initialize();
-  virtual void execute();
-  virtual PostprocessorValue getValue();
-  virtual void finalize();
-  virtual void threadJoin(const UserObject & uo);
+  virtual void initialize() override;
+  virtual void execute() override;
+  using Postprocessor::getValue;
+  virtual PostprocessorValue getValue() const override;
+  virtual void finalize() override;
+  virtual void threadJoin(const UserObject & uo) override;
 
 protected:
   Real _value;

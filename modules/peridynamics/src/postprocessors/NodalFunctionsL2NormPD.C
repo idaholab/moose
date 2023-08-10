@@ -35,7 +35,7 @@ NodalFunctionsL2NormPD::NodalFunctionsL2NormPD(const InputParameters & parameter
 }
 
 Real
-NodalFunctionsL2NormPD::getValue()
+NodalFunctionsL2NormPD::getValue() const
 {
   return std::sqrt(NodalIntegralPostprocessorBasePD::getValue());
 }

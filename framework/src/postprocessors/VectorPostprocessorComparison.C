@@ -65,7 +65,7 @@ VectorPostprocessorComparison::execute()
 }
 
 PostprocessorValue
-VectorPostprocessorComparison::getValue()
+VectorPostprocessorComparison::getValue() const
 {
   return _comparison_value;
 }

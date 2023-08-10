@@ -71,7 +71,7 @@ CFLTimeStepSizeTempl<is_ad>::initialize()
 
 template <bool is_ad>
 Real
-CFLTimeStepSizeTempl<is_ad>::getValue()
+CFLTimeStepSizeTempl<is_ad>::getValue() const
 {
   return _dt;
 }

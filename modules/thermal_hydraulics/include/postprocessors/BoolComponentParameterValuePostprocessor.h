@@ -20,9 +20,10 @@ class BoolComponentParameterValuePostprocessor : public GeneralPostprocessor
 public:
   BoolComponentParameterValuePostprocessor(const InputParameters & parameters);
 
-  virtual void initialize();
-  virtual Real getValue();
-  virtual void execute();
+  virtual void initialize() override;
+  using Postprocessor::getValue;
+  virtual Real getValue() const override;
+  virtual void execute() override;
 
 protected:
   InputParameterWarehouse & _input_parameter_warehouse;

@@ -60,7 +60,7 @@ RealComponentParameterValuePostprocessor::execute()
 }
 
 Real
-RealComponentParameterValuePostprocessor::getValue()
+RealComponentParameterValuePostprocessor::getValue() const
 {
   return _value;
 }

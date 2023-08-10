@@ -59,7 +59,7 @@ FeatureVolumeFraction::execute()
 }
 
 Real
-FeatureVolumeFraction::getValue()
+FeatureVolumeFraction::getValue() const
 {
   switch (_value_type)
   {

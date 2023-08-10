@@ -37,7 +37,7 @@ NodalIntegralPostprocessorBasePD::execute()
 }
 
 Real
-NodalIntegralPostprocessorBasePD::getValue()
+NodalIntegralPostprocessorBasePD::getValue() const
 {
   return _integral_value;
 }

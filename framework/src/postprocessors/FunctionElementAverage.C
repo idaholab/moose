@@ -39,7 +39,7 @@ FunctionElementAverage::execute()
 }
 
 Real
-FunctionElementAverage::getValue()
+FunctionElementAverage::getValue() const
 {
   return _integral_value / _volume;
 }

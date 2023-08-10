@@ -23,14 +23,15 @@ public:
 
   HomogenizedThermalConductivity(const InputParameters & parameters);
 
-  virtual void initialize();
-  virtual void execute();
-  virtual Real getValue();
-  virtual void threadJoin(const UserObject & y);
-  virtual void finalize();
+  virtual void initialize() override;
+  virtual void execute() override;
+  using Postprocessor::getValue;
+  virtual Real getValue() const override;
+  virtual void threadJoin(const UserObject & y) override;
+  virtual void finalize() override;
 
 protected:
-  virtual Real computeQpIntegral();
+  virtual Real computeQpIntegral() override;
 
   /// the row index of the homogenized thermal conductivity tensor that is returned
   const unsigned int _row;

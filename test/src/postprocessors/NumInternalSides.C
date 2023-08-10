@@ -44,7 +44,7 @@ NumInternalSides::finalize()
 }
 
 PostprocessorValue
-NumInternalSides::getValue()
+NumInternalSides::getValue() const
 {
   return _count;
 }

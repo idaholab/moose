@@ -25,7 +25,7 @@ BlocksMaxDimensionPostprocessor::BlocksMaxDimensionPostprocessor(const InputPara
 }
 
 Real
-BlocksMaxDimensionPostprocessor::getValue()
+BlocksMaxDimensionPostprocessor::getValue() const
 {
   return getMooseApp().actionWarehouse().mesh()->getBlocksMaxDimension(_blocks);
 }

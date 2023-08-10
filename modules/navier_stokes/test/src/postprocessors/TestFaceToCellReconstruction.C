@@ -65,7 +65,7 @@ TestFaceToCellReconstruction::initialize()
 }
 
 PostprocessorValue
-TestFaceToCellReconstruction::getValue()
+TestFaceToCellReconstruction::getValue() const
 {
   return _reconstruction_error;
 }

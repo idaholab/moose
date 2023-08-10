@@ -59,7 +59,7 @@ BoolComponentParameterValuePostprocessor::execute()
 }
 
 Real
-BoolComponentParameterValuePostprocessor::getValue()
+BoolComponentParameterValuePostprocessor::getValue() const
 {
   return _value;
 }

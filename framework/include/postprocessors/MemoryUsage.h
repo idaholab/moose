@@ -28,7 +28,8 @@ public:
   virtual void initialize() override {}
   virtual void execute() override;
   virtual void finalize() override;
-  virtual PostprocessorValue getValue() override;
+  using Postprocessor::getValue;
+  virtual PostprocessorValue getValue() const override;
 
 protected:
   enum class MemType

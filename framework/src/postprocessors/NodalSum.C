@@ -43,7 +43,7 @@ NodalSum::execute()
 }
 
 Real
-NodalSum::getValue()
+NodalSum::getValue() const
 {
   return _sum;
 }

@@ -40,7 +40,7 @@ ElementVectorL2Error::ElementVectorL2Error(const InputParameters & parameters)
 }
 
 Real
-ElementVectorL2Error::getValue()
+ElementVectorL2Error::getValue() const
 {
   return std::sqrt(ElementIntegralPostprocessor::getValue());
 }

@@ -23,14 +23,15 @@ public:
 
   AsymptoticExpansionHomogenizationElasticConstants(const InputParameters & parameters);
 
-  virtual void initialize();
-  virtual void execute();
-  virtual Real getValue();
-  virtual void finalize();
-  virtual void threadJoin(const UserObject & y);
+  virtual void initialize() override;
+  virtual void execute() override;
+  using Postprocessor::getValue;
+  virtual Real getValue() const override;
+  virtual void finalize() override;
+  virtual void threadJoin(const UserObject & y) override;
 
 protected:
-  virtual Real computeQpIntegral();
+  virtual Real computeQpIntegral() override;
 
 private:
   /// Base name of the material system

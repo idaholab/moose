@@ -26,13 +26,14 @@ public:
 
   MassFluxWeightedFlowRate(const InputParameters & parameters);
 
-  void initialize() override;
-  void finalize() override;
-  void threadJoin(const UserObject & y) override;
-  Real getValue() override;
+  virtual void initialize() override;
+  virtual void finalize() override;
+  virtual void threadJoin(const UserObject & y) override;
+  using Postprocessor::getValue;
+  virtual Real getValue() const override;
 
 protected:
-  Real computeFaceInfoIntegral(const FaceInfo * fi) override;
+  virtual Real computeFaceInfoIntegral(const FaceInfo * fi) override;
 
   /// density provided as functor
   const Moose::Functor<ADReal> & _density;

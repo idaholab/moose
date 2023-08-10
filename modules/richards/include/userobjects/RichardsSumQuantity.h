@@ -36,13 +36,13 @@ public:
   void add(Real contrib);
 
   /// does nothing
-  virtual void initialize();
+  virtual void initialize() override;
 
   /// does nothing
-  virtual void execute();
+  virtual void execute() override;
 
   /// does MPI gather on _total
-  virtual void finalize();
+  virtual void finalize() override;
 
   /// returns _total
   virtual Real getValue() const;

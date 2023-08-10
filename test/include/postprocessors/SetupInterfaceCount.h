@@ -37,13 +37,13 @@ public:
   /**
    * Each setup methods simply increments a counter.
    */
-  virtual void initialSetup() { _counts["initial"]++; }
-  virtual void timestepSetup() { _counts["timestep"]++; }
-  virtual void residualSetup() { _counts["linear"]++; }
-  virtual void jacobianSetup() { _counts["nonlinear"]++; }
-  virtual void initialize();
-  virtual void finalize();
-  virtual void execute() { _execute++; }
+  virtual void initialSetup() override { _counts["initial"]++; }
+  virtual void timestepSetup() override { _counts["timestep"]++; }
+  virtual void residualSetup() override { _counts["linear"]++; }
+  virtual void jacobianSetup() override { _counts["nonlinear"]++; }
+  virtual void initialize() override;
+  virtual void finalize() override;
+  virtual void execute() override { _execute++; }
   ///@}
 
   ///@{
@@ -57,7 +57,8 @@ public:
   /**
    * Return the count base on the count type supplied in the input file.
    */
-  PostprocessorValue getValue();
+  using Postprocessor::getValue;
+  virtual PostprocessorValue getValue() override;
 
 private:
   /// The type of count to report

@@ -36,7 +36,7 @@ DiscreteNucleationData::DiscreteNucleationData(const InputParameters & parameter
 }
 
 Real
-DiscreteNucleationData::getValue()
+DiscreteNucleationData::getValue() const
 {
   switch (_value_type)
   {

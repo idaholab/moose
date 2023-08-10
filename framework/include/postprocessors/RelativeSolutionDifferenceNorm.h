@@ -39,7 +39,8 @@ public:
    * Returns the relative solution norm taken from the transient executioner
    * @return A const reference to the value of the postprocessor
    */
-  virtual Real getValue() override;
+  using Postprocessor::getValue;
+  virtual Real getValue() const override;
 
 protected:
   /// Transient executioner

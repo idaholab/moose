@@ -54,7 +54,7 @@ SumPostprocessor::execute()
 }
 
 PostprocessorValue
-SumPostprocessor::getValue()
+SumPostprocessor::getValue() const
 {
   Real sum = 0;
   for (auto & v : _values)

@@ -28,8 +28,15 @@ public:
 
   /**
    * This will get called to actually grab the final value the postprocessor has calculated.
+   *
+   * This method will be removed in favor of the const version.
    */
-  virtual PostprocessorValue getValue() = 0;
+  virtual PostprocessorValue getValue();
+
+  /**
+   * This will get called to actually grab the final value the postprocessor has calculated.
+   */
+  virtual PostprocessorValue getValue() const;
 
   /**
    * Returns the name of the Postprocessor.

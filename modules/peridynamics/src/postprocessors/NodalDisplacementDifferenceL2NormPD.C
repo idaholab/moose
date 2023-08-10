@@ -54,7 +54,7 @@ NodalDisplacementDifferenceL2NormPD::NodalDisplacementDifferenceL2NormPD(
 }
 
 Real
-NodalDisplacementDifferenceL2NormPD::getValue()
+NodalDisplacementDifferenceL2NormPD::getValue() const
 {
   return std::sqrt(NodalIntegralPostprocessorBasePD::getValue());
 }

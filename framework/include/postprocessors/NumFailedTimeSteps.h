@@ -22,9 +22,10 @@ public:
 
   NumFailedTimeSteps(const InputParameters & parameters);
 
-  void initialize() override {}
-  void execute() override {}
-  Real getValue() override;
+  virtual void initialize() override {}
+  virtual void execute() override {}
+  using Postprocessor::getValue;
+  virtual Real getValue() const override;
 
 protected:
   /// Retrieves the current TimeStepper used by the executioner.

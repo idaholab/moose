@@ -23,11 +23,12 @@ public:
 
   NumInternalSides(const InputParameters & parameters);
   virtual ~NumInternalSides();
-  virtual void execute();
-  virtual void threadJoin(const UserObject & uo);
-  virtual void finalize();
-  virtual void initialize();
-  virtual PostprocessorValue getValue();
+  virtual void execute() override;
+  virtual void threadJoin(const UserObject & uo) override;
+  virtual void finalize() override;
+  virtual void initialize() override;
+  using Postprocessor::getValue;
+  virtual PostprocessorValue getValue() const override;
   const unsigned int & count() const { return _count; }
 
 private:

@@ -23,10 +23,11 @@ public:
 
   TestFaceToCellReconstruction(const InputParameters & parameters);
 
-  void initialize() override;
-  void execute() override {}
+  virtual void initialize() override;
+  virtual void execute() override {}
 
-  PostprocessorValue getValue() override final;
+  using Postprocessor::getValue;
+  virtual PostprocessorValue getValue() const override final;
 
 protected:
   PostprocessorValue _reconstruction_error;

@@ -26,7 +26,7 @@ TimestepSize::TimestepSize(const InputParameters & parameters)
 }
 
 Real
-TimestepSize::getValue()
+TimestepSize::getValue() const
 {
   return _feproblem.dt();
 }

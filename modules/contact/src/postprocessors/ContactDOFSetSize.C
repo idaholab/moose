@@ -75,7 +75,7 @@ ContactDOFSetSize::execute()
 }
 
 PostprocessorValue
-ContactDOFSetSize::getValue()
+ContactDOFSetSize::getValue() const
 {
   return _count;
 }

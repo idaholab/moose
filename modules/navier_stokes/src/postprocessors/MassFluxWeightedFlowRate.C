@@ -76,7 +76,7 @@ MassFluxWeightedFlowRate::threadJoin(const UserObject & y)
 }
 
 Real
-MassFluxWeightedFlowRate::getValue()
+MassFluxWeightedFlowRate::getValue() const
 {
   return _integral_value / _mdot;
 }

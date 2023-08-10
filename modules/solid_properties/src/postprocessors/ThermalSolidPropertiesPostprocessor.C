@@ -48,7 +48,7 @@ ThermalSolidPropertiesPostprocessor::execute()
 }
 
 PostprocessorValue
-ThermalSolidPropertiesPostprocessor::getValue()
+ThermalSolidPropertiesPostprocessor::getValue() const
 {
   switch (_property)
   {

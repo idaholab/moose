@@ -22,13 +22,14 @@ public:
   TestCrackCounter(const InputParameters & parameters);
 
   /// Initialize the number of Cracks.
-  virtual void initialize();
+  virtual void initialize() override;
 
   /// Calculates the number of Cracks
-  virtual void execute();
+  virtual void execute() override;
 
   /// Get number of Cracks
-  virtual Real getValue();
+  using Postprocessor::getValue;
+  virtual Real getValue() const override;
 
 protected:
   /// Variable used to write out the number of Cracks

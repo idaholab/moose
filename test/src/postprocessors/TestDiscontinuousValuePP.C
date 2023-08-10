@@ -50,7 +50,7 @@ TestDiscontinuousValuePP::initialSetup()
 }
 
 Real
-TestDiscontinuousValuePP::getValue()
+TestDiscontinuousValuePP::getValue() const
 {
   if (_evaluate_gradient)
   {

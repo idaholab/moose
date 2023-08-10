@@ -42,7 +42,8 @@ ChangeOverFixedPointPostprocessor::ChangeOverFixedPointPostprocessor(
     _pps_value(getPostprocessorValue("postprocessor")),
     _pps_value_old(0),
     _pps_value_initial(declareRestartableData<Real>("pps_value_initial")),
-    _t_step_old(-1)
+    _t_step_old(-1),
+    _value(0.0)
 {
   if (_change_with_respect_to_initial)
   {
@@ -72,8 +73,8 @@ ChangeOverFixedPointPostprocessor::execute()
 {
 }
 
-Real
-ChangeOverFixedPointPostprocessor::getValue()
+void
+ChangeOverFixedPointPostprocessor::finalize()
 {
   // detect the beginning of a new FixedPoint iteration process
   // it can either a new time step or a failed time step
@@ -119,7 +120,13 @@ ChangeOverFixedPointPostprocessor::getValue()
     change = _pps_value - base_value;
 
   if (_take_absolute_value)
-    return std::fabs(change);
+    _value = std::fabs(change);
   else
-    return change;
+    _value = change;
+}
+
+Real
+ChangeOverFixedPointPostprocessor::getValue() const
+{
+  return _value;
 }

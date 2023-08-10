@@ -45,7 +45,7 @@ BondStatusConvergedPostprocessorPD::execute()
 }
 
 Real
-BondStatusConvergedPostprocessorPD::getValue()
+BondStatusConvergedPostprocessorPD::getValue() const
 {
   return _num_bond_status_updated;
 }

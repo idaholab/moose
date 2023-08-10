@@ -26,7 +26,7 @@ NumAdaptivityCycles::NumAdaptivityCycles(const InputParameters & parameters)
 }
 
 Real
-NumAdaptivityCycles::getValue()
+NumAdaptivityCycles::getValue() const
 {
   return _fe_problem.getNumCyclesCompleted();
 }
