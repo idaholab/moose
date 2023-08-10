@@ -656,6 +656,11 @@ public:
   const RestartableDataMap & getRestartableDataMap(const RestartableDataMapName & name) const;
 
   /**
+   * @return Whether or not the restartable data has the given name registered.
+   */
+  bool hasRestartableDataMap(const RestartableDataMapName & name) const;
+
+  /**
    * Reserve a location for storing custom RestartableDataMap objects.
    *
    * This should be called in the constructor of an application.
@@ -665,6 +670,11 @@ public:
    *               given name is used to generate the suffix (MyMetaData -> _mymetadata)
    */
   void registerRestartableDataMapName(const RestartableDataMapName & name, std::string suffix = "");
+
+  /**
+   * @return The output name for the restartable data with name \p name
+   */
+  const std::string & getRestartableDataMapName(const RestartableDataMapName & name) const;
 
   /**
    * Return a reference to the recoverable data object
