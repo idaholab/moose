@@ -78,6 +78,8 @@ public:
   using ElemArg = Moose::ElemArg;
   using FaceArg = Moose::FaceArg;
   using StateArg = Moose::StateArg;
+  using NodeArg = Moose::NodeArgs;
+
 
   static InputParameters validParams();
 
@@ -557,6 +559,7 @@ private:
 
   ValueType evaluate(const ElemArg & elem, const StateArg &) const override final;
   ValueType evaluate(const FaceArg & face, const StateArg &) const override final;
+  ValueType evaluate(const NodeArg & node, const StateArg &) const override final;
   GradientType evaluateGradient(const ElemQpArg & qp_arg, const StateArg &) const override final;
   GradientType evaluateGradient(const ElemArg & elem_arg, const StateArg &) const override final;
   GradientType evaluateGradient(const FaceArg & face, const StateArg &) const override final;
@@ -712,6 +715,27 @@ typename MooseVariableFV<OutputType>::ValueType
 MooseVariableFV<OutputType>::evaluate(const ElemArg & elem_arg, const StateArg & state) const
 {
   return getElemValue(elem_arg.elem, state);
+}
+
+template <typename OutputType>
+typename MooseVariableFV<OutputType>::ValueType
+MooseVariableFV<OutputType>::evaluate(const Node & node_arg, const StateArg & state) const
+{
+  const auto & node_to_elem_map = _mesh.nodeToElemMap();
+  const auto & elem_ids = libmesh_map_find(node_to_elem_map, node_arg.node->id());
+  ValueType sum = 0;
+  unsigned short num_values = 0;
+  for (const auto elem_id : elem_ids)
+  {
+    const Elem * const elem = _mesh.queryElemPtr(elem_id);
+    mooseAssert(elem, "We should have this element available");
+    if (!this->hasBlocks(elem->subdomain_id()))
+      continue;
+    const ElemArg elem_arg{elem, /*correct_skewness=*/false};
+    sum += getElemValue(elem_arg, state);
+    ++num_values;
+  }
+  return sum / num_values;
 }
 
 template <typename OutputType>

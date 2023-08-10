@@ -985,7 +985,6 @@ MooseMesh::nodeToElemMap()
       _node_to_elem_map_built = true; // MUST be set at the end for double-checked locking to work!
     }
   }
-
   return _node_to_elem_map;
 }
 

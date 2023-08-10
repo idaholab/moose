@@ -86,8 +86,6 @@ protected:
                                 const Moose::StateArg &) const override;
   GradientType evaluateGradient(const Moose::FaceArg & face_arg,
                                 const Moose::StateArg &) const override;
-  GradientType evaluateGradient(const Moose::NodeArg & node_arg,
-                                const Moose::StateArg &) const override;
 
 private:
   /**
@@ -296,25 +294,18 @@ PiecewiseByBlockLambdaFunctor<T>::evaluate(const Moose::ElemPointArg & elem_poin
   return it->second(elem_point_arg, time);
 }
 
-// template <typename T>
-// typename PiecewiseByBlockLambdaFunctor<T>::ValueType
-// PiecewiseByBlockLambdaFunctor<T>::evaluate(const Moose::NodeArg & node_arg,
-//                                            const Moose::StateArg & time) const
-// {
-//   const Node * const node = node_arg.node;
-//   mooseAssert(node && node != libMesh::remote_node,
-//               "The element must be non-null and non-remote in functor material properties");
-//   auto it = _node_functor.find(node_arg.subdomain_id);
-//   if (it == _node_functor.end())
-//     subdomainErrorMessage(node_arg.subdomain_id);
-
-//   return it->second(node_arg, time);
-// }
 template <typename T>
 typename PiecewiseByBlockLambdaFunctor<T>::ValueType
-PiecewiseByBlockLambdaFunctor<T>::operator()(const Moose::NodeArg & node, const Moose::StateArg & state) const
+PiecewiseByBlockLambdaFunctor<T>::evaluate(const Moose::NodeArg & node_arg,
+                                           const Moose::StateArg & time) const
 {
-    return evaluate(node, state);
+  mooseAssert(node && node != libMesh::remote_node,
+              "The element must be non-null and non-remote in functor material properties");
+  auto it = _node_functor.find(node_arg.subdomain_id);
+  if (it == _node_functor.end())
+    subdomainErrorMessage(node_arg.subdomain_id);
+
+  return it->second(node_arg, time);
 }
 
 template <typename T>
@@ -331,12 +322,4 @@ PiecewiseByBlockLambdaFunctor<T>::evaluateGradient(const Moose::FaceArg & face_a
                                                    const Moose::StateArg & time) const
 {
   return Moose::FV::greenGaussGradient(face_arg, time, *this, true, _mesh);
-}
-
-template <typename T>
-typename PiecewiseByBlockLambdaFunctor<T>::GradientType
-PiecewiseByBlockLambdaFunctor<T>::evaluateGradient(const Moose::NodeArg & node_arg,
-                                                   const Moose::StateArg & time) const
-{
-  return Moose::FV::greenGaussGradient(node_arg, time, *this, true, _mesh);
 }
