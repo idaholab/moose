@@ -68,7 +68,7 @@ protected:
   const bool & _equal_area;
 
   /// prefix string for the boundary names
-  const std::string _boundary_name_prefix;
+  const BoundaryName _boundary_name_prefix;
 
   /// offset that is added to the boundary IDs
   const boundary_id_type _boundary_id_offset;

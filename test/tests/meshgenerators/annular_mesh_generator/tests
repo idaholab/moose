@@ -83,7 +83,7 @@
     exodiff = boundary_prefix_offset_in.e
     mesh_mode = 'REPLICATED'
     recover = false
-    requirement = 'The system shall have the capability of generating an annular mesh with user defined prefix on boundary name and offset on boundary ids'
+    requirement = 'The system shall have the capability of generating an annular mesh with a user-defined prefix on boundary names and/or an offset on the boundary ids'
     design = 'meshgenerators/AnnularMeshGenerator.md'
     issues = '#25167'
   []
