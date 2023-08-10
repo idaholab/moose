@@ -88,7 +88,7 @@
     requirement = 'The system shall support hybrid finite element method (HFEM) calculations with displaced meshes.'
     mumps = true
   []
-  [robin_adpatation]
+  [robin_adaptation]
     type = 'RunException'
     input = 'robin_adapt.i'
     expect_err = 'HFEM does not support mesh adaptivity currently'
