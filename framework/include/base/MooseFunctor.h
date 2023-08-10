@@ -547,13 +547,7 @@ template <typename T>
 typename FunctorBase<T>::ValueType
 FunctorBase<T>::operator()(const NodeArg & node, const StateArg & state) const
 {
-  if (_clearance_schedule.count(EXEC_ALWAYS))
     return evaluate(node, state);
-
-  mooseAssert(state.state == 0,
-              "Cached evaluations are only currently supported for the current state.");
-
-  return queryFVArgCache(_node_arg_to_value, node);
 }
 
 template <typename T>

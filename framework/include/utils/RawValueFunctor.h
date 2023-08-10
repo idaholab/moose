@@ -65,6 +65,10 @@ protected:
   {
     return MetaPhysicL::raw_value(_ad_functor(elem_point, state));
   }
+  ValueType evaluate(const NodeArg & node, const StateArg & state) const override
+  {
+    return MetaPhysicL::raw_value(_ad_functor(node, state));
+  }
 
   GradientType evaluateGradient(const ElemArg & elem, const StateArg & state) const override
   {
