@@ -146,23 +146,16 @@ uel_(double RHS[],
   const double temperature = PREDEF[0];
   const double voltage = PREDEF[2];
 
-  std::cout << "Before Y: " << Y << "\n";
-
   Y *= (temperature + voltage) / 1000;
-  std::cout << "temperature: " << temperature << "\n";
-  std::cout << "voltage: " << voltage << "\n";
-  std::cout << "Y: " << Y << "\n";
 
   // State-dependent contribution of elasticity modulus.
   Y *= (1 + SVARS[6] * 10.0);
-  std::cout << "Final Y: " << Y << "\n";
 
   double PROPS_MOD[2];
   PROPS_MOD[0] = Y;
   PROPS_MOD[1] = PROPS[1];
 
   const auto nu = PROPS[1];
-
 
   // double * stress = nullptr;
   double * statev = nullptr;
@@ -261,7 +254,6 @@ uel_(double RHS[],
   for (const auto i : range_stress)
     SVARS[i] = stress[i];
 
-
   Eigen::Matrix<double, 3, 3> E;
 
   E << ddsdde[0], ddsdde[1], ddsdde[2], //
@@ -287,7 +279,6 @@ uel_(double RHS[],
   }
 
   SVARS[6] += std::fabs(dstran[0]) + std::fabs(dstran[1]);
-  std::cout << "Accumulated incremental strain: " << SVARS[6] << "\n";
 
   // This is the "equivalent" piece of code to UMAT within the UEL routine
   if (false)

@@ -78,5 +78,4 @@ umat_(double * stress,
       stress[k1] += ddsdde[k1 * *ntens + k2] * dstran[k2];
 
    statev[0] += std::fabs(dstran[0]) + std::fabs(dstran[1]);
-   std::cout << "Accumulated reference strain for nonlinearity: " << statev[0] <<"\n";
 }
