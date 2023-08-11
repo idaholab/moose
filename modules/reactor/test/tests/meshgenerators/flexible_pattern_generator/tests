@@ -1,0 +1,288 @@
+[Tests]
+  design = 'meshgenerators/FlexiblePatternGenerator.md'
+  issues = '#24938'
+  [test]
+    requirement = "The system shall generate "
+    [single_hex_pattern_hex]
+      type = CSVDiff
+      input = single_hex_pattern.i
+      csvdiff = single_hex_pattern_hex.csv
+      recover = false
+      detail = "a single full hexagonal patterned mesh within a hexagonal background."
+    []
+    [single_hex_pattern_cartesian]
+      type = CSVDiff
+      input = single_hex_pattern.i
+      cli_args = "Mesh/fpg/boundary_type=CARTESIAN
+                  Outputs/csv/file_base=single_hex_pattern_cart"
+      csvdiff = single_hex_pattern_cart.csv
+      recover = false
+      detail = "a single full hexagonal patterned mesh with a cartesian background shape."
+    []
+    [single_hex_pattern_circular]
+      type = CSVDiff
+      input = single_hex_pattern.i
+      cli_args = "Mesh/fpg/boundary_type=CIRCLE
+                  Mesh/fpg/boundary_sectors=36
+                  Mesh/fpg/external_boundary_id=20000
+                  Outputs/csv/file_base=single_hex_pattern_circ"
+      csvdiff = single_hex_pattern_circ.csv
+      recover = false
+      detail = "a single full hexagonal patterned mesh with a circular background shape."
+    []
+    [single_hex_pattern_custom]
+      type = CSVDiff
+      input = single_hex_pattern_custom.i
+      csvdiff = single_hex_pattern_custom.csv
+      recover = false
+      detail = "a single full hexagonal patterned mesh with a custom background shape."
+    []
+    [single_hex_pattern_dummy]
+      type = CSVDiff
+      input = single_hex_pattern.i
+      cli_args = "Mesh/fpg/hex_patterns='0 0;0 1 0;0 0'
+                  Mesh/fpg/hex_rotations=30
+                  Outputs/csv/file_base=single_hex_pattern_dummy"
+      csvdiff = single_hex_pattern_dummy.csv
+      recover = false
+      detail = "a rotated single partial hexagonal patterned mesh with hexagonal background."
+    []
+    [double_hex_pattern]
+      type = CSVDiff
+      input = double_hex_pattern.i
+      csvdiff = double_hex_pattern.csv
+      recover = false
+      detail = "two full hexagonal patterned pins mesh with hexagonal background."
+    []
+    [single_rect_pattern]
+      type = CSVDiff
+      input = single_rect_pattern.i
+      csvdiff = single_rect_pattern.csv
+      recover = false
+      detail = "a single rectangular patterned mesh with hexagonal background."
+    []
+    [single_circ_pattern]
+      type = CSVDiff
+      input = single_circ_pattern.i
+      csvdiff = single_circ_pattern.csv
+      recover = false
+      detail = "an single circular patterned mesh with hexagonal background."
+    []
+    [double_circ_pattern]
+      type = CSVDiff
+      input = double_circ_pattern.i
+      csvdiff = double_circ_pattern.csv
+      recover = false
+      detail = "an double circular patterned mesh with hexagonal background."
+    []
+    [custom_pattern]
+      type = CSVDiff
+      input = custom_pattern.i
+      csvdiff = custom_pattern.csv
+      recover = false
+      detail = "a custom patterned mesh with hexagonal background."
+    []
+    [mixed_pattern]
+      type = CSVDiff
+      input = mixed_pattern.i
+      csvdiff = mixed_pattern.csv
+      recover = false
+      detail = "a mixed patterned mesh with hexagonal background."
+    []
+    [patterned_assm]
+      type = CSVDiff
+      input = patterned_assm.i
+      csvdiff = patterned_assm.csv
+      recover = false
+      mesh_mode = 'REPLICATED'
+      detail = "a patterned assembly mesh by stitching flexible patterned meshes."
+    []  
+  []
+  [error]
+    requirement = 'The system shall throw an error '
+    [err_nonexistent_input]
+      type = RunException
+      input = custom_pattern.i
+      cli_args = "/Mesh/fpg/extra_positions_mg_indices='1 0 0 0 0 0'
+                  --mesh-only err.e"
+      expect_err = "the index used for extra positions must be available"
+      detail = "if the unit mesh used for the pattern is not provided in the input meshes."
+    []
+    [err_unused_input]
+        type = RunException
+        input = double_hex_pattern.i
+        cli_args = "/Mesh/fpg/hex_patterns='0 0;0 0 0;0 0|0 0;0 0 0;0 0'
+                    --mesh-only err.e"
+        expect_err = "All the input mesh generator names are not used."
+        detail = "if some of the input meshes are not used in patterning."
+      []
+    [err_even_hex_pattern]
+      type = RunException
+      input = single_hex_pattern.i
+      cli_args = "/Mesh/fpg/hex_patterns='0 0;0 0'
+                  --mesh-only err.e"
+      expect_err = "of each element of this parameter must be odd"
+      detail = "if the hexagnal pattern provided has an even number of size."
+    []
+    [err_unity_hex_pattern]
+      type = RunException
+      input = single_hex_pattern.i
+      cli_args = "/Mesh/fpg/hex_patterns='0 0'
+                  --mesh-only err.e"
+      expect_err = "of each element of this parameter must be larger than unity"
+      detail = "if the hexagonal pattern provided has a unity length element."
+    []
+    [err_incorrect_hex_pattern]
+      type = RunException
+      input = single_hex_pattern.i
+      cli_args = "/Mesh/fpg/hex_patterns='0 0;0 0;0 0'
+                  --mesh-only err.e"
+      expect_err = "The two-dimentional array element of this parameter must have a correct hexagonal shape."
+      detail = "if the hexagonal pattern provided has an incorrect, non-hexagonal, shape."
+    []
+    [err_wrong_hex_pitches_size]
+      type = RunException
+      input = single_hex_pattern.i
+      cli_args = "/Mesh/fpg/hex_pitches='6 6'
+                  --mesh-only err.e"
+      expect_err = "The length of this parameter must be the same as that of hex_patterns."
+      detail = "if the provided pitch values of the hexagonal patterns have a size that does not match the number of hexagonal patterns to be generated."
+    []
+    [err_wrong_hex_origins_size]
+      type = RunException
+      input = single_hex_pattern.i
+      cli_args = "/Mesh/fpg/hex_origins='0 0 0 0 0 0'
+                  --mesh-only err.e"
+      expect_err = "the length of this parameter must be the same as that of hex_patterns."
+      detail = "if the provided origin locations of the hexagonal patterns have a size that does not match the number of hexagonal patterns to be generated."
+    []
+    [err_wrong_hex_rotations_size]
+      type = RunException
+      input = single_hex_pattern.i
+      cli_args = "/Mesh/fpg/hex_rotations='0 0'
+                  --mesh-only err.e"
+      expect_err = "the length of this parameter must be the same as that of hex_patterns."
+      detail = "if the provided rotation angles of the hexagonal patterns have a size that does not match the number of hexagonal patterns to be generated."
+    []
+    [err_incorrect_rect_pattern]
+      type = RunException
+      input = single_rect_pattern.i
+      cli_args = "/Mesh/fpg/rect_patterns='0 0;0 0 0'
+                  --mesh-only err.e"
+      expect_err = "The two-dimensional array element of this parameter must have a correct rectangular shape."
+      detail = "if the rectangular pattern provided has a correct shape."
+    []
+    [err_wrong_rect_pitches_x_size]
+      type = RunException
+      input = single_rect_pattern.i
+      cli_args = "/Mesh/fpg/rect_pitches_x='6 6'
+                  --mesh-only err.e"
+      expect_err = "The length of this parameter must be the same as that of rect_patterns."
+      detail = "if the provided x pitch values of the rectangular patterns have a size that does not match the number of rectangular patterns to be generated."
+    []
+    [err_wrong_rect_pitches_y_size]
+      type = RunException
+      input = single_rect_pattern.i
+      cli_args = "/Mesh/fpg/rect_pitches_y='8 8'
+                  --mesh-only err.e"
+      expect_err = "The length of this parameter must be the same as that of rect_patterns."
+      detail = "if the provided y pitch values of the rectangular patterns have a size that does not match the number of rectangular patterns to be generated."
+    []
+    [err_wrong_rect_origins_size]
+      type = RunException
+      input = single_rect_pattern.i
+      cli_args = "/Mesh/fpg/rect_origins='0 0 0 0 0 0'
+                  --mesh-only err.e"
+      expect_err = "the length of this parameter must be the same as that of rect_patterns."
+      detail = "if the provided origin locations of the rectangular patterns have a size that does not match the number of rectangular patterns to be generated."
+    []
+    [err_wrong_rect_rotations_size]
+      type = RunException
+      input = single_rect_pattern.i
+      cli_args = "/Mesh/fpg/rect_rotations='0 0'
+                  --mesh-only err.e"
+      expect_err = "the length of this parameter must be the same as that of rect_patterns."
+      detail = "if the provided rotation angles of the rectangular patterns have a size that does not match the number of rectangular patterns to be generated."
+    []
+    [err_wrong_circ_radii_size]
+      type = RunException
+      input = single_circ_pattern.i
+      cli_args = "/Mesh/fpg/circular_radii='7 7'
+                  --mesh-only err.e"
+      expect_err = "The length of this parameter must be the same as that of circular_patterns."
+      detail = "if the provided circular radii values of the rectangular patterns have a size that does not match the number of circular patterns to be generated."
+    []
+    [err_wrong_circ_origins_size]
+      type = RunException
+      input = single_circ_pattern.i
+      cli_args = "/Mesh/fpg/circular_origins='0 0 0 0 0 0'
+                  --mesh-only err.e"
+      expect_err = "the length of this parameter must be the same as that of circular_patterns."
+      detail = "if the provided origin locations of the circular patterns have a size that does not match the number of circular patterns to be generated."
+    []
+    [err_wrong_circ_rotations_size]
+      type = RunException
+      input = single_circ_pattern.i
+      cli_args = "/Mesh/fpg/circular_rotations='0 0'
+                  --mesh-only err.e"
+      expect_err = "the length of this parameter must be the same as that of circular_patterns."
+      detail = "if the provided rotation angles of the circular patterns have a size that does not match the number of circular patterns to be generated."
+    []
+    [err_wrong_extra_mg_size]
+      type = RunException
+      input = custom_pattern.i
+      cli_args = "/Mesh/fpg/extra_positions_mg_indices='0 0'
+                  --mesh-only err.e"
+      expect_err = "This parameter must have the same size as extra_positions."
+      detail = "if the provided mesh indices of the extra positioned meshes have a size that does not match the number of extra positions provided."
+    []
+    [err_no_custom_mesh]
+      type = RunException
+      input = single_hex_pattern.i
+      cli_args = "/Mesh/fpg/boundary_type=CUSTOM
+                  --mesh-only err.e"
+      expect_err = "boundary_mesh must be specified for CUSTOM boundary_type."
+      detail = "if the boundary input mesh is not provided when the boundary type is selected to be custom."
+    []
+    [err_custom_mesh_with_boundary_sector]
+      type = RunException
+      input = single_hex_pattern_custom.i
+      cli_args = "/Mesh/fpg/boundary_sectors=10
+                  --mesh-only err.e"
+      expect_err = "this parameter should not be provided for CUSTOM boundary_type."
+      detail = "if the boundary sector number is provided when the boundary type is selected to be custom."
+    []
+    [err_custom_mesh_with_boundary_size]
+      type = RunException
+      input = single_hex_pattern_custom.i
+      cli_args = "/Mesh/fpg/boundary_size=10
+                  --mesh-only err.e"
+      expect_err = "this parameter should not be provided for CUSTOM boundary_type."
+      detail = "if the boundary pitch value is provided when the boundary type is selected to be custom."
+    []
+    [err_redundant_custom_mesh]
+      type = RunException
+      input = single_hex_pattern_custom.i
+      cli_args = "/Mesh/fpg/boundary_type=HEXAGON
+                  --mesh-only err.e"
+      expect_err = "this parameter should not be provided for non-CUSTOM"
+      detail = "if the boundary input mesh is provided when the boundary type is not custom."
+    []
+    [err_noncustom_mesh_without_boundary_sectors]
+      type = RunException
+      input = single_hex_pattern_err.i
+      cli_args = "/Mesh/fpg/boundary_size=20
+                  --mesh-only err.e"
+      expect_err = "this parameter must be provided for non-CUSTOM"
+      detail = "if the boundary sectors nunber is not provided when the boundary type is not custom."
+    []
+    [err_noncustom_mesh_without_boundary_size]
+      type = RunException
+      input = single_hex_pattern_err.i
+      cli_args = "/Mesh/fpg/boundary_sectors=10
+                  --mesh-only err.e"
+      expect_err = "this parameter must be provided for non-CUSTOM"
+      detail = "if the boundary pitch value is not provided when the boundary type is not custom."
+    []
+  []
+[]
