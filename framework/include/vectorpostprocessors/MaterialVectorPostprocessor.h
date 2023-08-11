@@ -10,6 +10,7 @@
 #pragma once
 
 #include "ElementVectorPostprocessor.h"
+#include <optional>
 
 /// This postprocessor records all scalar material properties of the specified
 /// material object on specified elements at the indicated execution points
@@ -34,13 +35,18 @@ private:
   void sortVecs();
 
   /// Element ids to record material properties for.
-  std::set<unsigned int> _elem_filter;
+  std::optional<std::set<dof_id_type>> _elem_filter;
 
   /// Column of element id info.
   VectorPostprocessorValue & _elem_ids;
 
   /// Column of quadrature point indices.
   VectorPostprocessorValue & _qp_ids;
+
+  /// Columns of quadrature point coordinates.
+  VectorPostprocessorValue & _x_coords;
+  VectorPostprocessorValue & _y_coords;
+  VectorPostprocessorValue & _z_coords;
 
   /// Columns for each (scalar) property of the material.
   std::vector<VectorPostprocessorValue *> _prop_vecs;

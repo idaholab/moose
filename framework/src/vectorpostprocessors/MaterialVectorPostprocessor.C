@@ -26,37 +26,47 @@ MaterialVectorPostprocessor::validParams()
                              "elements at the indicated execution points.");
   params.addRequiredParam<MaterialName>("material",
                                         "Material for which all properties will be recorded.");
-  params.addRequiredParam<std::vector<unsigned int>>(
-      "elem_ids", "Element IDs to print data for (others are ignored).");
+  params.addParam<std::vector<dof_id_type>>(
+      "elem_ids",
+      "Subset of element IDs to print data for. If omitted, all elements will be printed.");
   return params;
 }
 
 MaterialVectorPostprocessor::MaterialVectorPostprocessor(const InputParameters & parameters)
   : ElementVectorPostprocessor(parameters),
-    _elem_filter(getParam<std::vector<unsigned int>>("elem_ids").begin(),
-                 getParam<std::vector<unsigned int>>("elem_ids").end()),
     _elem_ids(declareVector("elem_id")),
-    _qp_ids(declareVector("qp_id"))
+    _qp_ids(declareVector("qp_id")),
+    _x_coords(declareVector("x")),
+    _y_coords(declareVector("y")),
+    _z_coords(declareVector("z"))
 {
   auto & mat = getMaterialByName(getParam<MaterialName>("material"), true);
   auto & prop_names = mat.getSuppliedItems();
   if (mat.isBoundaryMaterial())
     mooseError(name(), ": boundary materials (i.e. ", mat.name(), ") cannot be used");
 
-  for (auto & id : _elem_filter)
+  // Get list of elements from user
+  if (parameters.isParamValid("elem_ids"))
   {
-    auto el = _mesh.getMesh().query_elem_ptr(id);
+    const auto & ids = getParam<std::vector<dof_id_type>>("elem_ids");
+    _elem_filter = std::set(ids.begin(), ids.end());
 
-    // We'd better have found the requested element on *some*
-    // processor.
-    bool found_elem = (el != nullptr);
-    this->comm().max(found_elem);
+    // check requested materials are available
+    for (const auto & id : ids)
+    {
+      auto el = _mesh.getMesh().query_elem_ptr(id);
 
-    // We might not have el on this processor in a distributed mesh,
-    // but it should be somewhere and it ought to have a material
-    // defined for its subdomain
-    if (!found_elem || (el && !mat.hasBlocks(el->subdomain_id())))
-      mooseError(name(), ": material ", mat.name(), " is not defined on element ", id);
+      // We'd better have found the requested element on *some*
+      // processor.
+      bool found_elem = (el != nullptr);
+      this->comm().max(found_elem);
+
+      // We might not have el on this processor in a distributed mesh,
+      // but it should be somewhere and it ought to have a material
+      // defined for its subdomain
+      if (!found_elem || (el && !mat.hasBlocks(el->subdomain_id())))
+        mooseError(name(), ": material ", mat.name(), " is not defined on element ", id);
+    }
   }
 
   for (auto & prop : prop_names)
@@ -85,6 +95,9 @@ MaterialVectorPostprocessor::initialize()
   {
     _elem_ids.clear();
     _qp_ids.clear();
+    _x_coords.clear();
+    _y_coords.clear();
+    _z_coords.clear();
     for (auto vec : _prop_vecs)
       vec->clear();
   }
@@ -93,8 +106,9 @@ MaterialVectorPostprocessor::initialize()
 void
 MaterialVectorPostprocessor::execute()
 {
-  unsigned int elem_id = _current_elem->id();
-  if (_elem_filter.count(elem_id) == 0)
+  // skip execution if element not in filter, assuming filter was used
+  const auto elem_id = _current_elem->id();
+  if (_elem_filter && !_elem_filter->count(elem_id))
     return;
 
   unsigned int nqp = _qrule->n_points();
@@ -102,6 +116,9 @@ MaterialVectorPostprocessor::execute()
   {
     _elem_ids.push_back(elem_id);
     _qp_ids.push_back(qp);
+    _x_coords.push_back(_q_point[qp](0));
+    _y_coords.push_back(_q_point[qp](1));
+    _z_coords.push_back(_q_point[qp](2));
   }
 
   for (unsigned int i = 0; i < _prop_names.size(); i++)
@@ -136,6 +153,9 @@ MaterialVectorPostprocessor::finalize()
   // collect all processor data
   comm().gather(0, _elem_ids);
   comm().gather(0, _qp_ids);
+  comm().gather(0, _x_coords);
+  comm().gather(0, _y_coords);
+  comm().gather(0, _z_coords);
   for (auto vec : _prop_vecs)
     comm().gather(0, *vec);
   sortVecs();
@@ -147,6 +167,9 @@ MaterialVectorPostprocessor::threadJoin(const UserObject & y)
   auto & vpp = static_cast<const MaterialVectorPostprocessor &>(y);
   _elem_ids.insert(_elem_ids.end(), vpp._elem_ids.begin(), vpp._elem_ids.end());
   _qp_ids.insert(_qp_ids.end(), vpp._qp_ids.begin(), vpp._qp_ids.end());
+  _x_coords.insert(_x_coords.end(), vpp._x_coords.begin(), vpp._x_coords.end());
+  _y_coords.insert(_y_coords.end(), vpp._y_coords.begin(), vpp._y_coords.end());
+  _z_coords.insert(_z_coords.end(), vpp._z_coords.begin(), vpp._z_coords.end());
 
   for (unsigned int i = 0; i < _prop_vecs.size(); i++)
   {
@@ -176,6 +199,9 @@ MaterialVectorPostprocessor::sortVecs()
 
   Moose::applyIndices(_elem_ids, ind);
   Moose::applyIndices(_qp_ids, ind);
+  Moose::applyIndices(_x_coords, ind);
+  Moose::applyIndices(_y_coords, ind);
+  Moose::applyIndices(_z_coords, ind);
   for (auto vec : _prop_vecs)
     Moose::applyIndices(*vec, ind);
 }
