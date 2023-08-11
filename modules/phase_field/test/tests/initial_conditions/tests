@@ -179,7 +179,17 @@
       # Testing optimal hex coloring with a backtracking algorithm
       method = '!DBG'
 
-      detail = 'hexagonal structure, and'
+      detail = 'hexagonal structure in 2D,'
+    []
+
+    [HexPolycrystalIC_3D]
+      type = Exodiff
+      input = HexPolycrystalIC_3D_columnar.i
+      exodiff = HexPolycrystalIC_3D_columnar_out.e
+      # Testing optimal hex coloring with a backtracking algorithm
+      method = '!DBG'
+
+      detail = 'hexagonal structure in 3D, and'
     []
 
     [TricrystalTripleJunctionIC]
