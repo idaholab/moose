@@ -18,6 +18,8 @@ OptimizationReporterBase::validParams()
   params.registerBase("OptimizationReporterBase");
   params.addRequiredParam<std::vector<ReporterValueName>>(
       "parameter_names", "List of parameter names, one for each group of parameters.");
+  params.addRangeCheckedParam<Real>(
+      "tikhonov_coeff", 0.0, "tikhonov_coeff >= 0", "Coefficient for Tikhonov Regularization.");
   params.suppressParameter<std::vector<VariableName>>("variable");
   params.suppressParameter<std::vector<std::string>>("variable_weight_names");
   params.registerBase("OptimizationReporterBase");
@@ -29,7 +31,8 @@ OptimizationReporterBase::OptimizationReporterBase(const InputParameters & param
     _parameter_names(getParam<std::vector<ReporterValueName>>("parameter_names")),
     _nparams(_parameter_names.size()),
     _parameters(_nparams),
-    _gradients(_nparams)
+    _gradients(_nparams),
+    _tikhonov_coeff(getParam<Real>("tikhonov_coeff"))
 {
   for (const auto & i : make_range(_nparams))
   {
@@ -51,6 +54,16 @@ OptimizationReporterBase::computeObjective()
   for (auto & misfit : _misfit_values)
     val += misfit * misfit;
 
+  if (_tikhonov_coeff > 0.0)
+  {
+    Real param_norm_sqr = 0;
+    for (const auto & data : _parameters)
+      for (const auto & val : *data)
+        param_norm_sqr += val * val;
+
+    val += _tikhonov_coeff * param_norm_sqr;
+  }
+
   return val * 0.5;
 }
 
@@ -71,15 +84,26 @@ OptimizationReporterBase::setSimulationValuesForTesting(std::vector<Real> & data
 void
 OptimizationReporterBase::computeGradient(libMesh::PetscVector<Number> & gradient) const
 {
-  for (const auto & p : make_range(_nparams))
-    if (_gradients[p]->size() != _nvalues[p])
+  for (const auto & param_group_id : make_range(_nparams))
+  {
+    if (_gradients[param_group_id]->size() != _nvalues[param_group_id])
       mooseError("The gradient for parameter ",
-                 _parameter_names[p],
+                 _parameter_names[param_group_id],
                  " has changed, expected ",
-                 _nvalues[p],
+                 _nvalues[param_group_id],
                  " versus ",
-                 _gradients[p]->size(),
+                 _gradients[param_group_id]->size(),
                  ".");
+
+    if (_tikhonov_coeff > 0.0)
+    {
+      auto params = _parameters[param_group_id];
+      auto grads = _gradients[param_group_id];
+      for (const auto & param_id : make_range(_nvalues[param_group_id]))
+        (*grads)[param_id] += (*params)[param_id] * _tikhonov_coeff;
+    }
+  }
+
   OptUtils::copyReporterIntoPetscVector(_gradients, gradient);
 }
 

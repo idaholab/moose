@@ -602,7 +602,7 @@
                   Mesh/gen/outward_interface_boundary_names="int1 int2"
                   Mesh/gen/create_outward_interface_boundaries=false
                   --mesh-only "poly_2d_err.e"'
-      expect_err = 'If set false, outward_interface_boundary_names should not be set as they are not used.'
+      expect_err = "If set false, 'outward_interface_boundary_names' should not be provided as they are not used."
       detail ='outward interface boundaries related parameters are provided while outward interface boundaries are not set to be created.'
     []
     [err_unneeded_inward_interface_params]
@@ -615,7 +615,7 @@
                   Mesh/gen/inward_interface_boundary_names="int1 int2"
                   Mesh/gen/create_inward_interface_boundaries=false
                   --mesh-only "poly_2d_err.e"'
-      expect_err = 'If set false, inward_interface_boundary_names should not be set as they are not used.'
+      expect_err = "If set false, 'inward_interface_boundary_names' should not be provided as they are not used."
       detail ='inward interface boundaries related parameters are provided but inward interface boundaries are not set to be created.'
     []
     [err_unneeded_interface_params]

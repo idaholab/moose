@@ -86,6 +86,9 @@ protected:
   /// Gradient values declared as reporter data
   std::vector<std::vector<Real> *> _gradients;
 
+  /// Tikhonov Coefficient for regularization
+  const Real _tikhonov_coeff;
+
   /// Bounds of the parameters
   std::vector<Real> _lower_bounds;
   std::vector<Real> _upper_bounds;

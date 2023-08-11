@@ -1,0 +1,147 @@
+[Tests]
+  design = 'meshgenerators/AdvancedConcentricCircleGenerator.md'
+  issues = '#24938'
+  [test]
+    requirement = "The system shall generate "
+    [general]
+      type = Exodiff
+      input = accg.i
+      cli_args = "Mesh/accg/num_sectors=8
+                  --mesh-only"
+      exodiff = accg_in.e
+      recover = false
+      detail = "a volume preserved concentric circles mesh."
+    []
+    [no_volume_preserve]
+      type = Exodiff
+      input = accg.i
+      cli_args = "Mesh/accg/preserve_volumes=false 
+                  Mesh/accg/num_sectors=8
+                  --mesh-only accg_nvp_in.e"
+      exodiff = accg_nvp_in.e
+      recover = false
+      detail = "a non volume preserved concentric circles mesh."
+    []
+    [custom_azi]
+      type = Exodiff
+      input = accg.i
+      cli_args = "Mesh/accg/customized_azimuthal_angles='15 45 80 120 150 200 240 300 345'
+                  --mesh-only accg_custom_azi_in.e"
+      exodiff = accg_custom_azi_in.e
+      recover = false
+      detail = "a volume preserved concentric circles mesh with custom nodal azimuthal angles."
+    []
+  []
+  [error]
+    requirement = 'The system shall throw an error '
+    [err_no_num_sectors]
+      type = RunException
+      input = accg.i
+      cli_args = "--mesh-only err.e"
+      expect_err = "this parameter must be specified if"
+      detail = "if the number of sectors is not specified in the absence of customized azimuthal "
+               "angles."
+    []
+    [err_inconstent_num_sectors]
+      type = RunException
+      input = accg.i
+      cli_args = "Mesh/accg/num_sectors=8
+                  Mesh/accg/customized_azimuthal_angles='15 45 80 120 150 200 240 300 345'
+                  --mesh-only err.e"
+      expect_err = "this parameter must be equal to the size of"
+      detail = "if the number of sectors is not consistent with the number of customized azimuthal "
+               "angles."
+    []
+    [err_non_monotonic_azi]
+      type = RunException
+      input = accg.i
+      cli_args = "Mesh/accg/customized_azimuthal_angles='15 45 80 120 150 200 240 300 345 10'
+                  --mesh-only err.e"
+      expect_err = "the azimuthal angles provided must be strictly increasing"
+      detail = "if the customized azimuthal angles are not monotonically increasing."
+    []
+    [err_oversize_azi]
+      type = RunException
+      input = accg.i
+      cli_args = "Mesh/accg/customized_azimuthal_angles='15 150 300 340'
+                  --mesh-only err.e"
+      expect_err = "please make sure the circle azimuthal discretization angles are less than"
+      detail = "if some of the customized azimuthal angles are larger than the supported intervals."
+    []
+    [err_unneeded_inward_names]
+      type = RunException
+      input = accg.i
+      cli_args = "Mesh/accg/num_sectors=8
+                  Mesh/accg/inward_interface_boundary_names='inward'
+                  --mesh-only err.e"
+      expect_err = "should not be provided as they are not used"
+      detail = "if the inward interface boundary names are provided while no inward interface boundaries are created."
+    []
+    [err_unneeded_outward_names]
+      type = RunException
+      input = accg.i
+      cli_args = "Mesh/accg/num_sectors=8
+                  Mesh/accg/create_outward_interface_boundaries=false
+                  Mesh/accg/outward_interface_boundary_names='outward'
+                  --mesh-only err.e"
+      expect_err = "should not be provided as they are not used"
+      detail = "if the outward interface boundary names are provided while no outward interface boundaries are created."
+    []
+    [err_unneeded_interface_shift]
+      type = RunException
+      input = accg.i
+      cli_args = "Mesh/accg/num_sectors=8
+                  Mesh/accg/create_outward_interface_boundaries=false
+                  Mesh/accg/interface_boundary_id_shift=100
+                  --mesh-only err.e"
+      expect_err = "this parameter should not be set if no interface boundaries are created"
+      detail = "if interface bondary id shift is provided while no interface boundaries are created."
+    []
+    [err_wrong_size_inward_names]
+      type = RunException
+      input = accg.i
+      cli_args = "Mesh/accg/num_sectors=8
+                  Mesh/accg/create_inward_interface_boundaries=true
+                  Mesh/accg/inward_interface_boundary_names='inward_1 inward_2'
+                  --mesh-only err.e"
+      expect_err = "the length of this parameter must be identical"
+      detail = "if the provided inward interface boundary names have the wrong size."
+    []
+    [err_wrong_size_outward_names]
+      type = RunException
+      input = accg.i
+      cli_args = "Mesh/accg/num_sectors=8
+                  Mesh/accg/outward_interface_boundary_names='outward_1 outward_2'
+                  --mesh-only err.e"
+      expect_err = "the length of this parameter must be identical"
+      detail = "if the provided outward interface boundary names have the wrong size."
+    []
+    [err_inconsistent_intervals]
+      type = RunException
+      input = accg.i
+      cli_args = "Mesh/accg/num_sectors=8
+                  Mesh/accg/ring_intervals=2
+                  --mesh-only err.e"
+      expect_err = "This parameter and ring_intervals must have the same length"
+      detail = "if the provided number of ring radii and ring intervals are inconsistent."
+    []
+    [err_inconsistent_bias]
+      type = RunException
+      input = accg.i
+      cli_args = "Mesh/accg/num_sectors=8
+                  Mesh/accg/ring_radial_biases='0.5'
+                  --mesh-only err.e"
+      expect_err = "This parameter and ring_radial_biases must have the same length"
+      detail = "if the provided number of ring radii and ring meshing biases are inconsistent."
+    []
+    [err_descend_radii]
+      type = RunException
+      input = accg.i
+      cli_args = "Mesh/accg/num_sectors=8
+                  Mesh/accg/ring_radii='2 1'
+                  --mesh-only err.e"
+      expect_err = "This parameter must be strictly ascending"
+      detail = "if provided radius array of the ring regions is not strictly ascending."
+    []
+  []
+[]
