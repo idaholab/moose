@@ -44,5 +44,6 @@ private:
   /// This post-processor value
   Real _value;
 
+  using Moose::FunctorBase<Real>::evaluate;
   usingFunctionParserUtilsMembers(false);
 };

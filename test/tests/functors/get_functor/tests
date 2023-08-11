@@ -1,0 +1,11 @@
+[Tests]
+  issues = '#25012'
+  design = 'Functors/index.md'
+
+  [test]
+    type = CSVDiff
+    input = get_functor.i
+    csvdiff = get_functor_out.csv
+    requirement = 'The system shall be able to use a variable, function, functor material property, and a post-processor in a functor parameter.'
+  []
+[]

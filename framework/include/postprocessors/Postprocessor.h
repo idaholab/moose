@@ -19,7 +19,9 @@
  * virtual getValue() interface which must be overridden by derived
  * classes.
  */
-class Postprocessor : public OutputInterface, public NonADFunctorInterface
+class Postprocessor : public OutputInterface,
+                      public NonADFunctorInterface,
+                      public Moose::FunctorBase<Real>
 {
 public:
   static InputParameters validParams();
@@ -39,10 +41,73 @@ public:
   virtual PostprocessorValue getValue() const;
 
   /**
+   * Gets the current value stored in the ReporterData.
+   *
+   * In most (but not all) cases, this should return the same as \c getValue().
+   */
+  PostprocessorValue getCurrentReporterValue() const;
+
+  /**
    * Returns the name of the Postprocessor.
    */
   std::string PPName() const { return _pp_name; }
 
 protected:
+  /// MOOSE object
+  const MooseObject & _pp_moose_object;
+
+  /// Post-processor name
   const std::string _pp_name;
+
+  /// FE problem
+  FEProblemBase & _pp_fe_problem;
+
+  /// Reporter data
+  ReporterData & _reporter_data;
+
+private:
+  using ElemArg = Moose::ElemArg;
+  using ElemQpArg = Moose::ElemQpArg;
+  using ElemSideQpArg = Moose::ElemSideQpArg;
+  using FaceArg = Moose::FaceArg;
+  using ElemPointArg = Moose::ElemPointArg;
+
+  ValueType evaluate(const ElemArg & elem, const Moose::StateArg & state) const override final;
+  ValueType evaluate(const FaceArg & face, const Moose::StateArg & state) const override final;
+  ValueType evaluate(const ElemQpArg & qp, const Moose::StateArg & state) const override final;
+  ValueType evaluate(const ElemSideQpArg & elem_side_qp,
+                     const Moose::StateArg & state) const override final;
+  ValueType evaluate(const ElemPointArg & elem_point,
+                     const Moose::StateArg & state) const override final;
+
+  GradientType evaluateGradient(const ElemArg & elem,
+                                const Moose::StateArg & state) const override final;
+  GradientType evaluateGradient(const FaceArg & face,
+                                const Moose::StateArg & state) const override final;
+  GradientType evaluateGradient(const ElemQpArg & qp,
+                                const Moose::StateArg & state) const override final;
+  GradientType evaluateGradient(const ElemSideQpArg & elem_side_qp,
+                                const Moose::StateArg & state) const override final;
+  GradientType evaluateGradient(const ElemPointArg & elem_point,
+                                const Moose::StateArg & state) const override final;
+
+  DotType evaluateDot(const ElemArg & elem, const Moose::StateArg & state) const override final;
+  DotType evaluateDot(const FaceArg & face, const Moose::StateArg & state) const override final;
+  DotType evaluateDot(const ElemQpArg & qp, const Moose::StateArg & state) const override final;
+  DotType evaluateDot(const ElemSideQpArg & elem_side_qp,
+                      const Moose::StateArg & state) const override final;
+  DotType evaluateDot(const ElemPointArg & elem_point,
+                      const Moose::StateArg & state) const override final;
+
+  /**
+   * Gives a one-time warning for calling an \c evaluateDot() method.
+   */
+  void evaluateDotWarning() const
+  {
+    mooseDoOnce(
+        mooseWarning("The time derivative functor operator was called on the post-processor '",
+                     _pp_name,
+                     "'. A zero value will always be returned, even if the post-processor value "
+                     "changes with time."));
+  }
 };

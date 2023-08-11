@@ -6,6 +6,7 @@ Functors are an abstraction, existing as a base class, that is available to seve
 - [Auxiliary variables](syntax/AuxVariables/index.md)
 - [Functor material properties](syntax/FunctorMaterials/index.md)
 - [Functions](syntax/Functions/index.md)
+- [Post-processors](syntax/Postprocessors/index.md)
 
 All functors can be called using the same interfaces. This enables considerable code re-use.
 For example, instead of having a kernel for each type of coupled forcing term, like
@@ -16,6 +17,11 @@ For example, instead of having a kernel for each type of coupled forcing term, l
 but for `Functors`, the space arguments can be an element, a point in an element,
 a face of an element, and so on. The time arguments represent the state of the functor : current, previous value (whether in time or iteration),
 or value before that previous one.
+
+!alert warning title=Using post-processors
+Note that when using post-processors, instead of being evaluated on-the-fly at
+a point in space and time, the most recently computed value is used, in accordance
+with the `execute_on` for the post-processor.
 
 !alert note
 If a Functor is reported as missing by the simulation, you may use the `Debug/`[!param](/Debug/SetupDebugAction/show_functors)
