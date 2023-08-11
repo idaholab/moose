@@ -7,9 +7,14 @@
 This optimization reporter provides a basic interface for inverse optimization with measurement data where all data is provided in the input file or from csv file. The objective function is defined as:
 
 !equation
-f(\mathbf{u}, \mathbf{p}) = \frac{1}{2}\sum^N_i \left(u_i - \tilde u_i\right)^2,
+f(\mathbf{u}, \mathbf{p}) = \frac{1}{2}\sum^N_i \left(u_i - \tilde u_i\right)^2 +R(\mathbf{u}, \mathbf{p}),
 
-where \mathbf{u} represents the simulation solution and $u_i$ is the solution value at measurement location $i$. $\tilde u_i$ is the measurement value at location $i$. $\mathbf{p}$ is the vector of parameters being optimized that the simulation solution depends on.
+where $\mathbf{u}$ represents the simulation solution with $u_i$ being the solution value at measurement location $i$. $\tilde u_i$ is the measurement value at location $i$. $\mathbf{p}$ is the vector of parameters being optimized that the simulation solution depends on.  $R(\mathbf{u}, \mathbf{p})$ provides regularization of the objective function.  We currently only support the Tikhonov regularization given by
+
+!equation
+R(\mathbf{u}, \mathbf{p}) = \frac{\alpha}{2}\|\mathbf{p}\|^2,
+
+where $\alpha$ is the Tikhonov coefficient specified in the input file by [!param](/OptimizationReporter/OptimizationReporter/tikhonov_coeff).
 
 ## Measurement Data id=sec:measure_data
 
@@ -21,7 +26,7 @@ Additionally, locations and values can be specified at input using [!param](/Opt
 
 ## Optimization Parameters
 
-`OptimizationReporter` is also responsible for creating parameter vector(s) for optimization, setting the initial condition for the optimization, and setting parameter bounds. Although the [Optimize.md] executioner holds a single vector for parameter values, this vector can be split into groups of parameters. This is done by specifying a name for each group with [!param](/OptimizationReporter/OptimizationReporter/parameter_names) and the number of parameters in each group with [!param](/OptimizationReporter/OptimizationReporter/num_values). The total number of parameters is ultimately defined by the sum of [!param](/OptimizationReporter/OptimizationReporter/num_values). The initial condition for the optimization can then be defined with [!param](/OptimizationReporter/OptimizationReporter/initial_condition), where a vector of data must defined for each group.  This vector an be a single value in which case all parameters in that group are set to that value or a value can be set for every parameter in that group.  The lower and upper bounds for the parameters can then specified by [!param](/OptimizationReporter/OptimizationReporter/lower_bounds) and [!param](/OptimizationReporter/OptimizationReporter/upper_bounds), respectively. The bounds follow the same input format rules as the `initial_condtion`.  If no initial conditions are provided, the parameters are initialized with 0.  Default values for `upper_bounds` and `lower_bounds` are std::numeric<Real>::max() and std::numeric<Real>::lower(), respectively.  These bounds are only applied if a bounded optimization algorithm is used.
+`OptimizationReporter` is also responsible for creating parameter vector(s) for optimization, setting the initial condition for the optimization, and setting parameter bounds. Although the [Optimize.md] executioner holds a single vector for parameter values, this vector can be split into groups of parameters. This is done by specifying a name for each group with [!param](/OptimizationReporter/OptimizationReporter/parameter_names) and the number of parameters in each group with [!param](/OptimizationReporter/OptimizationReporter/num_values). The total number of parameters is ultimately defined by the sum of [!param](/OptimizationReporter/OptimizationReporter/num_values). The initial condition for the optimization can then be defined with [!param](/OptimizationReporter/OptimizationReporter/initial_condition), where a vector of data must defined for each group.  This vector an be a single value in which case all parameters in that group are set to that value or a value can be set for every parameter in that group.  The lower and upper bounds for the parameters can then specified by [!param](/OptimizationReporter/OptimizationReporter/lower_bounds) and [!param](/OptimizationReporter/OptimizationReporter/upper_bounds), respectively. The bounds follow the same input format rules as the `initial_condtion`.  If no initial conditions are provided, the parameters are initialized with 0.  Default values for `upper_bounds` and `lower_bounds` are `std::numeric<Real>::max()` and `std::numeric<Real>::lower()`, respectively.  These bounds are only applied if a bounded optimization algorithm is used.
 
 ## Declared Data
 
@@ -38,7 +43,7 @@ Additionally, locations and values can be specified at input using [!param](/Opt
 | Simulation values | `simulation_values` | $N$ |
 | $u_i - \tilde{u}_i$ | `misfit_values` | $N$ |
 | Values of parameter group $g$ | [!param](/OptimizationReporter/OptimizationReporter/parameter_names)$_g$ | [!param](/OptimizationReporter/OptimizationReporter/num_values)$_g$ |
-| Parameter Gradient | `adjoint` | $\sum_{g}$[!param](/OptimizationReporter/OptimizationReporter/num_values)$_g$ |
+| Parameter Gradient of parameter group $g$ | `grad_`[!param](/OptimizationReporter/OptimizationReporter/parameter_names)$_g$  | [!param](/OptimizationReporter/OptimizationReporter/num_values)$_g$ |
 
 
 ## Example Input Syntax

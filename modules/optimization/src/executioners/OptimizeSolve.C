@@ -18,8 +18,9 @@ InputParameters
 OptimizeSolve::validParams()
 {
   InputParameters params = emptyInputParameters();
-  MooseEnum tao_solver_enum("taontr taobntr taobncg taonls taobnls taontl taobntl taolmvm "
-                            "taoblmvm taonm taobqnls taoowlqn taogpcg taobmrm");
+  MooseEnum tao_solver_enum(
+      "taontr taobntr taobncg taonls taobnls taobqnktr taontl taobntl taolmvm "
+      "taoblmvm taonm taobqnls taoowlqn taogpcg taobmrm");
   params.addRequiredParam<MooseEnum>(
       "tao_solver", tao_solver_enum, "Tao solver to use for optimization.");
   ExecFlagEnum exec_enum = ExecFlagEnum();
@@ -94,6 +95,9 @@ OptimizeSolve::taoSolve()
       break;
     case TaoSolverEnum::BOUNDED_NEWTON_LINE_SEARCH:
       ierr = TaoSetType(_tao, TAOBNLS);
+      break;
+    case TaoSolverEnum::BOUNDED_QUASI_NEWTON_TRUST_REGION:
+      ierr = TaoSetType(_tao, TAOBQNKTR);
       break;
     case TaoSolverEnum::NEWTON_TRUST_LINE:
       ierr = TaoSetType(_tao, TAONTL);
@@ -348,7 +352,6 @@ OptimizeSolve::objectiveFunction()
     _inner_solve->solve();
 
   _obj_iterate++;
-
   return _obj_function->computeObjective();
 }
 

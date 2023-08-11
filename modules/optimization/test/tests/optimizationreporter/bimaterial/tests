@@ -2,15 +2,26 @@
   issues = '#21885'
   design = 'Optimize.md NearestReporterCoordinatesFunction.md ElementOptimizationDiffusionCoefFunctionInnerProduct.md'
   [bimaterial]
-    requirement = 'The system shall be able to invert for the value of a material property in two separate regions using'
-    [taoblmvm]
+    requirement = 'The system shall be able to invert for the value of a material property in two separate regions using '
+    [adjoint]
       type = CSVDiff
       max_threads = 1 # Optimize executioner does not support multiple threads
       input = main.i
-      abs_zero = 1e-2
+      abs_zero = 1 # test parameter output; ignore gradient and objectve
       csvdiff = main_out_OptimizationReporter_0001.csv
       recover = false
-      detail = 'a gradient evaluated in a separate multiapp or'
+      detail = 'a gradient evaluated in a separate multiapp with parameter initial conditons 1.5x higher than the true solution; '
+    []
+    [adjoint_reg]
+      type = CSVDiff
+      input = "main.i regularization_for_main.i"
+      csvdiff = main_out_reg_OptimizationReporter_0001.csv
+      max_threads = 1 # Optimize executioner does not support multiple threads
+      rel_err = 0.1
+      abs_zero = 1 # test parameter output; ignore gradient and objectve
+      # steady solve
+      recover = false
+      detail = 'a gradient evaluated in a separate multiapp using Tikhonov regularization and parameter initial conditons 3x higher than the true solution; or '
     []
     [auto_adjoint]
       type = CSVDiff
@@ -18,7 +29,7 @@
       cli_args = 'Outputs/file_base=main_out'
       csvdiff = main_out_OptimizationReporter_0001.csv
       max_threads = 1 # Optimize executioner does not support multiple threads
-      abs_zero = 1e-2
+      abs_zero = 1 # test parameter output; ignore gradient and objectve
       recover = false
       detail = 'a gradient evaluated with an automatically computed adjoint.'
     []
