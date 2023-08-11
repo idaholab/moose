@@ -9,7 +9,6 @@
 
 #include "AnnularMeshGenerator.h"
 #include "CastUniquePointer.h"
-// #include "MooseEnum.h"
 
 #include "libmesh/replicated_mesh.h"
 #include "libmesh/face_quad4.h"
@@ -311,12 +310,16 @@ AnnularMeshGenerator::generate()
       const std::string old_sideset_name = boundary_info.sideset_name(*rit);
       const std::string old_nodeset_name = boundary_info.nodeset_name(*rit);
 
-      MeshTools::Modification::change_boundary_id(*mesh, *rit, *rit + _boundary_id_offset);
+      if (_boundary_id_offset != 0)
+        MeshTools::Modification::change_boundary_id(*mesh, *rit, *rit + _boundary_id_offset);
 
-      boundary_info.sideset_name(*rit + _boundary_id_offset) =
-          _boundary_name_prefix + old_sideset_name;
-      boundary_info.nodeset_name(*rit + _boundary_id_offset) =
-          _boundary_name_prefix + old_nodeset_name;
+      if (!_boundary_name_prefix.empty())
+      {
+        boundary_info.sideset_name(*rit + _boundary_id_offset) =
+            _boundary_name_prefix + old_sideset_name;
+        boundary_info.nodeset_name(*rit + _boundary_id_offset) =
+            _boundary_name_prefix + old_nodeset_name;
+      }
     }
   }
 
