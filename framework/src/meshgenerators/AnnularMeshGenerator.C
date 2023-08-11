@@ -13,6 +13,7 @@
 #include "libmesh/replicated_mesh.h"
 #include "libmesh/face_quad4.h"
 #include "libmesh/face_tri3.h"
+#include "libmesh/mesh_modification.h"
 
 registerMooseObject("MooseApp", AnnularMeshGenerator);
 
@@ -71,6 +72,10 @@ AnnularMeshGenerator::validParams()
                              "dmax!=360, a sector of an annulus or disc is created. In this case "
                              "boundary sidesets are also created at dmin and dmax, and "
                              "given these names");
+  params.addParam<BoundaryName>("boundary_name_prefix",
+                                "If provided, prefix the built in boundary names with this string");
+  params.addParam<boundary_id_type>(
+      "boundary_id_offset", 0, "This offset is added to the generated boundary IDs");
 
   return params;
 }
@@ -96,7 +101,11 @@ AnnularMeshGenerator::AnnularMeshGenerator(const InputParameters & parameters)
     _full_annulus(_dmin == 0.0 && _dmax == 360),
     _quad_subdomain_id(getParam<SubdomainID>("quad_subdomain_id")),
     _tri_subdomain_id(getParam<SubdomainID>("tri_subdomain_id")),
-    _equal_area(getParam<bool>("equal_area"))
+    _equal_area(getParam<bool>("equal_area")),
+    _boundary_name_prefix(isParamValid("boundary_name_prefix")
+                              ? getParam<BoundaryName>("boundary_name_prefix") + "_"
+                              : ""),
+    _boundary_id_offset(getParam<boundary_id_type>("boundary_id_offset"))
 {
   if ((parameters.isParamSetByUser("tmin") || parameters.isParamSetByUser("tmax")) &&
       (parameters.isParamSetByUser("dmin") || parameters.isParamSetByUser("dmax")))
@@ -291,8 +300,29 @@ AnnularMeshGenerator::generate()
       boundary_info.nodeset_name(3) = "dmax";
     }
   }
+  if (_boundary_id_offset != 0 || !_boundary_name_prefix.empty())
+  {
+    // apply boundary id offset and name prefix
+    const auto mesh_boundary_ids = boundary_info.get_boundary_ids();
+    for (auto rit = mesh_boundary_ids.rbegin(); rit != mesh_boundary_ids.rend(); ++rit)
+    {
+
+      const std::string old_sideset_name = boundary_info.sideset_name(*rit);
+      const std::string old_nodeset_name = boundary_info.nodeset_name(*rit);
+
+      if (_boundary_id_offset != 0)
+        MeshTools::Modification::change_boundary_id(*mesh, *rit, *rit + _boundary_id_offset);
+
+      if (!_boundary_name_prefix.empty())
+      {
+        boundary_info.sideset_name(*rit + _boundary_id_offset) =
+            _boundary_name_prefix + old_sideset_name;
+        boundary_info.nodeset_name(*rit + _boundary_id_offset) =
+            _boundary_name_prefix + old_nodeset_name;
+      }
+    }
+  }
 
   mesh->prepare_for_use();
-
   return dynamic_pointer_cast<MeshBase>(mesh);
 }
