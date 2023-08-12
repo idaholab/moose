@@ -20,43 +20,56 @@ MeshDiagnosticsGenerator::validParams()
 
   InputParameters params = MeshGenerator::validParams();
 
-  params.addRequiredParam<MeshGeneratorName>("input", "The mesh we want to          ");
-  params.addClassDescription("");
+  params.addRequiredParam<MeshGeneratorName>("input", "The mesh we want to diagnose");
+  params.addClassDescription("Runs a series of diagnostics on the mesh to detect potential issues "
+                             "such as unsupported features");
 
-  params.addParam<bool>(
-      "examine_element_volumes", true, "whether to examine volume of the elements");
+  // Options for the output level
+  MooseEnum chk_option("NO_CHECK INFO WARNING ERROR", "NO_CHECK");
+
+  params.addParam<MooseEnum>(
+      "examine_element_volumes", chk_option, "whether to examine volume of the elements");
   params.addParam<Real>("minimum_element_volumes", 1e-16, "minimum size for element volume");
   params.addParam<Real>("maximum_element_volumes", 1e16, "Maximum size for element volume");
 
-  params.addParam<bool>("examine_element_types",
-                        true,
-                        "whether to look for multiple element types in the same sub-domain");
-  params.addParam<bool>("examine_element_overlap", true, "whether to find overlapping elements");
-  params.addParam<bool>(
-      "examine_nonplanar_sides", true, "whether to check element sides are planar");
-  params.addParam<bool>("examine_non_conformality",
-                        true,
-                        "whether to examine the conformality of elements in the mesh");
-  params.addParam<Real>("nonconformal_tol", 1e-2, "tolerance for element non-conformality");
-  params.addParam<bool>("examine_adaptivity_non_conformal",
-                        true,
-                        "whether to check for adaptavity in non-conformal meshes");
+  params.addParam<MooseEnum>("examine_element_types",
+                             chk_option,
+                             "whether to look for multiple element types in the same sub-domain");
+  params.addParam<MooseEnum>(
+      "examine_element_overlap", chk_option, "whether to find overlapping elements");
+  params.addParam<MooseEnum>(
+      "examine_nonplanar_sides", chk_option, "whether to check element sides are planar");
+  params.addParam<MooseEnum>("examine_non_conformality",
+                             chk_option,
+                             "whether to examine the conformality of elements in the mesh");
+  params.addParam<Real>("nonconformal_tol", 1e-8, "tolerance for element non-conformality");
+  params.addParam<MooseEnum>("examine_adaptivity_non_conformal",
+                             chk_option,
+                             "whether to check for adaptavity in non-conformal meshes");
   return params;
 }
 
 MeshDiagnosticsGenerator::MeshDiagnosticsGenerator(const InputParameters & parameters)
   : MeshGenerator(parameters),
     _input(getMesh("input")),
-    _check_element_volumes(getParam<bool>("examine_element_volumes")),
+    _check_element_volumes(getParam<MooseEnum>("examine_element_volumes")),
     _min_volume(getParam<Real>("minimum_element_volumes")),
     _max_volume(getParam<Real>("maximum_element_volumes")),
-    _check_element_types(getParam<bool>("examine_element_types")),
-    _check_element_overlap(getParam<bool>("examine_element_overlap")),
-    _check_non_planar_sides(getParam<bool>("examine_nonplanar_sides")),
-    _check_non_conformal_mesh(getParam<bool>("examine_non_conformality")),
+    _check_element_types(getParam<MooseEnum>("examine_element_types")),
+    _check_element_overlap(getParam<MooseEnum>("examine_element_overlap")),
+    _check_non_planar_sides(getParam<MooseEnum>("examine_nonplanar_sides")),
+    _check_non_conformal_mesh(getParam<MooseEnum>("examine_non_conformality")),
     _non_conformality_tol(getParam<Real>("nonconformal_tol")),
-    _check_adaptivity_non_conformality(getParam<bool>("examine_adaptivity_non_conformal"))
+    _check_adaptivity_non_conformality(getParam<MooseEnum>("examine_adaptivity_non_conformal"))
 {
+  // Check that no secondary parameters have been passed with the main check disabled
+  if ((isParamSetByUser("minimum_element_volumes") ||
+       isParamSetByUser("maximum_element_volumes") && _check_element_volumes == "NO_CHECK"))
+    paramError("examine_element_volumes",
+               "You must specify set parameter to true to trigger element size checks");
+  if (isParamSetByUser("nonconformal_tol") && _check_non_conformal_mesh == "NO_CHECK")
+    paramError("examine_non_conformality",
+               "You must set this parameter to true to trigger mesh conformality check");
 }
 
 std::unique_ptr<MeshBase>
@@ -252,50 +265,6 @@ MeshDiagnosticsGenerator::generate()
     _console << "Number of non-conformal nodes: " << _num_nonconformal_nodes << std::endl;
     pl->unset_close_to_point_tol();
   }
-
-  // if (_check_non_conformal_mesh)
-  // {
-  //   auto pl = mesh->sub_point_locator();
-  //   // loop on nodes
-  //   for (auto & node : mesh->local_node_ptr_range())
-  //   {
-  //     pl->set_close_to_point_tol(_non_conformality_tol);
-  //     // find all the elements around this node
-  //     std::set<const Elem *> elements;
-  //     (*pl)(*node, elements);
-  //     // loop through the set of elements
-  //     for (auto & elem : elements)
-  //     {
-  //       // If the node is not part of this element's nodes, it is a
-  //       // case of non-conformality
-  //       bool found_conformal = false;
-
-  //       for (auto & elem_node : elem->node_ref_range())
-  //       {
-  //         if (*node == elem_node)
-  //         {
-  //           found_conformal = true;
-  //           break;
-  //         }
-  //       }
-  //       if (!found_conformal)
-  //         elements.erase(elem);
-  //     }
-  //     // if there is a non-conformality
-  //     // loop on elements that actually do have the node as one of their nodes
-  //     if (((mesh->mesh_dimension() == 2) && (elements.size() == 2)) ||
-  //         ((mesh->mesh_dimension() == 3) && (elements.size() == 4)))
-  //     {
-  //       for (auto & elem : elements)
-  //       {
-  //         if (!MooseUtils::absoluteFuzzyEqual(elem->volume(), (*elements.begin())->volume()))
-  //           break;
-  //       }
-  //     }
-  //   }
-  //   _console << "Number of non-conformal nodes: " << _num_nonconformal_nodes << std::endl;
-  //   pl->unset_close_to_point_tol();
-  // }
 
   if (_check_adaptivity_non_conformality)
   {

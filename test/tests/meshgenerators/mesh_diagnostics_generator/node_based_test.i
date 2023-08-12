@@ -1,10 +1,10 @@
 [Mesh]
   [copy1]
     type = ElementGenerator
-    nodal_positions = '2 2 0
-                       4 2 0
-                       4 4 0
-                       2 4 0'
+    nodal_positions = '0 0 0
+                       0 2 0
+                       2 2 0
+                       2 0 0'
     element_connectivity = '0 1 2 3'
     elem_type = 'QUAD4'
   []
@@ -17,12 +17,13 @@
 
   [copy2]
     type = ElementGenerator
-    nodal_positions = '1 3 0
-                       5 2 0
-                       5 4 0'
+    nodal_positions = '0 3 0
+                       0 2 0
+                       1 1 0
+                       2 3 0'
 
-    element_connectivity = '0 1 2'
-    elem_type = 'TRI3'
+    element_connectivity = '0 1 2 3'
+    elem_type = 'QUAD4'
   []
 
   [cmbn]

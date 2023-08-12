@@ -1,0 +1,65 @@
+[Tests]
+  issues = ''
+  design = 'meshgenerators/MeshDiagnostics.md'
+
+  [generate]
+    requirement = 'The system shall be able to diagnostize potential issues in a mesh, such as'
+
+    [overlap]
+      type = 'RunApp'
+      input = 'conformality_test.i'
+      cli_args = '--mesh-only'
+      mesh_mode = replicated
+
+      detail = 'element overlapping,'
+    []
+    [nonconformality]
+      type = 'RunApp'
+      input = 'node_based_test.i'
+      cli_args = '--mesh-only'
+      mesh_mode = replicated
+
+      detail = 'non-conformality in two dimensions,'
+    []
+    [nonconformality_3d]
+      type = 'RunApp'
+      input = 'conformality_test_3d.i'
+      cli_args = '--mesh-only'
+      mesh_mode = replicated
+
+      detail = 'non-conformality in three dimensions,'
+    []
+    [elem_types]
+      type = 'RunApp'
+      input = 'elem_types_test.i'
+      cli_args = '--mesh-only'
+      mesh_mode = replicated
+
+      detail = 'different element types in a single subdomain,'
+    []
+    [max_size]
+      type = 'RunApp'
+      input = 'max_test.i'
+      cli_args = '--mesh-only'
+      mesh_mode = replicated
+
+      detail = 'elements above a certain volume,'
+    []
+    [min_size]
+      type = 'RunApp'
+      input = 'min_test.i'
+      cli_args = '--mesh-only'
+      mesh_mode = replicated
+
+      detail = 'elements below a certain volume,'
+    []
+    [non_planar]
+      type = 'RunApp'
+      input = 'min_test.i'
+      cli_args = '--mesh-only'
+      mesh_mode = replicated
+
+      detail = 'non-planar sides on elements,'
+    []
+  []
+[]
