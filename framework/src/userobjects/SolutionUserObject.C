@@ -51,7 +51,10 @@ SolutionUserObject::validParams()
       "<not supplied>",
       "The name of the file holding the equation system info in xda/xdr format (xda/xdr only).");
   params.addParam<std::string>(
-      "system", "nl0", "The name of the system to pull values out of (xda/xdr only).");
+      "system",
+      "nl0",
+      "The name of the system to pull values out of (xda/xdr only). The default name for the "
+      "nonlinear system is 'nl0', auxiliary system is 'aux0'");
 
   // When using ExodusII a specific time is extracted
   params.addParam<std::string>("timestep",
@@ -95,8 +98,10 @@ SolutionUserObject::validParams()
       "if transformation_order = 'rotation0 scale_multiplier translation scale rotation1' then "
       "form p = R1*(R0*x*m - t)/s.  Then the values provided by the SolutionUserObject at point x "
       "in the simulation are the variable values at point p in the mesh.");
+  params.addParamNamesToGroup("scale scale_multiplier translation rotation0_vector rotation0_angle "
+                              "rotation1_angle transformation_order",
+                              "Coordinate system transformation");
   params.addClassDescription("Reads a variable from a mesh in one simulation to another");
-  // Return the parameters
   return params;
 }
 
