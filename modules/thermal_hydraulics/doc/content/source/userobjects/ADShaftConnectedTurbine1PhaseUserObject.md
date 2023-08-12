@@ -2,8 +2,8 @@
 
 !syntax description /UserObjects/ADShaftConnectedTurbine1PhaseUserObject
 
-A turbine is a parallel channel junction, a [ADJunctionParallelChannels1PhaseUserObject.md], a type of volume junction,
-a [ADVolumeJunction1PhaseUserObject.md]. As such its base contribution to the residual and Jacobian is set by these classes.
+A turbine is a volume junction, derived from 
+[ADVolumeJunction1PhaseUserObject.md]. As such its base contribution to the residual and Jacobian is set by this parent class.
 
 The additional residual for the momentum equation in each direction are:
 

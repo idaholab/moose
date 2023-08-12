@@ -5,6 +5,8 @@
 The boundary conditions retrieves the flux from an `ADBoundaryFluxBase`-derived user object,
 such as the [ADBoundaryFlux3EqnFreeOutflow.md].
 
+The heat flux contribution to the residual $R_i$ for the weak form of the energy equation is computed as:
+
 \begin{equation}
 R_i = (\psi_i, \Phi_{eqn} * \vec{n}) \quad \forall \psi_i,
 \end{equation}

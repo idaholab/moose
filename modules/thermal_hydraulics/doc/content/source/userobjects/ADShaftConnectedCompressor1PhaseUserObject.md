@@ -6,7 +6,7 @@ A compressor is a type of volume junction, a [ADVolumeJunction1PhaseUserObject.m
 As such its base contribution to the residual and Jacobian is set by this class. An additional contribution to
 the residual (and Jacobian) is described below:
 
-The contribution to the residual of the energy equation is simply the power dissipated in the component:
+The additional contribution to the residual of the energy equation is simply the power dissipated in the component:
 
 !equation
 R_e += (T_{friction} + T_{dissipation}) \omega
@@ -14,7 +14,7 @@ R_e += (T_{friction} + T_{dissipation}) \omega
 where $T_{friction}$ is the friction torque, $T_{dissipation}$ is the dissipation torque and $\omega$ is the rotation speed of
 the compressor.
 
-The contribution to the residual of the momentum equation in each direction is:
+The additional contribution to the residual of the momentum equation in each direction is:
 
 !equation
 \vec{R} = \Delta p A \vec{d}_{out}

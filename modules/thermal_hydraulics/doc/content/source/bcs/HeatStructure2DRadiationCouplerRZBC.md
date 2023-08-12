@@ -2,7 +2,7 @@
 
 !syntax description /BCs/HeatStructure2DRadiationCouplerRZBC
 
-The heat flux contribution to the residual $R_i$ for the weak form is computed as:
+The heat flux contribution to the residual $R_i$ for the weak form of the energy equation is computed as:
 
 \begin{equation}
 R_i = (\psi_i, _sigma * \dfrac{T^4 - T_{coupled}^4}{R} C \quad \forall \psi_i,
@@ -16,7 +16,7 @@ The radiation resistance is computed as:
 
 !equation
 R = \dfrac{1.0 - \epsilon}{\epsilon} + \dfrac{1.0}{V} +
-    \dfrac{1.0 - \epsilon_{coupled}} / \epsilon_{coupled} * A / A_{coupled}
+    \dfrac{1.0 - \epsilon_{coupled}}{\epsilon_{coupled}}  \dfrac{A}{A_{coupled}}
 
 where $\epsilon$ is the emissivity of one heat structure boundary, $\epsilon_{coupled}$ the surface emissivity
 of the other heat structure's boundary, $V$ the view factor between the two boundaries, $A$ the surface area,

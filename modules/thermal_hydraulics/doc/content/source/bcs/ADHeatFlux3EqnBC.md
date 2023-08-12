@@ -2,7 +2,7 @@
 
 !syntax description /BCs/ADHeatFlux3EqnBC
 
-The heat flux contribution to the residual $R_i$ for the weak form is computed as:
+The heat flux contribution to the residual $R_i$ for the weak form of the energy equation is computed as:
 
 \begin{equation}
 R_i = (\psi_i, -S q_{wall} P_{hf}) \quad \forall \psi_i,

@@ -2,7 +2,7 @@
 
 !syntax description /BCs/ConvectionHeatTransferBC
 
-The heat flux contribution to the residual $R_i$ for the weak form is computed as:
+The heat flux contribution to the residual $R_i$ for the weak form of the energy equation is computed as:
 
 \begin{equation}
 R_i = (\psi_i, h_{ambient}(t, \vec{x}) (T - T_{ambient}(t, \vec{x}) ) ) \quad \forall \psi_i,
