@@ -12,6 +12,7 @@
     type = MeshDiagnosticsGenerator
     input = elem_maker
     maximum_element_volumes = 0.1
+    examine_element_volumes = WARNING
   []
 []
 

@@ -5,20 +5,20 @@
   [generate]
     requirement = 'The system shall be able to diagnostize potential issues in a mesh, such as'
 
-    [overlap]
+    [nonconformality]
       type = 'RunApp'
       input = 'conformality_test.i'
       cli_args = '--mesh-only'
       mesh_mode = replicated
-
+      expect_out = 'Number of non-conformal nodes: 3'
       detail = 'element overlapping,'
     []
-    [nonconformality]
+    [overlap]
       type = 'RunApp'
       input = 'node_based_test.i'
       cli_args = '--mesh-only'
       mesh_mode = replicated
-
+      expect_out = 'Number of elements overlapping \(node-based heuristics\): '
       detail = 'non-conformality in two dimensions,'
     []
     [nonconformality_3d]
@@ -26,36 +26,36 @@
       input = 'conformality_test_3d.i'
       cli_args = '--mesh-only'
       mesh_mode = replicated
-
+      expect_out = 'Number of non-conformal nodes: 6'
       detail = 'non-conformality in three dimensions,'
     []
     [elem_types]
-      type = 'RunApp'
+      type = 'RunException'
       input = 'elem_types_test.i'
       cli_args = '--mesh-only'
       mesh_mode = replicated
-
+      expect_err = 'Element type in subdomain  \(0\) : TRI3 QUAD4'
       detail = 'different element types in a single subdomain,'
     []
     [max_size]
-      type = 'RunApp'
+      type = 'RunException'
       input = 'max_test.i'
       cli_args = '--mesh-only'
       mesh_mode = replicated
-
+      expect_err = 'Number of elements above prescribed volume : 1'
       detail = 'elements above a certain volume,'
     []
     [min_size]
-      type = 'RunApp'
+      type = 'RunException'
       input = 'min_test.i'
       cli_args = '--mesh-only'
       mesh_mode = replicated
-
+      expect_err = 'Number of elements below prescribed volume : 1'
       detail = 'elements below a certain volume,'
     []
     [non_planar]
       type = 'RunApp'
-      input = 'min_test.i'
+      input = 'non_planar_test.i'
       cli_args = '--mesh-only'
       mesh_mode = replicated
 

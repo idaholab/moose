@@ -15,7 +15,7 @@
   [diag]
     type = MeshDiagnosticsGenerator
     input = cube
-    examine_nonplanar_sides = true
+    examine_nonplanar_sides = INFO
   []
 []
 

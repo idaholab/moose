@@ -12,6 +12,7 @@
     type = MeshDiagnosticsGenerator
     input = elem_maker
     minimum_element_volumes = 1
+    examine_element_volumes = ERROR
   []
 []
 

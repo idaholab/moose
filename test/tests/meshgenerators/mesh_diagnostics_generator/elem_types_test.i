@@ -25,7 +25,7 @@
   [diag]
     type = MeshDiagnosticsGenerator
     input = cmbn
-    examine_element_types = true
+    examine_element_types = INFO
   []
 []
 

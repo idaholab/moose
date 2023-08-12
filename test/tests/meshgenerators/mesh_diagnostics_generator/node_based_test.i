@@ -34,7 +34,7 @@
   [diag]
     type = MeshDiagnosticsGenerator
     input = cmbn
-    examine_element_overlap = true
+    examine_element_overlap = INFO
   []
 []
 

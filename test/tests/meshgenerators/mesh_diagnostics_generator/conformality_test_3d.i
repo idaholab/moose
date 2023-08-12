@@ -43,7 +43,7 @@
   [diag]
     type = MeshDiagnosticsGenerator
     input = stitched
-    examine_non_conformality = true
+    examine_non_conformality = INFO
     nonconformal_tol = 0.01
   []
 []
