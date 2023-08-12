@@ -94,10 +94,20 @@ MeshDiagnosticsGenerator::generate()
     {
       if (elem->volume() <= _min_volume)
       {
+        if (_num_tiny_elems < 10)
+          _console << "Element too small detected with centroid : " << elem->true_centroid()
+                   << std::endl;
+        else if (_num_tiny_elems == 10)
+          _console << "Maximum output reached, log is silenced" << std::endl;
         _num_tiny_elems++;
       }
       if (elem->volume() >= _max_volume)
       {
+        if (_num_big_elems < 10)
+          _console << "Element too large detected with centroid : " << elem->true_centroid()
+                   << std::endl;
+        else if (_num_big_elems == 10)
+          _console << "Maximum output reached, log is silenced" << std::endl;
         _num_big_elems++;
       }
     }
@@ -179,7 +189,7 @@ MeshDiagnosticsGenerator::generate()
                    _num_elem_overlaps);
     _num_elem_overlaps = 0;
 
-    // loop all elements in mesh
+    // loop on all elements in mesh: assumes a replicated mesh
     for (auto & elem : mesh->active_element_ptr_range())
     {
       // find all the elements around the centroid of this element
@@ -204,7 +214,7 @@ MeshDiagnosticsGenerator::generate()
 
   if (_check_non_planar_sides != "NO_CHECK")
   {
-    // loop all elements in mesh
+    // loop on all elements in mesh: assumes a replicated mesh
     for (auto & elem : mesh->active_element_ptr_range())
     {
       for (auto i : make_range(elem->n_sides()))
@@ -220,7 +230,7 @@ MeshDiagnosticsGenerator::generate()
         RealVectorValue v2 = *nodes[0] - *nodes[2];
         bool aligned = MooseUtils::absoluteFuzzyEqual(v1 * v2 - v1.norm() * v2.norm(), 0);
         if (aligned)
-          continue; // TODO
+          continue;
 
         bool found_non_planar = false;
 
@@ -260,7 +270,7 @@ MeshDiagnosticsGenerator::generate()
       std::set<const Elem *> elements;
       (*pl)(*node, elements);
 
-      // loop through the set of elements
+      // loop through the set of elements near this node
       for (auto & elem : elements)
       {
         // If the node is not part of this element's nodes, it is a
@@ -302,22 +312,22 @@ MeshDiagnosticsGenerator::generate()
       std::set<const Elem *> elements;
       (*pl)(*node, elements);
 
-      // loop through the set of elements
+      // loop through the set of elements near this node
       for (auto & elem : elements)
       {
         // If the node is not part of this element's nodes, it is a
         // case of non-conformality
-        bool found_conformal = false;
+        bool node_on_elem = false;
 
         for (auto & elem_node : elem->node_ref_range())
         {
           if (*node == elem_node)
           {
-            found_conformal = true;
+            node_on_elem = true;
             break;
           }
         }
-        if (!found_conformal)
+        if (node_on_elem)
           elements.erase(elem);
       }
       if (elements.size() > 0)
