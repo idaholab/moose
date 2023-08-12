@@ -28,6 +28,17 @@ protected:
   /// the input mesh to be diagnosed
   std::unique_ptr<MeshBase> & _input;
 
+private:
+  /**
+   * Utility routine to output the final diagnostics level in the desired mode
+   * @param msg the message to output
+   * @param log_level the log level to output the message at
+   * @param may_error if set to false, prevents erroring from the log, despite the log level
+   * may_error is used to avoid erroring when the log is requested but there are no issues so it
+   * should just say "0 problems" with an info message
+   */
+  void diagnosticsLog(std::string msg, const MooseEnum & log_level, bool may_error);
+
   /// whether to check element volumes
   const MooseEnum _check_element_volumes;
   /// counter for the number of small elements

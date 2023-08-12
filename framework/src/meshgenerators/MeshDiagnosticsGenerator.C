@@ -43,9 +43,10 @@ MeshDiagnosticsGenerator::validParams()
                              chk_option,
                              "whether to examine the conformality of elements in the mesh");
   params.addParam<Real>("nonconformal_tol", 1e-8, "tolerance for element non-conformality");
-  params.addParam<MooseEnum>("examine_adaptivity_non_conformal",
-                             chk_option,
-                             "whether to check for adaptavity in non-conformal meshes");
+  params.addParam<MooseEnum>(
+      "search_for_adaptivity_nonconformality",
+      chk_option,
+      "whether to check for non-conformality arising from adaptive mesh refinement");
   return params;
 }
 
@@ -60,13 +61,14 @@ MeshDiagnosticsGenerator::MeshDiagnosticsGenerator(const InputParameters & param
     _check_non_planar_sides(getParam<MooseEnum>("examine_nonplanar_sides")),
     _check_non_conformal_mesh(getParam<MooseEnum>("examine_non_conformality")),
     _non_conformality_tol(getParam<Real>("nonconformal_tol")),
-    _check_adaptivity_non_conformality(getParam<MooseEnum>("examine_adaptivity_non_conformal"))
+    _check_adaptivity_non_conformality(getParam<MooseEnum>("search_for_adaptivity_nonconformality"))
 {
   // Check that no secondary parameters have been passed with the main check disabled
   if ((isParamSetByUser("minimum_element_volumes") ||
-       isParamSetByUser("maximum_element_volumes") && _check_element_volumes == "NO_CHECK"))
+       isParamSetByUser("maximum_element_volumes")) &&
+      _check_element_volumes == "NO_CHECK")
     paramError("examine_element_volumes",
-               "You must specify set parameter to true to trigger element size checks");
+               "You must set this parameter to true to trigger element size checks");
   if (isParamSetByUser("nonconformal_tol") && _check_non_conformal_mesh == "NO_CHECK")
     paramError("examine_non_conformality",
                "You must set this parameter to true to trigger mesh conformality check");
@@ -76,10 +78,18 @@ std::unique_ptr<MeshBase>
 MeshDiagnosticsGenerator::generate()
 {
   std::unique_ptr<MeshBase> mesh = std::move(_input);
+
+  // Most of the checks assume we use a replicated mesh
+  if (!mesh->is_replicated())
+    mooseError("Only replicated meshes are supported");
+
+  // We prepare for use at the beginning to facilitate diagnosis
+  // This deliberately does not trust the mesh to know whether it's already prepared or not
   mesh->prepare_for_use();
-  if (_check_element_volumes)
+
+  if (_check_element_volumes != "NO_CHECK")
   {
-    // loop elements within the mesh
+    // loop elements within the mesh (assumes replicated)
     for (auto & elem : mesh->active_element_ptr_range())
     {
       if (elem->volume() <= _min_volume)
@@ -91,11 +101,16 @@ MeshDiagnosticsGenerator::generate()
         _num_big_elems++;
       }
     }
-    _console << "Number of elements below volume size : " << _num_tiny_elems << std::endl;
-    _console << "Number of elements above volume size : " << _num_big_elems << std::endl;
+    diagnosticsLog("Number of elements below prescribed volume : " +
+                       std::to_string(_num_tiny_elems),
+                   _check_element_volumes,
+                   _num_tiny_elems);
+    diagnosticsLog("Number of elements above prescribed volume : " + std::to_string(_num_big_elems),
+                   _check_element_volumes,
+                   _num_big_elems);
   }
 
-  if (_check_element_types)
+  if (_check_element_types != "NO_CHECK")
   {
     std::set<subdomain_id_type> ids;
     mesh->subdomain_ids(ids);
@@ -117,15 +132,17 @@ MeshDiagnosticsGenerator::generate()
                       std::to_string(id) + ") :" + elem_type_names
                << std::endl;
       if (types.size() > 1)
-        mooseWarning("Two different element types in subdomain " + std::to_string(id));
+        diagnosticsLog("Two different element types in subdomain " + std::to_string(id),
+                       _check_element_types,
+                       true);
     }
   }
 
-  if (_check_element_overlap)
+  if (_check_element_overlap != "NO_CHECK")
   {
     auto pl = mesh->sub_point_locator();
-    // loop on nodes
-    for (auto & node : mesh->local_node_ptr_range())
+    // loop on nodes, assumed replicated mesh
+    for (auto & node : mesh->node_ptr_range())
     {
       // find all the elements around this node
       std::set<const Elem *> elements;
@@ -156,9 +173,10 @@ MeshDiagnosticsGenerator::generate()
       }
     }
 
-    _console << "Number of elements overlapping (node-based heuristics): " << _num_elem_overlaps
-             << std::endl;
-
+    diagnosticsLog("Number of elements overlapping (node-based heuristics): " +
+                       Moose::stringify(_num_elem_overlaps),
+                   _check_element_overlap,
+                   _num_elem_overlaps);
     _num_elem_overlaps = 0;
 
     // loop all elements in mesh
@@ -178,11 +196,13 @@ MeshDiagnosticsGenerator::generate()
           _console << "Maximum output reached, log is silenced" << std::endl;
       }
     }
-    _console << "Number of elements overlapping (centroid-based heuristics): " << _num_elem_overlaps
-             << std::endl;
+    diagnosticsLog("Number of elements overlapping (centroid-based heuristics): " +
+                       Moose::stringify(_num_elem_overlaps),
+                   _check_element_overlap,
+                   _num_elem_overlaps);
   }
 
-  if (_check_non_planar_sides)
+  if (_check_non_planar_sides != "NO_CHECK")
   {
     // loop all elements in mesh
     for (auto & elem : mesh->active_element_ptr_range())
@@ -223,14 +243,17 @@ MeshDiagnosticsGenerator::generate()
         }
       }
     }
-    _console << "Number of nonplanar element sides detected: " << _sides_non_planar << std::endl;
+    diagnosticsLog("Number of non-planar element sides detected: " +
+                       Moose::stringify(_sides_non_planar),
+                   _check_non_planar_sides,
+                   _sides_non_planar);
   }
 
-  if (_check_non_conformal_mesh)
+  if (_check_non_conformal_mesh != "NO_CHECK")
   {
     auto pl = mesh->sub_point_locator();
-    // loop on nodes
-    for (auto & node : mesh->local_node_ptr_range())
+    // loop on nodes, assumes a replicated mesh
+    for (auto & node : mesh->node_ptr_range())
     {
       pl->set_close_to_point_tol(_non_conformality_tol);
       // find all the elements around this node
@@ -262,15 +285,17 @@ MeshDiagnosticsGenerator::generate()
         }
       }
     }
-    _console << "Number of non-conformal nodes: " << _num_nonconformal_nodes << std::endl;
+    diagnosticsLog("Number of non-conformal nodes: " + Moose::stringify(_num_nonconformal_nodes),
+                   _check_non_conformal_mesh,
+                   _num_nonconformal_nodes);
     pl->unset_close_to_point_tol();
   }
 
-  if (_check_adaptivity_non_conformality)
+  if (_check_adaptivity_non_conformality != "NO_CHECK")
   {
     auto pl = mesh->sub_point_locator();
-    // loop on nodes
-    for (auto & node : mesh->local_node_ptr_range())
+    // loop on nodes, assumes a replicated mesh
+    for (auto & node : mesh->node_ptr_range())
     {
       pl->set_close_to_point_tol(_non_conformality_tol);
       // find all the elements around this node
@@ -314,4 +339,21 @@ MeshDiagnosticsGenerator::generate()
     }
   }
   return dynamic_pointer_cast<MeshBase>(mesh);
+}
+
+void
+MeshDiagnosticsGenerator::diagnosticsLog(std::string msg,
+                                         const MooseEnum & log_level,
+                                         bool may_error)
+{
+  mooseAssert(log_level != "NO_CHECK",
+              "We should not be outputting logs if the check had been disabled");
+  if (log_level == "INFO" || !may_error)
+    mooseInfoRepeated(msg);
+  else if (log_level == "WARNING")
+    mooseWarning(msg);
+  else if (log_level == "ERROR")
+    mooseError(msg);
+  else
+    mooseError("Should not reach here");
 }
