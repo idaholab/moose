@@ -226,9 +226,21 @@ MeshDiagnosticsGenerator::generate()
 
         if (nodes.size() <= 3)
           continue;
-        RealVectorValue v1 = *nodes[0] - *nodes[1];
-        RealVectorValue v2 = *nodes[0] - *nodes[2];
-        bool aligned = MooseUtils::absoluteFuzzyEqual(v1 * v2 - v1.norm() * v2.norm(), 0);
+        // First vector of the base
+        const RealVectorValue v1 = *nodes[0] - *nodes[1];
+
+        // Find another node so that we can form a basis. It should just be node 0, 1, 2
+        // to form two independent vectors, but degenerate elements can make them aligned
+        bool aligned = true;
+        unsigned int third_node_index = 2;
+        RealVectorValue v2;
+        while (aligned && third_node_index < nodes.size())
+        {
+          v2 = *nodes[0] - *nodes[third_node_index++];
+          aligned = MooseUtils::absoluteFuzzyEqual(v1 * v2 - v1.norm() * v2.norm(), 0);
+        }
+
+        // Degenerate element, could not find a third node that is not aligned
         if (aligned)
           continue;
 
@@ -332,7 +344,7 @@ MeshDiagnosticsGenerator::generate()
       }
       if (elements.size() > 0)
       {
-        for (auto & elem : mesh->active_element_ptr_range())
+        for (auto & elem : elements())
         {
           for (auto i : make_range(elem->n_sides()))
           {
