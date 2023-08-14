@@ -163,10 +163,10 @@ CoreMeshGenerator::CoreMeshGenerator(const InputParameters & parameters)
     }
   }
 
-  MeshGeneratorName reactor_params =
-      MeshGeneratorName(getMeshProperty<std::string>(RGMB::reactor_params_name, _inputs[0]));
-  const auto assembly_homogenization = getMeshProperty<bool>(RGMB::is_homogenized, _inputs[0]);
-  const auto pin_as_assembly = getMeshProperty<bool>(RGMB::is_single_pin, _inputs[0]);
+  MeshGeneratorName first_nondummy_assembly = "";
+  MeshGeneratorName reactor_params = "";
+  bool assembly_homogenization = false;
+  bool pin_as_assembly = false;
   std::map<subdomain_id_type, std::string> global_pin_map_type_to_name;
   std::map<subdomain_id_type, std::string> assembly_map_type_to_name;
   // Check that MG name for reactor params and assembly homogenization schemes are
@@ -176,6 +176,16 @@ CoreMeshGenerator::CoreMeshGenerator(const InputParameters & parameters)
     // Skip if assembly name is equal to dummy assembly name
     if (_inputs[i] == _empty_key)
       continue;
+
+    // Save properties of first non-dummy assembly to compare to other assemblies
+    if (first_nondummy_assembly == "")
+    {
+      first_nondummy_assembly = MeshGeneratorName(_inputs[i]);
+      reactor_params =
+          MeshGeneratorName(getMeshProperty<std::string>(RGMB::reactor_params_name, _inputs[i]));
+      assembly_homogenization = getMeshProperty<bool>(RGMB::is_homogenized, _inputs[i]);
+      pin_as_assembly = getMeshProperty<bool>(RGMB::is_single_pin, _inputs[i]);
+    }
     if (getMeshProperty<std::string>(RGMB::reactor_params_name, _inputs[i]) != reactor_params)
       mooseError("The name of all reactor_params objects should be identical across all pins in "
                  "the input assemblies.\n");
@@ -212,6 +222,10 @@ CoreMeshGenerator::CoreMeshGenerator(const InputParameters & parameters)
       }
     }
   }
+
+  // Check that there is at least one non-dummy assemby defined in lattice
+  if (first_nondummy_assembly == "")
+    paramError("inputs", "At least one non-dummy assembly must be defined in input assembly names");
 
   // Initialize ReactorMeshParams object stored in pin input
   initializeReactorMeshParams(reactor_params);
@@ -293,7 +307,7 @@ CoreMeshGenerator::CoreMeshGenerator(const InputParameters & parameters)
           }
           params.set<std::vector<unsigned int>>("sides_to_adapt") = std::vector<unsigned int>{0};
           params.set<std::vector<MeshGeneratorName>>("meshes_to_adapt_to") =
-              std::vector<MeshGeneratorName>{_inputs[0]};
+              std::vector<MeshGeneratorName>{first_nondummy_assembly};
           params.set<std::vector<subdomain_id_type>>("background_block_ids") =
               std::vector<subdomain_id_type>{UINT16_MAX - 1};
 
@@ -536,6 +550,27 @@ CoreMeshGenerator::generateMetadata()
   std::vector<std::vector<int>> assembly_name_lattice;
   std::vector<std::string> input_assembly_names;
   std::vector<std::string> input_pin_names;
+
+  // Iterate through input assembly names and define constituent assemblies and pins
+  for (const auto i : index_range(_inputs))
+  {
+    const auto input_assembly_name = _inputs[i];
+    if (input_assembly_name != _empty_key)
+    {
+      input_assembly_names.push_back(input_assembly_name);
+      if (!getMeshProperty<bool>(RGMB::is_single_pin, input_assembly_name))
+      {
+        const auto pin_names =
+            getMeshProperty<std::vector<std::string>>(RGMB::pin_names, input_assembly_name);
+        for (const auto & pin_name : pin_names)
+          if (std::find(input_pin_names.begin(), input_pin_names.end(), pin_name) ==
+              input_pin_names.end())
+            input_pin_names.push_back(pin_name);
+      }
+    }
+  }
+
+  // Iterate through pattern and remap dummy assemblies with index -1
   for (const auto i : index_range(_pattern))
   {
     std::vector<int> assembly_name_idx(_pattern[i].size());
@@ -545,30 +580,17 @@ CoreMeshGenerator::generateMetadata()
       // Use an assembly type of -1 to represent a dummy assembly
       if (input_assembly_name == _empty_key)
         assembly_name_idx[j] = -1;
+      // Set index of assembly name based on `input_assembly_names` variable
       else
       {
         const auto it = std::find(
             input_assembly_names.begin(), input_assembly_names.end(), input_assembly_name);
-        if (it == input_assembly_names.end())
-        {
-          assembly_name_idx[j] = input_assembly_names.size();
-          input_assembly_names.push_back(input_assembly_name);
-          if (!getMeshProperty<bool>(RGMB::is_single_pin, input_assembly_name))
-          {
-            const auto pin_names =
-                getMeshProperty<std::vector<std::string>>(RGMB::pin_names, input_assembly_name);
-            for (const auto & pin_name : pin_names)
-              if (std::find(input_pin_names.begin(), input_pin_names.end(), pin_name) ==
-                  input_pin_names.end())
-                input_pin_names.push_back(pin_name);
-          }
-        }
-        else
-          assembly_name_idx[j] = it - input_assembly_names.begin();
+        assembly_name_idx[j] = it - input_assembly_names.begin();
       }
     }
     assembly_name_lattice.push_back(assembly_name_idx);
   }
+
   declareMeshProperty(RGMB::pin_names, input_pin_names);
   declareMeshProperty(RGMB::assembly_names, input_assembly_names);
   declareMeshProperty(RGMB::assembly_lattice, assembly_name_lattice);

@@ -14,7 +14,7 @@
     type = 'RunApp'
     input = 'core_square.i'
     cli_args = "Mesh/cmg/show_rgmb_metadata=true"
-    expect_out = 'Global metadata.+mesh_dimensions: 3.+mesh_geometry: Square.+axial_mesh_sizes: 1.+axial_mesh_intervals: 1.+Core-level metadata.+cmg.+assembly_names: amg1, amg2.+assembly_lattice:.+0, 1.+1, 0.+Assembly-level metadata.+amg1.+assembly_type: 1.+pin_names: pin2.+pin_lattice:.+0, 0.+0, 0.+Assembly-level metadata.+amg2.+assembly_type: 2.+pin_names: pin3, pin1, pin2.+pin_lattice:.+0, 1.+1, 2.+Pin-level metadata.+pin2.+pin_type: 2.+background_region_id: 2.+Pin-level metadata.+pin3.+pin_type: 3.+background_region_id: 4.+Pin-level metadata.+pin1.+pin_type: 1.+background_region_id: 2'
+    expect_out = 'Global metadata.+mesh_dimensions: 3.+mesh_geometry: Square.+axial_mesh_sizes: 1.+axial_mesh_intervals: 1.+Core-level metadata.+cmg.+assembly_names: amg2, amg1.+assembly_lattice:.+1, 0.+0, 1.+Assembly-level metadata.+amg2.+assembly_type: 2.+pin_names: pin3, pin1, pin2.+pin_lattice:.+0, 1.+1, 2.+Assembly-level metadata.+amg1.+assembly_type: 1.+pin_names: pin2.+pin_lattice:.+0, 0.+0, 0.+Pin-level metadata.+pin3.+pin_type: 3.+background_region_id: 4.+Pin-level metadata.+pin1.+pin_type: 1.+background_region_id: 2.+Pin-level metadata.+pin2.+pin_type: 2.+background_region_id: 2'
   []
   [core_shared_assembly_ids]
     requirement = 'The system shall throw an error if a core is composed of different assemblies with a shared assembly type id'
@@ -60,6 +60,25 @@
     exodiff = 'core_empty_in.e'
     recover = false
   []
+  [empty_first_pos]
+    requirement = 'The system shall generate a 3D square core mesh with empty lattice positions defined as the first input name'
+    type = 'Exodiff'
+    input = 'core_square.i'
+    cli_args = "Mesh/cmg/inputs='empty amg1 amg2'
+                Mesh/cmg/pattern='0 1; 1 2'
+                Outputs/file_base=core_empty_in"
+    exodiff = 'core_empty_in.e'
+    recover = false
+  []
+  [err_all_empty]
+    requirement = 'The system shall throw an error if all input assembly names are defined as dummy assemblies'
+    type = 'RunException'
+    input = 'core_square.i'
+    cli_args = "Mesh/cmg/inputs='empty'
+                Mesh/cmg/pattern='0 0; 0 0'"
+    expect_err = 'At least one non-dummy assembly must be defined'
+    recover = false
+  []
   [hex]
     requirement = 'The system shall generate a 3D hexagonal core mesh with empty lattice positions and explicit block name specification'
     type = 'Exodiff'
@@ -74,7 +93,7 @@
     input = 'core_hex.i'
     cli_args = "Mesh/cmg/show_rgmb_metadata=true
                 Outputs/file_base=core_hex_in"
-    expect_out = 'Global metadata.+mesh_dimensions: 3.+mesh_geometry: Hex.+axial_mesh_sizes: 1, 1.+axial_mesh_intervals: 1, 1.+Core-level metadata.+cmg.+assembly_names: amg2, amg1.+assembly_lattice:.+-1, 0.+0, 1, -1.+-1, 0.+Assembly-level metadata.+amg2.+assembly_type: 2.+pin_names: pin1, pin3.+pin_lattice:.+0, 0.+0, 1, 0.+0, 0.+Assembly-level metadata.+amg1.+assembly_type: 1.+pin_names: pin2.+pin_lattice:.+0, 0.+0, 0, 0.+0, 0.+Pin-level metadata.+pin1.+pin_type: 1.+background_region_id: 12, 112.+Pin-level metadata.+pin3.+pin_type: 3.+background_region_id: 32, 132.+Pin-level metadata.+pin2.+pin_type: 2.+background_region_id: 21, 121'
+    expect_out = 'Global metadata.+mesh_dimensions: 3.+mesh_geometry: Hex.+axial_mesh_sizes: 1, 1.+axial_mesh_intervals: 1, 1.+Core-level metadata.+cmg.+assembly_names: amg1, amg2.+assembly_lattice:.+-1, 1.+1, 0, -1.+-1, 1.+Assembly-level metadata.+amg1.+assembly_type: 1.+pin_names: pin2.+pin_lattice:.+0, 0.+0, 0, 0.+0, 0.+Assembly-level metadata.+amg2.+assembly_type: 2.+pin_names: pin1, pin3.+pin_lattice:.+0, 0.+0, 1, 0.+0, 0.+Pin-level metadata.+pin2.+pin_type: 2.+background_region_id: 21, 121.+Pin-level metadata.+pin1.+pin_type: 1.+background_region_id: 12, 112.+Pin-level metadata.+pin3.+pin_type: 3.+background_region_id: 32, 132'
   []
   [single_assembly_square_core]
     requirement = 'The system shall generate a full 3D square core mesh with 2 single assembly types'
@@ -149,6 +168,12 @@
     input = 'core_hex_2d.i'
     cli_args = "Mesh/cmg/show_rgmb_metadata=true"
     expect_out = 'Global metadata.+mesh_dimensions: 2.+mesh_geometry: Hex.+Core-level metadata.+cmg.+peripheral_ring_radius: 7.+peripheral_ring_region_id: 5.+assembly_names: amg1.+assembly_lattice:.+0, 0.+0, 0, 0.+0, 0.+Assembly-level metadata.+amg1.+assembly_type: 1.+pin_names: pin1.+pin_lattice:.+0, 0.+0, 0, 0.+0, 0.+Pin-level metadata.+pin1.+pin_type: 1.+background_region_id: 2'
+  []
+  [hex_metadata_extra_assemblies]
+    requirement = 'The system shall print out reactor-related metadata to console output for a 3D hexagonal core mesh with extra assemblies not part of core lattice'
+    type = 'RunApp'
+    input = 'core_hex_extra_assemblies.i'
+    expect_out = 'Global metadata.+mesh_dimensions: 3.+mesh_geometry: Hex.+axial_mesh_sizes: 1, 1.+axial_mesh_intervals: 1, 1.+Core-level metadata.+cmg.+assembly_names: amg1, amg2, amg3.+assembly_lattice:.+-1, 1.+1, 0, -1.+-1, 1.+Assembly-level metadata.+amg1.+assembly_type: 1.+pin_names: pin2.+pin_lattice:.+0, 0.+0, 0, 0.+0, 0.+Assembly-level metadata.+amg2.+assembly_type: 2.+pin_names: pin1, pin3.+pin_lattice:.+0, 0.+0, 1, 0.+0, 0.+Assembly-level metadata.+amg3.+assembly_type: 3.+pin_names: pin1, pin3.+pin_lattice:.+0, 0.+0, 1, 0.+0, 0.+Pin-level metadata.+pin2.+pin_type: 2.+background_region_id: 21, 121.+Pin-level metadata.+pin1.+pin_type: 1.+background_region_id: 12, 112.+Pin-level metadata.+pin3.+pin_type: 3.+background_region_id: 32, 132'
   []
   [ptmg_periphery]
     requirement = 'The system shall generate a 2D hex core mesh with a reactor periphery meshed using a triangular mesh.'
