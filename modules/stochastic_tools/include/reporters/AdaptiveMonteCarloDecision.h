@@ -12,6 +12,7 @@
 #include "GeneralReporter.h"
 #include "AdaptiveImportanceSampler.h"
 #include "ParallelSubsetSimulation.h"
+#include "ActiveLearningGPDecision.h"
 
 /**
  * AdaptiveMonteCarloDecision will help make sample accept/reject decisions in adaptive Monte Carlo
@@ -37,8 +38,11 @@ protected:
   std::vector<std::vector<Real>> & _inputs;
 
 private:
-  /// Track the current step of the main App
-  const int & _step;
+  /**
+   * This reinitializes the Markov chain to the starting value
+   * until the Gaussian process training is completed.
+   */
+  void reinitChain();
 
   /// The adaptive Monte Carlo sampler
   Sampler & _sampler;
@@ -53,7 +57,7 @@ private:
   int _check_step;
 
   /// Communicator that was split based on samples that have rows
-  libMesh::Parallel::Communicator _local_comm;
+  libMesh::Parallel::Communicator & _local_comm;
 
   /// Storage for previously accepted input values. This helps in making decision on the next proposed inputs.
   std::vector<std::vector<Real>> _prev_val;
@@ -75,4 +79,10 @@ private:
 
   /// Store the intermediate ouput failure thresholds
   Real _output_limit;
+
+  /// Check if a GP is used
+  const bool _gp_used;
+
+  /// Store the GP training samples
+  const int * const _gp_training_samples;
 };

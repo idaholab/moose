@@ -48,6 +48,9 @@ private:
   /// Adaptive Importance Sampler
   AdaptiveImportanceSampler & _ais;
 
+  /// Flag for GP utilization
+  const std::vector<bool> * _gp_flag;
+
   /// Ensure that the MCMC algorithm proceeds in a sequential fashion
   int _check_step;
 

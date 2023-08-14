@@ -23,7 +23,10 @@ public:
    */
   static std::set<SamplerName> adaptiveSamplerNames()
   {
-    return {"ParallelSubsetSimulation", "AdaptiveImportance", "ActiveLearningMonteCarloSampler"};
+    return {"ParallelSubsetSimulation",
+            "AdaptiveImportance",
+            "AISActiveLearning",
+            "ActiveLearningMonteCarloSampler"};
   }
 
   /**

@@ -45,11 +45,14 @@ AdaptiveImportanceSampler::validParams()
       "num_random_seeds",
       100000,
       "Initialize a certain number of random seeds. Change from the default only if you have to.");
+  params.addParam<ReporterName>("flag_sample",
+                                "Flag samples if the surrogate prediction was inadequate.");
   return params;
 }
 
 AdaptiveImportanceSampler::AdaptiveImportanceSampler(const InputParameters & parameters)
   : Sampler(parameters),
+    TransientInterface(this),
     _proposal_std(getParam<std::vector<Real>>("proposal_std")),
     _initial_values(getParam<std::vector<Real>>("initial_values")),
     _output_limit(getParam<Real>("output_limit")),
@@ -59,8 +62,10 @@ AdaptiveImportanceSampler::AdaptiveImportanceSampler(const InputParameters & par
     _use_absolute_value(getParam<bool>("use_absolute_value")),
     _num_random_seeds(getParam<unsigned int>("num_random_seeds")),
     _is_sampling_completed(false),
-    _step(getCheckedPointerParam<FEProblemBase *>("_fe_problem_base")->timeStep()),
-    _inputs(getReporterValue<std::vector<std::vector<Real>>>("inputs_reporter"))
+    _inputs(getReporterValue<std::vector<std::vector<Real>>>("inputs_reporter")),
+    _retraining_steps(0),
+    _gp_flag(isParamValid("flag_sample") ? &getReporterValue<std::vector<bool>>("flag_sample")
+                                         : nullptr)
 {
   // Filling the `distributions` vector with the user-provided distributions.
   for (const DistributionName & name : getParam<std::vector<DistributionName>>("distributions"))
@@ -105,21 +110,22 @@ AdaptiveImportanceSampler::AdaptiveImportanceSampler(const InputParameters & par
 Real
 AdaptiveImportanceSampler::computeSample(dof_id_type /*row_index*/, dof_id_type col_index)
 {
-  const bool sample = _step > 1 && col_index == 0 && _check_step != _step;
+  const bool sample = _t_step > 1 && col_index == 0 && _check_step != _t_step;
+  const bool gp_flag = _gp_flag ? (*_gp_flag)[0] : false;
 
   if (sample && _is_sampling_completed)
     mooseError("Internal bug: the adaptive sampling is supposed to be completed but another sample "
                "has been requested.");
 
-  if (_step <= _num_samples_train)
+  if (_t_step <= _num_samples_train)
   {
     /* This is the importance distribution training step. Markov Chains are set up
-       to sample from the importance region or the failure region using the Metropolis
-       algorithm. Given that the previous sample resulted in a model failure, the next
-       sample is proposed such that it is very likely to result in a model failure as well.
-       The `initial_values` and `proposal_std` parameters provided by the user affects the
-       formation of the importance distribution. */
-    if (sample)
+      to sample from the importance region or the failure region using the Metropolis
+      algorithm. Given that the previous sample resulted in a model failure, the next
+      sample is proposed such that it is very likely to result in a model failure as well.
+      The `initial_values` and `proposal_std` parameters provided by the user affects the
+      formation of the importance distribution. */
+    if (sample && !gp_flag)
     {
       for (dof_id_type j = 0; j < _distributions.size(); ++j)
         _prev_value[j] = Normal::quantile(_distributions[j]->cdf(_inputs[j][0]), 0.0, 1.0);
@@ -127,7 +133,7 @@ AdaptiveImportanceSampler::computeSample(dof_id_type /*row_index*/, dof_id_type 
       for (dof_id_type i = 0; i < _distributions.size(); ++i)
         acceptance_ratio += std::log(Normal::pdf(_prev_value[i], 0.0, 1.0)) -
                             std::log(Normal::pdf(_inputs_sto[i].back(), 0.0, 1.0));
-      if (acceptance_ratio > std::log(getRand(_step)))
+      if (acceptance_ratio > std::log(getRand(_t_step)))
       {
         for (dof_id_type i = 0; i < _distributions.size(); ++i)
           _inputs_sto[i].push_back(_prev_value[i]);
@@ -138,29 +144,37 @@ AdaptiveImportanceSampler::computeSample(dof_id_type /*row_index*/, dof_id_type 
           _inputs_sto[i].push_back(_inputs_sto[i].back());
       }
       for (dof_id_type i = 0; i < _distributions.size(); ++i)
-        _prev_value[i] = Normal::quantile(getRand(_step), _inputs_sto[i].back(), _proposal_std[i]);
+        _prev_value[i] =
+            Normal::quantile(getRand(_t_step), _inputs_sto[i].back(), _proposal_std[i]);
     }
   }
-  else if (sample)
+  else if (sample && !gp_flag)
   {
     /* This is the importance sampling step using the importance distribution created
-       in the previous step. Once the importance distribution is known, sampling from
-       it is similar to a regular Monte Carlo sampling. */
+      in the previous step. Once the importance distribution is known, sampling from
+      it is similar to a regular Monte Carlo sampling. */
     for (dof_id_type i = 0; i < _distributions.size(); ++i)
     {
-      if (_step == _num_samples_train + 1)
+      if (_t_step == _num_samples_train + 1)
       {
         _mean_sto[i] = AdaptiveMonteCarloUtils::computeMean(_inputs_sto[i], 1);
         _std_sto[i] = AdaptiveMonteCarloUtils::computeSTD(_inputs_sto[i], 1);
       }
-      _prev_value[i] = (Normal::quantile(getRand(_step), _mean_sto[i], _std_factor * _std_sto[i]));
+      _prev_value[i] =
+          (Normal::quantile(getRand(_t_step), _mean_sto[i], _std_factor * _std_sto[i]));
     }
 
     // check if we have performed all the importance sampling steps
-    if (_step >= _num_samples_train + _num_importance_sampling_steps)
+    if (_t_step >= _num_samples_train + _num_importance_sampling_steps + _retraining_steps)
       _is_sampling_completed = true;
   }
 
-  _check_step = _step;
+  // When the GP fails, the current time step is 'wasted' and the retraining step doesn't
+  // happen until the next time step. Therefore, keep track of the number of retraining steps
+  // to increase the total number of steps taken.
+  if (sample && gp_flag && _t_step > _num_samples_train)
+    ++_retraining_steps;
+
+  _check_step = _t_step;
   return _distributions[col_index]->quantile(Normal::cdf(_prev_value[col_index], 0.0, 1.0));
 }

@@ -4,7 +4,8 @@
 
 ## Description
 
-This Reporter class computes the statistics associated with the [AdaptiveImportanceSampler](AdaptiveImportanceSampler.md).
+This Reporter class computes the statistics associated with the [AdaptiveImportanceSampler](AdaptiveImportanceSampler.md)
+ and [AISActiveLearning](AISActiveLearning).
 
 ## Available statistics
 
@@ -33,8 +34,7 @@ The following statistics have been implemented:
   The cov is given by:
 
   !equation id=eqn:ais_stats3
-  \hat{\delta}^{\textrm{AIS}} = \frac{\sqrt{\textrm{Var}(\hat{P}_f^{\textrm{AIS}})}}{\hat{P}_f^{\textrm{AIS}}}
-  \end{equation}
+  \hat{\delta}^{\textrm{AIS}} =\frac{\sqrt{\textrm{Var}(\hat{P}_f^{\textrm{AIS}})}}{\hat{P}_f^{\textrm{AIS}}}
 
   For computing this statistic, the samples from the training phase of [AdaptiveImportanceSampler](AdaptiveImportanceSampler.md)
   are not used.

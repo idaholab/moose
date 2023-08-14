@@ -43,7 +43,6 @@ ActiveLearningGPDecision::validParams()
 ActiveLearningGPDecision::ActiveLearningGPDecision(const InputParameters & parameters)
   : ActiveLearningReporterTempl<Real>(parameters),
     SurrogateModelInterface(this),
-    _step(getCheckedPointerParam<FEProblemBase *>("_fe_problem_base")->timeStep()),
     _learning_function(getParam<MooseEnum>("learning_function")),
     _learning_function_threshold(getParam<Real>("learning_function_threshold")),
     _learning_function_parameter(getParam<Real>("learning_function_parameter")),
@@ -111,13 +110,13 @@ void
 ActiveLearningGPDecision::preNeedSample()
 {
   // Accumulate inputs and outputs if we previously decided we needed a sample
-  if (_step > 1 && _decision)
+  if (_t_step > 1 && _decision)
   {
     // Accumulate data into _batch members
     setupData(_inputs, _outputs_global);
 
     // Retrain if we are outside the training phase
-    if (_step > _n_train)
+    if (_t_step > _n_train)
       _al_gp.reTrain(_inputs_batch, _outputs_batch);
   }
 
@@ -125,7 +124,7 @@ ActiveLearningGPDecision::preNeedSample()
   _inputs = _inputs_global;
 
   // Evaluate GP and decide if we need more data if outside training phase
-  if (_step > _n_train)
+  if (_t_step > _n_train)
     _decision = facilitateDecision();
 }
 

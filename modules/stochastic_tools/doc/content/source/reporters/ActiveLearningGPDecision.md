@@ -76,6 +76,14 @@ The recommended output format for using active learning is a json file. For each
 !alert note title=Number of output samples
 When processing the json file, the samples whose `need_sample` value is `True` need to be ignored to avoid repeated results. Therefore, the number of output samples with `need_sample` set to False should be equal to [!param](/Samplers/ActiveLearningMonteCarloSampler/num_samples), as any re-training step does not count as an accepted sample.
 
+## Other supported sampler types
+
+The following samplers are also supported with the `ActiveLearningGPDecision` reporter:
+
+- +Active Learning in Adaptive Importance Sampling (AIS-AL)+
+
+  See [AISActiveLearning](AISActiveLearning.md) for more information.
+
 !syntax parameters /Reporters/ActiveLearningGPDecision
 
 !syntax inputs /Reporters/ActiveLearningGPDecision
