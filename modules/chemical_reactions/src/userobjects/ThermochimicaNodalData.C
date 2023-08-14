@@ -8,7 +8,9 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "ThermochimicaNodalData.h"
+#include "ChemicalCompositionAction.h"
 #include "ThermochimicaUtils.h"
+#include "ActionWarehouse.h"
 #include "libmesh/int_range.h"
 
 #ifdef THERMOCHIMICA_ENABLED
@@ -26,15 +28,27 @@ ThermochimicaNodalData::validParams()
       params, "Provides access to Thermochimica-calculated data at nodes.");
 
   params.addRequiredCoupledVar("elements", "Amounts of elements");
-  params.addCoupledVar("element_potentials", "Chemical potentials of elements");
-
-  params.addCoupledVar("pressure", 1.0, "Pressure");
   params.addRequiredCoupledVar("temperature", "Coupled temperature");
+  params.addCoupledVar("pressure", 1.0, "Pressure");
 
-  params.addParam<bool>("reinit_requested", true, "Should Thermochimica use re-initialization?");
+  MooseEnum reinit_type("none time nodal", "nodal");
+  params.addParam<MooseEnum>(
+      "reinit_type", reinit_type, "Reinitialization scheme to use with Thermochimica");
+
+  params.addCoupledVar("output_element_potentials", "Chemical potentials of elements");
   params.addCoupledVar("output_phases", "Amounts of phases to be output");
   params.addCoupledVar("output_species", "Amounts of species to be output");
   params.addCoupledVar("output_vapor_pressures", "Vapour pressures of species to be output");
+  params.addCoupledVar("output_element_phases",
+                       "Elements whose molar amounts in specific phases are requested");
+
+  MooseEnum mUnit_op("mole_fraction moles", "moles");
+  params.addParam<MooseEnum>(
+      "output_species_unit", mUnit_op, "Mass unit for output species: mole_fractions or moles");
+
+  params.set<bool>("unique_node_execute") = true;
+
+  params.addPrivateParam<ChemicalCompositionAction *>("_chemical_composition_action");
   return params;
 }
 
@@ -42,142 +56,87 @@ ThermochimicaNodalData::ThermochimicaNodalData(const InputParameters & parameter
   : NodalUserObject(parameters),
     _pressure(coupledValue("pressure")),
     _temperature(coupledValue("temperature")),
-    _reinit_requested(getParam<bool>("reinit_requested")),
     _n_phases(coupledComponents("output_phases")),
     _n_species(coupledComponents("output_species")),
     _n_elements(coupledComponents("elements")),
     _n_vapor_species(coupledComponents("output_vapor_pressures")),
+    _n_phase_elements(coupledComponents("output_element_phases")),
+    _n_potentials(coupledComponents("output_element_potentials")),
     _el(_n_elements),
-    _el_name(_n_elements),
-    _ph_name(_n_phases),
-    _sp_phase_name(_n_species),
-    _sp_species_name(_n_species),
-    _vapor_phase_name(_n_vapor_species),
-    _vapor_species_name(_n_vapor_species),
-    _output_element_potential(isCoupled("element_potentials")),
-    _output_vapor_pressures(isCoupled("output_vapor_pressures"))
+    _action(*parameters.getCheckedPointerParam<ChemicalCompositionAction *>(
+        "_chemical_composition_action")),
+    _el_ids(_action.elementIDs()),
+    _reinit(_action.reinitializationType()),
+    _ph_names(_action.phases()),
+    _element_potentials(_action.elementPotentials()),
+    _species_phase_pairs(_action.speciesPhasePairs()),
+    _vapor_phase_pairs(_action.vaporPhasePairs()),
+    _phase_element_pairs(_action.phaseElementPairs()),
+    _output_element_potentials(isCoupled("output_element_potentials")),
+    _output_vapor_pressures(isCoupled("output_vapor_pressures")),
+    _output_element_phases(isCoupled("output_element_phases")),
+    _ph(_n_phases),
+    _sp(_n_species),
+    _vp(_n_vapor_species),
+    _el_pot(_n_potentials),
+    _el_ph(_n_phase_elements),
+    _output_mass_unit(_action.outputSpeciesUnit())
 {
   ThermochimicaUtils::checkLibraryAvailability(*this);
 
   if (n_threads() > 1)
     mooseError("Thermochimica does not support multi-threaded runs.");
-  if (coupledComponents("element_potentials") != _n_elements)
-    paramError("element_potentials", "Specify one element potential for each entry in `elements`");
 
+  if (_el_ids.size() != _n_elements)
+    mooseError("Element IDs size does not match number of elements.");
   for (const auto i : make_range(_n_elements))
-  {
     _el[i] = &coupledValue("elements", i);
-    _el_name[i] = getVar("elements", i)->name();
-#ifdef THERMOCHIMICA_ENABLED
-    // check if the element symbol is valid
-    _el_id.resize(_n_elements);
-    _el_id[i] = Thermochimica::atomicNumber(_el_name[i]);
-#endif
-  }
 
-#ifdef THERMOCHIMICA_ENABLED
+  if (isParamValid("output_phases"))
   {
-    // Get thermodynamic database information to compare with input files.
-    _db_num_phases = Thermochimica::getNumberPhasesDatabase();
-    _db_phase_names = Thermochimica::getPhaseNamesDatabase();
-    _db_species_names = Thermochimica::getSpeciesDatabase();
+    if (_ph_names.size() != _n_phases)
+      mooseError("Phase names vector size does not match number of phases.");
 
     for (const auto i : make_range(_n_phases))
-    {
-      _ph_name[i] = getVar("output_phases", i)->name();
-      if (std::find(_db_phase_names.begin(), _db_phase_names.end(), _ph_name[i]) ==
-          _db_phase_names.end())
-        paramError("output_phases", "Phase '", _ph_name[i], "' was not found in the simulation.");
-    }
+      _ph[i] = &writableVariable("output_phases", i);
+  }
+
+  if (isParamValid("output_species"))
+  {
+    if (_species_phase_pairs.size() != _n_species)
+      mooseError("Species name vector size does not match number of output species.");
 
     for (const auto i : make_range(_n_species))
-    {
-      auto species_var_name = getVar("output_species", i)->name();
-      auto colon = species_var_name.find_last_of(':');
-      if (colon == std::string::npos)
-        paramError("output_species", "No ':' separator found in variable '", species_var_name, "'");
-      _sp_phase_name[i] = species_var_name.substr(0, colon);
-      if (std::find(_db_phase_names.begin(), _db_phase_names.end(), _sp_phase_name[i]) ==
-          _db_phase_names.end())
-        paramError("output_species",
-                   "Phase name '",
-                   _sp_phase_name[i],
-                   "' of output species '",
-                   species_var_name,
-                   "' was not found in the simulation.");
-      _sp_species_name[i] = species_var_name.substr(colon + 1);
-
-      auto ph_index = std::distance(
-          _db_phase_names.begin(),
-          std::find(_db_phase_names.begin(), _db_phase_names.end(), _sp_phase_name[i]));
-      if (std::find(_db_species_names[ph_index].begin(),
-                    _db_species_names[ph_index].end(),
-                    _sp_species_name[i]) == _db_species_names[ph_index].end())
-        paramError("output_species",
-                   "Species '",
-                   _sp_species_name[i],
-                   "' was not found in the simulation.");
-    }
-
-    if (_output_element_potential)
-    {
-      _element_potentials.resize(_n_elements);
-      for (const auto i : make_range(_n_elements))
-      {
-        auto element_var_name = getVar("element_potentials", i)->name();
-        auto colon = element_var_name.find_last_of(':');
-        if (colon == std::string::npos)
-          paramError(
-              "element_potentials", "No ':' separator found in variable '", element_var_name, "'");
-        _element_potentials[i] = element_var_name.substr(colon + 1);
-        if (std::find(_el_name.begin(), _el_name.end(), _element_potentials[i]) == _el_name.end())
-          paramError("element_potentials",
-                     "Element '",
-                     _element_potentials[i],
-                     "' was not found in the simulation.");
-      }
-    }
-
-    if (_output_vapor_pressures)
-    {
-      if (!(Thermochimica::getNumberSpeciesDatabase()[0] > 0))
-        paramError("output_vapor_pressures",
-                   "Vapor pressures requested but database contains no gas phase.");
-
-      for (const auto i : make_range(_n_vapor_species))
-      {
-        auto vapor_species_name = getVar("output_vapor_pressures", i)->name();
-        auto colon = vapor_species_name.find_last_of(':');
-        if (colon == std::string::npos)
-          paramError("output_vapor_pressures",
-                     "No ':' separator found in variable '",
-                     vapor_species_name,
-                     "'");
-        _vapor_phase_name[i] = vapor_species_name.substr(0, colon);
-        if (_vapor_phase_name[i] != _db_phase_names[0])
-          paramError("output_vapor_pressures",
-                     "Phase '",
-                     _vapor_phase_name[i],
-                     "' of vapor species '",
-                     vapor_species_name,
-                     "' is not a gas phase. Cannot calculate vapor pressure.");
-        _vapor_species_name[i] = vapor_species_name.substr(colon + 1);
-        if (std::find(_db_species_names[0].begin(),
-                      _db_species_names[0].end(),
-                      _vapor_species_name[i]) == _db_species_names[0].end())
-          paramError("output_vapor_pressures",
-                     "Species '",
-                     _vapor_species_name[i],
-                     "' was not found in the gas phase.");
-      }
-    }
-    // get phase name && phase name should be that of gas phase && gas phase should be in the
-    // database gas phase in the database : get number of species in solution phase 0 and if that is
-    // greater than 0 then we definitely have a gas phase because that is how factsage format is.
-    // Then we can compare to the name of the first phase in database. If the phase name is wrong
-    // then there is an issue. If the phase name is correct then check the database
+      _sp[i] = &writableVariable("output_species", i);
   }
-#endif
+
+  if (isParamValid("output_vapor_pressures"))
+  {
+    if (_vapor_phase_pairs.size() != _n_vapor_species)
+      mooseError("Vapor species name vector size does not match number of output vapor species.");
+
+    for (const auto i : make_range(_n_vapor_species))
+      _vp[i] = &writableVariable("output_vapor_pressures", i);
+  }
+
+  if (isParamValid("output_element_phases"))
+  {
+    if (_phase_element_pairs.size() != _n_phase_elements)
+      mooseError("Element phase vector size does not match number of output elements in phases");
+
+    for (const auto i : make_range(_n_phase_elements))
+      _el_ph[i] = &writableVariable("output_element_phases", i);
+  }
+
+  if (isParamValid("output_element_potentials"))
+  {
+    if (_element_potentials.size() != _n_potentials)
+      mooseError("Element potentials vector size does not match number of element potentials "
+                 "specified for output.");
+
+    for (const auto i : make_range(_n_potentials))
+      _el_pot[i] = &writableVariable("output_element_potentials", i);
+  }
 }
 
 void
@@ -195,11 +154,12 @@ ThermochimicaNodalData::execute()
   // Set temperature and pressure for thermochemistry solver
   Thermochimica::setTemperaturePressure(temperature, pressure);
 
-  Thermochimica::setElementMass(0, 0.0); // Reset all element masses to 0
+  // Reset all element masses to 0
+  Thermochimica::setElementMass(0, 0.0);
 
   // Set element masses
   for (const auto i : make_range(_n_elements))
-    Thermochimica::setElementMass(_el_id[i], (*_el[i])[_qp]);
+    Thermochimica::setElementMass(_el_ids[i], (*_el[i])[_qp]);
 
   // Optionally ask for a re-initialization (if reinit_requested == true)
   reinitDataMooseToTc();
@@ -207,92 +167,153 @@ ThermochimicaNodalData::execute()
   // Calculate thermochemical equilibrium
   Thermochimica::thermochimica();
 
-  // fetch data for the current node
-  auto & d = _data[_current_node->id()];
-
   // Check for error status
   auto idbg = Thermochimica::checkInfoThermo();
   if (idbg != 0)
-  {
-    // Thermochimica::printState();
     mooseError("Thermochimica error ", idbg);
-  }
   else
   {
-    // Get requested phase indices if phase concentration output was requested
-    // i.e. if output_phases is coupled
-    d._phase_indices.resize(_n_phases);
-    for (const auto i : make_range(_n_phases))
-    {
-      // Is this maybe constant? No it isn't for now
-      auto [index, idbg] = Thermochimica::getPhaseIndex(_ph_name[i]);
-      if (idbg != 0)
-        mooseError("Failed to get index of phase '", _ph_name[i], "'");
-      // Convert from 1-based (fortran) to 0-based (c++) indexing
-      d._phase_indices[i] = index - 1;
-    }
-
     // Save data for future reinits
     reinitDataMooseFromTc();
 
-    d._species_fractions.resize(_n_species);
-    for (const auto i : make_range(_n_species))
-    {
-      auto [fraction, idbg] =
-          // can we somehow use IDs instead of strings here?
-          Thermochimica::getOutputMolSpeciesPhase(_sp_phase_name[i], _sp_species_name[i]);
+    // Get requested phase indices if phase concentration output was requested
+    // i.e. if output_phases is coupled
+    auto moles_phase = Thermochimica::getMolesPhase();
 
-      if (idbg == 0)
-        d._species_fractions[i] = fraction;
-      else if (idbg == 1)
-        d._species_fractions[i] = 0;
+    for (const auto i : make_range(_n_phases))
+    {
+      // Is this maybe constant? No it isn't for now
+      auto [index, idbg] = Thermochimica::getPhaseIndex(_ph_names[i]);
+      if (idbg != 0)
+        mooseError("Failed to get index of phase '", _ph_names[i], "'");
+      // Convert from 1-based (fortran) to 0-based (c++) indexing
+      if (index - 1 < 0)
+        _ph[i]->setNodalValue(0.0, _qp);
       else
-        mooseError("Failed to get phase speciation for phase '",
-                   _sp_phase_name[i],
-                   "' and species '",
-                   _sp_species_name[i],
-                   "'. Thermochimica returned ",
-                   idbg);
+        _ph[i]->setNodalValue(moles_phase[index - 1], _qp);
     }
 
-    if (_output_element_potential)
+    auto db_phases = Thermochimica::getPhaseNamesSystem();
+    auto getSpeciesMoles =
+        [this, moles_phase, db_phases](const std::string phase,
+                                       const std::string species) -> std::pair<double, int>
     {
-      d._element_potential_for_output.resize(_element_potentials.size());
+      Real value = 0.0;
+      int code = 0;
+
+      auto [index, idbg] = Thermochimica::getPhaseIndex(phase);
+
+      if (Thermochimica::isPhaseMQM(std::distance(
+              db_phases.begin(), std::find(db_phases.begin(), db_phases.end(), phase))))
+      {
+        auto [fraction, idbg] = Thermochimica::getMqmqaPairMolFraction(phase, species);
+
+        if (_output_mass_unit == "mole_fraction")
+        {
+          value = fraction;
+          code = idbg;
+        }
+        else if (_output_mass_unit == "moles")
+        {
+          auto [molesPair, idbgPair] = Thermochimica::getMqmqaMolesPairs(phase);
+          value = molesPair * fraction;
+          code = idbg + idbgPair;
+        }
+      }
+      else
+      {
+        auto [fraction, idbg] = Thermochimica::getOutputMolSpeciesPhase(phase, species);
+        if (_output_mass_unit == "mole_fraction")
+        {
+          value = fraction;
+          code = idbg;
+        }
+        else if (_output_mass_unit == "moles")
+        {
+          value = moles_phase[index - 1] * fraction;
+          code = idbg;
+        }
+      }
+      return {value, code};
+    };
+
+    for (const auto i : make_range(_n_species))
+    {
+      auto [fraction, idbg] = getSpeciesMoles(
+          _species_phase_pairs[i].first,
+          _species_phase_pairs[i].second); // can we somehow use IDs instead of strings here?
+
+      if (idbg == 0)
+        _sp[i]->setNodalValue(fraction, _qp);
+      else if (idbg == 1)
+        _sp[i]->setNodalValue(0.0, _qp);
+#ifndef NDEBUG
+      else
+        mooseError("Failed to get phase speciation for phase '",
+                   _species_phase_pairs[i].first,
+                   "' and species '",
+                   _species_phase_pairs[i].second,
+                   "'. Thermochimica returned ",
+                   idbg);
+#endif
+    }
+
+    if (_output_element_potentials)
       for (const auto i : index_range(_element_potentials))
       {
         auto [potential, idbg] = Thermochimica::getOutputChemPot(_element_potentials[i]);
 
         if (idbg == 0)
-          d._element_potential_for_output[i] = potential;
+          _el_pot[i]->setNodalValue(potential, _qp);
         else if (idbg == 1)
           // element not present, just leave this at 0 for now
-          d._element_potential_for_output[i] = 0.0;
+          _el_pot[i]->setNodalValue(0.0, _qp);
         else if (idbg == -1)
           Moose::out << "getoutputchempot " << idbg << "\n";
       }
-    }
 
     if (_output_vapor_pressures)
-    {
-      d._vapor_pressures.resize(_n_vapor_species);
       for (const auto i : make_range(_n_vapor_species))
       {
-        auto [fraction, moles, idbg] = Thermochimica::getOutputMolSpecies(_vapor_species_name[i]);
+        auto [fraction, moles, idbg] =
+            Thermochimica::getOutputMolSpecies(_vapor_phase_pairs[i].second);
         libmesh_ignore(moles);
 
         if (idbg == 0)
-          d._vapor_pressures[i] = fraction * pressure;
+          _vp[i]->setNodalValue(fraction * pressure, _qp);
         else if (idbg == 1)
-          d._vapor_pressures[i] = 0;
+          _vp[i]->setNodalValue(0.0, _qp);
+#ifndef NDEBUG
         else
           mooseError("Failed to get vapor pressure for phase '",
-                     _vapor_phase_name[i],
+                     _vapor_phase_pairs[i].first,
                      "' and species '",
-                     _vapor_species_name[i],
+                     _vapor_phase_pairs[i].second,
                      "'. Thermochimica returned ",
                      idbg);
+#endif
       }
-    }
+
+    if (_output_element_phases)
+      for (const auto i : make_range(_n_phase_elements))
+      {
+        auto [moles, idbg] = Thermochimica::getElementMolesInPhase(_phase_element_pairs[i].second,
+                                                                   _phase_element_pairs[i].first);
+
+        if (idbg == 0)
+          _el_ph[i]->setNodalValue(moles, _qp);
+        else if (idbg == 1)
+          _el_ph[i]->setNodalValue(0.0, _qp);
+#ifndef NDEBUG
+        else
+          mooseError("Failed to get moles of element '",
+                     _phase_element_pairs[i].second,
+                     "' in phase '",
+                     _phase_element_pairs[i].first,
+                     "'. Thermochimica returned ",
+                     idbg);
+#endif
+      }
   }
 #endif
 }
@@ -303,29 +324,21 @@ ThermochimicaNodalData::reinitDataMooseFromTc()
 #ifdef THERMOCHIMICA_ENABLED
   auto & d = _data[_current_node->id()];
 
-  if (_reinit_requested)
+  if (_reinit != "none")
   {
     Thermochimica::saveReinitData();
     auto data = Thermochimica::getReinitData();
-    d._assemblage = std::move(data.assemblage);
-    d._moles_phase = std::move(data.molesPhase);
-    d._element_potential = std::move(data.elementPotential);
-    d._chemical_potential = std::move(data.chemicalPotential);
-    d._mol_fraction = std::move(data.moleFraction);
-    d._elements_used = std::move(data.elementsUsed);
-    d._reinit_available = data.reinitAvailable;
-  }
-  else
-  {
-    // If phase concentration data output has been requested, _moles_phase is required even if other
-    // re-initialization data is not
-    if (_n_phases > 0)
-      d._moles_phase = Thermochimica::getMolesPhase();
 
-    // If element chemical potential data output has been requested, _element_potential is required
-    // even if other re-initialization data is not
-    if (_output_element_potential)
-      d._element_potential = Thermochimica::getAllElementPotential();
+    if (_reinit == "time")
+    {
+      d._assemblage = std::move(data.assemblage);
+      d._moles_phase = std::move(data.molesPhase);
+      d._element_potential = std::move(data.elementPotential);
+      d._chemical_potential = std::move(data.chemicalPotential);
+      d._mol_fraction = std::move(data.moleFraction);
+      d._elements_used = std::move(data.elementsUsed);
+      d._reinit_available = data.reinitAvailable;
+    }
   }
 #endif
 }
@@ -335,12 +348,15 @@ ThermochimicaNodalData::reinitDataMooseToTc()
 {
 #ifdef THERMOCHIMICA_ENABLED
   // Tell Thermochimica whether a re-initialization is requested for this calculation
-  Thermochimica::setReinitRequested(_reinit_requested);
+  if (_reinit == "none")
+    Thermochimica::setReinitRequested(false);
+  else
+    Thermochimica::setReinitRequested(true);
 
   // If we have re-initialization data and want a re-initialization, then
   // load data into Thermochimica
   auto it = _data.find(_current_node->id());
-  if (it != _data.end() && _reinit_requested)
+  if (it != _data.end() && _reinit == "time") // If doing previous timestep reinit
   {
     auto & d = it->second;
     if (d._reinit_available)
