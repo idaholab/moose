@@ -28,6 +28,16 @@ InputParameters
 SingleVariableReturnMappingSolutionTempl<is_ad>::validParams()
 {
   InputParameters params = emptyInputParameters();
+  MooseEnum solve_type("NEWTON SECANT", "NEWTON");
+  solve_type.addDocumentation(
+      "NEWTON",
+      "Newton-Raphson solve with line search. Should have quadratic convergence, and is the "
+      "preferred solve unless computing the derivative is computationally very expensive.");
+  solve_type.addDocumentation("SECANT",
+                              "Secant method or Regula-Falsi method. Should have order ~1.68 "
+                              "convergence. This is a derivative free method.");
+  params.addParam<MooseEnum>(
+      "solve_type", solve_type, "Solver used for the internal return mapping iterations");
   params.addParam<Real>(
       "relative_tolerance", 1e-8, "Relative convergence tolerance for Newton iteration");
   params.addParam<Real>(
@@ -60,7 +70,8 @@ SingleVariableReturnMappingSolutionTempl<is_ad>::validParams()
 template <bool is_ad>
 SingleVariableReturnMappingSolutionTempl<is_ad>::SingleVariableReturnMappingSolutionTempl(
     const InputParameters & parameters)
-  : _check_range(false),
+  : _solve_type(parameters.get<MooseEnum>("solve_type").getEnum<SolveType>()),
+    _check_range(false),
     _line_search(true),
     _bracket_solution(true),
     _internal_solve_output_on(
@@ -110,47 +121,58 @@ SingleVariableReturnMappingSolutionTempl<is_ad>::returnMappingSolve(
           ? std::make_unique<std::stringstream>()
           : nullptr;
 
-  // do the internal solve and capture iteration info during the first round
-  // iff full history output is requested regardless of whether the solve failed or succeeded
-  auto solve_state =
-      internalSolve(effective_trial_stress,
-                    scalar,
-                    _internal_solve_full_iteration_history ? iter_output.get() : nullptr);
-  if (solve_state != SolveState::SUCCESS &&
-      _internal_solve_output_on != InternalSolveOutput::ALWAYS)
+  if (_solve_type == SolveType::SECANT)
   {
-    // output suppressed by user, throw immediately
-    if (_internal_solve_output_on == InternalSolveOutput::NEVER)
-      mooseException("");
-
-    // user expects some kind of output, if necessary setup output stream now
-    if (!iter_output)
-      iter_output = std::make_unique<std::stringstream>();
-
-    // add the appropriate error message to the output
-    switch (solve_state)
-    {
-      case SolveState::NAN_INF:
-        *iter_output << "Encountered inf or nan in material return mapping iterations.\n";
-        break;
-
-      case SolveState::EXCEEDED_ITERATIONS:
-        *iter_output << "Exceeded maximum iterations in material return mapping iterations.\n";
-        break;
-
-      default:
-        mooseError("Unhandled solver state");
-    }
-
-    // if full history output is only requested for failed solves we have to repeat
-    // the solve a second time
-    if (_internal_solve_full_iteration_history)
-      internalSolve(effective_trial_stress, scalar, iter_output.get());
-
-    // Append summary and throw exception
-    outputIterationSummary(iter_output.get(), _iteration);
-    mooseException(iter_output->str());
+    internalSecantSolve(effective_trial_stress,
+                        scalar,
+                        _internal_solve_full_iteration_history ? iter_output.get() : nullptr);
   }
+  else if (_solve_type == SolveType::NEWTON)
+  {
+    // do the internal solve and capture iteration info during the first round
+    // iff full history output is requested regardless of whether the solve failed or succeeded
+    auto solve_state =
+        internalSolve(effective_trial_stress,
+                      scalar,
+                      _internal_solve_full_iteration_history ? iter_output.get() : nullptr);
+    if (solve_state != SolveState::SUCCESS &&
+        _internal_solve_output_on != InternalSolveOutput::ALWAYS)
+    {
+      // output suppressed by user, throw immediately
+      if (_internal_solve_output_on == InternalSolveOutput::NEVER)
+        mooseException("");
+
+      // user expects some kind of output, if necessary setup output stream now
+      if (!iter_output)
+        iter_output = std::make_unique<std::stringstream>();
+
+      // add the appropriate error message to the output
+      switch (solve_state)
+      {
+        case SolveState::NAN_INF:
+          *iter_output << "Encountered inf or nan in material return mapping iterations.\n";
+          break;
+
+        case SolveState::EXCEEDED_ITERATIONS:
+          *iter_output << "Exceeded maximum iterations in material return mapping iterations.\n";
+          break;
+
+        default:
+          mooseError("Unhandled solver state");
+      }
+
+      // if full history output is only requested for failed solves we have to repeat
+      // the solve a second time
+      if (_internal_solve_full_iteration_history)
+        internalSolve(effective_trial_stress, scalar, iter_output.get());
+
+      // Append summary and throw exception
+      outputIterationSummary(iter_output.get(), _iteration);
+      mooseException(iter_output->str());
+    }
+  }
+  else
+    mooseError("Unknown solve type.");
 
   if (_internal_solve_output_on == InternalSolveOutput::ALWAYS)
   {
@@ -302,6 +324,75 @@ SingleVariableReturnMappingSolutionTempl<is_ad>::internalSolve(
     return SolveState::EXCEEDED_ITERATIONS;
 
   return SolveState::SUCCESS;
+}
+
+template <bool is_ad>
+typename SingleVariableReturnMappingSolutionTempl<is_ad>::SolveState
+SingleVariableReturnMappingSolutionTempl<is_ad>::internalSecantSolve(
+    const GenericReal<is_ad> effective_trial_stress,
+    GenericReal<is_ad> & scalar,
+    std::stringstream * iter_output)
+{
+  // bail out for zero stress
+  if (effective_trial_stress < libMesh::TOLERANCE)
+  {
+    scalar = 0.0;
+    return SolveState::SUCCESS;
+  }
+
+  // two initial guesses
+  auto ak = initialGuess(effective_trial_stress);
+  auto bk = initialGuess(0.0);
+  if (ak == bk)
+    // mooseError("The update model must return a non-zero initialGuess!");
+    bk = ak + 1.0;
+
+  const auto fak0 = computeResidual(effective_trial_stress, ak);
+  const auto fbk0 = computeResidual(effective_trial_stress, bk);
+  GenericReal<is_ad> fak = fak0;
+  GenericReal<is_ad> fbk = fbk0;
+
+  // iterate
+  unsigned int k = 0;
+  while (true)
+  {
+    if (iter_output)
+      *iter_output << "a_k,b_k = " << ak << ',' << bk << '\n';
+
+    mooseAssert(fbk != fak, "Division by zero in secant update");
+    const auto ck = (ak * fbk - bk * fak) / (fbk - fak);
+
+    // do fak and fbk have the same sign?
+    if (fak * fbk > 0)
+      ak = ck;
+    else
+      bk = ck;
+
+    // delta x tolerance check!
+    if (std::abs(ak - bk) < _absolute_tolerance)
+    {
+      scalar = ak;
+      return SolveState::SUCCESS;
+    }
+
+    if (std::abs(fak0 * _relative_tolerance) > std::abs(fak) || std::abs(fak) < _absolute_tolerance)
+    {
+      scalar = ak;
+      return SolveState::SUCCESS;
+    }
+    if (std::abs(fbk0 * _relative_tolerance) > std::abs(fbk) || std::abs(fbk) < _absolute_tolerance)
+    {
+      scalar = bk;
+      return SolveState::SUCCESS;
+    }
+
+    if (k == _max_its)
+      return SolveState::EXCEEDED_ITERATIONS;
+
+    k++;
+    fak = computeResidual(effective_trial_stress, ak);
+    fbk = computeResidual(effective_trial_stress, bk);
+  }
 }
 
 template <bool is_ad>

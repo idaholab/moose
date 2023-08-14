@@ -31,6 +31,12 @@ public:
   virtual ~SingleVariableReturnMappingSolutionTempl() {}
 
 protected:
+  enum class SolveType
+  {
+    NEWTON,
+    SECANT
+  } _solve_type;
+
   /**
    * Perform the return mapping iterations
    * @param effective_trial_stress Effective trial stress
@@ -235,6 +241,9 @@ private:
   SolveState internalSolve(const GenericReal<is_ad> effective_trial_stress,
                            GenericReal<is_ad> & scalar,
                            std::stringstream * iter_output = nullptr);
+  SolveState internalSecantSolve(const GenericReal<is_ad> effective_trial_stress,
+                                 GenericReal<is_ad> & scalar,
+                                 std::stringstream * iter_output = nullptr);
 
   /**
    * Check to see whether the residual is within acceptable convergence limits.
