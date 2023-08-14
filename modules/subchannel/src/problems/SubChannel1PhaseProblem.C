@@ -97,7 +97,7 @@ SubChannel1PhaseProblem::validParams()
       "compute_power",
       "Flag that informs whether we solve the Enthalpy/Temperature equations or not");
   params.addRequiredParam<PostprocessorName>(
-      "P_out", "The postprocessor to use for the value of outlet pressure");
+      "P_out", "The postprocessor (or scalar) that provides the value of outlet pressure [Pa]");
   params.addRequiredParam<UserObjectName>("fp", "Fluid properties user object name");
   return params;
 }

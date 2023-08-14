@@ -2,17 +2,16 @@ T_in = 360.0
 mass_flux_in = ${fparse 1e+4 * 17.0 / 3600.}
 P_out = 4.923e6 # Pa
 
-
 [TriInterWrapperMesh]
-  [sub_channel]
-    type = TriInterWrapperMeshGenerator
-    nrings = 4
-    n_cells = 50
-    flat_to_flat = 0.16
-    heated_length = 3.0
-    assembly_pitch = 0.17
-    side_bypass = 0.01
-  []
+    [sub_channel]
+        type = TriInterWrapperMeshGenerator
+        nrings = 4
+        n_cells = 50
+        flat_to_flat = 0.16
+        heated_length = 3.0
+        assembly_pitch = 0.17
+        side_bypass = 0.01
+    []
 []
 
 
@@ -41,15 +40,11 @@ P_out = 4.923e6 # Pa
     []
 []
 
-
-[Modules]
-    [FluidProperties]
-        [sodium]
-            type = PBSodiumFluidProperties
-        []
+[FluidProperties]
+    [sodium]
+        type = PBSodiumFluidProperties
     []
 []
-
 
 [ICs]
     [S_IC]
@@ -76,7 +71,7 @@ P_out = 4.923e6 # Pa
     [P_ic]
         type = ConstantIC
         variable = P
-        value = 2.0e5
+        value = 0.0
     []
 
     [DP_ic]
@@ -136,19 +131,14 @@ P_out = 4.923e6 # Pa
     monolithic_thermal = false
 []
 
-
 [AuxKernels]
 []
-
 
 [Outputs]
   exodus = true
   checkpoint = false
 []
 
-
 [Executioner]
   type = Steady
-  nl_rel_tol = 0.9
-  l_tol = 0.9
 []

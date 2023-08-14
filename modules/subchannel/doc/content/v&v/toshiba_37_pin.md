@@ -77,12 +77,12 @@ All variables must be present at every input for the subchannel solver to run.
 
 !listing /examples/Toshiba_37_pin/toshiba_37_pin.i block=AuxVariables language=cpp
 
-### Modules
+### FluidProperties
 
-The module block specifies the thermophysical properties used in the subchannel solve.
+The FluidProperties block specifies the thermophysical properties used in the subchannel solve.
 Sodium properties are used in this case.
 
-!listing /examples/Toshiba_37_pin/toshiba_37_pin.i block=Modules language=cpp
+!listing /examples/Toshiba_37_pin/toshiba_37_pin.i block=FluidProperties language=cpp
 
 ### Problem
 

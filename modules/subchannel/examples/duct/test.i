@@ -27,7 +27,6 @@ P_out = 2.0e5 # Pa
   []
 []
 
-
 [AuxVariables]
   [mdot]
     block = subchannel
@@ -73,11 +72,9 @@ P_out = 2.0e5 # Pa
   []
 []
 
-[Modules]
-  [FluidProperties]
-    [sodium]
-       type = PBSodiumFluidProperties
-    []
+[FluidProperties]
+  [sodium]
+      type = PBSodiumFluidProperties
   []
 []
 
@@ -85,7 +82,6 @@ P_out = 2.0e5 # Pa
   type = LiquidMetalSubChannel1PhaseProblem
   fp = sodium
   n_blocks = 1
-  beta = 0.1
   P_out = 2.0e5
   CT = 1.0
   enforce_uniform_pressure = false
@@ -129,7 +125,7 @@ P_out = 2.0e5 # Pa
   [P_ic]
     type = ConstantIC
     variable = P
-    value = ${P_out}
+    value = 0.0
   []
 
   [DP_ic]
@@ -145,11 +141,10 @@ P_out = 2.0e5 # Pa
     fp = sodium
   []
 
-
   [rho_ic]
     type = RhoFromPressureTemperatureIC
     variable = rho
-    p = P
+    p = ${P_out}
     T = T
     fp = sodium
   []
@@ -157,7 +152,7 @@ P_out = 2.0e5 # Pa
   [h_ic]
     type = SpecificEnthalpyFromPressureTemperatureIC
     variable = h
-    p = P
+    p = ${P_out}
     T = T
     fp = sodium
   []
@@ -176,13 +171,6 @@ P_out = 2.0e5 # Pa
 []
 
 [AuxKernels]
-  [P_out_bc]
-    type = ConstantAux
-    variable = P
-    boundary = outlet
-    value = ${P_out}
-    execute_on = 'timestep_begin'
-  []
   [T_in_bc]
     type = ConstantAux
     variable = T
@@ -218,8 +206,6 @@ P_out = 2.0e5 # Pa
 
 [Executioner]
   type = Steady
-  nl_rel_tol = 0.9
-  l_tol = 0.9
 []
 
 ################################################################################
