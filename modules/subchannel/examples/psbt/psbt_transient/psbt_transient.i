@@ -35,7 +35,8 @@ P_out = 4.923e6 # Pa
   compute_density = true
   compute_viscosity = true
   compute_power = true
-  P_out = ${P_out}
+  P_out = Outlet_Pressure
+  verbose_subchannel = true
 []
 
 [ICs]
@@ -148,11 +149,21 @@ P_out = 4.923e6 # Pa
   []
 []
 
+[Postprocessors]
+  [Outlet_Pressure]
+    type = ParsedPostprocessor
+    pp_names = ''
+    use_t = true
+    function = 'if (t < 2, 4.923e6, 5e6)'
+    execute_on = 'INITIAL TIMESTEP_END'
+  []
+[]
+
 [Executioner]
   type = Transient
   nl_rel_tol = 0.9
   l_tol = 0.9
   start_time = 0.0
-  end_time = 8
+  end_time = 4
   dt = 1.0
 []

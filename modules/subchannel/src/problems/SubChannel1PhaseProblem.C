@@ -65,6 +65,7 @@ InputParameters
 SubChannel1PhaseProblem::validParams()
 {
   InputParameters params = ExternalProblem::validParams();
+  params += PostprocessorInterface::validParams();
   params.addClassDescription("Base class of the subchannel solvers");
   params.addRequiredParam<unsigned int>("n_blocks", "The number of blocks in the axial direction");
   params.addRequiredParam<Real>("CT", "Turbulent modeling parameter");
@@ -95,13 +96,15 @@ SubChannel1PhaseProblem::validParams()
   params.addRequiredParam<bool>(
       "compute_power",
       "Flag that informs whether we solve the Enthalpy/Temperature equations or not");
-  params.addRequiredParam<Real>("P_out", "Outlet Pressure [Pa]");
+  params.addRequiredParam<PostprocessorName>(
+      "P_out", "The postprocessor to use for the value of outlet pressure");
   params.addRequiredParam<UserObjectName>("fp", "Fluid properties user object name");
   return params;
 }
 
 SubChannel1PhaseProblem::SubChannel1PhaseProblem(const InputParameters & params)
   : ExternalProblem(params),
+    PostprocessorInterface(this),
     _subchannel_mesh(dynamic_cast<SubChannelMesh &>(_mesh)),
     _n_blocks(getParam<unsigned int>("n_blocks")),
     _Wij(declareRestartableData<libMesh::DenseMatrix<Real>>("Wij")),
@@ -115,7 +118,7 @@ SubChannel1PhaseProblem::SubChannel1PhaseProblem(const InputParameters & params)
     _pin_mesh_exist(_subchannel_mesh.pinMeshExist()),
     _duct_mesh_exist(_subchannel_mesh.ductMeshExist()),
     _dt(isTransient() ? dt() : _one),
-    _P_out(getParam<Real>("P_out")),
+    _P_out(getPostprocessorValue("P_out")),
     _CT(getParam<Real>("CT")),
     _P_tol(getParam<Real>("P_tol")),
     _T_tol(getParam<Real>("T_tol")),
@@ -2996,6 +2999,7 @@ SubChannel1PhaseProblem::externalSolve()
     _console << "Bulk coolant temperature at outlet :" << T_bulk_out << " K" << std::endl;
     _console << "Power added to coolant is: " << power_out - power_in << " Watt" << std::endl;
     _console << "Mass balance is: " << mass_flow_out - mass_flow_in << " kg/sec" << std::endl;
+    _console << "Outlet Pressure is: " << _P_out << " Pa" << std::endl;
     _console << " ======================================= " << std::endl;
   }
 }

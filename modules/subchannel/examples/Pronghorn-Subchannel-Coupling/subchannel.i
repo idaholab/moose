@@ -116,8 +116,7 @@ duct_inside = '${fparse duct_outside - 2 * duct_thickness}'
   type = LiquidMetalSubChannel1PhaseProblem
   fp = sodium
   n_blocks = 1
-  beta = 0.006
-  P_out = ${P_out}
+  P_out = report_pressure_outlet
   CT = 2.6
   compute_density = true
   compute_viscosity = true
@@ -159,7 +158,7 @@ duct_inside = '${fparse duct_outside - 2 * duct_thickness}'
   [P_ic]
     type = ConstantIC
     variable = P
-    value = ${P_out}
+    value = 0.0
   []
 
   [DP_ic]
@@ -179,7 +178,7 @@ duct_inside = '${fparse duct_outside - 2 * duct_thickness}'
   [rho_ic]
     type = RhoFromPressureTemperatureIC
     variable = rho
-    p = P
+    p = ${P_out}
     T = T
     fp = sodium
   []
@@ -187,7 +186,7 @@ duct_inside = '${fparse duct_outside - 2 * duct_thickness}'
   [h_ic]
     type = SpecificEnthalpyFromPressureTemperatureIC
     variable = h
-    p = P
+    p = ${P_out}
     T = T
     fp = sodium
   []
@@ -200,14 +199,6 @@ duct_inside = '${fparse duct_outside - 2 * duct_thickness}'
 []
 
 [AuxKernels]
-  [P_out_bc]
-    type = PostprocessorConstantAux
-    variable = P
-    boundary = outlet
-    postprocessor = report_pressure_outlet
-    execute_on = 'timestep_begin'
-    block = subchannel
-  []
   [T_in_bc]
     type = ConstantAux
     variable = T
@@ -250,8 +241,6 @@ duct_inside = '${fparse duct_outside - 2 * duct_thickness}'
 
 [Executioner]
   type = Steady
-  nl_rel_tol = 0.9
-  l_tol = 0.9
 []
 
 ################################################################################

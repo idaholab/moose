@@ -11,6 +11,8 @@ outlet_pressure = 758423 # Pa # gauge pressure
 # geometry parameters
 pin_diameter = 8e-3
 pin_pitch = 9.04e-3
+# cr_pin_diameter = 1.11e-2
+# cr_pin_pitch = 1.2476e-2
 flat_to_flat = 13.598e-2
 wire_diameter = 1.03e-3
 wire_pitch = 203.2e-3
@@ -34,12 +36,12 @@ D_hydraulic_interwrapper = ${fparse 2 * inter_assembly_gap}
 D_hydraulic_fuel = 0.00297
 
 wrapper_blocks = 'wrapper'
-flow_blocks = 'interwrapper porous_flow center_porous_flow'
+flow_blocks = 'interwrapper center_porous_flow'
 
 [Mesh]
   [fmesh]
     type = FileMeshGenerator
-    file = 'seven_wrapper_interwrapper2_in.e'
+    file = 'one_wrapper_interwrapper_in.e'
   []
 []
 
@@ -111,16 +113,6 @@ flow_blocks = 'interwrapper porous_flow center_porous_flow'
   []
 []
 
-[FVBCs]
-  active =''
-  [T_wrapper_inside_wall]
-    type = FVFunctorDirichletBC
-    variable = T_wrapper
-    functor = duct_surface_temperature_functor
-    boundary = 'inner_wall'
-  []
-[]
-
 [FVKernels]
   inactive ='solid_energy_time'
   [solid_energy_time]
@@ -179,9 +171,9 @@ flow_blocks = 'interwrapper porous_flow center_porous_flow'
     # material properties
     density = 'rho'
     dynamic_viscosity = 'mu'
-    thermal_conductivity = 'k k k'
+    thermal_conductivity = 'k k'
     # defined on all flow blocks
-    thermal_conductivity_blocks = 'interwrapper; porous_flow; center_porous_flow'
+    thermal_conductivity_blocks = 'interwrapper; center_porous_flow'
     specific_heat = 'cp'
 
     # initial conditions
@@ -190,14 +182,14 @@ flow_blocks = 'interwrapper porous_flow center_porous_flow'
     initial_pressure = '${outlet_pressure}'
 
     # boundary conditions
-    inlet_boundaries =     'inlet_interwrapper               inlet_assembly '
+    inlet_boundaries =     'inlet_interwrapper               inlet_central_assembly '
     momentum_inlet_types = 'fixed-velocity                   fixed-velocity'
     momentum_inlet_function = '0 0 inlet_vel_interwrapper_fn; 0 0 inlet_vel_assembly_fn'
 
     energy_inlet_types = 'fixed-temperature fixed-temperature'
     energy_inlet_function = '${inlet_temperature} ${inlet_temperature}'
 
-    wall_boundaries = 'outside_circumference conjugate_heat_transfer_boundary'
+    wall_boundaries = 'inner_wall outer_wall'
     momentum_wall_types = 'slip slip'
     energy_wall_types = 'heatflux heatflux'
     energy_wall_function = '0 0'
@@ -219,7 +211,7 @@ flow_blocks = 'interwrapper porous_flow center_porous_flow'
     speed = speed
     fp = fp
     characteristic_length = ${D_hydraulic_fuel}
-    block = 'porous_flow center_porous_flow'
+    block = 'center_porous_flow'
   []
 
   [fluid_props_interwrapper]
@@ -238,7 +230,6 @@ flow_blocks = 'interwrapper porous_flow center_porous_flow'
     type = ADPiecewiseByBlockFunctorMaterial
     prop_name = 'porosity'
     subdomain_to_prop_value = 'interwrapper 1
-                               porous_flow  0.3
                                center_porous_flow 0.3'
     block = ${flow_blocks}
   []
@@ -254,7 +245,6 @@ flow_blocks = 'interwrapper porous_flow center_porous_flow'
     type = PiecewiseByBlockFunctorMaterial
     prop_name =  'characteristic_length'
     subdomain_to_prop_value = 'interwrapper ${D_hydraulic_interwrapper}
-                               porous_flow  ${D_hydraulic_fuel}
                                center_porous_flow ${D_hydraulic_fuel}'
     block = ${flow_blocks}
   []
@@ -263,13 +253,6 @@ flow_blocks = 'interwrapper porous_flow center_porous_flow'
   [interwrapper_drag]
     type = FunctorChurchillDragCoefficients
     block = 'interwrapper'
-  []
-
-  [assembly_drag]
-    type = FunctorRehmeDragCoefficients
-    multipliers = '100 100 1'
-    hex_lattice = fuel_hex
-    block = 'porous_flow'
   []
 
   [center_assembly_drag]
@@ -281,9 +264,6 @@ flow_blocks = 'interwrapper porous_flow center_porous_flow'
     block = 'center_porous_flow'
   []
 
-  # get duct_surface_temperature_functor
-  # need to play this stupid game here to have it accepted
-  # by the BC
   [converter_to_regular]
     type = FunctorADConverter
     ad_props_in = 'duct_surface_temperature'
@@ -301,10 +281,6 @@ flow_blocks = 'interwrapper porous_flow center_porous_flow'
     initial_condition = 0
   []
 
-  # needed because T_wrapper gradient is zero
-  # in FEM loop
-  # how can we directly use T_wrapper to compute the
-  # qdot'
   [T_wrapper_linear]
     block = ${wrapper_blocks}
     initial_condition = ${inlet_temperature}
@@ -327,19 +303,6 @@ flow_blocks = 'interwrapper porous_flow center_porous_flow'
 []
 
 [AuxKernels]
-  [QPrime]
-    type = QPrimeDuctAux
-    diffusivity = ${k_wrapper}
-    flat_to_flat = ${flat_to_flat}
-    variable = q_prime_duct
-    # FIXME: need to do this because T_wrapper has zero
-    #        gradient
-    diffusion_variable = T_wrapper_linear
-    component = normal
-    boundary = 'inner_wall'
-    execute_on = 'timestep_end'
-  []
-
   [rho_var_aux]
     type = ADFunctorElementalAux
     variable = rho_var
@@ -357,8 +320,8 @@ flow_blocks = 'interwrapper porous_flow center_porous_flow'
   [rho_cp_T_fluid_var_aux]
     type = ParsedAux
     variable = rho_cp_T_fluid_var
-    args = 'rho_var cp_var T_fluid'
-    function = 'rho_var * cp_var * T_fluid'
+    coupled_variables = 'rho_var cp_var T_fluid'
+    expression = 'rho_var * cp_var * T_fluid'
     block = ${flow_blocks}
   []
 []
@@ -374,6 +337,12 @@ flow_blocks = 'interwrapper porous_flow center_porous_flow'
     type = SideAverageValue
     boundary = inlet_central_assembly
     variable = pressure
+  []
+
+  [pressure_drop_Pr]
+    type = ParsedPostprocessor
+    pp_names = 'inlet_average_pressure_Pr outlet_average_pressure_Pr'
+    function = 'inlet_average_pressure_Pr - outlet_average_pressure_Pr'
   []
 
   [inlet_central_mfr]
@@ -396,12 +365,6 @@ flow_blocks = 'interwrapper porous_flow center_porous_flow'
     function = 'abs(inlet_central_mfr/central_assembly_area)'
   []
 
-  [pressure_drop_Pr]
-    type = ParsedPostprocessor
-    pp_names = 'inlet_average_pressure_Pr outlet_average_pressure_Pr'
-    function = 'inlet_average_pressure_Pr - outlet_average_pressure_Pr'
-  []
-
   [report_pressure_drop]
     type = Receiver
   []
@@ -412,23 +375,22 @@ flow_blocks = 'interwrapper porous_flow center_porous_flow'
   solve_type = 'NEWTON'
   petsc_options_iname = '-pc_type -ksp_gmres_restart -pc_factor_shift_type -pc_factor_shift_amount'
   petsc_options_value = 'lu       100                 NONZERO               1e-10   '
-  end_time = 1.0
+  end_time = 0.04
   l_max_its = 10
   [TimeStepper]
    type = IterationAdaptiveDT
     dt = 0.01
     iteration_window = 2
     optimal_iterations = 6
-    growth_factor = 1.2
-    cutback_factor = 0.8
+    growth_factor = 1.0
+    cutback_factor = 1.0
   []
-  nl_abs_tol = 1e-3
+  nl_abs_tol = 1e-4
   nl_max_its = 15
 []
 
 [Outputs]
   exodus = true
-  #print_linear_residuals = false
 []
 
 ################################################################################
@@ -437,7 +399,6 @@ flow_blocks = 'interwrapper porous_flow center_porous_flow'
 
 [MultiApps]
   [subchannel]
-    # app_type = SubchannelApp
     type = FullSolveMultiApp
     input_files = 'subchannel.i'
     execute_on = 'timestep_end'

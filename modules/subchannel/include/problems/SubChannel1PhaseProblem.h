@@ -14,6 +14,7 @@
 
 #pragma once
 #include "ExternalProblem.h"
+#include "PostprocessorInterface.h"
 #include "SubChannelApp.h"
 #include "QuadSubChannelMesh.h"
 #include "SolutionHandle.h"
@@ -30,7 +31,7 @@ class SubChannel1PhaseProblem;
 /**
  * Base class for the 1-phase steady-state/transient subchannel solver.
  */
-class SubChannel1PhaseProblem : public ExternalProblem
+class SubChannel1PhaseProblem : public ExternalProblem, public PostprocessorInterface
 {
 public:
   SubChannel1PhaseProblem(const InputParameters & params);
@@ -154,7 +155,7 @@ protected:
   /// Time step
   const Real & _dt;
   /// Outlet Pressure
-  const Real & _P_out;
+  const PostprocessorValue & _P_out;
   /// Turbulent modeling parameter used in axial momentum equation
   const Real & _CT;
   /// Convergence tolerance for the pressure loop in external solve
