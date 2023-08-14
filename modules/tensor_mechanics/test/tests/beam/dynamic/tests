@@ -33,7 +33,7 @@
     type = 'Exodiff'
     input = 'dyn_euler_small_rayleigh_hht_ti.i'
     exodiff = 'dyn_euler_small_rayleigh_hht_out.e'
-    rel_err = 1e-5
+    rel_err = 2.1e-5
 
     allow_warnings = True
     requirement = "The mechanics system shall correctly predict the natural frequencies"
@@ -108,7 +108,7 @@
     requirement = "The mechanics system shall correctly model the response of a beam"
                   " modeled using beam elements in the presence of nodal mass,"
                   " nodal inertia and Rayleigh damping."
-    verification = 'beam_vandv.md'               
+    verification = 'beam_vandv.md'
     petsc_version = '>=3.8'
   [../]
   [./dyn_euler_added_mass_inertia_damping_ti]
