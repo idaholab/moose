@@ -3,19 +3,18 @@ mass_flux_in = ${fparse 1e+4 * 17.0 / 3600.}
 P_out = 4.923e6 # Pa
 
 [QuadInterWrapperMesh]
-    [sub_channel]
-      type = QuadInterWrapperMeshGenerator
-      nx = 5
-      ny = 5
-      n_cells = 10
-      assembly_pitch = 0.2
-      assembly_side_x = 0.18
-      assembly_side_y = 0.18
-      side_bypass = 0.01
-      heated_length = 3.0
-    []
+  [sub_channel]
+    type = QuadInterWrapperMeshGenerator
+    nx = 5
+    ny = 5
+    n_cells = 10
+    assembly_pitch = 0.2
+    assembly_side_x = 0.18
+    assembly_side_y = 0.18
+    side_bypass = 0.01
+    heated_length = 3.0
+  []
 []
-
 
 [AuxVariables]
   [mdot]
@@ -53,13 +52,11 @@ P_out = 4.923e6 # Pa
   []
 []
 
-
 [FluidProperties]
   [water]
     type = Water97FluidProperties
   []
 []
-
 
 [SubChannel]
   type = LiquidWaterInterWrapper1PhaseProblem
@@ -78,7 +75,6 @@ P_out = 4.923e6 # Pa
   staggered_pressure = false
   monolithic_thermal = false
 []
-
 
 [ICs]
   [S_IC]
@@ -145,7 +141,6 @@ P_out = 4.923e6 # Pa
   []
 []
 
-
 [AuxKernels]
   [T_in_bc]
     type = ConstantAux
@@ -164,12 +159,10 @@ P_out = 4.923e6 # Pa
   []
 []
 
-
 [Outputs]
   exodus = true
   checkpoint = false
 []
-
 
 [Executioner]
   type = Steady

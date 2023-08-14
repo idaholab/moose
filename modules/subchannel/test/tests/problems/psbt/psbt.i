@@ -43,7 +43,7 @@ P_out = 4.923e6 # Pa
   compute_density = true
   compute_viscosity = true
   compute_power = true
-  P_out = ${P_out}
+  P_out = report_pressure_outlet
   verbose_subchannel = true
 []
 
@@ -115,14 +115,6 @@ P_out = 4.923e6 # Pa
 []
 
 [AuxKernels]
-  [P_out_bc]
-    type = PostprocessorConstantAux
-    variable = P
-    boundary = outlet
-    postprocessor = report_pressure_outlet
-    execute_on = 'timestep_begin'
-    block = sub_channel
-  []
   [T_in_bc]
     type = ConstantAux
     variable = T

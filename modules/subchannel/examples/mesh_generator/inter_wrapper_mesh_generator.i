@@ -2,67 +2,61 @@ T_in = 360.0
 mass_flux_in = ${fparse 1e+4 * 17.0 / 3600.}
 P_out = 4.923e6 # Pa
 
-
 [QuadInterWrapperMesh]
-    [sub_channel]
-      type = QuadInterWrapperMeshGenerator
-      nx = 3
-      ny = 3
-      n_cells = 20
-      assembly_pitch = 0.2
-      assembly_side_x = 0.18
-      assembly_side_y = 0.18
-      side_bypass = 0.00095
-      heated_length = 1.00
-    []
-[]
-
-
-[AuxVariables]
-    [mdot]
-      block = sub_channel
-    []
-    [SumWij]
-      block = sub_channel
-    []
-    [P]
-      block = sub_channel
-    []
-    [DP]
-      block = sub_channel
-    []
-    [h]
-      block = sub_channel
-    []
-    [T]
-      block = sub_channel
-    []
-    [rho]
-      block = sub_channel
-    []
-    [mu]
-      block = sub_channel
-    []
-    [S]
-      block = sub_channel
-    []
-    [w_perim]
-      block = sub_channel
-    []
-    [q_prime]
-      block = sub_channel
-    []
-[]
-
-
-[Modules]
-  [FluidProperties]
-    [water]
-      type = Water97FluidProperties
-    []
+  [sub_channel]
+    type = QuadInterWrapperMeshGenerator
+    nx = 3
+    ny = 3
+    n_cells = 20
+    assembly_pitch = 0.2
+    assembly_side_x = 0.18
+    assembly_side_y = 0.18
+    side_bypass = 0.00095
+    heated_length = 1.00
   []
 []
 
+[AuxVariables]
+  [mdot]
+    block = sub_channel
+  []
+  [SumWij]
+    block = sub_channel
+  []
+  [P]
+    block = sub_channel
+  []
+  [DP]
+    block = sub_channel
+  []
+  [h]
+    block = sub_channel
+  []
+  [T]
+    block = sub_channel
+  []
+  [rho]
+    block = sub_channel
+  []
+  [mu]
+    block = sub_channel
+  []
+  [S]
+    block = sub_channel
+  []
+  [w_perim]
+    block = sub_channel
+  []
+  [q_prime]
+    block = sub_channel
+  []
+[]
+
+[FluidProperties]
+  [water]
+    type = Water97FluidProperties
+  []
+[]
 
 [SubChannel]
   type = LiquidWaterSubChannel1PhaseProblem
@@ -77,7 +71,6 @@ P_out = 4.923e6 # Pa
   compute_power = false
   P_out = ${P_out}
 []
-
 
 [ICs]
   [S_IC]
@@ -144,7 +137,6 @@ P_out = 4.923e6 # Pa
   []
 []
 
-
 [AuxKernels]
   [T_in_bc]
     type = ConstantAux
@@ -162,7 +154,6 @@ P_out = 4.923e6 # Pa
     execute_on = 'timestep_begin'
   []
 []
-
 
 [Outputs]
   exodus = true
@@ -190,9 +181,6 @@ P_out = 4.923e6 # Pa
   []
 []
 
-
 [Executioner]
   type = Steady
-  nl_rel_tol = 0.9
-  l_tol = 0.9
 []

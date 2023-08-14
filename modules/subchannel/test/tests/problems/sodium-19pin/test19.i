@@ -115,7 +115,8 @@ P_out = 2.0e5 # Pa
     variable = DP
     value = 0.0
   []
-    [Viscosity_ic]
+
+  [Viscosity_ic]
     type = ViscosityIC
     variable = mu
     p = ${P_out}
@@ -123,11 +124,10 @@ P_out = 2.0e5 # Pa
     fp = sodium
   []
 
-
   [rho_ic]
     type = RhoFromPressureTemperatureIC
     variable = rho
-    p = P
+    p = ${P_out}
     T = T
     fp = sodium
   []
@@ -135,7 +135,7 @@ P_out = 2.0e5 # Pa
   [h_ic]
     type = SpecificEnthalpyFromPressureTemperatureIC
     variable = h
-    p = P
+    p = ${P_out}
     T = T
     fp = sodium
   []
@@ -148,13 +148,6 @@ P_out = 2.0e5 # Pa
 []
 
 [AuxKernels]
-  [P_out_bc]
-    type = ConstantAux
-    variable = P
-    boundary = outlet
-    value = ${P_out}
-    execute_on = 'timestep_begin'
-  []
   [T_in_bc]
     type = ConstantAux
     variable = T
@@ -178,6 +171,4 @@ P_out = 2.0e5 # Pa
 
 [Executioner]
   type = Steady
-  nl_rel_tol = 0.9
-  l_tol = 0.9
 []

@@ -14,7 +14,6 @@ P_out = 4.923e6 # Pa
   []
 []
 
-
 [AuxVariables]
     [mdot]
     []
@@ -71,7 +70,7 @@ P_out = 4.923e6 # Pa
     [P_ic]
         type = ConstantIC
         variable = P
-        value = 2.0e5
+        value = 0.0
     []
 
     [DP_ic]
@@ -111,7 +110,6 @@ P_out = 4.923e6 # Pa
     []
 []
 
-
 [SubChannel]
     type = LiquidMetalInterWrapper1PhaseProblem
     fp = sodium
@@ -131,19 +129,14 @@ P_out = 4.923e6 # Pa
     interpolation_scheme = 'central_difference'
 []
 
-
 [AuxKernels]
 []
-
 
 [Outputs]
   exodus = true
   checkpoint = false
 []
 
-
 [Executioner]
   type = Steady
-  nl_rel_tol = 0.9
-  l_tol = 0.9
 []

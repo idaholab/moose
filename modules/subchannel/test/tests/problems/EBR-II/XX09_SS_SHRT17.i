@@ -141,7 +141,7 @@ unheated_length_exit = ${fparse 26.9*scale_factor}
   [P_ic]
     type = ConstantIC
     variable = P
-    value = ${P_out}
+    value = 0.0
   []
 
   [DP_ic]

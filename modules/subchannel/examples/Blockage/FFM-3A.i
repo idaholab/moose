@@ -110,7 +110,7 @@ P_out = 2.0e5 # Pa
   [P_ic]
     type = ConstantIC
     variable = P
-    value = ${P_out}
+    value = 0.0
   []
 
   [DP_ic]
@@ -129,7 +129,7 @@ P_out = 2.0e5 # Pa
   [rho_ic]
     type = RhoFromPressureTemperatureIC
     variable = rho
-    p = P
+    p = ${P_out}
     T = T
     fp = sodium
   []
@@ -137,7 +137,7 @@ P_out = 2.0e5 # Pa
   [h_ic]
     type = SpecificEnthalpyFromPressureTemperatureIC
     variable = h
-    p = P
+    p = ${P_out}
     T = T
     fp = sodium
   []
@@ -150,13 +150,6 @@ P_out = 2.0e5 # Pa
 []
 
 [AuxKernels]
-  [P_out_bc]
-    type = ConstantAux
-    variable = P
-    boundary = outlet
-    value = ${P_out}
-    execute_on = 'timestep_begin'
-  []
   [T_in_bc]
     type = ConstantAux
     variable = T

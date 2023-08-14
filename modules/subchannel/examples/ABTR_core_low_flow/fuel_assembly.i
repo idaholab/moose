@@ -130,11 +130,9 @@ duct_inside = ${fparse duct_outside - 2 * duct_thickness}
   []
 []
 
-[Modules]
-  [FluidProperties]
-    [sodium]
-       type = PBSodiumFluidProperties
-    []
+[FluidProperties]
+  [sodium]
+      type = PBSodiumFluidProperties
   []
 []
 
@@ -142,7 +140,6 @@ duct_inside = ${fparse duct_outside - 2 * duct_thickness}
   type = LiquidWaterSubChannel1PhaseProblem # Not solving heat conduction yet
   fp = sodium
   n_blocks = 25
-  beta = 0.1
   P_out = ${P_out}
   CT = 2.0
   enforce_uniform_pressure = false
@@ -187,7 +184,7 @@ duct_inside = ${fparse duct_outside - 2 * duct_thickness}
   [P_ic]
     type = ConstantIC
     variable = P
-    value = ${P_out}
+    value = 0.0
   []
 
   [DP_ic]
@@ -207,7 +204,7 @@ duct_inside = ${fparse duct_outside - 2 * duct_thickness}
   [rho_ic]
     type = RhoFromPressureTemperatureIC
     variable = rho
-    p = P
+    p = ${P_out}
     T = T
     fp = sodium
   []
@@ -215,7 +212,7 @@ duct_inside = ${fparse duct_outside - 2 * duct_thickness}
   [h_ic]
     type = SpecificEnthalpyFromPressureTemperatureIC
     variable = h
-    p = P
+    p = ${P_out}
     T = T
     fp = sodium
   []
@@ -234,14 +231,6 @@ duct_inside = ${fparse duct_outside - 2 * duct_thickness}
 []
 
 [AuxKernels]
-  [P_out_bc]
-    type = ConstantAux
-    variable = P
-    boundary = outlet
-    value = ${P_out}
-    execute_on = 'timestep_begin'
-    block = subchannel
-  []
   [T_in_bc]
     type = ConstantAux
     variable = T

@@ -63,7 +63,7 @@ P_out = 4.923e6 # Pa
   [P_ic]
     type = ConstantIC
     variable = P
-    value = ${P_out}
+    value = 0.0
   []
 
   [DP_ic]
@@ -75,7 +75,7 @@ P_out = 4.923e6 # Pa
   [rho_ic]
     type = RhoFromPressureTemperatureIC
     variable = rho
-    p = P
+    p = ${P_out}
     T = T
     fp = water
   []
@@ -83,7 +83,7 @@ P_out = 4.923e6 # Pa
   [h_ic]
     type = SpecificEnthalpyFromPressureTemperatureIC
     variable = h
-    p = P
+    p = ${P_out}
     T = T
     fp = water
   []

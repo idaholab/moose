@@ -23,6 +23,10 @@ index, white is the fuel-pin index and red is the gap index.
     id=hindex
     caption=Triangular Lattice subchannel index notation, in a $3$ ring sub-assemly.
 
+## Pressure boundary condition caveat
+
+Prongorn-SC's solver is designed to solve for relative pressure: $P_{relative} = P_{absolute} - P_{boundary}$, such that the relative pressure at the outlet boundary is zero. The pressure boundary condition is only explicitly used in the calculation of fluid properties. The user should be careful to initialize/set the pressure at the assembly outlet to zero (not setting it at all will also define the default value of zero).
+
 ## Related articles/papers
 
 Development of a Single-Phase, Transient, Subchannel Code, within the MOOSE Multi-Physics Computational Framework [!cite](kyriakopoulos2022development)

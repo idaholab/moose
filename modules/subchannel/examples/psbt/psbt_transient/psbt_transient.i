@@ -161,8 +161,6 @@ P_out = 4.923e6 # Pa
 
 [Executioner]
   type = Transient
-  nl_rel_tol = 0.9
-  l_tol = 0.9
   start_time = 0.0
   end_time = 4
   dt = 1.0

@@ -34,7 +34,6 @@ P_out = 4.923e6 # Pa
   compute_viscosity = true
   compute_power = true
   P_out = ${P_out}
-# Change the defaults
   implicit = true
   segregated = false
   staggered_pressure = false
@@ -112,14 +111,6 @@ P_out = 4.923e6 # Pa
 []
 
 [AuxKernels]
-  [P_out_bc]
-    type = PostprocessorConstantAux
-    variable = P
-    boundary = outlet
-    postprocessor = report_pressure_outlet
-    execute_on = 'timestep_begin'
-    block = subchannel
-  []
   [T_in_bc]
     type = ConstantAux
     variable = T
@@ -166,8 +157,6 @@ P_out = 4.923e6 # Pa
 
 [Executioner]
   type = Steady
-  nl_rel_tol = 0.9
-  l_tol = 0.9
 []
 
 [Postprocessors]

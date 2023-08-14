@@ -27,7 +27,6 @@ heated_length = 1.0 # m
   []
 []
 
-
 [Functions]
   [axial_heat_rate]
     type = ParsedFunction
@@ -76,11 +75,9 @@ heated_length = 1.0 # m
   []
 []
 
-[Modules]
-  [FluidProperties]
-    [water]
-      type = Water97FluidProperties
-    []
+[FluidProperties]
+  [water]
+    type = Water97FluidProperties
   []
 []
 

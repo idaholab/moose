@@ -27,11 +27,9 @@ P_out = 4.923e6 # Pa
   []
 []
 
-[Modules]
-  [FluidProperties]
-    [water]
-      type = Water97FluidProperties
-    []
+[FluidProperties]
+  [water]
+    type = Water97FluidProperties
   []
 []
 
@@ -47,7 +45,6 @@ P_out = 4.923e6 # Pa
   compute_viscosity = true
   compute_power = true
   P_out = ${P_out}
-
   restart_file_base = psbt_SS_out_cp/LATEST
   skip_additional_restart_data = true
 []
@@ -202,8 +199,6 @@ P_out = 4.923e6 # Pa
 
 [Executioner]
   type = Transient
-  nl_rel_tol = 0.9
-  l_tol = 0.9
   start_time = 0.0
   end_time = 0.2
   dt = 0.1

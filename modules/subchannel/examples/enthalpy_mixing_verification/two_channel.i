@@ -23,11 +23,9 @@ P_out = 155e+5 # Pa
   []
 []
 
-[Modules]
-  [FluidProperties]
-    [water]
-      type = Water97FluidProperties
-    []
+[FluidProperties]
+  [water]
+    type = Water97FluidProperties
   []
 []
 
@@ -151,8 +149,6 @@ P_out = 155e+5 # Pa
 
 [Executioner]
   type = Steady
-  nl_rel_tol = 0.9
-  l_tol = 0.9
 []
 
 ################################################################################

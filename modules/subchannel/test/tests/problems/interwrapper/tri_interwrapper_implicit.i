@@ -67,9 +67,9 @@ P_out = 4.923e6 # Pa
   []
 
   [P_ic]
-    type = ConstantIC
-    variable = P
-    value = 2.0e5
+      type = ConstantIC
+      variable = P
+      value = 0.0
   []
 
   [DP_ic]
