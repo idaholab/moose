@@ -128,7 +128,6 @@ unheated_length_exit = ${fparse 26.9*scale_factor}
   type = LiquidMetalSubChannel1PhaseProblem
   fp = sodium
   n_blocks = 1
-  beta = 0.006
   P_out = ${P_out}
   CT = 2.6
   compute_density = true
@@ -169,7 +168,7 @@ unheated_length_exit = ${fparse 26.9*scale_factor}
   [P_ic]
     type = ConstantIC
     variable = P
-    value = ${P_out}
+    value = 0.0
   []
 
   [DP_ic]
@@ -364,8 +363,6 @@ unheated_length_exit = ${fparse 26.9*scale_factor}
 
 [Executioner]
   type = Steady
-  nl_rel_tol = 0.9
-  l_tol = 0.9
 []
 
 ################################################################################

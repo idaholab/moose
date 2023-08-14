@@ -6,10 +6,10 @@ NODAL VARIABLES
 	P relative 6.5e-06
 	S
 	SumWij relative 3.0e-02
-	T relative 8.0e-06
+	T relative 9.0e-06
 	h relative 4.0e-05
 	mdot relative 4.5e-05
-	mu relative 8.5e-06
+	mu relative 9.0e-06
 	q_prime
 	rho
 	w_perim

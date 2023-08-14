@@ -108,7 +108,6 @@ unheated_length_exit = ${fparse 26.9*scale_factor}
   type = LiquidMetalSubChannel1PhaseProblem
   fp = sodium
   n_blocks = 1
-  beta = 0.006
   P_out = ${P_out}
   CT = 2.6
   compute_density = true
@@ -148,7 +147,7 @@ unheated_length_exit = ${fparse 26.9*scale_factor}
   [P_ic]
     type = ConstantIC
     variable = P
-    value = ${P_out}
+    value = 0.0
   []
 
   [DP_ic]
@@ -168,7 +167,7 @@ unheated_length_exit = ${fparse 26.9*scale_factor}
   [rho_ic]
     type = RhoFromPressureTemperatureIC
     variable = rho
-    p = P
+    p = ${P_out}
     T = T
     fp = sodium
   []
@@ -176,7 +175,7 @@ unheated_length_exit = ${fparse 26.9*scale_factor}
   [h_ic]
     type = SpecificEnthalpyFromPressureTemperatureIC
     variable = h
-    p = P
+    p = ${P_out}
     T = T
     fp = sodium
   []
@@ -219,14 +218,6 @@ unheated_length_exit = ${fparse 26.9*scale_factor}
 []
 
 [AuxKernels]
-  [P_out_bc]
-    type = PostprocessorConstantAux
-    variable = P
-    boundary = outlet
-    postprocessor = report_pressure_outlet
-    execute_on = 'timestep_begin'
-    block = subchannel
-  []
   [T_in_bc]
     type = ConstantAux
     variable = T
@@ -300,8 +291,6 @@ unheated_length_exit = ${fparse 26.9*scale_factor}
      timestep_limiting_function = 'time_step_limiting'
    []
    dtmax = 20
-  nl_rel_tol = 0.9
-  l_tol = 0.9
 []
 
 ################################################################################
