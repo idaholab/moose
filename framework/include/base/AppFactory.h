@@ -35,7 +35,7 @@ struct AppFactoryBuildInfoBase
   virtual InputParameters buildParameters() = 0;
   virtual ~AppFactoryBuildInfoBase() = default;
 
-  std::size_t _app_creation_count;
+  std::size_t _app_creation_count = 0;
 };
 template <typename T>
 struct AppFactoryBuildInfo : public AppFactoryBuildInfoBase
@@ -111,7 +111,7 @@ public:
   }
 
   /**
-   * Returns the amount of times the AppFactory created the named App-type
+   * @returns the amount of times the AppFactory created the named App-type
    */
   std::size_t createdAppCount(const std::string & app_type) const;
 
