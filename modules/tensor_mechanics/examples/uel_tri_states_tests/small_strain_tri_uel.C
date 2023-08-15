@@ -52,7 +52,6 @@ extern "C" void
 uel_(double RHS[],
      double AMATRX[],
      double SVARS[],
-     double /*SVARS*/[],
      double /*ENERGY*/[],
      int * /*NDOFEL*/,
      int * /*NRHS*/,
@@ -261,7 +260,7 @@ uel_(double RHS[],
       ddsdde[6], ddsdde[7], ddsdde[8];
 
   // integrating the CST to obtain the Element characteristic matrix (6,6)
-  const auto ke = Bt * E * B * t * A;
+  const Eigen::Matrix<double, 6, 6> ke = Bt * E * B * t * A;
 
   Eigen::Matrix<double, 3, 1> Sigma;
   Sigma << stress[0], stress[1], stress[2];
