@@ -29,7 +29,10 @@ StrainEnergyDensityTempl<is_ad>::validParams()
   params.addParam<std::string>("stress_name",
                                "stress",
                                "Optional parameter that allows the user to use "
-                               "different stresses on the same material system");
+                               "different stresses on the same material system. "
+                               "For example, when we have a degraded_stress and an intact_stress, "
+                               "we want to compute the degraded strain energy density and "
+                               "the intact strain energy density.");
   params.addParam<bool>(
       "incremental",
       "Optional flag for error checking if an incremental or total model should be used.");

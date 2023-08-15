@@ -99,6 +99,6 @@
     rel_err = 1e-6
     design = 'StrainEnergyDensity.md'
     requirement = 'The system shall be capable of calculating strain energy density for materials with '
-                  'elastic stress with a user-specified name and small strain.'
+                  'a user-specified stress by name and small strain.'
   []
 []
