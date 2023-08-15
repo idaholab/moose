@@ -35,7 +35,7 @@ private:
   /// counting number of overlapped nodes fixed
   unsigned int _num_fixed_nodes;
 
-  /// whether to flip elements that are oriented such that they have a negative volume
+  /// whether to flip element orientation such that they no longer have a negative volume
   const bool _fix_element_orientation;
 
   /// whether to split subdomains using each element's type

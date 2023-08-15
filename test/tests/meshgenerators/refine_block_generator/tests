@@ -17,7 +17,7 @@
       type = 'Exodiff'
       input = 'test_single.i'
       exodiff = 'test_single_in.e'
-      cli_args = 'Mesh/refine/refinement=0 Mesh/refine/max_element_size=0.5 --mesh-only'
+      cli_args = 'Mesh/refine/refinement=0 Mesh/refine/max_element_volume=0.5 --mesh-only'
       recover = false
       detail = 'a single block within a multi-domain mesh by requesting a maximum element size,'
     []

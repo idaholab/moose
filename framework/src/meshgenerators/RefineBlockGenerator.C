@@ -33,7 +33,7 @@ RefineBlockGenerator::validParams()
       "Toggles whether neighboring level one elements should be refined or not. Defaults to true. "
       "False may lead to unsupported mesh non-conformality without great care.");
   params.addParam<Real>(
-      "max_element_size", 1e8, "If elements are above that size, they will be refined more");
+      "max_element_volume", 1e8, "If elements are above that size, they will be refined more");
 
   return params;
 }
@@ -44,7 +44,7 @@ RefineBlockGenerator::RefineBlockGenerator(const InputParameters & parameters)
     _block(getParam<std::vector<SubdomainName>>("block")),
     _refinement(getParam<std::vector<unsigned int>>("refinement")),
     _enable_neighbor_refinement(getParam<bool>("enable_neighbor_refinement")),
-    _max_element_size(getParam<Real>("max_element_size"))
+    _max_element_volume(getParam<Real>("max_element_volume"))
 {
   if (_block.size() != _refinement.size())
     paramError("refinement", "The blocks and refinement parameter vectors should be the same size");
@@ -85,21 +85,17 @@ RefineBlockGenerator::generate()
 
   // Refine elements that are too big
   bool found_element_to_refine = true;
-  unsigned int i = 0;
+  bool refined_on_size = false;
   while (found_element_to_refine)
   {
     found_element_to_refine = false;
     for (auto bid : block_ids)
-    {
       for (auto & elem : mesh_ptr->active_subdomain_elements_ptr_range(bid))
-      {
-        if (elem->volume() >= _max_element_size)
+        if (elem->volume() >= _max_element_volume)
         {
           elem->set_refinement_flag(Elem::REFINE);
           found_element_to_refine = true;
         }
-      }
-    }
     // Refinement needs to be done on all ranks at the same time
     mesh_ptr->comm().max(found_element_to_refine);
 
@@ -109,11 +105,11 @@ RefineBlockGenerator::generate()
       if (!_enable_neighbor_refinement)
         refinedmesh.face_level_mismatch_limit() = 0;
       refinedmesh.refine_elements();
+      refined_on_size = true;
     }
-    i++;
   }
 
-  if (i > 1 || max > 0)
+  if (refined_on_size || max > 0)
     mesh_ptr->set_isnt_prepared();
 
   return mesh_ptr;

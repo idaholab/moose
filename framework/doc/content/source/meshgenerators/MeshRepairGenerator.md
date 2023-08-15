@@ -14,7 +14,7 @@ The operations currently implemented are:
 - flipping the orientation of negative volume elements. Negative volume elements can arise from a wrong orientation.
 
 - separating elements in subdomains into several subdomains depending on their element types. Subdomains with a mix of
-  element types are not supported by [Exodus.md] output. The new split subdomains have the type of the element appended.
+  element types are not supported by [Exodus.md] output. The new split subdomains' names have the type of the element appended to their respective names.
 
 !syntax parameters /Mesh/MeshRepairGenerator
 

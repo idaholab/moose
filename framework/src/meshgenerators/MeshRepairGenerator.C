@@ -27,7 +27,8 @@ MeshRepairGenerator::validParams()
                                              "Name of the mesh generator providing the mesh");
 
   params.addParam<bool>("fix_node_overlap", false, "Whether to merge overlapping nodes");
-  params.addParam<Real>("node_overlap_tol", 1e-8, "Tolerance for merging overlapping nodes");
+  params.addParam<Real>(
+      "node_overlap_tol", 1e-8, "Absolute tolerance for merging overlapping nodes");
 
   params.addParam<bool>(
       "fix_elements_orientation", false, "Whether to flip elements with negative volumes");
@@ -56,13 +57,14 @@ MeshRepairGenerator::generate()
   mesh->prepare_for_use();
 
   // Blanket ban on distributed. This can be relaxed for some operations if needed
-  if (!mesh->is_replicated())
-    mooseError("MeshRepairGenerator is not implemented for distributed meshes");
+  if (!mesh->is_serial())
+    mooseError("MeshRepairGenerator requires a serial mesh. The mesh should not be distributed.");
 
   if (_fix_overlapping_nodes)
   {
+    _num_fixed_nodes = 0;
     auto pl = mesh->sub_point_locator();
-    std::set<dof_id_type> nodes_removed;
+    std::unordered_set<dof_id_type> nodes_removed;
     // loop on nodes
     for (auto & node : mesh->local_node_ptr_range())
     {
@@ -106,6 +108,7 @@ MeshRepairGenerator::generate()
               // Replace the node in the element
               const_cast<Elem *>(elem)->set_node(elem->get_node_index(&elem_node)) = node;
               nodes_removed.insert(elem_node.id());
+
               _num_fixed_nodes++;
               if (_num_fixed_nodes < 10)
                 _console << "Stitching a node at : " << *node << std::endl;
@@ -117,6 +120,7 @@ MeshRepairGenerator::generate()
       }
     }
     _console << "Number of overlapping nodes which got merged: " << _num_fixed_nodes << std::endl;
+    mesh->remove_orphaned_nodes();
   }
 
   // Flip orientation of elements to keep positive volumes
@@ -141,22 +145,22 @@ MeshRepairGenerator::generate()
       if (types.size() > 1)
       {
         auto next_block_id = MooseMeshUtils::getNextFreeSubdomainID(*mesh);
-        unsigned int i = 0;
-        for (const auto & type_it : types)
+        subdomain_id_type i = 0;
+        for (const auto type : types)
         {
           auto new_id = next_block_id + i++;
           // Create blocks when a block has multiple element types
-          mesh->subdomain_name(new_id) = mesh->subdomain_name(id) + "_" + Moose::stringify(type_it);
+          mesh->subdomain_name(new_id) = mesh->subdomain_name(id) + "_" + Moose::stringify(type);
 
           // Re-assign elements to the new blocks
           for (auto elem : mesh->active_subdomain_elements_ptr_range(id))
-            if (elem->type() == type_it)
+            if (elem->type() == type)
               elem->subdomain_id() = new_id;
         }
       }
     }
   }
 
-  mesh->prepare_for_use();
+  mesh->set_isnt_prepared();
   return dynamic_pointer_cast<MeshBase>(mesh);
 }

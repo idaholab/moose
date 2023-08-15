@@ -38,7 +38,7 @@ private:
   const bool _enable_neighbor_refinement;
 
   /// maximum element size over which elements are refined
-  const Real _max_element_size;
+  const Real _max_element_volume;
 
   /**
    * The actual function refining the blocks. This is done recursively in order
