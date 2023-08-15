@@ -113,14 +113,14 @@ ChemicalCompositionAction::ChemicalCompositionAction(const InputParameters & par
                  " characters: ",
                  thermo_file);
 
-    if (!(_database_parsed))
+    if (!_database_parsed)
     {
       Thermochimica::setThermoFilename(thermo_file);
 
       // Read in thermodynamics model, only once
       Thermochimica::parseThermoFile();
 
-      int idbg = Thermochimica::checkInfoThermo();
+      const auto idbg = Thermochimica::checkInfoThermo();
       if (idbg != 0)
         paramError("thermofile", "Thermochimica data file cannot be parsed. ", idbg);
       else
@@ -135,9 +135,6 @@ ChemicalCompositionAction::ChemicalCompositionAction(const InputParameters & par
                  _database_file,
                  " already parsed. Cannot parse database ",
                  thermo_file);
-    else
-    {
-    }
   }
 
   // Set thermochimica units
