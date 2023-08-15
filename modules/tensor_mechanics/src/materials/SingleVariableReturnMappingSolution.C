@@ -353,11 +353,12 @@ SingleVariableReturnMappingSolutionTempl<is_ad>::internalSecantSolve(
   GenericReal<is_ad> fbk = fbk0;
 
   // iterate
-  unsigned int k = 0;
+  _iteration = 0; // (k)
   while (true)
   {
     if (iter_output)
-      *iter_output << "a_k,b_k = " << ak << ',' << bk << '\n';
+      *iter_output << "a_k,b_k = " << ak << ',' << bk << " f(a_k),f(b_k) = " << fak << ' ' << fbk
+                   << '\n';
 
     mooseAssert(fbk != fak, "Division by zero in secant update");
     const auto ck = (ak * fbk - bk * fak) / (fbk - fak);
@@ -372,24 +373,30 @@ SingleVariableReturnMappingSolutionTempl<is_ad>::internalSecantSolve(
     if (std::abs(ak - bk) < _absolute_tolerance)
     {
       scalar = ak;
+      _residual = fak;
+      _initial_residual = fak0;
       return SolveState::SUCCESS;
     }
 
     if (std::abs(fak0 * _relative_tolerance) > std::abs(fak) || std::abs(fak) < _absolute_tolerance)
     {
       scalar = ak;
+      _residual = fak;
+      _initial_residual = fak0;
       return SolveState::SUCCESS;
     }
     if (std::abs(fbk0 * _relative_tolerance) > std::abs(fbk) || std::abs(fbk) < _absolute_tolerance)
     {
       scalar = bk;
+      _residual = fbk;
+      _initial_residual = fbk0;
       return SolveState::SUCCESS;
     }
 
-    if (k == _max_its)
+    if (_iteration == _max_its)
       return SolveState::EXCEEDED_ITERATIONS;
 
-    k++;
+    _iteration++;
     fak = computeResidual(effective_trial_stress, ak);
     fbk = computeResidual(effective_trial_stress, bk);
   }
