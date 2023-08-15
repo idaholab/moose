@@ -3,7 +3,7 @@
 #   template/
 #   moose/
 #   moose-dev/
-{% set build = 0 %}
+{% set build = 1 %}
 {% set strbuild = "build_" + build|string %}
 {% set version = "2023.07.26" %}
 {% set vtk_friendly_version = "9.2" %}
