@@ -530,7 +530,7 @@ AssemblyMeshGenerator::generate()
     else
     {
       // Assembly peripheral element (background / duct), set subdomains according
-      // to user preferences and set pin type id to UINT16_MAX - 1 - peripheral index
+      // to user preferences and set pin type id to (UINT16_MAX/2) - 1 - peripheral index
       // Region id is inferred from z_id and peripheral_idx
       const auto base_block_id = elem->subdomain_id();
       const auto base_block_name = (*_build_mesh)->subdomain_name(base_block_id);
@@ -544,7 +544,7 @@ AssemblyMeshGenerator::generate()
 
       bool is_background_region = peripheral_idx == 0;
 
-      subdomain_id_type pin_type = UINT16_MAX - 1 - peripheral_idx;
+      subdomain_id_type pin_type = (UINT16_MAX / 2) - 1 - peripheral_idx;
       elem->set_extra_integer(pin_type_id_int, pin_type);
 
       const auto elem_rid = (is_background_region ? _background_region_id[z_id]
