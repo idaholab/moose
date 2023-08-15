@@ -42,6 +42,8 @@ requirements:
     - {{ moose_hdf5 }}
     - {{ moose_krb5 }}
     - {{ moose_ld64 }}          # [osx]
+    - {{ moose_libclang }}      # [not arm64 and osx]
+    - {{ moose_libclang13 }}    # [not arm64 and osx]
     - {{ moose_libxt }}         # [linux]
     - {{ moose_libsm }}         # [linux]
     - {{ moose_libx11 }}        # [linux]
