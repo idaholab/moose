@@ -55,7 +55,8 @@ XFEMCutMeshOutput::output()
   _exodus_io = std::make_unique<ExodusII_IO>(_es->get_mesh());
   // Default to non-HDF5 output for wider compatibility
   _exodus_io->set_hdf5_writing(false);
-  _exodus_io->write_timestep(filename(), *_es, exodus_num, time() + _app.getGlobalTimeOffset());
+  _exodus_io->write_timestep(
+      filename(), *_es, exodus_num, getOutputTime() + _app.getGlobalTimeOffset());
 
   // Done with these
   // We don't necessarily need to create a new mesh every time, but it's easier than

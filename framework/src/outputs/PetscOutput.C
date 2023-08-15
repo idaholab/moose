@@ -260,3 +260,9 @@ PetscOutput::time()
   else
     return Output::time();
 }
+
+Real
+PetscOutput::getOutputTime()
+{
+  return time();
+}

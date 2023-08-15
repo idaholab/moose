@@ -155,7 +155,7 @@ Nemesis::output()
 
   // Write nodal data
   _nemesis_io_ptr->write_timestep(
-      filename(), *_es_ptr, _nemesis_num, time() + _app.getGlobalTimeOffset());
+      filename(), *_es_ptr, _nemesis_num, getOutputTime() + _app.getGlobalTimeOffset());
   _nemesis_initialized = true;
 
   // Write elemental data

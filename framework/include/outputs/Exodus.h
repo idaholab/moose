@@ -64,7 +64,7 @@ public:
    * not had data written. Thus, it is important to only create a new ExodusII_IO object
    * if it is certain that it will be used.
    */
-  void outputSetup();
+  virtual void outputSetup();
 
   /**
    * Set the sequence state
@@ -130,6 +130,11 @@ protected:
   virtual void outputReporters() override;
 
   /**
+   * Customizes file output settings.
+   */
+  virtual void customizeFileOutput();
+
+  /**
    * Returns the current filename, this method handles the -s000 suffix
    * common to ExodusII files.
    * @return A string containing the current filename to be written
@@ -159,6 +164,15 @@ protected:
    */
   bool _exodus_initialized;
 
+  /// A flag indicating to the Exodus object that the mesh has changed
+  bool & _exodus_mesh_changed;
+
+  /// Sequence flag, if true each timestep is written to a new file
+  bool _sequence;
+
+  /// Count of outputs per exodus file
+  unsigned int & _exodus_num;
+
 private:
   /// Handle the call to mesh renumbering in libmesh's ExodusIO on non-contiguously numbered meshes
   void handleExodusIOMeshRenumbering();
@@ -171,20 +185,11 @@ private:
    */
   void outputEmptyTimestep();
 
-  /// Count of outputs per exodus file
-  unsigned int & _exodus_num;
-
   /// Flag indicating MOOSE is recovering via --recover command-line option
   bool _recovering;
 
   /// Storage for input file record; this is written to the file only after it has been initialized
   std::vector<std::string> _input_record;
-
-  /// A flag indicating to the Exodus object that the mesh has changed
-  bool & _exodus_mesh_changed;
-
-  /// Sequence flag, if true each timestep is written to a new file
-  bool _sequence;
 
   /// Flag for overwriting timesteps
   bool _overwrite;

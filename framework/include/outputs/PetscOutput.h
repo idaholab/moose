@@ -68,6 +68,14 @@ protected:
   {
     return _time >= _linear_start_time - _t_tol && _time <= _linear_end_time + _t_tol;
   }
+  /**
+   * Get the time that will be used for stream/file outputting. This method is intended to
+   * override the output given by time() for cases that do not conform to the linear, nonlinear,
+   * time step pattern. For example, this can be used for optimization or fixed point iteration
+   * solves. If you override this method for your application, replace time() calls with
+   * getOutputTime() calls and ensure output consistency.
+   */
+  virtual Real getOutputTime();
 
   /// Current norm returned from PETSc
   Real _norm;
