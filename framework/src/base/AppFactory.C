@@ -99,7 +99,7 @@ AppFactory::createdAppCount(const std::string & app_type) const
   // Error if the application type is not located
   const auto it = _name_to_build_info.find(app_type);
   if (it == _name_to_build_info.end())
-    mooseError(std::string("A '") + app_type + "' is not a registered object\n\n");
+    mooseError("AppFactory::createdAppCount(): '", app_type , "' is not a registered app");
 
   return it->second->_app_creation_count;
 }
