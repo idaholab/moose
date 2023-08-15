@@ -34,6 +34,8 @@
     min_parallel = 2
     petsc_version = '>=3.12.0'
     strumpack = true
+    # strumpack is not valgrind clean, see #23502 and https://github.com/pghysels/STRUMPACK/issues/103
+    valgrind = none
     issues = '#16501'
     cli_args = 'Mesh/dmg/dim=3 Mesh/dmg/nz=10 Outputs/file_base=diffusion_strumpack_3d_out -pc_type lu 	-pc_factor_mat_solver_type strumpack  -snes_view'
     requirement = "The system shall support the use of strumpack (sparse direct solver) for 3D problems"
