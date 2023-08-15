@@ -12,12 +12,12 @@ moose_ld64:                                                 # [osx]
   - ld64 609                                                # [not arm64 and osx]
   - ld64_osx-arm64 609                                      # [arm64]
 
+### Paraview (peacock) constraints/compatibility oddities
 moose_hdf5:
   - hdf5 1.12.2 mpi_mpich_h5d83325_0                        # [linux]
-  - hdf5 1.12.2 mpi_mpich_hc154f39_0                        # [not arm64 and osx]
+  - hdf5 1.14.0 mpi_mpich_h18663c6_3                        # [not arm64 and osx]
   - hdf5 1.12.2 mpi_mpich_h16e63df_0                        # [arm64]
 
-### Paraview (peacock) constraints/compatibility
 moose_krb5:
   - krb5 1.20.1 h81ceb04_0                                  # [linux]
   - krb5 1.20.1 h049b76e_0                                  # [not arm64 and osx]
@@ -25,6 +25,12 @@ moose_krb5:
 
 moose_icu:                                                  # [linux]
   - icu 70.1                                                # [linux]
+
+moose_libclang:                                             # [not arm64 and osx]
+  - libclang 14.0.6 default_hdb78580_1                      # [not arm64 and osx]
+
+moose_libclang13:                                           # [not arm64 and osx]
+  - libclang13 14.0.6 default_h953c2e9_1                    # [not arm64 and osx]
 
 ### End Paraview constraints
 
