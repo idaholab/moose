@@ -305,9 +305,10 @@
     hardening_constant = 0.0
   []
   [radial_return_stress]
-    type = ComputeMultipleInelasticStress
+    type = ComputeCreepPlasticityStress
     tangent_operator = elastic
-    inelastic_models = 'creep isotropic_plasticity'
+    creep_model = creep
+    plasticity_model = isotropic_plasticity
   []
 []
 

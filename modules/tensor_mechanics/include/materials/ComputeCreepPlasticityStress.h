@@ -14,7 +14,7 @@
 #include "PowerLawCreepStressUpdate.h"
 
 /**
- * ComputeCreepPlasticityInelasticStress computes the stress, the consistent tangent
+ * ComputeCreepPlasticityStress computes the stress, the consistent tangent
  * operator (or an approximation to it), and a decomposition of the strain
  * into elastic and inelastic parts.  By default finite strains are assumed.
  *
@@ -26,16 +26,18 @@
  * happens for both materials simultaneously rather than with a staggered approach.
  */
 
-class ComputeCreepPlasticityInelasticStress : public ComputeMultipleInelasticStressBase
+class ComputeCreepPlasticityStress : public ComputeMultipleInelasticStressBase
 {
 public:
   static InputParameters validParams();
 
-  ComputeCreepPlasticityInelasticStress(const InputParameters & parameters);
+  ComputeCreepPlasticityStress(const InputParameters & parameters);
 
   virtual void initialSetup() override;
 
 protected:
+  virtual std::vector<MaterialName> getInelasticModelNames() override;
+
   /**
    * Given the _strain_increment[_qp], iterate over all of the user-specified
    * recompute materials in order to find an admissible stress (which is placed

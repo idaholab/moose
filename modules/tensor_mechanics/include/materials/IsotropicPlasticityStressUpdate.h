@@ -41,9 +41,6 @@ public:
   using RadialReturnStressUpdateTempl<is_ad>::_base_name;
   using RadialReturnStressUpdateTempl<is_ad>::_three_shear_modulus;
 
-  GenericReal<is_ad> hardeningVariable() const { return _hardening_variable_old[_qp]; }
-  GenericReal<is_ad> hardeningSlope() const { return _hardening_slope; }
-
   virtual void
   computeStressInitialize(const GenericReal<is_ad> & effective_trial_stress,
                           const GenericRankFourTensor<is_ad> & elasticity_tensor) override;

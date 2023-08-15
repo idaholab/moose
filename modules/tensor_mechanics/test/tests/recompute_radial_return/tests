@@ -172,7 +172,7 @@
     input = 'cp_affine_plasticity.i'
     exodiff = 'cp_affine_plasticity_out.e'
     custom_cmp = 'affine_plasticity.exodiff'
-    design = 'IsotropicPlasticityStressUpdate.md ComputeCreepPlasticityInelasticStress.md'
+    design = 'IsotropicPlasticityStressUpdate.md ComputeCreepPlasticityStress.md'
     requirement = 'The system shall calculate, with J2 isotropic plasticity, the transient stress '
                   'eigenvalues with stationary eigenvectors verification test from K. Jamojjala, R. '
                   'Brannon, A. Sadeghirad, J. Guilkey, Verification tests in solid mechanics, '

@@ -1,10 +1,10 @@
 # Compute Creep and Plasticity Inelastic Stress
 
-!syntax description /Materials/ComputeCreepPlasticityInelasticStress
+!syntax description /Materials/ComputeCreepPlasticityStress
 
 ## Description
 
-`ComputeCreepPlasticityInelasticStress` computes the stress, the consistent tangent
+`ComputeCreepPlasticityStress` computes the stress, the consistent tangent
 operator (or an approximation), and a decomposition of the strain
 into elastic and inelastic components for a pair inelastic
 material models, namely creep and plasticity.
@@ -27,8 +27,9 @@ small strains.
 This class is not intended for use with a total small linearize strain formulation.
 !alert-end!
 
-`ComputeCreepPlasticityInelasticStress` requires one creep model and one plasticity model.
-These need to be based on:
+`ComputeCreepPlasticityStress` requires one creep model and one
+plasticity model.  These need to be "stress update" models that derive from the
+following base classes for creep and plasticity:
 
 - [PowerLawCreepStressUpdate](PowerLawCreepStressUpdate.md)
 - [IsotropicPlasticityStressUpdate](IsotropicPlasticityStressUpdate.md)
@@ -152,7 +153,7 @@ tangent operator implemented in each individual inelastic model with the
 Prior to calculating the final strain values, the algorithm checks the size of
 the current time step against any limitations on the size of the time step as
 optionally defined by the inelastic material models.
-As described in the Material Time Step Limiter section, the time step size
+As described in the [#limiter] section, the time step size
 involves a post processor to ensure that the current time step size is reasonable
 for each of the inelastic material models used in the simulation.
 
@@ -162,7 +163,7 @@ strain tensors are calculated by adding the increments to the old values.
 
 ## Other Calculations Performed by `StressUpdate` Materials
 
-The `ComputeCreepPlasticityInelasticStress` material relies on two helper calculations
+The `ComputeCreepPlasticityStress` material relies on two helper calculations
 to aid the simulation in converging.
 These helper computations are defined within the specific inelastic models, and
 only a brief overview is given here.
@@ -209,7 +210,7 @@ properties. Afterwards, the damage index is applied on the effective stress to
 calculate the damaged stress. This captures the effect of damage in a material
 undergoing creep or plastic deformation.
 
-### Material Time Step Limiter
+### Material Time Step Limiter id=limiter
 
 In some cases, particularly in creep, limits on the time step are required by
 the material model formulation. Each inelastic material model is responsible for
@@ -228,10 +229,10 @@ inelastic models and the damage model.
 !listing modules/tensor_mechanics/test/tests/combined_creep_plasticity/creepWithPlasticity.i block=Materials
 
 
-!syntax parameters /Materials/ComputeCreepPlasticityInelasticStress
+!syntax parameters /Materials/ComputeCreepPlasticityStress
 
-!syntax inputs /Materials/ComputeCreepPlasticityInelasticStress
+!syntax inputs /Materials/ComputeCreepPlasticityStress
 
-!syntax children /Materials/ComputeCreepPlasticityInelasticStress
+!syntax children /Materials/ComputeCreepPlasticityStress
 
 !bibtex bibliography

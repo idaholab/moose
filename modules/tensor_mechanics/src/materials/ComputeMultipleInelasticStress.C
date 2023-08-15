@@ -20,12 +20,22 @@ InputParameters
 ComputeMultipleInelasticStress::validParams()
 {
   InputParameters params = ComputeMultipleInelasticStressBase::validParams();
+  params.addRequiredParam<std::vector<MaterialName>>(
+      "inelastic_models",
+      "The material objects to use to calculate stress and inelastic strains. "
+      "Note: specify creep models first and plasticity models second.");
   return params;
 }
 
 ComputeMultipleInelasticStress::ComputeMultipleInelasticStress(const InputParameters & parameters)
   : ComputeMultipleInelasticStressBase(parameters)
 {
+}
+
+std::vector<MaterialName>
+ComputeMultipleInelasticStress::getInelasticModelNames()
+{
+  return getParam<std::vector<MaterialName>>("inelastic_models");
 }
 
 void

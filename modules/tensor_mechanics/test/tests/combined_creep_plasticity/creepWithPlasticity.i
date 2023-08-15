@@ -127,10 +127,11 @@
     poissons_ratio = 0.3
   []
   [creep_plas]
-    type = ComputeCreepPlasticityInelasticStress
+    type = ComputeCreepPlasticityStress
     block = 0
     tangent_operator = elastic
-    inelastic_models = 'creep plasticity'
+    creep_model = creep
+    plasticity_model = plasticity
     max_iterations = 50
     absolute_tolerance = 1e-06
   []

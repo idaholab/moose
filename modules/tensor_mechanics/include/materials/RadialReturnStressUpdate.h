@@ -148,14 +148,14 @@ public:
   }
 
   /// Current value of scalar inelastic strain
-  const GenericReal<is_ad> & scalarEffectiveInelasticStrain() const
+  const GenericReal<is_ad> & effectiveInelasticStrainIncrement() const
   {
-    return _scalar_effective_inelastic_strain;
+    return _effective_inelastic_strain_increment;
   }
 
-  void updateScalarEffectiveInelasticStrain(const GenericReal<is_ad> & seis)
+  void updateEffectiveInelasticStrainIncrement(const GenericReal<is_ad> & eisi)
   {
-    _scalar_effective_inelastic_strain = seis;
+    _effective_inelastic_strain_increment = eisi;
   }
 
   void updateEffectiveInelasticStrain(const GenericReal<is_ad> & increment)
@@ -220,7 +220,7 @@ protected:
   const MaterialProperty<Real> & _effective_inelastic_strain_old;
 
   /// Stores the scalar effective inelastic strain increment from Newton iteration
-  GenericReal<is_ad> _scalar_effective_inelastic_strain;
+  GenericReal<is_ad> _effective_inelastic_strain_increment;
 
   /**
    * Maximum allowable scalar inelastic strain increment, used to control the

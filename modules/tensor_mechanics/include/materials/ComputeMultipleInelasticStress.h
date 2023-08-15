@@ -35,6 +35,8 @@ public:
   ComputeMultipleInelasticStress(const InputParameters & parameters);
 
 protected:
+  virtual std::vector<MaterialName> getInelasticModelNames() override;
+
   virtual void updateQpState(RankTwoTensor & elastic_strain_increment,
                              RankTwoTensor & combined_inelastic_strain_increment) override;
 };

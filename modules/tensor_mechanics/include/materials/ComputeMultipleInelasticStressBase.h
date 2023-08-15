@@ -39,6 +39,8 @@ public:
   virtual void initialSetup() override;
 
 protected:
+  virtual std::vector<MaterialName> getInelasticModelNames() = 0;
+
   virtual void initQpStatefulProperties() override;
 
   virtual void computeQpStress() override;
@@ -137,7 +139,7 @@ protected:
   const enum class TangentOperatorEnum { elastic, nonlinear } _tangent_operator_type;
 
   /// number of plastic models
-  const unsigned _num_models;
+  unsigned _num_models;
 
   /// Flags to compute tangent during updateState call
   std::vector<bool> _tangent_computation_flag;
@@ -146,7 +148,7 @@ protected:
   TangentCalculationMethod _tangent_calculation_method;
 
   /// _inelastic_strain = sum_i (_inelastic_weights_i * inelastic_strain_from_model_i)
-  const std::vector<Real> _inelastic_weights;
+  std::vector<Real> _inelastic_weights;
 
   /// the consistent tangent operators computed by each plastic model
   std::vector<RankFourTensor> _consistent_tangent_operator;

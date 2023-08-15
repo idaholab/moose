@@ -54,10 +54,6 @@ ComputeMultipleInelasticStressBase::validParams()
       "Type of tangent operator to return.  'elastic': return the "
       "elasticity tensor.  'nonlinear': return the full, general consistent tangent "
       "operator.");
-  params.addRequiredParam<std::vector<MaterialName>>(
-      "inelastic_models",
-      "The material objects to use to calculate stress and inelastic strains. "
-      "Note: specify creep models first and plasticity models second.");
   params.addParam<std::vector<Real>>("combined_inelastic_strain_weights",
                                      "The combined_inelastic_strain Material Property is a "
                                      "weighted sum of the model inelastic strains.  This parameter "
@@ -85,25 +81,12 @@ ComputeMultipleInelasticStressBase::ComputeMultipleInelasticStressBase(
     _inelastic_strain_old(
         getMaterialPropertyOld<RankTwoTensor>(_base_name + "combined_inelastic_strain")),
     _tangent_operator_type(getParam<MooseEnum>("tangent_operator").getEnum<TangentOperatorEnum>()),
-    _num_models(getParam<std::vector<MaterialName>>("inelastic_models").size()),
-    _tangent_computation_flag(_num_models, false),
     _tangent_calculation_method(TangentCalculationMethod::ELASTIC),
-    _inelastic_weights(isParamValid("combined_inelastic_strain_weights")
-                           ? getParam<std::vector<Real>>("combined_inelastic_strain_weights")
-                           : std::vector<Real>(_num_models, true)),
-    _consistent_tangent_operator(_num_models),
     _cycle_models(getParam<bool>("cycle_models")),
     _material_timestep_limit(declareProperty<Real>(_base_name + "material_timestep_limit")),
     _identity_symmetric_four(RankFourTensor::initIdentitySymmetricFour),
     _all_models_isotropic(true)
 {
-  if (_inelastic_weights.size() != _num_models)
-    mooseError("ComputeMultipleInelasticStressBase: combined_inelastic_strain_weights must contain "
-               "the same "
-               "number of entries as inelastic_models ",
-               _inelastic_weights.size(),
-               " ",
-               _num_models);
 }
 
 void
@@ -123,7 +106,23 @@ ComputeMultipleInelasticStressBase::initialSetup()
   _is_elasticity_tensor_guaranteed_isotropic =
       hasGuaranteedMaterialProperty(_elasticity_tensor_name, Guarantee::ISOTROPIC);
 
-  std::vector<MaterialName> models = getParam<std::vector<MaterialName>>("inelastic_models");
+  std::vector<MaterialName> models = getInelasticModelNames();
+
+  _num_models = models.size();
+  _tangent_computation_flag.resize(_num_models, false);
+  _consistent_tangent_operator.resize(_num_models);
+
+  _inelastic_weights = isParamValid("combined_inelastic_strain_weights")
+                           ? getParam<std::vector<Real>>("combined_inelastic_strain_weights")
+                           : std::vector<Real>(_num_models, 1.0);
+
+  if (_inelastic_weights.size() != _num_models)
+    mooseError("ComputeMultipleInelasticStressBase: combined_inelastic_strain_weights must contain "
+               "the same "
+               "number of entries as inelastic_models ",
+               _inelastic_weights.size(),
+               " ",
+               _num_models);
 
   for (const auto i : make_range(_num_models))
   {

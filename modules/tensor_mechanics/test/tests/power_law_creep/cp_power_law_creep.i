@@ -89,8 +89,9 @@
     poissons_ratio = 0.3
   []
   [radial_return_stress]
-    type = ComputeCreepPlasticityInelasticStress
-    inelastic_models = 'power_law_creep isotropic_plasticity'
+    type = ComputeCreepPlasticityStress
+    creep_model = power_law_creep
+    plasticity_model = isotropic_plasticity
     tangent_operator = elastic
   []
   [power_law_creep]
