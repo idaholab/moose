@@ -52,7 +52,7 @@ function configure_libmesh()
     ./bootstrap || exit $?
     cd ../timpi || exit $?
     ./bootstrap || exit $?
-    cd ../netcdf/netcdf* || exit $?
+    cd ../netcdf/netcdf-c-4.6.2 || exit $?
     autoreconf -f -i || exit $?
   fi
 

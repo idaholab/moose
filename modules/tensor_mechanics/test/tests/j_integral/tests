@@ -26,6 +26,25 @@
     requirement = 'The domain integral action shall error out if the blocks selected do not have the '
                   'adequate material objects.'
   []
+  [j_2d_output_vpp]
+    type = 'CheckFiles'
+    issues = '#25162'
+    input = 'j_integral_2d.i'
+    check_files = 'j_integral_2d_output_vpp_out.csv'
+    check_not_exists = 'j_integral_2d_output_vpp_out_*VPP*.csv'
+    cli_args = "DomainIntegral/output_vpp=false Outputs/file_base=j_integral_2d_output_vpp_out"
+    requirement = 'The domain integral action shall suppress the vector postprocessor output '
+                  'and stop generating a csv file for each integration ring at each time step.'
+  []
+  [j_2d_output_pp]
+    type = 'CSVDiff'
+    issues = '#25162'
+    input = 'j_integral_2d.i'
+    csvdiff = 'j_integral_2d_output_pp_out.csv'
+    cli_args = "DomainIntegral/output_vpp=false Outputs/file_base=j_integral_2d_output_pp_out"
+    requirement = 'The domain integral action shall suppress the vector postprocessor output '
+                  'while the postprocessor outputs are not affected.'
+  []
   [j_2d_small_strain]
     type = 'CSVDiff'
     input = 'j_integral_2d_small_strain.i'

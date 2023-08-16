@@ -49,7 +49,7 @@ MaterialVectorPostprocessor::MaterialVectorPostprocessor(const InputParameters &
   if (parameters.isParamValid("elem_ids"))
   {
     const auto & ids = getParam<std::vector<dof_id_type>>("elem_ids");
-    _elem_filter = std::set(ids.begin(), ids.end());
+    _elem_filter = std::set<dof_id_type>(ids.begin(), ids.end());
 
     // check requested materials are available
     for (const auto & id : ids)

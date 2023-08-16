@@ -8,11 +8,10 @@
     csvdiff = main_out_OptimizationReporter_0001.csv
     # steady solve
     recover = false
-
     issues = '#21885'
     design = 'ElementOptimizationDiffusionCoefFunctionInnerProduct.md'
-    requirement = 'The system shall be able to perform gradient based material'
-                  ' parameter inversion for a single material property.'
+    requirement = 'The system shall be able to perform gradient based material parameter inversion '
+                  'for a single material property.'
 
   []
 []

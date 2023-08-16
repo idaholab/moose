@@ -10,6 +10,7 @@
 #include "OptimizeSolve.h"
 #include "OptimizationAppTypes.h"
 #include "OptimizationReporterBase.h"
+#include "Steady.h"
 
 #include "libmesh/petsc_vector.h"
 #include "libmesh/petsc_matrix.h"
@@ -255,6 +256,15 @@ OptimizeSolve::setTaoSolutionStatus(double f, int its, double gnorm, double cnor
   _obj_iterate = 0;
   _grad_iterate = 0;
   _hess_iterate = 0;
+
+  // Pass down the iteration number if the subapp is of the Steady/SteadyAndAdjoint type.
+  // This enables exodus per-iteration output.
+  for (auto & sub_app : _app.getExecutioner()->feProblem().getMultiAppWarehouse().getObjects())
+  {
+    if (auto steady = dynamic_cast<Steady *>(sub_app->getExecutioner(0)))
+      steady->setIterationNumberOutput((unsigned int)its);
+  }
+
   // print verbose per iteration output
   if (_verbose)
     _console << "TAO SOLVER: iteration=" << its << "\tf=" << f << "\tgnorm=" << gnorm
@@ -269,6 +279,7 @@ OptimizeSolve::monitor(Tao tao, void * ctx)
   PetscReal f, gnorm, cnorm, xdiff;
 
   TaoGetSolutionStatus(tao, &its, &f, &gnorm, &cnorm, &xdiff, &reason);
+
   auto * solver = static_cast<OptimizeSolve *>(ctx);
   solver->setTaoSolutionStatus((double)f, (int)its, (double)gnorm, (double)cnorm, (double)xdiff);
 

@@ -10,6 +10,7 @@
 #include "SolutionUserObject.h"
 
 // MOOSE includes
+#include "ConsoleUtils.h"
 #include "MooseError.h"
 #include "MooseMesh.h"
 #include "MooseUtils.h"
@@ -38,19 +39,22 @@ SolutionUserObject::validParams()
 
   // Add required parameters
   params.addRequiredParam<MeshFileName>(
-      "mesh", "The name of the mesh file (must be xda or exodusII file).");
+      "mesh", "The name of the mesh file (must be xda/xdr or exodusII file).");
   params.addParam<std::vector<std::string>>(
       "system_variables",
       std::vector<std::string>(),
       "The name of the nodal and elemental variables from the file you want to use for values");
 
-  // When using XDA files the following must be defined
+  // When using XDA/XDR files the following must be defined
   params.addParam<FileName>(
       "es",
       "<not supplied>",
-      "The name of the file holding the equation system info in xda format (xda only).");
+      "The name of the file holding the equation system info in xda/xdr format (xda/xdr only).");
   params.addParam<std::string>(
-      "system", "nl0", "The name of the system to pull values out of (xda only).");
+      "system",
+      "nl0",
+      "The name of the system to pull values out of (xda/xdr only). The default name for the "
+      "nonlinear system is 'nl0', auxiliary system is 'aux0'");
 
   // When using ExodusII a specific time is extracted
   params.addParam<std::string>("timestep",
@@ -94,8 +98,10 @@ SolutionUserObject::validParams()
       "if transformation_order = 'rotation0 scale_multiplier translation scale rotation1' then "
       "form p = R1*(R0*x*m - t)/s.  Then the values provided by the SolutionUserObject at point x "
       "in the simulation are the variable values at point p in the mesh.");
+  params.addParamNamesToGroup("scale scale_multiplier translation rotation0_vector rotation0_angle "
+                              "rotation1_angle transformation_order",
+                              "Coordinate system transformation");
   params.addClassDescription("Reads a variable from a mesh in one simulation to another");
-  // Return the parameters
   return params;
 }
 
@@ -165,6 +171,9 @@ SolutionUserObject::~SolutionUserObject() {}
 void
 SolutionUserObject::readXda()
 {
+  if (!isParamSetByUser("es"))
+    paramError("es", "Equation system file (.xda or .xdr) should have been specified");
+
   // Check that the required files exist
   MooseUtils::checkFileReadable(_es_file);
   MooseUtils::checkFileReadable(_mesh_file);
@@ -482,6 +491,7 @@ SolutionUserObject::initialSetup()
     readXda();
   }
 
+  // XDR mesh file supplied
   else if (MooseUtils::hasExtension(_mesh_file, "xdr"))
   {
     _file_type = "xdr";
@@ -655,7 +665,10 @@ SolutionUserObject::getLocalVarIndex(const std::string & var_name) const
                var_name,
                "' in the '",
                name(),
-               "' SolutionUserObject");
+               "' SolutionUserObject.\nSystem selected: ",
+               _system_name,
+               "\nAvailable variables:\n",
+               ConsoleUtils::formatString(Moose::stringify(_system_variables), ""));
   return it->second;
 }
 

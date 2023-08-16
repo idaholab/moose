@@ -24,7 +24,7 @@ in the datafile used for Thermochimica calculations. Similarly, if `output_speci
 of `phase:species` pairs, these will be parsed and the specified species in the specified phases will be
 located in Thermochimica output and stored for later output via an AuxKernel.
 
-If `element_potentials` is a non-empty list formatted as `any_string:element_name`, then the chemical
+If `output_element_potentials` is a non-empty list formatted as `any_string:element_name`, then the chemical
 potentials of the elements in the list are output to the variables specified in the list.
 
 ## Example Input Syntax

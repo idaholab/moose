@@ -34,7 +34,8 @@ Steady::Steady(const InputParameters & parameters)
     _feproblem_solve(*this),
     _system_time(getParam<Real>("time")),
     _time_step(_problem.timeStep()),
-    _time(_problem.time())
+    _time(_problem.time()),
+    _output_iteration_number(0)
 {
   _fixed_point_solve->setInnerSolve(_feproblem_solve);
 

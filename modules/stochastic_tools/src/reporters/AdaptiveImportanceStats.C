@@ -29,19 +29,25 @@ AdaptiveImportanceStats::validParams()
   params.addParam<ReporterValueName>("pf", "pf", "Failure probability estimate.");
   params.addParam<ReporterValueName>(
       "cov_pf", "cov_pf", "Coefficient of variation of failure probability.");
+  params.addParam<ReporterName>("flag_sample",
+                                "Flag samples if the surrogate prediction was inadequate.");
   params.addRequiredParam<SamplerName>("sampler", "The sampler object.");
   return params;
 }
 
 AdaptiveImportanceStats::AdaptiveImportanceStats(const InputParameters & parameters)
   : GeneralReporter(parameters),
-    _output_value(getReporterValue<std::vector<Real>>("output_value", REPORTER_MODE_DISTRIBUTED)),
+    _output_value(isParamValid("flag_sample") ? getReporterValue<std::vector<Real>>("output_value")
+                                              : getReporterValue<std::vector<Real>>(
+                                                    "output_value", REPORTER_MODE_DISTRIBUTED)),
     _mu_imp(declareValue<std::vector<Real>>("mu_imp")),
     _std_imp(declareValue<std::vector<Real>>("std_imp")),
     _pf(declareValue<std::vector<Real>>("pf")),
     _cov_pf(declareValue<std::vector<Real>>("cov_pf")),
     _step(getCheckedPointerParam<FEProblemBase *>("_fe_problem_base")->timeStep()),
     _ais(getSampler<AdaptiveImportanceSampler>("sampler")),
+    _gp_flag(isParamValid("flag_sample") ? &getReporterValue<std::vector<bool>>("flag_sample")
+                                         : nullptr),
     _check_step(std::numeric_limits<int>::max())
 {
   // Initialize variables
@@ -65,8 +71,9 @@ AdaptiveImportanceStats::execute()
     return;
   }
 
+  const bool gp_flag = _gp_flag ? (*_gp_flag)[0] : false;
   // Compute AdaptiveImportanceSampler statistics at each sample during the evaluation phase only.
-  if (_step > _ais.getNumSamplesTrain())
+  if (_step > _ais.getNumSamplesTrain() && !gp_flag)
   {
     // Get the statistics of the importance distributions in the standard Normal space.
     _mu_imp = _ais.getImportanceVectorMean();

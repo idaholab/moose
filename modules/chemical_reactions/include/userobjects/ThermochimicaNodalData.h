@@ -12,6 +12,9 @@
 // MOOSE includes
 #include "NodalUserObject.h"
 
+// Forward declaration
+class ChemicalCompositionAction;
+
 /**
  * User object that performs a Gibbs energy minimization at each node by calling
  * the Thermochimica code.
@@ -50,10 +53,6 @@ public:
     std::vector<double> _element_potential;
     std::vector<double> _chemical_potential;
     std::vector<double> _mol_fraction;
-    std::vector<Real> _species_fractions;
-    std::vector<Real> _vapor_pressures;
-    std::vector<int> _phase_indices;
-    std::vector<double> _element_potential_for_output;
   };
 
   const Data & getNodalData(dof_id_type node_id) const;
@@ -62,34 +61,51 @@ protected:
   const VariableValue & _pressure;
   const VariableValue & _temperature;
 
-  // re-initialization data
-  const bool _reinit_requested;
-
   const std::size_t _n_phases;
   const std::size_t _n_species;
   const std::size_t _n_elements;
   const std::size_t _n_vapor_species;
+  const std::size_t _n_phase_elements;
+  const std::size_t _n_potentials;
 
   std::vector<const VariableValue *> _el;
-  std::vector<std::string> _el_name;
-  std::vector<unsigned int> _el_id;
 
-  std::pair<int, int> _db_num_phases;
-  std::vector<std::string> _db_phase_names;
-  std::vector<std::vector<std::string>> _db_species_names;
+  const ChemicalCompositionAction & _action;
+  std::vector<unsigned int> _el_ids;
 
-  std::vector<std::string> _ph_name;
-  std::vector<std::string> _sp_phase_name;
-  std::vector<std::string> _sp_species_name;
-  std::vector<std::string> _vapor_phase_name;
-  std::vector<std::string> _vapor_species_name;
+  // re-initialization data
+  const std::string _reinit;
+
+  const std::vector<std::string> & _ph_names;
+  const std::vector<std::string> & _element_potentials;
+  const std::vector<std::pair<std::string, std::string>> & _species_phase_pairs;
+  const std::vector<std::pair<std::string, std::string>> & _vapor_phase_pairs;
+  const std::vector<std::pair<std::string, std::string>> & _phase_element_pairs;
 
   /// Nodal data (TODO: investigate writing directly to AuxVariables)
   std::unordered_map<dof_id_type, Data> _data;
 
   ///@{ Element chemical potential output
-  const bool _output_element_potential;
+  const bool _output_element_potentials;
   const bool _output_vapor_pressures;
-  std::vector<std::string> _element_potentials;
+  const bool _output_element_phases;
   ///@}
+
+  /// Writable phase amount variables
+  std::vector<MooseVariable *> _ph;
+
+  /// Writable species amount variables
+  std::vector<MooseVariable *> _sp;
+
+  /// Writable vapour pressures for each element
+  std::vector<MooseVariable *> _vp;
+
+  /// Writable chemical potential variables for each element
+  std::vector<MooseVariable *> _el_pot;
+
+  /// Writable variable for molar amounts of each element in specified phase
+  std::vector<MooseVariable *> _el_ph;
+
+  /// Mass unit for output species
+  std::string _output_mass_unit;
 };

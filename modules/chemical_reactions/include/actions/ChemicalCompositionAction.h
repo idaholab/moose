@@ -21,6 +21,33 @@ public:
   static InputParameters validParams();
   ChemicalCompositionAction(const InputParameters & params);
 
+  const std::vector<unsigned int> & elementIDs() const { return _element_ids; }
+
+  const std::vector<std::string> & phases() const { return _phases; }
+  const std::vector<std::string> & elementPotentials() const
+  {
+    return _tokenized_element_potentials;
+  }
+
+  const std::vector<std::pair<std::string, std::string>> & speciesPhasePairs() const
+  {
+    return _tokenized_species;
+  }
+
+  const std::vector<std::pair<std::string, std::string>> & vaporPhasePairs() const
+  {
+    return _tokenized_vapor_species;
+  }
+
+  const std::vector<std::pair<std::string, std::string>> & phaseElementPairs() const
+  {
+    return _tokenized_phase_elements;
+  }
+
+  const std::string & outputSpeciesUnit() const { return _output_mass_unit; }
+
+  const std::string & reinitializationType() const { return _reinit; }
+
   virtual void act();
 
 protected:
@@ -47,9 +74,34 @@ protected:
   /// List of species tracked by Thermochimica
   std::vector<std::string> _species;
 
+  /// Mass unit for output species
+  std::string _output_mass_unit;
+
   /// List of element chemical potentials to be extracted from Thermochimica
   std::vector<std::string> _element_potentials;
 
   /// List of gas phase species to extract vapor pressures from Thermochimica
   std::vector<std::string> _vapor_pressures;
+
+  /// List of elements in specific phases to extract the molar amount of the element in that phase
+  std::vector<std::string> _element_phases;
+
+  /// Flag for whether Thermochimica should use the reinit feature or not
+  std::string _reinit;
+
+  /// Name of the ThermochimicaNodalData UO to be set up
+  std::string _uo_name;
+
+  /// Atomic numbers of the selected elements
+  std::vector<unsigned int> _element_ids;
+
+  /// Keep track of database
+  static bool _database_parsed;
+  static std::string _database_file;
+
+  /// Tokenized versions of the output variables to avoid redoing tokenization
+  std::vector<std::pair<std::string, std::string>> _tokenized_species;
+  std::vector<std::string> _tokenized_element_potentials;
+  std::vector<std::pair<std::string, std::string>> _tokenized_vapor_species;
+  std::vector<std::pair<std::string, std::string>> _tokenized_phase_elements;
 };

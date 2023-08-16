@@ -10,11 +10,12 @@
 #pragma once
 
 #include "Sampler.h"
+#include "TransientInterface.h"
 
 /**
  * A class used to perform Adaptive Importance Sampling using a Markov Chain Monte Carlo algorithm
  */
-class AdaptiveImportanceSampler : public Sampler
+class AdaptiveImportanceSampler : public Sampler, public TransientInterface
 {
 public:
   static InputParameters validParams();
@@ -85,9 +86,6 @@ protected:
   bool _is_sampling_completed;
 
 private:
-  /// Track the current step of the main App
-  const int & _step;
-
   /// Storage for the inputs vector obtained from the reporter
   const std::vector<std::vector<Real>> & _inputs;
 
@@ -105,4 +103,10 @@ private:
 
   /// Storage for previously accepted samples by the decision reporter system
   std::vector<std::vector<Real>> _inputs_sto;
+
+  /// Number of retraining performed
+  int _retraining_steps;
+
+  /// Indicate whether GP prediction is good or bad to influence next proposed sample
+  const std::vector<bool> * const _gp_flag;
 };

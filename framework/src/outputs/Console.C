@@ -424,7 +424,7 @@ Console::writeTimestepInformation(bool output_dt)
     unsigned int time_step_digits = oss.str().length() - 11;
 
     // Print the time
-    oss << ", time = " << formatTime(time());
+    oss << ", time = " << formatTime(getOutputTime());
 
     if (output_dt)
     {

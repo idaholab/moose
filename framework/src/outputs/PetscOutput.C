@@ -133,7 +133,7 @@ PetscOutput::validParams()
       "output_nonlinear",
       false,
       "Specifies whether output occurs on each PETSc nonlinear residual evaluation");
-  params.addParamNamesToGroup("output_linear output_nonlinear", "execute_on");
+  params.addParamNamesToGroup("output_linear output_nonlinear", "Execution scheduling");
 
   // Pseudo time step divisors
   params.addParam<Real>(
@@ -166,7 +166,7 @@ PetscOutput::validParams()
                               "nonlinear_residual_start_time linear_residual_end_time "
                               "nonlinear_residual_end_time  nonlinear_residual_dt_divisor "
                               "linear_residual_dt_divisor",
-                              "PETSc");
+                              "PETSc linear/nonlinear output");
   return params;
 }
 
@@ -259,4 +259,10 @@ PetscOutput::time()
     return _linear_time;
   else
     return Output::time();
+}
+
+Real
+PetscOutput::getOutputTime()
+{
+  return time();
 }
