@@ -9,17 +9,16 @@
 
 #pragma once
 
-#include "LayeredSideAverageBase.h"
-#include "LayeredSideIntegral.h"
+#include "LayeredSideIntegralBase.h"
+#include "SideIntegralFunctorUserObject.h"
 
 /**
- * This UserObject computes side averages of a variable storing partial sums for the specified
- * number of intervals in a direction (x,y,z).
+ * Computes layered side integrals of a functor.
  */
-class LayeredSideAverage : public LayeredSideAverageBase<LayeredSideIntegral>
+class LayeredSideIntegralFunctor : public LayeredSideIntegralBase<SideIntegralFunctorUserObject>
 {
 public:
   static InputParameters validParams();
 
-  LayeredSideAverage(const InputParameters & parameters);
+  LayeredSideIntegralFunctor(const InputParameters & parameters);
 };

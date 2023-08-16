@@ -9,17 +9,18 @@
 
 #pragma once
 
-#include "LayeredSideAverageBase.h"
-#include "LayeredSideIntegral.h"
+#include "SideIntegralFunctorUserObject.h"
+#include "NearestPointBase.h"
+#include "LayeredSideAverageFunctor.h"
 
 /**
- * This UserObject computes side averages of a variable storing partial sums for the specified
- * number of intervals in a direction (x,y,z).
+ * Computes layered side averages of a functor nearest to a set of points.
  */
-class LayeredSideAverage : public LayeredSideAverageBase<LayeredSideIntegral>
+class NearestPointLayeredSideAverageFunctor
+  : public NearestPointBase<LayeredSideAverageFunctor, SideIntegralFunctorUserObject>
 {
 public:
   static InputParameters validParams();
 
-  LayeredSideAverage(const InputParameters & parameters);
+  NearestPointLayeredSideAverageFunctor(const InputParameters & parameters);
 };
