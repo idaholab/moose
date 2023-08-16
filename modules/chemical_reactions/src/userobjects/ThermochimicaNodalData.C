@@ -230,7 +230,7 @@ ThermochimicaNodalData::execute()
         }
         else if (_output_mass_unit == "moles")
         {
-          value = moles_phase[index - 1] * fraction;
+          value = index >= 1 ? moles_phase[index - 1] * fraction : 0.0;
           code = idbg;
         }
       }

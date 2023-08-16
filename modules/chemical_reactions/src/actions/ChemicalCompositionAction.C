@@ -21,6 +21,9 @@
 #include "checkUnits.h"
 #endif
 
+std::string ChemicalCompositionAction::_database_file = "";
+bool ChemicalCompositionAction::_database_parsed = false;
+
 registerMooseAction("ChemicalReactionsApp", ChemicalCompositionAction, "add_variable");
 registerMooseAction("ChemicalReactionsApp", ChemicalCompositionAction, "add_aux_variable");
 registerMooseAction("ChemicalReactionsApp", ChemicalCompositionAction, "add_ic");
@@ -102,21 +105,36 @@ ChemicalCompositionAction::ChemicalCompositionAction(const InputParameters & par
   if (isParamValid("thermofile"))
   {
     const auto thermo_file = getParam<FileName>("thermofile");
+
     if (thermo_file.length() > 1024)
       paramError("thermofile",
-                 "Path exceeds thermochimica's maximal permissible length of 1024 with ",
+                 "Path exceeds Thermochimica's maximal permissible length of 1024 with ",
                  thermo_file.length(),
                  " characters: ",
                  thermo_file);
 
-    Thermochimica::setThermoFilename(thermo_file);
+    if (!_database_parsed)
+    {
+      Thermochimica::setThermoFilename(thermo_file);
 
-    // Read in thermodynamics model, only once
-    Thermochimica::parseThermoFile();
+      // Read in thermodynamics model, only once
+      Thermochimica::parseThermoFile();
 
-    int idbg = Thermochimica::checkInfoThermo();
-    if (idbg != 0)
-      paramError("thermofile", "Thermochimica data file cannot be parsed. ", idbg);
+      const auto idbg = Thermochimica::checkInfoThermo();
+      if (idbg != 0)
+        paramError("thermofile", "Thermochimica data file cannot be parsed. ", idbg);
+      else
+      {
+        _database_file = thermo_file;
+        _database_parsed = true;
+      }
+    }
+    else if (_database_parsed && thermo_file != _database_file)
+      paramError("thermofile",
+                 "Thermodynamic database ",
+                 _database_file,
+                 " already parsed. Cannot parse database ",
+                 thermo_file);
   }
 
   // Set thermochimica units

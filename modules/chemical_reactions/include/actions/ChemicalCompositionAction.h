@@ -95,6 +95,10 @@ protected:
   /// Atomic numbers of the selected elements
   std::vector<unsigned int> _element_ids;
 
+  /// Keep track of database
+  static bool _database_parsed;
+  static std::string _database_file;
+
   /// Tokenized versions of the output variables to avoid redoing tokenization
   std::vector<std::pair<std::string, std::string>> _tokenized_species;
   std::vector<std::string> _tokenized_element_potentials;
