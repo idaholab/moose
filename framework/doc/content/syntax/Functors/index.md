@@ -45,6 +45,7 @@ you need `AD` in the consuming object. When you create a `Functor` (for example,
 return type so as to never discard some derivatives.
 
 In the constructor of the same class, you will have:
+
 ```
 CLASSNAME::CLASSNAME(const InputParameters & parameters) :
   ...

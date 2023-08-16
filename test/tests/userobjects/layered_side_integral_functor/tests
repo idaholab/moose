@@ -1,0 +1,10 @@
+[Tests]
+  [test]
+    type = CSVDiff
+    input = 'layered_side_integral_functor.i'
+    csvdiff = 'layered_side_integral_functor_out_test_vpp_0000.csv'
+    requirement = 'The system shall compute layered side integrals of a functor.'
+    design = 'LayeredSideIntegralFunctor.md'
+    issues = '#25106'
+  []
+[]
