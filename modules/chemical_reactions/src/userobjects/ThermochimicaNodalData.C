@@ -66,7 +66,7 @@ ThermochimicaNodalData::ThermochimicaNodalData(const InputParameters & parameter
     _action(*parameters.getCheckedPointerParam<ChemicalCompositionAction *>(
         "_chemical_composition_action")),
     _el_ids(_action.elementIDs()),
-    _reinit(_action.reinitializationType()),
+    _reinit((_action.reinitializationType()).getEnum<ReinitializationType>()),
     _ph_names(_action.phases()),
     _element_potentials(_action.elementPotentials()),
     _species_phase_pairs(_action.speciesPhasePairs()),
@@ -80,7 +80,7 @@ ThermochimicaNodalData::ThermochimicaNodalData(const InputParameters & parameter
     _vp(_n_vapor_species),
     _el_pot(_n_potentials),
     _el_ph(_n_phase_elements),
-    _output_mass_unit(_action.outputSpeciesUnit())
+    _output_mass_unit((_action.outputSpeciesUnit()).getEnum<OutputMassUnit>())
 {
   ThermochimicaUtils::checkLibraryAvailability(*this);
 
@@ -208,30 +208,44 @@ ThermochimicaNodalData::execute()
       {
         auto [fraction, idbg] = Thermochimica::getMqmqaPairMolFraction(phase, species);
 
-        if (_output_mass_unit == "mole_fraction")
+        switch (_output_mass_unit)
         {
-          value = fraction;
-          code = idbg;
-        }
-        else if (_output_mass_unit == "moles")
-        {
-          auto [molesPair, idbgPair] = Thermochimica::getMqmqaMolesPairs(phase);
-          value = molesPair * fraction;
-          code = idbg + idbgPair;
+          case OutputMassUnit::FRACTION:
+          {
+            value = fraction;
+            code = idbg;
+            break;
+          }
+          case OutputMassUnit::MOLES:
+          {
+            auto [molesPair, idbgPair] = Thermochimica::getMqmqaMolesPairs(phase);
+            value = molesPair * fraction;
+            code = idbg + idbgPair;
+            break;
+          }
+          default:
+            break;
         }
       }
       else
       {
         auto [fraction, idbg] = Thermochimica::getOutputMolSpeciesPhase(phase, species);
-        if (_output_mass_unit == "mole_fraction")
+        switch (_output_mass_unit)
         {
-          value = fraction;
-          code = idbg;
-        }
-        else if (_output_mass_unit == "moles")
-        {
-          value = index >= 1 ? moles_phase[index - 1] * fraction : 0.0;
-          code = idbg;
+          case OutputMassUnit::FRACTION:
+          {
+            value = fraction;
+            code = idbg;
+            break;
+          }
+          case OutputMassUnit::MOLES:
+          {
+            value = index >= 1 ? moles_phase[index - 1] * fraction : 0.0;
+            code = idbg;
+            break;
+          }
+          default:
+            break;
         }
       }
       return {value, code};
@@ -324,12 +338,12 @@ ThermochimicaNodalData::reinitDataMooseFromTc()
 #ifdef THERMOCHIMICA_ENABLED
   auto & d = _data[_current_node->id()];
 
-  if (_reinit != "none")
+  if (_reinit != ReinitializationType::NONE)
   {
     Thermochimica::saveReinitData();
     auto data = Thermochimica::getReinitData();
 
-    if (_reinit == "time")
+    if (_reinit == ReinitializationType::TIME)
     {
       d._assemblage = std::move(data.assemblage);
       d._moles_phase = std::move(data.molesPhase);
@@ -348,15 +362,19 @@ ThermochimicaNodalData::reinitDataMooseToTc()
 {
 #ifdef THERMOCHIMICA_ENABLED
   // Tell Thermochimica whether a re-initialization is requested for this calculation
-  if (_reinit == "none")
-    Thermochimica::setReinitRequested(false);
-  else
-    Thermochimica::setReinitRequested(true);
-
+  switch (_reinit)
+  {
+    case ReinitializationType::NONE:
+      Thermochimica::setReinitRequested(false);
+      break;
+    default:
+      Thermochimica::setReinitRequested(true);
+  }
   // If we have re-initialization data and want a re-initialization, then
   // load data into Thermochimica
   auto it = _data.find(_current_node->id());
-  if (it != _data.end() && _reinit == "time") // If doing previous timestep reinit
+  if (it != _data.end() &&
+      _reinit == ReinitializationType::TIME) // If doing previous timestep reinit
   {
     auto & d = it->second;
     if (d._reinit_available)
