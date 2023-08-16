@@ -82,7 +82,7 @@ class TaggingCommand(command.CommandComponent):
             LOG.warning(msg)
         else:
             self.extension.database['data'].append(PageData)
-            
+
         tag_dict_str=str(self.extension.database)
         key_list_regex=self.extension.allowed_keys+['data','name', 'path', 'key_vals']
         for i in range(len(key_list_regex)):
@@ -94,7 +94,7 @@ class TaggingCommand(command.CommandComponent):
         #my path to Derek's static file: /Users/rogedd/projects/tagview/dist/assets/index-93b559a6.js
         static_path='/Users/rogedd/projects/tagview/dist/assets/index-93b559a6.js'
         with open(static_path,'r') as f:
-            content=f.readlines()        
+            content=f.readlines()
         content[-1]=re.sub('\{data:\[\{.+\}\}\]\}',str(tag_dict_str), content[-1])
         with open(static_path, 'w') as f:
             f.writelines(content)
