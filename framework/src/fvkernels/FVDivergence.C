@@ -33,7 +33,6 @@ FVDivergence::FVDivergence(const InputParameters & params)
 ADReal
 FVDivergence::computeQpResidual()
 {
-  using namespace Moose::FV;
   const auto face =
       makeFace(*_face_info, Moose::FV::limiterType(Moose::FV::InterpMethod::Average), true);
   RealVectorValue vector = _vector_field(face, determineState());

@@ -60,10 +60,9 @@ public:
 
   void meshChanged() override;
   void initialize() override;
-  void execute() override{};
-  void finalize() override{};
+  void execute() override {}
+  void finalize() override {}
 
-  /// Bool of the Rhie Chow user object is used in monolithic/segregated approaches
   bool segregated() const override { return true; };
 
   /// Update the momentum system-related information

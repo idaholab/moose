@@ -52,7 +52,7 @@ MassFluxWeightedFlowRate::computeFaceInfoIntegral([[maybe_unused]] const FaceInf
 
   // Get face value for velocity
   const auto vel =
-      MetaPhysicL::raw_value(_rc_uo->getVelocity(_velocity_interp_method, *fi, state, _tid));
+      MetaPhysicL::raw_value(_rc_uo->getVelocity(*fi, state, _tid, _velocity_interp_method));
   const bool correct_skewness =
       _advected_interp_method == Moose::FV::InterpMethod::SkewCorrectedAverage;
 

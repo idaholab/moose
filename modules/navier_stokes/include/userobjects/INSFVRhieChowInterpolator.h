@@ -71,7 +71,7 @@ public:
   VectorValue<ADReal> getVelocity(const FaceInfo & fi,
                                   const Moose::StateArg & time,
                                   THREAD_ID tid,
-                                  Moose::FV::InterpMethod m) const;
+                                  Moose::FV::InterpMethod m) const override;
 
   /// Return the interpolation method used for velocity
   Moose::FV::InterpMethod velocityInterpolationMethod() const { return _velocity_interp_method; }
@@ -82,6 +82,8 @@ public:
   void initialize() override final;
   void execute() override;
   void finalize() override final;
+
+  bool segregated() const override { return false; };
 
   /**
    * makes sure coefficient data gets communicated on both sides of a given boundary

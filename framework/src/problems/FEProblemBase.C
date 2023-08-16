@@ -6009,12 +6009,10 @@ FEProblemBase::computeResidual(const NumericVector<Number> & soln,
   _fe_vector_tags.clear();
 
   for (const auto & residual_vector_tag : residual_vector_tags)
-  {
     // We filter out tags which do not have associated vectors in the current nonlinear
     // system. This is essential to be able to use system-dependent residual tags.
     if (_current_nl_sys->hasVector(residual_vector_tag._id))
       _fe_vector_tags.insert(residual_vector_tag._id);
-  }
 
   computeResidualInternal(soln, residual, _fe_vector_tags);
 }
@@ -6032,12 +6030,10 @@ FEProblemBase::computeResidualAndJacobian(const NumericVector<Number> & soln,
     _fe_vector_tags.clear();
 
     for (const auto & residual_vector_tag : residual_vector_tags)
-    {
       // We filter out tags which do not have associated vectors in the current nonlinear
       // system. This is essential to be able to use system-dependent residual tags.
       if (_current_nl_sys->hasVector(residual_vector_tag._id))
         _fe_vector_tags.insert(residual_vector_tag._id);
-    }
 
     setCurrentResidualVectorTags(_fe_vector_tags);
   }

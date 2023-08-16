@@ -30,7 +30,7 @@ protected:
    * Routine to compute this object's strong residual (e.g. not multipled by area). This routine
    * should also populate the _ae and _an coefficients
    */
-  ADReal computeQpResidual();
+  ADReal computeQpResidual() override;
 
   /// The dimension of the simulation
   const unsigned int _dim;

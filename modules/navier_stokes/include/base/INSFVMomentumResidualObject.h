@@ -49,7 +49,9 @@ public:
   virtual ~INSFVMomentumResidualObject() = default;
 
 protected:
-  /// SOMETHING NICE
+  /// The Rhie Chow user object that is responsible for generating face velocities for advection
+  /// terms. In monolithic solvers, it also collects data from kernels to determine suitable
+  /// face velocities.
   RhieChowInterpolatorBase & _rc_uo;
 
   /// index x|y|z

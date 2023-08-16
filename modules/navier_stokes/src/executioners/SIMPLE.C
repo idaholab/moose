@@ -153,7 +153,7 @@ SIMPLE::relaxMatrix(SparseMatrix<Number> & matrix,
   //
   // The trickery comes with storing everything in the diff-diagonal vector
   // to avoid the allocation and manipulation of a third vector
-  for (auto row_i = matrix.row_start(); row_i < matrix.row_stop(); row_i++)
+  for (const auto row_i : make_range(matrix.row_start(), matrix.row_stop()))
   {
     std::vector<numeric_index_type> indices;
     std::vector<Real> values;
@@ -166,7 +166,7 @@ SIMPLE::relaxMatrix(SparseMatrix<Number> & matrix,
   }
 
   // Time to modify the diagonal of the matrix
-  for (auto row_i = matrix.row_start(); row_i < matrix.row_stop(); row_i++)
+  for (const auto row_i : make_range(matrix.row_start(), matrix.row_stop()))
     matrix.set(row_i, row_i, diff_diagonal(row_i));
   matrix.close();
 
@@ -241,8 +241,7 @@ void
 SIMPLE::relaxSolutionUpdate(NonlinearSystemBase & system_in, Real relaxation_factor)
 {
   // We will need the latest and the second latest solution for the relaxation
-  NonlinearImplicitSystem & system = dynamic_cast<NonlinearImplicitSystem &>(system_in.system());
-  NumericVector<Number> & solution = *(system.current_local_solution.get());
+  NumericVector<Number> & solution = *(system_in.system().current_local_solution.get());
   NumericVector<Number> & solution_old = *(system_in.solutionPreviousNewton());
 
   // The relaxation is just u = lambda * u* + (1-lambda) u_old
@@ -270,16 +269,21 @@ SIMPLE::solveMomentumPredictor()
   // Temporary storage for the (flux-normalized) residuals form
   // different momentum components
   std::vector<Real> normalized_residuals;
+
+  // The 0 index is because if we have a monolithic system we only have one
+  // system. In case of split momentum systems the system matrix will be exactly the
+  // same for all components if wee lag the advecting velocity, thus it is enough to use
+  // use the first system.
   _problem.setCurrentNonlinearSystem(_momentum_system_numbers[0]);
 
   // We will use functions from the implicit system directly
   NonlinearImplicitSystem & momentum_system =
-      dynamic_cast<NonlinearImplicitSystem &>(_momentum_systems[0]->system());
+      static_cast<NonlinearImplicitSystem &>(_momentum_systems[0]->system());
 
   // We need a linear solver
   // TODO: ADD FUNCTIONALITY TO LIBMESH TO ACCEPT ABS TOLERANCES!
   PetscLinearSolver<Real> & momentum_solver =
-      dynamic_cast<PetscLinearSolver<Real> &>(*momentum_system.get_linear_solver());
+      static_cast<PetscLinearSolver<Real> &>(*momentum_system.get_linear_solver());
 
   // We create a vector which can be used as a helper in different situations. We
   // need the ghosting here so we use current_local_solution
@@ -316,7 +320,7 @@ SIMPLE::solveMomentumPredictor()
 
   // We solve the equation
   // TO DO: Add options to this function in Libmesh to accept absolute tolerance
-  momentum_solver.solve(mmat, mmat, solution, rhs, 1e-10, 100);
+  momentum_solver.solve(mmat, mmat, solution, rhs, /*tol*/ 1e-10, /*num_its*/ 100);
   momentum_system.update();
   // Make sure that we reuse the preconditioner if we end up solving the segregated
   // momentum components
@@ -350,7 +354,7 @@ SIMPLE::solveMomentumPredictor()
 
     // We will need the right hand side and the solution of the next component
     NonlinearImplicitSystem & momentum_system =
-        dynamic_cast<NonlinearImplicitSystem &>(_momentum_systems[system_i]->system());
+        static_cast<NonlinearImplicitSystem &>(_momentum_systems[system_i]->system());
     NumericVector<Number> & solution = *(momentum_system.solution);
     NumericVector<Number> & rhs = *(momentum_system.rhs);
 
@@ -368,7 +372,7 @@ SIMPLE::solveMomentumPredictor()
 
     // Solve this component. We don't update the ghosted solution yet, that will come at the end of
     // the corrector step
-    momentum_solver.solve(mmat, mmat, solution, rhs, 1e-10, 100);
+    momentum_solver.solve(mmat, mmat, solution, rhs, /*tol*/ 1e-10, /*num_its*/ 100);
     // Save the normalized residual
     normalized_residuals.push_back(momentum_solver.get_initial_residual() / norm_factor);
 
@@ -393,7 +397,7 @@ SIMPLE::solvePressureCorrector()
 
   // We will need some members from the implocot nonlinear system
   NonlinearImplicitSystem & pressure_system =
-      dynamic_cast<NonlinearImplicitSystem &>(_pressure_system.system());
+      static_cast<NonlinearImplicitSystem &>(_pressure_system.system());
 
   // We will need the solution, the right hand side and the matrix
   NumericVector<Number> & current_local_solution = *(pressure_system.current_local_solution);
@@ -403,7 +407,7 @@ SIMPLE::solvePressureCorrector()
 
   // Fetch the linear solver from the system
   PetscLinearSolver<Real> & pressure_solver =
-      dynamic_cast<PetscLinearSolver<Real> &>(*pressure_system.get_linear_solver());
+      static_cast<PetscLinearSolver<Real> &>(*pressure_system.get_linear_solver());
 
   // We need a zero vector to be able to emulate the Ax=b system by evaluating the
   // residual and jacobian. Unfortunately, this will leave us with the -b on the righ hand side

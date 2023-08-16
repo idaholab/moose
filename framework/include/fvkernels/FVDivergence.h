@@ -19,7 +19,7 @@
 ///
 /// where $\vec{v}$ is a vector field (described by a Moose Functor)
 /// which is independent of the variables. Derivatives in the AD system are not
-/// propagated in this class. An average of $\vec{v}$ is used to
+/// propagated in this class. Arithmetic weighted averaging is used to
 /// compute $\vec{v}$ on the face.
 class FVDivergence : public FVFluxKernel
 {

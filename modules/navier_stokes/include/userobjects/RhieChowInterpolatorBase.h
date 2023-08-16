@@ -70,7 +70,7 @@ public:
   const INSFVPressureVariable & pressure(THREAD_ID tid) const;
 
   /// Bool of the Rhie Chow user object is used in monolithic/segregated approaches
-  virtual bool segregated() const { return false; };
+  virtual bool segregated() const = 0;
 
   bool hasFaceSide(const FaceInfo & fi, const bool fi_elem_side) const override;
 
