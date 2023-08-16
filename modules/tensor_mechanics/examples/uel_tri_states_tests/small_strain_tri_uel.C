@@ -142,8 +142,9 @@ uel_(double RHS[],
   // Young's Modulus
   auto Y = PROPS[0];
 
-  const double temperature = PREDEF[0];
-  const double voltage = PREDEF[2];
+  // Coarse interpolation for testing spatially varying external fields
+  const double temperature = 1.0 / 3.0 * (PREDEF[0] + PREDEF[4] + PREDEF[8]);
+  const double voltage = 1.0 / 3.0 * (PREDEF[2] + PREDEF[6] + PREDEF[10]);
 
   Y *= (temperature + voltage) / 1000;
 

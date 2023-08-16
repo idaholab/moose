@@ -103,7 +103,6 @@ UELThread::onElement(const Elem * elem)
   }
 
   // Prepare external fields
-
   const auto nvar_aux = _aux_variables.size();
   _all_aux_var_dof_indices.resize(nnode * nvar_aux);    // ok
   _all_aux_var_dof_increments.resize(nnode * nvar_aux); // ok

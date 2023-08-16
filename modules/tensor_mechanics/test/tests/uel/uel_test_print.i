@@ -183,12 +183,11 @@
 
   l_max_its = 100
   l_tol = 1e-8
-  nl_max_its = 50
+  nl_max_its = 1
   nl_rel_tol = 1e-8
   nl_abs_tol = 1e-8
 
   error_on_dtmin = false
-
   dtmin = 10
   dt = 10
   end_time = 10
