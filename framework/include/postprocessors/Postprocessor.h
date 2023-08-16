@@ -10,9 +10,10 @@
 #pragma once
 
 #include "OutputInterface.h"
-#include "FEProblemBase.h"
 #include "NonADFunctorInterface.h"
 #include "libmesh/parallel.h"
+
+class MooseObject;
 
 /**
  * Base class for all Postprocessors.  Defines a name and sets up the
@@ -29,7 +30,11 @@ public:
   Postprocessor(const MooseObject * moose_object);
 
   /**
-   * This will get called to actually grab the final value the postprocessor has calculated.
+   * This will get called to actually grab the final value the postprocessor has calculated
+   *
+   * Note that this should only be called by internal methods, namely the problem that
+   * actually sets the value globally for other things to use. If you want the value
+   * outside of one of these external methods, you should use getCurrentValue().
    *
    * This method will be removed in favor of the const version.
    */
@@ -37,35 +42,52 @@ public:
 
   /**
    * This will get called to actually grab the final value the postprocessor has calculated.
+   *
+   * Note that this should only be called by internal methods, namely the problem that
+   * actually sets the value globally for other things to use. If you want the value
+   * outside of one of these external methods, you should use getCurrentValue().
    */
   virtual PostprocessorValue getValue() const;
 
   /**
-   * Gets the current value stored in the ReporterData.
+   * @return The "current" value of this Postprocessor.
    *
-   * In most (but not all) cases, this should return the same as \c getValue().
+   * Your sanity would tell you... why not just call getValue()? Well - the intention
+   * of getValue() is to be called by the problem when the UserObjects are executed,
+   * and not by other things. This enables the control of _when_ this Postprocessor
+   * is updated, which could be very important. If the implementation of getValue() is
+   * such that it actually computes a new value (instead of one that is called in
+   * finalize()), you could potentially call getValue() and not get the value as it
+   * was at the last time this PP was executed.
+   *
+   * What this does instead is gives you the value that was last set as this PP was
+   * executed by the problem. That is, the value that every object that uses the
+   * PostprocessorInterface will get you.
    */
-  PostprocessorValue getCurrentReporterValue() const;
+  const PostprocessorValue & getCurrentValue() const { return _current_value; }
 
   /**
    * Returns the name of the Postprocessor.
    */
-  std::string PPName() const { return _pp_name; }
+  const std::string & PPName() const { return _pp_name; }
 
 protected:
   /// MOOSE object
   const MooseObject & _pp_moose_object;
 
   /// Post-processor name
-  const std::string _pp_name;
+  const std::string & _pp_name;
 
-  /// FE problem
-  FEProblemBase & _pp_fe_problem;
-
-  /// Reporter data
-  ReporterData & _reporter_data;
+  /// The current value, which is the Reporter value that changes when we execute UOs in the problem)
+  const PostprocessorValue & _current_value;
 
 private:
+  /**
+   * Internal method to be used to declare the value and store it within _current_value in the
+   * constructor.
+   */
+  const PostprocessorValue & declareValue();
+
   using ElemArg = Moose::ElemArg;
   using ElemQpArg = Moose::ElemQpArg;
   using ElemSideQpArg = Moose::ElemSideQpArg;
@@ -100,14 +122,7 @@ private:
                       const Moose::StateArg & state) const override final;
 
   /**
-   * Gives a one-time warning for calling an \c evaluateDot() method.
+   * Internal method for giving a one-time warning for calling an \c evaluateDot() method.
    */
-  void evaluateDotWarning() const
-  {
-    mooseDoOnce(
-        mooseWarning("The time derivative functor operator was called on the post-processor '",
-                     _pp_name,
-                     "'. A zero value will always be returned, even if the post-processor value "
-                     "changes with time."));
-  }
+  void evaluateDotWarning() const;
 };
