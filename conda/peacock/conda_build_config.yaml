@@ -1,5 +1,5 @@
 moose_mpich:
-  - moose-mpich 4.0.3 build_0
+  - moose-mpich 4.0.2 build_9
 
 # Pesky packages that break internal CI
 # Note: Modifying/Updating this will require changes to conda/mpich!
