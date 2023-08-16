@@ -3574,45 +3574,6 @@ FEProblemBase::addPostprocessor(const std::string & pp_name,
                "\" already exists.  You may not add a Postprocessor by the same name.");
 
   addUserObject(pp_name, name, parameters);
-
-  for (THREAD_ID tid = 0; tid < libMesh::n_threads(); tid++)
-  {
-    std::vector<UserObject *> uos;
-    theWarehouse()
-        .query()
-        .template condition<AttribName>(name)
-        .template condition<AttribSystem>("UserObject")
-        .template condition<AttribThread>(tid)
-        .queryInto(uos);
-
-    UserObject * uo = nullptr;
-    if (uos.size() == 1)
-      uo = uos[0];
-    else
-    {
-      std::vector<UserObject *> uos_tid0;
-      theWarehouse()
-          .query()
-          .template condition<AttribName>(name)
-          .template condition<AttribSystem>("UserObject")
-          .template condition<AttribThread>(0)
-          .queryInto(uos_tid0);
-
-      if (uos_tid0.size() == 1)
-        uo = uos_tid0[0];
-      else
-        mooseError("This query should return exactly one object.");
-    }
-
-    if (auto * const functor = dynamic_cast<Moose::FunctorBase<Real> *>(uo))
-    {
-      this->addFunctor(name, *functor, tid);
-      if (_displaced_problem)
-        _displaced_problem->addFunctor(name, *functor, tid);
-    }
-    else
-      mooseError("Post-processors should all cast to Moose::FunctorBase<Real>.");
-  }
 }
 
 void
@@ -3665,6 +3626,14 @@ FEProblemBase::addUserObject(const std::string & user_object_name,
     _all_user_objects.addObject(user_object, tid);
 
     theWarehouse().add(user_object);
+
+    // Add as a Functor if it is one
+    if (const auto functor = dynamic_cast<Moose::FunctorBase<Real> *>(user_object.get()))
+    {
+      this->addFunctor(name, *functor, tid);
+      if (_displaced_problem)
+        _displaced_problem->addFunctor(name, *functor, tid);
+    }
 
     // Attempt to create all the possible UserObject types
     auto euo = std::dynamic_pointer_cast<ElementUserObject>(user_object);
