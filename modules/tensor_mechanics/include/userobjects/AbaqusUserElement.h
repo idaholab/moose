@@ -108,7 +108,10 @@ public:
 
   /// getters for the loop class
   const std::vector<const MooseVariableFieldBase *> & getVariables() const { return _variables; }
-  const std::vector<const MooseVariableFieldBase *> & getAuxVariables() const { return _aux_variables; }
+  const std::vector<const MooseVariableFieldBase *> & getAuxVariables() const
+  {
+    return _aux_variables;
+  }
 
   const uel_t & getPlugin() const { return _uel; }
 

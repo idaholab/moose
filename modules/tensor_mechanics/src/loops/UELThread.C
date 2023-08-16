@@ -113,7 +113,7 @@ UELThread::onElement(const Elem * elem)
     _aux_variables[i]->getDofIndices(elem, _aux_var_dof_indices);
 
     if (static_cast<int>(_aux_var_dof_indices.size()) != nnode)
-      mooseError("All auxiliary variables must be full order lagrangian");
+      mooseError("All auxiliary variables must be full order Lagrangian");
 
     for (const auto j : make_range(nnode))
       _all_aux_var_dof_indices[j * nvar_aux + i] = _aux_var_dof_indices[j];
@@ -122,7 +122,7 @@ UELThread::onElement(const Elem * elem)
   _all_aux_var_dof_values.resize(nnode * nvar_aux);
   _aux_var_values_to_uel.resize(nnode * nvar_aux * 2); // Value _and_ increment
 
-  _aux_sys->solution().get(_all_aux_var_dof_indices, _all_aux_var_dof_increments);
+  _aux_sys->currentSolution()->get(_all_aux_var_dof_indices, _all_aux_var_dof_increments);
   _all_aux_var_dof_increments.resize(nnode * nvar_aux);
   _aux_sys->solutionOld().get(_all_aux_var_dof_indices, _all_aux_var_dof_values);
 

@@ -11,6 +11,7 @@
 #include "SystemBase.h"
 #include "UELThread.h"
 
+
 #define QUOTE(macro) stringifyName(macro)
 
 registerMooseObject("TensorMechanicsApp", AbaqusUserElement);
@@ -89,12 +90,13 @@ AbaqusUserElement::AbaqusUserElement(const InputParameters & params)
 
   for (const auto & aux_variable_name : _aux_variable_names)
   {
-    const auto * aux_var =
+    MooseVariableFEBase * aux_var =
         &UserObject::_subproblem.getVariable(0,
                                              aux_variable_name,
                                              Moose::VarKindType::VAR_AUXILIARY,
                                              Moose::VarFieldType::VAR_FIELD_STANDARD);
     _aux_variables.push_back(aux_var);
+    aux_var->sys().addVariableToZeroOnResidual(aux_variable_name);
 
     // check block restriction
     if (!aux_var->hasBlocks(blockIDs()))
