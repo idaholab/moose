@@ -6,9 +6,9 @@
 #
 # As well as any directions pertaining to modifying those files.
 # ALSO: Follow the directions in scripts/tests/versioner_hashes.yaml
-{% set build = 0 %}
+{% set build = 9 %}
 {% set strbuild = "build_" + build|string %}
-{% set version = "4.0.3" %}
+{% set version = "4.0.2" %}
 
 package:
   name: moose-mpich
@@ -27,11 +27,17 @@ build:
 
 requirements:
   build:
-    # expose variables during build.sh to populate the activation script
     - mpich {{ version }}
     - mpich-mpicc {{ version }}
     - mpich-mpicxx {{ version }}
     - mpich-mpifort {{ version }}
+    - {{ moose_hdf5 }}
+    - {{ moose_krb5 }}
+    - {{ moose_icu }}
+    - {{ moose_libclang }}
+    - {{ moose_libclang13 }}
+    - {{ moose_clangcc }}       # [osx]
+    - {{ moose_clangxx }}       # [osx]
   run:
     - mpich {{ version }}
     - mpich-mpicc {{ version }}
@@ -41,9 +47,12 @@ requirements:
     - {{ moose_libgfortran5 }}
     - {{ moose_hdf5 }}
     - {{ moose_krb5 }}
+    - {{ moose_icu }}
     - {{ moose_ld64 }}          # [osx]
-    - {{ moose_libclang }}      # [not arm64 and osx]
-    - {{ moose_libclang13 }}    # [not arm64 and osx]
+    - {{ moose_libclang }}      # [osx]
+    - {{ moose_libclang13 }}    # [osx]
+    - {{ moose_clangcc }}       # [osx]
+    - {{ moose_clangxx }}       # [osx]
     - {{ moose_libxt }}         # [linux]
     - {{ moose_libsm }}         # [linux]
     - {{ moose_libx11 }}        # [linux]
@@ -53,7 +62,6 @@ requirements:
     - {{ moose_xorg_x11 }}      # [linux]
     - {{ moose_libglu }}        # [linux]
     - {{ moose_mesalib }}       # [linux]
-    - {{ moose_icu }}           # [linux]
     - cmake
     - make
     - libtool
