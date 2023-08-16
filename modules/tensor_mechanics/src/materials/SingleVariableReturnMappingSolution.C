@@ -344,8 +344,7 @@ SingleVariableReturnMappingSolutionTempl<is_ad>::internalSecantSolve(
   auto ak = initialGuess(effective_trial_stress);
   auto bk = initialGuess(0.0);
   if (ak == bk)
-    // mooseError("The update model must return a non-zero initialGuess!");
-    bk = ak + 1.0;
+    mooseError("The update model must return a non-zero initialGuess!");
 
   const auto fak0 = computeResidual(effective_trial_stress, ak);
   const auto fbk0 = computeResidual(effective_trial_stress, bk);

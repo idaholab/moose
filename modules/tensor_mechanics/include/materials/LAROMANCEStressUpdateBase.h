@@ -55,11 +55,17 @@ protected:
   virtual GenericReal<is_ad> computeResidual(const GenericReal<is_ad> & effective_trial_stress,
                                              const GenericReal<is_ad> & scalar) override;
 
+  template <bool with_derivative>
+  GenericReal<is_ad> computeResidualInternal(const GenericReal<is_ad> & effective_trial_stress,
+                                             const GenericReal<is_ad> & scalar);
+
   virtual GenericReal<is_ad>
   computeDerivative(const GenericReal<is_ad> & /*effective_trial_stress*/,
                     const GenericReal<is_ad> & /*scalar*/) override
   {
-    return _derivative;
+    if (_compute_derivative)
+      return _derivative;
+    mooseError("No derivative will be computed use the SECANT solve type");
   }
 
   virtual void
@@ -644,6 +650,9 @@ protected:
 
   /// JSON object constructed from the datafile
   nlohmann::json _json;
+
+  /// compute serivative (for Newton solve type_)
+  const bool _compute_derivative;
 
   using Material::_dt;
   using Material::_name;

@@ -230,7 +230,9 @@ LAROMANCEStressUpdateBaseTempl<is_ad>::LAROMANCEStressUpdateBaseTempl(
     _plastic_strain_increment(),
     _number_of_substeps(
         this->template declareProperty<Real>(this->_base_name + "number_of_substeps")),
-    _index_name(_window_failure.size())
+    _index_name(_window_failure.size()),
+    _compute_derivative(this->_solve_type ==
+                        SingleVariableReturnMappingSolutionTempl<is_ad>::SolveType::NEWTON)
 {
   this->_check_range = true; // this may not be necessary?
 
@@ -778,6 +780,18 @@ GenericReal<is_ad>
 LAROMANCEStressUpdateBaseTempl<is_ad>::computeResidual(
     const GenericReal<is_ad> & effective_trial_stress, const GenericReal<is_ad> & scalar)
 {
+  if (_compute_derivative)
+    return computeResidualInternal<true>(effective_trial_stress, scalar);
+  else
+    return computeResidualInternal<false>(effective_trial_stress, scalar);
+}
+
+template <bool is_ad>
+template <bool with_derivative>
+GenericReal<is_ad>
+LAROMANCEStressUpdateBaseTempl<is_ad>::computeResidualInternal(
+    const GenericReal<is_ad> & effective_trial_stress, const GenericReal<is_ad> & scalar)
+{
   mooseAssert(std::isfinite(MetaPhysicL::raw_value(effective_trial_stress)),
               "computeResidual: effective_trial_stress must be finite");
   mooseAssert(std::isfinite(MetaPhysicL::raw_value(scalar)),
@@ -792,7 +806,8 @@ LAROMANCEStressUpdateBaseTempl<is_ad>::computeResidual(
   if (this->_apply_strain)
   {
     trial_stress_mpa -= this->_three_shear_modulus * scalar * _stress_ucf;
-    dtrial_stress_dscalar -= this->_three_shear_modulus * _stress_ucf;
+    if constexpr (with_derivative)
+      dtrial_stress_dscalar -= this->_three_shear_modulus * _stress_ucf;
   }
   _input_values[_stress_input_index] = trial_stress_mpa;
 
@@ -800,9 +815,11 @@ LAROMANCEStressUpdateBaseTempl<is_ad>::computeResidual(
   for (unsigned int p = 0; p < _num_partitions; ++p)
     _weights[p] = _non_stress_weights[p];
   computeTileWeight(_weights, _input_values[_stress_input_index], _stress_input_index);
+
   auto dweights_dstress = _non_stress_weights;
-  computeTileWeight(
-      dweights_dstress, _input_values[_stress_input_index], _stress_input_index, true);
+  if constexpr (with_derivative)
+    computeTileWeight(
+        dweights_dstress, _input_values[_stress_input_index], _stress_input_index, true);
 
   computePartitionWeights(_partition_weights, _dpartition_weight_dstress);
 
@@ -839,7 +856,8 @@ LAROMANCEStressUpdateBaseTempl<is_ad>::computeResidual(
         for (unsigned int t = 0; t < _num_tiles[p]; ++t)
         {
           _weights[p][t] /= weight_normalizer;
-          dweights_dstress[p][t] /= weight_normalizer;
+          if constexpr (with_derivative)
+            dweights_dstress[p][t] /= weight_normalizer;
         }
 
       for (unsigned int t = 0; t < _num_tiles[p]; ++t)
@@ -851,14 +869,17 @@ LAROMANCEStressUpdateBaseTempl<is_ad>::computeResidual(
 
           total_rom_effective_strain_inc += _partition_weights[p] * _weights[p][t] * rom;
 
-          dtotal_rom_effective_strain_inc_dstress +=
-              _partition_weights[p] * _weights[p][t] * computeROM(t, p, _strain_output_index, true);
-          if (_dpartition_weight_dstress[p])
-            dtotal_rom_effective_strain_inc_dstress +=
-                _dpartition_weight_dstress[p] * _weights[p][t] * rom;
-          if (dweights_dstress[p][t])
-            dtotal_rom_effective_strain_inc_dstress +=
-                _partition_weights[p] * dweights_dstress[p][t] * rom;
+          if constexpr (with_derivative)
+          {
+            dtotal_rom_effective_strain_inc_dstress += _partition_weights[p] * _weights[p][t] *
+                                                       computeROM(t, p, _strain_output_index, true);
+            if (_dpartition_weight_dstress[p])
+              dtotal_rom_effective_strain_inc_dstress +=
+                  _dpartition_weight_dstress[p] * _weights[p][t] * rom;
+            if (dweights_dstress[p][t])
+              dtotal_rom_effective_strain_inc_dstress +=
+                  _partition_weights[p] * dweights_dstress[p][t] * rom;
+          }
         }
     }
   }
@@ -912,13 +933,15 @@ LAROMANCEStressUpdateBaseTempl<is_ad>::computeResidual(
   }
 
   _creep_rate[_qp] = total_rom_effective_strain_inc / _dt;
-  _derivative = dtotal_rom_effective_strain_inc_dstress * dtrial_stress_dscalar - 1.0;
+  if constexpr (with_derivative)
+    _derivative = dtotal_rom_effective_strain_inc_dstress * dtrial_stress_dscalar - 1.0;
 
   if (!this->_apply_strain)
   {
     if (_verbose)
       Moose::err << "    Strain not applied due to apply_strain input parameter!" << std::endl;
-    _derivative = 1.0;
+    if constexpr (with_derivative)
+      _derivative = 1.0;
     return 0.0;
   }
   return total_rom_effective_strain_inc - scalar;
@@ -1385,7 +1408,7 @@ LAROMANCEStressUpdateBaseTempl<is_ad>::outputIterationStep(
 {
   SingleVariableReturnMappingSolutionTempl<is_ad>::outputIterationStep(
       iter_output, effective_trial_stress, scalar, reference_residual);
-  if (iter_output)
+  if (iter_output && _compute_derivative)
     *iter_output << " derivative: "
                  << MetaPhysicL::raw_value(computeDerivative(effective_trial_stress, scalar))
                  << std::endl;
