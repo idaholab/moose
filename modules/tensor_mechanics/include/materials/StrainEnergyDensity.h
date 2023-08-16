@@ -34,6 +34,9 @@ protected:
   /// Base name of the material system
   const std::string _base_name;
 
+  /// stress name, for different stresses on the same material system
+  const std::string _stress_name;
+
   /// The strain energy density material property
   MaterialProperty<Real> & _strain_energy_density;
   const MaterialProperty<Real> & _strain_energy_density_old;
