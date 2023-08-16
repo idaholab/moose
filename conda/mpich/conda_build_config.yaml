@@ -1,27 +1,29 @@
 moose_libgfortran:
   - libgfortran-ng 13.1.0 h69a702a_0                        # [linux]
-  - libgfortran 5.0.0 11_3_0_h97931a8_31                    # [not arm64 and osx]
+  - libgfortran 5.0.0 12_3_0_h97931a8_1                     # [not arm64 and osx]
   - libgfortran 5.0.0 12_3_0_hd922786_1                     # [arm64]
 
 moose_libgfortran5:
   - libgfortran5 13.1.0 h15d22d2_0                          # [linux]
-  - libgfortran5 12.2.0 he409387_31                         # [not arm64 and osx]
+  - libgfortran5 12.3.0 hbd3c1fe_1                          # [not arm64 and osx]
   - libgfortran5 12.3.0 ha3a6a3e_1                          # [arm64]
 
 moose_ld64:                                                 # [osx]
   - ld64 609                                                # [not arm64 and osx]
   - ld64_osx-arm64 609                                      # [arm64]
 
-### Paraview (peacock) constraints/compatibility oddities
+### Paraview (peacock) constraints/oddities, especially libclang
 moose_clangcc:                                              # [osx]
+  - clang 12.0.1 h694c41f_0                                 # [not arm64 and osx]
   - clang 12.0.1 hce30654_0                                 # [arm64]
 
 moose_clangxx:                                              # [osx]
+  - clangxx 12.0.1 default_he082bbe_0                       # [not arm64 and osx]
   - clangxx 12.0.1 default_h8b1a7b7_0                       # [arm64]
 
 moose_hdf5:
   - hdf5 1.12.1 mpi_mpich_h08b82f9_4                        # [linux]
-  - hdf5 1.14.0 mpi_mpich_h18663c6_3                        # [not arm64 and osx]
+  - hdf5 1.12.2 mpi_mpich_hc154f39_0                        # [not arm64 and osx]
   - hdf5 1.12.2 mpi_mpich_h16e63df_0                        # [arm64]
 
 moose_krb5:
@@ -34,12 +36,12 @@ moose_icu:
 
 moose_libclang:
   - libclang 13.0.1 default_h7634d5b_3                      # [linux]
-  - libclang 14.0.6 default_hdb78580_1                      # [not arm64 and osx]
+  - libclang 13.0.1 root_62804_h2961583_3                   # [not arm64 and osx]
   - libclang 15.0.7 default_h5dc8d65_3                      # [arm64]
 
 moose_libclang13:
   - libclang13 16.0.1 default_h9b593c0_0                    # [linux]
-  - libclang13 14.0.6 default_h953c2e9_1                    # [not arm64 and osx]
+  - libclang13 16.0.1 default_h395b6a0_0                    # [not arm64 and osx]
   - libclang13 15.0.7 default_hc7183e1_3                    # [arm64]
 
 ### End Paraview constraints
