@@ -9,7 +9,8 @@
 
 #pragma once
 
-#include "OptimizationData.h"
+#include "GeneralReporter.h"
+#include "libmesh/petsc_matrix.h"
 
 namespace libMesh
 {
@@ -21,21 +22,20 @@ class PetscVector;
  * Base class for optimization objects, implements routines for calculating misfit. Derived classes
  * are responsible for parameter members and gradient computation.
  */
-class OptimizationReporterBase : public OptimizationData
+class OptimizationReporterBase : public GeneralReporter
 {
 public:
   static InputParameters validParams();
   OptimizationReporterBase(const InputParameters & parameters);
 
   void initialize() override final {}
-  void execute() override final {}
+  void execute() override {}
   void finalize() override final {}
-
   /**
    * Function to compute objective.
    * This is the last function called in objective routine
    */
-  virtual Real computeObjective();
+  virtual Real computeObjective() = 0;
 
   /**
    * Function to compute gradient.
@@ -50,9 +50,9 @@ public:
 
   /**
    * Function to override misfit values with the simulated values from the matrix free hessian
-   * forward solve
+   * forward solve.
    */
-  void setMisfitToSimulatedValues();
+  virtual void setMisfitToSimulatedValues(){};
 
   /**
    * Upper and lower bounds for each parameter being controlled
@@ -75,6 +75,11 @@ protected:
    * This is the first function called in objective/gradient/hessian routine
    */
   virtual void updateParameters(const libMesh::PetscVector<Number> & x);
+
+  /**
+   * Function to fill vector with parameters.
+   */
+  std::vector<Real> fillParamsVector(std::string type, Real default_value) const;
 
   /// Parameter names
   const std::vector<ReporterValueName> & _parameter_names;
@@ -101,6 +106,7 @@ protected:
 private:
   friend class OptimizeSolve;
   friend class OptimizationReporterTest;
-
-  void setSimulationValuesForTesting(std::vector<Real> & data);
+  /// private method for testing optimizationData with test src
+  virtual void setSimulationValuesForTesting(std::vector<Real> & /*data*/){};
+  virtual void setICsandBounds() = 0;
 };

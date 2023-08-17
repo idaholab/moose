@@ -14,20 +14,18 @@
 InputParameters
 OptimizationReporterBase::validParams()
 {
-  InputParameters params = OptimizationData::validParams();
+  InputParameters params = GeneralReporter::validParams();
   params.registerBase("OptimizationReporterBase");
   params.addRequiredParam<std::vector<ReporterValueName>>(
       "parameter_names", "List of parameter names, one for each group of parameters.");
   params.addRangeCheckedParam<Real>(
       "tikhonov_coeff", 0.0, "tikhonov_coeff >= 0", "Coefficient for Tikhonov Regularization.");
-  params.suppressParameter<std::vector<VariableName>>("variable");
-  params.suppressParameter<std::vector<std::string>>("variable_weight_names");
   params.registerBase("OptimizationReporterBase");
   return params;
 }
 
 OptimizationReporterBase::OptimizationReporterBase(const InputParameters & parameters)
-  : OptimizationData(parameters),
+  : GeneralReporter(parameters),
     _parameter_names(getParam<std::vector<ReporterValueName>>("parameter_names")),
     _nparams(_parameter_names.size()),
     _parameters(_nparams),
@@ -43,43 +41,6 @@ OptimizationReporterBase::OptimizationReporterBase(const InputParameters & param
   }
 }
 
-Real
-OptimizationReporterBase::computeObjective()
-{
-  // This will only be executed if measurement_values are available on the main app
-  for (const auto i : index_range(_measurement_values))
-    _misfit_values[i] = _simulation_values[i] - _measurement_values[i];
-
-  Real val = 0.0;
-  for (auto & misfit : _misfit_values)
-    val += misfit * misfit;
-
-  if (_tikhonov_coeff > 0.0)
-  {
-    Real param_norm_sqr = 0;
-    for (const auto & data : _parameters)
-      for (const auto & val : *data)
-        param_norm_sqr += val * val;
-
-    val += _tikhonov_coeff * param_norm_sqr;
-  }
-
-  return val * 0.5;
-}
-
-void
-OptimizationReporterBase::setMisfitToSimulatedValues()
-{
-  _misfit_values = _simulation_values;
-}
-
-// function only used for test objects
-void
-OptimizationReporterBase::setSimulationValuesForTesting(std::vector<Real> & data)
-{
-  _simulation_values.clear();
-  _simulation_values = data;
-}
 
 void
 OptimizationReporterBase::computeGradient(libMesh::PetscVector<Number> & gradient) const
@@ -130,4 +91,50 @@ Real
 OptimizationReporterBase::getUpperBound(dof_id_type i) const
 {
   return _upper_bounds[i];
+}
+
+std::vector<Real>
+OptimizationReporterBase::fillParamsVector(std::string type, Real default_value) const
+{
+  std::vector<std::vector<Real>> parsed_data;
+  if (isParamValid(type))
+  {
+    parsed_data = getParam<std::vector<std::vector<Real>>>(type);
+    if (parsed_data.size() != _nvalues.size())
+    {
+      paramError(type,
+                 "There must be a vector of ",
+                 type,
+                 " per parameter group.  The ",
+                 type,
+                 " input format is std::vector<std::vector<Real>> so each vector should be "
+                 "seperated by \";\" even if it is a single value per group for a constant ",
+                 type,
+                 ".");
+    }
+    for (std::size_t i = 0; i < parsed_data.size(); ++i)
+    {
+      // The case when the initial condition is constant for each parameter group
+      if (parsed_data[i].size() == 1)
+        parsed_data[i].resize(_nvalues[i], parsed_data[i][0]);
+      else if (parsed_data[i].size() != _nvalues[i])
+        paramError(type,
+                   "When ",
+                   type,
+                   " are given in input file, there must either be a single value per parameter "
+                   "group or a value for every parameter in the group.");
+    }
+  }
+
+  // fill with default values
+  if (parsed_data.empty())
+    for (const auto & params_per_group : _nvalues)
+      parsed_data.emplace_back(params_per_group, default_value);
+
+  // flatten into single vector
+  std::vector<Real> flattened_data;
+  for (const auto & vec : parsed_data)
+    flattened_data.insert(flattened_data.end(), vec.begin(), vec.end());
+
+  return flattened_data;
 }

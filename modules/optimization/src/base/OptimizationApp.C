@@ -7,6 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
+#include "ActionFactory.h"
 #include "OptimizationApp.h"
 #include "Moose.h"
 #include "AppFactory.h"
@@ -43,6 +44,7 @@ OptimizationApp::registerAll(Factory & f, ActionFactory & af, Syntax & syntax)
   registerSyntaxTask(
       "AddOptimizationReporterAction", "OptimizationReporter", "add_optimization_reporter");
   registerMooseObjectTask("add_optimization_reporter", OptimizationReporterBase, false);
+  appendMooseObjectTask("add_optimization_reporter", Reporter);
   addTaskDependency("add_optimization_reporter", "add_reporter");
 
   // General Optimization action

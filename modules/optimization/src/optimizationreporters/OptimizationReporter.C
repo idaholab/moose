@@ -17,6 +17,7 @@ InputParameters
 OptimizationReporter::validParams()
 {
   InputParameters params = OptimizationReporterBase::validParams();
+  params += OptimizationDataHelper::validParams();
   params.addClassDescription("Computes objective function, gradient and contains reporters for "
                              "communicating between optimizeSolve and subapps");
   params.addRequiredParam<std::vector<dof_id_type>>(
@@ -41,7 +42,16 @@ OptimizationReporter::validParams()
 }
 
 OptimizationReporter::OptimizationReporter(const InputParameters & parameters)
-  : OptimizationReporterBase(parameters)
+  : OptimizationReporterBase(parameters),
+    _opt_data(parameters),
+    _measurement_values(_opt_data.getMeasurementValues()),
+    _simulation_values(_opt_data.getSimValues()),
+    _misfit_values(_opt_data.getMisfitValues())
+{
+  setICsandBounds();
+}
+void
+OptimizationReporter::setICsandBounds()
 {
   _nvalues = getParam<std::vector<dof_id_type>>("num_values");
   _ndof = std::accumulate(_nvalues.begin(), _nvalues.end(), 0);
@@ -66,48 +76,46 @@ OptimizationReporter::OptimizationReporter(const InputParameters & parameters)
   }
 }
 
-std::vector<Real>
-OptimizationReporter::fillParamsVector(std::string type, Real default_value) const
+void
+OptimizationReporter::execute()
 {
-  std::vector<std::vector<Real>> parsed_data;
-  if (isParamValid(type))
+  _opt_data.computeMisfit();
+}
+
+Real
+OptimizationReporter::computeObjective()
+{
+  // This will only be executed if measurement_values are available on the main app
+  for (const auto i : index_range(_measurement_values))
+    _misfit_values[i] = _simulation_values[i] - _measurement_values[i];
+
+  Real val = 0.0;
+  for (auto & misfit : _misfit_values)
+    val += misfit * misfit;
+
+  if (_tikhonov_coeff > 0.0)
   {
-    parsed_data = getParam<std::vector<std::vector<Real>>>(type);
-    if (parsed_data.size() != _nvalues.size())
-    {
-      paramError(type,
-                 "There must be a vector of ",
-                 type,
-                 " per parameter group.  The ",
-                 type,
-                 " input format is std::vector<std::vector<Real>> so each vector should be "
-                 "seperated by \";\" even if it is a single value per group for a constant ",
-                 type,
-                 ".");
-    }
-    for (std::size_t i = 0; i < parsed_data.size(); ++i)
-    {
-      // The case when the initial condition is constant for each parameter group
-      if (parsed_data[i].size() == 1)
-        parsed_data[i].resize(_nvalues[i], parsed_data[i][0]);
-      else if (parsed_data[i].size() != _nvalues[i])
-        paramError(type,
-                   "When ",
-                   type,
-                   " are given in input file, there must either be a single value per parameter "
-                   "group or a value for every parameter in the group.");
-    }
+    Real param_norm_sqr = 0;
+    for (const auto & data : _parameters)
+      for (const auto & val : *data)
+        param_norm_sqr += val * val;
+
+    val += _tikhonov_coeff * param_norm_sqr;
   }
 
-  // fill with default values
-  if (parsed_data.empty())
-    for (const auto & params_per_group : _nvalues)
-      parsed_data.emplace_back(params_per_group, default_value);
+  return val * 0.5;
+}
 
-  // flatten into single vector
-  std::vector<Real> flattened_data;
-  for (const auto & vec : parsed_data)
-    flattened_data.insert(flattened_data.end(), vec.begin(), vec.end());
+void
+OptimizationReporter::setMisfitToSimulatedValues()
+{
+  _misfit_values = _simulation_values;
+}
 
-  return flattened_data;
+// function only used for test objects
+void
+OptimizationReporter::setSimulationValuesForTesting(std::vector<Real> & data)
+{
+  _simulation_values.clear();
+  _simulation_values = data;
 }
