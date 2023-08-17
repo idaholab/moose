@@ -92,6 +92,10 @@ CSV::initialSetup()
   }
 
   // See https://github.com/idaholab/moose/issues/25211.
+  mooseAssert(advancedExecuteOn().contains("postprocessors"),
+              "Missing expected postprocessors key");
+  mooseAssert(advancedExecuteOn().contains("scalars"), "Missing expected scalars key");
+  mooseAssert(advancedExecuteOn().contains("reporters"), "Missing expected reporters key");
   const auto pp_execute_on = advancedExecuteOn().find("postprocessors")->second;
   const auto scalar_execute_on = advancedExecuteOn().find("scalars")->second;
   const auto reporter_execute_on = advancedExecuteOn().find("reporters")->second;
