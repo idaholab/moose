@@ -30,9 +30,9 @@ protected:
   void format_diagnostics(const wasp::DataArray & diagnostics_array,
                           std::ostringstream & diagnostics_stream) const
   {
-    size_t diagnostics_size = diagnostics_array.size();
+    std::size_t diagnostics_size = diagnostics_array.size();
 
-    for (size_t i = 0; i < diagnostics_size; i++)
+    for (std::size_t i = 0; i < diagnostics_size; i++)
     {
       std::stringstream diagnostic_errors;
       int diagnostic_start_line;
@@ -99,13 +99,13 @@ protected:
     };
 
     std::vector<CompletionInfo> completions;
-    size_t max_label = 0;
-    size_t max_new_text = 0;
-    size_t max_doc = 0;
+    std::size_t max_label = 0;
+    std::size_t max_new_text = 0;
+    std::size_t max_doc = 0;
 
-    size_t completions_size = completions_array.size();
+    std::size_t completions_size = completions_array.size();
 
-    for (size_t i = 0; i < completions_size; i++)
+    for (std::size_t i = 0; i < completions_size; i++)
     {
       std::stringstream completion_errors;
       std::string completion_label;
@@ -344,7 +344,7 @@ TEST_F(MooseServerTest, DocumentOpenAndDiagnostics)
 
   EXPECT_EQ(document_uri, response_uri);
 
-  EXPECT_EQ(4, (int)diagnostics_array.size());
+  EXPECT_EQ(4u, diagnostics_array.size());
 
   std::ostringstream diagnostics_actual;
 
@@ -577,7 +577,7 @@ TEST_F(MooseServerTest, DocumentChangeAndDiagnostics)
 
   EXPECT_EQ(document_uri, response_uri);
 
-  EXPECT_EQ(7, (int)diagnostics_array.size());
+  EXPECT_EQ(7u, diagnostics_array.size());
 
   std::ostringstream diagnostics_actual;
 
@@ -830,7 +830,7 @@ TEST_F(MooseServerTest, CompletionMeshDefaultedType)
 
   EXPECT_EQ(request_id, response_id);
 
-  EXPECT_EQ(47, (int)completions_array.size());
+  EXPECT_EQ(47u, completions_array.size());
 
   std::ostringstream completions_actual;
 
@@ -935,7 +935,7 @@ TEST_F(MooseServerTest, CompletionDocumentRootLevel)
 
   EXPECT_EQ(request_id, response_id);
 
-  EXPECT_EQ(45, (int)completions_array.size());
+  EXPECT_EQ(45u, completions_array.size());
 
   std::ostringstream completions_actual;
 
@@ -1038,7 +1038,7 @@ TEST_F(MooseServerTest, CompletionValueActiveBlocks)
 
   EXPECT_EQ(request_id, response_id);
 
-  EXPECT_EQ(2, (int)completions_array.size());
+  EXPECT_EQ(2u, completions_array.size());
 
   std::ostringstream completions_actual;
 
@@ -1098,7 +1098,7 @@ TEST_F(MooseServerTest, CompletionValueBooleanParam)
 
   EXPECT_EQ(request_id, response_id);
 
-  EXPECT_EQ(2, (int)completions_array.size());
+  EXPECT_EQ(2u, completions_array.size());
 
   std::ostringstream completions_actual;
 
@@ -1158,7 +1158,7 @@ TEST_F(MooseServerTest, CompletionValueEnumsAndDocs)
 
   EXPECT_EQ(request_id, response_id);
 
-  EXPECT_EQ(4, (int)completions_array.size());
+  EXPECT_EQ(4u, completions_array.size());
 
   std::ostringstream completions_actual;
 
@@ -1220,7 +1220,7 @@ TEST_F(MooseServerTest, CompletionValueAllowedTypes)
 
   EXPECT_EQ(request_id, response_id);
 
-  EXPECT_EQ(5, (int)completions_array.size());
+  EXPECT_EQ(5u, completions_array.size());
 
   std::ostringstream completions_actual;
 
@@ -1283,7 +1283,7 @@ TEST_F(MooseServerTest, CompletionValueInputLookups)
 
   EXPECT_EQ(request_id, response_id);
 
-  EXPECT_EQ(4, (int)completions_array.size());
+  EXPECT_EQ(4u, completions_array.size());
 
   std::ostringstream completions_actual;
 
