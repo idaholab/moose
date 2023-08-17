@@ -335,7 +335,7 @@ MooseApp::validParams()
   params.addPrivateParam<unsigned int>("_multiapp_number");
   params.addPrivateParam<const MooseMesh *>("_master_mesh");
   params.addPrivateParam<const MooseMesh *>("_master_displaced_mesh");
-  params.addPrivateParam<std::string>("_input_text", ""); // input string passed by language server
+  params.addPrivateParam<std::string>("_input_text"); // input string passed by language server
 
   params.addParam<bool>(
       "use_legacy_material_output",
@@ -962,7 +962,10 @@ MooseApp::setupOptions()
     }
 
     // Pass list of input files and optional text string if provided to parser
-    _parser.parse(_input_filenames, getParam<std::string>("_input_text"));
+    if (!isParamValid("_input_text"))
+      _parser.parse(_input_filenames);
+    else
+      _parser.parse(_input_filenames, getParam<std::string>("_input_text"));
 
     if (isParamValid("mesh_only"))
     {
