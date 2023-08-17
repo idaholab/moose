@@ -36,6 +36,8 @@ PolycrystalHex::PolycrystalHex(const InputParameters & parameters)
   if (_columnar_3D == false && _dim == 3)
     mooseError(
         "PolycrystalHex is supported on 2D domains or 3D domains with the columnar_3D option");
+  if (_grain_num % 2 != 0)
+    mooseError("PolycrystalHex requires an even square number for 2D or columnar 3D");
 
   _random.seed(_tid, getParam<unsigned int>("rand_seed"));
 }
@@ -47,6 +49,14 @@ PolycrystalHex::precomputeGrainStructure()
 
   if (_columnar_3D && _dim == 3)
     d -= 1;
+
+  // check if periodic boundary condition is set
+  for (unsigned int j = 0; j < d; ++j)
+  {
+    for (unsigned int i = 0; i < _vars.size(); ++i)
+      if (!_mesh.isTranslatedPeriodic(_vars[i]->number(), j))
+        mooseError("PolycrystalHex works only with periodic BCs");
+  }
 
   const unsigned int root = MathUtils::round(std::pow(_grain_num, 1.0 / d));
 
