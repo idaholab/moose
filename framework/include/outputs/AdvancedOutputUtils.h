@@ -98,7 +98,7 @@ public:
   /**
    * A method for testing of a key exists
    */
-  bool contains(const std::string & name) { return find(name) != end(); }
+  bool contains(const std::string & name) const { return find(name) != end(); }
 
 protected:
   /// Data storage
