@@ -179,9 +179,7 @@ Postprocessor::evaluateDot(const ElemPointArg & /*elem_point_arg*/,
 void
 Postprocessor::evaluateDotWarning() const
 {
-  mooseDoOnce(
-      mooseWarning("The time derivative functor operator was called on the post-processor '",
-                   _pp_name,
-                   "'. A zero value will always be returned, even if the post-processor value "
-                   "changes with time."));
+  mooseDoOnce(_pp_moose_object.mooseWarning(
+      "The time derivative functor operator was called on this post-processor.\n\nA zero value "
+      "will always be returned, even if the post-processor value changes with time."));
 }
