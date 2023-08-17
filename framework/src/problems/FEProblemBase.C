@@ -901,6 +901,27 @@ FEProblemBase::initialSetup()
     projectSolution();
   }
 
+  for (THREAD_ID tid = 0; tid < n_threads; tid++)
+  {
+    _internal_side_indicators.initialSetup(tid);
+    _indicators.initialSetup(tid);
+    _markers.sort(tid);
+    _markers.initialSetup(tid);
+  }
+
+#ifdef LIBMESH_ENABLE_AMR
+
+  if (!_app.isRecovering())
+  {
+    unsigned int n = adaptivity().getInitialSteps();
+    if (n && !_app.isUltimateMaster() && _app.isRestarting())
+      mooseError("Cannot perform initial adaptivity during restart on sub-apps of a MultiApp!");
+
+    initialAdaptMesh();
+  }
+
+#endif // LIBMESH_ENABLE_AMR
+
   // Materials
   if (_all_materials.hasActiveObjects(0))
   {
@@ -936,27 +957,6 @@ FEProblemBase::initialSetup()
         _has_initialized_stateful = true;
     }
   }
-
-  for (THREAD_ID tid = 0; tid < n_threads; tid++)
-  {
-    _internal_side_indicators.initialSetup(tid);
-    _indicators.initialSetup(tid);
-    _markers.sort(tid);
-    _markers.initialSetup(tid);
-  }
-
-#ifdef LIBMESH_ENABLE_AMR
-
-  if (!_app.isRecovering())
-  {
-    unsigned int n = adaptivity().getInitialSteps();
-    if (n && !_app.isUltimateMaster() && _app.isRestarting())
-      mooseError("Cannot perform initial adaptivity during restart on sub-apps of a MultiApp!");
-
-    initialAdaptMesh();
-  }
-
-#endif // LIBMESH_ENABLE_AMR
 
   if (!_app.isRecovering() && !_app.isRestarting())
   {
