@@ -1,0 +1,16 @@
+[Tests]
+  issues = '#22356'
+  design = 'SIMPLE.md'
+  [2d-monolithic-momentum]
+    type = 'Exodiff'
+    input = 2d-segregated.i
+    exodiff = 2d-segregated_out.e
+    requirement = "The system shall be able to solve the steady-state Navier-Stokes problem in a 2D channel using the SIMPLE algorithm and keeping the momentum components in a monolithic system."
+  []
+  [2d-segregated-momentum]
+    type = 'Exodiff'
+    input = 2d-segregated-velocity.i
+    exodiff = 2d-segregated-velocity_out.e
+    requirement = "The system shall be able to solve the steady-state Navier-Stokes problem in a 2D channel using the SIMPLE algorithm with separating the momentum components into different systems."
+  []
+[]

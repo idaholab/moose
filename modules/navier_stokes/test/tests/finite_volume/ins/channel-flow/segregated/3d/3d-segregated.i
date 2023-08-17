@@ -12,15 +12,10 @@ pressure_tag = "pressure_grad"
     dx = '0.2'
     dy = '0.2'
     dz = '0.8'
-    ix = '30'
-    iy = '30'
-    iz = '120'
-    subdomain_id = '1'
+    ix = '3'
+    iy = '3'
+    iz = '12'
   []
-  # [read]
-  #   type = FileMeshGenerator
-  #   file = 2d-segregated_in.e
-  # []
 []
 
 [GlobalParams]
@@ -28,7 +23,7 @@ pressure_tag = "pressure_grad"
 []
 
 [Problem]
-  nl_sys_names = 'u_system v_system w_system pressure_system'
+  nl_sys_names = 'momentum_system pressure_system'
   previous_nl_solution_required = true
   error_on_jacobian_nonzero_reallocation = true
 []
@@ -47,19 +42,19 @@ pressure_tag = "pressure_grad"
   [vel_x]
     type = INSFVVelocityVariable
     initial_condition = 0.0
-    nl_sys = u_system
+    nl_sys = momentum_system
     two_term_boundary_expansion = false
   []
   [vel_y]
     type = INSFVVelocityVariable
     initial_condition = 0.0
-    nl_sys = v_system
+    nl_sys = momentum_system
     two_term_boundary_expansion = false
   []
   [vel_z]
     type = INSFVVelocityVariable
     initial_condition = 0.5
-    nl_sys = w_system
+    nl_sys = momentum_system
     two_term_boundary_expansion = false
   []
   [pressure]
@@ -207,36 +202,22 @@ pressure_tag = "pressure_grad"
   solve_type = 'NEWTON'
   petsc_options_iname = '-pc_type -pc_hypre_type -pc_factor_shift_type'
   petsc_options_value = 'hypre boomeramg NONZERO'
-  petsc_options = '-ksp_monitor'
   nl_max_its = 1
   l_max_its = 400
   l_abs_tol = 1e-8
   l_tol = 1e-8
   line_search = 'none'
   rhie_chow_user_object = 'rc'
-  momentum_systems = 'u_system v_system w_system'
+  momentum_systems = 'momentum_system'
   pressure_system = 'pressure_system'
   pressure_gradient_tag = ${pressure_tag}
   momentum_equation_relaxation = 0.8
   pressure_variable_relaxation = 0.3
-  num_iterations = 2
+  num_iterations = 60
   pressure_absolute_tolerance = 1e-9
   momentum_absolute_tolerance = 1e-9
   print_fields = false
 []
-
-# [Postprocessors]
-#   [inlet_p]
-#     type = SideAverageValue
-#     variable = 'pressure'
-#     boundary = 'left'
-#   []
-#   [outlet-u]
-#     type = SideIntegralVariablePostprocessor
-#     variable = u
-#     boundary = 'right'
-#   []
-# []
 
 [Outputs]
   exodus = true

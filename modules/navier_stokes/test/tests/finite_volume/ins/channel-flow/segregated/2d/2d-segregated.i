@@ -11,14 +11,9 @@ pressure_tag = "pressure_grad"
     dim = 2
     dx = '0.3'
     dy = '0.3'
-    ix = '1000'
-    iy = '1000'
-    subdomain_id = '1'
+    ix = '3'
+    iy = '3'
   []
-  # [read]
-  #   type = FileMeshGenerator
-  #   file = 2d-segregated_in.e
-  # []
 []
 
 [GlobalParams]
@@ -26,7 +21,7 @@ pressure_tag = "pressure_grad"
 []
 
 [Problem]
-  nl_sys_names = 'u_system v_system pressure_system'
+  nl_sys_names = 'momentum_system pressure_system'
   previous_nl_solution_required = true
   error_on_jacobian_nonzero_reallocation = true
 []
@@ -44,13 +39,13 @@ pressure_tag = "pressure_grad"
   [u]
     type = INSFVVelocityVariable
     initial_condition = 0.5
-    nl_sys = u_system
+    nl_sys = momentum_system
     two_term_boundary_expansion = false
   []
   [v]
     type = INSFVVelocityVariable
     initial_condition = 0.0
-    nl_sys = v_system
+    nl_sys = momentum_system
     two_term_boundary_expansion = false
   []
   [pressure]
@@ -164,16 +159,15 @@ pressure_tag = "pressure_grad"
   solve_type = 'NEWTON'
   petsc_options_iname = '-pc_type -pc_hypre_type -pc_factor_shift_type'
   petsc_options_value = 'hypre boomeramg NONZERO'
-  petsc_options = '-ksp_monitor'
   nl_max_its = 1
   l_max_its = 400
   l_abs_tol = 1e-8
   l_tol = 1e-8
   line_search = 'none'
   rhie_chow_user_object = 'rc'
-  momentum_systems = 'u_system v_system'
+  momentum_systems = 'momentum_system'
   pressure_system = 'pressure_system'
-  momentum_tag = ${pressure_tag}
+  pressure_gradient_tag = ${pressure_tag}
   momentum_equation_relaxation = 0.8
   pressure_variable_relaxation = 0.3
   num_iterations = 30
@@ -182,21 +176,8 @@ pressure_tag = "pressure_grad"
   print_fields = false
 []
 
-# [Postprocessors]
-#   [inlet_p]
-#     type = SideAverageValue
-#     variable = 'pressure'
-#     boundary = 'left'
-#   []
-#   [outlet-u]
-#     type = SideIntegralVariablePostprocessor
-#     variable = u
-#     boundary = 'right'
-#   []
-# []
-
 [Outputs]
-  exodus = false
+  exodus = true
   csv = false
   perf_graph = false
   print_nonlinear_residuals = false
