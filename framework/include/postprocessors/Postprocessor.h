@@ -78,7 +78,7 @@ protected:
   /// Post-processor name
   const std::string & _pp_name;
 
-  /// The current value, which is the Reporter value that changes when we execute UOs in the problem)
+  /// The current value, which is the Reporter value that changes when we execute UOs in the problem
   const PostprocessorValue & _current_value;
 
 private:
