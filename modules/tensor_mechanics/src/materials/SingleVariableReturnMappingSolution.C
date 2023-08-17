@@ -39,9 +39,11 @@ SingleVariableReturnMappingSolutionTempl<is_ad>::validParams()
   params.addParam<MooseEnum>(
       "solve_type", solve_type, "Solver used for the internal return mapping iterations");
   params.addParam<Real>(
-      "relative_tolerance", 1e-8, "Relative convergence tolerance for Newton iteration");
+      "deltax_tolerance", 1e-20, "Maximum solution update for iteration termination");
   params.addParam<Real>(
-      "absolute_tolerance", 1e-11, "Absolute convergence tolerance for Newton iteration");
+      "relative_tolerance", 1e-8, "Relative convergence tolerance for return mapping iteration");
+  params.addParam<Real>(
+      "absolute_tolerance", 1e-11, "Absolute convergence tolerance for return mapping iteration");
   params.addParam<Real>("acceptable_multiplier",
                         10,
                         "Factor applied to relative and absolute "
@@ -79,6 +81,7 @@ SingleVariableReturnMappingSolutionTempl<is_ad>::SingleVariableReturnMappingSolu
     _max_its(1000), // Far larger than ever expected to be needed
     _internal_solve_full_iteration_history(
         parameters.get<bool>("internal_solve_full_iteration_history")),
+    _deltax_tolerance(parameters.get<Real>("deltax_tolerance")),
     _relative_tolerance(parameters.get<Real>("relative_tolerance")),
     _absolute_tolerance(parameters.get<Real>("absolute_tolerance")),
     _acceptable_multiplier(parameters.get<Real>("acceptable_multiplier")),
@@ -239,7 +242,9 @@ SingleVariableReturnMappingSolutionTempl<is_ad>::internalSolve(
       updateBounds(
           scalar, _residual, init_resid_sign, scalar_upper_bound, scalar_lower_bound, iter_output);
 
-    if (converged(_residual, reference_residual))
+    if (converged(_residual, reference_residual) ||
+        (std::abs(scalar_increment) < _deltax_tolerance &&
+         convergedAcceptable(_iteration, reference_residual)))
     {
       outputIterationStep(iter_output, effective_trial_stress, scalar, reference_residual);
       break;
@@ -368,12 +373,14 @@ SingleVariableReturnMappingSolutionTempl<is_ad>::internalSecantSolve(
     else
       bk = ck;
 
-    // delta x tolerance check!
-    if (std::abs(ak - bk) < _absolute_tolerance)
+    // delta x tolerance check
+    if (std::abs(ak - bk) < _deltax_tolerance)
     {
-      scalar = ak;
-      _residual = fak;
+      scalar = ck;
+      _residual = 0.5 * (fak + fbk);
       _initial_residual = fak0;
+      if (iter_output)
+        *iter_output << "deltax convergence\n";
       return SolveState::SUCCESS;
     }
 

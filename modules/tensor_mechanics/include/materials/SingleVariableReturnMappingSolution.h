@@ -197,6 +197,9 @@ private:
   /// Whether to output iteration information all the time (regardless of whether iterations converge)
   const bool _internal_solve_full_iteration_history;
 
+  /// Solution update threshold below which the iterations are terminated
+  Real _deltax_tolerance;
+
   /// Relative convergence tolerance
   Real _relative_tolerance;
 
