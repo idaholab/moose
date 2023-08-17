@@ -17,7 +17,8 @@ OptimizationDataHelper::validParams()
   params += Reporter::validParams();
 
   params.addClassDescription(
-      "Reporter to hold measurement and simulation data for optimization problems");
+      "Helper reporter to hold measurement and simulation data for optimization problems, can be "
+      "used by other optimization reporters for misfit inverse optimization.");
   params.addParam<std::vector<Real>>(
       "measurement_values",
       "Measurement values collected from locations given by measurement_points");
