@@ -85,8 +85,9 @@
     [solution_valid_checkpoint]
       allow_warnings = true
       recover = false
-      type = RunApp
+      type = JSONDiff
       input = solution_invalid_recover.i
+      jsondiff = 'solution_invalid_checkpoint.json'
       cli_args = "Outputs/file_base='solution_invalid_checkpoint' Outputs/checkpoint=true"
       detail = 'outputting of checkpoint files'
     []
