@@ -3664,7 +3664,7 @@ FEProblemBase::addUserObject(const std::string & user_object_name,
   // the functor from thread 0 as the registered functor for all threads
   for (const auto tid : make_range(libMesh::n_threads()))
     if (const auto functor =
-            dynamic_cast<Moose::FunctorBase<Real> *>(uos.size() == 1 ? uos[0] : uos[tid]))
+            dynamic_cast<Moose::FunctorBase<Real> *>(uos[uos.size() == 1 ? 0 : tid].get()))
     {
       this->addFunctor(name, *functor, tid);
       if (_displaced_problem)
