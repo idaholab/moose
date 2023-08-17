@@ -91,4 +91,14 @@
     requirement = 'The system shall be capable of calculating strain energy rate density when using '
                   'hand-coded Jacobian and weak plane stress.'
   []
+  [tot_elas_stress_name]
+    type = 'CSVDiff'
+    issues = '#25202'
+    input = 'tot_model_stress_name.i'
+    csvdiff = 'tot_model_stress_name_out.csv'
+    rel_err = 1e-6
+    design = 'StrainEnergyDensity.md'
+    requirement = 'The system shall be capable of calculating strain energy density for materials with '
+                  'a user-specified stress by name and small strain.'
+  []
 []

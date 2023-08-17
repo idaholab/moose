@@ -26,6 +26,13 @@ StrainEnergyDensityTempl<is_ad>::validParams()
                                "Optional parameter that allows the user to define "
                                "multiple mechanics material systems on the same "
                                "block, i.e. for multiple phases");
+  params.addParam<std::string>("stress_name",
+                               "stress",
+                               "Optional parameter that allows the user to use "
+                               "different stresses on the same material system. "
+                               "For example, when we have a degraded_stress and an intact_stress, "
+                               "we want to compute the degraded strain energy density and "
+                               "the intact strain energy density.");
   params.addParam<bool>(
       "incremental",
       "Optional flag for error checking if an incremental or total model should be used.");
@@ -36,10 +43,11 @@ template <bool is_ad>
 StrainEnergyDensityTempl<is_ad>::StrainEnergyDensityTempl(const InputParameters & parameters)
   : DerivativeMaterialInterface<Material>(parameters),
     _base_name(isParamValid("base_name") ? getParam<std::string>("base_name") + "_" : ""),
+    _stress_name(getParam<std::string>("stress_name")),
     _strain_energy_density(declareProperty<Real>(_base_name + "strain_energy_density")),
     _strain_energy_density_old(getMaterialPropertyOld<Real>(_base_name + "strain_energy_density")),
-    _stress(getGenericMaterialProperty<RankTwoTensor, is_ad>(_base_name + "stress")),
-    _stress_old(getMaterialPropertyOld<RankTwoTensor>(_base_name + "stress")),
+    _stress(getGenericMaterialProperty<RankTwoTensor, is_ad>(_base_name + _stress_name)),
+    _stress_old(getMaterialPropertyOld<RankTwoTensor>(_base_name + _stress_name)),
     _mechanical_strain(
         getGenericMaterialProperty<RankTwoTensor, is_ad>(_base_name + "mechanical_strain")),
     _strain_increment(
